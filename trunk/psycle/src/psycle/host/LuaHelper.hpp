@@ -186,7 +186,7 @@ namespace psycle { namespace host {
       g = GetGValue(cr);
       b = GetBValue(cr);     
       int a = 0;
-      using namespace canvas;
+      using namespace ui;
       ARGB argb = (((ARGB) (b) << 0)  |
                    ((ARGB) (g) << 8)  |
                    ((ARGB) (r) << 16) |
@@ -282,14 +282,14 @@ namespace psycle { namespace host {
 			return 2;
 		}
 
-    template <class UDT, class RT>
+    template <class UDT, class CT, class RT>
 		static int getnumber1(lua_State* L,
 			                    const char* meta,                          
-						              RT (UDT::*pt2ConstMember)() const) { // function ptr
+						              RT (UDT::*pt2ConstMember)(CT) const) { // function ptr
 			int n = lua_gettop(L);
       if (n == 2) {
 		    UDT* m = LuaHelper::check<UDT>(L, 1, meta);
-        float val = luaL_checknumber(L, 2);
+        RT val = luaL_checknumber(L, 2);
 			  lua_pushnumber(L, (m->*pt2ConstMember)(val));
 			}  else {
         luaL_error(L, "Got %d arguments expected 2 (self)", n); 

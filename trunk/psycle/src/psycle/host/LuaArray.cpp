@@ -12,10 +12,9 @@
 #include <string>
 
 namespace psycle { namespace host {
-  
   PSArray::PSArray(int len, float v) :
       len_(len),
-      baselen_(len_),      
+      baselen_(len_),
       shared_(0) {
     cap_ = len_ - (len_ % 4) + 4;
     universalis::os::aligned_memory_alloc(16, ptr_, cap_);
@@ -23,7 +22,7 @@ namespace psycle { namespace host {
     if (can_aligned_ && v==0) {
       psycle::helpers::dsp::Clear(ptr_, len_);
     } else {
-      std::fill_n(ptr_, len_, v); 	 
+      std::fill_n(ptr_, len_, v);
     }
     base_ = ptr_;
   }
@@ -31,12 +30,12 @@ namespace psycle { namespace host {
   PSArray::PSArray(double start, double stop, double step) : shared_(0) {
       baselen_ = len_ = (stop-start+0.5)/step;
       cap_ = len_ - (len_ % 4) + 4;
-      universalis::os::aligned_memory_alloc(16, ptr_, cap_); // reserve		
+      universalis::os::aligned_memory_alloc(16, ptr_, cap_); // reserve
       base_ = ptr_;
       int count = 0;
       for (double i=start; i < stop; i+=step, ++count) ptr_[count] = i;
       can_aligned_ = is_aligned(ptr_);
-  }   
+  }
 
   PSArray::PSArray(PSArray& a1, PSArray& a2) : shared_(0) {
     baselen_ = len_ = a1.len() + a2.len();
@@ -70,25 +69,25 @@ namespace psycle { namespace host {
     }
   }
 
-  void PSArray::swap(PSArray& rhs) {	 
-    using std::swap;   
+  void PSArray::swap(PSArray& rhs) {
+    using std::swap;
     swap(ptr_, rhs.ptr_);
     swap(base_, rhs.base_);
     swap(cap_, rhs.cap_);
     swap(len_, rhs.len_);
     swap(baselen_, rhs.baselen_);
     swap(can_aligned_, rhs.can_aligned_);
-    swap(shared_, rhs.shared_);   
+    swap(shared_, rhs.shared_);
   }
 
   void PSArray::resize(int newsize) {
-    if (!shared_ && cap_ < newsize) {      
+    if (!shared_ && cap_ < newsize) {
       std::vector<float> buf(base_, base_+baselen_);
       universalis::os::aligned_memory_dealloc(base_);
       cap_ = newsize - (newsize % 4) + 4;
       universalis::os::aligned_memory_alloc(16, ptr_, cap_);
       for (int i = 0; i < baselen_; ++i) ptr_[i]=buf[i];
-      base_ = ptr_;      
+      base_ = ptr_;
     }
     baselen_ = len_ = newsize;
     can_aligned_ = is_aligned(ptr_);
@@ -97,17 +96,17 @@ namespace psycle { namespace host {
   bool PSArray::copyfrom(PSArray& src) {
     if (src.len() != len_) {
       return false;
-    }	
+    }
     if (src.can_aligned_) {
       psycle::helpers::dsp::Mov(src.ptr_, ptr_, len_);
     } else {
       std::copy(src.ptr_, src.ptr_ + len_, ptr_);
-    }    
+    }
     return true;
   }
 
   void PSArray::fillzero() {
-    if (base_ == ptr_ && can_aligned_) {      
+    if (base_ == ptr_ && can_aligned_) {
       psycle::helpers::dsp::Clear(ptr_, len_);
     } else {
       std::memset(ptr_, 0, len_ * sizeof *ptr_);
@@ -137,8 +136,8 @@ namespace psycle { namespace host {
     float* s = src.data();
     for (int i = 0; i < len_; ++i) ptr_[i] *= s[i];
   }
-   
-  void PSArray::sqrt(PSArray& src) {    
+
+  void PSArray::sqrt(PSArray& src) {
     for (int i = 0; i < len_; ++i) ::sqrt(ptr_[i]);
   }
 
@@ -147,19 +146,19 @@ namespace psycle { namespace host {
     if (can_aligned_) {
       psycle::helpers::dsp::Add(srcf, ptr_, len_, multi);
     } else {
-      for(int i = 0; i < len_; ++i) ptr_[i] += srcf[i] * multi;    
+      for(int i = 0; i < len_; ++i) ptr_[i] += srcf[i] * multi;
     }
   }
-  
+
   void PSArray::add(PSArray& src) {
-    float* s = src.data();    
+    float* s = src.data();
     if (can_aligned_) {
       psycle::helpers::dsp::SimpleAdd(s, ptr_, len_);
     } else {
       for (int i = 0; i < len_; ++i) ptr_[i] += s[i];
     }
   }
-   
+
   void PSArray::sub(PSArray& src) {
     float* s = src.data();
     if (can_aligned_) {
@@ -180,8 +179,8 @@ namespace psycle { namespace host {
       set_val(i, sum);
     }
   }
- 
-  int PSArray::copyfrom(PSArray& src, int pos) {	
+
+  int PSArray::copyfrom(PSArray& src, int pos) {
     if (pos < 0) return 0;
     for (int i = 0; i < src.len_ && i+pos < len_; ++i) {
       ptr_[i+pos] = src.ptr_[i];
@@ -190,7 +189,7 @@ namespace psycle { namespace host {
   }
 
   std::string PSArray::tostring() const {
-    std::stringstream res; 
+    std::stringstream res;
     res << "[ ";
     for (int i=0; i < len_; ++i)
       res << ptr_[i] << " ";
@@ -209,15 +208,15 @@ namespace psycle { namespace host {
   // LuaArrayBind
 
   const char* LuaArrayBind::meta = "array_meta";
-  
+
   static void call(lua_State* L, void (PSArray::*pt2Member)()) { // function ptr
-    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");			
-	  (rv->*pt2Member)();      
+    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+	  (rv->*pt2Member)();
 	}
 
   int LuaArrayBind::array_new(lua_State *L) {
     int n = lua_gettop(L);
-    PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
+    PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
     luaL_setmetatable(L, meta);
     int size;
     double val;
@@ -226,15 +225,15 @@ namespace psycle { namespace host {
       *udata = new PSArray();
       break;
     case 1 : {
-      if (lua_istable(L, 1)) {        
+      if (lua_istable(L, 1)) {
         size_t len = lua_rawlen(L, 1);
         *udata = new PSArray(len, 0);
         float* ptr = (*udata)->data();
         for (size_t i = 1; i <= len; ++i) {
           lua_rawgeti(L, 1, i);
-          *ptr++ = luaL_checknumber(L, -1); 
+          *ptr++ = luaL_checknumber(L, -1);
           lua_pop(L,1);
-        }        
+        }
       } else {
         size = luaL_checknumber (L, 1);
         *udata = new PSArray(size, 0);
@@ -253,49 +252,49 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaArrayBind::array_copy(lua_State* L) {  
+  int LuaArrayBind::array_copy(lua_State* L) {
     int n = lua_gettop(L);
     PSArray* dest = *(PSArray **)luaL_checkudata(L, 1, meta);
     if (n==3) {
       int pos = luaL_checknumber (L, 2);
-      PSArray* src = *(PSArray **)luaL_checkudata(L, 3, meta);	
-      dest->copyfrom(*src, pos);	   
+      PSArray* src = *(PSArray **)luaL_checkudata(L, 3, meta);
+      dest->copyfrom(*src, pos);
     } else {
-      PSArray* src = *(PSArray **)luaL_checkudata(L, 2, meta);      
+      PSArray* src = *(PSArray **)luaL_checkudata(L, 2, meta);
       if (!dest->copyfrom(*src)) {
         std::ostringstream o;
         o << "size src:" << src->len() << ", dst:" << dest->len() << "not compatible";
-        luaL_error(L, o.str().c_str());	
+        luaL_error(L, o.str().c_str());
       }
     }
     return LuaHelper::chaining(L);
   }
 
-  int LuaArrayBind::array_arange(lua_State* L) {	
+  int LuaArrayBind::array_arange(lua_State* L) {
     float start = luaL_checknumber (L, 1);
     float stop = luaL_checknumber (L, 2);
     float step = luaL_checknumber (L, 3);
-    PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
+    PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
     *udata = new PSArray(start, stop, step);
-    luaL_setmetatable(L, "array_meta");	
+    luaL_setmetatable(L, "array_meta");
     return 1;
   }
 
   int LuaArrayBind::array_random(lua_State* L) {
     int size = luaL_checknumber (L, 1);
-    PSArray ** ud = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
+    PSArray ** ud = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
     *ud = new PSArray(size, 1);
     struct {float* p; float operator()(int y) {
       return p[y] = (lua_Number)(rand()%RAND_MAX) / (lua_Number)RAND_MAX; }
     } f;
     (*ud)->do_op(f);
-    luaL_setmetatable(L, meta);	
+    luaL_setmetatable(L, meta);
     return 1;
   }
 
   int LuaArrayBind::array_gc (lua_State *L) {
-    PSArray* ptr = *(PSArray **)luaL_checkudata(L, 1, meta);    
-    delete ptr;	
+    PSArray* ptr = *(PSArray **)luaL_checkudata(L, 1, meta);
+    delete ptr;
     return 0;
   }
 
@@ -303,17 +302,17 @@ namespace psycle { namespace host {
     PSArray* udata = *(PSArray **)luaL_checkudata(L, idx, meta);
     PSArray** rv = (PSArray **)lua_newuserdata(L, sizeof(PSArray*));
     luaL_setmetatable(L, meta);
-    *rv = new PSArray(*udata);	
+    *rv = new PSArray(*udata);
     return *rv;
   }
 
   int LuaArrayBind::array_method_from_table(lua_State* L) {
     PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
-    size_t len = lua_rawlen(L, 2);    
+    size_t len = lua_rawlen(L, 2);
     float* ptr = rv->data();
     for (size_t i = 1; i <= len; ++i) {
       lua_rawgeti(L, 2, i);
-      *ptr++ = luaL_checknumber(L, -1); 
+      *ptr++ = luaL_checknumber(L, -1);
       lua_pop(L, 1);
     }
     return LuaHelper::chaining(L);
@@ -321,11 +320,11 @@ namespace psycle { namespace host {
 
   int LuaArrayBind::array_method_to_table(lua_State* L) {
     PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
-    lua_newtable(L);    
+    lua_newtable(L);
     for (size_t i = 0; i < rv->len(); ++i) {
       lua_pushnumber(L, rv->get_val(i));
-      lua_rawseti(L, 2, i+1);      
-    }    
+      lua_rawseti(L, 2, i+1);
+    }
     return 1;
   }
 
@@ -334,8 +333,8 @@ namespace psycle { namespace host {
     if (lua_isuserdata(L, 2)) {
       PSArray* v = *(PSArray **)luaL_checkudata(L, 2, meta);
       luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
-      rv->add(*v);      
-    } else {      
+      rv->add(*v);
+    } else {
       rv->add(luaL_checknumber (L, 2));
     }
     return LuaHelper::chaining(L);
@@ -348,7 +347,7 @@ namespace psycle { namespace host {
       luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
       rv->sub(*v);
     } else {
-      rv->add(-luaL_checknumber (L, 2));    
+      rv->add(-luaL_checknumber (L, 2));
     }
     return LuaHelper::chaining(L);
   }
@@ -362,7 +361,7 @@ namespace psycle { namespace host {
 
   int LuaArrayBind::array_method_random(lua_State* L) {
     PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
-    struct {float* p; float operator()(int y) {return (lua_Number)(rand()%RAND_MAX) / (lua_Number)RAND_MAX;;}} f;   
+    struct {float* p; float operator()(int y) {return (lua_Number)(rand()%RAND_MAX) / (lua_Number)RAND_MAX;;}} f;
     rv->do_op(f);
     return LuaHelper::chaining(L);
   }
@@ -393,7 +392,7 @@ namespace psycle { namespace host {
   }
 
   int LuaArrayBind::array_method_ceil(lua_State* L) {
-    call(L, &PSArray::ceil);    
+    call(L, &PSArray::ceil);
     return LuaHelper::chaining(L);
   }
 
@@ -412,8 +411,8 @@ namespace psycle { namespace host {
     if (lua_isuserdata(L, 2)) {
       PSArray* v = *(PSArray **)luaL_checkudata(L, 2, meta);
       luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
-      rv->mul(*v);      
-    } else {      
+      rv->mul(*v);
+    } else {
       rv->mul(luaL_checknumber (L, 2));
     }
     return LuaHelper::chaining(L);
@@ -487,7 +486,6 @@ namespace psycle { namespace host {
     return LuaHelper::chaining(L);
   }
 
-
   int LuaArrayBind::array_method_or(lua_State* L) {
     PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
     if (lua_isuserdata(L, 2)) {
@@ -497,7 +495,7 @@ namespace psycle { namespace host {
         return static_cast<int>(p[y]) | (int)v[y];}
       } f;
       f.v = v->data();
-      rv->do_op(f);	
+      rv->do_op(f);
     } else {
       struct {float* p; int c; float operator()(int y) {
         return static_cast<int>(p[y]) | c;}
@@ -595,7 +593,7 @@ namespace psycle { namespace host {
       } else {
         param1 = luaL_checknumber (L, 1);
         rv = create_copy_array(L, 2);
-      }	 
+      }
       struct {float* p; double c; float operator()(int y) {return p[y]+c;}} f;
       f.c = param1;
       rv->do_op(f);
@@ -620,7 +618,7 @@ namespace psycle { namespace host {
       } else {
         param1 = luaL_checknumber (L, 1);
         rv = create_copy_array(L, 2);
-      }	 
+      }
       struct {float* p; float c; float operator()(int y) {return p[y]-c;}} f;
       f.c = param1;
       rv->do_op(f);
@@ -646,7 +644,7 @@ namespace psycle { namespace host {
       } else {
         param1 = luaL_checknumber (L, 1);
         rv = create_copy_array(L, 2);
-      }	 
+      }
       struct {float* p; float c; float operator()(int y) {return p[y]-c;}} f;
       f.c = param1;
       rv->do_op(f);
@@ -671,7 +669,7 @@ namespace psycle { namespace host {
       } else {
         param1 = luaL_checknumber (L, 1);
         rv = create_copy_array(L, 2);
-      }	 
+      }
       struct {float* p; float c; float operator()(int y) {return pow(p[y],c);}} f;
       f.c = param1;
       rv->do_op(f);
@@ -682,9 +680,9 @@ namespace psycle { namespace host {
   int LuaArrayBind::array_sum(lua_State* L) {
     luaL_checktype(L, 1, LUA_TTABLE);
     struct {float* p; float* v; float operator()(int y) {return p[y]+v[y];}} f;
-    PSArray* dest = 0;	 
+    PSArray* dest = 0;
     for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
-      PSArray* v = *(PSArray **)luaL_checkudata(L, -1, meta);		 
+      PSArray* v = *(PSArray **)luaL_checkudata(L, -1, meta);
       if (!dest) {
         dest = new PSArray(v->len(), 0);
       }
@@ -714,7 +712,7 @@ namespace psycle { namespace host {
 
   int LuaArrayBind::array_method_rsum(lua_State* L) {
     PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
-    int n = lua_gettop(L);   
+    int n = lua_gettop(L);
     double sum = 0;
     if (n==2) {
       sum = luaL_checknumber(L, 2);
@@ -743,7 +741,7 @@ namespace psycle { namespace host {
       } else {
         param1 = luaL_checknumber (L, 1);
         rv = create_copy_array(L, 2);
-      }	 
+      }
       struct {float* p; float c; float operator()(int y) {return p[y]*c;}} f;
       f.c = param1;
       rv->do_op(f);
@@ -768,7 +766,7 @@ namespace psycle { namespace host {
       } else {
         param1 = luaL_checknumber (L, 1);
         rv = create_copy_array(L, 2);
-      }	 
+      }
       struct {float* p; float c; float operator()(int y) {return p[y]/c;}} f;
       f.c = param1;
       rv->do_op(f);
@@ -781,44 +779,44 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaArrayBind::array_sin(lua_State* L) {		
-    create_copy_array(L)->sin();    
+  int LuaArrayBind::array_sin(lua_State* L) {
+    create_copy_array(L)->sin();
     return 1;
   }
 
-  int LuaArrayBind::array_cos(lua_State* L) {		
-    create_copy_array(L)->cos();    
+  int LuaArrayBind::array_cos(lua_State* L) {
+    create_copy_array(L)->cos();
     return 1;
   }
 
-  int LuaArrayBind::array_tan(lua_State* L) {		
-    create_copy_array(L)->tan();    
+  int LuaArrayBind::array_tan(lua_State* L) {
+    create_copy_array(L)->tan();
     return 1;
   }
 
-  int LuaArrayBind::array_pow(lua_State* L) {		    
-    create_copy_array(L)->pow(luaL_checknumber (L, 2));    
+  int LuaArrayBind::array_pow(lua_State* L) {
+    create_copy_array(L)->pow(luaL_checknumber (L, 2));
     return 1;
   }
 
-  int LuaArrayBind::array_sqrt(lua_State* L) {		
-    create_copy_array(L)->sqrt();    
+  int LuaArrayBind::array_sqrt(lua_State* L) {
+    create_copy_array(L)->sqrt();
     return 1;
   }
 
   int LuaArrayBind::array_size(lua_State* L) {
-    PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);   
-    lua_pushnumber(L, (*ud)->len());  
+    PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
+    lua_pushnumber(L, (*ud)->len());
     return 1;
   }
 
   int LuaArrayBind::array_resize(lua_State* L) {
-    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);   
+    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
     rv->resize(luaL_checknumber (L, 2));
     return LuaHelper::chaining(L);
   }
 
-  int LuaArrayBind::array_fillzero(lua_State* L) {  
+  int LuaArrayBind::array_fillzero(lua_State* L) {
     call(L, &PSArray::fillzero);
     return LuaHelper::chaining(L);
   }
@@ -839,7 +837,7 @@ namespace psycle { namespace host {
   }
 
   int LuaArrayBind::array_clearmargin(lua_State* L) {
-    call(L, &PSArray::clearmargin);    
+    call(L, &PSArray::clearmargin);
     return LuaHelper::chaining(L);
   }
 
@@ -853,21 +851,21 @@ namespace psycle { namespace host {
   }
 
   int LuaArrayBind::array_tostring(lua_State *L) {
-    PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);   
+    PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
     lua_pushfstring(L, (*ud)->tostring().c_str());
     return 1;
   }
 
-  int LuaArrayBind::array_index(lua_State *L) {	
+  int LuaArrayBind::array_index(lua_State *L) {
     if (lua_isnumber(L, 2)) {
       PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
       int index = luaL_checknumber(L, 2);
       if (index <0 && index >= (*ud)->len()) {
-        luaL_error(L, "index out of range");      
+        luaL_error(L, "index out of range");
       }
       lua_pushnumber(L, *((*ud)->data()+index));
       return 1;
-    } else 
+    } else
       if (lua_istable(L, 2)) {
         PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
         std::vector<int> p;
@@ -883,9 +881,9 @@ namespace psycle { namespace host {
                p[0] < p[1])) {
             std::ostringstream o;
             o << "index" << p[0] << "," << p[1] << "," << " out of range (max)" << (*ud)->len();
-            luaL_error(L, o.str().c_str());	    
+            luaL_error(L, o.str().c_str());
           }
-          *rv = new PSArray(p[1]-p[0], 0);        
+          *rv = new PSArray(p[1]-p[0], 0);
           struct {float* p; float* v; int s; float operator()(int y) {return v[y+s];}} f;
           f.s = p[0];
           f.v = (*ud)->data();
@@ -904,13 +902,13 @@ namespace psycle { namespace host {
           if (result == 0) {
             return 1;
           }
-        }	
+        }
       }
-      // no method found	
+      // no method found
       return 0;
   }
 
-  int LuaArrayBind::array_new_index(lua_State *L) {	
+  int LuaArrayBind::array_new_index(lua_State *L) {
     if (lua_isnumber(L, 2)) {
       PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
       int index = luaL_checknumber(L, 2);
@@ -918,7 +916,7 @@ namespace psycle { namespace host {
       if (!(0 <= index && index < (*ud)->len())) {
          luaL_error(L, "index out of range");
       }
-      *((*ud)->data()+index) = value;      
+      *((*ud)->data()+index) = value;
       return 0;
     } else {
       //error
@@ -974,7 +972,7 @@ namespace psycle { namespace host {
       { "margin", array_margin},
       { "fromtable", array_method_from_table},
       { "table", array_method_to_table},
-      { "clearmargin", array_clearmargin },      
+      { "clearmargin", array_clearmargin },
       { "__newindex", array_new_index },
       { "__index", array_index },
       { "__gc", array_gc },
@@ -983,17 +981,16 @@ namespace psycle { namespace host {
       { "__sub", array_sub },
       { "__mul", array_mul },
       { "__div", array_div },
-      { "__mod", array_mod },      
+      { "__mod", array_mod },
       { "__pow", array_op_pow },
-      { "__unm", array_unm },      
+      { "__unm", array_unm },
       { "__concat", array_concat},
       { NULL, NULL }
     };
     luaL_newmetatable(L, meta);
-    luaL_setfuncs(L, pm_meta, 0);    
+    luaL_setfuncs(L, pm_meta, 0);
     lua_pop(L, 1);
-    luaL_newlib(L, pm_lib);	
+    luaL_newlib(L, pm_lib);
     return 1;
   }
-
 }}  // namespace

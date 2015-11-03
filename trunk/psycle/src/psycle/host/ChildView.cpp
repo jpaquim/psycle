@@ -169,6 +169,7 @@ namespace psycle { namespace host {
 			ON_WM_MBUTTONDOWN()
 			ON_WM_MOUSEMOVE()
 			ON_WM_MOUSEWHEEL()
+      ON_WM_SETCURSOR()
 //Main menu and toolbar (A few entries are in MainFrm)
 			ON_COMMAND(ID_FILE_NEW, OnFileNew)
 			ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
@@ -380,10 +381,14 @@ namespace psycle { namespace host {
         if (viewMode == view_modes::luaplugin)
 				{
           if (active_lua_ && !active_lua_->crashed()) {
-            active_lua_->OnGuiTimer(this->pParentFrame, this);           
-            canvas::Canvas* user_view = active_lua_->GetCanvas();          
-            user_view->SetParent(this);
-            user_view->InvalidateSave();
+            try {
+              active_lua_->OnGuiTimer(this->pParentFrame, this);           
+              ui::canvas::Canvas* user_view = active_lua_->GetCanvas();          
+              user_view->set_wnd(this);
+              user_view->InvalidateSave();
+            } catch(std::exception& e) {
+              e;
+            }            
           }
 				}
 
@@ -571,12 +576,13 @@ namespace psycle { namespace host {
       else if (active_lua_ && viewMode == view_modes::luaplugin)
       {
         LuaPlugin* lp = active_lua_;        
-        canvas::Canvas* user_view = lp->GetCanvas();        
+        ui::canvas::Canvas* user_view = lp->GetCanvas();        
         if (user_view !=0) {
-          if (user_view->parent() == 0) user_view->SetParent(this);  
-          mfc::Graphics g(&bufDC);
+          user_view->set_wnd(this);  
+          ui::mfc::Graphics g(&bufDC);
           try {
-            user_view->DrawFlush(&g, rgn);          
+            ui::mfc::Region canvas_rgn(rgn);
+            user_view->DrawFlush(&g, canvas_rgn);          
           } catch (std::exception& e) {
              RemoveLuaMenu();
              lp->custom_menubar = 0; 
@@ -630,7 +636,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnSize(UINT nType, int cx, int cy) 
 		{
-			CWnd ::OnSize(nType, cx, cy);
+			CWnd ::OnSize(nType, cx, cy);      
 
 			CW = cx;
 			CH = cy;
@@ -644,8 +650,10 @@ namespace psycle { namespace host {
 			if (viewMode == view_modes::pattern)
 			{
 				RecalcMetrics();
-			}
-			Repaint();
+			}			
+      CPoint cs(cx, cy);
+      Repaint();
+      DelegateLuaEvent(ui::canvas::Event::ONSIZE, 1, 0, cs);        
 		}
 
 		/// "Save Song" Function
@@ -2458,7 +2466,7 @@ namespace psycle { namespace host {
 
     bool CChildView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
       if (active_lua_ && viewMode == view_modes::luaplugin && !active_lua_->crashed()) {        
-        canvas::Event ev(0, (canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
+        ui::canvas::Event ev(0, (ui::canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
         return active_lua_->OnEvent(&ev);        		    
       }
       return false;
@@ -2470,9 +2478,9 @@ namespace psycle { namespace host {
         CMenu* main_menu = pParentMain->GetMenu();
         if (pParentMain->IsWindowVisible()) {
           const int defcount = pParentMain->defmainmenuitemcount;
-          int count = main_menu->GetMenuItemCount() - defcount;
+          int count = main_menu->GetMenuItemCount() - defcount;          
           if (count > 0) {
-            for (;count!=0; --count) {
+            for (;count > 0; --count) {
               pParentMain->GetMenu()->RemoveMenu(defcount, MF_BYPOSITION);
             }
             pParentMain->DrawMenuBar();
@@ -2495,7 +2503,7 @@ namespace psycle { namespace host {
         try {
           mac = LuaHost::LoadPlugin(info->dllname.c_str(), 1024);
           mac->Init();
-          canvas::Canvas* user_view = mac->GetCanvas();
+          ui::canvas::Canvas* user_view = mac->GetCanvas();
           if (user_view) {
             view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());            
           } else {            
@@ -2544,7 +2552,7 @@ namespace psycle { namespace host {
         RemoveLuaMenu();
         LuaPlugin* plug = it->second;        
         if (plug->crashed()) return;
-        canvas::Canvas* user_view = plug->GetCanvas();
+        ui::canvas::Canvas* user_view = plug->GetCanvas();
         if (user_view) {
           // integrate into childview
           active_lua_ = plug;        

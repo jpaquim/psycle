@@ -11,17 +11,13 @@
 struct lua_State;
 struct luaL_Reg;
 
-
-
 namespace universalis { namespace os {
 	class terminal;
 }}
 
-namespace psycle { namespace host { namespace canvas { struct Event; }}}
+namespace psycle { namespace host { namespace ui { namespace canvas { struct Event; }}}}
 
 namespace psycle { namespace host {
-
-
   //controlling function header
 static UINT StartThread (LPVOID param);
 
@@ -32,31 +28,29 @@ typedef struct THREADSTRUCT
         //you can add here other parameters you might be interested on
 } THREADSTRUCT;
 
-
 class TDlg {
 public:
   static UINT TDlg::StartThread (LPVOID param)
 {
 //    THREADSTRUCT*    ts = (THREADSTRUCT*)param;
 
-    //here is the time-consuming process 
+    //here is the time-consuming process
     //which interacts with your dialog
     AfxMessageBox ("Thread is started!");
 
         //see the access mode to your dialog controls
     static const char szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
-				
+
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
-				if ( dlg.DoModal() == IDOK ) 
+				if ( dlg.DoModal() == IDOK )
 				{
         }
-    
 
     //you can also call AfxEndThread() here
     return 1;
 }
 
-  void TDlg::OnStart() 
+  void TDlg::OnStart()
 {
         //call the thread on a button action or menu
     THREADSTRUCT *_param = new THREADSTRUCT;
@@ -65,19 +59,16 @@ public:
 }
 };
 
-
-
-
 class LuaPlugin;
 
 class LuaProxy {
-public:    
+public:
 	LuaProxy(LuaPlugin* plug, lua_State* state);
 	~LuaProxy();
 
     const PluginInfo& info() const { return info_; }
 	int num_cols() const { return plugimport_->numcols(); }
-	int num_parameter() const { return plugimport_->numparams(); }	
+	int num_parameter() const { return plugimport_->numparams(); }
 	double get_parameter_value(int numparam);
 	std::string get_parameter_id(int numparam);
 	std::string get_parameter_name(int numparam);
@@ -85,7 +76,7 @@ public:
 	std::string get_parameter_label(int numparam);
 	void get_parameter_range(int numparam,int &minval, int &maxval);
 	int get_parameter_type(int numparam);
-	int call_data(unsigned char **ptr, bool all);  
+	int call_data(unsigned char **ptr, bool all);
 	uint32_t call_data_size();
 	void call_putdata(unsigned char* data, int size);
 	// calls from proxy to script
@@ -98,7 +89,7 @@ public:
 	void call_command(int lastnote, int inst, int cmd, int val);
 	void call_noteon(int note, int lastnote, int inst, int cmd, int val);
 	void call_noteoff(int note, int lastnote, int inst, int cmd, int val);
-  bool call_event(canvas::Event* ev);
+  bool call_event(ui::canvas::Event* ev);
 	void call_newline();
 	void call_work(int num, int offset=0);
   void call_parameter(int numparameter, double val);
@@ -110,10 +101,10 @@ public:
 	std::string call_help();
 	void free_state();
 	void set_state(lua_State* state);
-	void reload();	
+	void reload();
   void update_menu(void* menu);
   LuaMenuBar* get_menu(LuaMenu* menu);
-  int gui_type() const { return plugimport_->gui_type(); }  
+  int gui_type() const { return plugimport_->gui_type(); }
   void call_setprogram(int idx);
   int call_numprograms();
   int get_curr_program();
@@ -130,18 +121,18 @@ private:
 	static int call_filedialog(lua_State* L);
   static int call_selmachine(lua_State* L);
 	static int set_machine(lua_State* L);
- 
+
 	void get_method_strict(lua_State* L, const char* method);
 	bool get_method_optional(lua_State* L, const char* method);
-	bool get_param(lua_State* L, int index, const char* method);  
+	bool get_param(lua_State* L, int index, const char* method);
 
 	std::string GetString();
 	PluginInfo info_;
 	LuaPlugin *plug_;
 	LuaMachine* plugimport_;
-	lua_State* L;	
+	lua_State* L;
 	static universalis::os::terminal * terminal;
-  static int gui_type_;  
+  static int gui_type_;
   TDlg test;
   mutable CRITICAL_SECTION cs;
 };
@@ -151,6 +142,5 @@ struct LuaHost {
    static LuaPlugin* LoadPlugin(const std::string& dllpath, int macIdx);
    static PluginInfo LoadInfo(const std::string& dllpath);
 };
-
 }
 }

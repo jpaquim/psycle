@@ -21,20 +21,18 @@
 #include <iostream>
 #include <fstream>
 
-
 namespace psycle { namespace host {
-
   //////////////////////////////////////////////////////////////////////////
   // Lua
 
   LuaPlugin::LuaPlugin(lua_State* state, int index, bool full)
     : curr_prg_(0), proxy_(this, state), custom_menubar(0)
-  {		
+  {
     _macIndex = index;
     _type = MACH_LUA;
     _mode = MACHMODE_FX;
     usenoteon_ = false;
-    std::sprintf(_editName, "native plugin");		
+    std::sprintf(_editName, "native plugin");
     InitializeSamplesVector();
     for(int i(0) ; i < MAX_TRACKS; ++i) {
       trackNote[i].key = 255; // No Note.
@@ -45,13 +43,13 @@ namespace psycle { namespace host {
       if (full) {
         proxy_.call_init();
       }
-    } catch(std::exception &e) { 
-      AfxMessageBox(e.what());  
+    } catch(std::exception &e) {
+      AfxMessageBox(e.what());
     }
   }
 
-  LuaPlugin::~LuaPlugin() {    
-    Free();    
+  LuaPlugin::~LuaPlugin() {
+    Free();
   }
 
   void LuaPlugin::Free() {
@@ -62,23 +60,23 @@ namespace psycle { namespace host {
 
   void LuaPlugin::OnReload() {
     try {
-      proxy_.reload();      
+      proxy_.reload();
       if (custom_menubar) {
         delete custom_menubar;
-      }      
+      }
       custom_menubar = 0;
     } CATCH_WRAP_AND_RETHROW(*this)
     /*PluginInfo info = CallPluginInfo();
     _mode = info.mode;*/
   }
 
-  bool LuaPlugin::OnEvent(canvas::Event* ev) {
-    try {       
-        if (GetCanvas() !=0 && GetGuiType() == 1) {                    
-          return proxy_.call_event(ev);           
-        }            
-      } catch(std::exception &e) { e;       
-    } 
+  bool LuaPlugin::OnEvent(ui::canvas::Event* ev) {
+    try {
+        if (GetCanvas() !=0 && GetGuiType() == 1) {
+          return proxy_.call_event(ev);
+        }
+      } catch(std::exception &e) { e;
+    }
     return false;
   }
 
@@ -91,10 +89,10 @@ namespace psycle { namespace host {
       Standby(false);
     }
 
-    if (!_mute) 
+    if (!_mute)
     {
       if ((_mode == MACHMODE_GENERATOR) || (!Bypass() && !Standby()))
-      {										
+      {
         int ns = numSamples;
         int us = 0;
         while (ns)
@@ -125,7 +123,7 @@ namespace psycle { namespace host {
               }
             }
             try
-            {								
+            {
               //proxy().Work(samplesV[0]+us, samplesV[1]+us, ns, Global::song().SONGTRACKS);
               proxy_.call_work(ns, us);
             }
@@ -200,13 +198,12 @@ namespace psycle { namespace host {
                   // do event
                   try
                   {
-                    proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);											
+                    proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
                   }
                   catch(const std::exception &e)
                   {
                     e;
                     return 0;
-
                   }
                   TriggerDelay[i]._cmd = 0;
                 }
@@ -226,10 +223,8 @@ namespace psycle { namespace host {
                   }
                   catch(const std::exception &e)
                   {
-
                     e;
                     return 0;
-
                   }
                   TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
                 }
@@ -279,7 +274,7 @@ namespace psycle { namespace host {
                   PatternEntry entry =TriggerDelay[i];
                   switch(ArpeggioCount[i])
                   {
-                  case 0: 
+                  case 0:
                     try
                     {
                       proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
@@ -475,7 +470,7 @@ namespace psycle { namespace host {
       }
       pFile->Write(size2);
       if(size2)
-      {        
+      {
         pFile->Write(pData, size2); // Number of parameters
         zapArray(pData);
       }
@@ -533,7 +528,7 @@ namespace psycle { namespace host {
     return false;
   }
 
-  void LuaPlugin::GetParamRange(int numparam,int &minval, int &maxval) { 
+  void LuaPlugin::GetParamRange(int numparam,int &minval, int &maxval) {
     if (crashed() || numparam < 0) {
       minval = 0; maxval = 0xFFFF;
       return;
@@ -545,8 +540,8 @@ namespace psycle { namespace host {
     } catch(std::exception &e) { e; }
   }
 
-  int LuaPlugin::GetParamType(int numparam) { 
-    if (crashed() || numparam < 0) {			  
+  int LuaPlugin::GetParamType(int numparam) {
+    if (crashed() || numparam < 0) {
       return 0;
     }
     int mpf = 0 ;
@@ -576,7 +571,7 @@ namespace psycle { namespace host {
       return 0;
     }
     if (numparam < GetNumParams()) {
-      int minval; int maxval;			  
+      int minval; int maxval;
       try {
         proxy_.get_parameter_range(numparam, minval, maxval);
         int quantization = (maxval-minval);
@@ -588,7 +583,7 @@ namespace psycle { namespace host {
     return 0;
   }
 
-  bool LuaPlugin::DescribeValue(int numparam, char * psTxt){			
+  bool LuaPlugin::DescribeValue(int numparam, char * psTxt){
     if (crashed() || numparam < 0) {
       std::string par_display("Out of range or Crashed");
       std::sprintf(psTxt, "%s", par_display);
@@ -623,7 +618,7 @@ namespace psycle { namespace host {
       try {
         if(!DescribeValue(numparam, parval)) {
           std::sprintf(parval,"%.0f",GetParamValue(numparam) * 1); // 1 = Plugin::quantizationVal())
-        }					
+        }
       }
       catch(const std::exception &e) {
         e;
@@ -634,7 +629,7 @@ namespace psycle { namespace host {
   }
 
   void LuaPlugin::GetParamId(int numparam, std::string& id) {
-    if (crashed() || numparam < 0) {      
+    if (crashed() || numparam < 0) {
       return;
     }
     if(numparam < GetNumParams()) {
@@ -648,7 +643,7 @@ namespace psycle { namespace host {
   }
 
   void LuaPlugin::AfterTweaked(int numparam) {
-    if (crashed() || numparam < 0) {      
+    if (crashed() || numparam < 0) {
       return;
     }
     if(numparam < GetNumParams()) {
@@ -660,11 +655,11 @@ namespace psycle { namespace host {
       }
     }
   }
-  
+
   std::string LuaPlugin::help() {
     if (crashed()) {
       return "saucer section missing";
-    }		
+    }
     try {
       return proxy_.call_help();
     } catch(const std::exception &e) { e; }
@@ -674,7 +669,7 @@ namespace psycle { namespace host {
   void LuaPlugin::NewLine() {
     if (crashed()) {
       return;
-    }		
+    }
     try {
       proxy_.call_newline();
     } catch(const std::exception &e) { e; }
@@ -691,8 +686,8 @@ namespace psycle { namespace host {
         int nv = (pData->_cmd<<8)+pData->_parameter;
         int const min = 0; // always range 0 .. FFFF like vst tweak
         int const max = 0xFFFF;
-        nv += min;        
-        if(nv > max) nv = max;                        
+        nv += min;
+        if(nv > max) nv = max;
         // quantization done in parameter.lua
         try
         {
@@ -791,10 +786,10 @@ namespace psycle { namespace host {
           proxy_.call_seqtick(channel, pData->_note, pData->_inst, pData->_cmd,
             pData->_parameter);
         } else {
-          // noteon modus				
+          // noteon modus
           if (note < notecommands::release)  { // Note on
             SendNoteOn(channel, note, pData->_inst, pData->_cmd, pData->_parameter);
-          } else if (note == notecommands::release) { // Note Off. 				
+          } else if (note == notecommands::release) { // Note Off.
             SendNoteOff(channel, note, notecommands::empty, pData->_inst,
               pData->_cmd, pData->_parameter);
           } else {
@@ -808,7 +803,7 @@ namespace psycle { namespace host {
     if (crashed()) {
       return;
     }
-    try {			  
+    try {
       proxy_.call_stop();
       if (usenoteon_!=0) {
         for(int i(0) ; i < MAX_TRACKS; ++i) {
@@ -863,46 +858,46 @@ namespace psycle { namespace host {
   }
 
   //Bank & Programs
-  
+
    void LuaPlugin::SetCurrentProgram(int idx) {
      if (crashed()) {
        return;
      }
-     try {		
+     try {
        proxy_.call_setprogram(idx);
        curr_prg_ = idx;
-     } catch(const std::exception &e) { e; }     
+     } catch(const std::exception &e) { e; }
    }
 
-   void LuaPlugin::GetIndexProgramName(int bnkidx, int prgIdx, char* val) {     
+   void LuaPlugin::GetIndexProgramName(int bnkidx, int prgIdx, char* val) {
      if (crashed()) {
        std::strcpy(val, "");
        return;
      }
-     try {			  
+     try {
        std::string name = proxy_.get_program_name(bnkidx, prgIdx);
        std::strcpy(val, name.c_str());
      } catch(const std::exception &e) {
        e; std::strcpy(val, "Out of Range");
      }
-   }          
+   }
 
    //Bank & Programs
-   int LuaPlugin::GetNumPrograms() {     
+   int LuaPlugin::GetNumPrograms() {
      if (crashed()) {
        return 0;
      }
-     try {			  
+     try {
        return proxy_.call_numprograms();
      } catch(const std::exception &e) { e; }
      return 0;
    }
 
-   int LuaPlugin::GetCurrentProgram() {     
+   int LuaPlugin::GetCurrentProgram() {
      if (crashed()) {
        return 0;
      }
-     try {			  
+     try {
        return proxy_.get_curr_program();
      } catch(const std::exception &e) { e; }
      return 0;
@@ -921,7 +916,7 @@ namespace psycle { namespace host {
       ofile.close();
    }
 
-   bool LuaPlugin::LoadBank(const std::string& filename) {      
+   bool LuaPlugin::LoadBank(const std::string& filename) {
       using namespace std;
       streampos size;
       char* pData;
@@ -939,9 +934,8 @@ namespace psycle { namespace host {
         proxy_.call_putdata((unsigned char*)pData, size);
         delete[] pData;
         return true;
-      }    
+      }
       return false;
    }
-
 }   // namespace
 }   // namespace

@@ -29,60 +29,68 @@ extern "C" {
 #include <sstream>
 
 namespace psycle { namespace host {
-
   universalis::os::terminal* LuaProxy::terminal = 0;
 
   LuaProxy::LuaProxy(LuaPlugin* plug, lua_State* state) : plug_(plug) {
     InitializeCriticalSection(&cs);
-    set_state(state);    
+    set_state(state);
   }
 
   LuaProxy::~LuaProxy() {
-    // if (terminal) { delete terminal; terminal = NULL; }    
+    // if (terminal) { delete terminal; terminal = NULL; }
     DeleteCriticalSection(&cs);
   }
 
-  void LuaProxy::set_state(lua_State* state) { 
+  void LuaProxy::set_state(lua_State* state) {
     L = state;
     export_c_funcs();
-    // require c modules  
-    LuaHelper::require<LuaResamplerBind>(L, "psycle.dsp.resampler");
-    LuaHelper::require<LuaDspMathHelper>(L, "psycle.dsp.math");
-    LuaHelper::require<LuaDspFilterBind>(L, "psycle.dsp.filter");
-    LuaHelper::require<LuaMidiHelper>(L, "psycle.midi");
-    LuaHelper::require<LuaArrayBind>(L, "psycle.array");        
-    LuaHelper::require<LuaDelayBind>(L, "psycle.delay");
+    // require c modules
+    // config
+    LuaHelper::require<LuaConfigBind>(L, "psycle.config");
+    // sound engine
+    LuaHelper::require<LuaArrayBind>(L, "psycle.array");
+    LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");
     LuaHelper::require<LuaMachineBind>(L, "psycle.machine");
     LuaHelper::require<LuaWaveOscBind>(L, "psycle.osc");
-    LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");
+    LuaHelper::require<LuaResamplerBind>(L, "psycle.dsp.resampler");
+    LuaHelper::require<LuaDelayBind>(L, "psycle.delay");
+    LuaHelper::require<LuaDspFilterBind>(L, "psycle.dsp.filter");
     LuaHelper::require<LuaEnvelopeBind>(L, "psycle.envelope");
+    LuaHelper::require<LuaDspMathHelper>(L, "psycle.dsp.math");
+    LuaHelper::require<LuaMidiHelper>(L, "psycle.midi");
     LuaHelper::require<LuaPlayerBind>(L, "psycle.player");
     LuaHelper::require<LuaPatternDataBind>(L, "psycle.pattern");
-    LuaHelper::require<LuaConfigBind>(L, "psycle.config");    
-    // ui binds    
+    // ui host interaction
+    LuaHelper::require<LuaSequenceBarBind>(L, "psycle.sequencebar");
     LuaHelper::require<LuaActionListenerBind>(L, "psycle.ui.hostactionlistener");
+    // ui binds
+    LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
+    LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
+    LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.graphics");
+    // ui menu binds
     LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
     LuaHelper::require<LuaMenuBind>(L, "psycle.ui.menu");
-    LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");    
-    LuaHelper::require<LuaDialogBind>(L, "psycle.ui.dialog");        
+    LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");
+    // ui dialog bind
+    LuaHelper::require<LuaDialogBind>(L, "psycle.ui.dialog");
+    // ui canvas binds
     LuaHelper::require<LuaCanvasBind>(L, "psycle.ui.canvas");
-    LuaHelper::require<LuaGroupBind>(L, "psycle.ui.canvas.group");    
+    LuaHelper::require<LuaGroupBind>(L, "psycle.ui.canvas.group");
     LuaHelper::require<LuaItemBind>(L, "psycle.ui.canvas.item");
-    LuaHelper::require<LuaRectBind>(L, "psycle.ui.canvas.rect");    
-    LuaHelper::require<LuaLineBind>(L, "psycle.ui.canvas.line");    
+    LuaHelper::require<LuaLineBind>(L, "psycle.ui.canvas.line");
+    LuaHelper::require<LuaPicBind>(L, "psycle.ui.canvas.pic");
+    LuaHelper::require<LuaRectBind>(L, "psycle.ui.canvas.rect");
     LuaHelper::require<LuaTextBind>(L, "psycle.ui.canvas.text");
-    // LuaHelper::require<LuaPixBind>(L, "psycle.ui.canvas.pix");
-    LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.canvas.graphics");
 #if !defined WINAMP_PLUGIN
-    LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");    
-#endif //!defined WINAMP_PLUGIN    
-#if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN    
+    LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
+#endif //!defined WINAMP_PLUGIN
+#if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
     luaL_requiref(L, "socket", luaopen_socket_core, 1);
     lua_pop(L, 1);
     luaL_requiref(L, "mime", luaopen_mime_core, 1);
     lua_pop(L, 1);
-#endif  //LUASOCKET_SUPPORT    
-    info_.mode = MACHMODE_FX;  
+#endif  //LUASOCKET_SUPPORT
+    info_.mode = MACHMODE_FX;
   }
 
   void LuaProxy::free_state() {
@@ -92,30 +100,30 @@ namespace psycle { namespace host {
     L = 0;
   }
 
-  void LuaProxy::reload() {        
+  void LuaProxy::reload() {
     plug_->Mute(true);
     lock();
-    lua_State* old_state = L;	
+    lua_State* old_state = L;
     lua_State* new_state = 0;
     try {
       new_state = LuaHost::load_script(plug_->GetDllName());
-      set_state(new_state);				      
-      call_run();      
-      call_init();      
+      set_state(new_state);
+      call_run();
+      call_init();
       if (old_state) {
         lua_close(old_state);
       }
       plug_->Mute(false);
-    } catch(std::exception &e) {      
+    } catch(std::exception &e) {
       if (new_state) {
         lua_close(new_state);
       }
       L = old_state;
       std::string s = std::string("Reload Error, old script still running!\n") + e.what();
       plug_->set_crashed(true);
-      unlock();      
+      unlock();
       throw std::exception(e);
-  //    AfxMessageBox(s.c_str());      
+  //    AfxMessageBox(s.c_str());
     }
     unlock();
   }
@@ -123,21 +131,21 @@ namespace psycle { namespace host {
   int LuaProxy::message(lua_State* L) {
     size_t len;
     const char* msg = luaL_checklstring(L, 1, &len);
-    CString cmsg(msg);	
+    CString cmsg(msg);
     AfxMessageBox(cmsg);
     return 0;
   }
 
-  int LuaProxy::terminal_output(lua_State* L) {    
+  int LuaProxy::terminal_output(lua_State* L) {
     if (terminal == 0) {
       terminal = new universalis::os::terminal();
-    }	
+    }
     int n = lua_gettop(L);  // number of arguments
     const char* out = 0;
     if (lua_isboolean(L, 1)) {
       int v = lua_toboolean(L, 1);
       if (v==1) out = "true"; else out = "false";
-    } else {	
+    } else {
       int i;
       lua_getglobal(L, "tostring");
       for (i=1; i<=n; i++) {
@@ -149,19 +157,19 @@ namespace psycle { namespace host {
         s = lua_tolstring(L, -1, &l);  /* get result */
         if (s == NULL)
           return luaL_error(L,
-          LUA_QL("tostring") " must return a string to " LUA_QL("print"));			
+          LUA_QL("tostring") " must return a string to " LUA_QL("print"));
         lua_pop(L, 1);  /* pop result */
-        terminal->output(universalis::os::loggers::levels::trace, s);			
-      }  
-    }	    
+        terminal->output(universalis::os::loggers::levels::trace, s);
+      }
+    }
     return 0;
   }
 
-  int LuaProxy::call_filedialog(lua_State* L) {  
+  int LuaProxy::call_filedialog(lua_State* L) {
     char szFilters[]= "Text Files (*.NC)|*.NC|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
     // Create an Open dialog; the default file name extension is ".my".
     CFileDialog* m_pFDlg = new CFileDialog(TRUE, "txt", "*.txt",
-      OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());   
+      OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
     m_pFDlg->DoModal();
     //m_pFDlg->Create(40000,AfxGetMainWnd());
     //m_pFDlg->ShowWindow(SW_SHOW);
@@ -172,7 +180,7 @@ namespace psycle { namespace host {
     return 0;
   }
 
-  int LuaProxy::call_selmachine(lua_State* L) {  
+  int LuaProxy::call_selmachine(lua_State* L) {
     CNewMachine dlg(AfxGetMainWnd());
     dlg.DoModal();
     if (dlg.Outputmachine >= 0) {
@@ -195,16 +203,16 @@ namespace psycle { namespace host {
     lua_getglobal(L, "psycle");
     lua_getfield(L, -1, "__self");
     LuaProxy* proxy = *(LuaProxy**)luaL_checkudata(L, -1, "psyhostmeta");
-    luaL_checktype(L, 1, LUA_TTABLE); 
-    lua_getfield(L, 1, "__self");	
+    luaL_checktype(L, 1, LUA_TTABLE);
+    lua_getfield(L, 1, "__self");
     LuaMachine** ud = (LuaMachine**) luaL_checkudata(L, -1, "psypluginmeta");
     (*ud)->set_mac(proxy->plug_);
     proxy->plugimport_ = *ud;
     proxy->plugimport_->setproxy(proxy);
     lua_pushvalue(L, 1);
     LuaHelper::register_weakuserdata(L, proxy->plugimport_);
-    lua_setfield(L, 2, "proxy");    
-    // share samples  
+    lua_setfield(L, 2, "proxy");
+    // share samples
     (*ud)->build_buffer(proxy->plug_->samplesV, 256);
     return 0;
   }
@@ -213,39 +221,39 @@ namespace psycle { namespace host {
     static const luaL_Reg methods[] = {
       {"output", terminal_output },
       {"setmachine", set_machine},
-      {"filedialog", call_filedialog},      
+      {"filedialog", call_filedialog},
       {"selmachine", call_selmachine},
       { NULL, NULL }
-    };  
-    lua_newtable(L); 
+    };
+    lua_newtable(L);
     luaL_setfuncs(L, methods, 0);
     LuaProxy** ud = (LuaProxy **)lua_newuserdata(L, sizeof(LuaProxy *));
     luaL_newmetatable(L, "psyhostmeta");
     lua_setmetatable(L, -2);
     *ud = this;
-    lua_setfield(L, -2, "__self");    
-    lua_setglobal(L, "psycle");    
-    lua_getglobal(L, "psycle");    
-    lua_newtable(L); // table for canvasdata    
+    lua_setfield(L, -2, "__self");
+    lua_setglobal(L, "psycle");
+    lua_getglobal(L, "psycle");
+    lua_newtable(L); // table for canvasdata
     lua_setfield(L, -2, "userdata");
     lua_newtable(L); // table for canvasdata
     lua_newtable(L); // metatable
     lua_pushstring(L, "kv");
-    lua_setfield(L, -2, "__mode"); 
+    lua_setfield(L, -2, "__mode");
     lua_setmetatable(L, -2);
     lua_setfield(L, -2, "weakuserdata");
-    lua_pop(L, 1);    
+    lua_pop(L, 1);
   }
 
   bool LuaProxy::get_param(lua_State* L, int index, const char* method) {
     if (index < 0) return false;
     try {
       LuaHelper::get_proxy(L);
-    } catch(std::exception &e) {	
+    } catch(std::exception &e) {
       throw psycle::host::exceptions::library_errors::loading_error(e.what());
     }
     lua_getfield(L, -1, "params");
-    if (lua_isnil(L, -1)) {	 
+    if (lua_isnil(L, -1)) {
       lua_pop(L, 1);
       throw psycle::host::exceptions::library_errors::loading_error("no param found");
     }
@@ -266,11 +274,11 @@ namespace psycle { namespace host {
   void LuaProxy::get_method_strict(lua_State* L, const char* method) {
     try {
       LuaHelper::get_proxy(L);
-    } catch(std::exception &e) {	
+    } catch(std::exception &e) {
       throw psycle::host::exceptions::library_errors::loading_error(e.what());
     }
     lua_getfield(L, -1, method);
-    if (lua_isnil(L, -1)) {	  
+    if (lua_isnil(L, -1)) {
       lua_pop(L, 3);
       throw psycle::host::exceptions::library_errors::loading_error("no "+std::string(method)+" found");
     }
@@ -282,16 +290,16 @@ namespace psycle { namespace host {
   bool LuaProxy::get_method_optional(lua_State* L, const char* method) {
     try {
       LuaHelper::get_proxy(L);
-    } catch(std::exception &e) {	
+    } catch(std::exception &e) {
       throw psycle::host::exceptions::library_errors::loading_error(e.what());
     }
     lua_getfield(L, -1, method);
-    if (lua_isnil(L, -1)) {	  
+    if (lua_isnil(L, -1)) {
       lua_pop(L, 3);
       return false;
     }
     if (lua_iscfunction(L, -1)) {
-      lua_pop(L, 3);	
+      lua_pop(L, 3);
       return false;
     }
     lua_remove(L, -3);
@@ -300,23 +308,23 @@ namespace psycle { namespace host {
     return true;
   }
 
-  PluginInfo LuaProxy::call_info() {		
+  PluginInfo LuaProxy::call_info() {
     PluginInfo info;
     info.type = MACH_LUA;
     info.mode = MACHMODE_FX;
-    info.allow = true;							
-    info.identifier = 0;							
+    info.allow = true;
+    info.identifier = 0;
     get_method_strict(L, "info");
     int status = lua_pcall(L, 1, 1 ,0);
     if (status) {
       const char* msg =lua_tostring(L, -1);
       std::ostringstream s; s << "Failed: " << msg << std::endl;
-      throw psycle::host::exceptions::library_errors::loading_error(s.str());	
+      throw psycle::host::exceptions::library_errors::loading_error(s.str());
     }
     if (lua_istable(L,-1)) {
       size_t len;
       for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
-        const char* key = luaL_checklstring(L, -2, &len);        
+        const char* key = luaL_checklstring(L, -2, &len);
         if (strcmp(key, "vendor") == 0) {
           const char* value = luaL_checklstring(L, -1, &len);
           info.vendor = std::string(value);
@@ -324,12 +332,12 @@ namespace psycle { namespace host {
           if (strcmp(key, "name") == 0) {
             const char* value = luaL_checklstring(L, -1, &len);
             info.name = std::string(value);
-          } else 
+          } else
             if (strcmp(key, "mode") == 0) {
               int value = luaL_checknumber(L, -1);
               switch (value) {
                 case 0 : info.mode = MACHMODE_GENERATOR; break;
-                case 3 : info.mode = MACHMODE_LUAUIEXT; break;                
+                case 3 : info.mode = MACHMODE_LUAUIEXT; break;
                 default: info.mode = MACHMODE_FX; break;
               }
             } else
@@ -342,18 +350,18 @@ namespace psycle { namespace host {
                 info.version = value;
               } else
                 if (strcmp(key, "api") == 0) {
-                  int value = luaL_checknumber(L, -1);                  
+                  int value = luaL_checknumber(L, -1);
                   info.APIversion = value;
                 } else
                   if (strcmp(key, "noteon") == 0) {
                     int value = luaL_checknumber(L, -1);
                     info.flags = value;
                   }
-      } 
+      }
     }
     std::ostringstream s;
     s << (info.mode == MACHMODE_GENERATOR ? "Lua instrument" : "Lua effect") << " by " << info.vendor;
-    info.desc = s.str();	
+    info.desc = s.str();
     return info;
   }
 
@@ -362,7 +370,7 @@ namespace psycle { namespace host {
     if (status) {
       CString msg(lua_tostring(L, -1));
       throw std::runtime_error(msg.GetString());
-    }  
+    }
   }
 
   void LuaProxy::call_init() {
@@ -375,10 +383,10 @@ namespace psycle { namespace host {
     }
   }
 
-  // call events  
+  // call events
   void LuaProxy::call_execute() {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "onexecute")) {
         unlock();
         return;
@@ -393,10 +401,9 @@ namespace psycle { namespace host {
       unlock();
   }
 
-
   void LuaProxy::call_newline() {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "sequencertick")) {
         unlock();
         return;
@@ -413,7 +420,7 @@ namespace psycle { namespace host {
 
   void LuaProxy::call_seqtick(int channel, int note, int ins, int cmd, int val) {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "seqtick")) {
         unlock();
         return;
@@ -435,11 +442,11 @@ namespace psycle { namespace host {
 
   void LuaProxy::call_command(int lastnote, int inst, int cmd, int val) {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "command")) {
         unlock();
         return;
-      }    
+      }
       if (lastnote != notecommands::empty) {
         lua_pushnumber(L, lastnote);
       } else {
@@ -460,7 +467,7 @@ namespace psycle { namespace host {
 
   void LuaProxy::call_noteon(int note, int lastnote, int inst, int cmd, int val) {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "noteon")) {
         unlock();
         return;
@@ -486,7 +493,7 @@ namespace psycle { namespace host {
 
   void LuaProxy::call_noteoff(int note, int lastnote, int inst, int cmd, int val) {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "noteoff")) {
         unlock();
         return;
@@ -512,7 +519,7 @@ namespace psycle { namespace host {
 
   std::string LuaProxy::call_help() {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "help")) {
         unlock();
         return "no help found";
@@ -524,23 +531,22 @@ namespace psycle { namespace host {
         throw std::runtime_error(msg.GetString());
       }
       if (!lua_isstring(L, -1)) {
-        std::string s("call_help must return a string");	
+        std::string s("call_help must return a string");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
       }
       unlock();
       return GetString();
-
     } CATCH_WRAP_AND_RETHROW(*plug_)
       unlock();
     return "no help found";
   }
 
-  int LuaProxy::call_data(unsigned char **ptr, bool all) {	
+  int LuaProxy::call_data(unsigned char **ptr, bool all) {
     lock();
     std::string str;
-    try {	
+    try {
       if (!get_method_optional(L, "data")) {
         unlock();
         str = "";
@@ -554,7 +560,7 @@ namespace psycle { namespace host {
         throw std::runtime_error(msg.GetString());
       }
       if (!lua_isstring(L, -1)) {
-        std::string s("data must return a string");	
+        std::string s("data must return a string");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
@@ -564,7 +570,7 @@ namespace psycle { namespace host {
       std::copy(str.begin(), str.end(), *ptr);
       unlock();
       return str.size();
-    } CATCH_WRAP_AND_RETHROW(*plug_)  
+    } CATCH_WRAP_AND_RETHROW(*plug_)
       unlock();
     return 0;
   }
@@ -572,7 +578,7 @@ namespace psycle { namespace host {
   uint32_t LuaProxy::call_data_size() {
     lock();
     std::string str;
-    try {	
+    try {
       if (!get_method_optional(L, "data")) {
         unlock();
         str = "";
@@ -585,7 +591,7 @@ namespace psycle { namespace host {
         throw std::runtime_error(msg.GetString());
       }
       if (!lua_isstring(L, -1)) {
-        std::string s("data must return a string");	
+        std::string s("data must return a string");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
@@ -593,14 +599,14 @@ namespace psycle { namespace host {
       str = GetString();
       unlock();
       return str.size();
-    } CATCH_WRAP_AND_RETHROW(*plug_)  
+    } CATCH_WRAP_AND_RETHROW(*plug_)
       unlock();
     return 0;
   }
 
   void LuaProxy::call_putdata(unsigned char* data, int size) {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "putdata")) {
         unlock();
         return;
@@ -617,9 +623,9 @@ namespace psycle { namespace host {
       unlock();
   }
 
-  void LuaProxy::call_work(int numSamples, int offset) {	
+  void LuaProxy::call_work(int numSamples, int offset) {
     if (numSamples > 0) {
-      lock();	  
+      lock();
       if (offset >0) {
         plugimport_->offset(offset);
       }
@@ -627,7 +633,7 @@ namespace psycle { namespace host {
       if (!get_method_optional(L, "work")) {
         unlock();
         return;
-      }	  
+      }
       lua_pushnumber(L, numSamples);
       int status = lua_pcall(L, 2, 0 ,0);
       if (offset >0) {
@@ -637,7 +643,7 @@ namespace psycle { namespace host {
         int n = lua_gettop(L);
         std::ostringstream o;
         o << lua_tostring(L, -1) << ", stack count :" << n;
-        std::string s(lua_tostring(L, -1));	 
+        std::string s(lua_tostring(L, -1));
         unlock();
         try {
           throw std::runtime_error(s);
@@ -650,7 +656,7 @@ namespace psycle { namespace host {
 
   void LuaProxy::call_stop() {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "stop")) {
         unlock();
         return;
@@ -667,7 +673,7 @@ namespace psycle { namespace host {
 
   void LuaProxy::call_sr_changed(int rate) {
     lock();
-    try {	
+    try {
       WaveOscTables::getInstance()->set_samplerate(rate);
       LuaDspFilterBind::setsamplerate(rate);
       LuaWaveOscBind::setsamplerate(rate);
@@ -692,10 +698,10 @@ namespace psycle { namespace host {
       unlock();
       return;
     }
-    int status = lua_pcall(L, 1, 0 ,0);   			
+    int status = lua_pcall(L, 1, 0 ,0);
     try {
       if (status) {
-        std::string s(lua_tostring(L, -1));	
+        std::string s(lua_tostring(L, -1));
         lua_pop(L,1);
         unlock();
 #if !defined WINAMP_PLUGIN
@@ -709,17 +715,17 @@ namespace psycle { namespace host {
   }
 
   // Parameter tweak range is [0..1]
-  void LuaProxy::call_parameter(int numparameter, double val) {  
+  void LuaProxy::call_parameter(int numparameter, double val) {
     lock();
     if (!get_param(L, numparameter, "setnorm")) {
       unlock();
       return;
     }
     lua_pushnumber(L, val);
-    int status = lua_pcall(L, 2, 0 ,0);   			
+    int status = lua_pcall(L, 2, 0 ,0);
     try {
       if (status) {
-        std::string s(lua_tostring(L, -1));	
+        std::string s(lua_tostring(L, -1));
         lua_pop(L,1);
         unlock();
 #if !defined WINAMP_PLUGIN
@@ -741,13 +747,13 @@ namespace psycle { namespace host {
     int status = lua_pcall(L, 1, 1 ,0);
     try {
       if (status) {
-        std::string s(lua_tostring(L, -1));	
+        std::string s(lua_tostring(L, -1));
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
       }
       if (!lua_isnumber(L, -1)) {
-        std::string s("function parameter:val must return a number");	
+        std::string s("function parameter:val must return a number");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
@@ -768,19 +774,19 @@ namespace psycle { namespace host {
     int status = lua_pcall(L, 1, 3 ,0);
     try {
       if (status) {
-        std::string s(lua_tostring(L, -1));	
+        std::string s(lua_tostring(L, -1));
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
       }
       for (int test = -1; test >= -3; --test)
         if (!lua_isnumber(L, test)) {
-          std::string s("function parameter:range must return numbers");	
+          std::string s("function parameter:range must return numbers");
           lua_pop(L, 1);
           unlock();
           throw std::runtime_error(s);
         }
-    } CATCH_WRAP_AND_RETHROW(*plug_) 
+    } CATCH_WRAP_AND_RETHROW(*plug_)
     double st = lua_tonumber(L, -1);
     minval = 0;
     maxval = st;
@@ -788,7 +794,7 @@ namespace psycle { namespace host {
     unlock();
   }
 
-  std::string LuaProxy::get_parameter_name(int numparam) {   
+  std::string LuaProxy::get_parameter_name(int numparam) {
     lock();
     if (!get_param(L, numparam, "name")) {
       unlock();
@@ -803,7 +809,7 @@ namespace psycle { namespace host {
         throw std::runtime_error(s);
       }
       if (!lua_isstring(L, -1)) {
-        std::string s("function parameter:getname must return a string");	
+        std::string s("function parameter:getname must return a string");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
@@ -814,7 +820,7 @@ namespace psycle { namespace host {
     return name;
   }
 
-  std::string LuaProxy::get_parameter_id(int numparam) {   
+  std::string LuaProxy::get_parameter_id(int numparam) {
     lock();
     if (!get_param(L, numparam, "id")) {
       unlock();
@@ -829,7 +835,7 @@ namespace psycle { namespace host {
         throw std::runtime_error(s);
       }
       if (!lua_isstring(L, -1)) {
-        std::string s("function parameter:id must return a string");	
+        std::string s("function parameter:id must return a string");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
@@ -855,7 +861,7 @@ namespace psycle { namespace host {
         throw std::runtime_error(s);
       }
       if (!lua_isstring(L, -1)) {
-        std::string s("function parameter:display must return a string");	
+        std::string s("function parameter:display must return a string");
         unlock();
         throw std::runtime_error(s);
       }
@@ -874,18 +880,18 @@ namespace psycle { namespace host {
     int status = lua_pcall(L, 1, 1 ,0);
     try {
       if (status) {
-        std::string s(lua_tostring(L, -1));	
+        std::string s(lua_tostring(L, -1));
         unlock();
         throw std::runtime_error(s);
       }
       if (!lua_isstring(L, -1)) {
-        std::string s("function parameter:label must return a string");	
+        std::string s("function parameter:label must return a string");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
       }
     } CATCH_WRAP_AND_RETHROW(*plug_)
-      std::string name(GetString());  
+      std::string name(GetString());
     unlock();
     return name;
   }
@@ -899,12 +905,12 @@ namespace psycle { namespace host {
     int status = lua_pcall(L, 1, 1 ,0);
     try {
       if (status) {
-        std::string s(lua_tostring(L, -1));	
+        std::string s(lua_tostring(L, -1));
         unlock();
         throw std::runtime_error(s);
       }
       if (!lua_isnumber(L, -1)) {
-        std::string s("function parameter:mpf must return a number");	
+        std::string s("function parameter:mpf must return a number");
         lua_pop(L, 1);
         unlock();
         throw std::runtime_error(s);
@@ -919,7 +925,7 @@ namespace psycle { namespace host {
   // call events
   void LuaProxy::call_setprogram(int idx) {
     lock();
-    try {	
+    try {
       if (!get_method_optional(L, "setprogram")) {
         unlock();
         return;
@@ -939,11 +945,11 @@ namespace psycle { namespace host {
   int LuaProxy::get_curr_program() {
     lock();
     int n1 = lua_gettop(L);
-    try {	
+    try {
       if (!get_method_optional(L, "getprogram")) {
         unlock();
         return 0;
-      }      
+      }
       int status = lua_pcall(L, 1, 1, 0);    // pc:sequencertick()
       if (status) {
         CString msg(lua_tostring(L, -1));
@@ -964,17 +970,17 @@ namespace psycle { namespace host {
 
   // call events
   int LuaProxy::call_numprograms() {
-     return plugimport_->numprograms();   
+     return plugimport_->numprograms();
   }
 
   std::string LuaProxy::get_program_name(int bnkidx, int idx) {
     lock();
     int n1 = lua_gettop(L);
-    try {	
+    try {
       if (!get_method_optional(L, "programname")) {
         unlock();
         return "";
-      }      
+      }
       lua_pushnumber(L, idx);
       int status = lua_pcall(L, 2, 1 ,0);    // pc:sequencertick()
       if (status) {
@@ -993,64 +999,64 @@ namespace psycle { namespace host {
     unlock();
     return NULL;
   }
-  
-  std::string LuaProxy::GetString() {	
+
+  std::string LuaProxy::GetString() {
     std::string name(lua_tostring(L, -1));
-    lua_pop(L, 1);  // pop returned value	
+    lua_pop(L, 1);  // pop returned value
     return name;
   }
 
   void LuaProxy::update_menu(void* hnd) {
     if (hnd) {
-      lock();    
+      lock();
       CFrameWnd* cwnd = (CFrameWnd*) hnd;
       cwnd->DrawMenuBar();
       unlock();
     }
   }
-  
+
   LuaMenuBar* LuaProxy::get_menu(LuaMenu* menu) {
     lock();
     try {
       LuaHelper::get_proxy(L);
-    } catch(std::exception &e) {	  
+    } catch(std::exception &e) {
       unlock();
       throw psycle::host::exceptions::library_errors::loading_error(e.what());
-    }  
+    }
     lua_getfield(L, -1, "__menus");
-    if (lua_isnil(L, -1)) {	 
+    if (lua_isnil(L, -1)) {
       lua_pop(L, 1);
       unlock();
       return 0;
-    } else {  
+    } else {
       LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, -1, LuaMenuBarBind::meta);
-      menubar->append(menu);      
+      menubar->append(menu);
       unlock();
       return menubar;
     }
   }
-  
+
   void LuaProxy::call_menu(UINT id) {
-    lock();    
+    lock();
     std::map<std::uint16_t, LuaMenuItem*>::iterator it = LuaMenuItem::menuItemIdMap.find(id);
     if (it != LuaMenuItem::menuItemIdMap.end()) {
       LuaHelper::find_userdata<>(L, it->second);
       lua_getfield(L, -1, "notify");
-      lua_pushvalue(L, -2); // self	
+      lua_pushvalue(L, -2); // self
       int status = lua_pcall(L, 1, 0, 0);
       if (status) {
-        std::string s(lua_tostring(L, -1));	
+        std::string s(lua_tostring(L, -1));
         lua_pop(L, 1);
         unlock();
-        throw std::runtime_error(s);  
-      }  
+        throw std::runtime_error(s);
+      }
       lua_pop(L, 1);
-    }    
+    }
     unlock();
   }
 
-  LuaCanvas* LuaProxy::call_canvas() {    
-    try {	
+  LuaCanvas* LuaProxy::call_canvas() {
+    try {
       lock();
       if (!get_method_optional(L, "canvas")) {
         unlock();
@@ -1061,7 +1067,7 @@ namespace psycle { namespace host {
         CString msg(lua_tostring(L, -1));
         unlock();
         throw std::runtime_error(msg.GetString());
-      }            
+      }
       if (lua_isnumber(L, -1) or lua_isnil(L, -1)) {
         unlock();
         return 0;
@@ -1074,10 +1080,10 @@ namespace psycle { namespace host {
     return 0;
   }
 
-  bool LuaProxy::call_event(canvas::Event* ev) {
-    lock();    
+  bool LuaProxy::call_event(ui::canvas::Event* ev) {
+    lock();
     bool res = false;
-    try {	      
+    try {
       if (!get_method_optional(L, "canvas")) {
         unlock();
         return false; // no canvas found;
@@ -1087,21 +1093,21 @@ namespace psycle { namespace host {
         CString msg(lua_tostring(L, -1));
         unlock();
         throw std::runtime_error(msg.GetString());
-      }            
+      }
       if (lua_isnumber(L, -1) || lua_isnil(L, -1)) {
         unlock();
         return false;
-      }      
-      canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, -1, LuaCanvasBind::meta);      
-      res = canvas->OnEvent(ev);      
+      }
+      ui::canvas::Canvas* canvas = LuaHelper::check<ui::canvas::Canvas>(L, -1, LuaCanvasBind::meta);
+      res = canvas->OnEvent(ev);
       lua_pop(L, 1);
-      unlock();            
-    } CATCH_WRAP_AND_RETHROW(*plug_)    
+      unlock();
+    } CATCH_WRAP_AND_RETHROW(*plug_)
     return res;
   }
 
   // Host
-  lua_State* LuaHost::load_script(const std::string& dllpath) {	
+  lua_State* LuaHost::load_script(const std::string& dllpath) {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     // set search path for require
@@ -1123,12 +1129,12 @@ namespace psycle { namespace host {
       const char* msg =lua_tostring(L, -1);
       std::ostringstream s; s
         << "Failed: " << msg << std::endl;
-      throw psycle::host::exceptions::library_errors::loading_error(s.str());			
+      throw psycle::host::exceptions::library_errors::loading_error(s.str());
     }
     return L;
   }
 
-  LuaPlugin* LuaHost::LoadPlugin(const std::string& dllpath, int macIdx) {	
+  LuaPlugin* LuaHost::LoadPlugin(const std::string& dllpath, int macIdx) {
     lua_State* L = load_script(dllpath);
     LuaPlugin *plug = new LuaPlugin(L, macIdx);
     plug->dll_path_ = dllpath;
@@ -1139,21 +1145,19 @@ namespace psycle { namespace host {
     return plug;
   }
 
-  PluginInfo LuaHost::LoadInfo(const std::string& dllpath) {	
+  PluginInfo LuaHost::LoadInfo(const std::string& dllpath) {
     LuaPlugin* plug = 0;
-    PluginInfo info;	
-    try { 
+    PluginInfo info;
+    try {
       lua_State* L = load_script(dllpath);
-      plug = new LuaPlugin(L, 0, false);	   
+      plug = new LuaPlugin(L, 0, false);
       info = plug->CallPluginInfo();
     } catch(std::exception &e) {
       delete plug;
       AfxMessageBox(e.what());
       throw e;
-    }	
+    }
     delete plug;
     return info;
   }
-
-
 }} // namespace
