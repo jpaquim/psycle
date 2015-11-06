@@ -71,8 +71,8 @@ namespace host {
 			int refreshcounter;
 			int lastprogram;
 			int lastnumprogrs;			
-      LuaMenuBar* custom_menubar;
-      LuaMenu barmenu;
+      ui::MenuBar* custom_menubar;
+      ui::mfc::Menu barmenu;
 		protected:
 			DECLARE_MESSAGE_MAP()
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);      

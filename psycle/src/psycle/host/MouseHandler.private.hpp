@@ -273,8 +273,10 @@ namespace psycle { namespace host {
 
 		void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, point))
+      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, point)) {
+        CWnd::OnLButtonDown(nFlags, point);
         return;
+      }
 			SetCapture();
 
 			if(viewMode == view_modes::machine)

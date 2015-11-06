@@ -119,7 +119,7 @@ namespace psycle { namespace host {
 			note_tab_selected=NULL;
 			MBStart.x=0;
 			MBStart.y=0;
-      lua_menu_ = new LuaMenu(0);
+      lua_menu_ = new mfc::Menu(0);
 
 			patView = &PsycleGlobal::conf().patView();
 			macView = &PsycleGlobal::conf().macView();
@@ -316,6 +316,7 @@ namespace psycle { namespace host {
 					(HBRUSH)GetStockObject( HOLLOW_BRUSH ),
 					NULL
 				);
+
 			return TRUE;
 		}
 
@@ -2498,7 +2499,7 @@ namespace psycle { namespace host {
       int pos = 8; bool has_ext = false;
       for (; it != list.end(); ++it) {
         PluginInfo* info = *it;        
-        int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter++;
+        int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;
         LuaPlugin* mac = 0;
         try {
           mac = LuaHost::LoadPlugin(info->dllname.c_str(), 1024);
@@ -2509,10 +2510,10 @@ namespace psycle { namespace host {
           } else {            
             view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
           }
-          LuaMenuItem::id_counter++;
+          ui::MenuItem::id_counter++;
           lua_extensions_.push_back(mac); 
           menuItemIdMap[id] = mac;
-          if (user_view) LuaMenuItem::id_counter++;          
+          if (user_view) ui::MenuItem::id_counter++;          
           has_ext = true;
         } catch (std::exception& e) {
           e;
@@ -2520,7 +2521,7 @@ namespace psycle { namespace host {
       } 
       if (has_ext) {
         view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
-        int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter++;
+        int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;
         view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
         menuItemIdMap[id] = NULL;
       }

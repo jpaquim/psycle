@@ -103,7 +103,7 @@ public:
 	void set_state(lua_State* state);
 	void reload();
   void update_menu(void* menu);
-  LuaMenuBar* get_menu(LuaMenu* menu);
+  ui::MenuBar* get_menu(ui::Menu* menu);
   int gui_type() const { return plugimport_->gui_type(); }
   void call_setprogram(int idx);
   int call_numprograms();
