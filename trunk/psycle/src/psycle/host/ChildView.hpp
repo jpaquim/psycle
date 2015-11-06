@@ -20,6 +20,10 @@ namespace host {
 
 		class CTransformPatternDlg;
 
+    namespace ui {
+      class Menu;
+    }
+
 		#define MAX_WIRE_DIALOGS 16
 		#define MAX_DRAW_MESSAGES 32
 
@@ -465,7 +469,7 @@ namespace host {
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];
       public:
       class LuaPlugin* active_lua_;      
-      class LuaMenu* lua_menu_;
+      ui::Menu* lua_menu_;
       std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;
       std::vector<LuaPlugin*> lua_extensions_;
 

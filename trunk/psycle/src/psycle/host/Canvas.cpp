@@ -8,8 +8,13 @@
 namespace psycle {
 namespace host  {
 namespace ui {
+
+int ui::MenuItem::id_counter = 0;
+std::map<std::uint16_t, ui::MenuItem*> ui::MenuItem::menuItemIdMap;
+
 namespace mfc {
-  void Image::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans) {
+
+void Image::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans) {
   BITMAP bm;
   // Get the dimensions of the source bitmap
   pBmpSource->GetObject(sizeof(BITMAP), &bm);
@@ -84,6 +89,90 @@ void Graphics::TransparentBlt(CDC* pDC,
   hdcMem.SelectObject(hbmT);
   hdcMem.DeleteDC();
 }
+
+void MenuBar::append(ui::Menu* menu) {
+  int pos = menu->cmenu()->GetMenuItemCount();
+  std::vector<ui::Menu*>::iterator it = items.begin();
+  for ( ; it != items.end(); ++it) {
+    ui::Menu* m = *it;
+    menu->cmenu()->AppendMenu(MF_POPUP, (UINT_PTR)m->cmenu()->m_hMenu, m->label().c_str());
+    m->set_parent(menu);
+    m->set_pos(pos++);
+  }
+  menu->setbar(this);
+}
+
+void MenuBar::remove(CMenu* menu, int pos) {
+    std::vector<ui::Menu*>::iterator it = items.begin();
+    for ( ; it != items.end(); ++it) {
+      menu->RemoveMenu(pos++, MF_BYPOSITION);
+    }
+}
+
+// Menu
+void Menu::set_label(const std::string& label) {
+  label_ = label;
+  if (parent()) {
+    parent()->cmenu()->ModifyMenu(pos_, MF_BYPOSITION, 0, label.c_str());
+    ui::MenuBar* b = bar();
+    b->setupdate(b!=0);
+  }
+}
+
+void Menu::add(ui::Menu* newmenu) {
+  cmenu_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)newmenu->cmenu()->m_hMenu, newmenu->label().c_str());
+  newmenu->set_parent(this);
+  newmenu->set_pos(cmenu_->GetMenuItemCount()-1);
+}
+
+void Menu::add(ui::MenuItem* item) {
+  items.push_back(item);
+  item->set_menu(this);
+  const int id = ID_DYNAMIC_MENUS_START+item->id_counter;
+  item->set_id(id);
+  MenuItem::menuItemIdMap[item->id()] = item;
+  cmenu_->AppendMenu(MF_STRING, id, item->label().c_str());
+  if (item->checked()) {
+		cmenu_->CheckMenuItem(id, MF_CHECKED | MF_BYCOMMAND);
+  }
+}
+
+void Menu::addseparator() {
+  cmenu_->AppendMenu(MF_SEPARATOR, 0, "-");
+}
+
+void Menu::remove(ui::MenuItem* item) {
+  std::vector<ui::MenuItem*>::iterator it;
+  it = std::find(items.begin(), items.end(), item);
+  if (it != items.end()) {
+    items.erase(it);
+  }
+  cmenu_->RemoveMenu(item->id(), MF_BYCOMMAND);
+}
+
+// menuitem  
+
+void MenuItem::set_label(const std::string& label) {
+  label_ = label;
+  if (menu_) {
+      menu_->cmenu()->ModifyMenu(id(), MF_BYCOMMAND, id(), label.c_str());
+  }
+}
+
+void MenuItem::check() {
+  check_ = true;
+  if (menu_) {
+    menu_->cmenu()->CheckMenuItem(id(), MF_CHECKED | MF_BYCOMMAND);
+  }
+}
+
+void MenuItem::uncheck() {
+  check_ = false;
+  if (menu_) {
+      menu_->cmenu()->CheckMenuItem(id(), MF_UNCHECKED | MF_BYCOMMAND);
+  }
+}
+
 }  // namespace mfc
 
 namespace canvas {
@@ -94,6 +183,7 @@ void Item::Init(Group* parent, double x, double y) {
   y_ = y;
   managed_ = has_store_ = update_ = false;
   visible_ = pointer_events_ = true;
+  has_clip_ = false;
 }
 
 Item::~Item() {
@@ -105,7 +195,6 @@ Item::~Item() {
   }
 }
 
-void Item::set_zorder(int z) { if (parent_) parent_->set_zorder(this, z); }
 void Item::Detach() { if (parent_) parent_->Remove(this); }
 
 void Item::CheckButtonPress() {
@@ -177,7 +266,8 @@ void Item::FLS() {
     fls_rgn_.Combine(tmp, RGN_OR);
     has_store_ = false;
   } else {
-    STR(); has_store_ = false;
+    STR();
+    has_store_ = false;
   }
   if (parent()) {
     Canvas* c = this->canvas();
@@ -238,13 +328,25 @@ double Item::zoomabsy() const {
   return y;
 }
 
+bool Item::IsInGroup(Group* group) const {  
+  const Group* p = parent();
+  while (p) {
+    if (group == p) return true;
+    p = p->parent();
+  }
+  return false;
+}
+
 Group::Group() : Item(),  widget_(0) { Init(); }
 Group::Group(Canvas* widget) : Item(), widget_(widget) { Init(); }
 Group::Group(Group* parent, double x, double y) : Item(parent), widget_(0) {
   Init();
 }
 
-Group::~Group() {
+Group::~Group() {  
+  if (widget_ && is_root_ && !managed()) {
+    widget_->root_ = 0;
+  }
   for (iterator it = items_.begin(); it != items_.end(); ++it) {
     Item* item = *it;
     if (item->managed()) {
@@ -257,18 +359,7 @@ Group::~Group() {
 
 void Group::Init() {
   zoom_ = 1;
-  is_root_ = false;
-  has_clip_ = false;
-}
-
-void Group::Clear() {
-  STR();
-  for (iterator it = items_.begin(); it != items_.end(); ++it ) {
-    Item* item = *it;
-    if (item->managed()) delete item;
-  }
-  items_.clear();
-  FLS();
+  is_root_ = false;  
 }
 
 void Group::Draw(Graphics* g, Region& repaint_rgn, Canvas* canvas) {
@@ -291,12 +382,8 @@ void Group::Draw(Graphics* g, Region& repaint_rgn, Canvas* canvas) {
         tmp.Offset(dx, dy);
         item_rgn.Combine(tmp, RGN_AND);
         g->SetClip(&tmp);
-      }
-      item->Draw(g, repaint_rgn, canvas);
-      if (item->has_clip()) {
-        g->SetClip(0);
-      }
-      item->Draw(g, repaint_rgn, canvas);
+      }           
+      item->Draw(g, repaint_rgn, canvas);      
       if (item->has_clip()) {
         g->SetClip(0);
       }
@@ -313,6 +400,7 @@ void Group::Add(Item* item) {
   STR();
   item->set_parent(this);
   items_.push_back(item);
+  needsupdate();
   FLS();
 }
 
@@ -350,15 +438,14 @@ void Group::Remove(Item* item) {
   FLS();
 }
 
-void Group::RemoveAll() {
+void Group::Clear() {
   STR();
+  for (iterator it = items_.begin(); it != items_.end(); ++it ) {
+    Item* item = *it;
+    if (item->managed()) delete item;
+  }
   items_.clear();
   FLS();
-}
-
-void Group::RaiseToTop(Item* item) {
-  Remove(item);
-  Add(item);
 }
 
 const Region& Group::region() const {
@@ -423,7 +510,7 @@ Item* Group::Intersect(double x, double y, Event* ev, bool& worked) {
         }
       }
     }
-  if (found_noevent) {
+  if (found_noevent) {    
     Canvas* c = canvas();
     if (c) {
       found = c->DelegateEvent(ev, found_noevent);
@@ -431,6 +518,15 @@ Item* Group::Intersect(double x, double y, Event* ev, bool& worked) {
         worked = true;
         return found;
       }
+    }
+  } else if (ev->type() == Event::MOTION_NOTIFY) {
+    Canvas* c = canvas();
+    if (c && c->out_item_ && !c->button_press_item_ && c->out_item_->IsInGroup(this)) {        
+      Event event(c->out_item_, Event::MOTION_OUT, ev->cx(), ev->cy(),ev->button(), ev->shift());
+      Item* ret = c->DelegateEvent(&event, c->out_item_);
+      c->out_item_ = 0;
+      worked = true;
+      return 0;
     }
   }
   return found;
@@ -458,6 +554,14 @@ bool Group::work_item_event(Item* item, Event* ev) {
   return 0;
 }
 
+void Group::OnMessage(CanvasMsg msg) {
+  for (iterator it = items_.begin(); it != items_.end(); ++it ) {
+    (*it)->OnMessage(msg);
+  }
+}
+
+
+// Rect class
 Rect::Rect(Group* parent, double x, double y, double width, double height)
   : Item(parent, x, y), width_(width), height_(height) {
     fillcolor_ = strokecolor_ = 0;
@@ -470,11 +574,9 @@ void Rect::Init() {
 }
 
 void Rect::Draw(Graphics* g, Region& repaint_rgn, class Canvas* widget) {
-  double z = acczoom();
-  ARGB old_color = g->color();
+  double z = acczoom();  
   g->SetColor(fillcolor_);
-  g->FillRect(0, 0, width_, height_);
-  g->SetColor(old_color);
+  g->FillRect(0, 0, width_, height_);  
 /*    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);
   CPen pen;
   pen.CreatePen(PS_SOLID, 1, ToCOLORREF(strokecolor_));
@@ -547,20 +649,18 @@ const Region& Rect::region() const {
   return rgn_;
 }
 
-void Line::Draw(Graphics* g, Region& repaint_region, Canvas* widget) {
-  ARGB old_color = g->color();
+void Line::Draw(Graphics* g, Region& repaint_region, Canvas* widget) {  
   g->SetColor(color());
   double mx, my;
   mx = my = 0;
   for (Points::iterator it = pts_.begin(); it != pts_.end(); ++it) {
-    const std::pair<double, double>& pt = (*it);
+    Point& pt = (*it);
     if (it != pts_.begin()) {
       g->DrawLine(mx, my, pt.first, pt.second);
     }
     mx = pt.first;
     my = pt.second;
-  }
-  g->SetColor(old_color);
+  }  
 }
 
 Item* Line::Intersect(double x, double y, Event* ev, bool &worked) {
@@ -605,7 +705,7 @@ const Region& Line::region() const {
 }
 
 Text::Text(Group* parent) : Item(parent) {
-    Init(parent ? parent->zoom() : 1.0);
+  Init(parent ? parent->zoom() : 1.0);
 }
 
 Text::Text(Group* parent, const std::string& text) : Item(parent), text_(text) {
@@ -642,11 +742,9 @@ const Region& Text::region() const {
   return rgn_;
 }
 
-void Text::Draw(Graphics* g, Region& repaint_region, Canvas* widget) {
-    ARGB old_color = g->color();
+void Text::Draw(Graphics* g, Region& repaint_region, Canvas* widget) {    
     g->SetColor(color_);
-    g->DrawString(text_, 0, 0);
-    g->SetColor(old_color);
+    g->DrawString(text_, 0, 0);    
 }
 
 // PixBuf
@@ -725,11 +823,14 @@ void Canvas::Init() {
   root_->is_root_ = true;
   root_->set_manage(false);
   cursor_ = LoadCursor(0, IDC_ARROW);
+  old_wnd_ = wnd_;
 }
 
 Canvas::~Canvas() {
   if (managed_) {
     delete root_;
+  } else if (root_) {
+    root_->widget_ = 0;    
   }
 }
 
@@ -756,7 +857,7 @@ void Canvas::Draw(Graphics *g, Region& rgn) {
     }
     memDC.SelectObject(oldbmp);
     memDC.DeleteDC();*/
-  } else {
+  } else {    
     double x, y, width, height;
     rgn.GetBoundRect(x, y, width, height);
     ARGB old_color = color();
@@ -818,6 +919,10 @@ Item* Canvas::DelegateEvent(Event* ev, Item* item) {
   return erg ? item : 0;
 }
 
+void Canvas::NotifyAll() {
+
+}
+
 void Canvas::Invalidate(Region& rgn) {
   if (IsSaving()) {
     save_rgn_.Combine(rgn, RGN_OR);
@@ -833,6 +938,207 @@ void Canvas::Flush() {
   }
   save_rgn_.Clear();
 }
+
+
+// CanvasView
+BEGIN_MESSAGE_MAP(CanvasView, CWnd)
+  ON_WM_CREATE()
+  ON_WM_SETFOCUS()
+	ON_WM_PAINT()
+	ON_WM_LBUTTONDOWN()
+  ON_WM_RBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONUP()
+	ON_WM_RBUTTONUP()
+  ON_WM_KEYDOWN()
+	ON_WM_KEYUP()
+END_MESSAGE_MAP()
+
+int CanvasView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
+	if (CWnd::OnCreate(lpCreateStruct) == -1) {
+		return -1;
+	}      
+	return 0;
+}
+
+BOOL CanvasView::PreCreateWindow(CREATESTRUCT& cs) {
+	if (!CWnd::PreCreateWindow(cs))
+		return FALSE;
+			
+	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+	cs.style &= ~WS_BORDER;
+	return TRUE;
+}
+
+void CanvasView::OnSetFocus(CWnd* pOldWnd) {
+	CWnd::OnSetFocus(pOldWnd);
+	GetParent()->SetFocus();
+}
+
+void CanvasView::OnPaint() {  
+    CRgn pRgn;
+	  pRgn.CreateRectRgn(0, 0, 0, 0);
+	  GetUpdateRgn(&pRgn, FALSE);
+    CPaintDC dc(this);
+	  CRect rc;
+	  GetClientRect(&rc);
+	  CDC bufferDC;
+	  CBitmap bufferBmp;
+	  bufferDC.CreateCompatibleDC(&dc);
+	  bufferBmp.CreateCompatibleBitmap(&dc, rc.right-rc.left, rc.bottom-rc.top);
+    CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);		
+    if (canvas_) {
+      try {
+        ui::mfc::Graphics g(&bufferDC);
+        ui::mfc::Region canvas_rgn(pRgn);
+        canvas_->DrawFlush(&g, canvas_rgn);
+      } catch (std::exception& e) {
+        AfxMessageBox(e.what());
+      }
+    }
+    dc.BitBlt(0, 0, rc.right, rc.bottom, &bufferDC, 0, 0, SRCCOPY);
+    bufferDC.SelectObject(oldbmp);	
+	  bufferDC.DeleteDC();
+  
+}
+
+void CanvasView::OnLButtonDown(UINT nFlags, CPoint pt) {
+  DelegateEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, pt);
+	CWnd::OnLButtonDown(nFlags, pt);
+}
+
+void CanvasView::OnRButtonDown(UINT nFlags, CPoint pt) {
+  DelegateEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, pt);
+  CWnd::OnRButtonDown(nFlags, pt);
+}
+
+void CanvasView::OnLButtonDblClk(UINT nFlags, CPoint pt) {
+  DelegateEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, pt);
+	CWnd::OnLButtonDblClk(nFlags, pt);
+}
+
+void CanvasView::OnMouseMove(UINT nFlags, CPoint pt) {
+  DelegateEvent(canvas::Event::MOTION_NOTIFY, 1, nFlags, pt);
+	CWnd::OnMouseMove(nFlags, pt);
+}
+
+void CanvasView::OnLButtonUp(UINT nFlags, CPoint pt) {      
+  DelegateEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, pt);
+	CWnd::OnLButtonUp(nFlags, pt);
+}
+
+void CanvasView::OnRButtonUp(UINT nFlags, CPoint pt) { 
+  DelegateEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, pt);
+	CWnd::OnRButtonUp(nFlags, pt);
+}
+
+bool CanvasView::DelegateEvent(int type, int button, UINT nFlags, CPoint pt) {
+  if (canvas_) {        
+    Event ev(0, (Event::Type)type, pt.x, pt.y, button, nFlags);
+    return canvas_->OnEvent(&ev);        		    
+  }
+  return false;
+}
+
+// CanvasFrame
+IMPLEMENT_DYNAMIC(CanvasFrameWnd, CFrameWnd)
+
+BEGIN_MESSAGE_MAP(CanvasFrameWnd, CFrameWnd)
+	ON_WM_CREATE()
+	ON_WM_CLOSE()
+	ON_WM_DESTROY()
+	ON_WM_TIMER()
+	ON_WM_SETFOCUS()
+	ON_WM_KEYDOWN()
+	ON_WM_KEYUP()
+	ON_WM_SIZING()	 
+END_MESSAGE_MAP()
+
+int CanvasFrameWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)  {		
+  if( CFrameWnd::OnCreate(lpCreateStruct) == 0) {
+    pView_ = new CanvasView();
+    pView_->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
+		CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL); 
+    return 0;
+  }       
+  return -1;		
+}
+    
+BOOL CanvasFrameWnd::PreCreateWindow(CREATESTRUCT& cs) {
+	if (!CFrameWnd::PreCreateWindow(cs))
+		return FALSE;
+			
+  cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+	return TRUE;
+}
+
+void CanvasFrameWnd::OnClose() {      			
+  OnEvent(1);
+	// CFrameWnd::OnClose();
+}
+
+void CanvasFrameWnd::OnDestroy() {    
+	/*HICON _icon = GetIcon(false);
+	DestroyIcon(_icon);*/
+  if (pView_ != NULL) { 
+    pView_->DestroyWindow();
+    delete pView_;
+  }
+}
+
+void CanvasFrameWnd::PostNcDestroy() {			
+	CFrameWnd::PostNcDestroy();
+}
+
+void CanvasFrameWnd::PostOpenWnd() {
+	pView_->Open();
+	ResizeWindow(0);
+}
+
+void CanvasFrameWnd::GetWindowSize(CRect &rcFrame, CRect &rcClient, CRect *pRect) {
+  rcClient.top = 0; rcClient.left = 0;
+	rcClient.right = 400; rcClient.bottom = 300;
+	rcFrame = rcClient;			
+}
+
+void CanvasFrameWnd::ResizeWindow(CRect *pRect) {
+	CRect rcEffFrame,rcEffClient,rcTemp,tbRect;
+	GetWindowSize(rcEffFrame, rcEffClient, pRect);
+	SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
+	pView_->SetWindowPos(NULL,rcEffClient.left, rcEffClient.top, rcEffClient.right,rcEffClient.bottom,SWP_NOZORDER);         
+	pView_->WindowIdle();
+}
+
+void CanvasFrameWnd::SetTitle(const std::string& title) {
+   SetWindowTextA(title.c_str());
+}
+
+void CanvasFrameWnd::SetPos(int x, int y) {
+  // todo  
+}
+
+// Messages
+void CanvasFrameWnd::OnTimer(UINT_PTR nIDEvent) {            
+	CFrameWnd::OnTimer(nIDEvent);
+}
+
+void CanvasFrameWnd::OnSetFocus(CWnd* pOldWnd) {
+	CFrameWnd::OnSetFocus(pOldWnd);			
+}
+
+void CanvasFrameWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {          	
+	CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
+}
+
+void CanvasFrameWnd::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {              			
+	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+void CanvasFrameWnd::OnSizing(UINT fwSide, LPRECT pRect) {
+  CFrameWnd::OnSizing(fwSide, pRect);
+}
+
 } // namespace canvas
 } // namespace ui
 } // namespace host

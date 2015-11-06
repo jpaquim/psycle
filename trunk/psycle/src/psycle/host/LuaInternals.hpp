@@ -176,26 +176,10 @@ namespace psycle { namespace host {
      Song* song_;
   };
 
-  /*struct LuaPatternBind {
-    static int open(lua_State *L);
-    static int create(lua_State* L);
-    static int track(lua_State* L);
-    static int eventat(lua_State* L);
-    static int insertevent(lua_State* L);
-    static const char* meta;
-    static int createevent(lua_State* L, LuaPatternEvent& ev);
-  };*/
-
-  struct LuaSequenceBarBind {
-    static int open(lua_State *L);
-    static int create(lua_State* L);
-    static int currpattern(lua_State* L);
-    static const char* meta;
-  };
-
   struct LuaPatternDataBind {
     static int open(lua_State *L);
     static int create(lua_State* L);
+    static int pattern(lua_State* L);
     static int track(lua_State* L);
     static int numtracks(lua_State *L);
     static int numlines(lua_State *L);
@@ -203,6 +187,13 @@ namespace psycle { namespace host {
     static int insertevent(lua_State* L);
     static const char* meta;
     static int createevent(lua_State* L, LuaPatternEvent& ev);
+  };
+
+   struct LuaSequenceBarBind {
+    static int open(lua_State *L);
+    static int create(lua_State* L);
+    static int currpattern(lua_State* L);
+    static const char* meta;
   };
 
   template <typename T>

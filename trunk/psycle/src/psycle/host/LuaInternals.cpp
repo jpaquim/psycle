@@ -258,7 +258,7 @@ namespace psycle { namespace host {
       {NULL, NULL}
     };
     LuaHelper::open(L, meta, methods,  gc);
-    // define enums
+    // define constants
     lua_pushnumber(L, 0);
     lua_setfield(L, -2, "FX");
     lua_pushnumber(L, 1);
@@ -268,7 +268,7 @@ namespace psycle { namespace host {
     lua_pushnumber(L, 3);
     lua_setfield(L, -2, "PRSNATIVE");
     lua_pushnumber(L, 1);
-    lua_setfield(L, -2, "PRSCHUNK");
+    lua_setfield(L, -2, "PRSCHUNK");    
     return 1;
   }
 
@@ -302,7 +302,7 @@ namespace psycle { namespace host {
         e; luaL_error(L, "plugin not found error");
       }
     }
-    lua_newtable(L);
+    lua_createtable(L, udata->mac()->GetNumParams(), 0);
     for (int idx = 0; idx < udata->mac()->GetNumParams(); ++idx) {
       lua_getglobal(L, "require");
       lua_pushstring(L, "parameter");
@@ -710,10 +710,11 @@ namespace psycle { namespace host {
   int LuaPatternDataBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
       {"new", create},
-      {"track", track},
-      {"numtracks", numtracks},
-      {"eventat", eventat},
       {"setevent", insertevent},
+      {"eventat", eventat},
+      {"track", track},      
+      {"pattern", create},      
+      {"numtracks", numtracks},      
       {"numlines", numlines},
       {NULL, NULL}
     };
@@ -721,7 +722,7 @@ namespace psycle { namespace host {
   }
 
   int LuaPatternDataBind::createevent(lua_State* L, LuaPatternEvent& ev) {
-    lua_newtable(L);
+    lua_createtable(L, 0, 3);
     lua_pushnumber(L, ev.pos);
     lua_setfield(L, -2, "pos");
     lua_pushnumber(L, ev.val);
@@ -757,12 +758,24 @@ namespace psycle { namespace host {
     return createevent(L, ev);
   }
 
+  int LuaPatternDataBind::pattern(lua_State* L) {
+    LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
+    lua_newtable(L);
+    const int len = pattern->numtracks();
+    /*for (int i=1; i <= len; ++i) {
+      lua_pushvalue(L, 1);
+      lua_pushnumber
+      track(L);
+      lua_rawseti(L, i
+    }*/
+    return 1;
+  }
+
   int LuaPatternDataBind::track(lua_State* L) {
     LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
     int ps = luaL_checknumber(L, 2);
     int trk = luaL_checknumber(L, 3);
-    PatternEntry entry;
-    lua_newtable(L);
+    PatternEntry entry;    
     std::vector<LuaPatternEvent> events;
     LuaPatternEvent* last = 0;
     int lastpos = 0;
@@ -784,9 +797,13 @@ namespace psycle { namespace host {
         last = &events.back();
       }
     }
-    lua_newtable(L);
+    if (events.size()!=0 && events.back().val!=notecommands::release) {
+      events.back().len = pattern->numlines(ps) - events.back().pos;
+    }
+    lua_createtable(L, events.size(), 0);
     int i=1;
-    for (std::vector<LuaPatternEvent>::iterator it = events.begin(); it != events.end(); ++it, ++i) {
+    std::vector<LuaPatternEvent>::iterator it = events.begin();
+    for (; it != events.end(); ++it, ++i) {
       LuaPatternEvent& ev = *it;
       createevent(L, ev);
       lua_rawseti(L, -2, i);
@@ -1139,29 +1156,11 @@ namespace psycle { namespace host {
       { NULL, NULL}
     };
     LuaHelper::open(L, meta, methods, gc, tostring);
-    lua_pushnumber(L, 1);
-    lua_setfield(L, -2, "SIN");
-    lua_pushnumber(L, 2);
-    lua_setfield(L, -2, "SAW");
-    lua_pushnumber(L, 3);
-    lua_setfield(L, -2, "SQR");
-    lua_pushnumber(L, 4);
-    lua_setfield(L, -2, "TRI");
-    lua_pushnumber(L, 5);
-    lua_setfield(L, -2, "PWM");
-    lua_pushnumber(L, 6);
-    lua_setfield(L, -2, "RND");
-    // Quality
-    lua_pushnumber(L, 1);
-    lua_setfield(L, -2, "ZEROHOLD");
-    lua_pushnumber(L, 2);
-    lua_setfield(L, -2, "LINEAR");
-    lua_pushnumber(L, 3);
-    lua_setfield(L, -2, "SPLINE");
-    lua_pushnumber(L, 4);
-    lua_setfield(L, -2, "SINC");
-    lua_pushnumber(L, 5);
-    lua_setfield(L, -2, "SOXR");
+    static const char* const e[] = {"SIN", "SAW", "SQR", "TRI", "PWM", "RND"};
+    LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]), 1);    
+    static const char* const f[] = 
+       {"ZEROHOLD", "LINEAR", "SPLINE", "SINC", "SOXR"};
+    LuaHelper::buildenum(L, f, sizeof(f)/sizeof(f[0]), 1);
     return 1;
   }
 
@@ -1479,7 +1478,7 @@ namespace psycle { namespace host {
        "Long Guiro", "Claves", "Hi Wood Block", "Low Wood Block",
        "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle"
       };
-    lua_newtable(L);
+    lua_createtable(L, 127, 0);
     for (int i = 1; i<128; ++i) {
       lua_pushstring(L, i>34 && i<82 ? names[i-35] : "");
       lua_rawseti(L, -2, i);
@@ -1516,32 +1515,12 @@ namespace psycle { namespace host {
       {"tostring", tostring},
       { NULL, NULL }
     };
-    LuaHelper::open(L, meta, methods, gc, tostring);
-    lua_pushnumber(L, 0);
-    lua_setfield(L, -2, "LOWPASS");
-    lua_pushnumber(L, 1);
-    lua_setfield(L, -2, "HIGHPASS");
-    lua_pushnumber(L, 2);
-    lua_setfield(L, -2, "BANDPASS");
-    lua_pushnumber(L, 3);
-    lua_setfield(L, -2, "BANDREJECT");
-    lua_pushnumber(L, 4);
-    lua_setfield(L, -2, "NONE");
-    lua_pushnumber(L, 5);
-    lua_setfield(L, -2, "ITLOWPASS");
-    lua_pushnumber(L, 6);
-    lua_setfield(L, -2, "MPTLOWPASS");
-    lua_pushnumber(L, 7);
-    lua_setfield(L, -2, "MPTHIGHPASS");
-    lua_pushnumber(L, 8);
-    lua_setfield(L, -2, "LOWPASS12E");
-    lua_pushnumber(L, 9);
-    lua_setfield(L, -2, "HIGHPASS12E");
-    lua_pushnumber(L, 10);
-    lua_setfield(L, -2, "BANDPASS12E");
-    lua_pushnumber(L, 11);
-    lua_setfield(L, -2, "BANDREJECT12E");
-
+    LuaHelper::open(L, meta, methods, gc, tostring);    
+    static const char* const e[] = 
+      {"LOWPASS", "HIGHPASS", "BANDPASS", "BANDREJECT", "NONE", "ITLOWPASS",
+       "MPTLOWPASS", "MPTHIGHPASS", "LOWPASS12E", "HIGHPASS12E", "BANDPASS12E",
+       "BANDREJECT12E"};        
+    LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]));
     return 1;
   }
 
@@ -1662,13 +1641,9 @@ namespace psycle { namespace host {
       {"copytobank", set_bank},
       { NULL, NULL }
     };
-    LuaHelper::open(L, meta, methods, gc);
-    lua_pushnumber(L, 0);
-    lua_setfield(L, -2, "DO_NOT");
-    lua_pushnumber(L, 1);
-    lua_setfield(L, -2, "NORMAL");
-    lua_pushnumber(L, 2);
-    lua_setfield(L, -2, "BIDI");
+    LuaHelper::open(L, meta, methods, gc);    
+    static const char* const e[] = {"DO_NOT", "NORMAL", "BIDI"};      
+    LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]));    
     return 1;
   }
 

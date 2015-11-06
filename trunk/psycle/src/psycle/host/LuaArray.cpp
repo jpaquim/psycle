@@ -320,7 +320,7 @@ namespace psycle { namespace host {
 
   int LuaArrayBind::array_method_to_table(lua_State* L) {
     PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
-    lua_newtable(L);
+    lua_createtable(L, rv->len(), 0);
     for (size_t i = 0; i < rv->len(); ++i) {
       lua_pushnumber(L, rv->get_val(i));
       lua_rawseti(L, 2, i+1);

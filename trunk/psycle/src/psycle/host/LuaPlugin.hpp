@@ -58,7 +58,7 @@ namespace psycle { namespace host {
     PluginInfo CallPluginInfo() { return proxy_.call_info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
     virtual void AfterTweaked(int numparam);
-    LuaMenuBar* GetMenu(LuaMenu* menu) {
+    ui::MenuBar* GetMenu(ui::Menu* menu) {
       if (!custom_menubar) {
         custom_menubar = proxy_.get_menu(menu);
       } else {
@@ -161,7 +161,7 @@ namespace psycle { namespace host {
       unsigned char cmd,
       unsigned char val);
     public:
-    LuaMenuBar* custom_menubar;
+    ui::MenuBar* custom_menubar;
   };
 }   // namespace
 }   // namespace

@@ -70,17 +70,18 @@ namespace psycle { namespace host {
     // ui menu binds
     LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
     LuaHelper::require<LuaMenuBind>(L, "psycle.ui.menu");
-    LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");
-    // ui dialog bind
-    LuaHelper::require<LuaDialogBind>(L, "psycle.ui.dialog");
-    // ui canvas binds
+    LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");        
+    // ui canvas binds    
     LuaHelper::require<LuaCanvasBind>(L, "psycle.ui.canvas");
-    LuaHelper::require<LuaGroupBind>(L, "psycle.ui.canvas.group");
-    LuaHelper::require<LuaItemBind>(L, "psycle.ui.canvas.item");
-    LuaHelper::require<LuaLineBind>(L, "psycle.ui.canvas.line");
-    LuaHelper::require<LuaPicBind>(L, "psycle.ui.canvas.pic");
-    LuaHelper::require<LuaRectBind>(L, "psycle.ui.canvas.rect");
-    LuaHelper::require<LuaTextBind>(L, "psycle.ui.canvas.text");
+    LuaHelper::require<LuaFrameWndBind>(L, "psycle.ui.canvas.frame");
+    LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");    
+    LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
+    LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
+    LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");
+    LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
+    LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
+    LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
+    LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
 #if !defined WINAMP_PLUGIN
     LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN
@@ -343,7 +344,7 @@ namespace psycle { namespace host {
             } else
             if (strcmp(key, "generator") == 0) {
               int value = luaL_checknumber(L, -1);
-              if (value==0) info.mode = MACHMODE_GENERATOR; else info.mode = MACHMODE_FX;
+              if (value==1) info.mode = MACHMODE_GENERATOR; else info.mode = MACHMODE_FX;
             } else
               if (strcmp(key, "version") == 0) {
                 const char* value = luaL_checklstring(L, -1, &len);
@@ -1015,7 +1016,7 @@ namespace psycle { namespace host {
     }
   }
 
-  LuaMenuBar* LuaProxy::get_menu(LuaMenu* menu) {
+  ui::MenuBar* LuaProxy::get_menu(ui::Menu* menu) {
     lock();
     try {
       LuaHelper::get_proxy(L);
@@ -1029,7 +1030,7 @@ namespace psycle { namespace host {
       unlock();
       return 0;
     } else {
-      LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, -1, LuaMenuBarBind::meta);
+      MenuBar* menubar = LuaHelper::check<MenuBar>(L, -1, LuaMenuBarBind::meta);
       menubar->append(menu);
       unlock();
       return menubar;
@@ -1038,8 +1039,8 @@ namespace psycle { namespace host {
 
   void LuaProxy::call_menu(UINT id) {
     lock();
-    std::map<std::uint16_t, LuaMenuItem*>::iterator it = LuaMenuItem::menuItemIdMap.find(id);
-    if (it != LuaMenuItem::menuItemIdMap.end()) {
+    std::map<std::uint16_t, MenuItem*>::iterator it = MenuItem::menuItemIdMap.find(id);
+    if (it != MenuItem::menuItemIdMap.end()) {
       LuaHelper::find_userdata<>(L, it->second);
       lua_getfield(L, -1, "notify");
       lua_pushvalue(L, -2); // self
