@@ -168,8 +168,7 @@ namespace psycle { namespace host {
 			ON_WM_LBUTTONDBLCLK()
 			ON_WM_MBUTTONDOWN()
 			ON_WM_MOUSEMOVE()
-			ON_WM_MOUSEWHEEL()
-      ON_WM_SETCURSOR()
+			ON_WM_MOUSEWHEEL()      
 //Main menu and toolbar (A few entries are in MainFrm)
 			ON_COMMAND(ID_FILE_NEW, OnFileNew)
 			ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
@@ -333,16 +332,20 @@ namespace psycle { namespace host {
 		/// Timer initialization
 		void CChildView::InitTimer()
 		{
-			KillTimer(ID_TIMER_VIEW_REFRESH);
-			KillTimer(ID_TIMER_AUTOSAVE);
-			if (!SetTimer(ID_TIMER_VIEW_REFRESH,30,NULL)) // GUI update. 
+      // note: timer are now in main runing, cause luaWnd is an own CWnd
+      // and CChildview timer else would be disabled on SW_HIDE      
+      // pParentMain delegates the OnTimer to the OnTimer method
+      // of the CChilcView
+			pParentMain->KillTimer(ID_TIMER_VIEW_REFRESH);
+			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);
+			if (!pParentMain->SetTimer(ID_TIMER_VIEW_REFRESH,30,NULL)) // GUI update. 
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
 
 			if ( PsycleGlobal::conf().autosaveSong )
 			{
-				if (!SetTimer(ID_TIMER_AUTOSAVE,PsycleGlobal::conf().autosaveSongTime*60000,NULL)) // Autosave Song
+				if (!pParentMain->SetTimer(ID_TIMER_AUTOSAVE,PsycleGlobal::conf().autosaveSongTime*60000,NULL)) // Autosave Song
 				{
 					AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 				}
@@ -378,20 +381,7 @@ namespace psycle { namespace host {
 				if (viewMode == view_modes::machine)
 				{
 						Repaint(draw_modes::playback);
-				} else
-        if (viewMode == view_modes::luaplugin)
-				{
-          if (active_lua_ && !active_lua_->crashed()) {
-            try {
-              active_lua_->OnGuiTimer(this->pParentFrame, this);           
-              ui::canvas::Canvas* user_view = active_lua_->GetCanvas();          
-              user_view->set_wnd(this);
-              user_view->InvalidateSave();
-            } catch(std::exception& e) {
-              e;
-            }            
-          }
-				}
+				} 
 
 				for(int c=0; c<MAX_MACHINES; c++)
 				{
@@ -508,8 +498,8 @@ namespace psycle { namespace host {
 			{
 				PsycleGlobal::conf()._pOutputDriver->Reset();
 			}
-			KillTimer(ID_TIMER_VIEW_REFRESH);
-			KillTimer(ID_TIMER_AUTOSAVE);
+			pParentMain->KillTimer(ID_TIMER_VIEW_REFRESH);
+			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);
 		}
 
 		void CChildView::OnPaint() 
@@ -653,8 +643,7 @@ namespace psycle { namespace host {
 				RecalcMetrics();
 			}			
       CPoint cs(cx, cy);
-      Repaint();
-      DelegateLuaEvent(ui::canvas::Event::ONSIZE, 1, 0, cs);        
+      Repaint();      
 		}
 
 		/// "Save Song" Function
@@ -1097,6 +1086,10 @@ namespace psycle { namespace host {
 		/// Tool bar buttons and View Commands
 		void CChildView::OnMachineview() 
 		{
+      if (!this->IsWindowVisible()) {
+        pParentMain->m_luaWndView.ShowWindow(SW_HIDE);
+        this->ShowWindow(SW_SHOW);
+      }
 			if (viewMode != view_modes::machine)
 			{
         RemoveLuaMenu();
@@ -1127,6 +1120,10 @@ namespace psycle { namespace host {
 
 		void CChildView::OnPatternView() 
 		{
+      if (!this->IsWindowVisible()) {
+        pParentMain->m_luaWndView.ShowWindow(SW_HIDE);
+        this->ShowWindow(SW_SHOW);
+      }
 			if (viewMode != view_modes::pattern)
 			{
         RemoveLuaMenu();
@@ -2465,14 +2462,6 @@ namespace psycle { namespace host {
 				pCmdUI->SetCheck(0);	
 		}
 
-    bool CChildView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
-      if (active_lua_ && viewMode == view_modes::luaplugin && !active_lua_->crashed()) {        
-        ui::canvas::Event ev(0, (ui::canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
-        return active_lua_->OnEvent(&ev);        		    
-      }
-      return false;
-    }
-
     void CChildView::RemoveLuaMenu()
     {
       if (pParentMain) {
@@ -2555,8 +2544,22 @@ namespace psycle { namespace host {
         if (plug->crashed()) return;
         ui::canvas::Canvas* user_view = plug->GetCanvas();
         if (user_view) {
+          CRect rect;            
+          GetWindowRect(&rect);
+          pParentMain->ScreenToClient(rect);                    
+          //this->ScreenToClient(&rect); //optional step - see below          
+          pParentMain->m_wndView.ShowWindow(SW_HIDE);          
+          pParentMain->m_luaWndView.set_canvas(user_view);
+          pParentMain->m_luaWndView.ShowWindow(SW_SHOW);          
+//          pParentMain->m_luaWndView.BringWindowToTop(); // ShowWindow(SW_SHOW); // SetActiveWindow(); //.set_canvas(user_view);          
+          //pParentMain->m_luaWndView.ShowWindow(SW_SHOW);          
+          pParentMain->m_luaWndView.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);
+          //pParentMain->m_luaWndView.SetWindowPos(NULL, 0, 0, 500, 500, SWP_NOZORDER);
+          pParentMain->m_luaWndView.InitTimer();
+          GetParent()->SetActiveWindow();
+          /*
           // integrate into childview
-          active_lua_ = plug;        
+          /active_lua_ = plug;        
           viewMode = view_modes::luaplugin;          
           lua_menu_->setcmenu(pParentMain->GetMenu());        
           active_lua_->GetMenu(lua_menu_);
@@ -2571,8 +2574,8 @@ namespace psycle { namespace host {
           //ShowScrollBar(SB_VERT,TRUE);
 				  //ShowScrollBar(SB_HORZ,TRUE);
 			    Invalidate(false);
-          active_lua_->InvalidateMenuBar();          
-          SetFocus();
+          active_lua_->InvalidateMenuBar();
+          SetFocus();*/
         } else {          
           plug->OnExecute(); // notify ext should do sth
         }               

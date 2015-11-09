@@ -9,6 +9,8 @@ machine = require("psycle.machine"):new()
 
 local array = require("psycle.array")
 local dspmath = require("psycle.dsp.math")
+local canvas = require("psycle.ui.canvas")
+local rect = require("psycle.ui.canvas.rect")
 
 
 local arps = {}
@@ -77,7 +79,11 @@ function machine:init(samplerate)
   self.currvoice = 1 
   for i=1, 3 do arps[#arps+1] = arp:new(voice:new()) end  
   for i=0, 64 do channels[i] = 0 end  
-  for i= 0, 119 do notes[i] = nil end  
+  for i=0, 119 do notes[i] = nil end
+  self.gui = canvas:new()
+  rect:new(self.gui:root()):setpos(10, 10, 200, 200):setcolor(0xFFFFFF) 
+--  self:showcustomgui()
+  self.gui:setpreferredsize(600, 600)
 end
 
 -- fill the audio buffer
@@ -187,6 +193,10 @@ function machine:ontweaked(param)
   elseif param==p.arpsteps then
     for i=1, #arps do arps[i]:setsteps(param:val()) end
   end	 
+end
+
+function machine:canvas()
+  return self.gui
 end
 
 return machine

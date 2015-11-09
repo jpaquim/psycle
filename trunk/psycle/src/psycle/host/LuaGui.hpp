@@ -86,17 +86,13 @@ struct LuaFrameWndBind {
   static int setpos(lua_State* L);
 };
 
-struct LuaCanvas : public ui::canvas::Canvas {
-  LuaCanvas(lua_State* state) : ui::canvas::Canvas(),
-                                L(state),
-                                show_scrollbar(false),
-                                nposv(0),
-                                nposh(0) {}
+class LuaCanvas : public ui::canvas::Canvas {
+ public:
+  LuaCanvas(lua_State* state);
   virtual ui::canvas::Item* OnEvent(ui::canvas::Event* ev);
-  bool show_scrollbar;
-  int nposv, nposh;
  private:
   lua_State* L;
+  LuaMachine* mac_;
 };
 
 class LuaItem : public ui::canvas::Item {  
@@ -240,6 +236,16 @@ class LuaEdit : public ui::canvas::Edit {
    lua_State* L;
 };
 
+class LuaScrollBar : public ui::canvas::ScrollBar {
+ public:
+  static std::string type() { return "buttonitem"; }
+  LuaScrollBar(lua_State* state) : ui::canvas::ScrollBar(), L(state) {}
+  LuaScrollBar(lua_State* state, ui::canvas::Group* parent) 
+    : ui::canvas::ScrollBar(parent), L(state) {}  
+ private:
+   lua_State* L;
+};
+
 struct LuaCanvasBind {
   static const char* meta;
   static int open(lua_State *L);    
@@ -266,24 +272,78 @@ template<class T = LuaItem>
 class LuaItemBind {
  public:    
   static const std::string meta;
-  static int open(lua_State *L);
-  static int setmethods(lua_State* L);
+  static int open(lua_State *L) { 
+    return openex<LuaItemBind>(L, meta, setmethods, gc);
+  }
+  static int setmethods(lua_State* L) {
+    static const luaL_Reg methods[] = {
+      {"new", create}, 
+      {"setpos", setpos},
+      {"pos", pos},
+      {"clientpos", clientpos},
+      {"getfocus", getfocus},
+      // {"setzoom", setzoom},
+      {"show", show},
+      {"hide", hide},
+      {"enablepointerevents", enablepointerevents},
+      {"disablepointerevents", disablepointerevents},
+//      {"tostring", tostring},
+      {"parent", parent},
+      {"boundrect", boundrect},
+      {"canvas", canvas},
+      {"setsize", setsize},
+      //{"intersect", intersect},
+      {"fls", fls},
+//      {"setclip", setclip},
+      { NULL, NULL }
+    };
+    luaL_setfuncs(L, methods, 0);
+    return 0;
+  }
   static int create(lua_State *L);
-  static int draw(lua_State* L);
-  static int pos(lua_State *L);
-  static int clientpos(lua_State* L);
-  static int setpos(lua_State *L);
-  static int setsize(lua_State* L);
+  static int gc(lua_State* L) { return delete_userdata<T>(L, meta.c_str()); }  
+  static int draw(lua_State* L) { return 0; }
+  static int setpos(lua_State *L) {
+    callstrict2(L, meta.c_str(), &T::SetXY);
+    return chaining(L);
+  }
+  static int pos(lua_State *L) {
+    return get2number2<T,double>(L, meta.c_str(), &T::pos);
+  }
+  static int clientpos(lua_State* L) {
+    return get2number2<T,double>(L, meta.c_str(), &T::clientpos);
+  }
+  static int setsize(lua_State* L) {
+    callstrict2(L, meta.c_str(), &T::SetSize);
+    return chaining(L);
+  }
   static int fls(lua_State *L);    
   static int canvas(lua_State* L);
-  static int show(lua_State* L);
-  static int hide(lua_State* L);
-  static int enablepointerevents(lua_State* L);
-  static int disablepointerevents(lua_State* L);
-  static int boundrect(lua_State* L);
+  static int show(lua_State* L) {
+    call(L, meta, &T::Show);
+    return chaining(L);
+  }
+  static int hide(lua_State* L) {
+    call(L, meta, &T::Hide);
+    return chaining(L);
+  }
+  static int enablepointerevents(lua_State* L) {
+    call(L, meta, &T::EnablePointerEvents);
+    return chaining(L);
+  }
+  static int disablepointerevents(lua_State* L) {
+    LuaHelper::call(L, meta, &T::DisablePointerEvents);
+    return chaining(L);
+  }
+  static int boundrect(lua_State* L) {
+    return get4numbers(L, meta, &T::GetBoundRect);
+  }
   static int parent(lua_State *L);
-  static int getfocus(lua_State *L);   
-  static int gc(lua_State* L);       
+  static int getfocus(lua_State *L) {
+    T* item = LuaHelper::check<T>(L, 1, meta);
+    item->GetFocus();
+    return chaining(L);
+  }
 };
 
 template <class T>
@@ -293,9 +353,7 @@ template <class T = LuaGroup>
 class LuaGroupBind : public LuaItemBind<T> {
  public:
   typedef LuaItemBind<T> B;
-  static int open(lua_State *L) { 
-    return LuaHelper::openex<B>(L, meta, setmethods, gc);
-  }
+  static int open(lua_State *L) { return openex<B>(L, meta, setmethods, gc); }
   static int setmethods(lua_State* L) {
     static const luaL_Reg methods[] = {
       {"new", create},      
@@ -591,9 +649,23 @@ class LuaEditBind : public LuaItemBind<T> {
     return chaining(L);
   }
   static int gettext(lua_State *L) {
-    getstring(L, meta, &T::GetText);
+    getstringbyvalue(L, meta, &T::GetText);
     return chaining(L);
   }
+};
+
+template <class T = LuaScrollBar>
+class LuaScrollBarBind : public LuaItemBind<T> {
+ public:   
+  typedef LuaItemBind<T> B;   
+  static int open(lua_State *L) { return openex<B>(L, meta, setmethods, gc); }
+  static int setmethods(lua_State* L) {
+    static const luaL_Reg methods[] = {      
+       {NULL, NULL}
+    };    
+    luaL_setfuncs(L, methods, 0);
+    return 0;
+  }  
 };
 
 template class LuaRectBind<LuaRect>;
@@ -602,6 +674,7 @@ template class LuaTextBind<LuaText>;
 template class LuaPicBind<LuaPic>;
 template class LuaButtonBind<LuaButton>;
 template class LuaEditBind<LuaEdit>;
+template class LuaScrollBarBind<LuaScrollBar>;
 
 
 } // unnamed

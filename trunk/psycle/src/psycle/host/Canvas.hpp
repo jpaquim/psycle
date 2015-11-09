@@ -19,12 +19,10 @@ typedef std::pair<double, double> Point;
 typedef std::vector<std::pair<double, double> > Points;
 
 enum CursorStyle {
-  AUTO, MOVE, NO_DROP, COL_RESIZE,
-  ALL_SCROLL, POINTER, NOT_ALLOWED,
-  ROW_RESIZE, CROSSHAIR, PROGRESS, E_RESIZE,
-  NE_RESIZE, DEFAULT, TEXT, N_RESIZE,
-  NW_RESIZE, HELP, VERTICAL_TEXT, S_RESIZE,
-  SE_RESIZE, INHERIT, WAIT, W_RESIZE, SW_RESIZE
+  AUTO, MOVE, NO_DROP, COL_RESIZE, ALL_SCROLL, POINTER, NOT_ALLOWED,
+  ROW_RESIZE, CROSSHAIR, PROGRESS, E_RESIZE, NE_RESIZE, DEFAULT, TEXT,
+  N_RESIZE, NW_RESIZE, HELP, VERTICAL_TEXT, S_RESIZE, SE_RESIZE, INHERIT,
+  WAIT, W_RESIZE, SW_RESIZE
 };
 
 struct Font {
@@ -268,8 +266,7 @@ class Image : public ui::Image {
     bmp_ = 0;    
     shared_ = false;
   }
-  CBitmap* bmp_;
-  CBitmap mask_;
+  CBitmap *bmp_, mask_;
   bool shared_;
 };
 
@@ -457,8 +454,7 @@ class Graphics : public ui::Graphics {
   }
 
   void SetClip(ui::Region* rgn) {
-    rgn ? cr_->SelectClipRgn((CRgn*) rgn->source())
-        : cr_->SelectClipRgn(0);
+    rgn ? cr_->SelectClipRgn((CRgn*) rgn->source()) : cr_->SelectClipRgn(0);
   }
 
   CRgn& clip() {
@@ -620,16 +616,8 @@ public:
   virtual bool OnEvent(Event* ev) { return 0; }
   void GetFocus();
   void Detach();
-  virtual void Show() {
-    if (!visible_) {
-      STR(); visible_ = true; FLS();
-    }
-  }
-  virtual void Hide() {
-    if (visible_) {
-      STR(); visible_ = false; FLS();
-    }
-  }
+  virtual void Show() { if (!visible_) { STR(); visible_ = true; FLS(); } }
+  virtual void Hide() { if (visible_) { STR(); visible_ = false; FLS(); } }
   void STR();  // store old region
   void FLS();  // invalidate combine new & old region
   void FLS(const Region& rgn); // invalidate region
@@ -643,16 +631,13 @@ public:
     if (update_) { region(); }
     return rgn_.Intersect(x, y) ? this : 0;    
   }
-
   bool visible() const { return visible_; }
   virtual void SetXY(double x, double y) {
-    if (x_!=x || y_!=y) {
-      STR(); 
-      x_ = x; 
-      y_ = y; 
-      FLS();
+    if (x_!=x || y_!=y) { 
+      STR(); x_ = x; y_ = y; FLS();
     }
   }
+
   double x() const { return x_; }
   double y() const { return y_; }
   void pos(double& xv, double& yv) const { xv = x(); yv = y(); }
@@ -898,85 +883,101 @@ class CWndItem : public ui::canvas::Item {
   }
   virtual void OnMessage(ui::canvas::CanvasMsg msg) {
     if (msg == ui::canvas::ONWND) {
-      if (!control_->m_hWnd) {        
-        const int nID = 50000;
-        CWnd* wnd = canvas()->wnd();
+      CWnd* wnd = canvas()->wnd();
+      if (p_wnd_!= wnd) {
+        p_wnd_ = wnd;
         int cx = zoomabsx();
-        int cy = zoomabsy();
-        OnCreate(wnd, nID, cx, cy);
+        int cy = zoomabsy();        
+        control_->SetParent(p_wnd_);
+        SetXY(cx, cy);        
+        control_->ShowWindow(SW_SHOW);
       }
     }
   }
   virtual void OnCreate(CWnd* wnd, int id, int cx, int cy) {}
   virtual void SetXY(double x, double y) {
     x_ = x;
-    y_ = y;      
-    CWnd* wnd = canvas()->wnd();
-    if (wnd && control_) {
-      int cx = zoomabsx();
-      int cy = zoomabsy();
-      control_->SetWindowPos(wnd, cx, cy, cx, cy, SWP_NOSIZE | SWP_NOZORDER);
-    }    
+    y_ = y;          
+    int cx = zoomabsx();
+    int cy = zoomabsy();
+    control_->SetWindowPos(p_wnd_, cx, cy, cx, cy, SWP_NOSIZE | SWP_NOZORDER);        
   }
+  CWnd* p_wnd() { return p_wnd_; }
+  const CWnd* p_wnd() const { return p_wnd_; }
   T* control() { return (T*)control_; }
   const T* control() const { return (T*)control_; }
 
  private:
-  void Init() { control_ = new T(); w_= 200; h_= 20; needsupdate(); }
+  void Init() { 
+    control_ = new T();
+    p_wnd_ = ::AfxGetMainWnd();
+    w_= 200; h_= 20;
+    needsupdate();
+  }
   int w_, h_;
-  CWnd* control_;
+  CWnd* control_, *p_wnd_;
 };
 
 class Button : public CWndItem<CButton> {
  public:
   static std::string type() { return "buttonitem"; }
-  Button() : CWndItem<CButton>() {}
-  Button(ui::canvas::Group* parent) : CWndItem<CButton>(parent) {}
-  void OnCreate(CWnd* wnd, int nID, int cx, int cy) {    
-    control()->Create("Button text", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER, CRect(cx, cy, cx+55, cy+19), wnd, nID);
+  Button() : CWndItem<CButton>() { Init(); }
+  Button(ui::canvas::Group* parent) : CWndItem<CButton>(parent) { Init(); }  
+private:
+  void Init() {  
+    int nID = 50000;
+    int cx = 0;
+    int cy = 0;
+    control()->Create("btn", WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
+      CRect(cx, cy, cx+55, cy+19), p_wnd(), nID);
   }
 };
 
 class Edit : public CWndItem<CEdit> {
  public:
   static std::string type() { return "edititem"; }
-  Edit() : CWndItem<CEdit>() {}
-  Edit(ui::canvas::Group* parent) : CWndItem<CEdit>(parent) {}
-  void OnCreate(CWnd* wnd, int nID, int cx, int cy) {    
-    control()->Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP, CRect(cx, cy, cx+55, cy+19), wnd, nID);
-    Update();
-  }
+  Edit() : CWndItem<CEdit>() { Init(); }
+  Edit(ui::canvas::Group* parent) : CWndItem<CEdit>(parent) { Init(); }
   void SetText(const std::string& text) {
-    txt_ = text;
-    Update();
+    control()->SetWindowText(text.c_str());
   }
-
-  const std::string& GetText() const {
-    if (control()) {
-      CString s;
-      control()->GetWindowTextA(s);
-      txt_ = std::string(s.GetString());
-    }    
-    return txt_;
-  }
-
-  void Update() {
-    if (control()->m_hWnd) {
-      control()->SetWindowText(txt_.c_str());
-    }
-  }
+  std::string GetText() const {    
+    CString s;
+    control()->GetWindowTextA(s);
+    return s.GetString();
+  }  
 private:
-  mutable std::string txt_;
+  void Init() {  
+    int nID = 50000;
+    int cx = 0;
+    int cy = 0;
+    control()->Create(WS_CHILD | WS_TABSTOP,
+      CRect(cx, cy, cx+55, cy+19), p_wnd(), nID);
+  }  
 };
 
+class ScrollBar : public CWndItem<CScrollBar> {
+ public:
+  static std::string type() { return "scrollbaritem"; }
+  ScrollBar() : CWndItem<CScrollBar>() { Init(); }
+  ScrollBar(ui::canvas::Group* parent) : CWndItem<CScrollBar>(parent) { Init(); }  
+private:
+  void Init() {  
+    int nID = 50000;
+    int cx = 0;
+    int cy = 0;    
+    control()->Create(SBS_HORZ | SBS_TOPALIGN | WS_CHILD | WS_VISIBLE,
+                  CRect(cx, cy, cx+100, cy+30), p_wnd(), nID);
+  }
+};
 
+// canvas
 class Canvas {
   friend class Item;
   friend class Group;
  public:
   Canvas() : wnd_(0) { Init(); }
-  Canvas(CWnd* parent) : wnd_(parent) { Init(); }
-  void Init();
+  Canvas(CWnd* parent) : wnd_(parent) { Init(); }  
   ~Canvas();
   
   Group* root() { return root_; }
@@ -991,8 +992,8 @@ class Canvas {
     bg_height_ = width;
   }
   void StealFocus(Item* item);
-    virtual canvas::Item* OnEvent(Event* ev);
-    virtual void OnSize(int cx, int cy) {
+  virtual canvas::Item* OnEvent(Event* ev);
+  virtual void OnSize(int cx, int cy) {
        cw_ = cx;
        ch_ = cy;
     }
@@ -1000,9 +1001,8 @@ class Canvas {
     bool IsSaving() const { return save_; }
     void set_wnd(CWnd* wnd) {
       if (old_wnd_ != wnd) {
-        wnd_ = wnd;
-        root_->OnMessage(ONWND);
-        old_wnd_ = wnd;
+        old_wnd_ = wnd_ = wnd;        
+        root_->OnMessage(ONWND);        
       }
     }
     CWnd* wnd() { return wnd_; }
@@ -1075,14 +1075,15 @@ class Canvas {
   double zoomabsy() const { return 0; }
   double x() const { return 0; }
   double y() const { return 0; }
-
+  bool show_scrollbar;
+  int nposv, nposh;
  protected:
   void Invalidate(Region& rgn);
  private:
+  void Init();
   Canvas(const Canvas& other) {}
   Canvas& operator=(Canvas rhs) {}
-  Item* DelegateEvent(Event* event, Item* item);
-  void NotifyAll();
+  Item* DelegateEvent(Event* event, Item* item);  
   CWnd* wnd_, *old_wnd_;
   Group* root_;
   bool save_, steal_focus_, managed_;
@@ -1097,9 +1098,35 @@ class Canvas {
 
 class CanvasFrameWnd;
 
-class CanvasView : public CWnd {
+int const ID_TIMER_VIEW_REFRESH = 40;
+
+class BaseView {
+ public:
+  BaseView(CWnd* wnd) : canvas_(0), wnd_(wnd) { assert(wnd); } 
+  virtual ~BaseView() {}
+  void set_canvas(Canvas* canvas) { canvas_ = canvas; canvas_->set_wnd(wnd_); }
+  Canvas* canvas() { return canvas_; }  
+  void InitTimer() {
+    if (!wnd_->SetTimer(ID_TIMER_VIEW_REFRESH, 30, NULL)) // GUI update. 
+    {
+			AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
+		}
+  }
+  void StopTimer() {
+    wnd_->KillTimer(ID_TIMER_VIEW_REFRESH);
+  }
+  CWnd* wnd() { return wnd_; }
+protected:
+  void Draw();  
+  bool DelegateEvent(int type, int button, UINT nFlags, CPoint pt);
+private:
+  Canvas* canvas_;
+  CWnd* wnd_;
+};
+
+class View : public CWnd, public BaseView {
 	public:
-		CanvasView() : canvas_(0) {}
+    View() : BaseView(this) {} // : canvas_(0) {}
 		virtual void Open() {};
 		virtual bool GetViewSize(CRect& rect) {      
 			rect.left= rect.top = 0;
@@ -1107,35 +1134,43 @@ class CanvasView : public CWnd {
 			rect.bottom = 400;
 			return true;      
     }    
-		virtual void WindowIdle() {      
-      Invalidate(false);
-    }
-    void set_canvas(Canvas* canvas) { canvas_ = canvas; }
-    Canvas* canvas() { return canvas_; }
-
+		virtual void WindowIdle() { Invalidate(false); }    
 	protected:
-		virtual void* WindowPtr() { return GetSafeHwnd(); }		
-    BOOL PreCreateWindow(CREATESTRUCT& cs);		
+		virtual void* WindowPtr() { return GetSafeHwnd(); }	
+    virtual BOOL PreCreateWindow(CREATESTRUCT& cs);    
 	DECLARE_MESSAGE_MAP()
 		int OnCreate(LPCREATESTRUCT lpCreateStruct);
+    void OnDestroy();
 		void OnSetFocus(CWnd* pOldWnd);
 		void OnPaint();
-		void OnLButtonDown(UINT nFlags, CPoint point);
-    void OnRButtonDown(UINT nFlags, CPoint point);
-		void OnLButtonDblClk(UINT nFlags, CPoint pt);
-		void OnMouseMove(UINT nFlags, CPoint point);
-		void OnLButtonUp(UINT nFlags, CPoint point);
-		void OnRButtonUp(UINT nFlags, CPoint point);
-    
-  private:
-    bool DelegateEvent(int type, int button, UINT nFlags, CPoint pt);
-    Canvas* canvas_;
+		void OnLButtonDown(UINT nFlags, CPoint pt) { 
+      DelegateEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, pt);
+    }
+    void OnRButtonDown(UINT nFlags, CPoint pt) {
+      DelegateEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, pt);
+    }
+		void OnLButtonDblClk(UINT nFlags, CPoint pt) {
+      DelegateEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, pt);
+    }
+		void OnMouseMove(UINT nFlags, CPoint pt) {
+      DelegateEvent(canvas::Event::MOTION_NOTIFY, 0, nFlags, pt);
+    }
+		void OnLButtonUp(UINT nFlags, CPoint pt) {
+      DelegateEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, pt);
+    }
+		void OnRButtonUp(UINT nFlags, CPoint pt) {
+      DelegateEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, pt);
+    }
+    void OnTimer(UINT_PTR nIDEvent);
+    BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+    void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+		void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);          
 };
 
 class CanvasFrameWnd : public CFrameWnd {			
  DECLARE_DYNAMIC(CanvasFrameWnd)
  public:   
-  virtual ~CanvasFrameWnd() {} //Use OnDestroy
+  virtual ~CanvasFrameWnd() {} // Use OnDestroy
   void set_canvas(Canvas* canvas) { assert(pView_); pView_->set_canvas(canvas); }
   Canvas* canvas() { return pView_ ? pView_->canvas() : 0; }
   virtual void PostOpenWnd();
@@ -1155,13 +1190,12 @@ class CanvasFrameWnd : public CFrameWnd {
 	int OnCreate(LPCREATESTRUCT lpCreateStruct);      
 	void OnClose();
   void OnDestroy();
-	void OnTimer(UINT_PTR nIDEvent);
 	void OnSetFocus(CWnd* pOldWnd);
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	void OnSizing(UINT fwSide, LPRECT pRect);
 private:
-  CanvasView* pView_;
+  View* pView_;
 };
 
 } // namespace canvas

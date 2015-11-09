@@ -5,11 +5,43 @@
 #include "Psycle.hpp"
 #include "BaseParamView.hpp"
 #include "PsycleConfig.hpp"
+#include "Canvas.hpp"
 
 namespace psycle {
 namespace host {
 
 		class Machine;
+
+    class CanvasParamView : public CBaseParamView, public ui::canvas::BaseView {
+     public:
+       CanvasParamView(CFrameMachine* frame, Machine* effect) :
+          CBaseParamView(frame), ui::canvas::BaseView(this) {}
+       BOOL PreCreateWindow(CREATESTRUCT& cs);
+     protected:
+       DECLARE_MESSAGE_MAP()
+       int OnCreate(LPCREATESTRUCT lpCreateStruct);
+       void OnDestroy();
+       void OnPaint() { Draw(); }
+       void OnLButtonDown(UINT nFlags, CPoint pt) { 
+         DelegateEvent(ui::canvas::Event::BUTTON_PRESS, 1, nFlags, pt);
+       }
+       void OnRButtonDown(UINT nFlags, CPoint pt) {
+         DelegateEvent(ui::canvas::Event::BUTTON_PRESS, 2, nFlags, pt);
+       }
+		   void OnLButtonDblClk(UINT nFlags, CPoint pt) {
+         DelegateEvent(ui::canvas::Event::BUTTON_2PRESS, 1, nFlags, pt);
+       }
+		   void OnMouseMove(UINT nFlags, CPoint pt) {
+         DelegateEvent(ui::canvas::Event::MOTION_NOTIFY, 0, nFlags, pt);
+       }
+		   void OnLButtonUp(UINT nFlags, CPoint pt) {
+         DelegateEvent(ui::canvas::Event::BUTTON_RELEASE, 1, nFlags, pt);
+       }
+		   void OnRButtonUp(UINT nFlags, CPoint pt) {
+         DelegateEvent(ui::canvas::Event::BUTTON_RELEASE, 2, nFlags, pt);
+       }
+       void OnReload(Machine* mac);
+    };
 
 		/// Native Knob-based UI for psycle plugins and non-GUI VSTs
 		class CNativeView : public CBaseParamView
@@ -39,9 +71,7 @@ namespace host {
 		
 		public:
 			static PsycleConfig::MachineParam* uiSetting;
-		protected:
-      bool DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point);
-      bool PaintLuaGui(CDC &bufferDC, CPaintDC& dc, CRect& rect, CRgn &pRgn, CBitmap* oldbmp, CFont *oldfont);
+		protected:      
       void ComputeLeds(int tweakpar, std::vector<int>& on, int &maxf, int &koffset, int &amp_v, int &x_knob, int &y_knob);
 			Machine* _pMachine;
 

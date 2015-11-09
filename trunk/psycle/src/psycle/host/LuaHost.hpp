@@ -88,8 +88,7 @@ public:
 	// calls if noteon modus used
 	void call_command(int lastnote, int inst, int cmd, int val);
 	void call_noteon(int note, int lastnote, int inst, int cmd, int val);
-	void call_noteoff(int note, int lastnote, int inst, int cmd, int val);
-  bool call_event(ui::canvas::Event* ev);
+	void call_noteoff(int note, int lastnote, int inst, int cmd, int val);  
 	void call_newline();
 	void call_work(int num, int offset=0);
   void call_parameter(int numparameter, double val);

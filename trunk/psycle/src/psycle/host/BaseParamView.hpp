@@ -15,6 +15,7 @@ class CBaseParamView : public CWnd {
 		virtual void WindowIdle() {      
       Invalidate(false);
     }
+    virtual void OnReload(class Machine* mac) {}
 	protected:
 		virtual void* WindowPtr() { return GetSafeHwnd(); }
 		CFrameMachine* parentFrame;

@@ -6,7 +6,6 @@
 #include "FrameMachine.hpp"
 #include "Machine.hpp"
 #include "LuaPlugin.hpp"
-#include "Canvas.hpp"
 #include "NewVal.hpp"
 
 #include "Plugin.hpp" // For default parameter value.
@@ -22,6 +21,51 @@ namespace psycle { namespace host {
   using namespace ui;
 		
 	PsycleConfig::MachineParam* CNativeView::uiSetting;
+
+    BEGIN_MESSAGE_MAP(CanvasParamView, CWnd)
+			ON_WM_CREATE()	
+      ON_WM_DESTROY()
+			ON_WM_PAINT()
+      ON_WM_LBUTTONDOWN()
+      ON_WM_RBUTTONDOWN()
+			ON_WM_LBUTTONDBLCLK()
+			ON_WM_MOUSEMOVE()
+			ON_WM_LBUTTONUP()
+			ON_WM_RBUTTONUP()      
+		END_MESSAGE_MAP()
+
+    int CanvasParamView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+		{
+			if (CWnd::OnCreate(lpCreateStruct) == -1)
+			{
+				return -1;
+			}      
+			return 0;
+		}
+
+    void CanvasParamView::OnDestroy()
+		{
+      StopTimer();
+    }
+
+		BOOL CanvasParamView::PreCreateWindow(CREATESTRUCT& cs)
+		{
+			if (!CWnd::PreCreateWindow(cs))
+				return FALSE;
+			
+			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+			cs.style &= ~WS_BORDER;
+			return TRUE;
+		}						  
+
+    void CanvasParamView::OnReload(Machine* mac)
+    {
+      LuaPlugin* lp = (LuaPlugin*) (mac);
+      canvas::Canvas* user_view = lp->GetCanvas();
+      if (user_view !=0 && lp->GetGuiType() == 1) {
+        set_canvas(user_view);
+      }
+    }
 
 		BEGIN_MESSAGE_MAP(CNativeView, CWnd)
 			ON_WM_CREATE()
@@ -108,7 +152,6 @@ namespace psycle { namespace host {
 			bufferBmp.CreateCompatibleBitmap(&dc,rect.right-rect.left,rect.bottom-rect.top);
 			CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);
 			CFont *oldfont=bufferDC.SelectObject(&uiSetting->font);
-      if (PaintLuaGui(bufferDC, dc, rect, pRgn, oldbmp, oldfont)) return;
 			CDC knobDC;
 			CBitmap* oldKnobbmp;
 			knobDC.CreateCompatibleDC(&bufferDC);
@@ -240,9 +283,7 @@ namespace psycle { namespace host {
 		}
 
 		void CNativeView::OnLButtonDown(UINT nFlags, CPoint point) 
-		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, point))
-        return;      
+		{      
 			tweakpar = ConvertXYtoParam(point.x,point.y);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
@@ -266,14 +307,11 @@ namespace psycle { namespace host {
 
     void CNativeView::OnRButtonDown(UINT nFlags, CPoint point) 
 		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, point))
-        return;
+      CWnd::OnRButtonDown(nFlags, point);
     }
 
 		void CNativeView::OnLButtonDblClk(UINT nFlags, CPoint pt)
-		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, pt))
-        return;
+		{      
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
 				int par = ConvertXYtoParam(pt.x,pt.y);
@@ -288,9 +326,7 @@ namespace psycle { namespace host {
 		}
 
 		void CNativeView::OnMouseMove(UINT nFlags, CPoint point) 
-		{
-      if (DelegateLuaEvent(canvas::Event::MOTION_NOTIFY, 0, nFlags, point))
-        return;
+		{      
 			if (istweak && !positioning && _pMachine->GetParamType(tweakpar)!=4)
 			{
 				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
@@ -343,9 +379,7 @@ namespace psycle { namespace host {
 		}
 
 		void CNativeView::OnLButtonUp(UINT nFlags, CPoint point) 
-		{      
-      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, point))
-        return;
+		{           
 			istweak = false;
 			ReleaseCapture();			
 			if (_pMachine->GetParamType(tweakpar)==5) {							
@@ -404,9 +438,7 @@ namespace psycle { namespace host {
 		}
 
 		void CNativeView::OnRButtonUp(UINT nFlags, CPoint point) 
-		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, point))
-        return;
+		{      
 			tweakpar = ConvertXYtoParam(point.x,point.y);
 
 			if ((tweakpar > -1) && (tweakpar < numParameters))
@@ -543,33 +575,6 @@ namespace psycle { namespace host {
 				}
 			}
     }
-
-    bool CNativeView::PaintLuaGui(CDC &bufferDC, CPaintDC& dc, CRect& rect, CRgn &pRgn, CBitmap* oldbmp, CFont *oldfont) {
-       if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        ui::canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-          if (user_view->wnd() == 0) user_view->set_wnd(this);
-          mfc::Graphics g(&bufferDC);
-          ui::mfc::Region rgn(pRgn);
-          user_view->DrawFlush(&g, rgn);
-          dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);			
-		 	    bufferDC.SelectObject(oldbmp);
-			    bufferDC.SelectObject(oldfont);
-			    bufferDC.DeleteDC();
-          return true;
-        }
-      }
-      return false;
-    }
-
-    bool CNativeView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
-      if (_pMachine->_type == MACH_LUA) {        
-        ui::canvas::Event ev(0, (ui::canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
-        return ((LuaPlugin*) _pMachine)->OnEvent(&ev);        		    
-      }
-      return false;
-    }
-  
+      
 	}   // namespace
 }   // namespace

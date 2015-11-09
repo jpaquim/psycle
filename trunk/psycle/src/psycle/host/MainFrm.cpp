@@ -18,6 +18,7 @@
 #include "WaveInMacDlg.hpp"
 #include "WireDlg.hpp"
 #include "WaveEdFrame.hpp"
+#include "ProgressDialog.hpp"
 
 #include "Player.hpp"
 #include "Plugin.hpp"
@@ -95,6 +96,7 @@ namespace psycle { namespace host {
 			ON_WM_ACTIVATE()
 			ON_WM_DESTROY()
 			ON_WM_DROPFILES()
+      ON_WM_TIMER()
 //songbar start
 			ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
 			ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
@@ -190,7 +192,8 @@ namespace psycle { namespace host {
 
 			_pSong=&Global::song();
 
-			// create a view to occupy the client area of the frame
+
+      // create a view to occupy the client area of the frame
 			m_wndView.pParentFrame = this;
 			if (!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
@@ -199,6 +202,16 @@ namespace psycle { namespace host {
 				return -1;
 			}
 			m_wndView.ValidateParent();
+
+      if (!m_luaWndView.Create(NULL, NULL, WS_CHILD | WS_BORDER,
+		  CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST+1, NULL))
+			{
+				TRACE0("Failed to create view window\n");
+				return -1;
+			}		
+			
+      	      
+    
 			// Create Toolbars.
 			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
@@ -415,6 +428,7 @@ namespace psycle { namespace host {
 			m_seqBar.DestroyWindow();
 			// m_pWndWed->DestroyWindow(); is called by the default CWnd::DestroyWindow() function, and the memory freed by subsequent CWnd::OnPostNCDestroy()
 			m_wndView.DestroyWindow();
+      m_luaWndView.DestroyWindow();
 			// m_wndInst is autodeleted when closed.
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
@@ -1178,5 +1192,9 @@ namespace psycle { namespace host {
 			}
 			return FALSE;
 		}
+
+    void CMainFrame::OnTimer( UINT_PTR nIDEvent ) {
+      this->m_wndView.OnTimer(nIDEvent);
+    }
 
 }}
