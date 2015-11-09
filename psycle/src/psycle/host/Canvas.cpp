@@ -824,6 +824,8 @@ void Canvas::Init() {
   root_->set_manage(false);
   cursor_ = LoadCursor(0, IDC_ARROW);
   old_wnd_ = wnd_;
+  show_scrollbar = false;  
+  nposv = nposh = 0;
 }
 
 Canvas::~Canvas() {
@@ -919,11 +921,7 @@ Item* Canvas::DelegateEvent(Event* ev, Item* item) {
   return erg ? item : 0;
 }
 
-void Canvas::NotifyAll() {
-
-}
-
-void Canvas::Invalidate(Region& rgn) {
+void Canvas::Invalidate(Region& rgn) { 
   if (IsSaving()) {
     save_rgn_.Combine(rgn, RGN_OR);
   } else
@@ -941,8 +939,10 @@ void Canvas::Flush() {
 
 
 // CanvasView
-BEGIN_MESSAGE_MAP(CanvasView, CWnd)
+BEGIN_MESSAGE_MAP(View, CWnd)
+  ON_WM_TIMER()
   ON_WM_CREATE()
+  ON_WM_DESTROY()
   ON_WM_SETFOCUS()
 	ON_WM_PAINT()
 	ON_WM_LBUTTONDOWN()
@@ -953,92 +953,142 @@ BEGIN_MESSAGE_MAP(CanvasView, CWnd)
 	ON_WM_RBUTTONUP()
   ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
+  ON_WM_SETCURSOR()
+  ON_WM_HSCROLL()
+  ON_WM_VSCROLL()
 END_MESSAGE_MAP()
 
-int CanvasView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
+
+BOOL View::PreCreateWindow(CREATESTRUCT& cs) 
+		{
+			if (!CWnd::PreCreateWindow(cs))
+				return FALSE;
+			
+			cs.dwExStyle |= WS_EX_CLIENTEDGE;
+			cs.style &= ~WS_BORDER;
+			cs.lpszClass = AfxRegisterWndClass
+				(
+					CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
+					//::LoadCursor(NULL, IDC_ARROW), HBRUSH(COLOR_WINDOW+1), NULL);
+					::LoadCursor(NULL, IDC_ARROW),
+					(HBRUSH)GetStockObject( HOLLOW_BRUSH ),
+					NULL
+				);
+
+			return TRUE;
+		}
+
+int View::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (CWnd::OnCreate(lpCreateStruct) == -1) {
 		return -1;
 	}      
 	return 0;
 }
 
-BOOL CanvasView::PreCreateWindow(CREATESTRUCT& cs) {
+void View::OnDestroy() { StopTimer(); }
+
+/* BOOL View::PreCreateWindow(CREATESTRUCT& cs) {
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
 			
 	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 	cs.style &= ~WS_BORDER;
 	return TRUE;
-}
+}*/
 
-void CanvasView::OnSetFocus(CWnd* pOldWnd) {
+void View::OnSetFocus(CWnd* pOldWnd) {
 	CWnd::OnSetFocus(pOldWnd);
 	GetParent()->SetFocus();
 }
 
-void CanvasView::OnPaint() {  
+void View::OnPaint() {
+  Draw();
+}
+
+void BaseView::Draw() {  
     CRgn pRgn;
 	  pRgn.CreateRectRgn(0, 0, 0, 0);
-	  GetUpdateRgn(&pRgn, FALSE);
-    CPaintDC dc(this);
+	  wnd_->GetUpdateRgn(&pRgn, FALSE);
+    CPaintDC dc(wnd_);
 	  CRect rc;
-	  GetClientRect(&rc);
+	  wnd_->GetClientRect(&rc);
 	  CDC bufferDC;
 	  CBitmap bufferBmp;
 	  bufferDC.CreateCompatibleDC(&dc);
 	  bufferBmp.CreateCompatibleBitmap(&dc, rc.right-rc.left, rc.bottom-rc.top);
     CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);		
-    if (canvas_) {
+    if (canvas()) {
       try {
         ui::mfc::Graphics g(&bufferDC);
         ui::mfc::Region canvas_rgn(pRgn);
-        canvas_->DrawFlush(&g, canvas_rgn);
+        canvas()->DrawFlush(&g, canvas_rgn);
       } catch (std::exception& e) {
         AfxMessageBox(e.what());
       }
     }
     dc.BitBlt(0, 0, rc.right, rc.bottom, &bufferDC, 0, 0, SRCCOPY);
     bufferDC.SelectObject(oldbmp);	
-	  bufferDC.DeleteDC();
-  
+	  bufferDC.DeleteDC();  
 }
 
-void CanvasView::OnLButtonDown(UINT nFlags, CPoint pt) {
-  DelegateEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, pt);
-	CWnd::OnLButtonDown(nFlags, pt);
-}
-
-void CanvasView::OnRButtonDown(UINT nFlags, CPoint pt) {
-  DelegateEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, pt);
-  CWnd::OnRButtonDown(nFlags, pt);
-}
-
-void CanvasView::OnLButtonDblClk(UINT nFlags, CPoint pt) {
-  DelegateEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, pt);
-	CWnd::OnLButtonDblClk(nFlags, pt);
-}
-
-void CanvasView::OnMouseMove(UINT nFlags, CPoint pt) {
-  DelegateEvent(canvas::Event::MOTION_NOTIFY, 1, nFlags, pt);
-	CWnd::OnMouseMove(nFlags, pt);
-}
-
-void CanvasView::OnLButtonUp(UINT nFlags, CPoint pt) {      
-  DelegateEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, pt);
-	CWnd::OnLButtonUp(nFlags, pt);
-}
-
-void CanvasView::OnRButtonUp(UINT nFlags, CPoint pt) { 
-  DelegateEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, pt);
-	CWnd::OnRButtonUp(nFlags, pt);
-}
-
-bool CanvasView::DelegateEvent(int type, int button, UINT nFlags, CPoint pt) {
-  if (canvas_) {        
+bool BaseView::DelegateEvent(int type, int button, UINT nFlags, CPoint pt) {
+  if (canvas()) {        
     Event ev(0, (Event::Type)type, pt.x, pt.y, button, nFlags);
-    return canvas_->OnEvent(&ev);        		    
+    return canvas()->OnEvent(&ev);        		    
   }
   return false;
+}
+
+void View::OnTimer(UINT_PTR nIDEvent) {
+  if (canvas() && IsWindowVisible()) {
+    try {    
+      if (canvas()->show_scrollbar) {
+        ShowScrollBar(SB_BOTH, TRUE);
+        SCROLLINFO si;
+				si.cbSize = sizeof(SCROLLINFO);
+				si.fMask = SIF_PAGE | SIF_RANGE;
+				si.nMin = 0;
+				si.nMax = canvas()->nposv; // -VISLINES;
+				si.nPage = 1;
+				SetScrollInfo(SB_VERT,&si);
+        si.nMax = canvas()->nposh; // -VISLINES;
+        SetScrollInfo(SB_HORZ,&si);
+        canvas()->show_scrollbar = false;
+      }
+      canvas()->set_wnd(this);
+      canvas()->InvalidateSave();
+    } catch(std::exception& e) {
+      e;
+    }
+  }				
+}
+
+void View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+  if (nSBCode == SB_THUMBTRACK) {
+    CPoint pt(0, nPos);
+    DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
+    SetScrollPos(SB_VERT, nPos, false);
+    CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
+  }
+}
+
+// DelegateLuaEvent(ui::canvas::Event::ONSIZE, 1, 0, cs);        
+
+void View::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+  if (nSBCode == SB_THUMBTRACK) {
+    CPoint pt(nPos, 0);
+    DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
+    SetScrollPos(SB_HORZ, nPos, false);
+    CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
+  }
+}
+
+BOOL View::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {    
+   if (canvas()) {
+    SetCursor(canvas()->cursor());
+    return TRUE;
+   }
+  return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
 // CanvasFrame
@@ -1048,7 +1098,6 @@ BEGIN_MESSAGE_MAP(CanvasFrameWnd, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
-	ON_WM_TIMER()
 	ON_WM_SETFOCUS()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
@@ -1057,7 +1106,7 @@ END_MESSAGE_MAP()
 
 int CanvasFrameWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)  {		
   if( CFrameWnd::OnCreate(lpCreateStruct) == 0) {
-    pView_ = new CanvasView();
+    pView_ = new View();
     pView_->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 		CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL); 
     return 0;
@@ -1084,7 +1133,7 @@ void CanvasFrameWnd::OnDestroy() {
   if (pView_ != NULL) { 
     pView_->DestroyWindow();
     delete pView_;
-  }
+  }  
 }
 
 void CanvasFrameWnd::PostNcDestroy() {			
@@ -1119,10 +1168,6 @@ void CanvasFrameWnd::SetPos(int x, int y) {
 }
 
 // Messages
-void CanvasFrameWnd::OnTimer(UINT_PTR nIDEvent) {            
-	CFrameWnd::OnTimer(nIDEvent);
-}
-
 void CanvasFrameWnd::OnSetFocus(CWnd* pOldWnd) {
 	CFrameWnd::OnSetFocus(pOldWnd);			
 }

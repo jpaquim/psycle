@@ -17,6 +17,8 @@ namespace psycle { namespace host {
 		int const ID_TIMER_PARAM_REFRESH = 2104;
 		extern CPsycleApp theApp;
     using namespace ui;
+
+        
 		//////////////////////////////////////////////////////////////////////////
 
 		void CMyToolBar::OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle)
@@ -259,7 +261,7 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
-      if (_machine->_type == MACH_LUA) {
+      /*if (_machine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _machine;
         canvas::Canvas* user_view = lp->GetCanvas();
         if (user_view !=0 && lp->GetGuiType() == 1) { 
@@ -283,9 +285,9 @@ namespace psycle { namespace host {
           if (lp->OnEvent(&ev)) {
             return;
           }
-        }		    
+        }
       }
-
+      */
 			// ignore repeats: nFlags&0x4000
 			const BOOL bRepeat = nFlags&0x4000;
 			CmdDef cmd(PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags));
@@ -321,7 +323,7 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{      
-      if (_machine->_type == MACH_LUA) {
+     /* if (_machine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _machine;
         canvas::Canvas* user_view = lp->GetCanvas();
         if (user_view !=0 && lp->GetGuiType() == 1) { 
@@ -346,7 +348,7 @@ namespace psycle { namespace host {
             return;
           }        
         }		    
-      }
+      }*/
 
 			CmdDef cmd(PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
@@ -625,8 +627,9 @@ namespace psycle { namespace host {
 		void CFrameMachine::OnMachineReloadScript()
 		{
 			if (_machine->_type == MACH_LUA)
-			{
+			{                
 				_machine->reload();
+        pView->OnReload(_machine);
         ResizeWindow(0);
         pView->Invalidate(false);
 			}
@@ -745,7 +748,18 @@ namespace psycle { namespace host {
 			CBaseParamView* gui;
 			if(machine()._type == MACH_MIXER) {
 				gui = new MixerFrameView(this,&machine());
-			}
+			} else 
+      if(machine()._type == MACH_LUA) {
+        CanvasParamView* cpv;
+        gui = cpv = new CanvasParamView(this, &machine());
+        LuaPlugin* lp = (LuaPlugin*) _machine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+          cpv->set_canvas(user_view);
+        } else {
+          gui = new CNativeView(this,&machine());
+        }
+      }
 			else {
 				gui = new CNativeView(this,&machine());
 			}

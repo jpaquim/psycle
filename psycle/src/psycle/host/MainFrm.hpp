@@ -10,6 +10,7 @@
 #include "InfoDlg.hpp"
 #include "InstrumentEditorUI.hpp"
 #include "MidiMonitorDlg.hpp"
+#include "Canvas.hpp"
 
 
 namespace universalis { namespace os {
@@ -95,6 +96,7 @@ namespace psycle { namespace host {
       
 			
 			CChildView  m_wndView;
+      ui::canvas::View m_luaWndView;
 			//CRebar      m_rebar;
 			CToolBar    m_wndToolBar;
 			CBitmap     m_tbBm;
@@ -215,6 +217,8 @@ namespace psycle { namespace host {
 			afx_msg void OnUpdateViewMachinebar(CCmdUI* pCmdUI);
 			afx_msg void OnPsyhelp();
 //Menu end
+      // autosave timer   
+      afx_msg void OnTimer( UINT_PTR nIDEvent );
 };
 
 }}

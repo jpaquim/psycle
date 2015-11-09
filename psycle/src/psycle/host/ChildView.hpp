@@ -244,8 +244,7 @@ namespace host {
 			void RestoreRecent();
     public:
       void RemoveLuaMenu();
-      void LoadLuaExtensions();
-      bool DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point);
+      void LoadLuaExtensions();      
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;
@@ -473,8 +472,7 @@ namespace host {
       std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;
       std::vector<LuaPlugin*> lua_extensions_;
 
-		public:
-			BOOL OnSetCursor( CWnd* pWnd, UINT nHitTest, UINT message);
+		public:			
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
 			DECLARE_MESSAGE_MAP()
@@ -501,9 +499,9 @@ namespace host {
 			afx_msg void OnBarrec();
 			afx_msg void OnBarstop();
 			afx_msg void OnRecordWav();
-			afx_msg void OnFullScreen();
-		protected:
+			afx_msg void OnFullScreen();		
 			afx_msg void OnTimer( UINT_PTR nIDEvent );
+    protected:
 			afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 			afx_msg void OnFileNew();
 			afx_msg void OnFileSave();

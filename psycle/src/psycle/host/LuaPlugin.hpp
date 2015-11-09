@@ -70,8 +70,7 @@ namespace psycle { namespace host {
     virtual int GetGuiType() const { return proxy_.gui_type(); }
     void OnMenu(UINT id) { proxy_.call_menu(id); }
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
-    ui::canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
-    bool OnEvent(ui::canvas::Event* ev);
+    ui::canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }    
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);
@@ -98,30 +97,12 @@ namespace psycle { namespace host {
 		}
 		virtual int GetNumBanks(){ return (numPrograms()/128)+1;};*/
     virtual void OnGuiTimer(void* mhnd, void* chnd) {
+      // todo not working atm .. transfer to Canvas.cpp
       if (!crashed()) {
         if (custom_menubar && custom_menubar->needsupdate()) {
           proxy_.update_menu(mhnd);
           custom_menubar->setupdate(false);
-        }
-        LuaCanvas* canvas = proxy_.call_canvas();
-        if (canvas) {
-          ui::canvas::Event ev(0, ui::canvas::Event::ONTIMER, 0, 0, 0, 0);
-          proxy_.call_event(&ev);
-          if (canvas->show_scrollbar) {
-             CWnd* view = (CWnd*) chnd;
-             view->ShowScrollBar(SB_BOTH,TRUE);
-             SCROLLINFO si;
-				     si.cbSize = sizeof(SCROLLINFO);
-				     si.fMask = SIF_PAGE | SIF_RANGE;
-				     si.nMin = 0;
-				     si.nMax = canvas->nposv; // -VISLINES;
-				     si.nPage = 1;
-				     view->SetScrollInfo(SB_VERT,&si);
-             si.nMax = canvas->nposh; // -VISLINES;
-             view->SetScrollInfo(SB_HORZ,&si);
-             canvas->show_scrollbar = false;
-          }
-        }
+        }        
       }
     }
 

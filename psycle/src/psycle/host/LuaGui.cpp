@@ -509,9 +509,18 @@ namespace psycle { namespace host {
 
   const char* LuaCanvasBind::meta = "psycanvasmeta";
 
+  LuaCanvas::LuaCanvas(lua_State* state) :
+        ui::canvas::Canvas(), L(state) {
+     LuaHelper::get_proxy(L);     
+     mac_ = lua_isnil(L, -1) ? 0 : LuaHelper::check<LuaMachine>(L, -1, LuaMachineBind::meta);
+     lua_pop(L, 2);
+  }
+
   canvas::Item* LuaCanvas::OnEvent(canvas::Event* ev) {
+    if (mac_) mac_->lock();
     canvas::Item* item = canvas::Canvas::OnEvent(ev);
     CallEvents(L, ev, this, true);
+    if (mac_) mac_->unlock();
     return item;
   }
 
@@ -660,41 +669,6 @@ namespace psycle { namespace host {
   ///////////////////////////////////////////////////////////////////////////////
   // LuaItemBind
   ///////////////////////////////////////////////////////////////////////////////
-
-  template <class T>
-  int LuaItemBind<T>::open(lua_State *L) {   
-    LuaHelper::openmeta(L, meta, gc);    
-    lua_newtable(L);
-    setmethods(L);
-    return 1; // LuaHelper::open(L, meta.c_str(), methods,  gc);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::setmethods(lua_State* L) {
-    static const luaL_Reg methods[] = {
-      {"new", create},    
-      {"setpos", setpos},
-      {"pos", pos},
-      {"clientpos", clientpos},
-      {"getfocus", getfocus},
-      // {"setzoom", setzoom},      
-      {"show", show},
-      {"hide", hide},
-      {"enablepointerevents", enablepointerevents},
-      {"disablepointerevents", disablepointerevents},
-//      {"tostring", tostring},
-      {"parent", parent},
-      {"boundrect", boundrect},
-      {"canvas", canvas},
-      {"setsize", setsize},
-      //{"intersect", intersect},  
-      {"fls", fls},
-//      {"setclip", setclip},
-      { NULL, NULL }
-    };
-    luaL_setfuncs(L, methods, 0);
-    return 0;
-  }
   
   template <class T>
   int LuaItemBind<T>::create(lua_State* L) {    
@@ -735,36 +709,6 @@ namespace psycle { namespace host {
   }
 
   template <class T>
-  int LuaItemBind<T>::draw(lua_State* L) { return 0; }
-
-  template <class T>
-  int LuaItemBind<T>::setpos(lua_State* L) {
-    LuaHelper::callstrict2(L, meta.c_str(), &T::SetXY);
-    return LuaHelper::chaining(L);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::pos(lua_State* L) {
-    return LuaHelper::get2number2<T,double>(L, meta.c_str(), &T::pos);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::clientpos(lua_State* L) {
-    return LuaHelper::get2number2<T,double>(L, meta.c_str(), &T::clientpos);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::gc(lua_State* L) {
-    return LuaHelper::delete_userdata<T>(L, meta.c_str());
-  }
-
-  template <class T>
-  int LuaItemBind<T>::setsize(lua_State* L) {
-    LuaHelper::callstrict2(L, meta.c_str(), &T::SetSize);
-    return LuaHelper::chaining(L);
-  }
-
-  template <class T>
   int LuaItemBind<T>::canvas(lua_State* L) {
     int err = LuaHelper::check_argnum(L, 1, "self");
     if (err!=0) return err;
@@ -772,36 +716,7 @@ namespace psycle { namespace host {
     canvas::Canvas* canvas = item->canvas();
     LuaHelper::find_weakuserdata(L, canvas);
     return 1;
-  }
-
-  template <class T>
-  int LuaItemBind<T>::show(lua_State* L) {
-    LuaHelper::call(L, meta, &T::Show);
-    return LuaHelper::chaining(L);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::hide(lua_State* L) {
-    LuaHelper::call(L, meta, &T::Hide);
-    return LuaHelper::chaining(L);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::enablepointerevents(lua_State* L) {
-    LuaHelper::call(L, meta, &T::EnablePointerEvents);
-    return LuaHelper::chaining(L);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::disablepointerevents(lua_State* L) {
-    LuaHelper::call(L, meta, &T::DisablePointerEvents);
-    return LuaHelper::chaining(L);
-  }
-
-  template <class T>
-  int LuaItemBind<T>::boundrect(lua_State* L) {
-    return LuaHelper::get4numbers(L, meta, &T::GetBoundRect);    
-  }
+  }   
 
   template <class T>
   int LuaItemBind<T>::parent(lua_State* L) {
@@ -812,14 +727,7 @@ namespace psycle { namespace host {
     LuaHelper::find_userdata<>(L, group);
     return 1;
   }
-
-  template <class T>
-  int LuaItemBind<T>::getfocus(lua_State* L) {
-    T* item = LuaHelper::check<T>(L, 1, meta);
-    item->GetFocus();
-    return LuaHelper::chaining(L);
-  } 
-   
+    
   template class LuaItemBind<LuaItem>;
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -844,7 +752,10 @@ namespace psycle { namespace host {
                 item = LuaHelper::test<LuaButton>(L, index, LuaButtonBind<LuaButton>::meta);
                 if (!item) {
                   item = LuaHelper::test<LuaEdit>(L, index, LuaButtonBind<LuaEdit>::meta);
-                }              
+                }
+                if (!item) {
+                  item = LuaHelper::test<LuaScrollBar>(L, index, LuaScrollBarBind<LuaScrollBar>::meta);
+                }
               }
             }
           }

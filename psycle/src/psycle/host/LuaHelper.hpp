@@ -290,7 +290,20 @@ namespace LuaHelper {
 			return 1;
 		}
 
-				
+    template <class UDT>
+		static int getstringbyvalue(lua_State* L,
+			                          const std::string& meta,
+						                    std::string (UDT::*pt2ConstMember)() const) { // function ptr
+			int n = lua_gettop(L);
+      if (n ==1) {
+		    UDT* m = LuaHelper::check<UDT>(L, 1, meta.c_str());
+			  lua_pushstring(L, (m->*pt2ConstMember)().c_str());		      		    			
+			}  else {
+        luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+	    }
+			return 1;
+		}
+    				
 		template <class UDT, class RT>
 		static int getnumber(lua_State* L,
 			                const std::string& meta,

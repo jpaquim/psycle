@@ -9,10 +9,6 @@ namespace psycle { namespace host {
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
 			//Right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) extended by sampler.
-      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, point)) {         
-        return;
-      }
-
 			SetCapture();
 			
 			if(viewMode == view_modes::machine) // User is in machine view mode
@@ -89,8 +85,6 @@ namespace psycle { namespace host {
 		
 		void CChildView::OnRButtonUp( UINT nFlags, CPoint point )
 		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, point))
-        return;
 			ReleaseCapture();
 			allowcontextmenu=true;
 
@@ -273,10 +267,6 @@ namespace psycle { namespace host {
 
 		void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, point)) {
-        CWnd::OnLButtonDown(nFlags, point);
-        return;
-      }
 			SetCapture();
 
 			if(viewMode == view_modes::machine)
@@ -571,8 +561,6 @@ namespace psycle { namespace host {
 
 		void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, point))
-        return;
 			ReleaseCapture();
 			
 			if (viewMode == view_modes::machine )
@@ -734,8 +722,6 @@ namespace psycle { namespace host {
 
 		void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		{
-      if (DelegateLuaEvent(canvas::Event::MOTION_NOTIFY, 0, nFlags, point))
-        return;
 			if (viewMode == view_modes::machine)
 			{
 				if (smac > -1 && (nFlags & MK_LBUTTON))
@@ -1060,11 +1046,8 @@ namespace psycle { namespace host {
 		}
 
 
-
 		void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		{
-      if (DelegateLuaEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, point))
-        return;
 			int tmac=-1;
 			
 			switch (viewMode)
@@ -1296,19 +1279,6 @@ namespace psycle { namespace host {
 
 		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{      
-      if (nSBCode == SB_THUMBTRACK) {        
-        if (viewMode == view_modes::luaplugin) {
-          CPoint pt(0, nPos);
-          DelegateLuaEvent(canvas::Event::SCROLL, 0, 0, pt);
-          SetScrollPos(SB_VERT, nPos, false);
-          CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
-          return;        
-        }
-      }      
-
-      std::stringstream s; s << nPos;
-      OutputDebugString(s.str().c_str());
-
 			if ( viewMode == view_modes::pattern )
 			{       
 				switch(nSBCode)
@@ -1391,17 +1361,7 @@ namespace psycle { namespace host {
 
 
 		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-		{      
-      if (nSBCode == SB_THUMBTRACK) {        
-        if (viewMode == view_modes::luaplugin) {
-          CPoint pt(nPos, 0);
-          DelegateLuaEvent(canvas::Event::SCROLL, 0, 0, pt);
-          SetScrollPos(SB_HORZ, nPos, false);
-          CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
-          return;        
-        }
-      }   
-      
+		{     
 			if ( viewMode == view_modes::pattern )
 			{
 				switch(nSBCode)
@@ -1766,14 +1726,6 @@ namespace psycle { namespace host {
 			}
 			return true;
 		}
-
-    BOOL CChildView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {
-      if (active_lua_ && viewMode == view_modes::luaplugin) {
-       canvas::Canvas* user_view = active_lua_->GetCanvas();        
-       if (user_view !=0) { SetCursor(user_view->cursor()); return TRUE; }
-      }
-      return CWnd::OnSetCursor(pWnd, nHitTest, message);
-    }
-
+ 
 
 }}

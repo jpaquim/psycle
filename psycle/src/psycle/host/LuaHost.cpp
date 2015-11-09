@@ -82,6 +82,7 @@ namespace psycle { namespace host {
     LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
     LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
     LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
+    LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.canvas.scrollbar");
 #if !defined WINAMP_PLUGIN
     LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN
@@ -1080,33 +1081,7 @@ namespace psycle { namespace host {
     } CATCH_WRAP_AND_RETHROW(*plug_)
     return 0;
   }
-
-  bool LuaProxy::call_event(ui::canvas::Event* ev) {
-    lock();
-    bool res = false;
-    try {
-      if (!get_method_optional(L, "canvas")) {
-        unlock();
-        return false; // no canvas found;
-      }
-      int status = lua_pcall(L, 1, 1 ,0); // machine:canvas()
-      if (status) {
-        CString msg(lua_tostring(L, -1));
-        unlock();
-        throw std::runtime_error(msg.GetString());
-      }
-      if (lua_isnumber(L, -1) || lua_isnil(L, -1)) {
-        unlock();
-        return false;
-      }
-      ui::canvas::Canvas* canvas = LuaHelper::check<ui::canvas::Canvas>(L, -1, LuaCanvasBind::meta);
-      res = canvas->OnEvent(ev);
-      lua_pop(L, 1);
-      unlock();
-    } CATCH_WRAP_AND_RETHROW(*plug_)
-    return res;
-  }
-
+  
   // Host
   lua_State* LuaHost::load_script(const std::string& dllpath) {
     lua_State* L = luaL_newstate();

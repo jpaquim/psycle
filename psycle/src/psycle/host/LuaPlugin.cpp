@@ -69,17 +69,7 @@ namespace psycle { namespace host {
     /*PluginInfo info = CallPluginInfo();
     _mode = info.mode;*/
   }
-
-  bool LuaPlugin::OnEvent(ui::canvas::Event* ev) {
-    try {
-        if (GetCanvas() !=0 && GetGuiType() == 1) {
-          return proxy_.call_event(ev);
-        }
-      } catch(std::exception &e) { e;
-    }
-    return false;
-  }
-
+  
   int LuaPlugin::GenerateAudioInTicks(int /*startSample*/, int numSamples) throw(psycle::host::exception)
   {
     if (crashed()) {
