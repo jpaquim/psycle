@@ -64,8 +64,7 @@ namespace psycle { namespace host {
 			,prevEditPosition(0)
 			,ChordModeOffs(0)
 			,updateMode(0)
-			,updatePar(0)
-			,viewMode(view_modes::luaplugin) //machine)      
+			,updatePar(0)			
 			,_outputActive(false)
 			,CW(300)
 			,CH(200)
@@ -151,7 +150,7 @@ namespace psycle { namespace host {
       }
 		}
 
-		BEGIN_MESSAGE_MAP(CChildView,CWnd )
+		BEGIN_MESSAGE_MAP(CChildView,CWnd)      
 			ON_WM_TIMER()
 			ON_WM_PAINT()
 			ON_WM_DESTROY()
@@ -331,21 +330,17 @@ namespace psycle { namespace host {
 
 		/// Timer initialization
 		void CChildView::InitTimer()
-		{
-      // note: timer are now in main runing, cause luaWnd is an own CWnd
-      // and CChildview timer else would be disabled on SW_HIDE      
-      // pParentMain delegates the OnTimer to the OnTimer method
-      // of the CChilcView
-			pParentMain->KillTimer(ID_TIMER_VIEW_REFRESH);
-			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);
-			if (!pParentMain->SetTimer(ID_TIMER_VIEW_REFRESH,30,NULL)) // GUI update. 
+		{      
+			KillTimer(ID_TIMER_VIEW_REFRESH);
+			KillTimer(ID_TIMER_AUTOSAVE);
+			if (!SetTimer(ID_TIMER_VIEW_REFRESH,30,NULL)) // GUI update. 
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
 
 			if ( PsycleGlobal::conf().autosaveSong )
 			{
-				if (!pParentMain->SetTimer(ID_TIMER_AUTOSAVE,PsycleGlobal::conf().autosaveSongTime*60000,NULL)) // Autosave Song
+				if (!SetTimer(ID_TIMER_AUTOSAVE,PsycleGlobal::conf().autosaveSongTime*60000,NULL)) // Autosave Song
 				{
 					AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 				}
@@ -563,25 +558,7 @@ namespace psycle { namespace host {
 			else if ( viewMode == view_modes::sequence)
 			{
 				DrawSeqEditor(&bufDC);
-			}
-      else if (active_lua_ && viewMode == view_modes::luaplugin)
-      {
-        LuaPlugin* lp = active_lua_;        
-        ui::canvas::Canvas* user_view = lp->GetCanvas();        
-        if (user_view !=0) {
-          user_view->set_wnd(this);  
-          ui::mfc::Graphics g(&bufDC);
-          try {
-            ui::mfc::Region canvas_rgn(rgn);
-            user_view->DrawFlush(&g, canvas_rgn);          
-          } catch (std::exception& e) {
-             RemoveLuaMenu();
-             lp->custom_menubar = 0; 
-             lp->set_crashed(true);
-             AfxMessageBox(e.what());             
-          }
-        }      
-      }
+			}      
 
 			CRect rc;
 			GetClientRect(&rc);
@@ -1086,7 +1063,7 @@ namespace psycle { namespace host {
 		/// Tool bar buttons and View Commands
 		void CChildView::OnMachineview() 
 		{
-      if (!this->IsWindowVisible()) {
+      if (!this->IsWindowVisible()) {        
         pParentMain->m_luaWndView.ShowWindow(SW_HIDE);
         this->ShowWindow(SW_SHOW);
       }
@@ -2521,12 +2498,16 @@ namespace psycle { namespace host {
         if (active_lua_) {
           RemoveLuaMenu();
           LuaPlugin* lp = active_lua_;
-          lp->custom_menubar = 0;   
+          lp->custom_menubar.reset(0);
           try {                 
-            lp->proxy().reload();     
-            lua_menu_->setcmenu(pParentMain->GetMenu());        
+            lp->proxy().reload();            
+            pParentMain->m_luaWndView.set_canvas(lp->proxy().call_canvas());
+            CRect rc;            
+            GetWindowRect(&rc);
+            pParentMain->m_luaWndView.ScreenToClient(rc);            
+            pParentMain->m_luaWndView.OnSize(SIZE_RESTORED, rc.Width(), rc.Height());
+            lua_menu_->setcmenu(pParentMain->GetMenu());  
             lp->GetMenu(lua_menu_);
-            viewMode = view_modes::luaplugin;
             lp->set_crashed(false);
           } catch (std::exception e) {
             AfxMessageBox(e.what());
@@ -2550,13 +2531,15 @@ namespace psycle { namespace host {
           //this->ScreenToClient(&rect); //optional step - see below          
           pParentMain->m_wndView.ShowWindow(SW_HIDE);          
           pParentMain->m_luaWndView.set_canvas(user_view);
+          user_view->Flush();
           pParentMain->m_luaWndView.ShowWindow(SW_SHOW);          
 //          pParentMain->m_luaWndView.BringWindowToTop(); // ShowWindow(SW_SHOW); // SetActiveWindow(); //.set_canvas(user_view);          
-          //pParentMain->m_luaWndView.ShowWindow(SW_SHOW);          
           pParentMain->m_luaWndView.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);
+          pParentMain->m_luaWndView.OnSize(SIZE_RESTORED, rect.Width(), rect.Height());
           //pParentMain->m_luaWndView.SetWindowPos(NULL, 0, 0, 500, 500, SWP_NOZORDER);
           pParentMain->m_luaWndView.InitTimer();
           GetParent()->SetActiveWindow();
+          active_lua_ = plug;
           /*
           // integrate into childview
           /active_lua_ = plug;        
@@ -2585,7 +2568,7 @@ namespace psycle { namespace host {
         }
       }
 		}
-
+     
 }}
 
 // graphics operations, private headers included only by this translation unit

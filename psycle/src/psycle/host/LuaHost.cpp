@@ -43,6 +43,7 @@ namespace psycle { namespace host {
 
   void LuaProxy::set_state(lua_State* state) {
     L = state;
+    LuaHost::proxy_map[L] = this;
     export_c_funcs();
     // require c modules
     // config
@@ -1083,6 +1084,8 @@ namespace psycle { namespace host {
   }
   
   // Host
+  std::map<lua_State*, LuaProxy*> LuaHost::proxy_map;
+
   lua_State* LuaHost::load_script(const std::string& dllpath) {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
@@ -1121,19 +1124,16 @@ namespace psycle { namespace host {
     return plug;
   }
 
-  PluginInfo LuaHost::LoadInfo(const std::string& dllpath) {
-    LuaPlugin* plug = 0;
+  PluginInfo LuaHost::LoadInfo(const std::string& dllpath) {    
     PluginInfo info;
     try {
       lua_State* L = load_script(dllpath);
-      plug = new LuaPlugin(L, 0, false);
+      std::auto_ptr<LuaPlugin> plug(new LuaPlugin(L, 0, false));
       info = plug->CallPluginInfo();
-    } catch(std::exception &e) {
-      delete plug;
+    } catch(std::exception &e) {      
       AfxMessageBox(e.what());
       throw e;
-    }
-    delete plug;
+    }    
     return info;
   }
 }} // namespace

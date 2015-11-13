@@ -19,14 +19,13 @@ namespace psycle { namespace host {
   class LuaConfig {
     public:
      LuaConfig();
-     LuaConfig(const std::string& group);
-     ~LuaConfig();
+     LuaConfig(const std::string& group);     
 
-     ConfigStorage* store() { return store_; }
+     ConfigStorage* store() { return store_.get(); }
      void OpenGroup(const std::string& group);
      void CloseGroup();
     private:
-     ConfigStorage* store_;
+     std::auto_ptr<ConfigStorage> store_;
   };
 
   struct LuaConfigBind {
@@ -45,28 +44,24 @@ namespace psycle { namespace host {
 
   class Machine;
 
-  class LuaMachine {
-  public:
-    enum PRSType {
-      NATIVEPRS = 0,
-      CHUNKPRS = 1
-    };
-
-    enum GuiType {
+  struct MachinePresetType {
+    enum Value {
       NATIVE = 0,
-      CUSTOMWND = 1,
-      CHILDVIEW = 2
+      CHUNK = 1
     };
+  };
 
+  class LuaMachine {
+  public:      
     LuaMachine()
         : proxy_(0),
           mac_(0),
           shared_(false),
           num_parameter_(0),
           num_cols_(0),
-          gui_type_(0),
+          ui_type_(MachineUiType::NATIVE),
           canvas_(0),
-          prsmode_(LuaMachine::NATIVEPRS),
+          prsmode_(MachinePresetType::NATIVE),
           num_programs_(0)
           {}
     ~LuaMachine();
@@ -89,21 +84,22 @@ namespace psycle { namespace host {
     void set_numprograms(int num) { num_programs_ = num; }
     int numprograms() const { return num_programs_; }
     int numchannels() const { return sampleV_.size(); }
-    int gui_type() const { return gui_type_; }
-    void set_gui_type(int t) { gui_type_ = t; }
+    MachineUiType::Value ui_type() const { return ui_type_; }
+    void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
     ui::canvas::Canvas* get_canvas(int idx = 0) { return canvas_; }
-    PRSType prsmode() const { return prsmode_; }
-    void setprsmode(PRSType prsmode) { prsmode_ = prsmode; }
+    MachinePresetType::Value prsmode() const { return prsmode_; }
+    void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
     void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
   private:
     LuaMachine(LuaMachine&) {}
     LuaMachine& operator=(LuaMachine) {}
     Machine* mac_;
     psybuffer sampleV_;
-    bool shared_;
-    int num_parameter_, num_cols_, gui_type_, num_programs_;
+    bool shared_;    
+    int num_parameter_, num_cols_, num_programs_;
+    MachineUiType::Value ui_type_;
     ui::canvas::Canvas* canvas_;
-    PRSType prsmode_;
+    MachinePresetType::Value prsmode_;
     LuaProxy* proxy_;
   };
 
@@ -147,7 +143,9 @@ namespace psycle { namespace host {
     static int create(lua_State* L);
     static int samplerate(lua_State* L);
     static int tpb(lua_State* L);
+    static int spt(lua_State* L);
     static int line(lua_State* L);
+    static int rline(lua_State* L);
     static int playing(lua_State* L);
     static int ps(lua_State* L);
   };
@@ -528,8 +526,7 @@ namespace psycle { namespace host {
   };
 
   struct WaveOsc {
-    WaveOsc(WaveOscTables::Shape shape);
-    ~WaveOsc() { delete resampler_; }
+    WaveOsc(WaveOscTables::Shape shape);    
     void work(int num, float* data, SingleWorkInterface* master);
     float base_frequency() const { return resampler_->frequency(); }
     void set_frequency(float f) { resampler_->set_frequency(f); }
@@ -551,13 +548,13 @@ namespace psycle { namespace host {
     helpers::dsp::resampler::quality::type quality() const {
       return resampler_->quality();
     }
-    RWInterface* resampler() { return resampler_; }
+    RWInterface* resampler() { return resampler_.get(); }
     void setpm(float* ptr) { resampler_->setpm(ptr); }
     void setfm(float* ptr) { resampler_->setfm(ptr); }
     void setam(float* ptr) { resampler_->setam(ptr); }
     void setpwm(float* ptr) { resampler_->setpwm(ptr); }
   private:
-    RWInterface* resampler_;
+    std::auto_ptr<RWInterface> resampler_;
     WaveOscTables::Shape shape_;
   };
 

@@ -62,7 +62,7 @@ namespace psycle { namespace host {
     {
       LuaPlugin* lp = (LuaPlugin*) (mac);
       canvas::Canvas* user_view = lp->GetCanvas();
-      if (user_view !=0 && lp->GetGuiType() == 1) {
+      if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
         set_canvas(user_view);
       }
     }
@@ -499,7 +499,7 @@ namespace psycle { namespace host {
       if (_pMachine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _pMachine;
         canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
+        if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
           rect.left= rect.top = 0;
           double w, h;
           user_view->preferredsize(w, h);

@@ -137,6 +137,7 @@ namespace psycle { namespace host {
 			afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 			afx_msg void OnDestroy();
 			afx_msg void OnDropFiles(HDROP hDropInfo);
+      afx_msg void OnSize(UINT nType, int cx, int cy);
 //SongBar start
 			afx_msg void OnSelchangeTrackcombo();
 			afx_msg void OnCloseupTrackcombo();
@@ -216,9 +217,8 @@ namespace psycle { namespace host {
 			afx_msg void OnUpdateViewSequencerbar(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateViewMachinebar(CCmdUI* pCmdUI);
 			afx_msg void OnPsyhelp();
-//Menu end
-      // autosave timer   
-      afx_msg void OnTimer( UINT_PTR nIDEvent );
+//Menu end      
+      afx_msg LRESULT OnReloadLua(WPARAM, LPARAM);
 };
 
 }}

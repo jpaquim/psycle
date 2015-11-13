@@ -91,6 +91,9 @@ void Graphics::TransparentBlt(CDC* pDC,
 }
 
 void MenuBar::append(ui::Menu* menu) {
+  int i;
+  int z = 0;
+  
   int pos = menu->cmenu()->GetMenuItemCount();
   std::vector<ui::Menu*>::iterator it = items.begin();
   for ( ; it != items.end(); ++it) {
@@ -176,13 +179,13 @@ void MenuItem::uncheck() {
 }  // namespace mfc
 
 namespace canvas {
-void Item::Init(Group* parent, double x, double y) {
-  parent_ = 0;
-  if (parent) parent->Add(this);
+void Item::Init(Group* parent, double x, double y) {  
+  parent_ = 0;  
+  if (parent) parent->Add(this);    
   x_ = x;
   y_ = y;
-  managed_ = has_store_ = update_ = false;
-  visible_ = pointer_events_ = true;
+  managed_ = has_store_ = false;
+  visible_ = pointer_events_ = update_=  true;
   has_clip_ = false;
 }
 
@@ -192,7 +195,7 @@ Item::~Item() {
   if (parent_ && !managed_) {
     iterator it = find(parent_->begin(), parent_->end(), this);
     parent_->items_.erase(it);
-  }
+  }  
 }
 
 void Item::Detach() { if (parent_) parent_->Remove(this); }
@@ -252,19 +255,19 @@ void Item::GetFocus() {
   if (c) c->StealFocus(this);
 }
 
-void Item::STR() {
-  fls_rgn_ = region();
-  fls_rgn_.Offset(zoomabsx(), zoomabsy());
+void Item::STR() {  
+  fls_rgn_.reset(region().Clone());
+  fls_rgn_->Offset(zoomabsx(), zoomabsy());
   has_store_ = true;
 }
 
 void Item::FLS() {
   if (has_store_) {
     needsupdate();
-    mfc::Region tmp(region());
-    tmp.Offset(zoomabsx(), zoomabsy());
-    fls_rgn_.Combine(tmp, RGN_OR);
-    has_store_ = false;
+    std::auto_ptr<Region> tmp(region().Clone());
+    tmp->Offset(zoomabsx(), zoomabsy());
+    fls_rgn_->Combine(*tmp, RGN_OR);
+    has_store_ = false;    
   } else {
     STR();
     has_store_ = false;
@@ -272,20 +275,30 @@ void Item::FLS() {
   if (parent()) {
     Canvas* c = this->canvas();
     if (c) {
-      c->Invalidate(fls_rgn_);
+      if (has_clip()) {
+        std::auto_ptr<Region> tmp(clip().Clone());
+        tmp->Offset(zoomabsx(), zoomabsy());
+        fls_rgn_->Combine(*tmp, RGN_AND);        
+      }
+      c->Invalidate(*fls_rgn_);
     }
   }
 }
 
 void Item::FLS(const Region& rgn) {
-  mfc::Region tmp(rgn);
-  tmp.Offset(zoomabsx(), zoomabsy());
+  std::auto_ptr<Region> tmp(region().Clone());
+  tmp->Offset(zoomabsx(), zoomabsy());
   STR(); has_store_ = false;
-  fls_rgn_.Combine(tmp, RGN_AND);
+  fls_rgn_->Combine(*tmp, RGN_AND);
   if (parent()) {
     Canvas* c = this->canvas();
     if (c) {
-      c->Invalidate(fls_rgn_);
+      if (has_clip()) {
+        std::auto_ptr<Region> tmp(clip().Clone());
+        tmp->Offset(zoomabsx(), zoomabsy());
+        fls_rgn_->Combine(*tmp, RGN_AND);              
+      }
+      c->Invalidate(*fls_rgn_);
     }
   }
 }
@@ -299,7 +312,7 @@ double Item::zoomabsx() const {
     p = p->parent();
   }
   double x = 0.0;
-  double zoom = 1.0;
+ // double zoom = 1.0;
   std::vector<const Item*>::const_reverse_iterator rev_it = items.rbegin();
   for ( ; rev_it != items.rend(); ++rev_it) {
     const Item* item = *rev_it;
@@ -318,7 +331,7 @@ double Item::zoomabsy() const {
     p = p->parent();
   }
   double y = 0.0;
-  double zoom = 1.0;
+  // double zoom = 1.0;
   std::vector<const Item*>::const_reverse_iterator rev_it = items.rbegin();
   for ( ; rev_it != items.rend(); ++rev_it) {
     const Item* item = *rev_it;
@@ -366,22 +379,22 @@ void Group::Draw(Graphics* g, Region& repaint_rgn, Canvas* canvas) {
   for (iterator it = items_.begin(); it != items_.end(); ++it ) {
     Item* item = *it;
     if (!item->visible()) continue;
-    mfc::Region item_rgn(item->region());
+    std::auto_ptr<Region> item_rgn(item->region().Clone());    
     double dx, dy;
     dx = dy = 0;
     if (item->parent()) {
       dx = item->zoomabsx();
       dy = item->zoomabsy();
-      item_rgn.Offset(dx, dy);
+      item_rgn->Offset(dx, dy);
     }
-    int erg = item_rgn.Combine(repaint_rgn, RGN_AND);
+    int erg = item_rgn->Combine(repaint_rgn, RGN_AND);
     if (erg != NULLREGION) {
       g->Translate(dx, dy);
       if (item->has_clip()) {
-        mfc::Region tmp(item->clip());
-        tmp.Offset(dx, dy);
-        item_rgn.Combine(tmp, RGN_AND);
-        g->SetClip(&tmp);
+        std::auto_ptr<Region> tmp(item->clip().Clone());        
+        tmp->Offset(dx, dy);
+        item_rgn->Combine(*tmp, RGN_AND);
+        g->SetClip(tmp.get());
       }           
       item->Draw(g, repaint_rgn, canvas);      
       if (item->has_clip()) {
@@ -399,9 +412,9 @@ void Group::Add(Item* item) {
   }
   STR();
   item->set_parent(this);
-  items_.push_back(item);
-  needsupdate();
+  items_.push_back(item);  
   FLS();
+  item->needsupdate();
 }
 
 void Group::Insert(iterator it, Item* item) {
@@ -448,25 +461,26 @@ void Group::Clear() {
   FLS();
 }
 
-const Region& Group::region() const {
-  if (update_) {
-    mfc::Region rgn;
-    std::vector<Item*>::const_iterator it = items_.begin();
-    for ( ; it != items_.end(); ++it) {
-      Item* item = *it;
-      if (item->visible()) {
-        mfc::Region tmp(item->region());
-        tmp.Offset(item->x(), item->y());
-        int nCombineResult = rgn.Combine(tmp, RGN_OR);
-        if (nCombineResult == NULLREGION) {
-          rgn.Clear();
-        }
+void Group::onupdateregion() {  
+  std::auto_ptr<Region> rgn(new mfc::Region());  
+  std::vector<Item*>::const_iterator it = items_.begin();
+  for ( ; it != items_.end(); ++it) {
+    Item* item = *it;
+    if (item->visible()) {
+      std::auto_ptr<Region> tmp(item->region().Clone());      
+      std::stringstream str;
+      double x, y, w, h;
+      item->GetBoundRect(x, y, w, h);
+      str << "x" << x << ", y" << y << ",w" << w << ",h" << h;
+      OutputDebugString(str.str().c_str());
+      tmp->Offset(item->x(), item->y());        
+      int nCombineResult = rgn->Combine(*tmp, RGN_OR);
+      if (nCombineResult == NULLREGION) {
+        rgn->Clear();
       }
     }
-    rgn_ = rgn;
-    update_ = false;
-  }
-  return rgn_;
+  }    
+  rgn_.reset(rgn->Clone());
 }
 
 void Group::set_zorder(Item* item, int z) {
@@ -523,9 +537,9 @@ Item* Group::Intersect(double x, double y, Event* ev, bool& worked) {
     Canvas* c = canvas();
     if (c && c->out_item_ && !c->button_press_item_ && c->out_item_->IsInGroup(this)) {        
       Event event(c->out_item_, Event::MOTION_OUT, ev->cx(), ev->cy(),ev->button(), ev->shift());
-      Item* ret = c->DelegateEvent(&event, c->out_item_);
-      c->out_item_ = 0;
-      worked = true;
+      c->DelegateEvent(&event, c->out_item_);      
+      c->out_item_ = 0;      
+      worked = true;      
       return 0;
     }
   }
@@ -541,6 +555,7 @@ bool Group::work_item_event(Item* item, Event* ev) {
     } else {
         if (ev->type() == Event::MOTION_NOTIFY ) {
           if (!c->button_press_item_ && c->out_item_ && item!=c->out_item_) { // mouseout
+            OutputDebugString("out");
             Event event(c->out_item_, Event::MOTION_OUT, ev->cx(), ev->cy(),ev->button(), ev->shift());
             c->DelegateEvent(&event, c->out_item_);
           }
@@ -574,7 +589,7 @@ void Rect::Init() {
 }
 
 void Rect::Draw(Graphics* g, Region& repaint_rgn, class Canvas* widget) {
-  double z = acczoom();  
+  // double z = acczoom();  
   g->SetColor(fillcolor_);
   g->FillRect(0, 0, width_, height_);  
 /*    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);
@@ -641,12 +656,8 @@ void Rect::Draw(Graphics* g, Region& repaint_rgn, class Canvas* widget) {
   return 0;
 }*/
 
-const Region& Rect::region() const {
-  if (update_) {
-    rgn_.SetRect(0, 0, width_+1, height_+1);
-    update_ = false;
-  }
-  return rgn_;
+void Rect::onupdateregion() {
+  rgn_->SetRect(0, 0, width_+1, height_+1);  
 }
 
 void Line::Draw(Graphics* g, Region& repaint_region, Canvas* widget) {  
@@ -692,16 +703,12 @@ Item* Line::Intersect(double x, double y, Event* ev, bool &worked) {
   return item;
 }
 
-const Region& Line::region() const {
-  if (update_) {
-    double x1, y1, x2, y2;
-    double dist = 5;
-    GetBoundRect(x1, y1, x2, y2);
-    double zoom = parent() ? parent()->zoom() : 1.0;
-    rgn_.SetRect((x1-dist)*zoom, (y1-dist)*zoom, (x2+2*dist+1)*zoom, (y2+2*dist+1)*zoom);
-    update_ = false;
-  }
-  return rgn_;
+void Line::onupdateregion() {  
+  double x1, y1, x2, y2;
+  double dist = 5;
+  GetBoundRect(x1, y1, x2, y2);
+  double zoom = parent() ? parent()->zoom() : 1.0;
+  rgn_->SetRect((x1-dist)*zoom, (y1-dist)*zoom, (x2+2*dist+1)*zoom, (y2+2*dist+1)*zoom);    
 }
 
 Text::Text(Group* parent) : Item(parent) {
@@ -721,8 +728,7 @@ void Text::Init(double zoom) {
   font_.CreateFontIndirect(&lfLogFont);
 }
 
-const Region& Text::region() const {
-  if (update_) {
+void Text::onupdateregion() {  
     Canvas* c =  const_cast<Text*>(this)->canvas();
     if (c) {
       HDC dc = GetDC(0);
@@ -735,11 +741,9 @@ const Region& Text::region() const {
       ReleaseDC(0, dc);
       text_w = extents.cx;
       text_h = extents.cy+10;
-      rgn_.SetRect(0, 0, text_w +1, text_h+1);
+      rgn_->SetRect(0, 0, text_w +1, text_h+1);
       update_ = false;
-    }
-  }
-  return rgn_;
+    }    
 }
 
 void Text::Draw(Graphics* g, Region& repaint_region, Canvas* widget) {    
@@ -801,12 +805,8 @@ void Pic::SetImage(Image* image) {
   FLS();
 }
 
-const Region& Pic::region() const {
-  if (update_) {
-    rgn_.SetRect(0, 0, width_, height_);
-    update_ = false;
-  }
-  return rgn_;
+void Pic::onupdateregion() {
+  rgn_->SetRect(0, 0, width_, height_);    
 }
 
 // Canvas
@@ -879,7 +879,7 @@ Item* Canvas::OnEvent(Event* ev) {
   if (ev->type() == Event::ONTIMER || ev->type() == Event::SCROLL || ev->type() == Event::ONSIZE) {
     return 0;
   }
-  Item* item = button_press_item_;
+  Item* item = button_press_item_;  
   if (item && ev->type() == Event::KEY_DOWN || item && ev->type() == Event::KEY_UP) {
     if (focus_item_) {
       Event e(focus_item_, ev->type(), ev->cx(), ev->cy(), ev->button(), ev->shift());
@@ -893,6 +893,9 @@ Item* Canvas::OnEvent(Event* ev) {
       item = e.item();
   } else
   if (ev->type() != Event::BUTTON_RELEASE) {
+      if (ev->type() == Event::BUTTON_PRESS) {
+         int fordebugonly = 0;
+      }
       bool worked = false;
       item = root_->Intersect(ev->cx(), ev->cy(), ev, worked);
   }
@@ -932,13 +935,53 @@ void Canvas::Invalidate(Region& rgn) {
 
 void Canvas::Flush() {
   if (wnd_) {
-    wnd_->InvalidateRgn((CRgn*) save_rgn_.source(), 0);
+    RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) save_rgn_.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+    // wnd_->InvalidateRgn((CRgn*) save_rgn_.source(), 0);
   }
   save_rgn_.Clear();
 }
 
 
 // CanvasView
+
+bool BaseView::DelegateEvent(int type, int button, UINT nFlags, CPoint pt) {
+  if (canvas()) {     
+    try {             
+      Event ev(0, (Event::Type)type, pt.x, pt.y, button, nFlags);
+      return canvas()->OnEvent(&ev);
+    } catch (std::exception& e) {
+      AfxMessageBox(e.what());
+    }    
+  }
+  return false;
+}
+
+void BaseView::Draw() {  
+    CRgn pRgn;
+	  pRgn.CreateRectRgn(0, 0, 0, 0);
+	  wnd_->GetUpdateRgn(&pRgn, FALSE);
+    CPaintDC dc(wnd_);
+	  CRect rc;
+	  wnd_->GetClientRect(&rc);
+	  CDC bufferDC;
+	  CBitmap bufferBmp;
+	  bufferDC.CreateCompatibleDC(&dc);
+	  bufferBmp.CreateCompatibleBitmap(&dc, rc.right-rc.left, rc.bottom-rc.top);
+    CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);		
+    if (canvas()) {
+      try {
+        ui::mfc::Graphics g(&bufferDC);
+        ui::mfc::Region canvas_rgn(pRgn);
+        canvas()->DrawFlush(&g, canvas_rgn);
+      } catch (std::exception& e) {
+        AfxMessageBox(e.what());
+      }
+    }
+    dc.BitBlt(0, 0, rc.right, rc.bottom, &bufferDC, 0, 0, SRCCOPY);
+    bufferDC.SelectObject(oldbmp);	
+	  bufferDC.DeleteDC();  
+}
+
 BEGIN_MESSAGE_MAP(View, CWnd)
   ON_WM_TIMER()
   ON_WM_CREATE()
@@ -956,6 +999,9 @@ BEGIN_MESSAGE_MAP(View, CWnd)
   ON_WM_SETCURSOR()
   ON_WM_HSCROLL()
   ON_WM_VSCROLL()
+  ON_WM_SIZE()
+  ON_CONTROL_RANGE(BN_CLICKED, ID_DYNAMIC_CONTROLS_BEGIN, 
+            ID_DYNAMIC_CONTROLS_LAST, OnCtrlBtnClick)
 END_MESSAGE_MAP()
 
 
@@ -1005,40 +1051,6 @@ void View::OnPaint() {
   Draw();
 }
 
-void BaseView::Draw() {  
-    CRgn pRgn;
-	  pRgn.CreateRectRgn(0, 0, 0, 0);
-	  wnd_->GetUpdateRgn(&pRgn, FALSE);
-    CPaintDC dc(wnd_);
-	  CRect rc;
-	  wnd_->GetClientRect(&rc);
-	  CDC bufferDC;
-	  CBitmap bufferBmp;
-	  bufferDC.CreateCompatibleDC(&dc);
-	  bufferBmp.CreateCompatibleBitmap(&dc, rc.right-rc.left, rc.bottom-rc.top);
-    CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);		
-    if (canvas()) {
-      try {
-        ui::mfc::Graphics g(&bufferDC);
-        ui::mfc::Region canvas_rgn(pRgn);
-        canvas()->DrawFlush(&g, canvas_rgn);
-      } catch (std::exception& e) {
-        AfxMessageBox(e.what());
-      }
-    }
-    dc.BitBlt(0, 0, rc.right, rc.bottom, &bufferDC, 0, 0, SRCCOPY);
-    bufferDC.SelectObject(oldbmp);	
-	  bufferDC.DeleteDC();  
-}
-
-bool BaseView::DelegateEvent(int type, int button, UINT nFlags, CPoint pt) {
-  if (canvas()) {        
-    Event ev(0, (Event::Type)type, pt.x, pt.y, button, nFlags);
-    return canvas()->OnEvent(&ev);        		    
-  }
-  return false;
-}
-
 void View::OnTimer(UINT_PTR nIDEvent) {
   if (canvas() && IsWindowVisible()) {
     try {    
@@ -1052,35 +1064,55 @@ void View::OnTimer(UINT_PTR nIDEvent) {
 				si.nPage = 1;
 				SetScrollInfo(SB_VERT,&si);
         si.nMax = canvas()->nposh; // -VISLINES;
-        SetScrollInfo(SB_HORZ,&si);
+        SetScrollInfo(SB_HORZ, &si);
         canvas()->show_scrollbar = false;
       }
       canvas()->set_wnd(this);
       canvas()->InvalidateSave();
+      this->DelegateEvent(Event::ONTIMER, 0, 0, CPoint(0, 0));
     } catch(std::exception& e) {
       e;
     }
   }				
 }
 
-void View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
-  if (nSBCode == SB_THUMBTRACK) {
-    CPoint pt(0, nPos);
-    DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
-    SetScrollPos(SB_VERT, nPos, false);
-    CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
+void View::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {   
+  if (nSBCode == SB_THUMBTRACK) {    
+    if (pScrollBar) {
+     ScrollBar* scrbar = (ScrollBar*) ScrollBar::FindById(pScrollBar->GetDlgCtrlID());
+     pScrollBar->SetScrollPos(nPos);     
+     try {
+       scrbar->OnScroll(nPos);
+     } catch (std::exception& e) {
+       AfxMessageBox(e.what());
+     }
+    } else {
+      CPoint pt(nPos, 0);
+      DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
+      SetScrollPos(SB_HORZ, nPos, false);
+    }    
   }
+  CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-// DelegateLuaEvent(ui::canvas::Event::ONSIZE, 1, 0, cs);        
 
-void View::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
-  if (nSBCode == SB_THUMBTRACK) {
-    CPoint pt(nPos, 0);
-    DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
-    SetScrollPos(SB_HORZ, nPos, false);
-    CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
+void View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {  
+  if (nSBCode == SB_THUMBTRACK) {    
+    if (pScrollBar) {
+      ScrollBar* scrbar = (ScrollBar*) ScrollBar::FindById(pScrollBar->GetDlgCtrlID());
+      pScrollBar->SetScrollPos(nPos);
+      try {
+       scrbar->OnScroll(nPos);
+     } catch (std::exception& e) {
+       AfxMessageBox(e.what());
+     }
+    } else {
+      CPoint pt(nPos, 0);
+      DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
+      SetScrollPos(SB_VERT, nPos, false);
+    }    
   }
+  CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 BOOL View::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {    
@@ -1091,6 +1123,22 @@ BOOL View::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {
   return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
+void View::OnSize(UINT nType, int cx, int cy) {  
+  if (canvas()) {
+    try {
+      canvas()->OnSize(cx, cy);
+      canvas()->ClearSave();
+      Invalidate();
+    } catch (std::exception& e) {
+      AfxMessageBox(e.what());
+    }  
+  }
+  CWnd::OnSize(nType, cx, cy);
+}
+
+
+
+
 // CanvasFrame
 IMPLEMENT_DYNAMIC(CanvasFrameWnd, CFrameWnd)
 
@@ -1100,8 +1148,7 @@ BEGIN_MESSAGE_MAP(CanvasFrameWnd, CFrameWnd)
 	ON_WM_DESTROY()
 	ON_WM_SETFOCUS()
 	ON_WM_KEYDOWN()
-	ON_WM_KEYUP()
-	ON_WM_SIZING()	 
+	ON_WM_KEYUP()  
 END_MESSAGE_MAP()
 
 int CanvasFrameWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)  {		
@@ -1155,16 +1202,7 @@ void CanvasFrameWnd::ResizeWindow(CRect *pRect) {
 	CRect rcEffFrame,rcEffClient,rcTemp,tbRect;
 	GetWindowSize(rcEffFrame, rcEffClient, pRect);
 	SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
-	pView_->SetWindowPos(NULL,rcEffClient.left, rcEffClient.top, rcEffClient.right,rcEffClient.bottom,SWP_NOZORDER);         
-	pView_->WindowIdle();
-}
-
-void CanvasFrameWnd::SetTitle(const std::string& title) {
-   SetWindowTextA(title.c_str());
-}
-
-void CanvasFrameWnd::SetPos(int x, int y) {
-  // todo  
+	pView_->SetWindowPos(NULL,rcEffClient.left, rcEffClient.top, rcEffClient.right,rcEffClient.bottom,SWP_NOZORDER);	
 }
 
 // Messages
@@ -1180,9 +1218,6 @@ void CanvasFrameWnd::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
 	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
-void CanvasFrameWnd::OnSizing(UINT fwSide, LPRECT pRect) {
-  CFrameWnd::OnSizing(fwSide, pRect);
-}
 
 } // namespace canvas
 } // namespace ui

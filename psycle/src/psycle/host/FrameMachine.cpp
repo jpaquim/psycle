@@ -122,7 +122,7 @@ namespace psycle { namespace host {
 			if (_machine->_type == MACH_LUA)
 			{        
         barmenu.setcmenu(GetMenu());
-        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(&barmenu);        
+        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(&barmenu).get();
 			}
 
 			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
@@ -226,7 +226,7 @@ namespace psycle { namespace host {
         if (machine()._type == MACH_LUA) {
           LuaPlugin* lp = (LuaPlugin*) (&machine());
           canvas::Canvas* user_view = lp->GetCanvas();
-          if (user_view !=0 && lp->GetGuiType() == 1) {
+          if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
             user_view->set_wnd(pView);
             user_view->InvalidateSave();
           } else {
@@ -389,7 +389,7 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnProgramsOpenpreset()
 		{      
-      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNKPRS) {
+      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==MachinePresetType::CHUNK) {
         char tmp[2048];			
 			  CFileDialog dlg(TRUE,
 				  "fxb",
@@ -423,7 +423,7 @@ namespace psycle { namespace host {
 		}
 		void CFrameMachine::OnProgramsSavepreset()
 		{			
-      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNKPRS) {
+      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==MachinePresetType::CHUNK) {
         char tmp[2048];			
 			  CFileDialog dlg(FALSE,
 				  "fxb",
@@ -754,7 +754,7 @@ namespace psycle { namespace host {
         gui = cpv = new CanvasParamView(this, &machine());
         LuaPlugin* lp = (LuaPlugin*) _machine;
         canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
+        if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
           cpv->set_canvas(user_view);
         } else {
           gui = new CNativeView(this,&machine());
@@ -798,7 +798,7 @@ namespace psycle { namespace host {
       if (_machine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _machine;
         canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
+        if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
           user_view->OnSize(rcClient.right, rcClient.bottom);
         }
       }  

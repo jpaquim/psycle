@@ -151,8 +151,10 @@ namespace LuaHelper {
       lua_getfield(L, -1, "userdata");      
       if (!lua_isnil(L, -1)) {
         lua_pushlightuserdata(L, ud);
-        lua_gettable(L, -2);                 
-        lua_remove(L, -2);
+        lua_gettable(L, -2); 
+        if (lua_istable(L, -1)) {
+          lua_remove(L, -2);
+        }
         lua_remove(L, -2);
       } else {
         assert(0);         
@@ -172,6 +174,39 @@ namespace LuaHelper {
       } else {
         assert(0);         
       }
+    }
+
+    static int send_event(lua_State* L, void* ud, const std::string& eventmethod, int numargs = 1, bool is_weak = false) {
+      int n1 = lua_gettop(L);
+      if (is_weak) {
+        LuaHelper::find_weakuserdata<>(L, ud);
+      } else { 
+        LuaHelper::find_userdata<>(L, ud);
+      }
+      bool has_event_method = false;      
+      if (!lua_isnil(L, -1)) {
+        lua_getfield(L, -1, eventmethod.c_str());      
+        has_event_method = !lua_isnil(L, -1);
+        if (has_event_method) {
+          lua_pushvalue(L, -2);
+          lua_remove(L, -3);
+          for (int i = numargs; i > 0; --i) {
+            lua_pushvalue(L, -numargs-2);
+          }          
+          int status = lua_pcall(L, numargs+1, 0, 0);
+          if (status) {
+            const char* msg = lua_tostring(L, -1);
+            throw psycle::host::exceptions::library_error::runtime_error(std::string(msg));
+          }
+        } else {
+          lua_pop(L, 2);
+        }
+      } else {
+        lua_pop(L, 1);
+      }    
+      int n2 = lua_gettop(L);
+      assert(n1==n2);
+      return has_event_method;
     }
 
     static int chaining(lua_State* L) {
@@ -411,6 +446,19 @@ namespace LuaHelper {
       return 0;
 		}
 
+    template <class UDT, class T>
+		static int callstrict1INT(lua_State* L, const std::string& meta,
+						       void (UDT::*pt2Member)(T)) { // function ptr
+			int n = lua_gettop(L); 
+			if (n != 2) {
+        luaL_error(L, "Got %d arguments expected 2 (self, value)", n); 
+      }   
+			UDT* ud = LuaHelper::check<UDT>(L, 1, meta.c_str());
+			T val = (T) (int) luaL_checknumber(L, 2);      
+			(ud->*pt2Member)(val);
+      return 0;
+		}
+
 		template <class UDT, class T, class T2>
 		static int callstrict2(lua_State* L, const std::string& meta,
 						       void (UDT::*pt2Member)(T, T2), bool dec1 = false, bool dec2 = false) { // function ptr
@@ -426,7 +474,7 @@ namespace LuaHelper {
 			(ud->*pt2Member)(val, val2);
       return 0;
 		}
-
+    
 		template <class UDT, class T>
 		static int callopt1(lua_State* L, const std::string& meta,
 						    void (UDT::*pt2Member)(T), T def) {

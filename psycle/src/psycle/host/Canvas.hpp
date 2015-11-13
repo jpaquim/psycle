@@ -36,6 +36,7 @@ class Region {
   Region() {}
   Region(int x, int y, int width, int height) {}
   virtual ~Region() = 0;
+  virtual Region* Clone() const = 0;
 
   virtual void Offset(int dx, int dy) = 0;
   virtual int Combine(const Region& other, int combinemode) = 0;
@@ -46,6 +47,9 @@ class Region {
   virtual void SetRect(double x, double y, double width, double height) = 0;
   virtual void* source() = 0;
   virtual const void* source() const = 0;
+private:
+  Region& operator = (const Region& other) {/* do nothing */}
+  Region(const Region& other) {/* do nothing */}
 };
 
 inline Region::~Region() {}
@@ -157,21 +161,14 @@ namespace mfc {
 class Region : public ui::Region {
  public:
   Region() { Init(0, 0, 0, 0); }
-  Region(int x, int y, int width, int height) { Init(x, y, width, height); }
-  Region(const ui::Region& other) {
-    Init(0, 0, 0, 0);
-    rgn_.CopyRgn((const CRgn*) other.source());
-  }
+  Region(int x, int y, int width, int height) { Init(x, y, width, height); }  
   Region(const CRgn& rgn)  {
     assert(rgn.m_hObject);
     Init(0, 0, 0, 0);
     rgn_.CopyRgn(&rgn);
   }
   ~Region() { rgn_.DeleteObject(); }
-  Region& operator=(const Region& rhs) {
-    rgn_.CopyRgn((CRgn*)rhs.source());
-    return *this;
-  }
+  virtual Region* Clone() const { return new Region(rgn_); }  
   void Offset(int dx, int dy) {
     CPoint pt(dx, dy);
     rgn_.OffsetRgn(pt);
@@ -566,11 +563,9 @@ using namespace ui;
 class Item;
 class Canvas;
 
-enum CanvasMsg {
-  ONWND
-};
+enum CanvasMsg { ONWND };
 
-struct Event {
+struct Event {  
   enum Type {
     BUTTON_PRESS,
     BUTTON_2PRESS,
@@ -583,9 +578,9 @@ struct Event {
     ONSIZE,
     ONTIMER
   };
-  Event(Item* item, Type type, int cx, int cy, int button, unsigned int shift)
+  Event(Item* item, Event::Type type, int cx, int cy, int button, unsigned int shift)
        : item_(item), type_(type), cx_(cx), cy_(cy), button_(button), shift_(shift) {}
-  Type type() const { return type_; }
+  Event::Type type() const { return type_; }
   void setcxy(double x, double y) { cx_ = x; cy_ = y; }
   double cx() const { return cx_; }
   double cy() const { return cy_; }
@@ -595,16 +590,31 @@ struct Event {
   Item* item() const { return item_; }
  private:
   Item* item_;
-  Type type_;
+  Event::Type type_;
   double cx_, cy_;
   unsigned int button_, shift_;
 };
 
 class Item {
 public:
-  Item() { Init(); }
-  Item(class Group* parent) { Init(parent); }
-  Item(class Group* parent, double x, double y) { Init(parent, x, y); }
+  Item() 
+    : rgn_(new mfc::Region),
+      clp_rgn_(new mfc::Region),
+      fls_rgn_(new mfc::Region) { 
+        Init();
+  }
+  Item(class Group* parent) 
+    : rgn_(new mfc::Region),
+      clp_rgn_(new mfc::Region),
+      fls_rgn_(new mfc::Region) {
+        Init(parent);
+  }
+  Item(class Group* parent, double x, double y) 
+    : rgn_(new mfc::Region),
+      clp_rgn_(new mfc::Region),
+      fls_rgn_(new mfc::Region)  { 
+        Init(parent, x, y);
+  }
   virtual ~Item();
   
   typedef std::vector<Item*>::iterator iterator;
@@ -618,18 +628,25 @@ public:
   void Detach();
   virtual void Show() { if (!visible_) { STR(); visible_ = true; FLS(); } }
   virtual void Hide() { if (visible_) { STR(); visible_ = false; FLS(); } }
+  // regions
   void STR();  // store old region
   void FLS();  // invalidate combine new & old region
   void FLS(const Region& rgn); // invalidate region
   virtual void needsupdate();
-
-  virtual const Region& region() const { return rgn_; }
+  virtual const Region& region() const { 
+    if (update_) {    
+      update_ = false;
+      const_cast<Item*>(this)->onupdateregion();    
+    }            
+    return *rgn_.get();
+  }
+  virtual void onupdateregion() { needsupdate(); }
   virtual void GetBoundRect(double& x, double& y, double& width, double& height) const {
     region().GetBoundRect(x, y, width, height);
   }
   virtual Item* Intersect(double x, double y, Event* ev, bool& worked) {
     if (update_) { region(); }
-    return rgn_.Intersect(x, y) ? this : 0;    
+    return rgn_->Intersect(x, y) ? this : 0;    
   }
   bool visible() const { return visible_; }
   virtual void SetXY(double x, double y) {
@@ -662,14 +679,14 @@ public:
   bool managed() const { return managed_; }
     
   void SetClip(int x, int y, int width, int height) {
-    clp_rgn_.SetRect(x, y, width, height);
+    clp_rgn_->SetRect(x, y, width, height);
     has_clip_ = true;
   }
   bool has_clip() const { return has_clip_; }
-  const Region& clip() const { return clp_rgn_; }
+  const Region& clip() const { return *clp_rgn_.get(); }
   void RemoveClip() { has_clip_ = false; }
   virtual void OnMessage(CanvasMsg msg) {};
-
+  
 protected:
   void CheckButtonPress();
   void CheckFocusItem();  
@@ -679,13 +696,14 @@ protected:
      }
   }          
   mutable bool update_, has_clip_;
-  mutable mfc::Region rgn_, clp_rgn_;
+  mutable std::auto_ptr<Region> rgn_;
+  std::auto_ptr<Region> clp_rgn_;  
   double x_, y_;
 
 private:
   void Init(Group* parent_ = 0, double x = 0, double y = 0);
   Group* parent_;
-  mfc::Region fls_rgn_;
+  std::auto_ptr<Region> fls_rgn_;
   bool managed_, visible_, pointer_events_, has_store_;
   std::vector<Item*> dummy;
 };
@@ -721,7 +739,7 @@ class Group : public Item {
   int zorder(Item* item) const;
   void setzoom(double zoom) { zoom_ = zoom; }
   virtual double zoom() const { return zoom_; }
-  virtual const Region& region() const;
+  virtual void onupdateregion();
 
   bool work_item_event(Item* item, Event* ev);    
   bool is_root() const { return is_root_; }
@@ -765,7 +783,7 @@ class Rect : public Item {
   ARGB strokecolor() const { return strokecolor_; }
   void SetBorder(double bx, double by) { STR(); bx_ = bx; by_ = by; FLS(); }
   void border(double &bx, double &by) const { bx = bx_; by = by_; }  
-  virtual const Region& region() const;  
+  virtual void onupdateregion();
  private:
   void Init();
   // bool paintRect(CDC &hdc, RECT dim, COLORREF penCol, COLORREF brushCol, unsigned int opacity);
@@ -781,7 +799,7 @@ class Pic : public Item {
   ~Pic() {}
 
   virtual void Draw(Graphics* g, Region& repaint_region, Canvas* widget);
-  virtual const Region& region() const;
+  virtual void onupdateregion();
   void SetSize(int width, int height) {
     STR();
     width_ = width;
@@ -814,7 +832,7 @@ class Line : public Item {
   const Point& PointAt(int index) const { return pts_.at(index); }
   void SetColor(ARGB color) { color_ = color; FLS(); }
   ARGB color() const { return color_; }
-  virtual const Region& region() const;
+  virtual void onupdateregion();
  private:
   Points pts_;
   ARGB color_;
@@ -828,7 +846,7 @@ class Text : public Item {
   virtual ~Text() { }
 
   virtual void Draw(Graphics* cr, Region& repaint_region, Canvas* widget);
-  virtual const Region& region() const;
+  virtual void onupdateregion();
   void SetText(const std::string& text) { STR(); text_ = text; FLS(); }
   const std::string& text() const { return text_; }
   void SetColor(ARGB color) { color_ = color; FLS(); }
@@ -854,12 +872,7 @@ class CWndItem : public ui::canvas::Item {
  public:  
   CWndItem() : ui::canvas::Item() { Init(); }
   CWndItem(ui::canvas::Group* parent) : ui::canvas::Item(parent) { Init(); }
-  ~CWndItem() {
-    if (control_->m_hWnd) {      
-      control_->DestroyWindow();      
-    }
-    delete control_;
-  }
+  virtual ~CWndItem() { control_.DestroyWindow(); }
 
   virtual void Draw(ui::Graphics* g, ui::Region& repaint_region,
         ui::canvas::Canvas* widget) {
@@ -874,13 +887,7 @@ class CWndItem : public ui::canvas::Item {
       }
     }*/
   }     
-  const Region& region() const {
-    if (update_) {
-      rgn_.SetRect(0, 0, w_+1, h_ +1);
-      update_ = false;
-    }
-    return rgn_;
-  }
+  virtual void onupdateregion() { rgn_->SetRect(0, 0, w_+1, h_+1); }
   virtual void OnMessage(ui::canvas::CanvasMsg msg) {
     if (msg == ui::canvas::ONWND) {
       CWnd* wnd = canvas()->wnd();
@@ -888,48 +895,62 @@ class CWndItem : public ui::canvas::Item {
         p_wnd_ = wnd;
         int cx = zoomabsx();
         int cy = zoomabsy();        
-        control_->SetParent(p_wnd_);
+        control_.SetParent(p_wnd_);
         SetXY(cx, cy);        
-        control_->ShowWindow(SW_SHOW);
+        control_.ShowWindow(SW_SHOW);
       }
     }
-  }
-  virtual void OnCreate(CWnd* wnd, int id, int cx, int cy) {}
+  }  
   virtual void SetXY(double x, double y) {
     x_ = x;
     y_ = y;          
     int cx = zoomabsx();
     int cy = zoomabsy();
-    control_->SetWindowPos(p_wnd_, cx, cy, cx, cy, SWP_NOSIZE | SWP_NOZORDER);        
-  }
+    control_.SetWindowPos(p_wnd_, cx, cy, cx, cy, SWP_NOSIZE | SWP_NOZORDER);        
+  }  
   CWnd* p_wnd() { return p_wnd_; }
-  const CWnd* p_wnd() const { return p_wnd_; }
-  T* control() { return (T*)control_; }
-  const T* control() const { return (T*)control_; }
-
+  const CWnd* p_wnd() const { return p_wnd_; }    
+  int id() const { return id_; }    
+  static CWndItem<T>* FindById(int id) {
+    std::map<std::uint16_t, CWndItem<T>*>::const_iterator it 
+      = id_map_.find(id);
+    return it!=id_map_.end() ? it->second : 0;
+  }
+ protected:
+   static int newid() { return id_counter++; }
+   T& ctrl() { return control_; }
+   const T& ctrl() const { return control_; }
  private:
-  void Init() { 
-    control_ = new T();
+  void Init() {
+    id_ = newid();
+    id_map_[id_] = this;      
     p_wnd_ = ::AfxGetMainWnd();
     w_= 200; h_= 20;
     needsupdate();
   }
-  int w_, h_;
-  CWnd* control_, *p_wnd_;
+  int w_, h_, id_;
+  T control_;
+  CWnd *p_wnd_;
+  static int id_counter;
+  static std::map<std::uint16_t, CWndItem<T>*> id_map_;
 };
+
+template <typename T>
+int CWndItem<T>::id_counter = ID_DYNAMIC_CONTROLS_BEGIN;
+
+template <typename T>
+std::map<std::uint16_t, CWndItem<T>*> CWndItem<T>::id_map_;
 
 class Button : public CWndItem<CButton> {
  public:
   static std::string type() { return "buttonitem"; }
   Button() : CWndItem<CButton>() { Init(); }
   Button(ui::canvas::Group* parent) : CWndItem<CButton>(parent) { Init(); }  
+  virtual void OnClick() {}
 private:
-  void Init() {  
-    int nID = 50000;
-    int cx = 0;
-    int cy = 0;
-    control()->Create("btn", WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
-      CRect(cx, cy, cx+55, cy+19), p_wnd(), nID);
+  void Init() {        
+    ctrl().Create("btn", WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
+      CRect(0, 0, 55, 19), p_wnd(), id());
   }
 };
 
@@ -938,36 +959,50 @@ class Edit : public CWndItem<CEdit> {
   static std::string type() { return "edititem"; }
   Edit() : CWndItem<CEdit>() { Init(); }
   Edit(ui::canvas::Group* parent) : CWndItem<CEdit>(parent) { Init(); }
-  void SetText(const std::string& text) {
-    control()->SetWindowText(text.c_str());
-  }
+  void SetText(const std::string& text) { ctrl().SetWindowText(text.c_str()); }
   std::string GetText() const {    
     CString s;
-    control()->GetWindowTextA(s);
+    ctrl().GetWindowTextA(s);
     return s.GetString();
   }  
 private:
-  void Init() {  
-    int nID = 50000;
-    int cx = 0;
-    int cy = 0;
-    control()->Create(WS_CHILD | WS_TABSTOP,
-      CRect(cx, cy, cx+55, cy+19), p_wnd(), nID);
+  void Init() {
+    ctrl().Create(WS_CHILD | WS_TABSTOP, CRect(0, 0, 55, 19), p_wnd(), id());
   }  
 };
+
+enum Orientation { HORZ = 0, VERT = 1 };
 
 class ScrollBar : public CWndItem<CScrollBar> {
  public:
   static std::string type() { return "scrollbaritem"; }
   ScrollBar() : CWndItem<CScrollBar>() { Init(); }
   ScrollBar(ui::canvas::Group* parent) : CWndItem<CScrollBar>(parent) { Init(); }  
+  virtual void OnScroll(int pos) {}
+  virtual void SetPos(double x, double y, double w, double h) {
+    x_ = x;
+    y_ = y;          
+    int cx = zoomabsx();
+    int cy = zoomabsy();
+    ctrl().SetWindowPos(p_wnd(), cx, cy, w, h, SWP_NOZORDER);        
+  }
+  void SetRange(int minpos, int maxpos) { 
+    ctrl().SetScrollRange(minpos, maxpos);
+  }
+  void SetOrientation(Orientation orientation) {    
+    DWORD cs = (ctrl().GetStyle() & !SB_HORZ & !SB_VERT) | orientation;
+    SCROLLINFO si;
+    ctrl().GetScrollInfo(&si);
+    CRect rc;
+    ctrl().GetClientRect(&rc);
+    ctrl().DestroyWindow();        
+    ctrl().Create(cs, rc, p_wnd(), id());        
+  }
+  void SetScrollPos(int pos) { ctrl().SetScrollPos(pos); }
+  
 private:
-  void Init() {  
-    int nID = 50000;
-    int cx = 0;
-    int cy = 0;    
-    control()->Create(SBS_HORZ | SBS_TOPALIGN | WS_CHILD | WS_VISIBLE,
-                  CRect(cx, cy, cx+100, cy+30), p_wnd(), nID);
+  void Init() {        
+    ctrl().Create(SBS_VERT | WS_CHILD, CRect(0 , 0, 100, 30), p_wnd(), id());
   }
 };
 
@@ -998,7 +1033,8 @@ class Canvas {
        ch_ = cy;
     }
     void SetSave(bool on) { save_ = on; }
-    bool IsSaving() const { return save_; }
+    bool IsSaving() const { return save_; }    
+    void ClearSave() { save_rgn_.Clear(); }
     void set_wnd(CWnd* wnd) {
       if (old_wnd_ != wnd) {
         old_wnd_ = wnd_ = wnd;        
@@ -1107,14 +1143,11 @@ class BaseView {
   void set_canvas(Canvas* canvas) { canvas_ = canvas; canvas_->set_wnd(wnd_); }
   Canvas* canvas() { return canvas_; }  
   void InitTimer() {
-    if (!wnd_->SetTimer(ID_TIMER_VIEW_REFRESH, 30, NULL)) // GUI update. 
-    {
+    if (!wnd_->SetTimer(ID_TIMER_VIEW_REFRESH, 10, NULL)) {
 			AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 		}
   }
-  void StopTimer() {
-    wnd_->KillTimer(ID_TIMER_VIEW_REFRESH);
-  }
+  void StopTimer() { wnd_->KillTimer(ID_TIMER_VIEW_REFRESH); }
   CWnd* wnd() { return wnd_; }
 protected:
   void Draw();  
@@ -1126,17 +1159,9 @@ private:
 
 class View : public CWnd, public BaseView {
 	public:
-    View() : BaseView(this) {} // : canvas_(0) {}
-		virtual void Open() {};
-		virtual bool GetViewSize(CRect& rect) {      
-			rect.left= rect.top = 0;
-			rect.right = 300;
-			rect.bottom = 400;
-			return true;      
-    }    
-		virtual void WindowIdle() { Invalidate(false); }    
-	protected:
-		virtual void* WindowPtr() { return GetSafeHwnd(); }	
+    View() : BaseView(this) {}
+		virtual void Open() {};		
+	protected:		
     virtual BOOL PreCreateWindow(CREATESTRUCT& cs);    
 	DECLARE_MESSAGE_MAP()
 		int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -1144,27 +1169,35 @@ class View : public CWnd, public BaseView {
 		void OnSetFocus(CWnd* pOldWnd);
 		void OnPaint();
 		void OnLButtonDown(UINT nFlags, CPoint pt) { 
-      DelegateEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, pt);
+      DelegateEvent(Event::BUTTON_PRESS, 1, nFlags, pt);
     }
     void OnRButtonDown(UINT nFlags, CPoint pt) {
-      DelegateEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, pt);
+      DelegateEvent(Event::BUTTON_PRESS, 2, nFlags, pt);
     }
 		void OnLButtonDblClk(UINT nFlags, CPoint pt) {
-      DelegateEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, pt);
+      DelegateEvent(Event::BUTTON_2PRESS, 1, nFlags, pt);
     }
 		void OnMouseMove(UINT nFlags, CPoint pt) {
-      DelegateEvent(canvas::Event::MOTION_NOTIFY, 0, nFlags, pt);
+      DelegateEvent(Event::MOTION_NOTIFY, 0, nFlags, pt);
     }
 		void OnLButtonUp(UINT nFlags, CPoint pt) {
-      DelegateEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, pt);
+      DelegateEvent(Event::BUTTON_RELEASE, 1, nFlags, pt);
     }
 		void OnRButtonUp(UINT nFlags, CPoint pt) {
-      DelegateEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, pt);
+      DelegateEvent(Event::BUTTON_RELEASE, 2, nFlags, pt);
     }
     void OnTimer(UINT_PTR nIDEvent);
     BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
-    void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-		void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);          
+    void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);         
+		void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);    
+    void OnCtrlBtnClick(UINT nID) {
+      Button* btn = (Button*) Button::FindById(nID);
+      if (btn) {
+        btn->OnClick();
+      }
+    }
+   public:
+    void OnSize(UINT nType, int cx, int cy);
 };
 
 class CanvasFrameWnd : public CFrameWnd {			
@@ -1174,8 +1207,8 @@ class CanvasFrameWnd : public CFrameWnd {
   void set_canvas(Canvas* canvas) { assert(pView_); pView_->set_canvas(canvas); }
   Canvas* canvas() { return pView_ ? pView_->canvas() : 0; }
   virtual void PostOpenWnd();
-  void SetTitle(const std::string& title);
-  void SetPos(int x, int y);
+  void SetTitle(const std::string& title) { SetWindowTextA(title.c_str()); }
+  void SetPos(int x, int y) { }
  protected:
   CanvasFrameWnd() : CFrameWnd(), pView_(0) {}; // protected constructor used by dynamic creation
                                                 // Use OnCreate.
@@ -1192,9 +1225,8 @@ class CanvasFrameWnd : public CFrameWnd {
   void OnDestroy();
 	void OnSetFocus(CWnd* pOldWnd);
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-	void OnSizing(UINT fwSide, LPRECT pRect);
-private:
+	void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);	
+ private:
   View* pView_;
 };
 

@@ -86,8 +86,7 @@ namespace host {
 			{
 				machine,
 				pattern,
-				sequence,
-        luaplugin
+				sequence        
 			};
 		};
 
@@ -607,7 +606,7 @@ namespace host {
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
-      afx_msg void OnDynamicMenuItems(UINT nID);
+      afx_msg void OnDynamicMenuItems(UINT nID);      
 };
 
 

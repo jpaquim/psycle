@@ -81,6 +81,14 @@ namespace psycle
       MACHMODE_LUAUIEXT = 3
 		};
 
+    struct MachineUiType {
+      enum Value {      
+        NATIVE = 0,
+        CUSTOMWND = 1,
+        CHILDVIEW = 2
+      };    
+    };
+
 		struct PatternCmd
 		{
 			enum{

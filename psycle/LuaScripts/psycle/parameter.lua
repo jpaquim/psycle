@@ -102,12 +102,12 @@ function parameter:id() return self.id_ end
 function parameter:setname(str) self.name_ = str end
 function parameter:name() return self.name_ end
 function parameter:label() return self.label_ end
-function parameter:setmin(min) local tmp = self:val() self.min_ = min if tmp<min then tmp=min end self:setval(tmp) end
-function parameter:min() return self.min_ end
-function parameter:setmax(max) local tmp = self:val() self.max_ = max if tmp>max then tmp=max end self:setval(tmp) end
-function parameter:max() return self.max_ end
-function parameter:setstep(step) local tmp = self:val() self.step_ = step self:setval(tmp) end
-function parameter:step() return self.step_; end
+function parameter:setminval(min) local tmp = self:val() self.min_ = min if tmp<min then tmp=min end self:setval(tmp) end
+function parameter:minval() return self.min_ end
+function parameter:setmaxval(max) local tmp = self:val() self.max_ = max if tmp>max then tmp=max end self:setval(tmp) end
+function parameter:maxval() return self.max_ end
+function parameter:setsteps(steps) local tmp = self:val() self.step_ = steps self:setval(tmp) end
+function parameter:steps() return self.step_; end
 function parameter:val()
   local tmp = self.val_*(self.max_-self.min_)+self.min_
     if vel == nil then
@@ -191,7 +191,7 @@ function parameter:addlistener(listener)
   return self
 end
 
-function parameter:notify()
+function parameter:notify()  
   for k, v in pairs(self.listener_) do     
      v:ontweaked(self)
   end

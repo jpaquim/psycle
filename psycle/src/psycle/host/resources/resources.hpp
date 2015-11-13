@@ -1196,6 +1196,9 @@
 #define ID__SETSUSTANTOSELECTION        34441
 #define ID_DYNAMIC_MENUS_START          34442
 #define ID_DYNAMIC_MENUS_END            35442
+#define ID_DYNAMIC_CONTROLS_BEGIN       35443
+#define ID_DYNAMIC_CONTROLS_LAST        45443
+#define WM_USER_RELOAD_LUA              45444
 #define ID_TEXT                         65535
 
 // Next default values for new objects

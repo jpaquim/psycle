@@ -34,8 +34,7 @@ function knob:init(par)
   if (self.par ~= nil) then
     self.par:addlistener(self)
   end  
-  self.screenh = 800
-  self:setsize(30, 30)
+  self.screenh = 800  
   return self
 end
 
@@ -123,6 +122,10 @@ end
 
 function knob:tostring()
   return "knob"
+end
+
+function knob:onupdateregion(region)
+   region:setrect(0, 0, 30, 30)
 end
 
 return knob

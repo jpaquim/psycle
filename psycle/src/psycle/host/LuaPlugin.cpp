@@ -61,10 +61,7 @@ namespace psycle { namespace host {
   void LuaPlugin::OnReload() {
     try {
       proxy_.reload();
-      if (custom_menubar) {
-        delete custom_menubar;
-      }
-      custom_menubar = 0;
+      custom_menubar.reset(0);      
     } CATCH_WRAP_AND_RETHROW(*this)
     /*PluginInfo info = CallPluginInfo();
     _mode = info.mode;*/
@@ -322,7 +319,7 @@ namespace psycle { namespace host {
 
   bool LuaPlugin::LoadSpecificChunk(RiffFile* pFile, int version)
   {
-    if (proxy_.prsmode() == LuaMachine::NATIVEPRS) {
+    if (proxy_.prsmode() == MachinePresetType::NATIVE) {
     uint32_t size;
     pFile->Read(size); // size of whole structure
     if(size)
@@ -403,7 +400,7 @@ namespace psycle { namespace host {
 							SetProgram(_program);
 							EndSetProgram();*/
 							pFile->Skip(sizeof(float) *count);
-              bool b = proxy_.prsmode() == LuaMachine::CHUNKPRS;
+              bool b = proxy_.prsmode() == MachinePresetType::CHUNK;
 							if(b)
 							{
 								unsigned char * data(new unsigned char[size]);
@@ -427,7 +424,7 @@ namespace psycle { namespace host {
 
   void LuaPlugin::SaveSpecificChunk(RiffFile * pFile)
   {
-    if (proxy_.prsmode() == LuaMachine::NATIVEPRS) {
+    if (proxy_.prsmode() == MachinePresetType::NATIVE) {
       uint32_t count = GetNumParams();
       uint32_t size2(0);
       unsigned char * pData = 0;
@@ -435,9 +432,8 @@ namespace psycle { namespace host {
       {
         size2 = proxy_.call_data(&pData, false);
       }
-      catch(const std::exception &e)
-      {
-        e;
+      catch(const std::exception&)
+      {        
         // data won't be saved
       }
       uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
@@ -465,13 +461,13 @@ namespace psycle { namespace host {
         zapArray(pData);
       }
     } else {
-    try {
+      try {
 			    UINT count(GetNumParams());
 					unsigned char _program=0;
 					UINT size(sizeof _program + sizeof count);
 					UINT chunksize(0);
 					unsigned char * pData(0);
-          bool b = proxy_.prsmode() == LuaMachine::CHUNKPRS;
+          bool b = proxy_.prsmode() == MachinePresetType::CHUNK;
 					if(b)
 					{
 						count=0;

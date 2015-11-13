@@ -38,19 +38,13 @@ namespace psycle { namespace host {
   // LuaConfig+Bind
   /////////////////////////////////////////////////////////////////////////////
 
-  LuaConfig::LuaConfig() {
-    store_ = PsycleGlobal::conf().CreateStore();
-  }
+  LuaConfig::LuaConfig() : store_(PsycleGlobal::conf().CreateStore()) { }
 
-  LuaConfig::LuaConfig(const std::string& group) {
-     store_ = PsycleGlobal::conf().CreateStore();
+  LuaConfig::LuaConfig(const std::string& group) 
+    : store_(PsycleGlobal::conf().CreateStore()){     
      OpenGroup(group);
   }
-
-  LuaConfig::~LuaConfig() {
-    delete store_;
-  }
-
+  
   void LuaConfig::OpenGroup(const std::string& group) {
     // Do not open group if loading version 1.8.6
     if(!store_->GetVersion().empty()) {
@@ -344,19 +338,19 @@ namespace psycle { namespace host {
 
    int LuaMachineBind::show_native_gui(lua_State* L) {
     LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
-    plug->set_gui_type(LuaMachine::GuiType::NATIVE);
+    plug->set_ui_type(MachineUiType::NATIVE);
     return 0;
   }
 
   int LuaMachineBind::show_custom_gui(lua_State* L) {
     LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
-    plug->set_gui_type(LuaMachine::GuiType::CUSTOMWND);
+    plug->set_ui_type(MachineUiType::CUSTOMWND);
     return 0;
   }
 
   int LuaMachineBind::show_childview_gui(lua_State* L) {
     LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
-    plug->set_gui_type(LuaMachine::GuiType::CHILDVIEW);
+    plug->set_ui_type(MachineUiType::CHILDVIEW);
     return 0;
   }
 
@@ -600,7 +594,7 @@ namespace psycle { namespace host {
 
   int LuaMachineBind::setpresetmode(lua_State* L) {
     LuaMachine* plugin = LuaHelper::check<LuaMachine>(L, 1, meta);
-    LuaMachine::PRSType mode = (LuaMachine::PRSType) ((int) luaL_checknumber(L, 2));
+    MachinePresetType::Value mode = (MachinePresetType::Value) ((int) luaL_checknumber(L, 2));
     plugin->setprsmode(mode);
     return 0;
   }
@@ -624,6 +618,8 @@ namespace psycle { namespace host {
       {"new", create},
       {"samplerate", samplerate},
       {"tpb", tpb},
+      {"spt", spt},
+      {"rline", rline},
       {"line", line},
       {"playing", playing},
       {NULL, NULL}
@@ -645,6 +641,23 @@ namespace psycle { namespace host {
     if (err!=0) return err;
     Player* p = LuaHelper::check<Player>(L, 1, meta);
     lua_pushnumber(L, p->lpb);
+    return 1;
+  }
+
+  int LuaPlayerBind::rline(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;
+    Player* p = LuaHelper::check<Player>(L, 1, meta);
+    double row = (p->SamplesPerRow()-p->_samplesRemaining)/(double)p->SamplesPerRow() + p->_lineCounter;
+    lua_pushnumber(L, row);
+    return 1;
+  }
+
+   int LuaPlayerBind::spt(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;
+    Player* p = LuaHelper::check<Player>(L, 1, meta);
+    lua_pushnumber(L, p->SamplesPerTick());
     return 1;
   }
 
@@ -759,9 +772,9 @@ namespace psycle { namespace host {
   }
 
   int LuaPatternDataBind::pattern(lua_State* L) {
-    LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
+    // LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
     lua_newtable(L);
-    const int len = pattern->numtracks();
+    //const int len = pattern->numtracks();
     /*for (int i=1; i <= len; ++i) {
       lua_pushvalue(L, 1);
       lua_pushnumber
@@ -1067,11 +1080,11 @@ namespace psycle { namespace host {
   WaveOsc::WaveOsc(WaveOscTables::Shape shape) : shape_(shape) {
     if (shape != WaveOscTables::PWM) {
       WaveList<float>::Type tbl = WaveOscTables::getInstance()->tbl(shape);
-      resampler_ = new ResamplerWrap<float, 1>(tbl);
+      resampler_.reset(new ResamplerWrap<float, 1>(tbl));
       resampler_->set_frequency(263);
     } else {
       // pwm subtract two saw's
-      resampler_ = new PWMWrap<float, 1>();
+      resampler_.reset(new PWMWrap<float, 1>());
       resampler_->set_frequency(263);
     }
   }
@@ -1088,8 +1101,7 @@ namespace psycle { namespace host {
           if (resampler_->Playing()) {
             rnew->Start(resampler_->phase());
           }
-          delete resampler_;
-          resampler_ = rnew;
+          resampler_.reset(rnew);          
         } else {
           resampler_->SetData(tbl);
         }
@@ -1100,8 +1112,7 @@ namespace psycle { namespace host {
         if (resampler_->Playing()) {
           rnew->Start(resampler_->phase());
         }
-        delete resampler_;
-        resampler_ = rnew;
+        resampler_.reset(rnew);
       }
       shape_ = shape;
     }
@@ -1329,19 +1340,16 @@ namespace psycle { namespace host {
         env = arr->data();
       }
       // check for master
-      LuaSingleWorker* master = 0;
+      std::auto_ptr<LuaSingleWorker> master;
       lua_getfield(L, 1, "sync");
       if (lua_isnil(L, -1)) {
         lua_pop(L, 1);
       } else {
         lua_pushvalue(L, 1);
-        master = new LuaSingleWorker(L);
+        master.reset(new LuaSingleWorker(L));
       }
-      osc->work(data->len(), data->data(), master);
-      lua_pushnumber(L,  data->len()); // return processed samples
-      if (master) {
-        delete master;
-      }
+      osc->work(data->len(), data->data(), master.get());
+      lua_pushnumber(L,  data->len()); // return processed samples      
     }  else {
       luaL_error(L, "Got %d arguments expected 2 or 3 (self, num, fm)", n);
     }
@@ -1455,10 +1463,14 @@ namespace psycle { namespace host {
 
   int LuaMidiHelper::notename(lua_State* L) {
     const char* notenames[]=
-    {"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-    int note = luaL_checknumber(L, 1);
+        {"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-", "C-"};
+    int note = luaL_checknumber(L, 1);    
     std::stringstream str;
-    str << notenames[note%12] << note/12;
+    if (note >= 0) {
+      str << notenames[note%12] << note/12;
+    } else {      
+      str << notenames[12 + note%12] << "(" << note/12-1 << ")";
+    }    
     lua_pushstring(L, str.str().c_str());
     return 1;
   }
@@ -2339,7 +2351,7 @@ namespace psycle { namespace host {
       std::ostringstream s; s << "Failed: " << msg << std::endl;
       luaL_error(L, "single work error", 0);
     }
-    int num = luaL_checknumber(L, -1);
+    // int num = luaL_checknumber(L, -1);
     lua_pop(L, 3);
     arr->clearmargin();
     return arr;
@@ -2486,19 +2498,16 @@ namespace psycle { namespace host {
       env = arr->data();
     }
     // check for master
-    LuaSingleWorker* master = 0;
+    std::auto_ptr<LuaSingleWorker> master;
     lua_getfield(L, 1, "sync");
     if (lua_isnil(L, -1)) {
       lua_pop(L, 1);
     } else {
       lua_pushvalue(L, 1);
-      master = new LuaSingleWorker(L);
+      master.reset(new LuaSingleWorker(L));
     }
-    int processed = rwrap->work(l->len(), l->data(), r->data(), master);
-    lua_pushnumber(L, processed); // return total number of resampled samples
-    if (master) {
-      delete master;
-    }
+    int processed = rwrap->work(l->len(), l->data(), r->data(), master.get());
+    lua_pushnumber(L, processed); // return total number of resampled samples    
     return 1;
   }
 
