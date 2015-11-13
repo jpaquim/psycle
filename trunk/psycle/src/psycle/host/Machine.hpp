@@ -530,7 +530,7 @@ namespace psycle
 					virtual void SetPosX(int x) {_x = x;}
 					virtual int  GetPosY() const { return _y; }
 					virtual void SetPosY(int y) {_y = y;}
-          virtual int GetGuiType() const { return 0; }
+          virtual MachineUiType::Value GetUiType() const { return MachineUiType::NATIVE; }
           virtual void OnGuiTimer(void* mhnd, void* chnd) {}
 
 				public:///\todo private:

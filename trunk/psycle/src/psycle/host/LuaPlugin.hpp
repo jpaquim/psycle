@@ -58,16 +58,16 @@ namespace psycle { namespace host {
     PluginInfo CallPluginInfo() { return proxy_.call_info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
     virtual void AfterTweaked(int numparam);
-    ui::MenuBar* GetMenu(ui::Menu* menu) {
-      if (!custom_menubar) {
-        custom_menubar = proxy_.get_menu(menu);
+    std::auto_ptr<ui::MenuBar> GetMenu(ui::Menu* menu) {
+      if (!custom_menubar.get()) {
+        custom_menubar.reset(proxy_.get_menu(menu));
       } else {
         custom_menubar->append(menu);
       }
       return custom_menubar;
     }
     std::string help();
-    virtual int GetGuiType() const { return proxy_.gui_type(); }
+    virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }
     void OnMenu(UINT id) { proxy_.call_menu(id); }
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
     ui::canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }    
@@ -99,7 +99,7 @@ namespace psycle { namespace host {
     virtual void OnGuiTimer(void* mhnd, void* chnd) {
       // todo not working atm .. transfer to Canvas.cpp
       if (!crashed()) {
-        if (custom_menubar && custom_menubar->needsupdate()) {
+        if (custom_menubar.get() && custom_menubar->needsupdate()) {
           proxy_.update_menu(mhnd);
           custom_menubar->setupdate(false);
         }        
@@ -108,12 +108,14 @@ namespace psycle { namespace host {
 
     std::string dll_path_;
     bool usenoteon_;
-    LuaMachine::PRSType prsmode() const { return proxy_.prsmode(); }
+    MachinePresetType::Value prsmode() const { return proxy_.prsmode(); }
 
     void lock() const { proxy_.lock(); }
     void unlock() const { proxy_.unlock(); }
 
-    void InvalidateMenuBar() { if (custom_menubar) custom_menubar->setupdate(true); }
+    void InvalidateMenuBar() { 
+      if (custom_menubar.get()) custom_menubar->setupdate(true);
+    }
 
   protected:
     LuaProxy proxy_;
@@ -142,7 +144,7 @@ namespace psycle { namespace host {
       unsigned char cmd,
       unsigned char val);
     public:
-    ui::MenuBar* custom_menubar;
+    std::auto_ptr<ui::MenuBar> custom_menubar;
   };
 }   // namespace
 }   // namespace

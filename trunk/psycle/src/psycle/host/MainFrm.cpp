@@ -95,8 +95,8 @@ namespace psycle { namespace host {
 			ON_WM_CLOSE()
 			ON_WM_ACTIVATE()
 			ON_WM_DESTROY()
-			ON_WM_DROPFILES()
-      ON_WM_TIMER()
+			ON_WM_DROPFILES()      
+      ON_WM_SIZE()      
 //songbar start
 			ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
 			ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
@@ -203,7 +203,7 @@ namespace psycle { namespace host {
 			}
 			m_wndView.ValidateParent();
 
-      if (!m_luaWndView.Create(NULL, NULL, WS_CHILD | WS_BORDER,
+      if (!m_luaWndView.Create(NULL, NULL, WS_CHILD | WS_BORDER | WS_CLIPCHILDREN,
 		  CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST+1, NULL))
 			{
 				TRACE0("Failed to create view window\n");
@@ -1193,8 +1193,12 @@ namespace psycle { namespace host {
 			return FALSE;
 		}
 
-    void CMainFrame::OnTimer( UINT_PTR nIDEvent ) {
-      this->m_wndView.OnTimer(nIDEvent);
+    void CMainFrame::OnSize(UINT nType, int cx, int cy) {        
+       CFrameWnd::OnSize(nType, cx, cy);
+       CRect rect;            
+       this->m_wndView.GetWindowRect(&rect);
+       ScreenToClient(rect);
+       m_luaWndView.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);
     }
-
+  
 }}

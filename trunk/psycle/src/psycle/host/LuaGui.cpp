@@ -16,6 +16,20 @@
 namespace psycle { namespace host {
   using namespace ui;  
 
+  void LuaLock::lock(lua_State* L) {
+    LuaProxy* proxy = LuaHost::proxy(L);
+    if (proxy) {
+      proxy->lock();
+    }
+  }
+  
+  void LuaLock::unlock(lua_State* L) {
+    LuaProxy* proxy = LuaHost::proxy(L);
+    if (proxy) {
+      proxy->unlock();
+    }
+  }
+
   ///////////////////////////////////////////////////////////////////////////////
   // MenuBinds
   ///////////////////////////////////////////////////////////////////////////////
@@ -501,6 +515,7 @@ namespace psycle { namespace host {
   bool LuaRect::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, this); }
   bool LuaLine::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, this); }  
   bool LuaText::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, this); }
+  bool LuaPic::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, this); }
   
   
   /////////////////////////////////////////////////////////////////////////////
@@ -680,8 +695,8 @@ namespace psycle { namespace host {
     } else if (n==2) {
       group = LuaHelper::check<LuaGroup>(L, 2, LuaGroupBind<>::meta);
       item = new T(L, group);
-    }
-    LuaHelper::new_userdata(L, meta.c_str(), item);
+    }    
+    LuaHelper::new_userdata(L, meta.c_str(), item);    
     if (group) {
       LuaHelper::register_userdata(L, item);
     }
@@ -823,9 +838,9 @@ namespace psycle { namespace host {
   int LuaGroupBind<T>::intersect(lua_State* L) {
     int err = LuaHelper::check_argnum(L, 3, "self, self, x1, y1 [,x2, y2]");
     if (err!=0) return err;
-    T* item = LuaHelper::check<T>(L, 1, meta);
-    double x = luaL_checknumber(L, 2);
-    double y = luaL_checknumber(L, 3);
+    // T* item = LuaHelper::check<T>(L, 1, meta);
+    // double x = luaL_checknumber(L, 2);
+    // double y = luaL_checknumber(L, 3);
     /*canvas::Item* res = item->intersect(x, y);
     if (res) {
       LuaHelper::find_userdata(L, res);
@@ -1231,12 +1246,33 @@ namespace psycle { namespace host {
       }
     }
 
-  const Region& LuaItem::region() const {
-    if (update_) {
-      rgn_.SetRect(0, 0, w_+1, h_ +1);
-      update_ = false;
+  void LuaItem::onupdateregion() {
+    LuaHost::proxy(L)->lock();
+    const int n1 = lua_gettop(L);
+    LuaHelper::find_userdata<>(L, this);    
+    if (!lua_isnil(L, -1)) {
+      lua_getfield(L, -1, "onupdateregion");
+      if (!lua_isnil(L, -1)) {
+        lua_pushvalue(L, -2);
+        lua_remove(L, -3);
+        ui::Region** rgn = (ui::Region **)lua_newuserdata(L, sizeof(ui::Region *));
+        *rgn = rgn_.get();
+        luaL_setmetatable(L, LuaRegionBind::meta);            
+        int status = lua_pcall(L, 2, 0, 0);
+        if (status) {
+          const char* msg = lua_tostring(L, -1);
+          LuaHost::proxy(L)->unlock();
+          throw psycle::host::exceptions::library_error::runtime_error(std::string(msg));
+        }      
+      } else {
+        lua_pop(L, 3);
+      }
+    } else {
+      lua_pop(L, 2);
     }
-    return rgn_;
+    const int n2 = lua_gettop(L);
+    assert(n1 == n2);
+    LuaHost::proxy(L)->unlock();    
   }
   
   ///////////////////////////////////////////////////////////////////////////////
@@ -1300,12 +1336,13 @@ namespace psycle { namespace host {
 
   int LuaRegionBind::open(lua_State *L) {
     static const luaL_Reg funcs[] = {
-      {"new", create},
+      {"new", create},      
       { "__gc", gc },
       { NULL, NULL }
     };
     static const luaL_Reg methods[] = {
       {"boundrect", boundrect},
+      {"setrect", setrect},
       { NULL, NULL }
     };
     luaL_newmetatable(L, meta);
@@ -1316,12 +1353,21 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaRegionBind::create(lua_State* L) {
-    int n = lua_gettop(L);
+  int LuaRegionBind::create(lua_State* L) {    
     Region ** ud = (Region **)lua_newuserdata(L, sizeof(Region *));
     luaL_setmetatable(L, meta);
     *ud = new mfc::Region();
     return 1;
+  }
+
+  int LuaRegionBind::setrect(lua_State *L) {    
+    Region ** ud = (Region **)luaL_checkudata(L, 1, meta);
+    double x = luaL_checknumber(L, 2);
+    double y = luaL_checknumber(L, 3);
+    double w = luaL_checknumber(L, 4);
+    double h = luaL_checknumber(L, 5);
+    (*ud)->SetRect(x, y, w, h);    
+    return LuaHelper::chaining(L);
   }
 
   int LuaRegionBind::gc(lua_State* L) {

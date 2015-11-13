@@ -14,6 +14,11 @@ namespace host {
 
 class LuaMachine;
 
+struct LuaLock {
+  static void lock(lua_State* L);
+  static void unlock(lua_State* L);
+};
+
 struct LuaMenuBarBind {
   static int open(lua_State *L);
   static const char* meta;
@@ -90,6 +95,18 @@ class LuaCanvas : public ui::canvas::Canvas {
  public:
   LuaCanvas(lua_State* state);
   virtual ui::canvas::Item* OnEvent(ui::canvas::Event* ev);
+  virtual void OnSize(int cx, int cy) {
+    LuaLock::lock(L);    
+    lua_pushnumber(L, cx);
+    lua_pushnumber(L, cy);
+    try {
+      LuaHelper::send_event(L, this, "onsize", 2, true);
+    } catch (std::exception& e) {
+      LuaLock::unlock(L); 
+      throw psycle::host::exceptions::library_error::runtime_error(std::string(e.what()));
+    }  
+    LuaLock::unlock(L);
+  }
  private:
   lua_State* L;
   LuaMachine* mac_;
@@ -98,25 +115,19 @@ class LuaCanvas : public ui::canvas::Canvas {
 class LuaItem : public ui::canvas::Item {  
  public:
   static std::string type() { return "canvasitem"; }
-  LuaItem(lua_State* state) : ui::canvas::Item(), L(state) { Init(); }
+  LuaItem(lua_State* state) : ui::canvas::Item(), L(state) { }
   LuaItem(lua_State* state, ui::canvas::Group* parent) :
-      ui::canvas::Item(parent), L(state) {
-    Init();
+      ui::canvas::Item(parent), L(state) {    
   }
   virtual bool OnEvent(ui::canvas::Event* ev);
   virtual void Draw(ui::Graphics* g, ui::Region& repaint_region,
     ui::canvas::Canvas* widget);
-  const ui::Region& region() const;
-  // till regions will be bind
-  void SetSize(double w, double h) { STR(); w_ = w; h_ = h; FLS(); }
-    virtual void OnMessage(ui::canvas::CanvasMsg msg) {
-    if (msg == ui::canvas::CanvasMsg::ONWND) {      
-    }
-  }
- private:
-  void Init() { w_ = h_ = 0; }
-  lua_State* L;
-  int w_, h_;
+  virtual void onupdateregion();
+  virtual void OnMessage(ui::canvas::CanvasMsg msg) {
+    if (msg == ui::canvas::ONWND) { }
+  }  
+ private:  
+  lua_State* L;  
 };
 
 class LuaGroup : public ui::canvas::Group {
@@ -169,7 +180,7 @@ class LuaPic : public ui::canvas::Pic {
   LuaPic(lua_State* state) : ui::canvas::Pic(), L(state) {}
   LuaPic(lua_State* state, ui::canvas::Group* parent) :
   ui::canvas::Pic(parent), L(state) {}
-  virtual bool OnEvent(ui::canvas::Event* ev) { return true; }
+  virtual bool OnEvent(ui::canvas::Event* ev);
  private:
   lua_State* L;
 };
@@ -188,6 +199,7 @@ struct LuaRegionBind {
   static int open(lua_State *L);
   static const char* meta;  
   static int create(lua_State *L);
+  static int setrect(lua_State *L);
   static int boundrect(lua_State *L);
   static int gc(lua_State* L);
 };
@@ -221,7 +233,13 @@ class LuaButton : public ui::canvas::Button {
   static std::string type() { return "buttonitem"; }
   LuaButton(lua_State* state) : ui::canvas::Button(), L(state) {}
   LuaButton(lua_State* state, ui::canvas::Group* parent) 
-    : ui::canvas::Button(parent), L(state) {}  
+    : ui::canvas::Button(parent), L(state) {}
+  virtual void OnClick() {
+    LuaLock::lock(L);
+    lua_newtable(L);
+    LuaHelper::send_event(L, this, "onclick");
+    LuaLock::unlock(L);
+  }
  private:
    lua_State* L;
 };
@@ -242,6 +260,16 @@ class LuaScrollBar : public ui::canvas::ScrollBar {
   LuaScrollBar(lua_State* state) : ui::canvas::ScrollBar(), L(state) {}
   LuaScrollBar(lua_State* state, ui::canvas::Group* parent) 
     : ui::canvas::ScrollBar(parent), L(state) {}  
+  virtual void OnScroll(int pos) {
+    LuaLock::lock(L);    
+    lua_pushnumber(L, pos);        
+    try {
+      LuaHelper::send_event(L, this, "onscroll");
+    } catch (std::exception& e) {
+      LuaLock::unlock(L); 
+      throw psycle::host::exceptions::library_error::runtime_error(std::string(e.what()));
+    }  
+  }
  private:
    lua_State* L;
 };
@@ -285,13 +313,13 @@ class LuaItemBind {
       // {"setzoom", setzoom},
       {"show", show},
       {"hide", hide},
+      {"updateregion", updateregion},
       {"enablepointerevents", enablepointerevents},
       {"disablepointerevents", disablepointerevents},
 //      {"tostring", tostring},
       {"parent", parent},
       {"boundrect", boundrect},
-      {"canvas", canvas},
-      {"setsize", setsize},
+      {"canvas", canvas},    
       //{"intersect", intersect},
       {"fls", fls},
 //      {"setclip", setclip},
@@ -307,16 +335,16 @@ class LuaItemBind {
     callstrict2(L, meta.c_str(), &T::SetXY);
     return chaining(L);
   }
+  static int updateregion(lua_State *L) {
+    call(L, meta.c_str(), &T::needsupdate);
+    return chaining(L);
+  }
   static int pos(lua_State *L) {
     return get2number2<T,double>(L, meta.c_str(), &T::pos);
   }
   static int clientpos(lua_State* L) {
     return get2number2<T,double>(L, meta.c_str(), &T::clientpos);
-  }
-  static int setsize(lua_State* L) {
-    callstrict2(L, meta.c_str(), &T::SetSize);
-    return chaining(L);
-  }
+  }  
   static int fls(lua_State *L);    
   static int canvas(lua_State* L);
   static int show(lua_State* L) {
@@ -427,7 +455,6 @@ class LuaRectBind : public LuaItemBind<T> {
     }
     return LuaHelper::chaining(L);
   }
-
   static int pos(lua_State *L) {
     int err = LuaHelper::check_argnum(L, 1, "self");
     if (err!=0) return err;
@@ -660,12 +687,49 @@ class LuaScrollBarBind : public LuaItemBind<T> {
   typedef LuaItemBind<T> B;   
   static int open(lua_State *L) { return openex<B>(L, meta, setmethods, gc); }
   static int setmethods(lua_State* L) {
-    static const luaL_Reg methods[] = {      
-       {NULL, NULL}
+    static const luaL_Reg methods[] = {
+      {"setpos", setpos},
+      {"setscrollpos", setscrollpos},
+      {"setrange", setrange},
+      {"setorientation", setorientation},
+      {NULL, NULL}
     };    
     luaL_setfuncs(L, methods, 0);
+    const char* const e[] = {"HORZ", "VERT"};
+    buildenum(L, e, 2);
     return 0;
-  }  
+  }
+  static int setscrollpos(lua_State* L) {
+    LuaHelper::callstrict1(L, meta, &LuaScrollBar::SetScrollPos);
+    return chaining(L);
+  }
+  static int setrange(lua_State* L) {
+    LuaHelper::callstrict2(L, meta, &LuaScrollBar::SetRange);
+    return chaining(L);
+  }
+  static int setorientation(lua_State* L) {
+    LuaHelper::callstrict1INT(L, meta, &LuaScrollBar::SetOrientation);
+    return chaining(L);
+  }
+  static int setpos(lua_State *L) {
+    const int n = lua_gettop(L);
+    if (n==3) {
+      T* item = check<T>(L, 1, meta);
+      item->SetXY(luaL_checknumber(L, 2), luaL_checknumber(L, 3));
+      return chaining(L);
+    } else
+    if (n==5) {
+      T* item = check<T>(L, 1, meta);
+      double x = luaL_checknumber(L, 2);
+      double y = luaL_checknumber(L, 3);
+      double w = luaL_checknumber(L, 4);
+      double h = luaL_checknumber(L, 5);
+      item->SetPos(x, y, w, h);
+    } else {
+       return luaL_error(L, "Wrong number of arguments.");
+    }
+    return chaining(L);
+  }
 };
 
 template class LuaRectBind<LuaRect>;

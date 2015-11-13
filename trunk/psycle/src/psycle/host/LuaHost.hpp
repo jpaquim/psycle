@@ -66,7 +66,7 @@ public:
 	LuaProxy(LuaPlugin* plug, lua_State* state);
 	~LuaProxy();
 
-    const PluginInfo& info() const { return info_; }
+  const PluginInfo& info() const { return info_; }
 	int num_cols() const { return plugimport_->numcols(); }
 	int num_parameter() const { return plugimport_->numparams(); }
 	double get_parameter_value(int numparam);
@@ -103,12 +103,12 @@ public:
 	void reload();
   void update_menu(void* menu);
   ui::MenuBar* get_menu(ui::Menu* menu);
-  int gui_type() const { return plugimport_->gui_type(); }
+  MachineUiType::Value ui_type() const { return plugimport_->ui_type(); }
   void call_setprogram(int idx);
   int call_numprograms();
   int get_curr_program();
   std::string get_program_name(int bnkidx, int idx);
-  LuaMachine::PRSType prsmode() const { return plugimport_->prsmode(); }
+  MachinePresetType::Value prsmode() const { return plugimport_->prsmode(); }
   void lock() const { ::EnterCriticalSection(&cs); }
   void unlock() const { ::LeaveCriticalSection(&cs); }
 private:
@@ -136,10 +136,17 @@ private:
   mutable CRITICAL_SECTION cs;
 };
 
-struct LuaHost {
+struct LuaHost {   
+   static std::map<lua_State*, LuaProxy*> proxy_map;
+   static LuaProxy* proxy(lua_State* L) {
+     std::map<lua_State*, LuaProxy*>::iterator it = proxy_map.find(L);     
+     return it != proxy_map.end() ? it->second : 0;
+   }
    static lua_State* load_script(const std::string& dllpath);
    static LuaPlugin* LoadPlugin(const std::string& dllpath, int macIdx);
    static PluginInfo LoadInfo(const std::string& dllpath);
 };
+
+
 }
 }
