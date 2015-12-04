@@ -219,22 +219,10 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
-		{      
-      machine().OnGuiTimer(this, this);
+		{            
 			if ( nIDEvent == ID_TIMER_PARAM_REFRESH )
-			{
-        if (machine()._type == MACH_LUA) {
-          LuaPlugin* lp = (LuaPlugin*) (&machine());
-          canvas::Canvas* user_view = lp->GetCanvas();
-          if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
-            user_view->set_wnd(pView);
-            user_view->InvalidateSave();
-          } else {
-            pView->WindowIdle();
-          }          
-        } else {
-				  pView->WindowIdle();
-        }
+			{        
+        pView->WindowIdle();
 				if (--refreshcounter <= 0) {
 					int tmp = _machine->GetCurrentProgram();
 					if (lastprogram != tmp) {
@@ -244,8 +232,7 @@ namespace psycle { namespace host {
 						}
 						else {
 							ChangeProgram(tmp);	
-						}
-						
+						}						
 					}
 					refreshcounter=30;
 				}
@@ -610,7 +597,7 @@ namespace psycle { namespace host {
 			if ( _machine->_type == MACH_LUA) {
 				try
 				{
-					MessageBox(((LuaPlugin*)_machine)->help().c_str());
+					((LuaPlugin*)_machine)->help();
 				}
 				catch(const std::exception &)
 				{
@@ -646,7 +633,7 @@ namespace psycle { namespace host {
 
 			} else
 			if ( _machine->_type == MACH_LUA) {
-				PluginInfo info = ((LuaPlugin*)_machine)->CallPluginInfo();
+				PluginInfo info = ((LuaPlugin*)_machine)->info();
 				MessageBox(CString("Authors: ") + CString(info.vendor.c_str()),
 					 CString("About ") + CString(info.name.c_str()));
 
@@ -753,8 +740,8 @@ namespace psycle { namespace host {
         CanvasParamView* cpv;
         gui = cpv = new CanvasParamView(this, &machine());
         LuaPlugin* lp = (LuaPlugin*) _machine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
+        LuaCanvas::WeakPtr user_view = lp->canvas();
+        if (!user_view.expired() && lp->ui_type() == MachineUiType::CUSTOMWND) {
           cpv->set_canvas(user_view);
         } else {
           gui = new CNativeView(this,&machine());
@@ -797,7 +784,7 @@ namespace psycle { namespace host {
 
       if (_machine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _machine;
-        canvas::Canvas* user_view = lp->GetCanvas();
+        canvas::Canvas* user_view = lp->canvas().lock().get();
         if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
           user_view->OnSize(rcClient.right, rcClient.bottom);
         }

@@ -36,6 +36,7 @@ namespace psycle { namespace host {
 			void ProcessCmdLine(LPSTR cmdline);
 
 			UINT m_uUserMessage;
+      HMODULE m_hDll;  
 		};
 
 

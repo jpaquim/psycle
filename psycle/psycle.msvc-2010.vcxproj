@@ -33,6 +33,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CLRSupport>false</CLRSupport>
+    <UseOfAtl>Dynamic</UseOfAtl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -152,6 +153,8 @@
     <ClInclude Include="src\psycle\host\LuaGui.hpp" />
     <ClInclude Include="src\psycle\host\LuaHelper.hpp" />
     <ClInclude Include="src\psycle\host\LuaInternals.hpp" />
+    <ClInclude Include="src\psycle\host\SciLexer.h" />
+    <ClInclude Include="src\psycle\host\Scintilla.h" />
     <ClInclude Include="src\psycle\host\version.hpp" />
     <ClInclude Include="src\psycle\host\ASIOInterface.hpp" />
     <ClInclude Include="src\psycle\host\AudioDriver.hpp" />

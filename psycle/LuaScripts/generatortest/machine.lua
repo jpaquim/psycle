@@ -26,12 +26,14 @@ function machine:info()
   return  {vendor="psycle",
            name="luaris",
 		   generator=1, --machine.GENERATOR,
+       mode = machine.GENERATOR,
 		   version=0,
 		   api=0} -- noteon = 1
 end
 
 -- help text displayed by the host
 function machine:help()
+  a = 2 + "s"
   return "01xx : slide up\n"..
          "02xx : slide down\n"..
 		 "04xy : vibrato(frq,gain)\n"..
@@ -59,7 +61,7 @@ function machine:init(samplerate)
   p.vol = param:newknob("vol", "", 0, 1, 100, 0.5)
   p.flb = param:newlabel("Filter")
   p.ft = param:newknob("FilterType","",0, 11, 11, 0):addlistener(self)
-  function p.ft:display()
+  function p.ft:display()    
     return filtertypes[self:val()+1]
   end
   p.fc = param:newknob("VCF CutOff","",0,127,127,127):addlistener(self)
@@ -79,11 +81,7 @@ function machine:init(samplerate)
   self.currvoice = 1 
   for i=1, 3 do arps[#arps+1] = arp:new(voice:new()) end  
   for i=0, 64 do channels[i] = 0 end  
-  for i=0, 119 do notes[i] = nil end
-  self.gui = canvas:new()
-  rect:new(self.gui:root()):setpos(10, 10, 200, 200):setcolor(0xFFFFFF) 
---  self:showcustomgui()
-  self.gui:setpreferredsize(600, 600)
+  for i=0, 119 do notes[i] = nil end  
 end
 
 -- fill the audio buffer
@@ -171,7 +169,7 @@ function machine:noteoff(note, lastnote, inst, cmd, val)
 end
 -- end of alternative code
 
-function machine:stop()  
+function machine:stop()    
   local num = #arps
   for i = 1, num do arps[i]:faststop() end
   for i=0, 64 do channels[i] = 0 end
@@ -180,8 +178,7 @@ function machine:stop()
 end
 
 function machine:ontweaked(param)
-  if param==p.ft then
-     filtercurr:settype(param:val())
+  if param==p.ft then     
   elseif param==p.fc then
      filtercurr:setcutoff(param:val())
   elseif param==p.fr then
@@ -195,8 +192,7 @@ function machine:ontweaked(param)
   end	 
 end
 
-function machine:canvas()
-  return self.gui
+function machine:onaftertweaked()
 end
 
 return machine

@@ -34,6 +34,7 @@
 #include "PlotterDlg.hpp"
 #include "LuaArray.hpp"
 #include <universalis/os/terminal.hpp>
+#include "Scintilla.h"
 
 namespace psycle { namespace host {
 
@@ -186,12 +187,18 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 		int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
-		{
+		{      
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
 
 			_pSong=&Global::song();
-
+      
+      /*       CRect (0,0, lpCreateStruct-> cx, lpCreateStruct-> cy),
+         this, 10000); 
+			{
+				TRACE0("Failed to create view window\n");
+				return -1;
+			}*/
 
       // create a view to occupy the client area of the frame
 			m_wndView.pParentFrame = this;
@@ -202,16 +209,14 @@ namespace psycle { namespace host {
 				return -1;
 			}
 			m_wndView.ValidateParent();
-
-      if (!m_luaWndView.Create(NULL, NULL, WS_CHILD | WS_BORDER | WS_CLIPCHILDREN,
+      
+      if (!m_luaWndView.Create(NULL, NULL, WS_CHILD | WS_BORDER | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 		  CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST+1, NULL))
 			{
 				TRACE0("Failed to create view window\n");
 				return -1;
 			}		
-			
-      	      
-    
+    		                        
 			// Create Toolbars.
 			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
@@ -231,9 +236,8 @@ namespace psycle { namespace host {
 			//16x16 widthxheight of the toolbar icons. Same as the 4bit one.
 			m_tbImagelist.Create(16, 16, ILC_COLOR32|ILC_MASK, 4, 4);
 			m_tbImagelist.Add(&m_tbBm, &m_tbBm2);
-			m_tbImagelist.SetBkColor(CLR_NONE);
+			m_tbImagelist.SetBkColor(CLR_NONE);			      
 
-			
 			m_wndToolBar.GetToolBarCtrl().SetImageList(&m_tbImagelist);
 			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER|CBRS_SIZE_DYNAMIC|CCS_ADJUSTABLE);
 
@@ -351,6 +355,16 @@ namespace psycle { namespace host {
 			CFrameWnd::Dump(dc);
 		}
 	#endif  
+
+    BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
+    {
+      if(m_luaWndView.IsWindowVisible() && pMsg->message==WM_KEYDOWN ) {                 
+        if (m_luaWndView.SendMessageA(pMsg->message, pMsg->wParam, pMsg->lParam))
+          return TRUE;                
+         }            
+      return CFrameWnd::PreTranslateMessage(pMsg);
+    }
+
 
 		BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
 		{
@@ -499,7 +513,8 @@ namespace psycle { namespace host {
 				filepath += "\\autosave.psy";
 				DeleteFile(filepath);
 				SaveBarState(_T("General"));
-
+        // prevent lua gc from double deletion
+        LuaFrameWndBind::mfcclosing = true;
 				CFrameWnd::OnClose();
 			}
 		}
@@ -1195,10 +1210,15 @@ namespace psycle { namespace host {
 
     void CMainFrame::OnSize(UINT nType, int cx, int cy) {        
        CFrameWnd::OnSize(nType, cx, cy);
-       CRect rect;            
-       this->m_wndView.GetWindowRect(&rect);
-       ScreenToClient(rect);
-       m_luaWndView.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);
+       CRect rc;            
+       this->m_wndView.GetWindowRect(&rc);
+       ScreenToClient(rc); 
+       CRect rc1;
+       m_wndStatusBar.GetWindowRect(&rc1);
+       ScreenToClient(rc1);
+       int ch = rc1.top - rc.top;
+       m_luaWndView.SetWindowPos(NULL, rc.left, rc.top, rc.Width(), ch, SWP_NOZORDER);
     }
-  
+
+    
 }}

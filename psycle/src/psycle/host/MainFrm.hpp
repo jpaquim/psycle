@@ -44,6 +44,7 @@ namespace psycle { namespace host {
 		// Overrides
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+      virtual BOOL PreTranslateMessage(MSG* pMsg);
 			#if !defined NDEBUG
 				virtual void AssertValid() const;
 				virtual void Dump(CDumpContext& dc) const;
@@ -115,8 +116,7 @@ namespace psycle { namespace host {
 			InstrumentEditorUI* m_wndInst;
 			CWaveEdFrame*	m_pWndWed;
 			universalis::os::terminal * terminal;
-      
-
+            
 			// Attributes
 		public:
 			Song* _pSong;
@@ -219,6 +219,8 @@ namespace psycle { namespace host {
 			afx_msg void OnPsyhelp();
 //Menu end      
       afx_msg LRESULT OnReloadLua(WPARAM, LPARAM);
+            
 };
 
+ 
 }}

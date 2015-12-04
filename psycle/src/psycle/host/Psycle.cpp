@@ -52,7 +52,7 @@ namespace psycle { namespace host {
 		}
        
 		BOOL CPsycleApp::InitInstance()			
-		{		           
+		{                 
 			// InitCommonControlsEx() is required on Windows XP if an application
 			// manifest specifies use of ComCtl32.dll version 6 or later to enable
 			// visual styles.  Otherwise, any window creation will fail.
@@ -90,6 +90,14 @@ namespace psycle { namespace host {
 				}
 				return FALSE;
 			}
+
+
+      std::string sci_path = global_.conf().GetAbsoluteLuaDir();
+      sci_path += "\\psycle\\SciLexer.dll";
+      m_hDll = LoadLibrary (_T (sci_path.c_str()));
+         if (m_hDll == NULL) {
+         AfxMessageBox ("LoadLibrary SciLexer.dll failure ...");
+      }
 
 
 			// To create the main window, this code creates a new frame window
@@ -150,6 +158,9 @@ namespace psycle { namespace host {
 
 		int CPsycleApp::ExitInstance() 
 		{
+      if (m_hDll != NULL) {
+        FreeLibrary (m_hDll);
+      }
 			if(global_.conf()._pOutputDriver != NULL) {
 				global_.conf()._pOutputDriver->Enable(false);
 				global_.midi().Close();

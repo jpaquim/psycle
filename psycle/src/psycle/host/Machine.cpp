@@ -1039,7 +1039,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						{
 							try
 							{
-								luaPlug = dynamic_cast<LuaPlugin*>(LuaHost::LoadPlugin(sPath.c_str(),shellIdx));								
+								luaPlug = dynamic_cast<LuaPlugin*>(LuaGlobal::LoadPlugin(sPath.c_str(),shellIdx));								
 							}
 							catch(const std::runtime_error & e)
 							{
@@ -1686,6 +1686,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			return true;
 		}
 
-
+   
 	}
 }

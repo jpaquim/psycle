@@ -25,48 +25,50 @@ namespace psycle { namespace host {
   //////////////////////////////////////////////////////////////////////////
   // Lua
 
+  int LuaPlugin::idex_ = 1024;
+
   LuaPlugin::LuaPlugin(lua_State* state, int index, bool full)
-    : curr_prg_(0), proxy_(this, state), custom_menubar(0)
-  {
-    _macIndex = index;
+    : proxy_(this, state),
+      curr_prg_(0),
+      custom_menubar(0),
+      do_exit_(false), 
+      do_reload_(false),
+      usenoteon_(false) {    
+    _macIndex = (index == -1) ? idex_++ : index;
     _type = MACH_LUA;
     _mode = MACHMODE_FX;
-    usenoteon_ = false;
     std::sprintf(_editName, "native plugin");
-    InitializeSamplesVector();
+    InitializeSamplesVector();    
     for(int i(0) ; i < MAX_TRACKS; ++i) {
       trackNote[i].key = 255; // No Note.
       trackNote[i].midichan = 0;
-    }
-    try {
-      proxy_.call_run();
-      if (full) {
-        proxy_.call_init();
-      }
-    } catch(std::exception &e) {
-      AfxMessageBox(e.what());
-    }
+    }        
+    proxy().Run();
+    if (full) {
+      proxy().Init();
+    }    
   }
 
-  LuaPlugin::~LuaPlugin() {
-    Free();
+  LuaPlugin::~LuaPlugin() {    
+    Free();    
   }
 
   void LuaPlugin::Free() {
     try {
-      proxy_.free_state();
-    } catch(std::exception &e) { e; } //do nothing.
+      proxy().Free();
+    } catch(std::exception& e) {
+      AfxMessageBox(e.what());
+    } 
   }
 
   void LuaPlugin::OnReload() {
     try {
-      proxy_.reload();
-      custom_menubar.reset(0);      
-    } CATCH_WRAP_AND_RETHROW(*this)
-    /*PluginInfo info = CallPluginInfo();
-    _mode = info.mode;*/
+      proxy().Reload();
+      custom_menubar.reset(0);
+    } catch(std::exception&) {
+    }
   }
-  
+
   int LuaPlugin::GenerateAudioInTicks(int /*startSample*/, int numSamples) throw(psycle::host::exception)
   {
     if (crashed()) {
@@ -112,7 +114,7 @@ namespace psycle { namespace host {
             try
             {
               //proxy().Work(samplesV[0]+us, samplesV[1]+us, ns, Global::song().SONGTRACKS);
-              proxy_.call_work(ns, us);
+              proxy().Work(ns, us);
             }
             catch(const std::exception & e)
             {
@@ -130,7 +132,7 @@ namespace psycle { namespace host {
               {
                 //todo: this should change if we implement multi-io for native plugins (complicated right now. needs new API calls)
                 //proxy().Work(samplesV[0]+us, samplesV[1]+us, nextevent, Global::song().SONGTRACKS);
-                proxy_.call_work(nextevent, us);
+                proxy().Work(nextevent, us);
               }
               catch(const std::exception &e)
               {
@@ -163,7 +165,7 @@ namespace psycle { namespace host {
                     }
                     try
                     {
-                      proxy_.call_parameter(TWSInst[i], int(TWSCurrent[i])/(double)0xFFFF);
+                      proxy().ParameterTweak(TWSInst[i], int(TWSCurrent[i])/(double)0xFFFF);
                     }
                     catch(const std::exception &e)
                     {
@@ -185,7 +187,7 @@ namespace psycle { namespace host {
                   // do event
                   try
                   {
-                    proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+                    proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
                   }
                   catch(const std::exception &e)
                   {
@@ -206,7 +208,7 @@ namespace psycle { namespace host {
                   // do event
                   try
                   {
-                    proxy_.call_seqtick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+                    proxy().SeqTick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
                   }
                   catch(const std::exception &e)
                   {
@@ -227,7 +229,7 @@ namespace psycle { namespace host {
                   // do event
                   try
                   {
-                    proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+                    proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
                   }
                   catch(const std::exception &e)
                   {
@@ -264,7 +266,7 @@ namespace psycle { namespace host {
                   case 0:
                     try
                     {
-                      proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+                      proxy_.SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
                     }
                     catch(const std::exception &e)
                     {
@@ -277,7 +279,7 @@ namespace psycle { namespace host {
                     entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
                     try
                     {
-                      proxy_.call_seqtick(i ,entry._note, entry._inst, 0, 0);
+                      proxy_.SeqTick(i ,entry._note, entry._inst, 0, 0);
                     }
                     catch(const std::exception &e)
                     {
@@ -290,7 +292,7 @@ namespace psycle { namespace host {
                     entry._note+=(TriggerDelay[i]._parameter&0x0F);
                     try
                     {
-                      proxy_.call_seqtick(i ,entry._note, entry._inst, 0, 0);
+                      proxy_.SeqTick(i ,entry._note, entry._inst, 0, 0);
                     }
                     catch(const std::exception &e)
                     {
@@ -342,7 +344,7 @@ namespace psycle { namespace host {
       }
       int num = GetNumParams();
       for (int i = 0; i < num; ++i) {
-        std::string id = proxy_.get_parameter_id(i);
+        std::string id = proxy_.Id(i);
         std::map<std::string, int>::iterator it = ids.find(id);
         if (it != ids.end()) {
           int idx = ids[id];
@@ -359,7 +361,7 @@ namespace psycle { namespace host {
         pFile->Read(pData, size2); // Number of parameters
         try
         {
-          proxy_.call_putdata(pData, size2);
+          proxy().PutData(pData, size2);
           delete[] pData;
         }
         catch(const std::exception &e)
@@ -405,7 +407,7 @@ namespace psycle { namespace host {
 							{
 								unsigned char * data(new unsigned char[size]);
 								pFile->Read(data, size); // Number of parameters
-                proxy_.call_putdata(data, size);
+                proxy().PutData(data, size);
 								zapArray(data);
 							}
 							else
@@ -430,16 +432,16 @@ namespace psycle { namespace host {
       unsigned char * pData = 0;
       try
       {
-        size2 = proxy_.call_data(&pData, false);
+        size2 = proxy().GetData(&pData, false);
       }
       catch(const std::exception&)
-      {        
+      {
         // data won't be saved
       }
       uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
       std::vector<std::string> ids;
       for (UINT i = 0; i < count; i++) {
-        std::string id = proxy_.get_parameter_id(i);
+        std::string id = proxy_.Id(i);
         ids.push_back(id);
         size += id.length()+1;
       }
@@ -471,7 +473,7 @@ namespace psycle { namespace host {
 					if(b)
 					{
 						count=0;
-            chunksize = proxy_.call_data(&pData, true);
+            chunksize = proxy().GetData(&pData, true);
 						size+=chunksize;
 					}
 					else
@@ -491,7 +493,7 @@ namespace psycle { namespace host {
 					{
 						for(UINT i(0); i < count; ++i)
 						{
-              float temp = proxy_.get_parameter_value(i);
+              float temp = proxy_.Val(i);
 							pFile->Write(&temp, sizeof temp);
 						}
 					}
@@ -506,9 +508,9 @@ namespace psycle { namespace host {
     }
     try {
       int minval; int maxval;
-      proxy_.get_parameter_range(numparam, minval, maxval);
+      proxy().Range(numparam, minval, maxval);
       int quantization = (maxval-minval);
-      proxy_.call_parameter(numparam,double(value)/double(quantization));
+      proxy().ParameterTweak(numparam,double(value)/double(quantization));
       return true;
     } catch(std::exception &e) { e; } //do nothing.
     return false;
@@ -521,7 +523,7 @@ namespace psycle { namespace host {
     }
     try {
       if( numparam < GetNumParams() ) {
-        proxy_.get_parameter_range(numparam, minval, maxval);
+        proxy().Range(numparam, minval, maxval);
       }
     } catch(std::exception &e) { e; }
   }
@@ -533,7 +535,7 @@ namespace psycle { namespace host {
     int mpf = 0 ;
     try {
       if( numparam < GetNumParams() ) {
-        mpf = proxy_.get_parameter_type(numparam);
+        mpf = proxy().Type(numparam);
       }
     } catch(std::exception &e) { e; }
     return mpf;
@@ -546,7 +548,7 @@ namespace psycle { namespace host {
     }
     try {
       if( numparam < GetNumParams() ) {
-        std::string name = proxy_.get_parameter_name(numparam);
+        std::string name = proxy().Name(numparam);
         std::strcpy(parval, name.c_str());
       } else std::strcpy(parval, "Out of Range");
     } catch(std::exception &e) { e; std::strcpy(parval, ""); }
@@ -559,42 +561,16 @@ namespace psycle { namespace host {
     if (numparam < GetNumParams()) {
       int minval; int maxval;
       try {
-        proxy_.get_parameter_range(numparam, minval, maxval);
+        proxy_.Range(numparam, minval, maxval);
         int quantization = (maxval-minval);
-        return proxy_.get_parameter_value(numparam) * quantization;
+        return proxy().Val(numparam) * quantization;
       } catch(std::exception &e) { e; } //do nothing.
     } else {
       // out of range
     }
     return 0;
   }
-
-  bool LuaPlugin::DescribeValue(int numparam, char * psTxt){
-    if (crashed() || numparam < 0) {
-      std::string par_display("Out of range or Crashed");
-      std::sprintf(psTxt, "%s", par_display);
-      return false;
-    }
-    if(numparam >= 0 && numparam < GetNumParams()) {
-      try {
-        std::string par_display = proxy_.get_parameter_display(numparam);
-        std::string par_label = proxy_.get_parameter_label(numparam);
-        if (par_label == "")
-          std::sprintf(psTxt, "%s", par_display.c_str());
-        else {
-          std::sprintf(psTxt, "%s(%s)", par_display.c_str(), par_label.c_str());
-        }
-        return true;
-      } catch(std::exception &e) {
-        e;
-        std::string par_display("Out of range");
-        std::sprintf(psTxt, "%s", par_display);
-        return true;
-      } //do nothing.
-    }
-    return false;
-  }
-
+  
   void LuaPlugin::GetParamValue(int numparam, char * parval) {
     if (crashed() || numparam < 0) {
       std::strcpy(parval, "Out of Range or Crashed");
@@ -602,7 +578,7 @@ namespace psycle { namespace host {
     }
     if(numparam < GetNumParams()) {
       try {
-        if(!DescribeValue(numparam, parval)) {
+        if(!proxy().DescribeValue(numparam, parval)) {
           std::sprintf(parval,"%.0f",GetParamValue(numparam) * 1); // 1 = Plugin::quantizationVal())
         }
       }
@@ -620,7 +596,7 @@ namespace psycle { namespace host {
     }
     if(numparam < GetNumParams()) {
       try {
-        id = proxy_.get_parameter_id(numparam);
+        id = proxy_.Id(numparam);
       } catch(const std::exception &e) {
         e;
         return;
@@ -648,7 +624,7 @@ namespace psycle { namespace host {
     }
     try {
       return proxy_.call_help();
-    } catch(const std::exception &e) { e; }
+    } catch(const std::exception &) { }
     return "";
   }
 
@@ -657,7 +633,7 @@ namespace psycle { namespace host {
       return;
     }
     try {
-      proxy_.call_newline();
+      proxy().SequencerTick();
     } catch(const std::exception &e) { e; }
   }
 
@@ -677,7 +653,7 @@ namespace psycle { namespace host {
         // quantization done in parameter.lua
         try
         {
-          proxy_.call_parameter(pData->_inst, double(nv)/0xFFFF);
+          proxy().ParameterTweak(pData->_inst, double(nv)/0xFFFF);
         }
         catch(const std::exception &e)
         {
@@ -734,7 +710,7 @@ namespace psycle { namespace host {
           TWSInst[i] = pData->_inst;
           try
           {
-            TWSCurrent[i] = proxy_.get_parameter_value(TWSInst[i])*0xFFFF;
+            TWSCurrent[i] = proxy_.Val(TWSInst[i])*0xFFFF;
           }
           catch(const std::exception &e)
           {
@@ -756,7 +732,7 @@ namespace psycle { namespace host {
           // quantization done in parameter.lua
           try
           {
-            proxy_.call_parameter(pData->_inst, nv/(double)0xFFFF);
+            proxy().ParameterTweak(pData->_inst, nv/(double)0xFFFF);
           }
           catch(const std::exception &e)
           {
@@ -769,7 +745,7 @@ namespace psycle { namespace host {
       try {
         const int note = pData->_note;
         if (usenoteon_==0) {
-          proxy_.call_seqtick(channel, pData->_note, pData->_inst, pData->_cmd,
+          proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd,
             pData->_parameter);
         } else {
           // noteon modus
@@ -790,7 +766,7 @@ namespace psycle { namespace host {
       return;
     }
     try {
-      proxy_.call_stop();
+      proxy().Stop();
       if (usenoteon_!=0) {
         for(int i(0) ; i < MAX_TRACKS; ++i) {
           trackNote[i].key = 255; // No Note.
@@ -809,7 +785,7 @@ namespace psycle { namespace host {
       if(trackNote[channel].key != notecommands::empty) {
         oldnote = trackNote[channel].key;
       }
-      proxy_.call_command(oldnote, inst, cmd, val);
+      proxy().Command(oldnote, inst, cmd, val);
   }
 
   void LuaPlugin::SendNoteOn(unsigned char channel,
@@ -826,7 +802,7 @@ namespace psycle { namespace host {
       thisnote.key = key;
       thisnote.midichan = 0;
       trackNote[channel] = thisnote;
-      proxy_.call_noteon(key, oldnote, inst, cmd, val);
+      proxy().NoteOn(key, oldnote, inst, cmd, val);
   }
 
   void LuaPlugin::SendNoteOff(unsigned char channel,
@@ -838,7 +814,7 @@ namespace psycle { namespace host {
       if (trackNote[channel].key == notecommands::empty)
         return;
       note thenote = trackNote[channel];
-      proxy_.call_noteoff(thenote.key, lastkey, inst, cmd, val);
+      proxy().NoteOff(thenote.key, lastkey, inst, cmd, val);
       trackNote[channel].key = 255;
       trackNote[channel].midichan = 0;
   }
@@ -891,7 +867,7 @@ namespace psycle { namespace host {
 
    void LuaPlugin::SaveBank(const std::string& filename) {
       unsigned char * pData(0);
-      int chunksize = proxy_.call_data(&pData, true);
+      int chunksize = proxy().GetData(&pData, true);
       using namespace std;
 	  #if __cplusplus >= 201103L
         ofstream ofile(filename, ios::binary);
@@ -917,7 +893,7 @@ namespace psycle { namespace host {
         file.seekg (0, ios::beg);
         file.read(pData, size);
         file.close();
-        proxy_.call_putdata((unsigned char*)pData, size);
+        proxy().PutData((unsigned char*)pData, size);
         delete[] pData;
         return true;
       }

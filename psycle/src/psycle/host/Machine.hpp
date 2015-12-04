@@ -12,6 +12,7 @@
 #include <universalis/stdlib/chrono.hpp>
 #include <universalis/os/loggers.hpp>
 #include <stdexcept>
+
 namespace psycle
 {
 	namespace host
@@ -530,8 +531,7 @@ namespace psycle
 					virtual void SetPosX(int x) {_x = x;}
 					virtual int  GetPosY() const { return _y; }
 					virtual void SetPosY(int y) {_y = y;}
-          virtual MachineUiType::Value GetUiType() const { return MachineUiType::NATIVE; }
-          virtual void OnGuiTimer(void* mhnd, void* chnd) {}
+          virtual MachineUiType::Value GetUiType() const { return MachineUiType::NATIVE; }          
 
 				public:///\todo private:
 					int _x;
@@ -688,6 +688,6 @@ namespace psycle
 		protected:
 			static char* _psName;
 		};
-
+    
 	}
 }
