@@ -2,6 +2,8 @@
 ///\brief implementation file for psycle::host::Global.
 #include <psycle/host/detail/project.private.hpp>
 #include "Global.hpp"
+#include "LuaPlugin.hpp"
+#include "machineloader.hpp"
 
 #define _GetProc(fun, type, name) \
 {                                                  \
@@ -46,7 +48,7 @@ namespace psycle
 		Song * Global::pSong(0);
 		Player * Global::pPlayer(0);
 		vst::Host * Global::pVstHost(0);
-		MachineLoader * Global::pMacLoad(0);
+		MachineLoader * Global::pMacLoad(0);    
 
 		FAvSetMmThreadCharacteristics    Global::pAvSetMmThreadCharacteristics(NULL);
 		FAvRevertMmThreadCharacteristics Global::pAvRevertMmThreadCharacteristics(NULL);
@@ -71,6 +73,42 @@ namespace psycle
 			  &osvi, VER_MAJORVERSION | VER_MINORVERSION,
 			  dwlConditionMask);
 		}
+    
+    
+
+
+    Timer::Timer() { GlobalTimer::instance().AddListener(this); }
+    Timer::~Timer() { GlobalTimer::instance().RemoveListener(this); }
+
+    void GlobalTimer::AddListener(Timer* listener) {                
+      listeners_.push_back(listener);
+    }
+    
+    void GlobalTimer::RemoveListener(Timer* listener) {  
+      if (!listeners_.empty()) {
+        TimerList::iterator i = std::find(listeners_.begin(), listeners_.end(), listener);
+        if (i != listeners_.end()) {
+          if (i!=it) {
+            listeners_.erase(i);
+          } else {
+            listeners_.erase(it++);
+            removed_ = true;
+          }          
+        }
+      }
+    }
+    
+    void GlobalTimer::OnViewRefresh() {          
+      it = listeners_.begin();
+      while (it != listeners_.end()) {
+        (*it)->OnTimerViewRefresh();
+        if (!removed_) {          
+          ++it;
+        } else {
+          removed_ = false;
+        }
+      }
+    }       
 
 		Global::Global()
 		{
@@ -84,5 +122,7 @@ namespace psycle
 			portaudio::CloseAVRT();
 		}
 
-	}
+
+    
+  }    
 }

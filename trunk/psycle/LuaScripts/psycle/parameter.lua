@@ -20,7 +20,7 @@ function parameter:new(name, label, min, max, step, val, mpf, id)
 			 label_ = label,
 			 min_ = min,
 			 max_ = max,
-             velrange_ = 0, 
+       velrange_ = 0, 
 			 learn_ = false,
 			 step_ = step,
 			 val_ = (val-min)/(max-min),
@@ -168,10 +168,19 @@ function parameter:learn(dolearn)
     self.learn_ = dolearn    
 end
 
+function parameter:startnotify()
+  for k, v in pairs(self.listener_) do      
+     if (v.onstarttweak ~=nil) then	   
+       v:onstarttweak(self)
+	 end
+  end
+  return self
+end
+
 function parameter:afternotify()
   for k, v in pairs(self.listener_) do      
-     if (v.aftertweaked ~=nil) then	   
-       v:aftertweaked(self)
+     if (v.onaftertweaked ~=nil) then	   
+       v:onaftertweaked(self)
 	 end
   end
   return self

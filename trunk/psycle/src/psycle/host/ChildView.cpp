@@ -106,6 +106,7 @@ namespace psycle { namespace host {
 			,patBufferCopy(false)
 			,_pSong(Global::song())
       ,active_lua_(0)      
+      ,lua_ui_extentions_(new LuaUiExtentions())
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -118,7 +119,7 @@ namespace psycle { namespace host {
 			note_tab_selected=NULL;
 			MBStart.x=0;
 			MBStart.y=0;
-      lua_menu_ = new mfc::Menu(0);
+      lua_menu_ = new ui::mfc::Menu(0);
 
 			patView = &PsycleGlobal::conf().patView();
 			macView = &PsycleGlobal::conf().macView();
@@ -133,8 +134,7 @@ namespace psycle { namespace host {
 
 		CChildView::~CChildView()
 		{
-			PsycleGlobal::inputHandler().SetChildView(NULL);
-
+			PsycleGlobal::inputHandler().SetChildView(NULL);      
 			if ( bmpDC != NULL )
 			{
 				char buf[128];
@@ -142,12 +142,7 @@ namespace psycle { namespace host {
 				TRACE(buf);
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
-			}
-      delete lua_menu_;
-      std::vector<LuaPlugin*>::iterator it = lua_extensions_.begin();
-      if (it != lua_extensions_.end()) {
-        delete *it;
-      }
+			}      
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd)      
@@ -351,9 +346,10 @@ namespace psycle { namespace host {
 		void CChildView::OnTimer( UINT_PTR nIDEvent )
 		{
 			if (nIDEvent == ID_TIMER_VIEW_REFRESH)
-			{
+			{        
 				CSingleLock lock(&_pSong.semaphore, FALSE);
 				if (!lock.Lock(50)) return;
+        GlobalTimer::instance().OnViewRefresh();
 				Master* master = ((Master*)_pSong._pMachine[MASTER_INDEX]);
 				if (master)
 				{
@@ -489,15 +485,17 @@ namespace psycle { namespace host {
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
+      GlobalTimer::instance().Clear();
 			if (PsycleGlobal::conf()._pOutputDriver->Initialized())
 			{
 				PsycleGlobal::conf()._pOutputDriver->Reset();
 			}
 			pParentMain->KillTimer(ID_TIMER_VIEW_REFRESH);
-			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);
+			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);      
+      delete lua_menu_;      
 		}
 
-		void CChildView::OnPaint() 
+    void CChildView::OnPaint() 
 		{
       CRgn rgn;
 			rgn.CreateRectRgn(0, 0, 0, 0);
@@ -2465,24 +2463,27 @@ namespace psycle { namespace host {
       int pos = 8; bool has_ext = false;
       for (; it != list.end(); ++it) {
         PluginInfo* info = *it;        
-        int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;
-        LuaPlugin* mac = 0;
+        int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;        
         try {
-          mac = LuaHost::LoadPlugin(info->dllname.c_str(), 1024);
+          LuaPluginPtr mac(LuaGlobal::LoadPlugin(info->dllname.c_str(), -1));
           mac->Init();
-          ui::canvas::Canvas* user_view = mac->GetCanvas();
+          ui::canvas::Canvas* user_view = 0;
+          try {
+            user_view = mac->canvas().lock().get();
+          } catch (std::exception&) {            
+          } 
           if (user_view) {
             view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());            
           } else {            
             view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
           }
           ui::MenuItem::id_counter++;
-          lua_extensions_.push_back(mac); 
-          menuItemIdMap[id] = mac;
+          LuaUiExtentions::instance()->Add(mac); 
+          menuItemIdMap[id] = mac.get();
           if (user_view) ui::MenuItem::id_counter++;          
           has_ext = true;
-        } catch (std::exception& e) {
-          e;
+        } catch (std::exception&) {
+          // LuaHost already displayed an error message
         }                
       } 
       if (has_ext) {
@@ -2500,12 +2501,14 @@ namespace psycle { namespace host {
           LuaPlugin* lp = active_lua_;
           lp->custom_menubar.reset(0);
           try {                 
-            lp->proxy().reload();            
-            pParentMain->m_luaWndView.set_canvas(lp->proxy().call_canvas());
+            lp->proxy().Reload();            
+            pParentMain->m_luaWndView.set_canvas(lp->canvas());
             CRect rc;            
-            GetWindowRect(&rc);
-            pParentMain->m_luaWndView.ScreenToClient(rc);            
-            pParentMain->m_luaWndView.OnSize(SIZE_RESTORED, rc.Width(), rc.Height());
+            pParentMain->m_luaWndView.GetClientRect(&rc);
+            ui::canvas::Canvas* c = lp->canvas().lock().get();
+            if (c) {
+              c->OnSize(rc.Width(), rc.Height());
+            }
             lua_menu_->setcmenu(pParentMain->GetMenu());  
             lp->GetMenu(lua_menu_);
             lp->set_crashed(false);
@@ -2523,44 +2526,24 @@ namespace psycle { namespace host {
         RemoveLuaMenu();
         LuaPlugin* plug = it->second;        
         if (plug->crashed()) return;
-        ui::canvas::Canvas* user_view = plug->GetCanvas();
-        if (user_view) {
+        LuaCanvas::WeakPtr user_view = plug->canvas();        
+        if (!user_view.expired()) {          
           CRect rect;            
           GetWindowRect(&rect);
-          pParentMain->ScreenToClient(rect);                    
-          //this->ScreenToClient(&rect); //optional step - see below          
+          pParentMain->ScreenToClient(rect);          
           pParentMain->m_wndView.ShowWindow(SW_HIDE);          
           pParentMain->m_luaWndView.set_canvas(user_view);
-          user_view->Flush();
+          pParentMain->m_luaWndView.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);                  
           pParentMain->m_luaWndView.ShowWindow(SW_SHOW);          
-//          pParentMain->m_luaWndView.BringWindowToTop(); // ShowWindow(SW_SHOW); // SetActiveWindow(); //.set_canvas(user_view);          
-          pParentMain->m_luaWndView.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);
-          pParentMain->m_luaWndView.OnSize(SIZE_RESTORED, rect.Width(), rect.Height());
-          //pParentMain->m_luaWndView.SetWindowPos(NULL, 0, 0, 500, 500, SWP_NOZORDER);
-          pParentMain->m_luaWndView.InitTimer();
           GetParent()->SetActiveWindow();
-          active_lua_ = plug;
-          /*
-          // integrate into childview
-          /active_lua_ = plug;        
-          viewMode = view_modes::luaplugin;          
-          lua_menu_->setcmenu(pParentMain->GetMenu());        
-          active_lua_->GetMenu(lua_menu_);
-          //ShowScrollBar(SB_BOTH,FALSE);
-          SCROLLINFO si;
-				  si.cbSize = sizeof(SCROLLINFO);
-				  si.fMask = SIF_PAGE | SIF_RANGE;
-				  si.nMin = 0;
-				  si.nMax = 20; // -VISLINES;
-				  si.nPage = 1;
-				  SetScrollInfo(SB_VERT,&si);
-          //ShowScrollBar(SB_VERT,TRUE);
-				  //ShowScrollBar(SB_HORZ,TRUE);
-			    Invalidate(false);
-          active_lua_->InvalidateMenuBar();
-          SetFocus();*/
-        } else {          
-          plug->OnExecute(); // notify ext should do sth
+          active_lua_ = plug;          
+        } else {  
+          try {
+            plug->OnExecute();
+          } catch (std::exception&) {
+            // LuaGlobal::onexception(plug->proxy().state());
+            // AfxMessageBox(e.what());
+          }  
         }               
       } else {        
         if (!active_lua_->crashed()) {

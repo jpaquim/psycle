@@ -5,7 +5,7 @@
 namespace psycle
 {
 	namespace host
-	{
+	{    
 //////////////////////////////////////////////////////////////////////////
 /// dummy machine.
 class Dummy : public Machine

@@ -105,7 +105,7 @@ namespace psycle
 					{
 						try
 						{
-							pMachine = luaPlug = dynamic_cast<LuaPlugin*>(LuaHost::LoadPlugin(psPluginDll,songIdx));
+							pMachine = luaPlug = dynamic_cast<LuaPlugin*>(LuaGlobal::LoadPlugin(psPluginDll,songIdx));
 						}
 						catch(const std::exception& e)
 						{

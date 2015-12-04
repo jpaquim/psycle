@@ -15,9 +15,16 @@ namespace universalis { namespace os {
 	class terminal;
 }}
 
-namespace psycle { namespace host { namespace ui { namespace canvas { struct Event; }}}}
+// namespace psycle { namespace host { namespace ui { namespace canvas { struct Event; }}}}
 
-namespace psycle { namespace host {
+namespace psycle {
+namespace host {
+    
+class LuaPlugin;
+
+typedef boost::shared_ptr<LuaPlugin> LuaPluginPtr;
+extern boost::shared_ptr<LuaPlugin> nullPtr;
+
   //controlling function header
 static UINT StartThread (LPVOID param);
 
@@ -28,89 +35,64 @@ typedef struct THREADSTRUCT
         //you can add here other parameters you might be interested on
 } THREADSTRUCT;
 
-class TDlg {
-public:
-  static UINT TDlg::StartThread (LPVOID param)
-{
-//    THREADSTRUCT*    ts = (THREADSTRUCT*)param;
-
-    //here is the time-consuming process
-    //which interacts with your dialog
-    AfxMessageBox ("Thread is started!");
-
-        //see the access mode to your dialog controls
-    static const char szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
-
-				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
-				if ( dlg.DoModal() == IDOK )
-				{
-        }
-
-    //you can also call AfxEndThread() here
-    return 1;
-}
-
-  void TDlg::OnStart()
-{
-        //call the thread on a button action or menu
-    THREADSTRUCT *_param = new THREADSTRUCT;
-    _param->_this = this;
-    AfxBeginThread (&StartThread, _param);
-}
-};
-
 class LuaPlugin;
 
-class LuaProxy {
+class LuaProxy : public LockIF {
 public:
 	LuaProxy(LuaPlugin* plug, lua_State* state);
 	~LuaProxy();
 
-  const PluginInfo& info() const { return info_; }
-	int num_cols() const { return plugimport_->numcols(); }
-	int num_parameter() const { return plugimport_->numparams(); }
-	double get_parameter_value(int numparam);
-	std::string get_parameter_id(int numparam);
-	std::string get_parameter_name(int numparam);
-	std::string get_parameter_display(int numparam);
-	std::string get_parameter_label(int numparam);
-	void get_parameter_range(int numparam,int &minval, int &maxval);
-	int get_parameter_type(int numparam);
-	int call_data(unsigned char **ptr, bool all);
-	uint32_t call_data_size();
-	void call_putdata(unsigned char* data, int size);
-	// calls from proxy to script
-	void call_run();
-	void call_init();
-  LuaCanvas* call_canvas();
-	PluginInfo call_info();
-	void call_seqtick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/);
-	// calls if noteon modus used
-	void call_command(int lastnote, int inst, int cmd, int val);
-	void call_noteon(int note, int lastnote, int inst, int cmd, int val);
-	void call_noteoff(int note, int lastnote, int inst, int cmd, int val);  
-	void call_newline();
-	void call_work(int num, int offset=0);
-  void call_parameter(int numparameter, double val);
-	void call_stop();
+  const PluginInfo& info() const;
+	int num_cols() const { return lua_mac_->numcols(); }
+	int num_parameter() const { return lua_mac_->numparams(); }
+					
+	void Run();
+	void Init();
+  void Reload();
+  void Free();
+
+  LuaCanvas::WeakPtr canvas() { return lua_mac_->canvas(); }
+
+  void SequencerTick();
+  void ParameterTweak(int par, double val);
+  void Work(int numsamples, int offset=0);
+  void Stop();
+  void PutData(unsigned char* data, int size);
+  int GetData(unsigned char **ptr, bool all);
+	uint32_t GetDataSize();
+  void Command(int lastnote, int inst, int cmd, int val);
+  void NoteOn(int note, int lastnote, int inst, int cmd, int val);
+	void NoteOff(int note, int lastnote, int inst, int cmd, int val);
+  bool DescribeValue(int parameter, char * txt);
+  void SeqTick(int channel, int note, int ins, int cmd, int val);	
+  double Val(int par);
+  std::string Id(int par);
+	std::string Name(int par);		
+	void Range(int par,int &minval, int &maxval);
+	int Type(int par);
+				
   void call_execute();
 	void call_sr_changed(int rate);
 	void call_aftertweaked(int idx);
-	void call_menu(UINT id);
-	std::string call_help();
-	void free_state();
+	void call_menu(UINT id);  
+	std::string call_help();	
 	void set_state(lua_State* state);
-	void reload();
+  lua_State* state() const { return L; }	
   void update_menu(void* menu);
   ui::MenuBar* get_menu(ui::Menu* menu);
-  MachineUiType::Value ui_type() const { return plugimport_->ui_type(); }
+  MachineUiType::Value ui_type() const { return lua_mac_->ui_type(); }
   void call_setprogram(int idx);
   int call_numprograms();
   int get_curr_program();
   std::string get_program_name(int bnkidx, int idx);
-  MachinePresetType::Value prsmode() const { return plugimport_->prsmode(); }
+  MachinePresetType::Value prsmode() const { return lua_mac_->prsmode(); }
   void lock() const { ::EnterCriticalSection(&cs); }
   void unlock() const { ::LeaveCriticalSection(&cs); }
+
+  LuaPlugin& host() { return *host_; }
+  LuaPlugin& host() const { return *host_; }
+  LuaMachine* lua_mac() { return lua_mac_; };
+      
 private:
 	void export_c_funcs();
 	// script callbacks
@@ -119,34 +101,54 @@ private:
 	static int terminal_output(lua_State* L);
 	static int call_filedialog(lua_State* L);
   static int call_selmachine(lua_State* L);
-	static int set_machine(lua_State* L);
-
-	void get_method_strict(lua_State* L, const char* method);
-	bool get_method_optional(lua_State* L, const char* method);
-	bool get_param(lua_State* L, int index, const char* method);
-
-	std::string GetString();
-	PluginInfo info_;
-	LuaPlugin *plug_;
-	LuaMachine* plugimport_;
+	static int set_machine(lua_State* L);  
+  std::string ParDisplay(int par);
+  std::string ParLabel(int par);
+  
+  mutable bool info_update_;
+	mutable PluginInfo info_;
+	LuaPlugin *host_;
+	LuaMachine* lua_mac_;
 	lua_State* L;
-	static universalis::os::terminal * terminal;
-  static int gui_type_;
-  TDlg test;
-  mutable CRITICAL_SECTION cs;
+	static universalis::os::terminal * terminal;  
+  mutable CRITICAL_SECTION cs;  
 };
 
-struct LuaHost {   
+typedef std::list<LuaPluginPtr> LuaUiList;
+typedef boost::shared_ptr<class LuaUiExtentions> LuaUiExtentionsPtr;
+
+class LuaUiExtentions {     
+ public:
+   LuaUiExtentions() { }
+   ~LuaUiExtentions() { }
+   static LuaUiExtentionsPtr instance();   
+   void Add(const LuaPluginPtr& ptr) { uiluaplugins.push_back(ptr); }
+   void Remove(const LuaPluginPtr& ptr) { uiluaplugins.remove(ptr); }
+   LuaUiList Get(const std::string& name);
+   LuaPluginPtr Get(int idx);   
+ private:
+   LuaUiList uiluaplugins;
+};
+
+struct LuaGlobal {
    static std::map<lua_State*, LuaProxy*> proxy_map;
    static LuaProxy* proxy(lua_State* L) {
-     std::map<lua_State*, LuaProxy*>::iterator it = proxy_map.find(L);     
+     std::map<lua_State*, LuaProxy*>::iterator it = proxy_map.find(L);
      return it != proxy_map.end() ? it->second : 0;
-   }
+   }   
    static lua_State* load_script(const std::string& dllpath);
    static LuaPlugin* LoadPlugin(const std::string& dllpath, int macIdx);
-   static PluginInfo LoadInfo(const std::string& dllpath);
+   static PluginInfo LoadInfo(const std::string& dllpath);         
+   static Machine* GetMachine(int idx);
+   static class LuaPlugin* GetLuaPlugin(int idx) {
+      Machine* mac = GetMachine(idx);
+      if (mac->_type == MACH_LUA) {
+        return (LuaPlugin*) mac;
+      }
+      return 0;
+   }   
 };
 
-
-}
-}
+ 
+}  // namespace host
+}  // namespace psycle

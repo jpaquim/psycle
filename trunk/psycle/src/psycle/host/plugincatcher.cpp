@@ -769,7 +769,7 @@ namespace psycle
 					{
 						PluginInfo info;
 						try {
-							info = LuaHost::LoadInfo(fileName.c_str());
+							info = LuaGlobal::LoadInfo(fileName.c_str());
 						}
 						catch(const std::exception & e) {
 							std::ostringstream s; s << typeid(e).name() << std::endl;

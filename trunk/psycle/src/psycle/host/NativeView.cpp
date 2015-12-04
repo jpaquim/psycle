@@ -43,9 +43,7 @@ namespace psycle { namespace host {
 			return 0;
 		}
 
-    void CanvasParamView::OnDestroy()
-		{
-      StopTimer();
+    void CanvasParamView::OnDestroy() {      
     }
 
 		BOOL CanvasParamView::PreCreateWindow(CREATESTRUCT& cs)
@@ -61,9 +59,9 @@ namespace psycle { namespace host {
     void CanvasParamView::OnReload(Machine* mac)
     {
       LuaPlugin* lp = (LuaPlugin*) (mac);
-      canvas::Canvas* user_view = lp->GetCanvas();
-      if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
-        set_canvas(user_view);
+      LuaCanvas::WeakPtr canvas = lp->canvas();      
+      if (!canvas.expired() && lp->ui_type() == MachineUiType::CUSTOMWND) {
+        set_canvas(lp->canvas());
       }
     }
 
@@ -495,18 +493,7 @@ namespace psycle { namespace host {
 		}
 
 		bool CNativeView::GetViewSize(CRect& rect)
-		{
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
-          rect.left= rect.top = 0;
-          double w, h;
-          user_view->preferredsize(w, h);
-          rect.right = w, rect.bottom = h;
-          return true;
-        }
-      }
+		{     
 			int realheight = uiSetting->dialheight+1;
 			int realwidth = colwidth+1;
 			rect.left= rect.top = 0;

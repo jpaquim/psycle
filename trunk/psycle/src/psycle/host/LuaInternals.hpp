@@ -7,9 +7,9 @@
 #include "LuaArray.hpp"
 #include "XMSampler.hpp"
 #include <psycle/helpers/resampler.hpp>
+#include "LuaHelper.hpp"
+#include "LuaGui.hpp"
 
-struct lua_State;
-struct luaL_Reg;
 
 namespace psycle {namespace host{namespace ui{namespace canvas{class Canvas;}}}}
 
@@ -19,7 +19,7 @@ namespace psycle { namespace host {
   class LuaConfig {
     public:
      LuaConfig();
-     LuaConfig(const std::string& group);     
+     LuaConfig(const std::string& group);
 
      ConfigStorage* store() { return store_.get(); }
      void OpenGroup(const std::string& group);
@@ -39,6 +39,8 @@ namespace psycle { namespace host {
     static int closegroup(lua_State* L);
     static int groups(lua_State* L);
     static int keys(lua_State* L);
+    static int octave(lua_State* L);
+    static int keytocmd(lua_State* L);
     static int plugindir(lua_State* L);
   };
 
@@ -52,18 +54,8 @@ namespace psycle { namespace host {
   };
 
   class LuaMachine {
-  public:      
-    LuaMachine()
-        : proxy_(0),
-          mac_(0),
-          shared_(false),
-          num_parameter_(0),
-          num_cols_(0),
-          ui_type_(MachineUiType::NATIVE),
-          canvas_(0),
-          prsmode_(MachinePresetType::NATIVE),
-          num_programs_(0)
-          {}
+  public:
+    LuaMachine(lua_State* L);    
     ~LuaMachine();
     void lock() const;
     void unlock() const;
@@ -86,21 +78,24 @@ namespace psycle { namespace host {
     int numchannels() const { return sampleV_.size(); }
     MachineUiType::Value ui_type() const { return ui_type_; }
     void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
-    ui::canvas::Canvas* get_canvas(int idx = 0) { return canvas_; }
+    void set_canvas(LuaCanvas::Ptr canvas) { canvas_ = canvas; }
+    LuaCanvas::WeakPtr canvas() { return canvas_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
     void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
+    void doexit();
+    void reload();    
   private:
-    LuaMachine(LuaMachine&) {}
-    LuaMachine& operator=(LuaMachine) {}
+    //LuaMachine(LuaMachine&)  {}
+    //LuaMachine& operator=(LuaMachine) {}
     Machine* mac_;
     psybuffer sampleV_;
-    bool shared_;    
+    bool shared_;
     int num_parameter_, num_cols_, num_programs_;
-    MachineUiType::Value ui_type_;
-    ui::canvas::Canvas* canvas_;
+    MachineUiType::Value ui_type_;    
     MachinePresetType::Value prsmode_;
-    LuaProxy* proxy_;
+    LuaProxy* proxy_; 
+    LuaCanvas::WeakPtr canvas_;
   };
 
   struct LuaMachineBind {
@@ -108,11 +103,11 @@ namespace psycle { namespace host {
     static const char* meta;
   private:
     static int create(lua_State* L);
+    static int gc(lua_State* L);
     static int work(lua_State* L);
     static int tick(lua_State* L);
     static int channel(lua_State* L);
-    static int resize(lua_State* L);
-    static int gc(lua_State* L);
+    static int resize(lua_State* L);    
     static int setbuffer(lua_State* L);
     static int setnorm(lua_State* L);
     static int getnorm(lua_State* L);
@@ -135,11 +130,14 @@ namespace psycle { namespace host {
     static int show_childview_gui(lua_State* L);
     static int getparam(lua_State* L);
     static int setpresetmode(lua_State* L);
+    static int exit(lua_State* L);
+    static int reload(lua_State* L);
+    static int setcanvas(lua_State* L);
   };
 
   struct LuaPlayerBind {
     static const char* meta;
-    static int open(lua_State *L);
+    static int open(lua_State *L);    
     static int create(lua_State* L);
     static int samplerate(lua_State* L);
     static int tpb(lua_State* L);
@@ -151,10 +149,10 @@ namespace psycle { namespace host {
   };
 
   struct LuaPatternEvent {
-    LuaPatternEvent(int v, int l, int p) : val(v), len(l), pos(p) {}
-    int val;
+    PatternEntry entry;
     int len;
     int pos;
+    bool has_off;
   };
 
   class LuaPatternData {
@@ -177,14 +175,18 @@ namespace psycle { namespace host {
   struct LuaPatternDataBind {
     static int open(lua_State *L);
     static int create(lua_State* L);
+    static int gc(lua_State* L);
     static int pattern(lua_State* L);
+    static int settrack(lua_State* L);
     static int track(lua_State* L);
     static int numtracks(lua_State *L);
     static int numlines(lua_State *L);
     static int eventat(lua_State* L);
-    static int insertevent(lua_State* L);
+    static int setevent(lua_State* L);
+    static int buildevent(lua_State* L);
     static const char* meta;
     static int createevent(lua_State* L, LuaPatternEvent& ev);
+    static int getevent(lua_State* L, int idx, LuaPatternEvent& ev);
   };
 
    struct LuaSequenceBarBind {
@@ -526,7 +528,7 @@ namespace psycle { namespace host {
   };
 
   struct WaveOsc {
-    WaveOsc(WaveOscTables::Shape shape);    
+    WaveOsc(WaveOscTables::Shape shape);
     void work(int num, float* data, SingleWorkInterface* master);
     float base_frequency() const { return resampler_->frequency(); }
     void set_frequency(float f) { resampler_->set_frequency(f); }

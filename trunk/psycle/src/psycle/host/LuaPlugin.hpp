@@ -10,18 +10,25 @@
 #include "Machine.hpp"
 #include "LuaArray.hpp"
 #include "LuaHost.hpp"
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
 
 struct lua_State;
-namespace psycle { namespace host { namespace ui { namespace canvas { struct Event; }}}}
 
 namespace psycle { namespace host {
-  class LuaPlugin : public Machine
+
+  const int AUTOID = -1;
+
+  class LuaPlugin : public Machine,
+                    public boost::enable_shared_from_this<LuaPlugin>,
+                    public Timer
   {
   public:
-    LuaPlugin(lua_State* state, int index, bool full=true);
+    LuaPlugin(lua_State* state, int index, bool full=true);    
     virtual ~LuaPlugin();
     void Free();
-    LuaProxy& proxy() { return proxy_; }
+    LuaProxy& proxy() { return proxy_; }    
+    const LuaProxy& proxy() const { return proxy_; }
 
     virtual int GenerateAudioInTicks( int startSample, int numSamples );
     virtual float GetAudioRange() const { return 1.0f; }
@@ -51,11 +58,10 @@ namespace psycle { namespace host {
     virtual void GetParamValue(int numparam, char * parval);
     virtual int GetParamValue(int numparam);
     virtual void GetParamId(int numparam, std::string& id);
-    virtual bool SetParameter(int numparam, int value); //{ return false;}
-    virtual bool DescribeValue(int parameter, char * psTxt);
+    virtual bool SetParameter(int numparam, int value); //{ return false;}    
     virtual int GetNumInputPins() const { return this->IsSynth() ? 0 : samplesV.size(); }
     virtual int GetNumOutputPins() const { return samplesV.size(); }
-    PluginInfo CallPluginInfo() { return proxy_.call_info(); }
+    const PluginInfo& info() const { return proxy().info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
     virtual void AfterTweaked(int numparam);
     std::auto_ptr<ui::MenuBar> GetMenu(ui::Menu* menu) {
@@ -70,7 +76,7 @@ namespace psycle { namespace host {
     virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }
     void OnMenu(UINT id) { proxy_.call_menu(id); }
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
-    ui::canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }    
+    LuaCanvas::WeakPtr canvas() { return proxy().canvas(); }
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);
@@ -96,16 +102,7 @@ namespace psycle { namespace host {
 				val[0]='\0';
 		}
 		virtual int GetNumBanks(){ return (numPrograms()/128)+1;};*/
-    virtual void OnGuiTimer(void* mhnd, void* chnd) {
-      // todo not working atm .. transfer to Canvas.cpp
-      if (!crashed()) {
-        if (custom_menubar.get() && custom_menubar->needsupdate()) {
-          proxy_.update_menu(mhnd);
-          custom_menubar->setupdate(false);
-        }        
-      }
-    }
-
+    
     std::string dll_path_;
     bool usenoteon_;
     MachinePresetType::Value prsmode() const { return proxy_.prsmode(); }
@@ -113,8 +110,16 @@ namespace psycle { namespace host {
     void lock() const { proxy_.lock(); }
     void unlock() const { proxy_.unlock(); }
 
-    void InvalidateMenuBar() { 
+    void InvalidateMenuBar() {
       if (custom_menubar.get()) custom_menubar->setupdate(true);
+    }
+
+    void DoExit() { do_exit_ = true; }
+    void DoReload() { do_reload_ = true; }
+
+    boost::shared_ptr<LuaPlugin> this_ptr()
+    {
+        return shared_from_this();
     }
 
   protected:
@@ -122,6 +127,21 @@ namespace psycle { namespace host {
     int curr_prg_;
 
   private:
+    virtual void OnTimerViewRefresh() {
+      if (do_exit_) {
+       LuaUiExtentions::instance()->Remove(this_ptr());
+      } else if (do_reload_) {
+        do_reload_ = false;
+        try {
+          try {
+            proxy().Reload();
+            custom_menubar.reset(0);
+          } CATCH_WRAP_AND_RETHROW(*this);
+        } catch (std::exception& ) {                
+        }
+      }
+    }
+
     // additions if noteon mode is used
     struct note {
       unsigned char key;
@@ -145,6 +165,9 @@ namespace psycle { namespace host {
       unsigned char val);
     public:
     std::auto_ptr<ui::MenuBar> custom_menubar;
+    bool do_exit_, do_reload_;    
+
+    static int idex_; // auto index for host extensions
   };
 }   // namespace
 }   // namespace

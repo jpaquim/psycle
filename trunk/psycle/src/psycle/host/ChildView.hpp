@@ -2,6 +2,7 @@
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
 #include <psycle/host/detail/project.hpp>
+#include <boost/shared_ptr.hpp>
 #include "Psycle.hpp"
 #include "PsycleConfig.hpp"
 #include "Song.hpp"
@@ -468,9 +469,13 @@ namespace host {
       public:
       class LuaPlugin* active_lua_;      
       ui::Menu* lua_menu_;
-      std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;
-      std::vector<LuaPlugin*> lua_extensions_;
+      std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;      
 
+      boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions() {
+        return lua_ui_extentions_;
+      }
+    private:
+      boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions_;
 		public:			
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);

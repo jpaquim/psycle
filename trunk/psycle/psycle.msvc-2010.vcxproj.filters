@@ -89,6 +89,9 @@
     <Filter Include="psycle\engine\machine\ladspa">
       <UniqueIdentifier>{9435c005-f88b-4d7f-905c-4880a1a27bc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="psycle\mfc\scintilla">
+      <UniqueIdentifier>{a7082389-bb63-41df-814e-a7533182308f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\psycle\host\Constants.hpp">
@@ -522,6 +525,12 @@
     </ClInclude>
     <ClInclude Include="src\psycle\host\LuaGui.hpp">
       <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Scintilla.h">
+      <Filter>psycle\mfc\scintilla</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SciLexer.h">
+      <Filter>psycle\mfc\scintilla</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
