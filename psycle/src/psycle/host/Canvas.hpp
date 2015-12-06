@@ -1201,7 +1201,11 @@ class Scintilla : public CWndItem<CScintilla>, public CSListener {
 
   void LoadFile(const std::string& filename) {
     using namespace std;    
-    ifstream file(filename, ios::in|ios::binary|ios::ate);
+    #if __cplusplus >= 201103L
+      ifstream file (filename, ios::in|ios::binary|ios::ate);
+    #else
+      ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
+    #endif
     if (file.is_open()) {
       modified_ = true;
       f(SCI_CANCEL, 0, 0);

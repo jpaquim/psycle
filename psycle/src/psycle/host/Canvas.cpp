@@ -472,8 +472,9 @@ int Group::zorder(Item::Ptr item) const {
 }
 
 Item::Ptr Group::Intersect(double x, double y, Event* ev, bool& worked) {  
+  Item::Ptr nullpointer;
   if (!Item::Intersect(x, y, ev,worked)) {
-    return 0;
+    return nullpointer;
   }
   if (ev->type() == Event::BUTTON_PRESS) {
     int fordebugonly = 0;
@@ -485,7 +486,7 @@ Item::Ptr Group::Intersect(double x, double y, Event* ev, bool& worked) {
     Item::Ptr item = *rev_it;
     item = item->visible() 
            ? item->Intersect(x-item->x(), y-item->y(), ev, worked)
-           : 0; 
+		   : nullpointer; 
     if (worked) {
       return item;
     }

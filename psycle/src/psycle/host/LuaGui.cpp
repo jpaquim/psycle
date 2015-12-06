@@ -513,6 +513,8 @@ int LuaFrameWndBind::setcanvas(lua_State* L) {
 ///////////////////////////////////////////////////////////////////////////////
 template<class T>
 canvas::Item::Ptr CallEvents(lua_State* L, canvas::Event* ev, T that, bool is_canvas = false) {  
+canvas::Item::Ptr nullpointer;
+
   int n1 = lua_gettop(L);
   if (is_canvas) {
     LuaHelper::find_weakuserdata<>(L, that.get());
@@ -617,7 +619,7 @@ canvas::Item::Ptr CallEvents(lua_State* L, canvas::Event* ev, T that, bool is_ca
   if (ev->type() != canvas::Event::ONTIMER) {
     lua_gc(L, LUA_GCCOLLECT, 0);
   }
-  return has_event_method ? that : 0;
+  return has_event_method ? that : nullpointer;
 }
 
 canvas::Item::WeakPtr LuaItem::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, shared_from_this()); }
