@@ -2465,7 +2465,7 @@ namespace psycle { namespace host {
         PluginInfo* info = *it;        
         int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;        
         try {
-          LuaPluginPtr mac(LuaGlobal::LoadPlugin(info->dllname.c_str(), -1));
+          LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
           mac->Init();
           ui::canvas::Canvas* user_view = 0;
           try {
@@ -2502,13 +2502,7 @@ namespace psycle { namespace host {
           lp->custom_menubar.reset(0);
           try {                 
             lp->proxy().Reload();            
-            pParentMain->m_luaWndView.set_canvas(lp->canvas());
-            CRect rc;            
-            pParentMain->m_luaWndView.GetClientRect(&rc);
-            ui::canvas::Canvas* c = lp->canvas().lock().get();
-            if (c) {
-              c->OnSize(rc.Width(), rc.Height());
-            }
+            pParentMain->m_luaWndView.set_canvas(lp->canvas());            
             lua_menu_->setcmenu(pParentMain->GetMenu());  
             lp->GetMenu(lua_menu_);
             lp->set_crashed(false);

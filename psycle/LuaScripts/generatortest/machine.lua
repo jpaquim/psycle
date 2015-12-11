@@ -32,8 +32,12 @@ function machine:info()
 end
 
 -- help text displayed by the host
-function machine:help()
+function machine:h1()
   a = 2 + "s"
+end
+
+function machine:help()
+  self:h1()
   return "01xx : slide up\n"..
          "02xx : slide down\n"..
 		 "04xy : vibrato(frq,gain)\n"..
@@ -118,7 +122,7 @@ function machine:freevoice()
   return self.currvoice
 end
 
-function machine:seqtick(channel, note, ins, cmd, val)  
+function machine:seqtick(channel, note, ins, cmd, val)
   local curr = arps[channels[channel]]
   if (note < 119) then 
     if cmd == 195 and curr~=nil and curr:isplaying() then  -- portamento         

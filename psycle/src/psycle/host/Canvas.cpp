@@ -180,6 +180,8 @@ void MenuItem::uncheck() {
 
 namespace canvas {
 
+Item::Ptr Item::nullpointer;
+
 void Item::Detach() { 
   if (!parent_.expired()) {
     parent_.lock()->Remove(shared_from_this());
@@ -239,11 +241,6 @@ void Item::FLS() {
   if (visible() && !parent().expired()) {
     Canvas* c = this->root();
     if (c && c->wnd()) {
-      if (has_clip()) {
-        std::auto_ptr<Region> tmp(clip().Clone());
-        tmp->Offset(zoomabsx(), zoomabsy());
-        fls_rgn_->Combine(*tmp, RGN_AND);        
-      }
       c->Invalidate(*fls_rgn_);
     }
   }
@@ -280,13 +277,12 @@ void Item::SetBlitXY(double x, double y) {
 
 double Item::zoomabsx() const {
   std::vector<Item::ConstPtr> items;
-  items.push_back(shared_from_this());
   Item::ConstWeakPtr p = parent();
   while (!p.expired()) {
     items.push_back(p.lock());
     p = p.lock()->parent();
   }
-  double x = 0.0;
+  double x = x_;
  // double zoom = 1.0;
   std::vector<Item::ConstPtr>::const_reverse_iterator rev_it = items.rbegin();
   for ( ; rev_it != items.rend(); ++rev_it) {
@@ -299,13 +295,12 @@ double Item::zoomabsx() const {
 
 double Item::zoomabsy() const {
   std::vector<Item::ConstPtr> items;
-  items.push_back(shared_from_this());
   Item::ConstWeakPtr p = parent();
   while (!p.expired()) {
     items.push_back(p.lock());
     p = p.lock()->parent();
   }
-  double y = 0.0;
+  double y = y_;
   // double zoom = 1.0;
   std::vector<Item::ConstPtr>::reverse_iterator rev_it = items.rbegin();
   for ( ; rev_it != items.rend(); ++rev_it) {
@@ -314,6 +309,76 @@ double Item::zoomabsy() const {
     y += item->y();
   }
   return y;
+}
+
+void Group::OnSize(double cw, double ch) {
+  Item::Ptr client;
+  double left, top, right, bottom;
+  left = top = 0.0;
+  right = cw;
+  bottom = ch;
+  std::vector<Item::Ptr>::iterator it = items_.begin();
+  for (; it != items_.end(); ++it) {
+    Item::Ptr item = *it;
+    if (item->has_style()) {
+      double x, y, w, h;      
+      item->BoundRect(x, y, w, h);
+      const Margin& margin = item->style()->margin();
+      double l = item->x();
+      double t = item->y();      
+      const int al = item->style()->align();
+      if (al & ALLEFT) {
+        l = left + margin.left();
+        if (!(al & ALRIGHT)) {
+          left += w + margin.left() + margin.right();
+        }
+      }
+      if (al & ALTOP) {        
+        t = top + margin.top();
+        if (!(al & ALBOTTOM)) {
+          top += h + margin.top() + margin.bottom();
+        }
+      }
+      if (al & ALRIGHT) {
+        if (al & ALLEFT) {          
+          w = right - l - margin.left() - margin.right();
+        } else {
+          l = right - w - margin.left() - margin.right();
+          if (!(al & ALLEFT)) {
+            right -= w - margin.left() - margin.right();
+          }
+        }
+      }
+      if (al & ALBOTTOM) { 
+        if (al & ALTOP) {          
+          h = bottom - t - margin.top() - margin.bottom();
+        } else {
+          t = bottom - h - margin.top() - margin.bottom();
+          if (!(al & ALTOP)) {
+            bottom -= h - margin.top() - margin.bottom();
+          }
+        }
+      }
+      if (al & ALCLIENT) {
+        client = item;        
+      }
+      item->SetXY(l, t);
+      if (item->width()!=w || item->height()!=h) {
+        item->OnSize(w, h);
+      }
+    }
+  }
+  if (client) {
+    const Margin& margin = client->style()->margin();
+    double l = left + margin.left();
+    double t = top + margin.top();
+    double w = right - left - margin.left() - margin.right();
+    double h = bottom - top - margin.top() - margin.bottom();
+    client->SetXY(l, t);
+    if (client->width()!=w || client->height()!=h) {
+      client->OnSize(w, h);
+    }
+  }
 }
 
 bool Item::IsInGroup(Item::WeakPtr group) const {  
@@ -432,7 +497,7 @@ void Group::Clear() {
   FLS();
 }
 
-void Group::onupdateregion() {  
+bool Group::onupdateregion() {  
   std::auto_ptr<Region> rgn(new mfc::Region());  
   std::vector<Item::Ptr>::const_iterator it = items_.begin();
   for ( ; it != items_.end(); ++it) {
@@ -447,6 +512,7 @@ void Group::onupdateregion() {
     }
   }    
   rgn_.reset(rgn->Clone());
+  return true;
 }
 
 void Group::set_zorder(Item::Ptr item, int z) {
@@ -472,9 +538,8 @@ int Group::zorder(Item::Ptr item) const {
 }
 
 Item::Ptr Group::Intersect(double x, double y, Event* ev, bool& worked) {  
-  Item::Ptr nullpointer;
   if (!Item::Intersect(x, y, ev,worked)) {
-    return nullpointer;
+    return Item::nullpointer;
   }
   if (ev->type() == Event::BUTTON_PRESS) {
     int fordebugonly = 0;
@@ -486,7 +551,7 @@ Item::Ptr Group::Intersect(double x, double y, Event* ev, bool& worked) {
     Item::Ptr item = *rev_it;
     item = item->visible() 
            ? item->Intersect(x-item->x(), y-item->y(), ev, worked)
-		   : nullpointer; 
+		   : Item::nullpointer; 
     if (worked) {
       return item;
     }
@@ -616,8 +681,9 @@ void Rect::Draw(Graphics* g, Region& draw_region) {
   return 0;
 }*/
 
-void Rect::onupdateregion() {
-  rgn_->SetRect(0, 0, width_+1, height_+1);  
+bool Rect::onupdateregion() {
+  rgn_->SetRect(0, 0, width_, height_);  
+  return true;
 }
 
 void Line::Draw(Graphics* g, Region& draw_region) {  
@@ -663,12 +729,13 @@ Item::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
   return Item::Ptr();
 }
 
-void Line::onupdateregion() {  
+bool Line::onupdateregion() {  
   double x1, y1, x2, y2;
   double dist = 5;
   BoundRect(x1, y1, x2, y2);
   double zoom = 1.0; // parent() ? parent()->zoom() : 1.0;
   rgn_->SetRect((x1-dist)*zoom, (y1-dist)*zoom, (x2+2*dist+1)*zoom, (y2+2*dist+1)*zoom);    
+  return true;
 }
 
 void Text::Init(double zoom) {
@@ -680,7 +747,10 @@ void Text::Init(double zoom) {
   font_.CreateFontIndirect(&lfLogFont);
 }
 
-void Text::onupdateregion() {  
+bool Text::onupdateregion() {  
+    if (text_=="test20") {
+      int fordummies = 30;
+    }
     Canvas* c =  const_cast<Text*>(this)->root();
     if (c) {
       HDC dc = GetDC(0);
@@ -692,13 +762,14 @@ void Text::onupdateregion() {
       SelectObject(dc, old_font);
       ReleaseDC(0, dc);
       text_w = extents.cx;
-      text_h = extents.cy+10;
-      rgn_->SetRect(0, 0, text_w +1, text_h+1);
-      update_ = false;
+      text_h = extents.cy;
+      rgn_->SetRect(0, 0, text_w, text_h);
+      return true;
     }    
+    return false;
 }
 
-void Text::Draw(Graphics* g, Region& draw_region) {    
+void Text::Draw(Graphics* g, Region& draw_region) { 
     g->SetColor(color_);
     g->DrawString(text_, 0, 0);    
 }
@@ -741,8 +812,9 @@ void Pic::SetImage(Image* image) {
   FLS();
 }
 
-void Pic::onupdateregion() {
-  rgn_->SetRect(0, 0, width_, height_);    
+bool Pic::onupdateregion() {
+  rgn_->SetRect(0, 0, width_, height_);
+  return true;
 }
 
 // Canvas
@@ -795,6 +867,12 @@ void Canvas::DoDraw(Graphics *g, Region& rgn) {
     }    
   }
   Group::Draw(g, rgn);
+}
+
+void Canvas::OnSize(int cw, int ch) {  
+  cw_ = cw;
+  ch_ = ch;
+  Group::OnSize(cw, ch);
 }
 
 void Canvas::StealFocus(Item::Ptr item) {
@@ -912,10 +990,10 @@ void BaseView::Draw() {
 	
 	CPaintDC dc(wnd_);
 
-  if (!bmpDC.m_hObject) {// buffer creation	
+  if (!bmpDC.m_hObject) { // buffer creation	
 		CRect rc;
 		wnd_->GetClientRect(&rc);		
-		bmpDC.CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
+		bmpDC.CreateCompatibleBitmap(&dc, rc.right - rc.left, rc.bottom - rc.top);
 		char buf[128];
 		sprintf(buf,"CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n",(void*)bmpDC);
 		TRACE(buf);
@@ -1146,10 +1224,6 @@ void CanvasFrameWnd::PostNcDestroy() {
 // Messages
 void CanvasFrameWnd::OnSetFocus(CWnd* pOldWnd) {
 	CFrameWnd::OnSetFocus(pOldWnd);			
-}
-
-BOOL CanvasFrameWnd::OnEraseBkgnd(CDC* dc)  {
-  return TRUE;
 }
 
 void CanvasFrameWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {          	

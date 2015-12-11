@@ -108,7 +108,7 @@ bool PSArray::copyfrom(PSArray& src) {
   return true;
 }
 
-void PSArray::fillzero() {
+void PSArray::clear() {
   if (base_ == ptr_ && can_aligned_) {
     psycle::helpers::dsp::Clear(ptr_, len_);
   } else {
@@ -366,46 +366,6 @@ int LuaArrayBind::array_method_random(lua_State* L) {
   PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
   struct {float* p; float operator()(int y) {return (lua_Number)(rand()%RAND_MAX) / (lua_Number)RAND_MAX;;}} f;
   rv->do_op(f);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_sin(lua_State* L) {
-  call(L, &PSArray::sin);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_cos(lua_State* L) {
-  call(L, &PSArray::cos);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_tan(lua_State* L) {
-  call(L, &PSArray::tan);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_sqrt(lua_State* L) {
-  call(L, &PSArray::sqrt);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_floor(lua_State* L) {
-  call(L, &PSArray::floor);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_ceil(lua_State* L) {
-  call(L, &PSArray::ceil);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_abs(lua_State* L) {
-  call(L, &PSArray::abs);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_sgn(lua_State* L) {
-  call(L, &PSArray::sgn);
   return LuaHelper::chaining(L);
 }
 
@@ -805,43 +765,6 @@ int LuaArrayBind::array_pow(lua_State* L) {
 int LuaArrayBind::array_sqrt(lua_State* L) {
   create_copy_array(L)->sqrt();
   return 1;
-}
-
-int LuaArrayBind::array_size(lua_State* L) {
-  PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
-  lua_pushnumber(L, (*ud)->len());
-  return 1;
-}
-
-int LuaArrayBind::array_resize(lua_State* L) {
-  PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
-  rv->resize(luaL_checknumber (L, 2));
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_fillzero(lua_State* L) {
-  call(L, &PSArray::fillzero);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_method_fill(lua_State* L) {
-  PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
-  (*ud)->fill(luaL_checknumber(L, 2));
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_margin(lua_State* L) {
-  PSArray** ud = (PSArray**) luaL_checkudata(L, 1, meta);
-  // todo range checks
-  int start = luaL_checknumber(L, 2);
-  int stop = luaL_checknumber(L, 3);
-  (*ud)->margin(start, stop);
-  return LuaHelper::chaining(L);
-}
-
-int LuaArrayBind::array_clearmargin(lua_State* L) {
-  call(L, &PSArray::clearmargin);
-  return LuaHelper::chaining(L);
 }
 
 int LuaArrayBind::array_concat(lua_State* L) {

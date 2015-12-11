@@ -308,16 +308,12 @@ int LuaMachineBind::open(lua_State *L) {
   };
   LuaHelper::open(L, meta, methods,  gc);
   // define constants
-  lua_pushnumber(L, 0);
-  lua_setfield(L, -2, "FX");
-  lua_pushnumber(L, 1);
-  lua_setfield(L, -2, "GENERATOR");
-  lua_pushnumber(L, 3);
-  lua_setfield(L, -2, "HOSTUI");
-  lua_pushnumber(L, 3);
-  lua_setfield(L, -2, "PRSNATIVE");
-  lua_pushnumber(L, 1);
-  lua_setfield(L, -2, "PRSCHUNK");
+  LuaHelper::constant(L, "FX", MACHMODE_FX);
+  LuaHelper::constant(L, "GENERATOR", MACHMODE_GENERATOR);
+  LuaHelper::constant(L, "HOSTUI", MACHMODE_LUAUIEXT);
+  LuaHelper::constant(L, "FX", MACHMODE_FX);
+  LuaHelper::constant(L, "PRSNATIVE", 3);  
+  LuaHelper::constant(L, "PRSCHUNK", 1);
   return 1;
 }
 
@@ -515,11 +511,6 @@ int LuaMachineBind::work(lua_State* L) {
    return 0;
 }
 
-int LuaMachineBind::resize(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaMachine::update_num_samples);
-  return LuaHelper::chaining(L);  
-}
-
 int LuaMachineBind::channel(lua_State* L) {
   int n = lua_gettop(L);
   if (n == 2) {
@@ -568,31 +559,6 @@ int LuaMachineBind::set_numchannels(lua_State* L) {
   plugin->mac()->InitializeSamplesVector(num);
   plugin->build_buffer(plugin->mac()->samplesV, 256);
   return 0;
-}
-
-int LuaMachineBind::numcols(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaMachine::numcols);
-  return 1;
-}
-
-int LuaMachineBind::set_numcols(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaMachine::set_numcols);
-  return LuaHelper::chaining(L);
-}
-
-int LuaMachineBind::numchannels(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaMachine::numchannels);
-  return 1;
-}
-
-int LuaMachineBind::set_numprograms(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaMachine::set_numprograms);
-  return LuaHelper::chaining(L);
-}
-
-int LuaMachineBind::numprograms(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaMachine::numprograms);
-  return 1;
 }
 
 int LuaMachineBind::setbuffer(lua_State* L) {
@@ -663,18 +629,6 @@ int LuaMachineBind::addhostlistener(lua_State* L) {
   listener->setmac(plugin.get());
   PsycleGlobal::actionHandler().AddListener(listener.get());
   return 0;
-}
-
-int LuaMachineBind::exit(lua_State* L) {  
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
-  plugin->doexit();
-  return 0;
-}
-
-int LuaMachineBind::reload(lua_State* L) {  
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
-  plugin->reload();
-  return LuaHelper::chaining(L);
 }
 
 int LuaMachineBind::setcanvas(lua_State* L) {
@@ -974,7 +928,7 @@ int LuaPatternDataBind::track(lua_State* L) {
       last = &events.back();
     }
   }
-  if (events.size()!=0 && events.back().entry._note!=notecommands::release) {
+  if (events.size()!=0 && !events.back().has_off && events.back().entry._note!=notecommands::release) {
     events.back().len = pattern->numlines(ps) - events.back().pos;
   }
   lua_createtable(L, events.size(), 0);
@@ -2527,7 +2481,7 @@ PSArray* LuaSingleWorker::work(int numSamples, int val) {
   PSArray* arr = *(PSArray **)luaL_checkudata(L, -1, LuaArrayBind::meta);
   arr->resize(numSamples+val);
   arr->margin(val, val+numSamples);
-  arr->fillzero();
+  arr->clear();
   lua_getfield(L, -2, "sync");
   lua_getfield(L, -1, "work");
   lua_pushvalue(L, -2);
@@ -2655,10 +2609,6 @@ int LuaResamplerBind::set_sync(lua_State* L) {
   return 0;
 }
 
-int LuaResamplerBind::set_sync_fadeout(lua_State* L) {
-  return LuaHelper::bind(L, meta, &RWInterface::set_sync_fadeout_size);
-}
-
 int LuaResamplerBind::work(lua_State* L) {
   int n = lua_gettop(L);
   if (n!=3 and n != 4 and n!=5 and n!=6) {
@@ -2698,43 +2648,12 @@ int LuaResamplerBind::work(lua_State* L) {
   return 1;
 }
 
-int LuaResamplerBind::isplaying(lua_State* L) {
-  int n = lua_gettop(L);
-  if (n != 1) {
-    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
-  }
-  boost::shared_ptr<RWInterface> rwrap = LuaHelper::check_sptr<RWInterface>(L, 1, meta);
-  lua_pushboolean(L, rwrap->Playing());
-  return 1;
-}
-
-int LuaResamplerBind::phase(lua_State* L) {
-  return LuaHelper::bind(L, meta, &RWInterface::phase);
-}
-
-int LuaResamplerBind::setphase(lua_State* L) {
-  return LuaHelper::bind(L, meta, &RWInterface::setphase);
-}
-
-int LuaResamplerBind::noteoff(lua_State* L) {
-  LuaHelper::bind(L, meta, &RWInterface::NoteOff);
-  return 0;
-}
-
 int LuaResamplerBind::start(lua_State* L) {
   return LuaHelper::callopt1<RWInterface, double>(L, meta, &RWInterface::Start, 0);
 }
 
 int LuaResamplerBind::stop(lua_State* L) {
   return LuaHelper::callopt1<RWInterface, double>(L, meta, &RWInterface::Stop, 0);
-}
-
-int LuaResamplerBind::set_frequency(lua_State* L) {
-  return LuaHelper::bind(L, meta, &RWInterface::set_frequency);
-}
-
-int LuaResamplerBind::frequency(lua_State* L) {
-  return LuaHelper::bind(L, meta, &RWInterface::frequency);
 }
 
 int LuaResamplerBind::set_quality(lua_State* L) {
@@ -2954,21 +2873,6 @@ int LuaEnvelopeBind::work(lua_State* L) {
   return 1;
 }
 
-int LuaEnvelopeBind::isplaying(lua_State *L) {
-  LuaHelper::bind(L, meta, &LEnvelope::is_playing);  
-  return 1;
-}
-
-int LuaEnvelopeBind::release(lua_State *L) {
-  LuaHelper::bind(L, meta, &LEnvelope::release);
-  return LuaHelper::chaining(L);
-}
-
-int LuaEnvelopeBind::start(lua_State *L) {
-  LuaHelper::bind(L, meta, &LEnvelope::start);
-  return LuaHelper::chaining(L);
-}
-
 int LuaEnvelopeBind::setpeak(lua_State* L) {
   LuaHelper::callstrict2<LEnvelope>(L, meta, &LEnvelope::setstagepeak, true);  
   return LuaHelper::chaining(L);
@@ -3002,16 +2906,6 @@ int LuaEnvelopeBind::time(lua_State* L) {
 int LuaEnvelopeBind::setstagetime(lua_State* L) {
   LuaHelper::callstrict2<LEnvelope>(L, meta, &LEnvelope::setstagetime, true);
   return LuaHelper::chaining(L);
-}
-
-int LuaEnvelopeBind::setstartvalue(lua_State* L) {
-  LuaHelper::bind(L, meta, &LEnvelope::setstartvalue);
-  return LuaHelper::chaining(L);
-}
-
-int LuaEnvelopeBind::lastvalue(lua_State *L) {
-  LuaHelper::bind(L, meta, &LEnvelope::lastvalue);
-  return 1;
 }
 
 int LuaEnvelopeBind::tostring(lua_State *L) {    

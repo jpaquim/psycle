@@ -9,8 +9,7 @@
 #include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/value_mapper.hpp>
 #include <psycle/helpers/dsp.hpp>
-
-struct lua_State;
+#include "LuaHelper.hpp"
 
 namespace psycle { namespace host {
   // array wrapper (shared : float*,
@@ -51,7 +50,7 @@ namespace psycle { namespace host {
     int copyfrom(PSArray& src, int pos);
     void resize(int newsize);
     std::string tostring() const;
-    void fillzero();
+    void clear();
     void fillzero(int pos) { fill(0, pos); }
     void fill(float val);
     void fill(float val, int pos);
@@ -124,13 +123,13 @@ namespace psycle { namespace host {
     static int array_tostring(lua_State *L);
     static int array_gc(lua_State* L);
     // array methods
-    static int array_size(lua_State* L);
-    static int array_resize(lua_State* L);
-    static int array_margin(lua_State* L);
-    static int array_clearmargin(lua_State* L);
+    static int array_size(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::len); }
+    static int array_resize(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::resize); }
+    static int array_margin(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::margin); }
+    static int array_clearmargin(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::clearmargin); }
     static int array_concat(lua_State* L);
-    static int array_fillzero(lua_State* L);
-    static int array_method_fill(lua_State* L);
+    static int array_fillzero(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::clear); }
+    static int array_method_fill(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::fill); }
     static int array_method_add(lua_State* L);
     static int array_method_sub(lua_State* L);
     static int array_method_mix(lua_State* L);
@@ -145,15 +144,15 @@ namespace psycle { namespace host {
     static int array_method_bnot(lua_State* L);
     static int array_method_min(lua_State* L);
     static int array_method_max(lua_State* L);
-    static int array_method_ceil(lua_State* L);
-    static int array_method_floor(lua_State* L);
-    static int array_method_abs(lua_State* L);
-    static int array_method_sgn(lua_State* L);
+    static int array_method_ceil(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::ceil); }
+    static int array_method_floor(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::floor); }
+    static int array_method_abs(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::abs); }
+    static int array_method_sgn(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::sgn); }
     static int array_method_random(lua_State* L);
-    static int array_method_sin(lua_State* L);
-    static int array_method_cos(lua_State* L);
-    static int array_method_tan(lua_State* L);
-    static int array_method_sqrt(lua_State* L);
+    static int array_method_sin(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::sin); }
+    static int array_method_cos(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::cos); }
+    static int array_method_tan(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::tan); }
+    static int array_method_sqrt(lua_State* L) { LUAEXPORTML(L, meta, &PSArray::sqrt); }
     static int array_method_from_table(lua_State* L);
     static int array_method_to_table(lua_State* L);
     // ops

@@ -56,10 +56,9 @@ function tabgroup:init()
   self.childs = group:new(self):setpos(0, self.maintop)  
 end
 
-function tabgroup:setpos(x, y, w, h)  
-  group.setpos(self, x, y)  
+function tabgroup:onsize(w, h)
   local t = self.maintop
-  function f(item) item:setpos(0, 0, w, h - t) end
+  function f(item) item:setsize(w, h - t) end
   self:traverse(f, self.childs:items())
   self.w, self.h  = w, h  
 end
@@ -72,7 +71,7 @@ end
 function tabgroup:add(page, label)  
   self:createheader(page, label)
   self.childs:add(page)
-  page:setpos(0, 0, self.w, self.h - self.maintop)
+  page:setsize(self.w, self.h - self.maintop)
   self:setactivepage(page)
 end
 
@@ -174,6 +173,10 @@ end
 function tabgroup:traverse(f, arr)  
   for i=1, #arr do f(arr[i]) end  
   return self
+end
+
+function tabgroup:onupdateregion(rgn)
+  rgn:setrect(0, 0, self.w, self.h)
 end
 
 return tabgroup

@@ -39,10 +39,11 @@ boost::shared_ptr<LuaPlugin> nullPtr;
 universalis::os::terminal* LuaProxy::terminal = 0;
 
 // Class Proxy : export and import between psycle and lua
-LuaProxy::LuaProxy(LuaPlugin* host, lua_State* L) : 
+LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) : 
     host_(host),
     info_update_(true) {
   InitializeCriticalSection(&cs);
+  L = LuaGlobal::load_script(dllname);
   set_state(L);
 }
 
@@ -88,6 +89,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");
   // ui canvas binds
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
+  LuaHelper::require<LuaItemStyleBind >(L, "psycle.ui.canvas.itemstyle");
   LuaHelper::require<LuaFrameWndBind>(L, "psycle.ui.canvas.frame");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
@@ -341,8 +343,9 @@ void LuaProxy::Init() {
       throw std::runtime_error(msg);
     }    
   } catch(std::exception& e) {
-    AfxMessageBox(e.what());  
-    throw std::runtime_error(e.what());
+    std::string msg = std::string("LuaProxy Init Errror.") + e.what();
+    AfxMessageBox(msg.c_str());
+    throw std::runtime_error(msg.c_str());
   }
 }
   
@@ -767,22 +770,10 @@ lua_State* LuaGlobal::load_script(const std::string& dllpath) {
   return L;
 }
 
-LuaPlugin* LuaGlobal::LoadPlugin(const std::string& dllpath, int macIdx) {
-  lua_State* L = load_script(dllpath);
-  LuaPlugin *plug = new LuaPlugin(L, macIdx);
-  plug->dll_path_ = dllpath;
-  PluginInfo info = plug->info();
-  plug->_mode = info.mode;
-  plug->usenoteon_ = info.flags;
-  strncpy(plug->_editName, info.name.c_str(),sizeof(plug->_editName)-1);
-  return plug;
-}
-  
 PluginInfo LuaGlobal::LoadInfo(const std::string& dllpath) {
   PluginInfo info;
   try {
-    lua_State* L = load_script(dllpath);
-    std::auto_ptr<LuaPlugin> plug(new LuaPlugin(L, 0, false));
+    std::auto_ptr<LuaPlugin> plug(new LuaPlugin(dllpath, 0, false));
     info = plug->info();
   } catch(std::exception &e) {
     AfxMessageBox(e.what());
@@ -808,11 +799,11 @@ namespace luaerrhandler {
 int error_handler(lua_State* L) {
   // first make sure that the error didn't occured in the plugineditor itself
   std::string edit_name = LuaGlobal::proxy(L)->host().GetEditName();
-  /*if (edit_name == "Plugineditor") {
-    needthis that;
-    that.invoke_catch_wrap(L);
+  if (edit_name == "Plugineditor") {
+    const char* msg = lua_tostring(L, -1);
+    AfxMessageBox(msg);
     return 1; // error in error handler
-  }*/
+  }
 
   lua_getglobal(L, "debug");
   lua_getfield(L, -1, "traceback");
@@ -843,7 +834,7 @@ int error_handler(lua_State* L) {
     int shellIdx;
     if (Global::machineload().lookupDllName("Plugineditor.lua", dllname, MACH_LUA,
           shellIdx)) {
-      editor.reset(LuaGlobal::LoadPlugin(dllname, AUTOID));
+      editor.reset(new LuaPlugin(dllname, AUTOID));
       LuaUiExtentions::instance()->Add(editor);
       editor->proxy().Init();
     }          
@@ -869,7 +860,9 @@ int error_handler(lua_State* L) {
         lua_pushinteger(LE, entry.linedefined);
         lua_setfield(LE, -2, "line");
         lua_pushstring(LE, entry.source);
-        lua_setfield(LE, -2, "source");      
+        lua_setfield(LE, -2, "source");
+        lua_pushstring(LE, entry.name ? entry.name : "");
+        lua_setfield(LE, -2, "name");
         lua_rawseti(LE, -2, i);
         ++i;
         ++depth;
