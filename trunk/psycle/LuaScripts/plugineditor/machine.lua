@@ -51,15 +51,16 @@ function machine:onexecute(msg, macidx, trace)
   self.maincanvas:setoutputtext(msg)
   self.maincanvas:setcallstack(trace)
   self.editmacidx_ = macidx  
-  if #trace > 0 then
-    local line = trace[#trace].line
-    local source = trace[#trace].source
+  for i=1, #trace do
+    local line = trace[i].line
+    local source = trace[i].source
     local isfile = false
     if source:len() > 1 then
        local firstchar = source:sub(1,1)
        local fname = source:sub(2) 
        if firstchar == "@" then        
          self.maincanvas:openfromfile(fname, line)     
+         break;
        end
     end
   end

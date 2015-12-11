@@ -32,8 +32,16 @@ function machine:info()
 end
 
 -- help text displayed by the host
-function machine:h1()
+function machine:h3()
   a = 2 + "s"
+end
+
+function machine:h2()
+  self:h3()
+end
+
+function machine:h1()
+  self:h2()
 end
 
 function machine:help()

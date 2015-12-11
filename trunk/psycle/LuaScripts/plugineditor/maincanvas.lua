@@ -138,7 +138,7 @@ function maincanvas:openfromfile(fname, line)
 end
 
 function maincanvas:setcallstack(trace)
-  for i=#trace, 1, -1 do
+  for i=1, #trace do
     self.callstack:add(trace[i])
   end 
   self.callstack:setdepth(1)
