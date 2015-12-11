@@ -49,16 +49,19 @@ end
 
 function machine:onexecute(msg, macidx, trace)    
   self.maincanvas:setoutputtext(msg)
-  self.editmacidx_ = macidx
-  local line = trace[#trace].line
-  local source = trace[#trace].source      
-  local isfile = false
-  if source:len() > 1 then
-     local firstchar = source:sub(1,1)
-     local fname = source:sub(2) 
-     if firstchar == "@" then        
-       self.maincanvas:openfromfile(fname, line)     
-     end
+  self.maincanvas:setcallstack(trace)
+  self.editmacidx_ = macidx  
+  if #trace > 0 then
+    local line = trace[#trace].line
+    local source = trace[#trace].source
+    local isfile = false
+    if source:len() > 1 then
+       local firstchar = source:sub(1,1)
+       local fname = source:sub(2) 
+       if firstchar == "@" then        
+         self.maincanvas:openfromfile(fname, line)     
+       end
+    end
   end
   if self.frame == nil then
     self:createframe()

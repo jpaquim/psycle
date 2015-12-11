@@ -24,7 +24,7 @@ namespace psycle { namespace host {
                     public Timer
   {
   public:
-    LuaPlugin(lua_State* state, int index, bool full=true);    
+    LuaPlugin(const std::string& dllpath, int index, bool full=true);    
     virtual ~LuaPlugin();
     void Free();
     LuaProxy& proxy() { return proxy_; }    

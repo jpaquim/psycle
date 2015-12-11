@@ -107,7 +107,7 @@ namespace psycle { namespace host {
     static int work(lua_State* L);
     static int tick(lua_State* L);
     static int channel(lua_State* L);
-    static int resize(lua_State* L);    
+    static int resize(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::update_num_samples); }    
     static int setbuffer(lua_State* L);
     static int setnorm(lua_State* L);
     static int getnorm(lua_State* L);
@@ -120,18 +120,18 @@ namespace psycle { namespace host {
     static int set_menus(lua_State* L);
     static int addhostlistener(lua_State* L);
     static int set_numchannels(lua_State* L);
-    static int numchannels(lua_State* L);
-    static int set_numprograms(lua_State* L);
-    static int numprograms(lua_State* L);
-    static int set_numcols(lua_State* L);
-    static int numcols(lua_State* L);
+    static int numchannels(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::numchannels); }
+    static int set_numprograms(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::numprograms); }
+    static int numprograms(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::numprograms); }
+    static int set_numcols(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::set_numcols); }
+    static int numcols(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::numcols); }
     static int show_native_gui(lua_State* L);
     static int show_custom_gui(lua_State* L);
     static int show_childview_gui(lua_State* L);
     static int getparam(lua_State* L);
     static int setpresetmode(lua_State* L);
-    static int exit(lua_State* L);
-    static int reload(lua_State* L);
+    static int exit(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::doexit); }
+    static int reload(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::reload); }
     static int setcanvas(lua_State* L);
   };
 
@@ -436,19 +436,19 @@ namespace psycle { namespace host {
     static int createwavetable(lua_State *L);
     static int gc(lua_State* L);
     static int work(lua_State* L);
-    static int noteoff(lua_State* L);
-    static int isplaying(lua_State* L);
+    static int noteoff(lua_State* L) { LUAEXPORTM(L, meta, &RWInterface::NoteOff); }
+    static int isplaying(lua_State* L) { LUAEXPORTM(L, meta, &RWInterface::Playing); }
     static int start(lua_State* L);
     static int stop(lua_State* L);
-    static int set_frequency(lua_State* L);
-    static int frequency(lua_State* L);
+    static int set_frequency(lua_State* L) { LUAEXPORTM(L, meta, &RWInterface::set_frequency); }
+    static int frequency(lua_State* L) { LUAEXPORTM(L, meta, &RWInterface::frequency); }
     static int set_wave_data(lua_State* L);
     static int set_quality(lua_State* L);
     static int quality(lua_State*);
     static int set_sync(lua_State*);
-    static int set_sync_fadeout(lua_State*);
-    static int phase(lua_State*);
-    static int setphase(lua_State*);
+    static int set_sync_fadeout(lua_State* L) { LUAEXPORTM(L, meta, &RWInterface::set_sync_fadeout_size); }
+    static int phase(lua_State* L) { LUAEXPORTM(L, meta, &RWInterface::phase); }
+    static int setphase(lua_State* L) { LUAEXPORTM(L, meta, &RWInterface::setphase); }
     static int setpm(lua_State*);
     static int setam(lua_State*);
     static int setfm(lua_State*);
@@ -729,16 +729,16 @@ namespace psycle { namespace host {
   private:
     static int create(lua_State *L);
     static int work(lua_State* L);
-    static int release(lua_State* L);
-    static int start(lua_State* L);
-    static int isplaying(lua_State* L);
+    static int release(lua_State* L) { LUAEXPORTM(L, meta, &LEnvelope::release); }
+    static int start(lua_State* L) { LUAEXPORTM(L, meta, &LEnvelope::start); }
+    static int isplaying(lua_State* L) { LUAEXPORTM(L, meta, &LEnvelope::is_playing); }
     static int setpeak(lua_State* L);
     static int peak(lua_State* L);
     static int tostring(lua_State* L);
     static int setstagetime(lua_State* L);
     static int time(lua_State* L);
-    static int setstartvalue(lua_State* L);
-    static int lastvalue(lua_State* L);
+    static int setstartvalue(lua_State* L) { LUAEXPORTM(L, meta, &LEnvelope::setstartvalue); }
+    static int lastvalue(lua_State* L) { LUAEXPORTM(L, meta, &LEnvelope::lastvalue); }
     static int gc(lua_State* L);
   };
 }}  // namespace

@@ -39,7 +39,7 @@ class LuaPlugin;
 
 class LuaProxy : public LockIF {
 public:
-	LuaProxy(LuaPlugin* plug, lua_State* state);
+	LuaProxy(LuaPlugin* plug, const std::string& dllname);
 	~LuaProxy();
 
   const PluginInfo& info() const;
@@ -137,7 +137,6 @@ struct LuaGlobal {
      return it != proxy_map.end() ? it->second : 0;
    }   
    static lua_State* load_script(const std::string& dllpath);
-   static LuaPlugin* LoadPlugin(const std::string& dllpath, int macIdx);
    static PluginInfo LoadInfo(const std::string& dllpath);         
    static Machine* GetMachine(int idx);
    static class LuaPlugin* GetLuaPlugin(int idx) {

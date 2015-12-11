@@ -89,8 +89,7 @@ namespace psycle { namespace host {
 					::PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
 				}
 				return FALSE;
-			}
-
+			}     
 
       std::string sci_path = global_.conf().GetAbsoluteLuaDir();
       sci_path += "\\psycle\\SciLexer.dll";

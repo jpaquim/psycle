@@ -12,12 +12,12 @@ local canvas = require("psycle.ui.canvas")
 
 local frame = require("psycle.ui.canvas.frame")
 local rect = require("psycle.ui.canvas.rect")
-local scrollbar = require("psycle.ui.canvas.scrollbar")
 local group = require("psycle.ui.canvas.group")
 local toolbar = require("psycle.ui.canvas.toolbar")
 local toolicon = require("psycle.ui.canvas.toolicon")
 local tabgroup = require("psycle.ui.canvas.tabgroup")
 local scintilla = require("psycle.ui.canvas.scintilla")
+local callstack = require("callstack")
 local sci = require("scintilladef")
 local scilex = require("scilexerdef")
 local config = require("psycle.config")
@@ -25,6 +25,7 @@ local machine = require("psycle.machine")
 local fileopen = require("psycle.ui.fileopen")
 local filesave = require("psycle.ui.filesave")
 local settings = require("settings")
+local style = require("psycle.ui.canvas.itemstyle")
 
 local maincanvas = canvas:new()
 
@@ -41,16 +42,27 @@ function maincanvas:init()
   local that = self
   function self.fileopen:onok(fname) that:openfromfile(fname) end
   self.filesaveas = filesave:new()  
-  self.toolbartop = 5
-  self.tabbartop = 30  
-  self.outputheight = 200
-  self.splitterheight = 5
   self.skin = self:initskin()
   self:setcolor(self.skin.colors.background);
-  self.pages = tabgroup:new(self)  
-  self.outputs = tabgroup:new(self)
+  local cfg = config:new("PatternVisual")
+  maincanvas.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
+  self.tg = group:new(self)
+  local tb = self:initfiletoolbar(0)
+  self.tg:style():setalign(style.ALTOP + style.ALLEFT + style.ALRIGHT)
+                 :setmargin(2, 5, 0, 2)
+  self:initplaytoolbar(200)
+  self.outputs = tabgroup:new(self):setheight(100)
+  self.outputs:style():setalign(style.ALBOTTOM + style.ALLEFT + style.ALRIGHT)
+  self.output = scintilla:new()  
+  self.outputs:add(self.output, "Output")
+  self.callstack = callstack:new(nil, self)
+  self.outputs:add(self.callstack, "Call stack")
   self.splitter = rect:new(self)
                       :setcolor(self.skin.colors.rowbeat)
+                      :setheight(5)
+  self.splitter:style():setalign(style.ALBOTTOM + style.ALLEFT + style.ALRIGHT)                    
+  self.pages = tabgroup:new(self)   
+  self.pages:style():setalign(style.ALCLIENT)                    
   local that = self           
   function self.splitter:onmousedown(e)
     self:canvas():mousecapture()
@@ -58,9 +70,9 @@ function maincanvas:init()
   function self.splitter:onmousemove(e)         
     that:setcursor(canvas.CURSOR.ROW_RESIZE)    
     if e.button == 1 then
-      local cw, ch = that:clientsize()
-      that.outputheight = math.min(math.max(that.splitterheight, ch - e.clienty), ch-that.tabbartop-that.splitterheight)
-      that:onsize(cw, ch)
+      local cw, ch = that:clientsize()   
+      that.outputs:setheight(ch - e.clienty)
+      that:setsize(cw, ch)
     end
   end
   function self.splitter:onmouseout()        
@@ -68,14 +80,8 @@ function maincanvas:init()
   end
   function self.splitter:onmouseup(e)
     self:canvas():mouserelease()
-  end  
-  self.output = scintilla:new()  
-  self.outputs:add(self.output, "Output")  
+  end 
   self.newpagecounter = 1
-  local cfg = config:new("PatternVisual")
-  maincanvas.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
-  local tb = self:initfiletoolbar(0)
-  self:initplaytoolbar(tb.xp+20)
 end
 
 function maincanvas:setoutputtext(text)
@@ -128,7 +134,14 @@ function maincanvas:openfromfile(fname, line)
     end    
     self.pages:add(page, name)   
   end  
-  page:f(sci.SCI_GOTOLINE, line, 0)
+  page:f(sci.SCI_GOTOLINE, line - 1, 0)
+end
+
+function maincanvas:setcallstack(trace)
+  for i=#trace, 1, -1 do
+    self.callstack:add(trace[i])
+  end 
+  self.callstack:setdepth(1)
 end
 
 function maincanvas:createnewpage()
@@ -182,7 +195,7 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:initfiletoolbar(x)  
-  local t = toolbar:new(self):setpos(x, self.toolbartop)
+  local t = toolbar:new(self.tg):setpos(x, 0)
   local inew = toolicon:new(t, self.picdir.."new.png", self.skin, 0xFFFFFF)
   local iopen = toolicon:new(t, self.picdir.."open.png", self.skin, 0xFFFFFF)
   local isave = toolicon:new(t, self.picdir.."save.png", self.skin, 0xFFFFFF)            
@@ -194,7 +207,7 @@ function maincanvas:initfiletoolbar(x)
 end
 
 function maincanvas:initplaytoolbar(x)  
-  local t = toolbar:new(self):setpos(x, self.toolbartop)  
+  local t = toolbar:new(self.tg):setpos(x, 0)  
   local istart = toolicon:new(t, self.picdir.."play.png", self.skin, 0xFFFFFF)
   local that = self
   function istart:onclick() that:playplugin() end
@@ -215,16 +228,16 @@ function maincanvas.initskin()
   end  
   return skin  
 end
-
-function maincanvas:onsize(width, height)       
-  local splitterident = 2
-  local spy = height-self.outputheight-self.splitterheight    
-  self.splitter:setpos(0, spy, width, self.splitterheight)
-  self.pages:setpos(0, self.tabbartop, width, spy-self.tabbartop-splitterident)  
-  self.outputs:setpos(0, spy+self.splitterheight, width, self.outputheight)  
-end
-   
-function maincanvas:ontimer()
-end
-
+ 
+function maincanvas:oncallstackclick(info)
+  local isfile = false
+  if info.source:len() > 1 then
+     local firstchar = info.source:sub(1,1)
+     local fname = info.source:sub(2) 
+     if firstchar == "@" then
+       self:openfromfile(fname, info.line)     
+     end
+  end
+end 
+ 
 return maincanvas
