@@ -94,13 +94,16 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
   LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
-  LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");
+  LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
   LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
+  LuaHelper::require<LuaTreeBind<> >(L, "psycle.ui.canvas.tree");
+  LuaHelper::require<LuaTextTreeItemBind>(L, "psycle.ui.canvas.texttreeitem");
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
   LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
   LuaHelper::require<LuaScintillaBind<> >(L, "psycle.ui.canvas.scintilla");
   LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.canvas.scrollbar");
+  LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.canvas.keyevent");
 #if !defined WINAMP_PLUGIN
   LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN
@@ -200,10 +203,11 @@ int LuaProxy::call_selmachine(lua_State* L) {
     std::string filename = dlg.psOutputDll;
     boost::filesystem::path p(filename);
     lua_pushstring(L, p.stem().string().c_str());
+    lua_pushstring(L, dlg.psOutputDll.c_str());
   } else {
     lua_pushnil(L);
   }   
-  return 1;
+  return 2;
 }
 
 int LuaProxy::set_machine(lua_State* L) {
@@ -241,7 +245,7 @@ void LuaProxy::export_c_funcs() {
   *ud = this;
   lua_setfield(L, -2, "__self");
   lua_setglobal(L, "psycle");
-  lua_getglobal(L, "psycle");
+  lua_getglobal(L, "psycle");  
   lua_newtable(L); // table for canvasdata
   lua_setfield(L, -2, "userdata");
   lua_newtable(L); // table for canvasdata
@@ -336,8 +340,8 @@ void LuaProxy::Run() {
 void LuaProxy::Init() {    
   try {
     LuaImport in(L, lua_mac_, this);    
-    if (in.open("init")) {
-      in.pcall(0);      
+    if (in.open("init")) {      
+      in.pcall(0);          
     } else {    
       const char* msg = "no init found";        
       throw std::runtime_error(msg);
@@ -656,6 +660,58 @@ std::string LuaProxy::get_program_name(int bnkidx, int idx) {
   } CATCH_WRAP_AND_RETHROW(host())
   return "";
 }
+
+bool LuaProxy::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
+  bool res = true;
+  try {
+    LuaImport in(L, lua_mac_, this);    
+    if (in.open("onkeydown")) {
+      lua_newtable(L);
+      int flags = 0;
+      if (GetKeyState(VK_SHIFT) & 0x8000) {
+          flags |= MK_SHIFT;
+      }
+      if (GetKeyState(VK_CONTROL) & 0x8000) {
+        flags |= MK_CONTROL;
+      }
+      lua_pushboolean(L, GetKeyState(VK_SHIFT) & 0x8000);
+      lua_setfield(L, -2, "shiftkey");
+      lua_pushboolean(L, GetKeyState(VK_CONTROL) & 0x8000);
+      lua_setfield(L, -2, "ctrlkey");      
+      lua_pushinteger(L, nChar);
+      lua_setfield(L, -2, "keycode");       
+      in.pcall(1);
+      in >> res;
+    }
+  } CATCH_WRAP_AND_RETHROW(host())
+  return res;
+}  
+
+bool LuaProxy::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
+  bool res = true;
+  try {
+    LuaImport in(L, lua_mac_, this);    
+    if (in.open("onkeyup")) {
+      lua_newtable(L);
+      int flags = 0;
+      if (GetKeyState(VK_SHIFT) & 0x8000) {
+          flags |= MK_SHIFT;
+      }
+      if (GetKeyState(VK_CONTROL) & 0x8000) {
+        flags |= MK_CONTROL;
+      }
+      lua_pushboolean(L, GetKeyState(VK_SHIFT) & 0x8000);
+      lua_setfield(L, -2, "shiftkey");
+      lua_pushboolean(L, GetKeyState(VK_CONTROL) & 0x8000);
+      lua_setfield(L, -2, "ctrlkey");      
+      lua_pushinteger(L, nChar);
+      lua_setfield(L, -2, "keycode");       
+      in.pcall(1);
+      in >> res;
+    }
+  } CATCH_WRAP_AND_RETHROW(host())
+  return res;
+}
   
 void LuaProxy::update_menu(void* hnd) {
   if (hnd) {
@@ -689,7 +745,7 @@ ui::MenuBar* LuaProxy::get_menu(ui::Menu* menu) {
 
 void LuaProxy::call_menu(UINT id) {
   lock();
-  std::map<std::uint16_t, MenuItem*>::iterator it = MenuItem::menuItemIdMap.find(id);
+  std::map<int, MenuItem*>::iterator it = MenuItem::menuItemIdMap.find(id);
   if (it != MenuItem::menuItemIdMap.end()) {
     LuaHelper::find_userdata<>(L, it->second);
     lua_getfield(L, -1, "notify");
@@ -710,35 +766,35 @@ void LuaProxy::call_menu(UINT id) {
 
 
 // Class LuaUiExtensions : Container for LuaUiExtensions
-LuaUiExtentionsPtr LuaUiExtentions::instance() {
+LuaUiExtentions::Ptr LuaUiExtentions::instance() {
   // needs to be stored in childview due the windows ondestroy calls at app end
   return ((CMainFrame*) ::AfxGetMainWnd())->m_wndView.lua_ui_extentions();    
 }
 
-LuaUiList LuaUiExtentions::Get(const std::string& name) {
-    LuaUiList list;
-    LuaUiList& plugs_ = uiluaplugins;
-    LuaUiList::iterator it = plugs_.begin();
-    for ( ; it != plugs_.end(); ++it) {
-      LuaPluginPtr ptr = *it;       
-      if (ptr->_editName == name) {
-        list.push_back(ptr);
-      }
+LuaUiExtentions::List LuaUiExtentions::Get(const std::string& name) {
+  LuaUiExtentions::List list;
+  LuaUiExtentions::List& plugs_ = uiluaplugins_;
+  LuaUiExtentions::List::iterator it = plugs_.begin();
+  for ( ; it != plugs_.end(); ++it) {
+    LuaPluginPtr ptr = *it;       
+    if (ptr->_editName == name) {
+      list.push_back(ptr);
     }
-    return list;
   }
+  return list;
+}
 
-  LuaPluginPtr LuaUiExtentions::Get(int idx) {
-    LuaUiList list;     
-    LuaUiList::iterator it = uiluaplugins.begin();
-    for (; it != uiluaplugins.end(); ++it) {
-      LuaPluginPtr ptr = *it;       
-      if (ptr->_macIndex == idx) {
-        return ptr;
-      }
+LuaPluginPtr LuaUiExtentions::Get(int idx) {
+  LuaUiExtentions::List list;     
+  LuaUiExtentions::List::iterator it = uiluaplugins_.begin();
+  for (; it != uiluaplugins_.end(); ++it) {
+    LuaPluginPtr ptr = *it;       
+    if (ptr->_macIndex == idx) {
+      return ptr;
     }
-    return nullPtr;
   }
+  return nullPtr;
+}
    
 // Host
 std::map<lua_State*, LuaProxy*> LuaGlobal::proxy_map;  
@@ -784,7 +840,7 @@ PluginInfo LuaGlobal::LoadInfo(const std::string& dllpath) {
    
 Machine* LuaGlobal::GetMachine(int idx) {
     Machine* mac = 0;
-    if (idx < MAX_VIRTUALINSTS) {
+    if (idx < MAX_MACHINES) {
       mac = Global::song()._pMachine[idx];
     } else {      
       LuaPluginPtr mac_ptr = 
@@ -792,6 +848,47 @@ Machine* LuaGlobal::GetMachine(int idx) {
       mac = mac_ptr.get();              
     }
     return mac;
+}
+
+std::vector<LuaPlugin*> LuaGlobal::GetAllLuas() {
+  std::vector<LuaPlugin*> plugs;
+  for (int i=0; i < MAX_MACHINES; ++i) {
+    Machine* mac = Global::song()._pMachine[i];
+    if (mac && mac->_type == MACH_LUA) {
+      plugs.push_back((LuaPlugin*)mac);
+    }
+  }
+  LuaUiExtentions::Ptr list = LuaUiExtentions::instance();
+  for (LuaUiExtentions::iterator it = list->begin(); it != list->end(); ++it) {
+    plugs.push_back((*it).get());
+  }
+  return plugs;
+}
+
+bool LuaGlobal::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
+  bool res = true;
+  typedef std::vector<LuaPlugin*> LuaList;
+  LuaList plugs = GetAllLuas();
+  for (LuaList::iterator it = plugs.begin(); it != plugs.end(); ++it) {
+    res = (*it)->OnKeyDown(nChar, nRepCnt, nFlags);
+    if (!res) {
+      break;
+    }
+  }
+  return res;
+}  
+
+bool LuaGlobal::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
+  bool res = true;
+  typedef std::vector<LuaPlugin*> LuaList;
+  LuaList plugs = GetAllLuas();
+  for (LuaList::iterator it = plugs.begin(); it != plugs.end(); ++it) {
+    res = (*it)->OnKeyUp(nChar, nRepCnt, nFlags);
+    if (!res) {
+      break;
+    }
+  }
+  return res;
 }
 
 namespace luaerrhandler {
@@ -810,8 +907,8 @@ int error_handler(lua_State* L) {
   lua_pushvalue(L, 1);  // pass error message 
   lua_pushinteger(L, 2);  // skip this function and traceback
   lua_call(L, 2, 1);
-  LuaUiList uilist = LuaUiExtentions::instance()->Get("Plugineditor");
-  LuaUiList::iterator uit = uilist.begin();
+  LuaUiExtentions::List uilist = LuaUiExtentions::instance()->Get("Plugineditor");
+  LuaUiExtentions::iterator uit = uilist.begin();
   LuaPluginPtr editor;
   // try to find an open instance of plugineditor
   // editing the error plugin

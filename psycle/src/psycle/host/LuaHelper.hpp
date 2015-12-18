@@ -45,7 +45,8 @@ int error_handler(lua_State* L);
 }
 
 struct LuaState { 
-  LuaState(lua_State* L) : L(L) { }
+  LuaState(lua_State* L) : L(L) {}
+  virtual ~LuaState() {}
  protected:
   lua_State* L;
 };
@@ -269,6 +270,11 @@ inline LuaImport& operator>> (LuaImport& import, double& val) {
   return import;
 }
 
+inline LuaImport& operator>> (LuaImport& import, bool& val) {
+  val = static_cast<bool>(lua_toboolean(import.L(), -1));  
+  return import;
+}
+
 inline LuaImport& operator>> (LuaImport& import, std::string& str) {
   const char* s = luaL_checkstring(import.L(), -1);
   if (s) {
@@ -360,15 +366,13 @@ namespace LuaHelper {
       return 1;
     }
 
-    template <class Base>
     static int openex(lua_State* L,
                       const std::string& meta,
                       lua_CFunction setmethods=0,
                       lua_CFunction gc=0,
                       lua_CFunction tostring=0) {
        openmeta(L, meta, gc);
-       lua_newtable(L);
-       Base::setmethods(L);
+       lua_newtable(L);     
        setmethods(L);
        return 1;
     }
@@ -585,6 +589,16 @@ namespace LuaHelper {
       bool val = (ud->*ptmember)();
       lua_pushboolean(L, val);
       return 1;
+    }
+
+    // void -> bool
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(bool), UserDataModel m = SPTR) {
+      numargcheck(L, 2);
+       T* ud = check<T>(L, 1, meta, m);
+      bool val = lua_toboolean(L, 2);
+      (ud->*ptmember)(val);
+      return 0;
     }
     
     // void -> int
@@ -922,6 +936,48 @@ namespace LuaHelper {
       const char* str = luaL_checkstring(L, 2);
       (ud->*ptmember)(str);      
       return 0;
+    }
+
+    // int -> const std::string& const
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, int (T::*ptmember)(const std::string&) const, UserDataModel m = SPTR) {
+      numargcheck(L, 2);
+      T* ud = check<T>(L, 1, meta, m);
+      const char* str = luaL_checkstring(L, 2);
+      int val = (ud->*ptmember)(str);      
+      lua_pushinteger(L, val);
+      return 1;
+    }
+
+    // int -> const std::string& x int x int const
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, int (T::*ptmember)(const std::string&, int, int) const, UserDataModel m = SPTR) {
+      numargcheck(L, 4);
+      T* ud = check<T>(L, 1, meta, m);
+      const char* str = luaL_checkstring(L, 2);
+      int val1 = luaL_checkinteger(L, 3);
+      int val2 = luaL_checkinteger(L, 4);
+      int val = (ud->*ptmember)(str, val1, val2);      
+      lua_pushinteger(L, val);
+      return 1;
+    }
+
+    // void -> const std::string& x int x int int& x int& x int& const
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(const std::string&, int, int, int&, int&, int&) const, UserDataModel m = SPTR) {
+      numargcheck(L, 4);
+      T* ud = check<T>(L, 1, meta, m);
+      const char* str = luaL_checkstring(L, 2);
+      int val1 = luaL_checkinteger(L, 3);
+      int val2 = luaL_checkinteger(L, 4);
+      int ret1(0);
+      int ret2(0);
+      int ret3(0);
+      (ud->*ptmember)(str, val1, val2, ret1, ret2, ret3);      
+      lua_pushinteger(L, ret1);
+      lua_pushinteger(L, ret2);
+      lua_pushinteger(L, ret3);
+      return 3;
     }
 
     // const std::string& -> void

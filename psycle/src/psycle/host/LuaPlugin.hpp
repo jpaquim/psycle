@@ -117,6 +117,12 @@ namespace psycle { namespace host {
     void DoExit() { do_exit_ = true; }
     void DoReload() { do_reload_ = true; }
 
+    bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
+      return proxy().OnKeyDown(nChar, nRepCnt, nFlags); }
+    bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) { 
+      return proxy().OnKeyUp(nChar, nRepCnt, nFlags);
+    }
+
     boost::shared_ptr<LuaPlugin> this_ptr()
     {
         return shared_from_this();

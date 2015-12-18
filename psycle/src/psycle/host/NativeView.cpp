@@ -7,6 +7,7 @@
 #include "Machine.hpp"
 #include "LuaPlugin.hpp"
 #include "NewVal.hpp"
+#include "Canvas.hpp"
 
 #include "Plugin.hpp" // For default parameter value.
 #include "InputHandler.hpp" //for undos
@@ -34,16 +35,26 @@ namespace psycle { namespace host {
 			ON_WM_RBUTTONUP()      
 		END_MESSAGE_MAP()
 
+    CanvasParamView::CanvasParamView(CFrameMachine* frame, Machine* effect) :
+          CBaseParamView(frame) {
+         canvas_view_.reset(new ui::canvas::View());
+    }
+
     int CanvasParamView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 		{
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
 			{
 				return -1;
-			}      
+			}           
+      canvas_view_->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+		    CRect(0, 0, 200, 200), this, AFX_IDW_PANE_FIRST, NULL); 
 			return 0;
 		}
 
-    void CanvasParamView::OnDestroy() {      
+    void CanvasParamView::OnDestroy() { 
+      if (canvas_view_.get() != 0) { 
+         canvas_view_->DestroyWindow();
+      }  
     }
 
 		BOOL CanvasParamView::PreCreateWindow(CREATESTRUCT& cs)
@@ -54,18 +65,26 @@ namespace psycle { namespace host {
 			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 			cs.style &= ~WS_BORDER;
 			return TRUE;
-		}						  
+		}				
+
+    void CanvasParamView::set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) {
+      canvas_view_->set_canvas(canvas);
+    }
+
+    void CanvasParamView::OnSize(UINT nType, int cx, int cy) {
+      canvas_view_->MoveWindow(0, 0, cx, cy);
+    }
 
     void CanvasParamView::OnReload(Machine* mac)
     {
       LuaPlugin* lp = (LuaPlugin*) (mac);
       LuaCanvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired() && lp->ui_type() == MachineUiType::CUSTOMWND) {
-        set_canvas(lp->canvas());
+        canvas_view_->set_canvas(lp->canvas());
       }
     }
 
-		BEGIN_MESSAGE_MAP(CNativeView, CWnd)
+   BEGIN_MESSAGE_MAP(CNativeView, CWnd)
 			ON_WM_CREATE()
 			ON_WM_SETFOCUS()
 			ON_WM_PAINT()

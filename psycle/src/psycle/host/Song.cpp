@@ -76,7 +76,7 @@ namespace psycle
 			Plugin* pPlugin(0);
 			LuaPlugin *luaPlug(0);
 			vst::Plugin *vstPlug(0);
-			if(songIdx < 0)
+			if(songIdx < 0 && (type != MACH_LUA || songIdx != AUTOID))
 			{
 				songIdx =	GetFreeMachine();
 				if(songIdx < 0) return NULL;

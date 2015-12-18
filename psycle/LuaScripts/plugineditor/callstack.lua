@@ -39,9 +39,9 @@ function callstack:init()
   self.row3 = group:new(self):setstyle(rowstyle)   
   rect:new(self.row1):setcolor(self.colors.header):setwidth(20):setstyle(colstyle)  
   rect:new(self.row2):setcolor(self.colors.header):setwidth(400):setstyle(colstyle)
-  text:new(self.row2):settext("Name"):setcolor(self.colors.headerfont)
+  --text:new(self.row2):settext("Name"):setcolor(self.colors.headerfont)
   rect:new(self.row3):setcolor(self.colors.header):setwidth(200):setstyle(colstyle)
-  text:new(self.row3):settext("Source"):setcolor(self.colors.headerfont)
+  --text:new(self.row3):settext("Source"):setcolor(self.colors.headerfont)
 end
 
 function onrowclick(self)

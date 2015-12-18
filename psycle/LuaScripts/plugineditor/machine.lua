@@ -31,7 +31,7 @@ end
 function machine:init(samplerate)
    self.maincanvas = maincanvas:new()
    self.editmacidx_ = -1
-   self:setcanvas(self.maincanvas)
+   self:setcanvas(self.maincanvas)     
 end
 
 function machine:createframe()  
@@ -47,21 +47,13 @@ function machine:editmacidx()
   return self.editmacidx_;
 end
 
-function machine:onexecute(msg, macidx, trace)    
+function machine:onexecute(msg, macidx, trace)
+  self.editmacidx_ = macidx 
   self.maincanvas:setoutputtext(msg)
   self.maincanvas:setcallstack(trace)
-  self.editmacidx_ = macidx  
   for i=1, #trace do
-    local line = trace[i].line
-    local source = trace[i].source
-    local isfile = false
-    if source:len() > 1 then
-       local firstchar = source:sub(1,1)
-       local fname = source:sub(2) 
-       if firstchar == "@" then        
-         self.maincanvas:openfromfile(fname, line)     
-         break;
-       end
+    if self.maincanvas:openinfo(trace[i]) then
+      break
     end
   end
   if self.frame == nil then
@@ -70,8 +62,4 @@ function machine:onexecute(msg, macidx, trace)
   self.frame:show() 
 end
 
-function machine:canvas()
-  return self.maincanvas
-end
-  
 return machine

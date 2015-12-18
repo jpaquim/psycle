@@ -5,42 +5,44 @@
 #include "Psycle.hpp"
 #include "BaseParamView.hpp"
 #include "PsycleConfig.hpp"
-#include "Canvas.hpp"
 
 namespace psycle {
 namespace host {
 
+    namespace ui { 
+    namespace canvas  { 
+      class View;
+      class Canvas;
+    }
+    }
+
 		class Machine;
 
-    class CanvasParamView : public CBaseParamView, public ui::canvas::BaseView {
+    class CanvasParamView : public CBaseParamView {
      public:
-       CanvasParamView(CFrameMachine* frame, Machine* effect) :
-          CBaseParamView(frame), ui::canvas::BaseView(this) {}
+       CanvasParamView(CFrameMachine* frame, Machine* effect);
+
        BOOL PreCreateWindow(CREATESTRUCT& cs);
+
+       void set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas);
+
      protected:
        DECLARE_MESSAGE_MAP()
        int OnCreate(LPCREATESTRUCT lpCreateStruct);
        void OnDestroy();
-       void OnPaint() { Draw(); }
-       void OnLButtonDown(UINT nFlags, CPoint pt) { 
-         DelegateEvent(ui::canvas::Event::BUTTON_PRESS, 1, nFlags, pt);
+       void OnSize(UINT nType, int cx, int cy);
+       
+       void OnReload(Machine* mac);      
+       virtual bool GetViewSize(CRect& rect) {
+         rect.top = 0;
+         rect.left = 0;
+         rect.right = 500;
+         rect.bottom = 500;
+         return true;
        }
-       void OnRButtonDown(UINT nFlags, CPoint pt) {
-         DelegateEvent(ui::canvas::Event::BUTTON_PRESS, 2, nFlags, pt);
-       }
-		   void OnLButtonDblClk(UINT nFlags, CPoint pt) {
-         DelegateEvent(ui::canvas::Event::BUTTON_2PRESS, 1, nFlags, pt);
-       }
-		   void OnMouseMove(UINT nFlags, CPoint pt) {
-         DelegateEvent(ui::canvas::Event::MOTION_NOTIFY, 0, nFlags, pt);
-       }
-		   void OnLButtonUp(UINT nFlags, CPoint pt) {
-         DelegateEvent(ui::canvas::Event::BUTTON_RELEASE, 1, nFlags, pt);
-       }
-		   void OnRButtonUp(UINT nFlags, CPoint pt) {
-         DelegateEvent(ui::canvas::Event::BUTTON_RELEASE, 2, nFlags, pt);
-       }
-       void OnReload(Machine* mac);
+      
+       private:
+         std::auto_ptr<ui::canvas::View> canvas_view_;
     };
 
 		/// Native Knob-based UI for psycle plugins and non-GUI VSTs

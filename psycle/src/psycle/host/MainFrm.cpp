@@ -35,6 +35,7 @@
 #include "LuaArray.hpp"
 #include <universalis/os/terminal.hpp>
 #include "Scintilla.h"
+#include "Canvas.hpp"
 
 namespace psycle { namespace host {
 
@@ -68,6 +69,7 @@ namespace psycle { namespace host {
 			,_pSong(NULL)
 			,pGearRackDialog(NULL)
 			,terminal(NULL)
+      ,m_luaWndView(new ui::canvas::View())
 		{
 			PsycleGlobal::inputHandler().SetMainFrame(this);
 			for(int c=0;c<MAX_MACHINES;c++) m_pWndMac[c]=NULL;
@@ -208,9 +210,8 @@ namespace psycle { namespace host {
 				TRACE0("Failed to create view window\n");
 				return -1;
 			}
-			m_wndView.ValidateParent();
-      
-      if (!m_luaWndView.Create(NULL, NULL, WS_CHILD | WS_BORDER | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+			m_wndView.ValidateParent();      
+      if (!m_luaWndView->Create(NULL, NULL, WS_CHILD | WS_BORDER | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
 		  CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST+1, NULL))
 			{
 				TRACE0("Failed to create view window\n");
@@ -358,8 +359,8 @@ namespace psycle { namespace host {
 
     BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
     {
-      if(m_luaWndView.IsWindowVisible() && pMsg->message==WM_KEYDOWN ) {                 
-        if (m_luaWndView.SendMessageA(pMsg->message, pMsg->wParam, pMsg->lParam))
+      if(m_luaWndView->IsWindowVisible() && pMsg->message==WM_KEYDOWN ) {                 
+        if (m_luaWndView->SendMessageA(pMsg->message, pMsg->wParam, pMsg->lParam))
           return TRUE;                
          }            
       return CFrameWnd::PreTranslateMessage(pMsg);
@@ -442,7 +443,7 @@ namespace psycle { namespace host {
 			m_seqBar.DestroyWindow();
 			// m_pWndWed->DestroyWindow(); is called by the default CWnd::DestroyWindow() function, and the memory freed by subsequent CWnd::OnPostNCDestroy()
 			m_wndView.DestroyWindow();
-      m_luaWndView.DestroyWindow();
+      m_luaWndView->DestroyWindow();
 			// m_wndInst is autodeleted when closed.
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
@@ -1217,7 +1218,7 @@ namespace psycle { namespace host {
        m_wndStatusBar.GetWindowRect(&rc1);
        ScreenToClient(rc1);
        int ch = rc1.top - rc.top;
-       m_luaWndView.SetWindowPos(NULL, rc.left, rc.top, rc.Width(), ch, SWP_NOZORDER);
+       m_luaWndView->SetWindowPos(NULL, rc.left, rc.top, rc.Width(), ch, SWP_NOZORDER);
     }
 
     

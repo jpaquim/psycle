@@ -2,182 +2,13 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #include <psycle/host/detail/project.private.hpp>
 #include "Canvas.hpp"
+#include "CanvasItems.hpp"
 #include <algorithm> // for std::transform
 #include <cctype> // for std::tolower
 
 namespace psycle {
 namespace host  {
 namespace ui {
-
-int ui::MenuItem::id_counter = 0;
-std::map<std::uint16_t, ui::MenuItem*> ui::MenuItem::menuItemIdMap;
-
-namespace mfc {
-
-void Image::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans) {
-  //assert(pBmpSource && pBmpSource->m_hObject);
-  BITMAP bm;
-  // Get the dimensions of the source bitmap
-  pBmpSource->GetObject(sizeof(BITMAP), &bm);
-  // Create the mask bitmap
-  if (pBmpMask->m_hObject) {
-    pBmpMask->DeleteObject();
-  }
-  pBmpMask->CreateBitmap( bm.bmWidth, bm.bmHeight, 1, 1, NULL);
-  // We will need two DCs to work with. One to hold the Image
-  // (the source), and one to hold the mask (destination).
-  // When blitting onto a monochrome bitmap from a color, pixels
-  // in the source color bitmap that are equal to the background
-  // color are blitted as white. All the remaining pixels are
-  // blitted as black.
-  CDC hdcSrc, hdcDst;
-  hdcSrc.CreateCompatibleDC(NULL);
-  hdcDst.CreateCompatibleDC(NULL);
-  // Load the bitmaps into memory DC
-  CBitmap* hbmSrcT = (CBitmap*) hdcSrc.SelectObject(pBmpSource);
-  CBitmap* hbmDstT = (CBitmap*) hdcDst.SelectObject(pBmpMask);
-  // Change the background to trans color
-  hdcSrc.SetBkColor(clrTrans);
-  // This call sets up the mask bitmap.
-  hdcDst.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcSrc,0,0,SRCCOPY);
-  // Now, we need to paint onto the original image, making
-  // sure that the "transparent" area is set to black. What
-  // we do is AND the monochrome image onto the color Image
-  // first. When blitting from mono to color, the monochrome
-  // pixel is first transformed as follows:
-  // if  1 (black) it is mapped to the color set by SetTextColor().
-  // if  0 (white) is is mapped to the color set by SetBkColor().
-  // Only then is the raster operation performed.
-  hdcSrc.SetTextColor(RGB(255,255,255));
-  hdcSrc.SetBkColor(RGB(0,0,0));
-  hdcSrc.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcDst,0,0,SRCAND);
-  // Clean up by deselecting any objects, and delete the
-  // DC's.
-  hdcSrc.SelectObject(hbmSrcT);
-  hdcDst.SelectObject(hbmDstT);
-  hdcSrc.DeleteDC();
-  hdcDst.DeleteDC();
-}
-
-void Graphics::TransparentBlt(CDC* pDC,
-  int xStart,
-  int yStart,
-  int wWidth,
-  int wHeight,
-  CDC* pTmpDC,
-  CBitmap* bmpMask,
-  int xSource, // = 0
-  int ySource) // = 0)
-{
-  // We are going to paint the two DDB's in sequence to the destination.
-  // 1st the monochrome bitmap will be blitted using an AND operation to
-  // cut a hole in the destination. The color image will then be ORed
-  // with the destination, filling it into the hole, but leaving the
-  // surrounding area untouched.
-  CDC hdcMem;
-  hdcMem.CreateCompatibleDC(pDC);
-  CBitmap* hbmT = hdcMem.SelectObject(bmpMask);
-  pDC->SetTextColor(RGB(0,0,0));
-  pDC->SetBkColor(RGB(255,255,255));
-  if (!pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource,
-    SRCAND)) {
-      TRACE("Transparent Blit failure SRCAND");
-  }
-  // Also note the use of SRCPAINT rather than SRCCOPY.
-  if (!pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
-    SRCPAINT)) {
-      TRACE("Transparent Blit failure SRCPAINT");
-  }
-  // Now, clean up.
-  hdcMem.SelectObject(hbmT);
-  hdcMem.DeleteDC();
-}
-
-void MenuBar::append(ui::Menu* menu) {
-  int pos = menu->cmenu()->GetMenuItemCount();
-  std::vector<ui::Menu*>::iterator it = items.begin();
-  for ( ; it != items.end(); ++it) {
-    ui::Menu* m = *it;
-    menu->cmenu()->AppendMenu(MF_POPUP, (UINT_PTR)m->cmenu()->m_hMenu, m->label().c_str());
-    m->set_parent(menu);
-    m->set_pos(pos++);
-  }
-  menu->setbar(this);
-}
-
-void MenuBar::remove(CMenu* menu, int pos) {
-    std::vector<ui::Menu*>::iterator it = items.begin();
-    for ( ; it != items.end(); ++it) {
-      menu->RemoveMenu(pos++, MF_BYPOSITION);
-    }
-}
-
-// Menu
-void Menu::set_label(const std::string& label) {
-  label_ = label;
-  if (parent()) {
-    parent()->cmenu()->ModifyMenu(pos_, MF_BYPOSITION, 0, label.c_str());
-    ui::MenuBar* b = bar();
-    b->setupdate(b!=0);
-  }
-}
-
-void Menu::add(ui::Menu* newmenu) {
-  cmenu_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)newmenu->cmenu()->m_hMenu, newmenu->label().c_str());
-  newmenu->set_parent(this);
-  newmenu->set_pos(cmenu_->GetMenuItemCount()-1);
-}
-
-void Menu::add(ui::MenuItem* item) {
-  items.push_back(item);
-  item->set_menu(this);
-  const int id = ID_DYNAMIC_MENUS_START+item->id_counter;
-  item->set_id(id);
-  MenuItem::menuItemIdMap[item->id()] = item;
-  cmenu_->AppendMenu(MF_STRING, id, item->label().c_str());
-  if (item->checked()) {
-		cmenu_->CheckMenuItem(id, MF_CHECKED | MF_BYCOMMAND);
-  }
-}
-
-void Menu::addseparator() {
-  cmenu_->AppendMenu(MF_SEPARATOR, 0, "-");
-}
-
-void Menu::remove(ui::MenuItem* item) {
-  std::vector<ui::MenuItem*>::iterator it;
-  it = std::find(items.begin(), items.end(), item);
-  if (it != items.end()) {
-    items.erase(it);
-  }
-  cmenu_->RemoveMenu(item->id(), MF_BYCOMMAND);
-}
-
-// menuitem  
-
-void MenuItem::set_label(const std::string& label) {
-  label_ = label;
-  if (menu_) {
-      menu_->cmenu()->ModifyMenu(id(), MF_BYCOMMAND, id(), label.c_str());
-  }
-}
-
-void MenuItem::check() {
-  check_ = true;
-  if (menu_) {
-    menu_->cmenu()->CheckMenuItem(id(), MF_CHECKED | MF_BYCOMMAND);
-  }
-}
-
-void MenuItem::uncheck() {
-  check_ = false;
-  if (menu_) {
-      menu_->cmenu()->CheckMenuItem(id(), MF_UNCHECKED | MF_BYCOMMAND);
-  }
-}
-
-}  // namespace mfc
-
 namespace canvas {
 
 Item::Ptr Item::nullpointer;
@@ -311,7 +142,80 @@ double Item::zoomabsy() const {
   return y;
 }
 
+bool Item::IsInGroupVisible() const {
+  bool res = visible();
+  Item::ConstWeakPtr p = parent();
+  while (!p.expired()) {
+    res = p.lock()->visible();
+    if (!res) {
+      break;   
+    }
+    p = p.lock()->parent();
+  }
+  return res;
+}
+
+void Item::Show() { 
+  if (!visible_) { 
+    STR(); 
+    visible_ = true;    
+    OnMessage(SHOW);
+    needsupdate();
+    /*if (!parent().expired()) {
+      Item::Ptr p = parent().lock();
+      p->OnSize(p->w_cache_, p->h_cache_);
+    }*/    
+    Canvas* c = root();
+    if (c) {
+     c->hack_resize_bug_show_ = true;
+     bool issave = c->IsSaving();
+      c->SetSave(true);
+      int w, h;
+      c->ClientSize(w, h);
+      c->OnSize(w, h);
+      c->Flush();
+      c->SetSave(issave);
+      c->Invalidate();
+      c->hack_resize_bug_show_ = false;
+    }
+    FLS();
+  }
+}
+
+void Item::Hide() { 
+  if (visible_) {
+    STR(); 
+    visible_ = false;    
+    OnMessage(HIDE);    
+
+    //needsupdate();
+
+    if (!parent().expired()) {
+      Item::Ptr p = parent().lock();
+      p->OnSize(p->w_cache_, p->h_cache_);
+      p->needsupdate();
+    }
+    /*Canvas* c = root();
+    if (c) {   
+      bool issave = c->IsSaving();
+      c->SetSave(true);
+      int w, h;
+      c->ClientSize(w, h);
+      c->OnSize(w, h);
+      c->Flush();
+      c->SetSave(issave);
+      c->Invalidate();
+    }*/
+    FLS();
+  } 
+}
+
 void Group::OnSize(double cw, double ch) {
+  if (cw ==0 || ch == 0) {
+    return;
+  }
+  w_cache_ = cw;
+  h_cache_ = ch;
   Item::Ptr client;
   double left, top, right, bottom;
   left = top = 0.0;
@@ -320,22 +224,29 @@ void Group::OnSize(double cw, double ch) {
   std::vector<Item::Ptr>::iterator it = items_.begin();
   for (; it != items_.end(); ++it) {
     Item::Ptr item = *it;
-    if (item->has_style()) {
-      double x, y, w, h;      
+    if (/*item->has_style() &&*/ item->visible()) {
+      double x, y, w, h;    
       item->BoundRect(x, y, w, h);
+//      if (w == 201) {
+//        int fordummies = 0;
+//      }
       const Margin& margin = item->style()->margin();
       double l = item->x();
       double t = item->y();      
       const int al = item->style()->align();
-      if (al & ALLEFT) {
+      if (al & ALLEFT) {        
         l = left + margin.left();
         if (!(al & ALRIGHT)) {
+          //item->OnSize(cw, ch);
+          //item->BoundRect(x, y, w, h);
           left += w + margin.left() + margin.right();
         }
       }
       if (al & ALTOP) {        
         t = top + margin.top();
         if (!(al & ALBOTTOM)) {
+         // item->OnSize(cw, ch);
+         // item->BoundRect(x, y, w, h);
           top += h + margin.top() + margin.bottom();
         }
       }
@@ -343,9 +254,9 @@ void Group::OnSize(double cw, double ch) {
         if (al & ALLEFT) {          
           w = right - l - margin.left() - margin.right();
         } else {
-          l = right - w - margin.left() - margin.right();
+          l = right - w - margin.right();
           if (!(al & ALLEFT)) {
-            right -= w - margin.left() - margin.right();
+            right -= w + margin.left() + margin.right();
           }
         }
       }
@@ -353,18 +264,25 @@ void Group::OnSize(double cw, double ch) {
         if (al & ALTOP) {          
           h = bottom - t - margin.top() - margin.bottom();
         } else {
-          t = bottom - h - margin.top() - margin.bottom();
+          t = bottom - h - margin.bottom();
           if (!(al & ALTOP)) {
-            bottom -= h - margin.top() - margin.bottom();
+            bottom -= h + margin.top() + margin.bottom() ;
           }
         }
       }
       if (al & ALCLIENT) {
         client = item;        
-      }
-      item->SetXY(l, t);
-      if (item->width()!=w || item->height()!=h) {
+      }      
+      if ((item->x() != l || item->y() != t) &&
+          (item->width()==w && item->height()==h)) {
+        item->SetXY(l, t);
+      } else
+      if ((item->x() == l && item->y() == t) && 
+          (item->width()!=w || item->height()!=h)) {
         item->OnSize(w, h);
+      } else
+      if (item->x() != l || item->y() != t || item->width()!=w || item->height()!=h) {
+        item->SetPos(l, t, w, h);
       }
     }
   }
@@ -375,9 +293,9 @@ void Group::OnSize(double cw, double ch) {
     double w = right - left - margin.left() - margin.right();
     double h = bottom - top - margin.top() - margin.bottom();
     client->SetXY(l, t);
-    if (client->width()!=w || client->height()!=h) {
+   // if (client->width()!=0 || client->height()!=0) {
       client->OnSize(w, h);
-    }
+    //}
   }
 }
 
@@ -391,7 +309,6 @@ bool Item::IsInGroup(Item::WeakPtr group) const {
   }
   return false;
 }
-
 
 void Group::Draw(Graphics* g, Region& draw_region) {
   for (iterator it = items_.begin(); it != items_.end(); ++it ) {
@@ -465,7 +382,10 @@ void Group::Add(const Item::Ptr& item) {
   }
   STR();
   item->set_parent(shared_from_this());
-  items_.push_back(item);  
+  items_.push_back(item); 
+  if (has_style() && w_cache_ !=0 && h_cache_ !=0) {
+    OnSize(w_cache_, h_cache_);
+  }
   FLS();
   item->needsupdate();
 }
@@ -537,73 +457,20 @@ int Group::zorder(Item::Ptr item) const {
   return z;
 }
 
-Item::Ptr Group::Intersect(double x, double y, Event* ev, bool& worked) {  
-  if (!Item::Intersect(x, y, ev,worked)) {
-    return Item::nullpointer;
-  }
-  if (ev->type() == Event::BUTTON_PRESS) {
-    int fordebugonly = 0;
-  }
-  Item::WeakPtr found;
-  Item::WeakPtr found_noevent;
+Item::Ptr Group::HitTest(double x, double y) {
+  Item::Ptr result;
   ItemList::const_reverse_iterator rev_it = items_.rbegin();
-  for ( ; rev_it != items_.rend(); ++rev_it) {
+  for (; rev_it != items_.rend(); ++rev_it) {
     Item::Ptr item = *rev_it;
     item = item->visible() 
-           ? item->Intersect(x-item->x(), y-item->y(), ev, worked)
-		   : Item::nullpointer; 
-    if (worked) {
-      return item;
-    }
+           ? item->HitTest(x-item->x(), y-item->y())
+		       : nullpointer; 
     if (item) {
-      if (WorkItemEvent(item, ev)) {
-        worked = true;
-        return item;
-      } else {
-        if (found_noevent.expired()) {
-            found_noevent = item;
-        }
-      }
+      result = item;
+      break;
     }
   }
-  if (!found_noevent.expired()) {    
-    Canvas* c = root();
-    if (c) {
-      found = c->DelegateEvent(ev, found_noevent);
-      if (!found.expired()) {
-        worked = true;
-        return found.lock();
-      }
-    }  
-  }
-  return found.lock();
-}
-
-bool Group::WorkItemEvent(Item::WeakPtr item, Event* ev) {
-  bool erg = false;
-  Canvas* c = root();
-  if (c) {    
-    Event::Type type = ev->type();
-    Event e(item, type, ev->cx(), ev->cy(), ev->button(), ev->shift());
-    if (type == Event::MOTION_NOTIFY && !c->mouse_move_.expired()) {
-      if (c->mouse_move_.lock() != item.lock() ) { // && !item.lock()->IsInGroup(c->mouse_move_)) {
-        Event evout(c->mouse_move_, Event::MOTION_OUT, ev->cx(), ev->cy(),ev->button(), ev->shift());
-        c->mouse_move_.lock()->OnEvent(&evout);
-        c->mouse_move_.reset();
-      }
-    }
-    erg = !item.lock()->OnEvent(&e).expired();
-    if (erg) {
-      if (type == Event::BUTTON_PRESS || 
-        type == Event::BUTTON_2PRESS) {
-        c->button_press_item_ = c->focus_item_ = item;        
-      } else
-      if (type == Event::MOTION_NOTIFY) {
-        c->mouse_move_ = item;
-      }
-    }
-  }
-  return erg;
+  return result;
 }
 
 void Group::OnMessage(CanvasMsg msg) {
@@ -612,215 +479,10 @@ void Group::OnMessage(CanvasMsg msg) {
   }
 }
 
-
-void Rect::Draw(Graphics* g, Region& draw_region) {
-  // double z = acczoom();  
-  g->SetColor(fillcolor_);
-  g->FillRect(0, 0, width_, height_);  
-/*    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);
-  CPen pen;
-  pen.CreatePen(PS_SOLID, 1, ToCOLORREF(strokecolor_));
-  CBrush brush(ToCOLORREF(fillcolor_));
-  CBrush* pOldBrush = devc->SelectObject(&brush);
-  CPen* pOldPen = devc->SelectObject(&pen);
-  double alpha = 1; // (GetAlpha(fillcolor_)) / 255.0;
-  if (alpha == 1) {
-    if (bx_!=0 || by_!=0) {
-      CPoint pt(bx_*z, by_*z);
-      devc->RoundRect(rect, pt);
-    } else {
-      devc->Rectangle(rect);
-    }
-  } else {
-    this->paintRect(*devc, rect, ToCOLORREF(strokecolor_),
-      ToCOLORREF(fillcolor_), (alpha*127));
-  }
-  devc->SelectObject(pOldPen);
-  devc->SelectObject(pOldBrush);*/
-}
-
-/*bool Rect::paintRect(CDC &hdc, RECT dim, COLORREF penCol, COLORREF brushCol, unsigned int opacity) {
-  XFORM rXform;
-  hdc.GetWorldTransform(&rXform);
-  XFORM rXform_new = rXform;
-  rXform_new.eDx = zoomabsx();
-  rXform_new.eDy = zoomabsy();
-  hdc.SetGraphicsMode(GM_ADVANCED);
-  hdc.SetWorldTransform(&rXform_new);
-  dim.right -= dim.left;
-  dim.bottom -= dim.top;
-  dim.left = dim.top = 0;
-  HDC tempHdc         = CreateCompatibleDC(hdc);
-  BLENDFUNCTION blend = {AC_SRC_OVER, 0, opacity, 0};
-  HBITMAP hbitmap;       // bitmap handle
-  BITMAPINFO bmi;        // bitmap header
-  // zero the memory for the bitmap info
-  ZeroMemory(&bmi, sizeof(BITMAPINFO));
-  // setup bitmap info
-  // set the bitmap width and height to 60% of the width and height of each of the three horizontal areas. Later on, the blending will occur in the center of each of the three areas.
-  bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-  bmi.bmiHeader.biWidth = dim.right-dim.left;
-  bmi.bmiHeader.biHeight = dim.bottom-dim.top;
-  bmi.bmiHeader.biPlanes = 1;
-  bmi.bmiHeader.biBitCount = 32;         // four 8-bit components
-  bmi.bmiHeader.biCompression = BI_RGB;
-  bmi.bmiHeader.biSizeImage = (dim.right-dim.left) * (dim.bottom-dim.top) * 4;
-  // create our DIB section and select the bitmap into the dc
-  hbitmap = CreateDIBSection(tempHdc, &bmi, DIB_RGB_COLORS, NULL, NULL, 0x0);
-  SelectObject(tempHdc, hbitmap);
-  SetDCPenColor(tempHdc, penCol);
-  SetDCBrushColor(tempHdc, brushCol);
-  HBRUSH br = CreateSolidBrush(brushCol);
-  FillRect(tempHdc, &dim, br);
-  AlphaBlend(hdc, dim.left, dim.top, dim.right, dim.bottom, tempHdc, dim.left, dim.top, dim.right, dim.bottom, blend);
-  DeleteObject(hbitmap);
-  DeleteObject(br);
-  DeleteObject(tempHdc);
-  hdc.SetGraphicsMode(GM_ADVANCED);
-  hdc.SetWorldTransform(&rXform);
-  return 0;
-}*/
-
-bool Rect::onupdateregion() {
-  rgn_->SetRect(0, 0, width_, height_);  
-  return true;
-}
-
-void Line::Draw(Graphics* g, Region& draw_region) {  
-  g->SetColor(color());
-  double mx, my;
-  mx = my = 0;
-  for (Points::iterator it = pts_.begin(); it != pts_.end(); ++it) {
-    Point& pt = (*it);
-    if (it != pts_.begin()) {
-      g->DrawLine(mx, my, pt.first, pt.second);
-    }
-    mx = pt.first;
-    my = pt.second;
-  }  
-}
-
-Item::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
-  /*double distance_ = 5;
-  Point  p1 = PointAt(0);
-  Point  p2 = PointAt(1);
-  double  ankathede    = p1.first - p2.first;
-  double  gegenkathede = p1.second - p2.second;
-  double  hypetenuse   = sqrt(ankathede*ankathede + gegenkathede*gegenkathede);
-  if (hypetenuse == 0) return 0;
-  double cos = ankathede    / hypetenuse;
-  double sin = gegenkathede / hypetenuse;
-  int dx = static_cast<int> (-sin*distance_);
-  int dy = static_cast<int> (-cos*distance_);
-  std::vector<CPoint> pts;
-  CPoint p;
-  p.x = p1.first + dx; p.y = p1.second - dy;
-  pts.push_back(p);
-  p.x = p2.first + dx; p.y = p2.second - dy;
-  pts.push_back(p);
-  p.x = p2.first - dx; p.y = p2.second + dy;
-  pts.push_back(p);
-  p.x = p1.first - dx; p.y = p1.second + dy;
-  pts.push_back(p);
-  CRgn rgn;
-  rgn.CreatePolygonRgn(&pts[0],pts.size(), WINDING);
-  Item::Ptr item = rgn.PtInRegion(x-this->x(),y-this->y()) ? this : 0;
-  rgn.DeleteObject();*/
-  return Item::Ptr();
-}
-
-bool Line::onupdateregion() {  
-  double x1, y1, x2, y2;
-  double dist = 5;
-  BoundRect(x1, y1, x2, y2);
-  double zoom = 1.0; // parent() ? parent()->zoom() : 1.0;
-  rgn_->SetRect((x1-dist)*zoom, (y1-dist)*zoom, (x2+2*dist+1)*zoom, (y2+2*dist+1)*zoom);    
-  return true;
-}
-
-void Text::Init(double zoom) {
-  color_ = 0;
-  LOGFONT lfLogFont;
-  memset(&lfLogFont, 0, sizeof(lfLogFont));
-  lfLogFont.lfHeight = 12*zoom;
-  strcpy(lfLogFont.lfFaceName, "Arial");
-  font_.CreateFontIndirect(&lfLogFont);
-}
-
-bool Text::onupdateregion() {  
-    if (text_=="test20") {
-      int fordummies = 30;
-    }
-    Canvas* c =  const_cast<Text*>(this)->root();
-    if (c) {
-      HDC dc = GetDC(0);
-      SIZE extents = {0};
-      HFONT old_font =
-        reinterpret_cast<HFONT>(SelectObject(dc, font_));
-      GetTextExtentPoint32(dc, text_.c_str(), text_.length(),
-        &extents);
-      SelectObject(dc, old_font);
-      ReleaseDC(0, dc);
-      text_w = extents.cx;
-      text_h = extents.cy;
-      rgn_->SetRect(0, 0, text_w, text_h);
-      return true;
-    }    
-    return false;
-}
-
-void Text::Draw(Graphics* g, Region& draw_region) { 
-    g->SetColor(color_);
-    g->DrawString(text_, 0, 0);    
-}
-
-// Pic
-inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp)
-{
-  BITMAP bm = { 0 };
-  GetObject(hBmp, sizeof(bm), &bm);
-  BITMAPINFO* bmi = (BITMAPINFO*) _alloca(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
-  ::ZeroMemory(bmi, sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
-  bmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-  BOOL bRes = ::GetDIBits(hDC, hBmp, 0, bm.bmHeight, NULL, bmi, DIB_RGB_COLORS);
-  if( !bRes || bmi->bmiHeader.biBitCount != 32 ) return;
-  LPBYTE pBitData = (LPBYTE) ::LocalAlloc(LPTR, bm.bmWidth * bm.bmHeight * sizeof(DWORD));
-  if( pBitData == NULL ) return;
-  LPBYTE pData = pBitData;
-  ::GetDIBits(hDC, hBmp, 0, bm.bmHeight, pData, bmi, DIB_RGB_COLORS);
-  for( int y = 0; y < bm.bmHeight; y++ ) {
-    for( int x = 0; x < bm.bmWidth; x++ ) {
-      pData[0] = (BYTE)((DWORD)pData[0] * pData[3] / 255);
-      pData[1] = (BYTE)((DWORD)pData[1] * pData[3] / 255);
-      pData[2] = (BYTE)((DWORD)pData[2] * pData[3] / 255);
-      pData += 4;
-    }
-  }
-  ::SetDIBits(hDC, hBmp, 0, bm.bmHeight, pBitData, bmi, DIB_RGB_COLORS);
-  ::LocalFree(pBitData);
-}
-
-void Pic::Draw(Graphics* g, Region& draw_region) {
-  g->DrawImage(image_, 0, 0, width_, height_, xsrc_, ysrc_);
-  // todo zoom  
-}
-
-void Pic::SetImage(Image* image) {
-  STR();
-  image_ = image;
-  image_->Size(width_, height_);  
-  FLS();
-}
-
-bool Pic::onupdateregion() {
-  rgn_->SetRect(0, 0, width_, height_);
-  return true;
-}
-
 // Canvas
 void Canvas::Init() {
   is_root_ = true;
-  steal_focus_ = item_blit_ = show_scrollbar = save_ = false;
+  steal_focus_ = item_blit_ = show_scrollbar = save_ = hack_resize_bug_show_= false;
   bg_image_ = 0;  
   bg_width_ = bg_height_ = 0;
   cw_ = pw_ = ch_ = ph_ = 300;
@@ -828,7 +490,7 @@ void Canvas::Init() {
   color_ = 0;
   save_rgn_.SetRect(0, 0, cw_, ch_);    
   cursor_ = LoadCursor(0, IDC_ARROW);
-  old_wnd_ = wnd_;    
+  old_wnd_ = wnd_;
 }
 
 void Canvas::Draw(Graphics *g, Region& rgn) {
@@ -872,75 +534,113 @@ void Canvas::DoDraw(Graphics *g, Region& rgn) {
 void Canvas::OnSize(int cw, int ch) {  
   cw_ = cw;
   ch_ = ch;
+  w_cache_ = cw;
+  h_cache_ = ch;
   Group::OnSize(cw, ch);
 }
 
-void Canvas::StealFocus(Item::Ptr item) {
+void Canvas::StealFocus(const Item::Ptr& item) {
   button_press_item_ = item;
   steal_focus_ = true;
 }
 
-Item::WeakPtr Canvas::OnEvent(Event* ev) {
-  if (!ev->item().expired()) {
-    return Item::WeakPtr();
-  }
-  if (ev->type() == Event::ONTIMER || ev->type() == Event::SCROLL || ev->type() == Event::ONSIZE) {
-    return Item::WeakPtr();
-  }
-  Item::WeakPtr item = button_press_item_;  
-  if (!item.expired() && ev->type() == Event::KEY_DOWN || !item.expired() && ev->type() == Event::KEY_UP) {
-    if (!focus_item_.expired()) {
-      Event e(focus_item_, ev->type(), ev->cx(), ev->cy(), ev->button(), ev->shift());
-      DelegateEvent(&e, focus_item_);
-      item = e.item();
+void Canvas::SetFocus(const Item::Ptr& item) {
+  if (item != focus_item_.lock()) {
+    if (!focus_item_.expired() && item != focus_item_.lock()) {
+      focus_item_.lock()->OnKillFocus();
     }
-  } else
-  if (!item.expired() && ev->type() == Event::MOTION_NOTIFY ) {
-      Event e(item, ev->type(), ev->cx(), ev->cy(), ev->button(), ev->shift());
-      DelegateEvent(&e, item);
-      item = e.item();
-  } else
-  if (ev->type() != Event::BUTTON_RELEASE) {
-      if (ev->type() == Event::BUTTON_PRESS) {
-         int fordebugonly = 0;
-      }
-      bool worked = false;
-      item = Group::Intersect(ev->cx(), ev->cy(), ev, worked);
-      if (ev->type() == Event::MOTION_NOTIFY && 
-          button_press_item_.expired() &&
-          !mouse_move_.expired() &&
-          (item.expired() || (item.lock() != mouse_move_.lock())))
-      {
-        Event evout(mouse_move_, Event::MOTION_OUT, ev->cx(), ev->cy(),ev->button(), ev->shift());
-        mouse_move_.lock()->OnEvent(&evout);
-        mouse_move_.reset();    
-      }      
+    focus_item_ = item;
+    if (!focus_item_.expired()) {
+      focus_item_.lock()->OnFocus();
+    }
   }
-  if (ev->type() == Event::BUTTON_RELEASE || ev->type() == Event::BUTTON_2PRESS) {
-      ev->setitem(item);
-      button_press_item_.reset();
-      if (!item.expired()) {
-        item.lock()->OnEvent(ev);
-      }
-  }
-  return item;
 }
 
-Item::WeakPtr Canvas::DelegateEvent(Event* ev, Item::WeakPtr item) {
-  bool erg = item.lock()->pointerevents() && !item.lock()->OnEvent(ev).expired();
-  while (!erg && !item.lock()->parent().expired()) {
-    item = item.lock()->parent();  // redirect event to parent
-    if (!button_press_item_.expired()) {
-      button_press_item_ = item;
-    }
-    ev->setitem(item);
-    erg = item.lock()->pointerevents() && !item.lock()->OnEvent(ev).expired();
-    if (steal_focus_) {
-      steal_focus_ = 0;
-      return item;
+// Events
+
+bool Canvas::WorkKeyDown(KeyEvent& ev) {
+  if (!focus_item_.expired()) {
+    Item::Ptr item = focus_item_.lock();   
+    WorkEvent(ev, &Item::OnKeyDown, item);    
+  } else {
+    ev.PreventDefault();
+    OnKeyDown(ev);
+  }  
+  return !ev.is_work_parent();
+}
+
+void Canvas::WorkKeyUp(KeyEvent& ev) {
+  if (!focus_item_.expired()) {
+    Item::Ptr item = focus_item_.lock();
+    WorkEvent(ev, &Item::OnKeyDown, item);;
+  } else {
+    OnKeyUp(ev);  
+  }
+}
+
+void Canvas::WorkMouseDown(MouseEvent& ev) {
+  button_press_item_ = HitTest(ev.cx(), ev.cy());  
+  if (!button_press_item_.expired()) {        
+    Item::Ptr item = button_press_item_.lock();    
+    WorkEvent(ev, &Item::OnMouseDown, item);
+    button_press_item_ = item;    
+  }
+  SetFocus(button_press_item_.lock());
+}
+
+void Canvas::WorkDblClick(MouseEvent& ev) {
+  button_press_item_ = HitTest(ev.cx(), ev.cy());  
+  if (!button_press_item_.expired()) {        
+    Item::Ptr item = button_press_item_.lock();    
+    WorkEvent(ev, &Item::OnDblclick, item);        
+  }
+  SetFocus(button_press_item_.lock());
+  button_press_item_ = nullpointer;
+}
+
+void Canvas::WorkMouseUp(MouseEvent& ev) {
+  if (!button_press_item_.expired()) {
+    button_press_item_.lock()->OnMouseUp(ev);
+    button_press_item_.reset();
+  } else {
+    Item::Ptr item = HitTest(ev.cx(), ev.cy());  
+    WorkEvent(ev, &Item::OnMouseUp, item);
+  }
+}
+
+void Canvas::WorkMouseMove(MouseEvent& ev) {
+  if (!button_press_item_.expired()) {        
+    Item::Ptr item = button_press_item_.lock();    
+    WorkEvent(ev, &Item::OnMouseMove, item);
+  } else {
+    Item::Ptr item = HitTest(ev.cx(), ev.cy());    
+    while (item) {
+      if (!mouse_move_.expired()  &&
+           mouse_move_.lock() != item
+         ) {
+        mouse_move_.lock()->OnMouseOut(ev);
+      }       
+      item->OnMouseMove(ev);
+      if (ev.is_work_parent()) {        
+        item = item->parent().lock();  
+      } else {
+        mouse_move_ = item;
+        break;
+      }
+    }    
+    if (!item && !mouse_move_.expired()) {
+      mouse_move_.lock()->OnMouseOut(ev);
+      mouse_move_.reset();
     }
   }
-  return item;
+}
+
+void Canvas::WorkOnSize(int cw, int ch) {
+  OnSize(cw, ch);
+}
+
+void Canvas::WorkTimer() {
+  // OnSize(cw, ch);
 }
 
 void Canvas::Invalidate(Region& rgn) { 
@@ -960,65 +660,73 @@ void Canvas::Flush() {
   save_rgn_.Clear();
 }
 
+void Canvas::Invalidate() {
+  if (wnd_) {
+    wnd_->Invalidate();
+  }
+}  
 
-IMPLEMENT_DYNAMIC(CScintilla, CWnd)
+void Canvas::InvalidateSave() {
+  if (wnd_ &&::IsWindow(wnd_->m_hWnd)) {
+      wnd_->InvalidateRgn((CRgn*) save_rgn_.source(), 0);
+  }
+}
 
-BEGIN_MESSAGE_MAP(CScintilla, CWnd)
-ON_NOTIFY_REFLECT_EX(SCN_CHARADDED, OnModified)
-END_MESSAGE_MAP()
+void Canvas::SetCapture() {
+  if (wnd_ && ::IsWindow(wnd_->m_hWnd)) {
+    ::SetCapture(wnd_->m_hWnd);
+  }
+}
+
+void Canvas::ReleaseCapture() {
+  if (wnd_ && ::IsWindow(wnd_->m_hWnd)) {
+    ::ReleaseCapture();
+  }
+}
+
+void Canvas::ShowCursor() { while (::ShowCursor(TRUE) < 0); }
+
+void Canvas::HideCursor() { while (::ShowCursor(FALSE) >= 0); }
+
+void Canvas::SetCursorPos(int x, int y) {
+  if (wnd_) {
+    CPoint point(x, y);
+    wnd_->ClientToScreen(&point);
+		::SetCursorPos(point.x, point.y);
+  }
+}
+
+void Canvas::SetCursor(CursorStyle style) {
+  LPTSTR c = 0;
+  int ac = 0;
+  switch (style) {
+    case AUTO        : c = IDC_IBEAM; break;
+    case MOVE        : c = IDC_SIZEALL; break;
+    case NO_DROP     : ac = AFX_IDC_NODROPCRSR; break;
+    case COL_RESIZE  : c = IDC_SIZEWE; break;
+    case ALL_SCROLL  : ac = AFX_IDC_TRACK4WAY; break;
+    case POINTER     : c = IDC_HAND; break;
+    case NOT_ALLOWED : c = IDC_NO; break;
+    case ROW_RESIZE  : c = IDC_SIZENS; break;
+    case CROSSHAIR   : c = IDC_CROSS; break;
+    case PROGRESS    : c = IDC_APPSTARTING; break;
+    case E_RESIZE    : c = IDC_SIZEWE; break;
+    case NE_RESIZE   : c = IDC_SIZENWSE; break;
+    case DEFAULT     : c = IDC_ARROW; break;
+    case TEXT        : c = IDC_IBEAM; break;
+    case N_RESIZE    : c = IDC_SIZENS; break;
+    case S_RESIZE    : c = IDC_SIZENS; break;
+    case SE_RESIZE   : c = IDC_SIZENWSE; break;
+    case INHERIT     : c = IDC_IBEAM; break;
+    case WAIT        : c = IDC_WAIT; break;
+    case W_RESIZE    : c = IDC_SIZEWE; break;
+    case SW_RESIZE   : c = IDC_SIZENESW; break;
+    default          : c = IDC_ARROW; break;
+  }
+  cursor_ = (c!=0) ? LoadCursor(0, c) : ::LoadCursor(0, MAKEINTRESOURCE(ac));
+}
 
 // CanvasView
-bool BaseView::DelegateEvent(int type, int button, UINT nFlags, CPoint pt) {
-  try {    
-    if (!canvas_.expired()) {
-      Event ev(Item::WeakPtr(), (Event::Type)type, pt.x, pt.y, button, nFlags);
-      Canvas* c = canvas().lock().get();
-      return !c->OnEvent(&ev).expired() ? true : false;
-    }
-  } catch (std::exception& e) {
-    AfxMessageBox(e.what());
-  }  
-  return false;
-}
-
-void BaseView::Draw() { 
-  CRgn rgn;
-  rgn.CreateRectRgn(0, 0, 0, 0);
-	int result = wnd_->GetUpdateRgn(&rgn, FALSE);
-
-  if (!result) return; // If no area to update, exit.
-	
-	CPaintDC dc(wnd_);
-
-  if (!bmpDC.m_hObject) { // buffer creation	
-		CRect rc;
-		wnd_->GetClientRect(&rc);		
-		bmpDC.CreateCompatibleBitmap(&dc, rc.right - rc.left, rc.bottom - rc.top);
-		char buf[128];
-		sprintf(buf,"CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n",(void*)bmpDC);
-		TRACE(buf);
-	}
-  CDC bufDC;
-	bufDC.CreateCompatibleDC(&dc);
-	CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);	    
-  if (!canvas_.expired()) {
-    Canvas* c = canvas().lock().get();
-    try {
-      ui::mfc::Graphics g(&bufDC);
-      ui::mfc::Region canvas_rgn(rgn);
-      c->Draw(&g, canvas_rgn);
-    } catch (std::exception& e) {
-      AfxMessageBox(e.what());
-    }
-  }
-
-  CRect rc;
-  wnd_->GetClientRect(&rc);
-	dc.BitBlt(0, 0, rc.right-rc.left, rc.bottom-rc.top, &bufDC, 0, 0, SRCCOPY);
-	bufDC.SelectObject(oldbmp);
-	bufDC.DeleteDC();
-  rgn.DeleteObject();    
-}
 
 BEGIN_MESSAGE_MAP(View, CWnd)  
   ON_WM_CREATE()
@@ -1038,14 +746,126 @@ BEGIN_MESSAGE_MAP(View, CWnd)
   ON_WM_VSCROLL()
   ON_WM_SIZE()
   ON_WM_KEYDOWN()
-  ON_WM_KEYUP()
+  ON_WM_KEYUP()    
   ON_CONTROL_RANGE(BN_CLICKED, ID_DYNAMIC_CONTROLS_BEGIN, 
             ID_DYNAMIC_CONTROLS_LAST, OnCtrlBtnClick)
+  ON_COMMAND_RANGE(ID_DYNAMIC_CONTROLS_BEGIN, ID_DYNAMIC_CONTROLS_LAST, OnCtrlCommand) 
 END_MESSAGE_MAP()
 
+void View::OnCtrlCommand(UINT id) {}
 
-BOOL View::PreCreateWindow(CREATESTRUCT& cs) 
-{
+std::map<HWND, View*> View::views_;
+std::map<std::uint16_t, Item::WeakPtr> View::mfc_ctrls_;
+
+HHOOK View::_hook = 0;
+
+LRESULT __stdcall View::HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
+  if (nCode == HC_ACTION) {
+    CWPSTRUCT* info = (CWPSTRUCT*) lParam;        
+    if (info->message == WM_SETFOCUS) {
+      FilterHook(info->hwnd);                     
+    }
+  }
+  return CallNextHookEx(_hook , nCode, wParam, lParam);       
+}
+
+void View::FilterHook(HWND hwnd) {  
+  typedef std::map<HWND, View*> ViewList;
+  ViewList::iterator it = views_.begin();
+  for (; it != views_.end(); ++it) {
+    View* view = (*it).second;
+    if (::IsChild(view->GetSafeHwnd(), hwnd)) {
+        view->OnFocusChange(::GetDlgCtrlID(hwnd));
+    }
+  } 
+}
+
+void View::SetFocusHook() {
+  if (_hook) {
+    return;
+  }
+  if (!(_hook = SetWindowsHookEx(WH_CALLWNDPROC, 
+                                 View::HookCallback,
+                                 AfxGetInstanceHandle(),
+                                 GetCurrentThreadId()))) {
+    TRACE(_T("ui::canvas::View : Failed to install hook!\n"));
+  }
+}
+
+void View::ReleaseHook() { 
+  UnhookWindowsHookEx(_hook);
+}
+
+void View::set_canvas(Canvas::WeakPtr canvas) { 
+  if (canvas_.lock() == canvas.lock()) {
+    return;
+  }    
+  if (!canvas_.expired()) {
+    canvas_.lock()->set_wnd(0);
+  }
+  canvas_ = canvas;            
+  if (!canvas.expired() && m_hWnd) {      
+    Canvas* c = canvas.lock().get();
+    c->set_wnd(this);
+    try {   
+      CRect rc;            
+      GetClientRect(&rc);
+      if (rc.Width() != 0 && rc.Height() != 0) {      
+        c->OnSize(rc.Width(), rc.Height());
+        c->ClearSave();
+        Invalidate();
+      }
+    } catch (std::exception& e) {
+      error(e);
+      AfxMessageBox(e.what());
+    }  
+  } 
+}        
+
+BOOL View::PreTranslateMessage(MSG* pMsg) {
+  if (pMsg->message==WM_KEYDOWN ) {
+    CWnd* hwndTest = GetFocus();
+    if (hwndTest) {
+      int id = hwndTest->GetDlgCtrlID();
+      Item::WeakPtr item = FindById(id);
+      Canvas* c = canvas().lock().get();    
+      if (c) {
+        UINT nFlags = 0;
+        UINT flags = Win32KeyFlags(nFlags);
+        try {
+          canvas::KeyEvent ev(pMsg->wParam, flags);
+          c->WorkKeyDown(ev);
+          return ev.is_prevent_default();
+        } catch(std::exception& e) {
+          AfxMessageBox(e.what());
+        }
+      }
+    }          
+  } else
+  if (pMsg->message == WM_KEYUP) {      
+    CWnd* hwndTest = GetFocus();
+    if (hwndTest) {
+      int id = hwndTest->GetDlgCtrlID();
+      Item::WeakPtr item = FindById(id);
+      Canvas* c = canvas().lock().get();    
+      if (c) {
+        UINT nFlags = 0;
+        UINT flags = Win32KeyFlags(nFlags);
+        try {
+          canvas::KeyEvent ev(pMsg->wParam, flags);
+          c->WorkKeyUp(ev);
+          return ev.is_prevent_default();
+        } catch(std::exception& e) {
+          AfxMessageBox(e.what());
+        }
+      }          
+    }
+  }
+  return CWnd::PreTranslateMessage(pMsg);
+}
+
+
+BOOL View::PreCreateWindow(CREATESTRUCT& cs) {
 	if (!CWnd::PreCreateWindow(cs))
 		return FALSE;
 	// CS_HREDRAW | CS_VREDRAW |
@@ -1067,12 +887,14 @@ int View::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (CWnd::OnCreate(lpCreateStruct) == -1) {
 		return -1;
 	}
-  cw_ = 0; ch_ = 0;  
+  views_[GetSafeHwnd()] = this;
+   // Set the hook
+  SetFocusHook();  
 	return 0;
 }
 
 void View::OnDestroy() {  
-  BaseView::OnDestroy();
+  bmpDC.DeleteObject();
 }
 
 /* BOOL View::PreCreateWindow(CREATESTRUCT& cs) {
@@ -1090,7 +912,7 @@ void View::OnSetFocus(CWnd* pOldWnd) {
 }
 
 void View::OnTimerViewRefresh() {    
-  if (!canvas_.expired() && IsWindowVisible()) {
+  if (!canvas_.expired() && m_hWnd && IsWindowVisible()) {
     try {          
       Canvas* c = canvas().lock().get();
       if (c->show_scrollbar) {
@@ -1110,7 +932,7 @@ void View::OnTimerViewRefresh() {
         c->set_wnd(this);
         c->InvalidateSave();
       }
-      DelegateEvent(Event::ONTIMER, 0, 0, CPoint(0, 0));
+      c->WorkTimer();
     } catch(std::exception& e) {
       e;
     }    
@@ -1129,13 +951,12 @@ void View::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
      }
     } else {
       CPoint pt(nPos, 0);
-      DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
+//      DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
       SetScrollPos(SB_HORZ, nPos, false);
     }    
   }
   CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
 }
-
 
 void View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {  
   if (nSBCode == SB_THUMBTRACK) {    
@@ -1149,7 +970,7 @@ void View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
      }
     } else {
       CPoint pt(nPos, 0);
-      DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
+      //DelegateEvent(canvas::Event::SCROLL, 0, 0, pt);
       SetScrollPos(SB_VERT, nPos, false);
     }    
   }
@@ -1165,14 +986,61 @@ BOOL View::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {
   return CWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
+
+void View::OnPaint() {
+ CRgn rgn;
+  rgn.CreateRectRgn(0, 0, 0, 0);
+	int result = GetUpdateRgn(&rgn, FALSE);
+
+  if (!result) return; // If no area to update, exit.
+	
+	CPaintDC dc(this);
+
+  if (!bmpDC.m_hObject) { // buffer creation	
+		CRect rc;
+		GetClientRect(&rc);		
+		bmpDC.CreateCompatibleBitmap(&dc, rc.right - rc.left, rc.bottom - rc.top);
+		char buf[128];
+		sprintf(buf,"CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n",(void*)bmpDC);
+		TRACE(buf);
+	}
+  CDC bufDC;
+	bufDC.CreateCompatibleDC(&dc);
+	CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);	    
+  if (!canvas_.expired()) {
+    Canvas* c = canvas().lock().get();
+    try {
+      ui::mfc::Graphics g(&bufDC);
+      ui::mfc::Region canvas_rgn(rgn);
+      c->Draw(&g, canvas_rgn);
+    } catch (std::exception& e) {
+      AfxMessageBox(e.what());
+    }
+  }
+
+  CRect rc;
+  GetClientRect(&rc);
+	dc.BitBlt(0, 0, rc.right-rc.left, rc.bottom-rc.top, &bufDC, 0, 0, SRCCOPY);
+	bufDC.SelectObject(oldbmp);
+	bufDC.DeleteDC();
+  rgn.DeleteObject();    
+}
+
 void View::OnSize(UINT nType, int cw, int ch) {  
   if (bmpDC.m_hObject != NULL) { // remove old buffer to force recreating it with new size
 	  TRACE("CanvasView::OnResize(). Deleted bmpDC\n");
 	  bmpDC.DeleteObject();	  
   }
-  Resize(cw, ch);
-  cw_ = cw;
-  ch_ = ch;
+   if (!canvas_.expired()) {      
+    try {
+      Canvas* c = canvas().lock().get();
+      c->WorkOnSize(cw, ch);
+      c->ClearSave();
+      Invalidate();
+    } catch (std::exception& e) {
+      AfxMessageBox(e.what());
+    }  
+  } 
   CWnd::OnSize(nType, cw, ch);
 }
 
@@ -1219,19 +1087,6 @@ void CanvasFrameWnd::OnDestroy() {
 
 void CanvasFrameWnd::PostNcDestroy() {			
 	CFrameWnd::PostNcDestroy();
-}
-
-// Messages
-void CanvasFrameWnd::OnSetFocus(CWnd* pOldWnd) {
-	CFrameWnd::OnSetFocus(pOldWnd);			
-}
-
-void CanvasFrameWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {          	
-	CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
-}
-
-void CanvasFrameWnd::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {              			
-	CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);  
 }
 
 
