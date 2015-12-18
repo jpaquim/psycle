@@ -5,7 +5,7 @@
 namespace psycle { namespace host {
 
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
+		{    
 			// undo code not required, enter note handles it
 			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);	
 			PsycleConfig& config = PsycleGlobal::conf();
@@ -51,12 +51,14 @@ namespace psycle { namespace host {
 
 		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
-			KeyUp(nChar, nRepCnt, nFlags);
+      if (LuaGlobal::OnKeyUp(nChar, nRepCnt, nFlags)) {
+			  KeyUp(nChar, nRepCnt, nFlags);
+      }
 			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
 		void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
-		{
+		{      
 			PsycleConfig& config = PsycleGlobal::conf();
 			// undo code not required, enternote and msbput handle it
 			BOOL bRepeat = nFlags&0x4000;
@@ -135,7 +137,9 @@ namespace psycle { namespace host {
 
 		void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		{
-			KeyDown(nChar, nRepCnt, nFlags);
+      if (LuaGlobal::OnKeyDown(nChar, nRepCnt, nFlags)) {      
+			  KeyDown(nChar, nRepCnt, nFlags);
+      }
 			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 		}
 

@@ -6,7 +6,7 @@
 #include "plugininfo.hpp"
 #include "LuaArray.hpp"
 #include "LuaInternals.hpp"
-#include "LuaGui.hpp"
+#include "Menu.hpp"
 
 struct lua_State;
 struct luaL_Reg;
@@ -14,8 +14,6 @@ struct luaL_Reg;
 namespace universalis { namespace os {
 	class terminal;
 }}
-
-// namespace psycle { namespace host { namespace ui { namespace canvas { struct Event; }}}}
 
 namespace psycle {
 namespace host {
@@ -25,16 +23,6 @@ class LuaPlugin;
 typedef boost::shared_ptr<LuaPlugin> LuaPluginPtr;
 extern boost::shared_ptr<LuaPlugin> nullPtr;
 
-  //controlling function header
-static UINT StartThread (LPVOID param);
-
-//structure for passing to the controlling function
-typedef struct THREADSTRUCT
-{
-    class TDlg*    _this;
-        //you can add here other parameters you might be interested on
-} THREADSTRUCT;
-
 class LuaPlugin;
 
 class LuaProxy : public LockIF {
@@ -42,17 +30,28 @@ public:
 	LuaProxy(LuaPlugin* plug, const std::string& dllname);
 	~LuaProxy();
 
+  // Host accessors
+  LuaPlugin& host() { return *host_; }
+  LuaPlugin& host() const { return *host_; }  
+  LuaMachine* lua_mac() { return lua_mac_; };
+
   const PluginInfo& info() const;
-	int num_cols() const { return lua_mac_->numcols(); }
-	int num_parameter() const { return lua_mac_->numparams(); }
-					
+	
+  // Script Control
 	void Run();
 	void Init();
   void Reload();
   void Free();
+  void set_state(lua_State* state);
+  lua_State* state() const { return L; }
+
+  // LockIF Implementation
+  void lock() const { ::EnterCriticalSection(&cs); }
+  void unlock() const { ::LeaveCriticalSection(&cs); }
 
   LuaCanvas::WeakPtr canvas() { return lua_mac_->canvas(); }
 
+  // Plugin calls
   void SequencerTick();
   void ParameterTweak(int par, double val);
   void Work(int numsamples, int offset=0);
@@ -69,15 +68,15 @@ public:
   std::string Id(int par);
 	std::string Name(int par);		
 	void Range(int par,int &minval, int &maxval);
-	int Type(int par);
-				
+	int Type(int par);				
+  bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);  
+  bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
   void call_execute();
 	void call_sr_changed(int rate);
 	void call_aftertweaked(int idx);
 	void call_menu(UINT id);  
 	std::string call_help();	
-	void set_state(lua_State* state);
-  lua_State* state() const { return L; }	
+	
   void update_menu(void* menu);
   ui::MenuBar* get_menu(ui::Menu* menu);
   MachineUiType::Value ui_type() const { return lua_mac_->ui_type(); }
@@ -85,14 +84,10 @@ public:
   int call_numprograms();
   int get_curr_program();
   std::string get_program_name(int bnkidx, int idx);
-  MachinePresetType::Value prsmode() const { return lua_mac_->prsmode(); }
-  void lock() const { ::EnterCriticalSection(&cs); }
-  void unlock() const { ::LeaveCriticalSection(&cs); }
-
-  LuaPlugin& host() { return *host_; }
-  LuaPlugin& host() const { return *host_; }
-  LuaMachine* lua_mac() { return lua_mac_; };
-      
+  MachinePresetType::Value prsmode() const { return lua_mac_->prsmode(); }  
+  int num_cols() const { return lua_mac_->numcols(); }
+	int num_parameter() const { return lua_mac_->numparams(); }
+        
 private:
 	void export_c_funcs();
 	// script callbacks
@@ -114,20 +109,29 @@ private:
   mutable CRITICAL_SECTION cs;  
 };
 
-typedef std::list<LuaPluginPtr> LuaUiList;
-typedef boost::shared_ptr<class LuaUiExtentions> LuaUiExtentionsPtr;
 
+// Container for LuaUiExtensions
 class LuaUiExtentions {     
  public:
-   LuaUiExtentions() { }
-   ~LuaUiExtentions() { }
-   static LuaUiExtentionsPtr instance();   
-   void Add(const LuaPluginPtr& ptr) { uiluaplugins.push_back(ptr); }
-   void Remove(const LuaPluginPtr& ptr) { uiluaplugins.remove(ptr); }
-   LuaUiList Get(const std::string& name);
-   LuaPluginPtr Get(int idx);   
+  typedef std::list<LuaPluginPtr> List;
+  typedef boost::shared_ptr<LuaUiExtentions> Ptr;
+
+  LuaUiExtentions() {}
+  ~LuaUiExtentions() {}
+  static LuaUiExtentions::Ptr instance();
+
+  typedef LuaUiExtentions::List::iterator iterator;
+  virtual iterator begin() { return uiluaplugins_.begin(); }
+  virtual iterator end() { return uiluaplugins_.end(); }
+  virtual bool empty() const { return true; }
+
+  void Add(const LuaPluginPtr& ptr) { uiluaplugins_.push_back(ptr); }
+  void Remove(const LuaPluginPtr& ptr) { uiluaplugins_.remove(ptr); }
+  LuaUiExtentions::List Get(const std::string& name);
+  LuaPluginPtr Get(int idx);  
+
  private:
-   LuaUiList uiluaplugins;
+  LuaUiExtentions::List uiluaplugins_;
 };
 
 struct LuaGlobal {
@@ -145,7 +149,10 @@ struct LuaGlobal {
         return (LuaPlugin*) mac;
       }
       return 0;
-   }   
+   }
+   static std::vector<LuaPlugin*> GetAllLuas();
+   static bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+   static bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
  

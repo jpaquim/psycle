@@ -10,14 +10,14 @@
 #include "InfoDlg.hpp"
 #include "InstrumentEditorUI.hpp"
 #include "MidiMonitorDlg.hpp"
-#include "Canvas.hpp"
-
 
 namespace universalis { namespace os {
 	class terminal;
 }}
 
 namespace psycle { namespace host {
+
+    namespace ui { namespace canvas { class View; } }
 
 		class Song;
 		class CWaveEdFrame;
@@ -97,7 +97,7 @@ namespace psycle { namespace host {
       
 			
 			CChildView  m_wndView;
-      ui::canvas::View m_luaWndView;
+      boost::shared_ptr<ui::canvas::View> m_luaWndView;
 			//CRebar      m_rebar;
 			CToolBar    m_wndToolBar;
 			CBitmap     m_tbBm;

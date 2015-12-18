@@ -215,7 +215,7 @@ void LuaMachine::load(const char* name) {
   PluginInfo* info = plug_catcher->info(name);
   if (info) {
     Song& song =  Global::song();
-    mac_ = song.CreateMachine(info->type, info->dllname.c_str(), 1024, 0);
+    mac_ = song.CreateMachine(info->type, info->dllname.c_str(), AUTOID, 0);
     mac_->Init();
     build_buffer(mac_->samplesV, 256);
     shared_ = false;
@@ -304,6 +304,7 @@ int LuaMachineBind::open(lua_State *L) {
     {"exit", exit},
     {"reload", reload},
     {"setcanvas", setcanvas},
+    {"type", type},  
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -314,6 +315,27 @@ int LuaMachineBind::open(lua_State *L) {
   LuaHelper::constant(L, "FX", MACHMODE_FX);
   LuaHelper::constant(L, "PRSNATIVE", 3);  
   LuaHelper::constant(L, "PRSCHUNK", 1);
+  LuaHelper::constant(L, "MACH_UNDEFINED", -1);
+	LuaHelper::constant(L, "MACH_MASTER", 0);
+	LuaHelper::constant(L, "MACH_SINE", 1); ///< now a plugin
+	LuaHelper::constant(L, "MACH_DIST", 2); ///< now a plugin
+  LuaHelper::constant(L, "MACH_SAMPLER", 3);
+  LuaHelper::constant(L, "MACH_DELAY", 4); ///< now a plugin
+	LuaHelper::constant(L, "MACH_2PFILTER", 5); ///< now a plugin
+	LuaHelper::constant(L, "MACH_GAIN", 6); ///< now a plugin
+	LuaHelper::constant(L, "MACH_FLANGER", 7); ///< now a plugin
+	LuaHelper::constant(L, "MACH_PLUGIN", 8);
+	LuaHelper::constant(L, "MACH_VST", 9);
+	LuaHelper::constant(L, "MACH_VSTFX", 10);
+	LuaHelper::constant(L, "MACH_SCOPE", 11); ///< Test machine. removed
+	LuaHelper::constant(L, "MACH_XMSAMPLER", 12);
+	LuaHelper::constant(L, "MACH_DUPLICATOR", 13);
+	LuaHelper::constant(L, "MACH_MIXER", 14);
+	LuaHelper::constant(L, "MACH_RECORDER", 15);
+	LuaHelper::constant(L, "MACH_DUPLICATOR2", 16);
+	LuaHelper::constant(L, "MACH_LUA", 17);
+	LuaHelper::constant(L, "MACH_LADSPA", 18);
+	LuaHelper::constant(L, "MACH_DUMMY", 255);
   return 1;
 }
 
@@ -328,8 +350,7 @@ int LuaMachineBind::create(lua_State* L) {
   if (n != 2) {
     return luaL_error(L, "Got %d arguments expected 1 (pluginname)", n);
   }
-  LuaMachine* udata = new LuaMachine(L);
-  LuaHelper::new_shared_userdata<LuaMachine>(L, meta, udata);
+  LuaMachine* udata = 0;
   if (lua_isnumber(L, 2)) {
     int idx = luaL_checknumber(L, 2);
     if (idx < 0 ) {
@@ -337,7 +358,9 @@ int LuaMachineBind::create(lua_State* L) {
     }
     Machine* mac = LuaGlobal::GetMachine(idx);
     if (mac) {
+      udata = new LuaMachine(L);
       udata->set_mac(mac);
+      LuaHelper::new_shared_userdata<LuaMachine>(L, meta, udata);      
     } else {
       lua_pushnil(L);
       return 1;
@@ -346,11 +369,14 @@ int LuaMachineBind::create(lua_State* L) {
     try {
       size_t len;
       const char* plug_name = luaL_checklstring(L, 2, &len);
+      udata = new LuaMachine(L);      
       udata->load(plug_name);
+      LuaHelper::new_shared_userdata<LuaMachine>(L, meta, udata);
     } catch (std::exception &e) {
       e; luaL_error(L, "plugin not found error");
     }
   }
+  assert(udata);
   lua_createtable(L, udata->mac()->GetNumParams(), 0);
   for (int idx = 0; idx < udata->mac()->GetNumParams(); ++idx) {
     lua_getglobal(L, "require");
@@ -388,6 +414,9 @@ int LuaMachineBind::create(lua_State* L) {
   lua_pushvalue(L, 4);
   lua_setfield(L, 3, "params");
   lua_pushvalue(L, 3);
+
+  
+
   return 1;
 }
 
@@ -399,6 +428,12 @@ int LuaMachineBind::show_native_gui(lua_State* L) {
   boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   plug->set_ui_type(MachineUiType::NATIVE);
   return 0;
+}
+
+int LuaMachineBind::type(lua_State* L) {
+  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  lua_pushinteger(L, (int)plug->mac()->_type);
+  return 1;
 }
 
 int LuaMachineBind::show_custom_gui(lua_State* L) {

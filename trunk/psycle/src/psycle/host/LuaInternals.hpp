@@ -83,6 +83,7 @@ namespace psycle { namespace host {
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
     void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
+    LuaProxy* proxy() { return proxy_; }
     void doexit();
     void reload();    
   private:
@@ -133,6 +134,7 @@ namespace psycle { namespace host {
     static int exit(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::doexit); }
     static int reload(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::reload); }
     static int setcanvas(lua_State* L);
+    static int type(lua_State* L);
   };
 
   struct LuaPlayerBind {

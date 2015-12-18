@@ -741,8 +741,11 @@ namespace psycle { namespace host {
         gui = cpv = new CanvasParamView(this, &machine());
         LuaPlugin* lp = (LuaPlugin*) _machine;
         LuaCanvas::WeakPtr user_view = lp->canvas();
-        if (!user_view.expired() && lp->ui_type() == MachineUiType::CUSTOMWND) {
+        if (!user_view.expired()) {
+          gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
+				    CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
           cpv->set_canvas(user_view);
+          return gui;
         } else {
           gui = new CNativeView(this,&machine());
         }

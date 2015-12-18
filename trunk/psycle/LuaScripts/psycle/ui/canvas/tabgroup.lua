@@ -10,6 +10,7 @@ local group = require("psycle.ui.canvas.group")
 local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local config = require("psycle.config")
+local style = require("psycle.ui.canvas.itemstyle")
 
 local tabgroup = group:new()
 
@@ -50,17 +51,14 @@ function tabgroup:new(parent)
   return c
 end
 
-function tabgroup:init()
-  self.w, self.h, self.maintop = 100, 100, 20  
+function tabgroup:init() 
+  self.w = 200
+  self.h = 150
+  self.hh = 20
   self.tabs = group:new(self)
-  self.childs = group:new(self):setpos(0, self.maintop)  
-end
-
-function tabgroup:onsize(w, h)
-  local t = self.maintop
-  function f(item) item:setsize(w, h - t) end
-  self:traverse(f, self.childs:items())
-  self.w, self.h  = w, h  
+  self.tabs:style():setalign(style.ALTOP + style.ALLEFT + style.ALRIGHT)
+  self.childs = group:new(self)
+  self.childs:style():setalign(style.ALCLIENT)
 end
 
 function tabgroup:setlabel(page, text)
@@ -68,10 +66,10 @@ function tabgroup:setlabel(page, text)
    self:traverse(f, self.tabs:items())
 end
 
-function tabgroup:add(page, label)  
+function tabgroup:add(page, label)
+  page:style():setalign(style.ALCLIENT)
   self:createheader(page, label)
   self.childs:add(page)
-  page:setsize(self.w, self.h - self.maintop)
   self:setactivepage(page)
 end
 
@@ -93,8 +91,7 @@ function tabgroup:setactiveheader(page)
 end
 
 function tabgroup:setactivepage(page)
-  if page then    
-    page:show()
+  if page then        
     local items = self.childs:items()  
     for i=1, #items do    
       local item = items[i]
@@ -104,6 +101,7 @@ function tabgroup:setactivepage(page)
     end        
     self:setactiveheader(page)
     self.activepage_ = page;
+    page:show()
   end
 end
 
@@ -129,6 +127,11 @@ function tabgroup:repositionheader()
   self:traverse(f, self.tabs:items())
 end
 
+function tabgroup:onsize(w, h)
+  self.w = w
+  self.h = h
+end
+
 function tabgroup:createheader(page, label)
   local header = group:new(self.tabs)  
   header.page = page  
@@ -136,18 +139,18 @@ function tabgroup:createheader(page, label)
   local xpos = itemcount*(itemw+tabgroup.header.IDENT)
   header:setpos(xpos, 0)
   header.backgroundtop = rect:new(header):setpos(0, 0, itemw, 4)
-  header.backgroundbottom = rect:new(header):setpos(0, 4, itemw, self.maintop - 4)
+  header.backgroundbottom = rect:new(header):setpos(0, 4, itemw, self.hh)
   header.text = text:new(header):setpos(2, 5):settext(label)
-  header.closerect = rect:new(header)
-                         :setpos(itemw -10, 5, 10, 10)
+  header.closegroup = group:new(header):setpos(itemw - 10, 5)
+  header.closerect = rect:new(header.closegroup)
+                         :setpos(0, 0, 10, 10)
                          :setcolor(tabgroup.skin.colors.TOP)  
-  header.close = text:new(header)
-                     :setpos(itemw - 7, 4)
+  header.close = text:new(header.closegroup)
+                     :setpos(3, 0)
                      :settext("x")
-                     :setcolor(tabgroup.skin.colors.TITLEFONT)          
-  local that = self   
-  function header.closerect:onmousedown() end
-  function header.closerect:onmouseup()       
+                     :setcolor(tabgroup.skin.colors.TITLEFONT)                     
+  local that = self
+  function header.closegroup:onmousedown()
     that:removepage(self:parent())    
   end
   function header:setskinhighlight()

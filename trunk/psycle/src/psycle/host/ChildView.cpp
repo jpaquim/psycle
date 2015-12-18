@@ -1062,7 +1062,7 @@ namespace psycle { namespace host {
 		void CChildView::OnMachineview() 
 		{
       if (!this->IsWindowVisible()) {        
-        pParentMain->m_luaWndView.ShowWindow(SW_HIDE);
+        pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
         this->ShowWindow(SW_SHOW);
       }
 			if (viewMode != view_modes::machine)
@@ -1096,7 +1096,7 @@ namespace psycle { namespace host {
 		void CChildView::OnPatternView() 
 		{
       if (!this->IsWindowVisible()) {
-        pParentMain->m_luaWndView.ShowWindow(SW_HIDE);
+        pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
         this->ShowWindow(SW_SHOW);
       }
 			if (viewMode != view_modes::pattern)
@@ -2502,7 +2502,7 @@ namespace psycle { namespace host {
           lp->custom_menubar.reset(0);
           try {                 
             lp->proxy().Reload();            
-            pParentMain->m_luaWndView.set_canvas(lp->canvas());            
+            pParentMain->m_luaWndView->set_canvas(lp->canvas());            
             lua_menu_->setcmenu(pParentMain->GetMenu());  
             lp->GetMenu(lua_menu_);
             lp->set_crashed(false);
@@ -2526,9 +2526,9 @@ namespace psycle { namespace host {
           GetWindowRect(&rect);
           pParentMain->ScreenToClient(rect);          
           pParentMain->m_wndView.ShowWindow(SW_HIDE);          
-          pParentMain->m_luaWndView.set_canvas(user_view);
-          pParentMain->m_luaWndView.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);                  
-          pParentMain->m_luaWndView.ShowWindow(SW_SHOW);          
+          pParentMain->m_luaWndView->set_canvas(user_view);
+          pParentMain->m_luaWndView->SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);                  
+          pParentMain->m_luaWndView->ShowWindow(SW_SHOW);          
           GetParent()->SetActiveWindow();
           active_lua_ = plug;          
         } else {  

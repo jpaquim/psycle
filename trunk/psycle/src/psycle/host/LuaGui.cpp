@@ -506,7 +506,7 @@ int LuaFrameWndBind::setcanvas(lua_State* L) {
 ///////////////////////////////////////////////////////////////////////////////
 // LuaCanvasBind
 ///////////////////////////////////////////////////////////////////////////////
-template<class T>
+/*template<class T>
 canvas::Item::Ptr CallEvents(lua_State* L, canvas::Event* ev, T that, bool is_canvas = false) {  
   LUASIZECHKBEG
   LuaHelper::find_weakuserdata<>(L, that.get());  
@@ -575,22 +575,8 @@ canvas::Item::Ptr CallEvents(lua_State* L, canvas::Event* ev, T that, bool is_ca
         lua_setfield(L, -2, "ctrlkey");
         lua_pushboolean(L, MK_ALT & ev->shift());
         lua_setfield(L, -2, "altkey");
-        if (!is_key) {
-          lua_pushnumber(L, ev->cx());
-          lua_setfield(L, -2, "clientx");
-          lua_pushnumber(L, ev->cy());
-          lua_setfield(L, -2, "clienty");
-          lua_pushnumber(L, ev->cx()-that->zoomabsx());
-          lua_setfield(L, -2, "x");
-          lua_pushnumber(L, ev->cy()-that->zoomabsy());
-          lua_setfield(L, -2, "y");
-          lua_pushnumber(L, ev->button());
-          lua_setfield(L, -2, "button");
-        } else {
-          // todo key events
-          lua_pushnumber(L, ev->button());
-          lua_setfield(L, -2, "keycode");
-        }
+        lua_pushnumber(L, ev->button());
+        lua_setfield(L, -2, "keycode");        
       }
       int status = lua_pcall(L, 2, 0, 0);
       if (status) {
@@ -606,16 +592,133 @@ canvas::Item::Ptr CallEvents(lua_State* L, canvas::Event* ev, T that, bool is_ca
   LUASIZECHKEND  
   if (ev->type() != canvas::Event::ONTIMER) {
     lua_gc(L, LUA_GCCOLLECT, 0);
-  }
+  }  
   return has_event_method ? that : canvas::Item::nullpointer;
+}*/
+
+
+void SendKeyEvent(lua_State* L,
+                       const::std::string method,
+                       ui::canvas::KeyEvent& ev, 
+                       ui::canvas::Item& item) {
+  LuaImport in(L, &item, LuaGlobal::proxy(L));
+  if (in.open(method)) {
+    ev.StopWorkParent();
+    canvas::KeyEvent* key_event = 
+      new canvas::KeyEvent(ev.keycode(), ev.flags());    
+    luaL_requiref(L, "psycle.ui.canvas.keyevent", LuaKeyEventBind::open, 1);    
+    LuaHelper::new_shared_userdata(L, LuaKeyEventBind::meta, key_event, lua_gettop(L)); 
+    lua_remove(L, -2);
+    in.pcall(0);
+    ev = *key_event;    
+  } else {
+    ev.WorkParent();    
+  }
 }
 
-canvas::Item::WeakPtr LuaItem::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, shared_from_this()); }
-canvas::Item::WeakPtr LuaGroup::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, shared_from_this()); }
-canvas::Item::WeakPtr LuaRect::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, shared_from_this()); }
-canvas::Item::WeakPtr LuaLine::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, shared_from_this()); }
-canvas::Item::WeakPtr LuaText::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, shared_from_this()); }
-canvas::Item::WeakPtr LuaPic::OnEvent(canvas::Event* ev) { return CallEvents(L, ev, shared_from_this()); }  
+void SendMouseEvent(lua_State* L,
+                  const::std::string method,
+                  ui::canvas::MouseEvent& ev, 
+                  ui::canvas::Item& item) {
+  LuaImport in(L, &item, LuaGlobal::proxy(L));
+  if (in.open(method)) {
+    ev.StopWorkParent();
+    lua_newtable(L); // build event table      
+    lua_pushnumber(L, ev.shift());
+    lua_setfield(L, -2, "shift");
+    lua_pushboolean(L, MK_SHIFT & ev.shift());
+    lua_setfield(L, -2, "shiftkey");
+    lua_pushboolean(L, MK_CONTROL & ev.shift());
+    lua_setfield(L, -2, "ctrlkey");
+    lua_pushboolean(L, MK_ALT & ev.shift());
+    lua_setfield(L, -2, "altkey");
+    lua_pushnumber(L, ev.cx());
+    lua_setfield(L, -2, "clientx");
+    lua_pushnumber(L, ev.cy());
+    lua_setfield(L, -2, "clienty");
+    lua_pushnumber(L, ev.cx() - item.zoomabsx());
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, ev.cy() - item.zoomabsy());
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, ev.button());
+    lua_setfield(L, -2, "button");
+    in.pcall(0);    
+  } else {
+    ev.WorkParent();
+  }
+}
+
+void LuaItem::OnMouseDown(ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+void LuaGroup::OnMouseDown( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+void LuaRect::OnMouseDown( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+void LuaLine::OnMouseDown( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+void LuaText::OnMouseDown( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+void LuaPic::OnMouseDown( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+void LuaCanvas::OnMouseDown( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+void LuaScintilla::OnMouseDown( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousedown", ev, *this); }
+
+void LuaItem::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+void LuaGroup::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+void LuaRect::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+void LuaLine::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+void LuaText::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+void LuaPic::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+void LuaCanvas::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+void LuaScintilla::OnMouseUp( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseup", ev, *this); }
+
+
+void LuaItem::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+void LuaGroup::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+void LuaRect::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+void LuaLine::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+void LuaText::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+void LuaPic::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+void LuaCanvas::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+void LuaScintilla::OnMouseMove( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmousemove", ev, *this); }
+
+void LuaItem::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+void LuaGroup::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+void LuaRect::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+void LuaLine::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+void LuaText::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+void LuaPic::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+void LuaCanvas::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+void LuaScintilla::OnMouseOut( ui::canvas::MouseEvent& ev) { SendMouseEvent(L, "onmouseout", ev, *this); }
+
+void LuaItem::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+void LuaGroup::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+void LuaRect::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+void LuaLine::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+void LuaText::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+void LuaPic::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+void LuaCanvas::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+void LuaScintilla::OnKeyDown( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeydown", ev, *this); }
+
+void LuaItem::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+void LuaGroup::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+void LuaRect::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+void LuaLine::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+void LuaText::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+void LuaPic::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+void LuaCanvas::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+void LuaScintilla::OnKeyUp( ui::canvas::KeyEvent& ev) { SendKeyEvent(L, "onkeyup", ev, *this); }
+
+
+//LuaTextTreeBind
+
+std::string LuaTextTreeItemBind::meta = LuaTextTreeItem::type();
+
+
+void LuaTextTreeItem::OnClick() {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onclick")) {
+      in.pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // LuaCanvas+Bind
@@ -629,17 +732,9 @@ void LuaCanvas::OnSize(int cw, int ch) {
   }
 }
 
-canvas::Item::WeakPtr LuaCanvas::OnEvent(canvas::Event* ev) {
-  LuaGlobal::proxy(L)->lock();
-  canvas::Item::WeakPtr item = canvas::Canvas::OnEvent(ev);  
-  CallEvents(L, ev, shared_from_this(), true);
-  LuaGlobal::proxy(L)->unlock();
-  return item;
-}
-
 template <class T>
 int LuaCanvasBind<T>::open(lua_State *L) {  
-   LuaHelper::openex<B>(L, meta, setmethods, gc);
+   LuaHelper::openex(L, meta, setmethods, gc);
   static const char* const e[] = {
     "AUTO", "MOVE", "NO_DROP", "COL_RESIZE", "ALL_SCROLL", "POINTER",
     "NOT_ALLOWED", "ROW_RESIZE", "CROSSHAIR", "PROGRESS", "E_RESIZE",
@@ -660,6 +755,16 @@ int LuaCanvasBind<T>::setcursor(lua_State* L) {
   boost::shared_ptr<T> canvas = LuaHelper::check_sptr<T>(L, 1, meta);
   CursorStyle style = (CursorStyle) (int) luaL_checknumber(L, 2);
   canvas->SetCursor(style);
+  return LuaHelper::chaining(L);
+}
+
+template <class T>
+int LuaCanvasBind<T>::setfocus(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 2, "Wrong number of arguments.");
+  if (err!=0) return err;
+  boost::shared_ptr<T> canvas = LuaHelper::check_sptr<T>(L, 1, meta);
+  canvas::Item::Ptr item = LuaGroupBind<>::test(L, 2);
+  canvas->SetFocus(item);
   return LuaHelper::chaining(L);
 }
 
@@ -706,6 +811,14 @@ int LuaItemBind<T>::create(lua_State* L) {
     group->Add(item);
     LuaHelper::register_userdata(L, item.get());
   }  
+  lua_getglobal (L, "require");
+  lua_pushstring (L, "psycle.signal");
+  lua_call (L, 1, 1);
+  lua_getfield(L, -1, "new");
+  lua_pushvalue(L, -2);
+  lua_call (L, 1, 1);	
+  lua_remove(L, -2);
+  lua_setfield(L, -2, "keydown");  
   return 1;
 }
 
@@ -763,7 +876,7 @@ int LuaItemBind<T>::parent(lua_State* L) {
   if (err!=0) return err;
   boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
   canvas::Item::WeakPtr group = item->parent();
-  LuaHelper::find_userdata<>(L, group.lock().get());
+  LuaHelper::find_weakuserdata<>(L, group.lock().get());
   return 1;
 }
 
@@ -788,6 +901,7 @@ canvas::Item::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {
     LuaScrollBarBind<LuaScrollBar>::meta.c_str(),
     LuaScintillaBind<LuaScintilla>::meta.c_str(),
     LuaComboBoxBind<LuaComboBox>::meta.c_str(),
+    LuaTreeBind<LuaTree>::meta.c_str()
   };
   int size = sizeof(metas)/sizeof(metas[0]);
   canvas::Item::Ptr item;
@@ -1201,6 +1315,45 @@ int LuaImageBind::settransparent(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+// LuaKeyEventBind
+///////////////////////////////////////////////////////////////////////////////
+
+const char* LuaKeyEventBind::meta = "psykeyeventbind";
+
+int LuaKeyEventBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"keycode", keycode},
+    {"shiftkey", shiftkey},
+    {"ctrlkey", ctrlkey},
+    {"preventdefault", preventdefault},    
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaKeyEventBind::create(lua_State* L) {
+  int keycode = luaL_checkinteger(L, -1);
+  canvas::KeyEvent* key_event = new canvas::KeyEvent(keycode, 0);
+  LuaHelper::new_shared_userdata<>(L, meta, key_event);
+  return 1;
+}
+
+int LuaKeyEventBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<canvas::KeyEvent>(L, meta);
+}
+
+int LuaKeyEventBind::preventdefault(lua_State* L) {  
+  int err = LuaHelper::check_argnum(L, 1, "");
+  if (err!=0) return err;
+  boost::shared_ptr<canvas::KeyEvent> keyevent = 
+    LuaHelper::check_sptr<canvas::KeyEvent>(L, 1, meta);
+  keyevent->PreventDefault();
+  return LuaHelper::chaining(L);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LuaStyleBind
 ///////////////////////////////////////////////////////////////////////////////
@@ -1211,7 +1364,9 @@ int LuaItemStyleBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
     {"setalign", setalign},
+    {"align", align},
     {"setmargin", setmargin},
+    {"margin", margin},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -1239,6 +1394,12 @@ int LuaItemStyleBind::setalign(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+int LuaItemStyleBind::align(lua_State* L) {
+  ui::canvas::Item::StylePtr style = LuaHelper::check_sptr<canvas::ItemStyle>(L, 1, meta);
+  lua_pushinteger(L, static_cast<int>(style->align()));
+  return 1;
+}
+
 int LuaItemStyleBind::setmargin(lua_State* L) {
   LuaHelper::check_argnum(L, 5, "5 Arguments expected.");
   ui::canvas::Item::StylePtr style = LuaHelper::check_sptr<canvas::ItemStyle>(L, 1, meta);
@@ -1247,6 +1408,15 @@ int LuaItemStyleBind::setmargin(lua_State* L) {
                          luaL_checknumber(L, 4),
                          luaL_checknumber(L, 5)));
   return LuaHelper::chaining(L);
+}
+
+int LuaItemStyleBind::margin(lua_State* L) {
+  ui::canvas::Item::StylePtr style = LuaHelper::check_sptr<canvas::ItemStyle>(L, 1, meta);
+  lua_pushinteger(L, style->margin().left());
+  lua_pushinteger(L, style->margin().top());
+  lua_pushinteger(L, style->margin().right());
+  lua_pushinteger(L, style->margin().bottom());
+  return 4;
 }
 
 // LuaScintilla
