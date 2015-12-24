@@ -41,8 +41,9 @@ namespace seib {
 		/* CFxBase class members                                                     */
 		/*===========================================================================*/
 
-		CFxBase::CFxBase()
-		{ CreateInitialized(); }
+		CFxBase::CFxBase() {
+			CreateInitialized();
+		}
 		void CFxBase::CreateInitialized()
 		{
 			fxMagic=0; version = 0; fxID = 0; fxVersion = 0; pf = 0; byteSizePos = 0;
@@ -420,11 +421,11 @@ namespace seib {
 		{
 			if (pChunk)
 				delete[] pChunk;
-//			*szFileName = '\0';                     /* reset file name                   */
+			//*szFileName = '\0';                     /* reset file name                   */
 			pChunk = 0;                           /* reset bank pointer                */
 			chunkSize = 0;
-//			nBankLen = 0;                           /* reset bank length                 */
-//			bChunk = false;                         /* and of course it's no chunk.      */
+			//nBankLen = 0;                           /* reset bank length                 */
+			//bChunk = false;                         /* and of course it's no chunk.      */
 			programs.clear();
 			numPrograms = 0;
 			currentProgram = 0;
@@ -436,7 +437,7 @@ namespace seib {
 
 		CFxBank & CFxBank::DoCopy(const CFxBank &org)
 		{
-//			FreeMemory();
+			//FreeMemory();
 			CFxBase::DoCopy(org);
 			if (org.IsChunk())
 			{

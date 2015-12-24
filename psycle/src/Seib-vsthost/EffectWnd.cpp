@@ -26,8 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <psycle/host/detail/project.private.hpp>
 #include "EffectWnd.hpp"
+
 namespace seib {
 	namespace vst{
+
 VkeysT CEffectWnd::VKeys[] =
 {
 	{ VK_BACK,      VKEY_BACK      },
@@ -129,12 +131,12 @@ CEffectWnd::~CEffectWnd()
 
 void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode &keyCode)
 {
-	if ((nChar >= 'A') && (nChar <= 'Z'))
+	if (nChar >= 'A' && nChar <= 'Z')
 		keyCode.character = nChar + ('a' - 'A');
 	else
 		keyCode.character = nChar;
 	keyCode.virt = 0;
-	for (int i = 0; i < (sizeof(VKeys)/sizeof(VKeys[0])); i++)
+	for (int i = 0; i < sizeof(VKeys)/sizeof(*VKeys); i++)
 	{
 		if (nChar == VKeys[i].vkWin)
 		{
@@ -155,7 +157,7 @@ void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstK
 /* SaveBank saves bank to file                                               */
 /*****************************************************************************/
 
-bool CEffectWnd::SaveBank(const std::string sName)
+bool CEffectWnd::SaveBank(std::string const & sName)
 {
 	pEffect->SetChunkFile(sName.c_str());
 	CFxBank b = pEffect->SaveBank();
@@ -167,7 +169,7 @@ bool CEffectWnd::SaveBank(const std::string sName)
 	else return false;
 }
 
-bool CEffectWnd::SaveProgram(const std::string sName)
+bool CEffectWnd::SaveProgram(std::string const & sName)
 {
 	pEffect->SetChunkFile(sName.c_str());
 	CFxProgram p = pEffect->SaveProgram();

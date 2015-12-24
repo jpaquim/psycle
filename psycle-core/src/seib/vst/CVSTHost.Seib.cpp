@@ -36,15 +36,16 @@ using namespace universalis::stdlib;
 /*****************************************************************************/
 /* Static Data                                                               */
 /*****************************************************************************/
-bool CFxBase::NeedsBSwap;
-int CVSTHost::quantization = 0x40000000;
+VstInt32 CVSTHost::quantization = 0x40000000;
+bool CVSTHost::useJBridge = false;
+bool CVSTHost::usePsycleVstBridge = false;
 VstTimeInfo CVSTHost::vstTimeInfo;
 
 CVSTHost * CVSTHost::pHost = 0; // pointer to the one and only host (singleton)
 
 namespace exceptions {
 	namespace dispatch_errors {
-		std::string am_opcode_to_string(long int opcode) {
+		std::string am_opcode_to_string(VstInt32 opcode) {
 			switch(opcode) {
 				#if defined $
 					#error "macro clash"
@@ -88,8 +89,7 @@ namespace exceptions {
 				}
 			}
 		}
-
-		std::string operation_description(long int code) {
+		std::string operation_description(VstInt32 code) throw() {
 			std::ostringstream s; s << code << ": " << am_opcode_to_string(code);
 			return s.str();
 		}
@@ -111,10 +111,14 @@ namespace HostCanDos
 	const char* canDoSendVstTimeInfo = "sendVstTimeInfo"; ///< Host supports send of VstTimeInfo to plug-in
 	const char* canDoReceiveVstEvents = "receiveVstEvents"; ///< Host can receive Vst events from plug-in
 	const char* canDoReceiveVstMidiEvent = "receiveVstMidiEvent"; ///< Host can receive MIDI events from plug-in 
+	const char* DECLARE_VST_DEPRECATED(canDoReceiveVstTimeInfo) = "receiveVstTimeInfo"; //Deprecated in 2.4
 	const char* canDoReportConnectionChanges = "reportConnectionChanges"; ///< Host will indicates the plug-in when something change in plug-in´s routing/connections with #suspend/#resume/#setSpeakerArrangement 
 	const char* canDoAcceptIOChanges = "acceptIOChanges"; ///< Host supports #ioChanged ()
 	const char* canDoSizeWindow = "sizeWindow"; ///< used by VSTGUI
+	const char* DECLARE_VST_DEPRECATED(canDoAsyncProcessing) = "asyncProcessing"; //Deprecated in 2.4
 	const char* canDoOffline = "offline"; ///< Host supports offline feature
+	const char* DECLARE_VST_DEPRECATED(canDoSupplyIdle) = "supplyIdle"; //Deprecated in 2.4
+	const char* DECLARE_VST_DEPRECATED(canDoSupportShell) = "supportShell"; //Deprecated in 2.4 in favour of shellCategory
 	const char* canDoOpenFileSelector = "openFileSelector"; ///< Host supports function #openFileSelector ()
 	const char* canDoCloseFileSelector = "closeFileSelector"; ///< Host supports function #closeFileSelector ()
 	const char* canDoStartStopProcess = "startStopProcess"; ///< Host supports functions #startProcess () and #stopProcess ()
@@ -134,9 +138,10 @@ namespace PlugCanDos
 	const char* canDoOffline = "offline"; ///< plug-in supports offline functions (#offlineNotify, #offlinePrepare, #offlineRun)
 	const char* canDoMidiProgramNames = "midiProgramNames"; ///< plug-in supports function #getMidiProgramName ()
 	const char* canDoBypass = "bypass"; ///< plug-in supports function #setBypass ()
+	//There are many deprecated ones. See vst 2.3.
 }
 
-CPatchChunkInfo::CPatchChunkInfo(CFxProgram fxstore)
+CPatchChunkInfo::CPatchChunkInfo(const CFxProgram& fxstore)
 {
 	version = 1;
 	pluginUniqueID=fxstore.GetFxID();
@@ -145,7 +150,7 @@ CPatchChunkInfo::CPatchChunkInfo(CFxProgram fxstore)
 	memset(future,0,sizeof(future));
 }
 
-CPatchChunkInfo::CPatchChunkInfo(CFxBank fxstore)
+CPatchChunkInfo::CPatchChunkInfo(const CFxBank& fxstore)
 {
 	version = 1;
 	pluginUniqueID=fxstore.GetFxID();
@@ -154,504 +159,6 @@ CPatchChunkInfo::CPatchChunkInfo(CFxBank fxstore)
 	memset(future,0,sizeof(future));
 }
 
-/*===========================================================================*/
-/* CFxBase class members                                                     */
-/*===========================================================================*/
-
-CFxBase::CFxBase() {
-	CreateInitialized();
-}
-
-void CFxBase::CreateInitialized() {
-	fxMagic=0; version = 0; fxID = 0; fxVersion = 0; pf = 0;
-	const char szChnk[] = "CcnK";
-	const long lChnk = cMagic;
-	NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
-	initialized = false;
-}
-
-CFxBase::CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion)
-	: fxMagic(0)
-	, version(_version)
-	, fxID(_fxID)
-	, fxVersion(_fxVersion)
-	, pf(0)
-{
-	const char szChnk[] = "CcnK";
-	const long lChnk = cMagic;
-	NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
-	initialized = false;
-}
-CFxBase::CFxBase(const char *pszFile)
-{
-	CreateInitialized();
-	if ( Load(pszFile) ) initialized = true;
-}
-CFxBase::CFxBase(FILE* pFileHandle)
-{
-	CreateInitialized();
-	pf = pFileHandle;
-	if (!pf)
-		return;
-	if ( LoadData() ) initialized = true;
-}
-CFxBase & CFxBase::DoCopy(const CFxBase &org)
-{
-	fxMagic=org.fxMagic;
-	version=org.version;
-	fxID=org.fxID;
-	fxVersion=org.fxVersion;
-	pathName = org.pathName;
-	initialized = org.initialized;
-	pf = org.pf;
-	return *this;
-}
-
-void CFxBase::SwapBytes(VstInt32 & l) {
-	///\todo: could this be improved?
-	unsigned char *b = (unsigned char *)&l;
-	VstInt32 intermediate =
-		((VstInt32)b[0] << 24) |
-		((VstInt32)b[1] << 16) |
-		((VstInt32)b[2] << 8) |
-		(VstInt32)b[3];
-	l = intermediate;
-}
-
-void CFxBase::SwapBytes(float & f) {
-	union { float f; VstInt32 i; } u;
-	u.f = f; SwapBytes(u.i); f = u.f;
-}
-
-template <class T>
-bool CFxBase::Read(T &f,bool allowswap) { size_t i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap && allowswap) SwapBytes(f); return (bool)i; }
-template <class T>
-bool CFxBase::Write(T f, bool allowswap)   { if (NeedsBSwap && allowswap) SwapBytes(f); size_t i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
-bool CFxBase::ReadArray(void* f,int size)  { size_t i=fread(f,size,1,pf); return (bool)i; }
-bool CFxBase::WriteArray(void* f, int size) { size_t i=fwrite(f,size,1,pf);  return (bool)i; }
-bool CFxBase::ReadHeader()
-{
-	VstInt32 chunkMagic(0),byteSize(0);
-	Read(chunkMagic);
-	if (chunkMagic != cMagic)
-		return false;
-	Read(byteSize);
-	Read(fxMagic);
-	Read(version);
-	Read(fxID);
-	Read(fxVersion);
-	return true;
-}
-bool CFxBase::WriteHeader()
-{
-	Write(cMagic);
-	Write(0);
-	Write(fxMagic);
-	Write(version);
-	Write(fxID);
-	Write(fxVersion);
-	return true;
-}
-
-bool CFxBase::Load(const char *pszFile)
-{
-	pf = fopen(pszFile, "rb");
-	if (!pf)
-		return false;
-
-	bool retval = LoadData();
-	fclose(pf);
-	pathName=pszFile;
-	return retval;
-}
-bool CFxBase::Save(const char *pszFile)
-{
-	pf = fopen(pszFile, "wb");
-	if (!pf)
-		return false;
-
-	bool retval = SaveData();
-	fclose(pf);
-	pathName=pszFile;
-	return retval;
-}
-
-
-/*===========================================================================*/
-/* CFxProgram class members                                                  */
-/*===========================================================================*/
-
-CFxProgram::CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool isChunk, void *data)
-	:CFxBase(1,_fxID, _fxVersion)
-{
-	Init();
-	if (!data)
-	{
-		//Create an amount of memory predefined
-		if (isChunk) SetChunkSize(size);
-		else SetNumParams(size);
-	}
-	else
-	{
-		if (isChunk) SetChunk(data,size);
-		else SetParameters(static_cast<const float*>(data),size);
-	}
-}
-CFxProgram::CFxProgram(FILE *pFileHandle)
-	:CFxBase()
-{
-	Init();
-	pf = pFileHandle;
-	if (!pf)
-		return;
-	LoadData();
-}
-
-CFxProgram::~CFxProgram()
-{
-	FreeMemory();
-}
-
-void CFxProgram::FreeMemory()
-{
-	if (pChunk)
-	{
-		delete[] pChunk;
-		pChunk = 0;
-		chunkSize = 0;
-	}
-	if (pParams)
-	{
-		delete[] pParams;
-		pParams = 0;
-		numParams = 0;
-	}
-}
-
-void CFxProgram::Init()
-{
-	numParams = chunkSize = 0;
-	pParams = 0;
-	pChunk = 0;
-	memset(prgName,0,sizeof(prgName));
-	ParamMode();
-}
-
-CFxProgram & CFxProgram::DoCopy(const CFxProgram &org)
-{
-	//FreeMemory();
-	CFxBase::DoCopy(org);
-	memcpy(prgName,org.prgName,sizeof(prgName));
-	if (org.pChunk)
-	{
-		SetChunk(org.pChunk,org.chunkSize);
-	}
-	else
-	{
-		SetParameters(org.pParams,org.numParams);
-	}
-	return *this;
-}
-
-bool CFxProgram::SetParameters(const float* pnewparams,int params)
-{
-	if (!SetNumParams(params,false))
-		return false;
-	memcpy(pParams,pnewparams,params*sizeof(float));
-	initialized=true;
-	return true;
-}
-bool CFxProgram::SetNumParams(VstInt32 nPars, bool initializeData)
-{
-	if (nPars <=0 )
-		return false;
-
-	ParamMode();
-	pParams = new float[nPars];
-	numParams = nPars;
-	if (pParams && initializeData)
-		memset(pParams,0,nPars*sizeof(float));
-	return !!pParams;
-}
-bool CFxProgram::SetParameter(int nParm, float val)
-{
-	if (nParm >= numParams)
-		return false;
-	if (val < 0.0)
-		val = 0.0;
-	else if (val > 1.0)
-		val = 1.0;
-	pParams[nParm] = val;
-	return true;
-}
-bool CFxProgram::SetChunk(const void *chunk, VstInt32 size)
-{
-	if (!SetChunkSize(size,false))
-		return false;
-
-	memcpy(pChunk,chunk,size);
-	initialized=true;
-	return true;
-}
-
-bool CFxProgram::SetChunkSize(VstInt32 size,bool initializeData)
-{
-	if (size <=0 )
-		return false;
-
-	ChunkMode();
-	pChunk = new unsigned char[size];
-	chunkSize = size;
-	if ( pChunk && initializeData )
-		memset(pChunk,0,size);
-	return !!pChunk;
-}
-
-bool CFxProgram::LoadData()
-{
-	CFxBase::LoadData();
-	if (fxMagic == fMagic) ParamMode();
-	else if ( fxMagic == chunkPresetMagic) ChunkMode();
-	else return false;
-
-	Read(numParams);
-	ReadArray(prgName,sizeof(prgName));
-	if(IsChunk())
-	{
-		VstInt32 size;
-		Read(size);
-		if (!SetChunkSize(size,false))
-			return false;
-		ReadArray(pChunk,size);
-	}
-	else
-	{
-		if (!SetNumParams(numParams,false))
-			return false;
-		for(int i = 0 ; i < numParams ; i++)
-			Read(pParams[i]);
-	}
-	initialized=true;
-	return true;
-}
-bool CFxProgram::SaveData()
-{
-	///\todo: update the "bytesize" value!
-	CFxBase::SaveData();
-	Write(numParams);
-	WriteArray(prgName,sizeof(prgName));
-	if(IsChunk())
-	{
-		const int size = GetChunkSize();
-		Write(size);
-		WriteArray(pChunk,size);
-	}
-	else
-	{
-		for (int i = 0; i < numParams ; i++)
-			Write(pParams[i]);
-	}
-	return true;
-}
-
-/*===========================================================================*/
-/* CFxBank class members                                                     */
-/*===========================================================================*/
-
-CFxBank::CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk, int _size, void*_data)
-	: CFxBase(2,_fxID, _fxVersion)
-{
-	Init();
-	if (isChunk)
-	{
-		SetChunk(_data,_size);
-	}
-	else
-	{
-		ProgramMode();
-		if ( _data )
-		{
-			for ( int i = 0; i < _numPrograms ; i++)
-			{
-				CFxProgram& prog = static_cast<CFxProgram*>(_data)[i];
-				programs.push_back(prog);
-			}
-			initialized=true;
-		}
-		else
-		{
-			for ( int i = 0; i < _numPrograms ; i++)
-			{
-				CFxProgram prog(_fxID,_fxVersion,_size);
-				programs.push_back(prog);
-			}
-		}
-	}
-	numPrograms = _numPrograms;
-}
-
-CFxBank::CFxBank(FILE *pFileHandle)
-	:CFxBase()
-{
-	Init();
-	pf = pFileHandle;
-	if (!pf)
-		return;
-	LoadData();
-}
-
-/*****************************************************************************/
-/* ~CFxBank : destructor                                                     */
-/*****************************************************************************/
-
-CFxBank::~CFxBank()
-{
-	FreeMemory();                               /* unload all data                   */
-}
-
-/*****************************************************************************/
-/* Init : initializes all data areas                                         */
-/*****************************************************************************/
-
-void CFxBank::Init()
-{
-	pChunk = 0;
-	numPrograms = currentProgram = chunkSize = 0;
-	programs.clear();
-}
-
-
-/*****************************************************************************/
-/* FreMemory : removes a loaded bank from memory                                */
-/*****************************************************************************/
-
-void CFxBank::FreeMemory()
-{
-	if (pChunk)
-		delete[] pChunk;
-	//*szFileName = '\0';                     /* reset file name                   */
-	pChunk = 0;                           /* reset bank pointer                */
-	chunkSize = 0;
-	//nBankLen = 0;                           /* reset bank length                 */
-	//bChunk = false;                         /* and of course it's no chunk.      */
-	programs.clear();
-	numPrograms = 0;
-	currentProgram = 0;
-}
-
-/*****************************************************************************/
-/* DoCopy : combined for copy constructor and assignment operator            */
-/*****************************************************************************/
-
-CFxBank & CFxBank::DoCopy(const CFxBank &org)
-{
-	//FreeMemory();
-	CFxBase::DoCopy(org);
-	if (org.IsChunk())
-	{
-		SetChunk(org.pChunk,org.chunkSize);
-	}
-	else
-	{
-		for (int i=0; i < org.numPrograms; i++)
-		{
-			CFxProgram newprog(org.programs[i]);
-			programs.push_back(newprog);
-		}
-		initialized=true;
-	}
-	numPrograms=org.numPrograms;
-	currentProgram=org.currentProgram;
-	return *this;
-}
-
-/*****************************************************************************/
-/* SetChunk / SetChunkSize : sets a new chunk                                */
-/*****************************************************************************/
-bool CFxBank::SetChunk(const void *chunk, VstInt32 size)
-{
-	if (!SetChunkSize(size))
-		return false;
-
-	memcpy(pChunk,chunk,size);
-	initialized=true;
-	return true;
-}
-
-bool CFxBank::SetChunkSize(VstInt32 size, bool initializeData)
-{
-	if (size <=0 )
-		return false;
-
-	ChunkMode();
-	pChunk = new unsigned char[size];
-	chunkSize = size;
-	if ( pChunk && initializeData )
-		memset(pChunk,0,size);
-	return !!pChunk;
-}
-
-/*****************************************************************************/
-/* LoadBank : loads a bank file                                              */
-/*****************************************************************************/
-
-bool CFxBank::LoadData()
-{
-	CFxBase::LoadData();
-	if (fxMagic == bankMagic) ProgramMode();
-	else if ( fxMagic == chunkBankMagic) ChunkMode();
-	else return false;
-
-	Read(numPrograms);
-	if (version == 2) { Read(currentProgram); Forward(124); }
-	else { currentProgram = 0; Forward(128); }
-
-	if (fxMagic == chunkBankMagic)
-	{
-		VstInt32 size;
-		Read(size);
-		SetChunkSize(size,false);
-		ReadArray(pChunk,size);
-	}
-	else
-	{
-		for (int i=0; i< numPrograms; i++)
-		{
-			CFxProgram loadprog(pf);
-			programs.push_back(loadprog);
-		}
-	}
-	initialized=true;
-	return true;
-}
-
-/*****************************************************************************/
-/* SaveBank : save bank to file                                              */
-/*****************************************************************************/
-
-bool CFxBank::SaveData()
-{
-	///\todo: update the "bytesize" value!
-	CFxBase::SaveData();
-	Write(numPrograms);
-	if (version == 2) { Write(currentProgram); Forward(124); }
-	else Forward(128);
-
-	if (fxMagic == chunkBankMagic)
-	{
-		VstInt32 size = chunkSize;
-		Write(size);
-		WriteArray(pChunk,size);
-	}
-	else
-	{
-		for (int i=0; i< numPrograms; i++)
-		{
-			programs[i].SaveData(pf);
-		}
-	}
-	return true;
-}
 
 /*===========================================================================*/
 /* CEffect class members                                                     */
@@ -660,7 +167,7 @@ bool CFxBank::SaveData()
 /*****************************************************************************/
 /* CEffect : constructor                                                     */
 /*****************************************************************************/
-void Crashingclass::crashed(std::exception const & e) const { ef->crashed2(e); }
+void Crashingclass::crashed(std::exception const & e) { ef->crashed2(e); }
 
 
 CEffect::CEffect(LoadedAEffect &loadstruct)
@@ -714,7 +221,7 @@ CEffect::~CEffect()
 {
 	try
 	{
-		if(ploader) Unload();
+		if (ploader) Unload();
 	}
 	catch(...)
 	{
@@ -733,9 +240,9 @@ void CEffect::Load(LoadedAEffect &loadstruct)
 	#if defined DIVERSALIS__OS__MICROSOFT
 		char const * name = (char*)(loadstruct.pluginloader->sFileName);
 		char const * const p = std::strrchr(name, '\\');
-		if(p) {
+		if (p) {
 			sDir = new char[p - name + 1];
-			if(sDir) {
+			if (sDir) {
 				std::memcpy(sDir, name, p - name);
 				((char*)sDir)[p - name] = '\0';
 			}
@@ -767,14 +274,41 @@ void CEffect::Load(LoadedAEffect &loadstruct)
 			// 5: Host to Plug, setSpeakerArrangement returned: false 
 			// The correct behaviour is try to check the return value of
 			// SetSpeakerArrangement, and if false, GetSpeakerArrangement
-			// And SetSpeakerArrangement with those values.
-			{
-				VstSpeakerArrangement VSTsa;
-				VSTsa.type = kSpeakerArrStereo;
-				VSTsa.numChannels = 2;
-				VSTsa.speakers[0].type = kSpeakerL;
-				VSTsa.speakers[1].type = kSpeakerR;
-				SetSpeakerArrangement(&VSTsa,&VSTsa);
+			// and SetSpeakerArrangement with those values.
+			if (false) {
+				//TODO: Implement a per-plugin speaker configuration. For now, let the plugins have their default configuration.
+				VstSpeakerArrangement SAi;
+				memset(&SAi,0,sizeof(VstSpeakerArrangement));
+				VstSpeakerArrangement SAo;
+				memset(&SAo,0,sizeof(VstSpeakerArrangement));
+				if (numInputs() > 0) {
+					SAi.type = kSpeakerArrStereo;
+					SAi.numChannels = 2;
+					SAi.speakers[0].type = kSpeakerL;
+					SAi.speakers[1].type = kSpeakerR;
+				}
+				else {
+					SAi.type = kSpeakerArrEmpty;
+					SAi.numChannels = 0;
+				}
+				if (numOutputs() > 0) {
+					SAo.type = kSpeakerArrStereo;
+					SAo.numChannels = 2;
+					SAo.speakers[0].type = kSpeakerL;
+					SAo.speakers[1].type = kSpeakerR;
+				}
+				else {
+					SAo.type = kSpeakerArrEmpty;
+					SAo.numChannels = 0;
+				}
+				if (GetVstVersion() >= 2300 && !SetSpeakerArrangement(&SAi,&SAo)) {
+					//This makes jme CR-777 crash on SetSpeakerArrangement (Synthedit based)
+					VstSpeakerArrangement* SAip = 0;
+					VstSpeakerArrangement* SAop = 0;
+					if (GetSpeakerArrangement(&SAip,&SAop)) {
+						SetSpeakerArrangement(SAip,SAop);
+					}
+				}
 			}
 			// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
 			SetSampleRate(CVSTHost::pHost->GetSampleRate());
@@ -808,7 +342,9 @@ void CEffect::Unload()
 
 	#if defined DIVERSALIS__OS__MICROSOFT
 		// reset directory
-		delete[] sDir; sDir = 0;
+		if (sDir) {
+			delete[] sDir; sDir = 0;
+		}
 	#else
 		#error "Freedom is unimplemented in that land; attempt no landing there."
 	#endif
@@ -851,7 +387,7 @@ bool CEffect::LoadBank(CFxBank& fxstore)
 			//MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
 			return false;
 		}
-		for (int i = 0; i < fxstore.GetNumPrograms(); i++)
+		for (VstInt32 i = 0; i < fxstore.GetNumPrograms(); i++)
 		{
 			const CFxProgram &storep = fxstore.GetProgram(i);
 			CPatchChunkInfo pinfo(storep);
@@ -868,8 +404,8 @@ bool CEffect::LoadBank(CFxBank& fxstore)
 			}
 			else 
 			{
-				int nParms = storep.GetNumParams();
-				for (int j = 0; j < nParms; j++)
+				VstInt32 nParms = storep.GetNumParams();
+				for (VstInt32 j = 0; j < nParms; j++)
 					SetParameter(j, storep.GetParameter(j));
 			}
 			EndSetProgram();
@@ -914,8 +450,8 @@ bool CEffect::LoadProgram(CFxProgram& fxstore)
 		}
 		BeginSetProgram();
 		SetProgramName(fxstore.GetProgramName());
-		int nParms = fxstore.GetNumParams();
-		for (int j = 0; j < nParms; j++)
+		VstInt32 nParms = fxstore.GetNumParams();
+		for (VstInt32 j = 0; j < nParms; j++)
 			SetParameter(j, fxstore.GetParameter(j));
 		EndSetProgram();
 	}
@@ -937,7 +473,7 @@ CFxBank CEffect::SaveBank(bool preferchunk)
 			bool mainsstate = bMainsState;
 			MainsChanged(false);
 			void *chunk=0;
-			int size=GetChunk(&chunk);
+			VstInt32 size=GetChunk(&chunk);
 			CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
 			b.SetProgramIndex(GetProgram());
 			if (mainsstate) MainsChanged(true);
@@ -949,7 +485,7 @@ CFxBank CEffect::SaveBank(bool preferchunk)
 			MainsChanged(false);
 			CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
 			b.SetProgramIndex(GetProgram());
-			for (int i = 0; i < numPrograms(); i++)
+			for (VstInt32 i = 0; i < numPrograms(); i++)
 			{
 				CFxProgram &storep = b.GetProgram(i);
 				SetProgram(i);
@@ -957,7 +493,7 @@ CFxBank CEffect::SaveBank(bool preferchunk)
 				GetProgramName(name);
 				storep.SetProgramName(name);
 				void *chunk=0;
-				int size=GetChunk(&chunk,true);
+				VstInt32 size=GetChunk(&chunk,true);
 				storep.CopyChunk(chunk,size);
 				storep.ManuallyInitialized();
 			}
@@ -974,15 +510,15 @@ CFxBank CEffect::SaveBank(bool preferchunk)
 		MainsChanged(false);
 		CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
 		b.SetProgramIndex(GetProgram());
-		for (int i = 0; i < numPrograms(); i++)
+		for (VstInt32 i = 0; i < numPrograms(); i++)
 		{
 			CFxProgram &storep = b.GetProgram(i);
 			SetProgram(i);
 			char name[kVstMaxProgNameLen+1];
 			GetProgramName(name);
 			storep.SetProgramName(name);
-			int nParms = numParams();
-			for (int j = 0; j < nParms; j++)
+			VstInt32 nParms = numParams();
+			for (VstInt32 j = 0; j < nParms; j++)
 				storep.SetParameter(j,GetParameter(j));
 			storep.ManuallyInitialized();
 		}
@@ -1000,7 +536,7 @@ CFxProgram CEffect::SaveProgram(bool preferchunk)
 		bool mainsstate = bMainsState;
 		if (mainsstate) MainsChanged(false);
 		void *chunk=0;
-		int size=GetChunk(&chunk,true);
+		VstInt32 size=GetChunk(&chunk,true);
 		CFxProgram p(uniqueId(),version(),size,true,chunk);
 		char name[kVstMaxProgNameLen+1];
 		GetProgramName(name);
@@ -1017,8 +553,8 @@ CFxProgram CEffect::SaveProgram(bool preferchunk)
 		char name[kVstMaxProgNameLen+1];
 		GetProgramName(name);
 		storep.SetProgramName(name);
-		int nParms = numParams();
-		for (int j = 0; j < nParms; j++)
+		VstInt32 nParms = numParams();
+		for (VstInt32 j = 0; j < nParms; j++)
 			storep.SetParameter(j,GetParameter(j));
 		storep.ManuallyInitialized();
 		if (mainsstate) MainsChanged(true);
@@ -1029,7 +565,7 @@ CFxProgram CEffect::SaveProgram(bool preferchunk)
 /* EffDispatch : calls an effect's dispatcher                                */
 /*****************************************************************************/
 
-VstIntPtr CEffect::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt) const
+VstIntPtr CEffect::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 {
 	if (!aEffect)
 		throw psycle::core::exception("Invalid AEffect!");
@@ -1060,8 +596,7 @@ void CEffect::Process(float **inputs, float **outputs, VstInt32 sampleframes)
 
 void CEffect::ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes)
 {
-	if ((!aEffect) ||
-		(!(aEffect->flags & effFlagsCanReplacing)))
+	if (!aEffect || !CanProcessReplace())
 		throw psycle::core::exception("Invalid AEffect!");
 
 	try
@@ -1100,7 +635,7 @@ void CEffect::SetParameter(VstInt32 index, float parameter)
 /* EffGetParameter : calls an effect's getParameter() function               */
 /*****************************************************************************/
 
-float CEffect::GetParameter(VstInt32 index) const
+float CEffect::GetParameter(VstInt32 index)
 {
 	if (!aEffect)
 		throw psycle::core::exception("Invalid AEffect!");
@@ -1111,7 +646,7 @@ float CEffect::GetParameter(VstInt32 index) const
 	}PSYCLE__HOST__CATCH_ALL(crashclass);
 }
 
-bool CEffect::OnSizeEditorWindow(long width, long height)
+bool CEffect::OnSizeEditorWindow(VstInt32 width, VstInt32 height)
 {
 	if (editorWnd)
 	{
@@ -1178,19 +713,21 @@ bool CEffect::OnGetChunkFile(char * nativePath)
 	return false;
 }
 
-bool CEffect::OnBeginAutomating(long index)
+bool CEffect::OnBeginAutomating(VstInt32 index)
 {
 	if (editorWnd) return editorWnd->BeginAutomating(index);
 	else return false;
 }
-bool CEffect::OnEndAutomating(long index)
+bool CEffect::OnEndAutomating(VstInt32 index)
 {
 	if (editorWnd) return editorWnd->EndAutomating(index); 
 	else return false;
 }
-void CEffect::OnSetParameterAutomated(long index, float value)
+void CEffect::OnSetParameterAutomated(VstInt32 index, float value)
 {
-	if (editorWnd) editorWnd->SetParameterAutomated(index,value);
+	if (editorWnd && CanBeAutomated(index)) {
+		editorWnd->SetParameterAutomated(index,value);
+	}
 }
 bool CEffect::OnOpenFileSelector (VstFileSelect *ptr) {
 	if (editorWnd) return editorWnd->OpenFileSelector(ptr);
@@ -1199,6 +736,47 @@ bool CEffect::OnOpenFileSelector (VstFileSelect *ptr) {
 bool CEffect::OnCloseFileSelector (VstFileSelect *ptr) {
 	if (editorWnd) return editorWnd->CloseFileSelector(ptr);
 	else return false;
+}
+std::string CEffect::GetNameFromSpeakerArrangement(VstSpeakerArrangement& arr, VstInt32 pin) const {
+	const char* chanName[] = { "Mono","Left", "Right", "Center", "Subbass", "Left Surround", "Right Surround",
+	"Left of Center", "Right of Center", "Surround", "Side Left", "Side Right", "Top Middle",
+	"Top Front Left", "Top Front Center", "Top Front Right", "Top Rear Left", "TopRear Center",
+	"Top Rear Right", "Subbass 2"};
+	const VstSpeakerType arrangement[][8] = {{kSpeakerM},{kSpeakerL,kSpeakerR},{kSpeakerLs,kSpeakerRs},{kSpeakerLc,kSpeakerRc},
+	{kSpeakerSl,kSpeakerSr},{kSpeakerC,kSpeakerLfe},{kSpeakerL,kSpeakerR,kSpeakerC},{kSpeakerL,kSpeakerR,kSpeakerS},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe},
+	{kSpeakerL,kSpeakerR,kSpeakerLfe,kSpeakerS},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerS},
+	{kSpeakerL,kSpeakerR,kSpeakerLs,kSpeakerRs},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerS},
+	{kSpeakerL,kSpeakerR,kSpeakerLfe,kSpeakerLs,kSpeakerRs},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs,kSpeakerCs},
+	{kSpeakerL,kSpeakerR,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerCs},
+	{kSpeakerL,kSpeakerR,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs,kSpeakerLc,kSpeakerRc},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerLc,kSpeakerRc},
+	{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+	};
+	std::stringstream name;
+	if(pin < arr.numChannels) {
+		if (arr.type >= 0 && arr.type < 24) {
+			name << chanName[arrangement[arr.type][pin]];
+		}
+		else if (arr.speakers[pin].type > 0 && arr.speakers[pin].type < 23) {
+			name << chanName[arr.speakers[pin].type];
+		}
+		else {
+			name << arr.speakers[pin].name;
+		}
+	}
+	else {
+		name << pin;
+	}
+	return name.str();
 }
 
 /*===========================================================================*/
@@ -1212,11 +790,11 @@ bool CEffect::OnCloseFileSelector (VstFileSelect *ptr) {
 CVSTHost::CVSTHost()
 {
 	if (pHost)                              /* disallow more than one host!      */
-		throw((int)1);
+		throw std::runtime_error("VST Host already created!");
 
 	lBlockSize = 1024;
 	vstTimeInfo.samplePos = 0.0;
-	vstTimeInfo.sampleRate = 44100.;
+	vstTimeInfo.sampleRate = 44100.0;
 	vstTimeInfo.nanoSeconds = 0.0;
 	vstTimeInfo.ppqPos = 0.0;
 	vstTimeInfo.tempo = 120.0;
@@ -1253,33 +831,68 @@ CVSTHost::~CVSTHost()
 CEffect* CVSTHost::LoadPlugin(const char * sName,VstInt32 shellIdx)
 {
 	PluginLoader* loader = new PluginLoader();
-	if (!loader->loadLibrary(sName))
+	AEffect* effect(0);
+	if (loader->loadLibrary(sName))
 	{
+		if(useJBridge && JBridge::IsBootStrapDll((HMODULE)loader->module)) 
+		{
+			delete loader;
+	
+			std::ostringstream s; s
+				<< "This is a JBridge wrapper. Ignoring it. " << sName << std::endl;
+			throw psycle::core::exceptions::library_errors::loading_error(s.str());
+		}
+		PluginEntryProc mainEntry = loader->getMainEntry ();
+		if(!mainEntry)
+		{
+			delete loader;
+			std::ostringstream s; s
+				<< "couldn't locate the main entry to VST: " << sName << std::endl;
+				throw psycle::core::exceptions::library_errors::symbol_resolving_error(s.str());
+		}
+	
+		loadingEffect = true;
+		loadingShellId = shellIdx;
+		isShell = false;
+		CEffect crashtest(0);
+		try
+		{
+			effect = mainEntry (AudioMasterCallback);
+		}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
+	}
+	else if (useJBridge && loader->loadJBridgeLibrary(sName))
+	{
+		PFNBRIDGEMAIN pfnBridgeMain = loader->getJBridgeMainEntry();
+		if(!pfnBridgeMain)
+		{
+			delete loader;
+			std::ostringstream s; s
+				<< "couldn't locate JBridge Main entry! " << std::endl;
+				throw psycle::host::exceptions::library_errors::symbol_resolving_error(s.str());
+		}
+		loadingEffect = true;
+		loadingShellId = shellIdx;
+		isShell = false;
+		effect = pfnBridgeMain( AudioMasterCallback, const_cast<char*>(sName) );
+		if (effect && (effect->magic != kEffectMagic))
+		{
+			// Fix for a possible bug. When loading asio.dll (a non VST),
+			// jBridge reports that it cannot load it, but then returns an effect,
+			// which makes the host crash if deleted. I assume it is already deleting it.
+			effect = NULL;
+		}
+	}
+	else if (usePsycleVstBridge && loader->loadPsycleBridgeLibrary(sName))
+	{
+		//todo.
+	}
+	else {
 		delete loader;
+		loader = NULL;
 		std::ostringstream s; s
 			<< "Couldn't open the library: " << sName << std::endl;
-		throw psycle::core::exceptions::library_errors::loading_error(s.str());
+		throw psycle::core::exceptions::library_errors::symbol_resolving_error(s.str());
 	}
-
-	PluginEntryProc mainEntry = loader->getMainEntry ();
-	if(!mainEntry)
-	{
-		delete loader;
-		std::ostringstream s; s
-			<< "couldn't locate the main entry to VST: " << sName << std::endl;
-			throw psycle::core::exceptions::library_errors::symbol_resolving_error(s.str());
-	}
-
-	loadingEffect = true;
-	loadingShellId = shellIdx;
-	isShell = false;
-	AEffect* effect(0);
-	CEffect crashtest(0);
-	try
-	{
-		effect = mainEntry (AudioMasterCallback);
-	}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
-
 	if (effect && (effect->magic != kEffectMagic))
 	{
 		delete effect;
@@ -1314,7 +927,7 @@ CEffect* CVSTHost::LoadPlugin(const char * sName,VstInt32 shellIdx)
 /* CalcTimeInfo : calculates time info from nanoSeconds                      */
 /*****************************************************************************/
 
-void CVSTHost::CalcTimeInfo(long lMask)
+void CVSTHost::CalcTimeInfo(VstInt32 lMask)
 {
 	// Either your player/sequencer or your overloaded member should update the following ones.
 	// They shouldn't need any calculations appart from your usual work procedures.
@@ -1329,40 +942,49 @@ void CVSTHost::CalcTimeInfo(long lMask)
 
 	const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
 	//ppqPos (sample pos in 1ppq units)
-	if( (lMask & (kVstPpqPosValid | kVstBarsValid | kVstClockValid)) && !(vstTimeInfo.flags & kVstBarsValid) )
+	if ((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask & kVstClockValid))
 	{
-		vstTimeInfo.flags |= kVstPpqPosValid;
-		vstTimeInfo.ppqPos = seconds * vstTimeInfo.tempo / 60.0;
-	}
-	//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
-	if(lMask & kVstBarsValid)
-	{
-		vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* ((int)vstTimeInfo.ppqPos / (int)vstTimeInfo.timeSigDenominator);
-		vstTimeInfo.flags |= kVstBarsValid;
-	}
-	//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
-	if(lMask & kVstClockValid)
-	{
-		// option 1:
-		const double onesampleclock = (60.0 * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.0); // get size of one 24ppq in samples.
-		vstTimeInfo.samplesToNextClock = onesampleclock * (((int)vstTimeInfo.samplePos / (int)onesampleclock)+1); // quantize.
+				//Warning: all this assumes constant tempo.
 
-		// option 2:
-		//const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1); // Quantize ppqpos
-		//const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo; // convert to samples
-		//vstTimeInfo.samplestoNextClock = sampleclockpos - ppqclockpos; // get the difference.
-		vstTimeInfo.flags |= kVstClockValid;
+		vstTimeInfo.flags |= kVstPpqPosValid;
+		const double beatpos = seconds * vstTimeInfo.tempo / 60.0;
+		vstTimeInfo.ppqPos = beatpos * 4.0 / static_cast<double>(vstTimeInfo.timeSigDenominator);
+
+		//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar.
+		if(lMask & kVstBarsValid)
+		{
+			vstTimeInfo.barStartPos= vstTimeInfo.timeSigNumerator* (static_cast<VstInt32>(vstTimeInfo.ppqPos) / vstTimeInfo.timeSigNumerator);
+			vstTimeInfo.flags |= kVstBarsValid;
+		}
+		//samplestoNextClock, how many samples from the current position to the next clock, (24ppq precision, i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
+		if(lMask & kVstClockValid)
+		{
+			// option 1:
+			const double onesampleclock = (60.0 * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.0); // get size of one 24ppq in samples.
+			vstTimeInfo.samplesToNextClock = onesampleclock * (((int)vstTimeInfo.samplePos / (int)onesampleclock)+1); // quantize.
+	
+			// option 2:
+			//Should be "round" instead of cast+1, but this is good enough.
+			//const double ppqclockpos = vstTimeInfo.ppqPos*24.0;
+			//const double nextclockpos = static_cast<VstInt32>(vstTimeInfo.ppqPos*24.0)+1;	// Get the next clock in 24ppqs
+			//vstTimeInfo.samplestoNextClock = (nextclockpos-ppqclockpos) * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo; // convert to samples
+	
+			vstTimeInfo.flags |= kVstClockValid;
+		}
 	}
-	//smpteOffset
+	//smpteOffset. This is probably wrong.
 	if(lMask & kVstSmpteValid)
 	{
 		// 24 fps ,  25 fps, 29.97 fps, 30 fps, 29.97 drop, 30 drop , Film 16mm ,  Film 35mm , none, none,
 		// HDTV: 23.976 fps, HDTV: 24.976 fps, HDTV: 59.94 fps, HDTV: 60 fps
-		static double fSmpteDiv[] = {24.f, 25.f, 29.97f, 30.f, 29.97f, 30.f , 0.f, 0.f, 0.f, 0.f, 23.976f, 24.976f, 59.94f, 60.f};
+		static double fSmpteDiv[] =
+		{	24.f,		25.f,		29.97f,		30.f,	29.97f,		30.f ,		0.f,		0.f,	0.f,	0.f,
+			23.976f,	24.976f,	59.94f,		60.f
+		};
 		double dOffsetInSecond = seconds - floor(seconds);
-		vstTimeInfo.smpteOffset = (long)(dOffsetInSecond *
+		vstTimeInfo.smpteOffset = (VstInt32)(dOffsetInSecond *
 			fSmpteDiv[vstTimeInfo.smpteFrameRate] *
-			80.0);
+			80.0L);
 		vstTimeInfo.flags |= kVstSmpteValid;
 	}
 	//nanoseconds (system time)
@@ -1389,14 +1011,14 @@ void CVSTHost::SetSampleRate(float fSampleRate)
 /* SetBlockSize : sets the block size                                        */
 /*****************************************************************************/
 
-void CVSTHost::SetBlockSize(long lSize)
+void CVSTHost::SetBlockSize(VstInt32 lSize)
 {
 	if (lSize == lBlockSize)                /* if no change                      */
 		return;                               /* do nothing.                       */
 	lBlockSize = lSize;                     /* remember new block size           */
 }
 
-void CVSTHost::SetTimeSignature(long numerator, long denominator)
+void CVSTHost::SetTimeSignature(VstInt32 numerator, VstInt32 denominator)
 {
 	vstTimeInfo.timeSigNumerator=numerator;
 	vstTimeInfo.timeSigDenominator=denominator; 
@@ -1425,7 +1047,7 @@ void CVSTHost::SetCycleActive(double cycleStart, double cycleEnd)
 /* and in fact there is a bug in the audioeffectx.cpp (in the host call)     */
 /* where it forgets about the index completely.                              */
 /*****************************************************************************/
-CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, int pinIndex) const 
+CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, VstInt32 pinIndex) const 
 {
 	/* What this function might have to do:
 	if (pinIndex == -1)
@@ -1444,7 +1066,7 @@ CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, int pinIndex) const
 /* where it forgets about the index completely.                              */
 /*****************************************************************************/
 
-CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, int pinIndex) const
+CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, VstInt32 pinIndex) const
 {
 	/* What this function might have to do:
 	if (pinIndex == -1)
@@ -1476,7 +1098,7 @@ bool CVSTHost::OnCanDo(CEffect &pEffect, const char *ptr) const {
 		//|| (!strcmp(ptr, canDoSizeWindow )) // "sizeWindow",
 
 		//|| (!strcmp(ptr, canDoAsyncProcessing )) // DEPRECATED
-		//|| (!strcmp(ptr, canDoOffline] )) // "offline",
+		//|| (!strcmp(ptr, canDoOffline )) // "offline",
 		|| (!strcmp(ptr, "supplyIdle" )) // DEPRECATED
 		//|| (!strcmp(ptr, "supportShell" )) // DEPRECATED
 		|| (!strcmp(ptr, canDoOpenFileSelector )) // "openFileSelector"
@@ -1495,7 +1117,7 @@ bool CVSTHost::OnCanDo(CEffect &pEffect, const char *ptr) const {
 /*****************************************************************************/
 // This is called by pre-2.4 VST plugins when resume() is called to indicate
 // that it is going to accept events.
-void CVSTHost::OnWantEvents(CEffect & pEffect, long filter)
+void CVSTHost::OnWantEvents(CEffect & pEffect, VstInt32 filter)
 {
 	if ( filter == kVstMidiType )
 	{
@@ -1510,7 +1132,7 @@ void CVSTHost::OnWantEvents(CEffect & pEffect, long filter)
 // function in order to refresh the plugin UI. This is done in the "idle" thread.
 // (the UI redrawing timer, usually).
 // Note that EditIdle() needs to be called repetitively. This just forces an
-// inmediate (as soon as possible) 
+// inmediate call (as soon as possible) 
 void CVSTHost::OnIdle(CEffect & pEffect)
 {
 	pEffect.NeedsEditIdle(true);
@@ -1541,13 +1163,14 @@ VstIntPtr CVSTHost::AudioMasterCallback(
 	void* ptr,
 	float opt
 ) {
-	if(!pHost) throw std::runtime_error("no vst host instance"); // It would have no sense that there is no host.
+	if (!pHost)
+		throw std::runtime_error("Missing VST Host instance!"); // It would have no sense that there is no host.
 
 	CEffect *pEffect = 0;
 	bool fakeeffect = false;
 
-	if(!effect) {
-		if(!pHost->loadingEffect) {
+	if (!effect) {
+		if (!pHost->loadingEffect) {
 			std::stringstream s; s
 				<< "Machine Error: AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin)" << std::endl
 				<< "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
@@ -1556,13 +1179,13 @@ VstIntPtr CVSTHost::AudioMasterCallback(
 		}
 		
 		// We try to simulate a pEffect plugin for this call, so that calls to
-		// GetVersion, GetProductString and similar can be answered.
+		// GetVSTVersion, GetProductString and similar can be answered.
 		// CEffect will throw an exception if the function requires a callback to the plugin.
 		fakeeffect = true;
 		pEffect = pHost->CreateWrapper(0);
 	} else {
 		pEffect = (CEffect*)(effect->resvd1);
-		if(!pEffect) {
+		if (!pEffect) {
 			char name[5] = { 0 };
 			std::memcpy(name, &effect->uniqueID, 4);
 			name[4] = '\0';
@@ -1570,7 +1193,7 @@ VstIntPtr CVSTHost::AudioMasterCallback(
 			std::stringstream s;
 			s
 				<< "Machine Error: AudioMaster call, with unknown pEffect" << std::endl
-				<< "Aeffect: " << name << ", opcode is " << exceptions::dispatch_errors::operation_description(opcode)
+				<< "Aeffect: " << name << ", opcode is: " << exceptions::dispatch_errors::operation_description(opcode)
 				<< ", with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 			pHost->Log(s.str());
 
@@ -1608,12 +1231,15 @@ VstIntPtr CVSTHost::AudioMasterCallback(
 				pHost->OnIdle(*pEffect);
 				break;
 			case audioMasterPinConnected :
-				// for compatibility with VST 1.0, false means connected.
-				result = !((value) ? 
+				{
+				bool connected = ((value) ? 
 					pHost->OnOutputConnected(*pEffect, index) :
 					pHost->OnInputConnected(*pEffect, index));
+				// for compatibility with VST 1.0, 0 means connected.
+				result = connected? 0 : 1;
 				if (fakeeffect )delete pEffect;
 				return result;
+				}
 		// VST 2.0
 			case audioMasterWantMidi :
 				pHost->OnWantEvents(*pEffect, value);
@@ -1671,15 +1297,21 @@ VstIntPtr CVSTHost::AudioMasterCallback(
 				if (fakeeffect )delete pEffect;
 				return result;
 			case audioMasterGetPreviousPlug :
-				result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index));
-				if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index)->GetAEffect());
-				if (fakeeffect )delete pEffect;
-				return result;
+				{
+					CEffect* effect = pHost->GetPreviousPlugIn(*pEffect,index);
+					if (effect) result = reinterpret_cast<VstIntPtr>(effect->GetAEffect());
+					else result=0;
+					if (fakeeffect )delete pEffect;
+					return result;
+				}
 			case audioMasterGetNextPlug :
-				result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index));
-				if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index)->GetAEffect());
-				if (fakeeffect )delete pEffect;
-				return result;
+				{
+					CEffect* effect = pHost->GetNextPlugIn(*pEffect,index);
+					if (effect) result = reinterpret_cast<VstIntPtr>(effect->GetAEffect());
+					else result=0;
+					if (fakeeffect )delete pEffect;
+					return result;
+				}
 			case audioMasterWillReplaceOrAccumulate :
 				result = pHost->OnWillProcessReplacing(*pEffect);
 				if (fakeeffect )delete pEffect;
@@ -1747,7 +1379,7 @@ VstIntPtr CVSTHost::AudioMasterCallback(
 				if (fakeeffect )delete pEffect;
 				return result;
 			case audioMasterOpenWindow :
-				result = (long)pHost->OnOpenWindow(*pEffect, (VstWindow *)ptr);
+				result = (VstIntPtr)pHost->OnOpenWindow(*pEffect, (VstWindow *)ptr);
 				if (fakeeffect )delete pEffect;
 				return result;
 			case audioMasterCloseWindow :
@@ -1803,7 +1435,7 @@ VstIntPtr CVSTHost::AudioMasterCallback(
 	// This is PSYCLE__HOST__CATCH_ALL() for static members.
 	} PSYCLE__HOST__CATCH_ALL__NO_CLASS(pEffect->crashclass);
 	if(fakeeffect) delete pEffect;
-	return 0;
+	return 0L;
 }
 
 }}
