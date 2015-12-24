@@ -247,11 +247,6 @@ namespace psycle
 			int badPlugsCount(0);
 			param->theCatcher->_numPlugins = 0;
 			bool cacheValid = param->theCatcher->LoadCacheFile(plugsCount, badPlugsCount, param->verify);
-			// If cache found&loaded and no verify, we're ready, else start scan.
-			if (cacheValid && !param->verify) {
-				param->theEvent.SetEvent();
-				return 0;
-			}
 
 			class populate_plugin_list
 			{
@@ -313,27 +308,30 @@ namespace psycle
 			loggers::information()("Scanning plugins ... Directory for Ladspas : " + Global::configuration().GetAbsoluteLadspaDir());
 			loggers::information()("Scanning plugins ... Listing ...");
 
-			progress.SetWindowText("Scanning plugins ... Listing ...");
-			progress.ShowWindow(SW_SHOW);
+			if (param->verify) {
+				progress.SetWindowText("Scanning plugins ... Listing ...");
+				progress.ShowWindow(SW_SHOW);
 
-			populate_plugin_list(nativePlugs,Global::configuration().GetAbsolutePluginDir());
+				populate_plugin_list(nativePlugs,Global::configuration().GetAbsolutePluginDir());
 #if	defined _WIN64
-			populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst64Dir());
-			if(Global::configuration().UsesJBridge() || Global::configuration().UsesPsycleVstBridge())
-			{
-				populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst32Dir());
-			}
-#elif defined _WIN32
-			populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst32Dir());
-			if(Global::configuration().UsesJBridge() || Global::configuration().UsesPsycleVstBridge())
-			{
 				populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst64Dir());
-			}
+				if(Global::configuration().UsesJBridge() || Global::configuration().UsesPsycleVstBridge())
+				{
+					populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst32Dir());
+				}
+#elif defined _WIN32
+				populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst32Dir());
+				if(Global::configuration().UsesJBridge() || Global::configuration().UsesPsycleVstBridge())
+				{
+					populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst64Dir());
+				}
 #endif
+				populate_plugin_list(ladspaPlugs,Global::configuration().GetAbsoluteLadspaDir(), false);
+			}
+			//Always scan lua dir since it is important that the psycle-specific script are up-to-date.
 			populate_plugin_list(luaPlugs,Global::configuration().GetAbsoluteLuaDir(), false);
-			populate_plugin_list(ladspaPlugs,Global::configuration().GetAbsoluteLadspaDir(), false);
 
-			int plugin_count = (int)(nativePlugs.size() + vstPlugs.size() + luaPlugs.size());
+			int plugin_count = (int)(nativePlugs.size() + vstPlugs.size() + luaPlugs.size() + ladspaPlugs.size());
 
 			{
 				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
@@ -354,42 +352,43 @@ namespace psycle
 #error unexpected platform
 #endif
 			}
-			out
-				<< "==========================================" << std::endl
-				<< "=== Psycle Plugin Scan Enumeration Log ===" << std::endl
-				<< std::endl
-				<< "If psycle is crashing on load, chances are it's a bad plugin, "
-				<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
+			if (param->verify) {
+				out
+					<< "==========================================" << std::endl
+					<< "=== Psycle Plugin Scan Enumeration Log ===" << std::endl
+					<< std::endl
+					<< "If psycle is crashing on load, chances are it's a bad plugin, "
+					<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
 
-			std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
-			progress.SetWindowText(s.str().c_str());
-
-			loggers::information()("Scanning plugins ... Testing Natives ...");
-			out
-				<< std::endl
-				<< "======================" << std::endl
-				<< "=== Native Plugins ===" << std::endl
-				<< std::endl;
-			out.flush();
-
-			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, &progress);
-
-			out.flush();
-			{
-				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
+				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
 				progress.SetWindowText(s.str().c_str());
+
+				loggers::information()("Scanning plugins ... Testing Natives ...");
+				out
+					<< std::endl
+					<< "======================" << std::endl
+					<< "=== Native Plugins ===" << std::endl
+					<< std::endl;
+				out.flush();
+
+				param->theCatcher->FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, &progress);
+
+				out.flush();
+				{
+					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
+					progress.SetWindowText(s.str().c_str());
+				}
+
+				loggers::information()("Scanning plugins ... Testing VSTs ...");
+				out
+					<< std::endl
+					<< "===================" << std::endl
+					<< "=== VST Plugins ===" << std::endl
+					<< std::endl;
+				out.flush();
+
+				param->theCatcher->FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, &progress);
 			}
-
-			loggers::information()("Scanning plugins ... Testing VSTs ...");
-			out
-				<< std::endl
-				<< "===================" << std::endl
-				<< "=== VST Plugins ===" << std::endl
-				<< std::endl;
-			out.flush();
-
-			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, &progress);
-
 			out.flush();
 			{
 				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Luas ...";
@@ -412,28 +411,25 @@ namespace psycle
 				loggers::information()(s.str().c_str());
 				progress.SetWindowText(s.str().c_str());
 			}
-			{
-				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing LADSPAs ...";
-				progress.SetWindowText(s.str().c_str());
+			if (param->verify) {
+				{
+					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing LADSPAs ...";
+					progress.SetWindowText(s.str().c_str());
+				}
+
+				loggers::information()("Scanning plugins ... Testing LADSPAs ...");
+				out
+					<< std::endl
+					<< "===================" << std::endl
+					<< "=== LADSPA Plugins ===" << std::endl
+					<< std::endl;
+				out.flush();
+
+				param->theCatcher->FindPlugins(plugsCount, badPlugsCount, ladspaPlugs, MACH_LADSPA, out, &progress);
 			}
-
-			loggers::information()("Scanning plugins ... Testing LADSPAs ...");
-			out
-				<< std::endl
-				<< "===================" << std::endl
-				<< "=== LADSPA Plugins ===" << std::endl
-				<< std::endl;
-			out.flush();
-
-			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, ladspaPlugs, MACH_LADSPA, out, &progress);
-
 
 			out.close();
 			param->theCatcher->_numPlugins = plugsCount;
-			progress.m_Progress.SetPos(16384);
-			progress.SetWindowText("Saving scan cache file ...");
-
-			loggers::information()("Saving scan cache file ...");
 			progress.SendMessage(WM_CLOSE);
 			param->theEvent.SetEvent();
 			return 0;
@@ -843,23 +839,21 @@ namespace psycle
 						} else {											
 							std::vector<PluginInfo>::iterator it = infos.begin();
 							for (int i = 0; it!=infos.end(); ++it, ++i)  {
-						     PluginInfo info = *it;
-							 if (i>0) {
-							   pInfo = _pPlugsInfo[currentPlugsCount]= new PluginInfo();
-							 }
-							*pInfo = info;	
-							pInfo->dllname = fileName;
-							pInfo->FileTime = time;
-							out << info.name << " - successfully instanciated";
-							out.flush();
-						    ++currentPlugsCount;
+								PluginInfo info = *it;
+								if (i>0) {
+									++currentPlugsCount;
+									pInfo = _pPlugsInfo[currentPlugsCount]= new PluginInfo();
+								}
+								*pInfo = info;	
+								pInfo->dllname = fileName;
+								pInfo->FileTime = time;
+								out << info.name << " - successfully instanciated";
+								out.flush();
 							}
 						}
 						learnDllName(fileName,type);
 					}
-					if (type!=MACH_LADSPA) {
-					  ++currentPlugsCount;
-					}
+					++currentPlugsCount;
 				}
 				catch(const std::exception & e)
 				{
@@ -925,7 +919,7 @@ namespace psycle
 				return false;
 #endif
 			}
-
+			uint64_t filesize = file.FileSize();
 			char Temp[MAX_PATH];
 			file.Read(Temp,8);
 			Temp[8]=0;
@@ -954,13 +948,21 @@ namespace psycle
 				{
 					UINT size;
 					file.Read(&size, sizeof size);
-					if(size)
+					if(size > 0 && size < filesize)
 					{
 						char *chars(new char[size + 1]);
 						file.Read(chars, size);
 						chars[size] = '\0';
 						p.error = (const char*)chars;
 						delete [] chars;
+					}
+					else if (size != 0) {
+						//There has been a problem reading the file. Regenerate it
+						_numPlugins = currentPlugsCount;
+						DestroyPluginInfo();
+						file.Close();
+						DeleteFile(cache.c_str());
+						return false;
 					}
 				}
 				file.Read(&p.allow,sizeof(p.allow));

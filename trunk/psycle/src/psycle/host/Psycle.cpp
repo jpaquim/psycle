@@ -91,12 +91,12 @@ namespace psycle { namespace host {
 				return FALSE;
 			}     
 
-      std::string sci_path = global_.conf().GetAbsoluteLuaDir();
-      sci_path += "\\psycle\\SciLexer.dll";
-      m_hDll = LoadLibrary (_T (sci_path.c_str()));
-         if (m_hDll == NULL) {
-         AfxMessageBox ("LoadLibrary SciLexer.dll failure ...");
-      }
+			std::string sci_path = global_.conf().appPath();
+			sci_path += "\\SciLexer.dll";
+			m_hDll = LoadLibrary (_T (sci_path.c_str()));
+			if (m_hDll == NULL) {
+				AfxMessageBox ("LoadLibrary SciLexer.dll failure ...");
+			}
 
 
 			// To create the main window, this code creates a new frame window
@@ -143,7 +143,7 @@ namespace psycle { namespace host {
 			else
 			{
 				global_.machineload().LoadPluginInfo(false);
-        pFrame->m_wndView.LoadLuaExtensions();
+		        pFrame->m_wndView.LoadLuaExtensions();
 				// Show splash screen
 				if (global_.conf()._showAboutAtStart)
 				{
@@ -209,6 +209,7 @@ namespace psycle { namespace host {
 			{
 				if(strcmp(cmdline,"/skipscan") != 0) {
 					global_.machineload().LoadPluginInfo(false);
+			        ((CMainFrame*)m_pMainWnd)->m_wndView.LoadLuaExtensions();
 					char tmpName [MAX_PATH];
 					std::strncpy(tmpName, m_lpCmdLine+1, MAX_PATH-1 );
 					tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
