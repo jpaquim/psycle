@@ -157,8 +157,6 @@
     <ClInclude Include="src\psycle\host\LuaHelper.hpp" />
     <ClInclude Include="src\psycle\host\LuaInternals.hpp" />
     <ClInclude Include="src\psycle\host\Menu.hpp" />
-    <ClInclude Include="src\psycle\host\SciLexer.h" />
-    <ClInclude Include="src\psycle\host\Scintilla.h" />
     <ClInclude Include="src\psycle\host\Ui.hpp" />
     <ClInclude Include="src\psycle\host\version.hpp" />
     <ClInclude Include="src\psycle\host\ASIOInterface.hpp" />
