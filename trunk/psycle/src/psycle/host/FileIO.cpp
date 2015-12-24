@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////
+
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -166,7 +166,7 @@ namespace psycle
 			char c;
 			while(true)
 			{
-				if (Read(&c, sizeof(c)))
+				if (Read(c))
 				{
 					if(c == 0) {
 						return true;
@@ -186,7 +186,7 @@ namespace psycle
 				char c;
 				for(std::size_t index = 0; index < maxBytes-1; index++)
 				{
-					if (Read(&c, sizeof c))
+					if (Read(c))
 					{
 						pData[index] = c;
 						if(c == 0) return true;
@@ -195,21 +195,13 @@ namespace psycle
 				}
 				do
 				{
-					if(!Read(&c, sizeof c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
+					if(!Read(c)) return false; //\todo : return false, or return true? the string is read already. it could be EOF.
 				} while(c != 0);
 				return true;
 			}
 			return false;
 		}
 
-		const TCHAR * RiffFile::ReadStringA2T(TCHAR* pData, const std::size_t maxLength)
-		{
-			char* _buffer = new char[maxLength];
-			ReadString(_buffer,maxLength);
-			/* \todo URGH, HA, OUCH, GLURPS!!!!!*/_tcscpy(pData,CA2T(_buffer));
-			delete [] _buffer;
-			return pData;
-		}
 		bool RiffFile::WriteString(const std::string & result)
 		{
 			Write(result.c_str(),result.length());
@@ -293,7 +285,7 @@ namespace psycle
 
 		bool OldPsyFile::Expect(const void* pData, std::size_t numBytes)
 		{
-			unsigned char c;
+			char c;
 			while (numBytes-- != 0)
 			{
 				if(std::fread(&c, sizeof c, 1, _file) != 1) return false;
@@ -338,5 +330,113 @@ namespace psycle
 		{
 			return !ferror(_file);
 		}
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// MemoryFile
+
+		bool MemoryFile::OpenMem(std::size_t blocksize/*=65536*/)
+		{
+			blocksize_=blocksize;
+			filesize=0;
+			filepos=0;
+			blockpos=0;
+			blockidx=0;
+			memoryblocks_.push_back(new char[blocksize_]);
+			return true;
+		}
+		bool MemoryFile::Close() {
+			std::vector<void*>::iterator ite;
+			for (ite=memoryblocks_.begin();ite!=memoryblocks_.end();++ite) 
+			{
+				delete *ite;
+			}
+			memoryblocks_.clear();
+			filesize=0;
+			filepos=0;
+			blockpos=0;
+			blockidx=0;
+			return true;
+		}
+		int MemoryFile::Seek(std::size_t bytes)
+		{
+			if (bytes >= filesize) {
+				blockidx = memoryblocks_.size()-1;
+				blockpos = filesize - blocksize_*(blockidx);
+			}
+			else {
+				std::size_t targetblock = bytes/blocksize_;
+				blockidx = targetblock;
+				blockpos = bytes - blocksize_*(blockidx);
+			}
+			//TODO: is this what is returned by seek?
+			filepos = blockpos + blocksize_*(blockidx);
+			return filepos;
+		}
+		int MemoryFile::Skip(std::size_t bytes)
+		{
+			return Seek(GetPos()+bytes);
+		}
+		bool MemoryFile::Expect(const void * pData, std::size_t numBytes)
+		{
+			char c;
+			while(numBytes-- != 0)
+			{
+				if(!ReadInternal(&c,1)) return false;
+				if(c != *((char*)pData)) return false;
+				pData = (char*)pData + 1;
+			}
+			return true;
+		}
+		bool MemoryFile::ReadInternal(void * pData, std::size_t numBytes)
+		{
+			bool ok=true;
+			char* outdata = static_cast<char*>(pData);
+			if (filepos+numBytes >= filesize) {
+				numBytes=filesize-filepos-1;
+				ok=false;
+			}
+			while (numBytes > 0) {
+				char* block = static_cast<char*>(memoryblocks_[blockidx]);
+				while (numBytes > 0 && blockpos < blocksize_) {
+					*outdata=block[blockpos];
+					blockpos++;
+					outdata++;
+					filepos++;
+					numBytes--;
+				}
+				if (blockpos >= blocksize_) {
+					blockidx++;
+					blockpos=0;
+				}
+			}
+			return ok;
+		}
+		bool MemoryFile::WriteInternal(void const * pData, std::size_t numBytes)
+		{
+			char const* indata = static_cast<char const*>(pData);
+			while (numBytes > 0) {
+				char* block = static_cast<char*>(memoryblocks_[blockidx]);
+				while (numBytes > 0 && blockpos < blocksize_) {
+					block[blockpos]=*indata;
+					blockpos++;
+					indata++;
+					filepos++;
+					numBytes--;
+				}
+				if (blockpos >= blocksize_) {
+					blockidx++;
+					blockpos=0;
+					if(blockidx >= memoryblocks_.size() ) {
+						memoryblocks_.push_back(new char[blocksize_]);
+					}
+				}
+			}
+			if (filepos >= filesize) { filesize=filepos; }
+
+			return true;
+		}
+
 	}
 }

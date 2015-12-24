@@ -99,8 +99,6 @@ namespace psycle
 			const uint16_t ReadUInt16() { uint16_t t; Read(t); return t; }
 			const int8_t ReadInt8()   {  int8_t t; Read(t); return t; }
 			const uint8_t ReadUInt8()  { uint8_t t; Read(t); return t; }
-			///\todo MSWINDOWS-SPEFOIHEZOFIHDSLKHGSIFIC CODE!!!!!!!!!
-			const TCHAR * RiffFile::ReadStringA2T(TCHAR* pData, const std::size_t maxLength);
 
 		public:
 		///\name 1 bit
@@ -341,5 +339,37 @@ namespace psycle
 		protected:
 			FILE* _file;
 		};
+
+	class MemoryFile : public RiffFile {
+		public:
+			MemoryFile():blocksize_(1),filesize(0),filepos(0),blockpos(0),blockidx(0){};
+			virtual ~MemoryFile() {Close();};
+
+			bool OpenMem(std::size_t blocksize=65536);
+			/*override*/ bool Close();
+
+			/*override*/ bool Expect (const void * pData, std::size_t numBytes);
+			/*override*/ int Seek(std::size_t bytes);
+			/*override*/ int Skip(std::size_t bytes);
+			/*override*/ bool Eof() {return filepos>=filesize;}
+			/*override*/ std::size_t FileSize() { return filesize; };
+			/*override*/ std::size_t GetPos() { return filepos; };
+
+		protected:
+			/*override*/ bool Open(std::string const & FileName) { return OpenMem(); }
+			/*override*/ bool Create(std::string const & FileName, bool overwrite) { return OpenMem(); }
+
+			/*override*/ bool ReadInternal(void * pData, std::size_t numBytes);
+			/*override*/ bool WriteInternal(void const * pData, std::size_t numBytes);
+
+			std::vector<void*> memoryblocks_;
+			std::size_t blocksize_;
+			std::size_t filesize;
+			std::size_t filepos;
+			std::size_t blockpos;
+			std::size_t blockidx;
+
+	};
+
 	}
 }

@@ -23,6 +23,7 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_TRACKSLIDER2, m_polyslider);
 			DDX_Control(pDX, IDC_TRACKLABEL2, m_polylabel);
 			DDX_Control(pDX, IDC_DEFAULTC4, m_defaultC4);
+			DDX_Control(pDX, IDC_LINEARSLIDE, m_linearSlide);
 		}
 
 		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
@@ -31,26 +32,28 @@ namespace psycle { namespace host {
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawNumVoices)
 			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
 			ON_BN_CLICKED(IDC_DEFAULTC4, OnDefaultC4)
+			ON_BN_CLICKED(IDC_LINEARSLIDE, OnLinearSlide)
 		END_MESSAGE_MAP()
 
 		BOOL CGearTracker::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
 
-			m_interpol.AddString("Hold/Chip Interp. [Lowest quality]");
-			m_interpol.AddString("Linear Interpolation [Low quality]");
-			m_interpol.AddString("Spline Interpolation [Medium quality]");
-			m_interpol.AddString("32Tap Sinc Interp. [High quality]");
+			m_interpol.AddString(_T("Hold/Chip Interp. [Lowest quality]"));
+			m_interpol.AddString(_T("Linear Interpolation [Low quality]"));
+			m_interpol.AddString(_T("Spline Interpolation [Medium quality]"));
+			m_interpol.AddString(_T("32Tap Sinc Interp. [High quality]"));
 			m_interpol.SetCurSel(machine._resampler.quality());
 			m_defaultC4.SetCheck(machine.isDefaultC4());
+			m_linearSlide.SetCheck(machine.isLinearSlide());
 			if(PsycleGlobal::conf().patView().showA440) {
-				m_defaultC4.SetWindowTextA("C4 plays the default speed (Otherwise, C3 does it)");
+				m_defaultC4.SetWindowText(_T("C4 plays the default speed (Otherwise, C3 does it)"));
 			}
 			else {
-				m_defaultC4.SetWindowTextA("C5 plays the default speed (Otherwise, C4 does it)");
+				m_defaultC4.SetWindowText(_T("C5 plays the default speed (Otherwise, C4 does it)"));
 			}
-
-			SetWindowText(machine._editName);
+			CString bla(machine._editName);
+			SetWindowText(bla);
 
 			m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 			m_polyslider.SetPos(machine._numVoices);
@@ -98,9 +101,9 @@ namespace psycle { namespace host {
 			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 			if (nmcd.dwDrawStage == CDDS_POSTPAINT)
 			{
-				char buffer[8];
-				sprintf(buffer, "%d", machine._numVoices);
-				m_polylabel.SetWindowText(buffer);
+				CString buf;
+				buf.Format(_T("%d"), machine._numVoices);
+				m_polylabel.SetWindowText(buf);
 				*pResult = CDRF_DODEFAULT;
 			}
 			else if (nmcd.dwDrawStage == CDDS_PREPAINT ){
@@ -119,6 +122,10 @@ namespace psycle { namespace host {
 		void CGearTracker::OnDefaultC4() 
 		{
 			machine.DefaultC4(m_defaultC4.GetCheck());
+		}
+		void CGearTracker::OnLinearSlide() 
+		{
+			machine.LinearSlide(m_linearSlide.GetCheck());
 		}
 		void CGearTracker::OnCancel() {
 			DestroyWindow();

@@ -91,7 +91,8 @@ namespace psycle
 			void NewLine();
 			void Work(int numsamples, helpers::dsp::resampler::work_func_type pResamplerWork, float* pSamplesL, float* pSamplesR);
 			int Tick(PatternEntry* pData, int channelNum, dsp::resampler& resampler, int baseC, std::vector<PatternEntry>&multicmdMem);
-			void PerformFx(dsp::resampler& resampler);
+			void PerformFxOld(dsp::resampler& resampler);
+			void PerformFxNew(dsp::resampler& resampler);
 			static inline int alteRand(int x)
 			{
 				return (x*rand())/32768;
@@ -125,7 +126,7 @@ namespace psycle
 		/// sampler.
 		class Sampler : public Machine
 		{
-			static const uint32_t SAMPLERVERSION = 0x00000001;
+			static const uint32_t SAMPLERVERSION = 0x00000002;
 			friend CGearTracker;
 		public:
 			Sampler(int index);
@@ -155,10 +156,17 @@ namespace psycle
 			bool isDefaultC4() const {
 				return baseC == notecommands::middleC;
 			}
+			void LinearSlide(bool correct) {
+				linearslide = correct;
+			}
+			bool isLinearSlide() {
+				return linearslide;
+			}
 
 		protected:
 			int GetFreeVoice() const;
 			int GetCurrentVoice(int track) const;
+			void EnablePerformFx();
 
 			static char* _psName;
 			unsigned char lastInstrument[MAX_TRACKS];
@@ -167,6 +175,7 @@ namespace psycle
 			psycle::helpers::dsp::cubic_resampler _resampler;
 			std::vector<PatternEntry> multicmdMem;
 			int baseC;
+			bool linearslide;
 		};
 
 

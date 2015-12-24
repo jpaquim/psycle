@@ -279,9 +279,9 @@ namespace psycle
 		{	
 			uint32_t size1,size2;
 			
-			CT2A _wave_name("");
-			riffFile.ReadStringA2T(_wave_name,32);
-			m_WaveName=_wave_name;
+			std::string wavename;
+			riffFile.ReadString(wavename);
+			m_WaveName=wavename;
 
 			riffFile.Read(m_WaveLength);
 			riffFile.Read(m_WaveGlobVolume);
@@ -380,9 +380,7 @@ namespace psycle
 				size2 = static_cast<uint32_t>(SoundSquash(m_pWaveDataR,&pData2,m_WaveLength));
 			}
 
-			CT2A _wave_name(m_WaveName.c_str());
-
-			riffFile.Write(_wave_name, std::strlen(_wave_name) + 1);
+			riffFile.WriteString(m_WaveName);
 
 			riffFile.Write(m_WaveLength);
 			riffFile.Write(m_WaveGlobVolume);

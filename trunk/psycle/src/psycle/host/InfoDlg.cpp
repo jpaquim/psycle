@@ -45,11 +45,11 @@ namespace psycle { namespace host {
 		{
 			CDialog::OnInitDialog();
 			m_machlist.InsertColumn(0,"Name",LVCFMT_LEFT,120,0);
-			m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,90,1);
-			m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
-			m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
-			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
-			m_machlist.InsertColumn(5,"Thread",LVCFMT_RIGHT,48,1);
+			m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,96,1);
+			m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,63,1);
+			m_machlist.InsertColumn(3,"Ins",LVCFMT_RIGHT,38,1);
+			m_machlist.InsertColumn(4,"Outs",LVCFMT_RIGHT,40,1);
+			m_machlist.InsertColumn(5,"%/Thread",LVCFMT_RIGHT,62,1);
 			m_cpu_perf.SetCheck(Global::player().measure_cpu_usage_? 1:0);
 			UpdateInfo();
 			InitTimer();
