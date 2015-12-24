@@ -207,12 +207,12 @@
 	  	FE1x 	Change Lines Per Beat. Resets Song Extraticks (FEEx)
 	  	FE2x	Set Bypass ( 0 off, else on).
 	  	FE3x	Set Mute (0 off, else on).
-	  	FEBx	Set Pattern Loop ( FEB0 set loop start, FEBx number of loops)
-	  	FEDx	Set Pattern Delay. ( x = number of lines+1 ). It is added upon song extraticks.
+	  	FEBx	Set Pattern Loop ( FEB0 set loop start, FEBx end loop and number of loops)
+	  	FEDx	Set Pattern Delay. ( x = number of lines+1 ). It is added to song extraticks.
 		FEEx    Set Song ExtraTicks per line ( x = number of ticks to add to each line. )
                 Used in conjunction with LPB (FExx), can emulate the speed command of classic trackers.
 				(I.e. FE06 FEE1 =  speed 5 )
-	  	FEFx	Set Pattern Fine delay in ticks ( lines = 1+((ticks*linesperbeat)/ticksperbeat) ).  It is added upon song extraticks.
+	  	FEFx	Set Pattern Fine delay in ticks ( lines = 1+((ticks*linesperbeat)/ticksperbeat) ).  It is added to song extraticks.
 	  	
 	  FDxx  -	Delay Trigger (xx/256 row duration) (works with noteoffs too)
 	  FCxx	-	Change Global/Wire Volume.
@@ -235,6 +235,7 @@
 			--- .. 05 F880 Sets the panning of Generator 5 to 80 (Middle) .
 	  F3xx 	-	Jump to sequence order number xx (in hex).
 	  F2xx	-	Jump to next sequence order, and to the line xx (in hex).
+	  F0xy  -   Arpeggio (x - offset of second note, y offset of third note).
 
 	* VST Commands:
 	
@@ -258,16 +259,26 @@
 	  		
 	  		
 	* Sampler Commands:
-
-	  01xx	-	Portamento Up  	value FA = increases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 5ms at 44Khz). 
+		If Linear slide mode (linear and BPM aware):
+	  01xx	-	Portamento Up  	value 1 = increase one semitone each beat.
 				Command does not have memory (no special meaning for 00)
-	  02xx	-	Portamento Down  value FA = decreases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 5ms at 44Khz).
+	  02xx	-	Portamento Down  value 1 = decrease one semitone each beat.
+				Command does not have memory (no special meaning for 00)
+	  03xx	-	Portamento to note.  value FA = increases or decreases the speed in one semitone each beat, until the corresponding note speed is reached.
+				Command does not have memory (no special meaning for 00)
+		If Old slide mode ( non linear, time based (not BPM aware) and slightly imprecise):
+	  01xx	-	Portamento Up  	value FA = increases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. ~5ms at 44Khz). 
+				Command does not have memory (no special meaning for 00)
+	  02xx	-	Portamento Down  value FA = decreases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. ~5ms at 44Khz).
 				Command does not have memory (no special meaning for 00)
 	  03xx	-	Portamento to note.  value FA = increases or decreases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 
-				5ms at 44Khz), until the corresponding note speed is reached. Command does not have memory (no special meaning for 00)
-				All three portamento commands aren't really song samplerate aware, since at higher song samplerates, it will slide faster.
+				~5ms at 44Khz), until the corresponding note speed is reached.
+				Command does not have memory (no special meaning for 00)
+				All three portamento commands aren't fully song samplerate aware. Higher song samplerates, will slide slightly differently.
+				Even, from one line to another, there might be small variations. (sliding the same note several times does not slide the same amount).
+
 	  08xx	-	Set panning position  0 full left, FF full right. 80 center
-	  09xx	-	Set sample offset  x = 1/256th of the sample length.
+	  09xx	-	Set sample offset  xx = 1/256th of the sample length.
 	  0Cxx	-	Set volume  0 = silent. FF = max volume.
 				If using virtual instruments, the aux column can be used to set volume command.
 	  0ECx	-	Note cut in x frames  (fixed 6 frames per line)

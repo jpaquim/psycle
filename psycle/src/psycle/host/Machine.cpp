@@ -6,13 +6,13 @@
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way
 #include "Song.hpp"
+// Included due to the plugin caching, which should be separated from the dialog.
 #include "machineloader.hpp"
 
 #if !defined WINAMP_PLUGIN
 	// This one is included to update the buffers that wiredlg uses for display. 
 	// Find a way to manage these buffers without its inclusion
 	#include "WireDlg.hpp"
-	// Included due to the plugin caching, which should be separated from the dialog.
 #endif //!defined WINAMP_PLUGIN
 
 // The inclusion of the following headers is needed because of a bad design.
@@ -872,7 +872,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					double bla = std::sqrt(std::max(rms.AccumLeft,rms.AccumRight)*(1.0/GetAudioRange())  / (double)rms.count);
 					if( bla < 0.00024 )
 					{
-						rms.count=0;
+						rms.count=512;
 						rms.AccumLeft=0.;
 						rms.AccumRight=0.;
 						rms.previousLeft=0.;
@@ -891,7 +891,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
 			if (_volumeDisplay>0 )--_volumeDisplay;
-			if ( Global::configuration().UsesAutoStopMachines() )
+			if ( autoStopMachine )
 			{
 				if (_volumeCounter < 8.0f)	{
 					_volumeCounter = 0.0f;
@@ -980,6 +980,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					{
 						std::string sPath;
 						int shellIdx=0;
+						pMachine=0;
 						if(!Global::machineload().lookupDllName(dllName,sPath,MACH_LADSPA,shellIdx)) 
 						{
 							// Check Compatibility Table.

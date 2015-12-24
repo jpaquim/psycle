@@ -201,9 +201,10 @@ namespace psycle { namespace host {
 				mainFrame->ChangeGen(tmac);
 				break;
 			case 2:
-				//fallthrough
+				mainFrame->ChangeIns(tmac);
+				break;
 			case 3:
-				mainFrame->ChangeAux(tmac);
+				mainFrame->ChangeWave(tmac);
 				break;
 			}
 		}

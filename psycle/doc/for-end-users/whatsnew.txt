@@ -58,6 +58,7 @@ v1.12.1 beta
   Instruments now load to both sampler and sampulse instrument list. 
   Envelopes are copied to sampler ADSR envelopes. As a side feature of this change, the "ADSR" button in Sampulse Envelopes does a better conversion to ADSR now.
   Samples can be loaded as sampulse intruments, SVX instruments (multioctave SVXs) now load as instruments (with the correct note mapping).
+* Sampler: There is a new option (enabled by default) in the machine configuration to select a better slide algorithm. See tweaking.txt for more information.
 ! Beats per minute (BPM) could be off a bit in version 1.12. It was caused by the new code that works in ticks per beat (like old trackers).
   A place with an unnecessary rounding has been corrected, and in the meantime, the synchronization code for VSTs has been considerably improved.
   Now, seeking and playing generate the same number of samples counted (there was a bug before), and the ppq and barpos position is based on

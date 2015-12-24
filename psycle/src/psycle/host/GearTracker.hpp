@@ -20,6 +20,7 @@ namespace host {
 			CSliderCtrl	m_polyslider;
 			CStatic	m_polylabel;
 			CButton m_defaultC4;
+			CButton m_linearSlide;
 			Sampler& machine;
 			CGearTracker** windowVar_;
 		// Overrides
@@ -36,6 +37,7 @@ namespace host {
 			afx_msg void OnCustomdrawNumVoices(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnSelchangeCombo1();
 			afx_msg void OnDefaultC4();
+			afx_msg void OnLinearSlide();
 		};
 
 	}   // namespace

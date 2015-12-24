@@ -3022,16 +3022,8 @@ namespace psycle
 
 			// save our file
 			PsycleGlobal::inputHandler().AddMacViewUndo();
-			///\todo: Wrong song dir causes "machine cloning failed"! 
-			///\todo: the process should be changed and save the data in memory.
-			CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
-			filepath += "\\psycle.tmp";
-			::DeleteFile(filepath);
-			OldPsyFile file;
-			if (!file.Create(static_cast<LPCTSTR>(filepath), true))
-			{
-				return false;
-			}
+			MemoryFile file;
+			file.OpenMem();
 
 			file.Write("MACD",4);
 			UINT version = CURRENT_FILE_VERSION_MACD;
@@ -3049,15 +3041,11 @@ namespace psycle
 			size = (UINT)(pos2-pos-sizeof(size));
 			file.Seek(pos);
 			file.Write(&size,sizeof(size));
-			file.Close();
+
 
 			// now load it
+			file.Seek(0);
 
-			if (!file.Open(static_cast<LPCTSTR>(filepath)))
-			{
-				DeleteFile(filepath);
-				return false;
-			}
 			char Header[5];
 			file.Read(&Header, 4);
 			Header[4] = 0;
@@ -3069,7 +3057,6 @@ namespace psycle
 				{
 					// there is an error, this file is newer than this build of psycle
 					file.Close();
-					DeleteFile(filepath);
 					return false;
 				}
 				else
@@ -3085,7 +3072,6 @@ namespace psycle
 					else
 					{
 						file.Close();
-						DeleteFile(filepath);
 						return false;
 					}
 				}
@@ -3093,11 +3079,9 @@ namespace psycle
 			else
 			{
 				file.Close();
-				DeleteFile(filepath);
 				return false;
 			}
 			file.Close();
-			DeleteFile(filepath);
 
 			// randomize the dst's position
 
@@ -3189,14 +3173,8 @@ namespace psycle
 
 			// save our file
 
-			CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
-			filepath += "\\psycle.tmp";
-			::DeleteFile(filepath);
-			RiffFile file;
-			if (!file.Create(static_cast<LPCTSTR>(filepath), true))
-			{
-				return false;
-			}
+			MemoryFile file;
+			file.OpenMem();
 
 			size_t pos = file.WriteHeader("INSD",CURRENT_FILE_VERSION_INSD);
 			uint32_t dummyindex = dst; // index
@@ -3211,53 +3189,49 @@ namespace psycle
 
 				file.UpdateSize(pos);
 			}
-			file.Close();
 
 			// now load it
+			file.Seek(0);
 
 			bool result=false;
-			if (file.Open(static_cast<LPCTSTR>(filepath)))
+			char Header[5];
+			uint32_t version=0;
+			uint32_t size;
+			file.Read(&Header, 4);
+			Header[4] = 0;
+			if (strcmp(Header,"INSD")==0)
 			{
-				char Header[5];
-				uint32_t version=0;
-				uint32_t size;
-				file.Read(&Header, 4);
-				Header[4] = 0;
-				if (strcmp(Header,"INSD")==0)
+				file.Read(&version,sizeof(version));
+				file.Read(&size,sizeof(size));
+				if (version <= CURRENT_FILE_VERSION_INSD)
 				{
-					file.Read(&version,sizeof(version));
-					file.Read(&size,sizeof(size));
-					if (version <= CURRENT_FILE_VERSION_INSD)
-					{
-						file.Read(dummyindex);
-						// we had better load it
-						_pInstrument[dst]->LoadFileChunk(&file,version, samples, dst);
-						if (!file.Eof()) {
-							file.Read(&Header, 4);
-							Header[4] = 0;
-							if (strcmp(Header,"SMSB")==0)
+					file.Read(dummyindex);
+					// we had better load it
+					_pInstrument[dst]->LoadFileChunk(&file,version, samples, dst);
+					if (!file.Eof()) {
+						file.Read(&Header, 4);
+						Header[4] = 0;
+						if (strcmp(Header,"SMSB")==0)
+						{
+							file.Read(&version,sizeof(version));
+							file.Read(&size,sizeof(size));
+							if (version <= CURRENT_FILE_VERSION_SMSB)
 							{
-								file.Read(&version,sizeof(version));
-								file.Read(&size,sizeof(size));
-								if (version <= CURRENT_FILE_VERSION_SMSB)
-								{
-									file.Read(dummyindex);
-									if ( !samples.Exists(dst) ) {
-										XMInstrument::WaveData<> wavetmp;
-										samples.SetSample(wavetmp,dst);
-									}
-									XMInstrument::WaveData<> & wave = samples.get(dst);
-									wave.Init();
-									wave.Load(file, version&0xFFFF);
+								file.Read(dummyindex);
+								if ( !samples.Exists(dst) ) {
+									XMInstrument::WaveData<> wavetmp;
+									samples.SetSample(wavetmp,dst);
 								}
+								XMInstrument::WaveData<> & wave = samples.get(dst);
+								wave.Init();
+								wave.Load(file, version&0xFFFF);
 							}
 						}
-						result=true;
 					}
+					result=true;
 				}
-				file.Close();
 			}
-			DeleteFile(filepath);
+			file.Close();
 			return result;
 #endif //!defined WINAMP_PLUGIN
 		}

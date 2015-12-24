@@ -77,6 +77,7 @@ namespace psycle
 			InitializeSamplesVector();
 			
 			baseC = notecommands::middleC;
+			linearslide=true;
 			_resampler.quality(helpers::dsp::resampler::quality::spline);
 			for (int i = 0; i < MAX_TRACKS; i++)
 			{
@@ -234,7 +235,15 @@ namespace psycle
 			for (std::vector<PatternEntry>::const_iterator ite = multicmdMem.begin(); ite != multicmdMem.end(); ++ite) {
 				if(ite->_inst == channel) {
 					if (ite->_cmd == SAMPLER_CMD_PORTA2NOTE && data._note < notecommands::release && idx != -1) {
+						if (isLinearSlide()) {
+							EnablePerformFx();
+						}
 						doporta=true;
+					}
+					else if (ite->_cmd == SAMPLER_CMD_PORTADOWN || ite->_cmd == SAMPLER_CMD_PORTAUP){
+						if (isLinearSlide()) {
+							EnablePerformFx();
+						}
 					}
 				}
 			}
@@ -474,22 +483,41 @@ namespace psycle
 
 		}
 
+		void Sampler::EnablePerformFx()
+		{
+			for (int i=0; i < Global::song().SONGTRACKS; i++)
+			{
+				if (TriggerDelay[i]._cmd == 0)
+				{
+					TriggerDelayCounter[i] = 0;
+					TriggerDelay[i]._cmd = 0xEF;
+					TriggerDelay[i]._parameter = Global::song().TicksPerBeat()/Global::song().LinesPerBeat();
+					break;
+				}
+			}
+		}
+
 		int Sampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 		{
 			if (!_mute)
 			{
 				Standby(false);
-				for (int voice=0; voice<_numVoices; voice++)
-				{
-					// A correct implementation needs to take numsamples and player samplerate into account.
-					// This will not be fixed to leave sampler compatible with old songs.
-					_voices[voice].PerformFx(_resampler);
+				if (!linearslide) {
+					for (int voice=0; voice<_numVoices; voice++)
+					{
+						// A correct implementation needs to take numsamples and player samplerate into account.
+						// This will not be fixed to keep sampler compatible with old songs.
+						_voices[voice].PerformFxOld(_resampler);
+					}
 				}
+				//remaining samples to work
 				int ns = numSamples;
+				//sample pointer offset.
 				int us = 0;
 				while (ns)
 				{
 					int nextevent = ns+1;
+					//get the nearest upcoming event.
 					for (int i=0; i < Global::song().SONGTRACKS; i++)
 					{
 						if (TriggerDelay[i]._cmd)
@@ -500,65 +528,57 @@ namespace psycle
 							}
 						}
 					}
+					// if nextevent doesn't happen on this work call
 					if (nextevent > ns)
 					{
+						//update nextevent times.
 						for (int i=0; i < Global::song().SONGTRACKS; i++)
 						{
-							// come back to this
 							if (TriggerDelay[i]._cmd)
 							{
 								TriggerDelayCounter[i] -= ns;
 							}
 						}
+						//and do work.
 						for (int voice=0; voice<_numVoices; voice++)
 						{
 							_voices[voice].Work(ns, _resampler.work, samplesV[0]+us,samplesV[1]+us);
 						}
 						ns = 0;
 					}
+					// if nextevent happens on this work call
 					else
 					{
+						//if it hasn't come yet
 						if (nextevent)
 						{
 							ns -= nextevent;
+							//do work.
 							for (int voice=0; voice<_numVoices; voice++)
 							{
 								_voices[voice].Work(nextevent, _resampler.work, samplesV[0]+us,samplesV[1]+us);
 							}
 							us += nextevent;
 						}
+						//and get nextevent
 						for (int i=0; i < Global::song().SONGTRACKS; i++)
 						{
-							// come back to this
-							if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+							// if it is this event
+							if (TriggerDelayCounter[i] == nextevent)
 							{
-								if (TriggerDelayCounter[i] == nextevent)
+								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
 									TriggerDelay[i]._cmd = 0;
 								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-							else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
+								else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
 									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-							else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
+								else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
@@ -577,10 +597,25 @@ namespace psycle
 										}
 									}
 								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
+								//Small hack to have a tracker tick.
+								else if (TriggerDelay[i]._cmd == 0xEF) {
+									TriggerDelay[i]._parameter--;
+									if (TriggerDelay[i]._parameter > 0) {
+										TriggerDelayCounter[i] = Global::player().SamplesPerTick();
+									}
+									else {
+										TriggerDelay[i]._cmd = 0;
+									}
+									for (int voice=0; voice<_numVoices; voice++)
+									{
+										_voices[voice].PerformFxNew(_resampler);
+									}
 								}
+							}
+							//update nextevent times.
+							else
+							{
+								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
 					}
@@ -635,6 +670,10 @@ namespace psycle
 						_triggerNoteDelay=0;
 					}
 					_envelope._stage = ENV_ATTACK;
+				}
+				else if (_envelope._stage == ENV_OFF)
+				{
+					return;
 				}
 			}
 			else if (_envelope._stage == ENV_OFF)
@@ -726,7 +765,7 @@ namespace psycle
 			_triggerNoteOff = 0;
 		}
 
-		void Voice::PerformFx(dsp::resampler& resampler)
+		void Voice::PerformFxOld(dsp::resampler& resampler)
 		{
 			// 4294967 stands for (2^30/250), meaning that
 			//value 250 = (inc)decreases the speed in 1/4th of the original (wave) speed each PerformFx call.
@@ -748,8 +787,42 @@ namespace psycle
 				break;
 				// 0x03 : Porta to note
 				case SAMPLER_CMD_PORTA2NOTE:
+					//effVal is multiplied by -1 in Tick if it needs to slide down.
 					shift=static_cast<int64_t>(effVal)*4294967ll * static_cast<float>(controller.wave->WaveSampleRate())/Global::player().SampleRate();
 					controller._speed+=shift;
+					if (( effVal < 0 && controller._speed < _effPortaSpeed ) 
+						|| ( effVal > 0 && controller._speed > _effPortaSpeed )) {
+						controller._speed = _effPortaSpeed;
+						effCmd = SAMPLER_CMD_NONE;
+					}
+					resampler.UpdateSpeed(controller.resampler_data,controller._speed);
+				break;
+
+				default:
+				break;
+			}
+		}
+		void Voice::PerformFxNew(dsp::resampler& resampler)
+		{
+			//value 1 = (inc)decreases the speed in one seminote each beat.
+			double factor = 1.0/(12.0*Global::song().TicksPerBeat());
+			switch(effCmd)
+			{
+				// 0x01 : Pitch Up
+				case SAMPLER_CMD_PORTAUP:
+					controller._speed*=pow(2.0,effVal*factor);
+					resampler.UpdateSpeed(controller.resampler_data,controller._speed);
+				break;
+				// 0x02 : Pitch Down
+				case SAMPLER_CMD_PORTADOWN:
+					controller._speed*=pow(2.0,-effVal*factor);
+					if ( controller._speed < 0 ) controller._speed=0;
+					resampler.UpdateSpeed(controller.resampler_data,controller._speed);
+				break;
+				// 0x03 : Porta to note
+				case SAMPLER_CMD_PORTA2NOTE:
+					//effVal is multiplied by -1 in Tick() if it needs to slide down.
+					controller._speed*=pow(2.0,effVal*factor);
 					if (( effVal < 0 && controller._speed < _effPortaSpeed ) 
 						|| ( effVal > 0 && controller._speed > _effPortaSpeed )) {
 						controller._speed = _effPortaSpeed;
@@ -787,6 +860,7 @@ namespace psycle
 		{
 			//Old version had default C4 as false
 			DefaultC4(false);
+			LinearSlide(false);
 			uint32_t size=0;
 			pFile->Read(&size,sizeof(size));
 			if (size)
@@ -796,7 +870,6 @@ namespace psycle
 				pFile->Read(&temp, sizeof(temp)); // numSubtracks
 				_numVoices=temp;
 				pFile->Read(&temp, sizeof(temp)); // quality
-
 				switch (temp)
 				{
 					case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
@@ -805,6 +878,7 @@ namespace psycle
 					case 1:
 					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}
+
 				if(size > 3*sizeof(uint32_t))
 				{
 					uint32_t internalversion;
@@ -814,6 +888,11 @@ namespace psycle
 						pFile->Read(&defaultC4, sizeof(bool)); // correct A4 frequency.
 						DefaultC4(defaultC4);
 					}
+					if (internalversion >= 2) {
+						bool slidemode;
+						pFile->Read(&slidemode, sizeof(bool)); // correct slide.
+						LinearSlide(slidemode);
+					}
 				}
 			}
 			return TRUE;
@@ -822,7 +901,7 @@ namespace psycle
 		void Sampler::SaveSpecificChunk(RiffFile* pFile) 
 		{
 			uint32_t temp;
-			uint32_t size = 3*sizeof(temp) + 1*sizeof(bool);
+			uint32_t size = 3*sizeof(temp) + 2*sizeof(bool);
 			pFile->Write(&size,sizeof(size));
 			temp = _numVoices;
 			pFile->Write(&temp, sizeof(temp)); // numSubtracks
@@ -839,6 +918,7 @@ namespace psycle
 			pFile->Write(SAMPLERVERSION);
 			bool defaultC4 = isDefaultC4();
 			pFile->Write(&defaultC4, sizeof(bool)); // correct A4
+			pFile->Write(&linearslide, sizeof(bool)); // correct slide
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -851,6 +931,7 @@ namespace psycle
 
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
+			linearslide=false;
 
 			legacyWires.resize(MAX_CONNECTIONS);
 			for(int i = 0; i < MAX_CONNECTIONS; i++) {
