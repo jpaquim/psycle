@@ -29,7 +29,8 @@
   "$(TopSrcDir)/psycle-audiodrivers/src";
   "$(TopSrcDir)/psycle-core/src";
   "$(TopSrcDir)/psycle-plugins/src";
-  "$(TopSrcDir)/psycle/src";$(IncludePath)</IncludePath>
+  "$(TopSrcDir)/psycle/src";
+  "$(TopSrcDir)/external-packages/scintilla/include";$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
