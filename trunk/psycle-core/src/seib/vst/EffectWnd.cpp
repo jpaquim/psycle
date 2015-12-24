@@ -29,22 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace seib { namespace vst {
 
-/********************************************************************************/
-// CEffectGui
-
-bool CEffectGui::GetViewSize(ERect &rcClient, ERect *pRect) {
-	if(!pRect) pEffect->EditGetRect(&pRect);
-	if(!pRect) return false;
-	rcClient.left = rcClient.top = 0;
-	rcClient.right = pRect->right - pRect->left;
-	rcClient.bottom = pRect->bottom - pRect->top;
-	return true;
-}
-
-
-/********************************************************************************/
-// CEffectWnd
-
 VkeysT CEffectWnd::VKeys[] = {
 	{ VK_BACK,      VKEY_BACK      },
 	{ VK_TAB,       VKEY_TAB       },
@@ -109,26 +93,65 @@ VkeysT CEffectWnd::VKeys[] = {
 	#endif
 };
 
-void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode & keyCode) {
-	if(nChar >= 'A' && nChar <= 'Z')
+
+/*****************************************************************************/
+/* GetWindowSize : calculates the effect window's size                       */
+/*****************************************************************************/
+
+bool CEffectGui::GetViewSize(ERect &rcClient, ERect *pRect) {
+	if(!pRect) {
+		//The return of this method is not reliable (example: oatmeal). That's why i just check the rect.
+		pEffect->EditGetRect(&pRect);
+		if(!pRect) return false;
+	}
+
+	rcClient.left = rcClient.top = 0;
+	rcClient.right = pRect->right - pRect->left;
+	rcClient.bottom = pRect->bottom - pRect->top;
+	return true;
+}
+
+/*===========================================================================*/
+/* CEffectWnd class members                                                  */
+/*===========================================================================*/
+
+CEffectWnd::CEffectWnd(CEffect* effect)
+: pEffect(effect)
+{
+}
+CEffectWnd::~CEffectWnd()
+{
+	///?
+}
+
+/*****************************************************************************/
+/* MakeVstKeyCode : converts from Windows to VST                             */
+/*****************************************************************************/
+
+void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode &keyCode) {
+	if (nChar >= 'A' && nChar <= 'Z')
 		keyCode.character = nChar + ('a' - 'A');
 	else
 		keyCode.character = nChar;
 	keyCode.virt = 0;
-	for(int i = 0; i < sizeof VKeys / sizeof *VKeys; ++i) {
-		if(nChar == VKeys[i].vkWin) {
+	for (int i = 0; i < sizeof(VKeys)/sizeof(*VKeys); ++i) {
+		if (nChar == VKeys[i].vkWin) {
 			keyCode.virt = VKeys[i].vstVirt;
 			break;
 		}
 		keyCode.modifier = 0;
-		if(GetKeyState(VK_SHIFT) & 0x8000)
+		if (GetKeyState(VK_SHIFT) & 0x8000)
 			keyCode.modifier |= MODIFIER_SHIFT;
-		if(GetKeyState(VK_CONTROL) & 0x8000)
+		if (GetKeyState(VK_CONTROL) & 0x8000)
 			keyCode.modifier |= MODIFIER_CONTROL;
-		if(GetKeyState(VK_MENU) & 0x8000)
+		if (GetKeyState(VK_MENU) & 0x8000)
 			keyCode.modifier |= MODIFIER_ALTERNATE;
 	}
 }
+
+/*****************************************************************************/
+/* SaveBank saves bank to file                                               */
+/*****************************************************************************/
 
 bool CEffectWnd::SaveBank(std::string const & sName) {
 	pEffect->SetChunkFile(sName.c_str());

@@ -675,6 +675,22 @@
 						RelativePath="src\seib\vst\EffectWnd.hpp"
 						>
 					</File>
+					<File
+						RelativePath="src\seib\vst\CVSTPreset.cpp"
+						>
+					</File>
+					<File
+						RelativePath="src\seib\vst\CVSTPreset.hpp"
+						>
+					</File>
+					<File
+						RelativePath="src\seib\vst\JBridgeEnabler.cpp"
+						>
+					</File>
+					<File
+						RelativePath="src\seib\vst\JBridgeEnabler.hpp"
+						>
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>

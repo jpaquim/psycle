@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 // steinberg's headers are unable to correctly detect the platform,
 // so we need to detect the platform ourselves,
-// and declare steinberg's nonstandard/specific options: WIN32/MAC
+// and declare steinberg's unstandard/specific options: WIN32/MAC
 #if defined DIVERSALIS__OS__MICROSOFT
 	#if !defined WIN32
 		#define WIN32 // steinberg's build option
@@ -47,12 +47,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vst2.x/aeffectx.h>
 #include <vst2.x/vstfxstore.h>
 
-namespace seib {
-	namespace vst {
+
+namespace seib { namespace vst {
+
 		/*****************************************************************************/
 		/* CFxBase : base class for FX Bank / Program Files                          */
 		/*****************************************************************************/
-		class CFxBase
+		class PSYCLE__CORE__DECL CFxBase
 		{
 		protected:
 			CFxBase();
@@ -108,7 +109,7 @@ namespace seib {
 		/*****************************************************************************/
 		/* CFxProgram : class for an .fxp (Program) file                             */
 		/*****************************************************************************/
-		class CFxProgram : public CFxBase
+		class PSYCLE__CORE__DECL CFxProgram : public CFxBase
 		{
 		public:
 			CFxProgram(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
@@ -124,7 +125,7 @@ namespace seib {
 			CFxProgram & operator=(CFxProgram const &org) { FreeMemory(); return DoCopy(org); }
 
 			// access functions
-			const char * GetProgramName() const	{ return prgName;	}
+			const char * GetProgramName() const { return prgName; }
 			void SetProgramName(const char *name = "")
 			{
 				//leave last char for null.
@@ -170,7 +171,7 @@ namespace seib {
 		/* CFxBank : class for an .fxb (Bank) file                                   */
 		/*****************************************************************************/
 
-		class CFxBank : public CFxBase
+		class PSYCLE__CORE__DECL CFxBank : public CFxBase
 		{
 		public:
 			CFxBank(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
@@ -200,7 +201,7 @@ namespace seib {
 				else return programs[nProgNum];
 			}
 			void SetProgramIndex(VstInt32 nProgNum) { if (nProgNum < numPrograms ) currentProgram = nProgNum; }
-			VstInt32 GetProgramIndex() const { return currentProgram;	}
+			VstInt32 GetProgramIndex() const { return currentProgram; }
 			void ManuallyInitialized() { initialized = true; }
 			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pf); }
 
@@ -225,5 +226,4 @@ namespace seib {
 			void ProgramMode() { FreeMemory(); fxMagic = bankMagic; }
 
 		};
-	}
-}
+}}

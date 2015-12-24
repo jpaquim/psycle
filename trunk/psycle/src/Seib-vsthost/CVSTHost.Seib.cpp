@@ -28,10 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <psycle/host/detail/project.private.hpp>
 #include "CVSTHost.Seib.hpp"  
-
 #include "EffectWnd.hpp"
 
-#if defined _WIN64 || defined _WIN32
+#if defined DIVERSALIS__OS__MICROSOFT
 	#pragma warning(push)
 	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
 	#include <MMSystem.h>
@@ -57,7 +56,7 @@ namespace seib {
 		bool CVSTHost::usePsycleVstBridge = false;
 		VstTimeInfo CVSTHost::vstTimeInfo;
 
-		CVSTHost * CVSTHost::pHost = NULL;      /* pointer to the one and only host  */
+		CVSTHost * CVSTHost::pHost = NULL; // pointer to the one and only host (singleton)
 
 		namespace exceptions
 		{
@@ -110,7 +109,7 @@ namespace seib {
 						}
 					}
 				}
-				const std::string operation_description(VstInt32 code) throw()
+				std::string operation_description(VstInt32 code) throw()
 				{
 					std::ostringstream s; s << code << ": " << am_opcode_to_string(code);
 					return s.str();
@@ -171,6 +170,7 @@ namespace seib {
 			numElements=fxstore.GetNumParams();
 			memset(future,0,sizeof(future));
 		}
+
 		CPatchChunkInfo::CPatchChunkInfo(const CFxBank& fxstore)
 		{
 			version = 1;
@@ -179,6 +179,7 @@ namespace seib {
 			numElements=fxstore.GetNumPrograms();
 			memset(future,0,sizeof(future));
 		}
+
 
 		/*===========================================================================*/
 		/* CEffect class members                                                     */
@@ -193,7 +194,7 @@ namespace seib {
 		CEffect::CEffect(LoadedAEffect &loadstruct)
 			: aEffect(0)
 			, ploader(0)
-//			, sFileName(0)
+			//, sFileName(0)
 			, sDir(0)
 			, bEditOpen(false)
 			, bNeedIdle(false)
@@ -241,7 +242,7 @@ namespace seib {
 		{
 			try
 			{
-				if  (ploader)	Unload();
+				if (ploader) Unload();
 			}
 			catch(const std::runtime_error&)
 			{
@@ -260,7 +261,7 @@ namespace seib {
 			aEffect=loadstruct.aEffect;
 			ploader=loadstruct.pluginloader;
 
-		#if defined _WIN64 || defined _WIN32
+		#if defined DIVERSALIS__OS__MICROSOFT
 			char const * name = (char*)(loadstruct.pluginloader->sFileName);
 			char const * const p = strrchr(name, '\\');
 			if (p)
@@ -273,7 +274,7 @@ namespace seib {
 				}
 			}
 			else { sDir = new char[1]; ((char*)sDir)[0]='\0'; }
-		#elif defined __APPLE__
+		#elif defined DIVERSALIS__OS__APPLE
 			#error yet to be done
 		#else
 			#error yet to be done
@@ -359,8 +360,9 @@ namespace seib {
 			delete ploader;
 			ploader = NULL;
 
-		#if defined _WIN64 || defined _WIN32
-			if (sDir)                               /* reset directory            */
+		#if defined DIVERSALIS__OS__MICROSOFT
+			// reset directory
+			if (sDir)
 			{
 				delete[] sDir;	sDir = NULL;
 			}
@@ -379,7 +381,7 @@ namespace seib {
 		{
 			if (uniqueId() != fxstore.GetFxID())
 			{
-//				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
+				//MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
 			bool mainsstate = bMainsState;
@@ -388,14 +390,13 @@ namespace seib {
 			{
 				if (!ProgramIsChunk())
 				{
-//					MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!",
-//						"Load Error", MB_ICONERROR);
+					//MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!", "Load Error", MB_ICONERROR);
 					return false;
 				}
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadBank(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				SetProgram(fxstore.GetProgramIndex());
@@ -406,7 +407,7 @@ namespace seib {
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadBank(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				for (VstInt32 i = 0; i < fxstore.GetNumPrograms(); i++)
@@ -442,7 +443,7 @@ namespace seib {
 		{
 			if (uniqueId() != fxstore.GetFxID())
 			{
-//				MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
+				//MessageBox("Loaded bank has another ID!", "VST Preset Load Error", MB_ICONERROR);
 				return false;
 			}
 			bool mainsstate = bMainsState;
@@ -451,14 +452,13 @@ namespace seib {
 			{
 				if (!ProgramIsChunk())
 				{
-//					MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!",
-//						"Load Error", MB_ICONERROR);
+					//MessageBox("Loaded bank contains a formatless chunk, but the effect can't handle that!", "Load Error", MB_ICONERROR);
 					return false;
 				}
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadProgram(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the chunk info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				SetChunk(fxstore.GetChunk(), fxstore.GetChunkSize(),true);
@@ -468,7 +468,7 @@ namespace seib {
 				CPatchChunkInfo pinfo(fxstore);
 				if (BeginLoadProgram(&pinfo) == -1 )
 				{
-//					MessageBox("Plugin didn't accept the program info data", "VST Preset Load Error", MB_ICONERROR);
+					//MessageBox("Plugin didn't accept the program info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
 				BeginSetProgram();
@@ -862,7 +862,7 @@ namespace seib {
 				if(useJBridge && JBridge::IsBootStrapDll((HMODULE)loader->module)) 
 				{
 					delete loader;
-					loader = NULL;
+
 					std::ostringstream s; s
 						<< "This is a JBridge wrapper. Ignoring it. " << sName << std::endl;
 						throw psycle::host::exceptions::library_errors::loading_error(s.str());
@@ -913,7 +913,6 @@ namespace seib {
 				std::ostringstream s; s
 					<< "Couldn't open the library: " << sName << std::endl;
 				throw psycle::host::exceptions::library_errors::loading_error(s.str());
-
 			}
 			if (effect && (effect->magic != kEffectMagic))
 			{
@@ -960,7 +959,7 @@ namespace seib {
 
 			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
 			//ppqPos	(sample pos in 1ppq units)
-			if((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask & kVstClockValid))
+			if ((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask & kVstClockValid))
 			{
 				//Warning: all this assumes constant tempo.
 
@@ -978,9 +977,9 @@ namespace seib {
 				if(lMask & kVstClockValid)
 				{
 					//Should be "round" instead of cast+1, but this is good enough.
-					const double ppqclockpos = static_cast<VstInt32>(vstTimeInfo.ppqPos*24.0)+1;					// Get the next clock in 24ppqs
-					const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
-					vstTimeInfo.samplesToNextClock = sampleclockpos - vstTimeInfo.samplePos;									// get the difference.
+					const double nextclockpos = static_cast<VstInt32>(vstTimeInfo.ppqPos*24.0)+1;					// Get the next clock in 24ppqs
+					const double nextsampleclockpos = nextclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
+					vstTimeInfo.samplesToNextClock = nextsampleclockpos - vstTimeInfo.samplePos;								// get the difference.
 					vstTimeInfo.flags |= kVstClockValid;
 				}
 			}
@@ -996,13 +995,13 @@ namespace seib {
 				double dOffsetInSecond = seconds - floor(seconds);
 				vstTimeInfo.smpteOffset = (VstInt32)(dOffsetInSecond *
 					fSmpteDiv[vstTimeInfo.smpteFrameRate] *
-					80.L);
+					80.0L);
 				vstTimeInfo.flags |= kVstSmpteValid;
 			}
 			//nanoseconds (system time)
 			if(lMask & kVstNanosValid)
 			{
-			#if defined _WIN64 || defined _WIN32
+			#if defined DIVERSALIS__OS__MICROSOFT
 				vstTimeInfo.nanoSeconds = timeGetTime() * 1000000.0;
 				vstTimeInfo.flags |= kVstNanosValid;
 			#else
@@ -1041,6 +1040,21 @@ namespace seib {
 			vstTimeInfo.flags |= kVstTimeSigValid;
 			vstTimeInfo.flags |= kVstTransportChanged;
 		}
+		void CVSTHost::SetCycleActive(double cycleStart, double cycleEnd)
+		{
+			if (cycleEnd - cycleStart > 0.1) {
+				vstTimeInfo.cycleStartPos=cycleStart;
+				vstTimeInfo.cycleEndPos=cycleEnd; 
+				vstTimeInfo.flags |= kVstTransportCycleActive;
+				vstTimeInfo.flags |= kVstCyclePosValid;
+			}
+			else {
+				vstTimeInfo.flags &= ~kVstTransportCycleActive;
+				vstTimeInfo.flags &= ~kVstCyclePosValid;
+			}
+		}
+
+
 
 		/*****************************************************************************/
 		/* GetPreviousPlugIn : returns predecessor to this plugin                    */
@@ -1048,7 +1062,7 @@ namespace seib {
 		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)	 */
 		/* where it forgets about the index completely.								 */
 		/*****************************************************************************/
-		CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, VstInt32 pinIndex)
+		CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, VstInt32 pinIndex) const
 		{
 			/* What this function might have to do:
 			if (pinIndex == -1)
@@ -1067,7 +1081,7 @@ namespace seib {
 		/* where it forgets about the index completely.								 */
 		/*****************************************************************************/
 
-		CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, VstInt32 pinIndex)
+		CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, VstInt32 pinIndex) const
 		{
 			/* What this function might have to do:
 			if (pinIndex == -1)
@@ -1078,11 +1092,12 @@ namespace seib {
 			*/
 			return 0;
 		}
+
 		/*****************************************************************************/
 		/* OnCanDo : returns whether the host can do a specific action               */
 		/*****************************************************************************/
 
-		bool CVSTHost::OnCanDo(CEffect &pEffect, const char *ptr)
+		bool CVSTHost::OnCanDo(CEffect &pEffect, const char *ptr) const
 		{
 			using namespace HostCanDos;
 			// For the host, according to audioeffectx.cpp , "!= 0 -> true", so there isn't "-1 : can't do".
@@ -1110,7 +1125,7 @@ namespace seib {
 
 				)
 				return true;
-			return false;                           /* per default, no.                  */
+			return false; // by default, no.
 		}
 
 
@@ -1199,7 +1214,7 @@ namespace seib {
 				if ( !pEffect ) 
 				{
 					char name[5]={0};
-					memcpy(name,&(effect->uniqueID),4);
+					memcpy(name, &(effect->uniqueID), 4);
 					name[4]='\0';
 
 					std::stringstream s; s
@@ -1315,17 +1330,17 @@ namespace seib {
 						CEffect* effect = pHost->GetPreviousPlugIn(*pEffect,index);
 						if (effect) result = reinterpret_cast<VstIntPtr>(effect->GetAEffect());
 						else result=NULL;
+						if (fakeeffect )delete pEffect;
+						return result;
 					}
-					if (fakeeffect )delete pEffect;
-					return result;
 				case audioMasterGetNextPlug :
 					{
 						CEffect* effect = pHost->GetNextPlugIn(*pEffect,index);
 						if (effect) result = reinterpret_cast<VstIntPtr>(effect->GetAEffect());
 						else result=NULL;
+						if (fakeeffect )delete pEffect;
+						return result;
 					}
-					if (fakeeffect )delete pEffect;
-					return result;
 				case audioMasterWillReplaceOrAccumulate :
 					result = pHost->OnWillProcessReplacing(*pEffect);
 					if (fakeeffect )delete pEffect;
