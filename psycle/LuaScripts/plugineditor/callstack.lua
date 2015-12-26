@@ -12,10 +12,10 @@ local style = require("psycle.ui.canvas.itemstyle")
 
 local callstack = group:new()
 
-local rowstyle = style:new():setalign(style.ALLEFT + style.ALTOP + style.ALBOTTOM)
+local rowstyle = style:new():setalign(style.ALLEFT)
                             :setmargin(0, 0, 2, 0)
-local colstyle = style:new():setalign(style.ALTOP + style.ALLEFT + style.ALRIGHT)
-                            :setmargin(0, 0, 0, 2)  
+local colstyle = style:new():setalign(style.ALTOP)
+                            :setmargin(0, 0, 0, 1)  
 
 function callstack:new(parent, listener)
   local c = group:new(parent)  
@@ -47,7 +47,7 @@ end
 function onrowclick(self)
   self.that.listener_:oncallstackclick(self.info) 
   local index = self:parent():itemindex(self)
-  self.that:setdepth(index-2)  
+  self.that:setdepth(index-1)  
 end
 
 function callstack:add(info)

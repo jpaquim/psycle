@@ -22,6 +22,7 @@
       <Filter>stk</Filter>
     </ClCompile>
     <ClCompile Include="..\src\psycle\plugins\stk\stk.reverbs.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\OnePole.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Delay.h">
@@ -45,5 +46,6 @@
     <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Stk.h">
       <Filter>stk</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\OnePole.h" />
   </ItemGroup>
 </Project>

@@ -7,47 +7,40 @@
 
 
 local group = require("psycle.ui.canvas.group")
+local style = require("psycle.ui.canvas.itemstyle")
 
 local toolbar = group:new()
 
 function toolbar:new(parent)
   local c = group:new(parent)  
   setmetatable(c, self)
-  self.__index = self  
+  self.__index = self 
   c:init()
   return c
 end
 
-function toolbar:init(x)
-
-end
-
-function toolbar:init() 
-  self.iconw = 40 
-  self.ident = 5
-  self.xp = 0
+function toolbar:init()
   self.icontable = {}
+  self:style():setmargin(4, 4, 4, 4)
 end
 
 function toolbar:add(icon)
-  group.add(self, icon:setpos(self.xp, 0))	
-  self.xp = self.xp + icon:width() + self.ident
+  icon:settoolbar(self)
+  icon:style():setalign(style.ALLEFT):setmargin(0, 0, 5, 0)
+  group.add(self, icon)	
 end
 
 function toolbar:seticons(icontable)
-  self.icontable = icontable  
-  for i=1, #icontable do
-    local icon = icontable[i]    
-	  icon:settoolbar(self)
-    group.add(self, icon:setpos(self.xp, 0))	
-	  self.xp = self.xp + icon:width() + self.ident
+  for i=1, #icontable do    
+    self:add(icontable[i])
   end
   return self
 end
 
 function toolbar:onnotify(sender)  
-  for i=1, #self.icontable do
-    local icon = self.icontable[i]
+  local items = self:items()
+  for i=1, #items do
+    local icon = items[i]
 	  if icon.istoggle_ and icon ~= sender then
 	    icon:seton(false)
 	  end

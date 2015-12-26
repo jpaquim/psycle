@@ -11,6 +11,7 @@ machine = require("psycle.machine"):new()
 
 local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
+local sysmetrics = require("psycle.ui.systemmetrics")
 
 -- plugin info
 function machine:info()
@@ -37,6 +38,10 @@ end
 function machine:createframe()  
   self.frame = frame:new():setcanvas(self.maincanvas)  
   self.frame:settitle("Psycle Plugineditor")  
+  local w, h = sysmetrics.screensize()
+  local fw = w * 0.9
+  local fh = h * 0.9
+  self.frame:setpos((w-fw)/2, (h-fh)/2, fw, fh)
   local that = self
   function self.frame:onclose(ev) 		       
     that:exit()

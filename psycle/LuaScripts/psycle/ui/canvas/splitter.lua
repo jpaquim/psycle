@@ -27,16 +27,16 @@ function splitter:init(orientation)
   self:setcolor(0x404040)
   self.orientation = orientation
   if orientation == splitter.HORZ then  
-    self:style():setalign(style.ALBOTTOM + style.ALLEFT + style.ALRIGHT)
+    self:style():setalign(style.ALBOTTOM)
     self:setheight(5)
   elseif orientation == splitter.VERT then
-    self:style():setalign(style.ALLEFT + style.ALTOP + style.ALBOTTOM)                    
+    self:style():setalign(style.ALLEFT)                    
     self:setwidth(5)
   end
 end
 
 function splitter:onmousedown(e)
-  self:canvas():mousecapture()
+  self:canvas():mousecapture()  
   self.dosplit_ = true
   self.dragpos = -1
   self.par = self:parent() 
@@ -49,24 +49,23 @@ function splitter:onmousedown(e)
     self.itemclientpos = y + self.item:height()
   else
     self.itemclientpos = x
-  end
+  end  
 end  
 
-function splitter:onmousemove(e)         
-  if self.dosplit_ then
+function splitter:onmousemove(e)      
+  if self.dosplit_ then 
     if self.orientation == splitter.HORZ then
       if (self.dragpos ~= e.clienty) then      
-        self.dragpos = e.clienty
-        local cw, ch = self.par:clientsize()       
-        self.item:setheight(self.itemclientpos - self.dragpos)          
-        self.par:setsize(cw, ch)      
+        self.dragpos = e.clienty              
+        local x, y, w, h = self.par:boundrect()             
+        self.item:setheight(self.itemclientpos - self.dragpos)       
+        self:canvas():updatealign()   
       end      
     elseif self.orientation == splitter.VERT then
       if (self.dragpos ~= e.clientx) then      
-        self.dragpos = e.clientx
-        local cw, ch = self.par:clientsize()       
+        self.dragpos = e.clientx    
         self.item:setwidth(self.dragpos - self.itemclientpos)          
-        self.par:setsize(cw, ch)      
+        self:canvas():updatealign()
       end 
     end
   else

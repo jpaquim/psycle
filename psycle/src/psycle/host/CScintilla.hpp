@@ -82,6 +82,14 @@ class CScintilla : public CWnd {
     }
   }
 
+  void set_find_regexp(bool on) {     
+   if (on) {
+      find_flags_ = find_flags_ | SCFIND_REGEXP;
+    } else {
+      find_flags_ = find_flags_ & ~SCFIND_REGEXP;
+    }
+  }
+
   void LoadFile(const std::string& filename) {
     using namespace std;    
     #if __cplusplus >= 201103L

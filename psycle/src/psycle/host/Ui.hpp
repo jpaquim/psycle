@@ -5,7 +5,6 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
-typedef int32_t ARGB;
 #undef GetGValue
 #define GetGValue(rgb) (LOBYTE((rgb) >> 8))
 #define ToCOLORREF(argb) RGB((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, (argb >> 0) & 0xFF)
@@ -16,8 +15,26 @@ namespace psycle {
 namespace host {
 namespace ui {
 
+typedef int32_t ARGB;
 typedef std::pair<double, double> Point;
 typedef std::vector<std::pair<double, double> > Points;
+
+struct Dimension {
+  Dimension() : w_(0), h_(0) {}
+  Dimension(double w, double h) : w_(w), h_(h) {}
+
+  void set_size(double w, double h) { 
+    w_ = w;
+    h_ = h; 
+  }
+  void set_width(double w) { w_ = w; }
+  void set_height(double h) { h_ = h; }
+  double width() const { return w_; }
+  double height() const { return h_; }
+
+ private:
+  double w_, h_;
+};
 
 struct Rect {
   Rect() { set(0, 0, 0, 0); }
@@ -58,7 +75,7 @@ struct Font {
 
 class Region {
  public:
-  Region() {}
+  Region() : w_cache_(-1), h_cache_(-1) {}
   Region(int x, int y, int width, int height) {}
   virtual ~Region() = 0;
   virtual Region* Clone() const = 0;
@@ -73,6 +90,8 @@ class Region {
 
   virtual void* source() = 0;
   virtual const void* source() const = 0;
+
+  double w_cache_, h_cache_;
 private:
   Region& operator = (const Region& other) {/* do nothing */}
   Region(const Region& other) {/* do nothing */}
@@ -115,19 +134,20 @@ friend class canvas::Group;
   virtual void FillRect(double x, double y, double width, double height) = 0;
   virtual void FillRoundRect(double x, double y, double width, double height, double arc_width, double arch_height) = 0;
   virtual void FillOval(double x, double y, double width, double height) = 0;
+  virtual void FillRegion(const ui::Region& rgn) = 0;
   virtual void SetColor(ARGB color) = 0;
   virtual ARGB color() const = 0;
   virtual void Translate(double x, double y) = 0;  
   virtual void SetFont(const Font& font) = 0;
   virtual Font font() const = 0;
-  virtual void DrawPolygon(const Points& podoubles) = 0;
-  virtual void FillPolygon(const Points& podoubles) = 0;
+  virtual void DrawPolygon(const ui::Points& podoubles) = 0;
+  virtual void FillPolygon(const ui::Points& podoubles) = 0;
   virtual void DrawPolyline(const Points& podoubles) = 0;
-  virtual void DrawImage(Image* img, double x, double y) = 0;
-  virtual void DrawImage(Image* img, double x, double y, double width, double height) = 0;
-  virtual void DrawImage(Image* img, double x, double y, double width, double height, double xsrc, double ysrc) = 0;
+  virtual void DrawImage(ui::Image* img, double x, double y) = 0;
+  virtual void DrawImage(ui::Image* img, double x, double y, double width, double height) = 0;
+  virtual void DrawImage(ui::Image* img, double x, double y, double width, double height, double xsrc, double ysrc) = 0;
   virtual void SetClip(double x, double y, double width, double height)=0;
-  virtual void SetClip(Region* rgn)=0;
+  virtual void SetClip(ui::Region* rgn)=0;
   virtual CRgn& clip() = 0;
 
   virtual CDC* dc() = 0;  // just for testing right now
@@ -136,7 +156,7 @@ private:
   virtual void RestoreOrigin() = 0;
 };
 
-inline Graphics::~Graphics() { }
+inline Graphics::~Graphics() {}
 
 namespace mfc
 {
@@ -148,15 +168,21 @@ class Region : public ui::Region {
   Region(const CRgn& rgn)  {
     assert(rgn.m_hObject);
     Init(0, 0, 0, 0);
-    rgn_.CopyRgn(&rgn);
+    rgn_.CopyRgn(&rgn);    
   }
   ~Region() { rgn_.DeleteObject(); }
-  virtual Region* Clone() const { return new Region(rgn_); }  
+  virtual Region* Clone() const { 
+    Region* r = new Region(rgn_);
+    r->h_cache_ = h_cache_;
+    r->w_cache_ = w_cache_;
+    return r;
+  }  
   void Offset(double dx, double dy) {
     CPoint pt(dx, dy);
     rgn_.OffsetRgn(pt);
   }
   int Combine(const ui::Region& other, int combinemode) {
+    
     return rgn_.CombineRgn(&rgn_, (const CRgn*)other.source(), combinemode);
   }  
   void BoundRect(double& x, double& y, double& width, double& height) const {
@@ -183,15 +209,13 @@ class Region : public ui::Region {
   void Clear() { SetRect(0, 0, 0, 0); }
   void* source() { return &rgn_; }
   const void* source() const { return &rgn_; };
-
+ 
  private:
-  void Init(int x, int y, int width, int height) {
-    w_cache_ = h_cache_ = -1;
+  void Init(int x, int y, int width, int height) {   
     rgn_.CreateRectRgn(x, y, x+width, y+height);
   }
   
-  CRgn rgn_;
-  double w_cache_, h_cache_;
+  CRgn rgn_;  
 };
 
 class Image : public ui::Image {
@@ -416,6 +440,12 @@ class Graphics : public ui::Graphics {
     check_pen_update();
     check_brush_update();
     cr_->Ellipse(x, y, x+width, y+height);
+  }
+
+  void FillRegion(const ui::Region& rgn) {    
+    check_pen_update();
+    check_brush_update();    
+    cr_->FillRgn((CRgn*) (&rgn)->source(), &brush);
   }
 
   void DrawPolygon(const ui::Points& points) {

@@ -35,7 +35,7 @@
 #include "LuaArray.hpp"
 #include <universalis/os/terminal.hpp>
 #include "Scintilla.h"
-#include "Canvas.hpp"
+#include "LuaGui.hpp"
 
 namespace psycle { namespace host {
 
@@ -515,7 +515,7 @@ namespace psycle { namespace host {
 				DeleteFile(filepath);
 				SaveBarState(_T("General"));
         // prevent lua gc from double deletion
-        LuaFrameWndBind::mfcclosing = true;
+        LuaFrameItemBind<>::mfcclosing = true;
 				CFrameWnd::OnClose();
 			}
 		}

@@ -15,6 +15,8 @@ namespace universalis { namespace os {
 	class terminal;
 }}
 
+namespace ui { namespace canvas { class Canvas; } }
+
 namespace psycle {
 namespace host {
     
@@ -49,7 +51,9 @@ public:
   void lock() const { ::EnterCriticalSection(&cs); }
   void unlock() const { ::LeaveCriticalSection(&cs); }
 
-  LuaCanvas::WeakPtr canvas() { return lua_mac_->canvas(); }
+  boost::weak_ptr<ui::canvas::Canvas> canvas() { 
+    return lua_mac_->canvas();
+  }
 
   // Plugin calls
   void SequencerTick();

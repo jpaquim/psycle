@@ -12,6 +12,7 @@
 #include "ladspamachine.h"
 #include "PresetsDlg.hpp"
 #include "ParamList.hpp"
+#include "Canvas.hpp"
 
 namespace psycle { namespace host {
 		int const ID_TIMER_PARAM_REFRESH = 2104;
@@ -740,7 +741,7 @@ namespace psycle { namespace host {
         CanvasParamView* cpv;
         gui = cpv = new CanvasParamView(this, &machine());
         LuaPlugin* lp = (LuaPlugin*) _machine;
-        LuaCanvas::WeakPtr user_view = lp->canvas();
+        ui::canvas::Canvas::WeakPtr user_view = lp->canvas();
         if (!user_view.expired()) {
           gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				    CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);

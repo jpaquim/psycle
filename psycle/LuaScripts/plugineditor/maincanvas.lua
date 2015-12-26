@@ -6,30 +6,27 @@
 -- Foundation ; either version 2, or (at your option) any later version.  
 
 -- require('mobdebug').start()
+-- local serpent = require("psycle.serpent")
 
-local canvas = require("psycle.ui.canvas")
-local serpent = require("psycle.serpent")
-
-local frame = require("psycle.ui.canvas.frame")
-local rect = require("psycle.ui.canvas.rect")
-local group = require("psycle.ui.canvas.group")
-local toolbar = require("psycle.ui.canvas.toolbar")
-local toolicon = require("psycle.ui.canvas.toolicon")
-local tabgroup = require("psycle.ui.canvas.tabgroup")
-local splitter = require("psycle.ui.canvas.splitter")
 local scintilla = require("psycle.ui.canvas.scintilla")
-local callstack = require("callstack")
 local sci = require("scintilladef")
 local scilex = require("scilexerdef")
-local machine = require("psycle.machine")
+
 local fileopen = require("psycle.ui.fileopen")
 local filesave = require("psycle.ui.filesave")
 local settings = require("settings")
 local style = require("psycle.ui.canvas.itemstyle")
+local group = require("psycle.ui.canvas.group")
+local canvas = require("psycle.ui.canvas")
+local rect = require("psycle.ui.canvas.rect")
+local toolbar = require("psycle.ui.canvas.toolbar")
+local toolicon = require("psycle.ui.canvas.toolicon")
+local tabgroup = require("psycle.ui.canvas.tabgroup")
+local splitter = require("psycle.ui.canvas.splitter")
 local search = require("search")
 local pluginexplorer = require("pluginexplorer")
---local serpent = require("psycle.serpent")
-local keyevent = require("psycle.ui.canvas.keyevent")
+local callstack = require("callstack")
+
 
 local maincanvas = canvas:new()
 
@@ -42,37 +39,44 @@ function maincanvas:new()
 end
 
 function maincanvas:init()
+  self:setcolor(settings.canvas.background);
+  
+    
+  self.search = search:new(self):hide()
+  self.search:style():setalign(style.ALBOTTOM)
+  self.search.dosearch:connect(maincanvas.onsearch, self)
+  
+  self:inittollbar()
+  self.outputs = tabgroup:new(self):setheight(120)
+  self.outputs:style():setalign(style.ALBOTTOM + style.ALFIXED)  
+  self.output = scintilla:new()
+  self.outputs:add(self.output, "Output")
+  self.callstack = callstack:new(nil, self)  
+  self.outputs:add(self.callstack, "Call stack")  
+  self.splitter = splitter:new(self, splitter.HORZ)
+  
+  self.pluginexplorer = pluginexplorer:new(self):setwidth(201)  
+  self.pluginexplorer:style():setalign(style.ALLEFT)     
+  self.pluginexplorer:setfilepath("test")
+  self.pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
+  self.splitter2 = splitter:new(self, splitter.VERT)
   self.fileopen = fileopen:new()
   local that = self
   function self.fileopen:onok(fname) that:openfromfile(fname) end
   self.filesaveas = filesave:new()
-  self:setcolor(settings.canvas.background);  
-  self.tg = group:new(self)  
-  self.tg:style():setalign(style.ALTOP + style.ALLEFT + style.ALRIGHT)
-                 :setmargin(2, 5, 0, 2)
-  self:initselectplugintoolbar():style():setalign(style.ALLEFT):setmargin(0, 0, 20, 0)
-  self:initfiletoolbar():style():setalign(style.ALLEFT):setmargin(0, 0, 20, 0)
-  self:initplaytoolbar():style():setalign(style.ALLEFT)
-  self.search = search:new(self):hide()
-  self.search:style():setalign(style.ALBOTTOM + style.ALLEFT + style.ALRIGHT)
-                     :setmargin(5, 5, 5, 5)              
-  self.search.dosearch:connect(maincanvas.onsearch, self)                     
-  self.outputs = tabgroup:new(self):setheight(100)
-  self.outputs:style():setalign(style.ALBOTTOM + style.ALLEFT + style.ALRIGHT)                     
-  self.splitter = splitter:new(self, splitter.HORZ)
-  self.pluginexplorer = pluginexplorer:new(self):setwidth(201)  
-  self.pluginexplorer:style():setalign(style.ALLEFT + style.ALTOP + style.ALBOTTOM)     
-  --self.pluginexplorer:setfilepath("test")
-  self.pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
-  self.splitter2 = splitter:new(self, splitter.VERT)
-  self.callstack = callstack:new(nil, self)
-  self.outputs:add(self.callstack, "Call stack")
-  self.output = scintilla:new()  
-  self.outputs:add(self.output, "Output")
+  
   
   self.pages = tabgroup:new(self)   
   self.pages:style():setalign(style.ALCLIENT)  
   self.newpagecounter = 1
+end
+
+function maincanvas:inittollbar()
+  self.tg = group:new(self)  
+  self.tg:style():setalign(style.ALTOP)
+  self:initselectplugintoolbar():style():setalign(style.ALLEFT):setmargin(4, 4, 4, 4)
+  self:initfiletoolbar():style():setalign(style.ALLEFT)
+  self:initplaytoolbar():style():setalign(style.ALLEFT)
 end
 
 function maincanvas:setoutputtext(text)
@@ -159,7 +163,7 @@ function maincanvas:setcallstack(trace)
 end
 
 function maincanvas:createnewpage()
-  local page = self:createpage():hide()  
+  local page = self:createpage()  
   self.pages:add(page, "new"..self.newpagecounter)
   page.pagecounter = self.newpagecounter
   self.newpagecounter = self.newpagecounter + 1
@@ -192,7 +196,6 @@ function maincanvas:playplugin()
   end
 end
 
-
 function maincanvas:initselectplugintoolbar(parent)
   local selectmachine = toolicon:new(self.tg):settext("no plugin loaded"):setsize(100, 20)
   local that = self
@@ -203,29 +206,7 @@ function maincanvas:initselectplugintoolbar(parent)
       that.pluginexplorer:setfilepath(path)
       self:settext(name):fls()      
     end    
-  end
- --[[ g.r:setpos(0, 0, 140, 26)
-  g.t:setxy(40, 7)  
-  local img = pix:new(g):setsize(10, 10):setxy(5, 5)
-  img:load(self.picdir .. "document-open.png"):settransparent(0,0,0)
-  local that = self
-  g.onmousedown = function(self)
-     local name = psycle.selmachine()
-	 if name then
-		 that.mac.mac = machine:new(name)
-		 g.t:settext(name)		 
-		 local p = orderedtable:new()
-		 for i = 1, #that.mac.mac.params do
-		   local par = that.mac.mac.params[i]
-		   p[par:id()] = par	   
-		 end         
-		 that.mac:setnumcols(that.mac.mac:numcols())		 
-		 that.mac.params = {}
-		 that.mac:addparameters(p)	
-		 that.properties:update() 	 
-	 end
-  end
-  return g ]]
+  end 
   return selectmachine
 end
 
@@ -266,7 +247,7 @@ function maincanvas:oncallstackclick(info)
   self:openinfo(info)
 end
 
-function maincanvas:onsearch(searchtext, dir, case, wholeword)
+function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)
   local page = self.pages:activepage()
   if page then  
     local cpmin, cpmax = 0, 0
@@ -285,6 +266,7 @@ function maincanvas:onsearch(searchtext, dir, case, wholeword)
     end        
     page:setfindmatchcase(case)
     page:setfindwholeword(wholeword)
+    page:setfindregexp(regexp)
     local line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)
     if line ~= -1 then
       page:setsel(cpselstart, cpselend)
@@ -294,16 +276,14 @@ end
 
 function maincanvas:displaysearch(ev)
   self.search:show()  
+  self:updatealign()
+  self.search:onfocus()
 end
 
-function maincanvas:onpluginexplorerclick(ev)
-  -- local str = serpent.dump(self)  
-  -- psycle.output(str)
+function maincanvas:onpluginexplorerclick(ev) 
    if ev.filename ~= "" then
-    -- psycle.output(self.newpagecounter)
      self:openfromfile(ev.path..ev.filename, 0)
    end
 end
-
 
 return maincanvas

@@ -10,6 +10,7 @@
 #include "WinIniFile.hpp"
 #include "Configuration.hpp"
 #include "PsycleConfig.hpp"
+#include "InputHandler.hpp"
 
 #if !defined WINAMP_PLUGIN
 #include "PlotterDlg.hpp"
@@ -22,6 +23,7 @@
 #include <psycle/helpers/resampler.hpp>
 #include <universalis/os/terminal.hpp>
 #include "Mainfrm.hpp"
+#include "LuaGui.hpp"
 
 #include <lua.hpp>
 #include <algorithm>
@@ -69,12 +71,10 @@ int LuaConfigBind::open(lua_State *L) {
     {"keys", keys},
     {"keytocmd", keytocmd},
     {"octave", octave},
-    {"luapath", plugindir},    
-
+    {"luapath", plugindir},
     {NULL, NULL}
   };
-  LuaHelper::open(L, meta, methods,  gc);
-  
+  LuaHelper::open(L, meta, methods,  gc);  
   return 1;
 }
 
@@ -309,33 +309,33 @@ int LuaMachineBind::open(lua_State *L) {
   };
   LuaHelper::open(L, meta, methods,  gc);
   // define constants
-  LuaHelper::constant(L, "FX", MACHMODE_FX);
-  LuaHelper::constant(L, "GENERATOR", MACHMODE_GENERATOR);
-  LuaHelper::constant(L, "HOSTUI", MACHMODE_LUAUIEXT);
-  LuaHelper::constant(L, "FX", MACHMODE_FX);
-  LuaHelper::constant(L, "PRSNATIVE", 3);  
-  LuaHelper::constant(L, "PRSCHUNK", 1);
-  LuaHelper::constant(L, "MACH_UNDEFINED", -1);
-	LuaHelper::constant(L, "MACH_MASTER", 0);
-	LuaHelper::constant(L, "MACH_SINE", 1); ///< now a plugin
-	LuaHelper::constant(L, "MACH_DIST", 2); ///< now a plugin
-  LuaHelper::constant(L, "MACH_SAMPLER", 3);
-  LuaHelper::constant(L, "MACH_DELAY", 4); ///< now a plugin
-	LuaHelper::constant(L, "MACH_2PFILTER", 5); ///< now a plugin
-	LuaHelper::constant(L, "MACH_GAIN", 6); ///< now a plugin
-	LuaHelper::constant(L, "MACH_FLANGER", 7); ///< now a plugin
-	LuaHelper::constant(L, "MACH_PLUGIN", 8);
-	LuaHelper::constant(L, "MACH_VST", 9);
-	LuaHelper::constant(L, "MACH_VSTFX", 10);
-	LuaHelper::constant(L, "MACH_SCOPE", 11); ///< Test machine. removed
-	LuaHelper::constant(L, "MACH_XMSAMPLER", 12);
-	LuaHelper::constant(L, "MACH_DUPLICATOR", 13);
-	LuaHelper::constant(L, "MACH_MIXER", 14);
-	LuaHelper::constant(L, "MACH_RECORDER", 15);
-	LuaHelper::constant(L, "MACH_DUPLICATOR2", 16);
-	LuaHelper::constant(L, "MACH_LUA", 17);
-	LuaHelper::constant(L, "MACH_LADSPA", 18);
-	LuaHelper::constant(L, "MACH_DUMMY", 255);
+  LuaHelper::setfield(L, "FX", MACHMODE_FX);
+  LuaHelper::setfield(L, "GENERATOR", MACHMODE_GENERATOR);
+  LuaHelper::setfield(L, "HOSTUI", MACHMODE_LUAUIEXT);
+  LuaHelper::setfield(L, "FX", MACHMODE_FX);
+  LuaHelper::setfield(L, "PRSNATIVE", 3);  
+  LuaHelper::setfield(L, "PRSCHUNK", 1);
+  LuaHelper::setfield(L, "MACH_UNDEFINED", -1);
+	LuaHelper::setfield(L, "MACH_MASTER", 0);
+	LuaHelper::setfield(L, "MACH_SINE", 1); ///< now a plugin
+	LuaHelper::setfield(L, "MACH_DIST", 2); ///< now a plugin
+  LuaHelper::setfield(L, "MACH_SAMPLER", 3);
+  LuaHelper::setfield(L, "MACH_DELAY", 4); ///< now a plugin
+	LuaHelper::setfield(L, "MACH_2PFILTER", 5); ///< now a plugin
+	LuaHelper::setfield(L, "MACH_GAIN", 6); ///< now a plugin
+	LuaHelper::setfield(L, "MACH_FLANGER", 7); ///< now a plugin
+	LuaHelper::setfield(L, "MACH_PLUGIN", 8);
+	LuaHelper::setfield(L, "MACH_VST", 9);
+	LuaHelper::setfield(L, "MACH_VSTFX", 10);
+	LuaHelper::setfield(L, "MACH_SCOPE", 11); ///< Test machine. removed
+	LuaHelper::setfield(L, "MACH_XMSAMPLER", 12);
+	LuaHelper::setfield(L, "MACH_DUPLICATOR", 13);
+	LuaHelper::setfield(L, "MACH_MIXER", 14);
+	LuaHelper::setfield(L, "MACH_RECORDER", 15);
+	LuaHelper::setfield(L, "MACH_DUPLICATOR2", 16);
+	LuaHelper::setfield(L, "MACH_LUA", 17);
+	LuaHelper::setfield(L, "MACH_LADSPA", 18);
+	LuaHelper::setfield(L, "MACH_DUMMY", 255);
   return 1;
 }
 
@@ -414,9 +414,7 @@ int LuaMachineBind::create(lua_State* L) {
   lua_pushvalue(L, 4);
   lua_setfield(L, 3, "params");
   lua_pushvalue(L, 3);
-
   
-
   return 1;
 }
 
@@ -807,22 +805,14 @@ int LuaPatternDataBind::open(lua_State *L) {
 
 int LuaPatternDataBind::createevent(lua_State* L, LuaPatternEvent& ev) {
   lua_createtable(L, 0, 7);
-  lua_pushnumber(L, ev.pos);
-  lua_setfield(L, -2, "pos");
-  lua_pushnumber(L, ev.len);
-  lua_setfield(L, -2, "len");
-  lua_pushboolean(L, ev.has_off);
-  lua_setfield(L, -2, "hasoff");
-  lua_pushnumber(L, ev.entry._note);
-  lua_setfield(L, -2, "val");
-  lua_pushnumber(L, ev.entry._inst);
-  lua_setfield(L, -2, "inst");
-  lua_pushnumber(L, ev.entry._mach);
-  lua_setfield(L, -2, "mach");
-  lua_pushnumber(L, ev.entry._cmd);
-  lua_setfield(L, -2, "cmd");
-  lua_pushnumber(L, ev.entry._parameter);
-  lua_setfield(L, -2, "parameter");
+  LuaHelper::setfield(L, "pos", ev.pos);
+  LuaHelper::setfield(L, "len", ev.len);
+  LuaHelper::setfield(L, "hasoff", ev.has_off);
+  LuaHelper::setfield(L, "val", static_cast<int>(ev.entry._note));
+  LuaHelper::setfield(L, "inst", static_cast<int>(ev.entry._inst));
+  LuaHelper::setfield(L, "mach", static_cast<int>(ev.entry._mach));
+  LuaHelper::setfield(L, "cmd", static_cast<int>(ev.entry._cmd));
+  LuaHelper::setfield(L, "parameter", static_cast<int>(ev.entry._parameter));  
   return 1;
 }
 
@@ -2835,10 +2825,8 @@ int LuaEnvelopeBind::open(lua_State *L) {
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods, gc, tostring);
-  lua_pushnumber(L, 0);
-  lua_setfield(L, -2, "LIN");
-  lua_pushnumber(L, 1);
-  lua_setfield(L, -2, "EXP");
+  LuaHelper::setfield(L, "LIN", 0);
+  LuaHelper::setfield(L, "EXP", 1);
   return 1;
 }
 
