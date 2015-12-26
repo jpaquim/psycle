@@ -8,7 +8,6 @@
 #include "XMSampler.hpp"
 #include <psycle/helpers/resampler.hpp>
 #include "LuaHelper.hpp"
-#include "LuaGui.hpp"
 
 
 namespace psycle {namespace host{namespace ui{namespace canvas{class Canvas;}}}}
@@ -78,8 +77,8 @@ namespace psycle { namespace host {
     int numchannels() const { return sampleV_.size(); }
     MachineUiType::Value ui_type() const { return ui_type_; }
     void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
-    void set_canvas(LuaCanvas::Ptr canvas) { canvas_ = canvas; }
-    LuaCanvas::WeakPtr canvas() { return canvas_; }
+    void set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) { canvas_ = canvas; }
+    boost::weak_ptr<ui::canvas::Canvas> canvas() { return canvas_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
     void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
@@ -96,7 +95,7 @@ namespace psycle { namespace host {
     MachineUiType::Value ui_type_;    
     MachinePresetType::Value prsmode_;
     LuaProxy* proxy_; 
-    LuaCanvas::WeakPtr canvas_;
+    boost::weak_ptr<ui::canvas::Canvas> canvas_;
   };
 
   struct LuaMachineBind {

@@ -41,7 +41,6 @@ tabgroup.header.color.BORDER = 0x00FF00
 tabgroup.header.color.HBG = 0xFFFFFF
 tabgroup.header.color.HLABEL = 0xFF0000
 tabgroup.header.color.HBORDER = 0x00FF00
-tabgroup.header.IDENT = 2
 
 function tabgroup:new(parent)  
   local c = group:new(parent)  
@@ -51,12 +50,10 @@ function tabgroup:new(parent)
   return c
 end
 
-function tabgroup:init() 
-  self.w = 200
-  self.h = 150
+function tabgroup:init()  
   self.hh = 20
   self.tabs = group:new(self)
-  self.tabs:style():setalign(style.ALTOP + style.ALLEFT + style.ALRIGHT)
+  self.tabs:style():setalign(style.ALTOP)
   self.childs = group:new(self)
   self.childs:style():setalign(style.ALCLIENT)
 end
@@ -71,6 +68,7 @@ function tabgroup:add(page, label)
   self:createheader(page, label)
   self.childs:add(page)
   self:setactivepage(page)
+  self:canvas():updatealign()
 end
 
 function tabgroup:activepage()
@@ -78,7 +76,7 @@ function tabgroup:activepage()
 end
 
 function tabgroup:setactiveheader(page)
-  if page then
+   if page then
     local function f(item)
       if item.page ~= page then
         item:setskinnormal()
@@ -87,7 +85,7 @@ function tabgroup:setactiveheader(page)
       end
     end
     self:traverse(f, self.tabs:items())
-  end
+  end  
 end
 
 function tabgroup:setactivepage(page)
@@ -96,12 +94,13 @@ function tabgroup:setactivepage(page)
     for i=1, #items do    
       local item = items[i]
       if item ~= page then
-        items[i]:hide()    
+        item:hide()    
       end
     end        
     self:setactiveheader(page)
     self.activepage_ = page;
     page:show()
+    self.childs:updatealign()
   end
 end
 
@@ -109,8 +108,7 @@ function tabgroup:removepage(header)
   local pages = self.childs:items()
   local idx = self.childs:itemindex(header.page)  
   self.childs:remove(header.page)
-  self.tabs:remove(header)
-  self:repositionheader()  
+  self.tabs:remove(header) 
   if idx == #pages then
     idx = idx -1
   end
@@ -118,50 +116,51 @@ function tabgroup:removepage(header)
   self:setactivepage(pages[idx])  
 end
 
-function tabgroup:repositionheader()
-  local itemw, xpos = 100, 0
-  local function f(item)    
-    item:setpos(xpos, 0)    
-    xpos = xpos + (itemw+tabgroup.header.IDENT)
-  end
-  self:traverse(f, self.tabs:items())
-end
-
-function tabgroup:onsize(w, h)
-  self.w = w
-  self.h = h
-end
-
 function tabgroup:createheader(page, label)
-  local header = group:new(self.tabs)  
-  header.page = page  
-  local itemcount, itemw = self.childs:itemcount(), 100  
-  local xpos = itemcount*(itemw+tabgroup.header.IDENT)
-  header:setpos(xpos, 0)
-  header.backgroundtop = rect:new(header):setpos(0, 0, itemw, 4)
-  header.backgroundbottom = rect:new(header):setpos(0, 4, itemw, self.hh)
-  header.text = text:new(header):setpos(2, 5):settext(label)
-  header.closegroup = group:new(header):setpos(itemw - 10, 5)
-  header.closerect = rect:new(header.closegroup)
-                         :setpos(0, 0, 10, 10)
-                         :setcolor(tabgroup.skin.colors.TOP)  
+  local header = group:new(self.tabs)
+  header:style():setalign(style.ALLEFT)  
+  header.page = page       
+  header.backgroundtop = rect:new(header):setheight(4):setcolor(tabgroup.skin.colors.TOP)
+  header.backgroundtop:style():setalign(style.ALTOP)  
+  header.closegroup = group:new(header)
+  header.closegroup:style():setalign(style.ALRIGHT)  
+  header.closerect = rect:new(header.closegroup):setwidth(10)
+  header.closerect:setcolor(tabgroup.skin.colors.TOP)
+  header.closerect:style():setalign(style.ALTOP)
   header.close = text:new(header.closegroup)
                      :setpos(3, 0)
                      :settext("x")
-                     :setcolor(tabgroup.skin.colors.TITLEFONT)                     
+                     :setcolor(tabgroup.skin.colors.TITLEFONT)   
+  local g = group:new(header)
+  g:style():setalign(style.ALTOP)  
+  header.text = text:new(header):setpos(2, 0):settext(label)
+  header.text:style():setalign(style.ALTOP):setmargin(5, 3, 5, 3)
+    --                     :setpos(0, 0, 10, 10)
+                           --:setcolor(0xFFFFF) --tabgroup.skin.colors.TOP)  
+  header.close = text:new(header.closegroup)
+                     :setpos(3, 0)
+                     :settext("x")
+                     :setcolor(tabgroup.skin.colors.TITLEFONT)   
+
+--header.backgroundbottom = rect:new(g)
+  --header.backgroundbottom:style():setalign(style.ALTOP)
+  --header.backgroundbottom:setcolor(0xFF0000)
+                       
+  
   local that = self
   function header.closegroup:onmousedown()
     that:removepage(self:parent())    
   end
+  
   function header:setskinhighlight()
     self.backgroundtop:setcolor(tabgroup.skin.colors.HTOP)
-    self.backgroundbottom:setcolor(tabgroup.skin.colors.HBOTTOM)
+    self.text:setfillcolor(tabgroup.skin.colors.HBOTTOM)
                    --:setstrokecolor(tabgroup.header.color.HBORDER)    
     self.text:setcolor(tabgroup.skin.colors.HFONTBOTTOM)
   end
   function header:setskinnormal()
     self.backgroundtop:setcolor(tabgroup.skin.colors.TOP)
-    self.backgroundbottom:setcolor(tabgroup.skin.colors.BOTTOM)    
+    self.text:setfillcolor(tabgroup.skin.colors.BOTTOM)    
                    --:setstrokecolor(tabgroup.header.color.BORDER)
     self.text:setcolor(tabgroup.skin.colors.FONTBOTTOM)
   end  
@@ -170,6 +169,7 @@ function tabgroup:createheader(page, label)
     that:setactivepage(self.page) 
   end
   function header:onmouseup(ev) end
+
   return header
 end
 
@@ -178,8 +178,5 @@ function tabgroup:traverse(f, arr)
   return self
 end
 
-function tabgroup:onupdateregion(rgn)
-  rgn:setrect(0, 0, self.w, self.h)
-end
 
 return tabgroup

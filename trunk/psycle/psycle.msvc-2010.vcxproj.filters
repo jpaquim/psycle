@@ -526,12 +526,6 @@
     <ClInclude Include="src\psycle\host\LuaGui.hpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClInclude>
-    <ClInclude Include="src\psycle\host\Scintilla.h">
-      <Filter>psycle\mfc\scintilla</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\SciLexer.h">
-      <Filter>psycle\mfc\scintilla</Filter>
-    </ClInclude>
     <ClInclude Include="src\psycle\host\Menu.hpp">
       <Filter>psycle\mfc</Filter>
     </ClInclude>
@@ -543,6 +537,9 @@
     </ClInclude>
     <ClInclude Include="src\psycle\host\CanvasItems.hpp">
       <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\DesignPatterns.hpp">
+      <Filter>psycle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -41,15 +41,23 @@ function checkbox:init(param)
   self.width = 100
   self.height = 20  
   self.check_ = false
+  
   self.checkgroup = group:new(self)  
-  self.checkrect = rect:new(self.checkgroup)
-                       :setpos(0, 0, 10, 10)
+  self.checkgroup:style():setalign(style.ALLEFT)
+                         :setmargin(0, 0, 4, 0)
+  self.checkrect = rect:new(self.checkgroup)                       
                        :setcolor(settings.colors.default.bg)
+  self.checkrect:style():setalign(style.ALLEFT)         
   self.checktext = text:new(self.checkgroup)
+                       :setpos(3, 0)
                        :setcolor(settings.colors.default.checker)
-                       :setpos(3, -1)
-  self.checkgroup:style():setalign(style.ALLEFT + style.ALTOP + style.ALBOTTOM)
-                         :setmargin(0, 0, 5, 0)
+                                              
+  --self.checktext:style():setalign(style.ALLEFT)
+  
+  self.text = text:new(self):settext("A Checkbox"):setcolor(settings.colors.default.text)
+  self.text:style():setalign(style.ALLEFT)
+  
+  
   local that = self
   function self.checkgroup:onmousedown()
     psycle.output("ondown")
@@ -63,8 +71,7 @@ function checkbox:init(param)
     end
     that.onclick(self.check)
   end
-  self.text = text:new(self):settext("A Checkbox"):setcolor(settings.colors.default.text)
-  self.text:style():setalign(style.ALLEFT + style.ALTOP + style.ALBOTTOM)
+  
 end
 
 function checkbox:settext(text)

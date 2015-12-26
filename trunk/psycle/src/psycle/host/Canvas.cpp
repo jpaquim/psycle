@@ -45,6 +45,28 @@ void Item::needsupdate() {
   }
 }
 
+void Item::PreventFls() {
+  Canvas* c = root();
+  if (c) {  
+    c->prevent_fls_ = true;
+  }
+}
+
+void Item::EnableFls() {
+  Canvas* c = root();
+  if (c) { 
+    c->prevent_fls_ = false;
+  }
+}
+
+void Item::SetSize(double w, double h) {
+  STR();
+  //PreventFls(); 
+  OnSize(w, h);     
+  //EnableFls();
+  FLS();
+}
+
 void Item::GetFocus() {
   Canvas* c = root();
   if (c) {
@@ -106,6 +128,22 @@ void Item::SetBlitXY(double x, double y) {
   FLS();
 }
 
+void Item::UpdateAlign() {
+  ui::Dimension dim;  
+  CalcDimension(dim);
+  Canvas* c = root();
+  bool old_save(false);
+  if (c) {
+    old_save = c->save_;
+    c->SetSave(true);
+  }
+  DoAlign();
+  if (c) {    
+    c->SetSave(old_save);
+    c->Flush();
+  }    
+}
+
 double Item::zoomabsx() const {
   std::vector<Item::ConstPtr> items;
   Item::ConstWeakPtr p = parent();
@@ -157,146 +195,216 @@ bool Item::IsInGroupVisible() const {
 
 void Item::Show() { 
   if (!visible_) { 
-    STR(); 
-    visible_ = true;    
-    OnMessage(SHOW);
-    needsupdate();
-    /*if (!parent().expired()) {
-      Item::Ptr p = parent().lock();
-      p->OnSize(p->w_cache_, p->h_cache_);
-    }*/    
-    Canvas* c = root();
-    if (c) {
-     c->hack_resize_bug_show_ = true;
-     bool issave = c->IsSaving();
-      c->SetSave(true);
-      int w, h;
-      c->ClientSize(w, h);
-      c->OnSize(w, h);
-      c->Flush();
-      c->SetSave(issave);
-      c->Invalidate();
-      c->hack_resize_bug_show_ = false;
-    }
-    FLS();
+    STR();     
+    visible_ = true;       
+    OnMessage(SHOW);        
+    FLS();   
   }
+  //  Canvas* c = root();
+  // if (c) {
+  // ui::Dimension dim;
+  // c->CalcDimension(dim);
+  // c->DoAlign();
+  // } 
 }
 
 void Item::Hide() { 
   if (visible_) {
     STR(); 
     visible_ = false;    
-    OnMessage(HIDE);    
-
-    //needsupdate();
-
-    if (!parent().expired()) {
-      Item::Ptr p = parent().lock();
-      p->OnSize(p->w_cache_, p->h_cache_);
-      p->needsupdate();
-    }
-    /*Canvas* c = root();
-    if (c) {   
-      bool issave = c->IsSaving();
-      c->SetSave(true);
-      int w, h;
-      c->ClientSize(w, h);
-      c->OnSize(w, h);
-      c->Flush();
-      c->SetSave(issave);
-      c->Invalidate();
-    }*/
+    OnMessage(HIDE);
     FLS();
   } 
 }
 
-void Group::OnSize(double cw, double ch) {
-  if (cw ==0 || ch == 0) {
-    return;
-  }
-  w_cache_ = cw;
-  h_cache_ = ch;
-  Item::Ptr client;
-  double left, top, right, bottom;
-  left = top = 0.0;
-  right = cw;
-  bottom = ch;
-  std::vector<Item::Ptr>::iterator it = items_.begin();
-  for (; it != items_.end(); ++it) {
-    Item::Ptr item = *it;
-    if (/*item->has_style() &&*/ item->visible()) {
-      double x, y, w, h;    
-      item->BoundRect(x, y, w, h);
-//      if (w == 201) {
-//        int fordummies = 0;
-//      }
-      const Margin& margin = item->style()->margin();
-      double l = item->x();
-      double t = item->y();      
-      const int al = item->style()->align();
-      if (al & ALLEFT) {        
-        l = left + margin.left();
-        if (!(al & ALRIGHT)) {
-          //item->OnSize(cw, ch);
-          //item->BoundRect(x, y, w, h);
-          left += w + margin.left() + margin.right();
-        }
-      }
-      if (al & ALTOP) {        
-        t = top + margin.top();
-        if (!(al & ALBOTTOM)) {
-         // item->OnSize(cw, ch);
-         // item->BoundRect(x, y, w, h);
-          top += h + margin.top() + margin.bottom();
-        }
-      }
-      if (al & ALRIGHT) {
-        if (al & ALLEFT) {          
-          w = right - l - margin.left() - margin.right();
-        } else {
-          l = right - w - margin.right();
-          if (!(al & ALLEFT)) {
-            right -= w + margin.left() + margin.right();
-          }
-        }
-      }
-      if (al & ALBOTTOM) { 
-        if (al & ALTOP) {          
-          h = bottom - t - margin.top() - margin.bottom();
-        } else {
-          t = bottom - h - margin.bottom();
-          if (!(al & ALTOP)) {
-            bottom -= h + margin.top() + margin.bottom() ;
-          }
-        }
-      }
-      if (al & ALCLIENT) {
-        client = item;        
-      }      
-      if ((item->x() != l || item->y() != t) &&
-          (item->width()==w && item->height()==h)) {
-        item->SetXY(l, t);
-      } else
-      if ((item->x() == l && item->y() == t) && 
-          (item->width()!=w || item->height()!=h)) {
-        item->OnSize(w, h);
-      } else
-      if (item->x() != l || item->y() != t || item->width()!=w || item->height()!=h) {
-        item->SetPos(l, t, w, h);
-      }
+void Item::DrawBackground(Graphics* g, Region& draw_region) {
+  int alpha = GetAlpha(fill_color());
+  if (alpha != 0xFF) {
+    g->SetColor(fill_color());
+    g->FillRegion(*rgn_);
+  }  
+}
+
+
+void Group::CalcDimension(ui::Dimension& dim) {
+  double w(0);
+  double h(0);  
+  double left(0);
+  double right(0);
+  double top(0);
+  double bottom(0);
+  int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
+  for (iterator i = items_.begin(); i != items_.end(); ++i) {
+    Item::Ptr item = *i;
+    if (!item->visible()) {
+      continue;
     }
+    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;
+    ui::Dimension idim;    
+    item->CalcDimension(idim);    
+    // width
+    {
+      double diff = right - left;
+      switch (item_style & bitmask) {
+        case ALLEFT:
+          left += item->dim_.width();
+          if (diff == 0) {          
+            w += item->dim_.width();
+            right += item->dim_.width();
+          } else {
+            double expand = item->dim_.width() - diff;
+            if (expand > 0) {
+              w += expand;
+              right += expand;
+            }
+          }
+        break;
+        case ALTOP:
+        case ALBOTTOM:
+          if (diff == 0) {
+            w += item->dim_.width();
+            right += item->dim_.width();
+          } else {
+            double expand = item->dim_.width() - diff;
+            if (expand > 0) {
+              w += expand;
+              right += expand;
+            }
+          }      
+        break;
+        case ALRIGHT:        
+          if (diff == 0) {          
+            w += item->dim_.width();
+            right += item->dim_.width();
+          } else {
+            double expand = item->dim_.width() - diff;
+            if (expand > 0) {
+              w += expand;
+              right += expand;
+            } else
+            if (expand == 0) {
+              right -= item->dim_.width();
+            }
+          }
+        break;      
+        default:
+          // w = std::max(item->dim_.width(), w);
+        break;
+      }    
+    }
+
+    // height
+    {
+      double diff = bottom - top;
+      switch (item_style & bitmask) {
+        case ALTOP:
+          top += item->dim_.height();
+          if (diff == 0) {          
+            h += item->dim_.height();
+            bottom += item->dim_.height();
+          } else {
+            double expand = item->dim_.height() - diff;
+            h += expand;
+            bottom += expand;            
+          }
+        break;
+        case ALLEFT:
+        case ALRIGHT:
+          if (diff == 0) {
+            h += item->dim_.height();
+            bottom += item->dim_.height();
+          } else {
+            double expand = item->dim_.height() - diff;
+            if (expand > 0) {
+              h += expand;
+              bottom += expand;
+            }
+          }      
+        break;
+        case ALBOTTOM:
+          if (diff == 0) {          
+            h += item->dim_.height();
+            bottom += item->dim_.height();
+          } else {
+            double expand = item->dim_.height() - diff;
+            if (expand > 0) {
+              h += expand;
+              bottom += expand;
+            }
+          }
+        break;            
+        default:
+          h = std::max(item->dim_.height(), h);
+        break;
+      }    
+    }
+  } // end loop 
+  if (has_style()) {
+    const Margin& margin = style()->margin();
+    w = w + margin.left() + margin.right();
+    h = h + margin.top() + margin.bottom();
   }
+  dim.set_size(w, h);  
+  dim_ = dim;
+}
+
+void Group::DoAlign() {
+  Item::Ptr client;
+  double left(0);
+  double right(width());
+  double top(0);
+  double bottom(height());
+  for (iterator i = items_.begin(); i != items_.end(); ++i) {
+    Item::Ptr item = *i;
+    if (!item->visible()) continue;
+    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;    
+    Margin margin;
+    if (item->has_style()) {
+      margin = item->style()->margin();
+    }
+    double margin_w = margin.left() + margin.right();
+    double margin_h = margin.top() + margin.bottom();
+    int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
+    switch (item_style & bitmask) {
+      case ALCLIENT:
+        client = item;
+      break;      
+      case ALLEFT:
+        item->SetPos(left + margin.left(), top + margin.top(), item->dim_.width() - margin_w, bottom - top - margin_h); 
+        left += item->dim_.width();
+      break;
+      case ALRIGHT:
+        item->SetPos(right - item->dim_.width() + margin.right(), top + margin.top(), item->dim_.width() - margin_w, bottom - top - margin_h); 
+        right -= item->dim_.width();
+      break;
+      case ALTOP:
+        {
+          double h = (item_style & ALFIXED) ? item->height() : item->dim_.height();
+          item->SetPos(left + margin.left(), top + margin.top(),  right - left - margin_w, h - margin_h); 
+          top += h;
+        }
+      break;
+      case ALBOTTOM:
+        {
+          double h = (item_style & ALFIXED) ? item->height() : item->dim_.height();
+          item->SetPos(left + margin.left(), bottom - h + margin.top(), right - left - margin_w, h - margin_h); 
+          bottom -= h;
+        }
+      break;
+      default:
+      break;
+    } // end switch  
+    if (item_style != ALCLIENT) {
+      item->DoAlign();
+    }
+  } // end loop 
   if (client) {
-    const Margin& margin = client->style()->margin();
-    double l = left + margin.left();
-    double t = top + margin.top();
-    double w = right - left - margin.left() - margin.right();
-    double h = bottom - top - margin.top() - margin.bottom();
-    client->SetXY(l, t);
-   // if (client->width()!=0 || client->height()!=0) {
-      client->OnSize(w, h);
-    //}
+    client->SetPos(left, top,  right - left, bottom - top); 
+    client->DoAlign();
   }
+}
+
+void Group::OnSize(double cw, double ch) {  
 }
 
 bool Item::IsInGroup(Item::WeakPtr group) const {  
@@ -353,11 +461,13 @@ void Group::Draw(Graphics* g, Region& draw_region) {
           }          
           item->draw_rgn_ = &tmp;          
           g->SetClip(&tmp);
+          item->DrawBackground(g, tmp);
           item->Draw(g, tmp);
           g->SetClip(0);
         }
         item->draw_rgn_ = &tmp;          
         g->SetClip(&tmp);
+        item->DrawBackground(g, tmp);
         item->Draw(g, tmp);
         g->SetClip(0);
         item->blit_.reset(0);
@@ -365,6 +475,7 @@ void Group::Draw(Graphics* g, Region& draw_region) {
         root()->item_blit_ = false;
       } else {
         item->draw_rgn_ = item_rgn.get();
+        item->DrawBackground(g, *item_rgn);        
         item->Draw(g, *item_rgn);
         item->draw_rgn_ = 0;
       }
@@ -376,16 +487,14 @@ void Group::Draw(Graphics* g, Region& draw_region) {
   }
 }
 
+
 void Group::Add(const Item::Ptr& item) {  
   if (!item->parent().expired()) {
     throw std::runtime_error("Item already child of a group.");
   }
   STR();
   item->set_parent(shared_from_this());
-  items_.push_back(item); 
-  if (has_style() && w_cache_ !=0 && h_cache_ !=0) {
-    OnSize(w_cache_, h_cache_);
-  }
+  items_.push_back(item);  
   FLS();
   item->needsupdate();
 }
@@ -420,18 +529,48 @@ void Group::Clear() {
 bool Group::onupdateregion() {  
   std::auto_ptr<Region> rgn(new mfc::Region());  
   std::vector<Item::Ptr>::const_iterator it = items_.begin();
+  bool first = true;
   for ( ; it != items_.end(); ++it) {
-    Item::Ptr item = *it;
+    Item::Ptr item = *it;  
     if (item->visible()) {
       std::auto_ptr<Region> tmp(item->region().Clone());      
       tmp->Offset(item->x(), item->y());        
       int nCombineResult = rgn->Combine(*tmp, RGN_OR);
       if (nCombineResult == NULLREGION) {
         rgn->Clear();
-      }
+        first = true;
+      } else if (first) {
+        rgn->Offset(-item->x(), -item->y());
+        first = false;
+      }     
     }
-  }    
+  }   
+  if (w_ != -1) {
+    double x, y, w, h;
+    rgn->BoundRect(x, y, w, h);
+    mfc::Region rgn1(x, y, w_, h); 
+    if (w > w_) {
+      rgn->Combine(rgn1, RGN_AND);
+      rgn->w_cache_ = w_;      
+    } else {
+      rgn->Combine(rgn1, RGN_OR);
+      rgn->w_cache_ = w_;     
+    }
+  }
+  if (h_ != -1) {
+    double x, y, w, h;
+    rgn->BoundRect(x, y, w, h);
+    mfc::Region rgn1(x, y, w, h_); 
+    if (h > h_) {
+      rgn->Combine(rgn1, RGN_AND);
+      rgn->h_cache_ = h_;
+    } else {
+      rgn->Combine(rgn1, RGN_OR);      
+      rgn->h_cache_ = h_;     
+    }
+  }
   rgn_.reset(rgn->Clone());
+  
   return true;
 }
 
@@ -482,7 +621,7 @@ void Group::OnMessage(CanvasMsg msg) {
 // Canvas
 void Canvas::Init() {
   is_root_ = true;
-  steal_focus_ = item_blit_ = show_scrollbar = save_ = hack_resize_bug_show_= false;
+  steal_focus_ = item_blit_ = show_scrollbar = save_ = prevent_fls_ = false;
   bg_image_ = 0;  
   bg_width_ = bg_height_ = 0;
   cw_ = pw_ = ch_ = ph_ = 300;
@@ -490,7 +629,7 @@ void Canvas::Init() {
   color_ = 0;
   save_rgn_.SetRect(0, 0, cw_, ch_);    
   cursor_ = LoadCursor(0, IDC_ARROW);
-  old_wnd_ = wnd_;
+  old_wnd_ = wnd_;  
 }
 
 void Canvas::Draw(Graphics *g, Region& rgn) {
@@ -531,11 +670,13 @@ void Canvas::DoDraw(Graphics *g, Region& rgn) {
   Group::Draw(g, rgn);
 }
 
-void Canvas::OnSize(int cw, int ch) {  
+
+
+void Canvas::OnSize(double cw, double ch) {  
   cw_ = cw;
   ch_ = ch;
-  w_cache_ = cw;
-  h_cache_ = ch;
+  needsupdate(); 
+  UpdateAlign();
   Group::OnSize(cw, ch);
 }
 
@@ -644,31 +785,39 @@ void Canvas::WorkTimer() {
 }
 
 void Canvas::Invalidate(Region& rgn) { 
-  if (IsSaving()) {
-    save_rgn_.Combine(rgn, RGN_OR);
-  } else if (wnd_) {
-      //wnd_->InvalidateRgn((CRgn*)rgn.source(), 0);
-    RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+  if (!prevent_fls_) {
+    if (IsSaving()) {
+      save_rgn_.Combine(rgn, RGN_OR);
+    } else if (wnd_) {
+        //wnd_->InvalidateRgn((CRgn*)rgn.source(), 0);    
+      RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+    }
   }
 }
 
 void Canvas::Flush() {
-  if (wnd_) {
-    RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) save_rgn_.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+  if (!prevent_fls_) {
+    if (wnd_) {
+      RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) save_rgn_.source()), RDW_INVALIDATE | RDW_UPDATENOW);
     // wnd_->InvalidateRgn((CRgn*) save_rgn_.source(), 0);
+    }
+    save_rgn_.Clear();
   }
-  save_rgn_.Clear();
 }
 
 void Canvas::Invalidate() {
-  if (wnd_) {
-    wnd_->Invalidate();
+  if (!prevent_fls_) {
+    if (wnd_) {
+      wnd_->Invalidate();    
+    }
   }
 }  
 
 void Canvas::InvalidateSave() {
-  if (wnd_ &&::IsWindow(wnd_->m_hWnd)) {
+  if (!prevent_fls_) {
+    if (wnd_ &&::IsWindow(wnd_->m_hWnd)) {
       wnd_->InvalidateRgn((CRgn*) save_rgn_.source(), 0);
+    }
   }
 }
 
@@ -684,9 +833,13 @@ void Canvas::ReleaseCapture() {
   }
 }
 
-void Canvas::ShowCursor() { while (::ShowCursor(TRUE) < 0); }
+void Canvas::ShowCursor() { 
+  while (::ShowCursor(TRUE) < 0);
+}
 
-void Canvas::HideCursor() { while (::ShowCursor(FALSE) >= 0); }
+void Canvas::HideCursor() { 
+  while (::ShowCursor(FALSE) >= 0); 
+}
 
 void Canvas::SetCursorPos(int x, int y) {
   if (wnd_) {
@@ -988,7 +1141,7 @@ BOOL View::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {
 
 
 void View::OnPaint() {
- CRgn rgn;
+  CRgn rgn;
   rgn.CreateRectRgn(0, 0, 0, 0);
 	int result = GetUpdateRgn(&rgn, FALSE);
 
@@ -1044,11 +1197,9 @@ void View::OnSize(UINT nType, int cw, int ch) {
   CWnd::OnSize(nType, cw, ch);
 }
 
+IMPLEMENT_DYNAMIC(FrameAdaptee, CFrameWnd)
 
-// CanvasFrame
-IMPLEMENT_DYNAMIC(CanvasFrameWnd, CFrameWnd)
-
-BEGIN_MESSAGE_MAP(CanvasFrameWnd, CFrameWnd)
+BEGIN_MESSAGE_MAP(FrameAdaptee, CFrameWnd)
 	ON_WM_CREATE()
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
@@ -1058,7 +1209,7 @@ BEGIN_MESSAGE_MAP(CanvasFrameWnd, CFrameWnd)
 	ON_WM_KEYUP()  
 END_MESSAGE_MAP()
 
-int CanvasFrameWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)  {		
+int FrameAdaptee::OnCreate(LPCREATESTRUCT lpCreateStruct)  {		
   if( CFrameWnd::OnCreate(lpCreateStruct) == 0) {
     pView_ = new View();
     pView_->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
@@ -1068,7 +1219,7 @@ int CanvasFrameWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)  {
   return -1;		
 }
     
-BOOL CanvasFrameWnd::PreCreateWindow(CREATESTRUCT& cs) {
+BOOL FrameAdaptee::PreCreateWindow(CREATESTRUCT& cs) {
 	if (!CFrameWnd::PreCreateWindow(cs))
 		return FALSE;
 			
@@ -1076,7 +1227,15 @@ BOOL CanvasFrameWnd::PreCreateWindow(CREATESTRUCT& cs) {
 	return TRUE;
 }
 
-void CanvasFrameWnd::OnDestroy() {    
+void FrameAdaptee::OnClose() { 
+ try {
+   frame_->OnFrameClose();
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+  }    
+}
+
+void FrameAdaptee::OnDestroy() {    
 	/*HICON _icon = GetIcon(false);
 	DestroyIcon(_icon);*/
   if (pView_ != NULL) { 
@@ -1084,11 +1243,6 @@ void CanvasFrameWnd::OnDestroy() {
     delete pView_; pView_ = 0;
   }  
 }
-
-void CanvasFrameWnd::PostNcDestroy() {			
-	CFrameWnd::PostNcDestroy();
-}
-
 
 } // namespace canvas
 } // namespace ui

@@ -332,6 +332,16 @@ namespace LuaHelper {
       lua_pop(L, 1);
     }
 
+    static void new_lua_module(lua_State* L, const std::string& name)  {
+      lua_getglobal (L, "require");
+      lua_pushstring (L, name.c_str());
+      lua_call (L, 1, 1);
+      lua_getfield(L, -1, "new");
+      lua_pushvalue(L, -2);
+      lua_call (L, 1, 1);	
+      lua_remove(L, -2);
+    }
+
     static int open(lua_State* L,
                     const std::string& meta,
                     const luaL_Reg methods[],
@@ -375,6 +385,28 @@ namespace LuaHelper {
        lua_newtable(L);     
        setmethods(L);
        return 1;
+    }
+
+    template <class T>
+    static boost::shared_ptr<T> createwithstate(lua_State* L, const std::string& meta, bool reg = false) {
+      int err = LuaHelper::check_argnum(L, 1, "self");
+      if (err!=0) return boost::shared_ptr<T>();
+      boost::shared_ptr<T> obj = new_shared_userdata<>(L, meta, new T(L));
+      if (reg) {
+        LuaHelper::register_userdata(L, obj.get());
+      }
+      return obj;
+    }
+
+    template <class T>
+    static boost::shared_ptr<T> create(lua_State* L, const std::string& meta, bool reg = false) {
+      int err = LuaHelper::check_argnum(L, 1, "self");
+      if (err!=0) return boost::shared_ptr<T>();
+      boost::shared_ptr<T> obj = new_shared_userdata<>(L, meta, new T());
+      if (reg) {
+        LuaHelper::register_userdata(L, obj.get());
+      }
+      return obj;
     }
 
 		// creates userdata able to support inheritance
@@ -497,8 +529,26 @@ namespace LuaHelper {
       lua_pop(L, 2);
     }
 
-    static int constant(lua_State* L, const std::string& name, int val) {
+    static int setfield(lua_State* L, const std::string& name, int val) {
       lua_pushinteger(L, val);
+      lua_setfield(L, -2, name.c_str());
+      return 0;
+    }
+
+    static int setfield(lua_State* L, const std::string& name, bool val) {
+      lua_pushboolean(L, val);
+      lua_setfield(L, -2, name.c_str());
+      return 0;
+    }
+
+    static int setfield(lua_State* L, const std::string& name, double val) {
+      lua_pushnumber(L, val);
+      lua_setfield(L, -2, name.c_str());
+      return 0;
+    }
+
+    static int setfield(lua_State* L, const std::string& name, const std::string& str) {
+      lua_pushstring(L, str.c_str());
       lua_setfield(L, -2, name.c_str());
       return 0;
     }
@@ -949,6 +999,19 @@ namespace LuaHelper {
       return 1;
     }
 
+
+    // void -> const std::string& x double x double
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(const std::string&, double, double), UserDataModel m = SPTR) {
+      numargcheck(L, 4);
+      T* ud = check<T>(L, 1, meta, m);
+      const char* str = luaL_checkstring(L, 2);
+      double val1 = luaL_checknumber(L, 3);
+      double val2 = luaL_checknumber(L, 4);
+      (ud->*ptmember)(str, val1, val2);      
+      return 0;
+    }
+
     // int -> const std::string& x int x int const
     template <class T>
     static int bind(lua_State* L, const std::string& meta, int (T::*ptmember)(const std::string&, int, int) const, UserDataModel m = SPTR) {
@@ -1000,7 +1063,27 @@ namespace LuaHelper {
       return 1;
     }
 
-		template <class UDT, class T>
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, int (T::*ptmember)(const T&, int), UserDataModel m = SPTR) { 
+      T* ud = check<T>(L, 1, meta, m);
+      T* ud1 = check<T>(L, 2, meta, m);
+      int val = luaL_checkinteger(L, 3);
+      int result = (ud->*ptmember)(*ud1, val);
+      lua_pushinteger(L, result);      
+      return 1;
+    }
+
+    template <class T, class T1>
+    static int bind(lua_State* L, const std::string& meta, T1* (T::*ptmember)(), UserDataModel m = SPTR) { 
+      T* ud = check<T>(L, 1, meta, m);      
+      T1* result = (ud->*ptmember)();
+      LuaHelper::find_weakuserdata(L, result);
+      return 1;
+    }
+
+    
+
+    template <class UDT, class T>
 		static int callstrict1(lua_State* L, const std::string& meta,
 						       void (UDT::*pt2Member)(T), bool dec1=false) { // function ptr
 			int n = lua_gettop(L);

@@ -23,6 +23,7 @@
 #include "SwingFillDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
 #include "ProgressDialog.hpp"
+#include "Canvas.hpp"
 
 #include "ITModule2.h"
 #include "XMSongLoader.hpp"
@@ -2462,7 +2463,8 @@ namespace psycle { namespace host {
       PluginInfoList::iterator it = list.begin();
       int pos = 8; bool has_ext = false;
       for (; it != list.end(); ++it) {
-        PluginInfo* info = *it;        
+        PluginInfo* info = *it;     
+        // if (info->name != "Plugineditor") continue;
         int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;        
         try {
           LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
@@ -2520,7 +2522,7 @@ namespace psycle { namespace host {
         RemoveLuaMenu();
         LuaPlugin* plug = it->second;        
         if (plug->crashed()) return;
-        LuaCanvas::WeakPtr user_view = plug->canvas();        
+        ui::canvas::Canvas::WeakPtr user_view = plug->canvas();        
         if (!user_view.expired()) {          
           CRect rect;            
           GetWindowRect(&rect);

@@ -13,7 +13,7 @@ namespace canvas {
 
 class Rect : public Item {
  public:
-  Rect::Rect() : Item() {
+  Rect() : Item() {
     bx_ = by_ = 0;
     width_ = height_ = 10;
     fillcolor_ = strokecolor_ = 0;
@@ -153,9 +153,7 @@ class CWndItem : public ui::canvas::Item {
   CWndItem() :
       ui::canvas::Item(),
       id_(newid()),      
-      p_wnd_(dummy_wnd()),
-      w_(200),
-      h_(20) {
+      p_wnd_(dummy_wnd()) {
     id_map_[id_] = this;
     needsupdate();  
   }  
@@ -163,27 +161,14 @@ class CWndItem : public ui::canvas::Item {
 
   virtual void Draw(ui::Graphics* g, ui::Region& draw_region) {                    
     double cx = zoomabsx();
-    double cy = zoomabsy();          
+    double cy = zoomabsy();
     CRect rc;
-    control_.GetWindowRect(&rc);
-    control_.GetParent()->ScreenToClient(&rc);                    
-    if (rc.left != cx || rc.top != cy || rc.Width() != w_ || rc.Height() != h_) { 
-      CRect rc;
-      control_.GetClientRect(&rc);
-      control_.MoveWindow(cx, cy, width(), height());
-      //CRgn rgn;
-      //rgn.CreateRectRgn(0, 0, 10, 10);
-      //control_.SetWindowRgn(*(CRgn*)(draw_region.source()), true);      
-      /*control_.ModifyStyle(0, WS_CLIPSIBLINGS); 
-      control_.ShowWindow(SW_HIDE);
-      control_.SetWindowRgn(rgn, true);
-      control_.ShowWindow(SW_SHOW);
-      control_.Invalidate();*/
-      // control_.MoveWindow(cx, cy, rc.Width(), rc.Height());
-      //::SetWindowRgn(control_.m_hWnd, NULL, false);
-      //control_.SetWindowRgn(*(CRgn*)(draw_region.source()), true);
-    }    
+    control_.GetClientRect(&rc);
+    std::stringstream str;          
+    str << "cwnd drawpos" << cx << "," << cy << "," << rc.Width() << "," << "," << rc.Height() << std::endl;
+		TRACE(str.str().c_str());              
   }     
+
   virtual void set_parent(const Item::WeakPtr& parent) { 
     canvas::Item::set_parent(parent);
     canvas::Canvas* c = root();
@@ -196,15 +181,22 @@ class CWndItem : public ui::canvas::Item {
        c->wnd()->RegisterMfcCtrl(shared_from_this(), ctrl().GetDlgCtrlID());
     }
   }
-  virtual bool onupdateregion() {
-    rgn_->SetRect(0, 0, w_, h_);
+  virtual bool onupdateregion() { 
+    CRect rc;  
+    control_.GetClientRect(&rc);
+    rgn_->SetRect(0, 0, rc.Width(), rc.Height());
     return true;
   }
   virtual void OnMessage(ui::canvas::CanvasMsg msg) {
-    if (msg == ui::canvas::HIDE && visible()) {
+    if (msg == ui::canvas::HIDE) {
       control_.ShowWindow(SW_HIDE);
     } 
     if (msg == ui::canvas::SHOW && visible()) {
+      int cx = zoomabsx();
+      int cy = zoomabsy(); 
+      CRect rc;
+      control_.GetClientRect(&rc);
+      control_.MoveWindow(cx, cy, rc.Width(), rc.Height());
       control_.ShowWindow(SW_SHOW);     
     }
     if (msg == ui::canvas::ONWND) {
@@ -221,20 +213,22 @@ class CWndItem : public ui::canvas::Item {
          CRgn rgn;
          rgn.CreateRectRgn(0, 0, 10, 10);  
          control_.SetWindowRgn(rgn, true);*/
-        if (IsInGroupVisible()) {
+        if (visible() && IsInGroupVisible()) {
+          int cx = zoomabsx();
+          int cy = zoomabsy();
+          CRect rc;
+          control_.GetClientRect(&rc);
+          control_.MoveWindow(cx, cy, rc.Width(), rc.Height());
           control_.ShowWindow(SW_SHOW);
         }
       }
     }
   }  
-  virtual void SetXY(double x, double y) {
-    x_ = x;
-    y_ = y;          
-    int cx = zoomabsx();
-    int cy = zoomabsy();
+
+  virtual void SetXY(double x, double y) {  
     CRect rc;
     control_.GetClientRect(&rc);
-    control_.MoveWindow(cx, cy, rc.Width(), rc.Height());
+    SetPos(x, y, rc.Width(), rc.Height());    
   }  
 
   virtual void OnSize(double w, double h) {
@@ -242,17 +236,16 @@ class CWndItem : public ui::canvas::Item {
   }
 
   virtual void SetPos(double x, double y, double w, double h) {
-    if (x_ != x || y_ !=y || w_ != w || h_ != h) {
+    CRect rc;
+    control_.GetClientRect(&rc);
+    int cx = zoomabsx() + (x-x_);
+    int cy = zoomabsy() + (y-y_);
+    if (cx != rc.left || cy != rc.top || w != rc.Width() || h != rc.Height()) { 
+      STR();
       x_ = x;
-      y_ = y;
-      if (w_!=w || h!=h_) {
-        w_ = w;
-        h_ = h;
-        needsupdate();
-      }
-      int cx = zoomabsx();
-      int cy = zoomabsy();      
-      ctrl().MoveWindow(cx, cy, w, h);
+      y_ = y; 
+      ctrl().MoveWindow(cx, cy, w, h); //, SWP_NOREDRAW);    
+      FLS();
     }
   }
   virtual void Show() { 
@@ -291,7 +284,7 @@ class CWndItem : public ui::canvas::Item {
      }
      return &dummy_wnd_;
    }
-  int w_, h_, id_;
+  int id_;
 
   T control_;  
   static int id_counter;
@@ -309,12 +302,13 @@ int CWndItem<T>::id_counter = ID_DYNAMIC_CONTROLS_BEGIN;
 template <typename T>
 std::map<std::uint16_t, CWndItem<T>*> CWndItem<T>::id_map_;
 
+
 class Button : public CWndItem<CButton> {
  public:
   static std::string type() { return "canvasbuttonitem"; }
   Button() : CWndItem<CButton>() { 
     ctrl().Create("btn", WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
-      CRect(0, 0, 55, 19), p_wnd(), id());    
+      CRect(0, 0, 55, 19), p_wnd(), id());   
   }  
   virtual void OnClick() {}  
 };
@@ -514,6 +508,7 @@ class Scintilla : public CWndItem<CScintilla> {
   bool has_selection() const { return ctrl().has_selection(); }
   void set_find_match_case(bool on) { ctrl().set_find_match_case(on); }
   void set_find_whole_word(bool on) { ctrl().set_find_whole_word(on); }
+  void set_find_regexp(bool on) { ctrl().set_find_regexp(on); }
   void LoadFile(const std::string& filename) { ctrl().LoadFile(filename); }      
   void SaveFile(const std::string& filename) { ctrl().SaveFile(filename); }  
   bool has_file() const { return ctrl().has_file(); }
@@ -527,7 +522,8 @@ class Edit : public CWndItem<CEdit> {
  public:
   static std::string type() { return "canvasedititem"; }
   Edit() : CWndItem<CEdit>() {
-    ctrl().Create(WS_CHILD | WS_TABSTOP, CRect(0, 0, 55, 19), p_wnd(), id());        
+    ctrl().Create(WS_CHILD | WS_TABSTOP, CRect(0, 0, 100, 20), p_wnd(), id());
+    //ctrl().SetWindowRgn((HRGN)rgn_->source(), false);
   }  
   void SetText(const std::string& text) { ctrl().SetWindowText(text.c_str()); }
   std::string text() const {    
@@ -536,8 +532,6 @@ class Edit : public CWndItem<CEdit> {
     return s.GetString();
   }  
 };
-
-enum Orientation { HORZ = 0, VERT = 1 };
 
 class ScrollBar : public CWndItem<CScrollBar> {
  public:

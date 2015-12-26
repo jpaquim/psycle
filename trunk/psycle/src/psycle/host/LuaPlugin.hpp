@@ -76,7 +76,7 @@ namespace psycle { namespace host {
     virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }
     void OnMenu(UINT id) { proxy_.call_menu(id); }
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
-    LuaCanvas::WeakPtr canvas() { return proxy().canvas(); }
+    boost::weak_ptr<ui::canvas::Canvas> canvas() { return proxy().canvas(); }
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);

@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::Global.
 #include <psycle/host/detail/project.private.hpp>
 #include "Global.hpp"
-#include "LuaPlugin.hpp"
 #include "machineloader.hpp"
 
 #define _GetProc(fun, type, name) \

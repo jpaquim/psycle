@@ -7,6 +7,7 @@
 #include "PsycleConfig.hpp"
 #include "Ui.hpp"
 #include "CScintilla.hpp"
+#include "DesignPatterns.hpp"
 
 #define BOOST_SIGNALS_NO_DEPRECATION_WARNING
 
@@ -33,23 +34,52 @@ struct BlitInfo {
   double dx, dy;  
 };
 
+class Item;
+
+
+class AlignStrategy {
+ public:
+  typedef boost::shared_ptr<AlignStrategy> Ptr;
+  typedef boost::weak_ptr<const AlignStrategy> ConstPtr;
+  typedef boost::weak_ptr<AlignStrategy> WeakPtr;  
+
+  AlignStrategy() {}
+  virtual ~AlignStrategy() = 0;
+  virtual void Add(boost::shared_ptr<Item>& item) = 0;  
+  virtual void DoAlign(bool has_w, bool has_h);
+};
+
+inline AlignStrategy::~AlignStrategy() {};
+
 enum AlignStyle {
-  ALNONE = 0,
-  ALLEFT = 1,
-  ALRIGHT = 2,
-  ALTOP = 4,
-  ALBOTTOM = 8,
-  ALCLIENT = 16
+  ALNONE = 1,
+  ALTOP = 2,
+  ALLEFT = 4,
+  ALRIGHT = 8,
+  ALBOTTOM = 16,   
+  ALCLIENT = 32,
+  ALFIXED = 64
+};
+
+enum Orientation { 
+  HORZ = 0, 
+  VERT = 1
 };
 
 typedef psycle::host::ui::Rect Margin;
 
-struct ItemStyle {
-  ItemStyle() : align_(ALNONE) { }
+class ItemStyle {
+ public:
+  ItemStyle() : align_(ALNONE) {}
 
   AlignStyle align() const { return align_; }
-  void set_align(AlignStyle align) { align_ = align; update(); }  
-  Margin margin() const { return margin_; }
+  void set_align(AlignStyle align) { 
+    align_ = align;
+    // update();
+  }  
+
+  const Margin& margin() const { return margin_; }
+
   void set_margin(Margin margin) { margin_ = margin; update(); }
   
    boost::signal<void ()> update;
@@ -85,12 +115,12 @@ class MouseEvent : public Event {
 
   double cx() const { return cx_; }
   double cy() const { return cy_; }
-  unsigned int button() const { return button_; }
-  unsigned int shift() const { return shift_; }
+  int button() const { return button_; }
+  int shift() const { return shift_; }
 
  private:    
   double cx_, cy_;
-  unsigned int button_, shift_;
+  int button_, shift_;
 };
 
 class KeyEvent : public Event {
@@ -126,9 +156,10 @@ public:
       clp_rgn_(new mfc::Region),
       fls_rgn_(new mfc::Region),       
       draw_rgn_(0) {
-    x_ = y_ = w_cache_ = h_cache_ = 0;
+    x_ = y_ = 0;
     visible_ = pointer_events_ = update_= true;
-    has_clip_ = has_store_ = needs_resize_ = false;    
+    has_clip_ = has_store_ = false;
+    color_ = 0xFF000000;
   }
     
   virtual ~Item() {}
@@ -139,12 +170,18 @@ public:
   virtual iterator begin() { return dummy.begin(); }
   virtual iterator end() { return dummy.end(); }
   virtual bool empty() const { return true; }
+  virtual int size() const { return 0; }
   
   virtual void Add(const Item::Ptr& item) {}
   virtual void Insert(iterator it, const Item::Ptr& item) {}
   virtual void Remove(const Item::Ptr& item) {}
   virtual void RemoveAll() {}
   virtual void Clear() {}
+
+  void set_align_strategy(AlignStrategy::Ptr& strategy) { 
+    align_strategy_ = strategy;
+  }
+  AlignStrategy::Ptr align_strategy() const { return align_strategy_; }
 
   ItemList SubItems() {
     ItemList allitems;
@@ -160,7 +197,10 @@ public:
     }
     return allitems;
   }
+
   virtual void Draw(Graphics* g, Region& draw_region) {}
+  void DrawBackground(Graphics* g, Region& draw_region);
+
   void GetFocus();
   void Detach();
   virtual void Show();
@@ -190,7 +230,13 @@ public:
     return irgn;
   }
   virtual void BoundRect(double& x, double& y, double& width, double& height) const {
-    region().BoundRect(x, y, width, height);
+    region().BoundRect(x, y, width, height);    
+  }
+
+  virtual void BoundRect(Rect& pos) const {
+    double x, y, w, h;
+    BoundRect(x, y, w, h);
+    pos.set(x, y, x + w, y + h);
   }
 
   virtual Item::Ptr HitTest(double x, double y) {
@@ -206,49 +252,40 @@ public:
     SetSize(width, height);
   }
 
+  virtual void SetX(double x) {
+    if (x_ != x) {      
+      STR(); x_ = x; FLS();
+    }      
+  } 
+
+  virtual void SetY(double y) {
+    if (y_ != y) {      
+      STR(); y_ = y; FLS();
+    }      
+  } 
+
   virtual void SetXY(double x, double y) {
     if (x_!=x || y_!=y) {      
       STR(); x_ = x; y_ = y; FLS();
     }      
   }  
-  void SetSize(double w, double h) {    
-    OnSize(w, h);    
-    needsupdate();
+  void SetSize(double w, double h);
+
+  virtual void SetWidth(double width) { 
+    double x1, y1, w, h;
+    BoundRect(x1, y1, w, h);
+    SetPos(x(), y(), width, h);   
   }
 
-  void ResizeLayout(double w, double h) {
-    if (!parent().expired()) {            
-      parent().lock()->OnSize(w, h);
-    }
+  void PreventFls();
+  void EnableFls();
+
+  virtual void SetHeight(double height) { 
+    double x1, y1, w, h;
+    BoundRect(x1, y1, w, h);
+    SetPos(x(), y(), w, height);   
   }
 
-  void SetWidth(double w) { 
-    double x1, y1, w1, h1;
-    x1 = y1 = w1 = h1 = 0;
-    if (!parent().expired()) { 
-      parent().lock()->BoundRect(x1, y1, w1, h1);
-    }
-    SetSize(w, height());
-  //  ResizeLayout(w1, h1);
-  }
-
-  void SetHeight(double h) {
-    double x1, y1, w1, h1;
-    x1 = y1 = w1 = h1 = 0;
-    if (!parent().expired()) { 
-      parent().lock()->BoundRect(x1, y1, w1, h1);
-    }
-    SetSize(width(), h); 
-   // ResizeLayout(w1, h1);
-  }
-  virtual void OnSize(double w, double h) { }
-  double x() const { return x_; }
-  double y() const { return y_; }
-  void pos(double& xv, double& yv) const { xv = x(); yv = y(); }
-  void clientpos(double& xv, double& yv) const { xv = zoomabsx(); yv = zoomabsy(); }
-  virtual double zoomabsx() const;
-  virtual double zoomabsy() const;
-  virtual double acczoom() const;  
   virtual double width() const {
     double x, y, w, h;
     region().BoundRect(x, y, w, h);
@@ -260,6 +297,32 @@ public:
     return h;
   }
 
+  virtual void CalcDimension(ui::Dimension& dim) {
+    if (has_style()) {
+      const Margin& margin = style()->margin();
+      dim.set_size(width() + margin.left() + margin.right(),
+                   height() + margin.top() + margin.bottom());
+    } else {
+      dim.set_size(width(), height());
+    }
+    dim_ = dim;
+  }
+
+  virtual void DoAlign() {}
+
+  void UpdateAlign();
+  
+  ui::Dimension dim_;
+
+  virtual void OnSize(double w, double h) {}
+  double x() const { return x_; }
+  double y() const { return y_; }
+  void pos(double& xv, double& yv) const { xv = x(); yv = y(); }
+  void clientpos(double& xv, double& yv) const { xv = zoomabsx(); yv = zoomabsy(); }
+  virtual double zoomabsx() const;
+  virtual double zoomabsy() const;
+  virtual double acczoom() const;  
+ 
   void EnablePointerEvents() { pointer_events_ = true; }
   void DisablePointerEvents() { pointer_events_ = false; }
   bool pointerevents() const { return pointer_events_; }
@@ -284,31 +347,20 @@ public:
   virtual void OnMessage(CanvasMsg msg) { }
   void set_style(StylePtr& style) { 
     style_ = style; 
-    style_->update.connect(boost::bind(&Item::onalign, this));
+   //  style_->update.connect(boost::bind(&Item::onalign, this));
   }
+
   StylePtr style() { 
     if (!style_) {
       style_ = Item::StylePtr(new ItemStyle());
-      style_->update.connect(boost::bind(&Item::onalign, this));
+     //  style_->update.connect(boost::bind(&Item::onalign, this));
     }
     return style_;
   }
   bool has_style() const { return style_ != 0; }  
-
-  void onalign() { 
-    if (!parent().expired()) {      
-      double x, y, w, h;
-      parent().lock()->BoundRect(x, y, w, h);
-      parent().lock()->OnSize(w, h);
-      double x1, y1, w1, h1;
-      parent().lock()->BoundRect(x1, y1, w1, h1);
-      if (w1 != h || w1 != w && 
-          parent().lock()->has_style() && 
-          parent().lock()->style()->align() != ALCLIENT) {
-        parent().lock()->onalign();
-      }
-    }
-  }
+  
+  void set_fill_color(ARGB color) { color_ = color; }
+  ARGB fill_color() const { return color_; }
 
  protected:
   void swap_smallest(double& x1, double& x2) const {
@@ -317,12 +369,11 @@ public:
      }
   }
   boost::shared_ptr<Item> this_ptr() { return shared_from_this(); }
-  double x_, y_, w_cache_, h_cache_;
+  double x_, y_;
   mutable bool update_, has_clip_;
   mutable std::auto_ptr<Region> rgn_;
-  std::auto_ptr<Region> clp_rgn_;    
-  bool needs_resize_;
-
+  std::auto_ptr<Region> clp_rgn_;
+   
   // Mouse Events
   virtual void OnMouseDown(MouseEvent& ev) { ev.WorkParent(); }
   virtual void OnMouseUp(MouseEvent& ev) { ev.WorkParent(); }
@@ -358,7 +409,15 @@ public:
   ItemList dummy;
   std::auto_ptr<BlitInfo> blit_;
   StylePtr style_;
+  AlignStrategy::Ptr align_strategy_;
+  ARGB color_;
 };
+
+class DefaultAlignStrategy : public AlignStrategy {
+  virtual void Add(Item::Ptr& item) {}
+  virtual void DoAlignStrategy() {}
+};
+
 
 class Canvas;
 
@@ -367,7 +426,7 @@ class Group : public Item {
   friend Canvas;
   friend Item;
   
-  Group() : Item(), zoom_(1), is_root_(false) { }
+  Group() : Item(), zoom_(1), is_root_(false), w_(-1), h_(-1) { }
 
   static std::string type() { return "canvasgroup"; }
 
@@ -394,19 +453,44 @@ class Group : public Item {
   virtual double zoom() const { return zoom_; }
   virtual bool onupdateregion();
 
-  bool WorkItemEvent(Item::WeakPtr item, Event* ev);
   bool is_root() const { return is_root_; }
   virtual void OnMessage(CanvasMsg msg);
+   
+  virtual void CalcDimension(ui::Dimension& dim);
+  virtual void DoAlign();
+  
+  virtual void SetPos(double x, double y, double width, double height) {
+    STR();
+    x_ = x;
+    y_ = y;
+    w_ = width;
+    h_ = height;
+    FLS();
+  }
+
+  virtual void SetWidth(double width) {    
+    w_ = width;
+    needsupdate();
+  }
+
+  virtual void SetHeight(double height) {    
+    h_ = height;
+    needsupdate();
+  }
 
   virtual void OnSize(double w, double h);
-  
- protected:
-  
+ 
+
+ protected:  
   ItemList items_;
+
  private:
-  void Init();  
+  void Init(); 
+
   double zoom_;
   bool is_root_;
+  double w_, h_;
+  ARGB color_;
 };
 
 
@@ -436,7 +520,7 @@ class Canvas : public Group {
   }
   void StealFocus(const Item::Ptr& item);
   void SetFocus(const Item::Ptr& item);
-  virtual void OnSize(int cx, int cy);
+  virtual void OnSize(double cx, double cy);
     void SetSave(bool on) { save_ = on; }
     bool IsSaving() const { return save_; }    
     void ClearSave() { save_rgn_.Clear(); }
@@ -453,6 +537,12 @@ class Canvas : public Group {
       cw = cw_;
       ch = ch_;
     }
+
+    virtual bool onupdateregion() { 
+      rgn_->SetRect(0, 0, cw_, ch_);
+      return true;
+    }
+
     void setpreferredsize(double width, double height) {
       pw_ = width;
       ph_ = height;
@@ -461,7 +551,7 @@ class Canvas : public Group {
       width = pw_;
       height = ph_;
     }
-  
+    
   void InvalidateSave();
   void SetCapture();  
   void ReleaseCapture();
@@ -487,10 +577,10 @@ class Canvas : public Group {
   void WorkOnSize(int cw, int ch);
   void WorkTimer();
 
+  void Invalidate(); // full invalidate
  protected:
   void Invalidate(Region& rgn);
-  void Invalidate();
-  bool hack_resize_bug_show_; // this is just a fast hack
+
  private:  
   void Init();
   void DoDraw(Graphics* g, Region& rgn);
@@ -511,7 +601,7 @@ class Canvas : public Group {
   }
 
   View* wnd_, *old_wnd_;  
-  bool save_, steal_focus_;
+  bool save_, steal_focus_, prevent_fls_;
   Item::WeakPtr button_press_item_, mouse_move_, focus_item_;
   CBitmap* bg_image_;
   int bg_width_, bg_height_;
@@ -521,7 +611,6 @@ class Canvas : public Group {
   HCURSOR cursor_;
   bool item_blit_;
 };
-
 
 
 class CanvasFrameWnd;
@@ -679,45 +768,58 @@ int Win32KeyFlags(UINT nFlags) {
   static std::map<std::uint16_t, Item::WeakPtr> mfc_ctrls_; 
 };
 
-class CanvasFrameWnd : public CFrameWnd {			
- DECLARE_DYNAMIC(CanvasFrameWnd)
- public:   
-  virtual ~CanvasFrameWnd() {} // Use OnDestroy
-  void set_canvas(Canvas::WeakPtr canvas) { assert(pView_); pView_->set_canvas(canvas); }
-  Canvas::WeakPtr canvas() { return pView_ ? pView_->canvas() : null_wptr; }  
-  void SetTitle(const std::string& title) { 
-    SetWindowTextA(_T(title.c_str()));
-  }
-  void SetPos(int x, int y) {}
 
- protected:
-  CanvasFrameWnd() : CFrameWnd(), pView_(0) {}; // protected constructor used 
-                                                // by dynamic creation,
-                                                // Use OnCreate.
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual void PostNcDestroy();  
+class Frame;
+
+class FrameAdaptee : public CFrameWnd {
+ DECLARE_DYNAMIC(FrameAdaptee)
+ public:
+  typedef boost::shared_ptr<FrameAdaptee> Ptr;
+  static FrameAdaptee* CreateInstance(Frame* frame) {
+    FrameAdaptee* wnd(new FrameAdaptee(frame));
+    wnd->Create(NULL, "PsycleLuaPlugin", WS_OVERLAPPEDWINDOW,
+    CRect(120, 100, 700, 480), ::AfxGetMainWnd());
+    return wnd;
+  }  
+  static void DestroyInstance(FrameAdaptee* adaptee) {
+    adaptee->DestroyWindow();
+  }
+  virtual ~FrameAdaptee() {} // Use OnDestroy
+  void set_canvas(Canvas::WeakPtr canvas) { assert(pView_); pView_->set_canvas(canvas); } 
+  Canvas::WeakPtr canvas() { return pView_ ? pView_->canvas() : null_wptr; } 
+  
+protected:   
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs); 
   int OnCreate(LPCREATESTRUCT lpCreateStruct);	
-  void OnDestroy();
+  
   BOOL OnEraseBkgnd(CDC* pDC) { return TRUE; }
-  void OnClose() { 
-    try {
-      OnFrameClose();
-    } catch (std::exception& e) {
-      AfxMessageBox(e.what());
-    }    
-  }
+  void OnClose();
+  virtual void OnDestroy();
+ private:
+  FrameAdaptee(Frame* frame) : frame_(frame), pView_(0) {}
+  Frame* frame_;
+  View* pView_; 
+  Canvas::WeakPtr null_wptr;
+ DECLARE_MESSAGE_MAP()	         
+};
 
+class Frame : public AdapterWithCreate<Frame, Item, FrameAdaptee> {
+ public:
+  typedef boost::shared_ptr<Frame> Ptr;
+  void set_canvas(Canvas::WeakPtr canvas) { adaptee_->set_canvas(canvas); }
+  Canvas::WeakPtr canvas() { return adaptee_->canvas(); } 
+  void SetTitle(const std::string& title) { adaptee_->SetWindowTextA(_T(title.c_str())); }    
+  virtual void Show() { adaptee_->ShowWindow(SW_SHOW); }
+  virtual void Hide() { adaptee_->ShowWindow(SW_HIDE); }
+  virtual void SetPos(double x, double y, double width, double height) {
+    adaptee_->MoveWindow(x, y, width, height);
+  }
   // Events
   virtual void OnTimerTick() {}
   virtual int OnFrameClose() { return 0; }  
   virtual void OnFrameTimer() {}
-
- DECLARE_MESSAGE_MAP()
-	      
- private: 
-  View* pView_;  
-  Canvas::WeakPtr null_wptr;
 };
+
 
 } // namespace canvas
 } // namespace ui

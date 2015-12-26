@@ -691,6 +691,10 @@
 					RelativePath="src\psycle\host\CScintilla.hpp"
 					>
 				</File>
+        <File
+					RelativePath="src\psycle\host\DesignPatterns.hpp"
+					>
+				</File>
 				<File
 					RelativePath="src\psycle\host\ExclusiveLock.cpp"
 					>

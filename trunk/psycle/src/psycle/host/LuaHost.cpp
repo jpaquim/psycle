@@ -12,7 +12,8 @@
 #include <boost/tokenizer.hpp>
 #include <lua.hpp>
 #include "LuaHelper.hpp"
-#include "Canvas.hpp"
+#include "LuaGui.hpp"
+#include "Menu.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
@@ -87,10 +88,11 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
   LuaHelper::require<LuaMenuBind>(L, "psycle.ui.menu");
   LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");
+  LuaHelper::require<LuaSystemMetrics>(L, "psycle.ui.systemmetrics");
   // ui canvas binds
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
   LuaHelper::require<LuaItemStyleBind >(L, "psycle.ui.canvas.itemstyle");
-  LuaHelper::require<LuaFrameWndBind>(L, "psycle.ui.canvas.frame");
+  LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
   LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");

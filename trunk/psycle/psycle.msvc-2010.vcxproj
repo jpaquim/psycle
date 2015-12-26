@@ -146,6 +146,7 @@
     <ClInclude Include="src\psycle\host\CanvasItems.hpp" />
     <ClInclude Include="src\psycle\host\Constants.hpp" />
     <ClInclude Include="src\psycle\host\CScintilla.hpp" />
+    <ClInclude Include="src\psycle\host\DesignPatterns.hpp" />
     <ClInclude Include="src\psycle\host\Global.hpp" />
     <ClInclude Include="src\psycle\host\InputHandler.hpp" />
     <ClInclude Include="src\psycle\host\InstrIndividualMap.hpp" />
@@ -475,6 +476,10 @@
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
+    <ProjectReference Include="..\build-systems\msvc\projects\scintilla\scintilla.msvc-2010.vcxproj">
+      <Project>{8c2525e9-cf53-4bbd-9a6a-f675760c52fa}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\psycle-audiodrivers\asio.msvc-2010.vcxproj">
       <Project>{21F6FB1D-B7DB-4EDB-A2B0-DA1B2F04AF01}</Project>
     </ProjectReference>
@@ -486,6 +491,10 @@
     </ProjectReference>
     <ProjectReference Include="..\psycle-helpers\psycle-helpers.msvc-2010.vcxproj">
       <Project>{16f2deb9-8f35-45c9-b460-732615f0c8d5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\universalis\universalis.msvc-2010.vcxproj">
+      <Project>{b78dfe59-051a-43fd-b489-775a4982581c}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
