@@ -9,7 +9,7 @@
 
 machine = require("psycle.machine"):new()
 
-local codegen = require("codegen")
+-- local codegen = require("codegen")
 local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
 local sysmetrics = require("psycle.ui.systemmetrics")
