@@ -14,6 +14,7 @@ local iconbutton = require("psycle.ui.canvas.toolicon")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local signal = require("psycle.signal")
 local settings = require("settings")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 
 local search = group:new()
@@ -35,18 +36,21 @@ function search:new(parent)
 end
 
 function search:init()  
-  self:style():setmargin(3, 3, 3, 3)
+  self:style():setmargin(3, 3, 3, 3):setpadding(10, 5, 10, 5)
   self.dosearch = signal:new()   
   self:createeditgroup(self)
 --  self:createreplacegroup(self)
   self:createclosebutton()
+  self.border = ornamentfactory:createlineborder(0x528A68)
+  self.border:setborderradius(10, 0, 0, 10)
+  self:setornament(self.border)
 end
 
 function search:createeditgroup(parent)      
   self.editgroup = group:new(parent)
   self.editgroup:style():setalign(style.ALLEFT)
   local optionrow = group:new(self.editgroup)
-  optionrow:style():setalign(style.ALTOP):setmargin(0, 0, 0, 3)
+  optionrow:style():setalign(style.ALTOP):setmargin(0, 0, 0, 5)
   self:createoptions(optionrow) 
   local editrow = group:new(self.editgroup)
   editrow:style():setalign(style.ALTOP):setmargin(0, 0, 0, 0)
@@ -129,7 +133,7 @@ function search:createclosebutton()
   local that = self
   function g:onmousedown()
     that:hide()
-    that:updatealign()
+    that:canvas():align()
   end
   return self
 end

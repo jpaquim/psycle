@@ -30,7 +30,7 @@ namespace psycle { namespace host {
   LuaPlugin::LuaPlugin(const std::string& dllpath, int index, bool full)
     : proxy_(this, dllpath),
       curr_prg_(0),
-      custom_menubar(0),
+      //custom_menubar(0),
       do_exit_(false), 
       do_reload_(false),
       usenoteon_(false) {
@@ -70,7 +70,7 @@ namespace psycle { namespace host {
   void LuaPlugin::OnReload() {
     try {
       proxy().Reload();
-      custom_menubar.reset(0);
+//      custom_menubar.reset(0);
     } catch(std::exception&) {
     }
   }

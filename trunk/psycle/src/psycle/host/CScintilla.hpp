@@ -12,6 +12,7 @@
 namespace psycle {
 namespace host  {
 
+
 class CScintilla : public CWnd {
  public:
   CScintilla() : find_flags_(0), is_modified_(false), has_file_(false) {}
@@ -36,6 +37,11 @@ class CScintilla : public CWnd {
 
   template<class T, class T1>
   int f(int sci_cmd, T lparam, T1 wparam) {     
+    return fn(ptr, sci_cmd, (WPARAM) lparam, (LPARAM) wparam);
+  }
+
+  template<class T, class T1>
+  int f(int sci_cmd, T lparam, T1 wparam) const {     
     return fn(ptr, sci_cmd, (WPARAM) lparam, (LPARAM) wparam);
   }
     
@@ -118,8 +124,29 @@ class CScintilla : public CWnd {
       has_file_ = true;
     } else {
       throw std::runtime_error("File Not Open Error!");
-    }
+    }    
   }
+
+  void set_foreground_color(COLORREF color) { f(SCI_STYLESETFORE, STYLE_DEFAULT, color); }
+  COLORREF foreground_color() const { return f(SCI_STYLEGETFORE, STYLE_DEFAULT, 0); }
+  void set_background_color(COLORREF color) { f(SCI_STYLESETBACK, STYLE_DEFAULT, color); }
+  COLORREF background_color() const { return f(SCI_STYLEGETBACK, STYLE_DEFAULT, 0); }
+
+  void set_linenumber_foreground_color(COLORREF color) { f(SCI_STYLESETFORE, STYLE_LINENUMBER, color); }
+  COLORREF linenumber_foreground_color() const { return f(SCI_STYLEGETFORE, STYLE_LINENUMBER, 0); }
+  void set_linenumber_background_color(COLORREF color) { f(SCI_STYLESETBACK, STYLE_LINENUMBER, color); }
+  COLORREF linenumber_background_color() const { return f(SCI_STYLEGETBACK, STYLE_LINENUMBER, 0); }
+
+  void set_sel_foreground_color(COLORREF color) { f(SCI_SETSELFORE, 1, color); }
+ // COLORREF sel_foreground_color() const { return f(SCI_GETSELFORE, 0, 0); }
+  void set_sel_background_color(COLORREF color) { f(SCI_SETSELBACK, 1, color); }
+ // COLORREF sel_background_color() const { return f(SCI_STYLEGETBACK, STYLE_sel, 0); }
+  void set_sel_alpha(int alpha) { f(SCI_SETSELALPHA, alpha, 0); }
+
+  void set_ident_color(COLORREF color) { f(SCI_STYLESETFORE, STYLE_INDENTGUIDE, color); }
+  void set_caret_color(COLORREF color) { f(SCI_SETCARETFORE, color, 0); }
+  COLORREF caret_color() const { return f(SCI_GETCARETFORE, 0, 0); }
+  void StyleClearAll() { f(SCI_STYLECLEARALL, 0, 0); }
 
   void SaveFile(const std::string& filename) {
     //Get the length of the document
@@ -175,22 +202,7 @@ class CScintilla : public CWnd {
     modified();
     return false;
   }
-
-  void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
-  }
-
-  void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
-  }
-
-  virtual BOOL PreTranslateMessage(MSG* pMsg) {
-    if (pMsg->message==WM_KEYDOWN ) {
-      int fordummies = 0;
-      // return 1;
-    } 
-    return CWnd::PreTranslateMessage(pMsg);
-  }
-
-  
+   
   DECLARE_MESSAGE_MAP(); 
 
  private:         

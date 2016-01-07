@@ -82,7 +82,7 @@ public:
 	std::string call_help();	
 	
   void update_menu(void* menu);
-  ui::MenuBar* get_menu(ui::Menu* menu);
+  ui::MenuBar::Ptr menu_bar();
   MachineUiType::Value ui_type() const { return lua_mac_->ui_type(); }
   void call_setprogram(int idx);
   int call_numprograms();

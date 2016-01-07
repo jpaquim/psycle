@@ -49,7 +49,7 @@ namespace mfc {
 
  void Menu::add(ui::MenuItem* item) {
   items.push_back(item);
-  item->set_menu(this);
+//  item->set_menu(this);
   const int id = ID_DYNAMIC_MENUS_START+item->id_counter;
   item->set_id(id);
   MenuItem::menuItemIdMap[item->id()] = item;

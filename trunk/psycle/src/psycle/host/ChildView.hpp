@@ -23,6 +23,7 @@ namespace host {
 
     namespace ui {
       class Menu;
+      class Window;
     }
 
 		#define MAX_WIRE_DIALOGS 16
@@ -368,6 +369,7 @@ namespace host {
 			}
 
 			void DrawSeqEditor(CDC *devc);
+      void ChangeCanvas(ui::Window* canvas);
 
 			int _ps();
 			unsigned char * _ptrack(int ps, int track);

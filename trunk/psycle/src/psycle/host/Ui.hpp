@@ -4,24 +4,53 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#define BOOST_SIGNALS_NO_DEPRECATION_WARNING
+#include <boost/signal.hpp>
+#include <boost/bind.hpp>
+#include <boost/weak_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #undef GetGValue
 #define GetGValue(rgb) (LOBYTE((rgb) >> 8))
 #define ToCOLORREF(argb) RGB((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, (argb >> 0) & 0xFF)
 #define GetAlpha(argb) (argb>>24) & 0xFF
-#define ToARGB(r, g, b) (((ARGB) (b) << 0) | ((ARGB) (g) << 8) |((ARGB) (r) << 16) | ((ARGB) (0) << 24))
+#define RGBToARGB(r, g, b) (((ARGB) (b) << 0) | ((ARGB) (g) << 8) |((ARGB) (r) << 16) | ((ARGB) (0) << 24))
+#define ToARGB(rgb) RGBToARGB(GetRValue(rgb), GetGValue(rgb), GetBValue(rgb))
 
 namespace psycle {
 namespace host {
 namespace ui {
 
-typedef int32_t ARGB;
-typedef std::pair<double, double> Point;
-typedef std::vector<std::pair<double, double> > Points;
+typedef uint32_t ARGB;
+typedef uint32_t RGB;
 
-struct Dimension {
-  Dimension() : w_(0), h_(0) {}
-  Dimension(double w, double h) : w_(w), h_(h) {}
+struct Point {
+  Point() : x_(0), y_(0) {}
+  Point(double x, double y) : x_(x), y_(y) {}
+  
+  void set(double x, double y) { 
+    x_ = x; 
+    y_ = y; 
+  }
+  void setx(double x) { x_ = x; }  
+  double x() const { return x_; }
+  void sety(double y) { y_ = y; }
+  double y() const { return y_; }
+ private:
+  double x_, y_;
+};
+
+typedef std::vector<Point> Points;
+
+struct Size {
+  Size() : w_(0), h_(0) {}
+  Size(double w, double h) : w_(w), h_(h) {}
+
+  inline bool operator==(const Size& rhs) const { 
+    return w_ == rhs.width()  && h_ == rhs.height();
+  }
+  inline bool operator!=(const Size& rhs) const { return !(*this == rhs); }
 
   void set_size(double w, double h) { 
     w_ = w;
@@ -43,6 +72,11 @@ struct Rect {
   inline void set(double l, double t, double r, double b) {
     left_ = l; top_ = t; right_ = r; bottom_ = b;
   }
+
+  inline void setxywh(double x, double y, double w, double h) {
+    left_ = x; top_ = y; right_ = x + w; bottom_ = y + h;
+  }
+
   inline void set_left(double val) { left_ = val; }
   inline void set_top(double val) { top_ = val; }
   inline void set_right(double val) { right_ = val; }
@@ -55,7 +89,9 @@ struct Rect {
   inline double bottom() const { return bottom_; }
   inline double width() const { return right_ - left_; }
   inline double height() const { return bottom_ - top_; }
-
+  inline ui::Size size() const { return Size(width(), height()); }
+  inline bool empty() const { return left_ == 0 && top_ == 0 && right_ == 0 && bottom_ == 0; }
+  
  private:
   double left_, top_, right_, bottom_;
 };
@@ -67,11 +103,72 @@ enum CursorStyle {
   WAIT, W_RESIZE, SW_RESIZE
 };
 
-struct Font {
-  Font() : name("Arial"), height(12) {}
+struct FontInfo {
   std::string name;
   int height;
 };
+
+class Event {
+ public:  
+  Event() : work_parent_(false), prevent_default_(false) {}
+  virtual ~Event() {}
+
+  void WorkParent() { work_parent_ = true; }
+  void StopWorkParent() { work_parent_ = false; }
+  bool is_work_parent() const { return work_parent_; }
+  void PreventDefault() { prevent_default_ = true; }
+  bool is_prevent_default() const { return prevent_default_; }
+  
+ private:  
+  bool work_parent_;
+  bool prevent_default_;
+};
+
+class Window;
+
+class MouseEvent : public Event {
+  public:
+   MouseEvent(int cx, int cy, int button, unsigned int shift)
+      : cx_(cx), 
+        cy_(cy), 
+        button_(button), 
+        shift_(shift) {
+   }
+
+  double cx() const { return cx_; }
+  double cy() const { return cy_; }
+  int button() const { return button_; }
+  int shift() const { return shift_; }
+
+ private:  
+  double cx_, cy_;
+  int button_, shift_;
+};
+
+class KeyEvent : public Event {
+ public:
+  KeyEvent(int keycode, int flags) : keycode_(keycode), flags_(flags) {}
+
+  int keycode() const { return keycode_; }
+  int flags() const { return flags_; }
+  bool shiftkey() const { return (MK_SHIFT & flags_) == MK_SHIFT; }
+  bool ctrlkey() const { return (MK_CONTROL & flags_) == MK_CONTROL; }    
+
+ private:
+   int keycode_, flags_;
+};
+
+class Font {
+ public:
+  Font() {}
+  virtual ~Font() = 0;
+  virtual Font* Clone() const = 0;
+
+  virtual void set_info(const FontInfo& info) = 0;
+  virtual FontInfo info() const = 0;
+};
+
+inline Font::~Font() {}
 
 class Region {
  public:
@@ -82,7 +179,7 @@ class Region {
 
   virtual void Offset(double dx, double dy) = 0;
   virtual int Combine(const Region& other, int combinemode) = 0;  
-  virtual void BoundRect(double& x, double& y, double& width, double& height) const = 0;
+  virtual ui::Rect bounds() const = 0;
   virtual bool Intersect(double x, double y) const = 0;
   virtual bool IntersectRect(double x, double y, double width, double height) const = 0;
   virtual void Clear() = 0;
@@ -126,9 +223,10 @@ friend class canvas::Group;
   virtual ~Graphics() = 0;
 
   virtual void CopyArea(double x, double y, double width, double height, double dx, double dy) = 0;
+  virtual void DrawArc(const ui::Rect& rect, const Point& start, const Point& end) = 0;
   virtual void DrawLine(double x1, double y1, double x2, double y2) = 0;
-  virtual void DrawRect(double x, double y, double width, double height) = 0;
-  virtual void DrawRoundRect(double x, double y, double width, double height, double arc_width, double arch_height) = 0;
+  virtual void DrawRect(const ui::Rect& rect) = 0;
+  virtual void DrawRoundRect(double x, double y, double width, double height, double arc_width, double arch_height) = 0;  
   virtual void DrawOval(double x, double y, double width, double height) = 0;
   virtual void DrawString(const std::string& str, double x, double y) = 0;
   virtual void FillRect(double x, double y, double width, double height) = 0;
@@ -139,7 +237,8 @@ friend class canvas::Group;
   virtual ARGB color() const = 0;
   virtual void Translate(double x, double y) = 0;  
   virtual void SetFont(const Font& font) = 0;
-  virtual Font font() const = 0;
+  virtual const Font& font() const = 0;
+  virtual Size text_size(const std::string& text) const = 0;
   virtual void DrawPolygon(const ui::Points& podoubles) = 0;
   virtual void FillPolygon(const ui::Points& podoubles) = 0;
   virtual void DrawPolyline(const Points& podoubles) = 0;
@@ -149,6 +248,7 @@ friend class canvas::Group;
   virtual void SetClip(double x, double y, double width, double height)=0;
   virtual void SetClip(ui::Region* rgn)=0;
   virtual CRgn& clip() = 0;
+  virtual void Dispose() = 0;
 
   virtual CDC* dc() = 0;  // just for testing right now
 private:
@@ -158,491 +258,291 @@ private:
 
 inline Graphics::~Graphics() {}
 
-namespace mfc
-{
 
-class Region : public ui::Region {
+class Systems {
  public:
-  Region() { Init(0, 0, 0, 0); }
-  Region(int x, int y, int width, int height) { Init(x, y, width, height); }  
-  Region(const CRgn& rgn)  {
-    assert(rgn.m_hObject);
-    Init(0, 0, 0, 0);
-    rgn_.CopyRgn(&rgn);    
+  static Systems& instance();
+  virtual ~Systems() {}
+  virtual ui::Region* CreateRegion() { 
+    assert(concrete_factory_);
+    return concrete_factory_->CreateRegion(); 
   }
-  ~Region() { rgn_.DeleteObject(); }
-  virtual Region* Clone() const { 
-    Region* r = new Region(rgn_);
-    r->h_cache_ = h_cache_;
-    r->w_cache_ = w_cache_;
-    return r;
-  }  
-  void Offset(double dx, double dy) {
-    CPoint pt(dx, dy);
-    rgn_.OffsetRgn(pt);
+  virtual ui::Graphics* CreateGraphics() { 
+    assert(concrete_factory_);
+    return concrete_factory_->CreateGraphics(); 
   }
-  int Combine(const ui::Region& other, int combinemode) {
-    
-    return rgn_.CombineRgn(&rgn_, (const CRgn*)other.source(), combinemode);
-  }  
-  void BoundRect(double& x, double& y, double& width, double& height) const {
-    CRect rc;
-    rgn_.GetRgnBox(&rc);
-    x = rc.left; y = rc.top; 
-    width = w_cache_ != -1 ? w_cache_ : rc.Width(); 
-    height = h_cache_ != -1 ? h_cache_ : rc.Height();
+  virtual ui::Graphics* CreateGraphics(void* dc) { 
+    assert(concrete_factory_);
+    return concrete_factory_->CreateGraphics(dc); 
   }
-  bool Intersect(double x, double y) const { return rgn_.PtInRegion(x, y); }
-  bool IntersectRect(double x, double y, double width, double height) const {
-    CRect rc(x, y, x+width, y+height);
-    return rgn_.RectInRegion(rc);
+  virtual ui::Image* CreateImage() { 
+    assert(concrete_factory_);
+    return concrete_factory_->CreateImage(); 
   }
-  virtual void SetRect(double x, double y, double width, double height) {
-    if (width == 0 || height == 0) {
-      w_cache_ = width;
-      h_cache_ = height;
-    } else {
-      w_cache_ = h_cache_ = -1;
-    }
-    rgn_.SetRectRgn(x, y, x+width, y+height);
+  virtual ui::Font* CreateFont() { 
+    assert(concrete_factory_);
+    return concrete_factory_->CreateFont(); 
   }
-  void Clear() { SetRect(0, 0, 0, 0); }
-  void* source() { return &rgn_; }
-  const void* source() const { return &rgn_; };
- 
- private:
-  void Init(int x, int y, int width, int height) {   
-    rgn_.CreateRectRgn(x, y, x+width, y+height);
-  }
-  
-  CRgn rgn_;  
-};
-
-class Image : public ui::Image {
- public:
-  Image() { Init(); }
-  Image(CBitmap* bmp) {
-    Init();
-    bmp_ = bmp;
-    shared_ = true;      
-  }
-  ~Image() {
-    if (!shared_ && bmp_) {
-      bmp_->DeleteObject();
-      delete bmp_;
-    }    
-    if (mask_.m_hObject) {
-      mask_.DeleteObject();
-    }
+  void set_concret_factory(Systems& concrete_factory) {
+    concrete_factory_ = &concrete_factory;
   }
 
-  void Load(const std::string& filename) {
-    if (!shared_ && bmp_) {
-      bmp_->DeleteObject();
-    }
-    shared_ = false;
-    CImage image;
-    HRESULT r;
-    r = image.Load(_T(filename.c_str()));
-    if (r!=S_OK) throw std::runtime_error(std::string("Error loading file:") + filename.c_str());    
-    bmp_ = new CBitmap();
-    bmp_->Attach(image.Detach());    
-  }
-
-  void size(double& width, double& height) const {
-    if (bmp_) {    
-      BITMAP bm;
-      bmp_->GetBitmap(&bm);
-      width = bm.bmWidth;
-      height = bm.bmHeight;
-    }    
-  }
-
-  void SetTransparent(bool on, ARGB color) {
-    if (mask_.m_hObject) {
-      mask_.DeleteObject();      
-    }
-    if (on) {      
-      PrepareMask(bmp_, &mask_, ToCOLORREF(color));
-    }
-  }
+ protected:
+  Systems();
+  Systems(Systems const&) {}             
+  Systems& operator=(Systems const&) {}
 
  private:
-  void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
-  void* source() { return bmp_; }
-  void* source() const { return bmp_; }
-  void* mask() { return mask_.m_hObject ? &mask_ : 0; }
-  const void* mask() const { return mask_.m_hObject ? &mask_ : 0; }
-  void Init() {
-    bmp_ = 0;    
-    shared_ = false;
-  }
-  CBitmap *bmp_, mask_;
-  bool shared_;
+  Systems* concrete_factory_;
 };
 
-inline void Image::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans) {
-  //assert(pBmpSource && pBmpSource->m_hObject);
-  BITMAP bm;
-  // Get the dimensions of the source bitmap
-  pBmpSource->GetObject(sizeof(BITMAP), &bm);
-  // Create the mask bitmap
-  if (pBmpMask->m_hObject) {
-    pBmpMask->DeleteObject();
-  }
-  pBmpMask->CreateBitmap( bm.bmWidth, bm.bmHeight, 1, 1, NULL);
-  // We will need two DCs to work with. One to hold the Image
-  // (the source), and one to hold the mask (destination).
-  // When blitting onto a monochrome bitmap from a color, pixels
-  // in the source color bitmap that are equal to the background
-  // color are blitted as white. All the remaining pixels are
-  // blitted as black.
-  CDC hdcSrc, hdcDst;
-  hdcSrc.CreateCompatibleDC(NULL);
-  hdcDst.CreateCompatibleDC(NULL);
-  // Load the bitmaps into memory DC
-  CBitmap* hbmSrcT = (CBitmap*) hdcSrc.SelectObject(pBmpSource);
-  CBitmap* hbmDstT = (CBitmap*) hdcDst.SelectObject(pBmpMask);
-  // Change the background to trans color
-  hdcSrc.SetBkColor(clrTrans);
-  // This call sets up the mask bitmap.
-  hdcDst.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcSrc,0,0,SRCCOPY);
-  // Now, we need to paint onto the original image, making
-  // sure that the "transparent" area is set to black. What
-  // we do is AND the monochrome image onto the color Image
-  // first. When blitting from mono to color, the monochrome
-  // pixel is first transformed as follows:
-  // if  1 (black) it is mapped to the color set by SetTextColor().
-  // if  0 (white) is is mapped to the color set by SetBkColor().
-  // Only then is the raster operation performed.
-  hdcSrc.SetTextColor(RGB(255,255,255));
-  hdcSrc.SetBkColor(RGB(0,0,0));
-  hdcSrc.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcDst,0,0,SRCAND);
-  // Clean up by deselecting any objects, and delete the
-  // DC's.
-  hdcSrc.SelectObject(hbmSrcT);
-  hdcDst.SelectObject(hbmDstT);
-  hdcSrc.DeleteDC();
-  hdcDst.DeleteDC();
-}
+enum WindowMsg {
+  ONWND,
+  SHOW,
+  HIDE,
+  FOCUS
+};
 
-class Graphics : public ui::Graphics {
+enum AlignStyle {
+  ALNONE = 1,
+  ALTOP = 2,
+  ALLEFT = 4,
+  ALRIGHT = 8,
+  ALBOTTOM = 16,   
+  ALCLIENT = 32,
+  ALFIXED = 64
+};
+
+class ItemStyle {
  public:
-  Graphics(CDC* cr) 
-      : cr_(cr),
-        color_(200),
-        brush(ToCOLORREF(200)),
-        updatepen_(false),
-        updatebrush_(false) {
-    assert(cr);
-    pen.CreatePen(PS_SOLID, 1, ToCOLORREF(color_));
-    cr->SetTextColor(ToCOLORREF(color_));
-    old_pen = cr->SelectObject(&pen);
-    old_brush = cr->SelectObject(&brush);
-    cr->GetWorldTransform(&rXform);    
-    cr->SetBkMode(TRANSPARENT);
-    LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));
-    lfLogFont.lfHeight = 12;
-    strcpy(lfLogFont.lfFaceName, "Arial");
-    cfont.CreateFontIndirect(&lfLogFont);
-    old_font = (CFont*) cr->SelectObject(&cfont);
-    old_rgn_.CreateRectRgn(0, 0, 0, 0);
-    clp_rgn_.CreateRectRgn(0, 0, 0, 0);
-    ::GetRandomRgn(cr->m_hDC, old_rgn_, SYSRGN);
-    POINT pt = {0,0};
-    HWND hwnd = ::WindowFromDC(cr->m_hDC);
-    ::MapWindowPoints(NULL, hwnd, &pt, 1);
-    old_rgn_.OffsetRgn(pt);    
-  }
+  typedef boost::shared_ptr<ItemStyle> Ptr;
+  ItemStyle() : align_(ALNONE) {}
 
-  virtual ~Graphics() {
-    cr_->SelectObject(old_pen);
-    pen.DeleteObject();
-    brush.DeleteObject();
-    cfont.DeleteObject();
-    cr_->SetGraphicsMode(GM_ADVANCED);
-    cr_->SetWorldTransform(&rXform);
-    cr_->SelectObject(old_font);
-    cr_->SetBkMode(OPAQUE);
-    cr_->SelectClipRgn(&old_rgn_);
-    old_rgn_.DeleteObject();
-    clp_rgn_.DeleteObject();
-  }
-
-  void DrawString(const std::string& str, double x, double y) {
-    check_pen_update();
-    cr_->TextOut(x, y, str.c_str());
-  }
-
-  void CopyArea(double x, double y, double width, double height, double dx, double dy) {
-    cr_->BitBlt(x+dx, y+dy, width, height, cr_, x, y, SRCCOPY);
-  }
-
-  void Translate(double x, double y) {
-    rXform.eDx += x;
-    rXform.eDy += y;
-    cr_->SetGraphicsMode(GM_ADVANCED);
-    cr_->SetWorldTransform(&rXform);
-  }
-
-  void SetColor(ARGB color) {
-    if (color_ != color) {
-      color_ = color;
-      updatepen_ = updatebrush_ = true;      
-    }
-  }
-
-  ARGB color() const { return color_; }
-
-  void DrawLine(double x1, double y1, double x2, double y2) {
-    check_pen_update();
-    cr_->MoveTo(x1, y1);
-    cr_->LineTo(x2, y2);
-  }
-
-  void DrawRect(double x, double y, double width, double height) {
-    check_pen_update();
-    check_brush_update();
-    CRect rc(x, y, x+width, y+height);
-    cr_->FrameRect(rc, &brush);
-  }
-
-  void DrawRoundRect(double x, double y, double width, double height, double arc_width, double arc_height) {
-    check_pen_update();
-    check_brush_update();
-    cr_->SelectStockObject(NULL_BRUSH);
-    cr_->RoundRect(x, y, x+width, y+height, arc_width, arc_height);
-    cr_->SelectObject(&brush);
-  }
-
-  void DrawOval(double x, double y, double width, double height) {
-    check_pen_update();
-    check_brush_update();
-    cr_->SelectStockObject(NULL_BRUSH);
-    cr_->Ellipse(x, y, x+width, y+height);
-    cr_->SelectObject(&brush);
-  }
-
-  void FillRoundRect(double x, double y, double width, double height, double arc_width, double arc_height) {
-    check_pen_update();
-    check_brush_update();
-    cr_->RoundRect(x, y, x+width, y+height, arc_width, arc_height);
-  }
-
-  void FillRect(double x, double y, double width, double height) {
-    check_pen_update();
-    check_brush_update();
-    cr_->Rectangle(x, y, x+width, y+height);
-  }
-
-  void FillOval(double x, double y, double width, double height) {
-    check_pen_update();
-    check_brush_update();
-    cr_->Ellipse(x, y, x+width, y+height);
-  }
-
-  void FillRegion(const ui::Region& rgn) {    
-    check_pen_update();
-    check_brush_update();    
-    cr_->FillRgn((CRgn*) (&rgn)->source(), &brush);
-  }
-
-  void DrawPolygon(const ui::Points& points) {
-    check_pen_update();
-    cr_->SelectStockObject(NULL_BRUSH);
-    std::vector<CPoint> lpPoints;
-    ui::Points::const_iterator it = points.begin();
-    const int size = points.size();
-    for (; it!=points.end(); ++it) {
-      lpPoints.push_back(CPoint(it->first, it->second));
-    }
-    cr_->Polygon(&lpPoints[0], size);
-    cr_->SelectObject(&brush);
-  }
-
-  void FillPolygon(const ui::Points& points) {
-    check_pen_update();
-    check_brush_update();
-    std::vector<CPoint> lpPoints;
-    ui::Points::const_iterator it = points.begin();
-    const int size = points.size();
-    for (; it!=points.end(); ++it) {
-      lpPoints.push_back(CPoint(it->first, it->second));
-    }
-    cr_->Polygon(&lpPoints[0], size);
-  }
-
-  void DrawPolyline(const ui::Points& points) {
-    check_pen_update();
-    std::vector<CPoint> lpPoints;
-    ui::Points::const_iterator it = points.begin();
-    const int size = points.size();
-    for (; it!=points.end(); ++it) {
-      lpPoints.push_back(CPoint(it->first, it->second));
-    }
-    cr_->Polyline(&lpPoints[0], size);
-  }
-
-  void SetFont(const Font& fnt) {
-    LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));
-    lfLogFont.lfHeight = fnt.height;
-    strcpy(lfLogFont.lfFaceName, fnt.name.c_str());
-    cfont.DeleteObject();
-    cfont.CreateFontIndirect(&lfLogFont);
-    cr_->SelectObject(&cfont);
-  }
-
-  Font font() const {
-    LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));
-    cfont.GetLogFont(&lfLogFont);
-    Font fnt;
-    fnt.name = lfLogFont.lfFaceName;
-    fnt.height = lfLogFont.lfHeight;
-    return fnt;
-  }
-
-  void DrawImage(ui::Image* img, double x, double y) {
-    double w, h;
-    img->size(w, h);
-    DrawImage(img, x, y, w, h, 0, 0);
-  }
-
-  void DrawImage(ui::Image* img, double x, double y, double width, double height) {
-    DrawImage(img, x, y, width, height, 0, 0);
-  }
-
-  void DrawImage(ui::Image* img, double x, double y, double width, double height, double xsrc,
-       double ysrc) {
-    CDC memDC;
-    CBitmap* oldbmp;
-    memDC.CreateCompatibleDC(cr_);
-    oldbmp = memDC.SelectObject((CBitmap*)img->source());
-    if (!img->mask()) {
-      cr_->BitBlt(x, y, width, height, &memDC, xsrc, ysrc, SRCCOPY);
-    } else {
-      TransparentBlt(cr_, x,  y, width, height, &memDC, (CBitmap*) img->mask(),
-        xsrc, ysrc);
-    }
-    memDC.SelectObject(oldbmp);
-    memDC.DeleteDC();
-  }
-
-  void SetClip(double x, double y, double width, double height) {
-    CRgn rgn;
-    rgn.CreateRectRgn(x, y, x+width, y+height);
-    cr_->SelectClipRgn(&rgn);
-    rgn.DeleteObject();
-  }
-
-  void SetClip(ui::Region* rgn) {
-    rgn ? cr_->SelectClipRgn((CRgn*) rgn->source()) : cr_->SelectClipRgn(0);
-  }
-
-  CRgn& clip() {
-    HDC hdc = cr_->m_hDC;
-    ::GetRandomRgn(hdc, clp_rgn_, SYSRGN);
-    POINT pt = {0,0};
-    // todo test this on different windows versions
-    HWND hwnd = ::WindowFromDC(hdc);
-    ::MapWindowPoints(NULL, hwnd, &pt, 1);
-    clp_rgn_.OffsetRgn(pt.x, pt.y);
-    return clp_rgn_;
-  }
-
-  void check_pen_update() {
-    if (updatepen_) { 
-      pen.DeleteObject();
-      pen.CreatePen(PS_SOLID, 1, ToCOLORREF(color_));
-      cr_->SelectObject(&pen);
-      cr_->SetTextColor(ToCOLORREF(color_));
-      updatepen_ = false;
-    }
-  }
-
-  void check_brush_update() {
-    if (updatebrush_) {
-      brush.DeleteObject();
-      brush.CreateSolidBrush(ToCOLORREF(color_));
-      cr_->SelectObject(&brush);    
-      updatebrush_ = false;
-    }
-  }
-
-  virtual CDC* dc() {
-     return cr_;
-  }
+  AlignStyle align() const { return align_; }
+  void set_align(AlignStyle align) { align_ = align; }  
+  void set_margin(const ui::Rect& margin) { margin_ = margin; }
+  const ui::Rect& margin() const { return margin_; }
+  void set_padding(const ui::Rect& padding) { padding_ = padding; }
+  const ui::Rect& padding() const { return padding_; }
     
-  private:
-   virtual void SaveOrigin() {
-     saveXform.push(rXform);
-   }
-   virtual void RestoreOrigin() {
-     rXform = saveXform.top();
-     saveXform.pop();
-     cr_->SetGraphicsMode(GM_ADVANCED);
-     cr_->SetWorldTransform(&rXform);
-   }
-   
-   void TransparentBlt(CDC* pDC,
-     int xStart,
-     int yStart,
-     int wWidth,
-     int wHeight,
-     CDC* pTmpDC,
-     CBitmap* bmpMask,
-     int xSource = 0,
-     int ySource = 0
-   );
-   CDC* cr_;
-   CPen pen, *old_pen;
-   CBrush brush, *old_brush;
-   mutable CFont cfont;
-   CFont* old_font;
-   ARGB color_;
-   bool updatepen_, updatebrush_;
-   XFORM rXform;
-   std::stack<XFORM> saveXform;
-   CRgn old_rgn_, clp_rgn_;
+ private:
+  AlignStyle align_;
+  ui::Rect margin_, padding_;
 };
 
-inline void Graphics::TransparentBlt(CDC* pDC,
-  int xStart,
-  int yStart,
-  int wWidth,
-  int wHeight,
-  CDC* pTmpDC,
-  CBitmap* bmpMask,
-  int xSource, // = 0
-  int ySource) // = 0)
-{
-  // We are going to paint the two DDB's in sequence to the destination.
-  // 1st the monochrome bitmap will be blitted using an AND operation to
-  // cut a hole in the destination. The color image will then be ORed
-  // with the destination, filling it into the hole, but leaving the
-  // surrounding area untouched.
-  CDC hdcMem;
-  hdcMem.CreateCompatibleDC(pDC);
-  CBitmap* hbmT = hdcMem.SelectObject(bmpMask);
-  pDC->SetTextColor(RGB(0,0,0));
-  pDC->SetBkColor(RGB(255,255,255));
-  if (!pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource,
-    SRCAND)) {
-      TRACE("Transparent Blit failure SRCAND");
-  }
-  // Also note the use of SRCPAINT rather than SRCCOPY.
-  if (!pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
-    SRCPAINT)) {
-      TRACE("Transparent Blit failure SRCPAINT");
-  }
-  // Now, clean up.
-  hdcMem.SelectObject(hbmT);
-  hdcMem.DeleteDC();
+class WindowImp;
+
+namespace canvas {
+  class Aligner;
 }
 
-} // namespace mfc
+class Window : public boost::enable_shared_from_this<Window> {
+ friend class WindowImp;
+ public:  
+  typedef boost::shared_ptr<Window> Ptr;  
+  typedef boost::shared_ptr<const Window> ConstPtr;
+  typedef boost::weak_ptr<Window> WeakPtr;
+  typedef boost::weak_ptr<const Window> ConstWeakPtr;  
+  typedef std::vector<Window::Ptr> List;
+  static Window::Ptr nullpointer;
+
+  Window() {}
+  Window(WindowImp* imp) { imp_.reset(imp); }
+  virtual ~Window();
+
+  void set_imp(WindowImp* imp) { imp_.reset(imp); }
+  WindowImp* imp() { return imp_.get(); };
+
+  // structure   
+  typedef Window::List::iterator iterator;
+  virtual iterator begin() { return dummy_list_.begin(); }
+  virtual iterator end() { return dummy_list_.end(); }
+  virtual bool empty() const { return true; }
+  virtual int size() const { return 0; }
+  virtual Window* root() { return 0; }
+  virtual Window* root() const { return 0; }
+  virtual bool is_root() const { return 0; }
+  virtual void set_parent(const Window::WeakPtr& parent) { parent_ = parent; }
+  virtual Window::WeakPtr parent() { return parent_; }
+  virtual Window::ConstWeakPtr parent() const { return parent_; }
+  virtual Window::List SubItems() { return Window::List(); }
+
+  virtual void Add(const Window::Ptr& item) {}
+  virtual void Insert(iterator it, const Window::Ptr& item) {}
+  virtual void Remove(const Window::Ptr& item) {}
+  virtual void RemoveAll() {}
+
+  virtual void set_pos(const ui::Point& pos) {}
+  virtual void set_pos(const ui::Rect& pos);
+  virtual ui::Rect pos() const { return ui::Rect(); }
+  virtual ui::Rect abs_pos() const { return ui::Rect(); }
+  virtual ui::Size dim() const;
+  virtual void set_aligner(const boost::shared_ptr<canvas::Aligner>& aligner) {}
+  virtual boost::shared_ptr<canvas::Aligner> aligner() const { return dummy_aligner_; }
+  virtual void set_style(const ItemStyle::Ptr& style) {}
+  virtual ItemStyle::Ptr style() { return ItemStyle::Ptr(); }
+  virtual ItemStyle::Ptr style() const { return ItemStyle::Ptr(); }
+  virtual bool has_style() const { return false; }  
+
+  virtual void Show();
+  virtual void Hide();
+  virtual bool visible() const { return true; }
+  virtual void Invalidate();
+  virtual void Invalidate(Region& rgn);
+  virtual void SetCapture();
+  virtual void ReleaseCapture();
+  virtual void ShowCursor();
+  virtual void HideCursor();
+  virtual void SetCursorPos(double x, double y);
+  virtual void SetCursor(CursorStyle style);  
+  virtual void set_parent(Window* window);
+
+  // Regions
+  virtual void needsupdate() {}
+  virtual const Region& region() const { return *dummy_region_.get(); }
+  virtual bool onupdateregion() { needsupdate(); return true; }
+  virtual Window::Ptr HitTest(double x, double y) { return nullpointer; }
+
+  // Events
+  virtual void OnMessage(WindowMsg msg, int param = 0) {}
+
+  virtual void Draw(Graphics* g, Region& draw_region) {}
+  virtual void DrawBackground(Graphics* g, Region& draw_region) {}
+  virtual void OnSize(double width, double height) {}
+
+  virtual void OnMouseDown(MouseEvent& ev) { ev.WorkParent(); }
+  virtual void OnMouseUp(MouseEvent& ev) { ev.WorkParent(); }
+  virtual void OnDblclick(MouseEvent& ev) { ev.WorkParent(); }
+  virtual void OnMouseMove(MouseEvent& ev) { ev.WorkParent(); }
+  virtual void OnMouseEnter(MouseEvent& ev) { ev.WorkParent(); }
+  virtual void OnMouseOut(MouseEvent& ev) { ev.WorkParent(); }
+  boost::signal<void (MouseEvent&)> MouseDown;
+  boost::signal<void (MouseEvent&)> MouseUp;
+  boost::signal<void (MouseEvent&)> DblClick;
+  boost::signal<void (MouseEvent&)> MouseMove;
+  boost::signal<void (MouseEvent&)> MouseEnter;
+  boost::signal<void (MouseEvent&)> MouseOut;
+  // Key Events
+  virtual void OnKeyDown(KeyEvent& ev) { ev.WorkParent(); }
+  virtual void OnKeyUp(KeyEvent& ev) { ev.WorkParent(); }
+  boost::signal<void (KeyEvent&)> KeyDown;
+  boost::signal<void (KeyEvent&)> KeyUp;
+  // Focus Events
+  virtual void OnFocus() {}
+  virtual void OnKillFocus() {}
+  boost::signal<void ()> Focus;
+  boost::signal<void ()> KillFocus;
+
+  // for inner window mfc controls
+  virtual void OnFocusChange(int id) {}
+ protected:  
+  virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
+  virtual void WorkMouseUp(MouseEvent& ev) { OnMouseUp(ev); }
+  virtual void WorkMouseMove(MouseEvent& ev) { OnMouseMove(ev); }
+  virtual void WorkDblClick(MouseEvent& ev) { OnDblclick(ev); }
+  virtual void WorkKeyUp(KeyEvent& ev) { OnKeyUp(ev); }
+  virtual bool WorkKeyDown(KeyEvent& ev) { OnKeyDown(ev); return true; }
+
+  std::auto_ptr<WindowImp> imp_;
+  Window::WeakPtr parent_;
+  static List dummy_list_;
+  static ui::Rect dummy_pos_;
+  boost::shared_ptr<canvas::Aligner> dummy_aligner_;
+  static boost::shared_ptr<ui::Region> dummy_region_;
+};
+
+class Ornament {
+ public:
+  Ornament() {}
+  virtual ~Ornament() = 0;
+
+  virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) = 0;
+  virtual std::auto_ptr<ui::Rect> padding() const { return std::auto_ptr<ui::Rect>(); }
+};
+
+inline Ornament::~Ornament() {}
+
+class WindowImp {
+ public:
+  WindowImp() : window_(0) {}
+  WindowImp(Window* window) : window_(window) {}
+  virtual ~WindowImp() {}
+
+  void set_window(Window* window) { window_ = window; }
+  Window* window() { return window_; }
+  Window* window() const { return window_; }
+
+  virtual void dev_set_pos(const ui::Rect& pos) = 0;
+  virtual ui::Size dev_dim() const = 0;
+  virtual void DevShow() = 0;
+  virtual void DevHide() = 0;
+  virtual void DevInvalidate() = 0;
+  virtual void DevInvalidate(Region& rgn) = 0;
+  virtual void DevSetCapture() = 0;
+  virtual void DevReleaseCapture() = 0;
+  virtual void DevShowCursor() = 0;
+  virtual void DevHideCursor() = 0;
+  virtual void DevSetCursorPos(double x, double y) = 0;
+  virtual void DevSetCursor(CursorStyle style) {}
+  virtual void DevDestroy() {}
+  virtual void dev_set_parent(Window* window) {}
+
+  // Events
+  virtual void OnDevDraw(Graphics* g, Region& draw_region) {
+    if (window_) {
+      window_->Draw(g, draw_region);
+    }
+  }
+
+  virtual void OnDevSize(double width, double height) {
+    if (window_) {
+      window_->OnSize(width, height);
+    }
+  }
+  virtual void OnDevMouseDown(MouseEvent& ev) {
+    if (window_) {
+      window_->WorkMouseDown(ev);
+    }
+  }
+  virtual void OnDevMouseUp(MouseEvent& ev) {
+    if (window_) {
+      window_->WorkMouseUp(ev);
+    }
+  }
+  virtual void OnDevDblclick(MouseEvent& ev) {
+    if (window_) {
+      window_->WorkDblClick(ev);
+    }
+  }
+  virtual void OnDevMouseMove(MouseEvent& ev) {
+    if (window_) {
+      window_->WorkMouseMove(ev);
+    }
+  }  
+
+  // Key Events
+  virtual void OnDevKeyDown(KeyEvent& ev) { 
+    if (window_) {
+      window_->WorkKeyDown(ev);
+    }
+  }
+  virtual void OnDevKeyUp(KeyEvent& ev) {
+    if (window_) {
+      window_->WorkKeyDown(ev);
+    }
+  }
+
+  virtual void OnDevFocusChange(int id) {
+    if (window_) {
+      window_->OnFocusChange(id);
+    }
+  }
+
+ private:
+  Window* window_;
+};
+
+
 } // namespace ui
 } // namespace host
 } // namespace psycle

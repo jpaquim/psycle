@@ -117,7 +117,7 @@ int LuaConfigBind::get(lua_State *L) {
     } else {
       store->Read(key, color);
       using namespace ui;
-      lua_pushnumber(L, ToARGB(GetRValue(color), GetGValue(color), GetBValue(color)));      
+      lua_pushnumber(L, ToARGB(color));      
     }
   } else {
     return 0;

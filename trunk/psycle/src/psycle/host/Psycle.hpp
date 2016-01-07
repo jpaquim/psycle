@@ -11,8 +11,9 @@
 
 namespace psycle { namespace host {
 
-		class CMainFrame; // forward declaration
-
+    // forward declaration
+		class CMainFrame; 
+    
 		/// root class.
 		class CPsycleApp : public CWinAppEx
 		{
@@ -36,7 +37,7 @@ namespace psycle { namespace host {
 			void ProcessCmdLine(LPSTR cmdline);
 
 			UINT m_uUserMessage;
-      HMODULE m_hDll;  
+      HMODULE m_hDll;     
 		};
 
 

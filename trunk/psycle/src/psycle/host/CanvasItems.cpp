@@ -14,10 +14,14 @@ namespace host  {
 namespace ui {
 namespace canvas {
 
+int IDHandler::id_counter = ID_DYNAMIC_CONTROLS_BEGIN;
+
 void Rect::Draw(Graphics* g, Region& draw_region) {
   // double z = acczoom();  
-  g->SetColor(fillcolor_);
-  g->FillRect(0, 0, width_, height_);  
+  //if (GetAlpha(fillcolor_) != 0xFF) {
+    g->SetColor(fillcolor_);
+    g->FillRect(0, 0, width_, height_);  
+  //}
 /*    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);
   CPen pen;
   pen.CreatePen(PS_SOLID, 1, ToCOLORREF(strokecolor_));
@@ -94,10 +98,10 @@ void Line::Draw(Graphics* g, Region& draw_region) {
   for (Points::iterator it = pts_.begin(); it != pts_.end(); ++it) {
     Point& pt = (*it);
     if (it != pts_.begin()) {
-      g->DrawLine(mx, my, pt.first, pt.second);
+      g->DrawLine(mx, my, pt.x(), pt.y());
     }
-    mx = pt.first;
-    my = pt.second;
+    mx = pt.x();
+    my = pt.y();
   }  
 }
 
@@ -131,45 +135,34 @@ Item::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
 }
 
 bool Line::onupdateregion() {  
-  double x1, y1, x2, y2;
-  double dist = 5;
-  BoundRect(x1, y1, x2, y2);
+  double dist = 5;  
   double zoom = 1.0; // parent() ? parent()->zoom() : 1.0;
-  rgn_->SetRect((x1-dist)*zoom, (y1-dist)*zoom, (x2+2*dist+1)*zoom, (y2+2*dist+1)*zoom);    
+  ui::Rect bounds = this->bounds();
+  rgn_->SetRect((bounds.left()-dist)*zoom, 
+                (bounds.top()-dist)*zoom, 
+                (bounds.width()+2*dist+1)*zoom, 
+                (bounds.height()+2*dist+1)*zoom);
   return true;
 }
 
-void Text::Init(double zoom) {
-  color_ = 0;
-  LOGFONT lfLogFont;
-  memset(&lfLogFont, 0, sizeof(lfLogFont));
-  lfLogFont.lfHeight = 12*zoom;
-  strcpy(lfLogFont.lfFaceName, "Arial");
-  font_.CreateFontIndirect(&lfLogFont);
-}
-
 bool Text::onupdateregion() {  
-  Canvas* c =  const_cast<Text*>(this)->root();
+  Canvas* c = (Canvas*) const_cast<Text*>(this)->root();
   if (c) {
-    HDC dc = GetDC(0);
-    SIZE extents = {0};
-    HFONT old_font =
-      reinterpret_cast<HFONT>(SelectObject(dc, font_));
-    GetTextExtentPoint32(dc, text_.c_str(), text_.length(),
-      &extents);
-    SelectObject(dc, old_font);
-    ReleaseDC(0, dc);
-    text_w = extents.cx;
-    text_h = extents.cy;
-    rgn_->SetRect(0, 0, text_w, text_h);
+    std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
+    g->SetFont(*font_);    
+    ui::Size size = g->text_size(text_);
+    double w = auto_size_width() ? size.width() : size_.width();
+    double h = auto_size_height() ? size.height() : size_.height();
+    rgn_->SetRect(0, 0, w, h);
     return true;
   }    
   return false;
 }
 
-void Text::Draw(Graphics* g, Region& draw_region) { 
-    g->SetColor(color_);
-    g->DrawString(text_, 0, 0);    
+void Text::Draw(Graphics* g, Region& draw_region) {   
+  g->SetFont(*font_);
+  g->SetColor(color_);
+  g->DrawString(text_, 0, 0);    
 }
 
 // Pic

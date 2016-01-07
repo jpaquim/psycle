@@ -24,7 +24,7 @@ function splitter:new(parent, orientation)
 end
   
 function splitter:init(orientation)
-  self:setcolor(0x404040)
+  self:setfillcolor(0x404040)
   self.orientation = orientation
   if orientation == splitter.HORZ then  
     self:style():setalign(style.ALBOTTOM)
@@ -43,10 +43,10 @@ function splitter:onmousedown(e)
   local idx = self.par:itemindex(self)
   local items = self.par:items() 
   self.item = items[idx-1]
-  local x, y = self.item:clientpos()
+  local x, y, w, h = self.item:clientpos()
   self.itemclientpos = 0
   if self.orientation == self.HORZ then    
-    self.itemclientpos = y + self.item:height()
+    self.itemclientpos = y + h
   else
     self.itemclientpos = x
   end  
@@ -56,16 +56,15 @@ function splitter:onmousemove(e)
   if self.dosplit_ then 
     if self.orientation == splitter.HORZ then
       if (self.dragpos ~= e.clienty) then      
-        self.dragpos = e.clienty              
-        local x, y, w, h = self.par:boundrect()             
+        self.dragpos = e.clienty                 
         self.item:setheight(self.itemclientpos - self.dragpos)       
-        self:canvas():updatealign()   
+        self:canvas():align()   
       end      
     elseif self.orientation == splitter.VERT then
       if (self.dragpos ~= e.clientx) then      
         self.dragpos = e.clientx    
         self.item:setwidth(self.dragpos - self.itemclientpos)          
-        self:canvas():updatealign()
+        self:canvas():align()
       end 
     end
   else

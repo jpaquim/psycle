@@ -12,7 +12,7 @@ local style = require("psycle.ui.canvas.itemstyle")
 
 local callstack = group:new()
 
-local rowstyle = style:new():setalign(style.ALLEFT)
+local rowstyle = style:new():setalign(style.ALLEFT + style.ALFIXED)
                             :setmargin(0, 0, 2, 0)
 local colstyle = style:new():setalign(style.ALTOP)
                             :setmargin(0, 0, 0, 1)  
@@ -33,14 +33,20 @@ function callstack:init()
     row1font = 0xFF0000,
     row = 0xFFFFFF,
     font = 0x000000
-  }                           
-  self.row1 = group:new(self):setstyle(rowstyle)  
-  self.row2 = group:new(self):setstyle(rowstyle)
-  self.row3 = group:new(self):setstyle(rowstyle)   
-  rect:new(self.row1):setcolor(self.colors.header):setwidth(20):setstyle(colstyle)  
-  rect:new(self.row2):setcolor(self.colors.header):setwidth(400):setstyle(colstyle)
+  }           
+  self:style():setpadding(5, 5, 5, 5)  
+  self.row1 = group:new(self):setstyle(rowstyle):setwidth(100)
+  self.row2 = group:new(self):setstyle(rowstyle):setwidth(500) 
+  self.row3 = group:new(self):setstyle(rowstyle):setwidth(100)    
+  text:new(self.row1):setautosize(false, true):settext(" "):setcolor(0xB0C8B1):setfillcolor(0x528A68):setstyle(colstyle)
+  text:new(self.row2):setautosize(false, true):settext("Name"):setcolor(0xB0C8B1):setfillcolor(0x528A68):setstyle(colstyle)
+  text:new(self.row3):setautosize(false, true):settext("source"):setcolor(0xB0C8B1):setfillcolor(0x528A68):setstyle(colstyle)
+  --t:style():setalign(style.AL)
+  
+  
+  --rect:new(self.row2):setcolor(0x2F2F2F):setwidth(400):setstyle(colstyle)
   --text:new(self.row2):settext("Name"):setcolor(self.colors.headerfont)
-  rect:new(self.row3):setcolor(self.colors.header):setwidth(200):setstyle(colstyle)
+  --rect:new(self.row3):setcolor(0x2F2F2F):setwidth(200):setstyle(colstyle)
   --text:new(self.row3):settext("Source"):setcolor(self.colors.headerfont)
 end
 
@@ -50,7 +56,11 @@ function onrowclick(self)
   self.that:setdepth(index-1)  
 end
 
-function callstack:add(info)
+function callstack:add(info)  
+  self.row1.t1 = text:new(self.row1):setautosize(false, true):settext("*"):setcolor(0x528A68):setfillcolor(0x2F2F2F):setstyle(colstyle)
+  self.row2.t2 = text:new(self.row2):setautosize(false, true):settext(info.name.." Line "..info.line):setcolor(0x528A68):setfillcolor(0x2F2F2F):setstyle(colstyle)
+  self.row3.t3 = text:new(self.row3):setautosize(false, true):settext(info.source:match("([^\\]+)$")):setcolor(0x528A68):setfillcolor(0x2F2F2F):setstyle(colstyle)
+--[[
   -- row1  
   self.r1 = group:new(self.row1):setstyle(colstyle)  
   rect:new(self.r1):setcolor(self.colors.row):setstyle(colstyle):setheight(12)
@@ -70,19 +80,19 @@ function callstack:add(info)
   self.r1.that, r2.that, r3.that = self, self, self
   --self.r1.onmousedown = onrowclick
   r2.onmousedown = onrowclick
-  r3.onmousedown = onrowclick
+  r3.onmousedown = onrowclick]]
 end
 
 function callstack:setdepth(depth)
-  local items = self.row1:items()
+  --[[local items = self.row1:items()
   for i=2, #items do
     local item = items[i] 
     if depth == i-1 then
-      item.text:settext("*")
+      item.t1:settext("*")
     else
-      item.text:settext("")
+      item.t1:settext("")
     end
-  end  
+  end ]] 
 end
 
 return callstack

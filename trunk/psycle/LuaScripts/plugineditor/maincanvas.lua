@@ -9,6 +9,7 @@
 -- local serpent = require("psycle.serpent")
 
 local scintilla = require("psycle.ui.canvas.scintilla")
+local lexer = require("psycle.ui.canvas.lexer")
 local sci = require("scintilladef")
 local scilex = require("scilexerdef")
 
@@ -26,7 +27,7 @@ local splitter = require("psycle.ui.canvas.splitter")
 local search = require("search")
 local pluginexplorer = require("pluginexplorer")
 local callstack = require("callstack")
-
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local maincanvas = canvas:new()
 
@@ -39,25 +40,28 @@ function maincanvas:new()
 end
 
 function maincanvas:init()
-  self:setcolor(settings.canvas.background);
-  
-    
+  self:setcolor(settings.canvas.colors.background);      
   self.search = search:new(self):hide()
   self.search:style():setalign(style.ALBOTTOM)
-  self.search.dosearch:connect(maincanvas.onsearch, self)
-  
+  self.search.dosearch:connect(maincanvas.onsearch, self)  
   self:inittollbar()
   self.outputs = tabgroup:new(self):setheight(120)
   self.outputs:style():setalign(style.ALBOTTOM + style.ALFIXED)  
   self.output = scintilla:new()
+  self.output:setforegroundcolor(settings.sci.default.foreground)
+  self.output:setbackgroundcolor(settings.sci.default.background) 
+  self.output:styleclearall()
+  self.output:setlinenumberforegroundcolor(0x939393)
+  self.output:setlinenumberbackgroundcolor(0x232323)
   self.outputs:add(self.output, "Output")
   self.callstack = callstack:new(nil, self)  
   self.outputs:add(self.callstack, "Call stack")  
   self.splitter = splitter:new(self, splitter.HORZ)
-  
   self.pluginexplorer = pluginexplorer:new(self):setwidth(201)  
   self.pluginexplorer:style():setalign(style.ALLEFT)     
   self.pluginexplorer:setfilepath("test")
+  self.pluginexplorer:setfillcolor(settings.canvas.colors.background)
+  self.pluginexplorer:settextcolor(settings.canvas.colors.foreground)
   self.pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
   self.splitter2 = splitter:new(self, splitter.VERT)
   self.fileopen = fileopen:new()
@@ -96,20 +100,54 @@ function maincanvas:dopageexist(fname)
   return found
 end
 
-function maincanvas:setlexer(page)
+function maincanvas:convertargb(color)
+  local v = -1
+  if color ~= -1 then
+    local r = bit32.band(bit32.rshift(color, 16), 0xFF)
+    local g = bit32.band(bit32.rshift(color, 8), 0xFF)
+    local b = bit32.band(color, 0xFF)               
+    v = bit32.bor(bit32.bor(r, bit32.lshift(g, 8)), bit32.lshift(b, 16))
+    bit32.band(bit32.band(bit32.rshift(v, 16), bit32.rshift(v, 8)), bit32.rshift(v, 0))
+  end
+  return v
+end
+
+function maincanvas:setforegroundstyle(page, style, color)
+  if color ~= -1 then    
+    page:f(sci.SCI_STYLESETFORE, style, self:convertargb(color))     
+  end
+end
+
+function maincanvas:setbackgroundstyle(page, style, color)
+  if color ~= -1 then        
+    page:f(sci.SCI_STYLESETBACK, style, self:convertargb(color))     
+  end
+end
+
+function maincanvas:setlexer(page)  
   page:f(sci.SCI_SETLEXER, scilex.SCLEX_LUA, 0)
-  page:f(sci.SCI_SETKEYWORDS, settings.lexer.keywords, 0)
-  page:f(sci.SCI_STYLESETSIZE, sci.STYLE_DEFAULT, settings.lexer.font.size)
-  page:f(sci.SCI_STYLESETFONT, sci.STYLE_DEFAULT, settings.lexer.font.name) 
-  page:f(sci.SCI_STYLECLEARALL, 0, 0)
-  for k, v in pairs(settings.lexer.colors) do       
-     local r = bit32.band(bit32.rshift(v, 16), 0xFF)
-     local g = bit32.band(bit32.rshift(v, 8), 0xFF)
-     local b = bit32.band(v, 0xFF)               
-     v = bit32.bor(bit32.bor(r, bit32.lshift(g, 8)), bit32.lshift(b, 16))
-     bit32.band(bit32.band(bit32.rshift(v, 16), bit32.rshift(v, 8)), bit32.rshift(v, 0))
-     page:f(sci.SCI_STYLESETFORE, scilex["SCE_C_"..k], v)     
-  end  
+  page:setforegroundcolor(0xCACACA)
+  page:setbackgroundcolor(settings.sci.default.background)   
+  page:styleclearall()
+  page:setlinenumberforegroundcolor(0x939393)
+  page:setlinenumberbackgroundcolor(0x232323)    
+  page:setselbackgroundcolor(0xFFFFFF)  
+  page:setselalpha(75)
+  local lex = lexer:new()
+  lex:setkeywords(settings.sci.lexer.keywords)
+  lex:setcommentcolor(settings.sci.lexer.commentcolor)
+  lex:setcommentlinecolor(settings.sci.lexer.commentlinecolor)
+  lex:setcommentdoccolor(settings.sci.lexer.commentdoccolor)
+  lex:setidentifiercolor(settings.sci.lexer.identifiercolor)
+  lex:setnumbercolor(settings.sci.lexer.numbercolor)
+  lex:setstringcolor(settings.sci.lexer.stringcolor)
+  lex:setwordcolor(settings.sci.lexer.wordcolor)
+  page:setlexer(lex)
+         
+  page:f(sci.SCI_STYLESETSIZE, sci.STYLE_DEFAULT, settings.sci.lexer.font.size)
+  page:f(sci.SCI_STYLESETFONT, sci.STYLE_DEFAULT, settings.sci.lexer.font.name) 
+  page:setcaretcolor(0x939393)
+    
 end
 
 function maincanvas:createpage()  
@@ -160,6 +198,7 @@ function maincanvas:setcallstack(trace)
     self.callstack:add(trace[i])
   end 
   self.callstack:setdepth(1)
+  self.callstack:align()
 end
 
 function maincanvas:createnewpage()
@@ -197,7 +236,8 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:initselectplugintoolbar(parent)
-  local selectmachine = toolicon:new(self.tg):settext("no plugin loaded"):setsize(100, 20)
+  local t = toolbar:new(self.tg)
+  local selectmachine = toolicon:new(t):settext("no plugin loaded"):setsize(100, 20)
   local that = self
   function selectmachine:onclick()
     local name, path = psycle.selmachine()
@@ -207,14 +247,15 @@ function maincanvas:initselectplugintoolbar(parent)
       self:settext(name):fls()      
     end    
   end 
-  return selectmachine
-end
+  -- local newproject = toolicon:new(t, settings.picdir.."plus.png", 0xFFFFFF)
+  return t
+end  
 
 function maincanvas:initfiletoolbar()  
   local t = toolbar:new(self.tg)
   local inew = toolicon:new(t, settings.picdir.."new.png", 0xFFFFFF)
   local iopen = toolicon:new(t, settings.picdir.."open.png", 0xFFFFFF)
-  local isave = toolicon:new(t, settings.picdir.."save.png", 0xFFFFFF)            
+  local isave = toolicon:new(t, settings.picdir.."save.png", 0xFFFFFF)  
   local that = self    
   function inew:onclick() that:createnewpage() end  
   function iopen:onclick() that.fileopen:show() end
@@ -275,13 +316,13 @@ function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)
 end
 
 function maincanvas:displaysearch(ev)
-  self.search:show()  
-  self:updatealign()
-  self.search:onfocus()
+  self.search:show():onfocus()
+  self:align()
 end
 
 function maincanvas:onpluginexplorerclick(ev) 
    if ev.filename ~= "" then
+    psycle.output(ev.path..ev.filename)
      self:openfromfile(ev.path..ev.filename, 0)
    end
 end

@@ -17,7 +17,7 @@ local settings = {
   colors = {
     default = {
       bg = cfg:get("pvc_row4beat"),
-      text = cfg:get("pvc_font"),
+      text = 0xB0C8B1,
       checker = cfg:get("pvc_font")
     },
     mousepress = {
@@ -46,11 +46,11 @@ function checkbox:init(param)
   self.checkgroup:style():setalign(style.ALLEFT)
                          :setmargin(0, 0, 4, 0)
   self.checkrect = rect:new(self.checkgroup)                       
-                       :setcolor(settings.colors.default.bg)
+                       :setfillcolor(settings.colors.default.bg)
   self.checkrect:style():setalign(style.ALLEFT)         
   self.checktext = text:new(self.checkgroup)
                        :setpos(3, 0)
-                       :setcolor(settings.colors.default.checker)
+                       :setfillcolor(settings.colors.default.checker)
                                               
   --self.checktext:style():setalign(style.ALLEFT)
   
@@ -63,10 +63,10 @@ function checkbox:init(param)
     psycle.output("ondown")
     that.check_ = not that.check_
     if that.check_ then
-      that.checkrect:setcolor(settings.colors.mousepress.bg)
+      that.checkrect:setfillcolor(settings.colors.mousepress.bg)
       that.checktext:settext("x")
     else
-      that.checkrect:setcolor(settings.colors.default.bg)
+      that.checkrect:setfillcolor(settings.colors.default.bg)
       that.checktext:settext("")
     end
     that.onclick(self.check)

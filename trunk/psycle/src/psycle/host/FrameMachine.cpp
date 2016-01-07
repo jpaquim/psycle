@@ -90,7 +90,9 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine(Machine* pMachine, CChildView* wndView_, CFrameMachine** windowVar_)
-		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0), barmenu(0), custom_menubar(0)
+		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0)
+    //, barmenu(0)
+    //, custom_menubar(0)
 		{
 			//Use OnCreate.
 		}
@@ -122,8 +124,8 @@ namespace psycle { namespace host {
       
 			if (_machine->_type == MACH_LUA)
 			{        
-        barmenu.setcmenu(GetMenu());
-        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(&barmenu).get();
+        /*barmenu.setcmenu(GetMenu());
+        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(&barmenu).get();*/
 			}
 
 			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
@@ -192,9 +194,9 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnClose() 
 		{
-      if (custom_menubar) {        
+      /*if (custom_menubar) {        
         custom_menubar->remove(GetMenu(), 2);        
-      }
+      }*/
 			KillTimer(ID_TIMER_PARAM_REFRESH);
 			CFrameWnd::OnClose();
 		}

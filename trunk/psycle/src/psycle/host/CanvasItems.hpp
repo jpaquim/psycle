@@ -10,7 +10,6 @@ namespace host  {
 namespace ui {
 namespace canvas {
 
-
 class Rect : public Item {
  public:
   Rect() : Item() {
@@ -22,14 +21,15 @@ class Rect : public Item {
   static std::string type() { return "canvasrect"; }
   virtual void Draw(Graphics* g, Region& draw_region);
 
-  void SetPos(double x1, double y1, double width, double height) {
+  void set_pos(const ui::Rect& rect) {
     STR();
-    x_ = x1;
-    y_ = y1;
-    width_ = width;
-    height_ = height;
+    x_ = rect.left();
+    y_ = rect.top();
+    width_ = rect.width();
+    height_ = rect.height();
     FLS();
   }
+  ui::Rect pos() const { return ui::Rect(x_, y_, x_ + width_, y_ + height_); }  
 
   virtual void OnSize(double width, double height) {
     STR();
@@ -37,17 +37,9 @@ class Rect : public Item {
     height_ = height;
     FLS();
   }
-
-  void pos(double &x, double &y, double &w, double &h) const {
-    x = x_;
-    y = y_;
-    w = width();
-    h = height();
-  }
-  double width() const { return width_; }
-  double height() const { return height_; }
+  
   // fill colors
-  void SetFillColor(ARGB color) { fillcolor_ = color; FLS(); }
+  void set_fill_color(ARGB color) { fillcolor_ = color; FLS(); }
   ARGB fillcolor() const { return fillcolor_; }
   // stroke colors
   void SetStrokeColor(ARGB color) { strokecolor_ = color; FLS(); }
@@ -119,8 +111,15 @@ class Line : public Item {
 
 class Text : public Item {
  public:
-  Text() : Item() { Init(1.0); }  
-  Text(const std::string& text) : text_(text) { Init(1.0); }
+  Text() : Item(), 
+      color_(0),
+      font_(ui::Systems::instance().CreateFont()) {
+  }
+  Text(const std::string& text) : 
+      color_(0),
+      text_(text), 
+      font_(ui::Systems::instance().CreateFont()) { 
+  }
 
   static std::string type() { return "canvastext"; }
 
@@ -130,19 +129,21 @@ class Text : public Item {
   const std::string& text() const { return text_; }
   void SetColor(ARGB color) { color_ = color; FLS(); }
   ARGB color() const { return color_; }
-  void SetFont(const CFont& font) {
-    LOGFONT lf;
-    const_cast<CFont&>(font).GetLogFont(&lf);
-    font_.DeleteObject();
-    font_.CreateFontIndirect(&lf);
-  }
+  void SetFont(const Font& font) { font_.reset(font.Clone()); }
+
+  virtual void OnSize(double w, double h) { size_.set_size(w, h); }
   
  private:
-  void Init(double zoom);
   std::string text_;
   ARGB color_;
-  CFont font_;
+  std::auto_ptr<Font> font_;
   mutable int text_w, text_h;
+  ui::Size size_;
+};
+
+struct IDHandler {  
+  static int id_counter;
+  // static std::map<std::uint16_t, CWndItem<T>*> id_map_;
 };
 
 // mfc wraper
@@ -154,14 +155,14 @@ class CWndItem : public ui::canvas::Item {
       ui::canvas::Item(),
       id_(newid()),      
       p_wnd_(dummy_wnd()) {
-    id_map_[id_] = this;
+//    id_map_[id_] = this;
     needsupdate();  
   }  
   virtual ~CWndItem() { control_.DestroyWindow(); }
 
   virtual void Draw(ui::Graphics* g, ui::Region& draw_region) {                    
-    double cx = zoomabsx();
-    double cy = zoomabsy();
+    double cx = abs_pos().left();
+    double cy = abs_pos().top();
     CRect rc;
     control_.GetClientRect(&rc);
     std::stringstream str;          
@@ -171,14 +172,14 @@ class CWndItem : public ui::canvas::Item {
 
   virtual void set_parent(const Item::WeakPtr& parent) { 
     canvas::Item::set_parent(parent);
-    canvas::Canvas* c = root();
+    canvas::Canvas* c = (Canvas*) root();
     if (parent.expired()) {
       p_wnd_ = dummy_wnd();
       control_.SetParent(p_wnd_);
-    } else if (c && c->wnd() && c->wnd() != p_wnd_) {       
-       p_wnd_ = c->wnd();
+    } else if (c && dynamic_cast<CWnd*>(root()->imp()) != p_wnd_) {       
+       p_wnd_ = dynamic_cast<CWnd*>(root()->imp());
        control_.SetParent(p_wnd_);
-       c->wnd()->RegisterMfcCtrl(shared_from_this(), ctrl().GetDlgCtrlID());
+     //  c->wnd()->RegisterMfcCtrl(shared_from_this(), ctrl().GetDlgCtrlID());
     }
   }
   virtual bool onupdateregion() { 
@@ -187,20 +188,38 @@ class CWndItem : public ui::canvas::Item {
     rgn_->SetRect(0, 0, rc.Width(), rc.Height());
     return true;
   }
-  virtual void OnMessage(ui::canvas::CanvasMsg msg) {
-    if (msg == ui::canvas::HIDE) {
-      control_.ShowWindow(SW_HIDE);
+  virtual void OnMessage(ui::canvas::WindowMsg msg, int param) {    
+    if (msg == FOCUS && param == id()) {
+      Canvas* c = (Canvas*) root();
+      if (c) {
+        c->SetFocus(shared_from_this());
+      }
+      return;
+    } else
+    if (msg == HIDE) {
+      Canvas* c = (Canvas*) root();
+      if (c) {
+        if (c->prevent_fls()) {
+          control_.SetWindowPos(NULL, 0, 0, 0, 0, 
+            SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE | SWP_HIDEWINDOW);
+        } else {
+          control_.ShowWindow(SW_HIDE);
+        }
+      } 
     } 
-    if (msg == ui::canvas::SHOW && visible()) {
-      int cx = zoomabsx();
-      int cy = zoomabsy(); 
+    if (msg == SHOW && visible()) {      
+      double cx = abs_pos().left();
+      double cy = abs_pos().top();
       CRect rc;
       control_.GetClientRect(&rc);
-      control_.MoveWindow(cx, cy, rc.Width(), rc.Height());
-      control_.ShowWindow(SW_SHOW);     
+      if (rc.left != cx || rc.top != cy) {
+        control_.SetWindowPos(NULL, cx, cy, cx, cy, SWP_NOSIZE | SWP_SHOWWINDOW);
+      } else {
+        control_.ShowWindow(SW_SHOW);
+      }
     }
-    if (msg == ui::canvas::ONWND) {
-      CWnd* wnd = root()->wnd();      
+    if (msg == ONWND) {
+      CWnd* wnd = dynamic_cast<CWnd*>((root())->imp());
       if (!wnd) {
         p_wnd_ = dummy_wnd();
         control_.SetParent(p_wnd_);        
@@ -209,42 +228,34 @@ class CWndItem : public ui::canvas::Item {
         p_wnd_ = wnd;
         control_.SetParent(p_wnd_);
         // todo correct clipping
-        /*control_.ModifyStyle(0, WS_CLIPSIBLINGS); 
-         CRgn rgn;
-         rgn.CreateRectRgn(0, 0, 10, 10);  
-         control_.SetWindowRgn(rgn, true);*/
-        if (visible() && IsInGroupVisible()) {
-          int cx = zoomabsx();
-          int cy = zoomabsy();
+        //control_.ModifyStyle(0, WS_CLIPSIBLINGS); 
+        // CRgn rgn;
+         //rgn.CreateRectRgn(0, 0, 10, 10);  
+         //control_.SetWindowRgn(rgn, true);
+        if (visible() && IsInGroupVisible()) {          
           CRect rc;
           control_.GetClientRect(&rc);
-          control_.MoveWindow(cx, cy, rc.Width(), rc.Height());
+          control_.MoveWindow(abs_pos().left(), abs_pos().top(), rc.Width(), rc.Height());
           control_.ShowWindow(SW_SHOW);
         }
       }
     }
   }  
 
-  virtual void SetXY(double x, double y) {  
-    CRect rc;
-    control_.GetClientRect(&rc);
-    SetPos(x, y, rc.Width(), rc.Height());    
-  }  
-
   virtual void OnSize(double w, double h) {
-    SetPos(x_, y_, w, h); 
+    set_pos(ui::Rect(x_, y_, x_ + w, y_ + h)); 
   }
 
-  virtual void SetPos(double x, double y, double w, double h) {
+  virtual void set_pos(const ui::Rect& pos) {
     CRect rc;
     control_.GetClientRect(&rc);
-    int cx = zoomabsx() + (x-x_);
-    int cy = zoomabsy() + (y-y_);
-    if (cx != rc.left || cy != rc.top || w != rc.Width() || h != rc.Height()) { 
+    int cx = abs_pos().left() + (pos.left() - x_);
+    int cy = abs_pos().top() + (pos.top() - y_);
+    if (cx != rc.left || cy != rc.top || pos.width() != rc.Width() || pos.height() != rc.Height()) { 
       STR();
-      x_ = x;
-      y_ = y; 
-      ctrl().MoveWindow(cx, cy, w, h); //, SWP_NOREDRAW);    
+      x_ = pos.left();
+      y_ = pos.top(); 
+      ctrl().MoveWindow(cx, cy, pos.width(), pos.height()); //, SWP_NOREDRAW);    
       FLS();
     }
   }
@@ -263,18 +274,17 @@ class CWndItem : public ui::canvas::Item {
   CWnd* p_wnd() { return p_wnd_; }
   const CWnd* p_wnd() const { return p_wnd_; }    
   int id() const { return id_; }    
-  static CWndItem<T>* FindById(int id) {
+  /*static CWndItem<T>* FindById(int id) {
     std::map<std::uint16_t, CWndItem<T>*>::const_iterator it 
       = id_map_.find(id);
     return it!=id_map_.end() ? it->second : 0;
-  }
+  }*/
  
   T& ctrl() { return control_; }
   const T& ctrl() const { return control_; }  
-
-  
+    
  protected:
-  static int newid() { return id_counter++; }  
+  static int newid() { return IDHandler::id_counter++; }  
   virtual void OnFocus() { ctrl().SetFocus(); }
   virtual void OnKillFocus() { ::SetFocus(NULL); }
  private:
@@ -287,8 +297,8 @@ class CWndItem : public ui::canvas::Item {
   int id_;
 
   T control_;  
-  static int id_counter;
-  static std::map<std::uint16_t, CWndItem<T>*> id_map_;
+
+  
   static CWnd dummy_wnd_;
   CWnd* p_wnd_;
 };
@@ -296,11 +306,10 @@ class CWndItem : public ui::canvas::Item {
 template <typename T>
 CWnd CWndItem<T>::dummy_wnd_;
 
-template <typename T>
-int CWndItem<T>::id_counter = ID_DYNAMIC_CONTROLS_BEGIN;
 
-template <typename T>
-std::map<std::uint16_t, CWndItem<T>*> CWndItem<T>::id_map_;
+
+//template <typename T>
+//std::map<std::uint16_t, CWndItem<T>*> CWndItem<T>::id_map_;
 
 
 class Button : public CWndItem<CButton> {
@@ -346,7 +355,7 @@ class Tree : public CWndItem<CTree> {
   Tree() : CWndItem<CTree>() { 
     ctrl().Create(WS_CHILD, CRect(10,10,200,100), p_wnd(), id());    
     #pragma warning(disable:4996)
-    ctrl().onclick.connect(bind(&Tree::onclick, this,  _1));
+    ctrl().onclick.connect(bind(&Tree::onclick, this,  _1));    
   }   
   ~Tree() {
   }
@@ -371,6 +380,14 @@ class Tree : public CWndItem<CTree> {
 
   std::list<boost::shared_ptr<TreeItem> > SubChildren();    
   std::list<boost::shared_ptr<TreeItem> > children_;
+
+  virtual void set_fill_color(ARGB color) { 
+    ctrl().SetBkColor(ToCOLORREF(color));  
+  }
+
+  virtual void set_text_color(ARGB color) {
+    ctrl().SetTextColor(ToCOLORREF(color));
+  }
 };
 
 class TreeItem : public boost::enable_shared_from_this<TreeItem> {
@@ -381,7 +398,7 @@ class TreeItem : public boost::enable_shared_from_this<TreeItem> {
   typedef boost::weak_ptr<TreeItem> WeakPtr;
   typedef std::list<TreeItem::Ptr> TreeItemList; 
 
-  TreeItem() {
+  TreeItem() : command_(0) {
     tvInsert.hParent = NULL;
     tvInsert.hInsertAfter = NULL;
     tvInsert.item.mask = TVIF_TEXT;
@@ -391,7 +408,11 @@ class TreeItem : public boost::enable_shared_from_this<TreeItem> {
 
   virtual ~TreeItem() { }
 
-  virtual void OnClick() {   }
+  virtual void OnClick() { 
+    if (command_) {
+      command_->Execute();
+    }
+  }
 
   void InsertItem(TreeItem::Ptr item) {
     if (item) {
@@ -460,6 +481,7 @@ private:
   TreeItemList children_;
   TreeItem::WeakPtr parent_; 
   Tree::WeakPtr tree_;
+  Command* command_;
 };
 
 class TextTreeItem : public TreeItem {
@@ -481,6 +503,45 @@ class TextTreeItem : public TreeItem {
  private:
    std::string text_;
 };
+
+struct Lexer {
+  Lexer() : 
+      comment_color_(0), 
+      comment_line_color_(0),
+      comment_doc_color_(0),
+      identifier_color_(0) {    
+  }
+
+  void set_keywords(const std::string& keywords) { keywords_ = keywords; }
+  const std::string& keywords() const { return keywords_; }
+  void set_comment_color(ARGB color) { comment_color_ = color; }
+  ARGB comment_color() const { return comment_color_; }
+  void set_comment_line_color(ARGB color) { comment_line_color_ = color; }
+  ARGB comment_line_color() const { return comment_line_color_; }
+  void set_comment_doc_color(ARGB color) { comment_doc_color_ = color; }
+  ARGB comment_doc_color() const { return comment_doc_color_; }
+  void set_identifier_color(ARGB color) { identifier_color_ = color; }
+  ARGB identifier_color() const { return  identifier_color_; }
+  void set_number_color(ARGB color) { number_color_ = color; }
+  ARGB number_color() const { return number_color_; }
+  void set_word_color(ARGB color) { word_color_ = color; }
+  ARGB word_color() const { return word_color_; }
+  void set_string_color(ARGB color) { string_color_ = color; }
+  ARGB string_color() const { return string_color_; }
+  void set_operator_color(ARGB color) { operator_color_ = color; }
+  ARGB operator_color() const { return operator_color_; }
+  void set_character_code_color(ARGB color) { character_code_color_ = color; }
+  ARGB character_code_color() const { return  character_code_color_; }
+  void set_preprocessor_color(ARGB color) { preprocessor_color_ = color; }
+  ARGB preprocessor_color() const { return  preprocessor_color_; }
+  
+private:
+  std::string keywords_;
+  ARGB comment_color_, comment_line_color_, comment_doc_color_,
+       identifier_color_, number_color_, string_color_, word_color_,       
+       operator_color_, character_code_color_, preprocessor_color_;
+};
+
 
 class Scintilla : public CWndItem<CScintilla> {
  public:
@@ -512,10 +573,44 @@ class Scintilla : public CWndItem<CScintilla> {
   void LoadFile(const std::string& filename) { ctrl().LoadFile(filename); }      
   void SaveFile(const std::string& filename) { ctrl().SaveFile(filename); }  
   bool has_file() const { return ctrl().has_file(); }
+  void set_lexer(const Lexer& lexer) {
+    ctrl().f(SCI_SETKEYWORDS, 0, lexer.keywords().c_str());
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_COMMENT, ToCOLORREF(lexer.comment_color())); 
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_COMMENTLINE, ToCOLORREF(lexer.comment_line_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_COMMENTDOC, ToCOLORREF(lexer.comment_doc_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_IDENTIFIER, ToCOLORREF(lexer.identifier_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_NUMBER, ToCOLORREF(lexer.number_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_STRING, ToCOLORREF(lexer.string_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_WORD, ToCOLORREF(lexer.word_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_PREPROCESSOR, ToCOLORREF(lexer.identifier_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_OPERATOR, ToCOLORREF(lexer.operator_color()));
+    ctrl().f(SCI_STYLESETFORE, SCE_LUA_CHARACTER, ToCOLORREF(lexer.character_code_color()));        
+  }
+  void set_foreground_color(ARGB color) { ctrl().set_foreground_color(ToCOLORREF(color)); }
+  ARGB foreground_color() const { return ToARGB(ctrl().foreground_color()); }  
+  void set_background_color(ARGB color) { ctrl().set_background_color(ToCOLORREF(color)); }
+  ARGB background_color() const { return ToARGB(ctrl().background_color()); }
+
+  void set_linenumber_foreground_color(ARGB color) { ctrl().set_linenumber_foreground_color(ToCOLORREF(color)); }
+  ARGB linenumber_foreground_color() const { return ToARGB(ctrl().linenumber_foreground_color()); }  
+  void set_linenumber_background_color(ARGB color) { ctrl().set_linenumber_background_color(ToCOLORREF(color)); }
+  ARGB linenumber_background_color() const { return ToARGB(ctrl().linenumber_background_color()); }
+
+  void set_sel_foreground_color(ARGB color) { ctrl().set_sel_foreground_color(ToCOLORREF(color)); }
+  //ARGB sel_foreground_color() const { return ToARGB(ctrl().sel_foreground_color()); }  
+  void set_sel_background_color(ARGB color) { ctrl().set_sel_background_color(ToCOLORREF(color)); }
+  //ARGB sel_background_color() const { return ToARGB(ctrl().sel_background_color()); }
+  void set_sel_alpha(int alpha) { ctrl().set_sel_alpha(alpha); }
+
+  void set_ident_color(ARGB color) { ctrl().set_ident_color(color); }
+
+   void set_caret_color(ARGB color) { ctrl().set_caret_color(ToCOLORREF(color)); }
+   ARGB caret_color() const { return ToARGB(ctrl().caret_color()); }  
+
+  void StyleClearAll() { ctrl().StyleClearAll(); }
   const std::string& filename() const { return ctrl().filename(); }
   bool is_modified() const { return ctrl().is_modified(); } 
-  virtual void OnFirstModified() {}
-
+  virtual void OnFirstModified() {}  
 };
 
 class Edit : public CWndItem<CEdit> {
@@ -538,7 +633,7 @@ class ScrollBar : public CWndItem<CScrollBar> {
   static std::string type() { return "canvasscrollbaritem"; }
   ScrollBar() : CWndItem<CScrollBar>() {    
     ctrl().Create(SBS_VERT | WS_CHILD | WS_VISIBLE, CRect(0, 0, 100, 20), p_wnd(), id());
-    SetPos(0, 0, GetSystemMetrics(SM_CXVSCROLL), 100);
+    set_pos(ui::Rect(0, 0, GetSystemMetrics(SM_CXVSCROLL), 100));
   }  
   virtual void OnScroll(int pos) {}  
   void SetScrollRange(int minpos, int maxpos) { 
@@ -562,7 +657,7 @@ class ScrollBar : public CWndItem<CScrollBar> {
     }    
     ctrl().DestroyWindow();        
     ctrl().Create(cs, rc, p_wnd(), id());
-    SetPos(rc.left, rc.top, rc.Width(), rc.Height());
+    set_pos(ui::Rect(rc.left, rc.top, rc.Width(), rc.Height()));
   }
   void SetScrollPos(int pos) { ctrl().SetScrollPos(pos); }
   int scroll_pos() const { return ctrl().GetScrollPos(); }
@@ -571,6 +666,113 @@ class ScrollBar : public CWndItem<CScrollBar> {
     width = GetSystemMetrics(SM_CXVSCROLL);
     height = GetSystemMetrics(SM_CXHSCROLL);
   }  
+};
+
+enum LineFormat {
+  DOTTED, DASHED, SOLID, DOUBLE, GROOVE, RIDGE, INSET, OUTSET, NONE, HIDDEN
+};
+
+struct BorderStyle {
+  BorderStyle() : top(SOLID), right(SOLID), bottom(SOLID), left(SOLID) {}
+  BorderStyle(LineFormat left, LineFormat top, LineFormat right,
+              LineFormat bottom) :
+      left(left), top(top), right(right), bottom(bottom) {
+  }
+  LineFormat left, top, right, bottom;  
+};
+
+struct BorderRadius {
+  BorderRadius() { left_top = right_top = left_bottom = right_bottom = 0.0; }
+  BorderRadius(double left_top, double right_top, double left_bottom, double right_bottom) : 
+      left_top(left_top),
+      right_top(right_top),
+      left_bottom(left_bottom),
+      right_bottom(right_bottom) {
+  }
+
+  bool empty() const { 
+    return left_top == 0 &&  right_top == 0 && left_bottom == 0 
+           && right_bottom == 0;
+  }
+  double left_top;
+  double right_top;
+  double left_bottom;
+  double right_bottom;
+};
+
+class LineBorder : public ui::Ornament {
+ public:
+  LineBorder() : color_(0xFFFFFF) {}
+  LineBorder(ARGB color) : color_(color) {}  
+   
+  virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {    
+    DrawBorder(item, g, draw_region);
+  }
+  virtual std::auto_ptr<ui::Rect> padding() const {
+    return std::auto_ptr<ui::Rect>(new ui::Rect(1, 1, 1, 1));
+  }
+
+  void set_border_radius(const BorderRadius& radius) { border_radius_ = radius; }
+  const BorderRadius& border_radius() const { return border_radius_; }
+  void set_border_style(const BorderStyle& style) { border_style_ = style; }
+  const BorderStyle& border_style() const { return border_style_; }
+  
+ private:  
+  void DrawBorder(Window::Ptr& item, Graphics* g, Region& draw_region) {
+    g->SetColor(color_);  
+    ui::Rect rc = item->region().bounds();
+    if (border_radius_.empty()) {
+      g->DrawRect(rc);
+    } else { 
+      if (border_style_.top != NONE) {
+        g->DrawLine(rc.left() + border_radius_.left_top, rc.top(), rc.right() - border_radius_.right_top - 1, rc.top());
+      }
+      if (border_style_.bottom != NONE) {
+        g->DrawLine(rc.left() + border_radius_.left_bottom, rc.bottom() - 1, rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1); 
+      }
+      if (border_style_.left != NONE) {
+        g->DrawLine(rc.left(), rc.top() + border_radius_.left_top, rc.left(), rc.bottom() - border_radius_.left_bottom -1);
+      }
+      if (border_style_.right != NONE) {
+        g->DrawLine(rc.right() - 1, rc.top() + border_radius_.right_top, rc.right() - 1, rc.bottom() - border_radius_.right_bottom);  
+      }
+      if (border_radius_.left_top != 0 && border_style_.top != NONE) {
+        g->DrawArc(ui::Rect(rc.left(), rc.top(), rc.left() + 2*border_radius_.left_top, rc.top() + 2*border_radius_.left_top), 
+                  Point(rc.left() + border_radius_.left_top, rc.top()), Point(rc.left(), rc.top() + border_radius_.left_top));
+      }
+      if (border_radius_.right_top != 0 && border_style_.top != NONE) {
+        g->DrawArc(ui::Rect(rc.right() - 2*border_radius_.right_top - 1, rc.top(), rc.right() - 1, rc.top() + 2*border_radius_.right_top), 
+                Point(rc.right() - 1, rc.top() + border_radius_.right_top), Point(rc.right() - border_radius_.right_top - 1, rc.top()));    
+      }
+      if (border_radius_.left_bottom != 0 && border_style_.bottom != NONE ) {
+        g->DrawArc(ui::Rect(rc.left(), rc.bottom() - 2*border_radius_.left_bottom - 1, rc.left() + 2*border_radius_.left_bottom, rc.bottom() - 1), 
+               Point(rc.left(), rc.bottom() - border_radius_.left_bottom - 1), Point(rc.left() + border_radius_.left_bottom, rc.bottom() - 1));
+      }
+      if (border_radius_.right_bottom != 0 && border_style_.bottom != NONE) {
+        g->DrawArc(ui::Rect(rc.right() - 2*border_radius_.right_bottom, rc.bottom() - 2*border_radius_.right_bottom - 1, rc.right() - 1, rc.bottom() - 1), 
+                Point(rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1), Point(rc.right() - 1, rc.bottom() - border_radius_.right_bottom - 1));
+      }
+    }
+  }  
+  
+  ARGB color_;
+  int thickness_;
+  BorderRadius border_radius_;
+  BorderStyle border_style_;
+};
+
+class OrnamentFactory {
+ public:
+  static OrnamentFactory &Instance() {  // Singleton instance
+    static OrnamentFactory instance;
+    return instance;
+  }
+
+  LineBorder* CreateLineBorder() { return new LineBorder(); }
+  LineBorder* CreateLineBorder(ARGB color) { return new LineBorder(color); }
+
+  private:
+   OrnamentFactory() {}    
 };
 
 

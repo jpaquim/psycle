@@ -103,6 +103,7 @@
     <ClCompile>
       <PreprocessorDefinitions>LUASOCKET_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
@@ -158,6 +159,7 @@
     <ClInclude Include="src\psycle\host\LuaHelper.hpp" />
     <ClInclude Include="src\psycle\host\LuaInternals.hpp" />
     <ClInclude Include="src\psycle\host\Menu.hpp" />
+    <ClInclude Include="src\psycle\host\MfcUi.hpp" />
     <ClInclude Include="src\psycle\host\Ui.hpp" />
     <ClInclude Include="src\psycle\host\version.hpp" />
     <ClInclude Include="src\psycle\host\ASIOInterface.hpp" />
@@ -308,6 +310,8 @@
     <ClCompile Include="src\psycle\host\LuaGui.cpp" />
     <ClCompile Include="src\psycle\host\LuaInternals.cpp" />
     <ClCompile Include="src\psycle\host\Menu.cpp" />
+    <ClCompile Include="src\psycle\host\MfcUi.cpp" />
+    <ClCompile Include="src\psycle\host\Ui.cpp" />
     <ClCompile Include="src\psycle\host\WasapiDriver.cpp" />
     <ClCompile Include="src\psycle\host\WaveOut.cpp" />
     <ClCompile Include="src\psycle\host\MidiInput.cpp" />
