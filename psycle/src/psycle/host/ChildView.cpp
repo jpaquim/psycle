@@ -2501,13 +2501,15 @@ namespace psycle { namespace host {
         if (active_lua_) {
           RemoveLuaMenu();
           LuaPlugin* lp = active_lua_;
-          lp->custom_menubar.reset(0);
-          try {                 
-            lp->proxy().Reload();            
-            pParentMain->m_luaWndView->set_canvas(lp->canvas());            
-            lua_menu_->setcmenu(pParentMain->GetMenu());  
-            lp->GetMenu(lua_menu_);
-            lp->set_crashed(false);
+          try {            
+           lp->proxy().Reload();            
+           ChangeCanvas(lp->canvas().lock().get());
+
+//            ui::MenuBar::Ptr menu_bar = lp->menu_bar();
+  //          menu_bar->
+    //        lua_menu_->setcmenu(pParentMain->GetMenu());  
+      //      lp->GetMenu(lua_menu_);
+        //    lp->set_crashed(false);
           } catch (std::exception e) {
             AfxMessageBox(e.what());
           }        
@@ -2524,15 +2526,13 @@ namespace psycle { namespace host {
         if (plug->crashed()) return;
         ui::canvas::Canvas::WeakPtr user_view = plug->canvas();        
         if (!user_view.expired()) {          
-          CRect rect;            
-          GetWindowRect(&rect);
-          pParentMain->ScreenToClient(rect);          
-          pParentMain->m_wndView.ShowWindow(SW_HIDE);          
-          pParentMain->m_luaWndView->set_canvas(user_view);
-          pParentMain->m_luaWndView->SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);                  
-          pParentMain->m_luaWndView->ShowWindow(SW_SHOW);          
-          GetParent()->SetActiveWindow();
-          active_lua_ = plug;          
+          ChangeCanvas(user_view.lock().get());
+          active_lua_ = plug;
+//          active_lua_->custom_menubar.reset(0);
+  //        lua_menu_->setcmenu(pParentMain->GetMenu());
+    //      active_lua_->GetMenu(lua_menu_);
+      //    active_lua_->InvalidateMenuBar();
+          Invalidate(false);
         } else {  
           try {
             plug->OnExecute();
@@ -2547,7 +2547,29 @@ namespace psycle { namespace host {
         }
       }
 		}
-     
+    
+    void CChildView::ChangeCanvas(ui::Window* canvas) {
+      CRect rect;            
+      GetWindowRect(&rect);
+      pParentMain->ScreenToClient(rect);          
+      pParentMain->m_wndView.ShowWindow(SW_HIDE);
+      CWnd* child = pParentMain->m_luaWndView->GetWindow(GW_CHILD);
+      if (child) {
+        child->ShowWindow(SW_HIDE);            
+      }
+      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();
+      if (!imp) {
+        imp = ui::mfc::WindowImp::Make(canvas, pParentMain->m_luaWndView.get(), 2000);                        
+      }
+      imp->ShowWindow(SW_SHOW);
+      canvas->set_imp(imp);
+      canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
+      canvas->OnMessage(ui::ONWND);          
+      pParentMain->m_luaWndView->MoveWindow(rect.left, rect.top, rect.Width(), rect.Height());
+      pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
+      //user_view.lock()->Show();
+      GetParent()->SetActiveWindow();      
+    }
 }}
 
 // graphics operations, private headers included only by this translation unit

@@ -4,16 +4,17 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
+#include <boost/shared_ptr.hpp>
+
 namespace psycle {
 namespace host {
 namespace ui {
-
-
 
 class Menu;
 
 class MenuBar {
  public:
+  typedef boost::shared_ptr<MenuBar> Ptr;
   MenuBar() {}
   virtual ~MenuBar() = 0;
   virtual void add(Menu* menu) = 0;
@@ -21,6 +22,7 @@ class MenuBar {
   virtual void remove(CMenu* menu, int pos) = 0;
   virtual bool needsupdate() const = 0;
   virtual void setupdate(bool update) = 0;
+  //virtual void setcmenu(CMenu* menu) = 0;
 };
 
 inline MenuBar::~MenuBar() {}
@@ -38,7 +40,7 @@ class MenuItem {
   virtual void check() = 0;
   virtual void uncheck() = 0;
   virtual bool checked() const = 0;
-  virtual void set_menu(Menu* menu) = 0;
+  //virtual void set_root(Menu* menu) = 0;
 };
 
 inline MenuItem::~MenuItem() {}
@@ -82,6 +84,9 @@ class MenuBar : public ui::MenuBar {
   void remove(CMenu* menu, int pos);
   bool needsupdate() const { return update_; }
   void setupdate(bool update) { update_ = update; }
+  /*void setroot(CMenu* menu) {
+
+  }*/
  private:
   std::vector<ui::Menu*> items;
   bool update_;

@@ -19,6 +19,8 @@
 
 #include <universalis/os/terminal.hpp>
 
+#include "Ui.hpp"
+
 // #include <vld.h>
 
 #include <sstream>
@@ -40,7 +42,7 @@ namespace psycle { namespace host {
 
 		CPsycleApp theApp; /// The one and only CPsycleApp object
 		
-		CPsycleApp::CPsycleApp() :m_uUserMessage(0)
+		CPsycleApp::CPsycleApp() : m_uUserMessage(0)
 		{			
 		   //	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	
           // _CrtSetBreakAlloc( 129 );
@@ -64,7 +66,7 @@ namespace psycle { namespace host {
 			InitCommonControlsEx(&InitCtrls);
 
 			CWinAppEx::InitInstance();
-
+                  
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
 			CInstanceChecker instanceChecker;

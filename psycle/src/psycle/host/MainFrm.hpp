@@ -97,7 +97,7 @@ namespace psycle { namespace host {
       
 			
 			CChildView  m_wndView;
-      boost::shared_ptr<ui::canvas::View> m_luaWndView;
+      boost::shared_ptr<CWnd> m_luaWndView;
 			//CRebar      m_rebar;
 			CToolBar    m_wndToolBar;
 			CBitmap     m_tbBm;

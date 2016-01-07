@@ -9,12 +9,12 @@
 namespace psycle {
 namespace host {
 
-    namespace ui { 
-    namespace canvas  { 
-      class View;
+  namespace ui { 
+    class Window; 
+    namespace canvas { 
       class Canvas;
-    }
-    }
+    } 
+  }
 
 		class Machine;
 
@@ -40,9 +40,8 @@ namespace host {
          rect.bottom = 500;
          return true;
        }
-      
-       private:
-         std::auto_ptr<ui::canvas::View> canvas_view_;
+     private:
+      void ChangeCanvas(ui::Window* canvas);     
     };
 
 		/// Native Knob-based UI for psycle plugins and non-GUI VSTs

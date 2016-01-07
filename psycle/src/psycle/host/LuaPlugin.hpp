@@ -64,14 +64,7 @@ namespace psycle { namespace host {
     const PluginInfo& info() const { return proxy().info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
     virtual void AfterTweaked(int numparam);
-    std::auto_ptr<ui::MenuBar> GetMenu(ui::Menu* menu) {
-      if (!custom_menubar.get()) {
-        custom_menubar.reset(proxy_.get_menu(menu));
-      } else {
-        custom_menubar->append(menu);
-      }
-      return custom_menubar;
-    }
+    ui::MenuBar::Ptr menu_bar() { return proxy().menu_bar(); }
     std::string help();
     virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }
     void OnMenu(UINT id) { proxy_.call_menu(id); }
@@ -111,7 +104,7 @@ namespace psycle { namespace host {
     void unlock() const { proxy_.unlock(); }
 
     void InvalidateMenuBar() {
-      if (custom_menubar.get()) custom_menubar->setupdate(true);
+      // if (custom_menubar.get()) custom_menubar->setupdate(true);
     }
 
     void DoExit() { do_exit_ = true; }
@@ -134,6 +127,11 @@ namespace psycle { namespace host {
 
   private:
     virtual void OnTimerViewRefresh() {
+      /*if (custom_menubar.get()) {
+        if (custom_menubar->needsupdate()) {
+          custom_menubar->setupdate(false);
+        }
+      }*/
       if (do_exit_) {
        LuaUiExtentions::instance()->Remove(this_ptr());
       } else if (do_reload_) {
@@ -141,7 +139,7 @@ namespace psycle { namespace host {
         try {
           try {
             proxy().Reload();
-            custom_menubar.reset(0);
+//            custom_menubar.reset(0);
           } CATCH_WRAP_AND_RETHROW(*this);
         } catch (std::exception& ) {                
         }
@@ -170,8 +168,7 @@ namespace psycle { namespace host {
       unsigned char cmd,
       unsigned char val);
     public:
-    std::auto_ptr<ui::MenuBar> custom_menubar;
-    bool do_exit_, do_reload_;    
+      bool do_exit_, do_reload_;    
 
     static int idex_; // auto index for host extensions
   };

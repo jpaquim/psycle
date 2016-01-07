@@ -9,9 +9,13 @@
 
 machine = require("psycle.machine"):new()
 
+local codegen = require("codegen")
 local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
 local sysmetrics = require("psycle.ui.systemmetrics")
+local menubar = require("psycle.ui.menubar")
+local menu = require("psycle.ui.menu")
+local menuitem = require("psycle.ui.menuitem")
 
 -- plugin info
 function machine:info()
@@ -32,7 +36,8 @@ end
 function machine:init(samplerate)
    self.maincanvas = maincanvas:new()
    self.editmacidx_ = -1
-   self:setcanvas(self.maincanvas)     
+   self:setcanvas(self.maincanvas)
+   self:initmenu()   
 end
 
 function machine:createframe()  
@@ -65,6 +70,25 @@ function machine:onexecute(msg, macidx, trace)
     self:createframe()
   end
   self.frame:show() 
+end
+
+function machine:initmenu()
+   self.menubar = menubar:new()
+   self.menu1 = menu:new("Plugineditor")
+   self.menubar:add(self.menu1)
+   self.menu2 = menu:new("New")
+   self.menu1:add(self.menu2)
+   self.menuitem1 = menuitem:new("Generator")
+   --self.menuitem1:addlistener(self)
+   self.menuitem2 = menuitem:new("Effect")
+   self.menu2:add(self.menuitem1)
+   self.menu2:add(self.menuitem2)   
+   self:setmenus(self.menubar)
+end
+
+function machine:onmenu(menuitem)
+  psycle.output("here")
+
 end
 
 return machine

@@ -89,9 +89,6 @@
     <Filter Include="psycle\engine\machine\ladspa">
       <UniqueIdentifier>{9435c005-f88b-4d7f-905c-4880a1a27bc1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="psycle\mfc\scintilla">
-      <UniqueIdentifier>{a7082389-bb63-41df-814e-a7533182308f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\psycle\host\Constants.hpp">
@@ -541,6 +538,9 @@
     <ClInclude Include="src\psycle\host\DesignPatterns.hpp">
       <Filter>psycle</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\MfcUi.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">
@@ -910,6 +910,12 @@
       <Filter>psycle\mfc\UIControls</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\CanvasItems.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MfcUi.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Ui.cpp">
       <Filter>psycle\mfc</Filter>
     </ClCompile>
   </ItemGroup>

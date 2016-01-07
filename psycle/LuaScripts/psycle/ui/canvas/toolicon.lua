@@ -119,8 +119,17 @@ end
 function toolicon:settoolbar(toolbar) self.toolbar = toolbar end
 
 function toolicon:onsize(cw, ch)
-  self.w = cw
-  self.h = ch
+  psycle.output("onsize:"..cw..","..ch)
+  if (cw ~= -1) then
+    self.w = cw
+  else
+    self.w = 20
+  end
+  if (ch ~= -1) then
+    self.h = ch
+  else
+    self.h = 20
+  end
 end
 
 function toolicon:onupdateregion(rgn)

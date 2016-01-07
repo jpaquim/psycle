@@ -36,8 +36,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
     CanvasParamView::CanvasParamView(CFrameMachine* frame, Machine* effect) :
-          CBaseParamView(frame) {
-         canvas_view_.reset(new ui::canvas::View());
+          CBaseParamView(frame) {         
     }
 
     int CanvasParamView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -45,16 +44,12 @@ namespace psycle { namespace host {
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
 			{
 				return -1;
-			}           
-      canvas_view_->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-		    CRect(0, 0, 200, 200), this, AFX_IDW_PANE_FIRST, NULL); 
+			}        
+//      canvas_view_.reset(new ui::canvas::View(this, AFX_IDW_PANE_FIRST));      
 			return 0;
 		}
 
-    void CanvasParamView::OnDestroy() { 
-      if (canvas_view_.get() != 0) { 
-         canvas_view_->DestroyWindow();
-      }  
+    void CanvasParamView::OnDestroy() {       
     }
 
 		BOOL CanvasParamView::PreCreateWindow(CREATESTRUCT& cs)
@@ -68,11 +63,16 @@ namespace psycle { namespace host {
 		}				
 
     void CanvasParamView::set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) {
-      canvas_view_->set_canvas(canvas);
+      if (!canvas.expired()) {
+        ChangeCanvas(canvas.lock().get());
+      }
     }
 
     void CanvasParamView::OnSize(UINT nType, int cx, int cy) {
-      canvas_view_->MoveWindow(0, 0, cx, cy);
+      CWnd* child = GetWindow(GW_CHILD);
+      if (child) {
+        child->MoveWindow(0, 0, cx, cy);
+      }      
     }
 
     void CanvasParamView::OnReload(Machine* mac)
@@ -80,8 +80,26 @@ namespace psycle { namespace host {
       LuaPlugin* lp = (LuaPlugin*) (mac);
       ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired() && lp->ui_type() == MachineUiType::CUSTOMWND) {
-        canvas_view_->set_canvas(lp->canvas());
+        ChangeCanvas(canvas.lock().get());
       }
+    }
+
+    void CanvasParamView::ChangeCanvas(ui::Window* canvas) {
+      CRect rect;            
+      GetWindowRect(&rect);
+      ScreenToClient(rect);
+      CWnd* child = GetWindow(GW_CHILD);
+      if (child) {
+        child->ShowWindow(SW_HIDE);            
+      }
+      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();
+      if (!imp) {
+        imp = ui::mfc::WindowImp::Make(canvas, this, 2000);                        
+      }
+      imp->ShowWindow(SW_SHOW);
+      canvas->set_imp(imp);
+      canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
+      canvas->OnMessage(ui::ONWND);            
     }
 
    BEGIN_MESSAGE_MAP(CNativeView, CWnd)

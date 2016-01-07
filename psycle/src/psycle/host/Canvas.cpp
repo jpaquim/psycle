@@ -11,28 +11,16 @@ namespace host  {
 namespace ui {
 namespace canvas {
 
-Item::Ptr Item::nullpointer;
-
 void Item::Detach() { 
   if (!parent_.expired()) {
     parent_.lock()->Remove(shared_from_this());
   }
 }
 
-double Item::acczoom() const {
-  double zoom = 1.0;
-  /*Item::ConstWeakPtr p = parent();
-  while (!p.expired()) {
-    zoom *= p.lock()->zoom();
-    p = p.lock()->parent();
-  }*/
-  return zoom;
-}
-
-Canvas* Item::root() {  
-  Item::Ptr item = shared_from_this();
+Window* Item::root() {  
+  Window::Ptr item = shared_from_this();
   do {
-    if (item->is_root()) return (Canvas*) item.get();
+    if (item->is_root()) return item.get();
     item = item->parent().lock();
   } while (item);  
   return 0;
@@ -46,14 +34,14 @@ void Item::needsupdate() {
 }
 
 void Item::PreventFls() {
-  Canvas* c = root();
+  Canvas* c = (Canvas*) root();
   if (c) {  
     c->prevent_fls_ = true;
   }
 }
 
 void Item::EnableFls() {
-  Canvas* c = root();
+  Canvas* c = (Canvas*) root();
   if (c) { 
     c->prevent_fls_ = false;
   }
@@ -61,14 +49,27 @@ void Item::EnableFls() {
 
 void Item::SetSize(double w, double h) {
   STR();
-  //PreventFls(); 
-  OnSize(w, h);     
-  //EnableFls();
+  OnSize(w, h);
   FLS();
 }
 
+void Item::set_ornament(boost::shared_ptr<ui::Ornament> ornament) {
+  ornament_ = ornament;
+  if (ornament) {
+    std::auto_ptr<ui::Rect> opad = ornament->padding();
+    ui::Rect pad = style()->padding();
+    pad.set(pad.left() + opad->left(),
+            pad.top() + opad->top(),
+            pad.right() + opad->right(),
+            pad.bottom() + opad->bottom());
+    style()->set_padding(pad);
+  } else if (has_style()) { 
+    style()->set_padding(ui::Rect());
+  }
+}
+
 void Item::GetFocus() {
-  Canvas* c = root();
+  Canvas* c = (Canvas*) root();
   if (c) {
     c->StealFocus(shared_from_this());
   }
@@ -76,7 +77,7 @@ void Item::GetFocus() {
 
 void Item::STR() {  
   fls_rgn_.reset(region().Clone());
-  fls_rgn_->Offset(zoomabsx(), zoomabsy());
+  fls_rgn_->Offset(pos().left(), pos().top());
   has_store_ = true;
 }
 
@@ -84,7 +85,7 @@ void Item::FLS() {
   if (has_store_) {
     needsupdate();
     std::auto_ptr<Region> tmp(region().Clone());
-    tmp->Offset(zoomabsx(), zoomabsy());
+    tmp->Offset(pos().left(), pos().top());
     fls_rgn_->Combine(*tmp, RGN_OR);
     has_store_ = false;    
   } else {
@@ -92,9 +93,9 @@ void Item::FLS() {
     has_store_ = false;
   }
   if (visible() && !parent().expired()) {
-    Canvas* c = this->root();
-    if (c && c->wnd()) {
-      c->Invalidate(*fls_rgn_);
+    Window* canvas = root();
+    if (canvas) {
+      canvas->Invalidate(*fls_rgn_);
     }
   }
 }
@@ -102,87 +103,51 @@ void Item::FLS() {
 void Item::FLS(const Region& rgn) {
   std::auto_ptr<Region> tmp(rgn.Clone());
   tmp->Combine(region(), RGN_AND);
-  tmp->Offset(zoomabsx(), zoomabsy());
+  tmp->Offset(pos().left(), pos().top());
   STR(); has_store_ = false;
   fls_rgn_->Combine(*tmp, RGN_AND);
   if (!parent().expired()) {
-    Canvas* c = this->root();
-    if (c) {      
-      c->Invalidate(*fls_rgn_);
+    Window* canvas = root();
+    if (canvas) {
+      canvas->Invalidate(*fls_rgn_);
     }
-  }
+  }  
 }
 
 void Item::SetBlitXY(double x, double y) {    
   BlitInfo* bi = new BlitInfo();    
   bi->dx = x - x_;
   bi->dy = y - y_;    
-  blit_.reset(bi);
-  double xr, yr, w, h;
-  region().BoundRect(xr, yr, w, h);    
+  blit_.reset(bi);  
   x_ = x; y_ = y;
-  Canvas* c = root();
+  Canvas* c = (Canvas*) root();
   if (c) {
     c->item_blit_ = true;
   }
   FLS();
 }
 
-void Item::UpdateAlign() {
-  ui::Dimension dim;  
-  CalcDimension(dim);
-  Canvas* c = root();
-  bool old_save(false);
-  if (c) {
-    old_save = c->save_;
-    c->SetSave(true);
-  }
-  DoAlign();
-  if (c) {    
-    c->SetSave(old_save);
-    c->Flush();
-  }    
-}
-
-double Item::zoomabsx() const {
-  std::vector<Item::ConstPtr> items;
-  Item::ConstWeakPtr p = parent();
+ui::Rect Item::abs_pos() const {    
+  std::vector<Window::ConstPtr> items;
+  Window::ConstWeakPtr p = parent();
   while (!p.expired()) {
     items.push_back(p.lock());
     p = p.lock()->parent();
   }
   double x = x_;
- // double zoom = 1.0;
-  std::vector<Item::ConstPtr>::const_reverse_iterator rev_it = items.rbegin();
+  double y = y_; 
+  std::vector<Window::ConstPtr>::const_reverse_iterator rev_it = items.rbegin();
   for ( ; rev_it != items.rend(); ++rev_it) {
-    Item::ConstPtr item = *rev_it;
-    // zoom *= item->parent() ? item->parent()->zoom() : 1.0;
-    x += item->x();
+    Item::ConstPtr item = *rev_it;    
+    x += item->pos().left();
+    y += item->pos().top();
   }
-  return x;
-}
-
-double Item::zoomabsy() const {
-  std::vector<Item::ConstPtr> items;
-  Item::ConstWeakPtr p = parent();
-  while (!p.expired()) {
-    items.push_back(p.lock());
-    p = p.lock()->parent();
-  }
-  double y = y_;
-  // double zoom = 1.0;
-  std::vector<Item::ConstPtr>::reverse_iterator rev_it = items.rbegin();
-  for ( ; rev_it != items.rend(); ++rev_it) {
-    const Item::ConstPtr item = *rev_it;
-    //zoom *= item->parent() ? item->parent()->zoom() : 1.0;
-    y += item->y();
-  }
-  return y;
+  return ui::Rect(x, y, x + dim().width(), y + dim().height());
 }
 
 bool Item::IsInGroupVisible() const {
   bool res = visible();
-  Item::ConstWeakPtr p = parent();
+  Window::ConstWeakPtr p = parent();
   while (!p.expired()) {
     res = p.lock()->visible();
     if (!res) {
@@ -199,13 +164,7 @@ void Item::Show() {
     visible_ = true;       
     OnMessage(SHOW);        
     FLS();   
-  }
-  //  Canvas* c = root();
-  // if (c) {
-  // ui::Dimension dim;
-  // c->CalcDimension(dim);
-  // c->DoAlign();
-  // } 
+  }  
 }
 
 void Item::Hide() { 
@@ -218,193 +177,18 @@ void Item::Hide() {
 }
 
 void Item::DrawBackground(Graphics* g, Region& draw_region) {
-  int alpha = GetAlpha(fill_color());
-  if (alpha != 0xFF) {
-    g->SetColor(fill_color());
-    g->FillRegion(*rgn_);
-  }  
-}
-
-
-void Group::CalcDimension(ui::Dimension& dim) {
-  double w(0);
-  double h(0);  
-  double left(0);
-  double right(0);
-  double top(0);
-  double bottom(0);
-  int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
-  for (iterator i = items_.begin(); i != items_.end(); ++i) {
-    Item::Ptr item = *i;
-    if (!item->visible()) {
-      continue;
+  if (draw_region.bounds().height() > 0) {
+    ARGB color = fill_color();
+    int alpha = GetAlpha(color);
+    if (alpha != 0xFF) {
+      g->SetColor(color);
+      g->FillRegion(*rgn_);
+    } 
+    if (!ornament_.expired()) { 
+      Item::Ptr t = shared_from_this();
+      ornament_.lock()->Draw(t, g, draw_region);
     }
-    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;
-    ui::Dimension idim;    
-    item->CalcDimension(idim);    
-    // width
-    {
-      double diff = right - left;
-      switch (item_style & bitmask) {
-        case ALLEFT:
-          left += item->dim_.width();
-          if (diff == 0) {          
-            w += item->dim_.width();
-            right += item->dim_.width();
-          } else {
-            double expand = item->dim_.width() - diff;
-            if (expand > 0) {
-              w += expand;
-              right += expand;
-            }
-          }
-        break;
-        case ALTOP:
-        case ALBOTTOM:
-          if (diff == 0) {
-            w += item->dim_.width();
-            right += item->dim_.width();
-          } else {
-            double expand = item->dim_.width() - diff;
-            if (expand > 0) {
-              w += expand;
-              right += expand;
-            }
-          }      
-        break;
-        case ALRIGHT:        
-          if (diff == 0) {          
-            w += item->dim_.width();
-            right += item->dim_.width();
-          } else {
-            double expand = item->dim_.width() - diff;
-            if (expand > 0) {
-              w += expand;
-              right += expand;
-            } else
-            if (expand == 0) {
-              right -= item->dim_.width();
-            }
-          }
-        break;      
-        default:
-          // w = std::max(item->dim_.width(), w);
-        break;
-      }    
-    }
-
-    // height
-    {
-      double diff = bottom - top;
-      switch (item_style & bitmask) {
-        case ALTOP:
-          top += item->dim_.height();
-          if (diff == 0) {          
-            h += item->dim_.height();
-            bottom += item->dim_.height();
-          } else {
-            double expand = item->dim_.height() - diff;
-            h += expand;
-            bottom += expand;            
-          }
-        break;
-        case ALLEFT:
-        case ALRIGHT:
-          if (diff == 0) {
-            h += item->dim_.height();
-            bottom += item->dim_.height();
-          } else {
-            double expand = item->dim_.height() - diff;
-            if (expand > 0) {
-              h += expand;
-              bottom += expand;
-            }
-          }      
-        break;
-        case ALBOTTOM:
-          if (diff == 0) {          
-            h += item->dim_.height();
-            bottom += item->dim_.height();
-          } else {
-            double expand = item->dim_.height() - diff;
-            if (expand > 0) {
-              h += expand;
-              bottom += expand;
-            }
-          }
-        break;            
-        default:
-          h = std::max(item->dim_.height(), h);
-        break;
-      }    
-    }
-  } // end loop 
-  if (has_style()) {
-    const Margin& margin = style()->margin();
-    w = w + margin.left() + margin.right();
-    h = h + margin.top() + margin.bottom();
   }
-  dim.set_size(w, h);  
-  dim_ = dim;
-}
-
-void Group::DoAlign() {
-  Item::Ptr client;
-  double left(0);
-  double right(width());
-  double top(0);
-  double bottom(height());
-  for (iterator i = items_.begin(); i != items_.end(); ++i) {
-    Item::Ptr item = *i;
-    if (!item->visible()) continue;
-    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;    
-    Margin margin;
-    if (item->has_style()) {
-      margin = item->style()->margin();
-    }
-    double margin_w = margin.left() + margin.right();
-    double margin_h = margin.top() + margin.bottom();
-    int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
-    switch (item_style & bitmask) {
-      case ALCLIENT:
-        client = item;
-      break;      
-      case ALLEFT:
-        item->SetPos(left + margin.left(), top + margin.top(), item->dim_.width() - margin_w, bottom - top - margin_h); 
-        left += item->dim_.width();
-      break;
-      case ALRIGHT:
-        item->SetPos(right - item->dim_.width() + margin.right(), top + margin.top(), item->dim_.width() - margin_w, bottom - top - margin_h); 
-        right -= item->dim_.width();
-      break;
-      case ALTOP:
-        {
-          double h = (item_style & ALFIXED) ? item->height() : item->dim_.height();
-          item->SetPos(left + margin.left(), top + margin.top(),  right - left - margin_w, h - margin_h); 
-          top += h;
-        }
-      break;
-      case ALBOTTOM:
-        {
-          double h = (item_style & ALFIXED) ? item->height() : item->dim_.height();
-          item->SetPos(left + margin.left(), bottom - h + margin.top(), right - left - margin_w, h - margin_h); 
-          bottom -= h;
-        }
-      break;
-      default:
-      break;
-    } // end switch  
-    if (item_style != ALCLIENT) {
-      item->DoAlign();
-    }
-  } // end loop 
-  if (client) {
-    client->SetPos(left, top,  right - left, bottom - top); 
-    client->DoAlign();
-  }
-}
-
-void Group::OnSize(double cw, double ch) {  
 }
 
 bool Item::IsInGroup(Item::WeakPtr group) const {  
@@ -425,68 +209,70 @@ void Group::Draw(Graphics* g, Region& draw_region) {
     std::auto_ptr<Region> item_rgn(item->region().Clone());
     double dx(0), dy(0);
     if (!item->parent().expired()) {
-      dx = item->zoomabsx();
-      dy = item->zoomabsy();
-      item_rgn->Offset(dx, dy);
+      dx = item->abs_pos().left();
+      dy = item->abs_pos().top();
+      item_rgn->Offset(dx, dy);      
     }
     int erg = item_rgn->Combine(draw_region, RGN_AND);    
     if (erg != NULLREGION) {      
       g->SaveOrigin();
-      g->Translate(item->x(), item->y());
-      if (item->has_clip()) {        
+      ui::Rect pad;
+/*      if (item->has_style()) {
+        pad = item->style()->padding();
+      }*/
+      g->Translate(item->pos().left(), item->pos().top());
+/*      if (item->has_clip()) {        
         g->SetClip(item_rgn.get());
-      }
-      if (item->blit_.get()) {        
-        double x, y, w, h;
-        item_rgn->BoundRect(x, y, w, h);                    
-        mfc::Region tmp;
+      }*/
+      /*if (item->blit_.get()) {
+        ui::Rect bounds = item_rgn->bounds();          
+        std::auto_ptr<ui::Region> tmp(ui::Systems::instance().CreateRegion());
         if (item->blit_->dy != 0) {
-          g->CopyArea(-item->x(), -item->y(), w, h, 0, item->blit_->dy);
+          g->CopyArea(-item->x(), -item->y(), bounds.width(), bounds.height(), 0, item->blit_->dy);
           if (item->blit_->dy > 0) {
-            tmp.SetRect(x, y, w, item->blit_->dy);              
+            tmp->SetRect(bounds.left(), bounds.top(), bounds.width(), item->blit_->dy);
           } else {            
-            tmp.SetRect(x, y+h+item->blit_->dy, w, -item->blit_->dy);              
+            tmp->SetRect(bounds.left(), bounds.top()+item->blit_->dy, bounds.width(), -item->blit_->dy);
           }          
-          item->draw_rgn_ = &tmp;          
-          g->SetClip(&tmp);
-          item->Draw(g, tmp);
+          item->draw_rgn_ = tmp.get();          
+          g->SetClip(tmp.get());
+          item->Draw(g, *tmp);
           g->SetClip(0);
         }
         if (item->blit_->dx != 0) {
-          g->CopyArea(-item->x(), -item->y(), w, h, item->blit_->dx, 0);
+          g->CopyArea(-item->x(), -item->y(), bounds.width(), bounds.height(), item->blit_->dx, 0);
           if (item->blit_->dx > 0) {
-            tmp.SetRect(x, y, item->blit_->dx, h);              
+            tmp->SetRect(bounds.left(), bounds.top(), item->blit_->dx, bounds.height());              
           } else {            
-            tmp.SetRect(x+w+item->blit_->dx, y, -item->blit_->dx, h);              
+            tmp->SetRect(bounds.left()+bounds.width()+item->blit_->dx, bounds.left(), -item->blit_->dx, bounds.height());              
           }          
-          item->draw_rgn_ = &tmp;          
-          g->SetClip(&tmp);
-          item->DrawBackground(g, tmp);
-          item->Draw(g, tmp);
+          item->draw_rgn_ = tmp.get();          
+          g->SetClip(tmp.get());
+          item->DrawBackground(g, *tmp);
+          item->Draw(g, *tmp);
           g->SetClip(0);
         }
-        item->draw_rgn_ = &tmp;          
-        g->SetClip(&tmp);
-        item->DrawBackground(g, tmp);
-        item->Draw(g, tmp);
+        item->draw_rgn_ = tmp.get();          
+        g->SetClip(tmp.get());
+        item->DrawBackground(g, *tmp);        
+        item->Draw(g, *tmp);       
         g->SetClip(0);
         item->blit_.reset(0);
         item->draw_rgn_ = 0;
         root()->item_blit_ = false;
-      } else {
-        item->draw_rgn_ = item_rgn.get();
+      } else {       */
+      //  item->draw_rgn_ = item_rgn.get();
         item->DrawBackground(g, *item_rgn);        
         item->Draw(g, *item_rgn);
-        item->draw_rgn_ = 0;
-      }
-      if (item->has_clip()) {
+      //  item->draw_rgn_ = 0;
+      //}
+      /*if (item->has_clip()) {
         g->SetClip(0);
-      }
+      }*/
       g->RestoreOrigin();
     }
   }
 }
-
 
 void Group::Add(const Item::Ptr& item) {  
   if (!item->parent().expired()) {
@@ -520,57 +306,50 @@ void Group::Remove(const Item::Ptr& item) {
   FLS();
 }
 
-void Group::Clear() {
-  STR();  
-  items_.clear();
-  FLS();
-}
-
 bool Group::onupdateregion() {  
-  std::auto_ptr<Region> rgn(new mfc::Region());  
+  std::auto_ptr<Region> rgn(ui::Systems::instance().CreateRegion());
   std::vector<Item::Ptr>::const_iterator it = items_.begin();
   bool first = true;
   for ( ; it != items_.end(); ++it) {
     Item::Ptr item = *it;  
     if (item->visible()) {
       std::auto_ptr<Region> tmp(item->region().Clone());      
-      tmp->Offset(item->x(), item->y());        
+      tmp->Offset(item->pos().left(), item->pos().top());        
       int nCombineResult = rgn->Combine(*tmp, RGN_OR);
       if (nCombineResult == NULLREGION) {
         rgn->Clear();
         first = true;
       } else if (first) {
-        rgn->Offset(-item->x(), -item->y());
+        rgn->Offset(-item->pos().left(), -item->pos().top());
         first = false;
       }     
     }
-  }   
-  if (w_ != -1) {
-    double x, y, w, h;
-    rgn->BoundRect(x, y, w, h);
-    mfc::Region rgn1(x, y, w_, h); 
-    if (w > w_) {
-      rgn->Combine(rgn1, RGN_AND);
+  }      
+  if (auto_size_width()) {
+    ui::Rect bounds = rgn->bounds();
+    std::auto_ptr<Region> rgn1(ui::Systems::instance().CreateRegion());
+    rgn1->SetRect(bounds.left(), bounds.top(), w_, bounds.height()); 
+    if (bounds.width() > w_) {
+      rgn->Combine(*rgn1, RGN_AND);
       rgn->w_cache_ = w_;      
     } else {
-      rgn->Combine(rgn1, RGN_OR);
+      rgn->Combine(*rgn1, RGN_OR);
       rgn->w_cache_ = w_;     
     }
   }
-  if (h_ != -1) {
-    double x, y, w, h;
-    rgn->BoundRect(x, y, w, h);
-    mfc::Region rgn1(x, y, w, h_); 
-    if (h > h_) {
-      rgn->Combine(rgn1, RGN_AND);
+  if (auto_size_height()) {
+    ui::Rect bounds = rgn->bounds();
+    std::auto_ptr<Region> rgn1(ui::Systems::instance().CreateRegion());
+    rgn1->SetRect(bounds.left(), bounds.top(), bounds.width(), h_); 
+    if (bounds.height() > h_) {
+      rgn->Combine(*rgn1, RGN_AND);
       rgn->h_cache_ = h_;
     } else {
-      rgn->Combine(rgn1, RGN_OR);      
+      rgn->Combine(*rgn1, RGN_OR);      
       rgn->h_cache_ = h_;     
     }
   }
-  rgn_.reset(rgn->Clone());
-  
+  rgn_.reset(rgn->Clone());  
   return true;
 }
 
@@ -596,13 +375,13 @@ int Group::zorder(Item::Ptr item) const {
   return z;
 }
 
-Item::Ptr Group::HitTest(double x, double y) {
-  Item::Ptr result;
-  ItemList::const_reverse_iterator rev_it = items_.rbegin();
+Window::Ptr Group::HitTest(double x, double y) {
+  Window::Ptr result;
+  Window::List::const_reverse_iterator rev_it = items_.rbegin();
   for (; rev_it != items_.rend(); ++rev_it) {
-    Item::Ptr item = *rev_it;
+    Window::Ptr item = *rev_it;
     item = item->visible() 
-           ? item->HitTest(x-item->x(), y-item->y())
+           ? item->HitTest(x-item->pos().left(), y-item->pos().top())
 		       : nullpointer; 
     if (item) {
       result = item;
@@ -612,31 +391,311 @@ Item::Ptr Group::HitTest(double x, double y) {
   return result;
 }
 
-void Group::OnMessage(CanvasMsg msg) {
+void Group::OnMessage(WindowMsg msg, int param) {
   for (iterator it = items_.begin(); it != items_.end(); ++it ) {
-    (*it)->OnMessage(msg);
+    (*it)->OnMessage(msg, param);
   }
 }
 
+void Group::set_aligner(const boost::shared_ptr<Aligner>& aligner) { 
+  aligner_ = aligner;
+  aligner_->set_group(boost::dynamic_pointer_cast<Group>(shared_from_this()));
+}
+  
+Window::List Aligner::dummy;
+
+void Group::Align() { 
+  Canvas* c = (Canvas*) root();
+  bool old_save(false);
+  if (c) {
+    old_save = c->save_;
+    c->SetSave(true);
+  }
+  if (aligner_) {
+    aligner_->Align();
+  }
+  if (c) {    
+    c->SetSave(old_save);
+    c->Flush();
+  }
+}
+// Aligner
+
+bool Aligner::full_align_ = true;
+
+void CalcDim::operator()(Aligner& aligner) const { aligner.CalcDimensions(); };
+void SetPos::operator()(Aligner& aligner) const { aligner.SetPositions(); };
+
+template<class T>
+void Aligner::PreOrderTreeTraverse(T& functor) {
+  Window* g = group_.lock().get();  
+  // cache pos information  
+  pos_ = g->pos(); //.set(g->pos().left(), g->y(), g->x() + g->width(), g->y() + g->height());
+  functor(*this);
+  for (iterator i = begin(); i != end(); ++i) {
+    Window::Ptr item = *i;
+    if (item->visible() && item->aligner()) {   
+      Aligner::Ptr al = item->aligner();
+      if (!item->aligner()->full_align() &&
+          al->pos_.left() == item->pos().left() &&
+          al->pos_.top() == item->pos().top() &&
+          al->pos_.width() == item->pos().width() &&
+          al->pos_.height() == item->pos().height()) {
+        continue;
+      }      
+      al->PreOrderTreeTraverse(functor);    
+    }
+  }  
+}
+
+template<class T>
+void Aligner::PostOrderTreeTraverse(T& functor) {  
+  for (iterator i = begin(); i != end(); ++i) {
+    Window::Ptr item = *i;
+    if (item->visible() && item->aligner()) { 
+      Aligner::Ptr al = item->aligner();
+      if (!al->full_align() &&
+          al->pos_.width() == item->pos().width() &&
+          al->pos_.height() == item->pos().height()) {
+        continue;
+      }  
+      al->PostOrderTreeTraverse(functor);
+    }
+  }
+  functor(*this);  
+}
+
+// DefaultAligner
+void DefaultAligner::CalcDimensions() {
+  double w(0);
+  double h(0);  
+  double left(0);
+  double right(0);
+  double top(0);
+  double bottom(0);
+  int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
+  for (iterator i = begin(); i != end(); ++i) {
+    Item::Ptr item = *i;
+    if (!item->visible()) {
+      continue;
+    }
+    ui::Size item_dim = item->aligner() ? item->aligner()->dim() : item->dim();
+    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;
+    // width
+    {
+      double diff = right - left;
+      switch (item_style & bitmask) {
+        case ALLEFT:
+          left += item_dim.width();
+          if (diff == 0) {          
+            w += item_dim.width();
+            right += item_dim.width();
+          } else {
+            double expand = item_dim.width() - diff;
+            if (expand > 0) {
+              w += expand;
+              right += expand;
+            }
+          }
+        break;
+        case ALTOP:
+        case ALBOTTOM:
+          if (diff == 0) {
+            w += item_dim.width();
+            right += item_dim.width();
+          } else {
+            double expand = item_dim.width() - diff;
+            if (expand > 0) {
+              w += expand;
+              right += expand;
+            }
+          }      
+        break;
+        case ALRIGHT:        
+          if (diff == 0) {          
+            w += item_dim.width();
+            right += item_dim.width();
+          } else {
+            double expand = item_dim.width() - diff;
+            if (expand > 0) {
+              w += expand;
+              right += expand;
+            } else
+            if (expand == 0) {
+              right -= item_dim.width();
+            }
+          }
+        break;      
+        default:
+          // w = std::max(item->dim_.width(), w);
+        break;
+      }    
+    }
+
+    // height
+    {
+      double diff = bottom - top;
+      switch (item_style & bitmask) {
+        case ALTOP:
+          top += item_dim.height();
+          if (diff == 0) {          
+            h += item_dim.height();
+            bottom += item_dim.height();
+          } else {
+            double expand = item_dim.height() - diff;
+            h += expand;
+            bottom += expand;            
+          }
+        break;
+        case ALLEFT:
+        case ALRIGHT:
+          if (diff == 0) {
+            h += item_dim.height();
+            bottom += item_dim.height();
+          } else {
+            double expand = item_dim.height() - diff;
+            if (expand > 0) {
+              h += expand;
+              bottom += expand;
+            }
+          }      
+        break;
+        case ALBOTTOM:
+          if (diff == 0) {          
+            h += item_dim.height();
+            bottom += item_dim.height();
+          } else {
+            double expand = item_dim.height() - diff;
+            if (expand > 0) {
+              h += expand;
+              bottom += expand;
+            }
+          }
+        break;            
+        default:
+          h = std::max(item_dim.height(), h);
+        break;
+      }    
+    }
+  } // end loop 
+  if (group_.lock()->has_style()) {
+    const ui::Rect& margin = group_.lock()->style()->margin();    
+    const ui::Rect& pad = group_.lock()->style()->padding();
+    if (w > 0 && h > 0) {
+      w += pad.left() + pad.right();
+      h += pad.top() + pad.bottom();       
+    }
+    w = w + margin.left() + margin.right();    
+    h = h + margin.top() + margin.bottom();     
+  }
+  dim_.set_size(w, h);  
+}
+
+
+void DefaultAligner::SetPositions() {
+  if (group_.expired()) {
+    return;
+  }
+  if (group_.lock()->region().bounds().empty()) {
+    return;
+  }
+  Item::Ptr client;
+  double left(0);
+  double right(group_.lock()->pos().width());
+  double top(0);
+  double bottom(group_.lock()->pos().height());  
+
+  for (iterator i = begin(); i != end(); ++i) {
+    Item::Ptr item = *i;
+    if (!item->visible()) continue;
+    ui::Size item_dim = item->aligner() ? item->aligner()->dim() : item->dim();
+    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;    
+    ui::Rect margin;    
+    if (item->has_style()) {
+      margin = item->style()->margin();
+    }
+    ui::Rect pad;
+    if (group_.lock()->has_style()) {
+      pad = group_.lock()->style()->padding();
+      margin.set(margin.left() + pad.left(),                 
+                 margin.top() + pad.top(),
+                 margin.right() - pad.right(),
+                 margin.bottom() - pad.bottom());
+    }
+    double margin_w = margin.left() + margin.right();
+    double margin_h = margin.top() + margin.bottom();
+    int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
+    switch (item_style & bitmask) {
+      case ALCLIENT:
+        client = item;
+      break;      
+      case ALLEFT:
+        {
+          double w = (item_style & ALFIXED) ? item->pos().width() + margin_w: item_dim.width();
+          item->set_pos(ui::Rect(left + margin.left(), 
+                                 top + margin.top(), 
+                                 left + margin.left() + w - margin_w, 
+                                 top + margin.top() + bottom - top - margin_h)); 
+          left += w;
+        }
+      break;
+      case ALRIGHT:
+        item->set_pos(ui::Rect(right - item_dim.width() + margin.right(), 
+                               top + margin.top(), 
+                               right - item_dim.width() + margin.right() + item_dim.width() - margin_w, 
+                               top + margin.top() + bottom - top - margin_h)); 
+        right -= item_dim.width();
+      break;
+      case ALTOP:
+        {
+          double h = (item_style & ALFIXED) ? item->pos().height() : item_dim.height();
+          item->set_pos(ui::Rect(left + margin.left(), 
+                                 top + margin.top(),  
+                                 left + margin.left() + right - left - margin_w, 
+                                 top + margin.top() + h - margin_h)); 
+          top += h;
+        }
+      break;
+      case ALBOTTOM:
+        {
+          double h = (item_style & ALFIXED) ? item->pos().height() : item_dim.height();
+          item->set_pos(ui::Rect(left + margin.left(), 
+                                 bottom - h + margin.top(), 
+                                 left + margin.left() + right - left - margin_w, 
+                                 bottom - h + margin.top() + h - margin_h)); 
+          bottom -= h;
+        }
+      break;
+      default:
+      break;
+    } // end switch      
+  } // end loop 
+  
+  if (client) {
+    client->set_pos(ui::Rect(left, top, right, bottom)); 
+  }
+}
+
+void DefaultAligner::Realign() {}
+
 // Canvas
-void Canvas::Init() {
+void Canvas::Init() {    
   is_root_ = true;
   steal_focus_ = item_blit_ = show_scrollbar = save_ = prevent_fls_ = false;
   bg_image_ = 0;  
   bg_width_ = bg_height_ = 0;
-  cw_ = pw_ = ch_ = ph_ = 300;
+  cw_ = ch_ = 300;
   nposv = nposh = 0;
   color_ = 0;
-  save_rgn_.SetRect(0, 0, cw_, ch_);    
-  cursor_ = LoadCursor(0, IDC_ARROW);
-  old_wnd_ = wnd_;  
+  save_rgn_->SetRect(0, 0, cw_, ch_);    
+  cursor_ = LoadCursor(0, IDC_ARROW); 
 }
 
 void Canvas::Draw(Graphics *g, Region& rgn) {
   if (IsSaving()) {
-    save_rgn_.Combine(rgn, RGN_OR);
-    DoDraw(g, save_rgn_);
-    save_rgn_.Clear();
+    save_rgn_->Combine(rgn, RGN_OR);
+    DoDraw(g, *save_rgn_);
+    save_rgn_->Clear();
   } else {
     DoDraw(g, rgn);
   }
@@ -661,23 +720,24 @@ void Canvas::DoDraw(Graphics *g, Region& rgn) {
     memDC.DeleteDC();*/
   } else {    
     if (!item_blit_) {
-      double x, y, width, height;
-      rgn.BoundRect(x, y, width, height);      
-      g->SetColor(color_);    
-      g->FillRect(x, y, width, height);
+      g->SetColor(color_);
+      ui::Rect bounds = rgn.bounds();    
+      g->FillRect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
     }    
   }
   Group::Draw(g, rgn);
 }
 
-
-
 void Canvas::OnSize(double cw, double ch) {  
-  cw_ = cw;
-  ch_ = ch;
-  needsupdate(); 
-  UpdateAlign();
-  Group::OnSize(cw, ch);
+  try {
+    cw_ = cw;
+    ch_ = ch;
+    needsupdate();    
+    Align();  
+    Group::OnSize(cw, ch);
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+  }
 }
 
 void Canvas::StealFocus(const Item::Ptr& item) {
@@ -700,157 +760,147 @@ void Canvas::SetFocus(const Item::Ptr& item) {
 // Events
 
 bool Canvas::WorkKeyDown(KeyEvent& ev) {
-  if (!focus_item_.expired()) {
-    Item::Ptr item = focus_item_.lock();   
-    WorkEvent(ev, &Item::OnKeyDown, item);    
-  } else {
-    ev.PreventDefault();
-    OnKeyDown(ev);
-  }  
+  try {
+    if (!focus_item_.expired()) {
+      Window::Ptr item = focus_item_.lock();   
+      WorkEvent(ev, &Window::OnKeyDown, item);    
+    } else {
+      ev.PreventDefault();
+      OnKeyDown(ev);
+    }
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+    error(e);    
+  }
   return !ev.is_work_parent();
 }
 
 void Canvas::WorkKeyUp(KeyEvent& ev) {
-  if (!focus_item_.expired()) {
-    Item::Ptr item = focus_item_.lock();
-    WorkEvent(ev, &Item::OnKeyDown, item);;
-  } else {
-    OnKeyUp(ev);  
+  try {
+    if (!focus_item_.expired()) {
+      Window::Ptr item = focus_item_.lock();
+      WorkEvent(ev, &Window::OnKeyDown, item);;
+    } else {
+      OnKeyUp(ev);  
+    }
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+    error(e);    
   }
 }
 
 void Canvas::WorkMouseDown(MouseEvent& ev) {
-  button_press_item_ = HitTest(ev.cx(), ev.cy());  
-  if (!button_press_item_.expired()) {        
-    Item::Ptr item = button_press_item_.lock();    
-    WorkEvent(ev, &Item::OnMouseDown, item);
-    button_press_item_ = item;    
+  try { 
+    button_press_item_ = HitTest(ev.cx(), ev.cy());  
+    if (!button_press_item_.expired()) {        
+      Window::Ptr item = button_press_item_.lock();    
+      WorkEvent(ev, &Window::OnMouseDown, item);
+      button_press_item_ = item;    
+    }
+    SetFocus(button_press_item_.lock());
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+    error(e);    
   }
-  SetFocus(button_press_item_.lock());
 }
 
 void Canvas::WorkDblClick(MouseEvent& ev) {
-  button_press_item_ = HitTest(ev.cx(), ev.cy());  
-  if (!button_press_item_.expired()) {        
-    Item::Ptr item = button_press_item_.lock();    
-    WorkEvent(ev, &Item::OnDblclick, item);        
+  try {
+    button_press_item_ = HitTest(ev.cx(), ev.cy());  
+    if (!button_press_item_.expired()) {        
+      Window::Ptr item = button_press_item_.lock();    
+      WorkEvent(ev, &Window::OnDblclick, item);        
+    }
+    SetFocus(button_press_item_.lock());
+    button_press_item_ = nullpointer;
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+    error(e);    
   }
-  SetFocus(button_press_item_.lock());
-  button_press_item_ = nullpointer;
 }
 
 void Canvas::WorkMouseUp(MouseEvent& ev) {
-  if (!button_press_item_.expired()) {
-    button_press_item_.lock()->OnMouseUp(ev);
-    button_press_item_.reset();
-  } else {
-    Item::Ptr item = HitTest(ev.cx(), ev.cy());  
-    WorkEvent(ev, &Item::OnMouseUp, item);
+  try {
+    if (!button_press_item_.expired()) {
+      button_press_item_.lock()->OnMouseUp(ev);
+      button_press_item_.reset();
+    } else {
+      Window::Ptr item = HitTest(ev.cx(), ev.cy());  
+      WorkEvent(ev, &Window::OnMouseUp, item);
+    }
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+    error(e);    
   }
 }
 
 void Canvas::WorkMouseMove(MouseEvent& ev) {
-  if (!button_press_item_.expired()) {        
-    Item::Ptr item = button_press_item_.lock();    
-    WorkEvent(ev, &Item::OnMouseMove, item);
-  } else {
-    Item::Ptr item = HitTest(ev.cx(), ev.cy());    
-    while (item) {
-      if (!mouse_move_.expired()  &&
-           mouse_move_.lock() != item
-         ) {
+  try {
+    if (!button_press_item_.expired()) {        
+      Window::Ptr item = button_press_item_.lock();    
+      WorkEvent(ev, &Window::OnMouseMove, item);
+    } else {
+      Window::Ptr item = HitTest(ev.cx(), ev.cy());    
+      while (item) {
+        if (!mouse_move_.expired()  &&
+             mouse_move_.lock() != item
+           ) {
+          mouse_move_.lock()->OnMouseOut(ev);
+        }       
+        item->OnMouseMove(ev);
+        if (ev.is_work_parent()) {        
+          item = item->parent().lock();  
+        } else {
+          mouse_move_ = item;
+          break;
+        }
+      }    
+      if (!item && !mouse_move_.expired()) {
         mouse_move_.lock()->OnMouseOut(ev);
-      }       
-      item->OnMouseMove(ev);
-      if (ev.is_work_parent()) {        
-        item = item->parent().lock();  
-      } else {
-        mouse_move_ = item;
-        break;
+        mouse_move_.reset();
       }
-    }    
-    if (!item && !mouse_move_.expired()) {
-      mouse_move_.lock()->OnMouseOut(ev);
-      mouse_move_.reset();
     }
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());
+    error(e);    
   }
-}
-
-void Canvas::WorkOnSize(int cw, int ch) {
-  OnSize(cw, ch);
-}
-
-void Canvas::WorkTimer() {
-  // OnSize(cw, ch);
 }
 
 void Canvas::Invalidate(Region& rgn) { 
   if (!prevent_fls_) {
     if (IsSaving()) {
-      save_rgn_.Combine(rgn, RGN_OR);
-    } else if (wnd_) {
-        //wnd_->InvalidateRgn((CRgn*)rgn.source(), 0);    
-      RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+      save_rgn_->Combine(rgn, RGN_OR);
+    } else { 
+      Window::Invalidate(rgn);
+      //RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
     }
   }
 }
 
 void Canvas::Flush() {
-  if (!prevent_fls_) {
-    if (wnd_) {
-      RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) save_rgn_.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+  if (!prevent_fls_) {  
+      Invalidate(*save_rgn_.get());
+      //RedrawWindow(wnd_->m_hWnd, NULL, *((CRgn*) save_rgn_->source()), RDW_INVALIDATE | RDW_UPDATENOW);
     // wnd_->InvalidateRgn((CRgn*) save_rgn_.source(), 0);
-    }
-    save_rgn_.Clear();
   }
+  save_rgn_->Clear();  
 }
 
 void Canvas::Invalidate() {
   if (!prevent_fls_) {
-    if (wnd_) {
-      wnd_->Invalidate();    
-    }
+    Invalidate();    
   }
 }  
 
 void Canvas::InvalidateSave() {
   if (!prevent_fls_) {
-    if (wnd_ &&::IsWindow(wnd_->m_hWnd)) {
-      wnd_->InvalidateRgn((CRgn*) save_rgn_.source(), 0);
-    }
-  }
-}
-
-void Canvas::SetCapture() {
-  if (wnd_ && ::IsWindow(wnd_->m_hWnd)) {
-    ::SetCapture(wnd_->m_hWnd);
-  }
-}
-
-void Canvas::ReleaseCapture() {
-  if (wnd_ && ::IsWindow(wnd_->m_hWnd)) {
-    ::ReleaseCapture();
-  }
-}
-
-void Canvas::ShowCursor() { 
-  while (::ShowCursor(TRUE) < 0);
-}
-
-void Canvas::HideCursor() { 
-  while (::ShowCursor(FALSE) >= 0); 
-}
-
-void Canvas::SetCursorPos(int x, int y) {
-  if (wnd_) {
-    CPoint point(x, y);
-    wnd_->ClientToScreen(&point);
-		::SetCursorPos(point.x, point.y);
+     // &&::IsWindow(wnd_->m_hWnd)) {
+    Invalidate(*save_rgn_.get()); // Rgn((CRgn*) save_rgn_->source(), 0);    
   }
 }
 
 void Canvas::SetCursor(CursorStyle style) {
-  LPTSTR c = 0;
+  /*LPTSTR c = 0;
   int ac = 0;
   switch (style) {
     case AUTO        : c = IDC_IBEAM; break;
@@ -876,79 +926,12 @@ void Canvas::SetCursor(CursorStyle style) {
     case SW_RESIZE   : c = IDC_SIZENESW; break;
     default          : c = IDC_ARROW; break;
   }
-  cursor_ = (c!=0) ? LoadCursor(0, c) : ::LoadCursor(0, MAKEINTRESOURCE(ac));
+  cursor_ = (c!=0) ? LoadCursor(0, c) : ::LoadCursor(0, MAKEINTRESOURCE(ac));*/
 }
 
 // CanvasView
 
-BEGIN_MESSAGE_MAP(View, CWnd)  
-  ON_WM_CREATE()
-  ON_WM_DESTROY()
-  ON_WM_SETFOCUS()
-	ON_WM_PAINT()
-	ON_WM_LBUTTONDOWN()
-  ON_WM_RBUTTONDOWN()
-	ON_WM_LBUTTONDBLCLK()
-	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONUP()
-	ON_WM_RBUTTONUP()
-  ON_WM_KEYDOWN()
-	ON_WM_KEYUP()
-  ON_WM_SETCURSOR()
-  ON_WM_HSCROLL()
-  ON_WM_VSCROLL()
-  ON_WM_SIZE()
-  ON_WM_KEYDOWN()
-  ON_WM_KEYUP()    
-  ON_CONTROL_RANGE(BN_CLICKED, ID_DYNAMIC_CONTROLS_BEGIN, 
-            ID_DYNAMIC_CONTROLS_LAST, OnCtrlBtnClick)
-  ON_COMMAND_RANGE(ID_DYNAMIC_CONTROLS_BEGIN, ID_DYNAMIC_CONTROLS_LAST, OnCtrlCommand) 
-END_MESSAGE_MAP()
-
-void View::OnCtrlCommand(UINT id) {}
-
-std::map<HWND, View*> View::views_;
-std::map<std::uint16_t, Item::WeakPtr> View::mfc_ctrls_;
-
-HHOOK View::_hook = 0;
-
-LRESULT __stdcall View::HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
-  if (nCode == HC_ACTION) {
-    CWPSTRUCT* info = (CWPSTRUCT*) lParam;        
-    if (info->message == WM_SETFOCUS) {
-      FilterHook(info->hwnd);                     
-    }
-  }
-  return CallNextHookEx(_hook , nCode, wParam, lParam);       
-}
-
-void View::FilterHook(HWND hwnd) {  
-  typedef std::map<HWND, View*> ViewList;
-  ViewList::iterator it = views_.begin();
-  for (; it != views_.end(); ++it) {
-    View* view = (*it).second;
-    if (::IsChild(view->GetSafeHwnd(), hwnd)) {
-        view->OnFocusChange(::GetDlgCtrlID(hwnd));
-    }
-  } 
-}
-
-void View::SetFocusHook() {
-  if (_hook) {
-    return;
-  }
-  if (!(_hook = SetWindowsHookEx(WH_CALLWNDPROC, 
-                                 View::HookCallback,
-                                 AfxGetInstanceHandle(),
-                                 GetCurrentThreadId()))) {
-    TRACE(_T("ui::canvas::View : Failed to install hook!\n"));
-  }
-}
-
-void View::ReleaseHook() { 
-  UnhookWindowsHookEx(_hook);
-}
-
+/*
 void View::set_canvas(Canvas::WeakPtr canvas) { 
   if (canvas_.lock() == canvas.lock()) {
     return;
@@ -957,14 +940,14 @@ void View::set_canvas(Canvas::WeakPtr canvas) {
     canvas_.lock()->set_wnd(0);
   }
   canvas_ = canvas;            
-  if (!canvas.expired() && m_hWnd) {      
+  if (!canvas.expired()) {      
+  //if (!canvas.expired() && m_hWnd) {      
     Canvas* c = canvas.lock().get();
     c->set_wnd(this);
     try {   
-      CRect rc;            
-      GetClientRect(&rc);
-      if (rc.Width() != 0 && rc.Height() != 0) {      
-        c->OnSize(rc.Width(), rc.Height());
+      ui::Size size = dim();
+      if (size.width() != 0 && size.height() != 0) {      
+        c->OnSize(size.width(), size.height());
         c->ClearSave();
         Invalidate();
       }
@@ -973,98 +956,10 @@ void View::set_canvas(Canvas::WeakPtr canvas) {
       AfxMessageBox(e.what());
     }  
   } 
-}        
+} */  
 
-BOOL View::PreTranslateMessage(MSG* pMsg) {
-  if (pMsg->message==WM_KEYDOWN ) {
-    CWnd* hwndTest = GetFocus();
-    if (hwndTest) {
-      int id = hwndTest->GetDlgCtrlID();
-      Item::WeakPtr item = FindById(id);
-      Canvas* c = canvas().lock().get();    
-      if (c) {
-        UINT nFlags = 0;
-        UINT flags = Win32KeyFlags(nFlags);
-        try {
-          canvas::KeyEvent ev(pMsg->wParam, flags);
-          c->WorkKeyDown(ev);
-          return ev.is_prevent_default();
-        } catch(std::exception& e) {
-          AfxMessageBox(e.what());
-        }
-      }
-    }          
-  } else
-  if (pMsg->message == WM_KEYUP) {      
-    CWnd* hwndTest = GetFocus();
-    if (hwndTest) {
-      int id = hwndTest->GetDlgCtrlID();
-      Item::WeakPtr item = FindById(id);
-      Canvas* c = canvas().lock().get();    
-      if (c) {
-        UINT nFlags = 0;
-        UINT flags = Win32KeyFlags(nFlags);
-        try {
-          canvas::KeyEvent ev(pMsg->wParam, flags);
-          c->WorkKeyUp(ev);
-          return ev.is_prevent_default();
-        } catch(std::exception& e) {
-          AfxMessageBox(e.what());
-        }
-      }          
-    }
-  }
-  return CWnd::PreTranslateMessage(pMsg);
-}
-
-
-BOOL View::PreCreateWindow(CREATESTRUCT& cs) {
-	if (!CWnd::PreCreateWindow(cs))
-		return FALSE;
-	// CS_HREDRAW | CS_VREDRAW |
-	cs.dwExStyle |= WS_EX_CLIENTEDGE;
-	cs.style &= ~WS_BORDER;
-	cs.lpszClass = AfxRegisterWndClass
-		(
-				CS_DBLCLKS,
-			//::LoadCursor(NULL, IDC_ARROW), HBRUSH(COLOR_WINDOW+1), NULL);
-			::LoadCursor(NULL, IDC_ARROW),
-			(HBRUSH)GetStockObject( HOLLOW_BRUSH ),
-			NULL
-		);
-
-	return TRUE;
-}
-
-int View::OnCreate(LPCREATESTRUCT lpCreateStruct) {
-	if (CWnd::OnCreate(lpCreateStruct) == -1) {
-		return -1;
-	}
-  views_[GetSafeHwnd()] = this;
-   // Set the hook
-  SetFocusHook();  
-	return 0;
-}
-
-void View::OnDestroy() {  
-  bmpDC.DeleteObject();
-}
-
-/* BOOL View::PreCreateWindow(CREATESTRUCT& cs) {
-	if (!CWnd::PreCreateWindow(cs))
-		return FALSE;
-			
-	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-	cs.style &= ~WS_BORDER;
-	return TRUE;
-}*/
-
-void View::OnSetFocus(CWnd* pOldWnd) {
-	CWnd::OnSetFocus(pOldWnd);
-	GetParent()->SetFocus();
-}
-
-void View::OnTimerViewRefresh() {    
+/*
+void MFCView::OnTimerViewRefresh() {    
   if (!canvas_.expired() && m_hWnd && IsWindowVisible()) {
     try {          
       Canvas* c = canvas().lock().get();
@@ -1082,7 +977,7 @@ void View::OnTimerViewRefresh() {
         c->show_scrollbar = false;
       }
       if (c->IsSaving()) {
-        c->set_wnd(this);
+//        c->set_wnd(this);
         c->InvalidateSave();
       }
       c->WorkTimer();
@@ -1092,7 +987,7 @@ void View::OnTimerViewRefresh() {
   }
 }
 
-void View::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {   
+void MFCView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {   
   if (nSBCode == SB_THUMBTRACK) {    
     if (pScrollBar) {
      ScrollBar* scrbar = (ScrollBar*) ScrollBar::FindById(pScrollBar->GetDlgCtrlID());
@@ -1111,7 +1006,7 @@ void View::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
   CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-void View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {  
+void MFCView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {  
   if (nSBCode == SB_THUMBTRACK) {    
     if (pScrollBar) {
       ScrollBar* scrbar = (ScrollBar*) ScrollBar::FindById(pScrollBar->GetDlgCtrlID());
@@ -1130,72 +1025,14 @@ void View::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
   CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-BOOL View::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {    
+BOOL MFCView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {    
    Canvas* c = canvas().lock().get();    
    if (c) {
-    SetCursor(c->cursor());
+    ::SetCursor(c->cursor());
     return TRUE;
    }
   return CWnd::OnSetCursor(pWnd, nHitTest, message);
-}
-
-
-void View::OnPaint() {
-  CRgn rgn;
-  rgn.CreateRectRgn(0, 0, 0, 0);
-	int result = GetUpdateRgn(&rgn, FALSE);
-
-  if (!result) return; // If no area to update, exit.
-	
-	CPaintDC dc(this);
-
-  if (!bmpDC.m_hObject) { // buffer creation	
-		CRect rc;
-		GetClientRect(&rc);		
-		bmpDC.CreateCompatibleBitmap(&dc, rc.right - rc.left, rc.bottom - rc.top);
-		char buf[128];
-		sprintf(buf,"CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n",(void*)bmpDC);
-		TRACE(buf);
-	}
-  CDC bufDC;
-	bufDC.CreateCompatibleDC(&dc);
-	CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);	    
-  if (!canvas_.expired()) {
-    Canvas* c = canvas().lock().get();
-    try {
-      ui::mfc::Graphics g(&bufDC);
-      ui::mfc::Region canvas_rgn(rgn);
-      c->Draw(&g, canvas_rgn);
-    } catch (std::exception& e) {
-      AfxMessageBox(e.what());
-    }
-  }
-
-  CRect rc;
-  GetClientRect(&rc);
-	dc.BitBlt(0, 0, rc.right-rc.left, rc.bottom-rc.top, &bufDC, 0, 0, SRCCOPY);
-	bufDC.SelectObject(oldbmp);
-	bufDC.DeleteDC();
-  rgn.DeleteObject();    
-}
-
-void View::OnSize(UINT nType, int cw, int ch) {  
-  if (bmpDC.m_hObject != NULL) { // remove old buffer to force recreating it with new size
-	  TRACE("CanvasView::OnResize(). Deleted bmpDC\n");
-	  bmpDC.DeleteObject();	  
-  }
-   if (!canvas_.expired()) {      
-    try {
-      Canvas* c = canvas().lock().get();
-      c->WorkOnSize(cw, ch);
-      c->ClearSave();
-      Invalidate();
-    } catch (std::exception& e) {
-      AfxMessageBox(e.what());
-    }  
-  } 
-  CWnd::OnSize(nType, cw, ch);
-}
+} */
 
 IMPLEMENT_DYNAMIC(FrameAdaptee, CFrameWnd)
 
@@ -1210,10 +1047,7 @@ BEGIN_MESSAGE_MAP(FrameAdaptee, CFrameWnd)
 END_MESSAGE_MAP()
 
 int FrameAdaptee::OnCreate(LPCREATESTRUCT lpCreateStruct)  {		
-  if( CFrameWnd::OnCreate(lpCreateStruct) == 0) {
-    pView_ = new View();
-    pView_->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-		CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);    
+  if( CFrameWnd::OnCreate(lpCreateStruct) == 0) {        
     return 0;
   }       
   return -1;		
@@ -1238,10 +1072,7 @@ void FrameAdaptee::OnClose() {
 void FrameAdaptee::OnDestroy() {    
 	/*HICON _icon = GetIcon(false);
 	DestroyIcon(_icon);*/
-  if (pView_ != NULL) { 
-    pView_->DestroyWindow();
-    delete pView_; pView_ = 0;
-  }  
+  // pView_ = 0;    
 }
 
 } // namespace canvas

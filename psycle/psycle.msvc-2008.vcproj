@@ -728,6 +728,14 @@
 					>
 				</File>
         <File
+					RelativePath="src\psycle\host\MfcUi.hpp"
+					>
+				</File>
+        <File
+					RelativePath="src\psycle\host\MfcUi.cpp"
+					>
+				</File>
+        <File
 					RelativePath="src\psycle\host\Menu.cpp"
 					>
 				</File>
@@ -786,9 +794,13 @@
 				<File
 					RelativePath="src\psycle\host\SongpDlg.hpp"
 					>
-				</File>
+				</File>        
         <File
 					RelativePath="src\psycle\host\Ui.hpp"
+					>
+				</File>
+        <File
+					RelativePath="src\psycle\host\Ui.cpp"
 					>
 				</File>
 				<File

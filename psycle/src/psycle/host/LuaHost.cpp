@@ -103,9 +103,12 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaTextTreeItemBind>(L, "psycle.ui.canvas.texttreeitem");
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
   LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
+  LuaHelper::require<LuaLexerBind>(L, "psycle.ui.canvas.lexer");
   LuaHelper::require<LuaScintillaBind<> >(L, "psycle.ui.canvas.scintilla");
   LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.canvas.scrollbar");
   LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.canvas.keyevent");
+  LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.canvas.ornamentfactory");
+  LuaHelper::require<LineBorderBind>(L, "psycle.ui.canvas.lineborder");
 #if !defined WINAMP_PLUGIN
   LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN
@@ -724,7 +727,7 @@ void LuaProxy::update_menu(void* hnd) {
   }
 }
 
-ui::MenuBar* LuaProxy::get_menu(ui::Menu* menu) {
+ui::MenuBar::Ptr LuaProxy::menu_bar() {
   lock();
   try {
     LuaHelper::get_proxy(L);
@@ -736,12 +739,11 @@ ui::MenuBar* LuaProxy::get_menu(ui::Menu* menu) {
   if (lua_isnil(L, -1)) {
     lua_pop(L, 1);
     unlock();
-    return 0;
+    return boost::shared_ptr<MenuBar>();
   } else {
-    boost::shared_ptr<MenuBar> menubar = LuaHelper::check_sptr<MenuBar>(L, -1, LuaMenuBarBind::meta);
-    menubar->append(menu);
+    boost::shared_ptr<MenuBar> menubar = LuaHelper::check_sptr<MenuBar>(L, -1, LuaMenuBarBind::meta);    
     unlock();
-    return menubar.get();
+    return menubar;
   }
 }
 

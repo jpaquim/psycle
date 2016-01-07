@@ -11,6 +11,7 @@ local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local config = require("psycle.config")
 local style = require("psycle.ui.canvas.itemstyle")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local tabgroup = group:new()
 
@@ -53,14 +54,23 @@ end
 function tabgroup:init()  
   self.hh = 20
   self.tabs = group:new(self)
-  self.tabs:style():setalign(style.ALTOP)
+  self.tabs:style():setalign(style.ALTOP)  
+  self.tabs:setfillcolor(0x2F2F2F)
+  self.tabs.border = ornamentfactory:createlineborder(0x528A68)
+  self.tabs.border:setborderradius(5, 5, 0, 0)
+  self.tabs.border:setborderstyle(style.NONE, style.NONE, style.NONE, style.SOLID)
+  self.tabs:setornament(self.tabs.border)
   self.childs = group:new(self)
   self.childs:style():setalign(style.ALCLIENT)
 end
 
 function tabgroup:setlabel(page, text)
-   function f(item)  if item.page==page then item.text:settext(text) end end
-   self:traverse(f, self.tabs:items())
+  function f(item)  
+    if item.page==page then 
+     item.text:settext(text)
+    end
+  end
+  self:traverse(f, self.tabs:items())
 end
 
 function tabgroup:add(page, label)
@@ -68,7 +78,7 @@ function tabgroup:add(page, label)
   self:createheader(page, label)
   self.childs:add(page)
   self:setactivepage(page)
-  self:canvas():updatealign()
+  self:align()
 end
 
 function tabgroup:activepage()
@@ -89,18 +99,21 @@ function tabgroup:setactiveheader(page)
 end
 
 function tabgroup:setactivepage(page)
-  if page then        
+  if page then  
+    self:preventfls()  
     local items = self.childs:items()  
     for i=1, #items do    
       local item = items[i]
       if item ~= page then
         item:hide()    
       end
-    end        
+    end
+    self:enablefls()
     self:setactiveheader(page)
-    self.activepage_ = page;
+    self.activepage_ = page;  
+    self.tabs:align()
     page:show()
-    self.childs:updatealign()
+    self.childs:align()    
   end
 end
 
@@ -118,58 +131,39 @@ end
 
 function tabgroup:createheader(page, label)
   local header = group:new(self.tabs)
-  header:style():setalign(style.ALLEFT)  
-  header.page = page       
-  header.backgroundtop = rect:new(header):setheight(4):setcolor(tabgroup.skin.colors.TOP)
-  header.backgroundtop:style():setalign(style.ALTOP)  
-  header.closegroup = group:new(header)
-  header.closegroup:style():setalign(style.ALRIGHT)  
-  header.closerect = rect:new(header.closegroup):setwidth(10)
-  header.closerect:setcolor(tabgroup.skin.colors.TOP)
-  header.closerect:style():setalign(style.ALTOP)
-  header.close = text:new(header.closegroup)
-                     :setpos(3, 0)
-                     :settext("x")
-                     :setcolor(tabgroup.skin.colors.TITLEFONT)   
-  local g = group:new(header)
-  g:style():setalign(style.ALTOP)  
-  header.text = text:new(header):setpos(2, 0):settext(label)
-  header.text:style():setalign(style.ALTOP):setmargin(5, 3, 5, 3)
-    --                     :setpos(0, 0, 10, 10)
-                           --:setcolor(0xFFFFF) --tabgroup.skin.colors.TOP)  
-  header.close = text:new(header.closegroup)
-                     :setpos(3, 0)
-                     :settext("x")
-                     :setcolor(tabgroup.skin.colors.TITLEFONT)   
-
---header.backgroundbottom = rect:new(g)
-  --header.backgroundbottom:style():setalign(style.ALTOP)
-  --header.backgroundbottom:setcolor(0xFF0000)
-                       
-  
+  header:style():setalign(style.ALLEFT):setmargin(0, 0, 1, 0)
+  header.border = ornamentfactory:createlineborder(0x528A68)
+  header.border:setborderradius(5, 5, 0, 0)
+  header:setornament(header.border)
+  header.page = page    
+  header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
+  header.text:style():setalign(style.ALLEFT):setmargin(5, 4, 2, 4)  
+  header.close = text:new(header)                   
+                     :setcolor(tabgroup.skin.colors.TITLEFONT) 
+                     :settext("x")                                    
+  header.close:style():setalign(style.ALLEFT):setmargin(4, 0, 4, 0)
   local that = self
-  function header.closegroup:onmousedown()
+  function header.close:onmousedown()
     that:removepage(self:parent())    
   end
   
   function header:setskinhighlight()
-    self.backgroundtop:setcolor(tabgroup.skin.colors.HTOP)
-    self.text:setfillcolor(tabgroup.skin.colors.HBOTTOM)
-                   --:setstrokecolor(tabgroup.header.color.HBORDER)    
-    self.text:setcolor(tabgroup.skin.colors.HFONTBOTTOM)
+    --self:setfillcolor(0x073F1E)
+    self:setornament(self.border)
+    self.text:setcolor(0xB0C8B1)
   end
-  function header:setskinnormal()
-    self.backgroundtop:setcolor(tabgroup.skin.colors.TOP)
-    self.text:setfillcolor(tabgroup.skin.colors.BOTTOM)    
-                   --:setstrokecolor(tabgroup.header.color.BORDER)
-    self.text:setcolor(tabgroup.skin.colors.FONTBOTTOM)
+  function header:setskinnormal()    
+    self:setfillcolor(0xFF000000)    
+    self:setornament(nil)
+    self.text:setcolor(0x528A68)    
+    self:fls()
   end  
   header:setskinnormal()  
-  function header:onmousedown(ev)    
-    that:setactivepage(self.page) 
+  function header:onmousedown(ev)     
+    --self:style():setalign(style.ALLEFT):setmargin(-10, 0, 1, 0)
+    that:setactivepage(self.page)     
   end
   function header:onmouseup(ev) end
-
   return header
 end
 
@@ -177,6 +171,5 @@ function tabgroup:traverse(f, arr)
   for i=1, #arr do f(arr[i]) end  
   return self
 end
-
 
 return tabgroup

@@ -34,6 +34,7 @@ function pluginexplorer:dirLookup(directory)
     item.filename = file   
     local that = self
     function item:onclick()
+      psycle.output("click")
       local ev = { 
         sender = that, 
         path = item.path,
@@ -55,8 +56,7 @@ function scriptpath()
   return getpath(str, "\\")
 end
 
-function pluginexplorer:setfilepath(path)
-  -- local path = scriptpath()
+function pluginexplorer:setfilepath(path) 
   self:clear()
   self:dirLookup(path) 
 end

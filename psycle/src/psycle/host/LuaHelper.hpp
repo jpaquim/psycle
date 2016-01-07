@@ -622,6 +622,17 @@ namespace LuaHelper {
       return ud;
     }
 
+
+    // void -> const T1&
+    template <class T, class T1>
+    static int bindud(lua_State* L, const std::string& meta1, const std::string& meta2, void (T::*ptmember)(const T1& v), UserDataModel m = SPTR) {
+      numargcheck(L, 2);      
+      T* ud = check<T>(L, 1, meta1, m);
+      boost::shared_ptr<T1> p = LuaHelper::check_sptr<T1>(L, 2, meta2);
+      (ud->*ptmember)(*p.get());
+      return 0;
+    }
+
     // void -> void
     template <class T>
     static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(void), UserDataModel m = SPTR) {
@@ -650,13 +661,34 @@ namespace LuaHelper {
       (ud->*ptmember)(val);
       return 0;
     }
+
+    // void -> bool X int
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(bool, bool), UserDataModel m = SPTR) {
+      numargcheck(L, 3);
+      T* ud = check<T>(L, 1, meta, m);
+      bool val1 = lua_toboolean(L, 2);
+      bool val2 = lua_toboolean(L, 3);
+      (ud->*ptmember)(val1, val2);            
+      return 0;
+    }
     
     // void -> int
     template <class T>
     static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(int), UserDataModel m = SPTR) {
       numargcheck(L, 2);
-       T* ud = check<T>(L, 1, meta, m);
+      T* ud = check<T>(L, 1, meta, m);
       int val = luaL_checkinteger(L, 2);
+      (ud->*ptmember)(val);
+      return 0;
+    }
+
+    // void -> uint
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(unsigned int), UserDataModel m = SPTR) {
+      numargcheck(L, 2);
+      T* ud = check<T>(L, 1, meta, m);
+      unsigned int val = luaL_checknumber(L, 2);
       (ud->*ptmember)(val);
       return 0;
     }
@@ -671,6 +703,16 @@ namespace LuaHelper {
       return 1;
     }
 
+    // unsinged int -> void (const)
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, unsigned int (T::*ptmember)() const, UserDataModel m = SPTR) {
+      numargcheck(L, 1);
+      T* ud = check<T>(L, 1, meta, m);     
+      unsigned int val = (ud->*ptmember)();
+      lua_pushinteger(L, val);
+      return 1;
+    }
+
     // int -> void const
     template <class T>
     static int bind(lua_State* L, const std::string& meta, int (T::*ptmember)() const, UserDataModel m = SPTR) {
@@ -681,8 +723,7 @@ namespace LuaHelper {
       return 1;
     }
     
-
-    // int -> void  (const )
+    // int -> void  (const)
     template <class T>
     static int bindinc1(lua_State* L, const std::string& meta, int (T::*ptmember)() const, UserDataModel m = SPTR) {      
       numargcheck(L, 1);
@@ -859,7 +900,7 @@ namespace LuaHelper {
       return 0;
     }
 
-     // void -> double X double X double X double x double x double
+    // void -> double X double X double X double x double x double
     template <class T>
     static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(double, double, double, double, double, double), UserDataModel m = SPTR) {
       numargcheck(L, 7);
@@ -1077,6 +1118,15 @@ namespace LuaHelper {
     static int bind(lua_State* L, const std::string& meta, T1* (T::*ptmember)(), UserDataModel m = SPTR) { 
       T* ud = check<T>(L, 1, meta, m);      
       T1* result = (ud->*ptmember)();
+      LuaHelper::find_weakuserdata(L, result);
+      return 1;
+    }
+
+    template <class T, class T1>
+    static int bind(lua_State* L, const std::string& meta, T1* (T::*ptmember)(int), UserDataModel m = SPTR) { 
+      T* ud = check<T>(L, 1, meta, m); 
+      int val = lual_checkinteger(L, 2);
+      T1* result = (ud->*ptmember)(val);
       LuaHelper::find_weakuserdata(L, result);
       return 1;
     }
