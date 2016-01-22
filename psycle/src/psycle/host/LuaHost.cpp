@@ -93,15 +93,16 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
   LuaHelper::require<LuaItemStyleBind >(L, "psycle.ui.canvas.itemstyle");
   LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
-  LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
+  LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");  
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
   LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
   LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
   LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
   LuaHelper::require<LuaTreeBind<> >(L, "psycle.ui.canvas.tree");
-  LuaHelper::require<LuaTextTreeItemBind>(L, "psycle.ui.canvas.texttreeitem");
+  //LuaHelper::require<LuaTextTreeItemBind>(L, "psycle.ui.canvas.texttreeitem");
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
+  LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.canvas.combobox");
   LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
   LuaHelper::require<LuaLexerBind>(L, "psycle.ui.canvas.lexer");
   LuaHelper::require<LuaScintillaBind<> >(L, "psycle.ui.canvas.scintilla");
@@ -109,6 +110,8 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.canvas.keyevent");
   LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.canvas.ornamentfactory");
   LuaHelper::require<LineBorderBind>(L, "psycle.ui.canvas.lineborder");
+  LuaHelper::require<WallpaperBind>(L, "psycle.ui.canvas.wallpaper");
+  LuaHelper::require<FillBind>(L, "psycle.ui.canvas.fill");
 #if !defined WINAMP_PLUGIN
   LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN

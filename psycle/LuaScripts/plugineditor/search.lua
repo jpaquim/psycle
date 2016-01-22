@@ -6,6 +6,7 @@
 -- Foundation ; either version 2, or (at your option) any later version.  
 
 local group = require("psycle.ui.canvas.group")
+local group = require("psycle.ui.canvas.group")
 local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local style = require("psycle.ui.canvas.itemstyle")
@@ -35,41 +36,44 @@ function search:new(parent)
   return c
 end
 
-function search:init()  
-  self:style():setmargin(3, 3, 3, 3):setpadding(10, 5, 10, 5)
+function search:init() 
+  self:setautosize(false, true)    
+  --self:style():setmargin(3, 3, 3, 3):setpadding(10, 5, 10, 5)
   self.dosearch = signal:new()   
-  self:createeditgroup(self)
+  self:createeditgroup(self)  
 --  self:createreplacegroup(self)
   self:createclosebutton()
-  self.border = ornamentfactory:createlineborder(0x528A68)
-  self.border:setborderradius(10, 0, 0, 10)
-  self:setornament(self.border)
+  --self:setornament(ornamentfactory:createlineborder(0x528A68))  
+ --self.border = ornamentfactory:createlineborder(0x528A68)
+  --self.border:setborderradius(10, 0, 0, 10)
+ --self:setornament(self.border)
+ self:setornament(ornamentfactory:createfill(0x528A68))   
 end
 
 function search:createeditgroup(parent)      
-  self.editgroup = group:new(parent)
-  self.editgroup:style():setalign(style.ALLEFT)
-  local optionrow = group:new(self.editgroup)
-  optionrow:style():setalign(style.ALTOP):setmargin(0, 0, 0, 5)
-  self:createoptions(optionrow) 
-  local editrow = group:new(self.editgroup)
-  editrow:style():setalign(style.ALTOP):setmargin(0, 0, 0, 0)
-  self:createeditfield(editrow):initeditevents()
-  self:createsearchbuttons(editrow)
-  return self
+ self.editgroup = group:new(parent):setautosize(true, true)
+ self.editgroup:style():setalign(style.ALLEFT)
+ local optionrow = group:new(self.editgroup):setautosize(true, true)
+ optionrow:style():setalign(style.ALTOP)--:setmargin(0, 0, 0, 5)
+ self:createoptions(optionrow) 
+ local editrow = group:new(self.editgroup):setautosize(true, true)
+ editrow:style():setalign(style.ALTOP)--:setmargin(0, 0, 0, 0)
+ self:createeditfield(editrow):initeditevents()  
+ self:createsearchbuttons(editrow)
+ return self
 end
 
 function search:createeditfield(parent)
-  self.edit = edit:new(parent)
+  self.edit = edit:new(parent):setpos(0, 0, 200, 20)
   self.edit:style():setalign(style.ALLEFT)
   return self
 end
 
 function search:createsearchbuttons(parent)
   self.up = iconbutton:new(parent, settings.picdir.."up.png", 0xFFFFFF)
-  self.up:style():setalign(style.ALLEFT):setmargin(2, 0, 2, 0)
+  self.up:style():setalign(style.ALLEFT)--:setmargin(2, 0, 2, 0)
   self.down = iconbutton:new(parent, settings.picdir.."down.png", 0xFFFFFF)
-  self.down:style():setalign(style.ALLEFT):setmargin(0, 0, 0, 0)
+  self.down:style():setalign(style.ALLEFT)--:setmargin(0, 0, 0, 0)
   local that = self
   function self.up:onclick()
     that.dosearch:emit(that.edit:text(), 
@@ -118,20 +122,20 @@ end
 
 function search:createoptions(parent)
   self.casesensitive = checkbox:new(parent):settext("match case")
-  self.casesensitive:style():setalign(style.ALLEFT):setmargin(0, 0, 0, 0)
+  self.casesensitive:style():setalign(style.ALLEFT)--:setmargin(0, 0, 0, 0)
   self.wholeword = checkbox:new(parent):settext("match whole words only")
-  self.wholeword:style():setalign(style.ALLEFT):setmargin(5, 0, 0, 0)
+  self.wholeword:style():setalign(style.ALLEFT)--:setmargin(5, 0, 0, 0)
   self.useregexp = checkbox:new(parent):settext("use regexp")
-  self.useregexp:style():setalign(style.ALLEFT):setmargin(5, 0, 0, 0)
+  self.useregexp:style():setalign(style.ALLEFT)--:setmargin(5, 0, 0, 0)
   return self
 end
 
 function search:createclosebutton()
-  local g = group:new(self)  
+  local g = group:new(self):setautosize(true, true)
   g:style():setalign(style.ALRIGHT)--:setmargin(2, 2, 2, 2)
-  text:new(g):settext("x"):setcolor(0xFFFFFF):style():setalign(style.ALLEFT)  
+  text:new(g):settext("X"):setcolor(0xFFFFFF):style() --:setalign(style.ALRIGHT)  
   local that = self
-  function g:onmousedown()
+  function g:onmousedown()    
     that:hide()
     that:canvas():align()
   end

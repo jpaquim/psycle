@@ -8,6 +8,7 @@
 #include "LuaPlugin.hpp"
 #include "NewVal.hpp"
 #include "Canvas.hpp"
+#include "MfcUi.hpp"
 
 #include "Plugin.hpp" // For default parameter value.
 #include "InputHandler.hpp" //for undos
@@ -87,19 +88,16 @@ namespace psycle { namespace host {
     void CanvasParamView::ChangeCanvas(ui::Window* canvas) {
       CRect rect;            
       GetWindowRect(&rect);
-      ScreenToClient(rect);
       CWnd* child = GetWindow(GW_CHILD);
       if (child) {
         child->ShowWindow(SW_HIDE);            
       }
-      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();
-      if (!imp) {
-        imp = ui::mfc::WindowImp::Make(canvas, this, 2000);                        
-      }
-      imp->ShowWindow(SW_SHOW);
-      canvas->set_imp(imp);
-      canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
-      canvas->OnMessage(ui::ONWND);            
+      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
+      imp->SetParent(this);      
+      //canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
+      canvas->set_pos(ui::Rect(0, 0, 500, 500)); // set_pos(ui::Rect(0, 0, 500, 500));
+      canvas->Show();                        
+      SetActiveWindow();           
     }
 
    BEGIN_MESSAGE_MAP(CNativeView, CWnd)

@@ -529,14 +529,8 @@
     <ClInclude Include="src\psycle\host\Ui.hpp">
       <Filter>psycle\mfc</Filter>
     </ClInclude>
-    <ClInclude Include="src\psycle\host\CScintilla.hpp">
-      <Filter>psycle\mfc\UIControls</Filter>
-    </ClInclude>
     <ClInclude Include="src\psycle\host\CanvasItems.hpp">
       <Filter>psycle\mfc</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\DesignPatterns.hpp">
-      <Filter>psycle</Filter>
     </ClInclude>
     <ClInclude Include="src\psycle\host\MfcUi.hpp">
       <Filter>psycle\mfc</Filter>
@@ -905,9 +899,6 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\Menu.cpp">
       <Filter>psycle\mfc</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\CScintilla.cpp">
-      <Filter>psycle\mfc\UIControls</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\CanvasItems.cpp">
       <Filter>psycle\mfc</Filter>

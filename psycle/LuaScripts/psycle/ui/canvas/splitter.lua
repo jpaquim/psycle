@@ -8,7 +8,8 @@
 local canvas = require("psycle.ui.canvas")
 local rect = require("psycle.ui.canvas.rect")
 local style = require("psycle.ui.canvas.itemstyle")
-local serpent = require("psycle.serpent")
+-- local serpent = require("psycle.serpent")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local splitter = rect:new()
 
@@ -24,14 +25,14 @@ function splitter:new(parent, orientation)
 end
   
 function splitter:init(orientation)
-  self:setfillcolor(0x404040)
+  self:setornament(ornamentfactory:createfill(0x404040))  
   self.orientation = orientation
   if orientation == splitter.HORZ then  
     self:style():setalign(style.ALBOTTOM)
-    self:setheight(5)
+    self:setpos(0, 0, 0, 5)
   elseif orientation == splitter.VERT then
     self:style():setalign(style.ALLEFT)                    
-    self:setwidth(5)
+    self:setpos(0, 0, 5, 0)
   end
 end
 
@@ -56,14 +57,16 @@ function splitter:onmousemove(e)
   if self.dosplit_ then 
     if self.orientation == splitter.HORZ then
       if (self.dragpos ~= e.clienty) then      
-        self.dragpos = e.clienty                 
-        self.item:setheight(self.itemclientpos - self.dragpos)       
+        self.dragpos = e.clienty
+        local x, y, w, h = self.item:pos()
+        self.item:setpos(x, y, w, self.itemclientpos - self.dragpos)       
         self:canvas():align()   
       end      
     elseif self.orientation == splitter.VERT then
       if (self.dragpos ~= e.clientx) then      
         self.dragpos = e.clientx    
-        self.item:setwidth(self.dragpos - self.itemclientpos)          
+        local x, y, w, h = self.item:pos()
+        self.item:setpos(x, y, self.dragpos - self.itemclientpos, h)
         self:canvas():align()
       end 
     end

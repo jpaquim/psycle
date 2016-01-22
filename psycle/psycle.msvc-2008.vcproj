@@ -682,19 +682,7 @@
 				<File
 					RelativePath="src\psycle\host\ChildView.hpp"
 					>
-				</File>
-        <File
-					RelativePath="src\psycle\host\CScintilla.cpp"
-					>
-				</File>
-				<File
-					RelativePath="src\psycle\host\CScintilla.hpp"
-					>
-				</File>
-        <File
-					RelativePath="src\psycle\host\DesignPatterns.hpp"
-					>
-				</File>
+				</File>        
 				<File
 					RelativePath="src\psycle\host\ExclusiveLock.cpp"
 					>

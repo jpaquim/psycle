@@ -211,10 +211,9 @@ namespace psycle { namespace host {
 			}
 			m_wndView.ValidateParent();
       m_luaWndView.reset(new CWnd());
-      m_luaWndView->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
-				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST + 1, NULL);
-      // m_luaWndView.reset(new ui::canvas::View(this, AFX_IDW_PANE_FIRST+1));
-    		                        
+      m_luaWndView->Create(NULL, NULL, WS_CHILD | WS_VISIBLE,
+				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST + 1, NULL);     
+
 			// Create Toolbars.
 			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
@@ -1212,14 +1211,12 @@ namespace psycle { namespace host {
        ScreenToClient(rc); 
        CRect rc1;
        m_wndStatusBar.GetWindowRect(&rc1);
-       ScreenToClient(rc1);
-       int ch = rc1.top - rc.top;
+       ScreenToClient(rc1);       
        m_luaWndView->MoveWindow(rc.left, rc.top, rc.Width(), rc.Height());
        CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
        if (child) {
          child->MoveWindow(0, 0, rc.Width(), rc.Height());
-       }
-       
+       }       
     }
 
     

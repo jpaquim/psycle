@@ -24,6 +24,7 @@
 #include "InterpolateCurveDlg.hpp"
 #include "ProgressDialog.hpp"
 #include "Canvas.hpp"
+#include "MfcUi.hpp"
 
 #include "ITModule2.h"
 #include "XMSongLoader.hpp"
@@ -2557,17 +2558,12 @@ namespace psycle { namespace host {
       if (child) {
         child->ShowWindow(SW_HIDE);            
       }
-      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();
-      if (!imp) {
-        imp = ui::mfc::WindowImp::Make(canvas, pParentMain->m_luaWndView.get(), 2000);                        
-      }
-      imp->ShowWindow(SW_SHOW);
-      canvas->set_imp(imp);
+      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
+      imp->SetParent(pParentMain->m_luaWndView.get());      
       canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
-      canvas->OnMessage(ui::ONWND);          
+      canvas->Show();            
       pParentMain->m_luaWndView->MoveWindow(rect.left, rect.top, rect.Width(), rect.Height());
       pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
-      //user_view.lock()->Show();
       GetParent()->SetActiveWindow();      
     }
 }}
