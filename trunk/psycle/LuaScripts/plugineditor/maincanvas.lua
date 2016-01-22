@@ -28,6 +28,14 @@ local search = require("search")
 local pluginexplorer = require("pluginexplorer")
 local callstack = require("callstack")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local combobox = require("psycle.ui.canvas.combobox")
+local scrollbar = require("psycle.ui.canvas.scrollbar")
+local edit = require("psycle.ui.canvas.edit")
+local button = require("psycle.ui.canvas.button")
+local image = require("psycle.ui.image")
+local text = require("psycle.ui.canvas.text")
+local group = require("psycle.ui.canvas.group")
+local checkbox = require("psycle.ui.canvas.checkbox")
 
 local maincanvas = canvas:new()
 
@@ -39,48 +47,36 @@ function maincanvas:new()
   return c
 end
 
-function maincanvas:init()
-  self:setcolor(settings.canvas.colors.background);      
-  self.search = search:new(self):hide()
+function maincanvas:init()    
+  self:setornament(ornamentfactory:createfill(settings.canvas.colors.background))  
+  self:inittollbar()   
+  self.search = search:new(self):setpos(0, 0, 200, 200)
   self.search:style():setalign(style.ALBOTTOM)
-  self.search.dosearch:connect(maincanvas.onsearch, self)  
-  self:inittollbar()
-  self.outputs = tabgroup:new(self):setheight(120)
+  self.search.dosearch:connect(maincanvas.onsearch, self) 
+  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 120)
   self.outputs:style():setalign(style.ALBOTTOM + style.ALFIXED)  
   self.output = scintilla:new()
   self.output:setforegroundcolor(settings.sci.default.foreground)
   self.output:setbackgroundcolor(settings.sci.default.background) 
   self.output:styleclearall()
   self.output:setlinenumberforegroundcolor(0x939393)
-  self.output:setlinenumberbackgroundcolor(0x232323)
+  self.output:setlinenumberbackgroundcolor(0x232323)  
   self.outputs:add(self.output, "Output")
-  self.callstack = callstack:new(nil, self)  
-  self.outputs:add(self.callstack, "Call stack")  
   self.splitter = splitter:new(self, splitter.HORZ)
-  self.pluginexplorer = pluginexplorer:new(self):setwidth(201)  
+  self.pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0)
   self.pluginexplorer:style():setalign(style.ALLEFT)     
-  self.pluginexplorer:setfilepath("test")
-  self.pluginexplorer:setfillcolor(settings.canvas.colors.background)
-  self.pluginexplorer:settextcolor(settings.canvas.colors.foreground)
-  self.pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
+  self.pluginexplorer:setbackgroundcolor(settings.canvas.colors.background)
+  self.pluginexplorer:setfilepath("test")  
+  self.pluginexplorer:settextcolor(settings.canvas.colors.foreground)  
+  self.pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)  
   self.splitter2 = splitter:new(self, splitter.VERT)
   self.fileopen = fileopen:new()
   local that = self
   function self.fileopen:onok(fname) that:openfromfile(fname) end
-  self.filesaveas = filesave:new()
-  
-  
+  self.filesaveas = filesave:new() 
   self.pages = tabgroup:new(self)   
-  self.pages:style():setalign(style.ALCLIENT)  
-  self.newpagecounter = 1
-end
-
-function maincanvas:inittollbar()
-  self.tg = group:new(self)  
-  self.tg:style():setalign(style.ALTOP)
-  self:initselectplugintoolbar():style():setalign(style.ALLEFT):setmargin(4, 4, 4, 4)
-  self:initfiletoolbar():style():setalign(style.ALLEFT)
-  self:initplaytoolbar():style():setalign(style.ALLEFT)
+  self.pages:style():setalign(style.ALCLIENT)    
+  self.newpagecounter = 1  
 end
 
 function maincanvas:setoutputtext(text)
@@ -235,9 +231,18 @@ function maincanvas:playplugin()
   end
 end
 
+function maincanvas:inittollbar()  
+  self.tg = group:new(self):setautosize(true, true)
+  self.tg:style():setalign(style.ALTOP)
+  self:initselectplugintoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
+  self:initfiletoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
+  self:initplaytoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
+end
+
+
 function maincanvas:initselectplugintoolbar(parent)
   local t = toolbar:new(self.tg)
-  local selectmachine = toolicon:new(t):settext("no plugin loaded"):setsize(100, 20)
+  local selectmachine = toolicon:new(t):settext("no plugin loaded"):setpos(0, 0, 100, 20)
   local that = self
   function selectmachine:onclick()
     local name, path = psycle.selmachine()
@@ -265,9 +270,11 @@ end
 
 function maincanvas:initplaytoolbar()  
   local t = toolbar:new(self.tg)
+--  local istart = rect:new(t):setpos(0, 0, 20, 20)
+  --istart:setornament(ornamentfactory:createfill(0xFFFFFF))
   local istart = toolicon:new(t, settings.picdir.."play.png", 0xFFFFFF)
   local that = self
-  function istart:onclick() that:playplugin() end
+  --function istart:onclick() that:playplugin() end
   return t
 end
 

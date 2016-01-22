@@ -41,7 +41,8 @@ function machine:init(samplerate)
 end
 
 function machine:createframe()  
-  self.frame = frame:new():setcanvas(self.maincanvas)  
+  self.frame = frame:new()
+  self.frame:setview(self.maincanvas)  
   self.frame:settitle("Psycle Plugineditor")  
   local w, h = sysmetrics.screensize()
   local fw = w * 0.9
@@ -60,7 +61,7 @@ end
 function machine:onexecute(msg, macidx, trace)
   self.editmacidx_ = macidx 
   self.maincanvas:setoutputtext(msg)
-  self.maincanvas:setcallstack(trace)
+  --self.maincanvas:setcallstack(trace)
   for i=1, #trace do
     if self.maincanvas:openinfo(trace[i]) then
       break

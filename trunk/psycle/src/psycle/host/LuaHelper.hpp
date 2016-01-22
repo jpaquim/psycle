@@ -632,7 +632,7 @@ namespace LuaHelper {
       (ud->*ptmember)(*p.get());
       return 0;
     }
-
+    
     // void -> void
     template <class T>
     static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(void), UserDataModel m = SPTR) {

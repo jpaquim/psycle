@@ -7,21 +7,19 @@
 #include "Psycle.hpp"
 #include "PsycleConfig.hpp"
 #include "Ui.hpp"
-#include "CScintilla.hpp"
 
 namespace psycle {
 namespace host  {
 namespace ui {
 namespace canvas {
 
-int IDHandler::id_counter = ID_DYNAMIC_CONTROLS_BEGIN;
-
+  /*
 void Rect::Draw(Graphics* g, Region& draw_region) {
   // double z = acczoom();  
-  //if (GetAlpha(fillcolor_) != 0xFF) {
-    g->SetColor(fillcolor_);
-    g->FillRect(0, 0, width_, height_);  
-  //}
+  if (GetAlpha(fillcolor_) != 0xFF) {
+   g->SetColor(fillcolor_);
+   g->FillRect(0, 0, width_, height_);  
+  }
 /*    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);
   CPen pen;
   pen.CreatePen(PS_SOLID, 1, ToCOLORREF(strokecolor_));
@@ -42,7 +40,7 @@ void Rect::Draw(Graphics* g, Region& draw_region) {
   }
   devc->SelectObject(pOldPen);
   devc->SelectObject(pOldBrush);*/
-}
+// }
 
 /*bool Rect::paintRect(CDC &hdc, RECT dim, COLORREF penCol, COLORREF brushCol, unsigned int opacity) {
   XFORM rXform;
@@ -86,10 +84,6 @@ void Rect::Draw(Graphics* g, Region& draw_region) {
   return 0;
 }*/
 
-bool Rect::onupdateregion() {
-  rgn_->SetRect(0, 0, width_, height_);  
-  return true;
-}
 
 void Line::Draw(Graphics* g, Region& draw_region) {  
   g->SetColor(color());
@@ -105,7 +99,7 @@ void Line::Draw(Graphics* g, Region& draw_region) {
   }  
 }
 
-Item::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
+Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
   /*double distance_ = 5;
   Point  p1 = PointAt(0);
   Point  p2 = PointAt(1);
@@ -131,32 +125,28 @@ Item::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
   rgn.CreatePolygonRgn(&pts[0],pts.size(), WINDING);
   Item::Ptr item = rgn.PtInRegion(x-this->x(),y-this->y()) ? this : 0;
   rgn.DeleteObject();*/
-  return Item::Ptr();
+  return Window::Ptr();
 }
 
-bool Line::onupdateregion() {  
+bool Line::OnUpdateArea() {  
   double dist = 5;  
   double zoom = 1.0; // parent() ? parent()->zoom() : 1.0;
-  ui::Rect bounds = this->bounds();
-  rgn_->SetRect((bounds.left()-dist)*zoom, 
-                (bounds.top()-dist)*zoom, 
-                (bounds.width()+2*dist+1)*zoom, 
-                (bounds.height()+2*dist+1)*zoom);
+  ui::Rect bounds = area().bounds();
+  area_->Clear();
+  area_->Add(RectShape(ui::Rect((bounds.left()-dist)*zoom, 
+                                (bounds.top()-dist)*zoom, 
+                                (bounds.left() + bounds.width()+2*dist+1)*zoom, 
+                                (bounds.top() + bounds.height()+2*dist+1)*zoom)));
   return true;
 }
 
-bool Text::onupdateregion() {  
-  Canvas* c = (Canvas*) const_cast<Text*>(this)->root();
-  if (c) {
-    std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
-    g->SetFont(*font_);    
-    ui::Size size = g->text_size(text_);
-    double w = auto_size_width() ? size.width() : size_.width();
-    double h = auto_size_height() ? size.height() : size_.height();
-    rgn_->SetRect(0, 0, w, h);
-    return true;
-  }    
-  return false;
+bool Text::OnUpdateArea() {    
+  std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
+  g->SetFont(*font_);    
+  ui::Dimension size = g->text_size(text_);
+  area_->Clear();
+  area_->Add(RectShape(ui::Rect(0, 0, size.width(), size.height())));
+  return true;  
 }
 
 void Text::Draw(Graphics* g, Region& draw_region) {   
@@ -166,8 +156,7 @@ void Text::Draw(Graphics* g, Region& draw_region) {
 }
 
 // Pic
-inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp)
-{
+inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp) {
   BITMAP bm = { 0 };
   GetObject(hBmp, sizeof(bm), &bm);
   BITMAPINFO* bmi = (BITMAPINFO*) _alloca(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
@@ -199,46 +188,15 @@ void Pic::Draw(Graphics* g, Region& draw_region) {
 void Pic::SetImage(Image* image) {
   STR();
   image_ = image;
-  image_->size(width_, height_);  
+  width_ = image_->dim().width();
+  height_ = image_->dim().height();
   FLS();
 }
 
-bool Pic::onupdateregion() {
-  rgn_->SetRect(0, 0, width_, height_);
+bool Pic::OnUpdateArea() {
+  area_->Clear();
+  area_->Add(RectShape(ui::Rect(0, 0, width_, height_)));  
   return true;
-}
-
-IMPLEMENT_DYNAMIC(CTree, CTreeCtrl) 
-
-BEGIN_MESSAGE_MAP(CTree, CTreeCtrl)
-ON_NOTIFY_REFLECT_EX(TVN_SELCHANGED, OnClick)
-END_MESSAGE_MAP()
-
-std::list<boost::shared_ptr<TreeItem> > Tree::SubChildren() {
-    std::list<boost::shared_ptr<TreeItem> > allitems;
-    std::list<boost::shared_ptr<TreeItem> >::iterator it = children_.begin();
-    for (; it != children_.end(); ++it) {
-      boost::shared_ptr<TreeItem> item = *it;
-      allitems.push_back(item);
-      std::list<boost::shared_ptr<TreeItem> > subs = item->SubChildren();
-      std::list<boost::shared_ptr<TreeItem> >::iterator itsub = subs.begin();
-      for (; itsub != subs.end(); ++itsub) {
-        allitems.push_back(*it);
-      }
-    }
-    return allitems;
-  }
-
-void Tree::onclick(HTREEITEM hItem) {
-  TreeItem::TreeItemList subitems = SubChildren(); 
-  TreeItem::TreeItemList::iterator it = subitems.begin();
-  for ( ; it != subitems.end(); ++it) {
-    TreeItem::Ptr subitem = *it;
-    if (subitem->hItem == hItem) {
-      subitem->OnClick();
-      break;
-    }
-   }  
 }
 
 

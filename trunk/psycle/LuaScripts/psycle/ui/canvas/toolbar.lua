@@ -20,8 +20,9 @@ function toolbar:new(parent)
 end
 
 function toolbar:init()
+  self:setautosize(true, true)
   self.icontable = {}
-  self:style():setmargin(4, 4, 4, 4)
+  self:style()--:setmargin(4, 4, 4, 4)
 end
 
 function toolbar:add(icon)

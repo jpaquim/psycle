@@ -174,7 +174,7 @@ end
 function machine:noteoff(note, lastnote, inst, cmd, val)
   if (cmd == 195) then return end
   if lastnote then
-	 notes[note]:faststop()
+    notes[note]:faststop()
   else
      notes[note]:noteoff()
   end  

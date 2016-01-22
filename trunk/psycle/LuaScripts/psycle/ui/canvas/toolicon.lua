@@ -33,18 +33,20 @@ local settings = {
 function toolicon:new(parent, filename, trans)
   local c = item:new()
   setmetatable(c, self)
-  self.__index = self  
-  c:init(filename, trans)
+  self.__index = self
   if parent ~= nil then
-    parent:add(c)
+   parent:add(c)
   end
+  c:init(filename, trans)  
   return c
 end
 
 function toolicon:onclick() end
 
 function toolicon:init(filename, trans)
-  self.w, self.h = 20, 20  
+  self.w, self.h = 20, 20
+  self:setautosize(false, false)
+  self:setpos(0, 0, self.w, self.h)
   self.cc = settings.colors.default.bg
   self.on = false  
   self.text_ = ""
@@ -61,8 +63,9 @@ function toolicon:init(filename, trans)
 end
 
 function toolicon:draw(g)
+  local x, y, w, h = self:pos()
   g:setcolor(self.cc)   
-  g:fillroundrect(0, 0, self.w, self.h, 5, 5)  
+  g:fillroundrect(0, 0, w, h, 5, 5)  
   local xpos = 0
   if self.img then
     g:drawimage(self.img, self.centerx, self.centery) 
@@ -116,24 +119,8 @@ function toolicon:seton(on)
   return self
 end
 
-function toolicon:settoolbar(toolbar) self.toolbar = toolbar end
-
-function toolicon:onsize(cw, ch)
-  psycle.output("onsize:"..cw..","..ch)
-  if (cw ~= -1) then
-    self.w = cw
-  else
-    self.w = 20
-  end
-  if (ch ~= -1) then
-    self.h = ch
-  else
-    self.h = 20
-  end
-end
-
-function toolicon:onupdateregion(rgn)
-   rgn:setrect(0, 0, self.w, self.h)   
+function toolicon:settoolbar(toolbar)
+  self.toolbar = toolbar
 end
 
 function toolicon:addlistener(listener)    

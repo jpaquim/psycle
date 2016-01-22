@@ -10,6 +10,7 @@ local text = require("psycle.ui.canvas.text")
 local rect = require("psycle.ui.canvas.rect")
 local style = require("psycle.ui.canvas.itemstyle")
 local cfg = require("psycle.config"):new("PatternVisual")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local checkbox = group:new()
 
@@ -29,7 +30,7 @@ local settings = {
   }
 }
 
-function checkbox:new(parent)  
+function checkbox:new(parent)    
   local c = group:new(parent)  
   setmetatable(c, self)
   self.__index = self
@@ -37,30 +38,27 @@ function checkbox:new(parent)
   return c
 end
 
-function checkbox:init(param)  
-  self.width = 100
-  self.height = 20  
-  self.check_ = false
-  
-  self.checkgroup = group:new(self)  
+function checkbox:init()  
+  self:setautosize(true, true) 
+  self.check_ = false  
+  self.checkgroup = group:new(self):setautosize(true, true)
   self.checkgroup:style():setalign(style.ALLEFT)
                          :setmargin(0, 0, 4, 0)
-  self.checkrect = rect:new(self.checkgroup)                       
-                       :setfillcolor(settings.colors.default.bg)
+  self.checkrect = rect:new(self.checkgroup):setpos(0, 0, 10, 10)                 
+                       :setornament(ornamentfactory:createfill(settings.colors.default.bg))
   self.checkrect:style():setalign(style.ALLEFT)         
   self.checktext = text:new(self.checkgroup)
-                       :setpos(3, 0)
-                       :setfillcolor(settings.colors.default.checker)
+    --                   :setpos(3, 0)
+      --                 :setornament(ornamentfactory:createfill(settings.colors.default.checker))                       
                                               
   --self.checktext:style():setalign(style.ALLEFT)
   
-  self.text = text:new(self):settext("A Checkbox"):setcolor(settings.colors.default.text)
+  self.text = text:new(self):settext("A Checkbox")--:setcolor(settings.colors.default.text)
   self.text:style():setalign(style.ALLEFT)
   
   
   local that = self
-  function self.checkgroup:onmousedown()
-    psycle.output("ondown")
+  function self.checkgroup:onmousedown()    
     that.check_ = not that.check_
     if that.check_ then
       that.checkrect:setfillcolor(settings.colors.mousepress.bg)

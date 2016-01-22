@@ -453,9 +453,40 @@ int LuaFrameWnd::OnFrameClose() {
 template <class T>
 bool LuaFrameItemBind<T>::mfcclosing = false;
 
+template <class T>
+int LuaFrameItemBind<T>::create(lua_State* L) {
+  //  int n = lua_gettop(L);  // Number of arguments    
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->MakeImp();
+  LuaHelper::register_weakuserdata(L, item.get());  
+  return 1;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LuaCanvasBind
 ///////////////////////////////////////////////////////////////////////////////
+template <class T>
+int LuaCanvasBind<T>::create(lua_State* L) {
+  int n = lua_gettop(L);  // Number of arguments  
+  boost::shared_ptr<LuaGroup> group;
+  if (n==2 && !lua_isnil(L, 2)) {
+    group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+    if (!group) {
+      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+    }    
+  }
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->set_aligner(boost::shared_ptr<canvas::Aligner>(new ui::canvas::DefaultAligner()));
+  LuaHelper::register_weakuserdata(L, item.get());
+  if (group) {    
+    group->Add(item);
+    LuaHelper::register_userdata(L, item.get());
+  }  
+  LuaHelper::new_lua_module(L, "psycle.signal");  
+  lua_setfield(L, -2, "keydown");
+  return 1;
+}
+
 template <class T>
 bool CanvasItem<T>::SendKeyEvent(lua_State* L,
                                  const::std::string method,
@@ -516,17 +547,17 @@ void CanvasItem<T>::OnSize(double width, double height) {
 }
 
 template <class T>
-bool CanvasItem<T>::onupdateregion() {
+bool CanvasItem<T>::OnUpdateArea() {
   LuaImport in(L, this, LuaGlobal::proxy(L));
   try {
-    if (in.open("onupdateregion")) {
-      ui::Region** rgn = (ui::Region **)lua_newuserdata(L, sizeof(ui::Region *));
-      *rgn = rgn_.get();
-      luaL_setmetatable(L, LuaRegionBind::meta);
+    if (in.open("onupdatearea")) {
+      ui::Area** rgn = (ui::Area **)lua_newuserdata(L, sizeof(ui::Area *));
+      *rgn = area_.get();
+      luaL_setmetatable(L, LuaAreaBind::meta);
       in.pcall(0);
       *rgn = 0;
     } else {
-      T::onupdateregion();
+      T::OnUpdateArea();
     }
   } catch(std::exception& e) {
     AfxMessageBox(e.what());
@@ -536,7 +567,7 @@ bool CanvasItem<T>::onupdateregion() {
 
 //LuaTextTreeBind
 
-std::string LuaTextTreeItemBind::meta = LuaTextTreeItem::type();
+/*std::string LuaTextTreeItemBind::meta = LuaTextTreeItem::type();
 
 void LuaTextTreeItem::OnClick() {
   try {
@@ -547,7 +578,7 @@ void LuaTextTreeItem::OnClick() {
   } catch (std::exception& e) {
       AfxMessageBox(e.what());    
   }
-}
+}*/
 
 /////////////////////////////////////////////////////////////////////////////
 // LuaCanvas+Bind
@@ -583,7 +614,7 @@ int LuaCanvasBind<T>::setfocus(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 2, "Wrong number of arguments.");
   if (err!=0) return err;
   boost::shared_ptr<T> canvas = LuaHelper::check_sptr<T>(L, 1, meta);
-  canvas::Item::Ptr item = LuaGroupBind<>::test(L, 2);
+  Window::Ptr item = LuaGroupBind<>::test(L, 2);
   canvas->SetFocus(item);
   return LuaHelper::chaining(L);
 }
@@ -591,7 +622,7 @@ int LuaCanvasBind<T>::setfocus(lua_State* L) {
 template <class T>
 int LuaCanvasBind<T>::showscrollbar(lua_State* L) {
   boost::shared_ptr<T> canvas = LuaHelper::check_sptr<T>(L, 1, meta);
-  canvas->show_scrollbar = true;
+//  canvas->show_scrollbar = true;
   return LuaHelper::chaining(L);
 }
 
@@ -603,9 +634,9 @@ int LuaCanvasBind<T>::setscrollinfo(lua_State* L) {
   luaL_checktype(L, 2, LUA_TTABLE);
   lua_getfield(L, 2, "nposh");
   lua_getfield(L, 2, "nposv");
-  canvas->nposh = luaL_checknumber(L, -2);
-  canvas->nposv = luaL_checknumber(L, -1);
-  canvas->show_scrollbar = true;
+  // canvas->nposh = luaL_checknumber(L, -2);
+  // canvas->nposv = luaL_checknumber(L, -1);
+  // canvas->show_scrollbar = true;
   return LuaHelper::chaining(L);
 }
   
@@ -636,6 +667,9 @@ int LuaItemBind<T>::create(lua_State* L) {
     }    
   }
   boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  if (!item->imp()) {
+    item->set_imp(ui::ImpFactory::instance().CreateWindowImp()); 
+  }
   LuaHelper::register_weakuserdata(L, item.get());
   if (group) {    
     group->Add(item);
@@ -690,8 +724,18 @@ int LuaItemBind<T>::parent(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;
   boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-  canvas::Item::WeakPtr group = item->parent();
+  Window::WeakPtr group = item->parent();
   LuaHelper::find_weakuserdata<>(L, group.lock().get());
+  return 1;
+}
+
+template <class T>
+int LuaItemBind<T>::canvas(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
+  Window* root = window->root();
+  LuaHelper::find_weakuserdata<>(L, root);
   return 1;
 }
 
@@ -700,7 +744,6 @@ template class LuaItemBind<LuaItem>;
 ///////////////////////////////////////////////////////////////////////////////
 // LuaGroupBind
 ///////////////////////////////////////////////////////////////////////////////
-
 
 template <class T>
 int LuaGroupBind<T>::create(lua_State* L) {
@@ -725,8 +768,8 @@ int LuaGroupBind<T>::create(lua_State* L) {
 }
 
 template <class T>
-canvas::Item::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {  
-  static const char* metas[] = {
+ui::Window::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {  
+  static const char* metas[] = {    
     LuaRectBind<>::meta.c_str(),
     LuaCanvasBind<>::meta.c_str(),
     LuaGroupBind<>::meta.c_str(),
@@ -742,9 +785,9 @@ canvas::Item::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {
     LuaTreeBind<LuaTree>::meta.c_str()
   };
   int size = sizeof(metas)/sizeof(metas[0]);
-  canvas::Item::Ptr item;
+  Window::Ptr item;
   for (int i = 0; i < size; ++i) {
-    item = LuaHelper::test_sptr<canvas::Item>(L, index, metas[i]);
+    item = LuaHelper::test_sptr<Window>(L, index, metas[i]);
     if (item) {
       break;
     }
@@ -754,11 +797,11 @@ canvas::Item::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {
 
 template <class T>
 int LuaGroupBind<T>::removeall(lua_State* L) {  
-  canvas::Item::Ptr group = LuaHelper::check_sptr<T>(L, 1, meta);
-  std::vector<canvas::Item::Ptr> subitems = group->SubItems();
+  Window::Ptr group = LuaHelper::check_sptr<T>(L, 1, meta);
+  std::vector<Window::Ptr> subitems = group->SubItems();
   T::iterator it = subitems.begin();
   for ( ; it != subitems.end(); ++it) {
-    canvas::Item::Ptr subitem = *it;
+    Window::Ptr subitem = *it;
     LuaHelper::unregister_userdata<>(L, subitem.get());
   }  
   group->RemoveAll();  
@@ -768,12 +811,12 @@ int LuaGroupBind<T>::removeall(lua_State* L) {
 template <class T>
 int LuaGroupBind<T>::remove(lua_State* L) {  
   boost::shared_ptr<T> group = LuaHelper::check_sptr<T>(L, 1, meta);    
-  canvas::Item::Ptr item = test(L, 2);
+  Window::Ptr item = test(L, 2);
   if (item) {
-    std::vector<canvas::Item::Ptr> subitems = item->SubItems();
+    std::vector<Window::Ptr> subitems = item->SubItems();
     T::iterator it = subitems.begin();
     for ( ; it != subitems.end(); ++it) {
-      canvas::Item::Ptr subitem = *it;
+      Window::Ptr subitem = *it;
       LuaHelper::unregister_userdata<>(L, subitem.get());    
     }
     LuaHelper::unregister_userdata<>(L, item.get());
@@ -789,7 +832,7 @@ int LuaGroupBind<T>::add(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 2, "self, item");
   if (err!=0) return err;
   boost::shared_ptr<T> group = LuaHelper::check_sptr<T>(L, 1, meta);
-  canvas::Item::Ptr item = test(L, 2);
+  Window::Ptr item = test(L, 2);
   if (item) {
     try {
       group->Add(item);
@@ -810,7 +853,7 @@ int LuaGroupBind<T>::intersect(lua_State* L) {
   // T* item = LuaHelper::check<T>(L, 1, meta);
   // double x = luaL_checknumber(L, 2);
   // double y = luaL_checknumber(L, 3);
-  /*canvas::Item* res = item->intersect(x, y);
+  /*Window* res = item->intersect(x, y);
   if (res) {
     LuaHelper::find_userdata(L, res);
   } else {
@@ -839,7 +882,7 @@ int LuaGroupBind<T>::setzorder(lua_State* L) {
 /*  int err = LuaHelper::check_argnum(L, 3, "self, item, z");
   if (err!=0) return err;
   boost::shared_ptr<T> group = LuaHelper::check_sptr<T>(L, 1, meta);
-  canvas::Item* item = test(L, 2);
+  Window* item = test(L, 2);
   if (item) {
     int z  = luaL_checknumber(L, 3);
     group->set_zorder(item, z - 1); // transform from lua onebased to zerobased
@@ -852,7 +895,7 @@ int LuaGroupBind<T>::zorder(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 2, "self, item");
   if (err!=0) return err;
   boost::shared_ptr<T> group = LuaHelper::check_sptr<T>(L, 1, meta);
-  canvas::Item::Ptr item = test(L, 2);
+  Window::Ptr item = test(L, 2);
   if (item) {
     int z  = group->zorder(item);
     lua_pushnumber(L, z + 1); // transform from zerobased to lua onebased
@@ -864,6 +907,127 @@ int LuaGroupBind<T>::zorder(lua_State* L) {
 
 template class LuaGroupBind<LuaGroup>;
 
+template <class T>
+int LuaComboBoxBind<T>::create(lua_State* L) {
+  //  int n = lua_gettop(L);  // Number of arguments    
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->MakeImp();
+  LuaHelper::register_weakuserdata(L, item.get());  
+  return 1;
+}
+
+template <class T>
+int LuaTreeBind<T>::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments  
+  boost::shared_ptr<LuaGroup> group;
+  if (n==2 && !lua_isnil(L, 2)) {
+    group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+    if (!group) {
+      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+    }    
+  }
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->MakeImp();
+  LuaHelper::register_weakuserdata(L, item.get());
+  if (group) {    
+    group->Add(item);
+    LuaHelper::register_userdata(L, item.get());
+  }  
+  LuaHelper::new_lua_module(L, "psycle.signal");  
+  lua_setfield(L, -2, "keydown");
+  return 1;
+}
+template <class T>
+int LuaEditBind<T>::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments  
+  boost::shared_ptr<LuaGroup> group;
+  if (n==2 && !lua_isnil(L, 2)) {
+    group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+    if (!group) {
+      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+    }    
+  }
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->MakeImp();
+  LuaHelper::register_weakuserdata(L, item.get());
+  if (group) {    
+    group->Add(item);
+    LuaHelper::register_userdata(L, item.get());
+  }  
+  LuaHelper::new_lua_module(L, "psycle.signal");  
+  lua_setfield(L, -2, "keydown");
+  return 1;
+}
+
+template <class T>
+int LuaButtonBind<T>::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments  
+  boost::shared_ptr<LuaGroup> group;
+  if (n==2 && !lua_isnil(L, 2)) {
+    group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+    if (!group) {
+      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+    }    
+  }
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->MakeImp();
+  LuaHelper::register_weakuserdata(L, item.get());
+  if (group) {    
+    group->Add(item);
+    LuaHelper::register_userdata(L, item.get());
+  }  
+  LuaHelper::new_lua_module(L, "psycle.signal");  
+  lua_setfield(L, -2, "keydown");
+  return 1;
+}
+
+template <class T>
+int LuaScrollBarBind<T>::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments  
+  boost::shared_ptr<LuaGroup> group;
+  if (n>=2 && !lua_isnil(L, 2)) {
+    group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+    if (!group) {
+      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+    }       
+  }
+  ui::Orientation orientation = ui::VERT;
+  if (n==3) {
+     orientation = static_cast<ui::Orientation>(luaL_checkinteger(L, 3));
+  }
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->MakeImp(orientation);
+  LuaHelper::register_weakuserdata(L, item.get());
+  if (group) {    
+    group->Add(item);
+    LuaHelper::register_userdata(L, item.get());
+  }  
+  LuaHelper::new_lua_module(L, "psycle.signal");  
+  lua_setfield(L, -2, "keydown");
+  return 1;
+}
+
+template <class T>
+int LuaScintillaBind<T>::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments  
+  boost::shared_ptr<LuaGroup> group;
+  if (n==2 && !lua_isnil(L, 2)) {
+    group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+    if (!group) {
+      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+    }    
+  }
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  item->MakeImp();
+  LuaHelper::register_weakuserdata(L, item.get());
+  if (group) {    
+    group->Add(item);
+    LuaHelper::register_userdata(L, item.get());
+  }  
+  LuaHelper::new_lua_module(L, "psycle.signal");  
+  lua_setfield(L, -2, "keydown");
+  return 1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // LuaGraphicsBind
@@ -1055,7 +1219,7 @@ void LuaItem::Draw(Graphics* g, Region& draw_rgn) {
     Graphics** gr = (Graphics **)lua_newuserdata(L, sizeof(Graphics *));
     *gr = g;
     luaL_setmetatable(L, LuaGraphicsBind::meta);
-    in.pcall(0);    
+    in.pcall(0);
   }      
 }
 
@@ -1104,6 +1268,17 @@ int LuaImageBind::settransparent(lua_State* L) {
   img->SetTransparent(true, argb);
   return LuaHelper::chaining(L);
 }
+
+int LuaImageBind::size(lua_State* L) {  
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<Image> img = LuaHelper::check_sptr<Image>(L, 1, meta);  
+  ui::Dimension dim = img->dim();
+  lua_pushnumber(L, dim.width());
+  lua_pushnumber(L, dim.height());
+  return 2;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // LuaKeyEventBind
@@ -1178,20 +1353,20 @@ int LuaItemStyleBind::gc(lua_State* L) {
 }
 
 int LuaItemStyleBind::setalign(lua_State* L) {
-  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<canvas::ItemStyle>(L, 1, meta);
+  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<ItemStyle>(L, 1, meta);
   style->set_align(static_cast<canvas::AlignStyle>(luaL_checkinteger(L, 2)));
   return LuaHelper::chaining(L);
 }
 
 int LuaItemStyleBind::align(lua_State* L) {
-  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<canvas::ItemStyle>(L, 1, meta);
+  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<ItemStyle>(L, 1, meta);
   lua_pushinteger(L, static_cast<int>(style->align()));
   return 1;
 }
 
 int LuaItemStyleBind::setmargin(lua_State* L) {
   LuaHelper::check_argnum(L, 5, "5 Arguments expected.");
-  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<canvas::ItemStyle>(L, 1, meta);
+  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<ItemStyle>(L, 1, meta);
   style->set_margin(Rect(luaL_checknumber(L, 2),
                          luaL_checknumber(L, 3),
                          luaL_checknumber(L, 4),
@@ -1200,7 +1375,7 @@ int LuaItemStyleBind::setmargin(lua_State* L) {
 }
 
 int LuaItemStyleBind::margin(lua_State* L) {
-  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<canvas::ItemStyle>(L, 1, meta);
+  ui::ItemStyle::Ptr style = LuaHelper::check_sptr<ItemStyle>(L, 1, meta);
   lua_pushinteger(L, style->margin().left());
   lua_pushinteger(L, style->margin().top());
   lua_pushinteger(L, style->margin().right());
@@ -1241,6 +1416,8 @@ int OrnamentFactoryBind::open(lua_State *L) {
 
   static const luaL_Reg methods[] = {   
     {"createlineborder", createlineborder},
+    {"createwallpaper", createwallpaper},
+    {"createfill", createfill},
     {NULL, NULL}
   };
   luaL_newmetatable(L, meta.c_str());
@@ -1267,6 +1444,28 @@ int OrnamentFactoryBind::createlineborder(lua_State* L) {
   Ornament* e = af->Instance().CreateLineBorder(color);
   luaL_requiref(L, "psycle.ui.canvas.lineborder", &LineBorderBind::open, 1);
   LuaHelper::new_shared_userdata(L, LineBorderBind::meta.c_str(), e, 3);  
+  return 1;
+}
+
+int OrnamentFactoryBind::createwallpaper(lua_State* L) { 
+  using namespace ui::canvas;
+  OrnamentFactory* af = 
+    *(OrnamentFactory **)luaL_checkudata(L, 1, meta.c_str());
+  ui::Image::Ptr image = LuaHelper::check_sptr<ui::Image>(L, 2, LuaImageBind::meta);  
+  Ornament* e = af->Instance().CreateWallpaper(image);
+  luaL_requiref(L, "psycle.ui.canvas.wallpaper", &WallpaperBind::open, 1);
+  LuaHelper::new_shared_userdata(L, WallpaperBind::meta.c_str(), e, 3);  
+  return 1;
+}
+
+int OrnamentFactoryBind::createfill(lua_State* L) { 
+  using namespace ui::canvas;
+  OrnamentFactory* af = 
+    *(OrnamentFactory **)luaL_checkudata(L, 1, meta.c_str());
+  ARGB color = luaL_checknumber(L, 2);
+  ui::Ornament* e = af->Instance().CreateFill(color);
+  luaL_requiref(L, "psycle.ui.canvas.fill", &WallpaperBind::open, 1);
+  LuaHelper::new_shared_userdata(L, FillBind::meta.c_str(), e, 3);  
   return 1;
 }
 
@@ -1314,6 +1513,56 @@ int LineBorderBind::setborderstyle(lua_State* L) {
   canvas::LineFormat bottom = static_cast<canvas::LineFormat>(luaL_checkinteger(L, 5));
   border->set_border_style(canvas::BorderStyle(left, top, right, bottom));  
   return LuaHelper::chaining(L);
+}
+
+std::string WallpaperBind::meta = "canvaswallpaper";
+
+int WallpaperBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods, gc);   
+  return 1;
+}
+
+int WallpaperBind::create(lua_State* L) {
+  using namespace ui::canvas;
+  int err = LuaHelper::check_argnum(L, 2, "self");
+  if (err!=0) return err;
+  ui::Image::Ptr image = LuaHelper::check_sptr<ui::Image>(L, 2, LuaImageBind::meta);
+  Wallpaper* wallpaper = new Wallpaper(image);
+  LuaHelper::new_shared_userdata<>(L, meta, wallpaper);
+  return 1;
+}
+
+int WallpaperBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::canvas::Wallpaper>(L, meta);
+}
+
+std::string FillBind::meta = "canvasfill";
+
+int FillBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods, gc);   
+  return 1;
+}
+
+int FillBind::create(lua_State* L) {
+  using namespace ui::canvas;
+  int err = LuaHelper::check_argnum(L, 2, "self");
+  if (err!=0) return err;
+  ARGB color = luaL_checknumber(L, 2);
+  Fill* fill = new Fill(color);
+  LuaHelper::new_shared_userdata<>(L, meta, fill);
+  return 1;
+}
+
+int FillBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::canvas::Fill>(L, meta);
 }
 
 // LuaScintilla
@@ -1403,6 +1652,51 @@ int LuaRegionBind::create(lua_State* L) {
 
 int LuaRegionBind::gc(lua_State* L) {
   ui::Region* rgn= *(ui::Region **)luaL_checkudata(L, 1, meta);
+  delete rgn;
+  return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// LuaAreaBind
+///////////////////////////////////////////////////////////////////////////////
+
+const char* LuaAreaBind::meta = "psyareabind";
+
+int LuaAreaBind::open(lua_State *L) {
+  static const luaL_Reg funcs[] = {
+    {"new", create},      
+    { NULL, NULL }
+  };
+  static const luaL_Reg methods[] = {
+    {"boundrect", boundrect},
+    {"setrect", setrect},
+    {"combine", combine},
+    {"offset", offset},
+    { "__gc", gc },
+    { NULL, NULL }
+  };
+  luaL_newmetatable(L, meta);
+  lua_pushvalue(L, -1);
+  lua_setfield(L, -2, "__index");
+  luaL_setfuncs(L, methods, 0);    
+  luaL_newlib(L, funcs);
+  LuaHelper::setfield(L, "OR", RGN_OR);
+  LuaHelper::setfield(L, "AND", RGN_AND);
+  LuaHelper::setfield(L, "XOR", RGN_XOR);
+  LuaHelper::setfield(L, "DIFF", RGN_DIFF);
+  LuaHelper::setfield(L, "COPY", RGN_COPY);
+  return 1;
+}
+
+int LuaAreaBind::create(lua_State* L) {
+  ui::Area ** ud = (ui::Area **)lua_newuserdata(L, sizeof(ui::Area *));
+  luaL_setmetatable(L, meta);
+  *ud = new ui::Area();
+  return 1;
+}
+
+int LuaAreaBind::gc(lua_State* L) {
+  ui::Area* rgn= *(ui::Area **)luaL_checkudata(L, 1, meta);
   delete rgn;
   return 0;
 }

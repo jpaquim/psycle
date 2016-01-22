@@ -2,6 +2,8 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "Ui.hpp"
+#include "Scintilla.h"
+#include "SciLexer.h"
 
 namespace psycle {
 namespace host {
@@ -10,63 +12,25 @@ namespace mfc {
 
 class Region : public ui::Region {
  public:
-  Region() { Init(0, 0, 0, 0); }
-  Region(int x, int y, int width, int height) { Init(x, y, width, height); }  
-  Region(const CRgn& rgn)  {
-    assert(rgn.m_hObject);
-    Init(0, 0, 0, 0);
-    rgn_.CopyRgn(&rgn);    
-  }
-  ~Region() { rgn_.DeleteObject(); }
+  Region();
+  Region(int x, int y, int width, int height);
+  Region(const CRgn& rgn);
+  ~Region();
   
-  virtual Region* Clone() const { 
-    Region* r = new Region(rgn_);
-    r->h_cache_ = h_cache_;
-    r->w_cache_ = w_cache_;
-    return r;
-  }  
-  void Offset(double dx, double dy) {
-    CPoint pt(dx, dy);
-    rgn_.OffsetRgn(pt);
-  }
-  int Combine(const ui::Region& other, int combinemode) {
-    
-    return rgn_.CombineRgn(&rgn_, (const CRgn*)other.source(), combinemode);
-  }  
-  ui::Rect bounds() const {
-    CRect rc;
-    rgn_.GetRgnBox(&rc);
-    ui::Rect bounds; 
-    bounds.setxywh(rc.left,
-                   rc.top,
-                   w_cache_ != -1 ? w_cache_ : rc.Width(),
-                   h_cache_ != -1 ? h_cache_ : rc.Height());
-    return bounds;
-  }
-  bool Intersect(double x, double y) const { return rgn_.PtInRegion(x, y); }
-  bool IntersectRect(double x, double y, double width, double height) const {
-    CRect rc(x, y, x+width, y+height);
-    return rgn_.RectInRegion(rc);
-  }
-  virtual void SetRect(double x, double y, double width, double height) {
-    if (width == 0 || height == 0) {
-      w_cache_ = width;
-      h_cache_ = height;
-    } else {
-      w_cache_ = h_cache_ = -1;
-    }
-    rgn_.SetRectRgn(x, y, x+width, y+height);
-  }
-  void Clear() { SetRect(0, 0, 0, 0); }
-  void* source() { return &rgn_; }
-  const void* source() const { return &rgn_; };
+  virtual Region* Clone() const;
+  void Offset(double dx, double dy);
+  int Combine(const ui::Region& other, int combinemode);     
+  ui::Rect bounds() const;
+  bool Intersect(double x, double y) const;
+  bool IntersectRect(double x, double y, double width, double height) const;
+  virtual void SetRect(double x, double y, double width, double height);
+  void Clear();
+  void* source();
+  const void* source() const;
  
  private:
-  void Init(int x, int y, int width, int height) {   
-    rgn_.CreateRectRgn(x, y, x+width, y+height);
-  }
-  
-  CRgn rgn_;  
+  void Init(int x, int y, int width, int height);
+  CRgn rgn_;
 };
 
 class Image : public ui::Image {
@@ -100,13 +64,14 @@ class Image : public ui::Image {
     bmp_->Attach(image.Detach());    
   }
 
-  void size(double& width, double& height) const {
+  virtual ui::Dimension dim() const {
+    ui::Dimension image_dim;
     if (bmp_) {    
       BITMAP bm;
       bmp_->GetBitmap(&bm);
-      width = bm.bmWidth;
-      height = bm.bmHeight;
+      image_dim.set(bm.bmWidth, bm.bmHeight);
     }    
+    return image_dim;
   }
 
   void SetTransparent(bool on, ARGB color) {
@@ -416,19 +381,17 @@ class Graphics : public ui::Graphics {
 
   const Font& font() const { return font_; }
 
-  virtual Size text_size(const std::string& text) const {
-    ui::Size size;
+  virtual Dimension text_size(const std::string& text) const {
+    ui::Dimension size;
     SIZE extents = {0};
     GetTextExtentPoint32(cr_->m_hDC, text.c_str(), text.length(),
       &extents);
-    size.set_size(extents.cx, extents.cy);
+    size.set(extents.cx, extents.cy);
     return size;
   }
 
-  void DrawImage(ui::Image* img, double x, double y) {
-    double w, h;
-    img->size(w, h);
-    DrawImage(img, x, y, w, h, 0, 0);
+  void DrawImage(ui::Image* img, double x, double y) {    
+    DrawImage(img, x, y, img->dim().width(), img->dim().height(), 0, 0);
   }
 
   void DrawImage(ui::Image* img, double x, double y, double width, double height) {
@@ -581,26 +544,44 @@ inline void Graphics::TransparentBlt(CDC* pDC,
   hdcMem.DeleteDC();
 }
 
-class WindowImp : public CWnd, public ui::WindowImp {
+class WindowHook {
  public:
-  WindowImp() : ui::WindowImp() {}
-  WindowImp(ui::Window* w) : ui::WindowImp(w) {}
-  
-  static WindowImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
-    WindowImp* imp = new WindowImp();
-    imp->Create(parent, nID);    
-    imp->set_window(w);
-    return imp;
-  }  
+  static void SetFocusHook();
+  static void ReleaseHook();
+  static LRESULT __stdcall HookCallback(int nCode, WPARAM wParam, LPARAM lParam);    
+  static void FilterHook(HWND hwnd);  
+  static HHOOK _hook;
+  static std::map<HWND, ui::WindowImp*> windows_;
+};
 
-  virtual void dev_set_pos(const ui::Rect& pos) {
-    MoveWindow(pos.left(), pos.top(), pos.width(), pos.height());
+struct WindowID { 
+  static int id_counter;
+  static int auto_id() { return id_counter++; }
+};
+
+struct DummyWindow {
+  static CWnd* dummy() {
+     if (!dummy_wnd_.m_hWnd) {   
+       dummy_wnd_.Create(0, "psycleuidummywnd", 0, CRect(0, 0, 0, 0), ::AfxGetMainWnd(), 0);       
+     }
+    return &dummy_wnd_;
   }
+ private:
+  static CWnd dummy_wnd_;
+};
 
-  virtual ui::Size dev_dim() const {
+template <class T, class I>
+class WindowTemplateImp : public T, public I {
+ public:  
+  WindowTemplateImp() : I(), color_(0xFF000000) {}
+  WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000) {}
+    
+  virtual void dev_set_pos(const ui::Rect& pos);
+  virtual ui::Rect dev_pos() const;
+  virtual ui::Dimension dev_dim() const {
     CRect rc;            
     GetClientRect(&rc);
-    return ui::Size(rc.Width(), rc.Height());
+    return ui::Dimension(rc.Width(), rc.Height());
   }
   
   virtual void DevShow() { ShowWindow(SW_SHOW); }  
@@ -608,7 +589,7 @@ class WindowImp : public CWnd, public ui::WindowImp {
   virtual void DevInvalidate() { Invalidate(); }
   virtual void DevInvalidate(ui::Region& rgn) {
     if (m_hWnd) {
-      ::RedrawWindow(m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+//      ::RedrawWindow(m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
     }
   }
   virtual void DevSetCapture() { SetCapture(); }  
@@ -619,62 +600,58 @@ class WindowImp : public CWnd, public ui::WindowImp {
     CPoint point(x, y);
     ClientToScreen(&point);
 		::SetCursorPos(point.x, point.y);
-  }
-  virtual void DevSetCursor(CursorStyle style) {}
-
-  virtual void dev_set_parent(Window* window) {
-    SetParent(dynamic_cast<CWnd*>(window->imp()));
-  }
-
-  BOOL Create(CWnd* pParentWnd, UINT nID) {
-   if (!CWnd::Create(NULL, 
-                     NULL, 
-                     WS_CHILD | WS_BORDER | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-		                 CRect(0, 0, 0, 0), 
-                     pParentWnd, 
-                     nID, 
-                     NULL)) {
-		  TRACE0("Failed to create window\n");
-			return false;
-	  }    
-    return true;
-  }
-
+  }  
+  virtual void dev_set_parent(Window* window);  
   virtual void DevDestroy() { DestroyWindow(); }
-  
+
+  virtual void dev_set_fill_color(ARGB color) { color_ = color; }
+  virtual ARGB dev_fill_color() const { return color_; }
+
+    
  protected:		
-  virtual BOOL PreCreateWindow(CREATESTRUCT& cs);   
+  //virtual BOOL PreCreateWindow(CREATESTRUCT& cs);   
   virtual BOOL PreTranslateMessage(MSG* pMsg);  
 	DECLARE_MESSAGE_MAP()
 	int OnCreate(LPCREATESTRUCT lpCreateStruct);
   void OnDestroy();	
   void OnPaint();
-  void OnSize(UINT nType, int cx, int cy);  
+  void OnSize(UINT nType, int cx, int cy); 
+
+  BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
+
   // MouseEvents
-  void OnLButtonDown(UINT nFlags, CPoint pt) {    
+  void OnLButtonDown(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
     MouseEvent ev(pt.x, pt.y, 1, nFlags);
     OnDevMouseDown(ev);                  
   }
   void OnRButtonDown(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
     MouseEvent ev(pt.x, pt.y, 2, nFlags);
     OnDevMouseDown(ev);                  
   }
 	void OnLButtonDblClk(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
     MouseEvent ev(pt.x, pt.y, 1, nFlags);
     OnDevDblclick(ev);
   }
 	void OnMouseMove(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
     MouseEvent ev(pt.x, pt.y, 1, nFlags);
     OnDevMouseMove(ev);                  
   }
 	void OnLButtonUp(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
     MouseEvent ev(pt.x, pt.y, 1, nFlags);
     OnDevMouseUp(ev);
   }
 	void OnRButtonUp(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
     MouseEvent ev(pt.x, pt.y, 2, nFlags);
     OnDevMouseUp(ev);
   }
+
+  virtual bool OnDevUpdateArea(ui::Area& area);
 
  private:
   int Win32KeyFlags(UINT nFlags) {
@@ -689,15 +666,479 @@ class WindowImp : public CWnd, public ui::WindowImp {
       flags |= MK_ALT;
     }
     return flags;
+  }    
+
+  void MapPointToRoot(CPoint& pt) {
+    CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
+    MapWindowPoints(root, &pt, 1);
   }
   
-  static void SetFocusHook();
-  static void ReleaseHook();
-  static LRESULT __stdcall HookCallback(int nCode, WPARAM wParam, LPARAM lParam);  
   CBitmap bmpDC;
-  static void FilterHook(HWND hwnd);  
-  static HHOOK _hook;
-  static std::map<HWND, WindowImp*> windows_;
+  ARGB color_;
+  ui::Point dev_pos_;  
+};
+
+class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
+ public:
+  WindowImp() : 
+      WindowTemplateImp<CWnd, ui::WindowImp>(),
+      cursor_(LoadCursor(0, IDC_ARROW)) {
+  }
+  WindowImp(ui::Window* w) :
+      WindowTemplateImp<CWnd, ui::WindowImp>(w),
+      cursor_(LoadCursor(0, IDC_ARROW)) {
+  }
+
+  static WindowImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    WindowImp* imp = new WindowImp();
+    if (!imp->Create(NULL, 
+                     NULL, 
+                     WS_CHILD, //  | WS_EX_COMPOSITED,
+		                 CRect(0, 0, 0, 0), 
+                     parent, 
+                     nID, 
+                     NULL)) {
+		  TRACE0("Failed to create window\n");
+			return 0;
+	  }            
+    imp->set_window(w);
+    return imp;
+  }  
+  
+ protected:
+  virtual void DevSetCursor(CursorStyle style);
+  /*BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {   
+    ::SetCursor(cursor_);
+    return TRUE;   
+  } */  
+ private:
+   HCURSOR cursor_;
+};
+
+class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {
+ public:  
+  ScrollBarImp() : WindowTemplateImp<CScrollBar, ui::ScrollBarImp>() {}
+
+  static ScrollBarImp* Make(ui::Window* w, CWnd* parent, UINT nID, Orientation orientation) {
+    ScrollBarImp* imp = new ScrollBarImp();
+    int orientation_flag;
+    ui::Dimension size;
+    if (orientation == HORZ) {
+      size.set(100, GetSystemMetrics(SM_CXHSCROLL));
+      orientation_flag = SBS_HORZ;
+    } else {
+      size.set(GetSystemMetrics(SM_CXVSCROLL), 100);
+      orientation_flag = SBS_VERT;
+    }
+  
+    if (!imp->Create(orientation_flag | WS_CHILD | WS_VISIBLE,
+                     CRect(0, 0, size.width(), size.height()), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    return imp;
+  }  
+
+  virtual void dev_set_scroll_range(int minpos, int maxpos) {
+    SetScrollRange(minpos, maxpos);
+  }
+
+  virtual void dev_scroll_range(int& minpos, int& maxpos) {
+    GetScrollRange(&minpos, &maxpos);
+  }
+
+  virtual void dev_set_scroll_pos(int pos) { SetScrollPos(pos); }
+  virtual int dev_scroll_pos() const { return GetScrollPos(); }
+  virtual ui::Dimension dev_system_size() const {
+    return ui::Dimension(GetSystemMetrics(SM_CXVSCROLL), 
+                    GetSystemMetrics(SM_CXHSCROLL));    
+  }
+ protected:
+   DECLARE_MESSAGE_MAP()
+  void OnPaint() { CScrollBar::OnPaint(); }
+};
+
+class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
+ public:  
+  ButtonImp() : WindowTemplateImp<CButton, ui::ButtonImp>() {}
+
+  static ButtonImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    ButtonImp* imp = new ButtonImp();
+    if (!imp->Create("Button", WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
+                     CRect(0, 0, 55, 19), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    return imp;
+  }
+
+  BOOL OnEraseBkgnd(CDC* pDC) { return CButton::OnEraseBkgnd(pDC); }
+
+  virtual void dev_set_text(const std::string& text) { SetWindowText(text.c_str()); }
+  virtual std::string dev_text() const {
+    CString s;    
+    GetWindowTextA(s);
+    return s.GetString();
+  }
+
+protected:
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CButton::OnPaint(); }
+};
+
+class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
+ public:  
+  FrameImp() : WindowTemplateImp<CFrameWnd, ui::FrameImp>() {}
+
+  static FrameImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    FrameImp* imp = new FrameImp();    
+    if (!imp->Create(NULL, "PsycleWindow", WS_OVERLAPPEDWINDOW,
+                     CRect(0, 0, 200, 200), 
+                     parent)) {
+      TRACE0("Failed to create frame window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    return imp;
+  }
+    
+  virtual void dev_set_title(const std::string& title) {
+    SetWindowTextA(_T(title.c_str()));
+  }
+
+  virtual void dev_set_view(ui::Window::Ptr view) {
+    CWnd* wnd = dynamic_cast<CWnd*>(view->imp());
+    if (wnd) {
+      wnd->SetParent(this);      
+      view_ = view;
+    }
+  }
+
+  void OnSize(UINT nType, int cx, int cy) {
+    if (view_) {
+      CRect rect;
+      this->GetClientRect(rect);
+      CWnd* wnd = dynamic_cast<CWnd*>(view_->imp());
+      if (wnd) {
+        wnd->MoveWindow(&rect);
+      }
+    }
+  }
+
+ protected:
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CFrameWnd::OnPaint(); }
+  ui::Window::Ptr view_;
+};
+
+
+class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
+ public:  
+  TreeImp() : WindowTemplateImp<CTreeCtrl, ui::TreeImp>() {}
+
+  static TreeImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    TreeImp* imp = new TreeImp();
+    if (!imp->Create(WS_CHILD, 
+                     CRect(0, 0, 200, 200), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    return imp;
+  }
+
+  virtual void dev_set_background_color(ARGB color) { 
+    SetBkColor(ToCOLORREF(color));
+  }  
+  virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
+  BOOL OnEraseBkgnd(CDC* pDC) { return CTreeCtrl::OnEraseBkgnd(pDC); }
+  
+ protected:
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CTreeCtrl::OnPaint(); }  
+};
+
+class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
+ public:  
+  ComboBoxImp() : WindowTemplateImp<CComboBox, ui::ComboBoxImp>() {}
+
+  static ComboBoxImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    ComboBoxImp* imp = new ComboBoxImp();
+    if (!imp->Create(WS_CHILD|WS_VSCROLL|CBS_DROPDOWNLIST,
+                     CRect(10,10,200,100), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    return imp;
+  }  
+};
+
+class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
+ public:  
+  EditImp() : WindowTemplateImp<CEdit, ui::EditImp>() {}
+
+  static EditImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    EditImp* imp = new EditImp();
+    if (!imp->Create(WS_CHILD | WS_TABSTOP | WS_VISIBLE,
+                     CRect(10,10,200,100), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    return imp;
+  }
+
+  BOOL OnEraseBkgnd(CDC* pDC) { return CEdit::OnEraseBkgnd(pDC); }
+
+  virtual void dev_set_text(const std::string& text) { SetWindowText(text.c_str()); }
+  virtual std::string dev_text() const {
+    CString s;    
+    GetWindowTextA(s);
+    return s.GetString();
+  }
+
+protected:
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CEdit::OnPaint(); }
+};
+
+class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
+ public:  
+  static std::string type() { return "canvasscintillaitem"; }
+  
+  ScintillaImp() : 
+      WindowTemplateImp<CWnd, ui::ScintillaImp>(),
+      find_flags_(0),
+      is_modified_(false),
+      has_file_(false) {
+    //ctrl().modified.connect(boost::bind(&Scintilla::OnFirstModified, this));
+    //ctrl().Create(p_wnd(), id());       
+  }
+
+  static ScintillaImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    ScintillaImp* imp = new ScintillaImp();
+    if (!imp->Create(parent, nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    return imp;
+  }
+          
+  bool Create(CWnd* pParentWnd, UINT nID) {
+    if (!CreateEx(0, 
+        _T("scintilla"),
+         "", 
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_CLIPCHILDREN
+        , CRect(0, 0, 0, 0),
+        pParentWnd,
+        nID,
+        0)) {
+      TRACE0("Failed to create scintilla window\n");				
+      return false;
+    }
+      
+    fn = (int (__cdecl *)(void *,int,int,int))
+         SendMessage(SCI_GETDIRECTFUNCTION, 0, 0);
+    ptr = (void *)SendMessage(SCI_GETDIRECTPOINTER, 0, 0);   
+
+    f(SCI_SETMARGINWIDTHN, 0, 32);
+    return true;
+  }
+
+  virtual int dev_f(int sci_cmd, void* lparam, void* wparam) {
+    return f(sci_cmd, lparam, wparam);
+  }
+
+  template<class T, class T1>
+  int f(int sci_cmd, T lparam, T1 wparam) {     
+    return fn(ptr, sci_cmd, (WPARAM) lparam, (LPARAM) wparam);
+  }
+
+  template<class T, class T1>
+  int f(int sci_cmd, T lparam, T1 wparam) const {     
+    return fn(ptr, sci_cmd, (WPARAM) lparam, (LPARAM) wparam);
+  }
+    
+  void DevAddText(const std::string& text) {       
+    f(SCI_ADDTEXT, text.size(), text.c_str());
+  }
+
+  void DevFindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const {
+    TextToFind txt;
+    txt.chrg.cpMin = cpmin;      
+    txt.chrg.cpMax = cpmax;
+    txt.lpstrText = text.c_str();
+    pos = const_cast<ScintillaImp*>(this)->f(SCI_FINDTEXT, find_flags_, &txt);
+    cpselstart = txt.chrgText.cpMin;
+    cpselend = txt.chrgText.cpMax;
+  }
+
+  void DevGotoLine(int pos) { f(SCI_GOTOLINE, pos, 0); }
+  int dev_length() const {
+    return const_cast<ScintillaImp*>(this)->f(SCI_GETLENGTH, 0, 0);
+  }
+  int dev_selectionstart() const {
+    return const_cast<ScintillaImp*>(this)->f(SCI_GETSELECTIONSTART, 0, 0);     
+  }
+  int dev_selectionend() const {
+    return const_cast<ScintillaImp*>(this)->f(SCI_GETSELECTIONEND, 0, 0);     
+  }
+  void DevSetSel(int cpmin, int cpmax) { f(SCI_SETSEL, cpmin, cpmax); }
+  bool has_selection() const { return dev_selectionstart() != dev_selectionend(); }
+ 
+  void dev_set_find_match_case(bool on) {     
+   if (on) {
+      find_flags_ = find_flags_ | SCFIND_MATCHCASE;
+    } else {
+      find_flags_ = find_flags_ & ~SCFIND_MATCHCASE;
+    }
+  }
+
+  void dev_set_find_whole_word(bool on) {
+    if (on) {
+      find_flags_ = find_flags_ | SCFIND_WHOLEWORD;
+    } else {
+      find_flags_ = find_flags_ & ~SCFIND_WHOLEWORD;
+    }
+  }
+
+  void dev_set_find_regexp(bool on) {     
+   if (on) {
+      find_flags_ = find_flags_ | SCFIND_REGEXP;
+    } else {
+      find_flags_ = find_flags_ & ~SCFIND_REGEXP;
+    }
+  }
+
+  void DevLoadFile(const std::string& filename) {
+    using namespace std;    
+    #if __cplusplus >= 201103L
+      ifstream file (filename, ios::in|ios::binary|ios::ate);
+    #else
+      ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
+    #endif
+    if (file.is_open()) {
+      is_modified_ = true;
+      f(SCI_CANCEL, 0, 0);
+      f(SCI_SETUNDOCOLLECTION, 0, 0);      
+      file.seekg(0, ios::end);
+      size_t size = file.tellg();
+      char *contents = new char [size];
+      file.seekg (0, ios::beg);
+      file.read (contents, size);
+      file.close();
+      f(SCI_ADDTEXT, size, contents);      
+      f(SCI_SETUNDOCOLLECTION, true, 0);
+      f(SCI_EMPTYUNDOBUFFER, 0, 0);      
+      f(SCI_SETSAVEPOINT, 0, 0);      
+      f(SCI_GOTOPOS, 0, 0);      
+      delete [] contents;
+      fname_ = filename;
+      is_modified_ = false;
+      has_file_ = true;
+    } else {
+      throw std::runtime_error("File Not Open Error!");
+    }    
+  }
+
+  virtual void dev_set_lexer(const Lexer& lexer);
+
+  void dev_set_foreground_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_DEFAULT, ToCOLORREF(color)); }
+  ARGB dev_foreground_color() const { return ToARGB(f(SCI_STYLEGETFORE, STYLE_DEFAULT, 0)); }
+  void dev_set_background_color(ARGB color) { f(SCI_STYLESETBACK, STYLE_DEFAULT, ToCOLORREF(color)); }
+  ARGB dev_background_color() const { return ToARGB(f(SCI_STYLEGETBACK, STYLE_DEFAULT, 0)); }
+
+  void dev_set_linenumber_foreground_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_LINENUMBER, ToCOLORREF(color)); }
+  ARGB dev_linenumber_foreground_color() const { return ToARGB(f(SCI_STYLEGETFORE, STYLE_LINENUMBER, 0)); }
+  void dev_set_linenumber_background_color(ARGB color) { f(SCI_STYLESETBACK, STYLE_LINENUMBER, ToCOLORREF(color)); }
+  ARGB dev_linenumber_background_color() const { return ToARGB(f(SCI_STYLEGETBACK, STYLE_LINENUMBER, 0)); }
+
+  void dev_set_sel_foreground_color(ARGB color) { f(SCI_SETSELFORE, 1, ToCOLORREF(color)); }
+ // COLORREF sel_foreground_color() const { return f(SCI_GETSELFORE, 0, 0); }
+  void dev_set_sel_background_color(ARGB color) { f(SCI_SETSELBACK, 1, ToCOLORREF(color)); }
+ // COLORREF sel_background_color() const { return f(SCI_STYLEGETBACK, STYLE_sel, 0); }
+  void dev_set_sel_alpha(int alpha) { ToARGB(f(SCI_SETSELALPHA, alpha, 0)); }
+
+  void dev_set_ident_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_INDENTGUIDE, ToCOLORREF(color)); }
+  void dev_set_caret_color(ARGB color) { f(SCI_SETCARETFORE, ToCOLORREF(color), 0); }
+  ARGB dev_caret_color() const { return ToARGB(f(SCI_GETCARETFORE, 0, 0)); }
+  void DevStyleClearAll() { f(SCI_STYLECLEARALL, 0, 0); }
+
+  void DevSaveFile(const std::string& filename) {
+    //Get the length of the document
+    int nDocLength = f(SCI_GETLENGTH, 0, 0);
+    //Write the data in blocks to disk
+    CFile file;
+    BOOL res = file.Open(_T(filename.c_str()), CFile::modeCreate | CFile::modeReadWrite);
+    if (res) {
+      is_modified_ = true;
+      for (int i=0; i<nDocLength; i += 4095) //4095 because data will be returned NULL terminated
+      {
+        int nGrabSize = nDocLength - i;
+        if (nGrabSize > 4095)
+          nGrabSize = 4095;
+        //Get the data from the control
+        TextRange tr;
+        tr.chrg.cpMin = i;
+        tr.chrg.cpMax = i + nGrabSize;
+        char Buffer[4096];
+        tr.lpstrText = Buffer;
+        f(SCI_GETTEXTRANGE, 0, &tr);
+        //Write it to disk
+        file.Write(Buffer, nGrabSize);
+      }
+    file.Close();
+    has_file_ = true;
+    fname_ = filename;
+    is_modified_ = false;
+    } else {
+      throw std::runtime_error("File Save Error");
+    }
+  }  
+  bool dev_has_file() const { return has_file_; }
+  virtual const std::string& dev_filename() const { return fname_; }  
+  bool dev_is_modified() const { return is_modified_; }
+  virtual void OnModified() { 
+    if (!is_modified_) {
+      OnDevFirstModified();
+    }
+    is_modified_ = true;
+  }
+
+  virtual void DevOnFirstModified() {}
+
+  boost::signal<void ()> modified;
+            
+ protected:
+  DECLARE_DYNAMIC(ScintillaImp)     
+  int (*fn)(void*,int,int,int);
+  void * ptr;
+   
+  BOOL OnModified(NMHDR *,LRESULT *) {
+    modified();
+    return false;
+  }
+   
+  DECLARE_MESSAGE_MAP(); 
+
+ private:         
+  DWORD find_flags_;
+  std::string fname_;
+  bool is_modified_, has_file_;
 };
 
 class Systems : public ui::Systems {
@@ -707,6 +1148,64 @@ class Systems : public ui::Systems {
   virtual ui::Graphics* CreateGraphics(void* dc) { return new ui::mfc::Graphics((CDC*) dc); }
   virtual ui::Image* CreateImage() { return new ui::mfc::Image(); }
   virtual ui::Font* CreateFont() { return new ui::mfc::Font(); }
+  virtual ui::Window* CreateWin() { 
+    Window* window = new Window();
+    WindowImp* imp = WindowImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
+    imp->set_window(window);
+    return window;
+  }
+  virtual ui::ScrollBar* CreateScrollBar() { 
+    ScrollBar* window = new ScrollBar();
+    ScrollBarImp* imp = ScrollBarImp::Make(window, DummyWindow::dummy(), WindowID::auto_id(), ui::VERT);
+    imp->set_window(window);
+    return window;
+  }
+  virtual ui::ComboBox* CreateComboBox() { 
+    ComboBox* window = new ComboBox();
+    ComboBoxImp* imp = ComboBoxImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
+    imp->set_window(window);
+    return window;
+  }
+  virtual ui::Edit* CreateEdit() { 
+    Edit* window = new Edit();
+    EditImp* imp = EditImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
+    imp->set_window(window);
+    return window;
+  }
+  virtual ui::Button* CreateButton() { 
+    Button* window = new Button();
+    ButtonImp* imp = ButtonImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
+    imp->set_window(window);
+    return window;
+  }
+};
+
+class ImpFactory : public ui::ImpFactory {
+ public:
+  virtual ui::WindowImp* CreateWindowImp() {     
+    return WindowImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
+  virtual ui::FrameImp* CreateFrameImp() {     
+    return FrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());    
+  }
+  virtual ui::ScrollBarImp* CreateScrollBarImp(Orientation orientation) {     
+    return ScrollBarImp::Make(0, DummyWindow::dummy(), WindowID::auto_id(), orientation);    
+  }
+  virtual ui::ComboBoxImp* CreateComboBoxImp() {     
+    return ComboBoxImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
+  virtual ui::ButtonImp* CreateButtonImp() {     
+    return ButtonImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }  
+  virtual ui::EditImp* CreateEditImp() {     
+    return EditImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }  
+  virtual ui::ScintillaImp* CreateScintillaImp() {     
+    return ScintillaImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  } 
+  virtual ui::TreeImp* CreateTreeImp() {     
+    return TreeImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
 };
 
 

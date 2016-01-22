@@ -9,6 +9,7 @@ local group = require("psycle.ui.canvas.group")
 local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local style = require("psycle.ui.canvas.itemstyle")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local callstack = group:new()
 
@@ -35,12 +36,12 @@ function callstack:init()
     font = 0x000000
   }           
   self:style():setpadding(5, 5, 5, 5)  
-  self.row1 = group:new(self):setstyle(rowstyle):setwidth(100)
-  self.row2 = group:new(self):setstyle(rowstyle):setwidth(500) 
-  self.row3 = group:new(self):setstyle(rowstyle):setwidth(100)    
-  text:new(self.row1):setautosize(false, true):settext(" "):setcolor(0xB0C8B1):setfillcolor(0x528A68):setstyle(colstyle)
-  text:new(self.row2):setautosize(false, true):settext("Name"):setcolor(0xB0C8B1):setfillcolor(0x528A68):setstyle(colstyle)
-  text:new(self.row3):setautosize(false, true):settext("source"):setcolor(0xB0C8B1):setfillcolor(0x528A68):setstyle(colstyle)
+  self.row1 = group:new(self):setstyle(rowstyle):setpos(0, 0, 100, 0)
+  self.row2 = group:new(self):setstyle(rowstyle):setpos(0, 0, 500, 0) 
+  self.row3 = group:new(self):setstyle(rowstyle):setpos(0, 0, 100, 0)
+  text:new(self.row1):setautosize(false, true):settext(" "):setcolor(0xB0C8B1):setornament(ornamentfactory:createfill(0x528A68)):setstyle(colstyle)
+  text:new(self.row2):setautosize(false, true):settext("Name"):setcolor(0xB0C8B1):setornament(ornamentfactory:createfill(0x528A68)):setstyle(colstyle)
+  text:new(self.row3):setautosize(false, true):settext("source"):setcolor(0xB0C8B1):setornament(ornamentfactory:createfill(0x528A68)):setstyle(colstyle)
   --t:style():setalign(style.AL)
   
   
@@ -57,9 +58,9 @@ function onrowclick(self)
 end
 
 function callstack:add(info)  
-  self.row1.t1 = text:new(self.row1):setautosize(false, true):settext("*"):setcolor(0x528A68):setfillcolor(0x2F2F2F):setstyle(colstyle)
-  self.row2.t2 = text:new(self.row2):setautosize(false, true):settext(info.name.." Line "..info.line):setcolor(0x528A68):setfillcolor(0x2F2F2F):setstyle(colstyle)
-  self.row3.t3 = text:new(self.row3):setautosize(false, true):settext(info.source:match("([^\\]+)$")):setcolor(0x528A68):setfillcolor(0x2F2F2F):setstyle(colstyle)
+  self.row1.t1 = text:new(self.row1):setautosize(false, true):settext("*"):setcolor(0x528A68):setornament(ornamentfactory:createfill(0x2F2F2F)):setstyle(colstyle)
+  self.row2.t2 = text:new(self.row2):setautosize(false, true):settext(info.name.." Line "..info.line):setcolor(0x528A68):setornament(ornamentfactory:createfill(0x2F2F2F)):setstyle(colstyle)
+  self.row3.t3 = text:new(self.row3):setautosize(false, true):settext(info.source:match("([^\\]+)$")):setcolor(0x528A68):setornament(ornamentfactory:createfill(0x2F2F2F)):setstyle(colstyle)
 --[[
   -- row1  
   self.r1 = group:new(self.row1):setstyle(colstyle)  
