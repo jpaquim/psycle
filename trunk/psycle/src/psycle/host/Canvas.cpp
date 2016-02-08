@@ -185,10 +185,10 @@ void DefaultAligner::SetPositions() {
     ui::Rect pad;
     if (group_.lock()->has_style()) {
       pad = group_.lock()->style()->padding();
-      margin.set(margin.left() + pad.left(),                 
-                 margin.top() + pad.top(),
-                 margin.right() - pad.right(),
-                 margin.bottom() - pad.bottom());
+      margin.set(ui::Point(margin.left() + pad.left(),                 
+                           margin.top() + pad.top()),
+                 ui::Point(margin.right() - pad.right(),
+                           margin.bottom() - pad.bottom()));
     }
     double margin_w = margin.left() + margin.right();
     double margin_h = margin.top() + margin.bottom();
@@ -200,37 +200,37 @@ void DefaultAligner::SetPositions() {
       case ALLEFT:
         {         
           double w = item_dim.width();
-          item->set_pos(ui::Rect(left + margin.left(), 
-                                 top + margin.top(), 
-                                 left + margin.left() + w - margin_w, 
-                                 top + margin.top() + bottom - top - margin_h)); 
+          item->set_pos(ui::Rect(ui::Point(left + margin.left(), 
+                                           top + margin.top()), 
+                                 ui::Point(left + margin.left() + w - margin_w, 
+                                           top + margin.top() + bottom - top - margin_h))); 
           left += w;
         }
       break;
       case ALRIGHT:
-        item->set_pos(ui::Rect(right - item_dim.width() + margin.right(), 
-                               top + margin.top(), 
-                               right - item_dim.width() + margin.right() + item_dim.width() - margin_w, 
-                               top + margin.top() + bottom - top - margin_h)); 
+        item->set_pos(ui::Rect(ui::Point(right - item_dim.width() + margin.right(), 
+                                         top + margin.top()), 
+                               ui::Point(right - item_dim.width() + margin.right() + item_dim.width() - margin_w, 
+                                         top + margin.top() + bottom - top - margin_h))); 
         right -= item_dim.width();
       break;
       case ALTOP:
         {
           double h = item_dim.height();
-          item->set_pos(ui::Rect(left + margin.left(), 
-                                 top + margin.top(),  
-                                 left + margin.left() + right - left - margin_w, 
-                                 top + h - margin_h)); 
+          item->set_pos(ui::Rect(ui::Point(left + margin.left(), 
+                                           top + margin.top()),  
+                                 ui::Point(left + margin.left() + right - left - margin_w, 
+                                           top + h - margin_h))); 
           top += h - margin_h;
         }
       break;
       case ALBOTTOM:
         {
           double h = item_dim.height();
-          item->set_pos(ui::Rect(left + margin.left(), 
-                                 bottom - h + margin_h + margin.top(), 
-                                 left + margin.left() + right - left - margin_w, 
-                                 bottom - h + margin.top() + h - margin.bottom())); 
+          item->set_pos(ui::Rect(ui::Point(left + margin.left(), 
+                                           bottom - h + margin_h + margin.top()), 
+                                 ui::Point(left + margin.left() + right - left - margin_w, 
+                                           bottom - h + margin.top() + h - margin.bottom()))); 
           bottom -= h - margin_h;
         }
       break;
@@ -240,7 +240,7 @@ void DefaultAligner::SetPositions() {
   } // end loop 
   
   if (client) {    
-    client->set_pos(ui::Rect(left, top, right, bottom));    
+    client->set_pos(ui::Rect(ui::Point(left, top), ui::Point(right, bottom)));    
   }
 }
 
