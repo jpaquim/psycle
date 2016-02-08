@@ -11,8 +11,14 @@ namespace ui {
 
 
 boost::shared_ptr<ui::Region> Window::dummy_region_(ui::Systems::instance().CreateRegion());
-Window::List Window::dummy_list_;
+Window::Container Window::dummy_list_;
 Window::Ptr Window::nullpointer;
+
+std::auto_ptr<ui::Region> Rect::region() const {
+  std::auto_ptr<ui::Region> result(ui::Systems::instance().CreateRegion());
+  result->SetRect(*this);
+  return result;  
+}
 
 Area* Area::Clone() const {
   Area* area = new Area();  
@@ -21,14 +27,23 @@ Area* Area::Clone() const {
   return area;  
 }
 
+void Area::Update() const {
+  region_cache_.reset(0);
+  update_bound_cache_ = true;
+}
+
 std::auto_ptr<ui::Region> Area::region() const {
-  std::auto_ptr<ui::Region> rgn(ui::Systems::instance().CreateRegion());
-  rect_const_iterator i = rect_shapes_.begin();
-  for (; i != rect_shapes_.end(); ++i) {
-    ui::Rect bounds = (*i).bounds();
-    rgn->SetRect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+  if (!region_cache_.get()) {
+    region_cache_.reset(ui::Systems::instance().CreateRegion());
+    rect_const_iterator i = rect_shapes_.begin();
+    for (; i != rect_shapes_.end(); ++i) {
+      ui::Rect bounds = (*i).bounds();
+      std::auto_ptr<ui::Region> tmp(ui::Systems::instance().CreateRegion());
+      tmp->SetRect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+      region_cache_->Combine(*tmp, RGN_OR);
+    }
   }
-  return rgn;
+  return region_cache_;
 }
 
 void Area::Offset(double dx, double dy) {
@@ -36,10 +51,12 @@ void Area::Offset(double dx, double dy) {
   for (; i != rect_shapes_.end(); ++i) {
     i->Offset(dx, dy);
   }
+  Update();
 }
 
 void Area::Clear() {
   rect_shapes_.clear();
+  Update();
 }
 
 bool Area::Intersect(double x, double y) const {
@@ -48,42 +65,49 @@ bool Area::Intersect(double x, double y) const {
 
 void Area::Add(const RectShape& rect) {
   rect_shapes_.push_back(rect);
+  Update();
 }
 
 int Area::Combine(const Area& other, int combinemode) {
   if (combinemode == RGN_OR) {
     rect_shapes_.insert(rect_shapes_.end(), other.rect_shapes_.begin(),
                         other.rect_shapes_.end());
+    Update();
     return COMPLEXREGION;
   } 
   return ERROR;
 }
 
-ui::Rect Area::bounds() const {
-  if (rect_shapes_.empty()) {
-    return Rect(0, 0, 0, 0);
+ui::Rect& Area::bounds() const {
+  if (update_bound_cache_) {
+    if (rect_shapes_.empty()) {
+      bound_cache_.set(ui::Point(), ui::Point());
+      Update();
+      return bound_cache_;
+    }
+    bound_cache_.set(ui::Point(std::numeric_limits<double>::max(),
+                               std::numeric_limits<double>::max()),
+                     ui::Point(std::numeric_limits<double>::min(),
+                               std::numeric_limits<double>::min()));
+    rect_const_iterator i = rect_shapes_.begin();
+    for (; i != rect_shapes_.end(); ++i) {
+      ui::Rect bounds = (*i).bounds();
+      if (bounds.left() < bound_cache_.left()) {
+        bound_cache_.set_left(bounds.left());
+      }
+      if (bounds.top() < bound_cache_.top()) {
+        bound_cache_.set_top(bounds.top());
+      }
+      if (bounds.right() > bound_cache_.right()) {
+        bound_cache_.set_right(bounds.right());
+      }
+      if (bounds.bottom() > bound_cache_.bottom()) {
+        bound_cache_.set_bottom(bounds.bottom());
+      }
+    }
+    Update();
   }
-  ui::Rect result(std::numeric_limits<double>::max(),
-                  std::numeric_limits<double>::max(),
-                  std::numeric_limits<double>::min(),
-                  std::numeric_limits<double>::min());
-  rect_const_iterator i = rect_shapes_.begin();
-  for (; i != rect_shapes_.end(); ++i) {
-    ui::Rect bounds = (*i).bounds();
-    if (bounds.left() < result.left()) {
-      result.set_left(bounds.left());
-    }
-    if (bounds.top() < result.top()) {
-      result.set_top(bounds.top());
-    }
-    if (bounds.right() > result.right()) {
-      result.set_right(bounds.right());
-    }
-    if (bounds.bottom() > result.bottom()) {
-      result.set_bottom(bounds.bottom());
-    }
-  }
-  return result;
+  return bound_cache_;
 }
 
 Window::Window() :
@@ -98,6 +122,7 @@ Window::Window() :
 Window::Window(WindowImp* imp) : 
     update_(true),
     area_(new Area()),
+    fls_area_(new Area()),
     auto_size_width_(true),
     auto_size_height_(true),
     visible_(true),
@@ -107,7 +132,9 @@ Window::Window(WindowImp* imp) :
 
 Window::~Window() {
   if (imp_.get()) {
-    imp_->DevDestroy(); 
+    if (imp_->DevDestroy()) {
+      imp_.release();
+    }
   }
 }
 
@@ -145,6 +172,36 @@ bool Window::IsInGroup(Window::WeakPtr group) const {
   return false;
 }
 
+void Window::STR() {  
+  // fls_area_.reset(ornament_.expired() ? area().Clone());
+  fls_area_.reset(new Area(area().bounds()));
+  fls_area_->Offset(abs_pos().left(), abs_pos().top());
+//  has_store_ = true;
+}
+
+void Window::FLS() {
+  /*if (has_store_) {
+    needsupdate();
+    std::auto_ptr<Region> tmp(region().Clone());
+    tmp->Offset(zoomabsx(), zoomabsy());
+    fls_rgn_->Combine(*tmp, RGN_OR);
+    has_store_ = false;    
+  } else {
+    STR();
+    has_store_ = false;
+  }
+  if (visible() && !parent().expired()) {
+    Canvas* c = this->root();
+    if (c && c->wnd()) {
+      c->Invalidate(*fls_rgn_);
+    }
+  }*/
+  STR();
+  if (root()) {
+    root()->Invalidate(*fls_area_->region());
+  }
+}
+
 bool Window::IsInGroupVisible() const {
   bool res = visible();
   Window::ConstWeakPtr p = parent();
@@ -158,21 +215,22 @@ bool Window::IsInGroupVisible() const {
   return res;
 }
 
-void Window::set_ornament(boost::shared_ptr<Ornament> ornament) {
+void Window::set_ornament(boost::shared_ptr<Ornament> ornament) {  
   ornament_ = ornament;
   if (ornament) {
     std::auto_ptr<ui::Rect> opad = ornament->padding();
     if (opad.get()) {
       ui::Rect pad = style()->padding();
-      pad.set(pad.left() + opad->left(),
-              pad.top() + opad->top(),
-              pad.right() + opad->right(),
-              pad.bottom() + opad->bottom());    
+      pad.set(ui::Point(pad.left() + opad->left(),
+                        pad.top() + opad->top()),
+              ui::Point(pad.right() + opad->right(),
+                        pad.bottom() + opad->bottom()));
       style()->set_padding(pad);
     }
   } else if (has_style()) { 
     style()->set_padding(ui::Rect());
   }
+  FLS();
 }
 
 boost::weak_ptr<ui::Ornament> Window::ornament() {
@@ -217,10 +275,7 @@ ui::Point Window::CalcAbsPos(const Point& pos) const {
 }
 
 void Window::set_pos(const ui::Point& pos) {    
-  set_pos(ui::Rect(pos.x(),
-                   pos.y(),
-                   pos.x() + area().bounds().width(),
-                   area().bounds().height()));
+  set_pos(ui::Rect(pos, ui::Dimension(area().bounds().width(), area().bounds().height())));
 }
 
 void Window::set_pos(const ui::Rect& pos) {
@@ -350,71 +405,124 @@ void Window::set_parent(Window* window) {
   }
 }
 
+void Window::set_clip_children() {
+  if (imp_.get()) {
+    imp_->dev_set_clip_children();
+  }
+}
+
+void Window::add_style(UINT flag) {
+  if (imp_.get()) {
+    imp_->dev_add_style(flag);
+  }
+}
+
+void Window::remove_style(UINT flag) {
+  if (imp_.get()) {
+    imp_->dev_remove_style(flag);
+  }
+}
+
 void Window::DrawBackground(Graphics* g, Region& draw_region) {
  if (draw_region.bounds().height() > 0) {    
     if (!ornament().expired()) { 
       Window::Ptr t = shared_from_this();
+      if (debug_text() == "checktext") {
+        int fordebugonly = 0;
+      }
       ui::Rect bounds = area().bounds();
       ornament().lock()->Draw(t, g, draw_region);
     }
   }
 }
 
-template<class T>
-void Window::PreOrderTreeTraverse(T& functor) {  
+template<class T, class T1>
+void Window::PreOrderTreeTraverse(T& functor, T1& cond) {  
   if (!functor(*this)) {
     for (iterator i = begin(); i != end(); ++i) {
-      Window::Ptr item = *i;          
-      item->PreOrderTreeTraverse(functor);
+      Window::Ptr window = *i;      
+      if (!cond(*window.get())) {
+        window->PreOrderTreeTraverse(functor, cond);
+      }
     }  
   }
 }
 
-template<class T>
-void Window::PostOrderTreeTraverse(T& functor) {  
-  for (iterator child_it = begin(); child_it != end(); ++child_it) {    
-    (*child_it)->PostOrderTreeTraverse(functor);
+template<class T, class T1>
+void Window::PostOrderTreeTraverse(T& functor, T1& cond) {      
+  for (iterator i = begin(); i != end(); ++i) {
+    Window::Ptr window = *i;  
+    if (!cond(*window.get())) {      
+      window->PostOrderTreeTraverse(functor, cond);
+    }
   }
-  functor(*this);  
+  functor(*this);
 }
 
 // Aligner
+Aligner::Aligner() : aligned_(false) {}
+
 bool Aligner::full_align_ = true;
 
-void CalcDim::operator()(Aligner& aligner) const { aligner.CalcDimensions(); };
-void SetPos::operator()(Aligner& aligner) const { aligner.SetPositions(); };
-
-template<class T>
-void Aligner::PreOrderTreeTraverse(T& functor) {
-  Window* g = group_.lock().get();  
-  pos_ = g->pos();
-  functor(*this);
-  for (iterator child_it = begin(); child_it != end(); ++child_it) {
-    Window::Ptr child = *child_it;
-    if (child->visible() && child->aligner()) {      
-      child->aligner()->PreOrderTreeTraverse(functor);    
-    }
-  }  
+bool Visible::operator()(Window& window) const {
+  return window.visible();
 }
 
-template<class T>
-void Aligner::PostOrderTreeTraverse(T& functor) {  
-  for (iterator i = begin(); i != end(); ++i) {
-    Window::Ptr window = *i;
-    if (window->visible() && window->aligner()) {      
-      window->aligner()->PostOrderTreeTraverse(functor);
-    }
+void CalcDim::operator()(Window& window) const {
+ if (window.aligner()) {
+   window.aligner()->CalcDimensions();    
+ } 
+};
+
+bool AbortPos::operator()(Window& window) const { 
+    bool abort_tree_walk = true;
+    if (window.visible() && window.has_childs() && window.aligner()) {      
+      //std::stringstream str;
+      //str << "---- " << window.debug_text() << "----" << std::endl;
+      //str << "wo-pos" << window.pos_old_.left() << "," << window.pos_old_.top() << std::endl;
+      //str << "w-pos" << window.pos().left() << "," << window.pos().top() << std::endl;
+		 // TRACE(str.str().c_str());
+      if (!window.aligner()->aligned() || 
+        window.pos() != window.pos_old_) {
+        abort_tree_walk = false;
+        std::stringstream str;
+        str << "wo-pos" << window.pos_old_.left() << "," << window.pos_old_.top() << std::endl;
+        str << "wo-size" << window.pos_old_.width() << "," << window.pos_old_.height() << std::endl;
+        str << "w-pos" << window.pos().left() << "," << window.pos().top() << std::endl;
+        str << "w-size" << window.pos().width() << "," << window.pos().height() << std::endl;
+        str << "---- not abort: " << window.debug_text() << "----" << std::endl;
+        TRACE(str.str().c_str());
+        window.aligner()->aligned_ = true;
+      }
+    }    
+    return abort_tree_walk;
   }
-  functor(*this);  
+
+bool SetUnaligned::operator()(Window& window) const {
+  if (window.aligner()) {
+    window.aligner()->aligned_ = false;    
+  }
+  return false;
 }
 
-Window::List Window::SubItems() {
-    Window::List allitems;
+bool SetPos::operator()(Window& window) const {    
+  for (Window::iterator it = window.begin(); it != window.end(); ++it) {
+    Window::Ptr child = *it;
+    child->pos_old_ = child->pos();
+  }
+  if (window.visible() && window.has_childs()) {    
+    window.aligner()->SetPositions();      
+  }  
+  return false;
+};
+
+Window::Container Window::SubItems() {
+    Window::Container allitems;
     iterator it = begin();
     for (; it != end(); ++it) {
       Window::Ptr item = *it;
       allitems.push_back(item);
-      Window::List subs = item->SubItems();
+      Window::Container subs = item->SubItems();
       iterator itsub = subs.begin();
       for (; itsub != subs.end(); ++itsub) {
         allitems.push_back(*it);
@@ -464,10 +572,7 @@ void Group::Remove(const Window::Ptr& item) {
 bool Group::OnUpdateArea() {  
   if (!auto_size_width() && !auto_size_height()) {
     area_->Clear();
-    area_->Add(RectShape(ui::Rect(area_->bounds().left(),
-                                  area_->bounds().top(), 
-                                  area_->bounds().left() + imp()->dev_pos().width(), 
-                                  area_->bounds().top() + imp()->dev_pos().height())));
+    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().size())));
     return true;
   }
 
@@ -486,18 +591,16 @@ bool Group::OnUpdateArea() {
   if (!auto_size_width()) {
     ui::Rect bounds = area_->bounds();
     area_->Clear();
-    area_->Add(RectShape(ui::Rect(bounds.left(),
-                                  bounds.top(), 
-                                  imp()->dev_pos().width(),
-                                  bounds.height())));
+    area_->Add(RectShape(ui::Rect(bounds.top_left(),
+                                  ui::Point(imp()->dev_pos().width(),
+                                            bounds.height()))));
   }
   if (!auto_size_height()) {        
     ui::Rect bounds = area_->bounds();
     area_->Clear();
-    area_->Add(RectShape(ui::Rect(bounds.left(),
-                                  bounds.top(), 
-                                  bounds.width(),
-                                  imp()->dev_pos().height())));
+    area_->Add(RectShape(ui::Rect(bounds.top_left(),                                  
+                                  ui::Point(bounds.width(),
+                                            imp()->dev_pos().height()))));
   }
   return true;
 }
@@ -524,7 +627,7 @@ int Group::zorder(Window::Ptr item) const {
 
 Window::Ptr Group::HitTest(double x, double y) {
   Window::Ptr result;
-  Window::List::const_reverse_iterator rev_it = items_.rbegin();
+  Window::Container::const_reverse_iterator rev_it = items_.rbegin();
   for (; rev_it != items_.rend(); ++rev_it) {
     Window::Ptr item = *rev_it;
     item = item->visible() 
@@ -549,12 +652,18 @@ void Group::set_aligner(const boost::shared_ptr<Aligner>& aligner) {
   aligner_->set_group(boost::dynamic_pointer_cast<Group>(shared_from_this()));
 }
   
-Window::List Aligner::dummy;
+Window::Container Aligner::dummy;
 
 void Group::Align() {  
   if (aligner_) {
     aligner_->Align();
   }  
+}
+
+void Group::FlagNotAligned() {
+  static AbortNone abort_none;
+  static SetUnaligned set_unaligned;
+  PreOrderTreeTraverse(set_unaligned, abort_none);  
 }
 
 ScrollBar::ScrollBar(ScrollBarImp* imp) : Window(imp) {}
@@ -608,7 +717,60 @@ void Frame::set_view(ui::Window::Ptr view) {
   }
 }
 
+void TreeNode::set_imp(TreeNodeImp* imp) { 
+  imp_.reset(imp);
+  if (imp) {
+    imp->set_tree_node(this);
+  }
+}
+
+void TreeNode::set_tree(boost::weak_ptr<Tree> tree) {
+  tree_ = tree;  
+  if (imp()) {
+    imp()->dev_set_tree(parent(), tree);
+  }
+  std::list<boost::shared_ptr<TreeNode> >::iterator i = children_.begin();
+  for (; i != children_.end(); ++i) {
+    boost::shared_ptr<TreeNode> node = *i;
+    node->set_tree(tree);    
+  }
+}
+
+void TreeNode::set_parent(const boost::weak_ptr<TreeNode>& parent) {
+  parent_ = parent;
+}
+
+void TreeNode::WorkClick() {
+  OnClick();
+  if (!tree_.expired()) {
+    tree_.lock()->OnClick(this);
+  }
+}
+
+void TreeNode::Add(boost::shared_ptr<TreeNode> node) {  
+  node->set_parent(shared_from_this());
+  children_.push_back(node);
+}
+
+void TreeNode::set_text(const std::string& text) {
+  if (imp()) {
+    imp()->dev_set_text(text);
+  }
+}
+
+std::string TreeNode::text() const {
+  return (imp()) ? imp()->dev_text() : "no imp";  
+}
+
 Tree::Tree(TreeImp* imp) : Window(imp) {}
+
+void Tree::AddNode(boost::shared_ptr<TreeNode> node) {  
+  children_.push_back(node);
+  node->set_tree(boost::dynamic_pointer_cast<Tree>(shared_from_this()));
+}
+
+void Tree::Clear() {
+}
 
 void Tree::set_background_color(ARGB color) {
   if (imp()) {
@@ -619,6 +781,131 @@ void Tree::set_background_color(ARGB color) {
 ARGB Tree::background_color() const {
   return imp() ? imp()->dev_background_color() : 0xFF00000;
 }
+
+void Tree::set_text_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_text_color(color);
+  }
+}
+
+ARGB Tree::text_color() const {
+  return imp() ? imp()->dev_text_color() : 0xFF00000;
+}
+
+void Tree::test() {    
+  boost::shared_ptr<TreeNode> child(new TreeNode());  
+  child->set_imp(new mfc::TreeNodeImp());
+  child->set_text("test");
+
+  boost::shared_ptr<TreeNode> child1(new TreeNode());  
+  child1->set_imp(new mfc::TreeNodeImp());
+  child1->set_text("test1");
+  child->Add(child1);
+
+  AddNode(child);    
+}
+
+void Tree::build(TreeNode& node) {
+  /*if (imp()) {
+    std::vector<TreeNode>::iterator child_iterator = node.children.begin();
+    for (; child_iterator != node.children.end(); ++child_iterator) {
+      TreeNode& child = *child_iterator;
+      imp()->dev_create_node(child);
+      build(*child_iterator);
+    }
+  }*/
+}
+
+
+Table::Table(TableImp* imp) : Window(imp) {}
+
+void Table::InsertColumn(int col, const std::string& text) {
+  if (imp()) {
+    imp()->DevInsertColumn(col, text);
+  }
+}
+
+void Table::InsertRow() {
+  if (imp()) {
+    imp()->DevInsertRow();
+  }
+}
+
+int Table::InsertText(int nItem, const std::string& text) {
+  if (imp()) {
+    return imp()->DevInsertText(nItem, text);
+  }
+  return 0;
+}
+
+void Table::SetText(int nItem, int nSubItem, const std::string& text) {
+  if (imp()) {
+    imp()->DevSetText(nItem, nSubItem, text);
+  }
+}
+
+void Table::set_background_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_background_color(color);
+  }
+}
+
+ARGB Table::background_color() const {
+  return imp() ? imp()->dev_background_color() : 0xFF00000;
+}
+
+void Table::set_text_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_text_color(color);
+  }
+}
+
+ARGB Table::text_color() const {
+  return imp() ? imp()->dev_text_color() : 0xFF00000;
+}
+
+void Table::AutoSize(int cols) {
+  if (imp()) {
+    imp()->DevAutoSize(cols);
+  }
+}
+
+void TableItem::set_imp(TableItemImp* imp) { 
+  imp_.reset(imp);
+  /*if (imp) {
+    imp->set_table_item(this);
+  }*/
+}
+
+void TableItem::set_table(boost::weak_ptr<Table> table) {
+  table_ = table;  
+  if (imp()) {
+    imp()->dev_set_table(table);
+  }
+/*  std::list<boost::shared_ptr<TreeNode> >::iterator i = children_.begin();
+  for (; i != children_.end(); ++i) {
+    boost::shared_ptr<TreeNode> node = *i;
+    node->set_tree(tree);    
+  }*/
+}
+
+void TableItem::WorkClick() {
+  OnClick();
+  if (!table_.expired()) {
+    // table_.lock()->OnClick(this);
+  }
+}
+
+void TableItem::set_text(const std::string& text) {
+  if (imp()) {
+    imp()->dev_set_text(text);
+  }
+}
+
+std::string TableItem::text() const {
+  return (imp()) ? imp()->dev_text() : "no imp";  
+}
+
 
 ComboBox::ComboBox(ComboBoxImp* imp) : Window(imp) {}
 
@@ -773,6 +1060,16 @@ ARGB Scintilla::linenumber_background_color() const {
   return imp() ? imp()->dev_linenumber_background_color() : 0;
 }
 
+void Scintilla::set_margin_background_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_margin_background_color(color);
+  }
+}
+
+ARGB Scintilla::margin_background_color() const {
+  return imp() ? imp()->dev_margin_background_color() : 0;
+}
+
 void Scintilla::set_sel_foreground_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_sel_foreground_color(color);
@@ -898,9 +1195,9 @@ ui::Tree* Systems::CreateTree() {
 // WindowImp
 
 void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {
-  if (window_) {
-    window_->DrawBackground(g, draw_region);
-    window_->Draw(g, draw_region);
+  if (window_) {    
+    window_->DrawBackground(g, draw_region);    
+    window_->Draw(g, draw_region);    
   }
 }
 
@@ -912,38 +1209,38 @@ void WindowImp::OnDevSize(double width, double height) {
 }
 
 void WindowImp::OnDevMouseDown(MouseEvent& ev) {
-  if (window_) {
+  if (window_ && window_->root()) {
     window_->root()->WorkMouseDown(ev);
   }
 }
 void WindowImp::OnDevMouseUp(MouseEvent& ev) {
   if (window_) {
-    assert(window_->root());
+    assert(window_->root() && window_->root());
     window_->root()->WorkMouseUp(ev);
   }
 }
 
 void WindowImp::OnDevDblclick(MouseEvent& ev) {
-  if (window_) {
+  if (window_ && window_->root()) {
     window_->root()->WorkDblClick(ev);
   }
 }
 
 void WindowImp::OnDevMouseMove(MouseEvent& ev) {
-  if (window_) {
+  if (window_ && window_->root()) {
     window_->root()->WorkMouseMove(ev);
   }
 }  
 
 // Key Events
 void WindowImp::OnDevKeyDown(KeyEvent& ev) { 
-  if (window_) {
+  if (window_ && window_->root()) {
     window_->root()->WorkKeyDown(ev);
   }
 }
 
 void WindowImp::OnDevKeyUp(KeyEvent& ev) {
-  if (window_) {
+  if (window_ && window_->root()) {
     window_->root()->WorkKeyDown(ev);
   }
 }
@@ -951,6 +1248,12 @@ void WindowImp::OnDevKeyUp(KeyEvent& ev) {
 void WindowImp::OnDevFocusChange(int id) {
   if (window_) {
     window_->OnFocusChange(id);
+  }
+}
+
+void FrameImp::OnDevClose() {
+  if (window()) {
+    ((Frame*)window())->OnClose();
   }
 }
 
@@ -973,6 +1276,11 @@ ui::WindowImp* ImpFactory::CreateWindowImp() {
   return concrete_factory_->CreateWindowImp(); 
 }
 
+ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateWindowCompositedImp(); 
+}
+
 ui::FrameImp* ImpFactory::CreateFrameImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateFrameImp(); 
@@ -993,9 +1301,19 @@ ui::EditImp* ImpFactory::CreateEditImp() {
   return concrete_factory_->CreateEditImp(); 
 }
 
+ui::TreeNodeImp* ImpFactory::CreateTreeNodeImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateTreeNodeImp(); 
+}
+
 ui::TreeImp* ImpFactory::CreateTreeImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateTreeImp(); 
+}
+
+ui::TableImp* ImpFactory::CreateTableImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateTableImp(); 
 }
 
 ui::ButtonImp* ImpFactory::CreateButtonImp() {

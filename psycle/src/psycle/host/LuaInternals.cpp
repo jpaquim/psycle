@@ -174,6 +174,100 @@ int LuaConfigBind::plugindir(lua_State* L) {
   return 1;
 }
 
+// PluginInfoBind
+
+const char* LuaPluginInfoBind::meta = "psyplugininfometa";
+
+int LuaPluginInfoBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"dllname", dllname},
+    {"name", name},
+    { NULL, NULL }
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaPluginInfoBind::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  LuaHelper::new_shared_userdata<PluginInfo>(L, meta, new PluginInfo());  
+  return 1;
+}
+
+int LuaPluginInfoBind::gc(lua_State* L) {
+  LuaHelper::delete_shared_userdata<PluginInfo>(L, meta);
+  return 0;
+}
+
+int LuaPluginInfoBind::dllname(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushstring(L, ud->dllname.c_str());
+  return 1;
+}
+
+int LuaPluginInfoBind::name(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushstring(L, ud->name.c_str());
+  return 1;
+}
+
+// LuaPluginCatcherBind
+
+const char* LuaPluginCatcherBind::meta = "psyplugincatchermeta";
+
+int LuaPluginCatcherBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"info", info},    
+    { NULL, NULL }
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaPluginCatcherBind::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  PluginCatcher* plug_catcher =
+    static_cast<PluginCatcher*>(&Global::machineload());
+  LuaHelper::new_shared_userdata<>(L, meta, plug_catcher, 1, true);
+  return 1;
+}
+
+int LuaPluginCatcherBind::gc(lua_State* L) {
+  LuaHelper::delete_shared_userdata<PluginCatcher>(L, meta);
+  return 0;
+}
+
+int LuaPluginCatcherBind::info(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 2) {
+    return luaL_error(L, "Got %d arguments expected 2 (self, name)", n);
+  }
+  boost::shared_ptr<PluginCatcher> ud = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);  
+  const char* name = luaL_checkstring(L, 2);  
+  luaL_requiref(L, "psycle.plugininfo", LuaPluginInfoBind::open, true);
+  PluginInfo* info = ud->info(name);
+  if (info) {
+    LuaHelper::new_shared_userdata<PluginInfo>(L, LuaPluginInfoBind::meta, info, 2);
+  } else {
+    lua_pushnil(L);
+  }
+  return 1;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // LuaMachine+Bind
 /////////////////////////////////////////////////////////////////////////////
@@ -272,6 +366,11 @@ void LuaMachine::reload() {
   }
 }
 
+void LuaMachine::set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) { 
+  canvas_ = canvas;
+  proxy_->OnCanvasChanged();
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // LuaMachineBind
 /////////////////////////////////////////////////////////////////////////////
@@ -282,6 +381,7 @@ int LuaMachineBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
     {"work", work},
+    {"info2", info2},
     {"tick", tick},
     {"channel", channel},
     {"setnumchannels", set_numchannels},
@@ -431,6 +531,15 @@ int LuaMachineBind::show_native_gui(lua_State* L) {
 int LuaMachineBind::type(lua_State* L) {
   boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   lua_pushinteger(L, (int)plug->mac()->_type);
+  return 1;
+}
+
+int LuaMachineBind::info2(lua_State* L) {
+  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  const PluginInfo& info = LuaGlobal::GetLuaPlugin(plug->mac()->_macIndex)->info();
+  lua_newtable(L);
+  LuaHelper::setfield(L, "dllname", info.dllname);
+  LuaHelper::setfield(L, "name", info.name);  
   return 1;
 }
 
@@ -666,8 +775,12 @@ int LuaMachineBind::addhostlistener(lua_State* L) {
 
 int LuaMachineBind::setcanvas(lua_State* L) {
   boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
-  LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
-  plugin->set_canvas(canvas);
+  if (!lua_isnil(L, 2)) {
+    LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
+    plugin->set_canvas(canvas);
+  } else {
+    plugin->set_canvas(boost::weak_ptr<ui::canvas::Canvas>());
+  }
   return LuaHelper::chaining(L);
 }
 

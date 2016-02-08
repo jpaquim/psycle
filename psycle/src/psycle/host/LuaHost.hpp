@@ -92,6 +92,7 @@ public:
   int num_cols() const { return lua_mac_->numcols(); }
 	int num_parameter() const { return lua_mac_->numparams(); }
         
+  void OnCanvasChanged();
 private:
 	void export_c_funcs();
 	// script callbacks

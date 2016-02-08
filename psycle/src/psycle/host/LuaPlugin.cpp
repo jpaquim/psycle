@@ -626,7 +626,7 @@ namespace psycle { namespace host {
 
   std::string LuaPlugin::help() {
     if (crashed()) {
-      return "saucer section missing";
+      return "Plugin crashed. No help available.";
     }
     try {
       return proxy_.call_help();

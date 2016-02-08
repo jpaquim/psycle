@@ -95,7 +95,7 @@ namespace psycle { namespace host {
       ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
       imp->SetParent(this);      
       //canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
-      canvas->set_pos(ui::Rect(0, 0, 500, 500)); // set_pos(ui::Rect(0, 0, 500, 500));
+      canvas->set_pos(ui::Rect(ui::Point(), ui::Point(500, 500))); // set_pos(ui::Rect(0, 0, 500, 500));
       canvas->Show();                        
       SetActiveWindow();           
     }

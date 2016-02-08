@@ -134,7 +134,8 @@ class LineBorder : public ui::Ornament {
     DrawBorder(item, g, draw_region);
   }
   virtual std::auto_ptr<ui::Rect> padding() const {
-    return std::auto_ptr<ui::Rect>(new ui::Rect(1, 1, 1, 1));
+    ui::Point pad(1, 1);
+    return std::auto_ptr<ui::Rect>(new ui::Rect(pad, pad));
   }
 
   void set_border_radius(const BorderRadius& radius) { border_radius_ = radius; }
@@ -162,20 +163,29 @@ class LineBorder : public ui::Ornament {
         g->DrawLine(rc.right() - 1, rc.top() + border_radius_.right_top, rc.right() - 1, rc.bottom() - border_radius_.right_bottom);  
       }
       if (border_radius_.left_top != 0 && border_style_.top != NONE) {
-        g->DrawArc(ui::Rect(rc.left(), rc.top(), rc.left() + 2*border_radius_.left_top, rc.top() + 2*border_radius_.left_top), 
-                  Point(rc.left() + border_radius_.left_top, rc.top()), Point(rc.left(), rc.top() + border_radius_.left_top));
+        g->DrawArc(ui::Rect(rc.top_left(), 
+                            ui::Point(rc.left() + 2*border_radius_.left_top, rc.top() + 2*border_radius_.left_top)),
+                   Point(rc.left() + border_radius_.left_top, rc.top()),
+                   Point(rc.left(), rc.top() + border_radius_.left_top));
       }
       if (border_radius_.right_top != 0 && border_style_.top != NONE) {
-        g->DrawArc(ui::Rect(rc.right() - 2*border_radius_.right_top - 1, rc.top(), rc.right() - 1, rc.top() + 2*border_radius_.right_top), 
-                Point(rc.right() - 1, rc.top() + border_radius_.right_top), Point(rc.right() - border_radius_.right_top - 1, rc.top()));    
+        g->DrawArc(ui::Rect(ui::Point(rc.right() - 2*border_radius_.right_top - 1, rc.top()),
+                            ui::Point(rc.right() - 1, rc.top() + 2*border_radius_.right_top)), 
+                   Point(rc.right() - 1, rc.top() + border_radius_.right_top),
+                   Point(rc.right() - border_radius_.right_top - 1, rc.top()));    
       }
       if (border_radius_.left_bottom != 0 && border_style_.bottom != NONE ) {
-        g->DrawArc(ui::Rect(rc.left(), rc.bottom() - 2*border_radius_.left_bottom - 1, rc.left() + 2*border_radius_.left_bottom, rc.bottom() - 1), 
-               Point(rc.left(), rc.bottom() - border_radius_.left_bottom - 1), Point(rc.left() + border_radius_.left_bottom, rc.bottom() - 1));
+        g->DrawArc(ui::Rect(ui::Point(rc.left(), rc.bottom() - 2*border_radius_.left_bottom - 1),
+                            ui::Point(rc.left() + 2*border_radius_.left_bottom, rc.bottom() - 1)), 
+                   Point(rc.left(), rc.bottom() - border_radius_.left_bottom - 1),
+                   Point(rc.left() + border_radius_.left_bottom, rc.bottom() - 1));
       }
       if (border_radius_.right_bottom != 0 && border_style_.bottom != NONE) {
-        g->DrawArc(ui::Rect(rc.right() - 2*border_radius_.right_bottom, rc.bottom() - 2*border_radius_.right_bottom - 1, rc.right() - 1, rc.bottom() - 1), 
-                Point(rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1), Point(rc.right() - 1, rc.bottom() - border_radius_.right_bottom - 1));
+        g->DrawArc(ui::Rect(ui::Point(rc.right() - 2*border_radius_.right_bottom,
+                                      rc.bottom() - 2*border_radius_.right_bottom - 1),
+                            ui::Point(rc.right() - 1, rc.bottom() - 1)), 
+                   Point(rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1),
+                   Point(rc.right() - 1, rc.bottom() - border_radius_.right_bottom - 1));
       }
     }
   }  
@@ -194,6 +204,8 @@ class Wallpaper : public ui::Ornament {
   virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {
     DrawWallpaper(item, g, draw_region);
   }
+
+  virtual bool transparent() const { return false; }
 
  private:
   void DrawWallpaper(Window::Ptr& item, Graphics* g, Region& draw_region) {
@@ -216,15 +228,21 @@ class Wallpaper : public ui::Ornament {
 
 class Fill : public ui::Ornament {
  public:
-  Fill() : color_(0xFF000000) {}
-  Fill(ARGB color) : color_(color) {}
+  Fill() : color_(0xFF000000), use_bounds_(false) {}
+  Fill(ARGB color) : color_(color), use_bounds_(false) {}
+  Fill(ARGB color, bool use_bounds) : color_(color), use_bounds_(use_bounds) {}
    
   virtual void set_color(ARGB color) { color_ = color; }
-  virtual ARGB color() const { return color_; }
-
+  virtual ARGB color() const { return color_; }  
+  
   virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {
     DrawFill(item, g, draw_region);
   }
+  
+  void UseWindowBounds() { use_bounds_ = true; }
+  void UseWindowArea() { use_bounds_ = false; }
+
+  virtual bool transparent() const { return false; }
 
  private:
   void DrawFill(Window::Ptr& item, Graphics* g, Region& draw_region) {
@@ -232,12 +250,13 @@ class Fill : public ui::Ornament {
       int alpha = GetAlpha(color_);
       if (alpha != 0xFF) {
         g->SetColor(color_);
-        g->FillRegion(*item->area().region().get());        
+        g->FillRegion(use_bounds_ ? *item->area().bounds().region().get() 
+                                  : *item->area().region().get());        
       }
     }
   }
-  
   ARGB color_;
+  bool use_bounds_;
 };
 
 class OrnamentFactory {
@@ -251,6 +270,7 @@ class OrnamentFactory {
   LineBorder* CreateLineBorder(ARGB color) { return new LineBorder(color); }
   Fill* CreateFill() { return new Fill(); }
   Fill* CreateFill(ARGB color) { return new Fill(color); }
+  Fill* CreateBoundFill(ARGB color) { return new Fill(color, true); }
   Wallpaper* CreateWallpaper(ui::Image::WeakPtr image) { return new Wallpaper(image); }
 
  private:

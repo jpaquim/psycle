@@ -43,6 +43,23 @@ namespace psycle { namespace host {
     static int plugindir(lua_State* L);
   };
 
+  struct LuaPluginInfoBind {
+    static const char* meta;
+    static int open(lua_State *L);    
+    static int create(lua_State* L);
+    static int gc(lua_State* L);    
+    static int dllname(lua_State* L);
+    static int name(lua_State* L);
+  };
+
+  struct LuaPluginCatcherBind {
+    static const char* meta;
+    static int open(lua_State *L);    
+    static int create(lua_State* L);    
+    static int info(lua_State* L);
+    static int gc(lua_State* L);        
+  };
+
   class Machine;
 
   struct MachinePresetType {
@@ -77,7 +94,7 @@ namespace psycle { namespace host {
     int numchannels() const { return sampleV_.size(); }
     MachineUiType::Value ui_type() const { return ui_type_; }
     void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
-    void set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) { canvas_ = canvas; }
+    void set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas);
     boost::weak_ptr<ui::canvas::Canvas> canvas() { return canvas_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
@@ -111,7 +128,7 @@ namespace psycle { namespace host {
     static int setbuffer(lua_State* L);
     static int setnorm(lua_State* L);
     static int getnorm(lua_State* L);
-    static int name(lua_State* L);
+    static int dllname(lua_State* L);
     static int label(lua_State* L);
     static int display(lua_State* L);
     static int getrange(lua_State* L);
@@ -134,6 +151,8 @@ namespace psycle { namespace host {
     static int reload(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::reload); }
     static int setcanvas(lua_State* L);
     static int type(lua_State* L);
+    static int info2(lua_State* L);
+    static int name(lua_State* L);
   };
 
   struct LuaPlayerBind {

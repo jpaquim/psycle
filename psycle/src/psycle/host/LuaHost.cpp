@@ -60,6 +60,8 @@ void LuaProxy::set_state(lua_State* state) {
   // require c modules
   // config
   LuaHelper::require<LuaConfigBind>(L, "psycle.config");
+  LuaHelper::require<LuaPluginInfoBind>(L, "psycle.plugininfo");
+  LuaHelper::require<LuaPluginCatcherBind>(L, "psycle.plugincatcher");
   // sound engine
   LuaHelper::require<LuaArrayBind>(L, "psycle.array");
   LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");
@@ -100,7 +102,8 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
   LuaHelper::require<LuaTreeBind<> >(L, "psycle.ui.canvas.tree");
-  //LuaHelper::require<LuaTextTreeItemBind>(L, "psycle.ui.canvas.texttreeitem");
+  LuaHelper::require<LuaTreeNodeBind>(L, "psycle.ui.canvas.treenode");
+  LuaHelper::require<LuaTableBind<> >(L, "psycle.ui.canvas.table");
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
   LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.canvas.combobox");
   LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
@@ -368,6 +371,10 @@ void LuaProxy::call_execute() {
       in.pcall(0);      
     }
   } CATCH_WRAP_AND_RETHROW(host())
+}
+
+void LuaProxy::OnCanvasChanged() { 
+  host_->OnCanvasChanged();
 }
 
 void LuaProxy::SequencerTick() {
@@ -938,9 +945,11 @@ int error_handler(lua_State* L) {
     int shellIdx;
     if (Global::machineload().lookupDllName("Plugineditor.lua", dllname, MACH_LUA,
           shellIdx)) {
-      editor.reset(new LuaPlugin(dllname, AUTOID));
+      editor.reset(new LuaPlugin(dllname, AUTOID));      
       LuaUiExtentions::instance()->Add(editor);
       editor->proxy().Init();
+      editor->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, 
+        &((CMainFrame*)::AfxGetMainWnd())->m_wndView,  _1));
     }          
   }
   if (!editor.get()) {
@@ -952,7 +961,22 @@ int error_handler(lua_State* L) {
   try {
     if (in.open("onexecute")) {      
       lua_pushstring(LE, lua_tostring(L, -1));
-      lua_pushnumber(LE, LuaGlobal::proxy(L)->host()._macIndex);        
+      lua_pushnumber(LE, LuaGlobal::proxy(L)->host()._macIndex);
+
+      std::string filename_noext;
+      filename_noext = boost::filesystem::path(LuaGlobal::proxy(L)->host().GetDllName()).stem().string();
+      PluginCatcher* plug_catcher =
+        static_cast<PluginCatcher*>(&Global::machineload());
+      PluginInfo* info = plug_catcher->info(filename_noext.c_str());
+      if (info) {
+        luaL_requiref(LE, "psycle.plugininfo", LuaPluginInfoBind::open, true);
+        int n = lua_gettop(LE);        
+        LuaHelper::new_shared_userdata<>(LE, LuaPluginInfoBind::meta, new PluginInfo(*info), n);
+        lua_remove(LE, -2);        
+      } else {
+        lua_pushnil(LE);
+      }       
+
       int i = 1;
       int depth = 0;
       lua_Debug entry;
@@ -970,7 +994,8 @@ int error_handler(lua_State* L) {
         lua_rawseti(LE, -2, i);
         ++i;
         ++depth;
-      }
+      }        
+      
       in.pcall(0);          
       return 1;
     }

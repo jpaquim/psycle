@@ -211,7 +211,7 @@ namespace psycle { namespace host {
 			}
 			m_wndView.ValidateParent();
       m_luaWndView.reset(new CWnd());
-      m_luaWndView->Create(NULL, NULL, WS_CHILD | WS_VISIBLE,
+      m_luaWndView->Create(NULL, NULL, WS_CHILD | WS_VISIBLE, // | WS_EX_COMPOSITED,
 				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST + 1, NULL);     
 
 			// Create Toolbars.

@@ -16,6 +16,8 @@ local sysmetrics = require("psycle.ui.systemmetrics")
 local menubar = require("psycle.ui.menubar")
 local menu = require("psycle.ui.menu")
 local menuitem = require("psycle.ui.menuitem")
+local serpent = require("psycle.serpent")
+local plugincatcher = require("psycle.plugincatcher")
 
 -- plugin info
 function machine:info()
@@ -35,9 +37,10 @@ end
 
 function machine:init(samplerate)
    self.maincanvas = maincanvas:new()
+   self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)
    self.editmacidx_ = -1
    self:setcanvas(self.maincanvas)
-   self:initmenu()   
+   self:initmenu()      
 end
 
 function machine:createframe()  
@@ -58,21 +61,46 @@ function machine:editmacidx()
   return self.editmacidx_;
 end
 
-function machine:onexecute(msg, macidx, trace)
-  self.editmacidx_ = macidx 
-  self.maincanvas:setoutputtext(msg)
-  --self.maincanvas:setcallstack(trace)
-  for i=1, #trace do
-    if self.maincanvas:openinfo(trace[i]) then
-      break
-    end
-  end
-  if self.frame == nil then
-    self:createframe()
-  end
-  self.frame:show() 
+function machine:onexecute(msg, macidx, plugininfo, trace)
+  if msg == nil then  
+    self:openinmainframe()  
+  else  
+    self.editmacidx_ = macidx 
+    self.maincanvas:setoutputtext(msg)
+    self.maincanvas:setcallstack(trace)
+    for i=1, #trace do
+      if self.maincanvas:openinfo(trace[i]) then
+        break
+      end
+    end  
+    if self.frame == nil then      
+      self.maincanvas:setplugindir(plugininfo)
+      self:openinframe()
+    end  
+  end    
 end
 
+function machine:togglecanvas()
+  if self.frame == nil then   
+    self:openinframe()
+  else
+    self:openinmainframe()
+  end
+end
+
+function machine:openinframe() 
+  self.maincanvas:setwindowiconin()
+  self:setcanvas(nil)
+  self:createframe()   
+  self.frame:show()
+end
+
+function machine:openinmainframe() 
+  self.frame = nil
+  self.maincanvas:setwindowiconout()
+  self:setcanvas(self.maincanvas)
+end
+     
 function machine:initmenu()
    self.menubar = menubar:new()
    self.menu1 = menu:new("Plugineditor")
@@ -89,7 +117,6 @@ end
 
 function machine:onmenu(menuitem)
   psycle.output("here")
-
 end
 
 return machine

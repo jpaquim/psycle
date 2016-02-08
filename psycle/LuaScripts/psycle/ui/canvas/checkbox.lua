@@ -41,30 +41,25 @@ end
 function checkbox:init()  
   self:setautosize(true, true) 
   self.check_ = false  
-  self.checkgroup = group:new(self):setautosize(true, true)
+  self.checkgroup = group:new(self)
+                         :setautosize(false, false)
+                         :setpos(0, 0, 10, 10)
+                         :setornament(ornamentfactory:createfill(settings.colors.default.bg))
   self.checkgroup:style():setalign(style.ALLEFT)
-                         :setmargin(0, 0, 4, 0)
-  self.checkrect = rect:new(self.checkgroup):setpos(0, 0, 10, 10)                 
-                       :setornament(ornamentfactory:createfill(settings.colors.default.bg))
-  self.checkrect:style():setalign(style.ALLEFT)         
-  self.checktext = text:new(self.checkgroup)
-    --                   :setpos(3, 0)
-      --                 :setornament(ornamentfactory:createfill(settings.colors.default.checker))                       
-                                              
-  --self.checktext:style():setalign(style.ALLEFT)
-  
-  self.text = text:new(self):settext("A Checkbox")--:setcolor(settings.colors.default.text)
-  self.text:style():setalign(style.ALLEFT)
-  
-  
+                         :setmargin(0, 0, 4, 0)                           
+  self.checktext = text:new(self.checkgroup)                       
+                       :setcolor(settings.colors.default.checker)                       
+  self.checktext:setautosize(false, false)
+  self.checktext:style():setalign(style.ALCLIENT)
+  self.checktext:setdebugtext("checktext")
+  self.text = text:new(self):settext("A Checkbox")
+  self.text:style():setalign(style.ALLEFT)    
   local that = self
-  function self.checkgroup:onmousedown()    
+  function self.checkgroup:onmousedown()        
     that.check_ = not that.check_
-    if that.check_ then
-      that.checkrect:setfillcolor(settings.colors.mousepress.bg)
+    if that.check_ then      
       that.checktext:settext("x")
-    else
-      that.checkrect:setfillcolor(settings.colors.default.bg)
+    else      
       that.checktext:settext("")
     end
     that.onclick(self.check)
@@ -85,19 +80,6 @@ function checkbox:check()
   return self.check_;
 end
 
-
---[[function checkbox:onsize(w, h)
-  self.width = w
-  self.height = h
-  self:updateregion()
-end
-
-function checkbox:onupdateregion(rgn)
-  rgn:setrect(0, 0, self.width, self.height)
-end
-
-]]
 function checkbox:onclick(ischecked) end
-
 
 return checkbox

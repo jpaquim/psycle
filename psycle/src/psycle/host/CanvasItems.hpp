@@ -87,13 +87,14 @@ class Text : public Window {
 
   virtual void Draw(Graphics* cr, Region& draw_region);
   virtual bool OnUpdateArea();
-  void SetText(const std::string& text) { 
+  void set_text(const std::string& text) {     
     text_ = text;
     needsupdate();
     Window::set_pos(ui::Point(pos().left(), pos().top()));
+    FLS();
   }
   const std::string& text() const { return text_; }
-  void SetColor(ARGB color) {
+  void set_color(ARGB color) { 
     color_ = color;
     Invalidate();
   }

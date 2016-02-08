@@ -409,12 +409,16 @@ namespace LuaHelper {
       return obj;
     }
 
+    
+    struct NullDeleter {template<typename T> void operator()(T*) {} };
+
 		// creates userdata able to support inheritance
 		template <class T>
 		static boost::shared_ptr<T>& new_shared_userdata(lua_State* L, 
                                     const std::string& meta,
                                     T* ud,
-                                    int self=1) {
+                                    int self=1,
+                                    bool null_deleter = false) {
 			lua_pushvalue(L, self);
 			int n = lua_gettop(L);
 			luaL_checktype(L, -1, LUA_TTABLE);  // self
@@ -425,8 +429,12 @@ namespace LuaHelper {
 			lua_setfield(L, self, "__index");
       typedef boost::shared_ptr<T> SPtr;
 			SPtr* p = (SPtr*)lua_newuserdata(L, sizeof(SPtr));  
-      if (ud) {
-        new(p) SPtr(ud);
+      if (ud) {        
+        if (null_deleter) {          
+          new(p) SPtr(ud, NullDeleter());
+        } else {
+          new(p) SPtr(ud);
+        }
       } else {
         new(p) SPtr();
       }
@@ -440,9 +448,9 @@ namespace LuaHelper {
 
     template <class T>
 		static int delete_shared_userdata(lua_State* L, const std::string& meta) {
-      typedef boost::shared_ptr<T> SPtr;
+      typedef boost::shared_ptr<T> SPtr;      
 			SPtr* ud = (SPtr*) luaL_checkudata(L, 1, meta.c_str());      
-      ud->~SPtr();      
+      ud->~SPtr();
 			return 0;
 		}
 
@@ -1017,6 +1025,41 @@ namespace LuaHelper {
       lua_pushnumber(L, v3);
       lua_pushnumber(L, v4);                      
       return 4;
+    }
+
+    // void -> int, const std::string&
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(int, const std::string&), UserDataModel m = SPTR) {
+      numargcheck(L, 3);
+      T* ud = check<T>(L, 1, meta, m);
+      int val = luaL_checkinteger(L, 2);
+      const char* str = luaL_checkstring(L, 3);
+      (ud->*ptmember)(val, str);      
+      return 0;
+    }
+
+    // int -> int, const std::string&
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, int (T::*ptmember)(int, const std::string&), UserDataModel m = SPTR) {
+      numargcheck(L, 3);
+      T* ud = check<T>(L, 1, meta, m);
+      int val = luaL_checkinteger(L, 2);
+      const char* str = luaL_checkstring(L, 3);
+      int res = (ud->*ptmember)(val, str);      
+      lua_pushinteger(L, res);
+      return 1;
+    }
+
+    // void -> int x int x const std::string&
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(int, int, const std::string&), UserDataModel m = SPTR) {
+      numargcheck(L, 4);
+      T* ud = check<T>(L, 1, meta, m);
+      int val1 = luaL_checkinteger(L, 2);
+      int val2 = luaL_checkinteger(L, 3);
+      const char* str = luaL_checkstring(L, 4);
+      (ud->*ptmember)(val1, val2, str);      
+      return 0;
     }
 
     // void -> const std::string&

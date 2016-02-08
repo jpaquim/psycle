@@ -589,7 +589,7 @@ class WindowTemplateImp : public T, public I {
   virtual void DevInvalidate() { Invalidate(); }
   virtual void DevInvalidate(ui::Region& rgn) {
     if (m_hWnd) {
-//      ::RedrawWindow(m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+      ::RedrawWindow(m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
     }
   }
   virtual void DevSetCapture() { SetCapture(); }  
@@ -601,9 +601,12 @@ class WindowTemplateImp : public T, public I {
     ClientToScreen(&point);
 		::SetCursorPos(point.x, point.y);
   }  
-  virtual void dev_set_parent(Window* window);  
-  virtual void DevDestroy() { DestroyWindow(); }
-
+  virtual void dev_set_parent(Window* window);
+  virtual bool DevDestroy() {
+    DestroyWindow();
+    return true;
+  }
+      
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
 
@@ -652,7 +655,7 @@ class WindowTemplateImp : public T, public I {
   }
 
   virtual bool OnDevUpdateArea(ui::Area& area);
-
+  
  private:
   int Win32KeyFlags(UINT nFlags) {
     UINT flags = 0;
@@ -701,16 +704,40 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
 		  TRACE0("Failed to create window\n");
 			return 0;
 	  }            
+    imp->set_window(w);    
+    return imp;
+  } 
+
+  static WindowImp* MakeComposited(ui::Window* w, CWnd* parent, UINT nID) {
+    WindowImp* imp = new WindowImp();
+    if (!imp->Create(NULL, 
+                     NULL, 
+                     WS_CHILD | WS_EX_COMPOSITED,
+		                 CRect(0, 0, 0, 0), 
+                     parent, 
+                     nID, 
+                     NULL)) {
+		  TRACE0("Failed to create window\n");
+			return 0;
+	  }            
     imp->set_window(w);
     return imp;
-  }  
+  }
   
+  virtual void dev_set_clip_children() {
+    ModifyStyle(0, WS_CLIPCHILDREN);
+  }
+
+  virtual void dev_add_style(UINT flag) { ModifyStyle(0, flag); }
+  virtual void dev_remove_style(UINT flag) { ModifyStyle(flag, 0); }
+
  protected:
   virtual void DevSetCursor(CursorStyle style);
-  /*BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {   
+  BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {   
     ::SetCursor(cursor_);
     return TRUE;   
-  } */  
+  }  
+  DECLARE_MESSAGE_MAP()
  private:
    HCURSOR cursor_;
 };
@@ -830,11 +857,37 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
       }
     }
   }
-
+  
  protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CFrameWnd::OnPaint(); }
+  virtual void OnClose() { OnDevClose(); }
   ui::Window::Ptr view_;
+};
+
+class TreeNodeImp : public ui::TreeNodeImp {
+ public:
+  TreeNodeImp() : hItem(0) {}
+  
+  virtual void dev_set_text(const std::string& text) { text_ = text; }
+  virtual std::string dev_text() const { return text_; }
+  virtual void dev_set_tree(const boost::weak_ptr<ui::TreeNode>& parent,
+                            boost::weak_ptr<ui::Tree> tree);
+
+  HTREEITEM hItem;
+  std::string text_;  
+};
+
+class TableItemImp : public ui::TableItemImp {
+ public:
+  TableItemImp() {}
+
+  //virtual void DevAdd(boost::shared_ptr<ui::TableItem> node);
+  virtual void dev_set_text(const std::string& text) { text_ = text; }
+  virtual std::string dev_text() const { return text_; }
+  virtual void dev_set_table(boost::weak_ptr<ui::Table> table);
+  
+  std::string text_;  
 };
 
 
@@ -852,18 +905,30 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
       return 0;
     }
     imp->set_window(w);
+    imp->SetLineColor(0xFFFFFF);
     return imp;
   }
 
+  virtual void DevAddNode(ui::TreeNode& node);  
+  
   virtual void dev_set_background_color(ARGB color) { 
     SetBkColor(ToCOLORREF(color));
   }  
   virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
+  virtual void dev_set_text_color(ARGB color) {
+    SetTextColor(ToCOLORREF(color));
+  }
+  virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
+
   BOOL OnEraseBkgnd(CDC* pDC) { return CTreeCtrl::OnEraseBkgnd(pDC); }
   
+  std::map<HTREEITEM, TreeNodeImp*> tree_nodes;
  protected:
   DECLARE_MESSAGE_MAP()
-  void OnPaint() { CTreeCtrl::OnPaint(); }  
+  void OnPaint() { CTreeCtrl::OnPaint(); }
+  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);
+
+  
 };
 
 class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
@@ -896,7 +961,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
                      nID)) {
       TRACE0("Failed to create window\n");
       return 0;
-    }
+    }    
     imp->set_window(w);
     return imp;
   }
@@ -915,6 +980,47 @@ protected:
   void OnPaint() { CEdit::OnPaint(); }
 };
 
+class TableImp : public WindowTemplateImp<CListCtrl, ui::TableImp> {
+ public:  
+  TableImp() : WindowTemplateImp<CListCtrl, ui::TableImp>() {}
+
+  static TableImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    TableImp* imp = new TableImp();
+    if (!imp->Create(WS_CHILD|WS_VISIBLE|LVS_REPORT,
+                     CRect(10,10,200,100), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    imp->test();
+    return imp;
+  }  
+
+  void test();
+
+  virtual void dev_set_background_color(ARGB color) { 
+    SetBkColor(ToCOLORREF(color));
+  }  
+  virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
+  virtual void dev_set_text_color(ARGB color) {
+    SetTextColor(ToCOLORREF(color));
+  }
+  virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
+
+  virtual void DevInsertColumn(int col, const std::string& text);
+  virtual void DevInsertRow();  
+  virtual int DevInsertText(int nItem, const std::string& text);
+  virtual void DevSetText(int nItem, int nSubItem, const std::string& text);
+  virtual void DevAutoSize(int cols);
+
+ protected:
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CListCtrl::OnPaint(); }
+  BOOL OnEraseBkgnd(CDC* pDC) { return CListCtrl::OnEraseBkgnd(pDC); }
+};
+
 class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
  public:  
   static std::string type() { return "canvasscintillaitem"; }
@@ -923,7 +1029,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       WindowTemplateImp<CWnd, ui::ScintillaImp>(),
       find_flags_(0),
       is_modified_(false),
-      has_file_(false) {
+      has_file_(false) {    
     //ctrl().modified.connect(boost::bind(&Scintilla::OnFirstModified, this));
     //ctrl().Create(p_wnd(), id());       
   }
@@ -1067,6 +1173,12 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void dev_set_linenumber_background_color(ARGB color) { f(SCI_STYLESETBACK, STYLE_LINENUMBER, ToCOLORREF(color)); }
   ARGB dev_linenumber_background_color() const { return ToARGB(f(SCI_STYLEGETBACK, STYLE_LINENUMBER, 0)); }
 
+  void dev_set_margin_background_color(ARGB color) {
+    f(SCI_SETFOLDMARGINCOLOUR,1, color);
+    f(SCI_SETFOLDMARGINHICOLOUR,1, color);
+  }
+  ARGB dev_margin_background_color() const { return 0; }
+  
   void dev_set_sel_foreground_color(ARGB color) { f(SCI_SETSELFORE, 1, ToCOLORREF(color)); }
  // COLORREF sel_foreground_color() const { return f(SCI_GETSELFORE, 0, 0); }
   void dev_set_sel_background_color(ARGB color) { f(SCI_SETSELBACK, 1, ToCOLORREF(color)); }
@@ -1132,13 +1244,21 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     modified();
     return false;
   }
-   
+ 
+  BOOL OnFolder(NMHDR * nhmdr,LRESULT *);  
+
   DECLARE_MESSAGE_MAP(); 
 
  private:         
   DWORD find_flags_;
   std::string fname_;
   bool is_modified_, has_file_;
+
+  void SetupHighlighting(const Lexer& lexer);
+  void SetupFolding(const Lexer& lexer);
+  void SetFoldingBasics();
+  void SetFoldingColors(const Lexer& lexer);
+  void SetFoldingMarkers();
 };
 
 class Systems : public ui::Systems {
@@ -1182,8 +1302,11 @@ class Systems : public ui::Systems {
 
 class ImpFactory : public ui::ImpFactory {
  public:
-  virtual ui::WindowImp* CreateWindowImp() {     
+  virtual ui::WindowImp* CreateWindowImp() {
     return WindowImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
+  virtual ui::WindowImp* CreateWindowCompositedImp() {
+    return WindowImp::MakeComposited(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
   virtual ui::FrameImp* CreateFrameImp() {     
     return FrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());    
@@ -1202,9 +1325,15 @@ class ImpFactory : public ui::ImpFactory {
   }  
   virtual ui::ScintillaImp* CreateScintillaImp() {     
     return ScintillaImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
-  } 
+  }
+  virtual ui::TreeNodeImp* CreateTreeNodeImp() {     
+    return new TreeNodeImp();
+  }
   virtual ui::TreeImp* CreateTreeImp() {     
     return TreeImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
+  virtual ui::TableImp* CreateTableImp() {     
+    return TableImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
 };
 
