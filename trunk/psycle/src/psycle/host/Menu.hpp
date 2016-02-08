@@ -10,6 +10,20 @@ namespace psycle {
 namespace host {
 namespace ui {
 
+
+class Menu2 {
+ public:
+};
+
+class MenuBar2 : public Menu2 {
+ public:
+};
+
+class MenuItem2 {
+ public:
+};
+
+
 class Menu;
 
 class MenuBar {

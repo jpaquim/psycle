@@ -2485,6 +2485,7 @@ namespace psycle { namespace host {
           menuItemIdMap[id] = mac.get();
           if (user_view) ui::MenuItem::id_counter++;          
           has_ext = true;
+          mac->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, this,  _1));
         } catch (std::exception&) {
           // LuaHost already displayed an error message
         }                
@@ -2497,6 +2498,24 @@ namespace psycle { namespace host {
       }
     }
 
+    void CChildView::OnPluginCanvasChanged(LuaPlugin& plugin) {
+      // int fordebugonly = 0;
+      //if (active_lua_ == &plugin) {
+        ChangeCanvas(plugin.canvas().lock().get());
+        if (plugin.canvas().lock().get() == 0) {
+          if (!this->IsWindowVisible()) {        
+            pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+            this->ShowWindow(SW_SHOW);
+          }
+        } else {
+          if (this->IsWindowVisible()) {        
+            this->ShowWindow(SW_HIDE);
+            pParentMain->m_luaWndView->ShowWindow(SW_SHOW);            
+          }
+        }
+      //}
+    }
+
     void CChildView::OnDynamicMenuItems(UINT nID) {      
       if (menuItemIdMap[nID]==NULL) {
         if (active_lua_) {
@@ -2505,12 +2524,6 @@ namespace psycle { namespace host {
           try {            
            lp->proxy().Reload();            
            ChangeCanvas(lp->canvas().lock().get());
-
-//            ui::MenuBar::Ptr menu_bar = lp->menu_bar();
-  //          menu_bar->
-    //        lua_menu_->setcmenu(pParentMain->GetMenu());  
-      //      lp->GetMenu(lua_menu_);
-        //    lp->set_crashed(false);
           } catch (std::exception e) {
             AfxMessageBox(e.what());
           }        
@@ -2529,10 +2542,6 @@ namespace psycle { namespace host {
         if (!user_view.expired()) {          
           ChangeCanvas(user_view.lock().get());
           active_lua_ = plug;
-//          active_lua_->custom_menubar.reset(0);
-  //        lua_menu_->setcmenu(pParentMain->GetMenu());
-    //      active_lua_->GetMenu(lua_menu_);
-      //    active_lua_->InvalidateMenuBar();
           Invalidate(false);
         } else {  
           try {
@@ -2556,12 +2565,14 @@ namespace psycle { namespace host {
       pParentMain->m_wndView.ShowWindow(SW_HIDE);
       CWnd* child = pParentMain->m_luaWndView->GetWindow(GW_CHILD);
       if (child) {
-        child->ShowWindow(SW_HIDE);            
+        child->SetParent(ui::mfc::DummyWindow::dummy());            
       }
-      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
-      imp->SetParent(pParentMain->m_luaWndView.get());      
-      canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
-      canvas->Show();            
+      if (canvas) {
+        ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
+        imp->SetParent(pParentMain->m_luaWndView.get());      
+        canvas->set_pos(ui::Rect(ui::Point(), ui::Point(rect.Width(), rect.Height())));
+        canvas->Show();            
+      }
       pParentMain->m_luaWndView->MoveWindow(rect.left, rect.top, rect.Width(), rect.Height());
       pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
       GetParent()->SetActiveWindow();      

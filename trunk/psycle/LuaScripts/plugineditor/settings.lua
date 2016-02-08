@@ -25,6 +25,7 @@ local settings = {
       numbercolor = 0xFFA54B,
       stringcolor = 0xA0A0A0,
       wordcolor = 0xA6B5E1,      
+      foldingcolor = 0x939393,
       font = {name = "consolas", size = 12} 
     },
     default = {foreground =  0xB0C8B1, background = 0x232323},    

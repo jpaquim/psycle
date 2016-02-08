@@ -52,16 +52,24 @@ function tabgroup:new(parent)
 end
 
 function tabgroup:init()
+  --self:addstyle(0x02000000) 
+  self:setdebugtext("tabgroup")
   self:setautosize(false, false)
   self.hh = 20
   self.tabs = group:new(self):setautosize(false, true)
+  self.tabs:setdebugtext("tabs")
   self.tabs:style():setalign(style.ALTOP)    
-  self.tabs:setornament(ornamentfactory:createfill(0x2F2F2F))  
+  self.tabs:setornament(ornamentfactory:createboundfill(0x2F2F2F))  
+  --self.tabs:addstyle(0x02000000) 
   --self.tabs.border = ornamentfactory:createlineborder(0x528A68)
   --self.tabs.border:setborderradius(5, 5, 0, 0)
   ---self.tabs.border:setborderstyle(style.NONE, style.NONE, style.NONE, style.SOLID)
   --self.tabs:setornament(self.tabs.border)
   self.childs = group:new(self)
+  self.childs:setornament(ornamentfactory:createboundfill(0x292929))
+  self.childs:setclipchildren()
+  self.childs:setdebugtext("childgroup")
+  --self.childs:addstyle(0x02000000)  
   self.childs:setautosize(false, false)
   self.childs:style():setalign(style.ALCLIENT)
 end
@@ -76,6 +84,7 @@ function tabgroup:setlabel(page, text)
 end
 
 function tabgroup:add(page, label)
+  page:setautosize(false, false)
   page:style():setalign(style.ALCLIENT)
   self:createheader(page, label)
   self.childs:add(page)
@@ -115,7 +124,8 @@ function tabgroup:setactivepage(page)
     self.activepage_ = page;  
     self.tabs:align()
     page:show()
-    self.childs:align()    
+    self.childs:align()
+    self:fls()    
   end
 end
 
@@ -128,39 +138,42 @@ function tabgroup:removepage(header)
     idx = idx -1
   end
   local pages = self.childs:items()
-  self:setactivepage(pages[idx])  
+  self:setactivepage(pages[idx]) 
+  self:fls()
 end
 
 function tabgroup:createheader(page, label)
   local header = group:new(self.tabs):setautosize(true, true)
+  header:setdebugtext("header")
   header:style():setalign(style.ALLEFT):setmargin(0, 0, 1, 0)
  -- header.border = ornamentfactory:createlineborder(0x528A68)
   --header.border:setborderradius(5, 5, 0, 0)
   --header:setornament(header.border)
-  header:setornament(ornamentfactory:createfill(0xFF0000))
+  --header:setornament(ornamentfactory:createboundfill(0x0000FF))
   header.page = page    
-  header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
-  header.text:style():setalign(style.ALLEFT)--:setmargin(5, 4, 2, 4)  
-  header.close = text:new(header)                   
+  header.text = text:new(header):setdebugtext("text"):settext(label):setfont({name="Arial", height = "12"})
+  header.text:style():setalign(style.ALLEFT)--:setmargin(5, 4, 2, 4)    
+  header.close = text:new(header)    
+                     :setdebugtext("close")     
                      :setcolor(tabgroup.skin.colors.TITLEFONT) 
-                     :settext("x")                                    
+                     :settext("x")            
+                                       
   header.close:style():setalign(style.ALLEFT):setmargin(4, 0, 4, 0)
   local that = self
   function header.close:onmousedown()  
     that:removepage(self:parent())    
   end
   
-  function header:setskinhighlight()
-    --self:setfillcolor(0x073F1E)
-    --self:setornament(self.border)
-    self:setornament(ornamentfactory:createfill(0x2F2F2F))
+  function header:setskinhighlight()    
+    self:setornament(ornamentfactory:createboundfill(0x528A68))      
     self.text:setcolor(0xB0C8B1)
+    --self:invalidate()
   end
   function header:setskinnormal()    
-    self:setornament(ornamentfactory:createfill(0xFF0000))    
-    --self:setornament(nil)
+    --self:setornament(ornamentfactory:createboundfill(0xFF0000))    
+    self:setornament(nil)
     self.text:setcolor(0x528A68)    
-    self:fls()
+    --self:invalidate()
   end  
   header:setskinnormal()  
   function header:onmousedown(ev)     

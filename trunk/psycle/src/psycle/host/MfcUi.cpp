@@ -39,7 +39,7 @@ int Region::Combine(const ui::Region& other, int combinemode) {
 ui::Rect Region::bounds() const { 
   CRect rc;
   rgn_.GetRgnBox(&rc);
-  return ui::Rect(rc.left, rc.top, rc.right, rc.bottom);    
+  return ui::Rect(ui::Point(rc.left, rc.top), ui::Point(rc.right, rc.bottom));
 }
 
 bool Region::Intersect(double x, double y) const {
@@ -107,9 +107,7 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
   ON_WM_SETCURSOR()
   ON_WM_HSCROLL()
   ON_WM_VSCROLL()
-  ON_WM_SIZE()
-  ON_WM_KEYDOWN()
-  ON_WM_KEYUP()  
+  ON_WM_SIZE()  
 END_MESSAGE_MAP()
 
 template<class T, class I>
@@ -190,10 +188,7 @@ template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::dev_pos() const {
   CRect rc;
   GetClientRect(&rc);
-  return ui::Rect(dev_pos_.x(),
-                  dev_pos_.y(),
-                  dev_pos_.x() + rc.Width(),
-                  dev_pos_.y() + rc.Height());
+  return ui::Rect(dev_pos_, ui::Dimension(rc.Width(), rc.Height()));
 }
 
 template<class T, class I>
@@ -255,7 +250,7 @@ bool WindowTemplateImp<T, I>::OnDevUpdateArea(ui::Area& area) {
   CRect pos;
   GetClientRect(&pos);
   area.Clear();
-  area.Add(RectShape(ui::Rect(0, 0, pos.Width(), pos.Height())));
+  area.Add(RectShape(ui::Rect(ui::Point(), ui::Point(pos.Width(), pos.Height()))));
   return true;
 }
 
@@ -297,11 +292,36 @@ template class WindowTemplateImp<CButton, ui::ButtonImp>;
 template class WindowTemplateImp<CEdit, ui::EditImp>;
 template class WindowTemplateImp<CWnd, ui::ScintillaImp>;
 template class WindowTemplateImp<CTreeCtrl, ui::TreeImp>;
+template class WindowTemplateImp<CListCtrl, ui::TableImp>;
 template class WindowTemplateImp<CFrameWnd, ui::FrameImp>;
+
+BEGIN_MESSAGE_MAP(WindowImp, CWnd)
+  ON_WM_CREATE()
+  ON_WM_DESTROY()
+  //ON_WM_SETFOCUS()
+	ON_WM_PAINT()
+  ON_WM_ERASEBKGND()
+	ON_WM_LBUTTONDOWN()
+  ON_WM_RBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONUP()
+	ON_WM_RBUTTONUP()
+  ON_WM_KEYDOWN()
+	ON_WM_KEYUP()
+  ON_WM_SETCURSOR()
+  ON_WM_HSCROLL()
+  ON_WM_VSCROLL()
+  ON_WM_SIZE()
+  ON_WM_KEYDOWN()
+  ON_WM_KEYUP()  
+END_MESSAGE_MAP()
+
 
 BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
   ON_WM_SIZE()
 	ON_WM_PAINT()
+  ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 BEGIN_MESSAGE_MAP(ButtonImp, CButton)  
@@ -314,8 +334,103 @@ END_MESSAGE_MAP()
 
 BEGIN_MESSAGE_MAP(TreeImp, CTreeCtrl)  
   ON_WM_ERASEBKGND()
-	ON_WM_PAINT()
+	ON_WM_PAINT()  
+  ON_NOTIFY_REFLECT_EX(TVN_SELCHANGED, OnClick)
 END_MESSAGE_MAP()
+
+BOOL TreeImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
+  HTREEITEM hTtreeSelectedItem = GetSelectedItem();
+  std::map<HTREEITEM, TreeNodeImp*>::iterator it;
+  it = tree_nodes.find(hTtreeSelectedItem);
+  if (it != tree_nodes.end()) {
+    it->second->OnDevClick();  
+  }
+  return FALSE;
+}
+
+void TreeNodeImp::dev_set_tree(const boost::weak_ptr<ui::TreeNode>& parent,
+                               boost::weak_ptr<ui::Tree> tree) {
+  HTREEITEM p = 0;
+  if (!parent.expired()) {
+    p = ((mfc::TreeNodeImp*) parent.lock()->imp())->hItem;
+  }
+  TVINSERTSTRUCT tvInsert;
+  tvInsert.hParent = p;
+  tvInsert.hInsertAfter = p;
+  tvInsert.item.mask = TVIF_TEXT;  
+  tvInsert.item.pszText = const_cast<char *>(text_.c_str());  
+  mfc::TreeImp* treectrl = (mfc::TreeImp*) tree.lock()->imp();
+  hItem = treectrl->InsertItem(&tvInsert);
+  ((TreeImp*)tree.lock()->imp())->tree_nodes[hItem] = this;
+}
+
+void TreeImp::DevAddNode(ui::TreeNode& node) {  
+  TVINSERTSTRUCT tvInsert;
+  tvInsert.hParent = NULL;
+  tvInsert.hInsertAfter = NULL;
+  tvInsert.item.mask = TVIF_TEXT;
+  std::string text(node.text());
+  tvInsert.item.pszText = const_cast<char *>(text.c_str());
+  //ui::mfc::TreeNodeImp* mfc_node = (ui::mfc::TreeNodeImp*)(node.imp_.get());
+  InsertItem(&tvInsert);
+}
+
+BEGIN_MESSAGE_MAP(TableImp, CListCtrl)  
+  ON_WM_ERASEBKGND()
+	ON_WM_PAINT()  
+END_MESSAGE_MAP()
+
+void TableImp::test() {
+  // Insert columns
+ /* InsertColumn(0, "One", LVCFMT_LEFT, -1, 0);
+  InsertColumn(1, "Two", LVCFMT_LEFT, -1, 1);
+// Insert first row
+   int Index = InsertItem(LVIF_TEXT, 0, "One one", 0, 0, 0, NULL);
+   SetItem(Index, 1, LVIF_TEXT, "One two", 0, 0, 0, NULL);
+   //Insert second row
+   Index = InsertItem(LVIF_TEXT, 1, "Two one", 0, 0, 0, NULL);
+   SetItem(Index, 1, LVIF_TEXT, "Two two", 0, 0, 0, NULL);*/
+// Set column widths (an optional nice touch)
+//   SetColumnWidth(0, LVSCW_AUTOSIZE);
+   //SetColumnWidth(1, LVSCW_AUTOSIZE);   
+}
+
+void TableImp::DevInsertColumn(int col, const std::string& text) {
+  InsertColumn(col, text.c_str(), LVCFMT_LEFT, -1, 0);
+}
+
+void TableImp::DevInsertRow() {
+}
+
+int TableImp::DevInsertText(int nItem, const std::string& text) {
+  int index = InsertItem(LVIF_TEXT, nItem, text.c_str(), 0, 0, 0, NULL);
+  return index;
+}
+
+void TableImp::DevSetText(int nItem, int nSubItem, const std::string& text) {
+  SetItem(nItem, nSubItem, LVIF_TEXT, text.c_str(), 0, 0, 0, NULL);  
+}
+
+void TableImp::DevAutoSize(int cols) {
+  for (int i = 0; i < cols; i++) {
+    SetColumnWidth(i, LVSCW_AUTOSIZE);    
+  }
+}
+
+void TableItemImp::dev_set_table(boost::weak_ptr<ui::Table> table) {
+  /*HTREEITEM p = 0;
+  if (!parent.expired()) {
+    p = ((mfc::TreeNodeImp*) parent.lock()->imp())->hItem;
+  }
+  TVINSERTSTRUCT tvInsert;
+  tvInsert.hParent = p;
+  tvInsert.hInsertAfter = p;
+  tvInsert.item.mask = TVIF_TEXT;  
+  tvInsert.item.pszText = const_cast<char *>(text_.c_str());  
+  mfc::TreeImp* treectrl = (mfc::TreeImp*) tree.lock()->imp();
+  hItem = treectrl->InsertItem(&tvInsert);
+  ((TreeImp*)tree.lock()->imp())->tree_nodes[hItem] = this;*/
+}
 
 BEGIN_MESSAGE_MAP(ScrollBarImp, CScrollBar)  
 	ON_WM_PAINT()
@@ -325,9 +440,15 @@ IMPLEMENT_DYNAMIC(ScintillaImp, CWnd)
 
 BEGIN_MESSAGE_MAP(ScintillaImp, CWnd)
 ON_NOTIFY_REFLECT_EX(SCN_CHARADDED, OnModified)
+ON_NOTIFY_REFLECT_EX(SCN_MARGINCLICK, OnFolder)         
 END_MESSAGE_MAP()
 
 void ScintillaImp::dev_set_lexer(const Lexer& lexer) {
+  SetupHighlighting(lexer);
+  SetupFolding(lexer);
+}
+
+void ScintillaImp::SetupHighlighting(const Lexer& lexer) {
   f(SCI_SETKEYWORDS, 0, lexer.keywords().c_str());
   f(SCI_STYLESETFORE, SCE_LUA_COMMENT, ToCOLORREF(lexer.comment_color())); 
   f(SCI_STYLESETFORE, SCE_LUA_COMMENTLINE, ToCOLORREF(lexer.comment_line_color()));
@@ -339,6 +460,45 @@ void ScintillaImp::dev_set_lexer(const Lexer& lexer) {
   f(SCI_STYLESETFORE, SCE_LUA_PREPROCESSOR, ToCOLORREF(lexer.identifier_color()));
   f(SCI_STYLESETFORE, SCE_LUA_OPERATOR, ToCOLORREF(lexer.operator_color()));
   f(SCI_STYLESETFORE, SCE_LUA_CHARACTER, ToCOLORREF(lexer.character_code_color()));
+}
+
+void ScintillaImp::SetupFolding(const Lexer& lexer) {
+  SetFoldingBasics();
+  SetFoldingColors(lexer);
+  SetFoldingMarkers();
+}
+
+void ScintillaImp::SetFoldingBasics() {
+  f(SCI_SETMARGINWIDTHN, 2, 12);
+  f(SCI_SETMARGINSENSITIVEN, 2, true);  
+  f(SCI_SETMARGINTYPEN, 2, SC_MARGIN_SYMBOL);
+  f(SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS);
+  f(SCI_SETPROPERTY, _T("fold"), _T("1"));
+  f(SCI_SETPROPERTY, _T("fold.compact"), _T("1"));                
+  f(SCI_SETAUTOMATICFOLD, SC_AUTOMATICFOLD_SHOW | SC_AUTOMATICFOLD_CHANGE| SC_AUTOMATICFOLD_CLICK, 0);
+}
+
+void ScintillaImp::SetFoldingColors(const Lexer& lexer) {
+ for (int i = 25; i <= 31; i++) {    
+   f(SCI_MARKERSETBACK, i, ToCOLORREF(lexer.folding_color()));
+ }
+}
+
+void ScintillaImp::SetFoldingMarkers() {
+  f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDER, SC_MARK_BOXPLUS);
+  f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPEN, SC_MARK_BOXMINUS);
+  f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEREND, SC_MARK_BOXPLUSCONNECTED);
+  f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_TCORNER);
+  f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID, SC_MARK_BOXMINUSCONNECTED);
+  f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERSUB, SC_MARK_VLINE);  
+  f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERTAIL, SC_MARK_LCORNER);
+}
+
+BOOL ScintillaImp::OnFolder(NMHDR * nhmdr,LRESULT *) { 
+  SCNotification *pMsg = (SCNotification*)nhmdr;      
+  long lLine = f(SCI_LINEFROMPOSITION, pMsg->position, 0);
+  f(SCI_TOGGLEFOLD, lLine, 0);   
+  return false;
 }
 
 LRESULT __stdcall WindowHook::HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {

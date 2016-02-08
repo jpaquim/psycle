@@ -24,8 +24,16 @@ void DefaultAligner::CalcDimensions() {
     if (!item->visible()) {
       continue;
     }    
-    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;
-    ui::Dimension item_dim = item->aligner() ? item->aligner()->dim() : item->dim();
+    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;    
+    ui::Dimension item_dim = item->aligner() ? item->aligner()->dim() : item->dim();   
+    if (item->aligner()) {
+      if (!item->auto_size_width()) {
+        item_dim.set_width(item->dim().width());
+      }
+      if (!item->auto_size_height()) {
+        item_dim.set_height(item->dim().height());
+      }
+    }
     if (item_style != ALNONE) {
       const ui::Rect& margin = item->style()->margin();
       item_dim.set(item_dim.width() + margin.left() + margin.right(),
@@ -159,6 +167,14 @@ void DefaultAligner::SetPositions() {
     Window::Ptr item = *i;
     if (!item->visible()) continue;
     ui::Dimension item_dim = item->aligner() ? item->aligner()->dim() : item->dim();
+    if (item->aligner()) {
+      if (!item->auto_size_width()) {
+        item_dim.set_width(item->dim().width());
+      }
+      if (!item->auto_size_height()) {
+        item_dim.set_height(item->dim().height());
+      }
+    }
     AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;    
     ui::Rect margin;    
     if (item->has_style()) {
@@ -182,8 +198,8 @@ void DefaultAligner::SetPositions() {
         client = item;
       break;      
       case ALLEFT:
-        {
-          double w = (item_style & ALFIXED) ? item->pos().width() + margin_w: item_dim.width();
+        {         
+          double w = item_dim.width();
           item->set_pos(ui::Rect(left + margin.left(), 
                                  top + margin.top(), 
                                  left + margin.left() + w - margin_w, 
@@ -200,22 +216,22 @@ void DefaultAligner::SetPositions() {
       break;
       case ALTOP:
         {
-          double h = (item_style & ALFIXED) ? item->pos().height() : item_dim.height();
+          double h = item_dim.height();
           item->set_pos(ui::Rect(left + margin.left(), 
                                  top + margin.top(),  
                                  left + margin.left() + right - left - margin_w, 
-                                 top + margin.top() + h - margin_h)); 
-          top += h;
+                                 top + h - margin_h)); 
+          top += h - margin_h;
         }
       break;
       case ALBOTTOM:
         {
-          double h = (item_style & ALFIXED) ? item->pos().height() : item_dim.height();
+          double h = item_dim.height();
           item->set_pos(ui::Rect(left + margin.left(), 
-                                 bottom - h + margin.top(), 
+                                 bottom - h + margin_h + margin.top(), 
                                  left + margin.left() + right - left - margin_w, 
-                                 bottom - h + margin.top() + h - margin_h)); 
-          bottom -= h;
+                                 bottom - h + margin.top() + h - margin.bottom())); 
+          bottom -= h - margin_h;
         }
       break;
       default:
@@ -223,8 +239,8 @@ void DefaultAligner::SetPositions() {
     } // end switch      
   } // end loop 
   
-  if (client) {
-    client->set_pos(ui::Rect(left, top, right, bottom)); 
+  if (client) {    
+    client->set_pos(ui::Rect(left, top, right, bottom));    
   }
 }
 
@@ -389,7 +405,7 @@ void Canvas::Flush() {
 
 void Canvas::Invalidate() {
   if (!prevent_fls_) {
-    Invalidate();    
+    Window::Invalidate();    
   }
 }  
 

@@ -10,21 +10,22 @@ local image = require("psycle.ui.image")
 local item = require("psycle.ui.canvas.item")
 local listener = require("listener")
 local cfg = require("psycle.config"):new("PatternVisual")
+local serpent = require("psycle.serpent")
 
 local toolicon = item:new()
 
 local settings = { 
   colors = {
     default = {
-      bg = cfg:get("pvc_row4beat"),
-      text = cfg:get("pvc_font")
-    },
-    mousepress = {
       bg = cfg:get("pvc_row"),
       text = cfg:get("pvc_font")
     },
+    mousepress = {
+      bg = cfg:get("pvc_row4beat"),
+      text = cfg:get("pvc_font")
+    },
     mousemove = {
-      bg  = cfg:get("pvc_row"),
+      bg  = cfg:get("pvc_row4beat"),
       text = cfg:get("pvc_font")
     } 
   }
@@ -62,7 +63,7 @@ function toolicon:init(filename, trans)
   self.istoggle_ = false
 end
 
-function toolicon:draw(g)
+function toolicon:draw(g)  
   local x, y, w, h = self:pos()
   g:setcolor(self.cc)   
   g:fillroundrect(0, 0, w, h, 5, 5)  
@@ -73,8 +74,9 @@ function toolicon:draw(g)
     xpos = xpos + self.centerx + ix
   end
   g:setcolor(self.cc)
-  g:setcolor(settings.colors.default.text)
-  g:drawstring(self.text_, xpos, 0)
+  g:setcolor(settings.colors.default.text)  
+  local textwidth, textheight = g:textsize(self.text_)
+  g:drawstring(self.text_, xpos + 2, (h-textheight)/2)
 end
 
 function toolicon:onmousedown(ev)  
@@ -86,14 +88,14 @@ end
 function toolicon:onmousemove(ev)  
   if (not self.on) then 
     self.cc = settings.colors.mousemove.bg
-    self:fls()
+    self:invalidate()
   end
 end
 
 function toolicon:onmouseout(ev)  
   if (not self.on) then 
     self.cc = settings.colors.default.bg
-    self:fls()
+    self:invalidate()
   end
 end
 

@@ -526,6 +526,7 @@ namespace host {
 			afx_msg void OnViewInstrumenteditor();
 		public:
 			afx_msg void OnNewmachine();
+      void OnPluginCanvasChanged(LuaPlugin& plugin);
 		protected:
 			afx_msg void OnPopCut();
 			afx_msg void OnUpdateCutCopy(CCmdUI* pCmdUI);
@@ -613,7 +614,8 @@ namespace host {
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
-      afx_msg void OnDynamicMenuItems(UINT nID);      
+      afx_msg void OnDynamicMenuItems(UINT nID);  
+      
 };
 
 

@@ -37,7 +37,8 @@ function splitter:init(orientation)
 end
 
 function splitter:onmousedown(e)
-  self:canvas():mousecapture()  
+  self:canvas():mousecapture() 
+  self:canvas():addstyle(0x02000000)
   self.dosplit_ = true
   self.dragpos = -1
   self.par = self:parent() 
@@ -60,21 +61,21 @@ function splitter:onmousemove(e)
         self.dragpos = e.clienty
         local x, y, w, h = self.item:pos()
         self.item:setpos(x, y, w, self.itemclientpos - self.dragpos)       
-        self:canvas():align()   
+        self:parent():align()   
       end      
     elseif self.orientation == splitter.VERT then
       if (self.dragpos ~= e.clientx) then      
         self.dragpos = e.clientx    
         local x, y, w, h = self.item:pos()
         self.item:setpos(x, y, self.dragpos - self.itemclientpos, h)
-        self:canvas():align()
+        self:parent():align()
       end 
     end
   else
     if self.orientation == splitter.HORZ then
-      self:canvas():setcursor(canvas.CURSOR.ROW_RESIZE) 
+      self:setcursor(canvas.CURSOR.ROW_RESIZE) 
     elseif self.orientation == splitter.VERT then
-      self:canvas():setcursor(canvas.CURSOR.COL_RESIZE)
+      self:setcursor(canvas.CURSOR.COL_RESIZE)
     end
   end
 end
@@ -88,6 +89,7 @@ end
 function splitter:onmouseup(e)
   self.dosplit_ = false
   self:canvas():mouserelease()
+  self:canvas():removestyle(0x02000000)
 end 
 
 return splitter

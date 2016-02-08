@@ -133,19 +133,27 @@ bool Line::OnUpdateArea() {
   double zoom = 1.0; // parent() ? parent()->zoom() : 1.0;
   ui::Rect bounds = area().bounds();
   area_->Clear();
-  area_->Add(RectShape(ui::Rect((bounds.left()-dist)*zoom, 
-                                (bounds.top()-dist)*zoom, 
-                                (bounds.left() + bounds.width()+2*dist+1)*zoom, 
-                                (bounds.top() + bounds.height()+2*dist+1)*zoom)));
+  area_->Add(RectShape(ui::Rect(ui::Point((bounds.left()-dist)*zoom, 
+                                          (bounds.top()-dist)*zoom),
+                                ui::Point((bounds.left() + bounds.width()+2*dist+1)*zoom, 
+                                          (bounds.top() + bounds.height()+2*dist+1)*zoom))));
   return true;
 }
 
-bool Text::OnUpdateArea() {    
+bool Text::OnUpdateArea() {   
+  if (!auto_size_width() && !auto_size_height()) {
+    area_->Clear();
+    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(),                                  
+                                  ui::Point(area_->bounds().left() + imp()->dev_pos().width(), 
+                                            area_->bounds().top() + imp()->dev_pos().height()))));
+    return true;
+  }
+
   std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
   g->SetFont(*font_);    
   ui::Dimension size = g->text_size(text_);
   area_->Clear();
-  area_->Add(RectShape(ui::Rect(0, 0, size.width(), size.height())));
+  area_->Add(RectShape(ui::Rect(ui::Point(), ui::Point(size.width(), size.height()))));
   return true;  
 }
 
@@ -195,7 +203,7 @@ void Pic::SetImage(Image* image) {
 
 bool Pic::OnUpdateArea() {
   area_->Clear();
-  area_->Add(RectShape(ui::Rect(0, 0, width_, height_)));  
+  area_->Add(RectShape(ui::Rect(ui::Point(), ui::Point(width_, height_))));  
   return true;
 }
 

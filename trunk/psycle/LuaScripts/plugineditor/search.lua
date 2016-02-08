@@ -38,15 +38,11 @@ end
 
 function search:init() 
   self:setautosize(false, true)    
-  --self:style():setmargin(3, 3, 3, 3):setpadding(10, 5, 10, 5)
+  self:style():setmargin(1, 1, 1, 1) -- :setpadding(10, 5, 10, 5)
   self.dosearch = signal:new()   
   self:createeditgroup(self)  
 --  self:createreplacegroup(self)
-  self:createclosebutton()
-  --self:setornament(ornamentfactory:createlineborder(0x528A68))  
- --self.border = ornamentfactory:createlineborder(0x528A68)
-  --self.border:setborderradius(10, 0, 0, 10)
- --self:setornament(self.border)
+  self:createclosebutton() 
  self:setornament(ornamentfactory:createfill(0x528A68))   
 end
 
@@ -54,7 +50,7 @@ function search:createeditgroup(parent)
  self.editgroup = group:new(parent):setautosize(true, true)
  self.editgroup:style():setalign(style.ALLEFT)
  local optionrow = group:new(self.editgroup):setautosize(true, true)
- optionrow:style():setalign(style.ALTOP)--:setmargin(0, 0, 0, 5)
+ optionrow:style():setalign(style.ALTOP) --:setmargin(0, 5, 0, 0)
  self:createoptions(optionrow) 
  local editrow = group:new(self.editgroup):setautosize(true, true)
  editrow:style():setalign(style.ALTOP)--:setmargin(0, 0, 0, 0)
@@ -65,15 +61,16 @@ end
 
 function search:createeditfield(parent)
   self.edit = edit:new(parent):setpos(0, 0, 200, 20)
+  self.edit:setdebugtext("search")
   self.edit:style():setalign(style.ALLEFT)
   return self
 end
 
 function search:createsearchbuttons(parent)
   self.up = iconbutton:new(parent, settings.picdir.."up.png", 0xFFFFFF)
-  self.up:style():setalign(style.ALLEFT)--:setmargin(2, 0, 2, 0)
+  self.up:style():setalign(style.ALLEFT):setmargin(2, 0, 2, 0)
   self.down = iconbutton:new(parent, settings.picdir.."down.png", 0xFFFFFF)
-  self.down:style():setalign(style.ALLEFT)--:setmargin(0, 0, 0, 0)
+  self.down:style():setalign(style.ALLEFT)
   local that = self
   function self.up:onclick()
     that.dosearch:emit(that.edit:text(), 
@@ -94,7 +91,7 @@ end
 
 function search:initeditevents() 
   local that = self
-  function self.edit:onkeydown(ev)
+  function self.edit:onkeydown(ev)    
     if ev:keycode() == 13 then
       that.dosearch:emit(self:text(), 
                          search.DOWN, 

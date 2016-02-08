@@ -10,6 +10,8 @@
 #include "Machine.hpp"
 #include "LuaArray.hpp"
 #include "LuaHost.hpp"
+#define BOOST_SIGNALS_NO_DEPRECATION_WARNING
+#include <boost/signal.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -121,6 +123,10 @@ namespace psycle { namespace host {
         return shared_from_this();
     }
 
+    virtual void OnCanvasChanged() { CanvasChanged(*this); }
+
+    boost::signal<void (LuaPlugin&)> CanvasChanged;
+
   protected:
     LuaProxy proxy_;
     int curr_prg_;
@@ -134,7 +140,8 @@ namespace psycle { namespace host {
       }*/
       if (do_exit_) {
        LuaUiExtentions::instance()->Remove(this_ptr());
-      } else if (do_reload_) {
+      } else 
+      if (do_reload_) {
         do_reload_ = false;
         try {
           try {

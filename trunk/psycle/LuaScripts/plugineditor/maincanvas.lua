@@ -36,6 +36,7 @@ local image = require("psycle.ui.image")
 local text = require("psycle.ui.canvas.text")
 local group = require("psycle.ui.canvas.group")
 local checkbox = require("psycle.ui.canvas.checkbox")
+local signal = require("psycle.signal")
 
 local maincanvas = canvas:new()
 
@@ -47,27 +48,33 @@ function maincanvas:new()
   return c
 end
 
-function maincanvas:init()    
+function maincanvas:init()  
+  self.togglecanvas = signal:new() 
   self:setornament(ornamentfactory:createfill(settings.canvas.colors.background))  
   self:inittollbar()   
-  self.search = search:new(self):setpos(0, 0, 200, 200)
+  self.search = search:new(self):setpos(0, 0, 200, 200):hide()
   self.search:style():setalign(style.ALBOTTOM)
   self.search.dosearch:connect(maincanvas.onsearch, self) 
   self.outputs = tabgroup:new(self):setpos(0, 0, 0, 120)
-  self.outputs:style():setalign(style.ALBOTTOM + style.ALFIXED)  
+  self.outputs:style():setalign(style.ALBOTTOM)  
   self.output = scintilla:new()
   self.output:setforegroundcolor(settings.sci.default.foreground)
   self.output:setbackgroundcolor(settings.sci.default.background) 
   self.output:styleclearall()
   self.output:setlinenumberforegroundcolor(0x939393)
-  self.output:setlinenumberbackgroundcolor(0x232323)  
+  self.output:setlinenumberbackgroundcolor(0x232323)    
+  self.output:setmarginbackgroundcolor(0x232323)  
   self.outputs:add(self.output, "Output")
+  self.callstack = callstack:new(nil, self)
+  self.callstack:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
+  self.callstack:settextcolor(settings.canvas.colors.foreground)  
+  self.outputs:add(self.callstack, "Call stack")
   self.splitter = splitter:new(self, splitter.HORZ)
   self.pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0)
   self.pluginexplorer:style():setalign(style.ALLEFT)     
-  self.pluginexplorer:setbackgroundcolor(settings.canvas.colors.background)
-  self.pluginexplorer:setfilepath("test")  
-  self.pluginexplorer:settextcolor(settings.canvas.colors.foreground)  
+  self.pluginexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
+  self.pluginexplorer:settextcolor(settings.canvas.colors.foreground)
+  self.pluginexplorer:setfilepath("test")     
   self.pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)  
   self.splitter2 = splitter:new(self, splitter.VERT)
   self.fileopen = fileopen:new()
@@ -83,6 +90,13 @@ function maincanvas:setoutputtext(text)
   self.output:addtext(text)  
 end
 
+function maincanvas:setplugindir(plugininfo)  
+  local path = plugininfo:dllname()
+  path = path:sub(1, -5).."\\"
+  self.pluginexplorer:setfilepath(path)
+  self.selecttoolbar.selectmachine:settext(plugininfo:name()):fls()
+end
+
 function maincanvas:dopageexist(fname)
   local found = nil
   local items = self.pages.childs:items()    
@@ -96,38 +110,15 @@ function maincanvas:dopageexist(fname)
   return found
 end
 
-function maincanvas:convertargb(color)
-  local v = -1
-  if color ~= -1 then
-    local r = bit32.band(bit32.rshift(color, 16), 0xFF)
-    local g = bit32.band(bit32.rshift(color, 8), 0xFF)
-    local b = bit32.band(color, 0xFF)               
-    v = bit32.bor(bit32.bor(r, bit32.lshift(g, 8)), bit32.lshift(b, 16))
-    bit32.band(bit32.band(bit32.rshift(v, 16), bit32.rshift(v, 8)), bit32.rshift(v, 0))
-  end
-  return v
-end
-
-function maincanvas:setforegroundstyle(page, style, color)
-  if color ~= -1 then    
-    page:f(sci.SCI_STYLESETFORE, style, self:convertargb(color))     
-  end
-end
-
-function maincanvas:setbackgroundstyle(page, style, color)
-  if color ~= -1 then        
-    page:f(sci.SCI_STYLESETBACK, style, self:convertargb(color))     
-  end
-end
-
 function maincanvas:setlexer(page)  
   page:f(sci.SCI_SETLEXER, scilex.SCLEX_LUA, 0)
   page:setforegroundcolor(0xCACACA)
   page:setbackgroundcolor(settings.sci.default.background)   
   page:styleclearall()
   page:setlinenumberforegroundcolor(0x939393)
-  page:setlinenumberbackgroundcolor(0x232323)    
-  page:setselbackgroundcolor(0xFFFFFF)  
+  page:setlinenumberbackgroundcolor(0x232323)
+  page:setmarginbackgroundcolor(0x232323) 
+  page:setselbackgroundcolor(0xFFFFFF)    
   page:setselalpha(75)
   local lex = lexer:new()
   lex:setkeywords(settings.sci.lexer.keywords)
@@ -138,6 +129,7 @@ function maincanvas:setlexer(page)
   lex:setnumbercolor(settings.sci.lexer.numbercolor)
   lex:setstringcolor(settings.sci.lexer.stringcolor)
   lex:setwordcolor(settings.sci.lexer.wordcolor)
+  lex:setfoldingcolor(settings.sci.lexer.foldingcolor)
   page:setlexer(lex)
          
   page:f(sci.SCI_STYLESETSIZE, sci.STYLE_DEFAULT, settings.sci.lexer.font.size)
@@ -193,8 +185,9 @@ function maincanvas:setcallstack(trace)
   for i=1, #trace do
     self.callstack:add(trace[i])
   end 
+  self.callstack:autosize(3)
   self.callstack:setdepth(1)
-  self.callstack:align()
+  -- self.callstack:align()
 end
 
 function maincanvas:createnewpage()
@@ -232,19 +225,43 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittollbar()  
-  self.tg = group:new(self):setautosize(true, true)
-  self.tg:style():setalign(style.ALTOP)
-  self:initselectplugintoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
+  self.tg = group:new(self):setautosize(false, true)
+  self.tg:style():setalign(style.ALTOP):setmargin(3, 3, 3, 3)
+  self.windowtoolbar = self:initwindowtoolbar()
+  self.windowtoolbar:style():setalign(style.ALRIGHT)
+  self.selecttoolbar = self:initselectplugintoolbar()
+  self.selecttoolbar:style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
   self:initfiletoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
-  self:initplaytoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
+  self:initplaytoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)  
 end
 
+function maincanvas:setwindowiconin()
+  self.windowtoolbar.icon.img = image:new()
+                                :load(settings.picdir.."arrow_in.png")
+                                :settransparent(0xFFFFFF)
+end
+
+function maincanvas:setwindowiconout()
+   self.windowtoolbar.icon.img = image:new()
+                                 :load(settings.picdir.."arrow_out.png")
+                                 :settransparent(0xFFFFFF)
+end
+
+function maincanvas:initwindowtoolbar()
+  local t = toolbar:new(self.tg)
+  t.icon = toolicon:new(t, settings.picdir.."arrow_out.png", 0xFFFFFF)  
+  local that = self
+  function t.icon:onclick()   
+    that.togglecanvas:emit()
+  end
+  return t
+end
 
 function maincanvas:initselectplugintoolbar(parent)
   local t = toolbar:new(self.tg)
-  local selectmachine = toolicon:new(t):settext("no plugin loaded"):setpos(0, 0, 100, 20)
+  t.selectmachine = toolicon:new(t):settext("No Plugin Loaded"):setpos(0, 0, 100, 20)
   local that = self
-  function selectmachine:onclick()
+  function t.selectmachine:onclick()
     local name, path = psycle.selmachine()
     if name then   
       path = path:sub(1, -5).."\\"
@@ -270,12 +287,14 @@ end
 
 function maincanvas:initplaytoolbar()  
   local t = toolbar:new(self.tg)
---  local istart = rect:new(t):setpos(0, 0, 20, 20)
-  --istart:setornament(ornamentfactory:createfill(0xFFFFFF))
   local istart = toolicon:new(t, settings.picdir.."play.png", 0xFFFFFF)
   local that = self
-  --function istart:onclick() that:playplugin() end
+  function istart:onclick() that:playplugin() end
   return t
+end
+
+function maincanvas:oncallstackclick(info)
+  self:openinfo(info)
 end
 
 function maincanvas:openinfo(info)
@@ -290,12 +309,8 @@ function maincanvas:openinfo(info)
   end
   return isfile
 end
- 
-function maincanvas:oncallstackclick(info)
-  self:openinfo(info)
-end
 
-function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)
+function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)  
   local page = self.pages:activepage()
   if page then  
     local cpmin, cpmax = 0, 0
@@ -328,8 +343,7 @@ function maincanvas:displaysearch(ev)
 end
 
 function maincanvas:onpluginexplorerclick(ev) 
-   if ev.filename ~= "" then
-    psycle.output(ev.path..ev.filename)
+   if ev.filename ~= "" then    
      self:openfromfile(ev.path..ev.filename, 0)
    end
 end
