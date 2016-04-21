@@ -12,19 +12,13 @@ namespace ui {
 namespace canvas {
 
 void DefaultAligner::CalcDimensions() {
-  double w(0);
-  double h(0);  
-  double left(0);
-  double right(0);
-  double top(0);
-  double bottom(0);
-  int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
+  Dimension current_dim;  
+  ui::Rect current_pos;    
   for (iterator i = begin(); i != end(); ++i) {
     Window::Ptr item = *i;
     if (!item->visible()) {
       continue;
-    }    
-    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;    
+    }        
     ui::Dimension item_dim = item->aligner() ? item->aligner()->dim() : item->dim();   
     if (item->aligner()) {
       if (!item->auto_size_width()) {
@@ -34,121 +28,119 @@ void DefaultAligner::CalcDimensions() {
         item_dim.set_height(item->dim().height());
       }
     }
-    if (item_style != ALNONE) {
-      const ui::Rect& margin = item->style()->margin();
+    if (item->align() != ALNONE) {
+      const ui::Rect& margin = item->margin();
       item_dim.set(item_dim.width() + margin.left() + margin.right(),
                    item_dim.height() + margin.top() + margin.bottom());
     }
     // width
     {
-      double diff = right - left;
-      switch (item_style & bitmask) {
+      double diff = current_pos.width();
+      switch (item->align()) {
         case ALLEFT:
-          left += item_dim.width();
+          current_pos.set_left(current_pos.left() + item_dim.width());
           if (diff == 0) {          
-            w += item_dim.width();
-            right += item_dim.width();
+            current_dim.set_width(current_dim.width() + item_dim.width());
+            current_pos.set_right(current_pos.right() + item_dim.width());
           } else {
             double expand = item_dim.width() - diff;
             if (expand > 0) {
-              w += expand;
-              right += expand;
+              current_dim.set_width(current_dim.width() + expand);
+              current_pos.set_right(current_pos.right() + expand);
             }
           }
-        break;
-        case ALTOP:
-        case ALBOTTOM:
-          if (diff == 0) {
-            w += item_dim.width();
-            right += item_dim.width();
-          } else {
-            double expand = item_dim.width() - diff;
-            if (expand > 0) {
-              w += expand;
-              right += expand;
-            }
-          }      
         break;
         case ALRIGHT:        
           if (diff == 0) {          
-            w += item_dim.width();
-            right += item_dim.width();
+            current_dim.set_width(current_dim.width() + item_dim.width());
+            current_pos.set_right(current_pos.right() + item_dim.width());
           } else {
             double expand = item_dim.width() - diff;
             if (expand > 0) {
-              w += expand;
-              right += expand;
+              current_dim.set_width(current_dim.width() + expand);
+              current_pos.set_right(current_pos.right() + expand);
             } else
             if (expand == 0) {
-              right -= item_dim.width();
+              current_pos.set_right(current_pos.right() - item_dim.width());
             }
           }
-        break;      
+        break;  
+        case ALTOP:
+        case ALBOTTOM:
+          if (diff == 0) {
+            current_dim.set_width(current_dim.width() + item_dim.width());
+            current_pos.set_right(current_pos.right() + item_dim.width());
+          } else {
+            double expand = item_dim.width() - diff;
+            if (expand > 0) {
+              current_dim.set_width(current_dim.width() + expand);
+              current_pos.set_right(current_pos.right() + expand);
+            }
+          }      
+        break;
+            
         default:
-          w = std::max(item_dim.width(), w);
+          current_dim.set_width(std::max(item_dim.width(), current_dim.width()));          
         break;
       }    
     }
 
     // height
     {
-      double diff = bottom - top;
-      switch (item_style & bitmask) {
+      double diff = current_pos.height();
+      switch (item->align()) {
         case ALTOP:
-          top += item_dim.height();
-          if (diff == 0) {          
-            h += item_dim.height();
-            bottom += item_dim.height();
+          current_pos.set_top(current_pos.top() + item_dim.height());
+          if (diff == 0) {
+            current_dim.set_height(current_dim.height() + item_dim.height());            
+            current_pos.set_bottom(current_pos.bottom() + item_dim.height());
           } else {
             double expand = item_dim.height() - diff;
-            h += expand;
-            bottom += expand;            
+            current_dim.set_height(current_dim.height() + expand);
+            current_pos.set_bottom(current_pos.bottom() + expand); 
           }
         break;
         case ALLEFT:
         case ALRIGHT:
           if (diff == 0) {
-            h += item_dim.height();
-            bottom += item_dim.height();
+            current_dim.set_height(current_dim.height() + item_dim.height());
+            current_pos.set_bottom(current_pos.bottom() + item_dim.height());
           } else {
             double expand = item_dim.height() - diff;
             if (expand > 0) {
-              h += expand;
-              bottom += expand;
+              current_dim.set_height(current_dim.height() + expand);
+              current_pos.set_bottom(current_pos.bottom() + expand);
             }
           }      
         break;
         case ALBOTTOM:
           if (diff == 0) {          
-            h += item_dim.height();
-            bottom += item_dim.height();
+            current_dim.set_height(current_dim.height() + item_dim.height());
+            current_pos.set_bottom(current_pos.bottom() + item_dim.height());
           } else {
             double expand = item_dim.height() - diff;
             if (expand > 0) {
-              h += expand;
-              bottom += expand;
+              current_dim.set_height(current_dim.height() + expand);
+              current_pos.set_bottom(current_pos.bottom() + expand);
             }
           }
         break;            
         default:
-          h = std::max(item_dim.height(), h);
+          current_dim.set_height(std::max(item_dim.height(), current_dim.height()));          
         break;
       }    
     }
-  } // end loop 
-  if (group_.lock()->has_style()) {
-    const ui::Rect& margin = group_.lock()->style()->margin();    
-    const ui::Rect& pad = group_.lock()->style()->padding();
-    if (w > 0 && h > 0) {
-      w += pad.left() + pad.right();
-      h += pad.top() + pad.bottom();       
-    }
-    w = w + margin.left() + margin.right();    
-    h = h + margin.top() + margin.bottom();     
+  } // end loop   
+  const ui::Rect& margin = group_.lock()->margin();    
+  const ui::Rect& pad = group_.lock()->padding();
+  if (current_dim.width() > 0 && current_dim.height() > 0) {
+    current_dim.set_width(current_dim.width() + pad.left() + pad.right());
+    current_dim.set_height(current_dim.height() + pad.top() + pad.bottom());
   }
-  dim_.set(w, h);  
+  current_dim += ui::Dimension(margin.left() + margin.right(),
+                               margin.top() + margin.bottom());  
+  dim_ = current_dim;
 }
-
 
 void DefaultAligner::SetPositions() {
   if (group_.expired()) {
@@ -158,10 +150,8 @@ void DefaultAligner::SetPositions() {
     return;
   }
   Window::Ptr client;
-  double left(0);
-  double right(group_.lock()->pos().width());
-  double top(0);
-  double bottom(group_.lock()->pos().height());  
+
+  ui::Rect current_pos(ui::Point(0, 0), group_.lock()->pos().dimension());
 
   for (iterator i = begin(); i != end(); ++i) {
     Window::Ptr item = *i;
@@ -174,64 +164,53 @@ void DefaultAligner::SetPositions() {
       if (!item->auto_size_height()) {
         item_dim.set_height(item->dim().height());
       }
-    }
-    AlignStyle item_style = item->has_style() ? item->style()->align() : ALNONE;    
-    ui::Rect margin;    
-    if (item->has_style()) {
-      margin = item->style()->margin();      
-      item_dim.set(item_dim.width() + margin.left() + margin.right(),
-                   item_dim.height() + margin.top() + margin.bottom());    
-    }
-    ui::Rect pad;
-    if (group_.lock()->has_style()) {
-      pad = group_.lock()->style()->padding();
-      margin.set(ui::Point(margin.left() + pad.left(),                 
-                           margin.top() + pad.top()),
-                 ui::Point(margin.right() - pad.right(),
-                           margin.bottom() - pad.bottom()));
-    }
+    }    
+    ui::Rect margin = item->margin();      
+    item_dim += ui::Dimension(margin.left() + margin.right(), margin.top() + margin.bottom());
+    ui::Rect pad = group_.lock()->padding();
+    margin.set(margin.top_left() + pad.top_left(),
+               margin.bottom_right() - pad.bottom_right());
     double margin_w = margin.left() + margin.right();
-    double margin_h = margin.top() + margin.bottom();
-    int bitmask = ALCLIENT | ALLEFT | ALRIGHT | ALTOP | ALBOTTOM;
-    switch (item_style & bitmask) {
+    double margin_h = margin.top() + margin.bottom();    
+    switch (item->align()) {
       case ALCLIENT:
         client = item;
       break;      
       case ALLEFT:
         {         
           double w = item_dim.width();
-          item->set_pos(ui::Rect(ui::Point(left + margin.left(), 
-                                           top + margin.top()), 
-                                 ui::Point(left + margin.left() + w - margin_w, 
-                                           top + margin.top() + bottom - top - margin_h))); 
-          left += w;
+          item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
+                                           current_pos.top() + margin.top()), 
+                                 ui::Point(current_pos.left() + margin.left() + w - margin_w, 
+                                           current_pos.top() + margin.top() + current_pos.bottom() - current_pos.top() - margin_h))); 
+          current_pos.set_left(current_pos.left() + w);
         }
       break;
       case ALRIGHT:
-        item->set_pos(ui::Rect(ui::Point(right - item_dim.width() + margin.right(), 
-                                         top + margin.top()), 
-                               ui::Point(right - item_dim.width() + margin.right() + item_dim.width() - margin_w, 
-                                         top + margin.top() + bottom - top - margin_h))); 
-        right -= item_dim.width();
+        item->set_pos(ui::Rect(ui::Point(current_pos.right() - item_dim.width() + margin.right(), 
+                                         current_pos.top() + margin.top()), 
+                               ui::Point(current_pos.right() - item_dim.width() + margin.right() + item_dim.width() - margin_w, 
+                                         current_pos.top() + margin.top() + current_pos.bottom() - current_pos.top() - margin_h))); 
+        current_pos.set_right(current_pos.right() - item_dim.width());
       break;
       case ALTOP:
         {
           double h = item_dim.height();
-          item->set_pos(ui::Rect(ui::Point(left + margin.left(), 
-                                           top + margin.top()),  
-                                 ui::Point(left + margin.left() + right - left - margin_w, 
-                                           top + h - margin_h))); 
-          top += h - margin_h;
+          item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
+                                           current_pos.top() + margin.top()),  
+                                 ui::Point(current_pos.left() + margin.left() + current_pos.right() - current_pos.left() - margin_w, 
+                                           current_pos.top() + h - margin_h))); 
+          current_pos.set_top(current_pos.top() + h - margin_h);
         }
       break;
       case ALBOTTOM:
         {
           double h = item_dim.height();
-          item->set_pos(ui::Rect(ui::Point(left + margin.left(), 
-                                           bottom - h + margin_h + margin.top()), 
-                                 ui::Point(left + margin.left() + right - left - margin_w, 
-                                           bottom - h + margin.top() + h - margin.bottom()))); 
-          bottom -= h - margin_h;
+          item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
+                                           current_pos.bottom() - h + margin_h + margin.top()), 
+                                 ui::Point(current_pos.left() + margin.left() + current_pos.right() - current_pos.left() - margin_w, 
+                                           current_pos.bottom() - h + margin.top() + h - margin.bottom()))); 
+          current_pos.set_bottom(current_pos.bottom() - h - margin_h);
         }
       break;
       default:
@@ -240,7 +219,7 @@ void DefaultAligner::SetPositions() {
   } // end loop 
   
   if (client) {    
-    client->set_pos(ui::Rect(ui::Point(left, top), ui::Point(right, bottom)));    
+    client->set_pos(current_pos);    
   }
 }
 
@@ -249,13 +228,14 @@ void DefaultAligner::Realign() {}
 // Canvas
 void Canvas::Init() {
   set_auto_size(false, false);  
-  steal_focus_ = save_ = prevent_fls_ = false;  
+  steal_focus_ = prevent_fls_ = false;
+  save_ = true;  
 }
 
 void Canvas::OnSize(double cw, double ch) {
   Group::OnSize(cw, ch);
   try {    
-    Align();    
+    UpdateAlign();    
   } catch (std::exception& e) {
     AfxMessageBox(e.what());
   }
@@ -266,23 +246,11 @@ void Canvas::StealFocus(const Window::Ptr& item) {
   steal_focus_ = true;
 }
 
-void Canvas::SetFocus(const Window::Ptr& item) {
-  if (item != focus_item_.lock()) {
-    if (!focus_item_.expired() && item != focus_item_.lock()) {
-      focus_item_.lock()->OnKillFocus();
-    }
-    focus_item_ = item;
-    if (!focus_item_.expired()) {
-      focus_item_.lock()->OnFocus();
-    }
-  }
-}
-
 // Events
 bool Canvas::WorkKeyDown(KeyEvent& ev) {
   try {
-    if (!focus_item_.expired()) {
-      Window::Ptr item = focus_item_.lock();   
+    if (!focus().expired()) {
+      Window::Ptr item = focus().lock();   
       WorkEvent(ev, &Window::OnKeyDown, item);    
     } else {
       ev.PreventDefault();
@@ -295,78 +263,93 @@ bool Canvas::WorkKeyDown(KeyEvent& ev) {
   return !ev.is_work_parent();
 }
 
-void Canvas::WorkKeyUp(KeyEvent& ev) {
-  try {
-    if (!focus_item_.expired()) {
-      Window::Ptr item = focus_item_.lock();
+void Canvas::WorkKeyUp(KeyEvent& ev) {  
+  try {    
+    if (!focus().expired()) {
+      Window::Ptr item = focus().lock();
       WorkEvent(ev, &Window::OnKeyDown, item);;
     } else {
       OnKeyUp(ev);  
-    }
-  } catch (std::exception& e) {
+    }    
+  } catch (std::exception& e) {    
     AfxMessageBox(e.what());
     error(e);    
   }
 }
 
 void Canvas::WorkMouseDown(MouseEvent& ev) {
-  try { 
+  try {     
     button_press_item_ = HitTest(ev.cx(), ev.cy());  
     if (!button_press_item_.expired()) {        
       Window::Ptr item = button_press_item_.lock();    
-      WorkEvent(ev, &Window::OnMouseDown, item);
+      WorkEvent(ev, &Window::OnMouseDown, item, true);
       button_press_item_ = item;    
+    }        
+  } catch (std::exception& e) {    
+    AfxMessageBox(e.what());
+    error(e);    
+  }
+}
+
+void Canvas::WorkOnFocus(Event& ev) {
+  try {
+    if (!focus().expired()) {
+      Window::Ptr item = focus().lock();
+      WorkEvent(ev, &Window::OnFocus, item);;
+    } else {
+      OnFocus(ev);  
     }
-    SetFocus(button_press_item_.lock());
   } catch (std::exception& e) {
     AfxMessageBox(e.what());
     error(e);    
   }
 }
 
+
 void Canvas::WorkDblClick(MouseEvent& ev) {
-  try {
+  try {    
     button_press_item_ = HitTest(ev.cx(), ev.cy());  
     if (!button_press_item_.expired()) {        
       Window::Ptr item = button_press_item_.lock();    
       WorkEvent(ev, &Window::OnDblclick, item);        
     }
     SetFocus(button_press_item_.lock());
-    button_press_item_ = nullpointer;
-  } catch (std::exception& e) {
+    button_press_item_ = nullpointer;    
+  } catch (std::exception& e) {    
     AfxMessageBox(e.what());
     error(e);    
   }
 }
 
 void Canvas::WorkMouseUp(MouseEvent& ev) {
-  try {
+  try {    
     if (!button_press_item_.expired()) {
       button_press_item_.lock()->OnMouseUp(ev);
       button_press_item_.reset();
     } else {
       Window::Ptr item = HitTest(ev.cx(), ev.cy());  
       WorkEvent(ev, &Window::OnMouseUp, item);
-    }
-  } catch (std::exception& e) {
+    }    
+  } catch (std::exception& e) {    
     AfxMessageBox(e.what());
     error(e);    
   }
 }
 
 void Canvas::WorkMouseMove(MouseEvent& ev) {
-  try {
+  try {    
     if (!button_press_item_.expired()) {        
       Window::Ptr item = button_press_item_.lock();    
       WorkEvent(ev, &Window::OnMouseMove, item);
     } else {
       Window::Ptr item = HitTest(ev.cx(), ev.cy());    
       while (item) {
-        if (!mouse_move_.expired()  &&
-             mouse_move_.lock() != item
-           ) {
-          mouse_move_.lock()->OnMouseOut(ev);
-        }       
+        if (mouse_move_.lock() != item) {
+          if (!mouse_move_.expired()) {
+            mouse_move_.lock()->OnMouseOut(ev);
+          }
+          item->OnMouseEnter(ev);
+        }        
         item->OnMouseMove(ev);
         if (ev.is_work_parent()) {        
           item = item->parent().lock();  
@@ -379,34 +362,34 @@ void Canvas::WorkMouseMove(MouseEvent& ev) {
         mouse_move_.lock()->OnMouseOut(ev);
         mouse_move_.reset();
       }
-    }
-  } catch (std::exception& e) {
+    }    
+  } catch (std::exception& e) {    
     AfxMessageBox(e.what());
     error(e);    
   }
 }
 
-void Canvas::Invalidate(Region& rgn) { 
+void Canvas::Invalidate(const Region& rgn) {   
   if (!prevent_fls_) {
     if (IsSaving()) {
       save_rgn_->Combine(rgn, RGN_OR);
     } else { 
       Window::Invalidate(rgn);      
     }
-  }
+  }  
 }
 
-void Canvas::Flush() {
+void Canvas::Flush() {    
   if (!prevent_fls_) {  
-    Invalidate(*save_rgn_.get());      
+    Window::Invalidate(*save_rgn_.get());    
   }
-  save_rgn_->Clear();  
+  save_rgn_->Clear();    
 }
 
-void Canvas::Invalidate() {
+void Canvas::Invalidate() {  
   if (!prevent_fls_) {
     Window::Invalidate();    
-  }
+  }  
 }  
 
 void Canvas::InvalidateSave() {

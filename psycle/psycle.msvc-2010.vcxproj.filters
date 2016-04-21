@@ -535,6 +535,9 @@
     <ClInclude Include="src\psycle\host\MfcUi.hpp">
       <Filter>psycle\mfc</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\LockIF.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">
@@ -908,6 +911,9 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\Ui.cpp">
       <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LockIF.cpp">
+      <Filter>psycle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

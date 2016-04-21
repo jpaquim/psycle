@@ -153,6 +153,7 @@
     <ClInclude Include="src\psycle\host\ladspa.h" />
     <ClInclude Include="src\psycle\host\ladspahost.hpp" />
     <ClInclude Include="src\psycle\host\ladspamachine.h" />
+    <ClInclude Include="src\psycle\host\LockIF.hpp" />
     <ClInclude Include="src\psycle\host\LuaGui.hpp" />
     <ClInclude Include="src\psycle\host\LuaHelper.hpp" />
     <ClInclude Include="src\psycle\host\LuaInternals.hpp" />
@@ -304,6 +305,7 @@
     <ClCompile Include="src\psycle\host\InstrNoteMap.cpp" />
     <ClCompile Include="src\psycle\host\ladspahost.cpp" />
     <ClCompile Include="src\psycle\host\ladspamachine.cpp" />
+    <ClCompile Include="src\psycle\host\LockIF.cpp" />
     <ClCompile Include="src\psycle\host\LuaGui.cpp" />
     <ClCompile Include="src\psycle\host\LuaInternals.cpp" />
     <ClCompile Include="src\psycle\host\Menu.cpp" />

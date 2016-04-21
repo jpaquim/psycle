@@ -7,7 +7,10 @@
 
 
 local group = require("psycle.ui.canvas.group")
-local style = require("psycle.ui.canvas.itemstyle")
+local item = require("psycle.ui.canvas.item")
+
+local setmetatable = setmetatable
+_ENV = nil
 
 local toolbar = group:new()
 
@@ -22,12 +25,13 @@ end
 function toolbar:init()
   self:setautosize(true, true)
   self.icontable = {}
-  self:style()--:setmargin(4, 4, 4, 4)
+  --self:style()--:setmargin(4, 4, 4, 4)
 end
 
 function toolbar:add(icon)
   icon:settoolbar(self)
-  icon:style():setalign(style.ALLEFT):setmargin(0, 0, 5, 0)
+  icon:setalign(item.ALLEFT)
+  icon:setmargin(0, 0, 5, 0)
   group.add(self, icon)	
 end
 

@@ -6,7 +6,7 @@
 #include "plugininfo.hpp"
 #include "LuaArray.hpp"
 #include "LuaInternals.hpp"
-#include "Menu.hpp"
+#include "LockIF.hpp"
 
 struct lua_State;
 struct luaL_Reg;
@@ -15,10 +15,15 @@ namespace universalis { namespace os {
 	class terminal;
 }}
 
-namespace ui { namespace canvas { class Canvas; } }
+
 
 namespace psycle {
 namespace host {
+
+namespace ui { 
+  class Commands; 
+  namespace canvas { class Canvas; }
+}
     
 class LuaPlugin;
 
@@ -60,6 +65,7 @@ public:
   void ParameterTweak(int par, double val);
   void Work(int numsamples, int offset=0);
   void Stop();
+  void OnTimer();
   void PutData(unsigned char* data, int size);
   int GetData(unsigned char **ptr, bool all);
 	uint32_t GetDataSize();
@@ -77,12 +83,9 @@ public:
   bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
   void call_execute();
 	void call_sr_changed(int rate);
-	void call_aftertweaked(int idx);
-	void call_menu(UINT id);  
-	std::string call_help();	
-	
-  void update_menu(void* menu);
-  ui::MenuBar::Ptr menu_bar();
+	void call_aftertweaked(int idx);	  
+	std::string call_help();
+	    
   MachineUiType::Value ui_type() const { return lua_mac_->ui_type(); }
   void call_setprogram(int idx);
   int call_numprograms();
@@ -93,15 +96,21 @@ public:
 	int num_parameter() const { return lua_mac_->numparams(); }
         
   void OnCanvasChanged();
+  void OnActivated();
+  void OnDeactivated();
+
+  std::auto_ptr<ui::Commands> invokelater;
+
 private:
-	void export_c_funcs();
+  void export_c_funcs();
 	// script callbacks
-	static int set_parameter(lua_State* L);
-	static int message(lua_State* L);
-	static int terminal_output(lua_State* L);
-	static int call_filedialog(lua_State* L);
+  static int set_parameter(lua_State* L);
+  static int message(lua_State* L);
+  static int invoke_later(lua_State* L);
+  static int terminal_output(lua_State* L);
+  static int call_filedialog(lua_State* L);
   static int call_selmachine(lua_State* L);
-	static int set_machine(lua_State* L);  
+  static int set_machine(lua_State* L);  
   std::string ParDisplay(int par);
   std::string ParLabel(int par);
   
@@ -134,7 +143,7 @@ class LuaUiExtentions {
   void Remove(const LuaPluginPtr& ptr) { uiluaplugins_.remove(ptr); }
   LuaUiExtentions::List Get(const std::string& name);
   LuaPluginPtr Get(int idx);  
-
+  
  private:
   LuaUiExtentions::List uiluaplugins_;
 };
@@ -158,6 +167,8 @@ struct LuaGlobal {
    static std::vector<LuaPlugin*> GetAllLuas();
    static bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
    static bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
+
+   
 };
 
  

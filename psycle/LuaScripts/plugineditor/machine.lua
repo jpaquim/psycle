@@ -14,10 +14,9 @@ local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
 local sysmetrics = require("psycle.ui.systemmetrics")
 local menubar = require("psycle.ui.menubar")
-local menu = require("psycle.ui.menu")
-local menuitem = require("psycle.ui.menuitem")
 local serpent = require("psycle.serpent")
 local plugincatcher = require("psycle.plugincatcher")
+local treenode = require("psycle.ui.canvas.treenode")
 
 -- plugin info
 function machine:info()
@@ -35,12 +34,11 @@ function machine:help()
   return "no help"
 end
 
-function machine:init(samplerate)
-   self.maincanvas = maincanvas:new()
+function machine:init(samplerate)  
+   self.maincanvas = maincanvas:new()   
    self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)
    self.editmacidx_ = -1
-   self:setcanvas(self.maincanvas)
-   self:initmenu()      
+   self:setcanvas(self.maincanvas)   
 end
 
 function machine:createframe()  
@@ -61,7 +59,7 @@ function machine:editmacidx()
   return self.editmacidx_;
 end
 
-function machine:onexecute(msg, macidx, plugininfo, trace)
+function machine:onexecute(msg, macidx, plugininfo, trace)  
   if msg == nil then  
     self:openinmainframe()  
   else  
@@ -100,19 +98,33 @@ function machine:openinmainframe()
   self.maincanvas:setwindowiconout()
   self:setcanvas(self.maincanvas)
 end
-     
-function machine:initmenu()
-   self.menubar = menubar:new()
-   self.menu1 = menu:new("Plugineditor")
-   self.menubar:add(self.menu1)
-   self.menu2 = menu:new("New")
-   self.menu1:add(self.menu2)
-   self.menuitem1 = menuitem:new("Generator")
-   --self.menuitem1:addlistener(self)
-   self.menuitem2 = menuitem:new("Effect")
-   self.menu2:add(self.menuitem1)
-   self.menu2:add(self.menuitem2)   
-   self:setmenus(self.menubar)
+
+function machine:onactivated()
+  self:initmenu()
+  psycle.output("root size :"..self.root:size())
+end
+
+function machine:ondeactivated()  
+  self.root:remove(0)
+  self.node = nil
+  collectgarbage()
+end
+
+function machine:initmenu()   
+   self.menubar = menubar:new()   
+   self.root = treenode:new()   
+   self.menubar:setrootnode(self.root) 
+   --self.menubar:mainmenu()        
+   self.node = treenode:new()   
+   self.subnode = treenode:new()        
+   self.node:settext("test")
+   self.subnode:settext("sub_node");
+   self.node:add(self.subnode);
+   self.root:add(self.node);
+   self.menubar:update();
+   --self.maincanvas.pluginexplorer:setrootnode(self.root)  
+   --node = self.root:at(0)
+   --psycle.output(node:text())
 end
 
 function machine:onmenu(menuitem)

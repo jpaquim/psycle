@@ -9,15 +9,9 @@ local tablectrl = require("psycle.ui.canvas.table")
 local group = require("psycle.ui.canvas.group")
 local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
-local style = require("psycle.ui.canvas.itemstyle")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local callstack = tablectrl:new()
-
-local rowstyle = style:new():setalign(style.ALLEFT)
-                           -- :setmargin(0, 0, 2, 0)
-local colstyle = style:new():setalign(style.ALTOP)
-                           -- :setmargin(0, 0, 0, 1)  
 
 function callstack:new(parent, listener)
   local c = tablectrl:new(parent)  

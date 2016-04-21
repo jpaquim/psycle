@@ -60,15 +60,15 @@ namespace psycle { namespace host {
     void add(float addend);
     void add(PSArray& src);
     void sub(PSArray& src);
-    void sqrt() { for (int i = 0; i < len_; ++i) ::sqrt(ptr_[i]); }
+    void sqrt() { for (int i = 0; i < len_; ++i) ptr_[i] = ::sqrt(ptr_[i]); }
     void sqrt(PSArray& src);
-    void sin() { for (int i = 0; i < len_; ++i) ::sin(ptr_[i]); }
-    void cos() { for (int i = 0; i < len_; ++i) ::cos(ptr_[i]); }
-    void tan() { for (int i = 0; i < len_; ++i) ::tan(ptr_[i]); }
-    void floor() { for (int i = 0; i < len_; ++i) ::floor(ptr_[i]); }
-    void ceil() { for (int i = 0; i < len_; ++i) ::ceil(ptr_[i]); }
-    void abs() { for (int i = 0; i < len_; ++i) ::abs(ptr_[i]); }
-    void pow(float exp) { for (int i = 0; i < len_; ++i) ::pow(ptr_[i], exp); }
+    void sin() { for (int i = 0; i < len_; ++i) ptr_[i] = ::sin(ptr_[i]); }
+    void cos() { for (int i = 0; i < len_; ++i) ptr_[i] = ::cos(ptr_[i]); }
+    void tan() { for (int i = 0; i < len_; ++i) ptr_[i] = ::tan(ptr_[i]); }
+    void floor() { for (int i = 0; i < len_; ++i) ptr_[i] = ::floor(ptr_[i]); }
+    void ceil() { for (int i = 0; i < len_; ++i) ptr_[i] = ::ceil(ptr_[i]); }
+    void abs() { for (int i = 0; i < len_; ++i) ptr_[i] = ::abs(ptr_[i]); }
+    void pow(float exp) { for (int i = 0; i < len_; ++i) ptr_[i] = ::pow(ptr_[i], exp); }
     void sgn() {
       for (int i = 0; i < len_; ++i) {
         ptr_[i] = (ptr_[i] > 0) ? 1 : ((ptr_[i] < 0) ? -1 : 0);

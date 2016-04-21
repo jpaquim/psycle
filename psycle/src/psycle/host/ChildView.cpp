@@ -39,6 +39,9 @@
 
 
 namespace psycle { namespace host {
+
+    extern CPsycleApp theApp;
+
 		int const ID_TIMER_VIEW_REFRESH =39;
 		int const ID_TIMER_AUTOSAVE = 159;
 
@@ -120,8 +123,7 @@ namespace psycle { namespace host {
 			szBlankParam[0]='\0';
 			note_tab_selected=NULL;
 			MBStart.x=0;
-			MBStart.y=0;
-      lua_menu_ = new ui::mfc::Menu(0);
+			MBStart.y=0;      
 
 			patView = &PsycleGlobal::conf().patView();
 			macView = &PsycleGlobal::conf().macView();
@@ -132,6 +134,9 @@ namespace psycle { namespace host {
 
 			// Creates a new song object. The application Song.
 			_pSong.New();
+
+			mbar2 = new ui::MenuBar();
+			
 		}
 
 		CChildView::~CChildView()
@@ -345,10 +350,12 @@ namespace psycle { namespace host {
 		}
 
 		/// Timer handler
+
+
 		void CChildView::OnTimer( UINT_PTR nIDEvent )
-		{
+		{      
 			if (nIDEvent == ID_TIMER_VIEW_REFRESH)
-			{        
+			{            
 				CSingleLock lock(&_pSong.semaphore, FALSE);
 				if (!lock.Lock(50)) return;
         GlobalTimer::instance().OnViewRefresh();
@@ -494,7 +501,6 @@ namespace psycle { namespace host {
 			}
 			pParentMain->KillTimer(ID_TIMER_VIEW_REFRESH);
 			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);      
-      delete lua_menu_;      
 		}
 
     void CChildView::OnPaint() 
@@ -1060,16 +1066,23 @@ namespace psycle { namespace host {
 			pParentMain->StatusBarIdle();
 		}
 
+    void CChildView::HideActiveLua() {
+      pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+      if (active_lua_) {
+        active_lua_->OnDeactivated();
+      }
+      active_lua_ = 0;
+    }
+
 		/// Tool bar buttons and View Commands
 		void CChildView::OnMachineview() 
 		{
       if (!this->IsWindowVisible()) {        
-        pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+        HideActiveLua();
         this->ShowWindow(SW_SHOW);
       }
 			if (viewMode != view_modes::machine)
-			{
-        RemoveLuaMenu();
+			{        
 				viewMode = view_modes::machine;
 				ShowScrollBar(SB_BOTH,FALSE);
 
@@ -1098,12 +1111,11 @@ namespace psycle { namespace host {
 		void CChildView::OnPatternView() 
 		{
       if (!this->IsWindowVisible()) {
-        pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+        HideActiveLua();
         this->ShowWindow(SW_SHOW);
       }
 			if (viewMode != view_modes::pattern)
-			{
-        RemoveLuaMenu();
+			{        
 				RecalcMetrics();
 
 				viewMode = view_modes::pattern;
@@ -2438,24 +2450,7 @@ namespace psycle { namespace host {
 			else
 				pCmdUI->SetCheck(0);	
 		}
-
-    void CChildView::RemoveLuaMenu()
-    {
-      if (pParentMain) {
-        CMenu* main_menu = pParentMain->GetMenu();
-        if (pParentMain->IsWindowVisible()) {
-          const int defcount = pParentMain->defmainmenuitemcount;
-          int count = main_menu->GetMenuItemCount() - defcount;          
-          if (count > 0) {
-            for (;count > 0; --count) {
-              pParentMain->GetMenu()->RemoveMenu(defcount, MF_BYPOSITION);
-            }
-            pParentMain->DrawMenuBar();
-          }
-        }
-      }
-    }
-
+    
     void CChildView::LoadLuaExtensions() {
       CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);
       PluginCatcher* plug_catcher = 
@@ -2466,7 +2461,7 @@ namespace psycle { namespace host {
       for (; it != list.end(); ++it) {
         PluginInfo* info = *it;     
         // if (info->name != "Plugineditor") continue;
-        int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;        
+        int id = ID_DYNAMIC_MENUS_START+ui::MenuBar::id_counter++;   
         try {
           LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
           mac->Init();
@@ -2480,19 +2475,20 @@ namespace psycle { namespace host {
           } else {            
             view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
           }
-          ui::MenuItem::id_counter++;
+          ///ui::MenuItem::id_counter++;
           LuaUiExtentions::instance()->Add(mac); 
           menuItemIdMap[id] = mac.get();
-          if (user_view) ui::MenuItem::id_counter++;          
+          // if (user_view) ui::MenuItem::id_counter++;          
           has_ext = true;
           mac->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, this,  _1));
-        } catch (std::exception&) {
+        } catch (std::exception& e) {
+          AfxMessageBox(e.what());
           // LuaHost already displayed an error message
         }                
       } 
       if (has_ext) {
         view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
-        int id = ID_DYNAMIC_MENUS_START+ui::MenuItem::id_counter++;
+        int id = ID_DYNAMIC_MENUS_START + ui::MenuBar::id_counter++;
         view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
         menuItemIdMap[id] = NULL;
       }
@@ -2518,8 +2514,7 @@ namespace psycle { namespace host {
 
     void CChildView::OnDynamicMenuItems(UINT nID) {      
       if (menuItemIdMap[nID]==NULL) {
-        if (active_lua_) {
-          RemoveLuaMenu();
+        if (active_lua_) {          
           LuaPlugin* lp = active_lua_;
           try {            
            lp->proxy().Reload();            
@@ -2527,33 +2522,35 @@ namespace psycle { namespace host {
           } catch (std::exception e) {
             AfxMessageBox(e.what());
           }        
-          lp->InvalidateMenuBar();
+          // lp->InvalidateMenuBar();
           Invalidate(false);
         }
         return;        
       }       
 
       std::map<std::uint16_t, LuaPlugin*>::iterator it = menuItemIdMap.find(nID);
-      if (it != menuItemIdMap.end()) {
-        RemoveLuaMenu();
-        LuaPlugin* plug = it->second;        
+      if (it != menuItemIdMap.end()) {        
+        LuaPlugin* plug = it->second;         
         if (plug->crashed()) return;
-        ui::canvas::Canvas::WeakPtr user_view = plug->canvas();        
-        if (!user_view.expired()) {          
-          ChangeCanvas(user_view.lock().get());
-          active_lua_ = plug;
-          Invalidate(false);
-        } else {  
-          try {
-            plug->OnExecute();
-          } catch (std::exception&) {
-            // LuaGlobal::onexception(plug->proxy().state());
-            // AfxMessageBox(e.what());
-          }  
-        }               
+        if (active_lua_ != plug) {
+          ui::canvas::Canvas::WeakPtr user_view = plug->canvas();        
+          if (!user_view.expired()) {          
+            ChangeCanvas(user_view.lock().get()); 
+            active_lua_ = plug;
+            plug->OnActivated();
+            Invalidate(false);
+          } else {  
+            try {
+              plug->OnExecute();
+            } catch (std::exception&) {
+              // LuaGlobal::onexception(plug->proxy().state());
+              // AfxMessageBox(e.what());
+            }  
+          }               
+        }
       } else {        
         if (!active_lua_->crashed()) {
-			    active_lua_->OnMenu(nID);
+//			    active_lua_->OnMenu(nID);
         }
       }
 		}

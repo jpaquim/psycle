@@ -11,6 +11,7 @@ class CBaseParamView : public CWnd {
 	public:
 		CBaseParamView(CFrameMachine* frame) : parentFrame(frame) {};
 		virtual void Open() {};
+		virtual void Close(class Machine* mac) {};
 		virtual bool GetViewSize(CRect& rect) { return false; }
 		virtual void WindowIdle() {      
       Invalidate(false);

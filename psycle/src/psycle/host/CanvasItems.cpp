@@ -141,26 +141,39 @@ bool Line::OnUpdateArea() {
 }
 
 bool Text::OnUpdateArea() {   
-  if (!auto_size_width() && !auto_size_height()) {
-    area_->Clear();
-    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(),                                  
-                                  ui::Point(area_->bounds().left() + imp()->dev_pos().width(), 
-                                            area_->bounds().top() + imp()->dev_pos().height()))));
-    return true;
+  area_->Clear();  
+  if (!auto_size_width() && !auto_size_height()) {    
+    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));
+  } if (auto_size_width() && auto_size_height()) {
+    std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
+    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), g->text_size(text_))));
+  } else {
+    std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
+    double width = auto_size_width() ? g->text_size(text_).width() : imp()->dev_pos().dimension().width();
+    double height = auto_size_height() ? g->text_size(text_).height() : imp()->dev_pos().dimension().height();
+    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), Dimension(width, height))));
   }
-
-  std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
-  g->SetFont(*font_);    
-  ui::Dimension size = g->text_size(text_);
-  area_->Clear();
-  area_->Add(RectShape(ui::Rect(ui::Point(), ui::Point(size.width(), size.height()))));
   return true;  
+}
+
+void Text::set_text(const std::string& text) {  
+  STR();
+  text_ = text; 
+  Window::set_pos(pos().top_left());    
+  FLS();          
 }
 
 void Text::Draw(Graphics* g, Region& draw_region) {   
   g->SetFont(*font_);
   g->SetColor(color_);
-  g->DrawString(text_, 0, 0);    
+  double xp(0);
+  double yp(0);
+  if (alignment_ & ALCENTER) {
+    ui::Dimension text_dim = g->text_size(text_);    
+    xp = (dim().width() - text_dim.width()) / 2;
+    yp = (dim().height() - text_dim.height()) / 2;
+  }
+  g->DrawString(text_, xp, yp);    
 }
 
 // Pic

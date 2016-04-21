@@ -3,6 +3,7 @@
 
 #pragma once
 #include <lua.hpp>
+#include "LockIF.hpp"
 
 #include <boost/function.hpp>
 
@@ -50,16 +51,6 @@ struct LuaState {
  protected:
   lua_State* L;
 };
-
-class LockIF {
-  public:
-  LockIF() {}
-  virtual ~LockIF() = 0;
-  virtual void lock() const = 0;
-  virtual void unlock() const = 0;
-};
-
-inline LockIF::~LockIF() { }
 
 struct LuaImport {
   LuaImport(lua_State* L, void* target, const LockIF* lh)

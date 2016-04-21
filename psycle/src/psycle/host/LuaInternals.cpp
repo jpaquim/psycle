@@ -412,7 +412,6 @@ int LuaMachineBind::open(lua_State *L) {
   LuaHelper::setfield(L, "FX", MACHMODE_FX);
   LuaHelper::setfield(L, "GENERATOR", MACHMODE_GENERATOR);
   LuaHelper::setfield(L, "HOSTUI", MACHMODE_LUAUIEXT);
-  LuaHelper::setfield(L, "FX", MACHMODE_FX);
   LuaHelper::setfield(L, "PRSNATIVE", 3);  
   LuaHelper::setfield(L, "PRSCHUNK", 1);
   LuaHelper::setfield(L, "MACH_UNDEFINED", -1);

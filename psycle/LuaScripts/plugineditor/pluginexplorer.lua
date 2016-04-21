@@ -8,6 +8,7 @@
 local group = require("psycle.ui.canvas.group")
 local tree = require("psycle.ui.canvas.tree"):new()
 local treeitem = require("psycle.ui.canvas.treenode")
+local treenode = require("psycle.ui.canvas.treenode")
 local machine = require("psycle.machine"):new()
 local settings = require("settings")
 local signal = require("psycle.signal")
@@ -24,26 +25,19 @@ end
 
 function pluginexplorer:init()
   self.click = signal:new() 
-  self:setpos(0, 0, 100, 0)
+  self:setpos(0, 0, 100, 0)  
 end
 
 function pluginexplorer:dirLookup(directory)
+  self.rootnode = treenode:new() 
   local p = io.popen('dir "'..directory..'\\*.lua" /B')  
   for file in p:lines() do   
-    local item = treeitem:new():settext(file)   
-    item.path = directory
-    item.filename = file   
-    local that = self
-    function item:onclick()      
-      local ev = { 
-        sender = that, 
-        path = item.path,
-        filename = item.filename         
-      }
-      that.click:emit(ev)
-     end
-     self:addnode(item)
+    local node = treenode:new():settext(file)   
+    node.path = directory
+    node.filename = file    
+    self.rootnode:add(node)
    end
+   self:setrootnode(self.rootnode)
 end
 
 function getpath(str,sep)
@@ -59,6 +53,15 @@ end
 function pluginexplorer:setfilepath(path) 
   --self:clear()
   self:dirLookup(path) 
+end
+
+function pluginexplorer:onclick(node)
+  local ev = { 
+    sender = self, 
+    path = node.path,
+    filename = node.filename         
+  }
+  self.click:emit(ev)  
 end
 
 return pluginexplorer

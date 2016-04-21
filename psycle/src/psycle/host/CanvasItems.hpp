@@ -87,25 +87,21 @@ class Text : public Window {
 
   virtual void Draw(Graphics* cr, Region& draw_region);
   virtual bool OnUpdateArea();
-  void set_text(const std::string& text) {     
-    text_ = text;
-    needsupdate();
-    Window::set_pos(ui::Point(pos().left(), pos().top()));
-    FLS();
-  }
+  void set_text(const std::string& text);
   const std::string& text() const { return text_; }
   void set_color(ARGB color) { 
     color_ = color;
     Invalidate();
   }
   ARGB color() const { return color_; }
-  void SetFont(const Font& font) { font_.reset(font.Clone()); }
-    
+  void set_font(const Font& font) { font_.reset(font.Clone()); }    
+  void set_alignment(AlignStyle alignment) { alignment_ = alignment; }
+
  private:
   std::string text_;
+  AlignStyle alignment_;
   ARGB color_;
-  std::auto_ptr<Font> font_;
-  mutable int text_w, text_h;  
+  std::auto_ptr<Font> font_;  
 };
 
 
