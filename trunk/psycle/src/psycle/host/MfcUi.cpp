@@ -7,70 +7,76 @@ namespace host {
 namespace ui {
 namespace mfc {
 
-Region::Region() { Init(0, 0, 0, 0); }
-  
-Region::Region(int x, int y, int width, int height) {
-  Init(x, y, width, height);
-}  
 
-Region::Region(const CRgn& rgn)  {
-  assert(rgn.m_hObject);
-  Init(0, 0, 0, 0);
-  rgn_.CopyRgn(&rgn);    
+void GraphicsImp::FillRegion(const ui::Region& rgn) {    
+  check_pen_update();
+  check_brush_update();        
+  mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
+  assert(imp);
+  cr_->FillRgn(&imp->crgn(), &brush);
 }
+
+void GraphicsImp::SetClip(ui::Region* rgn) {
+  if (rgn) {
+    mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn->imp());
+    assert(imp);
+    cr_->SelectClipRgn(&imp->crgn());
+  } else {
+    cr_->SelectClipRgn(0);
+  }  
+}
+
+RegionImp::RegionImp() { rgn_.CreateRectRgn(0, 0, 0, 0); }
   
-Region::~Region() {
+RegionImp::RegionImp(const CRgn& rgn) {
+  assert(rgn.m_hObject);
+  rgn_.CreateRectRgn(0, 0, 0, 0);
+  rgn_.CopyRgn(&rgn);
+}
+
+RegionImp::~RegionImp() {
   rgn_.DeleteObject();
 }
-  
-Region* Region::Clone() const {
-  return new Region(rgn_);  
-}  
 
-void Region::Offset(double dx, double dy) {
+RegionImp* RegionImp::DevClone() const {
+  return new RegionImp(rgn_);  
+}
+  
+void RegionImp::DevOffset(double dx, double dy) {
   CPoint pt(dx, dy);
   rgn_.OffsetRgn(pt);
 }
 
-int Region::Combine(const ui::Region& other, int combinemode) {    
-  return rgn_.CombineRgn(&rgn_, (const CRgn*)other.source(), combinemode);
+int RegionImp::DevCombine(const ui::Region& other, int combinemode) {
+  mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(other.imp());
+  assert(imp);
+  return rgn_.CombineRgn(&rgn_, &imp->crgn(), combinemode);
 } 
 
-ui::Rect Region::bounds() const { 
+ui::Rect RegionImp::DevBounds() const { 
   CRect rc;
   rgn_.GetRgnBox(&rc);
   return ui::Rect(ui::Point(rc.left, rc.top), ui::Point(rc.right, rc.bottom));
 }
 
-bool Region::Intersect(double x, double y) const {
+bool RegionImp::DevIntersect(double x, double y) const {
   return rgn_.PtInRegion(x, y);  
 }
 
-bool Region::IntersectRect(double x, double y, double width, double height) const {
+bool RegionImp::DevIntersectRect(double x, double y, double width, double height) const {
   CRect rc(x, y, x + width, y + height);
   return rgn_.RectInRegion(rc);  
 }
   
-void Region::SetRect(double x, double y, double width, double height) {    
-  rgn_.SetRectRgn(x, y, x + width, y + height); 
+void RegionImp::DevSetRect(const ui::Rect& rect) {
+  rgn_.SetRectRgn(rect.left(), rect.top(), rect.right(), rect.bottom()); 
 }
 
-void Region::Clear() {
-  SetRect(0, 0, 0, 0);  
+void RegionImp::DevClear() {
+  DevSetRect(ui::Rect());  
 }
 
-void* Region::source() {
-  return &rgn_;
-}
   
-const void* Region::source() const {
-  return &rgn_;
-};
-  
-void Region::Init(int x, int y, int width, int height) {   
-  rgn_.CreateRectRgn(x, y, x+width, y+height);  
-}  
-
 std::map<HWND, ui::WindowImp*> WindowHook::windows_;
 HHOOK WindowHook::_hook = 0;
 int WindowID::id_counter = ID_DYNAMIC_CONTROLS_BEGIN;
@@ -178,10 +184,21 @@ void WindowTemplateImp<T, I>::OnDestroy() {
 template<class T, class I>
 void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
   dev_pos_.set(pos.left(), pos.top());
-  MoveWindow(pos.left(),
+  SetWindowPos(0, 
+               pos.left(),
+               pos.top(),
+               pos.width(),
+               pos.height(),               
+               SWP_NOZORDER |
+               SWP_ASYNCWINDOWPOS
+               );
+
+
+    //SWP_ASYNCWINDOWPOS
+  /*MoveWindow(pos.left(),
              pos.top(),
              pos.width(),
-             pos.height());
+             pos.height());*/
 }
 
 template<class T, class I>
@@ -189,6 +206,26 @@ ui::Rect WindowTemplateImp<T, I>::dev_pos() const {
   CRect rc;
   GetClientRect(&rc);
   return ui::Rect(dev_pos_, ui::Dimension(rc.Width(), rc.Height()));
+}
+
+template<class T, class I>
+ui::Rect WindowTemplateImp<T, I>::dev_abs_pos() const {
+  CRect rc;
+  GetClientRect(&rc);  
+  CPoint abs_pos(rc.left, rc.top);
+  MapPointToRoot(abs_pos);
+  return ui::Rect(ui::Point(abs_pos.x, abs_pos.y),
+                  ui::Dimension(rc.Width(), rc.Height()));
+}
+
+template<class T, class I>
+ui::Rect WindowTemplateImp<T, I>::dev_desktop_pos() const {
+  CRect rc;
+  GetClientRect(&rc);  
+  CPoint pos(rc.left, rc.top);
+  MapPointToDesktop(pos);
+  return ui::Rect(ui::Point(pos.x, pos.y),
+                  ui::Dimension(rc.Width(), rc.Height()));
 }
 
 template<class T, class I>
@@ -222,8 +259,8 @@ void WindowTemplateImp<T, I>::OnPaint() {
   CDC bufDC;*/
 	//bufDC.CreateCompatibleDC(&dc);
 	//CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);	
-  ui::mfc::Graphics g(&dc);
-  ui::mfc::Region draw_rgn(rgn);
+  ui::Graphics g(&dc);
+  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
   ui::Rect bounds = draw_rgn.bounds();
   OnDevDraw(&g, draw_rgn);
   g.Dispose();
@@ -322,11 +359,31 @@ BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
   ON_WM_SIZE()
 	ON_WM_PAINT()
   ON_WM_CLOSE()
+  ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
+void FrameImp::DevShowDecoration() {
+  ModifyStyleEx(0, WS_EX_CLIENTEDGE, SWP_FRAMECHANGED);
+  ModifyStyle(0, WS_CAPTION, SWP_FRAMECHANGED); 
+  ModifyStyle(0, WS_BORDER, SWP_FRAMECHANGED);
+  ModifyStyle(0, WS_THICKFRAME, SWP_FRAMECHANGED);
+}
+
+void FrameImp::DevHideDecoration() {
+  ModifyStyleEx(WS_EX_CLIENTEDGE, 0, SWP_FRAMECHANGED);
+  ModifyStyle(WS_CAPTION, 0, SWP_FRAMECHANGED); 
+  ModifyStyle(WS_BORDER, 0, SWP_FRAMECHANGED);
+  ModifyStyle(WS_THICKFRAME, 0, SWP_FRAMECHANGED);
+}
+
 BEGIN_MESSAGE_MAP(ButtonImp, CButton)  
-	ON_WM_PAINT()
+	ON_WM_PAINT()  
+  ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
 END_MESSAGE_MAP()
+
+void ButtonImp::OnClick() {
+  OnDevClick();
+}
 
 BEGIN_MESSAGE_MAP(EditImp, CEdit)  
 	ON_WM_PAINT()
@@ -340,40 +397,29 @@ END_MESSAGE_MAP()
 
 BOOL TreeImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
   HTREEITEM hTtreeSelectedItem = GetSelectedItem();
-  std::map<HTREEITEM, TreeNodeImp*>::iterator it;
-  it = tree_nodes.find(hTtreeSelectedItem);
-  if (it != tree_nodes.end()) {
-    it->second->OnDevClick();  
-  }
+  struct {
+     ui::Tree* tree;
+     HTREEITEM hTtreeSelectedItem;
+     void operator()(Node& node) {
+       std::list<TNImp*>::iterator it = node.imps.begin();
+       for ( ; it != node.imps.end(); ++it) {
+         TNImp* i = *it;
+         TNVImp* imp = dynamic_cast<TNVImp*>(i);
+         if (imp) {
+           if (imp->hItem == hTtreeSelectedItem) {
+             tree->OnClick(node.shared_from_this());
+           }
+         }
+       }
+     }
+  } f;
+  f.tree = tree_;
+  f.hTtreeSelectedItem = hTtreeSelectedItem;
+  tree_->root_node().lock()->traverse(f);
   return FALSE;
 }
 
-void TreeNodeImp::dev_set_tree(const boost::weak_ptr<ui::TreeNode>& parent,
-                               boost::weak_ptr<ui::Tree> tree) {
-  HTREEITEM p = 0;
-  if (!parent.expired()) {
-    p = ((mfc::TreeNodeImp*) parent.lock()->imp())->hItem;
-  }
-  TVINSERTSTRUCT tvInsert;
-  tvInsert.hParent = p;
-  tvInsert.hInsertAfter = p;
-  tvInsert.item.mask = TVIF_TEXT;  
-  tvInsert.item.pszText = const_cast<char *>(text_.c_str());  
-  mfc::TreeImp* treectrl = (mfc::TreeImp*) tree.lock()->imp();
-  hItem = treectrl->InsertItem(&tvInsert);
-  ((TreeImp*)tree.lock()->imp())->tree_nodes[hItem] = this;
-}
-
-void TreeImp::DevAddNode(ui::TreeNode& node) {  
-  TVINSERTSTRUCT tvInsert;
-  tvInsert.hParent = NULL;
-  tvInsert.hInsertAfter = NULL;
-  tvInsert.item.mask = TVIF_TEXT;
-  std::string text(node.text());
-  tvInsert.item.pszText = const_cast<char *>(text.c_str());
-  //ui::mfc::TreeNodeImp* mfc_node = (ui::mfc::TreeNodeImp*)(node.imp_.get());
-  InsertItem(&tvInsert);
-}
+void TreeImp::DevClear() { DeleteAllItems(); }
 
 BEGIN_MESSAGE_MAP(TableImp, CListCtrl)  
   ON_WM_ERASEBKGND()
@@ -513,13 +559,12 @@ LRESULT __stdcall WindowHook::HookCallback(int nCode, WPARAM wParam, LPARAM lPar
 
 void WindowHook::FilterHook(HWND hwnd) {  
   typedef std::map<HWND, ui::WindowImp*> WindowList;
-  WindowList::iterator it = windows_.begin();
-  for (; it != windows_.end(); ++it) {
-    ui::WindowImp* window = (*it).second;
-    if (::IsChild(((CWnd*)window)->GetSafeHwnd(), hwnd)) {
-      window->OnDevFocusChange(((CWnd*)window)->GetFocus()->GetDlgCtrlID());
-    }
-  } 
+  WindowList::iterator it = windows_.find(hwnd);
+  if (it != windows_.end()) {
+    Window::SetFocus(it->second->window()->shared_from_this());    
+  } else {
+    Window::SetFocus(Window::nullpointer);
+  }
 }
 
 void WindowHook::SetFocusHook() {

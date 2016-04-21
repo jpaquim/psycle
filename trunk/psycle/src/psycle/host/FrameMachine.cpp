@@ -206,7 +206,11 @@ namespace psycle { namespace host {
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
 			comboProgram.DestroyWindow();
-			if (pView != NULL) { pView->DestroyWindow(); delete pView; }
+			if (pView != NULL) { 
+			  pView->Close(_machine);
+			  pView->DestroyWindow();
+			  delete pView; 
+			}
 			if (pParamGui) pParamGui->SendMessage(WM_CLOSE);
 			if ( _machine->_type == MACH_PLUGIN)
 			{
@@ -1113,7 +1117,7 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnDynamicMenuItems(UINT nID) {			
       LuaPlugin* plug = ((LuaPlugin*)_machine);
-			plug->OnMenu(nID);        
+//			plug->OnMenu(nID);        
 		}
 
 	}   // namespace

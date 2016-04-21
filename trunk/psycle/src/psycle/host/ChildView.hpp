@@ -7,6 +7,7 @@
 #include "PsycleConfig.hpp"
 #include "Song.hpp"
 
+
 namespace psycle {
 namespace host {
 		class CMasterDlg;
@@ -21,9 +22,9 @@ namespace host {
 
 		class CTransformPatternDlg;
 
-    namespace ui {
-      class Menu;
+    namespace ui {      
       class Window;
+	    class MenuBar;
     }
 
 		#define MAX_WIRE_DIALOGS 16
@@ -243,8 +244,7 @@ namespace host {
 
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
-    public:
-      void RemoveLuaMenu();
+    public:      
       void LoadLuaExtensions();      
 		public:
 			//RECENT!!!//
@@ -469,8 +469,8 @@ namespace host {
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];
       public:
-      class LuaPlugin* active_lua_;      
-      ui::Menu* lua_menu_;
+      class LuaPlugin* active_lua_;  
+	    ui::MenuBar* mbar2;      
       std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;      
 
       boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions() {
@@ -478,6 +478,7 @@ namespace host {
       }
     private:
       boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions_;
+      void HideActiveLua();
 		public:			
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
@@ -768,5 +769,7 @@ namespace host {
 				(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
 
+
+		
 
 }}

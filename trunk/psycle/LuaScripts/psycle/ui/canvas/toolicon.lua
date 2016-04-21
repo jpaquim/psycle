@@ -35,8 +35,8 @@ function toolicon:new(parent, filename, trans)
   local c = item:new()
   setmetatable(c, self)
   self.__index = self
-  if parent ~= nil then
-   parent:add(c)
+  if parent ~= nil then  
+   parent:add(c)   
   end
   c:init(filename, trans)  
   return c
@@ -45,9 +45,8 @@ end
 function toolicon:onclick() end
 
 function toolicon:init(filename, trans)
-  self.w, self.h = 20, 20
-  self:setautosize(false, false)
-  self:setpos(0, 0, self.w, self.h)
+  local w, h = 20, 20
+  self:setautosize(false, false)  
   self.cc = settings.colors.default.bg
   self.on = false  
   self.text_ = ""
@@ -56,11 +55,25 @@ function toolicon:init(filename, trans)
     if trans~=nil then
       self.img:settransparent(trans)
     end  
-    local w, h = self.img:size()  
-    self.centerx, self.centery = (self.w-w)/2, (self.h-h)/2  
+    local iw, ih = self.img:size()  
+    self.centerx, self.centery = (w - iw)/2, (h - ih)/2
   end  
   self.clicklistener_ = listener:new("onclick", true)
   self.istoggle_ = false
+  self:setpos(0, 0, 20, 20)
+end
+
+function toolicon:setpos(x, y, w, h)
+  if self.img ~= nil then
+    local iw, ih = self.img:size()  
+    self.centerx, self.centery = (w - iw)/2, (h - ih)/2    
+  end  
+  if w ~= nil then    
+    item.setpos(self, x, y, w, h)
+  else    
+    item.setpos(self, x, y)
+  end  
+  return self
 end
 
 function toolicon:draw(g)  
@@ -123,6 +136,7 @@ end
 
 function toolicon:settoolbar(toolbar)
   self.toolbar = toolbar
+  return self
 end
 
 function toolicon:addlistener(listener)    

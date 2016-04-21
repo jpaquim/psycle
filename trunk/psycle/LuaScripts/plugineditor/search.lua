@@ -6,10 +6,9 @@
 -- Foundation ; either version 2, or (at your option) any later version.  
 
 local group = require("psycle.ui.canvas.group")
-local group = require("psycle.ui.canvas.group")
+local item = require("psycle.ui.canvas.item")
 local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
-local style = require("psycle.ui.canvas.itemstyle")
 local edit = require("psycle.ui.canvas.edit")
 local iconbutton = require("psycle.ui.canvas.toolicon")
 local checkbox = require("psycle.ui.canvas.checkbox")
@@ -19,11 +18,6 @@ local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 
 local search = group:new()
-
-local rowstyle = style:new():setalign(style.ALLEFT)
-                            --:setmargin(0, 0, 2, 0)
-local colstyle = style:new():setalign(style.ALTOP)
-                            --:setmargin(0, 0, 0, 2)  
 
 search.DOWN = 1
 search.UP = 2                            
@@ -38,7 +32,7 @@ end
 
 function search:init() 
   self:setautosize(false, true)    
-  self:style():setmargin(1, 1, 1, 1) -- :setpadding(10, 5, 10, 5)
+  self:setmargin(1, 1, 1, 1) -- :setpadding(10, 5, 10, 5)
   self.dosearch = signal:new()   
   self:createeditgroup(self)  
 --  self:createreplacegroup(self)
@@ -47,13 +41,10 @@ function search:init()
 end
 
 function search:createeditgroup(parent)      
- self.editgroup = group:new(parent):setautosize(true, true)
- self.editgroup:style():setalign(style.ALLEFT)
- local optionrow = group:new(self.editgroup):setautosize(true, true)
- optionrow:style():setalign(style.ALTOP) --:setmargin(0, 5, 0, 0)
+ self.editgroup = group:new(parent):setautosize(true, true):setalign(item.ALLEFT)
+ local optionrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP)
  self:createoptions(optionrow) 
- local editrow = group:new(self.editgroup):setautosize(true, true)
- editrow:style():setalign(style.ALTOP)--:setmargin(0, 0, 0, 0)
+ local editrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP)
  self:createeditfield(editrow):initeditevents()  
  self:createsearchbuttons(editrow)
  return self
@@ -61,16 +52,13 @@ end
 
 function search:createeditfield(parent)
   self.edit = edit:new(parent):setpos(0, 0, 200, 20)
-  self.edit:setdebugtext("search")
-  self.edit:style():setalign(style.ALLEFT)
+  self.edit:setdebugtext("search"):setalign(item.ALLEFT)
   return self
 end
 
 function search:createsearchbuttons(parent)
-  self.up = iconbutton:new(parent, settings.picdir.."up.png", 0xFFFFFF)
-  self.up:style():setalign(style.ALLEFT):setmargin(2, 0, 2, 0)
-  self.down = iconbutton:new(parent, settings.picdir.."down.png", 0xFFFFFF)
-  self.down:style():setalign(style.ALLEFT)
+  self.up = iconbutton:new(parent, settings.picdir.."up.png", 0xFFFFFF):setalign(item.ALLEFT)
+  self.down = iconbutton:new(parent, settings.picdir.."down.png", 0xFFFFFF):setalign(item.ALLEFT)
   local that = self
   function self.up:onclick()
     that.dosearch:emit(that.edit:text(), 
@@ -104,37 +92,30 @@ function search:initeditevents()
 end
 
 function search:createreplacegroup(parent)
-  self.replacegroup = group:new(parent)
-  self.replacegroup:style():setalign(style.ALLEFT)
+  self.replacegroup = group:new(parent):setalign(item.ALLEFT)
   self:createreplacefield(self.replacegroup)  
 end
 
 function search:createreplacefield(parent)
-  self.replaceactive = checkbox:new(parent):settext("replace with")
-  self.replaceactive:style():setalign(style.ALTOP)--:setmargin(0, 0, 2, 4)
-  self.replacefield = edit:new(parent)
-  self.replacefield:style():setalign(style.ALTOP)
+  self.replaceactive = checkbox:new(parent):settext("replace with"):setalign(item.ALTOP)
+  self.replacefield = edit:new(parent):setalign(item.ALTOP)
   return self
 end
 
 function search:createoptions(parent)
-  self.casesensitive = checkbox:new(parent):settext("match case")
-  self.casesensitive:style():setalign(style.ALLEFT)--:setmargin(0, 0, 0, 0)
-  self.wholeword = checkbox:new(parent):settext("match whole words only")
-  self.wholeword:style():setalign(style.ALLEFT)--:setmargin(5, 0, 0, 0)
-  self.useregexp = checkbox:new(parent):settext("use regexp")
-  self.useregexp:style():setalign(style.ALLEFT)--:setmargin(5, 0, 0, 0)
+  self.casesensitive = checkbox:new(parent):settext("match case"):setalign(item.ALLEFT)
+  self.wholeword = checkbox:new(parent):settext("match whole words only"):setalign(item.ALLEFT)
+  self.useregexp = checkbox:new(parent):settext("use regexp"):setalign(item.ALLEFT)
   return self
 end
 
 function search:createclosebutton()
-  local g = group:new(self):setautosize(true, true)
-  g:style():setalign(style.ALRIGHT)--:setmargin(2, 2, 2, 2)
-  text:new(g):settext("X"):setcolor(0xFFFFFF):style() --:setalign(style.ALRIGHT)  
+  local g = group:new(self):setautosize(true, true):setalign(item.ALRIGHT)
+  text:new(g):settext("X"):setcolor(0xFFFFFF)
   local that = self
   function g:onmousedown()    
     that:hide()
-    that:canvas():align()
+    that:canvas():updatealign()
   end
   return self
 end

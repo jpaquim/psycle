@@ -3,7 +3,6 @@
 
 #pragma once
 #include <psycle/host/detail/project.hpp>
-#include "Psycle.hpp"
 #include "PsycleConfig.hpp"
 #include "Ui.hpp"
 
@@ -22,7 +21,7 @@ class DefaultAligner : public Aligner {
  public:
   virtual void CalcDimensions();
   virtual void SetPositions();
-  virtual void Realign();
+  virtual void Realign();    
 };
 
 // canvas
@@ -44,8 +43,7 @@ class Canvas : public ui::Group {
   static std::string type() { return "canvas"; }
       
   void Flush();  
-  void StealFocus(const Window::Ptr& item);
-  void SetFocus(const Window::Ptr& item);
+  void StealFocus(const Window::Ptr& item);  
   virtual void OnSize(double cx, double cy);
   void SetSave(bool on) { save_ = on; }
   bool IsSaving() const { return save_; }    
@@ -59,11 +57,12 @@ class Canvas : public ui::Group {
   virtual void WorkDblClick(MouseEvent& ev);
   virtual void WorkKeyUp(KeyEvent& ev);
   virtual bool WorkKeyDown(KeyEvent& ev); 
+  virtual void WorkOnFocus(Event& ev);
 
   boost::signal<void (std::exception&)> error;
 
   void Invalidate();
-  void Invalidate(Region& rgn);
+  void Invalidate(const Region& rgn);
 
   bool prevent_fls() const { return prevent_fls_; }  
   virtual void OnFocusChange(int id) { OnMessage(FOCUS, id); }
@@ -76,9 +75,12 @@ class Canvas : public ui::Group {
   Canvas& operator=(Canvas rhs) {}
  
   template <class T, class T1>
-  void WorkEvent(T& ev, void (T1::*ptmember)(T&), Window::Ptr& item) {
+  void WorkEvent(T& ev, void (T1::*ptmember)(T&), Window::Ptr& item, bool set_focus = false) {
     while (item) {
       // send event to item
+      if (set_focus) {
+        SetFocus(item);
+      }
       (item.get()->*ptmember)(ev);
       if (ev.is_work_parent()) {
         item = item->parent().lock();  
@@ -89,7 +91,7 @@ class Canvas : public ui::Group {
   }
    
   bool save_, steal_focus_, prevent_fls_;
-  Window::WeakPtr button_press_item_, mouse_move_, focus_item_;  
+  Window::WeakPtr button_press_item_, mouse_move_;  
   std::auto_ptr<ui::Region> save_rgn_;  
 };
 
@@ -251,7 +253,7 @@ class Fill : public ui::Ornament {
       if (alpha != 0xFF) {
         g->SetColor(color_);
         g->FillRegion(use_bounds_ ? *item->area().bounds().region().get() 
-                                  : *item->area().region().get());        
+                                  : item->area().region());        
       }
     }
   }

@@ -6,9 +6,9 @@
 -- Foundation ; either version 2, or (at your option) any later version.  
 
 local group = require("psycle.ui.canvas.group")
+local item = require("psycle.ui.canvas.item")
 local text = require("psycle.ui.canvas.text")
 local rect = require("psycle.ui.canvas.rect")
-local style = require("psycle.ui.canvas.itemstyle")
 local cfg = require("psycle.config"):new("PatternVisual")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
@@ -45,15 +45,12 @@ function checkbox:init()
                          :setautosize(false, false)
                          :setpos(0, 0, 10, 10)
                          :setornament(ornamentfactory:createfill(settings.colors.default.bg))
-  self.checkgroup:style():setalign(style.ALLEFT)
-                         :setmargin(0, 0, 4, 0)                           
+                         :setalign(item.ALLEFT)
+                         :setmargin(0, 0, 4, 0)                         
   self.checktext = text:new(self.checkgroup)                       
                        :setcolor(settings.colors.default.checker)                       
-  self.checktext:setautosize(false, false)
-  self.checktext:style():setalign(style.ALCLIENT)
-  self.checktext:setdebugtext("checktext")
-  self.text = text:new(self):settext("A Checkbox")
-  self.text:style():setalign(style.ALLEFT)    
+  self.checktext:setautosize(false, false):setalign(item.ALCLIENT)  
+  self.text = text:new(self):settext("A Checkbox"):setalign(item.ALLEFT)    
   local that = self
   function self.checkgroup:onmousedown()        
     that.check_ = not that.check_

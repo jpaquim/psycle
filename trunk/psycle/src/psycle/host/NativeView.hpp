@@ -26,6 +26,9 @@ namespace host {
 
        void set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas);
 
+	   virtual void Close(Machine* mac);
+     virtual void WindowIdle();
+
      protected:
        DECLARE_MESSAGE_MAP()
        int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -41,7 +44,8 @@ namespace host {
          return true;
        }
      private:
-      void ChangeCanvas(ui::Window* canvas);     
+      void ChangeCanvas(ui::canvas::Canvas* canvas);     
+      ui::canvas::Canvas* canvas_;
     };
 
 		/// Native Knob-based UI for psycle plugins and non-GUI VSTs

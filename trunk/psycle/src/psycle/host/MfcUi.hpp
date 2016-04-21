@@ -2,6 +2,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "Ui.hpp"
+#include "Menu.hpp"
 #include "Scintilla.h"
 #include "SciLexer.h"
 
@@ -10,38 +11,15 @@ namespace host {
 namespace ui {
 namespace mfc {
 
-class Region : public ui::Region {
+class ImageImp : public ui::ImageImp {
  public:
-  Region();
-  Region(int x, int y, int width, int height);
-  Region(const CRgn& rgn);
-  ~Region();
-  
-  virtual Region* Clone() const;
-  void Offset(double dx, double dy);
-  int Combine(const ui::Region& other, int combinemode);     
-  ui::Rect bounds() const;
-  bool Intersect(double x, double y) const;
-  bool IntersectRect(double x, double y, double width, double height) const;
-  virtual void SetRect(double x, double y, double width, double height);
-  void Clear();
-  void* source();
-  const void* source() const;
- 
- private:
-  void Init(int x, int y, int width, int height);
-  CRgn rgn_;
-};
-
-class Image : public ui::Image {
- public:
-  Image() { Init(); }
-  Image(CBitmap* bmp) {
+  ImageImp() { Init(); }
+  ImageImp(CBitmap* bmp) {
     Init();
     bmp_ = bmp;
     shared_ = true;      
   }
-  ~Image() {
+  ~ImageImp() {
     if (!shared_ && bmp_) {
       bmp_->DeleteObject();
       delete bmp_;
@@ -97,7 +75,7 @@ class Image : public ui::Image {
   bool shared_;
 };
 
-inline void Image::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans) {
+inline void ImageImp::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans) {
   //assert(pBmpSource && pBmpSource->m_hObject);
   BITMAP bm;
   // Get the dimensions of the source bitmap
@@ -212,31 +190,37 @@ class Font : public ui::Font {
 // mfc::Graphics
 // ==============================================
 
-class Graphics : public ui::Graphics {
+class GraphicsImp : public ui::GraphicsImp {
  public:
-  Graphics() 
-      : cr_(CDC::FromHandle(GetDC(0))),      
+  GraphicsImp() 
+      : hScreenDC(::GetDC(0)),
+        cr_(CDC::FromHandle(hScreenDC)),      
         rgb_color_(0xFFFFFF),
         argb_color_(0xFFFFFF),
         brush(rgb_color_),
         updatepen_(false),
-        updatebrush_(false) {
-     Init();
+        updatebrush_(false) {       
+    Init();     
   }
 
-  Graphics(CDC* cr) 
-      : cr_(cr),
+  GraphicsImp(CDC* cr) 
+      : hScreenDC(0),
+        cr_(cr),
         rgb_color_(0xFFFFFF),
         argb_color_(0xFFFFFF),
         brush(rgb_color_),
         updatepen_(false),
-        updatebrush_(false) {
+        updatebrush_(false),
+        test(false) {
     Init();
   }
 
-  virtual ~Graphics() {
+  virtual ~GraphicsImp() {    
     if (cr_) {
       Dispose();
+    }
+    if (hScreenDC) {      
+      ReleaseDC(0, hScreenDC);      
     }
   }
 
@@ -331,11 +315,7 @@ class Graphics : public ui::Graphics {
     cr_->Ellipse(x, y, x+width, y+height);
   }
 
-  void FillRegion(const ui::Region& rgn) {    
-    check_pen_update();
-    check_brush_update();    
-    cr_->FillRgn((CRgn*) (&rgn)->source(), &brush);
-  }
+  void FillRegion(const ui::Region& rgn);
 
   void DrawPolygon(const ui::Points& points) {
     check_pen_update();
@@ -421,9 +401,7 @@ class Graphics : public ui::Graphics {
     rgn.DeleteObject();
   }
 
-  void SetClip(ui::Region* rgn) {
-    rgn ? cr_->SelectClipRgn((CRgn*) rgn->source()) : cr_->SelectClipRgn(0);
-  }
+  void SetClip(ui::Region* rgn);
 
   CRgn& clip() {
     HDC hdc = cr_->m_hDC;
@@ -456,6 +434,16 @@ class Graphics : public ui::Graphics {
   }
 
   virtual CDC* dc() { return cr_; }
+
+  virtual void SaveOrigin() {
+     saveXform.push(rXform);
+   }
+   virtual void RestoreOrigin() {
+     rXform = saveXform.top();
+     saveXform.pop();
+     cr_->SetGraphicsMode(GM_ADVANCED);
+     cr_->SetWorldTransform(&rXform);
+   }
     
   private:
    void Init() {
@@ -477,15 +465,7 @@ class Graphics : public ui::Graphics {
      old_rgn_.OffsetRgn(pt);    
    }
 
-   virtual void SaveOrigin() {
-     saveXform.push(rXform);
-   }
-   virtual void RestoreOrigin() {
-     rXform = saveXform.top();
-     saveXform.pop();
-     cr_->SetGraphicsMode(GM_ADVANCED);
-     cr_->SetWorldTransform(&rXform);
-   }
+   
    
    void TransparentBlt(CDC* pDC,
      int xStart,
@@ -497,7 +477,8 @@ class Graphics : public ui::Graphics {
      int xSource = 0,
      int ySource = 0
    );
-   CDC* cr_;
+   HDC hScreenDC;
+   CDC* cr_;   
    CPen pen, *old_pen;
    CBrush brush, *old_brush;
    mfc::Font font_;
@@ -508,9 +489,10 @@ class Graphics : public ui::Graphics {
    XFORM rXform;
    std::stack<XFORM> saveXform;
    CRgn old_rgn_, clp_rgn_;
+   bool test;
 };
 
-inline void Graphics::TransparentBlt(CDC* pDC,
+inline void GraphicsImp::TransparentBlt(CDC* pDC,
   int xStart,
   int yStart,
   int wWidth,
@@ -578,6 +560,8 @@ class WindowTemplateImp : public T, public I {
     
   virtual void dev_set_pos(const ui::Rect& pos);
   virtual ui::Rect dev_pos() const;
+  virtual ui::Rect dev_abs_pos() const;
+  virtual ui::Rect dev_desktop_pos() const;
   virtual ui::Dimension dev_dim() const {
     CRect rc;            
     GetClientRect(&rc);
@@ -587,9 +571,11 @@ class WindowTemplateImp : public T, public I {
   virtual void DevShow() { ShowWindow(SW_SHOW); }  
   virtual void DevHide() { ShowWindow(SW_HIDE); }
   virtual void DevInvalidate() { Invalidate(); }
-  virtual void DevInvalidate(ui::Region& rgn) {
+  virtual void DevInvalidate(const ui::Region& rgn) {
     if (m_hWnd) {
-      ::RedrawWindow(m_hWnd, NULL, *((CRgn*) rgn.source()), RDW_INVALIDATE | RDW_UPDATENOW);
+      mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
+      assert(imp);
+      ::RedrawWindow(m_hWnd, NULL, imp->crgn(), RDW_INVALIDATE | RDW_UPDATENOW);
     }
   }
   virtual void DevSetCapture() { SetCapture(); }  
@@ -602,11 +588,7 @@ class WindowTemplateImp : public T, public I {
 		::SetCursorPos(point.x, point.y);
   }  
   virtual void dev_set_parent(Window* window);
-  virtual bool DevDestroy() {
-    DestroyWindow();
-    return true;
-  }
-      
+  virtual bool DevDestroy() { return DestroyWindow(); }      
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
 
@@ -671,9 +653,15 @@ class WindowTemplateImp : public T, public I {
     return flags;
   }    
 
-  void MapPointToRoot(CPoint& pt) {
-    CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
-    MapWindowPoints(root, &pt, 1);
+  void MapPointToRoot(CPoint& pt) const {
+    if (window()->root()) {
+      CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
+      MapWindowPoints(root, &pt, 1);
+    }
+  }
+
+  void MapPointToDesktop(CPoint& pt) const {
+    ::MapWindowPoints(m_hWnd, ::GetDesktopWindow(), &pt, 1);
   }
   
   CBitmap bmpDC;
@@ -817,6 +805,7 @@ class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
 protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CButton::OnPaint(); }
+  void OnClick();
 };
 
 class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
@@ -831,7 +820,7 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
       TRACE0("Failed to create frame window\n");
       return 0;
     }
-    imp->set_window(w);
+    imp->set_window(w);        
     return imp;
   }
     
@@ -841,11 +830,14 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
 
   virtual void dev_set_view(ui::Window::Ptr view) {
     CWnd* wnd = dynamic_cast<CWnd*>(view->imp());
-    if (wnd) {
+    if (wnd) {      
       wnd->SetParent(this);      
       view_ = view;
     }
   }
+
+  virtual void DevShowDecoration();
+  virtual void DevHideDecoration();
 
   void OnSize(UINT nType, int cx, int cy) {
     if (view_) {
@@ -857,26 +849,22 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
       }
     }
   }
-  
+     
  protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CFrameWnd::OnPaint(); }
+  BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
   virtual void OnClose() { OnDevClose(); }
   ui::Window::Ptr view_;
 };
 
-class TreeNodeImp : public ui::TreeNodeImp {
- public:
-  TreeNodeImp() : hItem(0) {}
-  
-  virtual void dev_set_text(const std::string& text) { text_ = text; }
-  virtual std::string dev_text() const { return text_; }
-  virtual void dev_set_tree(const boost::weak_ptr<ui::TreeNode>& parent,
-                            boost::weak_ptr<ui::Tree> tree);
 
-  HTREEITEM hItem;
-  std::string text_;  
-};
+/*class MenuBarImp : public ui::MenuBarImp {
+ public:  
+  MenuBarImp() {}        
+
+  virtual void DevClear();
+};*/
 
 class TableItemImp : public ui::TableItemImp {
  public:
@@ -890,10 +878,9 @@ class TableItemImp : public ui::TableItemImp {
   std::string text_;  
 };
 
-
 class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
  public:  
-  TreeImp() : WindowTemplateImp<CTreeCtrl, ui::TreeImp>() {}
+  TreeImp() : WindowTemplateImp<CTreeCtrl, ui::TreeImp>() { tree_ = 0; }
 
   static TreeImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     TreeImp* imp = new TreeImp();
@@ -909,7 +896,9 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
     return imp;
   }
 
-  virtual void DevAddNode(ui::TreeNode& node);  
+  virtual void set_tree(ui::Tree* tree) { tree_ = tree; }
+  
+  virtual void DevClear();
   
   virtual void dev_set_background_color(ARGB color) { 
     SetBkColor(ToCOLORREF(color));
@@ -921,14 +910,12 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
   virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
 
   BOOL OnEraseBkgnd(CDC* pDC) { return CTreeCtrl::OnEraseBkgnd(pDC); }
-  
-  std::map<HTREEITEM, TreeNodeImp*> tree_nodes;
+    
  protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CTreeCtrl::OnPaint(); }
-  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);
-
-  
+  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);  
+  ui::Tree* tree_;
 };
 
 class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
@@ -963,6 +950,9 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
       return 0;
     }    
     imp->set_window(w);
+    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
+    // Set the hook
+    WindowHook::SetFocusHook();
     return imp;
   }
 
@@ -1261,12 +1251,32 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void SetFoldingMarkers();
 };
 
+class RegionImp : public ui::RegionImp {
+ public:
+  RegionImp();   
+  RegionImp(const CRgn& rgn);
+  virtual ~RegionImp();
+  
+  virtual RegionImp* DevClone() const;
+  void DevOffset(double dx, double dy);
+  int DevCombine(const ui::Region& other, int combinemode);     
+  ui::Rect DevBounds() const;
+  bool DevIntersect(double x, double y) const;
+  bool DevIntersectRect(double x, double y, double width, double height) const;
+  virtual void DevSetRect(const ui::Rect& rect);
+  void DevClear();
+  CRgn& crgn() { return rgn_; }
+
+ private:  
+  CRgn rgn_;
+};
+
 class Systems : public ui::Systems {
  public:
-  virtual ui::Region* CreateRegion() { return new ui::mfc::Region(); }
-  virtual ui::Graphics* CreateGraphics() { return new ui::mfc::Graphics(); }
-  virtual ui::Graphics* CreateGraphics(void* dc) { return new ui::mfc::Graphics((CDC*) dc); }
-  virtual ui::Image* CreateImage() { return new ui::mfc::Image(); }
+  virtual ui::Region* CreateRegion() { return new ui::Region(); }
+  virtual ui::Graphics* CreateGraphics() { return new ui::Graphics(); }
+  virtual ui::Graphics* CreateGraphics(void* dc) { return new ui::Graphics((CDC*) dc); }
+  virtual ui::Image* CreateImage() { return new ui::Image(); }
   virtual ui::Font* CreateFont() { return new ui::mfc::Font(); }
   virtual ui::Window* CreateWin() { 
     Window* window = new Window();
@@ -1298,6 +1308,10 @@ class Systems : public ui::Systems {
     imp->set_window(window);
     return window;
   }
+  virtual ui::MenuBar* CreateMenuBar() { 
+    MenuBar* bar = new MenuBar();    
+    return bar;
+  }
 };
 
 class ImpFactory : public ui::ImpFactory {
@@ -1325,16 +1339,29 @@ class ImpFactory : public ui::ImpFactory {
   }  
   virtual ui::ScintillaImp* CreateScintillaImp() {     
     return ScintillaImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
-  }
-  virtual ui::TreeNodeImp* CreateTreeNodeImp() {     
-    return new TreeNodeImp();
-  }
+  }  
   virtual ui::TreeImp* CreateTreeImp() {     
     return TreeImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
+  virtual ui::RegionImp* CreateRegionImp() {     
+    return new ui::mfc::RegionImp();
+  }
+  virtual ui::GraphicsImp* CreateGraphicsImp() {     
+    return new ui::mfc::GraphicsImp();
+  }  
+  virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr) {     
+    return new ui::mfc::GraphicsImp(cr);
+  }
+  virtual ui::ImageImp* CreateImageImp() {     
+    return new ui::mfc::ImageImp();
+  }
+/*  virtual ui::MenuBarImp* CreateMenuBarImp() {     
+    return new MenuBarImp(); // ::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }*/
+  
   virtual ui::TableImp* CreateTableImp() {     
     return TableImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
-  }
+  }  
 };
 
 

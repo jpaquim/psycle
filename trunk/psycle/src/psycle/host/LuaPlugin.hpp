@@ -18,7 +18,7 @@
 struct lua_State;
 
 namespace psycle { namespace host {
-
+  
   const int AUTOID = -1;
 
   class LuaPlugin : public Machine,
@@ -65,16 +65,16 @@ namespace psycle { namespace host {
     virtual int GetNumOutputPins() const { return samplesV.size(); }
     const PluginInfo& info() const { return proxy().info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
-    virtual void AfterTweaked(int numparam);
-    ui::MenuBar::Ptr menu_bar() { return proxy().menu_bar(); }
+    virtual void AfterTweaked(int numparam);    
     std::string help();
-    virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }
-    void OnMenu(UINT id) { proxy_.call_menu(id); }
+    virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }    
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
     boost::weak_ptr<ui::canvas::Canvas> canvas() { return proxy().canvas(); }
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);
+    void OnActivated() { proxy_.OnActivated();  }
+    void OnDeactivated() { proxy_.OnDeactivated();  }
 
     // Bank & Programs
     virtual void SetCurrentProgram(int idx);
@@ -137,7 +137,9 @@ namespace psycle { namespace host {
         if (custom_menubar->needsupdate()) {
           custom_menubar->setupdate(false);
         }
-      }*/
+      }*/      
+      proxy().OnTimer();
+
       if (do_exit_) {
        LuaUiExtentions::instance()->Remove(this_ptr());
       } else 

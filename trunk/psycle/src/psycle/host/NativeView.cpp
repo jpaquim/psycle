@@ -37,7 +37,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
     CanvasParamView::CanvasParamView(CFrameMachine* frame, Machine* effect) :
-          CBaseParamView(frame) {         
+          CBaseParamView(frame), canvas_(0) {         
     }
 
     int CanvasParamView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -69,6 +69,13 @@ namespace psycle { namespace host {
       }
     }
 
+    void CanvasParamView::WindowIdle() {       
+      if (canvas_) {
+        canvas_->Flush();
+      }
+      // Invalidate
+    }
+
     void CanvasParamView::OnSize(UINT nType, int cx, int cy) {
       CWnd* child = GetWindow(GW_CHILD);
       if (child) {
@@ -85,19 +92,27 @@ namespace psycle { namespace host {
       }
     }
 
-    void CanvasParamView::ChangeCanvas(ui::Window* canvas) {
-      CRect rect;            
-      GetWindowRect(&rect);
-      CWnd* child = GetWindow(GW_CHILD);
-      if (child) {
-        child->ShowWindow(SW_HIDE);            
+	void CanvasParamView::Close(Machine* mac)
+    {
+      LuaPlugin* lp = (LuaPlugin*) (mac);
+      ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
+      if (!canvas.expired()) {
+        ChangeCanvas(0);
       }
-      ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
-      imp->SetParent(this);      
-      //canvas->set_pos(ui::Rect(0, 0, rect.Width(), rect.Height())); // set_pos(ui::Rect(0, 0, 500, 500));
-      canvas->set_pos(ui::Rect(ui::Point(), ui::Point(500, 500))); // set_pos(ui::Rect(0, 0, 500, 500));
-      canvas->Show();                        
-      SetActiveWindow();           
+    }
+
+    void CanvasParamView::ChangeCanvas(ui::canvas::Canvas* canvas) {      
+      if (canvas_) {
+        canvas_->set_parent(0);        
+      }
+      if (canvas) {
+        ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
+        imp->SetParent(this);
+        canvas->set_pos(ui::Rect(ui::Point(), ui::Point(500,500))); //, rect.Height())));
+        canvas->Show();   
+        SetActiveWindow();
+        canvas_ = canvas;
+      }
     }
 
    BEGIN_MESSAGE_MAP(CNativeView, CWnd)
@@ -115,7 +130,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 
-		CNativeView::CNativeView(CFrameMachine* frame,Machine* effect)
+		CNativeView::CNativeView(CFrameMachine* frame, Machine* effect)
 		:CBaseParamView(frame)
 		,ncol(0)
 		,numParameters(0)

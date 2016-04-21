@@ -32,15 +32,15 @@ namespace psycle { namespace host {
 			DECLARE_MESSAGE_MAP()
 			afx_msg void OnAppAbout();
 		public:
-			PsycleGlobal global_;
+			PsycleGlobal global_;      
 		private:
 			void ProcessCmdLine(LPSTR cmdline);
 
 			UINT m_uUserMessage;
-      HMODULE m_hDll;     
+      HMODULE m_hDll;           
 		};
 
-
+    
 		/////////////////////////////////////////////////////////////////////////////
 		// CAboutDlg dialog used for App About
 
@@ -66,7 +66,6 @@ namespace psycle { namespace host {
 			afx_msg void OnContributors();
 			afx_msg void OnShowatstartup();
 		};
-
-
+    
 
 }}

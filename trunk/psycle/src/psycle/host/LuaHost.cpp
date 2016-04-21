@@ -6,6 +6,7 @@
 #include "LuaInternals.hpp"
 #include "LuaPlugin.hpp"
 #include "Player.hpp"
+#include "LockIF.hpp"
 #include "plugincatcher.hpp"
 #include "Song.hpp"
 #include <boost/filesystem.hpp>
@@ -13,6 +14,7 @@
 #include <lua.hpp>
 #include "LuaHelper.hpp"
 #include "LuaGui.hpp"
+#include "MfcUi.hpp"
 #include "Menu.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
@@ -33,10 +35,12 @@ extern "C" {
 
 namespace psycle { 
 namespace host {
+
+extern CPsycleApp theApp;
+  
 using namespace ui;
 
 boost::shared_ptr<LuaPlugin> nullPtr;
-
 universalis::os::terminal* LuaProxy::terminal = 0;
 
 // Class Proxy : export and import between psycle and lua
@@ -44,13 +48,36 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     host_(host),
     info_update_(true) {
   InitializeCriticalSection(&cs);
+  invokelater.reset(new ui::Commands());
   L = LuaGlobal::load_script(dllname);
-  set_state(L);
+  set_state(L);  
 }
 
 LuaProxy::~LuaProxy() {
   // if (terminal) { delete terminal; terminal = NULL; }
   DeleteCriticalSection(&cs);
+}
+
+int LuaProxy::invoke_later(lua_State* L) {
+  boost::shared_ptr<LuaRun> run = LuaHelper::check_sptr<LuaRun>(L, 1, LuaRunBind::meta);
+  struct {
+    LuaRun* run;
+    void operator()() const
+    {
+      run->Run();
+    }
+   } f;   
+  f.run = run.get();  
+  LuaGlobal::proxy(L)->invokelater->Add(f);  
+  return 0;
+}
+
+void LuaProxy::OnTimer() {    
+  lock();  
+  invokelater->Invoke();  
+  invokelater->Clear();
+  lua_gc(L, LUA_GCCOLLECT, 0);
+  unlock();
 }
 
 void LuaProxy::set_state(lua_State* state) {
@@ -78,7 +105,8 @@ void LuaProxy::set_state(lua_State* state) {
   // ui host interaction
   LuaHelper::require<LuaSequenceBarBind>(L, "psycle.sequencebar");
   LuaHelper::require<LuaActionListenerBind>(L, "psycle.ui.hostactionlistener");
-  LuaHelper::require<LuaCmdDefBind>(L, "psycle.ui.cmddef");    
+  LuaHelper::require<LuaCmdDefBind>(L, "psycle.ui.cmddef");
+  LuaHelper::require<LuaRunBind>(L, "psycle.run");
   // ui binds
   LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
   LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
@@ -88,12 +116,9 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaFileSaveBind>(L, "psycle.ui.filesave");
   // ui menu binds
   LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
-  LuaHelper::require<LuaMenuBind>(L, "psycle.ui.menu");
-  LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");
   LuaHelper::require<LuaSystemMetrics>(L, "psycle.ui.systemmetrics");
   // ui canvas binds
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
-  LuaHelper::require<LuaItemStyleBind >(L, "psycle.ui.canvas.itemstyle");
   LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");  
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
@@ -110,6 +135,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaLexerBind>(L, "psycle.ui.canvas.lexer");
   LuaHelper::require<LuaScintillaBind<> >(L, "psycle.ui.canvas.scintilla");
   LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.canvas.scrollbar");
+  LuaHelper::require<LuaEventBind>(L, "psycle.ui.canvas.event");
   LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.canvas.keyevent");
   LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.canvas.ornamentfactory");
   LuaHelper::require<LineBorderBind>(L, "psycle.ui.canvas.lineborder");
@@ -119,7 +145,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
-  luaL_requiref(L, "socket", luaopen_socket_core, 1);
+  luaL_requiref(L, "socket.core", luaopen_socket_core, 1);
   lua_pop(L, 1);
   luaL_requiref(L, "mime", luaopen_mime_core, 1);
   lua_pop(L, 1);
@@ -241,11 +267,12 @@ int LuaProxy::set_machine(lua_State* L) {
 
 void LuaProxy::export_c_funcs() {
   static const luaL_Reg methods[] = {
+    {"invokelater", invoke_later},
     {"output", terminal_output },
     {"alert", message },
     {"setmachine", set_machine},
     {"filedialog", call_filedialog},
-    {"selmachine", call_selmachine},      
+    {"selmachine", call_selmachine},	  
     { NULL, NULL }
   };
   lua_newtable(L);
@@ -375,6 +402,24 @@ void LuaProxy::call_execute() {
 
 void LuaProxy::OnCanvasChanged() { 
   host_->OnCanvasChanged();
+}
+
+void LuaProxy::OnActivated() {
+  try {
+    LuaImport in(L, lua_mac_, this);
+    if (in.open("onactivated")) {
+      in.pcall(0);      
+    }
+  } CATCH_WRAP_AND_RETHROW(host())
+}
+
+void LuaProxy::OnDeactivated() {
+  try {
+    LuaImport in(L, lua_mac_, this);
+    if (in.open("ondeactivated")) {
+      in.pcall(0);      
+    }
+  } CATCH_WRAP_AND_RETHROW(host())
 }
 
 void LuaProxy::SequencerTick() {
@@ -728,54 +773,6 @@ bool LuaProxy::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
   return res;
 }
   
-void LuaProxy::update_menu(void* hnd) {
-  if (hnd) {
-    lock();
-    CFrameWnd* cwnd = (CFrameWnd*) hnd;
-    cwnd->DrawMenuBar();
-    unlock();
-  }
-}
-
-ui::MenuBar::Ptr LuaProxy::menu_bar() {
-  lock();
-  try {
-    LuaHelper::get_proxy(L);
-  } catch(std::exception &e) {
-    unlock();
-    throw psycle::host::exceptions::library_errors::loading_error(e.what());
-  }
-  lua_getfield(L, -1, "__menus");
-  if (lua_isnil(L, -1)) {
-    lua_pop(L, 1);
-    unlock();
-    return boost::shared_ptr<MenuBar>();
-  } else {
-    boost::shared_ptr<MenuBar> menubar = LuaHelper::check_sptr<MenuBar>(L, -1, LuaMenuBarBind::meta);    
-    unlock();
-    return menubar;
-  }
-}
-
-void LuaProxy::call_menu(UINT id) {
-  lock();
-  std::map<int, MenuItem*>::iterator it = MenuItem::menuItemIdMap.find(id);
-  if (it != MenuItem::menuItemIdMap.end()) {
-    LuaHelper::find_userdata<>(L, it->second);
-    lua_getfield(L, -1, "notify");
-    lua_pushvalue(L, -2); // self
-    int status = lua_pcall(L, 1, 0, 0);
-    if (status) {
-      std::string s(lua_tostring(L, -1));
-      lua_pop(L, 1);
-      unlock();
-      throw std::runtime_error(s);
-    }
-    lua_pop(L, 1);
-  }
-  unlock();
-}
-    
 // End of Class Proxy
 
 

@@ -16,10 +16,8 @@ local scilex = require("scilexerdef")
 local fileopen = require("psycle.ui.fileopen")
 local filesave = require("psycle.ui.filesave")
 local settings = require("settings")
-local style = require("psycle.ui.canvas.itemstyle")
 local group = require("psycle.ui.canvas.group")
 local canvas = require("psycle.ui.canvas")
-local rect = require("psycle.ui.canvas.rect")
 local toolbar = require("psycle.ui.canvas.toolbar")
 local toolicon = require("psycle.ui.canvas.toolicon")
 local tabgroup = require("psycle.ui.canvas.tabgroup")
@@ -28,15 +26,10 @@ local search = require("search")
 local pluginexplorer = require("pluginexplorer")
 local callstack = require("callstack")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
-local combobox = require("psycle.ui.canvas.combobox")
-local scrollbar = require("psycle.ui.canvas.scrollbar")
-local edit = require("psycle.ui.canvas.edit")
-local button = require("psycle.ui.canvas.button")
 local image = require("psycle.ui.image")
-local text = require("psycle.ui.canvas.text")
-local group = require("psycle.ui.canvas.group")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local signal = require("psycle.signal")
+local item = require("psycle.ui.canvas.item")
 
 local maincanvas = canvas:new()
 
@@ -50,40 +43,67 @@ end
 
 function maincanvas:init()  
   self.togglecanvas = signal:new() 
-  self:setornament(ornamentfactory:createfill(settings.canvas.colors.background))  
+  self:setornament(ornamentfactory:createfill(settings.canvas.colors.background))
+  self:setupfiledialogs()
   self:inittollbar()   
-  self.search = search:new(self):setpos(0, 0, 200, 200):hide()
-  self.search:style():setalign(style.ALBOTTOM)
-  self.search.dosearch:connect(maincanvas.onsearch, self) 
-  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 120)
-  self.outputs:style():setalign(style.ALBOTTOM)  
-  self.output = scintilla:new()
-  self.output:setforegroundcolor(settings.sci.default.foreground)
-  self.output:setbackgroundcolor(settings.sci.default.background) 
-  self.output:styleclearall()
-  self.output:setlinenumberforegroundcolor(0x939393)
-  self.output:setlinenumberbackgroundcolor(0x232323)    
-  self.output:setmarginbackgroundcolor(0x232323)  
-  self.outputs:add(self.output, "Output")
-  self.callstack = callstack:new(nil, self)
-  self.callstack:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
-  self.callstack:settextcolor(settings.canvas.colors.foreground)  
-  self.outputs:add(self.callstack, "Call stack")
-  self.splitter = splitter:new(self, splitter.HORZ)
-  self.pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0)
-  self.pluginexplorer:style():setalign(style.ALLEFT)     
-  self.pluginexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
-  self.pluginexplorer:settextcolor(settings.canvas.colors.foreground)
-  self.pluginexplorer:setfilepath("test")     
-  self.pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)  
-  self.splitter2 = splitter:new(self, splitter.VERT)
+  self:createsearch()
+  self:createoutputs()
+  splitter:new(self, splitter.HORZ)
+  self.pluginexplorer = self:createpluginexplorer()
+  splitter:new(self, splitter.VERT)  
+  self:createpagegroup()  
+end
+
+function maincanvas:createsearch()
+  self.search = search:new(self):setpos(0, 0, 200, 200):hide():setalign(item.ALBOTTOM)
+  self.search.dosearch:connect(maincanvas.onsearch, self)   
+end
+
+function maincanvas:createoutputs()
+  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 120):setalign(item.ALBOTTOM)    
+  self.output = self:createoutput()
+  self.outputs:addpage(self.output, "Output")  
+  self.callstack = self:createcallstack()  
+  self.outputs:addpage(self.callstack, "Call stack")  
+end
+
+function maincanvas:createoutput()
+  local output = scintilla:new()
+  output:setforegroundcolor(settings.sci.default.foreground)
+  output:setbackgroundcolor(settings.sci.default.background) 
+  output:styleclearall()
+  output:setlinenumberforegroundcolor(0x939393)
+  output:setlinenumberbackgroundcolor(0x232323)    
+  output:setmarginbackgroundcolor(0x232323)
+  return output
+end
+
+function maincanvas:createcallstack()
+  local callstack = callstack:new(nil, self)
+  callstack:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
+  callstack:settextcolor(settings.canvas.colors.foreground)
+  return callstack
+end
+
+function maincanvas:createpagegroup()
+  self.pages = tabgroup:new(self):setalign(item.ALCLIENT)    
+  self.newpagecounter = 1
+end
+
+function maincanvas:createpluginexplorer()
+  local pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0):setalign(item.ALLEFT)     
+  pluginexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
+  pluginexplorer:settextcolor(settings.canvas.colors.foreground)
+  pluginexplorer:setfilepath("test")     
+  pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
+  return pluginexplorer
+end
+
+function maincanvas:setupfiledialogs()
   self.fileopen = fileopen:new()
   local that = self
   function self.fileopen:onok(fname) that:openfromfile(fname) end
   self.filesaveas = filesave:new() 
-  self.pages = tabgroup:new(self)   
-  self.pages:style():setalign(style.ALCLIENT)    
-  self.newpagecounter = 1  
 end
 
 function maincanvas:setoutputtext(text)
@@ -130,12 +150,10 @@ function maincanvas:setlexer(page)
   lex:setstringcolor(settings.sci.lexer.stringcolor)
   lex:setwordcolor(settings.sci.lexer.wordcolor)
   lex:setfoldingcolor(settings.sci.lexer.foldingcolor)
-  page:setlexer(lex)
-         
+  page:setlexer(lex)         
   page:f(sci.SCI_STYLESETSIZE, sci.STYLE_DEFAULT, settings.sci.lexer.font.size)
   page:f(sci.SCI_STYLESETFONT, sci.STYLE_DEFAULT, settings.sci.lexer.font.name) 
-  page:setcaretcolor(0x939393)
-    
+  page:setcaretcolor(0x939393)    
 end
 
 function maincanvas:createpage()  
@@ -175,24 +193,23 @@ function maincanvas:openfromfile(fname, line)
   else
     page = self:createpage()
     page:loadfile(fname)        
-    local name = fname:match("([^\\]+)$")       
-    self.pages:add(page, name)   
+    local name = fname:match("([^\\]+)$")           
+    self.pages:addpage(page, name)   
   end  
   page:gotoline(line - 1)
 end
 
 function maincanvas:setcallstack(trace)
-  for i=1, #trace do
+  for i=1, #trace do    
     self.callstack:add(trace[i])
   end 
   self.callstack:autosize(3)
-  self.callstack:setdepth(1)
-  -- self.callstack:align()
+  self.callstack:setdepth(1)  
 end
 
 function maincanvas:createnewpage()
-  local page = self:createpage()  
-  self.pages:add(page, "new"..self.newpagecounter)
+  local page = self:createpage()    
+  self.pages:addpage(page, "new"..self.newpagecounter)
   page.pagecounter = self.newpagecounter
   self.newpagecounter = self.newpagecounter + 1
 end
@@ -225,41 +242,37 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittollbar()  
-  self.tg = group:new(self):setautosize(false, true)
-  self.tg:style():setalign(style.ALTOP):setmargin(3, 3, 3, 3)
-  self.windowtoolbar = self:initwindowtoolbar()
-  self.windowtoolbar:style():setalign(style.ALRIGHT)
-  self.selecttoolbar = self:initselectplugintoolbar()
-  self.selecttoolbar:style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
-  self:initfiletoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)
-  self:initplaytoolbar():style():setalign(style.ALLEFT)--:setmargin(4, 4, 4, 0)  
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP)--:setmargin(3, 3, 3, 3)
+  self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
+  self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
+  self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
+  self:initplaytoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
 end
 
 function maincanvas:setwindowiconin()
-  self.windowtoolbar.icon.img = image:new()
+  self.windowtoolbar.img = image:new()
                                 :load(settings.picdir.."arrow_in.png")
                                 :settransparent(0xFFFFFF)
 end
 
 function maincanvas:setwindowiconout()
-   self.windowtoolbar.icon.img = image:new()
+   self.windowtoolbar.img = image:new()
                                  :load(settings.picdir.."arrow_out.png")
                                  :settransparent(0xFFFFFF)
 end
 
-function maincanvas:initwindowtoolbar()
-  local t = toolbar:new(self.tg)
-  t.icon = toolicon:new(t, settings.picdir.."arrow_out.png", 0xFFFFFF)  
+function maincanvas:initwindowtoolbar()  
+  local icon = toolicon:new(self.tg, settings.picdir.."arrow_out.png", 0xFFFFFF)  
   local that = self
-  function t.icon:onclick()   
+  function icon:onclick()   
     that.togglecanvas:emit()
   end
-  return t
+  return icon
 end
 
 function maincanvas:initselectplugintoolbar(parent)
   local t = toolbar:new(self.tg)
-  t.selectmachine = toolicon:new(t):settext("No Plugin Loaded"):setpos(0, 0, 100, 20)
+  t.selectmachine = toolicon:new(t):settext("No Plugin Loaded"):setpos(0, 0, 100, 20)  
   local that = self
   function t.selectmachine:onclick()
     local name, path = psycle.selmachine()
@@ -339,11 +352,13 @@ end
 
 function maincanvas:displaysearch(ev)
   self.search:show():onfocus()
-  self:align()
+  self:updatealign()
 end
 
+
+
 function maincanvas:onpluginexplorerclick(ev) 
-   if ev.filename ~= "" then    
+   if ev.filename ~= "" and ev.path then    
      self:openfromfile(ev.path..ev.filename, 0)
    end
 end
