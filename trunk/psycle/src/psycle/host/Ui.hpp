@@ -265,18 +265,18 @@ class Window;
 
 class Event {
  public:  
-  Event() : work_parent_(false), prevent_default_(false) {}
+  Event() : work_parent_(false), default_prevented_(false) {}
   virtual ~Event() {}
 
   void WorkParent() { work_parent_ = true; }
   void StopWorkParent() { work_parent_ = false; }
   bool is_work_parent() const { return work_parent_; }
-  void PreventDefault() { prevent_default_ = true; }
-  bool is_prevent_default() const { return prevent_default_; }  
+  void PreventDefault() { default_prevented_ = true; }
+  bool is_default_prevented() const { return default_prevented_; }  
   
  private:    
   bool work_parent_;
-  bool prevent_default_;
+  bool default_prevented_;
 };
 
 class Window;
@@ -498,6 +498,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual int size() const { return 0; }  
   bool has_childs() const { return size() != 0; }
   virtual Window* root();
+  virtual Window* root() const;
   virtual bool is_root() const { return 0; }
   virtual bool IsInGroup(Window::WeakPtr group) const;
   virtual bool IsInGroupVisible() const;
@@ -539,8 +540,9 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void STR(); // store old region
   virtual void Invalidate();
   virtual void Invalidate(const Region& rgn);
-  virtual void PreventFls() {}
-  virtual void EnableFls() {}
+  virtual void PreventFls();
+  virtual void EnableFls();
+  virtual bool is_fls_prevented() const;
   virtual void SetCapture();
   virtual void ReleaseCapture();
   virtual void ShowCursor();
@@ -782,6 +784,7 @@ class Ornament {
  public:
   Ornament() {}
   virtual ~Ornament() = 0;
+  virtual Ornament* Clone() = 0;
 
   virtual bool transparent() const { return true; }
 

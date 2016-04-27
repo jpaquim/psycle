@@ -125,7 +125,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
       UINT flags = Win32KeyFlags(nFlags);      
       KeyEvent ev(pMsg->wParam, flags);
       OnDevKeyDown(ev);
-      return ev.is_prevent_default();      
+      return ev.is_default_prevented();      
     }          
   } else
   if (pMsg->message == WM_KEYUP) {      
@@ -135,7 +135,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
       UINT flags = Win32KeyFlags(nFlags);
       KeyEvent ev(pMsg->wParam, flags);
       OnDevKeyUp(ev);
-      return ev.is_prevent_default();
+      return ev.is_default_prevented();
     }
   }
   return CWnd::PreTranslateMessage(pMsg);
@@ -188,7 +188,8 @@ void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
                pos.left(),
                pos.top(),
                pos.width(),
-               pos.height(),               
+               pos.height(),            
+               SWP_NOREDRAW |
                SWP_NOZORDER |
                SWP_ASYNCWINDOWPOS
                );

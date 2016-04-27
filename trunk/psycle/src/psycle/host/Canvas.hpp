@@ -63,8 +63,10 @@ class Canvas : public ui::Group {
 
   void Invalidate();
   void Invalidate(const Region& rgn);
+  virtual void PreventFls() { fls_prevented_ = true; }
+  virtual void EnableFls() { fls_prevented_ = false; }
+  bool is_fls_prevented() const { return fls_prevented_; }
 
-  bool prevent_fls() const { return prevent_fls_; }  
   virtual void OnFocusChange(int id) { OnMessage(FOCUS, id); }
 
   virtual bool is_root() const { return true; }
@@ -90,7 +92,7 @@ class Canvas : public ui::Group {
     }
   }
    
-  bool save_, steal_focus_, prevent_fls_;
+  bool save_, steal_focus_, fls_prevented_;
   Window::WeakPtr button_press_item_, mouse_move_;  
   std::auto_ptr<ui::Region> save_rgn_;  
 };
@@ -131,6 +133,12 @@ class LineBorder : public ui::Ornament {
  public:
   LineBorder() : color_(0xFFFFFF) {}
   LineBorder(ARGB color) : color_(color) {}  
+
+  LineBorder* Clone() {
+    LineBorder* border = new LineBorder();
+    *border = *this;
+    return border;
+  }
    
   virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {    
     DrawBorder(item, g, draw_region);
@@ -202,7 +210,13 @@ class Wallpaper : public ui::Ornament {
  public:
   Wallpaper() {}
   Wallpaper(ui::Image::WeakPtr image) : image_(image) {}
-   
+ 
+  Wallpaper* Clone() {
+    Wallpaper* paper = new Wallpaper();
+    *paper = *this;
+    return paper;
+  }
+
   virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {
     DrawWallpaper(item, g, draw_region);
   }
@@ -233,6 +247,12 @@ class Fill : public ui::Ornament {
   Fill() : color_(0xFF000000), use_bounds_(false) {}
   Fill(ARGB color) : color_(color), use_bounds_(false) {}
   Fill(ARGB color, bool use_bounds) : color_(color), use_bounds_(use_bounds) {}
+
+  Fill* Clone() {
+    Fill* fill = new Fill();
+    *fill = *this;
+    return fill;
+  }
    
   virtual void set_color(ARGB color) { color_ = color; }
   virtual ARGB color() const { return color_; }  

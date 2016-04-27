@@ -41,7 +41,8 @@ function maincanvas:new()
   return c
 end
 
-function maincanvas:init()  
+function maincanvas:init()
+  self:invalidatedirect()   
   self.togglecanvas = signal:new() 
   self:setornament(ornamentfactory:createfill(settings.canvas.colors.background))
   self:setupfiledialogs()
@@ -51,7 +52,7 @@ function maincanvas:init()
   splitter:new(self, splitter.HORZ)
   self.pluginexplorer = self:createpluginexplorer()
   splitter:new(self, splitter.VERT)  
-  self:createpagegroup()  
+  self:createpagegroup()    
 end
 
 function maincanvas:createsearch()
