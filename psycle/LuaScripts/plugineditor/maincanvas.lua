@@ -120,7 +120,7 @@ end
 
 function maincanvas:dopageexist(fname)
   local found = nil
-  local items = self.pages.childs:items()    
+  local items = self.pages.children:items()    
   for i=1, #items do
     local page = items[i]
     if page:filename() == fname then
