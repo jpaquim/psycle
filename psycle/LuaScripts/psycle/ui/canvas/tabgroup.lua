@@ -44,6 +44,7 @@ tabgroup.header.color.BORDER = 0x00FF00
 tabgroup.header.color.HBG = 0xFFFFFF
 tabgroup.header.color.HLABEL = 0xFF0000
 tabgroup.header.color.HBORDER = 0x00FF00
+tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 
 function tabgroup:new(parent)  
   local c = group:new(parent)  
@@ -54,13 +55,11 @@ function tabgroup:new(parent)
 end
 
 function tabgroup:init()
-  --self:addstyle(0x02000000) 
-  self:setdebugtext("tabgroup")
+  --self:addstyle(0x02000000)  
   self:setautosize(false, false)
   self.hh = 20  
-  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP)
-  local picdir = cfg:luapath().."\\psycle\\ui\\icons\\"  
-  local icon1 = toolicon:new(self.tabbar, picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)  
+  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP)  
+  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)  
   local that = self
   function icon1:onclick()    
     self.f = frame:new()  
@@ -103,11 +102,11 @@ function tabgroup:init()
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT)
   self.tabs:setornament(ornamentfactory:createboundfill(0x2F2F2F))    
       
-  self.childs = group:new(self)
-  self.childs:setornament(ornamentfactory:createboundfill(0x292929))
-  self.childs:setclipchildren()    
-  self.childs:setautosize(false, false)
-  self.childs:setalign(window.ALCLIENT)
+  self.children = group:new(self)
+  self.children:setornament(ornamentfactory:createboundfill(0x292929))
+  self.children:setclipchildren()    
+  self.children:setautosize(false, false)
+  self.children:setalign(window.ALCLIENT)
 end
 
 function tabgroup:setlabel(page, text)
@@ -119,66 +118,77 @@ function tabgroup:setlabel(page, text)
   self:traverse(f, self.tabs:items())
 end
 
-function tabgroup:addpage(page, label) 
+function tabgroup:saveflsstate()
+  self.isoldflsprevented_ = self:isflsprevented()
+  return self
+end
+
+function tabgroup:restoreflsstate()
+  if self.isoldflsprevented_ then
+    self:preventfls()
+  else
+    self:enablefls()
+  end
+  return self
+end
+
+function tabgroup:addpage(page, label)    
+  self:saveflsstate():preventfls()
   page:setautosize(false, false):setalign(window.ALCLIENT)
   self:createheader(page, label)
-  self.childs:add(page)
-  self:setactivepage(page)
-  self:updatealign()
+  self.children:add(page)  
+  self:setactivepage(page)    
+  self.tabs:updatealign()  
+  self.children:updatealign()    
+  self:restoreflsstate()
+  self:invalidate()
 end
 
 function tabgroup:activepage()
   return self.activepage_
 end
 
-function tabgroup:setactiveheader(page)
-   if page then
-    local function f(item)
-      if item.page ~= page then
-        item:setskinnormal()
-      else
-        item:setskinhighlight()
-      end
+function tabgroup:setactiveheader(page)  
+   if page then    
+    local items = self.tabs:items()
+    if self.activepage_ then
+      items[self.children:itemindex(self.activepage_)]:setskinnormal()
     end
-    self:traverse(f, self.tabs:items())
-  end  
+    items[self.children:itemindex(page)]:setskinhighlight()
+  end    
 end
 
 function tabgroup:setactivepage(page)
-  if page then  
-    self:preventfls()  
-    local items = self.childs:items()  
-    for i=1, #items do    
-      local item = items[i]
-      if item ~= page then
-        item:hide()    
-      end
-    end
-    self:enablefls()
+  if page then     
+    self:saveflsstate():preventfls()
+    if self.activepage_ then
+      self.activepage_:hide()
+    end    
     self:setactiveheader(page)
-    self.activepage_ = page;  
-    self.tabs:updatealign()
+    self.activepage_ = page;    
     page:show()
-    self.childs:updatealign()
-    self:fls()    
+    self:restoreflsstate():invalidate()
   end
 end
 
 function tabgroup:removepage(header)
-  local pages = self.childs:items()
-  local idx = self.childs:itemindex(header.page)  
-  self.childs:remove(header.page)
+  self:saveflsstate():preventfls()
+  local pages = self.children:items()
+  local idx = self.children:itemindex(header.page)  
+  self.children:remove(header.page)
+  self.activepage_ = nil
   self.tabs:remove(header) 
   if idx == #pages then
     idx = idx -1
   end
-  local pages = self.childs:items()
+  local pages = self.children:items()
+  self.tabs:updatealign()  
   self:setactivepage(pages[idx]) 
-  self:fls()
+  self:restoreflsstate():invalidate()
 end
 
-function tabgroup:createheader(page, label)  
-  local header = group:new(self.tabs):setautosize(true, true)
+function tabgroup:createheader(page, label)
+  local header = group:new(self.tabs):setautosize(true, true)  
   header:setalign(window.ALLEFT)--:setmargin(0, 0, 1, 0)
   header.page = page    
   header.text = text:new(header):setdebugtext("text"):settext(label):setfont({name="Arial", height = "12"})
@@ -194,15 +204,16 @@ function tabgroup:createheader(page, label)
     that:removepage(self:parent())    
   end
   
-  function header:setskinhighlight()    
-    self:setornament(ornamentfactory:createboundfill(0x528A68))      
+  function header:setskinhighlight()        
+    self:setornament(ornamentfactory:createboundfill(0x528A68))
     self.text:setcolor(0xB0C8B1) 
+    self.text:setcolor(0xFFFF00) 
   end
   function header:setskinnormal()    
     self:setornament(nil)
-    self.text:setcolor(0x528A68)        
-  end  
-  header:setskinnormal()  
+    self.text:setcolor(0x528A68)    
+  end    
+  header:setskinnormal()    
   function header:onmousedown(ev)    
     that:setactivepage(self.page)     
   end

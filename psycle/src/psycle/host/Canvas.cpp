@@ -228,7 +228,7 @@ void DefaultAligner::Realign() {}
 // Canvas
 void Canvas::Init() {
   set_auto_size(false, false);  
-  steal_focus_ = prevent_fls_ = false;
+  steal_focus_ = fls_prevented_ = false;
   save_ = true;  
 }
 
@@ -370,7 +370,7 @@ void Canvas::WorkMouseMove(MouseEvent& ev) {
 }
 
 void Canvas::Invalidate(const Region& rgn) {   
-  if (!prevent_fls_) {
+  if (!fls_prevented_) {
     if (IsSaving()) {
       save_rgn_->Combine(rgn, RGN_OR);
     } else { 
@@ -380,20 +380,20 @@ void Canvas::Invalidate(const Region& rgn) {
 }
 
 void Canvas::Flush() {    
-  if (!prevent_fls_) {  
+  if (!fls_prevented_) {  
     Window::Invalidate(*save_rgn_.get());    
   }
   save_rgn_->Clear();    
 }
 
 void Canvas::Invalidate() {  
-  if (!prevent_fls_) {
+  if (!fls_prevented_) {
     Window::Invalidate();    
   }  
 }  
 
 void Canvas::InvalidateSave() {
-  if (!prevent_fls_) {     
+  if (!fls_prevented_) {     
     Invalidate(*save_rgn_.get());
   }
 }

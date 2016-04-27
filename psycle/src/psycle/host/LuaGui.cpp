@@ -553,6 +553,20 @@ int LuaCanvasBind<T>::setscrollinfo(lua_State* L) {
   // canvas->show_scrollbar = true;
   return LuaHelper::chaining(L);
 }
+
+template <class T>
+int LuaCanvasBind<T>::invalidateontimer(lua_State* L) {     
+  boost::shared_ptr<T> canvas = LuaHelper::check_sptr<T>(L, 1, meta);
+  canvas->SetSave(true);
+  return LuaHelper::chaining(L);
+}
+
+template <class T>
+int LuaCanvasBind<T>::invalidatedirect(lua_State* L) {
+  boost::shared_ptr<T> canvas = LuaHelper::check_sptr<T>(L, 1, meta);
+  canvas->SetSave(false);
+  return LuaHelper::chaining(L);
+}
   
 template class LuaCanvasBind<LuaCanvas>;
 
@@ -1323,14 +1337,15 @@ const char* LuaEventBind::meta = "psyeventbind";
 int LuaEventBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},    
-    {"preventdefault", preventdefault},    
+    {"preventdefault", preventdefault},
+    {"isdefaultprevented", isdefaultprevented},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
 }
 
 int LuaEventBind::create(lua_State* L) {
-  int keycode = luaL_checkinteger(L, -1);  
+  // int keycode = luaL_checkinteger(L, -1);  
   LuaHelper::new_shared_userdata<>(L, meta, new canvas::Event());
   return 1;
 }
@@ -1348,7 +1363,8 @@ int LuaKeyEventBind::open(lua_State *L) {
     {"keycode", keycode},
     {"shiftkey", shiftkey},
     {"ctrlkey", ctrlkey},
-    {"preventdefault", preventdefault},    
+    {"preventdefault", preventdefault},
+    {"isdefaultprevented", isdefaultprevented},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);

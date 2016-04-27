@@ -203,6 +203,7 @@ struct LuaEventBind {
   static int create(lua_State *L);
   static int gc(lua_State* L);
   static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::PreventDefault); }
+  static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_default_prevented); }
 };
 
 struct LuaKeyEventBind {
@@ -214,6 +215,7 @@ struct LuaKeyEventBind {
   static int shiftkey(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::shiftkey); }
   static int ctrlkey(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::ctrlkey); }
   static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::PreventDefault); }
+  static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_default_prevented); }
 };
 
 struct LuaImageBind {
@@ -430,6 +432,7 @@ class LuaItemBind {
       // {"setzoom", setzoom},
       {"show", show},
       {"hide", hide},
+      {"visible", visible},
       {"updatearea", updatearea},
       {"enablepointerevents", enablepointerevents},
       {"disablepointerevents", disablepointerevents},
@@ -441,6 +444,7 @@ class LuaItemBind {
       {"invalidate", invalidate},
       {"preventfls", preventfls},
       {"enablefls", enablefls},      
+      {"isflsprevented", isflsprevented},
       {"str", str},
       {"area", area},
       {"drawregion", drawregion},
@@ -448,6 +452,7 @@ class LuaItemBind {
       {"clip", clip},
       {"tostring", tostring},   
       {"setornament", setornament},
+      {"ornament", ornament},
       {"setcursor", setcursor},
       {"setclipchildren", setclipchildren},
       {"addstyle", addstyle},
@@ -549,6 +554,7 @@ class LuaItemBind {
   static int fls(lua_State *L);
   static int preventfls(lua_State *L) { LUAEXPORT(L, &T::PreventFls) }
   static int enablefls(lua_State *L) { LUAEXPORT(L, &T::EnableFls) }
+  static int isflsprevented(lua_State *L) { LUAEXPORT(L, &T::is_fls_prevented) }
   static int str(lua_State *L) { LUAEXPORT(L, &T::STR) }
   static int canvas(lua_State* L);
   static int show(lua_State* L) { LUAEXPORT(L, &T::Show) }
@@ -603,7 +609,11 @@ class LuaItemBind {
     LUAEXPORT(L, &T::set_debug_text);
   }
 
-  static int setornament(lua_State* L) { 
+  static int visible(lua_State* L) {
+    LUAEXPORT(L, &T::visible);
+  }
+
+  static int setornament(lua_State* L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     boost::shared_ptr<ui::Ornament> ornament;
     if (!lua_isnil(L, 2)) {      
@@ -619,6 +629,21 @@ class LuaItemBind {
     item->set_ornament(ornament);
     return LuaHelper::chaining(L);
   }
+
+  static int ornament(lua_State* L) {
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+    if (item->ornament().expired()) {
+      lua_pushnil(L);
+    } else {
+      /*luaL_requiref(L, "psycle.ui.canvas.ornament", LuaOrnamentBind::open, true);
+      int n = lua_gettop(L);                  
+      ui::Ornament* ornament = item->ornament().lock()->Clone();
+      LuaHelper::new_shared_userdata<>(L, LuaOrnamentBind::meta, item->ornament().lock(), n, true);     */
+      lua_pushnumber(L, 1); // todo
+    }
+    return 1;
+  }
+
 };
 
 template <class T>
@@ -679,7 +704,9 @@ class LuaCanvasBind : public LuaGroupBind<T> {
       {"setcursorpos", setcursorpos},
       {"showscrollbar", showscrollbar},
       {"setscrollinfo", setscrollinfo},
-      {"setfocus", setfocus},      
+      {"invalidateontimer", invalidateontimer},
+      {"invalidatedirect", invalidatedirect},
+      {"setfocus", setfocus},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -693,7 +720,9 @@ class LuaCanvasBind : public LuaGroupBind<T> {
   static int setcursorpos(lua_State* L) { LUAEXPORT(L, &T::SetCursorPos); }    
   static int showscrollbar(lua_State* L);
   static int setscrollinfo(lua_State* L);
-  static int setfocus(lua_State* L);  
+  static int setfocus(lua_State* L);
+  static int invalidateontimer(lua_State* L);
+  static int invalidatedirect(lua_State* L);
 };
 
 template<class T = LuaRect>

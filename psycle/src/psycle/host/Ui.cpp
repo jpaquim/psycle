@@ -457,11 +457,24 @@ void Window::set_parent(const Window::WeakPtr& parent) {
 }
 
 Window* Window::root() {  
-  Window::Ptr window = shared_from_this();
-  do {
-    if (window->is_root()) return window.get();
-    window = window->parent().lock();
-  } while (window);  
+  if (!parent().expired()) {
+    Window::Ptr window = shared_from_this();
+    do {
+      if (window->is_root()) return window.get();
+      window = window->parent().lock();
+    } while (window);  
+  }
+  return 0;
+}
+
+Window* Window::root() const {  
+  if (!parent().expired()) {
+    Window::ConstPtr window = shared_from_this();
+    do {
+      if (window->is_root()) return (Window*) window.get();
+      window = window->parent().lock();
+    } while (window);  
+  }
   return 0;
 }
 
@@ -512,6 +525,9 @@ bool Window::IsInGroupVisible() const {
 }
 
 void Window::set_ornament(boost::shared_ptr<Ornament> ornament) {  
+  if (!ornament.get() && ornament_.expired()) {
+    return;
+  }
   ornament_ = ornament;
   if (ornament) {
     std::auto_ptr<ui::Rect> opad = ornament->padding();
@@ -548,8 +564,10 @@ bool Window::OnUpdateArea() {
   return result;
 }
 
-void Window::set_pos(const ui::Point& pos) {    
+void Window::set_pos(const ui::Point& pos) {
+  STR();
   set_pos(ui::Rect(pos, area().bounds().dimension()));
+  FLS();
 }
 
 void Window::set_pos(const ui::Rect& pos) {
@@ -558,7 +576,9 @@ void Window::set_pos(const ui::Rect& pos) {
   if (imp_.get()) {    
     ui::Point bottom_right(pos.left() + (auto_size_width() ? dim().width() : pos.width()),
                            pos.top() + (auto_size_height() ? dim().height() : pos.height()));
+    STR();
     imp_->dev_set_pos(ui::Rect(pos.top_left(), bottom_right));
+    FLS();
   }
   if (size_changed) {
     OnSize(pos.width(), pos.height());
@@ -630,11 +650,28 @@ void Window::SetFocus(const Window::Ptr& item) {
   }
 }
 
+void Window::PreventFls() {
+  if (root()) {
+    root()->PreventFls();
+  }
+}
+
+void Window::EnableFls() {
+  if (root()) {
+    root()->EnableFls();
+  }
+}
+
+bool Window::is_fls_prevented() const { 
+  return root() ? root()->is_fls_prevented() : false; 
+}
+
 void Window::Show() {  
   if (imp_.get()) {
-    imp_->DevShow();  
+    imp_->DevShow();
   }  
   visible_ = true;
+  FLS();
 }
 
 void Window::Hide() {   
@@ -642,6 +679,7 @@ void Window::Hide() {
     imp_->DevHide();  
   }  
   visible_ = false;
+  FLS();
 }
 
 void Window::Invalidate() { 
@@ -1512,9 +1550,8 @@ void WindowImp::OnDevMouseDown(MouseEvent& ev) {
   }
 }
 void WindowImp::OnDevMouseUp(MouseEvent& ev) {
-  if (window_) {
-    assert(window_->root() && window_->root());
-    window_->root()->WorkMouseUp(ev);
+  if (window_ && window_->root()) {
+    window_->root()->WorkMouseUp(ev);    
   }
 }
 
