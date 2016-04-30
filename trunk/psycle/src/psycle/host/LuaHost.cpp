@@ -782,6 +782,15 @@ LuaUiExtentions::Ptr LuaUiExtentions::instance() {
   return ((CMainFrame*) ::AfxGetMainWnd())->m_wndView.lua_ui_extentions();    
 }
 
+void LuaUiExtentions::Free() {
+  LuaUiExtentions::List& plugs_ = uiluaplugins_;
+  LuaUiExtentions::List::iterator it = plugs_.begin();
+  for ( ; it != plugs_.end(); ++it) {
+    LuaPluginPtr ptr = *it;       
+    ptr->Free();
+  }
+}
+
 LuaUiExtentions::List LuaUiExtentions::Get(const std::string& name) {
   LuaUiExtentions::List list;
   LuaUiExtentions::List& plugs_ = uiluaplugins_;

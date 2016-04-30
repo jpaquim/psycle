@@ -55,6 +55,7 @@ function tabgroup:new(parent)
 end
 
 function tabgroup:init()
+  self.isoldflsprevented_ = {}
   --self:addstyle(0x02000000)  
   self:setautosize(false, false)
   self.hh = 20  
@@ -96,7 +97,7 @@ function tabgroup:init()
     self.f:hidedecoration()
     self.f:setpos(x + iw - 200, y + ih, 200, h)        
     self.f:show()    
-    c:getfocus()
+    c:getfocus()    
   end
   
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT)
@@ -119,16 +120,17 @@ function tabgroup:setlabel(page, text)
 end
 
 function tabgroup:saveflsstate()
-  self.isoldflsprevented_ = self:isflsprevented()
+  self.isoldflsprevented_[#self.isoldflsprevented_+1] = self:isflsprevented()  
   return self
 end
 
-function tabgroup:restoreflsstate()
-  if self.isoldflsprevented_ then
+function tabgroup:restoreflsstate()  
+  if self.isoldflsprevented_[#self.isoldflsprevented_] then
     self:preventfls()
   else
     self:enablefls()
   end
+  self.isoldflsprevented_[#self.isoldflsprevented_] = nil
   return self
 end
 

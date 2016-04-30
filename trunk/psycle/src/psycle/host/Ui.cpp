@@ -458,11 +458,18 @@ void Window::set_parent(const Window::WeakPtr& parent) {
 
 Window* Window::root() {  
   if (!parent().expired()) {
-    Window::Ptr window = shared_from_this();
-    do {
-      if (window->is_root()) return window.get();
-      window = window->parent().lock();
-    } while (window);  
+    //if (root_cache_.expired()) {
+      Window::Ptr window = shared_from_this();
+      do {
+        if (window->is_root()) {
+    //      root_cache_ = window;
+          return window.get();
+        }
+        window = window->parent().lock();
+      } while (window);        
+    //} else {
+      //return root_cache_.lock().get();
+    //}
   }
   return 0;
 }
@@ -570,7 +577,7 @@ void Window::set_pos(const ui::Point& pos) {
   FLS();
 }
 
-void Window::set_pos(const ui::Rect& pos) {
+void Window::set_pos(const ui::Rect& pos) {  
   bool size_changed = pos.width() != area().bounds().width() || 
                       pos.height() != area().bounds().height();  
   if (imp_.get()) {    
@@ -583,7 +590,7 @@ void Window::set_pos(const ui::Rect& pos) {
   if (size_changed) {
     OnSize(pos.width(), pos.height());
   }
-  WorkChildPos();
+  WorkChildPos();  
 }
 
 ui::Rect Window::pos() const { 
@@ -645,7 +652,10 @@ void Window::SetFocus(const Window::Ptr& item) {
     focus_item_ = item;
     if (!focus().expired()) {
       Event ev;
-      focus_item_.lock()->root()->WorkFocus(ev);      
+      Window* w = focus_item_.lock()->root();
+      if (w) {
+        w->WorkFocus(ev);
+      }
     }
   }
 }
@@ -812,13 +822,13 @@ bool AbortPos::operator()(Window& window) const {
       if (!window.aligner()->aligned() || 
         window.pos() != window.pos_old_) {
         abort_tree_walk = false;
-        std::stringstream str;
+        /*std::stringstream str;
         str << "wo-pos" << window.pos_old_.left() << "," << window.pos_old_.top() << std::endl;
         str << "wo-size" << window.pos_old_.width() << "," << window.pos_old_.height() << std::endl;
         str << "w-pos" << window.pos().left() << "," << window.pos().top() << std::endl;
         str << "w-size" << window.pos().width() << "," << window.pos().height() << std::endl;
         str << "---- not abort: " << window.debug_text() << "----" << std::endl;
-        TRACE(str.str().c_str());
+        TRACE(str.str().c_str());*/
         window.aligner()->aligned_ = true;
       }
     }    

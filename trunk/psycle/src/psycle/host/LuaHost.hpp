@@ -134,6 +134,8 @@ class LuaUiExtentions {
   ~LuaUiExtentions() {}
   static LuaUiExtentions::Ptr instance();
 
+  void Free();
+
   typedef LuaUiExtentions::List::iterator iterator;
   virtual iterator begin() { return uiluaplugins_.begin(); }
   virtual iterator end() { return uiluaplugins_.end(); }

@@ -190,8 +190,8 @@ void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
                pos.width(),
                pos.height(),            
                SWP_NOREDRAW |
-               SWP_NOZORDER |
-               SWP_ASYNCWINDOWPOS
+               SWP_NOZORDER
+               // SWP_ASYNCWINDOWPOS
                );
 
 
