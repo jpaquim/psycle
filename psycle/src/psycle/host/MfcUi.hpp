@@ -570,12 +570,16 @@ class WindowTemplateImp : public T, public I {
   
   virtual void DevShow() { ShowWindow(SW_SHOW); }  
   virtual void DevHide() { ShowWindow(SW_HIDE); }
-  virtual void DevInvalidate() { Invalidate(); }
+  virtual void DevInvalidate() {    
+    ::RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+    //::RedrawWindow(m_hWnd, NULL, imp->crgn(), RDW_INVALIDATE | RDW_UPDATENOW);
+    //Invalidate();
+  }
   virtual void DevInvalidate(const ui::Region& rgn) {
     if (m_hWnd) {
       mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
       assert(imp);
-      ::RedrawWindow(m_hWnd, NULL, imp->crgn(), RDW_INVALIDATE | RDW_UPDATENOW);
+      ::RedrawWindow(m_hWnd, NULL, imp->crgn(), RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
     }
   }
   virtual void DevSetCapture() { SetCapture(); }  
@@ -615,17 +619,7 @@ class WindowTemplateImp : public T, public I {
     MouseEvent ev(pt.x, pt.y, 2, nFlags);
     OnDevMouseDown(ev);                  
   }
-	void OnLButtonDblClk(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 1, nFlags);
-    OnDevDblclick(ev);
-  }
-	void OnMouseMove(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 1, nFlags);
-    OnDevMouseMove(ev);                  
-  }
-	void OnLButtonUp(UINT nFlags, CPoint pt) {
+  void OnLButtonUp(UINT nFlags, CPoint pt) {
     MapPointToRoot(pt);
     MouseEvent ev(pt.x, pt.y, 1, nFlags);
     OnDevMouseUp(ev);
@@ -635,7 +629,16 @@ class WindowTemplateImp : public T, public I {
     MouseEvent ev(pt.x, pt.y, 2, nFlags);
     OnDevMouseUp(ev);
   }
-
+	void OnLButtonDblClk(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
+    MouseEvent ev(pt.x, pt.y, 1, nFlags);
+    OnDevDblclick(ev);
+  }
+	void OnMouseMove(UINT nFlags, CPoint pt) {
+    MapPointToRoot(pt);
+    MouseEvent ev(pt.x, pt.y, 1, nFlags);
+    OnDevMouseMove(ev);                  
+  }	
   virtual bool OnDevUpdateArea(ui::Area& area);
   
  private:
@@ -1113,11 +1116,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   }
 
   void dev_set_find_regexp(bool on) {     
-   if (on) {
-      find_flags_ = find_flags_ | SCFIND_REGEXP;
-    } else {
-      find_flags_ = find_flags_ & ~SCFIND_REGEXP;
-    }
+    find_flags_ = (on) ? (find_flags_ | SCFIND_REGEXP) : (find_flags_ & ~SCFIND_REGEXP);    
   }
 
   void DevLoadFile(const std::string& filename) {

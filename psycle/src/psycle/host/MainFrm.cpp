@@ -508,9 +508,8 @@ namespace psycle { namespace host {
 				CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
 				filepath += "\\autosave.psy";
 				DeleteFile(filepath);
-				SaveBarState(_T("General"));
-        // prevent lua gc from double deletion
-        LuaFrameItemBind<>::mfcclosing = true;
+				SaveBarState(_T("General"));        
+        LuaUiExtentions::instance()->Free();
 				CFrameWnd::OnClose();
 			}
 		}

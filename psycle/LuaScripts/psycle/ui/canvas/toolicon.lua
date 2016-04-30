@@ -101,14 +101,14 @@ end
 function toolicon:onmousemove(ev)  
   if (not self.on) then 
     self.cc = settings.colors.mousemove.bg
-    self:invalidate()
+    self:fls()
   end
 end
 
 function toolicon:onmouseout(ev)  
   if (not self.on) then 
     self.cc = settings.colors.default.bg
-    self:invalidate()
+    self:fls()    
   end
 end
 

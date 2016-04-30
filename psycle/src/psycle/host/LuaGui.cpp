@@ -311,9 +311,6 @@ void LuaFrameWnd::OnClose() {
 }
 
 template <class T>
-bool LuaFrameItemBind<T>::mfcclosing = false;
-
-template <class T>
 int LuaFrameItemBind<T>::create(lua_State* L) {
   //  int n = lua_gettop(L);  // Number of arguments    
   boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));

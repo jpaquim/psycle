@@ -65,7 +65,7 @@ function maincanvas:createoutputs()
   self.output = self:createoutput()
   self.outputs:addpage(self.output, "Output")  
   self.callstack = self:createcallstack()  
-  self.outputs:addpage(self.callstack, "Call stack")  
+  --self.outputs:addpage(self.callstack, "Call stack")  
 end
 
 function maincanvas:createoutput()
@@ -243,7 +243,7 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittollbar()  
-  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP)--:setmargin(3, 3, 3, 3)
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP)--:setmargin(3, 3, 3, 3)  
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
   self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
   self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)

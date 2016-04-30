@@ -464,7 +464,8 @@ class LuaItemBind {
       {"setpadding", setmargin},
       {"padding", padding},
       {"align", align},
-
+      {"mousecapture", setcapture},
+      {"mouserelease", releasecapture},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -644,6 +645,8 @@ class LuaItemBind {
     return 1;
   }
 
+  static int setcapture(lua_State* L) { LUAEXPORT(L, &T::SetCapture); }
+  static int releasecapture(lua_State* L) { LUAEXPORT(L, &T::ReleaseCapture); }
 };
 
 template <class T>
@@ -696,9 +699,7 @@ class LuaCanvasBind : public LuaGroupBind<T> {
   static int setmethods(lua_State* L) {
     B::setmethods(L);
     static const luaL_Reg methods[] = {  
-      {"new", create},
-      {"mousecapture", setcapture},
-      {"mouserelease", releasecapture},     
+      {"new", create},      
       {"showcursor", showcursor},
       {"hidecursor", hidecursor},
       {"setcursorpos", setcursorpos},
@@ -712,9 +713,7 @@ class LuaCanvasBind : public LuaGroupBind<T> {
     luaL_setfuncs(L, methods, 0);
     return 0;
   }      
-  static int create(lua_State* L);
-  static int setcapture(lua_State* L) { LUAEXPORT(L, &T::SetCapture); }
-  static int releasecapture(lua_State* L) { LUAEXPORT(L, &T::ReleaseCapture); }  
+  static int create(lua_State* L);  
   static int showcursor(lua_State* L) { LUAEXPORT(L, &T::ShowCursor); }
   static int hidecursor(lua_State* L) { LUAEXPORT(L, &T::HideCursor); }  
   static int setcursorpos(lua_State* L) { LUAEXPORT(L, &T::SetCursorPos); }    
@@ -1103,14 +1102,7 @@ class LuaFrameItemBind : public LuaItemBind<T> {
  
   static int create(lua_State* L);
   static int gc(lua_State* L) {
-    if (!LuaFrameItemBind<T>::mfcclosing) {    
-/*      LuaFrameWnd::Ptr wnd = *(LuaFrameWnd::Ptr*) luaL_checkudata(L, 1, meta.c_str());    
-      ui::canvas::Canvas* c = wnd->canvas().lock().get();
-      if (c) {
-        LuaHelper::unregister_userdata(L, c);
-      }*/
-      LuaHelper::delete_shared_userdata<LuaFrameWnd>(L, meta);    
-    }
+    LuaHelper::delete_shared_userdata<LuaFrameWnd>(L, meta);    
     return 0;
   }
   static int setview(lua_State* L) {
@@ -1129,7 +1121,6 @@ class LuaFrameItemBind : public LuaItemBind<T> {
   static int settitle(lua_State* L)  { LUAEXPORT(L, &T::set_title); }
   static int showdecoration(lua_State* L)  { LUAEXPORT(L, &T::ShowDecoration); }
   static int hidedecoration(lua_State* L)  { LUAEXPORT(L, &T::HideDecoration); }  
-  static bool mfcclosing;
 };
 
 

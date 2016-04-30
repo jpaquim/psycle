@@ -150,9 +150,7 @@ void DefaultAligner::SetPositions() {
     return;
   }
   Window::Ptr client;
-
   ui::Rect current_pos(ui::Point(0, 0), group_.lock()->pos().dimension());
-
   for (iterator i = begin(); i != end(); ++i) {
     Window::Ptr item = *i;
     if (!item->visible()) continue;
@@ -177,13 +175,13 @@ void DefaultAligner::SetPositions() {
         client = item;
       break;      
       case ALLEFT:
-        {         
-          double w = item_dim.width();
+        {                   
+          double w = item_dim.width();          
           item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
                                            current_pos.top() + margin.top()), 
                                  ui::Point(current_pos.left() + margin.left() + w - margin_w, 
-                                           current_pos.top() + margin.top() + current_pos.bottom() - current_pos.top() - margin_h))); 
-          current_pos.set_left(current_pos.left() + w);
+                                           current_pos.top() + margin.top() + current_pos.bottom() - current_pos.top() - margin_h)));
+          current_pos.set_left(current_pos.left() + w);          
         }
       break;
       case ALRIGHT:
@@ -196,20 +194,34 @@ void DefaultAligner::SetPositions() {
       case ALTOP:
         {
           double h = item_dim.height();
-          item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
-                                           current_pos.top() + margin.top()),  
-                                 ui::Point(current_pos.left() + margin.left() + current_pos.right() - current_pos.left() - margin_w, 
-                                           current_pos.top() + h - margin_h))); 
+          ui::Rect new_size = 
+            ui::Rect(ui::Point(current_pos.left() + margin.left(),
+                               current_pos.top() + margin.top()),  
+                     ui::Point(current_pos.left() + margin.left() + 
+                                 + current_pos.right() - current_pos.left() 
+                                 - margin_w,
+                               current_pos.top() + h - margin_h));
+          if (new_size != item->area().bounds()) {
+            item->set_pos(new_size);             
+          }
           current_pos.set_top(current_pos.top() + h - margin_h);
         }
       break;
       case ALBOTTOM:
         {
           double h = item_dim.height();
-          item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
-                                           current_pos.bottom() - h + margin_h + margin.top()), 
-                                 ui::Point(current_pos.left() + margin.left() + current_pos.right() - current_pos.left() - margin_w, 
-                                           current_pos.bottom() - h + margin.top() + h - margin.bottom()))); 
+          ui::Rect new_size = 
+            ui::Rect(ui::Point(current_pos.left() + margin.left(), 
+                               current_pos.bottom() - h + margin_h
+                               + margin.top()),
+                     ui::Point(current_pos.left() + margin.left()
+                                 + current_pos.right() - current_pos.left()
+                                 - margin_w, 
+                               current_pos.bottom() - h + margin.top() + h 
+                                 - margin.bottom()));
+          if (new_size != item->area().bounds()) {
+            item->set_pos(new_size); 
+          }
           current_pos.set_bottom(current_pos.bottom() - h - margin_h);
         }
       break;

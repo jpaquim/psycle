@@ -482,6 +482,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual ~Window();
 
   void set_imp(WindowImp* imp);
+  void release_imp() { imp_.release(); }
   WindowImp* imp() { return imp_.get(); };
   WindowImp* imp() const { return imp_.get(); };
 
@@ -626,7 +627,6 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void WorkFocus(Event& ev) { OnFocus(ev); }
   void WorkChildPos();
   
-
   mutable bool update_;
   mutable std::auto_ptr<Area> area_;  
   mutable std::auto_ptr<Area> fls_area_;
@@ -643,7 +643,8 @@ class Window : public boost::enable_shared_from_this<Window> {
   static Window::WeakPtr focus_item_;
   AlignStyle align_;
   ui::Rect margin_, padding_;
-  bool has_store_;  
+  bool has_store_;
+  boost::weak_ptr<Window> root_cache_;
 };
 
 class Group : public Window {
