@@ -426,12 +426,7 @@ Window::Window(WindowImp* imp) :
   imp_.reset(imp);  
 }
 
-Window::~Window() {
-  if (imp_.get()) {
-    if (imp_->DevDestroy()) {
-      imp_.release();
-    }
-  }  
+Window::~Window() { 
 }
 
 void Window::set_imp(WindowImp* imp) { 

@@ -998,8 +998,7 @@ class LuaTreeNodeBind {
   }
 
   static int create(lua_State* L) {
-    boost::shared_ptr<ui::Node> node = LuaHelper::new_shared_userdata(L, meta.c_str(), new ui::Node());
-    // LuaHelper::register_weakuserdata(L, node.get());
+    LuaHelper::new_shared_userdata(L, meta.c_str(), new ui::Node());    
     return 1;
   }
 

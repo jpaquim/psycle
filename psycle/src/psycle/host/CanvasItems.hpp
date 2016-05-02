@@ -74,15 +74,14 @@ class Line : public Window {
 class Text : public Window {
  public:
   Text() : Window(), 
-      color_(0xFFFFFF),
-      font_(ui::Systems::instance().CreateFont()) {
+      color_(0xFFFFFF) {
+      //,font_(ui::Systems::instance().CreateFont()) {
   }
   Text(const std::string& text) : 
       color_(0xFFFFFF),
-      text_(text), 
-      font_(ui::Systems::instance().CreateFont()) { 
+      text_(text) {
+      // font_(ui::Systems::instance().CreateFont()) { 
   }
-
   static std::string type() { return "canvastext"; }
 
   virtual void Draw(Graphics* cr, Region& draw_region);
@@ -94,14 +93,16 @@ class Text : public Window {
     Invalidate();
   }
   ARGB color() const { return color_; }
-  void set_font(const Font& font) { font_.reset(font.Clone()); }    
+  void set_font(const Font& font) { 
+    // font_.reset(font.Clone());
+  }    
   void set_alignment(AlignStyle alignment) { alignment_ = alignment; }
 
  private:
   std::string text_;
   AlignStyle alignment_;
   ARGB color_;
-  std::auto_ptr<Font> font_;  
+  //std::auto_ptr<Font> font_;  
 };
 
 

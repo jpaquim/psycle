@@ -591,8 +591,7 @@ class WindowTemplateImp : public T, public I {
     ClientToScreen(&point);
 		::SetCursorPos(point.x, point.y);
   }  
-  virtual void dev_set_parent(Window* window);
-  virtual bool DevDestroy() { return DestroyWindow(); }      
+  virtual void dev_set_parent(Window* window);  
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
 

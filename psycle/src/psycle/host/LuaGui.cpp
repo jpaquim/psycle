@@ -471,7 +471,6 @@ void CanvasItem<T>::OnKillFocus() {
 }
 
 // LuaTree
-
 void LuaTree::OnClick(boost::shared_ptr<ui::Node> node) {
   try {
     LuaImport in(L, this, LuaGlobal::proxy(L));
@@ -484,29 +483,13 @@ void LuaTree::OnClick(boost::shared_ptr<ui::Node> node) {
   }
 }
 
-
 // LuaTreeNodeBind
+std::string LuaTreeNodeBind::meta = "psytreenode"; // LuaTreeNode::type();
 
-std::string LuaTreeNodeBind::meta = "psytreenode"; //LuaTreeNode::type();
-
-/*void LuaTreeNode::OnClick() {
-  try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
-    if (in.open("onclick")) {
-      in.pcall(0);
-    } 
-  } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
-  }
-}
-*/
-
-/////////////////////////////////////////////////////////////////////////////
-// LuaCanvas+Bind
-/////////////////////////////////////////////////////////////////////////////
+// LuaCanvas + Bind
 template <class T>
 int LuaCanvasBind<T>::open(lua_State *L) {  
-   LuaHelper::openex(L, meta, setmethods, gc);
+  LuaHelper::openex(L, meta, setmethods, gc);
   static const char* const e[] = {
     "AUTO", "MOVE", "NO_DROP", "COL_RESIZE", "ALL_SCROLL", "POINTER",
     "NOT_ALLOWED", "ROW_RESIZE", "CROSSHAIR", "PROGRESS", "E_RESIZE",
@@ -514,7 +497,8 @@ int LuaCanvasBind<T>::open(lua_State *L) {
     "VERTICAL_TEXT", "S_RESIZE", "SE_RESIZE", "INHERIT", "WAIT",
     "W_RESIZE", "SW_RESIZE"
   };
-  lua_newtable(L); // setcursor enum
+  // set cursor enum
+  lua_newtable(L);
   LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]));
   lua_setfield(L, -2, "CURSOR");
   return 1;
@@ -567,9 +551,7 @@ int LuaCanvasBind<T>::invalidatedirect(lua_State* L) {
   
 template class LuaCanvasBind<LuaCanvas>;
 
-///////////////////////////////////////////////////////////////////////////////
 // LuaItemBind
-///////////////////////////////////////////////////////////////////////////////
 void LuaItem::OnSize(double w, double h) {
   LuaImport in(L, this, LuaGlobal::proxy(L));
   try {
@@ -593,7 +575,7 @@ int LuaItemBind<T>::create(lua_State* L) {
   }
   boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
   if (!item->imp()) {
-    item->set_imp(ui::ImpFactory::instance().CreateWindowImp()); 
+    item->set_imp(ui::ImpFactory::instance().CreateWindowImp());    
   }
   LuaHelper::register_weakuserdata(L, item.get());
   if (group) {    
@@ -614,7 +596,7 @@ int LuaItemBind<T>::gc(lua_State* L) {
   for ( ; it != subitems.end(); ++it) {
     canvas::Window::Ptr subitem = *it;
     LuaHelper::unregister_userdata<>(L, subitem.get());
-  }    
+  }       
   return LuaHelper::delete_shared_userdata<T>(L, meta.c_str());
 }
 

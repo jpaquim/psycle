@@ -1360,8 +1360,7 @@ class WindowImp {
   virtual void DevShowCursor() = 0;
   virtual void DevHideCursor() = 0;
   virtual void DevSetCursorPos(double x, double y) = 0;
-  virtual void DevSetCursor(CursorStyle style) {}
-  virtual bool DevDestroy() { return false; }  
+  virtual void DevSetCursor(CursorStyle style) {}  
   virtual void dev_set_parent(Window* window) {} 
   virtual void dev_set_clip_children() {}
  

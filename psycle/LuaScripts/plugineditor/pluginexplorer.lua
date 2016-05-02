@@ -12,6 +12,7 @@ local treenode = require("psycle.ui.canvas.treenode")
 local machine = require("psycle.machine"):new()
 local settings = require("settings")
 local signal = require("psycle.signal")
+local serpent = require("psycle.serpent")
 
 local pluginexplorer = tree:new()
 
@@ -32,7 +33,8 @@ function pluginexplorer:dirLookup(directory)
   self.rootnode = treenode:new() 
   local p = io.popen('dir "'..directory..'\\*.lua" /B')  
   for file in p:lines() do   
-    local node = treenode:new():settext(file)   
+    psycle.alert("new node")
+    local node = treenode:new():settext(file)
     node.path = directory
     node.filename = file    
     self.rootnode:add(node)
@@ -56,6 +58,8 @@ function pluginexplorer:setfilepath(path)
 end
 
 function pluginexplorer:onclick(node)
+  local str = serpent.dump(node)
+  psycle.output(str:sub(1, 600))
   local ev = { 
     sender = self, 
     path = node.path,
