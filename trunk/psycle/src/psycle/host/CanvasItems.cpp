@@ -164,7 +164,7 @@ void Text::set_text(const std::string& text) {
 }
 
 void Text::Draw(Graphics* g, Region& draw_region) {   
-  g->SetFont(*font_);
+//  g->SetFont(*font_);
   g->SetColor(color_);
   double xp(0);
   double yp(0);

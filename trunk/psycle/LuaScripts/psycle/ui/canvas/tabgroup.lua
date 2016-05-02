@@ -8,7 +8,7 @@
 local canvas = require("psycle.ui.canvas")
 local group = require("psycle.ui.canvas.group")
 local window = require("psycle.ui.canvas.item")
-local rect = require("psycle.ui.canvas.rect")
+--local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local config = require("psycle.config")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
@@ -198,8 +198,7 @@ function tabgroup:createheader(page, label)
   header.close = text:new(header)    
                      :setdebugtext("close")     
                      :setcolor(tabgroup.skin.colors.TITLEFONT) 
-                     :settext("x")            
-                                       
+                     :settext("x")                                       
   header.close:setalign(window.ALLEFT)--:setmargin(4, 0, 4, 0)
   local that = self
   function header.close:onmousedown()  
@@ -208,7 +207,7 @@ function tabgroup:createheader(page, label)
   
   function header:setskinhighlight()        
     self:setornament(ornamentfactory:createboundfill(0x528A68))
-    self.text:setcolor(0xB0C8B1) 
+    --self.text:setcolor(0xB0C8B1) 
     self.text:setcolor(0xFFFF00) 
   end
   function header:setskinnormal()    

@@ -133,10 +133,7 @@ namespace psycle { namespace host {
 			PsycleGlobal::inputHandler().SetChildView(this);
 
 			// Creates a new song object. The application Song.
-			_pSong.New();
-
-			mbar2 = new ui::MenuBar();
-			
+			_pSong.New();						
 		}
 
 		CChildView::~CChildView()
