@@ -183,6 +183,7 @@ int LuaPluginInfoBind::open(lua_State *L) {
     {"new", create},
     {"dllname", dllname},
     {"name", name},
+    {"type", type},
     { NULL, NULL }
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -222,6 +223,16 @@ int LuaPluginInfoBind::name(lua_State* L) {
   return 1;
 }
 
+int LuaPluginInfoBind::type(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushnumber(L, ud->type);
+  return 1;
+}
+
 // LuaPluginCatcherBind
 
 const char* LuaPluginCatcherBind::meta = "psyplugincatchermeta";
@@ -229,7 +240,10 @@ const char* LuaPluginCatcherBind::meta = "psyplugincatchermeta";
 int LuaPluginCatcherBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
-    {"info", info},    
+    {"info", info},
+    {"infos", infos},
+    {"rescanall", rescanall},
+    {"rescannew", rescannew},
     { NULL, NULL }
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -256,7 +270,7 @@ int LuaPluginCatcherBind::info(lua_State* L) {
   if (n != 2) {
     return luaL_error(L, "Got %d arguments expected 2 (self, name)", n);
   }
-  boost::shared_ptr<PluginCatcher> ud = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);  
+  boost::shared_ptr<PluginCatcher> ud = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
   const char* name = luaL_checkstring(L, 2);  
   luaL_requiref(L, "psycle.plugininfo", LuaPluginInfoBind::open, true);
   PluginInfo* info = ud->info(name);
@@ -266,6 +280,34 @@ int LuaPluginCatcherBind::info(lua_State* L) {
     lua_pushnil(L);
   }
   return 1;
+}
+
+int LuaPluginCatcherBind::infos(lua_State* L) {
+  boost::shared_ptr<PluginCatcher> catcher = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
+  const int num_plugins = static_cast<PluginCatcher*>(&Global::machineload())->_numPlugins;
+  PluginInfo** const _pPlugsInfo = static_cast<PluginCatcher*>(&Global::machineload())->_pPlugsInfo;
+  lua_newtable(L);
+  for (int i=0; i < num_plugins; ++i) {
+    PluginInfo* plugin_info = _pPlugsInfo[i];
+    PluginInfo* new_plugin_info = new PluginInfo(*plugin_info);    
+    luaL_requiref(L, "psycle.plugininfo", LuaPluginInfoBind::open, true);
+    LuaHelper::new_shared_userdata<PluginInfo>(L, LuaPluginInfoBind::meta, new_plugin_info, 3);
+    lua_remove(L, -2);
+    lua_rawseti(L, -2, i+1);
+  }
+  return 1;
+}
+
+int LuaPluginCatcherBind::rescanall(lua_State* L) {
+  boost::shared_ptr<PluginCatcher> catcher = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
+  catcher->ReScan(true);
+  return LuaHelper::chaining(L);
+}
+
+int LuaPluginCatcherBind::rescannew(lua_State* L) {
+  boost::shared_ptr<PluginCatcher> catcher = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
+  catcher->ReScan(false);
+  return LuaHelper::chaining(L);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1726,9 +1768,35 @@ int LuaDspMathHelper::freqtonote(lua_State* L) {
   return 1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
+
+// FileHelperBind
+int LuaFileHelper::open(lua_State *L) {
+  static const luaL_Reg funcs[] = {
+    {"mkdir", mkdir},
+    {"isdirectory", isdirectory},
+    {NULL, NULL}
+  };
+  luaL_newlib(L, funcs);
+  return 1;
+}
+
+int LuaFileHelper::mkdir(lua_State* L) {
+  const char* dir_path = luaL_checkstring(L, 1);
+  std::string full_path = PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\" + dir_path;
+  boost::filesystem::path dir(full_path.c_str());
+	lua_pushboolean(L, (boost::filesystem::create_directories(dir)));
+  return 1;
+}
+
+int LuaFileHelper::isdirectory(lua_State* L) {
+  const char* dir_path = luaL_checkstring(L, 1);
+  std::string full_path = PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\" + dir_path;    
+  boost::filesystem::path dir(full_path.c_str());
+	lua_pushboolean(L, (boost::filesystem::is_directory(dir)));
+  return 1;
+}
+
 // MidiHelperBind
-///////////////////////////////////////////////////////////////////////////////
 int LuaMidiHelper::open(lua_State *L) {
   static const luaL_Reg funcs[] = {
     {"notename", notename},

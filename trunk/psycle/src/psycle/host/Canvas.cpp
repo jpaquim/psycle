@@ -220,7 +220,7 @@ void DefaultAligner::SetPositions() {
                                current_pos.bottom() - h + margin.top() + h 
                                  - margin.bottom()));
           if (new_size != item->area().bounds()) {
-            item->set_pos(new_size); 
+            item->set_pos(new_size);
           }
           current_pos.set_bottom(current_pos.bottom() - h - margin_h);
         }
@@ -236,6 +236,82 @@ void DefaultAligner::SetPositions() {
 }
 
 void DefaultAligner::Realign() {}
+
+// GridAligner
+void GridAligner::CalcDimensions() {  
+  Dimension itemmax;
+  for (iterator i = begin(); i != end(); ++i) {
+    Window::Ptr item = *i;
+    if (!item->visible()) {
+      continue;
+    }        
+    ui::Dimension item_dim = item->aligner() ? item->aligner()->dim() : item->dim();   
+    if (item->aligner()) {
+      if (!item->auto_size_width()) {
+        item_dim.set_width(item->dim().width());
+      }
+      if (!item->auto_size_height()) {
+        item_dim.set_height(item->dim().height());
+      }
+    }
+    if (item->align() != ALNONE) {
+      const ui::Rect& margin = item->margin();
+      item_dim.set(item_dim.width() + margin.left() + margin.right(),
+                   item_dim.height() + margin.top() + margin.bottom());
+    }       
+    itemmax.set_width(std::max(itemmax.width(), item_dim.width()));
+    itemmax.set_height(std::max(itemmax.height(), item_dim.height()));    
+  } // end loop   
+  
+  Dimension current_dim(itemmax.width()*col_num_, itemmax.height()*row_num_);
+
+  const ui::Rect& margin = group_.lock()->margin();    
+  const ui::Rect& pad = group_.lock()->padding();
+  if (current_dim.width() > 0 && current_dim.height() > 0) {
+    current_dim.set_width(current_dim.width() + pad.left() + pad.right());
+    current_dim.set_height(current_dim.height() + pad.top() + pad.bottom());
+  }
+  current_dim += ui::Dimension(margin.left() + margin.right(),
+                               margin.top() + margin.bottom());  
+  dim_ = current_dim;
+}
+
+void GridAligner::SetPositions() {
+  if (group_.expired()) {
+    return;
+  }
+  if (group_.lock()->area().bounds().empty()) {
+    return;
+  }
+  Window::Ptr client;
+  ui::Rect current_pos(ui::Point(0, 0), group_.lock()->aligner()->dim());
+
+  int cell_width = current_pos.width() / col_num_;
+  int cell_height = current_pos.height() / row_num_;
+
+  int pos = 0;
+  for (iterator i = begin(); i != end(); ++i) {
+    Window::Ptr item = *i;
+    if (!item->visible()) {
+      continue;
+    }
+    ui::Rect margin = item->margin();     
+    item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
+                                     current_pos.top() + margin.top()), 
+                           ui::Dimension(cell_width, cell_height)));    
+    ++pos;
+    if (pos < col_num_) {            
+      current_pos.Offset(cell_width + margin.right(), 0);      
+    } else {      
+      current_pos.Offset(0, cell_height + margin.bottom());
+      current_pos.set_left(0);
+      pos = 0;
+    }  
+  } // end loop     
+}
+
+void GridAligner::Realign() {}
+
 
 // Canvas
 void Canvas::Init() {

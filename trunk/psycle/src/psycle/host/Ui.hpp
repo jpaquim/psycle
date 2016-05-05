@@ -906,13 +906,17 @@ class MImp : public TNImp {
     }
   }
   CMenu* cmenu;  
-  CMenu* parent;
-  int pos_;  
+  CMenu* parent;  
 
   virtual void set_text(const std::string& text) {    
     parent->ModifyMenu(pos_, MF_BYPOSITION, 0, text.c_str());    
   }
-  
+
+  void set_pos(int pos) { pos_ = pos; }
+  int pos() const { return pos_; }
+
+  private:
+    int pos_;  
 };
 
 class MenuBar {
@@ -945,7 +949,7 @@ class MenuBar {
           parent->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)imp->cmenu->m_hMenu, node->text().c_str());          
           node->imps.push_back(imp);
         }        
-        imp->pos_ = pos;
+        imp->set_pos(pos);
       }
       if (node->size() > 0) {      
         std::list<TNImp*>::iterator it = node->imps.begin();
@@ -976,7 +980,7 @@ class MenuBar {
 	 MImp* imp = new MImp();
 	 imp->cmenu = pMenu;
    imp->parent = parent;
-   imp->pos_ = pos;
+   imp->set_pos(pos);
    imp->owner = this;
 	 result->AddImp(imp);
 	 int n = pMenu->GetMenuItemCount();
@@ -998,7 +1002,7 @@ class MenuBar {
        MImp* imp = new MImp();
 	     imp->cmenu = 0;
        imp->parent = parent;
-       imp->pos_ = i;
+       imp->set_pos(i);
        imp->owner = this;
 	     result->AddImp(imp);
      }

@@ -173,6 +173,13 @@ function tabgroup:setactivepage(page)
   end
 end
 
+function tabgroup:removeall()
+  self.activepage_ = nil
+  self.tabs:removeall()
+  self.children:removeall()
+  self:updatealign()
+end
+
 function tabgroup:removepage(header)
   self:saveflsstate():preventfls()
   local pages = self.children:items()

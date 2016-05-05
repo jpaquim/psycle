@@ -15,6 +15,8 @@ namespace psycle {namespace host{namespace ui{namespace canvas{class Canvas;}}}}
 namespace psycle { namespace host {
   class ConfigStorage;
 
+  
+
   class LuaConfig {
     public:
      LuaConfig();
@@ -50,6 +52,7 @@ namespace psycle { namespace host {
     static int gc(lua_State* L);    
     static int dllname(lua_State* L);
     static int name(lua_State* L);
+    static int type(lua_State* L);
   };
 
   struct LuaPluginCatcherBind {
@@ -57,7 +60,10 @@ namespace psycle { namespace host {
     static int open(lua_State *L);    
     static int create(lua_State* L);    
     static int info(lua_State* L);
-    static int gc(lua_State* L);        
+    static int infos(lua_State* L);
+    static int gc(lua_State* L);
+    static int rescanall(lua_State* L);
+    static int rescannew(lua_State* L);
   };
 
   class Machine;
@@ -618,6 +624,13 @@ namespace psycle { namespace host {
   private:
     static int notetofreq(lua_State* L);
     static int freqtonote(lua_State* L);
+  };
+
+  class LuaFileHelper {
+    public:
+      static int open(lua_State *L);
+      static int mkdir(lua_State* L);
+      static int isdirectory(lua_State* L);
   };
 
   struct LuaMidiHelper {
