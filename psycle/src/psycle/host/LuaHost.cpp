@@ -99,6 +99,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaDspFilterBind>(L, "psycle.dsp.filter");
   LuaHelper::require<LuaEnvelopeBind>(L, "psycle.envelope");
   LuaHelper::require<LuaDspMathHelper>(L, "psycle.dsp.math");
+  LuaHelper::require<LuaFileHelper>(L, "psycle.file");
   LuaHelper::require<LuaMidiHelper>(L, "psycle.midi");
   LuaHelper::require<LuaPlayerBind>(L, "psycle.player");
   LuaHelper::require<LuaPatternDataBind>(L, "psycle.pattern");

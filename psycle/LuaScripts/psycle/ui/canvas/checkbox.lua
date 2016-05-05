@@ -73,7 +73,7 @@ function checkbox:text()
   return self.text:text()
 end
 
-function checkbox:check() 
+function checkbox:check()   
   return self.check_;
 end
 

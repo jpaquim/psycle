@@ -32,8 +32,7 @@ end
 function pluginexplorer:dirLookup(directory)
   self.rootnode = treenode:new() 
   local p = io.popen('dir "'..directory..'\\*.lua" /B')  
-  for file in p:lines() do   
-    psycle.alert("new node")
+  for file in p:lines() do    
     local node = treenode:new():settext(file)
     node.path = directory
     node.filename = file    

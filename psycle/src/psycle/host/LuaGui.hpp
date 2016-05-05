@@ -11,6 +11,7 @@
 
 namespace psycle {
 namespace host {
+
 class LuaMachine;
 
 class LuaCmdDefBind {
@@ -466,6 +467,7 @@ class LuaItemBind {
       {"align", align},
       {"mousecapture", setcapture},
       {"mouserelease", releasecapture},
+      {"setaligner", setaligner},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -643,6 +645,15 @@ class LuaItemBind {
       lua_pushnumber(L, 1); // todo
     }
     return 1;
+  }
+
+  static int setaligner(lua_State* L) {
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+    int row_num = luaL_checkinteger(L, 2);
+    int col_num = luaL_checkinteger(L, 3);
+    boost::shared_ptr<ui::canvas::GridAligner> aligner(new ui::canvas::GridAligner(row_num, col_num));
+    item->set_aligner(aligner);
+    return LuaHelper::chaining(L);
   }
 
   static int setcapture(lua_State* L) { LUAEXPORT(L, &T::SetCapture); }
@@ -998,7 +1009,9 @@ class LuaTreeNodeBind {
   }
 
   static int create(lua_State* L) {
-    LuaHelper::new_shared_userdata(L, meta.c_str(), new ui::Node());    
+    LuaHelper::new_shared_userdata(L, meta.c_str(), new ui::Node());
+    lua_newtable(L);
+    lua_setfield(L, -2, "_children");
     return 1;
   }
 
@@ -1013,6 +1026,10 @@ class LuaTreeNodeBind {
     boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    
     boost::shared_ptr<ui::Node> treenode2 = LuaHelper::check_sptr<ui::Node>(L, 2, LuaTreeNodeBind::meta);
     treenode->AddNode(treenode2);
+    lua_getfield(L, -2, "_children");
+    int len = lua_rawlen(L, -1);
+    lua_pushvalue(L, -2);
+    lua_rawseti(L, -2, len+1);
     return LuaHelper::chaining(L);
   }
   static int size(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::size); }

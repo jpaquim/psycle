@@ -10,7 +10,7 @@ local cfg = require("psycle.config"):new("PatternVisual")
 local keys = {"background", "row", "row4beat", "rowbeat", "separator",
                 "font", "cursor", "selection", "playbar"}    
 
-local settings = { 
+local settings = {  
   picdir = cfg:luapath().."\\psycle\\ui\\icons\\",
   sci = {    
     lexer = {      

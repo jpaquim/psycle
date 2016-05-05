@@ -30,6 +30,12 @@ local image = require("psycle.ui.image")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local signal = require("psycle.signal")
 local item = require("psycle.ui.canvas.item")
+local catcher = require("psycle.plugincatcher")
+local serpent = require("psycle.serpent")
+local createeditplugin = require("createeditplugin")
+local filehelper = require("psycle.file")
+local templateparser = require("templateparser")
+local cfg = require("psycle.config"):new("PatternVisual")
 
 local maincanvas = canvas:new()
 
@@ -48,11 +54,18 @@ function maincanvas:init()
   self:setupfiledialogs()
   self:inittollbar()   
   self:createsearch()
+  self:createcreateeditplugin()
   self:createoutputs()
   splitter:new(self, splitter.HORZ)
   self.pluginexplorer = self:createpluginexplorer()
   splitter:new(self, splitter.VERT)  
   self:createpagegroup()    
+end
+
+function maincanvas:createcreateeditplugin()  
+  self.createeditplugin = createeditplugin:new(self):hide():setalign(item.ALTOP)
+  self.createeditplugin.doopen:connect(maincanvas.onopenplugin, self)
+  self.createeditplugin.docreate:connect(maincanvas.oncreateplugin, self)
 end
 
 function maincanvas:createsearch()
@@ -276,12 +289,16 @@ function maincanvas:initselectplugintoolbar(parent)
   t.selectmachine = toolicon:new(t):settext("No Plugin Loaded"):setpos(0, 0, 100, 20)  
   local that = self
   function t.selectmachine:onclick()
-    local name, path = psycle.selmachine()
-    if name then   
-      path = path:sub(1, -5).."\\"
-      that.pluginexplorer:setfilepath(path)
-      self:settext(name):fls()      
-    end    
+    local catcher = catcher:new()
+    local infos = catcher:infos()    
+    that.createeditplugin:show()
+    that:updatealign()
+    --local name, path = psycle.selmachine()
+    --if name then   
+      --path = path:sub(1, -5).."\\"
+      --that.pluginexplorer:setfilepath(path)
+      --self:settext(name):fls()      
+    --end    
   end 
   -- local newproject = toolicon:new(t, settings.picdir.."plus.png", 0xFFFFFF)
   return t
@@ -356,10 +373,63 @@ function maincanvas:displaysearch(ev)
   self:updatealign()
 end
 
+function maincanvas:createmachinefromtemplate(env)
+  local file = io.open(cfg:luapath().."\\plugineditor\\plugin.lu$", "r")  
+  local t = templateparser.prep(file, env)
+  file:close()  
+  return t
+end
 
+function maincanvas:createregistermachinefromtemplate(env)
+  local file = io.open(cfg:luapath().."\\plugineditor\\pluginregister.lu$", "r")
+  local t = templateparser.prep(file, env)
+  file:close()  
+  return t
+end
+
+function maincanvas:writetexttofile(filepath, text)
+   local file = io.open(filepath, "w")
+   file:write(text)
+   file:close()   
+end
+
+function maincanvas:oncreateplugin(pluginname)
+  local env = {}
+  env.vendor = "psycle"
+  env.pluginname = pluginname  
+  if not self.createeditplugin.machmode:check() then
+    env.machmode = "machine.FX"    
+  else
+    env.machmode = "machine.GENERATOR"
+  end
+  self:createregistermachinefromtemplate(env)
+  self:writetexttofile(cfg:luapath().."\\"..pluginname..".lua",
+                       self:createregistermachinefromtemplate(env))
+  filehelper.mkdir(pluginname)    
+  self:writetexttofile(cfg:luapath().."\\"..pluginname.."\\machine.lua",
+                       self:createmachinefromtemplate(env))
+  self:openplugin(pluginname)
+  catcher:new():rescannew()
+end
+
+function maincanvas:onopenplugin(pluginname)  
+  self:openplugin(pluginname)
+end
+
+function maincanvas:openplugin(pluginname)
+  self:closealltabs()
+  self.pluginexplorer:setfilepath(cfg:luapath().."\\"..pluginname.."\\")
+  self.selecttoolbar.selectmachine:settext(pluginname)
+  self:openfromfile(cfg:luapath().."\\"..pluginname.."\\machine.lua")  
+end
+
+function maincanvas:closealltabs()    
+  self.pages:removeall()
+  self.newpagecounter = 1
+end
 
 function maincanvas:onpluginexplorerclick(ev) 
-   if ev.filename ~= "" and ev.path then    
+   if ev.filename ~= "" and ev.path then       
      self:openfromfile(ev.path..ev.filename, 0)
    end
 end

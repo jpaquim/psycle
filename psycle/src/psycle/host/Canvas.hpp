@@ -24,6 +24,27 @@ class DefaultAligner : public Aligner {
   virtual void Realign();    
 };
 
+class GridAligner : public Aligner {
+ public:
+  GridAligner()
+    : Aligner(),
+      row_num_(2),
+      col_num_(2) {
+  }
+  GridAligner(int row_num, int col_num) 
+    : Aligner(),
+      row_num_(row_num),
+      col_num_(col_num) {
+  }
+
+  virtual void CalcDimensions();
+  virtual void SetPositions();
+  virtual void Realign();    
+
+ private:
+   int row_num_, col_num_;
+};
+
 // canvas
 class Canvas : public ui::Group {  
  public:
