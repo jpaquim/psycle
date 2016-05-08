@@ -396,16 +396,45 @@ BEGIN_MESSAGE_MAP(TreeImp, CTreeCtrl)
   ON_NOTIFY_REFLECT_EX(TVN_SELCHANGED, OnClick)
 END_MESSAGE_MAP()
 
+void TreeImp::DevUpdateTree(boost::shared_ptr<Node> node) {   
+  DevClear();  
+  struct {
+      TreeImp* treectrl;
+      std::map<Node*, HTREEITEM> items;     
+      void operator()(Node& node) {        
+        TreeNodeImp* imp = new TreeNodeImp();
+        imp->set_owner(this);
+        imp->hItem = 0;        
+        node.AddImp(imp);
+        if (node.parent().expired()) {
+          items[&node] = 0;
+          return;
+        }        
+        if (!node.parent().expired()) {
+          Node* p = node.parent().lock().get();
+          std::map<Node*, HTREEITEM>::const_iterator it = items.find(p);
+          if (it != items.end()) {
+            imp->hItem = it->second;
+          }
+        }        
+        imp->Insert(treectrl, node.text());
+        items[&node] = imp->hItem;
+      }
+    } f;
+  f.treectrl = this;
+  node->traverse(f);
+}
+
 BOOL TreeImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
   HTREEITEM hTtreeSelectedItem = GetSelectedItem();
   struct {
      ui::Tree* tree;
      HTREEITEM hTtreeSelectedItem;
      void operator()(Node& node) {
-       std::list<TNImp*>::iterator it = node.imps.begin();
+       std::list<NodeImp*>::iterator it = node.imps.begin();
        for ( ; it != node.imps.end(); ++it) {
-         TNImp* i = *it;
-         TNVImp* imp = dynamic_cast<TNVImp*>(i);
+         NodeImp* i = *it;
+         TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(i);
          if (imp) {
            if (imp->hItem == hTtreeSelectedItem) {
              tree->OnClick(node.shared_from_this());
@@ -582,6 +611,103 @@ void WindowHook::SetFocusHook() {
 
 void WindowHook::ReleaseHook() { 
   UnhookWindowsHookEx(_hook);
+}
+
+// MenuBarImp
+
+std::map<std::uint16_t, MenuBarImp*> MenuBarImp::menu_bar_id_map_;
+
+void MenuBarImp::DevInvalidate() {
+  ::AfxGetMainWnd()->DrawMenuBar();
+}
+
+void MenuBarImp::DevUpdate(boost::shared_ptr<Node> node) {
+  CWnd* pMain = ::AfxGetMainWnd();
+  UpdateNodes(node, pMain->GetMenu(), pMain->GetMenu()->GetMenuItemCount());
+  DevInvalidate();
+}
+
+void MenuBarImp::RegisterMenuEvent(std::uint16_t id, MenuImp* menu_imp) {
+  menu_item_id_map_[id] = menu_imp;
+  menu_bar_id_map_[id] = this;
+}
+
+void MenuBarImp::UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start) {
+  Node::Container::iterator it = parent_node->begin();    
+  for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
+    Node::Ptr node = *it;
+    if (!node->imps.size()) {        
+      MenuImp* menu_imp = new MenuImp(parent);
+      menu_imp->set_owner(this);
+      menu_imp->dev_set_pos(pos);      
+      if (node->size() == 0) {        
+        menu_imp->CreateMenuItem(node->text());
+        RegisterMenuEvent(menu_imp->id(), menu_imp);
+      } else {
+        menu_imp->CreateMenu(node->text());        
+      }
+      node->imps.push_back(menu_imp);      
+    }
+    if (node->size() > 0) {      
+      std::list<NodeImp*>::iterator it = node->imps.begin();
+      for ( ; it != node->imps.end(); ++it) {
+        if ((*it)->owner() == this) {
+          MenuImp* menu_imp =  dynamic_cast<MenuImp*>(*it);    
+          if (menu_imp) {
+            UpdateNodes(node, menu_imp->cmenu());
+          }
+          break;
+        }
+      }        
+    }
+  }
+}
+
+void MenuBarImp::WorkMenuItemEvent(int id) {
+  MenuImp* menu_imp = FindMenuItemById(id);
+  assert(menu_imp);
+  if (menu_bar()) {
+    struct {
+     ui::MenuBar* bar;
+     int selectedItemID;
+     void operator()(Node& node) {
+       std::list<NodeImp*>::iterator it = node.imps.begin();
+       for ( ; it != node.imps.end(); ++it) {
+         NodeImp* i = *it;
+         MenuImp* imp = dynamic_cast<MenuImp*>(i);
+          if (imp) {
+            if (imp->id() == selectedItemID) {
+             bar->OnMenuItemClick(node.shared_from_this());
+            }
+          }
+        }
+      }
+    } f;
+    f.bar = menu_bar();
+    f.selectedItemID = menu_imp->id();
+    menu_bar()->root_node().lock()->traverse(f);  
+  }
+}
+
+MenuImp* MenuBarImp::FindMenuItemById(int id) {
+  std::map<std::uint16_t, MenuImp*>::iterator it = menu_item_id_map_.find(id);
+  return (it != menu_item_id_map_.end()) ? it->second : 0;
+}
+
+MenuBarImp* MenuBarImp::MenuBarImpById(int id) {
+  std::map<std::uint16_t, MenuBarImp*>::iterator it = menu_bar_id_map_.find(id);
+  return (it != menu_bar_id_map_.end()) ? it->second : 0;
+}
+
+void MenuImp::CreateMenu(const std::string& text) {
+  cmenu_ = new CMenu();
+  cmenu_->CreateMenu();
+  parent_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)cmenu_->m_hMenu, text.c_str());    
+}
+
+void MenuImp::CreateMenuItem(const std::string& text) {
+  id_ = ID_DYNAMIC_MENUS_START + ui::MenuBar::id_counter++;
+  parent_->AppendMenu(MF_STRING, id_, text.c_str());  
 }
 
 } // namespace mfc

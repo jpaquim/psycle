@@ -316,11 +316,11 @@ class LuaButton : public CanvasItem<ui::Button> {
   virtual void OnClick();
 };
 
-/*class LuaTreeNode : public ui::Node, public LuaState {
+class LuaMenuBar : public ui::MenuBar, public LuaState {
  public:  
-  LuaTreeNode(lua_State* state) : LuaState(state) {}  
-  virtual void OnClick();
-};*/
+  LuaMenuBar(lua_State* state) : LuaState(state) {}  
+  virtual void OnMenuItemClick(boost::shared_ptr<ui::Node> node);
+};
 
 class LuaScintilla : public CanvasItem<ui::Scintilla> {
  public:  
@@ -919,7 +919,8 @@ struct LuaMenuBarBind {
   static int add(lua_State *L);  
   static int gc(lua_State* L);
   static int setrootnode(lua_State* L);  
-  static int update(lua_State* L) { LUAEXPORTM(L, meta, &ui::MenuBar::Update); }
+  static int update(lua_State* L) { LUAEXPORTM(L, meta, &LuaMenuBar::Update); }
+  static int invalidate(lua_State* L) { LUAEXPORTM(L, meta, &LuaMenuBar::Invalidate); }
 };
 
 template <class T = LuaTree>
@@ -1032,6 +1033,22 @@ class LuaTreeNodeBind {
     lua_rawseti(L, -2, len+1);
     return LuaHelper::chaining(L);
   }
+  static int remove(lua_State *L) {
+    if (lua_isnumber(L, 2)) {
+      boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);  
+      int index = luaL_checknumber(L, 2);
+      if (index < 1 && index > treenode->size()) {
+        luaL_error(L, "index out of range");
+      }
+      lua_getfield(L, -2, "_children");
+      lua_pushnil(L);
+      lua_rawseti(L, -2, index);
+      treenode->erase(treenode->begin() + index - 1);
+      lua_gc(L, LUA_GCCOLLECT, 0);
+      return 1;
+    }
+    return 0;
+  }
   static int size(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::size); }
   static int at(lua_State *L) {
     if (lua_isnumber(L, 2)) {
@@ -1047,21 +1064,7 @@ class LuaTreeNodeBind {
       return 1;
     }
     return 0;
-  }
-
-  static int remove(lua_State *L) {
-    if (lua_isnumber(L, 2)) {
-      boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);  
-      int index = luaL_checknumber(L, 2);
-      if (index <0 && index >= treenode->size()) {
-        luaL_error(L, "index out of range");
-      }
-      treenode->erase(treenode->begin() + index);
-      lua_gc(L, LUA_GCCOLLECT, 0);
-      return 1;
-    }
-    return 0;
-  }
+  }  
 
 };
 

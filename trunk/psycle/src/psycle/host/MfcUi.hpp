@@ -860,13 +860,55 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   ui::Window::Ptr view_;
 };
 
+class MenuImp;
 
-/*class MenuBarImp : public ui::MenuBarImp {
+class MenuBarImp : public ui::MenuBarImp { 
  public:  
-  MenuBarImp() {}        
+  MenuBarImp()  {} 
+ 
+  virtual void DevUpdate(boost::shared_ptr<Node> node);
+  virtual void DevInvalidate();
 
-  virtual void DevClear();
-};*/
+  void RegisterMenuEvent(std::uint16_t id, MenuImp* menu_imp);
+  MenuImp* FindMenuItemById(int id);
+  static MenuBarImp* MenuBarImpById(int id);
+  void WorkMenuItemEvent(int id);
+
+ private:
+   void UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start = 0);
+   std::map<std::uint16_t, MenuImp*> menu_item_id_map_;
+   static std::map<std::uint16_t, MenuBarImp*> menu_bar_id_map_;   
+};
+
+class MenuImp : public ui::MenuImp {  
+ public:
+  MenuImp(CMenu* parent) : cmenu_(0), parent_(parent), pos_(0), id_(0) {}
+  virtual ~MenuImp() {
+    if (::IsMenu(parent()->m_hMenu)) {      
+      parent()->RemoveMenu(pos_, MF_BYPOSITION);    
+    } else {
+      delete cmenu_;
+    }
+  }
+    
+  CMenu* parent() { return parent_; }
+  virtual void dev_set_text(const std::string& text) {    
+    parent()->ModifyMenu(pos_, MF_BYPOSITION, 0, text.c_str());    
+  }
+  void dev_set_pos(int pos) { pos_ = pos; }
+  int dev_pos() const { return pos_; }
+  void CreateMenu(const std::string& text);
+  void CreateMenuItem(const std::string& text);
+
+  CMenu* cmenu() { return cmenu_; }
+  int id() const { return id_; }
+  
+ private:
+    CMenu* cmenu_;
+    CMenu* parent_;    
+    int pos_;
+    int id_;
+};
 
 class TableItemImp : public ui::TableItemImp {
  public:
@@ -878,6 +920,21 @@ class TableItemImp : public ui::TableItemImp {
   virtual void dev_set_table(boost::weak_ptr<ui::Table> table);
   
   std::string text_;  
+};
+
+class TreeNodeImp : public NodeImp {  
+ public:
+  TreeNodeImp() : hItem(0) {}  
+  
+  HTREEITEM hItem;
+  void Insert(CTreeCtrl* tree, const std::string& text) {
+    TVINSERTSTRUCT tvInsert;
+    tvInsert.hParent = hItem;
+    tvInsert.hInsertAfter = hItem;
+    tvInsert.item.mask = TVIF_TEXT;  
+    tvInsert.item.pszText = const_cast<char *>(text.c_str());
+    hItem = tree->InsertItem(&tvInsert);
+  }
 };
 
 class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
@@ -912,6 +969,8 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
   virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
 
   BOOL OnEraseBkgnd(CDC* pDC) { return CTreeCtrl::OnEraseBkgnd(pDC); }
+
+  void DevUpdateTree(boost::shared_ptr<Node> node);
     
  protected:
   DECLARE_MESSAGE_MAP()
@@ -1353,9 +1412,13 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::ImageImp* CreateImageImp() {     
     return new ui::mfc::ImageImp();
   }
-/*  virtual ui::MenuBarImp* CreateMenuBarImp() {     
-    return new MenuBarImp(); // ::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
-  }*/
+  virtual ui::MenuBarImp* CreateMenuBarImp() {     
+    return new MenuBarImp();
+  }
+
+  virtual ui::MenuImp* CreateMenuImp() {
+    return new MenuImp(0);
+  }
   
   virtual ui::TableImp* CreateTableImp() {     
     return TableImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
