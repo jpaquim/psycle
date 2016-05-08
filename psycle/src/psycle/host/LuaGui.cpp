@@ -22,6 +22,7 @@ int LuaMenuBarBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},    
     {"update", update},
+    {"invalidate", invalidate},
     {"setrootnode", setrootnode},
     { NULL, NULL }
   };
@@ -31,17 +32,17 @@ int LuaMenuBarBind::open(lua_State *L) {
 int LuaMenuBarBind::create(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;
-  ui::MenuBar* menubar = ui::Systems::instance().CreateMenuBar();
+  LuaMenuBar* menubar = new LuaMenuBar(L); // ui::Systems::instance().CreateMenuBar();
   LuaHelper::new_shared_userdata<>(L, meta, menubar);
   return 1;
 }
 
 int LuaMenuBarBind::gc(lua_State* L) {
-  return LuaHelper::delete_shared_userdata<ui::MenuBar>(L, meta);  
+  return LuaHelper::delete_shared_userdata<LuaMenuBar>(L, meta);  
 }
 
 int LuaMenuBarBind::setrootnode(lua_State* L) {
-  boost::shared_ptr<ui::MenuBar> menu_bar = LuaHelper::check_sptr<ui::MenuBar>(L, 1, meta);
+  boost::shared_ptr<LuaMenuBar> menu_bar = LuaHelper::check_sptr<LuaMenuBar>(L, 1, meta);
   using namespace ui::canvas;
   boost::shared_ptr<Node> node = 
     boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaTreeNodeBind::meta.c_str()));
@@ -485,6 +486,20 @@ void LuaTree::OnClick(boost::shared_ptr<ui::Node> node) {
 
 // LuaTreeNodeBind
 std::string LuaTreeNodeBind::meta = "psytreenode"; // LuaTreeNode::type();
+
+
+// LuaMenuBar
+void LuaMenuBar::OnMenuItemClick(boost::shared_ptr<ui::Node> node) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onclick")) {
+      LuaHelper::find_weakuserdata<>(L, node.get());
+      in.pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
 
 // LuaCanvas + Bind
 template <class T>

@@ -100,27 +100,46 @@ function machine:openinmainframe()
 end
 
 function machine:onactivated()
-  self:initmenu()
-  psycle.output("root size :"..self.root:size())
+  self:initmenu()  
 end
 
-function machine:ondeactivated()  
-  self.root:remove(0)
+function machine:ondeactivated()    
+  self.root:remove(1)  
   self.node = nil
+  self.testnode = nil;
   collectgarbage()
+  self.menubar:invalidate()
 end
 
 function machine:initmenu()   
+   self.testnode = treenode:new()  
+   
    self.menubar = menubar:new()   
    self.root = treenode:new()   
    self.menubar:setrootnode(self.root) 
+   
+   local that = self
+   function self.menubar:onclick(node)       
+      if node == that.subnode then 
+        psycle.alert("subnode clicked")
+      elseif node == that.subnode1 then 
+        psycle.alert("subnode 1 clicked")
+      end
+   end
+   
    --self.menubar:mainmenu()        
    self.node = treenode:new()   
    self.subnode = treenode:new()        
-   self.node:settext("test")
+   self.node:settext("Plugineditor")
    self.subnode:settext("sub_node");
-   self.node:add(self.subnode);
+   self.node:add(self.subnode);   
+   self.subnode1 = treenode:new()           
+   self.subnode1:settext("sub_node1");
+   self.node:add(self.subnode1);
+   
+   psycle.output("#1."..serpent.dump(self.root._children))
    self.root:add(self.node);
+   psycle.output("#2"..serpent.dump(self.root._children))
    self.menubar:update();
    --self.maincanvas.pluginexplorer:setrootnode(self.root)  
    --node = self.root:at(0)

@@ -801,13 +801,17 @@ class Tree;
 
 class TreeImp;
 
-class TNImp { 
+class NodeImp { 
  public: 
-  virtual ~TNImp() {}
+  virtual ~NodeImp() {}
 
   virtual void set_text(const std::string& text) {}
 
-  void* owner;
+  void set_owner(void* owner) { owner_ = owner; }
+  void* owner() { return owner_; }
+  const void* owner() const { return owner_; }
+
+  void* owner_;
 };
 
 class Node : public boost::enable_shared_from_this<Node> {
@@ -831,9 +835,9 @@ class Node : public boost::enable_shared_from_this<Node> {
     void Clear() {
       struct {        
        void operator()(Node& node) {            
-         std::list<TNImp*>::iterator it = node.imps.begin();
+         std::list<NodeImp*>::iterator it = node.imps.begin();
          for ( ; it != node.imps.end(); ++it) {
-           TNImp* imp = *it;
+           NodeImp* imp = *it;
            delete imp;
          }
          node.imps.clear();
@@ -843,11 +847,11 @@ class Node : public boost::enable_shared_from_this<Node> {
     }
 
 
-    void AddImp(TNImp* imp) {
+    void AddImp(NodeImp* imp) {
       imps.push_back(imp);
     }
 
-    std::list<TNImp*> imps;
+    std::list<NodeImp*> imps;
     
     virtual void set_text(const std::string& text) { text_ = text; }
     virtual std::string text() const { return text_; }
@@ -883,140 +887,55 @@ class Node : public boost::enable_shared_from_this<Node> {
   boost::weak_ptr<Node> parent_;
 };
 
-class TNVImp : public TNImp {  
+class MenuBar;
+
+class MenuBarImp {
  public:
-  TNVImp() : hItem(0) {}  
-  HTREEITEM hItem;
-  void Insert(CTreeCtrl* tree, const std::string& text) {
-    TVINSERTSTRUCT tvInsert;
-    tvInsert.hParent = hItem;
-    tvInsert.hInsertAfter = hItem;
-    tvInsert.item.mask = TVIF_TEXT;  
-    tvInsert.item.pszText = const_cast<char *>(text.c_str());
-    hItem = tree->InsertItem(&tvInsert);
-  }
+  MenuBarImp() : bar_(0) {}
+  virtual ~MenuBarImp() = 0;
+  
+  void set_menu_bar(MenuBar* bar) { bar_ = bar; }
+  MenuBar* menu_bar() { return bar_; }
+
+  virtual void DevUpdate(boost::shared_ptr<Node> node) = 0;
+  virtual void DevInvalidate() = 0;
+   
+ private:
+  MenuBar* bar_;
 };
 
-class MImp : public TNImp {  
- public:
-  MImp() : cmenu(0), parent(0), pos_(0) {}  
-  virtual ~MImp() {
-    if (::IsMenu(parent->m_hMenu)) {      
-      parent->RemoveMenu(pos_, MF_BYPOSITION);    
-    }
-  }
-  CMenu* cmenu;  
-  CMenu* parent;  
+inline MenuBarImp::~MenuBarImp() {}
 
-  virtual void set_text(const std::string& text) {    
-    parent->ModifyMenu(pos_, MF_BYPOSITION, 0, text.c_str());    
-  }
+class MenuImp : public NodeImp {
+  public:
+    MenuImp() {}
+    virtual ~MenuImp() = 0;
 
-  void set_pos(int pos) { pos_ = pos; }
-  int pos() const { return pos_; }
-
-  private:
-    int pos_;  
+    virtual void dev_set_text(const std::string& text) = 0;
+    virtual void dev_set_pos(int pos) = 0;
+    virtual int dev_pos() const = 0;
 };
+
+inline  MenuImp::~MenuImp() {}
 
 class MenuBar {
  public:
-  MenuBar() {}
-  ~MenuBar() {}
+  MenuBar();
+  virtual ~MenuBar() {}
 
-  void Update() {
-    CWnd* pMain = ::AfxGetMainWnd();
-    UpdateNodes(root_node_.lock(), pMain->GetMenu(), pMain->GetMenu()->GetMenuItemCount());
-  }
-
-  void UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start = 0) {
-    Node::Container::iterator it = parent_node->begin();    
-    for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
-      Node::Ptr node = *it;
-      if (!node->imps.size()) {
-        MImp* imp = new MImp();  
-        imp->owner = this;
-        if (node->size() == 0) {        
-          const int id = ID_DYNAMIC_MENUS_START;
-          parent->AppendMenu(MF_STRING, id, node->text().c_str());
-          imp->cmenu = 0;          
-          imp->parent = parent;
-          node->imps.push_back(imp);
-        } else {
-          imp->cmenu = new CMenu();
-          imp->cmenu->CreateMenu();
-          imp->parent = parent;      
-          parent->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)imp->cmenu->m_hMenu, node->text().c_str());          
-          node->imps.push_back(imp);
-        }        
-        imp->set_pos(pos);
-      }
-      if (node->size() > 0) {      
-        std::list<TNImp*>::iterator it = node->imps.begin();
-        for ( ; it != node->imps.end(); ++it) {
-          if ((*it)->owner == this) {
-            MImp* imp =  dynamic_cast<MImp*>(*it);    
-            if (imp) {
-              UpdateNodes(node, imp->cmenu);
-            }
-            break;
-          }
-        }
-        
-      }
-    }
-  }
-
-
-  void CreateMenu() {
-    CWnd* pMain = ::AfxGetMainWnd();
-    Node::Ptr root = root_node_.lock();
-    CreateFromMenu(root, pMain->GetMenu(), 0, 0);
-  }
-
-  void CreateFromMenu(boost::shared_ptr<Node>& result,
-                      CMenu* pMenu, CMenu* parent, 
-                      int pos) {	 
-	 MImp* imp = new MImp();
-	 imp->cmenu = pMenu;
-   imp->parent = parent;
-   imp->set_pos(pos);
-   imp->owner = this;
-	 result->AddImp(imp);
-	 int n = pMenu->GetMenuItemCount();
-	 for (int i = 0; i < n; ++i) {		
-	   MENUINFO info;
-     pMenu->GetMenuInfo(&info);
-	   CString str;
-	   pMenu->GetMenuString(i, str, MF_BYPOSITION);
-	   CMenu* sub = pMenu->GetSubMenu(i);	  
-	   if (sub) {
-       boost::shared_ptr<Node> subnode(new Node());
-       subnode->set_text(str.GetString());
-		   CreateFromMenu(subnode, sub, pMenu, i);
-		   result->AddNode(subnode);
-	   } else {
-       boost::shared_ptr<Node> subnode(new Node());
-       subnode->set_text(str.GetString());
-       result->AddNode(subnode);
-       MImp* imp = new MImp();
-	     imp->cmenu = 0;
-       imp->parent = parent;
-       imp->set_pos(i);
-       imp->owner = this;
-	     result->AddImp(imp);
-     }
-	   OutputDebugString(str);
-	 }   
-  }
-  
+  virtual void Update();
+  virtual void Invalidate();
+    
   void set_root_node(boost::shared_ptr<Node>& root_node) { root_node_ = root_node; }
   boost::weak_ptr<Node> root_node() { return root_node_; }
+
+  virtual void OnMenuItemClick(boost::shared_ptr<Node> node) {}
 
   static int id_counter;
 
  private:
-  boost::weak_ptr<Node> root_node_;
+  std::auto_ptr<ui::MenuBarImp> imp_;
+  boost::weak_ptr<Node> root_node_;  
 };
 
 class Tree : public Window {
@@ -1047,7 +966,7 @@ class Tree : public Window {
   virtual void set_text_color(ARGB color);
   virtual ARGB text_color() const;
 
-  virtual void OnClick(boost::shared_ptr<Node> node) {}  
+  virtual void OnClick(boost::shared_ptr<Node> node) {}
 
  private:     
   boost::weak_ptr<Node> root_node_;    
@@ -1410,6 +1329,7 @@ class TreeImp : public WindowImp {
   virtual ARGB dev_text_color() const = 0;
   virtual void DevClear() = 0;
   virtual void set_tree(ui::Tree* tree) = 0;
+  virtual void DevUpdateTree(boost::shared_ptr<Node> node) = 0;
 };
 
 class TableItemImp {
@@ -1549,7 +1469,8 @@ class ImpFactory {
   virtual ui::ComboBoxImp* CreateComboBoxImp();
   virtual ui::EditImp* CreateEditImp();
   virtual ui::TreeImp* CreateTreeImp();
-  virtual ui::MenuBarImp* CreateMenuBarImp();  
+  virtual ui::MenuBarImp* CreateMenuBarImp();
+  virtual ui::MenuImp* CreateMenuImp();
   virtual ui::TableImp* CreateTableImp();  
   virtual ui::ButtonImp* CreateButtonImp();
   virtual ui::ScintillaImp* CreateScintillaImp();

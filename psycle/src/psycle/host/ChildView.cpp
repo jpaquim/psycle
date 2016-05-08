@@ -2509,7 +2509,12 @@ namespace psycle { namespace host {
       //}
     }
 
-    void CChildView::OnDynamicMenuItems(UINT nID) {      
+    void CChildView::OnDynamicMenuItems(UINT nID) {
+      ui::mfc::MenuBarImp* mbimp =  ui::mfc::MenuBarImp::MenuBarImpById(nID);
+      if (mbimp != 0) {
+        mbimp->WorkMenuItemEvent(nID);
+        return;
+      }
       if (menuItemIdMap[nID]==NULL) {
         if (active_lua_) {          
           LuaPlugin* lp = active_lua_;
@@ -2547,6 +2552,7 @@ namespace psycle { namespace host {
         }
       } else {        
         if (!active_lua_->crashed()) {
+          int debug = 1;
 //			    active_lua_->OnMenu(nID);
         }
       }

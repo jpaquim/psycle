@@ -469,8 +469,7 @@ namespace host {
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];
       public:
-      class LuaPlugin* active_lua_;  
-	    ui::MenuBar* mbar2;      
+      class LuaPlugin* active_lua_;	    
       std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;      
 
       boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions() {

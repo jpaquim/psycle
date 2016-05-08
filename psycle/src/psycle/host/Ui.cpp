@@ -15,7 +15,24 @@ boost::shared_ptr<ui::Region> Window::dummy_region_(ui::Systems::instance().Crea
 Window::Container Window::dummy_list_;
 Window::Ptr Window::nullpointer;
 Window::WeakPtr Window::focus_item_;
+
 int MenuBar::id_counter = 0;
+
+MenuBar::MenuBar() : imp_(ui::ImpFactory::instance().CreateMenuBarImp()) {
+  imp_->set_menu_bar(this);
+}
+
+void MenuBar::Update() {
+  if (!root_node_.expired()) {
+    assert(imp_.get());
+    imp_->DevUpdate(root_node_.lock());  
+  }
+}
+
+void MenuBar::Invalidate() {
+  assert(imp_.get());
+  imp_->DevInvalidate();
+}
 
 Region::Region() : imp_(ui::ImpFactory::instance().CreateRegionImp()) {
 }
@@ -1089,35 +1106,9 @@ void Tree::Clear() {
 }
 
 void Tree::UpdateTree() {
-  if (imp()) {
-    imp()->DevClear();
-  }
-  struct {
-      Tree* tree;
-      std::map<Node*, HTREEITEM> items;     
-      void operator()(Node& node) {            
-        mfc::TreeImp* treectrl = (mfc::TreeImp*) tree->imp();
-        TNVImp* imp = new TNVImp();
-        imp->owner = this;
-        imp->hItem = 0;        
-        if (node.parent().expired()) {
-          items[&node] = 0;
-          return;
-        }
-        node.AddImp(imp);
-        if (!node.parent().expired()) {
-          Node* p = node.parent().lock().get();
-          std::map<Node*, HTREEITEM>::const_iterator it = items.find(p);
-          if (it != items.end()) {
-            imp->hItem = it->second;
-          }
-        }        
-        imp->Insert(treectrl, node.text());
-        items[&node] = imp->hItem;
-      }
-    } f;
-    f.tree = this;
-    root_node_.lock()->traverse(f);
+  if (imp() && !root_node_.expired()) {
+    imp()->DevUpdateTree(root_node_.lock());
+  }  
 }
 
 void Tree::test1() {  
@@ -1649,6 +1640,11 @@ ui::TreeImp* ImpFactory::CreateTreeImp() {
 ui::MenuBarImp* ImpFactory::CreateMenuBarImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateMenuBarImp();
+}
+
+ui::MenuImp* ImpFactory::CreateMenuImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateMenuImp(); 
 }
 
 ui::TableImp* ImpFactory::CreateTableImp() {
