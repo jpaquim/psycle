@@ -33,7 +33,7 @@ end
 function maincanvas:initcontrollerdisplay(no, controller)
   local g = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(5, 5, 0, 0)  
   self:addtext(g, "Game Controller "..no)  
-  self:addtext(g, "y-pos"):addfield(g, "0", "xpos")
+  self:addtext(g, "x-pos"):addfield(g, "0", "xpos")
   self:addtext(g, "y-pos"):addfield(g, "0", "ypos")
   self:addtext(g, "z-pos"):addfield(g, "0",  "zpos")
   self:addtext(g, "button press down"):addfield(g, "0", "buttondown")
