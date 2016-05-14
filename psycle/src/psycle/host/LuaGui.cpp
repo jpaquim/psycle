@@ -1544,6 +1544,126 @@ int FillBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<ui::canvas::Fill>(L, meta);
 }
 
+
+void LuaGameController::OnButtonDown(int button) {   
+  LuaImport in(L, this, LuaGlobal::proxy(L));
+  if (in.open("onbuttondown")) {
+    in << button;
+    in.pcall(0);            
+  }
+}
+
+void LuaGameController::OnButtonUp(int button) {   
+  LuaImport in(L, this, LuaGlobal::proxy(L));
+  if (in.open("onbuttonup")) {
+    in << button;
+    in.pcall(0);            
+  }
+}
+
+void LuaGameController::OnXAxis(int pos, int oldpos) {
+  LuaImport in(L, this, LuaGlobal::proxy(L));
+  if (in.open("onxaxis")) {
+    in << pos << oldpos;
+    in.pcall(0);            
+  }
+}
+
+void LuaGameController::OnYAxis(int pos, int oldpos) {
+  LuaImport in(L, this, LuaGlobal::proxy(L));
+  if (in.open("onyaxis")) {
+    in << pos << oldpos;
+    in.pcall(0);            
+  }
+}
+
+void LuaGameController::OnZAxis(int pos, int oldpos) {
+  LuaImport in(L, this, LuaGlobal::proxy(L));
+  if (in.open("onzaxis")) {
+    in << pos << oldpos;
+    in.pcall(0);            
+  }
+}
+
+// GameControllerBind
+std::string LuaGameControllerBind::meta = "gamecontroller";
+
+int LuaGameControllerBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {"xpos", xpos},
+    {"ypos", ypos},
+    {"xzpos", zpos},
+    {"buttons", buttons},  
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods, gc);   
+  return 1;
+}
+
+int LuaGameControllerBind::create(lua_State* L) {
+  using namespace ui::canvas;
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;  
+  LuaGameController* game_controller_info = new LuaGameController(L);
+  LuaHelper::new_shared_userdata<>(L, meta, game_controller_info);
+  return 1;
+}
+
+int LuaGameControllerBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<LuaGameController>(L, meta);
+}
+
+
+int LuaGameControllerBind::buttons(lua_State* L) {
+  boost::shared_ptr<LuaGameController> controller = LuaHelper::check_sptr<LuaGameController>(L, 1, meta);
+  lua_pushinteger(L, controller->buttons().to_ulong());
+  return 1;
+}
+
+// GameControllerBind
+std::string LuaGameControllersBind::meta = "gamecontrollerbind";
+
+int LuaGameControllersBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"controllers", controllers},
+    {"update", update},
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods, gc);   
+  return 1;
+}
+
+int LuaGameControllersBind::create(lua_State* L) {
+  using namespace ui::canvas;
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;    
+  GameControllers<LuaGameController>* controller = new GameControllers<LuaGameController>();  
+  LuaHelper::new_shared_userdata<>(L, meta, controller);
+  lua_newtable(L);  
+  ui::GameControllers<LuaGameController>::iterator it = controller->begin();
+  for (; it != controller->end(); ++it) {
+    (*it)->set_lua_state(L);
+    luaL_requiref(L, "psycle.ui.gamecontroller", LuaGameControllerBind::open, 1);    
+    LuaHelper::new_shared_userdata(L, LuaGameControllerBind::meta, (*it).get(), lua_gettop(L), true);
+    lua_remove(L, -2);
+    lua_rawseti(L, -2, lua_rawlen(L, -2) + 1);
+  }
+  lua_setfield(L, -2, "_controllers");
+  return 1;
+}
+
+int LuaGameControllersBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<GameControllers<LuaGameController> >(L, meta);
+}
+
+int LuaGameControllersBind::controllers(lua_State* L) {
+  boost::shared_ptr<LuaGameController> controller = LuaHelper::check_sptr<LuaGameController>(L, 1, meta);
+  lua_getfield(L, -1, "_controllers");
+  return 1;
+}
+
 // LuaScintilla
 
 std::string LuaLexerBind::meta = "psylexermeta";

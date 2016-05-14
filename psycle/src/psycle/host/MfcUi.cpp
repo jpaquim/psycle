@@ -1,6 +1,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "MfcUi.hpp"
 #include "Psycle.hpp"
+#include "Mmsystem.h"
 
 namespace psycle {
 namespace host {
@@ -709,6 +710,25 @@ void MenuImp::CreateMenuItem(const std::string& text) {
   id_ = ID_DYNAMIC_MENUS_START + ui::MenuBar::id_counter++;
   parent_->AppendMenu(MF_STRING, id_, text.c_str());  
 }
+
+void GameControllersImp::DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) {
+  UINT num = joyGetNumDevs();
+  int game_controller_id = 0;
+  for ( ; game_controller_id < num; ++game_controller_id) {
+    JOYINFO joyinfo;    
+    int err = joyGetPos(game_controller_id, &joyinfo);
+    if (err == 0) {      
+      plugged_controller_ids.push_back(game_controller_id);      
+    }
+  }  
+}
+
+void GameControllersImp::DevUpdateController(ui::GameController& controller) {  
+  JOYINFO joy_info;
+  joyGetPos(controller.id(), &joy_info);
+  controller.set(joy_info.wXpos, joy_info.wYpos, joy_info.wZpos, static_cast<int>(joy_info.wButtons));
+}
+
 
 } // namespace mfc
 } // namespace ui

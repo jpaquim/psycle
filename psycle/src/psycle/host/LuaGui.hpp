@@ -395,6 +395,38 @@ struct FillBind {
   static int gc(lua_State* L);  
 };
 
+class LuaGameController : public ui::GameController,  public LuaState {
+ public:
+  LuaGameController() : ui::GameController(), LuaState(0) {}
+  LuaGameController(lua_State* L) : ui::GameController(), LuaState(L) {}
+
+  virtual void OnButtonDown(int button);
+  virtual void OnButtonUp(int button);
+  virtual void OnXAxis(int pos, int old_pos);
+  virtual void OnYAxis(int pos, int old_pos);
+  virtual void OnZAxis(int pos, int old_pos);
+};
+
+struct LuaGameControllerBind {
+  static std::string meta;
+  static int open(lua_State *L);  
+  static int create(lua_State *L); 
+  static int gc(lua_State* L);  
+  static int xpos(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::xpos); }
+  static int ypos(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::ypos); }
+  static int zpos(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::zpos); }
+  static int buttons(lua_State* L);    
+};
+
+struct LuaGameControllersBind {
+  static std::string meta;
+  static int open(lua_State *L);  
+  static int create(lua_State *L); 
+  static int gc(lua_State* L);  
+  static int update(lua_State* L) { LUAEXPORTM(L, LuaGameControllersBind::meta, &ui::GameControllers<LuaGameController>::Update); }
+  static int controllers(lua_State* L);
+};
+
 template<class T = LuaItem>
 class LuaItemBind {
  public:

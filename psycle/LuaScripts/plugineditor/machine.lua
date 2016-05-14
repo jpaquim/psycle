@@ -136,10 +136,8 @@ function machine:initmenu()
    self.subnode1 = treenode:new()           
    self.subnode1:settext("sub_node1");
    self.node:add(self.subnode1);
-   
-   psycle.output("#1."..serpent.dump(self.root._children))
-   self.root:add(self.node);
-   psycle.output("#2"..serpent.dump(self.root._children))
+      
+   self.root:add(self.node);   
    self.menubar:update();
    --self.maincanvas.pluginexplorer:setrootnode(self.root)  
    --node = self.root:at(0)
@@ -149,5 +147,6 @@ end
 function machine:onmenu(menuitem)
   psycle.output("here")
 end
+
 
 return machine

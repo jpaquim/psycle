@@ -6,6 +6,8 @@
 #include "MfcUi.hpp"
 #include "Menu.hpp"
 
+#include "LuaGui.hpp"
+
 namespace psycle {
 namespace host {
 namespace ui {
@@ -443,7 +445,10 @@ Window::Window(WindowImp* imp) :
   imp_.reset(imp);  
 }
 
-Window::~Window() { 
+Window::~Window() {   
+  if (ImpFactory::instance().DestroyWindowImp(imp_.get())) {              
+    imp_.release();         
+  }  
 }
 
 void Window::set_imp(WindowImp* imp) { 
@@ -1004,10 +1009,16 @@ void Group::set_aligner(const boost::shared_ptr<Aligner>& aligner) {
   
 Window::Container Aligner::dummy;
 
-void Group::UpdateAlign() {  
+void Group::UpdateAlign() {
+  bool is_prevented = is_fls_prevented();
+  PreventFls();  
   if (aligner_) {
     aligner_->Align();
-  }  
+  }
+  if (!is_prevented) {
+    EnableFls();    
+  }
+  Invalidate();
 }
 
 void Group::FlagNotAligned() {
@@ -1447,6 +1458,33 @@ bool Scintilla::is_modified() const {
   return imp() ? imp()->dev_is_modified() : false;
 }
 
+GameController::GameController() : id_(-1) {
+  xpos_ = ypos_ = zpos_ = 0;
+}
+
+void GameController::AfterUpdate(const GameController& old_state) {
+  for (int b = 0; b < 32; ++b) {
+    bool old_btn_set = old_state.buttons().test(b);
+    bool current_btn_set = buttons().test(b);
+    if (current_btn_set != old_btn_set) {
+      if (current_btn_set) {
+        OnButtonDown(b);
+      } else {
+        OnButtonUp(b);
+      }
+    }
+    if (xpos() != old_state.xpos()) {
+      OnXAxis(xpos(), old_state.xpos());
+    }
+    if (ypos() != old_state.ypos()) {
+      OnYAxis(ypos(), old_state.ypos());
+    }
+    if (zpos() != old_state.zpos()) {
+      OnZAxis(zpos(), old_state.zpos());
+    }
+  }  
+}
+
 // Ui Factory
 Systems& Systems::instance() {
   static Systems instance_;
@@ -1607,6 +1645,11 @@ ui::WindowImp* ImpFactory::CreateWindowImp() {
   return concrete_factory_->CreateWindowImp(); 
 }
 
+bool ImpFactory::DestroyWindowImp(ui::WindowImp* imp) {
+  assert(concrete_factory_.get());
+  return concrete_factory_->DestroyWindowImp(imp); 
+}
+
 ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateWindowCompositedImp(); 
@@ -1681,6 +1724,11 @@ ui::ImageImp* ImpFactory::CreateImageImp() {
 ui::ScintillaImp* ImpFactory::CreateScintillaImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateScintillaImp(); 
+}
+
+ui::GameControllersImp* ImpFactory::CreateGameControllersImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateGameControllersImp(); 
 }
 
 } // namespace ui

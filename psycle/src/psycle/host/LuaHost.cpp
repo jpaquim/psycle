@@ -78,6 +78,12 @@ void LuaProxy::OnTimer() {
   invokelater->Clear();
   lua_gc(L, LUA_GCCOLLECT, 0);
   unlock();
+  try {
+    LuaImport in(L, lua_mac_, this);
+    if (in.open("ontimer")) {
+      in.pcall(0);      
+    }    
+  } CATCH_WRAP_AND_RETHROW(host())
 }
 
 void LuaProxy::set_state(lua_State* state) {
@@ -112,6 +118,8 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
   LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
   LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.graphics");
+  LuaHelper::require<LuaGameControllersBind>(L, "psycle.ui.gamecontrollers");
+  LuaHelper::require<LuaGameControllerBind>(L, "psycle.ui.gamecontroller");
   // filedialog
   LuaHelper::require<LuaFileOpenBind>(L, "psycle.ui.fileopen");
   LuaHelper::require<LuaFileSaveBind>(L, "psycle.ui.filesave");

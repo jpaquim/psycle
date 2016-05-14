@@ -15,6 +15,7 @@ local checkbox = require("psycle.ui.canvas.checkbox")
 local signal = require("psycle.signal")
 local settings = require("settings")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local closebutton = require("closebutton")
 
 
 local search = group:new()
@@ -32,11 +33,11 @@ end
 
 function search:init() 
   self:setautosize(false, true)    
-  self:setmargin(1, 1, 1, 1) -- :setpadding(10, 5, 10, 5)
+  --self:setmargin(1, 1, 1, 1) -- :setpadding(10, 5, 10, 5)
   self.dosearch = signal:new()   
+  closebutton.new(self)
   self:createeditgroup(self)  
---  self:createreplacegroup(self)
-  self:createclosebutton() 
+--  self:createreplacegroup(self)  
  self:setornament(ornamentfactory:createfill(0x528A68))   
 end
 
@@ -106,17 +107,6 @@ function search:createoptions(parent)
   self.casesensitive = checkbox:new(parent):settext("match case"):setalign(item.ALLEFT)
   self.wholeword = checkbox:new(parent):settext("match whole words only"):setalign(item.ALLEFT)
   self.useregexp = checkbox:new(parent):settext("use regexp"):setalign(item.ALLEFT)
-  return self
-end
-
-function search:createclosebutton()
-  local g = group:new(self):setautosize(true, true):setalign(item.ALRIGHT)
-  text:new(g):settext("X"):setcolor(0xFFFFFF)
-  local that = self
-  function g:onmousedown()    
-    that:hide()
-    that:canvas():updatealign()
-  end
   return self
 end
 

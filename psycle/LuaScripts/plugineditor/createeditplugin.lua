@@ -23,6 +23,7 @@ local filehelper = require("psycle.file")
 local signal = require("psycle.signal")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local button = require("psycle.ui.canvas.button")
+local closebutton = require("closebutton")
 
 local createeditplugin = group:new()
 
@@ -35,14 +36,30 @@ function createeditplugin:new(parent)
 end
 
 function createeditplugin:init() 
-  self:setautosize(false, false)    
-  self:setpos(0, 0, 100, 100)
-  self:setornament(ornamentfactory:createfill(0x528A68))    
-  self:initnameprompt()    
+  self:setautosize(false, true)    
+  self:setpos(0, 0, 100, 0)
+  self:setornament(ornamentfactory:createfill(0x528A68))
+  closebutton.new(self)
+  self:initnameprompt()      
   self:initpluginlist()  
   self:initcreateoptions()
   self.docreate = signal:new()  
   self.doopen = signal:new()
+end
+
+function createeditplugin:initclosebutton()
+  local g = group:new(self):setpos(0, 0, 20, 0):setalign(item.ALRIGHT)  
+  local closebtn = text:new(g)
+                       :setautosize(false, true)
+                       :settext("X")
+                       :setalign(item.ALTOP)
+                       :setornament(ornamentfactory:createlineborder(0xFFFFFE))
+  local that = self
+  function closebtn:onmousedown()
+     that:hide()
+     that:parent():updatealign()
+  end
+  return self
 end
 
 function createeditplugin:initnameprompt()
@@ -64,8 +81,8 @@ function createeditplugin:createoredit()
   for i=1, #infos do
     if infos[i]:type() == machine.MACH_LUA then
       if infos[i]:name() == self.nameedit:text() then
-        self.doopen:emit(self.nameedit:text())        
-        self:hide():parent():updatealign()
+        self:hide()        
+        self.doopen:emit(self.nameedit:text())         
         found = true
         break
       end
@@ -92,13 +109,27 @@ function createeditplugin:initcreateoptions()
 end
 
 function createeditplugin:createplugin()  
-  if not filehelper.isdirectory(self.nameedit:text()) then    
-    self.docreate:emit(self.nameedit:text())
+  if not filehelper.isdirectory(self.nameedit:text()) then
     self:hide()
     self.createoptions:hide()
     self.pluginlist:show()    
-    self:parent():updatealign()
+    self.docreate:emit(self.nameedit:text())    
   end 
+end
+
+function createeditplugin:machinepath(info)  
+  local file = io.open(info:dllname(), "r")  
+  local str = ""
+  for line in file:lines() do
+    str = string.match(line, "require(%b())")
+    if str then
+      str = str:sub(3, -3)      
+      str = str:gsub("%.", "\\")      
+      break
+    end      
+  end
+  file:close()    
+  return str
 end
 
 function createeditplugin:updatepluginlist()
@@ -107,11 +138,27 @@ function createeditplugin:updatepluginlist()
   local lua_count = 0
   for i=1, #infos do
     if infos[i]:type() == machine.MACH_LUA then
-      text:new(self.pluginlist):setautosize(true, true):settext(infos[i]:name()):setmargin(0, 0, 10, 0)
+      local t = text:new(self.pluginlist):setautosize(true, true):settext(infos[i]:name()):setmargin(0, 0, 10, 0)      
+      t.info = infos[i]      
+      function t:onmouseenter()
+         self:setcolor(0xFFFF00)
+      end
+      local that = self
+      function t:onmouseup()
+        local dir = that:machinepath(self.info)        
+        that:hide()        
+        that.doopen:emit(dir)  
+      end
+      function t:onmousemove()
+      end
+      function t:onmouseout()
+         self:setcolor(0xFFFFFF)         
+      end
       lua_count = lua_count + 1
     end
   end   
-  self.pluginlist:setaligner(math.floor(lua_count / 3), 3)
+  local colnumber = 5
+  self.pluginlist:setaligner(math.floor(lua_count/colnumber + 0.5), colnumber)
 end
 
 return createeditplugin
