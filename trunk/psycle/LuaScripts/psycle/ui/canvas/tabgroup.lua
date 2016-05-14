@@ -81,13 +81,13 @@ function tabgroup:init()
       function t:onmousedown()        
         that:setactivepage(item.page)
       end
-      function t:onmouseenter()            
-        t:setornament(ornamentfactory:createfill(0x528A68))                
+      function t:onmouseenter()                    
+        self:setornament(ornamentfactory:createfill(0xFF0000)):fls()
       end
       function t:onmousemove()       
       end
       function t:onmouseout()               
-        t:setornament(nil)                
+        self:setornament(nil):fls()
       end
     end
     that:traverse(fun, that.tabs:items())

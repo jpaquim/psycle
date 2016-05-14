@@ -407,8 +407,8 @@ function maincanvas:oncreateplugin(pluginname)
                        self:createregistermachinefromtemplate(env))
   filehelper.mkdir(pluginname)    
   self:writetexttofile(cfg:luapath().."\\"..pluginname.."\\machine.lua",
-                       self:createmachinefromtemplate(env))
-  self:openplugin(pluginname)
+                       self:createmachinefromtemplate(env))                          
+  self:openplugin(pluginname.."\\machine")
   catcher:new():rescannew()
 end
 
@@ -416,11 +416,20 @@ function maincanvas:onopenplugin(pluginname)
   self:openplugin(pluginname)
 end
 
-function maincanvas:openplugin(pluginname)
-  self:closealltabs()
-  self.pluginexplorer:setfilepath(cfg:luapath().."\\"..pluginname.."\\")
-  self.selecttoolbar.selectmachine:settext(pluginname)
-  self:openfromfile(cfg:luapath().."\\"..pluginname.."\\machine.lua")  
+function findlast(haystack, needle)
+    local i=haystack:match(".*"..needle.."()")
+    if i==nil then return  else return i end
+end
+
+function maincanvas:openplugin(pluginpath)  
+  self:preventfls()
+  self:closealltabs()      
+  self.pluginexplorer:setfilepath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\")))
+  self.selecttoolbar.selectmachine:settext(pluginpath:sub(findlast(pluginpath, "\\"), -1))
+  self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")    
+  self:updatealign()
+  self:enablefls()  
+  self:invalidate()
 end
 
 function maincanvas:closealltabs()    

@@ -12,6 +12,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
+#include <bitset>
+
 #undef GetGValue
 #define GetGValue(rgb) (LOBYTE((rgb) >> 8))
 #define ToCOLORREF(argb) RGB((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, (argb >> 0) & 0xFF)
@@ -1189,6 +1191,105 @@ private:
   static std::string dummy_str_;
 };
 
+class GameController  { 
+ public:
+  GameController();
+
+  void set_id(int id) { id_ = id; }
+  int id() const { return id_; }  
+  void set(int xpos, int ypos, int zpos, std::bitset<32> buttons) {
+    xpos_ = xpos;
+    ypos_ = ypos;
+    zpos_ = zpos;
+    buttons_ = buttons;
+  }
+  int xpos() const { return xpos_; }
+  int ypos() const  { return ypos_; }
+  int zpos() const { return zpos_; }  
+  const std::bitset<32> buttons() const { return buttons_; }
+  
+  virtual void OnButtonDown(int button) {}
+  virtual void OnButtonUp(int button) {}
+  virtual void OnXAxis(int pos, int old_pos) {}
+  virtual void OnYAxis(int pos, int old_pos) {}
+  virtual void OnZAxis(int pos, int old_pos) {}
+    
+  void AfterUpdate(const GameController& old_state);
+
+ private:  
+  int id_;  
+  int xpos_, ypos_, zpos_;  
+  std::bitset<32> buttons_;
+};
+
+class GameControllersImp;
+
+template <class T>
+class GameControllers : public psycle::host::Timer {
+ public:
+   GameControllers() {
+     imp_.reset(ImpFactory::instance().CreateGameControllersImp());
+     ScanPluggedControllers();
+   }
+   virtual ~GameControllers() {}
+
+   typedef typename  std::vector<boost::shared_ptr<T> > Container;
+   typedef typename  std::vector<boost::shared_ptr<T> >::iterator iterator;
+
+   virtual iterator begin() { return plugged_controllers_.begin(); }
+   virtual iterator end() { return plugged_controllers_.end(); }
+   virtual bool empty() const { return plugged_controllers_.empty(); }
+   virtual int size() const { return plugged_controllers_.size(); }
+   
+   void set_imp(GameControllersImp* imp) { imp_.reset(imp); }
+   void release_imp() { imp_.release(); }
+   GameControllersImp* imp() { return imp_.get(); };
+   GameControllersImp* imp() const { return imp_.get(); };
+
+   void ScanPluggedControllers() {
+     std::vector<int> controller_ids;
+     imp_.get()->DevScanPluggedControllers(controller_ids);
+     std::vector<int>::iterator it = controller_ids.begin();
+     for ( ; it != controller_ids.end(); ++it) {       
+       boost::shared_ptr<T> game_controller_info(new T());
+       game_controller_info->set_id(*it);
+       plugged_controllers_.push_back(game_controller_info);
+     }
+   }
+
+   void Update() {
+     iterator it = plugged_controllers_.begin();
+     for ( ; it != plugged_controllers_.end(); ++it) {
+       boost::shared_ptr<T> controller = *it;
+       GameController old_state = *controller;
+       imp_->DevUpdateController(*controller.get()); 
+       controller->AfterUpdate(old_state);
+     }
+   }
+
+   virtual void OnTimerViewRefresh() {
+     Update();
+   }
+
+ private:
+   std::auto_ptr<GameControllersImp> imp_;
+   Container plugged_controllers_;   
+};
+
+template class GameControllers<GameController>;
+
+class GameControllersImp {
+ public:
+   GameControllersImp() {}
+   virtual ~GameControllersImp() = 0;
+
+   virtual void DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) = 0;   
+   virtual void DevUpdateController(ui::GameController& controller) = 0;
+};
+
+inline GameControllersImp::~GameControllersImp() {}
+
+
 class MenuBar;
 
 // Ui Factory
@@ -1463,6 +1564,7 @@ class ImpFactory {
 
   void set_concret_factory(ImpFactory& concrete_factory);
   virtual ui::WindowImp* CreateWindowImp();
+  virtual bool DestroyWindowImp(ui::WindowImp* imp);
   virtual ui::WindowImp* CreateWindowCompositedImp();
   virtual ui::FrameImp* CreateFrameImp();
   virtual ui::ScrollBarImp* CreateScrollBarImp(ui::Orientation orientation);
@@ -1478,6 +1580,7 @@ class ImpFactory {
   virtual ui::GraphicsImp* CreateGraphicsImp();
   virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr);
   virtual ui::ImageImp* CreateImageImp();
+  virtual ui::GameControllersImp* CreateGameControllersImp();  
 
  protected:
   ImpFactory() {}

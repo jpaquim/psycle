@@ -2550,11 +2550,6 @@ namespace psycle { namespace host {
             }  
           }               
         }
-      } else {        
-        if (!active_lua_->crashed()) {
-          int debug = 1;
-//			    active_lua_->OnMenu(nID);
-        }
       }
 		}
     

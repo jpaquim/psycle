@@ -1328,6 +1328,15 @@ class RegionImp : public ui::RegionImp {
   CRgn rgn_;
 };
 
+class GameControllersImp : public ui::GameControllersImp {
+ public:
+   GameControllersImp() {}
+   virtual ~GameControllersImp() {}
+   
+   virtual void DevScanPluggedControllers(std::vector<int>& plugged_controller_ids);
+   virtual void DevUpdateController(ui::GameController& controller);
+};
+
 class Systems : public ui::Systems {
  public:
   virtual ui::Region* CreateRegion() { return new ui::Region(); }
@@ -1373,6 +1382,17 @@ class Systems : public ui::Systems {
 
 class ImpFactory : public ui::ImpFactory {
  public:
+  virtual bool DestroyWindowImp(ui::WindowImp* imp) {
+    if (imp) {    
+      CWnd* wnd = (CWnd*) imp;
+      if (::IsWindow(wnd->m_hWnd)) { 
+        wnd->DestroyWindow();
+        return true;
+      }
+    }
+    return false;     
+  }
+
   virtual ui::WindowImp* CreateWindowImp() {
     return WindowImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
@@ -1422,7 +1442,11 @@ class ImpFactory : public ui::ImpFactory {
   
   virtual ui::TableImp* CreateTableImp() {     
     return TableImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
-  }  
+  }
+
+  virtual ui::GameControllersImp* CreateGameControllersImp() {
+    return new GameControllersImp();
+  }
 };
 
 
