@@ -12,12 +12,9 @@ namespace psycle {
 namespace host {
 namespace ui {
 
-
 boost::shared_ptr<ui::Region> Window::dummy_region_(ui::Systems::instance().CreateRegion());
 Window::Container Window::dummy_list_;
 Window::Ptr Window::nullpointer;
-Window::WeakPtr Window::focus_item_;
-
 int MenuBar::id_counter = 0;
 
 MenuBar::MenuBar() : imp_(ui::ImpFactory::instance().CreateMenuBarImp()) {
@@ -661,19 +658,20 @@ void Window::WorkChildPos() {
   } 
 }
 
-void Window::SetFocus(const Window::Ptr& item) { 
-  if (item != focus().lock()) {
-    if (!focus().expired() && item != focus().lock()) {
-      focus().lock()->OnKillFocus();
+
+Window::WeakPtr Window::focus() {
+  if (imp()) {
+    ui::Window* win = imp()->dev_focus_window();
+    if (win) {
+      return win->shared_from_this();
     }
-    focus_item_ = item;
-    if (!focus().expired()) {
-      Event ev;
-      Window* w = focus_item_.lock()->root();
-      if (w) {
-        w->WorkFocus(ev);
-      }
-    }
+  }
+  return Window::nullpointer;
+}
+
+void Window::SetFocus() {
+  if (imp()) {
+    imp()->DevSetFocus();      
   }
 }
 
@@ -698,7 +696,13 @@ void Window::Show() {
     imp_->DevShow();
   }  
   visible_ = true;
+  OnShow();
   FLS();
+}
+
+void Window::Show(const boost::shared_ptr<WindowShowStrategy>& aligner) {  
+  aligner->set_position(*this);
+  Show();  
 }
 
 void Window::Hide() {   
@@ -1067,6 +1071,19 @@ void ScrollBar::system_size(int& width, int& height) const {
   }
 }
 
+void WindowCenterToScreen::set_position(Window& window) {    
+  ui::Dimension win_dim(
+    (width_perc_ < 0)  ? window.dim().width()
+                       : Systems::instance().metrics().screen_dimension().width() * width_perc_,
+    (height_perc_ < 0) ? window.dim().height() 
+                       : Systems::instance().metrics().screen_dimension().height() * height_perc_
+  );
+  window.set_pos(ui::Rect(    
+    ((Systems::instance().metrics().screen_dimension() - win_dim) / 2.0)
+    .as_point(),
+    win_dim));
+}
+
 Frame::Frame() { set_auto_size(false, false); }
 
 Frame::Frame(FrameImp* imp) : Window(imp) { set_auto_size(false, false); }
@@ -1078,6 +1095,7 @@ void Frame::set_title(const std::string& title) {
 }
 
 void Frame::set_view(ui::Window::Ptr view) {
+  view_ = view;
   if (imp()) {
     imp()->dev_set_view(view);
     if (view) {
@@ -1156,6 +1174,12 @@ ARGB Tree::text_color() const {
   return imp() ? imp()->dev_text_color() : 0xFF00000;
 }
 
+bool Tree::is_editing() const {
+  return imp() ? imp()->dev_is_editing() : false;  
+}
+
+
+// Table
 Table::Table(TableImp* imp) : Window(imp) {}
 
 void Table::InsertColumn(int col, const std::string& text) {
@@ -1492,7 +1516,13 @@ Systems& Systems::instance() {
     instance_.concrete_factory_.reset(new ui::mfc::Systems());
   }
   return instance_;
-} 
+}
+
+SystemMetrics& Systems::metrics() {
+  static ui::mfc::SystemMetrics metrics_;  
+  return metrics_;
+}
+
 
 void Systems::set_concret_factory(Systems& concrete_factory) {
   concrete_factory_.reset(&concrete_factory);
@@ -1610,7 +1640,7 @@ void WindowImp::OnDevKeyDown(KeyEvent& ev) {
 
 void WindowImp::OnDevKeyUp(KeyEvent& ev) {
   if (window_ && window_->root()) {
-    window_->root()->WorkKeyDown(ev);
+    window_->root()->WorkKeyUp(ev);
   }
 }
 

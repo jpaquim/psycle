@@ -84,10 +84,11 @@ namespace psycle { namespace host {
     }
 
     void CanvasParamView::OnReload(Machine* mac)
-    {
+    {      
+      canvas_ = 0;
       LuaPlugin* lp = (LuaPlugin*) (mac);
       ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
-      if (!canvas.expired() && lp->ui_type() == MachineUiType::CUSTOMWND) {
+      if (!canvas.expired()) {
         ChangeCanvas(canvas.lock().get());
       }
     }

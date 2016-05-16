@@ -185,6 +185,8 @@ class LuaTree : public CanvasItem<ui::Tree> {
   }
 
   virtual void OnClick(boost::shared_ptr<ui::Node> node);
+  virtual void OnEditing(boost::shared_ptr<ui::Node> node, const std::string& text);
+  virtual void OnEdited(boost::shared_ptr<ui::Node> node, const std::string& text);
 };
 
 class LuaTable : public CanvasItem<ui::Table> {
@@ -347,6 +349,7 @@ class LuaFrameWnd : public CanvasItem<ui::Frame> {
    }
 
    virtual void OnClose();
+   virtual void OnShow();
 };
 
 class LuaScrollBar : public ui::ScrollBar, public LuaState {
@@ -461,7 +464,7 @@ class LuaItemBind {
     //  {"setheight", setheight},
       {"setautosize", setautosize},
       {"setdebugtext", setdebugtext},      
-      {"getfocus", getfocus},
+      {"setfocus", setfocus},
       // {"setzoom", setzoom},
       {"show", show},
       {"hide", hide},
@@ -489,8 +492,7 @@ class LuaItemBind {
       {"setcursor", setcursor},
       {"setclipchildren", setclipchildren},
       {"addstyle", addstyle},
-      {"removestyle", removestyle},
-      {"getfocus", getfocus},
+      {"removestyle", removestyle},      
       {"setalign", setalign},
       {"setmargin", setmargin},
       {"margin", margin},
@@ -556,8 +558,7 @@ class LuaItemBind {
     str << "LuaBind setsize" << v1 << "," << v2 << std::endl;
 		TRACE(str.str().c_str());
     LUAEXPORT(L, &T::SetSize); 
-  }*/
-  static int getfocus(lua_State *L) { LUAEXPORT(L, &T::GetFocus) }
+  }*/  
   static int updatearea(lua_State *L) { LUAEXPORT(L, &T::needsupdate) }
   static int pos(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
@@ -592,7 +593,17 @@ class LuaItemBind {
   static int isflsprevented(lua_State *L) { LUAEXPORT(L, &T::is_fls_prevented) }
   static int str(lua_State *L) { LUAEXPORT(L, &T::STR) }
   static int canvas(lua_State* L);
-  static int show(lua_State* L) { LUAEXPORT(L, &T::Show) }
+  static int show(lua_State* L) { 
+    int n = lua_gettop(L);
+    if (n==1) {
+      LUAEXPORT(L, &T::Show) 
+    } else {
+      boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+      boost::shared_ptr<ui::WindowShowStrategy> window_show_strategy = LuaHelper::check_sptr<ui::WindowShowStrategy>(L, 2, LuaCenterToScreenBind::meta);
+      item->Show(window_show_strategy);
+    }
+    return LuaHelper::chaining(L);
+  }
   static int hide(lua_State* L) { LUAEXPORT(L, &T::Hide) }
   static int enablepointerevents(lua_State* L) { LUAEXPORT(L, &T::EnablePointerEvents); }
   static int disablepointerevents(lua_State* L) { LUAEXPORT(L, &T::DisablePointerEvents); }
@@ -690,10 +701,12 @@ class LuaItemBind {
 
   static int setcapture(lua_State* L) { LUAEXPORT(L, &T::SetCapture); }
   static int releasecapture(lua_State* L) { LUAEXPORT(L, &T::ReleaseCapture); }
+  static int setfocus(lua_State *L) { LUAEXPORT(L, &T::SetFocus) }
 };
 
 template <class T>
 const std::string LuaItemBind<T>::meta = T::type();
+
 
 template <class T = LuaGroup>
 class LuaGroupBind : public LuaItemBind<T> {
@@ -749,8 +762,7 @@ class LuaCanvasBind : public LuaGroupBind<T> {
       {"showscrollbar", showscrollbar},
       {"setscrollinfo", setscrollinfo},
       {"invalidateontimer", invalidateontimer},
-      {"invalidatedirect", invalidatedirect},
-      {"setfocus", setfocus},
+      {"invalidatedirect", invalidatedirect},      
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -761,8 +773,7 @@ class LuaCanvasBind : public LuaGroupBind<T> {
   static int hidecursor(lua_State* L) { LUAEXPORT(L, &T::HideCursor); }  
   static int setcursorpos(lua_State* L) { LUAEXPORT(L, &T::SetCursorPos); }    
   static int showscrollbar(lua_State* L);
-  static int setscrollinfo(lua_State* L);
-  static int setfocus(lua_State* L);
+  static int setscrollinfo(lua_State* L);  
   static int invalidateontimer(lua_State* L);
   static int invalidatedirect(lua_State* L);
 };
@@ -944,6 +955,14 @@ class LuaComboBoxBind : public LuaItemBind<T> {
 };
 
 
+struct LuaCenterToScreenBind {
+  static int open(lua_State *L);
+  static const char* meta;
+  static int create(lua_State *L);
+  static int gc(lua_State* L);
+  static int sizetoscreen(lua_State* L) { LUAEXPORTM(L, LuaCenterToScreenBind::meta, &ui::WindowCenterToScreen::SizeToScreen) };
+};
+
 struct LuaMenuBarBind {
   static int open(lua_State *L);
   static const char* meta;
@@ -970,6 +989,7 @@ class LuaTreeBind : public LuaItemBind<T> {
       {"settextcolor", settextcolor},
       {"setbackgroundcolor", setbackgroundcolor},
       {"backgroundcolor", backgroundcolor},
+      {"isediting", isediting},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -980,12 +1000,13 @@ class LuaTreeBind : public LuaItemBind<T> {
   static int settextcolor(lua_State* L) { LUAEXPORTM(L, meta, &T::set_text_color); } 
   static int setbackgroundcolor(lua_State* L) { LUAEXPORT(L, &T::set_background_color) }
   static int backgroundcolor(lua_State* L) { LUAEXPORT(L, &T::background_color) }
+  static int isediting(lua_State* L) { LUAEXPORT(L, &T::is_editing) }
 
   static int setrootnode(lua_State* L) {
     boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
     using namespace ui::canvas;
     boost::shared_ptr<Node> node = 
-      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaTreeNodeBind::meta));
+      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
     tree->set_root_node(node);
     tree->UpdateTree();
     return LuaHelper::chaining(L);
@@ -1023,7 +1044,7 @@ class LuaTreeBind : public LuaItemBind<T> {
   }*/
 };
 
-class LuaTreeNodeBind {
+class LuaNodeBind {
  public:
   static std::string meta;
   static int open(lua_State *L) {
@@ -1057,7 +1078,7 @@ class LuaTreeNodeBind {
   static int add(lua_State* L) {
     using namespace ui::canvas;
     boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    
-    boost::shared_ptr<ui::Node> treenode2 = LuaHelper::check_sptr<ui::Node>(L, 2, LuaTreeNodeBind::meta);
+    boost::shared_ptr<ui::Node> treenode2 = LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta);
     treenode->AddNode(treenode2);
     lua_getfield(L, -2, "_children");
     int len = lua_rawlen(L, -1);
@@ -1089,10 +1110,10 @@ class LuaTreeNodeBind {
       if (index <0 && index >= treenode->size()) {
         luaL_error(L, "index out of range");
       }
-      luaL_requiref(L, "psycle.ui.canvas.treenode", LuaTreeNodeBind::open, true);
+      luaL_requiref(L, "psycle.ui.canvas.treenode", LuaNodeBind::open, true);
       int n = lua_gettop(L);      
       boost::shared_ptr<ui::Node> tn = *(treenode->begin() + index);      
-      LuaHelper::new_shared_userdata<>(L, LuaTreeNodeBind::meta, tn.get(), n, true);     
+      LuaHelper::new_shared_userdata<>(L, LuaNodeBind::meta, tn.get(), n, true);     
       return 1;
     }
     return 0;

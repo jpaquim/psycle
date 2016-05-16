@@ -340,8 +340,7 @@ bool Canvas::WorkKeyDown(KeyEvent& ev) {
     if (!focus().expired()) {
       Window::Ptr item = focus().lock();   
       WorkEvent(ev, &Window::OnKeyDown, item);    
-    } else {
-      ev.PreventDefault();
+    } else {      
       OnKeyDown(ev);
     }
   } catch (std::exception& e) {
@@ -355,7 +354,7 @@ void Canvas::WorkKeyUp(KeyEvent& ev) {
   try {    
     if (!focus().expired()) {
       Window::Ptr item = focus().lock();
-      WorkEvent(ev, &Window::OnKeyDown, item);;
+      WorkEvent(ev, &Window::OnKeyUp, item);;
     } else {
       OnKeyUp(ev);  
     }    
@@ -370,7 +369,7 @@ void Canvas::WorkMouseDown(MouseEvent& ev) {
     button_press_item_ = HitTest(ev.cx(), ev.cy());  
     if (!button_press_item_.expired()) {        
       Window::Ptr item = button_press_item_.lock();    
-      WorkEvent(ev, &Window::OnMouseDown, item, true);
+      WorkEvent(ev, &Window::OnMouseDown, item);
       button_press_item_ = item;    
     }        
   } catch (std::exception& e) {    
@@ -400,8 +399,7 @@ void Canvas::WorkDblClick(MouseEvent& ev) {
     if (!button_press_item_.expired()) {        
       Window::Ptr item = button_press_item_.lock();    
       WorkEvent(ev, &Window::OnDblclick, item);        
-    }
-    SetFocus(button_press_item_.lock());
+    }    
     button_press_item_ = nullpointer;    
   } catch (std::exception& e) {    
     AfxMessageBox(e.what());

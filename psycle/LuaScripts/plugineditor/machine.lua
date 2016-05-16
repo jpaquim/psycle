@@ -12,11 +12,16 @@ machine = require("psycle.machine"):new()
 -- local codegen = require("codegen")
 local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
+local centertoscreen = require("psycle.ui.canvas.centertoscreen")
 local sysmetrics = require("psycle.ui.systemmetrics")
 local menubar = require("psycle.ui.menubar")
 local serpent = require("psycle.serpent")
 local plugincatcher = require("psycle.plugincatcher")
-local treenode = require("psycle.ui.canvas.treenode")
+local node = require("psycle.node")
+local mainmenu = require("mainmenu")
+local menudesigner = require("menudesigner")
+local canvas = require("psycle.ui.canvas")
+local item = require("psycle.ui.canvas.item")
 
 -- plugin info
 function machine:info()
@@ -43,12 +48,8 @@ end
 
 function machine:createframe()  
   self.frame = frame:new()
-  self.frame:setview(self.maincanvas)  
-  self.frame:settitle("Psycle Plugineditor")  
-  local w, h = sysmetrics.screensize()
-  local fw = w * 0.9
-  local fh = h * 0.9
-  self.frame:setpos((w-fw)/2, (h-fh)/2, fw, fh)
+                    :setview(self.maincanvas)  
+                    :settitle("Psycle Plugineditor")
   local that = self
   function self.frame:onclose(ev) 		       
     that:exit()
@@ -90,7 +91,7 @@ function machine:openinframe()
   self.maincanvas:setwindowiconin()
   self:setcanvas(nil)
   self:createframe()   
-  self.frame:show()
+  self.frame:show(centertoscreen:new():sizetoscreen(0.9, 0.9))
 end
 
 function machine:openinmainframe() 
@@ -105,44 +106,43 @@ end
 
 function machine:ondeactivated()    
   self.root:remove(1)  
-  self.node = nil
-  self.testnode = nil;
+  self.node = nil  
   collectgarbage()
   self.menubar:invalidate()
 end
 
 function machine:initmenu()   
-   self.testnode = treenode:new()  
-   
    self.menubar = menubar:new()   
-   self.root = treenode:new()   
+   self.root = node:new()   
    self.menubar:setrootnode(self.root) 
+   
+   self.menus = mainmenu.menus()   
+   self.root:add(self.menus.node);
    
    local that = self
    function self.menubar:onclick(node)       
-      if node == that.subnode then 
-        psycle.alert("subnode clicked")
-      elseif node == that.subnode1 then 
-        psycle.alert("subnode 1 clicked")
+      if node == that.menus.menudesigner then         
+        that.menudesigner = menudesigner:new()
+        that.frame = frame:new()
+                          :settitle("Menu Designer")
+                          :setpos(0, 0, 400, 400)
+                          :setview(that.menudesigner)                                                            
+        function that.frame:ontest()
+          psycle.output("test")
+        end
+        function that.frame:onshow()
+          that.menudesigner.tree:setfocus()
+        end
+        function that.frame:onclose()           
+          that.frame = nil
+        end
+        that.frame:show(centertoscreen:new())
       end
-   end
-   
-   --self.menubar:mainmenu()        
-   self.node = treenode:new()   
-   self.subnode = treenode:new()        
-   self.node:settext("Plugineditor")
-   self.subnode:settext("sub_node");
-   self.node:add(self.subnode);   
-   self.subnode1 = treenode:new()           
-   self.subnode1:settext("sub_node1");
-   self.node:add(self.subnode1);
-      
-   self.root:add(self.node);   
-   self.menubar:update();
-   --self.maincanvas.pluginexplorer:setrootnode(self.root)  
-   --node = self.root:at(0)
-   --psycle.output(node:text())
+   end              
+   self.menubar:update()
 end
+
+
 
 function machine:onmenu(menuitem)
   psycle.output("here")

@@ -11,6 +11,16 @@ namespace host {
 namespace ui {
 namespace mfc {
 
+class SystemMetrics : public ui::SystemMetrics {
+ public:    
+  SystemMetrics() {}
+  virtual ~SystemMetrics() {}
+
+  virtual ui::Dimension screen_dimension() const {
+    return ui::Dimension(GetSystemMetrics(SM_CXFULLSCREEN), GetSystemMetrics(SM_CYFULLSCREEN));    
+  }
+};
+
 class ImageImp : public ui::ImageImp {
  public:
   ImageImp() { Init(); }
@@ -568,7 +578,8 @@ class WindowTemplateImp : public T, public I {
     return ui::Dimension(rc.Width(), rc.Height());
   }
   
-  virtual void DevShow() { ShowWindow(SW_SHOW); }  
+  
+  virtual void DevShow() { ShowWindow(SW_SHOW); }
   virtual void DevHide() { ShowWindow(SW_HIDE); }
   virtual void DevInvalidate() {    
     ::RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
@@ -595,7 +606,13 @@ class WindowTemplateImp : public T, public I {
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
 
-    
+  virtual ui::Window* dev_focus_window();
+  virtual void DevSetFocus() {    
+    if (GetFocus() != this) {
+      SetFocus();
+    }
+  }
+
  protected:		
   //virtual BOOL PreCreateWindow(CREATESTRUCT& cs);   
   virtual BOOL PreTranslateMessage(MSG* pMsg);  
@@ -939,11 +956,14 @@ class TreeNodeImp : public NodeImp {
 
 class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
  public:  
-  TreeImp() : WindowTemplateImp<CTreeCtrl, ui::TreeImp>() { tree_ = 0; }
-
+  TreeImp() : 
+      WindowTemplateImp<CTreeCtrl, ui::TreeImp>(), 
+      is_editing_(false) { 
+        tree_ = 0;
+  }
   static TreeImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     TreeImp* imp = new TreeImp();
-    if (!imp->Create(WS_CHILD, 
+    if (!imp->Create(WS_CHILD | TVS_EDITLABELS, 
                      CRect(0, 0, 200, 200), 
                      parent, 
                      nID)) {
@@ -951,14 +971,13 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
       return 0;
     }
     imp->set_window(w);
+    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
     imp->SetLineColor(0xFFFFFF);
     return imp;
   }
 
-  virtual void set_tree(ui::Tree* tree) { tree_ = tree; }
-  
-  virtual void DevClear();
-  
+  virtual void set_tree(ui::Tree* tree) { tree_ = tree; }  
+  virtual void DevClear();  
   virtual void dev_set_background_color(ARGB color) { 
     SetBkColor(ToCOLORREF(color));
   }  
@@ -967,16 +986,22 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
     SetTextColor(ToCOLORREF(color));
   }
   virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
-
   BOOL OnEraseBkgnd(CDC* pDC) { return CTreeCtrl::OnEraseBkgnd(pDC); }
-
   void DevUpdateTree(boost::shared_ptr<Node> node);
-    
+  void OnNodeChanged(Node& node);
+  bool dev_is_editing() const { return is_editing_; }
+
  protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CTreeCtrl::OnPaint(); }
   BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);  
+  BOOL OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
+  ui::Node* find_selected_node();
   ui::Tree* tree_;
+
+ private:
+   bool is_editing_;
 };
 
 class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
@@ -1092,6 +1117,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       return 0;
     }
     imp->set_window(w);
+    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
     return imp;
   }
           

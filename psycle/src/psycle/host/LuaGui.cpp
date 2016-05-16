@@ -45,7 +45,7 @@ int LuaMenuBarBind::setrootnode(lua_State* L) {
   boost::shared_ptr<LuaMenuBar> menu_bar = LuaHelper::check_sptr<LuaMenuBar>(L, 1, meta);
   using namespace ui::canvas;
   boost::shared_ptr<Node> node = 
-    boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaTreeNodeBind::meta.c_str()));
+    boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta.c_str()));
   menu_bar->set_root_node(node);
   // menu_bar->Update();    
   return LuaHelper::chaining(L);
@@ -266,10 +266,7 @@ int LuaFileSaveBind::filename(lua_State* L) {
   return 1;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// LuaSyetemMetricsBind
-/////////////////////////////////////////////////////////////////////////////
-
+// LuaSystemMetricsBind
 int  LuaSystemMetrics::open(lua_State *L) {
   static const luaL_Reg funcs[] = {
     {"screensize", screensize},    
@@ -280,35 +277,57 @@ int  LuaSystemMetrics::open(lua_State *L) {
 }
 
 int LuaSystemMetrics::screensize(lua_State* L) {
-  lua_pushinteger(L, GetSystemMetrics(SM_CXFULLSCREEN));
-  lua_pushinteger(L, GetSystemMetrics(SM_CYFULLSCREEN));
+  ui::Dimension screen_dim = ui::Systems::instance().metrics().screen_dimension();
+  lua_pushinteger(L, screen_dim.width());
+  lua_pushinteger(L, screen_dim.height());
   return 2;
 }
 
+//  LuaCenterShowStrategyBind
+const char* LuaCenterToScreenBind::meta = "psyscreencentermeta";
 
-/////////////////////////////////////////////////////////////////////////////
+int LuaCenterToScreenBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},        
+    {"sizetoscreen", sizetoscreen},
+    { NULL, NULL }
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaCenterToScreenBind::create(lua_State* L) {  
+  ui::WindowCenterToScreen* show_strategy;      
+  show_strategy = new ui::WindowCenterToScreen();  
+  LuaHelper::new_shared_userdata<>(L, meta, show_strategy);
+  return 1;
+}
+
+int LuaCenterToScreenBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::WindowCenterToScreen>(L, meta);  
+}
+
 // LuaFrameWnd+Bind
-/////////////////////////////////////////////////////////////////////////////
-
-void LuaFrameWnd::OnClose() {    
-  LuaHelper::find_weakuserdata<>(L, this);
-  bool has_event_method = false;
-  if (!lua_isnil(L, -1)) {
-    lua_getfield(L, -1, "onclose");
-  }
-  has_event_method = !lua_isnil(L, -1);
-  if (has_event_method) {
-    lua_pushvalue(L, -2);
-    lua_remove(L, -3);                  
-    int status = lua_pcall(L, 1, 0, 0);
-    if (status) {
-      const char* msg = lua_tostring(L, -1);
-      throw psycle::host::exceptions::library_error::runtime_error(std::string(msg));        
-    }      
-  } else {
-    lua_pop(L, 2);
+void LuaFrameWnd::OnClose() {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onclose")) {      
+      in << pcall(0);      
+    } 
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());    
   }    
   lua_gc(L, LUA_GCCOLLECT, 0);  
+}
+
+void LuaFrameWnd::OnShow() {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onshow")) {      
+      in << pcall(0);      
+    } 
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());    
+  }  
 }
 
 template <class T>
@@ -484,8 +503,32 @@ void LuaTree::OnClick(boost::shared_ptr<ui::Node> node) {
   }
 }
 
-// LuaTreeNodeBind
-std::string LuaTreeNodeBind::meta = "psytreenode"; // LuaTreeNode::type();
+void LuaTree::OnEditing(boost::shared_ptr<ui::Node> node, const std::string& text) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onediting")) {
+      LuaHelper::find_weakuserdata<>(L, node.get());
+      in << text << pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
+void LuaTree::OnEdited(boost::shared_ptr<ui::Node> node, const std::string& text) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onedited")) {
+      LuaHelper::find_weakuserdata<>(L, node.get());
+      in << text << pcall(0);      
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
+// LuaNodeBind
+std::string LuaNodeBind::meta = "psynode"; // LuaTreeNode::type();
 
 
 // LuaMenuBar
@@ -517,16 +560,6 @@ int LuaCanvasBind<T>::open(lua_State *L) {
   LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]));
   lua_setfield(L, -2, "CURSOR");
   return 1;
-}
-
-template <class T>
-int LuaCanvasBind<T>::setfocus(lua_State* L) {
-  int err = LuaHelper::check_argnum(L, 2, "Wrong number of arguments.");
-  if (err!=0) return err;
-  boost::shared_ptr<T> canvas = LuaHelper::check_sptr<T>(L, 1, meta);
-  Window::Ptr item = LuaGroupBind<>::test(L, 2);
-  canvas->SetFocus(item);
-  return LuaHelper::chaining(L);
 }
 
 template <class T>
