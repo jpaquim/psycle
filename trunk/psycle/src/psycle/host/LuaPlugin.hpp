@@ -23,7 +23,7 @@ namespace psycle { namespace host {
 
   class LuaPlugin : public Machine,
                     public boost::enable_shared_from_this<LuaPlugin>,
-                    public Timer
+                    public psycle::host::Timer
   {
   public:
     LuaPlugin(const std::string& dllpath, int index, bool full=true);    

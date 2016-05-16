@@ -190,11 +190,10 @@ function maincanvas:onkeydown(ev)
   if ev:ctrlkey() then
     if ev:keycode() == 70 then
       self:displaysearch()
-      --self:setfocus(self.search.edit)
       ev:preventdefault()
+      --self:setfocus(self.search.edit)      
     elseif ev:keycode() == 83 then
-      self:savepage()    
-      ev:preventdefault()
+      self:savepage()          
     end
   end  
 end

@@ -52,6 +52,7 @@ namespace psycle { namespace host {
     strncpy(_editName, info.name.c_str(),sizeof(_editName)-1);    
     if (full) {
       proxy().Init();
+      StartTimer();
     }    
   }
 

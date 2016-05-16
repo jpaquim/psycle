@@ -47,21 +47,6 @@ function createeditplugin:init()
   self.doopen = signal:new()
 end
 
-function createeditplugin:initclosebutton()
-  local g = group:new(self):setpos(0, 0, 20, 0):setalign(item.ALRIGHT)  
-  local closebtn = text:new(g)
-                       :setautosize(false, true)
-                       :settext("X")
-                       :setalign(item.ALTOP)
-                       :setornament(ornamentfactory:createlineborder(0xFFFFFE))
-  local that = self
-  function closebtn:onmousedown()
-     that:hide()
-     that:parent():updatealign()
-  end
-  return self
-end
-
 function createeditplugin:initnameprompt()
   local g = group:new(self):setautosize(true, true):setalign(item.ALTOP)
   text:new(g):settext("Name of Plugin to Edit?"):setalign(item.ALLEFT)

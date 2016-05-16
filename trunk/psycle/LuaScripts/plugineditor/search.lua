@@ -111,7 +111,7 @@ function search:createoptions(parent)
 end
 
 function search:onfocus()  
-  self:canvas():setfocus(self.edit)
+  self.edit:setfocus()
 end
 
 return search

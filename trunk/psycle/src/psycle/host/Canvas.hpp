@@ -91,19 +91,16 @@ class Canvas : public ui::Group {
   virtual void OnFocusChange(int id) { OnMessage(FOCUS, id); }
 
   virtual bool is_root() const { return true; }
-  
+    
  private:  
   void Init();  
   Canvas(const Canvas& other) {}
   Canvas& operator=(Canvas rhs) {}
  
   template <class T, class T1>
-  void WorkEvent(T& ev, void (T1::*ptmember)(T&), Window::Ptr& item, bool set_focus = false) {
+  void WorkEvent(T& ev, void (T1::*ptmember)(T&), Window::Ptr& item) {
     while (item) {
       // send event to item
-      if (set_focus) {
-        SetFocus(item);
-      }
       (item.get()->*ptmember)(ev);
       if (ev.is_work_parent()) {
         item = item->parent().lock();  

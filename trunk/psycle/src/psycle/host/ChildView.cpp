@@ -2539,7 +2539,11 @@ namespace psycle { namespace host {
           if (!user_view.expired()) {          
             ChangeCanvas(user_view.lock().get()); 
             active_lua_ = plug;
-            plug->OnActivated();
+            try {
+              plug->OnActivated();
+            } catch (std::exception& e) {              
+              // AfxMessageBox(e.what());
+            }
             Invalidate(false);
           } else {  
             try {

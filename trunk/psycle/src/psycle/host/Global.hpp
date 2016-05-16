@@ -47,7 +47,14 @@ namespace psycle
       public:
        Timer();
        virtual ~Timer();
-       virtual void OnTimerViewRefresh() = 0;       
+       
+       virtual void OnTimerViewRefresh() = 0;
+       void StartTimer() { is_running_ = true; }
+       void StopTimer() { is_running_ = false; }
+       bool is_running() const { return is_running_; }
+
+      private:
+        bool is_running_;
     };
             
     typedef std::list<Timer*> TimerList;

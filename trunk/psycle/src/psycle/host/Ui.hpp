@@ -72,6 +72,7 @@ typedef std::vector<Point> Points;
 
 struct Dimension {
   Dimension() : width_(0), height_(0) {}
+  Dimension(double val) : width_(val), height_(val) {}
   Dimension(double width, double height) : width_(width), height_(height) {}
 
   inline bool operator==(const Dimension& rhs) const { 
@@ -84,6 +85,12 @@ struct Dimension {
   inline Dimension operator-(const Dimension& rhs) const {
     return Dimension(width_ - rhs.width(), height_ - rhs.height());
   }
+  inline Dimension operator/(const Dimension& rhs) const {
+    return Dimension(width_/rhs.width(), height_/rhs.height());
+  }
+  inline Dimension operator*(const Dimension& rhs) const {
+    return Dimension(width_*rhs.width(), height_*rhs.height());
+  }
   Dimension& operator+=(const Dimension& rhs) {
     width_ += rhs.width();
     height_ += rhs.height();
@@ -94,6 +101,16 @@ struct Dimension {
     height_ -= rhs.height();
     return *this;
   }
+  Dimension& operator*=(const Dimension& rhs) {
+    width_ *= rhs.width();
+    height_ *= rhs.height();
+    return *this;
+  }
+  Dimension& operator/=(const Dimension& rhs) {
+    width_ /= rhs.width();
+    height_ /= rhs.height();
+    return *this;
+  } 
   void set(double width, double height) { 
     width_ = width;
     height_ = height;
@@ -103,6 +120,7 @@ struct Dimension {
   double width() const { return width_; }
   double height() const { return height_; }
 
+  ui::Point as_point() const { return ui::Point(width_, height_); }
  private:
   double width_, height_;
 };
@@ -168,6 +186,16 @@ struct Rect {
  private:
   ui::Point top_left_, bottom_right_;  
 };
+
+class SystemMetrics {
+ public:    
+  SystemMetrics() {}  
+  virtual ~SystemMetrics() = 0;
+
+  virtual ui::Dimension screen_dimension() const = 0;   
+};
+
+inline SystemMetrics::~SystemMetrics() {}
 
 class RegionImp;
 
@@ -469,6 +497,18 @@ class Commands {
    std::list<boost::function<void(void)>> functors;   
 };
 
+
+class Window;
+
+class WindowShowStrategy {
+  public:
+   WindowShowStrategy();
+   virtual ~WindowShowStrategy() = 0;
+   virtual void set_position(Window& window) = 0;
+};
+
+inline WindowShowStrategy::~WindowShowStrategy() {}
+
 class Window : public boost::enable_shared_from_this<Window> {
  friend class WindowImp;
  public:  
@@ -518,7 +558,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void Insert(iterator it, const Window::Ptr& item) {}
   virtual void Remove(const Window::Ptr& item) {}
   virtual void RemoveAll() {}
-  
+    
   virtual void set_pos(const ui::Point& pos);
   virtual void set_pos(const ui::Rect& pos);
   virtual ui::Rect pos() const;
@@ -534,8 +574,9 @@ class Window : public boost::enable_shared_from_this<Window> {
   const ui::Rect& margin() const { return margin_; }
   void set_padding(const ui::Rect& padding) { padding_ = padding; }
   const ui::Rect& padding() const { return padding_; }
-    
+  
   virtual void Show();
+  virtual void Show(const boost::shared_ptr<WindowShowStrategy>& aligner);
   virtual void Hide();
   virtual bool visible() const { return visible_; }
   virtual void FLS();  // invalidate combine new & old region
@@ -607,9 +648,8 @@ class Window : public boost::enable_shared_from_this<Window> {
   boost::signal<void (KeyEvent&)> KeyDown;
   boost::signal<void (KeyEvent&)> KeyUp;
   
-  static Window::WeakPtr focus() { return Window::focus_item_; }
-  static void SetFocus(const Window::Ptr& item);
-  virtual void GetFocus() { SetFocus(shared_from_this()); }
+  Window::WeakPtr focus();
+  virtual void SetFocus();  
   virtual void OnFocus(Event& ev) { ev.WorkParent(); }
   virtual void OnKillFocus() {}
   boost::signal<void ()> Focus;
@@ -641,8 +681,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   static boost::shared_ptr<ui::Region> dummy_region_;
   bool auto_size_width_, auto_size_height_;
   boost::weak_ptr<Ornament> ornament_;  
-  bool visible_, pointer_events_;
-  static Window::WeakPtr focus_item_;
+  bool visible_, pointer_events_;  
   AlignStyle align_;
   ui::Rect margin_, padding_;
   bool has_store_;
@@ -764,8 +803,23 @@ inline Aligner::~Aligner() {};
 
 class FrameImp;
 
+class WindowCenterToScreen {
+  public:   
+   WindowCenterToScreen() : width_perc_(-1), height_perc_(-1) {}   
+   virtual ~WindowCenterToScreen() {}
+   virtual void set_position(Window& window);
+
+   void SizeToScreen(double width_perc, double height_perc) {
+     width_perc_ = width_perc;
+     height_perc_ = height_perc;
+   }
+
+  private:    
+    double width_perc_, height_perc_;
+};
+
 class Frame : public Window {
- public:  
+ public:    
   typedef boost::weak_ptr<Frame> WeakPtr;
   static std::string type() { return "canvastreeitem"; }  
 
@@ -778,9 +832,12 @@ class Frame : public Window {
   virtual void set_view(ui::Window::Ptr view);
   virtual void set_title(const std::string& title);
   virtual void ShowDecoration();
-  virtual void HideDecoration();
-
+  virtual void HideDecoration();  
   virtual void OnClose() {}
+  virtual void OnShow() {}
+
+ private:
+  ui::Window::WeakPtr view_;
 };
 
 class Ornament {
@@ -808,11 +865,10 @@ class NodeImp {
   virtual ~NodeImp() {}
 
   virtual void set_text(const std::string& text) {}
-
   void set_owner(void* owner) { owner_ = owner; }
   void* owner() { return owner_; }
   const void* owner() const { return owner_; }
-
+  
   void* owner_;
 };
 
@@ -848,14 +904,11 @@ class Node : public boost::enable_shared_from_this<Node> {
       traverse(f);      
     }
 
-
-    void AddImp(NodeImp* imp) {
-      imps.push_back(imp);
-    }
+    void AddImp(NodeImp* imp) { imps.push_back(imp); }
 
     std::list<NodeImp*> imps;
     
-    virtual void set_text(const std::string& text) { text_ = text; }
+    virtual void set_text(const std::string& text) { text_ = text; changed(*this); }
     virtual std::string text() const { return text_; }
 
     void AddNode(boost::shared_ptr<Node> node) {
@@ -882,7 +935,9 @@ class Node : public boost::enable_shared_from_this<Node> {
 
     void set_parent(const boost::weak_ptr<Node>& parent) {  parent_ = parent; }
     boost::weak_ptr<Node> parent() const { return parent_; }
-    
+        
+    boost::signal<void (ui::Node&)> changed;
+
  private:
   std::string text_;    
   Container children_;
@@ -952,23 +1007,22 @@ class Tree : public Window {
   Tree(TreeImp* imp);
 
   TreeImp* imp() { return (TreeImp*) Window::imp(); };
-  TreeImp* imp() const { return (TreeImp*) Window::imp(); };
-      
+  TreeImp* imp() const { return (TreeImp*) Window::imp(); };      
   void UpdateTree();
   void set_root_node(boost::shared_ptr<Node>& root_node) {
     root_node_ = root_node;
   }
-  boost::weak_ptr<Node> root_node() { return root_node_; }
-      
-  void Clear();    
-  
+  boost::weak_ptr<Node> root_node() { return root_node_; }      
+  void Clear();      
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
-
   virtual void set_text_color(ARGB color);
   virtual ARGB text_color() const;
+  bool is_editing() const;
 
   virtual void OnClick(boost::shared_ptr<Node> node) {}
+  virtual void OnEditing(boost::shared_ptr<Node> node, const std::string& text) {}
+  virtual void OnEdited(boost::shared_ptr<Node> node, const std::string& text) {}
 
  private:     
   boost::weak_ptr<Node> root_node_;    
@@ -1230,6 +1284,7 @@ class GameControllers : public psycle::host::Timer {
    GameControllers() {
      imp_.reset(ImpFactory::instance().CreateGameControllersImp());
      ScanPluggedControllers();
+     StartTimer();
    }
    virtual ~GameControllers() {}
 
@@ -1299,6 +1354,7 @@ class Systems {
   virtual ~Systems() {}
 
   void set_concret_factory(Systems& concrete_factory);
+
   virtual ui::Region* CreateRegion();
   virtual ui::Graphics* CreateGraphics();
   virtual ui::Graphics* CreateGraphics(void* dc);
@@ -1313,13 +1369,15 @@ class Systems {
   virtual ui::Tree* CreateTree();
   virtual ui::MenuBar* CreateMenuBar();  
 
+  SystemMetrics& metrics();
+
  protected:
   Systems() {}
   Systems(Systems const&) {}             
   Systems& operator=(Systems const&) {}
 
  private:
-  std::auto_ptr<Systems> concrete_factory_;
+  std::auto_ptr<Systems> concrete_factory_;  
 };
 
 // Imp Interfaces
@@ -1387,6 +1445,8 @@ class WindowImp {
   virtual void DevSetCursor(CursorStyle style) {}  
   virtual void dev_set_parent(Window* window) {} 
   virtual void dev_set_clip_children() {}
+  virtual ui::Window* dev_focus_window() = 0;
+  virtual void DevSetFocus() = 0;
  
   virtual bool OnDevUpdateArea(ui::Area& rgn) { return true; }
   // Events raised by implementation
@@ -1416,7 +1476,7 @@ class FrameImp : public WindowImp {
   virtual void DevShowDecoration() = 0;
   virtual void DevHideDecoration() = 0;
 
-  virtual void OnDevClose();
+  virtual void OnDevClose(); 
 };
 
 class TreeImp : public WindowImp {
@@ -1431,6 +1491,7 @@ class TreeImp : public WindowImp {
   virtual void DevClear() = 0;
   virtual void set_tree(ui::Tree* tree) = 0;
   virtual void DevUpdateTree(boost::shared_ptr<Node> node) = 0;
+  virtual bool dev_is_editing() const = 0;
 };
 
 class TableItemImp {

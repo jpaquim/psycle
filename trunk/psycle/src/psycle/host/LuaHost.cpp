@@ -72,12 +72,19 @@ int LuaProxy::invoke_later(lua_State* L) {
   return 0;
 }
 
-void LuaProxy::OnTimer() {    
-  lock();  
-  invokelater->Invoke();  
-  invokelater->Clear();
-  lua_gc(L, LUA_GCCOLLECT, 0);
-  unlock();
+void LuaProxy::OnTimer() {      
+  try {
+    lock();  
+    invokelater->Invoke();  
+    invokelater->Clear();
+    lua_gc(L, LUA_GCCOLLECT, 0);
+    unlock();
+  } catch(std::exception& e) {    
+    std::string msg = std::string("LuaRun Errror.") + e.what();
+    AfxMessageBox(msg.c_str());
+    unlock();
+    throw std::runtime_error(msg.c_str());
+  }
   try {
     LuaImport in(L, lua_mac_, this);
     if (in.open("ontimer")) {
@@ -129,6 +136,7 @@ void LuaProxy::set_state(lua_State* state) {
   // ui canvas binds
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
   LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
+  LuaHelper::require<LuaCenterToScreenBind>(L, "psycle.ui.canvas.centertoscreen");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");  
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
   LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
@@ -136,7 +144,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
   LuaHelper::require<LuaTreeBind<> >(L, "psycle.ui.canvas.tree");
-  LuaHelper::require<LuaTreeNodeBind>(L, "psycle.ui.canvas.treenode");
+  LuaHelper::require<LuaNodeBind>(L, "psycle.node");
   LuaHelper::require<LuaTableBind<> >(L, "psycle.ui.canvas.table");
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
   LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.canvas.combobox");
@@ -386,7 +394,7 @@ void LuaProxy::Run() {
 // the bad thing: the exception is not rethrown then
 void LuaProxy::Init() {    
   try {
-    LuaImport in(L, lua_mac_, this);    
+    LuaImport in(L, lua_mac_, this);
     if (in.open("init")) {      
       in.pcall(0);          
     } else {    

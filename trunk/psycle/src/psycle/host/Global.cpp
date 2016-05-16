@@ -76,7 +76,7 @@ namespace psycle
     
 
 
-    Timer::Timer() { GlobalTimer::instance().AddListener(this); }
+    Timer::Timer() : is_running_(false) { GlobalTimer::instance().AddListener(this); }
     Timer::~Timer() { GlobalTimer::instance().RemoveListener(this); }
 
     void GlobalTimer::AddListener(Timer* listener) {                
@@ -100,7 +100,9 @@ namespace psycle
     void GlobalTimer::OnViewRefresh() {          
       it = listeners_.begin();
       while (it != listeners_.end()) {
-        (*it)->OnTimerViewRefresh();
+        if ((*it)->is_running()) {
+          (*it)->OnTimerViewRefresh();
+        }
         if (!removed_) {          
           ++it;
         } else {

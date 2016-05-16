@@ -129,7 +129,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
       return ev.is_default_prevented();      
     }          
   } else
-  if (pMsg->message == WM_KEYUP) {      
+  if (pMsg->message == WM_KEYUP) {          
     CWnd* hwndTest = GetFocus();
     if (hwndTest) {
       UINT nFlags = 0;
@@ -293,6 +293,18 @@ bool WindowTemplateImp<T, I>::OnDevUpdateArea(ui::Area& area) {
   return true;
 }
 
+template<class T, class I>
+ui::Window* WindowTemplateImp<T, I>::dev_focus_window() {
+  CWnd* hwndTest = GetFocus();
+  if (hwndTest) {
+    std::map<HWND, ui::WindowImp*>::iterator it = WindowHook::windows_.find(hwndTest->m_hWnd);
+    if (it != WindowHook::windows_.end()) {
+      return it->second->window();
+    }
+  }
+  return 0;
+}
+
 void WindowImp::DevSetCursor(CursorStyle style) {
   LPTSTR c = 0;
   int ac = 0;
@@ -322,7 +334,6 @@ void WindowImp::DevSetCursor(CursorStyle style) {
   }
   cursor_ = (c!=0) ? LoadCursor(0, c) : ::LoadCursor(0, MAKEINTRESOURCE(ac));
 }
-
 
 template class WindowTemplateImp<CWnd, ui::WindowImp>;
 template class WindowTemplateImp<CComboBox, ui::ComboBoxImp>;
@@ -395,6 +406,8 @@ BEGIN_MESSAGE_MAP(TreeImp, CTreeCtrl)
   ON_WM_ERASEBKGND()
 	ON_WM_PAINT()  
   ON_NOTIFY_REFLECT_EX(TVN_SELCHANGED, OnClick)
+  ON_NOTIFY_REFLECT_EX(TVN_BEGINLABELEDIT, OnBeginLabelEdit)
+  ON_NOTIFY_REFLECT_EX(TVN_ENDLABELEDIT, OnEndLabelEdit)
 END_MESSAGE_MAP()
 
 void TreeImp::DevUpdateTree(boost::shared_ptr<Node> node) {   
@@ -407,6 +420,7 @@ void TreeImp::DevUpdateTree(boost::shared_ptr<Node> node) {
         imp->set_owner(this);
         imp->hItem = 0;        
         node.AddImp(imp);
+        node.changed.connect(boost::bind(&TreeImp::OnNodeChanged, treectrl, _1));
         if (node.parent().expired()) {
           items[&node] = 0;
           return;
@@ -426,11 +440,30 @@ void TreeImp::DevUpdateTree(boost::shared_ptr<Node> node) {
   node->traverse(f);
 }
 
+void TreeImp::OnNodeChanged(Node& node) {
+  std::list<NodeImp*>::iterator it = node.imps.begin();
+  for ( ; it != node.imps.end(); ++it) {
+    NodeImp* i = *it;
+    TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(i);
+    if (imp) {
+      SetItemText(imp->hItem, node.text().c_str());       
+    }
+  }
+}
+
 BOOL TreeImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
-  HTREEITEM hTtreeSelectedItem = GetSelectedItem();
+  Node* node = find_selected_node();
+  if (node) {
+    tree_->OnClick(node->shared_from_this());
+  }
+  return FALSE;
+}
+
+ui::Node* TreeImp::find_selected_node() {  
   struct {
      ui::Tree* tree;
      HTREEITEM hTtreeSelectedItem;
+     ui::Node* selected_node_;
      void operator()(Node& node) {
        std::list<NodeImp*>::iterator it = node.imps.begin();
        for ( ; it != node.imps.end(); ++it) {
@@ -438,15 +471,41 @@ BOOL TreeImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
          TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(i);
          if (imp) {
            if (imp->hItem == hTtreeSelectedItem) {
-             tree->OnClick(node.shared_from_this());
+             selected_node_ = &node;             
            }
          }
        }
      }
   } f;
   f.tree = tree_;
-  f.hTtreeSelectedItem = hTtreeSelectedItem;
+  f.selected_node_ = 0;
+  f.hTtreeSelectedItem = GetSelectedItem();
   tree_->root_node().lock()->traverse(f);
+  return f.selected_node_;
+}
+
+BOOL TreeImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
+  Node* node = find_selected_node();
+  if (node) {
+    CEdit* edit = GetEditControl();
+    CString s;    
+    edit->GetWindowTextA(s);
+    is_editing_ = true;
+    tree_->OnEditing(node->shared_from_this(), s.GetString());
+  }
+  return FALSE;
+}
+
+
+BOOL TreeImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
+  Node* node = find_selected_node();
+  if (node) {
+    CEdit* edit = GetEditControl();
+    CString s;    
+    edit->GetWindowTextA(s);
+    is_editing_ = false;
+    tree_->OnEdited(node->shared_from_this(), s.GetString());
+  }
   return FALSE;
 }
 
@@ -590,12 +649,12 @@ LRESULT __stdcall WindowHook::HookCallback(int nCode, WPARAM wParam, LPARAM lPar
 
 void WindowHook::FilterHook(HWND hwnd) {  
   typedef std::map<HWND, ui::WindowImp*> WindowList;
-  WindowList::iterator it = windows_.find(hwnd);
+  /*WindowList::iterator it = windows_.find(hwnd);
   if (it != windows_.end()) {
-    Window::SetFocus(it->second->window()->shared_from_this());    
+    it->second->window()->
   } else {
     Window::SetFocus(Window::nullpointer);
-  }
+  }*/
 }
 
 void WindowHook::SetFocusHook() {
