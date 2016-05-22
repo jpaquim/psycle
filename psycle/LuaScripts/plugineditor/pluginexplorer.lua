@@ -25,7 +25,8 @@ end
 
 function pluginexplorer:init()
   self.click = signal:new() 
-  self:setpos(0, 0, 100, 0)  
+  self:setpos(0, 0, 100, 0)
+  self:showlines()
 end
 
 function pluginexplorer:dirLookup(directory)

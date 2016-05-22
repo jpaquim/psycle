@@ -613,9 +613,8 @@ class WindowTemplateImp : public T, public I {
     }
   }
 
- protected:		
-  //virtual BOOL PreCreateWindow(CREATESTRUCT& cs);   
-  virtual BOOL PreTranslateMessage(MSG* pMsg);  
+protected:  
+  virtual BOOL PreTranslateMessage(MSG* pMsg);
 	DECLARE_MESSAGE_MAP()
 	int OnCreate(LPCREATESTRUCT lpCreateStruct);
   void OnDestroy();	
@@ -657,7 +656,7 @@ class WindowTemplateImp : public T, public I {
   }	
   virtual bool OnDevUpdateArea(ui::Area& area);
   
- private:
+ protected:
   int Win32KeyFlags(UINT nFlags) {
     UINT flags = 0;
     if (GetKeyState(VK_SHIFT) & 0x8000) {
@@ -683,6 +682,7 @@ class WindowTemplateImp : public T, public I {
     ::MapWindowPoints(m_hWnd, ::GetDesktopWindow(), &pt, 1);
   }
   
+ private:
   CBitmap bmpDC;
   ARGB color_;
   ui::Point dev_pos_;  
@@ -883,7 +883,8 @@ class MenuBarImp : public ui::MenuBarImp {
  public:  
   MenuBarImp()  {} 
  
-  virtual void DevUpdate(boost::shared_ptr<Node> node);
+  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
+  virtual void DevErase(boost::shared_ptr<Node> node) {}
   virtual void DevInvalidate();
 
   void RegisterMenuEvent(std::uint16_t id, MenuImp* menu_imp);
@@ -930,8 +931,7 @@ class MenuImp : public ui::MenuImp {
 class TableItemImp : public ui::TableItemImp {
  public:
   TableItemImp() {}
-
-  //virtual void DevAdd(boost::shared_ptr<ui::TableItem> node);
+  
   virtual void dev_set_text(const std::string& text) { text_ = text; }
   virtual std::string dev_text() const { return text_; }
   virtual void dev_set_table(boost::weak_ptr<ui::Table> table);
@@ -942,16 +942,17 @@ class TableItemImp : public ui::TableItemImp {
 class TreeNodeImp : public NodeImp {  
  public:
   TreeNodeImp() : hItem(0) {}  
-  
-  HTREEITEM hItem;
-  void Insert(CTreeCtrl* tree, const std::string& text) {
+      
+  HTREEITEM DevInsert(CTreeCtrl* tree, const std::string& text, TreeNodeImp* prev_imp) {
     TVINSERTSTRUCT tvInsert;
     tvInsert.hParent = hItem;
-    tvInsert.hInsertAfter = hItem;
+    tvInsert.hInsertAfter = prev_imp ? prev_imp->hItem : TVI_LAST;
     tvInsert.item.mask = TVIF_TEXT;  
     tvInsert.item.pszText = const_cast<char *>(text.c_str());
-    hItem = tree->InsertItem(&tvInsert);
+    return tree->InsertItem(&tvInsert);
   }
+    
+  HTREEITEM hItem;    
 };
 
 class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
@@ -978,6 +979,11 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
 
   virtual void set_tree(ui::Tree* tree) { tree_ = tree; }  
   virtual void DevClear();  
+  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
+  virtual void DevErase(boost::shared_ptr<Node> node);
+
+  // virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> nodeafter);
+  virtual void DevEditNode(boost::shared_ptr<ui::Node> node);
   virtual void dev_set_background_color(ARGB color) { 
     SetBkColor(ToCOLORREF(color));
   }  
@@ -987,11 +993,17 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
   }
   virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
   BOOL OnEraseBkgnd(CDC* pDC) { return CTreeCtrl::OnEraseBkgnd(pDC); }
-  void DevUpdateTree(boost::shared_ptr<Node> node);
+  
+  void dev_select_node(const boost::shared_ptr<ui::Node>& node);
+  virtual boost::weak_ptr<Node> dev_selected();  
   void OnNodeChanged(Node& node);
   bool dev_is_editing() const { return is_editing_; }
-
- protected:
+  std::map<HTREEITEM, boost::weak_ptr<ui::Node> > htreeitem_node_map_;
+  void dev_add_item(boost::shared_ptr<Node> node);
+  virtual void DevShowLines();
+  virtual void DevHideLines();
+  
+ protected:  
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CTreeCtrl::OnPaint(); }
   BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);  
@@ -1001,7 +1013,7 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
   ui::Tree* tree_;
 
  private:
-   bool is_editing_;
+   bool is_editing_;  
 };
 
 class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {

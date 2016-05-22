@@ -1116,6 +1116,37 @@ void Frame::HideDecoration() {
   }
 }
 
+void Node::erase(iterator it) {       
+  boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
+  for ( ; imp_it != imps.end(); ++imp_it) {
+    imp_it->owner()->DevErase(*it);
+  }
+  children_.erase(it);
+}
+
+void Node::AddNode(boost::shared_ptr<Node> node) {
+  children_.push_back(node);
+  node->set_parent(shared_from_this());
+  boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
+  for ( ;imp_it != imps.end(); ++imp_it) {
+    imp_it->owner()->DevUpdate(node, boost::shared_ptr<ui::Node>());
+  }
+}
+
+void Node::insert(iterator it, Ptr node) { 
+  boost::shared_ptr<ui::Node> insert_after;
+  if (it != begin() && it != end()) {
+    iterator it1 = it;    
+    insert_after = *(--it1);
+  }      
+  children_.insert(it, node);
+  node->set_parent(shared_from_this());
+  boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
+  for ( ; imp_it != imps.end(); ++imp_it) {
+    imp_it->owner()->DevUpdate(node, insert_after);
+  }
+}
+
 Tree::Tree()  {     
   set_auto_size(false, false);  
 }
@@ -1125,8 +1156,7 @@ Tree::Tree(TreeImp* imp) : Window(imp) {
 }
 
 void Tree::Clear() {
-  if (!root_node_.expired()) {
-    root_node_.lock()->Clear();
+  if (!root_node_.expired()) {    
     root_node_.reset();
     if (imp()) {
       imp()->DevClear();
@@ -1136,22 +1166,19 @@ void Tree::Clear() {
 
 void Tree::UpdateTree() {
   if (imp() && !root_node_.expired()) {
-    imp()->DevUpdateTree(root_node_.lock());
+    imp()->DevClear();  
+    imp()->DevUpdate(root_node_.lock());
   }  
 }
 
-void Tree::test1() {  
-  r1.reset(new Node());       
-  r1->set_text("root");
-  s1.reset(new Node());
-  s1->set_text("s1");
-  s2.reset(new Node());
-  s2->set_text("s2");
-  r1->AddNode(s1);
-  s1->AddNode(s2); 
+boost::weak_ptr<Node> Tree::selected() {
+  return imp() ? imp()->dev_selected() : boost::weak_ptr<Node>();  
+}
 
-  set_root_node(r1);
-  UpdateTree();
+void Tree::select_node(const boost::shared_ptr<ui::Node>& node) {
+  if (imp()) {
+    imp()->dev_select_node(node);
+  }
 }
 
 void Tree::set_background_color(ARGB color) {
@@ -1174,8 +1201,26 @@ ARGB Tree::text_color() const {
   return imp() ? imp()->dev_text_color() : 0xFF00000;
 }
 
+void Tree::EditNode(boost::shared_ptr<ui::Node> node) {
+  if (imp()) {
+    imp()->DevEditNode(node);
+  }
+}
+
 bool Tree::is_editing() const {
   return imp() ? imp()->dev_is_editing() : false;  
+}
+
+void Tree::ShowLines() {
+  if (imp()) {
+    imp()->DevShowLines();
+  }
+}
+
+void Tree::HideLines() {
+  if (imp()) {
+    imp()->DevHideLines();
+  }
 }
 
 

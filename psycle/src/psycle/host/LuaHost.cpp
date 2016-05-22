@@ -187,10 +187,11 @@ void LuaProxy::Reload() {
       new_state = LuaGlobal::load_script(host_->GetDllName());
       set_state(new_state);
       Run();
-      Init();
+      Init();      
       if (old_state) {
         lua_close(old_state);
-      }        
+      }
+      OnActivated();
     } catch(std::exception &e) {
       if (new_state) {
         lua_close(new_state);
@@ -990,12 +991,9 @@ int error_handler(lua_State* L) {
       filename_noext = boost::filesystem::path(LuaGlobal::proxy(L)->host().GetDllName()).stem().string();
       PluginCatcher* plug_catcher =
         static_cast<PluginCatcher*>(&Global::machineload());
-      PluginInfo* info = plug_catcher->info(filename_noext.c_str());
-      if (info) {
-        luaL_requiref(LE, "psycle.plugininfo", LuaPluginInfoBind::open, true);
-        int n = lua_gettop(LE);        
-        LuaHelper::new_shared_userdata<>(LE, LuaPluginInfoBind::meta, new PluginInfo(*info), n);
-        lua_remove(LE, -2);        
+      PluginInfo* info = plug_catcher->info(filename_noext);
+      if (info) {       
+        LuaHelper::requirenew<LuaPluginInfoBind>(LE, "psycle.plugininfo", new PluginInfo(*info));
       } else {
         lua_pushnil(LE);
       }       

@@ -24,6 +24,8 @@ local signal = require("psycle.signal")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local button = require("psycle.ui.canvas.button")
 local closebutton = require("closebutton")
+local pic = require("psycle.ui.canvas.pic")
+local image = require("psycle.ui.image")
 
 local createeditplugin = group:new()
 
@@ -66,8 +68,9 @@ function createeditplugin:createoredit()
   for i=1, #infos do
     if infos[i]:type() == machine.MACH_LUA then
       if infos[i]:name() == self.nameedit:text() then
+        local dir = self:machinepath(infos[i])        
         self:hide()        
-        self.doopen:emit(self.nameedit:text())         
+        self.doopen:emit(dir, infos[i]:name(), infos[i]) 
         found = true
         break
       end
@@ -87,6 +90,12 @@ end
 
 function createeditplugin:initcreateoptions()  
   self.createoptions = group:new(self):setautosize(true, true):setalign(item.ALTOP):hide()
+  
+  --self.pic1 = pic:new(self.createoptions):setalign(item.ALTOP):setautosize(false, false):setpos(0, 0, 200, 140)
+  --local picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
+  --self.img = image:new():load(picdir.."generator.png")
+  --self.pic1:setimage(self.img)
+  
   self.machmode = checkbox:new(self.createoptions):settext("Is Generator"):setalign(item.ALTOP)      
   local btn = button:new(self.createoptions):settext("Create"):setalign(item.ALTOP)  
   local that = self
@@ -132,7 +141,7 @@ function createeditplugin:updatepluginlist()
       function t:onmouseup()
         local dir = that:machinepath(self.info)        
         that:hide()        
-        that.doopen:emit(dir)  
+        that.doopen:emit(dir, t.info:name(), t.info)  
       end
       function t:onmousemove()
       end

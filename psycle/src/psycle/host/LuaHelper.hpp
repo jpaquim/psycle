@@ -503,6 +503,13 @@ namespace LuaHelper {
         assert(0);
       }
     }
+
+    template <class UDB, class UD>
+		static void requirenew(lua_State* L, const::std::string& name, UD* ud, bool null_deleter = false) {
+      luaL_requiref(L, name.c_str(), UDB::open, true);      
+      LuaHelper::new_shared_userdata<>(L, UDB::meta, ud, lua_gettop(L), null_deleter);
+      lua_remove(L, -2);        
+    }
     
     static int chaining(lua_State* L) {
       lua_pushvalue(L, 1);
@@ -529,6 +536,10 @@ namespace LuaHelper {
       lua_pushnil(L);
       lua_settable(L, -3);
       lua_pop(L, 2);
+    }
+
+    static void collect_full_garbage(lua_State* L) {
+      lua_gc(L, LUA_GCCOLLECT, 0);
     }
 
     static int setfield(lua_State* L, const std::string& name, int val) {
@@ -1167,9 +1178,7 @@ namespace LuaHelper {
       LuaHelper::find_weakuserdata(L, result);
       return 1;
     }
-
     
-
     template <class UDT, class T>
 		static int callstrict1(lua_State* L, const std::string& meta,
 						       void (UDT::*pt2Member)(T), bool dec1=false) { // function ptr
@@ -1232,7 +1241,7 @@ namespace LuaHelper {
 	    }
 			return 1;
 		}
-
+    
     // useful for debugging to see the stack state
 		static void stackDump (lua_State *L) {
 			int top = lua_gettop(L);

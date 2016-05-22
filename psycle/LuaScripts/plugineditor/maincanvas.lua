@@ -27,7 +27,6 @@ local pluginexplorer = require("pluginexplorer")
 local callstack = require("callstack")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local image = require("psycle.ui.image")
-local checkbox = require("psycle.ui.canvas.checkbox")
 local signal = require("psycle.signal")
 local item = require("psycle.ui.canvas.item")
 local catcher = require("psycle.plugincatcher")
@@ -36,6 +35,7 @@ local createeditplugin = require("createeditplugin")
 local filehelper = require("psycle.file")
 local templateparser = require("templateparser")
 local cfg = require("psycle.config"):new("PatternVisual")
+local project = require("project")
 
 local maincanvas = canvas:new()
 
@@ -190,8 +190,7 @@ function maincanvas:onkeydown(ev)
   if ev:ctrlkey() then
     if ev:keycode() == 70 then
       self:displaysearch()
-      ev:preventdefault()
-      --self:setfocus(self.search.edit)      
+      ev:preventdefault()       
     elseif ev:keycode() == 83 then
       self:savepage()          
     end
@@ -247,10 +246,10 @@ end
 
 function maincanvas:playplugin()
   local macidx = psycle.proxy:editmacidx()
-  local mac = machine:new(macidx)
-  if mac then
+  local machine = machine:new(macidx)
+  if machine then
     self:savepage()
-    mac:reload()
+    machine:reload()
   end
 end
 
@@ -291,15 +290,8 @@ function maincanvas:initselectplugintoolbar(parent)
     local catcher = catcher:new()
     local infos = catcher:infos()    
     that.createeditplugin:show()
-    that:updatealign()
-    --local name, path = psycle.selmachine()
-    --if name then   
-      --path = path:sub(1, -5).."\\"
-      --that.pluginexplorer:setfilepath(path)
-      --self:settext(name):fls()      
-    --end    
-  end 
-  -- local newproject = toolicon:new(t, settings.picdir.."plus.png", 0xFFFFFF)
+    that:updatealign()    
+  end  
   return t
 end  
 
@@ -372,26 +364,6 @@ function maincanvas:displaysearch(ev)
   self:updatealign()
 end
 
-function maincanvas:createmachinefromtemplate(env)
-  local file = io.open(cfg:luapath().."\\plugineditor\\plugin.lu$", "r")  
-  local t = templateparser.prep(file, env)
-  file:close()  
-  return t
-end
-
-function maincanvas:createregistermachinefromtemplate(env)
-  local file = io.open(cfg:luapath().."\\plugineditor\\pluginregister.lu$", "r")
-  local t = templateparser.prep(file, env)
-  file:close()  
-  return t
-end
-
-function maincanvas:writetexttofile(filepath, text)
-   local file = io.open(filepath, "w")
-   file:write(text)
-   file:close()   
-end
-
 function maincanvas:oncreateplugin(pluginname)
   local env = {}
   env.vendor = "psycle"
@@ -400,19 +372,31 @@ function maincanvas:oncreateplugin(pluginname)
     env.machmode = "machine.FX"    
   else
     env.machmode = "machine.GENERATOR"
-  end
-  self:createregistermachinefromtemplate(env)
-  self:writetexttofile(cfg:luapath().."\\"..pluginname..".lua",
-                       self:createregistermachinefromtemplate(env))
-  filehelper.mkdir(pluginname)    
-  self:writetexttofile(cfg:luapath().."\\"..pluginname.."\\machine.lua",
-                       self:createmachinefromtemplate(env))                          
-  self:openplugin(pluginname.."\\machine")
-  catcher:new():rescannew()
+  end  
+  templateparser.work(cfg:luapath().."\\plugineditor\\pluginregister.lu$",
+                      cfg:luapath().."\\"..pluginname..".lua",
+                      env)  
+  filehelper.mkdir(pluginname)
+  templateparser.work(cfg:luapath().."\\plugineditor\\plugin.lu$",
+                      cfg:luapath().."\\"..pluginname.."\\machine.lua",
+                      env)
+  self:openplugin(pluginname.."\\machine", pluginname)
+  local catcher = catcher:new():rescannew()
+  local infos = catcher:infos()        
+  for i=1, #infos do       
+    if infos[i]:type() == machine.MACH_LUA and
+      infos[i]:name():lower() == pluginname:lower() then      
+      psycle.proxy.project = project:new()
+                                    :setplugininfo(infos[i])
+      break;     
+    end
+  end    
 end
 
-function maincanvas:onopenplugin(pluginname)  
-  self:openplugin(pluginname)
+function maincanvas:onopenplugin(pluginpath, pluginname, info)  
+  self:openplugin(pluginpath, pluginname, info)
+  psycle.proxy.project = project:new()
+                                :setplugininfo(info)  
 end
 
 function findlast(haystack, needle)
@@ -420,11 +404,11 @@ function findlast(haystack, needle)
     if i==nil then return  else return i end
 end
 
-function maincanvas:openplugin(pluginpath)  
+function maincanvas:openplugin(pluginpath, pluginname, plugininfo)  
   self:preventfls()
   self:closealltabs()      
   self.pluginexplorer:setfilepath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\")))
-  self.selecttoolbar.selectmachine:settext(pluginpath:sub(findlast(pluginpath, "\\"), -1))
+  self.selecttoolbar.selectmachine:settext(pluginname)
   self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")    
   self:updatealign()
   self:enablefls()  

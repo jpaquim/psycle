@@ -227,7 +227,7 @@ struct LuaImageBind {
   static int create(lua_State *L);
   static int gc(lua_State* L);
   static int size(lua_State* L);
-  static int load(lua_State *L);
+  static int load(lua_State *L) { LUAEXPORTM(L, meta, &ui::Image::Load); }
   static int settransparent(lua_State* L);
 };
 
@@ -984,12 +984,18 @@ class LuaTreeBind : public LuaItemBind<T> {
     static const luaL_Reg methods[] = {
       {"new", create},
       {"setrootnode", setrootnode},
-      {"addnode", addnode},
+      {"addnode", addnode},      
 //      {"clear", clear},
       {"settextcolor", settextcolor},
       {"setbackgroundcolor", setbackgroundcolor},
       {"backgroundcolor", backgroundcolor},
       {"isediting", isediting},
+      {"updatetree", updatetree},
+      {"selectnode", selectnode},
+      {"editnode", editnode},
+      {"selected", selected},
+      {"showlines", showlines},
+      {"hidelines", hidelines},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -997,11 +1003,39 @@ class LuaTreeBind : public LuaItemBind<T> {
   }
   
   static int create(lua_State* L);
+  static int showlines(lua_State* L) { LUAEXPORT(L, &T::ShowLines); }
+  static int hidelines(lua_State* L) { LUAEXPORT(L, &T::HideLines); }
   static int settextcolor(lua_State* L) { LUAEXPORTM(L, meta, &T::set_text_color); } 
   static int setbackgroundcolor(lua_State* L) { LUAEXPORT(L, &T::set_background_color) }
   static int backgroundcolor(lua_State* L) { LUAEXPORT(L, &T::background_color) }
   static int isediting(lua_State* L) { LUAEXPORT(L, &T::is_editing) }
-
+  static int updatetree(lua_State* L) { LUAEXPORT(L, &T::UpdateTree); }
+  static int selectnode(lua_State* L) { 
+    boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
+    using namespace ui::canvas;
+    boost::shared_ptr<Node> node = 
+      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    tree->select_node(node);
+    return LuaHelper::chaining(L);
+  }
+  static int editnode(lua_State* L) { 
+    boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
+    using namespace ui::canvas;
+    boost::shared_ptr<Node> node = 
+      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    tree->EditNode(node);
+    return LuaHelper::chaining(L);
+  }
+  static int selected(lua_State* L) {
+    boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
+    boost::shared_ptr<ui::Node> tn = tree->selected().lock();
+    if (tn.get()) {
+      LuaHelper::find_weakuserdata(L, tn.get());
+    } else {
+      lua_pushnil(L);
+    }
+    return 1;
+  }
   static int setrootnode(lua_State* L) {
     boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
     using namespace ui::canvas;
@@ -1053,9 +1087,12 @@ class LuaNodeBind {
       {"settext", settext},
       {"text", text},
       {"add", add},
+      {"insertafter", insertafter},
       {"size", size},
       {"at", at},
       {"remove", remove},
+      {"parent", parent},
+      {"level", level},
       {NULL, NULL}
     };
     LuaHelper::open(L, meta, methods,  gc);
@@ -1073,8 +1110,8 @@ class LuaNodeBind {
     return LuaHelper::delete_shared_userdata<ui::Node>(L, meta);
   }
 
-  static int settext(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::set_text); }  
-  static int text(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::text); } 
+  static int settext(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::set_text); }
+  static int text(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::text); }
   static int add(lua_State* L) {
     using namespace ui::canvas;
     boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    
@@ -1086,39 +1123,91 @@ class LuaNodeBind {
     lua_rawseti(L, -2, len+1);
     return LuaHelper::chaining(L);
   }
+
+  static int insertafter(lua_State* L) {
+    using namespace ui::canvas;
+    boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    
+    boost::shared_ptr<ui::Node> node1 = LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta);
+    boost::shared_ptr<ui::Node> node2 = LuaHelper::check_sptr<ui::Node>(L, 3, LuaNodeBind::meta);
+
+    for (ui::Node::iterator it = node->begin(); it != node->end(); ++it) {
+      if ((*it) == node2) {
+        ++it;
+        node->insert(it, node1);
+        break;
+      }
+    }    
+    lua_getfield(L, 1, "_children");
+    int len = lua_rawlen(L, -1);
+    lua_pushvalue(L, 2);
+    lua_rawseti(L, -2, len+1);
+    return LuaHelper::chaining(L);
+  }
   static int remove(lua_State *L) {
     if (lua_isnumber(L, 2)) {
-      boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);  
+      boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);
       int index = luaL_checknumber(L, 2);
       if (index < 1 && index > treenode->size()) {
         luaL_error(L, "index out of range");
       }
+      treenode->erase(treenode->begin() + index - 1);
       lua_getfield(L, -2, "_children");
       lua_pushnil(L);
-      lua_rawseti(L, -2, index);
-      treenode->erase(treenode->begin() + index - 1);
+      lua_rawseti(L, -2, index);      
       lua_gc(L, LUA_GCCOLLECT, 0);
       return 1;
+    } else {
+      boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, meta);
+      boost::shared_ptr<ui::Node> node1 = LuaHelper::check_sptr<ui::Node>(L, 2, meta);
+
+      lua_getfield(L, -2, "_children");
+      int n = lua_rawlen(L, -1);
+      for (int i = 1; i <= n; ++i) {
+        lua_rawgeti(L, -1, i);
+        boost::shared_ptr<ui::Node> node2 = LuaHelper::check_sptr<ui::Node>(L, lua_gettop(L), meta);
+        if (node2 == node1) {          
+          lua_pushnil(L);
+          lua_rawseti(L, -2, i);          
+          break;
+        }
+        lua_remove(L, -1);
+      }
+      for (ui::Node::iterator it = node->begin(); it != node->end(); ++it) {
+        if ((*it) == node1) {          
+          node->erase(it);
+          break;
+        }
+      }
+      lua_gc(L, LUA_GCCOLLECT, 0);
     }
-    return 0;
+    return LuaHelper::chaining(L);
   }
+
+  static int parent(lua_State *L) {
+    boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, meta);
+    LuaHelper::find_weakuserdata(L, node->parent().lock().get());
+    return 1;
+  }
+
   static int size(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::size); }
   static int at(lua_State *L) {
     if (lua_isnumber(L, 2)) {
       boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);  
       int index = luaL_checknumber(L, 2);
-      if (index <0 && index >= treenode->size()) {
+      if (index < 1 && index >= treenode->size()) {
         luaL_error(L, "index out of range");
-      }
-      luaL_requiref(L, "psycle.ui.canvas.treenode", LuaNodeBind::open, true);
-      int n = lua_gettop(L);      
-      boost::shared_ptr<ui::Node> tn = *(treenode->begin() + index);      
-      LuaHelper::new_shared_userdata<>(L, LuaNodeBind::meta, tn.get(), n, true);     
+      }            
+      boost::shared_ptr<ui::Node> tn = *(treenode->begin() + index - 1);
+      if (tn.get()) {
+        LuaHelper::find_weakuserdata(L, tn.get());
+      } else {
+        lua_pushnil(L);
+      }      
       return 1;
     }
     return 0;
-  }  
-
+  }
+  static int level(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::level); }
 };
 
 template <class T = LuaTable>

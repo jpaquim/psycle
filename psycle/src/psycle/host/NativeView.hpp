@@ -39,8 +39,8 @@ namespace host {
        virtual bool GetViewSize(CRect& rect) {
          rect.top = 0;
          rect.left = 0;
-         rect.right = 500;
-         rect.bottom = 500;
+         rect.right = 1000;
+         rect.bottom = 1000;
          return true;
        }
      private:

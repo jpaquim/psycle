@@ -97,7 +97,7 @@ function tabgroup:init()
     self.f:hidedecoration()
     self.f:setpos(x + iw - 200, y + ih, 200, h)        
     self.f:show()    
-    c:getfocus()    
+    c:setfocus()    
   end
   
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT)

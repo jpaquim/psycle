@@ -18,12 +18,14 @@ function mainmenu.menus()
    menus.newfile = node:new():settext("New")
    menus.filemenu:add(menus.newfile)
    menus.openfile = node:new():settext("Open")
-   menus.filemenu:add(menus.openfile)
+   menus.filemenu:add(menus.openfile) 
    -- tools
    menus.toolmenu = node:new():settext("Tools")
    menus.node:add(menus.toolmenu)
    menus.menudesigner = node:new():settext("Menu Designer")
    menus.toolmenu:add(menus.menudesigner)
+   menus.separator = node:new():settext("-")
+   menus.node:add(menus.separator)
    return menus
 end
 
