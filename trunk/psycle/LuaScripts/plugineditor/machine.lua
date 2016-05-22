@@ -22,6 +22,8 @@ local mainmenu = require("mainmenu")
 local menudesigner = require("menudesigner")
 local canvas = require("psycle.ui.canvas")
 local item = require("psycle.ui.canvas.item")
+local cfg = require("psycle.config"):new("PatternVisual")
+local project = require("project")
 
 -- plugin info
 function machine:info()
@@ -43,7 +45,8 @@ function machine:init(samplerate)
    self.maincanvas = maincanvas:new()   
    self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)
    self.editmacidx_ = -1
-   self:setcanvas(self.maincanvas)   
+   self:setcanvas(self.maincanvas)
+   self.project = {}   
 end
 
 function machine:createframe()  
@@ -101,12 +104,13 @@ function machine:openinmainframe()
 end
 
 function machine:onactivated()
-  self:initmenu()  
+  self:initmenu()
+  self.menubar:invalidate()  
 end
 
 function machine:ondeactivated()    
   self.root:remove(1)  
-  self.node = nil  
+  self.menus = nil  
   collectgarbage()
   self.menubar:invalidate()
 end
@@ -123,30 +127,29 @@ function machine:initmenu()
    function self.menubar:onclick(node)       
       if node == that.menus.menudesigner then         
         that.menudesigner = menudesigner:new()
+        if that.project.plugininfo then          
+          that.menudesigner.pluginname = that.project:plugininfo():name()
+          local success, menu1 = pcall(require, that.project:plugininfo():name():lower()..".mainmenu1")
+          if success then
+            that.menudesigner:setmenu(menu1.menu().node1)
+          else            
+            that.menudesigner.rootnode:at(1):settext(that.project:plugininfo():name())
+          end
+        end        
         that.frame = frame:new()
                           :settitle("Menu Designer")
                           :setpos(0, 0, 400, 400)
-                          :setview(that.menudesigner)                                                            
-        function that.frame:ontest()
-          psycle.output("test")
-        end
-        function that.frame:onshow()
-          that.menudesigner.tree:setfocus()
+                          :setview(that.menudesigner)        
+        function that.frame:onshow()          
+          that.menudesigner.tree:editnode(that.menudesigner.tree:selected())
         end
         function that.frame:onclose()           
           that.frame = nil
         end
-        that.frame:show(centertoscreen:new())
+        that.frame:show(centertoscreen:new())        
       end
    end              
    self.menubar:update()
 end
-
-
-
-function machine:onmenu(menuitem)
-  psycle.output("here")
-end
-
 
 return machine

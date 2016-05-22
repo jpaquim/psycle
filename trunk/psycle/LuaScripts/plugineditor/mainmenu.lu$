@@ -1,0 +1,11 @@
+local node = require("psycle.node")
+
+local menu = {}
+
+function menu.menu()
+  local menu = {}   
+$(nodes)
+  return menu
+end
+
+return menu

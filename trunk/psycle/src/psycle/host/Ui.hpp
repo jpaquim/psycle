@@ -11,6 +11,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/ptr_container/ptr_list.hpp>
 
 #include <bitset>
 
@@ -331,7 +332,7 @@ class MouseEvent : public Event {
 };
 
 class KeyEvent : public Event {
- public:
+ public:  
   KeyEvent(int keycode, int flags) : keycode_(keycode), flags_(flags) {}
 
   int keycode() const { return keycode_; }
@@ -859,26 +860,28 @@ inline Ornament::~Ornament() {}
 class Tree;
 
 class TreeImp;
+class Node;
+class NodeOwnerImp;
 
 class NodeImp { 
  public: 
+  NodeImp() : owner_(0) {}
   virtual ~NodeImp() {}
 
   virtual void set_text(const std::string& text) {}
-  void set_owner(void* owner) { owner_ = owner; }
-  void* owner() { return owner_; }
-  const void* owner() const { return owner_; }
+  void set_owner(NodeOwnerImp* owner) { owner_ = owner; }
+  NodeOwnerImp* owner() { return owner_; }
+  const NodeOwnerImp* owner() const { return owner_; }
   
-  void* owner_;
+ private:
+  NodeOwnerImp* owner_;
 };
 
 class Node : public boost::enable_shared_from_this<Node> {
   public:
     static std::string type() { return "treenode"; }
     Node() {}    
-    virtual ~Node() { 
-      Clear();
-    }
+    virtual ~Node() {}
    
     typedef boost::shared_ptr<Node> Ptr;
     typedef boost::weak_ptr<Node> WeakPtr;
@@ -890,50 +893,33 @@ class Node : public boost::enable_shared_from_this<Node> {
     int size() const { return children_.size(); }
     Ptr back() const { return children_.back(); }
     
-    void Clear() {
-      struct {        
-       void operator()(Node& node) {            
-         std::list<NodeImp*>::iterator it = node.imps.begin();
-         for ( ; it != node.imps.end(); ++it) {
-           NodeImp* imp = *it;
-           delete imp;
-         }
-         node.imps.clear();
-       }
-      } f;    
-      traverse(f);      
-    }
-
+    int level() const { return (!parent().expired()) ? parent().lock()->level() + 1 : 0; }
+    
     void AddImp(NodeImp* imp) { imps.push_back(imp); }
 
-    std::list<NodeImp*> imps;
+    boost::ptr_list<NodeImp> imps;
     
     virtual void set_text(const std::string& text) { text_ = text; changed(*this); }
     virtual std::string text() const { return text_; }
 
-    void AddNode(boost::shared_ptr<Node> node) {
-      children_.push_back(node);
-      node->set_parent(shared_from_this());
-    }
-
-    void insert(iterator it, Ptr node) { 
-      children_.insert(it, node);
-      node->set_parent(shared_from_this());
-    }
-
-    void erase(iterator it) { 
-      children_.erase(it);      
-    }
+    void AddNode(boost::shared_ptr<Node> node);
+    void insert(iterator it, Ptr node);
+    void erase(iterator it);
 
     template<class T>
-    void traverse(T& func) {
-      func(*this);            
-      for (iterator it = begin(); it != end(); ++it) {
-        (*it)->traverse(func);     
+    void traverse(T& func, boost::shared_ptr<ui::Node> prev_node = boost::shared_ptr<ui::Node>()) {
+      func(this->shared_from_this(), prev_node);
+      boost::shared_ptr<ui::Node> prev = boost::shared_ptr<ui::Node>();
+      for (iterator it = begin(); it != end(); ++it) {        
+        (*it)->traverse(func, prev);
+        prev = *it;
       }
     }
 
-    void set_parent(const boost::weak_ptr<Node>& parent) {  parent_ = parent; }
+    void set_parent(const boost::weak_ptr<Node>& parent) {
+      parent_ = parent;        
+    }
+
     boost::weak_ptr<Node> parent() const { return parent_; }
         
     boost::signal<void (ui::Node&)> changed;
@@ -944,17 +930,24 @@ class Node : public boost::enable_shared_from_this<Node> {
   boost::weak_ptr<Node> parent_;
 };
 
+class NodeOwnerImp {
+ public:
+  virtual ~NodeOwnerImp() {}
+  
+  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node = boost::shared_ptr<Node>()) = 0;
+  virtual void DevErase(boost::shared_ptr<Node> node) = 0;
+};
+
 class MenuBar;
 
-class MenuBarImp {
+class MenuBarImp : public NodeOwnerImp {
  public:
   MenuBarImp() : bar_(0) {}
   virtual ~MenuBarImp() = 0;
   
   void set_menu_bar(MenuBar* bar) { bar_ = bar; }
   MenuBar* menu_bar() { return bar_; }
-
-  virtual void DevUpdate(boost::shared_ptr<Node> node) = 0;
+  
   virtual void DevInvalidate() = 0;
    
  private:
@@ -962,6 +955,25 @@ class MenuBarImp {
 };
 
 inline MenuBarImp::~MenuBarImp() {}
+
+class PopupMenu;
+
+class PopupMenuImp {
+ public:
+  PopupMenuImp() : popup_menu_(0) {}
+  virtual ~PopupMenuImp() = 0;
+  
+  void set_popup_menu(PopupMenu* popup_menu) { popup_menu_ = popup_menu; }
+  PopupMenu* popup_menu() { return popup_menu_; }
+
+  virtual void DevUpdate(boost::shared_ptr<Node> node) = 0;
+  virtual void DevInvalidate() = 0;
+   
+ private:
+  PopupMenu* popup_menu_;
+};
+
+inline PopupMenuImp::~PopupMenuImp() {}
 
 class MenuImp : public NodeImp {
   public:
@@ -996,12 +1008,9 @@ class MenuBar {
 };
 
 class Tree : public Window {
- public: 
-  void test1();
-
-
+ public:
   typedef boost::weak_ptr<Tree> WeakPtr;
-  static std::string type() { return "canvastreeitem"; }  
+  static std::string type() { return "canvastree"; }  
 
   Tree();
   Tree(TreeImp* imp);
@@ -1018,17 +1027,28 @@ class Tree : public Window {
   virtual ARGB background_color() const;
   virtual void set_text_color(ARGB color);
   virtual ARGB text_color() const;
+  virtual void EditNode(boost::shared_ptr<ui::Node> node);
   bool is_editing() const;
+
+  void ShowLines();
+  void HideLines();
+
+  virtual void select_node(const boost::shared_ptr<Node>& node);
+  virtual boost::weak_ptr<Node> selected();
 
   virtual void OnClick(boost::shared_ptr<Node> node) {}
   virtual void OnEditing(boost::shared_ptr<Node> node, const std::string& text) {}
   virtual void OnEdited(boost::shared_ptr<Node> node, const std::string& text) {}
 
  private:     
-  boost::weak_ptr<Node> root_node_;    
-  boost::shared_ptr<Node> r1, s1, s2;  
+  boost::weak_ptr<Node> root_node_;  
 };
 
+class PopupMenu {
+ public:
+  PopupMenu() {}
+  virtual ~PopupMenu() {}
+};
 
 class TableItemImp;
 class Table;
@@ -1479,7 +1499,7 @@ class FrameImp : public WindowImp {
   virtual void OnDevClose(); 
 };
 
-class TreeImp : public WindowImp {
+class TreeImp : public WindowImp, public NodeOwnerImp {
  public:  
   TreeImp() : WindowImp() {}
   TreeImp(Window* window) : WindowImp(window) {}
@@ -1489,9 +1509,13 @@ class TreeImp : public WindowImp {
   virtual void dev_set_text_color(ARGB color) = 0;
   virtual ARGB dev_text_color() const = 0;
   virtual void DevClear() = 0;
-  virtual void set_tree(ui::Tree* tree) = 0;
-  virtual void DevUpdateTree(boost::shared_ptr<Node> node) = 0;
+  virtual void set_tree(ui::Tree* tree) = 0;  
+  virtual void dev_select_node(const boost::shared_ptr<Node>& node) = 0;
+  virtual boost::weak_ptr<Node> dev_selected() = 0;
+  virtual void DevEditNode(boost::shared_ptr<ui::Node> node) = 0;
   virtual bool dev_is_editing() const = 0;
+  virtual void DevShowLines() = 0;
+  virtual void DevHideLines() = 0;
 };
 
 class TableItemImp {
