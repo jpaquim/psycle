@@ -11,7 +11,7 @@ local item = require("psycle.ui.canvas.item")
 local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
-local tree = require("psycle.ui.canvas.tree")
+local tree = require("psycle.ui.canvas.treeview")
 local node = require("psycle.node")
 local button = require("psycle.ui.canvas.button")
 local templateparser = require("templateparser")
@@ -27,11 +27,10 @@ function menudesigner:new(parent)
   return c
 end
 
-function menudesigner:init() 
-  psycle.output("init")
+function menudesigner:init()   
   self:setautosize(false, false)    
   self:setpos(0, 0, 100, 0)
-  self:setornament(ornamentfactory:createfill(0x528A68))
+  self:setornament(ornamentfactory:createfill(0x528A68))  
   self.helptext = text:new(self):settext("CTRL + RIGHT create submenu"):setautosize(false, true):setalign(item.ALTOP)
   self.applybutton = button:new(self):settext("Apply"):setautosize(false, false):setalign(item.ALBOTTOM):setpos(0, 0, 0, 20)  
   local that = self  
@@ -39,6 +38,9 @@ function menudesigner:init()
     that:makecode()
   end  
   self.tree = tree:new(self):setautosize(false, false):setalign(item.ALCLIENT)
+  self.tree:showbuttons():showlines()
+  self.tree:setbackgroundcolor(0x2F2F2F)
+  self.tree:settextcolor(0xFFFFFF)
   function self.tree:onedited(node, text)
     self:selected():settext(text)    
   end

@@ -6,7 +6,7 @@
 -- Foundation ; either version 2, or (at your option) any later version.  
 
 local group = require("psycle.ui.canvas.group")
-local tree = require("psycle.ui.canvas.tree"):new()
+local tree = require("psycle.ui.canvas.treeview"):new()
 local node = require("psycle.node")
 local machine = require("psycle.machine"):new()
 local settings = require("settings")
@@ -65,6 +65,10 @@ function pluginexplorer:onclick(node)
     filename = node.filename         
   }
   self.click:emit(ev)  
+end
+
+function pluginexplorer:onrightclick(node)
+  psycle.alert("right click")
 end
 
 function pluginexplorer:onedited(node, text)

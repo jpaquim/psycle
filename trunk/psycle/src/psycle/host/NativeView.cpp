@@ -83,13 +83,25 @@ namespace psycle { namespace host {
       }      
     }
 
+    bool CanvasParamView::GetViewSize(CRect& rect) {
+      rect.top = 0;
+      rect.left = 0;
+      rect.right = 1000;
+      rect.bottom = 1000;
+      if (canvas_) {
+        rect.right = canvas_->dim().width();  
+        rect.bottom = canvas_->dim().height();
+      }
+      return true;
+    }
+
     void CanvasParamView::OnReload(Machine* mac)
     {      
       canvas_ = 0;
       LuaPlugin* lp = (LuaPlugin*) (mac);
       ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired()) {
-        ChangeCanvas(canvas.lock().get());
+        ChangeCanvas(canvas.lock().get());       
       }
     }
 
@@ -98,7 +110,7 @@ namespace psycle { namespace host {
       LuaPlugin* lp = (LuaPlugin*) (mac);
       ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired()) {
-        ChangeCanvas(0);
+        ChangeCanvas(0);        
       }
     }
 
@@ -108,9 +120,8 @@ namespace psycle { namespace host {
       }
       if (canvas) {
         ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
-        imp->SetParent(this);
-        canvas->set_pos(ui::Rect(ui::Point(), ui::Point(500,500))); //, rect.Height())));
-        canvas->Show();   
+        imp->SetParent(this);       
+        canvas->Show();
         SetActiveWindow();
         canvas_ = canvas;
       }

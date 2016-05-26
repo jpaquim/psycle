@@ -2,7 +2,6 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "Ui.hpp"
-#include "Menu.hpp"
 #include "Scintilla.h"
 #include "SciLexer.h"
 
@@ -17,7 +16,8 @@ class SystemMetrics : public ui::SystemMetrics {
   virtual ~SystemMetrics() {}
 
   virtual ui::Dimension screen_dimension() const {
-    return ui::Dimension(GetSystemMetrics(SM_CXFULLSCREEN), GetSystemMetrics(SM_CYFULLSCREEN));    
+    return ui::Dimension(GetSystemMetrics(SM_CXFULLSCREEN),
+                         GetSystemMetrics(SM_CYFULLSCREEN));
   }
 };
 
@@ -879,36 +879,53 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
 
 class MenuImp;
 
-class MenuBarImp : public ui::MenuBarImp { 
+class MenuContainerImp : public ui::MenuContainerImp { 
  public:  
-  MenuBarImp()  {} 
+  MenuContainerImp();
  
   virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
-  virtual void DevErase(boost::shared_ptr<Node> node) {}
+  virtual void DevErase(boost::shared_ptr<Node> node);
   virtual void DevInvalidate();
+  virtual void DevTrack(const ui::Point& pos) {}
 
   void RegisterMenuEvent(std::uint16_t id, MenuImp* menu_imp);
   MenuImp* FindMenuItemById(int id);
-  static MenuBarImp* MenuBarImpById(int id);
+  static MenuContainerImp* MenuContainerImpById(int id);
   void WorkMenuItemEvent(int id);
-
+  void set_menu_window(CWnd* menu_window, const Node::Ptr& root_node);
+  void set_cmenu(CMenu* cmenu) { cmenu_ = cmenu; }
+  
  private:
    void UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start = 0);
    std::map<std::uint16_t, MenuImp*> menu_item_id_map_;
-   static std::map<std::uint16_t, MenuBarImp*> menu_bar_id_map_;   
+   static std::map<std::uint16_t, MenuContainerImp*> menu_bar_id_map_;   
+   CWnd* menu_window_;
+   CMenu* cmenu_;
+};
+
+class PopupMenuImp : public MenuContainerImp { 
+ public:  
+  PopupMenuImp();
+  virtual ~PopupMenuImp() { popup_menu_->DestroyMenu(); }
+ 
+  virtual void DevTrack(const ui::Point& pos);
+ private:
+   std::auto_ptr<CMenu> popup_menu_;
 };
 
 class MenuImp : public ui::MenuImp {  
  public:
+  MenuImp() : cmenu_(0), parent_(0), pos_(0), id_(0) {}
   MenuImp(CMenu* parent) : cmenu_(0), parent_(parent), pos_(0), id_(0) {}
   virtual ~MenuImp() {
-    if (::IsMenu(parent()->m_hMenu)) {      
+    if (parent_ && ::IsMenu(parent()->m_hMenu)) {      
       parent()->RemoveMenu(pos_, MF_BYPOSITION);    
     } else {
       delete cmenu_;
     }
   }
     
+  void set_parent(CMenu* parent) { parent_ = parent; }
   CMenu* parent() { return parent_; }
   virtual void dev_set_text(const std::string& text) {    
     parent()->ModifyMenu(pos_, MF_BYPOSITION, 0, text.c_str());    
@@ -916,7 +933,7 @@ class MenuImp : public ui::MenuImp {
   void dev_set_pos(int pos) { pos_ = pos; }
   int dev_pos() const { return pos_; }
   void CreateMenu(const std::string& text);
-  void CreateMenuItem(const std::string& text);
+  void CreateMenuItem(const std::string& text, ui::Image* image);
 
   CMenu* cmenu() { return cmenu_; }
   int id() const { return id_; }
@@ -941,7 +958,8 @@ class TableItemImp : public ui::TableItemImp {
 
 class TreeNodeImp : public NodeImp {  
  public:
-  TreeNodeImp() : hItem(0) {}  
+  TreeNodeImp() : hItem(0) {}
+  ~TreeNodeImp() {}
       
   HTREEITEM DevInsert(CTreeCtrl* tree, const std::string& text, TreeNodeImp* prev_imp) {
     TVINSERTSTRUCT tvInsert;
@@ -955,15 +973,14 @@ class TreeNodeImp : public NodeImp {
   HTREEITEM hItem;    
 };
 
-class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
+class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
  public:  
-  TreeImp() : 
-      WindowTemplateImp<CTreeCtrl, ui::TreeImp>(), 
-      is_editing_(false) { 
-        tree_ = 0;
+  TreeViewImp() : 
+      WindowTemplateImp<CTreeCtrl, ui::TreeViewImp>(), 
+      is_editing_(false) {         
   }
-  static TreeImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
-    TreeImp* imp = new TreeImp();
+  static TreeViewImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    TreeViewImp* imp = new TreeViewImp();
     if (!imp->Create(WS_CHILD | TVS_EDITLABELS, 
                      CRect(0, 0, 200, 200), 
                      parent, 
@@ -977,7 +994,11 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
     return imp;
   }
 
-  virtual void set_tree(ui::Tree* tree) { tree_ = tree; }  
+  ui::TreeView* tree_view() { 
+    ui::TreeView* result = dynamic_cast<ui::TreeView*>(window());
+    assert(result);
+    return result;
+  }  
   virtual void DevClear();  
   virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
   virtual void DevErase(boost::shared_ptr<Node> node);
@@ -1002,15 +1023,17 @@ class TreeImp : public WindowTemplateImp<CTreeCtrl, ui::TreeImp> {
   void dev_add_item(boost::shared_ptr<Node> node);
   virtual void DevShowLines();
   virtual void DevHideLines();
+  virtual void DevShowButtons();
+  virtual void DevHideButtons();
   
  protected:  
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CTreeCtrl::OnPaint(); }
-  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);  
+  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnRightClick(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
   ui::Node* find_selected_node();
-  ui::Tree* tree_;
 
  private:
    bool is_editing_;  
@@ -1022,16 +1045,35 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
 
   static ComboBoxImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     ComboBoxImp* imp = new ComboBoxImp();
-    if (!imp->Create(WS_CHILD|WS_VSCROLL|CBS_DROPDOWNLIST,
+    if (!imp->Create(WS_CHILD|WS_VSCROLL|CBS_DROPDOWNLIST|WS_VISIBLE,
                      CRect(10,10,200,100), 
                      parent, 
                      nID)) {
       TRACE0("Failed to create window\n");
       return 0;
     }
-    imp->set_window(w);
+    imp->set_window(w);    
+    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
     return imp;
   }  
+  
+  void dev_set_items(const std::vector<std::string>& itemlist) {
+    ResetContent();
+    std::vector<std::string>::const_iterator it = itemlist.begin();
+    for (; it != itemlist.end(); ++it) {      
+      AddString((*it).c_str());
+    }
+  }
+  
+  virtual void dev_set_item_index(int index) { SetCurSel(index); }
+  virtual int dev_item_index() const { return GetCurSel(); }
+  
+  BOOL OnEraseBkgnd(CDC* pDC) { return CComboBox::OnEraseBkgnd(pDC); }
+
+ protected:
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CComboBox::OnPaint(); }
+  BOOL OnSelect();
 };
 
 class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
@@ -1412,8 +1454,8 @@ class Systems : public ui::Systems {
     imp->set_window(window);
     return window;
   }
-  virtual ui::MenuBar* CreateMenuBar() { 
-    MenuBar* bar = new MenuBar();    
+  virtual ui::MenuContainer* CreateMenuContainer() { 
+    MenuContainer* bar = new MenuContainer();    
     return bar;
   }
 };
@@ -1455,8 +1497,8 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::ScintillaImp* CreateScintillaImp() {     
     return ScintillaImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }  
-  virtual ui::TreeImp* CreateTreeImp() {     
-    return TreeImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  virtual ui::TreeViewImp* CreateTreeViewImp() {     
+    return TreeViewImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
   virtual ui::RegionImp* CreateRegionImp() {     
     return new ui::mfc::RegionImp();
@@ -1470,18 +1512,18 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::ImageImp* CreateImageImp() {     
     return new ui::mfc::ImageImp();
   }
-  virtual ui::MenuBarImp* CreateMenuBarImp() {     
-    return new MenuBarImp();
+  virtual ui::MenuContainerImp* CreateMenuContainerImp() {     
+    return new MenuContainerImp();
   }
-
+  virtual ui::MenuContainerImp* CreatePopupMenuImp() {     
+    return new PopupMenuImp();
+  } 
   virtual ui::MenuImp* CreateMenuImp() {
     return new MenuImp(0);
-  }
-  
+  }  
   virtual ui::TableImp* CreateTableImp() {     
     return TableImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
-
   virtual ui::GameControllersImp* CreateGameControllersImp() {
     return new GameControllersImp();
   }

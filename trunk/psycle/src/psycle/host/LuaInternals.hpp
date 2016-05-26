@@ -159,12 +159,14 @@ namespace psycle { namespace host {
     static int type(lua_State* L);
     static int info2(lua_State* L);
     static int name(lua_State* L);
+    static int pluginname(lua_State* L); 
   };
 
   struct LuaPlayerBind {
     static const char* meta;
     static int open(lua_State *L);    
     static int create(lua_State* L);
+    static int gc(lua_State* L);
     static int samplerate(lua_State* L);
     static int tpb(lua_State* L);
     static int spt(lua_State* L);

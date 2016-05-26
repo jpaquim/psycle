@@ -16,13 +16,13 @@ namespace universalis { namespace os {
 }}
 
 
-
 namespace psycle {
 namespace host {
 
 namespace ui { 
   class Commands; 
   namespace canvas { class Canvas; }
+  class MenuContainer;
 }
     
 class LuaPlugin;
@@ -101,6 +101,8 @@ public:
 
   std::auto_ptr<ui::Commands> invokelater;
 
+  boost::weak_ptr<ui::MenuContainer> menu_bar() { return menu_bar_; }
+
 private:
   void export_c_funcs();
 	// script callbacks
@@ -111,9 +113,10 @@ private:
   static int call_filedialog(lua_State* L);
   static int call_selmachine(lua_State* L);
   static int set_machine(lua_State* L);  
+  static int set_menubar(lua_State* L);
   std::string ParDisplay(int par);
   std::string ParLabel(int par);
-  
+    
   mutable bool info_update_;
 	mutable PluginInfo info_;
 	LuaPlugin *host_;
@@ -121,6 +124,7 @@ private:
 	lua_State* L;
 	static universalis::os::terminal * terminal;  
   mutable CRITICAL_SECTION cs;  
+  boost::weak_ptr<ui::MenuContainer> menu_bar_;
 };
 
 

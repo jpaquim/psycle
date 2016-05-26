@@ -347,7 +347,7 @@ template class WindowTemplateImp<CScrollBar, ui::ScrollBarImp>;
 template class WindowTemplateImp<CButton, ui::ButtonImp>;
 template class WindowTemplateImp<CEdit, ui::EditImp>;
 template class WindowTemplateImp<CWnd, ui::ScintillaImp>;
-template class WindowTemplateImp<CTreeCtrl, ui::TreeImp>;
+template class WindowTemplateImp<CTreeCtrl, ui::TreeViewImp>;
 template class WindowTemplateImp<CListCtrl, ui::TableImp>;
 template class WindowTemplateImp<CFrameWnd, ui::FrameImp>;
 
@@ -404,28 +404,41 @@ void ButtonImp::OnClick() {
   OnDevClick();
 }
 
+BEGIN_MESSAGE_MAP(ComboBoxImp, CComboBox)  
+	ON_WM_PAINT()
+  ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelect)
+END_MESSAGE_MAP()
+
+BOOL ComboBoxImp::OnSelect() {  
+  ui::ComboBox* combo_box = dynamic_cast<ui::ComboBox*>(window());
+  assert(combo_box);
+  combo_box->OnSelect();
+  return FALSE;
+}
+
 BEGIN_MESSAGE_MAP(EditImp, CEdit)  
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
-BEGIN_MESSAGE_MAP(TreeImp, CTreeCtrl)  
+BEGIN_MESSAGE_MAP(TreeViewImp, CTreeCtrl)  
   ON_WM_ERASEBKGND()
 	ON_WM_PAINT()  
   ON_NOTIFY_REFLECT_EX(TVN_SELCHANGED, OnClick)
   ON_NOTIFY_REFLECT_EX(TVN_BEGINLABELEDIT, OnBeginLabelEdit)
   ON_NOTIFY_REFLECT_EX(TVN_ENDLABELEDIT, OnEndLabelEdit)
+  ON_NOTIFY_REFLECT_EX(NM_RCLICK, OnRightClick)  
 END_MESSAGE_MAP()
 
-void TreeImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
+void TreeViewImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
   struct {
-      TreeImp* treectrl;       
+      TreeViewImp* that;       
       void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
         NodeImp* prev_node_imp = 0;
         if (prev_node) {
           boost::ptr_list<NodeImp>::iterator it = prev_node->imps.begin();
           while (it != prev_node->imps.end()) {
             NodeImp* i = &(*it);
-            if (i->owner() == treectrl) {
+            if (i->owner() == that) {
               prev_node_imp = i;
               break;
             } else {
@@ -437,7 +450,7 @@ void TreeImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> pr
         boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
         while (it != node->imps.end()) {
           NodeImp* i = &(*it);
-          if (i->owner() == treectrl) {
+          if (i->owner() == that) {
             it = node->imps.erase(it);            
           } else {
             ++it;
@@ -445,27 +458,27 @@ void TreeImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> pr
         }
         TreeNodeImp* new_imp = new TreeNodeImp();
         node->AddImp(new_imp);
-        new_imp->set_owner(treectrl);               
-        node->changed.connect(boost::bind(&TreeImp::OnNodeChanged, treectrl, _1));                
+        new_imp->set_owner(that);               
+        node->changed.connect(boost::bind(&TreeViewImp::OnNodeChanged, that, _1));                
         if (!node->parent().expired()) {
           boost::shared_ptr<ui::Node> parent_node = node->parent().lock();   
           boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
           for ( ; it != parent_node->imps.end(); ++it) {            
-            TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));            
+            TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
             if (imp) {      
-              TreeNodeImp* prev_imp = dynamic_cast<TreeNodeImp*>(prev_node_imp);              
-              new_imp->hItem = imp->DevInsert(treectrl, node->text(), prev_imp);              
-              treectrl->htreeitem_node_map_[new_imp->hItem] = node;
+              TreeNodeImp* prev_imp = dynamic_cast<TreeNodeImp*>(prev_node_imp);
+              new_imp->hItem = imp->DevInsert(that, node->text(), prev_imp);              
+              that->htreeitem_node_map_[new_imp->hItem] = node;
             }
           }
         }
       }
     } f;
-  f.treectrl = this;  
+  f.that = this;  
   node->traverse(f, prev_node);
 }
 
-void TreeImp::DevErase(boost::shared_ptr<Node> node) {
+void TreeViewImp::DevErase(boost::shared_ptr<Node> node) {
   boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
   for (; it != node->imps.end(); ++it) {     
     if (it->owner() == this) {
@@ -479,7 +492,7 @@ void TreeImp::DevErase(boost::shared_ptr<Node> node) {
   }
 }
 
-void TreeImp::DevEditNode(boost::shared_ptr<ui::Node> node) {    
+void TreeViewImp::DevEditNode(boost::shared_ptr<ui::Node> node) {    
   boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
   for ( ; it != node->imps.end(); ++it) {    
     TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
@@ -490,7 +503,7 @@ void TreeImp::DevEditNode(boost::shared_ptr<ui::Node> node) {
   }
 }
 
-void TreeImp::dev_select_node(const boost::shared_ptr<ui::Node>& node) {
+void TreeViewImp::dev_select_node(const boost::shared_ptr<ui::Node>& node) {
   boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
   for ( ; it != node->imps.end(); ++it) {    
     TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
@@ -500,12 +513,12 @@ void TreeImp::dev_select_node(const boost::shared_ptr<ui::Node>& node) {
   }
 }
 
-boost::weak_ptr<Node> TreeImp::dev_selected() {
+boost::weak_ptr<Node> TreeViewImp::dev_selected() {
   ui::Node* node = find_selected_node();
   return node ? node->shared_from_this() : boost::weak_ptr<ui::Node>();
 }
 
-void TreeImp::OnNodeChanged(Node& node) {
+void TreeViewImp::OnNodeChanged(Node& node) {
   boost::ptr_list<NodeImp>::iterator it = node.imps.begin();
   for ( ; it != node.imps.end(); ++it) {    
     TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
@@ -515,53 +528,69 @@ void TreeImp::OnNodeChanged(Node& node) {
   }
 }
 
-BOOL TreeImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
+BOOL TreeViewImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
-    tree_->OnClick(node->shared_from_this());
+    tree_view()->OnClick(node->shared_from_this());
   }
   return FALSE;
 }
 
-ui::Node* TreeImp::find_selected_node() {  
+BOOL TreeViewImp::OnRightClick(NMHDR * pNotifyStruct, LRESULT * result) {
+  Node* node = find_selected_node();
+  if (node) {
+    tree_view()->OnRightClick(node->shared_from_this());
+  }
+  return FALSE;
+}
+
+ui::Node* TreeViewImp::find_selected_node() {  
   std::map<HTREEITEM, boost::weak_ptr<ui::Node> >::iterator it;
   it = htreeitem_node_map_.find(GetSelectedItem());
   return (it != htreeitem_node_map_.end()) ? it->second.lock().get() : 0;
 }
 
-BOOL TreeImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
+BOOL TreeViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
     CEdit* edit = GetEditControl();
     CString s;    
     edit->GetWindowTextA(s);
     is_editing_ = true;
-    tree_->OnEditing(node->shared_from_this(), s.GetString());
+    tree_view()->OnEditing(node->shared_from_this(), s.GetString());
   }
   return FALSE;
 }
 
 
-BOOL TreeImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
+BOOL TreeViewImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
     CEdit* edit = GetEditControl();
     CString s;    
     edit->GetWindowTextA(s);
     is_editing_ = false;
-    tree_->OnEdited(node->shared_from_this(), s.GetString());
+    tree_view()->OnEdited(node->shared_from_this(), s.GetString());
   }
   return FALSE;
 }
 
-void TreeImp::DevClear() { DeleteAllItems(); }
+void TreeViewImp::DevClear() { DeleteAllItems(); }
 
-void TreeImp::DevShowLines() {
-  ModifyStyle(0, TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS);
+void TreeViewImp::DevShowLines() {
+  ModifyStyle(0, TVS_HASLINES | TVS_LINESATROOT);
 }
 
-void TreeImp::DevHideLines() {
-  ModifyStyle(TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS, 0);
+void TreeViewImp::DevHideLines() {
+  ModifyStyle(TVS_HASLINES | TVS_LINESATROOT, 0);
+}
+
+void TreeViewImp::DevShowButtons() {
+  ModifyStyle(0, TVS_HASBUTTONS);
+}
+
+void TreeViewImp::DevHideButtons() {
+  ModifyStyle(TVS_HASBUTTONS, 0);
 }
 
 BEGIN_MESSAGE_MAP(TableImp, CListCtrl)  
@@ -726,62 +755,100 @@ void WindowHook::ReleaseHook() {
   UnhookWindowsHookEx(_hook);
 }
 
-// MenuBarImp
+// MenuContainerImp
+std::map<std::uint16_t, MenuContainerImp*> MenuContainerImp::menu_bar_id_map_;
 
-std::map<std::uint16_t, MenuBarImp*> MenuBarImp::menu_bar_id_map_;
-
-void MenuBarImp::DevInvalidate() {
-  ::AfxGetMainWnd()->DrawMenuBar();
+MenuContainerImp::MenuContainerImp() : menu_window_(0), cmenu_(0) {  
 }
 
-void MenuBarImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {
-  CWnd* pMain = ::AfxGetMainWnd();
-  UpdateNodes(node, pMain->GetMenu(), pMain->GetMenu()->GetMenuItemCount());
-  DevInvalidate();
+void MenuContainerImp::set_menu_window(CWnd* menu_window, const Node::Ptr& root_node) {
+  menu_window_ = menu_window;  
+  if (!menu_window && root_node) {
+    cmenu_ = 0;
+    root_node->erase_imps(this);    
+  } else {
+    cmenu_ = menu_window->GetMenu();
+    DevUpdate(root_node, nullpointer);
+  }
 }
 
-void MenuBarImp::RegisterMenuEvent(std::uint16_t id, MenuImp* menu_imp) {
+void MenuContainerImp::DevInvalidate() {
+  if (menu_window_) {
+    menu_window_->DrawMenuBar();
+  }
+}
+
+void MenuContainerImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {
+  if (cmenu_) {
+    UpdateNodes(node, cmenu_, cmenu_->GetMenuItemCount());
+    DevInvalidate();
+  }
+}
+
+void MenuContainerImp::RegisterMenuEvent(std::uint16_t id, MenuImp* menu_imp) {
   menu_item_id_map_[id] = menu_imp;
   menu_bar_id_map_[id] = this;
 }
 
-void MenuBarImp::UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start) {
-  Node::Container::iterator it = parent_node->begin();    
-  for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
-    Node::Ptr node = *it;
-    if (!node->imps.size()) {        
+void MenuContainerImp::UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start) {
+  if (parent_node) {
+    Node::Container::iterator it = parent_node->begin();    
+    for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
+      Node::Ptr node = *it;
+
+      boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+      while (it != node->imps.end()) {
+        NodeImp* i = &(*it);
+        if (i->owner() == this) {
+          it = node->imps.erase(it);            
+        } else {
+          ++it;
+        }
+      }
+      
       MenuImp* menu_imp = new MenuImp(parent);
       menu_imp->set_owner(this);
       menu_imp->dev_set_pos(pos);      
       if (node->size() == 0) {        
-        menu_imp->CreateMenuItem(node->text());
+        ui::Image* img = !node->image().expired() ? node->image().lock().get() : 0;
+        menu_imp->CreateMenuItem(node->text(), img);
         RegisterMenuEvent(menu_imp->id(), menu_imp);
       } else {
         menu_imp->CreateMenu(node->text());        
       }
       node->imps.push_back(menu_imp);      
-    }
-    if (node->size() > 0) {      
-      boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-      for ( ; it != node->imps.end(); ++it) {
-        if (it->owner() == this) {
-          MenuImp* menu_imp =  dynamic_cast<MenuImp*>(&(*it));    
-          if (menu_imp) {
-            UpdateNodes(node, menu_imp->cmenu());
+      if (node->size() > 0) {      
+        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+        for ( ; it != node->imps.end(); ++it) {
+          if (it->owner() == this) {
+            MenuImp* menu_imp =  dynamic_cast<MenuImp*>(&(*it));    
+            if (menu_imp) {
+              UpdateNodes(node, menu_imp->cmenu());
+            }
+            break;
           }
-          break;
-        }
-      }        
+        }        
+      }
     }
   }
 }
 
-void MenuBarImp::WorkMenuItemEvent(int id) {
+void MenuContainerImp::DevErase(boost::shared_ptr<Node> node) {
+  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+  for (; it != node->imps.end(); ++it) {     
+    if (it->owner() == this) {      
+      node->imps.erase(it);
+      break;
+    } 
+  }
+}
+
+void MenuContainerImp::WorkMenuItemEvent(int id) {
   MenuImp* menu_imp = FindMenuItemById(id);
   assert(menu_imp);
   if (menu_bar()) {
     struct {
-     ui::MenuBar* bar;
+     ui::MenuContainer* bar;
      int selectedItemID;
      void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
@@ -801,28 +868,46 @@ void MenuBarImp::WorkMenuItemEvent(int id) {
   }
 }
 
-MenuImp* MenuBarImp::FindMenuItemById(int id) {
+MenuImp* MenuContainerImp::FindMenuItemById(int id) {
   std::map<std::uint16_t, MenuImp*>::iterator it = menu_item_id_map_.find(id);
   return (it != menu_item_id_map_.end()) ? it->second : 0;
 }
 
-MenuBarImp* MenuBarImp::MenuBarImpById(int id) {
-  std::map<std::uint16_t, MenuBarImp*>::iterator it = menu_bar_id_map_.find(id);
+MenuContainerImp* MenuContainerImp::MenuContainerImpById(int id) {
+  std::map<std::uint16_t, MenuContainerImp*>::iterator it = menu_bar_id_map_.find(id);
   return (it != menu_bar_id_map_.end()) ? it->second : 0;
 }
 
+
+// PopupMenuImp
+PopupMenuImp::PopupMenuImp() : popup_menu_(new CMenu()) {
+  popup_menu_->CreatePopupMenu();
+  set_cmenu(popup_menu_.get());
+}
+
+void PopupMenuImp::DevTrack(const ui::Point& pos) {
+  popup_menu_->TrackPopupMenu(
+    TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_HORPOSANIMATION | TPM_VERPOSANIMATION,
+    pos.x(), pos.y(), ::AfxGetMainWnd());
+}
+
+
+//MenuImp
 void MenuImp::CreateMenu(const std::string& text) {
   cmenu_ = new CMenu();
   cmenu_->CreateMenu();
   parent_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)cmenu_->m_hMenu, text.c_str());    
 }
 
-void MenuImp::CreateMenuItem(const std::string& text) {
+void MenuImp::CreateMenuItem(const std::string& text, ui::Image* image) {
   if (text == "-") {
     parent_->AppendMenuA(MF_SEPARATOR);  
   } else {
-    id_ = ID_DYNAMIC_MENUS_START + ui::MenuBar::id_counter++;
-    parent_->AppendMenu(MF_STRING, id_, text.c_str());  
+    id_ = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
+    parent_->AppendMenu(MF_STRING, id_, text.c_str());
+    if (image) {      
+      parent_->SetMenuItemBitmaps(id_, MF_BYCOMMAND, (CBitmap*) image->source(), (CBitmap*) image->source()); 
+    }
   }
 }
 

@@ -61,7 +61,7 @@ function splitter:onmousemove(e)
         self:preventfls()
         self.item:setpos(x, y, w, self.itemclientpos - self.dragpos)
         self:enablefls()
-        self:parent():updatealign()   
+        self:parent():updatealign()           
       end      
     elseif self.orientation == splitter.VERT then
       if (self.dragpos ~= e.clientx) then      
@@ -70,7 +70,7 @@ function splitter:onmousemove(e)
         self:preventfls()
         self.item:setpos(x, y, self.dragpos - self.itemclientpos, h)
         self:enablefls()
-        self:parent():updatealign()               
+        self:parent():updatealign()                       
       end 
     end
   else
@@ -91,7 +91,7 @@ end
 function splitter:onmouseup(e)
   self.dosplit_ = false
   self:mouserelease()  
-  self:canvas():invalidate()
+  self:canvas()
   --self:canvas():removestyle(0x02000000)
 end 
 

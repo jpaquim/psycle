@@ -13,6 +13,7 @@
 #include "PresetsDlg.hpp"
 #include "ParamList.hpp"
 #include "Canvas.hpp"
+#include "MfcUi.hpp"
 
 namespace psycle { namespace host {
 		int const ID_TIMER_PARAM_REFRESH = 2104;
@@ -65,8 +66,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_PROGRAMS_OPENPRESET, OnProgramsOpenpreset)
 			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
 			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
-			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)
-			ON_COMMAND_RANGE(ID_DYNAMIC_MENUS_START, ID_DYNAMIC_MENUS_END, OnDynamicMenuItems)
+			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)			
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
 			ON_COMMAND(ID_PROGRAMS_RESETDEFAULT, OnParametersResetparameters)
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
@@ -623,7 +623,14 @@ namespace psycle { namespace host {
 			if (_machine->_type == MACH_LUA)
 			{                
 				_machine->reload();
-        pView->OnReload(_machine);
+         pView->OnReload(_machine);
+        boost::weak_ptr<ui::MenuContainer> menu_bar = dynamic_cast<LuaPlugin*>(_machine)->proxy().menu_bar();
+        if (!menu_bar.expired()) {
+          ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+          menubar_imp->set_menu_window(this, menu_bar.lock()->root_node().lock());
+          menu_bar.lock()->Invalidate();
+        }
+       
         ResizeWindow(0);
         pView->Invalidate(false);
 			}
@@ -752,6 +759,12 @@ namespace psycle { namespace host {
           gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				    CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
           cpv->set_canvas(user_view);
+          boost::weak_ptr<ui::MenuContainer> menu_bar = lp->proxy().menu_bar();
+          if (!menu_bar.expired()) {
+            ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+            menubar_imp->set_menu_window(this, menu_bar.lock()->root_node().lock());
+            menu_bar.lock()->Invalidate();
+          }          
           return gui;
         } else {
           gui = new CNativeView(this,&machine());
@@ -1113,11 +1126,6 @@ namespace psycle { namespace host {
 			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value-min, undo);
 			if(pParamGui)
 				pParamGui->UpdateNew(param, value);
-		}
-
-		void CFrameMachine::OnDynamicMenuItems(UINT nID) {			
-      LuaPlugin* plug = ((LuaPlugin*)_machine);
-//			plug->OnMenu(nID);        
 		}
 
 	}   // namespace

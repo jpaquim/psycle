@@ -15,10 +15,10 @@ local frame = require("psycle.ui.canvas.frame")
 local centertoscreen = require("psycle.ui.canvas.centertoscreen")
 local sysmetrics = require("psycle.ui.systemmetrics")
 local menubar = require("psycle.ui.menubar")
+local mainmenu = require("mainmenu")
 local serpent = require("psycle.serpent")
 local plugincatcher = require("psycle.plugincatcher")
 local node = require("psycle.node")
-local mainmenu = require("mainmenu")
 local menudesigner = require("menudesigner")
 local canvas = require("psycle.ui.canvas")
 local item = require("psycle.ui.canvas.item")
@@ -42,11 +42,11 @@ function machine:help()
 end
 
 function machine:init(samplerate)  
+   self.project = project:new()   
    self.maincanvas = maincanvas:new()   
-   self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)
-   self.editmacidx_ = -1
+   self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)   
    self:setcanvas(self.maincanvas)
-   self.project = {}   
+   self:initmenu();   
 end
 
 function machine:createframe()  
@@ -59,15 +59,11 @@ function machine:createframe()
   end
 end
 
-function machine:editmacidx()
-  return self.editmacidx_;
-end
-
 function machine:onexecute(msg, macidx, plugininfo, trace)  
   if msg == nil then  
     self:openinmainframe()  
   else  
-    self.editmacidx_ = macidx 
+    self.project:setpluginindex(macidx)
     self.maincanvas:setoutputtext(msg)
     self.maincanvas:setcallstack(trace)
     for i=1, #trace do
@@ -104,22 +100,17 @@ function machine:openinmainframe()
 end
 
 function machine:onactivated()
-  self:initmenu()
-  self.menubar:invalidate()  
+  self.maincanvas:fillinstancecombobox()
 end
 
-function machine:ondeactivated()    
-  self.root:remove(1)  
-  self.menus = nil  
-  collectgarbage()
-  self.menubar:invalidate()
+function machine:ondeactivated()  
 end
 
 function machine:initmenu()   
-   self.menubar = menubar:new()   
+   self.menubar = menubar:new()
+   psycle.setmenubar(self.menubar)
    self.root = node:new()   
-   self.menubar:setrootnode(self.root) 
-   
+   self.menubar:setrootnode(self.root)   
    self.menus = mainmenu.menus()   
    self.root:add(self.menus.node);
    

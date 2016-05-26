@@ -32,6 +32,14 @@ namespace ui {
 typedef uint32_t ARGB;
 typedef uint32_t RGB;
 
+extern class {
+ public:
+  template<typename T>
+  operator boost::shared_ptr<T>() { return boost::shared_ptr<T>(); }
+  template<typename T>
+  operator boost::weak_ptr<T>() { return boost::weak_ptr<T>(); }
+} nullpointer;
+
 struct Point {
   Point() : x_(0), y_(0) {}
   Point(double x, double y) : x_(x), y_(y) {}
@@ -517,8 +525,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   typedef boost::shared_ptr<const Window> ConstPtr;
   typedef boost::weak_ptr<Window> WeakPtr;
   typedef boost::weak_ptr<const Window> ConstWeakPtr;  
-  typedef std::vector<Window::Ptr> Container;
-  static Window::Ptr nullpointer;
+  typedef std::vector<Window::Ptr> Container;  
 
   Window();
   Window(WindowImp* imp);
@@ -822,7 +829,7 @@ class WindowCenterToScreen {
 class Frame : public Window {
  public:    
   typedef boost::weak_ptr<Frame> WeakPtr;
-  static std::string type() { return "canvastreeitem"; }  
+  static std::string type() { return "canvasframe"; }  
 
   Frame();
   Frame(FrameImp* imp);
@@ -857,9 +864,9 @@ inline Ornament::~Ornament() {}
 
 // Controls
 
-class Tree;
+class TreeView;
 
-class TreeImp;
+class TreeViewImp;
 class Node;
 class NodeOwnerImp;
 
@@ -878,56 +885,58 @@ class NodeImp {
 };
 
 class Node : public boost::enable_shared_from_this<Node> {
-  public:
-    static std::string type() { return "treenode"; }
-    Node() {}    
-    virtual ~Node() {}
+ public:
+  static std::string type() { return "node"; }   
+  typedef boost::shared_ptr<Node> Ptr;
+  typedef boost::weak_ptr<Node> WeakPtr;
+  typedef std::vector<Node::Ptr> Container;
+  typedef Container::iterator iterator;
    
-    typedef boost::shared_ptr<Node> Ptr;
-    typedef boost::weak_ptr<Node> WeakPtr;
-    typedef std::vector<boost::shared_ptr<Node> > Container;
-    typedef Container::iterator iterator;
-    iterator begin() { return children_.begin(); }
-    iterator end() { return children_.end(); }
-    bool empty() const { return children_.empty(); }
-    int size() const { return children_.size(); }
-    Ptr back() const { return children_.back(); }
+  virtual ~Node() {}
+      
+  virtual void set_text(const std::string& text) { 
+    text_ = text;
+    changed(*this);
+  }
+  virtual std::string text() const { return text_; }
+  virtual void set_image(const Image::WeakPtr& image) { image_ = image; }
+  virtual Image::WeakPtr image() { return image_; }
+   
+   
+  iterator begin() { return children_.begin(); }
+  iterator end() { return children_.end(); }
+  bool empty() const { return children_.empty(); }
+  int size() const { return children_.size(); }
+  Ptr back() const { return children_.back(); }
     
-    int level() const { return (!parent().expired()) ? parent().lock()->level() + 1 : 0; }
-    
-    void AddImp(NodeImp* imp) { imps.push_back(imp); }
+  int level() const { return (!parent().expired()) ? parent().lock()->level() + 1 : 0; }    
+  void AddImp(NodeImp* imp) { imps.push_back(imp); }
+  void erase_imps(NodeOwnerImp* owner);
+          
+  void AddNode(const Node::Ptr& node);
+  void insert(iterator it, const Node::Ptr& node);
+  void erase(iterator it);
 
-    boost::ptr_list<NodeImp> imps;
-    
-    virtual void set_text(const std::string& text) { text_ = text; changed(*this); }
-    virtual std::string text() const { return text_; }
-
-    void AddNode(boost::shared_ptr<Node> node);
-    void insert(iterator it, Ptr node);
-    void erase(iterator it);
-
-    template<class T>
-    void traverse(T& func, boost::shared_ptr<ui::Node> prev_node = boost::shared_ptr<ui::Node>()) {
-      func(this->shared_from_this(), prev_node);
-      boost::shared_ptr<ui::Node> prev = boost::shared_ptr<ui::Node>();
-      for (iterator it = begin(); it != end(); ++it) {        
-        (*it)->traverse(func, prev);
-        prev = *it;
-      }
+  template<class T>
+  void traverse(T& func, Node::Ptr prev_node = nullpointer) {
+    func(this->shared_from_this(), prev_node);
+    ui::Node::Ptr prev = nullpointer;
+    for (iterator it = begin(); it != end(); ++it) {        
+      (*it)->traverse(func, prev);
+      prev = *it;
     }
+  }
 
-    void set_parent(const boost::weak_ptr<Node>& parent) {
-      parent_ = parent;        
-    }
+  void set_parent(const Node::WeakPtr& parent) { parent_ = parent; }
+  Node::WeakPtr parent() const { return parent_; }
+  boost::signal<void (Node&)> changed;
 
-    boost::weak_ptr<Node> parent() const { return parent_; }
-        
-    boost::signal<void (ui::Node&)> changed;
-
+  boost::ptr_list<NodeImp> imps;
  private:
-  std::string text_;    
+  std::string text_;
+  boost::weak_ptr<ui::Image> image_;
   Container children_;
-  boost::weak_ptr<Node> parent_;
+  Node::WeakPtr parent_;
 };
 
 class NodeOwnerImp {
@@ -938,42 +947,26 @@ class NodeOwnerImp {
   virtual void DevErase(boost::shared_ptr<Node> node) = 0;
 };
 
-class MenuBar;
+class MenuContainer;
 
-class MenuBarImp : public NodeOwnerImp {
+class MenuContainerImp : public NodeOwnerImp {
  public:
-  MenuBarImp() : bar_(0) {}
-  virtual ~MenuBarImp() = 0;
+  MenuContainerImp() : bar_(0) {}
+  virtual ~MenuContainerImp() = 0;
   
-  void set_menu_bar(MenuBar* bar) { bar_ = bar; }
-  MenuBar* menu_bar() { return bar_; }
+  void set_menu_bar(MenuContainer* bar) { bar_ = bar; }
+  MenuContainer* menu_bar() { return bar_; }
   
+  virtual void DevTrack(const ui::Point& pos) = 0;
   virtual void DevInvalidate() = 0;
    
  private:
-  MenuBar* bar_;
+  MenuContainer* bar_;
 };
 
-inline MenuBarImp::~MenuBarImp() {}
+inline MenuContainerImp::~MenuContainerImp() {}
 
 class PopupMenu;
-
-class PopupMenuImp {
- public:
-  PopupMenuImp() : popup_menu_(0) {}
-  virtual ~PopupMenuImp() = 0;
-  
-  void set_popup_menu(PopupMenu* popup_menu) { popup_menu_ = popup_menu; }
-  PopupMenu* popup_menu() { return popup_menu_; }
-
-  virtual void DevUpdate(boost::shared_ptr<Node> node) = 0;
-  virtual void DevInvalidate() = 0;
-   
- private:
-  PopupMenu* popup_menu_;
-};
-
-inline PopupMenuImp::~PopupMenuImp() {}
 
 class MenuImp : public NodeImp {
   public:
@@ -987,67 +980,80 @@ class MenuImp : public NodeImp {
 
 inline  MenuImp::~MenuImp() {}
 
-class MenuBar {
+class MenuContainer {
  public:
-  MenuBar();
-  virtual ~MenuBar() {}
+  MenuContainer();
+  MenuContainer(MenuContainerImp* imp);
+  virtual ~MenuContainer() {}
+
+  virtual MenuContainerImp* imp() { return imp_.get(); }
+  virtual MenuContainerImp* imp() const { return imp_.get(); }
 
   virtual void Update();
   virtual void Invalidate();
     
-  void set_root_node(boost::shared_ptr<Node>& root_node) { root_node_ = root_node; }
-  boost::weak_ptr<Node> root_node() { return root_node_; }
+  void set_root_node(Node::Ptr& root_node) { 
+    if (root_node_.use_count() > 1) {
+      root_node_.lock()->erase_imps(imp());
+    }
+    root_node_ = root_node;  
+  }
+  Node::WeakPtr root_node() { return root_node_; }
 
   virtual void OnMenuItemClick(boost::shared_ptr<Node> node) {}
 
   static int id_counter;
 
  private:
-  std::auto_ptr<ui::MenuBarImp> imp_;
+  std::auto_ptr<ui::MenuContainerImp> imp_;
   boost::weak_ptr<Node> root_node_;  
 };
 
-class Tree : public Window {
+class MenuBar : public MenuContainer {
+};
+
+class PopupMenu : public MenuContainer {
  public:
-  typedef boost::weak_ptr<Tree> WeakPtr;
-  static std::string type() { return "canvastree"; }  
+  PopupMenu();
+  virtual void Track(const ui::Point& pos); 
+};      
 
-  Tree();
-  Tree(TreeImp* imp);
+class TreeView : public Window {
+ public:
+  typedef boost::weak_ptr<TreeView> WeakPtr;
+  static std::string type() { return "canvastreeview"; }  
 
-  TreeImp* imp() { return (TreeImp*) Window::imp(); };
-  TreeImp* imp() const { return (TreeImp*) Window::imp(); };      
+  TreeView();
+  TreeView(TreeViewImp* imp);
+
+  TreeViewImp* imp() { return (TreeViewImp*) Window::imp(); };
+  TreeViewImp* imp() const { return (TreeViewImp*) Window::imp(); };      
   void UpdateTree();
-  void set_root_node(boost::shared_ptr<Node>& root_node) {
-    root_node_ = root_node;
-  }
+  void set_root_node(const Node::Ptr& root_node) { root_node_ = root_node; }
   boost::weak_ptr<Node> root_node() { return root_node_; }      
   void Clear();      
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
   virtual void set_text_color(ARGB color);
   virtual ARGB text_color() const;
-  virtual void EditNode(boost::shared_ptr<ui::Node> node);
+  virtual void EditNode(const Node::Ptr& node);
   bool is_editing() const;
 
   void ShowLines();
   void HideLines();
+  void ShowButtons();
+  void HideButtons();
 
-  virtual void select_node(const boost::shared_ptr<Node>& node);
+  virtual void select_node(const Node::Ptr& node);
   virtual boost::weak_ptr<Node> selected();
 
-  virtual void OnClick(boost::shared_ptr<Node> node) {}
-  virtual void OnEditing(boost::shared_ptr<Node> node, const std::string& text) {}
-  virtual void OnEdited(boost::shared_ptr<Node> node, const std::string& text) {}
+  virtual void OnClick(const Node::Ptr& node) {}
+  virtual void OnRightClick(const Node::Ptr& node) {}
+  virtual void OnEditing(const Node::Ptr& node, const std::string& text) {}
+  virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}
 
  private:     
   boost::weak_ptr<Node> root_node_;  
-};
-
-class PopupMenu {
- public:
-  PopupMenu() {}
-  virtual ~PopupMenu() {}
 };
 
 class TableItemImp;
@@ -1084,7 +1090,7 @@ class Table : public Window {
  public:    
   static std::string type() { return "canvastableitem"; }  
 
-  Table() { set_auto_size(false, false); }
+  Table();
   Table(TableImp* imp);
 
   TableImp* imp() { return (TableImp*) Window::imp(); };
@@ -1130,11 +1136,17 @@ class ComboBoxImp;
 class ComboBox : public Window {
  public:
   static std::string type() { return "canvascomboboxitem"; }
-  ComboBox() {}
+  ComboBox();
   ComboBox(ComboBoxImp* imp);
 
   ComboBoxImp* imp() { return (ComboBoxImp*) Window::imp(); };
   ComboBoxImp* imp() const { return (ComboBoxImp*) Window::imp(); };
+
+  virtual void set_items(const std::vector<std::string>& itemlist);
+
+  void set_item_index(int index);
+  int item_index() const;
+  virtual void OnSelect() {}
 };
 
 class EditImp;
@@ -1142,7 +1154,7 @@ class EditImp;
 class Edit : public Window {
  public:
   static std::string type() { return "canvaseditboxitem"; }
-  Edit() { set_auto_size(false, false); }
+  Edit();
   Edit(EditImp* imp);
 
   EditImp* imp() { return (EditImp*) Window::imp(); };
@@ -1156,7 +1168,7 @@ class ButtonImp;
 class Button : public Window {
  public:
   static std::string type() { return "canvaseditboxitem"; }
-  Button() {}
+  Button();
   Button(ButtonImp* imp);
 
   ButtonImp* imp() { return (ButtonImp*) Window::imp(); };
@@ -1214,7 +1226,7 @@ class ScintillaImp;
 class Scintilla : public Window {
  public:
   static std::string type() { return "canvasscintillaitem"; }
-  Scintilla() { set_auto_size(false, false); }
+  Scintilla();
   Scintilla(ScintillaImp* imp);
 
   ScintillaImp* imp() { return (ScintillaImp*) Window::imp(); };
@@ -1365,7 +1377,7 @@ class GameControllersImp {
 inline GameControllersImp::~GameControllersImp() {}
 
 
-class MenuBar;
+class MenuContainer;
 
 // Ui Factory
 class Systems {
@@ -1386,8 +1398,9 @@ class Systems {
   virtual ui::Edit* CreateEdit();
   virtual ui::Button* CreateButton();
   virtual ui::ScrollBar* CreateScrollBar();
-  virtual ui::Tree* CreateTree();
-  virtual ui::MenuBar* CreateMenuBar();  
+  virtual ui::TreeView* CreateTreeView();
+  virtual ui::MenuContainer* CreateMenuBar();
+  virtual ui::PopupMenu* CreatePopupMenu();
 
   SystemMetrics& metrics();
 
@@ -1488,55 +1501,46 @@ class WindowImp {
 
 class FrameImp : public WindowImp {
  public:  
-  FrameImp() : WindowImp() {}
-  FrameImp(Window* window) : WindowImp(window) {}  
+  FrameImp() {}
+  FrameImp(Window* window) : WindowImp(window) {}
 
   virtual void dev_set_title(const std::string& title) = 0;
   virtual void dev_set_view(ui::Window::Ptr view) = 0;
   virtual void DevShowDecoration() = 0;
   virtual void DevHideDecoration() = 0;
-
   virtual void OnDevClose(); 
 };
 
-class TreeImp : public WindowImp, public NodeOwnerImp {
+class TreeViewImp : public WindowImp, public NodeOwnerImp {
  public:  
-  TreeImp() : WindowImp() {}
-  TreeImp(Window* window) : WindowImp(window) {}
+  TreeViewImp() : WindowImp() {}
+  TreeViewImp(Window* window) : WindowImp(window) {}
       
   virtual void dev_set_background_color(ARGB color) = 0;
   virtual ARGB dev_background_color() const = 0;  
   virtual void dev_set_text_color(ARGB color) = 0;
   virtual ARGB dev_text_color() const = 0;
-  virtual void DevClear() = 0;
-  virtual void set_tree(ui::Tree* tree) = 0;  
+  virtual void DevClear() = 0;  
   virtual void dev_select_node(const boost::shared_ptr<Node>& node) = 0;
   virtual boost::weak_ptr<Node> dev_selected() = 0;
   virtual void DevEditNode(boost::shared_ptr<ui::Node> node) = 0;
   virtual bool dev_is_editing() const = 0;
   virtual void DevShowLines() = 0;
   virtual void DevHideLines() = 0;
+  virtual void DevShowButtons() = 0;
+  virtual void DevHideButtons() = 0;
 };
 
 class TableItemImp {
  public:
-  TableItemImp() {} // : tree_node_(0) {}
+  TableItemImp() {}
   virtual ~TableItemImp() {}
-  
-  //void set_tree_node(TreeNode* tree_node) { tree_node_ = tree_node; }
-  //TreeNode* tree_node() const { return tree_node_; }
-
+    
   virtual void dev_set_table(boost::weak_ptr<Table> table) = 0;  
   virtual void dev_set_text(const std::string& text) =  0;
   virtual std::string dev_text() const = 0;
-
-  
-  /*virtual void OnDevClick() {
-    tree_node_->WorkClick();
-  }*/
-
- private:
-  //TareeNode* tree_node_;
+    
+ private:  
 };
 
 class TableImp : public WindowImp {
@@ -1572,6 +1576,10 @@ class ComboBoxImp : public WindowImp {
  public:
   ComboBoxImp() : WindowImp() {}
   ComboBoxImp(Window* window) : WindowImp(window) {}
+
+  virtual void dev_set_items(const std::vector<std::string>& itemlist) = 0;
+  virtual void dev_set_item_index(int index) = 0;
+  virtual int dev_item_index() const = 0;
 };
 
 class ButtonImp : public WindowImp {
@@ -1639,7 +1647,8 @@ class ScintillaImp : public WindowImp {
   virtual void OnDevFirstModified() {}  
 };
 
-class MenuBarImp;
+class MenuContainerImp;
+class PopupMenuImp;
 class MenuItemImp;
 
 class ImpFactory {
@@ -1655,8 +1664,9 @@ class ImpFactory {
   virtual ui::ScrollBarImp* CreateScrollBarImp(ui::Orientation orientation);
   virtual ui::ComboBoxImp* CreateComboBoxImp();
   virtual ui::EditImp* CreateEditImp();
-  virtual ui::TreeImp* CreateTreeImp();
-  virtual ui::MenuBarImp* CreateMenuBarImp();
+  virtual ui::TreeViewImp* CreateTreeViewImp();
+  virtual ui::MenuContainerImp* CreateMenuContainerImp();
+  virtual ui::MenuContainerImp* CreatePopupMenuImp();
   virtual ui::MenuImp* CreateMenuImp();
   virtual ui::TableImp* CreateTableImp();  
   virtual ui::ButtonImp* CreateButtonImp();
