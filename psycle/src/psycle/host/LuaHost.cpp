@@ -15,7 +15,6 @@
 #include "LuaHelper.hpp"
 #include "LuaGui.hpp"
 #include "MfcUi.hpp"
-#include "Menu.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
@@ -132,6 +131,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaFileSaveBind>(L, "psycle.ui.filesave");
   // ui menu binds
   LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
+  LuaHelper::require<LuaPopupMenuBind>(L, "psycle.ui.popupmenu");
   LuaHelper::require<LuaSystemMetrics>(L, "psycle.ui.systemmetrics");
   // ui canvas binds
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
@@ -143,7 +143,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
   LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
-  LuaHelper::require<LuaTreeBind<> >(L, "psycle.ui.canvas.tree");
+  LuaHelper::require<LuaTreeViewBind<> >(L, "psycle.ui.canvas.treeview");
   LuaHelper::require<LuaNodeBind>(L, "psycle.node");
   LuaHelper::require<LuaTableBind<> >(L, "psycle.ui.canvas.table");
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
@@ -172,6 +172,7 @@ void LuaProxy::set_state(lua_State* state) {
 
 void LuaProxy::Free() {
   if (L) {
+    invokelater->Clear();
     lua_close(L);
   }
   L = 0;
@@ -189,11 +190,18 @@ void LuaProxy::Reload() {
       Run();
       Init();      
       if (old_state) {
+        LuaGlobal::proxy(old_state)->invokelater->Clear();
+        boost::weak_ptr<ui::MenuContainer> menu_bar = LuaGlobal::proxy(old_state)->menu_bar();
+        if (!menu_bar.expired()) {
+          menu_bar.lock()->root_node().lock()->erase_imps(menu_bar.lock()->imp());
+          menu_bar.lock()->Invalidate();           
+        }
         lua_close(old_state);
       }
       OnActivated();
     } catch(std::exception &e) {
       if (new_state) {
+        
         lua_close(new_state);
       }
       L = old_state;
@@ -283,12 +291,22 @@ int LuaProxy::set_machine(lua_State* L) {
   return 0;
 }
 
+int LuaProxy::set_menubar(lua_State* L) {
+  boost::shared_ptr<LuaMenuBar> menu_bar = LuaHelper::check_sptr<LuaMenuBar>(L, 1, LuaMenuBarBind::meta);  
+  lua_getglobal(L, "psycle");
+  lua_getfield(L, -1, "__self");
+  LuaProxy* proxy = *(LuaProxy**)luaL_checkudata(L, -1, "psyhostmeta");    
+  proxy->menu_bar_ = menu_bar;
+  return 0;
+}
+
 void LuaProxy::export_c_funcs() {
   static const luaL_Reg methods[] = {
     {"invokelater", invoke_later},
     {"output", terminal_output },
     {"alert", message },
     {"setmachine", set_machine},
+    {"setmenubar", set_menubar},
     {"filedialog", call_filedialog},
     {"selmachine", call_selmachine},	  
     { NULL, NULL }

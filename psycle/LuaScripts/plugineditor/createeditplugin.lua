@@ -131,7 +131,7 @@ function createeditplugin:updatepluginlist()
   local infos = catcher:infos()    
   local lua_count = 0
   for i=1, #infos do
-    if infos[i]:type() == machine.MACH_LUA then
+    if infos[i]:type() == machine.MACH_LUA then      
       local t = text:new(self.pluginlist):setautosize(true, true):settext(infos[i]:name()):setmargin(0, 0, 10, 0)      
       t.info = infos[i]      
       function t:onmouseenter()

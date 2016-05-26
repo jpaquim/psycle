@@ -24,7 +24,7 @@ namespace host {
 
     namespace ui {      
       class Window;
-	    class MenuBar;
+	    class MenuContainer;
     }
 
 		#define MAX_WIRE_DIALOGS 16

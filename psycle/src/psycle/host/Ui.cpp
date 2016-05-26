@@ -4,8 +4,6 @@
 #include "Psycle.hpp"
 
 #include "MfcUi.hpp"
-#include "Menu.hpp"
-
 #include "LuaGui.hpp"
 
 namespace psycle {
@@ -14,23 +12,36 @@ namespace ui {
 
 boost::shared_ptr<ui::Region> Window::dummy_region_(ui::Systems::instance().CreateRegion());
 Window::Container Window::dummy_list_;
-Window::Ptr Window::nullpointer;
-int MenuBar::id_counter = 0;
 
-MenuBar::MenuBar() : imp_(ui::ImpFactory::instance().CreateMenuBarImp()) {
+int MenuContainer::id_counter = 0;
+
+MenuContainer::MenuContainer() : imp_(ui::ImpFactory::instance().CreateMenuContainerImp()) {
   imp_->set_menu_bar(this);
 }
 
-void MenuBar::Update() {
+MenuContainer::MenuContainer(ui::MenuContainerImp* imp) : imp_(imp) {
+  imp_->set_menu_bar(this);
+}
+
+void MenuContainer::Update() {
   if (!root_node_.expired()) {
     assert(imp_.get());
     imp_->DevUpdate(root_node_.lock());  
   }
 }
 
-void MenuBar::Invalidate() {
+void MenuContainer::Invalidate() {
   assert(imp_.get());
   imp_->DevInvalidate();
+}
+
+PopupMenu::PopupMenu() 
+  : MenuContainer(ui::ImpFactory::instance().CreatePopupMenuImp()) {
+}
+
+void PopupMenu::Track(const ui::Point& pos) {
+  assert(imp());
+  imp()->DevTrack(pos);
 }
 
 Region::Region() : imp_(ui::ImpFactory::instance().CreateRegionImp()) {
@@ -440,6 +451,9 @@ Window::Window(WindowImp* imp) :
     pointer_events_(true),
     has_store_(false) {
   imp_.reset(imp);  
+  if (imp) {
+    imp->set_window(this);
+  }
 }
 
 Window::~Window() {   
@@ -666,7 +680,7 @@ Window::WeakPtr Window::focus() {
       return win->shared_from_this();
     }
   }
-  return Window::nullpointer;
+  return nullpointer;
 }
 
 void Window::SetFocus() {
@@ -1031,15 +1045,17 @@ void Group::FlagNotAligned() {
   PreOrderTreeTraverse(set_unaligned, abort_none);  
 }
 
-ScrollBar::ScrollBar() {
-  set_imp(ui::ImpFactory::instance().CreateScrollBarImp(HORZ));
+// ScrollBar
+ScrollBar::ScrollBar() 
+  : Window(ui::ImpFactory::instance().CreateScrollBarImp(HORZ)) {
 }
 
-ScrollBar::ScrollBar(const ui::Orientation& orientation) {
-  set_imp(ui::ImpFactory::instance().CreateScrollBarImp(orientation));
+ScrollBar::ScrollBar(const ui::Orientation& orientation) 
+  : Window(ui::ImpFactory::instance().CreateScrollBarImp(orientation)) {  
 }
 
-ScrollBar::ScrollBar(ScrollBarImp* imp) : Window(imp) {}
+ScrollBar::ScrollBar(ScrollBarImp* imp) : Window(imp) {
+}
 
 void ScrollBar::set_scroll_range(int minpos, int maxpos) {
   if (imp()) {
@@ -1084,9 +1100,13 @@ void WindowCenterToScreen::set_position(Window& window) {
     win_dim));
 }
 
-Frame::Frame() { set_auto_size(false, false); }
+Frame::Frame() : Window(ui::ImpFactory::instance().CreateFrameImp()) {
+  set_auto_size(false, false); 
+}
 
-Frame::Frame(FrameImp* imp) : Window(imp) { set_auto_size(false, false); }
+Frame::Frame(FrameImp* imp) : Window(imp) {
+  set_auto_size(false, false);
+}
 
 void Frame::set_title(const std::string& title) {
   if (imp()) {
@@ -1124,7 +1144,25 @@ void Node::erase(iterator it) {
   children_.erase(it);
 }
 
-void Node::AddNode(boost::shared_ptr<Node> node) {
+void Node::erase_imps(NodeOwnerImp* owner) {
+  struct {    
+    NodeOwnerImp* that;
+      void operator()(Node::Ptr node, Node::Ptr prev_node) {
+        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+        while (it != node->imps.end()) {          
+          if (it->owner() == that) {
+            it = node->imps.erase(it);            
+          } else {
+            ++it;
+          }
+        }
+      }
+  } imp_eraser;
+  imp_eraser.that = owner;
+  traverse(imp_eraser, nullpointer);
+}
+
+void Node::AddNode(const Node::Ptr& node) {
   children_.push_back(node);
   node->set_parent(shared_from_this());
   boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
@@ -1133,11 +1171,10 @@ void Node::AddNode(boost::shared_ptr<Node> node) {
   }
 }
 
-void Node::insert(iterator it, Ptr node) { 
-  boost::shared_ptr<ui::Node> insert_after;
-  if (it != begin() && it != end()) {
-    iterator it1 = it;    
-    insert_after = *(--it1);
+void Node::insert(iterator it, const Node::Ptr& node) { 
+  Node::Ptr insert_after;
+  if (it != begin() && it != end()) {    
+    insert_after = *(--iterator(it));
   }      
   children_.insert(it, node);
   node->set_parent(shared_from_this());
@@ -1147,15 +1184,15 @@ void Node::insert(iterator it, Ptr node) {
   }
 }
 
-Tree::Tree()  {     
-  set_auto_size(false, false);  
+TreeView::TreeView() : Window(ui::ImpFactory::instance().CreateTreeViewImp()) {
+  set_auto_size(false, false);
 }
 
-Tree::Tree(TreeImp* imp) : Window(imp) {
-  set_auto_size(false, false);  
+TreeView::TreeView(TreeViewImp* imp) : Window(imp) { 
+  set_auto_size(false, false);
 }
 
-void Tree::Clear() {
+void TreeView::Clear() {
   if (!root_node_.expired()) {    
     root_node_.reset();
     if (imp()) {
@@ -1164,68 +1201,84 @@ void Tree::Clear() {
   }
 }
 
-void Tree::UpdateTree() {
+void TreeView::UpdateTree() {
   if (imp() && !root_node_.expired()) {
     imp()->DevClear();  
     imp()->DevUpdate(root_node_.lock());
   }  
 }
 
-boost::weak_ptr<Node> Tree::selected() {
+boost::weak_ptr<Node> TreeView::selected() {
   return imp() ? imp()->dev_selected() : boost::weak_ptr<Node>();  
 }
 
-void Tree::select_node(const boost::shared_ptr<ui::Node>& node) {
+void TreeView::select_node(const Node::Ptr& node) {
   if (imp()) {
     imp()->dev_select_node(node);
   }
 }
 
-void Tree::set_background_color(ARGB color) {
+void TreeView::set_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_background_color(color);
   }
 }
 
-ARGB Tree::background_color() const {
+ARGB TreeView::background_color() const {
   return imp() ? imp()->dev_background_color() : 0xFF00000;
 }
 
-void Tree::set_text_color(ARGB color) {
+void TreeView::set_text_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_text_color(color);
   }
 }
 
-ARGB Tree::text_color() const {
+ARGB TreeView::text_color() const {
   return imp() ? imp()->dev_text_color() : 0xFF00000;
 }
 
-void Tree::EditNode(boost::shared_ptr<ui::Node> node) {
+void TreeView::EditNode(const Node::Ptr& node) {
   if (imp()) {
     imp()->DevEditNode(node);
   }
 }
 
-bool Tree::is_editing() const {
+bool TreeView::is_editing() const {
   return imp() ? imp()->dev_is_editing() : false;  
 }
 
-void Tree::ShowLines() {
+void TreeView::ShowLines() {
   if (imp()) {
     imp()->DevShowLines();
   }
 }
 
-void Tree::HideLines() {
+void TreeView::HideLines() {
   if (imp()) {
     imp()->DevHideLines();
   }
 }
 
+void TreeView::ShowButtons() {
+  if (imp()) {
+    imp()->DevShowButtons();
+  }
+}
+
+void TreeView::HideButtons() {
+  if (imp()) {
+    imp()->DevHideButtons();
+  }
+}
 
 // Table
-Table::Table(TableImp* imp) : Window(imp) {}
+Table::Table() : Window(ui::ImpFactory::instance().CreateTableImp()) {
+  set_auto_size(false, false);
+}
+
+Table::Table(TableImp* imp) : Window(imp) {
+}
 
 void Table::InsertColumn(int col, const std::string& text) {
   if (imp()) {
@@ -1314,10 +1367,37 @@ std::string TableItem::text() const {
   return (imp()) ? imp()->dev_text() : "no imp";  
 }
 
+ComboBox::ComboBox() : Window(ui::ImpFactory::instance().CreateComboBoxImp()) {  
+  set_auto_size(false, false);
+}
 
-ComboBox::ComboBox(ComboBoxImp* imp) : Window(imp) {}
+ComboBox::ComboBox(ComboBoxImp* imp) : Window(imp) {
+}
 
-Edit::Edit(EditImp* imp) : Window(imp) {}
+void ComboBox::set_items(const std::vector<std::string>& itemlist) {
+  if (imp()) {
+    imp()->dev_set_items(itemlist);
+  }
+}
+
+void ComboBox::set_item_index(int index) {
+  if (imp()) {
+    imp()->dev_set_item_index(index);
+  }
+}
+
+int ComboBox::item_index() const {
+  if (imp()) {
+    return imp() ? imp()->dev_item_index() : -1;
+  }
+}
+
+Edit::Edit() : Window(ui::ImpFactory::instance().CreateEditImp()) { 
+  set_auto_size(false, false);
+}
+
+Edit::Edit(EditImp* imp) : Window(imp) {
+}
 
 void Edit::set_text(const std::string& text) {
   if (imp()) {
@@ -1325,10 +1405,16 @@ void Edit::set_text(const std::string& text) {
   }
 }
 
-std::string Edit::text() const { return imp() ? imp()->dev_text() : ""; }
+std::string Edit::text() const { 
+  return imp() ? imp()->dev_text() : "";
+}
 
+Button::Button() : Window(ui::ImpFactory::instance().CreateButtonImp()) {
+  set_auto_size(false, false);
+}
 
-Button::Button(ButtonImp* imp) : Window(imp) {}
+Button::Button(ButtonImp* imp) : Window(imp) {
+}
 
 void Button::set_text(const std::string& text) {
   if (imp()) {
@@ -1336,11 +1422,18 @@ void Button::set_text(const std::string& text) {
   }
 }
 
-std::string Button::text() const { return imp() ? imp()->dev_text() : ""; }
+std::string Button::text() const {
+  return imp() ? imp()->dev_text() : "";
+}
 
 std::string Scintilla::dummy_str_ = "";
 
-Scintilla::Scintilla(ScintillaImp* imp) : Window(imp) {}
+Scintilla::Scintilla() : Window(ui::ImpFactory::instance().CreateScintillaImp()) { 
+  set_auto_size(false, false);
+}
+
+Scintilla::Scintilla(ScintillaImp* imp) : Window(imp) {
+}
 
 int Scintilla::f(int sci_cmd, void* lparam, void* wparam) {
   if (imp()) {
@@ -1627,14 +1720,19 @@ ui::ScrollBar* Systems::CreateScrollBar() {
   return new ui::ScrollBar();
 }
 
-ui::Tree* Systems::CreateTree() {
+ui::TreeView* Systems::CreateTreeView() {
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateTree(); 
+  return concrete_factory_->CreateTreeView(); 
 }
 
-ui::MenuBar* Systems::CreateMenuBar() {
+ui::MenuContainer* Systems::CreateMenuBar() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateMenuBar(); 
+}
+
+ui::PopupMenu* Systems::CreatePopupMenu() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreatePopupMenu(); 
 }
 
 // WindowImp
@@ -1702,7 +1800,6 @@ void ButtonImp::OnDevClick() {
 }
 
 // ImpFactory
-
 ImpFactory& ImpFactory::instance() {
   static ImpFactory instance_;
   if (!instance_.concrete_factory_.get()) {
@@ -1750,14 +1847,19 @@ ui::EditImp* ImpFactory::CreateEditImp() {
   return concrete_factory_->CreateEditImp(); 
 }
 
-ui::TreeImp* ImpFactory::CreateTreeImp() {
+ui::TreeViewImp* ImpFactory::CreateTreeViewImp() {
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateTreeImp(); 
+  return concrete_factory_->CreateTreeViewImp(); 
 }
 
-ui::MenuBarImp* ImpFactory::CreateMenuBarImp() {
+ui::MenuContainerImp* ImpFactory::CreateMenuContainerImp() {
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateMenuBarImp();
+  return concrete_factory_->CreateMenuContainerImp();
+}
+
+ui::MenuContainerImp* ImpFactory::CreatePopupMenuImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreatePopupMenuImp();
 }
 
 ui::MenuImp* ImpFactory::CreateMenuImp() {

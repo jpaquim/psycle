@@ -36,6 +36,7 @@ local filehelper = require("psycle.file")
 local templateparser = require("templateparser")
 local cfg = require("psycle.config"):new("PatternVisual")
 local project = require("project")
+local combobox = require("psycle.ui.canvas.combobox")
 
 local maincanvas = canvas:new()
 
@@ -52,9 +53,9 @@ function maincanvas:init()
   self.togglecanvas = signal:new() 
   self:setornament(ornamentfactory:createfill(settings.canvas.colors.background))
   self:setupfiledialogs()
-  self:inittollbar()   
+  self:inittoolbar()   
   self:createsearch()
-  self:createcreateeditplugin()
+  self:createcreateeditplugin()  
   self:createoutputs()
   splitter:new(self, splitter.HORZ)
   self.pluginexplorer = self:createpluginexplorer()
@@ -244,19 +245,21 @@ function maincanvas:savepage()
   end
 end
 
-function maincanvas:playplugin()
-  local macidx = psycle.proxy:editmacidx()
-  local machine = machine:new(macidx)
-  if machine then
-    self:savepage()
-    machine:reload()
+function maincanvas:playplugin()  
+  local pluginindex = psycle.proxy.project:pluginindex()
+  if pluginindex ~= -1 then
+    local machine = machine:new(pluginindex)
+    if machine then
+      self:savepage()
+      machine:reload()
+    end
   end
 end
 
-function maincanvas:inittollbar()  
+function maincanvas:inittoolbar()  
   self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP)--:setmargin(3, 3, 3, 3)  
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
-  self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
+  self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
   self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
   self:initplaytoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
 end
@@ -293,7 +296,30 @@ function maincanvas:initselectplugintoolbar(parent)
     that:updatealign()    
   end  
   return t
+end
+
+function maincanvas:fillinstancecombobox()
+   local items = {"new instance"}
+   if (psycle.proxy.project:plugininfo()) then
+     for machineindex= 0, 255 do
+       local machine = machine:new(machineindex);       
+       if machine and machine:type() == machine.MACH_LUA and machine:pluginname() == psycle.proxy.project:plugininfo():name() then
+         items[#items + 1] = machine:pluginname().."["..machineindex.."]"
+       end
+     end     
+   end
+   self.cbx:setitems(items)
+   self.cbx:setitemindex(1)
 end  
+
+function maincanvas:createinstanceselect(parent)
+  self.cbx = combobox:new(parent):setautosize(false, false):setpos(0, 0, 100, 20):setalign(item.ALLEFT)
+  function self.cbx:onselect()
+    psycle.output(self:itemindex())
+  end
+  self.cbx:setitems({"new instance"})
+  self.cbx:setitemindex(1)
+end
 
 function maincanvas:initfiletoolbar()  
   local t = toolbar:new(self.tg)
@@ -309,9 +335,10 @@ end
 
 function maincanvas:initplaytoolbar()  
   local t = toolbar:new(self.tg)
-  local istart = toolicon:new(t, settings.picdir.."play.png", 0xFFFFFF)
+  local istart = toolicon:new(t, settings.picdir.."play.png", 0xFFFFFF)  
   local that = self
   function istart:onclick() that:playplugin() end
+  self:createinstanceselect(t)
   return t
 end
 

@@ -1067,6 +1067,11 @@ namespace psycle { namespace host {
       pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
       if (active_lua_) {
         active_lua_->OnDeactivated();
+        boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
+        if (!menu_bar.expired()) {
+          menu_bar.lock()->root_node().lock()->erase_imps(menu_bar.lock()->imp());
+          menu_bar.lock()->Invalidate();           
+        }
       }
       active_lua_ = 0;
     }
@@ -2458,7 +2463,7 @@ namespace psycle { namespace host {
       for (; it != list.end(); ++it) {
         PluginInfo* info = *it;     
         // if (info->name != "Plugineditor") continue;
-        int id = ID_DYNAMIC_MENUS_START+ui::MenuBar::id_counter++;   
+        int id = ID_DYNAMIC_MENUS_START+ui::MenuContainer::id_counter++;   
         try {
           LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
           mac->Init();
@@ -2485,7 +2490,7 @@ namespace psycle { namespace host {
       } 
       if (has_ext) {
         view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
-        int id = ID_DYNAMIC_MENUS_START + ui::MenuBar::id_counter++;
+        int id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
         view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
         menuItemIdMap[id] = NULL;
       }
@@ -2510,7 +2515,7 @@ namespace psycle { namespace host {
     }
 
     void CChildView::OnDynamicMenuItems(UINT nID) {
-      ui::mfc::MenuBarImp* mbimp =  ui::mfc::MenuBarImp::MenuBarImpById(nID);
+      ui::mfc::MenuContainerImp* mbimp =  ui::mfc::MenuContainerImp::MenuContainerImpById(nID);
       if (mbimp != 0) {
         mbimp->WorkMenuItemEvent(nID);
         return;
@@ -2518,13 +2523,17 @@ namespace psycle { namespace host {
       if (menuItemIdMap[nID]==NULL) {
         if (active_lua_) {          
           LuaPlugin* lp = active_lua_;
-          try {            
+          try {                      
            lp->proxy().Reload();            
            ChangeCanvas(lp->canvas().lock().get());
+           boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
+           if (!menu_bar.expired()) {
+             ui::mfc::MenuContainerImp* menu_bar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+             menu_bar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
+           }
           } catch (std::exception e) {
             AfxMessageBox(e.what());
-          }        
-          // lp->InvalidateMenuBar();
+          }          
           Invalidate(false);
         }
         return;        
@@ -2540,8 +2549,13 @@ namespace psycle { namespace host {
             ChangeCanvas(user_view.lock().get()); 
             active_lua_ = plug;
             try {
+              boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
+              if (!menu_bar.expired()) {
+                ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+                menubar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
+              }
               plug->OnActivated();
-            } catch (std::exception& e) {              
+            } catch (std::exception&) {               
               // AfxMessageBox(e.what());
             }
             Invalidate(false);

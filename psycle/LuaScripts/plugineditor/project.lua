@@ -9,6 +9,7 @@ function project:new()
 end
 
 function project:init()   
+  self.pluginindex_ = -1
 end
 
 function project:setplugininfo(plugininfo)
@@ -18,6 +19,14 @@ end
 
 function project:plugininfo()
   return self.plugininfo_
+end
+
+function project:setpluginindex(index)
+  self.pluginindex_ = index
+end
+
+function project:pluginindex()
+  return self.pluginindex_
 end
 
 return project

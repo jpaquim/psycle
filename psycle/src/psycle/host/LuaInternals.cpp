@@ -424,6 +424,7 @@ int LuaMachineBind::open(lua_State *L) {
     {"new", create},
     {"work", work},
     {"info2", info2},
+    {"pluginname", pluginname},
     {"tick", tick},
     {"channel", channel},
     {"setnumchannels", set_numchannels},
@@ -581,6 +582,12 @@ int LuaMachineBind::info2(lua_State* L) {
   lua_newtable(L);
   LuaHelper::setfield(L, "dllname", info.dllname);
   LuaHelper::setfield(L, "name", info.name);  
+  return 1;
+}
+
+int LuaMachineBind::pluginname(lua_State* L) {
+  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  lua_pushstring(L, plug->mac()->GetName());
   return 1;
 }
 
@@ -842,12 +849,16 @@ int LuaPlayerBind::open(lua_State *L) {
     {"playing", playing},
     {NULL, NULL}
   };
-  return LuaHelper::open(L, meta, methods);
+  return LuaHelper::open(L, meta, methods, gc);
 }
 
 int LuaPlayerBind::create(lua_State* L) {
-  LuaHelper::new_shared_userdata<Player>(L, meta, &Global::player(), 1);
+  LuaHelper::new_shared_userdata<Player>(L, meta, &Global::player(), 1, true);
   return 1;
+}
+
+int LuaPlayerBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<LuaPlayerBind>(L, meta);
 }
 
 int LuaPlayerBind::samplerate(lua_State* L) {

@@ -315,7 +315,8 @@ void GridAligner::Realign() {}
 
 // Canvas
 void Canvas::Init() {
-  set_auto_size(false, false);  
+  set_auto_size(false, false);
+  set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 500)));
   steal_focus_ = fls_prevented_ = false;
   save_ = true;  
 }

@@ -107,8 +107,7 @@ namespace host {
 			afx_msg void OnProgramLess();
 			afx_msg void OnUpdateProgramLess(CCmdUI *pCmdUI);
 			afx_msg void OnProgramMore();
-			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);
-			afx_msg void OnDynamicMenuItems(UINT nID);
+			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);			
 		};
 
 	}   // namespace

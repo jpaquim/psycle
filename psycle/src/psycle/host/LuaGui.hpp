@@ -5,7 +5,6 @@
 #include <psycle/host/detail/project.hpp>
 #include "Canvas.hpp"
 #include "CanvasItems.hpp"
-#include "Menu.hpp"
 #include "InputHandler.hpp"
 #include "LuaHelper.hpp"
 
@@ -151,53 +150,38 @@ typedef CanvasItem<ui::canvas::Line> LuaLine;
 typedef CanvasItem<ui::canvas::Text> LuaText;
 typedef CanvasItem<ui::canvas::Pic> LuaPic;
 
-class LuaComboBox : public CanvasItem<ui::canvas::ComboBox> {
+class LuaButton : public CanvasItem<ui::Button> {
  public:  
-  LuaComboBox(lua_State* L) : CanvasItem<ui::canvas::ComboBox>(L) {}
-
-  void MakeImp() {
-    ui::ComboBoxImp* imp  = ui::ImpFactory::instance().CreateComboBoxImp();
-    this->set_imp(imp);
-    imp->set_window(this);
-  }
+  LuaButton(lua_State* L) : CanvasItem<ui::Button>(L) {}
+  
+  virtual void OnClick();
 };
 
 class LuaEdit : public CanvasItem<ui::Edit> {
  public:  
-  LuaEdit(lua_State* L) : CanvasItem<ui::Edit>(L) {}
-
-  void MakeImp() {
-    ui::EditImp* imp  = ui::ImpFactory::instance().CreateEditImp();
-    this->set_imp(imp);
-    imp->set_window(this);
-  }
+  LuaEdit(lua_State* L) : CanvasItem<ui::Edit>(L) {}  
 };
 
-class LuaTree : public CanvasItem<ui::Tree> {
+class LuaComboBox : public CanvasItem<ui::canvas::ComboBox> {
  public:  
-  LuaTree(lua_State* L) : CanvasItem<ui::Tree>(L) {}
+  LuaComboBox(lua_State* L) : CanvasItem<ui::canvas::ComboBox>(L) {}
 
-  void MakeImp() {
-    ui::TreeImp* imp  = ui::ImpFactory::instance().CreateTreeImp();
-    this->set_imp(imp);
-    imp->set_window(this);
-    imp->set_tree(this);
-  }
+  virtual void OnSelect();
+};
 
-  virtual void OnClick(boost::shared_ptr<ui::Node> node);
-  virtual void OnEditing(boost::shared_ptr<ui::Node> node, const std::string& text);
-  virtual void OnEdited(boost::shared_ptr<ui::Node> node, const std::string& text);
+class LuaTreeView : public CanvasItem<ui::TreeView> {
+ public:  
+  LuaTreeView(lua_State* L) : CanvasItem<ui::TreeView>(L) {}
+  
+  virtual void OnClick(const ui::Node::Ptr& node);
+  virtual void OnRightClick(const ui::Node::Ptr& node);
+  virtual void OnEditing(const ui::Node::Ptr& node, const std::string& text);
+  virtual void OnEdited(const ui::Node::Ptr& node, const std::string& text);
 };
 
 class LuaTable : public CanvasItem<ui::Table> {
  public:  
-  LuaTable(lua_State* L) : CanvasItem<ui::Table>(L) {}
-
-  void MakeImp() {
-    ui::TableImp* imp  = ui::ImpFactory::instance().CreateTableImp();
-    this->set_imp(imp);
-    imp->set_window(this);
-  }
+  LuaTable(lua_State* L) : CanvasItem<ui::Table>(L) {}  
 };
 
 struct LuaEventBind {
@@ -305,18 +289,6 @@ struct LuaGraphicsBind {
   static int gc(lua_State* L);
 };
 
-class LuaButton : public CanvasItem<ui::Button> {
- public:  
-  LuaButton(lua_State* L) : CanvasItem<ui::Button>(L) {}
-
-  void MakeImp() {
-    ui::ButtonImp* imp  = ui::ImpFactory::instance().CreateButtonImp();
-    this->set_imp(imp);
-    imp->set_window(this);
-  }
-
-  virtual void OnClick();
-};
 
 class LuaMenuBar : public ui::MenuBar, public LuaState {
  public:  
@@ -324,16 +296,16 @@ class LuaMenuBar : public ui::MenuBar, public LuaState {
   virtual void OnMenuItemClick(boost::shared_ptr<ui::Node> node);
 };
 
+class LuaPopupMenu : public ui::PopupMenu, public LuaState {
+ public:  
+  LuaPopupMenu(lua_State* state) : LuaState(state) {}  
+  virtual void OnMenuItemClick(boost::shared_ptr<ui::Node> node);
+};
+
 class LuaScintilla : public CanvasItem<ui::Scintilla> {
  public:  
   LuaScintilla(lua_State* L) : CanvasItem<ui::Scintilla>(L) {}
-
-  void MakeImp() {
-    ui::ScintillaImp* imp  = ui::ImpFactory::instance().CreateScintillaImp();
-    this->set_imp(imp);
-    imp->set_window(this);
-  }
-
+  
   virtual void OnFirstModified(); 
 };
 
@@ -341,13 +313,7 @@ class LuaFrameWnd : public CanvasItem<ui::Frame> {
  public:   
    typedef boost::shared_ptr<LuaFrameWnd> Ptr;
    LuaFrameWnd(lua_State* L) : CanvasItem<ui::Frame>(L) {}
-   
-   void MakeImp() {
-     ui::FrameImp* imp  = ui::ImpFactory::instance().CreateFrameImp();
-     this->set_imp(imp);
-     imp->set_window(this);
-   }
-
+      
    virtual void OnClose();
    virtual void OnShow();
 };
@@ -355,13 +321,11 @@ class LuaFrameWnd : public CanvasItem<ui::Frame> {
 class LuaScrollBar : public ui::ScrollBar, public LuaState {
  public:  
   LuaScrollBar(lua_State* state) : LuaState(state) {}
-
-  void MakeImp(ui::Orientation orientation) {
-    ui::ScrollBarImp* imp  = ui::ImpFactory::instance().CreateScrollBarImp(orientation);
-    this->set_imp(imp);
-    imp->set_window(this);
+  LuaScrollBar(lua_State* state, const ui::Orientation& orientation) 
+    : ui::ScrollBar(orientation), 
+      LuaState(state) {
   }
-
+  
   virtual void OnScroll(int pos);   
 };
 
@@ -923,16 +887,14 @@ class LuaButtonBind : public LuaItemBind<T> {
   static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
   static int setmethods(lua_State* L) {
     B::setmethods(L);
-    static const luaL_Reg methods[] = {
-       {"new", create},
+    static const luaL_Reg methods[] = {       
        {"settext", settext},
        {"text", text},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
-  }
-  static int create(lua_State *L);
+  }  
   static int settext(lua_State *L) { LUAEXPORT(L, &T::set_text); }
   static int text(lua_State *L) { LUAEXPORT(L, &T::text); }
 };
@@ -945,15 +907,42 @@ class LuaComboBoxBind : public LuaItemBind<T> {
   static int setmethods(lua_State* L) {
     B::setmethods(L);
     static const luaL_Reg methods[] = {
-       {"new", create},
+       {"setitems", setitems},
+       {"setitemindex", setitemindex},
+       {"itemindex", itemindex},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
   }
-  static int create(lua_State *L);
-};
+  static int setitems(lua_State* L) {
+    boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
+    std::vector<std::string> itemlist;
+    luaL_checktype(L, 2, LUA_TTABLE);
+    int n = lua_rawlen(L, 2);
+    for (int i = 1; i <= n; ++i) {
+      lua_rawgeti(L, 2, i);
+      const char* str = luaL_checkstring(L, -1);
+      lua_pop(L, 1);
+      itemlist.push_back(str);
+    }
+    combo_box->set_items(itemlist);
+    return LuaHelper::chaining(L);
+  }
 
+  static int itemindex(lua_State* L) {
+    boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
+    lua_pushinteger(L, combo_box->item_index() + 1);
+    return 1;
+  };
+
+  static int setitemindex(lua_State* L) {
+    boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
+    int item_index = luaL_checkinteger(L, 2) - 1;
+    combo_box->set_item_index(item_index);
+    return LuaHelper::chaining(L);
+  };
+};
 
 struct LuaCenterToScreenBind {
   static int open(lua_State *L);
@@ -974,15 +963,26 @@ struct LuaMenuBarBind {
   static int invalidate(lua_State* L) { LUAEXPORTM(L, meta, &LuaMenuBar::Invalidate); }
 };
 
-template <class T = LuaTree>
-class LuaTreeBind : public LuaItemBind<T> {
+struct LuaPopupMenuBind {
+  static int open(lua_State *L);
+  static const char* meta;
+  static int create(lua_State *L);
+  static int add(lua_State *L);  
+  static int gc(lua_State* L);
+  static int setrootnode(lua_State* L);  
+  static int update(lua_State* L) { LUAEXPORTM(L, meta, &LuaPopupMenu::Update); }
+  static int invalidate(lua_State* L) { LUAEXPORTM(L, meta, &LuaPopupMenu::Invalidate); }
+  static int track(lua_State* L);
+};
+
+template <class T = LuaTreeView>
+class LuaTreeViewBind : public LuaItemBind<T> {
  public:
   typedef LuaItemBind<T> B;
   static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
   static int setmethods(lua_State* L) {
     B::setmethods(L);
-    static const luaL_Reg methods[] = {
-      {"new", create},
+    static const luaL_Reg methods[] = {      
       {"setrootnode", setrootnode},
       {"addnode", addnode},      
 //      {"clear", clear},
@@ -996,39 +996,42 @@ class LuaTreeBind : public LuaItemBind<T> {
       {"selected", selected},
       {"showlines", showlines},
       {"hidelines", hidelines},
+      {"showbuttons", showbuttons},
+      {"hidebuttons", hidebuttons},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
   }
-  
-  static int create(lua_State* L);
+    
   static int showlines(lua_State* L) { LUAEXPORT(L, &T::ShowLines); }
   static int hidelines(lua_State* L) { LUAEXPORT(L, &T::HideLines); }
+  static int showbuttons(lua_State* L) { LUAEXPORT(L, &T::ShowButtons); }
+  static int hidebuttons(lua_State* L) { LUAEXPORT(L, &T::HideButtons); }
   static int settextcolor(lua_State* L) { LUAEXPORTM(L, meta, &T::set_text_color); } 
   static int setbackgroundcolor(lua_State* L) { LUAEXPORT(L, &T::set_background_color) }
   static int backgroundcolor(lua_State* L) { LUAEXPORT(L, &T::background_color) }
   static int isediting(lua_State* L) { LUAEXPORT(L, &T::is_editing) }
   static int updatetree(lua_State* L) { LUAEXPORT(L, &T::UpdateTree); }
   static int selectnode(lua_State* L) { 
-    boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
     using namespace ui::canvas;
     boost::shared_ptr<Node> node = 
       boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
-    tree->select_node(node);
+    tree_view->select_node(node);
     return LuaHelper::chaining(L);
   }
   static int editnode(lua_State* L) { 
-    boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
     using namespace ui::canvas;
     boost::shared_ptr<Node> node = 
       boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
-    tree->EditNode(node);
+    tree_view->EditNode(node);
     return LuaHelper::chaining(L);
   }
   static int selected(lua_State* L) {
-    boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
-    boost::shared_ptr<ui::Node> tn = tree->selected().lock();
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
+    boost::shared_ptr<ui::Node> tn = tree_view->selected().lock();
     if (tn.get()) {
       LuaHelper::find_weakuserdata(L, tn.get());
     } else {
@@ -1037,12 +1040,12 @@ class LuaTreeBind : public LuaItemBind<T> {
     return 1;
   }
   static int setrootnode(lua_State* L) {
-    boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
     using namespace ui::canvas;
     boost::shared_ptr<Node> node = 
       boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
-    tree->set_root_node(node);
-    tree->UpdateTree();
+    tree_view->set_root_node(node);
+    tree_view->UpdateTree();
     return LuaHelper::chaining(L);
   }
 
@@ -1050,16 +1053,7 @@ class LuaTreeBind : public LuaItemBind<T> {
     return LuaHelper::chaining(L);
   }
 
-  static int gc(lua_State* L) {
-    // using namespace ui::canvas;
-    // typedef boost::shared_ptr<T> SPtr;
-    /*SPtr tree = *(SPtr*) luaL_checkudata(L, 1, meta.c_str());
-    TreeItem::TreeItemList subitems = tree->SubChildren(); 
-    TreeItem::TreeItemList::iterator it = subitems.begin();
-    for ( ; it != subitems.end(); ++it) {
-      TreeItem::Ptr subitem = *it;
-      LuaHelper::unregister_userdata<>(L, subitem.get());
-    } */  
+  static int gc(lua_State* L) {    
     return LuaHelper::delete_shared_userdata<T>(L, meta);
   }
 
@@ -1085,6 +1079,7 @@ class LuaNodeBind {
     static const luaL_Reg methods[] = {
       {"new", create},
       {"settext", settext},
+      {"setimage", setimage},
       {"text", text},
       {"add", add},
       {"insertafter", insertafter},
@@ -1112,6 +1107,13 @@ class LuaNodeBind {
 
   static int settext(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::set_text); }
   static int text(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::text); }
+  static int setimage(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 2, "self, image");
+    if (err!=0) return err;
+    boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, meta);
+    node->set_image(LuaHelper::check_sptr<ui::Image>(L, 2, LuaImageBind::meta));
+    return LuaHelper::chaining(L);
+  }
   static int add(lua_State* L) {
     using namespace ui::canvas;
     boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    
@@ -1217,8 +1219,7 @@ class LuaTableBind : public LuaItemBind<T> {
   static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
   static int setmethods(lua_State* L) {
     B::setmethods(L);
-    static const luaL_Reg methods[] = {
-      {"new", create},      
+    static const luaL_Reg methods[] = {      
       {"insertcolumn", insertcolumn},
       {"inserttext", insertext},
       {"settext", settext},
@@ -1230,8 +1231,7 @@ class LuaTableBind : public LuaItemBind<T> {
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
-  }  
-  static int create(lua_State* L);  
+  }    
   static int gc(lua_State* L) { return LuaHelper::delete_shared_userdata<T>(L, meta); }
   static int insertcolumn(lua_State* L) { LUAEXPORTM(L, meta, &T::InsertColumn); }  
   static int insertext(lua_State* L) { LUAEXPORTM(L, meta, &T::InsertText); } 
@@ -1359,8 +1359,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
   static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
   static int setmethods(lua_State* L) {
     B::setmethods(L);
-    static const luaL_Reg methods[] = {      
-       {"new", create},
+    static const luaL_Reg methods[] = {       
        {"f", f},       
        {"gotoline", gotoline},
        {"length", length},
@@ -1399,8 +1398,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
-  }
-  static int create(lua_State *L);
+  }  
 
   static int f(lua_State *L) {
     boost::shared_ptr<T> sc = LuaHelper::check_sptr<LuaScintilla>(L, 1, meta);    
@@ -1486,16 +1484,14 @@ class LuaEditBind : public LuaItemBind<T> {
   static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
   static int setmethods(lua_State* L) {
     B::setmethods(L);
-    static const luaL_Reg methods[] = {
-       {"new", create},
+    static const luaL_Reg methods[] = {       
        {"settext", settext},
        {"text", text},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
-  }
-  static int create(lua_State *L);
+  }  
   static int settext(lua_State *L) { LUAEXPORT(L, &T::set_text); }
   static int text(lua_State *L) { LUAEXPORT(L, &T::text); }
 };
@@ -1539,7 +1535,7 @@ template class LuaEditBind<LuaEdit>;
 template class LuaScrollBarBind<LuaScrollBar>;
 template class LuaScintillaBind<LuaScintilla>;
 template class LuaComboBoxBind<LuaComboBox>;
-template class LuaTreeBind<LuaTree>;
+template class LuaTreeViewBind<LuaTreeView>;
 template class LuaTableBind<LuaTable>;
 template class LuaFrameItemBind<LuaFrameWnd>;
 

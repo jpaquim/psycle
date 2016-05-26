@@ -62,6 +62,7 @@ namespace psycle { namespace host {
 
   void LuaPlugin::Free() {
     try {
+      StopTimer();
       proxy().Free();
     } catch(std::exception& e) {
       AfxMessageBox(e.what());
@@ -70,8 +71,9 @@ namespace psycle { namespace host {
 
   void LuaPlugin::OnReload() {
     try {
+      StopTimer();
       proxy().Reload();
-//      custom_menubar.reset(0);
+      StartTimer();
     } catch(std::exception&) {
     }
   }

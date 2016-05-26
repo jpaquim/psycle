@@ -36,13 +36,7 @@ namespace host {
        void OnSize(UINT nType, int cx, int cy);
        
        void OnReload(Machine* mac);      
-       virtual bool GetViewSize(CRect& rect) {
-         rect.top = 0;
-         rect.left = 0;
-         rect.right = 1000;
-         rect.bottom = 1000;
-         return true;
-       }
+       virtual bool GetViewSize(CRect& rect);
      private:
       void ChangeCanvas(ui::canvas::Canvas* canvas);     
       ui::canvas::Canvas* canvas_;
