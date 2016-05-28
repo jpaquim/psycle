@@ -237,6 +237,7 @@ namespace host {
 			void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void NewMachine(int x = -1, int y = -1, int mac = -1);
+      void CreateNewMachine(int x, int y, int mac, int selectedMode, int Outputmachine, const std::string& psOutputDll, int shellIdx, Machine* insert = 0);
 			void DoMacPropDialog(int propMac);
 			void FileLoadsongNamed(const std::string& fName);
 			void ImportPatternBlock(const std::string& fName, bool newpattern=false);

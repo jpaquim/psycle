@@ -23,6 +23,7 @@ end
 
 function project:setpluginindex(index)
   self.pluginindex_ = index
+  return self
 end
 
 function project:pluginindex()

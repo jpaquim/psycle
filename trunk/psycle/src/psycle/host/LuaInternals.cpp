@@ -234,7 +234,6 @@ int LuaPluginInfoBind::type(lua_State* L) {
 }
 
 // LuaPluginCatcherBind
-
 const char* LuaPluginCatcherBind::meta = "psyplugincatchermeta";
 
 int LuaPluginCatcherBind::open(lua_State *L) {
@@ -832,10 +831,71 @@ int LuaMachineBind::setcanvas(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// PlayerBind
-///////////////////////////////////////////////////////////////////////////////
+const char* LuaMachinesBind::meta = "psyluamachinesbind";
 
+int LuaMachinesBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {"insert", insert},
+    {"at", at},
+    {"master", master},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods);
+}
+
+int LuaMachinesBind::create(lua_State* L) {
+  LuaHelper::new_shared_userdata(L, meta, new LuaMachines());
+  return 1;
+}
+
+int LuaMachinesBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<LuaMachines>(L, meta);
+}
+
+int LuaMachinesBind::at(lua_State* L) {
+  boost::shared_ptr<LuaMachines> p = LuaHelper::check_sptr<LuaMachines>(L, 1, meta);
+  int machine_index = luaL_checkinteger(L, 2);
+  Machine* machine = LuaGlobal::GetMachine(machine_index);
+  if (machine) {    
+    LuaMachine* lua_machine = new LuaMachine(L);
+    lua_machine->set_mac(machine);
+    LuaHelper::requirenew<LuaMachineBind>(L, "psycle.machine", lua_machine);
+  } else {
+    lua_pushnil(L);
+  }
+  return 1;
+}
+
+int LuaMachinesBind::insert(lua_State* L) {
+  boost::shared_ptr<LuaMachines> p = LuaHelper::check_sptr<LuaMachines>(L, 1, meta);
+  int n = lua_gettop(L);
+  int slot = 0;
+  if (n == 3) {
+    slot = luaL_checkinteger(L, 2);    
+  }
+  boost::shared_ptr<LuaMachine> lua_machine = LuaHelper::check_sptr<LuaMachine>(L, n, LuaMachineBind::meta);
+  lua_machine->set_shared(true);
+  if (n==2) {
+    if (lua_machine->mac()->_mode == MACHMODE_FX) {
+      slot = Global::song().GetFreeFxBus();
+    } else {
+      slot = Global::song().GetFreeBus();
+    }
+  }
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  int mode = (lua_machine->mac()->_mode == MACHMODE_FX) ? 1 : 0;
+  view->CreateNewMachine(-1, -1, slot, mode, lua_machine->mac()->_type, lua_machine->mac()->GetDllName(), 0, lua_machine->mac());
+  lua_pushinteger(L, slot);
+  return 1;
+}
+
+int LuaMachinesBind::master(lua_State* L) {
+  lua_pushnumber(L, MASTER_INDEX);
+  return at(L);
+}
+// PlayerBind
 const char* LuaPlayerBind::meta = "psyplayermeta";
 
 int LuaPlayerBind::open(lua_State *L) {
@@ -1785,6 +1845,7 @@ int LuaFileHelper::open(lua_State *L) {
   static const luaL_Reg funcs[] = {
     {"mkdir", mkdir},
     {"isdirectory", isdirectory},
+    {"filetree", filetree},
     {NULL, NULL}
   };
   luaL_newlib(L, funcs);
@@ -1804,6 +1865,68 @@ int LuaFileHelper::isdirectory(lua_State* L) {
   std::string full_path = PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\" + dir_path;    
   boost::filesystem::path dir(full_path.c_str());
 	lua_pushboolean(L, (boost::filesystem::is_directory(dir)));
+  return 1;
+}
+
+int LuaFileHelper::filetree(lua_State* L) {
+  const char* dir_path = luaL_checkstring(L, 1);  
+  using namespace boost::filesystem;    
+  try {
+    path dir(dir_path);
+    recursive_directory_iterator begin = recursive_directory_iterator(dir);
+    recursive_directory_iterator end = recursive_directory_iterator();
+    recursive_directory_iterator it = begin;  
+    std::string p;
+    LuaHelper::new_lua_module(L, "psycle.node");    
+    int level = 0;
+    for ( ; it != end; ++it) {      
+      path curr_path(it->path());      
+      if (is_directory(it->status())) {
+        level++;
+        LuaHelper::new_lua_module(L, "psycle.node");
+        lua_getfield(L, -2, "add");
+        lua_pushvalue(L, -3);
+        lua_pushvalue(L, -3);
+        LuaHelper::setfield(L, "isdirectory", true);
+        LuaHelper::setfield(L, "filename", "");
+        LuaHelper::setfield(L, "extension", "");
+        boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, -1, LuaNodeBind::meta);
+        node->set_text(curr_path.filename().string());        
+        LuaHelper::setfield(L, "path", curr_path.string()+"\\");
+        int status = lua_pcall(L, 2, 1, 0);
+        if (status) {        
+          const char* msg = lua_tostring(L, -1);
+          throw std::exception(msg);
+        } 
+        lua_pop(L, 1);
+      } else {        
+        for ( ; it.level() < level; --level) {          
+          lua_pop(L, 1);
+        }        
+        lua_getfield(L, -1, "add");
+        lua_pushvalue(L, -2);
+        LuaHelper::new_lua_module(L, "psycle.node");
+        LuaHelper::setfield(L, "isdirectory", false);
+        LuaHelper::setfield(L, "filename", curr_path.filename().string());
+        LuaHelper::setfield(L, "extension", curr_path.extension().string());
+        boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, -1, LuaNodeBind::meta);
+        node->set_text(curr_path.filename().string());
+        curr_path.remove_filename();
+        LuaHelper::setfield(L, "path", curr_path.string()+"\\");
+        int status = lua_pcall(L, 2, 1, 0);
+        if (status) {        
+          const char* msg = lua_tostring(L, -1);
+          throw std::exception(msg);
+        }
+        lua_pop(L, 1);
+      }
+    }
+    while ((level--) > 0) {
+      lua_pop(L, 1);
+    }
+  } catch (std::exception& e) {
+    lua_pushnil(L);
+  }  
   return 1;
 }
 

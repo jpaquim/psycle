@@ -215,6 +215,63 @@ struct LuaImageBind {
   static int settransparent(lua_State* L);
 };
 
+class LuaImagesBind {
+ public:
+  static std::string meta;
+  static int open(lua_State *L) {
+    static const luaL_Reg methods[] = {
+      {"new", create},                  
+      {"add", add},      
+      {"size", size},
+      {"at", at},      
+      {NULL, NULL}
+    };
+    LuaHelper::open(L, meta, methods,  gc);
+    return 1;
+  }
+
+  static int create(lua_State* L) {
+    LuaHelper::new_shared_userdata(L, meta.c_str(), new ui::Images());
+    lua_newtable(L);
+    lua_setfield(L, -2, "_children");
+    return 1;
+  }
+
+  static int gc(lua_State* L) {
+    return LuaHelper::delete_shared_userdata<ui::Images>(L, meta);
+  }    
+  static int add(lua_State* L) {    
+    boost::shared_ptr<ui::Images> images = LuaHelper::check_sptr<ui::Images>(L, 1, meta);
+    boost::shared_ptr<ui::Image> image = LuaHelper::check_sptr<ui::Image>(L, 2, LuaImageBind::meta);
+    images->Add(image);
+    lua_getfield(L, -2, "_children");
+    int len = lua_rawlen(L, -1);
+    lua_pushvalue(L, -2);
+    lua_rawseti(L, -2, len+1);
+    return LuaHelper::chaining(L);
+  }
+    
+  static int size(lua_State* L) { LUAEXPORTM(L, meta, &ui::Images::size); }
+  static int at(lua_State *L) {
+    if (lua_isnumber(L, 2)) {
+      ui::Images::Ptr images = LuaHelper::check_sptr<ui::Images>(L, 1, meta);
+      int index = luaL_checknumber(L, 2);
+      if (index < 1 && index >= images->size()) {
+        luaL_error(L, "index out of range");
+      }            
+      ui::Image::Ptr tn = *(images->begin() + index - 1);
+      if (tn.get()) {
+        LuaHelper::find_weakuserdata(L, tn.get());
+      } else {
+        lua_pushnil(L);
+      }      
+      return 1;
+    }
+    return 0;
+  }
+
+};
+
 struct LuaRegionBind {
   static int open(lua_State *L);
   static const char* meta;
@@ -269,14 +326,52 @@ struct LuaGraphicsBind {
   static int translate(lua_State *L) { LUAEXPORTM(L, meta, &ui::Graphics::Translate); }
   static int setcolor(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::SetColor); }
   static int color(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::color); }
-  static int drawline(lua_State *L) { LUAEXPORTM(L, meta, &ui::Graphics::DrawLine); }
+  static int drawline(lua_State *L) {
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->DrawLine(
+      ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
+      ui::Point(luaL_checknumber(L, 3), luaL_checknumber(L, 4)));
+    return LuaHelper::chaining(L);
+  }
   static int drawrect(lua_State *L);
-  static int drawroundrect(lua_State *L) { LUAEXPORTM(L, meta, &ui::Graphics::DrawRoundRect); }
-  static int drawoval(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::DrawOval); }
-  static int fillrect(lua_State *L) { LUAEXPORTM(L, meta, &ui::Graphics::FillRect); }
-  static int fillroundrect(lua_State *L) { LUAEXPORTM(L, meta, &ui::Graphics::FillRoundRect); }
-  static int filloval(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::FillOval); }
-  static int copyarea(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::CopyArea); }
+  static int drawroundrect(lua_State *L) {
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillRoundRect(ui::Rect(
+      ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
+      ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))),
+      ui::Dimension(luaL_checknumber(L, 6), luaL_checknumber(L, 7)));
+    return LuaHelper::chaining(L);
+  }
+  static int drawoval(lua_State* L) { 
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillRect(ui::Rect(
+      ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
+      ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))));
+    return LuaHelper::chaining(L);
+  }
+  static int fillrect(lua_State *L) {
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillRect(ui::Rect(
+      ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
+      ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))));
+    return LuaHelper::chaining(L);
+  }
+  static int fillroundrect(lua_State *L) {
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillRoundRect(ui::Rect(
+      ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
+      ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))),
+      ui::Dimension(luaL_checknumber(L, 6), luaL_checknumber(L, 7)));
+    return LuaHelper::chaining(L);  
+  }
+  static int filloval(lua_State* L) {
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillRect(ui::Rect(
+      ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
+      ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))));
+    return LuaHelper::chaining(L);
+  }
+  static int copyarea(lua_State* L) {
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->CopyArea(ui::Rect(
+      ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
+      ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))),
+      ui::Point(luaL_checknumber(L, 6), luaL_checknumber(L, 7)));
+    return LuaHelper::chaining(L);
+  }
   static int drawstring(lua_State* L);
   static int setfont(lua_State* L);
   static int font(lua_State* L);
@@ -603,7 +698,12 @@ class LuaItemBind {
     }
     return 1;
   }
-  static int setclip(lua_State* L) { LUAEXPORT(L, &T::SetClip); }
+  static int setclip(lua_State* L) {
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+    item->SetClip(ui::Rect(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)), 
+                           ui::Point(luaL_checknumber(L, 3), luaL_checknumber(L, 4))));
+    return LuaHelper::chaining(L);
+  }
   static int clip(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     ui::Region ** ud = (ui::Region **)lua_newuserdata(L, sizeof(ui::Region *));      
@@ -908,6 +1008,7 @@ class LuaComboBoxBind : public LuaItemBind<T> {
     B::setmethods(L);
     static const luaL_Reg methods[] = {
        {"setitems", setitems},
+       {"items", items},
        {"setitemindex", setitemindex},
        {"itemindex", itemindex},
        {NULL, NULL}
@@ -929,7 +1030,17 @@ class LuaComboBoxBind : public LuaItemBind<T> {
     combo_box->set_items(itemlist);
     return LuaHelper::chaining(L);
   }
-
+  static int items(lua_State* L) {
+    boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
+    lua_newtable(L);
+    std::vector<std::string> itemlist = combo_box->items();
+    std::vector<std::string>::iterator it = itemlist.begin();
+    for (int i = 1; it != itemlist.end(); ++it, ++i) {
+      lua_pushstring(L, (*it).c_str());
+      lua_rawseti(L, -2, i);
+    }    
+    return 1;
+  }
   static int itemindex(lua_State* L) {
     boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
     lua_pushinteger(L, combo_box->item_index() + 1);
@@ -998,6 +1109,7 @@ class LuaTreeViewBind : public LuaItemBind<T> {
       {"hidelines", hidelines},
       {"showbuttons", showbuttons},
       {"hidebuttons", hidebuttons},
+      {"setimages", setimages},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1048,15 +1160,20 @@ class LuaTreeViewBind : public LuaItemBind<T> {
     tree_view->UpdateTree();
     return LuaHelper::chaining(L);
   }
-
   static int addnode(lua_State* L) {    
     return LuaHelper::chaining(L);
   }
-
   static int gc(lua_State* L) {    
     return LuaHelper::delete_shared_userdata<T>(L, meta);
   }
 
+  static int setimages(lua_State* L) {    
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
+    ui::Images::Ptr images = LuaHelper::check_sptr<ui::Images>(L, 2, LuaImagesBind::meta);
+    tree_view->set_images(images);
+    return LuaHelper::chaining(L);
+  }
+  
   /*static int clear(lua_State* L) {
     using namespace ui::canvas;
     boost::shared_ptr<T> tree = LuaHelper::check_sptr<T>(L, 1, meta);
@@ -1080,6 +1197,8 @@ class LuaNodeBind {
       {"new", create},
       {"settext", settext},
       {"setimage", setimage},
+      {"setimageindex", setimageindex},
+      {"setselectedimageindex", setselectedimageindex},
       {"text", text},
       {"add", add},
       {"insertafter", insertafter},
@@ -1114,6 +1233,8 @@ class LuaNodeBind {
     node->set_image(LuaHelper::check_sptr<ui::Image>(L, 2, LuaImageBind::meta));
     return LuaHelper::chaining(L);
   }
+  static int setimageindex(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::set_image_index); }
+  static int setselectedimageindex(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::set_selected_image_index); }
   static int add(lua_State* L) {
     using namespace ui::canvas;
     boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    

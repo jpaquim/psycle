@@ -37,6 +37,8 @@ local templateparser = require("templateparser")
 local cfg = require("psycle.config"):new("PatternVisual")
 local project = require("project")
 local combobox = require("psycle.ui.canvas.combobox")
+local machine = require("psycle.machine")
+local machines = require("psycle.machines")
 
 local maincanvas = canvas:new()
 
@@ -108,8 +110,7 @@ end
 function maincanvas:createpluginexplorer()
   local pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0):setalign(item.ALLEFT)     
   pluginexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
-  pluginexplorer:settextcolor(settings.canvas.colors.foreground)
-  pluginexplorer:setfilepath("test")     
+  pluginexplorer:settextcolor(settings.canvas.colors.foreground)  
   pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
   return pluginexplorer
 end
@@ -246,13 +247,22 @@ function maincanvas:savepage()
 end
 
 function maincanvas:playplugin()  
-  local pluginindex = psycle.proxy.project:pluginindex()
+  local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
-    local machine = machine:new(pluginindex)
-    if machine then
-      self:savepage()
-      machine:reload()
-    end
+    machine = machine:new(pluginindex)
+     if machine then
+       self:savepage()
+       machine:reload()    
+     end
+  else
+    self:savepage()    
+    local fname = psycle.proxy.project:plugininfo():dllname():match("([^\\]+)$"):sub(1, -5)    
+    machine = machine:new(fname)
+    local machines = machines:new()
+    local pluginindex = machines:insert(machine)    
+    psycle.proxy.project:setpluginindex(pluginindex)    
+    self:fillinstancecombobox()
+    self:setpluginindex(pluginindex)
   end
 end
 
@@ -300,22 +310,35 @@ end
 
 function maincanvas:fillinstancecombobox()
    local items = {"new instance"}
+   self.cbxtopluginindex = {}
    if (psycle.proxy.project:plugininfo()) then
      for machineindex= 0, 255 do
        local machine = machine:new(machineindex);       
        if machine and machine:type() == machine.MACH_LUA and machine:pluginname() == psycle.proxy.project:plugininfo():name() then
          items[#items + 1] = machine:pluginname().."["..machineindex.."]"
+         self.cbxtopluginindex[#items] = machineindex
        end
      end     
    end
    self.cbx:setitems(items)
    self.cbx:setitemindex(1)
+   return self
 end  
+
+function maincanvas:setpluginindex(index)
+  self.cbx:setitemindex(index + 2)
+end
 
 function maincanvas:createinstanceselect(parent)
   self.cbx = combobox:new(parent):setautosize(false, false):setpos(0, 0, 100, 20):setalign(item.ALLEFT)
-  function self.cbx:onselect()
-    psycle.output(self:itemindex())
+  local that = self
+  function self.cbx:onselect()    
+    local pluginindex = that.cbxtopluginindex[self:itemindex()]
+    if pluginindex then
+      psycle.proxy.project:setpluginindex(pluginindex)       
+    else
+      psycle.proxy.project:setpluginindex(-1)       
+    end
   end
   self.cbx:setitems({"new instance"})
   self.cbx:setitemindex(1)
@@ -392,8 +415,7 @@ function maincanvas:displaysearch(ev)
 end
 
 function maincanvas:oncreateplugin(pluginname)
-  local env = {}
-  env.vendor = "psycle"
+  local env = { vendor = "psycle" }
   env.pluginname = pluginname  
   if not self.createeditplugin.machmode:check() then
     env.machmode = "machine.FX"    
@@ -413,8 +435,7 @@ function maincanvas:oncreateplugin(pluginname)
   for i=1, #infos do       
     if infos[i]:type() == machine.MACH_LUA and
       infos[i]:name():lower() == pluginname:lower() then      
-      psycle.proxy.project = project:new()
-                                    :setplugininfo(infos[i])
+      psycle.proxy.project = project:new():setplugininfo(infos[i])
       break;     
     end
   end    
@@ -422,13 +443,13 @@ end
 
 function maincanvas:onopenplugin(pluginpath, pluginname, info)  
   self:openplugin(pluginpath, pluginname, info)
-  psycle.proxy.project = project:new()
-                                :setplugininfo(info)  
+  psycle.proxy.project = project:new():setplugininfo(info)
+  self:fillinstancecombobox()  
 end
 
 function findlast(haystack, needle)
-    local i=haystack:match(".*"..needle.."()")
-    if i==nil then return  else return i end
+  local i=haystack:match(".*"..needle.."()")
+  if i==nil then return else return i end
 end
 
 function maincanvas:openplugin(pluginpath, pluginname, plugininfo)  

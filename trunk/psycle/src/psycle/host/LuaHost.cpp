@@ -105,6 +105,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaArrayBind>(L, "psycle.array");
   LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");
   LuaHelper::require<LuaMachineBind>(L, "psycle.machine");
+  LuaHelper::require<LuaMachinesBind>(L, "psycle.machines");
   LuaHelper::require<LuaWaveOscBind>(L, "psycle.osc");
   LuaHelper::require<LuaResamplerBind>(L, "psycle.dsp.resampler");
   LuaHelper::require<LuaDelayBind>(L, "psycle.delay");
@@ -123,6 +124,7 @@ void LuaProxy::set_state(lua_State* state) {
   // ui binds
   LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
   LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
+  LuaHelper::require<LuaImagesBind>(L, "psycle.ui.images");
   LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.graphics");
   LuaHelper::require<LuaGameControllersBind>(L, "psycle.ui.gamecontrollers");
   LuaHelper::require<LuaGameControllerBind>(L, "psycle.ui.gamecontroller");

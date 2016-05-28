@@ -179,16 +179,20 @@ class LineBorder : public ui::Ornament {
       g->DrawRect(rc);
     } else { 
       if (border_style_.top != NONE) {
-        g->DrawLine(rc.left() + border_radius_.left_top, rc.top(), rc.right() - border_radius_.right_top - 1, rc.top());
+        g->DrawLine(ui::Point(rc.left() + border_radius_.left_top, rc.top()),
+                    ui::Point(rc.right() - border_radius_.right_top - 1, rc.top()));
       }
       if (border_style_.bottom != NONE) {
-        g->DrawLine(rc.left() + border_radius_.left_bottom, rc.bottom() - 1, rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1); 
+        g->DrawLine(ui::Point(rc.left() + border_radius_.left_bottom, rc.bottom() - 1),
+                    ui::Point(rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1)); 
       }
       if (border_style_.left != NONE) {
-        g->DrawLine(rc.left(), rc.top() + border_radius_.left_top, rc.left(), rc.bottom() - border_radius_.left_bottom -1);
+        g->DrawLine(ui::Point(rc.left(), rc.top() + border_radius_.left_top), 
+                    ui::Point(rc.left(), rc.bottom() - border_radius_.left_bottom -1));
       }
       if (border_style_.right != NONE) {
-        g->DrawLine(rc.right() - 1, rc.top() + border_radius_.right_top, rc.right() - 1, rc.bottom() - border_radius_.right_bottom);  
+        g->DrawLine(ui::Point(rc.right() - 1, rc.top() + border_radius_.right_top), 
+                    ui::Point(rc.right() - 1, rc.bottom() - border_radius_.right_bottom));
       }
       if (border_radius_.left_top != 0 && border_style_.top != NONE) {
         g->DrawArc(ui::Rect(rc.top_left(), 
