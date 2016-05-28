@@ -14,9 +14,7 @@ namespace psycle {namespace host{namespace ui{namespace canvas{class Canvas;}}}}
 
 namespace psycle { namespace host {
   class ConfigStorage;
-
   
-
   class LuaConfig {
     public:
      LuaConfig();
@@ -79,6 +77,8 @@ namespace psycle { namespace host {
   public:
     LuaMachine(lua_State* L);    
     ~LuaMachine();
+    bool shared() const { return shared_; }
+    void set_shared(bool shared) { shared_ = shared; }
     void lock() const;
     void unlock() const;
     void load(const char* name);
@@ -160,6 +160,19 @@ namespace psycle { namespace host {
     static int info2(lua_State* L);
     static int name(lua_State* L);
     static int pluginname(lua_State* L); 
+  };
+
+
+  struct LuaMachines {};
+
+  struct LuaMachinesBind {
+    static int open(lua_State *L);
+    static const char* meta;  
+    static int create(lua_State* L);
+    static int gc(lua_State* L);
+    static int insert(lua_State* L);
+    static int at(lua_State* L);
+    static int master(lua_State* L);    
   };
 
   struct LuaPlayerBind {
@@ -633,6 +646,7 @@ namespace psycle { namespace host {
       static int open(lua_State *L);
       static int mkdir(lua_State* L);
       static int isdirectory(lua_State* L);
+      static int filetree(lua_State* L);
   };
 
   struct LuaMidiHelper {

@@ -64,8 +64,8 @@ bool RegionImp::DevIntersect(double x, double y) const {
   return rgn_.PtInRegion(x, y);  
 }
 
-bool RegionImp::DevIntersectRect(double x, double y, double width, double height) const {
-  CRect rc(x, y, x + width, y + height);
+bool RegionImp::DevIntersectRect(const ui::Rect& rect) const {
+  CRect rc(rect.left(), rect.top(), rect.right(), rect.bottom());
   return rgn_.RectInRegion(rc);  
 }
   
@@ -420,6 +420,18 @@ BEGIN_MESSAGE_MAP(EditImp, CEdit)
 	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
+HTREEITEM TreeNodeImp::DevInsert(TreeViewImp* tree, const ui::Node& node, TreeNodeImp* prev_imp) {  
+  TVINSERTSTRUCT tvInsert;
+  tvInsert.hParent = hItem;
+  tvInsert.hInsertAfter = prev_imp ? prev_imp->hItem : TVI_LAST;
+  tvInsert.item.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;  
+  tvInsert.item.iImage = node.image_index();
+  tvInsert.item.iSelectedImage =  node.selected_image_index();   
+  text_ = node.text();
+  tvInsert.item.pszText = const_cast<char *>(text_.c_str());  
+  return tree->InsertItem(&tvInsert);
+}
+
 BEGIN_MESSAGE_MAP(TreeViewImp, CTreeCtrl)  
   ON_WM_ERASEBKGND()
 	ON_WM_PAINT()  
@@ -465,9 +477,9 @@ void TreeViewImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node
           boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
           for ( ; it != parent_node->imps.end(); ++it) {            
             TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
-            if (imp) {      
+            if (imp) {              
               TreeNodeImp* prev_imp = dynamic_cast<TreeNodeImp*>(prev_node_imp);
-              new_imp->hItem = imp->DevInsert(that, node->text(), prev_imp);              
+              new_imp->hItem = imp->DevInsert(that, *node.get(), prev_imp);
               that->htreeitem_node_map_[new_imp->hItem] = node;
             }
           }
@@ -795,7 +807,6 @@ void MenuContainerImp::UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos
     Node::Container::iterator it = parent_node->begin();    
     for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
       Node::Ptr node = *it;
-
       boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
       while (it != node->imps.end()) {
         NodeImp* i = &(*it);

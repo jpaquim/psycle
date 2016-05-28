@@ -101,10 +101,10 @@ bool Region::Intersect(double x, double y) const {
   return result;
 }
 
-bool Region::IntersectRect(double x, double y, double width, double height) const {
+bool Region::IntersectRect(const ui::Rect& rect) const {
   bool result = false;
   if (imp_.get()) {
-    result = imp_.get()->DevIntersectRect(x, y, width, height);
+    result = imp_.get()->DevIntersectRect(rect);
   }
   return result;
 }
@@ -278,9 +278,9 @@ Graphics::Graphics() : imp_(ui::ImpFactory::instance().CreateGraphicsImp()) {
 Graphics::Graphics(CDC* cr) : imp_(ui::ImpFactory::instance().CreateGraphicsImp(cr)) {
 }
 
-void Graphics::CopyArea(double x, double y, double width, double height, double dx, double dy) {
+void Graphics::CopyArea(const ui::Rect& rect, const ui::Point& delta) {
   assert(imp_.get());
-  imp_->CopyArea(x, y, width, height, dx, dy);  
+  imp_->CopyArea(rect, delta);  
 }
 
 void Graphics::DrawArc(const ui::Rect& rect, const Point& start, const Point& end) {
@@ -288,9 +288,9 @@ void Graphics::DrawArc(const ui::Rect& rect, const Point& start, const Point& en
   imp_->DrawArc(rect, start, end);  
 }
 
-void Graphics::DrawLine(double x1, double y1, double x2, double y2) {
+void Graphics::DrawLine(const ui::Point& p1, const ui::Point& p2) {
   assert(imp_.get());  
-  imp_->DrawLine(x1, y1, x2, y2);  
+  imp_->DrawLine(p1, p2);  
 }
 
 void Graphics::DrawRect(const ui::Rect& rect) {
@@ -298,14 +298,14 @@ void Graphics::DrawRect(const ui::Rect& rect) {
   imp_->DrawRect(rect);  
 }
 
-void Graphics::DrawRoundRect(double x, double y, double width, double height, double arc_width, double arc_height) {
+void Graphics::DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
   assert(imp_.get());
-  imp_->DrawRoundRect(x, y, width, height, arc_width, arc_height);  
+  imp_->DrawRoundRect(rect, arc_dim);  
 }
 
-void Graphics::DrawOval(double x, double y, double width, double height) {
+void Graphics::DrawOval(const ui::Rect& rect) {
   assert(imp_.get());
-  imp_->DrawOval(x, y, width, height); 
+  imp_->DrawOval(rect); 
 }
 
 void Graphics::DrawString(const std::string& str, double x, double y) {
@@ -313,19 +313,19 @@ void Graphics::DrawString(const std::string& str, double x, double y) {
   imp_->DrawString(str, x, y);  
 }
 
-void Graphics::FillRect(double x, double y, double width, double height) {
+void Graphics::FillRect(const ui::Rect& rect) {
   assert(imp_.get());
-  imp_->FillRect(x, y, width, height);  
+  imp_->FillRect(rect);  
 }
 
-void Graphics::FillRoundRect(double x, double y, double width, double height, double arc_width, double arc_height) {  
+void Graphics::FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {  
   assert(imp_.get());
-  imp_->FillRoundRect(x, y, width, height, arc_width, arc_height);
+  imp_->FillRoundRect(rect, arc_dim);
 }
 
-void Graphics::FillOval(double x, double y, double width, double height) {  
+void Graphics::FillOval(const ui::Rect& rect) {  
   assert(imp_.get());
-  imp_->FillOval(x, y, width, height);
+  imp_->FillOval(rect);
 }
 
 void Graphics::FillRegion(const ui::Region& rgn) {  
@@ -393,9 +393,9 @@ void Graphics::DrawImage(ui::Image* img, double x, double y, double width, doubl
   imp_->DrawImage(img, x, y, width, height, xsrc, ysrc);  
 }
 
-void Graphics::SetClip(double x, double y, double width, double height) {
+void Graphics::SetClip(const ui::Rect& rect) {
   assert(imp_.get());
-  imp_->SetClip(x, y, width, height);  
+  imp_->SetClip(rect);  
 }
 
 void Graphics::SetClip(ui::Region* rgn) {
@@ -1272,6 +1272,13 @@ void TreeView::HideButtons() {
   }
 }
 
+void TreeView::set_images(const Images::Ptr& images) { 
+  images_ = images;
+  if (imp()) {
+    imp()->dev_set_images(images);
+  }
+}
+
 // Table
 Table::Table() : Window(ui::ImpFactory::instance().CreateTableImp()) {
   set_auto_size(false, false);
@@ -1377,6 +1384,14 @@ ComboBox::ComboBox(ComboBoxImp* imp) : Window(imp) {
 void ComboBox::set_items(const std::vector<std::string>& itemlist) {
   if (imp()) {
     imp()->dev_set_items(itemlist);
+  }
+}
+
+std::vector<std::string>  ComboBox::items() const {
+  if (imp()) {
+    return imp()->dev_items();
+  } else {
+    return std::vector<std::string>();
   }
 }
 

@@ -87,16 +87,14 @@ void Rect::Draw(Graphics* g, Region& draw_region) {
 
 void Line::Draw(Graphics* g, Region& draw_region) {  
   g->SetColor(color());
-  double mx, my;
-  mx = my = 0;
+  ui::Point mp;  
   for (Points::iterator it = pts_.begin(); it != pts_.end(); ++it) {
     Point& pt = (*it);
     if (it != pts_.begin()) {
-      g->DrawLine(mx, my, pt.x(), pt.y());
+      g->DrawLine(mp, pt);
     }
-    mx = pt.x();
-    my = pt.y();
-  }  
+    mp = pt;    
+  }
 }
 
 Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {

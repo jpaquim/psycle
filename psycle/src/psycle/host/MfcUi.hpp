@@ -253,8 +253,16 @@ class GraphicsImp : public ui::GraphicsImp {
     cr_->TextOut(x, y, str.c_str());
   }
 
-  void CopyArea(double x, double y, double width, double height, double dx, double dy) {
-    cr_->BitBlt(x+dx, y+dy, width, height, cr_, x, y, SRCCOPY);
+  void CopyArea(const ui::Rect& rect, const ui::Point& delta) {    
+    cr_->BitBlt(
+      rect.left() + delta.x(), 
+      rect.top() + delta.y(),
+      rect.width(),
+      rect.height(),
+      cr_,
+      delta.x(),
+      delta.y(),
+      SRCCOPY);
   }
 
   void Translate(double x, double y) {
@@ -280,10 +288,10 @@ class GraphicsImp : public ui::GraphicsImp {
     cr_->Arc(&rc, CPoint(start.x(), start.y()), CPoint(end.x(), end.y()));
   }
 
-  void DrawLine(double x1, double y1, double x2, double y2) {
+  void DrawLine(const ui::Point& p1, const ui::Point& p2) {
     check_pen_update();
-    cr_->MoveTo(x1, y1);
-    cr_->LineTo(x2, y2);
+    cr_->MoveTo(p1.x(), p1.y());
+    cr_->LineTo(p2.x(), p2.y());
   }
 
   void DrawRect(const ui::Rect& rect) {
@@ -293,36 +301,47 @@ class GraphicsImp : public ui::GraphicsImp {
     cr_->FrameRect(rc, &brush);
   }
   
-  void DrawRoundRect(double x, double y, double width, double height, double arc_width, double arc_height) {
+  void DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
     check_pen_update();
     check_brush_update();
     cr_->SelectStockObject(NULL_BRUSH);
-    cr_->RoundRect(x, y, x+width, y+height, arc_width, arc_height);
+    cr_->RoundRect(
+      rect.left(),
+      rect.top(),
+      rect.right(),
+      rect.bottom(),
+      arc_dim.width(), arc_dim.height());
     cr_->SelectObject(&brush);
   }
   
-  void DrawOval(double x, double y, double width, double height) {
+  void DrawOval(const ui::Rect& rect) {
     check_pen_update();
     check_brush_update();
     cr_->SelectStockObject(NULL_BRUSH);
-    cr_->Ellipse(x, y, x+width, y+height);
+    cr_->Ellipse(rect.left(), rect.top(), rect.right(), rect.bottom());
     cr_->SelectObject(&brush);
   }
 
-  void FillRoundRect(double x, double y, double width, double height, double arc_width, double arc_height) {
+  void FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
     check_pen_update();
     check_brush_update();
-    cr_->RoundRect(x, y, x+width, y+height, arc_width, arc_height);
+    cr_->RoundRect(
+      rect.left(),
+      rect.top(),
+      rect.right(),
+      rect.bottom(),
+      arc_dim.width(),
+      arc_dim.height());
   }
 
-  void FillRect(double x, double y, double width, double height) {
-    cr_->FillSolidRect(x, y, x+width, y+height, rgb_color_);
+  void FillRect(const ui::Rect& rect) {
+    cr_->FillSolidRect(rect.left(), rect.top(), rect.right(), rect.bottom(), rgb_color_);
   }
 
-  void FillOval(double x, double y, double width, double height) {
+  void FillOval(const ui::Rect& rect) {
     check_pen_update();
     check_brush_update();
-    cr_->Ellipse(x, y, x+width, y+height);
+    cr_->Ellipse(rect.left(), rect.top(), rect.right(), rect.bottom());
   }
 
   void FillRegion(const ui::Region& rgn);
@@ -404,9 +423,9 @@ class GraphicsImp : public ui::GraphicsImp {
     memDC.DeleteDC();
   }
 
-  void SetClip(double x, double y, double width, double height) {
+  void SetClip(const ui::Rect& rect) {
     CRgn rgn;
-    rgn.CreateRectRgn(x, y, x+width, y+height);
+    rgn.CreateRectRgn(rect.left(), rect.top(), rect.right(), rect.bottom());
     cr_->SelectClipRgn(&rgn);
     rgn.DeleteObject();
   }
@@ -956,28 +975,25 @@ class TableItemImp : public ui::TableItemImp {
   std::string text_;  
 };
 
+class TreeViewImp;
+
 class TreeNodeImp : public NodeImp {  
  public:
   TreeNodeImp() : hItem(0) {}
   ~TreeNodeImp() {}
       
-  HTREEITEM DevInsert(CTreeCtrl* tree, const std::string& text, TreeNodeImp* prev_imp) {
-    TVINSERTSTRUCT tvInsert;
-    tvInsert.hParent = hItem;
-    tvInsert.hInsertAfter = prev_imp ? prev_imp->hItem : TVI_LAST;
-    tvInsert.item.mask = TVIF_TEXT;  
-    tvInsert.item.pszText = const_cast<char *>(text.c_str());
-    return tree->InsertItem(&tvInsert);
-  }
+  HTREEITEM DevInsert(ui::mfc::TreeViewImp* tree, const ui::Node& node, TreeNodeImp* prev_imp);
     
-  HTREEITEM hItem;    
+  HTREEITEM hItem;  
+  std::string text_;
 };
 
 class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
  public:  
   TreeViewImp() : 
       WindowTemplateImp<CTreeCtrl, ui::TreeViewImp>(), 
-      is_editing_(false) {         
+      is_editing_(false) {
+    m_imageList.Create(22, 22, ILC_COLOR32, 1, 1);
   }
   static TreeViewImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     TreeViewImp* imp = new TreeViewImp();
@@ -1026,6 +1042,14 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
   virtual void DevShowButtons();
   virtual void DevHideButtons();
   
+  virtual void dev_set_images(const ui::Images::Ptr& images) {
+    ui::Images::iterator it = images->begin();
+    for (; it != images->end(); ++it) {
+      m_imageList.Add((CBitmap*)(*it)->source(),  (COLORREF)0xFFFFFF);    
+    }
+    SetImageList(&m_imageList, TVSIL_NORMAL);
+  }
+  CImageList m_imageList;
  protected:  
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CTreeCtrl::OnPaint(); }
@@ -1036,7 +1060,7 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
   ui::Node* find_selected_node();
 
  private:
-   bool is_editing_;  
+   bool is_editing_;   
 };
 
 class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
@@ -1063,6 +1087,16 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
     for (; it != itemlist.end(); ++it) {      
       AddString((*it).c_str());
     }
+  }
+
+  virtual std::vector<std::string> dev_items() const {
+    std::vector<std::string> itemlist;
+    for (int i = 0; i < this->GetCount(); ++i) {
+      CString str;
+      GetLBText(i, str);
+      itemlist.push_back(str.GetString());
+    }
+    return itemlist;
   }
   
   virtual void dev_set_item_index(int index) { SetCurSel(index); }
@@ -1399,7 +1433,7 @@ class RegionImp : public ui::RegionImp {
   int DevCombine(const ui::Region& other, int combinemode);     
   ui::Rect DevBounds() const;
   bool DevIntersect(double x, double y) const;
-  bool DevIntersectRect(double x, double y, double width, double height) const;
+  bool DevIntersectRect(const ui::Rect& rect) const;
   virtual void DevSetRect(const ui::Rect& rect);
   void DevClear();
   CRgn& crgn() { return rgn_; }

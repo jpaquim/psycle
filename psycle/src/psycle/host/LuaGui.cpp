@@ -1045,7 +1045,7 @@ int LuaGraphicsBind::drawstring(lua_State* L) {
 int LuaGraphicsBind::drawrect(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 5, "");
   if (err!=0) return err;
-  boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);  
+  boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
   double v1 = luaL_checknumber(L, 2);
   double v2 = luaL_checknumber(L, 2);
   double v3 = luaL_checknumber(L, 2);
@@ -1261,6 +1261,8 @@ int LuaImageBind::size(lua_State* L) {
   lua_pushnumber(L, dim.height());
   return 2;
 }
+
+std::string LuaImagesBind::meta = "psyimagesbind";
 
 //LuaEventBind
 const char* LuaEventBind::meta = "psyeventbind";

@@ -1433,29 +1433,14 @@ namespace psycle { namespace host {
 		{
 			NewMachine();
 		}
-
-		/// Show new machine dialog
-		void CChildView::NewMachine(int x, int y, int mac) 
-		{
-			CNewMachine dlg(this);
-			if(mac >= 0)
-			{
-				if (mac < MAX_BUSES)
-				{
-					dlg.selectedMode = modegen;
-				}
-				else
-				{
-					dlg.selectedMode = modefx;
-				}
-			}
-			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
-			{
-				int fb,xs,ys;
+		
+    void CChildView::CreateNewMachine(int x, int y, int mac, int selectedMode, int Outputmachine, const std::string& psOutputDll, int shellIdx, Machine* insert)
+    {
+      int fb,xs,ys;
 				if (mac < 0)
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
-					if (dlg.selectedMode == modegen) 
+					if (selectedMode == modegen) 
 					{
 						fb = Global::song().GetFreeBus();
 						xs = MachineCoords->sGenerator.width;
@@ -1472,14 +1457,14 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					if (mac >= MAX_BUSES && dlg.selectedMode != modegen)
+					if (mac >= MAX_BUSES && selectedMode != modegen)
 					{
 						PsycleGlobal::inputHandler().AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords->sEffect.width;
 						ys = MachineCoords->sEffect.height;
 					}
-					else if (mac < MAX_BUSES && dlg.selectedMode == modegen)
+					else if (mac < MAX_BUSES && selectedMode == modegen)
 					{
 						PsycleGlobal::inputHandler().AddMacViewUndo();
 						fb = mac;
@@ -1531,17 +1516,25 @@ namespace psycle { namespace host {
 					}
 
 					bool created=false;
-					if (Global::song()._pMachine[fb] )
+          if (insert) {
+            CExclusiveLock lock(&Global::song().semaphore, 2, true);
+            Global::song()._pMachine[fb] = insert;
+				    insert->_x = x;
+				    insert->_y = y;
+            insert->_macIndex = fb;
+            created = true;            
+          } else
+					if (Global::song()._pMachine[fb])
 					{
-						created = Global::song().ReplaceMachine(Global::song()._pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+						created = Global::song().ReplaceMachine(Global::song()._pMachine[fb],(MachineType)Outputmachine, x, y, psOutputDll.c_str(),fb,shellIdx);
 					}
 					else 
 					{
-						created = Global::song().CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+						created = Global::song().CreateMachine((MachineType)Outputmachine, x, y, psOutputDll.c_str(),fb,shellIdx);
 					}
 					if (created)
 					{
-						if ( dlg.selectedMode == modegen)
+						if (selectedMode == modegen)
 						{
 							Global::song().seqBus = fb;
 						}
@@ -1577,6 +1570,26 @@ namespace psycle { namespace host {
 					}
 					else MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
+    }
+
+    /// Show new machine dialog
+		void CChildView::NewMachine(int x, int y, int mac) 
+		{
+			CNewMachine dlg(this);
+			if(mac >= 0)
+			{
+				if (mac < MAX_BUSES)
+				{
+					dlg.selectedMode = modegen;
+				}
+				else
+				{
+					dlg.selectedMode = modefx;
+				}
+			}
+			if ((dlg.DoModal() == IDOK) && (dlg.Outputmachine >= 0))
+			{
+				CreateNewMachine(x, y, mac, dlg.selectedMode, dlg.Outputmachine, dlg.psOutputDll, dlg.shellIdx);
 			}
 			//Repaint();
 			pParentMain->RedrawGearRackList();

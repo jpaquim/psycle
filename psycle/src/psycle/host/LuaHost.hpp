@@ -165,6 +165,7 @@ struct LuaGlobal {
    static Machine* GetMachine(int idx);
    static class LuaPlugin* GetLuaPlugin(int idx) {
       Machine* mac = GetMachine(idx);
+      assert(mac);
       if (mac->_type == MACH_LUA) {
         return (LuaPlugin*) mac;
       }

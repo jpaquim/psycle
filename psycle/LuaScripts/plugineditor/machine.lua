@@ -63,7 +63,8 @@ function machine:onexecute(msg, macidx, plugininfo, trace)
   if msg == nil then  
     self:openinmainframe()  
   else  
-    self.project:setpluginindex(macidx)
+    self.project:setplugininfo(plugininfo):setpluginindex(macidx)
+    self.maincanvas:fillinstancecombobox():setpluginindex(macidx)
     self.maincanvas:setoutputtext(msg)
     self.maincanvas:setcallstack(trace)
     for i=1, #trace do
@@ -99,8 +100,11 @@ function machine:openinmainframe()
   self:setcanvas(self.maincanvas)
 end
 
-function machine:onactivated()
+function machine:onactivated()  
   self.maincanvas:fillinstancecombobox()
+  if self.project and self.project:pluginindex() ~= -1 then
+    self.maincanvas:setpluginindex(self.project:pluginindex())
+  end
 end
 
 function machine:ondeactivated()  
@@ -118,7 +122,7 @@ function machine:initmenu()
    function self.menubar:onclick(node)       
       if node == that.menus.menudesigner then         
         that.menudesigner = menudesigner:new()
-        if that.project.plugininfo then          
+        if that.project and that.project:plugininfo() then          
           that.menudesigner.pluginname = that.project:plugininfo():name()
           local success, menu1 = pcall(require, that.project:plugininfo():name():lower()..".mainmenu1")
           if success then

@@ -1,5 +1,9 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2015-2016 members of the psycle project http://psycle.sourceforge.net
+// This source is free software ; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation ; either version 2, or (at your option) any later 
+// version.
+// copyright 2015-2016 members of the psycle project 
+// http://psycle.sourceforge.net
 
 #pragma once
 #include <psycle/host/detail/project.hpp>
@@ -47,7 +51,7 @@ struct Point {
   inline bool operator==(const Point& rhs) const { 
     return x_ == rhs.x()  && y_ == rhs.y();
   }
-  inline bool operator!=(const Point& rhs) const { return !(*this == rhs); }  
+  inline bool operator!=(const Point& rhs) const { return !(*this == rhs); }
   inline Point operator+(const Point& rhs) const { 
     return Point(x_ + rhs.x(), y_ + rhs.y());
   }
@@ -87,9 +91,11 @@ struct Dimension {
   inline bool operator==(const Dimension& rhs) const { 
     return width_ == rhs.width()  && height_ == rhs.height();
   }
-  inline bool operator!=(const Dimension& rhs) const { return !(*this == rhs); }
+  inline bool operator!=(const Dimension& rhs) const { 
+    return !(*this == rhs);
+  }
   inline Dimension operator+(const Dimension& rhs) const { 
-    return Dimension(width_ + rhs.width(), height_ + rhs.height());        
+    return Dimension(width_ + rhs.width(), height_ + rhs.height());
   }
   inline Dimension operator-(const Dimension& rhs) const {
     return Dimension(width_ - rhs.width(), height_ - rhs.height());
@@ -162,15 +168,19 @@ struct Rect {
 
   inline void set(const ui::Point& top_left, const ui::Dimension& dim) {
     top_left_ = top_left;
-    bottom_right_.set(top_left.x() + dim.width(), top_left.y() + dim.height());    
+    bottom_right_.set(top_left.x() + dim.width(), top_left.y() + dim.height());
   }
   
   inline void set_left(double left) { top_left_.setx(left); }
   inline void set_top(double top) { top_left_.sety(top); }
   inline void set_right(double right) { bottom_right_.setx(right); }
   inline void set_bottom(double bottom) { bottom_right_.sety(bottom); }
-  inline void set_width(double width) { bottom_right_.setx(top_left_.x() + width); }
-  inline void set_height(double height) { bottom_right_.setx(top_left_.y() + height); }
+  inline void set_width(double width) {
+    bottom_right_.setx(top_left_.x() + width);
+  }
+  inline void set_height(double height) {
+    bottom_right_.setx(top_left_.y() + height);
+  }
   inline double left() const { return top_left_.x(); }
   inline double top() const { return top_left_.y(); }
   inline double right() const { return bottom_right_.x(); }
@@ -179,9 +189,12 @@ struct Rect {
   inline double height() const { return bottom_right_.y() - top_left_.y(); }
   inline const ui::Point& top_left() const { return top_left_; }
   inline const ui::Point& bottom_right() const { return bottom_right_; }
-  inline ui::Dimension dimension() const { return Dimension(width(), height()); }
+  inline ui::Dimension dimension() const { 
+    return Dimension(width(), height());
+  }
   inline bool empty() const { 
-    return top_left_.x() == 0 && top_left_.y() == 0 && bottom_right_.x() == 0 && bottom_right_.y() == 0;
+    return top_left_.x() == 0 && top_left_.y() == 0 && 
+           bottom_right_.x() == 0 && bottom_right_.y() == 0;
   }
   
   inline void Offset(double dx, double dy) {
@@ -201,7 +214,7 @@ class SystemMetrics {
   SystemMetrics() {}  
   virtual ~SystemMetrics() = 0;
 
-  virtual ui::Dimension screen_dimension() const = 0;   
+  virtual ui::Dimension screen_dimension() const = 0;
 };
 
 inline SystemMetrics::~SystemMetrics() {}
@@ -225,12 +238,11 @@ class Region {
   virtual int Combine(const Region& other, int combinemode);
   virtual ui::Rect bounds() const;
   virtual bool Intersect(double x, double y) const;
-  virtual bool IntersectRect(double x, double y, double width, double height) const;
+  virtual bool IntersectRect(const ui::Rect& rect) const;
   virtual void Clear();
   virtual void SetRect(const ui::Rect& rect);  
   
- private:
-  
+ private:  
   std::auto_ptr<RegionImp> imp_;
 };
 
@@ -249,6 +261,7 @@ struct RectShape : public Shape {
   virtual void Offset(double dx, double dy) { rect_.Offset(dx, dy); }
   void SetRect(const ui::Rect& rect) { rect_ = rect; }
   virtual ui::Rect bounds() const{ return rect_; }
+
  private:
   ui::Rect rect_;
 };
@@ -269,21 +282,21 @@ struct Area {
 
   int size() const { return rect_shapes_.size(); }
  private:
-   void Update() const {
-     if (needs_update_) {
-       ComputeBounds();
-       ComputeRegion();
-       needs_update_ = false;
-     }
-   }
-   void ComputeBounds() const;
-   void ComputeRegion() const;
-   typedef std::vector<RectShape>::iterator rect_iterator;
-   typedef std::vector<RectShape>::const_iterator rect_const_iterator;
-   std::vector<RectShape> rect_shapes_; 
-   volatile mutable bool needs_update_;   
-   mutable ui::Rect bound_cache_;
-   mutable ui::Region region_cache_;   
+  void Update() const {
+    if (needs_update_) {
+      ComputeBounds();
+      ComputeRegion();
+      needs_update_ = false;
+    }
+  }
+  void ComputeBounds() const;
+  void ComputeRegion() const;
+  typedef std::vector<RectShape>::iterator rect_iterator;
+  typedef std::vector<RectShape>::const_iterator rect_const_iterator;
+  std::vector<RectShape> rect_shapes_; 
+  volatile mutable bool needs_update_;   
+  mutable ui::Rect bound_cache_;
+  mutable ui::Region region_cache_;   
 };
 
 enum Orientation { HORZ = 0, VERT = 1 };
@@ -300,8 +313,6 @@ struct FontInfo {
   int height;
 };
 
-class Window;
-
 class Event {
  public:  
   Event() : work_parent_(false), default_prevented_(false) {}
@@ -317,8 +328,6 @@ class Event {
   bool work_parent_;
   bool default_prevented_;
 };
-
-class Window;
 
 class MouseEvent : public Event {
   public:
@@ -373,7 +382,7 @@ class RegionImp {
   virtual int DevCombine(const Region& other, int combinemode) = 0;  
   virtual ui::Rect DevBounds() const = 0;
   virtual bool DevIntersect(double x, double y) const = 0;
-  virtual bool DevIntersectRect(double x, double y, double width, double height) const = 0;
+  virtual bool DevIntersectRect(const ui::Rect& rect) const = 0;
   virtual void DevClear() = 0;
   virtual void DevSetRect(const ui::Rect& rect) = 0;  
 };
@@ -416,6 +425,34 @@ class ImageImp {
 
 inline ImageImp::~ImageImp() { }
 
+class Images {
+ public:  
+  typedef boost::shared_ptr<Images> Ptr;
+  typedef boost::shared_ptr<const Images> ConstPtr;
+  typedef boost::weak_ptr<Images> WeakPtr;
+  typedef boost::weak_ptr<const Images> ConstWeakPtr;
+  typedef std::vector<ui::Image::Ptr> Container;
+  typedef Images::Container::iterator iterator;
+
+  virtual iterator begin() { return images_.begin(); }
+  virtual iterator end() { return images_.end(); }
+  virtual bool empty() const { return images_.empty(); }
+  virtual int size() const { return images_.size(); }
+  
+  Images() {}
+  virtual ~Images() {}
+    
+  void Add(const Image::Ptr& image) { images_.push_back(image); }
+  void Insert(iterator it, const Image::Ptr& item) { 
+    images_.insert(it, item);
+  }
+  void Remove(iterator it) { images_.erase(it); }
+  void RemoveAll() { images_.clear(); }
+
+  private:
+   Images::Container images_;
+};
+
 namespace canvas { class Group; }
 
 class GraphicsImp;
@@ -430,16 +467,16 @@ friend class canvas::Group;
   GraphicsImp* imp() { return imp_.get(); };
   GraphicsImp* imp() const { return imp_.get(); };
 
-  virtual void CopyArea(double x, double y, double width, double height, double dx, double dy);
+  virtual void CopyArea(const ui::Rect& rect, const ui::Point& delta);
   virtual void DrawArc(const ui::Rect& rect, const Point& start, const Point& end);
-  virtual void DrawLine(double x1, double y1, double x2, double y2);
+  virtual void DrawLine(const ui::Point& p1, const ui::Point& p2);
   virtual void DrawRect(const ui::Rect& rect);
-  virtual void DrawRoundRect(double x, double y, double width, double height, double arc_width, double arch_height);
-  virtual void DrawOval(double x, double y, double width, double height);
+  virtual void DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim);
+  virtual void DrawOval(const ui::Rect& rect);
   virtual void DrawString(const std::string& str, double x, double y);
-  virtual void FillRect(double x, double y, double width, double height);
-  virtual void FillRoundRect(double x, double y, double width, double height, double arc_width, double arch_height);
-  virtual void FillOval(double x, double y, double width, double height);
+  virtual void FillRect(const ui::Rect& rect);
+  virtual void FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim);
+  virtual void FillOval(const ui::Rect& rect);
   virtual void FillRegion(const ui::Region& rgn);
   virtual void SetColor(ARGB color);
   virtual ARGB color() const;
@@ -453,13 +490,13 @@ friend class canvas::Group;
   virtual void DrawImage(ui::Image* img, double x, double y);
   virtual void DrawImage(ui::Image* img, double x, double y, double width, double height);
   virtual void DrawImage(ui::Image* img, double x, double y, double width, double height, double xsrc, double ysrc);
-  virtual void SetClip(double x, double y, double width, double height);
+  virtual void SetClip(const ui::Rect& rect);
   virtual void SetClip(ui::Region* rgn);
   virtual CRgn& clip();
   virtual void Dispose();
   virtual CDC* dc();  // just for testing right now
 
-private:
+ private:
   std::auto_ptr<GraphicsImp> imp_;
   virtual void SaveOrigin();
   virtual void RestoreOrigin();
@@ -526,6 +563,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   typedef boost::weak_ptr<Window> WeakPtr;
   typedef boost::weak_ptr<const Window> ConstWeakPtr;  
   typedef std::vector<Window::Ptr> Container;  
+  typedef Window::Container::iterator iterator;
 
   Window();
   Window(WindowImp* imp);
@@ -541,8 +579,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 
   static std::string type() { return "canvasitem"; }
   virtual std::string GetType() const { return "window"; }
- 
-  typedef Window::Container::iterator iterator;
+   
   virtual iterator begin() { return dummy_list_.begin(); }
   virtual iterator end() { return dummy_list_.end(); }
   virtual bool empty() const { return true; }
@@ -617,7 +654,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   }
   virtual bool auto_size_width() const;
   virtual bool auto_size_height() const;
-  virtual void SetClip(double x, double y, double width, double height) {}
+  virtual void SetClip(const ui::Rect& rect) {}
   virtual bool has_clip() const { return false; }
   const Region& clip() const { return *dummy_region_.get(); }
   virtual void RemoveClip() {}
@@ -800,8 +837,7 @@ class Aligner {
      
   ui::Dimension dim_;
   ui::Rect pos_;
- 
-  
+   
  private: 
   static Window::Container dummy;
   static bool full_align_;
@@ -892,6 +928,7 @@ class Node : public boost::enable_shared_from_this<Node> {
   typedef std::vector<Node::Ptr> Container;
   typedef Container::iterator iterator;
    
+  Node::Node() : image_index_(0), selected_image_index_(0) {}
   virtual ~Node() {}
       
   virtual void set_text(const std::string& text) { 
@@ -901,8 +938,12 @@ class Node : public boost::enable_shared_from_this<Node> {
   virtual std::string text() const { return text_; }
   virtual void set_image(const Image::WeakPtr& image) { image_ = image; }
   virtual Image::WeakPtr image() { return image_; }
-   
-   
+
+  virtual void set_image_index(int index) { image_index_ = index; }
+  virtual int image_index() const { return image_index_; }
+  virtual void set_selected_image_index(int index) { selected_image_index_ = index; }
+  virtual int selected_image_index() const { return selected_image_index_; }
+      
   iterator begin() { return children_.begin(); }
   iterator end() { return children_.end(); }
   bool empty() const { return children_.empty(); }
@@ -934,7 +975,8 @@ class Node : public boost::enable_shared_from_this<Node> {
   boost::ptr_list<NodeImp> imps;
  private:
   std::string text_;
-  boost::weak_ptr<ui::Image> image_;
+  ui::Image::WeakPtr image_;
+  int image_index_, selected_image_index_;
   Container children_;
   Node::WeakPtr parent_;
 };
@@ -943,8 +985,8 @@ class NodeOwnerImp {
  public:
   virtual ~NodeOwnerImp() {}
   
-  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node = boost::shared_ptr<Node>()) = 0;
-  virtual void DevErase(boost::shared_ptr<Node> node) = 0;
+  virtual void DevUpdate(Node::Ptr, Node::Ptr prev_node = nullpointer) = 0;
+  virtual void DevErase(Node::Ptr node) = 0;
 };
 
 class MenuContainer;
@@ -1006,7 +1048,7 @@ class MenuContainer {
 
  private:
   std::auto_ptr<ui::MenuContainerImp> imp_;
-  boost::weak_ptr<Node> root_node_;  
+  Node::WeakPtr root_node_;  
 };
 
 class MenuBar : public MenuContainer {
@@ -1031,6 +1073,8 @@ class TreeView : public Window {
   void UpdateTree();
   void set_root_node(const Node::Ptr& root_node) { root_node_ = root_node; }
   boost::weak_ptr<Node> root_node() { return root_node_; }      
+  void set_images(const Images::Ptr& images);
+  boost::weak_ptr<Images> images() { return images_; }
   void Clear();      
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
@@ -1053,7 +1097,8 @@ class TreeView : public Window {
   virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}
 
  private:     
-  boost::weak_ptr<Node> root_node_;  
+  Node::WeakPtr root_node_;
+  Images::WeakPtr images_;
 };
 
 class TableItemImp;
@@ -1064,21 +1109,14 @@ class TableItem : public boost::enable_shared_from_this<TableItem> {
   static std::string type() { return "canvastableitem"; }
   virtual void set_text(const std::string& text);
   virtual std::string text() const;
-
   //virtual void Add(boost::shared_ptr<TableItem> item);
-
   void set_imp(TableItemImp* imp);
   TableItemImp* imp() { return imp_.get(); };
   TableItemImp* imp() const { return imp_.get(); };
-
-  void set_table(boost::weak_ptr<Table> table);
-  
-  virtual void OnClick() {}
-
-  
-
+  void set_table(boost::weak_ptr<Table> table);  
+  virtual void OnClick() {}  
   void WorkClick();
-private:  
+ private:
   //std::list<boost::shared_ptr<TreeNode> > children_;
   std::auto_ptr<TableItemImp> imp_;
   boost::weak_ptr<Table> table_;  
@@ -1097,7 +1135,6 @@ class Table : public Window {
   TableImp* imp() const { return (TableImp*) Window::imp(); };
   
   virtual void OnClick() {}   
-
   void InsertColumn(int col, const std::string& text);
   void InsertRow();
   int InsertText(int nItem, const std::string& text);
@@ -1105,7 +1142,6 @@ class Table : public Window {
   void AutoSize(int cols);
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
-
   virtual void set_text_color(ARGB color);
   virtual ARGB text_color() const;
 };
@@ -1143,6 +1179,7 @@ class ComboBox : public Window {
   ComboBoxImp* imp() const { return (ComboBoxImp*) Window::imp(); };
 
   virtual void set_items(const std::vector<std::string>& itemlist);
+  virtual std::vector<std::string> items() const;
 
   void set_item_index(int index);
   int item_index() const;
@@ -1260,7 +1297,6 @@ class Scintilla : public Window {
   ARGB linenumber_background_color() const;  
   void set_margin_background_color(ARGB color);
   ARGB margin_background_color() const;
-
   void set_sel_foreground_color(ARGB color);
   //ARGB sel_foreground_color() const { return ToARGB(ctrl().sel_foreground_color()); }  
   void set_sel_background_color(ARGB color);
@@ -1272,8 +1308,9 @@ class Scintilla : public Window {
   void StyleClearAll();
   const std::string& filename() const;
   bool is_modified() const;
-  virtual void OnFirstModified() {}  
-private:
+  virtual void OnFirstModified() {}
+
+ private:
   static std::string dummy_str_;
 };
 
@@ -1419,16 +1456,16 @@ class GraphicsImp {
   GraphicsImp() {}
   virtual ~GraphicsImp() {}
 
-  virtual void CopyArea(double x, double y, double width, double height, double dx, double dy) = 0;
+  virtual void CopyArea(const ui::Rect& rect, const ui::Point& delta) = 0;
   virtual void DrawArc(const ui::Rect& rect, const Point& start, const Point& end) = 0;
-  virtual void DrawLine(double x1, double y1, double x2, double y2) = 0;
+  virtual void DrawLine(const ui::Point& p1, const ui::Point& p2) = 0;
   virtual void DrawRect(const ui::Rect& rect) = 0;
-  virtual void DrawRoundRect(double x, double y, double width, double height, double arc_width, double arch_height) = 0;  
-  virtual void DrawOval(double x, double y, double width, double height) = 0;
+  virtual void DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) = 0;  
+  virtual void DrawOval(const ui::Rect& rect) = 0;
   virtual void DrawString(const std::string& str, double x, double y) = 0;
-  virtual void FillRect(double x, double y, double width, double height) = 0;
-  virtual void FillRoundRect(double x, double y, double width, double height, double arc_width, double arch_height) = 0;
-  virtual void FillOval(double x, double y, double width, double height) = 0;
+  virtual void FillRect(const ui::Rect& rect) = 0;
+  virtual void FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) = 0;
+  virtual void FillOval(const ui::Rect& rect) = 0;
   virtual void FillRegion(const ui::Region& rgn) = 0;
   virtual void SetColor(ARGB color) = 0;
   virtual ARGB color() const = 0;
@@ -1436,14 +1473,14 @@ class GraphicsImp {
   virtual void SetFont(const Font& font) = 0;
   virtual const Font& font() const = 0;
   virtual Dimension text_size(const std::string& text) const = 0;
-  virtual void DrawPolygon(const ui::Points& podoubles) = 0;
-  virtual void FillPolygon(const ui::Points& podoubles) = 0;
+  virtual void DrawPolygon(const ui::Points& pts) = 0;
+  virtual void FillPolygon(const ui::Points& pts) = 0;
   virtual void DrawPolyline(const Points& podoubles) = 0;
   virtual void DrawImage(ui::Image* img, double x, double y) = 0;
   virtual void DrawImage(ui::Image* img, double x, double y, double width, double height) = 0;
   virtual void DrawImage(ui::Image* img, double x, double y, double width, double height, double xsrc, double ysrc) = 0;
-  virtual void SetClip(double x, double y, double width, double height)=0;
-  virtual void SetClip(ui::Region* rgn)=0;
+  virtual void SetClip(const ui::Rect& rect) = 0;
+  virtual void SetClip(ui::Region* rgn) = 0;
   virtual CRgn& clip() = 0;
   virtual void Dispose() = 0;
   virtual CDC* dc() = 0;
@@ -1521,14 +1558,15 @@ class TreeViewImp : public WindowImp, public NodeOwnerImp {
   virtual void dev_set_text_color(ARGB color) = 0;
   virtual ARGB dev_text_color() const = 0;
   virtual void DevClear() = 0;  
-  virtual void dev_select_node(const boost::shared_ptr<Node>& node) = 0;
-  virtual boost::weak_ptr<Node> dev_selected() = 0;
-  virtual void DevEditNode(boost::shared_ptr<ui::Node> node) = 0;
+  virtual void dev_select_node(const Node::Ptr& node) = 0;
+  virtual Node::WeakPtr dev_selected() = 0;
+  virtual void DevEditNode(Node::Ptr node) = 0;
   virtual bool dev_is_editing() const = 0;
   virtual void DevShowLines() = 0;
   virtual void DevHideLines() = 0;
   virtual void DevShowButtons() = 0;
   virtual void DevHideButtons() = 0;
+  virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
 };
 
 class TableItemImp {
@@ -1577,6 +1615,7 @@ class ComboBoxImp : public WindowImp {
   ComboBoxImp() : WindowImp() {}
   ComboBoxImp(Window* window) : WindowImp(window) {}
 
+  virtual std::vector<std::string> dev_items() const = 0;
   virtual void dev_set_items(const std::vector<std::string>& itemlist) = 0;
   virtual void dev_set_item_index(int index) = 0;
   virtual int dev_item_index() const = 0;
