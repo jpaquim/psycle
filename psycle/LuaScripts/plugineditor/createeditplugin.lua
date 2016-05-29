@@ -26,6 +26,8 @@ local button = require("psycle.ui.canvas.button")
 local closebutton = require("closebutton")
 local pic = require("psycle.ui.canvas.pic")
 local image = require("psycle.ui.image")
+local listview = require("psycle.ui.canvas.listview")
+local node = require("psycle.node")
 
 local createeditplugin = group:new()
 
@@ -84,7 +86,17 @@ function createeditplugin:createoredit()
 end
 
 function createeditplugin:initpluginlist()  
-  self.pluginlist = group:new(self):setautosize(true, true):setalign(item.ALTOP)  
+  self.pluginlist = listview:new(self)
+                            :setautosize(false, true)
+                            :setalign(item.ALTOP)
+                            :setbackgroundcolor(0x528A68)
+                            :settextcolor(0xFFFF00)
+  local that = self
+  function self.pluginlist:onclick(node)
+    local dir = that:machinepath(node.info)        
+    that:hide()        
+    that.doopen:emit(dir, node.info:name(), node.info)  
+  end
   self:updatepluginlist()  
 end
 
@@ -129,30 +141,16 @@ end
 function createeditplugin:updatepluginlist()
   local catcher = catcher:new()
   local infos = catcher:infos()    
+  self.rootnode = node:new()
   local lua_count = 0
   for i=1, #infos do
     if infos[i]:type() == machine.MACH_LUA then      
-      local t = text:new(self.pluginlist):setautosize(true, true):settext(infos[i]:name()):setmargin(0, 0, 10, 0)      
-      t.info = infos[i]      
-      function t:onmouseenter()
-         self:setcolor(0xFFFF00)
-      end
-      local that = self
-      function t:onmouseup()
-        local dir = that:machinepath(self.info)        
-        that:hide()        
-        that.doopen:emit(dir, t.info:name(), t.info)  
-      end
-      function t:onmousemove()
-      end
-      function t:onmouseout()
-         self:setcolor(0xFFFFFF)         
-      end
-      lua_count = lua_count + 1
+      local node = node:new():settext(infos[i]:name())      
+      node.info = infos[i]      
+      self.rootnode:add(node)      
     end
-  end   
-  local colnumber = 5
-  self.pluginlist:setaligner(math.floor(lua_count/colnumber + 0.5), colnumber)
+  end 
+  self.pluginlist:setrootnode(self.rootnode)  
 end
 
 return createeditplugin

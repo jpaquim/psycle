@@ -39,6 +39,8 @@ local project = require("project")
 local combobox = require("psycle.ui.canvas.combobox")
 local machine = require("psycle.machine")
 local machines = require("psycle.machines")
+--local listview = require("psycle.ui.canvas.listview")
+local node = require("psycle.node")
 
 local maincanvas = canvas:new()
 
@@ -62,7 +64,26 @@ function maincanvas:init()
   splitter:new(self, splitter.HORZ)
   self.pluginexplorer = self:createpluginexplorer()
   splitter:new(self, splitter.VERT)  
-  self:createpagegroup()    
+  self:createpagegroup()
+-- listview report test
+--  self.listview = listview:new(self)
+--                          :setalign(item.ALBOTTOM)
+--                          :setautosize(false, false)
+--                          :setpos(0, 0, 0, 200)
+--                          :viewreport()
+--                          :addcolumn("Col1", 100)
+--                          :addcolumn("Col2", 100)
+--                          :addcolumn("Col3", 100)
+--  self.lroot = node:new()  
+--  for i=1, 10 do
+--    local node1 = node:new():settext("listitem"..i)    
+--    local subnode1 = node:new():settext("subitem1_of_"..i)
+--    node1:add(subnode1)
+--    local subnode2 = node:new():settext("subitem2_of_"..i)
+--    subnode1:add(subnode2)
+--    self.lroot:add(node1)
+--  end  
+--  self.listview:setrootnode(self.lroot)
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -256,13 +277,15 @@ function maincanvas:playplugin()
      end
   else
     self:savepage()    
-    local fname = psycle.proxy.project:plugininfo():dllname():match("([^\\]+)$"):sub(1, -5)    
-    machine = machine:new(fname)
-    local machines = machines:new()
-    local pluginindex = machines:insert(machine)    
-    psycle.proxy.project:setpluginindex(pluginindex)    
-    self:fillinstancecombobox()
-    self:setpluginindex(pluginindex)
+    if  psycle.proxy.project:plugininfo() then
+      local fname = psycle.proxy.project:plugininfo():dllname():match("([^\\]+)$"):sub(1, -5)    
+      machine = machine:new(fname)
+      local machines = machines:new()
+      local pluginindex = machines:insert(machine)    
+      psycle.proxy.project:setpluginindex(pluginindex)
+      self:fillinstancecombobox()
+      self:setpluginindex(pluginindex)
+    end
   end
 end
 
@@ -310,13 +333,13 @@ end
 
 function maincanvas:fillinstancecombobox()
    local items = {"new instance"}
-   self.cbxtopluginindex = {}
+   self.cbxtopluginindex = {-1}
    if (psycle.proxy.project:plugininfo()) then
      for machineindex= 0, 255 do
        local machine = machine:new(machineindex);       
        if machine and machine:type() == machine.MACH_LUA and machine:pluginname() == psycle.proxy.project:plugininfo():name() then
          items[#items + 1] = machine:pluginname().."["..machineindex.."]"
-         self.cbxtopluginindex[#items] = machineindex
+         self.cbxtopluginindex[#self.cbxtopluginindex + 1] = machineindex
        end
      end     
    end
@@ -325,8 +348,15 @@ function maincanvas:fillinstancecombobox()
    return self
 end  
 
-function maincanvas:setpluginindex(index)
-  self.cbx:setitemindex(index + 2)
+function maincanvas:setpluginindex(pluginindex)    
+  local cbxindex = 1  
+  for i = 1, #self.cbxtopluginindex do    
+    if self.cbxtopluginindex[i] == pluginindex then       
+       cbxindex = i
+       break    
+    end
+  end  
+  self.cbx:setitemindex(cbxindex)  
 end
 
 function maincanvas:createinstanceselect(parent)

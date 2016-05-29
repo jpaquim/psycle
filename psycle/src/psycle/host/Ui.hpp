@@ -903,6 +903,7 @@ inline Ornament::~Ornament() {}
 class TreeView;
 
 class TreeViewImp;
+class ListViewImp;
 class Node;
 class NodeOwnerImp;
 
@@ -1101,49 +1102,46 @@ class TreeView : public Window {
   Images::WeakPtr images_;
 };
 
-class TableItemImp;
-class Table;
-
-class TableItem : public boost::enable_shared_from_this<TableItem> {
+class ListView : public Window {
  public:
-  static std::string type() { return "canvastableitem"; }
-  virtual void set_text(const std::string& text);
-  virtual std::string text() const;
-  //virtual void Add(boost::shared_ptr<TableItem> item);
-  void set_imp(TableItemImp* imp);
-  TableItemImp* imp() { return imp_.get(); };
-  TableItemImp* imp() const { return imp_.get(); };
-  void set_table(boost::weak_ptr<Table> table);  
-  virtual void OnClick() {}  
-  void WorkClick();
- private:
-  //std::list<boost::shared_ptr<TreeNode> > children_;
-  std::auto_ptr<TableItemImp> imp_;
-  boost::weak_ptr<Table> table_;  
-};
+  typedef boost::weak_ptr<ListView> WeakPtr;
+  static std::string type() { return "canvaslistview"; }  
 
-class TableImp;
+  ListView();
+  ListView(ListViewImp* imp);
 
-class Table : public Window {
- public:    
-  static std::string type() { return "canvastableitem"; }  
-
-  Table();
-  Table(TableImp* imp);
-
-  TableImp* imp() { return (TableImp*) Window::imp(); };
-  TableImp* imp() const { return (TableImp*) Window::imp(); };
-  
-  virtual void OnClick() {}   
-  void InsertColumn(int col, const std::string& text);
-  void InsertRow();
-  int InsertText(int nItem, const std::string& text);
-  void SetText(int nItem, int nSubItem, const std::string& text);
-  void AutoSize(int cols);
+  ListViewImp* imp() { return (ListViewImp*) Window::imp(); };
+  ListViewImp* imp() const { return (ListViewImp*) Window::imp(); };      
+  void UpdateList();
+  void set_root_node(const Node::Ptr& root_node) { root_node_ = root_node; }
+  void AddColumn(const std::string& text, int width);
+  boost::weak_ptr<Node> root_node() { return root_node_; }      
+  void set_images(const Images::Ptr& images);
+  boost::weak_ptr<Images> images() { return images_; }
+  void Clear();      
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
   virtual void set_text_color(ARGB color);
   virtual ARGB text_color() const;
+  virtual void EditNode(const Node::Ptr& node);
+  bool is_editing() const;
+
+  void ViewList();
+  void ViewReport();  
+  void ViewIcon();
+  void ViewSmallIcon();
+  
+  virtual void select_node(const Node::Ptr& node);
+  virtual boost::weak_ptr<Node> selected();
+
+  virtual void OnClick(const Node::Ptr& node) {}
+  virtual void OnRightClick(const Node::Ptr& node) {}
+  virtual void OnEditing(const Node::Ptr& node, const std::string& text) {}
+  virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}
+
+ private:     
+  Node::WeakPtr root_node_;
+  Images::WeakPtr images_;
 };
 
 class ScrollBarImp;
@@ -1436,6 +1434,7 @@ class Systems {
   virtual ui::Button* CreateButton();
   virtual ui::ScrollBar* CreateScrollBar();
   virtual ui::TreeView* CreateTreeView();
+  virtual ui::ListView* CreateListView();
   virtual ui::MenuContainer* CreateMenuBar();
   virtual ui::PopupMenu* CreatePopupMenu();
 
@@ -1569,32 +1568,26 @@ class TreeViewImp : public WindowImp, public NodeOwnerImp {
   virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
 };
 
-class TableItemImp {
- public:
-  TableItemImp() {}
-  virtual ~TableItemImp() {}
-    
-  virtual void dev_set_table(boost::weak_ptr<Table> table) = 0;  
-  virtual void dev_set_text(const std::string& text) =  0;
-  virtual std::string dev_text() const = 0;
-    
- private:  
-};
-
-class TableImp : public WindowImp {
- public:
-  TableImp() : WindowImp() {}
-  TableImp(Window* window) : WindowImp(window) {}  
-
-  virtual void DevInsertColumn(int col, const std::string& text) = 0;
-  virtual void DevInsertRow() = 0;
-  virtual int DevInsertText(int nItem, const std::string& text) = 0;
-  virtual void DevSetText(int nItem, int nSubItem, const std::string& text) = 0;
-  virtual void DevAutoSize(int cols) = 0;
+class ListViewImp : public WindowImp, public NodeOwnerImp {
+ public:  
+  ListViewImp() : WindowImp() {}
+  ListViewImp(Window* window) : WindowImp(window) {}
+      
   virtual void dev_set_background_color(ARGB color) = 0;
   virtual ARGB dev_background_color() const = 0;  
   virtual void dev_set_text_color(ARGB color) = 0;
   virtual ARGB dev_text_color() const = 0;
+  virtual void DevClear() = 0;  
+  virtual void dev_select_node(const Node::Ptr& node) = 0;
+  virtual Node::WeakPtr dev_selected() = 0;
+  virtual void DevEditNode(Node::Ptr node) = 0;
+  virtual bool dev_is_editing() const = 0;
+  virtual void DevAddColumn(const std::string& text, int width) = 0;
+  virtual void DevViewList() = 0;
+  virtual void DevViewReport() = 0;
+  virtual void DevViewIcon() = 0;
+  virtual void DevViewSmallIcon() = 0;
+  virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
 };
 
 class ScrollBarImp : public WindowImp {
@@ -1704,10 +1697,10 @@ class ImpFactory {
   virtual ui::ComboBoxImp* CreateComboBoxImp();
   virtual ui::EditImp* CreateEditImp();
   virtual ui::TreeViewImp* CreateTreeViewImp();
+  virtual ui::ListViewImp* CreateListViewImp();
   virtual ui::MenuContainerImp* CreateMenuContainerImp();
   virtual ui::MenuContainerImp* CreatePopupMenuImp();
   virtual ui::MenuImp* CreateMenuImp();
-  virtual ui::TableImp* CreateTableImp();  
   virtual ui::ButtonImp* CreateButtonImp();
   virtual ui::ScintillaImp* CreateScintillaImp();
   virtual ui::RegionImp* CreateRegionImp();

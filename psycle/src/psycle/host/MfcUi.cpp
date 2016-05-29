@@ -348,7 +348,7 @@ template class WindowTemplateImp<CButton, ui::ButtonImp>;
 template class WindowTemplateImp<CEdit, ui::EditImp>;
 template class WindowTemplateImp<CWnd, ui::ScintillaImp>;
 template class WindowTemplateImp<CTreeCtrl, ui::TreeViewImp>;
-template class WindowTemplateImp<CListCtrl, ui::TableImp>;
+template class WindowTemplateImp<CListCtrl, ui::ListViewImp>;
 template class WindowTemplateImp<CFrameWnd, ui::FrameImp>;
 
 BEGIN_MESSAGE_MAP(WindowImp, CWnd)
@@ -605,62 +605,243 @@ void TreeViewImp::DevHideButtons() {
   ModifyStyle(TVS_HASBUTTONS, 0);
 }
 
-BEGIN_MESSAGE_MAP(TableImp, CListCtrl)  
+
+BEGIN_MESSAGE_MAP(ListViewImp, CListCtrl)
   ON_WM_ERASEBKGND()
 	ON_WM_PAINT()  
+  ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnClick)
+  ON_NOTIFY_REFLECT_EX(TVN_BEGINLABELEDIT, OnBeginLabelEdit)
+  ON_NOTIFY_REFLECT_EX(TVN_ENDLABELEDIT, OnEndLabelEdit)
+  ON_NOTIFY_REFLECT_EX(NM_RCLICK, OnRightClick)  
+  ON_NOTIFY_REFLECT(NM_CUSTOMDRAW,OnCustomDrawList)
 END_MESSAGE_MAP()
 
-void TableImp::test() {
-  // Insert columns
- /* InsertColumn(0, "One", LVCFMT_LEFT, -1, 0);
-  InsertColumn(1, "Two", LVCFMT_LEFT, -1, 1);
-// Insert first row
-   int Index = InsertItem(LVIF_TEXT, 0, "One one", 0, 0, 0, NULL);
-   SetItem(Index, 1, LVIF_TEXT, "One two", 0, 0, 0, NULL);
-   //Insert second row
-   Index = InsertItem(LVIF_TEXT, 1, "Two one", 0, 0, 0, NULL);
-   SetItem(Index, 1, LVIF_TEXT, "Two two", 0, 0, 0, NULL);*/
-// Set column widths (an optional nice touch)
-//   SetColumnWidth(0, LVSCW_AUTOSIZE);
-   //SetColumnWidth(1, LVSCW_AUTOSIZE);   
+void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp) {
+  node_imp->pos_ = prev_imp ? prev_imp->pos() + 1 : 0;
+  LVITEM lvi;
+  lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
+  lvi.cColumns = 0;
+  node_imp->text_ = node.text();
+  lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
+  lvi.iImage = node.image_index();
+  lvi.iItem = node_imp->pos_;
+  lvi.iSubItem = 0;
+  list->InsertItem(&lvi);  
 }
 
-void TableImp::DevInsertColumn(int col, const std::string& text) {
-  InsertColumn(col, text.c_str(), LVCFMT_LEFT, -1, 0);
+void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level) {
+  LVITEM lvi;
+  lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
+  lvi.cColumns = 0;
+  node_imp->text_ = node.text();
+  lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
+  lvi.iImage = node.image_index(); 
+  lvi.iItem = pos_;
+  lvi.iSubItem = level - 1;
+  list->SetItem(&lvi);
+  node_imp->set_pos(pos_);
 }
 
-void TableImp::DevInsertRow() {
+void ListViewImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
+  struct {
+      ListViewImp* that;       
+      void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
+        NodeImp* prev_node_imp = 0;
+        if (prev_node) {
+          boost::ptr_list<NodeImp>::iterator it = prev_node->imps.begin();
+          while (it != prev_node->imps.end()) {
+            NodeImp* i = &(*it);
+            if (i->owner() == that) {
+              prev_node_imp = i;
+              break;
+            } else {
+              ++it;
+            }        
+          }
+        }
+
+        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+        while (it != node->imps.end()) {
+          NodeImp* i = &(*it);
+          if (i->owner() == that) {
+            it = node->imps.erase(it);            
+          } else {
+            ++it;
+          }
+        }
+        ListNodeImp* new_imp = new ListNodeImp();
+        node->AddImp(new_imp);
+        new_imp->set_owner(that);               
+        node->changed.connect(boost::bind(&ListViewImp::OnNodeChanged, that, _1));                
+        if (!node->parent().expired()) {
+          boost::shared_ptr<ui::Node> parent_node = node->parent().lock();   
+          boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
+          for ( ; it != parent_node->imps.end(); ++it) {            
+            ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
+            if (imp) {              
+              ListNodeImp* prev_imp = dynamic_cast<ListNodeImp*>(prev_node_imp);
+              int level = node->level();
+              if (level == 1) {
+                imp->DevInsertFirst(that, *node.get(), new_imp, prev_imp);
+              } else {
+                imp->DevSetSub(that, *node.get(), new_imp, prev_imp, level);
+              }
+            }
+          }
+        }
+      }
+    } f;
+  f.that = this;  
+  node->traverse(f, prev_node);
 }
 
-int TableImp::DevInsertText(int nItem, const std::string& text) {
-  int index = InsertItem(LVIF_TEXT, nItem, text.c_str(), 0, 0, 0, NULL);
-  return index;
-}
-
-void TableImp::DevSetText(int nItem, int nSubItem, const std::string& text) {
-  SetItem(nItem, nSubItem, LVIF_TEXT, text.c_str(), 0, 0, 0, NULL);  
-}
-
-void TableImp::DevAutoSize(int cols) {
-  for (int i = 0; i < cols; i++) {
-    SetColumnWidth(i, LVSCW_AUTOSIZE);    
+void ListViewImp::DevErase(boost::shared_ptr<Node> node) {
+  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+  for (; it != node->imps.end(); ++it) {     
+    if (it->owner() == this) {
+      ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
+      if (imp) {
+      //  DeleteItem(imp->hItem);
+      }
+      node->imps.erase(it);
+      break;
+    } 
   }
 }
 
-void TableItemImp::dev_set_table(boost::weak_ptr<ui::Table> table) {
-  /*HTREEITEM p = 0;
-  if (!parent.expired()) {
-    p = ((mfc::TreeNodeImp*) parent.lock()->imp())->hItem;
+void ListViewImp::DevEditNode(boost::shared_ptr<ui::Node> node) {    
+  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+  for ( ; it != node->imps.end(); ++it) {    
+    ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
+    if (imp) {      
+      //EditLabel(imp->hItem);
+      break;
+    }
   }
-  TVINSERTSTRUCT tvInsert;
-  tvInsert.hParent = p;
-  tvInsert.hInsertAfter = p;
-  tvInsert.item.mask = TVIF_TEXT;  
-  tvInsert.item.pszText = const_cast<char *>(text_.c_str());  
-  mfc::TreeImp* treectrl = (mfc::TreeImp*) tree.lock()->imp();
-  hItem = treectrl->InsertItem(&tvInsert);
-  ((TreeImp*)tree.lock()->imp())->tree_nodes[hItem] = this;*/
 }
+
+void ListViewImp::dev_select_node(const boost::shared_ptr<ui::Node>& node) {
+  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+  for ( ; it != node->imps.end(); ++it) {    
+    ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
+    if (imp) {      
+      //SelectItem(imp->hItem);      
+    }
+  }
+}
+
+boost::weak_ptr<Node> ListViewImp::dev_selected() {
+  ui::Node* node = find_selected_node();
+  return node ? node->shared_from_this() : boost::weak_ptr<ui::Node>();
+}
+
+void ListViewImp::OnNodeChanged(Node& node) {
+  boost::ptr_list<NodeImp>::iterator it = node.imps.begin();
+  for ( ; it != node.imps.end(); ++it) {    
+    ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
+    if (imp) {      
+      //SetItemText(imp->hItem, node.text().c_str());       
+    }
+  }
+}
+
+BOOL ListViewImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {   
+  Node* node = find_selected_node();
+  if (node) {
+    list_view()->OnClick(node->shared_from_this());
+  }
+  return FALSE;
+}
+
+BOOL ListViewImp::OnRightClick(NMHDR * pNotifyStruct, LRESULT * result) {
+  Node* node = find_selected_node();
+  if (node) {
+    list_view()->OnRightClick(node->shared_from_this());
+  }
+  return FALSE;
+}
+
+ui::Node* ListViewImp::find_selected_node() {  
+  POSITION pos = GetFirstSelectedItemPosition();
+  int selected = -1;
+  if (pos != NULL) {
+    while (pos) {
+      selected = GetNextSelectedItem(pos);      
+    }
+  } 
+  struct {
+   ListViewImp* that;
+    int iItem;
+    Node::Ptr found;    
+    void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
+      boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+      NodeImp* imp = 0;
+      while (it != node->imps.end()) {
+        NodeImp* i = &(*it);
+        if (i->owner() == that) {
+          imp = i;
+          break;
+        } else {
+          ++it;        
+        }
+      }
+      if (imp) {
+        ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
+        if ((node->level() > 0) && (imp->pos() == iItem)) {
+          found = node;
+        }
+      }
+    }
+  } f;
+  f.that = this;  
+  f.iItem = selected;
+  list_view()->root_node().lock()->traverse(f);
+  return f.found.get();
+}
+
+BOOL ListViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
+  Node* node = find_selected_node();
+  if (node) {
+    CEdit* edit = GetEditControl();
+    CString s;    
+    edit->GetWindowTextA(s);
+    is_editing_ = true;
+    list_view()->OnEditing(node->shared_from_this(), s.GetString());
+  }
+  return FALSE;
+}
+
+
+BOOL ListViewImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
+  Node* node = find_selected_node();
+  if (node) {
+    CEdit* edit = GetEditControl();
+    CString s;    
+    edit->GetWindowTextA(s);
+    is_editing_ = false;
+    list_view()->OnEdited(node->shared_from_this(), s.GetString());
+  }
+  return FALSE;
+}
+
+void ListViewImp::DevClear() { DeleteAllItems(); }
+
+void ListViewImp::OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult) {
+   NMLVCUSTOMDRAW* pLVCD = reinterpret_cast<NMLVCUSTOMDRAW*>(pNMHDR);   
+   *pResult = CDRF_DODEFAULT;
+   switch(pLVCD->nmcd.dwDrawStage) {
+     case CDDS_PREPAINT:
+      *pResult = CDRF_NOTIFYITEMDRAW;
+      break;
+
+     case CDDS_ITEMPREPAINT:
+      *pResult = *pResult = CDRF_DODEFAULT; // CDRF_NOTIFYSUBITEMDRAW;
+      pLVCD->clrTextBk = GetBkColor();
+      break;     
+   }
+}
+
+//end list
 
 BEGIN_MESSAGE_MAP(ScrollBarImp, CScrollBar)  
 	ON_WM_PAINT()

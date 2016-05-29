@@ -146,8 +146,8 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
   LuaHelper::require<LuaTreeViewBind<> >(L, "psycle.ui.canvas.treeview");
-  LuaHelper::require<LuaNodeBind>(L, "psycle.node");
-  LuaHelper::require<LuaTableBind<> >(L, "psycle.ui.canvas.table");
+  LuaHelper::require<LuaListViewBind<> >(L, "psycle.ui.canvas.listview");
+  LuaHelper::require<LuaNodeBind>(L, "psycle.node");  
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
   LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.canvas.combobox");
   LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
