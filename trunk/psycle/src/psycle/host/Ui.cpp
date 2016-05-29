@@ -1279,99 +1279,106 @@ void TreeView::set_images(const Images::Ptr& images) {
   }
 }
 
-// Table
-Table::Table() : Window(ui::ImpFactory::instance().CreateTableImp()) {
+// ListView
+ListView::ListView() : Window(ui::ImpFactory::instance().CreateListViewImp()) {
   set_auto_size(false, false);
 }
 
-Table::Table(TableImp* imp) : Window(imp) {
+ListView::ListView(ListViewImp* imp) : Window(imp) { 
+  set_auto_size(false, false);
 }
 
-void Table::InsertColumn(int col, const std::string& text) {
-  if (imp()) {
-    imp()->DevInsertColumn(col, text);
+void ListView::Clear() {
+  if (!root_node_.expired()) {    
+    root_node_.reset();
+    if (imp()) {
+      imp()->DevClear();
+    }
   }
 }
 
-void Table::InsertRow() {
+void ListView::UpdateList() {
+  if (imp() && !root_node_.expired()) {
+    imp()->DevClear();  
+    imp()->DevUpdate(root_node_.lock());
+  }  
+}
+
+void ListView::AddColumn(const std::string& text, int width) {
   if (imp()) {
-    imp()->DevInsertRow();
+    imp()->DevAddColumn(text, width);
   }
 }
 
-int Table::InsertText(int nItem, const std::string& text) {
-  if (imp()) {
-    return imp()->DevInsertText(nItem, text);
-  }
-  return 0;
+boost::weak_ptr<Node> ListView::selected() {
+  return imp() ? imp()->dev_selected() : boost::weak_ptr<Node>();  
 }
 
-void Table::SetText(int nItem, int nSubItem, const std::string& text) {
+void ListView::select_node(const Node::Ptr& node) {
   if (imp()) {
-    imp()->DevSetText(nItem, nSubItem, text);
+    imp()->dev_select_node(node);
   }
 }
 
-void Table::set_background_color(ARGB color) {
+void ListView::set_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_background_color(color);
   }
 }
 
-ARGB Table::background_color() const {
+ARGB ListView::background_color() const {
   return imp() ? imp()->dev_background_color() : 0xFF00000;
 }
 
-void Table::set_text_color(ARGB color) {
+void ListView::set_text_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_text_color(color);
   }
 }
 
-ARGB Table::text_color() const {
+ARGB ListView::text_color() const {
   return imp() ? imp()->dev_text_color() : 0xFF00000;
 }
 
-void Table::AutoSize(int cols) {
+void ListView::EditNode(const Node::Ptr& node) {
   if (imp()) {
-    imp()->DevAutoSize(cols);
+    imp()->DevEditNode(node);
   }
 }
 
-void TableItem::set_imp(TableItemImp* imp) { 
-  imp_.reset(imp);
-  /*if (imp) {
-    imp->set_table_item(this);
-  }*/
+bool ListView::is_editing() const {
+  return imp() ? imp()->dev_is_editing() : false;  
 }
 
-void TableItem::set_table(boost::weak_ptr<Table> table) {
-  table_ = table;  
+void ListView::set_images(const Images::Ptr& images) { 
+  images_ = images;
   if (imp()) {
-    imp()->dev_set_table(table);
-  }
-/*  std::list<boost::shared_ptr<TreeNode> >::iterator i = children_.begin();
-  for (; i != children_.end(); ++i) {
-    boost::shared_ptr<TreeNode> node = *i;
-    node->set_tree(tree);    
-  }*/
-}
-
-void TableItem::WorkClick() {
-  OnClick();
-  if (!table_.expired()) {
-    // table_.lock()->OnClick(this);
+    imp()->dev_set_images(images);
   }
 }
 
-void TableItem::set_text(const std::string& text) {
+void ListView::ViewList() {
   if (imp()) {
-    imp()->dev_set_text(text);
+    imp()->DevViewList();
   }
 }
 
-std::string TableItem::text() const {
-  return (imp()) ? imp()->dev_text() : "no imp";  
+void ListView::ViewReport() {
+  if (imp()) {
+    imp()->DevViewReport();
+  }
+}
+
+void ListView::ViewIcon() {
+  if (imp()) {
+    imp()->DevViewIcon();
+  }
+}
+
+void ListView::ViewSmallIcon() {
+  if (imp()) {
+    imp()->DevViewSmallIcon();
+  }
 }
 
 ComboBox::ComboBox() : Window(ui::ImpFactory::instance().CreateComboBoxImp()) {  
@@ -1740,6 +1747,11 @@ ui::TreeView* Systems::CreateTreeView() {
   return concrete_factory_->CreateTreeView(); 
 }
 
+ui::ListView* Systems::CreateListView() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateListView(); 
+}
+
 ui::MenuContainer* Systems::CreateMenuBar() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateMenuBar(); 
@@ -1867,6 +1879,11 @@ ui::TreeViewImp* ImpFactory::CreateTreeViewImp() {
   return concrete_factory_->CreateTreeViewImp(); 
 }
 
+ui::ListViewImp* ImpFactory::CreateListViewImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateListViewImp(); 
+}
+
 ui::MenuContainerImp* ImpFactory::CreateMenuContainerImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateMenuContainerImp();
@@ -1880,11 +1897,6 @@ ui::MenuContainerImp* ImpFactory::CreatePopupMenuImp() {
 ui::MenuImp* ImpFactory::CreateMenuImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateMenuImp(); 
-}
-
-ui::TableImp* ImpFactory::CreateTableImp() {
-  assert(concrete_factory_.get());
-  return concrete_factory_->CreateTableImp(); 
 }
 
 ui::ButtonImp* ImpFactory::CreateButtonImp() {

@@ -964,17 +964,6 @@ class MenuImp : public ui::MenuImp {
     int id_;
 };
 
-class TableItemImp : public ui::TableItemImp {
- public:
-  TableItemImp() {}
-  
-  virtual void dev_set_text(const std::string& text) { text_ = text; }
-  virtual std::string dev_text() const { return text_; }
-  virtual void dev_set_table(boost::weak_ptr<ui::Table> table);
-  
-  std::string text_;  
-};
-
 class TreeViewImp;
 
 class TreeNodeImp : public NodeImp {  
@@ -1063,6 +1052,107 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
    bool is_editing_;   
 };
 
+class ListViewImp;
+
+class ListNodeImp : public NodeImp {  
+ public:
+  ListNodeImp() : pos_(0) {} // : hItem(0) {}
+  ~ListNodeImp() {}
+
+  void set_pos(int pos) { pos_ = pos; }
+  int pos() const { return pos_; }
+      
+  // LVITEM DevInsert(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* prev_imp);
+  void DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp);
+  void DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level);
+  // LVITEM hItem;  
+  std::string text_;
+  int pos_;
+};
+
+class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
+ public:  
+  ListViewImp() : 
+      WindowTemplateImp<CListCtrl, ui::ListViewImp>(), 
+      is_editing_(false),
+      column_pos_(0) {
+    m_imageList.Create(22, 22, ILC_COLOR32, 1, 1);
+  }
+  static ListViewImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    ListViewImp* imp = new ListViewImp();
+    if (!imp->Create(WS_CHILD | TVS_EDITLABELS, 
+                     CRect(0, 0, 200, 200), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);
+    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
+    // imp->SetLineColor(0xFFFFFF);
+    imp->DevViewList();
+    return imp;
+  }
+
+  ui::ListView* list_view() { 
+    ui::ListView* result = dynamic_cast<ui::ListView*>(window());
+    assert(result);
+    return result;
+  }  
+  virtual void DevClear();  
+  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
+  virtual void DevErase(boost::shared_ptr<Node> node);  
+  virtual void DevEditNode(boost::shared_ptr<ui::Node> node);
+  virtual void dev_set_background_color(ARGB color) {     
+    SetBkColor(ToCOLORREF(color));
+  }  
+  virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
+  virtual void dev_set_text_color(ARGB color) {
+    SetTextColor(ToCOLORREF(color));
+  }
+  virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
+  BOOL OnEraseBkgnd(CDC* pDC) { return CListCtrl::OnEraseBkgnd(pDC); }
+  
+  void dev_select_node(const boost::shared_ptr<ui::Node>& node);
+  virtual boost::weak_ptr<Node> dev_selected();  
+  void OnNodeChanged(Node& node);
+  bool dev_is_editing() const { return is_editing_; }
+  std::map<HTREEITEM, boost::weak_ptr<ui::Node> > htreeitem_node_map_;
+  void dev_add_item(boost::shared_ptr<Node> node);
+  virtual void dev_set_images(const ui::Images::Ptr& images) {
+    ui::Images::iterator it = images->begin();
+    for (; it != images->end(); ++it) {
+      m_imageList.Add((CBitmap*)(*it)->source(),  (COLORREF)0xFFFFFF);    
+    }
+    SetImageList(&m_imageList, TVSIL_NORMAL);
+  }
+
+  virtual void DevViewList() { SetView(LV_VIEW_LIST); }
+  virtual void DevViewReport() { SetView(LV_VIEW_DETAILS); }
+  virtual void DevViewIcon() { SetView(LV_VIEW_ICON); }
+  virtual void DevViewSmallIcon() { SetView(LV_VIEW_SMALLICON); }
+
+  virtual void DevAddColumn(const std::string& text, int width) {
+    InsertColumn(column_pos_++, _T(text.c_str()), LVCFMT_LEFT, width); //, nColInterval*3);
+  }
+
+  CImageList m_imageList;
+
+ protected:  
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CListCtrl::OnPaint(); }
+  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnRightClick(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
+  void OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult);
+  ui::Node* find_selected_node();
+
+ private:
+   bool is_editing_;
+   int column_pos_;
+};
+
 class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
  public:  
   ComboBoxImp() : WindowTemplateImp<CComboBox, ui::ComboBoxImp>() {}
@@ -1144,46 +1234,6 @@ protected:
   void OnPaint() { CEdit::OnPaint(); }
 };
 
-class TableImp : public WindowTemplateImp<CListCtrl, ui::TableImp> {
- public:  
-  TableImp() : WindowTemplateImp<CListCtrl, ui::TableImp>() {}
-
-  static TableImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
-    TableImp* imp = new TableImp();
-    if (!imp->Create(WS_CHILD|WS_VISIBLE|LVS_REPORT,
-                     CRect(10,10,200,100), 
-                     parent, 
-                     nID)) {
-      TRACE0("Failed to create window\n");
-      return 0;
-    }
-    imp->set_window(w);
-    imp->test();
-    return imp;
-  }  
-
-  void test();
-
-  virtual void dev_set_background_color(ARGB color) { 
-    SetBkColor(ToCOLORREF(color));
-  }  
-  virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
-  virtual void dev_set_text_color(ARGB color) {
-    SetTextColor(ToCOLORREF(color));
-  }
-  virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
-
-  virtual void DevInsertColumn(int col, const std::string& text);
-  virtual void DevInsertRow();  
-  virtual int DevInsertText(int nItem, const std::string& text);
-  virtual void DevSetText(int nItem, int nSubItem, const std::string& text);
-  virtual void DevAutoSize(int cols);
-
- protected:
-  DECLARE_MESSAGE_MAP()
-  void OnPaint() { CListCtrl::OnPaint(); }
-  BOOL OnEraseBkgnd(CDC* pDC) { return CListCtrl::OnEraseBkgnd(pDC); }
-};
 
 class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
  public:  
@@ -1534,6 +1584,9 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::TreeViewImp* CreateTreeViewImp() {     
     return TreeViewImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
+  virtual ui::ListViewImp* CreateListViewImp() {     
+    return ListViewImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
   virtual ui::RegionImp* CreateRegionImp() {     
     return new ui::mfc::RegionImp();
   }
@@ -1555,9 +1608,6 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::MenuImp* CreateMenuImp() {
     return new MenuImp(0);
   }  
-  virtual ui::TableImp* CreateTableImp() {     
-    return TableImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
-  }
   virtual ui::GameControllersImp* CreateGameControllersImp() {
     return new GameControllersImp();
   }

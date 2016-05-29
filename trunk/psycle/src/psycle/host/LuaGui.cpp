@@ -565,6 +565,56 @@ void LuaTreeView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
   }
 }
 
+
+// LuaListView
+void LuaListView::OnClick(const ui::Node::Ptr& node) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onclick")) {
+      LuaHelper::find_weakuserdata<>(L, node.get());
+      in.pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
+void LuaListView::OnRightClick(const ui::Node::Ptr& node) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onrightclick")) {
+      LuaHelper::find_weakuserdata<>(L, node.get());
+      in.pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
+void LuaListView::OnEditing(const ui::Node::Ptr& node, const std::string& text) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onediting")) {
+      LuaHelper::find_weakuserdata<>(L, node.get());
+      in << text << pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
+void LuaListView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onedited")) {
+      LuaHelper::find_weakuserdata<>(L, node.get());
+      in << text << pcall(0);      
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
 // LuaNodeBind
 std::string LuaNodeBind::meta = "psynode";
 
@@ -847,7 +897,7 @@ ui::Window::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {
     LuaScintillaBind<LuaScintilla>::meta.c_str(),
     LuaComboBoxBind<LuaComboBox>::meta.c_str(),
     LuaTreeViewBind<LuaTreeView>::meta.c_str(),
-    LuaTableBind<LuaTable>::meta.c_str()
+    LuaListViewBind<LuaListView>::meta.c_str()    
   };
   int size = sizeof(metas)/sizeof(metas[0]);
   Window::Ptr item;
