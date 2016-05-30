@@ -2101,7 +2101,7 @@ int LuaDspFilterBind::setfiltertype(lua_State* L) {
 }
 
 int LuaDspFilterBind::gc (lua_State *L) {
-  boost::shared_ptr<Filter> filter = LuaHelper::check_sptr<Filter>(L, 1,  meta);
+  boost::shared_ptr<Filter> filter = *(boost::shared_ptr<Filter>*) luaL_checkudata(L, 1, meta);  
   std::map<Filter*, Filter*>::iterator it = filters.find(filter.get());
   assert(it != filters.end());
   filters.erase(it);

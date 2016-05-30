@@ -886,9 +886,10 @@ lua_State* LuaGlobal::load_script(const std::string& dllpath) {
 
 PluginInfo LuaGlobal::LoadInfo(const std::string& dllpath) {
   PluginInfo info;
+  lua_State* L = 0;
   try {
-    std::auto_ptr<LuaPlugin> plug(new LuaPlugin(dllpath, 0, false));
-    info = plug->info();
+    LuaPlugin plug(dllpath, 0, false);
+    info = plug.info();
   } catch(std::exception &e) {
     AfxMessageBox(e.what());
     throw e;

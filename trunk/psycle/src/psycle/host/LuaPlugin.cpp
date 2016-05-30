@@ -27,7 +27,7 @@ namespace psycle { namespace host {
 
   int LuaPlugin::idex_ = 1024;
 
-  LuaPlugin::LuaPlugin(const std::string& dllpath, int index, bool full)
+   LuaPlugin::LuaPlugin(const std::string& dllpath, int index, bool full)
     : proxy_(this, dllpath),
       curr_prg_(0),
       //custom_menubar(0),
@@ -44,16 +44,22 @@ namespace psycle { namespace host {
       trackNote[i].midichan = 0;
     }   
     // script inits
-    proxy().Run();
-    dll_path_ = dllpath;
-    PluginInfo info = proxy().info();
-    _mode = info.mode;
-    usenoteon_ = info.flags;
-    strncpy(_editName, info.name.c_str(),sizeof(_editName)-1);    
-    if (full) {
-      proxy().Init();
-      StartTimer();
-    }    
+    try {
+      proxy().Run();
+      dll_path_ = dllpath;
+      PluginInfo info = proxy().info();
+      _mode = info.mode;
+      usenoteon_ = info.flags;
+      strncpy(_editName, info.name.c_str(),sizeof(_editName)-1);    
+      if (full) {
+        proxy().Init();
+        StartTimer();
+      }    
+    } catch (...) {
+      StopTimer();
+      proxy().Free();
+      throw;
+    }
   }
 
   LuaPlugin::~LuaPlugin() {    

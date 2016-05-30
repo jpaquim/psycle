@@ -143,7 +143,7 @@ namespace psycle { namespace host {
 			else
 			{
 				global_.machineload().LoadPluginInfo(false);
-		    pFrame->m_wndView.LoadLuaExtensions();
+		        pFrame->m_wndView.LoadLuaExtensions();
 				// Show splash screen
 				if (global_.conf()._showAboutAtStart)
 				{
@@ -151,7 +151,7 @@ namespace psycle { namespace host {
 				}
 				pFrame->CheckForAutosave();        
 			}
-            
+			          
 			return TRUE;
 		}
 

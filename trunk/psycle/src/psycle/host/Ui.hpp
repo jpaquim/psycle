@@ -656,7 +656,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual bool auto_size_height() const;
   virtual void SetClip(const ui::Rect& rect) {}
   virtual bool has_clip() const { return false; }
-  const Region& clip() const { return *dummy_region_.get(); }
+  const Region& clip() const;
   virtual void RemoveClip() {}
   
   virtual void Draw(Graphics* g, Region& draw_region) {}
@@ -722,8 +722,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   Window::WeakPtr parent_;  
   static Container dummy_list_;  
   std::string debug_text_;
-  boost::shared_ptr<Aligner> dummy_aligner_;
-  static boost::shared_ptr<ui::Region> dummy_region_;
+  boost::shared_ptr<Aligner> dummy_aligner_;  
   bool auto_size_width_, auto_size_height_;
   boost::weak_ptr<Ornament> ornament_;  
   bool visible_, pointer_events_;  
