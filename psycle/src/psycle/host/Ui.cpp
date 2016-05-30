@@ -10,7 +10,6 @@ namespace psycle {
 namespace host {
 namespace ui {
 
-boost::shared_ptr<ui::Region> Window::dummy_region_(ui::Systems::instance().CreateRegion());
 Window::Container Window::dummy_list_;
 
 int MenuContainer::id_counter = 0;
@@ -806,6 +805,11 @@ void Window::DrawBackground(Graphics* g, Region& draw_region) {
       ornament().lock()->Draw(shared_this, g, draw_region);
     }
   }
+}
+
+const Region& Window::clip() const {
+  static std::auto_ptr<ui::Region> dummy(ui::Systems::instance().CreateRegion());
+  return *dummy.get();
 }
 
 template<class T, class T1>

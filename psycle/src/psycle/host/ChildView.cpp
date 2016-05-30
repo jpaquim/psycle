@@ -2467,46 +2467,49 @@ namespace psycle { namespace host {
 		}
     
     void CChildView::LoadLuaExtensions() {
-      CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);
-      PluginCatcher* plug_catcher = 
-       static_cast<PluginCatcher*>(&Global::machineload()); 
+      PluginCatcher* plug_catcher = dynamic_cast<PluginCatcher*>(&Global::machineload()); 
+	  assert(plug_catcher);
       PluginInfoList list = plug_catcher->GetLuaExtensions();
-      PluginInfoList::iterator it = list.begin();
-      int pos = 8; bool has_ext = false;
-      for (; it != list.end(); ++it) {
-        PluginInfo* info = *it;     
-        // if (info->name != "Plugineditor") continue;
-        int id = ID_DYNAMIC_MENUS_START+ui::MenuContainer::id_counter++;   
-        try {
-          LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
-          mac->Init();
-          ui::canvas::Canvas* user_view = 0;
-          try {
-            user_view = mac->canvas().lock().get();
-          } catch (std::exception&) {            
-          } 
-          if (user_view) {
-            view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());            
-          } else {            
-            view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
-          }
-          ///ui::MenuItem::id_counter++;
-          LuaUiExtentions::instance()->Add(mac); 
-          menuItemIdMap[id] = mac.get();
-          // if (user_view) ui::MenuItem::id_counter++;          
-          has_ext = true;
-          mac->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, this,  _1));
-        } catch (std::exception& e) {
-          AfxMessageBox(e.what());
-          // LuaHost already displayed an error message
-        }                
-      } 
-      if (has_ext) {
-        view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
-        int id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
-        view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
-        menuItemIdMap[id] = NULL;
-      }
+	  if (list.size() > 0) {
+        CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);      
+	    PluginInfoList list = plug_catcher->GetLuaExtensions();
+	    PluginInfoList::iterator it = list.begin();
+	    int pos = 8; bool has_ext = false;
+	    for (; it != list.end(); ++it) {
+		  PluginInfo* info = *it;     
+		  // if (info->name != "Plugineditor") continue;
+	      int id = ID_DYNAMIC_MENUS_START+ui::MenuContainer::id_counter++;   
+		  try {
+			LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
+			mac->Init();
+			ui::canvas::Canvas* user_view = 0;
+			try {
+			  user_view = mac->canvas().lock().get();
+			} catch (std::exception&) {            
+		    } 
+		    if (user_view) {
+			  view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());            
+		    } else {            
+			  view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
+		    }
+		    ///ui::MenuItem::id_counter++;
+		    LuaUiExtentions::instance()->Add(mac); 
+		    menuItemIdMap[id] = mac.get();
+		    // if (user_view) ui::MenuItem::id_counter++;          
+		    has_ext = true;
+		    mac->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, this,  _1));
+		  } catch (std::exception& e) {
+		    AfxMessageBox(e.what());
+		    // LuaHost already displayed an error message
+		  }                
+	    } 
+	    if (has_ext) {
+		  view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
+		  int id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
+		  view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
+		  menuItemIdMap[id] = NULL;
+	    }
+	  }
     }
 
     void CChildView::OnPluginCanvasChanged(LuaPlugin& plugin) {

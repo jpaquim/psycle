@@ -9,8 +9,8 @@ machine = require("psycle.machine"):new()
 
 local array = require("psycle.array")
 local dspmath = require("psycle.dsp.math")
-local canvas = require("psycle.ui.canvas")
-local rect = require("psycle.ui.canvas.rect")
+--local canvas = require("psycle.ui.canvas")
+--local rect = require("psycle.ui.canvas.rect")
 
 
 local arps = {}
@@ -67,6 +67,11 @@ function machine:init(samplerate)
   voice.samplerate = samplerate        
   filter = require("psycle.dsp.filter")
   filtercurr = filter:new(filter.LOWPASS)
+  
+  local f1 = filter:new(filter.LOWPASS)
+  f1 = nil
+  collectgarbage()
+  
   -- setup voice independent parameters
   p = require("orderedtable"):new()
   p.mlb = param:newlabel("Master")

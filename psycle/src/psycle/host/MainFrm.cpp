@@ -326,9 +326,7 @@ namespace psycle { namespace host {
 			m_wndView.InitTimer();
 		//	m_wndView.Repaint();
 			m_wndView.SetFocus();
-		//	m_wndView.EnableSound();
-      defmainmenuitemcount = GetMenu()->GetMenuItemCount();
-          
+		//	m_wndView.EnableSound();			
 			return 0;
 		}
 		BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
@@ -443,6 +441,7 @@ namespace psycle { namespace host {
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
 			DragAcceptFiles(false);
+			m_tbImagelist.DeleteImageList();
 			CFrameWnd::OnDestroy();
 		}
 
