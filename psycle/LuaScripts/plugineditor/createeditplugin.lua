@@ -28,6 +28,7 @@ local pic = require("psycle.ui.canvas.pic")
 local image = require("psycle.ui.image")
 local listview = require("psycle.ui.canvas.listview")
 local node = require("psycle.node")
+local templateparser = require("templateparser")
 
 local createeditplugin = group:new()
 
@@ -92,7 +93,7 @@ function createeditplugin:initpluginlist()
                             :setbackgroundcolor(0x528A68)
                             :settextcolor(0xFFFF00)
   local that = self
-  function self.pluginlist:onclick(node)
+  function self.pluginlist:onchange(node)
     local dir = that:machinepath(node.info)        
     that:hide()        
     that.doopen:emit(dir, node.info:name(), node.info)  
@@ -101,25 +102,36 @@ function createeditplugin:initpluginlist()
 end
 
 function createeditplugin:initcreateoptions()  
-  self.createoptions = group:new(self):setautosize(true, true):setalign(item.ALTOP):hide()
-  
-  --self.pic1 = pic:new(self.createoptions):setalign(item.ALTOP):setautosize(false, false):setpos(0, 0, 200, 140)
-  --local picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
-  --self.img = image:new():load(picdir.."generator.png")
-  --self.pic1:setimage(self.img)
-  
-  self.machmode = checkbox:new(self.createoptions):settext("Is Generator"):setalign(item.ALTOP)      
-  local btn = button:new(self.createoptions):settext("Create"):setalign(item.ALTOP)  
-  local that = self
-  function btn:onclick() that:createplugin() end  
+  self.createoptions = group:new(self):setautosize(true, true):setalign(item.ALTOP):hide()  
+  self.templatelist = listview:new(self.createoptions):setalign(item.ALTOP):setautosize(false, false):setpos(0, 0, 200, 140)
+  self.listnode = node:new()  
+  local filetree = filehelper.filetree(cfg:luapath().."\\plugineditor\\templates")    
+  if filetree then        
+    for element in node_iter(filetree).next do            
+      if element.extension == ".lu$" then          
+        local str = templateparser.evaluate(element.path..element.filename)     
+        if str == "" then            
+        else
+          local node = node:new():settext(str)
+          node.path = element.path..element.filename
+          self.listnode:add(node)
+        end
+      end  
+    end
+  end
+  self.templatelist:setrootnode(self.listnode)
+  local that = self    
+  function self.templatelist:onclick(node)
+    that:createplugin(node.path)
+  end  
 end
 
-function createeditplugin:createplugin()  
+function createeditplugin:createplugin(templatepath)  
   if not filehelper.isdirectory(self.nameedit:text()) then
     self:hide()
     self.createoptions:hide()
     self.pluginlist:show()    
-    self.docreate:emit(self.nameedit:text())    
+    self.docreate:emit(self.nameedit:text(), templatepath)    
   end 
 end
 

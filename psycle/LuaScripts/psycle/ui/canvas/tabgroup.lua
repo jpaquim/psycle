@@ -14,6 +14,7 @@ local config = require("psycle.config")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local toolicon = require("psycle.ui.canvas.toolicon")
 local frame = require("psycle.ui.canvas.frame")
+local signal = require("psycle.signal")
 
 local tabgroup = group:new()
 
@@ -56,6 +57,8 @@ end
 
 function tabgroup:init()
   self.isoldflsprevented_ = {}
+  self.dopageclose = signal:new()
+  self.hasclosebutton_ = true
   --self:addstyle(0x02000000)  
   self:setautosize(false, false)
   self.hh = 20  
@@ -173,6 +176,16 @@ function tabgroup:setactivepage(page)
   end
 end
 
+function tabgroup:enableclosebutton()
+  self.hasclosebutton_ = true
+  return self
+end
+
+function tabgroup:disableclosebutton()
+  self.hasclosebutton_ = false
+  return self
+end
+
 function tabgroup:removeall()
   self.activepage_ = nil
   self.tabs:removeall()
@@ -180,7 +193,17 @@ function tabgroup:removeall()
   self:updatealign()
 end
 
-function tabgroup:removepage(header)
+function tabgroup:removepage(page)  
+  local tabs = self.tabs:items()  
+  for i=1, #tabs do
+    if tabs[i].page == page then
+      self:removepagebyheader(tabs[i])
+      break;
+    end
+  end  
+end
+
+function tabgroup:removepagebyheader(header)
   self:saveflsstate():preventfls()
   local pages = self.children:items()
   local idx = self.children:itemindex(header.page)  
@@ -198,23 +221,26 @@ end
 
 function tabgroup:createheader(page, label)
   local header = group:new(self.tabs):setautosize(true, true)  
-  header:setalign(window.ALLEFT)--:setmargin(0, 0, 1, 0)
+  header:setalign(window.ALLEFT):setmargin(0, 0, 5, 0)
   header.page = page    
   header.text = text:new(header):setdebugtext("text"):settext(label):setfont({name="Arial", height = "12"})
   header.text:setalign(window.ALLEFT)
-  header.close = text:new(header)    
-                     :setdebugtext("close")     
-                     :setcolor(tabgroup.skin.colors.TITLEFONT) 
-                     :settext("x")                                       
-  header.close:setalign(window.ALLEFT)--:setmargin(4, 0, 4, 0)
   local that = self
-  function header.close:onmousedown()  
-    that:removepage(self:parent())    
+  if self.hasclosebutton_ then
+    header.close = text:new(header)    
+                       :setdebugtext("close")     
+                       :setcolor(tabgroup.skin.colors.TITLEFONT) 
+                       :settext("x")                                                            
+    header.close:setalign(window.ALLEFT):setmargin(4, 0, 0, 0)    
+    function header.close:onmousedown()
+      ev = {}
+      ev.page = header.page      
+      that.dopageclose:emit(ev)           
+      that:removepagebyheader(self:parent())
+    end
   end
-  
   function header:setskinhighlight()        
-    self:setornament(ornamentfactory:createboundfill(0x528A68))
-    --self.text:setcolor(0xB0C8B1) 
+    self:setornament(ornamentfactory:createboundfill(0x528A68))    
     self.text:setcolor(0xFFFF00) 
   end
   function header:setskinnormal()    

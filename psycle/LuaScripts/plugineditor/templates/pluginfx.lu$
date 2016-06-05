@@ -1,0 +1,25 @@
+-- $(pluginname).lua
+
+@ return "FX"
+
+machine = require("psycle.machine"):new()
+
+-- add your requires here
+
+function machine:info()
+  return {
+    vendor = "$(vendor)",
+    name = "$(pluginname)",
+    mode = machine.FX,
+    version = 0,
+    api=0
+  }
+end
+
+function machine:init()  
+end
+
+function machine:work(num)  
+end
+
+return machine

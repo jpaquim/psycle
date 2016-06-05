@@ -34,11 +34,16 @@ end
 function search:init() 
   self:setautosize(false, true)    
   --self:setmargin(1, 1, 1, 1) -- :setpadding(10, 5, 10, 5)
-  self.dosearch = signal:new()   
-  closebutton.new(self)
+  self.dosearch = signal:new()
+  self.dohide = signal:new()
+  local closebtn = closebutton.new(self)
+  closebtn.dohide:connect(search.onclosebutton, self)
   self:createeditgroup(self)  
 --  self:createreplacegroup(self)  
  self:setornament(ornamentfactory:createfill(0x528A68))   
+  
+ self.lastpage = {}    
+ setmetatable(self.lastpage, {__mode ="kv"}) 
 end
 
 function search:createeditgroup(parent)      
@@ -80,13 +85,17 @@ end
 
 function search:initeditevents() 
   local that = self
-  function self.edit:onkeydown(ev)    
-    if ev:keycode() == 13 then
-      that.dosearch:emit(self:text(), 
+  function self.edit:onkeydown(ev)         
+    if ev:keycode() == ev.RETURN then      
+      that.dosearch:emit(that.edit:text(), 
                          search.DOWN, 
                          that.casesensitive:check(),
                          that.wholeword:check(),
                          that.useregexp:check())
+      ev:preventdefault()
+    elseif ev:keycode() == ev.ESCAPE then
+      that:hide():parent():updatealign()
+      that.dohide:emit()
     end
   end  
   return self
@@ -104,7 +113,9 @@ function search:createreplacefield(parent)
 end
 
 function search:createoptions(parent)
-  self.casesensitive = checkbox:new(parent):settext("match case"):setalign(item.ALLEFT)
+  self.casesensitive = checkbox:new(parent)
+  self.casesensitive.published.settext(self.casesensitive, "match case")
+  self.casesensitive:setalign(item.ALLEFT)
   self.wholeword = checkbox:new(parent):settext("match whole words only"):setalign(item.ALLEFT)
   self.useregexp = checkbox:new(parent):settext("use regexp"):setalign(item.ALLEFT)
   return self
@@ -112,6 +123,10 @@ end
 
 function search:onfocus()  
   self.edit:setfocus()
+end
+
+function search:onclosebutton()
+  self.dohide:emit()
 end
 
 return search

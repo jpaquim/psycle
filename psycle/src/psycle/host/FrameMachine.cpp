@@ -12,6 +12,7 @@
 #include "ladspamachine.h"
 #include "PresetsDlg.hpp"
 #include "ParamList.hpp"
+#include "LuaPlugin.hpp"
 #include "Canvas.hpp"
 #include "MfcUi.hpp"
 
@@ -193,10 +194,7 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnClose() 
-		{
-      /*if (custom_menubar) {        
-        custom_menubar->remove(GetMenu(), 2);        
-      }*/
+		{      
 			KillTimer(ID_TIMER_PARAM_REFRESH);
 			CFrameWnd::OnClose();
 		}
@@ -618,21 +616,23 @@ namespace psycle { namespace host {
 		   pCmdUI->Enable(_machine->_type == MACH_PLUGIN or _machine->_type == MACH_LUA);			
 		}
 
+    void CFrameMachine::OnReload() {
+      pView->OnReload(_machine);
+      boost::weak_ptr<ui::MenuContainer> menu_bar = dynamic_cast<LuaPlugin*>(_machine)->proxy().menu_bar();
+      if (!menu_bar.expired()) {
+        ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+        menubar_imp->set_menu_window(this, menu_bar.lock()->root_node().lock());
+        menu_bar.lock()->Invalidate();
+      }       
+      ResizeWindow(0);
+      pView->Invalidate(false);
+    }
+
 		void CFrameMachine::OnMachineReloadScript()
 		{
 			if (_machine->_type == MACH_LUA)
 			{                
-				_machine->reload();
-         pView->OnReload(_machine);
-        boost::weak_ptr<ui::MenuContainer> menu_bar = dynamic_cast<LuaPlugin*>(_machine)->proxy().menu_bar();
-        if (!menu_bar.expired()) {
-          ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
-          menubar_imp->set_menu_window(this, menu_bar.lock()->root_node().lock());
-          menu_bar.lock()->Invalidate();
-        }
-       
-        ResizeWindow(0);
-        pView->Invalidate(false);
+				_machine->reload();        
 			}
 		}
 		void CFrameMachine::OnUpdateMachineReloadScript(CCmdUI *pCmdUI)

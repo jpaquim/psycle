@@ -36,6 +36,7 @@
 #include <universalis/os/terminal.hpp>
 #include "Scintilla.h"
 #include "LuaGui.hpp"
+#include "LuaHost.hpp"
 
 namespace psycle { namespace host {
 

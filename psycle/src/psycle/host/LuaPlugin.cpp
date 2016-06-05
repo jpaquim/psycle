@@ -6,6 +6,8 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include <psycle/host/LuaPlugin.hpp>
+#include "MainFrm.hpp"
+#include "FrameMachine.hpp"
 
 #include <psycle/host/Global.hpp>
 #include <psycle/host/Configuration.hpp>
@@ -79,6 +81,9 @@ namespace psycle { namespace host {
     try {
       StopTimer();
       proxy().Reload();
+      if (((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]) {
+        ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]->OnReload();
+      }
       StartTimer();
     } catch(std::exception&) {
     }

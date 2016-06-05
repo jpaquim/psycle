@@ -13,7 +13,13 @@ namespace canvas {
 class Rect : public Window {
  public:
   static std::string type() { return "canvasrect"; }  
-  Rect() : Window() { set_auto_size(false, false); }            
+  Rect() : Window(), fill_color_(0) { set_auto_size(false, false); }
+
+  void SetColor(ARGB color) { fill_color_ = color; FLS(); }
+
+  void Draw(Graphics* g, Region& draw_region);
+ private:
+   ARGB fill_color_;
 };
 
 class Pic : public Window {

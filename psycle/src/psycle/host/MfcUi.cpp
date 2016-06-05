@@ -119,24 +119,32 @@ END_MESSAGE_MAP()
 
 template<class T, class I>
 BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
-  if (pMsg->message==WM_KEYDOWN ) {
-    CWnd* hwndTest = GetFocus();
-    if (hwndTest) {            
-      UINT nFlags = 0;
-      UINT flags = Win32KeyFlags(nFlags);      
-      KeyEvent ev(pMsg->wParam, flags);
-      OnDevKeyDown(ev);
-      return ev.is_default_prevented();      
+  if (pMsg->message==WM_KEYDOWN ) {        
+    UINT nFlags = 0;
+    UINT flags = Win32KeyFlags(nFlags);      
+    KeyEvent ev(pMsg->wParam, flags);      
+    if (window()) {
+      window()->OnKeyDown(ev);
+      if (!ev.is_default_prevented()) {
+        pMsg->hwnd = GetSafeHwnd();
+        ::TranslateMessage(pMsg);          
+		    ::DispatchMessage(pMsg);        
+      }
+      return ev.is_propagation_stopped();
     }          
   } else
   if (pMsg->message == WM_KEYUP) {          
-    CWnd* hwndTest = GetFocus();
-    if (hwndTest) {
-      UINT nFlags = 0;
-      UINT flags = Win32KeyFlags(nFlags);
-      KeyEvent ev(pMsg->wParam, flags);
-      OnDevKeyUp(ev);
-      return ev.is_default_prevented();
+    UINT nFlags = 0;
+    UINT flags = Win32KeyFlags(nFlags);      
+    KeyEvent ev(pMsg->wParam, flags);      
+    if (window()) {
+      window()->OnKeyUp(ev);
+      if (!ev.is_default_prevented()) {
+        pMsg->hwnd = GetSafeHwnd();
+        ::TranslateMessage(pMsg);          
+		    ::DispatchMessage(pMsg);        
+      }
+      return ev.is_propagation_stopped();
     }
   }
   return CWnd::PreTranslateMessage(pMsg);
@@ -368,9 +376,7 @@ BEGIN_MESSAGE_MAP(WindowImp, CWnd)
   ON_WM_SETCURSOR()
   ON_WM_HSCROLL()
   ON_WM_VSCROLL()
-  ON_WM_SIZE()
-  ON_WM_KEYDOWN()
-  ON_WM_KEYUP()  
+  ON_WM_SIZE()  
 END_MESSAGE_MAP()
 
 
@@ -435,11 +441,45 @@ HTREEITEM TreeNodeImp::DevInsert(TreeViewImp* tree, const ui::Node& node, TreeNo
 BEGIN_MESSAGE_MAP(TreeViewImp, CTreeCtrl)  
   ON_WM_ERASEBKGND()
 	ON_WM_PAINT()  
-  ON_NOTIFY_REFLECT_EX(TVN_SELCHANGED, OnClick)
+  ON_NOTIFY_REFLECT_EX(TVN_SELCHANGED, OnChange)
   ON_NOTIFY_REFLECT_EX(TVN_BEGINLABELEDIT, OnBeginLabelEdit)
   ON_NOTIFY_REFLECT_EX(TVN_ENDLABELEDIT, OnEndLabelEdit)
-  ON_NOTIFY_REFLECT_EX(NM_RCLICK, OnRightClick)  
+  ON_NOTIFY_REFLECT_EX(NM_RCLICK, OnRightClick)
+  ON_NOTIFY_REFLECT_EX(NM_DBLCLK, OnDblClick)  
 END_MESSAGE_MAP()
+
+
+BOOL TreeViewImp::PreTranslateMessage(MSG* pMsg) {
+  if (pMsg->message==WM_KEYDOWN ) {        
+    UINT nFlags = 0;
+    UINT flags = Win32KeyFlags(nFlags);      
+    KeyEvent ev(pMsg->wParam, flags);      
+    if (window()) {
+      window()->OnKeyDown(ev);
+      if (!ev.is_default_prevented()) {
+        pMsg->hwnd = ::GetFocus();
+        ::TranslateMessage(pMsg);          
+		    ::DispatchMessage(pMsg);        
+      }
+      return ev.is_propagation_stopped();
+    }          
+  } else
+  if (pMsg->message == WM_KEYUP) {          
+    UINT nFlags = 0;
+    UINT flags = Win32KeyFlags(nFlags);      
+    KeyEvent ev(pMsg->wParam, flags);      
+    if (window()) {
+      window()->OnKeyUp(ev);
+      if (!ev.is_default_prevented()) {
+        pMsg->hwnd = ::GetFocus();
+        ::TranslateMessage(pMsg);          
+		    ::DispatchMessage(pMsg);        
+      }
+      return ev.is_propagation_stopped();
+    }
+  }
+  return CTreeCtrl::PreTranslateMessage(pMsg);
+}
 
 void TreeViewImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
   struct {
@@ -540,20 +580,44 @@ void TreeViewImp::OnNodeChanged(Node& node) {
   }
 }
 
-BOOL TreeViewImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {
+BOOL TreeViewImp::OnChange(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
-    tree_view()->OnClick(node->shared_from_this());
+    tree_view()->OnChange(node->shared_from_this());
   }
   return FALSE;
 }
 
 BOOL TreeViewImp::OnRightClick(NMHDR * pNotifyStruct, LRESULT * result) {
-  Node* node = find_selected_node();
-  if (node) {
-    tree_view()->OnRightClick(node->shared_from_this());
-  }
+  POINT pt;
+  ::GetCursorPos(&pt);
+  Node::Ptr node = dev_node_at(ui::Point(pt.x, pt.y));
+  ui::Event ev;
+  tree_view()->WorkOnContextPopup(ev, ui::Point(pt.x, pt.y), node);
+  tree_view()->OnRightClick(node);  
   return FALSE;
+}
+
+BOOL TreeViewImp::OnDblClick(NMHDR * pNotifyStruct, LRESULT * result) {
+  CPoint pt;
+  ::GetCursorPos(&pt);
+  ScreenToClient(&pt);
+  MapPointToRoot(pt);
+  MouseEvent ev(pt.x, pt.y, 1, 0);
+  OnDevDblclick(ev);
+  return FALSE;
+}
+
+ui::Node::Ptr TreeViewImp::dev_node_at(const ui::Point& pos) const {
+  CPoint p(pos.x(), pos.y());
+  ScreenToClient(&p);
+  HTREEITEM item = HitTest(p);  
+  if (item) {
+    std::map<HTREEITEM, boost::weak_ptr<ui::Node> >::const_iterator it;
+    it = htreeitem_node_map_.find(item);
+    return (it != htreeitem_node_map_.end()) ? it->second.lock() : nullpointer;
+  }
+  return nullpointer;
 }
 
 ui::Node* TreeViewImp::find_selected_node() {  
@@ -609,7 +673,7 @@ void TreeViewImp::DevHideButtons() {
 BEGIN_MESSAGE_MAP(ListViewImp, CListCtrl)
   ON_WM_ERASEBKGND()
 	ON_WM_PAINT()  
-  ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnClick)
+  ON_NOTIFY_REFLECT_EX(LVN_ITEMCHANGED, OnChange)
   ON_NOTIFY_REFLECT_EX(TVN_BEGINLABELEDIT, OnBeginLabelEdit)
   ON_NOTIFY_REFLECT_EX(TVN_ENDLABELEDIT, OnEndLabelEdit)
   ON_NOTIFY_REFLECT_EX(NM_RCLICK, OnRightClick)  
@@ -745,10 +809,10 @@ void ListViewImp::OnNodeChanged(Node& node) {
   }
 }
 
-BOOL ListViewImp::OnClick(NMHDR * pNotifyStruct, LRESULT * result) {   
+BOOL ListViewImp::OnChange(NMHDR * pNotifyStruct, LRESULT * result) {   
   Node* node = find_selected_node();
   if (node) {
-    list_view()->OnClick(node->shared_from_this());
+    list_view()->OnChange(node->shared_from_this());
   }
   return FALSE;
 }
@@ -855,6 +919,7 @@ ON_NOTIFY_REFLECT_EX(SCN_MARGINCLICK, OnFolder)
 END_MESSAGE_MAP()
 
 void ScintillaImp::dev_set_lexer(const Lexer& lexer) {
+  SetupLexerType();
   SetupHighlighting(lexer);
   SetupFolding(lexer);
 }
@@ -877,6 +942,7 @@ void ScintillaImp::SetupFolding(const Lexer& lexer) {
   SetFoldingBasics();
   SetFoldingColors(lexer);
   SetFoldingMarkers();
+  SetupLexerType();
 }
 
 void ScintillaImp::SetFoldingBasics() {
@@ -903,6 +969,10 @@ void ScintillaImp::SetFoldingMarkers() {
   f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID, SC_MARK_BOXMINUSCONNECTED);
   f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERSUB, SC_MARK_VLINE);  
   f(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERTAIL, SC_MARK_LCORNER);
+}
+
+void ScintillaImp::SetupLexerType() {
+  f(SCI_SETLEXER, SCLEX_LUA, 0);
 }
 
 BOOL ScintillaImp::OnFolder(NMHDR * nhmdr,LRESULT *) { 
@@ -1070,7 +1140,6 @@ MenuContainerImp* MenuContainerImp::MenuContainerImpById(int id) {
   return (it != menu_bar_id_map_.end()) ? it->second : 0;
 }
 
-
 // PopupMenuImp
 PopupMenuImp::PopupMenuImp() : popup_menu_(new CMenu()) {
   popup_menu_->CreatePopupMenu();
@@ -1082,7 +1151,6 @@ void PopupMenuImp::DevTrack(const ui::Point& pos) {
     TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_HORPOSANIMATION | TPM_VERPOSANIMATION,
     pos.x(), pos.y(), ::AfxGetMainWnd());
 }
-
 
 //MenuImp
 void MenuImp::CreateMenu(const std::string& text) {

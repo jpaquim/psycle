@@ -1416,6 +1416,7 @@ int ComboBox::item_index() const {
   if (imp()) {
     return imp() ? imp()->dev_item_index() : -1;
   }
+  return 0;
 }
 
 Edit::Edit() : Window(ui::ImpFactory::instance().CreateEditImp()) { 
@@ -1489,11 +1490,11 @@ int Scintilla::length() const  {
   return imp() ? imp()->dev_length() : 0;
 }
 
-int Scintilla::selectionstart()  { 
+int Scintilla::selectionstart() const { 
   return imp() ? imp()->dev_selectionstart() : 0;
 }
 
-int Scintilla::selectionend()  {
+int Scintilla::selectionend() const {
   return imp() ? imp()->dev_selectionend() : 0;
 }
 
@@ -1505,6 +1506,22 @@ void Scintilla::SetSel(int cpmin, int cpmax)  {
 
 bool Scintilla::has_selection() const {
   return imp() ? imp()->dev_has_selection() : false;
+}
+
+int Scintilla::column() const { 
+  return imp() ? imp()->dev_column() : 0;
+}
+
+int Scintilla::line() const {
+  return imp() ? imp()->dev_line() : 0; 
+}
+
+bool Scintilla::ovr_type() const {
+  return imp() ? imp()->dev_ovr_type() : false;
+}
+
+bool Scintilla::modified() const {
+  return imp() ? imp()->dev_modified() : false;
 }
 
 void Scintilla::set_find_match_case(bool on) {
@@ -1642,8 +1659,10 @@ const std::string& Scintilla::filename() const {
   return imp() ? imp()->dev_filename() : dummy_str_;
 }
 
-bool Scintilla::is_modified() const {
-  return imp() ? imp()->dev_is_modified() : false;
+void Scintilla::set_font(const FontInfo& font_info) {
+  if (imp()) {
+    imp()->dev_set_font(font_info);
+  }
 }
 
 GameController::GameController() : id_(-1) {

@@ -1,0 +1,18 @@
+-- $(modulename).lua
+
+local group = require("psycle.ui.canvas.group")
+
+local $(modulename) = group:new()
+
+function $(modulename):new(parent)
+  local m = group:new(parent)
+  setmetatable(m, self)
+  self.__index = self  
+  m:init()
+  return m
+end
+
+function $(modulename):init()
+end
+
+return $(modulename)

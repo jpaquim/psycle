@@ -37,7 +37,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
     CanvasParamView::CanvasParamView(CFrameMachine* frame, Machine* effect) :
-          CBaseParamView(frame), canvas_(0) {         
+          CBaseParamView(frame) {         
     }
 
     int CanvasParamView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -45,8 +45,7 @@ namespace psycle { namespace host {
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
 			{
 				return -1;
-			}        
-//      canvas_view_.reset(new ui::canvas::View(this, AFX_IDW_PANE_FIRST));      
+			}            
 			return 0;
 		}
 
@@ -65,13 +64,13 @@ namespace psycle { namespace host {
 
     void CanvasParamView::set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) {
       if (!canvas.expired()) {
-        ChangeCanvas(canvas.lock().get());
+        ChangeCanvas(canvas.lock());
       }
     }
 
     void CanvasParamView::WindowIdle() {       
-      if (canvas_) {
-        canvas_->Flush();
+      if (!canvas_.expired()) {
+        canvas_.lock()->Flush();
       }
       // Invalidate
     }
@@ -88,20 +87,21 @@ namespace psycle { namespace host {
       rect.left = 0;
       rect.right = 1000;
       rect.bottom = 1000;
-      if (canvas_) {
-        rect.right = canvas_->dim().width();  
-        rect.bottom = canvas_->dim().height();
+      if (!canvas_.expired()) {
+        rect.right = canvas_.lock()->dim().width();  
+        rect.bottom = canvas_.lock()->dim().height();
       }
       return true;
     }
 
     void CanvasParamView::OnReload(Machine* mac)
     {      
-      canvas_ = 0;
       LuaPlugin* lp = (LuaPlugin*) (mac);
       ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired()) {
-        ChangeCanvas(canvas.lock().get());       
+        ChangeCanvas(canvas.lock());
+      } else {
+        ChangeCanvas(nullpointer);
       }
     }
 
@@ -110,18 +110,19 @@ namespace psycle { namespace host {
       LuaPlugin* lp = (LuaPlugin*) (mac);
       ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired()) {
-        ChangeCanvas(0);        
+        ChangeCanvas(nullpointer);        
       }
     }
 
-    void CanvasParamView::ChangeCanvas(ui::canvas::Canvas* canvas) {      
-      if (canvas_) {
-        canvas_->set_parent(0);        
+    void CanvasParamView::ChangeCanvas(const ui::canvas::Canvas::Ptr& canvas) {      
+      if (!canvas_.expired()) {
+        canvas_.lock()->set_parent(0);        
       }
       if (canvas) {
         ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
         imp->SetParent(this);       
         canvas->Show();
+        canvas->UpdateAlign();
         SetActiveWindow();
         canvas_ = canvas;
       }

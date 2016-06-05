@@ -8,8 +8,7 @@
 -- require('mobdebug').start()
 
 machine = require("psycle.machine"):new()
-
--- local codegen = require("codegen")
+  
 local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
 local centertoscreen = require("psycle.ui.canvas.centertoscreen")
@@ -24,8 +23,8 @@ local canvas = require("psycle.ui.canvas")
 local item = require("psycle.ui.canvas.item")
 local cfg = require("psycle.config"):new("PatternVisual")
 local project = require("project")
-
--- plugin info
+local templateparser = require("templateparser")
+  
 function machine:info()
   return { 
     vendor  = "psycle",
@@ -142,9 +141,31 @@ function machine:initmenu()
           that.frame = nil
         end
         that.frame:show(centertoscreen:new())        
+      elseif node == that.menus.newmodule then
+        local modulename = "newmodule"
+        local env = {}
+        env.modulename = modulename
+        templateparser.work(cfg:luapath().."\\plugineditor\\templates\\module.lu$",
+                            cfg:luapath().."\\"..modulename..".lua",
+                            env)  
+        that.maincanvas:openfromfile(cfg:luapath().."\\"..modulename..".lua")    
+        that.maincanvas:updatealign():enablefls():invalidate()
+      elseif node == that.menus.newgroup then
+        local modulename = "newgroup"
+        local env = {}
+        env.modulename = modulename
+        templateparser.work(cfg:luapath().."\\plugineditor\\templates\\group.lu$",
+                            cfg:luapath().."\\"..modulename..".lua",
+                            env)  
+        that.maincanvas:openfromfile(cfg:luapath().."\\"..modulename..".lua")    
+        that.maincanvas:updatealign():enablefls():invalidate()
       end
    end              
    self.menubar:update()
+end
+
+function machine:ontimer()
+  self.maincanvas:onidle()
 end
 
 return machine

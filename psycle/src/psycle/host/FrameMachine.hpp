@@ -4,7 +4,6 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "PresetIO.hpp"
-#include "LuaPlugin.hpp"
 
 namespace psycle {
 namespace host {
@@ -37,6 +36,7 @@ namespace host {
 			virtual void ResizeWindow(CRect* pRect);
 			virtual void GetWindowSize(CRect &rcFrame, CRect &rcClient, CRect *pRect = NULL);
 			virtual void PostOpenWnd();
+      void OnReload();
 		protected:
 			virtual CBaseParamView* CreateView();
 
@@ -70,9 +70,8 @@ namespace host {
 			int userSelected;
 			int refreshcounter;
 			int lastprogram;
-			int lastnumprogrs;			
-     // ui::MenuBar* custom_menubar;
-     // ui::mfc::Menu barmenu;
+			int lastnumprogrs;
+
 		protected:
 			DECLARE_MESSAGE_MAP()
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);      

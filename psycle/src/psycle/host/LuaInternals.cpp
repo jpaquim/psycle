@@ -1846,6 +1846,8 @@ int LuaFileHelper::open(lua_State *L) {
     {"mkdir", mkdir},
     {"isdirectory", isdirectory},
     {"filetree", filetree},
+    {"remove", remove},
+    {"rename", rename},
     {NULL, NULL}
   };
   luaL_newlib(L, funcs);
@@ -1866,6 +1868,30 @@ int LuaFileHelper::isdirectory(lua_State* L) {
   boost::filesystem::path dir(full_path.c_str());
 	lua_pushboolean(L, (boost::filesystem::is_directory(dir)));
   return 1;
+}
+
+int LuaFileHelper::remove(lua_State* L) {  
+  std::string pathstr = luaL_checkstring(L, 1);
+  boost::filesystem::path path(pathstr.c_str());
+  try {
+  boost::filesystem::remove(path);
+  } catch (std::exception& e) {
+    luaL_error(L, e.what());
+  }
+  return LuaHelper::chaining(L);
+}
+
+int LuaFileHelper::rename(lua_State* L) {  
+  std::string path_old_str = luaL_checkstring(L, 1);
+  boost::filesystem::path path_old(path_old_str.c_str());
+  std::string path_new_str = luaL_checkstring(L, 2);
+  boost::filesystem::path path_new(path_new_str.c_str());
+  try {
+    boost::filesystem::rename(path_old, path_new);
+  } catch (std::exception& e) {
+    luaL_error(L, e.what());
+  }
+  return LuaHelper::chaining(L);
 }
 
 int LuaFileHelper::filetree(lua_State* L) {
@@ -1889,7 +1915,7 @@ int LuaFileHelper::filetree(lua_State* L) {
         lua_pushvalue(L, -3);
         LuaHelper::setfield(L, "isdirectory", true);
         LuaHelper::setfield(L, "filename", "");
-        LuaHelper::setfield(L, "extension", "");
+        LuaHelper::setfield(L, "extension", "");        
         boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, -1, LuaNodeBind::meta);
         node->set_text(curr_path.filename().string());        
         LuaHelper::setfield(L, "path", curr_path.string()+"\\");
@@ -1904,7 +1930,7 @@ int LuaFileHelper::filetree(lua_State* L) {
           lua_pop(L, 1);
         }        
         lua_getfield(L, -1, "add");
-        lua_pushvalue(L, -2);
+        lua_pushvalue(L, -2);        
         LuaHelper::new_lua_module(L, "psycle.node");
         LuaHelper::setfield(L, "isdirectory", false);
         LuaHelper::setfield(L, "filename", curr_path.filename().string());
@@ -1924,7 +1950,7 @@ int LuaFileHelper::filetree(lua_State* L) {
     while ((level--) > 0) {
       lua_pop(L, 1);
     }
-  } catch (std::exception& e) {
+  } catch (std::exception&) {
     lua_pushnil(L);
   }  
   return 1;

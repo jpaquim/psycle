@@ -217,10 +217,17 @@ void LuaProxy::Reload() {
   } CATCH_WRAP_AND_RETHROW(host())
 }
 
-int LuaProxy::message(lua_State* L) {    
+int LuaProxy::alert(lua_State* L) {    
   const char* msg = luaL_checkstring(L, 1);    
   AfxMessageBox(msg);
   return 0;
+}
+
+int LuaProxy::confirm(lua_State* L) {    
+  const char* msg = luaL_checkstring(L, 1);    
+  int result = AfxMessageBox(msg, MB_OK | MB_OKCANCEL);
+  lua_pushboolean(L, result == IDOK);  
+  return 1;
 }
 
 int LuaProxy::terminal_output(lua_State* L) {
@@ -306,7 +313,8 @@ void LuaProxy::export_c_funcs() {
   static const luaL_Reg methods[] = {
     {"invokelater", invoke_later},
     {"output", terminal_output },
-    {"alert", message },
+    {"alert", alert},
+    {"confirm", confirm},
     {"setmachine", set_machine},
     {"setmenubar", set_menubar},
     {"filedialog", call_filedialog},
@@ -886,7 +894,6 @@ lua_State* LuaGlobal::load_script(const std::string& dllpath) {
 
 PluginInfo LuaGlobal::LoadInfo(const std::string& dllpath) {
   PluginInfo info;
-  lua_State* L = 0;
   try {
     LuaPlugin plug(dllpath, 0, false);
     info = plug.info();
@@ -922,32 +929,6 @@ std::vector<LuaPlugin*> LuaGlobal::GetAllLuas() {
     plugs.push_back((*it).get());
   }
   return plugs;
-}
-
-bool LuaGlobal::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
-  bool res = true;
-  typedef std::vector<LuaPlugin*> LuaList;
-  LuaList plugs = GetAllLuas();
-  for (LuaList::iterator it = plugs.begin(); it != plugs.end(); ++it) {
-    res = (*it)->OnKeyDown(nChar, nRepCnt, nFlags);
-    if (!res) {
-      break;
-    }
-  }
-  return res;
-}  
-
-bool LuaGlobal::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
-  bool res = true;
-  typedef std::vector<LuaPlugin*> LuaList;
-  LuaList plugs = GetAllLuas();
-  for (LuaList::iterator it = plugs.begin(); it != plugs.end(); ++it) {
-    res = (*it)->OnKeyUp(nChar, nRepCnt, nFlags);
-    if (!res) {
-      break;
-    }
-  }
-  return res;
 }
 
 namespace luaerrhandler {

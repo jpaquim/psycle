@@ -107,7 +107,8 @@ private:
   void export_c_funcs();
 	// script callbacks
   static int set_parameter(lua_State* L);
-  static int message(lua_State* L);
+  static int alert(lua_State* L);
+  static int confirm(lua_State* L);
   static int invoke_later(lua_State* L);
   static int terminal_output(lua_State* L);
   static int call_filedialog(lua_State* L);
@@ -171,11 +172,7 @@ struct LuaGlobal {
       }
       return 0;
    }
-   static std::vector<LuaPlugin*> GetAllLuas();
-   static bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-   static bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-
-   
+   static std::vector<LuaPlugin*> GetAllLuas();   
 };
 
  
