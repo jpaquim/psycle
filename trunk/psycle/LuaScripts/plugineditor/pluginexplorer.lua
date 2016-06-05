@@ -16,6 +16,7 @@ local filehelper = require("psycle.file")
 local image = require("psycle.ui.image")
 local images = require("psycle.ui.images")
 local settings = require("settings")
+local popupmenu = require("psycle.ui.popupmenu")
 
 local pluginexplorer = tree:new()
 
@@ -59,7 +60,8 @@ function pluginexplorer:new(parent)
 end
 
 function pluginexplorer:init()
-  self.click = signal:new() 
+  self.click = signal:new()
+  self.onremove = signal:new()
   self:setpos(0, 0, 100, 0)
   self:showlines():showbuttons()
   self.text = image:new():load(settings.picdir.."gnome-mime-text.png")
@@ -68,6 +70,28 @@ function pluginexplorer:init()
   self.images = images:new()
   self.images:add(self.text):add(self.folder):add(self.textlua)   
   self:setimages(self.images)
+  self:initpopupmenu()
+end
+
+function pluginexplorer:initpopupmenu()  
+  self.popuprootnode = node:new()
+  local node1 = node:new():settext("remove")
+  self.popuprootnode:add(node1)
+  local node2 = node:new():settext("rename")
+  self.popuprootnode:add(node2)
+  self.popupmenu = popupmenu:new():setrootnode(self.popuprootnode)
+  self.popupmenu:update()    
+  local that = self
+  function self.popupmenu:onclick(node)       
+    if node:text() == "remove" then
+      if psycle.confirm("Do you want to delete "..that.changenode.filename.."irrevocable ?") then        
+        that.onremove:emit(that.changenode)
+      end
+    elseif node:text() == "rename" then
+      that:editnode(that.changenode)
+    end
+  end
+  self:setpopupmenu(self.popupmenu)
 end
 
 function pluginexplorer:dirLookup(directory)
@@ -102,8 +126,9 @@ function pluginexplorer:setfilepath(path)
   self:dirLookup(path) 
 end
 
-function pluginexplorer:onclick(node)
-  if not node.isdirectory then  
+function pluginexplorer:ondblclick(ev)    
+  local node = self:selected()
+  if node and not node.isdirectory then  
     local ev = { 
       sender = self, 
       path = node.path,
@@ -113,11 +138,20 @@ function pluginexplorer:onclick(node)
   end
 end
 
-function pluginexplorer:onrightclick(node)
-  psycle.alert("right click")
+function pluginexplorer:oncontextpopup(ev)
+   if ev.node and ev.node.isdirectory then
+     ev:preventdefault()     
+     self.changenode = nil
+   else
+     self.changenode = ev.node
+   end
 end
 
-function pluginexplorer:onedited(node, text)
+function pluginexplorer:onedited(node, text)  
+  psycle.output(node.path..node.filename)
+  psycle.output(node.path..text)
+  filehelper.rename(node.path..node.filename, node.path..text)
+  node.filename = text
   node:settext(text)
 end
 

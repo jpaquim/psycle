@@ -517,10 +517,10 @@ void CanvasItem<T>::OnKillFocus() {
 }
 
 // LuaTreeView
-void LuaTreeView::OnClick(const ui::Node::Ptr& node) {
+void LuaTreeView::OnChange(const ui::Node::Ptr& node) {
   try {
     LuaImport in(L, this, LuaGlobal::proxy(L));
-    if (in.open("onclick")) {
+    if (in.open("onchange")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
     } 
@@ -565,12 +565,31 @@ void LuaTreeView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
   }
 }
 
-
-// LuaListView
-void LuaListView::OnClick(const ui::Node::Ptr& node) {
+void LuaTreeView::OnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const ui::Node::Ptr& node) {
   try {
     LuaImport in(L, this, LuaGlobal::proxy(L));
-    if (in.open("onclick")) {
+    if (in.open("oncontextpopup")) {      
+      LuaHelper::requirenew<LuaEventBind>(L, "psycle.ui.canvas.event", &ev, true);
+      LuaHelper::setfield(L, "x", mouse_point.x());
+      LuaHelper::setfield(L, "y", mouse_point.y());
+      if (node.get()) {
+        LuaHelper::find_weakuserdata(L, node.get());
+      } else {
+        lua_pushnil(L);
+      }
+      lua_setfield(L, -2, "node");
+      in.pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
+// LuaListView
+void LuaListView::OnChange(const ui::Node::Ptr& node) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onchange")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
     } 
@@ -1319,9 +1338,11 @@ const char* LuaEventBind::meta = "psyeventbind";
 
 int LuaEventBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
-    {"new", create},    
+    {"new", create},
     {"preventdefault", preventdefault},
     {"isdefaultprevented", isdefaultprevented},
+    {"stoppropagation", stoppropagation},
+    {"ispropagationstopped", ispropagationstopped},    
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -1347,6 +1368,8 @@ int LuaKeyEventBind::open(lua_State *L) {
     {"ctrlkey", ctrlkey},
     {"preventdefault", preventdefault},
     {"isdefaultprevented", isdefaultprevented},
+    {"stoppropagation", stoppropagation},
+    {"ispropagationstopped", ispropagationstopped},
     {NULL, NULL}
   };  
   LuaHelper::open(L, meta, methods,  gc);
@@ -1354,11 +1377,10 @@ int LuaKeyEventBind::open(lua_State *L) {
 		"LBUTTON", "RBUTTON", "CANCEL", "MBUTTON", "XBUTTON1", "XBUTTON2",
     "UNDEFINED07", "BACK", "TAB", "RESERVED0A", "RESERVED11", "CLEAR",
     "RETURN", "UNDEFINED0E", "UNDEFINED0F", "SHIFT", "CONTROL", "ALT",
-    "MENU", "PAUSE", "CAPITAL", "KANA", "HANGUEL", "HANGUL", "UNDEFINED16",
-    "FINAL", "HANJA", "KANJI", "UNDEFINED1A", "ESCAPE", "CONVERT",
-    "NONCONVERT", "ACCEPT", "MODECHANGE", "SPACE", "PRIOR", "NEXT", "END",
-    "HOME", "LEFT", "UP", "RIGHT", "DOWN", "SELECT", "PRINT", "EXECUTE",
-    "SNAPSHOT", "INSERT", "DELETE", "HELP"
+    "PAUSE", "CAPITAL", "KANA", "HANGUL", "UNDEFINED16", "FINAL", "HANJA",
+    "UNDEFINED1A", "ESCAPE", "CONVERT", "NONCONVERT", "ACCEPT", "MODECHANGE",
+    "SPACE", "PRIOR", "NEXT", "END", "HOME", "LEFT", "UP", "RIGHT", "DOWN",
+    "SELECT", "PRINT", "EXECUTE", "SNAPSHOT", "INSERT", "DELETE", "HELP"
 	};
   {
     size_t size = sizeof(e)/sizeof(e[0]);    
@@ -1667,36 +1689,9 @@ int LuaGameControllersBind::controllers(lua_State* L) {
 // LuaScintilla
 std::string LuaLexerBind::meta = "psylexermeta";
 
-void LuaScintilla::OnFirstModified() {   
-  LuaImport in(L, this, LuaGlobal::proxy(L));
-  if (in.open("onfirstmodified")) {
-    in.pcall(0);            
-  }
-}
 
-template <class T>
-int LuaTextBind<T>::setfont(lua_State* L) {
-  boost::shared_ptr<LuaText> text = LuaHelper::check_sptr<LuaText>(L, 1, meta);    
-  luaL_checktype(L, 2, LUA_TTABLE);
-  lua_getfield(L, 2, "name");
-  lua_getfield(L, 2, "height");
-  const char *name = luaL_checkstring(L, -2);
-  int height = luaL_checknumber(L, -1);
-  std::auto_ptr<Font> font(ui::Systems::instance().CreateFont());
-  FontInfo font_info;
-  font_info.name = name;
-  font_info.height = height;
-  font->set_info(font_info);
-  text->set_font(*font);
-  return LuaHelper::chaining(L);
-}
 
-template <class T>
-int LuaTextBind<T>::setalignment(lua_State* L) {
-  boost::shared_ptr<LuaText> text = LuaHelper::check_sptr<LuaText>(L, 1, meta);      
-  text->set_alignment(static_cast<canvas::AlignStyle>(luaL_checkinteger(L, 2)));
-  return LuaHelper::chaining(L);
-}
+
 
 void LuaButton::OnClick() {
   try {

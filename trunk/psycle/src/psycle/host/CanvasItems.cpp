@@ -13,13 +13,13 @@ namespace host  {
 namespace ui {
 namespace canvas {
 
-  /*
+  
 void Rect::Draw(Graphics* g, Region& draw_region) {
-  // double z = acczoom();  
-  if (GetAlpha(fillcolor_) != 0xFF) {
-   g->SetColor(fillcolor_);
-   g->FillRect(0, 0, width_, height_);  
-  }
+ //if (GetAlpha(fill_color_) != 0xFF) {
+    g->SetColor(fill_color_);
+    g->FillRect(ui::Rect(ui::Point(), dim()));  
+ //}
+}
 /*    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);
   CPen pen;
   pen.CreatePen(PS_SOLID, 1, ToCOLORREF(strokecolor_));
@@ -156,8 +156,7 @@ bool Text::OnUpdateArea() {
 
 void Text::set_text(const std::string& text) {  
   STR();
-  text_ = text; 
-  Window::set_pos(pos().top_left());    
+  text_ = text;  
   FLS();          
 }
 

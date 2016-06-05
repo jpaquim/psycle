@@ -105,9 +105,7 @@ namespace psycle { namespace host {
     void lock() const { proxy_.lock(); }
     void unlock() const { proxy_.unlock(); }
 
-    void InvalidateMenuBar() {
-      // if (custom_menubar.get()) custom_menubar->setupdate(true);
-    }
+    void InvalidateMenuBar() {}
 
     void DoExit() { do_exit_ = true; }
     void DoReload() { do_reload_ = true; }
@@ -132,12 +130,7 @@ namespace psycle { namespace host {
     int curr_prg_;
 
   private:
-    virtual void OnTimerViewRefresh() {
-      /*if (custom_menubar.get()) {
-        if (custom_menubar->needsupdate()) {
-          custom_menubar->setupdate(false);
-        }
-      }*/      
+    virtual void OnTimerViewRefresh() {      
       proxy().OnTimer();
 
       if (do_exit_) {
@@ -147,8 +140,7 @@ namespace psycle { namespace host {
         do_reload_ = false;
         try {
           try {
-            proxy().Reload();
-//            custom_menubar.reset(0);
+            reload();
           } CATCH_WRAP_AND_RETHROW(*this);
         } catch (std::exception& ) {                
         }

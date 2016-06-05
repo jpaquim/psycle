@@ -25,7 +25,7 @@ function splitter:new(parent, orientation)
 end
   
 function splitter:init(orientation)
-  self:setornament(ornamentfactory:createfill(0x404040))  
+  self:setcolor(0x404040)
   self.orientation = orientation
   if orientation == splitter.HORZ then  
     self:setalign(item.ALBOTTOM):setpos(0, 0, 0, 5)
@@ -47,8 +47,12 @@ function splitter:onmousedown(e)
   self.itemclientpos = 0
   if self.orientation == self.HORZ then    
     self.itemclientpos = y + h
-  else
-    self.itemclientpos = x
+  else    
+    if self:align() == item.ALLEFT then
+      self.itemclientpos = x
+    else
+      self.itemclientpos = x + w
+    end
   end  
 end  
 
@@ -67,8 +71,12 @@ function splitter:onmousemove(e)
       if (self.dragpos ~= e.clientx) then      
         self.dragpos = e.clientx    
         local x, y, w, h = self.item:pos()
-        self:preventfls()
-        self.item:setpos(x, y, self.dragpos - self.itemclientpos, h)
+        self:preventfls()      
+        if self:align() == item.ALLEFT then        
+          self.item:setpos(x, y, self.dragpos - self.itemclientpos, h)        
+        else
+          self.item:setpos(x, y, self.itemclientpos - self.dragpos, h)
+        end
         self:enablefls()
         self:parent():updatealign()                       
       end 

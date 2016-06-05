@@ -21,7 +21,7 @@ class LuaCmdDefBind {
 
 class LuaActionListener : public ActionListener,  public LuaState {
  public:
-  LuaActionListener(lua_State* L) : ActionListener(), LuaState(L), mac_(0) { }
+  LuaActionListener(lua_State* L) : ActionListener(), LuaState(L), mac_(0) {}
   virtual void OnNotify(ActionType action);
   void setmac(LuaMachine* mac) { mac_ = mac; }
  private:  
@@ -67,6 +67,11 @@ class CanvasItem : public T, public LuaState {
        T::OnMouseDown(ev);
      }
    }
+   virtual void OnDblclick(ui::canvas::MouseEvent& ev) {
+     if (!SendMouseEvent(L, "ondblclick", ev, *this)) {
+       T::OnDblclick(ev);
+     }
+   }   
    virtual void OnMouseUp(ui::canvas::MouseEvent& ev) {
      if (!SendMouseEvent(L, "onmouseup", ev, *this)) {
        T::OnMouseUp(ev);
@@ -173,17 +178,18 @@ class LuaTreeView : public CanvasItem<ui::TreeView> {
  public:  
   LuaTreeView(lua_State* L) : CanvasItem<ui::TreeView>(L) {}
   
-  virtual void OnClick(const ui::Node::Ptr& node);
+  virtual void OnChange(const ui::Node::Ptr& node);
   virtual void OnRightClick(const ui::Node::Ptr& node);
   virtual void OnEditing(const ui::Node::Ptr& node, const std::string& text);
   virtual void OnEdited(const ui::Node::Ptr& node, const std::string& text);
+  virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point, const ui::Node::Ptr& node);
 };
 
 class LuaListView : public CanvasItem<ui::ListView> {
  public:  
   LuaListView(lua_State* L) : CanvasItem<ui::ListView>(L) {}
   
-  virtual void OnClick(const ui::Node::Ptr& node);
+  virtual void OnChange(const ui::Node::Ptr& node);
   virtual void OnRightClick(const ui::Node::Ptr& node);
   virtual void OnEditing(const ui::Node::Ptr& node, const std::string& text);
   virtual void OnEdited(const ui::Node::Ptr& node, const std::string& text);
@@ -196,6 +202,8 @@ struct LuaEventBind {
   static int gc(lua_State* L);
   static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::PreventDefault); }
   static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_default_prevented); }
+  static int stoppropagation(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::StopPropagation); }
+  static int ispropagationstopped(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_propagation_stopped); }
 };
 
 struct LuaKeyEventBind {
@@ -208,6 +216,8 @@ struct LuaKeyEventBind {
   static int ctrlkey(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::ctrlkey); }
   static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::PreventDefault); }
   static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_default_prevented); }
+  static int stoppropagation(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::StopPropagation); }
+  static int ispropagationstopped(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_propagation_stopped); }
 };
 
 struct LuaImageBind {
@@ -392,21 +402,21 @@ struct LuaGraphicsBind {
 
 class LuaMenuBar : public ui::MenuBar, public LuaState {
  public:  
-  LuaMenuBar(lua_State* state) : LuaState(state) {}  
+  LuaMenuBar(lua_State* state) : LuaState(state) {}
+
   virtual void OnMenuItemClick(boost::shared_ptr<ui::Node> node);
 };
 
 class LuaPopupMenu : public ui::PopupMenu, public LuaState {
  public:  
-  LuaPopupMenu(lua_State* state) : LuaState(state) {}  
+  LuaPopupMenu(lua_State* state) : LuaState(state) {}
+
   virtual void OnMenuItemClick(boost::shared_ptr<ui::Node> node);
 };
 
 class LuaScintilla : public CanvasItem<ui::Scintilla> {
  public:  
-  LuaScintilla(lua_State* L) : CanvasItem<ui::Scintilla>(L) {}
-  
-  virtual void OnFirstModified(); 
+  LuaScintilla(lua_State* L) : CanvasItem<ui::Scintilla>(L) {}    
 };
 
 class LuaFrameWnd : public CanvasItem<ui::Frame> {
@@ -856,12 +866,14 @@ class LuaRectBind : public LuaItemBind<T> {
   }
   static int setmethods(lua_State* L) {
     B::setmethods(L);
-    static const luaL_Reg methods[] = {    
+    static const luaL_Reg methods[] = {
+      {"setcolor", setcolor},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
   }  
+  static int setcolor(lua_State* L) { LUAEXPORT(L, &T::SetColor); }
 };
 
 template <class T = LuaLine>
@@ -956,8 +968,26 @@ class LuaTextBind : public LuaItemBind<T> {
   static int text(lua_State* L) { LUAEXPORT(L, &T::text); }
   static int setcolor(lua_State* L) { LUAEXPORT(L, &T::set_color); }
   static int color(lua_State* L) { LUAEXPORT(L, &T::color); } 
-  static int setfont(lua_State* L);
-  static int setalignment(lua_State* L);
+  static int setfont(lua_State* L) {    
+    boost::shared_ptr<LuaText> text = LuaHelper::check_sptr<LuaText>(L, 1, meta);    
+    luaL_checktype(L, 2, LUA_TTABLE);
+    lua_getfield(L, 2, "name");
+    lua_getfield(L, 2, "height");
+    const char *name = luaL_checkstring(L, -2);
+    int height = luaL_checknumber(L, -1);
+    std::auto_ptr<ui::Font> font(ui::Systems::instance().CreateFont());
+    ui::FontInfo font_info;
+    font_info.name = name;
+    font_info.height = height;
+    font->set_info(font_info);
+    text->set_font(*font);
+    return LuaHelper::chaining(L);
+  }  
+  static int setalignment(lua_State* L) {    
+    LuaHelper::check_sptr<LuaText>(L, 1, meta)
+      ->set_alignment(static_cast<ui::canvas::AlignStyle>(luaL_checkinteger(L, 2)));
+    return LuaHelper::chaining(L);
+  }
 };
 
 template <class T = LuaPic>
@@ -1115,6 +1145,7 @@ class LuaTreeViewBind : public LuaItemBind<T> {
       {"showbuttons", showbuttons},
       {"hidebuttons", hidebuttons},
       {"setimages", setimages},
+      {"setpopupmenu", setpopupmenu},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1176,6 +1207,13 @@ class LuaTreeViewBind : public LuaItemBind<T> {
     boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
     ui::Images::Ptr images = LuaHelper::check_sptr<ui::Images>(L, 2, LuaImagesBind::meta);
     tree_view->set_images(images);
+    return LuaHelper::chaining(L);
+  }
+
+  static int setpopupmenu(lua_State* L) {    
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
+    ui::PopupMenu::Ptr popup_menu = LuaHelper::check_sptr<ui::PopupMenu>(L, 2, LuaPopupMenuBind::meta);
+    tree_view->set_popup_menu(popup_menu);
     return LuaHelper::chaining(L);
   }
   
@@ -1595,6 +1633,11 @@ class LuaScintillaBind : public LuaItemBind<T> {
        {"setidentcolor", setidentcolor},
        {"styleclearall", styleclearall},
        {"setlexer", setlexer},
+       {"setfont", setfont},
+       {"line", line},
+       {"column", column},
+       {"ovrtype", ovrtype},
+       {"modified", modified},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1676,6 +1719,19 @@ class LuaScintillaBind : public LuaItemBind<T> {
     LuaHelper::bindud<T, ui::Lexer>(L, meta, LuaLexerBind::meta, &T::set_lexer); 
     return LuaHelper::chaining(L);
   }
+  static int setfont(lua_State *L) {
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
+    ui::FontInfo font_info;
+    font_info.name = luaL_checkstring(L, 2);
+    font_info.height = luaL_checkinteger(L, 3);
+    item->set_font(font_info);
+    return LuaHelper::chaining(L);
+  }
+
+  static int line(lua_State *L) { LUAEXPORT(L, &T::line); }
+  static int column(lua_State *L) { LUAEXPORT(L, &T::column); }
+  static int ovrtype(lua_State *L) { LUAEXPORT(L, &T::ovr_type); }
+  static int modified(lua_State *L) { LUAEXPORT(L, &T::modified); }
 };
 
 template <class T = LuaEdit>

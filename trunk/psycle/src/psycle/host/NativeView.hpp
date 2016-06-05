@@ -38,8 +38,8 @@ namespace host {
        void OnReload(Machine* mac);      
        virtual bool GetViewSize(CRect& rect);
      private:
-      void ChangeCanvas(ui::canvas::Canvas* canvas);     
-      ui::canvas::Canvas* canvas_;
+      void ChangeCanvas(const boost::shared_ptr<ui::canvas::Canvas>& canvas);     
+      boost::weak_ptr<ui::canvas::Canvas> canvas_;
     };
 
 		/// Native Knob-based UI for psycle plugins and non-GUI VSTs

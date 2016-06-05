@@ -77,6 +77,10 @@ function checkbox:check()
   return self.check_;
 end
 
+checkbox.published = {
+  settext = checkbox.settext
+}
+
 function checkbox:onclick(ischecked) end
 
 return checkbox

@@ -30,7 +30,7 @@ function maincanvas:init()
   end    
 end
 
-function maincanvas:initcontrollerdisplay(no, controller)
+function maincanvas:initcontrollerdisplay(no, controller)  
   local g = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(5, 5, 0, 0)  
   self:addtext(g, "Game Controller "..no)  
   self:addtext(g, "x-pos"):addfield(g, "0", "xpos")
@@ -56,12 +56,12 @@ function maincanvas:initcontrollerdisplay(no, controller)
 end
 
 function maincanvas:addtext(parent, str, field)
-  local text = text:new(parent):settext(str):setcolor(0x528A68):setalign(item.ALTOP)  
+  local text = text:new(parent):settext(str):setcolor(0x528A68):setalign(item.ALTOP) :setautosize(false, true) 
   return self
 end
 
 function maincanvas:addfield(parent, str, field)
-  local text = text:new(parent):settext(str):setcolor(0xFFFFFF):setalign(item.ALTOP)  
+  local text = text:new(parent):settext(str):setcolor(0xFFFFFF):setalign(item.ALTOP):setautosize(false, true) 
   parent[field] = text 
   return self
 end

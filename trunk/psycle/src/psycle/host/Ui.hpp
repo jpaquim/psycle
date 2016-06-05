@@ -315,7 +315,7 @@ struct FontInfo {
 
 class Event {
  public:  
-  Event() : work_parent_(false), default_prevented_(false) {}
+  Event() : work_parent_(false), default_prevented_(false), stop_propagation_(false) {}
   virtual ~Event() {}
 
   void WorkParent() { work_parent_ = true; }
@@ -323,10 +323,13 @@ class Event {
   bool is_work_parent() const { return work_parent_; }
   void PreventDefault() { default_prevented_ = true; }
   bool is_default_prevented() const { return default_prevented_; }  
+  void StopPropagation() { stop_propagation_ = true; }
+  bool is_propagation_stopped() const { return stop_propagation_; }
   
  private:    
   bool work_parent_;
   bool default_prevented_;
+  bool stop_propagation_;
 };
 
 class MouseEvent : public Event {
@@ -1056,7 +1059,11 @@ class MenuBar : public MenuContainer {
 
 class PopupMenu : public MenuContainer {
  public:
+  typedef boost::shared_ptr<PopupMenu> Ptr;
+  typedef boost::weak_ptr<PopupMenu> WeakPtr;
+
   PopupMenu();
+
   virtual void Track(const ui::Point& pos); 
 };      
 
@@ -1075,6 +1082,9 @@ class TreeView : public Window {
   boost::weak_ptr<Node> root_node() { return root_node_; }      
   void set_images(const Images::Ptr& images);
   boost::weak_ptr<Images> images() { return images_; }
+  void set_popup_menu(const PopupMenu::Ptr& popup_menu) { 
+    popup_menu_ = popup_menu;
+  }
   void Clear();      
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
@@ -1091,14 +1101,21 @@ class TreeView : public Window {
   virtual void select_node(const Node::Ptr& node);
   virtual boost::weak_ptr<Node> selected();
 
-  virtual void OnClick(const Node::Ptr& node) {}
+  virtual void OnChange(const Node::Ptr& node) {}
   virtual void OnRightClick(const Node::Ptr& node) {}
   virtual void OnEditing(const Node::Ptr& node, const std::string& text) {}
-  virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}
-
+  virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}  
+  virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point, const ui::Node::Ptr& node) {}
+  virtual void WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const ui::Node::Ptr& node) {
+    OnContextPopup(ev, mouse_point, node);
+    if (!ev.is_default_prevented() && !popup_menu_.expired()) {
+      popup_menu_.lock()->Track(mouse_point);
+    }
+  }
  private:     
   Node::WeakPtr root_node_;
   Images::WeakPtr images_;
+  PopupMenu::WeakPtr popup_menu_;
 };
 
 class ListView : public Window {
@@ -1133,7 +1150,7 @@ class ListView : public Window {
   virtual void select_node(const Node::Ptr& node);
   virtual boost::weak_ptr<Node> selected();
 
-  virtual void OnClick(const Node::Ptr& node) {}
+  virtual void OnChange(const Node::Ptr& node) {}
   virtual void OnRightClick(const Node::Ptr& node) {}
   virtual void OnEditing(const Node::Ptr& node, const std::string& text) {}
   virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}
@@ -1273,8 +1290,8 @@ class Scintilla : public Window {
   void FindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const;
   void GotoLine(int pos);
   int length() const;
-  int selectionstart();
-  int selectionend();
+  int selectionstart() const;
+  int selectionend() const;
   void SetSel(int cpmin, int cpmax);
   bool has_selection() const;
   void set_find_match_case(bool on);
@@ -1306,6 +1323,11 @@ class Scintilla : public Window {
   const std::string& filename() const;
   bool is_modified() const;
   virtual void OnFirstModified() {}
+  void set_font(const FontInfo& font_info);
+  int column() const;    
+  int line() const;
+  bool ovr_type() const;
+  bool modified() const;
 
  private:
   static std::string dummy_str_;
@@ -1643,10 +1665,10 @@ class ScintillaImp : public WindowImp {
   virtual void DevFindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const {}
   virtual void DevGotoLine(int pos) {}
   virtual int dev_length() const { return 0; }
-  virtual int dev_selectionstart() { return 0; }
-  virtual int dev_selectionend() { return 0; }
+  virtual int dev_selectionstart() const = 0;
+  virtual int dev_selectionend() const = 0;
   virtual void DevSetSel(int cpmin, int cpmax) {}
-  virtual bool dev_has_selection() const { return false; }
+  virtual bool dev_has_selection() const = 0;
   virtual void dev_set_find_match_case(bool on) {}
   virtual void dev_set_find_whole_word(bool on) {}
   virtual void dev_set_find_regexp(bool on) {}
@@ -1673,9 +1695,12 @@ class ScintillaImp : public WindowImp {
   virtual void dev_set_caret_color(ARGB color) {}
   virtual ARGB dev_caret_color() const { return 0; }
   virtual void DevStyleClearAll() {}
-  virtual const std::string& dev_filename() const = 0;
-  virtual bool dev_is_modified() const { return false; }
-  virtual void OnDevFirstModified() {}  
+  virtual const std::string& dev_filename() const = 0;  
+  virtual void dev_set_font(const FontInfo& font_info) = 0;
+  virtual int dev_column() const = 0;    
+  virtual int dev_line() const = 0;
+  virtual bool dev_ovr_type() const = 0;
+  virtual bool dev_modified() const = 0;
 };
 
 class MenuContainerImp;

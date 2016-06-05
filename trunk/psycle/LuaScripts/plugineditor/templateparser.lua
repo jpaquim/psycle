@@ -9,8 +9,11 @@ local templateparser = {}
 
 function templateparser.prep(file, env)
   local output = ""
+  local evalscript = ""
   for line in file:lines() do
-    if string.find(line, "^#") then       
+    if string.find(line, "^@") then
+      -- skip
+    elseif string.find(line, "^#") then          
     else
       output = output..templateparser.replaceline(line, env)
     end    
@@ -19,7 +22,7 @@ function templateparser.prep(file, env)
 end
 
 function templateparser.replaceline(line, env)
-  local output = ""
+  local output = ""      
   local last = 1
   for text, expr, index in string.gmatch(line, "(.-)$(%b())()") do 
     last = index
@@ -38,16 +41,43 @@ function templateparser.replaceline(line, env)
   return output
 end
 
-function templateparser.work(templatepath, outputpath, env)   
-  templateparser.write(outputpath,
-                       templateparser.processtemplate(templatepath, env))
+function templateparser.work(templatepath, outputpath, env)     
+  templateparser.write(outputpath, 
+      templateparser.processtemplate(templatepath, env))
+end
+
+function templateparser.evaluate(templatepath)
+  local function findevalscript(file, var1) return templateparser.findevalscript(file) end
+  local evalstr = templateparser.readfile(templatepath, findevalscript)  
+  if evalstr == "" then
+    return ""
+  else
+    return load(evalstr)()
+  end
+end
+
+function templateparser.findevalscript(file)  
+  local evalscript = ""
+  for line in file:lines() do
+    if string.find(line, "^@") then
+      evalscript = evalscript .. line:sub(2, -1)         
+    else
+      -- skip
+    end    
+  end
+  return evalscript
 end
 
 function templateparser.processtemplate(templatepath, env)
-  local file = io.open(templatepath, "r")  
-  local t = templateparser.prep(file, env)
+  local function parse(file, var1) return templateparser.prep(file, var1) end
+  return templateparser.readfile(templatepath, parse, env)  
+end
+
+function templateparser.readfile(templatepath, fun, var1)
+  local file = io.open(templatepath, "r")
+  result = fun(file, var1)
   file:close()  
-  return t
+  return result
 end
 
 function templateparser.write(filepath, text)

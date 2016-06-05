@@ -1039,11 +1039,16 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
     SetImageList(&m_imageList, TVSIL_NORMAL);
   }
   CImageList m_imageList;
+
+  virtual ui::Node::Ptr dev_node_at(const ui::Point& pos) const;
+
  protected:  
+  virtual BOOL PreTranslateMessage(MSG* pMsg);
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CTreeCtrl::OnPaint(); }
-  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnChange(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnRightClick(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnDblClick(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
   ui::Node* find_selected_node();
@@ -1141,7 +1146,7 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
  protected:  
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CListCtrl::OnPaint(); }
-  BOOL OnClick(NMHDR * pNotifyStruct, LRESULT * result);
+  BOOL OnChange(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnRightClick(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
@@ -1241,8 +1246,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   
   ScintillaImp() : 
       WindowTemplateImp<CWnd, ui::ScintillaImp>(),
-      find_flags_(0),
-      is_modified_(false),
+      find_flags_(0),      
       has_file_(false) {    
     //ctrl().modified.connect(boost::bind(&Scintilla::OnFirstModified, this));
     //ctrl().Create(p_wnd(), id());       
@@ -1319,7 +1323,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     return const_cast<ScintillaImp*>(this)->f(SCI_GETSELECTIONEND, 0, 0);     
   }
   void DevSetSel(int cpmin, int cpmax) { f(SCI_SETSEL, cpmin, cpmax); }
-  bool has_selection() const { return dev_selectionstart() != dev_selectionend(); }
+  bool dev_has_selection() const { return dev_selectionstart() != dev_selectionend(); }
  
   void dev_set_find_match_case(bool on) {     
    if (on) {
@@ -1348,8 +1352,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     #else
       ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
     #endif
-    if (file.is_open()) {
-      is_modified_ = true;
+    if (file.is_open()) {      
       f(SCI_CANCEL, 0, 0);
       f(SCI_SETUNDOCOLLECTION, 0, 0);      
       file.seekg(0, ios::end);
@@ -1361,11 +1364,10 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       f(SCI_ADDTEXT, size, contents);      
       f(SCI_SETUNDOCOLLECTION, true, 0);
       f(SCI_EMPTYUNDOBUFFER, 0, 0);      
-      f(SCI_SETSAVEPOINT, 0, 0);      
+      f(SCI_SETSAVEPOINT, 0, 0);
       f(SCI_GOTOPOS, 0, 0);      
       delete [] contents;
-      fname_ = filename;
-      is_modified_ = false;
+      fname_ = filename;      
       has_file_ = true;
     } else {
       throw std::runtime_error("File Not Open Error!");
@@ -1407,8 +1409,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     //Write the data in blocks to disk
     CFile file;
     BOOL res = file.Open(_T(filename.c_str()), CFile::modeCreate | CFile::modeReadWrite);
-    if (res) {
-      is_modified_ = true;
+    if (res) {      
       for (int i=0; i<nDocLength; i += 4095) //4095 because data will be returned NULL terminated
       {
         int nGrabSize = nDocLength - i;
@@ -1427,24 +1428,32 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     file.Close();
     has_file_ = true;
     fname_ = filename;
-    is_modified_ = false;
+    f(SCI_SETSAVEPOINT, 0, 0);
     } else {
       throw std::runtime_error("File Save Error");
     }
   }  
   bool dev_has_file() const { return has_file_; }
   virtual const std::string& dev_filename() const { return fname_; }  
-  bool dev_is_modified() const { return is_modified_; }
-  virtual void OnModified() { 
-    if (!is_modified_) {
-      OnDevFirstModified();
-    }
-    is_modified_ = true;
-  }
-
-  virtual void DevOnFirstModified() {}
-
+  virtual void dev_set_font(const FontInfo& font_info) {
+    f(SCI_STYLESETSIZE, STYLE_DEFAULT, font_info.height);
+    f(SCI_STYLESETFONT, STYLE_DEFAULT, (LPARAM) (font_info.name.c_str())); 
+  }    
   boost::signal<void ()> modified;
+  int dev_column() const {
+    Sci_Position pos = f(SCI_GETCURRENTPOS, 0, 0);
+    return f(SCI_GETCOLUMN, pos, 0);    
+  }
+  int dev_line() const {  
+    Sci_Position pos = f(SCI_GETCURRENTPOS, 0, 0);    
+    return f(SCI_LINEFROMPOSITION, pos, 0);
+  }
+  bool dev_ovr_type() const {
+    return f(SCI_GETOVERTYPE, 0, 0);
+  }
+  bool dev_modified() const {
+    return f(SCI_GETMODIFY, 0, 0);
+  }
             
  protected:
   DECLARE_DYNAMIC(ScintillaImp)     
@@ -1463,13 +1472,14 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
  private:         
   DWORD find_flags_;
   std::string fname_;
-  bool is_modified_, has_file_;
+  bool has_file_;
 
   void SetupHighlighting(const Lexer& lexer);
   void SetupFolding(const Lexer& lexer);
   void SetFoldingBasics();
   void SetFoldingColors(const Lexer& lexer);
   void SetFoldingMarkers();
+  void SetupLexerType();
 };
 
 class RegionImp : public ui::RegionImp {
