@@ -84,13 +84,13 @@ function tabgroup:init()
       function t:onmousedown()        
         that:setactivepage(item.page)
       end
-      function t:onmouseenter()                    
-        self:setornament(ornamentfactory:createfill(0xFF0000)):fls()
+      function t:onmouseenter()                            
+        self:setornament(ornamentfactory:createfill(0xFF0000)):parent():invalidate()
       end
-      function t:onmousemove()       
+      function t:onmousemove()               
       end
-      function t:onmouseout()               
-        self:setornament(nil):fls()
+      function t:onmouseout()                       
+        self:setornament(nil):parent():invalidate()
       end
     end
     that:traverse(fun, that.tabs:items())
@@ -100,7 +100,7 @@ function tabgroup:init()
     self.f:hidedecoration()
     self.f:setpos(x + iw - 200, y + ih, 200, h)        
     self.f:show()    
-    c:setfocus()    
+    --c:setfocus()    
   end
   
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT)

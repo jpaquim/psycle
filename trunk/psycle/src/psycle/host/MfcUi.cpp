@@ -106,6 +106,7 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
 	ON_WM_LBUTTONDOWN()
   ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
+  ON_WM_MOUSELEAVE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
@@ -124,13 +125,12 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     UINT flags = Win32KeyFlags(nFlags);      
     KeyEvent ev(pMsg->wParam, flags);      
     if (window()) {
-      window()->OnKeyDown(ev);
-      if (!ev.is_default_prevented()) {
-        pMsg->hwnd = GetSafeHwnd();
-        ::TranslateMessage(pMsg);          
-		    ::DispatchMessage(pMsg);        
+      try {
+        window()->OnKeyDown(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
       }
-      return ev.is_propagation_stopped();
+      return prevent_propagate_event(ev, pMsg);    
     }          
   } else
   if (pMsg->message == WM_KEYUP) {          
@@ -138,16 +138,154 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     UINT flags = Win32KeyFlags(nFlags);      
     KeyEvent ev(pMsg->wParam, flags);      
     if (window()) {
-      window()->OnKeyUp(ev);
-      if (!ev.is_default_prevented()) {
-        pMsg->hwnd = GetSafeHwnd();
-        ::TranslateMessage(pMsg);          
-		    ::DispatchMessage(pMsg);        
+      try {
+        window()->OnKeyUp(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
       }
-      return ev.is_propagation_stopped();
+      return prevent_propagate_event(ev, pMsg);          
+    }
+  } else
+  if (pMsg->message == WM_MOUSELEAVE) {
+    mouse_enter_ = true;
+    CPoint pt(pMsg->pt);        
+    CRect rc;
+    GetWindowRect(&rc);
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    if (window()) {
+      try {
+        window()->OnMouseOut(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, pMsg);      
+    }    
+  }  else
+  if (pMsg->message == WM_LBUTTONDOWN) {
+    CPoint pt(pMsg->pt);        
+    CRect rc;
+    GetWindowRect(&rc);
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    if (window()) {
+      try {
+        window()->OnMouseDown(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, pMsg);      
+    }
+  } else
+  if (pMsg->message == WM_LBUTTONDBLCLK) {
+    CPoint pt(pMsg->pt);        
+    CRect rc;
+    GetWindowRect(&rc);
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    if (window()) {
+      try {
+        window()->OnDblclick(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, pMsg);      
+    }
+  } else
+  if (pMsg->message == WM_LBUTTONUP) {
+    CPoint pt(pMsg->pt);        
+    CRect rc;
+    GetWindowRect(&rc);
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    if (window()) {
+      try {
+        window()->OnMouseUp(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, pMsg);      
+    }
+  } else
+  if (pMsg->message == WM_RBUTTONDOWN) {
+    CPoint pt(pMsg->pt);        
+    CRect rc;
+    GetWindowRect(&rc);
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
+    if (window()) {
+      window()->OnMouseDown(ev);
+      return prevent_propagate_event(ev, pMsg);      
+    }
+  } else    
+  if (pMsg->message == WM_RBUTTONDBLCLK) {
+    CPoint pt(pMsg->pt);        
+    CRect rc;
+    GetWindowRect(&rc);
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
+    if (window()) {
+      try {
+        window()->OnDblclick(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, pMsg);      
+    }
+  } else
+  if (pMsg->message == WM_RBUTTONUP) {
+    CPoint pt(pMsg->pt);        
+    CRect rc;
+    GetWindowRect(&rc);
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
+    if (window()) {
+      try {
+        window()->OnMouseUp(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, pMsg);      
+    }
+  } else
+  if (pMsg->message == WM_MOUSEMOVE) {    
+    TRACKMOUSEEVENT tme;
+    tme.cbSize = sizeof(tme);
+    tme.hwndTrack = m_hWnd;
+    tme.dwFlags = TME_LEAVE;
+    tme.dwHoverTime = 1;    
+    m_bTracking = _TrackMouseEvent(&tme);     
+    CPoint pt(pMsg->pt);
+    CRect rc;
+    GetWindowRect(&rc);    
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    if (window()) {
+      if (mouse_enter_) {
+        mouse_enter_ = false;
+        try {
+          window()->OnMouseEnter(ev);
+        } catch (std::exception& e) {
+          ::AfxMessageBox(e.what());      
+        }
+      }   
+      try {
+        window()->OnMouseMove(ev);
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, pMsg);      
     }
   }
   return CWnd::PreTranslateMessage(pMsg);
+}
+
+template<class T, class I>
+BOOL WindowTemplateImp<T, I>::prevent_propagate_event(const ui::Event& ev, MSG* pMsg) {
+  if (!::IsWindow(m_hWnd)) {
+    return true;
+  }
+  if (!ev.is_default_prevented() && !ev.is_propagation_stopped()) {
+    return false;
+  }
+  if (!ev.is_default_prevented()) {
+    pMsg->hwnd = GetSafeHwnd();
+    ::TranslateMessage(pMsg);          
+	  ::DispatchMessage(pMsg);        
+  }
+  return ev.is_propagation_stopped();  
 }
 
 /*
@@ -214,14 +352,14 @@ void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
 template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::dev_pos() const {
   CRect rc;
-  GetClientRect(&rc);
+  GetWindowRect(&rc);
   return ui::Rect(dev_pos_, ui::Dimension(rc.Width(), rc.Height()));
 }
 
 template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::dev_abs_pos() const {
   CRect rc;
-  GetClientRect(&rc);  
+  GetClientRect(&rc);
   CPoint abs_pos(rc.left, rc.top);
   MapPointToRoot(abs_pos);
   return ui::Rect(ui::Point(abs_pos.x, abs_pos.y),
@@ -601,10 +739,11 @@ BOOL TreeViewImp::OnRightClick(NMHDR * pNotifyStruct, LRESULT * result) {
 BOOL TreeViewImp::OnDblClick(NMHDR * pNotifyStruct, LRESULT * result) {
   CPoint pt;
   ::GetCursorPos(&pt);
-  ScreenToClient(&pt);
-  MapPointToRoot(pt);
-  MouseEvent ev(pt.x, pt.y, 1, 0);
-  OnDevDblclick(ev);
+  ScreenToClient(&pt);  
+  MouseEvent ev(pt.x, pt.y, 1, 0);    
+  if (window()) {
+    window()->OnDblclick(ev);    
+  }
   return FALSE;
 }
 

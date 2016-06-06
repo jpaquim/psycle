@@ -5,6 +5,7 @@
 
 #include "MfcUi.hpp"
 #include "LuaGui.hpp"
+#include "Canvas.hpp"
 
 namespace psycle {
 namespace host {
@@ -484,6 +485,9 @@ void Window::set_parent(const Window::WeakPtr& parent) {
 }
 
 Window* Window::root() {  
+  if (is_root()) {
+    return this;
+  }
   if (!parent().expired()) {
     //if (root_cache_.expired()) {
       Window::Ptr window = shared_from_this();
@@ -559,9 +563,6 @@ bool Window::IsInGroupVisible() const {
 }
 
 void Window::set_ornament(boost::shared_ptr<Ornament> ornament) {  
-  if (!ornament.get() && ornament_.expired()) {
-    return;
-  }
   ornament_ = ornament;
   if (ornament) {
     std::auto_ptr<ui::Rect> opad = ornament->padding();
@@ -1032,15 +1033,18 @@ void Group::set_aligner(const boost::shared_ptr<Aligner>& aligner) {
 Window::Container Aligner::dummy;
 
 void Group::UpdateAlign() {
-  bool is_prevented = is_fls_prevented();
-  PreventFls();  
-  if (aligner_) {
-    aligner_->Align();
+  bool is_saving = false;
+  if (root()) {
+    is_saving = dynamic_cast<canvas::Canvas*>(root())->IsSaving();
+    dynamic_cast<canvas::Canvas*>(root())->SetSave(true);
   }
-  if (!is_prevented) {
-    EnableFls();    
+  if (aligner_) {        
+    aligner_->Align();    
   }
-  Invalidate();
+  if (!is_saving && root()) {    
+    dynamic_cast<canvas::Canvas*>(root())->Flush();
+    dynamic_cast<canvas::Canvas*>(root())->SetSave(false);
+  }  
 }
 
 void Group::FlagNotAligned() {
@@ -1798,42 +1802,6 @@ void WindowImp::OnDevSize(double width, double height) {
   if (window_) {
     window_->needsupdate();
     window_->OnSize(width, height);
-  }
-}
-
-void WindowImp::OnDevMouseDown(MouseEvent& ev) {
-  if (window_ && window_->root()) {
-    window_->root()->WorkMouseDown(ev);
-  }
-}
-void WindowImp::OnDevMouseUp(MouseEvent& ev) {
-  if (window_ && window_->root()) {
-    window_->root()->WorkMouseUp(ev);    
-  }
-}
-
-void WindowImp::OnDevDblclick(MouseEvent& ev) {
-  if (window_ && window_->root()) {
-    window_->root()->WorkDblClick(ev);
-  }
-}
-
-void WindowImp::OnDevMouseMove(MouseEvent& ev) {
-  if (window_ && window_->root()) {    
-    window_->root()->WorkMouseMove(ev);    
-  }
-}  
-
-// Key Events
-void WindowImp::OnDevKeyDown(KeyEvent& ev) { 
-  if (window_ && window_->root()) {
-    window_->root()->WorkKeyDown(ev);
-  }
-}
-
-void WindowImp::OnDevKeyUp(KeyEvent& ev) {
-  if (window_ && window_->root()) {
-    window_->root()->WorkKeyUp(ev);
   }
 }
 

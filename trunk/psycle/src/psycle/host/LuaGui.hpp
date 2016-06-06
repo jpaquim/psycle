@@ -1514,7 +1514,7 @@ class LuaFrameItemBind : public LuaItemBind<T> {
     LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
     if (canvas) {
       LuaHelper::register_userdata(L, canvas.get());
-      frame->set_view(canvas);
+      frame->set_view(canvas);      
     }    
     return LuaHelper::chaining(L);
   }

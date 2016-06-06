@@ -115,7 +115,7 @@ function maincanvas:createsearch()
 end
 
 function maincanvas:createoutputs()
-  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 120):setalign(item.ALBOTTOM)    
+  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 120):setalign(item.ALBOTTOM)  
   self.output = self:createoutput()
   self.outputs:addpage(self.output, "Output")  
   self.callstack = self:createcallstack()  
@@ -346,7 +346,7 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittoolbar()  
-  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP)--:setmargin(3, 3, 3, 3)  
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP)--:setmargin(3, 3, 3, 3)    
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
   self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
   self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)

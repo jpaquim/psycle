@@ -2476,9 +2476,8 @@ namespace psycle { namespace host {
 	    PluginInfoList::iterator it = list.begin();
 	    int pos = 8; bool has_ext = false;
 	    for (; it != list.end(); ++it) {
-		  PluginInfo* info = *it;     
-		  // if (info->name != "Plugineditor") continue;
-	      int id = ID_DYNAMIC_MENUS_START+ui::MenuContainer::id_counter++;   
+		  PluginInfo* info = *it;     		  
+	    int id = ID_DYNAMIC_MENUS_START+ui::MenuContainer::id_counter++;   
 		  try {
 			LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
 			mac->Init();
@@ -2486,12 +2485,12 @@ namespace psycle { namespace host {
 			try {
 			  user_view = mac->canvas().lock().get();
 			} catch (std::exception&) {            
-		    } 
-		    if (user_view) {
-			  view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());            
-		    } else {            
-			  view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
-		    }
+		  } 
+		  //if (user_view) {
+			   view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());
+		  //} else {            
+			//   view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
+		  //}
 		    ///ui::MenuItem::id_counter++;
 		    LuaUiExtentions::instance()->Add(mac); 
 		    menuItemIdMap[id] = mac.get();

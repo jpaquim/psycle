@@ -584,8 +584,8 @@ struct DummyWindow {
 template <class T, class I>
 class WindowTemplateImp : public T, public I {
  public:  
-  WindowTemplateImp() : I(), color_(0xFF000000) {}
-  WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000) {}
+  WindowTemplateImp() : I(), color_(0xFF000000), mouse_enter_(true) {}
+  WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000), mouse_enter_(true) {}
     
   virtual void dev_set_pos(const ui::Rect& pos);
   virtual ui::Rect dev_pos() const;
@@ -641,38 +641,7 @@ protected:
   void OnSize(UINT nType, int cx, int cy); 
 
   BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
-
-  // MouseEvents
-  void OnLButtonDown(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 1, nFlags);
-    OnDevMouseDown(ev);                  
-  }
-  void OnRButtonDown(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 2, nFlags);
-    OnDevMouseDown(ev);                  
-  }
-  void OnLButtonUp(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 1, nFlags);
-    OnDevMouseUp(ev);
-  }
-	void OnRButtonUp(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 2, nFlags);
-    OnDevMouseUp(ev);
-  }
-	void OnLButtonDblClk(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 1, nFlags);
-    OnDevDblclick(ev);
-  }
-	void OnMouseMove(UINT nFlags, CPoint pt) {
-    MapPointToRoot(pt);
-    MouseEvent ev(pt.x, pt.y, 1, nFlags);
-    OnDevMouseMove(ev);                  
-  }	
+  
   virtual bool OnDevUpdateArea(ui::Area& area);
   
  protected:
@@ -700,11 +669,15 @@ protected:
   void MapPointToDesktop(CPoint& pt) const {
     ::MapWindowPoints(m_hWnd, ::GetDesktopWindow(), &pt, 1);
   }
+
+  BOOL prevent_propagate_event(const ui::Event& ev, MSG* pMsg);
   
  private:
   CBitmap bmpDC;
   ARGB color_;
-  ui::Point dev_pos_;  
+  BOOL m_bTracking;
+  bool mouse_enter_;
+  ui::Point dev_pos_;
 };
 
 class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {

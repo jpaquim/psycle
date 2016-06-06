@@ -116,7 +116,7 @@ namespace psycle { namespace host {
 
     void CanvasParamView::ChangeCanvas(const ui::canvas::Canvas::Ptr& canvas) {      
       if (!canvas_.expired()) {
-        canvas_.lock()->set_parent(0);        
+        canvas_.lock()->set_parent(nullpointer);        
       }
       if (canvas) {
         ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
