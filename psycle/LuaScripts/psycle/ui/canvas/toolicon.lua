@@ -98,17 +98,17 @@ function toolicon:onmousedown(ev)
   self.clicklistener_:notify(self)
 end
 
-function toolicon:onmouseenter(ev)
+function toolicon:onmouseenter(ev)  
   if (not self.on) then 
     self.cc = settings.colors.mousemove.bg
     self:fls()
   end
 end
 
-function toolicon:onmousemove(ev)
+function toolicon:onmousemove(ev)  
 end
 
-function toolicon:onmouseout(ev)  
+function toolicon:onmouseout(ev)   
   if (not self.on) then 
     self.cc = settings.colors.default.bg
     self:fls()    

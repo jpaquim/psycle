@@ -62,7 +62,7 @@ class Canvas : public ui::Group {
   }   
     
   static std::string type() { return "canvas"; }
-      
+       
   void Flush();  
   void StealFocus(const Window::Ptr& item);  
   virtual void OnSize(double cx, double cy);
@@ -71,13 +71,7 @@ class Canvas : public ui::Group {
   void ClearSave() { save_rgn_->Clear(); }
      
   void InvalidateSave();  
-
-  virtual void WorkMouseDown(MouseEvent& ev);
-  virtual void WorkMouseUp(MouseEvent& ev);
-  virtual void WorkMouseMove(MouseEvent& ev);
-  virtual void WorkDblClick(MouseEvent& ev);
-  virtual void WorkKeyUp(KeyEvent& ev);
-  virtual bool WorkKeyDown(KeyEvent& ev); 
+  
   virtual void WorkOnFocus(Event& ev);
 
   boost::signal<void (std::exception&)> error;
@@ -110,8 +104,7 @@ class Canvas : public ui::Group {
     }
   }
    
-  bool save_, steal_focus_, fls_prevented_;
-  Window::WeakPtr button_press_item_, mouse_move_;  
+  bool save_, steal_focus_, fls_prevented_;  
   std::auto_ptr<ui::Region> save_rgn_;  
 };
 

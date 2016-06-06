@@ -121,7 +121,7 @@ function createeditplugin:initcreateoptions()
   end
   self.templatelist:setrootnode(self.listnode)
   local that = self    
-  function self.templatelist:onclick(node)
+  function self.templatelist:onchange(node)
     that:createplugin(node.path)
   end  
 end

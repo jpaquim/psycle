@@ -711,6 +711,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
   virtual void WorkMouseUp(MouseEvent& ev) { OnMouseUp(ev); }
   virtual void WorkMouseMove(MouseEvent& ev) { OnMouseMove(ev); }
+  virtual void WorkMouseLeave(MouseEvent& ev) { OnMouseOut(ev); }
   virtual void WorkDblClick(MouseEvent& ev) { OnDblclick(ev); }
   virtual void WorkKeyUp(KeyEvent& ev) { OnKeyUp(ev); }
   virtual bool WorkKeyDown(KeyEvent& ev) { OnKeyDown(ev); return true; }  
@@ -1542,13 +1543,7 @@ class WindowImp {
   // Events raised by implementation
   virtual void OnDevDraw(Graphics* g, Region& draw_region);  
   virtual void OnDevSize(double width, double height);
-  virtual void OnDevMouseDown(MouseEvent& ev);    
-  virtual void OnDevMouseUp(MouseEvent& ev);    
-  virtual void OnDevDblclick(MouseEvent& ev);   
-  virtual void OnDevMouseMove(MouseEvent& ev);  
-  virtual void OnDevKeyDown(KeyEvent& ev);   
-  virtual void OnDevKeyUp(KeyEvent& ev);    
-
+  
   virtual void dev_add_style(UINT flag) {}
   virtual void dev_remove_style(UINT flag) {}
 

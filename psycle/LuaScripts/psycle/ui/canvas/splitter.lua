@@ -36,7 +36,7 @@ end
 
 function splitter:onmousedown(e)
   self:mousecapture() 
-  --self:canvas():addstyle(0x02000000)
+  self:canvas():addstyle(0x02000000)
   self.dosplit_ = true
   self.dragpos = -1
   self.par = self:parent() 
@@ -99,8 +99,7 @@ end
 function splitter:onmouseup(e)
   self.dosplit_ = false
   self:mouserelease()  
-  self:canvas()
-  --self:canvas():removestyle(0x02000000)
+  self:canvas():removestyle(0x02000000)
 end 
 
 return splitter
