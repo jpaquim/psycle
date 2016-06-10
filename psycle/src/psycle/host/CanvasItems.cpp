@@ -7,6 +7,7 @@
 #include "Psycle.hpp"
 #include "PsycleConfig.hpp"
 #include "Ui.hpp"
+#include "Scintilla.h"
 
 namespace psycle {
 namespace host  {
@@ -144,9 +145,11 @@ bool Text::OnUpdateArea() {
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));
   } if (auto_size_width() && auto_size_height()) {
     std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
+    g->SetFont(*font_);
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), g->text_size(text_))));
   } else {
     std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
+    g->SetFont(*font_);
     double width = auto_size_width() ? g->text_size(text_).width() : imp()->dev_pos().dimension().width();
     double height = auto_size_height() ? g->text_size(text_).height() : imp()->dev_pos().dimension().height();
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), Dimension(width, height))));
@@ -156,12 +159,28 @@ bool Text::OnUpdateArea() {
 
 void Text::set_text(const std::string& text) {  
   STR();
-  text_ = text;  
+  text_ = text;
+  if (imp()) {
+    needsupdate();
+    imp()->dev_set_pos(pos());
+    WorkChildPos();
+  }
   FLS();          
 }
 
+void Text::set_font(const Font& font) {
+  STR();
+  font_.reset(font.Clone());
+  if (imp()) {
+    needsupdate();
+    imp()->dev_set_pos(pos());
+    WorkChildPos();
+  }
+  FLS();
+}
+
 void Text::Draw(Graphics* g, Region& draw_region) {   
-//  g->SetFont(*font_);
+  g->SetFont(*font_);
   g->SetColor(color_);
   double xp(0);
   double yp(0);
@@ -217,6 +236,42 @@ bool Pic::OnUpdateArea() {
   return true;
 }
 
+TerminalView::TerminalView() : Scintilla(), Timer() {
+  set_background_color(0x232323);
+  set_foreground_color(0xFFBF00);      
+  StyleClearAll();
+  set_linenumber_foreground_color(0x939393);
+  set_linenumber_background_color(0x232323);   
+  set_margin_background_color(0x232323);  
+  f(SCI_SETWRAPMODE, (void*) SC_WRAP_CHAR, 0);
+}
+
+void TerminalView::output(const std::string& text) {
+  struct {
+    std::string text;
+    TerminalView* that;
+    void operator()() const
+    {
+      that->AddText(text);
+    }
+   } f;   
+  f.that = this;
+  f.text = text;
+  invokelater.Add(f);
+}
+
+void TerminalFrame::Init() {
+  set_title("Psycle Terminal");
+  ui::canvas::Canvas::Ptr maincanvas = ui::canvas::Canvas::Ptr(new ui::canvas::Canvas());
+  set_view(maincanvas);
+  maincanvas->SetSave(false);
+  terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
+  terminal_view_->set_align(ALCLIENT);
+  maincanvas->Add(terminal_view_);
+  align_ = boost::shared_ptr<canvas::Aligner>(new ui::canvas::DefaultAligner()); 
+  maincanvas->set_aligner(align_);
+  set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
+}
 
 } // namespace canvas
 } // namespace ui

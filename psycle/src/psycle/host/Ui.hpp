@@ -558,6 +558,8 @@ class WindowShowStrategy {
 
 inline WindowShowStrategy::~WindowShowStrategy() {}
 
+class ChildPosEvent;
+
 class Window : public boost::enable_shared_from_this<Window> {
  friend class WindowImp;
  public:  
@@ -573,7 +575,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual ~Window();
 
   void set_imp(WindowImp* imp);
-  void release_imp() { imp_.release(); }
+  virtual void release_imp() { imp_.release(); }
   WindowImp* imp() { return imp_.get(); };
   WindowImp* imp() const { return imp_.get(); };
 
@@ -672,7 +674,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 
   virtual void OnMessage(WindowMsg msg, int param = 0) {}
   virtual void OnSize(double width, double height) {}
-  virtual void OnChildPos(ui::Window& child) {}
+  virtual void OnChildPos(ChildPosEvent& ev) {}
   
   virtual void EnablePointerEvents() { pointer_events_ = true; }
   virtual void DisablePointerEvents() { pointer_events_ = false; }
@@ -736,6 +738,16 @@ class Window : public boost::enable_shared_from_this<Window> {
   boost::weak_ptr<Window> root_cache_;
 };
 
+class ChildPosEvent : public Event {
+ public:  
+  ChildPosEvent(ui::Window::Ptr window) : window_(window) {}
+
+  Window::Ptr window() { return !window_.expired() ? window_.lock() : nullpointer; }
+
+ private:
+  Window::WeakPtr window_;
+};
+
 class Group : public Window {
  public:  
   static std::string type() { return "canvasgroup"; }
@@ -752,7 +764,11 @@ class Group : public Window {
   void Add(const Window::Ptr& window);
   void Insert(iterator it, const Window::Ptr& item);
   void Remove(const Window::Ptr& item);
-  void RemoveAll() { STR(); items_.clear(); FLS(); }
+  void RemoveAll() { 
+    STR();    
+    items_.clear(); 
+    FLS();
+  }
     
   // appearence
   void set_aligner(const boost::shared_ptr<Aligner>& aligner); 
@@ -765,12 +781,7 @@ class Group : public Window {
   void UpdateAlign();
   void FlagNotAligned();
   boost::shared_ptr<Aligner> aligner() const { return aligner_; }  
-  virtual void OnChildPos(Window& window) {
-    if (auto_size_width() || auto_size_height()) {
-      window.needsupdate();
-      Window::set_pos(pos());
-    }
-  }
+  virtual void OnChildPos(ChildPosEvent& ev);
   
  protected:  
   Window::Container items_;
@@ -881,14 +892,30 @@ class Frame : public Window {
   virtual void ShowDecoration();
   virtual void HideDecoration();  
   virtual void OnClose() {}
-  virtual void OnShow() {}
+  virtual void OnShow() {}  
 
  private:
   ui::Window::WeakPtr view_;
 };
 
+class PopupFrameImp;
+
+class PopupFrame : public Frame {
+ public:
+   PopupFrame();
+   PopupFrame(FrameImp* imp);
+
+   FrameImp* imp() { return (FrameImp*) Window::imp(); };
+   FrameImp* imp() const { return (FrameImp*) Window::imp(); };
+
+   static std::string type() { return "canvaspopupframe"; }  
+};
+
 class Ornament {
  public:
+  typedef boost::shared_ptr<Ornament> Ptr;
+  typedef boost::weak_ptr<Ornament> WeakPtr;
+
   Ornament() {}
   virtual ~Ornament() = 0;
   virtual Ornament* Clone() = 0;
@@ -924,6 +951,8 @@ class NodeImp {
   NodeOwnerImp* owner_;
 };
 
+class recursive_node_iterator;
+
 class Node : public boost::enable_shared_from_this<Node> {
  public:
   static std::string type() { return "node"; }   
@@ -953,11 +982,15 @@ class Node : public boost::enable_shared_from_this<Node> {
   bool empty() const { return children_.empty(); }
   int size() const { return children_.size(); }
   Ptr back() const { return children_.back(); }
+
+  recursive_node_iterator recursive_begin();
+  recursive_node_iterator recursive_end();
     
   int level() const { return (!parent().expired()) ? parent().lock()->level() + 1 : 0; }    
   void AddImp(NodeImp* imp) { imps.push_back(imp); }
   void erase_imps(NodeOwnerImp* owner);
-          
+  void erase_imp(NodeOwnerImp* owner);
+
   void AddNode(const Node::Ptr& node);
   void insert(iterator it, const Node::Ptr& node);
   void erase(iterator it);
@@ -977,6 +1010,9 @@ class Node : public boost::enable_shared_from_this<Node> {
   boost::signal<void (Node&)> changed;
 
   boost::ptr_list<NodeImp> imps;
+
+  NodeImp* imp(NodeOwnerImp& imp);
+
  private:
   std::string text_;
   ui::Image::WeakPtr image_;
@@ -985,11 +1021,53 @@ class Node : public boost::enable_shared_from_this<Node> {
   Node::WeakPtr parent_;
 };
 
+class recursive_node_iterator {
+ friend class Node;
+ public:
+  recursive_node_iterator(ui::Node::iterator& it) { i.push(it); }    
+
+  bool operator==(const recursive_node_iterator& rhs) const {
+    return i.size() == rhs.i.size() && i.top() == rhs.i.top();
+  }
+  inline bool operator!=(const recursive_node_iterator& rhs) const { 
+    return !(*this == rhs);
+  }
+  ui::Node::Ptr& operator*() { return *(i.top()); }
+  recursive_node_iterator& operator++() {    
+    Node::Ptr parent = (*i.top())->parent().lock();
+    if (i.top() != parent->end()) {
+      if ((*i.top())->size() > 0) {        
+        i.push((*i.top())->begin());        
+      } else {
+        ++i.top();        
+        while (i.size() > 1 && i.top() == parent->end()) {
+          i.pop();
+          parent = (*i.top())->parent().lock();
+          ++i.top();                    
+        }
+      }
+    } else 
+    if (i.size() > 0) {
+      i.pop();      
+    }
+    return *this;
+  }
+  recursive_node_iterator operator++(int) {
+    recursive_node_iterator clone(*this);
+    ++(*this);
+    return clone;
+  }
+  int level() const { return i.size(); }
+
+ private:  
+  std::stack<ui::Node::iterator> i;  
+};
+
 class NodeOwnerImp {
  public:
   virtual ~NodeOwnerImp() {}
   
-  virtual void DevUpdate(Node::Ptr, Node::Ptr prev_node = nullpointer) = 0;
+  virtual void DevUpdate(const Node::Ptr&, Node::Ptr prev_node = nullpointer) = 0;
   virtual void DevErase(Node::Ptr node) = 0;
 };
 
@@ -1147,6 +1225,9 @@ class ListView : public Window {
   void ViewReport();  
   void ViewIcon();
   void ViewSmallIcon();
+
+  void EnableRowSelect();
+  void DisableRowSelect();
   
   virtual void select_node(const Node::Ptr& node);
   virtual boost::weak_ptr<Node> selected();
@@ -1329,6 +1410,12 @@ class Scintilla : public Window {
   int line() const;
   bool ovr_type() const;
   bool modified() const;
+  int add_marker(int line, int id);
+  int delete_marker(int line, int id);
+  void define_marker(int id, int symbol, ARGB foreground_color, ARGB background_color);
+  void ShowCaretLine();
+  void HideCaretLine();
+  void set_caret_line_background_color(ARGB color);
 
  private:
   static std::string dummy_str_;
@@ -1451,6 +1538,7 @@ class Systems {
   virtual ui::Font* CreateFont();
   virtual ui::Window* CreateWin();
   virtual ui::Frame* CreateFrame();
+  virtual ui::PopupFrame* CreatePopupFrame();
   virtual ui::ComboBox* CreateComboBox();
   virtual ui::Edit* CreateEdit();
   virtual ui::Button* CreateButton();
@@ -1603,6 +1691,8 @@ class ListViewImp : public WindowImp, public NodeOwnerImp {
   virtual void DevViewReport() = 0;
   virtual void DevViewIcon() = 0;
   virtual void DevViewSmallIcon() = 0;
+  virtual void DevEnableRowSelect() = 0;  
+  virtual void DevDisableRowSelect() = 0;
   virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
 };
 
@@ -1696,6 +1786,12 @@ class ScintillaImp : public WindowImp {
   virtual int dev_line() const = 0;
   virtual bool dev_ovr_type() const = 0;
   virtual bool dev_modified() const = 0;
+  virtual int dev_add_marker(int line, int id) = 0;
+  virtual int dev_delete_marker(int line, int id) = 0;
+  virtual void dev_define_marker(int id, int symbol, ARGB foreground_color, ARGB background_color) = 0;
+  virtual void DevShowCaretLine() = 0;
+  virtual void DevHideCaretLine() = 0;
+  virtual void dev_set_caret_line_background_color(ARGB color)  = 0;
 };
 
 class MenuContainerImp;
@@ -1712,6 +1808,7 @@ class ImpFactory {
   virtual bool DestroyWindowImp(ui::WindowImp* imp);
   virtual ui::WindowImp* CreateWindowCompositedImp();
   virtual ui::FrameImp* CreateFrameImp();
+  virtual ui::FrameImp* CreatePopupFrameImp();
   virtual ui::ScrollBarImp* CreateScrollBarImp(ui::Orientation orientation);
   virtual ui::ComboBoxImp* CreateComboBoxImp();
   virtual ui::EditImp* CreateEditImp();

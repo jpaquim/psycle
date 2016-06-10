@@ -101,6 +101,7 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
   ON_WM_CREATE()
   ON_WM_DESTROY()
   //ON_WM_SETFOCUS()
+  ON_WM_KILLFOCUS()
 	ON_WM_PAINT()
   ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN()
@@ -116,132 +117,74 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
   ON_WM_HSCROLL()
   ON_WM_VSCROLL()
   ON_WM_SIZE()  
+  ON_WM_MOUSEACTIVATE()
 END_MESSAGE_MAP()
 
 template<class T, class I>
-BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
+BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {  
   if (pMsg->message==WM_KEYDOWN ) {        
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
-    KeyEvent ev(pMsg->wParam, flags);      
-    if (window()) {
-      try {
-        window()->OnKeyDown(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);    
-    }          
+    KeyEvent ev(pMsg->wParam, flags);    
+    return WorkEvent(ev, &Window::OnKeyDown, window(), pMsg);
   } else
   if (pMsg->message == WM_KEYUP) {          
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
     KeyEvent ev(pMsg->wParam, flags);      
-    if (window()) {
-      try {
-        window()->OnKeyUp(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);          
-    }
+    return WorkEvent(ev, &Window::OnKeyUp, window(), pMsg);    
   } else
   if (pMsg->message == WM_MOUSELEAVE) {
     mouse_enter_ = true;
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
-    if (window()) {
-      try {
-        window()->OnMouseOut(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);      
-    }    
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);
+    return WorkEvent(ev, &Window::OnMouseOut, window(), pMsg);    
   }  else
   if (pMsg->message == WM_LBUTTONDOWN) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
     MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
-    if (window()) {
-      try {
-        window()->OnMouseDown(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);      
-    }
+    return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
   } else
   if (pMsg->message == WM_LBUTTONDBLCLK) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
     MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
-    if (window()) {
-      try {
-        window()->OnDblclick(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);      
-    }
+    return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
   if (pMsg->message == WM_LBUTTONUP) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
     MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
-    if (window()) {
-      try {
-        window()->OnMouseUp(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);      
-    }
+    return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else
   if (pMsg->message == WM_RBUTTONDOWN) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
     MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
-    if (window()) {
-      window()->OnMouseDown(ev);
-      return prevent_propagate_event(ev, pMsg);      
-    }
+    return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
   } else    
   if (pMsg->message == WM_RBUTTONDBLCLK) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
     MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
-    if (window()) {
-      try {
-        window()->OnDblclick(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);      
-    }
+    return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
   if (pMsg->message == WM_RBUTTONUP) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
     MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
-    if (window()) {
-      try {
-        window()->OnMouseUp(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
-      }
-      return prevent_propagate_event(ev, pMsg);      
-    }
-  } else
-  if (pMsg->message == WM_MOUSEMOVE) {    
+    return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
+  } else  
+  if (pMsg->message == WM_MOUSEMOVE) {
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(tme);
     tme.hwndTrack = m_hWnd;
@@ -273,40 +216,21 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
 }
 
 template<class T, class I>
-BOOL WindowTemplateImp<T, I>::prevent_propagate_event(const ui::Event& ev, MSG* pMsg) {
+BOOL WindowTemplateImp<T, I>::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
   if (!::IsWindow(m_hWnd)) {
     return true;
-  }
-  if (!ev.is_default_prevented() && !ev.is_propagation_stopped()) {
-    return false;
-  }
+  }  
   if (!ev.is_default_prevented()) {
-    pMsg->hwnd = GetSafeHwnd();
+     pMsg->hwnd = GetSafeHwnd();
     ::TranslateMessage(pMsg);          
 	  ::DispatchMessage(pMsg);        
   }
   return ev.is_propagation_stopped();  
 }
 
-/*
 template<class T, class I>
-BOOL WindowTemplateImp<T, I>::PreCreateWindow(CREATESTRUCT& cs) {
-	if (!CWnd::PreCreateWindow(cs))
-		return FALSE;
-	// CS_HREDRAW | CS_VREDRAW |
-	cs.dwExStyle = 0; // |= WS_EX_CLIENTEDGE;
-	cs.style &= ~WS_BORDER;
-	cs.lpszClass = AfxRegisterWndClass
-		(
-				CS_DBLCLKS,
-			//::LoadCursor(NULL, IDC_ARROW), HBRUSH(COLOR_WINDOW+1), NULL);
-			::LoadCursor(NULL, IDC_ARROW),
-			(HBRUSH)GetStockObject( HOLLOW_BRUSH ),
-			NULL
-		);
-
-	return TRUE;
-}*/
+void WindowTemplateImp<T, I>::OnKillFocus(CWnd* pNewWnd) {  
+}
 
 template<class T, class I>
 int WindowTemplateImp<T, I>::OnCreate(LPCREATESTRUCT lpCreateStruct) {
@@ -337,16 +261,10 @@ void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
                pos.width(),
                pos.height(),            
                SWP_NOREDRAW |
-               SWP_NOZORDER
+               SWP_NOZORDER |
+               SWP_NOACTIVATE
                // SWP_ASYNCWINDOWPOS
                );
-
-
-    //SWP_ASYNCWINDOWPOS
-  /*MoveWindow(pos.left(),
-             pos.top(),
-             pos.width(),
-             pos.height());*/
 }
 
 template<class T, class I>
@@ -380,7 +298,7 @@ template<class T, class I>
 void WindowTemplateImp<T, I>::dev_set_parent(Window* parent) {  
   if (parent && parent->imp()) {    
     SetParent(dynamic_cast<CWnd*>(parent->imp()));    
-    ShowWindow(SW_SHOW);    
+    ShowWindow(SW_SHOW | SW_SHOWNOACTIVATE);    
   } else {
     SetParent(DummyWindow::dummy());
   }
@@ -523,6 +441,8 @@ BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
 	ON_WM_PAINT()
   ON_WM_CLOSE()
   ON_WM_ERASEBKGND()
+  ON_WM_KILLFOCUS()
+  ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 void FrameImp::DevShowDecoration() {
@@ -539,6 +459,32 @@ void FrameImp::DevHideDecoration() {
   ModifyStyle(WS_THICKFRAME, 0, SWP_FRAMECHANGED);
 }
 
+ui::FrameImp* PopupFrameImp::popup_frame_ = 0;
+
+LRESULT CALLBACK MouseHook(int Code, WPARAM wParam, LPARAM lParam) {
+    if (PopupFrameImp::popup_frame_ && 
+       (wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONDBLCLK)) {         
+        PopupFrameImp::popup_frame_->DevHide();      
+    }    
+    return CallNextHookEx(NULL, Code, wParam, lParam);
+}
+
+void PopupFrameImp::DevShow() {
+  popup_frame_ = 0;  
+  mouse_hook_ = SetWindowsHookEx(WH_MOUSE, MouseHook, 0, GetCurrentThreadId());
+  ShowWindow(SW_SHOWNOACTIVATE);    
+  popup_frame_ = this;
+}
+
+void PopupFrameImp::DevHide() {
+  PopupFrameImp::popup_frame_ = 0;
+  FrameImp::DevHide();  
+  if (mouse_hook_) {
+    UnhookWindowsHookEx(mouse_hook_);
+  }
+  mouse_hook_ = 0;  
+}
+
 BEGIN_MESSAGE_MAP(ButtonImp, CButton)  
 	ON_WM_PAINT()  
   ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
@@ -552,6 +498,20 @@ BEGIN_MESSAGE_MAP(ComboBoxImp, CComboBox)
 	ON_WM_PAINT()
   ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelect)
 END_MESSAGE_MAP()
+
+BOOL ComboBoxImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
+  if (!::IsWindow(m_hWnd)) {
+    return true;
+  }
+  if (pMsg->message == WM_LBUTTONDOWN) {
+    ev.StopPropagation(); 
+  }
+  if (!ev.is_default_prevented()) {    
+    ::TranslateMessage(pMsg);          
+	  ::DispatchMessage(pMsg);        
+  }
+  return ev.is_propagation_stopped();  
+}
 
 BOOL ComboBoxImp::OnSelect() {  
   ui::ComboBox* combo_box = dynamic_cast<ui::ComboBox*>(window());
@@ -586,120 +546,69 @@ BEGIN_MESSAGE_MAP(TreeViewImp, CTreeCtrl)
   ON_NOTIFY_REFLECT_EX(NM_DBLCLK, OnDblClick)  
 END_MESSAGE_MAP()
 
+BOOL TreeViewImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {  
+  if (!::IsWindow(m_hWnd)) {
+    return true;
+  }    
+  if (!ev.is_default_prevented()) {
+    if (pMsg->message == WM_KEYUP || pMsg->message == WM_KEYDOWN) {
+      pMsg->hwnd = ::GetFocus();
+    }
+    ::TranslateMessage(pMsg);          
+	  ::DispatchMessage(pMsg);            
+  }
+  pMsg->hwnd = GetSafeHwnd();
+  return ev.is_propagation_stopped();  
+}
 
-BOOL TreeViewImp::PreTranslateMessage(MSG* pMsg) {
-  if (pMsg->message==WM_KEYDOWN ) {        
-    UINT nFlags = 0;
-    UINT flags = Win32KeyFlags(nFlags);      
-    KeyEvent ev(pMsg->wParam, flags);      
-    if (window()) {
-      window()->OnKeyDown(ev);
-      if (!ev.is_default_prevented()) {
-        pMsg->hwnd = ::GetFocus();
-        ::TranslateMessage(pMsg);          
-		    ::DispatchMessage(pMsg);        
-      }
-      return ev.is_propagation_stopped();
-    }          
-  } else
-  if (pMsg->message == WM_KEYUP) {          
-    UINT nFlags = 0;
-    UINT flags = Win32KeyFlags(nFlags);      
-    KeyEvent ev(pMsg->wParam, flags);      
-    if (window()) {
-      window()->OnKeyUp(ev);
-      if (!ev.is_default_prevented()) {
-        pMsg->hwnd = ::GetFocus();
-        ::TranslateMessage(pMsg);          
-		    ::DispatchMessage(pMsg);        
-      }
-      return ev.is_propagation_stopped();
+void TreeViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
+  NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
+  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
+  node->erase_imp(this);  
+  TreeNodeImp* new_imp = new TreeNodeImp();
+  node->AddImp(new_imp);
+  new_imp->set_owner(this);
+  node->changed.connect(boost::bind(&TreeViewImp::OnNodeChanged, this, _1));
+  if (!node->parent().expired()) {
+    boost::shared_ptr<ui::Node> parent_node = node->parent().lock();
+    TreeNodeImp* parent_imp = dynamic_cast<TreeNodeImp*>(parent_node->imp(*this));
+    if (parent_imp) {
+      TreeNodeImp* prev_imp = dynamic_cast<TreeNodeImp*>(prev_node_imp);
+       new_imp->hItem = parent_imp->DevInsert(this, *node.get(), prev_imp);
+       htreeitem_node_map_[new_imp->hItem] = node;      
     }
   }
-  return CTreeCtrl::PreTranslateMessage(pMsg);
 }
 
-void TreeViewImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
-  struct {
-      TreeViewImp* that;       
-      void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
-        NodeImp* prev_node_imp = 0;
-        if (prev_node) {
-          boost::ptr_list<NodeImp>::iterator it = prev_node->imps.begin();
-          while (it != prev_node->imps.end()) {
-            NodeImp* i = &(*it);
-            if (i->owner() == that) {
-              prev_node_imp = i;
-              break;
-            } else {
-              ++it;
-            }        
-          }
-        }
-
-        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-        while (it != node->imps.end()) {
-          NodeImp* i = &(*it);
-          if (i->owner() == that) {
-            it = node->imps.erase(it);            
-          } else {
-            ++it;
-          }
-        }
-        TreeNodeImp* new_imp = new TreeNodeImp();
-        node->AddImp(new_imp);
-        new_imp->set_owner(that);               
-        node->changed.connect(boost::bind(&TreeViewImp::OnNodeChanged, that, _1));                
-        if (!node->parent().expired()) {
-          boost::shared_ptr<ui::Node> parent_node = node->parent().lock();   
-          boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
-          for ( ; it != parent_node->imps.end(); ++it) {            
-            TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
-            if (imp) {              
-              TreeNodeImp* prev_imp = dynamic_cast<TreeNodeImp*>(prev_node_imp);
-              new_imp->hItem = imp->DevInsert(that, *node.get(), prev_imp);
-              that->htreeitem_node_map_[new_imp->hItem] = node;
-            }
-          }
-        }
-      }
-    } f;
-  f.that = this;  
-  node->traverse(f, prev_node);
-}
-
-void TreeViewImp::DevErase(boost::shared_ptr<Node> node) {
-  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-  for (; it != node->imps.end(); ++it) {     
-    if (it->owner() == this) {
-      TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
-      if (imp) {
-        DeleteItem(imp->hItem);
-      }
-      node->imps.erase(it);
-      break;
-    } 
+void TreeViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {  
+  recursive_node_iterator end = node->recursive_end();
+  recursive_node_iterator it = node->recursive_begin();
+  boost::shared_ptr<Node> prev = prev_node;
+  UpdateNode(node, prev);
+  for ( ; it != end; ++it) {
+    UpdateNode((*it), prev);
+    prev = *it;
   }
 }
 
-void TreeViewImp::DevEditNode(boost::shared_ptr<ui::Node> node) {    
-  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-  for ( ; it != node->imps.end(); ++it) {    
-    TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
-    if (imp) {      
-      EditLabel(imp->hItem);
-      break;
-    }
+void TreeViewImp::DevErase(boost::shared_ptr<Node> node) {  
+  TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node->imp(*this));
+  if (imp) {
+    DeleteItem(imp->hItem);
+  } 
+}
+
+void TreeViewImp::DevEditNode(boost::shared_ptr<ui::Node> node) { 
+  TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node->imp(*this));
+  if (imp) {
+    EditLabel(imp->hItem);    
   }
 }
 
 void TreeViewImp::dev_select_node(const boost::shared_ptr<ui::Node>& node) {
-  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-  for ( ; it != node->imps.end(); ++it) {    
-    TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
-    if (imp) {      
-      SelectItem(imp->hItem);      
-    }
+  TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node->imp(*this));
+  if (imp) {  
+    SelectItem(imp->hItem);    
   }
 }
 
@@ -709,12 +618,9 @@ boost::weak_ptr<Node> TreeViewImp::dev_selected() {
 }
 
 void TreeViewImp::OnNodeChanged(Node& node) {
-  boost::ptr_list<NodeImp>::iterator it = node.imps.begin();
-  for ( ; it != node.imps.end(); ++it) {    
-    TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(&(*it));
-    if (imp) {      
-      SetItemText(imp->hItem, node.text().c_str());       
-    }
+  TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node.imp(*this));  
+  if (imp) {      
+    SetItemText(imp->hItem, node.text().c_str());   
   }
 }
 
@@ -819,15 +725,26 @@ BEGIN_MESSAGE_MAP(ListViewImp, CListCtrl)
   ON_NOTIFY_REFLECT(NM_CUSTOMDRAW,OnCustomDrawList)
 END_MESSAGE_MAP()
 
-void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp) {
-  node_imp->pos_ = prev_imp ? prev_imp->pos() + 1 : 0;
+BOOL ListViewImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {  
+  if (!::IsWindow(m_hWnd)) {
+    return true;
+  }  
+  if (!ev.is_default_prevented()) {    
+    ::TranslateMessage(pMsg);          
+	  ::DispatchMessage(pMsg);        
+  }
+  return ev.is_propagation_stopped();  
+}
+
+void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos) {
+  node_imp->pos_ = pos;
   LVITEM lvi;
   lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
   lvi.cColumns = 0;
   node_imp->text_ = node.text();
   lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
   lvi.iImage = node.image_index();
-  lvi.iItem = node_imp->pos_;
+  lvi.iItem = pos;
   lvi.iSubItem = 0;
   list->InsertItem(&lvi);  
 }
@@ -845,91 +762,66 @@ void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, Li
   node_imp->set_pos(pos_);
 }
 
-void ListViewImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
-  struct {
-      ListViewImp* that;       
-      void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
-        NodeImp* prev_node_imp = 0;
-        if (prev_node) {
-          boost::ptr_list<NodeImp>::iterator it = prev_node->imps.begin();
-          while (it != prev_node->imps.end()) {
-            NodeImp* i = &(*it);
-            if (i->owner() == that) {
-              prev_node_imp = i;
-              break;
-            } else {
-              ++it;
-            }        
-          }
-        }
 
-        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-        while (it != node->imps.end()) {
-          NodeImp* i = &(*it);
-          if (i->owner() == that) {
-            it = node->imps.erase(it);            
-          } else {
-            ++it;
-          }
-        }
-        ListNodeImp* new_imp = new ListNodeImp();
-        node->AddImp(new_imp);
-        new_imp->set_owner(that);               
-        node->changed.connect(boost::bind(&ListViewImp::OnNodeChanged, that, _1));                
-        if (!node->parent().expired()) {
-          boost::shared_ptr<ui::Node> parent_node = node->parent().lock();   
-          boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
-          for ( ; it != parent_node->imps.end(); ++it) {            
-            ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
-            if (imp) {              
-              ListNodeImp* prev_imp = dynamic_cast<ListNodeImp*>(prev_node_imp);
-              int level = node->level();
-              if (level == 1) {
-                imp->DevInsertFirst(that, *node.get(), new_imp, prev_imp);
-              } else {
-                imp->DevSetSub(that, *node.get(), new_imp, prev_imp, level);
-              }
-            }
-          }
+ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node, int pos) {
+  ListNodeImp* new_imp = new ListNodeImp();
+  NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
+  node->erase_imp(this);  
+  node->AddImp(new_imp);
+  new_imp->set_owner(this);
+  node->changed.connect(boost::bind(&ListViewImp::OnNodeChanged, this, _1));
+  if (!node->parent().expired()) {
+    boost::shared_ptr<ui::Node> parent_node = node->parent().lock();   
+    boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
+    for ( ; it != parent_node->imps.end(); ++it) {
+      ListNodeImp* parent_imp = dynamic_cast<ListNodeImp*>(parent_node->imp(*this));
+      if (parent_imp) {             
+        ListNodeImp* prev_imp = dynamic_cast<ListNodeImp*>(prev_node_imp);
+        int level = node->level();
+        if (level == 1) {
+          parent_imp->DevInsertFirst(this, *node.get(), new_imp, prev_imp, pos);
+        } else {
+          parent_imp->DevSetSub(this, *node.get(), new_imp, prev_imp, level);
         }
       }
-    } f;
-  f.that = this;  
-  node->traverse(f, prev_node);
+    }
+  }
+  return new_imp;
 }
 
-void ListViewImp::DevErase(boost::shared_ptr<Node> node) {
-  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-  for (; it != node->imps.end(); ++it) {     
-    if (it->owner() == this) {
-      ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
-      if (imp) {
-      //  DeleteItem(imp->hItem);
-      }
-      node->imps.erase(it);
-      break;
-    } 
+void ListViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {  
+  recursive_node_iterator end = node->recursive_end();
+  recursive_node_iterator it = node->recursive_begin();  
+  int pos = 0;
+  if (prev_node) {        
+    ListNodeImp* prev_imp = dynamic_cast<ListNodeImp*>(prev_node->imp(*this));
+    if (prev_imp) {
+      pos = prev_imp->pos() + 1;
+    }
+  }
+  ListNodeImp* imp = UpdateNode(node, prev_node, pos);  
+  boost::shared_ptr<Node> prev;
+  for (int i = 0; it != end; ++it, ++i) {    
+    UpdateNode((*it), prev, i);    
+    prev = *it;
   }
 }
 
-void ListViewImp::DevEditNode(boost::shared_ptr<ui::Node> node) {    
-  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-  for ( ; it != node->imps.end(); ++it) {    
-    ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
-    if (imp) {      
-      //EditLabel(imp->hItem);
-      break;
-    }
+void ListViewImp::DevErase(ui::Node::Ptr node) {
+  node->erase_imp(this);  
+}
+
+void ListViewImp::DevEditNode(ui::Node::Ptr node) {    
+  ListNodeImp* imp = dynamic_cast<ListNodeImp*>(node->imp(*this));
+  if (imp) {
+   //EditLabel(imp->hItem);    
   }
 }
 
-void ListViewImp::dev_select_node(const boost::shared_ptr<ui::Node>& node) {
-  boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-  for ( ; it != node->imps.end(); ++it) {    
-    ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
-    if (imp) {      
-      //SelectItem(imp->hItem);      
-    }
+void ListViewImp::dev_select_node(const ui::Node::Ptr& node) {
+  ListNodeImp* imp = dynamic_cast<ListNodeImp*>(node->imp(*this));
+  if (imp) {
+      //SelectItem(imp->hItem);    
   }
 }
 
@@ -939,12 +831,9 @@ boost::weak_ptr<Node> ListViewImp::dev_selected() {
 }
 
 void ListViewImp::OnNodeChanged(Node& node) {
-  boost::ptr_list<NodeImp>::iterator it = node.imps.begin();
-  for ( ; it != node.imps.end(); ++it) {    
-    ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
-    if (imp) {      
-      //SetItemText(imp->hItem, node.text().c_str());       
-    }
+  ListNodeImp* imp = dynamic_cast<ListNodeImp*>(node.imp(*this));
+  if (imp) {      
+      //SetItemText(imp->hItem, node.text().c_str());         
   }
 }
 
@@ -964,7 +853,7 @@ BOOL ListViewImp::OnRightClick(NMHDR * pNotifyStruct, LRESULT * result) {
   return FALSE;
 }
 
-ui::Node* ListViewImp::find_selected_node() {  
+ui::Node* ListViewImp::find_selected_node() {    
   POSITION pos = GetFirstSelectedItemPosition();
   int selected = -1;
   if (pos != NULL) {
@@ -972,36 +861,23 @@ ui::Node* ListViewImp::find_selected_node() {
       selected = GetNextSelectedItem(pos);      
     }
   } 
-  struct {
-   ListViewImp* that;
-    int iItem;
-    Node::Ptr found;    
-    void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
-      boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-      NodeImp* imp = 0;
-      while (it != node->imps.end()) {
-        NodeImp* i = &(*it);
-        if (i->owner() == that) {
-          imp = i;
-          break;
-        } else {
-          ++it;        
-        }
+  recursive_node_iterator end = list_view()->root_node().lock()->recursive_end();
+  recursive_node_iterator recursive_it = list_view()->root_node().lock()->recursive_begin();  
+  ui::Node::Ptr found;
+  for (; recursive_it != end; ++recursive_it) {    
+    boost::ptr_list<NodeImp>::iterator it = (*recursive_it)->imps.begin();
+    NodeImp* imp = (*recursive_it)->imp(*this);    
+    if (imp) {
+      ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));      
+      if (imp->pos() == selected) {
+        found = (*recursive_it);
+        break;
       }
-      if (imp) {
-        ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));
-        if ((node->level() > 0) && (imp->pos() == iItem)) {
-          found = node;
-        }
-      }
-    }
-  } f;
-  f.that = this;  
-  f.iItem = selected;
-  list_view()->root_node().lock()->traverse(f);
-  return f.found.get();
+    }    
+  }  
+  return found.get();
 }
-
+ 
 BOOL ListViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
@@ -1180,7 +1056,7 @@ void MenuContainerImp::DevInvalidate() {
   }
 }
 
-void MenuContainerImp::DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {
+void MenuContainerImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {
   if (cmenu_) {
     UpdateNodes(node, cmenu_, cmenu_->GetMenuItemCount());
     DevInvalidate();

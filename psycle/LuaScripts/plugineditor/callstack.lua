@@ -1,4 +1,4 @@
--- psycle callstack (c) 2015 by psycledelics
+-- psycle callstack (c) 2015, 2016 by psycledelics
 -- File: callstack.lua
 -- copyright 2015 members of the psycle project http://psycle.sourceforge.net
 -- This source is free software ; you can redistribute it and/or modify it under
@@ -6,19 +6,16 @@
 -- Foundation ; either version 2, or (at your option) any later version.  
 
 local listview = require("psycle.ui.canvas.listview")
-local group = require("psycle.ui.canvas.group")
-local rect = require("psycle.ui.canvas.rect")
-local text = require("psycle.ui.canvas.text")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local node = require("psycle.node")
+local signal = require("psycle.signal")
 
 local callstack = listview:new()
 
-function callstack:new(parent, listener)
+function callstack:new(parent)
   local c = listview:new(parent)  
   setmetatable(c, self)
   self.__index = self  
-  c:init()
-  c.listener_ = listener
+  c:init()  
   return c
 end
 
@@ -26,31 +23,30 @@ function callstack:init()
   self:addcolumn("", 50)
       :addcolumn("Name", 400)  
       :addcolumn("Source", 200)  
-      :setautosize(false, false)  
+      :setautosize(false, false)
+      :viewreport()
+      :enablerowselect()
+  self.rootnode = node:new()  
+  self:setrootnode(self.rootnode)  
+  self.change = signal:new()
 end
 
---function callstack:add(info)  
---  local Index = self:inserttext(self.row, "")
---  self:settext(Index, 1, info.name.." Line "..info.line)  
---  self:settext(Index, 2, info.source:match("([^\\]+)$"))
---  self.row = self.row + 1  
---end
-
---[[function onrowclick(self)
-  self.that.listener_:oncallstackclick(self.info) 
-  local index = self:parent():itemindex(self)
-  self.that:setdepth(index-1)  
+function callstack:addline(info)
+  local item = node:new():settext("")  
+  local infocopy = {}  
+  infocopy.name = info.name
+  infocopy.line = info.line
+  infocopy.source = info.source
+  item.info = infocopy
+  local subitem = node:new():settext(info.name.." Line "..info.line)  
+  item:add(subitem)
+  local subitem1 = node:new():settext(info.source:match("([^\\]+)$"))  
+  subitem:add(subitem1)
+  self.rootnode:add(item)  
 end
 
-function callstack:add(info)  
-  local Index = self:inserttext(self.row, "")
-  self:settext(Index, 1, info.name.." Line "..info.line)  
-  self:settext(Index, 2, info.source:match("([^\\]+)$"))
-  self.row = self.row + 1  
+function callstack:onchange(node)   
+  self.change:emit(node.info)
 end
-
-function callstack:setdepth(depth)
-end
---]]
 
 return callstack

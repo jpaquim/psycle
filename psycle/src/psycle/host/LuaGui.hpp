@@ -62,6 +62,8 @@ template <class T>
 class CanvasItem : public T, public LuaState {
  public:    
    CanvasItem(lua_State* L) : LuaState(L), T() {}
+   CanvasItem(lua_State* L, ui::WindowImp* imp) : LuaState(L), T(0) {}
+
    virtual void OnMouseDown(ui::canvas::MouseEvent& ev) {
      if (!SendMouseEvent(L, "onmousedown", ev, *this)) {
        T::OnMouseDown(ev);
@@ -422,7 +424,16 @@ class LuaScintilla : public CanvasItem<ui::Scintilla> {
 class LuaFrameWnd : public CanvasItem<ui::Frame> {
  public:   
    typedef boost::shared_ptr<LuaFrameWnd> Ptr;
-   LuaFrameWnd(lua_State* L) : CanvasItem<ui::Frame>(L) {}
+   LuaFrameWnd(lua_State* L) : CanvasItem<ui::Frame>(L) {}   
+      
+   virtual void OnClose();
+   virtual void OnShow();
+};
+
+class LuaPopupFrameWnd : public CanvasItem<ui::PopupFrame> {
+ public:   
+   typedef boost::shared_ptr<LuaPopupFrameWnd> Ptr;
+   LuaPopupFrameWnd(lua_State* L) : CanvasItem<ui::PopupFrame>(L) {}   
       
    virtual void OnClose();
    virtual void OnShow();
@@ -1256,6 +1267,8 @@ class LuaListViewBind : public LuaItemBind<T> {
       {"viewreport", viewreport},
       {"viewicon", viewicon},
       {"viewsmallicon", viewsmallicon},
+      {"enablerowselect", enablerowselect},
+      {"diablerowselect", disablerowselect},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1270,7 +1283,7 @@ class LuaListViewBind : public LuaItemBind<T> {
   static int viewlist(lua_State* L) { LUAEXPORT(L, &T::ViewList); }
   static int viewreport(lua_State* L) { LUAEXPORT(L, &T::ViewReport); }
   static int viewicon(lua_State* L) { LUAEXPORT(L, &T::ViewIcon); }
-  static int viewsmallicon(lua_State* L) { LUAEXPORT(L, &T::ViewSmallIcon); }  
+  static int viewsmallicon(lua_State* L) { LUAEXPORT(L, &T::ViewSmallIcon); }
   static int selectnode(lua_State* L) { 
     boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
     using namespace ui::canvas;
@@ -1321,6 +1334,9 @@ class LuaListViewBind : public LuaItemBind<T> {
     list_view->set_images(images);
     return LuaHelper::chaining(L);
   }
+
+  static int enablerowselect(lua_State* L) { LUAEXPORT(L, &T::EnableRowSelect); }
+  static int disablerowselect(lua_State* L) { LUAEXPORT(L, &T::DisableRowSelect); }
   
   /*static int clear(lua_State* L) {
     using namespace ui::canvas;
@@ -1489,7 +1505,7 @@ class LuaFrameItemBind : public LuaItemBind<T> {
   static int setmethods(lua_State* L) {
     B::setmethods(L);
     static const luaL_Reg methods[] = {
-      {"new", create},
+      {"new", create},      
       {"settitle", settitle},
       {"setview", setview},
       {"showdecoration", showdecoration},
@@ -1500,7 +1516,7 @@ class LuaFrameItemBind : public LuaItemBind<T> {
     return 0;
   }
  
-  static int create(lua_State* L);
+  static int create(lua_State* L);  
   static int gc(lua_State* L) {
     LuaHelper::delete_shared_userdata<LuaFrameWnd>(L, meta);    
     return 0;
@@ -1522,6 +1538,24 @@ class LuaFrameItemBind : public LuaItemBind<T> {
   static int showdecoration(lua_State* L)  { LUAEXPORT(L, &T::ShowDecoration); }
   static int hidedecoration(lua_State* L)  { LUAEXPORT(L, &T::HideDecoration); }  
 };
+
+typedef LuaFrameItemBind<LuaPopupFrameWnd> LuaPopupFrameItemBind;
+
+/*template <class T = LuaPopupFrameWnd>
+class LuaPopupFrameItemBind : public LuaFrameItemBind<T> {
+ public:
+  typedef LuaFrameItemBind<T> B;
+  static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
+  static int setmethods(lua_State* L) {
+    B::setmethods(L);
+    static const luaL_Reg methods[] = {
+      {NULL, NULL}
+    };
+    luaL_setfuncs(L, methods, 0);
+    return 0;
+  }   
+};*/
+
 
 
 class LuaLexerBind {
@@ -1606,8 +1640,11 @@ class LuaScintillaBind : public LuaItemBind<T> {
        {"savefile", savefile},
        {"filename", filename},
        {"hasfile", hasfile},
-       {"addtext", addtext},
+       {"addtext", addtext},       
        {"findtext", findtext},
+       {"addmarker", addmarker},
+       {"deletemarker", deletemarker},
+       {"definemarker", definemarker},
        {"selectionstart", selectionstart},
        {"selectionend", selectionend},
        {"setsel", setsel},
@@ -1638,6 +1675,9 @@ class LuaScintillaBind : public LuaItemBind<T> {
        {"column", column},
        {"ovrtype", ovrtype},
        {"modified", modified},
+       {"showcaretline", showcaretline},
+       {"hidecaretline", hidecaretline},
+       {"setcaretlinebackgroundcolor", setcaretlinebackgroundcolor},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1680,6 +1720,20 @@ class LuaScintillaBind : public LuaItemBind<T> {
     return 1;
   }
 
+  static int definemarker(lua_State *L) {
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+    int val1 = luaL_checkinteger(L, 2);
+    int val2 = luaL_checkinteger(L, 3);
+    int val3 = luaL_checkinteger(L, 4);
+    int val4 = luaL_checkinteger(L, 5);
+    item->define_marker(val1, val2, val3, val4);  
+    return 0;
+  }  
+  static int showcaretline(lua_State *L) { LUAEXPORT(L, &T::ShowCaretLine); } 
+  static int hidecaretline(lua_State *L) { LUAEXPORT(L, &T::HideCaretLine); }   
+  static int addmarker(lua_State *L) { LUAEXPORT(L, &T::add_marker); } 
+  static int setcaretlinebackgroundcolor(lua_State *L) { LUAEXPORT(L, &T::set_caret_line_background_color); } 
+  static int deletemarker(lua_State *L) { LUAEXPORT(L, &T::delete_marker); } 
   static int setsel(lua_State *L) { LUAEXPORT(L, &T::SetSel); } 
   static int selectionstart(lua_State *L) { LUAEXPORT(L, &T::selectionstart); } 
   static int selectionend(lua_State *L) { LUAEXPORT(L, &T::selectionend); } 
@@ -1795,6 +1849,7 @@ template class LuaComboBoxBind<LuaComboBox>;
 template class LuaTreeViewBind<LuaTreeView>;
 template class LuaListViewBind<LuaListView>;
 template class LuaFrameItemBind<LuaFrameWnd>;
+template class LuaFrameItemBind<LuaPopupFrameWnd>;
 
 } // namespace host
 } // namespace psycle

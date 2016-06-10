@@ -563,6 +563,7 @@ class WindowHook {
   static void FilterHook(HWND hwnd);  
   static HHOOK _hook;
   static std::map<HWND, ui::WindowImp*> windows_;
+  WindowImp* popup_window_;
 };
 
 struct WindowID { 
@@ -598,7 +599,7 @@ class WindowTemplateImp : public T, public I {
   }
   
   
-  virtual void DevShow() { ShowWindow(SW_SHOW); }
+  virtual void DevShow() { ShowWindow(SW_SHOWNOACTIVATE); }
   virtual void DevHide() { ShowWindow(SW_HIDE); }
   virtual void DevInvalidate() {    
     ::RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
@@ -639,6 +640,7 @@ protected:
   void OnDestroy();	
   void OnPaint();
   void OnSize(UINT nType, int cx, int cy); 
+  afx_msg void OnKillFocus(CWnd* pNewWnd);
 
   BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
   
@@ -670,7 +672,20 @@ protected:
     ::MapWindowPoints(m_hWnd, ::GetDesktopWindow(), &pt, 1);
   }
 
-  BOOL prevent_propagate_event(const ui::Event& ev, MSG* pMsg);
+  virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
+
+  template <class T, class T1>
+  bool WorkEvent(T& ev, void (T1::*ptmember)(T&), Window* window, MSG* msg) {
+    if (window) {
+      try {
+        (window->*ptmember)(ev);        
+      } catch (std::exception& e) {
+        ::AfxMessageBox(e.what());
+      }
+      return prevent_propagate_event(ev, msg);          
+    } 
+    return false;
+  }
   
  private:
   CBitmap bmpDC;
@@ -834,7 +849,7 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
     imp->set_window(w);        
     return imp;
   }
-    
+   
   virtual void dev_set_title(const std::string& title) {
     SetWindowTextA(_T(title.c_str()));
   }
@@ -849,7 +864,7 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
 
   virtual void DevShowDecoration();
   virtual void DevHideDecoration();
-
+  
   void OnSize(UINT nType, int cx, int cy) {
     if (view_) {
       CRect rect;
@@ -862,11 +877,39 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   }
      
  protected:
-  DECLARE_MESSAGE_MAP()
+  DECLARE_MESSAGE_MAP()  
   void OnPaint() { CFrameWnd::OnPaint(); }
   BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
   virtual void OnClose() { OnDevClose(); }
   ui::Window::Ptr view_;
+  afx_msg void OnKillFocus(CWnd* pNewWnd) {
+    if (window()) {
+      window()->OnKillFocus();
+    }
+  }
+  
+};
+
+class PopupFrameImp : public FrameImp {
+ public:
+   PopupFrameImp() : FrameImp(), mouse_hook_(0) {}
+
+  static PopupFrameImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    PopupFrameImp* imp = new PopupFrameImp();    
+    if (!imp->Create(NULL, "PsyclePopupFrame", WS_POPUP,
+                     CRect(0, 0, 200, 200), 
+                     parent, 0, WS_EX_TOPMOST | WS_EX_NOACTIVATE)) {
+      TRACE0("Failed to create frame window\n");
+      return 0;
+    }
+    imp->set_window(w);        
+    return imp;
+  }
+ 
+  virtual void DevShow();
+  virtual void DevHide();
+  HHOOK mouse_hook_;  
+  static ui::FrameImp* popup_frame_;  
 };
 
 class MenuImp;
@@ -875,7 +918,7 @@ class MenuContainerImp : public ui::MenuContainerImp {
  public:  
   MenuContainerImp();
  
-  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
+  virtual void DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node);
   virtual void DevErase(boost::shared_ptr<Node> node);
   virtual void DevInvalidate();
   virtual void DevTrack(const ui::Point& pos) {}
@@ -978,7 +1021,7 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
     return result;
   }  
   virtual void DevClear();  
-  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
+  virtual void DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node);
   virtual void DevErase(boost::shared_ptr<Node> node);
 
   // virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> nodeafter);
@@ -1015,8 +1058,8 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
 
   virtual ui::Node::Ptr dev_node_at(const ui::Point& pos) const;
 
- protected:  
-  virtual BOOL PreTranslateMessage(MSG* pMsg);
+ protected:
+  virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CTreeCtrl::OnPaint(); }
   BOOL OnChange(NMHDR * pNotifyStruct, LRESULT * result);
@@ -1025,9 +1068,10 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
   BOOL OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
   BOOL OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result);
   ui::Node* find_selected_node();
-
- private:
-   bool is_editing_;   
+  
+ private:   
+   void UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
+   bool is_editing_;
 };
 
 class ListViewImp;
@@ -1041,7 +1085,7 @@ class ListNodeImp : public NodeImp {
   int pos() const { return pos_; }
       
   // LVITEM DevInsert(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* prev_imp);
-  void DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp);
+  void DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos);
   void DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level);
   // LVITEM hItem;  
   std::string text_;
@@ -1078,7 +1122,7 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
     return result;
   }  
   virtual void DevClear();  
-  virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
+  virtual void DevUpdate(const Node::Ptr& node, Node::Ptr prev_node);
   virtual void DevErase(boost::shared_ptr<Node> node);  
   virtual void DevEditNode(boost::shared_ptr<ui::Node> node);
   virtual void dev_set_background_color(ARGB color) {     
@@ -1109,6 +1153,12 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   virtual void DevViewReport() { SetView(LV_VIEW_DETAILS); }
   virtual void DevViewIcon() { SetView(LV_VIEW_ICON); }
   virtual void DevViewSmallIcon() { SetView(LV_VIEW_SMALLICON); }
+  virtual void DevEnableRowSelect() {
+    SetExtendedStyle(GetExtendedStyle() | LVS_EX_FULLROWSELECT);
+  }
+  virtual void DevDisableRowSelect() {
+    SetExtendedStyle(GetExtendedStyle() & ~ LVS_EX_FULLROWSELECT);
+  }
 
   virtual void DevAddColumn(const std::string& text, int width) {
     InsertColumn(column_pos_++, _T(text.c_str()), LVCFMT_LEFT, width); //, nColInterval*3);
@@ -1117,6 +1167,8 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   CImageList m_imageList;
 
  protected:  
+  virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
+
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CListCtrl::OnPaint(); }
   BOOL OnChange(NMHDR * pNotifyStruct, LRESULT * result);
@@ -1127,6 +1179,7 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   ui::Node* find_selected_node();
 
  private:
+   ListNodeImp* UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node, int pos);
    bool is_editing_;
    int column_pos_;
 };
@@ -1173,6 +1226,8 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
   BOOL OnEraseBkgnd(CDC* pDC) { return CComboBox::OnEraseBkgnd(pDC); }
 
  protected:
+  virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
+
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CComboBox::OnPaint(); }
   BOOL OnSelect();
@@ -1235,6 +1290,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     WindowHook::windows_[imp->GetSafeHwnd()] = imp;
     return imp;
   }
+
           
   bool Create(CWnd* pParentWnd, UINT nID) {
     if (!CreateEx(0, 
@@ -1245,7 +1301,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
         pParentWnd,
         nID,
         0)) {
-      TRACE0("Failed to create scintilla window\n");				
+      TRACE0("Failed to create scintilla window\n");				      
       return false;
     }
       
@@ -1427,6 +1483,23 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   bool dev_modified() const {
     return f(SCI_GETMODIFY, 0, 0);
   }
+  int dev_add_marker(int line, int id) {
+    return f(SCI_MARKERADD, line, id);
+  }
+  int dev_delete_marker(int line, int id) {
+    return f(SCI_MARKERDELETE, line, id);
+  }
+  void dev_define_marker(int id, int symbol, ARGB foreground_color, ARGB background_color) {
+    f(SCI_MARKERDEFINE, id, symbol);
+    f(SCI_MARKERSETFORE, id, ToCOLORREF(foreground_color));
+    f(SCI_MARKERSETBACK, id, ToCOLORREF(background_color));
+  }
+  void DevShowCaretLine() {
+    f(SCI_SETCARETLINEVISIBLE, true, 0);
+    f(SCI_SETCARETLINEVISIBLEALWAYS, true, 0);
+  }
+  void DevHideCaretLine() { f(SCI_SETCARETLINEVISIBLE, false, 0); }
+  void dev_set_caret_line_background_color(ARGB color) { f(SCI_SETCARETLINEBACK, ToCOLORREF(color), 0); }
             
  protected:
   DECLARE_DYNAMIC(ScintillaImp)     
@@ -1548,6 +1621,9 @@ class ImpFactory : public ui::ImpFactory {
   }
   virtual ui::FrameImp* CreateFrameImp() {     
     return FrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());    
+  }
+  virtual ui::FrameImp* CreatePopupFrameImp() {
+    return PopupFrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());    
   }
   virtual ui::ScrollBarImp* CreateScrollBarImp(Orientation orientation) {     
     return ScrollBarImp::Make(0, DummyWindow::dummy(), WindowID::auto_id(), orientation);    

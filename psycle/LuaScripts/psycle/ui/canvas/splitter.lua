@@ -78,7 +78,7 @@ function splitter:onmousemove(e)
           self.item:setpos(x, y, self.itemclientpos - self.dragpos, h)
         end
         self:enablefls()
-        self:parent():updatealign()                       
+        self:parent():updatealign()        
       end 
     end
   else

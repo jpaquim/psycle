@@ -13,7 +13,7 @@ local text = require("psycle.ui.canvas.text")
 local config = require("psycle.config")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local toolicon = require("psycle.ui.canvas.toolicon")
-local frame = require("psycle.ui.canvas.frame")
+local popupframe = require("psycle.ui.canvas.popupframe")
 local signal = require("psycle.signal")
 
 local tabgroup = group:new()
@@ -66,41 +66,39 @@ function tabgroup:init()
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)  
   local that = self
   function icon1:onclick()    
-    self.f = frame:new()  
-    c = canvas:new()
-    local g = group:new(c)
-    g:setautosize(false, true)
-    g:setalign(window.ALTOP)
-    local that2 = self
-    function c:onkillfocus() 
-      that2.f:hide()
+    self.f = popupframe:new()
+    --self.f:addstyle(0x02000000)
+    self.c = canvas:new():invalidatedirect()
+    local that1 = self    
+    function self.c:onmousedown(ev)
+      that1.f:hide()
     end
-    self.f:setview(c)
-    c:setornament(ornamentfactory:createfill(0x292929))     
+    local g = group:new(self.c)
+    g:setautosize(false, true)
+    g:setalign(window.ALTOP)    
+    self.f:setview(self.c)
+    self.c:setornament(ornamentfactory:createfill(0x292929))    
     local fr = f
     function fun(item)
-      local t = text:new(g):setcolor(0xB0C8B1):settext(item.text:text()):setautosize(false, true) 
+      local t = text:new(g):setcolor(0xCACACA):settext(item.text:text()):setautosize(false, true) 
       t:setalignment(window.ALCENTER):setalign(window.ALTOP)      
       function t:onmousedown()        
         that:setactivepage(item.page)
       end
       function t:onmouseenter()                            
-        self:setornament(ornamentfactory:createfill(0xFF0000)):parent():invalidate()
-      end
-      function t:onmousemove()               
-      end
+        self:setornament(ornamentfactory:createlineborder(0x696969))
+      end      
       function t:onmouseout()                       
-        self:setornament(nil):parent():invalidate()
+        self:setornament(nil)
       end
     end
     that:traverse(fun, that.tabs:items())
-    c:updatealign()
+    self.c:updatealign()
     local x, y, w, h = g:pos()
     local x, y, iw, ih = icon1:desktoppos()
     self.f:hidedecoration()
-    self.f:setpos(x + iw - 200, y + ih, 200, h)        
-    self.f:show()    
-    --c:setfocus()    
+    self.f:setpos(x + iw - 200, y + ih, 200, h)       
+    self.f:show()            
   end
   
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT)
@@ -189,7 +187,9 @@ end
 function tabgroup:removeall()
   self.activepage_ = nil
   self.tabs:removeall()
+  collectgarbage()
   self.children:removeall()
+  collectgarbage()
   self:updatealign()
 end
 
@@ -221,31 +221,31 @@ end
 
 function tabgroup:createheader(page, label)
   local header = group:new(self.tabs):setautosize(true, true)  
-  header:setalign(window.ALLEFT):setmargin(0, 0, 5, 0)
+  header:setalign(window.ALLEFT):setmargin(0, 0, 5, 0)  
   header.page = page    
-  header.text = text:new(header):setdebugtext("text"):settext(label):setfont({name="Arial", height = "12"})
+  header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
   header.text:setalign(window.ALLEFT)
   local that = self
   if self.hasclosebutton_ then
     header.close = text:new(header)    
                        :setdebugtext("close")     
                        :setcolor(tabgroup.skin.colors.TITLEFONT) 
-                       :settext("x")                                                            
+                       :settext("x")                       
     header.close:setalign(window.ALLEFT):setmargin(4, 0, 0, 0)    
     function header.close:onmousedown()
-      ev = {}
-      ev.page = header.page      
+      local ev = {}
+      ev.page = self:parent().page      
       that.dopageclose:emit(ev)           
       that:removepagebyheader(self:parent())
     end
   end
   function header:setskinhighlight()        
-    self:setornament(ornamentfactory:createboundfill(0x528A68))    
-    self.text:setcolor(0xFFFF00) 
+    self:setornament(ornamentfactory:createlineborder(0x696969))    
+    self.text:setcolor(0xA6FF4D) 
   end
   function header:setskinnormal()    
     self:setornament(nil)
-    self.text:setcolor(0x528A68)    
+    self.text:setcolor(0xA1A1A1)    
   end    
   header:setskinnormal()    
   function header:onmousedown(ev)    

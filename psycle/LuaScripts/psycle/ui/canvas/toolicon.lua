@@ -8,7 +8,7 @@
 
 local image = require("psycle.ui.image")
 local item = require("psycle.ui.canvas.item")
-local listener = require("listener")
+local listener = require("psycle.listener")
 local cfg = require("psycle.config"):new("PatternVisual")
 local serpent = require("psycle.serpent")
 

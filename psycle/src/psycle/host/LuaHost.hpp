@@ -11,17 +11,15 @@
 struct lua_State;
 struct luaL_Reg;
 
-namespace universalis { namespace os {
-	class terminal;
-}}
-
-
 namespace psycle {
 namespace host {
 
 namespace ui { 
   class Commands; 
-  namespace canvas { class Canvas; }
+  namespace canvas {
+    class Canvas;
+    class TerminalFrame;
+  }
   class MenuContainer;
 }
     
@@ -122,10 +120,10 @@ private:
 	mutable PluginInfo info_;
 	LuaPlugin *host_;
 	LuaMachine* lua_mac_;
-	lua_State* L;
-	static universalis::os::terminal * terminal;  
+	lua_State* L;	
   mutable CRITICAL_SECTION cs;  
   boost::weak_ptr<ui::MenuContainer> menu_bar_;
+  static boost::shared_ptr<ui::canvas::TerminalFrame> terminal_frame_;
 };
 
 

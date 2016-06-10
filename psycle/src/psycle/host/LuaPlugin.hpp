@@ -130,7 +130,7 @@ namespace psycle { namespace host {
     int curr_prg_;
 
   private:
-    virtual void OnTimerViewRefresh() {      
+    virtual void OnTimerViewRefresh() {
       proxy().OnTimer();
 
       if (do_exit_) {

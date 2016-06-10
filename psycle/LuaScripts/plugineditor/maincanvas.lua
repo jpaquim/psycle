@@ -96,7 +96,7 @@ function maincanvas:init()
   self.pluginexplorer = self:createpluginexplorer()
   splitter:new(self, splitter.VERT)
   self:createpagegroup()  
-  if advancedview then
+  if self.advancedview then
     self.objectinspector = objectinspector:new(self):setalign(item.ALRIGHT):setpos(0, 0, 200, 0)  
     splitter:new(self, splitter.VERT):setalign(item.ALRIGHT)  
   end            
@@ -112,14 +112,16 @@ function maincanvas:createsearch()
   self.search = search:new(self):setpos(0, 0, 200, 200):hide():setalign(item.ALBOTTOM)
   self.search.dosearch:connect(maincanvas.onsearch, self)   
   self.search.dohide:connect(maincanvas.onsearchhide, self)
+  self.searchbeginpos = -1
+  self.searchrestarted = false
 end
 
 function maincanvas:createoutputs()
-  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 120):setalign(item.ALBOTTOM)  
-  self.output = self:createoutput()
+  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 150):setalign(item.ALBOTTOM)  
+  self.output = self:createoutput()  
   self.outputs:addpage(self.output, "Output")  
   self.callstack = self:createcallstack()  
-  --self.outputs:addpage(self.callstack, "Call stack")  
+  self.outputs:addpage(self.callstack, "Call stack")  
 end
 
 function maincanvas:createoutput()
@@ -129,12 +131,13 @@ function maincanvas:createoutput()
   output:styleclearall()
   output:setlinenumberforegroundcolor(0x939393)
   output:setlinenumberbackgroundcolor(0x232323)    
-  output:setmarginbackgroundcolor(0x232323)
+  output:setmarginbackgroundcolor(0x232323)  
   return output
 end
 
 function maincanvas:createcallstack()
-  local callstack = callstack:new(nil, self)
+  local callstack = callstack:new()
+  callstack.change:connect(maincanvas.oncallstackchange, self)
   callstack:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
   callstack:settextcolor(settings.canvas.colors.foreground)
   return callstack
@@ -215,26 +218,19 @@ function maincanvas:createmodulepage()
   return page
 end
 
-function maincanvas:createpage()  
+function maincanvas:createpage()
   local page = scintilla:new()  
+  local that = self
   function page:onkeydown(ev)
     if ev:ctrlkey() then
       if ev:keycode() == 70 or ev:keycode() == 83 then
-        ev:preventdefault()      
-      end
-    end  
-  end    
-  self:setlexer(page)
-  local that = self
-  function page:onfirstmodified()    
-    local fname = self:filename()
-    if fname ~= "" then    
-      fname = fname:match("([^\\]+)$")      
-      that.pages:setlabel(self, fname.."*")      
-    else      
-      that.pages:setlabel(self, "new"..self.pagecounter.."*")      
+        ev:preventdefault()
+      end            
     end
-  end   
+  end    
+  self:setlexer(page)  
+  page:setcaretlinebackgroundcolor(0x253E2F)
+  page:showcaretline()
   return page
 end
 
@@ -245,6 +241,9 @@ function maincanvas:onkeydown(ev)
       ev:stoppropagation()
     elseif ev:keycode() == 83 then      
       self:savepage()  
+      ev:stoppropagation()
+    elseif ev:keycode() == ev.F5  then
+      self:playplugin()
       ev:stoppropagation()
     end
   end  
@@ -270,18 +269,15 @@ function maincanvas:openfromfile(fname, line)
       function modulepagegroup:loadfile(name)
          page:loadfile(fname)
       end
-      function modulepagegroup:savefile(name)
-         page:savefile(fname)
-      end
-      function modulepagegroup:filename()
-        return page:filename()
-      end
-      function modulepagegroup:hasfile()
-        return page:hasfile()
-      end
-      function modulepagegroup:gotoline(line)
-        return page:gotoline(line)
-      end
+      function modulepagegroup:savefile(name) page:savefile(fname) end
+      function modulepagegroup:filename() return page:filename() end
+      function modulepagegroup:hasfile() return page:hasfile() end
+      function modulepagegroup:gotoline() return page:gotoline(line) end
+      function modulepagegroup:column() return page:column() end
+      function modulepagegroup:line() return page:line() end
+      function modulepagegroup:ovrtype() return page:ovrtype() end
+      function modulepagegroup:modified() return page:modified() end
+      
       self.pages:addpage(modulepagegroup, name)     
     else
       self.pages:addpage(page, name)     
@@ -292,7 +288,7 @@ end
 
 function maincanvas:setcallstack(trace)
   for i=1, #trace do    
-   -- self.callstack:add(trace[i])
+    self.callstack:addline(trace[i])
   end 
   --self.callstack:autosize(3)
   --self.callstack:setdepth(1)  
@@ -324,6 +320,10 @@ function maincanvas:savepage()
 end
 
 function maincanvas:playplugin()  
+  self.pages:activepage():definemarker(1, 31, 0x0000FF, 0x0000FF)
+  self.pages:activepage():addmarker(5, 1)
+--  self.callstack:addline()
+--[[
   local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
     machine = machine:new(pluginindex)
@@ -342,7 +342,8 @@ function maincanvas:playplugin()
       self:fillinstancecombobox()
       self:setpluginindex(pluginindex)
     end
-  end
+  end  
+  ]]
 end
 
 function maincanvas:inittoolbar()  
@@ -359,13 +360,14 @@ end
 
 function maincanvas:initstatus()  
   local g = group:new(self.tg):setalign(item.ALRIGHT):setautosize(true, false)
-  self.modifiedstatus = text:new(g):settext(""):setautosize(false, false):setpos(0, 0, 100, 0):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)  
+  self.searchrestartstatus = text:new(g):settext(""):setautosize(false, false):setpos(0, 0, 150, 0):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
+  self.modifiedstatus = text:new(g):settext(""):setautosize(false, false):setpos(0, 0, 100, 0):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
   text:new(g):settext("LINE"):setautosize(true, false):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
   self.linestatus = text:new(g):settext("1"):setautosize(false, false):setpos(0, 0, 50, 0):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
   text:new(g):settext("COL"):setautosize(true, false):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
   self.colstatus = text:new(g):settext("1"):setautosize(false, false):setpos(0, 0, 50, 0):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
   text:new(g):settext("INSERT"):setautosize(true, false):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
-  self.insertstatus = text:new(g):settext("ON"):setautosize(false, false):setpos(0, 0, 30, 0):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)  
+  self.insertstatus = text:new(g):settext("ON"):setautosize(false, false):setpos(0, 0, 30, 0):setalign(item.ALLEFT):setmargin(0, 0, 5, 0)
 end
 
 function maincanvas:setwindowiconin()
@@ -466,7 +468,7 @@ function maincanvas:initplaytoolbar()
   return t
 end
 
-function maincanvas:oncallstackclick(info)
+function maincanvas:oncallstackchange(info)
   self:openinfo(info)
 end
 
@@ -483,30 +485,65 @@ function maincanvas:openinfo(info)
   return isfile
 end
 
+function maincanvas:findprevsearch(page, pos)
+  local cpmin, cpmax = 0, 0
+  cpmin = pos
+  cpmax = 0
+  if page:hasselection() then 
+    cpmax = cpmax - 1
+  end
+  return cpmin, cpmax
+end
+
+function maincanvas:findnextsearch(page, pos)
+  local cpmin, cpmax = 0, 0
+  cpmin = pos
+  cpmax = page:length()
+  if page:hasselection() then       
+    cpmin = cpmin + 1
+  end
+  return cpmin, cpmax
+end
+
+function maincanvas:findsearch(page, dir, pos)
+  local cpmin, cpmax = 0, 0
+  if dir == search.DOWN then      
+    cpmin, cpmax = self:findnextsearch(page, pos)
+  else
+    cpmin, cpmax = self:findprevsearch(page, pos)
+  end
+  return cpmin, cpmax
+end
+
 function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)    
   local page = self.pages:activepage()
-  if page then  
-    local cpmin, cpmax = 0, 0
-    if dir == search.DOWN then      
-      cpmin = page:selectionstart()
-      cpmax = page:length()
-      if page:hasselection() then       
-       cpmin = cpmin + 1
-      end
-    else
-      cpmin = page:selectionstart()
-      cpmax = 0
-      if page:hasselection() then 
-        cpmax = cpmax - 1
-      end
-    end        
-    page:setfindmatchcase(case)
-    page:setfindwholeword(wholeword)
-    page:setfindregexp(regexp)    
-    local line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)    
-    if line ~= -1 then
-      page:setsel(cpselstart, cpselend)      
+  if page then 
+    page:setfindmatchcase(case):setfindwholeword(wholeword):setfindregexp(regexp)      
+    local cpmin, cpmax = self:findsearch(page, dir, page:selectionstart())
+    local line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)
+    if line == -1 then      
+      if dir == search.DOWN then
+        page:setsel(0, 0)
+        local cpmin, cpmax = self:findsearch(page, dir, 0)
+        line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)        
+      else
+        page:setsel(0, 0)
+        local cpmin, cpmax = self:findsearch(page, dir, page:length())
+        line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)
+      end             
     end
+    if line ~= -1 then
+      page:setsel(cpselstart, cpselend)
+      if self.searchbeginpos == cpselstart then
+        self.searchbegin = -1        
+        self.searchrestart = true
+      else
+        self.searchrestart = false
+      end
+      if self.searchbeginpos == -1 then
+        self.searchbeginpos = cpselstart        
+      end
+    end    
   end
 end
 
@@ -602,6 +639,14 @@ function maincanvas:onidle()
     if self.insertstatus:text() ~= ovr then
       self.insertstatus:settext(ovr)      
     end
+    if self.searchrestart then
+      searchrestartstr = "SEARCH AT BEGINNING POINT"
+    else
+      searchrestartstr = ""
+    end
+    if self.searchrestartstatus:text() ~= searchrestartstr then
+      self.searchrestartstatus:settext(searchrestartstr)
+    end
     local modified = "O"
     if  self.pages:activepage():modified() then
       modified = "MODIFIED"
@@ -611,6 +656,7 @@ function maincanvas:onidle()
     if self.modifiedstatus:text() ~= modified then
        self.modifiedstatus:settext(modified)
     end
+    
   end
 end
 
