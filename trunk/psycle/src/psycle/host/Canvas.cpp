@@ -343,7 +343,7 @@ void Canvas::WorkOnFocus(Event& ev) {
   try {
     if (!focus().expired()) {
       Window::Ptr item = focus().lock();
-      WorkEvent(ev, &Window::OnFocus, item);;
+      WorkEvent(ev, &Window::OnFocus, item);
     } else {
       OnFocus(ev);  
     }

@@ -88,6 +88,7 @@ class Text : public Window {
       text_(text),
       font_(ui::Systems::instance().CreateFont()) { 
   }
+
   static std::string type() { return "canvastext"; }
 
   virtual void Draw(Graphics* cr, Region& draw_region);
@@ -99,7 +100,7 @@ class Text : public Window {
     Invalidate();
   }
   ARGB color() const { return color_; }
-  void set_font(const Font& font) { font_.reset(font.Clone()); }
+  void set_font(const Font& font);
   void set_alignment(AlignStyle alignment) { alignment_ = alignment; }
 
  private:
@@ -109,6 +110,39 @@ class Text : public Window {
   std::auto_ptr<Font> font_;  
 };
 
+
+class TerminalView : public Scintilla, public psycle::host::Timer {
+ public: 
+  TerminalView();
+  void output(const std::string& text);   
+  virtual void OnTimerViewRefresh() { 
+    invokelater.Invoke();
+    invokelater.Clear();
+  }
+
+ private:
+   ui::Commands invokelater;
+};
+
+class TerminalFrame : public Frame {
+  public:   
+   void Init();
+   void output(const std::string& text) {      
+     Show();     
+     terminal_view_->output(text);
+   }
+   virtual void OnShow() { terminal_view_->StartTimer(); }
+   virtual void OnClose() { Hide(); }
+
+   virtual void release_imp() {
+     Frame::release_imp();
+     terminal_view_->release_imp();
+   }   
+
+  private:
+   boost::shared_ptr<TerminalView> terminal_view_;
+   boost::shared_ptr<canvas::Aligner> align_;
+};
 
 } // namespace canvas
 } // namespace ui

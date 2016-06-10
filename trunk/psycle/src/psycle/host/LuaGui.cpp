@@ -372,6 +372,30 @@ int LuaFrameItemBind<T>::create(lua_State* L) {
   return 1;
 }
 
+// LuaPopupFrameWnd+Bind
+void LuaPopupFrameWnd::OnClose() {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onclose")) {      
+      in << pcall(0);      
+    } 
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());    
+  }    
+  lua_gc(L, LUA_GCCOLLECT, 0);  
+}
+
+void LuaPopupFrameWnd::OnShow() {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("onshow")) {      
+      in << pcall(0);      
+    } 
+  } catch (std::exception& e) {
+    AfxMessageBox(e.what());    
+  }  
+}
+
 // LuaCanvasBind
 template <class T>
 int LuaCanvasBind<T>::create(lua_State* L) {
@@ -395,7 +419,6 @@ int LuaCanvasBind<T>::create(lua_State* L) {
   lua_setfield(L, -2, "keydown");
   return 1;
 }
-
 
 template <class T>
 bool CanvasItem<T>::SendEvent(lua_State* L,
@@ -1382,10 +1405,15 @@ int LuaKeyEventBind::open(lua_State *L) {
     "SPACE", "PRIOR", "NEXT", "END", "HOME", "LEFT", "UP", "RIGHT", "DOWN",
     "SELECT", "PRINT", "EXECUTE", "SNAPSHOT", "INSERT", "DELETE", "HELP"
 	};
-  {
-    size_t size = sizeof(e)/sizeof(e[0]);    
-    LuaHelper::buildenum(L, e, size, 1);      
-  }
+  size_t size = sizeof(e)/sizeof(e[0]);    
+  LuaHelper::buildenum(L, e, size, 1);  
+  static const char* const func_keys[] = {
+		"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",    
+    "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F21", 
+    "F22", "F23", "F24"    
+	};  
+  size = sizeof(func_keys)/sizeof(func_keys[0]);    
+  LuaHelper::buildenum(L, func_keys, size, 112);         
   return 1;
 }
 
@@ -1476,7 +1504,7 @@ std::string LineBorderBind::meta = "canvaslineborder";
 
 int LineBorderBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
-    {"new", create},
+    {"new", create},    
     {"setborderradius", setborderradius},
     {"setborderstyle", setborderstyle},
     {NULL, NULL}
@@ -1487,9 +1515,12 @@ int LineBorderBind::open(lua_State *L) {
 
 int LineBorderBind::create(lua_State* L) {
   using namespace ui::canvas;
-  int err = LuaHelper::check_argnum(L, 1, "self");
-  if (err!=0) return err;
-  LineBorder* border = new LineBorder(0xFFFFFF);
+  int n = lua_gettop(L);
+  ARGB color(0xFFFFFF);
+  if (n==2) {
+    color = luaL_checkinteger(L, 2);
+  }  
+  LineBorder* border = new LineBorder(color);
   LuaHelper::new_shared_userdata<>(L, meta, border);
   return 1;
 }

@@ -780,6 +780,18 @@ namespace LuaHelper {
       return 0;
     }
 
+    // int -> int X int
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, int (T::*ptmember)(int, int), UserDataModel m = SPTR) {
+      numargcheck(L, 3);
+      T* ud = check<T>(L, 1, meta, m);
+      int val1 = luaL_checkinteger(L, 2);
+      int val2 = luaL_checkinteger(L, 3);
+      int val = (ud->*ptmember)(val1, val2);
+      lua_pushinteger(L, val);
+      return 1;
+    }
+
      // void -> int X int X int X int
     template <class T>
     static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(int, int, int, int), UserDataModel m = SPTR) {
@@ -787,8 +799,8 @@ namespace LuaHelper {
       T* ud = check<T>(L, 1, meta, m);
       int val1 = luaL_checkinteger(L, 2);
       int val2 = luaL_checkinteger(L, 3);
-      int val3 = luaL_checkinteger(L, 2);
-      int val4 = luaL_checkinteger(L, 3);
+      int val3 = luaL_checkinteger(L, 4);
+      int val4 = luaL_checkinteger(L, 5);
       (ud->*ptmember)(val1, val2, val3, val4);      
       return 0;
     }

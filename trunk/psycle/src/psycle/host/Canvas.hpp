@@ -155,7 +155,7 @@ class LineBorder : public ui::Ornament {
     DrawBorder(item, g, draw_region);
   }
   virtual std::auto_ptr<ui::Rect> padding() const {
-    ui::Point pad(1, 1);
+    ui::Point pad(0, 0);
     return std::auto_ptr<ui::Rect>(new ui::Rect(pad, pad));
   }
 

@@ -23,12 +23,13 @@ local param = require("psycle.parameter")
   
 -- plugin info
 function machine:info()
-  return  {vendor="psycle",
-           name="luaris",
-		   generator=1, --machine.GENERATOR,
+  return  {
+       vendor="psycle",
+       name="luaris",
+       generator=1, --machine.GENERATOR,
        mode = machine.GENERATOR,
-		   version=0,
-		   api=0} -- noteon = 1
+       version=0,
+       api=0} -- noteon = 1
 end
 
 -- help text displayed by the host
@@ -47,21 +48,17 @@ end
 function machine:help()
   self:h1()
   return "01xx : slide up\n"..
-         "02xx : slide down\n"..
-		 "04xy : vibrato(frq,gain)\n"..
-		 "0Cxx : volumne\n"..
-         "C3xx : partomento"
+            "02xx : slide down\n"..
+            "04xy : vibrato(frq,gain)\n"..
+            "0Cxx : volumne\n"..
+            "C3xx : partomento"
 end
 
 local filtertypes = {"LowPass", "HighPass", "BandPass", "BandReject", "None",
-                     "ITLOWPASS", "MPTLP", "MPTHigh", "LP12E",
-					 "HP12E", "BP12E", "BR12"}
+                             "ITLOWPASS", "MPTLP", "MPTHigh", "LP12E",
+                             "HP12E", "BP12E", "BR12"}
 
 -- plugin constructor
-
-
-
-
 
 function machine:init(samplerate)   
   voice.samplerate = samplerate        

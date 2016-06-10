@@ -617,8 +617,8 @@ void Window::set_pos(const ui::Rect& pos) {
   }
   if (size_changed) {
     OnSize(pos.width(), pos.height());
-  }
-  WorkChildPos();  
+  }  
+  WorkChildPos();
 }
 
 ui::Rect Window::pos() const { 
@@ -667,11 +667,14 @@ void Window::WorkChildPos() {
   }  
   std::vector<Window::Ptr>::reverse_iterator rev_it = items.rbegin();
   for (; rev_it != items.rend(); ++rev_it) {
-    Window::Ptr item = *rev_it;    
-    item->OnChildPos(*this);    
+    Window::Ptr item = *rev_it;
+    ChildPosEvent ev(shared_from_this());
+    item->OnChildPos(ev);
+    if (ev.is_propagation_stopped()) {
+      break;
+    }
   } 
 }
-
 
 Window::WeakPtr Window::focus() {
   if (imp()) {
@@ -943,7 +946,7 @@ void Group::Remove(const Window::Ptr& item) {
     throw std::runtime_error("Item is no child of the group");
   }  
   items_.erase(it);  
-  item->set_parent(Window::WeakPtr());  
+  item->set_parent(nullpointer);  
 }
 
 bool Group::OnUpdateArea() {  
@@ -1019,6 +1022,16 @@ Window::Ptr Group::HitTest(double x, double y) {
   return result;
 }
 
+void Group::OnChildPos(ChildPosEvent& ev) {
+  if (auto_size_width() || auto_size_height()) {
+    ev.window()->needsupdate();
+    imp()->dev_set_pos(pos());
+  } else {
+    // ev.StopPropagation();
+  }
+}
+
+
 void Group::OnMessage(WindowMsg msg, int param) {
   for (iterator it = items_.begin(); it != items_.end(); ++it ) {
     (*it)->OnMessage(msg, param);
@@ -1038,6 +1051,7 @@ void Group::UpdateAlign() {
     is_saving = dynamic_cast<canvas::Canvas*>(root())->IsSaving();
     dynamic_cast<canvas::Canvas*>(root())->SetSave(true);
   }
+  this->EnableFls();
   if (aligner_) {        
     aligner_->Align();    
   }
@@ -1144,6 +1158,22 @@ void Frame::HideDecoration() {
   }
 }
 
+PopupFrame::PopupFrame() : Frame(ui::ImpFactory::instance().CreatePopupFrameImp()) {
+  set_auto_size(false, false); 
+}
+
+PopupFrame::PopupFrame(FrameImp* imp) : Frame(imp) {
+  set_auto_size(false, false);
+}
+
+recursive_node_iterator Node::recursive_begin() {
+  return recursive_node_iterator(begin());
+}
+
+recursive_node_iterator Node::recursive_end() {
+  return recursive_node_iterator(end());
+}
+
 void Node::erase(iterator it) {       
   boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
   for ( ; imp_it != imps.end(); ++imp_it) {
@@ -1152,30 +1182,51 @@ void Node::erase(iterator it) {
   children_.erase(it);
 }
 
+void Node::erase_imp(NodeOwnerImp* owner) {
+  boost::ptr_list<NodeImp>::iterator it = imps.begin();
+  while (it != imps.end()) {          
+    if (it->owner() == owner) {
+      it = imps.erase(it);            
+     } else {
+      ++it;
+    }
+  }
+}
+
 void Node::erase_imps(NodeOwnerImp* owner) {
   struct {    
-    NodeOwnerImp* that;
-      void operator()(Node::Ptr node, Node::Ptr prev_node) {
-        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
-        while (it != node->imps.end()) {          
-          if (it->owner() == that) {
-            it = node->imps.erase(it);            
-          } else {
-            ++it;
-          }
-        }
-      }
+    NodeOwnerImp* that;    
+    void operator()(Node::Ptr node, Node::Ptr prev_node) {
+      node->erase_imp(that);
+    }
   } imp_eraser;
   imp_eraser.that = owner;
   traverse(imp_eraser, nullpointer);
 }
 
+NodeImp* Node::imp(NodeOwnerImp& owner) {
+  NodeImp* result = 0;
+  boost::ptr_list<NodeImp>::iterator it = imps.begin();  
+  for ( ; it != imps.end(); ++it) {      
+   if (it->owner() == &owner) {
+     result = &(*it);
+     break;
+   }        
+  }  
+  return result;
+}
+
+
 void Node::AddNode(const Node::Ptr& node) {
+  ui::Node::Ptr prev;
+  if (children_.size() > 0) {
+    prev = children_.back();
+  }
   children_.push_back(node);
   node->set_parent(shared_from_this());
   boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
-  for ( ;imp_it != imps.end(); ++imp_it) {
-    imp_it->owner()->DevUpdate(node, boost::shared_ptr<ui::Node>());
+  for ( ;imp_it != imps.end(); ++imp_it) {    
+    imp_it->owner()->DevUpdate(node, prev);
   }
 }
 
@@ -1386,6 +1437,18 @@ void ListView::ViewIcon() {
 void ListView::ViewSmallIcon() {
   if (imp()) {
     imp()->DevViewSmallIcon();
+  }
+}
+
+void ListView::EnableRowSelect() {
+  if (imp()) {
+    imp()->DevEnableRowSelect();
+  }
+}
+
+void ListView::DisableRowSelect() {
+  if (imp()) {
+    imp()->DevDisableRowSelect();
   }
 }
 
@@ -1649,6 +1712,7 @@ void Scintilla::set_caret_color(ARGB color) {
     imp()->dev_set_caret_color(color);
   }
 }
+
 ARGB Scintilla::caret_color() const {
   return imp() ? imp()->dev_caret_color() : 0;
 }
@@ -1656,6 +1720,38 @@ ARGB Scintilla::caret_color() const {
 void Scintilla::StyleClearAll() {
   if (imp()) {
     imp()->DevStyleClearAll();
+  }
+}
+
+int Scintilla::add_marker(int line, int id) {
+  return imp() ? imp()->dev_add_marker(line, id) : 0;  
+}
+
+int Scintilla::delete_marker(int line, int id) {
+  return imp() ? imp()->dev_delete_marker(line, id) : 0;  
+}
+
+void Scintilla::define_marker(int id, int symbol, ARGB foreground_color, ARGB background_color) {
+  if (imp()) {
+    imp()->dev_define_marker(id, symbol, foreground_color, background_color);
+  }
+}
+
+void Scintilla::ShowCaretLine() {
+  if (imp()) {
+    imp()->DevShowCaretLine();
+  }
+}
+
+void Scintilla::HideCaretLine() {
+  if (imp()) {
+    imp()->DevHideCaretLine();
+  }
+}
+
+void Scintilla::set_caret_line_background_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_caret_line_background_color(color);
   }
 }
 
@@ -1748,6 +1844,11 @@ ui::Window* Systems::CreateWin() {
 ui::Frame* Systems::CreateFrame() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateFrame(); 
+}
+
+ui::PopupFrame* Systems::CreatePopupFrame() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreatePopupFrame(); 
 }
 
 ui::ComboBox* Systems::CreateComboBox() {
@@ -1848,6 +1949,11 @@ ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
 ui::FrameImp* ImpFactory::CreateFrameImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateFrameImp(); 
+}
+
+ui::FrameImp* ImpFactory::CreatePopupFrameImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreatePopupFrameImp(); 
 }
 
 ui::ScrollBarImp* ImpFactory::CreateScrollBarImp(ui::Orientation orientation) {

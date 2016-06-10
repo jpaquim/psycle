@@ -27,7 +27,6 @@ extern "C" {
 }
 #endif //defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 
-#include <universalis/os/terminal.hpp>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -40,7 +39,13 @@ extern CPsycleApp theApp;
 using namespace ui;
 
 boost::shared_ptr<LuaPlugin> nullPtr;
-universalis::os::terminal* LuaProxy::terminal = 0;
+struct NullDeleter {template<typename T> void operator()(T*) {} };
+struct ReleaseImpDeleter {
+  template<typename T> void operator()(T* frame) { 
+    frame->release_imp(); 
+  }
+};
+boost::shared_ptr<ui::canvas::TerminalFrame> LuaProxy::terminal_frame_;
 
 // Class Proxy : export and import between psycle and lua
 LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) : 
@@ -48,12 +53,15 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     info_update_(true) {
   InitializeCriticalSection(&cs);
   invokelater.reset(new ui::Commands());
+  if (!terminal_frame_.get()) {
+    terminal_frame_ = boost::shared_ptr<ui::canvas::TerminalFrame>(new ui::canvas::TerminalFrame(), ReleaseImpDeleter());
+    terminal_frame_->Init();      
+  }
   L = LuaGlobal::load_script(dllname);
-  set_state(L);  
+  set_state(L);
 }
 
-LuaProxy::~LuaProxy() {
-  // if (terminal) { delete terminal; terminal = NULL; }
+LuaProxy::~LuaProxy() {  
   DeleteCriticalSection(&cs);
 }
 
@@ -73,7 +81,7 @@ int LuaProxy::invoke_later(lua_State* L) {
 
 void LuaProxy::OnTimer() {      
   try {
-    lock();  
+    lock();    
     invokelater->Invoke();  
     invokelater->Clear();
     lua_gc(L, LUA_GCCOLLECT, 0);
@@ -138,6 +146,7 @@ void LuaProxy::set_state(lua_State* state) {
   // ui canvas binds
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
   LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
+  LuaHelper::require<LuaPopupFrameItemBind >(L, "psycle.ui.canvas.popupframe");
   LuaHelper::require<LuaCenterToScreenBind>(L, "psycle.ui.canvas.centertoscreen");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");  
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
@@ -231,9 +240,6 @@ int LuaProxy::confirm(lua_State* L) {
 }
 
 int LuaProxy::terminal_output(lua_State* L) {
-  if (terminal == 0) {
-    terminal = new universalis::os::terminal();
-  }
   int n = lua_gettop(L);  // number of arguments
   const char* out = 0;
   if (lua_isboolean(L, 1)) {
@@ -253,7 +259,7 @@ int LuaProxy::terminal_output(lua_State* L) {
         return luaL_error(L,
         LUA_QL("tostring") " must return a string to " LUA_QL("print"));
       lua_pop(L, 1);  /* pop result */
-      terminal->output(universalis::os::loggers::levels::trace, s);
+      terminal_frame_->output(s); //universalis::os::loggers::levels::trace, s);
     }
   }
   return 0;

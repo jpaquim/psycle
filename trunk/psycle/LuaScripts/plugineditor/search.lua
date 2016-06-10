@@ -7,7 +7,6 @@
 
 local group = require("psycle.ui.canvas.group")
 local item = require("psycle.ui.canvas.item")
-local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local edit = require("psycle.ui.canvas.edit")
 local iconbutton = require("psycle.ui.canvas.toolicon")
@@ -16,7 +15,6 @@ local signal = require("psycle.signal")
 local settings = require("settings")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local closebutton = require("closebutton")
-
 
 local search = group:new()
 
@@ -32,23 +30,19 @@ function search:new(parent)
 end
 
 function search:init() 
-  self:setautosize(false, true)    
-  --self:setmargin(1, 1, 1, 1) -- :setpadding(10, 5, 10, 5)
+  self:setautosize(false, true)      
   self.dosearch = signal:new()
   self.dohide = signal:new()
   local closebtn = closebutton.new(self)
   closebtn.dohide:connect(search.onclosebutton, self)
   self:createeditgroup(self)  
---  self:createreplacegroup(self)  
- self:setornament(ornamentfactory:createfill(0x528A68))   
-  
- self.lastpage = {}    
- setmetatable(self.lastpage, {__mode ="kv"}) 
+--self:createreplacegroup(self)  
+  self:setornament(ornamentfactory:createlineborder(0x253E2F))  
 end
 
 function search:createeditgroup(parent)      
  self.editgroup = group:new(parent):setautosize(true, true):setalign(item.ALLEFT)
- local optionrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP)
+ local optionrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP)-- :setmargin(0, 0, 0, 5)
  self:createoptions(optionrow) 
  local editrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP)
  self:createeditfield(editrow):initeditevents()  
@@ -86,9 +80,13 @@ end
 function search:initeditevents() 
   local that = self
   function self.edit:onkeydown(ev)         
-    if ev:keycode() == ev.RETURN then      
+    if ev:keycode() == ev.RETURN then
+      local dir = search.DOWN
+      if (ev:shiftkey()) then
+        dir = search.UP       
+      end
       that.dosearch:emit(that.edit:text(), 
-                         search.DOWN, 
+                         dir, 
                          that.casesensitive:check(),
                          that.wholeword:check(),
                          that.useregexp:check())
