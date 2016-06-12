@@ -189,7 +189,7 @@ void Text::Draw(Graphics* g, Region& draw_region) {
     xp = (dim().width() - text_dim.width()) / 2;
     yp = (dim().height() - text_dim.height()) / 2;
   }
-  g->DrawString(text_, xp, yp);    
+  g->DrawString(text_, xp, yp);  
 }
 
 // Pic
@@ -250,8 +250,7 @@ void TerminalView::output(const std::string& text) {
   struct {
     std::string text;
     TerminalView* that;
-    void operator()() const
-    {
+    void operator()() const {
       that->AddText(text);
     }
    } f;   

@@ -587,6 +587,8 @@ class LuaItemBind {
       {"mousecapture", setcapture},
       {"mouserelease", releasecapture},
       {"setaligner", setaligner},
+      {"enable", enable},
+      {"disable", disable},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -603,6 +605,8 @@ class LuaItemBind {
   static int margin(lua_State* L);
   static int setpadding(lua_State* L);
   static int padding(lua_State* L);
+  static int enable(lua_State *L) { LUAEXPORT(L, &T::Enable); }
+  static int disable(lua_State *L) { LUAEXPORT(L, &T::Disable); }
 
   static int addstyle(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
@@ -1649,6 +1653,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
        {"selectionend", selectionend},
        {"setsel", setsel},
        {"hasselection", hasselection},
+       {"replacesel", replacesel},
        {"setfindwholeword", setfindwholeword},
        {"setfindmatchcase", setfindmatchcase},
        {"setfindregexp", setfindregexp},
@@ -1738,6 +1743,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
   static int selectionstart(lua_State *L) { LUAEXPORT(L, &T::selectionstart); } 
   static int selectionend(lua_State *L) { LUAEXPORT(L, &T::selectionend); } 
   static int hasselection(lua_State *L) { LUAEXPORT(L, &T::has_selection); } 
+  static int replacesel(lua_State *L) { LUAEXPORT(L, &T::ReplaceSel); } 
   static int gotoline(lua_State *L) { LUAEXPORT(L, &T::GotoLine); }  
   static int length(lua_State *L) { LUAEXPORT(L, &T::length); }  
   static int addtext(lua_State *L) { LUAEXPORT(L, &T::AddText); } 
@@ -1797,14 +1803,14 @@ class LuaEditBind : public LuaItemBind<T> {
     B::setmethods(L);
     static const luaL_Reg methods[] = {       
        {"settext", settext},
-       {"text", text},
+       {"text", text},       
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
   }  
   static int settext(lua_State *L) { LUAEXPORT(L, &T::set_text); }
-  static int text(lua_State *L) { LUAEXPORT(L, &T::text); }
+  static int text(lua_State *L) { LUAEXPORT(L, &T::text); }  
 };
 
 template <class T = LuaScrollBar>

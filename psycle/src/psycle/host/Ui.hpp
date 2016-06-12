@@ -179,7 +179,7 @@ struct Rect {
     bottom_right_.setx(top_left_.x() + width);
   }
   inline void set_height(double height) {
-    bottom_right_.setx(top_left_.y() + height);
+    bottom_right_.sety(top_left_.y() + height);
   }
   inline double left() const { return top_left_.x(); }
   inline double top() const { return top_left_.y(); }
@@ -188,7 +188,13 @@ struct Rect {
   inline double width() const { return bottom_right_.x() - top_left_.x(); }
   inline double height() const { return bottom_right_.y() - top_left_.y(); }
   inline const ui::Point& top_left() const { return top_left_; }
+  inline const ui::Point top_right() const { return ui::Point(right(), top()); }
   inline const ui::Point& bottom_right() const { return bottom_right_; }
+  inline const ui::Point bottom_left() const { return ui::Point(left(), bottom()); }  
+  inline void set_dimension(const ui::Dimension& dimension) {
+    set_width(dimension.width());
+    set_height(dimension.height());
+  }
   inline ui::Dimension dimension() const { 
     return Dimension(width(), height());
   }
@@ -204,7 +210,16 @@ struct Rect {
     bottom_right_.sety(bottom_right_.y() + dy);    
   }
 
+  inline void Offset(const ui::Point& delta) { Offset(delta.x(), delta.y()); }
+
   std::auto_ptr<ui::Region> region() const;
+
+  std::string str() const {
+    std::stringstream str;
+    str << top_left_.x() << " " << top_left_.y() << " " << bottom_right_.x() << " " << bottom_right_.y();
+    return str.str();
+  }
+  
  private:
   ui::Point top_left_, bottom_right_;  
 };
@@ -708,6 +723,8 @@ class Window : public boost::enable_shared_from_this<Window> {
 
   void lock() const;   
   void unlock() const;
+  virtual void Enable();
+  virtual void Disable();
   
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
@@ -1293,7 +1310,7 @@ class Edit : public Window {
   EditImp* imp() { return (EditImp*) Window::imp(); };
   EditImp* imp() const { return (EditImp*) Window::imp(); };
   virtual void set_text(const std::string& text);
-  virtual std::string text() const;
+  virtual std::string text() const;  
 };
 
 class ButtonImp;
@@ -1376,6 +1393,7 @@ class Scintilla : public Window {
   int selectionend() const;
   void SetSel(int cpmin, int cpmax);
   bool has_selection() const;
+  void ReplaceSel(const std::string& text);
   void set_find_match_case(bool on);
   void set_find_whole_word(bool on);
   void set_find_regexp(bool on);
@@ -1634,6 +1652,8 @@ class WindowImp {
   
   virtual void dev_add_style(UINT flag) {}
   virtual void dev_remove_style(UINT flag) {}
+  virtual void DevEnable() = 0;
+  virtual void DevDisable() = 0;
 
  private:
   Window* window_;
@@ -1737,7 +1757,7 @@ class EditImp : public WindowImp {
   EditImp(Window* window) : WindowImp(window) {}
 
   virtual void dev_set_text(const std::string& text) = 0;
-  virtual std::string dev_text() const = 0;
+  virtual std::string dev_text() const = 0;  
 };
 
 class ScintillaImp : public WindowImp {
@@ -1754,6 +1774,7 @@ class ScintillaImp : public WindowImp {
   virtual int dev_selectionend() const = 0;
   virtual void DevSetSel(int cpmin, int cpmax) {}
   virtual bool dev_has_selection() const = 0;
+  virtual void DevReplaceSel(const std::string& text) = 0; 
   virtual void dev_set_find_match_case(bool on) {}
   virtual void dev_set_find_whole_word(bool on) {}
   virtual void dev_set_find_regexp(bool on) {}
