@@ -10,6 +10,7 @@ local item = require("psycle.ui.canvas.item")
 local text = require("psycle.ui.canvas.text")
 local edit = require("psycle.ui.canvas.edit")
 local iconbutton = require("psycle.ui.canvas.toolicon")
+local button = require("psycle.ui.canvas.button")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local signal = require("psycle.signal")
 local settings = require("settings")
@@ -33,31 +34,32 @@ function search:init()
   self:setautosize(false, true)      
   self.dosearch = signal:new()
   self.dohide = signal:new()
+  self.doreplace = signal:new()
   local closebtn = closebutton.new(self)
   closebtn.dohide:connect(search.onclosebutton, self)
   self:createeditgroup(self)  
---self:createreplacegroup(self)  
-  self:setornament(ornamentfactory:createlineborder(0x253E2F))  
+  self:createreplacegroup(self)  
+  self:setornament(ornamentfactory:createlineborder(0x253E2F))
 end
 
-function search:createeditgroup(parent)      
- self.editgroup = group:new(parent):setautosize(true, true):setalign(item.ALLEFT)
- local optionrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP)-- :setmargin(0, 0, 0, 5)
+function search:createeditgroup(parent)       
+ self.editgroup = group:new(parent):setautosize(true, true):setalign(item.ALLEFT):setmargin(5, 0, 0, 0)
+ self.editgroup:setornament(ornamentfactory:createfill(0x253E2F))
+ local optionrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP):setmargin(0, 5, 0, 5)
  self:createoptions(optionrow) 
- local editrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP)
- self:createeditfield(editrow):initeditevents()  
+ local editrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP):setmargin(0, 0, 0, 5)
+ self:createeditfield(editrow):initeditevents()   
  self:createsearchbuttons(editrow)
  return self
 end
 
 function search:createeditfield(parent)
-  self.edit = edit:new(parent):setpos(0, 0, 200, 20)
-  self.edit:setdebugtext("search"):setalign(item.ALLEFT)
+  self.edit = edit:new(parent):setpos(0, 0, 200, 20):setalign(item.ALLEFT)
   return self
 end
 
 function search:createsearchbuttons(parent)
-  self.up = iconbutton:new(parent, settings.picdir.."up.png", 0xFFFFFF):setalign(item.ALLEFT)
+  self.up = iconbutton:new(parent, settings.picdir.."up.png", 0xFFFFFF):setalign(item.ALLEFT):setmargin(5, 0, 2, 0)
   self.down = iconbutton:new(parent, settings.picdir.."down.png", 0xFFFFFF):setalign(item.ALLEFT)
   local that = self
   function self.up:onclick()
@@ -100,15 +102,48 @@ function search:initeditevents()
 end
 
 function search:createreplacegroup(parent)
-  self.replacegroup = group:new(parent):setalign(item.ALLEFT)
+  self.replacegroup = group:new(parent):setalign(item.ALLEFT):setautosize(true, true):setmargin(20, 0, 0, 0)
   self:createreplacefield(self.replacegroup)  
 end
 
-function search:createreplacefield(parent)
-  self.replaceactive = checkbox:new(parent):settext("replace with"):setalign(item.ALTOP)
-  self.replacefield = edit:new(parent):setalign(item.ALTOP)
+function search:createreplacefield(parent)  
+  self.replaceactive = checkbox:new(parent):settext("replace selection with"):setalign(item.ALTOP):setmargin(0, 5, 0, 5)  
+  self.replacefieldgroup = group:new(parent):setalign(item.ALTOP):setautosize(true, true):setmargin(20, 0, 0, 0)
+  self.replacefield = edit:new(self.replacefieldgroup):setalign(item.ALLEFT):setautosize(false, false):setpos(0, 0, 200, 20):setmargin(0, 0, 0, 5):disable()  
+  local that = self
+  function self.replacefield:onkeydown(ev)         
+    if ev:keycode() == ev.RETURN then      
+      that.doreplace:emit()
+      ev:preventdefault()
+    elseif ev:keycode() == ev.ESCAPE then
+      that:hide():parent():updatealign()
+      that.dohide:emit()
+    end
+  end
+  self:createreplacebutton(self.replacefieldgroup)  
+  function self.replaceactive:onclick(ischecked)
+     if self:check() then
+       that.replacefield:enable()
+       that.replacebtn:enable()
+       that.replacegroup:setornament(ornamentfactory:createfill(0xFFBF00))
+     else
+       that.replacefield:disable()
+       that.replacebtn:disable()
+       that.replacegroup:setornament(nil)
+     end
+  end
   return self
 end
+
+function search:createreplacebutton(parent)
+  self.replacebtn = button:new(parent):settext("replace"):setalign(item.ALLEFT):setmargin(5, 0, 2, 0):setpos(0, 0, 60, 20):disable()
+  local that = self
+  function self.replacebtn:onclick()
+    that.doreplace:emit()
+  end  
+  return self
+end
+
 
 function search:createoptions(parent)
   self.casesensitive = checkbox:new(parent)

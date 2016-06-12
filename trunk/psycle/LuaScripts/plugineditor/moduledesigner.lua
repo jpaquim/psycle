@@ -46,8 +46,8 @@ function moduledesigner:addcheckbox()
   self.objectinspector_:setobject(item)
 end
 
-function moduledesigner:adddrag(item, w, h)  
-  local g = group:new(self):setautosize(true, true):setpos(10, 10)    
+function moduledesigner:adddrag(item, w, h)    
+  local g = group:new(self):setautosize(false, false):setpos(10, 10, w, h)    
   function g:onmousedown(ev)    
     self.down = true    
     self. dragstart = { x = ev.x, y = ev.y }

@@ -28,10 +28,9 @@ void DefaultAligner::CalcDimensions() {
         item_dim.set_height(item->dim().height());
       }
     }
-    if (item->align() != ALNONE) {
-      const ui::Rect& margin = item->margin();
-      item_dim.set(item_dim.width() + margin.left() + margin.right(),
-                   item_dim.height() + margin.top() + margin.bottom());
+    if (item->align() != ALNONE) {      
+      item_dim.set(item_dim.width(),
+                   item_dim.height());
     }
     // width
     {
@@ -49,6 +48,7 @@ void DefaultAligner::CalcDimensions() {
               current_pos.set_right(current_pos.right() + expand);
             }
           }
+          current_dim.set_width(current_dim.width() + item->margin().right() + item->margin().left());
         break;
         case ALRIGHT:        
           if (diff == 0) {          
@@ -92,13 +92,14 @@ void DefaultAligner::CalcDimensions() {
         case ALTOP:
           current_pos.set_top(current_pos.top() + item_dim.height());
           if (diff == 0) {
-            current_dim.set_height(current_dim.height() + item_dim.height());            
-            current_pos.set_bottom(current_pos.bottom() + item_dim.height());
-          } else {
+            current_dim.set_height(current_dim.height() + item_dim.height());
+            current_pos.set_bottom(current_pos.bottom() + item_dim.height());            
+          } else {            
             double expand = item_dim.height() - diff;
             current_dim.set_height(current_dim.height() + expand);
             current_pos.set_bottom(current_pos.bottom() + expand); 
-          }
+          }          
+          current_dim.set_height(current_dim.height() + item->margin().bottom() + item->margin().top());
         break;
         case ALLEFT:
         case ALRIGHT:
@@ -111,7 +112,7 @@ void DefaultAligner::CalcDimensions() {
               current_dim.set_height(current_dim.height() + expand);
               current_pos.set_bottom(current_pos.bottom() + expand);
             }
-          }      
+          }          
         break;
         case ALBOTTOM:
           if (diff == 0) {          
@@ -131,14 +132,7 @@ void DefaultAligner::CalcDimensions() {
       }    
     }
   } // end loop   
-  const ui::Rect& margin = group_.lock()->margin();    
-  const ui::Rect& pad = group_.lock()->padding();
-  if (current_dim.width() > 0 && current_dim.height() > 0) {
-    current_dim.set_width(current_dim.width() + pad.left() + pad.right());
-    current_dim.set_height(current_dim.height() + pad.top() + pad.bottom());
-  }
-  current_dim += ui::Dimension(margin.left() + margin.right(),
-                               margin.top() + margin.bottom());  
+  
   dim_ = current_dim;
 }
 
@@ -162,76 +156,52 @@ void DefaultAligner::SetPositions() {
       if (!item->auto_size_height()) {
         item_dim.set_height(item->dim().height());        
       }
-    }        
-    ui::Rect margin = item->margin();      
-    item_dim += ui::Dimension(margin.left() + margin.right(), margin.top() + margin.bottom());
-    ui::Rect pad = group_.lock()->padding();
-    margin.set(margin.top_left() + pad.top_left(),
-               margin.bottom_right() - pad.bottom_right());
-    double margin_w = margin.left() + margin.right();
-    double margin_h = margin.top() + margin.bottom();    
+    }                        
     switch (item->align()) {
       case ALCLIENT:
         client = item;
       break;      
       case ALLEFT:
-        {                   
-          double w = item_dim.width();          
-          item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
-                                           current_pos.top() + margin.top()), 
-                                 ui::Point(current_pos.left() + margin.left() + w - margin_w, 
-                                           current_pos.top() + margin.top() + current_pos.bottom() - current_pos.top() - margin_h)));
-          current_pos.set_left(current_pos.left() + w);          
+        { 
+          ui::Point top_left = ui::Point(current_pos.left() +  item->margin().left(), current_pos.top());
+          current_pos.set_left(current_pos.left() + item_dim.width() + item->margin().left());
+          ui::Rect new_pos = ui::Rect(top_left, current_pos.bottom_left());                                 
+          if (new_pos != item->pos()) {
+            item->set_pos(new_pos);
+          }
+          current_pos.set_left(current_pos.left() + item->margin().right());
         }
       break;
       case ALRIGHT:
-        item->set_pos(ui::Rect(ui::Point(current_pos.right() - item_dim.width() + margin.right(), 
-                                         current_pos.top() + margin.top()), 
-                               ui::Point(current_pos.right() - item_dim.width() + margin.right() + item_dim.width() - margin_w, 
-                                         current_pos.top() + margin.top() + current_pos.bottom() - current_pos.top() - margin_h))); 
+        item->set_pos(ui::Rect(ui::Point(current_pos.right() - item_dim.width(), current_pos.top()), 
+                               ui::Point(current_pos.right(), current_pos.bottom())));
         current_pos.set_right(current_pos.right() - item_dim.width());
       break;
       case ALTOP:
-        {
-          double h = item_dim.height();          
-          ui::Rect new_size = 
-            ui::Rect(ui::Point(current_pos.left() + margin.left(),
-                               current_pos.top() + margin.top()),  
-                     ui::Point(current_pos.left() + margin.left() + 
-                                 + current_pos.right() - current_pos.left() 
-                                 - margin_w,
-                               current_pos.top() + h - margin_h));
-          ui::Rect old_pos = item->area().bounds();
-          old_pos.Offset(item->pos().left(), item->pos().top());
-          if (new_size != old_pos) {           
-            item->set_pos(new_size);             
-          }
-          current_pos.set_top(current_pos.top() + h - margin_h);
+        {                   
+          ui::Point top_left = ui::Point(current_pos.left(), current_pos.top() + item->margin().top());
+          current_pos.set_top(current_pos.top() + item_dim.height() + item->margin().top());
+          ui::Rect new_pos = ui::Rect(top_left, current_pos.top_right());
+          if (new_pos != item->pos()) {            
+            item->set_pos(new_pos);           
+          }          
+          current_pos.set_top(current_pos.top() + item->margin().bottom());
         }
       break;
       case ALBOTTOM:
-        {
-          double h = item_dim.height();
-          ui::Rect new_size = 
-            ui::Rect(ui::Point(current_pos.left() + margin.left(), 
-                               current_pos.bottom() - h + margin_h
-                               + margin.top()),
-                     ui::Point(current_pos.left() + margin.left()
-                                 + current_pos.right() - current_pos.left()
-                                 - margin_w, 
-                               current_pos.bottom() - h + margin.top() + h 
-                                 - margin.bottom()));         
-          ui::Rect old_pos = item->area().bounds();
-          old_pos.Offset(item->pos().left(), item->pos().top());
-          if (new_size != old_pos) {             
-            item->set_pos(new_size);
-          }
-          current_pos.set_bottom(current_pos.bottom() - h - margin_h);
+        {  
+          current_pos.set_bottom(current_pos.bottom() - item->margin().bottom());
+          ui::Point bottom_right = current_pos.bottom_right();
+          current_pos.set_bottom(current_pos.bottom() - item_dim.height());
+          ui::Rect new_pos = ui::Rect(current_pos.bottom_left(), bottom_right);
+          if (new_pos != item->pos()) {
+            item->set_pos(new_pos);
+          }          
         }
       break;
       default:
       break;
-    } // end switch      
+    } // end switch    
   } // end loop 
   
   if (client) {    
@@ -258,25 +228,14 @@ void GridAligner::CalcDimensions() {
         item_dim.set_height(item->dim().height());
       }
     }
-    if (item->align() != ALNONE) {
-      const ui::Rect& margin = item->margin();
-      item_dim.set(item_dim.width() + margin.left() + margin.right(),
-                   item_dim.height() + margin.top() + margin.bottom());
+    if (item->align() != ALNONE) {      
+      item_dim.set(item_dim.width(), item_dim.height());
     }       
     itemmax.set_width(std::max(itemmax.width(), item_dim.width()));
     itemmax.set_height(std::max(itemmax.height(), item_dim.height()));    
   } // end loop   
   
-  Dimension current_dim(itemmax.width()*col_num_, itemmax.height()*row_num_);
-
-  const ui::Rect& margin = group_.lock()->margin();    
-  const ui::Rect& pad = group_.lock()->padding();
-  if (current_dim.width() > 0 && current_dim.height() > 0) {
-    current_dim.set_width(current_dim.width() + pad.left() + pad.right());
-    current_dim.set_height(current_dim.height() + pad.top() + pad.bottom());
-  }
-  current_dim += ui::Dimension(margin.left() + margin.right(),
-                               margin.top() + margin.bottom());  
+  Dimension current_dim(itemmax.width()*col_num_, itemmax.height()*row_num_);  
   dim_ = current_dim;
 }
 
@@ -298,16 +257,14 @@ void GridAligner::SetPositions() {
     Window::Ptr item = *i;
     if (!item->visible()) {
       continue;
-    }
-    ui::Rect margin = item->margin();     
-    item->set_pos(ui::Rect(ui::Point(current_pos.left() + margin.left(), 
-                                     current_pos.top() + margin.top()), 
+    }    
+    item->set_pos(ui::Rect(ui::Point(current_pos.left(), current_pos.top()), 
                            ui::Dimension(cell_width, cell_height)));    
     ++pos;
     if (pos < col_num_) {            
-      current_pos.Offset(cell_width + margin.right(), 0);      
+      current_pos.Offset(cell_width, 0);      
     } else {      
-      current_pos.Offset(0, cell_height + margin.bottom());
+      current_pos.Offset(0, cell_height);
       current_pos.set_left(0);
       pos = 0;
     }  

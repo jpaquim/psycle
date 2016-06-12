@@ -62,7 +62,7 @@ function tabgroup:init()
   --self:addstyle(0x02000000)  
   self:setautosize(false, false)
   self.hh = 20  
-  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP)  
+  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):setornament(ornamentfactory:createfill(0x2F2F2F))  
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)  
   local that = self
   function icon1:onclick()    
@@ -99,10 +99,8 @@ function tabgroup:init()
     self.f:hidedecoration()
     self.f:setpos(x + iw - 200, y + ih, 200, h)       
     self.f:show()            
-  end
-  
-  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT)
-  self.tabs:setornament(ornamentfactory:createboundfill(0x2F2F2F))    
+  end  
+  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):setornament(ornamentfactory:createfill(0x2F2F2F))  
       
   self.children = group:new(self)
   self.children:setornament(ornamentfactory:createboundfill(0x292929))

@@ -194,23 +194,18 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     CPoint pt(pMsg->pt);
     CRect rc;
     GetWindowRect(&rc);    
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
-    if (window()) {
-      if (mouse_enter_) {
-        mouse_enter_ = false;
+    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);
+    if (mouse_enter_) {
+      mouse_enter_ = false;
+      if (window()) {
         try {
           window()->OnMouseEnter(ev);
         } catch (std::exception& e) {
           ::AfxMessageBox(e.what());      
-        }
-      }   
-      try {
-        window()->OnMouseMove(ev);
-      } catch (std::exception& e) {
-        ::AfxMessageBox(e.what());
+        }      
       }
-      return prevent_propagate_event(ev, pMsg);      
     }
+    return WorkEvent(ev, &Window::OnMouseMove, window(), pMsg);    
   }
   return CWnd::PreTranslateMessage(pMsg);
 }
@@ -799,7 +794,7 @@ void ListViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_
       pos = prev_imp->pos() + 1;
     }
   }
-  ListNodeImp* imp = UpdateNode(node, prev_node, pos);  
+  UpdateNode(node, prev_node, pos);  
   boost::shared_ptr<Node> prev;
   for (int i = 0; it != end; ++it, ++i) {    
     UpdateNode((*it), prev, i);    

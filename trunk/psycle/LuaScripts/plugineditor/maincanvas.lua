@@ -110,14 +110,15 @@ end
 
 function maincanvas:createsearch()
   self.search = search:new(self):setpos(0, 0, 200, 200):hide():setalign(item.ALBOTTOM)
-  self.search.dosearch:connect(maincanvas.onsearch, self)   
+  self.search.dosearch:connect(maincanvas.onsearch, self)
+  self.search.doreplace:connect(maincanvas.onreplace, self)
   self.search.dohide:connect(maincanvas.onsearchhide, self)
   self.searchbeginpos = -1
   self.searchrestarted = false
 end
 
 function maincanvas:createoutputs()
-  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 150):setalign(item.ALBOTTOM)  
+  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 150):setalign(item.ALBOTTOM)
   self.output = self:createoutput()  
   self.outputs:addpage(self.output, "Output")  
   self.callstack = self:createcallstack()  
@@ -515,7 +516,7 @@ function maincanvas:findsearch(page, dir, pos)
   return cpmin, cpmax
 end
 
-function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)    
+function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)
   local page = self.pages:activepage()
   if page then 
     page:setfindmatchcase(case):setfindwholeword(wholeword):setfindregexp(regexp)      
@@ -544,6 +545,20 @@ function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)
         self.searchbeginpos = cpselstart        
       end
     end    
+  end
+end
+
+function maincanvas:onreplace()
+  local page = self.pages:activepage()
+  if page then 
+    if page:hasselection() then     
+      page:replacesel(self.search.replacefield:text())      
+    end                 
+    self:onsearch(self.search.edit:text(), 
+                  self.search.DOWN,
+                  self.search.casesensitive:check(),
+                  self.search.wholeword:check(),
+                  self.search.useregexp:check())
   end
 end
 

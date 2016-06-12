@@ -148,7 +148,7 @@ const ui::Region& Area::region() const {
 }
 
 const ui::Rect& Area::bounds() const {    
-  Update();    
+  Update();  
   return bound_cache_;
 }
 
@@ -202,7 +202,7 @@ void Area::ComputeBounds() const {
     bound_cache_.set(ui::Point(std::numeric_limits<double>::max(),
                                 std::numeric_limits<double>::max()),
                       ui::Point(std::numeric_limits<double>::min(),
-                                std::numeric_limits<double>::min()));
+                                std::numeric_limits<double>::min()));    
     rect_const_iterator i = rect_shapes_.begin();
     for (; i != rect_shapes_.end(); ++i) {
       ui::Rect bounds = (*i).bounds();
@@ -633,12 +633,30 @@ ui::Rect Window::desktop_pos() const {
   return imp() ? Rect(imp_->dev_desktop_pos().top_left(), dim()) : Rect();
 }
 
-ui::Dimension Window::dim() const {
+ui::Dimension Window::dim() const {  
   if (imp_.get()) {
-    return ui::Dimension((auto_size_width() ? area().bounds().width() : imp_->dev_pos().width()),
-                    (auto_size_height() ? area().bounds().height() : imp_->dev_pos().height()));
+    ui::Dimension result;
+    if (auto_size_width()) {
+      if (aligner()) {
+        result.set_width(aligner()->dim().width());
+      } else {
+        result.set_width(area().bounds().width());
+      }
+    } else {
+      result.set_width(imp_->dev_pos().width());
+    }
+    if (auto_size_height()) {
+      if (aligner()) {
+        result.set_height(aligner()->dim().height());
+      } else {
+        result.set_height(area().bounds().height());
+      }
+    } else {
+      result.set_height(imp_->dev_pos().height());
+    }
+    return result;    
   } else {
-    return ui::Dimension(area().bounds().width(), area().bounds().height());
+    return area().bounds().dimension();
   }
 }
 
@@ -775,6 +793,18 @@ void Window::SetCursorPos(double x, double y) {
 void Window::SetCursor(CursorStyle style) {
   if (imp_.get()) {
     imp_->DevSetCursor(style);
+  }
+}
+
+void Window::Enable() {
+  if (imp()) {
+    imp()->DevEnable();
+  }
+}
+
+void Window::Disable() {
+  if (imp()) {
+    imp()->DevDisable();
   }
 }
 
@@ -952,12 +982,14 @@ void Group::Remove(const Window::Ptr& item) {
 bool Group::OnUpdateArea() {  
   if (!auto_size_width() && !auto_size_height()) {
     area_->Clear();
+    area_->Add(RectShape(ui::Rect()));
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(),
                                   imp()->dev_pos().dimension())));
     return true;
   }
 
   std::auto_ptr<Area> area(new Area());
+  area->Add(RectShape(ui::Rect()));
   std::vector<Window::Ptr>::const_iterator it = items_.begin();  
   for ( ; it != items_.end(); ++it) {
     Window::Ptr item = *it;  
@@ -982,7 +1014,7 @@ bool Group::OnUpdateArea() {
     area_->Add(RectShape(ui::Rect(bounds.top_left(),                                  
                                   ui::Point(bounds.width(),
                                             imp()->dev_pos().height()))));
-  }
+  }  
   return true;
 }
 
@@ -1024,7 +1056,7 @@ Window::Ptr Group::HitTest(double x, double y) {
 
 void Group::OnChildPos(ChildPosEvent& ev) {
   if (auto_size_width() || auto_size_height()) {
-    ev.window()->needsupdate();
+    ev.window()->needsupdate();    
     imp()->dev_set_pos(pos());
   } else {
     // ev.StopPropagation();
@@ -1568,6 +1600,12 @@ int Scintilla::selectionend() const {
 void Scintilla::SetSel(int cpmin, int cpmax)  {
   if (imp()) {
     imp()->DevSetSel(cpmin, cpmax);
+  }
+}
+
+void Scintilla::ReplaceSel(const std::string& text)  {
+  if (imp()) {
+    imp()->DevReplaceSel(text);
   }
 }
 

@@ -598,7 +598,8 @@ class WindowTemplateImp : public T, public I {
     return ui::Dimension(rc.Width(), rc.Height());
   }
   
-  
+  virtual void DevEnable() { EnableWindow(true); }
+  virtual void DevDisable() { EnableWindow(false); }
   virtual void DevShow() { ShowWindow(SW_SHOWNOACTIVATE); }
   virtual void DevHide() { ShowWindow(SW_HIDE); }
   virtual void DevInvalidate() {    
@@ -1246,7 +1247,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }    
-    imp->set_window(w);
+    imp->set_window(w);    
     WindowHook::windows_[imp->GetSafeHwnd()] = imp;
     // Set the hook
     WindowHook::SetFocusHook();
@@ -1261,7 +1262,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
     GetWindowTextA(s);
     return s.GetString();
   }
-
+    
 protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CEdit::OnPaint(); }
@@ -1353,7 +1354,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   }
   void DevSetSel(int cpmin, int cpmax) { f(SCI_SETSEL, cpmin, cpmax); }
   bool dev_has_selection() const { return dev_selectionstart() != dev_selectionend(); }
- 
+  void DevReplaceSel(const std::string& text) { f(SCI_REPLACESEL, 0, text.c_str()); }
   void dev_set_find_match_case(bool on) {     
    if (on) {
       find_flags_ = find_flags_ | SCFIND_MATCHCASE;

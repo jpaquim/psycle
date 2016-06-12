@@ -59,7 +59,7 @@ function checkbox:init()
     else      
       that.checktext:settext("")
     end
-    that.onclick(self.check)
+    that:onclick(that.check_)
   end
   
 end
