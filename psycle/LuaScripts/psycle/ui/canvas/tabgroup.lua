@@ -13,38 +13,15 @@ local text = require("psycle.ui.canvas.text")
 local config = require("psycle.config")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local toolicon = require("psycle.ui.canvas.toolicon")
+local frame = require("psycle.ui.canvas.frame")
 local popupframe = require("psycle.ui.canvas.popupframe")
+local popupmenu = require("psycle.ui.popupmenu")
+local node = require("psycle.node")
 local signal = require("psycle.signal")
+local centertoscreen = require("psycle.ui.canvas.centertoscreen")
 
 local tabgroup = group:new()
-
-tabgroup.cfgkeys = {
-  "FontTop",
-  "FontBottom",
-  "HFontTop",
-  "HFontBottom",
-  "TitleFont",
-  "Top",
-  "Bottom",
-  "HTop",
-  "HBottom",
-  "Title"         
-}
-tabgroup.skin = {colors={}}
 local cfg = config:new("MacParamVisual")
-for i=1, #tabgroup.cfgkeys do
-  local keyname = tabgroup.cfgkeys[i]
-  tabgroup.skin.colors[string.upper(keyname)] = cfg:get("machineGUI"..keyname.."Color")
-end
-
--- todo skin defaults ..
-tabgroup.header = { color={} }
-tabgroup.header.color.BG = 0x000000
-tabgroup.header.color.LABEL = 0xFF0000
-tabgroup.header.color.BORDER = 0x00FF00
-tabgroup.header.color.HBG = 0xFFFFFF
-tabgroup.header.color.HLABEL = 0xFF0000
-tabgroup.header.color.HBORDER = 0x00FF00
 tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 
 function tabgroup:new(parent)  
@@ -56,15 +33,17 @@ function tabgroup:new(parent)
 end
 
 function tabgroup:init()
+  self.frames = {}
   self.isoldflsprevented_ = {}
   self.dopageclose = signal:new()
   self.hasclosebutton_ = true
   --self:addstyle(0x02000000)  
-  self:setautosize(false, false)
-  self.hh = 20  
+  self:setautosize(false, false)  
   self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):setornament(ornamentfactory:createfill(0x2F2F2F))  
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)  
   local that = self
+  self:inittabpopupmenu()
+  self:initframepopupmenu()
   function icon1:onclick()    
     self.f = popupframe:new()
     --self.f:addstyle(0x02000000)
@@ -73,12 +52,9 @@ function tabgroup:init()
     function self.c:onmousedown(ev)
       that1.f:hide()
     end
-    local g = group:new(self.c)
-    g:setautosize(false, true)
-    g:setalign(window.ALTOP)    
+    local g = group:new(self.c):setautosize(false, true):setalign(window.ALTOP)    
     self.f:setview(self.c)
     self.c:setornament(ornamentfactory:createfill(0x292929))    
-    local fr = f
     function fun(item)
       local t = text:new(g):setcolor(0xCACACA):settext(item.text:text()):setautosize(false, true) 
       t:setalignment(window.ALCENTER):setalign(window.ALTOP)      
@@ -102,11 +78,9 @@ function tabgroup:init()
   end  
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):setornament(ornamentfactory:createfill(0x2F2F2F))  
       
-  self.children = group:new(self)
+  self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)
   self.children:setornament(ornamentfactory:createboundfill(0x292929))
-  self.children:setclipchildren()    
-  self.children:setautosize(false, false)
-  self.children:setalign(window.ALCLIENT)
+  self.children:setclipchildren()  
 end
 
 function tabgroup:setlabel(page, text)
@@ -138,7 +112,8 @@ function tabgroup:addpage(page, label)
   page:setautosize(false, false):setalign(window.ALCLIENT)
   self:createheader(page, label)
   self.children:add(page)  
-  self:setactivepage(page)    
+  self:setactivepage(page)
+  self.tabbar:updatealign()  
   self.tabs:updatealign()  
   self.children:updatealign()    
   self:restoreflsstate()
@@ -146,16 +121,26 @@ function tabgroup:addpage(page, label)
 end
 
 function tabgroup:activepage()
-  return self.activepage_
+  if self.activeframepage_ ~= nil then
+    return self.activeframepage_
+  else
+    return self.activepage_
+  end
 end
 
 function tabgroup:setactiveheader(page)  
    if page then    
     local items = self.tabs:items()
     if self.activepage_ then
-      items[self.children:itemindex(self.activepage_)]:setskinnormal()
+      local index = self.children:itemindex(self.activepage_)
+      if index ~= 0 then
+        items[index]:setskinnormal()
+      end
     end
-    items[self.children:itemindex(page)]:setskinhighlight()
+    local index = self.children:itemindex(page)
+    if index ~= 0 then
+      items[index]:setskinhighlight()
+    end
   end    
 end
 
@@ -184,6 +169,7 @@ end
 
 function tabgroup:removeall()
   self.activepage_ = nil
+  self.activeframepage_ = nil
   self.tabs:removeall()
   collectgarbage()
   self.children:removeall()
@@ -194,14 +180,14 @@ end
 function tabgroup:removepage(page)  
   local tabs = self.tabs:items()  
   for i=1, #tabs do
-    if tabs[i].page == page then
+    if tabs[i].page == page then    
       self:removepagebyheader(tabs[i])
       break;
     end
   end  
 end
 
-function tabgroup:removepagebyheader(header)
+function tabgroup:removepagebyheader(header)  
   self:saveflsstate():preventfls()
   local pages = self.children:items()
   local idx = self.children:itemindex(header.page)  
@@ -225,15 +211,14 @@ function tabgroup:createheader(page, label)
   header.text:setalign(window.ALLEFT)
   local that = self
   if self.hasclosebutton_ then
-    header.close = text:new(header)    
-                       :setdebugtext("close")     
-                       :setcolor(tabgroup.skin.colors.TITLEFONT) 
+    header.close = text:new(header)                           
+                       :setcolor(0xB0D8B1)
                        :settext("x")                       
     header.close:setalign(window.ALLEFT):setmargin(4, 0, 0, 0)    
     function header.close:onmousedown()
       local ev = {}
-      ev.page = self:parent().page      
-      that.dopageclose:emit(ev)           
+      ev.page = self:parent().page
+      that.dopageclose:emit(ev)
       that:removepagebyheader(self:parent())
     end
   end
@@ -246,11 +231,150 @@ function tabgroup:createheader(page, label)
     self.text:setcolor(0xA1A1A1)    
   end    
   header:setskinnormal()    
-  function header:onmousedown(ev)    
-    that:setactivepage(self.page)     
+  function header:onmousedown(ev)        
+    that:setactivepage(self.page)
+    if ev.button == 2 then
+      local x, y = self:desktoppos()
+      that.tabpopupmenu:track(x + 5, y + 5)
+      that.tabpopupmenu.headertext = self.text:text()
+    end    
   end
   function header:onmouseup(ev) end  
   return header
+end
+
+function tabgroup:inittabpopupmenu() 
+  self.tabpopuprootnode = node:new()
+  local node1 = node:new():settext("Close")
+  self.tabpopuprootnode:add(node1)
+  local node2 = node:new():settext("Show As Window")
+  self.tabpopuprootnode:add(node2)
+  self.tabpopupmenu = popupmenu:new():setrootnode(self.tabpopuprootnode):update()    
+  local that = self    
+  function self.tabpopupmenu:onclick(node)       
+    if node:text() == "Show As Window" then      
+      that:openinframe(that.activepage_, self.headertext)      
+    elseif node:text() == "Close" then
+      local ev = {}
+      ev.page = that:activepage()
+      that.dopageclose:emit(ev)
+      that:removepage(ev.page)
+    end
+  end  
+end
+
+function tabgroup:initframepopupmenu() 
+  self.framepopuprootnode = node:new()
+  local node1 = node:new():settext("Close")
+  self.framepopuprootnode:add(node1)
+  local node2 = node:new():settext("Dock To Tabs")
+  self.framepopuprootnode:add(node2)
+  self.framepopupmenu = popupmenu:new():setrootnode(self.framepopuprootnode):update()    
+  local that = self
+  function self.framepopupmenu:onclick(node)       
+    if node:text() == "Dock To Tabs" then      
+      that:openintab(self.frame_)      
+      self.frame_ = nil
+    elseif node:text() == "Close" then
+      local page = self.frame_:view():items()[1]
+      local ev = {}
+      ev.page = page
+      that.dopageclose:emit(ev)
+      that:unregisterframe(self.frame_)      
+      that:removeframepagepointer()      
+    end    
+  end  
+end
+
+function tabgroup:openinframe(page, name)    
+  local canvas = canvas:new()  
+  self:removepage(page)
+  self.activepage_ = nil  
+  canvas:add(page)
+  local frame = self:createframe(canvas, name)
+  self.framepopupmenu.frame_ = frame
+  frame:setpopupmenu(self.framepopupmenu)
+  frame:show(centertoscreen:new():sizetoscreen(0.3, 0.5))
+end
+
+function tabgroup:createframe(canvas, name)  
+  local frame = frame:new():setview(canvas):settitle(name)  
+  frame.tabgroup = self
+  self.frames[#self.frames+1] = frame
+  local that = self
+  function frame:oncontextpopup(ev)
+     that.framepopupmenu.frame_ = self
+  end
+  function frame:onclose(ev)
+    local page = self:view():items()[1]
+    local ev = {}
+    ev.page = page
+    that.dopageclose:emit(ev)
+    for i = 1, #that.frames do
+      if that.frames[i] == self then
+        that.frames[i] = nil
+        break
+      end
+    end
+    that.framepopupmenu.frame_ = nil
+    that.activeframe_ = nil
+    that.activeframepage_ = nil
+    self = nil  
+  end
+  function frame:onfocus()
+   local page = self:view():items()[1]
+   self.tabgroup.activepage_ = nil
+   self.tabgroup.activeframepage_ = page
+   self.tabgroup.framepopupmenu.frame_ = self
+  end
+  function frame:onkillfocus()
+    self.activeframepage_ = nil
+  end
+  return frame
+end
+
+function tabgroup:openintab(frame)     
+  local page = frame:view():items()[1]
+  local name = frame:title()
+  frame:view():remove(page)
+  self:unregisterframe(frame)  
+  self:removeframepagepointer()
+  self:hideallpages()
+  self:setnormalskintoalltabs()
+  self:addpage(page, name)
+  self:setactivepage(page)    
+  self.tabs:updatealign()  
+  self.children:updatealign()    
+end
+
+function tabgroup:hideallpages()
+  local pages = self.children:items()
+  for i=1, #pages do
+    pages[i]:hide()
+  end
+end
+
+function tabgroup:removeframepagepointer()
+  self.activepage_ = nil
+  self.activeframepage_ = nil
+  self.framepopupmenu.frame_ = nil
+end
+
+function tabgroup:setnormalskintoalltabs()
+  local tabs = self.tabs:items()
+  for i=1, #tabs do
+    tabs[i]:setskinnormal()
+  end
+end  
+
+
+function tabgroup:unregisterframe(frame)
+  for i = 1, #self.frames do
+    if self.frames[i] == frame then
+      self.frames[i] = nil
+      break
+    end  
+  end
 end
 
 function tabgroup:traverse(f, arr)  

@@ -1168,6 +1168,10 @@ void Frame::set_title(const std::string& title) {
   }
 }
 
+std::string Frame::title() const {
+  return imp() ? imp()->dev_title() : "";
+}
+
 void Frame::set_view(ui::Window::Ptr view) {
   view_ = view;
   if (imp()) {
@@ -1188,6 +1192,16 @@ void Frame::HideDecoration() {
   if (imp()) {
     imp()->DevHideDecoration();
   }
+}
+
+void Frame::WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point) {
+  if (!popup_menu_.expired()) {
+    ev.StopPropagation();
+  }
+  OnContextPopup(ev, mouse_point);
+  if (!ev.is_default_prevented() && !popup_menu_.expired()) {
+    popup_menu_.lock()->Track(mouse_point);
+  }  
 }
 
 PopupFrame::PopupFrame() : Frame(ui::ImpFactory::instance().CreatePopupFrameImp()) {

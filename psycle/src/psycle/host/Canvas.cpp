@@ -76,7 +76,8 @@ void DefaultAligner::CalcDimensions() {
               current_dim.set_width(current_dim.width() + expand);
               current_pos.set_right(current_pos.right() + expand);
             }
-          }      
+          }
+          current_dim.set_width(current_dim.width() + item->margin().right() + item->margin().left());
         break;
             
         default:
@@ -112,7 +113,8 @@ void DefaultAligner::CalcDimensions() {
               current_dim.set_height(current_dim.height() + expand);
               current_pos.set_bottom(current_pos.bottom() + expand);
             }
-          }          
+          }
+          current_dim.set_height(current_dim.height() + item->margin().bottom() + item->margin().top());
         break;
         case ALBOTTOM:
           if (diff == 0) {          
@@ -163,8 +165,8 @@ void DefaultAligner::SetPositions() {
       break;      
       case ALLEFT:
         { 
-          ui::Point top_left = ui::Point(current_pos.left() +  item->margin().left(), current_pos.top());
-          current_pos.set_left(current_pos.left() + item_dim.width() + item->margin().left());
+          ui::Point top_left = ui::Point(current_pos.left() +  item->margin().left(), current_pos.top() + item->margin().top());          
+          current_pos.set_left(current_pos.left() + item_dim.width() + item->margin().left());          
           ui::Rect new_pos = ui::Rect(top_left, current_pos.bottom_left());                                 
           if (new_pos != item->pos()) {
             item->set_pos(new_pos);
@@ -179,7 +181,7 @@ void DefaultAligner::SetPositions() {
       break;
       case ALTOP:
         {                   
-          ui::Point top_left = ui::Point(current_pos.left(), current_pos.top() + item->margin().top());
+          ui::Point top_left = ui::Point(current_pos.left() + item->margin().left(), current_pos.top() + item->margin().top());
           current_pos.set_top(current_pos.top() + item_dim.height() + item->margin().top());
           ui::Rect new_pos = ui::Rect(top_left, current_pos.top_right());
           if (new_pos != item->pos()) {            
@@ -189,7 +191,7 @@ void DefaultAligner::SetPositions() {
         }
       break;
       case ALBOTTOM:
-        {  
+        {                      
           current_pos.set_bottom(current_pos.bottom() - item->margin().bottom());
           ui::Point bottom_right = current_pos.bottom_right();
           current_pos.set_bottom(current_pos.bottom() - item_dim.height());

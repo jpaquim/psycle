@@ -683,6 +683,9 @@ protected:
       } catch (std::exception& e) {
         ::AfxMessageBox(e.what());
       }
+      if (!::IsWindow(msg->hwnd)) {
+        return true;
+      }
       return prevent_propagate_event(ev, msg);          
     } 
     return false;
@@ -855,6 +858,12 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
     SetWindowTextA(_T(title.c_str()));
   }
 
+  virtual std::string dev_title() const {
+    CString str;
+    GetWindowTextA(str);
+    return str.GetString();    
+  }
+
   virtual void dev_set_view(ui::Window::Ptr view) {
     CWnd* wnd = dynamic_cast<CWnd*>(view->imp());
     if (wnd) {      
@@ -878,17 +887,24 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   }
      
  protected:
-  DECLARE_MESSAGE_MAP()  
+  virtual BOOL PreTranslateMessage(MSG* pMsg);
+  DECLARE_MESSAGE_MAP()
+  afx_msg void OnContextMenu( CWnd* pWnd, CPoint pos );
   void OnPaint() { CFrameWnd::OnPaint(); }
   BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
   virtual void OnClose() { OnDevClose(); }
   ui::Window::Ptr view_;
+  afx_msg void OnSetFocus(CWnd* pNewWnd) {
+    if (window()) {
+      ui::Event ev;
+      window()->OnFocus(ev);
+    }
+  }
   afx_msg void OnKillFocus(CWnd* pNewWnd) {
     if (window()) {
       window()->OnKillFocus();
     }
   }
-  
 };
 
 class PopupFrameImp : public FrameImp {
