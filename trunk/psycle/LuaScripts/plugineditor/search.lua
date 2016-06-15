@@ -108,8 +108,8 @@ end
 
 function search:createreplacefield(parent)  
   self.replaceactive = checkbox:new(parent):settext("replace selection with"):setalign(item.ALTOP):setmargin(0, 5, 0, 5)  
-  self.replacefieldgroup = group:new(parent):setalign(item.ALTOP):setautosize(true, true):setmargin(20, 0, 0, 0)
-  self.replacefield = edit:new(self.replacefieldgroup):setalign(item.ALLEFT):setautosize(false, false):setpos(0, 0, 200, 20):setmargin(0, 0, 0, 5):disable()  
+  self.replacefieldgroup = group:new(parent):setalign(item.ALTOP):setautosize(true, true):setmargin(0, 0, 0, 5)
+  self.replacefield = edit:new(self.replacefieldgroup):setalign(item.ALLEFT):setautosize(false, false):setpos(0, 0, 200, 20):disable()  
   local that = self
   function self.replacefield:onkeydown(ev)         
     if ev:keycode() == ev.RETURN then      

@@ -893,7 +893,10 @@ class WindowCenterToScreen {
     double width_perc_, height_perc_;
 };
 
+class PopupMenu;
+
 class Frame : public Window {
+ friend FrameImp;
  public:    
   typedef boost::weak_ptr<Frame> WeakPtr;
   static std::string type() { return "canvasframe"; }  
@@ -905,14 +908,23 @@ class Frame : public Window {
   FrameImp* imp() const { return (FrameImp*) Window::imp(); };
 
   virtual void set_view(ui::Window::Ptr view);
+  ui::Window::WeakPtr view() { return view_; }
   virtual void set_title(const std::string& title);
+  virtual std::string title() const;
+  void set_popup_menu(const boost::shared_ptr<PopupMenu>& popup_menu) { 
+    popup_menu_ = popup_menu;
+  }
+  boost::weak_ptr<PopupMenu> popup_menu() { return popup_menu_; }
   virtual void ShowDecoration();
   virtual void HideDecoration();  
   virtual void OnClose() {}
   virtual void OnShow() {}  
+  virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point) {}
+  virtual void WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point);
 
- private:
+ private:  
   ui::Window::WeakPtr view_;
+  boost::weak_ptr<PopupMenu> popup_menu_;
 };
 
 class PopupFrameImp;
@@ -1665,10 +1677,11 @@ class FrameImp : public WindowImp {
   FrameImp(Window* window) : WindowImp(window) {}
 
   virtual void dev_set_title(const std::string& title) = 0;
+  virtual std::string dev_title() const = 0;
   virtual void dev_set_view(ui::Window::Ptr view) = 0;
   virtual void DevShowDecoration() = 0;
-  virtual void DevHideDecoration() = 0;
-  virtual void OnDevClose(); 
+  virtual void DevHideDecoration() = 0;  
+  virtual void OnDevClose();
 };
 
 class TreeViewImp : public WindowImp, public NodeOwnerImp {

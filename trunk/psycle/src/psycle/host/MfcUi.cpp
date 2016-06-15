@@ -121,14 +121,14 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
 END_MESSAGE_MAP()
 
 template<class T, class I>
-BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {  
-  if (pMsg->message==WM_KEYDOWN ) {        
+BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
+  if (pMsg->message==WM_KEYDOWN ) {
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
     KeyEvent ev(pMsg->wParam, flags);    
     return WorkEvent(ev, &Window::OnKeyDown, window(), pMsg);
   } else
-  if (pMsg->message == WM_KEYUP) {          
+  if (pMsg->message == WM_KEYUP) {
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
     KeyEvent ev(pMsg->wParam, flags);      
@@ -136,7 +136,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
   } else
   if (pMsg->message == WM_MOUSELEAVE) {
     mouse_enter_ = true;
-    CPoint pt(pMsg->pt);        
+    CPoint pt(pMsg->pt);
     CRect rc;
     GetWindowRect(&rc);
     MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);
@@ -438,7 +438,18 @@ BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
   ON_WM_ERASEBKGND()
   ON_WM_KILLFOCUS()
   ON_WM_SETFOCUS()
+  ON_WM_NCRBUTTONDOWN()
 END_MESSAGE_MAP()
+
+BOOL FrameImp::PreTranslateMessage(MSG* pMsg) {
+  if (pMsg->message==WM_NCRBUTTONDOWN) {    
+    ui::Event ev;
+    ui::Point point(pMsg->pt.x, pMsg->pt.y);
+    ((Frame*)window())->WorkOnContextPopup(ev, point);    
+    return ev.is_propagation_stopped();    
+  }
+  return WindowTemplateImp<CFrameWnd, ui::FrameImp>::PreTranslateMessage(pMsg);
+}
 
 void FrameImp::DevShowDecoration() {
   ModifyStyleEx(0, WS_EX_CLIENTEDGE, SWP_FRAMECHANGED);

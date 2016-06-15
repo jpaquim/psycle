@@ -365,12 +365,35 @@ void LuaFrameWnd::OnShow() {
   }  
 }
 
+void LuaFrameWnd::OnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const ui::Node::Ptr& node) {
+  try {
+    LuaImport in(L, this, LuaGlobal::proxy(L));
+    if (in.open("oncontextpopup")) {      
+      LuaHelper::requirenew<LuaEventBind>(L, "psycle.ui.canvas.event", &ev, true);
+      LuaHelper::setfield(L, "x", mouse_point.x());
+      LuaHelper::setfield(L, "y", mouse_point.y());      
+      in.pcall(0);
+    } 
+  } catch (std::exception& e) {
+      AfxMessageBox(e.what());    
+  }
+}
+
 template <class T>
 int LuaFrameItemBind<T>::create(lua_State* L) {  
   boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));  
   LuaHelper::register_weakuserdata(L, item.get());  
   return 1;
 }
+
+template <class T>
+int LuaFrameItemBind<T>::view(lua_State* L) {  
+  boost::shared_ptr<T> frame = LuaHelper::check_sptr<T>(L, 1, meta);
+  LuaHelper::find_weakuserdata<>(L, frame->view().lock().get());
+  return 1;
+}
+
+
 
 // LuaPopupFrameWnd+Bind
 void LuaPopupFrameWnd::OnClose() {

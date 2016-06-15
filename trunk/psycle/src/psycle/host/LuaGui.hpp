@@ -428,6 +428,7 @@ class LuaFrameWnd : public CanvasItem<ui::Frame> {
       
    virtual void OnClose();
    virtual void OnShow();
+   virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point, const ui::Node::Ptr& node);
 };
 
 class LuaPopupFrameWnd : public CanvasItem<ui::PopupFrame> {
@@ -1511,9 +1512,12 @@ class LuaFrameItemBind : public LuaItemBind<T> {
     static const luaL_Reg methods[] = {
       {"new", create},      
       {"settitle", settitle},
+      {"title", title},
       {"setview", setview},
+      {"view", view},
       {"showdecoration", showdecoration},
       {"hidedecoration", hidedecoration},
+      {"setpopupmenu", setpopupmenu},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1539,8 +1543,16 @@ class LuaFrameItemBind : public LuaItemBind<T> {
     return LuaHelper::chaining(L);
   }
   static int settitle(lua_State* L)  { LUAEXPORT(L, &T::set_title); }
+  static int title(lua_State* L)  { LUAEXPORT(L, &T::title); }
   static int showdecoration(lua_State* L)  { LUAEXPORT(L, &T::ShowDecoration); }
   static int hidedecoration(lua_State* L)  { LUAEXPORT(L, &T::HideDecoration); }  
+  static int view(lua_State* L);
+  static int setpopupmenu(lua_State* L) {    
+    boost::shared_ptr<T> frame = LuaHelper::check_sptr<T>(L, 1, meta);
+    ui::PopupMenu::Ptr popup_menu = LuaHelper::check_sptr<ui::PopupMenu>(L, 2, LuaPopupMenuBind::meta);
+    frame->set_popup_menu(popup_menu);
+    return LuaHelper::chaining(L);
+  }
 };
 
 typedef LuaFrameItemBind<LuaPopupFrameWnd> LuaPopupFrameItemBind;
@@ -1695,26 +1707,26 @@ class LuaScintillaBind : public LuaItemBind<T> {
     WPARAM wparam(0);
     LPARAM lparam(0);    
     switch (lua_type(L, 3)) {
-      case LUA_TSTRING: // strings
+      case LUA_TSTRING:
 			  wparam = (WPARAM) lua_tostring(L, 3);
 			break;
-			case LUA_TBOOLEAN: // booleans
+			case LUA_TBOOLEAN:
 				wparam = (WPARAM) lua_toboolean(L, 3);
 			break;
-			case LUA_TNUMBER: // numbers
+			case LUA_TNUMBER:
 				wparam = (WPARAM) lua_tonumber(L, 3);
 			break;
       default:
         luaL_error(L, "Wrong argument type");
     }
     switch (lua_type(L, 4)) {
-      case LUA_TSTRING: // strings
+      case LUA_TSTRING:
 			  lparam = (LPARAM) lua_tostring(L, 4);
 			break;
-			case LUA_TBOOLEAN: // booleans
+			case LUA_TBOOLEAN:
 				lparam = (LPARAM) lua_toboolean(L, 4);
 			break;
-			case LUA_TNUMBER: // numbers
+			case LUA_TNUMBER:
 				lparam = (LPARAM) lua_tonumber(L, 4);
 			break;
       default:
