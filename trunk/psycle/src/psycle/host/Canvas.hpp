@@ -2,8 +2,7 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #pragma once
-#include <psycle/host/detail/project.hpp>
-#include "PsycleConfig.hpp"
+
 #include "Ui.hpp"
 
 namespace psycle {
@@ -65,7 +64,7 @@ class Canvas : public ui::Group {
        
   void Flush();  
   void StealFocus(const Window::Ptr& item);  
-  virtual void OnSize(double cx, double cy);
+  virtual void OnSize(const ui::Dimension& dimension);
   void SetSave(bool on) { save_ = on; }
   bool IsSaving() const { return save_; }    
   void ClearSave() { save_rgn_->Clear(); }
@@ -97,7 +96,7 @@ class Canvas : public ui::Group {
       // send event to item
       (item.get()->*ptmember)(ev);
       if (ev.is_work_parent()) {
-        item = item->parent().lock();  
+        item = item->parent()->shared_from_this();
       } else {    
         break;
       }
@@ -245,8 +244,8 @@ class Wallpaper : public ui::Ornament {
       ui::Dimension image_dim = image_.lock()->dim();
       if ((item->dim().width() > image_dim.width()) || 
          (item->dim().height() > image_dim.height())) {
-        for (int cx = 0; cx < item->dim().width(); cx += image_dim.width()) {
-          for (int cy = 0; cy < item->dim().height(); cy += image_dim.height()) {
+        for (double cx = 0; cx < item->dim().width(); cx += image_dim.width()) {
+          for (double cy = 0; cy < item->dim().height(); cy += image_dim.height()) {
             g->DrawImage(image_.lock().get(), cx, cy, image_dim.width(), image_dim.height());
           }
         }

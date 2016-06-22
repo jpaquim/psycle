@@ -1,10 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
-#include <psycle/host/detail/project.private.hpp>
+
+// #include "stdafx.h"
+
 #include "Canvas.hpp"
 #include "CanvasItems.hpp"
 #include <algorithm> // for std::transform
 #include <cctype> // for std::tolower
+
+
 
 namespace psycle {
 namespace host  {
@@ -81,7 +85,7 @@ void DefaultAligner::CalcDimensions() {
         break;
             
         default:
-          current_dim.set_width(std::max(item_dim.width(), current_dim.width()));          
+          current_dim.set_width((std::max)(item_dim.width(), current_dim.width()));
         break;
       }    
     }
@@ -129,7 +133,7 @@ void DefaultAligner::CalcDimensions() {
           }
         break;            
         default:
-          current_dim.set_height(std::max(item_dim.height(), current_dim.height()));          
+          current_dim.set_height((std::max)(item_dim.height(), current_dim.height()));          
         break;
       }    
     }
@@ -169,15 +173,21 @@ void DefaultAligner::SetPositions() {
           current_pos.set_left(current_pos.left() + item_dim.width() + item->margin().left());          
           ui::Rect new_pos = ui::Rect(top_left, current_pos.bottom_left());                                 
           if (new_pos != item->pos()) {
-            item->set_pos(new_pos);
+            item->set_pos(new_pos);            
           }
           current_pos.set_left(current_pos.left() + item->margin().right());
         }
       break;
       case ALRIGHT:
-        item->set_pos(ui::Rect(ui::Point(current_pos.right() - item_dim.width(), current_pos.top()), 
-                               ui::Point(current_pos.right(), current_pos.bottom())));
-        current_pos.set_right(current_pos.right() - item_dim.width());
+        {
+          current_pos.set_right(current_pos.right() - item->margin().right());
+          ui::Point bottom_right = current_pos.bottom_right();
+          current_pos.set_right(current_pos.right() - item_dim.width());
+          ui::Rect new_pos = ui::Rect(current_pos.top_right(), bottom_right);
+          if (new_pos != item->pos()) {           
+            item->set_pos(new_pos);
+          }
+        }
       break;
       case ALTOP:
         {                   
@@ -185,7 +195,7 @@ void DefaultAligner::SetPositions() {
           current_pos.set_top(current_pos.top() + item_dim.height() + item->margin().top());
           ui::Rect new_pos = ui::Rect(top_left, current_pos.top_right());
           if (new_pos != item->pos()) {            
-            item->set_pos(new_pos);           
+            item->set_pos(new_pos);
           }          
           current_pos.set_top(current_pos.top() + item->margin().bottom());
         }
@@ -206,7 +216,7 @@ void DefaultAligner::SetPositions() {
     } // end switch    
   } // end loop 
   
-  if (client) {    
+  if (client && client->pos() != current_pos) {    
     client->set_pos(current_pos);    
   }
 }
@@ -233,8 +243,8 @@ void GridAligner::CalcDimensions() {
     if (item->align() != ALNONE) {      
       item_dim.set(item_dim.width(), item_dim.height());
     }       
-    itemmax.set_width(std::max(itemmax.width(), item_dim.width()));
-    itemmax.set_height(std::max(itemmax.height(), item_dim.height()));    
+    itemmax.set_width((std::max)(itemmax.width(), item_dim.width()));
+    itemmax.set_height((std::max)(itemmax.height(), item_dim.height()));    
   } // end loop   
   
   Dimension current_dim(itemmax.width()*col_num_, itemmax.height()*row_num_);  
@@ -251,8 +261,8 @@ void GridAligner::SetPositions() {
   Window::Ptr client;
   ui::Rect current_pos(ui::Point(0, 0), group_.lock()->aligner()->dim());
 
-  int cell_width = current_pos.width() / col_num_;
-  int cell_height = current_pos.height() / row_num_;
+  double cell_width = current_pos.width() / col_num_;
+  double cell_height = current_pos.height() / row_num_;
 
   int pos = 0;
   for (iterator i = begin(); i != end(); ++i) {
@@ -284,8 +294,8 @@ void Canvas::Init() {
   save_ = true;  
 }
 
-void Canvas::OnSize(double cw, double ch) {
-  Group::OnSize(cw, ch);
+void Canvas::OnSize(const ui::Dimension& dimension) {
+  Group::OnSize(dimension);
   try {    
     UpdateAlign();    
   } catch (std::exception& e) {

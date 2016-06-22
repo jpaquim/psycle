@@ -37,9 +37,10 @@ function tabgroup:init()
   self.isoldflsprevented_ = {}
   self.dopageclose = signal:new()
   self.hasclosebutton_ = true
+  self:setclipchildren()
   --self:addstyle(0x02000000)  
-  self:setautosize(false, false)  
-  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):setornament(ornamentfactory:createfill(0x2F2F2F))  
+  self:setautosize(false, false)
+  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):setornament(ornamentfactory:createfill(0x2F2F2F))
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)  
   local that = self
   self:inittabpopupmenu()
@@ -79,8 +80,8 @@ function tabgroup:init()
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):setornament(ornamentfactory:createfill(0x2F2F2F))  
       
   self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)
-  self.children:setornament(ornamentfactory:createboundfill(0x292929))
-  self.children:setclipchildren()  
+  self.children:setclipchildren()
+  self.children:setornament(ornamentfactory:createboundfill(0x292929))  
 end
 
 function tabgroup:setlabel(page, text)
@@ -107,7 +108,7 @@ function tabgroup:restoreflsstate()
   return self
 end
 
-function tabgroup:addpage(page, label)    
+function tabgroup:addpage(page, label)      
   self:saveflsstate():preventfls()
   page:setautosize(false, false):setalign(window.ALCLIENT)
   self:createheader(page, label)
@@ -151,8 +152,9 @@ function tabgroup:setactivepage(page)
       self.activepage_:hide()
     end    
     self:setactiveheader(page)
-    self.activepage_ = page;    
+    self.activepage_ = page;        
     page:show()
+    self.children:updatealign()
     self:restoreflsstate():invalidate()
   end
 end
@@ -208,7 +210,7 @@ function tabgroup:createheader(page, label)
   header:setalign(window.ALLEFT):setmargin(0, 0, 5, 0)  
   header.page = page    
   header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
-  header.text:setalign(window.ALLEFT)
+  header.text:setalign(window.ALLEFT):setmargin(5, 2, 0, 0)
   local that = self
   if self.hasclosebutton_ then
     header.close = text:new(header)                           

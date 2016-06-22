@@ -72,45 +72,7 @@ namespace psycle
 			  &osvi, VER_MAJORVERSION | VER_MINORVERSION,
 			  dwlConditionMask);
 		}
-    
-    
-
-
-    Timer::Timer() : is_running_(false) { GlobalTimer::instance().AddListener(this); }
-    Timer::~Timer() { GlobalTimer::instance().RemoveListener(this); }
-
-    void GlobalTimer::AddListener(Timer* listener) {                
-      listeners_.push_back(listener);
-    }
-    
-    void GlobalTimer::RemoveListener(Timer* listener) {  
-      if (!listeners_.empty()) {
-        TimerList::iterator i = std::find(listeners_.begin(), listeners_.end(), listener);
-        if (i != listeners_.end()) {
-          if (i!=it) {
-            listeners_.erase(i);
-          } else {
-            listeners_.erase(it++);
-            removed_ = true;
-          }          
-        }
-      }
-    }
-    
-    void GlobalTimer::OnViewRefresh() {          
-      it = listeners_.begin();
-      while (it != listeners_.end()) {
-        if ((*it)->is_running()) {
-          (*it)->OnTimerViewRefresh();
-        }
-        if (!removed_) {          
-          ++it;
-        } else {
-          removed_ = false;
-        }
-      }
-    }       
-
+            
 		Global::Global()
 		{
 			if (Is_Vista_or_Later()) {

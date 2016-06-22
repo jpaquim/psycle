@@ -41,8 +41,10 @@ local moduledesigner = require("moduledesigner")
 local objectinspector = require("objectinspector")
 local text = require("psycle.ui.canvas.text")
 local node = require("psycle.node")
-
+local pianokeymap = require("psycle.ui.canvas.pianokeymap")
+local pianokeys = require("psycle.ui.canvas.pianokeys")
 local maincanvas = canvas:new()
+local scrollbox = require("psycle.ui.canvas.scrollbox")
 
 function maincanvas:new()
   local c = canvas:new()  
@@ -50,36 +52,6 @@ function maincanvas:new()
   self.__index = self  
   c:init()
   return c
-end
-
-function node_iter(node)
-  local i = {-1}
-  local level_ = 1
-  local n = node 
-  return 
-  { 
-    level = function() return level_ - 1 end,
-    next = function()
-            i[level_] = i[level_] + 1
-            if i[level_] == 0 then return n end
-            if i[level_] <= n:size() then
-              local child = n:at(i[level_])  
-              if child:size() > 0 then
-                level_ = level_ + 1
-                i[level_] = 0
-                n = child                
-              end                 
-              return child
-            elseif level_ > 1 then
-              level_ = level_ - 1              
-              i[level_] = i[level_] + 1
-              if i[level_] <= n:parent():size() then
-                n = n:parent()
-                return n:at(i[level_])
-              end
-            end
-          end                                     
-  }
 end
 
 function maincanvas:init()
@@ -96,10 +68,15 @@ function maincanvas:init()
   self.pluginexplorer = self:createpluginexplorer()
   splitter:new(self, splitter.VERT)
   self:createpagegroup()  
+  -- self.scrollbox = scrollbox:new(self):setalign(item.ALTOP):setautosize(false, false):setpos(0, 0, 0, 80)  
+  --self.pianokeys = pianokeys:new(self.scrollbox):setautosize(false, false):setpos(0, 0, 1000, 50);
   if self.advancedview then
     self.objectinspector = objectinspector:new(self):setalign(item.ALRIGHT):setpos(0, 0, 200, 0)  
     splitter:new(self, splitter.VERT):setalign(item.ALRIGHT)  
   end            
+  --self.pianokeys2 = pianokeys:new(self):setalign(item.ALRIGHT):setautosize(false, false):setpos(0, 0, 50, 0):setkeydirection(pianokeys.KEYDIRECTIONRIGHT)
+  --self.pianokeys3 = pianokeys:new(self):setalign(item.ALBOTTOM):setautosize(false, false):setpos(0, 0, 0, 50):setkeydirection(pianokeys.KEYDIRECTIONBOTTOM)
+  --self.pianokeys4 = pianokeys:new(self):setalign(item.ALLEFT):setautosize(false, false):setpos(0, 0, 50, 0):setkeydirection(pianokeys.KEYDIRECTIONLEFT)
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -145,13 +122,13 @@ function maincanvas:createcallstack()
 end
 
 function maincanvas:createpagegroup()
-  self.pages = tabgroup:new(self):setalign(item.ALCLIENT)
+  self.pages = tabgroup:new(self):setalign(item.ALCLIENT):setautosize(false, false)
   self.pages.dopageclose:connect(maincanvas.onclosepage, self)
   self.newpagecounter = 1
 end
 
 function maincanvas:createpluginexplorer()
-  local pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0):setalign(item.ALLEFT)     
+  local pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0):setalign(item.ALLEFT)
   pluginexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
   pluginexplorer:settextcolor(settings.canvas.colors.foreground)  
   pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
@@ -220,7 +197,7 @@ function maincanvas:createmodulepage()
 end
 
 function maincanvas:createpage()
-  local page = scintilla:new()  
+  local page = scintilla:new():setautosize(false, false)
   local that = self
   function page:onkeydown(ev)
     if ev:ctrlkey() then
@@ -296,7 +273,7 @@ function maincanvas:setcallstack(trace)
 end
 
 function maincanvas:createnewpage()
-  local page = self:createpage()    
+  local page = self:createpage()
   self.pages:addpage(page, "new"..self.newpagecounter)
   page.pagecounter = self.newpagecounter
   self.newpagecounter = self.newpagecounter + 1
@@ -321,10 +298,12 @@ function maincanvas:savepage()
 end
 
 function maincanvas:playplugin()  
+  self.scrollbox:scrollby(-10, 0)
+  --self:invalidate()
+--[[
   self.pages:activepage():definemarker(1, 31, 0x0000FF, 0x0000FF)
   self.pages:activepage():addmarker(5, 1)
---  self.callstack:addline()
---[[
+  self.callstack:addline()
   local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
     machine = machine:new(pluginindex)
@@ -406,23 +385,23 @@ function maincanvas:initselectplugintoolbar(parent)
 end
 
 function maincanvas:fillinstancecombobox()
-   local items = {"new instance"}
-   self.cbxtopluginindex = {-1}
-   if (psycle.proxy.project:plugininfo()) then
-     for machineindex= 0, 255 do
-       local machine = machine:new(machineindex);       
-       if machine and machine:type() == machine.MACH_LUA and machine:pluginname() == psycle.proxy.project:plugininfo():name() then
-         items[#items + 1] = machine:pluginname().."["..machineindex.."]"
-         self.cbxtopluginindex[#self.cbxtopluginindex + 1] = machineindex
-       end
-     end     
-   end
-   self.cbx:setitems(items)
-   self.cbx:setitemindex(1)
-   return self
+  local items = {"new instance"}
+  self.cbxtopluginindex = {-1}
+  if (psycle.proxy.project:plugininfo()) then
+    for machineindex= 0, 255 do
+      local machine = machine:new(machineindex);       
+      if machine and machine:type() == machine.MACH_LUA and machine:pluginname() == psycle.proxy.project:plugininfo():name() then
+        items[#items + 1] = machine:pluginname().."["..machineindex.."]"
+        self.cbxtopluginindex[#self.cbxtopluginindex + 1] = machineindex
+      end
+    end     
+  end
+  self.cbx:setitems(items)
+  self.cbx:setitemindex(1)
+  return self
 end  
 
-function maincanvas:setpluginindex(pluginindex)    
+function maincanvas:setpluginindex(pluginindex)
   local cbxindex = 1  
   for i = 1, #self.cbxtopluginindex do    
     if self.cbxtopluginindex[i] == pluginindex then       
@@ -635,7 +614,7 @@ function maincanvas:onpluginexplorernoderemove(node)
   end  
 end
 
-function maincanvas:onidle()
+function maincanvas:onidle()  
   if self.pages:activepage() then
     local l = (self.pages:activepage():line() + 1)..""
     local c = (self.pages:activepage():column() + 1)..""
@@ -670,9 +649,8 @@ function maincanvas:onidle()
     end    
     if self.modifiedstatus:text() ~= modified then
        self.modifiedstatus:settext(modified)
-    end
-    
-  end
+    end    
+  end 
 end
 
 function maincanvas:onsearchhide()

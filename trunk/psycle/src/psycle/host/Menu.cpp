@@ -1,7 +1,8 @@
-#include <psycle/host/detail/project.hpp>
-#include "Menu.hpp"
-#include "Psycle.hpp"
+#pragma once
 
+// #include "stdafx.h"
+
+#include "Menu.hpp"
 
 namespace psycle {
 namespace host {

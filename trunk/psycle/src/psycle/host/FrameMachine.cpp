@@ -809,7 +809,7 @@ namespace psycle { namespace host {
         LuaPlugin* lp = (LuaPlugin*) _machine;
         canvas::Canvas* user_view = lp->canvas().lock().get();
         if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
-          user_view->OnSize(rcClient.right, rcClient.bottom);
+          user_view->OnSize(ui::Dimension(rcClient.right, rcClient.bottom));
         }
       }  
 
