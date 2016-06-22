@@ -35,6 +35,45 @@ namespace mfc {
 
 }
 
+class Timer { 
+ public:
+  Timer();
+  virtual ~Timer();
+       
+  virtual void OnTimerViewRefresh() = 0;
+  void StartTimer() { is_running_ = true; }
+  void StopTimer() { is_running_ = false; }
+  bool is_running() const { return is_running_; }
+
+ private:
+  bool is_running_;
+};
+            
+typedef std::list<Timer*> TimerList;
+
+class GlobalTimer {
+  friend class CChildView;
+  friend Timer;
+ public:
+  static GlobalTimer& instance() {
+    static GlobalTimer instance;
+    return instance;
+  }       
+ private:       
+  GlobalTimer() : removed_(false), it(listeners_.end()) { }
+  ~GlobalTimer() { }                
+  void OnViewRefresh();       
+  void AddListener(Timer*);
+  void RemoveListener(Timer*);
+  void Clear() {
+    listeners_.clear(); 
+    it = listeners_.end();
+    removed_ = true;
+  }
+  TimerList listeners_;
+  TimerList::iterator it;
+  bool removed_;
+};
 
 }  // namespace
 }  // namespace

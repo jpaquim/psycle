@@ -130,6 +130,9 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaCmdDefBind>(L, "psycle.ui.cmddef");
   LuaHelper::require<LuaRunBind>(L, "psycle.run");
   // ui binds
+  LuaHelper::require<LuaPointBind>(L, "psycle.ui.point");
+  LuaHelper::require<LuaDimensionBind>(L, "psycle.ui.dimension");
+  LuaHelper::require<LuaUiRectBind>(L, "psycle.ui.rect");
   LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
   LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
   LuaHelper::require<LuaImagesBind>(L, "psycle.ui.images");
@@ -142,13 +145,14 @@ void LuaProxy::set_state(lua_State* state) {
   // ui menu binds
   LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
   LuaHelper::require<LuaPopupMenuBind>(L, "psycle.ui.popupmenu");
-  LuaHelper::require<LuaSystemMetrics>(L, "psycle.ui.systemmetrics");
+  LuaHelper::require<LuaSystemMetrics>(L, "psycle.ui.systemmetrics");  
   // ui canvas binds
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
   LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
   LuaHelper::require<LuaPopupFrameItemBind >(L, "psycle.ui.canvas.popupframe");
   LuaHelper::require<LuaCenterToScreenBind>(L, "psycle.ui.canvas.centertoscreen");
-  LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");  
+  LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
+  LuaHelper::require<LuaScrollBoxBind<> >(L, "psycle.ui.canvas.scrollbox");
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
   LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
   LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
@@ -211,8 +215,7 @@ void LuaProxy::Reload() {
       }
       OnActivated();
     } catch(std::exception &e) {
-      if (new_state) {
-        
+      if (new_state) {        
         lua_close(new_state);
       }
       L = old_state;

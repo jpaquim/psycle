@@ -430,8 +430,7 @@ int LuaCanvasBind<T>::create(lua_State* L) {
       group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
     }    
   }
-  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
-  //item->set_imp(ui::ImpFactory::instance().CreateWindowCompositedImp());
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));  
   item->set_aligner(boost::shared_ptr<canvas::Aligner>(new ui::canvas::DefaultAligner()));
   LuaHelper::register_weakuserdata(L, item.get());
   if (group) {    
@@ -505,12 +504,12 @@ bool CanvasItem<T>::SendMouseEvent(lua_State* L,
 }
 
 template <class T>
-void CanvasItem<T>::OnSize(double width, double height) {
-  T::OnSize(width, height);  
+void CanvasItem<T>::OnSize(const ui::Dimension& dimension) {
+  T::OnSize(dimension);  
   try {
     LuaImport in(L, this, LuaGlobal::proxy(L));
     if (in.open("onsize")) {
-      in << width << height << pcall(0);
+      in << dimension.width() << dimension.height() << pcall(0);
     }
   } catch(std::exception& e) {
     AfxMessageBox(e.what());
@@ -783,7 +782,10 @@ int LuaItemBind<T>::create(lua_State* L) {
   if (n==2 && !lua_isnil(L, 2)) {
     group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
     if (!group) {
-      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+      group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+      if (!group) {
+        group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaScrollBoxBind<>::meta);
+      }
     }    
   }
   boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
@@ -906,9 +908,8 @@ template <class T>
 int LuaItemBind<T>::parent(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;
-  boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-  Window::WeakPtr group = item->parent();
-  LuaHelper::find_weakuserdata<>(L, group.lock().get());
+  boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);  
+  LuaHelper::find_weakuserdata<>(L, item->parent());
   return 1;
 }
 
@@ -962,7 +963,8 @@ ui::Window::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {
     LuaScintillaBind<LuaScintilla>::meta.c_str(),
     LuaComboBoxBind<LuaComboBox>::meta.c_str(),
     LuaTreeViewBind<LuaTreeView>::meta.c_str(),
-    LuaListViewBind<LuaListView>::meta.c_str()    
+    LuaListViewBind<LuaListView>::meta.c_str(),
+    LuaScrollBoxBind<LuaScrollBox>::meta.c_str()
   };
   int size = sizeof(metas)/sizeof(metas[0]);
   Window::Ptr item;
@@ -1379,6 +1381,113 @@ int LuaImageBind::size(lua_State* L) {
 
 std::string LuaImagesBind::meta = "psyimagesbind";
 
+// PointBind
+std::string LuaPointBind::meta = "psypointmeta";
+
+int LuaPointBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"setxy", setxy},
+    {"setx", setx},
+    {"x", x},
+    {"sety", sety},
+    {"y", y},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaPointBind::create(lua_State* L) {  
+  int n = lua_gettop(L);
+  if (n==1) {
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::Point());
+  } else
+  if (n==3) {
+    double x = luaL_checknumber(L, 2);
+    double y = luaL_checknumber(L, 3);
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::Point(x, y));
+  } else {
+    luaL_error(L, "Wrong number of arguments");
+  }
+  return 1;
+}
+
+int LuaPointBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::Point>(L, meta);
+}
+
+// DimensionBind
+std::string LuaDimensionBind::meta = "psydimensionmeta";
+
+int LuaDimensionBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"set", set},
+    {"set_width", setwidth},
+    {"width", width},
+    {"set_height", setheight},
+    {"height", height},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaDimensionBind::create(lua_State* L) {
+  int n = lua_gettop(L);
+  if (n==1) {
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::Dimension());
+  } else
+  if (n==3) {
+    double width = luaL_checknumber(L, 2);
+    double height = luaL_checknumber(L, 3);
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::Dimension(width, height));
+  } else {
+    luaL_error(L, "Wrong number of arguments");
+  }
+  return 1;
+}
+
+int LuaDimensionBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::Dimension>(L, meta);
+}
+
+// RectBind
+std::string LuaUiRectBind::meta = "psyuirectmeta";
+
+int LuaUiRectBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"set", set},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaUiRectBind::create(lua_State* L) {
+  int n = lua_gettop(L);
+  if (n==1) {
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::Rect());
+  } else
+  if (n==3) {    
+    boost::shared_ptr<ui::Point> point 
+      = LuaHelper::check_sptr<ui::Point>(L, 2, LuaPointBind::meta);
+    boost::shared_ptr<ui::Dimension> dimension 
+      = LuaHelper::check_sptr<ui::Dimension>(L, 3, LuaDimensionBind::meta);    
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::Rect(*point.get(), *dimension.get()));    
+  } else {
+    luaL_error(L, "Wrong number of arguments");
+  }  
+  return 1;
+}
+
+int LuaUiRectBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::Rect>(L, meta);
+}
+
+int LuaUiRectBind::set(lua_State* L) {
+  return LuaHelper::chaining(L);
+}
+
 //LuaEventBind
 const char* LuaEventBind::meta = "psyeventbind";
 
@@ -1775,6 +1884,7 @@ void LuaScrollBar::OnScroll(int pos) {
     in << pos << pcall(0);
   }  
 }
+
 
 // LuaRegion+Bind
 const char* LuaRegionBind::meta = "psyregionbind";

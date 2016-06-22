@@ -1,9 +1,13 @@
 #pragma once
+
 #include <psycle/host/detail/project.hpp>
-#include "Psycle.hpp"
 #include "Ui.hpp"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
+#include <fstream>
+#include <string>
+#include <iostream>
 
 namespace psycle {
 namespace host {
@@ -18,6 +22,10 @@ class SystemMetrics : public ui::SystemMetrics {
   virtual ui::Dimension screen_dimension() const {
     return ui::Dimension(GetSystemMetrics(SM_CXFULLSCREEN),
                          GetSystemMetrics(SM_CYFULLSCREEN));
+  }
+  virtual ui::Dimension scrollbar_size() const {
+    return ui::Dimension(GetSystemMetrics(SM_CXHSCROLL),
+                         GetSystemMetrics(SM_CXVSCROLL));
   }
 };
 
@@ -335,7 +343,7 @@ class GraphicsImp : public ui::GraphicsImp {
   }
 
   void FillRect(const ui::Rect& rect) {
-    cr_->FillSolidRect(rect.left(), rect.top(), rect.right(), rect.bottom(), rgb_color_);
+    cr_->FillSolidRect(rect.left(), rect.top(), rect.width(), rect.height(), rgb_color_);
   }
 
   void FillOval(const ui::Rect& rect) {
@@ -596,8 +604,12 @@ class WindowTemplateImp : public T, public I {
     CRect rc;            
     GetClientRect(&rc);
     return ui::Dimension(rc.Width(), rc.Height());
+  }  
+  virtual void DevScrollTo(int offset_x, int offset_y) {
+    //::SetScrollPos(m_hWnd, SB_HORZ, offset_x, TRUE);
+    //::SetScrollPos(m_hWnd, SB_HORZ, offset_x, TRUE);
+    ScrollWindow(-offset_x, -offset_y);
   }
-  
   virtual void DevEnable() { EnableWindow(true); }
   virtual void DevDisable() { EnableWindow(false); }
   virtual void DevShow() { ShowWindow(SW_SHOWNOACTIVATE); }
@@ -645,9 +657,15 @@ protected:
 
   BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
   
-  virtual bool OnDevUpdateArea(ui::Area& area);
-  
+  virtual bool OnDevUpdateArea(ui::Area& area);   
  protected:
+
+  virtual void OnHScroll(UINT a, UINT b, CScrollBar* pScrollBar) {
+    ReflectLastMsg(pScrollBar->GetSafeHwnd());
+  }
+  virtual void OnVScroll(UINT a, UINT b, CScrollBar* pScrollBar) {
+    ReflectLastMsg(pScrollBar->GetSafeHwnd());
+  }
   int Win32KeyFlags(UINT nFlags) {
     UINT flags = 0;
     if (GetKeyState(VK_SHIFT) & 0x8000) {
@@ -755,12 +773,12 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
     ::SetCursor(cursor_);
     return TRUE;   
   }  
-  DECLARE_MESSAGE_MAP()
+  DECLARE_MESSAGE_MAP()  
  private:
    HCURSOR cursor_;
 };
 
-class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {
+class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {  
  public:  
   ScrollBarImp() : WindowTemplateImp<CScrollBar, ui::ScrollBarImp>() {}
 
@@ -801,9 +819,12 @@ class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {
     return ui::Dimension(GetSystemMetrics(SM_CXVSCROLL), 
                     GetSystemMetrics(SM_CXHSCROLL));    
   }
- protected:
+    
+ protected:   
+   virtual BOOL OnChildNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+  
    DECLARE_MESSAGE_MAP()
-  void OnPaint() { CScrollBar::OnPaint(); }
+  void OnPaint() { CScrollBar::OnPaint(); }  
 };
 
 class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
@@ -819,7 +840,7 @@ class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
-    imp->set_window(w);
+    imp->set_window(w);  
     return imp;
   }
 
@@ -1393,11 +1414,11 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
 
   void DevLoadFile(const std::string& filename) {
     using namespace std;    
-    #if __cplusplus >= 201103L
+//    #if __cplusplus >= 201103L
       ifstream file (filename, ios::in|ios::binary|ios::ate);
-    #else
-      ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
-    #endif
+//    #else
+//      ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
+//    #endif
     if (file.is_open()) {      
       f(SCI_CANCEL, 0, 0);
       f(SCI_SETUNDOCOLLECTION, 0, 0);      
@@ -1586,13 +1607,7 @@ class Systems : public ui::Systems {
     WindowImp* imp = WindowImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
     imp->set_window(window);
     return window;
-  }
-  virtual ui::ScrollBar* CreateScrollBar() { 
-    ScrollBar* window = new ScrollBar();
-    ScrollBarImp* imp = ScrollBarImp::Make(window, DummyWindow::dummy(), WindowID::auto_id(), ui::VERT);
-    imp->set_window(window);
-    return window;
-  }
+  }  
   virtual ui::ComboBox* CreateComboBox() { 
     ComboBox* window = new ComboBox();
     ComboBoxImp* imp = ComboBoxImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());

@@ -1,11 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-#pragma once
-#include <psycle/host/detail/project.hpp>
+// #include "stdafx.h"
+
 #include "CanvasItems.hpp"
-#include "Psycle.hpp"
-#include "PsycleConfig.hpp"
 #include "Ui.hpp"
 #include "Scintilla.h"
 
@@ -158,25 +156,23 @@ bool Text::OnUpdateArea() {
 }
 
 void Text::set_text(const std::string& text) {  
-  STR();
   text_ = text;
   if (imp()) {
     needsupdate();
     imp()->dev_set_pos(pos());
     WorkChildPos();
   }
-  FLS();          
+  FLSEX();          
 }
 
-void Text::set_font(const Font& font) {
-  STR();
+void Text::set_font(const Font& font) {  
   font_.reset(font.Clone());
   if (imp()) {
     needsupdate();
     imp()->dev_set_pos(pos());
     WorkChildPos();
   }
-  FLS();
+  FLSEX();
 }
 
 void Text::Draw(Graphics* g, Region& draw_region) {   
@@ -218,16 +214,14 @@ inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp) {
 }
 
 void Pic::Draw(Graphics* g, Region& draw_region) {
-  g->DrawImage(image_, 0, 0, width_, height_, xsrc_, ysrc_);
-  // todo zoom  
+  g->DrawImage(image_, 0, 0, width_, height_, xsrc_, ysrc_);    
 }
 
-void Pic::SetImage(Image* image) {
-  STR();
+void Pic::SetImage(Image* image) {  
   image_ = image;
   width_ = image_->dim().width();
   height_ = image_->dim().height();
-  FLS();
+  FLSEX();
 }
 
 bool Pic::OnUpdateArea() {

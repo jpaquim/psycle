@@ -1,7 +1,9 @@
-#include <psycle/host/detail/project.hpp>
+//#include "stdafx.h"
+
 #include "MfcUi.hpp"
-#include "Psycle.hpp"
 #include "Mmsystem.h"
+#include "resources/resources.hpp"
+// #include "Resource.h"
 
 namespace psycle {
 namespace host {
@@ -122,6 +124,9 @@ END_MESSAGE_MAP()
 
 template<class T, class I>
 BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
+  if (pMsg->message==WM_HSCROLL ) {
+    int fordebugonly(0);
+  } else
   if (pMsg->message==WM_KEYDOWN ) {
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
@@ -210,6 +215,12 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
   return CWnd::PreTranslateMessage(pMsg);
 }
 
+/*template<class T, class I>
+void WindowTemplateImp<T, I>::OnHScroll(UINT a, UINT b, CScrollBar* pScrollBar) {
+  ScrollBarImp* sb = (ScrollBarImp*) pScrollBar;
+  sb->OnDevScroll(a);
+}*/
+
 template<class T, class I>
 BOOL WindowTemplateImp<T, I>::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
   if (!::IsWindow(m_hWnd)) {
@@ -249,7 +260,7 @@ void WindowTemplateImp<T, I>::OnDestroy() {
 
 template<class T, class I>
 void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
-  dev_pos_.set(pos.left(), pos.top());
+  dev_pos_.set_xy(pos.left(), pos.top());
   SetWindowPos(0, 
                pos.left(),
                pos.top(),
@@ -339,7 +350,7 @@ void WindowTemplateImp<T, I>::OnSize(UINT nType, int cw, int ch) {
 	  TRACE("CanvasView::OnResize(). Deleted bmpDC\n");
 	  bmpDC.DeleteObject();	  
   }  
-  OnDevSize(cw, ch);
+  OnDevSize(ui::Dimension(cw, ch));
   CWnd::OnSize(nType, cw, ch);
 }
 
@@ -435,6 +446,7 @@ BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
   ON_WM_SIZE()
 	ON_WM_PAINT()
   ON_WM_CLOSE()
+  ON_WM_HSCROLL()
   ON_WM_ERASEBKGND()
   ON_WM_KILLFOCUS()
   ON_WM_SETFOCUS()
@@ -442,6 +454,9 @@ BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
 END_MESSAGE_MAP()
 
 BOOL FrameImp::PreTranslateMessage(MSG* pMsg) {
+  if (pMsg->message==WM_HSCROLL) {    
+    int fordeugonly(0);
+  } else
   if (pMsg->message==WM_NCRBUTTONDOWN) {    
     ui::Event ev;
     ui::Point point(pMsg->pt.x, pMsg->pt.y);
@@ -927,10 +942,24 @@ void ListViewImp::OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult) {
 }
 
 //end list
-
 BEGIN_MESSAGE_MAP(ScrollBarImp, CScrollBar)  
-	ON_WM_PAINT()
+	ON_WM_PAINT()    
 END_MESSAGE_MAP()
+
+BOOL ScrollBarImp::OnChildNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT* pResult) {
+  if (uMsg == WM_HSCROLL || uMsg == WM_VSCROLL) {
+    int nScrollCode = (short)LOWORD(wParam);
+	  int nPos = (short)HIWORD(wParam);
+    switch(nScrollCode) {
+      case SB_THUMBTRACK:     //The user is dragging the scroll box. This message is sent repeatedly until the user releases the mouse button. The nPos parameter indicates the position that the scroll box has been dragged to.         
+        dev_set_scroll_pos(nPos);
+        break;
+    }
+    
+    OnDevScroll(nPos);
+  }
+  return  WindowTemplateImp<CScrollBar, ui::ScrollBarImp>::OnChildNotify(uMsg, wParam, lParam, pResult);
+}
 
 IMPLEMENT_DYNAMIC(ScintillaImp, CWnd)
 

@@ -147,8 +147,7 @@ function toolicon:addlistener(listener)
   return self
 end
 
-function toolicon:settext(text)
-  self:str()
+function toolicon:settext(text)  
   self.text_ = text
   self:fls()
   return self

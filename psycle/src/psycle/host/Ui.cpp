@@ -1,14 +1,14 @@
 #pragma once
-#include <psycle/host/detail/project.hpp>
-#include "Ui.hpp"
-#include "Psycle.hpp"
 
+// #include "stdafx.h"
+#include "Ui.hpp"
 #include "MfcUi.hpp"
-#include "LuaGui.hpp"
 #include "Canvas.hpp"
+#include <limits>
 
 namespace psycle {
 namespace host {
+
 namespace ui {
 
 Window::Container Window::dummy_list_;
@@ -157,7 +157,7 @@ void Area::Offset(double dx, double dy) {
   for (; i != rect_shapes_.end(); ++i) {
     i->Offset(dx, dy);
   }
-  needs_update_ = true;
+  needs_update_ = true;  
 }
 
 void Area::Clear() {  
@@ -199,10 +199,10 @@ void Area::ComputeBounds() const {
   if (rect_shapes_.empty()) {
     bound_cache_.set(ui::Point(), ui::Point());
   } else {
-    bound_cache_.set(ui::Point(std::numeric_limits<double>::max(),
-                                std::numeric_limits<double>::max()),
-                      ui::Point(std::numeric_limits<double>::min(),
-                                std::numeric_limits<double>::min()));    
+    bound_cache_.set(ui::Point((std::numeric_limits<double>::max)(),
+								(std::numeric_limits<double>::max)()),
+                      ui::Point((std::numeric_limits<double>::min)(),
+		                        (std::numeric_limits<double>::min)()));
     rect_const_iterator i = rect_shapes_.begin();
     for (; i != rect_shapes_.end(); ++i) {
       ui::Rect bounds = (*i).bounds();
@@ -430,17 +430,18 @@ void Graphics::RestoreOrigin() {
 
 
 Window::Window() :
+    parent_(0),
     update_(true),
     area_(new Area()),
     auto_size_width_(true),
     auto_size_height_(true),
     visible_(true),
     align_(ALNONE),
-    pointer_events_(true),
-    has_store_(false) {    
+    pointer_events_(true) {    
 }
 
 Window::Window(WindowImp* imp) : 
+    parent_(0),
     update_(true),
     area_(new Area()),
     fls_area_(new Area()),
@@ -448,15 +449,18 @@ Window::Window(WindowImp* imp) :
     auto_size_height_(true),
     visible_(true),
     align_(ALNONE),
-    pointer_events_(true),
-    has_store_(false) {
+    pointer_events_(true) {
   imp_.reset(imp);  
   if (imp) {
     imp->set_window(this);
   }
 }
 
-Window::~Window() {   
+Window::~Window() {
+  for (iterator it = begin(); it != end(); ++it) {
+    (*it)->parent_ = 0;
+  }
+
   if (ImpFactory::instance().DestroyWindowImp(imp_.get())) {              
     imp_.release();         
   }  
@@ -477,87 +481,83 @@ void Window::unlock() const {
   psycle::host::mfc::WinLock::Instance().unlock();
 }
 
-void Window::set_parent(const Window::WeakPtr& parent) {  
-  parent_ = parent;  
-  if (imp_.get()) {
-    imp_->dev_set_parent(parent.lock().get());
-  }  
-}
-
 Window* Window::root() {  
   if (is_root()) {
     return this;
   }
-  if (!parent().expired()) {
-    //if (root_cache_.expired()) {
-      Window::Ptr window = shared_from_this();
-      do {
-        if (window->is_root()) {
-    //      root_cache_ = window;
-          return window.get();
-        }
-        window = window->parent().lock();
-      } while (window);        
-    //} else {
-      //return root_cache_.lock().get();
-    //}
+  if (parent()) {    
+    Window* window = this;
+    do {
+     if (window->is_root()) {    
+       return window;
+     }
+     window = window->parent();
+   } while (window);            
   }
   return 0;
 }
 
-Window* Window::root() const {  
-  if (!parent().expired()) {
-    Window::ConstPtr window = shared_from_this();
+const Window* Window::root() const {  
+  if (is_root()) {
+    return this;
+  }
+  if (parent()) {    
+    const Window* window = this;
     do {
-      if (window->is_root()) return (Window*) window.get();
-      window = window->parent().lock();
-    } while (window);  
+     if (window->is_root()) {    
+       return window;
+     }
+     window = window->parent();
+   } while (window);            
   }
   return 0;
 }
 
 bool Window::IsInGroup(Window::WeakPtr group) const {  
-  Window::ConstWeakPtr p = parent();
-  while (!p.expired()) {
-    if (group.lock() == p.lock()) {
+  const Window* p = parent();
+  while (p) {
+    if (group.lock().get() == p) {
       return true;
     }
-    p = p.lock()->parent();
+    p = p->parent();
   }
   return false;
 }
 
-void Window::STR() {    
-  fls_area_.reset(new Area(area().bounds()));
-  fls_area_->Offset(abs_pos().left(), abs_pos().top());
-  has_store_ = true;    
-}
-
-void Window::FLS() {    
-  if (has_store_) {
+void Window::FLSEX() {  
+  if (visible() && root()) {
     needsupdate();
     std::auto_ptr<Area> tmp(new Area(area().bounds()));
     tmp->Offset(abs_pos().left(), abs_pos().top());
-    fls_area_->Combine(*tmp, RGN_OR);    
-    has_store_ = false;    
-  } else {
-    STR();
-    has_store_ = false;
-  }
+    if (fls_area_.get()) {    
+      fls_area_->Combine(*tmp, RGN_OR);
+      root()->Invalidate(fls_area_->region());  
+    } else {
+      root()->Invalidate(tmp->region());  
+    }  
+    fls_area_ = tmp;  
+  }  
+}
+
+void Window::FLS() {
   if (visible() && root()) {
-    root()->Invalidate(fls_area_->region());
-  }    
+    needsupdate();
+    std::auto_ptr<Area> tmp(new Area(area().bounds()));
+    tmp->Offset(abs_pos().left(), abs_pos().top());    
+    root()->Invalidate(tmp->region());
+    fls_area_ = tmp;
+  }
 }
 
 bool Window::IsInGroupVisible() const {
   bool res = visible();
-  Window::ConstWeakPtr p = parent();
-  while (!p.expired()) {
-    res = p.lock()->visible();
+  const Window* p = parent();
+  while (p) {
+    res = p->visible();
     if (!res) {
       break;   
     }
-    p = p.lock()->parent();
+    p = p->parent();
   }
   return res;
 }
@@ -599,26 +599,29 @@ bool Window::OnUpdateArea() {
   return result;
 }
 
-void Window::set_pos(const ui::Point& pos) {
-  STR();
-  set_pos(ui::Rect(pos, area().bounds().dimension()));
-  FLS();
+void Window::set_pos(const ui::Point& pos) {  
+  set_pos(ui::Rect(pos, area().bounds().dimension()));  
 }
 
-void Window::set_pos(const ui::Rect& pos) {  
+void Window::set_pos(const ui::Rect& pos) {
   bool size_changed = pos.width() != area().bounds().width() || 
                       pos.height() != area().bounds().height();  
   if (imp_.get()) {    
     ui::Point bottom_right(pos.left() + (auto_size_width() ? dim().width() : pos.width()),
-                           pos.top() + (auto_size_height() ? dim().height() : pos.height()));
-    STR();
-    imp_->dev_set_pos(ui::Rect(pos.top_left(), bottom_right));
-    FLS();
+                           pos.top() + (auto_size_height() ? dim().height() : pos.height()));        
+    imp_->dev_set_pos(ui::Rect(pos.top_left(), bottom_right));    
+    FLSEX();    
   }
   if (size_changed) {
-    OnSize(pos.width(), pos.height());
+    OnSize(pos.dimension());
   }  
   WorkChildPos();
+}
+
+void Window::ScrollTo(int offsetx, int offsety) {
+  if (imp()) {
+    imp()->DevScrollTo(offsetx, offsety);
+  }
 }
 
 ui::Rect Window::pos() const { 
@@ -670,18 +673,18 @@ bool Window::auto_size_height() const {
 
 void Window::needsupdate() {
   update_ = true;
-  if (!parent().expired()) {
-    parent().lock()->needsupdate();
+  if (parent()) {
+    parent()->needsupdate();
   }
 }
 
 void Window::WorkChildPos() {
   needsupdate();
   std::vector<Window::Ptr> items;
-  Window::WeakPtr p = parent();
-  while (!p.expired()) {
-    items.push_back(p.lock());
-    p = p.lock()->parent();
+  Window* p = parent();
+  while (p) {
+    items.push_back(p->shared_from_this());
+    p = p->parent();
   }  
   std::vector<Window::Ptr>::reverse_iterator rev_it = items.rbegin();
   for (; rev_it != items.rend(); ++rev_it) {
@@ -812,6 +815,7 @@ void Window::set_parent(Window* window) {
   if (imp_.get()) {
     imp_->dev_set_parent(window);
   }
+  parent_ = window;
 }
 
 void Window::set_clip_children() {
@@ -954,18 +958,18 @@ Group::Group(WindowImp* imp) {
 }  
 
 void Group::Add(const Window::Ptr& window) {  
-  if (!window->parent().expired()) {
+  if (window->parent()) {
     throw std::runtime_error("Item already child of a group.");
   }  
   items_.push_back(window);
-  window->set_parent(shared_from_this());  
+  window->set_parent(this);  
   window->needsupdate();
 }
 
 void Group::Insert(iterator it, const Window::Ptr& item) {
   assert(item);
-  assert(item->parent().expired());  
-  item->set_parent(shared_from_this());
+  assert(item->parent());  
+  item->set_parent(this);
   items_.insert(it, item);  
 }
 
@@ -976,17 +980,17 @@ void Group::Remove(const Window::Ptr& item) {
     throw std::runtime_error("Item is no child of the group");
   }  
   items_.erase(it);  
-  item->set_parent(nullpointer);  
+  item->set_parent(0);  
 }
 
 bool Group::OnUpdateArea() {  
-  if (!auto_size_width() && !auto_size_height()) {
-    area_->Clear();
-    area_->Add(RectShape(ui::Rect()));
-    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(),
+  //if (!auto_size_width() && !auto_size_height()) {
+    area_->Clear();  
+    //area_->Add(RectShape(ui::Rect()));
+    area_->Add(RectShape(ui::Rect(ui::Point(), // area_->bounds().top_left(),
                                   imp()->dev_pos().dimension())));
     return true;
-  }
+  //}
 
   std::auto_ptr<Area> area(new Area());
   area->Add(RectShape(ui::Rect()));
@@ -1138,6 +1142,79 @@ void ScrollBar::system_size(int& width, int& height) const {
     ui::Dimension dim = imp()->dev_system_size();
     width = dim.width();
     height = dim.height();
+  }
+}
+
+void ScrollBarImp::OnDevScroll(int pos) {
+  ((ui::ScrollBar*) window())->OnScroll(pos);
+  //((ui::ScrollBar*) window())->scroll(*this);
+}
+
+// ScrollBox
+ScrollBox::ScrollBox() {  
+  Init();  
+}
+
+void ScrollBox::Init() {
+  client_.reset(new ui::Group());
+  client_background_.reset(ui::canvas::OrnamentFactory::Instance().CreateFill(0x292929));
+  client_->set_ornament(client_background_);
+  Group::Add(client_);
+  hscrollbar_.reset(ui::Systems::instance().CreateScrollBar(HORZ));
+  hscrollbar_->set_auto_size(false, false);
+  hscrollbar_->scroll.connect(boost::bind(&ScrollBox::OnHScroll, this, _1));
+  hscrollbar_->set_scroll_range(0, 100);
+  hscrollbar_->set_scroll_pos(0);
+  Group::Add(hscrollbar_);
+  vscrollbar_.reset(ui::Systems::instance().CreateScrollBar(VERT));
+  vscrollbar_->set_auto_size(false, false);
+  vscrollbar_->scroll.connect(boost::bind(&ScrollBox::OnVScroll, this, _1));
+  vscrollbar_->set_scroll_range(0, 100);
+  vscrollbar_->set_scroll_pos(0);
+  Group::Add(vscrollbar_);
+}
+
+void ScrollBox::OnSize(const ui::Dimension& dimension) {
+  ui::Dimension scrollbar_size = ui::Systems::instance().metrics().scrollbar_size();
+  hscrollbar_->set_pos(
+      ui::Rect(ui::Point(0, dimension.height() -  scrollbar_size.height()),
+               ui::Dimension(dimension.width(), scrollbar_size.height())));
+  vscrollbar_->set_pos(
+      ui::Rect(ui::Point(dimension.width() -  scrollbar_size.width(), 0), 
+               ui::Dimension(scrollbar_size.width(), dimension.height() - scrollbar_size.height())));
+  client_->set_pos(
+       ui::Rect(ui::Point(0, 0), 
+                ui::Dimension(dimension.width() - scrollbar_size.width(),
+                              dimension.height() - scrollbar_size.height())));
+}
+
+void ScrollBox::OnHScroll(ui::ScrollBar& bar) {
+  if (!client_->empty()) {
+    ui::Window::Ptr view = *client_->begin();
+    int dx = bar.scroll_pos() + view->pos().left();
+    ScrollBy(-dx, 0);
+  }
+}
+
+void ScrollBox::OnVScroll(ui::ScrollBar& bar) {
+  if (!client_->empty()) {
+    ui::Window::Ptr view = *client_->begin();
+    int dy = bar.scroll_pos() + view->pos().top();
+    std::stringstream str;
+    str << view->pos().top() << std::endl;
+    OutputDebugString(str.str().c_str());
+    ScrollBy(0, -dy);
+  }
+}
+
+void ScrollBox::ScrollBy(double dx, double dy) {
+  if (!client_->empty()) {
+    ui::Window::Ptr view = *client_->begin();
+    ui::Rect new_pos = view->pos();
+    new_pos.set_left(new_pos.left() + dx);
+    new_pos.set_top(new_pos.top() + dy);
+    view->imp()->dev_set_pos(new_pos);
+    view->ScrollTo(-dx, -dy);
   }
 }
 
@@ -1554,6 +1631,7 @@ Button::Button() : Window(ui::ImpFactory::instance().CreateButtonImp()) {
 }
 
 Button::Button(ButtonImp* imp) : Window(imp) {
+  set_auto_size(false, false);
 }
 
 void Button::set_text(const std::string& text) {
@@ -1564,6 +1642,15 @@ void Button::set_text(const std::string& text) {
 
 std::string Button::text() const {
   return imp() ? imp()->dev_text() : "";
+}
+
+bool Button::OnUpdateArea() {  
+  area_->Clear();
+  std::stringstream str;
+  str << "BW " << imp()->dev_pos().dimension().width() << ";" << std::endl;
+  OutputDebugString(str.str().c_str());
+  area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));  
+  return true;
 }
 
 std::string Scintilla::dummy_str_ = "";
@@ -1918,8 +2005,8 @@ ui::Button* Systems::CreateButton() {
   return concrete_factory_->CreateButton(); 
 }
 
-ui::ScrollBar* Systems::CreateScrollBar() {  
-  return new ui::ScrollBar();
+ui::ScrollBar* Systems::CreateScrollBar(Orientation orientation) {  
+  return new ui::ScrollBar(orientation);
 }
 
 ui::TreeView* Systems::CreateTreeView() {
@@ -1946,15 +2033,19 @@ ui::PopupMenu* Systems::CreatePopupMenu() {
 
 void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {
   if (window_) {    
-    window_->DrawBackground(g, draw_region);    
-    window_->Draw(g, draw_region);    
+    window_->DrawBackground(g, draw_region);
+    try {
+      window_->Draw(g, draw_region);    
+    } catch(std::exception&) {
+
+    }
   }
 }
 
-void WindowImp::OnDevSize(double width, double height) {
+void WindowImp::OnDevSize(const ui::Dimension& dimension) {
   if (window_) {
     window_->needsupdate();
-    window_->OnSize(width, height);
+    window_->OnSize(dimension);
   }
 }
 
