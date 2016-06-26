@@ -137,19 +137,22 @@ bool Line::OnUpdateArea() {
   return true;
 }
 
-bool Text::OnUpdateArea() {   
-  area_->Clear();  
+bool Text::OnUpdateArea() {
+  area_->Clear();
+  if (!imp()) {
+    return false;
+  }
   if (!auto_size_width() && !auto_size_height()) {    
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));
   } if (auto_size_width() && auto_size_height()) {
-    std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
-    g->SetFont(*font_);
-    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), g->text_size(text_))));
+    Graphics g;
+    g.SetFont(*font_);
+    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), g.text_size(text_))));
   } else {
-    std::auto_ptr<Graphics> g(ui::Systems::instance().CreateGraphics());
-    g->SetFont(*font_);
-    double width = auto_size_width() ? g->text_size(text_).width() : imp()->dev_pos().dimension().width();
-    double height = auto_size_height() ? g->text_size(text_).height() : imp()->dev_pos().dimension().height();
+    Graphics g;
+    g.SetFont(*font_);
+    double width = auto_size_width() ? g.text_size(text_).width() : imp()->dev_pos().dimension().width();
+    double height = auto_size_height() ? g.text_size(text_).height() : imp()->dev_pos().dimension().height();
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), Dimension(width, height))));
   }
   return true;  
@@ -261,7 +264,7 @@ void TerminalFrame::Init() {
   terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
   terminal_view_->set_align(ALCLIENT);
   maincanvas->Add(terminal_view_);
-  align_ = boost::shared_ptr<canvas::Aligner>(new ui::canvas::DefaultAligner()); 
+  align_ = boost::shared_ptr<ui::Aligner>(new ui::canvas::DefaultAligner()); 
   maincanvas->set_aligner(align_);
   set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
 }

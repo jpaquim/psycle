@@ -47,6 +47,7 @@ namespace psycle { namespace host {
     }   
     // script inits
     try {
+      proxy().PrepareState();
       proxy().Run();
       dll_path_ = dllpath;
       PluginInfo info = proxy().info();

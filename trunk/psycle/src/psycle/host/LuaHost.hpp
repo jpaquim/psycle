@@ -30,7 +30,31 @@ extern boost::shared_ptr<LuaPlugin> nullPtr;
 
 class LuaPlugin;
 
-class LuaProxy : public LockIF {
+class LuaControl : public LockIF {
+ public:
+  LuaControl();
+  virtual ~LuaControl();
+  
+  void Load(const std::string& filename);
+  virtual void PrepareState();
+  void Run();
+  void Free();  
+
+  
+  lua_State* state() const { return L; }
+
+  // LockIF Implementation
+  void lock() const { ::EnterCriticalSection(&cs); }
+  void unlock() const { ::LeaveCriticalSection(&cs); }
+  
+  protected:
+   lua_State* L;
+   std::auto_ptr<ui::Commands> invokelater;   
+  private:   
+   mutable CRITICAL_SECTION cs;   
+};
+
+class LuaProxy : public LuaControl {
 public:
 	LuaProxy(LuaPlugin* plug, const std::string& dllname);
 	~LuaProxy();
@@ -42,17 +66,10 @@ public:
 
   const PluginInfo& info() const;
 	
-  // Script Control
-	void Run();
+  // Script Control	
 	void Init();
   void Reload();
-  void Free();
-  void set_state(lua_State* state);
-  lua_State* state() const { return L; }
-
-  // LockIF Implementation
-  void lock() const { ::EnterCriticalSection(&cs); }
-  void unlock() const { ::LeaveCriticalSection(&cs); }
+  void PrepareState();
 
   boost::weak_ptr<ui::canvas::Canvas> canvas() { 
     return lua_mac_->canvas();
@@ -96,20 +113,17 @@ public:
   void OnCanvasChanged();
   void OnActivated();
   void OnDeactivated();
-
-  std::auto_ptr<ui::Commands> invokelater;
-
+  
   boost::weak_ptr<ui::MenuContainer> menu_bar() { return menu_bar_; }
 
 private:
   void export_c_funcs();
+  static int invoke_later(lua_State* L);
 	// script callbacks
   static int set_parameter(lua_State* L);
   static int alert(lua_State* L);
-  static int confirm(lua_State* L);
-  static int invoke_later(lua_State* L);
-  static int terminal_output(lua_State* L);
-  static int call_filedialog(lua_State* L);
+  static int confirm(lua_State* L);  
+  static int terminal_output(lua_State* L);  
   static int call_selmachine(lua_State* L);
   static int set_machine(lua_State* L);  
   static int set_menubar(lua_State* L);
@@ -119,13 +133,11 @@ private:
   mutable bool info_update_;
 	mutable PluginInfo info_;
 	LuaPlugin *host_;
-	LuaMachine* lua_mac_;
-	lua_State* L;	
+	LuaMachine* lua_mac_;	
   mutable CRITICAL_SECTION cs;  
   boost::weak_ptr<ui::MenuContainer> menu_bar_;
   static boost::shared_ptr<ui::canvas::TerminalFrame> terminal_frame_;
 };
-
 
 // Container for LuaUiExtensions
 class LuaUiExtentions {     

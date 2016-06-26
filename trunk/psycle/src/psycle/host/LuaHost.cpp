@@ -38,6 +38,59 @@ extern CPsycleApp theApp;
   
 using namespace ui;
 
+LuaControl::LuaControl() : L(0) {
+  invokelater.reset(new ui::Commands());
+  InitializeCriticalSection(&cs);  
+}
+LuaControl::~LuaControl() {
+  DeleteCriticalSection(&cs);
+}
+
+void LuaControl::Load(const std::string& filename) {
+  L = LuaGlobal::load_script(filename);
+}
+
+void LuaControl::Run() {  
+  int status = lua_pcall(L, 0, LUA_MULTRET, 0);
+  if (status) {         
+    const char* msg = lua_tostring(L, -1);        
+    AfxMessageBox(msg);
+    throw std::runtime_error(msg);       
+  } 
+}
+
+void LuaControl::Free() {
+  if (L) {
+    invokelater->Clear();
+    lua_close(L);
+  }
+  L = 0;
+}
+
+void LuaControl::PrepareState() {
+  static const luaL_Reg methods[] = {    
+    { NULL, NULL }
+  };
+  lua_newtable(L);
+  luaL_setfuncs(L, methods, 0);
+  LuaControl** ud = (LuaControl **)lua_newuserdata(L, sizeof(LuaProxy *));
+  luaL_newmetatable(L, "psyhostmeta");
+  lua_setmetatable(L, -2);
+  *ud = this;
+  lua_setfield(L, -2, "__self");
+  lua_setglobal(L, "psycle");
+  lua_getglobal(L, "psycle");  
+  lua_newtable(L); // table for canvasdata
+  lua_setfield(L, -2, "userdata");
+  lua_newtable(L); // table for canvasdata
+  lua_newtable(L); // metatable
+  lua_pushstring(L, "kv");
+  lua_setfield(L, -2, "__mode");
+  lua_setmetatable(L, -2);
+  lua_setfield(L, -2, "weakuserdata");
+  lua_pop(L, 1);
+}
+
 boost::shared_ptr<LuaPlugin> nullPtr;
 struct NullDeleter {template<typename T> void operator()(T*) {} };
 struct ReleaseImpDeleter {
@@ -47,23 +100,19 @@ struct ReleaseImpDeleter {
 };
 boost::shared_ptr<ui::canvas::TerminalFrame> LuaProxy::terminal_frame_;
 
+
 // Class Proxy : export and import between psycle and lua
 LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) : 
     host_(host),
-    info_update_(true) {
-  InitializeCriticalSection(&cs);
-  invokelater.reset(new ui::Commands());
+    info_update_(true) {    
   if (!terminal_frame_.get()) {
     terminal_frame_ = boost::shared_ptr<ui::canvas::TerminalFrame>(new ui::canvas::TerminalFrame(), ReleaseImpDeleter());
     terminal_frame_->Init();      
   }
-  L = LuaGlobal::load_script(dllname);
-  set_state(L);
+  L = LuaGlobal::load_script(dllname);  
 }
 
-LuaProxy::~LuaProxy() {  
-  DeleteCriticalSection(&cs);
-}
+LuaProxy::~LuaProxy() {}
 
 int LuaProxy::invoke_later(lua_State* L) {
   boost::shared_ptr<LuaRun> run = LuaHelper::check_sptr<LuaRun>(L, 1, LuaRunBind::meta);
@@ -100,8 +149,7 @@ void LuaProxy::OnTimer() {
   } CATCH_WRAP_AND_RETHROW(host())
 }
 
-void LuaProxy::set_state(lua_State* state) {
-  L = state;
+void LuaProxy::PrepareState() {  
   LuaGlobal::proxy_map[L] = this;
   export_c_funcs();
   // require c modules
@@ -129,50 +177,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaHelper::require<LuaActionListenerBind>(L, "psycle.ui.hostactionlistener");
   LuaHelper::require<LuaCmdDefBind>(L, "psycle.ui.cmddef");
   LuaHelper::require<LuaRunBind>(L, "psycle.run");
-  // ui binds
-  LuaHelper::require<LuaPointBind>(L, "psycle.ui.point");
-  LuaHelper::require<LuaDimensionBind>(L, "psycle.ui.dimension");
-  LuaHelper::require<LuaUiRectBind>(L, "psycle.ui.rect");
-  LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
-  LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
-  LuaHelper::require<LuaImagesBind>(L, "psycle.ui.images");
-  LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.graphics");
-  LuaHelper::require<LuaGameControllersBind>(L, "psycle.ui.gamecontrollers");
-  LuaHelper::require<LuaGameControllerBind>(L, "psycle.ui.gamecontroller");
-  // filedialog
-  LuaHelper::require<LuaFileOpenBind>(L, "psycle.ui.fileopen");
-  LuaHelper::require<LuaFileSaveBind>(L, "psycle.ui.filesave");
-  // ui menu binds
-  LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
-  LuaHelper::require<LuaPopupMenuBind>(L, "psycle.ui.popupmenu");
-  LuaHelper::require<LuaSystemMetrics>(L, "psycle.ui.systemmetrics");  
-  // ui canvas binds
-  LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
-  LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
-  LuaHelper::require<LuaPopupFrameItemBind >(L, "psycle.ui.canvas.popupframe");
-  LuaHelper::require<LuaCenterToScreenBind>(L, "psycle.ui.canvas.centertoscreen");
-  LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
-  LuaHelper::require<LuaScrollBoxBind<> >(L, "psycle.ui.canvas.scrollbox");
-  LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
-  LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
-  LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
-  LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
-  LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
-  LuaHelper::require<LuaTreeViewBind<> >(L, "psycle.ui.canvas.treeview");
-  LuaHelper::require<LuaListViewBind<> >(L, "psycle.ui.canvas.listview");
-  LuaHelper::require<LuaNodeBind>(L, "psycle.node");  
-  LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
-  LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.canvas.combobox");
-  LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
-  LuaHelper::require<LuaLexerBind>(L, "psycle.ui.canvas.lexer");
-  LuaHelper::require<LuaScintillaBind<> >(L, "psycle.ui.canvas.scintilla");
-  LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.canvas.scrollbar");
-  LuaHelper::require<LuaEventBind>(L, "psycle.ui.canvas.event");
-  LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.canvas.keyevent");
-  LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.canvas.ornamentfactory");
-  LuaHelper::require<LineBorderBind>(L, "psycle.ui.canvas.lineborder");
-  LuaHelper::require<WallpaperBind>(L, "psycle.ui.canvas.wallpaper");
-  LuaHelper::require<FillBind>(L, "psycle.ui.canvas.fill");
+  lua_ui_requires(L);
 #if !defined WINAMP_PLUGIN
   LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN
@@ -185,14 +190,6 @@ void LuaProxy::set_state(lua_State* state) {
   info_.mode = MACHMODE_FX;
 }
 
-void LuaProxy::Free() {
-  if (L) {
-    invokelater->Clear();
-    lua_close(L);
-  }
-  L = 0;
-}
-
 void LuaProxy::Reload() {
   try {      
     lock();
@@ -200,8 +197,8 @@ void LuaProxy::Reload() {
     lua_State* old_state = L;
     lua_State* new_state = 0;
     try {
-      new_state = LuaGlobal::load_script(host_->GetDllName());
-      set_state(new_state);
+      L = LuaGlobal::load_script(host_->GetDllName());      
+      PrepareState();
       Run();
       Init();      
       if (old_state) {
@@ -268,15 +265,6 @@ int LuaProxy::terminal_output(lua_State* L) {
   return 0;
 }
 
-int LuaProxy::call_filedialog(lua_State* L) {
-  char szFilters[]= "Text Files (*.NC)|*.NC|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
-  // Create an Open dialog; the default file name extension is ".my".
-  CFileDialog* m_pFDlg = new CFileDialog(TRUE, "txt", "*.txt",
-    OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
-  m_pFDlg->DoModal();   
-  return 0;
-}
-
 int LuaProxy::call_selmachine(lua_State* L) {    
   CNewMachine dlg(AfxGetMainWnd());
   dlg.DoModal();
@@ -325,8 +313,7 @@ void LuaProxy::export_c_funcs() {
     {"alert", alert},
     {"confirm", confirm},
     {"setmachine", set_machine},
-    {"setmenubar", set_menubar},
-    {"filedialog", call_filedialog},
+    {"setmenubar", set_menubar},    
     {"selmachine", call_selmachine},	  
     { NULL, NULL }
   };
@@ -349,8 +336,9 @@ void LuaProxy::export_c_funcs() {
   lua_setfield(L, -2, "weakuserdata");
   lua_pop(L, 1);
 }
-    
-  const PluginInfo& LuaProxy::info() const {    
+
+
+const PluginInfo& LuaProxy::info() const {    
   try {
     if (info_update_) {      
       info_.type = MACH_LUA;
@@ -413,18 +401,6 @@ void LuaProxy::export_c_funcs() {
   return info_;
 }
 
-void LuaProxy::Run() {
-  // Note: Don't use the try { } CATCH_WRAP_AND_RETHROW(host()) macro here.
-  // Run and Init are called from the host ctor
-  // catch wrap doesn't seem to work inside the host ctor
-  // the bad thing: the exception is not rethrown then     
-  int status = lua_pcall(L, 0, LUA_MULTRET, 0);
-  if (status) {         
-    const char* msg = lua_tostring(L, -1);        
-    AfxMessageBox(msg);
-    throw std::runtime_error(msg);       
-  } 
-}
 
 // Note: Don't use the try { } CATCH_WRAP_AND_RETHROW(host()) macro here.
 // Run and Init are called from the host ctor

@@ -48,7 +48,9 @@ class GridAligner : public Aligner {
 class Canvas : public ui::Group {  
  public:
   typedef boost::shared_ptr<Canvas> Ptr;
-  typedef boost::weak_ptr<Canvas> WeakPtr;  
+  typedef boost::shared_ptr<const Canvas> ConstPtr;
+  typedef boost::weak_ptr<Canvas> WeakPtr;
+  typedef boost::weak_ptr<const Canvas> ConstWeakPtr;
   
   Canvas() : Group(), save_rgn_(ui::Systems::instance().CreateRegion()) {    
     Init();

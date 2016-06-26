@@ -12,6 +12,7 @@
 #include "ladspamachine.h"
 #include "PresetsDlg.hpp"
 #include "ParamList.hpp"
+#include "ParamMap.hpp"
 #include "LuaPlugin.hpp"
 #include "Canvas.hpp"
 #include "MfcUi.hpp"
@@ -73,6 +74,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
 			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
 			ON_COMMAND(ID_VIEWS_PARAMETERLIST, OnViewsParameterlist)
+      ON_COMMAND(ID_VIEWS_PARAMETERMAP, OnViewsParameterMap)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERLIST, OnUpdateViewsParameterlist)
 			ON_COMMAND(ID_VIEWS_BANKMANAGER, OnViewsBankmanager)
 			ON_COMMAND(ID_VIEWS_SHOWTOOLBAR, OnViewsShowtoolbar)
@@ -91,7 +93,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine(Machine* pMachine, CChildView* wndView_, CFrameMachine** windowVar_)
-		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0)
+		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), pParamMapGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0)
     //, barmenu(0)
     //, custom_menubar(0)
 		{
@@ -210,6 +212,9 @@ namespace psycle { namespace host {
 			  delete pView; 
 			}
 			if (pParamGui) pParamGui->SendMessage(WM_CLOSE);
+      if (pParamMapGui) { 
+        delete pParamMapGui;
+      }
 			if ( _machine->_type == MACH_PLUGIN)
 			{
 				((Plugin*)_machine)->GetCallback()->hWnd = NULL;
@@ -565,6 +570,24 @@ namespace psycle { namespace host {
 				pParamGui->SendMessage(WM_CLOSE);
 			}
 		}
+
+    void CFrameMachine::OnViewsParameterMap()
+		{      
+      CRect rc;
+			GetWindowRect(&rc);
+			if (!pParamMapGui)
+			{
+				pParamMapGui = new ParamMap(&machine());
+        pParamMapGui->close.connect(boost::bind(&CFrameMachine::OnParamMapClose, this, _1));
+				pParamMapGui->set_pos(ui::Rect(ui::Point(rc.right+1, rc.top), ui::Dimension(450, 500)));
+				pParamMapGui->Show();
+			}
+			else
+			{
+				delete pParamMapGui;
+        pParamMapGui = 0;
+			}
+    }
 
 		void CFrameMachine::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
 		{
@@ -1127,6 +1150,9 @@ namespace psycle { namespace host {
 			if(pParamGui)
 				pParamGui->UpdateNew(param, value);
 		}
+    void CFrameMachine::OnParamMapClose(ui::Frame&) {
+      pParamMapGui = 0;
+    }
 
 	}   // namespace
 }   // namespace

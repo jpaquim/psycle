@@ -10,7 +10,11 @@ namespace host {
 		class CChildView;
 		class Machine;
 		class CBaseParamView;
-		class CParamList;
+		class CParamList;    
+    class ParamMap;
+    namespace ui {
+    class Frame;
+    }
 
 		class CMyToolBar : public CToolBar {
 		public:
@@ -62,6 +66,7 @@ namespace host {
 			CComboBox comboProgram;
 			CBaseParamView* pView;
 			CParamList* pParamGui;
+      ParamMap* pParamMapGui;
 			
 			std::list<CPreset> internalPresets;
 			std::list<CPreset> userPresets;
@@ -93,6 +98,7 @@ namespace host {
 			afx_msg void OnUpdateOperationsEnabled(CCmdUI *pCmdUI);
 			afx_msg void OnViewsBankmanager();
 			afx_msg void OnViewsParameterlist();
+      afx_msg void OnViewsParameterMap();
 			afx_msg void OnUpdateViewsParameterlist(CCmdUI *pCmdUI);
 			afx_msg void OnViewsShowtoolbar();
 			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
@@ -106,7 +112,8 @@ namespace host {
 			afx_msg void OnProgramLess();
 			afx_msg void OnUpdateProgramLess(CCmdUI *pCmdUI);
 			afx_msg void OnProgramMore();
-			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);			
+			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);   
+      void OnParamMapClose(ui::Frame&);
 		};
 
 	}   // namespace

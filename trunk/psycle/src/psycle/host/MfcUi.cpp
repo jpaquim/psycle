@@ -537,6 +537,7 @@ BOOL ComboBoxImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
 BOOL ComboBoxImp::OnSelect() {  
   ui::ComboBox* combo_box = dynamic_cast<ui::ComboBox*>(window());
   assert(combo_box);
+  combo_box->select(*combo_box);
   combo_box->OnSelect();
   return FALSE;
 }
@@ -822,8 +823,12 @@ void ListViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_
   }
   UpdateNode(node, prev_node, pos);  
   boost::shared_ptr<Node> prev;
-  for (int i = 0; it != end; ++it, ++i) {    
-    UpdateNode((*it), prev, i);    
+  pos = 0;
+  for (; it != end; ++it) {    
+    UpdateNode((*it), prev, pos);
+    if ((*it)->level() == 1) {
+      ++pos;
+    }
     prev = *it;
   }
 }
@@ -862,6 +867,7 @@ BOOL ListViewImp::OnChange(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
     list_view()->OnChange(node->shared_from_this());
+    list_view()->change(*list_view(), node->shared_from_this());
   }
   return FALSE;
 }
@@ -897,6 +903,31 @@ ui::Node* ListViewImp::find_selected_node() {
     }    
   }  
   return found.get();
+}
+
+std::vector<ui::Node::Ptr> ListViewImp::dev_selected_nodes() {
+  std::vector<ui::Node::Ptr> nodes;
+  POSITION pos = GetFirstSelectedItemPosition();
+  int selected = -1;
+  if (pos != NULL) {
+    while (pos) {
+      selected = GetNextSelectedItem(pos);
+      if (selected != -1) {
+        Node::Ptr root = list_view()->root_node().lock();
+        ui::Node::Ptr found;
+        Node::iterator it = root->begin();
+        for (int pos = 0; it != root->end(); pos++, ++it) {
+          if (pos == selected) {
+            found = *it;
+            break;
+          }
+        }
+        assert(found.get());        
+        nodes.push_back(found);                     
+      }
+    } 
+  }
+  return nodes;
 }
  
 BOOL ListViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {

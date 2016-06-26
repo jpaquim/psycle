@@ -1196,6 +1196,7 @@
 #define ID__SETSUSTAINEND               34440
 #define ID__SETSUSTANTOSELECTION        34441
 #define ID_DYNAMIC_MENUS_START          34442
+#define ID_VIEWS_PARAMETERMAP           34443
 #define ID_DYNAMIC_MENUS_END            35442
 #define ID_DYNAMIC_CONTROLS_BEGIN       35443
 #define ID_DYNAMIC_CONTROLS_LAST        45443
@@ -1208,7 +1209,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        346
-#define _APS_NEXT_COMMAND_VALUE         34443
+#define _APS_NEXT_COMMAND_VALUE         34444
 #define _APS_NEXT_CONTROL_VALUE         2432
 #define _APS_NEXT_SYMED_VALUE           65
 #endif

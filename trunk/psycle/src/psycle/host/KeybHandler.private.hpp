@@ -51,6 +51,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
+      KeyUp(nChar, nRepCnt, nFlags);
 			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
@@ -133,7 +134,8 @@ namespace psycle { namespace host {
 		}
 
 		void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
-		{      
+		{ 
+      KeyDown(nChar, nRepCnt, nFlags);
 			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 		}
 

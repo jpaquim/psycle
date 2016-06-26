@@ -865,7 +865,9 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
 
   static FrameImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     FrameImp* imp = new FrameImp();    
-    if (!imp->Create(NULL, "PsycleWindow", WS_OVERLAPPEDWINDOW,
+    int style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX |
+                WS_MAXIMIZEBOX;
+    if (!imp->Create(NULL, "PsycleWindow", style,
                      CRect(0, 0, 200, 200), 
                      parent)) {
       TRACE0("Failed to create frame window\n");
@@ -901,7 +903,7 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
       CRect rect;
       this->GetClientRect(rect);
       CWnd* wnd = dynamic_cast<CWnd*>(view_->imp());
-      if (wnd) {
+      if (wnd && ::IsWindow(wnd->m_hWnd)) {
         wnd->MoveWindow(&rect);
       }
     }
@@ -1120,7 +1122,7 @@ class ListNodeImp : public NodeImp {
   ~ListNodeImp() {}
 
   void set_pos(int pos) { pos_ = pos; }
-  int pos() const { return pos_; }
+  virtual int pos() const { return pos_; }
       
   // LVITEM DevInsert(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* prev_imp);
   void DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos);
@@ -1186,7 +1188,6 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
     }
     SetImageList(&m_imageList, TVSIL_NORMAL);
   }
-
   virtual void DevViewList() { SetView(LV_VIEW_LIST); }
   virtual void DevViewReport() { SetView(LV_VIEW_DETAILS); }
   virtual void DevViewIcon() { SetView(LV_VIEW_ICON); }
@@ -1197,12 +1198,15 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   virtual void DevDisableRowSelect() {
     SetExtendedStyle(GetExtendedStyle() & ~ LVS_EX_FULLROWSELECT);
   }
-
   virtual void DevAddColumn(const std::string& text, int width) {
     InsertColumn(column_pos_++, _T(text.c_str()), LVCFMT_LEFT, width); //, nColInterval*3);
   }
+  virtual std::vector<ui::Node::Ptr> dev_selected_nodes();
 
   CImageList m_imageList;
+
+  virtual int dev_top_index() const { return GetTopIndex(); }
+  virtual void DevEnsureVisible(int index) { EnsureVisible(index, true); }
 
  protected:  
   virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
@@ -1240,6 +1244,10 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
     return imp;
   }  
   
+  void dev_add_item(const std::string& item) {    
+    AddString(item.c_str());    
+  }
+
   void dev_set_items(const std::vector<std::string>& itemlist) {
     ResetContent();
     std::vector<std::string>::const_iterator it = itemlist.begin();
@@ -1260,6 +1268,12 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
   
   virtual void dev_set_item_index(int index) { SetCurSel(index); }
   virtual int dev_item_index() const { return GetCurSel(); }
+
+  virtual std::string dev_text() const {
+    CString str;
+    GetWindowTextA(str);
+    return str.GetString();
+  }
   
   BOOL OnEraseBkgnd(CDC* pDC) { return CComboBox::OnEraseBkgnd(pDC); }
 

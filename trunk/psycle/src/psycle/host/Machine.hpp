@@ -159,6 +159,34 @@ namespace psycle
 			int maxValue;
 		};
 
+    class ParamTranslator
+    {
+    public:
+      typedef std::vector<int> TranslateContainer;
+
+      ParamTranslator(Machine& machine) : machine_(&machine) {
+        translate_container_.reserve(256);
+        for (int i = 0; i < 256; ++i) {
+          translate_container_.push_back(i);
+        }
+      }
+
+     inline void set_virtual_index(int virtual_index, int machine_index) {
+       translate_container_[virtual_index] = machine_index;
+     }
+     inline int translate(int virtual_index) const {
+       if (virtual_index >=0 && virtual_index < 256) {
+         return translate_container_[virtual_index]; 
+       } else {
+         throw std::runtime_error("Plugin Index Out of Range");
+       }
+     }  
+    
+    private:
+      Machine* machine_;
+      TranslateContainer translate_container_;
+    };
+
 		class Wire
 		{
 		public:
@@ -504,7 +532,7 @@ namespace psycle
             std::ostringstream s; s << numparam; id = s.str();
           }
 					virtual bool SetParameter(int numparam, int value) { return false; }
-                    virtual void AfterTweaked(int idx) {};
+          virtual void AfterTweaked(int idx) {};
 					virtual void SetCurrentProgram(int idx) {};
 					virtual int GetCurrentProgram() {return 0;};
 					virtual void GetCurrentProgramName(char* val) {strcpy(val,"Program 0");};
@@ -649,6 +677,18 @@ namespace psycle
 				///\todo hardcoded limits and wastes with MAX_CONNECTIONS
 				CPoint _connectionPoint[MAX_CONNECTIONS];
 			///\}
+
+        // TODO 
+        int translate_param(int virtual_index ) const { 
+          return param_translator_.translate(virtual_index);
+        }
+
+        inline void set_virtual_param_index(int virtual_index, int machine_index) {
+          param_translator_.set_virtual_index(virtual_index, machine_index);
+        }
+        
+      private:
+        ParamTranslator param_translator_;
 		};
 
 		inline int Wire::GetSrcWireIndex() const { return (enabled) ? GetSrcMachine().FindOutputWire(this) : -1; };

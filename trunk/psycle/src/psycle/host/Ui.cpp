@@ -429,7 +429,7 @@ void Graphics::RestoreOrigin() {
 }
 
 
-Window::Window() :
+Window::Window() :   
     parent_(0),
     update_(true),
     area_(new Area()),
@@ -437,7 +437,8 @@ Window::Window() :
     auto_size_height_(true),
     visible_(true),
     align_(ALNONE),
-    pointer_events_(true) {    
+    pointer_events_(true) {
+  set_imp(ui::ImpFactory::instance().CreateWindowImp());
 }
 
 Window::Window(WindowImp* imp) : 
@@ -984,13 +985,13 @@ void Group::Remove(const Window::Ptr& item) {
 }
 
 bool Group::OnUpdateArea() {  
-  //if (!auto_size_width() && !auto_size_height()) {
+  if (aligner_ || (!auto_size_width() && !auto_size_height())) {
     area_->Clear();  
-    //area_->Add(RectShape(ui::Rect()));
-    area_->Add(RectShape(ui::Rect(ui::Point(), // area_->bounds().top_left(),
+    area_->Add(RectShape(ui::Rect()));
+    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(),
                                   imp()->dev_pos().dimension())));
     return true;
-  //}
+  }
 
   std::auto_ptr<Area> area(new Area());
   area->Add(RectShape(ui::Rect()));
@@ -1074,7 +1075,7 @@ void Group::OnMessage(WindowMsg msg, int param) {
   }
 }
 
-void Group::set_aligner(const boost::shared_ptr<Aligner>& aligner) { 
+void Group::set_aligner(const Aligner::Ptr& aligner) { 
   aligner_ = aligner;
   aligner_->set_group(boost::dynamic_pointer_cast<Group>(shared_from_this()));
 }
@@ -1327,6 +1328,17 @@ void Node::erase_imps(NodeOwnerImp* owner) {
   traverse(imp_eraser, nullpointer);
 }
 
+void Node::clear() {
+  for (Node::iterator it = children_.begin(); it != children_.end(); ++it) {
+    boost::ptr_list<NodeImp>::iterator imp_it = (*it)->imps.begin();
+    for ( ; imp_it != (*it)->imps.begin(); ++imp_it) {
+      (*imp_it).owner()->DevErase(*it);
+    }
+  }  
+  imps.clear();
+  children_.clear();
+}
+
 NodeImp* Node::imp(NodeOwnerImp& owner) {
   NodeImp* result = 0;
   boost::ptr_list<NodeImp>::iterator it = imps.begin();  
@@ -1496,6 +1508,20 @@ boost::weak_ptr<Node> ListView::selected() {
   return imp() ? imp()->dev_selected() : boost::weak_ptr<Node>();  
 }
 
+std::vector<Node::Ptr> ListView::selected_nodes() {
+  return imp() ? imp()->dev_selected_nodes() : std::vector<Node::Ptr>();  
+}
+
+int ListView::top_index() const {
+  return imp() ? imp()->dev_top_index() : 0;  
+}
+
+void ListView::EnsureVisible(int index) {
+  if (imp()) {
+    imp()->DevEnsureVisible(index);
+  }
+}
+
 void ListView::select_node(const Node::Ptr& node) {
   if (imp()) {
     imp()->dev_select_node(node);
@@ -1582,6 +1608,12 @@ ComboBox::ComboBox() : Window(ui::ImpFactory::instance().CreateComboBoxImp()) {
 ComboBox::ComboBox(ComboBoxImp* imp) : Window(imp) {
 }
 
+void ComboBox::add_item(const std::string& item) {
+  if (imp()) {
+    imp()->dev_add_item(item);
+  }
+}
+
 void ComboBox::set_items(const std::vector<std::string>& itemlist) {
   if (imp()) {
     imp()->dev_set_items(itemlist);
@@ -1593,6 +1625,14 @@ std::vector<std::string>  ComboBox::items() const {
     return imp()->dev_items();
   } else {
     return std::vector<std::string>();
+  }
+}
+
+std::string ComboBox::text() const {
+  if (imp()) {
+    return imp()->dev_text();
+  } else {
+    return "";
   }
 }
 
@@ -1628,6 +1668,11 @@ std::string Edit::text() const {
 
 Button::Button() : Window(ui::ImpFactory::instance().CreateButtonImp()) {
   set_auto_size(false, false);
+}
+
+Button::Button(const std::string& text) : Window(ui::ImpFactory::instance().CreateButtonImp()) {      
+  set_auto_size(false, false);  
+  imp()->dev_set_text(text);  
 }
 
 Button::Button(ButtonImp* imp) : Window(imp) {
@@ -2051,6 +2096,7 @@ void WindowImp::OnDevSize(const ui::Dimension& dimension) {
 
 void FrameImp::OnDevClose() {
   if (window()) {
+    ((Frame*)window())->close(*((Frame*)window()));
     ((Frame*)window())->OnClose();
   }
 }
@@ -2058,6 +2104,7 @@ void FrameImp::OnDevClose() {
 void ButtonImp::OnDevClick() {
   if (window()) {
     ((Button*)window())->OnClick();
+    ((Button*)window())->click(*((Button*)window()));
   }
 }
 
@@ -2174,6 +2221,7 @@ ui::GameControllersImp* ImpFactory::CreateGameControllersImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGameControllersImp(); 
 }
+
 
 } // namespace ui
 } // namespace host
