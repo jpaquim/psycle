@@ -52,44 +52,9 @@ namespace psycle { namespace host {
 		CPsycleApp::~CPsycleApp()
 		{
 		}
-    
-    /*void test_node() {
-      using namespace ui;
-      Node::Ptr root(new Node());
-      Node::Ptr node1(new Node()); node1->set_text("node1");
-      Node::Ptr node2(new Node()); node2->set_text("node2");
-      Node::Ptr node3(new Node()); node3->set_text("node3");
-      Node::Ptr node4(new Node()); node4->set_text("node4");
-      root->AddNode(node1);
-      root->AddNode(node2);
-      root->AddNode(node3);
-      root->AddNode(node4);
-
-      Node::Ptr subnode1(new Node()); subnode1->set_text("subnode1");
-      Node::Ptr subnode2(new Node()); subnode2->set_text("subnode2");
-      Node::Ptr subnode3(new Node()); subnode3->set_text("subnode3");
-      node1->AddNode(subnode1);
-      node1->AddNode(subnode2);
-      node1->AddNode(subnode3);
-
-      Node::Ptr subsubnode1(new Node()); subsubnode1->set_text("subsubnode1");
-      subnode1->AddNode(subsubnode1);      
-
-      Node::Ptr subnode4(new Node()); subnode4->set_text("subnode4");
-      node4->AddNode(subnode4);
-
-      recursive_node_iterator end = root->recursive_end();
-      recursive_node_iterator it = root->recursive_begin();
-
-      for ( ; it != end; ++it) {        
-        OutputDebugString((*it)->text().c_str());
-      }
-    }*/
-       
+              
 		BOOL CPsycleApp::InitInstance()			
-		{     
-      // test_node();
-
+		{           
 			// InitCommonControlsEx() is required on Windows XP if an application
 			// manifest specifies use of ComCtl32.dll version 6 or later to enable
 			// visual styles.  Otherwise, any window creation will fail.
@@ -180,7 +145,7 @@ namespace psycle { namespace host {
 			else
 			{
 				global_.machineload().LoadPluginInfo(false);
-		        pFrame->m_wndView.LoadLuaExtensions();
+        pFrame->m_wndView.LoadLuaExtensions();
 				// Show splash screen
 				if (global_.conf()._showAboutAtStart)
 				{

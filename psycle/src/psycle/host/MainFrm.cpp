@@ -354,10 +354,9 @@ namespace psycle { namespace host {
 
     BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
     {
-/*      if(m_luaWndView->IsWindowVisible() && pMsg->message==WM_KEYDOWN ) {                 
-        if (m_luaWndView->SendMessageA(pMsg->message, pMsg->wParam, pMsg->lParam))
-          return TRUE;                
-         }            */
+      if(pMsg->message==WM_KEYDOWN ) {                 
+        int fordebugonly(0);
+      }
       return CFrameWnd::PreTranslateMessage(pMsg);
     }
 

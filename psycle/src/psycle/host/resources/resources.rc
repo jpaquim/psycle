@@ -13,20 +13,18 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Neutral (Default) resources
+// Neutral (Standard) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEUD)
-#ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_MENU_ENV_EDIT MENU 
+IDR_MENU_ENV_EDIT MENU
 BEGIN
     POPUP ""
     BEGIN
@@ -45,7 +43,7 @@ BEGIN
     END
 END
 
-IDR_WAVEFRAME MENU 
+IDR_WAVEFRAME MENU
 BEGIN
     POPUP "Process"
     BEGIN
@@ -95,7 +93,7 @@ BEGIN
     END
 END
 
-IDR_FRAMEMACHINE MENU 
+IDR_FRAMEMACHINE MENU
 BEGIN
     POPUP "Programs"
     BEGIN
@@ -119,6 +117,7 @@ BEGIN
     POPUP "Views"
     BEGIN
         MENUITEM "Parameter list",              ID_VIEWS_PARAMETERLIST
+        MENUITEM "Parameter map",               ID_VIEWS_PARAMETERMAP
         MENUITEM "Bank manager",                ID_VIEWS_BANKMANAGER
         MENUITEM SEPARATOR
         MENUITEM "Show toolbar",                ID_VIEWS_SHOWTOOLBAR
@@ -129,7 +128,7 @@ BEGIN
     END
 END
 
-IDR_MAINFRAME MENU 
+IDR_MAINFRAME MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -249,7 +248,7 @@ BEGIN
     END
 END
 
-IDR_POPUPMENU MENU 
+IDR_POPUPMENU MENU
 BEGIN
     POPUP "Context Menu"
     BEGIN
@@ -284,7 +283,7 @@ BEGIN
     END
 END
 
-IDR_WAVED_POPUP MENU 
+IDR_WAVED_POPUP MENU
 BEGIN
     POPUP ""
     BEGIN
@@ -305,7 +304,7 @@ BEGIN
     END
 END
 
-IDR_SEQUENCE_MENU MENU 
+IDR_SEQUENCE_MENU MENU
 BEGIN
     POPUP "Context Menu"
     BEGIN
@@ -323,7 +322,7 @@ BEGIN
     END
 END
 
-IDR_POPUP_MACHINE MENU 
+IDR_POPUP_MACHINE MENU
 BEGIN
     POPUP "Popup Mac"
     BEGIN
@@ -404,7 +403,7 @@ IDB_MAINTOOLBAR24MASK   BITMAP                  "Toolbar24Mask.bmp"
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS 
+IDR_MAINFRAME ACCELERATORS
 BEGIN
     "A",            ID_CONFIGURATION_ENABLEAUDIO, VIRTKEY, ALT, NOINVERT
     "S",            ID_CONFIGURATION_SETTINGS, VIRTKEY, ALT, NOINVERT
@@ -414,13 +413,13 @@ BEGIN
     VK_F10,         ID_VIEW_INSTRUMENTEDITOR, VIRTKEY, NOINVERT
 END
 
-IDR_FRAMEMACHINE ACCELERATORS 
+IDR_FRAMEMACHINE ACCELERATORS
 BEGIN
     "P",            ID_PARAMETERS_SHOWPRESET, VIRTKEY, ALT, NOINVERT
     "R",            ID_PARAMETERS_VIEWS_RELOAD, VIRTKEY, ALT, NOINVERT
 END
 
-IDR_WAVEFRAME ACCELERATORS 
+IDR_WAVEFRAME ACCELERATORS
 BEGIN
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "P",            ID_EDIT_CROP,           VIRTKEY, CONTROL, NOINVERT
@@ -439,7 +438,7 @@ BEGIN
     "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
 END
 
-IDR_INSTRUMENTEDIT ACCELERATORS 
+IDR_INSTRUMENTEDIT ACCELERATORS
 BEGIN
     "7",            ID_ACCEL_FILTER,        VIRTKEY, ALT, NOINVERT
     "4",            ID_ACCEL_GEN,           VIRTKEY, ALT, NOINVERT
@@ -2204,7 +2203,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_SONGBAR, DIALOG
     BEGIN
@@ -2960,7 +2959,7 @@ END
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR  16, 16
+IDR_MAINFRAME TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_LOADSONG
@@ -2990,7 +2989,7 @@ BEGIN
     BUTTON      ID_PSYHELP
 END
 
-IDR_WAVEDFRAME TOOLBAR  17, 17
+IDR_WAVEDFRAME TOOLBAR 17, 17
 BEGIN
     BUTTON      ID_WAVED_PLAYFROMSTART
     BUTTON      ID_WAVED_PLAY
@@ -3008,7 +3007,7 @@ BEGIN
     BUTTON      ID_WAVEED_WAVEPLUS
 END
 
-IDR_FRAMEMACHINE TOOLBAR  16, 16
+IDR_FRAMEMACHINE TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_OPERATIONS_ENABLED
     SEPARATOR
@@ -3062,18 +3061,18 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_MAINFRAME           "[Untitled.psy] Psycle Modular Music Creation Studio "
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_APP_TITLE       "Psycle"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -3084,19 +3083,19 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_NEW             "New song\nNew"
     ID_FILE_SAVE_AS         "Save Song As\nSave As"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ABOUTPSYCLE          "Information and Logo\nLogo"
     ID_HELP_SALUDOS         "Greetings to People\nGreetings"
@@ -3107,7 +3106,7 @@ BEGIN
     ID_AUTOSTOP             "AutoStop Idle Machines (those that don't create Output)\nAutoStop Machines"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_SEQUENCER       "Show/Hide Sequencer Bar"
     ID_CONFIGURATION_LOOPPLAYBACK 
@@ -3116,7 +3115,7 @@ BEGIN
     ID_VIEW_LoggingWindow   "Opens the error logging window"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_HELP_README          "Opens the ./doc/readme.txt File\nOpen ./doc/readme.txt"
     ID_HELP_TWEAKING        "Opens the ./doc/tweaking.txt File\nOpen ./doc/tweaking.txt"
@@ -3131,7 +3130,7 @@ BEGIN
     ID_VIEW_SONGBAR         "Show/Hide Song Bar (Tempo, tbp, and Vu-meter)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_LOADSONG        "Open Song\nOpen"
     ID_FILE_IMPORT_XMFILE   "Imports Songs from Modules (XM, IT and S3M) \nImport Module"
@@ -3139,7 +3138,7 @@ BEGIN
     ID_FILE_SONGPROPERTIES  "Shows the Song Properties Dialog\nShow Song Properties"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_MACHINEVIEW          "Show Machine view\nMachines"
     ID_PATTERNVIEW          "Show Pattern view\nPatterns"
@@ -3154,7 +3153,7 @@ BEGIN
     ID_PSYHELP              "Open online help\nHelp"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_POP_PATTENPROPERTIES "Pops Up the Pattern Properties Dialog\nShow Pattern Properties"
     ID_POP_MIXPASTE         "Paste, Mixing the content of the buffer with the pattern\nMix Paste"
@@ -3169,7 +3168,7 @@ BEGIN
     ID_SELECTION_SHOWALL    "Show entire wave"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_COULDNT_INITIALIZE_TIMER "Couldn't initialize timer"
     IDS_SONG_SAVED          "Song Saved"
@@ -3181,7 +3180,7 @@ BEGIN
     ID_HELP_WHATSNEW        "Opens the ./doc/whatsnew.txt File\nOpen ./doc/whatsnew.txt"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_DELETE          "Delete selection"
     ID_CONVERT_MONO         "Mix channels to mono"
@@ -3191,7 +3190,7 @@ BEGIN
     ID_INDICATOR_SEL        "Selection:"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_POP_CUT              "Cut the selected rows (delete them) and puts them to the buffer\nCut Selection"
     ID_POP_COPY             "Copy the selected rows to the buffer\nCopy Selection"
@@ -3204,7 +3203,7 @@ BEGIN
     ID_POP_TRANSPOSE_12     "Transposes the notes 12 seminotes down (1 octave)\nTraspose -12"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_POP_INTERPOLATE_CURVE 
                             "Interpolates the values using an user defined curve\nInterpolate values"
@@ -3216,7 +3215,7 @@ BEGIN
     ID_EDIT_SNAPTOZERO      "Set/Unset Snap to Zero"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_COPY            "Copy Selection to Clipboard\nCopy Selection"
     ID_EDIT_CUT             "Cut Selection to clipboard\nCut Selection"
@@ -3226,26 +3225,26 @@ BEGIN
     ID_EDIT_REDO            "Redo last Undo\nRedo"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "Information and Logo"
     ID_APP_EXIT             "Exits Psycle\nExit"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDC_SEQCUT              "Sequence Cut to Clipboard\nCut Sequence"
     IDC_SEQCOPY             "Sequence Copy to Clipboard\nCopy Sequence"
     IDC_SEQPASTE            "Sequence Paste to Clipboard\nPaste Sequence"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show/Hide Toolbar"
     ID_VIEW_STATUS_BAR      "Show/Hide Status Bar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_INDICATOR_SEQPOS     "Pos:00"
     ID_INDICATOR_PATTERN    "Pat:00"
@@ -3258,14 +3257,14 @@ BEGIN
     ID_INDICATOR_OCTAVE     "Oct:0"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_CROP            "Cut everything but selection"
     ID_VIEW_MIXER           "Opens Mixer\nOpen Mixer"
     ID_POP_BLOCKSWITCH      "Exchange the block from cursor with the one previously copied."
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WAVED_PLAY           "Play Wave from Cursor"
     ID_WAVED_PLAYFROMSTART  "Play Wave from Start"
@@ -3273,7 +3272,7 @@ BEGIN
     ID_WAVED_RELEASE        "Release from Loop"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_POPUP_ZOOMOUT        "Zoom Out"
     ID_FASTFORWARD          "Move Cursor to Wave End"
@@ -3283,7 +3282,7 @@ BEGIN
     ID_POPUP_SELECTIONTOLOOP "Set Current Selection as Loop Points"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_POPUP_ZOOMSEL        "Set Viewable Area to Selection"
     ID_POPUP_CUT            "Cut Selected Data into Clipboard"
@@ -3295,7 +3294,7 @@ BEGIN
     ID_POPUP_ZOOMIN         "Zoom In"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_ABOUT_EXTENDEDINFO   "Gives extended information about this plugin"
     ID_OPERATIONS_ENABLED   "Switches on or off the VST plugin."
@@ -3307,30 +3306,30 @@ BEGIN
                             "Randomizes the values of the current program"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_PROGRAMS_OPENPRESET  "Opens the Open file dialog box to load a new Bank/Program"
     ID_PROGRAMS_SAVEPRESET  "Opens the Save file box to save the current bank/program"
     ID_ABOUT_ABOUTMAC       "Shows an about box about this plugin."
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID__TRANSFORMPATTERN    "Pops Up the Transform Pattern Dialog\nShow Transform Pattern"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EXPORT               "Export song as Fast Tracker 2 module\nExport XM"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WAVEED_WAVEMIN       "Decrease sample position"
     ID_WAVEED_WAVEPLUS      "Increase sample position"
 END
 
-#endif    // Neutral (Default) resources
+#endif    // Neutral (Standard) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -102,16 +102,16 @@ function parameter:id() return self.id_ end
 function parameter:setname(str) self.name_ = str end
 function parameter:name() return self.name_ end
 function parameter:label() return self.label_ end
-function parameter:setminval(min) local tmp = self:val() self.min_ = min if tmp<min then tmp=min end self:setval(tmp) end
+function parameter:setminval(min) local tmp = self:val() self.min_ = min if tmp < min then tmp = min end self:setval(tmp) end
 function parameter:minval() return self.min_ end
-function parameter:setmaxval(max) local tmp = self:val() self.max_ = max if tmp>max then tmp=max end self:setval(tmp) end
+function parameter:setmaxval(max) local tmp = self:val() self.max_ = max if tmp > max then tmp = max end self:setval(tmp) end
 function parameter:maxval() return self.max_ end
 function parameter:setsteps(steps) local tmp = self:val() self.step_ = steps self:setval(tmp) end
 function parameter:steps() return self.step_; end
 function parameter:val()
-  local tmp = self.val_*(self.max_-self.min_)+self.min_
-    if vel == nil then
-  return tmp
+  local tmp = self.val_*(self.max_ - self.min_)+self.min_
+  if vel == nil then
+    return tmp
   else    
     local v = tmp + self.velrange_*vel
     return math.max(self.min_, math.min(v, self.max_))    
@@ -119,9 +119,10 @@ function parameter:val()
 end
 
 function parameter:setval(val)
-  self:setnorm((val-self.min_)/(self.max_-self.min_))
+  self:setnorm((val - self.min_)/(self.max_ - self.min_))
   return self
 end
+
 function parameter:display()
   if self:hasvel() then
     return self:veldisplay()
@@ -133,10 +134,10 @@ end
 function parameter:veldisplay()
   if self:hasvelrange() then	         
      if self.learn_ == 1 then		  
-	   return self:start()..".."..self:start()+self:velrange()
+	   return self:start()..".."..self:start() + self:velrange()
 	 else		  
 	   local min, max = self:range()		  
-	   local mv = math.max(min, math.min(self:val()+self:velrange(), max))
+	   local mv = math.max(min, math.min(self:val() + self:velrange(), max))
 	   return self:val()..".."..mv		
 	 end
   else
@@ -149,7 +150,7 @@ function parameter:setnorm(val)
   val = math.floor(self.step_*val+0.5)/self.step_
   if self.val_ ~= val then	
 	if self.learn_ == true then
-	  local tmp = val*(self.max_-self.min_)+self.min_
+	  local tmp = val*(self.max_ - self.min_) + self.min_
       self.velrange_ = tmp - self.start_	
     else
 	  self.val_ = val
@@ -161,7 +162,7 @@ end
 
 function parameter:learn(dolearn)    
     if dolearn == true then	   
-	  self.start_ = self.val_*(self.max_-self.min_)+self.min_
+	  self.start_ = self.val_*(self.max_ - self.min_) + self.min_
     elseif dolearn == false and self_learn == true then
 	  --setval(velpar:start())	  
 	end

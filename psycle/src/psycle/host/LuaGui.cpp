@@ -389,11 +389,9 @@ int LuaFrameItemBind<T>::create(lua_State* L) {
 template <class T>
 int LuaFrameItemBind<T>::view(lua_State* L) {  
   boost::shared_ptr<T> frame = LuaHelper::check_sptr<T>(L, 1, meta);
-  LuaHelper::find_weakuserdata<>(L, frame->view().lock().get());
+  LuaHelper::find_weakuserdata<>(L, frame->view().get());
   return 1;
 }
-
-
 
 // LuaPopupFrameWnd+Bind
 void LuaPopupFrameWnd::OnClose() {

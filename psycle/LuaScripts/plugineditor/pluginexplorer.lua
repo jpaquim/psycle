@@ -20,7 +20,6 @@ local popupmenu = require("psycle.ui.popupmenu")
 
 local pluginexplorer = tree:new()
 
-
 function node_iter(node)
   local i = {-1}
   local level_ = 1

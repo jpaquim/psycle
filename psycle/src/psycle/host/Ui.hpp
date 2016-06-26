@@ -639,7 +639,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual ui::Dimension dim() const;  
    
   virtual void set_aligner(const boost::shared_ptr<Aligner>& aligner) {}
-  virtual boost::shared_ptr<Aligner> aligner() const { return dummy_aligner_; }  
+  virtual boost::shared_ptr<Aligner> aligner() const { return nullpointer; }  
   void set_align(AlignStyle align) { align_ = align; }
   AlignStyle align() const { return align_; }
   void set_margin(const ui::Rect& margin) { margin_ = margin; }
@@ -750,8 +750,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   std::auto_ptr<WindowImp> imp_;
   Window* parent_;  
   static Container dummy_list_;  
-  std::string debug_text_;
-  boost::shared_ptr<Aligner> dummy_aligner_;  
+  std::string debug_text_;  
   bool auto_size_width_, auto_size_height_;
   boost::weak_ptr<Ornament> ornament_;  
   bool visible_, pointer_events_;  
@@ -853,7 +852,7 @@ class Aligner {
   void CachePos(const ui::Rect& pos) { pos_ = pos; }
   
   ui::Group::WeakPtr group_;
-  bool aligned_;
+  bool aligned_;  
 
  protected:  
   typedef Window::Container::iterator iterator;
@@ -902,7 +901,11 @@ class PopupMenu;
 class Frame : public Window {
  friend FrameImp;
  public:    
+  typedef boost::shared_ptr<Frame> Ptr;
+  typedef boost::shared_ptr<const Frame> ConstPtr;
   typedef boost::weak_ptr<Frame> WeakPtr;
+  typedef boost::weak_ptr<const Frame> ConstWeakPtr;
+
   static std::string type() { return "canvasframe"; }
 
   Frame();
@@ -912,7 +915,7 @@ class Frame : public Window {
   FrameImp* imp() const { return (FrameImp*) Window::imp(); };
 
   virtual void set_view(ui::Window::Ptr view);
-  ui::Window::WeakPtr view() { return view_; }
+  ui::Window::Ptr view() { return view_.lock(); }
   virtual void set_title(const std::string& title);
   virtual std::string title() const;
   void set_popup_menu(const boost::shared_ptr<PopupMenu>& popup_menu) { 
@@ -925,10 +928,12 @@ class Frame : public Window {
   virtual void OnShow() {}  
   virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point) {}
   virtual void WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point);
+  
+  boost::signal<void (Frame&)> close;
 
  private:  
   ui::Window::WeakPtr view_;
-  boost::weak_ptr<PopupMenu> popup_menu_;
+  boost::weak_ptr<PopupMenu> popup_menu_;  
 };
 
 class PopupFrameImp;
@@ -975,6 +980,7 @@ class NodeImp {
   NodeImp() : owner_(0) {}
   virtual ~NodeImp() {}
 
+  virtual int pos() const { return -1; }
   virtual void set_text(const std::string& text) {}
   void set_owner(NodeOwnerImp* owner) { owner_ = owner; }
   NodeOwnerImp* owner() { return owner_; }
@@ -995,6 +1001,11 @@ class Node : public boost::enable_shared_from_this<Node> {
   typedef Container::iterator iterator;
    
   Node::Node() : image_index_(0), selected_image_index_(0) {}
+  Node::Node(const std::string& text) : 
+      text_(text),
+      image_index_(0),
+      selected_image_index_(0) {
+  }
   virtual ~Node() {}
       
   virtual void set_text(const std::string& text) { 
@@ -1027,6 +1038,7 @@ class Node : public boost::enable_shared_from_this<Node> {
   void AddNode(const Node::Ptr& node);
   void insert(iterator it, const Node::Ptr& node);
   void erase(iterator it);
+  void clear();
 
   template<class T>
   void traverse(T& func, Node::Ptr prev_node = nullpointer) {
@@ -1231,9 +1243,13 @@ class TreeView : public Window {
 };
 
 class ListView : public Window {
- public:
-  typedef boost::weak_ptr<ListView> WeakPtr;
+ public:  
   static std::string type() { return "canvaslistview"; }  
+
+  typedef boost::shared_ptr<ListView> Ptr;
+  typedef boost::shared_ptr<const ListView> ConstPtr;
+  typedef boost::weak_ptr<ListView> WeakPtr;
+  typedef boost::weak_ptr<const ListView> ConstWeakPtr;
 
   ListView();
   ListView(ListViewImp* imp);
@@ -1264,11 +1280,16 @@ class ListView : public Window {
   
   virtual void select_node(const Node::Ptr& node);
   virtual boost::weak_ptr<Node> selected();
+  virtual std::vector<Node::Ptr> selected_nodes();
+  int top_index() const;
+  void EnsureVisible(int index);
 
   virtual void OnChange(const Node::Ptr& node) {}
   virtual void OnRightClick(const Node::Ptr& node) {}
   virtual void OnEditing(const Node::Ptr& node, const std::string& text) {}
   virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}
+
+  boost::signal<void (ListView&, const Node::Ptr& node)> change;
 
  private:     
   Node::WeakPtr root_node_;
@@ -1279,7 +1300,10 @@ class ScrollBarImp;
 
 class ScrollBar : public Window {
  public:
-  typedef boost::shared_ptr<ui::ScrollBar> Ptr;  
+  typedef boost::shared_ptr<ScrollBar> Ptr;
+  typedef boost::shared_ptr<const ScrollBar> ConstPtr;
+  typedef boost::weak_ptr<ScrollBar> WeakPtr;
+  typedef boost::weak_ptr<const ScrollBar> ConstWeakPtr;
 
   static std::string type() { return "canvasscrollbaritem"; }
   ScrollBar();
@@ -1322,18 +1346,29 @@ class ComboBoxImp;
 class ComboBox : public Window {
  public:
   static std::string type() { return "canvascomboboxitem"; }
+  
+  typedef boost::shared_ptr<ComboBox> Ptr;
+  typedef boost::shared_ptr<const ComboBox> ConstPtr;
+  typedef boost::weak_ptr<ComboBox> WeakPtr;
+  typedef boost::weak_ptr<const ComboBox> ConstWeakPtr;
+
   ComboBox();
   ComboBox(ComboBoxImp* imp);
 
   ComboBoxImp* imp() { return (ComboBoxImp*) Window::imp(); };
   ComboBoxImp* imp() const { return (ComboBoxImp*) Window::imp(); };
 
+  virtual void add_item(const std::string& item);
   virtual void set_items(const std::vector<std::string>& itemlist);
   virtual std::vector<std::string> items() const;
 
   void set_item_index(int index);
   int item_index() const;
+
+  std::string text() const;
   virtual void OnSelect() {}
+
+  boost::signal<void (ComboBox&)> select;
 };
 
 class EditImp;
@@ -1354,8 +1389,15 @@ class ButtonImp;
 
 class Button : public Window {
  public:
-  static std::string type() { return "canvaseditboxitem"; }
+  static std::string type() { return "canvasbuttonitem"; }
+
+  typedef boost::shared_ptr<Button> Ptr;
+  typedef boost::shared_ptr<const Button> ConstPtr;
+  typedef boost::weak_ptr<Button> WeakPtr;
+  typedef boost::weak_ptr<const Button> ConstWeakPtr;
+
   Button();
+  Button(const std::string& text);
   Button(ButtonImp* imp);
 
   ButtonImp* imp() { return (ButtonImp*) Window::imp(); };
@@ -1366,6 +1408,8 @@ class Button : public Window {
   virtual void OnClick() {}
 
   bool OnUpdateArea();
+
+  boost::signal<void (Button&)> click;
 };
 
 struct Lexer {
@@ -1744,6 +1788,7 @@ class ListViewImp : public WindowImp, public NodeOwnerImp {
   virtual ARGB dev_text_color() const = 0;
   virtual void DevClear() = 0;  
   virtual void dev_select_node(const Node::Ptr& node) = 0;
+  virtual std::vector<Node::Ptr> dev_selected_nodes() = 0;
   virtual Node::WeakPtr dev_selected() = 0;
   virtual void DevEditNode(Node::Ptr node) = 0;
   virtual bool dev_is_editing() const = 0;
@@ -1755,6 +1800,8 @@ class ListViewImp : public WindowImp, public NodeOwnerImp {
   virtual void DevEnableRowSelect() = 0;  
   virtual void DevDisableRowSelect() = 0;
   virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
+  virtual int dev_top_index() const = 0;
+  virtual void DevEnsureVisible(int index) = 0;
 };
 
 class ScrollBarImp : public WindowImp {
@@ -1777,10 +1824,12 @@ class ComboBoxImp : public WindowImp {
   ComboBoxImp() : WindowImp() {}
   ComboBoxImp(Window* window) : WindowImp(window) {}
 
+  virtual void dev_add_item(const std::string& item) = 0;
   virtual std::vector<std::string> dev_items() const = 0;
   virtual void dev_set_items(const std::vector<std::string>& itemlist) = 0;
   virtual void dev_set_item_index(int index) = 0;
   virtual int dev_item_index() const = 0;
+  virtual std::string dev_text() const = 0;
 };
 
 class ButtonImp : public WindowImp {

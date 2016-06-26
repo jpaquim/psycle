@@ -398,7 +398,7 @@ struct LuaGraphicsBind {
     return LuaHelper::chaining(L);
   }
   static int drawoval(lua_State* L) { 
-    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillRect(ui::Rect(
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->DrawOval(ui::Rect(
       ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
       ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))));
     return LuaHelper::chaining(L);
@@ -418,7 +418,7 @@ struct LuaGraphicsBind {
     return LuaHelper::chaining(L);  
   }
   static int filloval(lua_State* L) {
-    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillRect(ui::Rect(
+    LuaHelper::check_sptr<ui::Graphics>(L, 1, meta)->FillOval(ui::Rect(
       ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)),
       ui::Dimension(luaL_checknumber(L, 4), luaL_checknumber(L, 5))));
     return LuaHelper::chaining(L);
@@ -564,12 +564,12 @@ class LuaItemBind {
   typedef LuaItemBind B;
   static int open(lua_State *L) {
     LuaHelper::openex(L, meta, setmethods, gc);
-    LuaHelper::setfield(L, "ALLEFT", canvas::ALLEFT);
-    LuaHelper::setfield(L, "ALTOP", canvas::ALTOP);
-    LuaHelper::setfield(L, "ALRIGHT", canvas::ALRIGHT);
-    LuaHelper::setfield(L, "ALBOTTOM", canvas::ALBOTTOM);  
-    LuaHelper::setfield(L, "ALCLIENT", canvas::ALCLIENT);
-    LuaHelper::setfield(L, "ALCENTER", canvas::ALCENTER);
+    LuaHelper::setfield(L, "ALLEFT", ui::ALLEFT);
+    LuaHelper::setfield(L, "ALTOP", ui::ALTOP);
+    LuaHelper::setfield(L, "ALRIGHT", ui::ALRIGHT);
+    LuaHelper::setfield(L, "ALBOTTOM", ui::ALBOTTOM);  
+    LuaHelper::setfield(L, "ALCLIENT", ui::ALCLIENT);
+    LuaHelper::setfield(L, "ALCENTER", ui::ALCENTER);
     static const char* const e[] = {
 		  "DOTTED", "DASHED", "SOLID", "DOUBLE", "GROOVE", "RIDGE", "INSET", 
       "OUTSET", "NONE", "HIDDEN"
@@ -1121,6 +1121,8 @@ class LuaComboBoxBind : public LuaItemBind<T> {
        {"items", items},
        {"setitemindex", setitemindex},
        {"itemindex", itemindex},
+       {"additem", additem},
+       {"text", text},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1140,6 +1142,12 @@ class LuaComboBoxBind : public LuaItemBind<T> {
     combo_box->set_items(itemlist);
     return LuaHelper::chaining(L);
   }
+  static int additem(lua_State* L) {
+    boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);    
+    const char* str = luaL_checkstring(L, -1);    
+    combo_box->add_item(str);
+    return LuaHelper::chaining(L);
+  }
   static int items(lua_State* L) {
     boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
     lua_newtable(L);
@@ -1156,13 +1164,13 @@ class LuaComboBoxBind : public LuaItemBind<T> {
     lua_pushinteger(L, combo_box->item_index() + 1);
     return 1;
   };
-
   static int setitemindex(lua_State* L) {
     boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
     int item_index = luaL_checkinteger(L, 2) - 1;
     combo_box->set_item_index(item_index);
     return LuaHelper::chaining(L);
   };
+  static int text(lua_State* L) { LUAEXPORT(L, &T::text); }
 };
 
 struct LuaCenterToScreenBind {
@@ -1324,6 +1332,7 @@ class LuaListViewBind : public LuaItemBind<T> {
       {"isediting", isediting},
       {"updatelist", updatelist},
       {"selectnode", selectnode},
+      {"selectednodes", selectednodes},
       {"editnode", editnode},
       {"selected", selected},
       {"setimages", setimages},
@@ -1348,6 +1357,18 @@ class LuaListViewBind : public LuaItemBind<T> {
   static int viewreport(lua_State* L) { LUAEXPORT(L, &T::ViewReport); }
   static int viewicon(lua_State* L) { LUAEXPORT(L, &T::ViewIcon); }
   static int viewsmallicon(lua_State* L) { LUAEXPORT(L, &T::ViewSmallIcon); }
+  static int selectednodes(lua_State* L) { 
+    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
+    using namespace ui::canvas;
+    lua_newtable(L);
+    std::vector<ui::Node::Ptr> nodes = list_view->selected_nodes();
+    std::vector<ui::Node::Ptr>::iterator it = nodes.begin();
+    for (int i = 1; it != nodes.end(); ++i, ++it) {
+      LuaHelper::find_weakuserdata(L, (*it).get());
+      lua_rawseti(L, -2, i);
+    }      
+    return 1;
+  }
   static int selectnode(lua_State* L) { 
     boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
     using namespace ui::canvas;
@@ -1433,6 +1454,7 @@ class LuaNodeBind {
       {"size", size},
       {"at", at},
       {"remove", remove},
+      {"clear", clear},
       {"parent", parent},
       {"level", level},
       {NULL, NULL}
@@ -1530,9 +1552,11 @@ class LuaNodeBind {
         }
       }
       lua_gc(L, LUA_GCCOLLECT, 0);
-    }
+    }    
     return LuaHelper::chaining(L);
   }
+
+  static int clear(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::clear); }
 
   static int parent(lua_State *L) {
     boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, meta);
@@ -1928,6 +1952,56 @@ template class LuaListViewBind<LuaListView>;
 template class LuaFrameItemBind<LuaFrameWnd>;
 template class LuaFrameItemBind<LuaPopupFrameWnd>;
 template class LuaScrollBoxBind<LuaScrollBox>;
+
+
+static int lua_ui_requires(lua_State* L) {
+  // ui binds
+  LuaHelper::require<LuaPointBind>(L, "psycle.ui.point");
+  LuaHelper::require<LuaDimensionBind>(L, "psycle.ui.dimension");
+  LuaHelper::require<LuaUiRectBind>(L, "psycle.ui.rect");
+  LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
+  LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
+  LuaHelper::require<LuaImagesBind>(L, "psycle.ui.images");
+  LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.graphics");
+  LuaHelper::require<LuaGameControllersBind>(L, "psycle.ui.gamecontrollers");
+  LuaHelper::require<LuaGameControllerBind>(L, "psycle.ui.gamecontroller");
+  // filedialog
+  LuaHelper::require<LuaFileOpenBind>(L, "psycle.ui.fileopen");
+  LuaHelper::require<LuaFileSaveBind>(L, "psycle.ui.filesave");
+  // ui menu binds
+  LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
+  LuaHelper::require<LuaPopupMenuBind>(L, "psycle.ui.popupmenu");
+  LuaHelper::require<LuaSystemMetrics>(L, "psycle.ui.systemmetrics");  
+  // ui canvas binds
+  LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
+  LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
+  LuaHelper::require<LuaPopupFrameItemBind >(L, "psycle.ui.canvas.popupframe");
+  LuaHelper::require<LuaCenterToScreenBind>(L, "psycle.ui.canvas.centertoscreen");
+  LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
+  LuaHelper::require<LuaScrollBoxBind<> >(L, "psycle.ui.canvas.scrollbox");
+  LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
+  LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
+  LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
+  LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
+  LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
+  LuaHelper::require<LuaTreeViewBind<> >(L, "psycle.ui.canvas.treeview");
+  LuaHelper::require<LuaListViewBind<> >(L, "psycle.ui.canvas.listview");
+  LuaHelper::require<LuaNodeBind>(L, "psycle.node");  
+  LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
+  LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.canvas.combobox");
+  LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
+  LuaHelper::require<LuaLexerBind>(L, "psycle.ui.canvas.lexer");
+  LuaHelper::require<LuaScintillaBind<> >(L, "psycle.ui.canvas.scintilla");
+  LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.canvas.scrollbar");
+  LuaHelper::require<LuaEventBind>(L, "psycle.ui.canvas.event");
+  LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.canvas.keyevent");
+  LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.canvas.ornamentfactory");
+  LuaHelper::require<LineBorderBind>(L, "psycle.ui.canvas.lineborder");
+  LuaHelper::require<WallpaperBind>(L, "psycle.ui.canvas.wallpaper");
+  LuaHelper::require<FillBind>(L, "psycle.ui.canvas.fill");
+  return 0;
+}
+
 
 } // namespace host
 } // namespace psycle

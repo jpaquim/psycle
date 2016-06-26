@@ -79,11 +79,18 @@ class Line : public Window {
 
 class Text : public Window {
  public:
+  typedef boost::shared_ptr<Text> Ptr;
+  typedef boost::shared_ptr<const Text> ConstPtr;
+  typedef boost::weak_ptr<Text> WeakPtr;
+  typedef boost::weak_ptr<const Text> ConstWeakPtr;
+
   Text() : Window(), 
+      alignment_(ALCENTER),
       color_(0xFFFFFF),
       font_(ui::Systems::instance().CreateFont()) {
   }
   Text(const std::string& text) : 
+      alignment_(ALCENTER),
       color_(0xFFFFFF),
       text_(text),
       font_(ui::Systems::instance().CreateFont()) { 
