@@ -193,7 +193,9 @@ void DefaultAligner::SetPositions() {
         {                   
           ui::Point top_left = ui::Point(current_pos.left() + item->margin().left(), current_pos.top() + item->margin().top());
           current_pos.set_top(current_pos.top() + item_dim.height() + item->margin().top());
-          ui::Rect new_pos = ui::Rect(top_left, current_pos.top_right());
+          ui::Point bottom_right = current_pos.top_right();
+          bottom_right.set_x(bottom_right.x() - item->margin().right());
+          ui::Rect new_pos = ui::Rect(top_left, bottom_right);
           if (new_pos != item->pos()) {            
             item->set_pos(new_pos);
           }          

@@ -579,7 +579,7 @@ namespace psycle { namespace host {
 			{
 				pParamMapGui = new ParamMap(&machine());
         pParamMapGui->close.connect(boost::bind(&CFrameMachine::OnParamMapClose, this, _1));
-				pParamMapGui->set_pos(ui::Rect(ui::Point(rc.right+1, rc.top), ui::Dimension(450, 500)));
+				pParamMapGui->set_pos(ui::Rect(ui::Point(rc.right+1, rc.top), ui::Dimension(500, 500)));
 				pParamMapGui->Show();
 			}
 			else
@@ -1147,8 +1147,12 @@ namespace psycle { namespace host {
 		void CFrameMachine::Automate(int param, int value, bool undo, int min)
 		{
 			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value-min, undo);
-			if(pParamGui)
+			if (pParamGui) {
 				pParamGui->UpdateNew(param, value);
+      }
+      if (pParamMapGui) {
+        pParamMapGui->UpdateNew(param, value);
+      }
 		}
     void CFrameMachine::OnParamMapClose(ui::Frame&) {
       pParamMapGui = 0;

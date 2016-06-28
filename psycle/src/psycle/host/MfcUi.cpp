@@ -123,10 +123,7 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
 END_MESSAGE_MAP()
 
 template<class T, class I>
-BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
-  if (pMsg->message==WM_HSCROLL ) {
-    int fordebugonly(0);
-  } else
+BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {  
   if (pMsg->message==WM_KEYDOWN ) {
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
@@ -415,6 +412,7 @@ template class WindowTemplateImp<CWnd, ui::WindowImp>;
 template class WindowTemplateImp<CComboBox, ui::ComboBoxImp>;
 template class WindowTemplateImp<CScrollBar, ui::ScrollBarImp>;
 template class WindowTemplateImp<CButton, ui::ButtonImp>;
+template class WindowTemplateImp<CButton, ui::CheckBoxImp>;
 template class WindowTemplateImp<CEdit, ui::EditImp>;
 template class WindowTemplateImp<CWnd, ui::ScintillaImp>;
 template class WindowTemplateImp<CTreeCtrl, ui::TreeViewImp>;
@@ -454,9 +452,6 @@ BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
 END_MESSAGE_MAP()
 
 BOOL FrameImp::PreTranslateMessage(MSG* pMsg) {
-  if (pMsg->message==WM_HSCROLL) {    
-    int fordeugonly(0);
-  } else
   if (pMsg->message==WM_NCRBUTTONDOWN) {    
     ui::Event ev;
     ui::Point point(pMsg->pt.x, pMsg->pt.y);
@@ -478,6 +473,14 @@ void FrameImp::DevHideDecoration() {
   ModifyStyle(WS_CAPTION, 0, SWP_FRAMECHANGED); 
   ModifyStyle(WS_BORDER, 0, SWP_FRAMECHANGED);
   ModifyStyle(WS_THICKFRAME, 0, SWP_FRAMECHANGED);
+}
+
+void FrameImp::DevPreventResize() {
+  ModifyStyle(WS_SIZEBOX, 0, SWP_FRAMECHANGED);
+}
+
+void FrameImp::DevAllowResize() {  
+  ModifyStyle(0, WS_SIZEBOX, SWP_FRAMECHANGED);
 }
 
 ui::FrameImp* PopupFrameImp::popup_frame_ = 0;
@@ -512,6 +515,15 @@ BEGIN_MESSAGE_MAP(ButtonImp, CButton)
 END_MESSAGE_MAP()
 
 void ButtonImp::OnClick() {
+  OnDevClick();
+}
+
+BEGIN_MESSAGE_MAP(CheckBoxImp, CButton)  
+	ON_WM_PAINT()  
+  ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
+END_MESSAGE_MAP()
+
+void CheckBoxImp::OnClick() {
   OnDevClick();
 }
 
@@ -758,8 +770,7 @@ BOOL ListViewImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
   return ev.is_propagation_stopped();  
 }
 
-void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos) {
-  node_imp->pos_ = pos;
+void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos) {  
   LVITEM lvi;
   lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
   lvi.cColumns = 0;
@@ -768,7 +779,14 @@ void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& nod
   lvi.iImage = node.image_index();
   lvi.iItem = pos;
   lvi.iSubItem = 0;
+  node_imp->lvi = lvi;
   list->InsertItem(&lvi);  
+}
+
+void ListNodeImp::set_text(ui::mfc::ListViewImp* list, const std::string& text) {
+  text_ = text;
+  lvi.pszText = const_cast<char *>(text_.c_str());
+  list->SetItemText(lvi.iItem, lvi.iSubItem, text.c_str());
 }
 
 void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level) {
@@ -778,12 +796,12 @@ void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, Li
   node_imp->text_ = node.text();
   lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
   lvi.iImage = node.image_index(); 
-  lvi.iItem = pos_;
+  lvi.iItem = pos();
   lvi.iSubItem = level - 1;
+  node_imp->lvi = lvi;
   list->SetItem(&lvi);
-  node_imp->set_pos(pos_);
+  node_imp->set_pos(pos());
 }
-
 
 ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node, int pos) {
   ListNodeImp* new_imp = new ListNodeImp();
@@ -859,7 +877,7 @@ boost::weak_ptr<Node> ListViewImp::dev_selected() {
 void ListViewImp::OnNodeChanged(Node& node) {
   ListNodeImp* imp = dynamic_cast<ListNodeImp*>(node.imp(*this));
   if (imp) {      
-      //SetItemText(imp->hItem, node.text().c_str());         
+    imp->set_text(this, node.text());      
   }
 }
 

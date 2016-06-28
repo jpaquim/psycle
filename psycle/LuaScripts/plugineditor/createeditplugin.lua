@@ -82,13 +82,16 @@ function createeditplugin:createoredit()
   if not found then
     self.pluginlist:hide()
     self.createoptions:show()
-    self:updatealign()    
+    self:updatealign()
+    self:parent():updatealign()
+    self:parent():invalidate()
   end
 end
 
-function createeditplugin:initpluginlist()  
+function createeditplugin:initpluginlist()    
   self.pluginlist = listview:new(self)
-                            :setautosize(false, true)
+                            :setautosize(false, false)
+                            :setpos(0, 0, 0, 200)
                             :setalign(item.ALTOP)
                             :setbackgroundcolor(0x528A68)
                             :settextcolor(0xFFFF00)
@@ -102,8 +105,8 @@ function createeditplugin:initpluginlist()
 end
 
 function createeditplugin:initcreateoptions()  
-  self.createoptions = group:new(self):setautosize(true, true):setalign(item.ALTOP):hide()  
-  self.templatelist = listview:new(self.createoptions):setalign(item.ALTOP):setautosize(false, false):setpos(0, 0, 200, 140)
+  self.createoptions = group:new(self):setautosize(true, true):setalign(item.ALTOP):setmargin(0, 5, 0, 5):hide()  
+  self.templatelist = listview:new(self.createoptions):setalign(item.ALLEFT):setautosize(false, false):setpos(0, 0, 200, 140)
   self.listnode = node:new()  
   local filetree = filehelper.filetree(cfg:luapath().."\\plugineditor\\templates")    
   if filetree then        

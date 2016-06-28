@@ -1153,7 +1153,13 @@ int LuaGraphicsBind::gc(lua_State* L) {
 }
 
 int LuaGraphicsBind::drawstring(lua_State* L) {
-  LuaHelper::bind(L, meta, &Graphics::DrawString);  
+  int err = LuaHelper::check_argnum(L, 4, "");
+  if (err!=0) return err;
+  boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+  const char* str = luaL_checkstring(L, 2);
+  double x = luaL_checknumber(L, 3);
+  double y = luaL_checknumber(L, 4);
+  g->DrawString(str, ui::Point(x, y));
   return LuaHelper::chaining(L);
 }
 
@@ -1162,10 +1168,10 @@ int LuaGraphicsBind::drawrect(lua_State* L) {
   if (err!=0) return err;
   boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
   double v1 = luaL_checknumber(L, 2);
-  double v2 = luaL_checknumber(L, 2);
-  double v3 = luaL_checknumber(L, 2);
-  double v4 = luaL_checknumber(L, 2);
-  g->DrawRect(ui::Rect(ui::Point(v1, v2), ui::Point(v1 + v3, v2 + v4)));
+  double v2 = luaL_checknumber(L, 3);
+  double v3 = luaL_checknumber(L, 4);
+  double v4 = luaL_checknumber(L, 5);
+  g->DrawRect(ui::Rect(ui::Point(v1, v2), ui::Dimension(v3, v4)));
   return LuaHelper::chaining(L);
 }
 

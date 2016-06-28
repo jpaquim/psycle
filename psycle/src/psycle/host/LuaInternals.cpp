@@ -59,6 +59,13 @@ void LuaConfig::CloseGroup() {
 	}
 }
 
+ui::ARGB LuaConfig::color(const std::string& key) {  
+  COLORREF color;
+  using namespace ui;  
+  store_->Read(key, color);  
+  return ToARGB(color);      
+}
+
 const char* LuaConfigBind::meta = "psyconfigmeta";
 
 int LuaConfigBind::open(lua_State *L) {
@@ -108,16 +115,13 @@ int LuaConfigBind::get(lua_State *L) {
   boost::shared_ptr<LuaConfig> cfg = LuaHelper::check_sptr<LuaConfig>(L, 1, meta);
   ConfigStorage* store = cfg->store();
   if (store) {
-    const std::string key(luaL_checkstring(L, 2));
-    COLORREF color;
+    const std::string key(luaL_checkstring(L, 2));    
     if (key=="dialwidth") {      
       lua_pushnumber(L, PsycleGlobal::conf().macParam().dialwidth);
     } else if (key=="dialheight") {      
       lua_pushnumber(L, PsycleGlobal::conf().macParam().dialheight);
-    } else {
-      store->Read(key, color);
-      using namespace ui;
-      lua_pushnumber(L, ToARGB(color));      
+    } else {      
+      lua_pushnumber(L, cfg->color(key));
     }
   } else {
     return 0;

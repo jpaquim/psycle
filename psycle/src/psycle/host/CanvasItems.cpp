@@ -146,11 +146,11 @@ bool Text::OnUpdateArea() {
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));
   } if (auto_size_width() && auto_size_height()) {
     Graphics g;
-    g.SetFont(*font_);
+    g.SetFont(font_);
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), g.text_size(text_))));
   } else {
     Graphics g;
-    g.SetFont(*font_);
+    g.SetFont(font_);
     double width = auto_size_width() ? g.text_size(text_).width() : imp()->dev_pos().dimension().width();
     double height = auto_size_height() ? g.text_size(text_).height() : imp()->dev_pos().dimension().height();
     area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), Dimension(width, height))));
@@ -169,7 +169,7 @@ void Text::set_text(const std::string& text) {
 }
 
 void Text::set_font(const Font& font) {  
-  font_.reset(font.Clone());
+  font_ = font;
   if (imp()) {
     needsupdate();
     imp()->dev_set_pos(pos());
@@ -179,16 +179,39 @@ void Text::set_font(const Font& font) {
 }
 
 void Text::Draw(Graphics* g, Region& draw_region) {   
-  g->SetFont(*font_);
-  g->SetColor(color_);
-  double xp(0);
-  double yp(0);
-  if (alignment_ & ALCENTER) {
-    ui::Dimension text_dim = g->text_size(text_);    
-    xp = (dim().width() - text_dim.width()) / 2;
-    yp = (dim().height() - text_dim.height()) / 2;
+  g->SetFont(font_);
+  g->SetColor(color_);  
+  g->DrawString(text_, ComputeAlignment(g));
+}
+
+ui::Point Text::ComputeAlignment(Graphics* g) const {
+  ui::Point result;
+  ui::Dimension text_dim = g->text_size(text_);
+  switch (justify_) {
+    case LEFTJUSTIFY:
+    break;    
+    case CENTERJUSTIFY:
+      result.set_x((dim().width() - text_dim.width()) / 2);
+    break;
+    case RIGHTJUSTIFY:
+      result.set_x(dim().width() - text_dim.width());
+    break;
+    default:
+    break;
   }
-  g->DrawString(text_, xp, yp);  
+  switch (vertical_alignment_) {
+    case ALTOP:
+    break;
+    case ALCENTER:
+      result.set_y((dim().height() - text_dim.height()) / 2);
+    break;
+    case ALBOTTOM:
+      result.set_y(dim().height() - text_dim.height());
+    break;
+    default:      
+    break;
+  }
+  return result;
 }
 
 // Pic

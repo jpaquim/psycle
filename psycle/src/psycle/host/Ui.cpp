@@ -236,6 +236,36 @@ void Commands::Invoke() {
   }  
 }
 
+Font::Font() : imp_(ui::ImpFactory::instance().CreateFontImp()) {
+}
+
+Font::Font(const ui::FontInfo& font_info) : imp_(ui::ImpFactory::instance().CreateFontImp()) {
+  imp_->dev_set_info(font_info);
+}
+
+Font::Font(const Font& other) {    
+  assert(other.imp());
+  imp_.reset(other.imp()->DevClone());  
+}
+
+Font& Font::operator= (const Font& other) {
+  assert(other.imp());
+  if (this != &other) {
+    imp_.reset(other.imp()->DevClone());
+  }
+  return *this;
+}
+
+void Font::set_info(const FontInfo& info) {
+  assert(imp());  
+  imp()->dev_set_info(info);
+}
+
+FontInfo Font::info() const {
+  assert(imp());
+  return imp()->dev_info();
+}
+
 //Image
 Image::Image() : imp_(ui::ImpFactory::instance().CreateImageImp()) {
 }
@@ -308,9 +338,9 @@ void Graphics::DrawOval(const ui::Rect& rect) {
   imp_->DrawOval(rect); 
 }
 
-void Graphics::DrawString(const std::string& str, double x, double y) {
+void Graphics::DrawString(const std::string& str, const ui::Point& point) {
   assert(imp_.get());
-  imp_->DrawString(str, x, y);  
+  imp_->DrawString(str, point.x(), point.y());  
 }
 
 void Graphics::FillRect(const ui::Rect& rect) {
@@ -1272,6 +1302,18 @@ void Frame::HideDecoration() {
   }
 }
 
+void Frame::PreventResize() {
+  if (imp()) {
+    imp()->DevPreventResize();
+  }
+}
+
+void Frame::AllowResize() {
+  if (imp()) {
+    imp()->DevAllowResize();
+  }
+}
+
 void Frame::WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point) {
   if (!popup_menu_.expired()) {
     ev.StopPropagation();
@@ -1690,12 +1732,44 @@ std::string Button::text() const {
 }
 
 bool Button::OnUpdateArea() {  
-  area_->Clear();
-  std::stringstream str;
-  str << "BW " << imp()->dev_pos().dimension().width() << ";" << std::endl;
-  OutputDebugString(str.str().c_str());
+  area_->Clear();  
   area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));  
   return true;
+}
+
+CheckBox::CheckBox() : Button(ui::ImpFactory::instance().CreateCheckBoxImp()) {
+  set_auto_size(false, false);
+}
+
+CheckBox::CheckBox(const std::string& text) : Button(ui::ImpFactory::instance().CreateCheckBoxImp()) {
+  set_auto_size(false, false);  
+  imp()->dev_set_text(text);  
+}
+
+CheckBox::CheckBox(CheckBoxImp* imp) : Button(imp) {
+  set_auto_size(false, false);
+}
+
+bool CheckBox::checked() const {
+  return imp() ? imp()->dev_checked() : false;
+}
+
+void CheckBox::Check() {
+  if (imp()) {
+    imp()->DevCheck();
+  }
+}
+
+void CheckBox::UnCheck() {
+  if (imp()) {
+    imp()->DevUnCheck();
+  }
+}
+
+void CheckBox::set_background_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_background_color(color);
+  }
 }
 
 std::string Scintilla::dummy_str_ = "";
@@ -2016,8 +2090,7 @@ ui::Image* Systems::CreateImage() {
 }
 
 ui::Font* Systems::CreateFont() { 
-  assert(concrete_factory_.get());
-  return concrete_factory_->CreateFont(); 
+  return new ui::Font();  
 }
 
 ui::Window* Systems::CreateWin() {
@@ -2191,9 +2264,19 @@ ui::ButtonImp* ImpFactory::CreateButtonImp() {
   return concrete_factory_->CreateButtonImp(); 
 }
 
+ui::CheckBoxImp* ImpFactory::CreateCheckBoxImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateCheckBoxImp(); 
+}
+
 ui::RegionImp* ImpFactory::CreateRegionImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateRegionImp(); 
+}
+
+ui::FontImp* ImpFactory::CreateFontImp() {  
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFontImp();
 }
 
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp() {

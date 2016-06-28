@@ -85,15 +85,15 @@ class Text : public Window {
   typedef boost::weak_ptr<const Text> ConstWeakPtr;
 
   Text() : Window(), 
-      alignment_(ALCENTER),
-      color_(0xFFFFFF),
-      font_(ui::Systems::instance().CreateFont()) {
+      vertical_alignment_(ALTOP),
+      justify_(LEFTJUSTIFY),
+      color_(0xFFFFFF) {
   }
   Text(const std::string& text) : 
-      alignment_(ALCENTER),
+      vertical_alignment_(ALTOP),
+      justify_(LEFTJUSTIFY),
       color_(0xFFFFFF),
-      text_(text),
-      font_(ui::Systems::instance().CreateFont()) { 
+      text_(text) { 
   }
 
   static std::string type() { return "canvastext"; }
@@ -108,13 +108,18 @@ class Text : public Window {
   }
   ARGB color() const { return color_; }
   void set_font(const Font& font);
-  void set_alignment(AlignStyle alignment) { alignment_ = alignment; }
+  void set_vertical_alignment(AlignStyle vertical_alignment) { 
+    vertical_alignment_ = vertical_alignment;
+  }
+  void set_justify(JustifyStyle justify) { justify_ = justify; }
 
  private:
+  ui::Point ComputeAlignment(Graphics* g) const;
   std::string text_;
-  AlignStyle alignment_;
+  AlignStyle vertical_alignment_;
+  JustifyStyle justify_;
   ARGB color_;
-  std::auto_ptr<Font> font_;  
+  ui::Font font_;  
 };
 
 

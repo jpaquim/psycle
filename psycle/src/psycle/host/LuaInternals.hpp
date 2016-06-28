@@ -23,6 +23,8 @@ namespace psycle { namespace host {
      ConfigStorage* store() { return store_.get(); }
      void OpenGroup(const std::string& group);
      void CloseGroup();
+     uint32_t color(const std::string& key);
+
     private:
      std::auto_ptr<ConfigStorage> store_;
   };

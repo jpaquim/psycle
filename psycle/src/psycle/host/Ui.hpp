@@ -325,11 +325,6 @@ enum CursorStyle {
   WAIT, W_RESIZE, SW_RESIZE
 };
 
-struct FontInfo {
-  std::string name;
-  int height;
-};
-
 class Event {
  public:  
   Event() : work_parent_(false), default_prevented_(false), stop_propagation_(false) {}
@@ -381,17 +376,44 @@ class KeyEvent : public Event {
    int keycode_, flags_;
 };
 
-class Font {
- public:
-  Font() {}
-  virtual ~Font() = 0;
-  virtual Font* Clone() const = 0;
-
-  virtual void set_info(const FontInfo& info) = 0;
-  virtual FontInfo info() const = 0;
+struct FontInfo {
+  FontInfo() : name("Arial"), height(12), bold(false) {}
+  std::string name;
+  int height;
+  bool bold;
 };
 
-inline Font::~Font() {}
+class FontImp;
+
+class Font {
+ public:
+  Font();
+  Font(const FontInfo& font_info);  
+  Font(const Font& other);
+  Font& operator= (const Font& other);
+  virtual ~Font() {}
+  
+  ui::FontImp* imp() { return imp_.get(); }
+  ui::FontImp* imp() const { return imp_.get(); }
+
+  virtual void set_info(const FontInfo& info);
+  virtual FontInfo info() const;
+
+ private:  
+  std::auto_ptr<FontImp> imp_;
+};
+
+class FontImp {
+ public:
+  FontImp() {}
+  virtual ~FontImp() = 0;
+  virtual FontImp* DevClone() const = 0;
+
+  virtual void dev_set_info(const FontInfo& info) = 0;
+  virtual FontInfo dev_info() const = 0;
+};
+
+inline FontImp::~FontImp() {}
 
 class RegionImp {
  public:
@@ -497,7 +519,7 @@ friend class canvas::Group;
   virtual void DrawRect(const ui::Rect& rect);
   virtual void DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim);
   virtual void DrawOval(const ui::Rect& rect);
-  virtual void DrawString(const std::string& str, double x, double y);
+  virtual void DrawString(const std::string& str, const ui::Point& point);
   virtual void FillRect(const ui::Rect& rect);
   virtual void FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim);
   virtual void FillOval(const ui::Rect& rect);
@@ -536,6 +558,12 @@ enum AlignStyle {
   ALBOTTOM,   
   ALCLIENT, 
   ALCENTER
+};
+
+enum JustifyStyle {
+  LEFTJUSTIFY,
+  RIGHTJUSTIFY,
+  CENTERJUSTIFY
 };
 
 class WindowImp;
@@ -923,7 +951,10 @@ class Frame : public Window {
   }
   boost::weak_ptr<PopupMenu> popup_menu() { return popup_menu_; }
   virtual void ShowDecoration();
-  virtual void HideDecoration();  
+  virtual void HideDecoration();
+  virtual void PreventResize();
+  virtual void AllowResize();
+
   virtual void OnClose() {}
   virtual void OnShow() {}  
   virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point) {}
@@ -1412,6 +1443,33 @@ class Button : public Window {
   boost::signal<void (Button&)> click;
 };
 
+class CheckBoxImp;
+
+class CheckBox : public Button {
+ public:
+  static std::string type() { return "canvascomboboxitem"; }
+  
+  typedef boost::shared_ptr<CheckBox> Ptr;
+  typedef boost::shared_ptr<const CheckBox> ConstPtr;
+  typedef boost::weak_ptr<CheckBox> WeakPtr;
+  typedef boost::weak_ptr<const CheckBox> ConstWeakPtr;
+
+  CheckBox();
+  CheckBox(const std::string& text);
+  CheckBox(CheckBoxImp* imp);
+
+  CheckBoxImp* imp() { return (CheckBoxImp*) Window::imp(); };
+  CheckBoxImp* imp() const { return (CheckBoxImp*) Window::imp(); };
+
+  virtual void set_background_color(ARGB color);
+  virtual bool checked() const;
+
+  void Check();
+  void UnCheck();
+  
+  boost::signal<void (CheckBox&)> click;
+};
+
 struct Lexer {
   Lexer() : 
       comment_color_(0), 
@@ -1752,7 +1810,10 @@ class FrameImp : public WindowImp {
   virtual std::string dev_title() const = 0;
   virtual void dev_set_view(ui::Window::Ptr view) = 0;
   virtual void DevShowDecoration() = 0;
-  virtual void DevHideDecoration() = 0;  
+  virtual void DevHideDecoration() = 0;
+  virtual void DevPreventResize() = 0;
+  virtual void DevAllowResize() = 0;
+
   virtual void OnDevClose();
 };
 
@@ -1843,6 +1904,17 @@ class ButtonImp : public WindowImp {
   virtual void OnDevClick();
 };
 
+class CheckBoxImp : public ui::ButtonImp {
+ public:
+  CheckBoxImp() : ButtonImp() {}  
+  CheckBoxImp(Window* window) : ButtonImp(window) {}
+
+  virtual void dev_set_background_color(ARGB color) = 0;
+  virtual bool dev_checked() const = 0;
+  virtual void DevCheck() = 0;
+  virtual void DevUnCheck() = 0;
+};
+
 class EditImp : public WindowImp {
  public:
   EditImp() : WindowImp() {}
@@ -1931,8 +2003,10 @@ class ImpFactory {
   virtual ui::MenuContainerImp* CreatePopupMenuImp();
   virtual ui::MenuImp* CreateMenuImp();
   virtual ui::ButtonImp* CreateButtonImp();
+  virtual ui::CheckBoxImp* CreateCheckBoxImp();
   virtual ui::ScintillaImp* CreateScintillaImp();
   virtual ui::RegionImp* CreateRegionImp();
+  virtual ui::FontImp* CreateFontImp();
   virtual ui::GraphicsImp* CreateGraphicsImp();
   virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr);
   virtual ui::ImageImp* CreateImageImp();

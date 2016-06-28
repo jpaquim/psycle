@@ -138,63 +138,47 @@ inline void ImageImp::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORR
   hdcDst.DeleteDC();
 }
 
-class Font : public ui::Font {
+class FontImp : public ui::FontImp {
  public:
-  Font() {
+  FontImp() {
     LOGFONT lfLogFont;
     memset(&lfLogFont, 0, sizeof(lfLogFont));
     lfLogFont.lfHeight = 12;    
     strcpy(lfLogFont.lfFaceName, "Arial");
     cfont_.CreateFontIndirect(&lfLogFont);  
   }
-
-  Font::Font(const Font& other) {       
-    cfont_.DeleteObject();
-    LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));
-    Font* font = (Font*)(&other);
-    font->cfont().GetLogFont(&lfLogFont);
-    cfont_.CreateFontIndirect(&lfLogFont);
-  }
-
-  Font& operator= (const Font& other) {
-    if (this != &other) {
-      cfont_.DeleteObject();
-      LOGFONT lfLogFont;
-      memset(&lfLogFont, 0, sizeof(lfLogFont));
-      Font* font = (Font*)(&other);
-      font->cfont().GetLogFont(&lfLogFont);
-      cfont_.CreateFontIndirect(&lfLogFont);
-    }
-    return *this;
-  }
-
-  virtual ~Font() {
+  
+  virtual ~FontImp() {
     cfont_.DeleteObject();
   }
 
-  virtual Font* Clone() const { 
-    Font* clone = new Font();
-    clone->set_info(info());    
+  virtual FontImp* DevClone() const { 
+    FontImp* clone = new FontImp();
+    clone->dev_set_info(dev_info());
     return clone;
   }
 
-  virtual void set_info(const FontInfo& info) {
+  virtual void dev_set_info(const FontInfo& info) {
     LOGFONT lfLogFont;
     memset(&lfLogFont, 0, sizeof(lfLogFont));
     lfLogFont.lfHeight = info.height;
+    lfLogFont.lfHeight = info.height;
+    if (info.bold) {
+      lfLogFont.lfWeight = FW_BOLD;
+    }
     strcpy(lfLogFont.lfFaceName, info.name.c_str());
     cfont_.DeleteObject();
     cfont_.CreateFontIndirect(&lfLogFont);
   }
 
-  virtual FontInfo info() const {
+  virtual FontInfo dev_info() const {
     LOGFONT lfLogFont;
     memset(&lfLogFont, 0, sizeof(lfLogFont));
     cfont_.GetLogFont(&lfLogFont);
     FontInfo info;
     info.height = lfLogFont.lfHeight;
     info.name = lfLogFont.lfFaceName;
+    info.bold = (lfLogFont.lfWeight == FW_BOLD);
     return info;
   }
 
@@ -391,9 +375,11 @@ class GraphicsImp : public ui::GraphicsImp {
   }
 
   void SetFont(const ui::Font& font) {
-    font_ = *dynamic_cast<const ui::mfc::Font*>(&font);
-    cr_->SelectObject(font_.cfont());
-    cr_->SetTextColor(rgb_color_);
+    font_ = font;
+    mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+    assert(imp);
+    cr_->SelectObject(imp->cfont());
+    cr_->SetTextColor(rgb_color_);    
   }
 
   const Font& font() const { return font_; }
@@ -492,7 +478,9 @@ class GraphicsImp : public ui::GraphicsImp {
      cr_->GetWorldTransform(&rXform);    
      cr_->SetBkMode(TRANSPARENT);
     
-     old_font = (CFont*) cr_->SelectObject(&font_.cfont());
+     mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+     assert(imp);
+     old_font = (CFont*) cr_->SelectObject(&imp->cfont());
      old_rgn_.CreateRectRgn(0, 0, 0, 0);
      clp_rgn_.CreateRectRgn(0, 0, 0, 0);
      ::GetRandomRgn(cr_->m_hDC, old_rgn_, SYSRGN);
@@ -518,7 +506,7 @@ class GraphicsImp : public ui::GraphicsImp {
    CDC* cr_;   
    CPen pen, *old_pen;
    CBrush brush, *old_brush;
-   mfc::Font font_;
+   ui::Font font_;
    CFont* old_font;
    ARGB argb_color_;
    RGB rgb_color_;
@@ -833,7 +821,8 @@ class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
 
   static ButtonImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     ButtonImp* imp = new ButtonImp();
-    if (!imp->Create("Button", WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
+    if (!imp->Create("Button",
+                     WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
                      CRect(0, 0, 55, 19), 
                      parent, 
                      nID)) {
@@ -859,6 +848,45 @@ protected:
   void OnClick();
 };
 
+class CheckBoxImp : public WindowTemplateImp<CButton, ui::CheckBoxImp> {
+ public:  
+  CheckBoxImp() : WindowTemplateImp<CButton, ui::CheckBoxImp>() {}
+
+  static CheckBoxImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    CheckBoxImp* imp = new CheckBoxImp();
+    if (!imp->Create("CheckBox",
+                     WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER  | BS_CHECKBOX | BS_AUTOCHECKBOX,
+                     CRect(0, 0, 55, 19), 
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }
+    imp->set_window(w);  
+    return imp;
+  }
+
+  BOOL OnEraseBkgnd(CDC* pDC) { return CButton::OnEraseBkgnd(pDC); }
+
+  virtual void dev_set_text(const std::string& text) { SetWindowText(text.c_str()); }
+  virtual std::string dev_text() const {
+    CString s;    
+    GetWindowTextA(s);
+    return s.GetString();
+  }
+  virtual void dev_set_background_color(ARGB color) {     
+    // this->S
+  }
+  virtual bool dev_checked() const { return GetCheck() != 0; }
+  virtual void DevCheck()  { SetCheck(true); }
+  virtual void DevUnCheck() { SetCheck(false); }
+
+protected:
+  DECLARE_MESSAGE_MAP()
+  void OnPaint() { CButton::OnPaint(); }
+  void OnClick();
+};
+
 class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
  public:  
   FrameImp() : WindowTemplateImp<CFrameWnd, ui::FrameImp>() {}
@@ -866,7 +894,7 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   static FrameImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     FrameImp* imp = new FrameImp();    
     int style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX |
-                WS_MAXIMIZEBOX;
+                WS_MAXIMIZEBOX | WS_SIZEBOX;    
     if (!imp->Create(NULL, "PsycleWindow", style,
                      CRect(0, 0, 200, 200), 
                      parent)) {
@@ -897,6 +925,8 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
 
   virtual void DevShowDecoration();
   virtual void DevHideDecoration();
+  virtual void DevPreventResize();
+  virtual void DevAllowResize();
   
   void OnSize(UINT nType, int cx, int cy) {
     if (view_) {
@@ -1118,18 +1148,19 @@ class ListViewImp;
 
 class ListNodeImp : public NodeImp {  
  public:
-  ListNodeImp() : pos_(0) {} // : hItem(0) {}
+  ListNodeImp() { memset(&lvi, 0, sizeof(lvi)); }
   ~ListNodeImp() {}
 
-  void set_pos(int pos) { pos_ = pos; }
-  virtual int pos() const { return pos_; }
+  void set_pos(int pos) { lvi.iItem = pos; }
+  virtual int pos() const { return lvi.iItem; }
       
   // LVITEM DevInsert(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* prev_imp);
   void DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos);
   void DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level);
-  // LVITEM hItem;  
-  std::string text_;
-  int pos_;
+  void set_text(ui::mfc::ListViewImp* list, const std::string& text);
+
+  LVITEM lvi;
+  std::string text_;  
 };
 
 class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
@@ -1165,8 +1196,8 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   virtual void DevUpdate(const Node::Ptr& node, Node::Ptr prev_node);
   virtual void DevErase(boost::shared_ptr<Node> node);  
   virtual void DevEditNode(boost::shared_ptr<ui::Node> node);
-  virtual void dev_set_background_color(ARGB color) {     
-    SetBkColor(ToCOLORREF(color));
+  virtual void dev_set_background_color(ARGB color) {      
+    SetBkColor(ToCOLORREF(color));    
   }  
   virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
   virtual void dev_set_text_color(ARGB color) {
@@ -1614,8 +1645,7 @@ class Systems : public ui::Systems {
   virtual ui::Region* CreateRegion() { return new ui::Region(); }
   virtual ui::Graphics* CreateGraphics() { return new ui::Graphics(); }
   virtual ui::Graphics* CreateGraphics(void* dc) { return new ui::Graphics((CDC*) dc); }
-  virtual ui::Image* CreateImage() { return new ui::Image(); }
-  virtual ui::Font* CreateFont() { return new ui::mfc::Font(); }
+  virtual ui::Image* CreateImage() { return new ui::Image(); }  
   virtual ui::Window* CreateWin() { 
     Window* window = new Window();
     WindowImp* imp = WindowImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
@@ -1639,7 +1669,7 @@ class Systems : public ui::Systems {
     ButtonImp* imp = ButtonImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
     imp->set_window(window);
     return window;
-  }
+  }  
   virtual ui::MenuContainer* CreateMenuContainer() { 
     MenuContainer* bar = new MenuContainer();    
     return bar;
@@ -1680,6 +1710,9 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::ButtonImp* CreateButtonImp() {     
     return ButtonImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }  
+  virtual ui::CheckBoxImp* CreateCheckBoxImp() {     
+    return CheckBoxImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
   virtual ui::EditImp* CreateEditImp() {     
     return EditImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }  
@@ -1694,6 +1727,9 @@ class ImpFactory : public ui::ImpFactory {
   }
   virtual ui::RegionImp* CreateRegionImp() {     
     return new ui::mfc::RegionImp();
+  }
+  virtual ui::FontImp* CreateFontImp() {    
+    return new ui::mfc::FontImp();
   }
   virtual ui::GraphicsImp* CreateGraphicsImp() {     
     return new ui::mfc::GraphicsImp();
