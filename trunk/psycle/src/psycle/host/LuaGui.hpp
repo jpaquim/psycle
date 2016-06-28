@@ -1024,7 +1024,13 @@ template <class T = LuaText>
 class LuaTextBind : public LuaItemBind<T> {
  public:
   typedef LuaItemBind<T> B;
-  static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
+  static int open(lua_State *L) { 
+    LuaHelper::openex(L, meta, setmethods, gc); 
+    LuaHelper::setfield(L, "LEFTJUSTIFY", ui::LEFTJUSTIFY);
+    LuaHelper::setfield(L, "CENTERJUSTIFY", ui::CENTERJUSTIFY);
+    LuaHelper::setfield(L, "RIGHTJUSTIFY", ui::RIGHTJUSTIFY);
+    return 1;    
+  }
   static int setmethods(lua_State* L) {
      B::setmethods(L);
      static const luaL_Reg methods[] = {
@@ -1033,7 +1039,8 @@ class LuaTextBind : public LuaItemBind<T> {
       {"setcolor", setcolor},
       {"color", color},
       {"setfont", setfont},
-      {"setalignment", setalignment},
+      {"setverticalalignment", setverticalalignment},
+      {"setjustify", setjustify},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1058,9 +1065,14 @@ class LuaTextBind : public LuaItemBind<T> {
     text->set_font(*font);
     return LuaHelper::chaining(L);
   }  
-  static int setalignment(lua_State* L) {    
+  static int setverticalalignment(lua_State* L) {    
     LuaHelper::check_sptr<LuaText>(L, 1, meta)
-      ->set_alignment(static_cast<ui::canvas::AlignStyle>(luaL_checkinteger(L, 2)));
+      ->set_vertical_alignment(static_cast<ui::canvas::AlignStyle>(luaL_checkinteger(L, 2)));
+    return LuaHelper::chaining(L);
+  }
+  static int setjustify(lua_State* L) {    
+    LuaHelper::check_sptr<LuaText>(L, 1, meta)
+      ->set_justify(static_cast<ui::canvas::JustifyStyle>(luaL_checkinteger(L, 2)));
     return LuaHelper::chaining(L);
   }
 };
