@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-
+#pragma once
 #include "Canvas.hpp"
 #include <algorithm> // for std::transform
 #include <cctype> // for std::tolower
@@ -152,8 +152,22 @@ class TerminalFrame : public Frame {
    }   
 
   private:
-   boost::shared_ptr<TerminalView> terminal_view_;
-   boost::shared_ptr<canvas::Aligner> align_;
+   boost::shared_ptr<TerminalView> terminal_view_;   
+};
+
+class HeaderGroup : public ui::Group {
+ public:
+  HeaderGroup();
+
+	virtual void Add(const ui::Window::Ptr& item);
+	void set_title(const std::string& title) { header_text_->set_text(title); }
+	const std::string& title() const { return header_text_->text(); }
+
+ private:
+	ui::Ornament::Ptr header_background_;
+	ui::Ornament::Ptr border_;
+	ui::canvas::Text::Ptr header_text_;
+	ui::Group::Ptr client_;
 };
 
 } // namespace canvas

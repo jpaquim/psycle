@@ -264,6 +264,7 @@ TerminalView::TerminalView() : Scintilla(), Timer() {
   set_linenumber_background_color(0x232323);   
   set_margin_background_color(0x232323);  
   f(SCI_SETWRAPMODE, (void*) SC_WRAP_CHAR, 0);
+	StartTimer();
 }
 
 void TerminalView::output(const std::string& text) {
@@ -286,13 +287,70 @@ void TerminalFrame::Init() {
   maincanvas->SetSave(false);
   terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
   terminal_view_->set_align(ALCLIENT);
-  maincanvas->Add(terminal_view_);
-  align_ = boost::shared_ptr<ui::Aligner>(new ui::canvas::DefaultAligner()); 
-  maincanvas->set_aligner(align_);
+  maincanvas->Add(terminal_view_);  
+  maincanvas->set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));
   set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
+}
+
+HeaderGroup::HeaderGroup() {		
+	header_background_.reset(ui::canvas::OrnamentFactory::Instance().CreateFill(0x6D799C));
+	ui::canvas::LineBorder* border = new ui::canvas::LineBorder(0x444444);
+	border->set_border_radius(ui::canvas::BorderRadius(5, 5, 5, 5));
+	border_.reset(border);
+	set_ornament(border_);
+	set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));	
+	set_auto_size(false, false);
+	ui::Group::Ptr header(new ui::Group());
+	header->set_align(ui::ALTOP);
+	header->set_auto_size(false, true);
+	header->set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));
+	header->set_ornament(header_background_);
+	header->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
+	Group::Add(header);				
+	header_text_.reset(new ui::canvas::Text());	
+	header_text_->set_text("Header");
+	header->Add(header_text_);	
+	ui::FontInfo info;
+	info.name = "Tahoma";
+	info.height = 12;
+	info.bold = true;
+	ui::Font font(info);
+	header_text_->set_font(font);
+	header_text_->set_color(0xFFFFFF);
+	header_text_->set_align(ui::ALLEFT);
+	header_text_->set_auto_size(true, true);
+	header_text_->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
+	//header_text_->set_pos(ui::Rect(ui::Point(), ui::Dimension(200, 20)));
+
+	client_.reset(new ui::Group());	
+	Group::Add(client_);	
+	client_->set_align(ui::ALCLIENT);
+	client_->set_auto_size(false, false);
+	client_->set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));		
+	client_->set_margin(ui::Rect(ui::Point(5, 0), ui::Point(5, 5)));
+}
+
+void HeaderGroup::Add(const ui::Window::Ptr& item) {		
+	client_->Add(item);
 }
 
 } // namespace canvas
 } // namespace ui
 } // namespace host
 } // namespace psycle
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

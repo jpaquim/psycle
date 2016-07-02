@@ -2,7 +2,7 @@
 // copyright 2007-2015 members of the psycle project http://psycle.sourceforge.net
 
 #pragma once
-#include <psycle/host/detail/project.hpp>
+// #include <psycle/host/detail/project.hpp>
 #include "Canvas.hpp"
 #include "CanvasItems.hpp"
 #include "InputHandler.hpp"
@@ -310,7 +310,7 @@ class LuaImagesBind {
   static int at(lua_State *L) {
     if (lua_isnumber(L, 2)) {
       ui::Images::Ptr images = LuaHelper::check_sptr<ui::Images>(L, 1, meta);
-      int index = luaL_checknumber(L, 2);
+      int index = static_cast<int>(luaL_checkinteger(L, 2));
       if (index < 1 && index >= images->size()) {
         luaL_error(L, "index out of range");
       }            
@@ -828,8 +828,8 @@ class LuaItemBind {
 
   static int setaligner(lua_State* L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    int row_num = luaL_checkinteger(L, 2);
-    int col_num = luaL_checkinteger(L, 3);
+    int row_num = static_cast<int>(luaL_checkinteger(L, 2));
+    int col_num = static_cast<int>(luaL_checkinteger(L, 3));
     boost::shared_ptr<ui::canvas::GridAligner> aligner(new ui::canvas::GridAligner(row_num, col_num));
     item->set_aligner(aligner);
     return LuaHelper::chaining(L);
@@ -993,7 +993,7 @@ class LuaLineBind : public LuaItemBind<T> {
     int err = LuaHelper::check_argnum(L, 4, "self, idx, x, y");
     if (err!=0) return err;
     boost::shared_ptr<T> line = LuaHelper::check_sptr<T>(L, 1, meta);
-    double idx = luaL_checknumber(L, 2);
+    int idx = static_cast<int>(luaL_checkinteger(L, 2));
     double x = luaL_checknumber(L, 3);
     double y = luaL_checknumber(L, 4);
     ui::Point pt(x, y);
@@ -1056,7 +1056,7 @@ class LuaTextBind : public LuaItemBind<T> {
     lua_getfield(L, 2, "name");
     lua_getfield(L, 2, "height");
     const char *name = luaL_checkstring(L, -2);
-    int height = luaL_checknumber(L, -1);
+    int height = static_cast<int>(luaL_checknumber(L, -1));
     std::auto_ptr<ui::Font> font(ui::Systems::instance().CreateFont());
     ui::FontInfo font_info;
     font_info.name = name;
@@ -1178,7 +1178,7 @@ class LuaComboBoxBind : public LuaItemBind<T> {
   };
   static int setitemindex(lua_State* L) {
     boost::shared_ptr<T> combo_box = LuaHelper::check_sptr<T>(L, 1, meta);
-    int item_index = luaL_checkinteger(L, 2) - 1;
+    int item_index = static_cast<int>(luaL_checkinteger(L, 2) - 1);
     combo_box->set_item_index(item_index);
     return LuaHelper::chaining(L);
   };
@@ -1418,7 +1418,7 @@ class LuaListViewBind : public LuaItemBind<T> {
   }  
   static int addcolumn(lua_State* L) { 
     boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    list_view->AddColumn(luaL_checkstring(L, 2), luaL_checkinteger(L, 3));
+    list_view->AddColumn(luaL_checkstring(L, 2), static_cast<int>(luaL_checkinteger(L, 3)));
     return LuaHelper::chaining(L);
   }
   static int gc(lua_State* L) {    
@@ -1531,7 +1531,7 @@ class LuaNodeBind {
   static int remove(lua_State *L) {
     if (lua_isnumber(L, 2)) {
       boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);
-      int index = luaL_checknumber(L, 2);
+      int index = static_cast<int>(luaL_checkinteger(L, 2));
       if (index < 1 && index > treenode->size()) {
         luaL_error(L, "index out of range");
       }
@@ -1580,7 +1580,7 @@ class LuaNodeBind {
   static int at(lua_State *L) {
     if (lua_isnumber(L, 2)) {
       boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);  
-      int index = luaL_checknumber(L, 2);
+      int index = static_cast<int>(luaL_checkinteger(L, 2));
       if (index < 1 && index >= treenode->size()) {
         luaL_error(L, "index out of range");
       }            
@@ -1798,7 +1798,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
 
   static int f(lua_State *L) {
     boost::shared_ptr<T> sc = LuaHelper::check_sptr<LuaScintilla>(L, 1, meta);    
-    int sci = luaL_checknumber(L, 2);
+    int sci = static_cast<int>(luaL_checkinteger(L, 2));
     WPARAM wparam(0);
     LPARAM lparam(0);    
     switch (lua_type(L, 3)) {
@@ -1834,10 +1834,10 @@ class LuaScintillaBind : public LuaItemBind<T> {
 
   static int definemarker(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    int val1 = luaL_checkinteger(L, 2);
-    int val2 = luaL_checkinteger(L, 3);
-    int val3 = luaL_checkinteger(L, 4);
-    int val4 = luaL_checkinteger(L, 5);
+    int val1 = static_cast<int>(luaL_checkinteger(L, 2));
+    int val2 = static_cast<int>(luaL_checkinteger(L, 3));
+    int val3 = static_cast<int>(luaL_checkinteger(L, 4));
+    int val4 = static_cast<int>(luaL_checkinteger(L, 5));
     item->define_marker(val1, val2, val3, val4);  
     return 0;
   }  
@@ -1890,7 +1890,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
     ui::FontInfo font_info;
     font_info.name = luaL_checkstring(L, 2);
-    font_info.height = luaL_checkinteger(L, 3);
+    font_info.height = static_cast<int>(luaL_checkinteger(L, 3));
     item->set_font(font_info);
     return LuaHelper::chaining(L);
   }

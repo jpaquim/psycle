@@ -711,16 +711,16 @@ void Window::needsupdate() {
 
 void Window::WorkChildPos() {
   needsupdate();
-  std::vector<Window::Ptr> items;
+  std::vector<Window*> items;
   Window* p = parent();
   while (p) {
-    items.push_back(p->shared_from_this());
+    items.push_back(p);
     p = p->parent();
   }  
-  std::vector<Window::Ptr>::reverse_iterator rev_it = items.rbegin();
+  std::vector<Window*>::reverse_iterator rev_it = items.rbegin();
   for (; rev_it != items.rend(); ++rev_it) {
-    Window::Ptr item = *rev_it;
-    ChildPosEvent ev(shared_from_this());
+    Window* item = *rev_it;
+    ChildPosEvent ev(*this);
     item->OnChildPos(ev);
     if (ev.is_propagation_stopped()) {
       break;
@@ -905,7 +905,7 @@ void Window::PostOrderTreeTraverse(T& functor, T1& cond) {
 }
 
 // Aligner
-Aligner::Aligner() : aligned_(false) {}
+Aligner::Aligner() : group_(0), aligned_(false) {}
 
 bool Aligner::full_align_ = true;
 
@@ -1107,7 +1107,7 @@ void Group::OnMessage(WindowMsg msg, int param) {
 
 void Group::set_aligner(const Aligner::Ptr& aligner) { 
   aligner_ = aligner;
-  aligner_->set_group(boost::dynamic_pointer_cast<Group>(shared_from_this()));
+  aligner_->set_group(*this);
 }
   
 Window::Container Aligner::dummy;
@@ -2103,6 +2103,11 @@ ui::Frame* Systems::CreateFrame() {
   return concrete_factory_->CreateFrame(); 
 }
 
+ui::Frame* Systems::CreateMainFrame() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateMainFrame(); 
+}
+
 ui::PopupFrame* Systems::CreatePopupFrame() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreatePopupFrame(); 
@@ -2212,6 +2217,11 @@ ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
 ui::FrameImp* ImpFactory::CreateFrameImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateFrameImp(); 
+}
+
+ui::FrameImp* ImpFactory::CreateMainFrameImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateMainFrameImp(); 
 }
 
 ui::FrameImp* ImpFactory::CreatePopupFrameImp() {

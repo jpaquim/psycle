@@ -789,17 +789,22 @@ class Window : public boost::enable_shared_from_this<Window> {
 
 class ChildPosEvent : public Event {
  public:  
-  ChildPosEvent(ui::Window::Ptr window) : window_(window) {}
+  ChildPosEvent(ui::Window& window) : window_(&window) {}
 
-  Window::Ptr window() { return !window_.expired() ? window_.lock() : nullpointer; }
+  Window* window() { return window_; }
 
  private:
-  Window::WeakPtr window_;
+  Window* window_;
 };
 
 class Group : public Window {
  public:  
   static std::string type() { return "canvasgroup"; }
+
+	typedef boost::shared_ptr<Group> Ptr;
+  typedef boost::shared_ptr<const Group> ConstPtr;
+  typedef boost::weak_ptr<Group> WeakPtr;
+  typedef boost::weak_ptr<const Group> ConstWeakPtr;  
 
   Group();  
   Group(WindowImp* imp);
@@ -862,15 +867,17 @@ class Aligner {
     static SetPos set_pos;    
     static AbortDefault abort;
         
-    group_.lock()->PostOrderTreeTraverse(calc_dim, abort);
-    group_.lock()->PreOrderTreeTraverse(set_pos, pos_abort);
+		if (group_) {
+			group_->PostOrderTreeTraverse(calc_dim, abort);
+			group_->PreOrderTreeTraverse(set_pos, pos_abort);
+		}
     //full_align_ = false;
   }
 
   virtual void CalcDimensions() = 0;
   virtual void SetPositions() = 0;
 
-  virtual void set_group(const ui::Group::WeakPtr& group) { group_ = group; }  
+  virtual void set_group(ui::Group& group) { group_ = &group; }  
   const ui::Dimension& dim() const { return dim_; }
   const ui::Rect& pos() const { return pos_; }   
 
@@ -879,22 +886,22 @@ class Aligner {
 
   void CachePos(const ui::Rect& pos) { pos_ = pos; }
   
-  ui::Group::WeakPtr group_;
+  ui::Group* group_;
   bool aligned_;  
 
  protected:  
   typedef Window::Container::iterator iterator;
   iterator begin() { 
-    return !group_.expired() ? group_.lock()->begin() : dummy.begin();
+    return group_ ? group_->begin() : dummy.begin();
   }  
   iterator end() { 
-    return !group_.expired() ? group_.lock()->end() : dummy.end();   
+    return group_ ? group_->end() : dummy.end();   
   }
   bool empty() const { 
-    return !group_.expired() ? group_.lock()->empty() : false; 
+    return group_ ? group_->empty() : false; 
   }
   int size() const { 
-    return !group_.expired() ? group_.lock()->size() : 0;
+    return group_ ? group_->size() : 0;
   }  
      
   ui::Dimension dim_;
@@ -1697,6 +1704,7 @@ class Systems {
   virtual ui::Font* CreateFont();
   virtual ui::Window* CreateWin();
   virtual ui::Frame* CreateFrame();
+  virtual ui::Frame* CreateMainFrame();
   virtual ui::PopupFrame* CreatePopupFrame();
   virtual ui::ComboBox* CreateComboBox();
   virtual ui::Edit* CreateEdit();
@@ -1815,6 +1823,7 @@ class FrameImp : public WindowImp {
   virtual void DevAllowResize() = 0;
 
   virtual void OnDevClose();
+  bool DevIsValid() const;
 };
 
 class TreeViewImp : public WindowImp, public NodeOwnerImp {
@@ -1993,6 +2002,7 @@ class ImpFactory {
   virtual bool DestroyWindowImp(ui::WindowImp* imp);
   virtual ui::WindowImp* CreateWindowCompositedImp();
   virtual ui::FrameImp* CreateFrameImp();
+  virtual ui::FrameImp* CreateMainFrameImp();
   virtual ui::FrameImp* CreatePopupFrameImp();
   virtual ui::ScrollBarImp* CreateScrollBarImp(ui::Orientation orientation);
   virtual ui::ComboBoxImp* CreateComboBoxImp();

@@ -1,6 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
+// #include "stdafx.h"
 #include "LuaGui.hpp"
 
 #include "PsycleConfig.hpp"
@@ -17,6 +18,11 @@ namespace host {
 using namespace ui;
 
 const char* LuaMenuBarBind::meta = "psymenubarmeta";
+
+LockIF* locker(lua_State *L) {
+  //return LuaGlobal::proxy(L);
+  return 0;
+}
 
 int LuaMenuBarBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
@@ -90,7 +96,6 @@ int LuaPopupMenuBind::track(lua_State* L) {
   popup_menu->Track(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));    
   return LuaHelper::chaining(L);
 }
-
 
 // PsycleCmdDefBind
 int LuaCmdDefBind::open(lua_State* L) {   
@@ -313,8 +318,8 @@ int  LuaSystemMetrics::open(lua_State *L) {
 
 int LuaSystemMetrics::screensize(lua_State* L) {
   ui::Dimension screen_dim = ui::Systems::instance().metrics().screen_dimension();
-  lua_pushinteger(L, screen_dim.width());
-  lua_pushinteger(L, screen_dim.height());
+  lua_pushinteger(L, static_cast<int>(screen_dim.width()));
+  lua_pushinteger(L, static_cast<int>(screen_dim.height()));
   return 2;
 }
 
@@ -344,7 +349,7 @@ int LuaCenterToScreenBind::gc(lua_State* L) {
 // LuaFrameWnd+Bind
 void LuaFrameWnd::OnClose() {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onclose")) {      
       in << pcall(0);      
     } 
@@ -356,7 +361,7 @@ void LuaFrameWnd::OnClose() {
 
 void LuaFrameWnd::OnShow() {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onshow")) {      
       in << pcall(0);      
     } 
@@ -367,7 +372,7 @@ void LuaFrameWnd::OnShow() {
 
 void LuaFrameWnd::OnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const ui::Node::Ptr& node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("oncontextpopup")) {      
       LuaHelper::requirenew<LuaEventBind>(L, "psycle.ui.canvas.event", &ev, true);
       LuaHelper::setfield(L, "x", mouse_point.x());
@@ -396,7 +401,7 @@ int LuaFrameItemBind<T>::view(lua_State* L) {
 // LuaPopupFrameWnd+Bind
 void LuaPopupFrameWnd::OnClose() {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onclose")) {      
       in << pcall(0);      
     } 
@@ -408,7 +413,7 @@ void LuaPopupFrameWnd::OnClose() {
 
 void LuaPopupFrameWnd::OnShow() {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onshow")) {      
       in << pcall(0);      
     } 
@@ -445,7 +450,7 @@ bool CanvasItem<T>::SendEvent(lua_State* L,
                               const::std::string method,
                               ui::Event& ev, 
                               ui::Window& item) {
-  LuaImport in(L, &item, LuaGlobal::proxy(L));
+  LuaImport in(L, &item, locker(L));
   bool has_method = in.open(method);
   if (has_method) {
     ev.StopWorkParent();
@@ -463,7 +468,7 @@ bool CanvasItem<T>::SendKeyEvent(lua_State* L,
                                  const::std::string method,
                                  ui::KeyEvent& ev, 
                                  ui::Window& item) {
-  LuaImport in(L, &item, LuaGlobal::proxy(L));
+  LuaImport in(L, &item, locker(L));
   bool has_method = in.open(method);
   if (has_method) {
     ev.StopWorkParent();
@@ -481,7 +486,7 @@ bool CanvasItem<T>::SendMouseEvent(lua_State* L,
                                    const::std::string method,
                                    ui::MouseEvent& ev, 
                                    ui::Window& item) {  
-  LuaImport in(L, &item, LuaGlobal::proxy(L));
+  LuaImport in(L, &item, locker(L));
   bool has_method = in.open(method);
   if (has_method) {
     ev.StopWorkParent();
@@ -505,7 +510,7 @@ template <class T>
 void CanvasItem<T>::OnSize(const ui::Dimension& dimension) {
   T::OnSize(dimension);  
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onsize")) {
       in << dimension.width() << dimension.height() << pcall(0);
     }
@@ -516,7 +521,7 @@ void CanvasItem<T>::OnSize(const ui::Dimension& dimension) {
 
 template <class T>
 bool CanvasItem<T>::OnUpdateArea() {
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   try {
     if (in.open("onupdatearea")) {
       ui::Area** rgn = (ui::Area **)lua_newuserdata(L, sizeof(ui::Area *));
@@ -550,7 +555,7 @@ template <class T>
 void CanvasItem<T>::OnKillFocus() {
   T::OnKillFocus();
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onkillfocus")) {
       in.pcall(0);
     }
@@ -562,7 +567,7 @@ void CanvasItem<T>::OnKillFocus() {
 // LuaTreeView
 void LuaTreeView::OnChange(const ui::Node::Ptr& node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onchange")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
@@ -574,7 +579,7 @@ void LuaTreeView::OnChange(const ui::Node::Ptr& node) {
 
 void LuaTreeView::OnRightClick(const ui::Node::Ptr& node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onrightclick")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
@@ -586,7 +591,7 @@ void LuaTreeView::OnRightClick(const ui::Node::Ptr& node) {
 
 void LuaTreeView::OnEditing(const ui::Node::Ptr& node, const std::string& text) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onediting")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in << text << pcall(0);
@@ -598,7 +603,7 @@ void LuaTreeView::OnEditing(const ui::Node::Ptr& node, const std::string& text) 
 
 void LuaTreeView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onedited")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in << text << pcall(0);      
@@ -610,7 +615,7 @@ void LuaTreeView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
 
 void LuaTreeView::OnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const ui::Node::Ptr& node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("oncontextpopup")) {      
       LuaHelper::requirenew<LuaEventBind>(L, "psycle.ui.canvas.event", &ev, true);
       LuaHelper::setfield(L, "x", mouse_point.x());
@@ -631,7 +636,7 @@ void LuaTreeView::OnContextPopup(ui::Event& ev, const ui::Point& mouse_point, co
 // LuaListView
 void LuaListView::OnChange(const ui::Node::Ptr& node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onchange")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
@@ -643,7 +648,7 @@ void LuaListView::OnChange(const ui::Node::Ptr& node) {
 
 void LuaListView::OnRightClick(const ui::Node::Ptr& node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onrightclick")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
@@ -655,7 +660,7 @@ void LuaListView::OnRightClick(const ui::Node::Ptr& node) {
 
 void LuaListView::OnEditing(const ui::Node::Ptr& node, const std::string& text) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onediting")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in << text << pcall(0);
@@ -667,7 +672,7 @@ void LuaListView::OnEditing(const ui::Node::Ptr& node, const std::string& text) 
 
 void LuaListView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onedited")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in << text << pcall(0);      
@@ -683,7 +688,7 @@ std::string LuaNodeBind::meta = "psynode";
 // LuaMenuContainer
 void LuaMenuBar::OnMenuItemClick(boost::shared_ptr<ui::Node> node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onclick")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
@@ -696,7 +701,7 @@ void LuaMenuBar::OnMenuItemClick(boost::shared_ptr<ui::Node> node) {
 // LuaPopupMenu
 void LuaPopupMenu::OnMenuItemClick(boost::shared_ptr<ui::Node> node) {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onclick")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in.pcall(0);
@@ -763,7 +768,7 @@ template class LuaCanvasBind<LuaCanvas>;
 
 // LuaItemBind
 void LuaItem::OnSize(double w, double h) {
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   try {
     if (in.open("onsize")) {
       in << w << h << pcall(0);
@@ -840,10 +845,10 @@ int LuaItemBind<T>::setmargin(lua_State* L) {
 template <class T>
 int LuaItemBind<T>::margin(lua_State* L) {
   boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-  lua_pushinteger(L, window->margin().left());
-  lua_pushinteger(L, window->margin().top());
-  lua_pushinteger(L, window->margin().right());
-  lua_pushinteger(L, window->margin().bottom());
+  lua_pushnumber(L, window->margin().left());
+  lua_pushnumber(L, window->margin().top());
+  lua_pushnumber(L, window->margin().right());
+  lua_pushnumber(L, window->margin().bottom());
   return 4;
 }
 
@@ -860,10 +865,10 @@ int LuaItemBind<T>::setpadding(lua_State* L) {
 template <class T>
 int LuaItemBind<T>::padding(lua_State* L) {
   boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-  lua_pushinteger(L, window->padding().left());
-  lua_pushinteger(L, window->padding().top());
-  lua_pushinteger(L, window->padding().right());
-  lua_pushinteger(L, window->padding().bottom());
+  lua_pushnumber(L, window->padding().left());
+  lua_pushnumber(L, window->padding().top());
+  lua_pushnumber(L, window->padding().right());
+  lua_pushnumber(L, window->padding().bottom());
   return 4;
 }
 
@@ -1183,11 +1188,11 @@ int LuaGraphicsBind::setfont(lua_State* L) {
   lua_getfield(L, 2, "name");
   lua_getfield(L, 2, "height");
   const char *name = luaL_checkstring(L, -2);
-  int height = luaL_checknumber(L, -1);
+  double height = luaL_checknumber(L, -1);
   std::auto_ptr<Font> font(ui::Systems::instance().CreateFont());
   FontInfo font_info;
   font_info.name = name;
-  font_info.height = height;
+  font_info.height = static_cast<int>(height);
   font->set_info(font_info);
   g->SetFont(*font);
   return LuaHelper::chaining(L);
@@ -1224,7 +1229,7 @@ int LuaGraphicsBind::drawpolygon(lua_State* L) {
   size_t n2 = lua_rawlen(L, 2);
   if (n1!=n2) return luaL_error(L, "Length of x and y points have to be the same size.");
   Points points;
-  for (int i=1; i <=n1; ++i) {
+  for (size_t i=1; i <= n1; ++i) {
     lua_rawgeti(L, 2, i);
     lua_rawgeti(L, 3, i);
     double x = luaL_checknumber(L, -2);
@@ -1245,7 +1250,7 @@ int LuaGraphicsBind::drawpolyline(lua_State* L) {
   size_t n2 = lua_rawlen(L, 2);
   if (n1!=n2) return luaL_error(L, "Length of x and y points have to be the same size.");
   Points points;
-  for (int i=1; i <=n1; ++i) {
+  for (size_t i=1; i <= n1; ++i) {
     lua_rawgeti(L, 2, i);
     lua_rawgeti(L, 3, i);
     double x = luaL_checknumber(L, -2);
@@ -1264,9 +1269,11 @@ int LuaGraphicsBind::fillpolygon(lua_State* L) {
   luaL_checktype(L, 2, LUA_TTABLE);
   size_t n1 = lua_rawlen(L, 2);
   size_t n2 = lua_rawlen(L, 2);
-  if (n1!=n2) return luaL_error(L, "Length of x and y points have to be the same size.");
+	if (n1 != n2) {
+		return luaL_error(L, "Length of x and y points have to be the same size.");
+	}
   Points points;
-  for (int i=1; i <=n1; ++i) {
+  for (size_t i=1; i <=n1; ++i) {
     lua_rawgeti(L, 2, i);
     lua_rawgeti(L, 3, i);
     double x = luaL_checknumber(L, -2);
@@ -1280,7 +1287,7 @@ int LuaGraphicsBind::fillpolygon(lua_State* L) {
 
 int LuaGraphicsBind::drawimage(lua_State* L) {
   int n = lua_gettop(L);
-  if (n!=4 and n!=6 and n!=8) return luaL_error(L, "Wrong number of arguments.");
+  if (n!=4 && n!=6 && n!=8) return luaL_error(L, "Wrong number of arguments.");
   boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
   boost::shared_ptr<Image> img = LuaHelper::check_sptr<Image>(L, 2, LuaImageBind::meta);
   double x = luaL_checknumber(L, 3);
@@ -1333,7 +1340,7 @@ int LuaRunBind::gc(lua_State* L) {
 
 // LuaItem + Bind
 void LuaItem::Draw(ui::Graphics* g, ui::Region& draw_rgn) {    
-  LuaImport in(L, this, LuaGlobal::proxy(L));  
+  LuaImport in(L, this, locker(L));  
   if (in.open("draw")) {        
     LuaHelper::requirenew<LuaGraphicsBind>(L, "psycle.ui.canvas.graphics", g, true);
     in.pcall(0);    
@@ -1368,7 +1375,7 @@ int LuaImageBind::settransparent(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 2, "self, color");
   if (err!=0) return err;
   boost::shared_ptr<Image> img = LuaHelper::check_sptr<Image>(L, 1, meta);
-  int argb = luaL_checknumber(L, 2);
+  ARGB argb = static_cast<ARGB>(luaL_checknumber(L, 2));
   img->SetTransparent(true, argb);
   return LuaHelper::chaining(L);
 }
@@ -1554,7 +1561,7 @@ int LuaKeyEventBind::open(lua_State *L) {
 }
 
 int LuaKeyEventBind::create(lua_State* L) {
-  int keycode = luaL_checkinteger(L, -1);
+	int keycode = static_cast<int>(luaL_checkinteger(L, -1));
   canvas::KeyEvent* key_event = new canvas::KeyEvent(keycode, 0);
   LuaHelper::new_shared_userdata<>(L, meta, key_event);
   return 1;
@@ -1602,7 +1609,7 @@ int OrnamentFactoryBind::createlineborder(lua_State* L) {
                                         "psycle.ui.canvas.lineborder", 
                                         ui::canvas::OrnamentFactory::Instance()
                                           .CreateLineBorder(
-                                            luaL_checkinteger(L, 2)));
+                                            static_cast<ARGB>(luaL_checkinteger(L, 2))));
   return 1;
 }
 
@@ -1622,7 +1629,7 @@ int OrnamentFactoryBind::createfill(lua_State* L) {
   LuaHelper::requirenew<FillBind>(L,
                                   "psycle.ui.canvas.fill",
                                      ui::canvas::OrnamentFactory::Instance()
-                                       .CreateFill(luaL_checknumber(L, 2)));
+                                       .CreateFill(static_cast<ARGB>(luaL_checknumber(L, 2))));
   return 1;
 }
 
@@ -1632,7 +1639,7 @@ int OrnamentFactoryBind::createboundfill(lua_State* L) {
                                   "psycle.ui.canvas.fill",
                                      ui::canvas::OrnamentFactory::Instance()
                                        .CreateBoundFill(
-                                         luaL_checknumber(L, 2)));
+                                         static_cast<ARGB>(luaL_checknumber(L, 2))));
   return 1;  
 }
 
@@ -1654,7 +1661,7 @@ int LineBorderBind::create(lua_State* L) {
   int n = lua_gettop(L);
   ARGB color(0xFFFFFF);
   if (n==2) {
-    color = luaL_checkinteger(L, 2);
+    color = static_cast<ARGB>(luaL_checkinteger(L, 2));
   }  
   LineBorder* border = new LineBorder(color);
   LuaHelper::new_shared_userdata<>(L, meta, border);
@@ -1725,7 +1732,7 @@ int FillBind::create(lua_State* L) {
   using namespace ui::canvas;
   int err = LuaHelper::check_argnum(L, 2, "self");
   if (err!=0) return err;
-  ARGB color = luaL_checknumber(L, 2);
+  ARGB color = static_cast<ARGB>(luaL_checknumber(L, 2));
   Fill* fill = new Fill(color);
   LuaHelper::new_shared_userdata<>(L, meta, fill);
   return 1;
@@ -1737,7 +1744,7 @@ int FillBind::gc(lua_State* L) {
 
 // LuaGameController + Bind
 void LuaGameController::OnButtonDown(int button) {   
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   if (in.open("onbuttondown")) {
     in << button;
     in.pcall(0);            
@@ -1745,7 +1752,7 @@ void LuaGameController::OnButtonDown(int button) {
 }
 
 void LuaGameController::OnButtonUp(int button) {   
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   if (in.open("onbuttonup")) {
     in << button;
     in.pcall(0);            
@@ -1753,7 +1760,7 @@ void LuaGameController::OnButtonUp(int button) {
 }
 
 void LuaGameController::OnXAxis(int pos, int oldpos) {
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   if (in.open("onxaxis")) {
     in << pos << oldpos;
     in.pcall(0);            
@@ -1761,7 +1768,7 @@ void LuaGameController::OnXAxis(int pos, int oldpos) {
 }
 
 void LuaGameController::OnYAxis(int pos, int oldpos) {
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   if (in.open("onyaxis")) {
     in << pos << oldpos;
     in.pcall(0);            
@@ -1769,7 +1776,7 @@ void LuaGameController::OnYAxis(int pos, int oldpos) {
 }
 
 void LuaGameController::OnZAxis(int pos, int oldpos) {
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   if (in.open("onzaxis")) {
     in << pos << oldpos;
     in.pcall(0);            
@@ -1862,7 +1869,7 @@ std::string LuaLexerBind::meta = "psylexermeta";
 
 void LuaButton::OnClick() {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onclick")) {
       in.pcall(0);
     } 
@@ -1873,7 +1880,7 @@ void LuaButton::OnClick() {
 
 void LuaComboBox::OnSelect() {
   try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
+    LuaImport in(L, this, locker(L));
     if (in.open("onselect")) {      
       in.pcall(0);
     } 
@@ -1883,7 +1890,7 @@ void LuaComboBox::OnSelect() {
 }
 
 void LuaScrollBar::OnScroll(int pos) {  
-  LuaImport in(L, this, LuaGlobal::proxy(L));
+  LuaImport in(L, this, locker(L));
   if (in.open("onscroll")) {
     in << pos << pcall(0);
   }  

@@ -33,14 +33,16 @@ class ParamMap : public ui::Frame {
  public:
 	ParamMap(Machine* machine);	
   
-  virtual void OnClose() { delete this; }
+  virtual void OnClose() { 
+    delete this;  
+  }
 
   void UpdateNew(int par,int value);
 
  private:
   void InitLayout();  
   void AddListView();
-  void AddHelpGroup(const ui::Group::Ptr& parent);
+  void AddHelpGroup(const ui::Window::Ptr& parent);
   void FillListView();
   void FillComboBox();  
   void AddMachineParamSelect(const ui::Group::Ptr& parent);
@@ -49,8 +51,8 @@ class ParamMap : public ui::Frame {
   void OnListViewChange(ui::ListView&, const ui::Node::Ptr&);
   void OnComboBoxSelect(ui::ComboBox&);  
   std::string param_name(int index) const;
-  ui::Group::Ptr CreateRow(const ui::Group::Ptr& parent);
-  ui::Group::Ptr CreateTitleRow(const ui::Group::Ptr& parent, const std::string& header_text);
+  ui::Group::Ptr CreateRow(const ui::Window::Ptr& parent);
+  ui::Group::Ptr CreateTitleRow(const ui::Window::Ptr& parent, const std::string& header_text);
   void ReplaceSelection();
 
   ui::Node::Ptr root_node_;

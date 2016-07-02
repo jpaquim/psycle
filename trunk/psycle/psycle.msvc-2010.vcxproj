@@ -96,6 +96,10 @@
     <Link>
       <AdditionalDependencies>htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
+      <IgnoreAllDefaultLibraries>
+      </IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>src\psycle\host\resources\DeclareDPIAware.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -484,6 +488,12 @@
     <ProjectReference Include="..\build-systems\msvc\projects\scintilla\scintilla.msvc-2010.vcxproj">
       <Project>{8c2525e9-cf53-4bbd-9a6a-f675760c52fa}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\external-packages\lsqlite3_fsl09w\luasqlite2010.vcxproj">
+      <Project>{ff0fd59f-8679-4186-83d2-b84c7d6adf99}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\external-packages\sqlite-amalgamation-3130000\sqllite2010.vcxproj">
+      <Project>{60e409ad-2f79-4a7f-ba19-dffee25bd5af}</Project>
     </ProjectReference>
     <ProjectReference Include="..\psycle-audiodrivers\asio.msvc-2010.vcxproj">
       <Project>{21F6FB1D-B7DB-4EDB-A2B0-DA1B2F04AF01}</Project>
