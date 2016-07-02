@@ -20,6 +20,10 @@
 #include <universalis/os/terminal.hpp>
 
 #include "Ui.hpp"
+/*extern "C" {
+  #include <sqlite3.h>  
+}*/
+
 
 // #include <vld.h>
 
@@ -52,6 +56,18 @@ namespace psycle { namespace host {
 		CPsycleApp::~CPsycleApp()
 		{
 		}
+
+   /* static int callback(void *NotUsed, int argc, char **argv, char **azColName){
+  int i;
+  for(i=0; i<argc; i++){
+		char s[2048];
+    sprintf_s(s, "%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+		OutputDebugString(s);
+   }
+   printf("\n");
+   return 0;
+}*/
+
               
 		BOOL CPsycleApp::InitInstance()			
 		{           
@@ -153,6 +169,26 @@ namespace psycle { namespace host {
 				}
 				pFrame->CheckForAutosave();        
 			}
+
+      // sql test
+ /*{  
+  sqlite3 *db;
+  char *zErrMsg = 0;
+  int rc;     
+	const char* dbname = "core.db";	
+  rc = sqlite3_open(dbname, &db);
+  if( rc ){
+    AfxMessageBox(sqlite3_errmsg(db));
+    sqlite3_close(db);     
+  }
+	const char* sql_cmd = "select * from inventory";
+  rc = sqlite3_exec(db, sql_cmd, callback, 0, &zErrMsg);
+  if( rc!=SQLITE_OK ){
+    AfxMessageBox("SQL error: %s\n");
+    sqlite3_free(zErrMsg);
+  }
+  sqlite3_close(db);
+}*/
 			          
 			return TRUE;
 		}

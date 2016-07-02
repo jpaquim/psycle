@@ -123,7 +123,7 @@ private:
   static int set_parameter(lua_State* L);
   static int alert(lua_State* L);
   static int confirm(lua_State* L);  
-  static int terminal_output(lua_State* L);  
+  static int terminal_output(lua_State* L);
   static int call_selmachine(lua_State* L);
   static int set_machine(lua_State* L);  
   static int set_menubar(lua_State* L);

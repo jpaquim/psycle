@@ -183,13 +183,13 @@ void ParamMap::AddListView() {
     boost::bind(&ParamMap::OnListViewChange, this, _1, _2));
 }
 
-ui::Group::Ptr ParamMap::CreateRow(const ui::Group::Ptr& parent) {
+ui::Group::Ptr ParamMap::CreateRow(const ui::Window::Ptr& parent) {
   ui::Group::Ptr header_group(new ui::Group());
   header_group->set_aligner(
     ui::Aligner::Ptr(new ui::canvas::DefaultAligner()));
   header_group->set_auto_size(false, true);
   header_group->set_align(ui::ALTOP);
-  header_group->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));  
+  header_group->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
   parent->Add(header_group);  
   return header_group;
 }
@@ -253,7 +253,7 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   allow_auto_learn_chk_box_->set_text("Auto Learn");
 }
 
-void ParamMap::AddHelpGroup(const ui::Group::Ptr& parent) {
+void ParamMap::AddHelpGroup(const ui::Window::Ptr& parent) {
   ui::Group::Ptr help_group = CreateRow(parent);
   help_group->set_auto_size(false, false);
   help_group->set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 200)));
@@ -276,7 +276,7 @@ void ParamMap::AddHelpGroup(const ui::Group::Ptr& parent) {
   help_group->Add(txt2);
 }
 
-ui::Group::Ptr ParamMap::CreateTitleRow(const ui::Group::Ptr& parent, const std::string& header_text) {
+ui::Group::Ptr ParamMap::CreateTitleRow(const ui::Window::Ptr& parent, const std::string& header_text) {
   ui::Group::Ptr header_group = CreateRow(parent);
   header_group->set_ornament(skin_.title_background);  
   ui::canvas::Text::Ptr txt(new ui::canvas::Text(header_text));

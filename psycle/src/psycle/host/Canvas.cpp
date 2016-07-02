@@ -83,7 +83,9 @@ void DefaultAligner::CalcDimensions() {
           }
           current_dim.set_width(current_dim.width() + item->margin().right() + item->margin().left());
         break;
-            
+        case ALCLIENT:    
+					current_dim.set_width(current_dim.width() + item->margin().right() + item->margin().left());
+				break;
         default:
           current_dim.set_width((std::max)(item_dim.width(), current_dim.width()));
         break;
@@ -131,7 +133,10 @@ void DefaultAligner::CalcDimensions() {
               current_pos.set_bottom(current_pos.bottom() + expand);
             }
           }
-        break;            
+        break;
+				case ALCLIENT:    
+					current_dim.set_height(current_dim.height() + item->margin().bottom() + item->margin().top());
+				break;
         default:
           current_dim.set_height((std::max)(item_dim.height(), current_dim.height()));          
         break;
@@ -143,14 +148,14 @@ void DefaultAligner::CalcDimensions() {
 }
 
 void DefaultAligner::SetPositions() {
-  if (group_.expired()) {
+  if (!group_) {
     return;
   }
-  if (group_.lock()->area().bounds().empty()) {
+  if (group_->area().bounds().empty()) {
     return;
   }
   Window::Ptr client;
-  ui::Rect current_pos(ui::Point(0, 0), group_.lock()->pos().dimension());
+  ui::Rect current_pos(ui::Point(0, 0), group_->pos().dimension());
   for (iterator i = begin(); i != end(); ++i) {
     Window::Ptr item = *i;
     if (!item->visible()) continue;
@@ -218,8 +223,14 @@ void DefaultAligner::SetPositions() {
     } // end switch    
   } // end loop 
   
-  if (client && client->pos() != current_pos) {    
-    client->set_pos(current_pos);    
+  if (client) {
+		current_pos.set_left(current_pos.left() + client->margin().left());
+		current_pos.set_top(current_pos.top() + client->margin().top());		
+		current_pos.set_right(current_pos.right() - client->margin().right());
+		current_pos.set_bottom(current_pos.bottom() - client->margin().bottom());
+		if (current_pos != client->pos()) {
+			client->set_pos(current_pos);
+		}
   }
 }
 
@@ -254,14 +265,14 @@ void GridAligner::CalcDimensions() {
 }
 
 void GridAligner::SetPositions() {
-  if (group_.expired()) {
+  if (!group_) {
     return;
   }
-  if (group_.lock()->area().bounds().empty()) {
+  if (group_->area().bounds().empty()) {
     return;
   }
   Window::Ptr client;
-  ui::Rect current_pos(ui::Point(0, 0), group_.lock()->aligner()->dim());
+  ui::Rect current_pos(ui::Point(0, 0), group_->aligner()->dim());
 
   double cell_width = current_pos.width() / col_num_;
   double cell_height = current_pos.height() / row_num_;

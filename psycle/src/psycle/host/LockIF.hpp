@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <list>
+
 namespace psycle {
 namespace host {  
 
@@ -59,10 +61,11 @@ class GlobalTimer {
     static GlobalTimer instance;
     return instance;
   }       
+	void OnViewRefresh();
  private:       
   GlobalTimer() : removed_(false), it(listeners_.end()) { }
   ~GlobalTimer() { }                
-  void OnViewRefresh();       
+  
   void AddListener(Timer*);
   void RemoveListener(Timer*);
   void Clear() {

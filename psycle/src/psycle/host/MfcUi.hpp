@@ -1,9 +1,11 @@
 #pragma once
 
 #include <psycle/host/detail/project.hpp>
+#include "atlimage.h"
 #include "Ui.hpp"
 #include "Scintilla.h"
 #include "SciLexer.h"
+
 
 #include <fstream>
 #include <string>
@@ -636,8 +638,8 @@ class WindowTemplateImp : public T, public I {
 
 protected:  
   virtual BOOL PreTranslateMessage(MSG* pMsg);
-	DECLARE_MESSAGE_MAP()
-	int OnCreate(LPCREATESTRUCT lpCreateStruct);
+  DECLARE_MESSAGE_MAP()
+  int OnCreate(LPCREATESTRUCT lpCreateStruct);
   void OnDestroy();	
   void OnPaint();
   void OnSize(UINT nType, int cx, int cy); 
@@ -669,7 +671,7 @@ protected:
   }    
 
   void MapPointToRoot(CPoint& pt) const {
-    if (window()->root()) {
+    if (window() && window()->root()) {
       CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
       MapWindowPoints(root, &pt, 1);
     }
@@ -895,15 +897,38 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
     FrameImp* imp = new FrameImp();    
     int style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX |
                 WS_MAXIMIZEBOX | WS_SIZEBOX;    
-    if (!imp->Create(NULL, "PsycleWindow", style,
-                     CRect(0, 0, 200, 200), 
-                     parent)) {
+		
+    if (!imp->Create(NULL, "PsycleWindow", style, CRect(0, 0, 200, 200),  
+		             parent)) {					 
       TRACE0("Failed to create frame window\n");
       return 0;
     }
     imp->set_window(w);        
     return imp;
   }
+
+  static FrameImp* MakeMain(ui::Window* w) {
+	FrameImp* imp = new FrameImp();    	    
+    if (!imp->CreateEx(NULL, AfxRegisterWndClass(0), "PsycleWindow", WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, CRect(0, 0, 200, 200), NULL, 0,  
+		             NULL)) {					 
+      TRACE0("Failed to create frame window\n");
+      return 0;
+    }
+    imp->set_window(w);        
+    return imp;
+  }
+
+  BOOL PreCreateWindow(CREATESTRUCT& cs)
+{
+	if( !CFrameWnd::PreCreateWindow(cs) )
+		return FALSE;
+	// TODO: Ändern Sie hier die Fensterklasse oder die Darstellung, indem Sie
+	//  CREATESTRUCT cs modifizieren.
+
+	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+	cs.lpszClass = AfxRegisterWndClass(0);
+	return TRUE;
+}
    
   virtual void dev_set_title(const std::string& title) {
     SetWindowTextA(_T(title.c_str()));
@@ -927,6 +952,10 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   virtual void DevHideDecoration();
   virtual void DevPreventResize();
   virtual void DevAllowResize();
+
+  bool DevIsValid() const {
+	  return m_hWnd && ::IsWindow(m_hWnd);
+  }
   
   void OnSize(UINT nType, int cx, int cy) {
     if (view_) {
@@ -945,7 +974,12 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   afx_msg void OnContextMenu( CWnd* pWnd, CPoint pos );
   void OnPaint() { CFrameWnd::OnPaint(); }
   BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
-  virtual void OnClose() { OnDevClose(); }
+  virtual void OnClose() {		
+	if (window()) {
+    ((Frame*)window())->close(*(Frame*)window());
+	  ((Frame*)window())->OnClose();
+	}
+  }
   ui::Window::Ptr view_;
   afx_msg void OnSetFocus(CWnd* pNewWnd) {
     if (window()) {
@@ -1219,10 +1253,24 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
     }
     SetImageList(&m_imageList, TVSIL_NORMAL);
   }
-  virtual void DevViewList() { SetView(LV_VIEW_LIST); }
-  virtual void DevViewReport() { SetView(LV_VIEW_DETAILS); }
-  virtual void DevViewIcon() { SetView(LV_VIEW_ICON); }
-  virtual void DevViewSmallIcon() { SetView(LV_VIEW_SMALLICON); }
+  virtual void DevViewList() { 
+	  ::SendMessage(this->m_hWnd, LVM_SETVIEW, (WPARAM)LV_VIEW_LIST, 0);
+	   // SetView(LV_VIEW_LIST);  
+  }
+  virtual void DevViewReport() { 
+	  this->ModifyStyle(0, LVS_REPORT, 0);
+	  //::SendMessage(this->m_hWnd, LVM_SETVIEW, (WPARAM)  LV_VIEW_DETAILS, 0);
+	   //SetView(LV_VIEW_DETAILS);
+  }
+  virtual void DevViewIcon() { 
+	  ::SendMessage(this->m_hWnd, LVM_SETVIEW, (WPARAM)LV_VIEW_ICON, 0);
+	   //SetView(LV_VIEW_ICON);   
+  }
+  virtual void DevViewSmallIcon() { 
+	  ::SendMessage(this->m_hWnd, LVM_SETVIEW, (WPARAM)LV_VIEW_SMALLICON, 0);
+	   //SetView(LV_VIEW_SMALLICON); 
+  
+  }
   virtual void DevEnableRowSelect() {
     SetExtendedStyle(GetExtendedStyle() | LVS_EX_FULLROWSELECT);
   }
@@ -1459,11 +1507,11 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
 
   void DevLoadFile(const std::string& filename) {
     using namespace std;    
-//    #if __cplusplus >= 201103L
+    #if __cplusplus >= 201103L
       ifstream file (filename, ios::in|ios::binary|ios::ate);
-//    #else
-//      ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
-//    #endif
+    #else
+      ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
+    #endif
     if (file.is_open()) {      
       f(SCI_CANCEL, 0, 0);
       f(SCI_SETUNDOCOLLECTION, 0, 0);      
@@ -1696,7 +1744,10 @@ class ImpFactory : public ui::ImpFactory {
     return WindowImp::MakeComposited(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
   virtual ui::FrameImp* CreateFrameImp() {     
-    return FrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());    
+	  return FrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());
+  }
+  virtual ui::FrameImp* CreateMainFrameImp() {     
+	  return FrameImp::MakeMain(0);
   }
   virtual ui::FrameImp* CreatePopupFrameImp() {
     return PopupFrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());    

@@ -23,6 +23,9 @@
   "$(TopSrcDir)/external-packages/fluidsynth/include";
   "$(TopSrcDir)/external-packages/stk-4.5.0";
   "$(TopSrcDir)/external-packages/ladspa";
+  "$(TopSrcDir)/external-packages/sqlite-amalgamation-3130000";
+  "$(TopSrcDir)/external-packages/lsqlite3_fsl09w";
+ 
   "$(TopSrcDir)/diversalis/src";
   "$(TopSrcDir)/universalis/src";
   "$(TopSrcDir)/psycle-helpers/src";
