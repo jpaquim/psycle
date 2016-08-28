@@ -353,10 +353,7 @@ namespace psycle { namespace host {
 	#endif  
 
     BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
-    {
-      if(pMsg->message==WM_KEYDOWN ) {                 
-        int fordebugonly(0);
-      }
+    {      
       return CFrameWnd::PreTranslateMessage(pMsg);
     }
 

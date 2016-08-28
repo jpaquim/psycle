@@ -10,7 +10,6 @@ local group = require("psycle.ui.canvas.group")
 local window = require("psycle.ui.canvas.item")
 --local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
-local config = require("psycle.config")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local toolicon = require("psycle.ui.canvas.toolicon")
 local frame = require("psycle.ui.canvas.frame")
@@ -21,8 +20,10 @@ local signal = require("psycle.signal")
 local centertoscreen = require("psycle.ui.canvas.centertoscreen")
 
 local tabgroup = group:new()
-local cfg = config:new("MacParamVisual")
-tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
+--local cfg = config:new("MacParamVisual")
+-- cfg:luapath()
+local plugin_path = "C:\\Users\\User\\Documents\\Visual Studio 2015\\Projects\\exforward\\exforward\\LuaScripts"
+tabgroup.picdir = plugin_path.."\\psycle\\ui\\icons\\"
 
 function tabgroup:new(parent)  
   local c = group:new(parent)  
@@ -37,11 +38,12 @@ function tabgroup:init()
   self.isoldflsprevented_ = {}
   self.dopageclose = signal:new()
   self.hasclosebutton_ = true
-  self:setclipchildren()
+  --self:setclipchildren()
   --self:addstyle(0x02000000)  
   self:setautosize(false, false)
-  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):setornament(ornamentfactory:createfill(0x2F2F2F))
-  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)  
+  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):addornament(ornamentfactory:createfill(0x2F2F2F))      
+  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)    
+  --icon1:setmargin(5, 5, 5, 5)
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
@@ -54,19 +56,19 @@ function tabgroup:init()
       that1.f:hide()
     end
     local g = group:new(self.c):setautosize(false, true):setalign(window.ALTOP)    
-    self.f:setview(self.c)
-    self.c:setornament(ornamentfactory:createfill(0x292929))    
+    self.f:setviewport(self.c)
+    self.c:addornament(ornamentfactory:createfill(0x292929))    
     function fun(item)
-      local t = text:new(g):setcolor(0xCACACA):settext(item.text:text()):setautosize(false, true) 
-      t:setalignment(window.ALCENTER):setalign(window.ALTOP)      
+      local t = text:new(g):setcolor(0xCACACA):settext(item.text:text()):setautosize(false, true)      
+      t:setjustify(window.ALCENTER):setalign(window.ALTOP)      
       function t:onmousedown()        
         that:setactivepage(item.page)
       end
       function t:onmouseenter()                            
-        self:setornament(ornamentfactory:createlineborder(0x696969))
+        self:addornament(ornamentfactory:createlineborder(0x696969))
       end      
       function t:onmouseout()                       
-        self:setornament(nil)
+        self:removeornaments()
       end
     end
     that:traverse(fun, that.tabs:items())
@@ -77,11 +79,11 @@ function tabgroup:init()
     self.f:setpos(x + iw - 200, y + ih, 200, h)       
     self.f:show()            
   end  
-  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):setornament(ornamentfactory:createfill(0x2F2F2F))  
+  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x2F2F2F))  
       
   self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)
   self.children:setclipchildren()
-  self.children:setornament(ornamentfactory:createboundfill(0x292929))  
+  self.children:addornament(ornamentfactory:createboundfill(0x292929))  
 end
 
 function tabgroup:setlabel(page, text)
@@ -109,16 +111,17 @@ function tabgroup:restoreflsstate()
 end
 
 function tabgroup:addpage(page, label)      
-  self:saveflsstate():preventfls()
+  --self:saveflsstate():preventfls()
+  page:setautosize(false, false)
   page:setautosize(false, false):setalign(window.ALCLIENT)
   self:createheader(page, label)
   self.children:add(page)  
-  self:setactivepage(page)
-  self.tabbar:updatealign()  
-  self.tabs:updatealign()  
-  self.children:updatealign()    
-  self:restoreflsstate()
-  self:invalidate()
+  self:setactivepage(page)  
+  --self.tabbar:updatealign()  
+  --self.tabs:updatealign()  
+  --self.children:updatealign()    
+  --self:restoreflsstate()  
+  --self:invalidate()  
 end
 
 function tabgroup:activepage()
@@ -147,15 +150,16 @@ end
 
 function tabgroup:setactivepage(page)
   if page then     
-    self:saveflsstate():preventfls()
+    --self:saveflsstate():preventfls()
     if self.activepage_ then
       self.activepage_:hide()
     end    
     self:setactiveheader(page)
     self.activepage_ = page;        
+	page:setdebugtext("ps")
     page:show()
-    self.children:updatealign()
-    self:restoreflsstate():invalidate()
+	self:updatealign()    
+    --self:restoreflsstate():invalidate()
   end
 end
 
@@ -207,16 +211,16 @@ end
 
 function tabgroup:createheader(page, label)
   local header = group:new(self.tabs):setautosize(true, true)  
-  header:setalign(window.ALLEFT):setmargin(0, 0, 5, 0)  
+  header:setalign(window.ALLEFT)
   header.page = page    
   header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
-  header.text:setalign(window.ALLEFT):setmargin(5, 2, 0, 0)
+  header.text:setalign(window.ALLEFT):setmargin(5, 5, 5, 5)  
   local that = self
   if self.hasclosebutton_ then
     header.close = text:new(header)                           
                        :setcolor(0xB0D8B1)
                        :settext("x")                       
-    header.close:setalign(window.ALLEFT):setmargin(4, 0, 0, 0)    
+    header.close:setalign(window.ALLEFT):setmargin(5, 5, 5, 5)   
     function header.close:onmousedown()
       local ev = {}
       ev.page = self:parent().page
@@ -225,14 +229,28 @@ function tabgroup:createheader(page, label)
     end
   end
   function header:setskinhighlight()        
-    self:setornament(ornamentfactory:createlineborder(0x696969))    
+    self:addornament(ornamentfactory:createlineborder(0x696969))    
     self.text:setcolor(0xA6FF4D) 
   end
   function header:setskinnormal()    
-    self:setornament(nil)
+    self:removeornaments()
     self.text:setcolor(0xA1A1A1)    
   end    
   header:setskinnormal()    
+  function header:onmouseenter(ev)    
+    if self.page == that:activepage() then
+	  self.text:setcolor(0xB6FF5D) 
+	else
+	  self.text:setcolor(0xFFFFFF)    
+	end
+  end
+  function header:onmouseout(ev)
+    if self.page == that:activepage() then
+	  self.text:setcolor(0xA6FF4D) 
+	else
+      self.text:setcolor(0xA1A1A1) 	
+	end
+  end  
   function header:onmousedown(ev)        
     that:setactivepage(self.page)
     if ev.button == 2 then

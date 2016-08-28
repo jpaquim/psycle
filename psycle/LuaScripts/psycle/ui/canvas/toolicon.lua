@@ -9,7 +9,6 @@
 local image = require("psycle.ui.image")
 local item = require("psycle.ui.canvas.item")
 local listener = require("psycle.listener")
-local cfg = require("psycle.config"):new("PatternVisual")
 local serpent = require("psycle.serpent")
 
 local toolicon = item:new()
@@ -17,16 +16,16 @@ local toolicon = item:new()
 local settings = { 
   colors = {
     default = {
-      bg = cfg:get("pvc_row"),
-      text = cfg:get("pvc_font")
+      bg = 0x3E3E3E,
+      text = 0xCACACA
     },
     mousepress = {
-      bg = cfg:get("pvc_row4beat"),
-      text = cfg:get("pvc_font")
+      bg = 0x363636,
+      text = 0xCACACA
     },
     mousemove = {
-      bg  = cfg:get("pvc_row4beat"),
-      text = cfg:get("pvc_font")
+      bg  = 0x363636,
+      text = 0xCACACA
     } 
   }
 }
@@ -45,8 +44,7 @@ end
 function toolicon:onclick() end
 
 function toolicon:init(filename, trans)
-  local w, h = 20, 20
-  self:setautosize(false, false)  
+  self:setautosize(true, true)  
   self.cc = settings.colors.default.bg
   self.on = false  
   self.text_ = ""
@@ -54,9 +52,7 @@ function toolicon:init(filename, trans)
     self.img = image:new():load(filename)
     if trans~=nil then
       self.img:settransparent(trans)
-    end  
-    local iw, ih = self.img:size()  
-    self.centerx, self.centery = (w - iw)/2, (h - ih)/2
+    end    
   end  
   self.clicklistener_ = listener:new("onclick", true)
   self.istoggle_ = false
@@ -79,7 +75,7 @@ end
 function toolicon:draw(g)  
   local x, y, w, h = self:pos()
   g:setcolor(self.cc)   
-  g:fillroundrect(0, 0, w, h, 5, 5)  
+  g:fillroundrect(0, 0, w-1, h-1, 5, 5)  
   local xpos = 0
   if self.img then
     g:drawimage(self.img, self.centerx, self.centery) 
@@ -155,6 +151,22 @@ end
 
 function toolicon:text()
   return self.text_
+end
+
+function toolicon:oncalcautodimension()
+  return 20, 20
+end
+
+function toolicon:onupdatearea(area, width, height)  
+  local auto_w, auto_h = self:autosize()
+  if auto_w then
+    width = 20
+  end
+  if auto_h then
+    height = 20
+  end
+  area:setrect(0, 0, width, height)  
+  return true
 end
 
 return toolicon

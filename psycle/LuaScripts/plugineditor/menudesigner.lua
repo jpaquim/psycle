@@ -30,7 +30,7 @@ end
 function menudesigner:init()   
   self:setautosize(false, false)    
   self:setpos(0, 0, 100, 0)
-  self:setornament(ornamentfactory:createfill(0x528A68))  
+  self:addornament(ornamentfactory:createfill(0x528A68))  
   self.helptext = text:new(self):settext("CTRL + RIGHT create submenu"):setautosize(false, true):setalign(item.ALTOP)
   self.applybutton = button:new(self):settext("Apply"):setautosize(false, false):setalign(item.ALBOTTOM):setpos(0, 0, 0, 20)  
   local that = self  

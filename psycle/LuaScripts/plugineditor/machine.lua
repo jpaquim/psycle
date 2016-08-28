@@ -50,7 +50,7 @@ end
 
 function machine:createframe()  
   self.frame = frame:new()
-                    :setview(self.maincanvas)  
+                    :setviewport(self.maincanvas)  
                     :settitle("Psycle Plugineditor")
   local that = self
   function self.frame:onclose(ev) 		       
@@ -133,7 +133,7 @@ function machine:initmenu()
         that.frame = frame:new()
                           :settitle("Menu Designer")
                           :setpos(0, 0, 400, 400)
-                          :setview(that.menudesigner)        
+                          :setviewport(that.menudesigner)        
         function that.frame:onshow()          
           that.menudesigner.tree:editnode(that.menudesigner.tree:selected())
         end

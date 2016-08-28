@@ -25,7 +25,7 @@ MenuContainer::MenuContainer(ui::MenuContainerImp* imp) : imp_(imp) {
 
 void MenuContainer::Update() {
   if (!root_node_.expired()) {
-    assert(imp_.get());
+    assert(imp_.get());		
     imp_->DevUpdate(root_node_.lock());  
   }
 }
@@ -267,195 +267,265 @@ FontInfo Font::info() const {
 }
 
 //Image
-Image::Image() : imp_(ui::ImpFactory::instance().CreateImageImp()) {
+Image::Image() 
+	: imp_(ui::ImpFactory::instance().CreateImageImp()), 
+    has_file_(false) {
+}
+
+Image::Image(const Image& other)
+    : imp_(other.imp()->DevClone()), has_file_(other.has_file_) {
+}
+
+Image& Image::operator=(const Image& other){
+	if (this != &other) {
+		imp_.reset(other.imp()->DevClone());
+		has_file_ = other.has_file_;
+	}
+	return *this;
+}
+
+void Image::Reset(const ui::Dimension& dimension) {
+  assert(imp_.get());
+  imp_->DevReset(dimension);	
 }
 
 void Image::Load(const std::string& filename) {
   assert(imp_.get());
-  imp_->Load(filename);
+  imp_->DevLoad(filename);
+	filename_ = filename;
+}
+
+void Image::Save(const std::string& filename) {
+  assert(imp_.get());
+  imp_->DevSave(filename);
+	filename_ = filename;
+}
+
+void Image::Save() {
+  assert(imp_.get());
+  imp_->DevSave(filename_);
 }
 
 void Image::SetTransparent(bool on, ARGB color) {
   assert(imp_.get());
-  imp_->SetTransparent(on, color);
+  imp_->DevSetTransparent(on, color);
 }
 
 ui::Dimension Image::dim() const {
   assert(imp_.get());
-  return imp_->dim();
+  return imp_->dev_dim();
 }
 
-void* Image::source() {
+std::auto_ptr<ui::Graphics> Image::graphics() {
+  assert(imp_.get());		
+	CDC* memDC = new CDC();
+  memDC->CreateCompatibleDC(NULL);
+	std::auto_ptr<ui::Graphics> paint_graphics(new ui::Graphics(memDC));
+	paint_graphics->AttachImage(this);	
+	return paint_graphics;
+}
+
+void Image::Cut(const ui::Rect& bounds) {
+	assert(imp_.get());
+	return imp_->DevCut(bounds);
+}
+
+void Image::SetPixel(ui::Point & pt, ARGB color) {
   assert(imp_.get());
-  return imp_->source();
+  imp_->DevSetPixel(pt, color);
 }
 
-void* Image::mask() {
+ARGB Image::GetPixel(ui::Point & pt) const {
   assert(imp_.get());
-  return imp_->mask();
+  return imp_->DevGetPixel(pt);	
 }
 
-const void* Image::mask() const {
-  assert(imp_.get());
-  return imp_->mask();
+void Image::Resize(const ui::Dimension& dimension) {
+	assert(imp_.get());
+	imp_->DevResize(dimension);
 }
 
+void Image::Rotate(float radians) {
+	assert(imp_.get());
+	imp_->DevRotate(radians);
+}
 
 // Graphics
 Graphics::Graphics() : imp_(ui::ImpFactory::instance().CreateGraphicsImp()) {
 }
 
-Graphics::Graphics(CDC* cr) : imp_(ui::ImpFactory::instance().CreateGraphicsImp(cr)) {
+Graphics::Graphics(CDC* cr) 
+	: imp_(ui::ImpFactory::instance().CreateGraphicsImp(cr)) {
 }
 
 void Graphics::CopyArea(const ui::Rect& rect, const ui::Point& delta) {
   assert(imp_.get());
-  imp_->CopyArea(rect, delta);  
+  imp_->DevCopyArea(rect, delta);  
 }
 
 void Graphics::DrawArc(const ui::Rect& rect, const Point& start, const Point& end) {
   assert(imp_.get());
-  imp_->DrawArc(rect, start, end);  
+  imp_->DevDrawArc(rect, start, end);  
 }
 
 void Graphics::DrawLine(const ui::Point& p1, const ui::Point& p2) {
   assert(imp_.get());  
-  imp_->DrawLine(p1, p2);  
+  imp_->DevDrawLine(p1, p2);  
 }
 
 void Graphics::DrawRect(const ui::Rect& rect) {
   assert(imp_.get());
-  imp_->DrawRect(rect);  
+  imp_->DevDrawRect(rect);  
 }
 
 void Graphics::DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
   assert(imp_.get());
-  imp_->DrawRoundRect(rect, arc_dim);  
+  imp_->DevDrawRoundRect(rect, arc_dim);  
 }
 
 void Graphics::DrawOval(const ui::Rect& rect) {
   assert(imp_.get());
-  imp_->DrawOval(rect); 
+  imp_->DevDrawOval(rect); 
 }
 
 void Graphics::DrawString(const std::string& str, const ui::Point& point) {
   assert(imp_.get());
-  imp_->DrawString(str, point.x(), point.y());  
+  imp_->DevDrawString(str, point.x(), point.y());  
 }
 
 void Graphics::FillRect(const ui::Rect& rect) {
   assert(imp_.get());
-  imp_->FillRect(rect);  
+  imp_->DevFillRect(rect);  
 }
 
 void Graphics::FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {  
   assert(imp_.get());
-  imp_->FillRoundRect(rect, arc_dim);
+  imp_->DevFillRoundRect(rect, arc_dim);
 }
 
 void Graphics::FillOval(const ui::Rect& rect) {  
   assert(imp_.get());
-  imp_->FillOval(rect);
+  imp_->DevFillOval(rect);
 }
 
 void Graphics::FillRegion(const ui::Region& rgn) {  
   assert(imp_.get());
-  imp_->FillRegion(rgn);
+  imp_->DevFillRegion(rgn);
 }
 
 void Graphics::SetColor(ARGB color) {
   assert(imp_.get());
-  imp_->SetColor(color);  
+  imp_->DevSetColor(color);  
 }
 
 ARGB Graphics::color() const {
   assert(imp_.get());
-  return imp_->color();
+  return imp_->dev_color();
+}
+
+void Graphics::SetPenWidth(double width) {
+	assert(imp_.get()); 
+  imp_->DevSetPenWidth(width);
 }
 
 void Graphics::Translate(double x, double y) {
   assert(imp_.get()); 
-  imp_->Translate(x, y);
+  imp_->DevTranslate(x, y);
 }
 
 void Graphics::SetFont(const Font& font) {
   assert(imp_.get());
-  imp_->SetFont(font);  
+  imp_->DevSetFont(font);  
 }
 
 const Font& Graphics::font() const {
   assert(imp_.get());
-  return imp_->font();
+  return imp_->dev_font();
 }
 
 Dimension Graphics::text_size(const std::string& text) const {
   assert(imp_.get());
-  return imp_->text_size(text);  
+  return imp_->dev_text_size(text);  
 }
 
 void Graphics::DrawPolygon(const ui::Points& points) {
   assert(imp_.get());
-  imp_->DrawPolygon(points);  
+  imp_->DevDrawPolygon(points);  
 }
 
 void Graphics::FillPolygon(const ui::Points& points) {
   assert(imp_.get());
-  imp_->DrawPolygon(points);  
+  imp_->DevDrawPolygon(points);  
 }
 
 void Graphics::DrawPolyline(const Points& points) {
   assert(imp_.get());
-  imp_->DrawPolyline(points);  
+  imp_->DevDrawPolyline(points);  
 }
 
-void Graphics::DrawImage(ui::Image* img, double x, double y) {
+void Graphics::DrawImage(ui::Image* img, const ui::Point& top_left) {
   assert(imp_.get());
-  imp_->DrawImage(img, x, y);  
+  imp_->DevDrawImage(img, top_left);  
 }
 
-void Graphics::DrawImage(ui::Image* img, double x, double y, double width, double height) {
+void Graphics::DrawImage(ui::Image* img, const ui::Rect& position) {
   assert(imp_.get());
-  imp_->DrawImage(img, x, y, width, height);  
+  imp_->DevDrawImage(img, position);  
 }
 
-void Graphics::DrawImage(ui::Image* img, double x, double y, double width, double height, double xsrc, double ysrc) {
+void Graphics::DrawImage(ui::Image* img, const ui::Rect& destination_position,
+		                     const ui::Point& src) {
   assert(imp_.get());
-  imp_->DrawImage(img, x, y, width, height, xsrc, ysrc);  
+  imp_->DevDrawImage(img, destination_position, src);
+}
+
+void Graphics::DrawImage(ui::Image* img,
+	                       const ui::Rect& destination_position,
+		                     const ui::Point& src,
+	                       const ui::Point& zoom_factor) {
+  assert(imp_.get());
+  imp_->DevDrawImage(img, destination_position, src, zoom_factor);
 }
 
 void Graphics::SetClip(const ui::Rect& rect) {
   assert(imp_.get());
-  imp_->SetClip(rect);  
+  imp_->DevSetClip(rect);  
 }
 
 void Graphics::SetClip(ui::Region* rgn) {
   assert(imp_.get());
-  imp_->SetClip(rgn);  
+  imp_->DevSetClip(rgn);  
 }
 
 CRgn& Graphics::clip() {  
   assert(imp_.get());
-  return imp_->clip();
+  return imp_->dev_clip();
 }
 
 void Graphics::Dispose() {
   assert(imp_.get());
-  imp_->Dispose();  
+  imp_->DevDispose();  
+}
+
+void Graphics::AttachImage(ui::Image * image)
+{
+	assert(imp_.get());
+  return imp_->DevAttachImage(image);	
 }
 
 CDC* Graphics::dc() {
   assert(imp_.get());
-  return imp_->dc();
+  return imp_->dev_dc();
 }
 
 void Graphics::SaveOrigin() {
   assert(imp_.get());
-  imp_->SaveOrigin();
+  imp_->DevSaveOrigin();
 }
 
 void Graphics::RestoreOrigin() {
   assert(imp_.get());
-  imp_->RestoreOrigin();
+  imp_->DevRestoreOrigin();
 }
 
 
@@ -467,7 +537,8 @@ Window::Window() :
     auto_size_height_(true),
     visible_(true),
     align_(ALNONE),
-    pointer_events_(true) {
+    pointer_events_(true),
+		prevent_auto_dimension_(false) {
   set_imp(ui::ImpFactory::instance().CreateWindowImp());
 }
 
@@ -480,7 +551,8 @@ Window::Window(WindowImp* imp) :
     auto_size_height_(true),
     visible_(true),
     align_(ALNONE),
-    pointer_events_(true) {
+    pointer_events_(true),
+		prevent_auto_dimension_(false) {
   imp_.reset(imp);  
   if (imp) {
     imp->set_window(this);
@@ -558,8 +630,13 @@ bool Window::IsInGroup(Window::WeakPtr group) const {
 void Window::FLSEX() {  
   if (visible() && root()) {
     needsupdate();
-    std::auto_ptr<Area> tmp(new Area(area().bounds()));
-    tmp->Offset(abs_pos().left(), abs_pos().top());
+		ui::Rect bounds = area().bounds();		
+		bounds.Increase(padding());
+		bounds.Increase(margin());	
+		bounds.Increase(border_space());
+		bounds.Offset(abs_pos().left() + padding().left() + border_space().left() + margin().left(),
+			            abs_pos().top() + padding().top() + border_space().top() + margin().top());
+    std::auto_ptr<Area> tmp(new Area(bounds));		    
     if (fls_area_.get()) {    
       fls_area_->Combine(*tmp, RGN_OR);
       root()->Invalidate(fls_area_->region());  
@@ -571,10 +648,15 @@ void Window::FLSEX() {
 }
 
 void Window::FLS() {
-  if (visible() && root()) {
+  if (visible() && root()) {		
     needsupdate();
-    std::auto_ptr<Area> tmp(new Area(area().bounds()));
-    tmp->Offset(abs_pos().left(), abs_pos().top());    
+		ui::Rect bounds = area().bounds();
+		bounds.Increase(padding());
+		bounds.Increase(margin());
+		bounds.Increase(border_space());
+		bounds.Offset(abs_pos().left() + padding().left() + border_space().left() + margin().left(),
+			            abs_pos().top() + padding().top() + border_space().top() + margin().top());
+    std::auto_ptr<Area> tmp(new Area(bounds));    
     root()->Invalidate(tmp->region());
     fls_area_ = tmp;
   }
@@ -593,60 +675,59 @@ bool Window::IsInGroupVisible() const {
   return res;
 }
 
-void Window::set_ornament(boost::shared_ptr<Ornament> ornament) {  
-  ornament_ = ornament;
-  if (ornament) {
-    std::auto_ptr<ui::Rect> opad = ornament->padding();
-    if (opad.get()) {
-      ui::Rect pad = padding();
-      pad.set(ui::Point(pad.left() + opad->left(),
-                        pad.top() + opad->top()),
-              ui::Point(pad.right() + opad->right(),
-                        pad.bottom() + opad->bottom()));
-      set_padding(pad);
-    }
-  } else { 
-    set_padding(ui::Rect());
-  }
-  FLS();
+void Window::add_ornament(boost::shared_ptr<Ornament> ornament) {  
+  ornaments_.push_back(ornament);
+	if (imp_.get()) {
+		imp_->dev_set_border_space(sum_border_space());
+	}
+  FLSEX();
 }
 
-boost::weak_ptr<ui::Ornament> Window::ornament() {
-  return ornament_;
+void Window::RemoveOrnaments() {
+	ornaments_.clear();
+	if (imp_.get()) {
+		imp_->dev_set_border_space(ui::BoxSpace());
+	}
+	FLSEX();
 }
 
-const Area& Window::area() const { 
-  if (update_) {          
-    update_ = !const_cast<Window*>(this)->OnUpdateArea();          
-  }            
+Window::Ornaments Window::ornaments() {
+  return ornaments_;
+}
+
+const Area& Window::area() const {	
+	area_->Clear();
+	area_->Add(ui::Rect(ui::Point::zero(), dim()));
   return *area_.get();
 }  
 
-bool Window::OnUpdateArea() { 
-  bool result = true;
-  if (imp_.get()) {
-    result = imp_->OnDevUpdateArea(*area_.get());
-  }
-  return result;
-}
-
 void Window::set_pos(const ui::Point& pos) {  
-  set_pos(ui::Rect(pos, area().bounds().dimension()));  
+  set_pos(ui::Rect(pos, dim()));
 }
 
-void Window::set_pos(const ui::Rect& pos) {
-  bool size_changed = pos.width() != area().bounds().width() || 
-                      pos.height() != area().bounds().height();  
-  if (imp_.get()) {    
-    ui::Point bottom_right(pos.left() + (auto_size_width() ? dim().width() : pos.width()),
-                           pos.top() + (auto_size_height() ? dim().height() : pos.height()));        
-    imp_->dev_set_pos(ui::Rect(pos.top_left(), bottom_right));    
-    FLSEX();    
+void Window::set_pos(const ui::Rect& pos) {  
+	ui::Rect new_pos = pos;
+	bool has_auto_dimension = (!prevent_auto_dimension_) && (auto_size_width() || auto_size_height());
+	if (imp_.get()) {    		
+		if (has_auto_dimension) {
+			ui::Dimension auto_dimension = OnCalcAutoDimension();
+			if (auto_size_width()) {
+				new_pos.set_width(auto_dimension.width());
+			}
+			if (auto_size_height()) {
+				new_pos.set_height(auto_dimension.height());
+			}
+	  }
+		bool size_changed = pos.dimension() != new_pos.dimension();
+		imp_->dev_set_pos(new_pos);
+    FLSEX();
+		if (size_changed) {
+      OnSize(new_pos.dimension());
+    }
+		if (!prevent_auto_dimension_) {
+		  WorkChildPos();
+		}
   }
-  if (size_changed) {
-    OnSize(pos.dimension());
-  }  
-  WorkChildPos();
 }
 
 void Window::ScrollTo(int offsetx, int offsety) {
@@ -656,7 +737,7 @@ void Window::ScrollTo(int offsetx, int offsety) {
 }
 
 ui::Rect Window::pos() const { 
-  return imp() ? Rect(imp_->dev_pos().top_left(), dim()) : Rect();
+  return imp() ? imp_->dev_pos() : Rect();
 }
 
 ui::Rect Window::abs_pos() const {
@@ -668,30 +749,57 @@ ui::Rect Window::desktop_pos() const {
 }
 
 ui::Dimension Window::dim() const {  
-  if (imp_.get()) {
-    ui::Dimension result;
-    if (auto_size_width()) {
-      if (aligner()) {
-        result.set_width(aligner()->dim().width());
-      } else {
-        result.set_width(area().bounds().width());
-      }
-    } else {
-      result.set_width(imp_->dev_pos().width());
-    }
-    if (auto_size_height()) {
-      if (aligner()) {
-        result.set_height(aligner()->dim().height());
-      } else {
-        result.set_height(area().bounds().height());
-      }
-    } else {
-      result.set_height(imp_->dev_pos().height());
-    }
-    return result;    
-  } else {
-    return area().bounds().dimension();
+	return (imp_.get()) ? imp_->dev_pos().dimension() : ui::Dimension();
+}
+
+void Window::UpdateAutoDimension() {
+	ui::Dimension new_dimension = pos().dimension();
+	bool has_auto_dimension = auto_size_width() || auto_size_height();
+	if (imp_.get()) {    		
+		if (has_auto_dimension) {
+			ui::Dimension auto_dimension = OnCalcAutoDimension();
+			if (auto_size_width()) {
+				new_dimension.set_width(auto_dimension.width());
+			}
+			if (auto_size_height()) {
+				new_dimension.set_height(auto_dimension.height());
+			}
+	  }		
+		imp_->dev_set_pos(ui::Rect(pos().top_left(), new_dimension));
+    FLSEX();		
+    OnSize(new_dimension);    
+		WorkChildPos();
   }
+}
+
+void Window::set_margin(const BoxSpace& margin) {
+	if (imp_.get()) {
+		imp_->dev_set_margin(margin);
+	}
+}
+
+const BoxSpace& Window::margin() const {	
+	return imp() ? imp_->dev_margin() : BoxSpace::zero();
+}
+
+void Window::set_padding(const ui::BoxSpace& padding) {
+	if (imp_.get()) {
+		imp_->dev_set_padding(padding);
+	}	
+}
+
+const BoxSpace& Window::padding() const {
+	return imp() ? imp_->dev_padding() : BoxSpace::zero();
+}
+
+void Window::set_border_space(const ui::BoxSpace& border_space) {
+	if (imp_.get()) {
+		imp_->dev_set_border_space(border_space);
+	}
+}
+
+const BoxSpace& Window::border_space() const {
+	return imp() ? imp_->dev_border_space() : BoxSpace::zero();
 }
 
 bool Window::auto_size_width() const { 
@@ -707,6 +815,48 @@ void Window::needsupdate() {
   if (parent()) {
     parent()->needsupdate();
   }
+}
+
+void Window::UpdateStyle(const StyleClass& style_class) {		
+	UpdatePadding(style_class);
+}
+
+void Window::UpdatePadding(const StyleClass& style_class) {
+	using namespace psycle::host;
+	ui::BoxSpace pad = padding();
+	bool found(false);
+	double value(0);
+	style_class.get("padding-top", value, found);
+	if (found) {
+		pad.set_top(value);
+	}
+	style_class.get("padding-left", value, found);
+	if (found) {
+		pad.set_left(value);
+	}
+	style_class.get("padding-right", value, found);
+	if (found) {
+		pad.set_right(value);
+	}
+	style_class.get("padding-bottom", value, found);
+	if (found) {
+		pad.set_bottom(value);
+	}	
+	set_padding(pad);
+}
+
+ui::BoxSpace Window::sum_border_space() const {
+	ui::BoxSpace result;
+	return result;
+	/*
+	if (!ornaments_.empty()) {       
+			for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {				
+				if (!(*it).expired()) {
+					result = result + (*it).lock()->preferred_space();		
+				}
+			}
+    }
+	return result; */
 }
 
 void Window::WorkChildPos() {
@@ -760,13 +910,12 @@ bool Window::is_fls_prevented() const {
   return root() ? root()->is_fls_prevented() : false; 
 }
 
-void Window::Show() {  
+void Window::Show() {
   if (imp_.get()) {
     imp_->DevShow();
   }  
   visible_ = true;
-  OnShow();
-  FLS();
+  OnShow();  
 }
 
 void Window::Show(const boost::shared_ptr<WindowShowStrategy>& aligner) {  
@@ -788,90 +937,109 @@ void Window::Invalidate() {
   }
 }
 
-void Window::Invalidate(const Region& rgn) { 
-  if (imp_.get()) {    
-    imp_->DevInvalidate(rgn);    
-  }
+void Window::Invalidate(const Region& rgn) {
+	if (imp_.get()) {
+		imp_->DevInvalidate(rgn);
+	}
 }
 
-void Window::SetCapture() { 
-  if (imp_.get()) {
-    imp_->DevSetCapture();
-  }
+void Window::SetCapture() {
+	if (imp_.get()) {
+		imp_->DevSetCapture();
+	}
 }
 
 void Window::ReleaseCapture() {
-  if (imp_.get()) {
-    imp_->DevReleaseCapture();
-  }
+	if (imp_.get()) {
+		imp_->DevReleaseCapture();
+	}
 }
 
 void Window::ShowCursor() {
-  if (imp_.get()) {
-    imp_->DevShowCursor();
-  }
+	if (imp_.get()) {
+		imp_->DevShowCursor();
+	}
 }
 
 void Window::HideCursor() {
-  if (imp_.get()) {
-    imp_->DevHideCursor();
-  }
+	if (imp_.get()) {
+		imp_->DevHideCursor();
+	}
 }
 
 void Window::SetCursorPos(double x, double y) {
-  if (imp_.get()) {
-    imp_->DevSetCursorPos(x, y);
-  }
+	if (imp_.get()) {
+		imp_->DevSetCursorPos(x, y);
+	}
 }
 
 void Window::SetCursor(CursorStyle style) {
-  if (imp_.get()) {
-    imp_->DevSetCursor(style);
-  }
+	if (imp_.get()) {
+		imp_->DevSetCursor(style);
+	}
 }
 
 void Window::Enable() {
-  if (imp()) {
-    imp()->DevEnable();
-  }
+	if (imp()) {
+		imp()->DevEnable();
+	}
 }
 
 void Window::Disable() {
-  if (imp()) {
-    imp()->DevDisable();
-  }
+	if (imp()) {
+		imp()->DevDisable();
+	}
+}
+
+void Window::ViewDoubleBuffered() {
+	if (imp_.get()) {
+		imp_->DevViewDoubleBuffered();
+	}
+}
+
+void Window::ViewSingleBuffered() {
+	if (imp_.get()) {
+		imp_->DevViewSingleBuffered();
+	}
+}
+
+bool Window::is_double_buffered() const {
+	return imp() ? imp_->dev_is_double_buffered() : false;
 }
 
 void Window::set_parent(Window* window) {
-  if (imp_.get()) {
-    imp_->dev_set_parent(window);
-  }
-  parent_ = window;
+	if (imp_.get()) {
+		imp_->dev_set_parent(window);
+	}
+	parent_ = window;
 }
 
 void Window::set_clip_children() {
-  if (imp_.get()) {
-    imp_->dev_set_clip_children();
-  }
+	if (imp_.get()) {
+		imp_->dev_set_clip_children();
+	}
 }
 
 void Window::add_style(UINT flag) {
-  if (imp_.get()) {
-    imp_->dev_add_style(flag);
-  }
+	if (imp_.get()) {
+		imp_->dev_add_style(flag);
+	}
 }
 
 void Window::remove_style(UINT flag) {
-  if (imp_.get()) {
-    imp_->dev_remove_style(flag);
-  }
+	if (imp_.get()) {
+		imp_->dev_remove_style(flag);
+	}
 }
 
 void Window::DrawBackground(Graphics* g, Region& draw_region) {
- if (draw_region.bounds().height() > 0) {    
-    if (!ornament().expired()) { 
-      Window::Ptr shared_this = shared_from_this();      
-      ornament().lock()->Draw(shared_this, g, draw_region);
+	if (draw_region.bounds().height() > 0) {
+		if (!ornaments().empty()) {
+			for (Ornaments::iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
+				if (!(*it).expired()) {					
+          (*it).lock()->Draw(*this, g, draw_region);
+				}
+			}
     }
   }
 }
@@ -896,7 +1064,7 @@ void Window::PreOrderTreeTraverse(T& functor, T1& cond) {
 template<class T, class T1>
 void Window::PostOrderTreeTraverse(T& functor, T1& cond) {      
   for (iterator i = begin(); i != end(); ++i) {
-    Window::Ptr window = *i;  
+    Window::Ptr window = *i;		
     if (!cond(*window.get())) {      
       window->PostOrderTreeTraverse(functor, cond);
     }
@@ -921,15 +1089,19 @@ void CalcDim::operator()(Window& window) const {
 
 bool AbortPos::operator()(Window& window) const { 
     bool abort_tree_walk = true;
+		if (window.debug_text() == "me") {
+			int fordebugonly(0);
+		}
     if (window.visible() && window.has_childs() && window.aligner()) {      
       //std::stringstream str;
       //str << "---- " << window.debug_text() << "----" << std::endl;
       //str << "wo-pos" << window.pos_old_.left() << "," << window.pos_old_.top() << std::endl;
       //str << "w-pos" << window.pos().left() << "," << window.pos().top() << std::endl;
-		 // TRACE(str.str().c_str());
+		 // TRACE(str.str().c_str());								
       if (!window.aligner()->aligned() || 
-        window.pos() != window.pos_old_) {
+				window.aligner()->pos() != window.pos_old_) {
         abort_tree_walk = false;
+				window.aligner()->aligned_ = true;
         /*std::stringstream str;
         str << "wo-pos" << window.pos_old_.left() << "," << window.pos_old_.top() << std::endl;
         str << "wo-size" << window.pos_old_.width() << "," << window.pos_old_.height() << std::endl;
@@ -937,7 +1109,7 @@ bool AbortPos::operator()(Window& window) const {
         str << "w-size" << window.pos().width() << "," << window.pos().height() << std::endl;
         str << "---- not abort: " << window.debug_text() << "----" << std::endl;
         TRACE(str.str().c_str());*/
-        window.aligner()->aligned_ = true;
+        
       }
     }    
     return abort_tree_walk;
@@ -995,6 +1167,11 @@ void Group::Add(const Window::Ptr& window) {
   items_.push_back(window);
   window->set_parent(this);  
   window->needsupdate();
+
+	// style test
+	if (!style_sheet().expired()) {
+		style_sheet().lock()->parse(*(items_.back().get()));
+	}
 }
 
 void Group::Insert(iterator it, const Window::Ptr& item) {
@@ -1014,48 +1191,36 @@ void Group::Remove(const Window::Ptr& item) {
   item->set_parent(0);  
 }
 
-bool Group::OnUpdateArea() {  
-  if (aligner_ || (!auto_size_width() && !auto_size_height())) {
-    area_->Clear();  
-    area_->Add(RectShape(ui::Rect()));
-    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(),
-                                  imp()->dev_pos().dimension())));
-    return true;
-  }
-
-  std::auto_ptr<Area> area(new Area());
-  area->Add(RectShape(ui::Rect()));
-  std::vector<Window::Ptr>::const_iterator it = items_.begin();  
-  for ( ; it != items_.end(); ++it) {
-    Window::Ptr item = *it;  
-    if (item->visible()) {
-      std::auto_ptr<Area> tmp(item->area().Clone());      
-      tmp->Offset(item->pos().left(), item->pos().top());        
-      // int nCombineResult = 
-      area->Combine(*tmp, RGN_OR);           
+ui::Dimension Group::OnCalcAutoDimension() const {	
+	ui::Rect result(ui::Point((std::numeric_limits<double>::max)(),
+	 						    (std::numeric_limits<double>::max)()),
+                  ui::Point((std::numeric_limits<double>::min)(),
+                  (std::numeric_limits<double>::min)()));	      
+  for (const_iterator i = begin(); i != end(); ++i) {		  
+		 ui::Rect item_pos = (*i)->pos();
+		 item_pos.Increase(ui::BoxSpace((*i)->padding().top() + (*i)->border_space().top() + (*i)->margin().top(),
+			 (*i)->padding().right() + (*i)->border_space().right() + (*i)->margin().right(),
+			 (*i)->padding().bottom() + (*i)->border_space().bottom() + (*i)->margin().bottom(),
+			 (*i)->padding().left() + (*i)->border_space().left() + (*i)->margin().left()));
+		  if (item_pos.left() < result.left()) {
+        result.set_left(item_pos.left());
+      }
+      if (item_pos.top() < result.top()) {
+        result.set_top(item_pos.top());
+      }
+      if (item_pos.right() > result.right()) {
+        result.set_right(item_pos.right());
+      }
+      if (item_pos.bottom() > result.bottom()) {
+        result.set_bottom(item_pos.bottom());
+      }
     }
-  }
-  area_.reset(area->Clone()); 
-  if (!auto_size_width()) {
-    ui::Rect bounds = area_->bounds();
-    area_->Clear();
-    area_->Add(RectShape(ui::Rect(bounds.top_left(),
-                                  ui::Point(imp()->dev_pos().width(),
-                                            bounds.height()))));
-  }
-  if (!auto_size_height()) {        
-    ui::Rect bounds = area_->bounds();
-    area_->Clear();
-    area_->Add(RectShape(ui::Rect(bounds.top_left(),                                  
-                                  ui::Point(bounds.width(),
-                                            imp()->dev_pos().height()))));
-  }  
-  return true;
+	return result.dimension();
 }
 
 void Group::set_zorder(Window::Ptr item, int z) {
   assert(item);
-  if (z<0 || z>=items_.size()) return;
+  if (z<0 || z>= static_cast<int>(items_.size())) return;
   iterator it = find(items_.begin(), items_.end(), item);
   assert(it != items_.end());  
   items_.erase(it);
@@ -1063,8 +1228,8 @@ void Group::set_zorder(Window::Ptr item, int z) {
 }
 
 int Group::zorder(Window::Ptr item) const {
-  int z = -1;
-  for (int k = 0; k < items_.size(); k++) {
+	size_t z = -1;
+  for (size_t k = 0; k < items_.size(); k++) {
     if (items_[k] == item) {
       z = k;
       break;
@@ -1091,8 +1256,15 @@ Window::Ptr Group::HitTest(double x, double y) {
 
 void Group::OnChildPos(ChildPosEvent& ev) {
   if (auto_size_width() || auto_size_height()) {
-    ev.window()->needsupdate();    
-    imp()->dev_set_pos(pos());
+    ev.window()->needsupdate();    		
+		ui::Dimension new_dimension = OnCalcAutoDimension();
+		if (!auto_size_width()) {
+			new_dimension.set_width(pos().width());
+		}
+		if (!auto_size_height()) {
+			new_dimension.set_height(pos().height());
+		}
+    imp()->dev_set_pos(ui::Rect(pos().top_left(), new_dimension));
   } else {
     // ev.StopPropagation();
   }
@@ -1115,16 +1287,16 @@ Window::Container Aligner::dummy;
 void Group::UpdateAlign() {
   bool is_saving = false;
   if (root()) {
-    is_saving = dynamic_cast<canvas::Canvas*>(root())->IsSaving();
-    dynamic_cast<canvas::Canvas*>(root())->SetSave(true);
+    is_saving = dynamic_cast<Canvas*>(root())->IsSaving();
+    dynamic_cast<Canvas*>(root())->SetSave(true);
   }
   this->EnableFls();
   if (aligner_) {        
     aligner_->Align();    
   }
   if (!is_saving && root()) {    
-    dynamic_cast<canvas::Canvas*>(root())->Flush();
-    dynamic_cast<canvas::Canvas*>(root())->SetSave(false);
+    dynamic_cast<Canvas*>(root())->Flush();
+    dynamic_cast<Canvas*>(root())->SetSave(false);
   }  
 }
 
@@ -1171,8 +1343,8 @@ int ScrollBar::scroll_pos() const {
 void ScrollBar::system_size(int& width, int& height) const {
   if (imp()) {
     ui::Dimension dim = imp()->dev_system_size();
-    width = dim.width();
-    height = dim.height();
+    width = static_cast<int>(dim.width());
+    height = static_cast<int>(dim.height());
   }
 }
 
@@ -1182,15 +1354,29 @@ void ScrollBarImp::OnDevScroll(int pos) {
 }
 
 // ScrollBox
-ScrollBox::ScrollBox() {  
+ScrollBox::ScrollBox() {
   Init();  
 }
 
-void ScrollBox::Init() {
+void ScrollBox::Init() { 
+	// ViewDoubleBuffered();
+  pane_.reset(new ui::Group());
+  client_background_.reset(ui::OrnamentFactory::Instance().CreateFill(0x292929));
+	
+  //pane_->set_ornament(client_background_);
+  //pane_->ViewDoubleBuffered();
+	pane_->set_auto_size(false, false);
+	Group::Add(pane_);
+
   client_.reset(new ui::Group());
-  client_background_.reset(ui::canvas::OrnamentFactory::Instance().CreateFill(0x292929));
-  client_->set_ornament(client_background_);
-  Group::Add(client_);
+  //client_->ViewDoubleBuffered();
+	//pane_->add_style(0x02000000 | WS_CLIPCHILDREN);
+  //client_background_.reset(ui::OrnamentFactory::Instance().CreateFill(0x292929));
+  //client_->set_ornament(client_background_);
+	client_->set_auto_size(true, true);  
+	//client_->add_style(0x02000000 | WS_CLIPCHILDREN);
+	pane_->Add(client_);
+
   hscrollbar_.reset(ui::Systems::instance().CreateScrollBar(HORZ));
   hscrollbar_->set_auto_size(false, false);
   hscrollbar_->scroll.connect(boost::bind(&ScrollBox::OnHScroll, this, _1));
@@ -1205,6 +1391,17 @@ void ScrollBox::Init() {
   Group::Add(vscrollbar_);
 }
 
+void ScrollBox::UpdateScrollRange() {
+	if (client_) {
+		client_->needsupdate();
+ 		ui::Dimension dimension = client_->area().bounds().dimension();
+		ui::Dimension pane_dimension = pane_->area().bounds().dimension();
+		dimension -= pane_dimension;
+		hscrollbar_->set_scroll_range(0, static_cast<int>(dimension.width()));
+		vscrollbar_->set_scroll_range(0, static_cast<int>(dimension.height()));
+	}
+}
+
 void ScrollBox::OnSize(const ui::Dimension& dimension) {
   ui::Dimension scrollbar_size = ui::Systems::instance().metrics().scrollbar_size();
   hscrollbar_->set_pos(
@@ -1213,16 +1410,17 @@ void ScrollBox::OnSize(const ui::Dimension& dimension) {
   vscrollbar_->set_pos(
       ui::Rect(ui::Point(dimension.width() -  scrollbar_size.width(), 0), 
                ui::Dimension(scrollbar_size.width(), dimension.height() - scrollbar_size.height())));
-  client_->set_pos(
+  pane_->set_pos(
        ui::Rect(ui::Point(0, 0), 
-                ui::Dimension(dimension.width() - scrollbar_size.width(),
-                              dimension.height() - scrollbar_size.height())));
+                ui::Dimension(dimension.width() - scrollbar_size.width() - 2,
+                              dimension.height() - scrollbar_size.height() - 2)));
+	UpdateScrollRange();
 }
 
 void ScrollBox::OnHScroll(ui::ScrollBar& bar) {
   if (!client_->empty()) {
     ui::Window::Ptr view = *client_->begin();
-    int dx = bar.scroll_pos() + view->pos().left();
+		int dx = static_cast<int>(bar.scroll_pos() + view->pos().left());
     ScrollBy(-dx, 0);
   }
 }
@@ -1230,10 +1428,7 @@ void ScrollBox::OnHScroll(ui::ScrollBar& bar) {
 void ScrollBox::OnVScroll(ui::ScrollBar& bar) {
   if (!client_->empty()) {
     ui::Window::Ptr view = *client_->begin();
-    int dy = bar.scroll_pos() + view->pos().top();
-    std::stringstream str;
-    str << view->pos().top() << std::endl;
-    OutputDebugString(str.str().c_str());
+    int dy = static_cast<int>(bar.scroll_pos() + view->pos().top());
     ScrollBy(0, -dy);
   }
 }
@@ -1245,8 +1440,17 @@ void ScrollBox::ScrollBy(double dx, double dy) {
     new_pos.set_left(new_pos.left() + dx);
     new_pos.set_top(new_pos.top() + dy);
     view->imp()->dev_set_pos(new_pos);
-    view->ScrollTo(-dx, -dy);
+    view->ScrollTo(static_cast<int>(-dx), static_cast<int>(-dy));
   }
+}
+
+void ScrollBox::ScrollTo(const ui::Point& top_left) {
+	if (!client_->empty()) {
+		ui::Window::Ptr view = *client_->begin();		
+		view->set_pos(top_left);
+		hscrollbar_->set_scroll_pos(static_cast<int>(top_left.x()));
+		vscrollbar_->set_scroll_pos(static_cast<int>(top_left.y()));
+	}
 }
 
 void WindowCenterToScreen::set_position(Window& window) {    
@@ -1280,12 +1484,12 @@ std::string Frame::title() const {
   return imp() ? imp()->dev_title() : "";
 }
 
-void Frame::set_view(ui::Window::Ptr view) {
-  view_ = view;
+void Frame::set_viewport(ui::Window::Ptr viewport) {
+  viewport_ = viewport;
   if (imp()) {
-    imp()->dev_set_view(view);
-    if (view) {
-      view->Show();
+    imp()->dev_set_viewport(viewport);
+    if (viewport) {
+      viewport->Show();
     }
   }
 }
@@ -1508,6 +1712,12 @@ void TreeView::HideButtons() {
   }
 }
 
+void TreeView::ExpandAll() {
+  if (imp()) {
+    imp()->DevExpandAll();
+  }
+}
+
 void TreeView::set_images(const Images::Ptr& images) { 
   images_ = images;
   if (imp()) {
@@ -1721,6 +1931,19 @@ Button::Button(ButtonImp* imp) : Window(imp) {
   set_auto_size(false, false);
 }
 
+void Button::Check() {
+	if (imp()) {
+		imp()->DevCheck();
+	}
+}
+
+void Button::UnCheck() {
+	if (imp()) {
+		imp()->DevUnCheck();
+	}
+}
+
+
 void Button::set_text(const std::string& text) {
   if (imp()) {
     imp()->dev_set_text(text);
@@ -1729,12 +1952,6 @@ void Button::set_text(const std::string& text) {
 
 std::string Button::text() const {
   return imp() ? imp()->dev_text() : "";
-}
-
-bool Button::OnUpdateArea() {  
-  area_->Clear();  
-  area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));  
-  return true;
 }
 
 CheckBox::CheckBox() : Button(ui::ImpFactory::instance().CreateCheckBoxImp()) {
@@ -1754,22 +1971,80 @@ bool CheckBox::checked() const {
   return imp() ? imp()->dev_checked() : false;
 }
 
-void CheckBox::Check() {
-  if (imp()) {
-    imp()->DevCheck();
-  }
-}
-
-void CheckBox::UnCheck() {
-  if (imp()) {
-    imp()->DevUnCheck();
-  }
-}
-
 void CheckBox::set_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_background_color(color);
   }
+}
+
+RadioButton::RadioButton() : Button(ui::ImpFactory::instance().CreateRadioButtonImp()) {
+	set_auto_size(false, false);
+}
+
+RadioButton::RadioButton(const std::string& text) : Button(ui::ImpFactory::instance().CreateRadioButtonImp()) {
+	set_auto_size(false, false);
+	imp()->dev_set_text(text);
+}
+
+RadioButton::RadioButton(RadioButtonImp* imp) : Button(imp) {
+	set_auto_size(false, false);
+}
+
+bool RadioButton::checked() const {
+	return imp() ? imp()->dev_checked() : false;
+}
+
+void RadioButton::Check() {
+	if (imp()) {
+		imp()->DevCheck();
+	}
+}
+
+void RadioButton::UnCheck() {
+	if (imp()) {
+		imp()->DevUnCheck();
+	}
+}
+
+void RadioButton::set_background_color(ARGB color) {
+	if (imp()) {
+		imp()->dev_set_background_color(color);
+	}
+}
+
+GroupBox::GroupBox() : Button(ui::ImpFactory::instance().CreateGroupBoxImp()) {
+	set_auto_size(false, false);
+}
+
+GroupBox::GroupBox(const std::string& text) : Button(ui::ImpFactory::instance().CreateGroupBoxImp()) {
+	set_auto_size(false, false);
+	imp()->dev_set_text(text);
+}
+
+GroupBox::GroupBox(GroupBoxImp* imp) : Button(imp) {
+	set_auto_size(false, false);
+}
+
+bool GroupBox::checked() const {
+	return imp() ? imp()->dev_checked() : false;
+}
+
+void GroupBox::Check() {
+	if (imp()) {
+		imp()->DevCheck();
+	}
+}
+
+void GroupBox::UnCheck() {
+	if (imp()) {
+		imp()->DevUnCheck();
+	}
+}
+
+void GroupBox::set_background_color(ARGB color) {
+	if (imp()) {
+		imp()->dev_set_background_color(color);
+	}
 }
 
 std::string Scintilla::dummy_str_ = "";
@@ -1869,6 +2144,7 @@ void Scintilla::set_find_regexp(bool on) {
 
 void Scintilla::LoadFile(const std::string& filename) {
   if (imp()) {
+		imp()->DevClearAll();
     imp()->DevLoadFile(filename);
   }
 }
@@ -2013,6 +2289,13 @@ void Scintilla::set_caret_line_background_color(ARGB color) {
   }
 }
 
+void Scintilla::ClearAll()
+{
+	if (imp()) {
+    imp()->DevClearAll();
+  }
+}
+
 const std::string& Scintilla::filename() const {
   return imp() ? imp()->dev_filename() : dummy_str_;
 }
@@ -2154,15 +2437,11 @@ ui::PopupMenu* Systems::CreatePopupMenu() {
 
 // WindowImp
 
-void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {
-  if (window_) {    
-    window_->DrawBackground(g, draw_region);
-    try {
-      window_->Draw(g, draw_region);    
-    } catch(std::exception&) {
-
-    }
-  }
+void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {  
+  try {
+	window_->Draw(g, draw_region);    
+  } catch(std::exception&) {
+  }  
 }
 
 void WindowImp::OnDevSize(const ui::Dimension& dimension) {
@@ -2207,6 +2486,11 @@ ui::WindowImp* ImpFactory::CreateWindowImp() {
 bool ImpFactory::DestroyWindowImp(ui::WindowImp* imp) {
   assert(concrete_factory_.get());
   return concrete_factory_->DestroyWindowImp(imp); 
+}
+
+ui::AlertImp* ImpFactory::CreateAlertImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateAlertImp(); 
 }
 
 ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
@@ -2279,6 +2563,16 @@ ui::CheckBoxImp* ImpFactory::CreateCheckBoxImp() {
   return concrete_factory_->CreateCheckBoxImp(); 
 }
 
+ui::RadioButtonImp* ImpFactory::CreateRadioButtonImp() {
+	assert(concrete_factory_.get());
+	return concrete_factory_->CreateRadioButtonImp();
+}
+
+ui::GroupBoxImp* ImpFactory::CreateGroupBoxImp() {
+	assert(concrete_factory_.get());
+	return concrete_factory_->CreateGroupBoxImp();
+}
+
 ui::RegionImp* ImpFactory::CreateRegionImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateRegionImp(); 
@@ -2315,6 +2609,20 @@ ui::GameControllersImp* ImpFactory::CreateGameControllersImp() {
   return concrete_factory_->CreateGameControllersImp(); 
 }
 
+
+void StyleSheet::parse(ui::Window & window) {	
+	for (StyleClassContainer::iterator it = style_classes_.begin(); it != style_classes_.end(); ++it) {
+		StyleClass::Ptr style_class = *it;
+		if (style_class->name() == window.style_class_name()) {
+			window.UpdateStyle(*(style_class.get()));
+		}
+	}
+}
+
+Alert::Alert(const std::string& text) 
+	  : imp_(ui::ImpFactory::instance().CreateAlertImp()) {
+	imp_->DevAlert(text);
+}
 
 } // namespace ui
 } // namespace host

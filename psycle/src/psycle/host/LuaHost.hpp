@@ -16,10 +16,8 @@ namespace host {
 
 namespace ui { 
   class Commands; 
-  namespace canvas {
-    class Canvas;
-    class TerminalFrame;
-  }
+  class Canvas;
+  class TerminalFrame;
   class MenuContainer;
 }
     
@@ -55,9 +53,9 @@ class LuaControl : public LockIF {
 };
 
 class LuaProxy : public LuaControl {
-public:
-	LuaProxy(LuaPlugin* plug, const std::string& dllname);
-	~LuaProxy();
+ public:
+  LuaProxy(LuaPlugin* plug, const std::string& dllname);
+  ~LuaProxy();
 
   // Host accessors
   LuaPlugin& host() { return *host_; }
@@ -67,11 +65,11 @@ public:
   const PluginInfo& info() const;
 	
   // Script Control	
-	void Init();
+  void Init();
   void Reload();
   void PrepareState();
 
-  boost::weak_ptr<ui::canvas::Canvas> canvas() { 
+  boost::weak_ptr<ui::Canvas> canvas() { 
     return lua_mac_->canvas();
   }
 
@@ -131,12 +129,12 @@ private:
   std::string ParLabel(int par);
     
   mutable bool info_update_;
-	mutable PluginInfo info_;
-	LuaPlugin *host_;
-	LuaMachine* lua_mac_;	
+  mutable PluginInfo info_;
+  LuaPlugin *host_;
+  LuaMachine* lua_mac_;	
   mutable CRITICAL_SECTION cs;  
   boost::weak_ptr<ui::MenuContainer> menu_bar_;
-  static boost::shared_ptr<ui::canvas::TerminalFrame> terminal_frame_;
+  static boost::shared_ptr<ui::TerminalFrame> terminal_frame_;
 };
 
 // Container for LuaUiExtensions

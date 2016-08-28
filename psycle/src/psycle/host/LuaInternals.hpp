@@ -8,12 +8,44 @@
 #include "XMSampler.hpp"
 #include <psycle/helpers/resampler.hpp>
 #include "LuaHelper.hpp"
+#include "InputHandler.hpp"
 
 
-namespace psycle {namespace host{namespace ui{namespace canvas{class Canvas;}}}}
+namespace psycle { 
+namespace host {
+namespace ui { 
+	class Canvas; 
+}
+}
+}
 
 namespace psycle { namespace host {
   class ConfigStorage;
+
+  class LuaMachine;
+
+class LuaCmdDefBind {
+ public:
+  static int open(lua_State* L);
+  static int keytocmd(lua_State* L);  
+};
+
+class LuaActionListener : public ActionListener,  public LuaState {
+ public:
+  LuaActionListener(lua_State* L) : ActionListener(), LuaState(L), mac_(0) {}
+  virtual void OnNotify(ActionType action);
+  void setmac(LuaMachine* mac) { mac_ = mac; }
+ private:  
+  LuaMachine* mac_;
+};
+
+
+struct LuaActionListenerBind {
+  static const char* meta;
+  static int open(lua_State *L);
+  static int create(lua_State *L);
+  static int gc(lua_State* L);
+};
   
   class LuaConfig {
     public:
@@ -102,8 +134,8 @@ namespace psycle { namespace host {
     int numchannels() const { return sampleV_.size(); }
     MachineUiType::Value ui_type() const { return ui_type_; }
     void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
-    void set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas);
-    boost::weak_ptr<ui::canvas::Canvas> canvas() { return canvas_; }
+    void set_canvas(boost::weak_ptr<ui::Canvas> canvas);
+    boost::weak_ptr<ui::Canvas> canvas() { return canvas_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
     void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
@@ -120,7 +152,7 @@ namespace psycle { namespace host {
     MachineUiType::Value ui_type_;    
     MachinePresetType::Value prsmode_;
     LuaProxy* proxy_; 
-    boost::weak_ptr<ui::canvas::Canvas> canvas_;
+    boost::weak_ptr<ui::Canvas> canvas_;
   };
 
   struct LuaMachineBind {

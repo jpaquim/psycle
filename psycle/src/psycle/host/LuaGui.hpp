@@ -5,35 +5,10 @@
 // #include <psycle/host/detail/project.hpp>
 #include "Canvas.hpp"
 #include "CanvasItems.hpp"
-#include "InputHandler.hpp"
 #include "LuaHelper.hpp"
 
 namespace psycle {
 namespace host {
-
-class LuaMachine;
-
-class LuaCmdDefBind {
- public:
-  static int open(lua_State* L);
-  static int keytocmd(lua_State* L);  
-};
-
-class LuaActionListener : public ActionListener,  public LuaState {
- public:
-  LuaActionListener(lua_State* L) : ActionListener(), LuaState(L), mac_(0) {}
-  virtual void OnNotify(ActionType action);
-  void setmac(LuaMachine* mac) { mac_ = mac; }
- private:  
-  LuaMachine* mac_;
-};
-
-struct LuaActionListenerBind {
-  static const char* meta;
-  static int open(lua_State *L);
-  static int create(lua_State *L);
-  static int gc(lua_State* L);
-};
 
 struct LuaFileOpenBind {
   static const char* meta;
@@ -96,54 +71,54 @@ class CanvasItem : public T, public LuaState {
    CanvasItem(lua_State* L) : LuaState(L), T() {}
    CanvasItem(lua_State* L, ui::WindowImp* imp) : LuaState(L), T(0) {}
 
-   virtual void OnMouseDown(ui::canvas::MouseEvent& ev) {
+   virtual void OnMouseDown(ui::MouseEvent& ev) {
      if (!SendMouseEvent(L, "onmousedown", ev, *this)) {
        T::OnMouseDown(ev);
      }
    }
-   virtual void OnDblclick(ui::canvas::MouseEvent& ev) {
+   virtual void OnDblclick(ui::MouseEvent& ev) {
      if (!SendMouseEvent(L, "ondblclick", ev, *this)) {
        T::OnDblclick(ev);
      }
    }   
-   virtual void OnMouseUp(ui::canvas::MouseEvent& ev) {
+   virtual void OnMouseUp(ui::MouseEvent& ev) {
      if (!SendMouseEvent(L, "onmouseup", ev, *this)) {
        T::OnMouseUp(ev);
      }
    }
-   virtual void OnMouseMove(ui::canvas::MouseEvent& ev) {
+   virtual void OnMouseMove(ui::MouseEvent& ev) {
      if (!SendMouseEvent(L, "onmousemove", ev, *this)) {
        T::OnMouseMove(ev);
      }
    }
-   virtual void OnMouseEnter(ui::canvas::MouseEvent& ev) {
+   virtual void OnMouseEnter(ui::MouseEvent& ev) {
      if (!SendMouseEvent(L, "onmouseenter", ev, *this)) {
        T::OnMouseEnter(ev);
      }
    }
-   virtual void OnMouseOut(ui::canvas::MouseEvent& ev) {
+   virtual void OnMouseOut(ui::MouseEvent& ev) {
      if (!SendMouseEvent(L, "onmouseout", ev, *this)) {
        T::OnMouseOut(ev);
      }
    }
-   virtual void OnKeyDown(ui::canvas::KeyEvent& ev) {
+   virtual void OnKeyDown(ui::KeyEvent& ev) {
      if (!SendKeyEvent(L, "onkeydown", ev, *this)) {
        T::OnKeyDown(ev);
      }
    }
-   virtual void OnKeyUp(ui::canvas::KeyEvent& ev) {
+   virtual void OnKeyUp(ui::KeyEvent& ev) {
      if (!SendKeyEvent(L, "onkeyup", ev, *this)) {
        T::OnKeyUp(ev);
      }
    }
-   virtual void OnFocus(ui::canvas::Event& ev) {
+   virtual void OnFocus(ui::Event& ev) {
      if (!SendEvent(L, "onfocus", ev, *this)) {
        T::OnFocus(ev);
      }
    }
    virtual void OnKillFocus();
-   virtual void OnSize(const ui::Dimension &dimension);
-   virtual bool OnUpdateArea();
+   virtual void OnSize(const ui::Dimension &dimension);   
+	 virtual ui::Dimension OnCalcAutoDimension() const;
  
    static bool SendEvent(lua_State* L,
                          const::std::string method,
@@ -183,11 +158,18 @@ class LuaItem : public CanvasItem<ui::Window> {
 };
 
 typedef CanvasItem<ui::Group> LuaGroup;
-typedef CanvasItem<ui::canvas::Canvas> LuaCanvas;
-typedef CanvasItem<ui::canvas::Rect> LuaRect;
-typedef CanvasItem<ui::canvas::Line> LuaLine;
-typedef CanvasItem<ui::canvas::Text> LuaText;
-typedef CanvasItem<ui::canvas::Pic> LuaPic;
+typedef CanvasItem<ui::HeaderGroup> LuaHeaderGroup;
+typedef CanvasItem<ui::Canvas> LuaCanvas;
+typedef CanvasItem<ui::RectangleBox> LuaRectangleBox;
+typedef CanvasItem<ui::Line> LuaLine;
+typedef CanvasItem<ui::Text> LuaText;
+
+class LuaPic : public CanvasItem<ui::Pic> {
+ public:  
+  LuaPic(lua_State* L) : CanvasItem<ui::Pic>(L) {}  
+  
+  virtual void Draw(ui::Graphics* g, ui::Region& draw_rgn);
+};
 
 class LuaScrollBox : public CanvasItem<ui::ScrollBox> {
  public:  
@@ -202,14 +184,28 @@ class LuaButton : public CanvasItem<ui::Button> {
   virtual void OnClick();
 };
 
+class LuaRadioButton : public CanvasItem<ui::RadioButton> {
+public:
+	LuaRadioButton(lua_State* L) : CanvasItem<ui::RadioButton>(L) {}
+
+	virtual void OnClick();
+};
+
+class LuaGroupBox : public CanvasItem<ui::GroupBox> {
+public:
+	LuaGroupBox(lua_State* L) : CanvasItem<ui::GroupBox>(L) {}
+
+	virtual void OnClick();
+};
+
 class LuaEdit : public CanvasItem<ui::Edit> {
  public:  
   LuaEdit(lua_State* L) : CanvasItem<ui::Edit>(L) {}  
 };
 
-class LuaComboBox : public CanvasItem<ui::canvas::ComboBox> {
+class LuaComboBox : public CanvasItem<ui::ComboBox> {
  public:  
-  LuaComboBox(lua_State* L) : CanvasItem<ui::canvas::ComboBox>(L) {}
+  LuaComboBox(lua_State* L) : CanvasItem<ui::ComboBox>(L) {}
 
   virtual void OnSelect();
 };
@@ -240,10 +236,10 @@ struct LuaEventBind {
   static const char* meta;
   static int create(lua_State *L);
   static int gc(lua_State* L);
-  static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::PreventDefault); }
-  static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_default_prevented); }
-  static int stoppropagation(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::StopPropagation); }
-  static int ispropagationstopped(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_propagation_stopped); }
+  static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::Event::PreventDefault); }
+  static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::Event::is_default_prevented); }
+  static int stoppropagation(lua_State* L) { LUAEXPORTM(L, meta, &ui::Event::StopPropagation); }
+  static int ispropagationstopped(lua_State* L) { LUAEXPORTM(L, meta, &ui::Event::is_propagation_stopped); }
 };
 
 struct LuaKeyEventBind {
@@ -251,13 +247,27 @@ struct LuaKeyEventBind {
   static const char* meta;
   static int create(lua_State *L);
   static int gc(lua_State* L);
-  static int keycode(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::keycode); }  
-  static int shiftkey(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::shiftkey); }
-  static int ctrlkey(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::ctrlkey); }
-  static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::KeyEvent::PreventDefault); }
-  static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_default_prevented); }
-  static int stoppropagation(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::StopPropagation); }
-  static int ispropagationstopped(lua_State* L) { LUAEXPORTM(L, meta, &ui::canvas::Event::is_propagation_stopped); }
+  static int keycode(lua_State* L) { LUAEXPORTM(L, meta, &ui::KeyEvent::keycode); }  
+  static int shiftkey(lua_State* L) { LUAEXPORTM(L, meta, &ui::KeyEvent::shiftkey); }
+  static int ctrlkey(lua_State* L) { LUAEXPORTM(L, meta, &ui::KeyEvent::ctrlkey); }
+  static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::KeyEvent::PreventDefault); }
+  static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::Event::is_default_prevented); }
+  static int stoppropagation(lua_State* L) { LUAEXPORTM(L, meta, &ui::Event::StopPropagation); }
+  static int ispropagationstopped(lua_State* L) { LUAEXPORTM(L, meta, &ui::Event::is_propagation_stopped); }
+};
+
+struct LuaMouseEventBind {
+	static int open(lua_State *L);
+	static const char* meta;
+	static int create(lua_State *L);
+	static int gc(lua_State* L);	
+	static int clientx(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::cx); }
+	static int clienty(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::cy); }	
+	static int button(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::button); }
+	static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::PreventDefault); }
+	static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::is_default_prevented); }
+	static int stoppropagation(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::StopPropagation); }
+	static int ispropagationstopped(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::is_propagation_stopped); }
 };
 
 struct LuaImageBind {
@@ -265,9 +275,53 @@ struct LuaImageBind {
   static const char* meta;
   static int create(lua_State *L);
   static int gc(lua_State* L);
+  static int graphics(lua_State* L);
   static int size(lua_State* L);
+  static int resize(lua_State* L);  
+  static int rotate(lua_State* L);
+  static int reset(lua_State *L);
   static int load(lua_State *L) { LUAEXPORTM(L, meta, &ui::Image::Load); }
+  static int save(lua_State *L);
+  static int cut(lua_State *L);
   static int settransparent(lua_State* L);
+  static int setpixel(lua_State *L);
+  static int getpixel(lua_State *L);
+};
+
+class LuaColorHelper {
+ public:
+  static int open(lua_State *L) {
+  static const luaL_Reg funcs[] = {
+    {"encodeargb", encodeargb},
+    {"decodeargb", decodeargb},			
+    { NULL, NULL }
+  };
+  luaL_newlib(L, funcs);
+  return 1;
+  }
+
+  static int encodeargb(lua_State* L) {
+		int red = static_cast<int>(luaL_checkinteger(L, 1));
+	  int green = static_cast<int>(luaL_checkinteger(L, 2));
+	  int blue = static_cast<int>(luaL_checkinteger(L, 3));
+	  int alpha = static_cast<int>(luaL_checkinteger(L, 4));
+	  int argb = (blue << 0) | (green << 8) | (red << 16) | (alpha << 24);
+	  lua_pushinteger(L, argb);
+	  return 1;
+  }
+
+  static int decodeargb(lua_State* L) {
+	  int argb = static_cast<int>(luaL_checkinteger(L, 1));
+	  int alpha = (argb >> 24) & 0xff;
+	  int red = (argb >> 16) & 0xff;
+	  int green = (argb >> 8) & 0xff;
+	  int blue = argb & 0xff;
+	  lua_pushinteger(L, red);
+	  lua_pushinteger(L, green);
+	  lua_pushinteger(L, blue);
+	  lua_pushinteger(L, alpha);
+	  return 4;
+  }
 };
 
 class LuaImagesBind {
@@ -278,7 +332,7 @@ class LuaImagesBind {
       {"new", create},                  
       {"add", add},      
       {"size", size},
-      {"at", at},      
+      {"at", at},      	  
       {NULL, NULL}
     };
     LuaHelper::open(L, meta, methods,  gc);
@@ -332,7 +386,7 @@ struct LuaRegionBind {
   static const char* meta;
   static int create(lua_State *L);
   static int setrect(lua_State *L) { 
-    ui::Region* rgn= *(ui::Region **)luaL_checkudata(L, 1, meta);
+	ui::Region::Ptr rgn = LuaHelper::check_sptr<ui::Region>(L, 1, meta);    
     ui::Rect rect(ui::Point(luaL_checknumber(L, 2),
                             luaL_checknumber(L, 3)),
                   ui::Dimension(luaL_checknumber(L, 4),
@@ -342,8 +396,8 @@ struct LuaRegionBind {
     return LuaHelper::chaining(L);
   }
    
-  static int boundrect(lua_State *L) {
-    ui::Region* rgn= *(ui::Region **)luaL_checkudata(L, 1, meta);
+  static int bounds(lua_State *L) {
+	ui::Region::Ptr rgn = LuaHelper::check_sptr<ui::Region>(L, 1, meta);
     ui::Rect bounds = rgn->bounds();
     lua_pushnumber(L, bounds.left());
     lua_pushnumber(L, bounds.top());
@@ -359,10 +413,9 @@ struct LuaRegionBind {
 struct LuaAreaBind {
   static int open(lua_State *L);
   static const char* meta;
-  static int create(lua_State *L);
-  //static int setrect(lua_State *L) { LUAEXPORTML(L, meta, &ui::Area:: ::SetRect); }
+  static int create(lua_State *L);  
   static int boundrect(lua_State *L) {
-    ui::Area* rgn= *(ui::Area **)luaL_checkudata(L, 1, meta);
+		boost::shared_ptr<ui::Area> rgn = LuaHelper::check_sptr<ui::Area>(L, 1, meta);
     ui::Rect bounds = rgn->bounds();
     lua_pushnumber(L, bounds.left());
     lua_pushnumber(L, bounds.top());
@@ -371,7 +424,13 @@ struct LuaAreaBind {
     return 4;
   }
   static int combine(lua_State *L) { LUAEXPORTML(L, meta, &ui::Area::Combine); }
-  static int offset(lua_State *L) LUAEXPORTML(L, meta, &ui::Area::Offset);
+	static int offset(lua_State *L) { LUAEXPORTML(L, meta, &ui::Area::Offset); }
+	static int clear(lua_State* L) { LUAEXPORTML(L, meta, &ui::Area::Clear); }
+	static int setrect(lua_State* L) {
+		boost::shared_ptr<ui::Area> rgn = LuaHelper::check_sptr<ui::Area>(L, 1, meta);
+		rgn->Combine(ui::Area(ui::Rect(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)), ui::Point(luaL_checknumber(L, 4), luaL_checknumber(L, 5)))), RGN_OR);
+		return LuaHelper::chaining(L);
+	}
   static int gc(lua_State* L);
 };
 
@@ -481,14 +540,22 @@ class LuaPopupFrameWnd : public CanvasItem<ui::PopupFrame> {
    virtual void OnShow();
 };
 
+class LuaSplitter : public ui::Splitter, public LuaState {
+ public:  
+  LuaSplitter(lua_State* L) : LuaState(L) {}
+  LuaSplitter(lua_State* L, const ui::Orientation& orientation) 
+    : ui::Splitter(orientation), 
+      LuaState(L) {
+  }  
+};
+
 class LuaScrollBar : public ui::ScrollBar, public LuaState {
  public:  
   LuaScrollBar(lua_State* state) : LuaState(state) {}
   LuaScrollBar(lua_State* state, const ui::Orientation& orientation) 
     : ui::ScrollBar(orientation), 
       LuaState(state) {
-  }
-  
+  }  
   virtual void OnScroll(int pos);   
 };
 
@@ -582,7 +649,7 @@ class LuaItemBind {
     static const luaL_Reg methods[] = {
       {"new", create},
       {"setpos", setpos},
-      {"scrollto", scrollto},
+//      {"scrollto", scrollto},
      // {"setsize", setsize},     
       {"pos", pos},
       {"clientpos", clientpos},
@@ -590,6 +657,7 @@ class LuaItemBind {
     //  {"setwidth", setwidth},
     //  {"setheight", setheight},
       {"setautosize", setautosize},
+			{"autosize", autosize},
       {"setdebugtext", setdebugtext},      
       {"setfocus", setfocus},
       // {"setzoom", setzoom},
@@ -613,8 +681,9 @@ class LuaItemBind {
       {"setclip", setclip},
       {"clip", clip},
       {"tostring", tostring},   
-      {"setornament", setornament},
-      {"ornament", ornament},
+      {"addornament", addornament},
+			{"removeornaments", removeornaments},
+      {"ornaments", ornaments},
       {"setcursor", setcursor},
       {"setclipchildren", setclipchildren},
       {"addstyle", addstyle},
@@ -622,7 +691,7 @@ class LuaItemBind {
       {"setalign", setalign},
       {"setmargin", setmargin},
       {"margin", margin},
-      {"setpadding", setmargin},
+      {"setpadding", setpadding},
       {"padding", padding},
       {"align", align},
       {"mousecapture", setcapture},
@@ -630,6 +699,11 @@ class LuaItemBind {
       {"setaligner", setaligner},
       {"enable", enable},
       {"disable", disable},
+			{"showcursor", showcursor},
+      {"hidecursor", hidecursor},
+      {"setcursorpos", setcursorpos},			
+	    {"viewdoublebuffered", viewdoublebuffered},
+	    {"viewsinglebuffered", viewsinglebuffered},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -648,14 +722,24 @@ class LuaItemBind {
   static int padding(lua_State* L);
   static int enable(lua_State *L) { LUAEXPORT(L, &T::Enable); }
   static int disable(lua_State *L) { LUAEXPORT(L, &T::Disable); }
-
+	static int showcursor(lua_State* L) { LUAEXPORT(L, &T::ShowCursor); }
+  static int hidecursor(lua_State* L) { LUAEXPORT(L, &T::HideCursor); }
+  static int setcursorpos(lua_State* L) { LUAEXPORT(L, &T::SetCursorPos); }
+  static int viewdoublebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewDoubleBuffered); }
+  static int viewsinglebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewSingleBuffered); }
   static int addstyle(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     UINT style = (unsigned int) luaL_checknumber(L, 2);    
     item->add_style(style);
     return LuaHelper::chaining(L);
   }
-
+	static int autosize(lua_State *L) {
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);		
+		lua_pushboolean(L, item->auto_size_width());
+		lua_pushboolean(L, item->auto_size_height());    
+		return 2;
+  }
+	
   static int removestyle(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     UINT style = (unsigned int) luaL_checknumber(L, 2);    
@@ -680,7 +764,7 @@ class LuaItemBind {
     return LuaHelper::chaining(L);
   }
 
-  static int scrollto(lua_State *L) { LUAEXPORT(L, &T::ScrollTo); }  
+//  static int scrollto(lua_State *L) { LUAEXPORT(L, &T::ScrollTo); }  
 //  static int setblitpos(lua_State *L) { LUAEXPORT(L, &T::SetBlitXY) }
   /*static int setsize(lua_State* L) { 
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
@@ -795,26 +879,30 @@ class LuaItemBind {
     LUAEXPORT(L, &T::visible);
   }
 
-  static int setornament(lua_State* L) {
+  static int addornament(lua_State* L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     boost::shared_ptr<ui::Ornament> ornament;
     if (!lua_isnil(L, 2)) {      
-      ornament = LuaHelper::test_sptr<ui::canvas::LineBorder>(L, 2, LineBorderBind::meta);
+      ornament = LuaHelper::test_sptr<ui::LineBorder>(L, 2, LineBorderBind::meta);
       if (!ornament) {
-        ornament = LuaHelper::test_sptr<ui::canvas::Wallpaper>(L, 2, WallpaperBind::meta);
+        ornament = LuaHelper::test_sptr<ui::Wallpaper>(L, 2, WallpaperBind::meta);
         if (!ornament) {
-          ornament = LuaHelper::test_sptr<ui::canvas::Fill>(L, 2, FillBind::meta);
+          ornament = LuaHelper::test_sptr<ui::Fill>(L, 2, FillBind::meta);
         }
       }            
     }    
     lua_setfield(L, -2, "_ornament");
-    item->set_ornament(ornament);
+    item->add_ornament(ornament);
     return LuaHelper::chaining(L);
   }
 
-  static int ornament(lua_State* L) {
+	static int removeornaments(lua_State* L) {
+    LUAEXPORT(L, &T::RemoveOrnaments);
+  }
+
+  static int ornaments(lua_State* L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    if (item->ornament().expired()) {
+    if (item->ornaments().empty()) {
       lua_pushnil(L);
     } else {
       /*luaL_requiref(L, "psycle.ui.canvas.ornament", LuaOrnamentBind::open, true);
@@ -830,7 +918,7 @@ class LuaItemBind {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     int row_num = static_cast<int>(luaL_checkinteger(L, 2));
     int col_num = static_cast<int>(luaL_checkinteger(L, 3));
-    boost::shared_ptr<ui::canvas::GridAligner> aligner(new ui::canvas::GridAligner(row_num, col_num));
+    boost::shared_ptr<ui::GridAligner> aligner(new ui::GridAligner(row_num, col_num));
     item->set_aligner(aligner);
     return LuaHelper::chaining(L);
   }
@@ -883,6 +971,23 @@ class LuaGroupBind : public LuaItemBind<T> {
   static ui::Window::Ptr test(lua_State* L, int index); 
 };
 
+template <class T = LuaHeaderGroup>
+class LuaHeaderGroupBind : public LuaGroupBind<T> {
+ public:
+  typedef LuaGroupBind<T> B;  
+  static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
+  static int setmethods(lua_State* L) {
+    B::setmethods(L);
+    static const luaL_Reg methods[] = {   
+      {"settitle", settitle},            
+      {NULL, NULL}
+    };
+    luaL_setfuncs(L, methods, 0);
+    return 0;
+  }  
+  static int settitle(lua_State* L) { LUAEXPORT(L, &T::set_title); }  
+};
+
 template <class T = LuaScrollBox>
 class LuaScrollBoxBind : public LuaItemBind<T> {
  public:
@@ -892,13 +997,20 @@ class LuaScrollBoxBind : public LuaItemBind<T> {
     B::setmethods(L);
     static const luaL_Reg methods[] = {      
       {"scrollby", scrollby},
+			{"scrollto", scrollto},
+			{"updatescrollrange", updatescrollrange},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
-  }
-  static int create(lua_State *L);
+  }  
   static int scrollby(lua_State* L) { LUAEXPORT(L, &T::ScrollBy); }
+	static int scrollto(lua_State* L) { 
+		boost::shared_ptr<T> box = LuaHelper::check_sptr<T>(L, 1, meta);
+		box->ScrollTo(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+		return LuaHelper::chaining(L);
+	}
+	static int updatescrollrange(lua_State* L) { LUAEXPORT(L, &T::UpdateScrollRange); }
 };
 
 template <class T = LuaCanvas>
@@ -909,10 +1021,7 @@ class LuaCanvasBind : public LuaGroupBind<T> {
   static int setmethods(lua_State* L) {
     B::setmethods(L);
     static const luaL_Reg methods[] = {  
-      {"new", create},
-      {"showcursor", showcursor},
-      {"hidecursor", hidecursor},
-      {"setcursorpos", setcursorpos},
+      {"new", create},      
       {"showscrollbar", showscrollbar},
       {"setscrollinfo", setscrollinfo},
       {"invalidateontimer", invalidateontimer},
@@ -922,18 +1031,15 @@ class LuaCanvasBind : public LuaGroupBind<T> {
     luaL_setfuncs(L, methods, 0);
     return 0;
   }      
-  static int create(lua_State* L);
-  static int showcursor(lua_State* L) { LUAEXPORT(L, &T::ShowCursor); }
-  static int hidecursor(lua_State* L) { LUAEXPORT(L, &T::HideCursor); }
-  static int setcursorpos(lua_State* L) { LUAEXPORT(L, &T::SetCursorPos); }
+  static int create(lua_State* L);  
   static int showscrollbar(lua_State* L);
   static int setscrollinfo(lua_State* L);
   static int invalidateontimer(lua_State* L);
   static int invalidatedirect(lua_State* L);
 };
 
-template<class T = LuaRect>
-class LuaRectBind : public LuaItemBind<T> {
+template<class T = LuaRectangleBox>
+class LuaRectangleBoxBind : public LuaItemBind<T> {
  public:
   typedef LuaItemBind<T> B;
   static int open(lua_State *L) { 
@@ -1067,12 +1173,12 @@ class LuaTextBind : public LuaItemBind<T> {
   }  
   static int setverticalalignment(lua_State* L) {    
     LuaHelper::check_sptr<LuaText>(L, 1, meta)
-      ->set_vertical_alignment(static_cast<ui::canvas::AlignStyle>(luaL_checkinteger(L, 2)));
+      ->set_vertical_alignment(static_cast<ui::AlignStyle>(luaL_checkinteger(L, 2)));
     return LuaHelper::chaining(L);
   }
   static int setjustify(lua_State* L) {    
     LuaHelper::check_sptr<LuaText>(L, 1, meta)
-      ->set_justify(static_cast<ui::canvas::JustifyStyle>(luaL_checkinteger(L, 2)));
+      ->set_justify(static_cast<ui::JustifyStyle>(luaL_checkinteger(L, 2)));
     return LuaHelper::chaining(L);
   }
 };
@@ -1087,19 +1193,33 @@ class LuaPicBind : public LuaItemBind<T> {
     static const luaL_Reg methods[] = {
       {"setsource", setsource},
       {"setimage", setimage},
+	  {"setzoom", setzoom},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
   }
-  static int setsource(lua_State* L) { LUAEXPORT(L, &T::SetSource); }
+  static int setsource(lua_State* L) {
+		int err = LuaHelper::check_argnum(L, 3, "self, x, y");
+    if (err!=0) return err;
+    boost::shared_ptr<T> pic = LuaHelper::check_sptr<T>(L, 1, meta);
+		pic->SetSource(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+    return LuaHelper::chaining(L);		
+	}
+	static int setzoom(lua_State* L) {
+		int err = LuaHelper::check_argnum(L, 3, "self, x, y");
+    if (err!=0) return err;
+    boost::shared_ptr<T> pic = LuaHelper::check_sptr<T>(L, 1, meta);
+		pic->set_zoom(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+    return LuaHelper::chaining(L);		
+	}
   static int setimage(lua_State* L) {
     int err = LuaHelper::check_argnum(L, 2, "self, image");
     if (err!=0) return err;
     boost::shared_ptr<T> pic = LuaHelper::check_sptr<T>(L, 1, meta);
     pic->SetImage(LuaHelper::check_sptr<ui::Image>(L, 2, LuaImageBind::meta).get());
     return LuaHelper::chaining(L);
-  }  
+  } 
 };
 
 template <class T = LuaButton>
@@ -1119,6 +1239,101 @@ class LuaButtonBind : public LuaItemBind<T> {
   }  
   static int settext(lua_State *L) { LUAEXPORT(L, &T::set_text); }
   static int text(lua_State *L) { LUAEXPORT(L, &T::text); }
+};
+
+
+template <class T = LuaSplitter>
+class LuaSplitterBind : public LuaItemBind<T> {
+ public:
+  typedef LuaItemBind<T> B;
+  static int open(lua_State *L) {
+	LuaHelper::openex(L, meta, setmethods, gc);
+	LuaHelper::setfield(L, "HORZ", ui::HORZ);
+	LuaHelper::setfield(L, "VERT", ui::VERT);
+	return 1;
+  }
+  static int create(lua_State *L) {
+	int n = lua_gettop(L);  // Number of arguments  
+    boost::shared_ptr<LuaGroup> group;
+	ui::Orientation orientation = ui::VERT;
+    if (n>=2 && !lua_isnil(L, 2)) {
+      group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+      if (!group) {
+        group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+		if (!group) {
+          group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaHeaderGroupBind<>::meta);
+		  if (!group) {
+			group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaScrollBoxBind<>::meta);
+		  }
+        }
+      }    
+	  if (n==3) {
+		orientation = (ui::Orientation) luaL_checkinteger(L, 3);
+	  }
+    }
+    boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L, orientation));    
+    LuaHelper::register_weakuserdata(L, item.get());
+    if (group) {    
+      group->Add(item);
+      LuaHelper::register_userdata(L, item.get());
+    }  
+    LuaHelper::new_lua_module(L, "psycle.signal");  
+    lua_setfield(L, -2, "keydown");
+    return 1;
+  }
+  static int setmethods(lua_State* L) {
+    B::setmethods(L);
+    static const luaL_Reg methods[] = {
+	   {"new", create},   
+       {NULL, NULL}
+    };
+    luaL_setfuncs(L, methods, 0);
+    return 0;
+  } 
+};
+
+template <class T = LuaGroupBox>
+class LuaGroupBoxBind : public LuaItemBind<T> {
+public:
+	typedef LuaItemBind<T> B;
+	static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
+	static int setmethods(lua_State* L) {
+		B::setmethods(L);
+		static const luaL_Reg methods[] = {
+			{ "settext", settext },
+			{ "text", text },
+			{ NULL, NULL }
+		};
+		luaL_setfuncs(L, methods, 0);
+		return 0;
+	}
+	static int settext(lua_State *L) { LUAEXPORT(L, &T::set_text); }
+	static int text(lua_State *L) { LUAEXPORT(L, &T::text); }
+};
+
+template <class T = LuaRadioButton>
+class LuaRadioButtonBind : public LuaItemBind<T> {
+public:
+	typedef LuaItemBind<T> B;
+	static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
+	static int setmethods(lua_State* L) {
+		B::setmethods(L);
+		static const luaL_Reg methods[] = {
+			{"settext", settext},
+			{"text", text},
+			{"check", check},
+			{"uncheck", uncheck},
+			{"checked", checked},
+			{NULL, NULL}
+		};
+		luaL_setfuncs(L, methods, 0);
+		return 0;
+	}
+	static int settext(lua_State *L) { LUAEXPORT(L, &T::set_text); }
+	static int text(lua_State *L) { LUAEXPORT(L, &T::text); }
+	static int check(lua_State *L) { LUAEXPORT(L, &T::Check); }
+	static int uncheck(lua_State *L) { LUAEXPORT(L, &T::UnCheck); }
+	static int checked(lua_State *L) { LUAEXPORT(L, &T::checked); }
 };
 
 template <class T = LuaComboBox>
@@ -1257,18 +1472,16 @@ class LuaTreeViewBind : public LuaItemBind<T> {
   static int isediting(lua_State* L) { LUAEXPORT(L, &T::is_editing) }
   static int updatetree(lua_State* L) { LUAEXPORT(L, &T::UpdateTree); }
   static int selectnode(lua_State* L) { 
-    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    using namespace ui::canvas;
-    boost::shared_ptr<Node> node = 
-      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);    
+    boost::shared_ptr<ui::Node> node = 
+      boost::dynamic_pointer_cast<ui::Node>(LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta));
     tree_view->select_node(node);
     return LuaHelper::chaining(L);
   }
   static int editnode(lua_State* L) { 
-    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    using namespace ui::canvas;
-    boost::shared_ptr<Node> node = 
-      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);    
+    boost::shared_ptr<ui::Node> node = 
+      boost::dynamic_pointer_cast<ui::Node>(LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta));
     tree_view->EditNode(node);
     return LuaHelper::chaining(L);
   }
@@ -1283,10 +1496,9 @@ class LuaTreeViewBind : public LuaItemBind<T> {
     return 1;
   }
   static int setrootnode(lua_State* L) {
-    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    using namespace ui::canvas;
-    boost::shared_ptr<Node> node = 
-      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    boost::shared_ptr<T> tree_view = LuaHelper::check_sptr<T>(L, 1, meta);    
+    boost::shared_ptr<ui::Node> node = 
+      boost::dynamic_pointer_cast<ui::Node>(LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta));
     tree_view->set_root_node(node);
     tree_view->UpdateTree();
     return LuaHelper::chaining(L);
@@ -1370,8 +1582,7 @@ class LuaListViewBind : public LuaItemBind<T> {
   static int viewicon(lua_State* L) { LUAEXPORT(L, &T::ViewIcon); }
   static int viewsmallicon(lua_State* L) { LUAEXPORT(L, &T::ViewSmallIcon); }
   static int selectednodes(lua_State* L) { 
-    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    using namespace ui::canvas;
+    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);    
     lua_newtable(L);
     std::vector<ui::Node::Ptr> nodes = list_view->selected_nodes();
     std::vector<ui::Node::Ptr>::iterator it = nodes.begin();
@@ -1382,18 +1593,16 @@ class LuaListViewBind : public LuaItemBind<T> {
     return 1;
   }
   static int selectnode(lua_State* L) { 
-    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    using namespace ui::canvas;
-    boost::shared_ptr<Node> node = 
-      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);    
+    boost::shared_ptr<ui::Node> node = 
+      boost::dynamic_pointer_cast<ui::Node>(LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta));
     list_view->select_node(node);
     return LuaHelper::chaining(L);
   }
   static int editnode(lua_State* L) { 
-    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    using namespace ui::canvas;
-    boost::shared_ptr<Node> node = 
-      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);    
+    boost::shared_ptr<ui::Node> node = 
+      boost::dynamic_pointer_cast<ui::Node>(LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta));
     list_view->EditNode(node);
     return LuaHelper::chaining(L);
   }
@@ -1408,10 +1617,9 @@ class LuaListViewBind : public LuaItemBind<T> {
     return 1;
   }
   static int setrootnode(lua_State* L) {
-    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
-    using namespace ui::canvas;
-    boost::shared_ptr<Node> node = 
-      boost::dynamic_pointer_cast<Node>(LuaHelper::check_sptr<ui::canvas::Node>(L, 2, LuaNodeBind::meta));
+    boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);    
+    boost::shared_ptr<ui::Node> node = 
+      boost::dynamic_pointer_cast<ui::Node>(LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta));
     list_view->set_root_node(node);
     list_view->UpdateList();
     return LuaHelper::chaining(L);
@@ -1424,14 +1632,12 @@ class LuaListViewBind : public LuaItemBind<T> {
   static int gc(lua_State* L) {    
     return LuaHelper::delete_shared_userdata<T>(L, meta);
   }
-
   static int setimages(lua_State* L) {    
     boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);
     ui::Images::Ptr images = LuaHelper::check_sptr<ui::Images>(L, 2, LuaImagesBind::meta);
     list_view->set_images(images);
     return LuaHelper::chaining(L);
   }
-
   static int enablerowselect(lua_State* L) { LUAEXPORT(L, &T::EnableRowSelect); }
   static int disablerowselect(lua_State* L) { LUAEXPORT(L, &T::DisableRowSelect); }
   
@@ -1498,7 +1704,6 @@ class LuaNodeBind {
   static int setimageindex(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::set_image_index); }
   static int setselectedimageindex(lua_State* L) { LUAEXPORTM(L, meta, &ui::Node::set_selected_image_index); }
   static int add(lua_State* L) {
-    using namespace ui::canvas;
     boost::shared_ptr<ui::Node> treenode = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    
     boost::shared_ptr<ui::Node> treenode2 = LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta);
     treenode->AddNode(treenode2);
@@ -1510,7 +1715,6 @@ class LuaNodeBind {
   }
 
   static int insertafter(lua_State* L) {
-    using namespace ui::canvas;
     boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, meta);    
     boost::shared_ptr<ui::Node> node1 = LuaHelper::check_sptr<ui::Node>(L, 2, LuaNodeBind::meta);
     boost::shared_ptr<ui::Node> node2 = LuaHelper::check_sptr<ui::Node>(L, 3, LuaNodeBind::meta);
@@ -1608,7 +1812,7 @@ class LuaFrameItemBind : public LuaItemBind<T> {
       {"new", create},      
       {"settitle", settitle},
       {"title", title},
-      {"setview", setview},
+      {"setviewport", setviewport},
       {"view", view},
       {"showdecoration", showdecoration},
       {"hidedecoration", hidedecoration},
@@ -1619,21 +1823,25 @@ class LuaFrameItemBind : public LuaItemBind<T> {
     return 0;
   }
  
-  static int create(lua_State* L);  
+	static int create(lua_State* L) {		
+		boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+		LuaHelper::register_weakuserdata(L, item.get());
+		return 1;
+	}
   static int gc(lua_State* L) {
     LuaHelper::delete_shared_userdata<LuaFrameWnd>(L, meta);    
     return 0;
   }
-  static int setview(lua_State* L) {
+  static int setviewport(lua_State* L) {
     LuaFrameWnd::Ptr frame = LuaHelper::check_sptr<LuaFrameWnd>(L, 1, meta);    
-/*    ui::canvas::Canvas::WeakPtr old_canvas = wnd->canvas();
+/*    ui::Canvas::WeakPtr old_canvas = wnd->canvas();
     if (!old_canvas.expired()) {
       LuaHelper::unregister_userdata(L, old_canvas.lock().get());
     }*/
     LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
     if (canvas) {
       LuaHelper::register_userdata(L, canvas.get());
-      frame->set_view(canvas);      
+      frame->set_viewport(canvas);      
     }    
     return LuaHelper::chaining(L);
   }
@@ -1641,7 +1849,11 @@ class LuaFrameItemBind : public LuaItemBind<T> {
   static int title(lua_State* L)  { LUAEXPORT(L, &T::title); }
   static int showdecoration(lua_State* L)  { LUAEXPORT(L, &T::ShowDecoration); }
   static int hidedecoration(lua_State* L)  { LUAEXPORT(L, &T::HideDecoration); }  
-  static int view(lua_State* L);
+	static int view(lua_State* L) {		
+		boost::shared_ptr<T> frame = LuaHelper::check_sptr<T>(L, 1, meta);
+		LuaHelper::find_weakuserdata<>(L, frame->viewport().get());
+		return 1;		
+	}
   static int setpopupmenu(lua_State* L) {    
     boost::shared_ptr<T> frame = LuaHelper::check_sptr<T>(L, 1, meta);
     ui::PopupMenu::Ptr popup_menu = LuaHelper::check_sptr<ui::PopupMenu>(L, 2, LuaPopupMenuBind::meta);
@@ -1752,6 +1964,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
        {"filename", filename},
        {"hasfile", hasfile},
        {"addtext", addtext},       
+			 {"clearall", clearall},
        {"findtext", findtext},
        {"addmarker", addmarker},
        {"deletemarker", deletemarker},
@@ -1899,6 +2112,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
   static int column(lua_State *L) { LUAEXPORT(L, &T::column); }
   static int ovrtype(lua_State *L) { LUAEXPORT(L, &T::ovr_type); }
   static int modified(lua_State *L) { LUAEXPORT(L, &T::modified); }
+	static int clearall(lua_State *L) { LUAEXPORT(L, &T::ClearAll); }
 };
 
 template <class T = LuaEdit>
@@ -1942,7 +2156,31 @@ class LuaScrollBarBind : public LuaItemBind<T> {
     LuaHelper::buildenum(L, e, 2);
     return 0;
   }
-  static int create(lua_State *L);
+	static int create(lua_State *L) {		
+		int n = lua_gettop(L);  // Number of arguments  
+		boost::shared_ptr<LuaGroup> group;
+		if (n >= 2 && !lua_isnil(L, 2)) {
+			group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+			if (!group) {
+				group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaHeaderGroupBind<>::meta);
+				if (!group) {
+					group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
+				}
+			}
+		}
+		ui::Orientation orientation = ui::VERT;
+		if (n == 3) {
+			orientation = static_cast<ui::Orientation>(luaL_checkinteger(L, 3));
+		}
+		boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L, orientation));
+		if (group) {
+			group->Add(item);
+			LuaHelper::register_userdata(L, item.get());
+		}
+		LuaHelper::new_lua_module(L, "psycle.signal");
+		lua_setfield(L, -2, "keydown");
+		return 1;		
+	}
   static int setscrollpos(lua_State* L) { LUAEXPORT(L, &T::set_scroll_pos); }
   static int scrollpos(lua_State* L) { LUAEXPORT(L, &T::scroll_pos); }
   static int setscrollrange(lua_State* L) { LUAEXPORT(L, &T::set_scroll_range); }
@@ -1950,11 +2188,13 @@ class LuaScrollBarBind : public LuaItemBind<T> {
   static int systemsize(lua_State* L) { LUAEXPORT(L, &T::system_size); }   
 };
 
-template class LuaRectBind<LuaRect>;
+template class LuaRectangleBoxBind<LuaRectangleBox>;
 template class LuaLineBind<LuaLine>;
 template class LuaTextBind<LuaText>;
 template class LuaPicBind<LuaPic>;
 template class LuaButtonBind<LuaButton>;
+template class LuaRadioButtonBind<LuaRadioButton>;
+template class LuaGroupBoxBind<LuaGroupBox>;
 template class LuaEditBind<LuaEdit>;
 template class LuaScrollBarBind<LuaScrollBar>;
 template class LuaScintillaBind<LuaScintilla>;
@@ -1964,6 +2204,7 @@ template class LuaListViewBind<LuaListView>;
 template class LuaFrameItemBind<LuaFrameWnd>;
 template class LuaFrameItemBind<LuaPopupFrameWnd>;
 template class LuaScrollBoxBind<LuaScrollBox>;
+template class LuaSplitterBind<LuaSplitter>;
 
 
 static int lua_ui_requires(lua_State* L) {
@@ -1972,9 +2213,11 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaDimensionBind>(L, "psycle.ui.dimension");
   LuaHelper::require<LuaUiRectBind>(L, "psycle.ui.rect");
   LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
+	LuaHelper::require<LuaAreaBind>(L, "psycle.ui.area");
   LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
   LuaHelper::require<LuaImagesBind>(L, "psycle.ui.images");
   LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.graphics");
+  LuaHelper::require<LuaColorHelper>(L, "psycle.ui.colorhelper");
   LuaHelper::require<LuaGameControllersBind>(L, "psycle.ui.gamecontrollers");
   LuaHelper::require<LuaGameControllerBind>(L, "psycle.ui.gamecontroller");
   // filedialog
@@ -1990,16 +2233,20 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaPopupFrameItemBind >(L, "psycle.ui.canvas.popupframe");
   LuaHelper::require<LuaCenterToScreenBind>(L, "psycle.ui.canvas.centertoscreen");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
+  LuaHelper::require<LuaHeaderGroupBind<> >(L, "psycle.ui.canvas.headergroup");
   LuaHelper::require<LuaScrollBoxBind<> >(L, "psycle.ui.canvas.scrollbox");
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
   LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
   LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
-  LuaHelper::require<LuaRectBind<> >(L, "psycle.ui.canvas.rect");
+  LuaHelper::require<LuaRectangleBoxBind<> >(L, "psycle.ui.canvas.rect");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
+  LuaHelper::require<LuaSplitterBind<> >(L, "psycle.ui.canvas.splitter");
   LuaHelper::require<LuaTreeViewBind<> >(L, "psycle.ui.canvas.treeview");
   LuaHelper::require<LuaListViewBind<> >(L, "psycle.ui.canvas.listview");
   LuaHelper::require<LuaNodeBind>(L, "psycle.node");  
   LuaHelper::require<LuaButtonBind<> >(L, "psycle.ui.canvas.button");
+  LuaHelper::require<LuaRadioButtonBind<> >(L, "psycle.ui.canvas.radiobutton");
+  LuaHelper::require<LuaGroupBoxBind<> >(L, "psycle.ui.canvas.groupbox");
   LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.canvas.combobox");
   LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.canvas.edit");
   LuaHelper::require<LuaLexerBind>(L, "psycle.ui.canvas.lexer");
@@ -2007,6 +2254,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.canvas.scrollbar");
   LuaHelper::require<LuaEventBind>(L, "psycle.ui.canvas.event");
   LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.canvas.keyevent");
+  LuaHelper::require<LuaMouseEventBind>(L, "psycle.ui.canvas.mouseevent");
   LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.canvas.ornamentfactory");
   LuaHelper::require<LineBorderBind>(L, "psycle.ui.canvas.lineborder");
   LuaHelper::require<WallpaperBind>(L, "psycle.ui.canvas.wallpaper");

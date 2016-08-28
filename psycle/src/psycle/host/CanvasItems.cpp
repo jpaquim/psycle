@@ -10,79 +10,13 @@
 namespace psycle {
 namespace host  {
 namespace ui {
-namespace canvas {
-
   
-void Rect::Draw(Graphics* g, Region& draw_region) {
+void RectangleBox::Draw(Graphics* g, Region& draw_region) {
  //if (GetAlpha(fill_color_) != 0xFF) {
     g->SetColor(fill_color_);
     g->FillRect(ui::Rect(ui::Point(), dim()));  
  //}
 }
-/*    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);
-  CPen pen;
-  pen.CreatePen(PS_SOLID, 1, ToCOLORREF(strokecolor_));
-  CBrush brush(ToCOLORREF(fillcolor_));
-  CBrush* pOldBrush = devc->SelectObject(&brush);
-  CPen* pOldPen = devc->SelectObject(&pen);
-  double alpha = 1; // (GetAlpha(fillcolor_)) / 255.0;
-  if (alpha == 1) {
-    if (bx_!=0 || by_!=0) {
-      CPoint pt(bx_*z, by_*z);
-      devc->RoundRect(rect, pt);
-    } else {
-      devc->Rectangle(rect);
-    }
-  } else {
-    this->paintRect(*devc, rect, ToCOLORREF(strokecolor_),
-      ToCOLORREF(fillcolor_), (alpha*127));
-  }
-  devc->SelectObject(pOldPen);
-  devc->SelectObject(pOldBrush);*/
-// }
-
-/*bool Rect::paintRect(CDC &hdc, RECT dim, COLORREF penCol, COLORREF brushCol, unsigned int opacity) {
-  XFORM rXform;
-  hdc.GetWorldTransform(&rXform);
-  XFORM rXform_new = rXform;
-  rXform_new.eDx = zoomabsx();
-  rXform_new.eDy = zoomabsy();
-  hdc.SetGraphicsMode(GM_ADVANCED);
-  hdc.SetWorldTransform(&rXform_new);
-  dim.right -= dim.left;
-  dim.bottom -= dim.top;
-  dim.left = dim.top = 0;
-  HDC tempHdc         = CreateCompatibleDC(hdc);
-  BLENDFUNCTION blend = {AC_SRC_OVER, 0, opacity, 0};
-  HBITMAP hbitmap;       // bitmap handle
-  BITMAPINFO bmi;        // bitmap header
-  // zero the memory for the bitmap info
-  ZeroMemory(&bmi, sizeof(BITMAPINFO));
-  // setup bitmap info
-  // set the bitmap width and height to 60% of the width and height of each of the three horizontal areas. Later on, the blending will occur in the center of each of the three areas.
-  bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-  bmi.bmiHeader.biWidth = dim.right-dim.left;
-  bmi.bmiHeader.biHeight = dim.bottom-dim.top;
-  bmi.bmiHeader.biPlanes = 1;
-  bmi.bmiHeader.biBitCount = 32;         // four 8-bit components
-  bmi.bmiHeader.biCompression = BI_RGB;
-  bmi.bmiHeader.biSizeImage = (dim.right-dim.left) * (dim.bottom-dim.top) * 4;
-  // create our DIB section and select the bitmap into the dc
-  hbitmap = CreateDIBSection(tempHdc, &bmi, DIB_RGB_COLORS, NULL, NULL, 0x0);
-  SelectObject(tempHdc, hbitmap);
-  SetDCPenColor(tempHdc, penCol);
-  SetDCBrushColor(tempHdc, brushCol);
-  HBRUSH br = CreateSolidBrush(brushCol);
-  FillRect(tempHdc, &dim, br);
-  AlphaBlend(hdc, dim.left, dim.top, dim.right, dim.bottom, tempHdc, dim.left, dim.top, dim.right, dim.bottom, blend);
-  DeleteObject(hbitmap);
-  DeleteObject(br);
-  DeleteObject(tempHdc);
-  hdc.SetGraphicsMode(GM_ADVANCED);
-  hdc.SetWorldTransform(&rXform);
-  return 0;
-}*/
-
 
 void Line::Draw(Graphics* g, Region& draw_region) {  
   g->SetColor(color());
@@ -125,7 +59,7 @@ Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
   return Window::Ptr();
 }
 
-bool Line::OnUpdateArea() {  
+/*bool Line::OnUpdateArea(const ui::Dimension& preferred_dimension) {
   double dist = 5;  
   double zoom = 1.0; // parent() ? parent()->zoom() : 1.0;
   ui::Rect bounds = area().bounds();
@@ -135,37 +69,17 @@ bool Line::OnUpdateArea() {
                                 ui::Point((bounds.left() + bounds.width()+2*dist+1)*zoom, 
                                           (bounds.top() + bounds.height()+2*dist+1)*zoom))));
   return true;
-}
+}*/
 
-bool Text::OnUpdateArea() {
-  area_->Clear();
-  if (!imp()) {
-    return false;
-  }
-  if (!auto_size_width() && !auto_size_height()) {    
-    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), imp()->dev_pos().dimension())));
-  } if (auto_size_width() && auto_size_height()) {
-    Graphics g;
-    g.SetFont(font_);
-    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), g.text_size(text_))));
-  } else {
-    Graphics g;
-    g.SetFont(font_);
-    double width = auto_size_width() ? g.text_size(text_).width() : imp()->dev_pos().dimension().width();
-    double height = auto_size_height() ? g.text_size(text_).height() : imp()->dev_pos().dimension().height();
-    area_->Add(RectShape(ui::Rect(area_->bounds().top_left(), Dimension(width, height))));
-  }
-  return true;  
+ui::Dimension Text::OnCalcAutoDimension() const {
+	Graphics g;
+	g.SetFont(font_);
+	return g.text_size(text_);
 }
 
 void Text::set_text(const std::string& text) {  
   text_ = text;
-  if (imp()) {
-    needsupdate();
-    imp()->dev_set_pos(pos());
-    WorkChildPos();
-  }
-  FLSEX();          
+	UpdateAutoDimension();
 }
 
 void Text::set_font(const Font& font) {  
@@ -178,7 +92,7 @@ void Text::set_font(const Font& font) {
   FLSEX();
 }
 
-void Text::Draw(Graphics* g, Region& draw_region) {   
+void Text::Draw(Graphics* g, Region& draw_region) {	
   g->SetFont(font_);
   g->SetColor(color_);  
   g->DrawString(text_, ComputeAlignment(g));
@@ -240,20 +154,147 @@ inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp) {
 }
 
 void Pic::Draw(Graphics* g, Region& draw_region) {
-  g->DrawImage(image_, 0, 0, width_, height_, xsrc_, ysrc_);    
+	if (image_) {
+		if (zoom_factor_ == ui::Point(1.0, 1.0)) {
+			g->DrawImage(image_, ui::Rect(ui::Point::zero(), view_dimension_), src_);
+		} else {
+		  g->DrawImage(image_, ui::Rect(ui::Point::zero(), view_dimension_), src_, zoom_factor_);
+		}
+	}
 }
 
 void Pic::SetImage(Image* image) {  
   image_ = image;
-  width_ = image_->dim().width();
-  height_ = image_->dim().height();
+  view_dimension_ = image_ ? image_->dim() : ui::Dimension::zero();
   FLSEX();
 }
 
-bool Pic::OnUpdateArea() {
-  area_->Clear();
-  area_->Add(RectShape(ui::Rect(ui::Point(), ui::Point(width_, height_))));  
-  return true;
+ui::Dimension Pic::OnCalcAutoDimension() const {
+	return view_dimension_;
+}
+
+Splitter::Splitter() :  
+	Window(), 
+	fill_color_(0x404040),
+	do_split_(false),
+	drag_pos_(-1),
+	item_client_pos_(0),
+	item_(0) {
+  set_auto_size(false, false);
+  set_orientation(HORZ);
+  set_align(ui::ALBOTTOM);
+  set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+}
+
+Splitter::Splitter(Orientation orientation) :
+     Window(), 
+	 fill_color_(0x404040),
+	 do_split_(false),
+	 drag_pos_(-1),
+	 item_client_pos_(0),
+	 item_(0) {
+  set_auto_size(false, false);
+  set_orientation(orientation);
+  if (orientation == ui::HORZ) {
+	set_align(ui::ALBOTTOM);
+	set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+  } else {
+	set_align(ui::ALLEFT);
+	set_pos(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
+  }
+}
+
+
+void Splitter::Draw(Graphics* g, Region& draw_region) {
+ //if (GetAlpha(fill_color_) != 0xFF) {
+    g->SetColor(fill_color_);
+    g->FillRect(ui::Rect(ui::Point(), dim()));  
+ //}
+}
+
+void Splitter::OnMouseDown(MouseEvent& ev) {
+	SetCapture();	  	
+	do_split_ = true;
+	drag_pos_ = -1;
+	ui::Window* last = 0;
+	item_ = 0;
+  iterator it = parent()->begin();
+  for (; it!=parent()->end(); ++it) {
+    if ((*it).get() == this) {
+			item_ = last;
+      break;
+    }
+		last = (*it).get();
+  }
+	if (item_) {
+		ui::Rect client_pos = item_->abs_pos();
+		item_client_pos_ = 0;
+		if (orientation_ == HORZ) {
+			item_client_pos_ = client_pos.bottom();
+		}
+		else {
+			if (align() == ALLEFT) {
+				item_client_pos_ = client_pos.left();
+			}
+			else {
+				item_client_pos_ = client_pos.right();
+			}
+		}
+	} else {
+	  do_split_ = false;
+	}
+}
+
+void Splitter::OnMouseUp(MouseEvent& ev) {
+	do_split_ = false;
+	ReleaseCapture();	
+}
+
+void Splitter::OnMouseMove(MouseEvent& ev) {
+	if (do_split_) {
+		if (orientation_ == HORZ) {
+			if (drag_pos_ != ev.cy()) {
+				drag_pos_ = ev.cy();
+				ui::Rect item_pos = item_->pos();
+				PreventFls();
+				item_pos.set_height(item_client_pos_ - drag_pos_);
+				item_->set_pos(item_pos);
+				EnableFls();
+				dynamic_cast<ui::Group*>(parent())->UpdateAlign();
+			}
+		} else {
+			if (orientation_ == VERT) {
+				if (drag_pos_ != ev.cx()) {
+					drag_pos_ = ev.cx();
+					ui::Rect item_pos = item_->pos();
+					// PreventFls();
+					if (align() == ALLEFT) {
+						item_pos.set_width(drag_pos_ - item_client_pos_);
+						item_->set_pos(item_pos);
+					} else {
+						item_pos.set_width(item_client_pos_ - drag_pos_);
+						item_->set_pos(item_pos);
+					}
+					// EnableFls();
+					dynamic_cast<ui::Group*>(parent())->UpdateAlign();					
+				}
+			}
+		}
+	}
+	else {
+		if (orientation_ == HORZ) {
+			SetCursor(ui::ROW_RESIZE);
+		} else
+		if (orientation_ == VERT) {
+			SetCursor(ui::COL_RESIZE);
+		}
+	}
+}
+
+void Splitter::OnMouseOut(MouseEvent& ev) {
+	if (!do_split_) {
+		SetCursor(ui::DEFAULT);
+	}
 }
 
 TerminalView::TerminalView() : Scintilla(), Timer() {
@@ -282,34 +323,43 @@ void TerminalView::output(const std::string& text) {
 
 void TerminalFrame::Init() {
   set_title("Psycle Terminal");
-  ui::canvas::Canvas::Ptr maincanvas = ui::canvas::Canvas::Ptr(new ui::canvas::Canvas());
-  set_view(maincanvas);
+  ui::Canvas::Ptr maincanvas = ui::Canvas::Ptr(new ui::Canvas());
+  set_viewport(maincanvas);
   maincanvas->SetSave(false);
   terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
   terminal_view_->set_align(ALCLIENT);
   maincanvas->Add(terminal_view_);  
-  maincanvas->set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));
+  maincanvas->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
   set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
 }
 
 HeaderGroup::HeaderGroup() {		
-	header_background_.reset(ui::canvas::OrnamentFactory::Instance().CreateFill(0x6D799C));
-	ui::canvas::LineBorder* border = new ui::canvas::LineBorder(0x444444);
-	border->set_border_radius(ui::canvas::BorderRadius(5, 5, 5, 5));
+	Init();
+}
+
+HeaderGroup::HeaderGroup(const std::string& title) {
+	Init();
+	header_text_->set_text(title);
+}
+
+void HeaderGroup::Init() {
+	header_background_.reset(ui::OrnamentFactory::Instance().CreateFill(0x6D799C));
+	ui::LineBorder* border = new ui::LineBorder(0x444444);
+	border->set_border_radius(ui::BorderRadius(5, 5, 5, 5));
 	border_.reset(border);
-	set_ornament(border_);
-	set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));	
+	add_ornament(border_);
+	set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
 	set_auto_size(false, false);
 	ui::Group::Ptr header(new ui::Group());
 	header->set_align(ui::ALTOP);
 	header->set_auto_size(false, true);
-	header->set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));
-	header->set_ornament(header_background_);
-	header->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
-	Group::Add(header);				
-	header_text_.reset(new ui::canvas::Text());	
+	header->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
+	header->add_ornament(header_background_);
+	header->set_margin(ui::BoxSpace(5));
+	Group::Add(header);
+	header_text_.reset(new ui::Text());
 	header_text_->set_text("Header");
-	header->Add(header_text_);	
+	header->Add(header_text_);
 	ui::FontInfo info;
 	info.name = "Tahoma";
 	info.height = 12;
@@ -319,22 +369,32 @@ HeaderGroup::HeaderGroup() {
 	header_text_->set_color(0xFFFFFF);
 	header_text_->set_align(ui::ALLEFT);
 	header_text_->set_auto_size(true, true);
-	header_text_->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
-	//header_text_->set_pos(ui::Rect(ui::Point(), ui::Dimension(200, 20)));
+	header_text_->set_margin(ui::BoxSpace(0, 5, 0, 0));
 
-	client_.reset(new ui::Group());	
-	Group::Add(client_);	
+	client_.reset(new ui::Group());
+	Group::Add(client_);
 	client_->set_align(ui::ALCLIENT);
 	client_->set_auto_size(false, false);
-	client_->set_aligner(ui::Aligner::Ptr(new canvas::DefaultAligner()));		
-	client_->set_margin(ui::Rect(ui::Point(5, 0), ui::Point(5, 5)));
+	client_->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
+	client_->set_margin(ui::BoxSpace(0, 5, 5, 5));
 }
 
 void HeaderGroup::Add(const ui::Window::Ptr& item) {		
 	client_->Add(item);
 }
 
-} // namespace canvas
+void HeaderGroup::RemoveAll() {		
+	client_->RemoveAll();
+}
+
+void HeaderGroup::UpdateAlign() {		
+	client_->UpdateAlign();
+}
+
+void HeaderGroup::FlsClient() {
+	client_->Invalidate();
+}
+
 } // namespace ui
 } // namespace host
 } // namespace psycle

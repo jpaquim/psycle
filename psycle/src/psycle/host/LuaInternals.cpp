@@ -10,7 +10,6 @@
 #include "WinIniFile.hpp"
 #include "Configuration.hpp"
 #include "PsycleConfig.hpp"
-#include "InputHandler.hpp"
 
 #if !defined WINAMP_PLUGIN
 #include "PlotterDlg.hpp"
@@ -411,9 +410,103 @@ void LuaMachine::reload() {
   }
 }
 
-void LuaMachine::set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) { 
+void LuaMachine::set_canvas(boost::weak_ptr<ui::Canvas> canvas) { 
   canvas_ = canvas;
   proxy_->OnCanvasChanged();
+}
+
+// PsycleCmdDefBind
+int LuaCmdDefBind::open(lua_State* L) {   
+  static const luaL_Reg funcs[] = {
+    {"keytocmd", keytocmd},           
+    {NULL, NULL}
+  };
+  luaL_newlib(L, funcs);
+  static const char* const e[] = {
+		"TRANSPOSECHANNELINC", "TRANSPOSECHANNELDEC", "TRANSPOSECHANNELINC12", 
+    "TRANSPOSECHANNELDEC12", "TRANSPOSEBLOCKINC", "TRANSPOSEBLOCKDEC",
+    "TRANSPOSEBLOCKINC12", "TRANSPOSEBLOCKDEC12", "PATTERNCUT",
+    "PATTERNCOPY", "PATTERNPASTE", "ROWINSERT", "ROWDELETE", "ROWCLEAR",
+    "BLOCKSTART", "BLOCKEND", "BLOCKUNMARK", "BLOCKDOUBLE", "BLOCKHALVE",
+    "BLOCKCUT", "BLOCKCOPY", "BLOCKPASTE", "BLOCKMIX", "BLOCKINTERPOLATE",
+    "BLOCKSETMACHINE", "BLOCKSETINSTR", "SELECTALL", "SELECTCOL",
+    "EDITQUANTIZEDEC", "EDITQUANTIZEINC", "PATTERNMIXPASTE",
+    "PATTERNTRACKMUTE", "KEYSTOPANY", "PATTERNDELETE", "BLOCKDELETE",
+    "PATTERNTRACKSOLO", "PATTERNTRACKRECORD", "SELECTBAR"
+	};
+  {
+    size_t size = sizeof(e)/sizeof(e[0]);    
+    LuaHelper::buildenum(L, e, size, CS_EDT_START);      
+  }
+  {
+    static const char* const e[] = {"NULL", "NOTE", "EDITOR", "IMMEDIATE"};
+    size_t size = sizeof(e)/sizeof(e[0]);
+    LuaHelper::buildenum(L, e, size, 0);
+  }
+  return 1;
+};
+
+int LuaCmdDefBind::keytocmd(lua_State* L) {
+  luaL_checktype(L, 1, LUA_TTABLE);
+  lua_getfield(L, 1, "keycode");
+  char c = luaL_checknumber(L, -1);
+  lua_pop(L, 1);
+  UINT nFlags = 0;
+  CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(c, nFlags);
+  if (cmd.GetID() == -1) {
+    // try again with extended key (bit 8)
+    cmd = PsycleGlobal::inputHandler().KeyToCmd(c, nFlags | 256);
+  }
+  lua_createtable(L, 0, 3);
+  LuaHelper::setfield(L, "note", cmd.GetNote());
+  LuaHelper::setfield(L, "id", cmd.GetID());
+  LuaHelper::setfield(L, "type", cmd.GetType());  
+  return 1;
+}
+  
+// PsycleActions + Lua Bind
+void LuaActionListener::OnNotify(ActionType action) {
+  LuaGlobal::proxy(L)->lock();
+  LuaHelper::find_userdata<>(L, this);
+  lua_getfield(L, -1, "onnotify");
+  lua_pushvalue(L, -2);
+  lua_remove(L, -3);
+  lua_pushnumber(L, action);
+  int status = lua_pcall(L, 2, 0, 0);
+  if (status) {
+    LuaGlobal::proxy(L)->unlock();
+    const char* msg = lua_tostring(L, -1);
+    throw psycle::host::exceptions::library_error::runtime_error(std::string(msg));
+  }
+  LuaGlobal::proxy(L)->unlock();
+}
+
+const char* LuaActionListenerBind::meta = "psyactionlistenermeta";
+
+int LuaActionListenerBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    { NULL, NULL }
+  };
+  LuaHelper::open(L, meta, methods,  gc);
+  static const char* const e[] = {
+    "TPB", "BPM", "TRKNUM", "PLAY", "PLAYSTART", "PLAYSEQ", "STOP", "REC",
+    "SEQSEL", "SEQFOLLOWSONG"
+  };
+  LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]), 1);
+  return 1;
+}
+
+int LuaActionListenerBind::create(lua_State* L) {
+  LuaHelper::createwithstate<LuaActionListener>(L, meta, true);
+  return 1;
+}
+
+int LuaActionListenerBind::gc(lua_State* L) {
+  typedef boost::shared_ptr<LuaActionListener> T;
+  T listener = *(T *)luaL_checkudata(L, 1, meta);
+  PsycleGlobal::actionHandler().RemoveListener(listener.get());
+  return LuaHelper::delete_shared_userdata<LuaActionListener>(L, meta);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -830,7 +923,7 @@ int LuaMachineBind::setcanvas(lua_State* L) {
     LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
     plugin->set_canvas(canvas);
   } else {
-    plugin->set_canvas(boost::weak_ptr<ui::canvas::Canvas>());
+    plugin->set_canvas(boost::weak_ptr<ui::Canvas>());
   }
   return LuaHelper::chaining(L);
 }

@@ -8,9 +8,6 @@
 namespace psycle {
 namespace host {
 namespace ui {
-namespace canvas {
-
-using namespace ui;
 
 struct BlitInfo {
   double dx, dy;  
@@ -21,6 +18,31 @@ class DefaultAligner : public Aligner {
   virtual void CalcDimensions();
   virtual void SetPositions();
   virtual void Realign();    
+ private:
+	 void prepare_pos_set();
+	 bool has_items() const;
+	 bool skip_item(const Window::Ptr& window) const;
+	 void update_item_pos_except_client(const Window::Ptr& window);
+	 void update_client_pos(const Window::Ptr& client);
+	 void calc_non_content_dimension(const Window::Ptr& window);
+	 void calc_window_dim(const Window::Ptr& window);	 
+	 void update_left(const Window::Ptr& window);
+	 void update_top(const Window::Ptr& window);
+	 void update_right(const Window::Ptr& window);
+	 void update_bottom(const Window::Ptr& window);
+	 ui::Rect calc_new_pos_left() const;
+	 ui::Rect calc_new_pos_top() const;
+	 ui::Rect calc_new_pos_right() const;
+	 ui::Rect calc_new_pos_bottom() const;	 
+	 void adjust_current_pos_left();
+	 void adjust_current_pos_top();
+	 void adjust_current_pos_right();
+	 void adjust_current_pos_bottom();
+	 void adjust_current_pos_client(const Window::Ptr& window);
+
+	 ui::Rect current_pos_;
+	 ui::Dimension non_content_dimension_;
+	 ui::Dimension item_dim_;
 };
 
 class GridAligner : public Aligner {
@@ -143,8 +165,9 @@ struct BorderRadius {
 
 class LineBorder : public ui::Ornament {
  public:
-  LineBorder() : color_(0xFFFFFF) {}
-  LineBorder(ARGB color) : color_(color) {}  
+  LineBorder() : color_(0xFFFFFF), border_width_(1) {}
+  LineBorder(ARGB color) : color_(color), border_width_(1) {}  
+	LineBorder(ARGB color, const ui::BoxSpace& border_width) : color_(color), border_width_(border_width) {}  
 
   LineBorder* Clone() {
     LineBorder* border = new LineBorder();
@@ -152,7 +175,7 @@ class LineBorder : public ui::Ornament {
     return border;
   }
    
-  virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {    
+  virtual void Draw(Window& item, Graphics* g, Region& draw_region) {    
     DrawBorder(item, g, draw_region);
   }
   virtual std::auto_ptr<ui::Rect> padding() const {
@@ -164,12 +187,19 @@ class LineBorder : public ui::Ornament {
   const BorderRadius& border_radius() const { return border_radius_; }
   void set_border_style(const BorderStyle& style) { border_style_ = style; }
   const BorderStyle& border_style() const { return border_style_; }
+
+	virtual ui::BoxSpace preferred_space() const { return border_width_; }
   
  private:  
-  void DrawBorder(Window::Ptr& item, Graphics* g, Region& draw_region) {
+  void DrawBorder(Window& item, Graphics* g, Region& draw_region) {
     g->SetColor(color_);  
-    ui::Rect rc = item->area().bounds();
+		ui::Rect rc = item.area().bounds();
+		rc.Increase(ui::BoxSpace(0, 
+			                      item.padding().width() + item.border_space().width(),
+                            item.padding().height() + item.border_space().height(),
+			                      0));
     if (border_radius_.empty()) {
+			g->SetPenWidth(border_width_.top());
       g->DrawRect(rc);
     } else { 
       if (border_style_.top != NONE) {
@@ -217,7 +247,7 @@ class LineBorder : public ui::Ornament {
   }  
   
   ARGB color_;
-  int thickness_;
+	ui::BoxSpace border_width_;
   BorderRadius border_radius_;
   BorderStyle border_style_;
 };
@@ -233,29 +263,28 @@ class Wallpaper : public ui::Ornament {
     return paper;
   }
 
-  virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {
+  virtual void Draw(Window& item, Graphics* g, Region& draw_region) {
     DrawWallpaper(item, g, draw_region);
   }
 
   virtual bool transparent() const { return false; }
 
  private:
-  void DrawWallpaper(Window::Ptr& item, Graphics* g, Region& draw_region) {
+  void DrawWallpaper(Window& item, Graphics* g, Region& draw_region) {
     if (!image_.expired()) {
-      ui::Dimension dim = item->dim();
+      ui::Dimension dim = item.dim();
       ui::Dimension image_dim = image_.lock()->dim();
-      if ((item->dim().width() > image_dim.width()) || 
-         (item->dim().height() > image_dim.height())) {
-        for (double cx = 0; cx < item->dim().width(); cx += image_dim.width()) {
-          for (double cy = 0; cy < item->dim().height(); cy += image_dim.height()) {
-            g->DrawImage(image_.lock().get(), cx, cy, image_dim.width(), image_dim.height());
+      if ((item.dim().width() > image_dim.width()) || 
+         (item.dim().height() > image_dim.height())) {
+        for (double cx = 0; cx < item.dim().width(); cx += image_dim.width()) {
+          for (double cy = 0; cy < item.dim().height(); cy += image_dim.height()) {
+						g->DrawImage(image_.lock().get(), Rect(Point(cx, cy), image_dim));
           }
         }
       }
     }
-  }
-  
-  ui::Image::WeakPtr image_;
+  }  
+  Image::WeakPtr image_;
 };
 
 class Fill : public ui::Ornament {
@@ -273,7 +302,7 @@ class Fill : public ui::Ornament {
   virtual void set_color(ARGB color) { color_ = color; }
   virtual ARGB color() const { return color_; }  
   
-  virtual void Draw(Window::Ptr& item, Graphics* g, Region& draw_region) {
+  virtual void Draw(Window& item, Graphics* g, Region& draw_region) {
     DrawFill(item, g, draw_region);
   }
   
@@ -283,13 +312,14 @@ class Fill : public ui::Ornament {
   virtual bool transparent() const { return false; }
 
  private:
-  void DrawFill(Window::Ptr& item, Graphics* g, Region& draw_region) {
+  void DrawFill(Window& item, Graphics* g, Region& draw_region) {
     if (draw_region.bounds().height() > 0) {    
       int alpha = GetAlpha(color_);
       if (alpha != 0xFF) {
         g->SetColor(color_);
-        g->FillRegion(use_bounds_ ? *item->area().bounds().region().get() 
-                                  : item->area().region());        
+				//draw_region.bounds()
+					g->FillRegion(draw_region); // use_bounds_ ? *item->area().bounds().region().get()
+                                  //: item->area().region());        
       }
     }
   }
@@ -306,6 +336,7 @@ class OrnamentFactory {
 
   LineBorder* CreateLineBorder() { return new LineBorder(); }
   LineBorder* CreateLineBorder(ARGB color) { return new LineBorder(color); }
+	LineBorder* CreateLineBorder(ARGB color, const ui::BoxSpace& border_width) { return new LineBorder(color, border_width); }
   Fill* CreateFill() { return new Fill(); }
   Fill* CreateFill(ARGB color) { return new Fill(color); }
   Fill* CreateBoundFill(ARGB color) { return new Fill(color, true); }
@@ -316,7 +347,6 @@ class OrnamentFactory {
 };
 
 
-} // namespace canvas
 } // namespace ui
 } // namespace host
 } // namespace psycle

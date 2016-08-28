@@ -62,7 +62,7 @@ namespace psycle { namespace host {
 			return TRUE;
 		}				
 
-    void CanvasParamView::set_canvas(boost::weak_ptr<ui::canvas::Canvas> canvas) {
+    void CanvasParamView::set_canvas(boost::weak_ptr<ui::Canvas> canvas) {
       if (!canvas.expired()) {
         ChangeCanvas(canvas.lock());
       }
@@ -97,7 +97,7 @@ namespace psycle { namespace host {
     void CanvasParamView::OnReload(Machine* mac)
     {      
       LuaPlugin* lp = (LuaPlugin*) (mac);
-      ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
+      ui::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired()) {
         ChangeCanvas(canvas.lock());
       } else {
@@ -108,13 +108,13 @@ namespace psycle { namespace host {
 	void CanvasParamView::Close(Machine* mac)
     {
       LuaPlugin* lp = (LuaPlugin*) (mac);
-      ui::canvas::Canvas::WeakPtr canvas = lp->canvas();      
+      ui::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired()) {
         ChangeCanvas(nullpointer);        
       }
     }
 
-    void CanvasParamView::ChangeCanvas(const ui::canvas::Canvas::Ptr& canvas) {      
+    void CanvasParamView::ChangeCanvas(const ui::Canvas::Ptr& canvas) {      
       if (!canvas_.expired()) {
         canvas_.lock()->set_parent(0);        
       }

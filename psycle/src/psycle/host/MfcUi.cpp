@@ -11,7 +11,7 @@ namespace ui {
 namespace mfc {
 
 
-void GraphicsImp::FillRegion(const ui::Region& rgn) {    
+void GraphicsImp::DevFillRegion(const ui::Region& rgn) {    
   check_pen_update();
   check_brush_update();        
   mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
@@ -19,7 +19,7 @@ void GraphicsImp::FillRegion(const ui::Region& rgn) {
   cr_->FillRgn(&imp->crgn(), &brush);
 }
 
-void GraphicsImp::SetClip(ui::Region* rgn) {
+void GraphicsImp::DevSetClip(ui::Region* rgn) {
   if (rgn) {
     mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn->imp());
     assert(imp);
@@ -29,7 +29,9 @@ void GraphicsImp::SetClip(ui::Region* rgn) {
   }  
 }
 
-RegionImp::RegionImp() { rgn_.CreateRectRgn(0, 0, 0, 0); }
+RegionImp::RegionImp() { 
+	rgn_.CreateRectRgn(0, 0, 0, 0); 
+}
   
 RegionImp::RegionImp(const CRgn& rgn) {
   assert(rgn.m_hObject);
@@ -46,7 +48,7 @@ RegionImp* RegionImp::DevClone() const {
 }
   
 void RegionImp::DevOffset(double dx, double dy) {
-  CPoint pt(dx, dy);
+  CPoint pt(static_cast<int>(dx), static_cast<int>(dy));
   rgn_.OffsetRgn(pt);
 }
 
@@ -63,22 +65,39 @@ ui::Rect RegionImp::DevBounds() const {
 }
 
 bool RegionImp::DevIntersect(double x, double y) const {
-  return rgn_.PtInRegion(x, y);  
+  return rgn_.PtInRegion(static_cast<int>(x), static_cast<int>(y)) != 0;
 }
 
-bool RegionImp::DevIntersectRect(const ui::Rect& rect) const {
-  CRect rc(rect.left(), rect.top(), rect.right(), rect.bottom());
-  return rgn_.RectInRegion(rc);  
+bool RegionImp::DevIntersectRect(const ui::Rect& rect) const {  
+  return rgn_.RectInRegion(TypeConverter::rect(rect)) != 0;  
 }
   
 void RegionImp::DevSetRect(const ui::Rect& rect) {
-  rgn_.SetRectRgn(rect.left(), rect.top(), rect.right(), rect.bottom()); 
+  rgn_.SetRectRgn(TypeConverter::rect(rect)); 
 }
 
 void RegionImp::DevClear() {
   DevSetRect(ui::Rect());  
 }
 
+void ImageImp::DevReset(const ui::Dimension& dimension) {
+	Dispose();
+	bmp_ = new CBitmap();
+	CDC dc;
+	dc.CreateCompatibleDC(NULL);
+	bmp_->CreateCompatibleBitmap(&dc, static_cast<int>(dimension.width()), static_cast<int>(dimension.height()));
+	::ReleaseDC(NULL, dc);
+}
+
+ui::Graphics* ImageImp::dev_graphics() {
+	if (!paint_graphics_.get()) {		
+		CDC* memDC = new CDC();
+        memDC->CreateCompatibleDC(NULL);
+		paint_graphics_.reset(new ui::Graphics(memDC));
+		memDC->SelectObject(bmp_);	
+	}
+	return paint_graphics_.get();
+}
   
 std::map<HWND, ui::WindowImp*> WindowHook::windows_;
 HHOOK WindowHook::_hook = 0;
@@ -106,11 +125,12 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
   ON_WM_KILLFOCUS()
 	ON_WM_PAINT()
   ON_WM_ERASEBKGND()
-	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDOWN()	
   ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
   ON_WM_MOUSELEAVE()
 	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSEHOVER()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
   ON_WM_KEYDOWN()
@@ -119,11 +139,11 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
   ON_WM_HSCROLL()
   ON_WM_VSCROLL()
   ON_WM_SIZE()  
-  ON_WM_MOUSEACTIVATE()
+  ON_WM_MOUSEACTIVATE()	
 END_MESSAGE_MAP()
 
 template<class T, class I>
-BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {  
+BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {  		
   if (pMsg->message==WM_KEYDOWN ) {
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
@@ -136,56 +156,64 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     KeyEvent ev(pMsg->wParam, flags);      
     return WorkEvent(ev, &Window::OnKeyUp, window(), pMsg);    
   } else
-  if (pMsg->message == WM_MOUSELEAVE) {
-    mouse_enter_ = true;
-    CPoint pt(pMsg->pt);
-    CRect rc;
-    GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);
-    return WorkEvent(ev, &Window::OnMouseOut, window(), pMsg);    
+  if (pMsg->message == WM_MOUSELEAVE) {	
+		CPoint pt;
+		GetCursorPos(&pt);
+		ScreenToClient(&pt);
+		CWnd* child = ChildWindowFromPoint(pt, CWP_SKIPINVISIBLE);
+		if (!child) {
+      mouse_enter_ = true;      
+      CRect rc;
+      GetWindowRect(&rc);
+      MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(this->dev_abs_pos().top()), 1, pMsg->wParam);
+      return WorkEvent(ev, &Window::OnMouseOut, window(), pMsg);    
+		}
   }  else
   if (pMsg->message == WM_LBUTTONDOWN) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(dev_abs_pos().top()), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
-  } else
+	} else
   if (pMsg->message == WM_LBUTTONDBLCLK) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(dev_abs_pos().top()), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
   if (pMsg->message == WM_LBUTTONUP) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);    
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(dev_abs_pos().top()), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else
   if (pMsg->message == WM_RBUTTONDOWN) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(dev_abs_pos().top()), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
   } else    
   if (pMsg->message == WM_RBUTTONDBLCLK) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(dev_abs_pos().top()), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
   if (pMsg->message == WM_RBUTTONUP) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 2, pMsg->wParam);    
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(dev_abs_pos().top()), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else  
+	if (pMsg->message == WM_MOUSEHOVER) {
+
+	} else
   if (pMsg->message == WM_MOUSEMOVE) {
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(tme);
@@ -196,14 +224,14 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     CPoint pt(pMsg->pt);
     CRect rc;
     GetWindowRect(&rc);    
-    MouseEvent ev(pt.x - rc.left + this->dev_abs_pos().left(), pt.y - rc.top + this->dev_abs_pos().top(), 1, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_pos().left()), pt.y - rc.top + static_cast<int>(dev_abs_pos().top()), 1, pMsg->wParam);
     if (mouse_enter_) {
       mouse_enter_ = false;
       if (window()) {
         try {
           window()->OnMouseEnter(ev);
         } catch (std::exception& e) {
-          ::AfxMessageBox(e.what());      
+          Alert(e.what());      
         }      
       }
     }
@@ -256,45 +284,45 @@ void WindowTemplateImp<T, I>::OnDestroy() {
 }
 
 template<class T, class I>
-void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
-  dev_pos_.set_xy(pos.left(), pos.top());
+void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {	
   SetWindowPos(0, 
-               pos.left(),
-               pos.top(),
-               pos.width(),
-               pos.height(),            
-               SWP_NOREDRAW |
-               SWP_NOZORDER |
-               SWP_NOACTIVATE
-               // SWP_ASYNCWINDOWPOS
-               );
+		           static_cast<int>(pos.left() + margin_.left()),
+		           static_cast<int>(pos.top() + margin_.top()),
+		           static_cast<int>(pos.width() + padding_.width() + border_space_.width()),
+		           static_cast<int>(pos.height() + padding_.height() + border_space_.height()),
+               SWP_NOREDRAW | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::dev_pos() const {
-  CRect rc;
-  GetWindowRect(&rc);
-  return ui::Rect(dev_pos_, ui::Dimension(rc.Width(), rc.Height()));
+	CRect rc;
+	GetWindowRect(&rc);
+	if (GetParent()) {
+	  ::MapWindowPoints(HWND_DESKTOP, GetParent()->m_hWnd, (LPPOINT)&rc, 2);	
+	}
+  return ui::Rect(ui::Point(rc.left - margin_.left(), rc.top - margin_.top()),
+		              ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height()));
 }
 
 template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::dev_abs_pos() const {
   CRect rc;
-  GetClientRect(&rc);
-  CPoint abs_pos(rc.left, rc.top);
-  MapPointToRoot(abs_pos);
-  return ui::Rect(ui::Point(abs_pos.x, abs_pos.y),
-                  ui::Dimension(rc.Width(), rc.Height()));
+	GetWindowRect(&rc);  
+	if (window() && window()->root()) {
+     CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
+		 ::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);		 
+		 return ui::Rect(ui::Point(rc.left - margin_.left(), rc.top - margin_.top()),
+                  ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height()));
+	}
+	return ui::Rect::zero();
 }
 
 template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::dev_desktop_pos() const {
   CRect rc;
-  GetClientRect(&rc);  
-  CPoint pos(rc.left, rc.top);
-  MapPointToDesktop(pos);
-  return ui::Rect(ui::Point(pos.x, pos.y),
-                  ui::Dimension(rc.Width(), rc.Height()));
+  GetWindowRect(&rc);  
+  return ui::Rect(ui::Point(rc.left - margin_.left(), rc.top - margin_.top()),
+                  ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height()));
 }
 
 template<class T, class I>
@@ -306,38 +334,97 @@ void WindowTemplateImp<T, I>::dev_set_parent(Window* parent) {
     SetParent(DummyWindow::dummy());
   }
 }
+/*
+template<class T, class I>
+void WindowTemplateImp<T, I>::OnNcPaint() {
+	if (window() && !window()->ornament().expired()) {		
+		ui::BoxSpace padding = window()->padding();
+		CRect rectWindow;
+		GetWindowRect(rectWindow);
+		ScreenToClient(rectWindow);
+		rectWindow.right = rectWindow.right + static_cast<int>(padding.width());
+		rectWindow.bottom = rectWindow.bottom + static_cast<int>(padding.height());
+		CRgn rgn;
+		rgn.CreateRectRgn(rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom); // 0, 0, 0, 0);		
+		if (padding.left() != 0) {
+			int fordebugonly(0);
+		}
+		if (window()->debug_text() == "txt") {
+			int fordebugonly(0);
+		}
+		ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
+		CDC *pDC = GetWindowDC();
+		ui::Graphics g(pDC);
+		// Just fill everything blue
+		//CBrush br(0x00FF0000);
+		//rectWindow.right = rectWindow.right + padding.left() + padding.right();
+		//rectWindow.bottom = rectWindow.bottom + padding.top() + padding.bottom();
+		// pDC->FillRect(rectWindow, &br);
+		window()->DrawBackground(&g, draw_rgn);
+		g.Dispose();
+		rgn.DeleteObject();
+	}	
+}*/
 
 template<class T, class I>
-void WindowTemplateImp<T, I>::OnPaint() {
+BOOL WindowTemplateImp<T, I>::OnEraseBkgnd(CDC * pDC) {
+	if (window()) {		
+		CRect rect;
+		GetClientRect(rect);		
+		CRgn rgn;
+		rgn.CreateRectRgn(rect.left, rect.top, rect.right, rect.bottom);		
+		ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));		
+		ui::Graphics g(pDC);		
+		window()->DrawBackground(&g, draw_rgn);
+		g.Dispose();
+		rgn.DeleteObject();		
+	}
+	return TRUE;
+}
+
+
+template<class T, class I>
+void WindowTemplateImp<T, I>::OnPaint() {	
   CRgn rgn;
   rgn.CreateRectRgn(0, 0, 0, 0);
 	int result = GetUpdateRgn(&rgn, FALSE);
 
-  if (!result) return; // If no area to update, exit.
-	
-	CPaintDC dc(this);
+  if (!result) {
+		return; // If no area to update, exit
+	}
 
-  /*if (!bmpDC.m_hObject) { // buffer creation	
+  CPaintDC dc(this);
+
+  if (!is_double_buffered_) {    
+	  ui::Graphics g(&dc);
+	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));		
+	  g.Translate(padding_.left() + border_space_.left(), padding_.top() + border_space_.top());
+	  OnDevDraw(&g, draw_rgn);	
+	  g.Dispose();
+  }
+  else {
+	if (!bmpDC.m_hObject) { // buffer creation	
 		CRect rc;
-		GetClientRect(&rc);		
+		GetClientRect(&rc);
 		bmpDC.CreateCompatibleBitmap(&dc, rc.right - rc.left, rc.bottom - rc.top);
 		char buf[128];
-		sprintf(buf,"CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n",(void*)bmpDC);
+		sprintf(buf, "CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n", (void*)bmpDC);
 		TRACE(buf);
-	}
-  CDC bufDC;*/
-	//bufDC.CreateCompatibleDC(&dc);
-	//CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);	
-  ui::Graphics g(&dc);
-  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
-  ui::Rect bounds = draw_rgn.bounds();
-  OnDevDraw(&g, draw_rgn);
-  g.Dispose();
-  //CRect rc;
-  //GetClientRect(&rc);
-	//dc.BitBlt(0, 0, rc.right-rc.left, rc.bottom-rc.top, &bufDC, 0, 0, SRCCOPY);
-	//bufDC.SelectObject(oldbmp);
-	//bufDC.DeleteDC();
+	}	
+	CDC bufDC;
+	bufDC.CreateCompatibleDC(&dc);
+	CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);
+	ui::Graphics g(&bufDC);
+	ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
+	ui::Rect bounds = draw_rgn.bounds();
+	OnDevDraw(&g, draw_rgn);
+	g.Dispose();
+	CRect rc;
+	GetClientRect(&rc);
+	dc.BitBlt(0, 0, rc.right - rc.left, rc.bottom - rc.top, &bufDC, 0, 0, SRCCOPY);
+	bufDC.SelectObject(oldbmp);
+	bufDC.DeleteDC();
+  }
   rgn.DeleteObject();    
 }
 
@@ -356,9 +443,20 @@ bool WindowTemplateImp<T, I>::OnDevUpdateArea(ui::Area& area) {
   CRect pos;
   GetClientRect(&pos);
   area.Clear();
-  area.Add(RectShape(ui::Rect(ui::Point(), ui::Point(pos.Width(), pos.Height()))));
+	ui::BoxSpace padding;
+	if (window()) {
+		padding = window()->padding();
+	}
+  area.Add(RectShape(ui::Rect(ui::Point(-padding.left(), -padding.top()), ui::Point(pos.Width() + padding.left() + padding.right(), pos.Height() + padding.top() + padding.bottom()))));
   return true;
 }
+
+/*SetWindowPos(0,
+	pos.left() + margin.left() - padding.left(),
+	pos.top() + margin.top() - padding.top(),
+	pos.width() + padding.left() + padding.right(),
+	pos.height() + padding.top() + padding.bottom(),*/
+
 
 template<class T, class I>
 ui::Window* WindowTemplateImp<T, I>::dev_focus_window() {
@@ -408,11 +506,30 @@ void WindowImp::DevSetCursor(CursorStyle style) {
   cursor_ = (c!=0) ? LoadCursor(0, c) : ::LoadCursor(0, MAKEINTRESOURCE(ac));
 }
 
+/*
+BOOL WindowImp::OnEraseBkgnd(CDC * pDC) {
+	if (window() && !window()->ornament().expired()) {
+		CRect rc;
+		GetClientRect(&rc);
+		CRgn rgn;
+		rgn.CreateRectRgn(0, 0, rc.Width(), rc.Height());
+		
+		ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
+		ui::Rect r = draw_rgn.bounds();
+		ui::Graphics g(pDC);						
+		window()->DrawBackground(&g, draw_rgn);
+		g.Dispose();
+	}
+	return TRUE;
+}*/
+
 template class WindowTemplateImp<CWnd, ui::WindowImp>;
 template class WindowTemplateImp<CComboBox, ui::ComboBoxImp>;
 template class WindowTemplateImp<CScrollBar, ui::ScrollBarImp>;
 template class WindowTemplateImp<CButton, ui::ButtonImp>;
 template class WindowTemplateImp<CButton, ui::CheckBoxImp>;
+template class WindowTemplateImp<CButton, ui::RadioButtonImp>;
+template class WindowTemplateImp<CButton, ui::GroupBoxImp>;
 template class WindowTemplateImp<CEdit, ui::EditImp>;
 template class WindowTemplateImp<CWnd, ui::ScintillaImp>;
 template class WindowTemplateImp<CTreeCtrl, ui::TreeViewImp>;
@@ -425,9 +542,9 @@ BEGIN_MESSAGE_MAP(WindowImp, CWnd)
   //ON_WM_SETFOCUS()
 	ON_WM_PAINT()
   ON_WM_ERASEBKGND()
-	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDOWN()	
   ON_WM_RBUTTONDOWN()
-	ON_WM_LBUTTONDBLCLK()
+	ON_WM_LBUTTONDBLCLK()	
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
@@ -436,7 +553,7 @@ BEGIN_MESSAGE_MAP(WindowImp, CWnd)
   ON_WM_SETCURSOR()
   ON_WM_HSCROLL()
   ON_WM_VSCROLL()
-  ON_WM_SIZE()  
+  ON_WM_SIZE()  	
 END_MESSAGE_MAP()
 
 
@@ -449,19 +566,23 @@ BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
   ON_WM_KILLFOCUS()
   ON_WM_SETFOCUS()
   ON_WM_NCRBUTTONDOWN()
+	ON_WM_LBUTTONDOWN()	
+	ON_WM_NCHITTEST()
+	ON_COMMAND_RANGE(ID_DYNAMIC_MENUS_START, ID_DYNAMIC_MENUS_END, OnDynamicMenuItems)
 END_MESSAGE_MAP()
 
-BOOL FrameImp::PreTranslateMessage(MSG* pMsg) {
+BOOL FrameImp::PreTranslateMessage(MSG* pMsg) {	
   if (pMsg->message==WM_NCRBUTTONDOWN) {    
     ui::Event ev;
     ui::Point point(pMsg->pt.x, pMsg->pt.y);
     ((Frame*)window())->WorkOnContextPopup(ev, point);    
     return ev.is_propagation_stopped();    
   }
+	((Frame*)window())->PreTranslateMessage(pMsg);
   return WindowTemplateImp<CFrameWnd, ui::FrameImp>::PreTranslateMessage(pMsg);
 }
 
-void FrameImp::DevShowDecoration() {
+void FrameImp::DevShowDecoration() {	
   ModifyStyleEx(0, WS_EX_CLIENTEDGE, SWP_FRAMECHANGED);
   ModifyStyle(0, WS_CAPTION, SWP_FRAMECHANGED); 
   ModifyStyle(0, WS_BORDER, SWP_FRAMECHANGED);
@@ -480,7 +601,15 @@ void FrameImp::DevPreventResize() {
 }
 
 void FrameImp::DevAllowResize() {  
-  ModifyStyle(0, WS_SIZEBOX, SWP_FRAMECHANGED);
+  ModifyStyle(0, WS_SIZEBOX, SWP_FRAMECHANGED);	
+}
+
+void FrameImp::OnDynamicMenuItems(UINT nID) {
+  ui::mfc::MenuContainerImp* mbimp =  ui::mfc::MenuContainerImp::MenuContainerImpById(nID);
+  if (mbimp != 0) {
+    mbimp->WorkMenuItemEvent(nID);
+    return;
+  }
 }
 
 ui::FrameImp* PopupFrameImp::popup_frame_ = 0;
@@ -527,6 +656,24 @@ void CheckBoxImp::OnClick() {
   OnDevClick();
 }
 
+BEGIN_MESSAGE_MAP(RadioButtonImp, CButton)
+	ON_WM_PAINT()
+	ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
+END_MESSAGE_MAP()
+
+void RadioButtonImp::OnClick() {
+	OnDevClick();
+}
+
+BEGIN_MESSAGE_MAP(GroupBoxImp, CButton)
+	ON_WM_PAINT()
+	ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
+END_MESSAGE_MAP()
+
+void GroupBoxImp::OnClick() {
+	OnDevClick();
+}
+
 BEGIN_MESSAGE_MAP(ComboBoxImp, CComboBox)  
 	ON_WM_PAINT()
   ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelect)
@@ -555,7 +702,7 @@ BOOL ComboBoxImp::OnSelect() {
 }
 
 BEGIN_MESSAGE_MAP(EditImp, CEdit)  
-	ON_WM_PAINT()
+	ON_WM_PAINT()	
 END_MESSAGE_MAP()
 
 HTREEITEM TreeNodeImp::DevInsert(TreeViewImp* tree, const ui::Node& node, TreeNodeImp* prev_imp) {  
@@ -565,8 +712,12 @@ HTREEITEM TreeNodeImp::DevInsert(TreeViewImp* tree, const ui::Node& node, TreeNo
   tvInsert.item.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;  
   tvInsert.item.iImage = node.image_index();
   tvInsert.item.iSelectedImage =  node.selected_image_index();   
-  text_ = node.text();
-  tvInsert.item.pszText = const_cast<char *>(text_.c_str());  
+  text_ = Charset::utf8_to_win(node.text());
+#ifdef UNICODE
+	tvInsert.item.pszText = const_cast<WCHAR *>(text_.c_str());
+#else
+  tvInsert.item.pszText = const_cast<char *>(text_.c_str());
+#endif
   return tree->InsertItem(&tvInsert);
 }
 
@@ -654,13 +805,14 @@ boost::weak_ptr<Node> TreeViewImp::dev_selected() {
 void TreeViewImp::OnNodeChanged(Node& node) {
   TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node.imp(*this));  
   if (imp) {      
-    SetItemText(imp->hItem, node.text().c_str());   
+    SetItemText(imp->hItem, Charset::utf8_to_win(node.text()).c_str());   
   }
 }
 
 BOOL TreeViewImp::OnChange(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
+		tree_view()->change(*tree_view(), node->shared_from_this());
     tree_view()->OnChange(node->shared_from_this());
   }
   return FALSE;
@@ -688,9 +840,9 @@ BOOL TreeViewImp::OnDblClick(NMHDR * pNotifyStruct, LRESULT * result) {
 }
 
 ui::Node::Ptr TreeViewImp::dev_node_at(const ui::Point& pos) const {
-  CPoint p(pos.x(), pos.y());
-  ScreenToClient(&p);
-  HTREEITEM item = HitTest(p);  
+	CPoint pt(TypeConverter::point(pos));
+  ScreenToClient(&pt);
+  HTREEITEM item = HitTest(pt);  
   if (item) {
     std::map<HTREEITEM, boost::weak_ptr<ui::Node> >::const_iterator it;
     it = htreeitem_node_map_.find(item);
@@ -709,10 +861,12 @@ BOOL TreeViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
     CEdit* edit = GetEditControl();
-    CString s;    
-    edit->GetWindowTextA(s);
-    is_editing_ = true;
-    tree_view()->OnEditing(node->shared_from_this(), s.GetString());
+		if (edit) {
+		  is_editing_ = true;
+      CString s;    
+      edit->GetWindowText(s);    
+      tree_view()->OnEditing(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
+		}
   }
   return FALSE;
 }
@@ -722,10 +876,13 @@ BOOL TreeViewImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
     CEdit* edit = GetEditControl();
-    CString s;    
-    edit->GetWindowTextA(s);
-    is_editing_ = false;
-    tree_view()->OnEdited(node->shared_from_this(), s.GetString());
+		if (edit) {
+			is_editing_ = false;
+			CString s;    
+			edit->GetWindowText(s);    
+			tree_view()->OnEdited(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
+			tree_view()->edited(*tree_view(), node->shared_from_this(),Charset::win_to_utf8(s.GetString()));
+		}
   }
   return FALSE;
 }
@@ -746,6 +903,57 @@ void TreeViewImp::DevShowButtons() {
 
 void TreeViewImp::DevHideButtons() {
   ModifyStyle(TVS_HASBUTTONS, 0);
+}
+
+HTREEITEM GetNextTreeItem(const CTreeCtrl& treeCtrl, HTREEITEM hItem)
+{
+      // has this item got any children
+      if (treeCtrl.ItemHasChildren(hItem))
+      {
+            return treeCtrl.GetNextItem(hItem, TVGN_CHILD);
+      }
+      else if (treeCtrl.GetNextItem(hItem, TVGN_NEXT) != NULL)
+      {
+            // the next item at this level
+            return treeCtrl.GetNextItem(hItem, TVGN_NEXT);
+      }
+      else
+      {
+            // return the next item after our parent
+            hItem = treeCtrl.GetParentItem(hItem);
+            if (hItem == NULL)
+            {
+                  // no parent
+                  return NULL;
+            }
+            while (hItem && treeCtrl.GetNextItem(hItem, TVGN_NEXT) == NULL)
+            {
+                  hItem = treeCtrl.GetParentItem(hItem);									
+            }
+            // next item that follows our parent
+            return treeCtrl.GetNextItem(hItem, TVGN_NEXT);
+      }
+}
+
+// Functions to expands all items in a tree control
+void ExpandAll(CTreeCtrl& treeCtrl)
+{
+     
+     HTREEITEM hRootItem = treeCtrl.GetRootItem();
+     HTREEITEM hItem = hRootItem;
+
+     while (hItem)
+     {
+          if (treeCtrl.ItemHasChildren(hItem))
+          {
+               treeCtrl.Expand(hItem, TVE_EXPAND);
+          }
+          hItem = GetNextTreeItem(treeCtrl, hItem);
+     }
+}
+
+void TreeViewImp::DevExpandAll() {
+	ExpandAll(*this);  
 }
 
 
@@ -774,8 +982,13 @@ void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& nod
   LVITEM lvi;
   lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
   lvi.cColumns = 0;
-  node_imp->text_ = node.text();
+  node_imp->text_ = Charset::utf8_to_win(node.text());
+//  lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
+#ifdef UNICODE
+	lvi.pszText = const_cast<WCHAR *>(node_imp->text_.c_str());
+#else
   lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
+#endif
   lvi.iImage = node.image_index();
   lvi.iItem = pos;
   lvi.iSubItem = 0;
@@ -784,17 +997,26 @@ void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& nod
 }
 
 void ListNodeImp::set_text(ui::mfc::ListViewImp* list, const std::string& text) {
-  text_ = text;
+  text_ = Charset::utf8_to_win(text);  
+#ifdef UNICODE
+	lvi.pszText = const_cast<WCHAR *>(text_.c_str());
+#else
   lvi.pszText = const_cast<char *>(text_.c_str());
-  list->SetItemText(lvi.iItem, lvi.iSubItem, text.c_str());
+#endif
+	
+  list->SetItemText(lvi.iItem, lvi.iSubItem, Charset::utf8_to_win(text).c_str());
 }
 
 void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level) {
   LVITEM lvi;
   lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
   lvi.cColumns = 0;
-  node_imp->text_ = node.text();
+  node_imp->text_ = Charset::utf8_to_win(node.text());  
+#ifdef UNICODE
+	lvi.pszText = const_cast<WCHAR *>(node_imp->text_.c_str());
+#else
   lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
+#endif
   lvi.iImage = node.image_index(); 
   lvi.iItem = pos();
   lvi.iSubItem = level - 1;
@@ -852,7 +1074,9 @@ void ListViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_
 }
 
 void ListViewImp::DevErase(ui::Node::Ptr node) {
-  node->erase_imp(this);  
+	if (node) {
+		node->erase_imp(this);
+	}
 }
 
 void ListViewImp::DevEditNode(ui::Node::Ptr node) {    
@@ -952,10 +1176,12 @@ BOOL ListViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
     CEdit* edit = GetEditControl();
-    CString s;    
-    edit->GetWindowTextA(s);
-    is_editing_ = true;
-    list_view()->OnEditing(node->shared_from_this(), s.GetString());
+		if (edit) {
+      CString s;    
+      edit->GetWindowText(s);
+      is_editing_ = true;
+      list_view()->OnEditing(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
+		}
   }
   return FALSE;
 }
@@ -965,10 +1191,12 @@ BOOL ListViewImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   Node* node = find_selected_node();
   if (node) {
     CEdit* edit = GetEditControl();
-    CString s;    
-    edit->GetWindowTextA(s);
-    is_editing_ = false;
-    list_view()->OnEdited(node->shared_from_this(), s.GetString());
+		if (edit) {
+		  is_editing_ = false;
+      CString s;    
+      edit->GetWindowText(s);    
+      list_view()->OnEdited(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
+		}
   }
   return FALSE;
 }
@@ -1109,7 +1337,7 @@ void WindowHook::SetFocusHook() {
                                  WindowHook::HookCallback,
                                  AfxGetInstanceHandle(),
                                  GetCurrentThreadId()))) {
-    TRACE(_T("ui::canvas::MFCView : Failed to install hook!\n"));
+    TRACE(_T("ui::MFCView : Failed to install hook!\n"));
   }
 }
 
@@ -1118,7 +1346,7 @@ void WindowHook::ReleaseHook() {
 }
 
 // MenuContainerImp
-std::map<std::uint16_t, MenuContainerImp*> MenuContainerImp::menu_bar_id_map_;
+std::map<int, MenuContainerImp*> MenuContainerImp::menu_bar_id_map_;
 
 MenuContainerImp::MenuContainerImp() : menu_window_(0), cmenu_(0) {  
 }
@@ -1141,13 +1369,13 @@ void MenuContainerImp::DevInvalidate() {
 }
 
 void MenuContainerImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {
-  if (cmenu_) {
+  if (cmenu_) {		
     UpdateNodes(node, cmenu_, cmenu_->GetMenuItemCount());
     DevInvalidate();
   }
 }
 
-void MenuContainerImp::RegisterMenuEvent(std::uint16_t id, MenuImp* menu_imp) {
+void MenuContainerImp::RegisterMenuEvent(int id, MenuImp* menu_imp) {
   menu_item_id_map_[id] = menu_imp;
   menu_bar_id_map_[id] = this;
 }
@@ -1218,6 +1446,7 @@ void MenuContainerImp::WorkMenuItemEvent(int id) {
           if (imp) {
             if (imp->id() == selectedItemID) {
              bar->OnMenuItemClick(node->shared_from_this());
+						 bar->menu_item_click(*bar, node->shared_from_this());
             }
           }
         }
@@ -1230,12 +1459,12 @@ void MenuContainerImp::WorkMenuItemEvent(int id) {
 }
 
 MenuImp* MenuContainerImp::FindMenuItemById(int id) {
-  std::map<std::uint16_t, MenuImp*>::iterator it = menu_item_id_map_.find(id);
+  std::map<int, MenuImp*>::iterator it = menu_item_id_map_.find(id);
   return (it != menu_item_id_map_.end()) ? it->second : 0;
 }
 
 MenuContainerImp* MenuContainerImp::MenuContainerImpById(int id) {
-  std::map<std::uint16_t, MenuContainerImp*>::iterator it = menu_bar_id_map_.find(id);
+  std::map<int, MenuContainerImp*>::iterator it = menu_bar_id_map_.find(id);
   return (it != menu_bar_id_map_.end()) ? it->second : 0;
 }
 
@@ -1248,31 +1477,34 @@ PopupMenuImp::PopupMenuImp() : popup_menu_(new CMenu()) {
 void PopupMenuImp::DevTrack(const ui::Point& pos) {
   popup_menu_->TrackPopupMenu(
     TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_HORPOSANIMATION | TPM_VERPOSANIMATION,
-    pos.x(), pos.y(), ::AfxGetMainWnd());
+    static_cast<int>(pos.x()), static_cast<int>(pos.y()), ::AfxGetMainWnd());
 }
 
 //MenuImp
 void MenuImp::CreateMenu(const std::string& text) {
   cmenu_ = new CMenu();
   cmenu_->CreateMenu();
-  parent_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)cmenu_->m_hMenu, text.c_str());    
+  parent_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)cmenu_->m_hMenu, Charset::utf8_to_win(text).c_str());    
 }
 
 void MenuImp::CreateMenuItem(const std::string& text, ui::Image* image) {
   if (text == "-") {
-    parent_->AppendMenuA(MF_SEPARATOR);  
+    parent_->AppendMenu(MF_SEPARATOR);  
   } else {
     id_ = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
-    parent_->AppendMenu(MF_STRING, id_, text.c_str());
-    if (image) {      
-      parent_->SetMenuItemBitmaps(id_, MF_BYCOMMAND, (CBitmap*) image->source(), (CBitmap*) image->source()); 
+    parent_->AppendMenu(MF_STRING |  MF_ENABLED, id_, Charset::utf8_to_win(text).c_str());
+    if (image) {  
+			assert(image->imp());			
+			ImageImp* imp = dynamic_cast<ImageImp*>(image->imp());
+			assert(imp);
+      parent_->SetMenuItemBitmaps(id_, MF_BYCOMMAND, imp->dev_source(), imp->dev_source()); 
     }
   }
 }
 
 void GameControllersImp::DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) {
   UINT num = joyGetNumDevs();
-  int game_controller_id = 0;
+  UINT game_controller_id = 0;
   for ( ; game_controller_id < num; ++game_controller_id) {
     JOYINFO joyinfo;    
     int err = joyGetPos(game_controller_id, &joyinfo);

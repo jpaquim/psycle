@@ -7,13 +7,13 @@
 
 namespace psycle {
 namespace host {
-		class CChildView;
-		class Machine;
-		class CBaseParamView;
-		class CParamList;    
+	class CChildView;
+	class Machine;
+	class CBaseParamView;
+	class CParamList;    
     class ParamMap;
     namespace ui {
-    class Frame;
+      class Frame;
     }
 
 		class CMyToolBar : public CToolBar {
