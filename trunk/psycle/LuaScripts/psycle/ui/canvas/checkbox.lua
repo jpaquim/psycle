@@ -9,7 +9,6 @@ local group = require("psycle.ui.canvas.group")
 local item = require("psycle.ui.canvas.item")
 local text = require("psycle.ui.canvas.text")
 local rect = require("psycle.ui.canvas.rect")
-local cfg = require("psycle.config"):new("PatternVisual")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local checkbox = group:new()
@@ -17,15 +16,15 @@ local checkbox = group:new()
 local settings = { 
   colors = {
     default = {
-      bg = cfg:get("pvc_row4beat"),
+      bg = 0x3E3E3E,
       text = 0xB0C8B1,
-      checker = cfg:get("pvc_font")
+      checker = 0xCACACA
     },
     mousepress = {
-      bg = cfg:get("pvc_row")
+      bg = 0x3E3E3E
     },
     mousemove = {
-      bg  = cfg:get("pvc_row") 
+      bg  = 0x3E3E3E
     }     
   }
 }
@@ -41,26 +40,23 @@ end
 function checkbox:init()  
   self:setautosize(true, true) 
   self.check_ = false  
-  self.checkgroup = group:new(self)
+  self.checkgroup = text:new(self)  
                          :setautosize(false, false)
                          :setpos(0, 0, 10, 10)
-                         :setornament(ornamentfactory:createfill(settings.colors.default.bg))
+                         :addornament(ornamentfactory:createfill(settings.colors.default.bg))
                          :setalign(item.ALLEFT)
-                         :setmargin(0, 0, 4, 0)                         
-  self.checktext = text:new(self.checkgroup)                       
-                       :setcolor(settings.colors.default.checker)                       
-  self.checktext:setautosize(false, false):setalign(item.ALCLIENT)  
-  self.text = text:new(self):settext("A Checkbox"):setalign(item.ALLEFT)    
+                         --:setmargin(0, 0, 4, 0)                           
+  self.text = text:new(self):settext("A Checkbox sds  s ds a s sa d12345678"):setalign(item.ALLEFT):setautosize(true, true)    
   local that = self
   function self.checkgroup:onmousedown()        
     that.check_ = not that.check_
     if that.check_ then      
-      that.checktext:settext("x")
+      that.checkgroup:settext("x")
     else      
-      that.checktext:settext("")
+      that.checkgroup:settext("")
     end
-    that:onclick(that.check_)
-  end
+      that:onclick(that.check_)
+    end
   
 end
 

@@ -43,7 +43,7 @@ end
 function createeditplugin:init() 
   self:setautosize(false, true)    
   self:setpos(0, 0, 100, 0)
-  self:setornament(ornamentfactory:createfill(0x528A68))
+  self:addornament(ornamentfactory:createfill(0x528A68))
   closebutton.new(self)
   self:initnameprompt()      
   self:initpluginlist()  

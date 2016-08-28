@@ -61,7 +61,7 @@ class ParamMap : public ui::Frame {
   ui::ListView::Ptr list_view_;
   ui::ComboBox::Ptr cbx_box_;
   ui::CheckBox::Ptr allow_auto_learn_chk_box_;
-  ui::canvas::Text::Ptr machine_param_end_txt_;  
+  ui::Text::Ptr machine_param_end_txt_;  
   boost::shared_ptr<ui::Ornament> border_;
   boost::shared_ptr<ui::Ornament> text_border_;
 

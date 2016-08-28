@@ -17,7 +17,7 @@ namespace universalis { namespace os {
 
 namespace psycle { namespace host {
 
-    namespace ui { namespace canvas { class View; } }
+    namespace ui { class View; }
 
 		class Song;
 		class CWaveEdFrame;

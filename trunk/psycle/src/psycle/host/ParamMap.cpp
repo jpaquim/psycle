@@ -20,7 +20,6 @@ ParamMapSkin::ParamMapSkin() {
   font_color = ToARGB(machine_params.fontTopColor);
   title_font_color = ToARGB(machine_params.fonttitleColor);
   range_end_color = ToARGB(machine_params.fontBottomColor);  
-  using namespace canvas;
   background.reset(OrnamentFactory::Instance().CreateFill(background_color));  
   title_background.reset(OrnamentFactory::Instance().CreateFill(title_background_color));  
   font = CastCFont(&machine_params.font);
@@ -45,19 +44,19 @@ ParamMap::ParamMap(Machine* machine)
       list_view_(new ui::ListView()),
       cbx_box_(new ui::ComboBox()),
       allow_auto_learn_chk_box_(new ui::CheckBox()),
-      machine_param_end_txt_(new ui::canvas::Text()),
+      machine_param_end_txt_(new ui::Text()),
       root_node_(new ui::Node()) {
   set_title("Parameter map");
   PreventResize();
-  ui::canvas::Canvas::Ptr view_(new ui::canvas::Canvas());
+  ui::Canvas::Ptr view_(new ui::Canvas());
   view_->SetSave(false);  
-  ui::canvas::LineBorder* border = 
-    new ui::canvas::LineBorder(skin_.font_color);
-  border->set_border_radius(ui::canvas::BorderRadius(5, 5, 5, 5));
+  ui::LineBorder* border = 
+    new ui::LineBorder(skin_.font_color);
+  border->set_border_radius(ui::BorderRadius(5, 5, 5, 5));
   border_.reset(border);
-  view_->set_ornament(skin_.background);
-  set_view(view_);   
-  view_->set_aligner(ui::Aligner::Ptr(new ui::canvas::DefaultAligner()));      
+  view_->add_ornament(skin_.background);
+  set_viewport(view_);   
+  view_->set_aligner(ui::Aligner::Ptr(new ui::DefaultAligner()));      
   FillListView();
   AddListView();  
   InitLayout();    
@@ -150,26 +149,26 @@ std::string ParamMap::param_name(int index) const {
 
 void ParamMap::InitLayout() {
   Window::Ptr client_group(new ui::Group());  
-  view()->Add(client_group);
+  viewport()->Add(client_group);
   client_group->set_align(ui::ALCLIENT);    
   client_group->set_aligner(
-    ui::Aligner::Ptr(new ui::canvas::DefaultAligner()));
-  client_group->set_ornament(skin_.background);
+    ui::Aligner::Ptr(new ui::DefaultAligner()));
+  client_group->add_ornament(skin_.background);
       
   client_group->Add(top_client_group_);
   top_client_group_->set_auto_size(false, true);
-  top_client_group_->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
+  top_client_group_->set_margin(ui::BoxSpace(5));
   top_client_group_->set_align(ui::ALTOP);
   
   top_client_group_->set_aligner(ui::Aligner::Ptr(
-    new ui::canvas::DefaultAligner()));
-  top_client_group_->set_ornament(border_);
+    new ui::DefaultAligner()));
+  top_client_group_->add_ornament(border_);
 
   AddHelpGroup(client_group);
 }
 
 void ParamMap::AddListView() {  
-  view()->Add(list_view_);
+  viewport()->Add(list_view_);
   list_view_->set_background_color(skin_.list_view_background_color);
   list_view_->set_text_color(skin_.font_color);
   list_view_->set_align(ui::ALLEFT);
@@ -186,10 +185,10 @@ void ParamMap::AddListView() {
 ui::Group::Ptr ParamMap::CreateRow(const ui::Window::Ptr& parent) {
   ui::Group::Ptr header_group(new ui::Group());
   header_group->set_aligner(
-    ui::Aligner::Ptr(new ui::canvas::DefaultAligner()));
+    ui::Aligner::Ptr(new ui::DefaultAligner()));
   header_group->set_auto_size(false, true);
   header_group->set_align(ui::ALTOP);
-  header_group->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
+  header_group->set_margin(ui::BoxSpace(5));
   parent->Add(header_group);  
   return header_group;
 }
@@ -198,14 +197,14 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   CreateTitleRow(parent, "Offset To Machine Parameter");
     
   ui::Group::Ptr cbx_group = CreateRow(parent);  
-  cbx_group->set_margin(ui::Rect(ui::Point(5, 0), ui::Point(0, 5)));  
-  ui::canvas::Text::Ptr txt1(new ui::canvas::Text("FROM"));
+  cbx_group->set_margin(ui::BoxSpace(0, 0, 5, 5));  
+  ui::Text::Ptr txt1(new ui::Text("FROM"));
   txt1->set_auto_size(false, false);
   cbx_group->Add(txt1);
   txt1->set_align(ui::ALLEFT);
   txt1->set_vertical_alignment(ui::ALCENTER);
   txt1->set_color(skin_.font_color);      
-  txt1->set_margin(ui::Rect(ui::Point(), ui::Point(10, 0)));
+  txt1->set_margin(ui::BoxSpace(0, 10, 0, 0));
   txt1->set_justify(ui::RIGHTJUSTIFY);  
   txt1->set_pos(ui::Rect(ui::Point(), ui::Dimension(50, 0)));
   txt1->set_font(skin_.font);
@@ -217,10 +216,10 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
     boost::bind(&ParamMap::OnComboBoxSelect, this, _1));
 
   ui::Group::Ptr end_group = CreateRow(parent);
-  end_group->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(0, 10)));  
-  ui::canvas::Text::Ptr txt2(new ui::canvas::Text("TO"));  
+  end_group->set_margin(ui::BoxSpace(5, 0, 10, 5));  
+  ui::Text::Ptr txt2(new ui::Text("TO"));  
   end_group->Add(txt2);
-  txt2->set_margin(ui::Rect(ui::Point(), ui::Point(10, 0)));
+  txt2->set_margin(ui::BoxSpace(0, 10, 0, 0));
   txt2->set_justify(ui::RIGHTJUSTIFY);
   txt2->set_auto_size(false, true);
   txt2->set_color(skin_.font_color);  
@@ -233,9 +232,9 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   machine_param_end_txt_->set_font(skin_.font);
     
   ui::Group::Ptr btn_group = CreateRow(parent);
-  btn_group->set_margin(ui::Rect(ui::Point(5, 0), ui::Point(0, 5)));  
+  btn_group->set_margin(ui::BoxSpace(0, 0, 5, 5));  
     
-  ui::canvas::Button::Ptr replace_btn(new ui::canvas::Button());
+  ui::Button::Ptr replace_btn(new ui::Button());
   btn_group->Add(replace_btn);
   replace_btn->set_align(ui::ALLEFT);
   replace_btn->set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(100, 20)));
@@ -247,7 +246,7 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   allow_auto_learn_chk_box_->set_align(ui::ALLEFT);
   allow_auto_learn_chk_box_->Check();
   allow_auto_learn_chk_box_->set_margin(
-    ui::Rect(ui::Point(5, 0), ui::Point()));
+    ui::BoxSpace(0, 0, 0, 5));
   allow_auto_learn_chk_box_->set_pos(
     ui::Rect(ui::Point(), ui::Dimension(100, 20)));
   allow_auto_learn_chk_box_->set_text("Auto Learn");
@@ -257,34 +256,34 @@ void ParamMap::AddHelpGroup(const ui::Window::Ptr& parent) {
   ui::Group::Ptr help_group = CreateRow(parent);
   help_group->set_auto_size(false, false);
   help_group->set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 200)));
-  help_group->set_ornament(border_);
+  help_group->add_ornament(border_);
 
   CreateTitleRow(help_group, "Help");
   
-  ui::canvas::Text::Ptr txt1(new ui::canvas::Text("Shift + Up/Down: Select a range."));
+  ui::Text::Ptr txt1(new ui::Text("Shift + Up/Down: Select a range."));
   txt1->set_align(ui::ALTOP);
   txt1->set_font(skin_.font);
   txt1->set_color(skin_.font_color);
-  txt1->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(0, 5)));
+  txt1->set_margin(ui::BoxSpace(5, 5, 5, 0));
   help_group->Add(txt1);
 
-  ui::canvas::Text::Ptr txt2(new ui::canvas::Text("Auto Learn Checked: Select a range and tweak a knob"));
+  ui::Text::Ptr txt2(new ui::Text("Auto Learn Checked: Select a range and tweak a knob"));
   txt2->set_align(ui::ALTOP);
   txt2->set_font(skin_.font);
   txt2->set_color(skin_.font_color);
-  txt2->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(0, 5)));
+  txt2->set_margin(ui::BoxSpace(5, 5, 5, 0));
   help_group->Add(txt2);
 }
 
 ui::Group::Ptr ParamMap::CreateTitleRow(const ui::Window::Ptr& parent, const std::string& header_text) {
   ui::Group::Ptr header_group = CreateRow(parent);
-  header_group->set_ornament(skin_.title_background);  
-  ui::canvas::Text::Ptr txt(new ui::canvas::Text(header_text));
+  header_group->add_ornament(skin_.title_background);  
+  ui::Text::Ptr txt(new ui::Text(header_text));
   txt->set_font(skin_.title_font);
   header_group->Add(txt);
   txt->set_color(skin_.title_font_color);  
   txt->set_auto_size(true, true);
-  txt->set_margin(ui::Rect(ui::Point(5, 5), ui::Point(5, 5)));
+  txt->set_margin(ui::BoxSpace(5));
   txt->set_align(ui::ALLEFT);
   return header_group;
 }

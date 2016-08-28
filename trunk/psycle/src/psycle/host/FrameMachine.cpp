@@ -777,7 +777,7 @@ namespace psycle { namespace host {
         CanvasParamView* cpv;
         gui = cpv = new CanvasParamView(this, &machine());
         LuaPlugin* lp = (LuaPlugin*) _machine;
-        ui::canvas::Canvas::WeakPtr user_view = lp->canvas();
+        ui::Canvas::WeakPtr user_view = lp->canvas();
         if (!user_view.expired()) {
           gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				    CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
@@ -828,13 +828,13 @@ namespace psycle { namespace host {
 				rcClient.right = pRect->right - pRect->left; rcClient.bottom = pRect->bottom - pRect->top;
 			}
 
-      if (_machine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _machine;
-        canvas::Canvas* user_view = lp->canvas().lock().get();
-        if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
-          user_view->OnSize(ui::Dimension(rcClient.right, rcClient.bottom));
-        }
-      }  
+			if (_machine->_type == MACH_LUA) {
+			  LuaPlugin* lp = (LuaPlugin*) _machine;
+			  Canvas* user_view = lp->canvas().lock().get();
+			  if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
+			    user_view->OnSize(ui::Dimension(rcClient.right, rcClient.bottom));
+			  }
+			}  
 
 			//Add frame border/caption size.
 			CalcWindowRect(rcFrame);

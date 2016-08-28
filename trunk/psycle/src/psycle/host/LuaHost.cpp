@@ -98,7 +98,7 @@ struct ReleaseImpDeleter {
     frame->release_imp(); 
   }
 };
-boost::shared_ptr<ui::canvas::TerminalFrame> LuaProxy::terminal_frame_;
+boost::shared_ptr<ui::TerminalFrame> LuaProxy::terminal_frame_;
 
 
 // Class Proxy : export and import between psycle and lua
@@ -106,7 +106,7 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     host_(host),
     info_update_(true) {    
   if (!terminal_frame_.get()) {
-    terminal_frame_ = boost::shared_ptr<ui::canvas::TerminalFrame>(new ui::canvas::TerminalFrame(), ReleaseImpDeleter());
+    terminal_frame_ = boost::shared_ptr<ui::TerminalFrame>(new ui::TerminalFrame(), ReleaseImpDeleter());
     terminal_frame_->Init();      
   }
   L = LuaGlobal::load_script(dllname);  

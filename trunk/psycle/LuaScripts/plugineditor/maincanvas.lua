@@ -63,7 +63,7 @@ function maincanvas:init()
   self.advancedview = false
   self:invalidatedirect()   
   self.togglecanvas = signal:new() 
-  self:setornament(ornamentfactory:createfill(settings.canvas.colors.background))
+  self:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   self:setupfiledialogs()
   self:inittoolbar()   
   self:createsearch()
@@ -332,7 +332,7 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittoolbar()  
-  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP)--:setmargin(3, 3, 3, 3)    
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP) --:setmargin(3, 3, 3, 3)    
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
   self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
   self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
@@ -377,8 +377,8 @@ function maincanvas:initwindowtoolbar()
 end
 
 function maincanvas:initselectplugintoolbar(parent)
-  local t = toolbar:new(self.tg)
-  t.selectmachine = toolicon:new(t):settext("No Plugin Loaded"):setpos(0, 0, 100, 20)  
+  local t = toolbar:new(self.tg):setautosize(true, false)
+  t.selectmachine = toolicon:new(t):setautosize(false, false):settext("No Plugin Loaded"):setpos(0, 0, 120, 20) 
   local that = self
   function t.selectmachine:onclick()
     local catcher = catcher:new()
@@ -438,7 +438,10 @@ function maincanvas:initfiletoolbar()
   local iopen = toolicon:new(t, settings.picdir.."open.png", 0xFFFFFF)
   local isave = toolicon:new(t, settings.picdir.."save.png", 0xFFFFFF)  
   local that = self    
-  function inew:onclick() that:createnewpage() end  
+  function inew:onclick() 
+    that:createnewpage() 	
+    that.pages:updatealign()
+  end  
   function iopen:onclick() that.fileopen:show() end
   function isave:onclick() that:savepage() end
   return t
@@ -549,6 +552,7 @@ end
 function maincanvas:displaysearch(ev)
   self.search:show():onfocus()
   self:updatealign()
+  --self.search:updatealign()
 end
 
 function maincanvas:oncreateplugin(pluginname, templatepath)

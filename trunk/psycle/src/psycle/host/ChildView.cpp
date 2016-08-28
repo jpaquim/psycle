@@ -2481,7 +2481,7 @@ namespace psycle { namespace host {
 		  try {
 			LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
 			mac->Init();
-			ui::canvas::Canvas* user_view = 0;
+			ui::Canvas* user_view = 0;
 			try {
 			  user_view = mac->canvas().lock().get();
 			} catch (std::exception&) {            
@@ -2559,7 +2559,7 @@ namespace psycle { namespace host {
         LuaPlugin* plug = it->second;         
         if (plug->crashed()) return;
         if (active_lua_ != plug) {
-          ui::canvas::Canvas::WeakPtr user_view = plug->canvas();        
+          ui::Canvas::WeakPtr user_view = plug->canvas();        
           if (!user_view.expired()) {          
             ChangeCanvas(user_view.lock().get()); 
             active_lua_ = plug;

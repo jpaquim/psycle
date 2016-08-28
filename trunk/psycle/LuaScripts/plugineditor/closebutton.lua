@@ -19,12 +19,12 @@ function closebutton.new(parent)
   end  
   
   function closebtn:onmouseenter()  
-    self:setornament(ornamentfactory:createlineborder(0xFFFFFE))
+    self:addornament(ornamentfactory:createlineborder(0xFFFFFE))
   end
   function closebtn:onmousemove()  
   end
   function closebtn:onmouseout()     
-    self:setornament(nil)    
+    self:removeornaments()
   end
   g.dohide = signal:new()
   return g

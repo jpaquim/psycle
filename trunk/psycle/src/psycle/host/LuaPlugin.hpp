@@ -69,7 +69,7 @@ namespace psycle { namespace host {
     std::string help();
     virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }    
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
-    boost::weak_ptr<ui::canvas::Canvas> canvas() { return proxy().canvas(); }
+    boost::weak_ptr<ui::Canvas> canvas() { return proxy().canvas(); }
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);
