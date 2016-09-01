@@ -31,7 +31,7 @@ end
 function toolbar:add(icon)
   icon:settoolbar(self)
   icon:setalign(item.ALLEFT)
-  icon:setmargin(0, 0, 5, 0)
+  icon:setmargin(0, 5, 0, 0)
   group.add(self, icon)	
 end
 

@@ -43,7 +43,8 @@ public:
  }
 #else
 static std::string utf8_to_win(const std::string& str) {
-	return str; // boost::locale::conv::from_utf(str, std::locale());  
+//	return boost::locale::conv::from_utf(str, std::locale());  
+	return str;
 }
 static std::string win_to_utf8(const std::string& str) { return str; }
 #endif
@@ -417,6 +418,31 @@ inline void ImageImp::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORR
   hdcDst.DeleteDC();
 }
 
+/*
+inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp) {
+  BITMAP bm = { 0 };
+  GetObject(hBmp, sizeof(bm), &bm);
+  BITMAPINFO* bmi = (BITMAPINFO*) _alloca(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
+  ::ZeroMemory(bmi, sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
+  bmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+  BOOL bRes = ::GetDIBits(hDC, hBmp, 0, bm.bmHeight, NULL, bmi, DIB_RGB_COLORS);
+  if( !bRes || bmi->bmiHeader.biBitCount != 32 ) return;
+  LPBYTE pBitData = (LPBYTE) ::LocalAlloc(LPTR, bm.bmWidth * bm.bmHeight * sizeof(DWORD));
+  if( pBitData == NULL ) return;
+  LPBYTE pData = pBitData;
+  ::GetDIBits(hDC, hBmp, 0, bm.bmHeight, pData, bmi, DIB_RGB_COLORS);
+  for( int y = 0; y < bm.bmHeight; y++ ) {
+    for( int x = 0; x < bm.bmWidth; x++ ) {
+      pData[0] = (BYTE)((DWORD)pData[0] * pData[3] / 255);
+      pData[1] = (BYTE)((DWORD)pData[1] * pData[3] / 255);
+      pData[2] = (BYTE)((DWORD)pData[2] * pData[3] / 255);
+      pData += 4;
+    }
+  }
+  ::SetDIBits(hDC, hBmp, 0, bm.bmHeight, pBitData, bmi, DIB_RGB_COLORS);
+  ::LocalFree(pBitData);
+}*/
+
 class FontImp : public ui::FontImp {
  public:
   FontImp() {
@@ -775,7 +801,7 @@ class GraphicsImp : public ui::GraphicsImp {
   void check_pen_update() {
     if (updatepen_) { 
       pen.DeleteObject();
-      pen.CreatePen(PS_SOLID, pen_width_, rgb_color_);
+      pen.CreatePen(PS_SOLID | PS_COSMETIC, pen_width_, rgb_color_);
       cr_->SelectObject(&pen);
       cr_->SetTextColor(rgb_color_);
       updatepen_ = false;
@@ -934,7 +960,7 @@ class WindowTemplateImp : public T, public I {
     
   virtual void dev_set_pos(const ui::Rect& pos);
   virtual ui::Rect dev_pos() const;
-  virtual ui::Rect dev_abs_pos() const;
+  virtual ui::Rect dev_abs_pos() const;	
   virtual ui::Rect dev_desktop_pos() const;
   virtual ui::Dimension dev_dim() const {
     CRect rc;            
@@ -965,15 +991,18 @@ class WindowTemplateImp : public T, public I {
   virtual void DevHide() { ShowWindow(SW_HIDE); }
   virtual void DevInvalidate() {    		
 		if (window() && window()->root()) {
-        CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());			
-				::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
+      CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());			
+			::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
 		}    
   }
   virtual void DevInvalidate(const ui::Region& rgn) {
     if (m_hWnd) {
       mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
-      assert(imp);	  
-    ::RedrawWindow(m_hWnd, NULL, imp->crgn(), RDW_INVALIDATE | RDW_ERASE);
+      assert(imp);	
+			if (window() && window()->root()) {
+        CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());											
+				::RedrawWindow(m_hWnd, NULL, imp->crgn(), RDW_INVALIDATE | RDW_ERASE);
+			}
     }
   }
   virtual void DevSetCapture() { SetCapture(); }  
@@ -1045,6 +1074,8 @@ protected:
   void MapPointToDesktop(CPoint& pt) const {
     ::MapWindowPoints(m_hWnd, ::GetDesktopWindow(), &pt, 1);
   }
+
+	ui::Rect MapPosToBoxModel(const CRect& rc) const;
 
   virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
 

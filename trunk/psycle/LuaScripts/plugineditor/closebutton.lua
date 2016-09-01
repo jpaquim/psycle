@@ -7,10 +7,12 @@ local signal = require("psycle.signal")
 local closebutton = {}
 
 function closebutton.new(parent)
-  local g = group:new(parent):setpos(0, 0, 20, 0):setalign(item.ALRIGHT)  
+  local g = group:new(parent):setautosize(false, false):setpos(0, 0, 20, 10):setalign(item.ALRIGHT)  
   local closebtn = text:new(g)
-                       :setautosize(false, true)
+                       :setautosize(false, false)
                        :settext("X")
+					   :setverticalalignment(item.ALCENTER)
+					   :setjustify(text.CENTERJUSTIFY)
                        :setalign(item.ALTOP)                       
   local that = parent
   function closebtn:onmousedown()

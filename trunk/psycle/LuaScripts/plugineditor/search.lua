@@ -32,7 +32,8 @@ function search:new(parent)
 end
 
 function search:init() 
-  self:setautosize(false, true)      
+  self:setautosize(false, true)
+  self:setpadding(5, 5, 5, 5)  
   self.dosearch = signal:new()
   self.dohide = signal:new()
   self.doreplace = signal:new()
@@ -137,7 +138,7 @@ end
 
 function search:createreplacebutton(parent)
   self.replacebtn = button:new(parent):settext("replace"):setalign(item.ALLEFT)
-  --:setmargin(5, 0, 2, 0)
+  :setmargin(0, 0, 0, 2)
   :setpos(0, 0, 60, 20):disable()
   local that = self
   function self.replacebtn:onclick()
@@ -148,9 +149,9 @@ end
 
 
 function search:createoptions(parent)
-  self.casesensitive = checkbox:new(parent):setalign(item.ALLEFT):settext("match case  1223344 genau")
-  self.wholeword = checkbox:new(parent):setalign(item.ALLEFT):settext("match whole words only")
-  self.useregexp = checkbox:new(parent):setalign(item.ALLEFT):settext("use regexp")
+  self.casesensitive = checkbox:new(parent):setalign(item.ALLEFT):settext("match case"):setmargin(0, 5, 0, 0)
+  self.wholeword = checkbox:new(parent):setalign(item.ALLEFT):settext("match whole words only"):setmargin(0, 5, 0, 0)
+  self.useregexp = checkbox:new(parent):setalign(item.ALLEFT):settext("use regexp"):setmargin(0, 5, 0, 0)
   return self
 end
 

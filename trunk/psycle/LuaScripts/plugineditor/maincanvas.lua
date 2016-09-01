@@ -194,6 +194,8 @@ function maincanvas:setlexer(page)
   page:setlexer(lex)         
   page:setfont(settings.sci.lexer.font.name, settings.sci.lexer.font.size)
   page:setcaretcolor(0x939393)
+  page:setcaretlinebackgroundcolor(0x373533)
+  page:showcaretline()
 end
 
 function maincanvas:createmodulepage()
@@ -211,9 +213,7 @@ function maincanvas:createpage()
       end            
     end
   end    
-  self:setlexer(page)  
-  page:setcaretlinebackgroundcolor(0x253E2F)
-  page:showcaretline()
+  self:setlexer(page)    
   return page
 end
 
@@ -332,7 +332,7 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittoolbar()  
-  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP) --:setmargin(3, 3, 3, 3)    
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(5, 5, 5, 5)    
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
   self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
   self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
@@ -378,7 +378,7 @@ end
 
 function maincanvas:initselectplugintoolbar(parent)
   local t = toolbar:new(self.tg):setautosize(true, false)
-  t.selectmachine = toolicon:new(t):setautosize(false, false):settext("No Plugin Loaded"):setpos(0, 0, 120, 20) 
+  t.selectmachine = toolicon:new(t):setautosize(false, false):settext("No Plugin Loaded"):setpos(0, 0, 120, 10) 
   local that = self
   function t.selectmachine:onclick()
     local catcher = catcher:new()
@@ -418,7 +418,7 @@ function maincanvas:setpluginindex(pluginindex)
 end
 
 function maincanvas:createinstanceselect(parent)
-  self.cbx = combobox:new(parent):setautosize(false, false):setpos(0, 0, 100, 20):setalign(item.ALLEFT)
+  self.cbx = combobox:new(parent):setautosize(false, false):setpos(0, 0, 200, 20):setalign(item.ALLEFT)
   local that = self
   function self.cbx:onselect()    
     local pluginindex = that.cbxtopluginindex[self:itemindex()]

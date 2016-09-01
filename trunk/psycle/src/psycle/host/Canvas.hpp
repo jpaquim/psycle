@@ -17,7 +17,7 @@ class DefaultAligner : public Aligner {
  public:
   virtual void CalcDimensions();
   virtual void SetPositions();
-  virtual void Realign();    
+
  private:
 	 void prepare_pos_set();
 	 bool has_items() const;
@@ -30,15 +30,18 @@ class DefaultAligner : public Aligner {
 	 void update_top(const Window::Ptr& window);
 	 void update_right(const Window::Ptr& window);
 	 void update_bottom(const Window::Ptr& window);
-	 ui::Rect calc_new_pos_left() const;
-	 ui::Rect calc_new_pos_top() const;
-	 ui::Rect calc_new_pos_right() const;
-	 ui::Rect calc_new_pos_bottom() const;	 
+	 ui::Rect calc_new_pos_left(const Window::Ptr& window) const;
+	 ui::Rect calc_new_pos_top(const Window::Ptr& window) const;
+	 ui::Rect calc_new_pos_right(const Window::Ptr& window) const;
+	 ui::Rect calc_new_pos_bottom(const Window::Ptr& window) const;	 
 	 void adjust_current_pos_left();
 	 void adjust_current_pos_top();
 	 void adjust_current_pos_right();
 	 void adjust_current_pos_bottom();
-	 void adjust_current_pos_client(const Window::Ptr& window);
+	 void adjust_current_pos_client(const Window::Ptr& window);	 
+	 bool is_window_pos_equal(const ui::Rect& new_pos, const ui::Window::Ptr window) const;
+
+	 void OnWindowDimensionChanged(ui::Window& window);
 
 	 ui::Rect current_pos_;
 	 ui::Dimension non_content_dimension_;
@@ -77,7 +80,6 @@ class Canvas : public ui::Group {
   Canvas() : Group(), save_rgn_(ui::Systems::instance().CreateRegion()) {    
     Init();
   }
-
   Canvas(ui::Window* parent) : 
       Group(),
       save_rgn_(ui::Systems::instance().CreateRegion()) {    
@@ -198,8 +200,8 @@ class LineBorder : public ui::Ornament {
 			                      item.padding().width() + item.border_space().width(),
                             item.padding().height() + item.border_space().height(),
 			                      0));
-    if (border_radius_.empty()) {
-			g->SetPenWidth(border_width_.top());
+    if (border_radius_.empty()) {			
+			g->SetPenWidth(border_width_.top() == 1 ? 0 : border_width_.top()*2);			
       g->DrawRect(rc);
     } else { 
       if (border_style_.top != NONE) {
