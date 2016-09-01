@@ -284,10 +284,18 @@ void WindowTemplateImp<T, I>::OnDestroy() {
 }
 
 template<class T, class I>
-void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {	
+void WindowTemplateImp<T, I>::dev_set_pos(const ui::Rect& pos) {
+	ui::Point top_left = pos.top_left();
+	top_left.Offset(margin_.left(), margin_.top());
+  if (window() && window()->parent()) {
+	  top_left.Offset(window()->parent()->border_space().left() +
+			                window()->parent()->padding().left(),
+									  window()->parent()->border_space().top() +
+			                window()->parent()->padding().top());
+  }	
   SetWindowPos(0, 
-		           static_cast<int>(pos.left() + margin_.left()),
-		           static_cast<int>(pos.top() + margin_.top()),
+		           static_cast<int>(top_left.x()),
+		           static_cast<int>(top_left.y()),
 		           static_cast<int>(pos.width() + padding_.width() + border_space_.width()),
 		           static_cast<int>(pos.height() + padding_.height() + border_space_.height()),
                SWP_NOREDRAW | SWP_NOZORDER | SWP_NOACTIVATE);
@@ -299,9 +307,8 @@ ui::Rect WindowTemplateImp<T, I>::dev_pos() const {
 	GetWindowRect(&rc);
 	if (GetParent()) {
 	  ::MapWindowPoints(HWND_DESKTOP, GetParent()->m_hWnd, (LPPOINT)&rc, 2);	
-	}
-  return ui::Rect(ui::Point(rc.left - margin_.left(), rc.top - margin_.top()),
-		              ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height()));
+	}	
+	return MapPosToBoxModel(rc);
 }
 
 template<class T, class I>
@@ -309,10 +316,9 @@ ui::Rect WindowTemplateImp<T, I>::dev_abs_pos() const {
   CRect rc;
 	GetWindowRect(&rc);  
 	if (window() && window()->root()) {
-     CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
-		 ::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);		 
-		 return ui::Rect(ui::Point(rc.left - margin_.left(), rc.top - margin_.top()),
-                  ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height()));
+    CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
+		::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);		 
+		return MapPosToBoxModel(rc);
 	}
 	return ui::Rect::zero();
 }
@@ -320,9 +326,22 @@ ui::Rect WindowTemplateImp<T, I>::dev_abs_pos() const {
 template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::dev_desktop_pos() const {
   CRect rc;
-  GetWindowRect(&rc);  
-  return ui::Rect(ui::Point(rc.left - margin_.left(), rc.top - margin_.top()),
-                  ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height()));
+  GetWindowRect(&rc);
+	return MapPosToBoxModel(rc);  
+}
+
+template<class T, class I>
+ui::Rect WindowTemplateImp<T, I>::MapPosToBoxModel(const CRect& rc) const {
+	 ui::Point top_left(rc.left - margin_.left(), rc.top - margin_.top());	
+	   if (window() && window()->parent()) {
+		   top_left.Offset(-window()->parent()->border_space().left() - window()->parent()->padding().left(),
+			                 -window()->parent()->border_space().top() - window()->parent()->padding().top());
+	   }
+		 return ui::Rect(top_left,
+		              ui::Dimension(rc.Width() - padding_.width() -
+										              border_space_.width(),
+										            rc.Height() - padding_.height() -
+										              border_space_.height()));
 }
 
 template<class T, class I>
@@ -399,7 +418,7 @@ void WindowTemplateImp<T, I>::OnPaint() {
 	  ui::Graphics g(&dc);
 	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));		
 	  g.Translate(padding_.left() + border_space_.left(), padding_.top() + border_space_.top());
-	  OnDevDraw(&g, draw_rgn);	
+	  OnDevDraw(&g, draw_rgn);
 	  g.Dispose();
   }
   else {

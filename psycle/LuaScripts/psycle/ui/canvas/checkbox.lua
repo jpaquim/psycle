@@ -45,8 +45,8 @@ function checkbox:init()
                          :setpos(0, 0, 10, 10)
                          :addornament(ornamentfactory:createfill(settings.colors.default.bg))
                          :setalign(item.ALLEFT)
-                         --:setmargin(0, 0, 4, 0)                           
-  self.text = text:new(self):settext("A Checkbox sds  s ds a s sa d12345678"):setalign(item.ALLEFT):setautosize(true, true)    
+                         :setmargin(0, 4, 0, 0)  
+  self.text = text:new(self):settext("A Checkbox"):setalign(item.ALLEFT):setautosize(true, true)    
   local that = self
   function self.checkgroup:onmousedown()        
     that.check_ = not that.check_
@@ -55,9 +55,8 @@ function checkbox:init()
     else      
       that.checkgroup:settext("")
     end
-      that:onclick(that.check_)
-    end
-  
+    that:onclick(that.check_)
+  end  
 end
 
 function checkbox:settext(text)

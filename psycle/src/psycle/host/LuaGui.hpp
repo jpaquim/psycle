@@ -891,12 +891,22 @@ class LuaItemBind {
         }
       }            
     }    
-    lua_setfield(L, -2, "_ornament");
+		lua_getfield(L, 1, "_ornaments");
+		if (lua_isnil(L, -1)) {
+			lua_newtable(L);
+			lua_setfield(L, 1, "_ornaments");
+		}
+		lua_getfield(L, 1, "_ornaments");
+		int n = lua_rawlen(L, -1);
+		lua_pushvalue(L, 2);
+		lua_rawseti(L, -2, n + 1);    
     item->add_ornament(ornament);
     return LuaHelper::chaining(L);
   }
 
-	static int removeornaments(lua_State* L) {
+	static int removeornaments(lua_State* L) {		
+		lua_pushnil(L);
+		lua_setfield(L, 1, "_ornaments");
     LUAEXPORT(L, &T::RemoveOrnaments);
   }
 

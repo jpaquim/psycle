@@ -29,6 +29,7 @@
 #define ToARGB(rgb) RGBToARGB(GetRValue(rgb), GetGValue(rgb), GetBValue(rgb))
 
 // #define ANSITOUTF8(str) boost::locale::conv::to_utf<char>(str, std::locale())
+#define ANSITOUTF8(str) str
 
 namespace psycle {
 namespace host {
@@ -85,6 +86,11 @@ struct Point {
   double x() const { return x_; }
   void set_y(double y) { y_ = y; }
   double y() const { return y_; }
+	void Offset(double dx, double dy) {
+		x_ += dx;
+		y_ += dy;
+	}
+	void reset() { x_ = y_ = 0; }
 
  private:
   double x_, y_;
@@ -937,8 +943,11 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void OnFocus(Event& ev) { ev.WorkParent(); }
 	virtual void OnKillFocus() {}
 	boost::signal<void()> Focus;
-	boost::signal<void()> KillFocus;
-	ui::Rect pos_old_;
+	boost::signal<void()> KillFocus;	
+
+	bool has_align_dimension_changed() const { return align_dimension_changed_; }
+	void reset_align_dimension_changed() { align_dimension_changed_ = false; }	
+	void align_dimension_changed() { align_dimension_changed_ = true; }
 
 	void lock() const;
 	void unlock() const;
@@ -965,6 +974,20 @@ class Window : public boost::enable_shared_from_this<Window> {
                          padding().height() + border_space().height() +
                          margin().height());
   }
+	ui::Rect overall_pos() const { return overall_pos(pos()); }
+	ui::Rect overall_pos(const ui::Rect& pos) const {			
+		ui::Rect result(
+			pos.top_left(),
+			ui::Dimension(pos.width() + padding().width() + border_space().width(), 
+										pos.height() + padding().height() + border_space().height())
+		);
+		result.Offset(margin().left(), margin().top());
+		if (parent()) {
+			result.Offset(parent()->border_space().left() + parent()->padding().left(),
+										parent()->border_space().top() + parent()->padding().top());
+		}
+		return result;		
+ }
   
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
@@ -995,6 +1018,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   boost::weak_ptr<Window> root_cache_;	
 	StyleSheet::WeakPtr style_sheet_;
 	std::string style_class_name_;
+	bool align_dimension_changed_;
 };
 
 class ChildPosEvent : public Event {
@@ -1102,8 +1126,8 @@ class Aligner {
   void CachePos(const ui::Rect& pos) { pos_ = pos; }
   
   ui::Group* group_;
-  bool aligned_;  
-
+  bool aligned_;
+	
  protected:  
   typedef Window::Container::iterator iterator;
   iterator begin() { 
@@ -1124,7 +1148,7 @@ class Aligner {
    
  private: 
   static Window::Container dummy;
-  static bool full_align_;
+  static bool full_align_;	
 };
 
 inline Aligner::~Aligner() {};
@@ -1311,6 +1335,7 @@ class Node : public boost::enable_shared_from_this<Node> {
   void set_parent(const Node::WeakPtr& parent) { parent_ = parent; }
   Node::WeakPtr parent() const { return parent_; }
   boost::signal<void (Node&)> changed;
+	boost::signal<void (Window&)> dimension_changed;
 
   boost::ptr_list<NodeImp> imps;
 

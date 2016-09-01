@@ -1,6 +1,7 @@
 #pragma once
 
 // #include "stdafx.h"
+
 #include "Ui.hpp"
 #include "MfcUi.hpp"
 #include "Canvas.hpp"
@@ -538,7 +539,8 @@ Window::Window() :
     visible_(true),
     align_(ALNONE),
     pointer_events_(true),
-		prevent_auto_dimension_(false) {
+		prevent_auto_dimension_(false),
+		align_dimension_changed_(true) {
   set_imp(ui::ImpFactory::instance().CreateWindowImp());
 }
 
@@ -552,7 +554,8 @@ Window::Window(WindowImp* imp) :
     visible_(true),
     align_(ALNONE),
     pointer_events_(true),
-		prevent_auto_dimension_(false) {
+		prevent_auto_dimension_(false),
+		align_dimension_changed_(true) {
   imp_.reset(imp);  
   if (imp) {
     imp->set_window(this);
@@ -628,15 +631,9 @@ bool Window::IsInGroup(Window::WeakPtr group) const {
 }
 
 void Window::FLSEX() {  
-  if (visible() && root()) {
-    needsupdate();
-		ui::Rect bounds = area().bounds();		
-		bounds.Increase(padding());
-		bounds.Increase(margin());	
-		bounds.Increase(border_space());
-		bounds.Offset(abs_pos().left() + padding().left() + border_space().left() + margin().left(),
-			            abs_pos().top() + padding().top() + border_space().top() + margin().top());
-    std::auto_ptr<Area> tmp(new Area(bounds));		    
+  if (visible() && root()) {    
+		ui::Rect fls_pos = overall_pos(abs_pos());
+    std::auto_ptr<Area> tmp(new Area(fls_pos));		    
     if (fls_area_.get()) {    
       fls_area_->Combine(*tmp, RGN_OR);
       root()->Invalidate(fls_area_->region());  
@@ -648,15 +645,9 @@ void Window::FLSEX() {
 }
 
 void Window::FLS() {
-  if (visible() && root()) {		
-    needsupdate();
-		ui::Rect bounds = area().bounds();
-		bounds.Increase(padding());
-		bounds.Increase(margin());
-		bounds.Increase(border_space());
-		bounds.Offset(abs_pos().left() + padding().left() + border_space().left() + margin().left(),
-			            abs_pos().top() + padding().top() + border_space().top() + margin().top());
-    std::auto_ptr<Area> tmp(new Area(bounds));    
+  if (visible() && root()) {    
+		ui::Rect fls_pos = overall_pos(abs_pos());
+    std::auto_ptr<Area> tmp(new Area(fls_pos));    
     root()->Invalidate(tmp->region());
     fls_area_ = tmp;
   }
@@ -718,14 +709,15 @@ void Window::set_pos(const ui::Rect& pos) {
 				new_pos.set_height(auto_dimension.height());
 			}
 	  }
-		bool size_changed = pos.dimension() != new_pos.dimension();
+		bool size_changed = imp_->dev_pos().dimension() != new_pos.dimension();
 		imp_->dev_set_pos(new_pos);
     FLSEX();
 		if (size_changed) {
+			align_dimension_changed();
       OnSize(new_pos.dimension());
     }
 		if (!prevent_auto_dimension_) {
-		  WorkChildPos();
+		  // WorkChildPos();
 		}
   }
 }
@@ -846,9 +838,7 @@ void Window::UpdatePadding(const StyleClass& style_class) {
 }
 
 ui::BoxSpace Window::sum_border_space() const {
-	ui::BoxSpace result;
-	return result;
-	/*
+	ui::BoxSpace result;	
 	if (!ornaments_.empty()) {       
 			for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {				
 				if (!(*it).expired()) {
@@ -856,7 +846,7 @@ ui::BoxSpace Window::sum_border_space() const {
 				}
 			}
     }
-	return result; */
+	return result;
 }
 
 void Window::WorkChildPos() {
@@ -1035,6 +1025,9 @@ void Window::remove_style(UINT flag) {
 void Window::DrawBackground(Graphics* g, Region& draw_region) {
 	if (draw_region.bounds().height() > 0) {
 		if (!ornaments().empty()) {
+			if (debug_text() == "hg") {
+				int fordebugonly(0);
+			}
 			for (Ornaments::iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
 				if (!(*it).expired()) {					
           (*it).lock()->Draw(*this, g, draw_region);
@@ -1088,68 +1081,46 @@ void CalcDim::operator()(Window& window) const {
 };
 
 bool AbortPos::operator()(Window& window) const { 
-    bool abort_tree_walk = true;
-		if (window.debug_text() == "me") {
-			int fordebugonly(0);
-		}
-    if (window.visible() && window.has_childs() && window.aligner()) {      
-      //std::stringstream str;
-      //str << "---- " << window.debug_text() << "----" << std::endl;
-      //str << "wo-pos" << window.pos_old_.left() << "," << window.pos_old_.top() << std::endl;
-      //str << "w-pos" << window.pos().left() << "," << window.pos().top() << std::endl;
-		 // TRACE(str.str().c_str());								
-      if (!window.aligner()->aligned() || 
-				window.aligner()->pos() != window.pos_old_) {
-        abort_tree_walk = false;
-				window.aligner()->aligned_ = true;
-        /*std::stringstream str;
-        str << "wo-pos" << window.pos_old_.left() << "," << window.pos_old_.top() << std::endl;
-        str << "wo-size" << window.pos_old_.width() << "," << window.pos_old_.height() << std::endl;
-        str << "w-pos" << window.pos().left() << "," << window.pos().top() << std::endl;
-        str << "w-size" << window.pos().width() << "," << window.pos().height() << std::endl;
-        str << "---- not abort: " << window.debug_text() << "----" << std::endl;
-        TRACE(str.str().c_str());*/
-        
-      }
-    }    
-    return abort_tree_walk;
-  }
+  bool result = true;
+	if (window.aligner()) {
+		bool window_needs_align = (window.visible() && window.has_childs() && (!window.aligner()->aligned() ||
+			window.has_align_dimension_changed()));
+      result = !window_needs_align;        
+      window.aligner()->aligned_ = window_needs_align;  
+	}
+  return result;
+}
 
 bool SetUnaligned::operator()(Window& window) const {
   if (window.aligner()) {
-    window.aligner()->aligned_ = false;    
+    window.aligner()->aligned_ = false;
   }
   return false;
 }
 
-bool SetPos::operator()(Window& window) const {    
-  for (Window::iterator it = window.begin(); it != window.end(); ++it) {
-    Window::Ptr child = *it;
-    child->pos_old_ = child->pos();
-  }
+bool SetPos::operator()(Window& window) const {  
   if (window.visible() && window.has_childs()) {    
-    window.aligner()->SetPositions();      
+    window.aligner()->SetPositions();
   }  
   return false;
 };
 
 Window::Container Window::SubItems() {
-    Window::Container allitems;
-    iterator it = begin();
-    for (; it != end(); ++it) {
-      Window::Ptr item = *it;
-      allitems.push_back(item);
-      Window::Container subs = item->SubItems();
-      iterator itsub = subs.begin();
-      for (; itsub != subs.end(); ++itsub) {
-        allitems.push_back(*it);
-      }
+  Window::Container allitems;
+  iterator it = begin();
+  for (; it != end(); ++it) {
+    Window::Ptr item = *it;
+    allitems.push_back(item);
+    Window::Container subs = item->SubItems();
+    iterator itsub = subs.begin();
+    for (; itsub != subs.end(); ++itsub) {
+      allitems.push_back(*it);
     }
-    return allitems;
-  }     
+  }
+  return allitems;
+}     
 
 // Group
-
 Group::Group() {
   set_imp(ui::ImpFactory::instance().CreateWindowImp());
   set_auto_size(false, false);

@@ -71,88 +71,88 @@ Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
   return true;
 }*/
 
+
+// Text
 ui::Dimension Text::OnCalcAutoDimension() const {
-	Graphics g;
-	g.SetFont(font_);
-	return g.text_size(text_);
+	if (!is_auto_dimension_calculated_) {			
+		CalculateAutoDimension();
+	}
+	return auto_dimension_cache_;
 }
 
 void Text::set_text(const std::string& text) {  
   text_ = text;
+	PrepareAutoDimensionUpdate();
 	UpdateAutoDimension();
 }
 
 void Text::set_font(const Font& font) {  
   font_ = font;
-  if (imp()) {
-    needsupdate();
-    imp()->dev_set_pos(pos());
-    WorkChildPos();
-  }
-  FLSEX();
+	PrepareAutoDimensionUpdate();
+	UpdateAutoDimension();  
 }
 
 void Text::Draw(Graphics* g, Region& draw_region) {	
-  g->SetFont(font_);
-  g->SetColor(color_);  
-  g->DrawString(text_, ComputeAlignment(g));
+	PrepareGraphics(g);
+	CalculateAlignmentAndJustify();
+	OutputText(g);
 }
 
-ui::Point Text::ComputeAlignment(Graphics* g) const {
-  ui::Point result;
-  ui::Dimension text_dim = g->text_size(text_);
-  switch (justify_) {
-    case LEFTJUSTIFY:
-    break;    
-    case CENTERJUSTIFY:
-      result.set_x((dim().width() - text_dim.width()) / 2);
-    break;
-    case RIGHTJUSTIFY:
-      result.set_x(dim().width() - text_dim.width());
-    break;
-    default:
-    break;
-  }
-  switch (vertical_alignment_) {
-    case ALTOP:
-    break;
-    case ALCENTER:
-      result.set_y((dim().height() - text_dim.height()) / 2);
-    break;
-    case ALBOTTOM:
-      result.set_y(dim().height() - text_dim.height());
-    break;
-    default:      
-    break;
-  }
-  return result;
+void Text::PrepareGraphics(Graphics* g) {
+	g->SetFont(font_);
+  g->SetColor(color_);
+}
+
+void Text::CalculateAlignmentAndJustify() const {	
+	CalculateAutoDimension();
+	if (!is_aligned_) {
+		align_cache_.reset();
+		switch (justify_) {
+			case LEFTJUSTIFY:
+			break;    
+			case CENTERJUSTIFY:
+				align_cache_.set_x((dim().width() - auto_dimension_cache_.width()) / 2);
+			break;
+			case RIGHTJUSTIFY:
+				align_cache_.set_x(dim().width() - auto_dimension_cache_.width());
+			break;
+			default:
+			break;
+		}
+		CalculateJustify();
+		is_aligned_ = true;
+	}	
+}
+
+void Text::CalculateAutoDimension() const {
+	if (!is_auto_dimension_calculated_) {
+		Graphics g;
+		g.SetFont(font_);
+		auto_dimension_cache_ = g.text_size(text_);
+		is_auto_dimension_calculated_ = true;
+	}
+}
+
+void Text::CalculateJustify() const {
+	switch (vertical_alignment_) {
+			case ALTOP:
+			break;
+			case ALCENTER:
+				align_cache_.set_y((dim().height() - auto_dimension_cache_.height()) / 2);
+			break;
+			case ALBOTTOM:
+				align_cache_.set_y(dim().height() - auto_dimension_cache_.height());
+			break;
+			default:      
+			break;
+		}
+}
+
+void Text::OutputText(Graphics* g) {
+	g->DrawString(text_, align_cache_);  
 }
 
 // Pic
-inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp) {
-  BITMAP bm = { 0 };
-  GetObject(hBmp, sizeof(bm), &bm);
-  BITMAPINFO* bmi = (BITMAPINFO*) _alloca(sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
-  ::ZeroMemory(bmi, sizeof(BITMAPINFOHEADER) + (256 * sizeof(RGBQUAD)));
-  bmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-  BOOL bRes = ::GetDIBits(hDC, hBmp, 0, bm.bmHeight, NULL, bmi, DIB_RGB_COLORS);
-  if( !bRes || bmi->bmiHeader.biBitCount != 32 ) return;
-  LPBYTE pBitData = (LPBYTE) ::LocalAlloc(LPTR, bm.bmWidth * bm.bmHeight * sizeof(DWORD));
-  if( pBitData == NULL ) return;
-  LPBYTE pData = pBitData;
-  ::GetDIBits(hDC, hBmp, 0, bm.bmHeight, pData, bmi, DIB_RGB_COLORS);
-  for( int y = 0; y < bm.bmHeight; y++ ) {
-    for( int x = 0; x < bm.bmWidth; x++ ) {
-      pData[0] = (BYTE)((DWORD)pData[0] * pData[3] / 255);
-      pData[1] = (BYTE)((DWORD)pData[1] * pData[3] / 255);
-      pData[2] = (BYTE)((DWORD)pData[2] * pData[3] / 255);
-      pData += 4;
-    }
-  }
-  ::SetDIBits(hDC, hBmp, 0, bm.bmHeight, pBitData, bmi, DIB_RGB_COLORS);
-  ::LocalFree(pBitData);
-}
-
 void Pic::Draw(Graphics* g, Region& draw_region) {
 	if (image_) {
 		if (zoom_factor_ == ui::Point(1.0, 1.0)) {
@@ -398,19 +398,3 @@ void HeaderGroup::FlsClient() {
 } // namespace ui
 } // namespace host
 } // namespace psycle
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

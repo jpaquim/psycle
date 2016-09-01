@@ -42,8 +42,7 @@ function tabgroup:init()
   --self:addstyle(0x02000000)  
   self:setautosize(false, false)
   self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):addornament(ornamentfactory:createfill(0x2F2F2F))      
-  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setpos(0, 0, 10, 10):setalign(window.ALRIGHT)    
-  --icon1:setmargin(5, 5, 5, 5)
+  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setautosize(false, false):setpos(0, 0, 15, 10):setalign(window.ALRIGHT)    
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
@@ -79,8 +78,7 @@ function tabgroup:init()
     self.f:setpos(x + iw - 200, y + ih, 200, h)       
     self.f:show()            
   end  
-  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x2F2F2F))  
-      
+  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x2F2F2F))      
   self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)
   self.children:setclipchildren()
   self.children:addornament(ornamentfactory:createboundfill(0x292929))  
@@ -110,18 +108,14 @@ function tabgroup:restoreflsstate()
   return self
 end
 
-function tabgroup:addpage(page, label)      
-  --self:saveflsstate():preventfls()
+function tabgroup:addpage(page, label)  
   page:setautosize(false, false)
-  page:setautosize(false, false):setalign(window.ALCLIENT)
+  page:setalign(window.ALCLIENT)
   self:createheader(page, label)
   self.children:add(page)  
-  self:setactivepage(page)  
-  --self.tabbar:updatealign()  
-  --self.tabs:updatealign()  
-  --self.children:updatealign()    
-  --self:restoreflsstate()  
-  --self:invalidate()  
+  self:setactivepage(page) 
+  self.tabs:updatealign()
+  self.tabbar:updatealign()
 end
 
 function tabgroup:activepage()
@@ -211,7 +205,7 @@ end
 
 function tabgroup:createheader(page, label)
   local header = group:new(self.tabs):setautosize(true, true)  
-  header:setalign(window.ALLEFT)
+  header:setalign(window.ALLEFT)  
   header.page = page    
   header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
   header.text:setalign(window.ALLEFT):setmargin(5, 5, 5, 5)  
@@ -229,12 +223,15 @@ function tabgroup:createheader(page, label)
     end
   end
   function header:setskinhighlight()        
+    self:setpadding(0, 0, 0, 0)
+	self:removeornaments()
     self:addornament(ornamentfactory:createlineborder(0x696969))    
-    self.text:setcolor(0xA6FF4D) 
+    self.text:setcolor(0xA6FF4D) 	
   end
-  function header:setskinnormal()    
-    self:removeornaments()
-    self.text:setcolor(0xA1A1A1)    
+  function header:setskinnormal()
+    self:setpadding(1, 1, 1, 1)
+    self:removeornaments()	
+    self.text:setcolor(0xA1A1A1)     
   end    
   header:setskinnormal()    
   function header:onmouseenter(ev)    
