@@ -176,7 +176,7 @@ class LineBorder : public ui::Ornament {
     *border = *this;
     return border;
   }
-   
+     
   virtual void Draw(Window& item, Graphics* g, Region& draw_region) {    
     DrawBorder(item, g, draw_region);
   }
@@ -270,6 +270,8 @@ class Wallpaper : public ui::Ornament {
   }
 
   virtual bool transparent() const { return false; }
+
+  virtual bool has_overall_background() const { return true; }
 
  private:
   void DrawWallpaper(Window& item, Graphics* g, Region& draw_region) {

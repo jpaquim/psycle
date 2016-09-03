@@ -277,6 +277,10 @@ Image::Image(const Image& other)
     : imp_(other.imp()->DevClone()), has_file_(other.has_file_) {
 }
 
+Image::~Image() {
+  int fordebugonly(0);
+}
+
 Image& Image::operator=(const Image& other){
 	if (this != &other) {
 		imp_.reset(other.imp()->DevClone());
@@ -293,7 +297,7 @@ void Image::Reset(const ui::Dimension& dimension) {
 void Image::Load(const std::string& filename) {
   assert(imp_.get());
   imp_->DevLoad(filename);
-	filename_ = filename;
+  filename_ = filename;
 }
 
 void Image::Save(const std::string& filename) {
@@ -331,12 +335,12 @@ void Image::Cut(const ui::Rect& bounds) {
 	return imp_->DevCut(bounds);
 }
 
-void Image::SetPixel(ui::Point & pt, ARGB color) {
+void Image::SetPixel(const ui::Point& pt, ARGB color) {
   assert(imp_.get());
   imp_->DevSetPixel(pt, color);
 }
 
-ARGB Image::GetPixel(ui::Point & pt) const {
+ARGB Image::GetPixel(const ui::Point & pt) const {
   assert(imp_.get());
   return imp_->DevGetPixel(pt);	
 }
@@ -353,6 +357,9 @@ void Image::Rotate(float radians) {
 
 // Graphics
 Graphics::Graphics() : imp_(ui::ImpFactory::instance().CreateGraphicsImp()) {
+}
+
+Graphics::Graphics(bool debug) : imp_(ui::ImpFactory::instance().CreateGraphicsImp(debug)) {
 }
 
 Graphics::Graphics(CDC* cr) 
@@ -474,6 +481,10 @@ void Graphics::DrawImage(ui::Image* img, const ui::Rect& position) {
   imp_->DevDrawImage(img, position);  
 }
 
+void Graphics::set_debug_flag() {
+  imp_->DevSetDebugFlag();
+}
+
 void Graphics::DrawImage(ui::Image* img, const ui::Rect& destination_position,
 		                     const ui::Point& src) {
   assert(imp_.get());
@@ -498,10 +509,10 @@ void Graphics::SetClip(ui::Region* rgn) {
   imp_->DevSetClip(rgn);  
 }
 
-CRgn& Graphics::clip() {  
+/*CRgn& Graphics::clip() {  
   assert(imp_.get());
   return imp_->dev_clip();
-}
+}*/
 
 void Graphics::Dispose() {
   assert(imp_.get());
@@ -745,22 +756,22 @@ ui::Dimension Window::dim() const {
 }
 
 void Window::UpdateAutoDimension() {
-	ui::Dimension new_dimension = pos().dimension();
-	bool has_auto_dimension = auto_size_width() || auto_size_height();
-	if (imp_.get()) {    		
-		if (has_auto_dimension) {
-			ui::Dimension auto_dimension = OnCalcAutoDimension();
-			if (auto_size_width()) {
-				new_dimension.set_width(auto_dimension.width());
-			}
-			if (auto_size_height()) {
-				new_dimension.set_height(auto_dimension.height());
-			}
-	  }		
-		imp_->dev_set_pos(ui::Rect(pos().top_left(), new_dimension));
-    FLSEX();		
-    OnSize(new_dimension);    
-		WorkChildPos();
+  ui::Dimension new_dimension = pos().dimension();
+  bool has_auto_dimension = auto_size_width() || auto_size_height();
+  if (has_auto_dimension && imp_.get()) {    				
+	ui::Dimension auto_dimension = OnCalcAutoDimension();
+    if (auto_size_width()) {
+		new_dimension.set_width(auto_dimension.width());
+	}
+	if (auto_size_height()) {
+		new_dimension.set_height(auto_dimension.height());
+	}	  
+	if (overall_pos() != overall_pos(ui::Rect(pos().top_left(), new_dimension))) {
+	    imp_->dev_set_pos(ui::Rect(pos().top_left(), new_dimension));
+        OnSize(new_dimension); 	
+	    WorkChildPos();	  
+	}
+	FLSEX();
   }
 }
 
@@ -1023,18 +1034,24 @@ void Window::remove_style(UINT flag) {
 }
 
 void Window::DrawBackground(Graphics* g, Region& draw_region) {
-	if (draw_region.bounds().height() > 0) {
-		if (!ornaments().empty()) {
-			if (debug_text() == "hg") {
-				int fordebugonly(0);
-			}
-			for (Ornaments::iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
-				if (!(*it).expired()) {					
-          (*it).lock()->Draw(*this, g, draw_region);
-				}
-			}
+  if (draw_region.bounds().height() > 0) {					
+    for (Ornaments::iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
+	  if (!(*it).expired()) {					
+        (*it).lock()->Draw(*this, g, draw_region);
+	  }
+    }
+  }  
+}
+
+bool Window::has_overall_background() const {
+  bool result = false;
+  for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
+    if (!(*it).expired() && ((*it).lock()->has_overall_background())) {						  
+	   result = true;
+	   break;
     }
   }
+  return result;
 }
 
 const Region& Window::clip() const {
@@ -1163,6 +1180,11 @@ void Group::Remove(const Window::Ptr& item) {
 }
 
 ui::Dimension Group::OnCalcAutoDimension() const {	
+	if (!auto_size_width() && !auto_size_height()) {
+		int fordebugonly(0);
+	}
+
+
 	ui::Rect result(ui::Point((std::numeric_limits<double>::max)(),
 	 						    (std::numeric_limits<double>::max)()),
                   ui::Point((std::numeric_limits<double>::min)(),
@@ -1227,7 +1249,7 @@ Window::Ptr Group::HitTest(double x, double y) {
 
 void Group::OnChildPos(ChildPosEvent& ev) {
   if (auto_size_width() || auto_size_height()) {
-    ev.window()->needsupdate();    		
+      ev.window()->needsupdate();    		
 		ui::Dimension new_dimension = OnCalcAutoDimension();
 		if (!auto_size_width()) {
 			new_dimension.set_width(pos().width());
@@ -2338,6 +2360,11 @@ ui::Graphics* Systems::CreateGraphics(void* dc) {
   return concrete_factory_->CreateGraphics(dc); 
 }
 
+ui::Graphics* Systems::CreateGraphics(bool debug) { 
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateGraphics(debug); 
+}
+
 ui::Image* Systems::CreateImage() { 
   assert(concrete_factory_.get());
   return concrete_factory_->CreateImage(); 
@@ -2559,6 +2586,11 @@ ui::GraphicsImp* ImpFactory::CreateGraphicsImp() {
   return concrete_factory_->CreateGraphicsImp(); 
 }
 
+ui::GraphicsImp* ImpFactory::CreateGraphicsImp(bool debug) {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateGraphicsImp(debug); 
+}
+
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp(CDC* cr) {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(cr); 
@@ -2590,8 +2622,11 @@ void StyleSheet::parse(ui::Window & window) {
 	}
 }
 
-Alert::Alert(const std::string& text) 
-	  : imp_(ui::ImpFactory::instance().CreateAlertImp()) {
+AlertBox::AlertBox() 
+	  : imp_(ui::ImpFactory::instance().CreateAlertImp()) {	
+}
+
+void AlertBox::OpenMessageBox(const std::string& text) {
 	imp_->DevAlert(text);
 }
 

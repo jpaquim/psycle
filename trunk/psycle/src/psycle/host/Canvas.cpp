@@ -421,7 +421,7 @@ void Canvas::OnSize(const ui::Dimension& dimension) {
   try {    
     UpdateAlign();    
   } catch (std::exception& e) {
-    ui::Alert(e.what());
+    ui::alert(e.what());
   }
 }
 
@@ -439,7 +439,7 @@ void Canvas::WorkOnFocus(Event& ev) {
       OnFocus(ev);  
     }
   } catch (std::exception& e) {
-    ui::Alert(e.what());
+    ui::alert(e.what());
     error(e);    
   }
 }

@@ -53,8 +53,8 @@ void LuaControl::Load(const std::string& filename) {
 void LuaControl::Run() {  
   int status = lua_pcall(L, 0, LUA_MULTRET, 0);
   if (status) {         
-    const char* msg = lua_tostring(L, -1);        
-    AfxMessageBox(msg);
+    const char* msg = lua_tostring(L, -1); 
+    ui::alert(msg);
     throw std::runtime_error(msg);       
   } 
 }

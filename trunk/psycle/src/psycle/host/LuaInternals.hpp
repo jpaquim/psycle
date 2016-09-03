@@ -681,8 +681,11 @@ struct LuaActionListenerBind {
       static int mkdir(lua_State* L);
       static int isdirectory(lua_State* L);
       static int filetree(lua_State* L);
+	  static int directorylist(lua_State* L);	  
+	  static int parentdirectory(lua_State* L);
       static int remove(lua_State* L);
       static int rename(lua_State* L);
+	  static int createfileinfo(lua_State* L, boost::filesystem::path curr);
   };
 
   struct LuaMidiHelper {
