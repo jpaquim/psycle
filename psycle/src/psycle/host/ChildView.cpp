@@ -519,7 +519,7 @@ namespace psycle { namespace host {
 				sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%p\n",(void*)bmpDC);
 				TRACE(buf);
 			}
-			CDC bufDC;
+			CDC bufDC;			
 			bufDC.CreateCompatibleDC(&dc);
 			CBitmap* oldbmp;
 			oldbmp = bufDC.SelectObject(bmpDC);

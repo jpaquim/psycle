@@ -531,7 +531,7 @@ class Image {
   Image();
   Image(const Image& other);
   Image& operator=(const Image& other);
-  virtual ~Image() {};
+  virtual ~Image();
 
   ImageImp* imp() { return imp_.get(); }
   const ImageImp* imp() const { return imp_.get(); }
@@ -545,16 +545,16 @@ class Image {
   std::auto_ptr<ui::Graphics> graphics();
   void Cut(const ui::Rect& bounds);
 
-  void SetPixel(ui::Point& pt, ARGB color);
-  ARGB GetPixel(ui::Point& pt) const;
+  void SetPixel(const ui::Point& pt, ARGB color);
+  ARGB GetPixel(const ui::Point& pt) const;
 
   virtual void Resize(const ui::Dimension& dimension);
   virtual void Rotate(float radians);
 
  private:
   std::auto_ptr<ImageImp> imp_;	 
-	std::string filename_;
-	bool has_file_;
+  std::string filename_;
+  bool has_file_;
 };
 
 class ImageImp {
@@ -570,8 +570,8 @@ class ImageImp {
   virtual ui::Dimension dev_dim() const = 0;  
   virtual ui::Graphics* dev_graphics() = 0;
   virtual void DevCut(const ui::Rect& bounds) = 0;
-  virtual void DevSetPixel(ui::Point& pt, ARGB color) = 0;
-  virtual ARGB DevGetPixel(ui::Point& pt) const = 0;
+  virtual void DevSetPixel(const ui::Point& pt, ARGB color) = 0;
+  virtual ARGB DevGetPixel(const ui::Point& pt) const = 0;
 
   virtual void DevResize(const ui::Dimension& dimension) = 0;
   virtual void DevRotate(float radians) = 0;
@@ -619,6 +619,7 @@ friend class Group;
   typedef boost::weak_ptr<Graphics> WeakPtr;
   typedef boost::weak_ptr<const Graphics> ConstWeakPtr;
   Graphics(); 
+  Graphics(bool); 
   Graphics(CDC* cr);
 
   virtual ~Graphics() {}
@@ -657,10 +658,12 @@ friend class Group;
 		                     const ui::Point& zoom_faktor);
   virtual void SetClip(const ui::Rect& rect);
   virtual void SetClip(ui::Region* rgn);
-  virtual CRgn& clip();
+  // virtual CRgn& clip();
   virtual void Dispose();
 	void AttachImage(ui::Image* image);
   virtual CDC* dc();  // just for testing right now
+
+  void set_debug_flag();
 
  private:
   std::auto_ptr<GraphicsImp> imp_;
@@ -717,13 +720,20 @@ class Commands {
 
 class AlertImp;
 
-class Alert {
- public:
-	 Alert(const std::string& text);
 
+class AlertBox {
+ public:	 
+	 AlertBox();
+
+	 void OpenMessageBox(const std::string& text);
  private:
 	 std::auto_ptr<AlertImp> imp_;
 };
+
+inline void alert(const std::string& text) {
+	AlertBox alert_box;
+	alert_box.OpenMessageBox(text);
+}
 
 class AlertImp {
  public:
@@ -895,6 +905,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	}
 	virtual bool auto_size_width() const;
 	virtual bool auto_size_height() const;
+	bool auto_size() const { return auto_size_width() && auto_size_height(); }
 	virtual void SetClip(const ui::Rect& rect) {}
 	virtual bool has_clip() const { return false; }
 	const Region& clip() const;
@@ -989,6 +1000,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 		return result;		
  }
   
+ virtual bool has_overall_background() const;
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
   virtual void WorkMouseUp(MouseEvent& ev) { OnMouseUp(ev); }
@@ -1005,6 +1017,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   mutable bool update_;
   mutable std::auto_ptr<Area> area_;  
   mutable std::auto_ptr<Area> fls_area_;
+    
  private:
 	ui::BoxSpace sum_border_space() const;
   std::auto_ptr<WindowImp> imp_;
@@ -1243,6 +1256,8 @@ class Ornament {
   virtual std::auto_ptr<ui::Rect> padding() const { return std::auto_ptr<ui::Rect>(); }
 
   virtual ui::BoxSpace preferred_space() const { return ui::BoxSpace(); }
+
+  virtual bool has_overall_background() const { return false; }
 };
 
 inline Ornament::~Ornament() {}
@@ -1894,7 +1909,9 @@ class Scintilla : public Window {
   void ShowCaretLine();
   void HideCaretLine();
   void set_caret_line_background_color(ARGB color);
-	void ClearAll();
+  void ClearAll();
+
+  virtual bool has_overall_background() const { return true; }
 
  private:
   static std::string dummy_str_;
@@ -2012,6 +2029,7 @@ class Systems {
 
   virtual ui::Region* CreateRegion();
   virtual ui::Graphics* CreateGraphics();
+  virtual ui::Graphics* CreateGraphics(bool debug);
   virtual ui::Graphics* CreateGraphics(void* dc);
   virtual ui::Image* CreateImage();
   virtual ui::Font* CreateFont();
@@ -2045,6 +2063,7 @@ class GraphicsImp {
   GraphicsImp() {}
   virtual ~GraphicsImp() {}
 
+  virtual void DevSetDebugFlag() = 0;
   virtual void DevCopyArea(const ui::Rect& rect, const ui::Point& delta) = 0;
   virtual void DevDrawArc(const ui::Rect& rect, const Point& start, const Point& end) = 0;
   virtual void DevDrawLine(const ui::Point& p1, const ui::Point& p2) = 0;
@@ -2084,7 +2103,7 @@ class GraphicsImp {
 		                        const ui::Point& zoom_factor) = 0;
   virtual void DevSetClip(const ui::Rect& rect) = 0;
   virtual void DevSetClip(ui::Region* rgn) = 0;
-  virtual CRgn& dev_clip() = 0;
+  // virtual CRgn& dev_clip() = 0;
   virtual void DevDispose() = 0;
   virtual CDC* dev_dc() = 0;
   virtual void DevSaveOrigin() = 0;
@@ -2382,6 +2401,7 @@ class ImpFactory {
   virtual ui::ScintillaImp* CreateScintillaImp();
   virtual ui::RegionImp* CreateRegionImp();
   virtual ui::FontImp* CreateFontImp();
+  virtual ui::GraphicsImp* CreateGraphicsImp(bool debug);
   virtual ui::GraphicsImp* CreateGraphicsImp();
   virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr);
   virtual ui::ImageImp* CreateImageImp();

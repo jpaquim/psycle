@@ -41,7 +41,7 @@ function tabgroup:init()
   --self:setclipchildren()
   --self:addstyle(0x02000000)  
   self:setautosize(false, false)
-  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):addornament(ornamentfactory:createfill(0x2F2F2F))      
+  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):addornament(ornamentfactory:createfill(0x232323)):setpadding(2, 0, 2, 2)
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setautosize(false, false):setpos(0, 0, 15, 10):setalign(window.ALRIGHT)    
   local that = self
   self:inittabpopupmenu()
@@ -78,10 +78,10 @@ function tabgroup:init()
     self.f:setpos(x + iw - 200, y + ih, 200, h)       
     self.f:show()            
   end  
-  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x2F2F2F))      
+  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x232323))      
   self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)
-  self.children:setclipchildren()
-  self.children:addornament(ornamentfactory:createboundfill(0x292929))  
+  --self.children:setclipchildren()
+  self.children:addornament(ornamentfactory:createboundfill(0x232323))  
 end
 
 function tabgroup:setlabel(page, text)
@@ -224,28 +224,29 @@ function tabgroup:createheader(page, label)
   end
   function header:setskinhighlight()        
     self:setpadding(0, 0, 0, 0)
-	self:removeornaments()
-    self:addornament(ornamentfactory:createlineborder(0x696969))    
-    self.text:setcolor(0xA6FF4D) 	
+	self:removeornaments()    
+	self:addornament(ornamentfactory:createfill(0x333333)) 
+	self:addornament(ornamentfactory:createlineborder(0x696969))    
+    self.text:setcolor(0xFFFFFF) 	
   end
   function header:setskinnormal()
     self:setpadding(1, 1, 1, 1)
     self:removeornaments()	
-    self.text:setcolor(0xA1A1A1)     
+    self.text:setcolor(0xC0C0C0)     
   end    
   header:setskinnormal()    
   function header:onmouseenter(ev)    
     if self.page == that:activepage() then
-	  self.text:setcolor(0xB6FF5D) 
+	  self.text:setcolor(0xFFFFFF) 
 	else
 	  self.text:setcolor(0xFFFFFF)    
 	end
   end
   function header:onmouseout(ev)
     if self.page == that:activepage() then
-	  self.text:setcolor(0xA6FF4D) 
+	  self.text:setcolor(0xFFFFFF) 
 	else
-      self.text:setcolor(0xA1A1A1) 	
+      self.text:setcolor(0xC0C0C0) 	
 	end
   end  
   function header:onmousedown(ev)        

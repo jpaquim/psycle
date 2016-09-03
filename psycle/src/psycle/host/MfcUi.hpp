@@ -86,16 +86,7 @@ class ImageImp : public ui::ImageImp {
  public:
   ImageImp() : bmp_(0), shared_(false) {}
   ImageImp(CBitmap* bmp) : bmp_(bmp), shared_(true) {}
-
-  ~ImageImp() {
-    if (!shared_ && bmp_) {
-      bmp_->DeleteObject();
-      delete bmp_;
-    }    
-    if (mask_.m_hObject) {
-      mask_.DeleteObject();
-    }
-  }
+  ~ImageImp() { Dispose(); }
 
   virtual ImageImp* DevClone() const {		
 		ImageImp* clone = new ImageImp();
@@ -122,10 +113,10 @@ class ImageImp : public ui::ImageImp {
   void DevReset(const ui::Dimension& dimension);	
 
   virtual void DevLoad(const std::string& filename) {
-		Dispose();
+	Dispose();
     CImage image;
     HRESULT r;		
-		r = image.Load(Charset::utf8_to_win(filename).c_str());
+	r = image.Load(Charset::utf8_to_win(filename).c_str());
     if (r!=S_OK) throw std::runtime_error(std::string("Error loading file:") + filename.c_str());    
     bmp_ = new CBitmap();
     bmp_->Attach(image.Detach());    
@@ -139,7 +130,7 @@ class ImageImp : public ui::ImageImp {
 			image.Detach();
 			if (r != S_OK) throw std::runtime_error(std::string("Error saving file:") + filename.c_str());
 		}
-  }	
+	}	
 	void SetBitmap(CBitmap* bmp) {
 		if (!shared_ && bmp_) {
       bmp_->DeleteObject();
@@ -148,9 +139,9 @@ class ImageImp : public ui::ImageImp {
 		bmp_ = bmp;
 	}
 	void FromHandle(HBITMAP handle) {
-		Dispose();				
-		bmp_ = new CBitmap();
-		bmp_->FromHandle(handle);
+	  Dispose();				
+	  bmp_ = new CBitmap();
+	  bmp_->FromHandle(handle);
 	}
   virtual ui::Dimension dev_dim() const {
     ui::Dimension image_dim;
@@ -194,7 +185,7 @@ class ImageImp : public ui::ImageImp {
 		bmp_ = clone_bmp;
 	}
 
-	virtual void DevSetPixel(ui::Point& pt, ARGB color) {
+	virtual void DevSetPixel(const ui::Point& pt, ARGB color) {
 		CDC src_dc;
 		src_dc.CreateCompatibleDC(NULL);
 		CBitmap* old_bmp_src = src_dc.SelectObject(bmp_);
@@ -204,7 +195,7 @@ class ImageImp : public ui::ImageImp {
 		::ReleaseDC(NULL, src_dc);
 	}
 
-	virtual ARGB DevGetPixel(ui::Point& pt) const {
+	virtual ARGB DevGetPixel(const ui::Point& pt) const {
 	  CDC src_dc;
 	  src_dc.CreateCompatibleDC(NULL);
 	  CBitmap* old_bmp_src = src_dc.SelectObject(bmp_);
@@ -357,12 +348,17 @@ class ImageImp : public ui::ImageImp {
 	}
 
  private:
-	void Dispose() {
-		if (!shared_ && bmp_) {
-      bmp_->DeleteObject();
-    }
-    shared_ = false;
+  void Dispose() {
+	if (!shared_ && bmp_) {
+	  bmp_->DeleteObject();
+	  delete bmp_;
+	  bmp_ = 0;
 	}
+	if (mask_.m_hObject) {
+	  mask_.DeleteObject();
+	}
+	shared_ = false;
+  }
   void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);    
 	virtual ui::Graphics* dev_graphics();
 
@@ -454,11 +450,11 @@ class FontImp : public ui::FontImp {
 #else
     strcpy(lfLogFont.lfFaceName, "Arial");
 #endif
-    cfont_.CreateFontIndirect(&lfLogFont);  
+    cfont_ = ::CreateFontIndirect(&lfLogFont);  
   }
   
   virtual ~FontImp() {
-    cfont_.DeleteObject();
+    ::DeleteObject(cfont_);
   }
 
   virtual FontImp* DevClone() const { 
@@ -480,25 +476,25 @@ class FontImp : public ui::FontImp {
 #else
     strcpy(lfLogFont.lfFaceName,Charset:: utf8_to_win(info.name).c_str());
 #endif    
-    cfont_.DeleteObject();
-    cfont_.CreateFontIndirect(&lfLogFont);
+    ::DeleteObject(cfont_);
+    cfont_ = ::CreateFontIndirect(&lfLogFont);
   }
 
   virtual FontInfo dev_info() const {
     LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));
-    cfont_.GetLogFont(&lfLogFont);
-    FontInfo info;
+    memset(&lfLogFont, 0, sizeof(lfLogFont));		
+	::GetObject(cfont_, sizeof(LOGFONT), &lfLogFont);
+    FontInfo info;	
     info.height = lfLogFont.lfHeight;
     info.name = Charset::win_to_utf8(lfLogFont.lfFaceName);
     info.bold = (lfLogFont.lfWeight == FW_BOLD);
     return info;
   }
 
-  CFont& cfont() const { return cfont_; }
+  HFONT cfont() const { return cfont_; }
 
  private:
-   mutable CFont cfont_;
+   mutable HFONT cfont_;
 };
 
 // ==============================================
@@ -506,16 +502,16 @@ class FontImp : public ui::FontImp {
 // ==============================================
 
 class GraphicsImp : public ui::GraphicsImp {
- public:
+ public:  
   GraphicsImp() 
       : hScreenDC(::GetDC(0)),
         cr_(CDC::FromHandle(hScreenDC)),      
         rgb_color_(0xFFFFFF),
         argb_color_(0xFFFFFF),
-        brush(rgb_color_),
         updatepen_(false),
         updatebrush_(false),
-				pen_width_(1) {       
+        pen_width_(1),
+        debug_flag_(false) {       
     Init();     
   }
 
@@ -523,15 +519,51 @@ class GraphicsImp : public ui::GraphicsImp {
       : hScreenDC(0),
         cr_(cr),
         rgb_color_(0xFFFFFF),
-        argb_color_(0xFFFFFF),
-        brush(rgb_color_),
+        argb_color_(0xFFFFFF),		
         updatepen_(false),
         updatebrush_(false),
-        pen_width_(1) {
+        pen_width_(1),
+        debug_flag_(false) {
     Init();
   }
 
+  GraphicsImp(bool debug) : 
+	    hScreenDC(::GetDC(0)),
+        cr_(CDC::FromHandle(hScreenDC)),      
+        rgb_color_(0xFFFFFF),
+        argb_color_(0xFFFFFF),		
+        updatepen_(false),
+        updatebrush_(false),
+        pen_width_(1),
+        debug_flag_(true) {	
+    cr_->SetTextColor(rgb_color_);
+	 pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
+     old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
+	 brush = ::CreateSolidBrush(rgb_color_);			      	 
+     old_brush = (HBRUSH)::SelectObject(cr_->m_hDC, brush);
+	 mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+     assert(imp);
+     old_font = (HFONT) SelectObject(cr_->m_hDC, imp->cfont());
+	 old_rgn_ =  ::CreateRectRgn(0, 0, 0, 0);
+     clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);    
+  }
+
   virtual ~GraphicsImp() {    
+	if (debug_flag_) {
+	  ::SelectObject(cr_->m_hDC, old_pen);
+      ::DeleteObject(pen);
+	  ::SelectObject(cr_->m_hDC, old_brush);
+      ::DeleteObject(brush);
+	  ::SelectObject(cr_->m_hDC, old_font);
+	  ::DeleteObject(old_rgn_);
+	  ::DeleteObject(clp_rgn_);      
+	/*  cr_->SelectObject(old_brush);
+      brush.DeleteObject();*/
+	 if (hScreenDC) {      
+       ReleaseDC(0, hScreenDC);      
+    }
+	return;
+	}
     if (cr_) {
       DevDispose();
     }
@@ -541,20 +573,26 @@ class GraphicsImp : public ui::GraphicsImp {
   }
 
   virtual void DevDispose() {
-    cr_->SelectObject(old_pen);
-    pen.DeleteObject();
-    brush.DeleteObject();
+    ::SelectObject(cr_->m_hDC, old_pen);
+    ::DeleteObject(pen);
+	::SelectObject(cr_->m_hDC, old_brush);
+    ::DeleteObject(brush);
+	::SelectObject(cr_->m_hDC, old_font);
     cr_->SetGraphicsMode(GM_ADVANCED);
     cr_->SetWorldTransform(&rXform);
     cr_->SelectObject(old_font);
     cr_->SetBkMode(OPAQUE);
-    cr_->SelectClipRgn(&old_rgn_);
-		if (old_bpm_) {
-			cr_->SelectObject(old_bpm_);
-		}
-    old_rgn_.DeleteObject();
-    clp_rgn_.DeleteObject();
+    ::SelectClipRgn(cr_->m_hDC, old_rgn_);
+    if (old_bpm_) {
+       cr_->SelectObject(old_bpm_);
+     }
+    ::DeleteObject(old_rgn_);
+	::DeleteObject(clp_rgn_);    
     cr_ = 0;
+  }
+
+  virtual void DevSetDebugFlag() {
+	  debug_flag_ = true;
   }
 
   void DevDrawString(const std::string& str, double x, double y) {
@@ -675,17 +713,18 @@ class GraphicsImp : public ui::GraphicsImp {
     ui::Points::const_iterator it = points.begin();
     const int size = points.size();
     for (; it!=points.end(); ++it) {
-			lpPoints.push_back(TypeConverter::point(*it));
+      lpPoints.push_back(TypeConverter::point(*it));
     }
     cr_->Polyline(&lpPoints[0], size);
   }
 
   void DevSetFont(const ui::Font& font) {
+	::SelectObject(cr_->m_hDC, old_font);
     font_ = font;
     mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
     assert(imp);
-    cr_->SelectObject(imp->cfont());
-    cr_->SetTextColor(rgb_color_);    
+    ::SelectObject(cr_->m_hDC, imp->cfont());
+    ::SetTextColor(cr_->m_hDC, rgb_color_);    
   }
 
   const Font& dev_font() const { return font_; }
@@ -787,22 +826,23 @@ class GraphicsImp : public ui::GraphicsImp {
 
   void DevSetClip(ui::Region* rgn);
 
-  CRgn& dev_clip() {
+  /*CRgn& dev_clip() {
     HDC hdc = cr_->m_hDC;
     ::GetRandomRgn(hdc, clp_rgn_, SYSRGN);
     POINT pt = {0,0};
     // todo test this on different windows versions
     HWND hwnd = ::WindowFromDC(hdc);
     ::MapWindowPoints(NULL, hwnd, &pt, 1);
-    clp_rgn_.OffsetRgn(pt.x, pt.y);
+    ::OffsetRgn(clp_rgn_, pt.x, pt.y);
     return clp_rgn_;
-  }
+  }*/
 
   void check_pen_update() {
     if (updatepen_) { 
-      pen.DeleteObject();
-      pen.CreatePen(PS_SOLID | PS_COSMETIC, pen_width_, rgb_color_);
-      cr_->SelectObject(&pen);
+	   ::SelectObject(cr_->m_hDC, old_pen);
+      ::DeleteObject(pen);
+      pen = CreatePen(PS_SOLID | PS_COSMETIC, pen_width_, rgb_color_);
+      old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
       cr_->SetTextColor(rgb_color_);
       updatepen_ = false;
     }
@@ -810,9 +850,10 @@ class GraphicsImp : public ui::GraphicsImp {
 
   void check_brush_update() {
     if (updatebrush_) {
-      brush.DeleteObject();
-      brush.CreateSolidBrush(rgb_color_);			
-      cr_->SelectObject(&brush);    
+	  ::SelectObject(cr_->m_hDC, old_brush);
+      DeleteObject(brush);
+      brush = ::CreateSolidBrush(rgb_color_);			
+	  old_brush = (HBRUSH) ::SelectObject(cr_->m_hDC, brush);      
       updatebrush_ = false;
     }
   }
@@ -843,28 +884,27 @@ class GraphicsImp : public ui::GraphicsImp {
   private:
    void Init() {
      assert(cr_);
-		 old_bpm_ = 0;
-     pen.CreatePen(PS_SOLID, 1, rgb_color_);
-     cr_->SetTextColor(rgb_color_);
-     old_pen = cr_->SelectObject(&pen);
-     old_brush = cr_->SelectObject(&brush);
+	 old_bpm_ = 0;
+	 cr_->SetTextColor(rgb_color_);
+	 pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
+     old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
+	 brush = ::CreateSolidBrush(rgb_color_);			      	 
+     old_brush = (HBRUSH)::SelectObject(cr_->m_hDC, brush);
      cr_->GetWorldTransform(&rXform);    
      cr_->SetBkMode(TRANSPARENT);
     
      mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
      assert(imp);
-     old_font = (CFont*) cr_->SelectObject(&imp->cfont());
-     old_rgn_.CreateRectRgn(0, 0, 0, 0);
-     clp_rgn_.CreateRectRgn(0, 0, 0, 0);
+     old_font = (HFONT) ::SelectObject(cr_->m_hDC, imp->cfont());
+     old_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
+     clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
      ::GetRandomRgn(cr_->m_hDC, old_rgn_, SYSRGN);
      POINT pt = {0,0};
      HWND hwnd = ::WindowFromDC(cr_->m_hDC);
      ::MapWindowPoints(NULL, hwnd, &pt, 1);
-     old_rgn_.OffsetRgn(pt);  		 
+     ::OffsetRgn(old_rgn_, pt.x, pt.y);  		 
    }
-
-   
-   
+      
    void TransparentBlt(CDC* pDC,
      int xStart,
      int yStart,
@@ -877,18 +917,19 @@ class GraphicsImp : public ui::GraphicsImp {
    );
    HDC hScreenDC;
    CDC* cr_;   
-   CPen pen, *old_pen;
-   CBrush brush, *old_brush;
+   HPEN pen, old_pen;
+   HBRUSH brush, old_brush;
    ui::Font font_;
-   CFont* old_font;
+   HFONT old_font;
    ARGB argb_color_;
    RGB rgb_color_;
    bool updatepen_, updatebrush_;
    XFORM rXform;
    std::stack<XFORM> saveXform;
-   CRgn old_rgn_, clp_rgn_;
-	 CBitmap* old_bpm_;
+   HRGN old_rgn_, clp_rgn_;
+   CBitmap* old_bpm_;
    int pen_width_;
+   bool debug_flag_;
 };
 
 inline void GraphicsImp::TransparentBlt(CDC* pDC,
@@ -985,24 +1026,25 @@ class WindowTemplateImp : public T, public I {
   }
   virtual void DevEnable() { EnableWindow(true); }
   virtual void DevDisable() { EnableWindow(false); }
-  virtual void DevShow() { 		
-		ShowWindow(SW_SHOWNORMAL); 
-	}
+  virtual void DevShow() { ShowWindow(SW_SHOWNORMAL); }
   virtual void DevHide() { ShowWindow(SW_HIDE); }
-  virtual void DevInvalidate() {    		
-		if (window() && window()->root()) {
-      CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());			
-			::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
-		}    
+  virtual void DevInvalidate() {    			  
+	if (window() && window()->root()) {
+      CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());	
+	  ::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
+	}
   }
-  virtual void DevInvalidate(const ui::Region& rgn) {
+  virtual void DevInvalidate(const ui::Region& rgn) {	  	  
     if (m_hWnd) {
       mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
       assert(imp);	
-			if (window() && window()->root()) {
-        CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());											
-				::RedrawWindow(m_hWnd, NULL, imp->crgn(), RDW_INVALIDATE | RDW_ERASE);
-			}
+      if (window() && window()->root()) {
+		int flag =  RDW_INVALIDATE;
+		if (!window()->has_overall_background()) {
+			flag |= RDW_ERASE;
+		}
+		::RedrawWindow(m_hWnd, NULL, imp->crgn(), flag);
+      }
     }
   }
   virtual void DevSetCapture() { SetCapture(); }  
@@ -1085,7 +1127,7 @@ protected:
       try {
         (window->*ptmember)(ev);        
       } catch (std::exception& e) {
-        Alert(e.what());
+        alert(e.what());
       }
       if (!::IsWindow(msg->hwnd)) {
         return true;
@@ -1711,7 +1753,7 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
       WindowTemplateImp<CListCtrl, ui::ListViewImp>(), 
       is_editing_(false),
       column_pos_(0) {
-    m_imageList.Create(22, 22, ILC_COLOR32, 1, 1);
+    m_imageList.Create(16, 16, ILC_COLOR32, 1, 1);
   }
   static ListViewImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     ListViewImp* imp = new ListViewImp();
@@ -1757,19 +1799,19 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   virtual void dev_set_images(const ui::Images::Ptr& images) {
     ui::Images::iterator it = images->begin();
     for (; it != images->end(); ++it) {
-			Image::Ptr image = *it;
-			assert(image->imp());			
-			ImageImp* imp = dynamic_cast<ImageImp*>(image->imp());
-			assert(imp);
-      m_imageList.Add(imp->dev_source(),  (COLORREF)0xFFFFFF);    
+	  Image::Ptr image = *it;
+	  assert(image->imp());			
+	  ImageImp* imp = dynamic_cast<ImageImp*>(image->imp());
+	  assert(imp);
+      m_imageList.Add(imp->dev_source(),  static_cast<COLORREF>(0xFFFFFF));    
     }
-    SetImageList(&m_imageList, TVSIL_NORMAL);
+    SetImageList(&m_imageList, LVSIL_SMALL);
   }
   virtual void DevViewList() { 
-	  ::SendMessage(this->m_hWnd, LVM_SETVIEW, (WPARAM)LV_VIEW_LIST, 0);	   
+	::SendMessage(this->m_hWnd, LVM_SETVIEW, (WPARAM)LV_VIEW_LIST, 0);	   
   }
   virtual void DevViewReport() { 
-	  this->ModifyStyle(0, LVS_REPORT, 0);	  
+	this->ModifyStyle(0, LVS_REPORT, 0);	  
   }
   virtual void DevViewIcon() { 
 	  ::SendMessage(this->m_hWnd, LVM_SETVIEW, (WPARAM)LV_VIEW_ICON, 0);	   
@@ -1935,7 +1977,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     if (!CreateEx(0, 
         _T("scintilla"),
          _T(""), 
-        WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_CLIPCHILDREN
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP
         , CRect(0, 0, 0, 0),
         pParentWnd,
         nID,
@@ -2154,6 +2196,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   }
  
   BOOL OnFolder(NMHDR * nhmdr,LRESULT *);  
+  BOOL OnEraseBkgnd(CDC* pDC) { return true; }
 
   DECLARE_MESSAGE_MAP(); 
 
@@ -2203,6 +2246,7 @@ class Systems : public ui::Systems {
  public:
   virtual ui::Region* CreateRegion() { return new ui::Region(); }
   virtual ui::Graphics* CreateGraphics() { return new ui::Graphics(); }
+  virtual ui::Graphics* CreateGraphics(bool debug) { return new ui::Graphics(debug); }
   virtual ui::Graphics* CreateGraphics(void* dc) { return new ui::Graphics((CDC*) dc); }
   virtual ui::Image* CreateImage() { return new ui::Image(); }  
   virtual ui::Window* CreateWin() { 
@@ -2305,6 +2349,9 @@ class ImpFactory : public ui::ImpFactory {
   }
   virtual ui::GraphicsImp* CreateGraphicsImp() {     
     return new ui::mfc::GraphicsImp();
+  }  
+  virtual ui::GraphicsImp* CreateGraphicsImp(bool debug) {     
+    return new ui::mfc::GraphicsImp(debug);
   }  
   virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr) {     
     return new ui::mfc::GraphicsImp(cr);

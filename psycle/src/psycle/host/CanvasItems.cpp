@@ -82,8 +82,11 @@ ui::Dimension Text::OnCalcAutoDimension() const {
 
 void Text::set_text(const std::string& text) {  
   text_ = text;
-	PrepareAutoDimensionUpdate();
-	UpdateAutoDimension();
+  if (auto_size()) {
+    PrepareAutoDimensionUpdate();
+    UpdateAutoDimension();
+  }
+  FLSEX();
 }
 
 void Text::set_font(const Font& font) {  
@@ -125,8 +128,8 @@ void Text::CalculateAlignmentAndJustify() const {
 }
 
 void Text::CalculateAutoDimension() const {
-	if (!is_auto_dimension_calculated_) {
-		Graphics g;
+	if (!is_auto_dimension_calculated_) {		
+		Graphics g;		
 		g.SetFont(font_);
 		auto_dimension_cache_ = g.text_size(text_);
 		is_auto_dimension_calculated_ = true;
@@ -256,10 +259,10 @@ void Splitter::OnMouseMove(MouseEvent& ev) {
 			if (drag_pos_ != ev.cy()) {
 				drag_pos_ = ev.cy();
 				ui::Rect item_pos = item_->pos();
-				PreventFls();
+				//PreventFls();
 				item_pos.set_height(item_client_pos_ - drag_pos_);
 				item_->set_pos(item_pos);
-				EnableFls();
+				//EnableFls();
 				dynamic_cast<ui::Group*>(parent())->UpdateAlign();
 			}
 		} else {
@@ -267,7 +270,7 @@ void Splitter::OnMouseMove(MouseEvent& ev) {
 				if (drag_pos_ != ev.cx()) {
 					drag_pos_ = ev.cx();
 					ui::Rect item_pos = item_->pos();
-					// PreventFls();
+					PreventFls();
 					if (align() == ALLEFT) {
 						item_pos.set_width(drag_pos_ - item_client_pos_);
 						item_->set_pos(item_pos);
@@ -275,8 +278,8 @@ void Splitter::OnMouseMove(MouseEvent& ev) {
 						item_pos.set_width(item_client_pos_ - drag_pos_);
 						item_->set_pos(item_pos);
 					}
-					// EnableFls();
-					dynamic_cast<ui::Group*>(parent())->UpdateAlign();					
+					EnableFls();
+					dynamic_cast<ui::Group*>(parent())->UpdateAlign();										
 				}
 			}
 		}

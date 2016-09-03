@@ -258,7 +258,7 @@ void LuaFrameWnd::OnClose() {
       in << pcall(0);      
     } 
   } catch (std::exception& e) {
-    AfxMessageBox(e.what());    
+    ui::alert(e.what());		
   }    
   lua_gc(L, LUA_GCCOLLECT, 0);  
 }
@@ -270,7 +270,7 @@ void LuaFrameWnd::OnShow() {
       in << pcall(0);      
     } 
   } catch (std::exception& e) {
-    AfxMessageBox(e.what());    
+    ui::alert(e.what());   
   }  
 }
 
@@ -284,7 +284,7 @@ void LuaFrameWnd::OnContextPopup(ui::Event& ev, const ui::Point& mouse_point, co
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -296,7 +296,7 @@ void LuaPopupFrameWnd::OnClose() {
       in << pcall(0);      
     } 
   } catch (std::exception& e) {
-    AfxMessageBox(e.what());    
+    ui::alert(e.what());   
   }    
   lua_gc(L, LUA_GCCOLLECT, 0);  
 }
@@ -308,7 +308,7 @@ void LuaPopupFrameWnd::OnShow() {
       in << pcall(0);      
     } 
   } catch (std::exception& e) {
-    AfxMessageBox(e.what());    
+    ui::alert(e.what());   
   }  
 }
 
@@ -417,7 +417,7 @@ void CanvasItem<T>::OnSize(const ui::Dimension& dimension) {
       in << dimension.width() << dimension.height() << pcall(0);
     }
   } catch(std::exception& e) {
-    AfxMessageBox(e.what());
+    ui::alert(e.what());
   }
 }
 
@@ -433,7 +433,7 @@ ui::Dimension CanvasItem<T>::OnCalcAutoDimension() const {
 			result = T::OnCalcAutoDimension();
     }
 	} catch(std::exception& e) {
-    AfxMessageBox(e.what());
+    ui::alert(e.what());
   }
 	return result;
 }
@@ -447,7 +447,7 @@ void CanvasItem<T>::OnFocus() {
       in.pcall(0);
     }
   } catch(std::exception& e) {
-    AfxMessageBox(e.what());
+    ui::Alert(e.what());
   }
 }*/
 
@@ -460,7 +460,7 @@ void CanvasItem<T>::OnKillFocus() {
       in.pcall(0);
     }
   } catch(std::exception& e) {
-    AfxMessageBox(e.what());
+    ui::alert(e.what());
   }
 }
 
@@ -473,7 +473,7 @@ void LuaTreeView::OnChange(const ui::Node::Ptr& node) {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -485,7 +485,7 @@ void LuaTreeView::OnRightClick(const ui::Node::Ptr& node) {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -497,7 +497,7 @@ void LuaTreeView::OnEditing(const ui::Node::Ptr& node, const std::string& text) 
       in << text << pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -509,7 +509,7 @@ void LuaTreeView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
       in << text << pcall(0);      
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -529,7 +529,7 @@ void LuaTreeView::OnContextPopup(ui::Event& ev, const ui::Point& mouse_point, co
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -542,7 +542,7 @@ void LuaListView::OnChange(const ui::Node::Ptr& node) {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -554,7 +554,7 @@ void LuaListView::OnRightClick(const ui::Node::Ptr& node) {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -566,7 +566,7 @@ void LuaListView::OnEditing(const ui::Node::Ptr& node, const std::string& text) 
       in << text << pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -578,7 +578,7 @@ void LuaListView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
       in << text << pcall(0);      
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -594,7 +594,7 @@ void LuaMenuBar::OnMenuItemClick(boost::shared_ptr<ui::Node> node) {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -607,7 +607,7 @@ void LuaPopupMenu::OnMenuItemClick(boost::shared_ptr<ui::Node> node) {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -674,7 +674,7 @@ void LuaItem::OnSize(double w, double h) {
       in << w << h << pcall(0);
     }
   } catch(std::exception& e) {
-    AfxMessageBox(e.what());
+    ui::alert(e.what());
   }
 }
   
@@ -1893,7 +1893,7 @@ void LuaButton::OnClick() {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-      AfxMessageBox(e.what());    
+      ui::alert(e.what());   
   }
 }
 
@@ -1905,7 +1905,7 @@ void LuaRadioButton::OnClick() {
 		}
 	}
 	catch (std::exception& e) {
-		AfxMessageBox(e.what());
+		ui::alert(e.what());
 	}
 }
 
@@ -1917,7 +1917,7 @@ void LuaGroupBox::OnClick() {
 		}
 	}
 	catch (std::exception& e) {
-		AfxMessageBox(e.what());
+		ui::alert(e.what());
 	}
 }
 
@@ -1928,7 +1928,7 @@ void LuaComboBox::OnSelect() {
       in.pcall(0);
     } 
   } catch (std::exception& e) {
-    AfxMessageBox(e.what());    
+    ui::alert(e.what());   
   }
 }
 

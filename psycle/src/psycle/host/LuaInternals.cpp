@@ -1943,6 +1943,8 @@ int LuaFileHelper::open(lua_State *L) {
     {"mkdir", mkdir},
     {"isdirectory", isdirectory},
     {"filetree", filetree},
+	{"parentdirectory", parentdirectory},
+	{"directorylist", directorylist},
     {"remove", remove},
     {"rename", rename},
     {NULL, NULL}
@@ -1989,6 +1991,91 @@ int LuaFileHelper::rename(lua_State* L) {
     luaL_error(L, e.what());
   }
   return LuaHelper::chaining(L);
+}
+
+int LuaFileHelper::parentdirectory(lua_State* L) {
+  const char* dir_path = luaL_checkstring(L, 1);  
+  using namespace boost::filesystem;    
+  path p(dir_path);
+  try {
+    if (exists(p)) {
+      if (is_regular_file(p)) { // is p a regular file?   
+		lua_pushnil(L); // no directory        
+	  } else 
+      if (is_directory(p)) {        
+		 path parent = p.parent_path();
+		 createfileinfo(L, parent);
+      }
+      else {
+        lua_pushnil(L); // cout << p << " exists, but is neither a regular file nor a directory\n";
+	  }
+    } else {
+      lua_pushnil(L); // does not exist
+	}
+  } catch (const filesystem_error& ex) {
+    lua_pushnil(L);
+  }
+  return 1;
+}
+
+int LuaFileHelper::directorylist(lua_State* L) {
+  const char* dir_path = luaL_checkstring(L, 1);  
+  using namespace boost::filesystem;    
+  path p(dir_path);
+  try {
+    if (exists(p)) {
+      if (is_regular_file(p)) { // is p a regular file?   
+		lua_pushnil(L); // no directory        
+	  } else 
+      if (is_directory(p)) {        
+        typedef std::vector<path> vec;
+        vec v;
+        std::copy(directory_iterator(p), directory_iterator(), std::back_inserter(v));
+        std::sort(v.begin(), v.end());                                   
+		lua_newtable(L);
+		int i = 1;
+        for (vec::const_iterator it (v.begin()); it != v.end(); ++it) {		  
+		  path curr = *it;
+		  OutputDebugString(curr.string().c_str());
+		  if (is_directory(curr)) {
+			createfileinfo(L, curr);
+			lua_rawseti(L, -2, i++);
+		  }		  
+        }		
+		for (vec::const_iterator it (v.begin()); it != v.end(); ++it) {		  
+		  path curr = *it;
+		  if (is_regular_file(curr)) {
+			createfileinfo(L, curr);
+			lua_rawseti(L, -2, i++);
+		  }		  
+        }
+      }
+      else {
+        lua_pushnil(L); // cout << p << " exists, but is neither a regular file nor a directory\n";
+	  }
+    } else {
+      lua_pushnil(L); // does not exist
+	}
+  } catch (const filesystem_error& ex) {
+    lua_pushnil(L);
+  }
+  return 1;
+}
+
+int LuaFileHelper::createfileinfo(lua_State* L, boost::filesystem::path curr) {
+  lua_newtable(L);
+  LuaHelper::setfield(L, "filename", curr.filename().string());
+  if (is_directory(curr)) { 	
+	LuaHelper::setfield(L, "isdirectory", true);			
+    LuaHelper::setfield(L, "extension", "");	
+  }	else 
+  if (is_regular_file(curr)) {		
+	LuaHelper::setfield(L, "isdirectory", false);            
+    LuaHelper::setfield(L, "extension", curr.extension().string());	
+  }		  
+  curr.remove_filename();
+  LuaHelper::setfield(L, "path", curr.string());			  
+  return 1;
 }
 
 int LuaFileHelper::filetree(lua_State* L) {

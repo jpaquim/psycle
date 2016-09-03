@@ -16,7 +16,7 @@ void GraphicsImp::DevFillRegion(const ui::Region& rgn) {
   check_brush_update();        
   mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
   assert(imp);
-  cr_->FillRgn(&imp->crgn(), &brush);
+  ::FillRgn(cr_->m_hDC, imp->crgn(), brush);  
 }
 
 void GraphicsImp::DevSetClip(ui::Region* rgn) {
@@ -231,7 +231,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
         try {
           window()->OnMouseEnter(ev);
         } catch (std::exception& e) {
-          Alert(e.what());      
+          alert(e.what());      
         }      
       }
     }
@@ -387,18 +387,16 @@ void WindowTemplateImp<T, I>::OnNcPaint() {
 
 template<class T, class I>
 BOOL WindowTemplateImp<T, I>::OnEraseBkgnd(CDC * pDC) {
-	if (window()) {		
-		CRect rect;
-		GetClientRect(rect);		
-		CRgn rgn;
-		rgn.CreateRectRgn(rect.left, rect.top, rect.right, rect.bottom);		
-		ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));		
-		ui::Graphics g(pDC);		
-		window()->DrawBackground(&g, draw_rgn);
-		g.Dispose();
-		rgn.DeleteObject();		
-	}
-	return TRUE;
+  if (window()) {		
+	CRect rect;
+	GetWindowRect(rect);					
+    ::MapWindowPoints(HWND_DESKTOP, m_hWnd, (LPPOINT)&rect, 2);		
+	ui::Region draw_rgn(ui::Rect(ui::Point(rect.left, rect.top),
+						ui::Point(rect.right, rect.bottom)));
+	ui::Graphics g(pDC);		
+	window()->DrawBackground(&g, draw_rgn);		
+  }
+  return TRUE;
 }
 
 
@@ -406,7 +404,7 @@ template<class T, class I>
 void WindowTemplateImp<T, I>::OnPaint() {	
   CRgn rgn;
   rgn.CreateRectRgn(0, 0, 0, 0);
-	int result = GetUpdateRgn(&rgn, FALSE);
+  int result = GetUpdateRgn(&rgn, FALSE);
 
   if (!result) {
 		return; // If no area to update, exit
@@ -999,7 +997,7 @@ BOOL ListViewImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
 
 void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos) {  
   LVITEM lvi;
-  lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
+  lvi.mask =  LVIF_TEXT | LVIF_IMAGE;
   lvi.cColumns = 0;
   node_imp->text_ = Charset::utf8_to_win(node.text());
 //  lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
@@ -1009,7 +1007,7 @@ void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& nod
   lvi.pszText = const_cast<char *>(node_imp->text_.c_str());
 #endif
   lvi.iImage = node.image_index();
-  lvi.iItem = pos;
+  lvi.iItem = pos;    
   lvi.iSubItem = 0;
   node_imp->lvi = lvi;
   list->InsertItem(&lvi);  
@@ -1028,7 +1026,7 @@ void ListNodeImp::set_text(ui::mfc::ListViewImp* list, const std::string& text) 
 
 void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level) {
   LVITEM lvi;
-  lvi.mask =  LVIF_TEXT | TVIF_IMAGE;
+  lvi.mask =  LVIF_TEXT | LVIF_IMAGE;
   lvi.cColumns = 0;
   node_imp->text_ = Charset::utf8_to_win(node.text());  
 #ifdef UNICODE
@@ -1260,6 +1258,7 @@ BOOL ScrollBarImp::OnChildNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESUL
 IMPLEMENT_DYNAMIC(ScintillaImp, CWnd)
 
 BEGIN_MESSAGE_MAP(ScintillaImp, CWnd)
+ON_WM_ERASEBKGND()
 ON_NOTIFY_REFLECT_EX(SCN_CHARADDED, OnModified)
 ON_NOTIFY_REFLECT_EX(SCN_MARGINCLICK, OnFolder)         
 END_MESSAGE_MAP()

@@ -25,7 +25,7 @@
 }*/
 
 
-// #include <vld.h>
+#include <vld.h>
 
 #include <sstream>
 
