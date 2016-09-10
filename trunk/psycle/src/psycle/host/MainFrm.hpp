@@ -11,6 +11,7 @@
 #include "InstrumentEditorUI.hpp"
 #include "MidiMonitorDlg.hpp"
 
+
 namespace universalis { namespace os {
 	class terminal;
 }}
@@ -36,7 +37,7 @@ namespace psycle { namespace host {
 			friend class InputHandler;
 		public:
 			CMainFrame();
-			virtual ~CMainFrame();
+			virtual ~CMainFrame();      
 		protected: 
 			DECLARE_DYNAMIC(CMainFrame)
 

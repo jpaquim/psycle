@@ -579,7 +579,7 @@ namespace psycle { namespace host {
 			{
 				pParamMapGui = new ParamMap(&machine());
         pParamMapGui->close.connect(boost::bind(&CFrameMachine::OnParamMapClose, this, _1));
-				pParamMapGui->set_pos(ui::Rect(ui::Point(rc.right+1, rc.top), ui::Dimension(500, 500)));
+				pParamMapGui->set_position(ui::Rect(ui::Point(rc.right+1, rc.top), ui::Dimension(500, 500)));
 				pParamMapGui->Show();
 			}
 			else

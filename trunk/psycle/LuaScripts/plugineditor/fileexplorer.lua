@@ -14,7 +14,10 @@ local signal = require("psycle.signal")
 local image = require("psycle.ui.image")
 local images = require("psycle.ui.images")
 local settings = require("settings")
-
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local closebutton = require("closebutton")
+local text = require("psycle.ui.canvas.text")
+local edit = require("psycle.ui.canvas.edit")
 local fileexplorer = group:new()
 
 function fileexplorer:new(parent)  
@@ -28,15 +31,50 @@ end
 function fileexplorer:init()
    self:initlistview()   
    self:initicons()
+   self:initheader()
    self:initdefaultstyle()
    self:initsignals()   
+end
+
+function fileexplorer:initheader()
+  self:setdebugtext("left")
+  self.header = group:new(self)
+                     :setalign(item.ALTOP)
+                     :setautosize(false, false)
+					 :setpos(0, 0, 0, 20)					 
+					 :addornament(ornamentfactory:createlineborder(0x3F3F3F))					 
+  self:initmachineselector()					 
+  local closebutton = closebutton.new(self.header)
+  local that = self
+  function closebutton.closebtn:onmousedown()
+     that:setpos(0, 0, 0, 0)
+	 that:parent():flagnotaligned()  
+     that:parent():updatealign()     
+  end 
+end
+
+function fileexplorer:initmachineselector()
+  self.machineselector = edit:new(self.header)
+                             :setautosize(false, false)
+							 :settext("No Plugin Loaded")
+							 :setpos(0, 0, 0, 20)
+							 :setalign(item.ALCLIENT)
+							 :setbackgroundcolor(0x2F2F2F)
+							 :settextcolor(0xFFFFFF)
+							-- :setjustify(text.CENTERJUSTIFY)
+							-- :setverticalalignment(item.ALCENTER)
+  local that = self
+  function self.machineselector:onmousedown()
+    that.onselectmachine:emit()
+  end
 end
 
 function fileexplorer:initlistview()
   self.listview = listview:new(self)
                           :setalign(item.ALCLIENT)
 						  :setautosize(false, false)
-						  :viewlist()						  
+						  :viewlist()			
+						  :setmargin(10, 0, 0, 10)
   local that = self
   function self.listview:ondblclick(ev)    
 	local node = self:selected()
@@ -55,6 +93,7 @@ function fileexplorer:initlistview()
 end
 
 function fileexplorer:initdefaultstyle()
+  self:addornament(ornamentfactory:createfill(0x2F2F2F))
   self.listview:setbackgroundcolor(0x2F2F2F)
   self.listview:settextcolor(0xFFFFFF)  
 end
@@ -73,6 +112,7 @@ end
 function fileexplorer:initsignals()
   self.click = signal:new()
   self.onremove = signal:new()
+  self.onselectmachine = signal:new()
 end
 
 function fileexplorer:setpath(path)
@@ -97,6 +137,10 @@ function fileexplorer:setpath(path)
   end    
   self.listview:setrootnode(self.rootnode) 
   self.listview:updatelist()
+end
+
+function fileexplorer:setmachinename(name)
+  self.machineselector:settext(name)
 end
 
 function fileexplorer:addparentdirectorynode(path)

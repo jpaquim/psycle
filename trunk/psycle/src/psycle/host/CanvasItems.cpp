@@ -181,12 +181,12 @@ Splitter::Splitter() :
 	fill_color_(0x404040),
 	do_split_(false),
 	drag_pos_(-1),
-	item_client_pos_(0),
+	parent_abs_pos_(0),
 	item_(0) {
   set_auto_size(false, false);
   set_orientation(HORZ);
   set_align(ui::ALBOTTOM);
-  set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+  set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
 }
 
 Splitter::Splitter(Orientation orientation) :
@@ -194,16 +194,16 @@ Splitter::Splitter(Orientation orientation) :
 	 fill_color_(0x404040),
 	 do_split_(false),
 	 drag_pos_(-1),
-	 item_client_pos_(0),
+	 parent_abs_pos_(0),
 	 item_(0) {
   set_auto_size(false, false);
   set_orientation(orientation);
   if (orientation == ui::HORZ) {
 	set_align(ui::ALBOTTOM);
-	set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+	set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
   } else {
 	set_align(ui::ALLEFT);
-	set_pos(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
+	set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
   }
 }
 
@@ -215,76 +215,65 @@ void Splitter::Draw(Graphics* g, Region& draw_region) {
  //}
 }
 
-void Splitter::OnMouseDown(MouseEvent& ev) {
-	SetCapture();	  	
-	do_split_ = true;
+void Splitter::OnMouseDown(MouseEvent& ev) {	
+	ui::Window* last = item_ = 0;
 	drag_pos_ = -1;
-	ui::Window* last = 0;
-	item_ = 0;
-  iterator it = parent()->begin();
-  for (; it!=parent()->end(); ++it) {
+  for (iterator it = parent()->begin(); it!=parent()->end(); ++it) {
     if ((*it).get() == this) {
 			item_ = last;
       break;
     }
 		last = (*it).get();
   }
-	if (item_) {
-		ui::Rect client_pos = item_->abs_pos();
-		item_client_pos_ = 0;
-		if (orientation_ == HORZ) {
-			item_client_pos_ = client_pos.bottom();
-		}
-		else {
-			if (align() == ALLEFT) {
-				item_client_pos_ = client_pos.left();
-			}
-			else {
-				item_client_pos_ = client_pos.right();
-			}
-		}
-	} else {
-	  do_split_ = false;
+	if (item_) {		
+		parent_abs_pos_ = (orientation_ == HORZ) ? parent()->abs_position().top()
+                                             : parent()->abs_position().left();
+    do_split_ = true;		
+    BringWindowToTop();
+	  SetCapture();	
 	}
 }
 
 void Splitter::OnMouseUp(MouseEvent& ev) {
 	do_split_ = false;
-	ReleaseCapture();	
+	ReleaseCapture();
+  if (orientation_ == VERT) {   
+    if (align() == ALLEFT) {
+      item_->set_position(ui::Rect(item_->position().top_left(),
+                     ui::Dimension(position().top_left().x() -
+                                   item_->position().top_left().x(),
+                                   item_->position().height())));      
+    }
+  } else      
+  if (orientation_ == HORZ) {    
+    if (align() == ALBOTTOM) {
+		  item_->set_position(ui::Rect(item_->position().top_left(),
+                     ui::Dimension(item_->position().width(),
+                                   item_->position().bottom_right().y() - 
+                                   position().top_left().y() - 
+                                   position().height())));
+    }
+  }  
+  ((Group*)parent())->FlagNotAligned();
+  parent()->UpdateAlign();    
 }
 
 void Splitter::OnMouseMove(MouseEvent& ev) {
 	if (do_split_) {
 		if (orientation_ == HORZ) {
-			if (drag_pos_ != ev.cy()) {
-				drag_pos_ = ev.cy();
-				ui::Rect item_pos = item_->pos();
-				//PreventFls();
-				item_pos.set_height(item_client_pos_ - drag_pos_);
-				item_->set_pos(item_pos);
-				//EnableFls();
-				dynamic_cast<ui::Group*>(parent())->UpdateAlign();
-			}
+      if (drag_pos_ != ev.cy()) {        			  
+         set_position(ui::Point(position().top_left().x(), ev.cy() - parent_abs_pos_));
+         drag_pos_ = ev.cy();
+      }
 		} else {
 			if (orientation_ == VERT) {
-				if (drag_pos_ != ev.cx()) {
-					drag_pos_ = ev.cx();
-					ui::Rect item_pos = item_->pos();
-					PreventFls();
-					if (align() == ALLEFT) {
-						item_pos.set_width(drag_pos_ - item_client_pos_);
-						item_->set_pos(item_pos);
-					} else {
-						item_pos.set_width(item_client_pos_ - drag_pos_);
-						item_->set_pos(item_pos);
-					}
-					EnableFls();
-					dynamic_cast<ui::Group*>(parent())->UpdateAlign();										
+				if (drag_pos_ != ev.cx()) {													
+          set_position(ui::Point(ev.cx() - parent_abs_pos_, position().top_left().y()));
+          drag_pos_ = ev.cx();
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		if (orientation_ == HORZ) {
 			SetCursor(ui::ROW_RESIZE);
 		} else
@@ -333,7 +322,7 @@ void TerminalFrame::Init() {
   terminal_view_->set_align(ALCLIENT);
   maincanvas->Add(terminal_view_);  
   maincanvas->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
-  set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
+  set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
 }
 
 HeaderGroup::HeaderGroup() {		

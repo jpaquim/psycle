@@ -2498,8 +2498,7 @@ namespace psycle { namespace host {
 		    has_ext = true;
 		    mac->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, this,  _1));
 		  } catch (std::exception& e) {
-		    AfxMessageBox(e.what());
-		    // LuaHost already displayed an error message
+		    ui::alert(e.what());		    
 		  }                
 	    } 
 	    if (has_ext) {
@@ -2547,7 +2546,7 @@ namespace psycle { namespace host {
              menu_bar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
            }
           } catch (std::exception e) {
-            AfxMessageBox(e.what());
+            ui::alert(e.what());
           }          
           Invalidate(false);
         }
@@ -2598,7 +2597,7 @@ namespace psycle { namespace host {
       if (canvas) {
         ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
         imp->SetParent(pParentMain->m_luaWndView.get());      
-        canvas->set_pos(ui::Rect(ui::Point(), ui::Point(rect.Width(), rect.Height())));
+        canvas->set_position(ui::Rect(ui::Point(), ui::Point(rect.Width(), rect.Height())));
         canvas->Show();            
       }
       pParentMain->m_luaWndView->MoveWindow(rect.left, rect.top, rect.Width(), rect.Height());

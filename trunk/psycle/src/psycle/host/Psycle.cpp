@@ -113,7 +113,7 @@ namespace psycle { namespace host {
 			sci_path += "\\SciLexer.dll";
 			m_hDll = LoadLibrary (_T (sci_path.c_str()));
 			if (m_hDll == NULL) {
-				AfxMessageBox ("LoadLibrary SciLexer.dll failure ...");
+				ui::alert("LoadLibrary SciLexer.dll failure ...");
 			}
 
 

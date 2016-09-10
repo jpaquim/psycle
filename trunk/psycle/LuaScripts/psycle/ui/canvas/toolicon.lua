@@ -16,15 +16,15 @@ local toolicon = item:new()
 local settings = { 
   colors = {
     default = {
-      bg = 0x3E3E3E,
+      bg = 0x292929,
       text = 0xCACACA
     },
     mousepress = {
-      bg = 0x363636,
+      bg = 0xf1f1f1,
       text = 0xCACACA
     },
     mousemove = {
-      bg  = 0x363636,
+      bg  = 0x414131,
       text = 0xCACACA
     } 
   }

@@ -12,7 +12,7 @@ local item = require("psycle.ui.canvas.item")
 local setmetatable = setmetatable
 _ENV = nil
 
-local toolbar = group:new()
+local toolbar = group:new() 
 
 function toolbar:new(parent)
   local c = group:new(parent)  

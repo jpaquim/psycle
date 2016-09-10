@@ -23,7 +23,7 @@ class DefaultAligner : public Aligner {
 	 bool has_items() const;
 	 bool skip_item(const Window::Ptr& window) const;
 	 void update_item_pos_except_client(const Window::Ptr& window);
-	 void update_client_pos(const Window::Ptr& client);
+	 void update_client_position(const Window::Ptr& client);
 	 void calc_non_content_dimension(const Window::Ptr& window);
 	 void calc_window_dim(const Window::Ptr& window);	 
 	 void update_left(const Window::Ptr& window);
@@ -35,11 +35,10 @@ class DefaultAligner : public Aligner {
 	 ui::Rect calc_new_pos_right(const Window::Ptr& window) const;
 	 ui::Rect calc_new_pos_bottom(const Window::Ptr& window) const;	 
 	 void adjust_current_pos_left();
-	 void adjust_current_pos_top();
+	 void adjust_current_pos_top(const Window::Ptr window);
 	 void adjust_current_pos_right();
 	 void adjust_current_pos_bottom();
-	 void adjust_current_pos_client(const Window::Ptr& window);	 
-	 bool is_window_pos_equal(const ui::Rect& new_pos, const ui::Window::Ptr window) const;
+	 void adjust_current_pos_client(const Window::Ptr& window);	 	 
 
 	 void OnWindowDimensionChanged(ui::Window& window);
 

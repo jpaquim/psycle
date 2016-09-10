@@ -8,24 +8,23 @@ local closebutton = {}
 
 function closebutton.new(parent)
   local g = group:new(parent):setautosize(false, false):setpos(0, 0, 20, 10):setalign(item.ALRIGHT)  
-  local closebtn = text:new(g)
-                       :setautosize(false, false)
-                       :settext("X")
-					   :setverticalalignment(item.ALCENTER)
-					   :setjustify(text.CENTERJUSTIFY)
-                       :setalign(item.ALTOP)                       
-  local that = parent
-  function closebtn:onmousedown()
+  g.closebtn = text:new(g)
+                   :setautosize(false, false)
+                   :settext("X")
+	 		       :setverticalalignment(item.ALCENTER)
+				   :setjustify(text.CENTERJUSTIFY)
+                   :setalign(item.ALTOP)  
+  function g.closebtn:onmousedown()
      that:hide():parent():updatealign()
      g.dohide:emit()
   end  
   
-  function closebtn:onmouseenter()  
+  function g.closebtn:onmouseenter()  
     self:addornament(ornamentfactory:createlineborder(0xFFFFFE))
   end
-  function closebtn:onmousemove()  
+  function g.closebtn:onmousemove()  
   end
-  function closebtn:onmouseout()     
+  function g.closebtn:onmouseout()     
     self:removeornaments()
   end
   g.dohide = signal:new()

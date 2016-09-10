@@ -312,6 +312,7 @@ int LuaPluginCatcherBind::rescannew(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+
 /////////////////////////////////////////////////////////////////////////////
 // LuaMachine+Bind
 /////////////////////////////////////////////////////////////////////////////
@@ -2013,6 +2014,7 @@ int LuaFileHelper::parentdirectory(lua_State* L) {
       lua_pushnil(L); // does not exist
 	}
   } catch (const filesystem_error& ex) {
+    ex.what();
     lua_pushnil(L);
   }
   return 1;
@@ -2025,38 +2027,37 @@ int LuaFileHelper::directorylist(lua_State* L) {
   try {
     if (exists(p)) {
       if (is_regular_file(p)) { // is p a regular file?   
-		lua_pushnil(L); // no directory        
-	  } else 
+		    lua_pushnil(L); // no directory        
+	    } else 
       if (is_directory(p)) {        
         typedef std::vector<path> vec;
         vec v;
         std::copy(directory_iterator(p), directory_iterator(), std::back_inserter(v));
         std::sort(v.begin(), v.end());                                   
-		lua_newtable(L);
-		int i = 1;
+		    lua_newtable(L);
+		    int i = 1;
         for (vec::const_iterator it (v.begin()); it != v.end(); ++it) {		  
-		  path curr = *it;
-		  OutputDebugString(curr.string().c_str());
-		  if (is_directory(curr)) {
-			createfileinfo(L, curr);
-			lua_rawseti(L, -2, i++);
-		  }		  
+		      path curr = *it;		     
+		      if (is_directory(curr)) {
+			     createfileinfo(L, curr);
+			     lua_rawseti(L, -2, i++);
+		      }		  
         }		
-		for (vec::const_iterator it (v.begin()); it != v.end(); ++it) {		  
-		  path curr = *it;
-		  if (is_regular_file(curr)) {
-			createfileinfo(L, curr);
-			lua_rawseti(L, -2, i++);
-		  }		  
+		    for (vec::const_iterator it (v.begin()); it != v.end(); ++it) {		  
+		      path curr = *it;
+		      if (is_regular_file(curr)) {
+			      createfileinfo(L, curr);
+			      lua_rawseti(L, -2, i++);
+		      }		  
         }
-      }
-      else {
+      } else {
         lua_pushnil(L); // cout << p << " exists, but is neither a regular file nor a directory\n";
-	  }
+	    }
     } else {
       lua_pushnil(L); // does not exist
-	}
+	  }
   } catch (const filesystem_error& ex) {
+    ex.what();
     lua_pushnil(L);
   }
   return 1;

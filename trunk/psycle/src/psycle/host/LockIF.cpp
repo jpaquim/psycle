@@ -3,6 +3,7 @@
 
 //#include "stdafx.h"
 #include "LockIF.hpp"
+#include "MainFrm.hpp"
 
 namespace psycle {
 namespace host {  
@@ -36,16 +37,29 @@ void GlobalTimer::RemoveListener(Timer* listener) {
 void GlobalTimer::OnViewRefresh() {          
   it = listeners_.begin();
   while (it != listeners_.end()) {
-    if ((*it)->is_running()) {
-      (*it)->OnTimerViewRefresh();
-    }
+    Timer* timer = *it;
+    if (timer->is_running()) {
+      timer->OnTimerViewRefresh();      
+    }    
     if (!removed_) {          
       ++it;
     } else {
       removed_ = false;
     }
   }
-}       
+}   
+
+void GlobalTimer::KillTimer() {
+  CMainFrame* fr = (CMainFrame*) ::AfxGetMainWnd();
+  CChildView* cv = &fr->m_wndView;    
+  cv->KillTimer(39);
+}
+
+void GlobalTimer::StartTimer() {
+  CMainFrame* fr = (CMainFrame*) ::AfxGetMainWnd();
+  CChildView* cv = &fr->m_wndView;    
+  cv->SetTimer(39,30,NULL);
+}
 
 }  // namespace
 }  // namespace

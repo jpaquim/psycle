@@ -133,8 +133,11 @@ struct LuaImport {
       lua_pop(L_, 1); // pop error_handler func
       if (lh_) {
         lh_->unlock(); 
-      }        
-      assert(end_top == begin_top_);
+      } 
+      if (end_top != begin_top_) {
+        const char* msg = "LuaImport close Lua stack incorrect";
+        throw std::runtime_error(msg);
+      }             
       is_open_ = false;
     }
   }
