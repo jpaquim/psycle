@@ -61,7 +61,9 @@ class GlobalTimer {
     static GlobalTimer instance;
     return instance;
   }       
-	void OnViewRefresh();
+	void OnViewRefresh();  
+  void KillTimer();
+  void StartTimer();
  private:       
   GlobalTimer() : removed_(false), it(listeners_.end()) { }
   ~GlobalTimer() { }                

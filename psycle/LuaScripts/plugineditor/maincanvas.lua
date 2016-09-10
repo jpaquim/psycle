@@ -7,7 +7,6 @@
 
 -- require('mobdebug').start()
 -- local serpent = require("psycle.serpent")
-
 local scintilla = require("psycle.ui.canvas.scintilla")
 local lexer = require("psycle.ui.canvas.lexer")
 local fileopen = require("psycle.ui.fileopen")
@@ -30,7 +29,9 @@ local item = require("psycle.ui.canvas.item")
 local catcher = require("psycle.plugincatcher")
 local serpent = require("psycle.serpent")
 local createeditplugin = require("createeditplugin")
+local pluginselector = require("pluginselector")
 local filehelper = require("psycle.file")
+local fileobserver = require("psycle.fileobserver")
 local templateparser = require("templateparser")
 local cfg = require("psycle.config"):new("PatternVisual")
 local project = require("project")
@@ -51,6 +52,7 @@ local point = require("psycle.ui.point")
 local listview = require("psycle.ui.canvas.listview")
 local combobox = require("psycle.ui.canvas.combobox")
 local button = require("psycle.ui.canvas.button")
+local run = require("psycle.run")
 
 function maincanvas:new()
   local c = canvas:new()  
@@ -60,7 +62,7 @@ function maincanvas:new()
   return c
 end
 
-function maincanvas:init()
+function maincanvas:init()  
   self.advancedview = false
   self:invalidatedirect()   
   self.togglecanvas = signal:new() 
@@ -70,8 +72,7 @@ function maincanvas:init()
   self:createsearch()
   self:createcreateeditplugin()  
   self:createoutputs()
-  splitter:new(self, splitter.HORZ)
-  --self.pluginexplorer = self:createpluginexplorer()
+  splitter:new(self, splitter.HORZ)  
   self.fileexplorer = self:createfileexplorer()
   splitter:new(self, splitter.VERT)
   self:createpagegroup()  
@@ -84,12 +85,37 @@ function maincanvas:init()
   --self.pianokeys2 = pianokeys:new(self):setalign(item.ALRIGHT):setautosize(false, false):setpos(0, 0, 50, 0):setkeydirection(pianokeys.KEYDIRECTIONRIGHT)
   --self.pianokeys3 = pianokeys:new(self):setalign(item.ALBOTTOM):setautosize(false, false):setpos(0, 0, 0, 50):setkeydirection(pianokeys.KEYDIRECTIONBOTTOM)
   --self.pianokeys4 = pianokeys:new(self):setalign(item.ALLEFT):setautosize(false, false):setpos(0, 0, 50, 0):setkeydirection(pianokeys.KEYDIRECTIONLEFT)
+  self.fileobserver = fileobserver:new()
+  --self.fileobserver:startwatching()
+  function self.fileobserver:oncreatefile(path)
+    psycle.alert(path)
+  end
+  local that = self
+  function self.fileobserver:onchangefile(path)
+    local pages = that.pages.children:items();
+	for i=1, #pages do 
+	  if pages[i]:filename() == path then        	 
+	    if psycle.confirm("File "..path.." outside changed. Do you want to reload ?") then
+	      that:openfromfile(path)
+	    end
+	  end	    
+    end    
+  end
+  function self.fileobserver:ondeletefile(path)
+    psycle.output(path)
+  end
 end
 
 function maincanvas:createcreateeditplugin()  
-  self.createeditplugin = createeditplugin:new(self):hide():setalign(item.ALTOP)
-  self.createeditplugin.doopen:connect(maincanvas.onopenplugin, self)
-  self.createeditplugin.docreate:connect(maincanvas.oncreateplugin, self)
+  self.pluginselector = pluginselector:new(self)
+                                      :hide()
+									  :setalign(item.ALTOP)
+                                      :setautosize(false, false)
+									  :setpos(0, 0, 0, 200)
+
+  --self.createeditplugin = createeditplugin:new(self):hide():setalign(item.ALTOP)
+  self.pluginselector.doopen:connect(maincanvas.onopenplugin, self)
+  --self.createeditplugin.docreate:connect(maincanvas.oncreateplugin, self)
 end
 
 function maincanvas:createsearch()
@@ -149,6 +175,7 @@ function maincanvas:createfileexplorer()
   --fileexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
   --fileexplorer:settextcolor(settings.canvas.colors.foreground)  
   fileexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
+  fileexplorer.onselectmachine:connect(maincanvas.onselectmachine, self)
   --pluginexplorer.onremove:connect(maincanvas.onpluginexplorernoderemove, self)
   return fileexplorer
 end
@@ -167,8 +194,8 @@ end
 function maincanvas:setplugindir(plugininfo)  
   local path = plugininfo:dllname()
   path = path:sub(1, -5).."\\"
-  self.pluginexplorer:setfilepath(path)
-  self.selecttoolbar.selectmachine:settext(plugininfo:name()):fls()
+  self.fileexplorer:setpath(path)
+  self.fileexplorer:setmachinename(plugininfo:name())
 end
 
 function maincanvas:dopageexist(fname)
@@ -247,9 +274,12 @@ end
 
 function maincanvas:openfromfile(fname, line)
   if not line  then line = 0 end
-  local page = self:dopageexist(fname)
+  local page = self:dopageexist(fname)  
   if page ~= nil then
-    self.pages:setactivepage(page)
+    page:reload()
+    if self.pages:activepage() ~= page then	  
+      self.pages:setactivepage(page)
+	end
   else    
     page = self:createpage()
     page:loadfile(fname)        
@@ -300,7 +330,8 @@ end
 function maincanvas:savepage()
   local page = self.pages:activepage()
   if page then
-    local fname = ""    
+    local fname = "" 
+    self.fileobserver:stopwatching()
     if page:hasfile() then
       fname = page:filename()    
       page:savefile(fname)
@@ -312,6 +343,7 @@ function maincanvas:savepage()
       fname = fname:match("([^\\]+)$")
       self.pages:setlabel(page, fname)
     end  
+	self.fileobserver:startwatching()
   end
 end
 
@@ -346,8 +378,7 @@ end
 
 function maincanvas:inittoolbar()  
   self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(5, 5, 5, 5)    
-  self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
-  self.selecttoolbar = self:initselectplugintoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
+  self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)  
   self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
   self:initplaytoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
   if self.advancedview then
@@ -365,6 +396,7 @@ function maincanvas:initstatus()
 								 :setalign(item.ALLEFT)
 								 :setverticalalignment(item.ALCENTER)
 								 :setmargin(0, 0, 0, 5)
+								 :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   self.modifiedstatus = text:new(g)
                             :settext("")
 							:setautosize(false, false)
@@ -372,6 +404,7 @@ function maincanvas:initstatus()
 							:setalign(item.ALLEFT)
 							:setverticalalignment(item.ALCENTER)
 							:setmargin(0, 5, 0, 0)
+							:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   text:new(g)
       :settext("LINE")
 	  :setautosize(true, false)
@@ -385,6 +418,7 @@ function maincanvas:initstatus()
 						:setalign(item.ALLEFT)
 						:setverticalalignment(item.ALCENTER)
 						:setmargin(0, 5, 0, 0)
+						:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   text:new(g)
       :settext("COL")
 	  :setautosize(true, false)
@@ -398,6 +432,7 @@ function maincanvas:initstatus()
 					   :setalign(item.ALLEFT)
 					   :setverticalalignment(item.ALCENTER)
 					   :setmargin(0, 5, 0, 0)
+					   :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   text:new(g)
       :settext("INSERT")
 	  :setautosize(true, false)
@@ -410,6 +445,7 @@ function maincanvas:initstatus()
 						  :setpos(0, 0, 30, 0)
 						  :setverticalalignment(item.ALCENTER)
 						  :setalign(item.ALLEFT)
+						  :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
 end
 
 function maincanvas:setwindowiconin()
@@ -433,17 +469,11 @@ function maincanvas:initwindowtoolbar()
   return icon
 end
 
-function maincanvas:initselectplugintoolbar(parent)
-  local t = toolbar:new(self.tg):setautosize(true, true)
-  t.selectmachine = toolicon:new(t):setautosize(false, false):settext("No Plugin Loaded"):setpos(0, 0, 120, 20) 
-  local that = self
-  function t.selectmachine:onclick()
-    local catcher = catcher:new()
-    local infos = catcher:infos()    
-    that.createeditplugin:show()
-    that:updatealign()    
-  end  
-  return t
+function maincanvas:onselectmachine()
+  local catcher = catcher:new()
+  local infos = catcher:infos()
+  self.pluginselector:show()
+  self:updatealign()    
 end
 
 function maincanvas:fillinstancecombobox()
@@ -494,13 +524,16 @@ function maincanvas:initfiletoolbar()
   local inew = toolicon:new(t, settings.picdir.."new.png", 0xFFFFFF)
   local iopen = toolicon:new(t, settings.picdir.."open.png", 0xFFFFFF)
   local isave = toolicon:new(t, settings.picdir.."save.png", 0xFFFFFF)  
+  local iundo = toolicon:new(t, settings.picdir.."undo.png", 0xFFFFFF)
+  local iredo = toolicon:new(t, settings.picdir.."redo.png", 0xFFFFFF)  
   local that = self    
   function inew:onclick() 
-    that:createnewpage() 	
-    that.pages:updatealign()
+    that:createnewpage()    
   end  
   function iopen:onclick() that.fileopen:show() end
   function isave:onclick() that:savepage() end
+  function iredo:onclick() that:redo() end
+  function iundo:onclick() that:undo() end
   return t
 end
 
@@ -649,7 +682,7 @@ function maincanvas:openplugin(pluginpath, pluginname, plugininfo)
   self:preventfls()
   self:closealltabs()      
   self.fileexplorer:setpath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\")))
-  self.selecttoolbar.selectmachine:settext(pluginname)
+  self.fileexplorer:setmachinename(pluginname)
   self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")    
   self:updatealign()
   self:enablefls()  
@@ -728,6 +761,18 @@ end
 function maincanvas:onclosepage(ev)  
   if ev.page:modified() and psycle.confirm("Do you want to save changes to "..ev.page:filename().."?") then
     self:savepage()
+  end
+end
+
+function maincanvas:undo()  
+  if self.pages:activepage() then
+    self.pages:activepage():undo()
+  end
+end
+
+function maincanvas:redo()
+  if self.pages:activepage() then
+    self.pages:activepage():redo()
   end
 end
 

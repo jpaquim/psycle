@@ -19,6 +19,7 @@
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 #include <algorithm>
+#include "resources\resources.hpp"
 
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 extern "C" {
@@ -106,6 +107,8 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     host_(host),
     info_update_(true) {    
   if (!terminal_frame_.get()) {
+
+
     terminal_frame_ = boost::shared_ptr<ui::TerminalFrame>(new ui::TerminalFrame(), ReleaseImpDeleter());
     terminal_frame_->Init();      
   }
@@ -131,8 +134,7 @@ int LuaProxy::invoke_later(lua_State* L) {
 void LuaProxy::OnTimer() {      
   try {
     lock();    
-    invokelater->Invoke();  
-    invokelater->Clear();
+    invokelater->Invoke();              
     lua_gc(L, LUA_GCCOLLECT, 0);
     unlock();
   } catch(std::exception& e) {    
@@ -140,13 +142,13 @@ void LuaProxy::OnTimer() {
     AfxMessageBox(msg.c_str());
     unlock();
     throw std::runtime_error(msg.c_str());
-  }
+  }  
   try {
     LuaImport in(L, lua_mac_, this);
     if (in.open("ontimer")) {
       in.pcall(0);      
-    }    
-  } CATCH_WRAP_AND_RETHROW(host())
+    }
+   } CATCH_WRAP_AND_RETHROW(host())
 }
 
 void LuaProxy::PrepareState() {  
@@ -169,6 +171,7 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaEnvelopeBind>(L, "psycle.envelope");
   LuaHelper::require<LuaDspMathHelper>(L, "psycle.dsp.math");
   LuaHelper::require<LuaFileHelper>(L, "psycle.file");
+  LuaHelper::require<LuaFileObserverBind>(L, "psycle.fileobserver");
   LuaHelper::require<LuaMidiHelper>(L, "psycle.midi");
   LuaHelper::require<LuaPlayerBind>(L, "psycle.player");
   LuaHelper::require<LuaPatternDataBind>(L, "psycle.pattern");
@@ -234,9 +237,9 @@ int LuaProxy::alert(lua_State* L) {
 
 int LuaProxy::confirm(lua_State* L) {    
   const char* msg = luaL_checkstring(L, 1);    
-  int result = AfxMessageBox(msg, MB_OK | MB_OKCANCEL);
+  int result = AfxMessageBox(msg, MB_OK | MB_OKCANCEL | MB_TOPMOST);
   lua_pushboolean(L, result == IDOK);  
-  return 1;
+  return 1;  
 }
 
 int LuaProxy::terminal_output(lua_State* L) {
@@ -992,6 +995,9 @@ int error_handler(lua_State* L) {
       while (lua_getstack(L, depth, &entry)) {
         int status = lua_getinfo(L, "nSl", &entry);
         assert(status);
+        if (status == 0) {
+          luaL_error(L, "lua getinfo error");
+        }
         lua_newtable(LE);
         lua_pushinteger(LE, entry.linedefined);
         lua_setfield(LE, -2, "line");

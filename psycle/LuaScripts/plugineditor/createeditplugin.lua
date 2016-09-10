@@ -29,6 +29,7 @@ local image = require("psycle.ui.image")
 local listview = require("psycle.ui.canvas.listview")
 local node = require("psycle.node")
 local templateparser = require("templateparser")
+local pluginselector = require("pluginselector")
 
 local createeditplugin = group:new()
 
@@ -41,21 +42,20 @@ function createeditplugin:new(parent)
 end
 
 function createeditplugin:init() 
-  self:setautosize(false, true)    
-  self:setpos(0, 0, 100, 0)
+  self:setautosize(false, false)    
+  self:setpos(0, 0, 100, 300)
   self:addornament(ornamentfactory:createfill(0x528A68))
   closebutton.new(self)
-  self:initnameprompt()      
-  self:initpluginlist()  
+  --self:initnameprompt()         
   self:initcreateoptions()
   self.docreate = signal:new()  
   self.doopen = signal:new()
+  self.pluginselector = pluginselector:new(self):setautosize(false, false):setalign(item.ALTOP):setpos(0, 0, 0, 200)
 end
 
 function createeditplugin:initnameprompt()
-  local g = group:new(self):setautosize(true, true):setalign(item.ALTOP)
-  text:new(g):settext("Name of Plugin to Edit?"):setalign(item.ALLEFT)
-  self.nameedit = edit:new(g):setautosize(false, false):setpos(0, 0, 200, 20):setalign(item.ALLEFT):setmargin(5, 0, 0, 0)
+  local g = group:new(self):setautosize(true, true):setalign(item.ALBOTTOM)  
+  self.nameedit = edit:new(g):settext("Search or create plugin"):setautosize(false, false):setpos(0, 0, 200, 20):setalign(item.ALLEFT):setmargin(5, 0, 0, 0)
   local that = self
   function self.nameedit:onkeydown(ev)    
     if ev:keycode() == 13 then

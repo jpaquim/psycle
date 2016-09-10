@@ -10,6 +10,7 @@
 #include "lua.hpp"
 #include "LuaArray.hpp"
 #include "LuaInternals.hpp"
+#include "Ui.hpp"
 
 
 namespace psycle { namespace host {
@@ -43,8 +44,8 @@ namespace psycle { namespace host {
 			std::string path = Global::configuration().GetAbsoluteLuaDir() + "/plotblit.lua";
 			int status = luaL_loadfile(L, path.c_str());
 			if (status) {
-              CString msg(lua_tostring(L, -1));
-	          AfxMessageBox(msg);
+        const char* msg = lua_tostring(L, -1);
+	      ui::alert(msg);
 			  lua_close (L);
 			  return;
             }
@@ -52,15 +53,15 @@ namespace psycle { namespace host {
 //			LuaWaveOscBind::register_module(L);             
 			status = lua_pcall(L, 0, LUA_MULTRET, 0);
 			if (status) {
-              CString msg(lua_tostring(L, -1));
-	          AfxMessageBox(msg);
-            }  else {
+        const char* msg = lua_tostring(L, -1);
+	      ui::alert(msg);
+      }  else {
 			  lua_getglobal(L, "work");
 			  status = lua_pcall(L, 0, 1, 0);
 			  if (status) {
-                CString msg(lua_tostring(L, -1));
-	            AfxMessageBox(msg);
-              }  else {
+          const char* msg = lua_tostring(L, -1);
+	        ui::alert(msg);
+        }  else {
 			    PSArray* x = *(PSArray **)luaL_checkudata(L, -1, "array_meta");			
 			    assert(x);
 			    this->set_data(x->data(), x->len());
@@ -76,7 +77,7 @@ namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CPlotterDlg, CDialog)			
 			ON_WM_PAINT()
-	        ON_WM_ERASEBKGND()
+	    ON_WM_ERASEBKGND()
 			ON_WM_CLOSE()
 		END_MESSAGE_MAP()
 

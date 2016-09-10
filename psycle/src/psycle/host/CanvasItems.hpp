@@ -155,11 +155,11 @@ class Splitter : public Window {
 		orientation_ = orientation; 
 		if (orientation == HORZ) {
 			set_align(ALBOTTOM);
-			set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+			set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
 		} else 
 	  if (orientation == VERT) {
 			set_align(ALLEFT);
-		  set_pos(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
+		  set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
 	  }  		
 	}
 
@@ -174,7 +174,7 @@ class Splitter : public Window {
 	 bool do_split_;
 	 Orientation orientation_;
 	 double drag_pos_;
-	 double item_client_pos_;
+	 double parent_abs_pos_;
 	 ui::Window* item_;
 };
 
@@ -182,10 +182,7 @@ class TerminalView : public Scintilla, public psycle::host::Timer {
  public: 
   TerminalView();
   void output(const std::string& text);   
-  virtual void OnTimerViewRefresh() { 
-    invokelater.Invoke();
-    invokelater.Clear();
-  }
+  virtual void OnTimerViewRefresh() { invokelater.Invoke(); }
 
  private:
    ui::Commands invokelater;

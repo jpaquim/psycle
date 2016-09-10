@@ -11,6 +11,8 @@
 
 // For SAMPLER_CMD_VOLUME
 #include "Sampler.hpp"
+// For Alert
+#include "Ui.hpp"
 
 namespace psycle
 {
@@ -1715,5 +1717,16 @@ namespace psycle
 				}
 			}
 		}
+
+   void ActionHandler::Notify(ActionType action) {
+        ActionListenerList::iterator it = listeners_.begin();
+        for (; it!=listeners_.end(); ++it) {
+          try {
+            (*it)->OnNotify(action);
+          } catch (std::exception& e) {
+            ui::alert(e.what());
+          }
+        }
+      }
 	}
 }

@@ -15,6 +15,7 @@
 #include <psycle/host/Player.hpp>
 #include <psycle/helpers/math.hpp>
 #include "Zap.hpp"
+#include "Ui.hpp"
 
 #include <lua.hpp>
 #include <boost/algorithm/string.hpp>
@@ -74,7 +75,7 @@ namespace psycle { namespace host {
       StopTimer();
       proxy().Free();
     } catch(std::exception& e) {
-      AfxMessageBox(e.what());
+      ui::alert(e.what());
     } 
   }
 
@@ -86,7 +87,8 @@ namespace psycle { namespace host {
         ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]->OnReload();
       }
       StartTimer();
-    } catch(std::exception&) {
+    } catch(std::exception& e) {
+      ui::alert(e.what());
     }
   }
 

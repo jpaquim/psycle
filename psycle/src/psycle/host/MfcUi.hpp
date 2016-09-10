@@ -3,6 +3,7 @@
 #pragma warning(disable: 4996)
 // #include <psycle/host/detail/project.hpp>
 #include "atlimage.h"
+#include <afxtempl.h>
 #include "Ui.hpp"
 #include "Scintilla.h"
 #include "SciLexer.h"
@@ -999,20 +1000,21 @@ class WindowTemplateImp : public T, public I {
   WindowTemplateImp() : I(), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false) {}
   WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false) {}
     
-  virtual void dev_set_pos(const ui::Rect& pos);
-  virtual ui::Rect dev_pos() const;
-  virtual ui::Rect dev_abs_pos() const;	
-  virtual ui::Rect dev_desktop_pos() const;
+  virtual void dev_set_position(const ui::Rect& pos);
+  virtual ui::Rect dev_position() const;
+  virtual ui::Rect dev_abs_position() const;	
+  virtual ui::Rect dev_desktop_position() const;
   virtual ui::Dimension dev_dim() const {
     CRect rc;            
     GetWindowRect(&rc);
     return ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height());
   }
+  virtual bool dev_check_position(const ui::Rect& pos) const;
 	virtual void dev_set_margin(const BoxSpace& margin) { margin_ = margin; }
 	virtual const BoxSpace& dev_margin() const { return margin_; }
 	virtual void dev_set_padding(const BoxSpace& padding) {
 		padding_ = padding;				
-		dev_set_pos(dev_pos());		
+		dev_set_position(dev_position());		
 	}
 	virtual const BoxSpace& dev_padding() const { return padding_; }
 	virtual void dev_set_border_space(const BoxSpace& border_space) { 
@@ -1029,30 +1031,30 @@ class WindowTemplateImp : public T, public I {
   virtual void DevShow() { ShowWindow(SW_SHOWNORMAL); }
   virtual void DevHide() { ShowWindow(SW_HIDE); }
   virtual void DevInvalidate() {    			  
-	if (window() && window()->root()) {
-      CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());	
-	  ::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
-	}
+	  if (window() && window()->root()) {
+        CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());	
+	    ::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
+	  }
   }
   virtual void DevInvalidate(const ui::Region& rgn) {	  	  
     if (m_hWnd) {
       mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
       assert(imp);	
-      if (window() && window()->root()) {
-		int flag =  RDW_INVALIDATE;
+      int flag =  RDW_INVALIDATE | RDW_UPDATENOW;
+     /* if (window() && window()->root()) {
+		
 		if (!window()->has_overall_background()) {
-			flag |= RDW_ERASE;
-		}
-		::RedrawWindow(m_hWnd, NULL, imp->crgn(), flag);
-      }
+			// flag |= RDW_ERASE;
+		}*/
+		  ::RedrawWindow(m_hWnd, NULL, imp->crgn(), flag);      
     }
   }
   virtual void DevSetCapture() { SetCapture(); }  
   virtual void DevReleaseCapture() { ReleaseCapture(); }  
   virtual void DevShowCursor() { while (::ShowCursor(TRUE) < 0); }  
   virtual void DevHideCursor() { while (::ShowCursor(FALSE) >= 0); }
-  virtual void DevSetCursorPos(double x, double y) {
-    CPoint point(static_cast<int>(x), static_cast<int>(y));
+  virtual void DevSetCursorPosition(const ui::Point& position) {    
+    CPoint point = TypeConverter::point(position);    
     ClientToScreen(&point);
 		::SetCursorPos(point.x, point.y);
   }  
@@ -1070,6 +1072,7 @@ class WindowTemplateImp : public T, public I {
   virtual void DevViewDoubleBuffered() { is_double_buffered_ = true; }
   virtual void DevViewSingleBuffered() { is_double_buffered_ = false; }
   virtual bool dev_is_double_buffered() const { return is_double_buffered_; }
+  virtual void DevBringWindowToTop() { BringWindowToTop(); }
 
 protected:  
   virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -1172,7 +1175,7 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
     WindowImp* imp = new WindowImp();
     if (!imp->Create(NULL, 
                      NULL, 
-                     WS_CHILD, //  | WS_EX_COMPOSITED,
+                     WS_CHILD | WS_CLIPSIBLINGS,
 		                 CRect(0, 0, 100, 20), 
                      parent, 
                      nID, 
@@ -1254,8 +1257,8 @@ class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {
     GetScrollRange(&minpos, &maxpos);
   }
 
-  virtual void dev_set_scroll_pos(int pos) { SetScrollPos(pos); }
-  virtual int dev_scroll_pos() const { return GetScrollPos(); }
+  virtual void dev_set_scroll_position(int pos) { SetScrollPos(pos); }
+  virtual int dev_scroll_position() const { return GetScrollPos(); }
   virtual ui::Dimension dev_system_size() const {
     return ui::Dimension(GetSystemMetrics(SM_CXVSCROLL), 
                     GetSystemMetrics(SM_CXHSCROLL));    
@@ -1606,8 +1609,8 @@ class MenuImp : public ui::MenuImp {
   virtual void dev_set_text(const std::string& text) {    
     parent()->ModifyMenu(pos_, MF_BYPOSITION, 0, Charset::utf8_to_win(text).c_str());    
   }
-  void dev_set_pos(int pos) { pos_ = pos; }
-  int dev_pos() const { return pos_; }
+  void dev_set_position(int pos) { pos_ = pos; }
+  int dev_position() const { return pos_; }
   void CreateMenu(const std::string& text);
   void CreateMenuItem(const std::string& text, ui::Image* image);
 
@@ -1731,8 +1734,8 @@ class ListNodeImp : public NodeImp {
   ListNodeImp() { memset(&lvi, 0, sizeof(lvi)); }
   ~ListNodeImp() {}
 
-  void set_pos(int pos) { lvi.iItem = pos; }
-  virtual int pos() const { return lvi.iItem; }
+  void set_position(int pos) { lvi.iItem = pos; }
+  virtual int position() const { return lvi.iItem; }
       
   // LVITEM DevInsert(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* prev_imp);
   void DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos);
@@ -1914,7 +1917,18 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
 
 class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
  public:  
-  EditImp() : WindowTemplateImp<CEdit, ui::EditImp>() {}
+  EditImp() : 
+      WindowTemplateImp<CEdit, ui::EditImp>(), 
+      text_color_(0),
+      background_color_(0xFFFFFF)  {  
+    background_brush_.CreateSolidBrush(background_color_);
+  }
+
+  ~EditImp() {    
+	  if (background_brush_.GetSafeHandle()) {
+       background_brush_.DeleteObject();
+    }
+  }
 
   static EditImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     EditImp* imp = new EditImp();
@@ -1926,8 +1940,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
       return 0;
     }    
     imp->set_window(w);		
-    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
-    // Set the hook
+    WindowHook::windows_[imp->GetSafeHwnd()] = imp;    
     WindowHook::SetFocusHook();
     return imp;
   }
@@ -1942,10 +1955,26 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
     GetWindowText(s);		
 		return Charset::win_to_utf8(s.GetString());
   }
+  virtual void dev_set_background_color(ARGB color) {        
+	  background_color_ = ToCOLORREF(color);		  
+	  if (background_brush_.GetSafeHandle()) {
+      background_brush_.DeleteObject();
+    }
+	  background_brush_.CreateSolidBrush(background_color_);
+  }  
+  virtual ARGB dev_background_color() const { return ToARGB(text_color_); }  
+  virtual void dev_set_text_color(ARGB color) {
+    text_color_ = ToCOLORREF(color);
+  }
+  virtual ARGB dev_text_color() const { return ToARGB(background_color_); }
     
 protected:
   DECLARE_MESSAGE_MAP()
-  void OnPaint() { CEdit::OnPaint(); }	
+  COLORREF text_color_;
+	COLORREF background_color_;	
+	CBrush background_brush_;	
+	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
+  void OnPaint() { CEdit::OnPaint(); }	  
 };
 
 
@@ -1977,7 +2006,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     if (!CreateEx(0, 
         _T("scintilla"),
          _T(""), 
-        WS_CHILD | WS_VISIBLE | WS_TABSTOP
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_CLIPSIBLINGS
         , CRect(0, 0, 0, 0),
         pParentWnd,
         nID,
@@ -2087,6 +2116,13 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     }    
   }
 
+  void DevReload() {
+    if (has_file_) {
+      DevClearAll();
+      DevLoadFile(fname_);
+    }
+  }
+
   virtual void dev_set_lexer(const Lexer& lexer);
 
   void dev_set_foreground_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_DEFAULT, ToCOLORREF(color)); }
@@ -2184,6 +2220,9 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   }
   void DevHideCaretLine() { f(SCI_SETCARETLINEVISIBLE, false, 0); }
   void dev_set_caret_line_background_color(ARGB color) { f(SCI_SETCARETLINEBACK, ToCOLORREF(color), 0); }
+
+  void dev_undo() { f(SCI_UNDO, 0, 0); }
+  void dev_redo() { f(SCI_REDO, 0, 0); }
             
  protected:
   DECLARE_DYNAMIC(ScintillaImp)     
@@ -2240,6 +2279,184 @@ class GameControllersImp : public ui::GameControllersImp {
    
    virtual void DevScanPluggedControllers(std::vector<int>& plugged_controller_ids);
    virtual void DevUpdateController(ui::GameController& controller);
+};
+
+
+// FileInformation.h: interface for the CFileInformation class.
+//
+//////////////////////////////////////////////////////////////////////
+//
+// Youry M. Jukov, Israel
+//
+// Last update - 29.07.2003 
+//
+//////////////////////////////////////////////////////////////////////
+
+class   CFileInformation;
+typedef CTypedPtrList<CObList, CFileInformation*> FI_List;
+typedef FI_List* P_FI_List;
+
+typedef enum FileAction { faNone, faDelete, faCreate, faChange, } EFileAction;
+typedef enum FileSize   { fsBytes, fsKBytes, fsMBytes, } EFileSize;
+
+#define IS_NOTACT_FILE( action ) ( action == faNone   )
+#define IS_CREATE_FILE( action ) ( action == faCreate )
+#define IS_DELETE_FILE( action ) ( action == faDelete )
+#define IS_CHANGE_FILE( action ) ( action == faChange )
+
+typedef UINT (*DirParsCallback)( CString path, LPVOID pData );
+
+class CFileInformation : public CObject  
+{
+public:
+	CFileInformation();
+	CFileInformation( CString path );
+	CFileInformation( CString dir, CString file );
+	CFileInformation( WIN32_FIND_DATA fd, CString dir );
+	CFileInformation( const CFileInformation& fdi );
+	CFileInformation( const CFileInformation* fdi );
+	virtual ~CFileInformation();
+
+	const CFileInformation& operator =( const CFileInformation& fdi );
+	BOOL operator ==( CFileInformation fdi ) const;
+	BOOL operator !=( CFileInformation fdi ) const;
+	
+	BOOL Load( CString file );
+	BOOL Load( CString dir, CString file );
+	CString GetFileDir( CString path ) const;
+
+	BOOL IsFileExist() const;
+	BOOL IsNotAvailableNow() const;
+	BOOL IsSystem() const;
+	BOOL IsReadOnly() const;
+	BOOL IsHidden() const;
+	BOOL IsNormal() const;
+	BOOL IsArchive() const;
+	BOOL IsDirectory() const;
+	BOOL IsCurrentRoot() const;
+	BOOL IsParentDir() const;
+	BOOL IsRootFile() const;
+	BOOL IsTemporary() const;
+	BOOL IsWinTemporary() const;
+	BOOL IsActualFile() const;
+	BOOL IsOk() const;
+	BOOL IsSomeFileName( CString fileName ) const;
+	BOOL IsSomeFileName( const CFileInformation& fdi ) const;
+	BOOL IsSomeFileDir( CString fileDir ) const;
+	BOOL IsSomeFileDir( const CFileInformation& fdi ) const;
+	BOOL IsSomeFilePath( CString filePath ) const;
+	BOOL IsSomeFilePath( const CFileInformation& fdi ) const;
+	BOOL IsSomeFileData( WIN32_FIND_DATA fd ) const;
+	BOOL IsSomeFileData( const CFileInformation& fdi ) const;
+	BOOL IsSomeFileSize( DWORD dwFileSizeHigh, DWORD dwFileSizeLow ) const;
+	BOOL IsSomeFileSize( const CFileInformation& fdi ) const;
+	BOOL IsSomeFileAttribute( DWORD dwAttribute ) const;
+	BOOL IsSomeFileAttribute( const CFileInformation& fdi ) const;
+	BOOL IsSomeFileLastWriteTime( FILETIME fileTime ) const;
+	BOOL IsSomeFileLastWriteTime( const CFileInformation& fdi ) const;
+
+	BOOL FileAttributeReadOnly( BOOL set = TRUE );
+
+	FILETIME        GetFileLastWriteTime() const;
+	CString         GetFilePath() const;
+	void            SetFileDir( const CString& dir );
+	CString         GetFileDir() const;
+	DWORD           GetFileAttribute() const;
+	unsigned long   GetFileSize( DWORD& dwFileSizeHigh, DWORD& dwFileSizeLow ) const;
+	unsigned long   GetFileSize( EFileSize& fsFormat ) const;
+	CString         GetFileName() const;
+	CString         GetFileNameWithoutExt() const;
+	CString         GetFileExt() const;
+	void            ZeroFileData();
+	WIN32_FIND_DATA GetFileData() const;
+	void            SetFileData( WIN32_FIND_DATA fd );
+
+	static CString		ConcPath( const CString& first, const CString& second );
+	static int 			EnumDirFiles( CString root, P_FI_List list );
+	static int 			EnumFiles( CString root, P_FI_List list );
+	static int 			EnumDirFilesExt( CString root, CString ext, P_FI_List list );
+	static int 			EnumFilesExt( CString root, CString ext, P_FI_List list );
+	static void			CopyFiles( const P_FI_List oldList, P_FI_List newList );
+	static void			CopyFilesAndFI( const P_FI_List oldList, P_FI_List newList );
+	static void			SortFiles( P_FI_List list );
+	static void			SortFilesABC( P_FI_List list );
+	static BOOL			RemoveFiles( P_FI_List list );
+	static BOOL			FindFilePath( CString root, CString& file );
+	static EFileAction	CompareFiles( P_FI_List oldList, P_FI_List newList, CFileInformation& fi );
+	static BOOL			FindFilePathOnDisk( CString& file );
+	static BOOL			FindFilePathOnCD( CString& file );
+	static void			CopyDir( CString oldRoot, CString newRoot );
+	static void			MoveDir( CString oldRoot, CString newRoot );
+	static void         RemoveDir( CString dir );
+	static void			CreateDir( CString dir );
+	static void         ParseDir( CString root, DirParsCallback action, LPVOID pData );
+	static UINT         GetPathLevel( CString path );
+	static CString      GenerateNewFileName( CString path );
+	static CString      GetFileDirectory( CString path );
+	static CString      GetFileName( CString path );
+	static CString      GetFileNameWithoutExt( CString path );
+	static CString      GetFileExt( CString path );
+
+protected:
+	CString m_dir;
+	WIN32_FIND_DATA m_fd;
+};
+
+//  .h: interface for the CNotifyDirCheck class.
+//
+//////////////////////////////////////////////////////////////////////
+
+typedef UINT NOTIFICATION_CALLBACK( CFileInformation fiObject, EFileAction faAction, LPVOID lpData );
+typedef NOTIFICATION_CALLBACK* NOTIFICATION_CALLBACK_PTR;
+
+UINT NotifyDirThread( LPVOID pParam );
+
+#define NOTIFICATION_TIMEOUT 1000
+
+class CNotifyDirCheck : public CObject  
+{
+public:
+	CNotifyDirCheck();
+	CNotifyDirCheck( CString csDir, NOTIFICATION_CALLBACK_PTR ncpAction, LPVOID lpData = NULL );
+	virtual ~CNotifyDirCheck();
+
+	const NOTIFICATION_CALLBACK_PTR GetActionCallback() const { return m_ncpAction; }
+	void                            SetActionCallback( NOTIFICATION_CALLBACK_PTR ncpAction ) { m_ncpAction = ncpAction; }
+	CString                         GetDirectory() const { return m_csDir; }
+	void                            SetDirectory( CString csDir ) { m_csDir = csDir; }
+	LPVOID                          GetData() const { return m_lpData; }
+	void                            SetData( LPVOID lpData ) { m_lpData = lpData; }
+	BOOL                            IsRun() const { return m_isRun; }
+	BOOL                            Run();
+	void                            Stop();
+
+	//Override Action to work with each new event  
+	virtual UINT                    Action( CFileInformation fiObject, EFileAction faAction );
+	
+protected:
+	void                            SetRun()  { m_isRun = TRUE; }
+	void                            SetStop() { m_isRun = FALSE; }
+
+protected:
+	NOTIFICATION_CALLBACK_PTR m_ncpAction;
+	CWinThread*               m_pThread;
+	CString                   m_csDir;
+	BOOL                      m_isRun;
+	LPVOID					  m_lpData;
+};
+
+class FileObserverImp : public ui::FileObserverImp {
+ public:
+  FileObserverImp(FileObserver* file_observer);
+
+  virtual void DevStartWatching() { notify_dir_change_.Run(); }
+  virtual void DevStopWatching() { notify_dir_change_.Stop(); }
+  virtual void DevSetDirectory(const std::string& path) { 
+    notify_dir_change_.SetDirectory(Charset::utf8_to_win(path).c_str());
+  }
+
+ private:
+  CNotifyDirCheck notify_dir_change_;
 };
 
 class Systems : public ui::Systems {
@@ -2370,6 +2587,9 @@ class ImpFactory : public ui::ImpFactory {
   }  
   virtual ui::GameControllersImp* CreateGameControllersImp() {
     return new GameControllersImp();
+  }
+  virtual ui::FileObserverImp* CreateFileObserverImp(FileObserver* file_observer) {
+    return new FileObserverImp(file_observer);
   }
 };
 

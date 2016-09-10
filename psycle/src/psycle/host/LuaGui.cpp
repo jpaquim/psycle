@@ -3,6 +3,7 @@
 
 // #include "stdafx.h"
 #include "LuaGui.hpp"
+#include "LuaHost.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -17,8 +18,7 @@ using namespace ui;
 const char* LuaMenuBarBind::meta = "psymenubarmeta";
 
 LockIF* locker(lua_State *L) {
-  //return LuaGlobal::proxy(L);
-  return 0;
+  return LuaGlobal::proxy(L);  
 }
 
 int LuaMenuBarBind::open(lua_State *L) {
@@ -91,9 +91,6 @@ int LuaPopupMenuBind::track(lua_State* L) {
   popup_menu->Track(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));    
   return LuaHelper::chaining(L);
 }
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////
 // PsycleFileOpenBind
@@ -208,6 +205,115 @@ int LuaFileSaveBind::filename(lua_State* L) {
   boost::shared_ptr<LuaFileDialog> luadlg = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
   lua_pushstring(L, luadlg->fname.c_str());
   return 1;
+}
+
+// LuaFileObserver + Bind
+void LuaFileObserver::OnCreateFile(const std::string& path) { 
+  struct {
+    std::string path;
+    lua_State* L;
+    LuaFileObserver* that;
+    void operator()() const {
+      try {
+        LuaImport in(L, that, locker(L));
+        if (in.open("oncreatefile")) {
+          lua_pushstring(L, path.c_str());
+          in << pcall(0);      
+        }
+      } catch (std::exception& e) {
+         ui::alert(e.what());		
+      }
+    }
+   } f;   
+  f.L = L;
+  f.that = this;
+  f.path = path;
+  LuaGlobal::InvokeLater(L, f);  
+}
+
+void LuaFileObserver::OnDeleteFile(const std::string& path) {
+  struct {
+    std::string path;
+    lua_State* L;
+    LuaFileObserver* that;
+    void operator()() const {
+      try {
+        LuaImport in(L, that, locker(L));
+        if (in.open("ondeletefile")) {
+          lua_pushstring(L, path.c_str());
+          in << pcall(0);      
+        }
+      } catch (std::exception& e) {
+         ui::alert(e.what());		
+      }
+    }
+   } f;   
+  f.L = L;
+  f.that = this;
+  f.path = path;
+  LuaGlobal::InvokeLater(L, f);
+}
+
+void LuaFileObserver::OnChangeFile(const std::string& path) {   
+  struct {
+    std::string path;
+    lua_State* L;
+    LuaFileObserver* that;
+    void operator()() const {
+      try {
+        LuaImport in(L, that, locker(L));
+        if (in.open("onchangefile")) {
+          lua_pushstring(L, path.c_str());
+          in << pcall(0);      
+        }
+      } catch (std::exception& e) {
+         ui::alert(e.what());		
+      }
+    }
+   } f;   
+  f.L = L;
+  f.that = this;
+  f.path = path;
+  LuaGlobal::InvokeLater(L, f);
+}
+
+const char* LuaFileObserverBind::meta = "psyfileobservermeta";
+
+int LuaFileObserverBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {"setdirectory", setdirectory},
+    {"startwatching", startwatching},
+    {"stopwatching", stopwatching},
+    { NULL, NULL }
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaFileObserverBind::create(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }  
+  LuaHelper::new_shared_userdata<>(L, meta, new LuaFileObserver(L), 1, true);
+  return 1;
+}
+
+int LuaFileObserverBind::gc(lua_State* L) {
+  LuaHelper::delete_shared_userdata<LuaFileObserver>(L, meta);
+  return 0;
+}
+
+int LuaFileObserverBind::setdirectory(lua_State* L) { 
+  LUAEXPORTM(L, meta, &LuaFileObserver::SetDirectory);
+}
+
+int LuaFileObserverBind::startwatching(lua_State* L) { 
+  LUAEXPORTM(L, meta, &LuaFileObserver::StartWatching);
+}
+
+int LuaFileObserverBind::stopwatching(lua_State* L) { 
+  LUAEXPORTM(L, meta, &LuaFileObserver::StopWatching);
 }
 
 // LuaSystemMetricsBind
@@ -399,8 +505,8 @@ bool CanvasItem<T>::SendMouseEvent(lua_State* L,
     LuaHelper::setfield(L, "altkey", static_cast<int>(MK_ALT & ev.shift()));
     LuaHelper::setfield(L, "clientx", ev.cx());
     LuaHelper::setfield(L, "clienty", ev.cy());
-    LuaHelper::setfield(L, "x", ev.cx() - item.abs_pos().left());
-    LuaHelper::setfield(L, "y", ev.cy() - item.abs_pos().top());
+    LuaHelper::setfield(L, "x", ev.cx() - item.abs_position().left());
+    LuaHelper::setfield(L, "y", ev.cy() - item.abs_position().top());
     LuaHelper::setfield(L, "button", ev.button());    
     in.pcall(0);    
   }
@@ -742,6 +848,14 @@ int LuaItemBind<T>::setmargin(lua_State* L) {
                                   luaL_checknumber(L, 3),
                                   luaL_checknumber(L, 4),
                                   luaL_checknumber(L, 5)));
+  return LuaHelper::chaining(L);
+}
+
+template <class T>
+int LuaItemBind<T>::setcursorposition(lua_State* L) {
+  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);  
+  window->SetCursorPosition(ui::Point(luaL_checknumber(L, 2),
+                                      luaL_checknumber(L, 3)));
   return LuaHelper::chaining(L);
 }
 
@@ -1201,8 +1315,7 @@ int LuaGraphicsBind::drawimage(lua_State* L) {
 void LuaRun::Run() {  
   LuaImport in(L, this, 0);  
   if (in.open("run")) {    
-    in.pcall(0);    
-    in.close();    
+    in.pcall(0);
   }  
 }
 
@@ -1812,9 +1925,9 @@ std::string LuaGameControllerBind::meta = "gamecontroller";
 int LuaGameControllerBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},    
-    {"xpos", xpos},
-    {"ypos", ypos},
-    {"xzpos", zpos},
+    {"xposition", xposition},
+    {"yposition", yposition},
+    {"xzposition", zposition},
     {"buttons", buttons},  
     {NULL, NULL}
   };

@@ -187,16 +187,7 @@ namespace psycle
           listeners_.erase(it);
         }
       }            
-      void Notify(ActionType action) {
-        ActionListenerList::iterator it = listeners_.begin();
-        for (; it!=listeners_.end(); ++it) {
-          try {
-            (*it)->OnNotify(action);
-          } catch (std::exception& e) {
-            AfxMessageBox(e.what());
-          }
-        }
-      }
+      void Notify(ActionType action);
     private:        
        ActionListenerList listeners_;
     };

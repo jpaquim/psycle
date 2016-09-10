@@ -3,6 +3,7 @@
 // #include "stdafx.h"
 
 #include "Ui.hpp"
+#include "LockIF.hpp"
 #include "MfcUi.hpp"
 #include "Canvas.hpp"
 #include <limits>
@@ -223,18 +224,25 @@ void Area::ComputeBounds() const {
   }  
 }
 
-Commands::Commands() {}
+Commands::Commands() : locker_(new psycle::host::mfc::WinLock()), invalid_(false), addcount(0) {}
 
-void Commands::Clear() {  
-  functors.clear();  
+void Commands::Clear() {
+/*  locker_->lock();
+  functors.clear();
+  locker_->unlock();  */
 }
 
 void Commands::Invoke() {       
+//  locker_->lock();
+  GlobalTimer::instance().KillTimer();
   std::list<boost::function<void(void)>>::iterator it = functors.begin();
-  while (it != functors.end()) {
-    (*it)();       
-    it++;
-  }  
+  while (it != functors.end()) { 
+    boost::function<void(void)> func = *it;    
+    it = functors.erase(it);    
+    func();   
+  }    
+ GlobalTimer::instance().StartTimer();
+//  locker_->unlock();
 }
 
 Font::Font() : imp_(ui::ImpFactory::instance().CreateFontImp()) {
@@ -277,9 +285,7 @@ Image::Image(const Image& other)
     : imp_(other.imp()->DevClone()), has_file_(other.has_file_) {
 }
 
-Image::~Image() {
-  int fordebugonly(0);
-}
+Image::~Image() {}
 
 Image& Image::operator=(const Image& other){
 	if (this != &other) {
@@ -643,7 +649,7 @@ bool Window::IsInGroup(Window::WeakPtr group) const {
 
 void Window::FLSEX() {  
   if (visible() && root()) {    
-		ui::Rect fls_pos = overall_pos(abs_pos());
+		ui::Rect fls_pos = overall_position(abs_position());
     std::auto_ptr<Area> tmp(new Area(fls_pos));		    
     if (fls_area_.get()) {    
       fls_area_->Combine(*tmp, RGN_OR);
@@ -657,7 +663,7 @@ void Window::FLSEX() {
 
 void Window::FLS() {
   if (visible() && root()) {    
-		ui::Rect fls_pos = overall_pos(abs_pos());
+		ui::Rect fls_pos = overall_position(abs_position());
     std::auto_ptr<Area> tmp(new Area(fls_pos));    
     root()->Invalidate(tmp->region());
     fls_area_ = tmp;
@@ -703,13 +709,13 @@ const Area& Window::area() const {
   return *area_.get();
 }  
 
-void Window::set_pos(const ui::Point& pos) {  
-  set_pos(ui::Rect(pos, dim()));
+void Window::set_position(const ui::Point& pos) {  
+  set_position(ui::Rect(pos, dim()));
 }
 
-void Window::set_pos(const ui::Rect& pos) {  
+void Window::set_position(const ui::Rect& pos) {  
 	ui::Rect new_pos = pos;
-	bool has_auto_dimension = (!prevent_auto_dimension_) && (auto_size_width() || auto_size_height());
+	bool has_auto_dimension = (!prevent_auto_dimension_) && ((auto_size_width() || auto_size_height()));
 	if (imp_.get()) {    		
 		if (has_auto_dimension) {
 			ui::Dimension auto_dimension = OnCalcAutoDimension();
@@ -720,15 +726,15 @@ void Window::set_pos(const ui::Rect& pos) {
 				new_pos.set_height(auto_dimension.height());
 			}
 	  }
-		bool size_changed = imp_->dev_pos().dimension() != new_pos.dimension();
-		imp_->dev_set_pos(new_pos);
-    FLSEX();
-		if (size_changed) {
-			align_dimension_changed();
+		bool size_changed = imp_->dev_position().dimension() != new_pos.dimension();
+		imp_->dev_set_position(new_pos);
+    FLSEX();    
+    align_dimension_changed();    
+		if (size_changed) {			
       OnSize(new_pos.dimension());
     }
 		if (!prevent_auto_dimension_) {
-		  // WorkChildPos();
+		  // WorkChildposition();
 		}
   }
 }
@@ -739,24 +745,28 @@ void Window::ScrollTo(int offsetx, int offsety) {
   }
 }
 
-ui::Rect Window::pos() const { 
-  return imp() ? imp_->dev_pos() : Rect();
+ui::Rect Window::position() const { 
+  return imp() ? imp_->dev_position() : Rect();
 }
 
-ui::Rect Window::abs_pos() const {
-  return imp() ? Rect(imp_->dev_abs_pos().top_left(), dim()) : Rect();
+ui::Rect Window::abs_position() const {
+  return imp() ? Rect(imp_->dev_abs_position().top_left(), dim()) : Rect();
 }
 
-ui::Rect Window::desktop_pos() const {
-  return imp() ? Rect(imp_->dev_desktop_pos().top_left(), dim()) : Rect();
+ui::Rect Window::desktop_position() const {
+  return imp() ? Rect(imp_->dev_desktop_position().top_left(), dim()) : Rect();
 }
 
 ui::Dimension Window::dim() const {  
-	return (imp_.get()) ? imp_->dev_pos().dimension() : ui::Dimension();
+	return (imp_.get()) ? imp_->dev_position().dimension() : ui::Dimension();
+}
+
+bool Window::check_position(const ui::Rect& pos) const {
+  return (imp_.get()) ? imp_->dev_check_position(pos) : false;
 }
 
 void Window::UpdateAutoDimension() {
-  ui::Dimension new_dimension = pos().dimension();
+  ui::Dimension new_dimension = position().dimension();
   bool has_auto_dimension = auto_size_width() || auto_size_height();
   if (has_auto_dimension && imp_.get()) {    				
 	ui::Dimension auto_dimension = OnCalcAutoDimension();
@@ -766,10 +776,10 @@ void Window::UpdateAutoDimension() {
 	if (auto_size_height()) {
 		new_dimension.set_height(auto_dimension.height());
 	}	  
-	if (overall_pos() != overall_pos(ui::Rect(pos().top_left(), new_dimension))) {
-	    imp_->dev_set_pos(ui::Rect(pos().top_left(), new_dimension));
+	if (overall_position() != overall_position(ui::Rect(position().top_left(), new_dimension))) {
+	    imp_->dev_set_position(ui::Rect(position().top_left(), new_dimension));
         OnSize(new_dimension); 	
-	    WorkChildPos();	  
+	    WorkChildPosition();	  
 	}
 	FLSEX();
   }
@@ -860,7 +870,7 @@ ui::BoxSpace Window::sum_border_space() const {
 	return result;
 }
 
-void Window::WorkChildPos() {
+void Window::WorkChildPosition() {
   needsupdate();
   std::vector<Window*> items;
   Window* p = parent();
@@ -872,7 +882,7 @@ void Window::WorkChildPos() {
   for (; rev_it != items.rend(); ++rev_it) {
     Window* item = *rev_it;
     ChildPosEvent ev(*this);
-    item->OnChildPos(ev);
+    item->OnChildPosition(ev);
     if (ev.is_propagation_stopped()) {
       break;
     }
@@ -917,6 +927,12 @@ void Window::Show() {
   }  
   visible_ = true;
   OnShow();  
+}
+
+void Window::BringWindowToTop() {
+  if (imp_.get()) {
+    imp_->DevBringWindowToTop();
+  }
 }
 
 void Window::Show(const boost::shared_ptr<WindowShowStrategy>& aligner) {  
@@ -968,9 +984,9 @@ void Window::HideCursor() {
 	}
 }
 
-void Window::SetCursorPos(double x, double y) {
+void Window::SetCursorPosition(const ui::Point& position) {
 	if (imp_.get()) {
-		imp_->DevSetCursorPos(x, y);
+		imp_->DevSetCursorPosition(position);
 	}
 }
 
@@ -1099,11 +1115,11 @@ void CalcDim::operator()(Window& window) const {
 
 bool AbortPos::operator()(Window& window) const { 
   bool result = true;
-	if (window.aligner()) {
+	if (window.aligner()) { 
 		bool window_needs_align = (window.visible() && window.has_childs() && (!window.aligner()->aligned() ||
-			window.has_align_dimension_changed()));
-      result = !window_needs_align;        
-      window.aligner()->aligned_ = window_needs_align;  
+	  window.has_align_dimension_changed()));   
+    result = !window_needs_align;        
+    window.aligner()->aligned_ = window_needs_align;  
 	}
   return result;
 }
@@ -1180,17 +1196,12 @@ void Group::Remove(const Window::Ptr& item) {
 }
 
 ui::Dimension Group::OnCalcAutoDimension() const {	
-	if (!auto_size_width() && !auto_size_height()) {
-		int fordebugonly(0);
-	}
-
-
 	ui::Rect result(ui::Point((std::numeric_limits<double>::max)(),
 	 						    (std::numeric_limits<double>::max)()),
                   ui::Point((std::numeric_limits<double>::min)(),
                   (std::numeric_limits<double>::min)()));	      
   for (const_iterator i = begin(); i != end(); ++i) {		  
-		 ui::Rect item_pos = (*i)->pos();
+		 ui::Rect item_pos = (*i)->position();
 		 item_pos.Increase(ui::BoxSpace((*i)->padding().top() + (*i)->border_space().top() + (*i)->margin().top(),
 			 (*i)->padding().right() + (*i)->border_space().right() + (*i)->margin().right(),
 			 (*i)->padding().bottom() + (*i)->border_space().bottom() + (*i)->margin().bottom(),
@@ -1221,14 +1232,14 @@ void Group::set_zorder(Window::Ptr item, int z) {
 }
 
 int Group::zorder(Window::Ptr item) const {
-	size_t z = -1;
-  for (size_t k = 0; k < items_.size(); k++) {
+	int result = -1;
+  for (Window::Container::size_type k = 0; k < items_.size(); ++k) {
     if (items_[k] == item) {
-      z = k;
+      result = k;
       break;
     }
   }
-  return z;
+  return result;
 }
 
 Window::Ptr Group::HitTest(double x, double y) {
@@ -1237,7 +1248,7 @@ Window::Ptr Group::HitTest(double x, double y) {
   for (; rev_it != items_.rend(); ++rev_it) {
     Window::Ptr item = *rev_it;
     item = item->visible() 
-           ? item->HitTest(x-item->pos().left(), y-item->pos().top())
+           ? item->HitTest(x-item->position().left(), y-item->position().top())
 		       : nullpointer; 
     if (item) {
       result = item;
@@ -1247,17 +1258,17 @@ Window::Ptr Group::HitTest(double x, double y) {
   return result;
 }
 
-void Group::OnChildPos(ChildPosEvent& ev) {
+void Group::OnChildPosition(ChildPosEvent& ev) {
   if (auto_size_width() || auto_size_height()) {
       ev.window()->needsupdate();    		
 		ui::Dimension new_dimension = OnCalcAutoDimension();
 		if (!auto_size_width()) {
-			new_dimension.set_width(pos().width());
+			new_dimension.set_width(position().width());
 		}
 		if (!auto_size_height()) {
-			new_dimension.set_height(pos().height());
+			new_dimension.set_height(position().height());
 		}
-    imp()->dev_set_pos(ui::Rect(pos().top_left(), new_dimension));
+    imp()->dev_set_position(ui::Rect(position().top_left(), new_dimension));
   } else {
     // ev.StopPropagation();
   }
@@ -1278,19 +1289,21 @@ void Group::set_aligner(const Aligner::Ptr& aligner) {
 Window::Container Aligner::dummy;
 
 void Group::UpdateAlign() {
-  bool is_saving = false;
-  if (root()) {
-    is_saving = dynamic_cast<Canvas*>(root())->IsSaving();
-    dynamic_cast<Canvas*>(root())->SetSave(true);
-  }
-  this->EnableFls();
-  if (aligner_) {        
+  if (aligner_) {   
+    bool old_is_saving = false, old_is_fls_prevented = false;    
+    if (root()) {     
+       old_is_fls_prevented = root()->is_fls_prevented();      
+       if (!old_is_fls_prevented) {
+        old_is_saving = dynamic_cast<Canvas*>(root())->IsSaving();
+        dynamic_cast<Canvas*>(root())->SetSave(true);
+      }
+    }         
     aligner_->Align();    
+    if (!old_is_saving && !old_is_fls_prevented && root()) {    
+      dynamic_cast<Canvas*>(root())->Flush();
+      dynamic_cast<Canvas*>(root())->SetSave(false);
+    }  
   }
-  if (!is_saving && root()) {    
-    dynamic_cast<Canvas*>(root())->Flush();
-    dynamic_cast<Canvas*>(root())->SetSave(false);
-  }  
 }
 
 void Group::FlagNotAligned() {
@@ -1323,14 +1336,14 @@ void ScrollBar::scroll_range(int& minpos, int& maxpos) {
   }
 }
 
-void ScrollBar::set_scroll_pos(int pos) {
+void ScrollBar::set_scroll_position(int pos) {
   if (imp()) {
-    imp()->dev_set_scroll_pos(pos);
+    imp()->dev_set_scroll_position(pos);
   }
 }
 
-int ScrollBar::scroll_pos() const {
-  return imp() ? imp()->dev_scroll_pos() : 0;  
+int ScrollBar::scroll_position() const {
+  return imp() ? imp()->dev_scroll_position() : 0;  
 }
 
 void ScrollBar::system_size(int& width, int& height) const {
@@ -1374,13 +1387,13 @@ void ScrollBox::Init() {
   hscrollbar_->set_auto_size(false, false);
   hscrollbar_->scroll.connect(boost::bind(&ScrollBox::OnHScroll, this, _1));
   hscrollbar_->set_scroll_range(0, 100);
-  hscrollbar_->set_scroll_pos(0);
+  hscrollbar_->set_scroll_position(0);
   Group::Add(hscrollbar_);
   vscrollbar_.reset(ui::Systems::instance().CreateScrollBar(VERT));
   vscrollbar_->set_auto_size(false, false);
   vscrollbar_->scroll.connect(boost::bind(&ScrollBox::OnVScroll, this, _1));
   vscrollbar_->set_scroll_range(0, 100);
-  vscrollbar_->set_scroll_pos(0);
+  vscrollbar_->set_scroll_position(0);
   Group::Add(vscrollbar_);
 }
 
@@ -1397,13 +1410,13 @@ void ScrollBox::UpdateScrollRange() {
 
 void ScrollBox::OnSize(const ui::Dimension& dimension) {
   ui::Dimension scrollbar_size = ui::Systems::instance().metrics().scrollbar_size();
-  hscrollbar_->set_pos(
+  hscrollbar_->set_position(
       ui::Rect(ui::Point(0, dimension.height() -  scrollbar_size.height()),
                ui::Dimension(dimension.width(), scrollbar_size.height())));
-  vscrollbar_->set_pos(
+  vscrollbar_->set_position(
       ui::Rect(ui::Point(dimension.width() -  scrollbar_size.width(), 0), 
                ui::Dimension(scrollbar_size.width(), dimension.height() - scrollbar_size.height())));
-  pane_->set_pos(
+  pane_->set_position(
        ui::Rect(ui::Point(0, 0), 
                 ui::Dimension(dimension.width() - scrollbar_size.width() - 2,
                               dimension.height() - scrollbar_size.height() - 2)));
@@ -1413,7 +1426,7 @@ void ScrollBox::OnSize(const ui::Dimension& dimension) {
 void ScrollBox::OnHScroll(ui::ScrollBar& bar) {
   if (!client_->empty()) {
     ui::Window::Ptr view = *client_->begin();
-		int dx = static_cast<int>(bar.scroll_pos() + view->pos().left());
+		int dx = static_cast<int>(bar.scroll_position() + view->position().left());
     ScrollBy(-dx, 0);
   }
 }
@@ -1421,7 +1434,7 @@ void ScrollBox::OnHScroll(ui::ScrollBar& bar) {
 void ScrollBox::OnVScroll(ui::ScrollBar& bar) {
   if (!client_->empty()) {
     ui::Window::Ptr view = *client_->begin();
-    int dy = static_cast<int>(bar.scroll_pos() + view->pos().top());
+    int dy = static_cast<int>(bar.scroll_position() + view->position().top());
     ScrollBy(0, -dy);
   }
 }
@@ -1429,10 +1442,10 @@ void ScrollBox::OnVScroll(ui::ScrollBar& bar) {
 void ScrollBox::ScrollBy(double dx, double dy) {
   if (!client_->empty()) {
     ui::Window::Ptr view = *client_->begin();
-    ui::Rect new_pos = view->pos();
+    ui::Rect new_pos = view->position();
     new_pos.set_left(new_pos.left() + dx);
     new_pos.set_top(new_pos.top() + dy);
-    view->imp()->dev_set_pos(new_pos);
+    view->imp()->dev_set_position(new_pos);
     view->ScrollTo(static_cast<int>(-dx), static_cast<int>(-dy));
   }
 }
@@ -1440,9 +1453,9 @@ void ScrollBox::ScrollBy(double dx, double dy) {
 void ScrollBox::ScrollTo(const ui::Point& top_left) {
 	if (!client_->empty()) {
 		ui::Window::Ptr view = *client_->begin();		
-		view->set_pos(top_left);
-		hscrollbar_->set_scroll_pos(static_cast<int>(top_left.x()));
-		vscrollbar_->set_scroll_pos(static_cast<int>(top_left.y()));
+		view->set_position(top_left);
+		hscrollbar_->set_scroll_position(static_cast<int>(top_left.x()));
+		vscrollbar_->set_scroll_position(static_cast<int>(top_left.y()));
 	}
 }
 
@@ -1453,7 +1466,7 @@ void WindowCenterToScreen::set_position(Window& window) {
     (height_perc_ < 0) ? window.dim().height() 
                        : Systems::instance().metrics().screen_dimension().height() * height_perc_
   );
-  window.set_pos(ui::Rect(    
+  window.set_position(ui::Rect(    
     ((Systems::instance().metrics().screen_dimension() - win_dim) / 2.0)
     .as_point(),
     win_dim));
@@ -1530,11 +1543,13 @@ PopupFrame::PopupFrame(FrameImp* imp) : Frame(imp) {
 }
 
 recursive_node_iterator Node::recursive_begin() {
-  return recursive_node_iterator(begin());
+  Node::iterator b = begin();
+  return recursive_node_iterator(b);
 }
 
 recursive_node_iterator Node::recursive_end() {
-  return recursive_node_iterator(end());
+  Node::iterator e = end();
+  return recursive_node_iterator(e);
 }
 
 void Node::erase(iterator it) {       
@@ -1911,6 +1926,26 @@ std::string Edit::text() const {
   return imp() ? imp()->dev_text() : "";
 }
 
+void Edit::set_background_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_background_color(color);
+  }
+}
+
+ARGB Edit::background_color() const {
+  return imp() ? imp()->dev_background_color() : 0xFF00000;
+}
+
+void Edit::set_text_color(ARGB color) {
+  if (imp()) {
+    imp()->dev_set_text_color(color);
+  }
+}
+
+ARGB Edit::text_color() const {
+  return imp() ? imp()->dev_text_color() : 0xFF00000;
+}
+
 Button::Button() : Window(ui::ImpFactory::instance().CreateButtonImp()) {
   set_auto_size(false, false);
 }
@@ -2142,6 +2177,12 @@ void Scintilla::LoadFile(const std::string& filename) {
   }
 }
 
+void Scintilla::Reload() {
+  if (imp()) {    
+		imp()->DevReload();
+  }
+}
+
 void Scintilla::SaveFile(const std::string& filename) {
   if (imp()) {
     imp()->DevSaveFile(filename);
@@ -2282,10 +2323,21 @@ void Scintilla::set_caret_line_background_color(ARGB color) {
   }
 }
 
-void Scintilla::ClearAll()
-{
+void Scintilla::ClearAll() {
 	if (imp()) {
     imp()->DevClearAll();
+  }
+}
+
+void Scintilla::Undo() {
+  if (imp()) {
+    imp()->dev_undo();
+  }
+}
+
+void Scintilla::Redo() {
+  if (imp()) {
+    imp()->dev_redo();
   }
 }
 
@@ -2314,16 +2366,39 @@ void GameController::AfterUpdate(const GameController& old_state) {
         OnButtonUp(b);
       }
     }
-    if (xpos() != old_state.xpos()) {
-      OnXAxis(xpos(), old_state.xpos());
+    if (xposition() != old_state.xposition()) {
+      OnXAxis(xposition(), old_state.xposition());
     }
-    if (ypos() != old_state.ypos()) {
-      OnYAxis(ypos(), old_state.ypos());
+    if (yposition() != old_state.yposition()) {
+      OnYAxis(yposition(), old_state.yposition());
     }
-    if (zpos() != old_state.zpos()) {
-      OnZAxis(zpos(), old_state.zpos());
+    if (zposition() != old_state.zposition()) {
+      OnZAxis(zposition(), old_state.zposition());
     }
   }  
+}
+
+FileObserver::FileObserver() : 
+   imp_(ui::ImpFactory::instance().CreateFileObserverImp(this)) {
+}
+
+void FileObserver::StartWatching() {
+  if (imp()) {
+    imp()->DevStartWatching();
+  }
+}
+
+void FileObserver::StopWatching() {
+  if (imp()) {
+    imp()->DevStopWatching();
+  }
+}
+
+
+void FileObserver::SetDirectory(const std::string& path) {
+  if (imp()) {
+    imp()->DevSetDirectory(path);
+  }
 }
 
 // Ui Factory
@@ -2610,6 +2685,11 @@ ui::ScintillaImp* ImpFactory::CreateScintillaImp() {
 ui::GameControllersImp* ImpFactory::CreateGameControllersImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGameControllersImp(); 
+}
+
+ui::FileObserverImp* ImpFactory::CreateFileObserverImp(FileObserver* file_observer) {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFileObserverImp(file_observer); 
 }
 
 

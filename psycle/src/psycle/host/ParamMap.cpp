@@ -110,7 +110,7 @@ void ParamMap::ReplaceSelection() {
   std::vector<ui::Node::Ptr>::iterator it = nodes.begin();
   for (int i = 0; it != nodes.end(); ++i, ++it) {
     if (i + cbx_box_->item_index() < machine_->GetNumParams()) {      
-      int virtual_index = (*it)->imp(*list_view_->imp())->pos();      
+      int virtual_index = (*it)->imp(*list_view_->imp())->position();      
       std::stringstream str;
       str << i << " [" << param_name(i + cbx_box_->item_index()) << "]";
       ui::Node::Ptr col2_node = *(*it)->begin();
@@ -206,12 +206,12 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   txt1->set_color(skin_.font_color);      
   txt1->set_margin(ui::BoxSpace(0, 10, 0, 0));
   txt1->set_justify(ui::RIGHTJUSTIFY);  
-  txt1->set_pos(ui::Rect(ui::Point(), ui::Dimension(50, 0)));
+  txt1->set_position(ui::Rect(ui::Point(), ui::Dimension(50, 0)));
   txt1->set_font(skin_.font);
   cbx_group->Add(cbx_box_);
   cbx_box_->set_auto_size(false, false);
   cbx_box_->set_align(ui::ALLEFT);
-  cbx_box_->set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(150, 20)));  
+  cbx_box_->set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(150, 20)));  
   cbx_box_->select.connect(
     boost::bind(&ParamMap::OnComboBoxSelect, this, _1));
 
@@ -224,7 +224,7 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   txt2->set_auto_size(false, true);
   txt2->set_color(skin_.font_color);  
   txt2->set_align(ui::ALLEFT);
-  txt2->set_pos(ui::Rect(ui::Point(), ui::Dimension(50, 0)));
+  txt2->set_position(ui::Rect(ui::Point(), ui::Dimension(50, 0)));
   txt2->set_font(skin_.font);
   end_group->Add(machine_param_end_txt_);    
   machine_param_end_txt_->set_align(ui::ALLEFT); 
@@ -237,7 +237,7 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   ui::Button::Ptr replace_btn(new ui::Button());
   btn_group->Add(replace_btn);
   replace_btn->set_align(ui::ALLEFT);
-  replace_btn->set_pos(ui::Rect(ui::Point(0, 0), ui::Dimension(100, 20)));
+  replace_btn->set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(100, 20)));
   replace_btn->set_text("replace");    
   replace_btn->click.connect(
     boost::bind(&ParamMap::OnReplaceButtonClick, this, _1));
@@ -247,7 +247,7 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   allow_auto_learn_chk_box_->Check();
   allow_auto_learn_chk_box_->set_margin(
     ui::BoxSpace(0, 0, 0, 5));
-  allow_auto_learn_chk_box_->set_pos(
+  allow_auto_learn_chk_box_->set_position(
     ui::Rect(ui::Point(), ui::Dimension(100, 20)));
   allow_auto_learn_chk_box_->set_text("Auto Learn");
 }
@@ -255,7 +255,7 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
 void ParamMap::AddHelpGroup(const ui::Window::Ptr& parent) {
   ui::Group::Ptr help_group = CreateRow(parent);
   help_group->set_auto_size(false, false);
-  help_group->set_pos(ui::Rect(ui::Point(), ui::Dimension(0, 200)));
+  help_group->set_position(ui::Rect(ui::Point(), ui::Dimension(0, 200)));
   help_group->add_ornament(border_);
 
   CreateTitleRow(help_group, "Help");

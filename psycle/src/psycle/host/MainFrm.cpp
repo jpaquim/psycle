@@ -188,7 +188,7 @@ namespace psycle { namespace host {
 //menu end
 		END_MESSAGE_MAP()
 
-		int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
+    int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{      
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
@@ -327,7 +327,7 @@ namespace psycle { namespace host {
 			m_wndView.InitTimer();
 		//	m_wndView.Repaint();
 			m_wndView.SetFocus();
-		//	m_wndView.EnableSound();			
+		//	m_wndView.EnableSound();			    
 			return 0;
 		}
 		BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
@@ -1213,6 +1213,8 @@ namespace psycle { namespace host {
          child->MoveWindow(0, 0, rc.Width(), rc.Height());
        }       
     }
+
+    
 
     
 }}

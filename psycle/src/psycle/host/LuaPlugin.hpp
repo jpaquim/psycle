@@ -132,7 +132,6 @@ namespace psycle { namespace host {
   private:
     virtual void OnTimerViewRefresh() {
       proxy().OnTimer();
-
       if (do_exit_) {
        LuaUiExtentions::instance()->Remove(this_ptr());
       } else 
@@ -144,9 +143,8 @@ namespace psycle { namespace host {
           } CATCH_WRAP_AND_RETHROW(*this);
         } catch (std::exception& ) {                
         }
-      }
+      }      
     }
-
     // additions if noteon mode is used
     struct note {
       unsigned char key;

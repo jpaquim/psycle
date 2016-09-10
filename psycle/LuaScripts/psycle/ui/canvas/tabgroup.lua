@@ -8,7 +8,6 @@
 local canvas = require("psycle.ui.canvas")
 local group = require("psycle.ui.canvas.group")
 local window = require("psycle.ui.canvas.item")
---local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local toolicon = require("psycle.ui.canvas.toolicon")
@@ -37,9 +36,7 @@ function tabgroup:init()
   self.frames = {}
   self.isoldflsprevented_ = {}
   self.dopageclose = signal:new()
-  self.hasclosebutton_ = true
-  --self:setclipchildren()
-  --self:addstyle(0x02000000)  
+  self.hasclosebutton_ = true 
   self:setautosize(false, false)
   self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):addornament(ornamentfactory:createfill(0x232323)):setpadding(2, 0, 2, 2)
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setautosize(false, false):setpos(0, 0, 15, 10):setalign(window.ALRIGHT)    
@@ -47,8 +44,7 @@ function tabgroup:init()
   self:inittabpopupmenu()
   self:initframepopupmenu()
   function icon1:onclick()    
-    self.f = popupframe:new()
-    --self.f:addstyle(0x02000000)
+    self.f = popupframe:new()    
     self.c = canvas:new():invalidatedirect()
     local that1 = self    
     function self.c:onmousedown(ev)
@@ -79,8 +75,7 @@ function tabgroup:init()
     self.f:show()            
   end  
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x232323))      
-  self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)
-  --self.children:setclipchildren()
+  self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)  
   self.children:addornament(ornamentfactory:createboundfill(0x232323))  
 end
 
@@ -102,20 +97,24 @@ function tabgroup:restoreflsstate()
   if self.isoldflsprevented_[#self.isoldflsprevented_] then
     self:preventfls()
   else
-    self:enablefls()
+    self:enablefls()     
   end
   self.isoldflsprevented_[#self.isoldflsprevented_] = nil
-  return self
-end
+  return self            
+end                    
 
-function tabgroup:addpage(page, label)  
+function tabgroup:addpage(page, label)
+  self:preventfls()
   page:setautosize(false, false)
   page:setalign(window.ALCLIENT)
   self:createheader(page, label)
-  self.children:add(page)  
-  self:setactivepage(page) 
-  self.tabs:updatealign()
-  self.tabbar:updatealign()
+  self.children:add(page)
+  self:setactivepage(page)
+  self:enablefls()
+  self:flagnotaligned()  
+  self:updatealign()
+  self:enablefls()
+  self:fls()
 end
 
 function tabgroup:activepage()
@@ -127,32 +126,31 @@ function tabgroup:activepage()
 end
 
 function tabgroup:setactiveheader(page)  
-   if page then    
-    local items = self.tabs:items()
+   if page ~= self.activepage_ then    
+    local tabs = self.tabs:items()
     if self.activepage_ then
       local index = self.children:itemindex(self.activepage_)
       if index ~= 0 then
-        items[index]:setskinnormal()
+        tabs[index]:setskinnormal()
       end
     end
     local index = self.children:itemindex(page)
-    if index ~= 0 then
-      items[index]:setskinhighlight()
+    if index ~= 0 then	  
+      tabs[index]:setskinhighlight()
     end
   end    
 end
 
 function tabgroup:setactivepage(page)
-  if page then     
-    --self:saveflsstate():preventfls()
-    if self.activepage_ then
+  if page and self.activepage_ ~= page  then
+    --self:saveflsstate():preventfls()    
+    self:setactiveheader(page)    
+    page:show()	
+	if self.activepage_ then
       self.activepage_:hide()
     end    
-    self:setactiveheader(page)
-    self.activepage_ = page;        
-	page:setdebugtext("ps")
-    page:show()
-	self:updatealign()    
+	self.activepage_ = page;
+	self.children:updatealign()
     --self:restoreflsstate():invalidate()
   end
 end
@@ -236,16 +234,12 @@ function tabgroup:createheader(page, label)
   end    
   header:setskinnormal()    
   function header:onmouseenter(ev)    
-    if self.page == that:activepage() then
-	  self.text:setcolor(0xFFFFFF) 
-	else
+    if self.page ~= that:activepage() then	  
 	  self.text:setcolor(0xFFFFFF)    
 	end
   end
   function header:onmouseout(ev)
-    if self.page == that:activepage() then
-	  self.text:setcolor(0xFFFFFF) 
-	else
+    if self.page ~= that:activepage() then	  
       self.text:setcolor(0xC0C0C0) 	
 	end
   end  
@@ -359,10 +353,7 @@ function tabgroup:openintab(frame)
   self:removeframepagepointer()
   self:hideallpages()
   self:setnormalskintoalltabs()
-  self:addpage(page, name)
-  self:setactivepage(page)    
-  self.tabs:updatealign()  
-  self.children:updatealign()    
+  self:addpage(page, name)  
 end
 
 function tabgroup:hideallpages()

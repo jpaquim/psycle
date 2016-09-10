@@ -28,6 +28,25 @@ struct LuaFileSaveBind {
   static int filename(lua_State *L);
 };
 
+class LuaFileObserver : public ui::FileObserver, public LuaState {
+ public:
+   LuaFileObserver(lua_State* L) : LuaState(L), ui::FileObserver() {}
+   
+   virtual void OnCreateFile(const std::string& path);
+   virtual void OnDeleteFile(const std::string& path);
+   virtual void OnChangeFile(const std::string& path);
+};
+
+struct LuaFileObserverBind {
+    static const char* meta;
+    static int open(lua_State *L);    
+    static int create(lua_State* L);    
+    static int gc(lua_State* L);
+    static int setdirectory(lua_State* L);
+    static int startwatching(lua_State* L);
+    static int stopwatching(lua_State* L);
+  };
+
 struct LuaPointBind {
   static std::string meta;
   static int open(lua_State *L);  
@@ -609,9 +628,9 @@ struct LuaGameControllerBind {
   static int open(lua_State *L);  
   static int create(lua_State *L); 
   static int gc(lua_State* L);  
-  static int xpos(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::xpos); }
-  static int ypos(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::ypos); }
-  static int zpos(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::zpos); }
+  static int xposition(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::xposition); }
+  static int yposition(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::yposition); }
+  static int zposition(lua_State* L) { LUAEXPORTM(L, LuaGameControllerBind::meta, &ui::GameController::zposition); }
   static int buttons(lua_State* L);    
 };
 
@@ -648,12 +667,12 @@ class LuaItemBind {
   static int setmethods(lua_State* L) {
     static const luaL_Reg methods[] = {
       {"new", create},
-      {"setpos", setpos},
+      {"setpos", setposition},
 //      {"scrollto", scrollto},
      // {"setsize", setsize},     
-      {"pos", pos},
-      {"clientpos", clientpos},
-      {"desktoppos", desktoppos},
+      {"pos", position},
+      {"clientpos", clientposition},
+      {"desktoppos", desktopposition},
     //  {"setwidth", setwidth},
     //  {"setheight", setheight},
       {"setautosize", setautosize},
@@ -701,7 +720,7 @@ class LuaItemBind {
       {"disable", disable},
 			{"showcursor", showcursor},
       {"hidecursor", hidecursor},
-      {"setcursorpos", setcursorpos},			
+      {"setcursorpos", setcursorposition},			
 	    {"viewdoublebuffered", viewdoublebuffered},
 	    {"viewsinglebuffered", viewsinglebuffered},
       {NULL, NULL}
@@ -724,7 +743,7 @@ class LuaItemBind {
   static int disable(lua_State *L) { LUAEXPORT(L, &T::Disable); }
 	static int showcursor(lua_State* L) { LUAEXPORT(L, &T::ShowCursor); }
   static int hidecursor(lua_State* L) { LUAEXPORT(L, &T::HideCursor); }
-  static int setcursorpos(lua_State* L) { LUAEXPORT(L, &T::SetCursorPos); }
+  static int setcursorposition(lua_State* L);
   static int viewdoublebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewDoubleBuffered); }
   static int viewsinglebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewSingleBuffered); }
   static int addstyle(lua_State *L) {
@@ -747,19 +766,19 @@ class LuaItemBind {
     return LuaHelper::chaining(L);
   }
 
-  static int setpos(lua_State *L) {
+  static int setposition(lua_State *L) {
     const int n = lua_gettop(L);
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     if (n==3) {
       double v1 = luaL_checknumber(L, 2);
       double v2 = luaL_checknumber(L, 3);
-      item->set_pos(ui::Rect(ui::Point(v1, v2), ui::Dimension(item->pos().width(), item->pos().height())));
+      item->set_position(ui::Rect(ui::Point(v1, v2), ui::Dimension(item->position().width(), item->position().height())));
     } else {
       double v1 = luaL_checknumber(L, 2);
       double v2 = luaL_checknumber(L, 3);
       double v3 = luaL_checknumber(L, 4);
       double v4 = luaL_checknumber(L, 5);
-      item->set_pos(ui::Rect(ui::Point(v1, v2), ui::Dimension(v3, v4)));
+      item->set_position(ui::Rect(ui::Point(v1, v2), ui::Dimension(v3, v4)));
     }
     return LuaHelper::chaining(L);
   }
@@ -776,31 +795,31 @@ class LuaItemBind {
     LUAEXPORT(L, &T::SetSize); 
   }*/  
   static int updatearea(lua_State *L) { LUAEXPORT(L, &T::needsupdate) }
-  static int pos(lua_State *L) {
+  static int position(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    lua_pushnumber(L, item->pos().left());
-    lua_pushnumber(L, item->pos().top());
-    lua_pushnumber(L, item->pos().width());
-    lua_pushnumber(L, item->pos().height());
+    lua_pushnumber(L, item->position().left());
+    lua_pushnumber(L, item->position().top());
+    lua_pushnumber(L, item->position().width());
+    lua_pushnumber(L, item->position().height());
     return 4;
   }  
 //  static int setwidth(lua_State *L) { LUAEXPORT(L, &T::SetWidth) }
 //  static int setheight(lua_State *L) { LUAEXPORT(L, &T::SetHeight) }
   static int setautosize(lua_State *L) { LUAEXPORT(L, &T::set_auto_size) }
-  static int clientpos(lua_State* L) { 
+  static int clientposition(lua_State* L) { 
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    lua_pushnumber(L, item->abs_pos().left());
-    lua_pushnumber(L, item->abs_pos().top());
-    lua_pushnumber(L, item->abs_pos().width());
-    lua_pushnumber(L, item->abs_pos().height());
+    lua_pushnumber(L, item->abs_position().left());
+    lua_pushnumber(L, item->abs_position().top());
+    lua_pushnumber(L, item->abs_position().width());
+    lua_pushnumber(L, item->abs_position().height());
     return 4;    
   }
-  static int desktoppos(lua_State* L) { 
+  static int desktopposition(lua_State* L) { 
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    lua_pushnumber(L, item->desktop_pos().left());
-    lua_pushnumber(L, item->desktop_pos().top());
-    lua_pushnumber(L, item->desktop_pos().width());
-    lua_pushnumber(L, item->desktop_pos().height());
+    lua_pushnumber(L, item->desktop_position().left());
+    lua_pushnumber(L, item->desktop_position().top());
+    lua_pushnumber(L, item->desktop_position().width());
+    lua_pushnumber(L, item->desktop_position().height());
     return 4;    
   }
   static int fls(lua_State *L);
@@ -1970,6 +1989,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
        {"gotoline", gotoline},
        {"length", length},
        {"loadfile", loadfile},
+       {"reload", reload},
        {"savefile", savefile},
        {"filename", filename},
        {"hasfile", hasfile},
@@ -2013,6 +2033,8 @@ class LuaScintillaBind : public LuaItemBind<T> {
        {"showcaretline", showcaretline},
        {"hidecaretline", hidecaretline},
        {"setcaretlinebackgroundcolor", setcaretlinebackgroundcolor},
+       {"undo", undo},
+       {"redo", redo},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -2080,6 +2102,7 @@ class LuaScintillaBind : public LuaItemBind<T> {
   static int findtext(lua_State *L) { LUAEXPORT(L, &T::FindText); }  
   static int clear(lua_State *L) { LUAEXPORT(L, &T::RemoveAll); }  
   static int loadfile(lua_State *L) { LUAEXPORT(L, &T::LoadFile); }
+  static int reload(lua_State *L) { LUAEXPORT(L, &T::Reload); }
   static int savefile(lua_State *L) { LUAEXPORT(L, &T::SaveFile); }
   static int filename(lua_State *L) { LUAEXPORT(L, &T::filename); }  
   static int hasfile(lua_State *L) { LUAEXPORT(L, &T::has_file); }
@@ -2123,6 +2146,8 @@ class LuaScintillaBind : public LuaItemBind<T> {
   static int ovrtype(lua_State *L) { LUAEXPORT(L, &T::ovr_type); }
   static int modified(lua_State *L) { LUAEXPORT(L, &T::modified); }
 	static int clearall(lua_State *L) { LUAEXPORT(L, &T::ClearAll); }
+  static int undo(lua_State *L) { LUAEXPORT(L, &T::Undo); } 
+  static int redo(lua_State *L) { LUAEXPORT(L, &T::Redo); } 
 };
 
 template <class T = LuaEdit>
@@ -2134,14 +2159,20 @@ class LuaEditBind : public LuaItemBind<T> {
     B::setmethods(L);
     static const luaL_Reg methods[] = {       
        {"settext", settext},
-       {"text", text},       
+       {"text", text},
+       {"settextcolor", settextcolor},
+       {"setbackgroundcolor", setbackgroundcolor},
+       {"backgroundcolor", backgroundcolor},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
   }  
   static int settext(lua_State *L) { LUAEXPORT(L, &T::set_text); }
-  static int text(lua_State *L) { LUAEXPORT(L, &T::text); }  
+  static int text(lua_State *L) { LUAEXPORT(L, &T::text); }
+  static int settextcolor(lua_State* L) { LUAEXPORTM(L, meta, &T::set_text_color); } 
+  static int setbackgroundcolor(lua_State* L) { LUAEXPORT(L, &T::set_background_color) }
+  static int backgroundcolor(lua_State* L) { LUAEXPORT(L, &T::background_color) }
 };
 
 template <class T = LuaScrollBar>
@@ -2153,9 +2184,9 @@ class LuaScrollBarBind : public LuaItemBind<T> {
     B::setmethods(L);
     static const luaL_Reg methods[] = {
       {"new", create},
-      {"setpos", setpos},
-      {"setscrollpos", setscrollpos},
-      {"scrollpos", scrollpos},
+      {"setpos", setposition},
+      {"setscrollpos", setscrollposition},
+      {"scrollpos", scrollposition},
       {"setscrollrange", setscrollrange},
       {"scrollrange", scrollrange},
       {"systemsize", systemsize},
@@ -2191,8 +2222,8 @@ class LuaScrollBarBind : public LuaItemBind<T> {
 		lua_setfield(L, -2, "keydown");
 		return 1;		
 	}
-  static int setscrollpos(lua_State* L) { LUAEXPORT(L, &T::set_scroll_pos); }
-  static int scrollpos(lua_State* L) { LUAEXPORT(L, &T::scroll_pos); }
+  static int setscrollposition(lua_State* L) { LUAEXPORT(L, &T::set_scroll_position); }
+  static int scrollposition(lua_State* L) { LUAEXPORT(L, &T::scroll_position); }
   static int setscrollrange(lua_State* L) { LUAEXPORT(L, &T::set_scroll_range); }
   static int scrollrange(lua_State* L) { LUAEXPORT(L, &T::scroll_range); }
   static int systemsize(lua_State* L) { LUAEXPORT(L, &T::system_size); }   

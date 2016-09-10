@@ -114,6 +114,13 @@ class LuaProxy : public LuaControl {
   
   boost::weak_ptr<ui::MenuContainer> menu_bar() { return menu_bar_; }
 
+  template<typename T>   
+  void InvokeLater(T& f) { 
+    lock();
+    invokelater->Add(f);
+    unlock();
+  }
+
 private:
   void export_c_funcs();
   static int invoke_later(lua_State* L);
@@ -180,7 +187,11 @@ struct LuaGlobal {
       }
       return 0;
    }
-   static std::vector<LuaPlugin*> GetAllLuas();   
+   static std::vector<LuaPlugin*> GetAllLuas();
+   template<typename T>   
+   static void InvokeLater(lua_State* L, T& f) {
+     LuaGlobal::proxy(L)->InvokeLater(f); 
+   }   
 };
 
  
