@@ -7,7 +7,7 @@ local item = require("psycle.ui.canvas.item")
 local button = require("psycle.ui.canvas.button")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local canvas = require("psycle.ui.canvas")
-local rect = require("psycle.ui.canvas.rect")
+local rect = require("psycle.ui.canvas.rectanglebox")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local edit = require("psycle.ui.canvas.edit")
 local listener = require("listener")
@@ -47,7 +47,7 @@ function moduledesigner:addcheckbox()
 end
 
 function moduledesigner:adddrag(item, w, h)    
-  local g = group:new(self):setautosize(false, false):setpos(10, 10, w, h)    
+  local g = group:new(self):setautosize(false, false):setposition(10, 10, w, h)    
   function g:onmousedown(ev)    
     self.down = true    
     self. dragstart = { x = ev.x, y = ev.y }
@@ -55,24 +55,24 @@ function moduledesigner:adddrag(item, w, h)
   end
   function g:onmousemove(ev)    
     if self.down ~= nil then       
-      local x, y = self:pos()
-      self:setpos(x + ev.x - self.dragstart.x, y + ev.y - self.dragstart.y)
+      local x, y = self:position()
+      self:setposition(x + ev.x - self.dragstart.x, y + ev.y - self.dragstart.y)
     end
   end
   function g:onmouseup(ev)
     self.down = nil
     self:canvas():removestyle(0x02000000)
   end
-  rect:new(g):setpos(0, 0, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
-  rect:new(g):setpos(w/2 - 5, 0, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
-  rect:new(g):setpos(w, 0, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
-  rect:new(g):setpos(0, h, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
-  rect:new(g):setpos(w/2 - 5, h, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
-  rect:new(g):setpos(w, h, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
-  rect:new(g):setpos(0, h/2 - 5, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
-  rect:new(g):setpos(w, h/2 - 5, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setposition(0, 0, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setposition(w/2 - 5, 0, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setpostion(w, 0, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setposition(0, h, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setposition(w/2 - 5, h, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setposition(w, h, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setposition(0, h/2 - 5, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
+  rect:new(g):setposition(w, h/2 - 5, 10, 10):setcolor(0x00FFFF):setautosize(false, false)
   g:add(item)
-  item:setpos(5, 5, w, h)  
+  item:setposition(5, 5, w, h)  
   --self.maincanvas:setornament(ornamentfactory:createfill(0xFFFF00)) 
   --local r = rect:new(g):setpos(0, 0, w, h)
 end

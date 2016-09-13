@@ -5,6 +5,9 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local canvas = require("psycle.ui.canvas")
 local group = require("psycle.ui.canvas.group")
 local window = require("psycle.ui.canvas.item")
@@ -39,7 +42,10 @@ function tabgroup:init()
   self.hasclosebutton_ = true 
   self:setautosize(false, false)
   self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):addornament(ornamentfactory:createfill(0x232323)):setpadding(2, 0, 2, 2)
-  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF) :setautosize(false, false):setpos(0, 0, 15, 10):setalign(window.ALRIGHT)    
+  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
+                        :setautosize(false, false)
+                        :setposition(rect:new(point:new(0, 0), dimension:new(15, 10)))
+						:setalign(window.ALRIGHT)    
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
@@ -68,10 +74,10 @@ function tabgroup:init()
     end
     that:traverse(fun, that.tabs:items())
     self.c:updatealign()
-    local x, y, w, h = g:pos()
-    local x, y, iw, ih = icon1:desktoppos()
+    local x, y, w, h = g:position()
+    local x, y, iw, ih = icon1:desktopposition()
     self.f:hidedecoration()
-    self.f:setpos(x + iw - 200, y + ih, 200, h)       
+	      :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h)))    
     self.f:show()            
   end  
   self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x232323))      
@@ -246,7 +252,7 @@ function tabgroup:createheader(page, label)
   function header:onmousedown(ev)        
     that:setactivepage(self.page)
     if ev.button == 2 then
-      local x, y = self:desktoppos()
+      local x, y = self:desktopposition()
       that.tabpopupmenu:track(x + 5, y + 5)
       that.tabpopupmenu.headertext = self.text:text()
     end    

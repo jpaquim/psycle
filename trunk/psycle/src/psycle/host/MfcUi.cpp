@@ -476,26 +476,6 @@ void WindowTemplateImp<T, I>::OnSize(UINT nType, int cw, int ch) {
 }
 
 template<class T, class I>
-bool WindowTemplateImp<T, I>::OnDevUpdateArea(ui::Area& area) {
-  CRect pos;
-  GetClientRect(&pos);
-  area.Clear();
-	ui::BoxSpace padding;
-	if (window()) {
-		padding = window()->padding();
-	}
-  area.Add(RectShape(ui::Rect(ui::Point(-padding.left(), -padding.top()), ui::Point(pos.Width() + padding.left() + padding.right(), pos.Height() + padding.top() + padding.bottom()))));
-  return true;
-}
-
-/*SetWindowPos(0,
-	pos.left() + margin.left() - padding.left(),
-	pos.top() + margin.top() - padding.top(),
-	pos.width() + padding.left() + padding.right(),
-	pos.height() + padding.top() + padding.bottom(),*/
-
-
-template<class T, class I>
 ui::Window* WindowTemplateImp<T, I>::dev_focus_window() {
   Window* result = 0;
   HWND hwnd = ::GetFocus();
@@ -747,6 +727,13 @@ HBRUSH EditImp::CtlColor(CDC* pDC, UINT nCtlColor) {
 	pDC->SetTextColor(text_color_);	
 	pDC->SetBkColor(background_color_);	
 	return background_brush_;
+}
+
+void EditImp::dev_set_font(const Font& font) {
+   font_ = font;
+   mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+   assert(imp);   
+   ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
 }
 
 

@@ -77,6 +77,12 @@ struct LuaUiRectBind {
   static int create(lua_State *L);
   static int gc(lua_State* L);
   static int set(lua_State* L);
+  static int left(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::left); }
+  static int top(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::top); }
+  static int right(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::right); }
+  static int bottom(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::bottom); }
+  static int width(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::width); }
+  static int height(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::height); }
 };
 
 struct LuaSystemMetrics {
@@ -667,19 +673,16 @@ class LuaItemBind {
   static int setmethods(lua_State* L) {
     static const luaL_Reg methods[] = {
       {"new", create},
-      {"setpos", setposition},
+      {"setposition", setposition},
 //      {"scrollto", scrollto},
      // {"setsize", setsize},     
-      {"pos", position},
-      {"clientpos", clientposition},
-      {"desktoppos", desktopposition},
-    //  {"setwidth", setwidth},
-    //  {"setheight", setheight},
+      {"position", position},
+      {"clientposition", clientposition},
+      {"desktopposition", desktopposition},
       {"setautosize", setautosize},
 			{"autosize", autosize},
       {"setdebugtext", setdebugtext},      
-      {"setfocus", setfocus},
-      // {"setzoom", setzoom},
+      {"setfocus", setfocus},    
       {"show", show},
       {"hide", hide},
       {"visible", visible},
@@ -689,7 +692,7 @@ class LuaItemBind {
       {"parent", parent},
       {"bounds", bounds},
       {"canvas", canvas},      
-      //{"intersect", intersect},      
+      //{"intersect", intersect},
       {"fls", fls},
       {"invalidate", invalidate},
       {"preventfls", preventfls},
@@ -757,43 +760,19 @@ class LuaItemBind {
 		lua_pushboolean(L, item->auto_size_width());
 		lua_pushboolean(L, item->auto_size_height());    
 		return 2;
-  }
-	
+  }	
   static int removestyle(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     UINT style = (unsigned int) luaL_checknumber(L, 2);    
     item->remove_style(style);
     return LuaHelper::chaining(L);
   }
-
-  static int setposition(lua_State *L) {
-    const int n = lua_gettop(L);
+  static int setposition(lua_State *L) {        
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    if (n==3) {
-      double v1 = luaL_checknumber(L, 2);
-      double v2 = luaL_checknumber(L, 3);
-      item->set_position(ui::Rect(ui::Point(v1, v2), ui::Dimension(item->position().width(), item->position().height())));
-    } else {
-      double v1 = luaL_checknumber(L, 2);
-      double v2 = luaL_checknumber(L, 3);
-      double v3 = luaL_checknumber(L, 4);
-      double v4 = luaL_checknumber(L, 5);
-      item->set_position(ui::Rect(ui::Point(v1, v2), ui::Dimension(v3, v4)));
-    }
+    boost::shared_ptr<ui::Rect> pos = LuaHelper::check_sptr<ui::Rect>(L, 2, LuaUiRectBind::meta);
+    item->set_position(*pos);    
     return LuaHelper::chaining(L);
   }
-
-//  static int scrollto(lua_State *L) { LUAEXPORT(L, &T::ScrollTo); }  
-//  static int setblitpos(lua_State *L) { LUAEXPORT(L, &T::SetBlitXY) }
-  /*static int setsize(lua_State* L) { 
-    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    double v1 = luaL_checknumber(L, 2);
-    double v2 = luaL_checknumber(L, 3);
-    std::stringstream str;
-    str << "LuaBind setsize" << v1 << "," << v2 << std::endl;
-		TRACE(str.str().c_str());
-    LUAEXPORT(L, &T::SetSize); 
-  }*/  
   static int updatearea(lua_State *L) { LUAEXPORT(L, &T::needsupdate) }
   static int position(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
@@ -803,8 +782,6 @@ class LuaItemBind {
     lua_pushnumber(L, item->position().height());
     return 4;
   }  
-//  static int setwidth(lua_State *L) { LUAEXPORT(L, &T::SetWidth) }
-//  static int setheight(lua_State *L) { LUAEXPORT(L, &T::SetHeight) }
   static int setautosize(lua_State *L) { LUAEXPORT(L, &T::set_auto_size) }
   static int clientposition(lua_State* L) { 
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
@@ -2163,6 +2140,7 @@ class LuaEditBind : public LuaItemBind<T> {
        {"settextcolor", settextcolor},
        {"setbackgroundcolor", setbackgroundcolor},
        {"backgroundcolor", backgroundcolor},
+       {"setfont", setfont},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -2173,6 +2151,24 @@ class LuaEditBind : public LuaItemBind<T> {
   static int settextcolor(lua_State* L) { LUAEXPORTM(L, meta, &T::set_text_color); } 
   static int setbackgroundcolor(lua_State* L) { LUAEXPORT(L, &T::set_background_color) }
   static int backgroundcolor(lua_State* L) { LUAEXPORT(L, &T::background_color) }
+  static int setfont(lua_State* L) { 
+    int err = LuaHelper::check_argnum(L, 2, "self, font");
+    if (err!=0) return err;
+    boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
+    luaL_checktype(L, 2, LUA_TTABLE);
+    lua_getfield(L, 2, "name");
+    lua_getfield(L, 2, "height");
+    const char *name = luaL_checkstring(L, -2);
+    double height = luaL_checknumber(L, -1);
+    ui::Font font;
+    ui::FontInfo font_info;
+    font_info.name = name;
+    font_info.height = static_cast<int>(height);
+    font.set_info(font_info);
+    window->set_font(font);
+    return LuaHelper::chaining(L);
+  }
+  
 };
 
 template <class T = LuaScrollBar>
@@ -2279,7 +2275,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaItemBind<> >(L, "psycle.ui.canvas.item");
   LuaHelper::require<LuaLineBind<> >(L, "psycle.ui.canvas.line");
   LuaHelper::require<LuaPicBind<> >(L, "psycle.ui.canvas.pic");  
-  LuaHelper::require<LuaRectangleBoxBind<> >(L, "psycle.ui.canvas.rect");
+  LuaHelper::require<LuaRectangleBoxBind<> >(L, "psycle.ui.canvas.rectanglebox");
   LuaHelper::require<LuaTextBind<> >(L, "psycle.ui.canvas.text");
   LuaHelper::require<LuaSplitterBind<> >(L, "psycle.ui.canvas.splitter");
   LuaHelper::require<LuaTreeViewBind<> >(L, "psycle.ui.canvas.treeview");
@@ -2302,7 +2298,6 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<FillBind>(L, "psycle.ui.canvas.fill");
   return 0;
 }
-
 
 } // namespace host
 } // namespace psycle

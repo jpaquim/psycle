@@ -5,6 +5,9 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local group = require("psycle.ui.canvas.group")
 local item = require("psycle.ui.canvas.item")
 local text = require("psycle.ui.canvas.text")
@@ -55,7 +58,9 @@ function search:createeditgroup(parent)
 end
 
 function search:createeditfield(parent)
-  self.edit = edit:new(parent):setpos(0, 0, 200, 20):setalign(item.ALLEFT)
+  self.edit = edit:new(parent)
+                  :setposition(rect:new(point:new(0, 0), dimension:new(200, 20)))
+				  :setalign(item.ALLEFT)
   return self
 end
 
@@ -137,9 +142,12 @@ function search:createreplacefield(parent)
 end
 
 function search:createreplacebutton(parent)
-  self.replacebtn = button:new(parent):settext("replace"):setalign(item.ALLEFT)
-  :setmargin(0, 0, 0, 2)
-  :setpos(0, 0, 60, 20):disable()
+  self.replacebtn = button:new(parent)
+                          :settext("replace")
+						  :setalign(item.ALLEFT)
+                          :setmargin(0, 0, 0, 2)
+                          :setposition(rect:new(point:new(0, 0), dimension:new(60, 20)))
+                          :disable()
   local that = self
   function self.replacebtn:onclick()
     that.doreplace:emit()

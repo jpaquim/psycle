@@ -148,7 +148,8 @@ void LuaProxy::OnTimer() {
     if (in.open("ontimer")) {
       in.pcall(0);      
     }
-   } CATCH_WRAP_AND_RETHROW(host())
+  } catch(std::exception& e) {
+  }
 }
 
 void LuaProxy::PrepareState() {  
@@ -196,6 +197,7 @@ void LuaProxy::PrepareState() {
 void LuaProxy::Reload() {
   try {      
     lock();
+    GlobalTimer::instance().KillTimer();
     host_->set_crashed(true);
     lua_State* old_state = L;
     lua_State* new_state = 0;
@@ -214,17 +216,20 @@ void LuaProxy::Reload() {
         lua_close(old_state);
       }
       OnActivated();
+      GlobalTimer::instance().StartTimer();
     } catch(std::exception &e) {
       if (new_state) {        
         lua_close(new_state);
       }
       L = old_state;
       std::string s = std::string("Reload Error, old script still running!\n") + e.what();        
+      GlobalTimer::instance().StartTimer();
       unlock();
       throw std::exception(s.c_str());  
     }
     host_->Mute(false);
     host_->set_crashed(false);
+    GlobalTimer::instance().StartTimer();
     unlock();
   } CATCH_WRAP_AND_RETHROW(host())
 }
@@ -366,6 +371,9 @@ const PluginInfo& LuaProxy::info() const {
               info_.name = std::string(value);
             } else
               if (strcmp(key, "mode") == 0) {
+                if (lua_isnumber(L, -1) == 0) {
+                  throw std::runtime_error("info mode not a number"); 
+                }
                 int value = luaL_checknumber(L, -1);
                 switch (value) {
                   case 0 : info_.mode = MACHMODE_GENERATOR; break;

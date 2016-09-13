@@ -1946,6 +1946,12 @@ ARGB Edit::text_color() const {
   return imp() ? imp()->dev_text_color() : 0xFF00000;
 }
 
+void Edit::set_font(const Font& font) {
+  if (imp()) {
+    imp()->dev_set_font(font);
+  }  
+}
+
 Button::Button() : Window(ui::ImpFactory::instance().CreateButtonImp()) {
   set_auto_size(false, false);
 }
@@ -2512,7 +2518,7 @@ ui::PopupMenu* Systems::CreatePopupMenu() {
 
 void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {  
   try {
-	window_->Draw(g, draw_region);    
+	  window_->Draw(g, draw_region);    
   } catch(std::exception&) {
   }  
 }

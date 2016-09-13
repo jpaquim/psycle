@@ -5,6 +5,9 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local item = require("psycle.ui.canvas.item")
 local group = require("psycle.ui.canvas.group")
 local listview = require("psycle.ui.canvas.listview")
@@ -41,13 +44,13 @@ function fileexplorer:initheader()
   self.header = group:new(self)
                      :setalign(item.ALTOP)
                      :setautosize(false, false)
-					 :setpos(0, 0, 0, 20)					 
+					 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
 					 :addornament(ornamentfactory:createlineborder(0x3F3F3F))					 
   self:initmachineselector()					 
   local closebutton = closebutton.new(self.header)
   local that = self
   function closebutton.closebtn:onmousedown()
-     that:setpos(0, 0, 0, 0)
+     that:setposition(rect:new(point:new(0, 0), dimension:new(0, 0)))
 	 that:parent():flagnotaligned()  
      that:parent():updatealign()     
   end 
@@ -56,11 +59,12 @@ end
 function fileexplorer:initmachineselector()
   self.machineselector = edit:new(self.header)
                              :setautosize(false, false)
-							 :settext("No Plugin Loaded")
-							 :setpos(0, 0, 0, 20)
+							 :settext("Name of Plugin to Edit?")
+							 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
 							 :setalign(item.ALCLIENT)
 							 :setbackgroundcolor(0x2F2F2F)
 							 :settextcolor(0xFFFFFF)
+							 :setfont({name="arial", height=13})
 							-- :setjustify(text.CENTERJUSTIFY)
 							-- :setverticalalignment(item.ALCENTER)
   local that = self

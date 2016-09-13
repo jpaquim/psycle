@@ -5,7 +5,9 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
-
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local image = require("psycle.ui.image")
 local item = require("psycle.ui.canvas.item")
 local listener = require("psycle.listener")
@@ -56,24 +58,22 @@ function toolicon:init(filename, trans)
   end  
   self.clicklistener_ = listener:new("onclick", true)
   self.istoggle_ = false
-  self:setpos(0, 0, 20, 20)
+  self:setposition(rect:new(point:new(0, 0), dimension:new(20, 20)))
 end
 
-function toolicon:setpos(x, y, w, h)
+function toolicon:setposition(rect)
+  local w = rect:width()
+  local h = rect:height()
   if self.img ~= nil then
     local iw, ih = self.img:size()  
     self.centerx, self.centery = (w - iw)/2, (h - ih)/2    
   end  
-  if w ~= nil then    
-    item.setpos(self, x, y, w, h)
-  else    
-    item.setpos(self, x, y)
-  end  
+  item.setposition(self, rect)  
   return self
 end
 
 function toolicon:draw(g)  
-  local x, y, w, h = self:pos()
+  local x, y, w, h = self:position()
   g:setcolor(self.cc)   
   g:fillroundrect(0, 0, w-1, h-1, 5, 5)  
   local xpos = 0

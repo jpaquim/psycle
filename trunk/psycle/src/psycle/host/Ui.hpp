@@ -1708,6 +1708,7 @@ class Edit : public Window {
   virtual ARGB background_color() const;
   virtual void set_text_color(ARGB color);
   virtual ARGB text_color() const;
+  void set_font(const Font& font);
 };
 
 class ButtonImp;
@@ -2161,7 +2162,6 @@ class WindowImp {
   virtual ui::Window* dev_focus_window() = 0;
   virtual void DevSetFocus() = 0;
  
-  virtual bool OnDevUpdateArea(ui::Area& rgn) { return true; }  
   virtual void OnDevDraw(Graphics* g, Region& draw_region);  
   virtual void OnDevSize(const ui::Dimension& dimension);
   
@@ -2327,6 +2327,7 @@ class EditImp : public WindowImp {
   virtual ARGB dev_background_color() const = 0;  
   virtual void dev_set_text_color(ARGB color) = 0;
   virtual ARGB dev_text_color() const = 0;
+  virtual void dev_set_font(const Font& font) = 0;
 };
 
 class ScintillaImp : public WindowImp {

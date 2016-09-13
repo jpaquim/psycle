@@ -12,6 +12,9 @@ local lexer = require("psycle.ui.canvas.lexer")
 local fileopen = require("psycle.ui.fileopen")
 local filesave = require("psycle.ui.filesave")
 local settings = require("settings")
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local group = require("psycle.ui.canvas.group")
 local canvas = require("psycle.ui.canvas")
 local toolbar = require("psycle.ui.canvas.toolbar")
@@ -28,7 +31,6 @@ local signal = require("psycle.signal")
 local item = require("psycle.ui.canvas.item")
 local catcher = require("psycle.plugincatcher")
 local serpent = require("psycle.serpent")
-local createeditplugin = require("createeditplugin")
 local pluginselector = require("pluginselector")
 local filehelper = require("psycle.file")
 local fileobserver = require("psycle.fileobserver")
@@ -75,16 +77,13 @@ function maincanvas:init()
   splitter:new(self, splitter.HORZ)  
   self.fileexplorer = self:createfileexplorer()
   splitter:new(self, splitter.VERT)
-  self:createpagegroup()  
-  -- self.scrollbox = scrollbox:new(self):setalign(item.ALTOP):setautosize(false, false):setpos(0, 0, 0, 80)  
-  --self.pianokeys = pianokeys:new(self.scrollbox):setautosize(false, false):setpos(0, 0, 1000, 50);
+  self:createpagegroup()    
   if self.advancedview then
-    self.objectinspector = objectinspector:new(self):setalign(item.ALRIGHT):setpos(0, 0, 200, 0)  
+    self.objectinspector = objectinspector:new(self)
+	                                      :setalign(item.ALRIGHT)
+	                                      :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
     splitter:new(self, splitter.VERT):setalign(item.ALRIGHT)  
-  end            
-  --self.pianokeys2 = pianokeys:new(self):setalign(item.ALRIGHT):setautosize(false, false):setpos(0, 0, 50, 0):setkeydirection(pianokeys.KEYDIRECTIONRIGHT)
-  --self.pianokeys3 = pianokeys:new(self):setalign(item.ALBOTTOM):setautosize(false, false):setpos(0, 0, 0, 50):setkeydirection(pianokeys.KEYDIRECTIONBOTTOM)
-  --self.pianokeys4 = pianokeys:new(self):setalign(item.ALLEFT):setautosize(false, false):setpos(0, 0, 50, 0):setkeydirection(pianokeys.KEYDIRECTIONLEFT)
+  end              
   self.fileobserver = fileobserver:new()
   --self.fileobserver:startwatching()
   function self.fileobserver:oncreatefile(path)
@@ -111,15 +110,16 @@ function maincanvas:createcreateeditplugin()
                                       :hide()
 									  :setalign(item.ALTOP)
                                       :setautosize(false, false)
-									  :setpos(0, 0, 0, 200)
-
-  --self.createeditplugin = createeditplugin:new(self):hide():setalign(item.ALTOP)
+									  :setposition(rect:new(point:new(0, 0), dimension:new(0, 200)))  
   self.pluginselector.doopen:connect(maincanvas.onopenplugin, self)
-  --self.createeditplugin.docreate:connect(maincanvas.oncreateplugin, self)
+  self.pluginselector.docreate:connect(maincanvas.oncreateplugin, self)
 end
 
 function maincanvas:createsearch()
-  self.search = search:new(self):setpos(0, 0, 200, 200):hide():setalign(item.ALBOTTOM)
+  self.search = search:new(self)
+                      :setposition(rect:new(point:new(0, 0), dimension:new(200, 200)))
+					  :hide()
+					  :setalign(item.ALBOTTOM)
   self.search.dosearch:connect(maincanvas.onsearch, self)
   self.search.doreplace:connect(maincanvas.onreplace, self)
   self.search.dohide:connect(maincanvas.onsearchhide, self)
@@ -128,7 +128,9 @@ function maincanvas:createsearch()
 end
 
 function maincanvas:createoutputs()
-  self.outputs = tabgroup:new(self):setpos(0, 0, 0, 180):setalign(item.ALBOTTOM)
+  self.outputs = tabgroup:new(self)
+                         :setposition(rect:new(point:new(0, 0), dimension:new(0, 180)))
+						 :setalign(item.ALBOTTOM)
   self.output = self:createoutput()  
   self.outputs:addpage(self.output, "Output")  
   self.callstack = self:createcallstack()  
@@ -161,7 +163,9 @@ function maincanvas:createpagegroup()
 end
 
 function maincanvas:createpluginexplorer()
-  local pluginexplorer = pluginexplorer:new(self):setpos(0, 0, 200, 0):setalign(item.ALLEFT)
+  local pluginexplorer = pluginexplorer:new(self)
+                                       :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
+									   :setalign(item.ALLEFT)
   pluginexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
   pluginexplorer:settextcolor(settings.canvas.colors.foreground)  
   pluginexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
@@ -170,10 +174,10 @@ function maincanvas:createpluginexplorer()
 end
 
 function maincanvas:createfileexplorer()
-  local fileexplorer = fileexplorer:new(self):setpos(0, 0, 200, 0):setalign(item.ALLEFT)
-  fileexplorer:setpath(cfg:luapath())
-  --fileexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
-  --fileexplorer:settextcolor(settings.canvas.colors.foreground)  
+  local fileexplorer = fileexplorer:new(self)
+                                   :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
+								   :setalign(item.ALLEFT)
+  fileexplorer:setpath(cfg:luapath())  
   fileexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
   fileexplorer.onselectmachine:connect(maincanvas.onselectmachine, self)
   --pluginexplorer.onremove:connect(maincanvas.onpluginexplorernoderemove, self)
@@ -392,7 +396,7 @@ function maincanvas:initstatus()
   self.searchrestartstatus = text:new(g)
                                  :settext("")
 								 :setautosize(false, false)
-								 :setpos(0, 0, 150, 0)
+								 :setposition(rect:new(point:new(0, 0), dimension:new(150, 0)))
 								 :setalign(item.ALLEFT)
 								 :setverticalalignment(item.ALCENTER)
 								 :setmargin(0, 0, 0, 5)
@@ -400,7 +404,7 @@ function maincanvas:initstatus()
   self.modifiedstatus = text:new(g)
                             :settext("")
 							:setautosize(false, false)
-							:setpos(0, 0, 100, 0)
+							:setposition(rect:new(point:new(0, 0), dimension:new(100, 0)))
 							:setalign(item.ALLEFT)
 							:setverticalalignment(item.ALCENTER)
 							:setmargin(0, 5, 0, 0)
@@ -414,7 +418,7 @@ function maincanvas:initstatus()
   self.linestatus = text:new(g)
                         :settext("1")
 						:setautosize(false, false)
-						:setpos(0, 0, 50, 0)
+						:setposition(rect:new(point:new(0, 0), dimension:new(50, 0)))
 						:setalign(item.ALLEFT)
 						:setverticalalignment(item.ALCENTER)
 						:setmargin(0, 5, 0, 0)
@@ -428,7 +432,7 @@ function maincanvas:initstatus()
   self.colstatus = text:new(g)
                        :settext("1")
 					   :setautosize(false, false)
-					   :setpos(0, 0, 50, 0)
+					   :setposition(rect:new(point:new(0, 0), dimension:new(50, 0)))
 					   :setalign(item.ALLEFT)
 					   :setverticalalignment(item.ALCENTER)
 					   :setmargin(0, 5, 0, 0)
@@ -442,7 +446,7 @@ function maincanvas:initstatus()
   self.insertstatus = text:new(g)
                           :settext("ON")
 						  :setautosize(false, false)
-						  :setpos(0, 0, 30, 0)
+						  :setposition(rect:new(point:new(0, 0), dimension:new(30, 0)))
 						  :setverticalalignment(item.ALCENTER)
 						  :setalign(item.ALLEFT)
 						  :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
@@ -505,7 +509,10 @@ function maincanvas:setpluginindex(pluginindex)
 end
 
 function maincanvas:createinstanceselect(parent)
-  self.cbx = combobox:new(parent):setautosize(false, false):setpos(0, 0, 200, 20):setalign(item.ALLEFT)
+  self.cbx = combobox:new(parent)
+                     :setautosize(false, false)
+                     :setposition(rect:new(point:new(0, 0), dimension:new(200, 200)))
+					 :setalign(item.ALLEFT)
   local that = self
   function self.cbx:onselect()    
     local pluginindex = that.cbxtopluginindex[self:itemindex()]
@@ -641,30 +648,25 @@ end
 
 function maincanvas:displaysearch(ev)
   self.search:show():onfocus()
-  self:updatealign()
-  --self.search:updatealign()
+  self:updatealign()  
 end
 
-function maincanvas:oncreateplugin(pluginname, templatepath)
-  local env = { vendor = "psycle" }
-  env.pluginname = pluginname  
-  templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",
-                      cfg:luapath().."\\"..pluginname..".lua",
-                      env)  
-  filehelper.mkdir(pluginname)
-  templateparser.work(templatepath,
-                      cfg:luapath().."\\"..pluginname.."\\machine.lua",
-                      env)
-  self:openplugin(pluginname.."\\machine", pluginname)
+function maincanvas:oncreateplugin(template, pluginname)
+  local filters = template.filters 
+  for i=1, #filters do	
+    local fname = string.sub(filters[i].outputpath, 1, -5)    
+    self:openplugin(pluginname.."\\"..fname, pluginname)
+  end 					  
+  
   local catcher = catcher:new():rescannew()
-  local infos = catcher:infos()        
-  for i=1, #infos do       
-    if infos[i]:type() == machine.MACH_LUA and
-      infos[i]:name():lower() == pluginname:lower() then      
-      psycle.proxy.project = project:new():setplugininfo(infos[i])
-      break;     
-    end
-  end    
+  --local infos = catcher:infos()        
+  --for i=1, #infos do       
+   -- if infos[i]:type() == machine.MACH_LUA and
+   --    infos[i]:name():lower() == pluginname:lower() then      
+    --  psycle.proxy.project = project:new():setplugininfo(infos[i])
+    --  break;     
+  --  end
+  --end    
 end
 
 function maincanvas:onopenplugin(pluginpath, pluginname, info)  

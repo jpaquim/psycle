@@ -5,10 +5,12 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local canvas = require("psycle.ui.canvas")
 local group = require("psycle.ui.canvas.group")
 local item = require("psycle.ui.canvas.item")
-local rect = require("psycle.ui.canvas.rect")
 local text = require("psycle.ui.canvas.text")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local tree = require("psycle.ui.canvas.treeview")
@@ -29,10 +31,11 @@ end
 
 function menudesigner:init()   
   self:setautosize(false, false)    
-  self:setpos(0, 0, 100, 0)
+  self:setposition(rect:new(point:new(0, 0), dimension:new(100, 0)))
   self:addornament(ornamentfactory:createfill(0x528A68))  
   self.helptext = text:new(self):settext("CTRL + RIGHT create submenu"):setautosize(false, true):setalign(item.ALTOP)
-  self.applybutton = button:new(self):settext("Apply"):setautosize(false, false):setalign(item.ALBOTTOM):setpos(0, 0, 0, 20)  
+  self.applybutton = button:new(self):settext("Apply"):setautosize(false, false):setalign(item.ALBOTTOM)
+                           :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
   local that = self  
   function self.applybutton:onclick()    
     that:makecode()

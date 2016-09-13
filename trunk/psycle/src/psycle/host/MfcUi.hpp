@@ -1085,8 +1085,7 @@ protected:
 
   afx_msg void OnKillFocus(CWnd* pNewWnd);		
   BOOL OnEraseBkgnd(CDC* pDC);
-  
-  virtual bool OnDevUpdateArea(ui::Area& area);   
+    
  protected:
 
   virtual void OnHScroll(UINT a, UINT b, CScrollBar* pScrollBar) {
@@ -1517,6 +1516,7 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
   virtual void OnClose() {		
 	if (window()) {
+    ((Frame*)window())->close(*(Frame*)window());
 	  ((Frame*)window())->OnClose();
 	}
   }
@@ -1967,7 +1967,8 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
     text_color_ = ToCOLORREF(color);
   }
   virtual ARGB dev_text_color() const { return ToARGB(background_color_); }
-    
+  virtual void dev_set_font(const Font& font);
+  
 protected:
   DECLARE_MESSAGE_MAP()
   COLORREF text_color_;
@@ -1975,6 +1976,7 @@ protected:
 	CBrush background_brush_;	
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
   void OnPaint() { CEdit::OnPaint(); }	  
+  ui::Font font_;
 };
 
 

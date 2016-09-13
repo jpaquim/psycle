@@ -8,7 +8,7 @@ function machine:info()
   return {
     vendor = "$(vendor)",
     name = "$(pluginname)",
-    mode = "$(machmode)",
+    mode = $(machmode),
     version = 0,
     api=0
   }
