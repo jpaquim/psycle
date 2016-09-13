@@ -5,10 +5,12 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local group = require("psycle.ui.canvas.group")
 local item = require("psycle.ui.canvas.item")
 local text = require("psycle.ui.canvas.text")
-local rect = require("psycle.ui.canvas.rect")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 
 local checkbox = group:new()
@@ -42,7 +44,7 @@ function checkbox:init()
   self.check_ = false  
   self.checkgroup = text:new(self)  
                          :setautosize(false, false)
-                         :setpos(0, 0, 10, 10)
+                         :setposition(rect:new(point:new(0, 0), dimension:new(10, 10)))
                          :addornament(ornamentfactory:createfill(settings.colors.default.bg))
                          :setalign(item.ALLEFT)
                          :setmargin(0, 4, 0, 0)  

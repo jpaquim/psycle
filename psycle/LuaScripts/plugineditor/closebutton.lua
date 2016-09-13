@@ -1,3 +1,6 @@
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local item = require("psycle.ui.canvas.item")
 local group = require("psycle.ui.canvas.group")
 local text = require("psycle.ui.canvas.text")
@@ -7,7 +10,10 @@ local signal = require("psycle.signal")
 local closebutton = {}
 
 function closebutton.new(parent)
-  local g = group:new(parent):setautosize(false, false):setpos(0, 0, 20, 10):setalign(item.ALRIGHT)  
+  local g = group:new(parent)
+                 :setautosize(false, false)
+				 :setposition(rect:new(point:new(0, 0), dimension:new(20, 10)))
+				 :setalign(item.ALRIGHT)  
   g.closebtn = text:new(g)
                    :setautosize(false, false)
                    :settext("X")

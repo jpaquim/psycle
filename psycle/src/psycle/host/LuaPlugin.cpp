@@ -80,13 +80,11 @@ namespace psycle { namespace host {
   }
 
   void LuaPlugin::OnReload() {
-    try {
-      StopTimer();
+    try {      
       proxy().Reload();
       if (((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]) {
         ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]->OnReload();
-      }
-      StartTimer();
+      }      
     } catch(std::exception& e) {
       ui::alert(e.what());
     }

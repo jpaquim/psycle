@@ -9,9 +9,6 @@ machine = require("psycle.machine"):new()
 
 local array = require("psycle.array")
 local dspmath = require("psycle.dsp.math")
---local canvas = require("psycle.ui.canvas")
---local rect = require("psycle.ui.canvas.rect")
-
 
 local arps = {}
 local channels = {}

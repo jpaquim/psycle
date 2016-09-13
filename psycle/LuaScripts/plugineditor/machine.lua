@@ -9,6 +9,9 @@
 
 machine = require("psycle.machine"):new()
   
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
 local centertoscreen = require("psycle.ui.canvas.centertoscreen")
@@ -132,7 +135,7 @@ function machine:initmenu()
         end        
         that.frame = frame:new()
                           :settitle("Menu Designer")
-                          :setpos(0, 0, 400, 400)
+                          :setposition(rect:new(point:new(0, 0), dimension:new(400, 400)))
                           :setviewport(that.menudesigner)        
         function that.frame:onshow()          
           that.menudesigner.tree:editnode(that.menudesigner.tree:selected())

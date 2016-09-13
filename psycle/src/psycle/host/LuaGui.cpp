@@ -1190,12 +1190,12 @@ int LuaGraphicsBind::setfont(lua_State* L) {
   lua_getfield(L, 2, "height");
   const char *name = luaL_checkstring(L, -2);
   double height = luaL_checknumber(L, -1);
-  std::auto_ptr<Font> font(ui::Systems::instance().CreateFont());
+  Font font;
   FontInfo font_info;
   font_info.name = name;
   font_info.height = static_cast<int>(height);
-  font->set_info(font_info);
-  g->SetFont(*font);
+  font.set_info(font_info);
+  g->SetFont(font);
   return LuaHelper::chaining(L);
 }
 
@@ -1565,7 +1565,12 @@ std::string LuaUiRectBind::meta = "psyuirectmeta";
 int LuaUiRectBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
-    {"set", set},
+    {"left", left},
+    {"top", top},
+    {"right", right},
+    {"bottom", bottom},
+    {"width", width},
+    {"height", height},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);

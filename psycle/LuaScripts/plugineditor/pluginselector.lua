@@ -5,6 +5,9 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
 local item = require("psycle.ui.canvas.item")
 local group = require("psycle.ui.canvas.group")
 local listview = require("psycle.ui.canvas.listview")
@@ -20,6 +23,12 @@ local text = require("psycle.ui.canvas.text")
 local tabgroup = require("psycle.ui.canvas.tabgroup")
 local catcher = require("psycle.plugincatcher")
 local machine = require("psycle.machine")
+local cfg = require("psycle.config"):new("PatternVisual")
+local templateparser = require("templateparser")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local edit = require("psycle.ui.canvas.edit")
+local text = require("psycle.ui.canvas.text")
+local button = require("psycle.ui.canvas.button")
 
 local pluginselector = group:new()
 
@@ -31,20 +40,21 @@ function pluginselector:new(parent)
   return c
 end
 
-function pluginselector:init()  
+function pluginselector:init()   
    self.doopen = signal:new()
+   self.docreate = signal:new()
    self.tg = tabgroup:new(self):setalign(item.ALCLIENT)
    local g = group:new():setautosize(false, false)
    self:initpluginlist(g)
-   self:initplugincreate()
+   self.creategroup = self:initplugincreate()
+   self.creategroup.propertypage = nil
    self.tg:addpage(g, "All")
    local closebutton = closebutton.new(self.tg.tabbar):setalign(item.ALRIGHT)
    local that = self
-   function closebutton.closebtn:onmousedown()
+   function closebutton.closebtn:onmousedown()      
      that:hide():parent():updatealign()     
   end 
 end
-
 
 function pluginselector:initplugincreate()
   local g = group:new():setautosize(false, false)
@@ -53,19 +63,98 @@ function pluginselector:initplugincreate()
                                   :setalign(item.ALCLIENT)
 								  :setautosize(false, false)
                                   :setbackgroundcolor(0x3E3E3E)
-                                  :settextcolor(0xFFFFFF)
-  self.plugincreatelistrootnode = node:new()  
-  local nodefx = node:new():settext("FX")
-  self.plugincreatelistrootnode:add(nodefx)
-  local nodegen = node:new():settext("Generator")          
-  self.plugincreatelistrootnode:add(nodegen)
-  self.plugincreatelist:setrootnode(self.plugincreatelistrootnode)
+                                  :settextcolor(0xFFFFFF)								  								  
+  local path = cfg:luapath().."\\plugineditor\\templates"
+  self.plugincreatelistrootnode = node:new()    
+  local dir = filehelper.directorylist(path)    
+  for i=1, #dir do
+    if not dir[i].isdirectory and dir[i].extension == ".lua" then
+	  local fname = string.sub(dir[i].filename, 1, -5)      
+      local template = require("templates."..fname)	   
+	  local newnode = node:new():settext(template.label)
+	  newnode.template = template
+	  self.plugincreatelistrootnode:add(newnode)
+	end
+  end        
+  self.plugincreatelist:setrootnode(self.plugincreatelistrootnode)  
+  local that = self
+  function self.plugincreatelist:onchange(node)    
+    that.template = node.template
+	if that.creategroup.propertypage then
+	  that.creategroup:remove(that.creategroup.propertypage)
+	  that.creategroup.propertypage = nil	  
+	end
+	that.creategroup.propertypage = that:createproperties(node.template.properties)	
+	that:parent():flagnotaligned()
+	that:parent():updatealign()
+  end  
+  return g
 end
+
+function pluginselector:createproperties(properties)
+  local g = group:new(self.creategroup)
+                 :setautosize(false, false)
+                 :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
+				 :setalign(item.ALRIGHT)
+  g:addornament(ornamentfactory:createfill(0x2F2F2F))
+  if (properties) then
+	for i=1, #properties do
+	  if properties[i].edit then	  	  
+		local div = group:new(g):setautosize(false, true):setalign(item.ALTOP)  
+		g[properties[i].property] = edit:new(div):setautosize(false, false)
+		                                :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
+										:setalign(item.ALCLIENT)
+										:settext(properties[i].value)
+		text:new(div):setautosize(false, false):setalign(item.ALLEFT):settext(properties[i].property)
+      end	
+	end
+  end
+  local b = button:new(g):settext("Create"):setalign(item.ALBOTTOM)
+  local that = self
+  function b:onclick()
+   that:oncreateplugin(that.template)  
+  end
+  return g
+end
+
+function pluginselector:oncreateplugin(template)
+  local filters = template.filters  
+  local env = {}  
+  local properties = self.template.properties
+  for i=1, #properties do
+	if properties[i].edit then
+	  env[properties[i].property] = self.creategroup.propertypage[properties[i].property]:text()
+	else
+	  if properties[i].type == "string" then
+	    env[properties[i].property] = properties[i].value
+	  elseif properties[i].type == "machtype" then
+	    if properties[i].value == "FX" then
+		  env[properties[i].property] = "machine.FX"
+		elseif properties[i].value == "generator" then
+	      env[properties[i].property] = "machine.GENERATOR"
+	    end
+	  end
+	end	  
+  end	      
+  filehelper.mkdir(env.pluginname)
+  templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",
+	 		          cfg:luapath().."\\"..env.pluginname..".lua",
+					  env)
+  for i=1, #filters do	
+    local templatepath = cfg:luapath().."\\plugineditor\\templates\\"..filters[i].templatepath
+    templateparser.work(templatepath,
+                        cfg:luapath().."\\"..env.pluginname.."\\"..filters[i].outputpath,
+						env)    
+  end 
+  self.docreate:emit(template, env.pluginname)  
+end  
+
+
 
 function pluginselector:initpluginlist(parent)
   self.pluginlist = listview:new(parent)
                             :setautosize(false, false)
-                            :setpos(0, 0, 0, 200)
+                            :setposition(rect:new(point:new(0, 0), dimension:new(0, 200)))
                             :setalign(item.ALTOP)
                             :setbackgroundcolor(0x3E3E3E)
                             :settextcolor(0xFFFFFF)
