@@ -2900,7 +2900,7 @@ UINT NotifyDirThread( LPVOID pParam )
 		return 0;
 
 	hDir = FindFirstChangeNotification( pNDC->GetDirectory(),
-										TRUE,
+										FALSE,
 										FILE_NOTIFY_CHANGE_FILE_NAME  |
 										FILE_NOTIFY_CHANGE_DIR_NAME   |
 										FILE_NOTIFY_CHANGE_SIZE       |

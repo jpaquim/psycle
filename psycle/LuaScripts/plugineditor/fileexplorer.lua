@@ -63,12 +63,12 @@ function fileexplorer:initmachineselector()
 							 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
 							 :setalign(item.ALCLIENT)
 							 :setbackgroundcolor(0x2F2F2F)
-							 :settextcolor(0xFFFFFF)
-							 :setfont({name="arial", height=13})
+							 :settextcolor(0xCACACA)
+							 :setfont({name="arial", height=13, style=1})
 							-- :setjustify(text.CENTERJUSTIFY)
 							-- :setverticalalignment(item.ALCENTER)
   local that = self
-  function self.machineselector:onmousedown()
+  function self.machineselector:onmousedown()    
     that.onselectmachine:emit()
   end
 end

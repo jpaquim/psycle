@@ -466,10 +466,11 @@ class KeyEvent : public Event {
 };
 
 struct FontInfo {
-  FontInfo() : name("Arial"), height(12), bold(false) {}
+  FontInfo() : name("Arial"), height(12), bold(false), italic(false) {}
   std::string name;
   int height;
   bool bold;
+  bool italic;
 };
 
 class FontImp;
@@ -2406,6 +2407,7 @@ class FileObserver {
   virtual void StartWatching();
   virtual void StopWatching();
   virtual void SetDirectory(const std::string& path);
+  virtual std::string directory() const;
 
   virtual void OnCreateFile(const std::string& path) {}
   virtual void OnDeleteFile(const std::string& path) {}
@@ -2424,6 +2426,7 @@ class FileObserverImp {
   virtual void DevStartWatching() = 0;
   virtual void DevStopWatching() = 0;
   virtual void DevSetDirectory(const std::string& path) = 0;
+  virtual std::string dev_directory() const = 0;
   
  private:
    FileObserver* file_observer_;
