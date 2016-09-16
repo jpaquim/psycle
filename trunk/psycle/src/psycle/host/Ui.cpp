@@ -2400,6 +2400,9 @@ void FileObserver::StopWatching() {
   }
 }
 
+std::string FileObserver::directory() const {
+  return imp() ? imp()->dev_directory() : "";
+}
 
 void FileObserver::SetDirectory(const std::string& path) {
   if (imp()) {

@@ -467,10 +467,12 @@ class FontImp : public ui::FontImp {
   virtual void dev_set_info(const FontInfo& info) {
     LOGFONT lfLogFont;
     memset(&lfLogFont, 0, sizeof(lfLogFont));
-    lfLogFont.lfHeight = info.height;
-    lfLogFont.lfHeight = info.height;
+    lfLogFont.lfHeight = info.height;    
     if (info.bold) {
       lfLogFont.lfWeight = FW_BOLD;
+    }
+    if (info.italic) {
+      lfLogFont.lfItalic = TRUE;
     }
 #ifdef UNICODE
 		wcscpy(lfLogFont.lfFaceName, Charset::utf8_to_win(info.name).c_str());
@@ -2455,6 +2457,10 @@ class FileObserverImp : public ui::FileObserverImp {
   virtual void DevStopWatching() { notify_dir_change_.Stop(); }
   virtual void DevSetDirectory(const std::string& path) { 
     notify_dir_change_.SetDirectory(Charset::utf8_to_win(path).c_str());
+  }
+  virtual std::string dev_directory() const {
+    CString str = notify_dir_change_.GetDirectory();
+    return Charset::win_to_utf8(str.GetString());
   }
 
  private:

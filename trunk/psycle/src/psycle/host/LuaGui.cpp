@@ -283,6 +283,7 @@ int LuaFileObserverBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},    
     {"setdirectory", setdirectory},
+    {"directory", directory},
     {"startwatching", startwatching},
     {"stopwatching", stopwatching},
     { NULL, NULL }
@@ -306,6 +307,10 @@ int LuaFileObserverBind::gc(lua_State* L) {
 
 int LuaFileObserverBind::setdirectory(lua_State* L) { 
   LUAEXPORTM(L, meta, &LuaFileObserver::SetDirectory);
+}
+
+int LuaFileObserverBind::directory(lua_State* L) { 
+  LUAEXPORTM(L, meta, &LuaFileObserver::directory);
 }
 
 int LuaFileObserverBind::startwatching(lua_State* L) { 
@@ -1187,7 +1192,7 @@ int LuaGraphicsBind::setfont(lua_State* L) {
   boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
   luaL_checktype(L, 2, LUA_TTABLE);
   lua_getfield(L, 2, "name");
-  lua_getfield(L, 2, "height");
+  lua_getfield(L, 2, "height");  
   const char *name = luaL_checkstring(L, -2);
   double height = luaL_checknumber(L, -1);
   Font font;

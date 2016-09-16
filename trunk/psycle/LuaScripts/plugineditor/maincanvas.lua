@@ -65,6 +65,7 @@ function maincanvas:new()
 end
 
 function maincanvas:init()  
+  self.fileobservers = {}
   self.advancedview = false
   self:invalidatedirect()   
   self.togglecanvas = signal:new() 
@@ -83,26 +84,7 @@ function maincanvas:init()
 	                                      :setalign(item.ALRIGHT)
 	                                      :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
     splitter:new(self, splitter.VERT):setalign(item.ALRIGHT)  
-  end              
-  self.fileobserver = fileobserver:new()
-  --self.fileobserver:startwatching()
-  function self.fileobserver:oncreatefile(path)
-    psycle.alert(path)
-  end
-  local that = self
-  function self.fileobserver:onchangefile(path)
-    local pages = that.pages.children:items();
-	for i=1, #pages do 
-	  if pages[i]:filename() == path then        	 
-	    if psycle.confirm("File "..path.." outside changed. Do you want to reload ?") then
-	      that:openfromfile(path)
-	    end
-	  end	    
-    end    
-  end
-  function self.fileobserver:ondeletefile(path)
-    psycle.output(path)
-  end
+  end                     
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -286,7 +268,10 @@ function maincanvas:openfromfile(fname, line)
 	end
   else    
     page = self:createpage()
-    page:loadfile(fname)        
+    page:loadfile(fname)    
+    local sep = "\\"  
+    local dir = fname:match("(.*"..sep..")")    
+    self:addfiletowatcher(dir)	
     local name = fname:match("([^\\]+)$")           
     if self.advancedview then
       local modulepagegroup = tabgroup:new():setautosize(false, false):disableclosebutton()
@@ -313,7 +298,7 @@ function maincanvas:openfromfile(fname, line)
       self.pages:addpage(page, name)     
     end    
   end  
-  page:gotoline(line - 1)
+  page:gotoline(line - 1)    
 end
 
 function maincanvas:setcallstack(trace)
@@ -334,20 +319,27 @@ end
 function maincanvas:savepage()
   local page = self.pages:activepage()
   if page then
-    local fname = "" 
-    self.fileobserver:stopwatching()
+    local fname = ""     
     if page:hasfile() then
-      fname = page:filename()    
+	  fname = page:filename()    
+	  local sep = "\\"  
+      local dir = fname:match("(.*"..sep..")")    
+      local fileobserver = self:findfileobserverdir(dir)
+	  if fileobserver then
+	    fileobserver:stopwatching()
+	  end
       page:savefile(fname)
       fname = fname:match("([^\\]+)$")
       self.pages:setlabel(page, fname)
+	  if fileobserver then
+	    fileobserver:startwatching()
+	  end
     elseif self.filesaveas:show() then      
       fname = self.filesaveas:filename()          
       page:savefile(fname)
       fname = fname:match("([^\\]+)$")
       self.pages:setlabel(page, fname)
-    end  
-	self.fileobserver:startwatching()
+    end	
   end
 end
 
@@ -685,6 +677,8 @@ function maincanvas:openplugin(pluginpath, pluginname, plugininfo)
   self:closealltabs()      
   self.fileexplorer:setpath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\")))
   self.fileexplorer:setmachinename(pluginname)
+  self.fileexplorer.machineselector:settextcolor(0xFFFFFF)
+							       :setfont({name="arial", height=13, style=1})  
   self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")    
   self:updatealign()
   self:enablefls()  
@@ -776,6 +770,77 @@ function maincanvas:redo()
   if self.pages:activepage() then
     self.pages:activepage():redo()
   end
+end
+
+function maincanvas:findfileobserverdir(dir)
+  local result = nil
+  for i=1, #self.fileobservers do
+    if self.fileobservers[i]:directory() == dir then
+	  result = self.fileobservers[i]
+	  break
+	end  
+  end  
+  return result
+end
+
+function maincanvas:addfiletowatcher(dir)  
+  if not self:findfileobserverdir(dir) then
+    local fileobserver = fileobserver:new()
+	fileobserver:setdirectory(dir)
+    self.fileobservers[#self.fileobservers + 1] = fileobserver
+	local that = self
+	function fileobserver:oncreatefile(path)	
+	end	
+	function fileobserver:onchangefile(path)
+      local pages = that.pages.children:items()
+	  for i=1, #pages do 
+	    if pages[i]:filename() == path then        	 
+	      if psycle.confirm("File "..path.." outside changed. Do you want to reload ?") then
+	        that:openfromfile(path)
+			break;
+	      end
+	    end	    
+      end    
+    end  
+    function fileobserver:ondeletefile(path)
+	  local pages = that.pages.children:items()     
+      for i=1, #pages do 	  
+	    if pages[i]:filename() == path then        	 
+	      if not psycle.confirm('The file "'..path..'" '.."doesn't exist anymore.\nKeep this file in editor?") then
+             that.pages:removepage(pages[i])
+			 local sep = "\\"  
+             local filedir = path:match("(.*"..sep..")")    
+			 that:removefilewatcher(filedir)
+             break;
+	      end
+	    end
+	  end
+    end
+	fileobserver:startwatching()		
+  end    
+end
+
+function maincanvas:removefilewatcher(dir)    
+  local found = false
+  for i=1, #self.pages do
+    local fname = self.pages[i]:fname()
+    local sep = "\\"  
+    local filedir = fname:match("(.*"..sep..")")    	
+	if filedir == dir then
+	  found = true
+	  break
+	end
+  end
+  if not found then
+	for i=1, #self.fileobservers do
+      if self.fileobservers[i]:directory() == dir then
+	    self.fileobservers[i]:stopwatching()
+	    table.remove(self.fileobservers, i)
+		self.fileexplorer:setpath(dir)
+	    break	    
+      end  	  
+	end
+  end    
 end
 
 return maincanvas
