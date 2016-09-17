@@ -482,15 +482,15 @@ namespace psycle { namespace host {
 							current = i;
 							for (int j = 0; j < MAX_CONNECTIONS; j++)
 							{
-								if (master.inWires[i].Enabled())
+								if (master.inWires[j].Enabled())
 								{
 									if (j != i)
 									{
-										master.inWires[i].GetSrcMachine()._mute = true;
+										master.inWires[j].GetSrcMachine()._mute = true;
 									}
 									else
 									{
-										master.inWires[i].GetSrcMachine()._mute = false;
+										master.inWires[j].GetSrcMachine()._mute = false;
 									}
 								}
 							}
@@ -552,7 +552,7 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					SaveWav(static_cast<LPCTSTR>(name),real_bits[bits],real_rate[rate],channelmode,isFloat);
+					SaveWav(mypath.string(),real_bits[bits],real_rate[rate],channelmode,isFloat);
 				}
 			}
 			else if (m_outputtype == 1 || m_outputtype == 2)
@@ -615,6 +615,7 @@ namespace psycle { namespace host {
 			
 			int blockSLine;
 			int blockELine;
+			std::stringstream ss;
 
 			switch (m_recmode)
 			{
@@ -632,7 +633,8 @@ namespace psycle { namespace host {
 				break;
 			case 1:
 				m_patnumber.GetWindowText(name);
-				hexstring_to_integer(static_cast<LPCTSTR>(name), pstart);
+				ss << name;
+				hexstring_to_integer(ss.str(), pstart);
 				m_progress.SetRange(0,thesong.patternLines[pstart]);
 				for (cont=0;cont<thesong.playLength;cont++)
 				{
@@ -649,9 +651,12 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				m_rangestart.GetWindowText(name);
-				hexstring_to_integer(static_cast<LPCTSTR>(name) , pstart);
+				ss << name;
+				hexstring_to_integer(ss.str() , pstart);
+				ss.clear();
 				m_rangeend.GetWindowText(name);
-				hexstring_to_integer(static_cast<LPCTSTR>(name), tmp);
+				ss << name;
+				hexstring_to_integer(ss.str(), tmp);
 				j=0;
 				for (cont=pstart;cont<=tmp;cont++)
 				{
@@ -666,11 +671,16 @@ namespace psycle { namespace host {
 				break;
 			case 3:
 				m_patnumber.GetWindowText(name);
-				hexstring_to_integer(static_cast<LPCTSTR>(name), pstart);
+				ss << name;
+				hexstring_to_integer(ss.str(), pstart);
 				m_linestart.GetWindowText(name);
-				hexstring_to_integer(static_cast<LPCTSTR>(name), blockSLine);
+				ss.clear();
+				ss << name;
+				hexstring_to_integer(ss.str(), blockSLine);
 				m_lineend.GetWindowText(name);
-				hexstring_to_integer(static_cast<LPCTSTR>(name), blockELine);
+				ss.clear();
+				ss << name;
+				hexstring_to_integer(ss.str(), blockELine);
 
 				m_progress.SetRange(blockSLine,blockELine);
 				//find the position in the sequence where the pstart pattern is located.

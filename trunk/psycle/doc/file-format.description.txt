@@ -270,7 +270,7 @@ MACHINES DATA
 HEADER:
 id = "MACD"; 
 version = 0;
-size = ...  // depends for each machine.  Might not be correct in some versions
+size = ...  // depends for each machine.  Might not be correct for files generated in some Psycle versions
 
 * Types 1,2,4,5,6 and 7 are only valid in old .psy's. They were converted to native Plugins later on, so you shouldn't find them in this fileformat.
 
@@ -295,6 +295,7 @@ enum MachineType
 	MACH_RECORDER = 15,		// new in 1.9/ 1.8.5
 	MACH_DUPLICATOR2 = 16,	// new in 1.10.1
 	MACH_LUA = 17,			// new in 1.11
+	MACH_LADSPA = 18,		// new in 1.12.1
 	MACH_DUMMY	= 255
 };
 
@@ -365,7 +366,7 @@ If the machine is a MACH_MIXER, then, also the mappings of the sends and returns
 loop for standard wires
 If mixer
 	loop for *each valid* return wire (as defined by the returnMacIdx being different than -1)
-	loop for *each valid* send wire (as defined by the returnMacIdx being different than -1)
+	loop for *each valid* send wire (as defined by the sendMacIdx being different than -1)
 end if.
 
 	
@@ -611,6 +612,13 @@ size = 0
 // The default loader for Dummy just does a "Skip(size);", because the loader
 // uses the dummy when it cannot load a plugin from a song.
 
+*===================
+MACHINE SPECIFIC DATA(MACH_LADSPA)
+size: sizeof(int) + numParams*sizeof(float);
+*===================
+
+int numParams; // Indicates the number of parameters that are stored for this plugin.
+float parameter[numParams]; // array with the parameters.
 
 
 ===================

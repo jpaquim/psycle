@@ -6,6 +6,8 @@
 // http://psycle.sourceforge.net
 
 #pragma once
+#include <psycle/host/detail/project.hpp>
+#include "Psycle.hpp"
 
 #include "LockIF.hpp"
 #define BOOST_SIGNALS_NO_DEPRECATION_WARNING

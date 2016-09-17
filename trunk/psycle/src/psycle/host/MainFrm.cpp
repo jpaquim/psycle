@@ -445,17 +445,20 @@ namespace psycle { namespace host {
 
 		void CMainFrame::CheckForAutosave()
 		{
-			CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
+			std::string filepath = PsycleGlobal::conf().GetAbsoluteSongDir();
 			filepath += "\\autosave.psy";
 
 			OldPsyFile file;
-			if(file.Open(static_cast<LPCTSTR>(filepath)))
+			if(file.Open(filepath))
 			{
 				file.Close();
 				int val = MessageBox("An autosave.psy file has been found in the root song dir. Do you want to reload it? (Press \"No\" to delete it)","Song Recovery",MB_YESNOCANCEL);
 
-				if (val == IDYES ) m_wndView.FileLoadsongNamed(static_cast<LPCTSTR>(filepath));
-				else if (val == IDNO ) DeleteFile(filepath);
+				if (val == IDYES ) m_wndView.FileLoadsongNamed(filepath);
+				else if (val == IDNO ) {
+					CString filepathwin = filepath.c_str();
+					DeleteFile(filepathwin);
+				}	
 			}
 		}
 
