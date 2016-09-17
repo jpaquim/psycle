@@ -115,16 +115,14 @@ namespace psycle { namespace host {
 			if (m_hDll == NULL) {
 				ui::alert("LoadLibrary SciLexer.dll failure ...");
 			}
-
-
+      
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
 			CMainFrame* pFrame = new CMainFrame();
 			if (!pFrame)
 				return FALSE;
 			m_pMainWnd = pFrame;
-
-
+      
 			if(!loaded) // problem reading registry info. missing or damaged
 			{
 				CConfigDlg dlg("Psycle Settings");
@@ -161,6 +159,7 @@ namespace psycle { namespace host {
 			else
 			{
 				global_.machineload().LoadPluginInfo(false);
+        ui::Systems::instance().InitInstance();
         pFrame->m_wndView.LoadLuaExtensions();
 				// Show splash screen
 				if (global_.conf()._showAboutAtStart)
@@ -168,33 +167,13 @@ namespace psycle { namespace host {
 					OnAppAbout();
 				}
 				pFrame->CheckForAutosave();        
-			}
-
-      // sql test
- /*{  
-  sqlite3 *db;
-  char *zErrMsg = 0;
-  int rc;     
-	const char* dbname = "core.db";	
-  rc = sqlite3_open(dbname, &db);
-  if( rc ){
-    AfxMessageBox(sqlite3_errmsg(db));
-    sqlite3_close(db);     
-  }
-	const char* sql_cmd = "select * from inventory";
-  rc = sqlite3_exec(db, sql_cmd, callback, 0, &zErrMsg);
-  if( rc!=SQLITE_OK ){
-    AfxMessageBox("SQL error: %s\n");
-    sqlite3_free(zErrMsg);
-  }
-  sqlite3_close(db);
-}*/
+			}      
 			          
 			return TRUE;
 		}
 
 		int CPsycleApp::ExitInstance() 
-		{
+		{      
       if (m_hDll != NULL) {
         FreeLibrary (m_hDll);
       }

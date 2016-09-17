@@ -313,6 +313,8 @@ void TerminalView::output(const std::string& text) {
   invokelater.Add(f);
 }
 
+std::auto_ptr<TerminalFrame> TerminalFrame::terminal_frame_(0);
+
 void TerminalFrame::Init() {
   set_title("Psycle Terminal");
   ui::Canvas::Ptr maincanvas = ui::Canvas::Ptr(new ui::Canvas());

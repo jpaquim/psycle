@@ -492,6 +492,7 @@ namespace psycle { namespace host {
 
 		void CMainFrame::OnClose() 
 		{
+      ui::Systems::instance().ExitInstance();
 			if (m_wndView.CheckUnsavedSong("Exit Psycle"))
 			{
 				CloseAllMacGuis();

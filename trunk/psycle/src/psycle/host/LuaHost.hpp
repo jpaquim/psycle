@@ -16,8 +16,7 @@ namespace host {
 
 namespace ui { 
   class Commands; 
-  class Canvas;
-  class TerminalFrame;
+  class Canvas;  
   class MenuContainer;
 }
     
@@ -140,8 +139,7 @@ private:
   LuaPlugin *host_;
   LuaMachine* lua_mac_;	
   mutable CRITICAL_SECTION cs;  
-  boost::weak_ptr<ui::MenuContainer> menu_bar_;
-  static boost::shared_ptr<ui::TerminalFrame> terminal_frame_;
+  boost::weak_ptr<ui::MenuContainer> menu_bar_;  
 };
 
 // Container for LuaUiExtensions

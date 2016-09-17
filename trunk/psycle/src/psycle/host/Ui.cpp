@@ -5,13 +5,15 @@
 #include "Ui.hpp"
 #include "LockIF.hpp"
 #include "MfcUi.hpp"
-#include "Canvas.hpp"
+#include "CanvasItems.hpp"
 #include <limits>
 
 namespace psycle {
 namespace host {
 
 namespace ui {
+
+std::auto_ptr<ui::Point> ui::Point::zero_(0);
 
 Window::Container Window::dummy_list_;
 
@@ -2417,6 +2419,14 @@ Systems& Systems::instance() {
     instance_.concrete_factory_.reset(new ui::mfc::Systems());
   }
   return instance_;
+}
+
+void Systems::InitInstance() {
+  ui::TerminalFrame::InitInstance();
+}
+
+void Systems::ExitInstance() {
+  ui::TerminalFrame::ExitInstance();
 }
 
 SystemMetrics& Systems::metrics() {
