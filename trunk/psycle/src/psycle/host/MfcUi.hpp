@@ -12,7 +12,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <unordered_map>
+#include <map>
 
 namespace psycle {
 namespace host {
@@ -1864,7 +1864,8 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
    ListNodeImp* UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node, int pos);
    bool is_editing_;
    int column_pos_;
-   typedef std::unordered_map<int, ListNodeImp*> ImpLookUpTable;
+   typedef std::map<int, ListNodeImp*> ImpLookUpTable;
+   typedef ImpLookUpTable::iterator ImpLookUpIterator;
    ImpLookUpTable lookup_table_;
 };
 

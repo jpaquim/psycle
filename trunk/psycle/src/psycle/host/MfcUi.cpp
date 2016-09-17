@@ -1062,7 +1062,7 @@ ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared
   ListNodeImp* new_imp = new ListNodeImp();  
   NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
   node->erase_imp(this);  
-  ImpLookUpTable::iterator it = lookup_table_.find(pos);
+  ImpLookUpIterator it = lookup_table_.find(pos);
   if (it != lookup_table_.end()) {
     lookup_table_.erase(it);
   }  
@@ -1172,7 +1172,7 @@ ui::Node* ListViewImp::find_selected_node() {
     }
   } 
   if (selected != -1) {
-    ImpLookUpTable::iterator it = lookup_table_.find(selected);
+    ImpLookUpIterator it = lookup_table_.find(selected);
     if (it != lookup_table_.end() && !it->second->node().expired()) {            
       result = it->second->node().lock().get();      
     }
@@ -1188,7 +1188,7 @@ std::vector<ui::Node::Ptr> ListViewImp::dev_selected_nodes() {
     while (pos) {
       selected = GetNextSelectedItem(pos);
       if (selected != -1) {
-        ImpLookUpTable::iterator it = lookup_table_.find(selected);
+        ImpLookUpIterator it = lookup_table_.find(selected);
         if (it != lookup_table_.end() && !it->second->node().expired()) {          
           nodes.push_back(it->second->node().lock());                     
         }
