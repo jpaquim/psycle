@@ -47,8 +47,9 @@ namespace psycle { namespace host {
 
 		CMainFrame		*pParentMain;    
 
-		char* CChildView::hex_tab[16] = {
-			"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"
+		TCHAR* CChildView::hex_tab[16] = {
+			_T("0"), _T("1"), _T("2"), _T("3"), _T("4"), _T("5"), _T("6"), _T("7"),
+			_T("8"), _T("9"), _T("A"), _T("B"), _T("C"), _T("D"), _T("E"), _T("F")
 		};
 
 		CChildView::CChildView()
@@ -146,7 +147,8 @@ namespace psycle { namespace host {
 				TRACE(buf);
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
-			}      
+			}
+
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd)      
@@ -431,10 +433,10 @@ namespace psycle { namespace host {
 			}
 			if (nIDEvent == ID_TIMER_AUTOSAVE && !Global::player()._recording)
 			{
-				CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
+				std::string filepath(PsycleGlobal::conf().GetAbsoluteSongDir());
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
-				if(!file.Create(static_cast<LPCTSTR>(filepath), true)) return;
+				if(!file.Create(filepath, true)) return;
 				CProgressDialog progress(NULL,false);
 				_pSong.Save(&file,progress, true);
 				if (!file.Close())
@@ -498,6 +500,8 @@ namespace psycle { namespace host {
 			}
 			pParentMain->KillTimer(ID_TIMER_VIEW_REFRESH);
 			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);      
+			//This prevents some rare cases with LUA plugins and the LuaWaveOscBind::oscs being deleted before Song instance.
+			Global::song().New();
 		}
 
     void CChildView::OnPaint() 
@@ -667,9 +671,10 @@ namespace psycle { namespace host {
 				{
 					PsycleGlobal::conf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 				}
-				
+				std::stringstream ss;
+				ss << str;
 				XMSongExport file;
-				if (!file.Create(static_cast<LPCTSTR>(str), true))
+				if (!file.Create(ss.str(), true))
 				{
 					MessageBox("Error creating file!", "Error!", MB_OK);
 					return;
@@ -768,7 +773,7 @@ namespace psycle { namespace host {
 					Global::song().fileName = str;
 				}
 				
-				if (!file.Create(static_cast<LPCTSTR>(str), true))
+				if (!file.Create(Global::song().fileName, true))
 				{
 					MessageBox("Error creating file!", "Error!", MB_OK);
 					return;
@@ -782,8 +787,10 @@ namespace psycle { namespace host {
 				}
 				else 
 				{
-					std::string recent = static_cast<LPCTSTR>(str);
-					AppendToRecent(recent);
+					std::stringstream ss;
+					ss << str;
+
+					AppendToRecent(ss.str());
 					
 					PsycleGlobal::inputHandler().SafePoint();
 				}
@@ -1300,7 +1307,9 @@ namespace psycle { namespace host {
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
 				{
-					Global::player().StartRecording(static_cast<LPCTSTR>(dlg.GetPathName()));
+					std::stringstream ss;
+					ss << dlg.GetPathName();
+					Global::player().StartRecording(ss.str());
 				}
 				//If autoStopMachine is activated, deactivate it while recording
 				if ( PsycleGlobal::conf().UsesAutoStopMachines() ) 
