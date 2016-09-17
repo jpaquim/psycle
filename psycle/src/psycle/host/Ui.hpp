@@ -54,8 +54,10 @@ struct Point {
   Point(double x, double y) : x_(x), y_(y) {}
 
 	inline static const Point& zero() {
-		static Point* zero_point = new Point();
-    return *zero_point;
+    if (zero_.get() == 0) {
+      zero_ = std::auto_ptr<ui::Point>(new ui::Point());
+    }
+    return *zero_;
 	}
 
   inline bool operator==(const Point& rhs) const { 
@@ -94,6 +96,7 @@ struct Point {
 
  private:
   double x_, y_;
+  static std::auto_ptr<ui::Point> zero_;
 };
 
 typedef std::vector<Point> Points;
@@ -2060,6 +2063,9 @@ class Systems {
   virtual ui::PopupMenu* CreatePopupMenu();
 
   SystemMetrics& metrics();
+
+  void InitInstance();
+  void ExitInstance();
 	
  protected:
   Systems() {}

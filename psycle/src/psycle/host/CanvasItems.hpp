@@ -190,6 +190,7 @@ class TerminalView : public Scintilla, public psycle::host::Timer {
 
 class TerminalFrame : public Frame {
   public:   
+   TerminalFrame() { Init(); }
    void Init();
    void output(const std::string& text) {      
      Show();     
@@ -201,10 +202,20 @@ class TerminalFrame : public Frame {
    virtual void release_imp() {
      Frame::release_imp();
      terminal_view_->release_imp();
-   }   
+   }
+   
+   static void InitInstance() { instance(); }
+   static void ExitInstance() { terminal_frame_.reset(0); }
+   static TerminalFrame& instance() {
+     if (terminal_frame_.get() == 0) {
+       terminal_frame_ = std::auto_ptr<TerminalFrame>(new TerminalFrame());
+     }
+     return *terminal_frame_;
+   }
 
   private:
-   boost::shared_ptr<TerminalView> terminal_view_;   
+   boost::shared_ptr<TerminalView> terminal_view_;
+   static std::auto_ptr<TerminalFrame> terminal_frame_;
 };
 
 class HeaderGroup : public ui::Group {

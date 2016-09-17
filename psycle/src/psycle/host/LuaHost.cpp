@@ -14,7 +14,7 @@
 #include <lua.hpp>
 #include "LuaHelper.hpp"
 #include "LuaGui.hpp"
-#include "MfcUi.hpp"
+#include "CanvasItems.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
@@ -99,19 +99,11 @@ struct ReleaseImpDeleter {
     frame->release_imp(); 
   }
 };
-boost::shared_ptr<ui::TerminalFrame> LuaProxy::terminal_frame_;
-
 
 // Class Proxy : export and import between psycle and lua
 LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) : 
     host_(host),
-    info_update_(true) {    
-  if (!terminal_frame_.get()) {
-
-
-    terminal_frame_ = boost::shared_ptr<ui::TerminalFrame>(new ui::TerminalFrame(), ReleaseImpDeleter());
-    terminal_frame_->Init();      
-  }
+    info_update_(true) {  
   L = LuaGlobal::load_script(dllname);  
 }
 
@@ -267,7 +259,7 @@ int LuaProxy::terminal_output(lua_State* L) {
         return luaL_error(L,
         LUA_QL("tostring") " must return a string to " LUA_QL("print"));
       lua_pop(L, 1);  /* pop result */
-      terminal_frame_->output(s); //universalis::os::loggers::levels::trace, s);
+      ui::TerminalFrame::instance().output(s);
     }
   }
   return 0;
