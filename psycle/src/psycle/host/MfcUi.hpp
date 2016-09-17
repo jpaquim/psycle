@@ -1289,6 +1289,10 @@ class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
+	HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+	CFont font;
+	font.Attach( hFont );
+	imp->SetFont(&font);
     imp->set_window(w);  
     return imp;
   }
@@ -1326,6 +1330,10 @@ class CheckBoxImp : public WindowTemplateImp<CButton, ui::CheckBoxImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
+	HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+	CFont font;
+	font.Attach( hFont );
+	imp->SetFont(&font);
     imp->set_window(w);  
     return imp;
   }
@@ -1871,6 +1879,10 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
+	HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+	CFont font;
+	font.Attach( hFont );
+	imp->SetFont(&font);
     imp->set_window(w);    
     WindowHook::windows_[imp->GetSafeHwnd()] = imp;
     return imp;

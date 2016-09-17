@@ -901,16 +901,17 @@ namespace psycle
 		{
 			if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
 			{
-				if(pData->_inst < _pInfo->numParameters)
+				int param = translate_param(pData->_inst);
+				if(param < _pInfo->numParameters)
 				{
 					int nv = (pData->_cmd<<8)+pData->_parameter;
-					int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-					int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+					int const min = _pInfo->Parameters[param]->MinValue;
+					int const max = _pInfo->Parameters[param]->MaxValue;
 					nv += min;
 					if(nv > max) nv = max;
 					try
 					{
-						proxy().ParameterTweak(pData->_inst, nv);
+						proxy().ParameterTweak(param, nv);
 					}
 					catch(const std::exception &e)
 					{
@@ -926,7 +927,8 @@ namespace psycle
 			}
 			else if(pData->_note == notecommands::tweakslide)
 			{
-				if(pData->_inst < _pInfo->numParameters)
+				int param = translate_param(pData->_inst);
+				if(param < _pInfo->numParameters)
 				{
 					int i;
 					if(TWSActive)
@@ -934,7 +936,7 @@ namespace psycle
 						// see if a tweak slide for this parameter is already happening
 						for(i = 0; i < MAX_TWS; i++)
 						{
-							if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+							if((TWSInst[i] == param) && (TWSDelta[i] != 0))
 							{
 								// yes
 								break;
@@ -963,14 +965,14 @@ namespace psycle
 					if (i < MAX_TWS)
 					{
 						TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
-						float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
-						float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
+						float min = float(_pInfo->Parameters[param]->MinValue);
+						float max = float(_pInfo->Parameters[param]->MaxValue);
 						TWSDestination[i] += min;
 						if (TWSDestination[i] > max)
 						{
 							TWSDestination[i] = max;
 						}
-						TWSInst[i] = pData->_inst;
+						TWSInst[i] = param;
 						try
 						{
 							TWSCurrent[i] = float(proxy().Val(TWSInst[i]));
@@ -993,13 +995,13 @@ namespace psycle
 					{
 						// we have used all our slots, just send a twk
 						int nv = (pData->_cmd<<8)+pData->_parameter;
-						int const min = _pInfo->Parameters[pData->_inst]->MinValue;
-						int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
+						int const min = _pInfo->Parameters[param]->MinValue;
+						int const max = _pInfo->Parameters[param]->MaxValue;
 						nv += min;
 						if (nv > max) nv = max;
 						try
 						{
-							proxy().ParameterTweak(pData->_inst, nv);
+							proxy().ParameterTweak(param, nv);
 						}
 						catch(const std::exception &e)
 						{

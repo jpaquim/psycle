@@ -664,7 +664,8 @@ namespace psycle { namespace host {
     }
     if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
     {
-      if(pData->_inst < proxy_.num_parameter())
+		int param = translate_param(pData->_inst);
+      if(param < proxy_.num_parameter())
       {
         int nv = (pData->_cmd<<8)+pData->_parameter;
         int const min = 0; // always range 0 .. FFFF like vst tweak
@@ -674,7 +675,7 @@ namespace psycle { namespace host {
         // quantization done in parameter.lua
         try
         {
-          proxy().ParameterTweak(pData->_inst, double(nv)/0xFFFF);
+          proxy().ParameterTweak(param, double(nv)/0xFFFF);
         }
         catch(const std::exception &e)
         {
@@ -684,7 +685,8 @@ namespace psycle { namespace host {
       }
     } else if(pData->_note == notecommands::tweakslide)
     {
-      if(pData->_inst < proxy_.num_parameter())
+		int param = translate_param(pData->_inst);
+      if(param < proxy_.num_parameter())
       {
         int i;
         if(TWSActive)
@@ -692,7 +694,7 @@ namespace psycle { namespace host {
           // see if a tweak slide for this parameter is already happening
           for(i = 0; i < MAX_TWS; i++)
           {
-            if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+            if((TWSInst[i] == param) && (TWSDelta[i] != 0))
             {
               // yes
               break;
@@ -728,7 +730,7 @@ namespace psycle { namespace host {
           {
             TWSDestination[i] = max;
           }
-          TWSInst[i] = pData->_inst;
+          TWSInst[i] = param;
           try
           {
             TWSCurrent[i] = proxy_.Val(TWSInst[i])*0xFFFF;
@@ -753,7 +755,7 @@ namespace psycle { namespace host {
           // quantization done in parameter.lua
           try
           {
-            proxy().ParameterTweak(pData->_inst, nv/(double)0xFFFF);
+            proxy().ParameterTweak(param, nv/(double)0xFFFF);
           }
           catch(const std::exception &e)
           {
