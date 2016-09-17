@@ -55,13 +55,7 @@ struct Point {
   Point() : x_(0), y_(0) {}
   Point(double x, double y) : x_(x), y_(y) {}
 
-	inline static const Point& zero() {
-    if (zero_.get() == 0) {
-      zero_ = std::auto_ptr<ui::Point>(new ui::Point());
-    }
-    return *zero_;
-	}
-
+	inline static const Point& zero() { return zero_; }
   inline bool operator==(const Point& rhs) const { 
     return x_ == rhs.x()  && y_ == rhs.y();
   }
@@ -98,7 +92,7 @@ struct Point {
 
  private:
   double x_, y_;
-  static std::auto_ptr<ui::Point> zero_;
+  static const ui::Point zero_;
 };
 
 typedef std::vector<Point> Points;
@@ -226,11 +220,7 @@ struct Rect {
      bottom_right_(top_left.x() + dim.width(), top_left.y() + dim.height()) {
   }
 
-	inline static const Rect& zero() {
-		static Rect* zero_rect = new Rect();
-    return *zero_rect;
-	}
-
+	inline static const Rect& zero() { return zero_; }
   inline bool operator==(const Rect& rhs) const { 
     return left() == rhs.left() && 
            top() == rhs.top() && 
@@ -314,6 +304,7 @@ struct Rect {
   
  private:
   ui::Point top_left_, bottom_right_;  
+  static const ui::Rect zero_;
 };
 
 class SystemMetrics {
@@ -1292,12 +1283,16 @@ class NodeImp {
 
   virtual int position() const { return -1; }
   virtual void set_text(const std::string& text) {}
+
+  void set_node(const boost::shared_ptr<Node>& node) { node_ = node; } 
+  boost::weak_ptr<Node> node() { return node_; }
   void set_owner(NodeOwnerImp* owner) { owner_ = owner; }
   NodeOwnerImp* owner() { return owner_; }
   const NodeOwnerImp* owner() const { return owner_; }
   	
  private:
   NodeOwnerImp* owner_;	
+  boost::weak_ptr<Node> node_;
 };
 
 class recursive_node_iterator;
@@ -1342,7 +1337,9 @@ class Node : public boost::enable_shared_from_this<Node> {
   recursive_node_iterator recursive_end();
     
   int level() const { return (!parent().expired()) ? parent().lock()->level() + 1 : 0; }    
-  void AddImp(NodeImp* imp) { imps.push_back(imp); }
+  void AddImp(NodeImp* imp) { 
+    imps.push_back(imp);    
+  }
   void erase_imps(NodeOwnerImp* owner);
   void erase_imp(NodeOwnerImp* owner);
 

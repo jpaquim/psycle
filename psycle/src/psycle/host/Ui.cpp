@@ -13,7 +13,8 @@ namespace host {
 
 namespace ui {
 
-std::auto_ptr<ui::Point> ui::Point::zero_(0);
+const ui::Point ui::Point::zero_;
+const ui::Rect ui::Rect::zero_;
 
 Window::Container Window::dummy_list_;
 

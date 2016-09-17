@@ -784,6 +784,7 @@ void TreeViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Nod
   node->erase_imp(this);  
   TreeNodeImp* new_imp = new TreeNodeImp();
   node->AddImp(new_imp);
+  new_imp->set_node(node);
   new_imp->set_owner(this);
   node->changed.connect(boost::bind(&TreeViewImp::OnNodeChanged, this, _1));
   if (!node->parent().expired()) {
@@ -1058,11 +1059,16 @@ void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, Li
 }
 
 ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node, int pos) {
-  ListNodeImp* new_imp = new ListNodeImp();
+  ListNodeImp* new_imp = new ListNodeImp();  
   NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
   node->erase_imp(this);  
+  ImpLookUpTable::iterator it = lookup_table_.find(pos);
+  if (it != lookup_table_.end()) {
+    lookup_table_.erase(it);
+  }  
   node->AddImp(new_imp);
-  new_imp->set_owner(this);
+  new_imp->set_node(node);
+  new_imp->set_owner(this);  
   node->changed.connect(boost::bind(&ListViewImp::OnNodeChanged, this, _1));
   if (!node->parent().expired()) {
     boost::shared_ptr<ui::Node> parent_node = node->parent().lock();   
@@ -1074,8 +1080,10 @@ ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared
         int level = node->level();
         if (level == 1) {
           parent_imp->DevInsertFirst(this, *node.get(), new_imp, prev_imp, pos);
+          lookup_table_[pos] = new_imp;
         } else {
           parent_imp->DevSetSub(this, *node.get(), new_imp, prev_imp, level);
+          lookup_table_[new_imp->position()] = new_imp;
         }
       }
     }
@@ -1107,7 +1115,7 @@ void ListViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_
 
 void ListViewImp::DevErase(ui::Node::Ptr node) {
 	if (node) {
-		node->erase_imp(this);
+		node->erase_imp(this);    
 	}
 }
 
@@ -1155,6 +1163,7 @@ BOOL ListViewImp::OnRightClick(NMHDR * pNotifyStruct, LRESULT * result) {
 }
 
 ui::Node* ListViewImp::find_selected_node() {    
+  Node* result = 0;
   POSITION pos = GetFirstSelectedItemPosition();
   int selected = -1;
   if (pos != NULL) {
@@ -1162,21 +1171,13 @@ ui::Node* ListViewImp::find_selected_node() {
       selected = GetNextSelectedItem(pos);      
     }
   } 
-  recursive_node_iterator end = list_view()->root_node().lock()->recursive_end();
-  recursive_node_iterator recursive_it = list_view()->root_node().lock()->recursive_begin();  
-  ui::Node::Ptr found;
-  for (; recursive_it != end; ++recursive_it) {    
-    boost::ptr_list<NodeImp>::iterator it = (*recursive_it)->imps.begin();
-    NodeImp* imp = (*recursive_it)->imp(*this);    
-    if (imp) {
-      ListNodeImp* imp = dynamic_cast<ListNodeImp*>(&(*it));      
-      if (imp->position() == selected) {
-        found = (*recursive_it);
-        break;
-      }
-    }    
+  if (selected != -1) {
+    ImpLookUpTable::iterator it = lookup_table_.find(selected);
+    if (it != lookup_table_.end() && !it->second->node().expired()) {            
+      result = it->second->node().lock().get();      
+    }
   }  
-  return found.get();
+  return result;
 }
 
 std::vector<ui::Node::Ptr> ListViewImp::dev_selected_nodes() {
@@ -1187,17 +1188,10 @@ std::vector<ui::Node::Ptr> ListViewImp::dev_selected_nodes() {
     while (pos) {
       selected = GetNextSelectedItem(pos);
       if (selected != -1) {
-        Node::Ptr root = list_view()->root_node().lock();
-        ui::Node::Ptr found;
-        Node::iterator it = root->begin();
-        for (int pos = 0; it != root->end(); pos++, ++it) {
-          if (pos == selected) {
-            found = *it;
-            break;
-          }
+        ImpLookUpTable::iterator it = lookup_table_.find(selected);
+        if (it != lookup_table_.end() && !it->second->node().expired()) {          
+          nodes.push_back(it->second->node().lock());                     
         }
-        assert(found.get());        
-        nodes.push_back(found);                     
       }
     } 
   }
