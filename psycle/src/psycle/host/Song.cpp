@@ -775,12 +775,12 @@ namespace psycle
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 #ifndef NDEBUG 
+				zapObject(_pMachine[mac]);
+#else
 				try
 				{
 					zapObject(_pMachine[mac]);
 				}catch(...){};
-#else
-				zapObject(_pMachine[mac]);
 #endif
 			}
 		}
