@@ -73,6 +73,32 @@ Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
 
 
 // Text
+Text::Text() : Window(), 
+    vertical_alignment_(ALTOP),
+    justify_(LEFTJUSTIFY),
+    color_(0xFFFFFF),
+    is_auto_dimension_calculated_(false),
+	  is_aligned_(false) {      
+}
+
+Text::Text(const std::string& text) : 
+  vertical_alignment_(ALTOP),
+  justify_(LEFTJUSTIFY),
+  color_(0xFFFFFF),
+  text_(text),
+  is_auto_dimension_calculated_(false),
+  is_aligned_(false) { 
+}
+
+void Text::set_property(const ConfigurationProperty& configuration_property) {
+  if (configuration_property.name() == "color") {
+    set_color(configuration_property.int_value());
+  } else
+  if (configuration_property.name() == "font") {    
+    set_font(ui::Font(configuration_property.font_info_value()));
+  }
+}
+
 ui::Dimension Text::OnCalcAutoDimension() const {
 	if (!is_auto_dimension_calculated_) {			
 		CalculateAutoDimension();

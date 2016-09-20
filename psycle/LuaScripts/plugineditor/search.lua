@@ -18,13 +18,14 @@ local checkbox = require("psycle.ui.canvas.checkbox")
 local signal = require("psycle.signal")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local closebutton = require("closebutton")
+local settings = require("settings")
 
 local search = group:new()
 
 search.DOWN = 1
 search.UP = 2                            
 
-search.iconpath = "C:\\Users\\User\\Documents\\Visual Studio 2015\\Projects\\exforward\\exforward\\LuaScripts\\psycle\\ui\\icons\\"
+search.iconpath = settings.picdir
                             
 function search:new(parent)
   local c = group:new(parent)  

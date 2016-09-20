@@ -3,6 +3,7 @@
 // #include "stdafx.h"
 
 #include "Ui.hpp"
+#include <lua.hpp>
 #include "LockIF.hpp"
 #include "MfcUi.hpp"
 #include "CanvasItems.hpp"
@@ -1566,7 +1567,7 @@ void Node::erase(iterator it) {
 void Node::erase_imp(NodeOwnerImp* owner) {
   boost::ptr_list<NodeImp>::iterator it = imps.begin();
   while (it != imps.end()) {          
-    if (it->owner() == owner) {
+    if (it->owner() == owner) {      
       it = imps.erase(it);            
      } else {
       ++it;
@@ -2413,6 +2414,141 @@ void FileObserver::SetDirectory(const std::string& path) {
   }
 }
 
+// Ui Configuration
+void DefaultElementFinder::InitDefault() {
+  Properties text_properties;
+  text_properties.push_back(ConfigurationProperty("color", 0xFF0000));
+  elements_["text"] = text_properties;
+}
+
+ElementFinder::Properties DefaultElementFinder::FindElement(const std::string& name) {
+  Properties result;
+  Elements::iterator it = elements_.find(name);
+  if (it != elements_.end()) {
+    result = it->second;
+  }
+  return result;
+}
+
+// Lua Configuration Reader
+void LuaElementFinder::LoadSettingsFromLuaScript() {
+  std::string path = Systems::instance().config_path();
+  lua_State* L = load_script(Systems::instance().config_path());
+  int status = lua_pcall(L, 0, LUA_MULTRET, 0);
+  if (status) {         
+    const char* msg = lua_tostring(L, -1); 
+    ui::alert(msg);
+    throw std::runtime_error(msg);       
+  }
+  lua_getglobal(L, "require");
+  lua_pushstring(L, "uiconfiguration");  
+  status = lua_pcall(L, 1, 1, 0);
+  if (status) {
+    const char* msg =lua_tostring(L, -1);
+    std::ostringstream s; s
+      << "Failed: " << msg << std::endl;
+    throw std::runtime_error(s.str());
+  }  
+  ParseElements(L);  
+  lua_close(L);
+}
+
+void LuaElementFinder::ParseElements(lua_State* L) {   
+  if (lua_istable(L, -1)) {
+    for (lua_pushnil(L); lua_next(L, -2) != 0; lua_pop(L, 1)) {   
+      const char* key = lua_tostring(L, -2);
+      if (std::string(key)=="elements") {                
+        if (lua_istable(L, -1)) {
+          for (lua_pushnil(L); lua_next(L, -2) != 0; lua_pop(L, 1)) {   
+            const char* key = lua_tostring(L, -2);
+            ElementFinder::Properties element;      
+            lua_getfield(L, -1, "properties");          
+            for (lua_pushnil(L); lua_next(L, -2) != 0; lua_pop(L, 1)) {         
+              const char* name = lua_tostring(L, -2);           
+              lua_getfield(L, -1, "type");
+              const char* type_name = lua_tostring (L, -1);
+              lua_pop(L, 1); // pop type
+              lua_getfield(L, -1, "value");
+              if (std::string(type_name) == "int") {
+                int value = lua_tointeger(L, -1);                
+                ConfigurationProperty configuartion_property(name, value);
+                element.push_back(configuartion_property);        
+              } else 
+              if (std::string(type_name) == "font") {
+                ui::FontInfo font_info;
+                lua_getfield(L, -1, "size");
+                if (!lua_isnil(L, -1)) {
+                  int size = lua_tointeger(L, -1);
+                  font_info.height = size;
+                }
+                lua_pop(L, 1);
+                lua_getfield(L, -1, "name");
+                if (!lua_isnil(L, -1)) {
+                  const char* name = lua_tostring(L, -1);
+                  font_info.name = name;
+                }
+                lua_pop(L, 1);
+                ConfigurationProperty configuartion_property(name, font_info);
+                element.push_back(configuartion_property);
+              }
+              lua_pop(L, 1); // pop value              
+            }
+            elements_[key] = element;      
+            lua_pop(L, 1); // properties
+          }
+        }        
+      }
+    }
+    lua_pop(L, 1);  // pop elements     
+  }
+}
+
+ElementFinder::Properties LuaElementFinder::FindElement(const std::string& name) {
+  Properties result;
+  Elements::iterator it = elements_.find(name);
+  if (it != elements_.end()) {
+    result = it->second;
+  }
+  return result;
+}
+
+lua_State*  LuaElementFinder::load_script(const std::string& dllpath) {
+  lua_State* L = luaL_newstate();
+  luaL_openlibs(L);
+  // set search path for require
+  std::string filename_noext;
+  boost::filesystem::path p(dllpath);
+  std::string dir = p.parent_path().string();
+  std::string fn = p.stem().string();
+  lua_getglobal(L, "package");
+  std::string path1 = dir + "/?.lua;" + dir + "/" + fn + "/?.lua;"+dir + "/"+ "psycle/?.lua";
+  std::replace(path1.begin(), path1.end(), '/', '\\' );
+  lua_pushstring(L, path1.c_str());
+  lua_setfield(L, -2, "path");
+
+  std::string path = dllpath;
+  /// This is needed to prevent loading problems
+  std::replace(path.begin(), path.end(), '\\', '/');
+  int status = luaL_loadfile(L, path.c_str());
+  if (status) {
+    const char* msg =lua_tostring(L, -1);
+    std::ostringstream s; s
+      << "Failed: " << msg << std::endl;
+    throw std::runtime_error(s.str());
+  }
+  return L;
+}
+
+
+
+void Configuration::InitWindow(ui::Window& element, const std::string& name) {
+  ElementFinder::Properties properties = finder_->FindElement("text");
+  ElementFinder::Properties::iterator it = properties.begin();
+  for ( ; it != properties.end(); ++it) {
+    element.set_property(*it); 
+  }  
+}
+
 // Ui Factory
 Systems& Systems::instance() {
   static Systems instance_;
@@ -2422,7 +2558,8 @@ Systems& Systems::instance() {
   return instance_;
 }
 
-void Systems::InitInstance() {
+void Systems::InitInstance(const std::string& config_path) {
+  config_path_ = config_path;
   ui::TerminalFrame::InitInstance();
 }
 
@@ -2497,6 +2634,12 @@ ui::ComboBox* Systems::CreateComboBox() {
 ui::Edit* Systems::CreateEdit() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateEdit(); 
+}
+
+ui::Text* Systems::CreateText() {
+  Text* result = new Text();
+  Configuration::instance().InitWindow(*result, "text");  
+  return result;
 }
 
 ui::Button* Systems::CreateButton() {

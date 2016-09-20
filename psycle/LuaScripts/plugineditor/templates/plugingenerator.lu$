@@ -1,7 +1,5 @@
 -- $(pluginname).lua
 
-@ return "GENERATOR"
-
 machine = require("psycle.machine"):new()
 
 -- add your requires here

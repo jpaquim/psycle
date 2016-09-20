@@ -1582,54 +1582,48 @@ class MenuContainerImp : public ui::MenuContainerImp {
   static MenuContainerImp* MenuContainerImpById(int id);
   void WorkMenuItemEvent(int id);
   void set_menu_window(CWnd* menu_window, const Node::Ptr& root_node);
-  void set_cmenu(CMenu* cmenu) { cmenu_ = cmenu; }
+  void set_hmenu(HMENU hmenu) { hmenu_ = hmenu; }
   
  private:
-   void UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start = 0);
+   void UpdateNodes(Node::Ptr parent_node, HMENU parent, int pos_start = 0);
    std::map<int, MenuImp*> menu_item_id_map_;
    static std::map<int, MenuContainerImp*> menu_bar_id_map_;   
    CWnd* menu_window_;
-   CMenu* cmenu_;
+   HMENU hmenu_;
 };
 
 class PopupMenuImp : public MenuContainerImp { 
  public:  
   PopupMenuImp();
-  virtual ~PopupMenuImp() { popup_menu_->DestroyMenu(); }
+  virtual ~PopupMenuImp() { ::DestroyMenu(popup_menu_); }
  
   virtual void DevTrack(const ui::Point& pos);
  private:
-   std::auto_ptr<CMenu> popup_menu_;
+   HMENU popup_menu_;
 };
 
 class MenuImp : public ui::MenuImp {  
  public:
-  MenuImp() : cmenu_(0), parent_(0), pos_(0), id_(0) {}
-  MenuImp(CMenu* parent) : cmenu_(0), parent_(parent), pos_(0), id_(0) {}
-  virtual ~MenuImp() {
-    if (parent_ && ::IsMenu(parent()->m_hMenu)) {      
-      parent()->RemoveMenu(pos_, MF_BYPOSITION);    
-    } else {
-      delete cmenu_;
-    }
-  }
+  MenuImp() : hmenu_(0), parent_(0), pos_(0), id_(0) {}
+  MenuImp(HMENU parent) : hmenu_(0), parent_(parent), pos_(0), id_(0) {}
+  virtual ~MenuImp();
     
-  void set_parent(CMenu* parent) { parent_ = parent; }
-  CMenu* parent() { return parent_; }
+  void set_parent(HMENU parent) { parent_ = parent; }
+  HMENU parent() { return parent_; }
   virtual void dev_set_text(const std::string& text) {    
-    parent()->ModifyMenu(pos_, MF_BYPOSITION, 0, Charset::utf8_to_win(text).c_str());    
+    ::ModifyMenu(parent_, pos_, MF_BYPOSITION, 0, Charset::utf8_to_win(text).c_str());    
   }
   void dev_set_position(int pos) { pos_ = pos; }
   int dev_position() const { return pos_; }
   void CreateMenu(const std::string& text);
   void CreateMenuItem(const std::string& text, ui::Image* image);
 
-  CMenu* cmenu() { return cmenu_; }
+  HMENU hmenu() { return hmenu_; }
   int id() const { return id_; }
   
  private:
-    CMenu* cmenu_;
-    CMenu* parent_;    
+    HMENU hmenu_;
+    HMENU parent_;    
     int pos_;
     int id_;
 };

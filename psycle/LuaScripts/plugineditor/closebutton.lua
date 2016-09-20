@@ -21,6 +21,7 @@ function closebutton.new(parent)
 				   :setjustify(text.CENTERJUSTIFY)
                    :setalign(item.ALTOP)  
   function g.closebtn:onmousedown()
+    local that = parent
      that:hide():parent():updatealign()
      g.dohide:emit()
   end  

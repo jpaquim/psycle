@@ -128,7 +128,7 @@ function pluginselector:oncreateplugin(template)
 	  if properties[i].type == "string" then
 	    env[properties[i].property] = properties[i].value
 	  elseif properties[i].type == "machtype" then
-	    if properties[i].value == "FX" then
+	    if properties[i].value == "fx" then
 		  env[properties[i].property] = "machine.FX"
 		elseif properties[i].value == "generator" then
 	      env[properties[i].property] = "machine.GENERATOR"

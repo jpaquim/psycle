@@ -113,7 +113,7 @@ void ParamMap::ReplaceSelection() {
       int virtual_index = (*it)->imp(*list_view_->imp())->position();      
       std::stringstream str;
       str << i << " [" << param_name(i + cbx_box_->item_index()) << "]";
-      ui::Node::Ptr col2_node = *(*it)->begin();
+      ui::Node::Ptr col2_node = *it;
       col2_node->set_text(str.str());         
       machine_->set_virtual_param_index(
         virtual_index, i + cbx_box_->item_index());

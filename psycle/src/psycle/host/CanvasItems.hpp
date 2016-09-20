@@ -81,23 +81,12 @@ class Text : public Window {
   typedef boost::weak_ptr<Text> WeakPtr;
   typedef boost::weak_ptr<const Text> ConstWeakPtr;
 
-  Text() : Window(), 
-      vertical_alignment_(ALTOP),
-      justify_(LEFTJUSTIFY),
-      color_(0xFFFFFF),
-			is_auto_dimension_calculated_(false),
-			is_aligned_(false) {
-  }
-  Text(const std::string& text) : 
-      vertical_alignment_(ALTOP),
-      justify_(LEFTJUSTIFY),
-      color_(0xFFFFFF),
-      text_(text),
-			is_auto_dimension_calculated_(false),
-			is_aligned_(false) { 
-  }
+  Text();
+  Text(const std::string& text);
 
-  static std::string type() { return "canvastext"; }
+  static std::string type() { return "text"; }
+
+  virtual void set_property(const ConfigurationProperty& configuration_property);
 
   virtual void Draw(Graphics* cr, Region& draw_region);  
   void set_text(const std::string& text);
@@ -126,7 +115,7 @@ class Text : public Window {
 	void PrepareAutoDimensionUpdate() const {		
 	  is_auto_dimension_calculated_ = is_aligned_ = false;
   }
-	void OutputText(Graphics* g);	
+	void OutputText(Graphics* g);
 
   std::string text_;
   AlignStyle vertical_alignment_;
