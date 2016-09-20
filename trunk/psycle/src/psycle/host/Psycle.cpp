@@ -159,7 +159,7 @@ namespace psycle { namespace host {
 			else
 			{
 				global_.machineload().LoadPluginInfo(false);
-        ui::Systems::instance().InitInstance();
+        ui::Systems::instance().InitInstance(PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\psycle\\ui\\uiconfiguration.lua");
         pFrame->m_wndView.LoadLuaExtensions();
 				// Show splash screen
 				if (global_.conf()._showAboutAtStart)

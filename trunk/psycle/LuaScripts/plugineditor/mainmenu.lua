@@ -27,7 +27,7 @@ function mainmenu.menus()
    menus.newmenu:add(menus.newmodule)   
    menus.openfile = node:new():settext("Open")
    menus.filemenu:add(menus.openfile) 
-   -- tools
+   --- tools
    menus.toolmenu = node:new():settext("Tools")
    menus.node:add(menus.toolmenu)
    menus.menudesigner = node:new():settext("Menu Designer")

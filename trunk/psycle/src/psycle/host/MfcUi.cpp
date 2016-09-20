@@ -1375,16 +1375,16 @@ void WindowHook::ReleaseHook() {
 // MenuContainerImp
 std::map<int, MenuContainerImp*> MenuContainerImp::menu_bar_id_map_;
 
-MenuContainerImp::MenuContainerImp() : menu_window_(0), cmenu_(0) {  
+MenuContainerImp::MenuContainerImp() : menu_window_(0), hmenu_(0) {  
 }
 
 void MenuContainerImp::set_menu_window(CWnd* menu_window, const Node::Ptr& root_node) {
   menu_window_ = menu_window;  
   if (!menu_window && root_node) {
-    cmenu_ = 0;
+    hmenu_ = 0;
     root_node->erase_imps(this);    
   } else {
-    cmenu_ = menu_window->GetMenu();
+    hmenu_ = menu_window->GetMenu()->m_hMenu;
     DevUpdate(root_node, nullpointer);
   }
 }
@@ -1396,8 +1396,8 @@ void MenuContainerImp::DevInvalidate() {
 }
 
 void MenuContainerImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {
-  if (cmenu_) {		
-    UpdateNodes(node, cmenu_, cmenu_->GetMenuItemCount());
+  if (hmenu_) {		
+    UpdateNodes(node, hmenu_, ::GetMenuItemCount(hmenu_));
     DevInvalidate();
   }
 }
@@ -1407,7 +1407,7 @@ void MenuContainerImp::RegisterMenuEvent(int id, MenuImp* menu_imp) {
   menu_bar_id_map_[id] = this;
 }
 
-void MenuContainerImp::UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos_start) {
+void MenuContainerImp::UpdateNodes(Node::Ptr parent_node, HMENU parent, int pos_start) {
   if (parent_node) {
     Node::Container::iterator it = parent_node->begin();    
     for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
@@ -1439,7 +1439,7 @@ void MenuContainerImp::UpdateNodes(Node::Ptr parent_node, CMenu* parent, int pos
           if (it->owner() == this) {
             MenuImp* menu_imp =  dynamic_cast<MenuImp*>(&(*it));    
             if (menu_imp) {
-              UpdateNodes(node, menu_imp->cmenu());
+              UpdateNodes(node, menu_imp->hmenu());
             }
             break;
           }
@@ -1496,39 +1496,49 @@ MenuContainerImp* MenuContainerImp::MenuContainerImpById(int id) {
 }
 
 // PopupMenuImp
-PopupMenuImp::PopupMenuImp() : popup_menu_(new CMenu()) {
-  popup_menu_->CreatePopupMenu();
-  set_cmenu(popup_menu_.get());
+PopupMenuImp::PopupMenuImp() : popup_menu_(0) {
+  popup_menu_ = ::CreatePopupMenu();
+  set_hmenu(popup_menu_);
 }
 
 void PopupMenuImp::DevTrack(const ui::Point& pos) {
-  popup_menu_->TrackPopupMenu(
+  ::TrackPopupMenu(popup_menu_,
     TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_HORPOSANIMATION | TPM_VERPOSANIMATION,
-    static_cast<int>(pos.x()), static_cast<int>(pos.y()), ::AfxGetMainWnd());
+    static_cast<int>(pos.x()), static_cast<int>(pos.y()), 0, ::AfxGetMainWnd()->m_hWnd, 0);
 }
 
 //MenuImp
+MenuImp::~MenuImp()  {  
+  if (parent_ && ::IsMenu(parent_)) {      
+     RemoveMenu(parent_, pos_, MF_BYPOSITION);    
+   } else {     
+     ::DestroyMenu(hmenu_);     
+   }  
+}
+
 void MenuImp::CreateMenu(const std::string& text) {
-  cmenu_ = new CMenu();
-  cmenu_->CreateMenu();
-  parent_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)cmenu_->m_hMenu, Charset::utf8_to_win(text).c_str());    
+  hmenu_ = ::CreateMenu();  
+  AppendMenu(parent_, MF_POPUP | MF_ENABLED, (UINT_PTR)hmenu_, Charset::utf8_to_win(text).c_str());
+  UINT count = ::GetMenuItemCount(parent_);
+  pos_ = count - 1;
 }
 
 void MenuImp::CreateMenuItem(const std::string& text, ui::Image* image) {
   if (text == "-") {
-    parent_->AppendMenu(MF_SEPARATOR);  
+    ::AppendMenu(parent_, MF_SEPARATOR, 0, NULL);  
   } else {
     id_ = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
-    parent_->AppendMenu(MF_STRING |  MF_ENABLED, id_, Charset::utf8_to_win(text).c_str());
+    ::AppendMenu(parent_, MF_STRING |  MF_ENABLED, id_, Charset::utf8_to_win(text).c_str());
     if (image) {  
 			assert(image->imp());			
 			ImageImp* imp = dynamic_cast<ImageImp*>(image->imp());
 			assert(imp);
-      parent_->SetMenuItemBitmaps(id_, MF_BYCOMMAND, imp->dev_source(), imp->dev_source()); 
+      ::SetMenuItemBitmaps(parent_, id_, MF_BYCOMMAND, (HBITMAP)imp->dev_source()->m_hObject, (HBITMAP)imp->dev_source()->m_hObject); 
     }
   }
 }
 
+// GameController
 void GameControllersImp::DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) {
   UINT num = joyGetNumDevs();
   UINT game_controller_id = 0;

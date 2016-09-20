@@ -806,6 +806,7 @@ int LuaItemBind<T>::create(lua_State* L) {
     }    
   }
   boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
+  ui::Configuration::instance().InitWindow(*item.get(), T::type());
   if (!item->imp()) {
     item->set_imp(ui::ImpFactory::instance().CreateWindowImp());    
   }

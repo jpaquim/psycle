@@ -48,7 +48,6 @@ local node = require("psycle.node")
 local pianokeymap = require("psycle.ui.canvas.pianokeymap")
 local pianokeys = require("psycle.ui.canvas.pianokeys")
 local maincanvas = canvas:new()
-local scrollbox = require("psycle.ui.canvas.scrollbox")
 local item = require("psycle.ui.canvas.item")
 local point = require("psycle.ui.point")
 local listview = require("psycle.ui.canvas.listview")
@@ -343,8 +342,7 @@ function maincanvas:savepage()
   end
 end
 
-function maincanvas:playplugin()  
-  self.scrollbox:scrollby(-10, 0)
+function maincanvas:playplugin()    
   --self:invalidate()
 --[[
   self.pages:activepage():definemarker(1, 31, 0x0000FF, 0x0000FF)
@@ -659,6 +657,8 @@ function maincanvas:oncreateplugin(template, pluginname)
     --  break;     
   --  end
   --end    
+  self.pluginselector:hide()
+  self:updatealign()
 end
 
 function maincanvas:onopenplugin(pluginpath, pluginname, info)  

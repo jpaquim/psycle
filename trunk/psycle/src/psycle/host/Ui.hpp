@@ -798,6 +798,35 @@ class StyleSheet {
   StyleClassContainer style_classes_;
 };
 
+class ConfigurationProperty {
+ public:
+  ConfigurationProperty() {}
+  ConfigurationProperty(const std::string& name, const std::string& value) 
+    : name_(name), value_(value), int_value_(0) {
+  }
+  ConfigurationProperty(const std::string& name, int value) 
+    : name_(name), int_value_(value) {
+  }
+  ConfigurationProperty(const std::string& name, const ui::FontInfo& font_info) 
+    : name_(name), font_info_value_(font_info) {
+  }
+
+  void set_name(const std::string& name) { name_ = name;  }
+  const std::string& name() const { return name_; }
+  void set_value(const std::string& value) { value_ = value;  }
+  const std::string& value() const { return value_; }
+  void set_int_value(int value) { int_value_ = value;  }
+  int int_value() const { return int_value_; }
+  ui::FontInfo font_info_value() const { return font_info_value_; }
+
+ private:
+  std::string value_;
+  int int_value_;
+  ui::FontInfo font_info_value_;
+  std::string name_;
+};
+
+
 class Window : public boost::enable_shared_from_this<Window> {
 	friend class WindowImp;
  public:
@@ -850,6 +879,8 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void Insert(iterator it, const Window::Ptr& item) {}
 	virtual void Remove(const Window::Ptr& item) {}
 	virtual void RemoveAll() {}
+
+  virtual void set_property(const ConfigurationProperty& configuration_property) {}
 
 	virtual void set_position(const ui::Point& pos);
 	virtual void set_position(const ui::Rect& pos);
@@ -1475,8 +1506,7 @@ class MenuContainer {
   virtual void Update();
   virtual void Invalidate();
     
-  void set_root_node(Node::Ptr& root_node) { 
-   // if (root_node_.use_count() > 1) {
+  void set_root_node(Node::Ptr& root_node) {
 		if (!root_node_.expired()) {
       root_node_.lock()->erase_imps(imp());
     }
@@ -1491,7 +1521,7 @@ class MenuContainer {
 
  private:
   std::auto_ptr<ui::MenuContainerImp> imp_;
-  Node::WeakPtr root_node_;  
+  Node::WeakPtr root_node_;
 };
 
 class MenuBar : public MenuContainer {
@@ -2034,6 +2064,66 @@ inline GameControllersImp::~GameControllersImp() {}
 
 class MenuContainer;
 
+
+class ElementFinder {
+ public:
+  typedef std::vector<ConfigurationProperty> Properties;  
+  typedef std::map<std::string, Properties> Elements;
+
+  ElementFinder() {}
+  virtual ~ElementFinder() = 0;
+
+  virtual Properties FindElement(const std::string& name) = 0;
+};
+
+inline ElementFinder::~ElementFinder() {}
+
+class DefaultElementFinder : public ElementFinder {
+ public:
+  DefaultElementFinder() : ElementFinder() { InitDefault(); }
+  virtual ~DefaultElementFinder() {}
+  virtual Properties FindElement(const std::string& name);
+  void InitDefault();
+
+ private: 
+  Elements elements_;
+};
+
+class LuaElementFinder : public ElementFinder {
+ public:
+  LuaElementFinder() : ElementFinder() { LoadSettingsFromLuaScript(); }
+  virtual ~LuaElementFinder() {}
+  virtual Properties FindElement(const std::string& name);  
+
+ private: 
+  void LoadSettingsFromLuaScript();
+  lua_State* load_script(const std::string& dllpath);
+  void ParseElements(struct lua_State* L);
+  Elements elements_;
+};
+
+
+class Configuration {
+ public:
+  Configuration(ElementFinder* finder) : finder_(finder) {}
+  
+  static Configuration& instance() {
+    try {
+      static Configuration configuration(new LuaElementFinder());
+      return configuration;
+    } catch (std::exception& e) {
+      ui::alert(e.what());
+      static Configuration configuration(new DefaultElementFinder());
+      return configuration;
+    }
+  }        
+  void InitWindow(ui::Window& element, const std::string& name);
+
+ private:   
+   std::auto_ptr<ElementFinder> finder_;
+};
+
+
 // Ui Factory
 class Systems {
  public:
@@ -2053,7 +2143,8 @@ class Systems {
   virtual ui::Frame* CreateMainFrame();
   virtual ui::PopupFrame* CreatePopupFrame();
   virtual ui::ComboBox* CreateComboBox();
-  virtual ui::Edit* CreateEdit();
+  virtual ui::Edit* CreateEdit();  
+  virtual class Text* CreateText();
   virtual ui::Button* CreateButton();
   virtual ui::ScrollBar* CreateScrollBar(Orientation orientation = VERT);
   virtual ui::TreeView* CreateTreeView();
@@ -2063,8 +2154,10 @@ class Systems {
 
   SystemMetrics& metrics();
 
-  void InitInstance();
+  void InitInstance(const std::string& config_path);
   void ExitInstance();
+
+  std::string config_path() const { return config_path_; }
 	
  protected:
   Systems() {}
@@ -2072,7 +2165,8 @@ class Systems {
   Systems& operator=(Systems const&) {}
 
  private:
-  std::auto_ptr<Systems> concrete_factory_;  
+  std::auto_ptr<Systems> concrete_factory_;
+  std::string config_path_;
 };
 
 // Imp Interfaces

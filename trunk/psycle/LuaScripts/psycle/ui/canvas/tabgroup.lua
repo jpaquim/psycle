@@ -22,10 +22,9 @@ local signal = require("psycle.signal")
 local centertoscreen = require("psycle.ui.canvas.centertoscreen")
 
 local tabgroup = group:new()
---local cfg = config:new("MacParamVisual")
--- cfg:luapath()
-local plugin_path = "C:\\Users\\User\\Documents\\Visual Studio 2015\\Projects\\exforward\\exforward\\LuaScripts"
-tabgroup.picdir = plugin_path.."\\psycle\\ui\\icons\\"
+local cfg = require("psycle.config"):new("MacParamVisual")
+
+tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 
 function tabgroup:new(parent)  
   local c = group:new(parent)  
