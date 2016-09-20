@@ -272,6 +272,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			m_gencombo.ResetContent();
 			m_gencombo.AddString("No Machines Loaded");
+			m_gencombo.SetItemData(m_gencombo.GetCount()-1,65535);
 			selected = 0;
 		}
 		else if (!found) 
@@ -305,7 +306,13 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			else 
 			{	//the rest.
 				m_auxcombo.SetCurSel(AUX_PARAMS);
-				m_pSong->auxcolSelected = std::min(m_pSong->paramSelected,m_pSong->_pMachine[m_pSong->seqBus]->GetNumParams());
+				if (m_pSong->_pMachine[m_pSong->seqBus]->translate_param(m_pSong->paramSelected) < m_pSong->_pMachine[m_pSong->seqBus]->GetNumParams())
+				{
+					m_pSong->auxcolSelected = m_pSong->paramSelected;
+				}
+				else {
+					m_pSong->auxcolSelected = m_pSong->_pMachine[m_pSong->seqBus]->GetNumParams();
+				}
 			}
 		}
 		else
@@ -386,16 +393,27 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	}
 	void MachineBar::OnBDecAux() 
 	{
-		ChangeAux(m_pSong->auxcolSelected-1);
+		const int val = m_inscombo.GetCurSel();
+		if ( val > 0 ) {
+			m_inscombo.SetCurSel(val-1);
+			int nsb = GetNumFromCombo(&m_inscombo);
+			ChangeAux(nsb);
+		}
 		((CButton*)GetDlgItem(IDC_B_DECWAV))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
 
 	void MachineBar::OnBIncAux() 
 	{
-		int target = m_pSong->auxcolSelected+1;
-		if (m_pSong->seqBus < MAX_MACHINES) {
+		bool changed= false;
+		int val = m_inscombo.GetCurSel();
+		if ( val < m_inscombo.GetCount() ) {
+			val = m_inscombo.GetCurSel()+1;
+			changed=true;
+		}
+		else if (m_pSong->seqBus < MAX_MACHINES) {
 			//Automatically increase the samples/instruments vector when using increase button. Good for loading samples from toolbar.
+			int target = m_pSong->auxcolSelected+1;
 			Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
 			if (tmac) {
 				if (tmac->_type == MACH_XMSAMPLER) {
@@ -404,6 +422,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 						inst.Init();
 						Global::song().xminstruments.SetInst(inst,target);
 						UpdateComboIns(true);
+						val = m_inscombo.GetCurSel()+1;
+						changed=true;
 					}
 				}
 				else if (tmac->_type == MACH_SAMPLER) {
@@ -412,19 +432,28 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 						wave.Init();
 						Global::song().samples.SetSample(wave,target);
 						UpdateComboIns(true);
+						val = m_inscombo.GetCurSel()+1;
+						changed=true;
 					}
 				}
 			}
 		}
-		ChangeAux(target);
+		if (changed) {
+			m_inscombo.SetCurSel(val);
+			int nsb = GetNumFromCombo(&m_inscombo);
+			ChangeAux(nsb);
+		}
 		((CButton*)GetDlgItem(IDC_B_INCWAV))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
 
 	void MachineBar::UpdateComboIns(bool updatelist)
 	{
-		int listlen = 0;
-		
+		bool found=false;
+		int selected = -1;
+
+		macComboInitialized = false;
+
 		if (updatelist) 
 		{
 			m_inscombo.ResetContent();
@@ -434,8 +463,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			if (updatelist) 
 			{
 				m_inscombo.AddString("No parameters");
+				m_inscombo.SetItemData(m_inscombo.GetCount()-1,65535);
 			}
-			listlen = 1;
 		}
 		else if ( m_auxcombo.GetCurSel() == AUX_PARAMS)	// Params
 		{
@@ -444,31 +473,43 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			if (tmac) 
 			{
 				int i=0;
-				if (updatelist) 
+				for (i=0;i<256;i++)
 				{
-					for (i=0;i<tmac->GetNumParams();i++)
-					{
-						char buffer[64],buffer2[64];
-						std::memset(buffer2,0,64);
-						tmac->GetParamName(i,buffer2);
-						bool label(false);
-						if(tmac->_type == MACH_PLUGIN)
+					int param = tmac->translate_param(i);
+					if ( param < tmac->GetNumParams()) {
+						if (updatelist) 
 						{
-							if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[i]->Flags & psycle::plugin_interface::MPF_STATE))
-								label = true;
+							char buffer[64],buffer2[64];
+							std::memset(buffer2,0,64);
+							tmac->GetParamName(param,buffer2);
+							bool label(false);
+							if(tmac->_type == MACH_PLUGIN)
+							{
+								if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[param]->Flags & psycle::plugin_interface::MPF_STATE))
+									label = true;
+							}
+							if(label) {
+								// just a label
+								sprintf(buffer, "------ %s ------", buffer2);
+							}
+							else if (i != param) {
+								sprintf(buffer, "%.2X:(%.2X)  %s", i, param, buffer2);
+							}
+							else {
+								sprintf(buffer, "%.2X:  %s", i, buffer2);
+							}
+							m_inscombo.AddString(buffer);
+							m_inscombo.SetItemData(m_inscombo.GetCount()-1,i);
 						}
-						if(label)
-							// just a label
-							sprintf(buffer, "------ %s ------", buffer2);
-						else
-							sprintf(buffer, "%.2X:  %s", i, buffer2);
-						m_inscombo.AddString(buffer);
-						listlen++;
+						if (!found) 
+						{
+							selected++;
+						}
+						if (m_pSong->auxcolSelected == i) 
+						{
+							found = true;
+						}
 					}
-				}
-				else
-				{
-					listlen = m_inscombo.GetCount();
 				}
 			}
 			else
@@ -476,45 +517,55 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				if (updatelist) 
 				{
 					m_inscombo.AddString("No Machine");
+					m_inscombo.SetItemData(m_inscombo.GetCount()-1,65535);
 				}
-				listlen = 1;
 			}
 		}
 		else
 		{
 			char buffer[64];
-			if (updatelist) 
+			Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
+			if (tmac && tmac->NeedsAuxColumn()) 
 			{
-				Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
-				if (tmac && tmac->NeedsAuxColumn()) 
+				int listlen= tmac->NumAuxColumnIndexes();
+				if (updatelist) 
 				{
-					listlen= tmac->NumAuxColumnIndexes();
 					for (int i(0); i<listlen; i++)
 					{
 						sprintf(buffer, "%.2X: %s", i, tmac->AuxColumnName(i));
 						m_inscombo.AddString(buffer);
+						m_inscombo.SetItemData(m_inscombo.GetCount()-1,i);
 					}
 				}
-				else
-				{
-					m_inscombo.AddString("No Machine");
+				if (m_pSong->auxcolSelected < listlen) {
+					selected=m_pSong->auxcolSelected;
+					found=true;
 				}
 			}
 			else
 			{
-				listlen = m_inscombo.GetCount();
+				m_inscombo.AddString("No Machine");
+				m_inscombo.SetItemData(m_inscombo.GetCount()-1,65535);
 			}
 		}
-		if (m_pSong->auxcolSelected >= listlen)
-		{
+		if (!found) {
 			m_pSong->auxcolSelected = 0;
+			selected=0;
 		}
-		m_inscombo.SetCurSel(m_pSong->auxcolSelected);
+
+		m_inscombo.SetCurSel(selected);
+		macComboInitialized = true;
 	}
 
 	void MachineBar::OnSelchangeBarComboins() 
 	{
-		ChangeAux(m_inscombo.GetCurSel());
+		if(macComboInitialized)
+		{
+			int nsb = GetNumFromCombo(&m_inscombo);
+			if (m_pSong->auxcolSelected != nsb) {
+				ChangeAux(nsb);
+			}
+		}
 	}
 
 	void MachineBar::OnCloseupBarComboins()
@@ -556,10 +607,18 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	}
 	void MachineBar::ChangeAux(int i)	// User Called (Hotkey, button or list change)
 	{
-		if (i<0 || i >= m_inscombo.GetCount()) return;
+		if (i<0) return;
+		if (m_auxcombo.GetCurSel() == AUX_PARAMS) {
+			int dummy=-1;
+			Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, dummy);
+			if (tmac && tmac->translate_param(i) >= tmac->GetNumParams()) return;
+		}
+		else if (i >= m_inscombo.GetCount()) return;
 
 		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
 			m_pSong->paramSelected=i;
+			m_pSong->auxcolSelected=i;
+			m_inscombo.SetCurSel(GetNumFromComboInv(&m_inscombo));
 		} else {
 			int dummy=-1;
 			Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, dummy);
@@ -581,9 +640,9 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			m_pParentMain->UpdateInstrumentEditor();
 			m_pParentMain->WaveEditorBackUpdate();
 			m_pParentMain->RedrawGearRackList();
+			m_pSong->auxcolSelected=i;
+			m_inscombo.SetCurSel(m_pSong->auxcolSelected);
 		}
-		m_pSong->auxcolSelected=i;
-		m_inscombo.SetCurSel(m_pSong->auxcolSelected);
 	}
 
 	void MachineBar::OnLoadwave() 
@@ -1068,10 +1127,24 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	int MachineBar::GetNumFromCombo(CComboBox *cb)
 	{
+		int result;
+		result = cb->GetItemData(cb->GetCurSel());
+		if (result == 65535) result = 0; //Since we have to assign a value, we assing zero.
+		/* Old method that parsed the string. hexstring_to_integer took care of removing invalid characters (--- entries)
 		CString str;
 		cb->GetWindowText(str);
-		int result;
-		helpers::hexstring_to_integer(static_cast<LPCTSTR>(str.Left(2)), result);
+		std::stringstream ss;
+		ss << str.Left(2);
+		helpers::hexstring_to_integer(ss.str(), result);
+		*/
 		return result;
+	}
+	int MachineBar::GetNumFromComboInv(CComboBox *cb)
+	{
+		int i=0;
+		for (;i< cb->GetCount(); i++) {
+			if (cb->GetItemData(i) == m_pSong->auxcolSelected) break;
+		}
+		return i;
 	}
 }}

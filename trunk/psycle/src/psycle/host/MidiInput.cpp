@@ -696,10 +696,10 @@ Exit:
 								inst  = gParameter;
 								int dummy=-1;
 								Machine * mac =  Global::song().GetMachineOfBus(busMachine, dummy);
-								if(mac && inst < mac->GetNumParams())
+								if(mac && mac->translate_param(inst) < mac->GetNumParams())
 								{	
 									int minval, maxval;
-									mac->GetParamRange(inst, minval, maxval);
+									mac->GetParamRange(mac->translate_param(inst), minval, maxval);
 									int value = minval + helpers::math::round<int, float>( data2 * (maxval-minval) / 127.f);
 									cmd = value / 256;
 									parameter = value % 256;

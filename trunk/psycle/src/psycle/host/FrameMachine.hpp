@@ -98,8 +98,9 @@ namespace host {
 			afx_msg void OnUpdateOperationsEnabled(CCmdUI *pCmdUI);
 			afx_msg void OnViewsBankmanager();
 			afx_msg void OnViewsParameterlist();
-      afx_msg void OnViewsParameterMap();
 			afx_msg void OnUpdateViewsParameterlist(CCmdUI *pCmdUI);
+      afx_msg void OnViewsParameterMap();
+	  afx_msg void OnUpdateViewsParameterMap(CCmdUI *pCmdUI);
 			afx_msg void OnViewsShowtoolbar();
 			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
 			afx_msg void OnParametersCommand();

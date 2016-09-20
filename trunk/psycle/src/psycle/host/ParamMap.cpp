@@ -38,8 +38,9 @@ ui::Font ParamMapSkin::CastCFont(CFont* font) {
   return ui::Font(font_info);
 }
 
-ParamMap::ParamMap(Machine* machine) 
+ParamMap::ParamMap(Machine* machine,ParamMap** windowVar) 
     : machine_(machine),
+	 windowVar_(windowVar),
       top_client_group_(new ui::Group()),
       list_view_(new ui::ListView()),
       cbx_box_(new ui::ComboBox()),
@@ -76,19 +77,19 @@ void ParamMap::UpdateNew(int par,int value) {
 void ParamMap::FillListView() {  
   for (int i = 0; i < 256; ++i) {    
     std::stringstream str;
-    str << i << " ->";
+	str << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << i << " ->";
     ui::Node::Ptr col1_node(new ui::Node(str.str()));                
     std::stringstream str1;    
-    str1 << machine_->translate_param(i) 
+	str1 << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << machine_->translate_param(i) 
          << " ["
          << param_name(machine_->translate_param(i)) 
          << "]";
     ui::Node::Ptr col2_node(new ui::Node(str1.str()));
-    col1_node->AddNode(col2_node);
+	col1_node->AddNode(col2_node);
     root_node_->AddNode(col1_node);
   }
   if (list_view_) {
-    list_view_->UpdateList();
+    //list_view_->UpdateList();
   }
 }
 

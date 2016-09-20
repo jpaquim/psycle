@@ -1074,13 +1074,20 @@ namespace psycle { namespace host {
       pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
       if (active_lua_) {
         active_lua_->OnDeactivated();
+        HideActiveLuaMenu();
+      }
+      active_lua_ = 0;
+    }
+
+    void CChildView::HideActiveLuaMenu() {
+      if (active_lua_) {
         boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
-        if (!menu_bar.expired()) {
-          menu_bar.lock()->root_node().lock()->erase_imps(menu_bar.lock()->imp());
+        if (!menu_bar.expired() && !menu_bar.lock()->root_node().expired()) {
+          ui::Node::Ptr root = menu_bar.lock()->root_node().lock();
+          root->erase_imps(menu_bar.lock()->imp());
           menu_bar.lock()->Invalidate();           
         }
       }
-      active_lua_ = 0;
     }
 
 		/// Tool bar buttons and View Commands
@@ -1807,7 +1814,8 @@ namespace psycle { namespace host {
 			if ( notecommand == notecommands::tweak ) {
 				int min=0, max=0xFFFF;
 				if(targetmac < MAX_MACHINES && _pSong._pMachine[targetmac] != NULL) {
-					_pSong._pMachine[targetmac]->GetParamRange(targettwk,min,max);
+					Machine* pmac=_pSong._pMachine[targetmac];
+					pmac->GetParamRange(pmac->translate_param(targettwk),min,max);
 				}
 				//If the parameter uses negative number, the values are shifted up.
 				max-=min;
@@ -1818,7 +1826,8 @@ namespace psycle { namespace host {
 			else if ( notecommand == notecommands::tweakslide ) {
 				int min=0, max=0xFFFF;
 				if(targetmac < MAX_MACHINES && _pSong._pMachine[targetmac] != NULL) {
-					_pSong._pMachine[targetmac]->GetParamRange(targettwk,min,max);
+					Machine* pmac=_pSong._pMachine[targetmac];
+					pmac->GetParamRange(pmac->translate_param(targettwk),min,max);
 				}
 				//If the parameter uses negative number, the values are shifted up.
 				max-=min;

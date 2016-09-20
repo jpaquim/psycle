@@ -46,7 +46,15 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.12.1 beta
+v1.12.2 beta
+-------
++ Parameter remapping for all types of plugins. It is mainly useful for VST plugins that have more than 256 parameters
++ Lua Host: Integrated plugin editor that is even used for debugging code.
+* Sampler: There is a new option (enabled by default) in the machine configuration to select a better slide algorithm. See tweaking.txt for more information.
+* Lua Host: Many more changes in the implementation. Compatibility with existing plugins is kept, but there are a couple of small changes (like in the ahdsr)
+
+
+v1.12.1 beta (2015-05-10)
 -------
 + Possibility to load multiple samples at once: (Only from samples bank, wave editor, or samples list of gear rack)
 + Implemented tweak replace, to allow removing tweak values.
@@ -58,7 +66,6 @@ v1.12.1 beta
   Instruments now load to both sampler and sampulse instrument list. 
   Envelopes are copied to sampler ADSR envelopes. As a side feature of this change, the "ADSR" button in Sampulse Envelopes does a better conversion to ADSR now.
   Samples can be loaded as sampulse intruments, SVX instruments (multioctave SVXs) now load as instruments (with the correct note mapping).
-* Sampler: There is a new option (enabled by default) in the machine configuration to select a better slide algorithm. See tweaking.txt for more information.
 ! Beats per minute (BPM) could be off a bit in version 1.12. It was caused by the new code that works in ticks per beat (like old trackers).
   A place with an unnecessary rounding has been corrected, and in the meantime, the synchronization code for VSTs has been considerably improved.
   Now, seeking and playing generate the same number of samples counted (there was a bug before), and the ppq and barpos position is based on

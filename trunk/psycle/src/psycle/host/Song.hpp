@@ -112,10 +112,10 @@ namespace psycle
 
 
 			///\}
-			/// The index of the selected MIDI program for note entering
+			/// The index of the selected machine parameter for note entering
 			/// \todo This is a gui thing... should not be here.
 			int paramSelected;
-			/// The index for the auxcolumn selected (would be waveselected, midiselected, or an index to a machine parameter)
+			/// The index for the auxcolumn selected (would be waveselected, midiselected, or paramSelected)
 			/// \todo This is a gui thing... should not be here.
 			int auxcolSelected;
 			/// Wether each of the tracks is muted.

@@ -312,7 +312,7 @@ using namespace helpers;
 		
 		void LADSPAMachine::SetDefaultsForControls()
 		{
-			for (int lPortIndex = 0; lPortIndex < _numPars; lPortIndex++) {
+			for (int lPortIndex = 0; lPortIndex < GetNumParams(); lPortIndex++) {
 				values_[lPortIndex].setDefault();
 			}
 		}
@@ -324,25 +324,13 @@ using namespace helpers;
 			pFile->Read(size); // size of whole structure
 			if(size)
 			{
-				if(version > CURRENT_FILE_VERSION_MACD)
+				uint32_t count=0;
+				pFile->Read(count);  // size of vars
+				for(unsigned int i(0) ; i < count ; ++i)
 				{
-					pFile->Skip(size);
-					std::ostringstream s; s
-						<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
-						<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-					//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-					return false;
-				}
-				else
-				{
-					uint32_t count=0;
-					pFile->Read(count);  // size of vars
-					for(unsigned int i(0) ; i < count ; ++i)
-					{
-						float temp=0;
-						pFile->Read(temp);
-						values_[i].setrawvalue(temp);
-					}
+					float temp=0;
+					pFile->Read(temp);
+					values_[i].setrawvalue(temp);
 				}
 			}
 			return true;
