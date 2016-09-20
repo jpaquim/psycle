@@ -1175,7 +1175,7 @@ namespace psycle { namespace host {
 						{
 							char buf[64];
 							buf[0]=0;
-							pmac->GetParamName(toffset[1],buf);
+							pmac->GetParamName(pmac->translate_param(toffset[1]),buf);
 							if(buf[0])
 								oss <<  " - " << buf;
 						}

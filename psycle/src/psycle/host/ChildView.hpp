@@ -478,8 +478,9 @@ namespace host {
       }
     private:
       boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions_;
-      void HideActiveLua();
+      void HideActiveLua();      
 		public:      
+      void HideActiveLuaMenu();
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
 			DECLARE_MESSAGE_MAP()

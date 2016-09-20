@@ -31,9 +31,10 @@ class ParamMapSkin {
 
 class ParamMap : public ui::Frame {
  public:
-	ParamMap(Machine* machine);	
+	ParamMap(Machine* machine,ParamMap** windowVar);
   
   virtual void OnClose() { 
+	if(windowVar_!= NULL) *windowVar_ = NULL;
     delete this;  
   }
 
@@ -57,6 +58,7 @@ class ParamMap : public ui::Frame {
 
   ui::Node::Ptr root_node_;
   Machine* machine_;
+  ParamMap** windowVar_;
   ui::Group::Ptr top_client_group_;
   ui::ListView::Ptr list_view_;
   ui::ComboBox::Ptr cbx_box_;

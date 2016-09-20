@@ -1195,6 +1195,10 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					//TODO: What to do on possibly wrong wire load?
 					pMachine->LoadWireMapping(pFile, version);
 				}
+				if (version >= 2)
+				{
+					pMachine->LoadParamMapping(pFile, version);
+				}
 			}
 			else {
 #if !defined WINAMP_PLUGIN
@@ -1286,6 +1290,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			pFile->WriteString(tmpName);
 			SaveSpecificChunk(pFile);
 			SaveWireMapping(pFile);
+			SaveParamMapping(pFile);
 		}
 
 		void Machine::SaveSpecificChunk(RiffFile* pFile) 
@@ -1367,6 +1372,49 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					const Wire::PinConnection &pin = pinMapping[j];
 					pFile->Write(pin.first);
 					pFile->Write(pin.second);
+				}
+			}
+			return true;
+		}
+
+		bool Machine::LoadParamMapping(RiffFile* pFile, int version)
+		{
+			int nummaps=0;
+			if (!pFile->Expect("PMAP",4)) {
+				return false;
+			}
+			pFile->Read(nummaps);
+			for(int i=0; i < nummaps; i++)
+			{
+				uint8_t idx;
+				uint16_t value;
+				pFile->Read(idx);
+				pFile->Read(value);
+				set_virtual_param_index(idx,value);
+			}
+			return true;
+		}
+
+		bool Machine::SaveParamMapping(RiffFile* pFile)
+		{
+			uint8_t numMaps=0;
+			for (int i=0;i<256;i++)
+			{
+				const int param = translate_param(i);
+				if ( param < GetNumParams()) {
+					numMaps++;
+				}
+			}
+			pFile->Write("PMAP",4);
+			pFile->Write(numMaps);
+			for (int i=0;i<256;i++)
+			{
+				const int param = translate_param(i);
+				if ( param < GetNumParams()) {
+					const uint8_t idx = static_cast<uint8_t>(i);
+					const uint16_t value = static_cast<uint16_t>(translate_param(i));
+					pFile->Write(idx);
+					pFile->Write(value);
 				}
 			}
 			return true;

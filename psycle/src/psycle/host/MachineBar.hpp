@@ -55,6 +55,7 @@ namespace psycle { namespace host {
 
 	protected:
 		int GetNumFromCombo(CComboBox* cb);
+		int GetNumFromComboInv(CComboBox *cb);
 		bool LoadWave(int waveIdx);
 		bool LoadInstrument(int instIdx, bool indexIsSample);
 		void SaveWave(int waveIdx);

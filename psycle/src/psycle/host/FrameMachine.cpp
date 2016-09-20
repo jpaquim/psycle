@@ -74,8 +74,9 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
 			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
 			ON_COMMAND(ID_VIEWS_PARAMETERLIST, OnViewsParameterlist)
-      ON_COMMAND(ID_VIEWS_PARAMETERMAP, OnViewsParameterMap)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERLIST, OnUpdateViewsParameterlist)
+			ON_COMMAND(ID_VIEWS_PARAMETERMAP, OnViewsParameterMap)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERMAP, OnUpdateViewsParameterMap)
 			ON_COMMAND(ID_VIEWS_BANKMANAGER, OnViewsBankmanager)
 			ON_COMMAND(ID_VIEWS_SHOWTOOLBAR, OnViewsShowtoolbar)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
@@ -572,26 +573,32 @@ namespace psycle { namespace host {
 		}
 
     void CFrameMachine::OnViewsParameterMap()
-		{      
+	{      
       CRect rc;
-			GetWindowRect(&rc);
-			if (!pParamMapGui)
-			{
-				pParamMapGui = new ParamMap(&machine());
+		GetWindowRect(&rc);
+		if (!pParamMapGui)
+		{
+			pParamMapGui = new ParamMap(&machine(),&pParamMapGui);
         pParamMapGui->close.connect(boost::bind(&CFrameMachine::OnParamMapClose, this, _1));
-				pParamMapGui->set_position(ui::Rect(ui::Point(rc.right+1, rc.top), ui::Dimension(500, 500)));
-				pParamMapGui->Show();
-			}
-			else
-			{
-				delete pParamMapGui;
+			pParamMapGui->set_position(ui::Rect(ui::Point(rc.right+1, rc.top), ui::Dimension(500, 500)));
+			pParamMapGui->Show();
+		}
+		else
+		{
+			delete pParamMapGui;
         pParamMapGui = 0;
-			}
+		}
     }
 
 		void CFrameMachine::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
 		{
 			pCmdUI->SetCheck(pParamGui!= NULL);
+			pCmdUI->Enable(machine().GetNumParams() > 0);
+		}
+
+		void CFrameMachine::OnUpdateViewsParameterMap(CCmdUI *pCmdUI)
+		{
+			pCmdUI->SetCheck(pParamMapGui!= NULL);
 			pCmdUI->Enable(machine().GetNumParams() > 0);
 		}
 
@@ -1153,7 +1160,7 @@ namespace psycle { namespace host {
       if (pParamMapGui) {
         pParamMapGui->UpdateNew(param, value);
       }
-		}
+	}
     void CFrameMachine::OnParamMapClose(ui::Frame&) {
       pParamMapGui = 0;
     }

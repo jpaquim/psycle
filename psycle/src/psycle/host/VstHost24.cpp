@@ -757,21 +757,23 @@ namespace psycle
 				if(note == notecommands::tweak || note == notecommands::tweakeffect) // Tweak Command
 				{
 					const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
-					SetParameter(pData->_inst, value);
+					int param = translate_param(pData->_inst);
+					SetParameter(param, value);
 				}
 				else if(note == notecommands::tweakslide)
 				{
+					int param = translate_param(pData->_inst);
 					int i;
 					if(TWSActive)
 					{
-						for(i = 0 ; i < MAX_TWS; ++i) if(TWSInst[i] == pData->_inst && TWSDelta[i]) break;
+						for(i = 0 ; i < MAX_TWS; ++i) if(TWSInst[i] == param && TWSDelta[i]) break;
 						if(i == MAX_TWS) for(i = 0 ; i < MAX_TWS; ++i) if(!TWSDelta[i]) break;
 					}
 					else for(i = MAX_TWS - 1 ; i > 0 ; --i) TWSDelta[i] = 0;
 					if(i < MAX_TWS)
 					{
 						TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
-						TWSInst[i] = pData->_inst;
+						TWSInst[i] = param;
 						TWSCurrent[i] = GetParameter(TWSInst[i]);
 						TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::player().SamplesPerRow();
 						TWSSamples = 0;
@@ -781,7 +783,8 @@ namespace psycle
 					{
 						// we have used all our slots, just send a twk
 						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
-						SetParameter(pData->_inst, value);
+						int param = translate_param(pData->_inst);
+						SetParameter(param, value);
 					}
 				}
 				else if(pData->_note == notecommands::midicc && pData->_inst >= 0x80 && pData->_inst < 0xFF) // Mcm (MIDI CC) Command

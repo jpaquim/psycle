@@ -410,10 +410,12 @@ namespace psycle
 					static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 					virtual bool LoadWireMapping(RiffFile* pFile, int version);
+					virtual bool LoadParamMapping(RiffFile* pFile, int version);
 					virtual void SaveDllNameAndIndex(RiffFile * pFile,int index);
 					virtual void SaveFileChunk(RiffFile * pFile);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
 					virtual bool SaveWireMapping(RiffFile* pFile);
+					virtual bool SaveParamMapping(RiffFile* pFile);
 					virtual void PostLoad(Machine** _pMachine);
 					//Helper for PSY2/PSY3 Song loading.
 					static int FindLegacyOutput(Machine* sourceMac, int macIndex);
