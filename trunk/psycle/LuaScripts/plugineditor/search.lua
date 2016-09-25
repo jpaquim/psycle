@@ -1,25 +1,25 @@
--- psycle plugineditor (c) 2015 by psycledelics
+-- psycle plugineditor (c) 2015, 2016 by psycledelics
 -- File: search.lua
 -- copyright 2015 members of the psycle project http://psycle.sourceforge.net
 -- This source is free software ; you can redistribute it and/or modify it under
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local signal = require("psycle.signal")
 local point = require("psycle.ui.point")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
-local group = require("psycle.ui.canvas.group")
+local boxspace = require("psycle.ui.boxspace")
 local item = require("psycle.ui.canvas.item")
-local text = require("psycle.ui.canvas.text")
-local edit = require("psycle.ui.canvas.edit")
-local iconbutton = require("psycle.ui.canvas.toolicon")
+local group = require("psycle.ui.canvas.group")
 local button = require("psycle.ui.canvas.button")
+local edit = require("psycle.ui.canvas.edit")
+local text = require("psycle.ui.canvas.text")
 local checkbox = require("psycle.ui.canvas.checkbox")
-local signal = require("psycle.signal")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local iconbutton = require("psycle.ui.canvas.toolicon")
 local closebutton = require("closebutton")
 local settings = require("settings")
-
 local search = group:new()
 
 search.DOWN = 1
@@ -37,22 +37,30 @@ end
 
 function search:init() 
   self:setautosize(false, true)
-  self:setpadding(5, 5, 5, 5)  
+  self:setpadding(boxspace:new(5))  
   self.dosearch = signal:new()
   self.dohide = signal:new()
   self.doreplace = signal:new()
-  local closebtn = closebutton.new(self)
-  closebtn.dohide:connect(search.onclosebutton, self)
+  local g = group:new(self):setautosize(true, true):setalign(item.ALRIGHT)
+  local closebutton = closebutton.new(g):setalign(item.ALTOP)  
+  closebutton.dohide:connect(search.onclosebutton, self)
   self:createeditgroup(self)  
   self:createreplacegroup(self)  
   self:addornament(ornamentfactory:createlineborder(0x253E2F))
 end
 
 function search:createeditgroup(parent)       
- self.editgroup = group:new(parent):setautosize(true, true):setalign(item.ALLEFT) 
- local optionrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP):setmargin(5, 0, 5, 0)                        
+ self.editgroup = group:new(parent)
+                       :setautosize(true, true):setalign(item.ALLEFT) 
+ local optionrow = group:new(self.editgroup)
+                        :setautosize(true, true)
+						:setalign(item.ALTOP)
+						:setmargin(boxspace:new(5, 0, 5, 0))
  self:createoptions(optionrow) 
- local editrow = group:new(self.editgroup):setautosize(true, true):setalign(item.ALTOP):setmargin(0, 0, 5, 0)
+ local editrow = group:new(self.editgroup)
+                      :setautosize(true, true)
+					  :setalign(item.ALTOP)
+					  :setmargin(boxspace:new(0, 0, 5, 0))
  self:createeditfield(editrow):initeditevents()   
  self:createsearchbuttons(editrow)
  return self
@@ -62,12 +70,17 @@ function search:createeditfield(parent)
   self.edit = edit:new(parent)
                   :setposition(rect:new(point:new(0, 0), dimension:new(200, 20)))
 				  :setalign(item.ALLEFT)
+				  :setbackgroundcolor(0x373533)  
+				  :settextcolor(0xFFFFFF)
   return self
 end
 
 function search:createsearchbuttons(parent)
-  self.up = iconbutton:new(parent, search.iconpath.."up.png", 0xFFFFFF):setalign(item.ALLEFT):setmargin(0, 2, 0, 5)
-  self.down = iconbutton:new(parent, search.iconpath.."down.png", 0xFFFFFF):setalign(item.ALLEFT)
+  self.up = iconbutton:new(parent, search.iconpath.."up.png", 0xFFFFFF)
+                      :setalign(item.ALLEFT)
+					  :setmargin(boxspace:new(0, 2, 0, 5))
+  self.down = iconbutton:new(parent, search.iconpath.."down.png", 0xFFFFFF)
+                        :setalign(item.ALLEFT)
   local that = self
   function self.up:onclick()
     that.dosearch:emit(that.edit:text(), 
@@ -109,14 +122,29 @@ function search:initeditevents()
 end
 
 function search:createreplacegroup(parent)
-  self.replacegroup = group:new(parent):setalign(item.ALLEFT):setautosize(true, true):setmargin(0, 0, 0, 20)
+  self.replacegroup = group:new(parent)
+                           :setalign(item.ALLEFT)
+						   :setautosize(true, true)
+						   :setmargin(boxspace:new(0, 0, 0, 20))
+						   :setpadding(boxspace:new(0, 5, 0, 5))
   self:createreplacefield(self.replacegroup)  
 end
 
 function search:createreplacefield(parent)  
-  self.replaceactive = checkbox:new(parent):settext("replace selection with"):setalign(item.ALTOP):setmargin(5, 0, 5, 0)  
-  self.replacefieldgroup = group:new(parent):setalign(item.ALTOP):setautosize(true, true):setmargin(0, 0, 5, 0)
-  self.replacefield = edit:new(self.replacefieldgroup):setalign(item.ALLEFT):setautosize(false, false):disable()  
+  self.replaceactive = checkbox:new(parent)
+                               :settext("replace selection with")
+							   :setalign(item.ALTOP)
+							   :setmargin(boxspace:new(5, 0, 5, 0))
+  self.replacefieldgroup = group:new(parent)
+                                :setalign(item.ALTOP)
+								:setautosize(true, true)
+								:setmargin(boxspace:new(0, 0, 5, 0))
+  self.replacefield = edit:new(self.replacefieldgroup)
+                          :disable()
+                          :setalign(item.ALLEFT)
+						  :setautosize(false, false)						  
+						  :settextcolor(0xA0A0A0)
+						  :setbackgroundcolor(0x323232)						  
   local that = self
   function self.replacefield:onkeydown(ev)         
     if ev:keycode() == ev.RETURN then      
@@ -132,11 +160,16 @@ function search:createreplacefield(parent)
      if self:check() then
        that.replacefield:enable()
        that.replacebtn:enable()
-       that.replacegroup:addornament(ornamentfactory:createfill(0xFFBF00))
+	   that.replacefield:setbackgroundcolor(0x373533)       
+	   that.replacefield:settextcolor(0xFFFFFF)
+	   that.replacegroup:addornament(ornamentfactory:createlineborder(0x525252))
      else
        that.replacefield:disable()
        that.replacebtn:disable()
-       that.replacegroup:removeornaments()
+       that.replacegroup:removeornaments()	   
+	   that.replacefield:setbackgroundcolor(0x323232)	   
+	   that.replacefield:settextcolor(0xA0A0A0)
+	   that.replacefield:fls()
      end
   end
   return self
@@ -146,7 +179,7 @@ function search:createreplacebutton(parent)
   self.replacebtn = button:new(parent)
                           :settext("replace")
 						  :setalign(item.ALLEFT)
-                          :setmargin(0, 0, 0, 2)
+                          :setmargin(boxspace:new(0, 0, 0, 2))
                           :setposition(rect:new(point:new(0, 0), dimension:new(60, 20)))
                           :disable()
   local that = self
@@ -158,9 +191,18 @@ end
 
 
 function search:createoptions(parent)
-  self.casesensitive = checkbox:new(parent):setalign(item.ALLEFT):settext("match case"):setmargin(0, 5, 0, 0)
-  self.wholeword = checkbox:new(parent):setalign(item.ALLEFT):settext("match whole words only"):setmargin(0, 5, 0, 0)
-  self.useregexp = checkbox:new(parent):setalign(item.ALLEFT):settext("use regexp"):setmargin(0, 5, 0, 0)
+  self.casesensitive = checkbox:new(parent)
+                               :setalign(item.ALLEFT)
+							   :settext("match case")
+							   :setmargin(boxspace:new(0, 5, 0, 0))
+  self.wholeword = checkbox:new(parent)
+                           :setalign(item.ALLEFT)
+						   :settext("match whole words only")
+						   :setmargin(boxspace:new(0, 5, 0, 0))
+  self.useregexp = checkbox:new(parent)
+                           :setalign(item.ALLEFT)
+						   :settext("use regexp")
+						   :setmargin(boxspace:new(0, 5, 0, 0))
   return self
 end
 
@@ -168,7 +210,7 @@ function search:onfocus()
   self.edit:setfocus()
 end
 
-function search:onclosebutton()
+function search:onclosebutton()  
   self.dohide:emit()
 end
 

@@ -196,7 +196,6 @@ struct LuaActionListenerBind {
     static int pluginname(lua_State* L); 
   };
 
-
   struct LuaMachines {};
 
   struct LuaMachinesBind {
@@ -206,7 +205,8 @@ struct LuaActionListenerBind {
     static int gc(lua_State* L);
     static int insert(lua_State* L);
     static int at(lua_State* L);
-    static int master(lua_State* L);    
+    static int master(lua_State* L);
+    static int muted(lua_State* L);    
   };
 
   struct LuaPlayerBind {

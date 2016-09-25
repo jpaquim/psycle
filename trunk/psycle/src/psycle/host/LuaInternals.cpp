@@ -936,6 +936,7 @@ int LuaMachinesBind::open(lua_State *L) {
     {"new", create},    
     {"insert", insert},
     {"at", at},
+    {"muted", muted},
     {"master", master},
     {NULL, NULL}
   };
@@ -965,13 +966,24 @@ int LuaMachinesBind::at(lua_State* L) {
   return 1;
 }
 
+int LuaMachinesBind::muted(lua_State* L) {  
+  boost::shared_ptr<LuaMachines> p = LuaHelper::check_sptr<LuaMachines>(L, 1, meta);
+  int machine_index = luaL_checkinteger(L, 2);
+  Machine* machine(0);
+  if (machine_index >= 0 && machine_index < 256) {
+    machine = LuaGlobal::GetMachine(machine_index);
+  }
+  lua_pushboolean(L, machine ? machine->Mute() : true);
+  return 1;
+}
+
 int LuaMachinesBind::insert(lua_State* L) {
   boost::shared_ptr<LuaMachines> p = LuaHelper::check_sptr<LuaMachines>(L, 1, meta);
   int n = lua_gettop(L);
   int slot = 0;
   if (n == 3) {
     slot = luaL_checkinteger(L, 2);    
-  }
+  }  
   boost::shared_ptr<LuaMachine> lua_machine = LuaHelper::check_sptr<LuaMachine>(L, n, LuaMachineBind::meta);
   lua_machine->set_shared(true);
   if (n==2) {

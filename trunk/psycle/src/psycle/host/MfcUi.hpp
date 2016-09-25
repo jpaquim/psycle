@@ -442,7 +442,7 @@ inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp) {
 
 class FontImp : public ui::FontImp {
  public:
-  FontImp() {
+  FontImp() : stock_id_(-1) {
     LOGFONT lfLogFont;
     memset(&lfLogFont, 0, sizeof(lfLogFont));
     lfLogFont.lfHeight = 12;    
@@ -453,34 +453,52 @@ class FontImp : public ui::FontImp {
 #endif
     cfont_ = ::CreateFontIndirect(&lfLogFont);  
   }
+
+  FontImp(int stock_id) : stock_id_(stock_id) {
+    cfont_ = (HFONT) GetStockObject(stock_id);	  
+  }
   
   virtual ~FontImp() {
-    ::DeleteObject(cfont_);
+    if (stock_id_ == -1) {
+      ::DeleteObject(cfont_);
+    }
   }
 
   virtual FontImp* DevClone() const { 
-    FontImp* clone = new FontImp();
-    clone->dev_set_info(dev_info());
+    FontImp* clone = 0;
+    if (stock_id_  == -1) {
+      clone = new FontImp();
+      clone->dev_set_info(dev_info());
+    } else {
+      clone = new FontImp(stock_id_);      
+    }
     return clone;
   }
 
   virtual void dev_set_info(const FontInfo& info) {
-    LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));
-    lfLogFont.lfHeight = info.height;    
-    if (info.bold) {
-      lfLogFont.lfWeight = FW_BOLD;
-    }
-    if (info.italic) {
-      lfLogFont.lfItalic = TRUE;
-    }
+    if (info.stock_id == -1) {
+      stock_id_ = info.stock_id;
+      LOGFONT lfLogFont;
+      memset(&lfLogFont, 0, sizeof(lfLogFont));
+      lfLogFont.lfHeight = info.height;    
+      if (info.bold) {
+        lfLogFont.lfWeight = FW_BOLD;
+      }
+      if (info.italic) {
+        lfLogFont.lfItalic = TRUE;
+      }
 #ifdef UNICODE
-		wcscpy(lfLogFont.lfFaceName, Charset::utf8_to_win(info.name).c_str());
+		  wcscpy(lfLogFont.lfFaceName, Charset::utf8_to_win(info.name).c_str());
 #else
-    strcpy(lfLogFont.lfFaceName,Charset:: utf8_to_win(info.name).c_str());
-#endif    
-    ::DeleteObject(cfont_);
-    cfont_ = ::CreateFontIndirect(&lfLogFont);
+      strcpy(lfLogFont.lfFaceName,Charset:: utf8_to_win(info.name).c_str());
+#endif        
+      ::DeleteObject(cfont_);
+      cfont_ = ::CreateFontIndirect(&lfLogFont);
+    } else {
+      ::DeleteObject(cfont_);
+      cfont_ = (HFONT) ::GetStockObject(info.stock_id);
+      stock_id_ = info.stock_id;
+    }
   }
 
   virtual FontInfo dev_info() const {
@@ -491,6 +509,7 @@ class FontImp : public ui::FontImp {
     info.height = lfLogFont.lfHeight;
     info.name = Charset::win_to_utf8(lfLogFont.lfFaceName);
     info.bold = (lfLogFont.lfWeight == FW_BOLD);
+    info.stock_id = stock_id_;
     return info;
   }
 
@@ -498,6 +517,7 @@ class FontImp : public ui::FontImp {
 
  private:
    mutable HFONT cfont_;
+   mutable int stock_id_;
 };
 
 // ==============================================
@@ -1004,12 +1024,16 @@ class WindowTemplateImp : public T, public I {
     
   virtual void dev_set_position(const ui::Rect& pos);
   virtual ui::Rect dev_position() const;
-  virtual ui::Rect dev_abs_position() const;	
+  virtual ui::Rect dev_absolute_position() const;	
+  virtual ui::Rect dev_absolute_system_position() const;  
+
   virtual ui::Rect dev_desktop_position() const;
   virtual ui::Dimension dev_dim() const {
     CRect rc;            
     GetWindowRect(&rc);
-    return ui::Dimension(rc.Width() - padding_.width() - border_space_.width(), rc.Height() - padding_.height() - border_space_.height());
+    return ui::Dimension(
+       rc.Width() - padding_.width() - border_space_.width(),
+       rc.Height() - padding_.height() - border_space_.height());
   }
   virtual bool dev_check_position(const ui::Rect& pos) const;
 	virtual void dev_set_margin(const BoxSpace& margin) { margin_ = margin; }
@@ -1023,9 +1047,7 @@ class WindowTemplateImp : public T, public I {
 		border_space_ = border_space;
 	}
 	virtual const BoxSpace& dev_border_space() const { return border_space_; }
-  virtual void DevScrollTo(int offset_x, int offset_y) {
-    //::SetScrollPos(m_hWnd, SB_HORZ, offset_x, TRUE);
-    //::SetScrollPos(m_hWnd, SB_HORZ, offset_x, TRUE);
+  virtual void DevScrollTo(int offset_x, int offset_y) {   
     ScrollWindow(-offset_x, -offset_y);
   }
   virtual void DevEnable() { EnableWindow(true); }
@@ -1034,7 +1056,7 @@ class WindowTemplateImp : public T, public I {
   virtual void DevHide() { ShowWindow(SW_HIDE); }
   virtual void DevInvalidate() {    			  
 	  if (window() && window()->root()) {
-        CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());	
+      CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());	
 	    ::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
 	  }
   }
@@ -1042,15 +1064,14 @@ class WindowTemplateImp : public T, public I {
     if (m_hWnd) {
       mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
       assert(imp);	
-      int flag =  RDW_INVALIDATE | RDW_UPDATENOW;
-     /* if (window() && window()->root()) {
-		
-		if (!window()->has_overall_background()) {
-			// flag |= RDW_ERASE;
-		}*/
+      int flag =  RDW_INVALIDATE | RDW_UPDATENOW;     
+      if (window() && window()->transparent()) {
+         flag |= RDW_ERASE;      
+       }      
 		  ::RedrawWindow(m_hWnd, NULL, imp->crgn(), flag);      
     }
   }
+  
   virtual void DevSetCapture() { SetCapture(); }  
   virtual void DevReleaseCapture() { ReleaseCapture(); }  
   virtual void DevShowCursor() { while (::ShowCursor(TRUE) < 0); }  
@@ -1063,14 +1084,12 @@ class WindowTemplateImp : public T, public I {
   virtual void dev_set_parent(Window* window);  
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
-
   virtual ui::Window* dev_focus_window();
   virtual void DevSetFocus() {    
     if (GetFocus() != this) {
       SetFocus();
     }
   }
-
   virtual void DevViewDoubleBuffered() { is_double_buffered_ = true; }
   virtual void DevViewSingleBuffered() { is_double_buffered_ = false; }
   virtual bool dev_is_double_buffered() const { return is_double_buffered_; }
@@ -1083,13 +1102,8 @@ protected:
   void OnDestroy();	
   void OnPaint();
   void OnSize(UINT nType, int cx, int cy); 
-
-
   afx_msg void OnKillFocus(CWnd* pNewWnd);		
-  BOOL OnEraseBkgnd(CDC* pDC);
-    
- protected:
-
+  BOOL OnEraseBkgnd(CDC* pDC) { return TRUE; }     
   virtual void OnHScroll(UINT a, UINT b, CScrollBar* pScrollBar) {
     ReflectLastMsg(pScrollBar->GetSafeHwnd());
   }
@@ -1109,22 +1123,17 @@ protected:
     }
     return flags;
   }    
-
   void MapPointToRoot(CPoint& pt) const {
     if (window() && window()->root()) {
       CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
       MapWindowPoints(root, &pt, 1);
     }
   }
-
   void MapPointToDesktop(CPoint& pt) const {
     ::MapWindowPoints(m_hWnd, ::GetDesktopWindow(), &pt, 1);
   }
-
 	ui::Rect MapPosToBoxModel(const CRect& rc) const;
-
   virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
-
   template <class T, class T1>
   bool WorkEvent(T& ev, void (T1::*ptmember)(T&), Window* window, MSG* msg) {
     if (window) {
@@ -1309,11 +1318,15 @@ class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
 	virtual bool dev_checked() const { return GetCheck() != 0; }
 	virtual void DevCheck() { SetCheck(true); }
 	virtual void DevUnCheck() { SetCheck(false); }
+  virtual void dev_set_font(const Font& font);
+  virtual const Font& dev_font() const { return font_; }
 
 protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CButton::OnPaint(); }
   void OnClick();
+private:
+  ui::Font font_;
 };
 
 class CheckBoxImp : public WindowTemplateImp<CButton, ui::CheckBoxImp> {
@@ -1352,11 +1365,15 @@ class CheckBoxImp : public WindowTemplateImp<CButton, ui::CheckBoxImp> {
   virtual bool dev_checked() const { return GetCheck() != 0; }
   virtual void DevCheck()  { SetCheck(true); }
   virtual void DevUnCheck() { SetCheck(false); }
-
-protected:
+  virtual void dev_set_font(const Font& font);
+  virtual const Font& dev_font() const { return font_; }
+ protected:
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CButton::OnPaint(); }
   void OnClick();
+  
+ private:
+  ui::Font font_;
 };
 
 class RadioButtonImp : public WindowTemplateImp<CButton, ui::RadioButtonImp> {
@@ -1391,11 +1408,15 @@ public:
 	virtual bool dev_checked() const { return GetCheck() != 0; }
 	virtual void DevCheck() { SetCheck(true); }
 	virtual void DevUnCheck() { SetCheck(false); }
+  virtual void dev_set_font(const Font& font);
+  virtual const Font& dev_font() const { return font_; }
 
 protected:
 	DECLARE_MESSAGE_MAP()
 	void OnPaint() { CButton::OnPaint(); }
 	void OnClick();
+
+  ui::Font font_;
 };
 
 class GroupBoxImp : public WindowTemplateImp<CButton, ui::GroupBoxImp> {
@@ -1431,11 +1452,16 @@ public:
 	virtual bool dev_checked() const { return GetCheck() != 0; }
 	virtual void DevCheck() { SetCheck(true); }
 	virtual void DevUnCheck() { SetCheck(false); }
+  virtual void dev_set_font(const Font& font);
+  virtual const Font& dev_font() const { return font_; }
 
-protected:
+ protected:
 	DECLARE_MESSAGE_MAP()
 	void OnPaint() { CButton::OnPaint(); }
 	void OnClick();
+
+ private:
+  ui::Font font_;
 };
 
 class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
@@ -1918,12 +1944,18 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
   
   BOOL OnEraseBkgnd(CDC* pDC) { return CComboBox::OnEraseBkgnd(pDC); }
 
+  virtual void dev_set_font(const Font& font);
+  virtual const Font& dev_font() const { return font_; }
+
  protected:
   virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
 
   DECLARE_MESSAGE_MAP()
   void OnPaint() { CComboBox::OnPaint(); }
   BOOL OnSelect();
+ 
+ private:
+   ui::Font font_;
 };
 
 class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
@@ -1979,6 +2011,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
   }
   virtual ARGB dev_text_color() const { return ToARGB(background_color_); }
   virtual void dev_set_font(const Font& font);
+  virtual const Font& dev_font() const { return font_; }
   
 protected:
   DECLARE_MESSAGE_MAP()
@@ -2525,11 +2558,9 @@ class ImpFactory : public ui::ImpFactory {
     }
     return false;     
   }
-
 	virtual ui::AlertImp* CreateAlertImp() {
 		return new AlertImp();
   }
-
   virtual ui::WindowImp* CreateWindowImp() {
     return WindowImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
@@ -2580,6 +2611,9 @@ class ImpFactory : public ui::ImpFactory {
   }
   virtual ui::FontImp* CreateFontImp() {    
     return new ui::mfc::FontImp();
+  }
+  virtual ui::FontImp* CreateFontImp(int stockid) {    
+    return new ui::mfc::FontImp(stockid);
   }
   virtual ui::GraphicsImp* CreateGraphicsImp() {     
     return new ui::mfc::GraphicsImp();

@@ -52,7 +52,7 @@ struct LuaState {
   void set_lua_state(lua_State* state) { L = state; }
 
  protected:
-  lua_State* L;
+  mutable lua_State* L;
 };
 
 struct LuaImport {

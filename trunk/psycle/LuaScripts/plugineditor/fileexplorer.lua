@@ -1,26 +1,28 @@
--- psycle fileexplorer (c) 2015 by psycledelics
+-- psycle fileexplorer (c) 2016 by psycledelics
 -- File: fileexplorer.lua
--- copyright 2015 members of the psycle project http://psycle.sourceforge.net
+-- copyright 2016 members of the psycle project http://psycle.sourceforge.net
 -- This source is free software ; you can redistribute it and/or modify it under
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local signal = require("psycle.signal")
+local node = require("psycle.node")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
-local item = require("psycle.ui.canvas.item")
-local group = require("psycle.ui.canvas.group")
-local listview = require("psycle.ui.canvas.listview")
-local node = require("psycle.node")
-local filehelper = require("psycle.file")
-local signal = require("psycle.signal")
+local boxspace = require("psycle.ui.boxspace")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local image = require("psycle.ui.image")
 local images = require("psycle.ui.images")
-local settings = require("settings")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
-local closebutton = require("closebutton")
-local text = require("psycle.ui.canvas.text")
+local item = require("psycle.ui.canvas.item")
+local group = require("psycle.ui.canvas.group")
 local edit = require("psycle.ui.canvas.edit")
+local listview = require("psycle.ui.canvas.listview")
+local text = require("psycle.ui.canvas.text")
+local filehelper = require("psycle.file")
+local settings = require("settings")
+local closebutton = require("closebutton")
+
 local fileexplorer = group:new()
 
 function fileexplorer:new(parent)  
@@ -49,10 +51,9 @@ function fileexplorer:initheader()
   self:initmachineselector()					 
   local closebutton = closebutton.new(self.header)
   local that = self
-  function closebutton.closebtn:onmousedown()
+  function closebutton:onmousedown()
      that:setposition(rect:new(point:new(0, 0), dimension:new(0, 0)))
-	 that:parent():flagnotaligned()  
-     that:parent():updatealign()     
+	 that:parent():flagnotaligned():updatealign()     
   end 
 end
 
@@ -63,8 +64,7 @@ function fileexplorer:initmachineselector()
 							 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
 							 :setalign(item.ALCLIENT)
 							 :setbackgroundcolor(0x2F2F2F)
-							 :settextcolor(0xCACACA)
-							 :setfont({name="arial", height=13, style=1})
+							 :settextcolor(0xCACACA)							 
 							-- :setjustify(text.CENTERJUSTIFY)
 							-- :setverticalalignment(item.ALCENTER)
   local that = self
@@ -78,7 +78,7 @@ function fileexplorer:initlistview()
                           :setalign(item.ALCLIENT)
 						  :setautosize(false, false)
 						  :viewlist()			
-						  :setmargin(10, 0, 0, 10)
+						  :setmargin(boxspace:new(10, 0, 0, 10))
   local that = self
   function self.listview:ondblclick(ev)    
 	local node = self:selected()
@@ -159,6 +159,5 @@ function fileexplorer:addparentdirectorynode(path)
 	self.rootnode:add(node)  
   end
 end
-
 
 return fileexplorer

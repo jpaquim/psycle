@@ -32,6 +32,7 @@
 #include "Player.hpp"
 #include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include "LuaPlugin.hpp"
+#include "CanvasItems.hpp"
 
 #include <cmath> // SwingFill
 
@@ -1451,7 +1452,7 @@ namespace psycle { namespace host {
 		}
 		
     void CChildView::CreateNewMachine(int x, int y, int mac, int selectedMode, int Outputmachine, const std::string& psOutputDll, int shellIdx, Machine* insert)
-    {
+    {      
       int fb,xs,ys;
 				if (mac < 0)
 				{
@@ -1532,7 +1533,7 @@ namespace psycle { namespace host {
 					}
 
 					bool created=false;
-          if (insert) {
+          if (insert) {            
             CExclusiveLock lock(&Global::song().semaphore, 2, true);
             Global::song()._pMachine[fb] = insert;
 				    insert->_x = x;
@@ -1582,6 +1583,7 @@ namespace psycle { namespace host {
 
 						pParentMain->UpdateComboGen();
 						Repaint(draw_modes::all);
+            
 						//Repaint(draw_modes::all_machines); // Seems that this doesn't always work (multiple calls to Repaint?)
 					}
 					else MessageBox("Machine Creation Failed","Error!",MB_OK);

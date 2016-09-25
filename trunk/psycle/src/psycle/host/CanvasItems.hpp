@@ -99,33 +99,33 @@ class Text : public Window {
   void set_font(const Font& font);
   void set_vertical_alignment(AlignStyle vertical_alignment) { 
     vertical_alignment_ = vertical_alignment;
-		is_aligned_ = false;
+		UpdateTextAlignment();
   }
   void set_justify(JustifyStyle justify) { 
 		justify_ = justify;
-		is_aligned_ = false;
+		UpdateTextAlignment();
 	}
-	virtual ui::Dimension OnCalcAutoDimension() const;
-
- private:  
-	void PrepareGraphics(Graphics* g);	
-	void CalculateAlignmentAndJustify() const;	
-	void CalculateJustify() const;
-	void CalculateAutoDimension() const;
-	void PrepareAutoDimensionUpdate() const {		
-	  is_auto_dimension_calculated_ = is_aligned_ = false;
+	virtual ui::Dimension OnCalcAutoDimension() const { 
+    return text_dimension();
   }
-	void OutputText(Graphics* g);
+  virtual void OnSize(const ui::Dimension& dimension) { 
+    UpdateTextAlignment();
+  }
+
+ private:	
+  void UpdateTextAlignment() { is_aligned_ = false; }
+	const ui::Point& text_alignment_position();	
+  double justify_offset(const ui::Dimension& text_dimension);
+  double vertical_alignment_offset(const ui::Dimension& text_dimension);	
+  ui::Dimension text_dimension() const;
 
   std::string text_;
   AlignStyle vertical_alignment_;
   JustifyStyle justify_;
   ARGB color_;
-  ui::Font font_;
-	mutable bool is_auto_dimension_calculated_;
-	mutable ui::Dimension auto_dimension_cache_;
-	mutable bool is_aligned_;
-	mutable ui::Point align_cache_;
+  ui::Font font_;		
+	bool is_aligned_;
+	ui::Point alignment_position_;
 };
 
 class Splitter : public Window {

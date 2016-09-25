@@ -91,7 +91,7 @@ class Canvas : public ui::Group {
   void StealFocus(const Window::Ptr& item);  
   virtual void OnSize(const ui::Dimension& dimension);
   void SetSave(bool on) { save_ = on; }
-  bool IsSaving() const { return save_; }    
+  virtual bool IsSaving() const { return save_; }    
   void ClearSave() { save_rgn_->Clear(); }
      
   void InvalidateSave();  
@@ -267,10 +267,8 @@ class Wallpaper : public ui::Ornament {
   virtual void Draw(Window& item, Graphics* g, Region& draw_region) {
     DrawWallpaper(item, g, draw_region);
   }
-
+  
   virtual bool transparent() const { return false; }
-
-  virtual bool has_overall_background() const { return true; }
 
  private:
   void DrawWallpaper(Window& item, Graphics* g, Region& draw_region) {

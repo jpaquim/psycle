@@ -8,6 +8,7 @@
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
+local boxspace = require("psycle.ui.boxspace")
 local canvas = require("psycle.ui.canvas")
 local group = require("psycle.ui.canvas.group")
 local window = require("psycle.ui.canvas.item")
@@ -19,7 +20,7 @@ local popupframe = require("psycle.ui.canvas.popupframe")
 local popupmenu = require("psycle.ui.popupmenu")
 local node = require("psycle.node")
 local signal = require("psycle.signal")
-local centertoscreen = require("psycle.ui.canvas.centertoscreen")
+local framealigner = require("psycle.ui.canvas.framealigner")
 
 local tabgroup = group:new()
 local cfg = require("psycle.config"):new("MacParamVisual")
@@ -40,7 +41,11 @@ function tabgroup:init()
   self.dopageclose = signal:new()
   self.hasclosebutton_ = true 
   self:setautosize(false, false)
-  self.tabbar = group:new(self):setautosize(false, true):setalign(window.ALTOP):addornament(ornamentfactory:createfill(0x232323)):setpadding(2, 0, 2, 2)
+  self.tabbar = group:new(self)
+                     :setautosize(false, true)
+					 :setalign(window.ALTOP)
+					 :addornament(ornamentfactory:createfill(0x232323))
+					 :setpadding(boxspace:new(2, 0, 2, 2))
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
                         :setautosize(false, false)
                         :setposition(rect:new(point:new(0, 0), dimension:new(15, 10)))
@@ -59,22 +64,32 @@ function tabgroup:init()
     self.f:setviewport(self.c)
     self.c:addornament(ornamentfactory:createfill(0x292929))    
     function fun(item)
-      local t = text:new(g):setcolor(0xCACACA):settext(item.text:text()):setautosize(false, true)      
+      local t = text:new(g)
+	                :setcolor(0xCACACA)
+					:settext(item.text:text())
+					:setautosize(false, true)
+					:setpadding(boxspace:new(1))
       t:setjustify(window.ALCENTER):setalign(window.ALTOP)      
       function t:onmousedown()        
         that:setactivepage(item.page)
       end
       function t:onmouseenter()                            
+	    self:setpadding(boxspace:new(0))
         self:addornament(ornamentfactory:createlineborder(0x696969))
       end      
       function t:onmouseout()                       
+	    self:setpadding(boxspace:new(1, 1, 1, 1))
         self:removeornaments()
       end
     end
     that:traverse(fun, that.tabs:items())
     self.c:updatealign()
-    local x, y, w, h = g:position()
-    local x, y, iw, ih = icon1:desktopposition()
+	
+	local h = g:position():height()	
+	local x = icon1:desktopposition():left()
+	local y = icon1:desktopposition():top()	
+    local iw = icon1:desktopposition():width()
+	local ih = icon1:desktopposition():height()
     self.f:hidedecoration()
 	      :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h)))    
     self.f:show()            
@@ -211,13 +226,14 @@ function tabgroup:createheader(page, label)
   header:setalign(window.ALLEFT)  
   header.page = page    
   header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
-  header.text:setalign(window.ALLEFT):setmargin(5, 5, 5, 5)  
+  header.text:setalign(window.ALLEFT):setmargin(boxspace:new(5))  
   local that = self
   if self.hasclosebutton_ then
     header.close = text:new(header)                           
                        :setcolor(0xB0D8B1)
                        :settext("x")                       
-    header.close:setalign(window.ALLEFT):setmargin(5, 5, 5, 5)   
+					   :setverticalalignment(window.ALCENTER)
+    header.close:setalign(window.ALLEFT):setautosize(true, false):setmargin(boxspace:new(0, 5, 0, 5))
     function header.close:onmousedown()
       local ev = {}
       ev.page = self:parent().page
@@ -226,21 +242,21 @@ function tabgroup:createheader(page, label)
     end
   end
   function header:setskinhighlight()        
-    self:setpadding(0, 0, 0, 0)
+    self:setpadding(boxspace:new(0))
 	self:removeornaments()    
 	self:addornament(ornamentfactory:createfill(0x333333)) 
 	self:addornament(ornamentfactory:createlineborder(0x696969))    
     self.text:setcolor(0xFFFFFF) 	
   end
   function header:setskinnormal()
-    self:setpadding(1, 1, 1, 1)
+    self:setpadding(boxspace:new(1))
     self:removeornaments()	
     self.text:setcolor(0xC0C0C0)     
   end    
   header:setskinnormal()    
-  function header:onmouseenter(ev)    
+  function header:onmouseenter(ev)       
     if self.page ~= that:activepage() then	  
-	  self.text:setcolor(0xFFFFFF)    
+	  self.text:setcolor(0xFFFFFF)    	  
 	end
   end
   function header:onmouseout(ev)
@@ -311,7 +327,7 @@ function tabgroup:openinframe(page, name)
   local frame = self:createframe(canvas, name)
   self.framepopupmenu.frame_ = frame
   frame:setpopupmenu(self.framepopupmenu)
-  frame:show(centertoscreen:new():sizetoscreen(0.3, 0.5))
+  frame:show(framealigner:new():sizetoscreen(0.3, 0.5))
 end
 
 function tabgroup:createframe(canvas, name)  

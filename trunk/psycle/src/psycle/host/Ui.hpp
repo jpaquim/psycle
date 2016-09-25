@@ -189,11 +189,17 @@ struct BoxSpace {
 		return top_left_ == rhs.top_left_ && bottom_right_ == rhs.bottom_right_;
   }
   inline bool operator!=(const BoxSpace& rhs) const { return !(*this == rhs); }
-
 	inline bool empty() const { 
 		return top_left_ == ui::Point::zero() && bottom_right_ == Point::zero();
   }
-
+  void set(double space) { 
+    top_left_.set_xy(space, space);
+    bottom_right_.set_xy(space, space);
+  }
+  void set(double top, double right, double bottom, double left) {
+		top_left_.set_xy(left, top);
+		bottom_right_.set_xy(right, bottom);
+	}
 	void set_top(double top) { top_left_.set_y(top); }
 	double top() const { return top_left_.y(); }
 	void set_right(double right) { bottom_right_.set_x(right); }
@@ -462,11 +468,12 @@ class KeyEvent : public Event {
 };
 
 struct FontInfo {
-  FontInfo() : name("Arial"), height(12), bold(false), italic(false) {}
+  FontInfo() : name("Arial"), height(12), bold(false), italic(false), stock_id(-1) {}
   std::string name;
   int height;
   bool bold;
   bool italic;
+  int stock_id;
 };
 
 class FontImp;
@@ -748,7 +755,7 @@ class Window;
 
 class WindowShowStrategy {
   public:
-   WindowShowStrategy();
+   WindowShowStrategy() {};
    virtual ~WindowShowStrategy() = 0;
    virtual void set_position(Window& window) = 0;
 };
@@ -808,7 +815,7 @@ class ConfigurationProperty {
     : name_(name), int_value_(value) {
   }
   ConfigurationProperty(const std::string& name, const ui::FontInfo& font_info) 
-    : name_(name), font_info_value_(font_info) {
+    : name_(name), font_info_value_(font_info), int_value_(0) {
   }
 
   void set_name(const std::string& name) { name_ = name;  }
@@ -886,7 +893,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void set_position(const ui::Rect& pos);
 	virtual void ScrollTo(int offsetx, int offsety);
 	virtual ui::Rect position() const;
-	virtual ui::Rect abs_position() const;
+	virtual ui::Rect absolute_position() const;
 	virtual ui::Rect desktop_position() const;
   virtual bool check_position(const ui::Rect& pos) const;
 	virtual ui::Dimension dim() const;	
@@ -921,6 +928,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void PreventFls();
 	virtual void EnableFls();
 	virtual bool is_fls_prevented() const;
+  virtual bool IsSaving() const { return false; }
 	virtual void SetCapture();
 	virtual void ReleaseCapture();
 	virtual void ShowCursor();
@@ -1021,7 +1029,8 @@ class Window : public boost::enable_shared_from_this<Window> {
                          padding().height() + border_space().height() +
                          margin().height());
   }
-	ui::Rect overall_position() const { return overall_position(position()); }
+
+ 	ui::Rect overall_position() const { return overall_position(position()); }
 	ui::Rect overall_position(const ui::Rect& pos) const {			
 		ui::Rect result(
 			pos.top_left(),
@@ -1035,8 +1044,15 @@ class Window : public boost::enable_shared_from_this<Window> {
 		}
 		return result;		
  }
-  
- virtual bool has_overall_background() const;
+ Window* FirstNonTransparentWindow() {
+   Window* result = this;
+   while (!result->is_root() && result->parent() && result->transparent()) {            
+     result = result->parent();       
+   }
+   return result;
+ }
+ 
+ virtual bool transparent() const;
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
   virtual void WorkMouseUp(MouseEvent& ev) { OnMouseUp(ev); }
@@ -1063,11 +1079,10 @@ class Window : public boost::enable_shared_from_this<Window> {
   bool auto_size_width_, auto_size_height_, prevent_auto_dimension_;
   Ornaments ornaments_;
   bool visible_, pointer_events_;  
-  AlignStyle align_;		
-  boost::weak_ptr<Window> root_cache_;	
+  AlignStyle align_;  
 	StyleSheet::WeakPtr style_sheet_;
 	std::string style_class_name_;
-	bool align_dimension_changed_;
+	bool align_dimension_changed_;  
 };
 
 class ChildPosEvent : public Event {
@@ -1204,10 +1219,30 @@ inline Aligner::~Aligner() {};
 
 class FrameImp;
 
-class WindowCenterToScreen {
+class FrameAligner : public WindowShowStrategy {
   public:   
-   WindowCenterToScreen() : width_perc_(-1), height_perc_(-1) {}   
-   virtual ~WindowCenterToScreen() {}
+   FrameAligner() :
+       width_perc_(-1),
+       height_perc_(-1),
+       alignment_(ALCENTER) {}
+   FrameAligner(AlignStyle alignment) : width_perc_(-1), height_perc_(-1), alignment_(alignment) {}   
+   virtual ~FrameAligner() {}
+   virtual void set_position(Window& window);
+
+   void SizeToScreen(double width_perc, double height_perc) {
+     width_perc_ = width_perc;
+     height_perc_ = height_perc;
+   }
+
+  private:    
+    double width_perc_, height_perc_;
+    AlignStyle alignment_;
+};
+
+class WindowRightToScreen {
+  public:   
+   WindowRightToScreen() : width_perc_(-1), height_perc_(-1) {}   
+   virtual ~WindowRightToScreen() {}
    virtual void set_position(Window& window);
 
    void SizeToScreen(double width_perc, double height_perc) {
@@ -1291,9 +1326,7 @@ class Ornament {
   virtual void Draw(Window& item, Graphics* g, Region& draw_region) = 0;
   virtual std::auto_ptr<ui::Rect> padding() const { return std::auto_ptr<ui::Rect>(); }
 
-  virtual ui::BoxSpace preferred_space() const { return ui::BoxSpace(); }
-
-  virtual bool has_overall_background() const { return false; }
+  virtual ui::BoxSpace preferred_space() const { return ui::BoxSpace(); }  
 };
 
 inline Ornament::~Ornament() {}
@@ -1336,12 +1369,13 @@ class Node : public boost::enable_shared_from_this<Node> {
   typedef std::vector<Node::Ptr> Container;
   typedef Container::iterator iterator;
    
-  Node::Node() : image_index_(0), selected_image_index_(0), data_(0) {}
+  Node::Node() : image_index_(0), selected_image_index_(0), data_(0), parent_(0) {}
   Node::Node(const std::string& text) : 
       text_(text),
       image_index_(0),
       selected_image_index_(0),
-			data_(0) {
+			data_(0),
+      parent_(0) {
   }
   virtual ~Node() {}
       
@@ -1367,7 +1401,7 @@ class Node : public boost::enable_shared_from_this<Node> {
   recursive_node_iterator recursive_begin();
   recursive_node_iterator recursive_end();
     
-  int level() const { return (!parent().expired()) ? parent().lock()->level() + 1 : 0; }    
+  int level() const { return parent() ? parent()->level() + 1 : 0; }    
   void AddImp(NodeImp* imp) { 
     imps.push_back(imp);    
   }
@@ -1389,8 +1423,8 @@ class Node : public boost::enable_shared_from_this<Node> {
     }
   }
 
-  void set_parent(const Node::WeakPtr& parent) { parent_ = parent; }
-  Node::WeakPtr parent() const { return parent_; }
+  void set_parent(Node* parent) { parent_ = parent; }
+  Node* parent() const { return parent_; }
   boost::signal<void (Node&)> changed;
 	boost::signal<void (Window&)> dimension_changed;
 
@@ -1407,7 +1441,7 @@ class Node : public boost::enable_shared_from_this<Node> {
   ui::Image::WeakPtr image_;
   int image_index_, selected_image_index_;
   Container children_;
-  Node::WeakPtr parent_;
+  Node* parent_;
 	void* data_;
 };
 
@@ -1424,7 +1458,7 @@ class recursive_node_iterator {
   }
   ui::Node::Ptr& operator*() { return *(i.top()); }
   recursive_node_iterator& operator++() {    
-    Node::Ptr parent = (*i.top())->parent().lock();
+    Node* parent = (*i.top())->parent();
     if (i.top() != parent->end()) {
       if ((*i.top())->size() > 0) {        
         i.push((*i.top())->begin());        
@@ -1432,7 +1466,7 @@ class recursive_node_iterator {
         ++i.top();        
         while (i.size() > 1 && i.top() == parent->end()) {
           i.pop();
-          parent = (*i.top())->parent().lock();
+          parent = (*i.top())->parent();
           ++i.top();                    
         }
       }
@@ -1699,7 +1733,7 @@ class ComboBoxImp;
 
 class ComboBox : public Window {
  public:
-  static std::string type() { return "canvascomboboxitem"; }
+  static std::string type() { return "combobox"; }
   
   typedef boost::shared_ptr<ComboBox> Ptr;
   typedef boost::shared_ptr<const ComboBox> ConstPtr;
@@ -1721,6 +1755,9 @@ class ComboBox : public Window {
 
   std::string text() const;
   virtual void OnSelect() {}
+  void set_font(const Font& font);
+
+  virtual void set_property(const ConfigurationProperty& configuration_property);
 
   boost::signal<void (ComboBox&)> select;
 };
@@ -1729,7 +1766,7 @@ class EditImp;
 
 class Edit : public Window {
  public:
-  static std::string type() { return "canvaseditboxitem"; }
+  static std::string type() { return "edit"; }
   Edit();
   Edit(EditImp* imp);
 
@@ -1748,7 +1785,7 @@ class ButtonImp;
 
 class Button : public Window {
  public:
-  static std::string type() { return "canvasbuttonitem"; }
+  static std::string type() { return "button"; }
 
   typedef boost::shared_ptr<Button> Ptr;
   typedef boost::shared_ptr<const Button> ConstPtr;
@@ -1767,7 +1804,8 @@ class Button : public Window {
   virtual void OnClick() {}  
 	virtual void Check();
 	virtual void UnCheck();
-
+  
+  void set_font(const Font& font);
 
   boost::signal<void (Button&)> click;
 };
@@ -1776,7 +1814,7 @@ class CheckBoxImp;
 
 class CheckBox : public Button {
  public:
-  static std::string type() { return "canvascomboboxitem"; }
+  static std::string type() { return "checkbox"; }
   
   typedef boost::shared_ptr<CheckBox> Ptr;
   typedef boost::shared_ptr<const CheckBox> ConstPtr;
@@ -1792,6 +1830,8 @@ class CheckBox : public Button {
 
   virtual void set_background_color(ARGB color);
   virtual bool checked() const;
+  
+  void set_font(const Font& font);
  
   boost::signal<void (CheckBox&)> click;
 };
@@ -1800,7 +1840,7 @@ class RadioButtonImp;
 
 class RadioButton : public Button {
 public:
-	static std::string type() { return "canvasradiobuttonitem"; }
+	static std::string type() { return "radiobutton"; }
 
 	typedef boost::shared_ptr<RadioButton> Ptr;
 	typedef boost::shared_ptr<const RadioButton> ConstPtr;
@@ -1819,6 +1859,7 @@ public:
 
 	void Check();
 	void UnCheck();
+  void set_font(const Font& font);
 
 	boost::signal<void(RadioButton&)> click;
 };
@@ -1827,7 +1868,7 @@ class GroupBoxImp;
 
 class GroupBox : public Button {
 public:
-	static std::string type() { return "canvascomboboxitem"; }
+	static std::string type() { return "groupbox"; }
 
 	typedef boost::shared_ptr<GroupBox> Ptr;
 	typedef boost::shared_ptr<const GroupBox> ConstPtr;
@@ -1846,6 +1887,7 @@ public:
 
 	void Check();
 	void UnCheck();
+  void set_font(const Font& font);
 
 	boost::signal<void(GroupBox&)> click;
 };
@@ -1959,7 +2001,7 @@ class Scintilla : public Window {
   void ClearAll();
   void Undo();
   void Redo();
-  virtual bool has_overall_background() const { return true; }
+  virtual bool transparent() const { return true; }
 
  private:
   static std::string dummy_str_;
@@ -2146,6 +2188,7 @@ class Systems {
   virtual ui::Edit* CreateEdit();  
   virtual class Text* CreateText();
   virtual ui::Button* CreateButton();
+  virtual ui::CheckBox* CreateCheckBox();
   virtual ui::ScrollBar* CreateScrollBar(Orientation orientation = VERT);
   virtual ui::TreeView* CreateTreeView();
   virtual ui::ListView* CreateListView();
@@ -2235,7 +2278,8 @@ class WindowImp {
 
   virtual void dev_set_position(const ui::Rect& pos) = 0;  
   virtual ui::Rect dev_position() const = 0;
-  virtual ui::Rect dev_abs_position() const = 0;
+  virtual ui::Rect dev_absolute_position() const = 0;
+  virtual ui::Rect dev_absolute_system_position() const = 0;  
   virtual ui::Rect dev_desktop_position() const = 0;
   virtual ui::Dimension dev_dim() const = 0;
   virtual bool dev_check_position(const ui::Rect& pos) const = 0;
@@ -2250,7 +2294,7 @@ class WindowImp {
   virtual void DevHide() = 0;
   virtual void DevBringWindowToTop() = 0;
   virtual void DevInvalidate() = 0;
-  virtual void DevInvalidate(const Region& rgn) = 0;
+  virtual void DevInvalidate(const Region& rgn) = 0;  
   virtual void DevSetCapture() = 0;
   virtual void DevReleaseCapture() = 0;
   virtual void DevShowCursor() = 0;
@@ -2370,6 +2414,8 @@ class ComboBoxImp : public WindowImp {
   virtual void dev_set_item_index(int index) = 0;
   virtual int dev_item_index() const = 0;
   virtual std::string dev_text() const = 0;
+  virtual void dev_set_font(const Font& font) = 0;
+  virtual const ui::Font& dev_font() const = 0;
 };
 
 class ButtonImp : public WindowImp {
@@ -2384,6 +2430,8 @@ class ButtonImp : public WindowImp {
 	virtual void DevCheck() = 0;
 	virtual void DevUnCheck() = 0;
 	virtual bool dev_checked() const = 0;
+  virtual void dev_set_font(const Font& font) = 0;
+  virtual const ui::Font& dev_font() const = 0;
 };
 
 class CheckBoxImp : public ui::ButtonImp {
@@ -2403,6 +2451,8 @@ public:
 	virtual bool dev_checked() const = 0;
 	virtual void DevCheck() = 0;
 	virtual void DevUnCheck() = 0;
+  virtual void dev_set_font(const Font& font) = 0;
+  virtual const ui::Font& dev_font() const = 0;
 };
 
 class GroupBoxImp : public ui::ButtonImp {
@@ -2428,6 +2478,7 @@ class EditImp : public WindowImp {
   virtual void dev_set_text_color(ARGB color) = 0;
   virtual ARGB dev_text_color() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
+  virtual const ui::Font& dev_font() const = 0;
 };
 
 class ScintillaImp : public WindowImp {
@@ -2565,6 +2616,7 @@ class ImpFactory {
   virtual ui::ScintillaImp* CreateScintillaImp();
   virtual ui::RegionImp* CreateRegionImp();
   virtual ui::FontImp* CreateFontImp();
+  virtual ui::FontImp* CreateFontImp(int stockid);
   virtual ui::GraphicsImp* CreateGraphicsImp(bool debug);
   virtual ui::GraphicsImp* CreateGraphicsImp();
   virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr);

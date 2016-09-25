@@ -339,9 +339,9 @@ int LuaSystemMetrics::screensize(lua_State* L) {
 }
 
 //  LuaCenterShowStrategyBind
-const char* LuaCenterToScreenBind::meta = "psyscreencentermeta";
+const char* LuaFrameAlignerBind::meta = "psyframealignermeta";
 
-int LuaCenterToScreenBind::open(lua_State *L) {
+int LuaFrameAlignerBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},        
     {"sizetoscreen", sizetoscreen},
@@ -350,15 +350,23 @@ int LuaCenterToScreenBind::open(lua_State *L) {
   return LuaHelper::open(L, meta, methods,  gc);
 }
 
-int LuaCenterToScreenBind::create(lua_State* L) {  
-  ui::WindowCenterToScreen* show_strategy;      
-  show_strategy = new ui::WindowCenterToScreen();  
-  LuaHelper::new_shared_userdata<>(L, meta, show_strategy);
+int LuaFrameAlignerBind::create(lua_State* L) {  
+  ui::FrameAligner* show_strategy(0);      
+  ui::AlignStyle alignment(ui::ALCENTER);
+  int n = lua_gettop(L);  
+  if (n == 2) {
+    alignment = (ui::AlignStyle)(luaL_checkinteger(L, 2));
+  } else 
+  if (n != 1) {
+    luaL_error(L, "FrameAligner create. Wrong number of arguments.");
+  }  
+  show_strategy = new ui::FrameAligner(alignment); 
+  LuaHelper::new_shared_userdata<>(L, meta, show_strategy);     
   return 1;
 }
 
-int LuaCenterToScreenBind::gc(lua_State* L) {
-  return LuaHelper::delete_shared_userdata<ui::WindowCenterToScreen>(L, meta);  
+int LuaFrameAlignerBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::FrameAligner>(L, meta);  
 }
 
 // LuaFrameWnd+Bind
@@ -788,6 +796,21 @@ void LuaItem::OnSize(double w, double h) {
     ui::alert(e.what());
   }
 }
+
+bool LuaItem::transparent() const {
+  bool result(false);
+  LuaImport in(L, const_cast<LuaItem*>(this), locker(L));
+  try {
+    if (in.open("transparent")) {
+      in << pcall(1) >> result;
+    } else {
+      result = CanvasItem<ui::Window>::transparent();
+    }
+  } catch(std::exception& e) {
+    ui::alert(e.what());
+  }
+  return result;
+}
   
 template <class T>
 int LuaItemBind<T>::create(lua_State* L) {
@@ -805,11 +828,8 @@ int LuaItemBind<T>::create(lua_State* L) {
       }
     }    
   }
-  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));
-  ui::Configuration::instance().InitWindow(*item.get(), T::type());
-  if (!item->imp()) {
-    item->set_imp(ui::ImpFactory::instance().CreateWindowImp());    
-  }
+  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));  
+  ui::Configuration::instance().InitWindow(*item.get(), T::type());  
   LuaHelper::register_weakuserdata(L, item.get());
   if (group) {    
     group->Add(item);
@@ -848,16 +868,6 @@ int LuaItemBind<T>::align(lua_State* L) {
 }
 
 template <class T>
-int LuaItemBind<T>::setmargin(lua_State* L) {
-  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);  
-  window->set_margin(ui::BoxSpace(luaL_checknumber(L, 2),
-                                  luaL_checknumber(L, 3),
-                                  luaL_checknumber(L, 4),
-                                  luaL_checknumber(L, 5)));
-  return LuaHelper::chaining(L);
-}
-
-template <class T>
 int LuaItemBind<T>::setcursorposition(lua_State* L) {
   boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);  
   window->SetCursorPosition(ui::Point(luaL_checknumber(L, 2),
@@ -866,33 +876,33 @@ int LuaItemBind<T>::setcursorposition(lua_State* L) {
 }
 
 template <class T>
-int LuaItemBind<T>::margin(lua_State* L) {
-  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-  lua_pushnumber(L, window->margin().left());
-  lua_pushnumber(L, window->margin().top());
-  lua_pushnumber(L, window->margin().right());
-  lua_pushnumber(L, window->margin().bottom());
-  return 4;
-}
-
-template <class T>
 int LuaItemBind<T>::setpadding(lua_State* L) {
-  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-  window->set_padding(ui::BoxSpace(luaL_checknumber(L, 2),
-                                   luaL_checknumber(L, 3),
-                                   luaL_checknumber(L, 4),
-                                   luaL_checknumber(L, 5)));
+  boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+  boost::shared_ptr<ui::BoxSpace> space = LuaHelper::check_sptr<ui::BoxSpace>(L, 2, LuaBoxSpaceBind::meta);
+  item->set_padding(*space);    
   return LuaHelper::chaining(L);
 }
 
 template <class T>
 int LuaItemBind<T>::padding(lua_State* L) {
-  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-  lua_pushnumber(L, window->padding().left());
-  lua_pushnumber(L, window->padding().top());
-  lua_pushnumber(L, window->padding().right());
-  lua_pushnumber(L, window->padding().bottom());
-  return 4;
+  boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
+  LuaHelper::requirenew<LuaBoxSpaceBind>(L, "psycle.ui.boxspace", new ui::BoxSpace(item->padding()));
+  return 1;
+}
+
+template <class T>
+int LuaItemBind<T>::setmargin(lua_State* L) {
+  boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+  boost::shared_ptr<ui::BoxSpace> space = LuaHelper::check_sptr<ui::BoxSpace>(L, 2, LuaBoxSpaceBind::meta);
+  item->set_margin(*space);    
+  return LuaHelper::chaining(L);
+}
+
+template <class T>
+int LuaItemBind<T>::margin(lua_State* L) {
+  boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
+  LuaHelper::requirenew<LuaBoxSpaceBind>(L, "psycle.ui.boxspace", new ui::BoxSpace(item->margin()));
+  return 1;
 }
 
 template <class T>
@@ -909,7 +919,8 @@ template <class T>
 int LuaItemBind<T>::fls(lua_State* L) {
   const int n=lua_gettop(L);
   if (n==1) {
-    LuaHelper::bind(L, meta, &T::FLS);
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
+    item->FLS();        
   } else
   if (n==2) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
@@ -1361,17 +1372,17 @@ const char* LuaImageBind::meta = "psyimagebind";
 int LuaImageBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
-	{"reset", reset},
+	  {"reset", reset},
     {"load", load},
-	{"cut", cut},
-	{"save", save},
+	  {"cut", cut},
+	  {"save", save},
     {"settransparent", settransparent},
     {"size", size},
-	{"resize", resize},
-	{"rotate", rotate},
-	{"graphics", graphics},
-	{"setpixel", setpixel},
-	{"getpixel", getpixel},
+	  {"resize", resize},
+	  {"rotate", rotate},
+	  {"graphics", graphics},
+	  {"setpixel", setpixel},
+	  {"getpixel", getpixel},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -1604,6 +1615,64 @@ int LuaUiRectBind::gc(lua_State* L) {
 }
 
 int LuaUiRectBind::set(lua_State* L) {
+  return LuaHelper::chaining(L);
+}
+
+// BoxSpaceBind
+std::string LuaBoxSpaceBind::meta = "psyuiboxspacemeta";
+
+int LuaBoxSpaceBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"left", left},
+    {"top", top},
+    {"right", right},
+    {"bottom", bottom},    
+    {"set", set},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaBoxSpaceBind::create(lua_State* L) {
+  int n = lua_gettop(L);
+  if (n==1) {
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::BoxSpace());
+  } else
+  if (n==2) {
+    double space = luaL_checknumber(L, 2);
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::BoxSpace(space));
+  } else
+  if (n==5) {    
+    double top = luaL_checknumber(L, 2);
+    double right = luaL_checknumber(L, 3);
+    double bottom = luaL_checknumber(L, 4);
+    double left = luaL_checknumber(L, 5);    
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::BoxSpace(top, right, bottom, left));
+  } else {
+    luaL_error(L, "Wrong number of arguments");
+  }  
+  return 1;
+}
+
+int LuaBoxSpaceBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::BoxSpace>(L, meta);
+}
+
+int LuaBoxSpaceBind::set(lua_State* L) {
+  int n = lua_gettop(L);
+  boost::shared_ptr<ui::BoxSpace> box_space = LuaHelper::check_sptr<ui::BoxSpace>(L, 1, meta);
+  if (n==2) {
+    double space = luaL_checknumber(L, 2);
+    box_space->set(space);    
+  } else
+  if (n==5) {    
+    double top = luaL_checknumber(L, 2);
+    double right = luaL_checknumber(L, 3);
+    double bottom = luaL_checknumber(L, 4);
+    double left = luaL_checknumber(L, 5);    
+    box_space->set(top, right, bottom, left);
+  }
   return LuaHelper::chaining(L);
 }
 

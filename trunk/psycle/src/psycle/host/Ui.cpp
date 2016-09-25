@@ -252,8 +252,13 @@ void Commands::Invoke() {
 Font::Font() : imp_(ui::ImpFactory::instance().CreateFontImp()) {
 }
 
-Font::Font(const ui::FontInfo& font_info) : imp_(ui::ImpFactory::instance().CreateFontImp()) {
-  imp_->dev_set_info(font_info);
+Font::Font(const ui::FontInfo& font_info)  {
+  if (font_info.stock_id == -1) {
+    imp_.reset(ui::ImpFactory::instance().CreateFontImp());
+    imp_->dev_set_info(font_info);
+  } else {
+    imp_.reset(ui::ImpFactory::instance().CreateFontImp(font_info.stock_id));
+  }  
 }
 
 Font::Font(const Font& other) {    
@@ -608,7 +613,7 @@ void Window::unlock() const {
   psycle::host::mfc::WinLock::Instance().unlock();
 }
 
-Window* Window::root() {  
+Window* Window::root() {   
   if (is_root()) {
     return this;
   }
@@ -652,25 +657,34 @@ bool Window::IsInGroup(Window::WeakPtr group) const {
 }
 
 void Window::FLSEX() {  
-  if (visible() && root()) {    
-		ui::Rect fls_pos = overall_position(abs_position());
+  ui::Window* root_window = root();
+  if (root_window && visible() && imp()) {    
+		ui::Rect fls_pos = imp()->dev_absolute_system_position();
     std::auto_ptr<Area> tmp(new Area(fls_pos));		    
     if (fls_area_.get()) {    
       fls_area_->Combine(*tmp, RGN_OR);
-      root()->Invalidate(fls_area_->region());  
+      root_window->Invalidate(fls_area_->region());  
     } else {
-      root()->Invalidate(tmp->region());  
+      root_window->Invalidate(tmp->region());  
     }  
     fls_area_ = tmp;  
-  }  
+  }
 }
 
 void Window::FLS() {
-  if (visible() && root()) {    
-		ui::Rect fls_pos = overall_position(abs_position());
-    std::auto_ptr<Area> tmp(new Area(fls_pos));    
-    root()->Invalidate(tmp->region());
-    fls_area_ = tmp;
+  if (visible() && imp()) {                    
+    ui::Rect pos = imp()->dev_absolute_system_position();        
+    fls_area_.reset(new Area(pos));
+    Window* root_window = root();
+    if (root_window && root_window->IsSaving()) {
+      root_window->Invalidate(fls_area_->region());
+    } else {
+      ui::Window* non_transparent_window = FirstNonTransparentWindow();
+      assert(non_transparent_window->imp());
+      ui::Rect non_trans_pos = non_transparent_window->imp()->dev_absolute_system_position();
+      Area redraw_rgn(ui::Rect(pos.top_left() - non_trans_pos.top_left(), pos.dimension()));        
+      non_transparent_window->Invalidate(redraw_rgn.region());        
+    }
   }
 }
 
@@ -753,8 +767,8 @@ ui::Rect Window::position() const {
   return imp() ? imp_->dev_position() : Rect();
 }
 
-ui::Rect Window::abs_position() const {
-  return imp() ? Rect(imp_->dev_abs_position().top_left(), dim()) : Rect();
+ui::Rect Window::absolute_position() const {
+  return imp() ? Rect(imp_->dev_absolute_position().top_left(), dim()) : Rect();
 }
 
 ui::Rect Window::desktop_position() const {
@@ -773,19 +787,19 @@ void Window::UpdateAutoDimension() {
   ui::Dimension new_dimension = position().dimension();
   bool has_auto_dimension = auto_size_width() || auto_size_height();
   if (has_auto_dimension && imp_.get()) {    				
-	ui::Dimension auto_dimension = OnCalcAutoDimension();
+	  ui::Dimension auto_dimension = OnCalcAutoDimension();
     if (auto_size_width()) {
-		new_dimension.set_width(auto_dimension.width());
-	}
-	if (auto_size_height()) {
-		new_dimension.set_height(auto_dimension.height());
-	}	  
-	if (overall_position() != overall_position(ui::Rect(position().top_left(), new_dimension))) {
+		  new_dimension.set_width(auto_dimension.width());
+    }
+    if (auto_size_height()) {
+		  new_dimension.set_height(auto_dimension.height());      
+	  }  
+	  if (overall_position() != overall_position(ui::Rect(position().top_left(), new_dimension))) {
 	    imp_->dev_set_position(ui::Rect(position().top_left(), new_dimension));
-        OnSize(new_dimension); 	
+      OnSize(new_dimension); 	
 	    WorkChildPosition();	  
-	}
-	FLSEX();
+      FLSEX();    
+	  }	  
   }
 }
 
@@ -953,8 +967,8 @@ void Window::Hide() {
 }
 
 void Window::Invalidate() { 
-  if (imp_.get()) {
-    imp_->DevInvalidate();
+  if (imp_.get()) {    
+    imp_->DevInvalidate();    
   }
 }
 
@@ -1063,11 +1077,11 @@ void Window::DrawBackground(Graphics* g, Region& draw_region) {
   }  
 }
 
-bool Window::has_overall_background() const {
-  bool result = false;
+bool Window::transparent() const {
+  bool result = true;
   for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
-    if (!(*it).expired() && ((*it).lock()->has_overall_background())) {						  
-	   result = true;
+    if (!(*it).expired() && !((*it).lock()->transparent())) {						  
+	   result = false;
 	   break;
     }
   }
@@ -1298,7 +1312,7 @@ void Group::UpdateAlign() {
     if (root()) {     
        old_is_fls_prevented = root()->is_fls_prevented();      
        if (!old_is_fls_prevented) {
-        old_is_saving = dynamic_cast<Canvas*>(root())->IsSaving();
+        old_is_saving = root()->IsSaving();
         dynamic_cast<Canvas*>(root())->SetSave(true);
       }
     }         
@@ -1463,17 +1477,25 @@ void ScrollBox::ScrollTo(const ui::Point& top_left) {
 	}
 }
 
-void WindowCenterToScreen::set_position(Window& window) {    
+void FrameAligner::set_position(Window& window) {    
   ui::Dimension win_dim(
     (width_perc_ < 0)  ? window.dim().width()
                        : Systems::instance().metrics().screen_dimension().width() * width_perc_,
     (height_perc_ < 0) ? window.dim().height() 
                        : Systems::instance().metrics().screen_dimension().height() * height_perc_
   );
-  window.set_position(ui::Rect(    
-    ((Systems::instance().metrics().screen_dimension() - win_dim) / 2.0)
-    .as_point(),
-    win_dim));
+  ui::Point top_left;
+  switch (alignment_) {    
+    case ALRIGHT:      
+      top_left.set_xy(Systems::instance().metrics().screen_dimension().width() - win_dim.width(), (Systems::instance().metrics().screen_dimension().height() - win_dim.height()) /2);
+    break;    
+    case ALCENTER:
+      top_left = ((Systems::instance().metrics().screen_dimension() - win_dim) / 2.0).as_point();
+    break;
+    default:
+    ;    
+  }
+  window.set_position(ui::Rect(top_left, win_dim));
 }
 
 Frame::Frame() : Window(ui::ImpFactory::instance().CreateFrameImp()) {
@@ -1609,14 +1631,13 @@ NodeImp* Node::imp(NodeOwnerImp& owner) {
   return result;
 }
 
-
 void Node::AddNode(const Node::Ptr& node) {
   ui::Node::Ptr prev;
   if (children_.size() > 0) {
     prev = children_.back();
   }
   children_.push_back(node);
-  node->set_parent(shared_from_this());
+  node->set_parent(this);
   boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
   for ( ;imp_it != imps.end(); ++imp_it) {    
     imp_it->owner()->DevUpdate(node, prev);
@@ -1629,7 +1650,7 @@ void Node::insert(iterator it, const Node::Ptr& node) {
     insert_after = *(--iterator(it));
   }      
   children_.insert(it, node);
-  node->set_parent(shared_from_this());
+  node->set_parent(this);
   boost::ptr_list<NodeImp>::iterator imp_it = imps.begin();
   for ( ; imp_it != imps.end(); ++imp_it) {
     imp_it->owner()->DevUpdate(node, insert_after);
@@ -1872,6 +1893,27 @@ ComboBox::ComboBox() : Window(ui::ImpFactory::instance().CreateComboBoxImp()) {
 ComboBox::ComboBox(ComboBoxImp* imp) : Window(imp) {
 }
 
+void ComboBox::set_property(const ConfigurationProperty& configuration_property) {
+  if (configuration_property.name() == "color") {
+    // set_color(configuration_property.int_value());
+  } else
+  if (configuration_property.name() == "font") {
+    if (configuration_property.int_value() != -0) {
+      FontInfo info;
+      info.stock_id = configuration_property.int_value();
+      set_font(ui::Font(info));
+    } else {
+      set_font(ui::Font(configuration_property.font_info_value()));
+    }
+  }
+}
+
+void ComboBox::set_font(const Font& font) {
+  if (imp()) {
+    imp()->dev_set_font(font);
+  }  
+}
+
 void ComboBox::add_item(const std::string& item) {
   if (imp()) {
     imp()->dev_add_item(item);
@@ -1969,6 +2011,12 @@ Button::Button(ButtonImp* imp) : Window(imp) {
   set_auto_size(false, false);
 }
 
+void Button::set_font(const Font& font) {
+  if (imp()) {
+    imp()->dev_set_font(font);
+  }  
+}
+
 void Button::Check() {
 	if (imp()) {
 		imp()->DevCheck();
@@ -2015,6 +2063,12 @@ void CheckBox::set_background_color(ARGB color) {
   }
 }
 
+void CheckBox::set_font(const Font& font) {
+  if (imp()) {
+    imp()->dev_set_font(font);
+  }  
+}
+
 RadioButton::RadioButton() : Button(ui::ImpFactory::instance().CreateRadioButtonImp()) {
 	set_auto_size(false, false);
 }
@@ -2050,6 +2104,12 @@ void RadioButton::set_background_color(ARGB color) {
 	}
 }
 
+void RadioButton::set_font(const Font& font) {
+  if (imp()) {
+    imp()->dev_set_font(font);
+  }  
+}
+
 GroupBox::GroupBox() : Button(ui::ImpFactory::instance().CreateGroupBoxImp()) {
 	set_auto_size(false, false);
 }
@@ -2083,6 +2143,12 @@ void GroupBox::set_background_color(ARGB color) {
 	if (imp()) {
 		imp()->dev_set_background_color(color);
 	}
+}
+
+void GroupBox::set_font(const Font& font) {
+  if (imp()) {
+    imp()->dev_set_font(font);
+  }  
 }
 
 std::string Scintilla::dummy_str_ = "";
@@ -2474,6 +2540,11 @@ void LuaElementFinder::ParseElements(lua_State* L) {
                 ConfigurationProperty configuartion_property(name, value);
                 element.push_back(configuartion_property);        
               } else 
+              if (std::string(type_name) == "stock") {
+                int value = lua_tointeger(L, -1);                
+                ConfigurationProperty configuartion_property(name, value);
+                element.push_back(configuartion_property);        
+              } else
               if (std::string(type_name) == "font") {
                 ui::FontInfo font_info;
                 lua_getfield(L, -1, "size");
@@ -2486,7 +2557,7 @@ void LuaElementFinder::ParseElements(lua_State* L) {
                 if (!lua_isnil(L, -1)) {
                   const char* name = lua_tostring(L, -1);
                   font_info.name = name;
-                }
+                }                
                 lua_pop(L, 1);
                 ConfigurationProperty configuartion_property(name, font_info);
                 element.push_back(configuartion_property);
@@ -2527,7 +2598,7 @@ lua_State*  LuaElementFinder::load_script(const std::string& dllpath) {
   lua_setfield(L, -2, "path");
 
   std::string path = dllpath;
-  /// This is needed to prevent loading problems
+  /// This prevents loading problems
   std::replace(path.begin(), path.end(), '\\', '/');
   int status = luaL_loadfile(L, path.c_str());
   if (status) {
@@ -2539,10 +2610,8 @@ lua_State*  LuaElementFinder::load_script(const std::string& dllpath) {
   return L;
 }
 
-
-
 void Configuration::InitWindow(ui::Window& element, const std::string& name) {
-  ElementFinder::Properties properties = finder_->FindElement("text");
+  ElementFinder::Properties properties = finder_->FindElement(name);
   ElementFinder::Properties::iterator it = properties.begin();
   for ( ; it != properties.end(); ++it) {
     element.set_property(*it); 
@@ -2627,13 +2696,15 @@ ui::PopupFrame* Systems::CreatePopupFrame() {
 }
 
 ui::ComboBox* Systems::CreateComboBox() {
-  assert(concrete_factory_.get());
-  return concrete_factory_->CreateComboBox(); 
+  ComboBox* result = new ComboBox();
+  Configuration::instance().InitWindow(*result, "combobox");  
+  return result;
 }
 
 ui::Edit* Systems::CreateEdit() {
-  assert(concrete_factory_.get());
-  return concrete_factory_->CreateEdit(); 
+  Edit* result = new Edit();
+  Configuration::instance().InitWindow(*result, "edit");  
+  return result;
 }
 
 ui::Text* Systems::CreateText() {
@@ -2643,8 +2714,15 @@ ui::Text* Systems::CreateText() {
 }
 
 ui::Button* Systems::CreateButton() {
-  assert(concrete_factory_.get());
-  return concrete_factory_->CreateButton(); 
+  Button* result = new Button();
+  Configuration::instance().InitWindow(*result, "button");  
+  return result;  
+}
+
+ui::CheckBox* Systems::CreateCheckBox() {
+  CheckBox* result = new CheckBox();
+  Configuration::instance().InitWindow(*result, "checkbox");  
+  return result;  
 }
 
 ui::ScrollBar* Systems::CreateScrollBar(Orientation orientation) {  
@@ -2817,6 +2895,11 @@ ui::RegionImp* ImpFactory::CreateRegionImp() {
 ui::FontImp* ImpFactory::CreateFontImp() {  
   assert(concrete_factory_.get());
   return concrete_factory_->CreateFontImp();
+}
+
+ui::FontImp* ImpFactory::CreateFontImp(int stock) {  
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFontImp(stock);
 }
 
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp() {

@@ -165,7 +165,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
       mouse_enter_ = true;      
       CRect rc;
       GetWindowRect(&rc);
-      MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(this->dev_abs_position().top()), 1, pMsg->wParam);
+      MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(this->dev_absolute_position().top()), 1, pMsg->wParam);
       return WorkEvent(ev, &Window::OnMouseOut, window(), pMsg);    
 		}
   }  else
@@ -173,48 +173,48 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(dev_abs_position().top()), 1, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
 	} else
   if (pMsg->message == WM_LBUTTONDBLCLK) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(dev_abs_position().top()), 1, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
   if (pMsg->message == WM_LBUTTONUP) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(dev_abs_position().top()), 1, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else
   if (pMsg->message == WM_RBUTTONDOWN) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(dev_abs_position().top()), 2, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
   } else    
   if (pMsg->message == WM_RBUTTONDBLCLK) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(dev_abs_position().top()), 2, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
   if (pMsg->message == WM_RBUTTONUP) {
     CPoint pt(pMsg->pt);        
     CRect rc;
     GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(dev_abs_position().top()), 2, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else  
 	if (pMsg->message == WM_MOUSEHOVER) {
 
 	} else
-  if (pMsg->message == WM_MOUSEMOVE) {
+  if (pMsg->message == WM_MOUSEMOVE) {    
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(tme);
     tme.hwndTrack = m_hWnd;
@@ -224,7 +224,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     CPoint pt(pMsg->pt);
     CRect rc;
     GetWindowRect(&rc);    
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_abs_position().left()), pt.y - rc.top + static_cast<int>(dev_abs_position().top()), 1, pMsg->wParam);
+    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
     if (mouse_enter_) {
       mouse_enter_ = false;
       if (window()) {
@@ -312,13 +312,25 @@ ui::Rect WindowTemplateImp<T, I>::dev_position() const {
 }
 
 template<class T, class I>
-ui::Rect WindowTemplateImp<T, I>::dev_abs_position() const {
+ui::Rect WindowTemplateImp<T, I>::dev_absolute_position() const {
   CRect rc;
 	GetWindowRect(&rc);  
 	if (window() && window()->root()) {
     CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
-		::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);		 
+		::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);    
 		return MapPosToBoxModel(rc);
+	}
+	return ui::Rect::zero();
+}
+
+template<class T, class I>
+ui::Rect WindowTemplateImp<T, I>::dev_absolute_system_position() const {
+  CRect rc;
+	GetWindowRect(&rc);  
+	if (window() && window()->root()) {
+    CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
+		::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);    
+		return ui::Rect(ui::Point(rc.left, rc.top), ui::Point(rc.right, rc.bottom));
 	}
 	return ui::Rect::zero();
 }
@@ -373,52 +385,6 @@ void WindowTemplateImp<T, I>::dev_set_parent(Window* parent) {
     SetParent(DummyWindow::dummy());
   }
 }
-/*
-template<class T, class I>
-void WindowTemplateImp<T, I>::OnNcPaint() {
-	if (window() && !window()->ornament().expired()) {		
-		ui::BoxSpace padding = window()->padding();
-		CRect rectWindow;
-		GetWindowRect(rectWindow);
-		ScreenToClient(rectWindow);
-		rectWindow.right = rectWindow.right + static_cast<int>(padding.width());
-		rectWindow.bottom = rectWindow.bottom + static_cast<int>(padding.height());
-		CRgn rgn;
-		rgn.CreateRectRgn(rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom); // 0, 0, 0, 0);		
-		if (padding.left() != 0) {
-			int fordebugonly(0);
-		}
-		if (window()->debug_text() == "txt") {
-			int fordebugonly(0);
-		}
-		ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
-		CDC *pDC = GetWindowDC();
-		ui::Graphics g(pDC);
-		// Just fill everything blue
-		//CBrush br(0x00FF0000);
-		//rectWindow.right = rectWindow.right + padding.left() + padding.right();
-		//rectWindow.bottom = rectWindow.bottom + padding.top() + padding.bottom();
-		// pDC->FillRect(rectWindow, &br);
-		window()->DrawBackground(&g, draw_rgn);
-		g.Dispose();
-		rgn.DeleteObject();
-	}	
-}*/
-
-template<class T, class I>
-BOOL WindowTemplateImp<T, I>::OnEraseBkgnd(CDC * pDC) {
-  if (window()) {		
-	CRect rect;
-	GetWindowRect(rect);					
-    ::MapWindowPoints(HWND_DESKTOP, m_hWnd, (LPPOINT)&rect, 2);		
-	ui::Region draw_rgn(ui::Rect(ui::Point(rect.left, rect.top),
-						ui::Point(rect.right, rect.bottom)));
-	ui::Graphics g(pDC);		
-	window()->DrawBackground(&g, draw_rgn);		
-  }
-  return TRUE;
-}
-
 
 template<class T, class I>
 void WindowTemplateImp<T, I>::OnPaint() {	
@@ -434,7 +400,8 @@ void WindowTemplateImp<T, I>::OnPaint() {
 
   if (!is_double_buffered_) {    
 	  ui::Graphics g(&dc);
-	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));		
+	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));    
+    window()->DrawBackground(&g, draw_rgn);    
 	  g.Translate(padding_.left() + border_space_.left(), padding_.top() + border_space_.top());
 	  OnDevDraw(&g, draw_rgn);
 	  g.Dispose();
@@ -453,6 +420,7 @@ void WindowTemplateImp<T, I>::OnPaint() {
 	CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);
 	ui::Graphics g(&bufDC);
 	ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
+  window()->DrawBackground(&g, draw_rgn);  
 	ui::Rect bounds = draw_rgn.bounds();
 	OnDevDraw(&g, draw_rgn);
 	g.Dispose();
@@ -664,10 +632,24 @@ void ButtonImp::OnClick() {
   OnDevClick();
 }
 
+void ButtonImp::dev_set_font(const Font& font) {
+   font_ = font;
+   mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+   assert(imp);   
+   ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
+}
+
 BEGIN_MESSAGE_MAP(CheckBoxImp, CButton)  
 	ON_WM_PAINT()  
   ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
 END_MESSAGE_MAP()
+
+void CheckBoxImp::dev_set_font(const Font& font) {
+   font_ = font;
+   mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+   assert(imp);   
+   ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
+}
 
 void CheckBoxImp::OnClick() {
   OnDevClick();
@@ -678,6 +660,13 @@ BEGIN_MESSAGE_MAP(RadioButtonImp, CButton)
 	ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
 END_MESSAGE_MAP()
 
+void RadioButtonImp::dev_set_font(const Font& font) {
+   font_ = font;
+   mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+   assert(imp);   
+   ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
+}
+
 void RadioButtonImp::OnClick() {
 	OnDevClick();
 }
@@ -687,6 +676,13 @@ BEGIN_MESSAGE_MAP(GroupBoxImp, CButton)
 	ON_CONTROL_REFLECT(BN_CLICKED, OnClick)
 END_MESSAGE_MAP()
 
+void GroupBoxImp::dev_set_font(const Font& font) {
+   font_ = font;
+   mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+   assert(imp);   
+   ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
+}
+
 void GroupBoxImp::OnClick() {
 	OnDevClick();
 }
@@ -695,6 +691,13 @@ BEGIN_MESSAGE_MAP(ComboBoxImp, CComboBox)
 	ON_WM_PAINT()
   ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelect)
 END_MESSAGE_MAP()
+
+void ComboBoxImp::dev_set_font(const Font& font) {
+   font_ = font;
+   mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+   assert(imp);   
+   ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
+}
 
 BOOL ComboBoxImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
   if (!::IsWindow(m_hWnd)) {
@@ -787,8 +790,8 @@ void TreeViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Nod
   new_imp->set_node(node);
   new_imp->set_owner(this);
   node->changed.connect(boost::bind(&TreeViewImp::OnNodeChanged, this, _1));
-  if (!node->parent().expired()) {
-    boost::shared_ptr<ui::Node> parent_node = node->parent().lock();
+  if (node->parent()) {
+    ui::Node* parent_node = node->parent();
     TreeNodeImp* parent_imp = dynamic_cast<TreeNodeImp*>(parent_node->imp(*this));
     if (parent_imp) {
       TreeNodeImp* prev_imp = dynamic_cast<TreeNodeImp*>(prev_node_imp);
@@ -1070,8 +1073,8 @@ ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared
   new_imp->set_node(node);
   new_imp->set_owner(this);  
   node->changed.connect(boost::bind(&ListViewImp::OnNodeChanged, this, _1));
-  if (!node->parent().expired()) {
-    boost::shared_ptr<ui::Node> parent_node = node->parent().lock();   
+  if (node->parent()) {
+    ui::Node* parent_node = node->parent();
     boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
     for ( ; it != parent_node->imps.end(); ++it) {
       ListNodeImp* parent_imp = dynamic_cast<ListNodeImp*>(parent_node->imp(*this));
@@ -1227,7 +1230,9 @@ BOOL ListViewImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
   return FALSE;
 }
 
-void ListViewImp::DevClear() { DeleteAllItems(); }
+void ListViewImp::DevClear() {   
+  DeleteAllItems();
+}
 
 void ListViewImp::OnCustomDrawList(NMHDR *pNMHDR, LRESULT *pResult) {
    NMLVCUSTOMDRAW* pLVCD = reinterpret_cast<NMLVCUSTOMDRAW*>(pNMHDR);   

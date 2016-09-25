@@ -1,4 +1,4 @@
--- psycle plugineditor (c) 2015 by psycledelics
+-- psycle plugineditor (c) 2015, 2016 by psycledelics
 -- File: maincanvas.lua
 -- copyright 2015 members of the psycle project http://psycle.sourceforge.net
 -- This source is free software ; you can redistribute it and/or modify it under
@@ -7,53 +7,48 @@
 
 -- require('mobdebug').start()
 -- local serpent = require("psycle.serpent")
-local scintilla = require("psycle.ui.canvas.scintilla")
-local lexer = require("psycle.ui.canvas.lexer")
-local fileopen = require("psycle.ui.fileopen")
-local filesave = require("psycle.ui.filesave")
-local settings = require("settings")
+
+local machine = require("psycle.machine")
+local machines = require("psycle.machines")
+local catcher = require("psycle.plugincatcher")
+
+local cfg = require("psycle.config"):new("PatternVisual")
+local signal = require("psycle.signal")
+local run = require("psycle.run")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
-local group = require("psycle.ui.canvas.group")
-local canvas = require("psycle.ui.canvas")
-local toolbar = require("psycle.ui.canvas.toolbar")
-local toolicon = require("psycle.ui.canvas.toolicon")
-local tabgroup = require("psycle.ui.canvas.tabgroup")
-local splitter = require("psycle.ui.canvas.splitter")
-local search = require("search")
-local pluginexplorer = require("pluginexplorer")
-local fileexplorer = require("fileexplorer")
-local callstack = require("callstack")
+local boxspace = require("psycle.ui.boxspace")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local image = require("psycle.ui.image")
-local signal = require("psycle.signal")
 local item = require("psycle.ui.canvas.item")
-local catcher = require("psycle.plugincatcher")
-local serpent = require("psycle.serpent")
-local pluginselector = require("pluginselector")
-local filehelper = require("psycle.file")
-local fileobserver = require("psycle.fileobserver")
-local templateparser = require("templateparser")
-local cfg = require("psycle.config"):new("PatternVisual")
-local project = require("project")
-local combobox = require("psycle.ui.canvas.combobox")
-local machine = require("psycle.machine")
-local machines = require("psycle.machines")
-local modulepalette = require("modulepalette")
-local moduledesigner = require("moduledesigner")
-local objectinspector = require("objectinspector")
+local group = require("psycle.ui.canvas.group")
+local canvas = require("psycle.ui.canvas")
 local text = require("psycle.ui.canvas.text")
-local node = require("psycle.node")
-local pianokeymap = require("psycle.ui.canvas.pianokeymap")
-local pianokeys = require("psycle.ui.canvas.pianokeys")
-local maincanvas = canvas:new()
-local item = require("psycle.ui.canvas.item")
-local point = require("psycle.ui.point")
-local listview = require("psycle.ui.canvas.listview")
-local combobox = require("psycle.ui.canvas.combobox")
 local button = require("psycle.ui.canvas.button")
-local run = require("psycle.run")
+local splitter = require("psycle.ui.canvas.splitter")
+local combobox = require("psycle.ui.canvas.combobox")
+local scintilla = require("psycle.ui.canvas.scintilla")
+local lexer = require("psycle.ui.canvas.lexer")
+
+local filehelper = require("psycle.file")
+-- local fileobserver = require("psycle.fileobserver")
+local fileopen = require("psycle.ui.fileopen")
+local filesave = require("psycle.ui.filesave")
+local fileexplorer = require("fileexplorer")
+
+local toolicon = require("psycle.ui.canvas.toolicon")
+local toolbar = require("psycle.ui.canvas.toolbar")
+local tabgroup = require("psycle.ui.canvas.tabgroup")
+
+local settings = require("settings")
+local project = require("project")
+local search = require("search")
+local callstack = require("callstack")
+local pluginselector = require("pluginselector")
+local templateparser = require("templateparser")
+
+local maincanvas = canvas:new()
 
 function maincanvas:new()
   local c = canvas:new()  
@@ -64,9 +59,9 @@ function maincanvas:new()
 end
 
 function maincanvas:init()  
-  self.fileobservers = {}
-  self.advancedview = false
-  self:invalidatedirect()   
+  self.machines = machines:new()
+  -- self.fileobservers = {}  
+  self:invalidatedirect()     
   self.togglecanvas = signal:new() 
   self:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   self:setupfiledialogs()
@@ -77,13 +72,7 @@ function maincanvas:init()
   splitter:new(self, splitter.HORZ)  
   self.fileexplorer = self:createfileexplorer()
   splitter:new(self, splitter.VERT)
-  self:createpagegroup()    
-  if self.advancedview then
-    self.objectinspector = objectinspector:new(self)
-	                                      :setalign(item.ALRIGHT)
-	                                      :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
-    splitter:new(self, splitter.VERT):setalign(item.ALRIGHT)  
-  end                     
+  self:createpagegroup()  
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -238,7 +227,7 @@ function maincanvas:createpage()
     end
   end    
   self:setlexer(page)    
-  page:setmargin(2, 0, 0, 0)
+  page:setmargin(boxspace:new(2, 0, 0, 0))
   return page
 end
 
@@ -270,32 +259,9 @@ function maincanvas:openfromfile(fname, line)
     page:loadfile(fname)    
     local sep = "\\"  
     local dir = fname:match("(.*"..sep..")")    
-    self:addfiletowatcher(dir)	
+    --self:addfiletowatcher(dir)	
     local name = fname:match("([^\\]+)$")           
-    if self.advancedview then
-      local modulepagegroup = tabgroup:new():setautosize(false, false):disableclosebutton()
-      modulepagegroup.tabbar:setalign(item.ALBOTTOM)
-      modulepagegroup:addpage(page, "Source")
-      local md = moduledesigner:new():setautosize(false, false)
-      self.modulepalette:setdesigner(md)
-      md:setobjectinspector(self.objectinspector)
-      modulepagegroup:addpage(md, "Designer")    
-      function modulepagegroup:loadfile(name)
-         page:loadfile(fname)
-      end
-      function modulepagegroup:savefile(name) page:savefile(fname) end
-      function modulepagegroup:filename() return page:filename() end
-      function modulepagegroup:hasfile() return page:hasfile() end
-      function modulepagegroup:gotoline() return page:gotoline(line) end
-      function modulepagegroup:column() return page:column() end
-      function modulepagegroup:line() return page:line() end
-      function modulepagegroup:ovrtype() return page:ovrtype() end
-      function modulepagegroup:modified() return page:modified() end
-      
-      self.pages:addpage(modulepagegroup, name)     
-    else
-      self.pages:addpage(page, name)     
-    end    
+    self.pages:addpage(page, name)         
   end  
   page:gotoline(line - 1)    
 end
@@ -303,9 +269,7 @@ end
 function maincanvas:setcallstack(trace)
   for i=1, #trace do    
     self.callstack:addline(trace[i])
-  end 
-  --self.callstack:autosize(3)
-  --self.callstack:setdepth(1)  
+  end  
 end
 
 function maincanvas:createnewpage()
@@ -323,16 +287,16 @@ function maincanvas:savepage()
 	  fname = page:filename()    
 	  local sep = "\\"  
       local dir = fname:match("(.*"..sep..")")    
-      local fileobserver = self:findfileobserverdir(dir)
-	  if fileobserver then
-	    fileobserver:stopwatching()
-	  end
+--      local fileobserver = self:findfileobserverdir(dir)
+--	  if fileobserver then
+--	    fileobserver:stopwatching()
+--	  end
       page:savefile(fname)
       fname = fname:match("([^\\]+)$")
       self.pages:setlabel(page, fname)
-	  if fileobserver then
-	    fileobserver:startwatching()
-	  end
+--	  if fileobserver then
+--	    fileobserver:startwatching()
+--	  end
     elseif self.filesaveas:show() then      
       fname = self.filesaveas:filename()          
       page:savefile(fname)
@@ -342,42 +306,34 @@ function maincanvas:savepage()
   end
 end
 
-function maincanvas:playplugin()    
-  --self:invalidate()
---[[
-  self.pages:activepage():definemarker(1, 31, 0x0000FF, 0x0000FF)
-  self.pages:activepage():addmarker(5, 1)
-  self.callstack:addline()
+function maincanvas:playplugin()  
   local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
-    machine = machine:new(pluginindex)
+     machine = machine:new(pluginindex)
      if machine then
        self:savepage()
-       machine:reload()    
+       machine:reload()    	   
+	   self.playicon:seton(true)	   
      end
   else
-    self:savepage()    
+    --self:savepage()    
     if  psycle.proxy.project:plugininfo() then
       local fname = psycle.proxy.project:plugininfo():dllname():match("([^\\]+)$"):sub(1, -5)    
-      machine = machine:new(fname)
-      local machines = machines:new()
-      local pluginindex = machines:insert(machine)    
-      psycle.proxy.project:setpluginindex(pluginindex)
+      machine = machine:new(fname)      
+      local pluginindex = self.machines:insert(machine)    
+      psycle.proxy.project:setpluginindex(pluginindex)	  
       self:fillinstancecombobox()
       self:setpluginindex(pluginindex)
+	  self.playicon:seton(true)	  
     end
   end  
-  ]]
 end
 
 function maincanvas:inittoolbar()  
-  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(5, 5, 5, 5)    
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(boxspace:new(5))
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)  
-  self:initfiletoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)
-  self:initplaytoolbar():setalign(item.ALLEFT)--:setmargin(4, 4, 4, 0)  
-  if self.advancedview then
-    self.modulepalette = modulepalette:new(self.tg):setalign(item.ALCLIENT)
-  end
+  self:initfiletoolbar():setalign(item.ALLEFT)
+  self:initplaytoolbar():setalign(item.ALLEFT):setmargin(boxspace:new(0, 0, 0, 20))
   self:initstatus()
 end
 
@@ -389,7 +345,7 @@ function maincanvas:initstatus()
 								 :setposition(rect:new(point:new(0, 0), dimension:new(150, 0)))
 								 :setalign(item.ALLEFT)
 								 :setverticalalignment(item.ALCENTER)
-								 :setmargin(0, 0, 0, 5)
+								 :setmargin(boxspace:new(0, 0, 0, 5))
 								 :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   self.modifiedstatus = text:new(g)
                             :settext("")
@@ -397,42 +353,42 @@ function maincanvas:initstatus()
 							:setposition(rect:new(point:new(0, 0), dimension:new(100, 0)))
 							:setalign(item.ALLEFT)
 							:setverticalalignment(item.ALCENTER)
-							:setmargin(0, 5, 0, 0)
+							:setmargin(boxspace:new(0, 5, 0, 0))
 							:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   text:new(g)
       :settext("LINE")
 	  :setautosize(true, false)
 	  :setalign(item.ALLEFT)
 	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(0, 5, 0, 0)
+	  :setmargin(boxspace:new(0, 5, 0, 0))
   self.linestatus = text:new(g)
                         :settext("1")
 						:setautosize(false, false)
 						:setposition(rect:new(point:new(0, 0), dimension:new(50, 0)))
 						:setalign(item.ALLEFT)
 						:setverticalalignment(item.ALCENTER)
-						:setmargin(0, 5, 0, 0)
+						:setmargin(boxspace:new(0, 5, 0, 0))
 						:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   text:new(g)
       :settext("COL")
 	  :setautosize(true, false)
 	  :setalign(item.ALLEFT)
 	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(0, 5, 0, 0)
+	  :setmargin(boxspace:new(0, 5, 0, 0))
   self.colstatus = text:new(g)
                        :settext("1")
 					   :setautosize(false, false)
 					   :setposition(rect:new(point:new(0, 0), dimension:new(50, 0)))
 					   :setalign(item.ALLEFT)
 					   :setverticalalignment(item.ALCENTER)
-					   :setmargin(0, 5, 0, 0)
+					   :setmargin(boxspace:new(0, 5, 0, 0))
 					   :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
   text:new(g)
       :settext("INSERT")
 	  :setautosize(true, false)
 	  :setalign(item.ALLEFT)
 	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(0, 5, 0, 0)
+	  :setmargin(boxspace:new(0, 5, 0, 0))
   self.insertstatus = text:new(g)
                           :settext("ON")
 						  :setautosize(false, false)
@@ -446,12 +402,14 @@ function maincanvas:setwindowiconin()
   self.windowtoolbar.img = image:new()
                                 :load(settings.picdir.."arrow_in.png")
                                 :settransparent(0xFFFFFF)
+  self.windowtoolbar:seton(false)
 end
 
 function maincanvas:setwindowiconout()
    self.windowtoolbar.img = image:new()
                                  :load(settings.picdir.."arrow_out.png")
                                  :settransparent(0xFFFFFF)
+   self.windowtoolbar:seton(false)
 end
 
 function maincanvas:initwindowtoolbar()  
@@ -498,7 +456,7 @@ function maincanvas:setpluginindex(pluginindex)
   self.cbx:setitemindex(cbxindex)  
 end
 
-function maincanvas:createinstanceselect(parent)
+function maincanvas:createinstanceselect(parent)  
   self.cbx = combobox:new(parent)
                      :setautosize(false, false)
                      :setposition(rect:new(point:new(0, 0), dimension:new(200, 200)))
@@ -519,7 +477,7 @@ end
 function maincanvas:initfiletoolbar()  
   local t = toolbar:new(self.tg)
   local inew = toolicon:new(t, settings.picdir.."new.png", 0xFFFFFF)
-  local iopen = toolicon:new(t, settings.picdir.."open.png", 0xFFFFFF)
+  local iopen = toolicon:new(t, settings.picdir.."open.png", 0xFFFFFF)  
   local isave = toolicon:new(t, settings.picdir.."save.png", 0xFFFFFF)  
   local iundo = toolicon:new(t, settings.picdir.."undo.png", 0xFFFFFF)
   local iredo = toolicon:new(t, settings.picdir.."redo.png", 0xFFFFFF)  
@@ -536,9 +494,15 @@ end
 
 function maincanvas:initplaytoolbar()  
   local t = toolbar:new(self.tg)
-  local istart = toolicon:new(t, settings.picdir.."play.png", 0xFFFFFF)  
+  self.playicon = toolicon:new(t, settings.picdir.."poweroff.png", 0xFFFFFF)  
+  self.playicon.is_toggle = true
+  local on = image:new():load(settings.picdir.."poweron.png")
+  on:settransparent(0xFFFFFF)
+  self.playicon:settoggleimage(on)    
   local that = self
-  function istart:onclick() that:playplugin() end
+  function self.playicon:onclick()
+    that:playplugin()
+  end
   self:createinstanceselect(t)
   return t
 end
@@ -744,11 +708,23 @@ function maincanvas:onidle()
     end    
     if self.modifiedstatus:text() ~= modified then
        self.modifiedstatus:settext(modified)
-    end    
-  end 
+    end
+  end
+  self:updatepowericon()
+end
+
+function maincanvas:updatepowericon()
+  if self.cbxtopluginindex ~= nil then    
+    local isselectedmachinemute = self.machines:muted(self.cbxtopluginindex[self.cbx:itemindex()])	
+    if self.playicon:on() == isselectedmachinemute then      
+	  self.playicon:toggle()
+    end
+  end  
 end
 
 function maincanvas:onsearchhide()
+  self.search:hide()
+  self:updatealign()
   if self.pages:activepage() then
     self.pages:activepage():setfocus()
   end
@@ -772,75 +748,75 @@ function maincanvas:redo()
   end
 end
 
-function maincanvas:findfileobserverdir(dir)
-  local result = nil
-  for i=1, #self.fileobservers do
-    if self.fileobservers[i]:directory() == dir then
-	  result = self.fileobservers[i]
-	  break
-	end  
-  end  
-  return result
-end
+--function maincanvas:findfileobserverdir(dir)
+--  local result = nil
+--  for i=1, #self.fileobservers do
+--    if self.fileobservers[i]:directory() == dir then
+--	  result = self.fileobservers[i]
+--	  break
+--	end  
+--  end  
+--  return result
+--end
 
-function maincanvas:addfiletowatcher(dir)  
-  if not self:findfileobserverdir(dir) then
-    local fileobserver = fileobserver:new()
-	fileobserver:setdirectory(dir)
-    self.fileobservers[#self.fileobservers + 1] = fileobserver
-	local that = self
-	function fileobserver:oncreatefile(path)	
-	end	
-	function fileobserver:onchangefile(path)
-      local pages = that.pages.children:items()
-	  for i=1, #pages do 
-	    if pages[i]:filename() == path then        	 
-	      if psycle.confirm("File "..path.." outside changed. Do you want to reload ?") then
-	        that:openfromfile(path)
-			break;
-	      end
-	    end	    
-      end    
-    end  
-    function fileobserver:ondeletefile(path)
-	  local pages = that.pages.children:items()     
-      for i=1, #pages do 	  
-	    if pages[i]:filename() == path then        	 
-	      if not psycle.confirm('The file "'..path..'" '.."doesn't exist anymore.\nKeep this file in editor?") then
-             that.pages:removepage(pages[i])
-			 local sep = "\\"  
-             local filedir = path:match("(.*"..sep..")")    
-			 that:removefilewatcher(filedir)
-             break;
-	      end
-	    end
-	  end
-    end
-	fileobserver:startwatching()		
-  end    
-end
+-- function maincanvas:addfiletowatcher(dir)  
+--  if not self:findfileobserverdir(dir) then
+--    local fileobserver = fileobserver:new()
+--	fileobserver:setdirectory(dir)
+--  self.fileobservers[#self.fileobservers + 1] = fileobserver
+--	local that = self
+--	function fileobserver:oncreatefile(path)	
+--	end	
+--	function fileobserver:onchangefile(path)
+--    local pages = that.pages.children:items()
+--    for i=1, #pages do 
+--	    if pages[i]:filename() == path then        	 
+--	      if psycle.confirm("File "..path.." outside changed. Do you want to reload ?") then
+--	        that:openfromfile(path)
+--			break;
+--	      end
+--	    end	    
+--      end    
+--  end  
+--  function fileobserver:ondeletefile(path)
+--	  local pages = that.pages.children:items()     
+--    for i=1, #pages do 	  
+--	    if pages[i]:filename() == path then        	 
+--	      if not psycle.confirm('The file "'..path..'" '.."doesn't exist anymore.\nKeep this file in editor?") then
+--           that.pages:removepage(pages[i])
+--			 local sep = "\\"  
+--           local filedir = path:match("(.*"..sep..")")    
+--			 that:removefilewatcher(filedir)
+--           break;
+--	      end
+--	    end
+--	  end
+--  end
+--	fileobserver:startwatching()		
+-- end    
+--end
 
-function maincanvas:removefilewatcher(dir)    
-  local found = false
-  for i=1, #self.pages do
-    local fname = self.pages[i]:fname()
-    local sep = "\\"  
-    local filedir = fname:match("(.*"..sep..")")    	
-	if filedir == dir then
-	  found = true
-	  break
-	end
-  end
-  if not found then
-	for i=1, #self.fileobservers do
-      if self.fileobservers[i]:directory() == dir then
-	    self.fileobservers[i]:stopwatching()
-	    table.remove(self.fileobservers, i)
-		self.fileexplorer:setpath(dir)
-	    break	    
-      end  	  
-	end
-  end    
-end
+--function maincanvas:removefilewatcher(dir)    
+--  local found = false
+--  for i=1, #self.pages do
+--    local fname = self.pages[i]:fname()
+--    local sep = "\\"  
+--    local filedir = fname:match("(.*"..sep..")")    	
+--	if filedir == dir then
+--	  found = true
+--	  break
+--	end
+--  end
+-- if not found then
+--	for i=1, #self.fileobservers do
+--    if self.fileobservers[i]:directory() == dir then
+--	    self.fileobservers[i]:stopwatching()
+--	    table.remove(self.fileobservers, i)
+--		self.fileexplorer:setpath(dir)
+--	    break	    
+--    end  	  
+--	end
+--  end    
+--end
 
 return maincanvas
