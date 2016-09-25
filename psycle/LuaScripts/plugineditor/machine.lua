@@ -14,7 +14,7 @@ local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local maincanvas = require("maincanvas")
 local frame = require("psycle.ui.canvas.frame")
-local centertoscreen = require("psycle.ui.canvas.centertoscreen")
+local framealigner = require("psycle.ui.canvas.framealigner")
 local sysmetrics = require("psycle.ui.systemmetrics")
 local menubar = require("psycle.ui.menubar")
 local mainmenu = require("mainmenu")
@@ -49,6 +49,14 @@ function machine:init(samplerate)
    self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)   
    self:setcanvas(self.maincanvas)
    self:initmenu();   
+end
+
+function machine:editmachineindex()
+  local result = -1
+  if self.project and self.project:plugininfo() then          
+    result = self.project:pluginindex()
+  end
+  return result;
 end
 
 function machine:createframe()  
@@ -93,12 +101,12 @@ function machine:openinframe()
   self.maincanvas:setwindowiconin()
   self:setcanvas(nil)
   self:createframe()   
-  self.frame:show(centertoscreen:new():sizetoscreen(0.9, 0.9))
+  self.frame:show(framealigner:new(item.ALRIGHT):sizetoscreen(0.4, 0.8))
 end
 
 function machine:openinmainframe() 
-  self.frame = nil
   self.maincanvas:setwindowiconout()
+  self.frame = nil  
   self:setcanvas(self.maincanvas)
 end
 
@@ -143,7 +151,7 @@ function machine:initmenu()
         function that.frame:onclose()           
           that.frame = nil
         end
-        that.frame:show(centertoscreen:new())        
+        that.frame:show(framealigner:new())        
       elseif node == that.menus.newmodule then
         local modulename = "newmodule"
         local env = {}

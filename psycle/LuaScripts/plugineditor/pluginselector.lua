@@ -1,36 +1,34 @@
--- psycle pluginselector (c) 2015 by psycledelics
+-- psycle pluginselector (c) 2016 by psycledelics
 -- File: pluginselector.lua
 -- copyright 2016 members of the psycle project http://psycle.sourceforge.net
 -- This source is free software ; you can redistribute it and/or modify it under
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
+local cfg = require("psycle.config"):new("PatternVisual")
+local machine = require("psycle.machine")
+local catcher = require("psycle.plugincatcher")
+local signal = require("psycle.signal")
+local node = require("psycle.node")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
+local boxspace = require("psycle.ui.boxspace")
+local image = require("psycle.ui.image")
+local images = require("psycle.ui.images")
+local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
 local item = require("psycle.ui.canvas.item")
 local group = require("psycle.ui.canvas.group")
 local listview = require("psycle.ui.canvas.listview")
-local node = require("psycle.node")
-local filehelper = require("psycle.file")
-local signal = require("psycle.signal")
-local image = require("psycle.ui.image")
-local images = require("psycle.ui.images")
-local settings = require("settings")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
-local closebutton = require("closebutton")
-local text = require("psycle.ui.canvas.text")
-local tabgroup = require("psycle.ui.canvas.tabgroup")
-local catcher = require("psycle.plugincatcher")
-local machine = require("psycle.machine")
-local cfg = require("psycle.config"):new("PatternVisual")
-local templateparser = require("templateparser")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local button = require("psycle.ui.canvas.button")
 local edit = require("psycle.ui.canvas.edit")
 local text = require("psycle.ui.canvas.text")
-local button = require("psycle.ui.canvas.button")
-
+local filehelper = require("psycle.file")
+local tabgroup = require("psycle.ui.canvas.tabgroup")
+local closebutton = require("closebutton")
 local pluginselector = group:new()
+local templateparser = require("templateparser")
+local settings = require("settings")
 
 function pluginselector:new(parent)  
   local c = group:new(parent)  
@@ -50,10 +48,11 @@ function pluginselector:init()
    self.creategroup.propertypage = nil
    self.tg:addpage(g, "All")
    local closebutton = closebutton.new(self.tg.tabbar):setalign(item.ALRIGHT)
-   local that = self
-   function closebutton.closebtn:onmousedown()      
-     that:hide():parent():updatealign()     
-  end 
+   closebutton.dohide:connect(pluginselector.onhide, self)   
+end
+
+function pluginselector:onhide()
+  self:hide():parent():updatealign()     
 end
 
 function pluginselector:initplugincreate()
@@ -100,12 +99,15 @@ function pluginselector:createproperties(properties)
   if (properties) then
 	for i=1, #properties do
 	  if properties[i].edit then	  	  
-		local div = group:new(g):setautosize(false, true):setalign(item.ALTOP)  
+		local div = group:new(g):setautosize(false, false):setalign(item.ALTOP):setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
 		g[properties[i].property] = edit:new(div):setautosize(false, false)
-		                                :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
+		                                :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))
 										:setalign(item.ALCLIENT)
-										:settext(properties[i].value)
-		text:new(div):setautosize(false, false):setalign(item.ALLEFT):settext(properties[i].property)
+										:settext(properties[i].value)										
+		text:new(div):setautosize(true, true)
+		             :setalign(item.ALLEFT)
+		             :settext(properties[i].property)				
+                     :setmargin(boxspace:new(0, 5, 0, 0))
       end	
 	end
   end
@@ -158,6 +160,7 @@ function pluginselector:initpluginlist(parent)
                             :setalign(item.ALTOP)
                             :setbackgroundcolor(0x3E3E3E)
                             :settextcolor(0xFFFFFF)
+							:setmargin(boxspace:new(0, 5, 0, 0))
   local that = self
   local that = self
   function self.pluginlist:onchange(node)

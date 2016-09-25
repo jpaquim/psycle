@@ -189,7 +189,7 @@ void LuaProxy::PrepareState() {
 void LuaProxy::Reload() {
   try {      
     lock();
-    GlobalTimer::instance().KillTimer();
+    GlobalTimer::instance().KillTimer();    
     host_->set_crashed(true);
     lua_State* old_state = L;
     lua_State* new_state = 0;
@@ -207,8 +207,7 @@ void LuaProxy::Reload() {
         }
         lua_close(old_state);
       }
-      OnActivated();
-      GlobalTimer::instance().StartTimer();
+      OnActivated();      
     } catch(std::exception &e) {
       if (new_state) {        
         lua_close(new_state);
@@ -245,6 +244,7 @@ int LuaProxy::terminal_output(lua_State* L) {
   if (lua_isboolean(L, 1)) {
     int v = lua_toboolean(L, 1);
     if (v==1) out = "true"; else out = "false";
+    ui::TerminalFrame::instance().output(out);
   } else {
     int i;
     lua_getglobal(L, "tostring");
@@ -946,7 +946,7 @@ int error_handler(lua_State* L) {
     LuaProxy& proxy = plug->proxy();
     int idx(-1);      
     LuaImport in(proxy.state(), proxy.lua_mac(), 0);
-    if (in.open("editmacidx")) {
+    if (in.open("editmachineindex")) {
       in << pcall(1) >> idx;
       if (macIdx == idx) {
         editor = plug;
@@ -970,7 +970,7 @@ int error_handler(lua_State* L) {
     return 1; // uhps, plugin editor luascript missing ..
   }
     
-  lua_State* LE = editor->proxy().state();
+  lua_State* LE = editor->proxy().state();  
   LuaImport in(LE, editor->proxy().lua_mac(), 0);
   try {
     if (in.open("onexecute")) {      
@@ -979,15 +979,16 @@ int error_handler(lua_State* L) {
 
       std::string filename_noext;
       filename_noext = boost::filesystem::path(LuaGlobal::proxy(L)->host().GetDllName()).stem().string();
+      std::transform(filename_noext.begin(), filename_noext.end(), filename_noext.begin(), ::tolower);
       PluginCatcher* plug_catcher =
         static_cast<PluginCatcher*>(&Global::machineload());
       PluginInfo* info = plug_catcher->info(filename_noext);
       if (info) {       
         LuaHelper::requirenew<LuaPluginInfoBind>(LE, "psycle.plugininfo", new PluginInfo(*info));
-      } else {
-        lua_pushnil(LE);
+      } else {        
+        lua_pop(LE, 4);
+        throw std::runtime_error("No Plugininfo available.");
       }       
-
       int i = 1;
       int depth = 0;
       lua_Debug entry;
@@ -1014,7 +1015,7 @@ int error_handler(lua_State* L) {
       return 1;
     }
   } catch (std::exception& e ) {
-    // error in plugineditor
+    // error in plugineditor    
     AfxMessageBox((std::string("Error in error handler! Plugineditor failed!")+std::string(e.what())).c_str());    
   }  
   return 1;

@@ -6,6 +6,7 @@
 -- Foundation ; either version 2, or (at your option) any later version.  
 
 
+local boxspace = require("psycle.ui.boxspace")
 local group = require("psycle.ui.canvas.group")
 local item = require("psycle.ui.canvas.item")
 
@@ -25,13 +26,12 @@ end
 function toolbar:init()
   self:setautosize(true, true)
   self.icontable = {}
-  --self:style()--:setmargin(4, 4, 4, 4)
 end
 
 function toolbar:add(icon)
   icon:settoolbar(self)
   icon:setalign(item.ALLEFT)
-  icon:setmargin(0, 5, 0, 0)
+  icon:setmargin(boxspace:new(0, 5, 0, 0))
   group.add(self, icon)	
 end
 

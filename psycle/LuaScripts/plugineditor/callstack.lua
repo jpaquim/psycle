@@ -36,16 +36,16 @@ function callstack:addline(info)
   local infocopy = {}  
   infocopy.name = info.name
   infocopy.line = info.line
-  infocopy.source = info.source
-  item.info = infocopy
+  infocopy.source = info.source  
   local subitem = node:new():settext(info.name.." Line "..info.line)  
   item:add(subitem)
   local subitem1 = node:new():settext(info.source:match("([^\\]+)$"))  
-  subitem:add(subitem1)
+  subitem1.info = infocopy
+  subitem:add(subitem1)  
   self.rootnode:add(item)  
 end
 
-function callstack:onchange(node)   
+function callstack:onchange(node)  
   self.change:emit(node.info)
 end
 

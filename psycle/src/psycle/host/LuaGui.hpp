@@ -86,6 +86,18 @@ struct LuaUiRectBind {
   static int height(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::height); }
 };
 
+struct LuaBoxSpaceBind {
+  static std::string meta;
+  static int open(lua_State *L);  
+  static int create(lua_State *L);
+  static int gc(lua_State* L);
+  static int set(lua_State* L);
+  static int left(lua_State *L) { LUAEXPORTM(L, meta, &ui::BoxSpace::left); }
+  static int top(lua_State *L) { LUAEXPORTM(L, meta, &ui::BoxSpace::top); }
+  static int right(lua_State *L) { LUAEXPORTM(L, meta, &ui::BoxSpace::right); }
+  static int bottom(lua_State *L) { LUAEXPORTM(L, meta, &ui::BoxSpace::bottom); }  
+};
+
 struct LuaSystemMetrics {
   static int open(lua_State *L); 
   static int screensize(lua_State *L);
@@ -181,6 +193,7 @@ class LuaItem : public CanvasItem<ui::Window> {
   virtual void Draw(ui::Graphics* g, ui::Region& draw_rgn); 
   virtual void OnSize(double cw, double ch);  
   virtual std::string GetType() const { return "luaitem"; }
+  virtual bool transparent() const;
 };
 
 typedef CanvasItem<ui::Group> LuaGroup;
@@ -678,8 +691,9 @@ class LuaItemBind {
 //      {"scrollto", scrollto},
      // {"setsize", setsize},     
       {"position", position},
-      {"clientposition", clientposition},
+      {"absoluteposition", absoluteposition},
       {"desktopposition", desktopposition},
+      {"dimension", dimension},
       {"setautosize", setautosize},
 			{"autosize", autosize},
       {"setdebugtext", setdebugtext},      
@@ -776,29 +790,25 @@ class LuaItemBind {
   }
   static int updatearea(lua_State *L) { LUAEXPORT(L, &T::needsupdate) }
   static int position(lua_State *L) {
-    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    lua_pushnumber(L, item->position().left());
-    lua_pushnumber(L, item->position().top());
-    lua_pushnumber(L, item->position().width());
-    lua_pushnumber(L, item->position().height());
-    return 4;
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
+    LuaHelper::requirenew<LuaUiRectBind>(L, "psycle.ui.rect", new ui::Rect(item->position()));
+    return 1;
   }  
   static int setautosize(lua_State *L) { LUAEXPORT(L, &T::set_auto_size) }
-  static int clientposition(lua_State* L) { 
-    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    lua_pushnumber(L, item->abs_position().left());
-    lua_pushnumber(L, item->abs_position().top());
-    lua_pushnumber(L, item->abs_position().width());
-    lua_pushnumber(L, item->abs_position().height());
-    return 4;    
+  static int absoluteposition(lua_State* L) {     
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
+    LuaHelper::requirenew<LuaUiRectBind>(L, "psycle.ui.rect", new ui::Rect(item->absolute_position()));
+    return 1;
   }
-  static int desktopposition(lua_State* L) { 
-    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-    lua_pushnumber(L, item->desktop_position().left());
-    lua_pushnumber(L, item->desktop_position().top());
-    lua_pushnumber(L, item->desktop_position().width());
-    lua_pushnumber(L, item->desktop_position().height());
-    return 4;    
+  static int desktopposition(lua_State* L) {    
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
+    LuaHelper::requirenew<LuaUiRectBind>(L, "psycle.ui.rect", new ui::Rect(item->desktop_position()));
+    return 1;    
+  }
+  static int dimension(lua_State* L) {    
+    boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);    
+    LuaHelper::requirenew<LuaDimensionBind>(L, "psycle.ui.dimension", new ui::Dimension(item->dim()));
+    return 1;    
   }
   static int fls(lua_State *L);
   static int preventfls(lua_State *L) { LUAEXPORT(L, &T::PreventFls) }
@@ -811,7 +821,8 @@ class LuaItemBind {
       LUAEXPORT(L, &T::Show) 
     } else {
       boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
-      boost::shared_ptr<ui::WindowShowStrategy> window_show_strategy = LuaHelper::check_sptr<ui::WindowShowStrategy>(L, 2, LuaCenterToScreenBind::meta);
+      boost::shared_ptr<ui::WindowShowStrategy> window_show_strategy 
+          = LuaHelper::check_sptr<ui::WindowShowStrategy>(L, 2, LuaFrameAlignerBind::meta);
       item->Show(window_show_strategy);
     }
     return LuaHelper::chaining(L);
@@ -1407,12 +1418,12 @@ class LuaComboBoxBind : public LuaItemBind<T> {
   static int text(lua_State* L) { LUAEXPORT(L, &T::text); }
 };
 
-struct LuaCenterToScreenBind {
+struct LuaFrameAlignerBind {
   static int open(lua_State *L);
   static const char* meta;
   static int create(lua_State *L);
   static int gc(lua_State* L);
-  static int sizetoscreen(lua_State* L) { LUAEXPORTM(L, LuaCenterToScreenBind::meta, &ui::WindowCenterToScreen::SizeToScreen) };
+  static int sizetoscreen(lua_State* L) { LUAEXPORTM(L, meta, &ui::FrameAligner::SizeToScreen) };
 };
 
 struct LuaMenuBarBind {
@@ -1783,7 +1794,7 @@ class LuaNodeBind {
 
   static int parent(lua_State *L) {
     boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, meta);
-    LuaHelper::find_weakuserdata(L, node->parent().lock().get());
+    LuaHelper::find_weakuserdata(L, node->parent());
     return 1;
   }
 
@@ -2253,6 +2264,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaPointBind>(L, "psycle.ui.point");
   LuaHelper::require<LuaDimensionBind>(L, "psycle.ui.dimension");
   LuaHelper::require<LuaUiRectBind>(L, "psycle.ui.rect");
+  LuaHelper::require<LuaBoxSpaceBind>(L, "psycle.ui.boxspace");
   LuaHelper::require<LuaRegionBind>(L, "psycle.ui.region");
 	LuaHelper::require<LuaAreaBind>(L, "psycle.ui.area");
   LuaHelper::require<LuaImageBind>(L, "psycle.ui.image");
@@ -2272,7 +2284,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaCanvasBind<> >(L, "psycle.ui.canvas");
   LuaHelper::require<LuaFrameItemBind<> >(L, "psycle.ui.canvas.frame");
   LuaHelper::require<LuaPopupFrameItemBind >(L, "psycle.ui.canvas.popupframe");
-  LuaHelper::require<LuaCenterToScreenBind>(L, "psycle.ui.canvas.centertoscreen");
+  LuaHelper::require<LuaFrameAlignerBind>(L, "psycle.ui.canvas.framealigner");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.canvas.group");
   LuaHelper::require<LuaHeaderGroupBind<> >(L, "psycle.ui.canvas.headergroup");
   LuaHelper::require<LuaScrollBoxBind<> >(L, "psycle.ui.canvas.scrollbox");

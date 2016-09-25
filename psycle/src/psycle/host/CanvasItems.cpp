@@ -76,8 +76,7 @@ Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
 Text::Text() : Window(), 
     vertical_alignment_(ALTOP),
     justify_(LEFTJUSTIFY),
-    color_(0xFFFFFF),
-    is_auto_dimension_calculated_(false),
+    color_(0xFFFFFF),    
 	  is_aligned_(false) {      
 }
 
@@ -85,8 +84,7 @@ Text::Text(const std::string& text) :
   vertical_alignment_(ALTOP),
   justify_(LEFTJUSTIFY),
   color_(0xFFFFFF),
-  text_(text),
-  is_auto_dimension_calculated_(false),
+  text_(text),  
   is_aligned_(false) { 
 }
 
@@ -94,91 +92,81 @@ void Text::set_property(const ConfigurationProperty& configuration_property) {
   if (configuration_property.name() == "color") {
     set_color(configuration_property.int_value());
   } else
-  if (configuration_property.name() == "font") {    
-    set_font(ui::Font(configuration_property.font_info_value()));
+  if (configuration_property.name() == "font") {
+    if (configuration_property.int_value() != -0) {
+      FontInfo info;
+      info.stock_id = configuration_property.int_value();
+      set_font(ui::Font(info));
+    } else {
+      set_font(ui::Font(configuration_property.font_info_value()));
+    }
   }
-}
-
-ui::Dimension Text::OnCalcAutoDimension() const {
-	if (!is_auto_dimension_calculated_) {			
-		CalculateAutoDimension();
-	}
-	return auto_dimension_cache_;
 }
 
 void Text::set_text(const std::string& text) {  
   text_ = text;
-  if (auto_size()) {
-    PrepareAutoDimensionUpdate();
-    UpdateAutoDimension();
-  }
+  UpdateTextAlignment();   
+  UpdateAutoDimension();  
   FLSEX();
 }
 
 void Text::set_font(const Font& font) {  
   font_ = font;
-	PrepareAutoDimensionUpdate();
-	UpdateAutoDimension();  
+  UpdateTextAlignment();
+	UpdateAutoDimension();
+  FLSEX();
 }
 
-void Text::Draw(Graphics* g, Region& draw_region) {	
-	PrepareGraphics(g);
-	CalculateAlignmentAndJustify();
-	OutputText(g);
-}
-
-void Text::PrepareGraphics(Graphics* g) {
+void Text::Draw(Graphics* g, Region& draw_region) {  	
 	g->SetFont(font_);
   g->SetColor(color_);
+	g->DrawString(text_, text_alignment_position());  
 }
 
-void Text::CalculateAlignmentAndJustify() const {	
-	CalculateAutoDimension();
-	if (!is_aligned_) {
-		align_cache_.reset();
-		switch (justify_) {
-			case LEFTJUSTIFY:
-			break;    
-			case CENTERJUSTIFY:
-				align_cache_.set_x((dim().width() - auto_dimension_cache_.width()) / 2);
-			break;
-			case RIGHTJUSTIFY:
-				align_cache_.set_x(dim().width() - auto_dimension_cache_.width());
-			break;
-			default:
-			break;
-		}
-		CalculateJustify();
+ui::Dimension Text::text_dimension() const {
+  Graphics g;		
+	g.SetFont(font_);
+	return g.text_size(text_);
+}
+
+const ui::Point& Text::text_alignment_position() {
+  if (!is_aligned_) { 
+    ui::Dimension text_dim = text_dimension();
+    alignment_position_.set_xy(justify_offset(text_dim),
+                               vertical_alignment_offset(text_dim));
 		is_aligned_ = true;
-	}	
+  }	
+  return alignment_position_;
 }
 
-void Text::CalculateAutoDimension() const {
-	if (!is_auto_dimension_calculated_) {		
-		Graphics g;		
-		g.SetFont(font_);
-		auto_dimension_cache_ = g.text_size(text_);
-		is_auto_dimension_calculated_ = true;
+double Text::justify_offset(const ui::Dimension& text_dimension) {
+  double result(0);
+  switch (justify_) {	  
+		case CENTERJUSTIFY:
+			result = (dim().width() - text_dimension.width())/2;
+		break;
+		case RIGHTJUSTIFY:
+			result = dim().width() - text_dimension.width();
+		break;
+		default:
+		break;
+  }
+  return result;
+}
+
+double Text::vertical_alignment_offset(const ui::Dimension& text_dimension) {
+  double result(0);
+	switch (vertical_alignment_) {	  
+		case ALCENTER:        
+      result = (dim().height() - text_dimension.height())/2;
+		break;
+		case ALBOTTOM:
+		  result = dim().height() - text_dimension.height();
+		break;
+		default:      
+		break;
 	}
-}
-
-void Text::CalculateJustify() const {
-	switch (vertical_alignment_) {
-			case ALTOP:
-			break;
-			case ALCENTER:
-				align_cache_.set_y((dim().height() - auto_dimension_cache_.height()) / 2);
-			break;
-			case ALBOTTOM:
-				align_cache_.set_y(dim().height() - auto_dimension_cache_.height());
-			break;
-			default:      
-			break;
-		}
-}
-
-void Text::OutputText(Graphics* g) {
-	g->DrawString(text_, align_cache_);  
+  return result;
 }
 
 // Pic
@@ -252,8 +240,8 @@ void Splitter::OnMouseDown(MouseEvent& ev) {
 		last = (*it).get();
   }
 	if (item_) {		
-		parent_abs_pos_ = (orientation_ == HORZ) ? parent()->abs_position().top()
-                                             : parent()->abs_position().left();
+		parent_abs_pos_ = (orientation_ == HORZ) ? parent()->absolute_position().top()
+                                             : parent()->absolute_position().left();
     do_split_ = true;		
     BringWindowToTop();
 	  SetCapture();	
@@ -288,14 +276,14 @@ void Splitter::OnMouseMove(MouseEvent& ev) {
 	if (do_split_) {
 		if (orientation_ == HORZ) {
       if (drag_pos_ != ev.cy()) {        			  
-         set_position(ui::Point(position().top_left().x(), ev.cy() - parent_abs_pos_));
-         drag_pos_ = ev.cy();
+         drag_pos_ = (std::max)(0.0, ev.cy());
+         set_position(ui::Point(position().top_left().x(), drag_pos_ - parent_abs_pos_));         
       }
 		} else {
 			if (orientation_ == VERT) {
-				if (drag_pos_ != ev.cx()) {													
-          set_position(ui::Point(ev.cx() - parent_abs_pos_, position().top_left().y()));
-          drag_pos_ = ev.cx();
+				if (drag_pos_ != ev.cx()) {
+          drag_pos_ = (std::max)(0.0, ev.cx());
+          set_position(ui::Point(drag_pos_ - parent_abs_pos_, position().top_left().y()));          
 				}
 			}
 		}

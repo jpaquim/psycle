@@ -15,20 +15,24 @@ local serpent = require("psycle.serpent")
 
 local toolicon = item:new()
 
-local settings = { 
+toolicon.settings = { 
   colors = {
     default = {
       bg = 0x292929,
       text = 0xCACACA
     },
     mousepress = {
-      bg = 0xf1f1f1,
+      bg = 0x568857,
       text = 0xCACACA
     },
     mousemove = {
       bg  = 0x414131,
       text = 0xCACACA
-    } 
+    },
+    checked = {
+	  bg = 0xf1f1f1,
+      text = 0xCACACA
+	}	
   }
 }
 
@@ -47,8 +51,8 @@ function toolicon:onclick() end
 
 function toolicon:init(filename, trans)
   self:setautosize(true, true)  
-  self.cc = settings.colors.default.bg
-  self.on = false  
+  self.cc = toolicon.settings.colors.default.bg
+  self.on_ = false  
   self.text_ = ""
   if filename then
     self.img = image:new():load(filename)
@@ -58,7 +62,12 @@ function toolicon:init(filename, trans)
   end  
   self.clicklistener_ = listener:new("onclick", true)
   self.istoggle_ = false
-  self:setposition(rect:new(point:new(0, 0), dimension:new(20, 20)))
+  self:setposition(rect:new(point:new(0, 0), dimension:new(20, 20)))  
+end
+
+function toolicon:settoggleimage(image)
+  self.toggleimage_ = image
+  self.oldimage = nil  
 end
 
 function toolicon:setposition(rect)
@@ -72,10 +81,10 @@ function toolicon:setposition(rect)
   return self
 end
 
-function toolicon:draw(g)  
-  local x, y, w, h = self:position()
+function toolicon:draw(g)    
   g:setcolor(self.cc)   
-  g:fillroundrect(0, 0, w-1, h-1, 5, 5)  
+  local dim = self:dimension()
+  g:fillrect(rect:new(point:new(), dim))
   local xpos = 0
   if self.img then
     g:drawimage(self.img, self.centerx, self.centery) 
@@ -83,20 +92,20 @@ function toolicon:draw(g)
     xpos = xpos + self.centerx + ix
   end
   g:setcolor(self.cc)
-  g:setcolor(settings.colors.default.text)  
+  g:setcolor(toolicon.settings.colors.default.text)  
   local textwidth, textheight = g:textsize(self.text_)
-  g:drawstring(self.text_, xpos + 2, (h-textheight)/2)
+  g:drawstring(self.text_, xpos + 2, (dim:height() - textheight)/2)
 end
 
 function toolicon:onmousedown(ev)  
-  self:seton(not self.on)  
+  self:seton(not self.on_)  
   self:onclick()
   self.clicklistener_:notify(self)
 end
 
 function toolicon:onmouseenter(ev)  
-  if (not self.on) then 
-    self.cc = settings.colors.mousemove.bg
+  if (not self.on_) then     
+    self.cc = toolicon.settings.colors.mousemove.bg
     self:fls()
   end
 end
@@ -105,25 +114,37 @@ function toolicon:onmousemove(ev)
 end
 
 function toolicon:onmouseout(ev)   
-  if (not self.on) then 
-    self.cc = settings.colors.default.bg
+  if (not self.on_) then 
+    self.cc = toolicon.settings.colors.default.bg	
     self:fls()    
   end
 end
 
 function toolicon:onmouseup(ev)  
   if not self.is_toggle then
-    self:seton(not self.on)  
+    self:seton(not self.on_)  
   end
 end
 
+function toolicon:toggle()
+  self:seton(not self.on_)
+end
+
 function toolicon:seton(on)  
-  if self.on ~= on then
-    self.on = on
-    if on then 
-      self.cc = settings.colors.mousepress.bg
+  if self.on_ ~= on then
+    self.on_ = on
+    if on then 	  
+      self.cc = toolicon.settings.colors.mousepress.bg
+	  if (self.toggleimage_) then
+	    self.oldimage = self.img
+	    self.img = self.toggleimage_		
+	  end
     else
-      self.cc = settings.colors.default.bg
+	  if self.oldimage then	    
+	    self.img = self.oldimage
+	    self.oldimage = nil
+	  end
+      self.cc = toolicon.settings.colors.default.bg
     end
     self:fls()
     if self.toolbar~=nil and on and self.istoggle_ then
@@ -131,6 +152,10 @@ function toolicon:seton(on)
     end  
   end
   return self
+end
+
+function toolicon:on()
+  return self.on_;
 end
 
 function toolicon:settoolbar(toolbar)
@@ -167,6 +192,10 @@ function toolicon:onupdatearea(area, width, height)
   end
   area:setrect(0, 0, width, height)  
   return true
+end
+
+function toolicon:transparent()  
+  return false
 end
 
 return toolicon
