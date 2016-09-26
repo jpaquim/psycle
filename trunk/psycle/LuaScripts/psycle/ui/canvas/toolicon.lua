@@ -97,7 +97,8 @@ function toolicon:draw(g)
   g:drawstring(self.text_, xpos + 2, (dim:height() - textheight)/2)
 end
 
-function toolicon:onmousedown(ev)  
+function toolicon:onmousedown(ev) 
+  self:mousecapture()
   self:seton(not self.on_)  
   self:onclick()
   self.clicklistener_:notify(self)
@@ -121,8 +122,9 @@ function toolicon:onmouseout(ev)
 end
 
 function toolicon:onmouseup(ev)  
+  self:mouserelease()
   if not self.is_toggle then
-    self:seton(not self.on_)  
+    self:seton(false)  
   end
 end
 

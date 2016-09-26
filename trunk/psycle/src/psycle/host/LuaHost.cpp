@@ -17,6 +17,7 @@
 #include "CanvasItems.hpp"
 #include "NewMachine.hpp"
 #include "MainFrm.hpp"
+#include "MfcUi.hpp"
 #include "ChildView.hpp"
 #include <algorithm>
 #include "resources\resources.hpp"
@@ -810,25 +811,156 @@ bool LuaProxy::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
 // End of Class Proxy
 
 
-// Class LuaUiExtensions : Container for LuaUiExtensions
-LuaUiExtentions::Ptr LuaUiExtentions::instance() {
-  // needs to be stored in childview due the windows ondestroy calls at app end
-  return ((CMainFrame*) ::AfxGetMainWnd())->m_wndView.lua_ui_extentions();    
+// Class HostExtensions : Container for HostExtensions
+void HostExtensions::Load(CMenu* view_menu) {
+   PluginCatcher* plug_catcher = dynamic_cast<PluginCatcher*>(&Global::machineload()); 
+	 assert(plug_catcher);
+   PluginInfoList list = plug_catcher->GetLuaExtensions();
+	 if (list.size() > 0) {            
+	    PluginInfoList list = plug_catcher->GetLuaExtensions();
+	    PluginInfoList::iterator it = list.begin();
+	    int pos = 8; bool has_ext = false;
+	    for (; it != list.end(); ++it) {
+		  PluginInfo* info = *it;     		  
+	    int id = ID_DYNAMIC_MENUS_START+ui::MenuContainer::id_counter++;   
+		  try {
+			LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
+			mac->Init();
+			ui::Canvas* user_view = 0;
+			try {
+			  user_view = mac->canvas().lock().get();
+			} catch (std::exception&) {            
+		  } 
+		  //if (user_view) {
+			   view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());
+		  //} else {            
+			//   view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
+		  //}
+		    ///ui::MenuItem::id_counter++;
+		    Add(mac); 
+		    menuItemIdMap_[id] = mac.get();
+		    // if (user_view) ui::MenuItem::id_counter++;          
+		    has_ext = true;
+		    mac->CanvasChanged.connect(bind(&HostExtensions::OnPluginCanvasChanged, this,  _1));
+		  } catch (std::exception& e) {
+		    ui::alert(e.what());		    
+		  }                
+	    } 
+	    if (has_ext) {
+		  view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
+		  int id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
+		  view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
+		  menuItemIdMap_[id] = NULL;
+	    }
+	  }
 }
 
-void LuaUiExtentions::Free() {
-  LuaUiExtentions::List& plugs_ = uiluaplugins_;
-  LuaUiExtentions::List::iterator it = plugs_.begin();
+void HostExtensions::OnDynamicMenuItems(UINT nID) {
+  ui::mfc::MenuContainerImp* mbimp =  ui::mfc::MenuContainerImp::MenuContainerImpById(nID);
+  if (mbimp != 0) {
+     mbimp->WorkMenuItemEvent(nID);
+     return;
+  }
+  if (menuItemIdMap_[nID]==NULL) {
+   if (active_lua_) {          
+     LuaPlugin* lp = active_lua_;
+     try {                      
+       lp->proxy().Reload();            
+       child_view_->ChangeCanvas(lp->canvas().lock().get());
+       boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
+       if (!menu_bar.expired()) {
+         ui::mfc::MenuContainerImp* menu_bar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+         menu_bar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
+       }
+     } catch (std::exception e) {
+       ui::alert(e.what());
+     }          
+     child_view_->Invalidate(false);
+   }
+   return;  
+   }
+   std::map<std::uint16_t, LuaPlugin*>::iterator it = menuItemIdMap_.find(nID);
+      if (it != menuItemIdMap_.end()) {        
+        LuaPlugin* plug = it->second;         
+        if (plug->crashed()) return;
+        if (active_lua_ != plug) {
+          ui::Canvas::WeakPtr user_view = plug->canvas();        
+          if (!user_view.expired()) {          
+            child_view_->ChangeCanvas(user_view.lock().get()); 
+            active_lua_ = plug;
+            try {
+              boost::weak_ptr<ui::MenuContainer> menu_bar = plug->proxy().menu_bar();
+              if (!menu_bar.expired()) {
+                ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+                menubar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
+              }
+              plug->OnActivated();
+            } catch (std::exception&) {               
+              // AfxMessageBox(e.what());
+            }
+            child_view_->Invalidate(false);
+          } else {  
+            try {
+              plug->OnExecute();
+            } catch (std::exception&) {
+              // LuaGlobal::onexception(plug->proxy().state());
+              // AfxMessageBox(e.what());
+            }  
+          }               
+        }
+      }      
+}
+
+void HostExtensions::OnPluginCanvasChanged(LuaPlugin& plugin) {     
+  child_view_->ChangeCanvas(plugin.canvas().lock().get());
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
+  if (plugin.canvas().expired()) {        
+    if (!child_view_->IsWindowVisible()) {              
+      pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+      child_view_->ShowWindow(SW_SHOW);
+    }
+  } else {
+    if (child_view_->IsWindowVisible()) {        
+      child_view_->ShowWindow(SW_HIDE);
+      pParentMain->m_luaWndView->ShowWindow(SW_SHOW);            
+    }
+  }      
+}
+
+void HostExtensions::HideActiveLua() {
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;    
+  pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+  if (active_lua_) {
+     active_lua_->OnDeactivated();
+      HideActiveLuaMenu();
+  }
+  active_lua_ = 0;
+}
+
+void HostExtensions::HideActiveLuaMenu() {
+  if (active_lua_) {
+    boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
+    if (!menu_bar.expired() && !menu_bar.lock()->root_node().expired()) {
+      ui::Node::Ptr root = menu_bar.lock()->root_node().lock();
+      root->erase_imps(menu_bar.lock()->imp());
+      menu_bar.lock()->Invalidate();           
+    }
+  }
+}
+
+void HostExtensions::Free() {
+  HostExtensions::List& plugs_ = extensions_;
+  HostExtensions::List::iterator it = plugs_.begin();
   for ( ; it != plugs_.end(); ++it) {
     LuaPluginPtr ptr = *it;       
     ptr->Free();
   }
 }
 
-LuaUiExtentions::List LuaUiExtentions::Get(const std::string& name) {
-  LuaUiExtentions::List list;
-  LuaUiExtentions::List& plugs_ = uiluaplugins_;
-  LuaUiExtentions::List::iterator it = plugs_.begin();
+HostExtensions::List HostExtensions::Get(const std::string& name) {
+  HostExtensions::List list;
+  HostExtensions::List& plugs_ = extensions_;
+  HostExtensions::List::iterator it = plugs_.begin();
   for ( ; it != plugs_.end(); ++it) {
     LuaPluginPtr ptr = *it;       
     if (ptr->_editName == name) {
@@ -838,10 +970,10 @@ LuaUiExtentions::List LuaUiExtentions::Get(const std::string& name) {
   return list;
 }
 
-LuaPluginPtr LuaUiExtentions::Get(int idx) {
-  LuaUiExtentions::List list;     
-  LuaUiExtentions::List::iterator it = uiluaplugins_.begin();
-  for (; it != uiluaplugins_.end(); ++it) {
+LuaPluginPtr HostExtensions::Get(int idx) {
+  HostExtensions::List list;     
+  HostExtensions::List::iterator it = extensions_.begin();
+  for (; it != extensions_.end(); ++it) {
     LuaPluginPtr ptr = *it;       
     if (ptr->_macIndex == idx) {
       return ptr;
@@ -897,9 +1029,8 @@ Machine* LuaGlobal::GetMachine(int idx) {
     if (idx < MAX_MACHINES) {
       mac = Global::song()._pMachine[idx];
     } else {      
-      LuaPluginPtr mac_ptr = 
-        LuaUiExtentions::instance()->Get(idx);       
-      mac = mac_ptr.get();              
+      HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+      mac = host_extensions.Get(idx).get();      
     }
     return mac;
 }
@@ -912,8 +1043,8 @@ std::vector<LuaPlugin*> LuaGlobal::GetAllLuas() {
       plugs.push_back((LuaPlugin*)mac);
     }
   }
-  LuaUiExtentions::Ptr list = LuaUiExtentions::instance();
-  for (LuaUiExtentions::iterator it = list->begin(); it != list->end(); ++it) {
+  HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+  for (HostExtensions::iterator it = host_extensions.begin(); it != host_extensions.end(); ++it) {
     plugs.push_back((*it).get());
   }
   return plugs;
@@ -921,7 +1052,7 @@ std::vector<LuaPlugin*> LuaGlobal::GetAllLuas() {
 
 namespace luaerrhandler {
 
-int error_handler(lua_State* L) {
+int error_handler(lua_State* L) {  
   // first make sure that the error didn't occured in the plugineditor itself
   std::string edit_name = LuaGlobal::proxy(L)->host().GetEditName();
   if (edit_name == "Plugineditor") {
@@ -935,8 +1066,9 @@ int error_handler(lua_State* L) {
   lua_pushvalue(L, 1);  // pass error message 
   lua_pushinteger(L, 2);  // skip this function and traceback
   lua_call(L, 2, 1);
-  LuaUiExtentions::List uilist = LuaUiExtentions::instance()->Get("Plugineditor");
-  LuaUiExtentions::iterator uit = uilist.begin();
+  HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+  HostExtensions::List uilist = host_extensions.Get("Plugineditor");
+  HostExtensions::iterator uit = uilist.begin();
   LuaPluginPtr editor;
   // try to find an open instance of plugineditor
   // editing the error plugin
@@ -960,10 +1092,10 @@ int error_handler(lua_State* L) {
     if (Global::machineload().lookupDllName("Plugineditor.lua", dllname, MACH_LUA,
           shellIdx)) {
       editor.reset(new LuaPlugin(dllname, AUTOID));      
-      LuaUiExtentions::instance()->Add(editor);
+      host_extensions.Add(editor);
       editor->proxy().Init();
-      editor->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, 
-        &((CMainFrame*)::AfxGetMainWnd())->m_wndView,  _1));
+      editor->CanvasChanged.connect(bind(&HostExtensions::OnPluginCanvasChanged, 
+        &host_extensions,  _1));
     }          
   }
   if (!editor.get()) {

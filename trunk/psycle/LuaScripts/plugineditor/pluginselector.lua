@@ -41,13 +41,17 @@ end
 function pluginselector:init()   
    self.doopen = signal:new()
    self.docreate = signal:new()
-   self.tg = tabgroup:new(self):setalign(item.ALCLIENT)
-   local g = group:new():setautosize(false, false)
+   self.tg = tabgroup:new(self)
+                     :setalign(item.ALCLIENT)
+					 :disableclosebutton()
+   local g = group:new()
+                  :setautosize(false, false)
    self:initpluginlist(g)
    self.creategroup = self:initplugincreate()
    self.creategroup.propertypage = nil
    self.tg:addpage(g, "All")
-   local closebutton = closebutton.new(self.tg.tabbar):setalign(item.ALRIGHT)
+   local closebutton = closebutton.new(self.tg.tabbar)
+                                  :setalign(item.ALRIGHT)
    closebutton.dohide:connect(pluginselector.onhide, self)   
 end
 
@@ -99,7 +103,10 @@ function pluginselector:createproperties(properties)
   if (properties) then
 	for i=1, #properties do
 	  if properties[i].edit then	  	  
-		local div = group:new(g):setautosize(false, false):setalign(item.ALTOP):setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
+		local div = group:new(g)
+		                 :setautosize(false, false)
+						 :setalign(item.ALTOP)
+						 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
 		g[properties[i].property] = edit:new(div):setautosize(false, false)
 		                                :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))
 										:setalign(item.ALCLIENT)
@@ -151,8 +158,6 @@ function pluginselector:oncreateplugin(template)
   self.docreate:emit(template, env.pluginname)  
 end  
 
-
-
 function pluginselector:initpluginlist(parent)
   self.pluginlist = listview:new(parent)
                             :setautosize(false, false)
@@ -161,8 +166,7 @@ function pluginselector:initpluginlist(parent)
                             :setbackgroundcolor(0x3E3E3E)
                             :settextcolor(0xFFFFFF)
 							:setmargin(boxspace:new(0, 5, 0, 0))
-  local that = self
-  local that = self
+  local that = self  
   function self.pluginlist:onchange(node)
     local dir = that:machinepath(node.info)        
     that:hide()        

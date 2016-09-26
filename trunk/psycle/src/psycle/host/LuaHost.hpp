@@ -142,30 +142,39 @@ private:
   boost::weak_ptr<ui::MenuContainer> menu_bar_;  
 };
 
-// Container for LuaUiExtensions
-class LuaUiExtentions {     
+// Container for HostExtensions
+class HostExtensions {     
  public:
-  typedef std::list<LuaPluginPtr> List;
-  typedef boost::shared_ptr<LuaUiExtentions> Ptr;
+  typedef std::list<LuaPluginPtr> List;  
+  typedef std::map<std::uint16_t, LuaPlugin*> MenuMap;
 
-  LuaUiExtentions() {}
-  ~LuaUiExtentions() {}
-  static LuaUiExtentions::Ptr instance();
+  HostExtensions(class CChildView* child_view) : child_view_(child_view), active_lua_(0) {}
+  ~HostExtensions() {}  
 
+  void Load(CMenu* view_menu);
   void Free();
 
-  typedef LuaUiExtentions::List::iterator iterator;
-  virtual iterator begin() { return uiluaplugins_.begin(); }
-  virtual iterator end() { return uiluaplugins_.end(); }
+  typedef HostExtensions::List::iterator iterator;
+  virtual iterator begin() { return extensions_.begin(); }
+  virtual iterator end() { return extensions_.end(); }
   virtual bool empty() const { return true; }
 
-  void Add(const LuaPluginPtr& ptr) { uiluaplugins_.push_back(ptr); }
-  void Remove(const LuaPluginPtr& ptr) { uiluaplugins_.remove(ptr); }
-  LuaUiExtentions::List Get(const std::string& name);
+  void Add(const LuaPluginPtr& ptr) { extensions_.push_back(ptr); }
+  void Remove(const LuaPluginPtr& ptr) { extensions_.remove(ptr); }
+  HostExtensions::List Get(const std::string& name);
   LuaPluginPtr Get(int idx);  
-  
- private:
-  LuaUiExtentions::List uiluaplugins_;
+
+  MenuMap& menuItemIdMap() { return menuItemIdMap_; }
+  void OnDynamicMenuItems(UINT nID);
+  void OnPluginCanvasChanged(LuaPlugin& plugin);
+  void HideActiveLua();
+  void HideActiveLuaMenu();
+
+ private:   
+  HostExtensions::List extensions_;  
+  MenuMap menuItemIdMap_;
+  class CChildView* child_view_;
+  LuaPlugin* active_lua_;
 };
 
 struct LuaGlobal {

@@ -246,7 +246,8 @@ namespace host {
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
     public:      
-      void LoadLuaExtensions();      
+      void ChangeCanvas(ui::Window* canvas);
+      void LoadHostExtensions();      
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;
@@ -369,8 +370,7 @@ namespace host {
 				pDC->BitBlt(sdest.x+xDstOff, sdest.y+yDstOff, ssource.width, ssource.height, pSkinDC, ssource.x+xSrcOff, ssource.y+ySrcOff, SRCCOPY);
 			}
 
-			void DrawSeqEditor(CDC *devc);
-      void ChangeCanvas(ui::Window* canvas);
+			void DrawSeqEditor(CDC *devc);      
 
 			int _ps();
 			unsigned char * _ptrack(int ps, int track);
@@ -468,19 +468,12 @@ namespace host {
 			COLORREF pvc_fontCur[MAX_TRACKS+1];
 			COLORREF pvc_fontSel[MAX_TRACKS+1];
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
-			COLORREF pvc_selection4beat[MAX_TRACKS+1];
-      public:
-      class LuaPlugin* active_lua_;	    
-      std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;      
-
-      boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions() {
-        return lua_ui_extentions_;
-      }
+			COLORREF pvc_selection4beat[MAX_TRACKS+1];            
+    public:
+      class HostExtensions* host_extensions() { return host_extensions_.get(); }
     private:
-      boost::shared_ptr<class LuaUiExtentions> lua_ui_extentions_;
-      void HideActiveLua();      
+      std::auto_ptr<class HostExtensions> host_extensions_;           
 		public:      
-      void HideActiveLuaMenu();
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
 			DECLARE_MESSAGE_MAP()
@@ -527,8 +520,7 @@ namespace host {
 			afx_msg void OnFileSongproperties();
 			afx_msg void OnViewInstrumenteditor();
 		public:
-			afx_msg void OnNewmachine();
-      void OnPluginCanvasChanged(LuaPlugin& plugin);
+			afx_msg void OnNewmachine();      
 		protected:
 			afx_msg void OnPopCut();
 			afx_msg void OnUpdateCutCopy(CCmdUI* pCmdUI);
