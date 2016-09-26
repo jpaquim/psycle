@@ -130,21 +130,7 @@ namespace psycle { namespace host {
     int curr_prg_;
 
   private:
-    virtual void OnTimerViewRefresh() {
-      proxy().OnTimer();
-      if (do_exit_) {
-       LuaUiExtentions::instance()->Remove(this_ptr());
-      } else 
-      if (do_reload_) {
-        do_reload_ = false;
-        try {
-          try {
-            reload();
-          } CATCH_WRAP_AND_RETHROW(*this);
-        } catch (std::exception& ) {                
-        }
-      }      
-    }
+    virtual void OnTimerViewRefresh();
     // additions if noteon mode is used
     struct note {
       unsigned char key;

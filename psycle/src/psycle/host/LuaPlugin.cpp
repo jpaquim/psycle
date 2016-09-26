@@ -79,6 +79,23 @@ namespace psycle { namespace host {
     } 
   }
 
+  void LuaPlugin::OnTimerViewRefresh() {
+      proxy().OnTimer();
+      if (do_exit_) {
+        HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+        host_extensions.Remove(this_ptr());
+      } else 
+      if (do_reload_) {
+        do_reload_ = false;
+        try {
+          try {
+            reload();
+          } CATCH_WRAP_AND_RETHROW(*this);
+        } catch (std::exception& ) {                
+        }
+      }      
+    }
+
   void LuaPlugin::OnReload() {
     try {      
       proxy().Reload();

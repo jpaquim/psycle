@@ -160,7 +160,7 @@ namespace psycle { namespace host {
 			{
 				global_.machineload().LoadPluginInfo(false);
         ui::Systems::instance().InitInstance(PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\psycle\\ui\\uiconfiguration.lua");
-        pFrame->m_wndView.LoadLuaExtensions();
+        pFrame->m_wndView.LoadHostExtensions();
 				// Show splash screen
 				if (global_.conf()._showAboutAtStart)
 				{
@@ -225,7 +225,7 @@ namespace psycle { namespace host {
 			{
 				if(strcmp(cmdline,"/skipscan") != 0) {
 					global_.machineload().LoadPluginInfo(false);
-			        ((CMainFrame*)m_pMainWnd)->m_wndView.LoadLuaExtensions();
+			    ((CMainFrame*)m_pMainWnd)->m_wndView.LoadHostExtensions();
 					char tmpName [MAX_PATH];
 					std::strncpy(tmpName, m_lpCmdLine+1, MAX_PATH-1 );
 					tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;

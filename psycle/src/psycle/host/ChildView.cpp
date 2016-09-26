@@ -111,9 +111,8 @@ namespace psycle { namespace host {
 			,mcd_y(0)
 			,patBufferLines(0)
 			,patBufferCopy(false)
-			,_pSong(Global::song())
-      ,active_lua_(0)      
-      ,lua_ui_extentions_(new LuaUiExtentions())
+			,_pSong(Global::song())         
+      ,host_extensions_(new HostExtensions(this))
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -1070,32 +1069,12 @@ namespace psycle { namespace host {
 			}
 			pParentMain->StatusBarIdle();
 		}
-
-    void CChildView::HideActiveLua() {
-      pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
-      if (active_lua_) {
-        active_lua_->OnDeactivated();
-        HideActiveLuaMenu();
-      }
-      active_lua_ = 0;
-    }
-
-    void CChildView::HideActiveLuaMenu() {
-      if (active_lua_) {
-        boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
-        if (!menu_bar.expired() && !menu_bar.lock()->root_node().expired()) {
-          ui::Node::Ptr root = menu_bar.lock()->root_node().lock();
-          root->erase_imps(menu_bar.lock()->imp());
-          menu_bar.lock()->Invalidate();           
-        }
-      }
-    }
-
+        
 		/// Tool bar buttons and View Commands
 		void CChildView::OnMachineview() 
 		{
       if (!this->IsWindowVisible()) {        
-        HideActiveLua();
+        host_extensions_->HideActiveLua();
         this->ShowWindow(SW_SHOW);
       }
 			if (viewMode != view_modes::machine)
@@ -1128,7 +1107,7 @@ namespace psycle { namespace host {
 		void CChildView::OnPatternView() 
 		{
       if (!this->IsWindowVisible()) {
-        HideActiveLua();
+        host_extensions_->HideActiveLua();
         this->ShowWindow(SW_SHOW);
       }
 			if (viewMode != view_modes::pattern)
@@ -2486,125 +2465,14 @@ namespace psycle { namespace host {
 				pCmdUI->SetCheck(0);	
 		}
     
-    void CChildView::LoadLuaExtensions() {
-      PluginCatcher* plug_catcher = dynamic_cast<PluginCatcher*>(&Global::machineload()); 
-	  assert(plug_catcher);
-      PluginInfoList list = plug_catcher->GetLuaExtensions();
-	  if (list.size() > 0) {
-        CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);      
-	    PluginInfoList list = plug_catcher->GetLuaExtensions();
-	    PluginInfoList::iterator it = list.begin();
-	    int pos = 8; bool has_ext = false;
-	    for (; it != list.end(); ++it) {
-		  PluginInfo* info = *it;     		  
-	    int id = ID_DYNAMIC_MENUS_START+ui::MenuContainer::id_counter++;   
-		  try {
-			LuaPluginPtr mac(new LuaPlugin(info->dllname.c_str(), -1));
-			mac->Init();
-			ui::Canvas* user_view = 0;
-			try {
-			  user_view = mac->canvas().lock().get();
-			} catch (std::exception&) {            
-		  } 
-		  //if (user_view) {
-			   view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());
-		  //} else {            
-			//   view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
-		  //}
-		    ///ui::MenuItem::id_counter++;
-		    LuaUiExtentions::instance()->Add(mac); 
-		    menuItemIdMap[id] = mac.get();
-		    // if (user_view) ui::MenuItem::id_counter++;          
-		    has_ext = true;
-		    mac->CanvasChanged.connect(bind(&CChildView::OnPluginCanvasChanged, this,  _1));
-		  } catch (std::exception& e) {
-		    ui::alert(e.what());		    
-		  }                
-	    } 
-	    if (has_ext) {
-		  view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
-		  int id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
-		  view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
-		  menuItemIdMap[id] = NULL;
-	    }
-	  }
-    }
-
-    void CChildView::OnPluginCanvasChanged(LuaPlugin& plugin) {
-      // int fordebugonly = 0;
-      //if (active_lua_ == &plugin) {
-        ChangeCanvas(plugin.canvas().lock().get());
-        if (plugin.canvas().lock().get() == 0) {
-          if (!this->IsWindowVisible()) {        
-            pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
-            this->ShowWindow(SW_SHOW);
-          }
-        } else {
-          if (this->IsWindowVisible()) {        
-            this->ShowWindow(SW_HIDE);
-            pParentMain->m_luaWndView->ShowWindow(SW_SHOW);            
-          }
-        }
-      //}
+    void CChildView::LoadHostExtensions() {
+      host_extensions_->Load(pParentMain->GetMenu()->GetSubMenu(3));      
     }
 
     void CChildView::OnDynamicMenuItems(UINT nID) {
-      ui::mfc::MenuContainerImp* mbimp =  ui::mfc::MenuContainerImp::MenuContainerImpById(nID);
-      if (mbimp != 0) {
-        mbimp->WorkMenuItemEvent(nID);
-        return;
-      }
-      if (menuItemIdMap[nID]==NULL) {
-        if (active_lua_) {          
-          LuaPlugin* lp = active_lua_;
-          try {                      
-           lp->proxy().Reload();            
-           ChangeCanvas(lp->canvas().lock().get());
-           boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
-           if (!menu_bar.expired()) {
-             ui::mfc::MenuContainerImp* menu_bar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
-             menu_bar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
-           }
-          } catch (std::exception e) {
-            ui::alert(e.what());
-          }          
-          Invalidate(false);
-        }
-        return;        
-      }       
-
-      std::map<std::uint16_t, LuaPlugin*>::iterator it = menuItemIdMap.find(nID);
-      if (it != menuItemIdMap.end()) {        
-        LuaPlugin* plug = it->second;         
-        if (plug->crashed()) return;
-        if (active_lua_ != plug) {
-          ui::Canvas::WeakPtr user_view = plug->canvas();        
-          if (!user_view.expired()) {          
-            ChangeCanvas(user_view.lock().get()); 
-            active_lua_ = plug;
-            try {
-              boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
-              if (!menu_bar.expired()) {
-                ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
-                menubar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
-              }
-              plug->OnActivated();
-            } catch (std::exception&) {               
-              // AfxMessageBox(e.what());
-            }
-            Invalidate(false);
-          } else {  
-            try {
-              plug->OnExecute();
-            } catch (std::exception&) {
-              // LuaGlobal::onexception(plug->proxy().state());
-              // AfxMessageBox(e.what());
-            }  
-          }               
-        }
-      }
-		}
-    
+      host_extensions_->OnDynamicMenuItems(nID);      
+    }
+                
     void CChildView::ChangeCanvas(ui::Window* canvas) {
       CRect rect;            
       GetWindowRect(&rect);
