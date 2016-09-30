@@ -7,6 +7,7 @@
 #include "PsycleConfig.hpp"
 #include "Registry.hpp"
 #include "Machine.hpp"
+#include "PresetIO.hpp"
 
 namespace psycle {
 namespace host {
@@ -92,6 +93,18 @@ void ParamMap::FillListView() {
     //list_view_->UpdateList();
   }
 }
+void ParamMap::RecalculateListView() {  
+//	ui::Node::iterator it = root_node_->begin();
+//	for (int i=0; it != root_node_->end(); ++i, ++it) {
+/*		std::stringstream str1;    
+		str1 << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << machine_->translate_param(i) 
+			 << " ["
+			 << param_name(machine_->translate_param(i)) 
+			 << "]";
+     }
+*/
+  list_view_->UpdateList();
+}
 
 void ParamMap::FillComboBox() {
   for (int i = 0; i != machine_->GetNumParams(); ++i) {    
@@ -105,17 +118,43 @@ void ParamMap::FillComboBox() {
 void ParamMap::OnReplaceButtonClick(ui::Button&) {
   ReplaceSelection();
 }
+void ParamMap::OnSaveDefaultButtonClick(ui::Button&)
+{
+	ParamTranslator param(*machine_);
+	machine_->get_virtual_param_map(param);
+	char name[128];
+	strcpy(name,machine_->GetDllName());
+	if (strcmp(name,"") == 0) { strcpy(name,machine_->GetName()); }
+	PresetIO::SaveDefaultMap(PsycleGlobal::conf().GetAbsolutePresetsDir() + "/" + name + ".map",param, machine_->GetNumParams());
+}
+void ParamMap::OnLoadDefaultButtonClick(ui::Button&)
+{
+	ParamTranslator param(*machine_);
+	char name[128];
+	strcpy(name,machine_->GetDllName());
+	if (strcmp(name,"") == 0) { strcpy(name,machine_->GetName()); }
+	PresetIO::LoadDefaultMap(PsycleGlobal::conf().GetAbsolutePresetsDir() + "/" + name + ".map",param);
+	machine_->set_virtual_param_map(param);
+	//TODO: Redraw the list with the new values
+}
+void ParamMap::OnResetMapButtonClick(ui::Button&) {
+    for (int i = 0; i < 256; ++i) {
+	  machine_->set_virtual_param_index(i,i);
+    }
+	//TODO: Redraw the list with the new values
+}
 
 void ParamMap::ReplaceSelection() {  
   std::vector<ui::Node::Ptr> nodes = list_view_->selected_nodes();
   std::vector<ui::Node::Ptr>::iterator it = nodes.begin();
   for (int i = 0; it != nodes.end(); ++i, ++it) {
-    if (i + cbx_box_->item_index() < machine_->GetNumParams()) {      
-      int virtual_index = (*it)->imp(*list_view_->imp())->position();      
+    if (i + cbx_box_->item_index() < machine_->GetNumParams()) {
+      int virtual_index = (*it)->imp(*list_view_->imp())->position();
       std::stringstream str;
-      str << i << " [" << param_name(i + cbx_box_->item_index()) << "]";
+      str << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << i + cbx_box_->item_index();
+      str << " [" << param_name(i + cbx_box_->item_index()) << "]";
       ui::Node::Ptr col2_node = *it;
-      col2_node->set_text(str.str());         
+      col2_node->set_text(str.str());
       machine_->set_virtual_param_index(
         virtual_index, i + cbx_box_->item_index());
     } else {
@@ -251,6 +290,35 @@ void ParamMap::AddMachineParamSelect(const ui::Group::Ptr& parent) {
   allow_auto_learn_chk_box_->set_position(
     ui::Rect(ui::Point(), ui::Dimension(100, 20)));
   allow_auto_learn_chk_box_->set_text("Auto Learn");
+
+  ui::Group::Ptr preset_group = CreateRow(parent);  
+  preset_group->set_margin(ui::BoxSpace(0, 0, 5, 5));  
+  ui::Button::Ptr save_btn(new ui::Button());
+  preset_group->Add(save_btn);
+  save_btn->set_align(ui::ALLEFT);
+  save_btn->set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(100, 20)));
+  save_btn->set_text("Save as Default");
+  save_btn->click.connect(
+    boost::bind(&ParamMap::OnSaveDefaultButtonClick, this, _1));
+
+  ui::Group::Ptr preset2_group = CreateRow(parent);  
+  preset2_group->set_margin(ui::BoxSpace(0, 0, 5, 5));  
+  ui::Button::Ptr load_btn(new ui::Button());
+  preset2_group->Add(load_btn);
+  load_btn->set_align(ui::ALLEFT);
+  load_btn->set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(100, 20)));
+  load_btn->set_text("Load Default");
+  load_btn->click.connect(
+    boost::bind(&ParamMap::OnLoadDefaultButtonClick, this, _1));
+
+    ui::Button::Ptr reset_btn(new ui::Button());
+  preset2_group->Add(reset_btn);
+  reset_btn->set_align(ui::ALLEFT);
+  reset_btn->set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(100, 20)));
+  reset_btn->set_text("Reset mapping");
+  reset_btn->click.connect(
+    boost::bind(&ParamMap::OnResetMapButtonClick, this, _1));
+
 }
 
 void ParamMap::AddHelpGroup(const ui::Window::Ptr& parent) {

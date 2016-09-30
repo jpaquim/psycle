@@ -669,14 +669,20 @@ namespace psycle
 			if(pData->_note == notecommands::tweak)
 			{
 				int nv = (pData->_cmd<<8)+pData->_parameter;
-				SetParameter(pData->_inst,nv);
+				int param = translate_param(pData->_inst);
+				if(param < GetNumParams()) {
+					SetParameter(param,nv);
+				}
 			}
 			else if(pData->_note == notecommands::tweakslide)
 			{
 				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 				// doing simply "tweak" for now..
 				int nv = (pData->_cmd<<8)+pData->_parameter;
-				SetParameter(pData->_inst,nv);
+				int param = translate_param(pData->_inst);
+				if(param < GetNumParams()) {
+					SetParameter(param,nv);
+				}
 			}
 		}
 		void Mixer::recursive_process(unsigned int frames, bool measure_cpu_usage) {

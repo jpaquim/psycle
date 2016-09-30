@@ -257,8 +257,9 @@ using namespace helpers;
 		{
 			if ( pData->_note == notecommands::tweak || pData->_note == notecommands::tweakslide)
 			{
-				if(pData->_inst < values_.size()) {
-					SetParameter(pData->_inst,pData->_cmd*0x100+pData->_parameter);
+				int param = translate_param(pData->_inst);
+				if(param < GetNumParams()) {
+					SetParameter(param,pData->_cmd*0x100+pData->_parameter);
 				}
 			}
 		}

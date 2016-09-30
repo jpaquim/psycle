@@ -3,6 +3,7 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "PresetIO.hpp"
+#include "Machine.hpp"
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 namespace psycle { namespace host {
@@ -194,6 +195,78 @@ namespace psycle { namespace host {
 			}
 			delete[] ibuf;
 			delete[] dbuf;
+		}
+
+		void PresetIO::LoadDefaultMap(std::string szFile, ParamTranslator& translator)
+		{
+			std::FILE* hfile;
+			uint16_t numMaps=0;
+			hfile=std::fopen(szFile.c_str(),"rb");
+			for (int i = 0; i < 256; ++i) {
+				translator.set_virtual_index(i,i);
+			}
+			if(hfile)
+			{
+				int fileversion = 1;
+				if ( std::fread(&fileversion,sizeof(int),1,hfile) != 1)
+				{
+					::MessageBox(0,"Couldn't read from file. Operation aborted","Preset File Error",MB_OK);
+				}
+				else {
+					char pmap[4];
+					std::fread(pmap,sizeof(char),4, hfile);
+					if (fileversion == 1) {
+						std::fread(&numMaps,sizeof(uint8_t),1, hfile);
+						while (!feof(hfile) && !ferror(hfile))
+						{
+							uint8_t idx;
+							uint16_t value;
+							std::fread(&idx,sizeof(idx),1, hfile);
+							std::fread(&value,sizeof(value),1, hfile);
+							translator.set_virtual_index(idx,value);
+						}
+					}
+				}
+				std::fclose(hfile);
+			}
+		}
+
+		void PresetIO::SaveDefaultMap(std::string szFile, ParamTranslator& translator, int numparams)
+		{
+			std::FILE* hfile;
+			int fileversion = 1;
+			uint16_t numMaps=0;
+			if(!(hfile=std::fopen(szFile.c_str(),"wb")))
+			{
+				::MessageBox(0,"The File couldn't be opened for Writing. Operation Aborted","File Save Error",MB_OK);
+				return;
+			}
+
+			if ( std::fwrite(&fileversion,sizeof(int),1,hfile) != 1 )
+			{
+				::MessageBox(0,"Couldn't write to File. Operation Aborted","File Save Error",MB_OK);
+				return;
+			}
+			for (int i=0;i<256;i++)
+			{
+				const int param = translator.translate(i);
+				if ( param < numparams) {
+					numMaps++;
+				}
+			}
+			std::fwrite("PMAP",sizeof(char),4,hfile);
+			std::fwrite(&numMaps,sizeof(numMaps),1,hfile);
+			for (int i=0;i<256;i++)
+			{
+				const int param = translator.translate(i);
+				if ( param < numparams) {
+					const uint8_t idx = static_cast<uint8_t>(i);
+					const uint16_t value = static_cast<uint16_t>(param);
+					std::fwrite(&idx,sizeof(idx),1,hfile);
+					std::fwrite(&value,sizeof(value),1,hfile);
+				}
+			}
+			std::fclose(hfile);
 		}
 
 	}   // namespace

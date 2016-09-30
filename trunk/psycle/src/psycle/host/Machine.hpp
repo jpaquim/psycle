@@ -180,7 +180,13 @@ namespace psycle
        } else {
          throw std::runtime_error("Plugin Index Out of Range");
        }
-     }  
+     }
+	 inline void copyFrom(const ParamTranslator& trans) {
+		 translate_container_ = trans.translate_container_;
+	 }
+	 inline void copyTo(ParamTranslator& trans) {
+		 trans.translate_container_ = translate_container_;
+	 }
     
     private:
       Machine* machine_;
@@ -688,6 +694,12 @@ namespace psycle
         inline void set_virtual_param_index(int virtual_index, int machine_index) {
           param_translator_.set_virtual_index(virtual_index, machine_index);
         }
+		inline void set_virtual_param_map(const ParamTranslator& param) {
+			param_translator_.copyFrom(param);
+		}
+		inline void get_virtual_param_map(ParamTranslator& param) {
+			param_translator_.copyTo(param);
+		}
         
       private:
         ParamTranslator param_translator_;

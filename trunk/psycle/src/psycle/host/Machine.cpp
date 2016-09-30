@@ -1412,7 +1412,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				const int param = translate_param(i);
 				if ( param < GetNumParams()) {
 					const uint8_t idx = static_cast<uint8_t>(i);
-					const uint16_t value = static_cast<uint16_t>(translate_param(i));
+					const uint16_t value = static_cast<uint16_t>(param);
 					pFile->Write(idx);
 					pFile->Write(value);
 				}
