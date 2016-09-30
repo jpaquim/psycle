@@ -45,10 +45,15 @@ class ParamMap : public ui::Frame {
   void AddListView();
   void AddHelpGroup(const ui::Window::Ptr& parent);
   void FillListView();
+  void RecalculateListView();
   void FillComboBox();  
   void AddMachineParamSelect(const ui::Group::Ptr& parent);
   void UpdateMachineParamEndText();
   void OnReplaceButtonClick(ui::Button&);
+  void OnSaveDefaultButtonClick(ui::Button&);
+  void OnLoadDefaultButtonClick(ui::Button&);
+  void OnResetMapButtonClick(ui::Button&);
+  
   void OnListViewChange(ui::ListView&, const ui::Node::Ptr&);
   void OnComboBoxSelect(ui::ComboBox&);  
   std::string param_name(int index) const;

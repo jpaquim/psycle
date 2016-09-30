@@ -1430,146 +1430,147 @@ namespace psycle { namespace host {
 			NewMachine();
 		}
 		
-    void CChildView::CreateNewMachine(int x, int y, int mac, int selectedMode, int Outputmachine, const std::string& psOutputDll, int shellIdx, Machine* insert)
-    {      
-      int fb,xs,ys;
-				if (mac < 0)
+		void CChildView::CreateNewMachine(int x, int y, int mac, int selectedMode, int Outputmachine, const std::string& psOutputDll, int shellIdx, Machine* insert)
+		{      
+			int fb,xs,ys;
+			if (mac < 0)
+			{
+				PsycleGlobal::inputHandler().AddMacViewUndo();
+				if (selectedMode == modegen) 
+				{
+					fb = Global::song().GetFreeBus();
+					xs = MachineCoords->sGenerator.width;
+					ys = MachineCoords->sGenerator.height;
+				}
+				else 
+				{
+					fb = Global::song().GetFreeFxBus();
+					xs = MachineCoords->sEffect.width;
+					ys = MachineCoords->sEffect.height;
+				}
+				x-=xs/2;
+				y-=ys/2;
+			}
+			else
+			{
+				if (mac >= MAX_BUSES && selectedMode != modegen)
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
-					if (selectedMode == modegen) 
-					{
-						fb = Global::song().GetFreeBus();
-						xs = MachineCoords->sGenerator.width;
-						ys = MachineCoords->sGenerator.height;
-					}
-					else 
-					{
-						fb = Global::song().GetFreeFxBus();
-						xs = MachineCoords->sEffect.width;
-						ys = MachineCoords->sEffect.height;
-					}
-					x-=xs/2;
-					y-=ys/2;
+					fb = mac;
+					xs = MachineCoords->sEffect.width;
+					ys = MachineCoords->sEffect.height;
+				}
+				else if (mac < MAX_BUSES && selectedMode == modegen)
+				{
+					PsycleGlobal::inputHandler().AddMacViewUndo();
+					fb = mac;
+					xs = MachineCoords->sGenerator.width;
+					ys = MachineCoords->sGenerator.height;
 				}
 				else
 				{
-					if (mac >= MAX_BUSES && selectedMode != modegen)
-					{
-						PsycleGlobal::inputHandler().AddMacViewUndo();
-						fb = mac;
-						xs = MachineCoords->sEffect.width;
-						ys = MachineCoords->sEffect.height;
-					}
-					else if (mac < MAX_BUSES && selectedMode == modegen)
-					{
-						PsycleGlobal::inputHandler().AddMacViewUndo();
-						fb = mac;
-						xs = MachineCoords->sGenerator.width;
-						ys = MachineCoords->sGenerator.height;
-					}
-					else
-					{
-						MessageBox("Wrong Class of Machine!");
-						return;
-					}
+					MessageBox("Wrong Class of Machine!");
+					return;
 				}
+			}
 
-				if ( fb == -1)
+			if ( fb == -1)
+			{
+				MessageBox("Machine Creation Failed","Error!",MB_OK);
+			}
+			else
+			{
+				// Get info of old machine and close any open gui.
+				if (Global::song()._pMachine[fb])
 				{
-					MessageBox("Machine Creation Failed","Error!",MB_OK);
+					x = Global::song()._pMachine[fb]->_x;
+					y = Global::song()._pMachine[fb]->_y;
+					pParentMain->CloseMacGui(fb);
 				}
-				else
+				else if ((x < 0) || (y < 0))
 				{
-					// Get info of old machine and close any open gui.
-					if (Global::song()._pMachine[fb])
+					 // random position
+					bool bCovered = TRUE;
+					while (bCovered)
 					{
-						x = Global::song()._pMachine[fb]->_x;
-						y = Global::song()._pMachine[fb]->_y;
-						pParentMain->CloseMacGui(fb);
-					}
-					else if ((x < 0) || (y < 0))
-					{
-						 // random position
-						bool bCovered = TRUE;
-						while (bCovered)
+						x = (rand())%(CW-xs);
+						y = (rand())%(CH-ys);
+						bCovered = FALSE;
+						for (int i=0; i < MAX_MACHINES; i++)
 						{
-							x = (rand())%(CW-xs);
-							y = (rand())%(CH-ys);
-							bCovered = FALSE;
-							for (int i=0; i < MAX_MACHINES; i++)
+							if (Global::song()._pMachine[i])
 							{
-								if (Global::song()._pMachine[i])
+								if ((abs(Global::song()._pMachine[i]->_x - x) < 32) &&
+									(abs(Global::song()._pMachine[i]->_y - y) < 32))
 								{
-									if ((abs(Global::song()._pMachine[i]->_x - x) < 32) &&
-										(abs(Global::song()._pMachine[i]->_y - y) < 32))
-									{
-										bCovered = TRUE;
-										i = MAX_MACHINES;
-									}
+									bCovered = TRUE;
+									i = MAX_MACHINES;
 								}
 							}
 						}
 					}
-
-					bool created=false;
-          if (insert) {            
-            CExclusiveLock lock(&Global::song().semaphore, 2, true);
-            Global::song()._pMachine[fb] = insert;
-				    insert->_x = x;
-				    insert->_y = y;
-            insert->_macIndex = fb;
-            created = true;            
-          } else
-					if (Global::song()._pMachine[fb])
-					{
-						created = Global::song().ReplaceMachine(Global::song()._pMachine[fb],(MachineType)Outputmachine, x, y, psOutputDll.c_str(),fb,shellIdx);
-					}
-					else 
-					{
-						created = Global::song().CreateMachine((MachineType)Outputmachine, x, y, psOutputDll.c_str(),fb,shellIdx);
-					}
-					if (created)
-					{
-						if (selectedMode == modegen)
-						{
-							Global::song().seqBus = fb;
-						}
-
-						// make sure that no 2 machines have the same name, because that is irritating
-
-						int number = 1;
-						char buf[sizeof(_pSong._pMachine[fb]->_editName)+4];
-						strcpy (buf,_pSong._pMachine[fb]->_editName);
-
-						for (int i = 0; i < MAX_MACHINES-1; i++)
-						{
-							if (i!=fb)
-							{
-								if (_pSong._pMachine[i])
-								{
-									if (strcmp(_pSong._pMachine[i]->_editName,buf)==0)
-									{
-										number++;
-										sprintf(buf,"%s %d",_pSong._pMachine[fb]->_editName,number);
-										i = -1;
-									}
-								}
-							}
-						}
-
-						buf[sizeof(_pSong._pMachine[fb]->_editName)-1] = 0;
-						strncpy(_pSong._pMachine[fb]->_editName,buf,sizeof(_pSong._pMachine[fb]->_editName)-1);
-
-						pParentMain->UpdateComboGen();
-						Repaint(draw_modes::all);
-            
-						//Repaint(draw_modes::all_machines); // Seems that this doesn't always work (multiple calls to Repaint?)
-					}
-					else MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
-    }
 
-    /// Show new machine dialog
+				bool created=false;
+				if (insert) {            
+					CExclusiveLock lock(&Global::song().semaphore, 2, true);
+					Global::song()._pMachine[fb] = insert;
+					insert->_x = x;
+					insert->_y = y;
+					insert->_macIndex = fb;
+					created = true;            
+				}
+				else if (Global::song()._pMachine[fb])
+				{
+					created = Global::song().ReplaceMachine(Global::song()._pMachine[fb],(MachineType)Outputmachine, x, y, psOutputDll.c_str(),fb,shellIdx);
+				}
+				else 
+				{
+					created = Global::song().CreateMachine((MachineType)Outputmachine, x, y, psOutputDll.c_str(),fb,shellIdx);
+				}
+				if (created)
+				{
+					ParamTranslator param(*_pSong._pMachine[fb]);
+					char name[128];
+					strcpy(name,_pSong._pMachine[fb]->GetDllName());
+					if (strcmp(name,"") == 0) { strcpy(name,_pSong._pMachine[fb]->GetName()); }
+					PresetIO::LoadDefaultMap(PsycleGlobal::conf().GetAbsolutePresetsDir() + "/" + name + ".map",param);
+					_pSong._pMachine[fb]->set_virtual_param_map(param);
+				
+					if (selectedMode == modegen)
+					{
+						Global::song().seqBus = fb;
+					}
+
+					// make sure that no 2 machines have the same name, because that is irritating
+
+					int number = 1;
+					char buf[sizeof(_pSong._pMachine[fb]->_editName)+4];
+					strcpy (buf,_pSong._pMachine[fb]->_editName);
+
+					for (int i = 0; i < MAX_MACHINES-1; i++)
+					{
+						if (i!=fb && _pSong._pMachine[i] && strcmp(_pSong._pMachine[i]->_editName,buf)==0)
+						{
+							number++;
+							sprintf(buf,"%s %d",_pSong._pMachine[fb]->_editName,number);
+							i = -1;
+						}
+					}
+
+					buf[sizeof(_pSong._pMachine[fb]->_editName)-1] = 0;
+					strncpy(_pSong._pMachine[fb]->_editName,buf,sizeof(_pSong._pMachine[fb]->_editName)-1);
+
+					pParentMain->UpdateComboGen();
+					Repaint(draw_modes::all);
+        
+					//Repaint(draw_modes::all_machines); // Seems that this doesn't always work (multiple calls to Repaint?)
+				}
+				else MessageBox("Machine Creation Failed","Error!",MB_OK);
+			}
+		}
+
+		/// Show new machine dialog
 		void CChildView::NewMachine(int x, int y, int mac) 
 		{
 			CNewMachine dlg(this);

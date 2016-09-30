@@ -7,6 +7,8 @@
 #include "Preset.hpp"
 namespace psycle { namespace host {
 
+		class ParamTranslator;
+
 		/// skin file IO
 		class PresetIO
 		{
@@ -16,6 +18,8 @@ namespace psycle { namespace host {
 		public:
 			static void LoadPresets(const char* szFile, int numParameters, int dataSizeStruct,std::list<CPreset>& presets, bool warn_if_notexists=true);
 			static void SavePresets(const char* szFile, std::list<CPreset>& presets);
+			static void LoadDefaultMap(std::string szfile, ParamTranslator& translator);
+			static void SaveDefaultMap(std::string szfile, ParamTranslator& translator, int numparams);
 
 		protected:
 			static void LoadVersion0(FILE* hfile, int numpresets, int numParameters, std::list<CPreset>& presets);
