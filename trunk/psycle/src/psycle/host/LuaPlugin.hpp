@@ -34,17 +34,20 @@ namespace psycle { namespace host {
 
     virtual int GenerateAudioInTicks( int startSample, int numSamples );
     virtual float GetAudioRange() const { return 1.0f; }
-    virtual const char* const GetName(void) const { return proxy_.info().name.c_str(); }
+    virtual const char* const GetName(void) const {
+      name_ = proxy_.meta().name; 
+      return name_.c_str();
+    }
     // todo other paramter save that doesnt invalidate tweaks when changing num parameters
     virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
     virtual void SaveSpecificChunk(RiffFile * pFile);
     // todo testing
     virtual const char * const GetDllName() const throw() { return dll_path_.c_str(); }
     //PluginInfo
-    virtual const std::string GetAuthor() { return proxy_.info().vendor; }
-    virtual const uint32_t GetAPIVersion() { return proxy_.info().APIversion; }
-    virtual const uint32_t GetPlugVersion() { return atoi(proxy_.info().version.c_str()); }
-    bool IsSynth() const throw() { return (proxy_.info().mode == MACHMODE_GENERATOR); }
+    virtual const std::string GetAuthor() { return proxy_.meta().vendor; }
+    virtual const uint32_t GetAPIVersion() { return proxy_.meta().APIversion; }
+    virtual const uint32_t GetPlugVersion() { return atoi(proxy_.meta().version.c_str()); }
+    bool IsSynth() const throw() { return (proxy_.meta().mode == MACHMODE_GENERATOR); }
 
     //TODO: testing
     virtual void NewLine();
@@ -63,7 +66,7 @@ namespace psycle { namespace host {
     virtual bool SetParameter(int numparam, int value); //{ return false;}    
     virtual int GetNumInputPins() const { return this->IsSynth() ? 0 : samplesV.size(); }
     virtual int GetNumOutputPins() const { return samplesV.size(); }
-    const PluginInfo& info() const { return proxy().info(); }
+    PluginInfo info() const { return proxy().meta(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
     virtual void AfterTweaked(int numparam);    
     std::string help();
@@ -73,7 +76,7 @@ namespace psycle { namespace host {
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);
-    void OnActivated() { proxy_.OnActivated();  }
+    void OnActivated(int viewport) { proxy_.OnActivated(viewport); }
     void OnDeactivated() { proxy_.OnDeactivated();  }
 
     // Bank & Programs
@@ -116,20 +119,20 @@ namespace psycle { namespace host {
       return proxy().OnKeyUp(nChar, nRepCnt, nFlags);
     }
 
-    boost::shared_ptr<LuaPlugin> this_ptr()
-    {
-        return shared_from_this();
-    }
-
+    boost::shared_ptr<LuaPlugin> this_ptr() { return shared_from_this(); }
     virtual void OnCanvasChanged() { CanvasChanged(*this); }
-
     boost::signal<void (LuaPlugin&)> CanvasChanged;
+    boost::signal<void (LuaPlugin&, int)> ViewPortChanged;
+
+    std::string install_script() const { return proxy_.install_script(); }
+    std::string const title() { return proxy().title(); }
 
   protected:
     LuaProxy proxy_;
     int curr_prg_;
 
   private:
+    void MachineInits();
     virtual void OnTimerViewRefresh();
     // additions if noteon mode is used
     struct note {
@@ -156,6 +159,7 @@ namespace psycle { namespace host {
       bool do_exit_, do_reload_;    
 
     static int idex_; // auto index for host extensions
+    mutable std::string name_;
   };
 }   // namespace
 }   // namespace

@@ -38,7 +38,7 @@ class ParamMap : public ui::Frame {
     delete this;  
   }
 
-  void UpdateNew(int par,int value);
+  void UpdateNew(int par,int value);  
 
  private:
   void InitLayout();  
@@ -53,6 +53,7 @@ class ParamMap : public ui::Frame {
   void OnSaveDefaultButtonClick(ui::Button&);
   void OnLoadDefaultButtonClick(ui::Button&);
   void OnResetMapButtonClick(ui::Button&);
+  void RefreshParamMap();
   
   void OnListViewChange(ui::ListView&, const ui::Node::Ptr&);
   void OnComboBoxSelect(ui::ComboBox&);  

@@ -1268,6 +1268,11 @@ class Frame : public Window {
 
   Frame();
   Frame(FrameImp* imp);
+  virtual ~Frame() {
+    if (!viewport_.expired()) {
+      viewport_.lock()->set_parent(0);
+    }
+  }
 
   virtual void PreTranslateMessage(MSG* pMsg) {}
 
@@ -1559,6 +1564,10 @@ class MenuContainer {
 };
 
 class MenuBar : public MenuContainer {
+ public:
+   ~MenuBar() {
+     ::AfxGetMainWnd()->DrawMenuBar();
+   }
 };
 
 class PopupMenu : public MenuContainer {
@@ -1662,6 +1671,9 @@ class ListView : public Window {
 
   void EnableRowSelect();
   void DisableRowSelect();
+
+  void EnableDraw();
+  void PreventDraw();
   
   virtual void select_node(const Node::Ptr& node);
   virtual boost::weak_ptr<Node> selected();
@@ -2386,6 +2398,8 @@ class ListViewImp : public WindowImp, public NodeOwnerImp {
   virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
   virtual int dev_top_index() const = 0;
   virtual void DevEnsureVisible(int index) = 0;
+  virtual void DevEnableDraw() = 0;
+  virtual void DevPreventDraw() = 0;
 };
 
 class ScrollBarImp : public WindowImp {

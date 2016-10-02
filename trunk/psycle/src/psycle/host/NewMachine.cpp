@@ -129,7 +129,7 @@ namespace psycle { namespace host {
 					PluginInfo* pInfo = _pPlugsInfo[i];
 					if ( pInfo->error.empty())
 					{
-            if( pInfo->mode == MACHMODE_LUAUIEXT) {
+            if( pInfo->mode == MACHMODE_HOST) {
               continue;
             } else
 						if( pInfo->mode == MACHMODE_GENERATOR)

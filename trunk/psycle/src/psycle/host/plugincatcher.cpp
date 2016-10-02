@@ -167,7 +167,7 @@ namespace psycle
 					  (shellIdx == 0 || shellIdx == pInfo->identifier))
 				  {
 				   	// bad plugins always have allow = false
-            if(pInfo->allow && pInfo->mode == MACHMODE_LUAUIEXT) list.push_back(pInfo);
+            if(pInfo->allow && pInfo->mode == MACHMODE_HOST) list.push_back(pInfo);
 					/*std::ostringstream s; s
 						<< "Plugin " << name << " is disabled because:" << std::endl
 						<< pInfo->error << std::endl

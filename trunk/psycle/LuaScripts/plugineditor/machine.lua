@@ -32,7 +32,7 @@ function machine:info()
   return { 
     vendor  = "psycle",
     name    = "Plugineditor",
-    mode    = machine.HOSTUI,
+    mode    = machine.HOST,
     version = 0,
     api     = 0
   }
@@ -45,10 +45,11 @@ end
 
 function machine:init(samplerate)  
    self.project = project:new()   
-   self.maincanvas = maincanvas:new()   
+   self.maincanvas = maincanvas:new(self)   
    self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)   
    self:setcanvas(self.maincanvas)
-   self:initmenu();   
+   self:initmenu();
+   self:settitle("empty")  
 end
 
 function machine:editmachineindex()
@@ -59,58 +60,29 @@ function machine:editmachineindex()
   return result;
 end
 
-function machine:createframe()  
-  self.frame = frame:new()
-                    :setviewport(self.maincanvas)  
-                    :settitle("Psycle Plugineditor")
-  local that = self
-  function self.frame:onclose(ev) 		       
-    that:exit()
+function machine:onexecute(msg, macidx, plugininfo, trace)    
+  if msg ~= nil then
+	self.project:setplugininfo(plugininfo):setpluginindex(macidx)
+	self.maincanvas:fillinstancecombobox():setpluginindex(macidx)
+	self.maincanvas:setoutputtext(msg)
+	self.maincanvas:setcallstack(trace)
+	for i=1, #trace do
+    if self.maincanvas:openinfo(trace[i]) then
+		break
+	  end
+	end      
+	self.maincanvas:setplugindir(plugininfo)
+	if plugininfo then
+      self:settitle(plugininfo:name())
+	end
   end
-end
-
-function machine:onexecute(msg, macidx, plugininfo, trace)  
-  if msg == nil then  
-    self:openinmainframe()  
-  else  
-    self.project:setplugininfo(plugininfo):setpluginindex(macidx)
-    self.maincanvas:fillinstancecombobox():setpluginindex(macidx)
-    self.maincanvas:setoutputtext(msg)
-    self.maincanvas:setcallstack(trace)
-    for i=1, #trace do
-      if self.maincanvas:openinfo(trace[i]) then
-        break
-      end
-    end  
-    if self.frame == nil then      
-      self.maincanvas:setplugindir(plugininfo)
-      self:openinframe()
-    end  
-  end    
 end
 
 function machine:togglecanvas()
-  if self.frame == nil then   
-    self:openinframe()
-  else
-    self:openinmainframe()
-  end
+  self:toggleviewport()  
 end
 
-function machine:openinframe() 
-  self.maincanvas:setwindowiconin()
-  self:setcanvas(nil)
-  self:createframe()   
-  self.frame:show(framealigner:new(item.ALRIGHT):sizetoscreen(0.4, 0.8))
-end
-
-function machine:openinmainframe() 
-  self.maincanvas:setwindowiconout()
-  self.frame = nil  
-  self:setcanvas(self.maincanvas)
-end
-
-function machine:onactivated()  
+function machine:onactivated(viewport)  
   self.maincanvas:fillinstancecombobox()
   if self.project and self.project:pluginindex() ~= -1 then
     self.maincanvas:setpluginindex(self.project:pluginindex())

@@ -78,7 +78,7 @@ namespace psycle
 			MACHMODE_GENERATOR = 0,
 			MACHMODE_FX = 1,
 			MACHMODE_MASTER = 2,
-      MACHMODE_LUAUIEXT = 3
+      MACHMODE_HOST = 3      
 		};
 
     struct MachineUiType {

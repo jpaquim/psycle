@@ -1308,19 +1308,20 @@ Window::Container Aligner::dummy;
 
 void Group::UpdateAlign() {
   if (aligner_) {   
-    bool old_is_saving = false, old_is_fls_prevented = false;    
+    bool old_is_saving(false);
+    bool old_is_fls_prevented(false);
     if (root()) {     
-       old_is_fls_prevented = root()->is_fls_prevented();      
-       if (!old_is_fls_prevented) {
-        old_is_saving = root()->IsSaving();
+      old_is_fls_prevented = root()->is_fls_prevented();      
+      old_is_saving = root()->IsSaving();
+      if (!old_is_fls_prevented) {        
         dynamic_cast<Canvas*>(root())->SetSave(true);
       }
     }         
     aligner_->Align();    
     if (!old_is_saving && !old_is_fls_prevented && root()) {    
-      dynamic_cast<Canvas*>(root())->Flush();
-      dynamic_cast<Canvas*>(root())->SetSave(false);
+       dynamic_cast<Canvas*>(root())->Flush();
     }  
+    dynamic_cast<Canvas*>(root())->SetSave(old_is_saving);    
   }
 }
 
@@ -1778,9 +1779,24 @@ void ListView::Clear() {
 
 void ListView::UpdateList() {
   if (imp() && !root_node_.expired()) {
+    PreventDraw();
     imp()->DevClear();  
     imp()->DevUpdate(root_node_.lock());
+    EnableDraw();
+    FLS();
   }  
+}
+
+void ListView::EnableDraw() {
+  if (imp()) {
+    imp()->DevEnableDraw();
+  }
+}
+
+void ListView::PreventDraw() {
+  if (imp()) {
+    imp()->DevPreventDraw();
+  }
 }
 
 void ListView::AddColumn(const std::string& text, int width) {

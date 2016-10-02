@@ -50,10 +50,11 @@ local templateparser = require("templateparser")
 
 local maincanvas = canvas:new()
 
-function maincanvas:new()
+function maincanvas:new(machine)
   local c = canvas:new()  
   setmetatable(c, self)
   self.__index = self  
+  c.machine_ = machine  
   c:init()
   return c
 end
@@ -630,6 +631,7 @@ function maincanvas:onopenplugin(pluginpath, pluginname, info)
   self:openplugin(pluginpath, pluginname, info)
   psycle.proxy.project = project:new():setplugininfo(info)
   self:fillinstancecombobox()  
+  self.machine_:settitle(pluginname)
 end
 
 function findlast(haystack, needle)

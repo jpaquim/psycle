@@ -1809,6 +1809,8 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
     assert(result);
     return result;
   }  
+  virtual void DevEnableDraw() { SetRedraw(true); }
+  virtual void DevPreventDraw() { SetRedraw(false); }
   virtual void DevClear();  
   virtual void DevUpdate(const Node::Ptr& node, Node::Ptr prev_node);
   virtual void DevErase(boost::shared_ptr<Node> node);  

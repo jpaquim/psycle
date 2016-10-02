@@ -153,13 +153,13 @@ namespace psycle { namespace host {
 
 			//Psycle maintains its own recent
 			//LoadRecent(pFrame); // Import recent files from registry.
-
+      pFrame->m_wndView.InitWindowMenu();
 			if (*m_lpCmdLine)
 				ProcessCmdLine(m_lpCmdLine); // Process Command Line
 			else
 			{
 				global_.machineload().LoadPluginInfo(false);
-        ui::Systems::instance().InitInstance(PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\psycle\\ui\\uiconfiguration.lua");
+        ui::Systems::instance().InitInstance(PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\psycle\\ui\\uiconfiguration.lua");        
         pFrame->m_wndView.LoadHostExtensions();
 				// Show splash screen
 				if (global_.conf()._showAboutAtStart)

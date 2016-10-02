@@ -4,9 +4,10 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version. 
 
-local canvas = require("psycle.ui.canvas")
-local group = require("psycle.ui.canvas.group")
+local boxspace = require("psycle.ui.boxspace")
 local item = require("psycle.ui.canvas.item")
+local group = require("psycle.ui.canvas.group")
+local canvas = require("psycle.ui.canvas")
 local text = require("psycle.ui.canvas.text")
 local gamecontrollers = require("psycle.ui.gamecontrollers")
 local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
@@ -22,7 +23,7 @@ function maincanvas:new()
 end
 
 function maincanvas:init() 
-  self:setornament(ornamentfactory:createfill(0x000000))   
+  self:addornament(ornamentfactory:createfill(0x000000))   
   self.gamecontrollers = gamecontrollers:new()
   local controllers = self.gamecontrollers:controllers()  
   for i=1, #controllers do    
@@ -31,7 +32,10 @@ function maincanvas:init()
 end
 
 function maincanvas:initcontrollerdisplay(no, controller)  
-  local g = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(5, 5, 0, 0)  
+  local g = group:new(self)
+                        :setautosize(false, true)
+                        :setalign(item.ALTOP)
+                        :setmargin(boxspace:new(5, 5, 0, 0))
   self:addtext(g, "Game Controller "..no)  
   self:addtext(g, "x-pos"):addfield(g, "0", "xpos")
   self:addtext(g, "y-pos"):addfield(g, "0", "ypos")
@@ -56,12 +60,20 @@ function maincanvas:initcontrollerdisplay(no, controller)
 end
 
 function maincanvas:addtext(parent, str, field)
-  local text = text:new(parent):settext(str):setcolor(0x528A68):setalign(item.ALTOP) :setautosize(false, true) 
+  local text = text:new(parent)
+                         :settext(str)
+                         :setcolor(0x528A68)
+                         :setalign(item.ALTOP) 
+                         :setautosize(false, true) 
   return self
 end
 
 function maincanvas:addfield(parent, str, field)
-  local text = text:new(parent):settext(str):setcolor(0xFFFFFF):setalign(item.ALTOP):setautosize(false, true) 
+  local text = text:new(parent)
+                         :settext(str)
+                         :setcolor(0xFFFFFF)
+                         :setalign(item.ALTOP)
+                         :setautosize(false, true) 
   parent[field] = text 
   return self
 end
