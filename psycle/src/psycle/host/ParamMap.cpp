@@ -88,8 +88,7 @@ void ParamMap::RefreshParamMap() {
     col2_node->set_text(str.str());              
   }
   list_view_->EnableDraw();
-  list_view_->FLS();
-  FillComboBox();
+  list_view_->FLS();  
   UpdateMachineParamEndText();
 }
 
