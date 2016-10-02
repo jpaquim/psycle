@@ -247,7 +247,8 @@ namespace host {
 			void RestoreRecent();
     public:      
       void ChangeCanvas(ui::Window* canvas);
-      void LoadHostExtensions();      
+      void LoadHostExtensions();
+      void InitWindowMenu();      
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;

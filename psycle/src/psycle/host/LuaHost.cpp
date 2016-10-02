@@ -45,7 +45,8 @@ LuaControl::LuaControl() : L(0) {
   InitializeCriticalSection(&cs);  
 }
 LuaControl::~LuaControl() {
-  DeleteCriticalSection(&cs);
+  Free();
+  DeleteCriticalSection(&cs);  
 }
 
 void LuaControl::Load(const std::string& filename) {
@@ -55,16 +56,31 @@ void LuaControl::Load(const std::string& filename) {
 void LuaControl::Run() {  
   int status = lua_pcall(L, 0, LUA_MULTRET, 0);
   if (status) {         
-    const char* msg = lua_tostring(L, -1); 
-    ui::alert(msg);
+    const char* msg = lua_tostring(L, -1);    
     throw std::runtime_error(msg);       
-  } 
+  }   
+}
+
+void LuaControl::Start() {
+  lua_getglobal(L, "psycle");
+  if (lua_isnil(L, -1)) {
+    throw std::runtime_error("Psycle not available.");
+  }
+  lua_getfield(L, -1, "start");
+  if (!lua_isnil(L, -1)) {
+    int status = lua_pcall(L, 0, 0, 0);
+    if (status) {         
+      const char* msg = lua_tostring(L, -1); 
+      ui::alert(msg);
+      throw std::runtime_error(msg);       
+    }
+  }
 }
 
 void LuaControl::Free() {
   if (L) {
     invokelater->Clear();
-    lua_close(L);
+    lua_close(L);    
   }
   L = 0;
 }
@@ -81,7 +97,15 @@ void LuaControl::PrepareState() {
   *ud = this;
   lua_setfield(L, -2, "__self");
   lua_setglobal(L, "psycle");
-  lua_getglobal(L, "psycle");  
+  lua_getglobal(L, "psycle"); 
+  lua_pushinteger(L, CHILDVIEWPORT);
+  lua_setfield(L, -2, "CHILDVIEWPORT");
+  lua_pushinteger(L, FRAMEVIEWPORT);
+  lua_setfield(L, -2, "FRAMEVIEWPORT");
+  lua_pushinteger(L, MDI);
+  lua_setfield(L, -2, "MDI");
+  lua_pushinteger(L, SDI);
+  lua_setfield(L, -2, "SDI");
   lua_newtable(L); // table for canvasdata
   lua_setfield(L, -2, "userdata");
   lua_newtable(L); // table for canvasdata
@@ -101,10 +125,157 @@ struct ReleaseImpDeleter {
   }
 };
 
+std::string LuaControl::install_script() const {
+  std::string result;
+  lua_getglobal(L, "psycle");
+  if (lua_isnil(L, -1)) {
+    throw std::runtime_error("Psycle not available.");
+  }
+  lua_getfield(L, -1, "install");
+  if (!lua_isnil(L, -1)) {
+    int status = lua_pcall(L, 0, 1, 0);    
+    if (status) {         
+      const char* msg = lua_tostring(L, -1); 
+      ui::alert(msg);
+      throw std::runtime_error(msg);       
+    }
+    result = luaL_checkstring(L, -1);
+  }
+  return result;
+}
+
+PluginInfo LuaControl::meta() const {
+  PluginInfo result;
+  lua_getglobal(L, "psycle");
+  if (lua_isnil(L, -1)) {
+    throw std::runtime_error("Psycle not available.");
+  }
+  lua_getfield(L, -1, "info");
+  if (!lua_isnil(L, -1)) {
+    int status = lua_pcall(L, 0, 1, 0);    
+    if (status) {         
+      const char* msg = lua_tostring(L, -1); 
+      ui::alert(msg);
+      throw std::runtime_error(msg);       
+    }
+    result = parse_info();    
+  } else {
+    throw std::runtime_error("no info found");
+  }
+  return result;
+}
+
+PluginInfo LuaControl::parse_info() const {
+  PluginInfo result;
+  result.type = MACH_LUA;
+  result.mode = MACHMODE_FX;
+  result.allow = true;
+  result.identifier = 0;    
+  if (lua_istable(L,-1)) {
+    size_t len;
+    for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
+      const char* key = luaL_checklstring(L, -2, &len);
+      if (strcmp(key, "vendor") == 0) {
+        const char* value = luaL_checklstring(L, -1, &len);
+        result.vendor = std::string(value);
+      } else
+        if (strcmp(key, "name") == 0) {
+          const char* value = luaL_checklstring(L, -1, &len);
+          result.name = std::string(value);
+        } else
+          if (strcmp(key, "mode") == 0) {
+            if (lua_isnumber(L, -1) == 0) {
+              throw std::runtime_error("info mode not a number"); 
+            }
+            int value = luaL_checknumber(L, -1);
+            switch (value) {
+              case 0 : result.mode = MACHMODE_GENERATOR; break;
+              case 3 : result.mode = MACHMODE_HOST; break;
+              default: result.mode = MACHMODE_FX; break;
+            }
+          } else
+          if (strcmp(key, "generator") == 0) {
+            // deprecated, use mode instead
+            int value = luaL_checknumber(L, -1);
+            result.mode = (value==1) ? MACHMODE_GENERATOR : MACHMODE_FX;
+          } else
+            if (strcmp(key, "version") == 0) {
+              const char* value = luaL_checklstring(L, -1, &len);
+              result.version = value;
+            } else
+              if (strcmp(key, "api") == 0) {
+                int value = luaL_checknumber(L, -1);
+                result.APIversion = value;
+              } else
+                if (strcmp(key, "noteon") == 0) {
+                  int value = luaL_checknumber(L, -1);
+                  result.flags = value;
+                }
+    }
+  }   
+  std::ostringstream s;
+  s << (result.mode == MACHMODE_GENERATOR ? "Lua instrument"
+                                          : "Lua effect")
+    << " by "
+    << result.vendor;
+  result.desc = s.str();
+  return result;
+}
+
+void LuaStarter::PrepareState() {
+  static const luaL_Reg methods[] = {    
+    {"addmenu", addmenu},
+    {NULL, NULL}
+  };
+  lua_newtable(L);
+  luaL_setfuncs(L, methods, 0);
+  LuaControl** ud = (LuaControl **)lua_newuserdata(L, sizeof(LuaProxy *));
+  luaL_newmetatable(L, "psyhostmeta");
+  lua_setmetatable(L, -2);
+  *ud = this;
+  lua_setfield(L, -2, "__self");
+  lua_setglobal(L, "psycle");
+  lua_getglobal(L, "psycle"); 
+  lua_pushinteger(L, CHILDVIEWPORT);
+  lua_setfield(L, -2, "CHILDVIEWPORT");
+  lua_pushinteger(L, FRAMEVIEWPORT);
+  lua_setfield(L, -2, "FRAMEVIEWPORT");
+  lua_pushinteger(L, MDI);
+  lua_setfield(L, -2, "MDI");
+  lua_pushinteger(L, SDI);
+  lua_setfield(L, -2, "SDI");
+  lua_newtable(L); // table for canvasdata
+  lua_setfield(L, -2, "userdata");
+  lua_newtable(L); // table for canvasdata
+  lua_newtable(L); // metatable
+  lua_pushstring(L, "kv");
+  lua_setfield(L, -2, "__mode");
+  lua_setmetatable(L, -2);
+  lua_setfield(L, -2, "weakuserdata");
+  lua_pop(L, 1);
+}
+
+int LuaStarter::addmenu(lua_State* L) {
+  const char* menu_name = luaL_checkstring(L, 1);  
+  lua_getfield(L, 2, "plugin");
+  lua_getfield(L, 2, "label");    
+  lua_getfield(L, 2, "viewport");
+  lua_getfield(L, 2, "userinterface");
+  Link link(luaL_checkstring(L, -4),
+            luaL_checkstring(L, -3),
+            luaL_checkinteger(L, -2),
+            luaL_checkinteger(L, -1));   
+  HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+  host_extensions.AddMenu(link);
+  return 0;
+}
+
 // Class Proxy : export and import between psycle and lua
 LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) : 
     host_(host),
-    info_update_(true) {  
+    is_meta_cache_updated_(false),
+    lua_mac_(0),
+    user_interface_(SDI) {  
   L = LuaGlobal::load_script(dllname);  
 }
 
@@ -142,6 +313,12 @@ void LuaProxy::OnTimer() {
       in.pcall(0);      
     }
   } catch(std::exception& e) {
+  }
+}
+
+void LuaProxy::OnFrameClose(ui::Frame&) {
+  if (lua_mac_ && user_interface_ == MDI) {
+    lua_mac_->doexit();
   }
 }
 
@@ -183,8 +360,7 @@ void LuaProxy::PrepareState() {
   lua_pop(L, 1);
   luaL_requiref(L, "mime", luaopen_mime_core, 1);
   lua_pop(L, 1);
-#endif  //LUASOCKET_SUPPORT
-  info_.mode = MACHMODE_FX;
+#endif  //LUASOCKET_SUPPORT  
 }
 
 void LuaProxy::Reload() {
@@ -208,7 +384,7 @@ void LuaProxy::Reload() {
         }
         lua_close(old_state);
       }
-      OnActivated();      
+      OnActivated(2);      
     } catch(std::exception &e) {
       if (new_state) {        
         lua_close(new_state);
@@ -231,6 +407,7 @@ int LuaProxy::alert(lua_State* L) {
   AfxMessageBox(msg);
   return 0;
 }
+
 
 int LuaProxy::confirm(lua_State* L) {    
   const char* msg = luaL_checkstring(L, 1);    
@@ -315,7 +492,7 @@ void LuaProxy::export_c_funcs() {
     {"confirm", confirm},
     {"setmachine", set_machine},
     {"setmenubar", set_menubar},    
-    {"selmachine", call_selmachine},	  
+    {"selmachine", call_selmachine},    
     { NULL, NULL }
   };
   lua_newtable(L);
@@ -327,6 +504,16 @@ void LuaProxy::export_c_funcs() {
   lua_setfield(L, -2, "__self");
   lua_setglobal(L, "psycle");
   lua_getglobal(L, "psycle");  
+
+  lua_pushinteger(L, CHILDVIEWPORT);
+  lua_setfield(L, -2, "CHILDVIEWPORT");
+  lua_pushinteger(L, FRAMEVIEWPORT);
+  lua_setfield(L, -2, "FRAMEVIEWPORT");
+  lua_pushinteger(L, MDI);
+  lua_setfield(L, -2, "MDI");
+  lua_pushinteger(L, SDI);
+  lua_setfield(L, -2, "SDI");
+
   lua_newtable(L); // table for canvasdata
   lua_setfield(L, -2, "userdata");
   lua_newtable(L); // table for canvasdata
@@ -338,79 +525,55 @@ void LuaProxy::export_c_funcs() {
   lua_pop(L, 1);
 }
 
+bool LuaProxy::IsPsyclePlugin() const {   
+  bool result = lua_mac_ != 0;  
+  if (!result) {
+    lua_getglobal(L, "psycle");
+    if (lua_isnil(L, -1)) {
+      lua_pop(L, 1);
+    } else {
+      lua_getfield(L, -1, "info");
+      result = !lua_isnil(L, -1);      
+      lua_pop(L, 2);
+    }
+  }  
+  return result;
+}
 
-const PluginInfo& LuaProxy::info() const {    
+bool LuaProxy::HasDirectMetaAccess() const {
+  bool result(false);
+  lua_getglobal(L, "psycle");
+  if (lua_isnil(L, -1)) {
+    lua_pop(L, 1);
+  } else {
+    lua_getfield(L, -1, "info");
+    result = !lua_isnil(L, -1);      
+    lua_pop(L, 2);
+  }
+  return result;
+}
+
+PluginInfo LuaProxy::meta() const {
+  if (is_meta_cache_updated_) {
+    return meta_cache_;
+  }
+  PluginInfo result;  
   try {
-    if (info_update_) {      
-      info_.type = MACH_LUA;
-      info_.mode = MACHMODE_FX;
-      info_.allow = true;
-      info_.identifier = 0;    
+    result = cache_meta(LuaControl::meta());
+  } catch (std::exception& e) {
+    try {        
       LuaImport in(L, lua_mac_, this);
       if (!in.open("info")) {
         throw std::runtime_error("no info found"); 
       }
       in.pcall(1);    
-      if (lua_istable(L,-1)) {
-        size_t len;
-        for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
-          const char* key = luaL_checklstring(L, -2, &len);
-          if (strcmp(key, "vendor") == 0) {
-            const char* value = luaL_checklstring(L, -1, &len);
-            info_.vendor = std::string(value);
-          } else
-            if (strcmp(key, "name") == 0) {
-              const char* value = luaL_checklstring(L, -1, &len);
-              info_.name = std::string(value);
-            } else
-              if (strcmp(key, "mode") == 0) {
-                if (lua_isnumber(L, -1) == 0) {
-                  throw std::runtime_error("info mode not a number"); 
-                }
-                int value = luaL_checknumber(L, -1);
-                switch (value) {
-                  case 0 : info_.mode = MACHMODE_GENERATOR; break;
-                  case 3 : info_.mode = MACHMODE_LUAUIEXT; break;
-                  default: info_.mode = MACHMODE_FX; break;
-                }
-              } else
-              if (strcmp(key, "generator") == 0) {
-                // deprecated, use mode instead
-                int value = luaL_checknumber(L, -1);
-                info_.mode = (value==1) ? MACHMODE_GENERATOR : MACHMODE_FX;
-              } else
-                if (strcmp(key, "version") == 0) {
-                  const char* value = luaL_checklstring(L, -1, &len);
-                  info_.version = value;
-                } else
-                  if (strcmp(key, "api") == 0) {
-                    int value = luaL_checknumber(L, -1);
-                    info_.APIversion = value;
-                  } else
-                    if (strcmp(key, "noteon") == 0) {
-                      int value = luaL_checknumber(L, -1);
-                      info_.flags = value;
-                    }
-        }
-      }    
-      std::ostringstream s;
-      s << (info_.mode == MACHMODE_GENERATOR ? "Lua instrument" 
-                                              : "Lua effect") 
-        << " by "
-        << info_.vendor;
-      info_.desc = s.str();
-      info_update_ = false;
-    }      
-  } CATCH_WRAP_AND_RETHROW(host())
-  return info_;
+      result = cache_meta(parse_info());
+    } CATCH_WRAP_AND_RETHROW(host())
+  }
+  return result;
 }
 
-
-// Note: Don't use the try { } CATCH_WRAP_AND_RETHROW(host()) macro here.
-// Run and Init are called from the host ctor
-// catch wrap doesn't seem to work inside the host ctor
-// the bad thing: the exception is not rethrown then
-void LuaProxy::Init() {    
+void LuaProxy::Init() {
   try {
     LuaImport in(L, lua_mac_, this);
     if (in.open("init")) {      
@@ -439,11 +602,11 @@ void LuaProxy::OnCanvasChanged() {
   host_->OnCanvasChanged();
 }
 
-void LuaProxy::OnActivated() {
+void LuaProxy::OnActivated(int viewport) {
   try {
     LuaImport in(L, lua_mac_, this);
     if (in.open("onactivated")) {
-      in.pcall(0);      
+      in << viewport << pcall(0);           
     }
   } CATCH_WRAP_AND_RETHROW(host())
 }
@@ -806,14 +969,137 @@ bool LuaProxy::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
     }
   } CATCH_WRAP_AND_RETHROW(host())
   return res;
+}  
+
+void LuaProxy::OpenInFrame() {
+  if (!frame_ && !canvas().expired()) {
+    frame_.reset(new ui::Frame());
+    frame_->set_viewport(canvas().lock());
+    frame_->close.connect(boost::bind(&LuaProxy::OnFrameClose, this, _1));
+    boost::shared_ptr<ui::FrameAligner> right_frame_aligner(new ui::FrameAligner(ALRIGHT));
+    right_frame_aligner->SizeToScreen(0.4, 0.8);
+    frame_->Show(right_frame_aligner);
+  }
 }
-  
+
+void LuaProxy::ToggleViewPort() {    
+  if (!frame_) {
+    OpenInFrame();
+    if (host_) {
+      host_->ViewPortChanged(*host_, FRAMEVIEWPORT);
+    }
+  } else {
+    frame_.reset();
+    if (host_) {
+      host_->ViewPortChanged(*host_, CHILDVIEWPORT);
+    }
+  }
+}
+
+void LuaProxy::UpdateWindowsMenu() {
+  HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();  
+  host_extensions.ChangeWindowsMenuText(host_);
+}
+
 // End of Class Proxy
 
-
 // Class HostExtensions : Container for HostExtensions
+
+const int windows_menu_pos = 6;
+
+void HostExtensions::StartScript() {
+  AutoInstall();  
+  try {
+    LuaStarter starter;
+    starter.Load(PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\" +
+                 "start.lua");    
+    starter.PrepareState();
+    starter.Run();
+  } catch (std::exception& e) {
+    ui::alert(e.what());
+  }
+}
+
+void HostExtensions::AutoInstall() {
+  typedef std::vector<std::string> InstalledList;
+  InstalledList installed = search_auto_install();
+  PluginCatcher* plug_catcher = dynamic_cast<PluginCatcher*>(&Global::machineload()); 
+	assert(plug_catcher);
+  PluginInfoList list = plug_catcher->GetLuaExtensions();
+	if (list.size() > 0) {            
+	  PluginInfoList list = plug_catcher->GetLuaExtensions();
+    std::ofstream outfile;
+    std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
+    std::string start_script_path = script_path + "\\start.lua";
+    outfile.open(start_script_path.c_str(), std::ios_base::app);
+	  PluginInfoList::iterator it = list.begin();	  
+	  for (; it != list.end(); ++it) {
+		  PluginInfo* info = *it;     		
+      boost::filesystem::path p(info->dllname.c_str());            
+	    InstalledList::iterator k = std::find(installed.begin(), installed.end(), p.filename().string());
+      if (k == installed.end()) {         
+         LuaControl mac;
+         mac.Load(info->dllname.c_str());
+         mac.PrepareState();
+         mac.Run();
+         std::string install_script = mac.install_script();                  
+         //std::string install_script = luaL_checkstring(L, -1); // mac->install_script();                  
+         outfile << std::endl << "-- @" << p.filename().string() << std::endl << install_script;         
+      }
+	  }         
+  }
+}
+
+std::vector<std::string> HostExtensions::search_auto_install() {
+  std::vector<std::string> result;
+  std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
+  std::string start_script_path = script_path + "\\start.lua";
+  using namespace std;
+  ifstream fileInput;
+  int offset;
+  string line;
+  char* search = "@"; // test variable to search in file
+  // open file to search
+  fileInput.open(start_script_path.c_str());
+  if(fileInput.is_open()) {
+    unsigned int curLine = 0;
+    while(getline(fileInput, line)) { // I changed this, see below
+      curLine++;
+      if (line.find(search, 0) != string::npos) {
+        cout << "found: " << search << "line: " << curLine << endl;
+        std::string line_str(line.c_str());
+        std::size_t pos = line_str.find("@");
+        if (pos != std::string::npos) {
+          result.push_back(line_str.substr(pos + 1));
+        }       
+      }
+    }
+    fileInput.close();
+  }
+  return result;
+}
+
+void HostExtensions::AddMenu(Link& link) {
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
+  CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);	
+  int win32_menu_id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
+  view_menu->InsertMenu(
+      menu_pos_++,
+      MF_STRING | MF_BYPOSITION,
+      win32_menu_id,
+      ui::mfc::Charset::utf8_to_win(link.label()).c_str());  
+  menuItemIdMap_[win32_menu_id] = link;
+}
+
+void HostExtensions::InitWindowsMenu() {
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;
+  CMenu* main_menu = pParentMain->GetMenu();  
+  windows_menu_ = ::CreateMenu();    
+  InsertMenu(main_menu->GetSafeHmenu(), windows_menu_pos, MF_POPUP | MF_ENABLED, (UINT_PTR)windows_menu_, _T("Windows"));     
+}
+
 void HostExtensions::Load(CMenu* view_menu) {
-   PluginCatcher* plug_catcher = dynamic_cast<PluginCatcher*>(&Global::machineload()); 
+   /*PluginCatcher* plug_catcher = dynamic_cast<PluginCatcher*>(&Global::machineload()); 
 	 assert(plug_catcher);
    PluginInfoList list = plug_catcher->GetLuaExtensions();
 	 if (list.size() > 0) {            
@@ -852,7 +1138,42 @@ void HostExtensions::Load(CMenu* view_menu) {
 		  view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
 		  menuItemIdMap_[id] = NULL;
 	    }
-	  }
+	  }*/
+}
+
+void HostExtensions::AddToWindowsMenu(Link& link) {
+  const int id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
+  std::string label;
+  ::AppendMenu(windows_menu_,
+               MF_STRING | MF_BYPOSITION,
+               id,
+               ui::mfc::Charset::utf8_to_win(menu_label(link)).c_str());
+  menuItemIdMap_[id] = link;
+}
+
+std::string HostExtensions::menu_label(const Link& link) const {
+  std::string result;
+  if (!link.plugin.expired()) {  
+    std::string filename_noext;
+    filename_noext = boost::filesystem::path(link.dll_name()).stem().string();
+    std::transform(filename_noext.begin(), filename_noext.end(), filename_noext.begin(), ::tolower);
+    result = filename_noext + " - " + link.plugin.lock()->title();
+  } else {
+    result = link.label();
+  }
+  return result;
+}
+
+void HostExtensions::RemoveFromWindowsMenu(LuaPlugin* plugin) {
+  MenuMap::iterator it = menuItemIdMap_.begin();
+  for ( ; it != menuItemIdMap_.end(); ++it) {
+    if (!it->second.plugin.expired()) {
+      LuaPlugin* plug = it->second.plugin.lock().get();
+      if (plug == plugin) {
+        ::RemoveMenu(windows_menu_, it->first, MF_BYCOMMAND);
+      }
+    }
+  }
 }
 
 void HostExtensions::OnDynamicMenuItems(UINT nID) {
@@ -861,7 +1182,7 @@ void HostExtensions::OnDynamicMenuItems(UINT nID) {
      mbimp->WorkMenuItemEvent(nID);
      return;
   }
-  if (menuItemIdMap_[nID]==NULL) {
+  /*if (menuItemIdMap_[nID]==NULL) {
    if (active_lua_) {          
      LuaPlugin* lp = active_lua_;
      try {                      
@@ -878,37 +1199,65 @@ void HostExtensions::OnDynamicMenuItems(UINT nID) {
      child_view_->Invalidate(false);
    }
    return;  
-   }
-   std::map<std::uint16_t, LuaPlugin*>::iterator it = menuItemIdMap_.find(nID);
-      if (it != menuItemIdMap_.end()) {        
-        LuaPlugin* plug = it->second;         
-        if (plug->crashed()) return;
-        if (active_lua_ != plug) {
-          ui::Canvas::WeakPtr user_view = plug->canvas();        
-          if (!user_view.expired()) {          
-            child_view_->ChangeCanvas(user_view.lock().get()); 
-            active_lua_ = plug;
-            try {
-              boost::weak_ptr<ui::MenuContainer> menu_bar = plug->proxy().menu_bar();
-              if (!menu_bar.expired()) {
-                ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
-                menubar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
-              }
-              plug->OnActivated();
-            } catch (std::exception&) {               
-              // AfxMessageBox(e.what());
-            }
-            child_view_->Invalidate(false);
-          } else {  
-            try {
-              plug->OnExecute();
-            } catch (std::exception&) {
-              // LuaGlobal::onexception(plug->proxy().state());
-              // AfxMessageBox(e.what());
-            }  
-          }               
+   }*/
+   MenuMap::iterator it = menuItemIdMap_.find(nID);
+  int viewport = CHILDVIEWPORT;
+  if (it != menuItemIdMap_.end()) {        
+    Link link = it->second;
+    boost::shared_ptr<LuaPlugin> plug;
+    if (link.plugin.expired()) {
+      std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
+      link.plugin = plug = Execute(link);      
+      if (link.user_interface() == SDI) {        
+        menuItemIdMap_[nID] = link;
+      }
+      viewport = link.viewport();
+    } else {
+      plug = link.plugin.lock();
+      ui::Canvas::WeakPtr user_view = plug->canvas();      
+    }        
+    if (plug->crashed()) return;
+      if (active_lua_ != plug.get()) {
+        ui::Canvas::WeakPtr user_view = plug->canvas();        
+      if (!user_view.expired()) {            
+        active_lua_ = plug.get();
+        try {
+          boost::weak_ptr<ui::MenuContainer> menu_bar = plug->proxy().menu_bar();
+          if (!menu_bar.expired()) {
+            ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
+            menubar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
+          }
+          plug->ViewPortChanged(*plug.get(), viewport);
+          plug->OnActivated(viewport);
+        } catch (std::exception&) {               
+          // AfxMessageBox(e.what());
         }
-      }      
+        child_view_->Invalidate(false);
+      } else {  
+        try {
+          plug->OnExecute();
+        } catch (std::exception&) {
+          // LuaGlobal::onexception(plug->proxy().state());
+          // AfxMessageBox(e.what());
+        }  
+      }               
+    }
+  }      
+}
+
+LuaPluginPtr HostExtensions::Execute(Link& link) {
+  std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
+  LuaPluginPtr mac(new LuaPlugin(script_path + "\\" + link.dll_name().c_str(), -1));
+  mac->proxy().set_userinterface(link.user_interface());
+	mac->Init();			
+  Add(mac); 
+  mac->CanvasChanged.connect(boost::bind(&HostExtensions::OnPluginCanvasChanged, this,  _1));
+  mac->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, this,  _1, _2));  
+  link.plugin = mac;
+  if (link.user_interface() == MDI) {
+    AddToWindowsMenu(link); 
+  }
+  return mac;
 }
 
 void HostExtensions::OnPluginCanvasChanged(LuaPlugin& plugin) {     
@@ -925,6 +1274,23 @@ void HostExtensions::OnPluginCanvasChanged(LuaPlugin& plugin) {
       pParentMain->m_luaWndView->ShowWindow(SW_SHOW);            
     }
   }      
+}
+
+void HostExtensions::OnPluginViewPortChanged(LuaPlugin& plugin, int viewport) {
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
+  if (viewport == CHILDVIEWPORT) {
+    child_view_->ChangeCanvas(plugin.canvas().lock().get());
+    if (!child_view_->IsWindowVisible()) {      
+      child_view_->ShowWindow(SW_HIDE);
+      pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
+    }
+  } else 
+  if (viewport == FRAMEVIEWPORT) {
+    if (!child_view_->IsWindowVisible()) {              
+      pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+      child_view_->ShowWindow(SW_SHOW);
+    }
+  }
 }
 
 void HostExtensions::HideActiveLua() {
@@ -953,7 +1319,7 @@ void HostExtensions::Free() {
   HostExtensions::List::iterator it = plugs_.begin();
   for ( ; it != plugs_.end(); ++it) {
     LuaPluginPtr ptr = *it;       
-    ptr->Free();
+    ptr->Free();    
   }
 }
 
@@ -980,6 +1346,25 @@ LuaPluginPtr HostExtensions::Get(int idx) {
     }
   }
   return nullPtr;
+}
+
+void HostExtensions::ChangeWindowsMenuText(LuaPlugin* plugin) {
+  MenuMap::iterator it = menuItemIdMap_.begin();
+  for ( ; it != menuItemIdMap_.end(); ++it) {
+    if (!it->second.plugin.expired()) {
+      LuaPlugin* plug = it->second.plugin.lock().get();
+      if (plug == plugin) {    
+        std::string label = ui::mfc::Charset::utf8_to_win(
+                         menu_label(it->second)).c_str();    
+        ::ModifyMenu(windows_menu_,
+                     it->first,
+                     MF_BYCOMMAND | MF_STRING,
+                     it->first,
+                     label.c_str()
+                     );
+      }
+    }
+  }
 }
    
 // Host
@@ -1012,18 +1397,11 @@ lua_State* LuaGlobal::load_script(const std::string& dllpath) {
   return L;
 }
 
-PluginInfo LuaGlobal::LoadInfo(const std::string& dllpath) {
-  PluginInfo info;
-  try {
-    LuaPlugin plug(dllpath, 0, false);
-    info = plug.info();
-  } catch(std::exception &e) {
-    AfxMessageBox(e.what());
-    throw e;
-  }
-  return info;
+PluginInfo LuaGlobal::LoadInfo(const std::string& dllpath) {  
+  LuaPlugin plug(dllpath, 0, false);
+  return plug.info();    
 }
-   
+
 Machine* LuaGlobal::GetMachine(int idx) {
     Machine* mac = 0;
     if (idx < MAX_MACHINES) {
@@ -1086,17 +1464,16 @@ int error_handler(lua_State* L) {
       }
     }
   }
-  if (!editor.get()) {
-    std::string dllname;
-    int shellIdx;
-    if (Global::machineload().lookupDllName("Plugineditor.lua", dllname, MACH_LUA,
-          shellIdx)) {
-      editor.reset(new LuaPlugin(dllname, AUTOID));      
-      host_extensions.Add(editor);
-      editor->proxy().Init();
-      editor->CanvasChanged.connect(bind(&HostExtensions::OnPluginCanvasChanged, 
-        &host_extensions,  _1));
-    }          
+  if (!editor.get()) {    
+    Link link("plugineditor.lua",
+              "Plugin Editor",
+              FRAMEVIEWPORT,
+              MDI);
+    try {
+      editor = host_extensions.Execute(link);    
+    } catch (std::exception&) {
+      return 1;
+    }
   }
   if (!editor.get()) {
     return 1; // uhps, plugin editor luascript missing ..
@@ -1141,9 +1518,12 @@ int error_handler(lua_State* L) {
         lua_rawseti(LE, -2, i);
         ++i;
         ++depth;
-      }        
-      
+      }              
       in.pcall(0);          
+      editor->ViewPortChanged(*editor.get(), FRAMEVIEWPORT);          
+      editor->OnActivated(FRAMEVIEWPORT);
+      editor->proxy().OpenInFrame();
+      host_extensions.ChangeWindowsMenuText(editor.get());
       return 1;
     }
   } catch (std::exception& e ) {

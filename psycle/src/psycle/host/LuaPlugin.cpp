@@ -29,32 +29,32 @@ namespace psycle { namespace host {
   // Lua
 
   int LuaPlugin::idex_ = 1024;
-
-   LuaPlugin::LuaPlugin(const std::string& dllpath, int index, bool full)
-    : proxy_(this, dllpath),
-      curr_prg_(0),
-      //custom_menubar(0),
+   
+  LuaPlugin::LuaPlugin(const std::string& dllpath, int index, bool full) : 
+      proxy_(this, dllpath),
+      curr_prg_(0),      
       do_exit_(false), 
       do_reload_(false),
-      usenoteon_(false) {
-    // machine inits
+      usenoteon_(false) {   
+    dll_path_ = dllpath;
     _macIndex = (index == -1) ? idex_++ : index;
     _type = MACH_LUA;
-    _mode = MACHMODE_FX;
-    InitializeSamplesVector();    
-    for(int i(0) ; i < MAX_TRACKS; ++i) {
-      trackNote[i].key = 255; // No Note.
-      trackNote[i].midichan = 0;
-    }   
-    // script inits
+    _mode = MACHMODE_FX;    
+    // if (full || !proxy().HasDirectMetaAccess()) {
+      MachineInits();
+    // }
     try {
       proxy().PrepareState();
       proxy().Run();
-      dll_path_ = dllpath;
-      PluginInfo info = proxy().info();
-      _mode = info.mode;
-      usenoteon_ = info.flags;
-      strncpy(_editName, info.name.c_str(),sizeof(_editName)-1);    
+      if (!proxy().IsPsyclePlugin()) {
+        throw std::runtime_error("no psycle plugin"); 
+      }
+      if (full || !proxy().HasDirectMetaAccess()) {        
+        proxy().Start();
+      }      
+      _mode = proxy().meta().mode;            
+      usenoteon_ = proxy().meta().flags;
+      strncpy(_editName, proxy().meta().name.c_str(),sizeof(_editName) - 1);    
       if (full) {
         proxy().Init();
         StartTimer();
@@ -64,6 +64,14 @@ namespace psycle { namespace host {
       proxy().Free();
       throw;
     }
+  }
+
+  void LuaPlugin::MachineInits() {            
+    InitializeSamplesVector();        
+    for(int i(0) ; i < MAX_TRACKS; ++i) {      
+      trackNote[i].key = 255; // No Note.
+      trackNote[i].midichan = 0;
+    }   
   }
 
   LuaPlugin::~LuaPlugin() {    
@@ -76,7 +84,7 @@ namespace psycle { namespace host {
       proxy().Free();
     } catch(std::exception& e) {
       ui::alert(e.what());
-    } 
+    }     
   }
 
   void LuaPlugin::OnTimerViewRefresh() {

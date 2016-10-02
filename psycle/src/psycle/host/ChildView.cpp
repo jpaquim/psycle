@@ -2436,7 +2436,7 @@ namespace psycle { namespace host {
 					pParentMain->RedrawGearRackList();
 				}
 			}
-			if(dlg.deleted)
+	 		if(dlg.deleted)
 			{
 				pParentMain->CloseMacGui(propMac);
 				{
@@ -2466,8 +2466,15 @@ namespace psycle { namespace host {
 				pCmdUI->SetCheck(0);	
 		}
     
+    void CChildView::InitWindowMenu() {     
+      host_extensions_->InitWindowsMenu();    
+      // Link link;
+      //menuItemIdMap_[win32_menu_id] = link;
+    }
+
     void CChildView::LoadHostExtensions() {
-      host_extensions_->Load(pParentMain->GetMenu()->GetSubMenu(3));      
+      // host_extensions_->Load(pParentMain->GetMenu()->GetSubMenu(3));      
+      host_extensions_->StartScript();
     }
 
     void CChildView::OnDynamicMenuItems(UINT nID) {

@@ -17,6 +17,7 @@ namespace host {
 namespace ui { 
   class Commands; 
   class Canvas;  
+  class Frame;
   class MenuContainer;
 }
     
@@ -35,7 +36,8 @@ class LuaControl : public LockIF {
   void Load(const std::string& filename);
   virtual void PrepareState();
   void Run();
-  void Free();  
+  void Start();
+  virtual void Free();  
 
   
   lua_State* state() const { return L; }
@@ -43,13 +45,29 @@ class LuaControl : public LockIF {
   // LockIF Implementation
   void lock() const { ::EnterCriticalSection(&cs); }
   void unlock() const { ::LeaveCriticalSection(&cs); }
+
+  std::string install_script() const;
+  virtual PluginInfo meta() const;
   
   protected:
    lua_State* L;
    std::auto_ptr<ui::Commands> invokelater;   
+   PluginInfo parse_info() const;
   private:   
    mutable CRITICAL_SECTION cs;   
 };
+
+class LuaStarter : public LuaControl {
+ public:
+  virtual void PrepareState();
+  static int addmenu(lua_State* L);
+};
+
+static const int CHILDVIEWPORT = 1;
+static const int FRAMEVIEWPORT = 2;
+
+static const int MDI = 3;
+static const int SDI = 4;
 
 class LuaProxy : public LuaControl {
  public:
@@ -61,16 +79,18 @@ class LuaProxy : public LuaControl {
   LuaPlugin& host() const { return *host_; }  
   LuaMachine* lua_mac() { return lua_mac_; };
 
-  const PluginInfo& info() const;
+  virtual PluginInfo meta() const;
 	
   // Script Control	
-  void Init();
+  void Init();  
   void Reload();
   void PrepareState();
-
-  boost::weak_ptr<ui::Canvas> canvas() { 
-    return lua_mac_->canvas();
+  virtual void Free() {
+    LuaControl::Free();
+    frame_.reset();
   }
+
+  boost::weak_ptr<ui::Canvas> canvas() {  return lua_mac_->canvas(); }
 
   // Plugin calls
   void SequencerTick();
@@ -108,7 +128,7 @@ class LuaProxy : public LuaControl {
 	int num_parameter() const { return lua_mac_->numparams(); }
         
   void OnCanvasChanged();
-  void OnActivated();
+  void OnActivated(int viewport);
   void OnDeactivated();
   
   boost::weak_ptr<ui::MenuContainer> menu_bar() { return menu_bar_; }
@@ -118,7 +138,15 @@ class LuaProxy : public LuaControl {
     lock();
     invokelater->Add(f);
     unlock();
-  }
+  }  
+  bool IsPsyclePlugin() const;
+  bool HasDirectMetaAccess() const;
+  void OpenInFrame();
+  void ToggleViewPort();
+  void set_userinterface(int user_interface) { user_interface_ = user_interface; }
+  int userinterface() const { return user_interface_; }
+  std::string title() const { return lua_mac_ ? lua_mac_->title() : "noname"; }
+  void UpdateWindowsMenu();
 
 private:
   void export_c_funcs();
@@ -127,32 +155,65 @@ private:
   static int set_parameter(lua_State* L);
   static int alert(lua_State* L);
   static int confirm(lua_State* L);  
-  static int terminal_output(lua_State* L);
+  static int terminal_output(lua_State* L);  
   static int call_selmachine(lua_State* L);
   static int set_machine(lua_State* L);  
   static int set_menubar(lua_State* L);
   std::string ParDisplay(int par);
   std::string ParLabel(int par);
+  const PluginInfo& cache_meta(const PluginInfo& meta) const {
+     meta_cache_ = meta;
+     is_meta_cache_updated_ = true;
+     return meta_cache_;
+  }  
+  void OnFrameClose(ui::Frame&);
+  
     
-  mutable bool info_update_;
-  mutable PluginInfo info_;
+  mutable bool is_meta_cache_updated_;
+  mutable PluginInfo meta_cache_;
   LuaPlugin *host_;
   LuaMachine* lua_mac_;	
   mutable CRITICAL_SECTION cs;  
-  boost::weak_ptr<ui::MenuContainer> menu_bar_;  
+  boost::weak_ptr<ui::MenuContainer> menu_bar_;
+  boost::shared_ptr<ui::Frame> frame_;
+  int user_interface_;
+};
+
+class Link {
+  public:
+   Link() : viewport_(CHILDVIEWPORT), user_interface_(MDI) {}
+   Link(const std::string& dll_name, const std::string& label, int viewport, int user_interface) : 
+      dll_name_(dll_name),
+      label_(label),
+      viewport_(viewport),
+      user_interface_(user_interface) {
+   }
+
+   const std::string& dll_name() const { return dll_name_; }
+   const std::string& label() const { return label_; }
+   const int viewport() const { return viewport_; }
+   const int user_interface() const { return user_interface_; }
+
+   boost::weak_ptr<LuaPlugin> plugin;
+   
+ private:
+   std::string label_, dll_name_;   
+   int viewport_, user_interface_;
 };
 
 // Container for HostExtensions
 class HostExtensions {     
  public:
   typedef std::list<LuaPluginPtr> List;  
-  typedef std::map<std::uint16_t, LuaPlugin*> MenuMap;
+  typedef std::map<std::uint16_t, Link> MenuMap;
+  //typedef std::map<std::uint16_t, LuaPlugin*> MenuMap;
 
-  HostExtensions(class CChildView* child_view) : child_view_(child_view), active_lua_(0) {}
+  HostExtensions(class CChildView* child_view) : child_view_(child_view), active_lua_(0), menu_pos_(8) {}
   ~HostExtensions() {}  
 
   void Load(CMenu* view_menu);
-  void Free();
+  void StartScript();
+  void Free();  
 
   typedef HostExtensions::List::iterator iterator;
   virtual iterator begin() { return extensions_.begin(); }
@@ -160,21 +221,42 @@ class HostExtensions {
   virtual bool empty() const { return true; }
 
   void Add(const LuaPluginPtr& ptr) { extensions_.push_back(ptr); }
-  void Remove(const LuaPluginPtr& ptr) { extensions_.remove(ptr); }
+  void Remove(const LuaPluginPtr& ptr) {         
+    RemoveFromWindowsMenu(ptr.get());
+    extensions_.remove(ptr);        
+  }
   HostExtensions::List Get(const std::string& name);
   LuaPluginPtr Get(int idx);  
+  void AddMenu(Link& link);
 
   MenuMap& menuItemIdMap() { return menuItemIdMap_; }
   void OnDynamicMenuItems(UINT nID);
   void OnPluginCanvasChanged(LuaPlugin& plugin);
+  void OnPluginViewPortChanged(LuaPlugin& plugin, int viewport);
+
   void HideActiveLua();
   void HideActiveLuaMenu();
+  void InitWindowsMenu();
+
+  void RemoveFromWindowsMenu(LuaPlugin* plugin);
+
+  LuaPluginPtr Execute(Link& link);
+
+  void ChangeWindowsMenuText(LuaPlugin* plugin);
 
  private:   
+  lua_State*  load_script(const std::string& dllpath);
+  void AutoInstall();
+  std::vector<std::string> search_auto_install();
+  std::string menu_label(const Link& link) const;
+
   HostExtensions::List extensions_;  
   MenuMap menuItemIdMap_;
+  void AddToWindowsMenu(Link& link);
   class CChildView* child_view_;
   LuaPlugin* active_lua_;
+  int menu_pos_;
+  HMENU windows_menu_;
 };
 
 struct LuaGlobal {

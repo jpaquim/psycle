@@ -135,6 +135,7 @@ struct LuaActionListenerBind {
     MachineUiType::Value ui_type() const { return ui_type_; }
     void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
     void set_canvas(boost::weak_ptr<ui::Canvas> canvas);
+    void ToggleViewPort();
     boost::weak_ptr<ui::Canvas> canvas() { return canvas_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
@@ -142,6 +143,8 @@ struct LuaActionListenerBind {
     LuaProxy* proxy() { return proxy_; }
     void doexit();
     void reload();    
+    void set_title(const std::string& title);    
+    std::string title() const { return title_; }
   private:
     //LuaMachine(LuaMachine&)  {}
     //LuaMachine& operator=(LuaMachine) {}
@@ -153,6 +156,7 @@ struct LuaActionListenerBind {
     MachinePresetType::Value prsmode_;
     LuaProxy* proxy_; 
     boost::weak_ptr<ui::Canvas> canvas_;
+    std::string title_;
   };
 
   struct LuaMachineBind {
@@ -190,10 +194,12 @@ struct LuaActionListenerBind {
     static int exit(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::doexit); }
     static int reload(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::reload); }
     static int setcanvas(lua_State* L);
+    static int toggleviewport(lua_State* L);
     static int type(lua_State* L);
     static int info2(lua_State* L);
     static int name(lua_State* L);
-    static int pluginname(lua_State* L); 
+    static int pluginname(lua_State* L);
+    static int settitle(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::set_title); }    
   };
 
   struct LuaMachines {};

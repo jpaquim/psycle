@@ -179,12 +179,15 @@ function pluginselector:machinepath(info)
   local file = io.open(info:dllname(), "r")  
   local str = ""
   for line in file:lines() do
-    str = string.match(line, "require(%b())")
-    if str then
-      str = str:sub(3, -3)      
-      str = str:gsub("%.", "\\")      
-      break
-    end      
+    local pos = string.find(line, "psycle.setmachine")
+	if pos then
+      str = string.match(line, "require(%b())")	  
+      if str then
+        str = str:sub(3, -3)      
+        str = str:gsub("%.", "\\")      
+        break
+      end
+    end	
   end
   file:close()    
   return str

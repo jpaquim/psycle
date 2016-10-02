@@ -147,6 +147,10 @@ function fileexplorer:setmachinename(name)
   self.machineselector:settext(name)
 end
 
+function fileexplorer:machinename()
+  self.machineselector:text()
+end
+
 function fileexplorer:addparentdirectorynode(path)
   local parentdirectory = filehelper.parentdirectory(path)
   if parentdirectory then

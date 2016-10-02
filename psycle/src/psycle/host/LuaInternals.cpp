@@ -416,6 +416,10 @@ void LuaMachine::set_canvas(boost::weak_ptr<ui::Canvas> canvas) {
   proxy_->OnCanvasChanged();
 }
 
+void LuaMachine::ToggleViewPort() {
+  proxy_->ToggleViewPort();
+}
+
 // PsycleCmdDefBind
 int LuaCmdDefBind::open(lua_State* L) {   
   static const luaL_Reg funcs[] = {
@@ -446,6 +450,13 @@ int LuaCmdDefBind::open(lua_State* L) {
   }
   return 1;
 };
+
+void LuaMachine::set_title(const std::string& title) { 
+  title_ = title; 
+  if (proxy_) {
+     proxy_->UpdateWindowsMenu();
+  }
+}
 
 int LuaCmdDefBind::keytocmd(lua_State* L) {
   luaL_checktype(L, 1, LUA_TTABLE);
@@ -544,14 +555,16 @@ int LuaMachineBind::open(lua_State *L) {
     {"exit", exit},
     {"reload", reload},
     {"setcanvas", setcanvas},
+    {"toggleviewport", toggleviewport},
     {"type", type},  
+    {"settitle", settitle},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
   // define constants
   LuaHelper::setfield(L, "FX", MACHMODE_FX);
   LuaHelper::setfield(L, "GENERATOR", MACHMODE_GENERATOR);
-  LuaHelper::setfield(L, "HOSTUI", MACHMODE_LUAUIEXT);
+  LuaHelper::setfield(L, "HOST", MACHMODE_HOST);
   LuaHelper::setfield(L, "PRSNATIVE", 3);  
   LuaHelper::setfield(L, "PRSCHUNK", 1);
   LuaHelper::setfield(L, "MACH_UNDEFINED", -1);
@@ -926,6 +939,17 @@ int LuaMachineBind::setcanvas(lua_State* L) {
   } else {
     plugin->set_canvas(boost::weak_ptr<ui::Canvas>());
   }
+  return LuaHelper::chaining(L);
+}
+
+int LuaMachineBind::toggleviewport(lua_State* L) {
+  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  /*if (!lua_isnil(L, 2)) {
+    LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
+    plugin->set_canvas(canvas);
+  } else {*/
+  plugin->ToggleViewPort(); // set_canvas(boost::weak_ptr<ui::Canvas>());
+  //}
   return LuaHelper::chaining(L);
 }
 
