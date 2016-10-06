@@ -919,7 +919,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void Show(const boost::shared_ptr<WindowShowStrategy>& aligner);
   virtual void BringWindowToTop();
 	virtual void Hide();
-	virtual bool visible() const { return visible_; }
+	virtual bool visible() const;
 	virtual void FLS(); // invalidate new region
 	virtual void FLSEX(); //  invalidate combine new & old region
 	virtual void FLS(const Region& rgn) { Invalidate(rgn); } // invalidate region  
@@ -927,7 +927,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void Invalidate(const Region& rgn);
 	virtual void PreventFls();
 	virtual void EnableFls();
-	virtual bool is_fls_prevented() const;
+	virtual bool fls_prevented() const;
   virtual bool IsSaving() const { return false; }
 	virtual void SetCapture();
 	virtual void ReleaseCapture();
@@ -1173,24 +1173,28 @@ class Aligner {
 		if (group_) {
 			group_->PostOrderTreeTraverse(calc_dim, abort);
 			group_->PreOrderTreeTraverse(set_position, pos_abort);
-		}
-    //full_align_ = false;
+		}    
   }
 
   virtual void CalcDimensions() = 0;
   virtual void SetPositions() = 0;
 
   virtual void set_group(ui::Group& group) { group_ = &group; }  
+  ui::Group* group() { return group_; }
+  const ui::Group* group() const { return group_; }
+
+
+  void set_dimension(const ui::Dimension& dim) { dim_ = dim; }
   const ui::Dimension& dim() const { return dim_; }
   const ui::Rect& position() const { return pos_; }   
 
+  void set_aligned(bool aligned) { aligned_ = aligned; } 
   bool aligned() const { return aligned_; }
   bool full_align() const { return true; }
 
   void CachePosition(const ui::Rect& pos) { pos_ = pos; }
   
-  ui::Group* group_;
-  bool aligned_;
+   
 	
  protected:  
   typedef Window::Container::iterator iterator;
@@ -1206,13 +1210,15 @@ class Aligner {
   int size() const { 
     return group_ ? group_->size() : 0;
   }  
-     
-  ui::Dimension dim_;
+       
   ui::Rect pos_;
    
  private: 
+  ui::Group* group_;
   static Window::Container dummy;
-  static bool full_align_;	
+  static bool full_align_;
+  ui::Dimension dim_;
+  bool aligned_;
 };
 
 inline Aligner::~Aligner() {};
@@ -2304,6 +2310,7 @@ class WindowImp {
 	virtual void DevScrollTo(int offsetx, int offsety) = 0;
   virtual void DevShow() = 0;
   virtual void DevHide() = 0;
+  virtual bool dev_visible() const = 0;
   virtual void DevBringWindowToTop() = 0;
   virtual void DevInvalidate() = 0;
   virtual void DevInvalidate(const Region& rgn) = 0;  

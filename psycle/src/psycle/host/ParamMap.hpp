@@ -37,35 +37,40 @@ class ParamMap : public ui::Frame {
 	if(windowVar_!= NULL) *windowVar_ = NULL;
     delete this;  
   }
-
-  void UpdateNew(int par,int value);  
+  void UpdateNew(int par, int value);  
 
  private:
-  void InitLayout();  
+  void AddWindows();  
   void AddListView();
+  ui::Window::Ptr AddClientGroup();
+  void AddSelectOffsetWithButtonGroup(const ui::Window::Ptr& parent);
+  void AddSelectOffsetGroup(const ui::Window::Ptr& parent);
+  void AddButtonGroup(const ui::Window::Ptr& parent);
   void AddHelpGroup(const ui::Window::Ptr& parent);
-  void FillListView();
-  void RecalculateListView();
-  void FillComboBox();  
-  void AddMachineParamSelect(const ui::Group::Ptr& parent);
-  void UpdateMachineParamEndText();
-  void OnReplaceButtonClick(ui::Button&);
-  void OnSaveDefaultButtonClick(ui::Button&);
-  void OnLoadDefaultButtonClick(ui::Button&);
-  void OnResetMapButtonClick(ui::Button&);
-  void RefreshParamMap();
-  
-  void OnListViewChange(ui::ListView&, const ui::Node::Ptr&);
-  void OnComboBoxSelect(ui::ComboBox&);  
-  std::string param_name(int index) const;
+  void AddTextLine(const ui::Window::Ptr& parent, const std::string& text);
   ui::Group::Ptr CreateRow(const ui::Window::Ptr& parent);
   ui::Group::Ptr CreateTitleRow(const ui::Window::Ptr& parent, const std::string& header_text);
+  ui::Group::Ptr CreateTitleGroup(const ui::Window::Ptr& parent, const std::string& title);
+  void FillListView();  
+  void FillComboBox();  
+  void RefreshParamMap();  
+  void UpdateMachineParamEndText();
   void ReplaceSelection();
+  bool HasSelectionChanged();
+  std::string param_name(int index) const;
 
+  void OnReplaceButtonClick(ui::Button&) { ReplaceSelection(); }
+  void OnSaveDefaultButtonClick(ui::Button&);
+  void OnLoadDefaultButtonClick(ui::Button&);
+  void OnResetMapButtonClick(ui::Button&);    
+  void OnListViewChange(ui::ListView&, const ui::Node::Ptr&) { 
+    UpdateMachineParamEndText();
+  }
+  void OnComboBoxSelect(ui::ComboBox&) {  UpdateMachineParamEndText(); }
+         
   ui::Node::Ptr root_node_;
   Machine* machine_;
-  ParamMap** windowVar_;
-  ui::Group::Ptr top_client_group_;
+  ParamMap** windowVar_;  
   ui::ListView::Ptr list_view_;
   ui::ComboBox::Ptr cbx_box_;
   ui::CheckBox::Ptr allow_auto_learn_chk_box_;

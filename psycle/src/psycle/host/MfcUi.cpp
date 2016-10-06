@@ -379,15 +379,21 @@ ui::Rect WindowTemplateImp<T, I>::MapPosToBoxModel(const CRect& rc) const {
 template<class T, class I>
 void WindowTemplateImp<T, I>::dev_set_parent(Window* parent) {  
   if (parent && parent->imp()) {    
-    SetParent(dynamic_cast<CWnd*>(parent->imp()));    
-    ShowWindow(SW_SHOW | SW_SHOWNOACTIVATE);    
+    DevHide();
+    SetParent(dynamic_cast<CWnd*>(parent->imp()));
+    if (window() && window()->visible()) {
+      DevShow();    
+    }
   } else {
     SetParent(DummyWindow::dummy());
   }
 }
 
 template<class T, class I>
-void WindowTemplateImp<T, I>::OnPaint() {	
+void WindowTemplateImp<T, I>::OnPaint() {
+  if (window() && window()->debug_text() == "header") {
+    int fordebugonly(0);
+  }	
   CRgn rgn;
   rgn.CreateRectRgn(0, 0, 0, 0);
   int result = GetUpdateRgn(&rgn, FALSE);

@@ -204,7 +204,7 @@ Splitter::Splitter() :
 }
 
 Splitter::Splitter(Orientation orientation) :
-     Window(), 
+   Window(), 
 	 fill_color_(0x404040),
 	 do_split_(false),
 	 drag_pos_(-1),
@@ -213,11 +213,11 @@ Splitter::Splitter(Orientation orientation) :
   set_auto_size(false, false);
   set_orientation(orientation);
   if (orientation == ui::HORZ) {
-	set_align(ui::ALBOTTOM);
-	set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+	  set_align(ui::ALBOTTOM);
+	  set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
   } else {
-	set_align(ui::ALLEFT);
-	set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
+	  set_align(ui::ALLEFT);
+	  set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
   }
 }
 

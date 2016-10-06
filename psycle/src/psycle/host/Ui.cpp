@@ -673,17 +673,19 @@ void Window::FLSEX() {
 
 void Window::FLS() {
   if (visible() && imp()) {                    
-    ui::Rect pos = imp()->dev_absolute_system_position();        
-    fls_area_.reset(new Area(pos));
-    Window* root_window = root();
-    if (root_window && root_window->IsSaving()) {
-      root_window->Invalidate(fls_area_->region());
-    } else {
-      ui::Window* non_transparent_window = FirstNonTransparentWindow();
-      assert(non_transparent_window->imp());
-      ui::Rect non_trans_pos = non_transparent_window->imp()->dev_absolute_system_position();
-      Area redraw_rgn(ui::Rect(pos.top_left() - non_trans_pos.top_left(), pos.dimension()));        
-      non_transparent_window->Invalidate(redraw_rgn.region());        
+    Window* root_window = root();    
+    if (!fls_prevented()) {
+      ui::Rect pos = imp()->dev_absolute_system_position();        
+      fls_area_.reset(new Area(pos));   
+      if (root_window && root_window->IsSaving()) {
+        root_window->Invalidate(fls_area_->region());
+      } else {      
+        ui::Window* non_transparent_window = FirstNonTransparentWindow();
+        assert(non_transparent_window->imp());
+        ui::Rect non_trans_pos = non_transparent_window->imp()->dev_absolute_system_position();
+        Area redraw_rgn(ui::Rect(pos.top_left() - non_trans_pos.top_left(), pos.dimension()));        
+        non_transparent_window->Invalidate(redraw_rgn.region());            
+      }
     }
   }
 }
@@ -935,8 +937,8 @@ void Window::EnableFls() {
   }
 }
 
-bool Window::is_fls_prevented() const { 
-  return root() ? root()->is_fls_prevented() : false; 
+bool Window::fls_prevented() const { 
+  return root() ? root()->fls_prevented() : false; 
 }
 
 void Window::Show() {
@@ -965,6 +967,17 @@ void Window::Hide() {
   visible_ = false;
   FLS();
 }
+
+bool Window::visible() const { 
+ /* if (imp()) {
+    bool dev_vis = imp_->dev_visible();
+    if (visible_ != dev_vis) {
+      int fordebugonly(0);
+    }
+  }*/
+  return visible_;
+}
+  
 
 void Window::Invalidate() { 
   if (imp_.get()) {    
@@ -1125,6 +1138,50 @@ bool Visible::operator()(Window& window) const {
   return window.visible();
 }
 
+/*
+void CalcDim::operator()(Window& window) const { 
+ if (window.aligner()) {
+   window.aligner()->set_dimension(ui::Dimension());
+ }
+ if (window.aligner() && 
+     window.aligner()->group())
+     //!window.aligner()->group()->empty()) // &&
+   // (window.aligner()->group()->auto_size_width() || 
+   // window.aligner()->group()->auto_size_height()))
+ {
+   window.aligner()->CalcDimensions();       
+ } 
+};
+
+bool AbortPos::operator()(Window& window) const { 
+  bool result = true;
+	if (window.aligner()) { 
+		bool window_needs_align = (window.visible() && window.has_childs() && (!window.aligner()->aligned() ||
+	  window.has_align_dimension_changed()));   
+    result = !window_needs_align;        
+    window.aligner()->set_aligned(window_needs_align);
+	}
+  return result;
+}
+
+bool SetUnaligned::operator()(Window& window) const {
+  if (window.aligner()) {
+    window.aligner()->set_aligned(false);    
+  }
+  return false;
+}
+
+bool SetPos::operator()(Window& window) const {  
+  if (window.visible() &&
+      window.aligner() && 
+      window.aligner()->group() && 
+      !window.aligner()->group()->empty() &&
+      !window.aligner()->group()->area().bounds().empty()) {    
+    window.aligner()->SetPositions();
+  }  
+  return false;
+};*/
+
 void CalcDim::operator()(Window& window) const {
  if (window.aligner()) {
    window.aligner()->CalcDimensions();    
@@ -1137,14 +1194,14 @@ bool AbortPos::operator()(Window& window) const {
 		bool window_needs_align = (window.visible() && window.has_childs() && (!window.aligner()->aligned() ||
 	  window.has_align_dimension_changed()));   
     result = !window_needs_align;        
-    window.aligner()->aligned_ = window_needs_align;  
+    window.aligner()->set_aligned(window_needs_align);
 	}
   return result;
 }
 
 bool SetUnaligned::operator()(Window& window) const {
   if (window.aligner()) {
-    window.aligner()->aligned_ = false;
+    window.aligner()->set_aligned(false);
   }
   return false;
 }
@@ -1155,6 +1212,8 @@ bool SetPos::operator()(Window& window) const {
   }  
   return false;
 };
+
+
 
 Window::Container Window::SubItems() {
   Window::Container allitems;
@@ -1189,7 +1248,6 @@ void Group::Add(const Window::Ptr& window) {
   items_.push_back(window);
   window->set_parent(this);  
   window->needsupdate();
-
 	// style test
 	if (!style_sheet().expired()) {
 		style_sheet().lock()->parse(*(items_.back().get()));
@@ -1309,16 +1367,16 @@ Window::Container Aligner::dummy;
 void Group::UpdateAlign() {
   if (aligner_) {   
     bool old_is_saving(false);
-    bool old_is_fls_prevented(false);
+    bool old_fls_prevented(false);
     if (root()) {     
-      old_is_fls_prevented = root()->is_fls_prevented();      
+      old_fls_prevented = fls_prevented();      
       old_is_saving = root()->IsSaving();
-      if (!old_is_fls_prevented) {        
+      if (!old_fls_prevented) {        
         dynamic_cast<Canvas*>(root())->SetSave(true);
       }
     }         
     aligner_->Align();    
-    if (!old_is_saving && !old_is_fls_prevented && root()) {    
+    if (!old_is_saving && !old_fls_prevented && root()) {    
        dynamic_cast<Canvas*>(root())->Flush();
     }  
     dynamic_cast<Canvas*>(root())->SetSave(old_is_saving);    

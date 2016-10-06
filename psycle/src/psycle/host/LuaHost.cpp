@@ -1207,7 +1207,11 @@ void HostExtensions::OnDynamicMenuItems(UINT nID) {
     boost::shared_ptr<LuaPlugin> plug;
     if (link.plugin.expired()) {
       std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
-      link.plugin = plug = Execute(link);      
+      try {
+        link.plugin = plug = Execute(link);      
+      } catch(std::exception& e) {
+        return;
+      }
       if (link.user_interface() == SDI) {        
         menuItemIdMap_[nID] = link;
       }

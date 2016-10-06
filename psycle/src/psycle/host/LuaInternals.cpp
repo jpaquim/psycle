@@ -1980,8 +1980,9 @@ int LuaFileHelper::open(lua_State *L) {
     {"mkdir", mkdir},
     {"isdirectory", isdirectory},
     {"filetree", filetree},
-	{"parentdirectory", parentdirectory},
-	{"directorylist", directorylist},
+	  {"parentdirectory", parentdirectory},
+	  {"directorylist", directorylist},
+    {"fileinfo", fileinfo},
     {"remove", remove},
     {"rename", rename},
     {NULL, NULL}
@@ -2030,6 +2031,12 @@ int LuaFileHelper::rename(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+int LuaFileHelper::fileinfo(lua_State* L) {
+  const char* dir_path = luaL_checkstring(L, 1);      
+  createfileinfo(L, boost::filesystem::path(dir_path));
+  return 1;
+}
+
 int LuaFileHelper::parentdirectory(lua_State* L) {
   const char* dir_path = luaL_checkstring(L, 1);  
   using namespace boost::filesystem;    
@@ -2037,18 +2044,18 @@ int LuaFileHelper::parentdirectory(lua_State* L) {
   try {
     if (exists(p)) {
       if (is_regular_file(p)) { // is p a regular file?   
-		lua_pushnil(L); // no directory        
+		  lua_pushnil(L); // no directory        
 	  } else 
       if (is_directory(p)) {        
-		 path parent = p.parent_path();
-		 createfileinfo(L, parent);
+		    path parent = p.parent_path();
+		    createfileinfo(L, parent);
       }
       else {
         lua_pushnil(L); // cout << p << " exists, but is neither a regular file nor a directory\n";
-	  }
+	    }
     } else {
       lua_pushnil(L); // does not exist
-	}
+	  }
   } catch (const filesystem_error& ex) {
     ex.what();
     lua_pushnil(L);

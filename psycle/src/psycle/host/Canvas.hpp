@@ -19,13 +19,12 @@ class DefaultAligner : public Aligner {
   virtual void SetPositions();
 
  private:
-	 void prepare_pos_set();
-	 bool has_items() const;
+	 void prepare_pos_set();	 
 	 bool skip_item(const Window::Ptr& window) const;
 	 void update_item_pos_except_client(const Window::Ptr& window);
 	 void update_client_position(const Window::Ptr& client);
 	 void calc_non_content_dimension(const Window::Ptr& window);
-	 void calc_window_dim(const Window::Ptr& window);	 
+	 void calc_window_dim(const Window::Ptr& window);
 	 void update_left(const Window::Ptr& window);
 	 void update_top(const Window::Ptr& window);
 	 void update_right(const Window::Ptr& window);
@@ -45,6 +44,16 @@ class DefaultAligner : public Aligner {
 	 ui::Rect current_pos_;
 	 ui::Dimension non_content_dimension_;
 	 ui::Dimension item_dim_;
+};
+
+class WrapAligner : public Aligner {
+ public:
+  virtual void CalcDimensions();
+  virtual void SetPositions();
+ private:
+  void calc_window_dim(const Window::Ptr& window);
+
+  ui::Dimension item_dim_;
 };
 
 class GridAligner : public Aligner {
@@ -104,7 +113,7 @@ class Canvas : public ui::Group {
   void Invalidate(const Region& rgn);
   virtual void PreventFls() { fls_prevented_ = true; }
   virtual void EnableFls() { fls_prevented_ = false; }
-  bool is_fls_prevented() const { return fls_prevented_; }
+  bool fls_prevented() const { return fls_prevented_; }
 
   virtual void OnFocusChange(int id) { OnMessage(FOCUS, id); }
 
@@ -328,6 +337,42 @@ class Fill : public ui::Ornament {
   bool use_bounds_;
 };
 
+
+class CircleFill : public ui::Ornament {
+ public:
+  CircleFill() : color_(0xFF000000) {}
+  CircleFill(ARGB color) : color_(color) {}
+  CircleFill(ARGB color, bool use_bounds) : color_(color) {}
+
+  CircleFill* Clone() {
+    CircleFill* fill = new CircleFill();
+    *fill = *this;
+    return fill;
+  }
+   
+  virtual void set_color(ARGB color) { color_ = color; }
+  virtual ARGB color() const { return color_; }  
+  
+  virtual void Draw(Window& item, Graphics* g, Region& draw_region) {
+    DrawFill(item, g, draw_region);
+  }
+    
+  virtual bool transparent() const { return true; }
+
+ private:
+  void DrawFill(Window& item, Graphics* g, Region& draw_region) {
+    if (draw_region.bounds().height() > 0) {    
+      int alpha = GetAlpha(color_);
+      if (alpha != 0xFF) {
+        g->SetColor(color_);				
+				g->FillOval(ui::Rect(ui::Point(), item.dim()));
+      }
+    }
+  }
+  ARGB color_;
+  bool use_bounds_;
+};
+
 class OrnamentFactory {
  public:
   static OrnamentFactory &Instance() {  // Singleton instance
@@ -337,9 +382,11 @@ class OrnamentFactory {
 
   LineBorder* CreateLineBorder() { return new LineBorder(); }
   LineBorder* CreateLineBorder(ARGB color) { return new LineBorder(color); }
-	LineBorder* CreateLineBorder(ARGB color, const ui::BoxSpace& border_width) { return new LineBorder(color, border_width); }
+	LineBorder* CreateLineBorder(ARGB color, const ui::BoxSpace& border_width) { return new LineBorder(color, border_width); }  
   Fill* CreateFill() { return new Fill(); }
   Fill* CreateFill(ARGB color) { return new Fill(color); }
+  CircleFill* CreateCircleFill() { return new CircleFill(); }
+  CircleFill* CreateCircleFill(ARGB color) { return new CircleFill(color); }
   Fill* CreateBoundFill(ARGB color) { return new Fill(color, true); }
   Wallpaper* CreateWallpaper(ui::Image::WeakPtr image) { return new Wallpaper(image); }
 

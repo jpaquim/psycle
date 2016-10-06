@@ -605,6 +605,7 @@ struct OrnamentFactoryBind {
   static int createlineborder(lua_State* L);
   static int createwallpaper(lua_State* L);
   static int createfill(lua_State* L);
+  static int createcirclefill(lua_State* L);
   static int createboundfill(lua_State* L);
 };
 
@@ -625,6 +626,13 @@ struct WallpaperBind {
 };
 
 struct FillBind {
+  static std::string meta;
+  static int open(lua_State *L);  
+  static int create(lua_State *L); 
+  static int gc(lua_State* L);  
+};
+
+struct CircleFillBind {
   static std::string meta;
   static int open(lua_State *L);  
   static int create(lua_State *L); 
@@ -705,14 +713,14 @@ class LuaItemBind {
       {"enablepointerevents", enablepointerevents},
       {"disablepointerevents", disablepointerevents},
       {"parent", parent},
-      {"bounds", bounds},
-      {"canvas", canvas},      
+      {"root", root},
+      {"bounds", bounds},      
       //{"intersect", intersect},
-      {"fls", fls},
+      {"fls", fls},      
       {"invalidate", invalidate},
       {"preventfls", preventfls},
       {"enablefls", enablefls},      
-      {"isflsprevented", isflsprevented},      
+      {"flsprevented", flsprevented},      
       {"area", area},
       {"drawregion", drawregion},
       {"setclip", setclip},
@@ -813,8 +821,7 @@ class LuaItemBind {
   static int fls(lua_State *L);
   static int preventfls(lua_State *L) { LUAEXPORT(L, &T::PreventFls) }
   static int enablefls(lua_State *L) { LUAEXPORT(L, &T::EnableFls) }
-  static int isflsprevented(lua_State *L) { LUAEXPORT(L, &T::is_fls_prevented) }  
-  static int canvas(lua_State* L);
+  static int flsprevented(lua_State *L) { LUAEXPORT(L, &T::fls_prevented) }    
   static int show(lua_State* L) { 
     int n = lua_gettop(L);
     if (n==1) {
@@ -840,7 +847,8 @@ class LuaItemBind {
     lua_pushnumber(L, bounds.height());
     return 4;
   }  
-  static int parent(lua_State *L);  
+  static int parent(lua_State *L);
+  static int root(lua_State* L);
   static int area(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     ui::Area* rgn = item->area().Clone();
@@ -1043,7 +1051,8 @@ class LuaCanvasBind : public LuaGroupBind<T> {
       {"showscrollbar", showscrollbar},
       {"setscrollinfo", setscrollinfo},
       {"invalidateontimer", invalidateontimer},
-      {"invalidatedirect", invalidatedirect},      
+      {"invalidatedirect", invalidatedirect},
+      {"flush", flush},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1054,6 +1063,7 @@ class LuaCanvasBind : public LuaGroupBind<T> {
   static int setscrollinfo(lua_State* L);
   static int invalidateontimer(lua_State* L);
   static int invalidatedirect(lua_State* L);
+  static int flush(lua_State* L) { LUAEXPORT(L, &T::Flush); }
 };
 
 template<class T = LuaRectangleBox>
@@ -1584,6 +1594,8 @@ class LuaListViewBind : public LuaItemBind<T> {
       {"viewsmallicon", viewsmallicon},
       {"enablerowselect", enablerowselect},
       {"diablerowselect", disablerowselect},
+      {"preventdraw", preventdraw},
+      {"enabledraw", enabledraw},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1599,6 +1611,8 @@ class LuaListViewBind : public LuaItemBind<T> {
   static int viewreport(lua_State* L) { LUAEXPORT(L, &T::ViewReport); }
   static int viewicon(lua_State* L) { LUAEXPORT(L, &T::ViewIcon); }
   static int viewsmallicon(lua_State* L) { LUAEXPORT(L, &T::ViewSmallIcon); }
+  static int preventdraw(lua_State* L) { LUAEXPORT(L, &T::PreventDraw); }
+  static int enabledraw(lua_State* L) { LUAEXPORT(L, &T::EnableDraw); }
   static int selectednodes(lua_State* L) { 
     boost::shared_ptr<T> list_view = LuaHelper::check_sptr<T>(L, 1, meta);    
     lua_newtable(L);
@@ -2312,6 +2326,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LineBorderBind>(L, "psycle.ui.canvas.lineborder");
   LuaHelper::require<WallpaperBind>(L, "psycle.ui.canvas.wallpaper");
   LuaHelper::require<FillBind>(L, "psycle.ui.canvas.fill");
+  LuaHelper::require<CircleFillBind>(L, "psycle.ui.canvas.circlefill");
   return 0;
 }
 
