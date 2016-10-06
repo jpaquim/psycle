@@ -560,33 +560,33 @@ class GraphicsImp : public ui::GraphicsImp {
         pen_width_(1),
         debug_flag_(true) {	
     cr_->SetTextColor(rgb_color_);
-	 pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
-     old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
-	 brush = ::CreateSolidBrush(rgb_color_);			      	 
-     old_brush = (HBRUSH)::SelectObject(cr_->m_hDC, brush);
-	 mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
-     assert(imp);
-     old_font = (HFONT) SelectObject(cr_->m_hDC, imp->cfont());
-	 old_rgn_ =  ::CreateRectRgn(0, 0, 0, 0);
-     clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);    
+	  pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
+    old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
+	  brush = ::CreateSolidBrush(rgb_color_);			      	 
+    old_brush = (HBRUSH)::SelectObject(cr_->m_hDC, brush);
+	  mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+    assert(imp);
+    old_font = (HFONT) SelectObject(cr_->m_hDC, imp->cfont());
+	  old_rgn_ =  ::CreateRectRgn(0, 0, 0, 0);
+    clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);    
   }
 
   virtual ~GraphicsImp() {    
-	if (debug_flag_) {
-	  ::SelectObject(cr_->m_hDC, old_pen);
+	  if (debug_flag_) {
+	    ::SelectObject(cr_->m_hDC, old_pen);
       ::DeleteObject(pen);
-	  ::SelectObject(cr_->m_hDC, old_brush);
+	    ::SelectObject(cr_->m_hDC, old_brush);
       ::DeleteObject(brush);
-	  ::SelectObject(cr_->m_hDC, old_font);
-	  ::DeleteObject(old_rgn_);
-	  ::DeleteObject(clp_rgn_);      
+	    ::SelectObject(cr_->m_hDC, old_font);
+	    ::DeleteObject(old_rgn_);
+	    ::DeleteObject(clp_rgn_);      
 	/*  cr_->SelectObject(old_brush);
       brush.DeleteObject();*/
-	 if (hScreenDC) {      
-       ReleaseDC(0, hScreenDC);      
-    }
-	return;
-	}
+	    if (hScreenDC) {      
+        ReleaseDC(0, hScreenDC);      
+      }
+	    return;
+	  }
     if (cr_) {
       DevDispose();
     }
@@ -598,9 +598,9 @@ class GraphicsImp : public ui::GraphicsImp {
   virtual void DevDispose() {
     ::SelectObject(cr_->m_hDC, old_pen);
     ::DeleteObject(pen);
-	::SelectObject(cr_->m_hDC, old_brush);
+	  ::SelectObject(cr_->m_hDC, old_brush);
     ::DeleteObject(brush);
-	::SelectObject(cr_->m_hDC, old_font);
+	  ::SelectObject(cr_->m_hDC, old_font);
     cr_->SetGraphicsMode(GM_ADVANCED);
     cr_->SetWorldTransform(&rXform);
     cr_->SelectObject(old_font);
@@ -1052,8 +1052,22 @@ class WindowTemplateImp : public T, public I {
   }
   virtual void DevEnable() { EnableWindow(true); }
   virtual void DevDisable() { EnableWindow(false); }
-  virtual void DevShow() { ShowWindow(SW_SHOWNORMAL); }
+  virtual void DevShow() { 
+    if (window() && window()->fls_prevented()) {
+      SetWindowPos(0, 0, 0, 0, 0,
+                   SWP_SHOWWINDOW |
+                   SWP_NOOWNERZORDER | 
+                   SWP_NOREDRAW |
+                   SWP_NOZORDER |
+                   SWP_NOSIZE |
+                   SWP_NOMOVE | 
+                   SWP_NOACTIVATE);
+    } else {
+      ShowWindow(SW_SHOWNORMAL);
+    }
+  }
   virtual void DevHide() { ShowWindow(SW_HIDE); }
+  virtual bool dev_visible() const { return IsWindowVisible(); }
   virtual void DevInvalidate() {    			  
 	  if (window() && window()->root()) {
       CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());	
@@ -1185,8 +1199,8 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
     WindowImp* imp = new WindowImp();
     if (!imp->Create(NULL, 
                      NULL, 
-                     WS_CHILD | WS_CLIPSIBLINGS,
-		                 CRect(0, 0, 100, 20), 
+                     WS_VISIBLE | WS_CHILD | WS_CLIPSIBLINGS,
+		                 CRect(0, 0, 0, 0), 
                      parent, 
                      nID, 
                      NULL)) {
@@ -1201,7 +1215,7 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
     WindowImp* imp = new WindowImp();
     if (!imp->Create(NULL, 
                      NULL, 
-                     WS_CHILD | WS_EX_COMPOSITED,
+                     WS_VISIBLE | WS_CHILD | WS_EX_COMPOSITED,
 		                 CRect(0, 0, 0, 0), 
                      parent, 
                      nID, 
@@ -1291,7 +1305,7 @@ class ButtonImp : public WindowTemplateImp<CButton, ui::ButtonImp> {
   static ButtonImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     ButtonImp* imp = new ButtonImp();
     if (!imp->Create(_T("Button"),
-                     WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
+                     WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER,
                      CRect(0, 0, 200, 19), 
                      parent, 
                      nID)) {
@@ -1336,7 +1350,7 @@ class CheckBoxImp : public WindowTemplateImp<CButton, ui::CheckBoxImp> {
   static CheckBoxImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     CheckBoxImp* imp = new CheckBoxImp();
     if (!imp->Create(_T("CheckBox"),
-                     WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER  | BS_CHECKBOX | BS_AUTOCHECKBOX,
+                     WS_VISIBLE | WS_CHILD | WS_TABSTOP | BS_PUSHBUTTON | DT_CENTER  | BS_CHECKBOX | BS_AUTOCHECKBOX,
                      CRect(0, 0, 55, 19), 
                      parent, 
                      nID)) {
@@ -1383,7 +1397,7 @@ public:
 	static RadioButtonImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
 		RadioButtonImp* imp = new RadioButtonImp();
 		if (!imp->Create(_T("RadioButton"),
-			WS_CHILD | WS_TABSTOP | DT_CENTER | BS_AUTORADIOBUTTON,
+			WS_VISIBLE | WS_CHILD | WS_TABSTOP | DT_CENTER | BS_AUTORADIOBUTTON,
 			CRect(0, 0, 55, 19),
 			parent,
 			nID)) {
@@ -1426,7 +1440,7 @@ public:
 	static ui::GroupBoxImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
 		GroupBoxImp* imp = new GroupBoxImp();
 		if (!imp->Create(_T("GroupBox"),
-			WS_CHILD | WS_TABSTOP | DT_CENTER | BS_GROUPBOX,
+			WS_VISIBLE | WS_CHILD | WS_TABSTOP | DT_CENTER | BS_GROUPBOX,
 			CRect(0, 0, 55, 19),
 			parent,
 			nID)) {
@@ -1680,7 +1694,7 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
   }
   static TreeViewImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     TreeViewImp* imp = new TreeViewImp();
-    if (!imp->Create(WS_CHILD | TVS_EDITLABELS, 
+    if (!imp->Create(WS_VISIBLE | WS_CHILD | TVS_EDITLABELS,
                      CRect(0, 0, 200, 200), 
                      parent, 
                      nID)) {
@@ -1790,7 +1804,7 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   }
   static ListViewImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     ListViewImp* imp = new ListViewImp();
-    if (!imp->Create(WS_CHILD | TVS_EDITLABELS, 
+    if (!imp->Create(WS_VISIBLE | WS_CHILD | TVS_EDITLABELS, 
                      CRect(0, 0, 200, 200), 
                      parent, 
                      nID)) {
@@ -1897,7 +1911,7 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
 
   static ComboBoxImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     ComboBoxImp* imp = new ComboBoxImp();
-    if (!imp->Create(WS_CHILD|WS_VSCROLL|CBS_DROPDOWNLIST|WS_VISIBLE,
+    if (!imp->Create(WS_VISIBLE | WS_CHILD |WS_VSCROLL | CBS_DROPDOWNLIST,
                      CRect(0, 0, 200, 20), 
                      parent, 
                      nID)) {
@@ -1977,7 +1991,8 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
 
   static EditImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     EditImp* imp = new EditImp();
-    if (!imp->Create(WS_CHILD | WS_TABSTOP | WS_VISIBLE | ES_AUTOHSCROLL,
+    if (!imp->Create(WS_VISIBLE | WS_CHILD | WS_TABSTOP | WS_VISIBLE | 
+                     ES_AUTOHSCROLL,
                      CRect(0, 0, 200, 20), 
                      parent, 
                      nID)) {

@@ -675,22 +675,22 @@ struct LuaActionListenerBind {
   };
 
   struct LuaDspMathHelper {
-    static int open(lua_State *L);
-  private:
+    static int open(lua_State *L);   
     static int notetofreq(lua_State* L);
     static int freqtonote(lua_State* L);
   };
 
   class LuaFileHelper {
-    public:
-      static int open(lua_State *L);
-      static int mkdir(lua_State* L);
-      static int isdirectory(lua_State* L);
-      static int filetree(lua_State* L);
-	  static int directorylist(lua_State* L);	  
+   public:
+    static int open(lua_State *L);
+    static int mkdir(lua_State* L);
+    static int isdirectory(lua_State* L);
+    static int filetree(lua_State* L);
+	  static int directorylist(lua_State* L);
+    static int fileinfo(lua_State* L);
 	  static int parentdirectory(lua_State* L);
-      static int remove(lua_State* L);
-      static int rename(lua_State* L);
+    static int remove(lua_State* L);
+    static int rename(lua_State* L);
 	  static int createfileinfo(lua_State* L, boost::filesystem::path curr);
   };
 

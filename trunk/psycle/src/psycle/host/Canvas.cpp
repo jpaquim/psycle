@@ -140,11 +140,11 @@ void DefaultAligner::CalcDimensions() {
 		}
 	} // end loop   
 	
-	dim_ = current_dim;	
+	set_dimension(current_dim);
 }
 
 void DefaultAligner::SetPositions() {
-	if (has_items()) {
+	if (group() && group()->size() != 0) {
 		prepare_pos_set();
 		Window::Ptr client;
 		for (iterator i = begin(); i != end(); ++i) {
@@ -163,12 +163,8 @@ void DefaultAligner::SetPositions() {
 	}
 }
 
-bool DefaultAligner::has_items() const {
-	return group_ && group_->size() != 0;
-}
-
 void DefaultAligner::prepare_pos_set() {
-	current_pos_.set(ui::Point::zero(), group_->position().dimension());
+	current_pos_.set(ui::Point::zero(), group()->position().dimension());
 }
 
 bool DefaultAligner::skip_item(const Window::Ptr& item) const {
@@ -328,6 +324,45 @@ void DefaultAligner::adjust_current_pos_client(const Window::Ptr& window) {
 		));
 }
 
+// WrapAligner
+
+void WrapAligner::CalcDimensions() {}
+
+void WrapAligner::SetPositions() {  
+  if (group()->area().bounds().empty()) {
+    return;
+  }
+  Window::Ptr client;
+  ui::Rect current_position(ui::Point(0, 0), group()->aligner()->dim());
+
+  for (iterator it = begin(); it != end(); ++it) {
+    Window::Ptr window = *it;
+    if (!window->visible()) {
+      continue;
+    }    
+    calc_window_dim(window);
+    window->set_position(ui::Rect(current_position.top_left(), item_dim_));
+
+    if (current_position.left() > current_position.right()) {
+      current_position.set_left(0);
+      current_position.Offset(0, 100);     
+    }
+  }
+  
+}
+
+void WrapAligner::calc_window_dim(const Window::Ptr& window) {
+	item_dim_ = window->aligner() ? window->aligner()->dim() : window->dim();
+  if (window->aligner()) {
+    if (!window->auto_size_width()) {
+      item_dim_.set_width(window->dim().width());
+    }
+    if (!window->auto_size_height()) {
+      item_dim_.set_height(window->dim().height());        
+    }
+	}
+}
+
 // GridAligner
 void GridAligner::CalcDimensions() {  
   Dimension itemmax;
@@ -353,18 +388,18 @@ void GridAligner::CalcDimensions() {
   } // end loop   
   
   Dimension current_dim(itemmax.width()*col_num_, itemmax.height()*row_num_);  
-  dim_ = current_dim;
+  set_dimension(current_dim);
 }
 
 void GridAligner::SetPositions() {
-  if (!group_) {
+  if (!group()) {
     return;
   }
-  if (group_->area().bounds().empty()) {
+  if (group()->area().bounds().empty()) {
     return;
   }
   Window::Ptr client;
-  ui::Rect current_position(ui::Point(0, 0), group_->aligner()->dim());
+  ui::Rect current_position(ui::Point(0, 0), group()->aligner()->dim());
 
   double cell_width = current_position.width() / col_num_;
   double cell_height = current_position.height() / row_num_;

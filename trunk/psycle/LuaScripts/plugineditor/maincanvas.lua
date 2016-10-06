@@ -332,15 +332,16 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittoolbar()  
-  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(boxspace:new(5))
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(boxspace:new(5))  
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)  
   self:initfiletoolbar():setalign(item.ALLEFT)
-  self:initplaytoolbar():setalign(item.ALLEFT):setmargin(boxspace:new(0, 0, 0, 20))
+  self:initplaytoolbar():setalign(item.ALLEFT):setmargin(boxspace:new(0, 0, 0, 20))  
   self:initstatus()
 end
 
 function maincanvas:initstatus()  
   local g = group:new(self.tg):setalign(item.ALRIGHT):setautosize(true, false)
+  --g:addornament(ornamentfactory:createfill(0xFF0000))  
   self.searchrestartstatus = text:new(g)
                                  :settext("")
 								 :setautosize(false, false)
@@ -495,7 +496,7 @@ function maincanvas:initfiletoolbar()
 end
 
 function maincanvas:initplaytoolbar()  
-  local t = toolbar:new(self.tg)
+  local t = toolbar:new(self.tg)  
   self.playicon = toolicon:new(t, settings.picdir.."poweroff.png", 0xFFFFFF)  
   self.playicon.is_toggle = true
   local on = image:new():load(settings.picdir.."poweron.png")
@@ -642,7 +643,7 @@ end
 function maincanvas:openplugin(pluginpath, pluginname, plugininfo)  
   self:preventfls()
   self:closealltabs()      
-  self.fileexplorer:setpath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\")))
+  self.fileexplorer:sethomepath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\") - 1))
   self.fileexplorer:setmachinename(pluginname)
   self.fileexplorer.machineselector:settextcolor(0xFFFFFF)
 							       :setfont({name="arial", height=13, style=1})  

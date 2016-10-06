@@ -67,7 +67,10 @@ class Line : public Window {
   void SetPoint(int idx, const Point& pt) { pts_[idx] = pt; FLS(); }
   const Points& points() const { return pts_; }
   const Point& PointAt(int index) const { return pts_.at(index); }
-  void SetColor(ARGB color) { color_ = color; FLS(); }
+  void SetColor(ARGB color) { 
+    color_ = color;
+    FLS();
+  }
   ARGB color() const { return color_; }  
  private:
   Points pts_;

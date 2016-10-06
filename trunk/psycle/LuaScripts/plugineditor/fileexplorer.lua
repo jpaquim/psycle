@@ -22,6 +22,7 @@ local text = require("psycle.ui.canvas.text")
 local filehelper = require("psycle.file")
 local settings = require("settings")
 local closebutton = require("closebutton")
+local toolicon = require("psycle.ui.canvas.toolicon")
 
 local fileexplorer = group:new()
 
@@ -54,7 +55,7 @@ function fileexplorer:initheader()
   function closebutton:onmousedown()
      that:setposition(rect:new(point:new(0, 0), dimension:new(0, 0)))
 	 that:parent():flagnotaligned():updatealign()     
-  end 
+  end  
 end
 
 function fileexplorer:initmachineselector()
@@ -74,11 +75,12 @@ function fileexplorer:initmachineselector()
 end
 
 function fileexplorer:initlistview()
+  self.homepath = require("psycle.config"):new("PatternVisual"):luapath()
   self.listview = listview:new(self)
                           :setalign(item.ALCLIENT)
 						  :setautosize(false, false)
 						  :viewlist()			
-						  :setmargin(boxspace:new(10, 0, 0, 10))
+						  :setmargin(boxspace:new(0, 0, 0, 10))
   local that = self
   function self.listview:ondblclick(ev)    
 	local node = self:selected()
@@ -107,8 +109,12 @@ function fileexplorer:initicons()
   self.textlua = image:new():load(settings.picdir.."document.png")
   self.folder = image:new():load(settings.picdir.."folder_small.png")
   self.folder = image:new():load(settings.picdir.."folder_small.png")  
+  self.home = image:new():load(settings.picdir.."home.png")
   self.images = images:new()
-  self.images:add(self.text):add(self.folder):add(self.textlua)   
+  self.images:add(self.text)
+             :add(self.folder)
+			 :add(self.textlua)
+			 :add(self.home)   
   self.listview:viewsmallicon()
   self.listview:setimages(self.images)  
 end
@@ -119,13 +125,19 @@ function fileexplorer:initsignals()
   self.onselectmachine = signal:new()
 end
 
-function fileexplorer:setpath(path)
-  local dir = filehelper.directorylist(path)
+function fileexplorer:sethomepath(path)
+  self.homepath = path
+  self:setpath(path)
+end
+
+function fileexplorer:setpath(path)  
+  local dir = filehelper.directorylist(path)  
   self.rootnode = node:new()
+  self:addhomenode()
   self:addparentdirectorynode(path)
   for i=1, #dir do
     if dir[i] then      
-      local node = node:new():settext(dir[i].filename)
+      local node = node:new():settext(dir[i].filename)	  
 	  node.filename = dir[i].filename
 	  node.isdirectory = dir[i].isdirectory
 	  node.extension = dir[i].extension
@@ -151,6 +163,17 @@ function fileexplorer:machinename()
   self.machineselector:text()
 end
 
+function fileexplorer:addhomenode()
+  local dir = filehelper.fileinfo(self.homepath)
+  local node = node:new():settext("Plugin Home")
+  node:setimageindex(3):setselectedimageindex(3)
+  node.isdirectory = true
+  node.filename = dir.filename
+  node.extension = ""  
+  node.path = dir.path	
+  self.rootnode:add(node)  
+end
+
 function fileexplorer:addparentdirectorynode(path)
   local parentdirectory = filehelper.parentdirectory(path)
   if parentdirectory then
@@ -159,7 +182,7 @@ function fileexplorer:addparentdirectorynode(path)
 	node.isdirectory = true
 	node.filename = parentdirectory.filename
 	node.extension = ""  
-	node.path = parentdirectory.path
+	node.path = parentdirectory.path	
 	self.rootnode:add(node)  
   end
 end

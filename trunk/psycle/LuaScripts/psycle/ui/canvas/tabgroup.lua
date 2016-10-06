@@ -37,7 +37,7 @@ end
 
 function tabgroup:init()
   self.frames = {}
-  self.isoldflsprevented_ = {}
+  self.oldflsprevented_ = {}
   self.dopageclose = signal:new()
   self.hasclosebutton_ = true 
   self:setautosize(false, false)
@@ -109,33 +109,19 @@ function tabgroup:setlabel(page, text)
 end
 
 function tabgroup:saveflsstate()
-  self.isoldflsprevented_[#self.isoldflsprevented_+1] = self:isflsprevented()  
+  self.oldflsprevented_[#self.oldflsprevented_+1] = self:flsprevented()  
   return self
 end
 
 function tabgroup:restoreflsstate()  
-  if self.isoldflsprevented_[#self.isoldflsprevented_] then
+  if self.oldflsprevented_[#self.oldflsprevented_] then
     self:preventfls()
   else
     self:enablefls()     
   end
-  self.isoldflsprevented_[#self.isoldflsprevented_] = nil
+  self.oldflsprevented_[#self.oldflsprevented_] = nil
   return self            
 end                    
-
-function tabgroup:addpage(page, label)
-  self:preventfls()
-  page:setautosize(false, false)
-  page:setalign(window.ALCLIENT)
-  self:createheader(page, label)
-  self.children:add(page)
-  self:setactivepage(page)
-  self:enablefls()
-  self:flagnotaligned()  
-  self:updatealign()
-  self:enablefls()
-  self:fls()
-end
 
 function tabgroup:activepage()
   if self.activeframepage_ ~= nil then
@@ -161,17 +147,17 @@ function tabgroup:setactiveheader(page)
   end    
 end
 
-function tabgroup:setactivepage(page)
-  if page and self.activepage_ ~= page  then
-    --self:saveflsstate():preventfls()    
+function tabgroup:setactivepage(page, preventalign)
+  if page and self.activepage_ ~= page  then    
     self:setactiveheader(page)    
     page:show()	
 	if self.activepage_ then
       self.activepage_:hide()
     end    
 	self.activepage_ = page;
-	self.children:updatealign()
-    --self:restoreflsstate():invalidate()
+	if not preventalign then
+      self.children:updatealign()	
+	end
   end
 end
 
@@ -195,18 +181,18 @@ function tabgroup:removeall()
   self:updatealign()
 end
 
-function tabgroup:removepage(page)  
+function tabgroup:removepage(page)    
   local tabs = self.tabs:items()  
   for i=1, #tabs do
     if tabs[i].page == page then    
       self:removepagebyheader(tabs[i])
       break;
     end
-  end  
+  end      
 end
 
-function tabgroup:removepagebyheader(header)  
-  self:saveflsstate():preventfls()
+function tabgroup:removepagebyheader(header)    
+  self:root():invalidateontimer()
   local pages = self.children:items()
   local idx = self.children:itemindex(header.page)  
   self.children:remove(header.page)
@@ -215,38 +201,67 @@ function tabgroup:removepagebyheader(header)
   if idx == #pages then
     idx = idx -1
   end
-  local pages = self.children:items()
-  self.tabs:updatealign()  
-  self:setactivepage(pages[idx]) 
-  self:restoreflsstate():invalidate()
+  local pages = self.children:items()  
+  self:setactivepage(pages[idx], true)   
+  self:flagnotaligned():updatealign()
+  self:root():invalidatedirect():flush()  
 end
 
-function tabgroup:createheader(page, label)
-  local header = group:new(self.tabs):setautosize(true, true)  
-  header:setalign(window.ALLEFT)  
+function tabgroup:addpage(page, label)
+  self:root():invalidateontimer()
+  page:setautosize(false, false)
+  page:setalign(window.ALCLIENT)
+  self:createheader(page, label)
+  self.children:add(page)
+  self:setactivepage(page, true)  
+  self:flagnotaligned():updatealign()
+  self:root():invalidatedirect():flush()  
+end
+
+function tabgroup:createheader(page, label)  
+  local header = group:new()
+                      :setautosize(true, true)
+					  :setalign(window.ALLEFT)
+					  :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))					    
   header.page = page    
-  header.text = text:new(header):settext(label):setfont({name="Arial", height = "12"})
+  header.text = text:new(header)
+                    :settext(label)
+					:setfont({name="Arial", height = "13"})  
   header.text:setalign(window.ALLEFT):setmargin(boxspace:new(5))  
   local that = self
   if self.hasclosebutton_ then
     header.close = text:new(header)                           
                        :setcolor(0xB0D8B1)
-                       :settext("x")                       
-					   :setverticalalignment(window.ALCENTER)
-    header.close:setalign(window.ALLEFT):setautosize(true, false):setmargin(boxspace:new(0, 5, 0, 5))
+                       :settext("x")
+                       :setjustify(text.CENTERJUSTIFY)                       
+					   :setverticalalignment(window.ALCENTER)					   
+                       :setalign(window.ALLEFT)
+					   :setautosize(false, true)
+					   :setposition(rect:new(point:new(), dimension:new(15, 15)))
+					   :setmargin(boxspace:new(3, 5, 0, 5))
+					   :setfont({name="Arial", height = "15"})    
     function header.close:onmousedown()
       local ev = {}
       ev.page = self:parent().page
       that.dopageclose:emit(ev)
       that:removepagebyheader(self:parent())
     end
+	function header.close:onmouseenter(ev)
+	  self:setcolor(0xFFFFFF)
+	  self:addornament(ornamentfactory:createcirclefill(0xDB4437))
+	end
+	function header.close:onmouseout(ev)
+	  self:setcolor(0xB0D8B1)
+	  self:removeornaments()
+	end
   end
+  self.tabs:add(header)
   function header:setskinhighlight()        
     self:setpadding(boxspace:new(0))
 	self:removeornaments()    
 	self:addornament(ornamentfactory:createfill(0x333333)) 
 	self:addornament(ornamentfactory:createlineborder(0x696969))    
-    self.text:setcolor(0xFFFFFF) 	
+    self.text:setcolor(0xFFFFFF)     
   end
   function header:setskinnormal()
     self:setpadding(boxspace:new(1))
@@ -272,7 +287,7 @@ function tabgroup:createheader(page, label)
       that.tabpopupmenu.headertext = self.text:text()
     end    
   end
-  function header:onmouseup(ev) end  
+  function header:onmouseup(ev) end    		
   return header
 end
 

@@ -951,9 +951,11 @@ int LuaItemBind<T>::parent(lua_State* L) {
 }
 
 template <class T>
-int LuaItemBind<T>::canvas(lua_State* L) {
+int LuaItemBind<T>::root(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
-  if (err!=0) return err;
+  if (err!=0) {
+    return err;
+  }
   boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
   Window* root = window->root();
   LuaHelper::find_weakuserdata<>(L, root);
@@ -993,15 +995,15 @@ ui::Window::Ptr LuaGroupBind<T>::test(lua_State* L, int index) {
     LuaRectangleBoxBind<>::meta.c_str(),
     LuaCanvasBind<>::meta.c_str(),
     LuaGroupBind<>::meta.c_str(),
-	LuaHeaderGroupBind<>::meta.c_str(),
+	  LuaHeaderGroupBind<>::meta.c_str(),
     LuaTextBind<>::meta.c_str(),
-	LuaSplitterBind<>::meta.c_str(),
+	  LuaSplitterBind<>::meta.c_str(),
     LuaPicBind<>::meta.c_str(),
     LuaLineBind<>::meta.c_str(),
     LuaItemBind<LuaItem>::meta.c_str(),
     LuaButtonBind<LuaButton>::meta.c_str(),
-	LuaGroupBoxBind<LuaGroupBox>::meta.c_str(),
-	LuaRadioButtonBind<LuaRadioButton>::meta.c_str(),
+	  LuaGroupBoxBind<LuaGroupBox>::meta.c_str(),
+	  LuaRadioButtonBind<LuaRadioButton>::meta.c_str(),
     LuaEditBind<LuaEdit>::meta.c_str(),
     LuaScrollBarBind<LuaScrollBar>::meta.c_str(),
     LuaScintillaBind<LuaScintilla>::meta.c_str(),
@@ -1790,6 +1792,7 @@ int OrnamentFactoryBind::open(lua_State *L) {
     {"createlineborder", createlineborder},
     {"createwallpaper", createwallpaper},
     {"createfill", createfill},
+    {"createcirclefill", createcirclefill},
     {"createboundfill", createboundfill},
     {NULL, NULL}
   };
@@ -1850,6 +1853,15 @@ int OrnamentFactoryBind::createfill(lua_State* L) {
                                   "psycle.ui.canvas.fill",
                                      ui::OrnamentFactory::Instance()
                                        .CreateFill(static_cast<ARGB>(luaL_checknumber(L, 2))));
+  return 1;
+}
+
+int OrnamentFactoryBind::createcirclefill(lua_State* L) {   
+  luaL_checkudata(L, 1, meta.c_str());
+  LuaHelper::requirenew<FillBind>(L,
+                                  "psycle.ui.canvas.circlefill",
+                                     ui::OrnamentFactory::Instance()
+                                       .CreateCircleFill(static_cast<ARGB>(luaL_checknumber(L, 2))));
   return 1;
 }
 
@@ -1933,6 +1945,30 @@ int WallpaperBind::create(lua_State* L) {
 
 int WallpaperBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<ui::Wallpaper>(L, meta);
+}
+
+std::string CircleFillBind::meta = "canvascirclefill";
+
+int CircleFillBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods, gc);   
+  return 1;
+}
+
+int CircleFillBind::create(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 2, "self");
+  if (err!=0) return err;
+  ARGB color = static_cast<ARGB>(luaL_checknumber(L, 2));
+  CircleFill* fill = new CircleFill(color);
+  LuaHelper::new_shared_userdata<>(L, meta, fill);
+  return 1;
+}
+
+int CircleFillBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::Fill>(L, meta);
 }
 
 std::string FillBind::meta = "canvasfill";
