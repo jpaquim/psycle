@@ -18,13 +18,13 @@
 
 -- local extension = require("psycle.extension")
 
-local link = {
-  label = "keys",
-  plugin = "type.lua",
-  viewport = psycle.FRAMEVIEWPORT,
-  userinterface = psycle.MDI
-}
-psycle.replacemenu("help", 2, link)
+--local link = {
+--  label = "keys",
+--  plugin = "type.lua",
+--  viewport = psycle.FRAMEVIEWPORT,
+--  userinterface = psycle.MDI
+--}
+--psycle.replacemenu("help", 2, link)
 
 local link = {
   label = "New Plugin Editor",
