@@ -156,6 +156,7 @@ struct BorderStyle {
 
 struct BorderRadius {
   BorderRadius() { left_top = right_top = left_bottom = right_bottom = 0.0; }
+  BorderRadius(double radius) { left_top = right_top = left_bottom = right_bottom = radius; }
   BorderRadius(double left_top, double right_top, double left_bottom, double right_bottom) : 
       left_top(left_top),
       right_top(right_top),
@@ -167,6 +168,7 @@ struct BorderRadius {
     return left_top == 0 &&  right_top == 0 && left_bottom == 0 
            && right_bottom == 0;
   }
+ 
   double left_top;
   double right_top;
   double left_bottom;

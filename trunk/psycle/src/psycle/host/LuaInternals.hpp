@@ -75,6 +75,8 @@ struct LuaActionListenerBind {
     static int octave(lua_State* L);
     static int keytocmd(lua_State* L);
     static int plugindir(lua_State* L);
+    static int presetdir(lua_State* L);
+    
   };
 
   struct LuaPluginInfoBind {
@@ -106,7 +108,7 @@ struct LuaActionListenerBind {
       CHUNK = 1
     };
   };
-
+  
   class LuaMachine {
   public:
     LuaMachine(lua_State* L);    
@@ -212,7 +214,20 @@ struct LuaActionListenerBind {
     static int insert(lua_State* L);
     static int at(lua_State* L);
     static int master(lua_State* L);
-    static int muted(lua_State* L);    
+    static int muted(lua_State* L);        
+  };
+
+  struct LuaSetting {
+    LuaSetting(Machine* machine) : machine_(machine) {}
+   private:
+    Machine* machine_;
+  };
+
+  struct LuaSettingBind {
+    static int open(lua_State *L);
+    static const char* meta;  
+    static int create(lua_State* L);
+    static int gc(lua_State* L);        
   };
 
   struct LuaPlayerBind {

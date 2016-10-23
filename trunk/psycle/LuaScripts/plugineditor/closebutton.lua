@@ -9,9 +9,9 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
-local item = require("psycle.ui.canvas.item")
-local text = require("psycle.ui.canvas.text")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local item = require("psycle.ui.item")
+local text = require("psycle.ui.text")
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local signal = require("psycle.signal")
 
 local closebutton = {}

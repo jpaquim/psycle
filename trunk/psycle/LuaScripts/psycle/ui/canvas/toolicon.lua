@@ -9,7 +9,7 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local image = require("psycle.ui.image")
-local item = require("psycle.ui.canvas.item")
+local item = require("psycle.ui.item")
 local listener = require("psycle.listener")
 local serpent = require("psycle.serpent")
 
@@ -99,8 +99,7 @@ end
 
 function toolicon:onmousedown(ev) 
   self:mousecapture()
-  self:seton(not self.on_)  
-  self:onclick()
+  self:seton(not self.on_)    
   self.clicklistener_:notify(self)
 end
 
@@ -126,6 +125,7 @@ function toolicon:onmouseup(ev)
   if not self.is_toggle then
     self:seton(false)  
   end
+  self:onclick()
 end
 
 function toolicon:toggle()

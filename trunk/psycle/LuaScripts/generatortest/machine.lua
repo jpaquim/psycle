@@ -85,8 +85,8 @@ function machine:init(samplerate)
   p.arplb = param:newlabel("Arp")
   p.arpmode = param:newknob("Arp Mode", "", 0, 16, 16, 0):addlistener(self)
   p.arpspeed = param:newknob("Arp Speed", "bpm", 1, 1000, 999, 125):addlistener(self)
-  p.arpsteps = param:newknob("Arp Steps", "", 1, 16, 15, 4):addlistener(self)
-  self:addparameters(p)    
+  p.arpsteps = param:newknob("Arp Steps", "", 1, 16, 15, 4):addlistener(self)  
+  self:addparameters(p)  
   self:setnumcols(2)  
   -- create 3 polyphonic voices
   self.currvoice = 1 

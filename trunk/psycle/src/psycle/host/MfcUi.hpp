@@ -1124,6 +1124,7 @@ protected:
   virtual void OnVScroll(UINT a, UINT b, CScrollBar* pScrollBar) {
     ReflectLastMsg(pScrollBar->GetSafeHwnd());
   }
+  
   int Win32KeyFlags(UINT nFlags) {
     UINT flags = 0;
     if (GetKeyState(VK_SHIFT) & 0x8000) {
@@ -1233,6 +1234,7 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
 
   virtual void dev_add_style(UINT flag) { ModifyStyle(0, flag); }
   virtual void dev_remove_style(UINT flag) { ModifyStyle(flag, 0); }
+ 
 
  protected:
   virtual void DevSetCursor(CursorStyle style);
@@ -1811,6 +1813,8 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
+    imp->SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE,
+        LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
     imp->set_window(w);
     WindowHook::windows_[imp->GetSafeHwnd()] = imp;
     // imp->SetLineColor(0xFFFFFF);
@@ -1952,6 +1956,10 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
   virtual void dev_set_item_index(int index) { SetCurSel(index); }
   virtual int dev_item_index() const { return GetCurSel(); }
 
+  virtual void dev_set_text(const std::string& text) {
+    SetWindowText(Charset::utf8_to_win(text).c_str());
+  }
+
   virtual std::string dev_text() const {		
     CString s;
     GetWindowText(s);		
@@ -1962,6 +1970,7 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
 
   virtual void dev_set_font(const Font& font);
   virtual const Font& dev_font() const { return font_; }
+  virtual void dev_clear() { ResetContent(); }
 
  protected:
   virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
@@ -2023,10 +2032,10 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
 	  background_brush_.CreateSolidBrush(background_color_);
   }  
   virtual ARGB dev_background_color() const { return ToARGB(text_color_); }  
-  virtual void dev_set_text_color(ARGB color) {
+  virtual void dev_set_color(ARGB color) {
     text_color_ = ToCOLORREF(color);
   }
-  virtual ARGB dev_text_color() const { return ToARGB(background_color_); }
+  virtual ARGB dev_color() const { return ToARGB(background_color_); }
   virtual void dev_set_font(const Font& font);
   virtual const Font& dev_font() const { return font_; }
   
@@ -2083,6 +2092,8 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     ptr = (void *)SendMessage(SCI_GETDIRECTPOINTER, 0, 0);   
 
     f(SCI_SETMARGINWIDTHN, 0, 32);
+    f(SCI_SETMARGINWIDTHN, 1, 32);
+    f(SCI_SETMARGINSENSITIVEN, 1, TRUE);
     return true;
   }
 
@@ -2286,6 +2297,11 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
 
   void dev_undo() { f(SCI_UNDO, 0, 0); }
   void dev_redo() { f(SCI_REDO, 0, 0); }
+
+  void dev_set_tab_width(int width_in_chars) {  
+    f(SCI_SETTABWIDTH, width_in_chars, 0);
+  }
+  int dev_tab_width() const { return f(SCI_GETTABWIDTH, 0, 0); }
             
  protected:
   DECLARE_DYNAMIC(ScintillaImp)     
@@ -2297,11 +2313,11 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     return false;
   }
  
-  BOOL OnFolder(NMHDR * nhmdr,LRESULT *);  
+  BOOL OnMarginClick(NMHDR * nhmdr,LRESULT *);  
   BOOL OnEraseBkgnd(CDC* pDC) { return true; }
 
   DECLARE_MESSAGE_MAP(); 
-
+  
  private:         
   DWORD find_flags_;
   std::string fname_;
@@ -2561,6 +2577,13 @@ class Systems : public ui::Systems {
     MenuContainer* bar = new MenuContainer();    
     return bar;
   }
+  virtual void import_font(const std::string& path) {
+    int result = AddFontResource(Charset::utf8_to_win(path).c_str());     
+    if (result == 0) {
+      throw std::exception("Failed to add font.");
+    }
+  }
+
 };
 
 class ImpFactory : public ui::ImpFactory {

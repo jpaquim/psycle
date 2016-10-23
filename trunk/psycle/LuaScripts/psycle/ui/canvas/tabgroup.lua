@@ -10,17 +10,17 @@ local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
 local canvas = require("psycle.ui.canvas")
-local group = require("psycle.ui.canvas.group")
-local window = require("psycle.ui.canvas.item")
-local text = require("psycle.ui.canvas.text")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local group = require("psycle.ui.group")
+local window = require("psycle.ui.item")
+local text = require("psycle.ui.text")
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local toolicon = require("psycle.ui.canvas.toolicon")
-local frame = require("psycle.ui.canvas.frame")
-local popupframe = require("psycle.ui.canvas.popupframe")
+local frame = require("psycle.ui.frame")
+local popupframe = require("psycle.ui.popupframe")
 local popupmenu = require("psycle.ui.popupmenu")
 local node = require("psycle.node")
 local signal = require("psycle.signal")
-local framealigner = require("psycle.ui.canvas.framealigner")
+local framealigner = require("psycle.ui.framealigner")
 
 local tabgroup = group:new()
 local cfg = require("psycle.config"):new("MacParamVisual")
@@ -49,7 +49,7 @@ function tabgroup:init()
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
                         :setautosize(false, false)
                         :setposition(rect:new(point:new(0, 0), dimension:new(15, 10)))
-						:setalign(window.ALRIGHT)    
+						:setalign(window.ALRIGHT)    						
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
@@ -106,6 +106,7 @@ function tabgroup:setlabel(page, text)
     end
   end
   self:traverse(f, self.tabs:items())
+  self.tabs:updatealign()
 end
 
 function tabgroup:saveflsstate()
@@ -195,6 +196,9 @@ function tabgroup:removepagebyheader(header)
   self:root():invalidateontimer()
   local pages = self.children:items()
   local idx = self.children:itemindex(header.page)  
+  if header.page.onclose then
+    header.page:onclose()
+  end
   self.children:remove(header.page)
   self.activepage_ = nil
   self.tabs:remove(header) 
@@ -248,7 +252,7 @@ function tabgroup:createheader(page, label)
     end
 	function header.close:onmouseenter(ev)
 	  self:setcolor(0xFFFFFF)
-	  self:addornament(ornamentfactory:createcirclefill(0xDB4437))
+	  self:addornament(ornamentfactory:createcirclefill(0xA8444C))
 	end
 	function header.close:onmouseout(ev)
 	  self:setcolor(0xB0D8B1)
@@ -279,11 +283,10 @@ function tabgroup:createheader(page, label)
       self.text:setcolor(0xC0C0C0) 	
 	end
   end  
-  function header:onmousedown(ev)        
+  function header:onmousedown(ev)         
     that:setactivepage(self.page)
-    if ev.button == 2 then
-      local x, y = self:desktopposition()
-      that.tabpopupmenu:track(x + 5, y + 5)
+    if ev:button() == 2 then
+      that.tabpopupmenu:track(self:desktopposition():topleft():offset(5, 5))
       that.tabpopupmenu.headertext = self.text:text()
     end    
   end
@@ -346,7 +349,8 @@ function tabgroup:openinframe(page, name)
 end
 
 function tabgroup:createframe(canvas, name)  
-  local frame = frame:new():setview(canvas):settitle(name)  
+  local frame = frame:new():setviewport(canvas):settitle(name)
+  canvas:invalidatedirect()
   frame.tabgroup = self
   self.frames[#self.frames+1] = frame
   local that = self
@@ -425,6 +429,10 @@ end
 function tabgroup:traverse(f, arr)  
   for i=1, #arr do f(arr[i]) end  
   return self
+end
+
+function tabgroup:childat(i)
+  return self.children:items()[i]
 end
 
 return tabgroup

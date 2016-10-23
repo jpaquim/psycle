@@ -292,8 +292,7 @@ void ParamMap::RefreshParamMap() {
     ui::Node::Ptr col2_node = *(*it)->begin();
     col2_node->set_text(str.str());              
   }
-  list_view_->EnableDraw();
-  list_view_->FLS();  
+  list_view_->EnableDraw();  
   UpdateMachineParamEndText();
 }
 
@@ -323,8 +322,7 @@ void ParamMap::ReplaceSelection() {
       break;
     }    
   }  
-  list_view_->EnableDraw();
-  list_view_->FLS();
+  list_view_->EnableDraw();  
 }
 
 bool ParamMap::HasSelectionChanged() {

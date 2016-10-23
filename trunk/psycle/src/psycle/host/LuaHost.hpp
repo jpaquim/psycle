@@ -48,9 +48,13 @@ class LuaControl : public LockIF {
 
   std::string install_script() const;
   virtual PluginInfo meta() const;
+
+  void yield();
+  void resume();
   
   protected:
    lua_State* L;
+   lua_State* LM;
    std::auto_ptr<ui::Commands> invokelater;   
    PluginInfo parse_info() const;
   private:   
@@ -59,8 +63,10 @@ class LuaControl : public LockIF {
 
 class LuaStarter : public LuaControl {
  public:
-  virtual void PrepareState();
+  virtual void PrepareState();  
   static int addmenu(lua_State* L);
+  static int replacemenu(lua_State* L);
+  static int addextension(lua_State* L);
 };
 
 static const int CHILDVIEWPORT = 1;
@@ -179,6 +185,14 @@ private:
   int user_interface_;
 };
 
+class LuaPluginBind {
+ public:
+  static int open(lua_State *L);
+  static const char* meta;  
+  static int create(lua_State* L);
+  static int gc(lua_State* L);
+};
+
 class Link {
   public:
    Link() : viewport_(CHILDVIEWPORT), user_interface_(MDI) {}
@@ -227,7 +241,10 @@ class HostExtensions {
   }
   HostExtensions::List Get(const std::string& name);
   LuaPluginPtr Get(int idx);  
-  void AddMenu(Link& link);
+  void ReplaceHelpMenu(Link& link, int pos);
+  void AddViewMenu(Link& link);
+  void AddHelpMenu(Link& link);
+  CMenu* FindSubMenu(CMenu* parent, const std::string& text);
 
   MenuMap& menuItemIdMap() { return menuItemIdMap_; }
   void OnDynamicMenuItems(UINT nID);
@@ -243,6 +260,7 @@ class HostExtensions {
   LuaPluginPtr Execute(Link& link);
 
   void ChangeWindowsMenuText(LuaPlugin* plugin);
+  void AddToWindowsMenu(Link& link);
 
  private:   
   lua_State*  load_script(const std::string& dllpath);
@@ -251,8 +269,7 @@ class HostExtensions {
   std::string menu_label(const Link& link) const;
 
   HostExtensions::List extensions_;  
-  MenuMap menuItemIdMap_;
-  void AddToWindowsMenu(Link& link);
+  MenuMap menuItemIdMap_;  
   class CChildView* child_view_;
   LuaPlugin* active_lua_;
   int menu_pos_;
@@ -265,7 +282,7 @@ struct LuaGlobal {
      std::map<lua_State*, LuaProxy*>::iterator it = proxy_map.find(L);
      return it != proxy_map.end() ? it->second : 0;
    }   
-   static lua_State* load_script(const std::string& dllpath);
+   static lua_State* load_script(const std::string& dllpath);   
    static PluginInfo LoadInfo(const std::string& dllpath);         
    static Machine* GetMachine(int idx);
    static class LuaPlugin* GetLuaPlugin(int idx) {

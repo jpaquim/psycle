@@ -7,15 +7,15 @@
 
 local signal = require("psycle.signal")
 local point = require("psycle.ui.point")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
-local item = require("psycle.ui.canvas.item")
-local group = require("psycle.ui.canvas.group")
-local button = require("psycle.ui.canvas.button")
-local edit = require("psycle.ui.canvas.edit")
-local text = require("psycle.ui.canvas.text")
+local item = require("psycle.ui.item")
+local group = require("psycle.ui.group")
+local button = require("psycle.ui.button")
+local edit = require("psycle.ui.edit")
+local text = require("psycle.ui.text")
 local checkbox = require("psycle.ui.canvas.checkbox")
 local iconbutton = require("psycle.ui.canvas.toolicon")
 local closebutton = require("closebutton")
@@ -27,15 +27,15 @@ search.UP = 2
 
 search.iconpath = settings.picdir
                             
-function search:new(parent)
+function search:new(parent, setting)
   local c = group:new(parent)  
   setmetatable(c, self)
   self.__index = self  
-  c:init()  
+  c:init(setting)  
   return c
 end
 
-function search:init() 
+function search:init(setting) 
   self:setautosize(false, true)
   self:setpadding(boxspace:new(5))  
   self.dosearch = signal:new()
@@ -45,8 +45,8 @@ function search:init()
   local closebutton = closebutton.new(g):setalign(item.ALTOP)  
   closebutton.dohide:connect(search.onclosebutton, self)
   self:createeditgroup(self)  
-  self:createreplacegroup(self)  
-  self:addornament(ornamentfactory:createlineborder(0x253E2F))
+  self:createreplacegroup(self)    
+  self:applysetting(setting)
 end
 
 function search:createeditgroup(parent)       
@@ -69,9 +69,7 @@ end
 function search:createeditfield(parent)
   self.edit = edit:new(parent)
                   :setposition(rect:new(point:new(0, 0), dimension:new(200, 20)))
-				  :setalign(item.ALLEFT)
-				  :setbackgroundcolor(0x373533)  
-				  :settextcolor(0xFFFFFF)
+				  :setalign(item.ALLEFT)				  
   return self
 end
 
@@ -143,7 +141,7 @@ function search:createreplacefield(parent)
                           :disable()
                           :setalign(item.ALLEFT)
 						  :setautosize(false, false)						  
-						  :settextcolor(0xA0A0A0)
+						  :setcolor(0xA0A0A0)
 						  :setbackgroundcolor(0x323232)						  
   local that = self
   function self.replacefield:onkeydown(ev)         
@@ -161,14 +159,14 @@ function search:createreplacefield(parent)
        that.replacefield:enable()
        that.replacebtn:enable()
 	   that.replacefield:setbackgroundcolor(0x373533)       
-	   that.replacefield:settextcolor(0xFFFFFF)
+	   that.replacefield:setcolor(0xFFFFFF)
 	   that.replacegroup:addornament(ornamentfactory:createlineborder(0x525252))
      else
        that.replacefield:disable()
        that.replacebtn:disable()
        that.replacegroup:removeornaments()	   
 	   that.replacefield:setbackgroundcolor(0x323232)	   
-	   that.replacefield:settextcolor(0xA0A0A0)
+	   that.replacefield:setcolor(0xA0A0A0)
 	   that.replacefield:fls()
      end
   end
@@ -194,15 +192,15 @@ function search:createoptions(parent)
   self.casesensitive = checkbox:new(parent)
                                :setalign(item.ALLEFT)
 							   :settext("match case")
-							   :setmargin(boxspace:new(0, 5, 0, 0))
+							   :setmargin(boxspace:new(0, 5, 0, 0))							   
   self.wholeword = checkbox:new(parent)
                            :setalign(item.ALLEFT)
 						   :settext("match whole words only")
-						   :setmargin(boxspace:new(0, 5, 0, 0))
+						   :setmargin(boxspace:new(0, 5, 0, 0))						   
   self.useregexp = checkbox:new(parent)
                            :setalign(item.ALLEFT)
 						   :settext("use regexp")
-						   :setmargin(boxspace:new(0, 5, 0, 0))
+						   :setmargin(boxspace:new(0, 5, 0, 0))						   
   return self
 end
 
@@ -212,6 +210,28 @@ end
 
 function search:onclosebutton()  
   self.dohide:emit()
+end
+
+function search:applysetting(setting)  
+  self:addornament(ornamentfactory:createlineborder(0x253E2F))
+  local items = {    
+    self.casesensitive,
+	self.wholeword,
+	self.useregexp,
+	self.replaceactive    
+  }
+  for i=1, #items do
+    items[i]:setcolor(setting.general.properties.foregroundcolor:value())
+  end
+  
+  local items = {    
+    self.edit	
+  }
+  for i=1, #items do
+    local item = items[i]
+    item:setcolor(setting.general.children.ui.properties.editforegroundcolor:value())
+	    :setbackgroundcolor(setting.general.children.ui.properties.editbackgroundcolor:value())
+  end  
 end
 
 return search

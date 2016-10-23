@@ -40,7 +40,7 @@ extern CPsycleApp theApp;
   
 using namespace ui;
 
-LuaControl::LuaControl() : L(0) {
+LuaControl::LuaControl() : L(0), LM(0) {
   invokelater.reset(new ui::Commands());
   InitializeCriticalSection(&cs);  
 }
@@ -49,16 +49,24 @@ LuaControl::~LuaControl() {
   DeleteCriticalSection(&cs);  
 }
 
-void LuaControl::Load(const std::string& filename) {
+void LuaControl::Load(const std::string& filename) {  
   L = LuaGlobal::load_script(filename);
-}
+} 
 
-void LuaControl::Run() {  
+void LuaControl::Run() { 
   int status = lua_pcall(L, 0, LUA_MULTRET, 0);
-  if (status) {         
+  if (status) {      
     const char* msg = lua_tostring(L, -1);    
     throw std::runtime_error(msg);       
   }   
+}
+
+void LuaControl::yield() {
+  lua_yieldk(L, 0, 0, 0);
+}
+
+void LuaControl::resume() {
+  lua_resume(L, 0, 0);
 }
 
 void LuaControl::Start() {
@@ -225,6 +233,8 @@ PluginInfo LuaControl::parse_info() const {
 void LuaStarter::PrepareState() {
   static const luaL_Reg methods[] = {    
     {"addmenu", addmenu},
+    {"replacemenu", replacemenu},
+    {"addextension", addextension},
     {NULL, NULL}
   };
   lua_newtable(L);
@@ -253,21 +263,97 @@ void LuaStarter::PrepareState() {
   lua_setmetatable(L, -2);
   lua_setfield(L, -2, "weakuserdata");
   lua_pop(L, 1);
+  LuaHelper::require<LuaPluginBind>(L, "psycle.extension");
 }
 
 int LuaStarter::addmenu(lua_State* L) {
-  const char* menu_name = luaL_checkstring(L, 1);  
+  std::string menu_name(luaL_checkstring(L, 1));  
   lua_getfield(L, 2, "plugin");
   lua_getfield(L, 2, "label");    
   lua_getfield(L, 2, "viewport");
   lua_getfield(L, 2, "userinterface");
-  Link link(luaL_checkstring(L, -4),
+
+  LuaPluginPtr plugin = LuaHelper::test_sptr<LuaPlugin>(L, -4, LuaPluginBind::meta);
+  std::string plugin_name = !plugin ? luaL_checkstring(L, -4) : "test";  
+  Link link(plugin_name,
             luaL_checkstring(L, -3),
             luaL_checkinteger(L, -2),
             luaL_checkinteger(L, -1));   
-  HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
-  host_extensions.AddMenu(link);
+   HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+  if (plugin) {
+    link.plugin = plugin;
+    plugin->proxy().set_userinterface(link.user_interface());
+	  plugin->Init();			    
+    plugin->CanvasChanged.connect(boost::bind(&HostExtensions::OnPluginCanvasChanged, &host_extensions,  _1));
+    plugin->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, &host_extensions,  _1, _2));     
+    if (link.user_interface() == MDI) {
+      host_extensions.AddToWindowsMenu(link); 
+    }
+  }  
+  if (menu_name == "view") {
+    host_extensions.AddViewMenu(link);
+  } else
+  if (menu_name == "help") {
+    host_extensions.AddHelpMenu(link);
+  }
   return 0;
+}
+
+int LuaStarter::replacemenu(lua_State* L) {
+  std::string menu_name(luaL_checkstring(L, 1));  
+  int menu_pos(luaL_checkinteger(L, 2));
+  lua_getfield(L, 3, "plugin");
+  lua_getfield(L, 3, "label");    
+  lua_getfield(L, 3, "viewport");
+  lua_getfield(L, 3, "userinterface");
+
+  LuaPluginPtr plugin = LuaHelper::test_sptr<LuaPlugin>(L, -4, LuaPluginBind::meta);
+  std::string plugin_name = !plugin ? luaL_checkstring(L, -4) : "test";  
+  Link link(plugin_name,
+            luaL_checkstring(L, -3),
+            luaL_checkinteger(L, -2),
+            luaL_checkinteger(L, -1));   
+   HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+  if (plugin) {
+    link.plugin = plugin;
+    plugin->proxy().set_userinterface(link.user_interface());
+	  plugin->Init();			    
+    plugin->CanvasChanged.connect(boost::bind(&HostExtensions::OnPluginCanvasChanged, &host_extensions,  _1));
+    plugin->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, &host_extensions,  _1, _2));     
+    if (link.user_interface() == MDI) {
+      host_extensions.AddToWindowsMenu(link); 
+    }
+  }  
+  if (menu_name == "view") {
+    // host_extensions.AddViewMenu(link);
+  } else
+  if (menu_name == "help") {
+    host_extensions.ReplaceHelpMenu(link, menu_pos);
+  }
+  return 0;
+}
+
+int LuaStarter::addextension(lua_State* L) {
+  const char* extension_name = luaL_checkstring(L, 1);
+  PluginCatcher* plug_catcher =
+    static_cast<PluginCatcher*>(&Global::machineload());
+  PluginInfo* info = plug_catcher->info(extension_name);
+  if (info) {
+    if (info->mode == MACHMODE_HOST) {          
+     LuaPlugin* mac =new LuaPlugin(info->dllname, -1);     
+     mac->proxy().set_userinterface(SDI);
+	   mac->Init();			
+     luaL_requiref(L, "psycle.extension", &LuaPluginBind::open, true);    
+     LuaPluginPtr plugin = LuaHelper::new_shared_userdata<>(L, LuaPluginBind::meta, mac, lua_gettop(L));
+     lua_remove(L, -2);     
+     HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
+     host_extensions.Add(plugin);     
+    }
+  } else {
+    ui::alert("Error in start.lua : Extension " + std::string(extension_name) + " not found.");
+    lua_pushnil(L);
+  }
+  return 1;
 }
 
 // Class Proxy : export and import between psycle and lua
@@ -276,13 +362,16 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     is_meta_cache_updated_(false),
     lua_mac_(0),
     user_interface_(SDI) {  
-  L = LuaGlobal::load_script(dllname);  
+  Load(dllname);
 }
 
 LuaProxy::~LuaProxy() {}
 
 int LuaProxy::invoke_later(lua_State* L) {
-  boost::shared_ptr<LuaRun> run = LuaHelper::check_sptr<LuaRun>(L, 1, LuaRunBind::meta);
+  if lua_isnil(L, 1) {
+    return luaL_error(L, "Argument is nil.");
+  }
+  boost::shared_ptr<LuaRun> run = LuaHelper::check_sptr<LuaRun>(L, 1, LuaRunBind::meta);  
   struct {
     LuaRun* run;
     void operator()() const
@@ -291,7 +380,11 @@ int LuaProxy::invoke_later(lua_State* L) {
     }
    } f;   
   f.run = run.get();  
-  LuaGlobal::proxy(L)->invokelater->Add(f);  
+  LuaProxy* proxy = LuaGlobal::proxy(L);  
+  if (!proxy) {
+    return luaL_error(L, "invokelater: Proxy not found.");
+  }
+  proxy->invokelater->Add(f);  
   return 0;
 }
 
@@ -312,7 +405,7 @@ void LuaProxy::OnTimer() {
     if (in.open("ontimer")) {
       in.pcall(0);      
     }
-  } catch(std::exception& e) {
+  } catch(std::exception&) {
   }
 }
 
@@ -329,10 +422,10 @@ void LuaProxy::PrepareState() {
   // config
   LuaHelper::require<LuaConfigBind>(L, "psycle.config");
   LuaHelper::require<LuaPluginInfoBind>(L, "psycle.plugininfo");
-  LuaHelper::require<LuaPluginCatcherBind>(L, "psycle.plugincatcher");
+  LuaHelper::require<LuaPluginCatcherBind>(L, "psycle.plugincatcher");  
   // sound engine
   LuaHelper::require<LuaArrayBind>(L, "psycle.array");
-  LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");
+  LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");  
   LuaHelper::require<LuaMachineBind>(L, "psycle.machine");
   LuaHelper::require<LuaMachinesBind>(L, "psycle.machines");
   LuaHelper::require<LuaWaveOscBind>(L, "psycle.osc");
@@ -560,7 +653,7 @@ PluginInfo LuaProxy::meta() const {
   PluginInfo result;  
   try {
     result = cache_meta(LuaControl::meta());
-  } catch (std::exception& e) {
+  } catch (std::exception&) {
     try {        
       LuaImport in(L, lua_mac_, this);
       if (!in.open("info")) {
@@ -1003,13 +1096,29 @@ void LuaProxy::UpdateWindowsMenu() {
 
 // End of Class Proxy
 
+const char* LuaPluginBind::meta = "pluginmeta";
+
+int  LuaPluginBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods);
+}
+
+int LuaPluginBind::create(lua_State* L) {
+  const char* dllname = luaL_checkstring(L, 2);
+  LuaHelper::new_shared_userdata(L, meta, new LuaPlugin(dllname, AUTOID));
+  return 1;
+}
+
 // Class HostExtensions : Container for HostExtensions
 
 const int windows_menu_pos = 6;
 
-void HostExtensions::StartScript() {
-  AutoInstall();  
+void HostExtensions::StartScript() {    
   try {
+    AutoInstall();
     LuaStarter starter;
     starter.Load(PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\" +
                  "start.lua");    
@@ -1055,8 +1164,7 @@ std::vector<std::string> HostExtensions::search_auto_install() {
   std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
   std::string start_script_path = script_path + "\\start.lua";
   using namespace std;
-  ifstream fileInput;
-  int offset;
+  ifstream fileInput;  
   string line;
   char* search = "@"; // test variable to search in file
   // open file to search
@@ -1079,7 +1187,7 @@ std::vector<std::string> HostExtensions::search_auto_install() {
   return result;
 }
 
-void HostExtensions::AddMenu(Link& link) {
+void HostExtensions::AddViewMenu(Link& link) {
   CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
   CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);	
   int win32_menu_id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
@@ -1089,6 +1197,50 @@ void HostExtensions::AddMenu(Link& link) {
       win32_menu_id,
       ui::mfc::Charset::utf8_to_win(link.label()).c_str());  
   menuItemIdMap_[win32_menu_id] = link;
+}
+
+
+CMenu* HostExtensions::FindSubMenu(CMenu* parent, const std::string& text) {
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
+  CMenu* main_menu = pParentMain->GetMenu();
+  CMenu* result(0);
+  for ( int i=0; i < main_menu->GetMenuItemCount(); ++i) {
+    CString str;
+    main_menu->GetMenuString(i, str, MF_BYPOSITION);
+    std::string tmp(str.GetString());
+    if (tmp.find(text) != std::string::npos) {
+      result = main_menu->GetSubMenu(i);
+      break;
+    }
+  }
+  return result;
+}
+
+
+void HostExtensions::AddHelpMenu(Link& link) {  
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
+  CMenu* main_menu = pParentMain->GetMenu();
+  CMenu* help_menu = FindSubMenu(main_menu, "Help");  
+  if (help_menu) {    
+    int win32_menu_id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
+    help_menu->AppendMenu(      
+      MF_STRING,
+      win32_menu_id,
+      ui::mfc::Charset::utf8_to_win(link.label()).c_str());  
+    menuItemIdMap_[win32_menu_id] = link;
+  }
+}
+
+void HostExtensions::ReplaceHelpMenu(Link& link, int pos) {
+  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
+  CMenu* main_menu = pParentMain->GetMenu();
+  CMenu* help_menu = FindSubMenu(main_menu, "Help");
+  if (help_menu) {    
+    int win32_menu_id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;    
+    help_menu->RemoveMenu(pos, MF_BYPOSITION);
+    help_menu->InsertMenu(pos, MF_BYPOSITION, win32_menu_id, ui::mfc::Charset::utf8_to_win(link.label()).c_str());    
+    menuItemIdMap_[win32_menu_id] = link;
+  }
 }
 
 void HostExtensions::InitWindowsMenu() {
@@ -1209,7 +1361,7 @@ void HostExtensions::OnDynamicMenuItems(UINT nID) {
       std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
       try {
         link.plugin = plug = Execute(link);      
-      } catch(std::exception& e) {
+      } catch(std::exception&) {
         return;
       }
       if (link.user_interface() == SDI) {        
@@ -1375,8 +1527,9 @@ void HostExtensions::ChangeWindowsMenuText(LuaPlugin* plugin) {
 std::map<lua_State*, LuaProxy*> LuaGlobal::proxy_map;  
 
 lua_State* LuaGlobal::load_script(const std::string& dllpath) {
-  lua_State* L = luaL_newstate();
+  lua_State* L = luaL_newstate();   
   luaL_openlibs(L);
+  
   // set search path for require
   std::string filename_noext;
   boost::filesystem::path p(dllpath);

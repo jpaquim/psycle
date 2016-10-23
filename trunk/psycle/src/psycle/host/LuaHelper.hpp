@@ -298,18 +298,21 @@ namespace LuaHelper {
     // mimics the bahaviour of luaL_testudata for our own userdata structure
 		template <class T>
 		static boost::shared_ptr<T> test_sptr(lua_State* L, int index, const std::string& meta) {
-			boost::shared_ptr<T> nullpointer;
-			luaL_checktype(L, index, LUA_TTABLE);
-			lua_getfield(L, index, "__self");			
       typedef boost::shared_ptr<T> SPtr;
-      SPtr* ud = (SPtr*) luaL_testudata(L, -1, meta.c_str());
-      if (ud == NULL) {
-        lua_pop(L, 1);
-        return nullpointer;
-      }
-			luaL_argcheck(L, (ud) != 0, 1, (meta+" expected").c_str());
-			lua_pop(L, 1);
-			return *ud;
+			boost::shared_ptr<T> nullpointer;
+      if (lua_istable(L, index)) {			  
+			  lua_getfield(L, index, "__self");			        
+        SPtr* ud = (SPtr*) luaL_testudata(L, -1, meta.c_str());
+        if (ud == NULL) {
+          lua_pop(L, 1);
+          return nullpointer;
+        }
+			  luaL_argcheck(L, (ud) != 0, 1, (meta+" expected").c_str());
+			  lua_pop(L, 1);
+        return *ud;
+      } else {
+        return SPtr();
+      }			
 		}
 
     static int check_argnum(lua_State* L, int num, const std::string& names) {

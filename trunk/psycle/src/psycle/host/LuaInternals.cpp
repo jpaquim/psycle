@@ -30,6 +30,7 @@
 #include <sstream>
 #include <string>
 #include "PsycleConfig.hpp"
+#include "PresetIO.hpp"
 
 namespace psycle {
 namespace host {
@@ -78,6 +79,7 @@ int LuaConfigBind::open(lua_State *L) {
     {"keytocmd", keytocmd},
     {"octave", octave},
     {"luapath", plugindir},
+    {"presetpath", presetdir},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);  
@@ -174,6 +176,11 @@ int LuaConfigBind::octave(lua_State* L) {
 
 int LuaConfigBind::plugindir(lua_State* L) {
   lua_pushstring(L, PsycleGlobal::configuration().GetAbsoluteLuaDir().c_str());
+  return 1;
+}
+
+int LuaConfigBind::presetdir(lua_State* L) {
+  lua_pushstring(L, PsycleGlobal::conf().GetAbsolutePresetsDir().c_str());
   return 1;
 }
 
@@ -522,7 +529,7 @@ int LuaActionListenerBind::gc(lua_State* L) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// LuaMachineBind
+// LuaMachineBind 
 /////////////////////////////////////////////////////////////////////////////
 
 const char* LuaMachineBind::meta = "psypluginmeta";
@@ -557,7 +564,7 @@ int LuaMachineBind::open(lua_State *L) {
     {"setcanvas", setcanvas},
     {"toggleviewport", toggleviewport},
     {"type", type},  
-    {"settitle", settitle},
+    {"settitle", settitle},    
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -953,6 +960,7 @@ int LuaMachineBind::toggleviewport(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+// LuaMachinesBind
 const char* LuaMachinesBind::meta = "psyluamachinesbind";
 
 int LuaMachinesBind::open(lua_State *L) {
@@ -1029,6 +1037,8 @@ int LuaMachinesBind::master(lua_State* L) {
   lua_pushnumber(L, MASTER_INDEX);
   return at(L);
 }
+
+
 // PlayerBind
 const char* LuaPlayerBind::meta = "psyplayermeta";
 
@@ -1992,9 +2002,8 @@ int LuaFileHelper::open(lua_State *L) {
 }
 
 int LuaFileHelper::mkdir(lua_State* L) {
-  const char* dir_path = luaL_checkstring(L, 1);
-  std::string full_path = PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\" + dir_path;
-  boost::filesystem::path dir(full_path.c_str());
+  const char* dir_str = luaL_checkstring(L, 1);  
+  boost::filesystem::path dir(dir_str);
 	lua_pushboolean(L, (boost::filesystem::create_directories(dir)));
   return 1;
 }
@@ -2011,7 +2020,7 @@ int LuaFileHelper::remove(lua_State* L) {
   std::string pathstr = luaL_checkstring(L, 1);
   boost::filesystem::path path(pathstr.c_str());
   try {
-  boost::filesystem::remove(path);
+    boost::filesystem::remove(path);
   } catch (std::exception& e) {
     luaL_error(L, e.what());
   }

@@ -27,7 +27,7 @@ int LuaMenuBarBind::open(lua_State *L) {
     {"update", update},
     {"invalidate", invalidate},
     {"setrootnode", setrootnode},
-    { NULL, NULL }
+    {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
 }
@@ -61,7 +61,7 @@ int LuaPopupMenuBind::open(lua_State *L) {
     {"invalidate", invalidate},
     {"setrootnode", setrootnode},
     {"track", track},
-    { NULL, NULL }
+    {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
 }
@@ -87,19 +87,16 @@ int LuaPopupMenuBind::setrootnode(lua_State* L) {
 }
 
 int LuaPopupMenuBind::track(lua_State* L) {
+  using namespace ui;
   boost::shared_ptr<LuaPopupMenu> popup_menu = LuaHelper::check_sptr<LuaPopupMenu>(L, 1, meta);
-  popup_menu->Track(ui::Point(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));    
+  Point::Ptr point = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+  popup_menu->Track(*point.get());    
   return LuaHelper::chaining(L);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // PsycleFileOpenBind
 /////////////////////////////////////////////////////////////////////////////
-
-struct LuaFileDialog { 
-  LuaFileDialog(bool isopen) : isopen(isopen) { }
-  std::string fname; bool isopen;
-};
 
 const char* LuaFileOpenBind::meta = "psyfileopenmeta";
 
@@ -108,6 +105,7 @@ int LuaFileOpenBind::open(lua_State *L) {
     {"new", create},
     {"show", show},
     {"filename", filename},
+    {"setfolder", setfolder},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -116,7 +114,9 @@ int LuaFileOpenBind::open(lua_State *L) {
 
 int LuaFileOpenBind::create(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
-  if (err!=0) return err;       
+  if (err!=0) {
+    return err;
+  }
   LuaHelper::new_shared_userdata<>(L, meta, new LuaFileDialog(true));
   return 1;
 }
@@ -128,16 +128,17 @@ int LuaFileOpenBind::gc(lua_State* L) {
 int LuaFileOpenBind::show(lua_State* L) {
   boost::shared_ptr<LuaFileDialog> luadlg = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
   char szFilters[]= "Text Files (*.NC)|*.NC|Text Files (*.lua)|*.lua|All Files (*.*)|*.*||";
-  CFileDialog dlg(luadlg->isopen, "lua", "*.lua",
+  CFileDialog dlg(luadlg->is_open_dlg(), "lua", "*.lua",
               OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
-  INT_PTR result = dlg.DoModal();
-  std::string pathname(dlg.GetPathName().GetString());
-  luadlg->fname = pathname;
+  if (luadlg->folder() != "") {
+    dlg.m_ofn.lpstrInitialDir  = luadlg->folder().c_str();
+  }
+  INT_PTR result = dlg.DoModal();  
+  luadlg->set_filename(dlg.GetPathName().GetString());
   try {
     LuaImport import(L, luadlg.get(), 0);  
     if (import.open(result == IDOK ? "onok" : "oncancel")) {
-      import << pathname;
-      import.pcall(0);
+      import << luadlg->filename() << pcall(0);
     }
   } catch (std::exception& e) {
     return luaL_error(L, e.what());
@@ -148,7 +149,7 @@ int LuaFileOpenBind::show(lua_State* L) {
 
 int LuaFileOpenBind::filename(lua_State* L) {
   boost::shared_ptr<LuaFileDialog> luadlg = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
-  lua_pushstring(L, luadlg->fname.c_str());
+  lua_pushstring(L, luadlg->filename().c_str());
   return 1;
 }
 
@@ -163,15 +164,18 @@ int LuaFileSaveBind::open(lua_State *L) {
     {"new", create},
     {"show", show},
     {"filename", filename},
-    { NULL, NULL }
+    {"setfolder", setfolder},
+    {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods, gc);
   return 1;
 }
 
-int LuaFileSaveBind::create(lua_State* L) {
+int LuaFileSaveBind::create(lua_State* L) {  
   int err = LuaHelper::check_argnum(L, 1, "self");
-  if (err!=0) return err;     
+  if (err!=0) {
+    return err;
+  }  
   LuaHelper::new_shared_userdata<>(L, meta, new LuaFileDialog(false));  
   return 1;
 }
@@ -183,16 +187,17 @@ int LuaFileSaveBind::gc(lua_State* L) {
 int LuaFileSaveBind::show(lua_State* L) {
   boost::shared_ptr<LuaFileDialog> luadlg = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
   char szFilters[]= "Text Files (*.NC)|*.NC|Lua Files (*.lua)|*.lua|All Files (*.*)|*.*||";
-  CFileDialog dlg(luadlg->isopen, "lua", "*.lua",
+  CFileDialog dlg(luadlg->is_open_dlg(), "lua", "*.lua",
               OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
+  if (luadlg->folder() != "") {
+    dlg.m_ofn.lpstrInitialDir  = luadlg->folder().c_str();
+  }
   INT_PTR result = dlg.DoModal();
-  std::string pathname(dlg.GetPathName().GetString());
-  luadlg->fname = pathname;
+  luadlg->set_filename(dlg.GetPathName().GetString());
   try {
     LuaImport import(L, luadlg.get(), 0);  
     if (import.open(result == IDOK ? "onok" : "oncancel")) {
-      import << pathname;
-      import.pcall(0);
+      import << luadlg->filename() << pcall(0);
     }
   } catch (std::exception& e) {
     return luaL_error(L, e.what());
@@ -203,7 +208,7 @@ int LuaFileSaveBind::show(lua_State* L) {
 
 int LuaFileSaveBind::filename(lua_State* L) {
   boost::shared_ptr<LuaFileDialog> luadlg = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
-  lua_pushstring(L, luadlg->fname.c_str());
+  lua_pushstring(L, luadlg->filename().c_str());
   return 1;
 }
 
@@ -286,7 +291,7 @@ int LuaFileObserverBind::open(lua_State *L) {
     {"directory", directory},
     {"startwatching", startwatching},
     {"stopwatching", stopwatching},
-    { NULL, NULL }
+    {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
 }
@@ -321,6 +326,28 @@ int LuaFileObserverBind::stopwatching(lua_State* L) {
   LUAEXPORTM(L, meta, &LuaFileObserver::StopWatching);
 }
 
+// LuaSystemsBind
+std::string LuaSystemsBind::meta = "psyuisystemsbind";
+
+int LuaSystemsBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"importfont", importfont},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaSystemsBind::create(lua_State* L) {  
+  LuaHelper::new_shared_userdata<>(L, meta, &ui::Systems::instance(), 1, true);
+  return 1;
+}
+
+int LuaSystemsBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::Systems>(L, meta);
+}
+
+
 // LuaSystemMetricsBind
 int  LuaSystemMetrics::open(lua_State *L) {
   static const luaL_Reg funcs[] = {
@@ -345,7 +372,7 @@ int LuaFrameAlignerBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},        
     {"sizetoscreen", sizetoscreen},
-    { NULL, NULL }
+    {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
 }
@@ -1106,6 +1133,23 @@ int LuaGroupBind<T>::getitems(lua_State* L) {
 }
 
 template <class T>
+int LuaGroupBind<T>::at(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 2, "self, index");
+  if (err!=0) {
+    return err;
+  }
+  T::Ptr group = LuaHelper::check_sptr<T>(L, 1, meta);
+  int index = static_cast<int>(luaL_checkinteger(L, 2));
+  try {
+    Window::Ptr item = group->at(index + 1);
+    LuaHelper::find_userdata(L, (item).get());
+  } catch (std::exception& e) {
+    luaL_error(L, e.what());
+  }  
+  return 1;
+}
+
+template <class T>
 int LuaGroupBind<T>::setzorder(lua_State* L) {
 /*  int err = LuaHelper::check_argnum(L, 3, "self, item, z");
   if (err!=0) return err;
@@ -1136,6 +1180,50 @@ int LuaGroupBind<T>::zorder(lua_State* L) {
 template class LuaGroupBind<LuaGroup>;
 template class LuaHeaderGroupBind<LuaHeaderGroup>;
 
+// LuaFontInfoBind
+const char* LuaFontInfoBind::meta = "psyfontinfometa";
+
+int LuaFontInfoBind::open(lua_State *L) {  
+  static const luaL_Reg methods[] = {  
+    {"new", create},    
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);  
+}
+
+int LuaFontInfoBind::create(lua_State* L) {
+  ui::FontInfo* font_info = new ui::FontInfo();
+  LuaHelper::new_shared_userdata<>(L, meta, font_info);
+  return 1;  
+}
+
+int LuaFontInfoBind::gc(lua_State* L) {
+  LuaHelper::delete_shared_userdata<ui::FontInfo>(L, meta);  
+  return 0;
+}
+
+// LuaFontBind
+const char* LuaFontBind::meta = "psyfontsmeta";
+
+int LuaFontBind::open(lua_State *L) {  
+  static const luaL_Reg methods[] = {  
+    {"new", create},    
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);  
+}
+
+int LuaFontBind::create(lua_State* L) {
+  ui::Font* font = ui::Systems::instance().CreateFont();  
+  LuaHelper::new_shared_userdata<>(L, meta, font);
+  return 1;  
+}
+
+int LuaFontBind::gc(lua_State* L) {
+  LuaHelper::delete_shared_userdata<ui::Font>(L, meta);  
+  return 0;
+}
+
 // LuaGraphicsBind
 const char* LuaGraphicsBind::meta = "psygraphicsmeta";
 
@@ -1161,7 +1249,7 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"fillpolygon", fillpolygon},
     {"drawpolyline", drawpolyline},
     {"drawimage", drawimage},		
-    { NULL, NULL }
+    {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);  
 }
@@ -1512,13 +1600,14 @@ std::string LuaImagesBind::meta = "psyimagesbind";
 std::string LuaPointBind::meta = "psypointmeta";
 
 int LuaPointBind::open(lua_State *L) {
-  static const luaL_Reg methods[] = {
+  static const luaL_Reg methods[] = {    
     {"new", create},
     {"setxy", setxy},
     {"setx", setx},
     {"x", x},
     {"sety", sety},
     {"y", y},
+    {"offset", offset},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -1590,6 +1679,8 @@ int LuaUiRectBind::open(lua_State *L) {
     {"bottom", bottom},
     {"width", width},
     {"height", height},
+    {"topleft", topleft},
+    {"bottomright", bottomright},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -1601,8 +1692,8 @@ int LuaUiRectBind::create(lua_State* L) {
     LuaHelper::new_shared_userdata<>(L, meta, new ui::Rect());
   } else
   if (n==3) {    
-    boost::shared_ptr<ui::Point> point 
-      = LuaHelper::check_sptr<ui::Point>(L, 2, LuaPointBind::meta);
+    ui::Point::Ptr point 
+       = LuaHelper::check_sptr<ui::Point>(L, 2, LuaPointBind::meta);
     boost::shared_ptr<ui::Dimension> dimension 
       = LuaHelper::check_sptr<ui::Dimension>(L, 3, LuaDimensionBind::meta);    
     LuaHelper::new_shared_userdata<>(L, meta, new ui::Rect(*point.get(), *dimension.get()));    
@@ -1618,6 +1709,24 @@ int LuaUiRectBind::gc(lua_State* L) {
 
 int LuaUiRectBind::set(lua_State* L) {
   return LuaHelper::chaining(L);
+}
+
+int LuaUiRectBind::topleft(lua_State *L) {
+  using namespace ui;
+  Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+  LuaHelper::requirenew<LuaPointBind>(L,
+                                      "psycle.ui.point", 
+																			 new Point(rect->top_left()));
+  return 1;
+}
+
+int LuaUiRectBind::bottomright(lua_State *L) {
+  using namespace ui;
+  Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+  LuaHelper::requirenew<LuaPointBind>(L,
+                                      "psycle.ui.point", 
+																			 new Point(rect->bottom_right()));
+  return 1;
 }
 
 // BoxSpaceBind
@@ -1676,6 +1785,35 @@ int LuaBoxSpaceBind::set(lua_State* L) {
     box_space->set(top, right, bottom, left);
   }
   return LuaHelper::chaining(L);
+}
+
+// LuaBorderRadiusBind
+std::string LuaBorderRadiusBind::meta = "psyuiborderradiusemeta";
+
+int LuaBorderRadiusBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaBorderRadiusBind::create(lua_State* L) {
+  int n = lua_gettop(L);
+  if (n==1) {
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::BorderRadius());
+  } else
+  if (n==2) {
+    double radius = luaL_checknumber(L, 2);
+    LuaHelper::new_shared_userdata<>(L, meta, new ui::BorderRadius(radius));
+  } else {
+    luaL_error(L, "Wrong number of arguments");
+  }  
+  return 1;
+}
+
+int LuaBorderRadiusBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::BorderRadius>(L, meta);
 }
 
 //LuaEventBind
@@ -1756,6 +1894,7 @@ const char* LuaMouseEventBind::meta = "psymouseeventbind";
 int LuaMouseEventBind::open(lua_State *L) {
 	static const luaL_Reg methods[] = {
 		{"new", create},
+    {"button", button},
 		{"clientx", clientx},
 		{"clienty", clienty},		
 		{"preventdefault", preventdefault},
@@ -1785,7 +1924,7 @@ std::string OrnamentFactoryBind::meta = "canvasembelissherfactory";
 int OrnamentFactoryBind::open(lua_State *L) {
   static const luaL_Reg funcs[] = {
     {"new", create},      
-    { NULL, NULL }
+    {NULL, NULL}
   };
 
   static const luaL_Reg methods[] = {   
@@ -1820,16 +1959,12 @@ int OrnamentFactoryBind::createlineborder(lua_State* L) {
 																					ui::OrnamentFactory::Instance()
 																						.CreateLineBorder(
 																							static_cast<ARGB>(luaL_checkinteger(L, 2))));
-  } else if (n == 6) {
+  } else if (n == 3) {
+    boost::shared_ptr<ui::BoxSpace> space = LuaHelper::check_sptr<ui::BoxSpace>(L, 3, LuaBoxSpaceBind::meta);
 		LuaHelper::requirenew<LineBorderBind>(L,
 																					"psycle.ui.canvas.lineborder", 
-																					ui::OrnamentFactory::Instance()
-																						.CreateLineBorder(
-																							   static_cast<ARGB>(luaL_checkinteger(L, 2)),
-																								 ui::BoxSpace(luaL_checknumber(L, 3),
-																									  luaL_checknumber(L, 4),
-																									  luaL_checknumber(L, 5),
-																									  luaL_checknumber(L, 6))));
+																					ui::OrnamentFactory::Instance().CreateLineBorder(
+																						 static_cast<ARGB>(luaL_checkinteger(L, 2)), *space.get()));
 	} else {
 		return luaL_error(L, "LineBorder, wrong number of arguments");
 	}
@@ -1905,13 +2040,10 @@ int LineBorderBind::gc(lua_State* L) {
 
 int LineBorderBind::setborderradius(lua_State* L) {
   boost::shared_ptr<LineBorder> border = LuaHelper::check_sptr<LineBorder>(L, 1, meta);  
-  double r1 = luaL_checknumber(L, 2);
-  double r2 = luaL_checknumber(L, 3);
-  double r3 = luaL_checknumber(L, 4);
-  double r4 = luaL_checknumber(L, 5);
-  border->set_border_radius(BorderRadius(r1, r2, r3, r4));  
+  boost::shared_ptr<ui::BorderRadius> radius = LuaHelper::check_sptr<ui::BorderRadius>(L, 2, LuaBorderRadiusBind::meta);  
+  border->set_border_radius(*radius.get());  
   return LuaHelper::chaining(L);
-}
+} 
 
 int LineBorderBind::setborderstyle(lua_State* L) {
   boost::shared_ptr<LineBorder> border = LuaHelper::check_sptr<LineBorder>(L, 1, meta);  
@@ -1999,40 +2131,35 @@ int FillBind::gc(lua_State* L) {
 void LuaGameController::OnButtonDown(int button) {   
   LuaImport in(L, this, locker(L));
   if (in.open("onbuttondown")) {
-    in << button;
-    in.pcall(0);            
+    in << button << pcall(0);            
   }
 }
 
 void LuaGameController::OnButtonUp(int button) {   
   LuaImport in(L, this, locker(L));
   if (in.open("onbuttonup")) {
-    in << button;
-    in.pcall(0);            
+    in << button << pcall(0);            
   }
 }
 
 void LuaGameController::OnXAxis(int pos, int oldpos) {
   LuaImport in(L, this, locker(L));
   if (in.open("onxaxis")) {
-    in << pos << oldpos;
-    in.pcall(0);            
+    in << pos << oldpos << pcall(0);            
   }
 }
 
 void LuaGameController::OnYAxis(int pos, int oldpos) {
   LuaImport in(L, this, locker(L));
   if (in.open("onyaxis")) {
-    in << pos << oldpos;
-    in.pcall(0);            
+    in << pos << oldpos << pcall(0);            
   }
 }
 
 void LuaGameController::OnZAxis(int pos, int oldpos) {
   LuaImport in(L, this, locker(L));
   if (in.open("onzaxis")) {
-    in << pos << oldpos;
-    in.pcall(0);            
+    in << pos << oldpos << pcall(0);            
   }
 }
 
@@ -2112,6 +2239,18 @@ int LuaGameControllersBind::controllers(lua_State* L) {
 }
 
 // LuaScintilla
+
+void LuaScintilla::OnMarginClick(int line_pos) {
+  try {
+    LuaImport in(L, this, locker(L));
+    if (in.open("onmarginclick")) {
+      in << line_pos << pcall(0);
+    } 
+  } catch (std::exception& e) {
+      ui::alert(e.what());   
+  }
+}
+
 std::string LuaLexerBind::meta = "psylexermeta";
 
 
@@ -2179,7 +2318,7 @@ int LuaRegionBind::open(lua_State *L) {
     {"setrect", setrect},		
     {"combine", combine},
     {"offset", offset},    
-    { NULL, NULL }
+    {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods, gc);
   LuaHelper::setfield(L, "OR", RGN_OR);
@@ -2211,7 +2350,7 @@ int LuaAreaBind::open(lua_State *L) {
 		{"clear", clear},
     {"combine", combine},
     {"offset", offset},    
-    { NULL, NULL }
+    {NULL, NULL}
   };
 	LuaHelper::open(L, meta, methods, gc);
   LuaHelper::setfield(L, "OR", RGN_OR);

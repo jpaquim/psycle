@@ -19,34 +19,38 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local image = require("psycle.ui.image")
-local item = require("psycle.ui.canvas.item")
-local group = require("psycle.ui.canvas.group")
+local item = require("psycle.ui.item")
+local group = require("psycle.ui.group")
 local canvas = require("psycle.ui.canvas")
-local text = require("psycle.ui.canvas.text")
-local button = require("psycle.ui.canvas.button")
-local splitter = require("psycle.ui.canvas.splitter")
-local combobox = require("psycle.ui.canvas.combobox")
-local scintilla = require("psycle.ui.canvas.scintilla")
-local lexer = require("psycle.ui.canvas.lexer")
+local text = require("psycle.ui.text")
+local button = require("psycle.ui.button")
+local splitter = require("psycle.ui.splitter")
+local combobox = require("psycle.ui.combobox")
+local scintilla = require("psycle.ui.scintilla")
 
 local filehelper = require("psycle.file")
 -- local fileobserver = require("psycle.fileobserver")
 local fileopen = require("psycle.ui.fileopen")
 local filesave = require("psycle.ui.filesave")
 local fileexplorer = require("fileexplorer")
+local settingspage = require("settingspage")
+local textpage = require("textpage")
 
 local toolicon = require("psycle.ui.canvas.toolicon")
 local toolbar = require("psycle.ui.canvas.toolbar")
 local tabgroup = require("psycle.ui.canvas.tabgroup")
+local separator = require("psycle.ui.canvas.separator")
 
 local settings = require("settings")
 local project = require("project")
 local search = require("search")
+local output = require("output")
 local callstack = require("callstack")
 local pluginselector = require("pluginselector")
 local templateparser = require("templateparser")
+local run = require("psycle.run")
 
 local maincanvas = canvas:new()
 
@@ -62,9 +66,9 @@ end
 function maincanvas:init()  
   self.machines = machines:new()
   -- self.fileobservers = {}  
-  self:invalidatedirect()     
-  self.togglecanvas = signal:new() 
-  self:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
+  self:invalidatedirect()
+  local setting = self.machine_.settingsmanager:setting()
+  self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
   self:setupfiledialogs()
   self:inittoolbar()   
   self:createsearch()
@@ -73,7 +77,7 @@ function maincanvas:init()
   splitter:new(self, splitter.HORZ)  
   self.fileexplorer = self:createfileexplorer()
   splitter:new(self, splitter.VERT)
-  self:createpagegroup()  
+  self:createpagegroup()     
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -87,10 +91,12 @@ function maincanvas:createcreateeditplugin()
 end
 
 function maincanvas:createsearch()
-  self.search = search:new(self)
-                      :setposition(rect:new(point:new(0, 0), dimension:new(200, 200)))
+  local setting = self.machine_.settingsmanager:setting()
+  self.search = search:new(self, setting)
+                      :setposition(rect:new(point:new(), dimension:new(200, 200)))
 					  :hide()
 					  :setalign(item.ALBOTTOM)
+  self.search:applysetting(setting)					  
   self.search.dosearch:connect(maincanvas.onsearch, self)
   self.search.doreplace:connect(maincanvas.onreplace, self)
   self.search.dohide:connect(maincanvas.onsearchhide, self)
@@ -102,35 +108,21 @@ function maincanvas:createoutputs()
   self.outputs = tabgroup:new(self)
                          :setposition(rect:new(point:new(0, 0), dimension:new(0, 180)))
 						 :setalign(item.ALBOTTOM)
-  self.output = self:createoutput()  
+  self.output = output:new(nil, self.machine_.settingsmanager:setting())
   self.outputs:addpage(self.output, "Output")  
   self.callstack = self:createcallstack()  
   self.outputs:addpage(self.callstack, "Call stack")  
 end
 
-function maincanvas:createoutput()
-  local output = scintilla:new()
-  output:setforegroundcolor(settings.sci.default.foreground)
-  output:setbackgroundcolor(settings.sci.default.background) 
-  output:styleclearall()
-  output:setlinenumberforegroundcolor(0x939393)
-  output:setlinenumberbackgroundcolor(0x232323)    
-  output:setmarginbackgroundcolor(0x232323)  
-  return output
-end
-
 function maincanvas:createcallstack()
   local callstack = callstack:new()
-  callstack.change:connect(maincanvas.oncallstackchange, self)
-  callstack:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
-  callstack:settextcolor(settings.canvas.colors.foreground)
+  callstack.change:connect(maincanvas.oncallstackchange, self)  
   return callstack
 end
 
 function maincanvas:createpagegroup()
   self.pages = tabgroup:new(self):setalign(item.ALCLIENT):setautosize(false, false)
-  self.pages.dopageclose:connect(maincanvas.onclosepage, self)
-  self.newpagecounter = 1
+  self.pages.dopageclose:connect(maincanvas.onclosepage, self)  
 end
 
 function maincanvas:createpluginexplorer()
@@ -145,10 +137,10 @@ function maincanvas:createpluginexplorer()
 end
 
 function maincanvas:createfileexplorer()
-  local fileexplorer = fileexplorer:new(self)
+  local fileexplorer = fileexplorer:new(self, self.machine_.settingsmanager:setting().fileexplorer)
                                    :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
 								   :setalign(item.ALLEFT)
-  fileexplorer:setpath(cfg:luapath())  
+  fileexplorer:setpath(cfg:luapath())
   fileexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
   fileexplorer.onselectmachine:connect(maincanvas.onselectmachine, self)
   --pluginexplorer.onremove:connect(maincanvas.onpluginexplorernoderemove, self)
@@ -158,7 +150,9 @@ end
 function maincanvas:setupfiledialogs()
   self.fileopen = fileopen:new()
   local that = self
-  function self.fileopen:onok(fname) that:openfromfile(fname) end
+  function self.fileopen:onok(fname)    
+	that:openfromfile(fname)   
+  end
   self.filesaveas = filesave:new() 
 end
 
@@ -186,50 +180,9 @@ function maincanvas:dopageexist(fname)
   return found
 end
 
-function maincanvas:setlexer(page)  
-  page:setforegroundcolor(0xCACACA)
-  page:setbackgroundcolor(settings.sci.default.background)   
-  page:styleclearall()
-  page:setlinenumberforegroundcolor(0x939393)
-  page:setlinenumberbackgroundcolor(0x232323)
-  page:setmarginbackgroundcolor(0x232323) 
-  page:setselbackgroundcolor(0xFFFFFF)    
-  page:setselalpha(75)
-  local lex = lexer:new()
-  lex:setkeywords(settings.sci.lexer.keywords)
-  lex:setcommentcolor(settings.sci.lexer.commentcolor)
-  lex:setcommentlinecolor(settings.sci.lexer.commentlinecolor)
-  lex:setcommentdoccolor(settings.sci.lexer.commentdoccolor)
-  lex:setidentifiercolor(settings.sci.lexer.identifiercolor)
-  lex:setnumbercolor(settings.sci.lexer.numbercolor)
-  lex:setoperatorcolor(settings.sci.lexer.operatorcolor)
-  lex:setstringcolor(settings.sci.lexer.stringcolor)
-  lex:setwordcolor(settings.sci.lexer.wordcolor)
-  lex:setfoldingcolor(settings.sci.lexer.foldingcolor)
-  page:setlexer(lex)         
-  page:setfont(settings.sci.lexer.font.name, settings.sci.lexer.font.size)
-  page:setcaretcolor(0x939393)
-  page:setcaretlinebackgroundcolor(0x373533)
-  page:showcaretline()
-end
-
-function maincanvas:createmodulepage()
-  local page = self:createpage()  
-  return page
-end
-
 function maincanvas:createpage()
-  local page = scintilla:new():setautosize(false, false)
-  local that = self
-  function page:onkeydown(ev)
-    if ev:ctrlkey() then
-      if ev:keycode() == 70 or ev:keycode() == 83 then
-        ev:preventdefault()
-      end            
-    end
-  end    
-  self:setlexer(page)    
-  page:setmargin(boxspace:new(2, 0, 0, 0))
+  local page = textpage:new(nil, self.machine_.settingsmanager:setting())
+                       :setmargin(boxspace:new(2, 0, 0, 0))
   return page
 end
 
@@ -276,9 +229,7 @@ end
 
 function maincanvas:createnewpage()
   local page = self:createpage()
-  self.pages:addpage(page, "new"..self.newpagecounter)
-  page.pagecounter = self.newpagecounter
-  self.newpagecounter = self.newpagecounter + 1
+  self.pages:addpage(page, page:createdefaultname())  
 end
 
 function maincanvas:savepage()
@@ -299,13 +250,21 @@ function maincanvas:savepage()
 --	  if fileobserver then
 --	    fileobserver:startwatching()
 --	  end
-    elseif self.filesaveas:show() then      
-      fname = self.filesaveas:filename()          
-      page:savefile(fname)
-      fname = fname:match("([^\\]+)$")
-      self.pages:setlabel(page, fname)
+    else	  
+	  self.filesaveas:setfolder(self.fileexplorer:path())
+	  if self.filesaveas:show() then      
+        fname = self.filesaveas:filename()          
+        page:savefile(fname)
+        fname = fname:match("([^\\]+)$")
+        self.pages:setlabel(page, fname)
+	  end
     end	
   end
+end
+
+function trace (event, line)
+  --local s = debug.getinfo(2).short_src
+  --psycle.output("processing" .. line .. "\n")  
 end
 
 function maincanvas:playplugin()  
@@ -328,14 +287,24 @@ function maincanvas:playplugin()
       self:setpluginindex(pluginindex)
 	  self.playicon:seton(true)	  
     end
-  end  
+  end
 end
 
 function maincanvas:inittoolbar()  
   self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(boxspace:new(5))  
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)  
+  local settingsicon = toolicon:new(self.tg, settings.picdir.."settings.png", 0xFFFFFF):setalign(item.ALRIGHT):setmargin(boxspace:new(0, 10, 0, 10))  
+  local that = self
+  function settingsicon:onclick()
+    local settingspage = settingspage:new(nil, that.machine_)     
+	if settingspage then 
+	  settingspage.doapply:connect(maincanvas.onapplysetting, that)
+	  that.pages:addpage(settingspage, "Settings")
+	end
+  end
   self:initfiletoolbar():setalign(item.ALLEFT)
-  self:initplaytoolbar():setalign(item.ALLEFT):setmargin(boxspace:new(0, 0, 0, 20))  
+  separator:new(self.tg):setalign(item.ALLEFT)
+  self:initplaytoolbar():setalign(item.ALLEFT)
   self:initstatus()
 end
 
@@ -367,7 +336,7 @@ function maincanvas:initstatus()
   self.linestatus = text:new(g)
                         :settext("1")
 						:setautosize(false, false)
-						:setposition(rect:new(point:new(0, 0), dimension:new(50, 0)))
+						:setposition(rect:new(point:new(0, 0), dimension:new(30, 0)))
 						:setalign(item.ALLEFT)
 						:setverticalalignment(item.ALCENTER)
 						:setmargin(boxspace:new(0, 5, 0, 0))
@@ -381,7 +350,7 @@ function maincanvas:initstatus()
   self.colstatus = text:new(g)
                        :settext("1")
 					   :setautosize(false, false)
-					   :setposition(rect:new(point:new(0, 0), dimension:new(50, 0)))
+					   :setposition(rect:new(point:new(0, 0), dimension:new(30, 0)))
 					   :setalign(item.ALLEFT)
 					   :setverticalalignment(item.ALCENTER)
 					   :setmargin(boxspace:new(0, 5, 0, 0))
@@ -415,12 +384,12 @@ function maincanvas:setwindowiconout()
    self.windowtoolbar:seton(false)
 end
 
-function maincanvas:initwindowtoolbar()  
+function maincanvas:initwindowtoolbar()    
   local icon = toolicon:new(self.tg, settings.picdir.."arrow_out.png", 0xFFFFFF)  
   local that = self
   function icon:onclick()   
-    that.togglecanvas:emit()
-  end
+    that.machine_:toggleviewport()      
+  end       
   return icon
 end
 
@@ -488,7 +457,10 @@ function maincanvas:initfiletoolbar()
   function inew:onclick() 
     that:createnewpage()    
   end  
-  function iopen:onclick() that.fileopen:show() end
+  function iopen:onclick()
+    that.fileopen:setfolder(that.fileexplorer:path())
+    that.fileopen:show()
+  end
   function isave:onclick() that:savepage() end
   function iredo:onclick() that:redo() end
   function iundo:onclick() that:undo() end
@@ -560,32 +532,7 @@ end
 function maincanvas:onsearch(searchtext, dir, case, wholeword, regexp)
   local page = self.pages:activepage()
   if page then 
-    page:setfindmatchcase(case):setfindwholeword(wholeword):setfindregexp(regexp)      
-    local cpmin, cpmax = self:findsearch(page, dir, page:selectionstart())
-    local line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)
-    if line == -1 then      
-      if dir == search.DOWN then
-        page:setsel(0, 0)
-        local cpmin, cpmax = self:findsearch(page, dir, 0)
-        line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)        
-      else
-        page:setsel(0, 0)
-        local cpmin, cpmax = self:findsearch(page, dir, page:length())
-        line, cpselstart, cpselend = page:findtext(searchtext, cpmin, cpmax)
-      end             
-    end
-    if line ~= -1 then
-      page:setsel(cpselstart, cpselend)
-      if self.searchbeginpos == cpselstart then
-        self.searchbegin = -1        
-        self.searchrestart = true
-      else
-        self.searchrestart = false
-      end
-      if self.searchbeginpos == -1 then
-        self.searchbeginpos = cpselstart        
-      end
-    end    
+    page:onsearch(searchtext, dir, case, wholeword, regexp)
   end
 end
 
@@ -645,7 +592,7 @@ function maincanvas:openplugin(pluginpath, pluginname, plugininfo)
   self:closealltabs()      
   self.fileexplorer:sethomepath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\") - 1))
   self.fileexplorer:setmachinename(pluginname)
-  self.fileexplorer.machineselector:settextcolor(0xFFFFFF)
+  self.fileexplorer.machineselector:setcolor(0xFFFFFF)
 							       :setfont({name="arial", height=13, style=1})  
   self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")    
   self:updatealign()
@@ -655,7 +602,7 @@ end
 
 function maincanvas:closealltabs()    
   self.pages:removeall()
-  self.newpagecounter = 1
+  textpage.pagecounter = 1
 end
 
 function maincanvas:onpluginexplorerclick(ev)
@@ -677,44 +624,31 @@ function maincanvas:onpluginexplorernoderemove(node)
   end  
 end
 
-function maincanvas:onidle()  
-  if self.pages:activepage() then
-    local l = (self.pages:activepage():line() + 1)..""
-    local c = (self.pages:activepage():column() + 1)..""
-    local ovr = "ON"
-    if  self.pages:activepage():ovrtype() then
-      ovr = "OFF"
-    else
-      ovr = "ON"
-    end    
-    if self.linestatus:text() ~= l then
-      self.linestatus:settext(l)      
-    end
-    if self.colstatus:text() ~= c then
-      self.colstatus:settext(c)      
-    end
-    if self.insertstatus:text() ~= ovr then
-      self.insertstatus:settext(ovr)      
-    end
-    if self.searchrestart then
-      searchrestartstr = "SEARCH AT BEGINNING POINT"
-    else
-      searchrestartstr = ""
-    end
-    if self.searchrestartstatus:text() ~= searchrestartstr then
-      self.searchrestartstatus:settext(searchrestartstr)
-    end
-    local modified = "O"
-    if  self.pages:activepage():modified() then
-      modified = "MODIFIED"
-    else
-      modified = ""
-    end    
-    if self.modifiedstatus:text() ~= modified then
-       self.modifiedstatus:settext(modified)
-    end
-  end
+function maincanvas:onidle()
+  if self.pages:activepage() then  
+    self.pages:activepage():updatestatus(self)
+  end  
   self:updatepowericon()
+end
+
+function maincanvas:onupdatetextpagestatus(status)        
+  self.linestatus:settext(status.line)  
+  self.colstatus:settext(status.column)     
+  self.insertstatus:settext(maincanvas.boolastext(status.ovrtype, "ON", "OFF"))           
+  self.searchrestartstatus:settext(maincanvas.boolastext(self.searchrestart,
+                                                         "SEARCH AT BEGINNING POINT",
+														 ""))
+  self.modifiedstatus:settext(maincanvas.boolastext(status.modified,
+                                                    "MODIFIED",
+													""))  
+end
+
+function maincanvas.boolastext(value, ontext, offtext)  
+  if value then
+    return ontext
+  else
+    return offtext
+  end
 end
 
 function maincanvas:updatepowericon()
@@ -822,5 +756,14 @@ end
 --	end
 --  end    
 --end
+
+function maincanvas:onapplysetting(setting)
+  self.outputs:childat(1):applysetting(setting)
+  self.search:applysetting(setting)
+  local pages = self.pages.children:items()     
+  for i=1, #pages do
+    pages[i]:applysetting(setting)	
+  end 
+end
 
 return maincanvas
