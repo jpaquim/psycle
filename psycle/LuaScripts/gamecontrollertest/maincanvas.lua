@@ -5,12 +5,12 @@
 -- Foundation ; either version 2, or (at your option) any later version. 
 
 local boxspace = require("psycle.ui.boxspace")
-local item = require("psycle.ui.canvas.item")
-local group = require("psycle.ui.canvas.group")
+local item = require("psycle.ui.item")
+local group = require("psycle.ui.group")
 local canvas = require("psycle.ui.canvas")
-local text = require("psycle.ui.canvas.text")
+local text = require("psycle.ui.text")
 local gamecontrollers = require("psycle.ui.gamecontrollers")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 
 local maincanvas = canvas:new()
 

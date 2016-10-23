@@ -12,9 +12,9 @@ machine = require("psycle.machine"):new()
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
+local frame = require("psycle.ui.frame")
+local framealigner = require("psycle.ui.framealigner")
 local maincanvas = require("maincanvas")
-local frame = require("psycle.ui.canvas.frame")
-local framealigner = require("psycle.ui.canvas.framealigner")
 local sysmetrics = require("psycle.ui.systemmetrics")
 local menubar = require("psycle.ui.menubar")
 local mainmenu = require("mainmenu")
@@ -23,10 +23,11 @@ local plugincatcher = require("psycle.plugincatcher")
 local node = require("psycle.node")
 local menudesigner = require("menudesigner")
 local canvas = require("psycle.ui.canvas")
-local item = require("psycle.ui.canvas.item")
+local item = require("psycle.ui.item")
 local cfg = require("psycle.config"):new("PatternVisual")
 local project = require("project")
 local templateparser = require("templateparser")
+local settingsmanager = require("settingsmanager")
   
 function machine:info()
   return { 
@@ -44,11 +45,11 @@ function machine:help()
 end
 
 function machine:init(samplerate)  
+   self.settingsmanager = settingsmanager:new("plugineditor")
    self.project = project:new()   
    self.maincanvas = maincanvas:new(self)   
-   self.maincanvas.togglecanvas:connect(machine.togglecanvas, self)   
    self:setcanvas(self.maincanvas)
-   self:initmenu();
+   self:initmenu()
    self:settitle("empty")  
 end
 
@@ -76,10 +77,6 @@ function machine:onexecute(msg, macidx, plugininfo, trace)
       self:settitle(plugininfo:name())
 	end
   end
-end
-
-function machine:togglecanvas()
-  self:toggleviewport()  
 end
 
 function machine:onactivated(viewport)  

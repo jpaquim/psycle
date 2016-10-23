@@ -103,11 +103,13 @@ void Text::set_property(const ConfigurationProperty& configuration_property) {
   }
 }
 
-void Text::set_text(const std::string& text) {  
-  text_ = text;
-  UpdateTextAlignment();   
-  UpdateAutoDimension();  
-  FLSEX();
+void Text::set_text(const std::string& text) {
+  if (text_ != text) {
+    text_ = text;
+    UpdateTextAlignment();   
+    UpdateAutoDimension();  
+    FLSEX();
+  }
 }
 
 void Text::set_font(const Font& font) {  
@@ -125,7 +127,7 @@ void Text::Draw(Graphics* g, Region& draw_region) {
 
 ui::Dimension Text::text_dimension() const {
   Graphics g;		
-	g.SetFont(font_);
+	g.SetFont(font_); 
 	return g.text_size(text_);
 }
 

@@ -52,6 +52,10 @@ extern class {
 } nullpointer;
 
 struct Point {
+  typedef boost::shared_ptr<Point> Ptr;
+  typedef boost::shared_ptr<const Point> ConstPtr;
+  typedef boost::weak_ptr<Point> WeakPtr;
+    
   Point() : x_(0), y_(0) {}
   Point(double x, double y) : x_(x), y_(y) {}
 
@@ -216,6 +220,10 @@ struct BoxSpace {
 };
 
 struct Rect {
+  typedef boost::shared_ptr<Rect> Ptr;
+  typedef boost::shared_ptr<const Rect> ConstPtr;
+  typedef boost::weak_ptr<Rect> WeakPtr;
+  
   Rect() {}  
   Rect(const ui::Point& top_left, const ui::Point& bottom_right) :
      top_left_(top_left),
@@ -1114,6 +1122,15 @@ class Group : public Window {
   virtual Window::const_iterator end() const { return items_.end(); }
   virtual bool empty() const { return items_.empty(); }
   virtual int size() const { return items_.size(); }
+  virtual Window::Ptr at(int index) {
+    Window::Ptr result;
+    if (index >= 0 && index < items_.size()) {
+      result = *(items_.begin() + index);
+    } else {
+      throw std::exception("Index Out Of Bounds Error.");
+    }
+    return result;
+  }
   
   void Add(const Window::Ptr& window);
   void Insert(iterator it, const Window::Ptr& item);
@@ -1579,6 +1596,7 @@ class MenuBar : public MenuContainer {
 class PopupMenu : public MenuContainer {
  public:
   typedef boost::shared_ptr<PopupMenu> Ptr;
+  typedef boost::shared_ptr<const PopupMenu> ConstPtr;
   typedef boost::weak_ptr<PopupMenu> WeakPtr;
 
   PopupMenu();
@@ -1588,8 +1606,12 @@ class PopupMenu : public MenuContainer {
 
 class TreeView : public Window {
  public:
+  typedef boost::shared_ptr<TreeView> Ptr;
+  typedef boost::shared_ptr<const TreeView> ConstPtr;
   typedef boost::weak_ptr<TreeView> WeakPtr;
-  static std::string type() { return "canvastreeview"; }  
+  typedef boost::weak_ptr<const TreeView> ConstWeakPtr;
+  
+  static std::string type() { return "treeview"; }  
 
   TreeView();
   TreeView(TreeViewImp* imp);
@@ -1757,6 +1779,7 @@ class ComboBox : public Window {
   typedef boost::shared_ptr<const ComboBox> ConstPtr;
   typedef boost::weak_ptr<ComboBox> WeakPtr;
   typedef boost::weak_ptr<const ComboBox> ConstWeakPtr;
+  typedef std::vector<std::string> Items;
 
   ComboBox();
   ComboBox(ComboBoxImp* imp);
@@ -1766,16 +1789,29 @@ class ComboBox : public Window {
 
   virtual void add_item(const std::string& item);
   virtual void set_items(const std::vector<std::string>& itemlist);
-  virtual std::vector<std::string> items() const;
+  void set_item_by_text(const std::string& text) { 
+    Items tmp = items();
+    Items::iterator it = tmp.begin();
+    for (int i = 0; it != tmp.end(); ++it, ++i) {
+      if (*it == text) {
+        set_item_index(i);
+        break;
+      }
+    }
+  }
+  virtual Items items() const;
 
   void set_item_index(int index);
   int item_index() const;
 
+  void set_text(const std::string& text);
   std::string text() const;
   virtual void OnSelect() {}
   void set_font(const Font& font);
 
   virtual void set_property(const ConfigurationProperty& configuration_property);
+
+  void Clear();
 
   boost::signal<void (ComboBox&)> select;
 };
@@ -1794,8 +1830,8 @@ class Edit : public Window {
   virtual std::string text() const;
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
-  virtual void set_text_color(ARGB color);
-  virtual ARGB text_color() const;
+  virtual void set_color(ARGB color);
+  virtual ARGB color() const;
   void set_font(const Font& font);
 };
 
@@ -2003,8 +2039,7 @@ class Scintilla : public Window {
   ARGB caret_color() const;
   void StyleClearAll();
   const std::string& filename() const;
-  bool is_modified() const;
-  virtual void OnFirstModified() {}
+  bool is_modified() const;  
   void set_font(const FontInfo& font_info);
   int column() const;    
   int line() const;
@@ -2016,10 +2051,15 @@ class Scintilla : public Window {
   void ShowCaretLine();
   void HideCaretLine();
   void set_caret_line_background_color(ARGB color);
+  void set_tab_width(int width_in_chars);
+  int tab_width() const;
   void ClearAll();
   void Undo();
   void Redo();
   virtual bool transparent() const { return true; }
+
+  virtual void OnFirstModified() {}
+  virtual void OnMarginClick(int line_pos) {}
 
  private:
   static std::string dummy_str_;
@@ -2219,6 +2259,8 @@ class Systems {
   void ExitInstance();
 
   std::string config_path() const { return config_path_; }
+
+  virtual void import_font(const std::string& path);
 	
  protected:
   Systems() {}
@@ -2434,9 +2476,11 @@ class ComboBoxImp : public WindowImp {
   virtual void dev_set_items(const std::vector<std::string>& itemlist) = 0;
   virtual void dev_set_item_index(int index) = 0;
   virtual int dev_item_index() const = 0;
+  virtual void dev_set_text(const std::string& text) = 0;
   virtual std::string dev_text() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
   virtual const ui::Font& dev_font() const = 0;
+  virtual void dev_clear() = 0;
 };
 
 class ButtonImp : public WindowImp {
@@ -2496,8 +2540,8 @@ class EditImp : public WindowImp {
   virtual std::string dev_text() const = 0;
   virtual void dev_set_background_color(ARGB color) = 0;
   virtual ARGB dev_background_color() const = 0;  
-  virtual void dev_set_text_color(ARGB color) = 0;
-  virtual ARGB dev_text_color() const = 0;
+  virtual void dev_set_color(ARGB color) = 0;
+  virtual ARGB dev_color() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
   virtual const ui::Font& dev_font() const = 0;
 };
@@ -2557,6 +2601,8 @@ class ScintillaImp : public WindowImp {
   virtual void DevShowCaretLine() = 0;
   virtual void DevHideCaretLine() = 0;
   virtual void dev_set_caret_line_background_color(ARGB color)  = 0;
+  virtual void dev_set_tab_width(int width_in_chars) = 0;
+  virtual int dev_tab_width() const = 0;
   virtual void dev_undo() = 0;
   virtual void dev_redo() = 0;  
 };

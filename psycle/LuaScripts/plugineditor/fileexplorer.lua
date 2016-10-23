@@ -11,14 +11,14 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local image = require("psycle.ui.image")
 local images = require("psycle.ui.images")
-local item = require("psycle.ui.canvas.item")
-local group = require("psycle.ui.canvas.group")
-local edit = require("psycle.ui.canvas.edit")
-local listview = require("psycle.ui.canvas.listview")
-local text = require("psycle.ui.canvas.text")
+local item = require("psycle.ui.item")
+local group = require("psycle.ui.group")
+local edit = require("psycle.ui.edit")
+local listview = require("psycle.ui.listview")
+local text = require("psycle.ui.text")
 local filehelper = require("psycle.file")
 local settings = require("settings")
 local closebutton = require("closebutton")
@@ -26,19 +26,19 @@ local toolicon = require("psycle.ui.canvas.toolicon")
 
 local fileexplorer = group:new()
 
-function fileexplorer:new(parent)  
+function fileexplorer:new(parent, setting)  
   local c = group:new(parent)  
   setmetatable(c, self)
   self.__index = self
-  c:init()
+  c:init(setting)
   return c
 end
 
-function fileexplorer:init()
-   self:initlistview()   
+function fileexplorer:init(setting)
+   self:initlistview(setting)   
    self:initicons()
    self:initheader()
-   self:initdefaultstyle()
+   self:initdefaultstyle(setting)
    self:initsignals()   
 end
 
@@ -65,7 +65,7 @@ function fileexplorer:initmachineselector()
 							 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
 							 :setalign(item.ALCLIENT)
 							 :setbackgroundcolor(0x2F2F2F)
-							 :settextcolor(0xCACACA)							 
+							 :setcolor(0xCACACA)							 
 							-- :setjustify(text.CENTERJUSTIFY)
 							-- :setverticalalignment(item.ALCENTER)
   local that = self
@@ -74,8 +74,9 @@ function fileexplorer:initmachineselector()
   end
 end
 
-function fileexplorer:initlistview()
+function fileexplorer:initlistview(setting)
   self.homepath = require("psycle.config"):new("PatternVisual"):luapath()
+  self.currentpath = self.homepath
   self.listview = listview:new(self)
                           :setalign(item.ALCLIENT)
 						  :setautosize(false, false)
@@ -98,10 +99,10 @@ function fileexplorer:initlistview()
   end
 end
 
-function fileexplorer:initdefaultstyle()
-  self:addornament(ornamentfactory:createfill(0x2F2F2F))
-  self.listview:setbackgroundcolor(0x2F2F2F)
-  self.listview:settextcolor(0xFFFFFF)  
+function fileexplorer:initdefaultstyle(setting)
+  self:addornament(ornamentfactory:createfill(setting.properties.backgroundcolor:value()))
+  self.listview:setbackgroundcolor(setting.properties.backgroundcolor:value())
+  self.listview:settextcolor(setting.properties.foregroundcolor:value())  
 end
 
 function fileexplorer:initicons()
@@ -130,7 +131,8 @@ function fileexplorer:sethomepath(path)
   self:setpath(path)
 end
 
-function fileexplorer:setpath(path)  
+function fileexplorer:setpath(path)    
+  self.currentpath = path
   local dir = filehelper.directorylist(path)  
   self.rootnode = node:new()
   self:addhomenode()
@@ -153,6 +155,10 @@ function fileexplorer:setpath(path)
   end    
   self.listview:setrootnode(self.rootnode) 
   self.listview:updatelist()
+end
+
+function fileexplorer:path()  
+  return self.currentpath
 end
 
 function fileexplorer:setmachinename(name)

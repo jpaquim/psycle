@@ -390,18 +390,13 @@ void WindowTemplateImp<T, I>::dev_set_parent(Window* parent) {
 }
 
 template<class T, class I>
-void WindowTemplateImp<T, I>::OnPaint() {
-  if (window() && window()->debug_text() == "header") {
-    int fordebugonly(0);
-  }	
+void WindowTemplateImp<T, I>::OnPaint() { 
   CRgn rgn;
   rgn.CreateRectRgn(0, 0, 0, 0);
-  int result = GetUpdateRgn(&rgn, FALSE);
-
-  if (!result) {
-		return; // If no area to update, exit
+  int has_update_region = GetUpdateRgn(&rgn, FALSE);
+  if (!has_update_region) {
+		return; 
 	}
-
   CPaintDC dc(this);
 
   if (!is_double_buffered_) {    
@@ -1279,9 +1274,10 @@ IMPLEMENT_DYNAMIC(ScintillaImp, CWnd)
 
 BEGIN_MESSAGE_MAP(ScintillaImp, CWnd)
 ON_WM_ERASEBKGND()
-ON_NOTIFY_REFLECT_EX(SCN_CHARADDED, OnModified)
-ON_NOTIFY_REFLECT_EX(SCN_MARGINCLICK, OnFolder)         
+  ON_NOTIFY_REFLECT_EX(SCN_CHARADDED, OnModified)
+  ON_NOTIFY_REFLECT_EX(SCN_MARGINCLICK, OnMarginClick)         
 END_MESSAGE_MAP()
+
 
 void ScintillaImp::dev_set_lexer(const Lexer& lexer) {
   SetupLexerType();
@@ -1340,11 +1336,15 @@ void ScintillaImp::SetupLexerType() {
   f(SCI_SETLEXER, SCLEX_LUA, 0);
 }
 
-BOOL ScintillaImp::OnFolder(NMHDR * nhmdr,LRESULT *) { 
+BOOL ScintillaImp::OnMarginClick(NMHDR * nhmdr,LRESULT *) { 
   SCNotification *pMsg = (SCNotification*)nhmdr;      
-  long lLine = f(SCI_LINEFROMPOSITION, pMsg->position, 0);
-  f(SCI_TOGGLEFOLD, lLine, 0);   
-  return false;
+  long line_pos = f(SCI_LINEFROMPOSITION, pMsg->position, 0);
+  // f(SCI_TOGGLEFOLD, lLine, 0);  
+  Scintilla* scintilla = dynamic_cast<Scintilla*>(window());
+  if (scintilla) {
+    scintilla->OnMarginClick(line_pos);
+  }
+  return 0L;
 }
 
 LRESULT __stdcall WindowHook::HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {

@@ -7,8 +7,8 @@
 
 
 local boxspace = require("psycle.ui.boxspace")
-local group = require("psycle.ui.canvas.group")
-local item = require("psycle.ui.canvas.item")
+local group = require("psycle.ui.group")
+local item = require("psycle.ui.item")
 
 local setmetatable = setmetatable
 _ENV = nil

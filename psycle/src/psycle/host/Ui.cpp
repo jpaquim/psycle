@@ -1375,11 +1375,13 @@ void Group::UpdateAlign() {
         dynamic_cast<Canvas*>(root())->SetSave(true);
       }
     }         
-    aligner_->Align();    
-    if (!old_is_saving && !old_fls_prevented && root()) {    
+    aligner_->Align();
+    if (root()) {    
+      if (!old_is_saving && !old_fls_prevented) {    
        dynamic_cast<Canvas*>(root())->Flush();
-    }  
-    dynamic_cast<Canvas*>(root())->SetSave(old_is_saving);    
+      }  
+      dynamic_cast<Canvas*>(root())->SetSave(old_is_saving);    
+    }
   }
 }
 
@@ -1840,8 +1842,7 @@ void ListView::UpdateList() {
     PreventDraw();
     imp()->DevClear();  
     imp()->DevUpdate(root_node_.lock());
-    EnableDraw();
-    FLS();
+    EnableDraw();    
   }  
 }
 
@@ -2008,11 +2009,23 @@ std::vector<std::string>  ComboBox::items() const {
   }
 }
 
+void ComboBox::set_text(const std::string& text) {
+  if (imp()) {
+    imp()->dev_set_text(text);
+  }
+}
+
 std::string ComboBox::text() const {
   if (imp()) {
     return imp()->dev_text();
   } else {
     return "";
+  }
+}
+
+void ComboBox::Clear() {
+  if (imp()) {
+    imp()->dev_clear();
   }
 }
 
@@ -2049,6 +2062,7 @@ std::string Edit::text() const {
 void Edit::set_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_background_color(color);
+    FLS();
   }
 }
 
@@ -2056,14 +2070,15 @@ ARGB Edit::background_color() const {
   return imp() ? imp()->dev_background_color() : 0xFF00000;
 }
 
-void Edit::set_text_color(ARGB color) {
+void Edit::set_color(ARGB color) {
   if (imp()) {
-    imp()->dev_set_text_color(color);
+    imp()->dev_set_color(color);
+    FLS();
   }
 }
 
-ARGB Edit::text_color() const {
-  return imp() ? imp()->dev_text_color() : 0xFF00000;
+ARGB Edit::color() const {
+  return imp() ? imp()->dev_color() : 0xFF00000;
 }
 
 void Edit::set_font(const Font& font) {
@@ -2473,6 +2488,16 @@ void Scintilla::set_caret_line_background_color(ARGB color) {
   }
 }
 
+void Scintilla::set_tab_width(int width_in_chars) {
+  if (imp()) {
+    imp()->dev_set_tab_width(width_in_chars);
+  }
+}
+
+int Scintilla::tab_width() const {
+  return imp() ? imp()->dev_tab_width() : 0;  
+}
+
 void Scintilla::ClearAll() {
 	if (imp()) {
     imp()->DevClearAll();
@@ -2715,7 +2740,6 @@ SystemMetrics& Systems::metrics() {
   return metrics_;
 }
 
-
 void Systems::set_concret_factory(Systems& concrete_factory) {
   concrete_factory_.reset(&concrete_factory);
 }
@@ -2823,6 +2847,9 @@ ui::PopupMenu* Systems::CreatePopupMenu() {
   return concrete_factory_->CreatePopupMenu(); 
 }
 
+void Systems::import_font(const std::string& path) {  
+  concrete_factory_->import_font(path);
+}
 // WindowImp
 
 void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {  

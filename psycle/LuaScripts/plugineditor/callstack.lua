@@ -5,9 +5,10 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
-local listview = require("psycle.ui.canvas.listview")
+local listview = require("psycle.ui.listview")
 local node = require("psycle.node")
 local signal = require("psycle.signal")
+local settings = require("settings")
 
 local callstack = listview:new()
 
@@ -26,6 +27,8 @@ function callstack:init()
       :setautosize(false, false)
       :viewreport()
       :enablerowselect()
+	  :setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
+      :settextcolor(settings.canvas.colors.foreground)
   self.rootnode = node:new()  
   self:setrootnode(self.rootnode)  
   self.change = signal:new()

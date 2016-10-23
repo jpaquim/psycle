@@ -20,7 +20,7 @@ void DefaultAligner::CalcDimensions() {
     Window::Ptr item = *i;
     if (!item->visible()) {
       continue;
-    }	  
+    }	    
 		calc_window_dim(item);	
 		ui::Dimension item_dim = item_dim_;
     // width		
@@ -241,15 +241,26 @@ void DefaultAligner::calc_non_content_dimension(const Window::Ptr& window) {
 }
 
 void DefaultAligner::calc_window_dim(const Window::Ptr& window) {
-	item_dim_ = window->aligner() ? window->aligner()->dim() : window->dim();
-  if (window->aligner()) {
+ if (window->aligner()) {
+    item_dim_ = window->aligner()->dim();
     if (!window->auto_size_width()) {
       item_dim_.set_width(window->dim().width());        
     }
     if (!window->auto_size_height()) {
       item_dim_.set_height(window->dim().height());        
     }
-	}
+ } else {
+	  item_dim_ = window->dim();
+    if (window->auto_size()) {
+      ui::Dimension auto_dim = window->OnCalcAutoDimension();
+      if (window->auto_size_width()) {
+        item_dim_.set_width(auto_dim.width());
+      }
+      if (window->auto_size_height()) {
+        item_dim_.set_height(auto_dim.height());
+      }
+    }
+  }  
 }
 
 ui::Rect DefaultAligner::calc_new_pos_left(const Window::Ptr& window) const {

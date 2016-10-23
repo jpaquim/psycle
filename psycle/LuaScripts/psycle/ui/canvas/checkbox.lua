@@ -9,10 +9,10 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
-local group = require("psycle.ui.canvas.group")
-local item = require("psycle.ui.canvas.item")
-local text = require("psycle.ui.canvas.text")
-local ornamentfactory = require("psycle.ui.canvas.ornamentfactory"):new()
+local group = require("psycle.ui.group")
+local item = require("psycle.ui.item")
+local text = require("psycle.ui.text")
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 
 local checkbox = group:new()
 
@@ -62,6 +62,11 @@ function checkbox:init()
   end  
 end
 
+function checkbox:setcolor(color)
+  self.text:setcolor(color)
+  self.checkgroup:setcolor(color)
+end
+
 function checkbox:settext(text)
   self.text:settext(text)
   return self
@@ -73,6 +78,10 @@ end
 
 function checkbox:check()   
   return self.check_;
+end
+
+function checkbox:setcheck(checked)   
+  self.check_ = checked
 end
 
 checkbox.published = {
