@@ -16,12 +16,12 @@ namespace host {
 ParamMapSkin::ParamMapSkin() {
   PsycleConfig::MachineParam& machine_params = PsycleGlobal::conf().macParam();
   using namespace ui;
-  background_color = ToARGB(machine_params.topColor);  
-  list_view_background_color = ToARGB(machine_params.bottomColor);
-  title_background_color = ToARGB(machine_params.titleColor);  
-  font_color = ToARGB(machine_params.fontTopColor);
-  title_font_color = ToARGB(machine_params.fonttitleColor);
-  range_end_color = ToARGB(machine_params.fontBottomColor);  
+  background_color = ToARGB(machine_params.topColor) | 0xFF000000;  
+  list_view_background_color = ToARGB(machine_params.bottomColor) | 0xFF000000;
+  title_background_color = ToARGB(machine_params.titleColor) | 0xFF000000;  
+  font_color = ToARGB(machine_params.fontTopColor) | 0xFF000000;
+  title_font_color = ToARGB(machine_params.fonttitleColor) | 0xFF000000;
+  range_end_color = ToARGB(machine_params.fontBottomColor) | 0xFF000000;  
   background.reset(OrnamentFactory::Instance().CreateFill(background_color));  
   title_background.reset(OrnamentFactory::Instance().CreateFill(title_background_color));  
   font = ui::mfc::TypeConverter::font(machine_params.font);
