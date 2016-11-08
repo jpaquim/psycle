@@ -43,7 +43,7 @@ function menudesigner:init()
   self.tree = tree:new(self):setautosize(false, false):setalign(item.ALCLIENT)
   self.tree:showbuttons():showlines()
   self.tree:setbackgroundcolor(0x2F2F2F)
-  self.tree:settextcolor(0xFFFFFF)
+  self.tree:setcolor(0xFFFFFF)
   function self.tree:onedited(node, text)
     self:selected():settext(text)    
   end

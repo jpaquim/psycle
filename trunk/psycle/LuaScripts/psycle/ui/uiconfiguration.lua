@@ -8,42 +8,42 @@
 
 local uiconfiguration = {
   elements = {    
-	edit = {
+	--[[edit = {
 	   properties = {
-         color = {value=0xFFFFFF, type="int"},
+         color = {value=0xFFFFFFFE, type="int"},
 		 font = {value = 17, type="stock"}
        }
 	},
 	text = {
 	   properties = {
-         color = {value=0xFFFFFF, type="int"},
+         color = {value=0xFFFFFFFE, type="int"},
 		 font = {value = { name="arial", size="12"}, type="font"}
        }
 	},
 	button = {
 	   properties = {
-         color = {value=0xFFFFFF, type="int"},
+         color = {value=0xFFFFFFFE, type="int"},
 		 font = {value = 17, type="stock"}
        }
 	},
 	radiobutton = {
 	   properties = {
-         color = {value=0xFFFFFF, type="int"},
+         color = {value=0xFFFFFFFE, type="int"},
 		 font = {value = 17, type="stock"}
        }
 	},
 	combobox = {
 	   properties = {
-         color = {value=0xFFFFFF, type="int"},
+         color = {value=0xFFFFFFFE, type="int"},
 		 font = {value = 17, type="stock"}
        }
 	},
 	checkbox = {
 	   properties = {
-         color = {value=0xFFFFFF, type="int"},
+         color = {value=0xFFFFFFFE, type="int"},
 		 font = {value = 17, type="stock"}
        }
-	}
+	}]]
   }
 }
 

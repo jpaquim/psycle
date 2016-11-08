@@ -10,6 +10,8 @@ local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
 local canvas = require("psycle.ui.canvas")
+local font = require("psycle.ui.font")
+local fontinfo = require("psycle.ui.fontinfo")
 local group = require("psycle.ui.group")
 local window = require("psycle.ui.item")
 local text = require("psycle.ui.text")
@@ -24,7 +26,10 @@ local framealigner = require("psycle.ui.framealigner")
 
 local tabgroup = group:new()
 local cfg = require("psycle.config"):new("MacParamVisual")
+local serpent = require("psycle.serpent")
+local systems = require("psycle.ui.systems")
 
+tabgroup.windowtype = 70
 tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 
 function tabgroup:new(parent)  
@@ -32,11 +37,13 @@ function tabgroup:new(parent)
   setmetatable(c, self)  
   self.__index = self
   c:init()
+  systems:new():changewindowtype(tabgroup.windowtype, c)
   return c
 end
 
 function tabgroup:init()
   self.frames = {}
+  self:initdefaultcolors()
   self.oldflsprevented_ = {}
   self.dopageclose = signal:new()
   self.hasclosebutton_ = true 
@@ -44,12 +51,15 @@ function tabgroup:init()
   self.tabbar = group:new(self)
                      :setautosize(false, true)
 					 :setalign(window.ALTOP)
-					 :addornament(ornamentfactory:createfill(0x232323))
-					 :setpadding(boxspace:new(2, 0, 2, 2))
+					 :addornament(ornamentfactory:createfill(0xFF373737))
+					 :setpadding(boxspace:new(0, 0, 3, 0))
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
-                        :setautosize(false, false)
-                        :setposition(rect:new(point:new(0, 0), dimension:new(15, 10)))
-						:setalign(window.ALRIGHT)    						
+                        :setautosize(false, false)                        
+						:setverticalalignment(toolicon.ALCENTER)
+                        :setjustify(toolicon.CENTERJUSTIFY)
+						:setalign(window.ALRIGHT)    
+                        :setmargin(boxspace:new(0, 2, 0, 2))
+  icon1.cc = 0xFF373737						
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
@@ -62,10 +72,10 @@ function tabgroup:init()
     end
     local g = group:new(self.c):setautosize(false, true):setalign(window.ALTOP)    
     self.f:setviewport(self.c)
-    self.c:addornament(ornamentfactory:createfill(0x292929))    
+    self.c:addornament(ornamentfactory:createfill(0xFF292929))    
     function fun(item)
       local t = text:new(g)
-	                :setcolor(0xCACACA)
+	                :setcolor(0xFFCACACA)
 					:settext(item.text:text())
 					:setautosize(false, true)
 					:setpadding(boxspace:new(1))
@@ -75,7 +85,7 @@ function tabgroup:init()
       end
       function t:onmouseenter()                            
 	    self:setpadding(boxspace:new(0))
-        self:addornament(ornamentfactory:createlineborder(0x696969))
+        self:addornament(ornamentfactory:createlineborder(0xFF696969))
       end      
       function t:onmouseout()                       
 	    self:setpadding(boxspace:new(1, 1, 1, 1))
@@ -94,10 +104,30 @@ function tabgroup:init()
 	      :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h)))    
     self.f:show()            
   end  
-  self.tabs = group:new(self.tabbar):setautosize(false, true):setalign(window.ALCLIENT):addornament(ornamentfactory:createfill(0x232323))      
-  self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)  
-  self.children:addornament(ornamentfactory:createboundfill(0x232323))  
+  self.tabs = group:new(self.tabbar)
+                   :setautosize(false, true)
+				   :setalign(window.ALCLIENT)
+				   :addornament(ornamentfactory:createfill(self.tabbarcolor_))
+  self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)    
 end
+
+function tabgroup:initdefaultcolors()
+  self.color_ = 0xffffffff  
+  self.backgroundcolor_ = 0xFF333333
+  self.tabbarcolor_ = 0xFF333333
+  self.headercolor_ = 0xFF999999    
+  self.headerbackgroundcolor_ = 0xFF333333
+  self.headeractivecolor_ = 0xFFCACACA
+  self.headeractivebackgroundcolor_ = 0xFF568857
+  self.headerhovercolor_ = 0xFF999999
+  self.headerhoverbackgroundcolor_ = 0xFF333333
+  self.headerbordercolor_ = 0xFFFFFFFF
+  self.headerclosecolor_ = 0xFFFFFFFF
+  self.headerclosehovercolor_ = 0xFFFFFFFF
+  self.headerclosehoverbackgroundcolor_ = 0xFFFFFFFF   
+  return self
+end
+
 
 function tabgroup:setlabel(page, text)
   function f(item)  
@@ -226,16 +256,19 @@ function tabgroup:createheader(page, label)
   local header = group:new()
                       :setautosize(true, true)
 					  :setalign(window.ALLEFT)
-					  :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))					    
+					  :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))					  
   header.page = page    
+  local font = font:new():setfontinfo(fontinfo:new():setsize(13))  
   header.text = text:new(header)
                     :settext(label)
-					:setfont({name="Arial", height = "13"})  
-  header.text:setalign(window.ALLEFT):setmargin(boxspace:new(5))  
+					:setfont(font)
+                    :setalign(window.ALLEFT)
+					:setpadding(boxspace:new(3))
   local that = self
   if self.hasclosebutton_ then
+    local font = font:new():setfontinfo(fontinfo:new():setsize(13))
     header.close = text:new(header)                           
-                       :setcolor(0xB0D8B1)
+                       :setcolor(that.headerclosecolor_)
                        :settext("x")
                        :setjustify(text.CENTERJUSTIFY)                       
 					   :setverticalalignment(window.ALCENTER)					   
@@ -243,7 +276,7 @@ function tabgroup:createheader(page, label)
 					   :setautosize(false, true)
 					   :setposition(rect:new(point:new(), dimension:new(15, 15)))
 					   :setmargin(boxspace:new(3, 5, 0, 5))
-					   :setfont({name="Arial", height = "15"})    
+					   :setfont(font)    
     function header.close:onmousedown()
       local ev = {}
       ev.page = self:parent().page
@@ -251,36 +284,35 @@ function tabgroup:createheader(page, label)
       that:removepagebyheader(self:parent())
     end
 	function header.close:onmouseenter(ev)
-	  self:setcolor(0xFFFFFF)
-	  self:addornament(ornamentfactory:createcirclefill(0xA8444C))
+	  self:setcolor(that.headerclosehovercolor_)
+	  self:addornament(ornamentfactory:createcirclefill(that.headerclosehoverbackgroundcolor_))
 	end
 	function header.close:onmouseout(ev)
-	  self:setcolor(0xB0D8B1)
+	  self:setcolor(that.headerclosecolor_)
 	  self:removeornaments()
 	end
   end
   self.tabs:add(header)
   function header:setskinhighlight()        
-    self:setpadding(boxspace:new(0))
-	self:removeornaments()    
-	self:addornament(ornamentfactory:createfill(0x333333)) 
-	self:addornament(ornamentfactory:createlineborder(0x696969))    
-    self.text:setcolor(0xFFFFFF)     
+    self:setpadding(boxspace:new(2))
+	self:removeornaments():addornament(ornamentfactory:createfill(that.headeractivebackgroundcolor_)) 
+	self:addornament(ornamentfactory:createlineborder(that.headerbordercolor_))    
+    self.text:setcolor(that.headeractivecolor_)     
   end
   function header:setskinnormal()
-    self:setpadding(boxspace:new(1))
-    self:removeornaments()	
-    self.text:setcolor(0xC0C0C0)     
+    self:setpadding(boxspace:new(3))
+    self:removeornaments():addornament(ornamentfactory:createfill(that.headerbackgroundcolor_)) 
+    self.text:setcolor(that.headercolor_)
   end    
   header:setskinnormal()    
   function header:onmouseenter(ev)       
     if self.page ~= that:activepage() then	  
-	  self.text:setcolor(0xFFFFFF)    	  
+	  self.text:setcolor(that.headerhovercolor_)    	  
 	end
   end
   function header:onmouseout(ev)
     if self.page ~= that:activepage() then	  
-      self.text:setcolor(0xC0C0C0) 	
+      self.text:setcolor(that.headercolor_) 	
 	end
   end  
   function header:onmousedown(ev)         
@@ -433,6 +465,75 @@ end
 
 function tabgroup:childat(i)
   return self.children:items()[i]
+end
+
+function tabgroup:transparent()  
+  return false
+end
+
+function tabgroup:setcolor(color) 
+  self.color_ = color
+  
+  return self
+end
+
+function tabgroup:setbackgroundcolor(color) 
+  self.backgroundcolor_ = color
+  self.children:removeornaments():addornament(ornamentfactory:createboundfill(color))
+  return self
+end
+
+function tabgroup:setproperties(properties)  
+  if properties.color then    
+	self:setcolor(properties.color:value())
+  end  
+  if properties.backgroundcolor then    
+	self:setbackgroundcolor(properties.backgroundcolor:value())
+  end
+  if properties.tabbarcolor then
+    self.tabbarcolor_ = properties.tabbarcolor:value()
+	self.tabs:removeornaments():addornament(ornamentfactory:createfill(self.tabbarcolor_))
+  end
+  if properties.headercolor then
+    self.headercolor_ = properties.headercolor:value()
+  end
+  if properties.headeractivebackgroundcolor then
+    self.headerbackgroundcolor_ = properties.headerbackgroundcolor:value()
+  end  
+  if properties.headeractivecolor then
+    self.headeractivecolor_ = properties.headeractivecolor:value()
+  end
+  if properties.headeractivebackgroundcolor then
+    self.headeractivebackgroundcolor_ = properties.headeractivebackgroundcolor:value()
+  end
+  if properties.headerhovercolor then
+    self.headerhovercolor_ = properties.headerhovercolor:value()
+  end
+  if properties.headerhoverbackgroundcolor then
+    self.headerhoverbackgroundcolor_ = properties.headerhoverbackgroundcolor:value()
+  end  
+  if properties.headerbordercolor then
+    self.headerbordercolor_ = properties.headerbordercolor:value()
+  end
+  if properties.headerclosecolor then
+    self.headerclosecolor_ = properties.headerclosecolor:value()
+  end
+  if properties.headerclosehovercolor then
+    self.headerclosehovercolor_ = properties.headerclosehovercolor:value()
+  end
+  if properties.headerclosehoverbackgroundcolor then
+    self.headerclosehoverbackgroundcolor_ = properties.headerclosehoverbackgroundcolor:value()
+  end
+  local tabs = self.tabs:items()  
+  for i=1, #tabs do    
+    local header = tabs[i]
+    if header.page ~= self:activepage() then
+      header:setskinnormal()
+    else
+	  header:setskinhighlight()
+    end
+  end      
+  self:fls()  
 end
 
 return tabgroup

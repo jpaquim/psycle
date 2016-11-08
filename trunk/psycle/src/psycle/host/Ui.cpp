@@ -17,6 +17,7 @@ namespace ui {
 const ui::Point ui::Point::zero_;
 const ui::Rect ui::Rect::zero_;
 
+
 Window::Container Window::dummy_list_;
 
 int MenuContainer::id_counter = 0;
@@ -249,15 +250,100 @@ void Commands::Invoke() {
 //  locker_->unlock();
 }
 
+FontInfo::FontInfo() : imp_(ui::ImpFactory::instance().CreateFontInfoImp()) {
+}
+
+FontInfo::FontInfo(const std::string& family) :
+    imp_(ui::ImpFactory::instance().CreateFontInfoImp()) {
+  set_family(family);  
+}
+
+FontInfo::FontInfo(const std::string& family, int size) :
+    imp_(ui::ImpFactory::instance().CreateFontInfoImp()) {
+  set_family(family); 
+  set_size(size); 
+}
+
+FontInfo::FontInfo(const std::string& family, int size, int weight, FontStyle::Type style) :
+    imp_(ui::ImpFactory::instance().CreateFontInfoImp()) {
+  set_family(family);
+  set_size(size);
+  set_weight(weight);
+  set_style(style);
+}
+
+FontInfo::FontInfo(const FontInfo& other) {    
+  assert(other.imp());
+  imp_.reset(other.imp()->DevClone());  
+}
+
+FontInfo& FontInfo::operator=(const FontInfo& other) {
+  assert(other.imp());
+  if (this != &other) {
+    imp_.reset(other.imp()->DevClone());
+  }
+  return *this;
+}
+
+void FontInfo::set_style(FontStyle::Type style) {
+  assert(imp());  
+  imp()->dev_set_style(style);
+}
+
+FontStyle::Type FontInfo::style() const{
+  assert(imp());
+  return imp()->dev_style();
+}
+
+void FontInfo::set_size(int size) {
+  assert(imp());  
+  imp()->dev_set_size(size);
+}
+
+int FontInfo::size() const {
+  assert(imp());
+  return imp()->dev_size();
+}
+
+void FontInfo::set_weight(int weight) {
+  assert(imp());  
+  imp()->dev_set_weight(weight);
+}
+
+int FontInfo::weight() const {
+  assert(imp());
+  return imp()->dev_weight();
+}
+
+void FontInfo::set_family(const std::string& family) {
+  assert(imp());  
+  imp()->dev_set_family(family);
+}
+
+std::string FontInfo::family() const {
+  assert(imp());
+  return imp()->dev_family();
+}
+
+void FontInfo::set_stock_id(int id) {
+  assert(imp());
+  return imp()->dev_set_stock_id(id);
+}
+
+int FontInfo::stock_id() const {
+  assert(imp());
+  return imp()->dev_stock_id();
+}
+
 Font::Font() : imp_(ui::ImpFactory::instance().CreateFontImp()) {
 }
 
 Font::Font(const ui::FontInfo& font_info)  {
-  if (font_info.stock_id == -1) {
+  if (font_info.stock_id() == -1) {
     imp_.reset(ui::ImpFactory::instance().CreateFontImp());
-    imp_->dev_set_info(font_info);
+    imp_->dev_set_font_info(font_info);
   } else {
-    imp_.reset(ui::ImpFactory::instance().CreateFontImp(font_info.stock_id));
+    imp_.reset(ui::ImpFactory::instance().CreateFontImp(font_info.stock_id()));
   }  
 }
 
@@ -274,14 +360,14 @@ Font& Font::operator= (const Font& other) {
   return *this;
 }
 
-void Font::set_info(const FontInfo& info) {
+void Font::set_font_info(const FontInfo& info) {
   assert(imp());  
-  imp()->dev_set_info(info);
+  imp()->dev_set_font_info(info);
 }
 
-FontInfo Font::info() const {
+FontInfo Font::font_info() const {
   assert(imp());
-  return imp()->dev_info();
+  return imp()->dev_font_info();
 }
 
 //Image
@@ -387,56 +473,76 @@ void Graphics::CopyArea(const ui::Rect& rect, const ui::Point& delta) {
 }
 
 void Graphics::DrawArc(const ui::Rect& rect, const Point& start, const Point& end) {
-  assert(imp_.get());
-  imp_->DevDrawArc(rect, start, end);  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawArc(rect, start, end);  
+  }
 }
 
 void Graphics::DrawLine(const ui::Point& p1, const ui::Point& p2) {
-  assert(imp_.get());  
-  imp_->DevDrawLine(p1, p2);  
+  if (is_color_opaque()) {
+    assert(imp_.get());  
+    imp_->DevDrawLine(p1, p2);  
+  }
 }
 
 void Graphics::DrawRect(const ui::Rect& rect) {
-  assert(imp_.get());
-  imp_->DevDrawRect(rect);  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawRect(rect);  
+  }
 }
 
 void Graphics::DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
-  assert(imp_.get());
-  imp_->DevDrawRoundRect(rect, arc_dim);  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawRoundRect(rect, arc_dim);  
+  }
 }
 
 void Graphics::DrawOval(const ui::Rect& rect) {
-  assert(imp_.get());
-  imp_->DevDrawOval(rect); 
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawOval(rect); 
+  }
 }
 
 void Graphics::DrawString(const std::string& str, const ui::Point& point) {
-  assert(imp_.get());
-  imp_->DevDrawString(str, point.x(), point.y());  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawString(str, point.x(), point.y());
+  }
 }
 
 void Graphics::FillRect(const ui::Rect& rect) {
-  assert(imp_.get());
-  imp_->DevFillRect(rect);  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevFillRect(rect);
+  }
 }
 
-void Graphics::FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {  
-  assert(imp_.get());
-  imp_->DevFillRoundRect(rect, arc_dim);
+void Graphics::FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevFillRoundRect(rect, arc_dim);
+  }
 }
 
-void Graphics::FillOval(const ui::Rect& rect) {  
-  assert(imp_.get());
-  imp_->DevFillOval(rect);
+void Graphics::FillOval(const ui::Rect& rect) {
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevFillOval(rect);
+  }
 }
 
-void Graphics::FillRegion(const ui::Region& rgn) {  
-  assert(imp_.get());
-  imp_->DevFillRegion(rgn);
+void Graphics::FillRegion(const ui::Region& rgn) {
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevFillRegion(rgn);
+  }
 }
 
-void Graphics::SetColor(ARGB color) {
+void Graphics::set_color(ARGB color) {  
   assert(imp_.get());
   imp_->DevSetColor(color);  
 }
@@ -472,18 +578,24 @@ Dimension Graphics::text_size(const std::string& text) const {
 }
 
 void Graphics::DrawPolygon(const ui::Points& points) {
-  assert(imp_.get());
-  imp_->DevDrawPolygon(points);  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawPolygon(points);  
+  }
 }
 
 void Graphics::FillPolygon(const ui::Points& points) {
-  assert(imp_.get());
-  imp_->DevDrawPolygon(points);  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawPolygon(points);
+  }
 }
 
 void Graphics::DrawPolyline(const Points& points) {
-  assert(imp_.get());
-  imp_->DevDrawPolyline(points);  
+  if (is_color_opaque()) {
+    assert(imp_.get());
+    imp_->DevDrawPolyline(points);
+  }
 }
 
 void Graphics::DrawImage(ui::Image* img, const ui::Point& top_left) {
@@ -589,6 +701,7 @@ Window::Window(WindowImp* imp) :
 }
 
 Window::~Window() {
+  BeforeDestruction(*this);
   for (iterator it = begin(); it != end(); ++it) {
     (*it)->parent_ = 0;
   }
@@ -850,34 +963,6 @@ void Window::needsupdate() {
   }
 }
 
-void Window::UpdateStyle(const StyleClass& style_class) {		
-	UpdatePadding(style_class);
-}
-
-void Window::UpdatePadding(const StyleClass& style_class) {
-	using namespace psycle::host;
-	ui::BoxSpace pad = padding();
-	bool found(false);
-	double value(0);
-	style_class.get("padding-top", value, found);
-	if (found) {
-		pad.set_top(value);
-	}
-	style_class.get("padding-left", value, found);
-	if (found) {
-		pad.set_left(value);
-	}
-	style_class.get("padding-right", value, found);
-	if (found) {
-		pad.set_right(value);
-	}
-	style_class.get("padding-bottom", value, found);
-	if (found) {
-		pad.set_bottom(value);
-	}	
-	set_padding(pad);
-}
-
 ui::BoxSpace Window::sum_border_space() const {
 	ui::BoxSpace result;	
 	if (!ornaments_.empty()) {       
@@ -949,9 +1034,9 @@ void Window::Show() {
   OnShow();  
 }
 
-void Window::BringWindowToTop() {
+void Window::BringToTop() {
   if (imp_.get()) {
-    imp_->DevBringWindowToTop();
+    imp_->DevBringToTop();
   }
 }
 
@@ -1021,7 +1106,7 @@ void Window::SetCursorPosition(const ui::Point& position) {
 	}
 }
 
-void Window::SetCursor(CursorStyle style) {
+void Window::SetCursor(CursorStyle::Type style) {
 	if (imp_.get()) {
 		imp_->DevSetCursor(style);
 	}
@@ -1248,10 +1333,6 @@ void Group::Add(const Window::Ptr& window) {
   items_.push_back(window);
   window->set_parent(this);  
   window->needsupdate();
-	// style test
-	if (!style_sheet().expired()) {
-		style_sheet().lock()->parse(*(items_.back().get()));
-	}
 }
 
 void Group::Insert(iterator it, const Window::Ptr& item) {
@@ -1726,6 +1807,18 @@ TreeView::TreeView(TreeViewImp* imp) : Window(imp) {
   set_auto_size(false, false);
 }
 
+void TreeView::set_properties(const Properties& properties) {
+  for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+    if (it->first == "backgroundcolor") {
+      set_background_color(boost::get<ARGB>(it->second.value()));
+    } else
+    if (it->first == "color") {
+      set_color(boost::get<ARGB>(it->second.value()));
+    }    
+  }
+}
+
+
 void TreeView::Clear() {
   if (!root_node_.expired()) {    
     root_node_.reset();
@@ -1752,6 +1845,12 @@ void TreeView::select_node(const Node::Ptr& node) {
   }
 }
 
+void TreeView::deselect_node(const Node::Ptr& node) {
+  if (imp()) {
+    imp()->dev_deselect_node(node);
+  }
+}
+
 void TreeView::set_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_background_color(color);
@@ -1762,14 +1861,14 @@ ARGB TreeView::background_color() const {
   return imp() ? imp()->dev_background_color() : 0xFF00000;
 }
 
-void TreeView::set_text_color(ARGB color) {
+void TreeView::set_color(ARGB color) {
   if (imp()) {
-    imp()->dev_set_text_color(color);
+    imp()->dev_set_color(color);
   }
 }
 
-ARGB TreeView::text_color() const {
-  return imp() ? imp()->dev_text_color() : 0xFF00000;
+ARGB TreeView::color() const {
+  return imp() ? imp()->dev_color() : 0xFF00000;
 }
 
 void TreeView::EditNode(const Node::Ptr& node) {
@@ -1826,6 +1925,17 @@ ListView::ListView() : Window(ui::ImpFactory::instance().CreateListViewImp()) {
 
 ListView::ListView(ListViewImp* imp) : Window(imp) { 
   set_auto_size(false, false);
+}
+
+void ListView::set_properties(const Properties& properties) {
+  for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+    if (it->first == "backgroundcolor") {
+      set_background_color(boost::get<ARGB>(it->second.value()));
+    } else
+    if (it->first == "color") {
+      set_color(boost::get<ARGB>(it->second.value()));
+    }    
+  }
 }
 
 void ListView::Clear() {
@@ -1888,6 +1998,12 @@ void ListView::select_node(const Node::Ptr& node) {
   }
 }
 
+void ListView::deselect_node(const Node::Ptr& node) {
+  if (imp()) {
+    imp()->dev_deselect_node(node);
+  }
+}
+
 void ListView::set_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_background_color(color);
@@ -1898,14 +2014,14 @@ ARGB ListView::background_color() const {
   return imp() ? imp()->dev_background_color() : 0xFF00000;
 }
 
-void ListView::set_text_color(ARGB color) {
+void ListView::set_color(ARGB color) {
   if (imp()) {
-    imp()->dev_set_text_color(color);
+    imp()->dev_set_color(color);
   }
 }
 
-ARGB ListView::text_color() const {
-  return imp() ? imp()->dev_text_color() : 0xFF00000;
+ARGB ListView::color() const {
+  return imp() ? imp()->dev_color() : 0xFF00000;
 }
 
 void ListView::EditNode(const Node::Ptr& node) {
@@ -1975,7 +2091,7 @@ void ComboBox::set_property(const ConfigurationProperty& configuration_property)
   if (configuration_property.name() == "font") {
     if (configuration_property.int_value() != -0) {
       FontInfo info;
-      info.stock_id = configuration_property.int_value();
+      info.set_stock_id(configuration_property.int_value());
       set_font(ui::Font(info));
     } else {
       set_font(ui::Font(configuration_property.font_info_value()));
@@ -2049,6 +2165,17 @@ Edit::Edit() : Window(ui::ImpFactory::instance().CreateEditImp()) {
 Edit::Edit(EditImp* imp) : Window(imp) {
 }
 
+void Edit::set_properties(const Properties& properties) {
+  for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+    if (it->first == "backgroundcolor") {
+      set_background_color(boost::get<ARGB>(it->second.value()));
+    } else
+    if (it->first == "color") {
+      set_color(boost::get<ARGB>(it->second.value()));
+    }    
+  }
+}
+
 void Edit::set_text(const std::string& text) {
   if (imp()) {
     imp()->dev_set_text(text);
@@ -2085,6 +2212,12 @@ void Edit::set_font(const Font& font) {
   if (imp()) {
     imp()->dev_set_font(font);
   }  
+}
+
+void Edit::set_sel(int cpmin, int cpmax) {
+  if (imp()) {
+    imp()->dev_set_sel(cpmin, cpmax);
+  }
 }
 
 Button::Button() : Window(ui::ImpFactory::instance().CreateButtonImp()) {
@@ -2404,14 +2537,10 @@ ARGB Scintilla::linenumber_background_color() const {
   return imp() ? imp()->dev_linenumber_background_color() : 0;
 }
 
-void Scintilla::set_margin_background_color(ARGB color) {
+void Scintilla::set_folding_background_color(ARGB color) {
   if (imp()) {
-    imp()->dev_set_margin_background_color(color);
+    imp()->dev_set_folding_background_color(color);
   }
-}
-
-ARGB Scintilla::margin_background_color() const {
-  return imp() ? imp()->dev_margin_background_color() : 0;
 }
 
 void Scintilla::set_sel_foreground_color(ARGB color) {
@@ -2520,9 +2649,9 @@ const std::string& Scintilla::filename() const {
   return imp() ? imp()->dev_filename() : dummy_str_;
 }
 
-void Scintilla::set_font(const FontInfo& font_info) {
+void Scintilla::set_font_info(const FontInfo& font_info) {
   if (imp()) {
-    imp()->dev_set_font(font_info);
+    imp()->dev_set_font_info(font_info);
   }
 }
 
@@ -2649,13 +2778,13 @@ void LuaElementFinder::ParseElements(lua_State* L) {
                 lua_getfield(L, -1, "size");
                 if (!lua_isnil(L, -1)) {
                   int size = lua_tointeger(L, -1);
-                  font_info.height = size;
+                  font_info.set_size(size);
                 }
                 lua_pop(L, 1);
                 lua_getfield(L, -1, "name");
                 if (!lua_isnil(L, -1)) {
-                  const char* name = lua_tostring(L, -1);
-                  font_info.name = name;
+                  const char* family = lua_tostring(L, -1);
+                  font_info.set_family(family);
                 }                
                 lua_pop(L, 1);
                 ConfigurationProperty configuartion_property(name, font_info);
@@ -2721,7 +2850,7 @@ void Configuration::InitWindow(ui::Window& element, const std::string& name) {
 Systems& Systems::instance() {
   static Systems instance_;
   if (!instance_.concrete_factory_.get()) {
-    instance_.concrete_factory_.reset(new ui::mfc::Systems());
+    instance_.concrete_factory_.reset(new DefaultSystems());
   }
   return instance_;
 }
@@ -2742,6 +2871,41 @@ SystemMetrics& Systems::metrics() {
 
 void Systems::set_concret_factory(Systems& concrete_factory) {
   concrete_factory_.reset(&concrete_factory);
+}
+
+ui::Window* Systems::Create(WindowTypes::Type type) {  
+  using namespace WindowTypes;
+  assert(concrete_factory_.get());
+  Window* result(0);
+  switch (type) {    
+    case WindowTypes::WINDOW : result = CreateWin(); break;
+    case WindowTypes::TEXT : result = CreateText(); break;
+    case GROUP : result = CreateGroup(); break;
+    case FRAME : result = CreateFrame(); break;
+    case CANVAS : result = CreateCanvas(); break;
+    case POPUPFRAME : result = CreatePopupFrame(); break;
+    case RECTANGLEBOX : result = CreateRectangleBox(); break;
+    case HEADERGROUP : result = CreateHeaderGroup(); break;
+    case LINE : result = CreateLine(); break;
+    case PIC : result = CreatePic(); break;    
+    case EDIT : result = CreateEdit();  break;
+    case BUTTON : result = CreateButton(); break;
+    case COMBOBOX : result = CreateComboBox(); break;
+    case CHECKBOX : result = CreateCheckBox(); break;
+    case RADIOBUTTON : result = CreateRadioButton(); break;
+    case GROUPBOX : result = CreateGroupBox(); break;
+    case LISTVIEW : result = CreateListView(); break;
+    case TREEVIEW : result = CreateTreeView(); break;
+    case SCROLLBAR : result = CreateScrollBar(); break;
+    case SCROLLBOX : result = CreateScrollBox(); break;
+    case SCINTILLA : result = CreateScintilla(); break;    
+    break;
+  }
+  if (result) {        
+    OnWindowCreate(type, *result);
+    result->BeforeDestruction.connect(boost::bind(&Systems::OnWindowDestruction, this, _1));
+  }
+  return result;
 }
 
 ui::Region* Systems::CreateRegion() { 
@@ -2773,9 +2937,51 @@ ui::Font* Systems::CreateFont() {
   return new ui::Font();  
 }
 
+ui::Fonts* Systems::CreateFonts() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFonts();
+}
+
 ui::Window* Systems::CreateWin() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateWin(); 
+}
+
+ui::Canvas* Systems::CreateCanvas() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateCanvas();
+}
+
+ui::Group* Systems::CreateGroup() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateGroup();
+}
+
+ui::Scintilla* Systems::CreateScintilla() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateScintilla();
+}
+
+ui::ScrollBox* Systems::CreateScrollBox() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateScrollBox();
+}
+
+ui::RadioButton* Systems::CreateRadioButton() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateRadioButton();
+}
+ui::GroupBox* Systems::CreateGroupBox() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateGroupBox();
+}
+ui::RectangleBox* Systems::CreateRectangleBox() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateRectangleBox();
+}
+ui::HeaderGroup* Systems::CreateHeaderGroup() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateHeaderGroup();
 }
 
 ui::Frame* Systems::CreateFrame() {
@@ -2785,46 +2991,52 @@ ui::Frame* Systems::CreateFrame() {
 
 ui::Frame* Systems::CreateMainFrame() {
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateMainFrame(); 
+  return concrete_factory_->CreateMainFrame();
 }
 
 ui::PopupFrame* Systems::CreatePopupFrame() {
   assert(concrete_factory_.get());
-  return concrete_factory_->CreatePopupFrame(); 
+  return concrete_factory_->CreatePopupFrame();
 }
 
 ui::ComboBox* Systems::CreateComboBox() {
-  ComboBox* result = new ComboBox();
-  Configuration::instance().InitWindow(*result, "combobox");  
-  return result;
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateComboBox();
+}
+
+ui::Line* Systems::CreateLine() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateLine();
+}
+
+ui::Pic* Systems::CreatePic() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreatePic();
 }
 
 ui::Edit* Systems::CreateEdit() {
-  Edit* result = new Edit();
-  Configuration::instance().InitWindow(*result, "edit");  
-  return result;
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateEdit();
 }
 
 ui::Text* Systems::CreateText() {
-  Text* result = new Text();
-  Configuration::instance().InitWindow(*result, "text");  
-  return result;
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateText();
 }
 
 ui::Button* Systems::CreateButton() {
-  Button* result = new Button();
-  Configuration::instance().InitWindow(*result, "button");  
-  return result;  
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateButton();  
 }
 
 ui::CheckBox* Systems::CreateCheckBox() {
-  CheckBox* result = new CheckBox();
-  Configuration::instance().InitWindow(*result, "checkbox");  
-  return result;  
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateCheckBox();
 }
 
 ui::ScrollBar* Systems::CreateScrollBar(Orientation orientation) {  
-  return new ui::ScrollBar(orientation);
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateScrollBar(orientation);  
 }
 
 ui::TreeView* Systems::CreateTreeView() {
@@ -2847,9 +3059,169 @@ ui::PopupMenu* Systems::CreatePopupMenu() {
   return concrete_factory_->CreatePopupMenu(); 
 }
 
-void Systems::import_font(const std::string& path) {  
-  concrete_factory_->import_font(path);
+void Systems::OnWindowCreate(WindowTypes::Type window_type, Window& e) {
+  assert(concrete_factory_.get());
+  concrete_factory_->OnWindowCreate(window_type, e); 
 }
+
+void Systems::OnWindowDestruction(Window& e) {
+  assert(concrete_factory_.get());
+  concrete_factory_->OnWindowDestruction(e); 
+}
+
+void Systems::UpdateWindows() {
+  assert(concrete_factory_.get());
+  concrete_factory_->UpdateWindows();
+}
+
+void Systems::UpdateWindow(WindowTypes::Type window_type, Window* window) {
+  assert(concrete_factory_.get());
+  concrete_factory_->UpdateWindow(window_type, window);
+}
+
+void Systems::ChangeWindowType(int extended_window_type, Window* window) {
+  assert(concrete_factory_.get());
+  concrete_factory_->ChangeWindowType(extended_window_type, window);
+}
+
+void Systems::set_class_properties(WindowTypes::Type window_type,
+                                    const Properties& properties) {
+  assert(concrete_factory_.get());
+  concrete_factory_->set_class_properties(window_type, properties);
+}
+
+Properties Systems::class_properties(WindowTypes::Type window_type) {
+  assert(concrete_factory_.get());
+  return concrete_factory_->class_properties(window_type);
+}
+
+// DefaultSystems
+
+Region* DefaultSystems::CreateRegion() { 
+  return new Region();
+}
+
+Graphics* DefaultSystems::CreateGraphics() {
+  return new Graphics();
+}
+
+Graphics* DefaultSystems::CreateGraphics(bool debug) {
+  return new Graphics(debug);
+}
+
+Graphics* DefaultSystems::CreateGraphics(void* dc) {
+  return new Graphics(dc);
+}
+
+Image* DefaultSystems::CreateImage() {
+  return new Image();
+}
+
+Font* DefaultSystems::CreateFont() {
+ return new Font();
+}
+
+ui::Fonts* DefaultSystems::CreateFonts() {
+  return new mfc::Fonts();
+}
+
+ui::Window* DefaultSystems::CreateWin() {
+  return new Window();
+}
+
+ui::Frame* DefaultSystems::CreateFrame() {
+  return new Frame();
+}
+
+ui::Frame* DefaultSystems::CreateMainFrame() {
+  return new Frame();
+}
+
+ui::PopupFrame* DefaultSystems::CreatePopupFrame() {
+  return new PopupFrame();
+}
+
+ui::ComboBox* DefaultSystems::CreateComboBox() {
+  return new ComboBox();
+}
+
+ui::Canvas* DefaultSystems::CreateCanvas() {
+  return new Canvas();
+}
+
+ui::Group* DefaultSystems::CreateGroup() {
+  return new Group();
+}
+
+ui::RadioButton* DefaultSystems::CreateRadioButton() {
+  return new RadioButton();
+}
+
+ui::GroupBox* DefaultSystems::CreateGroupBox() {
+  return new GroupBox();
+}
+
+ui::RectangleBox* DefaultSystems::CreateRectangleBox() {
+  return new RectangleBox();
+}
+
+ui::HeaderGroup* DefaultSystems::CreateHeaderGroup() {
+  return new HeaderGroup();
+}
+
+ui::Edit* DefaultSystems::CreateEdit() {
+  return new Edit();
+}
+
+Line* DefaultSystems::CreateLine() {
+  return new Line();
+}
+
+Text* DefaultSystems::CreateText() {
+  return new Text();
+}
+
+Pic* DefaultSystems::CreatePic() {
+  return new Pic();
+}
+
+ScrollBox* DefaultSystems::CreateScrollBox() {
+  return new ScrollBox();
+}
+
+Scintilla* DefaultSystems::CreateScintilla() {
+  return new Scintilla();
+}
+
+ui::Button* DefaultSystems::CreateButton() {
+  return new Button();
+}
+
+ui::CheckBox* DefaultSystems::CreateCheckBox() {
+  return new CheckBox();
+}
+
+ui::ScrollBar* DefaultSystems::CreateScrollBar(Orientation orientation) {
+  return new ScrollBar(orientation);
+}
+
+ui::TreeView* DefaultSystems::CreateTreeView() {
+  return new TreeView();
+}
+
+ui::ListView* DefaultSystems::CreateListView() {
+  return new ListView();
+}
+
+ui::MenuContainer* DefaultSystems::CreateMenuBar() {
+  return new MenuBar();
+}
+
+ui::PopupMenu* DefaultSystems::CreatePopupMenu() {
+  return new PopupMenu();
+}
+
+
 // WindowImp
 
 void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {  
@@ -2993,6 +3365,11 @@ ui::RegionImp* ImpFactory::CreateRegionImp() {
   return concrete_factory_->CreateRegionImp(); 
 }
 
+ui::FontInfoImp* ImpFactory::CreateFontInfoImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFontInfoImp();
+}
+
 ui::FontImp* ImpFactory::CreateFontImp() {  
   assert(concrete_factory_.get());
   return concrete_factory_->CreateFontImp();
@@ -3023,7 +3400,6 @@ ui::ImageImp* ImpFactory::CreateImageImp() {
   return concrete_factory_->CreateImageImp(); 
 }
 
-
 ui::ScintillaImp* ImpFactory::CreateScintillaImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateScintillaImp(); 
@@ -3037,16 +3413,6 @@ ui::GameControllersImp* ImpFactory::CreateGameControllersImp() {
 ui::FileObserverImp* ImpFactory::CreateFileObserverImp(FileObserver* file_observer) {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateFileObserverImp(file_observer); 
-}
-
-
-void StyleSheet::parse(ui::Window & window) {	
-	for (StyleClassContainer::iterator it = style_classes_.begin(); it != style_classes_.end(); ++it) {
-		StyleClass::Ptr style_class = *it;
-		if (style_class->name() == window.style_class_name()) {
-			window.UpdateStyle(*(style_class.get()));
-		}
-	}
 }
 
 AlertBox::AlertBox() 

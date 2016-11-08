@@ -12,10 +12,16 @@ namespace ui {
 
 class RectangleBox : public Window {
  public:
-  static std::string type() { return "rectanglebox"; }  
+  static std::string type() { return "rectanglebox"; }
+  static WindowTypes::Type window_type() { return WindowTypes::RECTANGLEBOX; }
+
   RectangleBox() : Window(), fill_color_(0) { set_auto_size(false, false); }
 
-  void SetColor(ARGB color) { fill_color_ = color; FLS(); }
+  void set_color(ARGB color) { 
+    fill_color_ = color;
+    FLS();
+  }
+  ARGB color() const { return fill_color_; }
   void Draw(Graphics* g, Region& draw_region);
 
  private:
@@ -28,7 +34,7 @@ class Pic : public Window {
     transparent_ = pmdone = false;
   }
   
-  static std::string type() { return "canvaspic"; }
+  static std::string type() { return "pic"; }
 
   virtual void Draw(Graphics* g, Region& draw_region);  
 	virtual ui::Dimension OnCalcAutoDimension() const;
@@ -59,7 +65,7 @@ class Line : public Window {
  public:
   Line() : Window(), color_(0) { }    
   
-  static std::string type() { return "canvasline"; }
+  static std::string type() { return "line"; }
 
   virtual void Draw(Graphics* g, Region& draw_region);
   virtual Window::Ptr Intersect(double x, double y, Event* ev, bool &worked);  
@@ -67,7 +73,7 @@ class Line : public Window {
   void SetPoint(int idx, const Point& pt) { pts_[idx] = pt; FLS(); }
   const Points& points() const { return pts_; }
   const Point& PointAt(int index) const { return pts_.at(index); }
-  void SetColor(ARGB color) { 
+  void set_color(ARGB color) { 
     color_ = color;
     FLS();
   }
@@ -88,13 +94,14 @@ class Text : public Window {
   Text(const std::string& text);
 
   static std::string type() { return "text"; }
+  static WindowTypes::Type window_type() { return WindowTypes::TEXT; }
 
   virtual void set_property(const ConfigurationProperty& configuration_property);
 
   virtual void Draw(Graphics* cr, Region& draw_region);  
   void set_text(const std::string& text);
   const std::string& text() const { return text_; }
-  void set_color(ARGB color) { 
+  void set_color(ARGB color) {    
     color_ = color;
 		FLS();
   }
@@ -137,12 +144,16 @@ class Splitter : public Window {
   typedef boost::shared_ptr<const Splitter> ConstPtr;
   typedef boost::weak_ptr<Splitter> WeakPtr;
   typedef boost::weak_ptr<const Splitter> ConstWeakPtr;
-  static std::string type() { return "canvassplitter"; }  
+
+  static std::string type() { return "splitter"; }
+
   Splitter();
   Splitter(Orientation orientation);
 
-  void SetColor(ARGB color) { fill_color_ = color; FLS(); }
-
+  void SetColor(ARGB color) {
+    fill_color_ = color; 
+    FLS();
+  }
 	void set_orientation(Orientation orientation) {
 		orientation_ = orientation; 
 		if (orientation == HORZ) {
@@ -154,13 +165,13 @@ class Splitter : public Window {
 		  set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
 	  }  		
 	}
-
   void Draw(Graphics* g, Region& draw_region);
 
 	virtual void OnMouseDown(MouseEvent& ev);
 	virtual void OnMouseUp(MouseEvent& ev);
 	virtual void OnMouseMove(MouseEvent& ev);
 	virtual void OnMouseOut(MouseEvent& ev);
+
  private:
    ARGB fill_color_;
 	 bool do_split_;
@@ -212,7 +223,8 @@ class TerminalFrame : public Frame {
 
 class HeaderGroup : public ui::Group {
  public:
-	static std::string type() { return "canvasheadergroup"; }
+	static std::string type() { return "headergroup"; }
+  static WindowTypes::Type window_type() { return WindowTypes::HEADERGROUP; }
   
 	HeaderGroup();
 	HeaderGroup(const std::string& title);

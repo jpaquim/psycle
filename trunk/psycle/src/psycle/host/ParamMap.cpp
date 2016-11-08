@@ -24,20 +24,8 @@ ParamMapSkin::ParamMapSkin() {
   range_end_color = ToARGB(machine_params.fontBottomColor);  
   background.reset(OrnamentFactory::Instance().CreateFill(background_color));  
   title_background.reset(OrnamentFactory::Instance().CreateFill(title_background_color));  
-  font = CastCFont(&machine_params.font);
-  title_font = CastCFont(&machine_params.font_bold);
-}
-
-ui::Font ParamMapSkin::CastCFont(CFont* font) {
-  ui::Font result;
-  LOGFONT lfLogFont;
-  memset(&lfLogFont, 0, sizeof(lfLogFont));  
-  font->GetLogFont(&lfLogFont);  
-  ui::FontInfo font_info;
-  font_info.name = lfLogFont.lfFaceName;
-  font_info.height = lfLogFont.lfHeight;
-  font_info.bold = (lfLogFont.lfWeight == FW_BOLD);
-  return ui::Font(font_info);
+  font = ui::mfc::TypeConverter::font(machine_params.font);
+  title_font = ui::mfc::TypeConverter::font(machine_params.font_bold);
 }
 
 ParamMap::ParamMap(Machine* machine,ParamMap** windowVar) 
@@ -85,7 +73,7 @@ void ParamMap::AddWindows() {
 void ParamMap::AddListView() {  
   viewport()->Add(list_view_);
   list_view_->set_background_color(skin_.list_view_background_color);
-  list_view_->set_text_color(skin_.font_color);
+  list_view_->set_color(skin_.font_color);
   list_view_->set_align(ui::ALLEFT);
   list_view_->ViewReport();
   list_view_->EnableRowSelect();

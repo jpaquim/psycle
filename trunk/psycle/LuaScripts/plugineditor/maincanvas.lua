@@ -13,6 +13,7 @@ local machines = require("psycle.machines")
 local catcher = require("psycle.plugincatcher")
 
 local cfg = require("psycle.config"):new("PatternVisual")
+local systems = require("psycle.ui.systems")
 local signal = require("psycle.signal")
 local run = require("psycle.run")
 local point = require("psycle.ui.point")
@@ -37,6 +38,7 @@ local filesave = require("psycle.ui.filesave")
 local fileexplorer = require("fileexplorer")
 local settingspage = require("settingspage")
 local textpage = require("textpage")
+local advancededit = require("advancededit")
 
 local toolicon = require("psycle.ui.canvas.toolicon")
 local toolbar = require("psycle.ui.canvas.toolbar")
@@ -49,6 +51,7 @@ local search = require("search")
 local output = require("output")
 local callstack = require("callstack")
 local pluginselector = require("pluginselector")
+local statusbar = require("statusbar")
 local templateparser = require("templateparser")
 local run = require("psycle.run")
 
@@ -67,17 +70,17 @@ function maincanvas:init()
   self.machines = machines:new()
   -- self.fileobservers = {}  
   self:invalidatedirect()
-  local setting = self.machine_.settingsmanager:setting()
-  self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
+  local setting = self.machine_.settingsmanager:setting()  
   self:setupfiledialogs()
+  self:createcreateeditplugin()  
   self:inittoolbar()   
   self:createsearch()
-  self:createcreateeditplugin()  
   self:createoutputs()
   splitter:new(self, splitter.HORZ)  
   self.fileexplorer = self:createfileexplorer()
   splitter:new(self, splitter.VERT)
-  self:createpagegroup()     
+  self:createpagegroup()
+  self:onapplysetting(setting)
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -85,7 +88,7 @@ function maincanvas:createcreateeditplugin()
                                       :hide()
 									  :setalign(item.ALTOP)
                                       :setautosize(false, false)
-									  :setposition(rect:new(point:new(0, 0), dimension:new(0, 200)))  
+									  :setposition(rect:new(point:new(), dimension:new(0, 200)))  
   self.pluginselector.doopen:connect(maincanvas.onopenplugin, self)
   self.pluginselector.docreate:connect(maincanvas.oncreateplugin, self)
 end
@@ -106,7 +109,7 @@ end
 
 function maincanvas:createoutputs()
   self.outputs = tabgroup:new(self)
-                         :setposition(rect:new(point:new(0, 0), dimension:new(0, 180)))
+                         :setposition(rect:new(point:new(), dimension:new(0, 180)))
 						 :setalign(item.ALBOTTOM)
   self.output = output:new(nil, self.machine_.settingsmanager:setting())
   self.outputs:addpage(self.output, "Output")  
@@ -127,7 +130,7 @@ end
 
 function maincanvas:createpluginexplorer()
   local pluginexplorer = pluginexplorer:new(self)
-                                       :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
+                                       :setposition(rect:new(point:new(), dimension:new(200, 0)))
 									   :setalign(item.ALLEFT)
   pluginexplorer:setbackgroundcolor(0x2F2F2F) --settings.canvas.colors.background)
   pluginexplorer:settextcolor(settings.canvas.colors.foreground)  
@@ -138,11 +141,10 @@ end
 
 function maincanvas:createfileexplorer()
   local fileexplorer = fileexplorer:new(self, self.machine_.settingsmanager:setting().fileexplorer)
-                                   :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
+                                   :setposition(rect:new(point:new(), dimension:new(200, 0)))
 								   :setalign(item.ALLEFT)
-  fileexplorer:setpath(cfg:luapath())
-  fileexplorer.click:connect(maincanvas.onpluginexplorerclick, self)
-  fileexplorer.onselectmachine:connect(maincanvas.onselectmachine, self)
+  fileexplorer:setpath(cfg:luapath())  
+  fileexplorer.click:connect(maincanvas.onpluginexplorerclick, self)  
   --pluginexplorer.onremove:connect(maincanvas.onpluginexplorernoderemove, self)
   return fileexplorer
 end
@@ -262,11 +264,6 @@ function maincanvas:savepage()
   end
 end
 
-function trace (event, line)
-  --local s = debug.getinfo(2).short_src
-  --psycle.output("processing" .. line .. "\n")  
-end
-
 function maincanvas:playplugin()  
   local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
@@ -291,83 +288,72 @@ function maincanvas:playplugin()
 end
 
 function maincanvas:inittoolbar()  
-  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(boxspace:new(5))  
-  self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)  
-  local settingsicon = toolicon:new(self.tg, settings.picdir.."settings.png", 0xFFFFFF):setalign(item.ALRIGHT):setmargin(boxspace:new(0, 10, 0, 10))  
+  self.tg = group:new(self):setautosize(false, true):setalign(item.ALTOP):setmargin(boxspace:new(0, 0, 5, 0))
+  self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
+  local settingsicon = toolicon:new(self.tg, settings.picdir.."settings.png", 0xFFFFFF)                               							  
+  self:formattoolicon(settingsicon)
+  settingsicon:setalign(item.ALRIGHT)							   
   local that = self
   function settingsicon:onclick()
     local settingspage = settingspage:new(nil, that.machine_)     
+	                                 :setmargin(boxspace:new(2, 0, 0, 0))
 	if settingspage then 
 	  settingspage.doapply:connect(maincanvas.onapplysetting, that)
 	  that.pages:addpage(settingspage, "Settings")
 	end
-  end
+  end  
+  self:initmachineselector(self.tg)
   self:initfiletoolbar():setalign(item.ALLEFT)
-  separator:new(self.tg):setalign(item.ALLEFT)
+  separator:new(self.tg):setalign(item.ALLEFT):setmargin(boxspace:new(10))
   self:initplaytoolbar():setalign(item.ALLEFT)
   self:initstatus()
 end
 
-function maincanvas:initstatus()  
-  local g = group:new(self.tg):setalign(item.ALRIGHT):setautosize(true, false)
-  --g:addornament(ornamentfactory:createfill(0xFF0000))  
-  self.searchrestartstatus = text:new(g)
-                                 :settext("")
-								 :setautosize(false, false)
-								 :setposition(rect:new(point:new(0, 0), dimension:new(150, 0)))
-								 :setalign(item.ALLEFT)
-								 :setverticalalignment(item.ALCENTER)
-								 :setmargin(boxspace:new(0, 0, 0, 5))
-								 :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
-  self.modifiedstatus = text:new(g)
-                            :settext("")
-							:setautosize(false, false)
-							:setposition(rect:new(point:new(0, 0), dimension:new(100, 0)))
-							:setalign(item.ALLEFT)
-							:setverticalalignment(item.ALCENTER)
-							:setmargin(boxspace:new(0, 5, 0, 0))
-							:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
-  text:new(g)
-      :settext("LINE")
-	  :setautosize(true, false)
-	  :setalign(item.ALLEFT)
-	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(boxspace:new(0, 5, 0, 0))
-  self.linestatus = text:new(g)
-                        :settext("1")
-						:setautosize(false, false)
-						:setposition(rect:new(point:new(0, 0), dimension:new(30, 0)))
-						:setalign(item.ALLEFT)
-						:setverticalalignment(item.ALCENTER)
-						:setmargin(boxspace:new(0, 5, 0, 0))
-						:addornament(ornamentfactory:createfill(settings.canvas.colors.background))
-  text:new(g)
-      :settext("COL")
-	  :setautosize(true, false)
-	  :setalign(item.ALLEFT)
-	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(boxspace:new(0, 5, 0, 0))
-  self.colstatus = text:new(g)
-                       :settext("1")
-					   :setautosize(false, false)
-					   :setposition(rect:new(point:new(0, 0), dimension:new(30, 0)))
-					   :setalign(item.ALLEFT)
-					   :setverticalalignment(item.ALCENTER)
-					   :setmargin(boxspace:new(0, 5, 0, 0))
-					   :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
-  text:new(g)
-      :settext("INSERT")
-	  :setautosize(true, false)
-	  :setalign(item.ALLEFT)
-	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(boxspace:new(0, 5, 0, 0))
-  self.insertstatus = text:new(g)
-                          :settext("ON")
-						  :setautosize(false, false)
-						  :setposition(rect:new(point:new(0, 0), dimension:new(30, 0)))
-						  :setverticalalignment(item.ALCENTER)
-						  :setalign(item.ALLEFT)
-						  :addornament(ornamentfactory:createfill(settings.canvas.colors.background))
+function maincanvas:initmachineselector(parent)
+  self.machineselector = advancededit:new(parent)
+                         :setalign(item.ALLEFT)
+						 :setposition(rect:new(point:new(0, 0), dimension:new(200, 40)))
+  local that = self  
+  function self.machineselector:onmousedown(ev)    
+    that.pluginselector:show()
+    that:updatealign() 
+    advancededit.onmousedown(self, ev)	
+  end  
+  function self.machineselector:onkillfocus(ev)
+    --that.pluginselector:hide()  
+    that:updatealign()  
+    advancededit.onkillfocus(self, ev)	
+  end  
+  function self.machineselector:onkeydown(ev)
+    advancededit.onkeydown(self, ev)
+    if ev:keycode() == ev.RETURN then
+	  that:onmachineselectorreturnkey(self:text())
+	  that.pluginselector:hide()
+	end	
+	if ev:keycode() == ev.ESCAPE then
+	  that.pluginselector:hide()
+	  that:updatealign()
+	end
+  end
+  function self.machineselector:onkeyup(ev)
+    if self.selectorhasfocus then
+	  that.pluginselector:searchandfocusmachine(self:text())
+      that:updatealign()	  
+	end
+    advancededit.onkeyup(self, ev)	
+  end  
+end
+
+function maincanvas:onmachineselectorreturnkey(text)
+  local node = self.pluginselector:search(text)
+  if node then
+    self.pluginselector:open(node)
+  end  
+end
+
+function maincanvas:initstatus()    
+  local setting = self.machine_.settingsmanager:setting()
+  self.statusbar = statusbar:new(self.tg, setting)
 end
 
 function maincanvas:setwindowiconin()
@@ -385,19 +371,14 @@ function maincanvas:setwindowiconout()
 end
 
 function maincanvas:initwindowtoolbar()    
-  local icon = toolicon:new(self.tg, settings.picdir.."arrow_out.png", 0xFFFFFF)  
+  local icon = toolicon:new(self.tg, settings.picdir.."arrow_out.png", 0xFFFFFF)
+  self:formattoolicon(icon)
+  icon:setalign(item.ALRIGHT)
   local that = self
   function icon:onclick()   
     that.machine_:toggleviewport()      
   end       
   return icon
-end
-
-function maincanvas:onselectmachine()
-  local catcher = catcher:new()
-  local infos = catcher:infos()
-  self.pluginselector:show()
-  self:updatealign()    
 end
 
 function maincanvas:fillinstancecombobox()
@@ -431,8 +412,9 @@ end
 function maincanvas:createinstanceselect(parent)  
   self.cbx = combobox:new(parent)
                      :setautosize(false, false)
-                     :setposition(rect:new(point:new(0, 0), dimension:new(200, 200)))
+                     :setposition(rect:new(point:new(0, 0), dimension:new(150, 0)))
 					 :setalign(item.ALLEFT)
+					 :setmargin(boxspace:new(10))
   local that = self
   function self.cbx:onselect()    
     local pluginindex = that.cbxtopluginindex[self:itemindex()]
@@ -446,30 +428,53 @@ function maincanvas:createinstanceselect(parent)
   self.cbx:setitemindex(1)
 end
 
+function maincanvas:formattoolicon(icon)    
+  icon:setautosize(false, false)
+  icon:setverticalalignment(toolicon.ALCENTER)
+  icon:setjustify(toolicon.CENTERJUSTIFY)
+  icon:setposition(rect:new(point:new(), dimension:new(40, 0)))
+  return self
+end
+
 function maincanvas:initfiletoolbar()  
   local t = toolbar:new(self.tg)
-  local inew = toolicon:new(t, settings.picdir.."new.png", 0xFFFFFF)
-  local iopen = toolicon:new(t, settings.picdir.."open.png", 0xFFFFFF)  
-  local isave = toolicon:new(t, settings.picdir.."save.png", 0xFFFFFF)  
-  local iundo = toolicon:new(t, settings.picdir.."undo.png", 0xFFFFFF)
-  local iredo = toolicon:new(t, settings.picdir.."redo.png", 0xFFFFFF)  
+                   :setautosize(true, false)
+  local icons = {  
+    inew = toolicon:new(t, settings.picdir.."new.png", 0xFFFFFF),                      
+    iopen = toolicon:new(t, settings.picdir.."open.png", 0xFFFFFF),                        
+    isave = toolicon:new(t, settings.picdir.."save.png", 0xFFFFFF),
+    iundo = toolicon:new(t, settings.picdir.."undo.png", 0xFFFFFF),
+    iredo = toolicon:new(t, settings.picdir.."redo.png", 0xFFFFFF)
+  }
+  for _, icon in pairs(icons) do    
+    self:formattoolicon(icon)
+  end
   local that = self    
-  function inew:onclick() 
+  function icons.inew:onclick() 
     that:createnewpage()    
   end  
-  function iopen:onclick()
+  function icons.iopen:onclick()
     that.fileopen:setfolder(that.fileexplorer:path())
     that.fileopen:show()
   end
-  function isave:onclick() that:savepage() end
-  function iredo:onclick() that:redo() end
-  function iundo:onclick() that:undo() end
+  function icons.isave:onclick()
+    that:savepage()  
+  end
+  function icons.iredo:onclick()
+    that:redo()
+  end
+  function icons.iundo:onclick()
+    that:undo()
+  end
   return t
 end
 
 function maincanvas:initplaytoolbar()  
-  local t = toolbar:new(self.tg)  
-  self.playicon = toolicon:new(t, settings.picdir.."poweroff.png", 0xFFFFFF)  
+  local t = toolbar:new(self.tg)
+                   :setautosize(true, false)  
+  self.playicon = toolicon:new(t, settings.picdir.."poweroff.png", 0xFFFFFF)                          
+  self:formattoolicon(self.playicon)
+  self:formattoolicon(self.playicon)
   self.playicon.is_toggle = true
   local on = image:new():load(settings.picdir.."poweron.png")
   on:settransparent(0xFFFFFF)
@@ -570,16 +575,16 @@ function maincanvas:oncreateplugin(template, pluginname)
     --  psycle.proxy.project = project:new():setplugininfo(infos[i])
     --  break;     
   --  end
-  --end    
-  self.pluginselector:hide()
-  self:updatealign()
+  --end      
+  self.fileexplorer:setmachinename(pluginname)
+  self:setfocus()
 end
 
 function maincanvas:onopenplugin(pluginpath, pluginname, info)  
   self:openplugin(pluginpath, pluginname, info)
   psycle.proxy.project = project:new():setplugininfo(info)
   self:fillinstancecombobox()  
-  self.machine_:settitle(pluginname)
+  self.machine_:settitle(pluginname)      
 end
 
 function findlast(haystack, needle)
@@ -588,15 +593,14 @@ function findlast(haystack, needle)
 end
 
 function maincanvas:openplugin(pluginpath, pluginname, plugininfo)  
-  self:preventfls()
+  self:preventdraw()
   self:closealltabs()      
-  self.fileexplorer:sethomepath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\") - 1))
-  self.fileexplorer:setmachinename(pluginname)
-  self.fileexplorer.machineselector:setcolor(0xFFFFFF)
-							       :setfont({name="arial", height=13, style=1})  
-  self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")    
+  self.fileexplorer:sethomepath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\") - 1))  
+  self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")
+  self:setfocus()
+  self.machineselector:settext(pluginname)
   self:updatealign()
-  self:enablefls()  
+  self:enabledraw()  
   self:invalidate()
 end
 
@@ -632,13 +636,13 @@ function maincanvas:onidle()
 end
 
 function maincanvas:onupdatetextpagestatus(status)        
-  self.linestatus:settext(status.line)  
-  self.colstatus:settext(status.column)     
-  self.insertstatus:settext(maincanvas.boolastext(status.ovrtype, "ON", "OFF"))           
-  self.searchrestartstatus:settext(maincanvas.boolastext(self.searchrestart,
+  self.statusbar.linestatus:settext(status.line)  
+  self.statusbar.colstatus:settext(status.column)     
+  self.statusbar.insertstatus:settext(maincanvas.boolastext(status.ovrtype, "ON", "OFF"))           
+  self.statusbar.searchrestartstatus:settext(maincanvas.boolastext(self.searchrestart,
                                                          "SEARCH AT BEGINNING POINT",
 														 ""))
-  self.modifiedstatus:settext(maincanvas.boolastext(status.modified,
+  self.statusbar.modifiedstatus:settext(maincanvas.boolastext(status.modified,
                                                     "MODIFIED",
 													""))  
 end
@@ -757,7 +761,17 @@ end
 --  end    
 --end
 
-function maincanvas:onapplysetting(setting)
+function maincanvas:onapplysetting(setting)  
+  self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
+  local systems = systems:new()
+  systems:setstyleclass(systems.windowtypes.EDIT, setting.general.children.ui.children.edit.properties)
+  systems:setstyleclass(systems.windowtypes.LISTVIEW, setting.general.children.ui.children.listview.properties)
+  systems:setstyleclass(systems.windowtypes.TREEVIEW, setting.general.children.ui.children.treeview.properties)
+  systems:setstyleclass(toolicon.windowtype, setting.general.children.ui.children.toolicon.properties)
+  systems:setstyleclass(advancededit.windowtype, setting.general.children.ui.children.advancededit.properties)
+  systems:setstyleclass(statusbar.windowtype, setting.statusbar.properties)
+  systems:setstyleclass(tabgroup.windowtype, setting.general.children.ui.children.tabgroup.properties)
+  systems:updatewindows()
   self.outputs:childat(1):applysetting(setting)
   self.search:applysetting(setting)
   local pages = self.pages.children:items()     

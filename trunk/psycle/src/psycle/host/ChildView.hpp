@@ -246,7 +246,19 @@ namespace host {
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
     public:      
+      WINDOWPLACEMENT adjusted_child_view_placement();
       void ChangeCanvas(ui::Window* canvas);
+      void EraseOldExtensionWindow();
+      void ResizeExtensionView();
+      void ShowExtensionView();
+      void HideChildView() { ShowWindow(SW_HIDE); }
+      void ShowChildView() { ShowWindow(SW_SHOW); }
+      void SetExtensionActive();
+      void AddNewExtensionWindow(ui::Window* canvas);
+      void AlignExtensionChild(CWnd* extension_wnd);
+      void UpdateExtensionPosition();
+      bool child_size_changed() const;
+      
       void LoadHostExtensions();
       void InitWindowMenu();      
 		public:

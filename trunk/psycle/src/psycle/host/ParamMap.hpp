@@ -24,9 +24,6 @@ class ParamMapSkin {
   ui::Ornament::Ptr title_background;
   ui::Font font;
   ui::Font title_font;
-
- private:
-  static ui::Font CastCFont(CFont* font);
 };
 
 class ParamMap : public ui::Frame {

@@ -1,4 +1,4 @@
-// #include "stdafx.h"
+// #include "stdafx.h"MOUSEDOWN
 
 #include "MfcUi.hpp"
 #include "Mmsystem.h"
@@ -462,9 +462,10 @@ ui::Window* WindowTemplateImp<T, I>::dev_focus_window() {
   return result;
 }
 
-void WindowImp::DevSetCursor(CursorStyle style) {
+void WindowImp::DevSetCursor(CursorStyle::Type style) {
   LPTSTR c = 0;
   int ac = 0;
+  using namespace CursorStyle;
   switch (style) {
     case AUTO        : c = IDC_IBEAM; break;
     case MOVE        : c = IDC_SIZEALL; break;
@@ -479,7 +480,7 @@ void WindowImp::DevSetCursor(CursorStyle style) {
     case E_RESIZE    : c = IDC_SIZEWE; break;
     case NE_RESIZE   : c = IDC_SIZENWSE; break;
     case DEFAULT     : c = IDC_ARROW; break;
-    case TEXT        : c = IDC_IBEAM; break;
+    case CursorStyle::TEXT : c = IDC_IBEAM; break;
     case N_RESIZE    : c = IDC_SIZENS; break;
     case S_RESIZE    : c = IDC_SIZENS; break;
     case SE_RESIZE   : c = IDC_SIZENWSE; break;
@@ -723,8 +724,8 @@ BOOL ComboBoxImp::OnSelect() {
 }
 
 BEGIN_MESSAGE_MAP(EditImp, CEdit)  
-	ON_WM_PAINT()	
-  ON_WM_CTLCOLOR_REFLECT()
+	ON_WM_PAINT()	  
+  ON_WM_CTLCOLOR_REFLECT()  
 END_MESSAGE_MAP()
 
 HBRUSH EditImp::CtlColor(CDC* pDC, UINT nCtlColor) {
@@ -739,7 +740,6 @@ void EditImp::dev_set_font(const Font& font) {
    assert(imp);   
    ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
 }
-
 
 HTREEITEM TreeNodeImp::DevInsert(TreeViewImp* tree, const ui::Node& node, TreeNodeImp* prev_imp) {  
   TVINSERTSTRUCT tvInsert;
@@ -782,7 +782,7 @@ BOOL TreeViewImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
   return ev.is_propagation_stopped();  
 }
 
-void TreeViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node) {  
+void TreeViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node) {  
   NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
   boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
   node->erase_imp(this);  
@@ -802,7 +802,7 @@ void TreeViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Nod
   }
 }
 
-void TreeViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {  
+void TreeViewImp::DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node) {  
   recursive_node_iterator end = node->recursive_end();
   recursive_node_iterator it = node->recursive_begin();
   boost::shared_ptr<Node> prev = prev_node;
@@ -813,24 +813,31 @@ void TreeViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_
   }
 }
 
-void TreeViewImp::DevErase(boost::shared_ptr<Node> node) {  
+void TreeViewImp::DevErase(const Node::Ptr& node) {  
   TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node->imp(*this));
   if (imp) {
     DeleteItem(imp->hItem);
   } 
 }
 
-void TreeViewImp::DevEditNode(boost::shared_ptr<ui::Node> node) { 
+void TreeViewImp::DevEditNode(const Node::Ptr& node) { 
   TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node->imp(*this));
   if (imp) {
     EditLabel(imp->hItem);    
   }
 }
 
-void TreeViewImp::dev_select_node(const boost::shared_ptr<ui::Node>& node) {
+void TreeViewImp::dev_select_node(const Node::Ptr& node) {
   TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node->imp(*this));
   if (imp) {  
     SelectItem(imp->hItem);    
+  }
+}
+
+void TreeViewImp::dev_deselect_node(const Node::Ptr& node) {
+  TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node->imp(*this));
+  if (imp) {      
+    SetItemState(imp->hItem, 0, TVIS_SELECTED);
   }
 }
 
@@ -1062,7 +1069,16 @@ void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, Li
   node_imp->set_position(position());
 }
 
-ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node, int pos) {
+void ListNodeImp::Select(ui::mfc::ListViewImp* list_view_imp) {
+  list_view_imp->SetItemState(lvi.iItem, LVIS_SELECTED, LVIS_SELECTED);
+  list_view_imp->SetSelectionMark(lvi.iItem);
+}
+
+void ListNodeImp::Deselect(ui::mfc::ListViewImp* list_view_imp) {
+  list_view_imp->SetItemState(lvi.iItem, static_cast<UINT>(~LVIS_SELECTED), LVIS_SELECTED);
+}
+
+ListNodeImp* ListViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node, int pos) {
   ListNodeImp* new_imp = new ListNodeImp();  
   NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
   node->erase_imp(this);  
@@ -1095,7 +1111,7 @@ ListNodeImp* ListViewImp::UpdateNode(boost::shared_ptr<Node> node, boost::shared
   return new_imp;
 }
 
-void ListViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {  
+void ListViewImp::DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node) {  
   recursive_node_iterator end = node->recursive_end();
   recursive_node_iterator it = node->recursive_begin();  
   int pos = 0;
@@ -1117,23 +1133,40 @@ void ListViewImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_
   }
 }
 
-void ListViewImp::DevErase(ui::Node::Ptr node) {
+void ListViewImp::DevErase(const Node::Ptr& node) {
 	if (node) {
 		node->erase_imp(this);    
 	}
 }
 
-void ListViewImp::DevEditNode(ui::Node::Ptr node) {    
+void ListViewImp::DevEditNode(const Node::Ptr& node) {    
   ListNodeImp* imp = dynamic_cast<ListNodeImp*>(node->imp(*this));
   if (imp) {
    //EditLabel(imp->hItem);    
   }
 }
 
-void ListViewImp::dev_select_node(const ui::Node::Ptr& node) {
+void ListViewImp::dev_select_node(const Node::Ptr& node) {
   ListNodeImp* imp = dynamic_cast<ListNodeImp*>(node->imp(*this));
   if (imp) {
-      //SelectItem(imp->hItem);    
+    int selected = -1;
+    POSITION pos = GetFirstSelectedItemPosition();
+    if (pos != NULL) {
+      while (pos) {
+        selected = GetNextSelectedItem(pos);      
+      }
+    } 
+    if (selected != -1) {     
+      SetItemState(selected, static_cast<UINT>(~LVIS_SELECTED), LVIS_SELECTED);
+    }
+    imp->Select(this);           
+  }
+}
+
+void ListViewImp::dev_deselect_node(const Node::Ptr& node) {
+  ListNodeImp* imp = dynamic_cast<ListNodeImp*>(node->imp(*this));
+  if (imp) {
+    imp->Deselect(this);    
   }
 }
 
@@ -1297,6 +1330,7 @@ void ScintillaImp::SetupHighlighting(const Lexer& lexer) {
   f(SCI_STYLESETFORE, SCE_LUA_PREPROCESSOR, ToCOLORREF(lexer.identifier_color()));
   f(SCI_STYLESETFORE, SCE_LUA_OPERATOR, ToCOLORREF(lexer.operator_color()));
   f(SCI_STYLESETFORE, SCE_LUA_CHARACTER, ToCOLORREF(lexer.character_code_color()));
+  f(SCI_STYLESETBACK, SCE_LUA_CHARACTER, ToCOLORREF(lexer.character_code_color()));    
 }
 
 void ScintillaImp::SetupFolding(const Lexer& lexer) {
@@ -1310,7 +1344,7 @@ void ScintillaImp::SetFoldingBasics() {
   f(SCI_SETMARGINWIDTHN, 2, 12);
   f(SCI_SETMARGINSENSITIVEN, 2, true);  
   f(SCI_SETMARGINTYPEN, 2, SC_MARGIN_SYMBOL);
-  f(SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS);
+  f(SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS);  
   f(SCI_SETPROPERTY, _T("fold"), _T("1"));
   f(SCI_SETPROPERTY, _T("fold.compact"), _T("1"));                
   f(SCI_SETAUTOMATICFOLD, SC_AUTOMATICFOLD_SHOW | SC_AUTOMATICFOLD_CHANGE| SC_AUTOMATICFOLD_CLICK, 0);
@@ -1318,7 +1352,8 @@ void ScintillaImp::SetFoldingBasics() {
 
 void ScintillaImp::SetFoldingColors(const Lexer& lexer) {
  for (int i = 25; i <= 31; i++) {    
-   f(SCI_MARKERSETBACK, i, ToCOLORREF(lexer.folding_color()));
+   f(SCI_MARKERSETFORE, i, ToCOLORREF(lexer.folding_marker_fore_color()));
+   f(SCI_MARKERSETBACK, i, ToCOLORREF(lexer.folding_marker_back_color()));
  }
 }
 
@@ -1406,7 +1441,7 @@ void MenuContainerImp::DevInvalidate() {
   }
 }
 
-void MenuContainerImp::DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node) {
+void MenuContainerImp::DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node) {
   if (hmenu_) {		
     UpdateNodes(node, hmenu_, ::GetMenuItemCount(hmenu_));
     DevInvalidate();
@@ -1418,7 +1453,7 @@ void MenuContainerImp::RegisterMenuEvent(int id, MenuImp* menu_imp) {
   menu_bar_id_map_[id] = this;
 }
 
-void MenuContainerImp::UpdateNodes(Node::Ptr parent_node, HMENU parent, int pos_start) {
+void MenuContainerImp::UpdateNodes(const Node::Ptr& parent_node, HMENU parent, int pos_start) {
   if (parent_node) {
     Node::Container::iterator it = parent_node->begin();    
     for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
@@ -1460,7 +1495,7 @@ void MenuContainerImp::UpdateNodes(Node::Ptr parent_node, HMENU parent, int pos_
   }
 }
 
-void MenuContainerImp::DevErase(boost::shared_ptr<Node> node) {
+void MenuContainerImp::DevErase(const Node::Ptr& node) {
   boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
   for (; it != node->imps.end(); ++it) {     
     if (it->owner() == this) {      
@@ -3085,6 +3120,26 @@ FileObserverImp::FileObserverImp(FileObserver* file_observer) :
      ui::FileObserverImp(file_observer) {  
 	notify_dir_change_.SetData(file_observer);	
 	notify_dir_change_.SetActionCallback(DirCallback);	
+}
+
+/*extern "C" bool comp(FontPair& left, FontPair& right)
+{
+	if ((_T('@') != left.first.lfFaceName[0]) && (_T('@') == right.first.lfFaceName[0]))
+		return true;
+	if ((_T('@') == left.first.lfFaceName[0]) && (_T('@') != right.first.lfFaceName[0]))
+		return false;
+	return (_tcscmp(left.first.lfFaceName, right.first.lfFaceName) < 0);
+}*/
+
+extern "C" int CALLBACK enumerateFontsCallBack(ENUMLOGFONTEX *lpelf,
+												NEWTEXTMETRICEX *lpntm,
+												DWORD fontType, LPARAM lParam)
+{
+	lpntm;
+
+	FontVec* pFontVec = (FontVec*) lParam;
+	pFontVec->push_back(FontPair(lpelf->elfLogFont, fontType));
+	return TRUE;
 }
 
 

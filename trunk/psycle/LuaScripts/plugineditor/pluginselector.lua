@@ -28,6 +28,7 @@ local tabgroup = require("psycle.ui.canvas.tabgroup")
 local closebutton = require("closebutton")
 local templateparser = require("templateparser")
 local settings = require("settings")
+local recursivenodeiterator = require("psycle.recursivenodeiterator")
 
 local pluginselector = group:new()
 
@@ -44,30 +45,53 @@ function pluginselector:init()
    self.docreate = signal:new()
    self.tg = tabgroup:new(self)
                      :setalign(item.ALCLIENT)
-					 :disableclosebutton()
-   local g = group:new()
-                  :setautosize(false, false)
-   self:initpluginlist(g)
-   self.creategroup = self:initplugincreate()
-   self.creategroup.propertypage = nil
-   self.tg:addpage(g, "All")
+					 :disableclosebutton()   
+   self.creategroup = self:initplugincreate()   
+   self:initpluginlist()
    local closebutton = closebutton.new(self.tg.tabbar)
                                   :setalign(item.ALRIGHT)
    closebutton.dohide:connect(pluginselector.onhide, self)   
+end
+
+function pluginselector:searchandfocusmachine(text)  
+  local node = self:search(text)
+  if node then
+    self.openprevented = true	
+    self.pluginlist:selectnode(node)
+	self.openprevented = nil
+  else        
+    local selectednodes = self.pluginlist:selectednodes()
+    for _, node in ipairs(selectednodes) do
+	  self.pluginlist:deselectnode(node)
+	end
+  end
+end
+
+function pluginselector:search(text)      
+  local result = nil
+  if text ~= "" then
+    for element in recursivenodeiterator(self.rootnode).next do
+	  local i, j = string.find(element:text(), text, 1, true)  
+	  if i and i == 1 then
+	    result = element
+	  break;
+	  end  
+    end
+  end
+  return result
 end
 
 function pluginselector:onhide()
   self:hide():parent():updatealign()     
 end
 
-function pluginselector:initplugincreate()
-  local g = group:new():setautosize(false, false)
-  self.tg:addpage(g, "Create")   
-  self.plugincreatelist = listview:new(g)
+function pluginselector:initplugincreate()  
+  self.plugincreatelist = listview:new()
                                   :setalign(item.ALCLIENT)
 								  :setautosize(false, false)
-                                  :setbackgroundcolor(0x3E3E3E)
-                                  :settextcolor(0xFFFFFF)								  								  
+                                  :setbackgroundcolor(0xFF3E3E3E)
+                                  :setcolor(0xFFFFFFFF)  
+  self.tg:addpage(self.plugincreatelist, "Create")   								  
   local path = cfg:luapath().."\\plugineditor\\templates"
   self.plugincreatelistrootnode = node:new()    
   local dir = filehelper.directorylist(path)    
@@ -92,11 +116,11 @@ function pluginselector:initplugincreate()
 	that:parent():flagnotaligned()
 	that:parent():updatealign()
   end  
-  return g
+  return self.plugincreatelist
 end
 
 function pluginselector:createproperties(properties)
-  local g = group:new(self.creategroup)
+  local g = group:new(self)
                  :setautosize(false, false)
                  :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
 				 :setalign(item.ALRIGHT)
@@ -159,21 +183,28 @@ function pluginselector:oncreateplugin(template)
   self.docreate:emit(template, env.pluginname)  
 end  
 
-function pluginselector:initpluginlist(parent)
-  self.pluginlist = listview:new(parent)
+function pluginselector:initpluginlist()
+  self.pluginlist = listview:new()
                             :setautosize(false, false)
                             :setposition(rect:new(point:new(0, 0), dimension:new(0, 200)))
                             :setalign(item.ALTOP)
                             :setbackgroundcolor(0x3E3E3E)
-                            :settextcolor(0xFFFFFF)
-							:setmargin(boxspace:new(0, 5, 0, 0))
+                            :setcolor(0xFFFFFF)
+                            :setmargin(boxspace:new(0, 5, 0, 0))
+  self.tg:addpage(self.pluginlist, "All")
   local that = self  
   function self.pluginlist:onchange(node)
-    local dir = that:machinepath(node.info)        
-    that:hide()        
-    that.doopen:emit(dir, node.info:name(), node.info)  
+    if not that.openprevented then
+      that:open(node)    
+	end
   end  
-  self:updatepluginlist()  
+  self:updatepluginlist()
+end
+
+function pluginselector:open(node)
+  local dir = self:machinepath(node.info)        
+  self:hide()        	
+  self.doopen:emit(dir, node.info:name(), node.info)  
 end
 
 function pluginselector:machinepath(info)  

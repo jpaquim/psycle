@@ -12,46 +12,37 @@ local image = require("psycle.ui.image")
 local item = require("psycle.ui.item")
 local listener = require("psycle.listener")
 local serpent = require("psycle.serpent")
+local systems = require("psycle.ui.systems")
 
 local toolicon = item:new()
 
-toolicon.settings = { 
-  colors = {
-    default = {
-      bg = 0x292929,
-      text = 0xCACACA
-    },
-    mousepress = {
-      bg = 0x568857,
-      text = 0xCACACA
-    },
-    mousemove = {
-      bg  = 0x414131,
-      text = 0xCACACA
-    },
-    checked = {
-	  bg = 0xf1f1f1,
-      text = 0xCACACA
-	}	
-  }
-}
+toolicon.ALNONE = 0
+toolicon.ALCENTER = 7
+toolicon.LEFTJUSTIFY = 1
+toolicon.RIGHTJUSTIFY = 2
+toolicon.CENTERJUSTIFY = 3
 
-function toolicon:new(parent, filename, trans)
-  local c = item:new()
+toolicon.windowtype = 50
+
+function toolicon:new(parent, filename, trans)  
+  local c = item:new()  
   setmetatable(c, self)
   self.__index = self
   if parent ~= nil then  
    parent:add(c)   
   end
   c:init(filename, trans)  
+  systems:new():changewindowtype(toolicon.windowtype, c)
   return c
 end
 
 function toolicon:onclick() end
 
-function toolicon:init(filename, trans)
+function toolicon:init(filename, trans)  
   self:setautosize(true, true)  
-  self.cc = toolicon.settings.colors.default.bg
+  self:initdefaultcolors()  
+  self.verticalalignment_ = toolicon.ALNONE
+  self.justify_ = toolicon.ALNONE  
   self.on_ = false  
   self.text_ = ""
   if filename then
@@ -62,7 +53,54 @@ function toolicon:init(filename, trans)
   end  
   self.clicklistener_ = listener:new("onclick", true)
   self.istoggle_ = false
-  self:setposition(rect:new(point:new(0, 0), dimension:new(20, 20)))  
+  self:setposition(rect:new(point:new(0, 0), dimension:new(20, 20)))
+  self.hover = false
+end
+
+function toolicon:initdefaultcolors()
+  self.color = 0xFFCACACA    
+  self.backgroundcolor = 0xFF232323  
+  self.activecolor = 0xFFCACACA
+  self.activebackgroundcolor = 0xFF568857
+  self.hovercolor = 0xFFCACACA
+  self.hoverbackgroundcolor = 0xFF414135
+  return self
+end
+
+function toolicon:setjustify(justify)
+  self.justify_ = justify
+  return self
+end
+
+function toolicon:setverticalalignment(alignment)
+  self.verticalalignment_ = alignment
+  return self
+end
+
+function toolicon:justifyoffset()
+  local result = 0
+  if self.img then
+    local imagewidth, imageheight = self.img:size()
+    if self.justify_ == toolicon.CENTERJUSTIFY then
+      result = (self:dimension():width() - imagewidth)/2
+     elseif self.justify_ == toolicon.RIGHTJUSTIFY then
+       result = self:dimesion():width() - imagewidth
+     end
+  end
+  return result
+end
+
+function toolicon:verticalalignmentoffset()
+  local result = 0
+  if self.img then
+    local imagewidth, imageheight = self.img:size()
+    if self.verticalalignment_ == toolicon.ALCENTER then	  		
+      result = (self:dimension():height() - imageheight)/2
+    elseif self.verticalalignment_ == toolicon.ALBOTTOM then 				
+	  result = self:dimesion():height() - imageheight
+    end	
+  end
+  return result
 end
 
 function toolicon:settoggleimage(image)
@@ -70,31 +108,42 @@ function toolicon:settoggleimage(image)
   self.oldimage = nil  
 end
 
-function toolicon:setposition(rect)
-  local w = rect:width()
-  local h = rect:height()
-  if self.img ~= nil then
-    local iw, ih = self.img:size()  
-    self.centerx, self.centery = (w - iw)/2, (h - ih)/2    
-  end  
-  item.setposition(self, rect)  
-  return self
-end
-
 function toolicon:draw(g)    
-  g:setcolor(self.cc)   
-  local dim = self:dimension()
-  g:fillrect(rect:new(point:new(), dim))
+  self:updatebackgroundcolor(g)
+  g:fillrect(rect:new(point:new(), self:dimension()))
   local xpos = 0
   if self.img then
-    g:drawimage(self.img, self.centerx, self.centery) 
+    g:drawimage(self.img, self:justifyoffset(), self:verticalalignmentoffset()) 
     local ix, iy = self.img:size()    
-    xpos = xpos + self.centerx + ix
-  end
-  g:setcolor(self.cc)
-  g:setcolor(toolicon.settings.colors.default.text)  
+    xpos = xpos + ix
+  end    
+  self:updatecolor(g)
   local textwidth, textheight = g:textsize(self.text_)
-  g:drawstring(self.text_, xpos + 2, (dim:height() - textheight)/2)
+  g:drawstring(self.text_, xpos + 2, (self:dimension():height() - textheight)/2)
+end
+
+function toolicon:updatecolor(g)
+  if self.on_ then
+    g:setcolor(self.activecolor)
+  else
+    if self.hover then
+      g:setcolor(self.hovercolor)
+    else
+      g:setcolor(self.color)
+    end
+  end
+end
+
+function toolicon:updatebackgroundcolor(g)
+  if self.on_ then
+    g:setcolor(self.activebackgroundcolor)
+  else
+    if self.hover then
+      g:setcolor(self.hoverbackgroundcolor)
+    else
+      g:setcolor(self.backgroundcolor)
+    end
+  end
 end
 
 function toolicon:onmousedown(ev) 
@@ -105,7 +154,7 @@ end
 
 function toolicon:onmouseenter(ev)  
   if (not self.on_) then     
-    self.cc = toolicon.settings.colors.mousemove.bg
+    self.hover = true
     self:fls()
   end
 end
@@ -115,7 +164,7 @@ end
 
 function toolicon:onmouseout(ev)   
   if (not self.on_) then 
-    self.cc = toolicon.settings.colors.default.bg	
+    self.hover = false
     self:fls()    
   end
 end
@@ -135,8 +184,7 @@ end
 function toolicon:seton(on)  
   if self.on_ ~= on then
     self.on_ = on
-    if on then 	  
-      self.cc = toolicon.settings.colors.mousepress.bg
+    if on then 	        
 	  if (self.toggleimage_) then
 	    self.oldimage = self.img
 	    self.img = self.toggleimage_		
@@ -145,8 +193,7 @@ function toolicon:seton(on)
 	  if self.oldimage then	    
 	    self.img = self.oldimage
 	    self.oldimage = nil
-	  end
-      self.cc = toolicon.settings.colors.default.bg
+	  end      
     end
     self:fls()
     if self.toolbar~=nil and on and self.istoggle_ then
@@ -198,6 +245,28 @@ end
 
 function toolicon:transparent()  
   return false
+end
+
+function toolicon:setproperties(properties)  
+  if properties.color then
+    self.color = properties.color:value()
+  end
+  if properties.backgroundcolor then
+    self.backgroundcolor = properties.backgroundcolor:value()          
+  end
+  if properties.activecolor then
+    self.activecolor = properties.activecolor:value()
+  end
+  if properties.activebackgroundcolor then
+    self.activebackgroundcolor = properties.activebackgroundcolor:value()
+  end
+  if properties.hovercolor then
+    self.hovercolor = properties.hovercolor:value()
+  end
+  if properties.hoverbackgroundcolor then
+    self.hoverbackgroundcolor = properties.hoverbackgroundcolor:value()
+  end
+  self:fls()
 end
 
 return toolicon

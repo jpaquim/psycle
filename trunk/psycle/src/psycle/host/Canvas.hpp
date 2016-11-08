@@ -95,6 +95,7 @@ class Canvas : public ui::Group {
   }   
     
   static std::string type() { return "canvas"; }
+  static WindowTypes::Type window_type() { return WindowTypes::CANVAS; }
        
   void Flush();  
   void StealFocus(const Window::Ptr& item);  
@@ -177,7 +178,7 @@ struct BorderRadius {
 
 class LineBorder : public ui::Ornament {
  public:
-  LineBorder() : color_(0xFFFFFF), border_width_(1) {}
+  LineBorder() : color_(0xFFFFFFFF), border_width_(1) {}
   LineBorder(ARGB color) : color_(color), border_width_(1) {}  
 	LineBorder(ARGB color, const ui::BoxSpace& border_width) : color_(color), border_width_(border_width) {}  
 
@@ -204,7 +205,7 @@ class LineBorder : public ui::Ornament {
   
  private:  
   void DrawBorder(Window& item, Graphics* g, Region& draw_region) {
-    g->SetColor(color_);  
+    g->set_color(color_);  
 		ui::Rect rc = item.area().bounds();
 		rc.Increase(ui::BoxSpace(0, 
 			                      item.padding().width() + item.border_space().width(),
@@ -325,14 +326,11 @@ class Fill : public ui::Ornament {
 
  private:
   void DrawFill(Window& item, Graphics* g, Region& draw_region) {
-    if (draw_region.bounds().height() > 0) {    
-      int alpha = GetAlpha(color_);
-      if (alpha != 0xFF) {
-        g->SetColor(color_);
+    if (draw_region.bounds().height() > 0) {          
+       g->set_color(color_);
 				//draw_region.bounds()
-					g->FillRegion(draw_region); // use_bounds_ ? *item->area().bounds().region().get()
-                                  //: item->area().region());        
-      }
+			 g->FillRegion(draw_region); // use_bounds_ ? *item->area().bounds().region().get()
+                                  //: item->area().region());      
     }
   }
   ARGB color_;
@@ -363,12 +361,9 @@ class CircleFill : public ui::Ornament {
 
  private:
   void DrawFill(Window& item, Graphics* g, Region& draw_region) {
-    if (draw_region.bounds().height() > 0) {    
-      int alpha = GetAlpha(color_);
-      if (alpha != 0xFF) {
-        g->SetColor(color_);				
-				g->FillOval(ui::Rect(ui::Point(), item.dim()));
-      }
+    if (draw_region.bounds().height() > 0) {          
+      g->set_color(color_);
+			g->FillOval(ui::Rect(ui::Point(), item.dim()));      
     }
   }
   ARGB color_;
