@@ -1203,22 +1203,15 @@ namespace psycle { namespace host {
 			return FALSE;
 		}
 
-    void CMainFrame::OnSize(UINT nType, int cx, int cy) {        
+    void CMainFrame::OnSize(UINT nType, int cx, int cy)
+    {        
        CFrameWnd::OnSize(nType, cx, cy);
-       CRect rc;            
-       this->m_wndView.GetWindowRect(&rc);
-       ScreenToClient(rc); 
-       CRect rc1;
-       m_wndStatusBar.GetWindowRect(&rc1);
-       ScreenToClient(rc1);       
-       m_luaWndView->MoveWindow(rc.left, rc.top, rc.Width(), rc.Height());
-       CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
-       if (child) {
-         child->MoveWindow(0, 0, rc.Width(), rc.Height());
+       if (m_luaWndView && m_luaWndView->IsWindowVisible())
+       {
+         WINDOWPLACEMENT wp = m_wndView.adjusted_child_view_placement();
+         m_luaWndView->SetWindowPlacement(&wp);
+         m_wndView.AlignExtensionChild(m_luaWndView.get());
        }       
     }
-
-    
-
-    
+        
 }}

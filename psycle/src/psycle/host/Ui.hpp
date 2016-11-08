@@ -18,6 +18,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/ptr_container/ptr_list.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/variant.hpp>
 // #include <boost/locale.hpp>
 
 #include <bitset>
@@ -42,6 +43,7 @@ namespace ui {
 
 typedef uint32_t ARGB;
 typedef uint32_t RGB;
+typedef uint32_t RGBA;
 
 extern class {
  public:
@@ -50,6 +52,16 @@ extern class {
   template<typename T>
   operator boost::weak_ptr<T>() { return boost::weak_ptr<T>(); }
 } nullpointer;
+
+struct Color {
+  Color() : argb_(0xFF000000) {}  
+  Color(ARGB argb) : argb_(argb) {}
+  
+  ARGB argb() const { return argb_; }
+
+ private:   
+   ARGB argb_;
+};
 
 struct Point {
   typedef boost::shared_ptr<Point> Ptr;
@@ -417,12 +429,15 @@ struct Area {
 
 enum Orientation { HORZ = 0, VERT = 1 };
 
-enum CursorStyle {
+
+namespace  CursorStyle {
+enum Type {
   AUTO, MOVE, NO_DROP, COL_RESIZE, ALL_SCROLL, POINTER, NOT_ALLOWED,
   ROW_RESIZE, CROSSHAIR, PROGRESS, E_RESIZE, NE_RESIZE, DEFAULT, TEXT,
   N_RESIZE, NW_RESIZE, HELP, VERTICAL_TEXT, S_RESIZE, SE_RESIZE, INHERIT,
   WAIT, W_RESIZE, SW_RESIZE
 };
+}
 
 class Event {
  public:  
@@ -475,19 +490,64 @@ class KeyEvent : public Event {
    int keycode_, flags_;
 };
 
-struct FontInfo {
-  FontInfo() : name("Arial"), height(12), bold(false), italic(false), stock_id(-1) {}
-  std::string name;
-  int height;
-  bool bold;
-  bool italic;
-  int stock_id;
+namespace FontStyle {
+enum Type {
+  NORMAL = 1,
+  ITALIC = 2
+};
+}
+
+class FontInfoImp;
+
+struct FontInfo {  
+  typedef boost::shared_ptr<FontInfo> Ptr;
+	typedef boost::shared_ptr<const FontInfo> ConstPtr;
+	typedef boost::weak_ptr<FontInfo> WeakPtr;
+	typedef boost::weak_ptr<const FontInfo> ConstWeakPtr;
+
+
+  FontInfo();
+  FontInfo(const std::string& family);
+  FontInfo(const std::string& family, int size);
+  FontInfo(const std::string& family, int size, int weight, FontStyle::Type style);
+  FontInfo(const FontInfo& font_info);  
+  FontInfo(const Font& other);
+  FontInfo& operator= (const FontInfo& other);
+  virtual ~FontInfo() {}
+
+  FontInfoImp* imp() { return imp_.get(); }
+  FontInfoImp* imp() const { return imp_.get(); } 
+  
+  void set_style(FontStyle::Type style);
+  FontStyle::Type style() const;
+  void set_size(int size);
+  int size() const;
+  void set_weight(int weight);
+  int weight() const;
+  void set_family(const std::string& family);
+  std::string family() const;
+  void set_stock_id(int id);
+  int stock_id() const;
+
+  std::string tostring() const {
+    std::stringstream str;    
+    str << "\"" << family() << "\", " << size() << ", " << static_cast<int>(style());
+    return str.str();    
+  }
+
+ private:
+   std::auto_ptr<FontInfoImp> imp_;  
 };
 
 class FontImp;
 
 class Font {
  public:
+  typedef boost::shared_ptr<Font> Ptr;
+  typedef boost::shared_ptr<const Font> ConstPtr;
+  typedef boost::weak_ptr<Font> WeakPtr;
+  typedef boost::weak_ptr<const Font> ConstWeakPtr;
+
   Font();
   Font(const FontInfo& font_info);  
   Font(const Font& other);
@@ -497,8 +557,8 @@ class Font {
   ui::FontImp* imp() { return imp_.get(); }
   ui::FontImp* imp() const { return imp_.get(); }
 
-  virtual void set_info(const FontInfo& info);
-  virtual FontInfo info() const;
+  virtual void set_font_info(const FontInfo& info);
+  virtual FontInfo font_info() const;
 
  private:  
   std::auto_ptr<FontImp> imp_;
@@ -510,11 +570,40 @@ class FontImp {
   virtual ~FontImp() = 0;
   virtual FontImp* DevClone() const = 0;
 
-  virtual void dev_set_info(const FontInfo& info) = 0;
-  virtual FontInfo dev_info() const = 0;
+  virtual void dev_set_font_info(const FontInfo& info) = 0;
+  virtual FontInfo dev_font_info() const = 0;
 };
 
 inline FontImp::~FontImp() {}
+
+class FontInfoImp {
+ public:
+  FontInfoImp() {}
+  virtual ~FontInfoImp() = 0;
+  
+  virtual FontInfoImp* DevClone() const = 0;  
+  virtual void dev_set_style(FontStyle::Type style) = 0;
+  virtual FontStyle::Type dev_style() const = 0;
+  virtual void dev_set_size(int size) = 0;
+  virtual int dev_size() const = 0;
+  virtual void dev_set_weight(int weight) = 0;
+  virtual int dev_weight() const = 0;
+  virtual void dev_set_family(const std::string& family) = 0;
+  virtual std::string dev_family() const = 0;
+  virtual void dev_set_stock_id(int id) = 0;
+  virtual int dev_stock_id() const = 0;    
+};
+
+inline FontInfoImp::~FontInfoImp() {}
+
+class Fonts {
+ public:
+  Fonts() {}
+  virtual ~Fonts() {}
+    
+  virtual const std::vector<std::string>& font_list() const = 0;
+  virtual void import_font(const std::string& path)  = 0;
+};
 
 class RegionImp {
  public:
@@ -650,7 +739,7 @@ friend class Group;
   virtual void FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim);
   virtual void FillOval(const ui::Rect& rect);
   virtual void FillRegion(const ui::Region& rgn);
-  virtual void SetColor(ARGB color);
+  virtual void set_color(ARGB color);
   virtual ARGB color() const;
 	virtual void SetPenWidth(double width);
   virtual void Translate(double x, double y);
@@ -678,6 +767,11 @@ friend class Group;
   void set_debug_flag();
 
  private:
+   inline bool is_color_opaque() const { 
+     int alpha = GetAlpha(color());
+     bool result = (alpha != 0);
+     return result;
+   }
   std::auto_ptr<GraphicsImp> imp_;
   virtual void SaveOrigin();
   virtual void RestoreOrigin();
@@ -772,47 +866,6 @@ inline WindowShowStrategy::~WindowShowStrategy() {}
 
 class ChildPosEvent;
 
-
-class StyleClass {
- public:
-  typedef boost::shared_ptr<StyleClass> Ptr;
-	typedef boost::unordered_map<std::string, double> PropertyValuePair;
-
-  void set_name(const std::string& name) { name_ = name;  }
-  const std::string& name() const { return name_; }
-
-	void set(const std::string& key, int value) {
-		property_value_pairs_[key] = value;
-	}
-
-	void get(const std::string& key, double& result, bool& found) const {
-		PropertyValuePair::const_iterator it = property_value_pairs_.find(key);
-		if (it != property_value_pairs_.end()) {
-			found = true;
-			result = it->second;
-		} else {
-			found = false;
-		}
-	}
-	
- private:	 
-  std::string name_;
-	PropertyValuePair property_value_pairs_;
-};
-
-class StyleSheet {
- public:
-  typedef boost::shared_ptr<StyleSheet> Ptr;
-  typedef boost::weak_ptr<StyleSheet> WeakPtr;
-  typedef std::vector<StyleClass::Ptr> StyleClassContainer; 
-  void AddClass(const StyleClass::Ptr& style) { style_classes_.push_back(style);}
-
-	void parse(ui::Window& window);
-
- private:
-  StyleClassContainer style_classes_;
-};
-
 class ConfigurationProperty {
  public:
   ConfigurationProperty() {}
@@ -841,6 +894,94 @@ class ConfigurationProperty {
   std::string name_;
 };
 
+class Window;
+
+typedef boost::variant<ARGB, std::string, bool, FontInfo> MultiType;
+
+class Stock {
+ public:
+  virtual ~Stock() {}
+  virtual Stock* Clone() const { return new Stock(*this); }
+  virtual MultiType value(int stock_key) const { return MultiType(); }
+  virtual std::string key_tostring(int stock_key) const { return ""; }
+};
+
+class Property {
+ public:     
+  Property() : stock_(0), stock_key_(-1) {}
+  Property(const Stock& stock) : stock_(stock.Clone()), stock_key_(-1) {}
+  Property(const Property& other) : 
+       stock_((other.stock_) ? other.stock_->Clone() : 0),
+       value_(other.value_), 
+       stock_key_(other.stock_key_) {       
+  }
+  Property& operator=(Property other) {    
+    swap(*this, other);
+    return *this;
+  }  
+  // Property(Property&& other) : Property() {
+  //  swap(*this, other);
+  // }  
+  ~Property() { delete stock_; }
+  friend void swap(Property& first, Property& second) {        
+    using std::swap;        
+    swap(first.value_, second.value_);
+    swap(first.stock_key_, second.stock_key_);
+    swap(first.stock_, second.stock_);
+  }
+
+  MultiType value() const { 
+    MultiType result;
+    if (stock_key_ != -1) {
+      result = MultiType(stock_->value(stock_key_));
+    } else {
+      result = value_;
+    }
+    return result;
+  }
+  void set_value(const MultiType& value) { value_ = value; }
+  void set_stock_key(int stock_key) { stock_key_ = stock_key; }
+  int stock_key() const { return stock_key_; }
+  
+ private:
+  Stock* stock_;
+  MultiType value_;  
+  int stock_key_;
+};
+
+
+class Properties {
+ public:
+  typedef std::map<std::string, Property> Container;
+  Container elements;
+};
+
+namespace WindowTypes {
+enum Type {
+  WINDOW = 1,
+  GROUP,
+  FRAME,
+  CANVAS,
+  POPUPFRAME,
+  RECTANGLEBOX,
+  HEADERGROUP,
+  LINE,
+  PIC,
+  TEXT,
+  EDIT,
+  BUTTON,
+  COMBOBOX,
+  CHECKBOX,
+  RADIOBUTTON,
+  GROUPBOX,
+  LISTVIEW,
+  TREEVIEW,
+  SCROLLBAR,
+  SCROLLBOX,
+  SCINTILLA,  
+};
+}
+
 
 class Window : public boost::enable_shared_from_this<Window> {
 	friend class WindowImp;
@@ -862,11 +1003,12 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void release_imp() { imp_.release(); }
 	WindowImp* imp() { return imp_.get(); };
 	WindowImp* imp() const { return imp_.get(); };
-
+  
 	void set_debug_text(const std::string& text) { debug_text_ = text; }
 	const std::string& debug_text() const { return debug_text_; }
 
-	static std::string type() { return "canvasitem"; }
+	static std::string type() { return "window"; }
+  static WindowTypes::Type window_type() { return WindowTypes::WINDOW; }
 	virtual std::string GetType() const { return "window"; }
 
 	virtual iterator begin() { return dummy_list_.begin(); }
@@ -889,14 +1031,11 @@ class Window : public boost::enable_shared_from_this<Window> {
 	template <class T, class T1>
 	void PostOrderTreeTraverse(T& functor, T1& cond);
 	Window::Container SubItems();
-
 	virtual void Add(const Window::Ptr& item) {}
 	virtual void Insert(iterator it, const Window::Ptr& item) {}
 	virtual void Remove(const Window::Ptr& item) {}
 	virtual void RemoveAll() {}
-
   virtual void set_property(const ConfigurationProperty& configuration_property) {}
-
 	virtual void set_position(const ui::Point& pos);
 	virtual void set_position(const ui::Rect& pos);
 	virtual void ScrollTo(int offsetx, int offsety);
@@ -909,23 +1048,20 @@ class Window : public boost::enable_shared_from_this<Window> {
 	void UpdateAutoDimension();
 	void PreventAutoDimension() { prevent_auto_dimension_ = true; }
 	void RestoreAutoDimension() { prevent_auto_dimension_ = false; }
-
 	void set_margin(const BoxSpace& margin);
 	const BoxSpace& margin() const;
 	void set_padding(const ui::BoxSpace& padding);
 	const BoxSpace& padding() const;
 	void set_border_space(const ui::BoxSpace& border_space);
 	const BoxSpace& border_space() const;
-
 	virtual void set_aligner(const boost::shared_ptr<Aligner>& aligner) {}
 	virtual boost::shared_ptr<Aligner> aligner() const { return nullpointer; }
 	void set_align(AlignStyle align) { align_ = align; }
 	AlignStyle align() const { return align_; }		
   virtual void UpdateAlign() {}
-
 	virtual void Show();
 	virtual void Show(const boost::shared_ptr<WindowShowStrategy>& aligner);
-  virtual void BringWindowToTop();
+  virtual void BringToTop();
 	virtual void Hide();
 	virtual bool visible() const;
 	virtual void FLS(); // invalidate new region
@@ -942,9 +1078,8 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void ShowCursor();
 	virtual void HideCursor();
 	virtual void SetCursorPosition(const ui::Point& position);
-	virtual void SetCursor(CursorStyle style);
-	CursorStyle cursor() const { return DEFAULT; }
-
+	virtual void SetCursor(CursorStyle::Type style);
+	CursorStyle::Type cursor() const { return CursorStyle::DEFAULT; }
 	virtual void needsupdate();
 	virtual const Area& area() const;
 	virtual std::auto_ptr<Region> draw_region() { return std::auto_ptr<Region>(); }	
@@ -962,7 +1097,6 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual bool has_clip() const { return false; }
 	const Region& clip() const;
 	virtual void RemoveClip() {}
-
 	virtual void Draw(Graphics* g, Region& draw_region) {}
 	virtual void DrawBackground(Graphics* g, Region& draw_region);
 	virtual void add_ornament(boost::shared_ptr<ui::Ornament> ornament);
@@ -971,11 +1105,9 @@ class Window : public boost::enable_shared_from_this<Window> {
 	void set_clip_children();
 	void add_style(UINT flag);
 	void remove_style(UINT flag);
-
 	virtual void OnMessage(WindowMsg msg, int param = 0) {}
 	virtual void OnSize(const ui::Dimension& dimension) {}
 	virtual void OnChildPosition(ChildPosEvent& ev) {}
-
 	virtual void EnablePointerEvents() { pointer_events_ = true; }
 	virtual void DisablePointerEvents() { pointer_events_ = false; }
 	virtual bool pointerevents() const { return pointer_events_; }
@@ -989,55 +1121,40 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void OnMouseEnter(MouseEvent& ev) { ev.WorkParent(); }
 	virtual void OnMouseOut(MouseEvent& ev) { ev.WorkParent(); }
 	virtual void OnShow() {}
+  boost::signal<void(Window&)> BeforeDestruction;
 	boost::signal<void(MouseEvent&)> MouseDown;
 	boost::signal<void(MouseEvent&)> MouseUp;
 	boost::signal<void(MouseEvent&)> DblClick;
 	boost::signal<void(MouseEvent&)> MouseMove;
 	boost::signal<void(MouseEvent&)> MouseEnter;
 	boost::signal<void(MouseEvent&)> MouseOut;
-
 	virtual void OnKeyDown(KeyEvent& ev) { ev.WorkParent(); }
 	virtual void OnKeyUp(KeyEvent& ev) { ev.WorkParent(); }
 	boost::signal<void(KeyEvent&)> KeyDown;
 	boost::signal<void(KeyEvent&)> KeyUp;
-
 	Window::WeakPtr focus();
 	virtual void SetFocus();
 	virtual void OnFocus(Event& ev) { ev.WorkParent(); }
-	virtual void OnKillFocus() {}
+	virtual void OnKillFocus(Event& ev) { ev.WorkParent(); }
 	boost::signal<void()> Focus;
 	boost::signal<void()> KillFocus;	
-
 	bool has_align_dimension_changed() const { return align_dimension_changed_; }
 	void reset_align_dimension_changed() { align_dimension_changed_ = false; }	
 	void align_dimension_changed() { align_dimension_changed_ = true; }
-
 	void lock() const;
 	void unlock() const;
 	virtual void Enable();
 	virtual void Disable();
-
 	void ViewDoubleBuffered();
 	void ViewSingleBuffered();
 	bool is_double_buffered() const;
-
-	void SetStyleSheet(const StyleSheet::Ptr& style_sheet) { 
-		style_sheet_ = style_sheet;		
-	}
-
-	StyleSheet::WeakPtr style_sheet() { return style_sheet_; }
-	void set_style_class_name(const std::string& style_class_name) { 
-		style_class_name_ = style_class_name;
-	}
-	const std::string& style_class_name() const { return style_class_name_; }
-	void UpdateStyle(const StyleClass& style_class);
+  virtual void set_properties(const Properties& properties) {}
 	ui::Dimension non_content_dimension() const {
 	  return ui::Dimension(padding().width() + border_space().width() +
                          margin().width(),
                          padding().height() + border_space().height() +
                          margin().height());
   }
-
  	ui::Rect overall_position() const { return overall_position(position()); }
 	ui::Rect overall_position(const ui::Rect& pos) const {			
 		ui::Rect result(
@@ -1051,16 +1168,16 @@ class Window : public boost::enable_shared_from_this<Window> {
 										parent()->border_space().top() + parent()->padding().top());
 		}
 		return result;		
- }
- Window* FirstNonTransparentWindow() {
-   Window* result = this;
-   while (!result->is_root() && result->parent() && result->transparent()) {            
-     result = result->parent();       
-   }
-   return result;
- }
- 
- virtual bool transparent() const;
+  }
+  Window* FirstNonTransparentWindow() {
+    Window* result = this;
+    while (!result->is_root() && result->parent() && result->transparent()) {            
+      result = result->parent();       
+    }
+    return result;
+  } 
+  virtual bool transparent() const;
+
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
   virtual void WorkMouseUp(MouseEvent& ev) { OnMouseUp(ev); }
@@ -1072,8 +1189,6 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void WorkFocus(Event& ev) { OnFocus(ev); }
   void WorkChildPosition();
 
-	void UpdatePadding(const StyleClass& style_class);
-  
   mutable bool update_;
   mutable std::auto_ptr<Area> area_;  
   mutable std::auto_ptr<Area> fls_area_;
@@ -1087,9 +1202,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   bool auto_size_width_, auto_size_height_, prevent_auto_dimension_;
   Ornaments ornaments_;
   bool visible_, pointer_events_;  
-  AlignStyle align_;  
-	StyleSheet::WeakPtr style_sheet_;
-	std::string style_class_name_;
+  AlignStyle align_;		
 	bool align_dimension_changed_;  
 };
 
@@ -1106,6 +1219,7 @@ class ChildPosEvent : public Event {
 class Group : public Window {
  public:  
   static std::string type() { return "canvasgroup"; }
+  static WindowTypes::Type window_type() { return WindowTypes::GROUP; }
 
 	typedef boost::shared_ptr<Group> Ptr;
   typedef boost::shared_ptr<const Group> ConstPtr;
@@ -1287,7 +1401,8 @@ class Frame : public Window {
   typedef boost::weak_ptr<Frame> WeakPtr;
   typedef boost::weak_ptr<const Frame> ConstWeakPtr;
 
-  static std::string type() { return "canvasframe"; }
+  static std::string type() { return "frame"; }
+  static WindowTypes::Type window_type() { return WindowTypes::FRAME; }
 
   Frame();
   Frame(FrameImp* imp);
@@ -1337,7 +1452,8 @@ class PopupFrame : public Frame {
    FrameImp* imp() { return (FrameImp*) Window::imp(); };
    FrameImp* imp() const { return (FrameImp*) Window::imp(); };
 
-   static std::string type() { return "canvaspopupframe"; }  
+   static WindowTypes::Type window_type() { return WindowTypes::POPUPFRAME; }
+   static std::string type() { return "popupframe"; }  
 };
 
 class Ornament {
@@ -1519,8 +1635,8 @@ class NodeOwnerImp {
  public:
   virtual ~NodeOwnerImp() {}
   
-  virtual void DevUpdate(const Node::Ptr&, Node::Ptr prev_node = nullpointer) = 0;
-  virtual void DevErase(Node::Ptr node) = 0;
+  virtual void DevUpdate(const Node::Ptr&, const Node::Ptr& prev_node = nullpointer) = 0;
+  virtual void DevErase(const Node::Ptr& node) = 0;
 };
 
 class MenuContainer;
@@ -1611,13 +1727,16 @@ class TreeView : public Window {
   typedef boost::weak_ptr<TreeView> WeakPtr;
   typedef boost::weak_ptr<const TreeView> ConstWeakPtr;
   
-  static std::string type() { return "treeview"; }  
+  static std::string type() { return "treeview"; }
+  static WindowTypes::Type window_type() { return WindowTypes::TREEVIEW; }
 
   TreeView();
   TreeView(TreeViewImp* imp);
 
   TreeViewImp* imp() { return (TreeViewImp*) Window::imp(); };
   TreeViewImp* imp() const { return (TreeViewImp*) Window::imp(); };      
+
+  virtual void set_properties(const Properties& properties);
   void UpdateTree();
   void set_root_node(const Node::Ptr& root_node) { root_node_ = root_node; }
   boost::weak_ptr<Node> root_node() { return root_node_; }      
@@ -1629,8 +1748,8 @@ class TreeView : public Window {
   void Clear();      
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
-  virtual void set_text_color(ARGB color);
-  virtual ARGB text_color() const;
+  virtual void set_color(ARGB color);
+  virtual ARGB color() const;
   virtual void EditNode(const Node::Ptr& node);
   bool is_editing() const;
 
@@ -1641,14 +1760,15 @@ class TreeView : public Window {
 	void ExpandAll();
 
   virtual void select_node(const Node::Ptr& node);
-  virtual boost::weak_ptr<Node> selected();
+  virtual void deselect_node(const Node::Ptr& node);
+  virtual Node::WeakPtr selected();
 
   virtual void OnChange(const Node::Ptr& node) {}
   virtual void OnRightClick(const Node::Ptr& node) {}
   virtual void OnEditing(const Node::Ptr& node, const std::string& text) {}
   virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}  
-  virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point, const ui::Node::Ptr& node) {}
-  virtual void WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const ui::Node::Ptr& node) {
+  virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point, const Node::Ptr& node) {}
+  virtual void WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const Node::Ptr& node) {
     OnContextPopup(ev, mouse_point, node);
 		context_popup(*this, ev, mouse_point, node);
     if (!ev.is_default_prevented() && !popup_menu_.expired()) {
@@ -1656,7 +1776,7 @@ class TreeView : public Window {
     }
   }
 	boost::signal<void (TreeView&, const Node::Ptr&, const std::string&)> edited;
-	boost::signal<void (TreeView&, ui::Event&, const ui::Point&, const ui::Node::Ptr&)> context_popup;
+	boost::signal<void (TreeView&, ui::Event&, const ui::Point&, const Node::Ptr&)> context_popup;
 	boost::signal<void (TreeView&, const Node::Ptr& node)> change;
  private:     
   Node::WeakPtr root_node_;
@@ -1666,7 +1786,8 @@ class TreeView : public Window {
 
 class ListView : public Window {
  public:  
-  static std::string type() { return "canvaslistview"; }  
+  static std::string type() { return "listview"; }  
+  static WindowTypes::Type window_type() { return WindowTypes::LISTVIEW; }
 
   typedef boost::shared_ptr<ListView> Ptr;
   typedef boost::shared_ptr<const ListView> ConstPtr;
@@ -1678,17 +1799,19 @@ class ListView : public Window {
 
   ListViewImp* imp() { return (ListViewImp*) Window::imp(); };
   ListViewImp* imp() const { return (ListViewImp*) Window::imp(); };      
+
+  virtual void set_properties(const Properties& properties);
   void UpdateList();
   void set_root_node(const Node::Ptr& root_node) { root_node_ = root_node; }
   void AddColumn(const std::string& text, int width);
-  boost::weak_ptr<Node> root_node() { return root_node_; }      
+  Node::WeakPtr root_node() { return root_node_; }      
   void set_images(const Images::Ptr& images);
-  boost::weak_ptr<Images> images() { return images_; }
+  Images::WeakPtr images() { return images_; }
   void Clear();      
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
-  virtual void set_text_color(ARGB color);
-  virtual ARGB text_color() const;
+  virtual void set_color(ARGB color);
+  virtual ARGB color() const;
   virtual void EditNode(const Node::Ptr& node);
   bool is_editing() const;
 
@@ -1704,7 +1827,8 @@ class ListView : public Window {
   void PreventDraw();
   
   virtual void select_node(const Node::Ptr& node);
-  virtual boost::weak_ptr<Node> selected();
+  virtual void deselect_node(const Node::Ptr& node);
+  virtual Node::WeakPtr selected();
   virtual std::vector<Node::Ptr> selected_nodes();
   int top_index() const;
   void EnsureVisible(int index);
@@ -1730,7 +1854,9 @@ class ScrollBar : public Window {
   typedef boost::weak_ptr<ScrollBar> WeakPtr;
   typedef boost::weak_ptr<const ScrollBar> ConstWeakPtr;
 
-  static std::string type() { return "canvasscrollbaritem"; }
+  static std::string type() { return "scrollbar"; }
+  static WindowTypes::Type window_type() { return WindowTypes::SCROLLBAR; }
+
   ScrollBar();
   ScrollBar(const ui::Orientation& orientation);
   ScrollBar(ScrollBarImp* imp);
@@ -1774,6 +1900,7 @@ class ComboBoxImp;
 class ComboBox : public Window {
  public:
   static std::string type() { return "combobox"; }
+  static WindowTypes::Type window_type() { return WindowTypes::COMBOBOX; }
   
   typedef boost::shared_ptr<ComboBox> Ptr;
   typedef boost::shared_ptr<const ComboBox> ConstPtr;
@@ -1820,19 +1947,29 @@ class EditImp;
 
 class Edit : public Window {
  public:
+  typedef boost::shared_ptr<Edit> Ptr;
+  typedef boost::shared_ptr<const Edit> ConstPtr;
+  typedef boost::weak_ptr<Edit> WeakPtr;
+  typedef boost::weak_ptr<const Edit> ConstWeakPtr;
+
   static std::string type() { return "edit"; }
+  static WindowTypes::Type window_type() { return WindowTypes::EDIT; }
+
   Edit();
   Edit(EditImp* imp);
 
   EditImp* imp() { return (EditImp*) Window::imp(); };
   EditImp* imp() const { return (EditImp*) Window::imp(); };
+
+  virtual void set_properties(const Properties& properties);
   virtual void set_text(const std::string& text);
   virtual std::string text() const;
   virtual void set_background_color(ARGB color);
   virtual ARGB background_color() const;
   virtual void set_color(ARGB color);
   virtual ARGB color() const;
-  void set_font(const Font& font);
+  virtual void set_font(const Font& font);
+  virtual void set_sel(int cp_min, int cp_max);  
 };
 
 class ButtonImp;
@@ -1840,6 +1977,7 @@ class ButtonImp;
 class Button : public Window {
  public:
   static std::string type() { return "button"; }
+  static WindowTypes::Type window_type() { return WindowTypes::BUTTON; }
 
   typedef boost::shared_ptr<Button> Ptr;
   typedef boost::shared_ptr<const Button> ConstPtr;
@@ -1869,6 +2007,7 @@ class CheckBoxImp;
 class CheckBox : public Button {
  public:
   static std::string type() { return "checkbox"; }
+  static WindowTypes::Type window_type() { return WindowTypes::CHECKBOX; }
   
   typedef boost::shared_ptr<CheckBox> Ptr;
   typedef boost::shared_ptr<const CheckBox> ConstPtr;
@@ -1895,6 +2034,7 @@ class RadioButtonImp;
 class RadioButton : public Button {
 public:
 	static std::string type() { return "radiobutton"; }
+  static WindowTypes::Type window_type() { return WindowTypes::RADIOBUTTON; }
 
 	typedef boost::shared_ptr<RadioButton> Ptr;
 	typedef boost::shared_ptr<const RadioButton> ConstPtr;
@@ -1923,6 +2063,7 @@ class GroupBoxImp;
 class GroupBox : public Button {
 public:
 	static std::string type() { return "groupbox"; }
+  static WindowTypes::Type window_type() { return WindowTypes::GROUPBOX; }
 
 	typedef boost::shared_ptr<GroupBox> Ptr;
 	typedef boost::shared_ptr<const GroupBox> ConstPtr;
@@ -1948,11 +2089,18 @@ public:
 
 struct Lexer {
   Lexer() : 
-      comment_color_(0), 
+      comment_color_(0),
       comment_line_color_(0),
       comment_doc_color_(0),
       identifier_color_(0),
-      folding_color_(0) {    
+      number_color_(0),
+      string_color_(0),
+      word_color_(0),       
+      operator_color_(0),
+      character_code_color_(0),
+      preprocessor_color_(0),
+      folding_marker_fore_color_(0),
+      folding_marker_back_color_(0) {    
   }
 
   void set_keywords(const std::string& keywords) { keywords_ = keywords; }
@@ -1977,22 +2125,31 @@ struct Lexer {
   ARGB character_code_color() const { return  character_code_color_; }
   void set_preprocessor_color(ARGB color) { preprocessor_color_ = color; }
   ARGB preprocessor_color() const { return  preprocessor_color_; }
-  void set_folding_color(ARGB color) { folding_color_ = color; }
-  ARGB folding_color() const { return  folding_color_; }
+  void set_folding_marker_fore_color(ARGB color) { folding_marker_fore_color_ = color; }
+  ARGB folding_marker_fore_color() const { return  folding_marker_fore_color_; }
+  void set_folding_marker_back_color(ARGB color) { folding_marker_back_color_ = color; }
+  ARGB folding_marker_back_color() const { return  folding_marker_back_color_; }  
   
 private:
   std::string keywords_;
   ARGB comment_color_, comment_line_color_, comment_doc_color_,
        identifier_color_, number_color_, string_color_, word_color_,       
        operator_color_, character_code_color_, preprocessor_color_,
-       folding_color_;
+       folding_marker_fore_color_, folding_marker_back_color_;
 };
 
 class ScintillaImp;
 
 class Scintilla : public Window {
  public:
-  static std::string type() { return "canvasscintillaitem"; }
+  static std::string type() { return "scintilla"; }
+  static WindowTypes::Type window_type() { return WindowTypes::SCINTILLA; }
+
+  typedef boost::shared_ptr<Scintilla> Ptr;
+  typedef boost::shared_ptr<const Scintilla> ConstPtr;
+  typedef boost::weak_ptr<Scintilla> WeakPtr;
+  typedef boost::weak_ptr<const Scintilla> ConstWeakPtr;
+
   Scintilla();
   Scintilla(ScintillaImp* imp);
 
@@ -2003,7 +2160,12 @@ class Scintilla : public Window {
 
   int f(int sci_cmd, void* lparam, void* wparam);
   void AddText(const std::string& text);
-  void FindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const;
+  void FindText(const std::string& text,
+                int caret_pos_min,
+                int caret_pos_max,
+                int& pos,
+                int& caret_pos_selection_start,
+                int& caret_pos_selection_end) const;
   void GotoLine(int pos);
   int length() const;
   int selectionstart() const;
@@ -2027,8 +2189,7 @@ class Scintilla : public Window {
   ARGB linenumber_foreground_color() const;
   void set_linenumber_background_color(ARGB color);
   ARGB linenumber_background_color() const;  
-  void set_margin_background_color(ARGB color);
-  ARGB margin_background_color() const;
+  void set_folding_background_color(ARGB color);
   void set_sel_foreground_color(ARGB color);
   //ARGB sel_foreground_color() const { return ToARGB(ctrl().sel_foreground_color()); }  
   void set_sel_background_color(ARGB color);
@@ -2040,7 +2201,7 @@ class Scintilla : public Window {
   void StyleClearAll();
   const std::string& filename() const;
   bool is_modified() const;  
-  void set_font(const FontInfo& font_info);
+  void set_font_info(const FontInfo& font_info);
   int column() const;    
   int line() const;
   bool ovr_type() const;
@@ -2224,52 +2385,187 @@ class Configuration {
 };
 
 
+struct SystemsConfigVisitor {
+  virtual ~SystemsConfigVisitor() {}
+  virtual void visit(Window* window) = 0;
+};
+
+
 // Ui Factory
+
+class Canvas;
+class RadioGroup;
+class RectangleBox;
+class HeaderGroup;
+class Line;
+class Pic;
+class Text;
+
+typedef std::map<WindowTypes::Type, Properties> Skin;
+
+class WindowStyler {
+ public:  
+  typedef std::map<WindowTypes::Type, Properties> ClassProperties;
+  typedef std::multimap<WindowTypes::Type, Window*> Windows;
+
+  void set_class_properties(WindowTypes::Type window_type,
+                            const Properties& properties) {
+    class_properties_[window_type] = properties;
+  }
+  Properties class_properties(WindowTypes::Type window_type) {
+    ClassProperties::iterator it = class_properties_.find(window_type);
+    return (it != class_properties_.end()) ? it->second : Properties();
+  }
+  void UpdateWindows() {
+    Windows::iterator it = windows_.begin();
+    for (; it != windows_.end(); ++it) {                  
+      it->second->set_properties(class_properties(it->first));
+    }
+  }
+  void UpdateWindow(WindowTypes::Type window_type, Window* window) {
+    assert(window);    
+    window->set_properties(class_properties(window_type));
+  }    
+  void ChangeWindowType(int extended_window_type, Window* window) {
+    assert(window);
+    RemoveWindow(*window);
+    AddWindow(static_cast<WindowTypes::Type>(extended_window_type), *window);
+  }
+  void AddWindow(WindowTypes::Type window_type, Window& window) {
+     windows_.insert(std::pair<WindowTypes::Type, Window*>(
+        window_type, &window));
+  }  
+  void RemoveWindow(Window& window) {      
+    Windows::iterator it = windows_.begin();
+    for (; it != windows_.end(); ++it) {
+      if (it->second == &window) {
+        windows_.erase(it);
+        break;
+      }
+    }
+  }
+
+ private:
+  ClassProperties class_properties_;  
+  Windows windows_;
+};
+
 class Systems {
- public:
-  static Systems& instance();
+ public:  
+  Systems() {}    
+  Systems(Systems* concrete_factory) : concrete_factory_(concrete_factory) {}
   virtual ~Systems() {}
+  static Systems& instance();  
 
   void set_concret_factory(Systems& concrete_factory);
 
-  virtual ui::Region* CreateRegion();
-  virtual ui::Graphics* CreateGraphics();
-  virtual ui::Graphics* CreateGraphics(bool debug);
-  virtual ui::Graphics* CreateGraphics(void* dc);
-  virtual ui::Image* CreateImage();
-  virtual ui::Font* CreateFont();
-  virtual ui::Window* CreateWin();
-  virtual ui::Frame* CreateFrame();
-  virtual ui::Frame* CreateMainFrame();
-  virtual ui::PopupFrame* CreatePopupFrame();
-  virtual ui::ComboBox* CreateComboBox();
-  virtual ui::Edit* CreateEdit();  
-  virtual class Text* CreateText();
-  virtual ui::Button* CreateButton();
-  virtual ui::CheckBox* CreateCheckBox();
-  virtual ui::ScrollBar* CreateScrollBar(Orientation orientation = VERT);
-  virtual ui::TreeView* CreateTreeView();
-  virtual ui::ListView* CreateListView();
-  virtual ui::MenuContainer* CreateMenuBar();
-  virtual ui::PopupMenu* CreatePopupMenu();
+  virtual Window* Create(WindowTypes::Type type);  
+  virtual Region* CreateRegion();
+  virtual Graphics* CreateGraphics();
+  virtual Graphics* CreateGraphics(bool debug);
+  virtual Graphics* CreateGraphics(void* dc);
+  virtual Image* CreateImage();
+  virtual Font* CreateFont();  
+  virtual Fonts* CreateFonts();
+  virtual Window* CreateWin();
+  virtual Frame* CreateFrame();
+  virtual Frame* CreateMainFrame();
+  virtual PopupFrame* CreatePopupFrame();
+  virtual ComboBox* CreateComboBox();
+  virtual Canvas* CreateCanvas();
+  virtual Group* CreateGroup();  
+  virtual RadioButton* CreateRadioButton();
+  virtual GroupBox* CreateGroupBox();
+  virtual RectangleBox* CreateRectangleBox();
+  virtual HeaderGroup* CreateHeaderGroup();
+  virtual Edit* CreateEdit();  
+  virtual Line* CreateLine();
+  virtual Text* CreateText();
+  virtual Pic* CreatePic();
+  virtual ScrollBox* CreateScrollBox();
+  virtual Scintilla* CreateScintilla();
+  virtual Button* CreateButton();
+  virtual CheckBox* CreateCheckBox();
+  virtual ScrollBar* CreateScrollBar(Orientation orientation = VERT);
+  virtual TreeView* CreateTreeView();
+  virtual ListView* CreateListView();
+  virtual MenuContainer* CreateMenuBar();
+  virtual PopupMenu* CreatePopupMenu();
+  virtual void UpdateWindows();    
+  virtual void UpdateWindow(WindowTypes::Type window_type, Window* window);
+  virtual void ChangeWindowType(int extended_window_type, Window* window);
+  virtual void OnWindowCreate(WindowTypes::Type window_type, Window& e);
+  virtual void OnWindowDestruction(Window& e);
+  virtual void set_class_properties(WindowTypes::Type window_type,
+                                    const Properties& properties);
+  virtual Properties class_properties(WindowTypes::Type window_type);
 
   SystemMetrics& metrics();
-
   void InitInstance(const std::string& config_path);
   void ExitInstance();
-
   std::string config_path() const { return config_path_; }
+    	   
+ private:     
+  std::auto_ptr<Systems> concrete_factory_;
+  std::string config_path_;  
+};
 
-  virtual void import_font(const std::string& path);
-	
- protected:
-  Systems() {}
-  Systems(Systems const&) {}             
-  Systems& operator=(Systems const&) {}
+class DefaultSystems : public Systems {
+ public:  
+  virtual Region* CreateRegion();
+  virtual Graphics* CreateGraphics();
+  virtual Graphics* CreateGraphics(bool debug);
+  virtual Graphics* CreateGraphics(void* dc);
+  virtual Image* CreateImage();
+  virtual Font* CreateFont();  
+  virtual Fonts* CreateFonts();
+  virtual Window* CreateWin();
+  virtual Frame* CreateFrame();
+  virtual Frame* CreateMainFrame();
+  virtual PopupFrame* CreatePopupFrame();
+  virtual ComboBox* CreateComboBox();
+  virtual Canvas* CreateCanvas();
+  virtual Group* CreateGroup();  
+  virtual RadioButton* CreateRadioButton();
+  virtual GroupBox* CreateGroupBox();
+  virtual RectangleBox* CreateRectangleBox();
+  virtual HeaderGroup* CreateHeaderGroup();
+  virtual Edit* CreateEdit();  
+  virtual Line* CreateLine();
+  virtual Text* CreateText();
+  virtual Pic* CreatePic();
+  virtual ScrollBox* CreateScrollBox();
+  virtual Scintilla* CreateScintilla();
+  virtual Button* CreateButton();
+  virtual CheckBox* CreateCheckBox();
+  virtual ScrollBar* CreateScrollBar(Orientation orientation = VERT);
+  virtual TreeView* CreateTreeView();
+  virtual ListView* CreateListView();
+  virtual MenuContainer* CreateMenuBar();
+  virtual PopupMenu* CreatePopupMenu();
+  virtual void UpdateWindows() { window_styler_.UpdateWindows(); }
+  virtual void UpdateWindow(WindowTypes::Type window_type, Window* window) {
+    window_styler_.UpdateWindow(window_type, window);
+  }
+  virtual void set_class_properties(WindowTypes::Type window_type,
+                                    const Properties& properties) {
+    window_styler_.set_class_properties(window_type, properties);
+  }     
+  virtual Properties class_properties(WindowTypes::Type window_type) {
+    return window_styler_.class_properties(window_type);
+  }
+  virtual void ChangeWindowType(int extended_window_type, Window* window) {
+    window_styler_.ChangeWindowType(extended_window_type, window);
+  }
+  virtual void OnWindowCreate(WindowTypes::Type window_type, Window& window) {
+    window_styler_.AddWindow(window_type, window);
+  }
+  virtual void OnWindowDestruction(Window& window) {
+    window_styler_.RemoveWindow(window);
+  }
 
  private:
-  std::auto_ptr<Systems> concrete_factory_;
-  std::string config_path_;
+  WindowStyler window_styler_;
 };
 
 // Imp Interfaces
@@ -2279,15 +2575,15 @@ class GraphicsImp {
   virtual ~GraphicsImp() {}
 
   virtual void DevSetDebugFlag() = 0;
-  virtual void DevCopyArea(const ui::Rect& rect, const ui::Point& delta) = 0;
-  virtual void DevDrawArc(const ui::Rect& rect, const Point& start, const Point& end) = 0;
-  virtual void DevDrawLine(const ui::Point& p1, const ui::Point& p2) = 0;
-  virtual void DevDrawRect(const ui::Rect& rect) = 0;
-  virtual void DevDrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) = 0;  
-  virtual void DevDrawOval(const ui::Rect& rect) = 0;
+  virtual void DevCopyArea(const Rect& rect, const ui::Point& delta) = 0;
+  virtual void DevDrawArc(const Rect& rect, const Point& start, const Point& end) = 0;
+  virtual void DevDrawLine(const Point& p1, const ui::Point& p2) = 0;
+  virtual void DevDrawRect(const Rect& rect) = 0;
+  virtual void DevDrawRoundRect(const Rect& rect, const ui::Dimension& arc_dim) = 0;  
+  virtual void DevDrawOval(const Rect& rect) = 0;
   virtual void DevDrawString(const std::string& str, double x, double y) = 0;
-  virtual void DevFillRect(const ui::Rect& rect) = 0;
-  virtual void DevFillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) = 0;
+  virtual void DevFillRect(const Rect& rect) = 0;
+  virtual void DevFillRoundRect(const Rect& rect, const ui::Dimension& arc_dim) = 0;
   virtual void DevFillOval(const ui::Rect& rect) = 0;
   virtual void DevFillRegion(const ui::Region& rgn) = 0;
   virtual void DevSetColor(ARGB color) = 0;
@@ -2353,7 +2649,7 @@ class WindowImp {
   virtual void DevShow() = 0;
   virtual void DevHide() = 0;
   virtual bool dev_visible() const = 0;
-  virtual void DevBringWindowToTop() = 0;
+  virtual void DevBringToTop() = 0;
   virtual void DevInvalidate() = 0;
   virtual void DevInvalidate(const Region& rgn) = 0;  
   virtual void DevSetCapture() = 0;
@@ -2361,7 +2657,7 @@ class WindowImp {
   virtual void DevShowCursor() = 0;
   virtual void DevHideCursor() = 0;
   virtual void DevSetCursorPosition(const ui::Point& position) = 0;
-  virtual void DevSetCursor(CursorStyle style) {}  
+  virtual void DevSetCursor(CursorStyle::Type style) {}  
   virtual void dev_set_parent(Window* window) {} 
   virtual void dev_set_clip_children() {}
   virtual ui::Window* dev_focus_window() = 0;
@@ -2407,12 +2703,13 @@ class TreeViewImp : public WindowImp, public NodeOwnerImp {
       
   virtual void dev_set_background_color(ARGB color) = 0;
   virtual ARGB dev_background_color() const = 0;  
-  virtual void dev_set_text_color(ARGB color) = 0;
-  virtual ARGB dev_text_color() const = 0;
+  virtual void dev_set_color(ARGB color) = 0;
+  virtual ARGB dev_color() const = 0;
   virtual void DevClear() = 0;  
   virtual void dev_select_node(const Node::Ptr& node) = 0;
+  virtual void dev_deselect_node(const Node::Ptr& node) = 0;
   virtual Node::WeakPtr dev_selected() = 0;
-  virtual void DevEditNode(Node::Ptr node) = 0;
+  virtual void DevEditNode(const Node::Ptr& node) = 0;
   virtual bool dev_is_editing() const = 0;
   virtual void DevShowLines() = 0;
   virtual void DevHideLines() = 0;
@@ -2429,13 +2726,14 @@ class ListViewImp : public WindowImp, public NodeOwnerImp {
       
   virtual void dev_set_background_color(ARGB color) = 0;
   virtual ARGB dev_background_color() const = 0;  
-  virtual void dev_set_text_color(ARGB color) = 0;
-  virtual ARGB dev_text_color() const = 0;
+  virtual void dev_set_color(ARGB color) = 0;
+  virtual ARGB dev_color() const = 0;
   virtual void DevClear() = 0;  
   virtual void dev_select_node(const Node::Ptr& node) = 0;
+  virtual void dev_deselect_node(const Node::Ptr& node) = 0;
   virtual std::vector<Node::Ptr> dev_selected_nodes() = 0;
   virtual Node::WeakPtr dev_selected() = 0;
-  virtual void DevEditNode(Node::Ptr node) = 0;
+  virtual void DevEditNode(const Node::Ptr& node) = 0;
   virtual bool dev_is_editing() const = 0;
   virtual void DevAddColumn(const std::string& text, int width) = 0;
   virtual void DevViewList() = 0;
@@ -2544,6 +2842,7 @@ class EditImp : public WindowImp {
   virtual ARGB dev_color() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
   virtual const ui::Font& dev_font() const = 0;
+  virtual void dev_set_sel(int cpmin, int cpmax) = 0;
 };
 
 class ScintillaImp : public WindowImp {
@@ -2577,9 +2876,8 @@ class ScintillaImp : public WindowImp {
   virtual void dev_set_linenumber_foreground_color(ARGB color) {}
   virtual ARGB dev_linenumber_foreground_color() const { return 0; }
   virtual void dev_set_linenumber_background_color(ARGB color) {}
-  virtual ARGB dev_linenumber_background_color() const { return 0; }
-  virtual void dev_set_margin_background_color(ARGB color) {}
-  virtual ARGB dev_margin_background_color() const { return 0; }
+  virtual ARGB dev_linenumber_background_color() const { return 0; }  
+  virtual void dev_set_folding_background_color(ARGB color) {}  
   virtual void dev_set_sel_foreground_color(ARGB color) {}
   //ARGB sel_foreground_color() const { return ToARGB(ctrl().sel_foreground_color()); }  
   virtual void dev_set_sel_background_color(ARGB color) {}
@@ -2590,7 +2888,7 @@ class ScintillaImp : public WindowImp {
   virtual ARGB dev_caret_color() const { return 0; }
   virtual void DevStyleClearAll() {}
   virtual const std::string& dev_filename() const = 0;  
-  virtual void dev_set_font(const FontInfo& font_info) = 0;
+  virtual void dev_set_font_info(const FontInfo& font_info) = 0;
   virtual int dev_column() const = 0;    
   virtual int dev_line() const = 0;
   virtual bool dev_ovr_type() const = 0;
@@ -2682,6 +2980,7 @@ class ImpFactory {
 	virtual ui::GroupBoxImp* CreateGroupBoxImp();
   virtual ui::ScintillaImp* CreateScintillaImp();
   virtual ui::RegionImp* CreateRegionImp();
+  virtual ui::FontInfoImp* CreateFontInfoImp();
   virtual ui::FontImp* CreateFontImp();
   virtual ui::FontImp* CreateFontImp(int stockid);
   virtual ui::GraphicsImp* CreateGraphicsImp(bool debug);

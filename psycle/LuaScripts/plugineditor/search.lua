@@ -212,26 +212,7 @@ function search:onclosebutton()
   self.dohide:emit()
 end
 
-function search:applysetting(setting)  
-  self:addornament(ornamentfactory:createlineborder(0x253E2F))
-  local items = {    
-    self.casesensitive,
-	self.wholeword,
-	self.useregexp,
-	self.replaceactive    
-  }
-  for i=1, #items do
-    items[i]:setcolor(setting.general.properties.foregroundcolor:value())
-  end
-  
-  local items = {    
-    self.edit	
-  }
-  for i=1, #items do
-    local item = items[i]
-    item:setcolor(setting.general.children.ui.properties.editforegroundcolor:value())
-	    :setbackgroundcolor(setting.general.children.ui.properties.editbackgroundcolor:value())
-  end  
+function search:applysetting(setting)    
 end
 
 return search

@@ -19,26 +19,22 @@ local closebutton = {}
 function closebutton.new(parent)  
   local t = text:new(parent)
                 :setautosize(false, false)				   
-				:setposition(rect:new(point:new(0, 0), dimension:new(20, 15)))
+				:setposition(rect:new(point:new(), dimension:new(20, 15)))
                 :settext("X")
 	 	        :setverticalalignment(item.ALCENTER)
 				:setjustify(text.CENTERJUSTIFY)
-                :setalign(item.ALRIGHT)
-				:setpadding(boxspace:new(1, 1, 1, 1))
+                :setalign(item.ALRIGHT)				
   t:setdebugtext("close")				
-  function t:onmousedown()
-    self:setpadding(boxspace:new(1, 1, 1, 1))
+  function t:onmousedown()    
     self:removeornaments()  
     self.dohide:emit()
   end      
   function t:onmousemove()  
-    if not self:ornaments() then
-	  self:setpadding(boxspace:new(0, 0, 0, 0))
-      self:addornament(ornamentfactory:createlineborder(0xFFFFFE))
+    if not self:ornaments() then	  
+	  self:addornament(ornamentfactory:createfill(0xFFA8444C))      
 	end
   end
-  function t:onmouseout()    
-    self:setpadding(boxspace:new(1, 1, 1, 1))
+  function t:onmouseout()        
     self:removeornaments()
   end
   t.dohide = signal:new()

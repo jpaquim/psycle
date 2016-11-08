@@ -11,15 +11,13 @@ namespace psycle {
 namespace host  {
 namespace ui {
   
-void RectangleBox::Draw(Graphics* g, Region& draw_region) {
- //if (GetAlpha(fill_color_) != 0xFF) {
-    g->SetColor(fill_color_);
-    g->FillRect(ui::Rect(ui::Point(), dim()));  
- //}
+void RectangleBox::Draw(Graphics* g, Region& draw_region) { 
+  g->set_color(fill_color_);
+  g->FillRect(ui::Rect(ui::Point(), dim())); 
 }
 
 void Line::Draw(Graphics* g, Region& draw_region) {  
-  g->SetColor(color());
+  g->set_color(color());
   ui::Point mp;  
   for (Points::iterator it = pts_.begin(); it != pts_.end(); ++it) {
     Point& pt = (*it);
@@ -76,14 +74,14 @@ Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
 Text::Text() : Window(), 
     vertical_alignment_(ALTOP),
     justify_(LEFTJUSTIFY),
-    color_(0xFFFFFF),    
+    color_(0xFFFFFFFF),    
 	  is_aligned_(false) {      
 }
 
 Text::Text(const std::string& text) : 
   vertical_alignment_(ALTOP),
   justify_(LEFTJUSTIFY),
-  color_(0xFFFFFF),
+  color_(0xFFFFFFFF),
   text_(text),  
   is_aligned_(false) { 
 }
@@ -95,7 +93,7 @@ void Text::set_property(const ConfigurationProperty& configuration_property) {
   if (configuration_property.name() == "font") {
     if (configuration_property.int_value() != -0) {
       FontInfo info;
-      info.stock_id = configuration_property.int_value();
+      info.set_stock_id(configuration_property.int_value());
       set_font(ui::Font(info));
     } else {
       set_font(ui::Font(configuration_property.font_info_value()));
@@ -120,8 +118,8 @@ void Text::set_font(const Font& font) {
 }
 
 void Text::Draw(Graphics* g, Region& draw_region) {  	
-	g->SetFont(font_);
-  g->SetColor(color_);
+	g->SetFont(font_);  
+  g->set_color(color_);
 	g->DrawString(text_, text_alignment_position());  
 }
 
@@ -226,7 +224,7 @@ Splitter::Splitter(Orientation orientation) :
 
 void Splitter::Draw(Graphics* g, Region& draw_region) {
  //if (GetAlpha(fill_color_) != 0xFF) {
-    g->SetColor(fill_color_);
+    g->set_color(fill_color_);
     g->FillRect(ui::Rect(ui::Point(), dim()));  
  //}
 }
@@ -245,7 +243,7 @@ void Splitter::OnMouseDown(MouseEvent& ev) {
 		parent_abs_pos_ = (orientation_ == HORZ) ? parent()->absolute_position().top()
                                              : parent()->absolute_position().left();
     do_split_ = true;		
-    BringWindowToTop();
+    BringToTop();
 	  SetCapture();	
 	}
 }
@@ -291,27 +289,26 @@ void Splitter::OnMouseMove(MouseEvent& ev) {
 		}
 	} else {
 		if (orientation_ == HORZ) {
-			SetCursor(ui::ROW_RESIZE);
+			SetCursor(ui::CursorStyle::ROW_RESIZE);
 		} else
 		if (orientation_ == VERT) {
-			SetCursor(ui::COL_RESIZE);
+			SetCursor(ui::CursorStyle::COL_RESIZE);
 		}
 	}
 }
 
 void Splitter::OnMouseOut(MouseEvent& ev) {
 	if (!do_split_) {
-		SetCursor(ui::DEFAULT);
+		SetCursor(ui::CursorStyle::DEFAULT);
 	}
 }
 
 TerminalView::TerminalView() : Scintilla(), Timer() {
-  set_background_color(0x232323);
-  set_foreground_color(0xFFBF00);      
+  set_background_color(0xFF232323);
+  set_foreground_color(0xFFFFBF00);      
   StyleClearAll();
-  set_linenumber_foreground_color(0x939393);
-  set_linenumber_background_color(0x232323);   
-  set_margin_background_color(0x232323);  
+  set_linenumber_foreground_color(0xFF939393);
+  set_linenumber_background_color(0xFF232323);     
   f(SCI_SETWRAPMODE, (void*) SC_WRAP_CHAR, 0);
 	StartTimer();
 }
@@ -369,17 +366,12 @@ void HeaderGroup::Init() {
 	Group::Add(header);
 	header_text_.reset(new ui::Text());
 	header_text_->set_text("Header");
-	header->Add(header_text_);
-	ui::FontInfo info;
-	info.name = "Tahoma";
-	info.height = 12;
-	info.bold = true;
-	ui::Font font(info);
-	header_text_->set_font(font);
+	header->Add(header_text_);	
+	header_text_->set_font(Font(FontInfo("Tahoma", 12, 500, FontStyle::ITALIC)));
 	header_text_->set_color(0xFFFFFF);
-	header_text_->set_align(ui::ALLEFT);
+	header_text_->set_align(ALLEFT);
 	header_text_->set_auto_size(true, true);
-	header_text_->set_margin(ui::BoxSpace(0, 5, 0, 0));
+	header_text_->set_margin(BoxSpace(0, 5, 0, 0));
 
 	client_.reset(new ui::Group());
 	Group::Add(client_);

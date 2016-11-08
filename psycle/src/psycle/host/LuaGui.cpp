@@ -4,6 +4,7 @@
 // #include "stdafx.h"
 #include "LuaGui.hpp"
 #include "LuaHost.hpp"
+#include "MfcUi.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -16,6 +17,68 @@ namespace host {
 using namespace ui;
 
 const char* LuaMenuBarBind::meta = "psymenubarmeta";
+
+ui::MultiType PsycleStock::value(int stock_key) const {
+  using namespace ui;
+  PsycleConfig::PatternView* pv_cfg = &PsycleGlobal::conf().patView();
+  PsycleConfig::MachineParam* mv_cfg = &PsycleGlobal::conf().macParam();  
+  ARGB result(0xFF000000);
+  using namespace stock;
+  using namespace color;  
+  switch (stock_key) {
+    case PVBACKGROUND: result = pv_cfg->background; break;
+    case PVROW: result = pv_cfg->row; break;    
+    case PVROW4BEAT: result = pv_cfg->row4beat; break;
+    case PVROWBEAT: result = pv_cfg->rowbeat; break;
+    case PVSEPARATOR: result = pv_cfg->separator; break;
+    case PVFONT: result = pv_cfg->font; break;
+    case PVCURSOR: result = pv_cfg->cursor; break;
+    case PVSELECTION: result = pv_cfg->selection; break;
+    case PVPLAYBAR: result = pv_cfg->playbar; break;    
+    case MVFONTBOTTOMCOLOR : result = mv_cfg->fontBottomColor; break;
+		case MVFONTHTOPCOLOR : result = mv_cfg->fonthTopColor; break;
+		case MVFONTHBOTTOMCOLOR : result = mv_cfg->fonthBottomColor; break;
+		case MVFONTTITLECOLOR : result = mv_cfg->fonttitleColor; break;
+		case MVTOPCOLOR : result = mv_cfg->topColor; break;
+		case MVBOTTOMCOLOR : result = mv_cfg->bottomColor; break;
+		case MVHTOPCOLOR : result = mv_cfg->hTopColor; break;
+		case MVHBOTTOMCOLOR : result = mv_cfg->hBottomColor; break;
+		case MVTITLECOLOR : result = mv_cfg->titleColor; break;
+    default:
+    break;
+  }    
+  result = ToARGB(result) | 0xFF000000;  
+  return result;  
+}
+
+std::string PsycleStock::key_tostring(int stock_key) const {  
+  std::string result;
+  using namespace stock;
+  using namespace color;  
+  switch (stock_key) {
+    case PVBACKGROUND: result = "stock.color.PVBACKGROUND"; break;
+    case PVROW: result = "stock.color.PVROW"; break;
+    case PVROW4BEAT: result = "stock.color.PVROW4BEAT"; break;
+    case PVROWBEAT: result = "stock.color.PVROWBEAT"; break;
+    case PVSEPARATOR: result = "stock.color.PVSEPARATOR"; break;
+    case PVFONT: result = "stock.color.PVFONT"; break;
+    case PVCURSOR: result = "stock.color.PVCURSOR"; break;
+    case PVSELECTION: result = "stock.color.PVSELECTION"; break;
+    case PVPLAYBAR: result = "stock.color.PVPLAYBAR"; break;
+    case MVFONTBOTTOMCOLOR : result = "stock.color.MVFONTBOTTOMCOLOR"; break;
+		case MVFONTHTOPCOLOR : result = "stock.color.MVFONTHTOPCOLOR"; break;
+		case MVFONTHBOTTOMCOLOR : result = "stock.color.MVFONTHBOTTOMCOLOR"; break;
+		case MVFONTTITLECOLOR : result = "stock.color.MVFONTTITLECOLOR"; break;
+		case MVTOPCOLOR : result = "stock.color.MVTOPCOLOR"; break;
+		case MVBOTTOMCOLOR : result = "stock.color.MVBOTTOMCOLOR"; break;
+		case MVHTOPCOLOR : result = "stock.color.MVHTOPCOLOR"; break;
+		case MVHBOTTOMCOLOR : result = "stock.color.MVHBOTTOMCOLOR"; break;
+		case MVTITLECOLOR : result = "stock.color.MVTITLECOLOR"; break;
+    default:
+    break;
+  }
+  return result;
+}
 
 LockIF* locker(lua_State *L) {
   return LuaGlobal::proxy(L);  
@@ -331,15 +394,28 @@ std::string LuaSystemsBind::meta = "psyuisystemsbind";
 
 int LuaSystemsBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
-    {"new", create},
-    {"importfont", importfont},
+    {"new", create},    
+    {"setstyleclass", setstyleclass},    
+    {"changewindowtype", changewindowtype},
+    {"updatewindows", updatewindows},
     {NULL, NULL}
   };
-  return LuaHelper::open(L, meta, methods,  gc);
+  static const char* const e[] = {
+    "WINDOW", "GROUP", "FRAME", "CANVAS", "POPUPFRAME",
+    "RECTANGLEBOX", "HEADERGROUP", "LINE", "PIC",
+    "TEXT", "EDIT", "BUTTON", "COMBOBOX", "CHECKBOX",
+    "RADIOBUTTON", "GROUPBOX", "LISTVIEW", "TREEVIEW",
+    "SCROLLBAR", "SCROLLBOX", "SCINTILLA"
+  };    
+  LuaHelper::open(L, meta, methods,  gc);
+  lua_newtable(L);
+  LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]), 1);
+  lua_setfield(L, -2, "windowtypes");
+  return 1;
 }
 
 int LuaSystemsBind::create(lua_State* L) {  
-  LuaHelper::new_shared_userdata<>(L, meta, &ui::Systems::instance(), 1, true);
+  LuaHelper::new_shared_userdata<>(L, meta, LuaGlobal::proxy(L)->systems(), 1, true);
   return 1;
 }
 
@@ -347,6 +423,46 @@ int LuaSystemsBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<ui::Systems>(L, meta);
 }
 
+int LuaSystemsBind::changewindowtype(lua_State* L) {
+  using namespace ui;
+  Properties properties;
+  boost::shared_ptr<Systems> systems = LuaHelper::check_sptr<Systems>(L, 1, meta);  
+  WindowTypes::Type window_type = static_cast<WindowTypes::Type>(luaL_checkinteger(L, 2));
+  Window::Ptr item = LuaGroupBind<>::test(L, 3);
+  systems->ChangeWindowType(window_type, item.get());
+  return LuaHelper::chaining(L);
+}
+
+int LuaSystemsBind::setstyleclass(lua_State* L) {
+  using namespace ui;
+  Properties properties;
+  boost::shared_ptr<Systems> systems = LuaHelper::check_sptr<Systems>(L, 1, meta);
+  WindowTypes::Type window_type = static_cast<WindowTypes::Type>(luaL_checkinteger(L, 2));
+  lua_pushnil(L);
+  while (lua_next(L, -2) != 0) {
+    const char *key = lua_tostring(L, -2);
+    int type = lua_type(L, -1);
+    if (type == LUA_TTABLE) {
+      lua_getfield(L, -1, "value_");        
+      ARGB value = lua_tonumber(L, -1);
+      lua_pop(L, 1);
+      lua_getfield(L, -1, "stockkey_");
+      int stock_key(-1);
+      if (!lua_isnil(L, -1)) {
+        stock_key = luaL_checkinteger(L, -1);
+      }
+      lua_pop(L, 1); 
+      PsycleStock stock;
+      ui::Property p(stock);
+      p.set_value(value);
+      p.set_stock_key(stock_key);
+      properties.elements[key] = p;
+    }
+    lua_pop(L, 1);
+  }  
+  systems->set_class_properties(window_type, properties);
+  return LuaHelper::chaining(L);
+}
 
 // LuaSystemMetricsBind
 int  LuaSystemMetrics::open(lua_State *L) {
@@ -460,27 +576,15 @@ void LuaPopupFrameWnd::OnShow() {
 
 // LuaCanvasBind
 template <class T>
-int LuaCanvasBind<T>::create(lua_State* L) {
-  int n = lua_gettop(L);  // Number of arguments  
-  boost::shared_ptr<LuaGroup> group;
-  if (n==2 && !lua_isnil(L, 2)) {
-    group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
-    if (!group) {			
-		  group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaHeaderGroupBind<>::meta);
-			if (!group) {
-				group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaCanvasBind<>::meta);
-			}			
-    }
-  }
-  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));  
-  item->set_aligner(boost::shared_ptr<Aligner>(new ui::DefaultAligner()));
-  LuaHelper::register_weakuserdata(L, item.get());
+int LuaCanvasBind<T>::create(lua_State* L) { 
+  using namespace ui; 
+  Group::Ptr group = LuaItemBind<>::testgroup(L);  
+  Window::Ptr item = LuaHelper::new_shared_userdata(L, meta, new T(L));  
+  item->set_aligner(boost::shared_ptr<Aligner>(new DefaultAligner()));  
   if (group) {    
     group->Add(item);
     LuaHelper::register_userdata(L, item.get());
-  }  
-  LuaHelper::new_lua_module(L, "psycle.signal");  
-  lua_setfield(L, -2, "keydown");
+  }
   return 1;
 }
 
@@ -529,29 +633,10 @@ bool CanvasItem<T>::SendMouseEvent(lua_State* L,
 		ev.StopWorkParent();
 		LuaHelper::requirenew<LuaMouseEventBind>(L, "psycle.ui.canvas.mouseevent", &ev, true);
 		in.pcall(0);
-	}
+    in.close();
+	}  
 	LuaHelper::collect_full_garbage(L);
 	return has_method;
-
-	/*
-  LuaImport in(L, &item, locker(L));
-  bool has_method = in.open(method);
-  if (has_method) {
-    ev.StopWorkParent();
-    lua_newtable(L);
-    LuaHelper::setfield(L, "shift", ev.shift());
-    LuaHelper::setfield(L, "shiftkey", static_cast<int>(MK_SHIFT & ev.shift()));
-    LuaHelper::setfield(L, "ctrlkey", static_cast<int>(MK_CONTROL & ev.shift()));
-    LuaHelper::setfield(L, "altkey", static_cast<int>(MK_ALT & ev.shift()));
-    LuaHelper::setfield(L, "clientx", ev.cx());
-    LuaHelper::setfield(L, "clienty", ev.cy());
-    LuaHelper::setfield(L, "x", ev.cx() - item.abs_position().left());
-    LuaHelper::setfield(L, "y", ev.cy() - item.abs_position().top());
-    LuaHelper::setfield(L, "button", ev.button());    
-    in.pcall(0);    
-  }
-  LuaHelper::collect_full_garbage(L);
-  return has_method;*/
 }
 
 template <class T>
@@ -566,6 +651,37 @@ void CanvasItem<T>::OnSize(const ui::Dimension& dimension) {
     ui::alert(e.what());
   }
 }
+
+template <class T>
+void CanvasItem<T>::set_properties(const ui::Properties& properties) {
+  T::set_properties(properties);  
+  LuaImport in(L, this, locker(L));
+  try {
+    if (in.open("setproperties")) {
+      LuaHelper::new_lua_module(L, "psycle.orderedtable");      
+      for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+        const Property& p = it->second;
+        LuaHelper::new_lua_module(L, "property");        
+        ui::MultiType value = p.value();
+        if (value.which() == 0) {
+          lua_pushnumber(L, boost::get<ARGB>(p.value()));
+        } else {
+          luaL_error(L, "Wrong Property type.");
+        }
+        lua_setfield(L, -2, "value_");
+        if (p.stock_key() != -1) {
+          lua_pushinteger(L, p.stock_key());
+          lua_setfield(L, -2, "stock_key_");
+        }
+        lua_setfield(L, -2, it->first.c_str());
+      }
+      in << pcall(0);
+    }
+  } catch(std::exception& e) {
+    ui::alert(e.what());
+  }  
+}
+
 
 template<class T>
 ui::Dimension CanvasItem<T>::OnCalcAutoDimension() const {
@@ -582,32 +698,6 @@ ui::Dimension CanvasItem<T>::OnCalcAutoDimension() const {
     ui::alert(e.what());
   }
 	return result;
-}
-
-/*template <class T>
-void CanvasItem<T>::OnFocus() {
-  T::OnFocus();
-  try {
-    LuaImport in(L, this, LuaGlobal::proxy(L));
-    if (in.open("onfocus")) {
-      in.pcall(0);
-    }
-  } catch(std::exception& e) {
-    ui::Alert(e.what());
-  }
-}*/
-
-template <class T>
-void CanvasItem<T>::OnKillFocus() {
-  T::OnKillFocus();
-  try {
-    LuaImport in(L, this, locker(L));
-    if (in.open("onkillfocus")) {
-      in.pcall(0);
-    }
-  } catch(std::exception& e) {
-    ui::alert(e.what());
-  }
 }
 
 // LuaTreeView
@@ -729,7 +819,7 @@ void LuaListView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
 }
 
 // LuaNodeBind
-std::string LuaNodeBind::meta = "psynode";
+std::string LuaNodeBind::meta = ui::Node::type();
 
 // LuaMenuContainer
 void LuaMenuBar::OnMenuItemClick(boost::shared_ptr<ui::Node> node) {
@@ -838,9 +928,10 @@ bool LuaItem::transparent() const {
   }
   return result;
 }
-  
+
+
 template <class T>
-int LuaItemBind<T>::create(lua_State* L) {
+boost::shared_ptr<ui::Group> LuaItemBind<T>::testgroup(lua_State* L) {
   int n = lua_gettop(L);  // Number of arguments  
   boost::shared_ptr<LuaGroup> group;
   if (n==2 && !lua_isnil(L, 2)) {
@@ -855,15 +946,18 @@ int LuaItemBind<T>::create(lua_State* L) {
       }
     }    
   }
-  boost::shared_ptr<T> item = LuaHelper::new_shared_userdata(L, meta.c_str(), new T(L));  
-  ui::Configuration::instance().InitWindow(*item.get(), T::type());  
-  LuaHelper::register_weakuserdata(L, item.get());
+  return group;
+}
+  
+template <class T>
+int LuaItemBind<T>::create(lua_State* L) {  
+  ui::Group::Ptr group = testgroup(L);    
+  ui::Window::Ptr item = LuaHelper::new_shared_userdata(L, meta.c_str(), LuaGlobal::proxy(L)->systems()->Create(T::window_type()));  
   if (group) {    
     group->Add(item);
     LuaHelper::register_userdata(L, item.get());
   }  
-  LuaHelper::new_lua_module(L, "psycle.signal");  
-  lua_setfield(L, -2, "keydown");
+  LuaGlobal::proxy(L)->systems()->UpdateWindow(T::window_type(), item.get());  
   return 1;
 }
 
@@ -871,12 +965,13 @@ template <class T>
 int LuaItemBind<T>::gc(lua_State* L) {
   typedef boost::shared_ptr<T> SPtr;
   SPtr item = *(SPtr*) luaL_checkudata(L, 1, meta.c_str());
-  Window::Container subitems = item->SubItems();
-  T::iterator it = subitems.begin();
-  for ( ; it != subitems.end(); ++it) {
-    Window::Ptr subitem = *it;
-    LuaHelper::unregister_userdata<>(L, subitem.get());
-  }       
+  if (!item->empty()) {
+    Window::Container subitems = item->SubItems();
+    T::iterator it = subitems.begin();
+    for (; it != subitems.end(); ++it) {      
+      LuaHelper::unregister_userdata<>(L, (*it).get());          
+    }
+  }
   return LuaHelper::delete_shared_userdata<T>(L, meta.c_str());
 }
 
@@ -937,7 +1032,7 @@ int LuaItemBind<T>::setcursor(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 2, "Wrong number of arguments.");
   if (err!=0) return err;
   boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-  CursorStyle style = (CursorStyle) (int) luaL_checknumber(L, 2);
+  CursorStyle::Type style = (CursorStyle::Type) (int) luaL_checknumber(L, 2);
   window->SetCursor(style);
   return LuaHelper::chaining(L);
 }
@@ -1011,8 +1106,6 @@ int LuaGroupBind<T>::create(lua_State* L) {
     group->Add(item);
     LuaHelper::register_userdata(L, item.get());
   }  
-  LuaHelper::new_lua_module(L, "psycle.signal");  
-  lua_setfield(L, -2, "keydown");
   return 1;
 }
 
@@ -1181,19 +1274,48 @@ template class LuaGroupBind<LuaGroup>;
 template class LuaHeaderGroupBind<LuaHeaderGroup>;
 
 // LuaFontInfoBind
-const char* LuaFontInfoBind::meta = "psyfontinfometa";
+std::string LuaFontInfoBind::meta = "fontinfometa";
 
 int LuaFontInfoBind::open(lua_State *L) {  
   static const luaL_Reg methods[] = {  
     {"new", create},    
+    {"setfamily", setfamily},
+    {"family", family},
+    {"setsize", setsize},
+    {"size", size},
+    {"style", style},
+    {"tostring", tostring},
     {NULL, NULL}
   };
-  return LuaHelper::open(L, meta, methods,  gc);  
+  return LuaHelper::open(L, meta, methods, gc);  
 }
 
-int LuaFontInfoBind::create(lua_State* L) {
-  ui::FontInfo* font_info = new ui::FontInfo();
-  LuaHelper::new_shared_userdata<>(L, meta, font_info);
+int LuaFontInfoBind::create(lua_State* L) {  
+  using namespace ui;
+  int n = lua_gettop(L);
+    LuaHelper::new_shared_userdata<>(L, meta,  new FontInfo());
+  if (n==1) {
+    LuaHelper::new_shared_userdata<>(L, meta,  new FontInfo());
+  } else 
+  if (n==2) {
+    const char* family_name = luaL_checkstring(L, 2);
+    LuaHelper::new_shared_userdata<>(L, meta,  new FontInfo(family_name));
+  } else
+  if (n==3) {
+    const char* family_name = luaL_checkstring(L, 2);
+    int size  = luaL_checkinteger(L, 3);    
+    LuaHelper::new_shared_userdata<>(L, meta,  new FontInfo(family_name, size));
+  } else 
+  if (n==4) {
+    const char* family_name = luaL_checkstring(L, 2);
+    int size  = luaL_checkinteger(L, 3);    
+    int style  = luaL_checkinteger(L, 4);    
+    FontInfo* font_info = new FontInfo(family_name, size);
+    font_info->set_style(static_cast<FontStyle::Type>(style));
+    LuaHelper::new_shared_userdata<>(L, meta,  font_info);
+  } else {
+    luaL_error(L, "Wrong Number of Arguments.");
+  }   
   return 1;  
 }
 
@@ -1202,12 +1324,20 @@ int LuaFontInfoBind::gc(lua_State* L) {
   return 0;
 }
 
+int LuaFontInfoBind::tostring(lua_State* L) {  
+  using namespace ui;
+	FontInfo::Ptr font_info = LuaHelper::check_sptr<FontInfo>(L, 1, meta);
+  lua_pushstring(L, font_info->tostring().c_str());
+  return 1;
+}
+
 // LuaFontBind
 const char* LuaFontBind::meta = "psyfontsmeta";
 
 int LuaFontBind::open(lua_State *L) {  
   static const luaL_Reg methods[] = {  
-    {"new", create},    
+    {"new", create},
+    {"setfontinfo", setfontinfo},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);  
@@ -1222,6 +1352,51 @@ int LuaFontBind::create(lua_State* L) {
 int LuaFontBind::gc(lua_State* L) {
   LuaHelper::delete_shared_userdata<ui::Font>(L, meta);  
   return 0;
+}
+
+int LuaFontBind::setfontinfo(lua_State* L) {
+  using namespace ui;
+  Font::Ptr font = LuaHelper::check_sptr<Font>(L, 1, meta);
+  FontInfo::Ptr font_info = LuaHelper::check_sptr<FontInfo>(L, 2, LuaFontInfoBind::meta);    
+  font->set_font_info(*font_info.get());    
+  return LuaHelper::chaining(L);
+}
+
+// LuaFontsBind
+const char* LuaFontsBind::meta = "psyfontsmeta";
+
+int LuaFontsBind::open(lua_State *L) {  
+  static const luaL_Reg methods[] = {  
+    {"new", create},
+    {"fontlist", fontlist},
+    {"importfont", importfont},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);  
+}
+
+int LuaFontsBind::create(lua_State* L) {
+  ui::Fonts* fonts = ui::Systems::instance().CreateFonts();  
+  LuaHelper::new_shared_userdata<>(L, meta, fonts);
+  return 1;  
+}
+
+int LuaFontsBind::gc(lua_State* L) {
+  LuaHelper::delete_shared_userdata<ui::Fonts>(L, meta);  
+  return 0;
+}
+
+int LuaFontsBind::fontlist(lua_State* L) {
+  using namespace ui;
+  boost::shared_ptr<Fonts> fonts = LuaHelper::check_sptr<Fonts>(L, 1, meta);  
+  lua_newtable(L);
+  std::vector<std::string> list = fonts->font_list();
+  std::vector<std::string>::iterator it = list.begin();
+  for (int i = 0; it != list.end(); ++it, ++i) {    
+    lua_pushstring(L, (*it).c_str());
+    lua_rawseti(L, -2, i);
+  }
+  return 1;
 }
 
 // LuaGraphicsBind
@@ -1276,44 +1451,26 @@ int LuaGraphicsBind::drawstring(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
-int LuaGraphicsBind::drawrect(lua_State* L) {
-  int err = LuaHelper::check_argnum(L, 5, "");
-  if (err!=0) return err;
-  boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
-  double v1 = luaL_checknumber(L, 2);
-  double v2 = luaL_checknumber(L, 3);
-  double v3 = luaL_checknumber(L, 4);
-  double v4 = luaL_checknumber(L, 5);
-  g->DrawRect(ui::Rect(ui::Point(v1, v2), ui::Dimension(v3, v4)));
-  return LuaHelper::chaining(L);
-}
-
 int LuaGraphicsBind::setfont(lua_State* L) {
+  using namespace ui;
   int err = LuaHelper::check_argnum(L, 2, "self, font");
-  if (err!=0) return err;
+   if (err != 0) {
+    return err;
+  }
   boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
-  luaL_checktype(L, 2, LUA_TTABLE);
-  lua_getfield(L, 2, "name");
-  lua_getfield(L, 2, "height");  
-  const char *name = luaL_checkstring(L, -2);
-  double height = luaL_checknumber(L, -1);
-  Font font;
-  FontInfo font_info;
-  font_info.name = name;
-  font_info.height = static_cast<int>(height);
-  font.set_info(font_info);
-  g->SetFont(font);
+  Font::Ptr font = LuaHelper::check_sptr<Font>(L, 2, LuaFontBind::meta);  
+  g->SetFont(*font.get());
   return LuaHelper::chaining(L);
 }
 
 int LuaGraphicsBind::font(lua_State* L) {
+  using namespace ui;
   int err = LuaHelper::check_argnum(L, 1, "self");
-  if (err!=0) return err;
-  boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
-  FontInfo font_info = g->font().info();
-  lua_newtable(L);
-  LuaHelper::setfield(L, "name", font_info.name);
-  LuaHelper::setfield(L, "height", font_info.height);
+  if (err != 0) {
+    return err;
+  }
+  boost::shared_ptr<Graphics> g = LuaHelper::check_sptr<Graphics>(L, 1, meta);  
+  LuaHelper::requirenew<LuaFontBind>(L, "psycle.ui.font", new Font(g->font()));
   return 1;
 }
 
@@ -1958,13 +2115,13 @@ int OrnamentFactoryBind::createlineborder(lua_State* L) {
 																					"psycle.ui.canvas.lineborder", 
 																					ui::OrnamentFactory::Instance()
 																						.CreateLineBorder(
-																							static_cast<ARGB>(luaL_checkinteger(L, 2))));
+																							static_cast<ARGB>(luaL_checknumber(L, 2))));
   } else if (n == 3) {
     boost::shared_ptr<ui::BoxSpace> space = LuaHelper::check_sptr<ui::BoxSpace>(L, 3, LuaBoxSpaceBind::meta);
 		LuaHelper::requirenew<LineBorderBind>(L,
 																					"psycle.ui.canvas.lineborder", 
 																					ui::OrnamentFactory::Instance().CreateLineBorder(
-																						 static_cast<ARGB>(luaL_checkinteger(L, 2)), *space.get()));
+																						 static_cast<ARGB>(luaL_checknumber(L, 2)), *space.get()));
 	} else {
 		return luaL_error(L, "LineBorder, wrong number of arguments");
 	}
@@ -2025,7 +2182,7 @@ int LineBorderBind::open(lua_State *L) {
 
 int LineBorderBind::create(lua_State* L) {
   int n = lua_gettop(L);
-  ARGB color(0xFFFFFF);
+  ARGB color(0xFFFFFFFF);
   if (n==2) {
     color = static_cast<ARGB>(luaL_checkinteger(L, 2));
   }  
@@ -2380,6 +2537,156 @@ void LuaPic::Draw(ui::Graphics* g, ui::Region& draw_rgn) {
 	in.pcall(0);			
   }	
 }
+
+ui::Region* LuaSystems::CreateRegion() { 
+  assert(L_);
+  return new Region();
+}
+
+ui::Graphics* LuaSystems::CreateGraphics() {
+  assert(L_);
+  return new Graphics();
+}
+
+ui::Graphics* LuaSystems::CreateGraphics(bool debug) {
+  assert(L_);
+  return new Graphics(debug);
+}
+
+ui::Graphics* LuaSystems::CreateGraphics(void* dc) {
+  assert(L_);
+  return new Graphics(dc);
+}
+
+ui::Image* LuaSystems::CreateImage() {
+  assert(L_);
+  return new Image();
+}
+
+ui::Font* LuaSystems::CreateFont() {
+  assert(L_);
+  return new Font();
+}
+
+ui::Fonts* LuaSystems::CreateFonts() {
+  assert(L_);
+  return new ui::mfc::Fonts();
+}
+
+ui::Window* LuaSystems::CreateWin() {
+  assert(L_);
+  return new LuaItem(L_);
+}
+
+ui::Frame* LuaSystems::CreateFrame() {
+  assert(L_);
+  return new LuaFrameWnd(L_);
+}
+
+ui::Frame* LuaSystems::CreateMainFrame() {
+  assert(L_);
+  return new LuaFrameWnd(L_);
+}
+
+ui::PopupFrame* LuaSystems::CreatePopupFrame() {
+  assert(L_);
+  return new LuaPopupFrameWnd(L_);
+}
+
+ui::ComboBox* LuaSystems::CreateComboBox() {
+  assert(L_);
+  return new LuaComboBox(L_);
+}
+
+ui::Canvas* LuaSystems::CreateCanvas() {
+  assert(L_);
+  return new LuaCanvas(L_);
+}
+
+ui::Group* LuaSystems::CreateGroup() {
+  assert(L_);
+  return new LuaGroup(L_);
+}
+
+ui::RadioButton* LuaSystems::CreateRadioButton() {
+  assert(L_);
+  return new LuaRadioButton(L_);
+}
+
+ui::GroupBox* LuaSystems::CreateGroupBox() {
+  assert(L_);
+  return new LuaGroupBox(L_);
+}
+
+ui::RectangleBox* LuaSystems::CreateRectangleBox() {
+  assert(L_);
+  return new LuaRectangleBox(L_);
+}
+
+ui::HeaderGroup* LuaSystems::CreateHeaderGroup() {
+  assert(L_);
+  return new LuaHeaderGroup(L_);
+}
+
+ui::Edit* LuaSystems::CreateEdit() {
+  assert(L_);
+  return new LuaEdit(L_);
+}
+
+ui::Line* LuaSystems::CreateLine() {
+  assert(L_);
+  return new LuaLine(L_);
+}
+
+ui::Text* LuaSystems::CreateText() {
+  assert(L_);
+  return new LuaText(L_);
+}
+
+ui::Pic* LuaSystems::CreatePic() {
+  assert(L_);
+  return new LuaPic(L_);
+}
+
+ui::ScrollBox* LuaSystems::CreateScrollBox() {
+  return new LuaScrollBox(L_);
+}
+
+ui::Scintilla* LuaSystems::CreateScintilla() {
+  return new LuaScintilla(L_);
+}
+
+ui::Button* LuaSystems::CreateButton() {
+  return new LuaButton(L_);
+}
+
+ui::CheckBox* LuaSystems::CreateCheckBox() {
+  // return new LuaCheckbox(L_);
+  assert(0);
+  return 0;
+}
+
+ui::ScrollBar* LuaSystems::CreateScrollBar(ui::Orientation orientation) {
+  return new LuaScrollBar(L_, orientation);
+}
+
+ui::TreeView* LuaSystems::CreateTreeView() {
+  ui::TreeView* result =  new LuaTreeView(L_);  
+  return result;
+}
+
+ui::ListView* LuaSystems::CreateListView() {
+  return new LuaListView(L_);
+}
+
+ui::MenuContainer* LuaSystems::CreateMenuBar() {
+  return new LuaMenuBar(L_);
+}
+
+ui::PopupMenu* LuaSystems::CreatePopupMenu() {
+  return new LuaPopupMenu(L_);
+}
+
 
 } // namespace host
 } // namespace psycle

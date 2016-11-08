@@ -4,6 +4,9 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version. 
 
+local rect = require("psycle.ui.rect")
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
 local boxspace = require("psycle.ui.boxspace")
 local item = require("psycle.ui.item")
 local group = require("psycle.ui.group")
@@ -23,12 +26,14 @@ function maincanvas:new()
 end
 
 function maincanvas:init() 
-  self:addornament(ornamentfactory:createfill(0x000000))   
+  self:addornament(ornamentfactory:createfill(0xFF000000))   
   self.gamecontrollers = gamecontrollers:new()
   local controllers = self.gamecontrollers:controllers()  
   for i=1, #controllers do    
     self:initcontrollerdisplay(i, controllers[i])
   end    
+  self.stickposx, self.stickposy, self.stickposz = 0, 0, 0
+  self:createstick(self)
 end
 
 function maincanvas:initcontrollerdisplay(no, controller)  
@@ -42,6 +47,7 @@ function maincanvas:initcontrollerdisplay(no, controller)
   self:addtext(g, "z-pos"):addfield(g, "0",  "zpos")
   self:addtext(g, "button press down"):addfield(g, "0", "buttondown")
   self:addtext(g, "button press up"):addfield(g, "0", "buttonup")    
+  local that = self
   function controller:onbuttondown(button)    
     g.buttondown:settext(button)  
   end
@@ -49,20 +55,38 @@ function maincanvas:initcontrollerdisplay(no, controller)
     g.buttonup:settext(button)
   end
   function controller:onxaxis(pos, oldpos)
-    g.xpos:settext(pos)
+    that:calcstickposx(pos)
+	that.stick:fls()	
+    --g.xpos:settext(pos)
   end
   function controller:onzaxis(pos, oldpos)
-    g.ypos:settext(pos)
+    that:calcstickposz(pos)
+	that.stick:fls()
+    --g.ypos:settext(pos)
   end
   function controller:onyaxis(pos, oldpos)    
-    g.zpos:settext(pos)
+    that:calcstickposy(pos)
+	that.stick:fls()
+    --g.zpos:settext(pos)
   end  
+end
+
+function maincanvas:calcstickposx(pos)
+  self.stickposx = self.stick:dimension():width() * pos/65335  
+end
+
+function maincanvas:calcstickposy(pos)
+  self.stickposy = self.stick:dimension():height() * pos/65335
+end
+
+function maincanvas:calcstickposz(pos)
+  self.stickposz = self.stick:dimension():height() * pos/65335
 end
 
 function maincanvas:addtext(parent, str, field)
   local text = text:new(parent)
                          :settext(str)
-                         :setcolor(0x528A68)
+                         :setcolor(0xFF528A68)
                          :setalign(item.ALTOP) 
                          :setautosize(false, true) 
   return self
@@ -71,11 +95,26 @@ end
 function maincanvas:addfield(parent, str, field)
   local text = text:new(parent)
                          :settext(str)
-                         :setcolor(0xFFFFFF)
+                         :setcolor(0xFFFFFFFF)
                          :setalign(item.ALTOP)
                          :setautosize(false, true) 
   parent[field] = text 
   return self
+end
+
+function maincanvas:createstick(parent)
+  self.stick = item:new(parent)
+                   :setautosize(false, false)
+				   :viewdoublebuffered()
+				   :addornament(ornamentfactory:createfill(0xFF000000))   
+  self.stick:setposition(rect:new(point:new(200, 200), dimension:new(50, 50)))    
+  local that = self
+  function self.stick:draw(g)
+    local dim = self:dimension()
+    g:setcolor(0xFF528A68)
+    g:drawrect(rect:new(point:new(0, 0), dimension:new(dim:width()-1, dim:height()-1)))
+	g:drawoval(rect:new(point:new(that.stickposx - 5, that.stickposy - 5), dimension:new(10, 10)))
+  end
 end
 
 return maincanvas

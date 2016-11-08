@@ -7,6 +7,14 @@
 
 #include <boost/function.hpp>
 
+#if !defined(uint32_t)
+#ifdef _MSC_VER   
+   typedef unsigned __int32 uint32_t;
+#else
+   #include <stdint.h>
+#endif
+#endif
+
 #define LUASIZECHKBEG int stack_size_begin__ = lua_gettop(L);
 #define LUASIZECHKEND int stack_size_end__ = lua_gettop(L); assert(stack_size_begin__ == stack_size_end__);
 
@@ -640,7 +648,10 @@ namespace LuaHelper {
       }
       return ud;
     }
-
+    
+    static uint32_t check32bit(lua_State* L, int index) {
+      return static_cast<uint32_t>(luaL_checknumber(L, index));
+    } 
 
     // void -> const T1&
     template <class T, class T1>

@@ -60,6 +60,12 @@ struct LuaActionListenerBind {
     private:
      std::auto_ptr<ConfigStorage> store_;
   };
+      
+  struct LuaStockBind {
+    static int open(lua_State *L);      
+    static int value(lua_State* L);
+    static int key(lua_State* L);    
+  };
 
   struct LuaConfigBind {
     static int open(lua_State *L);
@@ -75,8 +81,7 @@ struct LuaActionListenerBind {
     static int octave(lua_State* L);
     static int keytocmd(lua_State* L);
     static int plugindir(lua_State* L);
-    static int presetdir(lua_State* L);
-    
+    static int presetdir(lua_State* L);    
   };
 
   struct LuaPluginInfoBind {

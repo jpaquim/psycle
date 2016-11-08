@@ -361,7 +361,8 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     host_(host),
     is_meta_cache_updated_(false),
     lua_mac_(0),
-    user_interface_(SDI) {  
+    user_interface_(SDI),
+    lua_systems_(0) {  
   Load(dllname);
 }
 
@@ -445,6 +446,7 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaCmdDefBind>(L, "psycle.ui.cmddef");
   LuaHelper::require<LuaRunBind>(L, "psycle.run");
   lua_ui_requires(L);
+  LuaHelper::require<LuaStockBind>(L, "psycle.stock");
 #if !defined WINAMP_PLUGIN
   LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");
 #endif //!defined WINAMP_PLUGIN
@@ -1093,6 +1095,25 @@ void LuaProxy::UpdateWindowsMenu() {
   HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();  
   host_extensions.ChangeWindowsMenuText(host_);
 }
+
+void LuaProxy::update_systems_state(lua_State* L) {
+  if (!systems_.get()) {
+    lua_systems_ = new LuaSystems();
+    lua_systems_->set_luastate(L);
+    systems_.reset(new Systems(lua_systems_));    
+  } 
+  lua_systems_->set_luastate(L);
+}
+
+ui::Systems* LuaProxy::systems() { 
+  if (!systems_.get()) {
+    lua_systems_ = new LuaSystems();
+    lua_systems_->set_luastate(L);
+    systems_.reset(new Systems(lua_systems_));
+  } 
+  return systems_.get();
+}
+
 
 // End of Class Proxy
 

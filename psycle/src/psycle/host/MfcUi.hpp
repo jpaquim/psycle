@@ -66,6 +66,43 @@ class TypeConverter {
 	inline static CPoint point(const ui::Dimension& dimension) {
 		return CPoint(static_cast<int>(dimension.width()), static_cast<int>(dimension.height()));
 	}
+  inline static Font font(const CFont& font) {    
+    LOGFONT lfLogFont;
+    memset(&lfLogFont, 0, sizeof(lfLogFont));  
+    const_cast<CFont*>(&font)->GetLogFont(&lfLogFont);  
+    ui::FontInfo font_info;
+    font_info.set_family(Charset::win_to_utf8(lfLogFont.lfFaceName));
+    font_info.set_size(lfLogFont.lfHeight);
+    font_info.set_weight(lfLogFont.lfWeight);
+    return ui::Font(font_info);		
+	}
+
+  inline static LOGFONT font_info(const FontInfo& font_info) {        
+    LOGFONT lfLogFont;
+    memset(&lfLogFont, 0, sizeof(lfLogFont));
+    lfLogFont.lfHeight = font_info.size();
+    lfLogFont.lfWeight = font_info.weight();      
+    if (font_info.style() == FontStyle::ITALIC) {
+      lfLogFont.lfItalic = TRUE;
+    }
+#ifdef UNICODE
+		wcscpy(lfLogFont.lfFaceName, Charset::utf8_to_win(font_info.family()).c_str());
+#else
+    strcpy(lfLogFont.lfFaceName,Charset:: utf8_to_win(font_info.family()).c_str());
+#endif        
+    return lfLogFont;
+  }
+
+  inline static FontInfo font_info(LOGFONT lfLogFont) {    
+    ui::FontInfo font_info;
+    font_info.set_family(lfLogFont.lfFaceName);
+    font_info.set_size(lfLogFont.lfHeight);
+    font_info.set_weight(lfLogFont.lfWeight);
+    if (lfLogFont.lfItalic == TRUE) {
+      font_info.set_style(FontStyle::ITALIC);
+    }
+    return font_info;		
+	}
 };
 
 class SystemMetrics : public ui::SystemMetrics {
@@ -440,6 +477,81 @@ inline void PremultiplyBitmapAlpha(HDC hDC, HBITMAP hBmp) {
   ::LocalFree(pBitData);
 }*/
 
+inline static Font font(const CFont& font) {    
+    LOGFONT lfLogFont;
+    memset(&lfLogFont, 0, sizeof(lfLogFont));  
+    const_cast<CFont*>(&font)->GetLogFont(&lfLogFont);  
+    ui::FontInfo font_info;
+    font_info.set_family(Charset::win_to_utf8(lfLogFont.lfFaceName));
+    font_info.set_size(lfLogFont.lfHeight);
+    font_info.set_weight(lfLogFont.lfWeight);
+    return ui::Font(font_info);		
+	}
+
+  inline static LOGFONT font_info(const FontInfo& font_info) {        
+    LOGFONT lfLogFont;
+    memset(&lfLogFont, 0, sizeof(lfLogFont));
+    lfLogFont.lfHeight = font_info.size();
+    lfLogFont.lfWeight = font_info.weight();      
+    if (font_info.style() == FontStyle::ITALIC) {
+        lfLogFont.lfItalic = TRUE;
+    }
+#ifdef UNICODE
+		wcscpy(lfLogFont.lfFaceName, Charset::utf8_to_win(font_info.family()).c_str());
+#else
+    strcpy(lfLogFont.lfFaceName,Charset:: utf8_to_win(font_info.family()).c_str());
+#endif        
+    return lfLogFont;
+  }
+
+class FontInfoImp : public ui::FontInfoImp {
+ public:
+  FontInfoImp() : stock_id_(-1) {    
+    memset(&lfLogFont, 0, sizeof(lfLogFont));
+    dev_set_family("Arial");
+    lfLogFont.lfHeight = 12;
+  }
+  ~FontInfoImp() {}
+
+  virtual FontInfoImp* DevClone() const { 
+    FontInfoImp* clone = new FontInfoImp(*this);    
+    return clone;
+  }
+
+  virtual void dev_set_style(FontStyle::Type style) {  
+    if (style == FontStyle::ITALIC) {
+      lfLogFont.lfItalic = TRUE;
+    }
+  }
+  virtual FontStyle::Type dev_style() const {
+    FontStyle::Type result = FontStyle::NORMAL;
+    if (lfLogFont.lfItalic == TRUE) {
+      result = FontStyle::ITALIC;
+    }
+    return result;
+  }
+  virtual void dev_set_size(int size) { lfLogFont.lfHeight = size; }
+  virtual int dev_size() const { return lfLogFont.lfHeight; }
+  virtual void dev_set_weight(int weight) { lfLogFont.lfWeight; }  
+  virtual int dev_weight() const { return lfLogFont.lfWeight; }  
+  virtual void dev_set_family(const std::string& family) {
+#ifdef UNICODE
+		wcscpy(lfLogFont.lfFaceName, Charset::utf8_to_win(family).c_str());
+#else
+    strcpy(lfLogFont.lfFaceName, Charset::utf8_to_win(family).c_str());
+#endif             
+  }
+  virtual std::string dev_family() const {
+    return Charset::win_to_utf8(lfLogFont.lfFaceName);
+  }
+  virtual void dev_set_stock_id(int id) { stock_id_ = id; }
+  virtual int dev_stock_id() const { return stock_id_; }
+
+ private:
+  LOGFONT lfLogFont;
+  int stock_id_;
+};
+
 class FontImp : public ui::FontImp {
  public:
   FontImp() : stock_id_(-1) {
@@ -468,48 +580,32 @@ class FontImp : public ui::FontImp {
     FontImp* clone = 0;
     if (stock_id_  == -1) {
       clone = new FontImp();
-      clone->dev_set_info(dev_info());
+      clone->dev_set_font_info(dev_font_info());
     } else {
       clone = new FontImp(stock_id_);      
     }
     return clone;
   }
 
-  virtual void dev_set_info(const FontInfo& info) {
-    if (info.stock_id == -1) {
-      stock_id_ = info.stock_id;
-      LOGFONT lfLogFont;
-      memset(&lfLogFont, 0, sizeof(lfLogFont));
-      lfLogFont.lfHeight = info.height;    
-      if (info.bold) {
-        lfLogFont.lfWeight = FW_BOLD;
-      }
-      if (info.italic) {
-        lfLogFont.lfItalic = TRUE;
-      }
-#ifdef UNICODE
-		  wcscpy(lfLogFont.lfFaceName, Charset::utf8_to_win(info.name).c_str());
-#else
-      strcpy(lfLogFont.lfFaceName,Charset:: utf8_to_win(info.name).c_str());
-#endif        
+  virtual void dev_set_font_info(const FontInfo& info) {
+    if (info.stock_id() == -1) {      
       ::DeleteObject(cfont_);
+      stock_id_ = info.stock_id();
+      LOGFONT lfLogFont = TypeConverter::font_info(info);
       cfont_ = ::CreateFontIndirect(&lfLogFont);
     } else {
       ::DeleteObject(cfont_);
-      cfont_ = (HFONT) ::GetStockObject(info.stock_id);
-      stock_id_ = info.stock_id;
+      cfont_ = (HFONT) ::GetStockObject(info.stock_id());
+      stock_id_ = info.stock_id();
     }
   }
 
-  virtual FontInfo dev_info() const {
+  virtual FontInfo dev_font_info() const {
     LOGFONT lfLogFont;
     memset(&lfLogFont, 0, sizeof(lfLogFont));		
-	::GetObject(cfont_, sizeof(LOGFONT), &lfLogFont);
-    FontInfo info;	
-    info.height = lfLogFont.lfHeight;
-    info.name = Charset::win_to_utf8(lfLogFont.lfFaceName);
-    info.bold = (lfLogFont.lfWeight == FW_BOLD);
-    info.stock_id = stock_id_;
+	::GetObject(cfont_, sizeof(LOGFONT), &lfLogFont);    
+    FontInfo info = TypeConverter::font_info(lfLogFont);    
+    info.set_stock_id(stock_id_);
     return info;
   }
 
@@ -530,7 +626,7 @@ class GraphicsImp : public ui::GraphicsImp {
       : hScreenDC(::GetDC(0)),
         cr_(CDC::FromHandle(hScreenDC)),      
         rgb_color_(0xFFFFFF),
-        argb_color_(0xFFFFFF),
+        argb_color_(0xFFFFFFFF),
         updatepen_(false),
         updatebrush_(false),
         pen_width_(1),
@@ -542,7 +638,7 @@ class GraphicsImp : public ui::GraphicsImp {
       : hScreenDC(0),
         cr_(cr),
         rgb_color_(0xFFFFFF),
-        argb_color_(0xFFFFFF),		
+        argb_color_(0xFFFFFFFF),		
         updatepen_(false),
         updatebrush_(false),
         pen_width_(1),
@@ -554,7 +650,7 @@ class GraphicsImp : public ui::GraphicsImp {
 	    hScreenDC(::GetDC(0)),
         cr_(CDC::FromHandle(hScreenDC)),      
         rgb_color_(0xFFFFFF),
-        argb_color_(0xFFFFFF),		
+        argb_color_(0xFFFFFFFF),        
         updatepen_(false),
         updatebrush_(false),
         pen_width_(1),
@@ -617,7 +713,7 @@ class GraphicsImp : public ui::GraphicsImp {
   virtual void DevSetDebugFlag() {
 	  debug_flag_ = true;
   }
-
+  
   void DevDrawString(const std::string& str, double x, double y) {
     check_pen_update();		
 		cr_->TextOut(static_cast<int>(x), static_cast<int>(y), Charset::utf8_to_win(str).c_str());
@@ -642,7 +738,7 @@ class GraphicsImp : public ui::GraphicsImp {
     cr_->SetWorldTransform(&rXform);
   }
 
-  void DevSetColor(ARGB color) {
+  void DevSetColor(ARGB color) {    
     if (argb_color_ != color) {
       argb_color_ = color;
       rgb_color_ = ToCOLORREF(color);
@@ -687,14 +783,14 @@ class GraphicsImp : public ui::GraphicsImp {
     cr_->SelectObject(&brush);
   }
 
-  void DevFillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
+  void DevFillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {        
     check_pen_update();
     check_brush_update();
-    cr_->RoundRect(TypeConverter::rect(rect), TypeConverter::point(arc_dim));
+    cr_->RoundRect(TypeConverter::rect(rect), TypeConverter::point(arc_dim));    
   }
 
-  void DevFillRect(const ui::Rect& rect) {
-    cr_->FillSolidRect(TypeConverter::rect(rect), rgb_color_);
+  void DevFillRect(const ui::Rect& rect) {        
+    cr_->FillSolidRect(TypeConverter::rect(rect), rgb_color_);    
   }
 
   void DevFillOval(const ui::Rect& rect) {
@@ -927,7 +1023,7 @@ class GraphicsImp : public ui::GraphicsImp {
      ::MapWindowPoints(NULL, hwnd, &pt, 1);
      ::OffsetRgn(old_rgn_, pt.x, pt.y);  		 
    }
-      
+           
    void TransparentBlt(CDC* pDC,
      int xStart,
      int yStart,
@@ -952,7 +1048,7 @@ class GraphicsImp : public ui::GraphicsImp {
    HRGN old_rgn_, clp_rgn_;
    CBitmap* old_bpm_;
    int pen_width_;
-   bool debug_flag_;
+   bool debug_flag_;   
 };
 
 inline void GraphicsImp::TransparentBlt(CDC* pDC,
@@ -1107,7 +1203,7 @@ class WindowTemplateImp : public T, public I {
   virtual void DevViewDoubleBuffered() { is_double_buffered_ = true; }
   virtual void DevViewSingleBuffered() { is_double_buffered_ = false; }
   virtual bool dev_is_double_buffered() const { return is_double_buffered_; }
-  virtual void DevBringWindowToTop() { BringWindowToTop(); }
+  virtual void DevBringToTop() { BringWindowToTop(); }
 
 protected:  
   virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -1237,7 +1333,7 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
  
 
  protected:
-  virtual void DevSetCursor(CursorStyle style);
+  virtual void DevSetCursor(CursorStyle::Type style);
   // BOOL OnEraseBkgnd(CDC* pDC);
   BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {   
     ::SetCursor(cursor_);
@@ -1565,7 +1661,7 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
 	afx_msg void OnDynamicMenuItems(UINT nID);  
   afx_msg void OnContextMenu( CWnd* pWnd, CPoint pos );		
   void OnPaint() { CFrameWnd::OnPaint(); }
-  BOOL OnEraseBkgnd(CDC* pDC) { return 1; }
+  BOOL OnEraseBkgnd(CDC* pDC) { return TRUE; }
   virtual void OnClose() {		
 	if (window()) {
     ((Frame*)window())->close(*(Frame*)window());
@@ -1581,7 +1677,8 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
   }
   afx_msg void OnKillFocus(CWnd* pNewWnd) {
     if (window()) {
-      window()->OnKillFocus();
+      ui::Event ev;
+      window()->OnKillFocus(ev);
     }
   }
 };
@@ -1614,8 +1711,8 @@ class MenuContainerImp : public ui::MenuContainerImp {
  public:  
   MenuContainerImp();
  
-  virtual void DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node);
-  virtual void DevErase(boost::shared_ptr<Node> node);
+  virtual void DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node);
+  virtual void DevErase(const Node::Ptr& node);
   virtual void DevInvalidate();
   virtual void DevTrack(const ui::Point& pos) {}
 
@@ -1627,11 +1724,11 @@ class MenuContainerImp : public ui::MenuContainerImp {
   void set_hmenu(HMENU hmenu) { hmenu_ = hmenu; }
   
  private:
-   void UpdateNodes(Node::Ptr parent_node, HMENU parent, int pos_start = 0);
-   std::map<int, MenuImp*> menu_item_id_map_;
-   static std::map<int, MenuContainerImp*> menu_bar_id_map_;   
-   CWnd* menu_window_;
-   HMENU hmenu_;
+  void UpdateNodes(const Node::Ptr& parent_node, HMENU parent, int pos_start = 0);
+  std::map<int, MenuImp*> menu_item_id_map_;
+  static std::map<int, MenuContainerImp*> menu_bar_id_map_;   
+  CWnd* menu_window_;
+  HMENU hmenu_;
 };
 
 class PopupMenuImp : public MenuContainerImp { 
@@ -1715,27 +1812,26 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
     return result;
   }  
   virtual void DevClear();  
-  virtual void DevUpdate(const Node::Ptr& node, boost::shared_ptr<Node> prev_node);
-  virtual void DevErase(boost::shared_ptr<Node> node);
-
-  // virtual void DevUpdate(boost::shared_ptr<Node> node, boost::shared_ptr<Node> nodeafter);
-  virtual void DevEditNode(boost::shared_ptr<ui::Node> node);
+  virtual void DevUpdate(const Node::Ptr& node,const Node::Ptr& prev_node);
+  virtual void DevErase(const Node::Ptr& node);  
+  virtual void DevEditNode(const Node::Ptr& node);
   virtual void dev_set_background_color(ARGB color) { 
     SetBkColor(ToCOLORREF(color));
   }  
   virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
-  virtual void dev_set_text_color(ARGB color) {
+  virtual void dev_set_color(ARGB color) {
     SetTextColor(ToCOLORREF(color));
   }
-  virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
+  virtual ARGB dev_color() const { return ToARGB(GetTextColor()); }
   BOOL OnEraseBkgnd(CDC* pDC) { return CTreeCtrl::OnEraseBkgnd(pDC); }
   
-  void dev_select_node(const boost::shared_ptr<ui::Node>& node);
-  virtual boost::weak_ptr<Node> dev_selected();  
+  void dev_select_node(const Node::Ptr& node);
+  void dev_deselect_node(const Node::Ptr& node);
+  virtual Node::WeakPtr dev_selected();  
   void OnNodeChanged(Node& node);
   bool dev_is_editing() const { return is_editing_; }
-  std::map<HTREEITEM, boost::weak_ptr<ui::Node> > htreeitem_node_map_;
-  void dev_add_item(boost::shared_ptr<Node> node);
+  std::map<HTREEITEM, Node::WeakPtr> htreeitem_node_map_;
+  void dev_add_item(Node::Ptr node);
   virtual void DevShowLines();
   virtual void DevHideLines();
   virtual void DevShowButtons();
@@ -1755,7 +1851,7 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
   }
   CImageList m_imageList;
 
-  virtual ui::Node::Ptr dev_node_at(const ui::Point& pos) const;
+  virtual Node::Ptr dev_node_at(const ui::Point& pos) const;
 
  protected:
   virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
@@ -1769,8 +1865,8 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
   ui::Node* find_selected_node();
   
  private:   
-   void UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node);
-   bool is_editing_;
+  void UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node);
+  bool is_editing_;
 };
 
 class ListViewImp;
@@ -1787,6 +1883,8 @@ class ListNodeImp : public NodeImp {
   void DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos);
   void DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level);
   void set_text(ui::mfc::ListViewImp* list, const std::string& text);
+  void Select(ui::mfc::ListViewImp* list);
+  void Deselect(ui::mfc::ListViewImp* list);
 
   LVITEM lvi;
 #ifdef UNICODE
@@ -1830,24 +1928,24 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   virtual void DevEnableDraw() { SetRedraw(true); }
   virtual void DevPreventDraw() { SetRedraw(false); }
   virtual void DevClear();  
-  virtual void DevUpdate(const Node::Ptr& node, Node::Ptr prev_node);
-  virtual void DevErase(boost::shared_ptr<Node> node);  
-  virtual void DevEditNode(boost::shared_ptr<ui::Node> node);
+  virtual void DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node);
+  virtual void DevErase(const Node::Ptr& node);  
+  virtual void DevEditNode(const Node::Ptr& node);
   virtual void dev_set_background_color(ARGB color) {      
     SetBkColor(ToCOLORREF(color));    
   }  
   virtual ARGB dev_background_color() const { return ToARGB(GetBkColor()); }  
-  virtual void dev_set_text_color(ARGB color) {
+  virtual void dev_set_color(ARGB color) {
     SetTextColor(ToCOLORREF(color));
   }
-  virtual ARGB dev_text_color() const { return ToARGB(GetTextColor()); }
-  BOOL OnEraseBkgnd(CDC* pDC) { return CListCtrl::OnEraseBkgnd(pDC); }
-  
+  virtual ARGB dev_color() const { return ToARGB(GetTextColor()); }
+  BOOL OnEraseBkgnd(CDC* pDC) { return CListCtrl::OnEraseBkgnd(pDC); }  
   void dev_select_node(const boost::shared_ptr<ui::Node>& node);
+  void dev_deselect_node(const boost::shared_ptr<ui::Node>& node);
   virtual boost::weak_ptr<Node> dev_selected();  
   void OnNodeChanged(Node& node);
   bool dev_is_editing() const { return is_editing_; }
-  std::map<HTREEITEM, boost::weak_ptr<ui::Node> > htreeitem_node_map_;
+  std::map<HTREEITEM, ui::Node::WeakPtr> htreeitem_node_map_;
   void dev_add_item(boost::shared_ptr<Node> node);
   virtual void dev_set_images(const ui::Images::Ptr& images) {
     ui::Images::iterator it = images->begin();
@@ -1881,13 +1979,11 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   virtual void DevAddColumn(const std::string& text, int width) {
     InsertColumn(column_pos_++, Charset::utf8_to_win(text).c_str(), LVCFMT_LEFT, width);
   }
-  virtual std::vector<ui::Node::Ptr> dev_selected_nodes();
-
-  CImageList m_imageList;
-
+  virtual std::vector<ui::Node::Ptr> dev_selected_nodes();  
   virtual int dev_top_index() const { return GetTopIndex(); }
   virtual void DevEnsureVisible(int index) { EnsureVisible(index, true); }
 
+  CImageList m_imageList;
  protected:  
   virtual BOOL prevent_propagate_event(ui::Event& ev, MSG* pMsg);
 
@@ -1901,7 +1997,7 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
   ui::Node* find_selected_node();
 
  private:
-   ListNodeImp* UpdateNode(boost::shared_ptr<Node> node, boost::shared_ptr<Node> prev_node, int pos);
+   ListNodeImp* UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node, int pos);
    bool is_editing_;
    int column_pos_;
    typedef std::map<int, ListNodeImp*> ImpLookUpTable;
@@ -2000,9 +2096,9 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
 
   static EditImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     EditImp* imp = new EditImp();
-    if (!imp->Create(WS_VISIBLE | WS_CHILD | WS_TABSTOP | WS_VISIBLE | 
+    if (!imp->Create(WS_VISIBLE | WS_CHILD | WS_TABSTOP | WS_VISIBLE |
                      ES_AUTOHSCROLL,
-                     CRect(0, 0, 200, 20), 
+                     CRect(0, 0, 200, 20),
                      parent, 
                      nID)) {
       TRACE0("Failed to create window\n");
@@ -2030,16 +2126,46 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
       background_brush_.DeleteObject();
     }
 	  background_brush_.CreateSolidBrush(background_color_);
+    Invalidate(TRUE);
   }  
-  virtual ARGB dev_background_color() const { return ToARGB(text_color_); }  
+  virtual ARGB dev_background_color() const { return ToARGB(background_color_); }  
   virtual void dev_set_color(ARGB color) {
     text_color_ = ToCOLORREF(color);
+    Invalidate(TRUE);
   }
-  virtual ARGB dev_color() const { return ToARGB(background_color_); }
+  virtual ARGB dev_color() const { return ToARGB(text_color_); }
   virtual void dev_set_font(const Font& font);
-  virtual const Font& dev_font() const { return font_; }
-  
-protected:
+  virtual const Font& dev_font() const { return font_; }  
+  virtual void dev_set_sel(int cpmin, int cpmax) { SetSel(cpmin, cpmax); }
+
+protected:      
+  virtual BOOL OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam,
+                             LRESULT* pResult) {
+    UINT notificationCode = (UINT) HIWORD(wParam);   
+    if((notificationCode == EN_KILLFOCUS)       ||   
+            (notificationCode == LBN_KILLFOCUS) ||
+            (notificationCode == CBN_KILLFOCUS) ||
+            (notificationCode == NM_KILLFOCUS)  ||
+            (notificationCode == WM_KILLFOCUS)) {
+      if (window()) {
+        ui::Event ev;
+        window()->OnKillFocus(ev);
+      }
+      return TRUE;
+    } else if((notificationCode == EN_SETFOCUS)       ||   
+            (notificationCode == LBN_SETFOCUS) ||
+            (notificationCode == CBN_SETFOCUS) ||
+            (notificationCode == NM_SETFOCUS)  ||
+            (notificationCode == WM_SETFOCUS)) {
+      if (window()) {
+        ui::Event ev;
+        window()->OnFocus(ev);
+      }
+      return TRUE;
+    }
+    return CEdit::OnChildNotify(message, wParam, lParam, pResult); 
+  }
+
   DECLARE_MESSAGE_MAP()
   COLORREF text_color_;
 	COLORREF background_color_;	
@@ -2209,12 +2335,11 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void dev_set_linenumber_background_color(ARGB color) { f(SCI_STYLESETBACK, STYLE_LINENUMBER, ToCOLORREF(color)); }
   ARGB dev_linenumber_background_color() const { return ToARGB(f(SCI_STYLEGETBACK, STYLE_LINENUMBER, 0)); }
 
-  void dev_set_margin_background_color(ARGB color) {
-    f(SCI_SETFOLDMARGINCOLOUR,1, color);
-    f(SCI_SETFOLDMARGINHICOLOUR,1, color);
+  void dev_set_folding_background_color(ARGB color) {
+    f(SCI_SETFOLDMARGINCOLOUR, 1, ToCOLORREF(color));
+    f(SCI_SETFOLDMARGINHICOLOUR, 1, ToCOLORREF(color));
   }
-  ARGB dev_margin_background_color() const { return 0; }
-  
+    
   void dev_set_sel_foreground_color(ARGB color) { f(SCI_SETSELFORE, 1, ToCOLORREF(color)); }
  // COLORREF sel_foreground_color() const { return f(SCI_GETSELFORE, 0, 0); }
   void dev_set_sel_background_color(ARGB color) { f(SCI_SETSELBACK, 1, ToCOLORREF(color)); }
@@ -2258,9 +2383,9 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   }  
   bool dev_has_file() const { return has_file_; }
   virtual const std::string& dev_filename() const { return fname_; }  
-  virtual void dev_set_font(const FontInfo& font_info) {
-    f(SCI_STYLESETSIZE, STYLE_DEFAULT, font_info.height);
-    f(SCI_STYLESETFONT, STYLE_DEFAULT, (LPARAM) (font_info.name.c_str())); 
+  virtual void dev_set_font_info(const FontInfo& font_info) {
+    f(SCI_STYLESETSIZE, STYLE_DEFAULT, font_info.size());
+    f(SCI_STYLESETFONT, STYLE_DEFAULT, (LPARAM) (font_info.family().c_str())); 
   }    
   boost::signal<void ()> modified;
   int dev_column() const {
@@ -2542,48 +2667,48 @@ class FileObserverImp : public ui::FileObserverImp {
   CNotifyDirCheck notify_dir_change_;
 };
 
-class Systems : public ui::Systems {
- public:
-  virtual ui::Region* CreateRegion() { return new ui::Region(); }
-  virtual ui::Graphics* CreateGraphics() { return new ui::Graphics(); }
-  virtual ui::Graphics* CreateGraphics(bool debug) { return new ui::Graphics(debug); }
-  virtual ui::Graphics* CreateGraphics(void* dc) { return new ui::Graphics((CDC*) dc); }
-  virtual ui::Image* CreateImage() { return new ui::Image(); }  
-  virtual ui::Window* CreateWin() { 
-    Window* window = new Window();
-    WindowImp* imp = WindowImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
-    imp->set_window(window);
-    return window;
-  }  
-  virtual ui::ComboBox* CreateComboBox() { 
-    ComboBox* window = new ComboBox();
-    ComboBoxImp* imp = ComboBoxImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
-    imp->set_window(window);
-    return window;
-  }
-  virtual ui::Edit* CreateEdit() { 
-    Edit* window = new Edit();
-    EditImp* imp = EditImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
-    imp->set_window(window);
-    return window;
-  }
-  virtual ui::Button* CreateButton() { 
-    Button* window = new Button();
-    ButtonImp* imp = ButtonImp::Make(window, DummyWindow::dummy(), WindowID::auto_id());
-    imp->set_window(window);
-    return window;
-  }  
-  virtual ui::MenuContainer* CreateMenuContainer() { 
-    MenuContainer* bar = new MenuContainer();    
-    return bar;
-  }
-  virtual void import_font(const std::string& path) {
-    int result = AddFontResource(Charset::utf8_to_win(path).c_str());     
-    if (result == 0) {
+extern "C" int CALLBACK enumerateFontsCallBack(ENUMLOGFONTEX *lpelf,
+												NEWTEXTMETRICEX *lpntm,
+												DWORD fontType, LPARAM lParam);
+
+  typedef	std::pair<LOGFONT, DWORD>	FontPair;
+   typedef	std::vector<FontPair> FontVec;
+
+
+class Fonts : public ui::Fonts {
+  public:
+    Fonts() {
+      enumerateFonts();
+    }
+
+   virtual void import_font(const std::string& path) {
+     int result = AddFontResource(Charset::utf8_to_win(path).c_str());     
+     if (result == 0) {
       throw std::exception("Failed to add font.");
     }
   }
+ 
 
+   const std::vector<std::string>& font_list() const { return names_; }
+
+  void enumerateFonts()
+  {
+	  names_.clear();
+	LOGFONT		lf;
+	lf.lfFaceName[0] = _T('\0');
+	lf.lfCharSet = DEFAULT_CHARSET;
+	lf.lfPitchAndFamily = 0;
+  CClientDC dc(DummyWindow::dummy());
+	::EnumFontFamiliesEx(dc.m_hDC, &lf,
+						(FONTENUMPROC) enumerateFontsCallBack,
+						(LPARAM) &m_FontVec, 0);
+	// std::sort(m_FontVec.begin(), m_FontVec.end(), comp);	
+	for (FontVec::iterator it = m_FontVec.begin(); it != m_FontVec.end(); it++)
+		names_.push_back(it->first.lfFaceName);
+  }
+
+  FontVec	m_FontVec;
+  std::vector<std::string> names_;
 };
 
 class ImpFactory : public ui::ImpFactory {
@@ -2649,9 +2774,8 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::RegionImp* CreateRegionImp() {     
     return new ui::mfc::RegionImp();
   }
-  virtual ui::FontImp* CreateFontImp() {    
-    return new ui::mfc::FontImp();
-  }
+  virtual ui::FontInfoImp* CreateFontInfoImp() { return new mfc::FontInfoImp(); }
+  virtual ui::FontImp* CreateFontImp() { return new ui::mfc::FontImp(); }
   virtual ui::FontImp* CreateFontImp(int stockid) {    
     return new ui::mfc::FontImp(stockid);
   }

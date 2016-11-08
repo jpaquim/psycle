@@ -2481,25 +2481,73 @@ namespace psycle { namespace host {
       host_extensions_->OnDynamicMenuItems(nID);      
     }
                 
-    void CChildView::ChangeCanvas(ui::Window* canvas) {
-      CRect rect;            
-      GetWindowRect(&rect);
-      pParentMain->ScreenToClient(rect);          
-      pParentMain->m_wndView.ShowWindow(SW_HIDE);
-      CWnd* child = pParentMain->m_luaWndView->GetWindow(GW_CHILD);
-      if (child) {
-        child->SetParent(ui::mfc::DummyWindow::dummy());            
+    void CChildView::ChangeCanvas(ui::Window* canvas) {      
+      if (canvas) { 
+        ResizeExtensionView();
+        EraseOldExtensionWindow();
+        AddNewExtensionWindow(canvas);
+        ShowExtensionView();          
+        HideChildView();
+        SetExtensionActive();
+      } else {
+        ShowChildView();
+        EraseOldExtensionWindow();        
       }
-      if (canvas) {
-        ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
-        imp->SetParent(pParentMain->m_luaWndView.get());      
-        canvas->set_position(ui::Rect(ui::Point(), ui::Point(rect.Width(), rect.Height())));
-        canvas->Show();            
-      }
-      pParentMain->m_luaWndView->MoveWindow(rect.left, rect.top, rect.Width(), rect.Height());
-      pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
-      GetParent()->SetActiveWindow();      
     }
+
+    void CChildView::ResizeExtensionView() {
+      WINDOWPLACEMENT wp = adjusted_child_view_placement();
+      pParentMain->m_luaWndView->SetWindowPlacement(&wp);              
+    }
+
+    void CChildView::ShowExtensionView() {
+      pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
+    }
+       
+    void CChildView::EraseOldExtensionWindow() {
+      CWnd* child = pParentMain->m_luaWndView->GetWindow(GW_CHILD);
+      if (child) {                  
+        child->SetParent(ui::mfc::DummyWindow::dummy());                  
+      }
+    }
+
+    void CChildView::AddNewExtensionWindow(ui::Window* canvas) {
+      ui::mfc::WindowImp* imp = canvas ? (ui::mfc::WindowImp*) canvas->imp() : 0;      
+      if (imp) {
+        imp->ShowWindow(SW_HIDE);
+        imp->SetParent(pParentMain->m_luaWndView.get());
+        AlignExtensionChild(pParentMain->m_luaWndView.get());
+        imp->ShowWindow(SW_SHOW);                     
+      }      
+    }
+
+    void CChildView::AlignExtensionChild(CWnd* extension_wnd) {
+      CWnd* child = extension_wnd->GetWindow(GW_CHILD);
+      if (child) {
+        CRect rcClient;
+        GetClientRect(&rcClient);
+        child->MoveWindow(0, 0, rcClient.Width(), rcClient.Height());        
+      }      
+    }
+
+    void CChildView::SetExtensionActive() {
+      pParentMain->m_luaWndView->SetActiveWindow();
+    }
+
+    WINDOWPLACEMENT CChildView::adjusted_child_view_placement() {
+      CRect rcClient, rcWind;
+      POINT ptDiff;
+      GetClientRect(&rcClient);
+      GetWindowRect(&rcWind);
+      ptDiff.x = (rcWind.right - rcWind.left) - rcClient.right;
+      ptDiff.y = (rcWind.bottom - rcWind.top) - rcClient.bottom;      
+      WINDOWPLACEMENT wp;
+      GetWindowPlacement(&wp);
+      wp.rcNormalPosition.left += ptDiff.x;
+      wp.rcNormalPosition.top += ptDiff.y;
+      return wp;
+    }
+    
 }}
 
 // graphics operations, private headers included only by this translation unit

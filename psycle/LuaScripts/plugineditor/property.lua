@@ -1,17 +1,20 @@
+local stock = require("psycle.stock")
+
 local property = {}
 
-function property:new(value, label, typename)  
+function property:new(value, label, typename, stockkey)
   local c = {}
   setmetatable(c, self)
   self.__index = self
-  c:init(value, label, typename)
+  c:init(value, label, typename, stockkey)
   return c
 end
 
-function property:init(value, label, typename)
+function property:init(value, label, typename, stockkey)
   self.label_ = ""    
   self.value_ = value  
-  self.label_ = label  
+  self.label_ = label    
+  self.stockkey_ = stockkey  
   self.preventedit_ = false
   self.typename_ = typename
 end
@@ -25,7 +28,21 @@ function property:setvalue(value)
 end
 
 function property:value()
-  return self.value_
+  local result
+  if self.stockkey_ then
+    result = stock.value(self.stockkey_)
+  else
+    result = self.value_
+  end
+  return result
+end
+
+function property:setstockkey(stockkey)
+  self.stockkey_ = stockkey
+end
+
+function property:stockkey()
+  return self.stockkey_
 end
 
 function property:tostring()
@@ -39,8 +56,10 @@ function property:tostring()
 end
 
 function property:write(file)
-  file:write('property:new(')  		  
-  if self:typename() == "color" then		    
+  file:write('property:new(')  	
+  if self:typename() == "fontinfo" then    
+    file:write('fontinfo:new('.. self:value():tostring() .. ')')    
+  elseif self:typename() == "color" then		    
     file:write("0x"..self:tostring())
   elseif self:typename() == "boolean" then
     if self:value() == "true" then
@@ -54,10 +73,16 @@ function property:write(file)
     file:write(self:tostring())
   end		 		  
   if self:typename() == "color" then
-    file:write(', "'.. self:label()..'", "color")')
+    file:write(', "'.. self:label()..'", "color"')
+  elseif self:typename() == "fontinfo" then
+    file:write(', "'.. self:label()..'", "fontinfo"')
   else
-    file:write(', "'.. self:label()..'")')
-   end
+    file:write(', "'.. self:label()..'"')
+  end
+  if self.stockkey_ then
+    file:write(', '.. stock.key(self.stockkey_))
+  end
+  file:write(')')
 end
 
 function property:typename()

@@ -19,6 +19,7 @@ namespace ui {
   class Canvas;  
   class Frame;
   class MenuContainer;
+  class Systems;
 }
     
 class LuaPlugin;
@@ -153,6 +154,8 @@ class LuaProxy : public LuaControl {
   int userinterface() const { return user_interface_; }
   std::string title() const { return lua_mac_ ? lua_mac_->title() : "noname"; }
   void UpdateWindowsMenu();
+  ui::Systems* systems();
+  void update_systems_state(lua_State* L);    
 
 private:
   void export_c_funcs();
@@ -183,6 +186,8 @@ private:
   boost::weak_ptr<ui::MenuContainer> menu_bar_;
   boost::shared_ptr<ui::Frame> frame_;
   int user_interface_;
+  std::auto_ptr<ui::Systems> systems_;
+  class LuaSystems* lua_systems_;
 };
 
 class LuaPluginBind {
@@ -276,7 +281,7 @@ class HostExtensions {
   HMENU windows_menu_;
 };
 
-struct LuaGlobal {
+struct LuaGlobal {   
    static std::map<lua_State*, LuaProxy*> proxy_map;
    static LuaProxy* proxy(lua_State* L) {
      std::map<lua_State*, LuaProxy*>::iterator it = proxy_map.find(L);

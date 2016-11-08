@@ -42,36 +42,28 @@ function fileexplorer:init(setting)
    self:initsignals()   
 end
 
-function fileexplorer:initheader()
-  self:setdebugtext("left")
+function fileexplorer:initheader()  
   self.header = group:new(self)
                      :setalign(item.ALTOP)
                      :setautosize(false, false)
-					 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
-					 :addornament(ornamentfactory:createlineborder(0x3F3F3F))					 
-  self:initmachineselector()					 
-  local closebutton = closebutton.new(self.header)
+					 :setposition(rect:new(point:new(0, 0), dimension:new(0, 25)))
+					 :addornament(ornamentfactory:createfill(0x333333))
+  local machinehomeicon = toolicon:new(self.header, settings.picdir.."home.png", 0xFFFFFF)                          
+  machinehomeicon:setautosize(false, false)
+  machinehomeicon:setverticalalignment(toolicon.ALCENTER)
+  --machinehomeicon:setjustify(toolicon.CENTERJUSTIFY)
+--  machinehomeicon:setposition(rect:new(point:new(), dimension:new(200, 0)))
+  machinehomeicon:setalign(item.ALCLIENT)  
+  machinehomeicon:settext("Machine Home")
+  machinehomeicon.cc = 0x333333
+  local on = image:new():load(settings.picdir.."poweron.png")
+  on:settransparent(0xFFFFFF)					 
+  local closebutton = closebutton.new(self.header):settext("<<")
   local that = self
   function closebutton:onmousedown()
      that:setposition(rect:new(point:new(0, 0), dimension:new(0, 0)))
 	 that:parent():flagnotaligned():updatealign()     
   end  
-end
-
-function fileexplorer:initmachineselector()
-  self.machineselector = edit:new(self.header)
-                             :setautosize(false, false)
-							 :settext("Name of Plugin to Edit?")
-							 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
-							 :setalign(item.ALCLIENT)
-							 :setbackgroundcolor(0x2F2F2F)
-							 :setcolor(0xCACACA)							 
-							-- :setjustify(text.CENTERJUSTIFY)
-							-- :setverticalalignment(item.ALCENTER)
-  local that = self
-  function self.machineselector:onmousedown()    
-    that.onselectmachine:emit()
-  end
 end
 
 function fileexplorer:initlistview(setting)
@@ -100,9 +92,7 @@ function fileexplorer:initlistview(setting)
 end
 
 function fileexplorer:initdefaultstyle(setting)
-  self:addornament(ornamentfactory:createfill(setting.properties.backgroundcolor:value()))
-  self.listview:setbackgroundcolor(setting.properties.backgroundcolor:value())
-  self.listview:settextcolor(setting.properties.foregroundcolor:value())  
+  --self:addornament(ornamentfactory:createfill(setting.properties.backgroundcolor:value()))  
 end
 
 function fileexplorer:initicons()
@@ -124,6 +114,9 @@ function fileexplorer:initsignals()
   self.click = signal:new()
   self.onremove = signal:new()
   self.onselectmachine = signal:new()
+  self.doedit = signal:new()
+  self.dohide = signal:new()  
+  self.doreturn = signal:new()  
 end
 
 function fileexplorer:sethomepath(path)
@@ -135,7 +128,7 @@ function fileexplorer:setpath(path)
   self.currentpath = path
   local dir = filehelper.directorylist(path)  
   self.rootnode = node:new()
-  self:addhomenode()
+  --self:addhomenode()
   self:addparentdirectorynode(path)
   for i=1, #dir do
     if dir[i] then      
@@ -161,17 +154,9 @@ function fileexplorer:path()
   return self.currentpath
 end
 
-function fileexplorer:setmachinename(name)
-  self.machineselector:settext(name)
-end
-
-function fileexplorer:machinename()
-  self.machineselector:text()
-end
-
 function fileexplorer:addhomenode()
   local dir = filehelper.fileinfo(self.homepath)
-  local node = node:new():settext("Plugin Home")
+  local node = node:new():settext("Machine Home")
   node:setimageindex(3):setselectedimageindex(3)
   node.isdirectory = true
   node.filename = dir.filename

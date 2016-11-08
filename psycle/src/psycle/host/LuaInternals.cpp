@@ -66,6 +66,78 @@ ui::ARGB LuaConfig::color(const std::string& key) {
   return ToARGB(color);      
 }
 
+// MidiHelperBind
+int LuaStockBind::open(lua_State *L) {
+  static const luaL_Reg funcs[] = {
+    {"value", value},
+    {"key", key},
+    {NULL, NULL}
+  };  
+  luaL_newlib(L, funcs);
+  lua_newtable(L);
+  {    
+    static const char* const e[] = {"PVBACKGROUND", "PVROW", "PVROW4BEAT", "PVROWBEAT", "PVSEPARATOR",
+                "PVFONT", "PVCURSOR", "PVSELECTION", "PVPLAYBAR"};               
+    size_t size = sizeof(e)/sizeof(e[0]);
+    LuaHelper::buildenum(L, e, size, 1);
+  }  
+  {    
+    static const char* const e[] = {"MVFONTBOTTOMCOLOR", "MVFONTHTOPCOLOR",
+                "MVFONTHBOTTOMCOLOR", "MVFONTTITLECOLOR", "MVTOPCOLOR", "MVBOTTOMCOLOR", 
+                "MVHTOPCOLOR", "MVHBOTTOMCOLOR", "MVTITLECOLOR"};               
+    size_t size = sizeof(e)/sizeof(e[0]);
+    LuaHelper::buildenum(L, e, size, 20);
+  }  
+  lua_setfield(L, -2, "color");
+  return 1;
+}
+
+/*
+  
+bool search_pair (lua_State *L, std::string& keystr, int index) {
+  bool result = false;
+  if (lua_type(L, index) == LUA_TSTRING) {
+     keystr = std::string(lua_tostring(L, index));
+     result = true;
+  }
+  return result;
+}
+
+void walk(lua_State* L, int enum_key, std::string& keystr, int index) {
+  lua_pushvalue(L, lua_gettop(L));
+  lua_pushnil(L);
+  while (lua_next(L, -2)) {
+    lua_pushvalue(L, -2);
+    const char *key = lua_tostring(L, -1);
+    if (lua_type(L, -2) == LUA_TNUMBER && enum_key == lua_tonumber(L, -2)) {
+      keystr = enum_key;
+      result = false;
+    }
+    const char *value = lua_tostring(L, -2);
+    if 
+  }
+}
+*/
+int LuaStockBind::key(lua_State* L) {  
+  int stock_key = luaL_checkinteger(L, 1);  
+  PsycleStock stock;
+  lua_pushstring(L, stock.key_tostring(stock_key).c_str());
+  return 1;  
+}
+
+int LuaStockBind::value(lua_State* L) {
+  using namespace ui;
+  int stock_key = luaL_checkinteger(L, 1);    
+  PsycleStock stock;
+  ui::MultiType result =stock.value(stock_key);  
+  if (result.which() == 0) {
+    lua_pushnumber(L, boost::get<ARGB>(stock.value(stock_key)));
+  } else {
+    luaL_error(L, "Wrong Property type.");
+  }
+  return 1;  
+}
+
 const char* LuaConfigBind::meta = "psyconfigmeta";
 
 int LuaConfigBind::open(lua_State *L) {
@@ -92,7 +164,7 @@ int LuaConfigBind::create(lua_State *L) {
     return luaL_error(L, "Got %d arguments expected 2 (self or self and group)", n);
   }
   LuaConfig* cfg = (n==1) ?  new LuaConfig() : new LuaConfig(luaL_checkstring(L, 2));
-  LuaHelper::new_shared_userdata<LuaConfig>(L, meta, cfg);
+  LuaHelper::new_shared_userdata<LuaConfig>(L, meta, cfg);    
   return 1;
 }
 

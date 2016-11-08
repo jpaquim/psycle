@@ -41,7 +41,7 @@ function settingsmanager:loadglobal()
     local path = cfg:presetpath()
     filehelper.mkdir(path .. "\\" .. self.pluginname_)  
     self.globalsetting_ = require(self.pluginname_ .. ".global")
-	self:saveglobal("default.lua")    
+	self:saveglobal("default")    
   end
   return self
 end
@@ -82,20 +82,20 @@ function settingsmanager:load(name)
   end  
   local f = loadfile(self:path())
   if f then
-    self.setting_ = f()	
-	local default = require(self.pluginname_ .. "..defaultsetting")	
-	if default.meta.version ~= self.setting_.meta.version then
+    self.setting_ = f()		
+	local default = require(self.pluginname_ .. "..defaultsetting")			
+	if default.meta.version ~= self.setting_.meta.version then	  
 	  self:extractmeta()	
 	  self:mergewithdefault(default, self.setting_)
 	  self.setting_ = default	  
       self:extractmeta()
 	  self:save()	  
-	else
+	else	  
       self:extractmeta()
     end	
   else  
     self:copydefault()	
-	self.setting_ = dofile(self:path())
+	self.setting_ = dofile(self:path())	
 	self:extractmeta()	
   end
   return self
@@ -103,10 +103,10 @@ end
 
 function settingsmanager:restoredefault()  
   self.setting_ = require(self.pluginname_ .. ".defaultsetting")  
-  self.globalsetting_.settingname = "default.lua"  
+  self.globalsetting_.settingname = "default.lua"
   self:extractmeta()  
   self:save()  
-  self:saveglobal("default.lua")
+  self:saveglobal("default")
 end
 
 function settingsmanager:copydefault()
@@ -173,6 +173,8 @@ function settingsmanager:save()
   end
   file:write([[
 local orderedtable = require("psycle.orderedtable")
+local fontinfo = require("psycle.ui.fontinfo")
+local stock = require("psycle.stock")
 local property = require("property")
 
 local settings = orderedtable.new()  
