@@ -7,24 +7,21 @@ local settings = orderedtable.new()
 
 settings.meta = {
   name = "plugineditor",
-  version = 0.1
+  version = 0.2
 }
 
 settings.general = {}
-settings.general.label = "General"
 settings.general.children = orderedtable.new()
 settings.general.children.ui = {}
-settings.general.children.ui.label = "Ui Components"
 settings.general.children.ui.children = orderedtable.new()
 settings.general.children.ui.children.edit = {}
-settings.general.children.ui.children.edit.label = "edit"
 settings.general.children.ui.children.edit.properties = orderedtable.new()
 settings.general.children.ui.children.edit.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.edit.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROW)
 
+settings.general.children.ui.children.edit.label = "edit"
 
 settings.general.children.ui.children.advancededit = {}
-settings.general.children.ui.children.advancededit.label = "advancededit"
 settings.general.children.ui.children.advancededit.properties = orderedtable.new()
 settings.general.children.ui.children.advancededit.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.advancededit.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROW)
@@ -33,9 +30,9 @@ settings.general.children.ui.children.advancededit.properties.hoverbackgroundcol
 settings.general.children.ui.children.advancededit.properties.activecolor = property:new(0xffb0d8b1, "Active Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.advancededit.properties.activebackgroundcolor = property:new(0xff323232, "Active Background Color", "color", stock.color.PVROW4BEAT)
 
+settings.general.children.ui.children.advancededit.label = "advancededit"
 
 settings.general.children.ui.children.tabgroup = {}
-settings.general.children.ui.children.tabgroup.label = "tabgroup"
 settings.general.children.ui.children.tabgroup.properties = orderedtable.new()
 settings.general.children.ui.children.tabgroup.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.tabgroup.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROW)
@@ -51,9 +48,9 @@ settings.general.children.ui.children.tabgroup.properties.headerclosecolor = pro
 settings.general.children.ui.children.tabgroup.properties.headerclosehovercolor = property:new(0xffffffff, "Header Close Hover Color", "color")
 settings.general.children.ui.children.tabgroup.properties.headerclosehoverbackgroundcolor = property:new(0xffa8444c, "Header Close Background Color", "color")
 
+settings.general.children.ui.children.tabgroup.label = "tabgroup"
 
 settings.general.children.ui.children.toolicon = {}
-settings.general.children.ui.children.toolicon.label = "toolicon"
 settings.general.children.ui.children.toolicon.properties = orderedtable.new()
 settings.general.children.ui.children.toolicon.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.toolicon.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVBACKGROUND)
@@ -62,21 +59,23 @@ settings.general.children.ui.children.toolicon.properties.hoverbackgroundcolor =
 settings.general.children.ui.children.toolicon.properties.activecolor = property:new(0xffb0d8b1, "Active Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.toolicon.properties.activebackgroundcolor = property:new(0xff323232, "Active Background Color", "color", stock.color.PVSELECTION)
 
+settings.general.children.ui.children.toolicon.label = "toolicon"
 
 settings.general.children.ui.children.listview = {}
-settings.general.children.ui.children.listview.label = "listview"
 settings.general.children.ui.children.listview.properties = orderedtable.new()
 settings.general.children.ui.children.listview.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.listview.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
 
+settings.general.children.ui.children.listview.label = "listview"
 
 settings.general.children.ui.children.treeview = {}
-settings.general.children.ui.children.treeview.label = "treeview"
 settings.general.children.ui.children.treeview.properties = orderedtable.new()
 settings.general.children.ui.children.treeview.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.general.children.ui.children.treeview.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
 
+settings.general.children.ui.children.treeview.label = "treeview"
 
+settings.general.children.ui.label = "Ui Components"
 
 settings.general.properties = orderedtable.new()
 settings.general.properties.haslinenumbers = property:new(false, "Show Linenumbers")
@@ -92,23 +91,37 @@ settings.general.properties.caretlinebackgroundcolor = property:new(0xffffff00, 
 settings.general.properties.caretcolor = property:new(0xffffff00, "Caret Color", "color", stock.color.PVFONT)
 settings.general.properties.font = property:new(fontinfo:new("courier", 12, 1), "Font", "fontinfo")
 
+settings.general.label = "General"
 
 settings.tab = {}
-settings.tab.label = "Tab"
 settings.tab.properties = orderedtable.new()
 settings.tab.properties.tabwidth = property:new(32, "Tabwidth")
 
+settings.tab.label = "Tab"
 
 settings.statusbar = {}
-settings.statusbar.label = "statusbar"
 settings.statusbar.properties = orderedtable.new()
 settings.statusbar.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.statusbar.properties.statuscolor = property:new(0xffb0d8b1, "Status Color", "color", stock.color.PVSELECTION)
 settings.statusbar.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
 
+settings.statusbar.label = "statusbar"
+
+settings.output = {}
+settings.output.properties = orderedtable.new()
+settings.output.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
+settings.output.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
+
+settings.output.label = "output"
+
+settings.textpage = {}
+settings.textpage.properties = orderedtable.new()
+settings.textpage.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
+settings.textpage.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
+
+settings.textpage.label = "textpage"
 
 settings.lualexer = {}
-settings.lualexer.label = "Lua Lexer"
 settings.lualexer.properties = orderedtable.new()
 settings.lualexer.properties.keywords = property:new("and break do else elseif end false for function if in local nil not or repeat return then true until while", "Keywords")
 settings.lualexer.properties.commentcolor = property:new(0xffb0d8b1, "Comment Color", "color")
@@ -122,6 +135,7 @@ settings.lualexer.properties.stringcolor = property:new(0xffa0a0a0, "String Colo
 settings.lualexer.properties.identifiercolor = property:new(0xffcacaca, "Identifier Color", "color")
 settings.lualexer.properties.numbercolor = property:new(0xffffa54b, "Number Color", "color")
 
+settings.lualexer.label = "Lua Lexer"
 
  
 return settings

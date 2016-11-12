@@ -124,7 +124,11 @@ end
 
 function toolicon:updatecolor(g)
   if self.on_ then
-    g:setcolor(self.activecolor)
+    if self.hover then
+      g:setcolor(self.activecolor)
+    else
+      g:setcolor(self.color)
+    end
   else
     if self.hover then
       g:setcolor(self.hovercolor)
@@ -136,7 +140,11 @@ end
 
 function toolicon:updatebackgroundcolor(g)
   if self.on_ then
-    g:setcolor(self.activebackgroundcolor)
+    if self.hover then
+      g:setcolor(self.activebackgroundcolor)
+    else
+      g:setcolor(self.backgroundcolor)
+    end
   else
     if self.hover then
       g:setcolor(self.hoverbackgroundcolor)
@@ -153,20 +161,25 @@ function toolicon:onmousedown(ev)
 end
 
 function toolicon:onmouseenter(ev)  
-  if (not self.on_) then     
-    self.hover = true
+  self.hover = true
+  if (not self.on_) then         
     self:fls()
   end
 end
 
 function toolicon:onmousemove(ev)  
+  local oldhover = self.hover
+  self.hover = self:absoluteposition():intersect(ev:clientpos())      
+  if self.hover ~= oldhover then
+    self:fls()
+  end
 end
 
 function toolicon:onmouseout(ev)   
-  if (not self.on_) then 
-    self.hover = false
+  self.hover = false
+  if (not self.on_) then     
     self:fls()    
-  end
+  end  
 end
 
 function toolicon:onmouseup(ev)  
@@ -174,7 +187,9 @@ function toolicon:onmouseup(ev)
   if not self.is_toggle then
     self:seton(false)  
   end
-  self:onclick()
+  if (self.hover) then
+    self:onclick()    
+  end
 end
 
 function toolicon:toggle()
@@ -231,40 +246,24 @@ function toolicon:oncalcautodimension()
   return 20, 20
 end
 
-function toolicon:onupdatearea(area, width, height)  
-  local auto_w, auto_h = self:autosize()
-  if auto_w then
-    width = 20
-  end
-  if auto_h then
-    height = 20
-  end
-  area:setrect(0, 0, width, height)  
-  return true
-end
-
 function toolicon:transparent()  
   return false
 end
 
+function toolicon:resethover()
+  self.hover = false
+  self:fls()
+end
+
 function toolicon:setproperties(properties)  
-  if properties.color then
-    self.color = properties.color:value()
-  end
-  if properties.backgroundcolor then
-    self.backgroundcolor = properties.backgroundcolor:value()          
-  end
-  if properties.activecolor then
-    self.activecolor = properties.activecolor:value()
-  end
-  if properties.activebackgroundcolor then
-    self.activebackgroundcolor = properties.activebackgroundcolor:value()
-  end
-  if properties.hovercolor then
-    self.hovercolor = properties.hovercolor:value()
-  end
-  if properties.hoverbackgroundcolor then
-    self.hoverbackgroundcolor = properties.hoverbackgroundcolor:value()
+  local setters = {"color", "backgroundcolor", "activecolor",
+                   "activebackgroundcolor", "hovercolor",
+                   "hoverbackgroundcolor"} 
+  for _, setter in pairs(setters) do        
+    local property = properties[setter]      
+    if property then    
+      self[setter] = property:value()
+    end
   end
   self:fls()
 end

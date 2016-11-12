@@ -5,7 +5,7 @@
 -- the terms of the GNU General Public License as published by the Free Software
 -- Foundation ; either version 2, or (at your option) any later version.  
 
-local cfg = require("psycle.config"):new("PatternVisual")
+local systems = require("psycle.ui.systems")
 local node = require("psycle.node")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
@@ -14,36 +14,23 @@ local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
 local lexer = require("psycle.ui.lexer")
 local scintilla = require("psycle.ui.scintilla")
-local settings = require("settings")
 local search = require("search")
 
 local output = scintilla:new()
 
-function output:new(parent, setting)    
+output.windowtype = 55
+
+function output:new(parent)    
   local c = scintilla:new(parent)  
   setmetatable(c, self)
   self.__index = self
-  c:init(setting)
+  c:init()
+  systems:new():changewindowtype(output.windowtype, c)
   return c
 end
 
-function output:init(setting)
-  self:setautosize(false, false)
-  self:applysetting(setting)  
-end
-
-function output:applysetting(setting)  
-  self:setforegroundcolor(setting.general.properties.foregroundcolor:value())
-  self:setbackgroundcolor(setting.general.properties.backgroundcolor:value())   
-  self:styleclearall()
-  self:setlinenumberforegroundcolor(setting.general.properties.linenumberforegroundcolor:value())
-  self:setlinenumberbackgroundcolor(setting.general.properties.linenumberbackgroundcolor:value())    
-  self:setselbackgroundcolor(setting.general.properties.selbackgroundcolor:value())    
-  self:setselalpha(75)
-  self:setfontinfo(fontinfo:new():setsize(settings.sci.lexer.font.size):setfamily(settings.sci.lexer.font.name))
-  self:setcaretcolor(0x939393)
-  self:setcaretlinebackgroundcolor(0x373533)
-  self:showcaretline()
+function output:init()
+  self:setautosize(false, false)  
 end
 
 function output:onkeydown(ev)
@@ -111,6 +98,28 @@ function output:onsearch(searchtext, dir, case, wholeword, regexp)
 	  self.searchbeginpos = cpselstart        
 	end
   end      
+end
+
+function output:setproperties(properties)      
+  if properties.color then    
+    self:setforegroundcolor(properties.color:value())	    
+  end
+  if properties.backgroundcolor then    
+	  self:setbackgroundcolor(properties.backgroundcolor:value())
+  end
+  self:styleclearall()
+  self:showcaretline()
+  if properties.color then    
+    self:setlinenumberforegroundcolor(properties.color:value())
+    self:setcaretcolor(properties.color:value())
+  end
+  if properties.backgroundcolor then    
+	  self:setlinenumberbackgroundcolor(properties.backgroundcolor:value())
+    self:setcaretlinebackgroundcolor(properties.backgroundcolor:value())
+  end
+  self:setselalpha(75)
+  self:setfontinfo(fontinfo:new():setsize(12):setfamily("consolas"))    
+  self:fls()
 end
 
 return output

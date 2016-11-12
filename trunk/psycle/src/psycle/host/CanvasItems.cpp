@@ -72,15 +72,15 @@ Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
 
 // Text
 Text::Text() : Window(), 
-    vertical_alignment_(ALTOP),
-    justify_(LEFTJUSTIFY),
+    vertical_alignment_(AlignStyle::ALTOP),
+    justify_(JustifyStyle::LEFTJUSTIFY),
     color_(0xFFFFFFFF),    
 	  is_aligned_(false) {      
 }
 
 Text::Text(const std::string& text) : 
-  vertical_alignment_(ALTOP),
-  justify_(LEFTJUSTIFY),
+  vertical_alignment_(AlignStyle::ALTOP),
+  justify_(JustifyStyle::LEFTJUSTIFY),
   color_(0xFFFFFFFF),
   text_(text),  
   is_aligned_(false) { 
@@ -142,10 +142,10 @@ const ui::Point& Text::text_alignment_position() {
 double Text::justify_offset(const ui::Dimension& text_dimension) {
   double result(0);
   switch (justify_) {	  
-		case CENTERJUSTIFY:
+		case JustifyStyle::CENTERJUSTIFY:
 			result = (dim().width() - text_dimension.width())/2;
 		break;
-		case RIGHTJUSTIFY:
+		case JustifyStyle::RIGHTJUSTIFY:
 			result = dim().width() - text_dimension.width();
 		break;
 		default:
@@ -157,10 +157,10 @@ double Text::justify_offset(const ui::Dimension& text_dimension) {
 double Text::vertical_alignment_offset(const ui::Dimension& text_dimension) {
   double result(0);
 	switch (vertical_alignment_) {	  
-		case ALCENTER:        
+		case AlignStyle::ALCENTER:        
       result = (dim().height() - text_dimension.height())/2;
 		break;
-		case ALBOTTOM:
+		case AlignStyle::ALBOTTOM:
 		  result = dim().height() - text_dimension.height();
 		break;
 		default:      
@@ -199,7 +199,7 @@ Splitter::Splitter() :
 	item_(0) {
   set_auto_size(false, false);
   set_orientation(HORZ);
-  set_align(ui::ALBOTTOM);
+  set_align(ui::AlignStyle::ALBOTTOM);
   set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
 }
 
@@ -213,10 +213,10 @@ Splitter::Splitter(Orientation orientation) :
   set_auto_size(false, false);
   set_orientation(orientation);
   if (orientation == ui::HORZ) {
-	  set_align(ui::ALBOTTOM);
+	  set_align(ui::AlignStyle::ALBOTTOM);
 	  set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
   } else {
-	  set_align(ui::ALLEFT);
+	  set_align(ui::AlignStyle::ALLEFT);
 	  set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
   }
 }
@@ -252,7 +252,7 @@ void Splitter::OnMouseUp(MouseEvent& ev) {
 	do_split_ = false;
 	ReleaseCapture();
   if (orientation_ == VERT) {   
-    if (align() == ALLEFT) {
+    if (align() == AlignStyle::ALLEFT) {
       item_->set_position(ui::Rect(item_->position().top_left(),
                      ui::Dimension(position().top_left().x() -
                                    item_->position().top_left().x(),
@@ -260,7 +260,7 @@ void Splitter::OnMouseUp(MouseEvent& ev) {
     }
   } else      
   if (orientation_ == HORZ) {    
-    if (align() == ALBOTTOM) {
+    if (align() == AlignStyle::ALBOTTOM) {
 		  item_->set_position(ui::Rect(item_->position().top_left(),
                      ui::Dimension(item_->position().width(),
                                    item_->position().bottom_right().y() - 
@@ -275,14 +275,14 @@ void Splitter::OnMouseUp(MouseEvent& ev) {
 void Splitter::OnMouseMove(MouseEvent& ev) {
 	if (do_split_) {
 		if (orientation_ == HORZ) {
-      if (drag_pos_ != ev.cy()) {        			  
-         drag_pos_ = (std::max)(0.0, ev.cy());
+      if (drag_pos_ != ev.client_pos().y()) {        			  
+         drag_pos_ = (std::max)(0.0, ev.client_pos().y());
          set_position(ui::Point(position().top_left().x(), drag_pos_ - parent_abs_pos_));         
       }
 		} else {
 			if (orientation_ == VERT) {
-				if (drag_pos_ != ev.cx()) {
-          drag_pos_ = (std::max)(0.0, ev.cx());
+				if (drag_pos_ != ev.client_pos().x()) {
+          drag_pos_ = (std::max)(0.0, ev.client_pos().x());
           set_position(ui::Point(drag_pos_ - parent_abs_pos_, position().top_left().y()));          
 				}
 			}
@@ -334,7 +334,7 @@ void TerminalFrame::Init() {
   set_viewport(maincanvas);
   maincanvas->SetSave(false);
   terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
-  terminal_view_->set_align(ALCLIENT);
+  terminal_view_->set_align(AlignStyle::ALCLIENT);
   maincanvas->Add(terminal_view_);  
   maincanvas->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
   set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
@@ -358,7 +358,7 @@ void HeaderGroup::Init() {
 	set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
 	set_auto_size(false, false);
 	ui::Group::Ptr header(new ui::Group());
-	header->set_align(ui::ALTOP);
+	header->set_align(ui::AlignStyle::ALTOP);
 	header->set_auto_size(false, true);
 	header->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
 	header->add_ornament(header_background_);
@@ -369,13 +369,13 @@ void HeaderGroup::Init() {
 	header->Add(header_text_);	
 	header_text_->set_font(Font(FontInfo("Tahoma", 12, 500, FontStyle::ITALIC)));
 	header_text_->set_color(0xFFFFFF);
-	header_text_->set_align(ALLEFT);
+	header_text_->set_align(AlignStyle::ALLEFT);
 	header_text_->set_auto_size(true, true);
 	header_text_->set_margin(BoxSpace(0, 5, 0, 0));
 
 	client_.reset(new ui::Group());
 	Group::Add(client_);
-	client_->set_align(ui::ALCLIENT);
+	client_->set_align(ui::AlignStyle::ALCLIENT);
 	client_->set_auto_size(false, false);
 	client_->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
 	client_->set_margin(ui::BoxSpace(0, 5, 5, 5));

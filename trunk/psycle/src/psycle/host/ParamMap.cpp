@@ -16,13 +16,13 @@ namespace host {
 ParamMapSkin::ParamMapSkin() {
   PsycleConfig::MachineParam& machine_params = PsycleGlobal::conf().macParam();
   using namespace ui;
-  background_color = ToARGB(machine_params.topColor) | 0xFF000000;  
-  list_view_background_color = ToARGB(machine_params.bottomColor) | 0xFF000000;
-  title_background_color = ToARGB(machine_params.titleColor) | 0xFF000000;  
-  font_color = ToARGB(machine_params.fontTopColor) | 0xFF000000;
-  title_font_color = ToARGB(machine_params.fonttitleColor) | 0xFF000000;
-  range_end_color = ToARGB(machine_params.fontBottomColor) | 0xFF000000;  
-  background.reset(OrnamentFactory::Instance().CreateFill(background_color));  
+  background_color = ToARGB(machine_params.topColor);
+  list_view_background_color = ToARGB(machine_params.bottomColor);
+  title_background_color = ToARGB(machine_params.titleColor);
+  font_color = ToARGB(machine_params.fontTopColor);
+  title_font_color = ToARGB(machine_params.fonttitleColor);
+  range_end_color = ToARGB(machine_params.fontBottomColor);
+  background.reset(OrnamentFactory::Instance().CreateFill(background_color));
   title_background.reset(OrnamentFactory::Instance().CreateFill(title_background_color));  
   font = ui::mfc::TypeConverter::font(machine_params.font);
   title_font = ui::mfc::TypeConverter::font(machine_params.font_bold);
@@ -74,7 +74,7 @@ void ParamMap::AddListView() {
   viewport()->Add(list_view_);
   list_view_->set_background_color(skin_.list_view_background_color);
   list_view_->set_color(skin_.font_color);
-  list_view_->set_align(ui::ALLEFT);
+  list_view_->set_align(ui::AlignStyle::ALLEFT);
   list_view_->ViewReport();
   list_view_->EnableRowSelect();
   list_view_->AddColumn("Virtual", 50);
@@ -88,7 +88,7 @@ void ParamMap::AddListView() {
 ui::Window::Ptr ParamMap::AddClientGroup() {
   ui::Window::Ptr client_group(new ui::Group());  
   viewport()->Add(client_group);
-  client_group->set_align(ui::ALCLIENT);    
+  client_group->set_align(ui::AlignStyle::ALCLIENT);    
   client_group->set_aligner(ui::Aligner::Ptr(new ui::DefaultAligner()));
   client_group->add_ornament(skin_.background);
   return client_group;
@@ -107,33 +107,32 @@ void ParamMap::AddSelectOffsetGroup(const ui::Window::Ptr& parent) {
   Text::Ptr txt1(new Text("FROM"));
   txt1->set_auto_size(false, false);
   cbx_group->Add(txt1);
-  txt1->set_align(ALLEFT);
-  txt1->set_vertical_alignment(ALCENTER);
+  txt1->set_align(AlignStyle::ALLEFT);
+  txt1->set_vertical_alignment(AlignStyle::ALCENTER);
   txt1->set_color(skin_.font_color);      
   txt1->set_margin(BoxSpace(0, 10, 0, 0));
-  txt1->set_justify(RIGHTJUSTIFY);  
+  txt1->set_justify(JustifyStyle::RIGHTJUSTIFY);  
   txt1->set_position(Rect(Point(), Dimension(50, 0)));
   txt1->set_font(skin_.font);
   cbx_group->Add(cbx_box_);
   cbx_box_->set_auto_size(false, false);
-  cbx_box_->set_align(ALLEFT);
+  cbx_box_->set_align(AlignStyle::ALLEFT);
   cbx_box_->set_position(Rect(Point(0, 0), Dimension(150, 20)));  
   cbx_box_->select.connect(
     boost::bind(&ParamMap::OnComboBoxSelect, this, _1));
-
   Group::Ptr end_group = CreateRow(parent);
   end_group->set_margin(BoxSpace(5, 0, 10, 5));  
   Text::Ptr txt2(new Text("TO"));  
   end_group->Add(txt2);
   txt2->set_margin(BoxSpace(0, 10, 0, 0));
-  txt2->set_justify(RIGHTJUSTIFY);
+  txt2->set_justify(JustifyStyle::RIGHTJUSTIFY);
   txt2->set_auto_size(false, true);
   txt2->set_color(skin_.font_color);  
-  txt2->set_align(ALLEFT);
+  txt2->set_align(AlignStyle::ALLEFT);
   txt2->set_position(Rect(Point(), Dimension(50, 0)));
   txt2->set_font(skin_.font);
   end_group->Add(machine_param_end_txt_);    
-  machine_param_end_txt_->set_align(ALLEFT); 
+  machine_param_end_txt_->set_align(AlignStyle::ALLEFT); 
   machine_param_end_txt_->set_color(skin_.range_end_color);
   machine_param_end_txt_->set_font(skin_.font);
 }
@@ -142,18 +141,17 @@ void ParamMap::AddSelectOffsetGroup(const ui::Window::Ptr& parent) {
 void ParamMap::AddButtonGroup(const ui::Window::Ptr& parent) {
   using namespace ui;
   Group::Ptr btn_group = CreateRow(parent);
-  btn_group->set_margin(BoxSpace(0, 0, 5, 5));  
-    
+  btn_group->set_margin(BoxSpace(0, 0, 5, 5));      
   Button::Ptr replace_btn(new Button());
   btn_group->Add(replace_btn);
-  replace_btn->set_align(ALLEFT);
+  replace_btn->set_align(AlignStyle::ALLEFT);
   replace_btn->set_position(Rect(Point(0, 0), Dimension(100, 20)));
   replace_btn->set_text("replace");    
   replace_btn->click.connect(
     boost::bind(&ParamMap::OnReplaceButtonClick, this, _1));
 
   btn_group->Add(allow_auto_learn_chk_box_);
-  allow_auto_learn_chk_box_->set_align(ALLEFT);
+  allow_auto_learn_chk_box_->set_align(AlignStyle::ALLEFT);
   allow_auto_learn_chk_box_->Check();
   allow_auto_learn_chk_box_->set_margin(BoxSpace(0, 0, 0, 5));
   allow_auto_learn_chk_box_->set_position(Rect(Point(), Dimension(100, 20)));
@@ -163,7 +161,7 @@ void ParamMap::AddButtonGroup(const ui::Window::Ptr& parent) {
   preset_group->set_margin(BoxSpace(0, 0, 5, 5));  
   Button::Ptr save_btn(new Button());
   preset_group->Add(save_btn);
-  save_btn->set_align(ALLEFT);
+  save_btn->set_align(AlignStyle::ALLEFT);
   save_btn->set_position(Rect(Point(), Dimension(100, 20)));
   save_btn->set_text("Save as Default");
   save_btn->click.connect(
@@ -173,7 +171,7 @@ void ParamMap::AddButtonGroup(const ui::Window::Ptr& parent) {
   preset2_group->set_margin(BoxSpace(0, 0, 5, 5));  
   Button::Ptr load_btn(new Button());
   preset2_group->Add(load_btn);
-  load_btn->set_align(ALLEFT);
+  load_btn->set_align(AlignStyle::ALLEFT);
   load_btn->set_margin(BoxSpace(0, 5, 0, 0));
   load_btn->set_position(Rect(Point(), Dimension(100, 20)));
   load_btn->set_text("Load Default");
@@ -182,7 +180,7 @@ void ParamMap::AddButtonGroup(const ui::Window::Ptr& parent) {
 
   Button::Ptr reset_btn(new Button());
   preset2_group->Add(reset_btn);  
-  reset_btn->set_align(ALLEFT);
+  reset_btn->set_align(AlignStyle::ALLEFT);
   reset_btn->set_position(Rect(Point(), Dimension(100, 20)));
   reset_btn->set_text("Reset mapping");
   reset_btn->click.connect(
@@ -198,7 +196,7 @@ void ParamMap::AddHelpGroup(const ui::Window::Ptr& parent) {
 void ParamMap::AddTextLine(const ui::Window::Ptr& parent, const std::string& text) {
   using namespace ui;
   Text::Ptr line(new Text(text));
-  line->set_align(ALTOP);
+  line->set_align(AlignStyle::ALTOP);
   line->set_font(skin_.font);
   line->set_color(skin_.font_color);
   line->set_margin(ui::BoxSpace(5));
@@ -210,7 +208,7 @@ ui::Group::Ptr ParamMap::CreateRow(const ui::Window::Ptr& parent) {
   Group::Ptr header_group(new Group());
   header_group->set_aligner(Aligner::Ptr(new DefaultAligner()));
   header_group->set_auto_size(false, true);
-  header_group->set_align(ALTOP);
+  header_group->set_align(AlignStyle::ALTOP);
   header_group->set_margin(BoxSpace(5));
   parent->Add(header_group);  
   return header_group;
@@ -226,7 +224,7 @@ ui::Group::Ptr ParamMap::CreateTitleRow(const ui::Window::Ptr& parent, const std
   txt->set_color(skin_.title_font_color);  
   txt->set_auto_size(true, true);
   txt->set_margin(BoxSpace(5));
-  txt->set_align(ALLEFT);
+  txt->set_align(AlignStyle::ALLEFT);
   return header_group;
 }
 
@@ -235,7 +233,7 @@ ui::Group::Ptr ParamMap::CreateTitleGroup(const ui::Window::Ptr& parent, const s
   Group::Ptr title_group(new Group());
   title_group->set_aligner(Aligner::Ptr(new DefaultAligner()));
   title_group->set_auto_size(false, true);
-  title_group->set_align(ALTOP);
+  title_group->set_align(AlignStyle::ALTOP);
   title_group->set_margin(BoxSpace(5));  
   title_group->add_ornament(border_);
   CreateTitleRow(title_group, title);

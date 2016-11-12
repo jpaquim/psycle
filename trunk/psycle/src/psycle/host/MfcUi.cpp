@@ -1,4 +1,4 @@
-// #include "stdafx.h"MOUSEDOWN
+// #include "stdafx.h"
 
 #include "MfcUi.hpp"
 #include "Mmsystem.h"
@@ -9,7 +9,6 @@ namespace psycle {
 namespace host {
 namespace ui {
 namespace mfc {
-
 
 void GraphicsImp::DevFillRegion(const ui::Region& rgn) {    
   check_pen_update();
@@ -85,7 +84,8 @@ void ImageImp::DevReset(const ui::Dimension& dimension) {
 	bmp_ = new CBitmap();
 	CDC dc;
 	dc.CreateCompatibleDC(NULL);
-	bmp_->CreateCompatibleBitmap(&dc, static_cast<int>(dimension.width()), static_cast<int>(dimension.height()));
+	bmp_->CreateCompatibleBitmap(&dc, static_cast<int>(dimension.width()),
+                               static_cast<int>(dimension.height()));
 	::ReleaseDC(NULL, dc);
 }
 
@@ -99,8 +99,6 @@ ui::Graphics* ImageImp::dev_graphics() {
 	return paint_graphics_.get();
 }
   
-std::map<HWND, ui::WindowImp*> WindowHook::windows_;
-HHOOK WindowHook::_hook = 0;
 int WindowID::id_counter = ID_DYNAMIC_CONTROLS_BEGIN;
 CWnd DummyWindow::dummy_wnd_;
 
@@ -163,52 +161,32 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
 		CWnd* child = ChildWindowFromPoint(pt, CWP_SKIPINVISIBLE);
 		if (!child) {
       mouse_enter_ = true;      
-      CRect rc;
-      GetWindowRect(&rc);
-      MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(this->dev_absolute_position().top()), 1, pMsg->wParam);
+      MouseEvent ev(MousePos(pt), 1, pMsg->wParam);
       return WorkEvent(ev, &Window::OnMouseOut, window(), pMsg);    
 		}
   }  else
-  if (pMsg->message == WM_LBUTTONDOWN) {
-    CPoint pt(pMsg->pt);        
-    CRect rc;
-    GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
+  if (pMsg->message == WM_LBUTTONDOWN) {    
+    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
 	} else
-  if (pMsg->message == WM_LBUTTONDBLCLK) {
-    CPoint pt(pMsg->pt);        
-    CRect rc;
-    GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
+  if (pMsg->message == WM_LBUTTONDBLCLK) {    
+    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
-  if (pMsg->message == WM_LBUTTONUP) {
-    CPoint pt(pMsg->pt);        
-    CRect rc;
-    GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
+  if (pMsg->message == WM_LBUTTONUP) {    
+    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else
-  if (pMsg->message == WM_RBUTTONDOWN) {
-    CPoint pt(pMsg->pt);        
-    CRect rc;
-    GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 2, pMsg->wParam);
+  if (pMsg->message == WM_RBUTTONDOWN) {        
+    MouseEvent ev(MousePos(pMsg->pt), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
   } else    
-  if (pMsg->message == WM_RBUTTONDBLCLK) {
-    CPoint pt(pMsg->pt);        
-    CRect rc;
-    GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 2, pMsg->wParam);
+  if (pMsg->message == WM_RBUTTONDBLCLK) {    
+    MouseEvent ev(MousePos(pMsg->pt), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
-  if (pMsg->message == WM_RBUTTONUP) {
-    CPoint pt(pMsg->pt);        
-    CRect rc;
-    GetWindowRect(&rc);
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 2, pMsg->wParam);
+  if (pMsg->message == WM_RBUTTONUP) {    
+    MouseEvent ev(MousePos(pMsg->pt), 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else  
 	if (pMsg->message == WM_MOUSEHOVER) {
@@ -220,11 +198,8 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     tme.hwndTrack = m_hWnd;
     tme.dwFlags = TME_LEAVE;
     tme.dwHoverTime = 1;    
-    m_bTracking = _TrackMouseEvent(&tme);     
-    CPoint pt(pMsg->pt);
-    CRect rc;
-    GetWindowRect(&rc);    
-    MouseEvent ev(pt.x - rc.left + static_cast<int>(dev_absolute_position().left()), pt.y - rc.top + static_cast<int>(dev_absolute_position().top()), 1, pMsg->wParam);
+    m_bTracking = _TrackMouseEvent(&tme);         
+    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
     if (mouse_enter_) {
       mouse_enter_ = false;
       if (window()) {
@@ -267,19 +242,12 @@ template<class T, class I>
 int WindowTemplateImp<T, I>::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 	if (CWnd::OnCreate(lpCreateStruct) == -1) {
 		return -1;
-	}
-  WindowHook::windows_[GetSafeHwnd()] = this;
-  // Set the hook
-  WindowHook::SetFocusHook();  
+	}  
 	return 0;
 }
 
 template<class T, class I>
-void WindowTemplateImp<T, I>::OnDestroy() {  
-  std::map<HWND, ui::WindowImp*>::iterator it = WindowHook::windows_.find(GetSafeHwnd());
-  if (it != WindowHook::windows_.end()) {
-    WindowHook::windows_.erase(it);
-  }
+void WindowTemplateImp<T, I>::OnDestroy() {    
   bmpDC.DeleteObject();
 }
 
@@ -330,7 +298,8 @@ ui::Rect WindowTemplateImp<T, I>::dev_absolute_system_position() const {
 	if (window() && window()->root()) {
     CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
 		::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);    
-		return ui::Rect(ui::Point(rc.left, rc.top), ui::Point(rc.right, rc.bottom));
+		return ui::Rect(ui::Point(rc.left, rc.top),
+                    ui::Point(rc.right, rc.bottom));
 	}
 	return ui::Rect::zero();
 }
@@ -357,17 +326,22 @@ bool WindowTemplateImp<T, I>::dev_check_position(const ui::Rect& pos) const {
 									  window()->parent()->border_space().top() +
 			              window()->parent()->padding().top());
   }	
-  ui::Rect pos1 = ui::Rect(top_left, ui::Dimension(pos.width() + padding_.width() + border_space_.width(),
-		                                               pos.height() + padding_.height() + border_space_.height()));
+  ui::Rect pos1 = ui::Rect(top_left,
+                           ui::Dimension(pos.width() + padding_.width() +
+                                         border_space_.width(),
+		                                     pos.height() + padding_.height() +
+                                         border_space_.height()));
   return TypeConverter::rect(pos1).EqualRect(rc);
 }
 
 template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::MapPosToBoxModel(const CRect& rc) const {
-	 ui::Point top_left(rc.left - margin_.left(), rc.top - margin_.top());	
-	   if (window() && window()->parent()) {
-		   top_left.Offset(-window()->parent()->border_space().left() - window()->parent()->padding().left(),
-			                 -window()->parent()->border_space().top() - window()->parent()->padding().top());
+	 ui::Point top_left(rc.left - margin_.left(), rc.top - margin_.top());   
+	   if (window() && window()->parent()) {       
+		   top_left.Offset(-window()->parent()->border_space().left() - 
+                       window()->parent()->padding().left(),
+			                 -window()->parent()->border_space().top() -
+                       window()->parent()->padding().top());
 	   }
 		 return ui::Rect(top_left,
 		              ui::Dimension(rc.Width() - padding_.width() -
@@ -398,68 +372,52 @@ void WindowTemplateImp<T, I>::OnPaint() {
 		return; 
 	}
   CPaintDC dc(this);
-
   if (!is_double_buffered_) {    
 	  ui::Graphics g(&dc);
 	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));    
     window()->DrawBackground(&g, draw_rgn);    
-	  g.Translate(padding_.left() + border_space_.left(), padding_.top() + border_space_.top());
+	  g.Translate(padding_.left() + border_space_.left(),
+                padding_.top() + border_space_.top());
 	  OnDevDraw(&g, draw_rgn);
 	  g.Dispose();
   }
   else {
-	if (!bmpDC.m_hObject) { // buffer creation	
-		CRect rc;
-		GetClientRect(&rc);
-		bmpDC.CreateCompatibleBitmap(&dc, rc.right - rc.left, rc.bottom - rc.top);
-		char buf[128];
-		sprintf(buf, "CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n", (void*)bmpDC);
-		TRACE(buf);
-	}	
-	CDC bufDC;
-	bufDC.CreateCompatibleDC(&dc);
-	CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);
-	ui::Graphics g(&bufDC);
-	ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
-  window()->DrawBackground(&g, draw_rgn);  
-	ui::Rect bounds = draw_rgn.bounds();
-	OnDevDraw(&g, draw_rgn);
-	g.Dispose();
-	CRect rc;
-	GetClientRect(&rc);
-	dc.BitBlt(0, 0, rc.right - rc.left, rc.bottom - rc.top, &bufDC, 0, 0, SRCCOPY);
-	bufDC.SelectObject(oldbmp);
-	bufDC.DeleteDC();
+	  if (!bmpDC.m_hObject) { // buffer creation	
+		  CRect rc;
+		  GetClientRect(&rc);
+		  bmpDC.CreateCompatibleBitmap(&dc, rc.right - rc.left, rc.bottom - rc.top);
+		  char buf[128];
+		  sprintf(buf, "CanvasView::OnPaint(). Initialized bmpDC to 0x%p\n",
+              (void*)bmpDC);
+		  TRACE(buf);
+	  }	
+	  CDC bufDC;
+	  bufDC.CreateCompatibleDC(&dc);
+	  CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);
+	  ui::Graphics g(&bufDC);
+	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
+    window()->DrawBackground(&g, draw_rgn);	  
+	  OnDevDraw(&g, draw_rgn);
+	  g.Dispose();
+	  CRect rc;
+	  GetClientRect(&rc);
+	  dc.BitBlt(0, 0, rc.right - rc.left, rc.bottom - rc.top, &bufDC, 0, 0,
+              SRCCOPY);
+	  bufDC.SelectObject(oldbmp);
+	  bufDC.DeleteDC();
   }
   rgn.DeleteObject();    
 }
 
 template<class T, class I>
-void WindowTemplateImp<T, I>::OnSize(UINT nType, int cw, int ch) {  
-  if (bmpDC.m_hObject != NULL) { // remove old buffer to force recreating it with new size
+void WindowTemplateImp<T, I>::OnSize(UINT nType, int cw, int ch) {
+  if (bmpDC.m_hObject != NULL) { 
+    // remove old buffer to force recreating it with new size
 	  TRACE("CanvasView::OnResize(). Deleted bmpDC\n");
 	  bmpDC.DeleteObject();	  
   }  
   OnDevSize(ui::Dimension(cw, ch));
   CWnd::OnSize(nType, cw, ch);
-}
-
-template<class T, class I>
-ui::Window* WindowTemplateImp<T, I>::dev_focus_window() {
-  Window* result = 0;
-  HWND hwnd = ::GetFocus();
-  if (hwnd) {
-    std::map<HWND, ui::WindowImp*>::iterator it;
-    do {
-      it = WindowHook::windows_.find(hwnd);
-      if (it != WindowHook::windows_.end()) {
-        result = it->second->window();
-        break;
-      }
-      hwnd = ::GetParent(hwnd);
-    } while (hwnd);
-  }
-  return result;
 }
 
 void WindowImp::DevSetCursor(CursorStyle::Type style) {
@@ -492,23 +450,6 @@ void WindowImp::DevSetCursor(CursorStyle::Type style) {
   }
   cursor_ = (c!=0) ? LoadCursor(0, c) : ::LoadCursor(0, MAKEINTRESOURCE(ac));
 }
-
-/*
-BOOL WindowImp::OnEraseBkgnd(CDC * pDC) {
-	if (window() && !window()->ornament().expired()) {
-		CRect rc;
-		GetClientRect(&rc);
-		CRgn rgn;
-		rgn.CreateRectRgn(0, 0, rc.Width(), rc.Height());
-		
-		ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
-		ui::Rect r = draw_rgn.bounds();
-		ui::Graphics g(pDC);						
-		window()->DrawBackground(&g, draw_rgn);
-		g.Dispose();
-	}
-	return TRUE;
-}*/
 
 template class WindowTemplateImp<CWnd, ui::WindowImp>;
 template class WindowTemplateImp<CComboBox, ui::ComboBoxImp>;
@@ -592,7 +533,8 @@ void FrameImp::DevAllowResize() {
 }
 
 void FrameImp::OnDynamicMenuItems(UINT nID) {
-  ui::mfc::MenuContainerImp* mbimp =  ui::mfc::MenuContainerImp::MenuContainerImpById(nID);
+  ui::mfc::MenuContainerImp* mbimp = 
+      ui::mfc::MenuContainerImp::MenuContainerImpById(nID);
   if (mbimp != 0) {
     mbimp->WorkMenuItemEvent(nID);
     return;
@@ -685,10 +627,6 @@ void GroupBoxImp::dev_set_font(const Font& font) {
    ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
 }
 
-void GroupBoxImp::OnClick() {
-	OnDevClick();
-}
-
 BEGIN_MESSAGE_MAP(ComboBoxImp, CComboBox)  
 	ON_WM_PAINT()
   ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelect)
@@ -741,7 +679,8 @@ void EditImp::dev_set_font(const Font& font) {
    ::SendMessage(this->m_hWnd, WM_SETFONT, (WPARAM)(imp->cfont()), TRUE);
 }
 
-HTREEITEM TreeNodeImp::DevInsert(TreeViewImp* tree, const ui::Node& node, TreeNodeImp* prev_imp) {  
+HTREEITEM TreeNodeImp::DevInsert(TreeViewImp* tree, const ui::Node& node,
+                                 TreeNodeImp* prev_imp) {
   TVINSERTSTRUCT tvInsert;
   tvInsert.hParent = hItem;
   tvInsert.hInsertAfter = prev_imp ? prev_imp->hItem : TVI_LAST;
@@ -782,7 +721,8 @@ BOOL TreeViewImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
   return ev.is_propagation_stopped();  
 }
 
-void TreeViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node) {  
+void TreeViewImp::UpdateNode(const Node::Ptr& node,
+                             const Node::Ptr& prev_node) {
   NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
   boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
   node->erase_imp(this);  
@@ -793,7 +733,8 @@ void TreeViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node) 
   node->changed.connect(boost::bind(&TreeViewImp::OnNodeChanged, this, _1));
   if (node->parent()) {
     ui::Node* parent_node = node->parent();
-    TreeNodeImp* parent_imp = dynamic_cast<TreeNodeImp*>(parent_node->imp(*this));
+    TreeNodeImp* parent_imp =
+        dynamic_cast<TreeNodeImp*>(parent_node->imp(*this));
     if (parent_imp) {
       TreeNodeImp* prev_imp = dynamic_cast<TreeNodeImp*>(prev_node_imp);
        new_imp->hItem = parent_imp->DevInsert(this, *node.get(), prev_imp);
@@ -802,7 +743,8 @@ void TreeViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node) 
   }
 }
 
-void TreeViewImp::DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node) {  
+void TreeViewImp::DevUpdate(const Node::Ptr& node,
+                            const Node::Ptr& prev_node) {
   recursive_node_iterator end = node->recursive_end();
   recursive_node_iterator it = node->recursive_begin();
   boost::shared_ptr<Node> prev = prev_node;
@@ -849,7 +791,7 @@ boost::weak_ptr<Node> TreeViewImp::dev_selected() {
 void TreeViewImp::OnNodeChanged(Node& node) {
   TreeNodeImp* imp = dynamic_cast<TreeNodeImp*>(node.imp(*this));  
   if (imp) {      
-    SetItemText(imp->hItem, Charset::utf8_to_win(node.text()).c_str());   
+    SetItemText(imp->hItem, Charset::utf8_to_win(node.text()).c_str());
   }
 }
 
@@ -876,7 +818,7 @@ BOOL TreeViewImp::OnDblClick(NMHDR * pNotifyStruct, LRESULT * result) {
   CPoint pt;
   ::GetCursorPos(&pt);
   ScreenToClient(&pt);  
-  MouseEvent ev(pt.x, pt.y, 1, 0);    
+  MouseEvent ev(Point(pt.x, pt.y), 1, 0);    
   if (window()) {
     window()->OnDblclick(ev);    
   }
@@ -909,7 +851,8 @@ BOOL TreeViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
 		  is_editing_ = true;
       CString s;    
       edit->GetWindowText(s);    
-      tree_view()->OnEditing(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
+      tree_view()->OnEditing(node->shared_from_this(),
+                             Charset::win_to_utf8(s.GetString()));
 		}
   }
   return FALSE;
@@ -924,8 +867,10 @@ BOOL TreeViewImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
 			is_editing_ = false;
 			CString s;    
 			edit->GetWindowText(s);    
-			tree_view()->OnEdited(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
-			tree_view()->edited(*tree_view(), node->shared_from_this(),Charset::win_to_utf8(s.GetString()));
+			tree_view()->OnEdited(node->shared_from_this(),
+                            Charset::win_to_utf8(s.GetString()));
+			tree_view()->edited(*tree_view(), node->shared_from_this(),
+                           Charset::win_to_utf8(s.GetString()));
 		}
   }
   return FALSE;
@@ -949,57 +894,43 @@ void TreeViewImp::DevHideButtons() {
   ModifyStyle(TVS_HASBUTTONS, 0);
 }
 
-HTREEITEM GetNextTreeItem(const CTreeCtrl& treeCtrl, HTREEITEM hItem)
-{
-      // has this item got any children
-      if (treeCtrl.ItemHasChildren(hItem))
-      {
-            return treeCtrl.GetNextItem(hItem, TVGN_CHILD);
-      }
-      else if (treeCtrl.GetNextItem(hItem, TVGN_NEXT) != NULL)
-      {
-            // the next item at this level
-            return treeCtrl.GetNextItem(hItem, TVGN_NEXT);
-      }
-      else
-      {
-            // return the next item after our parent
-            hItem = treeCtrl.GetParentItem(hItem);
-            if (hItem == NULL)
-            {
-                  // no parent
-                  return NULL;
-            }
-            while (hItem && treeCtrl.GetNextItem(hItem, TVGN_NEXT) == NULL)
-            {
-                  hItem = treeCtrl.GetParentItem(hItem);									
-            }
-            // next item that follows our parent
-            return treeCtrl.GetNextItem(hItem, TVGN_NEXT);
-      }
+HTREEITEM GetNextTreeItem(const CTreeCtrl& treeCtrl, HTREEITEM hItem) {
+  // has this item got any children
+  if (treeCtrl.ItemHasChildren(hItem)) {
+    return treeCtrl.GetNextItem(hItem, TVGN_CHILD);
+  } else if (treeCtrl.GetNextItem(hItem, TVGN_NEXT) != NULL) {
+  // the next item at this level
+    return treeCtrl.GetNextItem(hItem, TVGN_NEXT);
+  } else {
+    // return the next item after our parent
+    hItem = treeCtrl.GetParentItem(hItem);
+    if (hItem == NULL) {
+      // no parent
+      return NULL;
+    }
+    while (hItem && treeCtrl.GetNextItem(hItem, TVGN_NEXT) == NULL) {
+      hItem = treeCtrl.GetParentItem(hItem);									
+    }
+    // next item that follows our parent
+    return treeCtrl.GetNextItem(hItem, TVGN_NEXT);
+  }
 }
 
 // Functions to expands all items in a tree control
-void ExpandAll(CTreeCtrl& treeCtrl)
-{
-     
-     HTREEITEM hRootItem = treeCtrl.GetRootItem();
-     HTREEITEM hItem = hRootItem;
-
-     while (hItem)
-     {
-          if (treeCtrl.ItemHasChildren(hItem))
-          {
-               treeCtrl.Expand(hItem, TVE_EXPAND);
-          }
-          hItem = GetNextTreeItem(treeCtrl, hItem);
-     }
+void ExpandAll(CTreeCtrl& treeCtrl) {     
+  HTREEITEM hRootItem = treeCtrl.GetRootItem();
+  HTREEITEM hItem = hRootItem;
+    while (hItem) {
+    if (treeCtrl.ItemHasChildren(hItem)) {
+      treeCtrl.Expand(hItem, TVE_EXPAND);
+    }
+    hItem = GetNextTreeItem(treeCtrl, hItem);
+  }
 }
 
 void TreeViewImp::DevExpandAll() {
 	ExpandAll(*this);  
 }
-
 
 BEGIN_MESSAGE_MAP(ListViewImp, CListCtrl)
   ON_WM_ERASEBKGND()
@@ -1022,7 +953,8 @@ BOOL ListViewImp::prevent_propagate_event(ui::Event& ev, MSG* pMsg) {
   return ev.is_propagation_stopped();  
 }
 
-void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos) {  
+void ListNodeImp::DevInsertFirst(ui::mfc::ListViewImp* list, const Node& node,
+    ListNodeImp* node_imp, ListNodeImp* prev_imp, int pos) {
   LVITEM lvi;
   lvi.mask =  LVIF_TEXT | LVIF_IMAGE;
   lvi.cColumns = 0;
@@ -1051,7 +983,8 @@ void ListNodeImp::set_text(ui::mfc::ListViewImp* list, const std::string& text) 
   list->SetItemText(lvi.iItem, lvi.iSubItem, Charset::utf8_to_win(text).c_str());
 }
 
-void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const ui::Node& node, ListNodeImp* node_imp, ListNodeImp* prev_imp, int level) {
+void ListNodeImp::DevSetSub(ui::mfc::ListViewImp* list, const Node& node,
+     ListNodeImp* node_imp, ListNodeImp* prev_imp, int level) {
   LVITEM lvi;
   lvi.mask =  LVIF_TEXT | LVIF_IMAGE;
   lvi.cColumns = 0;
@@ -1075,10 +1008,12 @@ void ListNodeImp::Select(ui::mfc::ListViewImp* list_view_imp) {
 }
 
 void ListNodeImp::Deselect(ui::mfc::ListViewImp* list_view_imp) {
-  list_view_imp->SetItemState(lvi.iItem, static_cast<UINT>(~LVIS_SELECTED), LVIS_SELECTED);
+  list_view_imp->SetItemState(lvi.iItem,
+      static_cast<UINT>(~LVIS_SELECTED), LVIS_SELECTED);
 }
 
-ListNodeImp* ListViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& prev_node, int pos) {
+ListNodeImp* ListViewImp::UpdateNode(const Node::Ptr& node,
+                                     const Node::Ptr& prev_node, int pos) {
   ListNodeImp* new_imp = new ListNodeImp();  
   NodeImp* prev_node_imp = prev_node ? prev_node->imp(*this) : 0;
   node->erase_imp(this);  
@@ -1094,12 +1029,14 @@ ListNodeImp* ListViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& pre
     ui::Node* parent_node = node->parent();
     boost::ptr_list<NodeImp>::iterator it = parent_node->imps.begin();
     for ( ; it != parent_node->imps.end(); ++it) {
-      ListNodeImp* parent_imp = dynamic_cast<ListNodeImp*>(parent_node->imp(*this));
+      ListNodeImp* parent_imp =
+          dynamic_cast<ListNodeImp*>(parent_node->imp(*this));
       if (parent_imp) {             
         ListNodeImp* prev_imp = dynamic_cast<ListNodeImp*>(prev_node_imp);
         int level = node->level();
         if (level == 1) {
-          parent_imp->DevInsertFirst(this, *node.get(), new_imp, prev_imp, pos);
+          parent_imp->DevInsertFirst(this, *node.get(), new_imp, prev_imp,
+                                     pos);
           lookup_table_[pos] = new_imp;
         } else {
           parent_imp->DevSetSub(this, *node.get(), new_imp, prev_imp, level);
@@ -1111,7 +1048,8 @@ ListNodeImp* ListViewImp::UpdateNode(const Node::Ptr& node, const Node::Ptr& pre
   return new_imp;
 }
 
-void ListViewImp::DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node) {  
+void ListViewImp::DevUpdate(const Node::Ptr& node,
+                            const Node::Ptr& prev_node) {  
   recursive_node_iterator end = node->recursive_end();
   recursive_node_iterator it = node->recursive_begin();  
   int pos = 0;
@@ -1171,8 +1109,8 @@ void ListViewImp::dev_deselect_node(const Node::Ptr& node) {
 }
 
 boost::weak_ptr<Node> ListViewImp::dev_selected() {
-  ui::Node* node = find_selected_node();
-  return node ? node->shared_from_this() : boost::weak_ptr<ui::Node>();
+  Node* node = find_selected_node();
+  return node ? node->shared_from_this() : boost::weak_ptr<Node>();
 }
 
 void ListViewImp::OnNodeChanged(Node& node) {
@@ -1243,7 +1181,8 @@ BOOL ListViewImp::OnBeginLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
       CString s;    
       edit->GetWindowText(s);
       is_editing_ = true;
-      list_view()->OnEditing(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
+      list_view()->OnEditing(node->shared_from_this(),
+                             Charset::win_to_utf8(s.GetString()));
 		}
   }
   return FALSE;
@@ -1258,7 +1197,8 @@ BOOL ListViewImp::OnEndLabelEdit(NMHDR * pNotifyStruct, LRESULT * result) {
 		  is_editing_ = false;
       CString s;    
       edit->GetWindowText(s);    
-      list_view()->OnEdited(node->shared_from_this(), Charset::win_to_utf8(s.GetString()));
+      list_view()->OnEdited(node->shared_from_this(),
+                            Charset::win_to_utf8(s.GetString()));
 		}
   }
   return FALSE;
@@ -1293,14 +1233,15 @@ BOOL ScrollBarImp::OnChildNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESUL
     int nScrollCode = (short)LOWORD(wParam);
 	  int nPos = (short)HIWORD(wParam);
     switch(nScrollCode) {
-      case SB_THUMBTRACK:     //The user is dragging the scroll box. This message is sent repeatedly until the user releases the mouse button. The nPos parameter indicates the position that the scroll box has been dragged to.         
-        dev_set_scroll_position(nPos);
-        break;
+      case SB_THUMBTRACK:
+      dev_set_scroll_position(nPos);
+      break;
     }
     
     OnDevScroll(nPos);
   }
-  return  WindowTemplateImp<CScrollBar, ui::ScrollBarImp>::OnChildNotify(uMsg, wParam, lParam, pResult);
+  return  WindowTemplateImp<CScrollBar, ui::ScrollBarImp>::OnChildNotify(uMsg,
+      wParam, lParam, pResult);
 }
 
 IMPLEMENT_DYNAMIC(ScintillaImp, CWnd)
@@ -1347,7 +1288,9 @@ void ScintillaImp::SetFoldingBasics() {
   f(SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS);  
   f(SCI_SETPROPERTY, _T("fold"), _T("1"));
   f(SCI_SETPROPERTY, _T("fold.compact"), _T("1"));                
-  f(SCI_SETAUTOMATICFOLD, SC_AUTOMATICFOLD_SHOW | SC_AUTOMATICFOLD_CHANGE| SC_AUTOMATICFOLD_CLICK, 0);
+  f(SCI_SETAUTOMATICFOLD,
+    SC_AUTOMATICFOLD_SHOW | SC_AUTOMATICFOLD_CHANGE| SC_AUTOMATICFOLD_CLICK,
+    0);
 }
 
 void ScintillaImp::SetFoldingColors(const Lexer& lexer) {
@@ -1382,49 +1325,13 @@ BOOL ScintillaImp::OnMarginClick(NMHDR * nhmdr,LRESULT *) {
   return 0L;
 }
 
-LRESULT __stdcall WindowHook::HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
-  if (nCode == HC_ACTION) {
-    CWPSTRUCT* info = (CWPSTRUCT*) lParam;        
-    if (info->message == WM_SETFOCUS) {
-      FilterHook(info->hwnd);                     
-    }
-  }
-  return CallNextHookEx(_hook , nCode, wParam, lParam);       
-}
-
-void WindowHook::FilterHook(HWND hwnd) {  
-  typedef std::map<HWND, ui::WindowImp*> WindowList;
-  /*WindowList::iterator it = windows_.find(hwnd);
-  if (it != windows_.end()) {
-    it->second->window()->
-  } else {
-    Window::SetFocus(Window::nullpointer);
-  }*/
-}
-
-void WindowHook::SetFocusHook() {
-  if (_hook) {
-    return;
-  }
-  if (!(_hook = SetWindowsHookEx(WH_CALLWNDPROC, 
-                                 WindowHook::HookCallback,
-                                 AfxGetInstanceHandle(),
-                                 GetCurrentThreadId()))) {
-    TRACE(_T("ui::MFCView : Failed to install hook!\n"));
-  }
-}
-
-void WindowHook::ReleaseHook() { 
-  UnhookWindowsHookEx(_hook);
-}
-
 // MenuContainerImp
 std::map<int, MenuContainerImp*> MenuContainerImp::menu_bar_id_map_;
 
-MenuContainerImp::MenuContainerImp() : menu_window_(0), hmenu_(0) {  
-}
 
-void MenuContainerImp::set_menu_window(CWnd* menu_window, const Node::Ptr& root_node) {
+
+void MenuContainerImp::set_menu_window(CWnd* menu_window, 
+                                       const Node::Ptr& root_node) {
   menu_window_ = menu_window;  
   if (!menu_window && root_node) {
     hmenu_ = 0;
@@ -1441,7 +1348,8 @@ void MenuContainerImp::DevInvalidate() {
   }
 }
 
-void MenuContainerImp::DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node) {
+void MenuContainerImp::DevUpdate(const Node::Ptr& node, 
+                                 const Node::Ptr& prev_node) {
   if (hmenu_) {		
     UpdateNodes(node, hmenu_, ::GetMenuItemCount(hmenu_));
     DevInvalidate();
@@ -1453,7 +1361,8 @@ void MenuContainerImp::RegisterMenuEvent(int id, MenuImp* menu_imp) {
   menu_bar_id_map_[id] = this;
 }
 
-void MenuContainerImp::UpdateNodes(const Node::Ptr& parent_node, HMENU parent, int pos_start) {
+void MenuContainerImp::UpdateNodes(const Node::Ptr& parent_node, HMENU parent,
+                                   int pos_start) {
   if (parent_node) {
     Node::Container::iterator it = parent_node->begin();    
     for (int pos = pos_start; it != parent_node->end(); ++it, ++pos) {
@@ -1512,7 +1421,7 @@ void MenuContainerImp::WorkMenuItemEvent(int id) {
     struct {
      ui::MenuContainer* bar;
      int selectedItemID;
-     void operator()(boost::shared_ptr<ui::Node> node, boost::shared_ptr<ui::Node> prev_node) {
+     void operator()(Node::Ptr node, Node::Ptr prev_node) {
        boost::ptr_list<NodeImp>::iterator it = node->imps.begin();
        for ( ; it != node->imps.end(); ++it) {         
          MenuImp* imp = dynamic_cast<MenuImp*>(&(*it));
@@ -1550,7 +1459,8 @@ PopupMenuImp::PopupMenuImp() : popup_menu_(0) {
 void PopupMenuImp::DevTrack(const ui::Point& pos) {
   ::TrackPopupMenu(popup_menu_,
     TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_HORPOSANIMATION | TPM_VERPOSANIMATION,
-    static_cast<int>(pos.x()), static_cast<int>(pos.y()), 0, ::AfxGetMainWnd()->m_hWnd, 0);
+    static_cast<int>(pos.x()), static_cast<int>(pos.y()), 0,
+    ::AfxGetMainWnd()->m_hWnd, 0);
 }
 
 //MenuImp
@@ -1564,7 +1474,8 @@ MenuImp::~MenuImp()  {
 
 void MenuImp::CreateMenu(const std::string& text) {
   hmenu_ = ::CreateMenu();  
-  AppendMenu(parent_, MF_POPUP | MF_ENABLED, (UINT_PTR)hmenu_, Charset::utf8_to_win(text).c_str());
+  AppendMenu(parent_, MF_POPUP | MF_ENABLED, (UINT_PTR)hmenu_,
+             Charset::utf8_to_win(text).c_str());
   UINT count = ::GetMenuItemCount(parent_);
   pos_ = count - 1;
 }
@@ -1574,18 +1485,22 @@ void MenuImp::CreateMenuItem(const std::string& text, ui::Image* image) {
     ::AppendMenu(parent_, MF_SEPARATOR, 0, NULL);  
   } else {
     id_ = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
-    ::AppendMenu(parent_, MF_STRING |  MF_ENABLED, id_, Charset::utf8_to_win(text).c_str());
+    ::AppendMenu(parent_, MF_STRING |  MF_ENABLED, id_,
+                 Charset::utf8_to_win(text).c_str());
     if (image) {  
 			assert(image->imp());			
 			ImageImp* imp = dynamic_cast<ImageImp*>(image->imp());
 			assert(imp);
-      ::SetMenuItemBitmaps(parent_, id_, MF_BYCOMMAND, (HBITMAP)imp->dev_source()->m_hObject, (HBITMAP)imp->dev_source()->m_hObject); 
+      ::SetMenuItemBitmaps(parent_, id_, MF_BYCOMMAND,
+                           (HBITMAP)imp->dev_source()->m_hObject,
+                           (HBITMAP)imp->dev_source()->m_hObject);
     }
   }
 }
 
 // GameController
-void GameControllersImp::DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) {
+void GameControllersImp::DevScanPluggedControllers(
+     std::vector<int>& plugged_controller_ids) {
   UINT num = joyGetNumDevs();
   UINT game_controller_id = 0;
   for ( ; game_controller_id < num; ++game_controller_id) {
@@ -1600,7 +1515,8 @@ void GameControllersImp::DevScanPluggedControllers(std::vector<int>& plugged_con
 void GameControllersImp::DevUpdateController(ui::GameController& controller) {  
   JOYINFO joy_info;
   joyGetPos(controller.id(), &joy_info);
-  controller.set(joy_info.wXpos, joy_info.wYpos, joy_info.wZpos, static_cast<int>(joy_info.wButtons));
+  controller.set(joy_info.wXpos, joy_info.wYpos, joy_info.wZpos,
+                 static_cast<int>(joy_info.wButtons));
 }
 
 // FileInformation.cpp: implementation of the CFileInformation class.
@@ -1616,29 +1532,25 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFileInformation::CFileInformation()
-{
+CFileInformation::CFileInformation() {
 	ZeroFileData();
 	SetFileDir( CString( _T("default.txt") ) );
 }
 
-CFileInformation::CFileInformation( CString path )
-{
+CFileInformation::CFileInformation(CString path ) {
 	Load( path );
 }
 
-CFileInformation::CFileInformation( CString dir, CString file )
-{
-	Load( dir, file );
+CFileInformation::CFileInformation(CString dir, CString file) {
+	Load(dir, file);
 }
 
-CFileInformation::CFileInformation( WIN32_FIND_DATA fd, CString dir )
-{
-	SetFileData( fd );
-	SetFileDir( dir );
+CFileInformation::CFileInformation(WIN32_FIND_DATA fd, CString dir) {
+	SetFileData(fd);
+	SetFileDir(dir);
 }
 
-CFileInformation::CFileInformation( const CFileInformation& fdi )
+CFileInformation::CFileInformation(const CFileInformation& fdi)
 {
 	SetFileData( fdi.GetFileData() );
 	SetFileDir( fdi.GetFileDir() );
@@ -2231,8 +2143,7 @@ void CFileInformation::CopyFilesAndFI( const P_FI_List oldList, P_FI_List newLis
 	return;
 }
 
-void CFileInformation::SortFilesABC( P_FI_List list )
-{
+void CFileInformation::SortFilesABC( P_FI_List list ) {
 	if( list == NULL || list->GetCount() == 0 )
 		return;
 
@@ -2300,8 +2211,7 @@ BOOL CFileInformation::RemoveFiles( P_FI_List list )
 	return TRUE;
 }
 
-EFileAction CFileInformation::CompareFiles( P_FI_List oldList, P_FI_List newList, CFileInformation& fi )
-{
+EFileAction CFileInformation::CompareFiles( P_FI_List oldList, P_FI_List newList, CFileInformation& fi ) {
 	EFileAction       faType     = faNone;
 	POSITION          newListPos = NULL;
 	POSITION          oldListPos = NULL;
@@ -2393,8 +2303,7 @@ EFileAction CFileInformation::CompareFiles( P_FI_List oldList, P_FI_List newList
 	return faType;
 }
 
-BOOL CFileInformation::FindFilePath( CString root, CString& file )
-{
+BOOL CFileInformation::FindFilePath( CString root, CString& file ) {
 	WIN32_FIND_DATA ffd;
 	CString         path   = ConcPath( root, _T("*.*") );
 	HANDLE          sh     = FindFirstFile( path, &ffd );
@@ -2431,9 +2340,7 @@ BOOL CFileInformation::FindFilePath( CString root, CString& file )
 	return retval;
 }
 
-
-BOOL CFileInformation::FindFilePathOnDisk( CString& file )
-{
+BOOL CFileInformation::FindFilePathOnDisk( CString& file ) {
     DWORD dwDriveMask = GetLogicalDrives();
 	int   i,
 		  max_drv     = 26;
@@ -2463,8 +2370,7 @@ BOOL CFileInformation::FindFilePathOnDisk( CString& file )
 	return FALSE;
 }
 
-BOOL CFileInformation::FindFilePathOnCD( CString& file )
-{
+BOOL CFileInformation::FindFilePathOnCD( CString& file ) {
     DWORD dwDriveMask = GetLogicalDrives();
 	int   i,
 		  max_drv     = 26;
@@ -2494,8 +2400,7 @@ BOOL CFileInformation::FindFilePathOnCD( CString& file )
 	return FALSE;
 }
 
-BOOL CFileInformation::Load(CString file)
-{
+BOOL CFileInformation::Load(CString file) {
 	if(	!file.IsEmpty() && file[ file.GetLength() - 1 ] == L'\\' )
 		file = file.Left( file.GetLength() - 1 );
 	
@@ -2513,8 +2418,7 @@ BOOL CFileInformation::Load(CString file)
 	return FALSE;
 }
 
-BOOL CFileInformation::Load(CString dir, CString file)
-{
+BOOL CFileInformation::Load(CString dir, CString file) {
 	WIN32_FIND_DATA ffd;
 	HANDLE          hFind = FindFirstFile( ConcPath( dir, file ), &ffd );
 
@@ -2529,8 +2433,7 @@ BOOL CFileInformation::Load(CString dir, CString file)
 	return FALSE;
 }
 
-CString CFileInformation::GetFileDir(CString path) const
-{
+CString CFileInformation::GetFileDir(CString path) const {
 	CString dir;
 	dir.Empty();
 	int     pos = path.ReverseFind( L'\\' );
@@ -2541,8 +2444,7 @@ CString CFileInformation::GetFileDir(CString path) const
 	return dir;
 }
 
-BOOL CFileInformation::IsFileExist() const
-{
+BOOL CFileInformation::IsFileExist() const {
 	CString path = GetFilePath();
 	
 	if( path.IsEmpty() )
@@ -2556,8 +2458,7 @@ BOOL CFileInformation::IsFileExist() const
 	return TRUE;
 }
 
-void CFileInformation::CopyDir( CString oldRoot, CString newRoot )
-{
+void CFileInformation::CopyDir( CString oldRoot, CString newRoot ) {
 	if( oldRoot.IsEmpty() || newRoot.IsEmpty() )
 		return;
 
@@ -2570,8 +2471,7 @@ void CFileInformation::CopyDir( CString oldRoot, CString newRoot )
 
 	CFileInformation::CreateDir( newRoot );
 
-	do
-	{
+	do {
 		pFDI = new CFileInformation( ffd, oldRoot );
 
 		if( pFDI->IsRootFile() )
@@ -2600,8 +2500,7 @@ void CFileInformation::CopyDir( CString oldRoot, CString newRoot )
 	FindClose( sh );
 }
 
-void CFileInformation::MoveDir( CString oldRoot, CString newRoot )
-{
+void CFileInformation::MoveDir( CString oldRoot, CString newRoot ) {
 	if( oldRoot.IsEmpty() || newRoot.IsEmpty() )
 		return;
 
@@ -2614,8 +2513,7 @@ void CFileInformation::MoveDir( CString oldRoot, CString newRoot )
 
 	CFileInformation::CreateDir( newRoot );
 	
-	do
-	{
+	do {
 		pFDI = new CFileInformation( ffd, oldRoot );
 
 		if( pFDI->IsRootFile() )
@@ -2651,8 +2549,7 @@ void CFileInformation::MoveDir( CString oldRoot, CString newRoot )
 	FindClose( sh );
 }
 
-void CFileInformation::RemoveDir( CString dir )
-{
+void CFileInformation::RemoveDir(CString dir) {
     RemoveDirectory( dir );
 
     WIN32_FIND_DATA find;
@@ -2665,8 +2562,7 @@ void CFileInformation::RemoveDir( CString dir )
     
 	hndle = FindFirstFile( strFindFiles, &find );
 
-    while( hndle != INVALID_HANDLE_VALUE ) 
-    {    
+    while( hndle != INVALID_HANDLE_VALUE )  {    
         char *strFolderItem = (char*)malloc( MAX_PATH );
         
 		memset( strFolderItem, 0, MAX_PATH );
@@ -2721,133 +2617,99 @@ void CFileInformation::RemoveDir( CString dir )
     RemoveDirectory( dir );
 }
 
-void CFileInformation::CreateDir( CString dir )
-{
+void CFileInformation::CreateDir(CString dir) {
 	if( dir.IsEmpty() )
 		return;
-
 	if( dir[ dir.GetLength() - 1 ] == L'\\' )
 		dir = dir.Left( dir.GetLength() - 1 );
-
 	if( dir[ dir.GetLength() - 1 ] == L':' )
 		return;
-
 	int pos = dir.ReverseFind( L'\\' );
 	CreateDir( dir.Left( pos ) );
-
 	CreateDirectory( dir, NULL );
 }
 
-BOOL CFileInformation::IsOk() const
-{
+BOOL CFileInformation::IsOk() const {
 	CString dir  = GetFileDir();
 	CString name = GetFileName();
-
 	if( IsDirectory() )
 		return !dir.IsEmpty();
 	else
 		return !dir.IsEmpty() && !name.IsEmpty();
 }
 
-void CFileInformation::ParseDir( CString root, DirParsCallback action, LPVOID pData )
-{
+void CFileInformation::ParseDir( CString root, DirParsCallback action, LPVOID pData ) {
 	if( root.IsEmpty() || action == NULL )
 		return;
-
 	CFileInformation* pFDI;
 	WIN32_FIND_DATA   ffd;
-	HANDLE            sh = FindFirstFile( CFileInformation::ConcPath( root, _T("*.*") ), &ffd );
-	
+	HANDLE            sh = FindFirstFile( CFileInformation::ConcPath( root, _T("*.*") ), &ffd );	
 	if( INVALID_HANDLE_VALUE == sh )
 		return;
-
-	action( root, pData );
-	
-	do
-	{
+	action( root, pData );	
+	do {
 		pFDI = new CFileInformation( ffd, root );
 
-		if( pFDI->IsRootFile() )
-		{
+		if( pFDI->IsRootFile() ) {
 			delete pFDI;
 			continue;
 		}
 
-		if( pFDI->IsDirectory() )
-		{
+		if( pFDI->IsDirectory() ) {
 			ParseDir( CFileInformation::ConcPath( root, pFDI->GetFileName() ), action, pData );
 		}
 		
-		if( pFDI->IsActualFile() )
-		{
+		if( pFDI->IsActualFile() ) {
 			action( pFDI->GetFilePath(), pData );
 		}
-
 		delete pFDI;
 	}
 	while( FindNextFile( sh, &ffd ) );
-
 	FindClose( sh );
 }
 
-UINT CFileInformation::GetPathLevel( CString path )
-{
+UINT CFileInformation::GetPathLevel(CString path) {
 	UINT n   = 0;
-	int  pos = 0;
-	
-	do
-	{
+	int  pos = 0;	
+	do {
 		pos = path.Find( L'\\', pos );
 		if( pos++ > 0 )
 			n++;
 	}
 	while( pos > 0 );
-
 	return n;
 }
 
-CString CFileInformation::GenerateNewFileName(CString path)
-{
+CString CFileInformation::GenerateNewFileName(CString path) {
 	CString newPath = path;
 	FILE*   pFile   = fopen( newPath, _T("r") );
-
-	while( pFile != NULL )
-	{
+	while( pFile != NULL ) {
 		fclose( pFile );
-
 		CFileInformation fi( newPath );
-		newPath = fi.GetFileDir() + _T("\\_") + fi.GetFileName();
-		
+		newPath = fi.GetFileDir() + _T("\\_") + fi.GetFileName();		
 		pFile = fopen( newPath, _T("r") );
 	}
-
 	return newPath;
 }
 
-CString CFileInformation::GetFileDirectory( CString path )
-{
+CString CFileInformation::GetFileDirectory(CString path) {
 	CString dir(_T(""));
-	int     pos = path.ReverseFind( L'\\' );
-	
+	int pos = path.ReverseFind( L'\\' );	
 	if( pos != -1 )
 		dir = path.Left( pos );
 
 	return dir;
 }
 
-CString CFileInformation::GetFileName( CString path )
-{
+CString CFileInformation::GetFileName(CString path) {
 	CString name(_T(""));
-	int     pos = path.ReverseFind( L'\\' );
-	
+	int     pos = path.ReverseFind( L'\\' );	
 	if( pos != -1 )
 		name = path.Right( path.GetLength() - pos - 1 );
-
 	return name;
 }
 
-CString CFileInformation::GetFileNameWithoutExt( CString path )
-{
+CString CFileInformation::GetFileNameWithoutExt( CString path ) {
 	CString name = GetFileName( path );
 	int     pos = name.ReverseFind( L'.' );
 	
@@ -2857,8 +2719,7 @@ CString CFileInformation::GetFileNameWithoutExt( CString path )
 	return name;
 }
 
-CString CFileInformation::GetFileExt( CString path )
-{
+CString CFileInformation::GetFileExt( CString path ) {
 	CString ext = GetFileName( path );
 	int     pos = ext.ReverseFind( L'.' );
 	
@@ -2878,27 +2739,22 @@ CString CFileInformation::GetFileExt( CString path )
 // Simple Notification Callback
 //////////////////////////////////////////////////////////////////////
 
-UINT DefaultNotificationCallback( CFileInformation fiObject, EFileAction faAction, LPVOID lpData )
-{
+UINT DefaultNotificationCallback( CFileInformation fiObject, EFileAction faAction, LPVOID lpData ) {
 	CString csBuffer;
 	CString csFile = fiObject.GetFilePath();
 
-	if( IS_CREATE_FILE( faAction ) )
-	{
+	if( IS_CREATE_FILE( faAction ) ) {
 		csBuffer.Format( "Created %s", csFile );
 		AfxMessageBox( csBuffer );
 	}
-	else if( IS_DELETE_FILE( faAction ) )
-	{
+	else if( IS_DELETE_FILE( faAction ) ) {
 		csBuffer.Format( "Deleted %s", csFile );
 		AfxMessageBox( csBuffer );
 	}
-	else if( IS_CHANGE_FILE( faAction ) )
-	{
+	else if( IS_CHANGE_FILE( faAction ) ) {
 		csBuffer.Format( "Changed %s", csFile );
 		AfxMessageBox( csBuffer );
-	}
-	else
+	} else
 		return 1; //error, stop thread
 
 	return 0; //success
@@ -2908,8 +2764,7 @@ UINT DefaultNotificationCallback( CFileInformation fiObject, EFileAction faActio
 // Show Error Message Box
 //////////////////////////////////////////////////////////////////////
 
-static void ErrorMessage( CString failedSource )
-{
+static void ErrorMessage( CString failedSource ) {
 	LPVOID  lpMsgBuf;
 	CString csError;
 	DWORD   dwLastError = GetLastError();//error number
@@ -2936,8 +2791,7 @@ static void ErrorMessage( CString failedSource )
 // Work Thread 
 //////////////////////////////////////////////////////////////////////
 
-UINT NotifyDirThread( LPVOID pParam )
-{
+UINT NotifyDirThread( LPVOID pParam ) {
 	BOOL             bStop = FALSE;
 	HANDLE           hDir  = NULL; 
 	CNotifyDirCheck* pNDC  = (CNotifyDirCheck*)pParam;
@@ -2956,9 +2810,7 @@ UINT NotifyDirThread( LPVOID pParam )
 										FILE_NOTIFY_CHANGE_SIZE       |
 										FILE_NOTIFY_CHANGE_LAST_WRITE |
 										FILE_NOTIFY_CHANGE_ATTRIBUTES );
-
-	if( hDir == INVALID_HANDLE_VALUE )
-	{
+	if( hDir == INVALID_HANDLE_VALUE ) {
 		ErrorMessage( _T("FindFirstChangeNotification") );
 		return 0;
 	}
@@ -2970,9 +2822,8 @@ UINT NotifyDirThread( LPVOID pParam )
 
 		bStop = FALSE;
 
-		while( WaitForSingleObject( hDir, WAIT_TIMEOUT ) != WAIT_OBJECT_0 )
-		{	if( !pNDC->IsRun() )
-			{
+		while( WaitForSingleObject( hDir, WAIT_TIMEOUT ) != WAIT_OBJECT_0 ) {
+      if( !pNDC->IsRun() ) {
 				bStop = TRUE;//to end
 				break;
 			}
@@ -2981,14 +2832,10 @@ UINT NotifyDirThread( LPVOID pParam )
 			break;//to end
 
 		CFileInformation::RemoveFiles( &newFIL );
-		CFileInformation::EnumFiles( pNDC->GetDirectory(), &newFIL );
-		
+		CFileInformation::EnumFiles( pNDC->GetDirectory(), &newFIL );		
 		Sleep( WAIT_TIMEOUT );
-
 		faAction = CFileInformation::CompareFiles( &oldFIL, &newFIL, fi );
-
-		if( !IS_NOTACT_FILE( faAction ) )
-		{
+		if( !IS_NOTACT_FILE( faAction ) ) {
 			NOTIFICATION_CALLBACK_PTR ncpAction = pNDC->GetActionCallback();
 
 			if( ncpAction )	//call user's callback
@@ -3000,8 +2847,7 @@ UINT NotifyDirThread( LPVOID pParam )
 				break;//to end
 		}
 		
-		if( FindNextChangeNotification( hDir ) == 0 )
-		{
+		if( FindNextChangeNotification( hDir ) == 0 ) {
 			ErrorMessage( _T("FindNextChangeNotification") );
 			return 0;
 		}
@@ -3018,8 +2864,7 @@ UINT NotifyDirThread( LPVOID pParam )
 // Class 
 //////////////////////////////////////////////////////////////////////
 
-CNotifyDirCheck::CNotifyDirCheck()
-{
+CNotifyDirCheck::CNotifyDirCheck() {
 	SetDirectory( "" );
 	SetActionCallback( NULL );
 	SetData( NULL );
@@ -3027,8 +2872,7 @@ CNotifyDirCheck::CNotifyDirCheck()
 	m_pThread = NULL;
 }
 
-CNotifyDirCheck::CNotifyDirCheck(  CString csDir, NOTIFICATION_CALLBACK_PTR ncpAction, LPVOID lpData )
-{
+CNotifyDirCheck::CNotifyDirCheck(  CString csDir, NOTIFICATION_CALLBACK_PTR ncpAction, LPVOID lpData ) {
 	SetDirectory( csDir );
 	SetActionCallback( ncpAction );
 	SetData( lpData );
@@ -3036,13 +2880,11 @@ CNotifyDirCheck::CNotifyDirCheck(  CString csDir, NOTIFICATION_CALLBACK_PTR ncpA
 	m_pThread = NULL;
 }
 
-CNotifyDirCheck::~CNotifyDirCheck()
-{
+CNotifyDirCheck::~CNotifyDirCheck() {
 	Stop();
 }
 
-BOOL CNotifyDirCheck::Run()
-{
+BOOL CNotifyDirCheck::Run() {
 	if( IsRun() || m_pThread != NULL || m_csDir.IsEmpty() )
 		return FALSE;
 
@@ -3055,8 +2897,7 @@ BOOL CNotifyDirCheck::Run()
 	return IsRun();
 }
 
-void CNotifyDirCheck::Stop()
-{
+void CNotifyDirCheck::Stop() {
 	if( !IsRun() || m_pThread == NULL )
 		return;
 	
@@ -3066,29 +2907,22 @@ void CNotifyDirCheck::Stop()
 	m_pThread = NULL;
 }
 
-UINT CNotifyDirCheck::Action( CFileInformation fiObject, EFileAction faAction )
-{
+UINT CNotifyDirCheck::Action( CFileInformation fiObject, EFileAction faAction ) {
 	CString csBuffer;
 	CString csFile = fiObject.GetFilePath();
 
-	if( IS_CREATE_FILE( faAction ) )
-	{
+	if( IS_CREATE_FILE( faAction ) ) {
 		csBuffer.Format( "Created %s", csFile );
 		AfxMessageBox( csBuffer );
-	}
-	else if( IS_DELETE_FILE( faAction ) )
-	{
+	} else if( IS_DELETE_FILE( faAction ) ) {
 		csBuffer.Format( "Deleted %s", csFile );
 		AfxMessageBox( csBuffer );
-	}
-	else if( IS_CHANGE_FILE( faAction ) )
-	{
+	} else if( IS_CHANGE_FILE( faAction ) ) {
 		csBuffer.Format( "Changed %s", csFile );
 		AfxMessageBox( csBuffer );
 	}
 	else
 		return 1; //error, stop thread
-
 	return 0; //success
 }
 
@@ -3097,20 +2931,15 @@ UINT DirCallback( ui::mfc::CFileInformation fiObject, ui::mfc::EFileAction faAct
   CString           csBuffer;
 	CString           csFile = fiObject.GetFilePath();	
 
-	if( IS_CREATE_FILE( faAction ) )
-	{
+	if( IS_CREATE_FILE( faAction ) ) {
     file_observer->OnCreateFile(fiObject.GetFilePath().GetString());
-	}
-	else if( IS_DELETE_FILE( faAction ) )
-	{
+	} else if( IS_DELETE_FILE( faAction ) ) {
     file_observer->OnDeleteFile(fiObject.GetFilePath().GetString());
 	}
-	else if( IS_CHANGE_FILE( faAction ) )
-	{
+	else if( IS_CHANGE_FILE( faAction ) ) {
     file_observer->OnChangeFile(fiObject.GetFilePath().GetString());    
 	}
-	else
-	{
+	else {
 		return 1; //error, stop thread
 	}
   return 0;
@@ -3133,15 +2962,13 @@ FileObserverImp::FileObserverImp(FileObserver* file_observer) :
 
 extern "C" int CALLBACK enumerateFontsCallBack(ENUMLOGFONTEX *lpelf,
 												NEWTEXTMETRICEX *lpntm,
-												DWORD fontType, LPARAM lParam)
-{
+												DWORD fontType, LPARAM lParam) {
 	lpntm;
 
 	FontVec* pFontVec = (FontVec*) lParam;
 	pFontVec->push_back(FontPair(lpelf->elfLogFont, fontType));
 	return TRUE;
 }
-
 
 } // namespace mfc
 } // namespace ui

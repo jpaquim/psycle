@@ -27,7 +27,7 @@ void DefaultAligner::CalcDimensions() {
     {
       double diff = current_pos.width();
       switch (item->align()) {
-        case ALLEFT:
+        case AlignStyle::ALLEFT:
           current_pos.set_left(current_pos.left() + item_dim.width() + item->non_content_dimension().width());
           if (diff == 0) {          
             current_dim.set_width(current_dim.width() + item_dim.width() + item->non_content_dimension().width());
@@ -40,7 +40,7 @@ void DefaultAligner::CalcDimensions() {
             }
           }          
         break;
-        case ALRIGHT:        
+        case AlignStyle::ALRIGHT:        
           if (diff == 0) {          
             current_dim.set_width(current_dim.width() + item_dim.width() + item->margin().width());
             current_pos.set_right(current_pos.right() + item_dim.width() + item->margin().width());
@@ -56,8 +56,8 @@ void DefaultAligner::CalcDimensions() {
 						}
 					}
 					break;
-        case ALTOP:
-				case ALBOTTOM:
+        case AlignStyle::ALTOP:
+				case AlignStyle::ALBOTTOM:
 					if (diff == 0) {
 						current_dim.set_width(current_dim.width() + item_dim.width() - item->margin().width());
 						current_pos.set_right(current_pos.right() + item_dim.width());
@@ -71,7 +71,7 @@ void DefaultAligner::CalcDimensions() {
 					}
 					current_dim.set_width(current_dim.width());
 					break;
-				case ALCLIENT:
+				case AlignStyle::ALCLIENT:
 					current_dim.set_width(current_dim.width());
 					break;
 				default:
@@ -84,7 +84,7 @@ void DefaultAligner::CalcDimensions() {
 		{
 			double old_height = current_pos.height();
 			switch (item->align()) {
-			case ALTOP:
+			case AlignStyle::ALTOP:
 				current_pos.set_top(current_pos.top() + item_dim.height() + item->non_content_dimension().height());
 				if (old_height == 0) {
 					current_dim.set_height(current_dim.height() + item_dim.height() + item->non_content_dimension().height());
@@ -97,8 +97,8 @@ void DefaultAligner::CalcDimensions() {
 				}
 				// current_dim.set_height(current_dim.height() + item->margin().height());
 				break;
-			case ALLEFT:
-			case ALRIGHT:
+			case AlignStyle::ALLEFT:
+			case AlignStyle::ALRIGHT:
 				if (old_height == 0) {
 					current_dim.set_height(current_dim.height() + item_dim.height() + item->non_content_dimension().height());
 					current_pos.set_bottom(current_pos.bottom() + item_dim.height() + item->non_content_dimension().height());
@@ -111,7 +111,7 @@ void DefaultAligner::CalcDimensions() {
 					}
 				}
 				break;
-			case ALBOTTOM:
+			case AlignStyle::ALBOTTOM:
 				if (old_height == 0) {
 					current_dim.set_height(current_dim.height() + item_dim.height());
 					current_pos.set_bottom(current_pos.bottom() + item_dim.height());
@@ -125,7 +125,7 @@ void DefaultAligner::CalcDimensions() {
 				}
 				current_dim.set_height(current_dim.height() + item->margin().height());
 				break;
-			case ALCLIENT:
+			case AlignStyle::ALCLIENT:
 				if (item->auto_size_height()) {
 					current_dim.set_height(item_dim.height() + item->non_content_dimension().height());
 				}
@@ -150,7 +150,7 @@ void DefaultAligner::SetPositions() {
 		for (iterator i = begin(); i != end(); ++i) {
 			(*i)->reset_align_dimension_changed();			
 			if (!skip_item(*i)) {				
-				if ((*i)->align() == ALCLIENT) {
+				if ((*i)->align() == AlignStyle::ALCLIENT) {
 					client = *i;
 				} else {				
 					update_item_pos_except_client(*i);
@@ -168,7 +168,7 @@ void DefaultAligner::prepare_pos_set() {
 }
 
 bool DefaultAligner::skip_item(const Window::Ptr& item) const {
-	return (!item->visible() || (item->align() == ALNONE));
+	return (!item->visible() || (item->align() == AlignStyle::ALNONE));
 }
 
 void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
@@ -176,16 +176,16 @@ void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
   calc_window_dim(window);
 	window->PreventAutoDimension();
 	switch (window->align()) {        
-		case ALLEFT: 				  				  					
+		case AlignStyle::ALLEFT: 				  				  					
 			update_left(window);
 		break;      
-		case ALTOP:        
+		case AlignStyle::ALTOP:        
 			update_top(window);
 		break;
-		case ALRIGHT:        
+		case AlignStyle::ALRIGHT:        
 			update_right(window);
 		break;
-		case ALBOTTOM:        					
+		case AlignStyle::ALBOTTOM:        					
 			update_bottom(window);
 		break;
 		default:				 				
@@ -391,7 +391,7 @@ void GridAligner::CalcDimensions() {
         item_dim.set_height(item->dim().height());
       }
     }
-    if (item->align() != ALNONE) {      
+    if (item->align() != AlignStyle::ALNONE) {      
       item_dim.set(item_dim.width(), item_dim.height());
     }       
     itemmax.set_width((std::max)(itemmax.width(), item_dim.width()));
@@ -459,20 +459,6 @@ void Canvas::StealFocus(const Window::Ptr& item) {
 }
 
 // Events
-void Canvas::WorkOnFocus(Event& ev) {
-  try {
-    if (!focus().expired()) {
-      Window::Ptr item = focus().lock();
-      WorkEvent(ev, &Window::OnFocus, item);
-    } else {
-      OnFocus(ev);  
-    }
-  } catch (std::exception& e) {
-    ui::alert(e.what());
-    error(e);    
-  }
-}
-
 void Canvas::Invalidate(const Region& rgn) {   
   if (!fls_prevented_) {
     if (IsSaving()) {

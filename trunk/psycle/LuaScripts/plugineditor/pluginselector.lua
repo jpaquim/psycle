@@ -29,6 +29,8 @@ local closebutton = require("closebutton")
 local templateparser = require("templateparser")
 local settings = require("settings")
 local recursivenodeiterator = require("psycle.recursivenodeiterator")
+local propertiesview = require("propertiesview")
+local serpent = require("psycle.serpent")
 
 local pluginselector = group:new()
 
@@ -40,30 +42,35 @@ function pluginselector:new(parent)
   return c
 end
 
-function pluginselector:init()   
+function pluginselector:init()      
    self.doopen = signal:new()
    self.docreate = signal:new()
    self.tg = tabgroup:new(self)
                      :setalign(item.ALCLIENT)
-					 :disableclosebutton()   
-   self.creategroup = self:initplugincreate()   
+                     :disableclosebutton()   
+   self:initplugincreate()   
    self:initpluginlist()
+   self:initcreategroup(self.pg)
    local closebutton = closebutton.new(self.tg.tabbar)
                                   :setalign(item.ALRIGHT)
-   closebutton.dohide:connect(pluginselector.onhide, self)   
+   local that = self                                    
+   function closebutton:onclick()
+     self:resethover()
+     that:hide():parent():updatealign()     
+   end
 end
 
 function pluginselector:searchandfocusmachine(text)  
   local node = self:search(text)
   if node then
-    self.openprevented = true	
+    self.openprevented = true 
     self.pluginlist:selectnode(node)
-	self.openprevented = nil
+  self.openprevented = nil
   else        
     local selectednodes = self.pluginlist:selectednodes()
     for _, node in ipairs(selectednodes) do
-	  self.pluginlist:deselectnode(node)
-	end
+    self.pluginlist:deselectnode(node)
+  end
   end
 end
 
@@ -71,116 +78,125 @@ function pluginselector:search(text)
   local result = nil
   if text ~= "" then
     for element in recursivenodeiterator(self.rootnode).next do
-	  local i, j = string.find(element:text(), text, 1, true)  
-	  if i and i == 1 then
-	    result = element
-	  break;
-	  end  
+    local i, j = string.find(element:text(), text, 1, true)  
+    if i and i == 1 then
+      result = element
+    break;
+    end  
     end
   end
   return result
 end
 
-function pluginselector:onhide()
-  self:hide():parent():updatealign()     
-end
-
-function pluginselector:initplugincreate()  
-  self.plugincreatelist = listview:new()
-                                  :setalign(item.ALCLIENT)
-								  :setautosize(false, false)
+function pluginselector:initplugincreate()
+  self.pg = group:new()
+                 :setalign(item.ALCLIENT)
+                 :setautosize(false, false)  
+  self.plugincreatelist = listview:new(self.pg)
+                                  :setalign(item.ALLEFT)
+                                  :setposition(rect:new(point:new(), dimension:new(200, 0)))
+                                  :setautosize(false, false)
                                   :setbackgroundcolor(0xFF3E3E3E)
                                   :setcolor(0xFFFFFFFF)  
-  self.tg:addpage(self.plugincreatelist, "Create")   								  
-  local path = cfg:luapath().."\\plugineditor\\templates"
+  self.tg:addpage(self.pg, "Create")
   self.plugincreatelistrootnode = node:new()    
-  local dir = filehelper.directorylist(path)    
-  for i=1, #dir do
-    if not dir[i].isdirectory and dir[i].extension == ".lua" then
-	  local fname = string.sub(dir[i].filename, 1, -5)      
-      local template = require("templates."..fname)	   
-	  local newnode = node:new():settext(template.label)
-	  newnode.template = template
-	  self.plugincreatelistrootnode:add(newnode)
-	end
-  end        
+  local f = loadfile(cfg:luapath().."\\plugineditor\\templates\\machinecreate.lua")
+  if f then
+    self.setting = f()    
+  end  
+  for name, settinggroup in self.setting:opairs() do
+    if name ~= "meta" then  
+      local label = ""
+      if settinggroup.label then    
+        label = settinggroup.label    
+      else
+        label = name
+      end 
+      local node = node:new(self.plugincreatelistrootnode)
+                       :settext(label)    
+      node.properties = settinggroup.properties
+      node.outputs = settinggroup.outputs
+    end
+  end    
   self.plugincreatelist:setrootnode(self.plugincreatelistrootnode)  
   local that = self
-  function self.plugincreatelist:onchange(node)    
-    that.template = node.template
-	if that.creategroup.propertypage then
-	  that.creategroup:remove(that.creategroup.propertypage)
-	  that.creategroup.propertypage = nil	  
-	end
-	that.creategroup.propertypage = that:createproperties(node.template.properties)	
-	that:parent():flagnotaligned()
-	that:parent():updatealign()
+  function self.plugincreatelist:onchange(node)  
+    local oldpropertyview = nil
+    if that.activenode then
+      oldpropertyview = that.activenode.propertyview
+    end
+    that.activenode = node  
+    that:showproperties(node)    
+    if oldpropertyview then      
+      oldpropertyview:hide()
+    end
+    that:parent():flagnotaligned():updatealign()  
   end  
-  return self.plugincreatelist
+  that:parent():flagnotaligned():updatealign()  
+  return self.plugincreatelist    
 end
 
-function pluginselector:createproperties(properties)
-  local g = group:new(self)
-                 :setautosize(false, false)
-                 :setposition(rect:new(point:new(0, 0), dimension:new(200, 0)))
-				 :setalign(item.ALRIGHT)
-  g:addornament(ornamentfactory:createfill(0x2F2F2F))
-  if (properties) then
-	for i=1, #properties do
-	  if properties[i].edit then	  	  
-		local div = group:new(g)
-		                 :setautosize(false, false)
-						 :setalign(item.ALTOP)
-						 :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
-		g[properties[i].property] = edit:new(div):setautosize(false, false)
-		                                :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))
-										:setalign(item.ALCLIENT)
-										:settext(properties[i].value)										
-		text:new(div):setautosize(true, true)
-		             :setalign(item.ALLEFT)
-		             :settext(properties[i].property)				
-                     :setmargin(boxspace:new(0, 5, 0, 0))
-      end	
-	end
-  end
-  local b = button:new(g):settext("Create"):setalign(item.ALBOTTOM)
-  local that = self
-  function b:onclick()
-   that:oncreateplugin(that.template)  
-  end
-  return g
+function pluginselector:initcreategroup(parent)
+  self.creategroup_ = group:new(parent)
+                           :setautosize(false, false)                                                   
+                           :setalign(item.ALCLIENT)
+                           :setmargin(boxspace:new(5))
+  self:initcreatebutton(self.creategroup_)  
 end
 
-function pluginselector:oncreateplugin(template)
-  local filters = template.filters  
-  local env = {}  
-  local properties = self.template.properties
-  for i=1, #properties do
-	if properties[i].edit then
-	  env[properties[i].property] = self.creategroup.propertypage[properties[i].property]:text()
-	else
-	  if properties[i].type == "string" then
-	    env[properties[i].property] = properties[i].value
-	  elseif properties[i].type == "machtype" then
-	    if properties[i].value == "fx" then
-		  env[properties[i].property] = "machine.FX"
-		elseif properties[i].value == "generator" then
-	      env[properties[i].property] = "machine.GENERATOR"
-	    end
-	  end
-	end	  
-  end	      
-  filehelper.mkdir(env.pluginname)
+function pluginselector:initcreatebutton(parent)
+  local group = group:new(parent)
+                     :setalign(item.ALBOTTOM)
+                     :setautosize(false, true)
+                     :setmargin(boxspace:new(0, 0, 10, 0))
+  local createbutton = button:new(group)
+                              :settext("Create")
+                              :setalign(item.ALLEFT)
+                              :setmargin(boxspace:new(0, 10, 0, 0))
+                              :setposition(rect:new(point:new(), dimension:new(90, 20)))  
+  local that = self             
+  function createbutton:onclick()
+    if that.activenode and that.activenode.propertyview then 
+      that.activenode.propertyview:parseproperties()    
+      that:oncreateplugin(that.activenode.properties,
+                          that.activenode.outputs,
+                          that.activenode.properties.pluginname:value())
+    end
+  end
+  return group
+end
+
+
+function pluginselector:showproperties(node)  
+  if node.propertyview then
+    node.propertyview:show()    
+  else   
+    node.propertyview = 
+        propertiesview:new(self.creategroup_, "create", node.properties)
+                      :setautosize(false, false)                           
+                      :setalign(item.ALCLIENT)
+                      :addornament(ornamentfactory:createfill(0x2F2F2F))
+  end
+  self.creategroup_:show()
+  self:parent():flagnotaligned():updatealign()
+end
+
+function pluginselector:oncreateplugin(properties, outputs, machinename)
+  local env = {}
+  for name, property in properties:opairs() do    
+    env[name] = property:value()
+  end  
+  filehelper.mkdir(cfg:luapath().."\\"..machinename)  
   templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",
-	 		          cfg:luapath().."\\"..env.pluginname..".lua",
-					  env)
-  for i=1, #filters do	
-    local templatepath = cfg:luapath().."\\plugineditor\\templates\\"..filters[i].templatepath
+                      cfg:luapath().."\\"..machinename..".lua",
+                      env)
+  for _, output in pairs(outputs) do    
+    local templatepath = cfg:luapath().."\\plugineditor\\templates\\"..output.template
     templateparser.work(templatepath,
-                        cfg:luapath().."\\"..env.pluginname.."\\"..filters[i].outputpath,
-						env)    
+                        cfg:luapath().."\\"..machinename.."\\"..output.path,
+                        env)    
   end 
-  self.docreate:emit(template, env.pluginname)  
+  self.docreate:emit(outputs, machinename)  
 end  
 
 function pluginselector:initpluginlist()
@@ -196,14 +212,14 @@ function pluginselector:initpluginlist()
   function self.pluginlist:onchange(node)
     if not that.openprevented then
       that:open(node)    
-	end
+  end
   end  
   self:updatepluginlist()
 end
 
 function pluginselector:open(node)
   local dir = self:machinepath(node.info)        
-  self:hide()        	
+  self:hide()         
   self.doopen:emit(dir, node.info:name(), node.info)  
 end
 
@@ -212,14 +228,14 @@ function pluginselector:machinepath(info)
   local str = ""
   for line in file:lines() do
     local pos = string.find(line, "psycle.setmachine")
-	if pos then
-      str = string.match(line, "require(%b())")	  
+  if pos then
+      str = string.match(line, "require(%b())")   
       if str then
         str = str:sub(3, -3)      
         str = str:gsub("%.", "\\")      
         break
       end
-    end	
+    end 
   end
   file:close()    
   return str

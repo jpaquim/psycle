@@ -134,6 +134,13 @@ struct LuaUiRectBind {
   static int bottom(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::bottom); }
   static int width(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::width); }
   static int height(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::height); }
+  static int intersect(lua_State* L) {
+    using namespace ui;
+    Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+    Point::Ptr point = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
+    lua_pushboolean(L, rect->Intersect(*point.get()));
+    return 1;
+  }
   static int topleft(lua_State *L);
   static int bottomright(lua_State *L);
 };
@@ -168,6 +175,7 @@ struct LuaSystemsBind {
   static int create(lua_State *L);
   static int gc(lua_State* L);  
   static int updatewindows(lua_State* L) { LUAEXPORTM(L, meta, &ui::Systems::UpdateWindows); }
+  static int updatewindow(lua_State* L);
   static int changewindowtype(lua_State* L);
   static int setstyleclass(lua_State* L);  
 };
@@ -379,8 +387,13 @@ struct LuaMouseEventBind {
 	static const char* meta;
 	static int create(lua_State *L);
 	static int gc(lua_State* L);	
-	static int clientx(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::cx); }
-	static int clienty(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::cy); }	
+  static int clientpos(lua_State* L) { 
+    using namespace ui;
+    MouseEvent::Ptr ev = LuaHelper::check_sptr<MouseEvent>(L, 1, meta);
+    LuaHelper::requirenew<LuaPointBind>(L, "psycle.ui.point",
+																			 new Point(ev->client_pos()));
+    return 1;
+  }	
 	static int button(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::button); }
 	static int preventdefault(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::PreventDefault); }
 	static int isdefaultprevented(lua_State* L) { LUAEXPORTM(L, meta, &ui::MouseEvent::is_default_prevented); }
@@ -850,13 +863,14 @@ class LuaItemBind {
   static const std::string meta;  
   typedef LuaItemBind B;
   static int open(lua_State *L) {
+    using namespace ui;
     LuaHelper::openex(L, meta, setmethods, gc);
-    LuaHelper::setfield(L, "ALLEFT", ui::ALLEFT);
-    LuaHelper::setfield(L, "ALTOP", ui::ALTOP);
-    LuaHelper::setfield(L, "ALRIGHT", ui::ALRIGHT);
-    LuaHelper::setfield(L, "ALBOTTOM", ui::ALBOTTOM);  
-    LuaHelper::setfield(L, "ALCLIENT", ui::ALCLIENT);
-    LuaHelper::setfield(L, "ALCENTER", ui::ALCENTER);
+    LuaHelper::setfield(L, "ALLEFT", AlignStyle::ALLEFT);
+    LuaHelper::setfield(L, "ALTOP", AlignStyle::ALTOP);
+    LuaHelper::setfield(L, "ALRIGHT", AlignStyle::ALRIGHT);
+    LuaHelper::setfield(L, "ALBOTTOM", AlignStyle::ALBOTTOM);  
+    LuaHelper::setfield(L, "ALCLIENT", AlignStyle::ALCLIENT);
+    LuaHelper::setfield(L, "ALCENTER", AlignStyle::ALCENTER);
     static const char* const e[] = {
 		  "DOTTED", "DASHED", "SOLID", "DOUBLE", "GROOVE", "RIDGE", "INSET", 
       "OUTSET", "NONE", "HIDDEN"
@@ -1366,9 +1380,9 @@ class LuaTextBind : public LuaItemBind<T>, public LuaTextMixIn<T>, public LuaCol
   typedef LuaItemBind<T> B;  
   static int open(lua_State *L) { 
     LuaHelper::openex(L, T::type(), setmethods, gc); 
-    LuaHelper::setfield(L, "LEFTJUSTIFY", ui::LEFTJUSTIFY);
-    LuaHelper::setfield(L, "CENTERJUSTIFY", ui::CENTERJUSTIFY);
-    LuaHelper::setfield(L, "RIGHTJUSTIFY", ui::RIGHTJUSTIFY);
+    LuaHelper::setfield(L, "LEFTJUSTIFY", JustifyStyle::LEFTJUSTIFY);
+    LuaHelper::setfield(L, "CENTERJUSTIFY", JustifyStyle::CENTERJUSTIFY);
+    LuaHelper::setfield(L, "RIGHTJUSTIFY", JustifyStyle::RIGHTJUSTIFY);
     return 1;    
   }
   static int setmethods(lua_State* L) {
@@ -1386,12 +1400,14 @@ class LuaTextBind : public LuaItemBind<T>, public LuaTextMixIn<T>, public LuaCol
   }  
   static int setverticalalignment(lua_State* L) {    
     LuaHelper::check_sptr<LuaText>(L, 1, T::type())
-      ->set_vertical_alignment(static_cast<ui::AlignStyle>(luaL_checkinteger(L, 2)));
+      ->set_vertical_alignment(
+           static_cast<ui::AlignStyle::Type>(luaL_checkinteger(L, 2)));
     return LuaHelper::chaining(L);
   }
   static int setjustify(lua_State* L) {    
     LuaHelper::check_sptr<LuaText>(L, 1, T::type())
-      ->set_justify(static_cast<ui::JustifyStyle>(luaL_checkinteger(L, 2)));
+      ->set_justify(
+          static_cast<ui::JustifyStyle::Type>(luaL_checkinteger(L, 2)));
     return LuaHelper::chaining(L);
   }
 };
@@ -1400,7 +1416,9 @@ template <class T = LuaPic>
 class LuaPicBind : public LuaItemBind<T> {
  public:
   typedef LuaItemBind<T> B;
-  static int open(lua_State *L) { return LuaHelper::openex(L, meta, setmethods, gc); }
+  static int open(lua_State *L) { 
+   return LuaHelper::openex(L, meta, setmethods, gc);
+  }
   static int setmethods(lua_State* L) {
     B::setmethods(L);
     static const luaL_Reg methods[] = {
@@ -2461,9 +2479,8 @@ static int lua_ui_requires(lua_State* L) {
 }
 
 class LuaSystems : public ui::Systems {
- public:  
-  LuaSystems() : L_(0) {}
-  void set_luastate(lua_State* L) { L_ = L; }    
+ public:    
+  LuaSystems(lua_State* L) : L_(L) {}  
 
   virtual ui::Region* CreateRegion();
   virtual ui::Graphics* CreateGraphics();

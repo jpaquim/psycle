@@ -1,3 +1,4 @@
+local systems = require("psycle.ui.systems")
 local signal = require("psycle.signal")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
@@ -9,7 +10,6 @@ local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local item = require("psycle.ui.item")
 local group = require("psycle.ui.group")
 local edit = require("psycle.ui.edit")
-local systems = require("psycle.ui.systems")
 
 
 local advancededit = group:new()

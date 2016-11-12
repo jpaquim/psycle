@@ -10,6 +10,10 @@ function property:new(value, label, typename, stockkey)
   return c
 end
 
+function property:clone()
+  return property:new(self.value_, self.label_, self.typename_, self.stockkey_)  
+end
+
 function property:init(value, label, typename, stockkey)
   self.label_ = ""    
   self.value_ = value  
@@ -96,11 +100,13 @@ function property:typename()
 end
 
 function property:enableedit()
-  self.editable_ = true
+  self.preventedit_ = false
+  return self
 end
 
 function property:preventedit()
-  self.editable_ = false
+  self.preventedit_ = true
+  return self
 end
 
 function property:iseditprevented()

@@ -105,9 +105,7 @@ class Canvas : public ui::Group {
   void ClearSave() { save_rgn_->Clear(); }
      
   void InvalidateSave();  
-  
-  virtual void WorkOnFocus(Event& ev);
-
+    
   boost::signal<void (std::exception&)> error;
 
   void Invalidate();

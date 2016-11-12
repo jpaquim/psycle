@@ -56,7 +56,7 @@ class LuaControl : public LockIF {
   protected:
    lua_State* L;
    lua_State* LM;
-   std::auto_ptr<ui::Commands> invokelater;   
+   std::auto_ptr<ui::Commands> invokelater_;   
    PluginInfo parse_info() const;
   private:   
    mutable CRITICAL_SECTION cs;   
@@ -143,7 +143,7 @@ class LuaProxy : public LuaControl {
   template<typename T>   
   void InvokeLater(T& f) { 
     lock();
-    invokelater->Add(f);
+    invokelater_->Add(f);
     unlock();
   }  
   bool IsPsyclePlugin() const;
@@ -158,8 +158,8 @@ class LuaProxy : public LuaControl {
   void update_systems_state(lua_State* L);    
 
 private:
-  void export_c_funcs();
-  static int invoke_later(lua_State* L);
+  void ExportCFunctions();
+  static int invokelater(lua_State* L);
 	// script callbacks
   static int set_parameter(lua_State* L);
   static int alert(lua_State* L);
@@ -176,8 +176,7 @@ private:
      return meta_cache_;
   }  
   void OnFrameClose(ui::Frame&);
-  
-    
+      
   mutable bool is_meta_cache_updated_;
   mutable PluginInfo meta_cache_;
   LuaPlugin *host_;
@@ -186,8 +185,7 @@ private:
   boost::weak_ptr<ui::MenuContainer> menu_bar_;
   boost::shared_ptr<ui::Frame> frame_;
   int user_interface_;
-  std::auto_ptr<ui::Systems> systems_;
-  class LuaSystems* lua_systems_;
+  std::auto_ptr<ui::Systems> systems_;  
 };
 
 class LuaPluginBind {
