@@ -60,9 +60,9 @@ function fileexplorer:initheader()
   on:settransparent(0xFFFFFF)					 
   local closebutton = closebutton.new(self.header):settext("<<")
   local that = self
-  function closebutton:onmousedown()
-     that:setposition(rect:new(point:new(0, 0), dimension:new(0, 0)))
-	 that:parent():flagnotaligned():updatealign()     
+  function closebutton:onclick()
+    that:setposition(rect:new(point:new(0, 0), dimension:new(0, 0)))    
+	  that:parent():flagnotaligned():updatealign()     
   end  
 end
 

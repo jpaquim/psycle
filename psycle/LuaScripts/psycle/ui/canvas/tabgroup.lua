@@ -50,16 +50,16 @@ function tabgroup:init()
   self:setautosize(false, false)
   self.tabbar = group:new(self)
                      :setautosize(false, true)
-					 :setalign(window.ALTOP)
-					 :addornament(ornamentfactory:createfill(0xFF373737))
-					 :setpadding(boxspace:new(0, 0, 3, 0))
+           :setalign(window.ALTOP)
+           :addornament(ornamentfactory:createfill(0xFF373737))
+           :setpadding(boxspace:new(0, 0, 3, 0))
   local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
                         :setautosize(false, false)                        
-						:setverticalalignment(toolicon.ALCENTER)
+            :setverticalalignment(toolicon.ALCENTER)
                         :setjustify(toolicon.CENTERJUSTIFY)
-						:setalign(window.ALRIGHT)    
+            :setalign(window.ALRIGHT)    
                         :setmargin(boxspace:new(0, 2, 0, 2))
-  icon1.cc = 0xFF373737						
+  icon1.cc = 0xFF373737           
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
@@ -75,39 +75,39 @@ function tabgroup:init()
     self.c:addornament(ornamentfactory:createfill(0xFF292929))    
     function fun(item)
       local t = text:new(g)
-	                :setcolor(0xFFCACACA)
-					:settext(item.text:text())
-					:setautosize(false, true)
-					:setpadding(boxspace:new(1))
+                  :setcolor(0xFFCACACA)
+          :settext(item.text:text())
+          :setautosize(false, true)
+          :setpadding(boxspace:new(1))
       t:setjustify(window.ALCENTER):setalign(window.ALTOP)      
       function t:onmousedown()        
         that:setactivepage(item.page)
       end
       function t:onmouseenter()                            
-	    self:setpadding(boxspace:new(0))
+      self:setpadding(boxspace:new(0))
         self:addornament(ornamentfactory:createlineborder(0xFF696969))
       end      
       function t:onmouseout()                       
-	    self:setpadding(boxspace:new(1, 1, 1, 1))
+      self:setpadding(boxspace:new(1, 1, 1, 1))
         self:removeornaments()
       end
     end
     that:traverse(fun, that.tabs:items())
     self.c:updatealign()
-	
-	local h = g:position():height()	
-	local x = icon1:desktopposition():left()
-	local y = icon1:desktopposition():top()	
+  
+  local h = g:position():height() 
+  local x = icon1:desktopposition():left()
+  local y = icon1:desktopposition():top() 
     local iw = icon1:desktopposition():width()
-	local ih = icon1:desktopposition():height()
+  local ih = icon1:desktopposition():height()
     self.f:hidedecoration()
-	      :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h)))    
+        :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h)))    
     self.f:show()            
   end  
   self.tabs = group:new(self.tabbar)
                    :setautosize(false, true)
-				   :setalign(window.ALCLIENT)
-				   :addornament(ornamentfactory:createfill(self.tabbarcolor_))
+           :setalign(window.ALCLIENT)
+           :addornament(ornamentfactory:createfill(self.tabbarcolor_))
   self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)    
 end
 
@@ -172,7 +172,7 @@ function tabgroup:setactiveheader(page)
       end
     end
     local index = self.children:itemindex(page)
-    if index ~= 0 then	  
+    if index ~= 0 then    
       tabs[index]:setskinhighlight()
     end
   end    
@@ -181,14 +181,14 @@ end
 function tabgroup:setactivepage(page, preventalign)
   if page and self.activepage_ ~= page  then    
     self:setactiveheader(page)    
-    page:show()	
-	if self.activepage_ then
+    page:show() 
+  if self.activepage_ then
       self.activepage_:hide()
     end    
-	self.activepage_ = page;
-	if not preventalign then
-      self.children:updatealign()	
-	end
+  self.activepage_ = page;
+  if not preventalign then
+      self.children:updatealign() 
+  end
   end
 end
 
@@ -255,15 +255,15 @@ end
 function tabgroup:createheader(page, label)  
   local header = group:new()
                       :setautosize(true, true)
-					  :setalign(window.ALLEFT)
-					  :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))					  
+            :setalign(window.ALLEFT)
+            :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))           
   header.page = page    
   local font = font:new():setfontinfo(fontinfo:new():setsize(13))  
   header.text = text:new(header)
                     :settext(label)
-					:setfont(font)
+          :setfont(font)
                     :setalign(window.ALLEFT)
-					:setpadding(boxspace:new(3))
+          :setpadding(boxspace:new(3))
   local that = self
   if self.hasclosebutton_ then
     local font = font:new():setfontinfo(fontinfo:new():setsize(13))
@@ -271,32 +271,32 @@ function tabgroup:createheader(page, label)
                        :setcolor(that.headerclosecolor_)
                        :settext("x")
                        :setjustify(text.CENTERJUSTIFY)                       
-					   :setverticalalignment(window.ALCENTER)					   
+             :setverticalalignment(window.ALCENTER)            
                        :setalign(window.ALLEFT)
-					   :setautosize(false, true)
-					   :setposition(rect:new(point:new(), dimension:new(15, 15)))
-					   :setmargin(boxspace:new(3, 5, 0, 5))
-					   :setfont(font)    
+             :setautosize(false, true)
+             :setposition(rect:new(point:new(), dimension:new(15, 15)))
+             :setmargin(boxspace:new(3, 5, 0, 5))
+             :setfont(font)    
     function header.close:onmousedown()
       local ev = {}
       ev.page = self:parent().page
       that.dopageclose:emit(ev)
       that:removepagebyheader(self:parent())
     end
-	function header.close:onmouseenter(ev)
-	  self:setcolor(that.headerclosehovercolor_)
-	  self:addornament(ornamentfactory:createcirclefill(that.headerclosehoverbackgroundcolor_))
-	end
-	function header.close:onmouseout(ev)
-	  self:setcolor(that.headerclosecolor_)
-	  self:removeornaments()
-	end
+  function header.close:onmouseenter(ev)
+    self:setcolor(that.headerclosehovercolor_)
+    self:addornament(ornamentfactory:createcirclefill(that.headerclosehoverbackgroundcolor_))
+  end
+  function header.close:onmouseout(ev)
+    self:setcolor(that.headerclosecolor_)
+    self:removeornaments()
+  end
   end
   self.tabs:add(header)
   function header:setskinhighlight()        
     self:setpadding(boxspace:new(2))
-	self:removeornaments():addornament(ornamentfactory:createfill(that.headeractivebackgroundcolor_)) 
-	self:addornament(ornamentfactory:createlineborder(that.headerbordercolor_))    
+  self:removeornaments():addornament(ornamentfactory:createfill(that.headeractivebackgroundcolor_)) 
+  self:addornament(ornamentfactory:createlineborder(that.headerbordercolor_))    
     self.text:setcolor(that.headeractivecolor_)     
   end
   function header:setskinnormal()
@@ -306,14 +306,14 @@ function tabgroup:createheader(page, label)
   end    
   header:setskinnormal()    
   function header:onmouseenter(ev)       
-    if self.page ~= that:activepage() then	  
-	  self.text:setcolor(that.headerhovercolor_)    	  
-	end
+    if self.page ~= that:activepage() then    
+    self.text:setcolor(that.headerhovercolor_)        
+  end
   end
   function header:onmouseout(ev)
-    if self.page ~= that:activepage() then	  
-      self.text:setcolor(that.headercolor_) 	
-	end
+    if self.page ~= that:activepage() then    
+      self.text:setcolor(that.headercolor_)   
+  end
   end  
   function header:onmousedown(ev)         
     that:setactivepage(self.page)
@@ -322,7 +322,7 @@ function tabgroup:createheader(page, label)
       that.tabpopupmenu.headertext = self.text:text()
     end    
   end
-  function header:onmouseup(ev) end    		
+  function header:onmouseup(ev) end       
   return header
 end
 
@@ -485,14 +485,14 @@ end
 
 function tabgroup:setproperties(properties)  
   if properties.color then    
-	self:setcolor(properties.color:value())
+  self:setcolor(properties.color:value())
   end  
   if properties.backgroundcolor then    
-	self:setbackgroundcolor(properties.backgroundcolor:value())
+  self:setbackgroundcolor(properties.backgroundcolor:value())
   end
   if properties.tabbarcolor then
     self.tabbarcolor_ = properties.tabbarcolor:value()
-	self.tabs:removeornaments():addornament(ornamentfactory:createfill(self.tabbarcolor_))
+  self.tabs:removeornaments():addornament(ornamentfactory:createfill(self.tabbarcolor_))
   end
   if properties.headercolor then
     self.headercolor_ = properties.headercolor:value()
@@ -530,7 +530,7 @@ function tabgroup:setproperties(properties)
     if header.page ~= self:activepage() then
       header:setskinnormal()
     else
-	  header:setskinhighlight()
+    header:setskinhighlight()
     end
   end      
   self:fls()  

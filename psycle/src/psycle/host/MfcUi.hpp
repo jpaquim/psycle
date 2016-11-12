@@ -1085,17 +1085,6 @@ inline void GraphicsImp::TransparentBlt(CDC* pDC,
   hdcMem.DeleteDC();
 }
 
-class WindowHook {
- public:
-  static void SetFocusHook();
-  static void ReleaseHook();
-  static LRESULT __stdcall HookCallback(int nCode, WPARAM wParam, LPARAM lParam);    
-  static void FilterHook(HWND hwnd);  
-  static HHOOK _hook;
-  static std::map<HWND, ui::WindowImp*> windows_;
-  WindowImp* popup_window_;
-};
-
 struct WindowID { 
   static int id_counter;
   static int auto_id() { return id_counter++; }
@@ -1194,7 +1183,7 @@ class WindowTemplateImp : public T, public I {
   virtual void dev_set_parent(Window* window);  
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
-  virtual ui::Window* dev_focus_window();
+  // virtual ui::Window* dev_focus_window();
   virtual void DevSetFocus() {    
     if (GetFocus() != this) {
       SetFocus();
@@ -1259,6 +1248,15 @@ protected:
       return prevent_propagate_event(ev, msg) != 0;          
     } 
     return false;
+  }
+
+  Point MousePos(const CPoint& pt) {    
+    CRect rc;
+    GetWindowRect(&rc);
+    return Point(pt.x - rc.left + 
+                static_cast<int>(dev_absolute_position().left()),
+                pt.y - rc.top + 
+                static_cast<int>(this->dev_absolute_position().top()));
   }
   
  private:
@@ -1570,7 +1568,7 @@ public:
  protected:
 	DECLARE_MESSAGE_MAP()
 	void OnPaint() { CButton::OnPaint(); }
-	void OnClick();
+	void OnClick() { OnDevClick(); }
 
  private:
   ui::Font font_;
@@ -1709,7 +1707,7 @@ class MenuImp;
 
 class MenuContainerImp : public ui::MenuContainerImp { 
  public:  
-  MenuContainerImp();
+  MenuContainerImp() : menu_window_(0), hmenu_(0) {}
  
   virtual void DevUpdate(const Node::Ptr& node, const Node::Ptr& prev_node);
   virtual void DevErase(const Node::Ptr& node);
@@ -1800,8 +1798,7 @@ class TreeViewImp : public WindowTemplateImp<CTreeCtrl, ui::TreeViewImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
-    imp->set_window(w);
-    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
+    imp->set_window(w);    
     imp->SetLineColor(0xFFFFFF);
     return imp;
   }
@@ -1913,8 +1910,7 @@ class ListViewImp : public WindowTemplateImp<CListCtrl, ui::ListViewImp> {
     }
     imp->SendMessage(LVM_SETEXTENDEDLISTVIEWSTYLE,
         LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
-    imp->set_window(w);
-    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
+    imp->set_window(w);    
     // imp->SetLineColor(0xFFFFFF);
     imp->DevViewList();
     return imp;
@@ -2018,12 +2014,11 @@ class ComboBoxImp : public WindowTemplateImp<CComboBox, ui::ComboBoxImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
-	HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
-	CFont font;
-	font.Attach( hFont );
-	imp->SetFont(&font);
-    imp->set_window(w);    
-    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
+	  HGDIOBJ hFont = GetStockObject(DEFAULT_GUI_FONT);
+	  CFont font;
+	  font.Attach( hFont );
+	  imp->SetFont(&font);
+    imp->set_window(w);        
     return imp;
   }  
   
@@ -2104,9 +2099,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }    
-    imp->set_window(w);		
-    WindowHook::windows_[imp->GetSafeHwnd()] = imp;    
-    WindowHook::SetFocusHook();
+    imp->set_window(w);    
     return imp;
   }
 
@@ -2194,8 +2187,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       TRACE0("Failed to create window\n");
       return 0;
     }
-    imp->set_window(w);
-    WindowHook::windows_[imp->GetSafeHwnd()] = imp;
+    imp->set_window(w);    
     return imp;
   }
 

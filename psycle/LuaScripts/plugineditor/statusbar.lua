@@ -1,17 +1,21 @@
-local signal = require("psycle.signal")
+--[[ 
+psycle plugineditor (c) 2016 by psycledelics
+File: statusbar.lua
+copyright 2016 members of the psycle project http://psycle.sourceforge.net
+This source is free software ; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation ; either version 2, or (at your option) any later version.
+]]
+
+local systems = require("psycle.ui.systems")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
-local font = require("psycle.ui.font")
-local fontinfo = require("psycle.ui.fontinfo")
 local boxspace = require("psycle.ui.boxspace")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local item = require("psycle.ui.item")
 local group = require("psycle.ui.group")
 local text = require("psycle.ui.text")
-local edit = require("psycle.ui.edit")
-local systems = require("psycle.ui.systems")
-
 
 local statusbar = group:new()
 
@@ -28,108 +32,97 @@ function statusbar:new(parent, setting)
 end
 
 function statusbar:init(setting)  
-  self:setalign(item.ALRIGHT):setautosize(true, false)        
-  self.searchrestartstatus = text:new(self)
-                                 :settext("")
-								 :setautosize(false, false)
-								 :setposition(rect:new(point:new(0, 0), dimension:new(150, 0)))
-								 :setalign(item.ALLEFT)
-								 :setverticalalignment(item.ALCENTER)
-								 :setmargin(boxspace:new(0, 0, 0, 5))								 								 
-  self.modifiedstatus = text:new(self)
-                            :settext("")							
-							:setautosize(false, false)
-							:setposition(rect:new(point:new(0, 0), dimension:new(100, 0)))
-							:setalign(item.ALLEFT)
-							:setverticalalignment(item.ALCENTER)
-							:setmargin(boxspace:new(0, 5, 0, 0))							
-  self.linelabel = text:new(self)
-      :settext("LINE")
-	  :setautosize(true, false)
-	  :setalign(item.ALLEFT)
-	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(boxspace:new(0, 5, 0, 0))	  
-  self.linestatus = text:new(self)
-                        :settext("1")						
-						:setautosize(false, false)
-						:setposition(rect:new(point:new(0, 0), dimension:new(30, 0)))
-						:setalign(item.ALLEFT)
-						:setverticalalignment(item.ALCENTER)
-						:setmargin(boxspace:new(0, 5, 0, 0))						
-  self.collabel = text:new(self)
-      :settext("COL")
-	  :setautosize(true, false)
-	  :setalign(item.ALLEFT)
-	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(boxspace:new(0, 5, 0, 0))	   
-  self.colstatus = text:new(self)
-                       :settext("1")
-					   :setautosize(false, false)
-					   :setposition(rect:new(point:new(), dimension:new(30, 0)))
-					   :setalign(item.ALLEFT)
-					   :setverticalalignment(item.ALCENTER)
-					   :setmargin(boxspace:new(0, 5, 0, 0))					   
-  self.insertlabel = text:new(self)
-      :settext("INSERT")
-	  :setautosize(true, false)
-	  :setalign(item.ALLEFT)
-	  :setverticalalignment(item.ALCENTER)
-	  :setmargin(boxspace:new(0, 5, 0, 0))	  
-  self.insertstatus = text:new(self)
-                          :settext("ON")						  
-						  :setautosize(false, false)
-						  :setposition(rect:new(point:new(), dimension:new(30, 0)))
-						  :setverticalalignment(item.ALCENTER)
-						  :setalign(item.ALLEFT)						  
+  self:setalign(item.ALRIGHT)
+      :setautosize(true, false)       
+  self.status, self.label = {}, {}
+  self.status.searchrestart = self:createtext("", 100)
+  self.status.modified = self:createtext("", 100)
+  self.label.line = self:createtext("LINE")
+  self.status.line = self:createtext("1", 30)
+  self.label.col = self:createtext("COL")      
+  self.status.col = self:createtext("1", 30)
+  self.label.insert = self:createtext("INSERT")
+  self.status.insert = self:createtext("ON", 30)
+  self:initdefaultcolors()
+end
+
+function statusbar:updatestatus(status)
+  self.status.line:settext(status.line)  
+  self.status.col:settext(status.column)     
+  self.status.insert:settext(
+      statusbar.booltostring(status.ovrtype, "ON", "OFF"))
+  self.status.searchrestart:settext(
+      statusbar.booltostring(status.searchrestart,"SEARCH AT BEGINNING POINT"))
+  self.status.modified:settext(
+      statusbar.booltostring(status.modified, "MODIFIED"))
+end
+
+function statusbar.booltostring(value, ontext, offtext)
+  local result = ""
+  if value then
+    result = ontext
+  elseif offtext then
+    result = offtext    
+  end
+  return result
+end
+
+function statusbar:createtext(label, width)
+  local result = text:new(self)
+                     :settext(label)
+                     :setalign(item.ALLEFT)
+                     :setverticalalignment(item.ALCENTER)
+                     :setmargin(boxspace:new(0, 0, 0, 5))
+  if width then
+    result:setautosize(false, false)    
+    result:setposition(rect:new(point:new(), dimension:new(width, 0)))
+  else    
+    result:setautosize(true, false)
+  end        
+  return result
 end
 
 function statusbar:initdefaultcolors()
-  self.color_ = 0xffffffff
-  self.statuscolor_ = 0xffb0d8b1    
-  self.backgroundcolor_ = 0xFF333333
+  self:setcolor(0xFFFFFFFF)
+      :setstatuscolor(0xFFFFFFFF)
+      :setbackgroundcolor(0xFF333333)
   return self
 end
 
 function statusbar:setcolor(color) 
-  self.color_ = color
-  self.linelabel:setcolor(color)
-  self.collabel:setcolor(color)
-  self.insertlabel:setcolor(color)  
+  for i = 1, #self.label do
+    self.label[i]:setcolor(color)
+  end
   return self
 end
 
 function statusbar:setstatuscolor(color) 
-  self.statuscolor_ = color
-  self.linestatus:setcolor(color)
-  self.colstatus:setcolor(color)
-  self.insertstatus:setcolor(color)
-  self.searchrestartstatus:setcolor(color)  
-  self.modifiedstatus:setcolor(color)
+  for i = 1, #self.status do
+    self.status[i]:setcolor(color)
+  end    
   return self
 end
 
-function statusbar:setbackgroundcolor(color) 
-  self.backgroundcolor_ = color
-  self.linestatus:removeornaments():addornament(ornamentfactory:createfill(color))
-  self.colstatus:removeornaments():addornament(ornamentfactory:createfill(color))
-  self.insertstatus:removeornaments():addornament(ornamentfactory:createfill(color))
-  self.searchrestartstatus:removeornaments():addornament(ornamentfactory:createfill(color))
-  self.modifiedstatus:removeornaments():addornament(ornamentfactory:createfill(color))
-  self:removeornaments()
-  self:addornament(ornamentfactory:createfill(color))
-  return self
-end
-
-function statusbar:setproperties(properties)  
-  if properties.color then    
-	self:setcolor(properties.color:value())
+function statusbar:setbackgroundcolor(color)   
+  local backgroundfill = ornamentfactory:createfill(color)
+  self:addornament(backgroundfill)
+  for i = 1, #self.status do
+    self.status[i]:removeornaments():addornament(backgroundfill)
   end
-  if properties.statuscolor then    
-	self:setstatuscolor(properties.statuscolor:value())
-  end
-  if properties.backgroundcolor then    
-	self:setbackgroundcolor(properties.backgroundcolor:value())
+  for i = 1, #self.label do
+    self.label[i]:removeornaments():addornament(backgroundfill)
   end  
+  return self
+end
+
+function statusbar:setproperties(properties)
+  local setters = {"color", "statuscolor", "backgroundcolor"}
+  for _, setter in pairs(setters) do        
+    local property = properties[setter]      
+    if property then      
+      statusbar["set"..setter](self, property:value())
+    end
+  end
   self:fls()  
 end
 

@@ -51,138 +51,140 @@ end
 
 function propertiesview:createproperties(name, properties)    
   if (properties) then    
-    for name, property in properties:opairs() do		  
-	  if not property:iseditprevented() then	  	  
-		local div = group:new(self)
-		                 :setautosize(false, true)
-						 :setalign(item.ALTOP)
-						 :setposition(rect:new(point:new(), dimension:new(0, 20)))
-						 :setmargin(boxspace:new(0, 0, 5, 0))
-        if property:typename() == "fontinfo" then
-		  text:new(div):setautosize(true, true)
-			  		   :setalign(item.ALLEFT)
-					   :settext(property:label())
-					   :setmargin(boxspace:new(0, 10, 0, 0))					    
-          self[name] = {  family =  edit:new(div)
-		                                    :setautosize(false, false)
-					                        :setposition(rect:new(point:new(), dimension:new(100, 20)))
-						                    :setalign(item.ALLEFT)
-						                    :settext(property:value():family())						   
-						                    :setbackgroundcolor(0xFF373533)  
-						                    :setcolor(0xFFFFFFFF)
-						                    :setmargin(boxspace:new(0, 10, 0, 0)),
-						   size =  edit:new(div)
-		                                   :setautosize(false, false)
-					                       :setposition(rect:new(point:new(), dimension:new(100, 20)))
-						                   :setalign(item.ALLEFT)
-						                   :settext(property:value():size() .. "")
-						                   :setbackgroundcolor(0xFF373533)  
-						                   :setcolor(0xFFFFFFFF)
-						                   :setmargin(boxspace:new(0, 10, 0, 0)),
-                           style =  edit:new(div)
-		                                   :setautosize(false, false)
-					                       :setposition(rect:new(point:new(), dimension:new(100, 20)))
-						                   :setalign(item.ALLEFT)
-						                   :settext(property:value():style() .. "")
-						                   :setbackgroundcolor(0xFF373533)  
-						                   :setcolor(0xFFFFFFFF)
-						                   :setmargin(boxspace:new(0, 10, 0, 0))										   										   										   
-                       }										   
-          self.edits[#self.edits + 1] = self[name].family
-		  self.edits[#self.edits + 1] = self[name].size
-		  self.edits[#self.edits + 1] = self[name].style
-          text:new(div):setautosize(true, true)
-			  		   :setalign(item.ALLEFT)
-					   :settext("[family, size,style]")		  
-		elseif property:typename() == "color" then		  
-		
-		  text:new(div):setautosize(true, true)
-			  		   :setalign(item.ALLEFT)
-					   :settext(property:label())
-					   :setmargin(boxspace:new(0, 10, 0, 0))
-          self[name] = edit:new(div)
-		                   :setautosize(false, false)
-					       :setposition(rect:new(point:new(), dimension:new(100, 20)))
-						   :setalign(item.ALLEFT)
-						   :settext(property:tostring())						   
-						   :setbackgroundcolor(0xFF373533)  
-						   :setcolor(0xFFFFFFFF)
-						   :setmargin(boxspace:new(0, 10, 0, 0))				  
-          self.edits[#self.edits + 1] = self[name]          
-          local stock_color_box = combobox:new(div)
-		                                  :setautosize(false, false)
-					                      :setposition(rect:new(point:new(), dimension:new(100, 20)))
-						                  :setalign(item.ALLEFT)		
-                                          :setmargin(boxspace:new(0, 10, 0, 0))		  										  
-          stock_color_box:additem("Defined Color")
-		  for k, v in pairs(stock.color) do
-		    stock_color_box:additem(k.."")			
-		  end		  
-		  local that = self
-          function stock_color_box:onselect(ev)   
-			 local stockkey = stock.color[self:items()[self:itemindex()]]
-			 if stockkey then			    			    
-			   that[name]:settext(string.format("%x", stock.value(stockkey)))
-			   that[name]:setcolor(0xFFCACACA)
-			   that[name].stockkey = stockkey
-			 else
-			   that[name]:setcolor(that.editforegroundcolor)
-			   that[name].stockkey = false
-			 end
-          end
-		  if property:stockkey() then		    		    				
-		    stock_color_box:setitembytext(stock.key(property:stockkey()):match("[^.]+$"))
-			that[name].stockkey = property:stockkey()
-		  end
-          text:new(div):setautosize(true, true)
-			  		   :setalign(item.ALLEFT)
-					   :settext("[ARGB HEX]")					   
-		elseif property:typename() == "boolean" then
-		   self[name] = checkbox:new(div)
-		                        :setautosize(false, false)
-								:setposition(rect:new(point:new(), dimension:new(100, 20)))
-								:setalign(item.ALCLIENT)            
-								:settext(property:label())	
-        else		  
-	      text:new(div):setautosize(true, true)
-			  		   :setalign(item.ALLEFT)
-					   :settext(property:label())					   
-					   :setmargin(boxspace:new(0, 10, 0, 0))					   
-          self[name] = edit:new(div)
-		                   :setautosize(false, false)
-					       :setposition(rect:new(point:new(), dimension:new(100, 20)))
-						   :setalign(item.ALLEFT)
-						   :settext(property:tostring())        
-						   :setbackgroundcolor(0xFF373533)
-                           :setcolor(0xFFFFFFFF)
-          self.edits[#self.edits + 1] = self[name]
-        end					   
-      end	
-	end
+    for name, property in properties:opairs() do      
+    if not property:iseditprevented() then        
+      local div = group:new(self)
+                       :setautosize(false, true)
+                       :setalign(item.ALTOP)
+                       :setposition(rect:new(point:new(), dimension:new(0, 20)))
+                       :setmargin(boxspace:new(0, 0, 5, 0))
+      if property:typename() == "fontinfo" then
+        text:new(div)
+            :setautosize(true, true)
+            :setalign(item.ALLEFT)
+            :settext(property:label())
+            :setmargin(boxspace:new(0, 10, 0, 0))              
+        self[name] = {
+          family =  edit:new(div)
+                        :setautosize(false, false)
+                        :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                        :setalign(item.ALLEFT)
+                        :settext(property:value():family())              
+                        :setbackgroundcolor(0xFF373533)  
+                        :setcolor(0xFFFFFFFF)
+                        :setmargin(boxspace:new(0, 10, 0, 0)),
+          size =  edit:new(div)
+                      :setautosize(false, false)
+                      :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                      :setalign(item.ALLEFT)
+                      :settext(property:value():size() .. "")
+                      :setbackgroundcolor(0xFF373533)  
+                      :setcolor(0xFFFFFFFF)
+                      :setmargin(boxspace:new(0, 10, 0, 0)),
+          style =  edit:new(div)
+                       :setautosize(false, false)
+                       :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                       :setalign(item.ALLEFT)
+                       :settext(property:value():style() .. "")
+                       :setbackgroundcolor(0xFF373533)  
+                       :setcolor(0xFFFFFFFF)
+                       :setmargin(boxspace:new(0, 10, 0, 0))                                                                   
+      } 
+      self.edits[#self.edits + 1] = self[name].family
+      self.edits[#self.edits + 1] = self[name].size
+      self.edits[#self.edits + 1] = self[name].style
+      text:new(div)
+          :setautosize(true, true)
+          :setalign(item.ALLEFT)
+          :settext("[family, size,style]")     
+    elseif property:typename() == "color" then          
+        text:new(div):setautosize(true, true)
+            :setalign(item.ALLEFT)
+            :settext(property:label())
+            :setmargin(boxspace:new(0, 10, 0, 0))
+        self[name] = edit:new(div)
+                         :setautosize(false, false)
+                         :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                         :setalign(item.ALLEFT)
+                         :settext(property:tostring())               
+                         :setbackgroundcolor(0xFF373533)  
+                         :setcolor(0xFFFFFFFF)
+                         :setmargin(boxspace:new(0, 10, 0, 0))          
+        local stock_color_box = combobox:new(div)
+                                        :setautosize(false, false)
+                                        :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                                        :setalign(item.ALLEFT)    
+                                        :setmargin(boxspace:new(0, 10, 0, 0))                           
+        stock_color_box:additem("Defined Color")
+        for k, v in pairs(stock.color) do
+          stock_color_box:additem(k.."")      
+        end     
+        local that = self
+        function stock_color_box:onselect(ev)   
+         local stockkey = stock.color[self:items()[self:itemindex()]]
+         if stockkey then                   
+           that[name]:settext(string.format("%x", stock.value(stockkey)))
+           that[name]:setcolor(0xFFCACACA)
+           that[name].stockkey = stockkey
+         else
+           that[name]:setcolor(that.editforegroundcolor)
+           that[name].stockkey = false
+         end
+            end
+        if property:stockkey() then                       
+          stock_color_box:setitembytext(stock.key(property:stockkey()):match("[^.]+$"))
+        that[name].stockkey = property:stockkey()
+        end
+        text:new(div)
+            :setautosize(true, true)
+            :setalign(item.ALLEFT)
+            :settext("[ARGB HEX]")            
+      elseif property:typename() == "boolean" then
+         self[name] = checkbox:new(div)
+                              :setautosize(false, false)
+                              :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                              :setalign(item.ALCLIENT)            
+                              :settext(property:label())  
+      else      
+        text:new(div)
+            :setautosize(true, true)
+            :setalign(item.ALLEFT)
+            :settext(property:label())            
+            :setmargin(boxspace:new(0, 10, 0, 0))             
+        self[name] = edit:new(div)
+                         :setautosize(false, false)
+                         :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                         :setalign(item.ALLEFT)
+                         :settext(property:tostring())        
+                         :setbackgroundcolor(0xFF373533)
+                         :setcolor(0xFFFFFFFF)          
+      end            
+      end 
+    end
   end  
 end
 
 function propertiesview:parseproperties()
   if self.properties_ then  
-    for name, property in self.properties_:opairs() do	  
-	  if not property:iseditprevented() then
-	    if property:typename() == "fontinfo" then	      
-	      property:value():setfamily(self[name].family:text())
-		  property:value():setsize(self[name].size:text())		
-	    elseif property:typename() == "color" then
+    for name, property in self.properties_:opairs() do    
+      if not property:iseditprevented() then
+        if property:typename() == "fontinfo" then       
+          property:value():setfamily(self[name].family:text())
+          property:value():setsize(self[name].size:text())    
+        elseif property:typename() == "color" then
           if self[name].stockkey then
-		    property:setstockkey(self[name].stockkey)
-		  else
-	        property:setvalue(tonumber(self[name]:text(), 16))
-		  end
-	    elseif property:typename() == "number" then	    
-	  	  property:setvalue(tonumber(self[name]:text()))  
-	    elseif property:typename() == "string" then
-	      property:setvalue(self[name]:text())
-	    elseif property:typename() == "boolean" then
-	      property:setvalue(self[name]:check())
-	    end	 
-	  end	  
+          property:setstockkey(self[name].stockkey)
+        else
+          property:setvalue(tonumber(self[name]:text(), 16))
+        end
+      elseif property:typename() == "number" then     
+        property:setvalue(tonumber(self[name]:text()))  
+      elseif property:typename() == "string" then
+        property:setvalue(self[name]:text())
+      elseif property:typename() == "boolean" then
+        property:setvalue(self[name]:check())
+      end  
+    end   
     end
   end
   return self

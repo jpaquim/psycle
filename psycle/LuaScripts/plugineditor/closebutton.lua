@@ -13,31 +13,19 @@ local item = require("psycle.ui.item")
 local text = require("psycle.ui.text")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local signal = require("psycle.signal")
+local toolicon = require("psycle.ui.canvas.toolicon")
 
 local closebutton = {}
 
-function closebutton.new(parent)  
-  local t = text:new(parent)
-                :setautosize(false, false)				   
-				:setposition(rect:new(point:new(), dimension:new(20, 15)))
-                :settext("X")
-	 	        :setverticalalignment(item.ALCENTER)
-				:setjustify(text.CENTERJUSTIFY)
-                :setalign(item.ALRIGHT)				
-  t:setdebugtext("close")				
-  function t:onmousedown()    
-    self:removeornaments()  
-    self.dohide:emit()
-  end      
-  function t:onmousemove()  
-    if not self:ornaments() then	  
-	  self:addornament(ornamentfactory:createfill(0xFFA8444C))      
-	end
-  end
-  function t:onmouseout()        
-    self:removeornaments()
-  end
-  t.dohide = signal:new()
+function closebutton.new(parent)    
+  local t = toolicon:new(parent)
+                     :setautosize(false, false)           
+                     :setposition(rect:new(point:new(), dimension:new(20, 15)))
+                     :settext("X")
+                     --:setverticalalignment(item.ALCENTER)
+                     --:setjustify(text.CENTERJUSTIFY)
+                     :setalign(item.ALRIGHT)    
+  --t.hoverbackgroundcolor = 0xFFA8444C
   return t
 end
 

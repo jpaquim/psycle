@@ -41,7 +41,7 @@ extern CPsycleApp theApp;
 using namespace ui;
 
 LuaControl::LuaControl() : L(0), LM(0) {
-  invokelater.reset(new ui::Commands());
+  invokelater_.reset(new ui::Commands());
   InitializeCriticalSection(&cs);  
 }
 LuaControl::~LuaControl() {
@@ -87,7 +87,7 @@ void LuaControl::Start() {
 
 void LuaControl::Free() {
   if (L) {
-    invokelater->Clear();
+    invokelater_->Clear();
     lua_close(L);    
   }
   L = 0;
@@ -361,14 +361,13 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     host_(host),
     is_meta_cache_updated_(false),
     lua_mac_(0),
-    user_interface_(SDI),
-    lua_systems_(0) {  
+    user_interface_(SDI) {     
   Load(dllname);
 }
 
 LuaProxy::~LuaProxy() {}
 
-int LuaProxy::invoke_later(lua_State* L) {
+int LuaProxy::invokelater(lua_State* L) {
   if lua_isnil(L, 1) {
     return luaL_error(L, "Argument is nil.");
   }
@@ -385,14 +384,14 @@ int LuaProxy::invoke_later(lua_State* L) {
   if (!proxy) {
     return luaL_error(L, "invokelater: Proxy not found.");
   }
-  proxy->invokelater->Add(f);  
+  proxy->invokelater_->Add(f);  
   return 0;
 }
 
 void LuaProxy::OnTimer() {      
   try {
     lock();    
-    invokelater->Invoke();              
+    invokelater_->Invoke();              
     lua_gc(L, LUA_GCCOLLECT, 0);
     unlock();
   } catch(std::exception& e) {    
@@ -418,7 +417,7 @@ void LuaProxy::OnFrameClose(ui::Frame&) {
 
 void LuaProxy::PrepareState() {  
   LuaGlobal::proxy_map[L] = this;
-  export_c_funcs();
+  ExportCFunctions();
   // require c modules
   // config
   LuaHelper::require<LuaConfigBind>(L, "psycle.config");
@@ -471,7 +470,7 @@ void LuaProxy::Reload() {
       Run();
       Init();      
       if (old_state) {
-        LuaGlobal::proxy(old_state)->invokelater->Clear();
+        LuaGlobal::proxy(old_state)->invokelater_->Clear();
         boost::weak_ptr<ui::MenuContainer> menu_bar = LuaGlobal::proxy(old_state)->menu_bar();
         if (!menu_bar.expired()) {
           menu_bar.lock()->root_node().lock()->erase_imps(menu_bar.lock()->imp());
@@ -579,9 +578,9 @@ int LuaProxy::set_menubar(lua_State* L) {
   return 0;
 }
 
-void LuaProxy::export_c_funcs() {
+void LuaProxy::ExportCFunctions() {
   static const luaL_Reg methods[] = {
-    {"invokelater", invoke_later},
+    {"invokelater", invokelater},
     {"output", terminal_output },
     {"alert", alert},
     {"confirm", confirm},
@@ -1096,20 +1095,9 @@ void LuaProxy::UpdateWindowsMenu() {
   host_extensions.ChangeWindowsMenuText(host_);
 }
 
-void LuaProxy::update_systems_state(lua_State* L) {
-  if (!systems_.get()) {
-    lua_systems_ = new LuaSystems();
-    lua_systems_->set_luastate(L);
-    systems_.reset(new Systems(lua_systems_));    
-  } 
-  lua_systems_->set_luastate(L);
-}
-
 ui::Systems* LuaProxy::systems() { 
-  if (!systems_.get()) {
-    lua_systems_ = new LuaSystems();
-    lua_systems_->set_luastate(L);
-    systems_.reset(new Systems(lua_systems_));
+  if (!systems_.get()) {    
+    systems_.reset(new Systems(new LuaSystems(L)));
   } 
   return systems_.get();
 }

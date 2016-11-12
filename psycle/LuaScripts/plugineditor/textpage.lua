@@ -1,10 +1,13 @@
--- psycle pluginselector (c) 2016 by psycledelics
--- File: pluginselector.lua
--- copyright 2016 members of the psycle project http://psycle.sourceforge.net
--- This source is free software ; you can redistribute it and/or modify it under
--- the terms of the GNU General Public License as published by the Free Software
--- Foundation ; either version 2, or (at your option) any later version.  
+--[[ 
+psycle pluginselector (c) 2016 by psycledelics
+File: pluginselector.lua
+copyright 2016 members of the psycle project http://psycle.sourceforge.net
+This source is free software ; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation ; either version 2, or (at your option) any later version.
+]]
 
+local systems = require("psycle.ui.systems")
 local cfg = require("psycle.config"):new("PatternVisual")
 local node = require("psycle.node")
 local point = require("psycle.ui.point")
@@ -20,48 +23,21 @@ local serpent = require("psycle.serpent")
 
 local textpage = scintilla:new()
 
+textpage.windowtype = 95
 textpage.pagecounter = 0
 
-function textpage:new(parent, setting)    
+function textpage:new(parent)    
   local c = scintilla:new(parent)  
   setmetatable(c, self)
   self.__index = self
-  c:init(setting)
+  c:init()
   textpage.pagecounter = textpage.pagecounter + 1
+  systems:new():changewindowtype(textpage.windowtype, c)
   return c
 end
 
-function textpage:init(setting)
+function textpage:init()
   self:setautosize(false, false)
-  self:applysetting(setting)  
-end
-
-function textpage:applysetting(setting)  
-  self:setforegroundcolor(setting.general.properties.foregroundcolor:value())
-  self:setbackgroundcolor(setting.general.properties.backgroundcolor:value())   
-  self:styleclearall()
-  self:setlinenumberforegroundcolor(setting.general.properties.linenumberforegroundcolor:value())
-  self:setlinenumberbackgroundcolor(setting.general.properties.linenumberbackgroundcolor:value())    
-  self:setfoldingbackgroundcolor(setting.general.properties.foldingbackgroundcolor:value())
-  self:setselbackgroundcolor(setting.general.properties.selbackgroundcolor:value())    
-  self:setselalpha(75)
-  local lex = lexer:new()  
-  lex:setkeywords(setting.lualexer.properties.keywords:value())  
-  lex:setcommentcolor(setting.lualexer.properties.commentcolor:value())
-  lex:setcommentlinecolor(setting.lualexer.properties.commentlinecolor:value())
-  lex:setcommentdoccolor(setting.lualexer.properties.commentdoccolor:value())
-  lex:setidentifiercolor(setting.lualexer.properties.identifiercolor:value())
-  lex:setnumbercolor(setting.lualexer.properties.numbercolor:value())
-  lex:setfoldingmarkerforecolor(0xFF000000) -- setting.lualexer.properties.foldingmarkerforecolor:value())
-  lex:setfoldingmarkerbackcolor(0xFF000000) -- setting.lualexer.properties.foldingmarkerbackcolor:value())
-  lex:setoperatorcolor(setting.lualexer.properties.operatorcolor:value())
-  lex:setstringcolor(setting.lualexer.properties.stringcolor:value())
-  lex:setwordcolor(setting.lualexer.properties.wordcolor:value())   
-  self:setlexer(lex)  
-  self:setfontinfo(setting.general.properties.font:value()) --fontinfo:new():setsize(settings.sci.lexer.font.size):setfamily(settings.sci.lexer.font.name))
-  self:setcaretcolor(setting.general.properties.caretcolor:value())
-  self:setcaretlinebackgroundcolor(setting.general.properties.caretlinebackgroundcolor:value())  
-  self:showcaretline()
 end
 
 function textpage:onkeydown(ev)
@@ -81,15 +57,14 @@ function textpage:addbreakpoint(linepos)
   self:addmarker(linepos, 1)
 end
 
-function textpage:updatestatus(statusdisplay)
+function textpage:status()  
   local that = self
-  local status = {
+  return {
     line = that:line() + 1,
     column = that:column() + 1,
-	modified = that:modified(),
-	ovrtype = that:ovrtype()
-  }   
-  statusdisplay:onupdatetextpagestatus(status)
+	  modified = that:modified(),
+	  ovrtype = that:ovrtype()
+  }  
 end
 
 function textpage:createdefaultname()
@@ -153,6 +128,41 @@ function textpage:onsearch(searchtext, dir, case, wholeword, regexp)
 	  self.searchbeginpos = cpselstart        
 	end
   end      
+end
+
+
+function textpage:setproperties(properties)   
+  if properties.color then    
+    self:setforegroundcolor(properties.color:value())	    
+  end
+  if properties.backgroundcolor then    
+	  self:setbackgroundcolor(properties.backgroundcolor:value())
+  end
+  self:styleclearall()
+  self:showcaretline()    
+  local lexsetters = {"commentcolor", "commentlinecolor", "commentdoccolor",
+                      "foldingmarkerforecolor", "foldingmarkerbackcolor",
+                      "operatorcolor", "wordcolor", "stringcolor",
+                      "identifiercolor", "numbercolor"}  
+  local lex = lexer:new()  
+  for _, setter in pairs(lexsetters) do        
+    local property = properties[setter]      
+    if property then            
+      lex["set"..setter](lex, property:value())
+    end
+  end 
+  self:setlexer(lex)  
+  local setters = {"linenumberforegroundcolor", "linenumberbackgroundcolor", "foldingbackgroundcolor",
+                   "selbackgroundcolor",
+                   "caretcolor", "caretlinebackgroundcolor"} 
+  for _, setter in pairs(setters) do        
+    local property = properties[setter]      
+    if property then            
+      textpage["set"..setter](self, property:value())
+    end
+  end    
+  self:setselalpha(75)    
+  self:showcaretline()  
 end
 
 return textpage

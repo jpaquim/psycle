@@ -28,7 +28,7 @@
 #define GetGValue(rgb) (LOBYTE((rgb) >> 8))
 #define ToCOLORREF(argb) RGB((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, (argb >> 0) & 0xFF)
 #define GetAlpha(argb) (argb>>24) & 0xFF
-#define RGBToARGB(r, g, b) (((ARGB) (b) << 0) | ((ARGB) (g) << 8) |((ARGB) (r) << 16) | ((ARGB) (0) << 24))
+#define RGBToARGB(r, g, b) (((ARGB) (b) << 0) | ((ARGB) (g) << 8) |((ARGB) (r) << 16) | ((ARGB) (0xFF) << 24))
 #define ToARGB(rgb) RGBToARGB(GetRValue(rgb), GetGValue(rgb), GetBValue(rgb))
 
 // #define ANSITOUTF8(str) boost::locale::conv::to_utf<char>(str, std::locale())
@@ -114,6 +114,10 @@ struct Point {
 typedef std::vector<Point> Points;
 
 struct Dimension {
+  typedef boost::shared_ptr<Dimension> Ptr;
+  typedef boost::shared_ptr<const Dimension> ConstPtr;
+  typedef boost::weak_ptr<Dimension> WeakPtr;
+
   Dimension() : width_(0), height_(0) {}
   Dimension(double val) : width_(val), height_(val) {}
   Dimension(double width, double height) : width_(width), height_(height) {}
@@ -182,6 +186,10 @@ struct Dimension {
 class Region;
 
 struct BoxSpace {
+  typedef boost::shared_ptr<BoxSpace> Ptr;
+  typedef boost::shared_ptr<const BoxSpace> ConstPtr;
+  typedef boost::weak_ptr<BoxSpace> WeakPtr;
+
 	BoxSpace() {}
 	BoxSpace(double space) : top_left_(space, space), bottom_right_(space, space) {}
 	BoxSpace(double top, double right, double bottom, double left) :
@@ -237,11 +245,11 @@ struct Rect {
   typedef boost::weak_ptr<Rect> WeakPtr;
   
   Rect() {}  
-  Rect(const ui::Point& top_left, const ui::Point& bottom_right) :
+  Rect(const Point& top_left, const Point& bottom_right) :
      top_left_(top_left),
      bottom_right_(bottom_right) {
   }
-  Rect(const ui::Point& top_left, const ui::Dimension& dim) : 
+  Rect(const Point& top_left, const Dimension& dim) : 
      top_left_(top_left),
      bottom_right_(top_left.x() + dim.width(), top_left.y() + dim.height()) {
   }
@@ -255,12 +263,12 @@ struct Rect {
   }
   inline bool operator!=(const Rect& rhs) const { return !(*this == rhs); }
     
-  inline void set(const ui::Point& top_left, const ui::Point& bottom_right) {
+  inline void set(const Point& top_left, const Point& bottom_right) {
     top_left_ = top_left;
     bottom_right_ = bottom_right;
   }
 
-  inline void set(const ui::Point& top_left, const ui::Dimension& dim) {
+  inline void set(const Point& top_left, const Dimension& dim) {
     top_left_ = top_left;
     bottom_right_.set_xy(top_left.x() + dim.width(), top_left.y() + dim.height());
   }
@@ -281,10 +289,10 @@ struct Rect {
   inline double bottom() const { return bottom_right_.y(); }
   inline double width() const { return bottom_right_.x() - top_left_.x(); }
   inline double height() const { return bottom_right_.y() - top_left_.y(); }
-  inline const ui::Point& top_left() const { return top_left_; }
-  inline const ui::Point top_right() const { return ui::Point(right(), top()); }
-  inline const ui::Point& bottom_right() const { return bottom_right_; }
-  inline const ui::Point bottom_left() const { return ui::Point(left(), bottom()); }  
+  inline const Point& top_left() const { return top_left_; }
+  inline const Point top_right() const { return ui::Point(right(), top()); }
+  inline const Point& bottom_right() const { return bottom_right_; }
+  inline const Point bottom_left() const { return ui::Point(left(), bottom()); }  
   inline void set_dimension(const ui::Dimension& dimension) {
     set_width(dimension.width());
     set_height(dimension.height());
@@ -297,14 +305,14 @@ struct Rect {
            bottom_right_.x() == 0 && bottom_right_.y() == 0;
   }
 
-	void Increase(const ui::BoxSpace& space) {
+	void Increase(const BoxSpace& space) {
 		top_left_.set_x(top_left_.x() - space.left());
 		top_left_.set_y(top_left_.y() - space.top());
 		bottom_right_.set_x(bottom_right_.x() + space.right());
 		bottom_right_.set_y(bottom_right_.y() + space.bottom());
 	}
 
-	void Decrease(const ui::BoxSpace& space) {
+	void Decrease(const BoxSpace& space) {
 		top_left_.set_x(top_left_.x() + space.left());
 		top_left_.set_y(top_left_.y() + space.top());
 		bottom_right_.set_x(bottom_right_.x() - space.right());
@@ -316,6 +324,14 @@ struct Rect {
     top_left_.set_y(top_left_.y() + dy);
     bottom_right_.set_x(bottom_right_.x() + dx);
     bottom_right_.set_y(bottom_right_.y() + dy);    
+  }
+
+  inline bool Intersect(const Point& point) {    
+    if (point.x() < left()) return false;
+    if (point.y() < top()) return false;
+    if (point.x() >= right()) return false;
+    if (point.y() >= bottom()) return false;
+    return true;
   }
 
   inline void Offset(const ui::Point& delta) { Offset(delta.x(), delta.y()); }
@@ -347,8 +363,9 @@ inline SystemMetrics::~SystemMetrics() {}
 class RegionImp;
 
 class Region {
- public:  
+ public:    
   typedef boost::shared_ptr<Region> Ptr;
+  typedef boost::shared_ptr<const Region> ConstPtr;
   typedef boost::weak_ptr<Region> WeakPtr;
 
   Region();
@@ -375,6 +392,10 @@ class Region {
 };
 
 struct Shape {
+  typedef boost::shared_ptr<Shape> Ptr;
+  typedef boost::shared_ptr<const Shape> ConstPtr;
+  typedef boost::weak_ptr<Shape> WeakPtr;
+
   Shape() {}
   virtual ~Shape() {}
 
@@ -395,6 +416,10 @@ struct RectShape : public Shape {
 };
 
 struct Area {
+  typedef boost::shared_ptr<Area> Ptr;
+  typedef boost::shared_ptr<const Area> ConstPtr;
+  typedef boost::weak_ptr<Area> WeakPtr;
+
   Area();
   Area(const Rect& rect);
   Area* Clone() const;
@@ -459,21 +484,24 @@ class Event {
 };
 
 class MouseEvent : public Event {
-  public:
-   MouseEvent(int cx, int cy, int button, unsigned int shift)
-      : cx_(cx), 
-        cy_(cy), 
-        button_(button), 
-        shift_(shift) {
+ public:
+  typedef boost::shared_ptr<MouseEvent> Ptr;
+	typedef boost::shared_ptr<const MouseEvent> ConstPtr;
+	typedef boost::weak_ptr<MouseEvent> WeakPtr;
+	typedef boost::weak_ptr<const MouseEvent> ConstWeakPtr;
+
+  MouseEvent(const Point& client_pos, int button, unsigned int shift) : 
+       client_pos_(client_pos),        
+       button_(button), 
+       shift_(shift) {
    }
 
-  double cx() const { return cx_; }
-  double cy() const { return cy_; }
+  const Point& client_pos() const { return client_pos_; }  
   int button() const { return button_; }
   int shift() const { return shift_; }
 
  private:  
-  double cx_, cy_;
+  Point client_pos_;
   int button_, shift_;
 };
 
@@ -779,21 +807,13 @@ friend class Group;
 
 enum WindowMsg { ONWND, SHOW, HIDE, FOCUS };
 
-enum AlignStyle {
-  ALNONE = 1,
-  ALTOP,
-  ALLEFT,
-  ALRIGHT,
-  ALBOTTOM,   
-  ALCLIENT, 
-  ALCENTER
-};
+namespace AlignStyle {
+enum Type { ALNONE = 1, ALTOP, ALLEFT, ALRIGHT, ALBOTTOM, ALCLIENT, ALCENTER };
+}
 
-enum JustifyStyle {
-  LEFTJUSTIFY,
-  RIGHTJUSTIFY,
-  CENTERJUSTIFY
-};
+namespace JustifyStyle {
+enum Type { LEFTJUSTIFY, RIGHTJUSTIFY, CENTERJUSTIFY };
+}
 
 class WindowImp;
 class Ornament;
@@ -1056,8 +1076,8 @@ class Window : public boost::enable_shared_from_this<Window> {
 	const BoxSpace& border_space() const;
 	virtual void set_aligner(const boost::shared_ptr<Aligner>& aligner) {}
 	virtual boost::shared_ptr<Aligner> aligner() const { return nullpointer; }
-	void set_align(AlignStyle align) { align_ = align; }
-	AlignStyle align() const { return align_; }		
+	void set_align(AlignStyle::Type align) { align_ = align; }
+	AlignStyle::Type align() const { return align_; }		
   virtual void UpdateAlign() {}
 	virtual void Show();
 	virtual void Show(const boost::shared_ptr<WindowShowStrategy>& aligner);
@@ -1131,8 +1151,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void OnKeyDown(KeyEvent& ev) { ev.WorkParent(); }
 	virtual void OnKeyUp(KeyEvent& ev) { ev.WorkParent(); }
 	boost::signal<void(KeyEvent&)> KeyDown;
-	boost::signal<void(KeyEvent&)> KeyUp;
-	Window::WeakPtr focus();
+	boost::signal<void(KeyEvent&)> KeyUp;	
 	virtual void SetFocus();
 	virtual void OnFocus(Event& ev) { ev.WorkParent(); }
 	virtual void OnKillFocus(Event& ev) { ev.WorkParent(); }
@@ -1202,7 +1221,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   bool auto_size_width_, auto_size_height_, prevent_auto_dimension_;
   Ornaments ornaments_;
   bool visible_, pointer_events_;  
-  AlignStyle align_;		
+  AlignStyle::Type align_;		
 	bool align_dimension_changed_;  
 };
 
@@ -1361,11 +1380,15 @@ class FrameAligner : public WindowShowStrategy {
    FrameAligner() :
        width_perc_(-1),
        height_perc_(-1),
-       alignment_(ALCENTER) {}
-   FrameAligner(AlignStyle alignment) : width_perc_(-1), height_perc_(-1), alignment_(alignment) {}   
+       alignment_(AlignStyle::ALCENTER) {
+   }
+   FrameAligner(AlignStyle::Type alignment) : 
+       width_perc_(-1),
+       height_perc_(-1),
+       alignment_(alignment) {
+   }
    virtual ~FrameAligner() {}
    virtual void set_position(Window& window);
-
    void SizeToScreen(double width_perc, double height_perc) {
      width_perc_ = width_perc;
      height_perc_ = height_perc;
@@ -1373,7 +1396,7 @@ class FrameAligner : public WindowShowStrategy {
 
   private:    
     double width_perc_, height_perc_;
-    AlignStyle alignment_;
+    AlignStyle::Type alignment_;
 };
 
 class WindowRightToScreen {
@@ -1381,7 +1404,6 @@ class WindowRightToScreen {
    WindowRightToScreen() : width_perc_(-1), height_perc_(-1) {}   
    virtual ~WindowRightToScreen() {}
    virtual void set_position(Window& window);
-
    void SizeToScreen(double width_perc, double height_perc) {
      width_perc_ = width_perc;
      height_perc_ = height_perc;
@@ -1704,6 +1726,10 @@ class MenuContainer {
 
 class MenuBar : public MenuContainer {
  public:
+  typedef boost::shared_ptr<MenuBar> Ptr;
+  typedef boost::shared_ptr<const MenuBar> ConstPtr;
+  typedef boost::weak_ptr<MenuBar> WeakPtr;
+
    ~MenuBar() {
      ::AfxGetMainWnd()->DrawMenuBar();
    }
@@ -2390,9 +2416,6 @@ struct SystemsConfigVisitor {
   virtual void visit(Window* window) = 0;
 };
 
-
-// Ui Factory
-
 class Canvas;
 class RadioGroup;
 class RectangleBox;
@@ -2409,49 +2432,26 @@ class WindowStyler {
   typedef std::multimap<WindowTypes::Type, Window*> Windows;
 
   void set_class_properties(WindowTypes::Type window_type,
-                            const Properties& properties) {
-    class_properties_[window_type] = properties;
-  }
-  Properties class_properties(WindowTypes::Type window_type) {
-    ClassProperties::iterator it = class_properties_.find(window_type);
-    return (it != class_properties_.end()) ? it->second : Properties();
-  }
-  void UpdateWindows() {
-    Windows::iterator it = windows_.begin();
-    for (; it != windows_.end(); ++it) {                  
-      it->second->set_properties(class_properties(it->first));
-    }
-  }
-  void UpdateWindow(WindowTypes::Type window_type, Window* window) {
-    assert(window);    
-    window->set_properties(class_properties(window_type));
-  }    
-  void ChangeWindowType(int extended_window_type, Window* window) {
-    assert(window);
-    RemoveWindow(*window);
-    AddWindow(static_cast<WindowTypes::Type>(extended_window_type), *window);
-  }
-  void AddWindow(WindowTypes::Type window_type, Window& window) {
-     windows_.insert(std::pair<WindowTypes::Type, Window*>(
-        window_type, &window));
-  }  
-  void RemoveWindow(Window& window) {      
-    Windows::iterator it = windows_.begin();
-    for (; it != windows_.end(); ++it) {
-      if (it->second == &window) {
-        windows_.erase(it);
-        break;
-      }
-    }
-  }
+                            const Properties& properties);
+  Properties class_properties(WindowTypes::Type window_type);
+  void UpdateWindows();
+  void UpdateWindow(WindowTypes::Type window_type, Window* window);
+  void ChangeWindowType(int extended_window_type, Window* window);
+  void AddWindow(WindowTypes::Type window_type, Window& window);
+  void RemoveWindow(Window& window);
 
  private:
   ClassProperties class_properties_;  
   Windows windows_;
 };
 
+// Ui Factory
 class Systems {
  public:  
+  typedef boost::shared_ptr<Systems> Ptr;
+  typedef boost::shared_ptr<const Systems> ConstPtr;
+  typedef boost::weak_ptr<Systems> WeakPtr;
+
   Systems() {}    
   Systems(Systems* concrete_factory) : concrete_factory_(concrete_factory) {}
   virtual ~Systems() {}
@@ -2659,18 +2659,14 @@ class WindowImp {
   virtual void DevSetCursorPosition(const ui::Point& position) = 0;
   virtual void DevSetCursor(CursorStyle::Type style) {}  
   virtual void dev_set_parent(Window* window) {} 
-  virtual void dev_set_clip_children() {}
-  virtual ui::Window* dev_focus_window() = 0;
+  virtual void dev_set_clip_children() {}  
   virtual void DevSetFocus() = 0;
- 
   virtual void OnDevDraw(Graphics* g, Region& draw_region);  
-  virtual void OnDevSize(const ui::Dimension& dimension);
-  
+  virtual void OnDevSize(const ui::Dimension& dimension);  
   virtual void dev_add_style(UINT flag) {}
   virtual void dev_remove_style(UINT flag) {}
   virtual void DevEnable() = 0;
   virtual void DevDisable() = 0;
-
   virtual void DevViewDoubleBuffered() = 0;
   virtual void DevViewSingleBuffered() = 0;
   virtual bool dev_is_double_buffered() const = 0;

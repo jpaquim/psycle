@@ -43,7 +43,10 @@ function search:init(setting)
   self.doreplace = signal:new()
   local g = group:new(self):setautosize(true, true):setalign(item.ALRIGHT)
   local closebutton = closebutton.new(g):setalign(item.ALTOP)  
-  closebutton.dohide:connect(search.onclosebutton, self)
+  local that = self
+  function closebutton:onclick()  
+    that.dohide:emit()
+  end
   self:createeditgroup(self)  
   self:createreplacegroup(self)    
   self:applysetting(setting)
@@ -206,10 +209,6 @@ end
 
 function search:onfocus()  
   self.edit:setfocus()
-end
-
-function search:onclosebutton()  
-  self.dohide:emit()
 end
 
 function search:applysetting(setting)    

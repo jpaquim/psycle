@@ -41,7 +41,7 @@ function settingspage:new(parent, machine)
     setmetatable(result, self)
     self.__index = self
     result:init(machine)
-	settingspage.hasinstance = true
+  settingspage.hasinstance = true
   end
   return result
   
@@ -64,69 +64,69 @@ end
 function settingspage:initsettinggroup(parent)
   local group = group:new(parent)
                      :setalign(item.ALCLIENT)
-					 :setautosize(false, true)
+                     :setautosize(false, true)
                      :addornament(ornamentfactory:createfill(settings.sci.default.background))  
   text:new(group):setalign(item.ALLEFT)
                  :setautosize(true, false)
-				 :setverticalalignment(item.ALCENTER)
+                 :setverticalalignment(item.ALCENTER)
                  :settext("Settings")
-				 :setmargin(boxspace:new(0, 5, 0, 0))				 
+                 :setmargin(boxspace:new(0, 5, 0, 0))        
   self.settingnamebox = combobox:new(group):setalign(item.ALLEFT)
                                            :setautosize(false, false)
-				                           :setposition(rect:new(point:new(), dimension:new(70, 20)))
-										   :setmargin(boxspace:new(0, 10, 0, 0))
+                                           :setposition(rect:new(point:new(), dimension:new(70, 20)))
+                                           :setmargin(boxspace:new(0, 10, 0, 0))
   self.saveasbutton = button:new(group):setalign(item.ALLEFT)
-                            :setautosize(false, false)
-				            :setposition(rect:new(point:new(), dimension:new(60, 0)))				 
-                            :settext("Save As")
-				            :setmargin(boxspace:new(0, 5, 0, 0))  
+                                       :setautosize(false, false)
+                                       :setposition(rect:new(point:new(), dimension:new(60, 0)))        
+                                       :settext("Save As")
+                                       :setmargin(boxspace:new(0, 5, 0, 0))  
   self.savenameedit = edit:new(group):setalign(item.ALLEFT)
-                          :setautosize(true, false)				 
+                          :setautosize(true, false)        
                           :settext("")
-			              :setposition(rect:new(point:new(), dimension:new(60, 0))) 
-				          :setmargin(boxspace:new(0, 5, 0, 0))
-				          :hide()
+                          :setposition(rect:new(point:new(), dimension:new(60, 0))) 
+                          :setmargin(boxspace:new(0, 5, 0, 0))
+                          :hide()
   local that = self
   function self.savenameedit:onkeydown(ev)         
-    if ev:keycode() == ev.RETURN then	  
-	  that:updatesetting(that.rootnode)
+    if ev:keycode() == ev.RETURN then   
+      that:updatesetting(that.rootnode)
       that.settingsmanager:saveas(self:text())
-	  that.settingnamebox:clear()
-	  that:fillcombobox()
-	  that.settingnamebox:setitembytext(self:text())	  	  	  
+      that.settingnamebox:clear()
+      that:fillcombobox()
+      that.settingnamebox:setitembytext(self:text())            
     end    
-	if ev:keycode() == ev.RETURN or 
-	   ev:keycode() == ev.ESCAPE then	   
-	   that.saveasbutton:show()
-	   that.savenameedit:hide()
-	   self:parent():updatealign()
-	   ev:preventdefault()
-	end	
-  end  						  
+    if ev:keycode() == ev.RETURN or ev:keycode() == ev.ESCAPE then
+      that.saveasbutton:show()
+      that.savenameedit:hide()
+      self:parent():updatealign()
+      ev:preventdefault()
+    end 
+  end               
   local that = self
-  function self.saveasbutton:onclick()							 
+  function self.saveasbutton:onclick()               
     that.savenameedit:show()
-	that.saveasbutton:hide()
-	self:parent():flagnotaligned():updatealign()
-	that.savenameedit:setfocus()
-  end						  
-  local removesettingbutton = button:new(group):setalign(item.ALLEFT)
-                 :setautosize(false, false)
-				 :setposition(rect:new(point:new(), dimension:new(50, 0)))
-                 :settext("Remove")
-				 :setmargin(boxspace:new(0, 5, 0, 0))
+    that.saveasbutton:hide()
+    self:parent():flagnotaligned():updatealign()
+    that.savenameedit:setfocus()
+  end             
+  local removesettingbutton = 
+     button:new(group):setalign(item.ALLEFT)
+                      :setautosize(false, false)
+                      :setposition(rect:new(point:new(), dimension:new(50, 0)))
+                      :settext("Remove")
+                      :setmargin(boxspace:new(0, 5, 0, 0))
   function removesettingbutton:onclick()
     local name = that.settingnamebox:items()[that.settingnamebox:itemindex()]
     local path = cfg:presetpath().."\\plugineditor\\"..name..".lua"
     filehelper.remove(path)
-	that:fillcombobox()
-	that:load("default")
-	that.settingnamebox:setitembytext("default")
-  end	
-				 
+    that:fillcombobox()
+    that:load("default")
+    that.settingnamebox:setitembytext("default")
+  end 
+         
   function self.settingnamebox:onselect()    
-    local filename = self:items()[self:itemindex()]		
-	that:load(filename)
+    local filename = self:items()[self:itemindex()]   
+    that:load(filename)
   end  
   self:fillcombobox()
   return group
@@ -145,18 +145,18 @@ function settingspage:fillcombobox()
   local path = cfg:presetpath().."\\plugineditor"
   local dir = filehelper.directorylist(path)
   for i=1, #dir do
-    if dir[i] then	  
-	  if not dir[i].isdirectory and dir[i].extension == ".lua" and dir[i].filename ~= "global.lua" then	 
-	    local name = ""
+    if dir[i] then    
+      if not dir[i].isdirectory and dir[i].extension == ".lua" and dir[i].filename ~= "global.lua" then  
+        local name = ""
         local found, len, remainder = string.find(dir[i].filename, "^(.*)%.[^%.]*$")
-	    if found then
-		  name = remainder
-	    else
-		  name = path
-	    end				
-	    self.settingnamebox:additem(name)  
-      end	  	  
-	end
+        if found then
+          name = remainder
+        else
+          name = path
+        end       
+        self.settingnamebox:additem(name)  
+      end       
+    end
   end  
 end
 
@@ -167,66 +167,65 @@ end
 function settingspage:initpropertygroup(parent)
   local propertygroup = group:new(parent)
                              :setalign(item.ALCLIENT)
-					         :setautosize(false, false)
+                             :setautosize(false, false)
                              :addornament(ornamentfactory:createfill(settings.sci.default.background))
   propertygroup.header =  group:new(propertygroup)
                                :setalign(item.ALTOP)
-					           :setautosize(false, true)							   
+                               :setautosize(false, true)                 
                                :addornament(ornamentfactory:createfill(settings.sci.default.background))
-							   :setmargin(boxspace:new(5, 0, 0, 10))
+                               :setmargin(boxspace:new(5, 0, 0, 10))
   propertygroup.client =  group:new(propertygroup)
                                :setalign(item.ALCLIENT)
-					           :setautosize(false, false)    
+                               :setautosize(false, false)    
                                :addornament(ornamentfactory:createfill(settings.sci.default.background))
   local font = font:new():setfontinfo(fontinfo:new():setsize(18):setfamily("zorque"))
   propertygroup.headertext = text:new(propertygroup.header)
                                  :setautosize(true, true)
-					             :settext("")					 
-					             :setalign(item.ALRIGHT)
-					             --:setcolor(0x87CA7E)
-								 :setcolor(0xFFA8444C)
-					             :setmargin(boxspace:new(0, 10, 0, 0))  
-								 :setfont(font)
-                                 :setdebugtext("zork")
-  return propertygroup					 
+                                 :settext("")          
+                                 :setalign(item.ALRIGHT)
+                               --:setcolor(0x87CA7E)
+                                 :setcolor(0xFFA8444C)
+                                 :setmargin(boxspace:new(0, 10, 0, 0))  
+                                 :setfont(font)                                 
+  return propertygroup           
 end
 
 function settingspage:initapplygroup(parent)
   local group = group:new(parent)
                      :setalign(item.ALBOTTOM)
-					 :setautosize(false, true)
+                     :setautosize(false, true)
                      :setmargin(boxspace:new(0, 0, 10, 0))
   local applybutton = button:new(group)
                             :settext("Apply Changes")
-							:setalign(item.ALRIGHT)
-						    :setmargin(boxspace:new(0, 10, 0, 0))
-							:setposition(rect:new(point:new(), dimension:new(90, 20)))  
-  local that = self							
+                            :setalign(item.ALRIGHT)
+                            :setmargin(boxspace:new(0, 10, 0, 0))
+                            :setposition(rect:new(point:new(), dimension:new(90, 20)))  
+  local that = self             
   function applybutton:onclick()
     that:updatesetting(that.rootnode)
-	that.doapply:emit(that.settingsmanager:setting())	
-	that.settingsmanager:save()
+    that.doapply:emit(that.settingsmanager:setting()) 
+    that.settingsmanager:save()
   end
   return group
 end
 
 function settingspage:updatesetting(parent)
   for i=1, parent:size() do
-	local node = parent:at(i)	
+    local node = parent:at(i) 
     if node.propertygroup then        
-      node.propertygroup:parseproperties()		
-	end
-    if not node:empty()	then
-	   settingspage:updatesetting(node)
-	end
-  end	
+      node.propertygroup:parseproperties()    
+    end
+    if not node:empty() then
+      settingspage:updatesetting(node)
+    end
+  end 
 end
 
 function settingspage:inittree()
   self.tree = tree:new(self)
                   :setautosize(false, false)
-				  :setalign(item.ALLEFT)
-				  :setposition(rect:new(point:new(), dimension:new(200, 0)))
+                  :setalign(item.ALLEFT)
+                  :setposition(rect:new(point:new(), dimension:new(200, 0)))
   self.tree:showbuttons():showlines()  
   local that = self
   function self.tree:onchange(node)
@@ -237,20 +236,20 @@ end
 function settingspage:settab(node)
   if node.settingpageid ~= nil then
       if not node.propertygroup then
-	    node.propertygroup = propertiesview:new(self.propertygroup.client, node.settingpageid, node.settinggroup.properties, self.settingsmanager:setting())
-	                                       :setalign(item.ALCLIENT)                               
-                                           :setmargin(boxspace:new(10))                               	  
-	    node.propertygroup.doapply:connect(settingspage.onapply, self)        
+      node.propertygroup = propertiesview:new(self.propertygroup.client, node.settingpageid, node.settinggroup.properties, self.settingsmanager:setting())
+                                         :setalign(item.ALCLIENT)                               
+                                         :setmargin(boxspace:new(10))
+      node.propertygroup.doapply:connect(settingspage.onapply, self)        
       end
-	  node.propertygroup:show()	  
-	  if self.activepropertygroup ~= nil then
-	    self.activepropertygroup:hide()
-	  end	 
-	  self.activepropertygroup = node.propertygroup		
-	  self.propertygroup.headertext:settext(node.settingpageid)
-	  self.propertygroup.header:updatealign()
-	  self.propertygroup.client:updatealign()	  
-	end
+    node.propertygroup:show()   
+    if self.activepropertygroup ~= nil then
+      self.activepropertygroup:hide()
+    end  
+    self.activepropertygroup = node.propertygroup   
+    self.propertygroup.headertext:settext(node.settingpageid)
+    self.propertygroup.header:updatealign()
+    self.propertygroup.client:updatealign()   
+  end
 end
 
 function settingspage:updatetree()
@@ -262,18 +261,18 @@ end
 function settingspage:inittreenodes(parent, setting)    
   for name, settinggroup in setting:opairs() do    
     local label = ""
-	if settinggroup.label then	  
-	  label = settinggroup.label	  
-	else
-      label = name
-    end	
-    local node = node:new(parent)
-	                 :settext(label)
-	node.settingpageid = name
-	node.settinggroup = settinggroup
-	if settinggroup.children then
-	  self:inittreenodes(node, settinggroup.children)
-	end
+  if settinggroup.label then    
+    label = settinggroup.label    
+  else
+    label = name
+  end 
+  local node = node:new(parent)
+                   :settext(label)
+  node.settingpageid = name
+  node.settinggroup = settinggroup
+  if settinggroup.children then
+    self:inittreenodes(node, settinggroup.children)
+  end
   end  
 end
 
@@ -293,14 +292,14 @@ end
 
 function settingspage:applypropertiesviews(parent, setting)
   for i=1, parent:size() do
-	local node = parent:at(i)	
+  local node = parent:at(i) 
     if node.propertygroup then        
       node.propertygroup:applysetting(setting)
-	end
-    if not node:empty()	then
-	  self:applypropertiesviews(node, setting)
-	end
-  end	
+  end
+    if not node:empty() then
+    self:applypropertiesviews(node, setting)
+  end
+  end 
 end
 
 function settingspage:filename()
@@ -309,6 +308,12 @@ end
 
 function settingspage:onclose()
   settingspage.hasinstance = false
+end
+
+function settingspage:undo()
+end
+
+function settingspage:redo()
 end
 
 return settingspage

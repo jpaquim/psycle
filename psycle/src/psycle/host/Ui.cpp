@@ -16,10 +16,7 @@ namespace ui {
 
 const ui::Point ui::Point::zero_;
 const ui::Rect ui::Rect::zero_;
-
-
 Window::Container Window::dummy_list_;
-
 int MenuContainer::id_counter = 0;
 
 MenuContainer::MenuContainer() : imp_(ui::ImpFactory::instance().CreateMenuContainerImp()) {
@@ -675,7 +672,7 @@ Window::Window() :
     auto_size_width_(true),
     auto_size_height_(true),
     visible_(true),
-    align_(ALNONE),
+    align_(AlignStyle::ALNONE),
     pointer_events_(true),
 		prevent_auto_dimension_(false),
 		align_dimension_changed_(true) {
@@ -690,7 +687,7 @@ Window::Window(WindowImp* imp) :
     auto_size_width_(true),
     auto_size_height_(true),
     visible_(true),
-    align_(ALNONE),
+    align_(AlignStyle::ALNONE),
     pointer_events_(true),
 		prevent_auto_dimension_(false),
 		align_dimension_changed_(true) {
@@ -994,16 +991,6 @@ void Window::WorkChildPosition() {
   } 
 }
 
-Window::WeakPtr Window::focus() {
-  if (imp()) {
-    ui::Window* win = imp()->dev_focus_window();
-    if (win) {
-      return win->shared_from_this();
-    }
-  }
-  return nullpointer;
-}
-
 void Window::SetFocus() {
   if (imp()) {
     imp()->DevSetFocus();      
@@ -1187,7 +1174,7 @@ bool Window::transparent() const {
 }
 
 const Region& Window::clip() const {
-  static std::auto_ptr<ui::Region> dummy(ui::Systems::instance().CreateRegion());
+  static std::auto_ptr<ui::Region> dummy(new Region());
   return *dummy.get();
 }
 
@@ -1619,23 +1606,23 @@ void ScrollBox::ScrollTo(const ui::Point& top_left) {
 	}
 }
 
-void FrameAligner::set_position(Window& window) {    
-  ui::Dimension win_dim(
+void FrameAligner::set_position(Window& window) {  
+  using namespace ui;  
+  Dimension win_dim(
     (width_perc_ < 0)  ? window.dim().width()
                        : Systems::instance().metrics().screen_dimension().width() * width_perc_,
     (height_perc_ < 0) ? window.dim().height() 
                        : Systems::instance().metrics().screen_dimension().height() * height_perc_
   );
-  ui::Point top_left;
+  Point top_left;
   switch (alignment_) {    
-    case ALRIGHT:      
+    case AlignStyle::ALRIGHT:      
       top_left.set_xy(Systems::instance().metrics().screen_dimension().width() - win_dim.width(), (Systems::instance().metrics().screen_dimension().height() - win_dim.height()) /2);
     break;    
-    case ALCENTER:
+    case AlignStyle::ALCENTER:
       top_left = ((Systems::instance().metrics().screen_dimension() - win_dim) / 2.0).as_point();
     break;
-    default:
-    ;    
+    default:;    
   }
   window.set_position(ui::Rect(top_left, win_dim));
 }
@@ -2846,22 +2833,64 @@ void Configuration::InitWindow(ui::Window& element, const std::string& name) {
   }  
 }
 
-// Ui Factory
-Systems& Systems::instance() {
-  static Systems instance_;
-  if (!instance_.concrete_factory_.get()) {
-    instance_.concrete_factory_.reset(new DefaultSystems());
+
+void WindowStyler::set_class_properties(WindowTypes::Type window_type,
+                                        const Properties& properties) {
+    class_properties_[window_type] = properties;
+}
+
+Properties WindowStyler::class_properties(WindowTypes::Type window_type) {
+  ClassProperties::iterator it = class_properties_.find(window_type);
+  return (it != class_properties_.end()) ? it->second : Properties();
+}
+
+void WindowStyler::UpdateWindows() {
+  Windows::iterator it = windows_.begin();
+  for (; it != windows_.end(); ++it) {                  
+    it->second->set_properties(class_properties(it->first));
   }
+}
+
+void WindowStyler::UpdateWindow(WindowTypes::Type window_type, Window* window) {
+  assert(window);    
+  window->set_properties(class_properties(window_type));
+}    
+
+void WindowStyler::ChangeWindowType(int extended_window_type, Window* window) {
+  assert(window);
+  RemoveWindow(*window);
+  AddWindow(static_cast<WindowTypes::Type>(extended_window_type), *window);
+}
+
+void WindowStyler::AddWindow(WindowTypes::Type window_type, Window& window) {
+  windows_.insert(std::pair<WindowTypes::Type, Window*>(
+  window_type, &window));
+}
+
+void WindowStyler::RemoveWindow(Window& window) {      
+  Windows::iterator it = windows_.begin();
+  for (; it != windows_.end(); ++it) {
+    if (it->second == &window) {
+      windows_.erase(it);
+      break;
+    }
+  }
+}
+
+// Ui Factory
+
+Systems& Systems::instance() {
+  static Systems instance_(new DefaultSystems());  
   return instance_;
 }
 
 void Systems::InitInstance(const std::string& config_path) {
   config_path_ = config_path;
-  ui::TerminalFrame::InitInstance();
+  TerminalFrame::InitInstance();
 }
 
 void Systems::ExitInstance() {
-  ui::TerminalFrame::ExitInstance();
+  TerminalFrame::ExitInstance();
 }
 
 SystemMetrics& Systems::metrics() {

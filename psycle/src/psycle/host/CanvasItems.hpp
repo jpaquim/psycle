@@ -107,35 +107,31 @@ class Text : public Window {
   }
   ARGB color() const { return color_; }
   void set_font(const Font& font);
-  void set_vertical_alignment(AlignStyle vertical_alignment) { 
+  void set_vertical_alignment(AlignStyle::Type vertical_alignment) { 
     vertical_alignment_ = vertical_alignment;
 		UpdateTextAlignment();
   }
-  void set_justify(JustifyStyle justify) { 
+  void set_justify(JustifyStyle::Type justify) { 
 		justify_ = justify;
 		UpdateTextAlignment();
 	}
-	virtual ui::Dimension OnCalcAutoDimension() const { 
-    return text_dimension();
-  }
-  virtual void OnSize(const ui::Dimension& dimension) { 
-    UpdateTextAlignment();
-  }
+	virtual Dimension OnCalcAutoDimension() const { return text_dimension(); }
+  virtual void OnSize(const Dimension& dimension) { UpdateTextAlignment(); }
 
  private:	
   void UpdateTextAlignment() { is_aligned_ = false; }
-	const ui::Point& text_alignment_position();	
-  double justify_offset(const ui::Dimension& text_dimension);
-  double vertical_alignment_offset(const ui::Dimension& text_dimension);	
-  ui::Dimension text_dimension() const;
+	const Point& text_alignment_position();	
+  double justify_offset(const Dimension& text_dimension);
+  double vertical_alignment_offset(const Dimension& text_dimension);	
+  Dimension text_dimension() const;
 
   std::string text_;
-  AlignStyle vertical_alignment_;
-  JustifyStyle justify_;
+  AlignStyle::Type vertical_alignment_;
+  JustifyStyle::Type justify_;
   ARGB color_;
-  ui::Font font_;		
+  Font font_;		
 	bool is_aligned_;
-	ui::Point alignment_position_;
+	Point alignment_position_;
 };
 
 class Splitter : public Window {
@@ -157,11 +153,11 @@ class Splitter : public Window {
 	void set_orientation(Orientation orientation) {
 		orientation_ = orientation; 
 		if (orientation == HORZ) {
-			set_align(ALBOTTOM);
+			set_align(AlignStyle::ALBOTTOM);
 			set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
 		} else 
 	  if (orientation == VERT) {
-			set_align(ALLEFT);
+			set_align(AlignStyle::ALLEFT);
 		  set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
 	  }  		
 	}
@@ -188,7 +184,7 @@ class TerminalView : public Scintilla, public psycle::host::Timer {
   virtual void OnTimerViewRefresh() { invokelater.Invoke(); }
 
  private:
-   ui::Commands invokelater;
+   Commands invokelater;
 };
 
 class TerminalFrame : public Frame {
@@ -201,12 +197,10 @@ class TerminalFrame : public Frame {
    }
    virtual void OnShow() { terminal_view_->StartTimer(); }
    virtual void OnClose() { Hide(); }
-
    virtual void release_imp() {
      Frame::release_imp();
      terminal_view_->release_imp();
-   }
-   
+   }   
    static void InitInstance() { instance(); }
    static void ExitInstance() { terminal_frame_.reset(0); }
    static TerminalFrame& instance() {
@@ -221,7 +215,7 @@ class TerminalFrame : public Frame {
    static std::auto_ptr<TerminalFrame> terminal_frame_;
 };
 
-class HeaderGroup : public ui::Group {
+class HeaderGroup : public Group {
  public:
 	static std::string type() { return "headergroup"; }
   static WindowTypes::Type window_type() { return WindowTypes::HEADERGROUP; }
@@ -229,20 +223,19 @@ class HeaderGroup : public ui::Group {
 	HeaderGroup();
 	HeaderGroup(const std::string& title);
 
-	virtual void Add(const ui::Window::Ptr& item);
+	virtual void Add(const Window::Ptr& item);
 	virtual void RemoveAll();
 	virtual void UpdateAlign();
 	void set_title(const std::string& title) { header_text_->set_text(title); }
 	const std::string& title() const { return header_text_->text(); }
-
 	void FlsClient();
 
  private:
 	void Init();
-	ui::Ornament::Ptr header_background_;
-	ui::Ornament::Ptr border_;
-	ui::Text::Ptr header_text_;
-	ui::Group::Ptr client_;
+	Ornament::Ptr header_background_;
+	Ornament::Ptr border_;
+	Text::Ptr header_text_;
+	Group::Ptr client_;
 };
 
 } // namespace ui
