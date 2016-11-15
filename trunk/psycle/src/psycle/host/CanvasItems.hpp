@@ -144,21 +144,21 @@ class Splitter : public Window {
   static std::string type() { return "splitter"; }
 
   Splitter();
-  Splitter(Orientation orientation);
+  Splitter(Orientation::Type orientation);
 
   void SetColor(ARGB color) {
     fill_color_ = color; 
     FLS();
   }
-	void set_orientation(Orientation orientation) {
+	void set_orientation(Orientation::Type orientation) {
 		orientation_ = orientation; 
-		if (orientation == HORZ) {
+		if (orientation == Orientation::HORZ) {
 			set_align(AlignStyle::ALBOTTOM);
-			set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+			set_position(ui::Rect(Point(), Dimension(0, 5)));
 		} else 
-	  if (orientation == VERT) {
+	  if (orientation == Orientation::VERT) {
 			set_align(AlignStyle::ALLEFT);
-		  set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
+		  set_position(Rect(Point(), Dimension(5, 0)));
 	  }  		
 	}
   void Draw(Graphics* g, Region& draw_region);
@@ -171,7 +171,7 @@ class Splitter : public Window {
  private:
    ARGB fill_color_;
 	 bool do_split_;
-	 Orientation orientation_;
+	 Orientation::Type orientation_;
 	 double drag_pos_;
 	 double parent_abs_pos_;
 	 ui::Window* item_;

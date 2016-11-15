@@ -30,7 +30,6 @@ local splitter = require("psycle.ui.splitter")
 local combobox = require("psycle.ui.combobox")
 
 local filehelper = require("psycle.file")
--- local fileobserver = require("psycle.fileobserver")
 local fileopen = require("psycle.ui.fileopen")
 local filesave = require("psycle.ui.filesave")
 local fileexplorer = require("fileexplorer")
@@ -67,8 +66,7 @@ function maincanvas:new(machine)
 end
 
 function maincanvas:init()    
-  self.machines = machines:new()
-  -- self.fileobservers = {}  
+  self.machines = machines:new()  
   self:invalidatedirect()  
   self:initstyleclasses(self.machine_.settingsmanager:setting())
   self:setupfiledialogs()
@@ -184,7 +182,22 @@ end
 
 function maincanvas:onkeydown(ev)
   if ev:ctrlkey() then
-    if ev:keycode() == 70 then
+    if ev:keycode() == 78 then
+      self:createnewpage()   
+      ev:stoppropagation()
+    elseif ev:keycode() == 79 then
+      self.fileopen:setfolder(self.fileexplorer:path())      
+      self.fileopen:show()          
+      ev:stoppropagation()
+    elseif ev:keycode() == 87 then      
+      ev:stoppropagation()
+      if (self.pages:activepage()) then
+        local e = {}
+        e.page = self.pages:activepage()
+        self:onclosepage(e);        
+        self.pages:removepage(e.page)   
+      end      
+    elseif ev:keycode() == 70 then
       self:displaysearch() 
       ev:stoppropagation()
     elseif ev:keycode() == 83 then      
@@ -236,16 +249,9 @@ function maincanvas:savepage()
     fname = page:filename()    
     local sep = "\\"  
       local dir = fname:match("(.*"..sep..")")    
---    local fileobserver = self:findfileobserverdir(dir)
---    if fileobserver then
---      fileobserver:stopwatching()
---    end
       page:savefile(fname)
       fname = fname:match("([^\\]+)$")
       self.pages:setlabel(page, fname)
---    if fileobserver then
---      fileobserver:startwatching()
---    end
     else    
     self.filesaveas:setfolder(self.fileexplorer:path())
     if self.filesaveas:show() then      
@@ -317,27 +323,26 @@ function maincanvas:initmachineselector(parent)
     that:updatealign() 
     advancededit.onmousedown(self, ev)  
   end  
-  function self.machineselector:onkillfocus(ev)
-    --that.pluginselector:hide()  
+  function self.machineselector:onkillfocus(ev)    
     that:updatealign()  
     advancededit.onkillfocus(self, ev)  
   end  
   function self.machineselector:onkeydown(ev)
     advancededit.onkeydown(self, ev)
     if ev:keycode() == ev.RETURN then
-    that:onmachineselectorreturnkey(self:text())
-    that.pluginselector:hide()
-  end 
-  if ev:keycode() == ev.ESCAPE then
-    that.pluginselector:hide()
-    that:updatealign()
-  end
+      that:onmachineselectorreturnkey(self:text())
+      that.pluginselector:hide()
+    end 
+    if ev:keycode() == ev.ESCAPE then
+      that.pluginselector:hide()
+      that:updatealign()
+    end
   end
   function self.machineselector:onkeyup(ev)
     if self.selectorhasfocus then
-    that.pluginselector:searchandfocusmachine(self:text())
+      that.pluginselector:searchandfocusmachine(self:text())
       that:updatealign()    
-  end
+    end
     advancededit.onkeyup(self, ev)  
   end  
 end
@@ -354,29 +359,21 @@ function maincanvas:initstatus()
   self.statusbar = statusbar:new(self.tg, setting)
 end
 
-function maincanvas:setwindowiconin()
-  self.windowtoolbar.img = image:new()
-                                :load(maincanvas.picdir.."arrow_in.png")
-                                :settransparent(0xFFFFFF)
-  self.windowtoolbar:seton(false)
-end
-
-function maincanvas:setwindowiconout()
-   self.windowtoolbar.img = image:new()
-                                 :load(maincanvas.picdir.."arrow_out.png")
-                                 :settransparent(0xFFFFFF)
-   self.windowtoolbar:seton(false)
-end
-
 function maincanvas:initwindowtoolbar()    
   local icon = toolicon:new(self.tg, maincanvas.picdir.."arrow_out.png", 0xFFFFFF)
+  icon.is_toggle = true  
+  local windowinimg = image:new()
+                            :load(maincanvas.picdir.."arrow_in.png")
+                            :settransparent(0xFFFFFF)                                 
+  icon:settoggleimage(windowinimg)
   self:formattoolicon(icon)
   icon:setalign(item.ALRIGHT)
   local that = self
-  function icon:onclick()   
+  function icon:onclick()
+    self:resethover()    
     that.machine_:toggleviewport()      
-  end       
-  return icon
+  end
+  return icon        
 end
 
 function maincanvas:fillinstancecombobox()
@@ -447,28 +444,21 @@ function maincanvas:initfiletoolbar()
   for _, icon in pairs(icons) do    
     self:formattoolicon(icon)
   end
-  local that = self    
-  function icons.inew:onclick() 
-    that:createnewpage()    
-  end  
-  function icons.iopen:onclick()
-    that.fileopen:setfolder(that.fileexplorer:path())
-    self:resethover()
-    that.fileopen:show()
-  end
-  function icons.isave:onclick()
-    that:savepage()  
-  end
-  function icons.iredo:onclick()
-    that:redo()
-  end
-  function icons.iundo:onclick()
-    that:undo()
-  end
+  icons.inew.click:connect(maincanvas.createnewpage, self)
+  icons.iopen.click:connect(maincanvas.onopenfile, self)
+  icons.isave.click:connect(maincanvas.savepage, self)
+  icons.iredo.click:connect(maincanvas.redo, self)
+  icons.iundo.click:connect(maincanvas.undo, self)  
   return t
 end
 
-function maincanvas:initplaytoolbar()  
+function maincanvas:onopenfile(icon)
+  icon:resethover()
+  self.fileopen:setfolder(self.fileexplorer:path())  
+  self.fileopen:show()
+end
+
+function maincanvas:initplaytoolbar()
   local t = toolbar:new(self.tg)
                    :setautosize(true, false)  
   self.playicon = toolicon:new(t, maincanvas.picdir.."poweroff.png", 0xFFFFFF)                          
@@ -636,77 +626,6 @@ function maincanvas:redo()
     self.pages:activepage():redo()
   end
 end
-
---function maincanvas:findfileobserverdir(dir)
---  local result = nil
---  for i=1, #self.fileobservers do
---    if self.fileobservers[i]:directory() == dir then
---    result = self.fileobservers[i]
---    break
---  end  
---  end  
---  return result
---end
-
--- function maincanvas:addfiletowatcher(dir)  
---  if not self:findfileobserverdir(dir) then
---    local fileobserver = fileobserver:new()
---  fileobserver:setdirectory(dir)
---  self.fileobservers[#self.fileobservers + 1] = fileobserver
---  local that = self
---  function fileobserver:oncreatefile(path)  
---  end 
---  function fileobserver:onchangefile(path)
---    local pages = that.pages.children:items()
---    for i=1, #pages do 
---      if pages[i]:filename() == path then          
---        if psycle.confirm("File "..path.." outside changed. Do you want to reload ?") then
---          that:openfromfile(path)
---      break;
---        end
---      end     
---      end    
---  end  
---  function fileobserver:ondeletefile(path)
---    local pages = that.pages.children:items()     
---    for i=1, #pages do    
---      if pages[i]:filename() == path then          
---        if not psycle.confirm('The file "'..path..'" '.."doesn't exist anymore.\nKeep this file in editor?") then
---           that.pages:removepage(pages[i])
---       local sep = "\\"  
---           local filedir = path:match("(.*"..sep..")")    
---       that:removefilewatcher(filedir)
---           break;
---        end
---      end
---    end
---  end
---  fileobserver:startwatching()    
--- end    
---end
-
---function maincanvas:removefilewatcher(dir)    
---  local found = false
---  for i=1, #self.pages do
---    local fname = self.pages[i]:fname()
---    local sep = "\\"  
---    local filedir = fname:match("(.*"..sep..")")      
---  if filedir == dir then
---    found = true
---    break
---  end
---  end
--- if not found then
---  for i=1, #self.fileobservers do
---    if self.fileobservers[i]:directory() == dir then
---      self.fileobservers[i]:stopwatching()
---      table.remove(self.fileobservers, i)
---    self.fileexplorer:setpath(dir)
---      break     
---    end     
---  end
---  end    
---end
 
 function maincanvas:mergeproperties(source1, source2)
   local result = orderedtable.new()

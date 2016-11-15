@@ -50,20 +50,20 @@ function tabgroup:init()
   self:setautosize(false, false)
   self.tabbar = group:new(self)
                      :setautosize(false, true)
-           :setalign(window.ALTOP)
-           :addornament(ornamentfactory:createfill(0xFF373737))
-           :setpadding(boxspace:new(0, 0, 3, 0))
-  local icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
+                     :setalign(window.ALTOP)
+                     :addornament(ornamentfactory:createfill(0xFF373737))
+                     :setpadding(boxspace:new(0, 0, 3, 0))
+  self.tabbar.icon1 = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
                         :setautosize(false, false)                        
-            :setverticalalignment(toolicon.ALCENTER)
+                        :setverticalalignment(toolicon.ALCENTER)
                         :setjustify(toolicon.CENTERJUSTIFY)
-            :setalign(window.ALRIGHT)    
+                        :setalign(window.ALRIGHT)    
                         :setmargin(boxspace:new(0, 2, 0, 2))
-  icon1.cc = 0xFF373737           
+  self.tabbar.icon1.cc = 0xFF373737           
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
-  function icon1:onclick()    
+  function self.tabbar.icon1:onclick()    
     self.f = popupframe:new()    
     self.c = canvas:new():invalidatedirect()
     local that1 = self    
@@ -75,10 +75,10 @@ function tabgroup:init()
     self.c:addornament(ornamentfactory:createfill(0xFF292929))    
     function fun(item)
       local t = text:new(g)
-                  :setcolor(0xFFCACACA)
-          :settext(item.text:text())
-          :setautosize(false, true)
-          :setpadding(boxspace:new(1))
+                    :setcolor(0xFFCACACA)
+                    :settext(item.text:text())
+                    :setautosize(false, true)
+                    :setpadding(boxspace:new(1))
       t:setjustify(window.ALCENTER):setalign(window.ALTOP)      
       function t:onmousedown()        
         that:setactivepage(item.page)
@@ -95,20 +95,22 @@ function tabgroup:init()
     that:traverse(fun, that.tabs:items())
     self.c:updatealign()
   
-  local h = g:position():height() 
-  local x = icon1:desktopposition():left()
-  local y = icon1:desktopposition():top() 
-    local iw = icon1:desktopposition():width()
-  local ih = icon1:desktopposition():height()
+    local h = g:position():height() 
+    local x = self:desktopposition():left()
+    local y = self:desktopposition():top() 
+    local iw = self:desktopposition():width()
+    local ih = self:desktopposition():height()
     self.f:hidedecoration()
-        :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h)))    
+          :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h)))    
     self.f:show()            
   end  
   self.tabs = group:new(self.tabbar)
                    :setautosize(false, true)
-           :setalign(window.ALCLIENT)
-           :addornament(ornamentfactory:createfill(self.tabbarcolor_))
-  self.children = group:new(self):setautosize(false, false):setalign(window.ALCLIENT)    
+                   :setalign(window.ALCLIENT)
+                   :addornament(ornamentfactory:createfill(self.tabbarcolor_))
+  self.children = group:new(self)
+                       :setautosize(false, false)
+                       :setalign(window.ALCLIENT)    
 end
 
 function tabgroup:initdefaultcolors()
@@ -128,10 +130,9 @@ function tabgroup:initdefaultcolors()
   return self
 end
 
-
 function tabgroup:setlabel(page, text)
   function f(item)  
-    if item.page==page then 
+    if item.page == page then 
      item.text:settext(text)
     end
   end
@@ -182,13 +183,13 @@ function tabgroup:setactivepage(page, preventalign)
   if page and self.activepage_ ~= page  then    
     self:setactiveheader(page)    
     page:show() 
-  if self.activepage_ then
+    if self.activepage_ then
       self.activepage_:hide()
     end    
-  self.activepage_ = page;
-  if not preventalign then
+    self.activepage_ = page;
+    if not preventalign then
       self.children:updatealign() 
-  end
+    end
   end
 end
 
@@ -255,15 +256,15 @@ end
 function tabgroup:createheader(page, label)  
   local header = group:new()
                       :setautosize(true, true)
-            :setalign(window.ALLEFT)
-            :setposition(rect:new(point:new(0, 0), dimension:new(100, 20)))           
+                      :setalign(window.ALLEFT)
+                      :setposition(rect:new(point:new(), dimension:new(100, 20)))           
   header.page = page    
   local font = font:new():setfontinfo(fontinfo:new():setsize(13))  
   header.text = text:new(header)
                     :settext(label)
-          :setfont(font)
+                    :setfont(font)
                     :setalign(window.ALLEFT)
-          :setpadding(boxspace:new(3))
+                    :setpadding(boxspace:new(3))
   local that = self
   if self.hasclosebutton_ then
     local font = font:new():setfontinfo(fontinfo:new():setsize(13))
@@ -271,32 +272,32 @@ function tabgroup:createheader(page, label)
                        :setcolor(that.headerclosecolor_)
                        :settext("x")
                        :setjustify(text.CENTERJUSTIFY)                       
-             :setverticalalignment(window.ALCENTER)            
+                       :setverticalalignment(window.ALCENTER)            
                        :setalign(window.ALLEFT)
-             :setautosize(false, true)
-             :setposition(rect:new(point:new(), dimension:new(15, 15)))
-             :setmargin(boxspace:new(3, 5, 0, 5))
-             :setfont(font)    
+                       :setautosize(false, true)
+                       :setposition(rect:new(point:new(), dimension:new(15, 15)))
+                       :setmargin(boxspace:new(3, 5, 0, 5))
+                       :setfont(font)    
     function header.close:onmousedown()
       local ev = {}
       ev.page = self:parent().page
       that.dopageclose:emit(ev)
       that:removepagebyheader(self:parent())
     end
-  function header.close:onmouseenter(ev)
-    self:setcolor(that.headerclosehovercolor_)
-    self:addornament(ornamentfactory:createcirclefill(that.headerclosehoverbackgroundcolor_))
-  end
-  function header.close:onmouseout(ev)
-    self:setcolor(that.headerclosecolor_)
-    self:removeornaments()
-  end
+    function header.close:onmouseenter(ev)
+      self:setcolor(that.headerclosehovercolor_)
+      self:addornament(ornamentfactory:createcirclefill(that.headerclosehoverbackgroundcolor_))
+    end
+    function header.close:onmouseout(ev)
+      self:setcolor(that.headerclosecolor_)
+      self:removeornaments()
+    end
   end
   self.tabs:add(header)
   function header:setskinhighlight()        
     self:setpadding(boxspace:new(2))
-  self:removeornaments():addornament(ornamentfactory:createfill(that.headeractivebackgroundcolor_)) 
-  self:addornament(ornamentfactory:createlineborder(that.headerbordercolor_))    
+    self:removeornaments():addornament(ornamentfactory:createfill(that.headeractivebackgroundcolor_)) 
+    self:addornament(ornamentfactory:createlineborder(that.headerbordercolor_))    
     self.text:setcolor(that.headeractivecolor_)     
   end
   function header:setskinnormal()
@@ -307,13 +308,13 @@ function tabgroup:createheader(page, label)
   header:setskinnormal()    
   function header:onmouseenter(ev)       
     if self.page ~= that:activepage() then    
-    self.text:setcolor(that.headerhovercolor_)        
-  end
+      self.text:setcolor(that.headerhovercolor_)        
+    end
   end
   function header:onmouseout(ev)
     if self.page ~= that:activepage() then    
       self.text:setcolor(that.headercolor_)   
-  end
+    end
   end  
   function header:onmousedown(ev)         
     that:setactivepage(self.page)
@@ -322,7 +323,8 @@ function tabgroup:createheader(page, label)
       that.tabpopupmenu.headertext = self.text:text()
     end    
   end
-  function header:onmouseup(ev) end       
+  function header:onmouseup(ev)
+  end
   return header
 end
 

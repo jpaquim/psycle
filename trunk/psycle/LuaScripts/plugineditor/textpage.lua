@@ -25,6 +25,7 @@ local textpage = scintilla:new()
 
 textpage.windowtype = 95
 textpage.pagecounter = 0
+textpage.preventedkeys = {78, 79, 87, 70, 83, 87}
 
 function textpage:new(parent)    
   local c = scintilla:new(parent)  
@@ -130,6 +131,15 @@ function textpage:onsearch(searchtext, dir, case, wholeword, regexp)
   end      
 end
 
+function textpage:onkeydown(ev)
+  if ev:ctrlkey() then     
+    for _, key in pairs(textpage.preventedkeys) do
+      if ev:keycode() == key then
+        ev:preventdefault()
+      end      
+    end
+  end        
+end
 
 function textpage:setproperties(properties)   
   if properties.color then    

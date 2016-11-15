@@ -633,7 +633,6 @@ class GraphicsImp : public ui::GraphicsImp {
         debug_flag_(false) {       
     Init();     
   }
-
   GraphicsImp(CDC* cr) 
       : hScreenDC(0),
         cr_(cr),
@@ -645,7 +644,6 @@ class GraphicsImp : public ui::GraphicsImp {
         debug_flag_(false) {
     Init();
   }
-
   GraphicsImp(bool debug) : 
 	    hScreenDC(::GetDC(0)),
         cr_(CDC::FromHandle(hScreenDC)),      
@@ -666,7 +664,6 @@ class GraphicsImp : public ui::GraphicsImp {
 	  old_rgn_ =  ::CreateRectRgn(0, 0, 0, 0);
     clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);    
   }
-
   virtual ~GraphicsImp() {    
 	  if (debug_flag_) {
 	    ::SelectObject(cr_->m_hDC, old_pen);
@@ -706,20 +703,18 @@ class GraphicsImp : public ui::GraphicsImp {
        cr_->SelectObject(old_bpm_);
      }
     ::DeleteObject(old_rgn_);
-	::DeleteObject(clp_rgn_);    
+	  ::DeleteObject(clp_rgn_);    
     cr_ = 0;
   }
-
   virtual void DevSetDebugFlag() {
 	  debug_flag_ = true;
-  }
-  
-  void DevDrawString(const std::string& str, double x, double y) {
+  }  
+  void DevDrawString(const std::string& str, const Point& position) {
     check_pen_update();		
-		cr_->TextOut(static_cast<int>(x), static_cast<int>(y), Charset::utf8_to_win(str).c_str());
+		cr_->TextOut(static_cast<int>(position.x()), static_cast<int>(position.y()),
+                 Charset::utf8_to_win(str).c_str());
   }
-
-  void DevCopyArea(const ui::Rect& rect, const ui::Point& delta) {    
+  void DevCopyArea(const Rect& rect, const Point& delta) {    
     cr_->BitBlt(
 			static_cast<int>(rect.left() + delta.x()),
 			static_cast<int>(rect.top() + delta.y()),
@@ -730,14 +725,12 @@ class GraphicsImp : public ui::GraphicsImp {
 			static_cast<int>(delta.y()),
       SRCCOPY);
   }
-
-  void DevTranslate(double x, double y) {
-    rXform.eDx += static_cast<int>(x);
-    rXform.eDy += static_cast<int>(y);
+  void DevTranslate(const Point& delta) {
+    rXform.eDx += static_cast<int>(delta.x());
+    rXform.eDy += static_cast<int>(delta.y());
     cr_->SetGraphicsMode(GM_ADVANCED);
     cr_->SetWorldTransform(&rXform);
   }
-
   void DevSetColor(ARGB color) {    
     if (argb_color_ != color) {
       argb_color_ = color;
@@ -745,62 +738,51 @@ class GraphicsImp : public ui::GraphicsImp {
       updatepen_ = updatebrush_ = true;      
     }
   }
-
   ARGB dev_color() const { return argb_color_; }
-
-  void DevDrawArc(const ui::Rect& rect, const Point& start, const Point& end) {
+  void DevDrawArc(const Rect& rect, const Point& start, const Point& end) {
     check_pen_update();
     CRect rc = TypeConverter::rect(rect);
     cr_->Arc(&rc, TypeConverter::point(start), TypeConverter::point(end));
   }
-
-  void DevDrawLine(const ui::Point& p1, const ui::Point& p2) {
+  void DevDrawLine(const Point& p1, const Point& p2) {
     check_pen_update();
 		cr_->MoveTo(TypeConverter::point(p1));
     cr_->LineTo(TypeConverter::point(p2));
   }
-
-  void DevDrawRect(const ui::Rect& rect) {
+  void DevDrawRect(const Rect& rect) {
     check_pen_update();
     cr_->SelectStockObject(NULL_BRUSH);
 		cr_->Rectangle(TypeConverter::rect(rect));
 		cr_->SelectObject(&brush);
-  }
-  
-  void DevDrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
+  }  
+  void DevDrawRoundRect(const Rect& rect, const Dimension& arc_dim) {
     check_pen_update();
     check_brush_update();
     cr_->SelectStockObject(NULL_BRUSH);
 		cr_->RoundRect(TypeConverter::rect(rect), TypeConverter::point(arc_dim));      
     cr_->SelectObject(&brush);
-  }
-  
-  void DevDrawOval(const ui::Rect& rect) {
+  }  
+  void DevDrawOval(const Rect& rect) {
     check_pen_update();
     check_brush_update();
     cr_->SelectStockObject(NULL_BRUSH);
     cr_->Ellipse(TypeConverter::rect(rect));
     cr_->SelectObject(&brush);
   }
-
   void DevFillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {        
     check_pen_update();
     check_brush_update();
     cr_->RoundRect(TypeConverter::rect(rect), TypeConverter::point(arc_dim));    
   }
-
-  void DevFillRect(const ui::Rect& rect) {        
+  void DevFillRect(const Rect& rect) {        
     cr_->FillSolidRect(TypeConverter::rect(rect), rgb_color_);    
   }
-
-  void DevFillOval(const ui::Rect& rect) {
+  void DevFillOval(const Rect& rect) {
     check_pen_update();
     check_brush_update();
     cr_->Ellipse(TypeConverter::rect(rect));
   }
-
   void DevFillRegion(const ui::Region& rgn);
-
   void DevDrawPolygon(const ui::Points& points) {
     check_pen_update();
     cr_->SelectStockObject(NULL_BRUSH);
@@ -813,7 +795,6 @@ class GraphicsImp : public ui::GraphicsImp {
     cr_->Polygon(&lpPoints[0], size);
     cr_->SelectObject(&brush);
   }
-
   void DevFillPolygon(const ui::Points& points) {
     check_pen_update();
     check_brush_update();
@@ -825,7 +806,6 @@ class GraphicsImp : public ui::GraphicsImp {
     }
     cr_->Polygon(&lpPoints[0], size);
   }
-
   void DevDrawPolyline(const ui::Points& points) {
     check_pen_update();
     std::vector<CPoint> lpPoints;
@@ -836,7 +816,6 @@ class GraphicsImp : public ui::GraphicsImp {
     }
     cr_->Polyline(&lpPoints[0], size);
   }
-
   void DevSetFont(const ui::Font& font) {
 	::SelectObject(cr_->m_hDC, old_font);
     font_ = font;
@@ -845,25 +824,22 @@ class GraphicsImp : public ui::GraphicsImp {
     ::SelectObject(cr_->m_hDC, imp->cfont());
     ::SetTextColor(cr_->m_hDC, rgb_color_);    
   }
-
   const Font& dev_font() const { return font_; }
-
-  virtual Dimension dev_text_size(const std::string& text) const {
-    ui::Dimension size;
+  virtual Dimension dev_text_dimension(const std::string& text) const {
+    Dimension result;
     SIZE extents = {0};
-    GetTextExtentPoint32(cr_->m_hDC, Charset::utf8_to_win(text).c_str(), text.length(),
-      &extents);
-    size.set(extents.cx, extents.cy);
-    return size;
+    GetTextExtentPoint32(cr_->m_hDC,
+                         Charset::utf8_to_win(text).c_str(),
+                         text.length(), &extents);
+    result.set(extents.cx, extents.cy);
+    return result;
   }
-
 	virtual void DevSetPenWidth(double width) {
 		pen_width_ = static_cast<int>(width);
 		updatepen_ = true;
-	}
-	      
-	void DevDrawImage(ui::Image* image, const ui::Rect& destination_position,
-		             const ui::Point& src) {
+	}	      
+	void DevDrawImage(Image* image, const Rect& destination_position,
+                    const Point& src) {
 		if (image) {
 			assert(image->imp());
 			CDC memDC;
@@ -1346,11 +1322,11 @@ class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {
  public:  
   ScrollBarImp() : WindowTemplateImp<CScrollBar, ui::ScrollBarImp>() {}
 
-  static ScrollBarImp* Make(ui::Window* w, CWnd* parent, UINT nID, Orientation orientation) {
+  static ScrollBarImp* Make(ui::Window* w, CWnd* parent, UINT nID, Orientation::Type orientation) {
     ScrollBarImp* imp = new ScrollBarImp();
     int orientation_flag;
     ui::Dimension size;
-    if (orientation == HORZ) {
+    if (orientation == Orientation::HORZ) {
       size.set(100, GetSystemMetrics(SM_CXHSCROLL));
       orientation_flag = SBS_HORZ;
     } else {
@@ -1359,9 +1335,9 @@ class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {
     }
   
     if (!imp->Create(orientation_flag | WS_CHILD | WS_VISIBLE,
-                     CRect(0, 0, static_cast<int>(size.width()), static_cast<int>(size.height())),
-                     parent, 
-                     nID)) {
+                     CRect(0, 0, static_cast<int>(size.width()),
+                           static_cast<int>(size.height())),
+                     parent, nID)) {
       TRACE0("Failed to create window\n");
       return 0;
     }
@@ -2477,187 +2453,21 @@ class GameControllersImp : public ui::GameControllersImp {
    virtual void DevUpdateController(ui::GameController& controller);
 };
 
-
-// FileInformation.h: interface for the CFileInformation class.
-//
-//////////////////////////////////////////////////////////////////////
-//
-// Youry M. Jukov, Israel
-//
-// Last update - 29.07.2003 
-//
-//////////////////////////////////////////////////////////////////////
-
-class   CFileInformation;
-typedef CTypedPtrList<CObList, CFileInformation*> FI_List;
-typedef FI_List* P_FI_List;
-
-typedef enum FileAction { faNone, faDelete, faCreate, faChange, } EFileAction;
-typedef enum FileSize   { fsBytes, fsKBytes, fsMBytes, } EFileSize;
-
-#define IS_NOTACT_FILE( action ) ( action == faNone   )
-#define IS_CREATE_FILE( action ) ( action == faCreate )
-#define IS_DELETE_FILE( action ) ( action == faDelete )
-#define IS_CHANGE_FILE( action ) ( action == faChange )
-
-typedef UINT (*DirParsCallback)( CString path, LPVOID pData );
-
-class CFileInformation : public CObject  
-{
-public:
-	CFileInformation();
-	CFileInformation( CString path );
-	CFileInformation( CString dir, CString file );
-	CFileInformation( WIN32_FIND_DATA fd, CString dir );
-	CFileInformation( const CFileInformation& fdi );
-	CFileInformation( const CFileInformation* fdi );
-	virtual ~CFileInformation();
-
-	const CFileInformation& operator =( const CFileInformation& fdi );
-	BOOL operator ==( CFileInformation fdi ) const;
-	BOOL operator !=( CFileInformation fdi ) const;
-	
-	BOOL Load( CString file );
-	BOOL Load( CString dir, CString file );
-	CString GetFileDir( CString path ) const;
-
-	BOOL IsFileExist() const;
-	BOOL IsNotAvailableNow() const;
-	BOOL IsSystem() const;
-	BOOL IsReadOnly() const;
-	BOOL IsHidden() const;
-	BOOL IsNormal() const;
-	BOOL IsArchive() const;
-	BOOL IsDirectory() const;
-	BOOL IsCurrentRoot() const;
-	BOOL IsParentDir() const;
-	BOOL IsRootFile() const;
-	BOOL IsTemporary() const;
-	BOOL IsWinTemporary() const;
-	BOOL IsActualFile() const;
-	BOOL IsOk() const;
-	BOOL IsSomeFileName( CString fileName ) const;
-	BOOL IsSomeFileName( const CFileInformation& fdi ) const;
-	BOOL IsSomeFileDir( CString fileDir ) const;
-	BOOL IsSomeFileDir( const CFileInformation& fdi ) const;
-	BOOL IsSomeFilePath( CString filePath ) const;
-	BOOL IsSomeFilePath( const CFileInformation& fdi ) const;
-	BOOL IsSomeFileData( WIN32_FIND_DATA fd ) const;
-	BOOL IsSomeFileData( const CFileInformation& fdi ) const;
-	BOOL IsSomeFileSize( DWORD dwFileSizeHigh, DWORD dwFileSizeLow ) const;
-	BOOL IsSomeFileSize( const CFileInformation& fdi ) const;
-	BOOL IsSomeFileAttribute( DWORD dwAttribute ) const;
-	BOOL IsSomeFileAttribute( const CFileInformation& fdi ) const;
-	BOOL IsSomeFileLastWriteTime( FILETIME fileTime ) const;
-	BOOL IsSomeFileLastWriteTime( const CFileInformation& fdi ) const;
-
-	BOOL FileAttributeReadOnly( BOOL set = TRUE );
-
-	FILETIME        GetFileLastWriteTime() const;
-	CString         GetFilePath() const;
-	void            SetFileDir( const CString& dir );
-	CString         GetFileDir() const;
-	DWORD           GetFileAttribute() const;
-	unsigned long   GetFileSize( DWORD& dwFileSizeHigh, DWORD& dwFileSizeLow ) const;
-	unsigned long   GetFileSize( EFileSize& fsFormat ) const;
-	CString         GetFileName() const;
-	CString         GetFileNameWithoutExt() const;
-	CString         GetFileExt() const;
-	void            ZeroFileData();
-	WIN32_FIND_DATA GetFileData() const;
-	void            SetFileData( WIN32_FIND_DATA fd );
-
-	static CString		ConcPath( const CString& first, const CString& second );
-	static int 			EnumDirFiles( CString root, P_FI_List list );
-	static int 			EnumFiles( CString root, P_FI_List list );
-	static int 			EnumDirFilesExt( CString root, CString ext, P_FI_List list );
-	static int 			EnumFilesExt( CString root, CString ext, P_FI_List list );
-	static void			CopyFiles( const P_FI_List oldList, P_FI_List newList );
-	static void			CopyFilesAndFI( const P_FI_List oldList, P_FI_List newList );
-	static void			SortFiles( P_FI_List list );
-	static void			SortFilesABC( P_FI_List list );
-	static BOOL			RemoveFiles( P_FI_List list );
-	static BOOL			FindFilePath( CString root, CString& file );
-	static EFileAction	CompareFiles( P_FI_List oldList, P_FI_List newList, CFileInformation& fi );
-	static BOOL			FindFilePathOnDisk( CString& file );
-	static BOOL			FindFilePathOnCD( CString& file );
-	static void			CopyDir( CString oldRoot, CString newRoot );
-	static void			MoveDir( CString oldRoot, CString newRoot );
-	static void         RemoveDir( CString dir );
-	static void			CreateDir( CString dir );
-	static void         ParseDir( CString root, DirParsCallback action, LPVOID pData );
-	static UINT         GetPathLevel( CString path );
-	static CString      GenerateNewFileName( CString path );
-	static CString      GetFileDirectory( CString path );
-	static CString      GetFileName( CString path );
-	static CString      GetFileNameWithoutExt( CString path );
-	static CString      GetFileExt( CString path );
-
-protected:
-	CString m_dir;
-	WIN32_FIND_DATA m_fd;
-};
-
-//  .h: interface for the CNotifyDirCheck class.
-//
-//////////////////////////////////////////////////////////////////////
-
-typedef UINT NOTIFICATION_CALLBACK( CFileInformation fiObject, EFileAction faAction, LPVOID lpData );
-typedef NOTIFICATION_CALLBACK* NOTIFICATION_CALLBACK_PTR;
-
-UINT NotifyDirThread( LPVOID pParam );
-
-#define NOTIFICATION_TIMEOUT 1000
-
-class CNotifyDirCheck : public CObject  
-{
-public:
-	CNotifyDirCheck();
-	CNotifyDirCheck( CString csDir, NOTIFICATION_CALLBACK_PTR ncpAction, LPVOID lpData = NULL );
-	virtual ~CNotifyDirCheck();
-
-	const NOTIFICATION_CALLBACK_PTR GetActionCallback() const { return m_ncpAction; }
-	void                            SetActionCallback( NOTIFICATION_CALLBACK_PTR ncpAction ) { m_ncpAction = ncpAction; }
-	CString                         GetDirectory() const { return m_csDir; }
-	void                            SetDirectory( CString csDir ) { m_csDir = csDir; }
-	LPVOID                          GetData() const { return m_lpData; }
-	void                            SetData( LPVOID lpData ) { m_lpData = lpData; }
-	BOOL                            IsRun() const { return m_isRun; }
-	BOOL                            Run();
-	void                            Stop();
-
-	//Override Action to work with each new event  
-	virtual UINT                    Action( CFileInformation fiObject, EFileAction faAction );
-	
-protected:
-	void                            SetRun()  { m_isRun = TRUE; }
-	void                            SetStop() { m_isRun = FALSE; }
-
-protected:
-	NOTIFICATION_CALLBACK_PTR m_ncpAction;
-	CWinThread*               m_pThread;
-	CString                   m_csDir;
-	BOOL                      m_isRun;
-	LPVOID					  m_lpData;
-};
-
 class FileObserverImp : public ui::FileObserverImp {
  public:
-  FileObserverImp(FileObserver* file_observer);
+  FileObserverImp() : file_observer_(0) {}
+  FileObserverImp(FileObserver* file_observer) : file_observer_(file_observer) {}
+  virtual ~FileObserverImp() {};
 
-  virtual void DevStartWatching() { notify_dir_change_.Run(); }
-  virtual void DevStopWatching() { notify_dir_change_.Stop(); }
-  virtual void DevSetDirectory(const std::string& path) { 
-    notify_dir_change_.SetDirectory(Charset::utf8_to_win(path).c_str());
-  }
-  virtual std::string dev_directory() const {
-    CString str = notify_dir_change_.GetDirectory();
-    return Charset::win_to_utf8(str.GetString());
-  }
-
+  virtual void DevStartWatching() { assert(0); } // not implemented yet 
+  virtual void DevStopWatching() { assert(0); } // not implemented yet
+  virtual void DevSetDirectory(const std::string& path) { assert(0); } // not implemented yet
+  virtual std::string dev_directory() const { assert(0); return "todo"; } // not implemented yet
+  
  private:
-  CNotifyDirCheck notify_dir_change_;
+   FileObserver* file_observer_;
 };
+
 
 extern "C" int CALLBACK enumerateFontsCallBack(ENUMLOGFONTEX *lpelf,
 												NEWTEXTMETRICEX *lpntm,
@@ -2733,7 +2543,7 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::FrameImp* CreatePopupFrameImp() {
     return PopupFrameImp::Make(0, ::AfxGetMainWnd(), WindowID::auto_id());    
   }
-  virtual ui::ScrollBarImp* CreateScrollBarImp(Orientation orientation) {     
+  virtual ui::ScrollBarImp* CreateScrollBarImp(Orientation::Type orientation) {     
     return ScrollBarImp::Make(0, DummyWindow::dummy(), WindowID::auto_id(), orientation);    
   }
   virtual ui::ComboBoxImp* CreateComboBoxImp() {     

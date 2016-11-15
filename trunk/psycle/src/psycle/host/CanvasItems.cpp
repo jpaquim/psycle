@@ -123,13 +123,13 @@ void Text::Draw(Graphics* g, Region& draw_region) {
 	g->DrawString(text_, text_alignment_position());  
 }
 
-ui::Dimension Text::text_dimension() const {
+Dimension Text::text_dimension() const {
   Graphics g;		
 	g.SetFont(font_); 
-	return g.text_size(text_);
+	return g.text_dimension(text_);
 }
 
-const ui::Point& Text::text_alignment_position() {
+const Point& Text::text_alignment_position() {
   if (!is_aligned_) { 
     ui::Dimension text_dim = text_dimension();
     alignment_position_.set_xy(justify_offset(text_dim),
@@ -139,7 +139,7 @@ const ui::Point& Text::text_alignment_position() {
   return alignment_position_;
 }
 
-double Text::justify_offset(const ui::Dimension& text_dimension) {
+double Text::justify_offset(const Dimension& text_dimension) {
   double result(0);
   switch (justify_) {	  
 		case JustifyStyle::CENTERJUSTIFY:
@@ -154,7 +154,7 @@ double Text::justify_offset(const ui::Dimension& text_dimension) {
   return result;
 }
 
-double Text::vertical_alignment_offset(const ui::Dimension& text_dimension) {
+double Text::vertical_alignment_offset(const Dimension& text_dimension) {
   double result(0);
 	switch (vertical_alignment_) {	  
 		case AlignStyle::ALCENTER:        
@@ -172,7 +172,7 @@ double Text::vertical_alignment_offset(const ui::Dimension& text_dimension) {
 // Pic
 void Pic::Draw(Graphics* g, Region& draw_region) {
 	if (image_) {
-		if (zoom_factor_ == ui::Point(1.0, 1.0)) {
+		if (zoom_factor_ == Point(1.0, 1.0)) {
 			g->DrawImage(image_, ui::Rect(ui::Point::zero(), view_dimension_), src_);
 		} else {
 		  g->DrawImage(image_, ui::Rect(ui::Point::zero(), view_dimension_), src_, zoom_factor_);
@@ -182,11 +182,11 @@ void Pic::Draw(Graphics* g, Region& draw_region) {
 
 void Pic::SetImage(Image* image) {  
   image_ = image;
-  view_dimension_ = image_ ? image_->dim() : ui::Dimension::zero();
+  view_dimension_ = image_ ? image_->dim() : Dimension::zero();
   FLSEX();
 }
 
-ui::Dimension Pic::OnCalcAutoDimension() const {
+Dimension Pic::OnCalcAutoDimension() const {
 	return view_dimension_;
 }
 
@@ -198,12 +198,12 @@ Splitter::Splitter() :
 	parent_abs_pos_(0),
 	item_(0) {
   set_auto_size(false, false);
-  set_orientation(HORZ);
-  set_align(ui::AlignStyle::ALBOTTOM);
-  set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+  set_orientation(Orientation::HORZ);
+  set_align(AlignStyle::ALBOTTOM);
+  set_position(Rect(Point(), Dimension(0, 5)));
 }
 
-Splitter::Splitter(Orientation orientation) :
+Splitter::Splitter(Orientation::Type orientation) :
    Window(), 
 	 fill_color_(0x404040),
 	 do_split_(false),
@@ -212,25 +212,23 @@ Splitter::Splitter(Orientation orientation) :
 	 item_(0) {
   set_auto_size(false, false);
   set_orientation(orientation);
-  if (orientation == ui::HORZ) {
-	  set_align(ui::AlignStyle::ALBOTTOM);
-	  set_position(ui::Rect(ui::Point(), ui::Dimension(0, 5)));
+  if (orientation == Orientation::HORZ) {
+	  set_align(AlignStyle::ALBOTTOM);
+	  set_position(Rect(Point(), Dimension(0, 5)));
   } else {
-	  set_align(ui::AlignStyle::ALLEFT);
-	  set_position(ui::Rect(ui::Point(), ui::Dimension(5, 0)));
+	  set_align(AlignStyle::ALLEFT);
+	  set_position(Rect(Point(), Dimension(5, 0)));
   }
 }
 
 
-void Splitter::Draw(Graphics* g, Region& draw_region) {
- //if (GetAlpha(fill_color_) != 0xFF) {
-    g->set_color(fill_color_);
-    g->FillRect(ui::Rect(ui::Point(), dim()));  
- //}
+void Splitter::Draw(Graphics* g, Region& draw_region) { 
+  g->set_color(fill_color_);
+  g->FillRect(ui::Rect(Point(), dim()));   
 }
 
 void Splitter::OnMouseDown(MouseEvent& ev) {	
-	ui::Window* last = item_ = 0;
+	Window* last = item_ = 0;
 	drag_pos_ = -1;
   for (iterator it = parent()->begin(); it!=parent()->end(); ++it) {
     if ((*it).get() == this) {
@@ -240,8 +238,9 @@ void Splitter::OnMouseDown(MouseEvent& ev) {
 		last = (*it).get();
   }
 	if (item_) {		
-		parent_abs_pos_ = (orientation_ == HORZ) ? parent()->absolute_position().top()
-                                             : parent()->absolute_position().left();
+		parent_abs_pos_ = (orientation_ == Orientation::HORZ) 
+                      ? parent()->absolute_position().top()
+                      : parent()->absolute_position().left();
     do_split_ = true;		
     BringToTop();
 	  SetCapture();	
@@ -251,21 +250,21 @@ void Splitter::OnMouseDown(MouseEvent& ev) {
 void Splitter::OnMouseUp(MouseEvent& ev) {
 	do_split_ = false;
 	ReleaseCapture();
-  if (orientation_ == VERT) {   
+  if (orientation_ == Orientation::VERT) {   
     if (align() == AlignStyle::ALLEFT) {
-      item_->set_position(ui::Rect(item_->position().top_left(),
-                     ui::Dimension(position().top_left().x() -
-                                   item_->position().top_left().x(),
-                                   item_->position().height())));      
+      item_->set_position(Rect(item_->position().top_left(),
+                               Dimension(position().top_left().x() -
+                               item_->position().top_left().x(),
+                               item_->position().height())));      
     }
   } else      
-  if (orientation_ == HORZ) {    
+  if (orientation_ == Orientation::HORZ) {    
     if (align() == AlignStyle::ALBOTTOM) {
-		  item_->set_position(ui::Rect(item_->position().top_left(),
-                     ui::Dimension(item_->position().width(),
-                                   item_->position().bottom_right().y() - 
-                                   position().top_left().y() - 
-                                   position().height())));
+		  item_->set_position(Rect(item_->position().top_left(),
+                               Dimension(item_->position().width(),
+                               item_->position().bottom_right().y() -
+                               position().top_left().y() - 
+                               position().height())));
     }
   }  
   ((Group*)parent())->FlagNotAligned();
@@ -274,32 +273,34 @@ void Splitter::OnMouseUp(MouseEvent& ev) {
 
 void Splitter::OnMouseMove(MouseEvent& ev) {
 	if (do_split_) {
-		if (orientation_ == HORZ) {
+		if (orientation_ == Orientation::HORZ) {
       if (drag_pos_ != ev.client_pos().y()) {        			  
          drag_pos_ = (std::max)(0.0, ev.client_pos().y());
-         set_position(ui::Point(position().top_left().x(), drag_pos_ - parent_abs_pos_));         
+         set_position(Point(position().top_left().x(),
+                            drag_pos_ - parent_abs_pos_));
       }
 		} else {
-			if (orientation_ == VERT) {
+			if (orientation_ == Orientation::VERT) {
 				if (drag_pos_ != ev.client_pos().x()) {
           drag_pos_ = (std::max)(0.0, ev.client_pos().x());
-          set_position(ui::Point(drag_pos_ - parent_abs_pos_, position().top_left().y()));          
+          set_position(Point(drag_pos_ - parent_abs_pos_,
+                             position().top_left().y())); 
 				}
 			}
 		}
 	} else {
-		if (orientation_ == HORZ) {
-			SetCursor(ui::CursorStyle::ROW_RESIZE);
+		if (orientation_ == Orientation::HORZ) {
+			SetCursor(CursorStyle::ROW_RESIZE);
 		} else
-		if (orientation_ == VERT) {
-			SetCursor(ui::CursorStyle::COL_RESIZE);
+		if (orientation_ == Orientation::VERT) {
+			SetCursor(CursorStyle::COL_RESIZE);
 		}
 	}
 }
 
 void Splitter::OnMouseOut(MouseEvent& ev) {
 	if (!do_split_) {
-		SetCursor(ui::CursorStyle::DEFAULT);
+		SetCursor(CursorStyle::DEFAULT);
 	}
 }
 
@@ -330,14 +331,14 @@ std::auto_ptr<TerminalFrame> TerminalFrame::terminal_frame_(0);
 
 void TerminalFrame::Init() {
   set_title("Psycle Terminal");
-  ui::Canvas::Ptr maincanvas = ui::Canvas::Ptr(new ui::Canvas());
-  set_viewport(maincanvas);
-  maincanvas->SetSave(false);
+  Canvas::Ptr view_port = Canvas::Ptr(new Canvas());
+  set_viewport(view_port);
+  view_port->SetSave(false);
   terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
   terminal_view_->set_align(AlignStyle::ALCLIENT);
-  maincanvas->Add(terminal_view_);  
-  maincanvas->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
-  set_position(ui::Rect(ui::Point(0, 0), ui::Dimension(500, 400)));
+  view_port->Add(terminal_view_);  
+  view_port->set_aligner(Aligner::Ptr(new DefaultAligner()));
+  set_position(Rect(Point(), Dimension(500, 400)));
 }
 
 HeaderGroup::HeaderGroup() {		
@@ -350,35 +351,35 @@ HeaderGroup::HeaderGroup(const std::string& title) {
 }
 
 void HeaderGroup::Init() {
-	header_background_.reset(ui::OrnamentFactory::Instance().CreateFill(0x6D799C));
-	ui::LineBorder* border = new ui::LineBorder(0x444444);
-	border->set_border_radius(ui::BorderRadius(5, 5, 5, 5));
+	header_background_.reset(OrnamentFactory::Instance().CreateFill(0xFF6D799C));
+	LineBorder* border = new LineBorder(0xFF444444);
+	border->set_border_radius(BorderRadius(5));
 	border_.reset(border);
 	add_ornament(border_);
-	set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
+	set_aligner(Aligner::Ptr(new DefaultAligner()));
 	set_auto_size(false, false);
-	ui::Group::Ptr header(new ui::Group());
-	header->set_align(ui::AlignStyle::ALTOP);
+	Group::Ptr header(new Group());
+	header->set_align(AlignStyle::ALTOP);
 	header->set_auto_size(false, true);
-	header->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
+	header->set_aligner(Aligner::Ptr(new DefaultAligner()));
 	header->add_ornament(header_background_);
-	header->set_margin(ui::BoxSpace(5));
+	header->set_margin(BoxSpace(5));
 	Group::Add(header);
-	header_text_.reset(new ui::Text());
+	header_text_.reset(new Text());
 	header_text_->set_text("Header");
 	header->Add(header_text_);	
 	header_text_->set_font(Font(FontInfo("Tahoma", 12, 500, FontStyle::ITALIC)));
-	header_text_->set_color(0xFFFFFF);
+	header_text_->set_color(0xFFFFFFFF);
 	header_text_->set_align(AlignStyle::ALLEFT);
 	header_text_->set_auto_size(true, true);
 	header_text_->set_margin(BoxSpace(0, 5, 0, 0));
 
-	client_.reset(new ui::Group());
+	client_.reset(new Group());
 	Group::Add(client_);
-	client_->set_align(ui::AlignStyle::ALCLIENT);
+	client_->set_align(AlignStyle::ALCLIENT);
 	client_->set_auto_size(false, false);
-	client_->set_aligner(ui::Aligner::Ptr(new DefaultAligner()));
-	client_->set_margin(ui::BoxSpace(0, 5, 5, 5));
+	client_->set_aligner(Aligner::Ptr(new DefaultAligner()));
+	client_->set_margin(BoxSpace(0, 5, 5, 5));
 }
 
 void HeaderGroup::Add(const ui::Window::Ptr& item) {		
