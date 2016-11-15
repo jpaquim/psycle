@@ -38,9 +38,9 @@ end
 
 function maincanvas:initcontrollerdisplay(no, controller)  
   local g = group:new(self)
-                        :setautosize(false, true)
-                        :setalign(item.ALTOP)
-                        :setmargin(boxspace:new(5, 5, 0, 0))
+                 :setautosize(false, true)
+                 :setalign(item.ALTOP)
+                 :setmargin(boxspace:new(5, 5, 0, 0))
   self:addtext(g, "Game Controller "..no)  
   self:addtext(g, "x-pos"):addfield(g, "0", "xpos")
   self:addtext(g, "y-pos"):addfield(g, "0", "ypos")
@@ -56,18 +56,18 @@ function maincanvas:initcontrollerdisplay(no, controller)
   end
   function controller:onxaxis(pos, oldpos)
     that:calcstickposx(pos)
-	that.stick:fls()	
-    --g.xpos:settext(pos)
+    that.stick:fls()  
+    g.xpos:settext(pos)
   end
   function controller:onzaxis(pos, oldpos)
-    that:calcstickposz(pos)
-	that.stick:fls()
-    --g.ypos:settext(pos)
+   that:calcstickposz(pos)
+   that.stick:fls()
+   g.ypos:settext(pos)
   end
   function controller:onyaxis(pos, oldpos)    
-    that:calcstickposy(pos)
-	that.stick:fls()
-    --g.zpos:settext(pos)
+   that:calcstickposy(pos)
+   that.stick:fls()
+   g.zpos:settext(pos)
   end  
 end
 
@@ -85,19 +85,19 @@ end
 
 function maincanvas:addtext(parent, str, field)
   local text = text:new(parent)
-                         :settext(str)
-                         :setcolor(0xFF528A68)
-                         :setalign(item.ALTOP) 
-                         :setautosize(false, true) 
+                   :settext(str)
+                   :setcolor(0xFF528A68)
+                   :setalign(item.ALTOP) 
+                   :setautosize(false, true) 
   return self
 end
 
 function maincanvas:addfield(parent, str, field)
   local text = text:new(parent)
-                         :settext(str)
-                         :setcolor(0xFFFFFFFF)
-                         :setalign(item.ALTOP)
-                         :setautosize(false, true) 
+                   :settext(str)
+                   :setcolor(0xFFFFFFFF)
+                   :setalign(item.ALTOP)
+                   :setautosize(false, true) 
   parent[field] = text 
   return self
 end
@@ -105,15 +105,15 @@ end
 function maincanvas:createstick(parent)
   self.stick = item:new(parent)
                    :setautosize(false, false)
-				   :viewdoublebuffered()
-				   :addornament(ornamentfactory:createfill(0xFF000000))   
+                   :viewdoublebuffered()
+                   :addornament(ornamentfactory:createfill(0xFF000000))   
   self.stick:setposition(rect:new(point:new(200, 200), dimension:new(50, 50)))    
   local that = self
   function self.stick:draw(g)
     local dim = self:dimension()
     g:setcolor(0xFF528A68)
     g:drawrect(rect:new(point:new(0, 0), dimension:new(dim:width()-1, dim:height()-1)))
-	g:drawoval(rect:new(point:new(that.stickposx - 5, that.stickposy - 5), dimension:new(10, 10)))
+    g:drawoval(rect:new(point:new(that.stickposx - 5, that.stickposy - 5), dimension:new(10, 10)))
   end
 end
 

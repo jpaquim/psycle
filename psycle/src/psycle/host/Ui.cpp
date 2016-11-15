@@ -490,10 +490,11 @@ void Graphics::DrawRect(const ui::Rect& rect) {
   }
 }
 
-void Graphics::DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
+void Graphics::DrawRoundRect(const Rect& rect,
+                             const Dimension& arc_dimension) {
   if (is_color_opaque()) {
     assert(imp_.get());
-    imp_->DevDrawRoundRect(rect, arc_dim);  
+    imp_->DevDrawRoundRect(rect, arc_dimension);  
   }
 }
 
@@ -504,35 +505,36 @@ void Graphics::DrawOval(const ui::Rect& rect) {
   }
 }
 
-void Graphics::DrawString(const std::string& str, const ui::Point& point) {
+void Graphics::DrawString(const std::string& str, const Point& position) {
   if (is_color_opaque()) {
     assert(imp_.get());
-    imp_->DevDrawString(str, point.x(), point.y());
+    imp_->DevDrawString(str, position);
   }
 }
 
-void Graphics::FillRect(const ui::Rect& rect) {
+void Graphics::FillRect(const Rect& position) {
   if (is_color_opaque()) {
     assert(imp_.get());
-    imp_->DevFillRect(rect);
+    imp_->DevFillRect(position);
   }
 }
 
-void Graphics::FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim) {
+void Graphics::FillRoundRect(const Rect& position,
+                             const Dimension& arc_dimension) {
   if (is_color_opaque()) {
     assert(imp_.get());
-    imp_->DevFillRoundRect(rect, arc_dim);
+    imp_->DevFillRoundRect(position, arc_dimension);
   }
 }
 
-void Graphics::FillOval(const ui::Rect& rect) {
+void Graphics::FillOval(const Rect& position) {
   if (is_color_opaque()) {
     assert(imp_.get());
-    imp_->DevFillOval(rect);
+    imp_->DevFillOval(position);
   }
 }
 
-void Graphics::FillRegion(const ui::Region& rgn) {
+void Graphics::FillRegion(const Region& rgn) {
   if (is_color_opaque()) {
     assert(imp_.get());
     imp_->DevFillRegion(rgn);
@@ -554,9 +556,9 @@ void Graphics::SetPenWidth(double width) {
   imp_->DevSetPenWidth(width);
 }
 
-void Graphics::Translate(double x, double y) {
+void Graphics::Translate(const Point& delta) {
   assert(imp_.get()); 
-  imp_->DevTranslate(x, y);
+  imp_->DevTranslate(delta);
 }
 
 void Graphics::SetFont(const Font& font) {
@@ -569,19 +571,19 @@ const Font& Graphics::font() const {
   return imp_->dev_font();
 }
 
-Dimension Graphics::text_size(const std::string& text) const {
+Dimension Graphics::text_dimension(const std::string& text) const {
   assert(imp_.get());
-  return imp_->dev_text_size(text);  
+  return imp_->dev_text_dimension(text);  
 }
 
-void Graphics::DrawPolygon(const ui::Points& points) {
+void Graphics::DrawPolygon(const Points& points) {
   if (is_color_opaque()) {
     assert(imp_.get());
     imp_->DevDrawPolygon(points);  
   }
 }
 
-void Graphics::FillPolygon(const ui::Points& points) {
+void Graphics::FillPolygon(const Points& points) {
   if (is_color_opaque()) {
     assert(imp_.get());
     imp_->DevDrawPolygon(points);
@@ -595,12 +597,12 @@ void Graphics::DrawPolyline(const Points& points) {
   }
 }
 
-void Graphics::DrawImage(ui::Image* img, const ui::Point& top_left) {
+void Graphics::DrawImage(Image* img, const Point& top_left) {
   assert(imp_.get());
   imp_->DevDrawImage(img, top_left);  
 }
 
-void Graphics::DrawImage(ui::Image* img, const ui::Rect& position) {
+void Graphics::DrawImage(Image* img, const Rect& position) {
   assert(imp_.get());
   imp_->DevDrawImage(img, position);  
 }
@@ -609,26 +611,24 @@ void Graphics::set_debug_flag() {
   imp_->DevSetDebugFlag();
 }
 
-void Graphics::DrawImage(ui::Image* img, const ui::Rect& destination_position,
-		                     const ui::Point& src) {
+void Graphics::DrawImage(Image* img, const Rect& destination_position,
+		                     const Point& src) {
   assert(imp_.get());
   imp_->DevDrawImage(img, destination_position, src);
 }
 
-void Graphics::DrawImage(ui::Image* img,
-	                       const ui::Rect& destination_position,
-		                     const ui::Point& src,
-	                       const ui::Point& zoom_factor) {
+void Graphics::DrawImage(Image* img, const Rect& destination_position,
+		                     const Point& src, const Point& zoom_factor) {
   assert(imp_.get());
   imp_->DevDrawImage(img, destination_position, src, zoom_factor);
 }
 
-void Graphics::SetClip(const ui::Rect& rect) {
+void Graphics::SetClip(const Rect& rect) {
   assert(imp_.get());
   imp_->DevSetClip(rect);  
 }
 
-void Graphics::SetClip(ui::Region* rgn) {
+void Graphics::SetClip(Region* rgn) {
   assert(imp_.get());
   imp_->DevSetClip(rgn);  
 }
@@ -643,8 +643,7 @@ void Graphics::Dispose() {
   imp_->DevDispose();  
 }
 
-void Graphics::AttachImage(ui::Image * image)
-{
+void Graphics::AttachImage(Image* image) {
 	assert(imp_.get());
   return imp_->DevAttachImage(image);	
 }
@@ -664,7 +663,7 @@ void Graphics::RestoreOrigin() {
   imp_->DevRestoreOrigin();
 }
 
-
+// Window
 Window::Window() :   
     parent_(0),
     update_(true),
@@ -1315,28 +1314,30 @@ Group::Group(WindowImp* imp) {
 
 void Group::Add(const Window::Ptr& window) {  
   if (window->parent()) {
-    throw std::runtime_error("Item already child of a group.");
+    throw std::runtime_error("Window already child of a group.");
   }  
   items_.push_back(window);
   window->set_parent(this);  
   window->needsupdate();
 }
 
-void Group::Insert(iterator it, const Window::Ptr& item) {
-  assert(item);
-  assert(item->parent());  
-  item->set_parent(this);
-  items_.insert(it, item);  
+void Group::Insert(iterator it, const Window::Ptr& window) {
+  if (window->parent()) {
+    throw std::runtime_error("Window already child of a group.");
+  }      
+  items_.insert(it, window); 
+  window->set_parent(this);
+  window->needsupdate(); 
 }
 
-void Group::Remove(const Window::Ptr& item) {
-  assert(item);
-  iterator it = find(items_.begin(), items_.end(), item);
+void Group::Remove(const Window::Ptr& window) {
+  assert(window);
+  iterator it = find(items_.begin(), items_.end(), window);
   if (it == items_.end()) {
-    throw std::runtime_error("Item is no child of the group");
+    throw std::runtime_error("Window is no child of the group");
   }  
   items_.erase(it);  
-  item->set_parent(0);  
+  window->set_parent(0);  
 }
 
 ui::Dimension Group::OnCalcAutoDimension() const {	
@@ -1461,10 +1462,10 @@ void Group::FlagNotAligned() {
 
 // ScrollBar
 ScrollBar::ScrollBar() 
-  : Window(ui::ImpFactory::instance().CreateScrollBarImp(HORZ)) {
+  : Window(ui::ImpFactory::instance().CreateScrollBarImp(Orientation::HORZ)) {
 }
 
-ScrollBar::ScrollBar(const ui::Orientation& orientation) 
+ScrollBar::ScrollBar(const ui::Orientation::Type& orientation) 
   : Window(ui::ImpFactory::instance().CreateScrollBarImp(orientation)) {  
 }
 
@@ -1530,13 +1531,13 @@ void ScrollBox::Init() {
 	//client_->add_style(0x02000000 | WS_CLIPCHILDREN);
 	pane_->Add(client_);
 
-  hscrollbar_.reset(ui::Systems::instance().CreateScrollBar(HORZ));
+  hscrollbar_.reset(ui::Systems::instance().CreateScrollBar(Orientation::HORZ));
   hscrollbar_->set_auto_size(false, false);
   hscrollbar_->scroll.connect(boost::bind(&ScrollBox::OnHScroll, this, _1));
   hscrollbar_->set_scroll_range(0, 100);
   hscrollbar_->set_scroll_position(0);
   Group::Add(hscrollbar_);
-  vscrollbar_.reset(ui::Systems::instance().CreateScrollBar(VERT));
+  vscrollbar_.reset(ui::Systems::instance().CreateScrollBar(Orientation::VERT));
   vscrollbar_->set_auto_size(false, false);
   vscrollbar_->scroll.connect(boost::bind(&ScrollBox::OnVScroll, this, _1));
   vscrollbar_->set_scroll_range(0, 100);
@@ -3063,7 +3064,7 @@ ui::CheckBox* Systems::CreateCheckBox() {
   return concrete_factory_->CreateCheckBox();
 }
 
-ui::ScrollBar* Systems::CreateScrollBar(Orientation orientation) {  
+ui::ScrollBar* Systems::CreateScrollBar(Orientation::Type orientation) {  
   assert(concrete_factory_.get());
   return concrete_factory_->CreateScrollBar(orientation);  
 }
@@ -3230,7 +3231,7 @@ ui::CheckBox* DefaultSystems::CreateCheckBox() {
   return new CheckBox();
 }
 
-ui::ScrollBar* DefaultSystems::CreateScrollBar(Orientation orientation) {
+ui::ScrollBar* DefaultSystems::CreateScrollBar(ui::Orientation::Type orientation) {
   return new ScrollBar(orientation);
 }
 
@@ -3329,7 +3330,7 @@ ui::FrameImp* ImpFactory::CreatePopupFrameImp() {
   return concrete_factory_->CreatePopupFrameImp(); 
 }
 
-ui::ScrollBarImp* ImpFactory::CreateScrollBarImp(ui::Orientation orientation) {
+ui::ScrollBarImp* ImpFactory::CreateScrollBarImp(ui::Orientation::Type orientation) {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateScrollBarImp(orientation); 
 }

@@ -13,6 +13,7 @@ local item = require("psycle.ui.item")
 local listener = require("psycle.listener")
 local serpent = require("psycle.serpent")
 local systems = require("psycle.ui.systems")
+local signal = require("psycle.signal")
 
 local toolicon = item:new()
 
@@ -52,6 +53,7 @@ function toolicon:init(filename, trans)
     end    
   end  
   self.clicklistener_ = listener:new("onclick", true)
+  self.click = signal:new()
   self.istoggle_ = false
   self:setposition(rect:new(point:new(0, 0), dimension:new(20, 20)))
   self.hover = false
@@ -97,7 +99,7 @@ function toolicon:verticalalignmentoffset()
     if self.verticalalignment_ == toolicon.ALCENTER then	  		
       result = (self:dimension():height() - imageheight)/2
     elseif self.verticalalignment_ == toolicon.ALBOTTOM then 				
-	  result = self:dimesion():height() - imageheight
+	  result = self:dimension():height() - imageheight
     end	
   end
   return result
@@ -113,13 +115,14 @@ function toolicon:draw(g)
   g:fillrect(rect:new(point:new(), self:dimension()))
   local xpos = 0
   if self.img then
-    g:drawimage(self.img, self:justifyoffset(), self:verticalalignmentoffset()) 
+    g:drawimage(self.img, point:new(self:justifyoffset(), self:verticalalignmentoffset())) 
     local ix, iy = self.img:size()    
     xpos = xpos + ix
   end    
-  self:updatecolor(g)
-  local textwidth, textheight = g:textsize(self.text_)
-  g:drawstring(self.text_, xpos + 2, (self:dimension():height() - textheight)/2)
+  self:updatecolor(g)    
+  local ypos =
+      (self:dimension():height() - g:textdimension(self.text_):height())/2
+  g:drawstring(self.text_, point:new(xpos + 2, ypos))
 end
 
 function toolicon:updatecolor(g)
@@ -162,15 +165,15 @@ end
 
 function toolicon:onmouseenter(ev)  
   self.hover = true
-  if (not self.on_) then         
+  if (not self.on_) then
     self:fls()
   end
 end
 
 function toolicon:onmousemove(ev)  
   local oldhover = self.hover
-  self.hover = self:absoluteposition():intersect(ev:clientpos())      
-  if self.hover ~= oldhover then
+  self.hover = self:absoluteposition():intersect(ev:clientpos())            
+  if self.hover ~= oldhover then    
     self:fls()
   end
 end
@@ -185,11 +188,12 @@ end
 function toolicon:onmouseup(ev)  
   self:mouserelease()
   if not self.is_toggle then
-    self:seton(false)  
+    self:seton(false)
   end
   if (self.hover) then
-    self:onclick()    
-  end
+    self:onclick()       
+    self.click:emit(self)        
+  end  
 end
 
 function toolicon:toggle()
@@ -202,13 +206,13 @@ function toolicon:seton(on)
     if on then 	        
 	  if (self.toggleimage_) then
 	    self.oldimage = self.img
-	    self.img = self.toggleimage_		
+	    self.img = self.toggleimage_      
 	  end
     else
-	  if self.oldimage then	    
-	    self.img = self.oldimage
-	    self.oldimage = nil
-	  end      
+	    if self.oldimage then	    
+	      self.img = self.oldimage
+	      self.oldimage = nil
+	    end      
     end
     self:fls()
     if self.toolbar~=nil and on and self.istoggle_ then

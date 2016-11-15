@@ -448,12 +448,13 @@ struct Area {
   typedef std::vector<RectShape>::const_iterator rect_const_iterator;
   std::vector<RectShape> rect_shapes_; 
   volatile mutable bool needs_update_;   
-  mutable ui::Rect bound_cache_;
-  mutable ui::Region region_cache_;   
+  mutable Rect bound_cache_;
+  mutable Region region_cache_;   
 };
 
-enum Orientation { HORZ = 0, VERT = 1 };
-
+namespace Orientation {
+enum Type {HORZ = 0, VERT = 1};
+}
 
 namespace  CursorStyle {
 enum Type {
@@ -490,6 +491,7 @@ class MouseEvent : public Event {
 	typedef boost::weak_ptr<MouseEvent> WeakPtr;
 	typedef boost::weak_ptr<const MouseEvent> ConstWeakPtr;
 
+  MouseEvent() : button_(0), shift_(0) {}
   MouseEvent(const Point& client_pos, int button, unsigned int shift) : 
        client_pos_(client_pos),        
        button_(button), 
@@ -756,42 +758,39 @@ friend class Group;
   GraphicsImp* imp() { return imp_.get(); };
   GraphicsImp* imp() const { return imp_.get(); };
 
-  virtual void CopyArea(const ui::Rect& rect, const ui::Point& delta);
-  virtual void DrawArc(const ui::Rect& rect, const Point& start, const Point& end);
-  virtual void DrawLine(const ui::Point& p1, const ui::Point& p2);
-  virtual void DrawRect(const ui::Rect& rect);
-  virtual void DrawRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim);
-  virtual void DrawOval(const ui::Rect& rect);
-  virtual void DrawString(const std::string& str, const ui::Point& point);
+  virtual void CopyArea(const Rect& rect, const Point& delta);
+  virtual void DrawArc(const Rect& rect, const Point& start, const Point& end);
+  virtual void DrawLine(const Point& p1, const Point& p2);
+  virtual void DrawRect(const Rect& rect);
+  virtual void DrawRoundRect(const Rect& rect, const Dimension& arc_dim);
+  virtual void DrawOval(const Rect& rect);
+  virtual void DrawString(const std::string& str, const Point& point);
   virtual void FillRect(const ui::Rect& rect);
-  virtual void FillRoundRect(const ui::Rect& rect, const ui::Dimension& arc_dim);
-  virtual void FillOval(const ui::Rect& rect);
-  virtual void FillRegion(const ui::Region& rgn);
+  virtual void FillRoundRect(const Rect& rect, const Dimension& arc_dimension);
+  virtual void FillOval(const Rect& rect);
+  virtual void FillRegion(const Region& rgn);
   virtual void set_color(ARGB color);
   virtual ARGB color() const;
 	virtual void SetPenWidth(double width);
-  virtual void Translate(double x, double y);
+  virtual void Translate(const Point& delta);
   virtual void SetFont(const Font& font);
   virtual const Font& font() const;
-  virtual Dimension text_size(const std::string& text) const;
-  virtual void DrawPolygon(const ui::Points& points);
-  virtual void FillPolygon(const ui::Points& points);
+  virtual Dimension text_dimension(const std::string& text) const;
+  virtual void DrawPolygon(const Points& points);
+  virtual void FillPolygon(const Points& points);
   virtual void DrawPolyline(const Points& points);
-  virtual void DrawImage(ui::Image* img, const ui::Point& top_left);
-  virtual void DrawImage(ui::Image* img, const ui::Rect& position);
-  virtual void DrawImage(ui::Image* img, const ui::Rect& destination_position,
-		                     const ui::Point& src);
-	virtual void DrawImage(ui::Image* img,
-		                     const ui::Rect& destination_position,
-		                     const ui::Point& src,
-		                     const ui::Point& zoom_faktor);
-  virtual void SetClip(const ui::Rect& rect);
-  virtual void SetClip(ui::Region* rgn);
+  virtual void DrawImage(Image* img, const Point& top_left);
+  virtual void DrawImage(Image* img, const Rect& position);
+  virtual void DrawImage(Image* img, const Rect& destination_position,
+		                     const Point& src);
+	virtual void DrawImage(Image* img, const Rect& destination_position,
+		                     const Point& src, const Point& zoom_faktor);
+  virtual void SetClip(const Rect& rect);
+  virtual void SetClip(Region* rgn);
   // virtual CRgn& clip();
   virtual void Dispose();
-	void AttachImage(ui::Image* image);
+	void AttachImage(Image* image);
   virtual CDC* dc();  // just for testing right now
-
   void set_debug_flag();
 
  private:
@@ -1377,6 +1376,11 @@ class FrameImp;
 
 class FrameAligner : public WindowShowStrategy {
   public:   
+   typedef boost::shared_ptr<FrameAligner> Ptr;
+   typedef boost::shared_ptr<const FrameAligner> ConstPtr;
+   typedef boost::weak_ptr<FrameAligner> WeakPtr;
+   typedef boost::weak_ptr<const FrameAligner> ConstWeakPtr;
+
    FrameAligner() :
        width_perc_(-1),
        height_perc_(-1),
@@ -1884,7 +1888,7 @@ class ScrollBar : public Window {
   static WindowTypes::Type window_type() { return WindowTypes::SCROLLBAR; }
 
   ScrollBar();
-  ScrollBar(const ui::Orientation& orientation);
+  ScrollBar(const Orientation::Type& orientation);
   ScrollBar(ScrollBarImp* imp);
 
   ScrollBarImp* imp() { return (ScrollBarImp*) Window::imp(); };
@@ -2486,7 +2490,7 @@ class Systems {
   virtual Scintilla* CreateScintilla();
   virtual Button* CreateButton();
   virtual CheckBox* CreateCheckBox();
-  virtual ScrollBar* CreateScrollBar(Orientation orientation = VERT);
+  virtual ScrollBar* CreateScrollBar(Orientation::Type orientation = Orientation::VERT);
   virtual TreeView* CreateTreeView();
   virtual ListView* CreateListView();
   virtual MenuContainer* CreateMenuBar();
@@ -2538,7 +2542,7 @@ class DefaultSystems : public Systems {
   virtual Scintilla* CreateScintilla();
   virtual Button* CreateButton();
   virtual CheckBox* CreateCheckBox();
-  virtual ScrollBar* CreateScrollBar(Orientation orientation = VERT);
+  virtual ScrollBar* CreateScrollBar(Orientation::Type orientation = Orientation::VERT);
   virtual TreeView* CreateTreeView();
   virtual ListView* CreateListView();
   virtual MenuContainer* CreateMenuBar();
@@ -2575,51 +2579,54 @@ class GraphicsImp {
   virtual ~GraphicsImp() {}
 
   virtual void DevSetDebugFlag() = 0;
-  virtual void DevCopyArea(const Rect& rect, const ui::Point& delta) = 0;
+  virtual void DevCopyArea(const Rect& rect, const Point& delta) = 0;
   virtual void DevDrawArc(const Rect& rect, const Point& start, const Point& end) = 0;
-  virtual void DevDrawLine(const Point& p1, const ui::Point& p2) = 0;
+  virtual void DevDrawLine(const Point& p1, const Point& p2) = 0;
   virtual void DevDrawRect(const Rect& rect) = 0;
-  virtual void DevDrawRoundRect(const Rect& rect, const ui::Dimension& arc_dim) = 0;  
-  virtual void DevDrawOval(const Rect& rect) = 0;
-  virtual void DevDrawString(const std::string& str, double x, double y) = 0;
+  virtual void DevDrawRoundRect(const Rect& position,
+                                const Dimension& arc_diminesion) = 0;
+  virtual void DevDrawOval(const Rect& position) = 0;
+  virtual void DevDrawString(const std::string& str,
+                             const Point& position) = 0;
   virtual void DevFillRect(const Rect& rect) = 0;
-  virtual void DevFillRoundRect(const Rect& rect, const ui::Dimension& arc_dim) = 0;
-  virtual void DevFillOval(const ui::Rect& rect) = 0;
-  virtual void DevFillRegion(const ui::Region& rgn) = 0;
+  virtual void DevFillRoundRect(const Rect& position,
+                                const Dimension& arc_dimension) = 0;
+  virtual void DevFillOval(const Rect& position) = 0;
+  virtual void DevFillRegion(const Region& rgn) = 0;
   virtual void DevSetColor(ARGB color) = 0;
   virtual ARGB dev_color() const = 0;
-  virtual void DevTranslate(double x, double y) = 0;  
+  virtual void DevTranslate(const Point& delta) = 0;  
   virtual void DevSetFont(const Font& font) = 0;	
   virtual const Font& dev_font() const = 0;
-  virtual Dimension dev_text_size(const std::string& text) const = 0;
+  virtual Dimension dev_text_dimension(const std::string& text) const = 0;
 	virtual void DevSetPenWidth(double width) = 0;
-  virtual void DevDrawPolygon(const ui::Points& points) = 0;
-  virtual void DevFillPolygon(const ui::Points& points) = 0;
+  virtual void DevDrawPolygon(const Points& points) = 0;
+  virtual void DevFillPolygon(const Points& points) = 0;
   virtual void DevDrawPolyline(const Points& points) = 0;	
-  virtual void DevDrawImage(ui::Image* image, const ui::Point& top_left) {
+  virtual void DevDrawImage(Image* image, const Point& top_left) {
 		if (image) {
-			DevDrawImage(image, ui::Rect(top_left, image->dim()), ui::Point());
+			DevDrawImage(image, Rect(top_left, image->dim()), Point());
 		}
   }
-  virtual void DevDrawImage(ui::Image* image, const ui::Rect& position) {
+  virtual void DevDrawImage(Image* image, const Rect& position) {
 		if (image) {
-			DevDrawImage(image, position, ui::Point());
+			DevDrawImage(image, position, Point());
 		}
   }
-  virtual void DevDrawImage(ui::Image* img, const ui::Rect& destination_position,
-		                        const ui::Point& src) = 0;
-	virtual void DevDrawImage(ui::Image* img,
-		                        const ui::Rect& destination_position,
-		                        const ui::Point& src,
-		                        const ui::Point& zoom_factor) = 0;
-  virtual void DevSetClip(const ui::Rect& rect) = 0;
-  virtual void DevSetClip(ui::Region* rgn) = 0;
+  virtual void DevDrawImage(Image* img, const Rect& destination_position,
+		                        const Point& src) = 0;
+	virtual void DevDrawImage(Image* img,
+		                        const Rect& destination_position,
+		                        const Point& src,
+		                        const Point& zoom_factor) = 0;
+  virtual void DevSetClip(const Rect& rect) = 0;
+  virtual void DevSetClip(Region* rgn) = 0;
   // virtual CRgn& dev_clip() = 0;
   virtual void DevDispose() = 0;
   virtual CDC* dev_dc() = 0;
   virtual void DevSaveOrigin() = 0;
   virtual void DevRestoreOrigin() = 0;
-	virtual void DevAttachImage(ui::Image* image) = 0;
+	virtual void DevAttachImage(Image* image) = 0;
 };
 
 class WindowImp {
@@ -2632,13 +2639,13 @@ class WindowImp {
   Window* window() { return window_; }
   Window* window() const { return window_; }
 
-  virtual void dev_set_position(const ui::Rect& pos) = 0;  
-  virtual ui::Rect dev_position() const = 0;
-  virtual ui::Rect dev_absolute_position() const = 0;
-  virtual ui::Rect dev_absolute_system_position() const = 0;  
-  virtual ui::Rect dev_desktop_position() const = 0;
-  virtual ui::Dimension dev_dim() const = 0;
-  virtual bool dev_check_position(const ui::Rect& pos) const = 0;
+  virtual void dev_set_position(const Rect& pos) = 0;  
+  virtual Rect dev_position() const = 0;
+  virtual Rect dev_absolute_position() const = 0;
+  virtual Rect dev_absolute_system_position() const = 0;  
+  virtual Rect dev_desktop_position() const = 0;
+  virtual Dimension dev_dim() const = 0;
+  virtual bool dev_check_position(const Rect& pos) const = 0;
 	virtual void dev_set_margin(const BoxSpace& margin) = 0;
 	virtual const BoxSpace& dev_margin() const = 0;
 	virtual void dev_set_padding(const BoxSpace& padding) = 0;
@@ -2656,13 +2663,13 @@ class WindowImp {
   virtual void DevReleaseCapture() = 0;
   virtual void DevShowCursor() = 0;
   virtual void DevHideCursor() = 0;
-  virtual void DevSetCursorPosition(const ui::Point& position) = 0;
+  virtual void DevSetCursorPosition(const Point& position) = 0;
   virtual void DevSetCursor(CursorStyle::Type style) {}  
   virtual void dev_set_parent(Window* window) {} 
   virtual void dev_set_clip_children() {}  
   virtual void DevSetFocus() = 0;
   virtual void OnDevDraw(Graphics* g, Region& draw_region);  
-  virtual void OnDevSize(const ui::Dimension& dimension);  
+  virtual void OnDevSize(const Dimension& dimension);  
   virtual void dev_add_style(UINT flag) {}
   virtual void dev_remove_style(UINT flag) {}
   virtual void DevEnable() = 0;
@@ -2773,7 +2780,7 @@ class ComboBoxImp : public WindowImp {
   virtual void dev_set_text(const std::string& text) = 0;
   virtual std::string dev_text() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
-  virtual const ui::Font& dev_font() const = 0;
+  virtual const Font& dev_font() const = 0;
   virtual void dev_clear() = 0;
 };
 
@@ -2790,7 +2797,7 @@ class ButtonImp : public WindowImp {
 	virtual void DevUnCheck() = 0;
 	virtual bool dev_checked() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
-  virtual const ui::Font& dev_font() const = 0;
+  virtual const Font& dev_font() const = 0;
 };
 
 class CheckBoxImp : public ui::ButtonImp {
@@ -2811,7 +2818,7 @@ public:
 	virtual void DevCheck() = 0;
 	virtual void DevUnCheck() = 0;
   virtual void dev_set_font(const Font& font) = 0;
-  virtual const ui::Font& dev_font() const = 0;
+  virtual const Font& dev_font() const = 0;
 };
 
 class GroupBoxImp : public ui::ButtonImp {
@@ -2837,7 +2844,7 @@ class EditImp : public WindowImp {
   virtual void dev_set_color(ARGB color) = 0;
   virtual ARGB dev_color() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
-  virtual const ui::Font& dev_font() const = 0;
+  virtual const Font& dev_font() const = 0;
   virtual void dev_set_sel(int cpmin, int cpmax) = 0;
 };
 
@@ -2962,7 +2969,7 @@ class ImpFactory {
   virtual ui::FrameImp* CreateFrameImp();
   virtual ui::FrameImp* CreateMainFrameImp();
   virtual ui::FrameImp* CreatePopupFrameImp();
-  virtual ui::ScrollBarImp* CreateScrollBarImp(ui::Orientation orientation);
+  virtual ui::ScrollBarImp* CreateScrollBarImp(Orientation::Type orientation);
   virtual ui::ComboBoxImp* CreateComboBoxImp();
   virtual ui::EditImp* CreateEditImp();
   virtual ui::TreeViewImp* CreateTreeViewImp();

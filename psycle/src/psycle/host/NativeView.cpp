@@ -71,8 +71,7 @@ namespace psycle { namespace host {
     void CanvasParamView::WindowIdle() {       
       if (!canvas_.expired()) {
         canvas_.lock()->Flush();
-      }
-      // Invalidate
+      }      
     }
 
     void CanvasParamView::OnSize(UINT nType, int cx, int cy) {
