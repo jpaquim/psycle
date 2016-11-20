@@ -748,6 +748,14 @@ class GraphicsImp : public ui::GraphicsImp {
     check_pen_update();
 		cr_->MoveTo(TypeConverter::point(p1));
     cr_->LineTo(TypeConverter::point(p2));
+  }  
+  virtual void DevDrawCurve(const Point& p1, const Point& control_p1, const Point& control_p2, const Point& p2) {
+    check_pen_update();
+    POINT Pt[4] = {TypeConverter::point(p1),
+                   TypeConverter::point(control_p1),
+                   TypeConverter::point(control_p2),
+                   TypeConverter::point(p2)};             
+    cr_->PolyBezier(Pt, 4);
   }
   void DevDrawRect(const Rect& rect) {
     check_pen_update();
@@ -912,6 +920,33 @@ class GraphicsImp : public ui::GraphicsImp {
 	  }
   }
 
+  virtual void DevMoveTo(const Point& pt) { cr_->MoveTo(TypeConverter::point(pt)); }  
+  virtual void DevLineTo(const Point& pt) { cr_->LineTo(TypeConverter::point(pt)); }    
+  virtual void DevCurveTo(const Point& control_p1, const Point& control_p2, const Point& p) {
+    check_pen_update();
+    POINT Pt[3] = {TypeConverter::point(control_p1),
+                   TypeConverter::point(control_p2),
+                   TypeConverter::point(p)};             
+    cr_->PolyBezierTo(Pt, 3);
+  }
+  virtual void DevArcTo(const Rect& rect, const Point& start, const Point& end) {
+    check_pen_update();
+    CRect rc = TypeConverter::rect(rect);
+    cr_->ArcTo(&rc, TypeConverter::point(start), TypeConverter::point(end));
+  }
+  virtual void DevBeginPath() { cr_->BeginPath(); }  
+  virtual void DevEndPath() { cr_->EndPath(); }  
+  virtual void DevFillPath() {
+    check_pen_update();     
+    check_brush_update();
+    cr_->FillPath();
+  }  
+
+  virtual void DevDrawPath() {
+    check_pen_update();    
+    cr_->StrokePath();
+  }
+
   void DevSetClip(const ui::Rect& rect) {
     CRgn rgn;
     rgn.CreateRectRgn(static_cast<int>(rect.left()), static_cast<int>(rect.top()), static_cast<int>(rect.right()), static_cast<int>(rect.bottom()));
@@ -948,7 +983,7 @@ class GraphicsImp : public ui::GraphicsImp {
 	  ::SelectObject(cr_->m_hDC, old_brush);
       DeleteObject(brush);
       brush = ::CreateSolidBrush(rgb_color_);			
-	  old_brush = (HBRUSH) ::SelectObject(cr_->m_hDC, brush);      
+	    old_brush = (HBRUSH) ::SelectObject(cr_->m_hDC, brush);      
       updatebrush_ = false;
     }
   }

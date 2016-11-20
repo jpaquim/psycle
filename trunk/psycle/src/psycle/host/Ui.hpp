@@ -507,6 +507,12 @@ class MouseEvent : public Event {
   int button_, shift_;
 };
 
+namespace KeyCodes {
+enum Type { 
+  VKDELETE = 46
+};  
+}
+
 class KeyEvent : public Event {
  public:  
   KeyEvent(int keycode, int flags) : keycode_(keycode), flags_(flags) {}
@@ -761,13 +767,16 @@ friend class Group;
   virtual void CopyArea(const Rect& rect, const Point& delta);
   virtual void DrawArc(const Rect& rect, const Point& start, const Point& end);
   virtual void DrawLine(const Point& p1, const Point& p2);
+  virtual void DrawCurve(const Point& p1, const Point& control_p1, const Point& control_p2, const Point& p2);
   virtual void DrawRect(const Rect& rect);
-  virtual void DrawRoundRect(const Rect& rect, const Dimension& arc_dim);
+  virtual void DrawRoundRect(const Rect& rect, const Dimension& arc_dimension);
   virtual void DrawOval(const Rect& rect);
-  virtual void DrawString(const std::string& str, const Point& point);
-  virtual void FillRect(const ui::Rect& rect);
+  virtual void DrawCircle(const Point& center, double radius);
+  virtual void DrawString(const std::string& str, const Point& position);
+  virtual void FillRect(const Rect& rect);
   virtual void FillRoundRect(const Rect& rect, const Dimension& arc_dimension);
   virtual void FillOval(const Rect& rect);
+  virtual void FillCircle(const Point& center, double radius);
   virtual void FillRegion(const Region& rgn);
   virtual void set_color(ARGB color);
   virtual ARGB color() const;
@@ -792,6 +801,15 @@ friend class Group;
 	void AttachImage(Image* image);
   virtual CDC* dc();  // just for testing right now
   void set_debug_flag();
+
+  virtual void BeginPath();
+  virtual void EndPath();
+  virtual void FillPath();
+  virtual void DrawPath();
+  virtual void MoveTo(const Point& p);
+  virtual void LineTo(const Point& p);
+  virtual void CurveTo(const Point& control_p1, const Point& control_p2, const Point& p);
+  virtual void ArcTo(const Rect& rect, const Point& start, const Point& end);
 
  private:
    inline bool is_color_opaque() const { 
@@ -2582,6 +2600,7 @@ class GraphicsImp {
   virtual void DevCopyArea(const Rect& rect, const Point& delta) = 0;
   virtual void DevDrawArc(const Rect& rect, const Point& start, const Point& end) = 0;
   virtual void DevDrawLine(const Point& p1, const Point& p2) = 0;
+  virtual void DevDrawCurve(const Point& p1, const Point& control_p1, const Point& control_p2, const Point& p2) = 0;
   virtual void DevDrawRect(const Rect& rect) = 0;
   virtual void DevDrawRoundRect(const Rect& position,
                                 const Dimension& arc_diminesion) = 0;
@@ -2627,6 +2646,14 @@ class GraphicsImp {
   virtual void DevSaveOrigin() = 0;
   virtual void DevRestoreOrigin() = 0;
 	virtual void DevAttachImage(Image* image) = 0;
+  virtual void DevBeginPath() = 0;
+  virtual void DevEndPath() = 0;
+  virtual void DevFillPath() = 0;
+  virtual void DevDrawPath() = 0;
+  virtual void DevLineTo(const Point& point) = 0;
+  virtual void DevMoveTo(const Point& point) = 0;
+  virtual void DevCurveTo(const Point& control_p1, const Point& control_p2, const Point& p) = 0;
+  virtual void DevArcTo(const Rect& rect, const Point& start, const Point& end) = 0;
 };
 
 class WindowImp {

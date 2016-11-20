@@ -183,6 +183,12 @@ class TerminalView : public Scintilla, public psycle::host::Timer {
   void output(const std::string& text);   
   virtual void OnTimerViewRefresh() { invokelater.Invoke(); }
 
+  virtual void OnKeyDown(KeyEvent& ev) {
+    if (ev.keycode() == KeyCodes::VKDELETE) {
+      ClearAll();
+    }
+  }
+
  private:
    Commands invokelater;
 };
