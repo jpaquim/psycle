@@ -663,6 +663,16 @@ struct LuaGraphicsBind {
     g->DrawLine(*from.get(), *to.get());
     return LuaHelper::chaining(L);
   }
+  static int drawcurve(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);    
+    Point::Ptr p1= LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+    Point::Ptr control_p1 = LuaHelper::check_sptr<Point>(L, 3, LuaPointBind::meta);
+    Point::Ptr control_p2 = LuaHelper::check_sptr<Point>(L, 4, LuaPointBind::meta);
+    Point::Ptr p2 = LuaHelper::check_sptr<Point>(L, 5, LuaPointBind::meta);
+    g->DrawCurve(*p1.get(), *control_p1.get(), *control_p2.get(), *p2.get());
+    return LuaHelper::chaining(L);
+  }
   static int drawrect(lua_State *L) {
     using namespace ui;
     Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
@@ -684,6 +694,22 @@ struct LuaGraphicsBind {
     Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
     Rect::Ptr pos = LuaHelper::check_sptr<Rect>(L, 2, LuaUiRectBind::meta);
     g->DrawOval(*pos.get());
+    return LuaHelper::chaining(L);
+  }
+  static int drawcircle(lua_State* L) { 
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+    Point::Ptr center = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+    double radius = luaL_checknumber(L, 3);
+    g->DrawCircle(*center.get(), radius);
+    return LuaHelper::chaining(L);
+  }
+  static int fillcircle(lua_State* L) { 
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+    Point::Ptr center = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+    double radius = luaL_checknumber(L, 3);
+    g->FillCircle(*center.get(), radius);
     return LuaHelper::chaining(L);
   }
   static int fillrect(lua_State *L) {
@@ -724,6 +750,51 @@ struct LuaGraphicsBind {
   static int drawpolyline(lua_State* L);
   static int drawimage(lua_State* L);
   static int textdimension(lua_State* L);  
+  static int beginpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::BeginPath); }
+  static int endpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::EndPath); } 
+  static int fillpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::FillPath); } 
+  static int drawpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::DrawPath); } 
+  static int lineto(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g =  LuaHelper::check_sptr<Graphics>(L, 1, meta);        
+    Point::Ptr to = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+    g->LineTo(*to.get());
+    return LuaHelper::chaining(L);
+  }
+  static int moveto(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);        
+    Point::Ptr to = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+    g->MoveTo(*to.get());
+    return LuaHelper::chaining(L);
+  }
+  static int curveto(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);        
+    Point::Ptr control_p1 = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+    Point::Ptr control_p2 = LuaHelper::check_sptr<Point>(L, 3, LuaPointBind::meta);
+    Point::Ptr p = LuaHelper::check_sptr<Point>(L, 4, LuaPointBind::meta);
+    g->CurveTo(*control_p1.get(), *control_p2.get(), *p.get());
+    return LuaHelper::chaining(L);
+  }
+  static int arcto(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);        
+    Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 2, LuaUiRectBind::meta);
+    Point::Ptr p1 = LuaHelper::check_sptr<Point>(L, 3, LuaPointBind::meta);
+    Point::Ptr p2 = LuaHelper::check_sptr<Point>(L, 4, LuaPointBind::meta);
+    g->ArcTo(*rect.get(), *p1.get(), *p2.get());
+    return LuaHelper::chaining(L);
+  }
+  static int drawarc(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);        
+    Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 2, LuaUiRectBind::meta);
+    Point::Ptr p1 = LuaHelper::check_sptr<Point>(L, 3, LuaPointBind::meta);
+    Point::Ptr p2 = LuaHelper::check_sptr<Point>(L, 4, LuaPointBind::meta);
+    g->DrawArc(*rect.get(), *p1.get(), *p2.get());
+    return LuaHelper::chaining(L);
+  }
 };
 
 

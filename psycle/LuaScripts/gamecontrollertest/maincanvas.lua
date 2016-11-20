@@ -15,25 +15,33 @@ local text = require("psycle.ui.text")
 local gamecontrollers = require("psycle.ui.gamecontrollers")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 
+local cfg = require("psycle.config"):new()
+
 local maincanvas = canvas:new()
 
-function maincanvas:new()
-  local c = canvas:new()  
-  setmetatable(c, self)
-  self.__index = self  
-  c:init()
+function maincanvas:new(machine)  
+  local c = canvas:new()    
+  setmetatable(c, self)  
+  self.__index = self   
+  c:init(machine)  
   return c
 end
 
-function maincanvas:init() 
+function maincanvas:init(machine) 
+  self.machine_ = machine
   self:addornament(ornamentfactory:createfill(0xFF000000))   
   self.gamecontrollers = gamecontrollers:new()
   local controllers = self.gamecontrollers:controllers()  
   for i=1, #controllers do    
     self:initcontrollerdisplay(i, controllers[i])
   end    
-  self.stickposx, self.stickposy, self.stickposz = 0, 0, 0
+  self.stickposx, self.stickposy, self.stickposz = 50, 50, 0     
   self:createstick(self)
+end
+
+function maincanvas:svgtest()  
+  local path = cfg:luapath().."\\gamecontrollertest\\"..'note.svg'
+  self.svg = svg:new(path)  
 end
 
 function maincanvas:initcontrollerdisplay(no, controller)  
@@ -49,7 +57,7 @@ function maincanvas:initcontrollerdisplay(no, controller)
   self:addtext(g, "button press up"):addfield(g, "0", "buttonup")    
   local that = self
   function controller:onbuttondown(button)    
-    g.buttondown:settext(button)  
+    g.buttondown:settext(button)      
   end
   function controller:onbuttonup(button)    
     g.buttonup:settext(button)
@@ -107,13 +115,15 @@ function maincanvas:createstick(parent)
                    :setautosize(false, false)
                    :viewdoublebuffered()
                    :addornament(ornamentfactory:createfill(0xFF000000))   
-  self.stick:setposition(rect:new(point:new(200, 200), dimension:new(50, 50)))    
+  self.stick:setposition(rect:new(point:new(100, 100), dimension:new(200, 200)))    
   local that = self
   function self.stick:draw(g)
     local dim = self:dimension()
-    g:setcolor(0xFF528A68)
-    g:drawrect(rect:new(point:new(0, 0), dimension:new(dim:width()-1, dim:height()-1)))
-    g:drawoval(rect:new(point:new(that.stickposx - 5, that.stickposy - 5), dimension:new(10, 10)))
+    g:setcolor(0xFFFF0000)
+    g:fillcircle(point:new(that.stickposx, that.stickposy), 10)
+    g:setcolor(0xFF00FF00)
+    g:drawcircle(point:new(that.stickposx, that.stickposy), 10)
+    g:drawrect(rect:new(point:new(0, 0), dimension:new(dim:width()-1, dim:height()-1)))    
   end
 end
 

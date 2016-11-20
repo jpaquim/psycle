@@ -94,9 +94,7 @@ void LuaControl::Free() {
 }
 
 void LuaControl::PrepareState() {
-  static const luaL_Reg methods[] = {    
-    { NULL, NULL }
-  };
+  static const luaL_Reg methods[] = {{NULL, NULL}};
   lua_newtable(L);
   luaL_setfuncs(L, methods, 0);
   LuaControl** ud = (LuaControl **)lua_newuserdata(L, sizeof(LuaProxy *));
@@ -463,11 +461,15 @@ void LuaProxy::Reload() {
     GlobalTimer::instance().KillTimer();    
     host_->set_crashed(true);
     lua_State* old_state = L;
+    ui::Systems* old_systems = systems_.get();    
     lua_State* new_state = 0;
     try {
       L = LuaGlobal::load_script(host_->GetDllName());      
+      systems_.release();
+      systems_.reset(new Systems(new LuaSystems(L)));
       PrepareState();
       Run();
+      Start();
       Init();      
       if (old_state) {
         LuaGlobal::proxy(old_state)->invokelater_->Clear();
@@ -477,6 +479,7 @@ void LuaProxy::Reload() {
           menu_bar.lock()->Invalidate();           
         }
         lua_close(old_state);
+        delete old_systems;
       }
       OnActivated(2);      
     } catch(std::exception &e) {
@@ -484,6 +487,7 @@ void LuaProxy::Reload() {
         lua_close(new_state);
       }
       L = old_state;
+      systems_.reset(old_systems);
       std::string s = std::string("Reload Error, old script still running!\n") + e.what();        
       GlobalTimer::instance().StartTimer();
       unlock();

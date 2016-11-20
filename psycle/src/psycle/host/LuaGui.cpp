@@ -980,6 +980,16 @@ template <class T>
 int LuaItemBind<T>::create(lua_State* L) {  
   ui::Group::Ptr group = testgroup(L);    
   ui::Window::Ptr item = LuaHelper::new_shared_userdata(L, meta.c_str(), LuaGlobal::proxy(L)->systems()->Create(T::window_type()));  
+
+  if (item->debug_text() == "text") {
+     LuaHelper::find_weakuserdata(L, item.get());
+     if (lua_isnil(L, -1)) {
+       assert(0);
+     } else {
+       lua_pop(L, 1);
+     }
+  }
+
   if (group) {    
     group->Add(item);
     LuaHelper::register_userdata(L, item.get());
@@ -1475,12 +1485,16 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"setcolor", setcolor},
     {"color", color},
     {"drawline", drawline},
-    {"drawrect", drawrect},
+    {"drawcurve", drawcurve},
+    {"drawarc", drawarc},    
+    {"drawrect", drawrect},    
     {"drawoval", drawoval},
+    {"drawcircle", drawcircle},
     {"drawroundrect", drawroundrect},
     {"fillrect", fillrect},
     {"fillroundrect", fillroundrect},
     {"filloval", filloval},
+    {"fillcircle", fillcircle},
     {"copyarea", copyarea},
     {"drawstring", drawstring},
     {"setfont", setfont},
@@ -1490,6 +1504,14 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"fillpolygon", fillpolygon},
     {"drawpolyline", drawpolyline},
     {"drawimage", drawimage},		
+    {"beginpath", beginpath},
+    {"endpath", endpath},
+    {"fillpath", fillpath},
+    {"drawpath", drawpath},
+    {"moveto", moveto},
+    {"lineto", lineto},
+    {"curveto", curveto},
+    {"arcto", arcto},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);  

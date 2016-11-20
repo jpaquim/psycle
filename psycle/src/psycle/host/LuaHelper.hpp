@@ -171,6 +171,7 @@ struct LuaImport {
   bool get_method_optional(const std::string& method) {    
     find_weakuserdata();
     if (lua_isnil(L_, -1)) {
+      assert(0);
       lua_pop(L_, 1);
       throw std::runtime_error("no proxy found");
     }    

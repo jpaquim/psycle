@@ -9,7 +9,6 @@ machine = require("psycle.machine"):new()
 -- add your requires here
 local maincanvas = require("maincanvas")
 
-
 function machine:info()
   return {
     vendor = "psycle",
@@ -20,9 +19,9 @@ function machine:info()
   }
 end
 
-function machine:init()  
-  self.maincanvas = maincanvas:new()  
-  self:setcanvas(self.maincanvas)
+function machine:init()    
+  self.maincanvas = maincanvas:new(self)    
+  self:setcanvas(self.maincanvas)  
 end
 
 function machine:work(num)  

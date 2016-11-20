@@ -483,6 +483,13 @@ void Graphics::DrawLine(const ui::Point& p1, const ui::Point& p2) {
   }
 }
 
+void Graphics::DrawCurve(const Point& p1, const Point& control_p1, const Point& control_p2, const Point& p2) {
+  if (is_color_opaque()) {
+    assert(imp_.get());  
+    imp_->DevDrawCurve(p1, control_p1, control_p2, p2);  
+  }
+}
+
 void Graphics::DrawRect(const ui::Rect& rect) {
   if (is_color_opaque()) {
     assert(imp_.get());
@@ -502,6 +509,20 @@ void Graphics::DrawOval(const ui::Rect& rect) {
   if (is_color_opaque()) {
     assert(imp_.get());
     imp_->DevDrawOval(rect); 
+  }
+}
+
+void Graphics::DrawCircle(const Point& center, double radius) {
+  if (is_color_opaque()) {
+    assert(imp_.get());    
+    imp_->DevDrawOval(Rect(center - Point(radius, radius), center + Point(radius, radius))); 
+  }
+}
+
+void Graphics::FillCircle(const Point& center, double radius) {
+  if (is_color_opaque()) {
+    assert(imp_.get());    
+    imp_->DevFillOval(Rect(center - Point(radius, radius), center + Point(radius, radius))); 
   }
 }
 
@@ -633,10 +654,53 @@ void Graphics::SetClip(Region* rgn) {
   imp_->DevSetClip(rgn);  
 }
 
-/*CRgn& Graphics::clip() {  
+void Graphics::BeginPath() {
   assert(imp_.get());
-  return imp_->dev_clip();
-}*/
+  imp_->DevBeginPath();  
+}
+
+void Graphics::EndPath() {
+  assert(imp_.get());
+  imp_->DevEndPath();  
+}
+
+void Graphics::FillPath() {
+  assert(imp_.get());
+  imp_->DevFillPath();  
+}
+
+void Graphics::DrawPath() {
+  assert(imp_.get());
+  imp_->DevDrawPath();  
+}
+
+void Graphics::MoveTo(const ui::Point& p) {
+  if (is_color_opaque()) {
+    assert(imp_.get());  
+    imp_->DevMoveTo(p);  
+  }
+}
+
+void Graphics::CurveTo(const Point& control_p1, const Point& control_p2, const Point& p) {
+  if (is_color_opaque()) {
+    assert(imp_.get());  
+    imp_->DevCurveTo(control_p1, control_p2, p);  
+  }
+}
+
+void Graphics::ArcTo(const Rect& rect, const Point& start, const Point& end) {
+  if (is_color_opaque()) {
+    assert(imp_.get());  
+    imp_->DevArcTo(rect, start, end);  
+  }
+}
+
+void Graphics::LineTo(const ui::Point& p) {
+  if (is_color_opaque()) {
+    assert(imp_.get());  
+    imp_->DevLineTo(p);  
+  }
+}
 
 void Graphics::Dispose() {
   assert(imp_.get());

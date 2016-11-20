@@ -29,10 +29,10 @@ class DefaultAligner : public Aligner {
 	 void update_top(const Window::Ptr& window);
 	 void update_right(const Window::Ptr& window);
 	 void update_bottom(const Window::Ptr& window);
-	 ui::Rect calc_new_pos_left(const Window::Ptr& window) const;
-	 ui::Rect calc_new_pos_top(const Window::Ptr& window) const;
-	 ui::Rect calc_new_pos_right(const Window::Ptr& window) const;
-	 ui::Rect calc_new_pos_bottom(const Window::Ptr& window) const;	 
+	 Rect calc_new_pos_left(const Window::Ptr& window) const;
+	 Rect calc_new_pos_top(const Window::Ptr& window) const;
+	 Rect calc_new_pos_right(const Window::Ptr& window) const;
+	 Rect calc_new_pos_bottom(const Window::Ptr& window) const;	 
 	 void adjust_current_pos_left();
 	 void adjust_current_pos_top(const Window::Ptr window);
 	 void adjust_current_pos_right();
@@ -41,9 +41,9 @@ class DefaultAligner : public Aligner {
 
 	 void OnWindowDimensionChanged(ui::Window& window);
 
-	 ui::Rect current_pos_;
-	 ui::Dimension non_content_dimension_;
-	 ui::Dimension item_dim_;
+	 Rect current_pos_;
+	 Dimension non_content_dimension_;
+	 Dimension item_dim_;
 };
 
 class WrapAligner : public Aligner {
@@ -53,7 +53,7 @@ class WrapAligner : public Aligner {
  private:
   void calc_window_dim(const Window::Ptr& window);
 
-  ui::Dimension item_dim_;
+  Dimension item_dim_;
 };
 
 class GridAligner : public Aligner {
@@ -178,7 +178,7 @@ class LineBorder : public ui::Ornament {
  public:
   LineBorder() : color_(0xFFFFFFFF), border_width_(1) {}
   LineBorder(ARGB color) : color_(color), border_width_(1) {}  
-	LineBorder(ARGB color, const ui::BoxSpace& border_width) : color_(color), border_width_(border_width) {}  
+	LineBorder(ARGB color, const BoxSpace& border_width) : color_(color), border_width_(border_width) {}  
 
   LineBorder* Clone() {
     LineBorder* border = new LineBorder();
@@ -189,17 +189,16 @@ class LineBorder : public ui::Ornament {
   virtual void Draw(Window& item, Graphics* g, Region& draw_region) {    
     DrawBorder(item, g, draw_region);
   }
-  virtual std::auto_ptr<ui::Rect> padding() const {
+  virtual std::auto_ptr<Rect> padding() const {
     ui::Point pad(0, 0);
-    return std::auto_ptr<ui::Rect>(new ui::Rect(pad, pad));
+    return std::auto_ptr<Rect>(new Rect(pad, pad));
   }
 
   void set_border_radius(const BorderRadius& radius) { border_radius_ = radius; }
   const BorderRadius& border_radius() const { return border_radius_; }
   void set_border_style(const BorderStyle& style) { border_style_ = style; }
   const BorderStyle& border_style() const { return border_style_; }
-
-	virtual ui::BoxSpace preferred_space() const { return border_width_; }
+	virtual BoxSpace preferred_space() const { return border_width_; }
   
  private:  
   void DrawBorder(Window& item, Graphics* g, Region& draw_region) {
@@ -214,43 +213,43 @@ class LineBorder : public ui::Ornament {
       g->DrawRect(rc);
     } else { 
       if (border_style_.top != NONE) {
-        g->DrawLine(ui::Point(rc.left() + border_radius_.left_top, rc.top()),
-                    ui::Point(rc.right() - border_radius_.right_top - 1, rc.top()));
+        g->DrawLine(Point(rc.left() + border_radius_.left_top, rc.top()),
+                    Point(rc.right() - border_radius_.right_top - 1, rc.top()));
       }
       if (border_style_.bottom != NONE) {
-        g->DrawLine(ui::Point(rc.left() + border_radius_.left_bottom, rc.bottom() - 1),
-                    ui::Point(rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1)); 
+        g->DrawLine(Point(rc.left() + border_radius_.left_bottom, rc.bottom() - 1),
+                    Point(rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1)); 
       }
       if (border_style_.left != NONE) {
-        g->DrawLine(ui::Point(rc.left(), rc.top() + border_radius_.left_top), 
-                    ui::Point(rc.left(), rc.bottom() - border_radius_.left_bottom -1));
+        g->DrawLine(Point(rc.left(), rc.top() + border_radius_.left_top), 
+                    Point(rc.left(), rc.bottom() - border_radius_.left_bottom -1));
       }
       if (border_style_.right != NONE) {
-        g->DrawLine(ui::Point(rc.right() - 1, rc.top() + border_radius_.right_top), 
-                    ui::Point(rc.right() - 1, rc.bottom() - border_radius_.right_bottom));
+        g->DrawLine(Point(rc.right() - 1, rc.top() + border_radius_.right_top), 
+                    Point(rc.right() - 1, rc.bottom() - border_radius_.right_bottom));
       }
       if (border_radius_.left_top != 0 && border_style_.top != NONE) {
-        g->DrawArc(ui::Rect(rc.top_left(), 
-                            ui::Point(rc.left() + 2*border_radius_.left_top, rc.top() + 2*border_radius_.left_top)),
+        g->DrawArc(Rect(rc.top_left(), 
+                        Point(rc.left() + 2*border_radius_.left_top, rc.top() + 2*border_radius_.left_top)),
                    Point(rc.left() + border_radius_.left_top, rc.top()),
                    Point(rc.left(), rc.top() + border_radius_.left_top));
       }
       if (border_radius_.right_top != 0 && border_style_.top != NONE) {
-        g->DrawArc(ui::Rect(ui::Point(rc.right() - 2*border_radius_.right_top - 1, rc.top()),
-                            ui::Point(rc.right() - 1, rc.top() + 2*border_radius_.right_top)), 
+        g->DrawArc(Rect(Point(rc.right() - 2*border_radius_.right_top - 1, rc.top()),
+                        Point(rc.right() - 1, rc.top() + 2*border_radius_.right_top)), 
                    Point(rc.right() - 1, rc.top() + border_radius_.right_top),
                    Point(rc.right() - border_radius_.right_top - 1, rc.top()));    
       }
       if (border_radius_.left_bottom != 0 && border_style_.bottom != NONE ) {
-        g->DrawArc(ui::Rect(ui::Point(rc.left(), rc.bottom() - 2*border_radius_.left_bottom - 1),
-                            ui::Point(rc.left() + 2*border_radius_.left_bottom, rc.bottom() - 1)), 
+        g->DrawArc(Rect(Point(rc.left(), rc.bottom() - 2*border_radius_.left_bottom - 1),
+                        Point(rc.left() + 2*border_radius_.left_bottom, rc.bottom() - 1)), 
                    Point(rc.left(), rc.bottom() - border_radius_.left_bottom - 1),
                    Point(rc.left() + border_radius_.left_bottom, rc.bottom() - 1));
       }
       if (border_radius_.right_bottom != 0 && border_style_.bottom != NONE) {
-        g->DrawArc(ui::Rect(ui::Point(rc.right() - 2*border_radius_.right_bottom,
-                                      rc.bottom() - 2*border_radius_.right_bottom - 1),
-                            ui::Point(rc.right() - 1, rc.bottom() - 1)), 
+        g->DrawArc(Rect(Point(rc.right() - 2*border_radius_.right_bottom,
+                              rc.bottom() - 2*border_radius_.right_bottom - 1),
+                        Point(rc.right() - 1, rc.bottom() - 1)), 
                    Point(rc.right() - border_radius_.right_bottom - 1, rc.bottom() - 1),
                    Point(rc.right() - 1, rc.bottom() - border_radius_.right_bottom - 1));
       }
@@ -258,7 +257,7 @@ class LineBorder : public ui::Ornament {
   }  
   
   ARGB color_;
-	ui::BoxSpace border_width_;
+	BoxSpace border_width_;
   BorderRadius border_radius_;
   BorderStyle border_style_;
 };
@@ -266,7 +265,7 @@ class LineBorder : public ui::Ornament {
 class Wallpaper : public ui::Ornament {
  public:
   Wallpaper() {}
-  Wallpaper(ui::Image::WeakPtr image) : image_(image) {}
+  Wallpaper(Image::WeakPtr image) : image_(image) {}
  
   Wallpaper* Clone() {
     Wallpaper* paper = new Wallpaper();
@@ -283,8 +282,8 @@ class Wallpaper : public ui::Ornament {
  private:
   void DrawWallpaper(Window& item, Graphics* g, Region& draw_region) {
     if (!image_.expired()) {
-      ui::Dimension dim = item.dim();
-      ui::Dimension image_dim = image_.lock()->dim();
+      Dimension dim = item.dim();
+      Dimension image_dim = image_.lock()->dim();
       if ((item.dim().width() > image_dim.width()) || 
          (item.dim().height() > image_dim.height())) {
         for (double cx = 0; cx < item.dim().width(); cx += image_dim.width()) {
@@ -377,13 +376,17 @@ class OrnamentFactory {
 
   LineBorder* CreateLineBorder() { return new LineBorder(); }
   LineBorder* CreateLineBorder(ARGB color) { return new LineBorder(color); }
-	LineBorder* CreateLineBorder(ARGB color, const ui::BoxSpace& border_width) { return new LineBorder(color, border_width); }  
+	LineBorder* CreateLineBorder(ARGB color, const BoxSpace& border_width) {
+    return new LineBorder(color, border_width);
+  }  
   Fill* CreateFill() { return new Fill(); }
   Fill* CreateFill(ARGB color) { return new Fill(color); }
   CircleFill* CreateCircleFill() { return new CircleFill(); }
   CircleFill* CreateCircleFill(ARGB color) { return new CircleFill(color); }
   Fill* CreateBoundFill(ARGB color) { return new Fill(color, true); }
-  Wallpaper* CreateWallpaper(ui::Image::WeakPtr image) { return new Wallpaper(image); }
+  Wallpaper* CreateWallpaper(Image::WeakPtr image) {
+    return new Wallpaper(image);
+  }
 
  private:
    OrnamentFactory() {}    
