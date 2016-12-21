@@ -649,6 +649,10 @@ class GraphicsImp : public ui::GraphicsImp {
         cr_(CDC::FromHandle(hScreenDC)),      
         rgb_color_(0xFFFFFF),
         argb_color_(0xFFFFFFFF),        
+        rgb_stroke_color_(0xFFFFFF),
+        argb_stroke_color_(0xFFFFFFFF),
+        rgb_fill_color_(0xFFFFFF),
+        argb_fill_color_(0xFFFFFFFF),
         updatepen_(false),
         updatebrush_(false),
         pen_width_(1),
@@ -738,6 +742,18 @@ class GraphicsImp : public ui::GraphicsImp {
       updatepen_ = updatebrush_ = true;      
     }
   }
+  void DevSetStroke(ARGB color) {    
+    if (argb_stroke_color_ != color) {
+      argb_stroke_color_ = color;
+      rgb_stroke_color_ = ToCOLORREF(color);      
+    }
+  }
+  void DevSetFill(ARGB color) {    
+    if (argb_fill_color_ != color) {
+      argb_fill_color_ = color;
+      rgb_fill_color_ = ToCOLORREF(color);      
+    }
+  }  
   ARGB dev_color() const { return argb_color_; }
   void DevDrawArc(const Rect& rect, const Point& start, const Point& end) {
     check_pen_update();
@@ -824,7 +840,7 @@ class GraphicsImp : public ui::GraphicsImp {
     }
     cr_->Polyline(&lpPoints[0], size);
   }
-  void DevSetFont(const ui::Font& font) {
+  void DevSetFont(const Font& font) {
 	::SelectObject(cr_->m_hDC, old_font);
     font_ = font;
     mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
@@ -940,8 +956,22 @@ class GraphicsImp : public ui::GraphicsImp {
     check_pen_update();     
     check_brush_update();
     cr_->FillPath();
+  }
+  virtual void DevDrawFillPath() {
+    // pen udpate    
+	  ::SelectObject(cr_->m_hDC, old_pen);
+    ::DeleteObject(pen);
+    pen = CreatePen(PS_SOLID | PS_COSMETIC, pen_width_, rgb_stroke_color_);
+    old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);    
+    updatepen_ = true;      
+    // updatebrush_)
+	  ::SelectObject(cr_->m_hDC, old_brush);
+    DeleteObject(brush);
+    brush = ::CreateSolidBrush(rgb_fill_color_);			
+	  old_brush = (HBRUSH) ::SelectObject(cr_->m_hDC, brush);      
+    updatebrush_ = true;    
+    cr_->StrokeAndFillPath();
   }  
-
   virtual void DevDrawPath() {
     check_pen_update();    
     cr_->StrokePath();
@@ -1053,6 +1083,10 @@ class GraphicsImp : public ui::GraphicsImp {
    HFONT old_font;
    ARGB argb_color_;
    RGB rgb_color_;
+   ARGB argb_fill_color_;
+   RGB rgb_fill_color_;
+   ARGB argb_stroke_color_;
+   RGB rgb_stroke_color_;
    bool updatepen_, updatebrush_;
    XFORM rXform;
    std::stack<XFORM> saveXform;
@@ -1167,14 +1201,14 @@ class WindowTemplateImp : public T, public I {
   virtual void DevInvalidate() {    			  
 	  if (window() && window()->root()) {
       CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());	
-	    ::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE);        
+	    ::RedrawWindow(root->m_hWnd, NULL, NULL, RDW_FRAME | RDW_INVALIDATE | RDW_NOERASE);        
 	  }
   }
   virtual void DevInvalidate(const ui::Region& rgn) {	  	  
     if (m_hWnd) {
       mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(rgn.imp());
       assert(imp);	
-      int flag =  RDW_INVALIDATE | RDW_UPDATENOW;     
+      int flag =  RDW_INVALIDATE | RDW_UPDATENOW | RDW_NOERASE;     
       if (window() && window()->transparent()) {
          flag |= RDW_ERASE;      
        }      
@@ -1199,6 +1233,9 @@ class WindowTemplateImp : public T, public I {
     if (GetFocus() != this) {
       SetFocus();
     }
+  }
+  virtual bool dev_has_focus() const {    
+    return (GetFocus() == this);
   }
   virtual void DevViewDoubleBuffered() { is_double_buffered_ = true; }
   virtual void DevViewSingleBuffered() { is_double_buffered_ = false; }
@@ -2111,6 +2148,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
       return 0;
     }    
     imp->set_window(w);    
+    imp->dev_set_font(Font(FontInfo("Arial", 13)));
     return imp;
   }
 

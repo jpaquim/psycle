@@ -772,12 +772,16 @@ friend class Group;
   virtual void DrawRoundRect(const Rect& rect, const Dimension& arc_dimension);
   virtual void DrawOval(const Rect& rect);
   virtual void DrawCircle(const Point& center, double radius);
+  virtual void DrawEllipse(const Point& center, const Point& radius);
   virtual void DrawString(const std::string& str, const Point& position);
   virtual void FillRect(const Rect& rect);
   virtual void FillRoundRect(const Rect& rect, const Dimension& arc_dimension);
   virtual void FillOval(const Rect& rect);
   virtual void FillCircle(const Point& center, double radius);
+  virtual void FillEllipse(const Point& center, const Point& radius);
   virtual void FillRegion(const Region& rgn);
+  virtual void set_stroke(ARGB color);
+  virtual void set_fill(ARGB color);
   virtual void set_color(ARGB color);
   virtual ARGB color() const;
 	virtual void SetPenWidth(double width);
@@ -804,8 +808,9 @@ friend class Group;
 
   virtual void BeginPath();
   virtual void EndPath();
-  virtual void FillPath();
+  virtual void FillPath();  
   virtual void DrawPath();
+  virtual void DrawFillPath();
   virtual void MoveTo(const Point& p);
   virtual void LineTo(const Point& p);
   virtual void CurveTo(const Point& control_p1, const Point& control_p2, const Point& p);
@@ -1103,7 +1108,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual bool visible() const;
 	virtual void FLS(); // invalidate new region
 	virtual void FLSEX(); //  invalidate combine new & old region
-	virtual void FLS(const Region& rgn) { Invalidate(rgn); } // invalidate region  
+	virtual void FLS(const Region& rgn) { Invalidate(rgn); }
 	virtual void Invalidate();
 	virtual void Invalidate(const Region& rgn);
 	virtual void PreventFls();
@@ -1172,6 +1177,7 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void SetFocus();
 	virtual void OnFocus(Event& ev) { ev.WorkParent(); }
 	virtual void OnKillFocus(Event& ev) { ev.WorkParent(); }
+  virtual bool has_focus() const;
 	boost::signal<void()> Focus;
 	boost::signal<void()> KillFocus;	
 	bool has_align_dimension_changed() const { return align_dimension_changed_; }
@@ -2612,6 +2618,8 @@ class GraphicsImp {
                                 const Dimension& arc_dimension) = 0;
   virtual void DevFillOval(const Rect& position) = 0;
   virtual void DevFillRegion(const Region& rgn) = 0;
+  virtual void DevSetStroke(ARGB color) = 0;
+  virtual void DevSetFill(ARGB color) = 0;
   virtual void DevSetColor(ARGB color) = 0;
   virtual ARGB dev_color() const = 0;
   virtual void DevTranslate(const Point& delta) = 0;  
@@ -2650,6 +2658,7 @@ class GraphicsImp {
   virtual void DevEndPath() = 0;
   virtual void DevFillPath() = 0;
   virtual void DevDrawPath() = 0;
+  virtual void DevDrawFillPath() = 0;
   virtual void DevLineTo(const Point& point) = 0;
   virtual void DevMoveTo(const Point& point) = 0;
   virtual void DevCurveTo(const Point& control_p1, const Point& control_p2, const Point& p) = 0;
@@ -2695,6 +2704,7 @@ class WindowImp {
   virtual void dev_set_parent(Window* window) {} 
   virtual void dev_set_clip_children() {}  
   virtual void DevSetFocus() = 0;
+  virtual bool dev_has_focus() const = 0;
   virtual void OnDevDraw(Graphics* g, Region& draw_region);  
   virtual void OnDevSize(const Dimension& dimension);  
   virtual void dev_add_style(UINT flag) {}

@@ -45,6 +45,7 @@ end
 function pluginselector:init()      
    self.doopen = signal:new()
    self.docreate = signal:new()
+   self.docreatemodule = signal:new()
    self.tg = tabgroup:new(self)
                      :setalign(item.ALCLIENT)
                      :disableclosebutton()   
@@ -111,9 +112,10 @@ function pluginselector:initplugincreate()
         label = settinggroup.label    
       else
         label = name
-      end 
+      end       
       local node = node:new(self.plugincreatelistrootnode)
-                       :settext(label)    
+                       :settext(label)  
+      node.isplugin = settinggroup.isplugin                       
       node.properties = settinggroup.properties
       node.outputs = settinggroup.outputs
     end
@@ -158,9 +160,14 @@ function pluginselector:initcreatebutton(parent)
   function createbutton:onclick()
     if that.activenode and that.activenode.propertyview then 
       that.activenode.propertyview:parseproperties()    
-      that:oncreateplugin(that.activenode.properties,
-                          that.activenode.outputs,
-                          that.activenode.properties.pluginname:value())
+      if that.activenode.isplugin then
+        that:oncreateplugin(that.activenode.properties,
+                            that.activenode.outputs,
+                            that.activenode.properties.pluginname:value())
+      else
+        that:oncreatemodule(that.activenode.properties,
+                            that.activenode.outputs)
+      end
     end
   end
   return group
@@ -175,7 +182,7 @@ function pluginselector:showproperties(node)
         propertiesview:new(self.creategroup_, "create", node.properties)
                       :setautosize(false, false)                           
                       :setalign(item.ALCLIENT)
-                      :addornament(ornamentfactory:createfill(0x2F2F2F))
+                      :addornament(ornamentfactory:createfill(0xFF2F2F2F))
   end
   self.creategroup_:show()
   self:parent():flagnotaligned():updatealign()
@@ -197,6 +204,27 @@ function pluginselector:oncreateplugin(properties, outputs, machinename)
                         env)    
   end 
   self.docreate:emit(outputs, machinename)  
+  self:updatepluginlist()
+end  
+
+function pluginselector:oncreatemodule(properties, outputs)
+  local env = {}  
+  for name, property in properties:opairs() do    
+    env[name] = property:value()
+  end     
+  for _, output in pairs(outputs) do      
+    local p = "(.-)$(%b())()"
+    local path = output.path
+    local text, propertyname = path:match(p)
+    if propertyname then
+      propertyname = propertyname:sub(2, -2)              
+      path = path:gsub(p, env[propertyname])      
+    end
+    output.realpath = self.fileexplorer:path() .. "\\" .. path    
+    local templatepath = cfg:luapath().."\\plugineditor\\templates\\"..output.template    
+    templateparser.work(templatepath,  output.realpath, env)                         
+  end 
+  self.docreatemodule:emit(outputs)  
 end  
 
 function pluginselector:initpluginlist()
@@ -224,12 +252,12 @@ function pluginselector:open(node)
 end
 
 function pluginselector:machinepath(info)  
-  local file = io.open(info:dllname(), "r")  
+  local file = io.open(info:dllname(), "r")    
   local str = ""
   for line in file:lines() do
     local pos = string.find(line, "psycle.setmachine")
-  if pos then
-      str = string.match(line, "require(%b())")   
+    if pos then
+      str, expr = string.match(line, "require(%b())")         
       if str then
         str = str:sub(3, -3)      
         str = str:gsub("%.", "\\")      

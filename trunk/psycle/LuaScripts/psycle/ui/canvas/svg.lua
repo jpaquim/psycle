@@ -2,6 +2,9 @@ local slaxml = require 'psycle.slaxml'
 
 local svg = {}
 
+svg.defaultfill = "#FFFFFF"
+svg.defaultstroke= "#00FF00"
+
 local endl = '\n'
 
 local point = { 
@@ -20,17 +23,18 @@ local point = {
 }
 
 local pathcommands = {
-  new = function(self)
+  new = function(self, svg)
     local c = {}
     setmetatable(c, self)  
     self.__index = self    
     c:init()    
+    self.svg = svg
     return c
   end,  
   init = function(self) 
     self.scalex, self.scaley  = 1, 1
     self.lastpoint, self.lastctrlpoint = point:new(), point:new()
-    self.fill = nil
+    self.fill, self.stroke = svg.defaultfill, svg.defaultstroke
   end,  
   M  = { numargs = 2,
     drawcode = function(self, args)
@@ -80,17 +84,6 @@ local pathcommands = {
       return "g:curveto(" .. ptstr1 .. ", " .. ptstr2 .. "," .. ptstr3.. ")" .. endl      
     end
   },
-  Z  = { numargs = 0,     
-    drawcode = function(self, args)
-      result = "g:endpath()" .. endl
-      if self.fill and self.fill == "none" then
-        result = result .. "g:drawpath()" .. endl
-      else
-        result = result .. "g:fillpath()" .. endl
-      end
-      return result
-    end
-  },  
   l  = { numargs = 2,
     drawcode = function(self, args)
        self.lastpoint:offset(args[1], args[2])
@@ -109,14 +102,14 @@ local pathcommands = {
       return "g:curveto(" .. ptstr1 .. ", " .. ptstr2 .. "," .. ptstr3.. ")" .. endl  
     end
   },
-  z  = { numargs = 0,
+  Z  = { numargs = 0,
     drawcode = function(self, args)
-      result = "g:endpath()" .. endl
-      if self.fill and self.fill == "none" then
-        result = result .. "g:drawpath()" .. endl
-      else
-        result = result .. "g:fillpath()" .. endl
-      end
+      local result = "g:endpath()" .. endl
+      local fillcode = "g:fillpath()"
+      local strokecode = "g:drawpath()"   
+      local strokefillcode = "g:drawfillpath()"      
+      result = result .. self.svg:drawcodefillstroke(
+            self.fill, fillcode, self.stroke, strokecode, strokefillcode)
       return result
     end  
   },
@@ -165,8 +158,17 @@ function svg:new(filename)
 end
 
 function svg:init(filename) 
-  self.pathcommands = pathcommands:new()
-  self.circle = { cx, cy, r = 0, 0, 0 }
+  self.pathcommands = pathcommands:new(self)
+  self.circle = {
+    fill = svg.defaultfill, stroke = svg.defaultstroke, cx = 0, cy = 0,  r = 0
+  }
+  self.ellipse = {
+    fill = svg.defaultfill, stroke = svg.defaultstroke, cx = 0, cy = 0,  rx = 0, ry = 0
+  }
+  self.rect = {
+    fill = svg.defaultfill, stroke = svg.defaultfill,
+    x = 0, y = 0, width = 0, height = 0
+  }      
   self.currentelement = ""    
   self.mode = ""  
   self.viewport = {x = 0, y = 0, width = 100, height = 100}
@@ -201,6 +203,8 @@ function svg:init(filename)
           that.d = value          
         elseif name == "fill" then          
           that.pathcommands.fill = value
+        elseif name == "stroke" then          
+          that.pathcommands.stroke = value
         end
       elseif that.currentelement == "circle" then
         if name == "cx" then
@@ -214,6 +218,38 @@ function svg:init(filename)
         elseif name == "stroke" then          
           that.circle.stroke = value
         end
+      elseif that.currentelement == "ellipse" then
+        if name == "cx" then
+          that.ellipse.cx = value
+        elseif name == "cy" then
+          that.ellipse.cy = value
+        elseif name == "rx" then
+          that.ellipse.rx = value     
+        elseif name == "ry" then
+          that.ellipse.ry = value               
+        elseif name == "fill" then          
+          that.ellipse.fill = value
+        elseif name == "stroke" then          
+          that.ellipse.stroke = value
+        end
+      elseif that.currentelement == "rect" then           
+        if name == "x" then
+          that.rect.x = value
+        elseif name == "y" then
+          that.rect.y = value
+        elseif name == "width" then
+          that.rect.width = value     
+        elseif name == "height" then                  
+          that.rect.height = value
+        elseif name == "rx" then
+          that.rect.rx = value
+        elseif name == "ry" then
+          that.rect.ry = value          
+        elseif name == "fill" then          
+          that.rect.fill = value
+        elseif name == "stroke" then          
+          that.rect.stroke = value
+        end
       end
     end, -- attribute found on current element
     closeElement = function(name,nsURI)
@@ -226,16 +262,43 @@ function svg:init(filename)
         local scaley = that.viewport.height / that.viewbox.height        
         local ptstr = "point:new(" .. (that.circle.cx*scalex) .. "," 
                                    .. (that.circle.cy*scaley)  ..")"       
-        if that.circle.fill and that.circle.fill ~= "none" then                                             
-          that.drawcode = that.drawcode .. "g:setcolor(0xFF" .. that.circle.fill:sub(2) .. ")" .. endl
-        end  
-        if not that.circle.fill or that.circle.fill ~= "none" then
-          that.drawcode = that.drawcode .. "g:fillcircle(" .. ptstr .. "," .. that.circle.r*scalex .. ")" .. endl
+        local fillcode = "g:fillcircle(" .. ptstr .. "," .. that.circle.r*scalex .. ")"
+        local strokecode = "g:drawcircle(" .. ptstr .. "," .. that.circle.r*scalex .. ")"
+        that.drawcode = that.drawcode .. that:drawcodefillstroke(
+            that.circle.fill, fillcode, that.circle.stroke, strokecode)        
+      elseif name == "ellipse" then
+        local scalex = that.viewport.width / that.viewbox.width
+        local scaley = that.viewport.height / that.viewbox.height        
+        local ptstr = "point:new(" .. (that.ellipse.cx*scalex) .. "," 
+                                   .. (that.ellipse.cy*scaley)  ..")" 
+        local radiusstr = "point:new(" .. (that.ellipse.rx*scalex) .. "," 
+                                       .. (that.ellipse.ry*scaley)  .. ")"                                   
+        local fillcode = "g:fillellipse(" .. ptstr .. "," .. radiusstr .. ")"
+        local strokecode = "g:drawellipse(" .. ptstr .. "," .. radiusstr .. ")"
+        that.drawcode = that.drawcode .. that:drawcodefillstroke(
+            that.ellipse.fill, fillcode, that.ellipse.stroke, strokecode)              
+      elseif name == "rect" then
+        local scalex = that.viewport.width / that.viewbox.width
+        local scaley = that.viewport.height / that.viewbox.height        
+        local ptstr = "point:new(" .. (that.rect.x*scalex) .. ","
+                                   .. (that.rect.y*scaley)  .. ")"       
+        local dimstr = "dimension:new(" .. (that.rect.width*scalex) .. "," 
+                                        .. (that.rect.height*scaley)  .. ")"
+        local cornerstr = nil
+        if that.rect.rx and that.rect.ry then
+          cornerstr = "dimension:new(" .. (that.rect.rx*scalex) .. ","
+                                       .. (that.rect.ry*scaley)  .. ")"       
+        end        
+        local fillcode, strokecode = "", ""
+        if cornerstr then
+          fillcode = "g:fillroundrect(rect:new(" .. ptstr .. "," .. dimstr .. ")," .. cornerstr .. ")"
+          strokecode = "g:drawroundrect(rect:new(" .. ptstr .. "," .. dimstr .. ")," .. cornerstr .. ")"
+        else
+          fillcode = "g:fillrect(rect:new(" .. ptstr .. "," .. dimstr .. "))"
+          strokecode = "g:drawrect(rect:new(" .. ptstr .. "," .. dimstr .. "))"        
         end
-        if that.circle.stroke and that.circle.stroke ~= "none" then                                             
-          that.drawcode = that.drawcode .. "g:setcolor(0xFF" .. that.circle.stroke:sub(2) .. ")" .. endl
-          that.drawcode = that.drawcode .. "g:drawcircle(" .. ptstr .. "," .. that.circle.r*scalex .. ")" .. endl          
-        end          
+        that.drawcode = that.drawcode .. that:drawcodefillstroke(
+            that.rect.fill, fillcode, that.rect.stroke, strokecode)        
       end
     end, -- When "</foo>" or </x:foo> or "/>" is seen
     text         = function(text)                      end, -- text and CDATA nodes
@@ -246,16 +309,34 @@ function svg:init(filename)
   -- (does not strip leading/trailing whitespace from CDATA)  
   self.drawcode = 'local point = require("psycle.ui.point")' .. endl ..
                   'local rect = require("psycle.ui.rect")' .. endl .. 
+                  'local dimension = require("psycle.ui.dimension")' .. endl .. 
                   'local g = ...' .. endl
   self.parser:parse(myxml,{stripWhitespace=true})  
   psycle.output(self.drawcode)
   self.drawfunc = load(self.drawcode)     
 end
 
-function svg:transformpath(path)  
-  if self.pathcommands.fill and self.pathcommands.fill:find("#") then    
-    self.drawcode = self.drawcode .. "g:setcolor(0xFF" .. self.pathcommands.fill:sub(2) .. ")" .. endl
+function svg:drawcodefillstroke(fill, fillcode, stroke, strokecode, strokefillcode)  
+  local result = ""  
+  local hasstroke = stroke and stroke ~= "none"  
+  if strokefillcode and hasstroke and fill ~="none" then
+    result = "g:setstroke(0xFF" .. stroke:sub(2) .. ")" .. endl ..    
+             "g:setfill(0xFF" .. fill:sub(2) .. ")" .. endl ..
+             strokefillcode .. endl
+  else    
+    if fill ~= "none" then              
+      result = "g:setcolor(0xFF" .. fill:sub(2) .. ")" .. endl      
+      result = result .. fillcode .. endl
+    end
+    if stroke and stroke ~= "none" then                                             
+      result = result .. "g:setcolor(0xFF" .. stroke:sub(2) .. ")" .. endl
+      result = result .. strokecode .. endl          
+    end
   end
+  return result
+end
+
+function svg:transformpath(path)  
   self.drawcode = self.drawcode .. "g:beginpath()" .. endl
   self:parsepath(path)      
 end

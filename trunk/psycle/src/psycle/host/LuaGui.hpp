@@ -654,6 +654,20 @@ struct LuaGraphicsBind {
     g->set_color(color);
     return LuaHelper::chaining(L);    
   }
+  static int setfill(lua_State* L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+    ARGB color = LuaHelper::check32bit(L, 2);
+    g->set_fill(color);
+    return LuaHelper::chaining(L);    
+  }
+  static int setstroke(lua_State* L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+    ARGB color = LuaHelper::check32bit(L, 2);
+    g->set_stroke(color);
+    return LuaHelper::chaining(L);    
+  }
   static int color(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::color); }
   static int drawline(lua_State *L) {
     using namespace ui;
@@ -712,6 +726,22 @@ struct LuaGraphicsBind {
     g->FillCircle(*center.get(), radius);
     return LuaHelper::chaining(L);
   }
+  static int drawellipse(lua_State* L) { 
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+    Point::Ptr center = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
+    Point::Ptr radius = LuaHelper::check_sptr<Point>(L, 3, LuaPointBind::meta);    
+    g->DrawEllipse(*center.get(), *radius.get());
+    return LuaHelper::chaining(L);
+  }
+  static int fillellipse(lua_State* L) { 
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+    Point::Ptr center = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+    Point::Ptr radius = LuaHelper::check_sptr<Point>(L, 3, LuaPointBind::meta);    
+    g->FillEllipse(*center.get(), *radius.get());
+    return LuaHelper::chaining(L);
+  }
   static int fillrect(lua_State *L) {
     using namespace ui;
     Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
@@ -753,7 +783,8 @@ struct LuaGraphicsBind {
   static int beginpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::BeginPath); }
   static int endpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::EndPath); } 
   static int fillpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::FillPath); } 
-  static int drawpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::DrawPath); } 
+  static int drawpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::DrawPath); }
+  static int drawfillpath(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::DrawFillPath); }
   static int lineto(lua_State *L) {
     using namespace ui;
     Graphics::Ptr g =  LuaHelper::check_sptr<Graphics>(L, 1, meta);        
@@ -1009,7 +1040,8 @@ class LuaItemBind {
       {"setautosize", setautosize},
 			{"autosize", autosize},
       {"setdebugtext", setdebugtext},      
-      {"setfocus", setfocus},    
+      {"setfocus", setfocus},
+      {"hasfocus", hasfocus},
       {"show", show},
       {"hide", hide},
       {"visible", visible},
@@ -1053,7 +1085,7 @@ class LuaItemBind {
       {"setcursorpos", setcursorposition},			
 	    {"viewdoublebuffered", viewdoublebuffered},
 	    {"viewsinglebuffered", viewsinglebuffered},
-      {"bringtotop", bringtotop},      
+      {"bringtotop", bringtotop},            
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1079,6 +1111,7 @@ class LuaItemBind {
   static int viewdoublebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewDoubleBuffered); }
   static int viewsinglebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewSingleBuffered); }
   static int bringtotop(lua_State* L) { LUAEXPORT(L, &T::BringToTop); }
+  static int hasfocus(lua_State* L) { LUAEXPORT(L, &T::has_focus); }
   static int addstyle(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     UINT style = (unsigned int) luaL_checknumber(L, 2);    

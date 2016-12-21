@@ -459,7 +459,7 @@ void Canvas::StealFocus(const Window::Ptr& item) {
 }
 
 // Events
-void Canvas::Invalidate(const Region& rgn) {   
+void Canvas::Invalidate(const Region& rgn) {
   if (!fls_prevented_) {
     if (IsSaving()) {
       save_rgn_->Combine(rgn, RGN_OR);
@@ -471,8 +471,8 @@ void Canvas::Invalidate(const Region& rgn) {
 
 void Canvas::Flush() {    
   if (!fls_prevented_) {  
-    Window::Invalidate(*save_rgn_.get());    
-  }
+    Window::Invalidate(*save_rgn_.get());
+  }  
   save_rgn_->Clear();    
 }
 

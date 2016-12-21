@@ -526,6 +526,20 @@ void Graphics::FillCircle(const Point& center, double radius) {
   }
 }
 
+void Graphics::DrawEllipse(const Point& center, const Point& radius) {
+  if (is_color_opaque()) {
+    assert(imp_.get());    
+    imp_->DevDrawOval(Rect(center - radius, center + radius));
+  }
+}
+
+void Graphics::FillEllipse(const Point& center, const Point& radius) {
+  if (is_color_opaque()) {
+    assert(imp_.get());    
+    imp_->DevFillOval(Rect(center - radius, center + radius));
+  }
+}
+
 void Graphics::DrawString(const std::string& str, const Point& position) {
   if (is_color_opaque()) {
     assert(imp_.get());
@@ -565,6 +579,16 @@ void Graphics::FillRegion(const Region& rgn) {
 void Graphics::set_color(ARGB color) {  
   assert(imp_.get());
   imp_->DevSetColor(color);  
+}
+
+void Graphics::set_fill(ARGB color) {  
+  assert(imp_.get());
+  imp_->DevSetFill(color);  
+}
+
+void Graphics::set_stroke(ARGB color) {  
+  assert(imp_.get());
+  imp_->DevSetStroke(color);  
 }
 
 ARGB Graphics::color() const {
@@ -672,6 +696,11 @@ void Graphics::FillPath() {
 void Graphics::DrawPath() {
   assert(imp_.get());
   imp_->DevDrawPath();  
+}
+
+void Graphics::DrawFillPath() {
+  assert(imp_.get());
+  imp_->DevDrawFillPath();  
 }
 
 void Graphics::MoveTo(const ui::Point& p) {
@@ -921,11 +950,11 @@ void Window::set_position(const ui::Rect& pos) {
 	  }
 		bool size_changed = imp_->dev_position().dimension() != new_pos.dimension();
 		imp_->dev_set_position(new_pos);
-    FLSEX();    
-    align_dimension_changed();    
-		if (size_changed) {			
+    if (size_changed) {			
       OnSize(new_pos.dimension());
     }
+    FLSEX();    
+    align_dimension_changed();    		
 		if (!prevent_auto_dimension_) {
 		  // WorkChildposition();
 		}
@@ -1113,6 +1142,10 @@ bool Window::visible() const {
   return visible_;
 }
   
+
+bool Window::has_focus() const {
+  return imp() ? imp_->dev_has_focus() : false;
+}
 
 void Window::Invalidate() { 
   if (imp_.get()) {    
