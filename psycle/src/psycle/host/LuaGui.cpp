@@ -667,11 +667,12 @@ bool CanvasItem<T>::SendMouseEvent(lua_State* L,
 
 template <class T>
 void CanvasItem<T>::OnSize(const ui::Dimension& dimension) {
-  T::OnSize(dimension);  
+  T::OnSize(dimension);
   try {
     LuaImport in(L, this, locker(L));
     if (in.open("onsize")) {
-      in << dimension.width() << dimension.height() << pcall(0);
+      LuaHelper::requirenew<LuaDimensionBind>(L, "psycle.ui.dimension", new ui::Dimension(dimension));
+      in.pcall(0);
     }
   } catch(std::exception& e) {
     ui::alert(e.what());
@@ -1483,6 +1484,8 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"new", create},
     {"translate", translate},
     {"setcolor", setcolor},
+    {"setfill", setfill},
+    {"setstroke", setstroke},
     {"color", color},
     {"drawline", drawline},
     {"drawcurve", drawcurve},
@@ -1490,11 +1493,13 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"drawrect", drawrect},    
     {"drawoval", drawoval},
     {"drawcircle", drawcircle},
+    {"drawellipse", drawellipse},
     {"drawroundrect", drawroundrect},
     {"fillrect", fillrect},
     {"fillroundrect", fillroundrect},
     {"filloval", filloval},
     {"fillcircle", fillcircle},
+    {"fillellipse", fillellipse},
     {"copyarea", copyarea},
     {"drawstring", drawstring},
     {"setfont", setfont},
@@ -1508,6 +1513,7 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"endpath", endpath},
     {"fillpath", fillpath},
     {"drawpath", drawpath},
+    {"drawfillpath", drawfillpath},
     {"moveto", moveto},
     {"lineto", lineto},
     {"curveto", curveto},

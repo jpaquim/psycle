@@ -1295,8 +1295,8 @@ void ScintillaImp::SetFoldingBasics() {
 
 void ScintillaImp::SetFoldingColors(const Lexer& lexer) {
  for (int i = 25; i <= 31; i++) {    
-   f(SCI_MARKERSETFORE, i, ToCOLORREF(lexer.folding_marker_fore_color()));
-   f(SCI_MARKERSETBACK, i, ToCOLORREF(lexer.folding_marker_back_color()));
+   f(SCI_MARKERSETFORE, i, 0x0); //ToCOLORREF(lexer.folding_marker_fore_color()));
+   f(SCI_MARKERSETBACK, i, 0xFFFFFF); // ToCOLORREF(lexer.folding_marker_back_color()));
  }
 }
 
@@ -1518,7 +1518,6 @@ void GameControllersImp::DevUpdateController(ui::GameController& controller) {
   controller.set(joy_info.wXpos, joy_info.wYpos, joy_info.wZpos,
                  static_cast<int>(joy_info.wButtons));
 }
-
 
 
 /*extern "C" bool comp(FontPair& left, FontPair& right)

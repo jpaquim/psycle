@@ -29,20 +29,22 @@ function menudesigner:new(parent)
   return c
 end
 
-function menudesigner:init()   
-  self:setautosize(false, false)    
-  self:setposition(rect:new(point:new(0, 0), dimension:new(100, 0)))
-  self:addornament(ornamentfactory:createfill(0x528A68))  
-  self.helptext = text:new(self):settext("CTRL + RIGHT create submenu"):setautosize(false, true):setalign(item.ALTOP)
+function menudesigner:init()  
+  self:addornament(ornamentfactory:createfill(0xFF528A68))  
+  self.helptext = text:new(self)
+                      :setautosize(false, true)
+                      :setalign(item.ALTOP)
+                      :settext("CTRL + RIGHT create submenu") 
+                      :addornament(ornamentfactory:createfill(0xFF528A68))    
   self.applybutton = button:new(self):settext("Apply"):setautosize(false, false):setalign(item.ALBOTTOM)
-                           :setposition(rect:new(point:new(0, 0), dimension:new(0, 20)))
+                           :setposition(rect:new(point:new(), dimension:new(0, 20)))  
   local that = self  
   function self.applybutton:onclick()    
     that:makecode()
   end  
   self.tree = tree:new(self):setautosize(false, false):setalign(item.ALCLIENT)
   self.tree:showbuttons():showlines()
-  self.tree:setbackgroundcolor(0x2F2F2F)
+  self.tree:setbackgroundcolor(0xFF2F2F2F)
   self.tree:setcolor(0xFFFFFF)
   function self.tree:onedited(node, text)
     self:selected():settext(text)    
@@ -56,7 +58,7 @@ function menudesigner:init()
   self.tree:selectnode(emptynode)  
   function self.tree:onkeydown(ev)    
     if ev:ctrlkey() then
-      if ev:keycode() == 39 then -- ev.RIGHT then
+      if ev:keycode() == ev.RIGHT then
         local node = self:selected()
         if node:size() == 0 then      
           local newnode = node:new():settext("newnode")          
@@ -79,7 +81,7 @@ function menudesigner:init()
       that.tree:selectnode(newnode)
                :editnode(newnode)
       ev:preventdefault()    
-    elseif ev:keycode() == 46 then            
+    elseif ev:keycode() == ev.DELETE then            
        that.tree:selected():parent():remove(that.tree:selected())
     end
   end    

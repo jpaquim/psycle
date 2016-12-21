@@ -112,8 +112,8 @@ function machine:initmenu()
         end        
         that.frame = frame:new()
                           :settitle("Menu Designer")
-                          :setposition(rect:new(point:new(0, 0), dimension:new(400, 400)))
-                          :setviewport(that.menudesigner)        
+                          :setviewport(that.menudesigner)
+                          :setposition(rect:new(point:new(0, 0), dimension:new(400, 400)))                          
         function that.frame:onshow()          
           that.menudesigner.tree:editnode(that.menudesigner.tree:selected())
         end

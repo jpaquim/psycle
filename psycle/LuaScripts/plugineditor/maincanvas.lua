@@ -75,7 +75,8 @@ function maincanvas:init()
   self:createsearch()
   self:createoutputs()
   splitter:new(self, splitter.HORZ)  
-  self.fileexplorer = self:createfileexplorer()
+  self.fileexplorer = self:createfileexplorer()   
+  self.pluginselector.fileexplorer = self.fileexplorer
   splitter:new(self, splitter.VERT)
   self:createpagegroup()
   systems:new():updatewindows()
@@ -90,6 +91,46 @@ function maincanvas:createcreateeditplugin()
                       :setposition(rect:new(point:new(), dimension:new(0, 200)))
   self.pluginselector.doopen:connect(maincanvas.onopenplugin, self)
   self.pluginselector.docreate:connect(maincanvas.oncreateplugin, self)
+  self.pluginselector.docreatemodule:connect(maincanvas.oncreatemodule, self)
+end
+
+function maincanvas:onopenplugin(pluginpath, pluginname, info)  
+  self:openplugin(pluginpath, pluginname, info)
+  psycle.proxy.project = project:new():setplugininfo(info)
+  self:fillinstancecombobox()  
+  self.machine_:settitle(pluginname)      
+end
+
+function maincanvas:oncreateplugin(outputs, machinename)  
+  for _, output in pairs(outputs) do  
+    local fname = string.sub(output.path, 1, -5)    
+    self:openplugin(machinename.."\\"..fname, machinename)
+  end             
+  
+  local catcher = catcher:new():rescannew()
+  --local infos = catcher:infos()        
+  --for i=1, #infos do       
+   -- if infos[i]:type() == machine.MACH_LUA and
+   --    infos[i]:name():lower() == pluginname:lower() then      
+    --  psycle.proxy.project = project:new():setplugininfo(infos[i])
+    --  break;     
+  --  end
+  --end      
+  self.machineselector:settext(machinename)  
+  self.pluginselector:hide()
+  self:updatealign()
+  self:setfocus()
+end
+
+function maincanvas:oncreatemodule(outputs)    
+  for _, output in pairs(outputs) do    
+    self:openfromfile(output.realpath)    
+  end  
+  self.pluginselector:hide()
+  self.fileexplorer:update()
+  self:setfocus()  
+  self:updatealign()  
+  self:invalidate()
 end
 
 function maincanvas:createsearch()
@@ -182,7 +223,10 @@ end
 
 function maincanvas:onkeydown(ev)
   if ev:ctrlkey() then
-    if ev:keycode() == 78 then
+    if ev:keycode() == 0x47 then
+      self.statusbar.status.line:setfocus()
+      ev:stoppropagation()
+    elseif ev:keycode() == 78 then
       self:createnewpage()   
       ev:stoppropagation()
     elseif ev:keycode() == 79 then
@@ -217,7 +261,7 @@ function maincanvas:openfromfile(fname, line)
     page:reload()
     if self.pages:activepage() ~= page then   
       self.pages:setactivepage(page)
-  end
+    end
   else    
     page = self:createpage()
     page:loadfile(fname)    
@@ -291,7 +335,10 @@ function maincanvas:inittoolbar()
   self.tg = group:new(self)
                  :setautosize(false, true)
                  :setalign(item.ALTOP)
-                 :setmargin(boxspace:new(0, 0, 5, 0))
+                 :setmargin(boxspace:new(0, 0, 5, 0))  
+  self.tgsmall = group:new(self)
+                      :setautosize(false, true)
+                      :setalign(item.ALTOP)                 
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
   local settingsicon = toolicon:new(self.tg, maincanvas.picdir.."settings.png", 0xFFFFFF)                                               
   self:formattoolicon(settingsicon)
@@ -309,7 +356,7 @@ function maincanvas:inittoolbar()
   self:initfiletoolbar():setalign(item.ALLEFT)
   separator:new(self.tg):setalign(item.ALLEFT):setmargin(boxspace:new(10))
   self:initplaytoolbar():setalign(item.ALLEFT)
-  self:initstatus()
+  self:initstatus()  
 end
 
 function maincanvas:initmachineselector(parent)
@@ -356,7 +403,21 @@ end
 
 function maincanvas:initstatus()    
   local setting = self.machine_.settingsmanager:setting()
-  self.statusbar = statusbar:new(self.tg, setting)
+  self.statusbar = statusbar:new(self.tgsmall, setting)
+  self.statusbar.gotopage:connect(maincanvas.ongotopage, self)
+  self.statusbar.escape:connect(maincanvas.onstatuslineescape, self)
+end
+
+function maincanvas:ongotopage(edit)
+  if self.pages:activepage() then   
+     self.pages:activepage():gotoline(tonumber(edit:text()) - 1)
+  end
+end
+
+function maincanvas:onstatuslineescape(edit)
+  if self.pages:activepage() then   
+     self.pages:activepage():setfocus()
+  end
 end
 
 function maincanvas:initwindowtoolbar()    
@@ -513,34 +574,6 @@ end
 function maincanvas:displaysearch(ev)
   self.search:show():onfocus()
   self:updatealign()  
-end
-
-function maincanvas:oncreateplugin(outputs, machinename)  
-  for _, output in pairs(outputs) do  
-    local fname = string.sub(output.path, 1, -5)    
-    self:openplugin(machinename.."\\"..fname, machinename)
-  end             
-  
-  local catcher = catcher:new():rescannew()
-  --local infos = catcher:infos()        
-  --for i=1, #infos do       
-   -- if infos[i]:type() == machine.MACH_LUA and
-   --    infos[i]:name():lower() == pluginname:lower() then      
-    --  psycle.proxy.project = project:new():setplugininfo(infos[i])
-    --  break;     
-  --  end
-  --end      
-  self.machineselector:settext(machinename)  
-  self.pluginselector:hide()
-  self:updatealign()
-  self:setfocus()
-end
-
-function maincanvas:onopenplugin(pluginpath, pluginname, info)  
-  self:openplugin(pluginpath, pluginname, info)
-  psycle.proxy.project = project:new():setplugininfo(info)
-  self:fillinstancecombobox()  
-  self.machine_:settitle(pluginname)      
 end
 
 function findlast(haystack, needle)

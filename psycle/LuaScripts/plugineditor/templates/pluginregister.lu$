@@ -1,5 +1,4 @@
 -- $(pluginname)
 -- register file for psycle's lua plugin system
 
-machine = require("$(pluginname).machine");
-psycle.setmachine(machine)
+psycle.setmachine(require("$(pluginname).machine"))

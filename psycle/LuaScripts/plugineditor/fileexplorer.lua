@@ -178,4 +178,8 @@ function fileexplorer:addparentdirectorynode(path)
   end
 end
 
+function fileexplorer:update()
+  self:setpath(self.currentpath)
+end
+
 return fileexplorer

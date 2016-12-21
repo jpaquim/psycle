@@ -95,27 +95,21 @@ class Canvas : public ui::Group {
   }   
     
   static std::string type() { return "canvas"; }
-  static WindowTypes::Type window_type() { return WindowTypes::CANVAS; }
-       
+  static WindowTypes::Type window_type() { return WindowTypes::CANVAS; }       
   void Flush();  
   void StealFocus(const Window::Ptr& item);  
   virtual void OnSize(const ui::Dimension& dimension);
   void SetSave(bool on) { save_ = on; }
   virtual bool IsSaving() const { return save_; }    
-  void ClearSave() { save_rgn_->Clear(); }
-     
-  void InvalidateSave();  
-    
+  void ClearSave() { save_rgn_->Clear(); }           
   boost::signal<void (std::exception&)> error;
-
   void Invalidate();
   void Invalidate(const Region& rgn);
+  void InvalidateSave();
   virtual void PreventFls() { fls_prevented_ = true; }
   virtual void EnableFls() { fls_prevented_ = false; }
   bool fls_prevented() const { return fls_prevented_; }
-
   virtual void OnFocusChange(int id) { OnMessage(FOCUS, id); }
-
   virtual bool is_root() const { return true; }
     
  private:  

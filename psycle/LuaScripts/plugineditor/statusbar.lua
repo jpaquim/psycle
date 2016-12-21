@@ -7,6 +7,7 @@ the terms of the GNU General Public License as published by the Free Software
 Foundation ; either version 2, or (at your option) any later version.
 ]]
 
+local signal = require("psycle.signal")
 local systems = require("psycle.ui.systems")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
@@ -16,6 +17,7 @@ local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local item = require("psycle.ui.item")
 local group = require("psycle.ui.group")
 local text = require("psycle.ui.text")
+local edit = require("psycle.ui.edit")
 
 local statusbar = group:new()
 
@@ -32,13 +34,16 @@ function statusbar:new(parent, setting)
 end
 
 function statusbar:init(setting)  
+  self.gotopage = signal:new()
+  self.escape = signal:new()
   self:setalign(item.ALRIGHT)
       :setautosize(true, false)       
+      :setposition(rect:new(point:new(), dimension:new(0, 20)));
   self.status, self.label = {}, {}
   self.status.searchrestart = self:createtext("", 100)
   self.status.modified = self:createtext("", 100)
   self.label.line = self:createtext("LINE")
-  self.status.line = self:createtext("1", 30)
+  self.status.line = self:createedit("1", 30)
   self.label.col = self:createtext("COL")      
   self.status.col = self:createtext("1", 30)
   self.label.insert = self:createtext("INSERT")
@@ -47,7 +52,9 @@ function statusbar:init(setting)
 end
 
 function statusbar:updatestatus(status)
-  self.status.line:settext(status.line)  
+  if not self.status.line:hasfocus() then
+    self.status.line:settext(status.line)  
+  end
   self.status.col:settext(status.column)     
   self.status.insert:settext(
       statusbar.booltostring(status.ovrtype, "ON", "OFF"))
@@ -64,6 +71,42 @@ function statusbar.booltostring(value, ontext, offtext)
   elseif offtext then
     result = offtext    
   end
+  return result
+end
+
+function statusbar:createedit(label, width)
+  local wrapper = group:new(self):setautosize(false, false)
+                       :setalign(item.ALLEFT)
+                       :setmargin(boxspace:new(2, 0, 2, 5))
+                       :setpadding(boxspace:new(1))
+  local result = edit:new(wrapper)
+                     :settext(label)            
+                     :setalign(item.ALCLIENT)                     
+  local that = self
+  function result:onkeydown(ev)         
+    if ev:keycode() == ev.RETURN then      
+      that.gotopage:emit(self)
+      ev:preventdefault()
+    elseif ev:keycode() == ev.ESCAPE then    
+      that.escape:emit(self)
+      ev:preventdefault()
+    end
+  end
+  function wrapper:onmouseenter()                     
+    self:setpadding(boxspace:new(0))
+    self:addornament(ornamentfactory:createlineborder(0xFFFFFFFF))                     
+  end
+  function wrapper:onmouseout()                     
+    self:removeornaments()
+         :setpadding(boxspace:new(1))
+  end
+  if width then
+    result:setautosize(false, false)    
+    result:setposition(rect:new(point:new(), dimension:new(width, 15)))
+    wrapper:setposition(rect:new(point:new(), dimension:new(width, 0)))
+  else    
+    result:setautosize(true, false)
+  end        
   return result
 end
 
@@ -84,8 +127,8 @@ end
 
 function statusbar:initdefaultcolors()
   self:setcolor(0xFFFFFFFF)
-      :setstatuscolor(0xFFFFFFFF)
-      :setbackgroundcolor(0xFF333333)
+    :setstatuscolor(0xFFFFFFFF)
+  -- :setbackgroundcolor(0xFF333333)
   return self
 end
 
