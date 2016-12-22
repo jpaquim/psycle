@@ -20,6 +20,7 @@ local run = require("psycle.run")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
+local button = require("psycle.ui.button")
 local boxspace = require("psycle.ui.boxspace")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local image = require("psycle.ui.image")
@@ -36,6 +37,7 @@ local fileexplorer = require("fileexplorer")
 local settingspage = require("settingspage")
 local textpage = require("textpage")
 local advancededit = require("advancededit")
+local info = require("info")
 
 local toolicon = require("psycle.ui.canvas.toolicon")
 local toolbar = require("psycle.ui.canvas.toolbar")
@@ -69,9 +71,10 @@ function maincanvas:init()
   self.machines = machines:new()  
   self:invalidatedirect()  
   self:initstyleclasses(self.machine_.settingsmanager:setting())
-  self:setupfiledialogs()
+  self:setupfiledialogs()  
   self:createcreateeditplugin()  
-  self:inittoolbar()   
+  self:inittoolbar()
+  self:initinfo()  
   self:createsearch()
   self:createoutputs()
   splitter:new(self, splitter.HORZ)  
@@ -80,6 +83,15 @@ function maincanvas:init()
   splitter:new(self, splitter.VERT)
   self:createpagegroup()
   systems:new():updatewindows()
+end
+
+function maincanvas:initinfo()
+  self.info = info:new(self)
+                  :setalign(item.ALTOP)
+                  :setautosize(false, false)
+                  :setposition(rect:new(point:new(), dimension:new(0, 100)))
+                  :hide()
+  self.statusbar:setinfo(self.info)
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -223,7 +235,13 @@ end
 
 function maincanvas:onkeydown(ev)
   if ev:ctrlkey() then
-    if ev:keycode() == 0x47 then
+    if ev:keycode() >= 0x41 and ev:keycode() <= 0x5a then                  
+      self.statusbar:setcontrolkey(ev:keycode())      
+      self.info:jump(ev:keycode())      
+      self.info:show();
+      self:updatealign();
+      self.statusbar.status.control:setfocus()
+    elseif ev:keycode() == 0x47 then
       self.statusbar.status.line:setfocus()
       ev:stoppropagation()
     elseif ev:keycode() == 78 then
@@ -380,7 +398,7 @@ function maincanvas:initmachineselector(parent)
       that:onmachineselectorreturnkey(self:text())
       that.pluginselector:hide()
     end 
-    if ev:keycode() == ev.ESCAPE then
+    if ev:keycode() == ev.ESCAPE then      
       that.pluginselector:hide()
       that:updatealign()
     end
@@ -687,6 +705,7 @@ function maincanvas:initstyleclasses(setting)
   systems:setstyleclass(tabgroup.windowtype, setting.general.children.ui.children.tabgroup.properties)
   systems:setstyleclass(output.windowtype, setting.output.properties)  
   systems:setstyleclass(textpage.windowtype, self:mergeproperties(setting.lualexer.properties, setting.general.properties))
+  systems:setstyleclass(info.windowtype, setting.general.properties)
   self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
 end
 

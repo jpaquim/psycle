@@ -25,7 +25,7 @@ local textpage = scintilla:new()
 
 textpage.windowtype = 95
 textpage.pagecounter = 0
-textpage.preventedkeys = {78, 79, 87, 70, 83, 87}
+textpage.preventedkeys = {0x4A, 78, 79, 87, 70, 83, 87}
 
 function textpage:new(parent)    
   local c = scintilla:new(parent)  
@@ -42,12 +42,14 @@ function textpage:init()
 end
 
 function textpage:onkeydown(ev)
-  if ev:ctrlkey() then
-    if ev:keycode() == 70 or ev:keycode() == 83 then
-      ev:preventdefault()
-    end            
-  end
-end    
+  if ev:ctrlkey() then     
+    for _, key in pairs(textpage.preventedkeys) do
+      if ev:keycode() == key then
+        ev:preventdefault()
+      end      
+    end
+  end        
+end
 
 function textpage:onmarginclick(linepos)
   self:addbreakpoint(linepos)
@@ -129,16 +131,6 @@ function textpage:onsearch(searchtext, dir, case, wholeword, regexp)
 	  self.searchbeginpos = cpselstart        
 	end
   end      
-end
-
-function textpage:onkeydown(ev)
-  if ev:ctrlkey() then     
-    for _, key in pairs(textpage.preventedkeys) do
-      if ev:keycode() == key then
-        ev:preventdefault()
-      end      
-    end
-  end        
 end
 
 function textpage:setproperties(properties)   

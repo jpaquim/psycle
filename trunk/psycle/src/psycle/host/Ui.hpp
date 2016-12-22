@@ -2239,6 +2239,8 @@ class Scintilla : public Window {
   ARGB foreground_color() const;
   void set_background_color(ARGB color);
   ARGB background_color() const;
+  void HideLineNumbers();
+  void HideBreakpoints();
   void set_linenumber_foreground_color(ARGB color);
   ARGB linenumber_foreground_color() const;
   void set_linenumber_background_color(ARGB color);
@@ -2265,16 +2267,17 @@ class Scintilla : public Window {
   void define_marker(int id, int symbol, ARGB foreground_color, ARGB background_color);
   void ShowCaretLine();
   void HideCaretLine();
+  void HideHorScrollbar();
   void set_caret_line_background_color(ARGB color);
   void set_tab_width(int width_in_chars);
   int tab_width() const;
   void ClearAll();
   void Undo();
   void Redo();
-  virtual bool transparent() const { return true; }
-
+  virtual bool transparent() const { return true; }  
   virtual void OnFirstModified() {}
   virtual void OnMarginClick(int line_pos) {}
+
 
  private:
   static std::string dummy_str_;
@@ -2938,6 +2941,9 @@ class ScintillaImp : public WindowImp {
   virtual void dev_define_marker(int id, int symbol, ARGB foreground_color, ARGB background_color) = 0;
   virtual void DevShowCaretLine() = 0;
   virtual void DevHideCaretLine() = 0;
+  virtual void DevHideLineNumbers() = 0;
+  virtual void DevHideBreakpoints() = 0;
+  virtual void DevHideHorScrollbar() = 0;
   virtual void dev_set_caret_line_background_color(ARGB color)  = 0;
   virtual void dev_set_tab_width(int width_in_chars) = 0;
   virtual int dev_tab_width() const = 0;
