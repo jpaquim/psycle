@@ -2366,6 +2366,9 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
        {"tabwidth", tabwidth},
        {"undo", undo},
        {"redo", redo},
+       {"hidelinenumbers", hidelinenumbers},
+       {"hidebreakpoints", hidebreakpoints},
+       {"hidehorscrollbar", hidehorscrollbar},
        {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -2411,6 +2414,8 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
   }  
   static int showcaretline(lua_State *L) { LUAEXPORT(L, &T::ShowCaretLine); } 
   static int hidecaretline(lua_State *L) { LUAEXPORT(L, &T::HideCaretLine); }   
+  static int hidelinenumbers(lua_State *L) { LUAEXPORT(L, &T::HideLineNumbers); }
+  static int hidebreakpoints(lua_State *L) { LUAEXPORT(L, &T::HideBreakpoints); }  
   static int addmarker(lua_State *L) { LUAEXPORT(L, &T::add_marker); } 
   static int setcaretlinebackgroundcolor(lua_State *L) { LUAEXPORT(L, &T::set_caret_line_background_color); } 
   static int settabwidth(lua_State *L) { LUAEXPORT(L, &T::set_tab_width); } 
@@ -2450,6 +2455,7 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
   static int caretcolor(lua_State *L) { LUAEXPORT(L, &T::caret_color); }
   static int setidentcolor(lua_State *L) { LUAEXPORT(L, &T::set_ident_color); }
   static int styleclearall(lua_State *L) { LUAEXPORT(L, &T::StyleClearAll); }
+  static int hidehorscrollbar(lua_State *L) { LUAEXPORT(L, &T::HideHorScrollbar); }
   static int setlexer(lua_State *L) { 
     LuaHelper::bindud<T, ui::Lexer>(L, meta, LuaLexerBind::meta, &T::set_lexer); 
     return LuaHelper::chaining(L);

@@ -2366,7 +2366,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
 
   virtual void dev_set_lexer(const Lexer& lexer);
 
-  void dev_set_foreground_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_DEFAULT, ToCOLORREF(color)); }
+  void dev_set_foreground_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_DEFAULT, ToCOLORREF(color)); }  
   ARGB dev_foreground_color() const { return ToARGB(f(SCI_STYLEGETFORE, STYLE_DEFAULT, 0)); }
   void dev_set_background_color(ARGB color) { f(SCI_STYLESETBACK, STYLE_DEFAULT, ToCOLORREF(color)); }
   ARGB dev_background_color() const { return ToARGB(f(SCI_STYLEGETBACK, STYLE_DEFAULT, 0)); }
@@ -2459,6 +2459,9 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     f(SCI_SETCARETLINEVISIBLEALWAYS, true, 0);
   }
   void DevHideCaretLine() { f(SCI_SETCARETLINEVISIBLE, false, 0); }
+  void DevHideLineNumbers() { f(SCI_SETMARGINWIDTHN, 0, 0); }
+  void DevHideBreakpoints() { f(SCI_SETMARGINWIDTHN, 1, 0); }  
+  void DevHideHorScrollbar() { f(SCI_SETHSCROLLBAR, 0, 0); }
   void dev_set_caret_line_background_color(ARGB color) { f(SCI_SETCARETLINEBACK, ToCOLORREF(color), 0); }
 
   void dev_undo() { f(SCI_UNDO, 0, 0); }

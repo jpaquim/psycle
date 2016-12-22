@@ -2696,6 +2696,24 @@ void Scintilla::HideCaretLine() {
   }
 }
 
+void Scintilla::HideLineNumbers() {
+  if (imp()) {
+    imp()->DevHideLineNumbers();
+  }
+}
+
+void Scintilla::HideBreakpoints() {
+  if (imp()) {
+    imp()->DevHideBreakpoints();
+  }
+}
+
+void Scintilla::HideHorScrollbar() {
+  if (imp()) {
+    imp()->DevHideHorScrollbar();
+  }
+}
+
 void Scintilla::set_caret_line_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_caret_line_background_color(color);

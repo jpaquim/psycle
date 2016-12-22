@@ -36,19 +36,34 @@ end
 function statusbar:init(setting)  
   self.gotopage = signal:new()
   self.escape = signal:new()
-  self:setalign(item.ALRIGHT)
-      :setautosize(true, false)       
+  self:setalign(item.ALTOP)
+      :setautosize(false, false)       
       :setposition(rect:new(point:new(), dimension:new(0, 20)));
-  self.status, self.label = {}, {}
-  self.status.searchrestart = self:createtext("", 100)
-  self.status.modified = self:createtext("", 100)
-  self.label.line = self:createtext("LINE")
-  self.status.line = self:createedit("1", 30)
-  self.label.col = self:createtext("COL")      
-  self.status.col = self:createtext("1", 30)
-  self.label.insert = self:createtext("INSERT")
+  self.status, self.label = {}, {}  
   self.status.insert = self:createtext("ON", 30)
+  self.label.insert = self:createtext("INSERT")
+  self.status.col = self:createtext("1", 30)
+  self.label.col = self:createtext("COL")   
+  self.status.line = self:createedit("1", 30)
+  self.label.line = self:createtext("LINE")
+  self.status.modified = self:createtext("", 100)
+  self.status.searchrestart = self:createtext("", 100)  
+  self.status.control = self:createedit("", 30, item.ALLEFT)
+  function self.status.control:onkeydown(ev)
+    ev:preventdefault()
+  end
+  local that = self
+  function self.status.control:onkillfocus()
+    that.info:jumpmain()
+    that:clearcontrol()    
+    that.info:hide():parent():updatealign()
+  end
   self:initdefaultcolors()
+  self.prefix = ""
+end
+
+function statusbar:setinfo(info)
+  self.info = info
 end
 
 function statusbar:updatestatus(status)
@@ -64,6 +79,11 @@ function statusbar:updatestatus(status)
       statusbar.booltostring(status.modified, "MODIFIED"))
 end
 
+function statusbar:setcontrolkey(keycode)
+  self.prefix = "^" .. string.char(keycode)
+  self.status.control:settext(self.prefix)  
+end
+
 function statusbar.booltostring(value, ontext, offtext)
   local result = ""
   if value then
@@ -74,9 +94,33 @@ function statusbar.booltostring(value, ontext, offtext)
   return result
 end
 
-function statusbar:createedit(label, width)
+function statusbar:clearcontrol()
+  self.status.control:settext("")
+  self.prefix = ""
+end
+
+function statusbar:onkeydown(ev)  
+  if (ev:ctrlkey() and ev:keycode() == 0x45) or ev:keycode() == ev.ESCAPE then    
+    self.info:jumpmain()
+    self:clearcontrol()
+    ev:stoppropagation()
+    ev:preventdefault()
+    self.info:hide():parent():updatealign()
+    self.escape:emit(self)
+  else
+    self.info:jump(ev:keycode())
+    self.status.control:settext(self.prefix .. string.char(ev:keycode()))
+    ev:stoppropagation()
+    ev:preventdefault()
+  end  
+end
+
+function statusbar:createedit(label, width, align)
+  if not align then
+    align = item.ALRIGHT
+  end
   local wrapper = group:new(self):setautosize(false, false)
-                       :setalign(item.ALLEFT)
+                       :setalign(align)
                        :setmargin(boxspace:new(2, 0, 2, 5))
                        :setpadding(boxspace:new(1))
   local result = edit:new(wrapper)
@@ -98,7 +142,7 @@ function statusbar:createedit(label, width)
   end
   function wrapper:onmouseout()                     
     self:removeornaments()
-         :setpadding(boxspace:new(1))
+        :setpadding(boxspace:new(1))
   end
   if width then
     result:setautosize(false, false)    
@@ -113,7 +157,7 @@ end
 function statusbar:createtext(label, width)
   local result = text:new(self)
                      :settext(label)
-                     :setalign(item.ALLEFT)
+                     :setalign(item.ALRIGHT)
                      :setverticalalignment(item.ALCENTER)
                      :setmargin(boxspace:new(0, 0, 0, 5))
   if width then
