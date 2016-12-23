@@ -1,7 +1,8 @@
 return {
   title = "MAIN MENU",
   keymap = {
-    J = "helpmain"
+    J = "helpmain",
+    K = "kmenu"
   },
   display = {
     {shortdesc="J", desc="Help" }
