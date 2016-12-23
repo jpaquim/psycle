@@ -89,9 +89,29 @@ function maincanvas:initinfo()
   self.info = info:new(self)
                   :setalign(item.ALTOP)
                   :setautosize(false, false)
-                  :setposition(rect:new(point:new(), dimension:new(0, 100)))
+                  :setposition(rect:new(point:new(), dimension:new(0, 160)))
                   :hide()
+  self.info.cmd:connect(maincanvas.oncmdinfo, self)
   self.statusbar:setinfo(self.info)
+end
+
+function maincanvas:oncmdinfo(cmd)
+  if (self.pages:activepage()) then
+    self:onstatuslineescape()
+    if cmd == "saveresume" then
+      self:savepage()
+    elseif cmd == "savedone" then
+      self:savepage()
+      self.pages:removepage(self.pages:activepage())
+    elseif cmd == "saveexit" then
+      self:savepage()
+      dtesself.machine_:exit()
+    elseif cmd == "abandonfile" then
+      self.pages:removepage(self.pages:activepage())
+    else    
+      self.pages:activepage():oncmd(cmd)
+    end
+  end  
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -235,15 +255,14 @@ end
 
 function maincanvas:onkeydown(ev)
   if ev:ctrlkey() then
-    if ev:keycode() >= 0x41 and ev:keycode() <= 0x5a then                  
+    if ev:keycode() == 0x4A or ev:keycode() == 0x4B then
       self.statusbar:setcontrolkey(ev:keycode())      
-      self.info:jump(ev:keycode())      
-      self.info:show();
-      self:updatealign();
+      self.info:jump(ev:keycode())
       self.statusbar.status.control:setfocus()
     elseif ev:keycode() == 0x47 then
       self.statusbar.status.line:setfocus()
       ev:stoppropagation()
+      self.info:deactivate()
     elseif ev:keycode() == 78 then
       self:createnewpage()   
       ev:stoppropagation()
@@ -251,25 +270,29 @@ function maincanvas:onkeydown(ev)
       self.fileopen:setfolder(self.fileexplorer:path())      
       self.fileopen:show()          
       ev:stoppropagation()
-    elseif ev:keycode() == 87 then      
+    elseif ev:keycode() == 87 then         
       ev:stoppropagation()
-      if (self.pages:activepage()) then
-        local e = {}
-        e.page = self.pages:activepage()
-        self:onclosepage(e);        
-        self.pages:removepage(e.page)   
-      end      
+      self:closeandremovepage()
     elseif ev:keycode() == 70 then
       self:displaysearch() 
       ev:stoppropagation()
     elseif ev:keycode() == 83 then      
-      self:savepage()  
+      self:savepage()
       ev:stoppropagation()
     elseif ev:keycode() == ev.F5  then
       self:playplugin()
       ev:stoppropagation()
     end
   end  
+end
+
+function maincanvas:closeandremovepage()  
+  if (self.pages:activepage()) then
+    local e = {}
+    e.page = self.pages:activepage()
+    self:onclosepage(e);        
+    self.pages:removepage(e.page)   
+  end     
 end
 
 function maincanvas:openfromfile(fname, line)
@@ -640,7 +663,12 @@ function maincanvas:onidle()
   if activepage and activepage.status then  
     self.statusbar:updatestatus(activepage:status())    
   end  
-  self:updatepowericon()
+  self:updatepowericon()  
+  self.info:onidle()  
+  if self.info.strobe == 1 and self.info.activated == 1 and not self.info:visible() then    
+    self.info:show();
+    self:updatealign();    
+  end
 end
 
 function maincanvas:updatepowericon()

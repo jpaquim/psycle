@@ -2261,6 +2261,9 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     f(SCI_SETMARGINWIDTHN, 0, 32);
     f(SCI_SETMARGINWIDTHN, 1, 32);
     f(SCI_SETMARGINSENSITIVEN, 1, TRUE);
+    f(SCI_SETINDICATORCURRENT, 0, 1);
+    f(SCI_INDICATORFILLRANGE, 0, 200);
+
     return true;
   }
 

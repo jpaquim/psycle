@@ -12,7 +12,6 @@ local cfg = require("psycle.config"):new("PatternVisual")
 local node = require("psycle.node")
 local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
-local fontinfo = require("psycle.ui.fontinfo")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
 local lexer = require("psycle.ui.lexer")
@@ -20,12 +19,14 @@ local scintilla = require("psycle.ui.scintilla")
 local settings = require("settings")
 local search = require("search")
 local serpent = require("psycle.serpent")
-
 local textpage = scintilla:new()
 
 textpage.windowtype = 95
 textpage.pagecounter = 0
-textpage.preventedkeys = {0x4A, 78, 79, 87, 70, 83, 87}
+textpage.preventedkeys = {0x4A, 0x4B, 78, 79, 87, 70, 83, 87}
+
+textpage.EDITMODE = 0
+textpage.INFOMODE = 1
 
 function textpage:new(parent)    
   local c = scintilla:new(parent)  
@@ -39,16 +40,22 @@ end
 
 function textpage:init()
   self:setautosize(false, false)
+  self.mode = textpage.EDITMODE
+  self.blockbegin, self.blockend = -1, -1  
 end
 
-function textpage:onkeydown(ev)
+function textpage:onkeydown(ev)  
   if ev:ctrlkey() then     
-    for _, key in pairs(textpage.preventedkeys) do
-      if ev:keycode() == key then
-        ev:preventdefault()
-      end      
-    end
+    self:preventkeys(ev)    
   end        
+end
+
+function textpage:preventkeys(ev)
+  for _, key in pairs(textpage.preventedkeys) do
+    if ev:keycode() == key then
+      ev:preventdefault()
+    end      
+  end
 end
 
 function textpage:onmarginclick(linepos)
@@ -165,6 +172,38 @@ function textpage:setproperties(properties)
   end    
   self:setselalpha(75)    
   self:showcaretline()  
+end
+
+function textpage:setblockbegin()
+  self.blockbegin = self:selectionstart()
+  self:updatesel()
+end
+
+function textpage:setblockend()
+  self.blockend = self:selectionstart()
+  self:updatesel()
+end
+
+function textpage:deleteblock()
+  if self.blockbegin ~=-1 and self.blockend ~= -1 then
+    self:replacesel("")
+  end
+end
+
+function textpage:updatesel()
+  if self.blockbegin ~=-1 and self.blockend ~= -1 then
+    self:setsel(self.blockbegin, self.blockend)
+  end
+end
+
+function textpage:oncmd(cmd)
+  if cmd == "setblockbegin" then      
+    self:setblockbegin()    
+  elseif cmd == "setblockend" then    
+    self:setblockend()      
+  elseif cmd == "deleteblock" then      
+    self:deleteblock()
+  end    
 end
 
 return textpage
