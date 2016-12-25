@@ -5,6 +5,13 @@ return {
     K = "kmenu"
   },
   display = {
-    {shortdesc="J", desc="Help" }
+    {section = "--Cursor Movement--"},
+    {shortdesc = "^S", desc = "char left"},
+    {shortdesc = "^D", desc = "char right"},
+    {shortdesc = "^E", desc = "line up"},
+    {shortdesc = "^X", desc = "line down"},
+    {section = "--Other Menus--"},
+    {shortdesc = "^J", desc = "Help"},
+    {shortdesc = "^K", desc = "Block"}
   }
 }

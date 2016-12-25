@@ -47,16 +47,19 @@ function statusbar:init(setting)
   self.status.line = self:createedit("1", 30)
   self.label.line = self:createtext("LINE")
   self.status.modified = self:createtext("", 100)
-  self.status.searchrestart = self:createtext("", 100)  
-  self.status.control = self:createedit("", 30, item.ALLEFT)
+  self.status.searchrestart = self:createtext("", 100)    
+  self.status.control = self:createedit("", 30, item.ALLEFT)  
+  self.status.prompttext = self:createtext("", 30):setalign(item.ALLEFT):setautosize(true, false)
   function self.status.control:onkeydown(ev)
     ev:preventdefault()
   end
   local that = self
   function self.status.control:onkillfocus()
     that.info:jumpmain()
-    that:clearcontrol()    
-    that.info:hide():parent():updatealign()
+    that:clearcontrol()
+    if that.info.helplevel < 3 then
+      that.info:hide():parent():updatealign()
+    end
   end
   self:initdefaultcolors()
   self.prefix = ""
@@ -64,6 +67,14 @@ end
 
 function statusbar:setinfo(info)
   self.info = info
+  self.info.dojump:connect(statusbar.onjumpinfo, self)
+  self:updatealign()
+end
+
+function statusbar:onjumpinfo(link)  
+  if link.prompt then
+    self.status.prompttext:settext(link.prompt)
+  end
 end
 
 function statusbar:updatestatus(status)
@@ -95,18 +106,21 @@ function statusbar.booltostring(value, ontext, offtext)
 end
 
 function statusbar:clearcontrol()
-  self.status.control:settext("")
+  self.status.control:settext(""):fls()
   self.prefix = ""
+  self.status.prompttext:settext("")
 end
 
 function statusbar:onkeydown(ev)  
   if (ev:ctrlkey() and ev:keycode() == 0x45) or ev:keycode() == ev.ESCAPE then    
-    self.info:jumpmain()
-    self:clearcontrol()
+    self.info:jumpmain()    
     ev:stoppropagation()
     ev:preventdefault()
-    self.info:hide():parent():updatealign()
+    if self.info.helplevel < 3 then
+      self.info:hide():parent():updatealign()
+    end
     self.escape:emit(self)
+    self:clearcontrol()
   else
     self.info:jump(ev:keycode())
     self.status.control:settext(self.prefix .. string.char(ev:keycode()))

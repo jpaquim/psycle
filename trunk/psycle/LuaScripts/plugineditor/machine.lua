@@ -148,4 +148,8 @@ function machine:ontimer()
   self.maincanvas:onidle()
 end
 
+function machine:onkeydown(ev)
+  psycle.output(ev:keycode())
+end
+
 return machine

@@ -2491,6 +2491,30 @@ void Scintilla::GotoLine(int pos) {
   }
 }
 
+void Scintilla::LineUp() {
+  if (imp()) {
+    imp()->DevLineUp();
+  }
+}
+
+void Scintilla::LineDown() {
+  if (imp()) {
+    imp()->DevLineDown();
+  }
+} 
+
+void Scintilla::CharLeft() {
+  if (imp()) {
+    imp()->DevCharLeft();
+  }
+}
+
+void Scintilla::CharRight() {
+  if (imp()) {
+    imp()->DevCharRight();
+  }
+} 
+
 int Scintilla::length() const  { 
   return imp() ? imp()->dev_length() : 0;
 }

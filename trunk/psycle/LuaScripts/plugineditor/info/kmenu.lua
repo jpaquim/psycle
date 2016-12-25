@@ -21,8 +21,11 @@ return {
     {shortdesc = "B", desc = "Begin"},
     {shortdesc = "K", desc = "End"},
     --{shortdesc = "C", desc = "Copy"},
-    {shortdesc = "Y", desc = "Delete"}
+    {shortdesc = "Y", desc = "Delete"},
     --{shortdesc = "V", desc = "Move"},    
     --{shortdesc = "W", desc = "Write"}
+    {section = "--Other Menus--"},
+    {shortdesc = "^J", desc = "Help"},
+    {shortdesc = "^K", desc = "Block"}
   }
 }

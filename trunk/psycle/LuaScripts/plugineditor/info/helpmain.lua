@@ -1,10 +1,15 @@
 return {
   title = "HELP MENU",
   keymap = {    
+    H = "helplevel",
     S = "statusline"
   },
-  display = {     
-    {shortdesc = "", desc = "-Miscellaneous-", col = 0},
-    {shortdesc = "S", desc = "Status line", col = 0}
+  display = {
+    {section = ""},
+    {shortdesc = "H", desc = "Display & set help level"},    
+    {shortdesc = "S", desc = "Status line"},
+    {section = "--Other Menus--"},
+    {shortdesc = "^J", desc = "Help"},
+    {shortdesc = "^K", desc = "Block"}
   }
 }

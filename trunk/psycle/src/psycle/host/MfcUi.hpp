@@ -2298,7 +2298,10 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   }
 
   void DevGotoLine(int pos) { f(SCI_GOTOLINE, pos, 0); }
-
+  virtual void DevLineUp() { f(SCI_LINEUP, 0, 0); }
+  virtual void DevLineDown() { f(SCI_LINEDOWN, 0, 0); }
+  virtual void DevCharLeft() { f(SCI_CHARLEFT, 0, 0); }
+  virtual void DevCharRight() { f(SCI_CHARRIGHT, 0, 0); }
   int dev_length() const {
     return const_cast<ScintillaImp*>(this)->f(SCI_GETLENGTH, 0, 0);
   }

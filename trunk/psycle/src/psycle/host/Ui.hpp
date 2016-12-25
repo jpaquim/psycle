@@ -2221,6 +2221,10 @@ class Scintilla : public Window {
                 int& caret_pos_selection_start,
                 int& caret_pos_selection_end) const;
   void GotoLine(int pos);
+  void LineUp();
+  void LineDown();
+  void CharLeft();
+  void CharRight();
   int length() const;
   int selectionstart() const;
   int selectionend() const;
@@ -2897,7 +2901,11 @@ class ScintillaImp : public WindowImp {
   virtual void DevAddText(const std::string& text) {}
 	virtual void DevClearAll() = 0;
   virtual void DevFindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const {}
-  virtual void DevGotoLine(int pos) {}
+  virtual void DevGotoLine(int pos) = 0;
+  virtual void DevLineUp() = 0;
+  virtual void DevLineDown() = 0;
+  virtual void DevCharLeft() = 0;
+  virtual void DevCharRight() = 0;
   virtual int dev_length() const { return 0; }
   virtual int dev_selectionstart() const = 0;
   virtual int dev_selectionend() const = 0;

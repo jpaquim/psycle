@@ -2319,6 +2319,10 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
     static const luaL_Reg methods[] = {       
        {"f", f},       
        {"gotoline", gotoline},
+       {"lineup", lineup},
+       {"linedown", linedown},
+       {"charleft", charleft},
+       {"charright", charright},
        {"length", length},
        {"loadfile", loadfile},
        {"reload", reload},
@@ -2427,6 +2431,11 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
   static int hasselection(lua_State *L) { LUAEXPORT(L, &T::has_selection); } 
   static int replacesel(lua_State *L) { LUAEXPORT(L, &T::ReplaceSel); } 
   static int gotoline(lua_State *L) { LUAEXPORT(L, &T::GotoLine); }  
+  static int line(lua_State *L) { LUAEXPORT(L, &T::line); }
+  static int lineup(lua_State *L) { LUAEXPORT(L, &T::LineUp); }
+  static int linedown(lua_State *L) { LUAEXPORT(L, &T::LineDown); }
+  static int charleft(lua_State *L) { LUAEXPORT(L, &T::CharLeft); }
+  static int charright(lua_State *L) { LUAEXPORT(L, &T::CharRight); }
   static int length(lua_State *L) { LUAEXPORT(L, &T::length); }  
   static int addtext(lua_State *L) { LUAEXPORT(L, &T::AddText); } 
   static int findtext(lua_State *L) { LUAEXPORT(L, &T::FindText); }  
@@ -2466,8 +2475,7 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
     FontInfo::Ptr font_info = LuaHelper::check_sptr<FontInfo>(L, 2, LuaFontInfoBind::meta);        
     window->set_font_info(*font_info.get());
     return LuaHelper::chaining(L);
-  }
-  static int line(lua_State *L) { LUAEXPORT(L, &T::line); }
+  }  
   static int column(lua_State *L) { LUAEXPORT(L, &T::column); }
   static int ovrtype(lua_State *L) { LUAEXPORT(L, &T::ovr_type); }
   static int modified(lua_State *L) { LUAEXPORT(L, &T::modified); }
