@@ -33,8 +33,10 @@ end
 function info:init()
   self.timercounter = 0
   self.cmd = signal:new()
+  self.dojump = signal:new()
   self.strobe = 0
-  self.activated = 0  
+  self.activated = 0
+  self.helplevel = 2
   self.title = text:new(self)
                    :setalign(item.ALTOP)
                    :setautosize(false, true)
@@ -44,8 +46,11 @@ function info:init()
                        :hidelinenumbers()  
                        :hidebreakpoints()
                        :hidehorscrollbar()
-                       :setfontinfo(fontinfo:new("Lucida Sans Typewriter", 8))
-  self:loadrootlink()                       
+                       :setfontinfo(fontinfo:new("Lucida Sans Typewriter", 8))                        
+  self:loadrootlink()  
+  if self.helplevel < 3 then                  
+    self:hide()
+  end
 end
 
 function info:loadrootlink()
@@ -55,7 +60,10 @@ function info:loadrootlink()
     self.link = f()
   else
     self.link = nil
-  end   
+  end
+  if self.helplevel == 3 then    
+    self:builddisplay()
+  end  
 end
 
 function info:setproperties(properties)  
@@ -69,9 +77,6 @@ function info:setproperties(properties)
   if properties.color then    
     self.memo:setcaretcolor(properties.color:value())
   end
-  if properties.backgroundcolor then	  
-    --self.memo:setcaretlinebackgroundcolor(properties.backgroundcolor:value())
-  end
   self.memo:setselalpha(75)
   self.memo:setfontinfo(fontinfo:new():setsize(12):setfamily("consolas"))   
 end
@@ -82,20 +87,28 @@ function info:jumpmain()
   self.activated = 0
 end
 
-function info:onidle()  
-  if self.activated == 1 and self.strobe == 0 then    
-    self.timercounter = self.timercounter + 1
-    if self.timercounter > info.timeout then
-      self.strobe = 1
-      self.timercounter = 0
-    end   
+function info:onidle(canvas)
+  if self.helplevel < 3 then
+    if self.activated == 1 and self.strobe == 0 then    
+      self.timercounter = self.timercounter + 1
+      if self.timercounter > info.timeout then
+        self.strobe = 1
+        self.timercounter = 0
+      end   
+    end
+    if self.strobe == 1 and self.activated == 1 and not self:visible() then    
+      self:show();
+      canvas:updatealign();    
+    end  
   end
 end
 
-function info:setactivated()   
-  self.strobe = 0
-  self.timercounter = 0
-  self.activated = 1
+function info:setactivated()
+  if self.helplevel > 0 then
+    self.strobe = 0
+    self.timercounter = 0
+    self.activated = 1
+  end
 end
 
 function info:deactivate()
@@ -110,15 +123,16 @@ function info:jump(keycode)
       if src:sub(1, 1) == "@" then
         self:jumpmain()
         self.cmd:emit(src:sub(2, -1));
-        self:deactivate()
+        self:deactivate()        
       else
-        path = info.infodir .. src .. ".lua"
-        local f = loadfile(path)
+        path = info.infodir .. src .. ".lua"        
+        local f, err = loadfile(path)
         if f then
           self.link = f()
           self:builddisplay()
-        else
-          self.memo:addtext("Jump Error : info")  
+          self.dojump:emit(self.link)        
+        else          
+          self.memo:addtext("Error\nJump" .. path .. "\n" .. err)  
         end        
         self:setactivated()        
       end
@@ -127,10 +141,11 @@ function info:jump(keycode)
   return self
 end
 
-
 lpad = function(str, len, char)
-    if char == nil then char = ' ' end
-    return str .. string.rep(char, len - #str)
+  if char == nil then 
+    char = ' '
+  end
+  return str .. string.rep(char, len - #str)
 end
 
 function info:builddisplay()

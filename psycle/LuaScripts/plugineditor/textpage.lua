@@ -23,7 +23,7 @@ local textpage = scintilla:new()
 
 textpage.windowtype = 95
 textpage.pagecounter = 0
-textpage.preventedkeys = {0x4A, 0x4B, 78, 79, 87, 70, 83, 87}
+textpage.preventedkeys = {0x4A, 0x4B, 0x44, 0x45, 0x56, 0x45, 78, 79, 87, 70, 83, 87}
 
 textpage.EDITMODE = 0
 textpage.INFOMODE = 1
@@ -201,9 +201,12 @@ function textpage:oncmd(cmd)
     self:setblockbegin()    
   elseif cmd == "setblockend" then    
     self:setblockend()      
-  elseif cmd == "deleteblock" then      
+  elseif cmd == "deleteblock" then
     self:deleteblock()
-  end    
+  elseif cmd == "deleteblock" then
+  
+  elseif cmd == "deleteblock" then
+  end
 end
 
 return textpage
