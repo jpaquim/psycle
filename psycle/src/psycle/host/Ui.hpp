@@ -1073,9 +1073,9 @@ class Window : public boost::enable_shared_from_this<Window> {
 	template <class T, class T1>
 	void PostOrderTreeTraverse(T& functor, T1& cond);
 	Window::Container SubItems();
-	virtual void Add(const Window::Ptr& item) {}
-	virtual void Insert(iterator it, const Window::Ptr& item) {}
-	virtual void Remove(const Window::Ptr& item) {}
+	virtual void Add(const Window::Ptr& window) {}
+	virtual void Insert(iterator it, const Window::Ptr& window) {}
+	virtual void Remove(const Window::Ptr& window) {}
 	virtual void RemoveAll() {}
   virtual void set_property(const ConfigurationProperty& configuration_property) {}
 	virtual void set_position(const ui::Point& pos);
@@ -1085,8 +1085,14 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual ui::Rect absolute_position() const;
 	virtual ui::Rect desktop_position() const;
   virtual bool check_position(const ui::Rect& pos) const;
-	virtual ui::Dimension dim() const;	
-	virtual ui::Dimension OnCalcAutoDimension() const { return ui::Dimension(100, 20); }
+	virtual ui::Dimension dim() const;
+  virtual ui::Dimension min_dimension() const { return min_dimension_; }
+  virtual void set_min_dimension(const ui::Dimension& dimension) {
+     min_dimension_ = dimension;
+  }
+	virtual ui::Dimension OnCalcAutoDimension() const { 
+    return ui::Dimension(100, 20);
+  }
 	void UpdateAutoDimension();
 	void PreventAutoDimension() { prevent_auto_dimension_ = true; }
 	void RestoreAutoDimension() { prevent_auto_dimension_ = false; }
@@ -1189,6 +1195,8 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void Disable();
 	void ViewDoubleBuffered();
 	void ViewSingleBuffered();
+  void MapCapslockToCtrl();
+  void EnableCapslock();
 	bool is_double_buffered() const;
   virtual void set_properties(const Properties& properties) {}
 	ui::Dimension non_content_dimension() const {
@@ -1245,7 +1253,8 @@ class Window : public boost::enable_shared_from_this<Window> {
   Ornaments ornaments_;
   bool visible_, pointer_events_;  
   AlignStyle::Type align_;		
-	bool align_dimension_changed_;  
+	bool align_dimension_changed_;
+  ui::Dimension min_dimension_;
 };
 
 class ChildPosEvent : public Event {
@@ -2721,6 +2730,8 @@ class WindowImp {
   virtual void DevViewDoubleBuffered() = 0;
   virtual void DevViewSingleBuffered() = 0;
   virtual bool dev_is_double_buffered() const = 0;
+  virtual void DevMapCapslockToCtrl() = 0;
+  virtual void DevEnableCapslock() = 0;
 
  private:
   Window* window_;

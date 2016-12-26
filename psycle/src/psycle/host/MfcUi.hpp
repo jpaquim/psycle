@@ -1149,8 +1149,12 @@ struct DummyWindow {
 template <class T, class I>
 class WindowTemplateImp : public T, public I {
  public:  
-  WindowTemplateImp() : I(), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false) {}
-  WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false) {}
+  WindowTemplateImp() : I(), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false),
+      capslock_on_(false), map_capslock_to_ctrl_(false) {
+  }
+  WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false),
+      capslock_on_(false), map_capslock_to_ctrl_(false) {    
+  }
     
   virtual void dev_set_position(const ui::Rect& pos);
   virtual ui::Rect dev_position() const;
@@ -1229,19 +1233,19 @@ class WindowTemplateImp : public T, public I {
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
   // virtual ui::Window* dev_focus_window();
-  virtual void DevSetFocus() {    
-    if (GetFocus() != this) {
+  virtual void DevSetFocus() {
+    capslock_on_ = false;
+    if (GetFocus() != this) {      
       SetFocus();
     }
   }
-  virtual bool dev_has_focus() const {    
-    return (GetFocus() == this);
-  }
+  virtual bool dev_has_focus() const { return (GetFocus() == this); }
   virtual void DevViewDoubleBuffered() { is_double_buffered_ = true; }
   virtual void DevViewSingleBuffered() { is_double_buffered_ = false; }
   virtual bool dev_is_double_buffered() const { return is_double_buffered_; }
   virtual void DevBringToTop() { BringWindowToTop(); }
-
+  virtual void DevMapCapslockToCtrl() { map_capslock_to_ctrl_ = true; }
+  virtual void DevEnableCapslock() { map_capslock_to_ctrl_ = false; }
 protected:  
   virtual BOOL PreTranslateMessage(MSG* pMsg);
   DECLARE_MESSAGE_MAP()
@@ -1316,6 +1320,8 @@ protected:
 	BoxSpace margin_;
 	BoxSpace padding_;
 	BoxSpace border_space_;
+  bool capslock_on_;
+  bool map_capslock_to_ctrl_;
 };
 
 class AlertImp : public ui::AlertImp {
@@ -1715,14 +1721,14 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
 	}
   }
   ui::Window::Ptr viewport_;
-  afx_msg void OnSetFocus(CWnd* pNewWnd) {
+  afx_msg void OnSetFocus(CWnd* pNewWnd) {    
     if (window()) {
       ui::Event ev;
       window()->OnFocus(ev);
     }
   }
   afx_msg void OnKillFocus(CWnd* pNewWnd) {
-    if (window()) {
+    if (window()) {      
       ui::Event ev;
       window()->OnKillFocus(ev);
     }

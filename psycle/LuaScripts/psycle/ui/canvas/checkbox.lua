@@ -19,15 +19,15 @@ local checkbox = group:new()
 local settings = { 
   colors = {
     default = {
-      bg = 0x3E3E3E,
-      text = 0xB0C8B1,
-      checker = 0xCACACA
+      bg = 0xFF3E3E3E,
+      text = 0xFFB0C8B1,
+      checker = 0xFFCACACA
     },
     mousepress = {
-      bg = 0x3E3E3E
+      bg = 0xFF3E3E3E
     },
     mousemove = {
-      bg  = 0x3E3E3E
+      bg  = 0xFF3E3E3E
     }     
   }
 }
@@ -47,9 +47,16 @@ function checkbox:init()
                          :setautosize(false, false)
                          :setposition(rect:new(point:new(0, 0), dimension:new(10, 10)))
                          :addornament(ornamentfactory:createfill(settings.colors.default.bg))
+                         :addornament(ornamentfactory:createlineborder(0xFFCACACA))
                          :setalign(item.ALLEFT)
-                         :setmargin(boxspace:new(0, 4, 0, 0))  
-  self.text = text:new(self):settext("A Checkbox"):setalign(item.ALLEFT):setautosize(true, true)    
+                         :setmargin(boxspace:new(0, 4, 0, 0))
+                         :setjustify(text.CENTERJUSTIFY)
+                         :setverticalalignment(item.ALCENTER)
+  self.text = text:new(self)
+                  :settext("A Checkbox")
+                  :setalign(item.ALLEFT)
+                  :setautosize(true, false)
+                  :setverticalalignment(item.ALCENTER)
   local that = self
   function self.checkgroup:onmousedown()        
     that.check_ = not that.check_
@@ -82,6 +89,11 @@ end
 
 function checkbox:setcheck(checked)   
   self.check_ = checked
+  if self.check_ then      
+    self.checkgroup:settext("x")
+  else      
+    self.checkgroup:settext("")
+  end
 end
 
 checkbox.published = {

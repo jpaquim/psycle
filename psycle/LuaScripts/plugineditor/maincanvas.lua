@@ -98,14 +98,17 @@ end
 function maincanvas:oncmdinfo(cmd)  
   if (self.pages:activepage()) then    
     if cmd == "sethelplevel0" then
-      self.info.helplevel = 0
-      self.statusbar.status.prompttext:settext("")            
+      self.info.helplevel = 0                 
     elseif cmd == "sethelplevel1" then
       self.info.helplevel = 1
     elseif cmd == "sethelplevel2" then
       self.info.helplevel = 2
-    elseif cmd == "sethelplevel3" then
+    elseif cmd == "sethelplevel3" then      
       self.info.helplevel = 3
+      if not self.info:visible() then
+        self.info:show()      
+        self:updatealign();    
+      end
     elseif cmd == "saveresume" then
       self:savepage()
     elseif cmd == "savedone" then
@@ -119,7 +122,8 @@ function maincanvas:oncmdinfo(cmd)
     else    
       self.pages:activepage():oncmd(cmd)
     end
-    self:onstatuslineescape()
+    self.statusbar.status.prompttext:settext("")    
+    self:onstatuslineescape()    
   end  
 end
 
@@ -417,12 +421,12 @@ function maincanvas:inittoolbar()
   settingsicon:setalign(item.ALRIGHT)                
   local that = self
   function settingsicon:onclick()
-    local settingspage = settingspage:new(nil, that.machine_)     
-                                   :setmargin(boxspace:new(2, 0, 0, 0))
-  if settingspage then 
-    settingspage.doapply:connect(maincanvas.onapplysetting, that)
-    that.pages:addpage(settingspage, "Settings")
-  end
+    local settingspage = settingspage:new(nil, that.machine_)                                        
+    if settingspage then 
+      settingspage:setmargin(boxspace:new(2, 0, 0, 0))
+      settingspage.doapply:connect(maincanvas.onapplysetting, that)
+      that.pages:addpage(settingspage, "Settings")
+    end
   end  
   self:initmachineselector(self.tg)
   self:initfiletoolbar():setalign(item.ALLEFT)
@@ -759,7 +763,9 @@ function maincanvas:initstyleclasses(setting)
   systems:setstyleclass(statusbar.windowtype, setting.statusbar.properties)
   systems:setstyleclass(tabgroup.windowtype, setting.general.children.ui.children.tabgroup.properties)
   systems:setstyleclass(output.windowtype, setting.output.properties)  
-  systems:setstyleclass(textpage.windowtype, self:mergeproperties(setting.lualexer.properties, setting.general.properties))
+  systems:setstyleclass(textpage.windowtype, 
+      self:mergeproperties(setting.textpage.properties, self:mergeproperties(
+          setting.lualexer.properties, setting.general.properties)))
   systems:setstyleclass(info.windowtype, setting.general.properties)
   self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
 end
