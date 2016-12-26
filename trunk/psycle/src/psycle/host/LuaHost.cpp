@@ -1072,11 +1072,12 @@ bool LuaProxy::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
 void LuaProxy::OpenInFrame() {
   using namespace ui;
   if (!frame_ && !canvas().expired()) {
-    frame_.reset(new Frame());
+    frame_.reset(new Frame());    
     frame_->set_viewport(canvas().lock());
     frame_->close.connect(boost::bind(&LuaProxy::OnFrameClose, this, _1));
     FrameAligner::Ptr right_frame_aligner(new FrameAligner(AlignStyle::ALRIGHT));
     right_frame_aligner->SizeToScreen(0.4, 0.8);
+    frame_->set_min_dimension(ui::Dimension(800, 600));
     frame_->Show(right_frame_aligner);
   }
 }

@@ -1207,6 +1207,18 @@ void Window::Disable() {
 	}
 }
 
+void Window::MapCapslockToCtrl() {
+  if (imp()) {
+		imp()->DevMapCapslockToCtrl();
+	}
+}
+
+void Window::EnableCapslock() {
+  if (imp()) {
+		imp()->DevEnableCapslock();
+	}
+}
+
 void Window::ViewDoubleBuffered() {
 	if (imp_.get()) {
 		imp_->DevViewDoubleBuffered();
@@ -1706,11 +1718,18 @@ void ScrollBox::ScrollTo(const ui::Point& top_left) {
 
 void FrameAligner::set_position(Window& window) {  
   using namespace ui;  
+  
   Dimension win_dim(
-    (width_perc_ < 0)  ? window.dim().width()
-                       : Systems::instance().metrics().screen_dimension().width() * width_perc_,
-    (height_perc_ < 0) ? window.dim().height() 
-                       : Systems::instance().metrics().screen_dimension().height() * height_perc_
+    (width_perc_ < 0)  
+        ? window.dim().width()
+        : (std::max)(
+             window.min_dimension().width(),
+             Systems::instance().metrics().screen_dimension().width() * width_perc_),
+    (height_perc_ < 0)
+        ? window.dim().height() 
+        : (std::max)(
+             window.min_dimension().height(),
+             Systems::instance().metrics().screen_dimension().height() * height_perc_)                       
   );
   Point top_left;
   switch (alignment_) {    

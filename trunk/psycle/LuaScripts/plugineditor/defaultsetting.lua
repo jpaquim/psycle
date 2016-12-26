@@ -116,6 +116,7 @@ settings.output.label = "output"
 
 settings.textpage = {}
 settings.textpage.properties = orderedtable.new()
+settings.textpage.properties.mapcapslocktoctrl = property:new(true, "Map Capslock to Control")
 settings.textpage.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
 settings.textpage.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
 

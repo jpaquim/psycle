@@ -144,11 +144,45 @@ template<class T, class I>
 BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {  		
   if (pMsg->message==WM_KEYDOWN ) {
     UINT nFlags = 0;
+    if (map_capslock_to_ctrl_) {
+      BYTE byKeybState[256];
+      ::GetKeyboardState(byKeybState);
+      byKeybState[VK_CAPITAL] = 0;
+      byKeybState[VK_CONTROL] = 0;
+      ::SetKeyboardState(byKeybState); 
+      if (pMsg->wParam == 20 || pMsg->wParam == 17) {     
+        capslock_on_ = true;      
+      }
+      if  (capslock_on_) {        
+        BYTE byKeybState[256];
+        ::GetKeyboardState(byKeybState);
+        byKeybState[VK_CAPITAL] = 0;      
+        byKeybState[VK_CONTROL] = 0x80;
+        ::SetKeyboardState(byKeybState);      
+      }    
+    }
     UINT flags = Win32KeyFlags(nFlags);      
     KeyEvent ev(pMsg->wParam, flags);    
     return WorkEvent(ev, &Window::OnKeyDown, window(), pMsg);
   } else
-  if (pMsg->message == WM_KEYUP) {
+  if (pMsg->message == WM_KEYUP) {    
+    if (map_capslock_to_ctrl_) {
+      BYTE byKeybState[256];
+      ::GetKeyboardState(byKeybState);
+      byKeybState[VK_CAPITAL] = 0;
+      byKeybState[VK_CONTROL] = 0;
+      ::SetKeyboardState(byKeybState);
+      if (capslock_on_) {    
+        BYTE byKeybState[256];
+        ::GetKeyboardState(byKeybState);
+        byKeybState[VK_CAPITAL] = 0;
+        byKeybState[VK_CONTROL] = VK_CONTROL;
+        ::SetKeyboardState(byKeybState);
+      }
+      if (pMsg->wParam == 20 || pMsg->wParam == 17) {
+        capslock_on_ = false;
+      }
+    }
     UINT nFlags = 0;
     UINT flags = Win32KeyFlags(nFlags);      
     KeyEvent ev(pMsg->wParam, flags);      
@@ -236,6 +270,7 @@ BOOL WindowTemplateImp<T, I>::prevent_propagate_event(ui::Event& ev, MSG* pMsg) 
 
 template<class T, class I>
 void WindowTemplateImp<T, I>::OnKillFocus(CWnd* pNewWnd) {  
+  capslock_on_ = false;
 }
 
 template<class T, class I>

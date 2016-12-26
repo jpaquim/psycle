@@ -140,8 +140,15 @@ function textpage:onsearch(searchtext, dir, case, wholeword, regexp)
   end      
 end
 
-function textpage:setproperties(properties)   
-  if properties.color then    
+function textpage:setproperties(properties)  
+  if properties.mapcapslocktoctrl then
+    if  properties.mapcapslocktoctrl:value() then
+      self:mapcapslocktoctrl()
+    else
+      self:enablecapslockt()
+    end
+  end
+  if properties.color then
     self:setforegroundcolor(properties.color:value())	    
   end
   if properties.backgroundcolor then    

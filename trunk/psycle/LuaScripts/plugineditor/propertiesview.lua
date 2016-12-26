@@ -49,8 +49,9 @@ end
 
 
 
-function propertiesview:createproperties(name, properties)    
+function propertiesview:createproperties(name, properties)  
   if (properties) then    
+    self:preventdraw()
     for name, property in properties:opairs() do      
     if not property:iseditprevented() then        
       local div = group:new(self)
@@ -139,12 +140,13 @@ function propertiesview:createproperties(name, properties)
             :setautosize(true, true)
             :setalign(item.ALLEFT)
             :settext("[ARGB HEX]")            
-      elseif property:typename() == "boolean" then
+      elseif property:typename() == "boolean" then         
          self[name] = checkbox:new(div)
-                              :setautosize(false, false)
-                              :setposition(rect:new(point:new(), dimension:new(100, 20)))
-                              :setalign(item.ALCLIENT)            
-                              :settext(property:label())  
+                              :setautosize(true, false)
+                              :setposition(rect:new(point:new(), dimension:new(100, 15)))
+                              :setalign(item.ALLEFT)    
+                              :settext(property:label())
+                              :setcheck(property:value())         
       else      
         text:new(div)
             :setautosize(true, true)
@@ -161,6 +163,7 @@ function propertiesview:createproperties(name, properties)
       end            
       end 
     end
+    self:enabledraw()
   end  
 end
 
