@@ -65,7 +65,7 @@ class GlobalTimer {
   void KillTimer();
   void StartTimer();
  private:       
-  GlobalTimer() : removed_(false), it(listeners_.end()) { }
+  GlobalTimer() : removed_(false), started_(true), it(listeners_.end()) { }
   ~GlobalTimer() { }                
   
   void AddListener(Timer*);
@@ -78,6 +78,7 @@ class GlobalTimer {
   TimerList listeners_;
   TimerList::iterator it;
   bool removed_;
+  bool started_;
 };
 
 }  // namespace

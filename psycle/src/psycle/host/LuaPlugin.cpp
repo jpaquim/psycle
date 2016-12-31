@@ -50,7 +50,7 @@ namespace psycle { namespace host {
         throw std::runtime_error("no psycle plugin"); 
       }
       if (full || !proxy().HasDirectMetaAccess()) {        
-        proxy().Start();
+        proxy().Start();        
       }      
       _mode = proxy().meta().mode;            
       usenoteon_ = proxy().meta().flags;
@@ -98,24 +98,22 @@ namespace psycle { namespace host {
     } else 
     if (do_reload_) {
       do_reload_ = false;
-      try {
-        try {
-          reload();
-        } CATCH_WRAP_AND_RETHROW(*this);
-      } catch (std::exception& ) {                
+      try {        
+        GlobalTimer::instance().KillTimer();    
+        reload();        
+      } catch (std::exception& ) {
+        Mute(false);
+        set_crashed(false);  
       }
+      GlobalTimer::instance().StartTimer();
     }      
   }
 
-  void LuaPlugin::OnReload() {
-    try {      
-      proxy().Reload();
-      if (((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]) {
-        ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]->OnReload();
-      }      
-    } catch(std::exception& e) {
-      ui::alert(e.what());
-    }
+  void LuaPlugin::OnReload() {    
+    proxy().Reload();
+    if (((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]) {
+      ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]->OnReload();
+    }    
   }
 
   int LuaPlugin::GenerateAudioInTicks(int /*startSample*/, int numSamples) throw(psycle::host::exception)

@@ -1,3 +1,4 @@
+
 --[[ 
 psycle plugineditor (c) 2016 by psycledelics
 File: statusbar.lua
@@ -83,7 +84,7 @@ function statusbar:updatestatus(status)
   end
   self.status.col:settext(status.column)     
   self.status.insert:settext(
-      statusbar.booltostring(status.ovrtype, "ON", "OFF"))
+      statusbar.booltostring(not status.overtype, "ON", "OFF"))
   self.status.searchrestart:settext(
       statusbar.booltostring(status.searchrestart,"SEARCH AT BEGINNING POINT"))
   self.status.modified:settext(
@@ -97,7 +98,7 @@ end
 
 function statusbar.booltostring(value, ontext, offtext)
   local result = ""
-  if value then
+  if value == true then
     result = ontext
   elseif offtext then
     result = offtext    

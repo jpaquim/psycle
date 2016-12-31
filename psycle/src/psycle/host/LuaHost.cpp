@@ -78,8 +78,7 @@ void LuaControl::Start() {
   if (!lua_isnil(L, -1)) {
     int status = lua_pcall(L, 0, 0, 0);
     if (status) {         
-      const char* msg = lua_tostring(L, -1); 
-      ui::alert(msg);
+      const char* msg = lua_tostring(L, -1);      
       throw std::runtime_error(msg);       
     }
   }
@@ -442,6 +441,7 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaActionListenerBind>(L, "psycle.ui.hostactionlistener");
   LuaHelper::require<LuaCmdDefBind>(L, "psycle.ui.cmddef");
   LuaHelper::require<LuaRunBind>(L, "psycle.run");
+  LuaHelper::require<LuaCommandBind>(L, "psycle.command");
   lua_ui_requires(L);
   LuaHelper::require<LuaStockBind>(L, "psycle.stock");
 #if !defined WINAMP_PLUGIN
@@ -457,8 +457,7 @@ void LuaProxy::PrepareState() {
 
 void LuaProxy::Reload() {
   try {      
-    lock();
-    GlobalTimer::instance().KillTimer();    
+    lock();    
     host_->set_crashed(true);
     lua_State* old_state = L;
     ui::Systems* old_systems = systems_.get();    
@@ -488,14 +487,12 @@ void LuaProxy::Reload() {
       }
       L = old_state;
       systems_.reset(old_systems);
-      std::string s = std::string("Reload Error, old script still running!\n") + e.what();        
-      GlobalTimer::instance().StartTimer();
+      std::string s = std::string("Reload Error, old script still running!\n") + e.what();      
       unlock();
       throw std::exception(s.c_str());  
-    }
+    }     
     host_->Mute(false);
-    host_->set_crashed(false);
-    GlobalTimer::instance().StartTimer();
+    host_->set_crashed(false);  
     unlock();
   } CATCH_WRAP_AND_RETHROW(host())
 }
@@ -1376,7 +1373,8 @@ void HostExtensions::OnDynamicMenuItems(UINT nID) {
       std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
       try {
         link.plugin = plug = Execute(link);      
-      } catch(std::exception&) {
+      } catch(std::exception& e) {
+        ui::alert(e.what());
         return;
       }
       if (link.user_interface() == SDI) {        
@@ -1407,7 +1405,8 @@ void HostExtensions::OnDynamicMenuItems(UINT nID) {
       } else {  
         try {
           plug->OnExecute();
-        } catch (std::exception&) {
+        } catch (std::exception& e) {
+           ui::alert(e.what());
           // LuaGlobal::onexception(plug->proxy().state());
           // AfxMessageBox(e.what());
         }  

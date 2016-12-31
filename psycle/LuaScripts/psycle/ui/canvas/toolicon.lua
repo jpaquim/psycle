@@ -39,6 +39,16 @@ end
 
 function toolicon:onclick() end
 
+
+function weakref(data)
+    local weak = setmetatable({content=data}, {__mode="v"})
+    return function() return weak.content end
+end
+
+function toolicon:setcommand(command)
+  self.command_ = weakref(command)
+end
+
 function toolicon:init(filename, trans)  
   self:setautosize(true, true)  
   self:initdefaultcolors()  
@@ -159,8 +169,8 @@ end
 
 function toolicon:onmousedown(ev) 
   self:mousecapture()
-  self:seton(not self.on_)    
-  self.clicklistener_:notify(self)
+  self:seton(not self.on_)
+  self.clicklistener_:notify(self)  
 end
 
 function toolicon:onmouseenter(ev)  
@@ -192,6 +202,9 @@ function toolicon:onmouseup(ev)
   end
   if (self.hover) then
     self:onclick()       
+    if self.command_ then
+      self.command_():execute()
+    end
     self.click:emit(self)        
   end  
 end

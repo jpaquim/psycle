@@ -35,16 +35,21 @@ void GlobalTimer::RemoveListener(Timer* listener) {
 }
     
 void GlobalTimer::OnViewRefresh() {          
-  it = listeners_.begin();
-  while (it != listeners_.end()) {
-    Timer* timer = *it;
-    if (timer->is_running()) {
-      timer->OnTimerViewRefresh();      
-    }    
-    if (!removed_) {          
-      ++it;
-    } else {
-      removed_ = false;
+  if (started_) {
+    it = listeners_.begin();
+    while (it != listeners_.end()) {
+      Timer* timer = *it;
+      if (timer->is_running()) {
+        timer->OnTimerViewRefresh();      
+      }    
+      if (!started_) {
+        break;
+      }
+      if (!removed_) {          
+        ++it;
+      } else {
+        removed_ = false;
+      }
     }
   }
 }   
@@ -52,13 +57,22 @@ void GlobalTimer::OnViewRefresh() {
 void GlobalTimer::KillTimer() {
   CMainFrame* fr = (CMainFrame*) ::AfxGetMainWnd();
   CChildView* cv = &fr->m_wndView;    
-  cv->KillTimer(39);
+  MSG msg; 
+  HWND hWnd = cv->GetSafeHwnd();
+  started_ = false;
+  bool result = cv->KillTimer(39);
+  while (result && 
+    PeekMessage(&msg, hWnd, WM_TIMER, WM_TIMER, PM_NOREMOVE) && 
+       (msg.wParam == 39))  {
+    PeekMessage(&msg, hWnd, WM_TIMER, WM_TIMER, PM_REMOVE); 
+  }
 }
 
 void GlobalTimer::StartTimer() {
   CMainFrame* fr = (CMainFrame*) ::AfxGetMainWnd();
-  CChildView* cv = &fr->m_wndView;    
-  cv->SetTimer(39,30,NULL);
+  CChildView* cv = &fr->m_wndView;
+  started_ = true;
+  cv->SetTimer(39, 30, NULL);
 }
 
 }  // namespace
