@@ -1024,6 +1024,14 @@ enum Type {
 };
 }
 
+class Command {
+ public:
+  typedef boost::shared_ptr<Command> Ptr;
+  typedef boost::weak_ptr<Command> WeakPtr;  
+
+  virtual ~Command() {}
+  virtual void Execute() = 0; 
+};
 
 class Window : public boost::enable_shared_from_this<Window> {
 	friend class WindowImp;
@@ -2050,7 +2058,7 @@ class Button : public Window {
   Button();
   Button(const std::string& text);
   Button(ButtonImp* imp);
-
+  
   ButtonImp* imp() { return (ButtonImp*) Window::imp(); };
   ButtonImp* imp() const { return (ButtonImp*) Window::imp(); };
   virtual void set_text(const std::string& text);
@@ -2063,6 +2071,15 @@ class Button : public Window {
   void set_font(const Font& font);
 
   boost::signal<void (Button&)> click;
+  void set_command(const Command::Ptr& command) { command_ = command; }
+  void ExecuteAction() { 
+    if (!command_.expired()) {
+      command_.lock()->Execute();
+    }
+  }
+
+ private: 
+   Command::WeakPtr command_;
 };
 
 class CheckBoxImp;
@@ -2234,6 +2251,8 @@ class Scintilla : public Window {
   void LineDown();
   void CharLeft();
   void CharRight();
+  void WordLeft();
+  void WordRight();
   int length() const;
   int selectionstart() const;
   int selectionend() const;
@@ -2273,7 +2292,7 @@ class Scintilla : public Window {
   void set_font_info(const FontInfo& font_info);
   int column() const;    
   int line() const;
-  bool ovr_type() const;
+  bool over_type() const;
   bool modified() const;
   int add_marker(int line, int id);
   int delete_marker(int line, int id);
@@ -2917,6 +2936,8 @@ class ScintillaImp : public WindowImp {
   virtual void DevLineDown() = 0;
   virtual void DevCharLeft() = 0;
   virtual void DevCharRight() = 0;
+  virtual void DevWordLeft() = 0;
+  virtual void DevWordRight() = 0;
   virtual int dev_length() const { return 0; }
   virtual int dev_selectionstart() const = 0;
   virtual int dev_selectionend() const = 0;
@@ -2953,7 +2974,7 @@ class ScintillaImp : public WindowImp {
   virtual void dev_set_font_info(const FontInfo& font_info) = 0;
   virtual int dev_column() const = 0;    
   virtual int dev_line() const = 0;
-  virtual bool dev_ovr_type() const = 0;
+  virtual bool dev_over_type() const = 0;
   virtual bool dev_modified() const = 0;
   virtual int dev_add_marker(int line, int id) = 0;
   virtual int dev_delete_marker(int line, int id) = 0;

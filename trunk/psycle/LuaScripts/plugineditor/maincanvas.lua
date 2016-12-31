@@ -12,6 +12,7 @@ Foundation ; either version 2, or (at your option) any later version.
 local machine = require("psycle.machine")
 local machines = require("psycle.machines")
 local catcher = require("psycle.plugincatcher")
+local command = require("psycle.command")
 
 local cfg = require("psycle.config"):new("PatternVisual")
 local systems = require("psycle.ui.systems")
@@ -53,6 +54,8 @@ local statusbar = require("statusbar")
 local templateparser = require("templateparser")
 local run = require("psycle.run")
 local serpent = require("psycle.serpent")
+
+local sci = require("scintilladef")
 
 local maincanvas = canvas:new()
 
@@ -199,9 +202,25 @@ function maincanvas:createoutputs()
                  :setposition(rect:new(point:new(), dimension:new(0, 180)))
                  :setalign(item.ALBOTTOM)
   self.output = output:new()
-  self.outputs:addpage(self.output, "Output")  
+  local txt = "hello world, this a test. I love you all. Feliz año nuevo!"
+  self.output:f(sci.SCI_ADDTEXT, #txt, txt)
+  self:setindicator(self.output)    
+  self.outputs:addpage(self.output, "Output")    
   self.callstack = self:createcallstack()  
   self.outputs:addpage(self.callstack, "Call stack")  
+end
+
+function maincanvas:setindicator(page)
+   page:f(sci.SCI_INDICSETSTYLE, 8, sci.INDIC_PLAIN)
+   page:f(sci.SCI_INDICSETSTYLE, 9, sci.INDIC_SQUIGGLE)
+   page:f(sci.SCI_INDICSETSTYLE, 10, sci.INDIC_TT)
+   page:f(sci.SCI_INDICSETSTYLE, 11, sci.INDIC_DIAGONAL)
+   page:f(sci.SCI_INDICSETSTYLE, 12, sci.INDIC_STRIKE)
+   page:f(sci.SCI_INDICSETSTYLE, 13, sci.INDIC_BOX)
+   page:f(sci.SCI_INDICSETSTYLE, 14, sci.INDIC_ROUNDBOX)
+   page:f(sci.SCI_SETINDICATORCURRENT, 14, 0)
+   page:f(sci.SCI_POSITIONFROMLINE, 14, 0)
+   page:f(sci.SCI_INDICATORFILLRANGE, 2, 5)
 end
 
 function maincanvas:createcallstack()
@@ -269,8 +288,16 @@ end
 function maincanvas:onkeydown(ev)  
   if ev:ctrlkey() then
     local done = false
-    if self.cursormovement == 1 and self.pages:activepage() then      
-      if ev:keycode() == 0x53 then                
+    if self.cursormovement == 1 and self.pages:activepage() then
+      if ev:keycode() == 0x41 then
+        self.pages:activepage():wordleft()
+        done = true      
+        ev:stoppropagation()
+      elseif ev:keycode() == 0x46 then
+        self.pages:activepage():wordright()
+        done = true      
+        ev:stoppropagation()
+      elseif ev:keycode() == 0x53 then                
         self.pages:activepage():charleft()
         done = true      
         ev:stoppropagation()
@@ -416,7 +443,7 @@ function maincanvas:inittoolbar()
                       :setautosize(false, true)
                       :setalign(item.ALTOP)                 
   self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
-  local settingsicon = toolicon:new(self.tg, maincanvas.picdir.."settings.png", 0xFFFFFF)                                               
+  local settingsicon = toolicon:new(self.tg, maincanvas.picdir.."settings.png", 0xFFFFFF)
   self:formattoolicon(settingsicon)
   settingsicon:setalign(item.ALRIGHT)                
   local that = self
@@ -428,11 +455,22 @@ function maincanvas:inittoolbar()
       that.pages:addpage(settingspage, "Settings")
     end
   end  
+  self:createreloadicon()
   self:initmachineselector(self.tg)
   self:initfiletoolbar():setalign(item.ALLEFT)
   separator:new(self.tg):setalign(item.ALLEFT):setmargin(boxspace:new(10))
   self:initplaytoolbar():setalign(item.ALLEFT)
   self:initstatus()  
+end
+
+function maincanvas:createreloadicon()
+  local reloadicon = toolicon:new(self.tg, maincanvas.picdir.."reload.png", 0xFFFFFF)
+  self:formattoolicon(reloadicon)
+  reloadicon:setalign(item.ALRIGHT)                
+  local that = self
+  function reloadicon:onclick()
+    that.machine_:reload()
+  end  
 end
 
 function maincanvas:initmachineselector(parent)
@@ -581,7 +619,16 @@ function maincanvas:initfiletoolbar()
   for _, icon in pairs(icons) do    
     self:formattoolicon(icon)
   end
-  icons.inew.click:connect(maincanvas.createnewpage, self)
+  
+  self.newpagecommand = command:new()
+  local that = self
+  function self.newpagecommand:execute()
+    local page = that:createpage()
+    that.pages:addpage(page, page:createdefaultname())  
+  end
+  icons.inew:setcommand(self.newpagecommand)
+  
+  --icons.inew.click:connect(maincanvas.createnewpage, self)
   icons.iopen.click:connect(maincanvas.onopenfile, self)
   icons.isave.click:connect(maincanvas.savepage, self)
   icons.iredo.click:connect(maincanvas.redo, self)

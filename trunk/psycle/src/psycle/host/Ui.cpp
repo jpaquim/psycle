@@ -2534,6 +2534,18 @@ void Scintilla::CharRight() {
   }
 } 
 
+void Scintilla::WordLeft() {
+  if (imp()) {
+    imp()->DevWordLeft();
+  }
+}
+
+void Scintilla::WordRight() {
+  if (imp()) {
+    imp()->DevWordRight();
+  }
+}
+
 int Scintilla::length() const  { 
   return imp() ? imp()->dev_length() : 0;
 }
@@ -2570,8 +2582,8 @@ int Scintilla::line() const {
   return imp() ? imp()->dev_line() : 0; 
 }
 
-bool Scintilla::ovr_type() const {
-  return imp() ? imp()->dev_ovr_type() : false;
+bool Scintilla::over_type() const {
+  return imp() ? imp()->dev_over_type() : false;
 }
 
 bool Scintilla::modified() const {
@@ -3436,6 +3448,7 @@ void FrameImp::OnDevClose() {
 void ButtonImp::OnDevClick() {
   if (window()) {
     ((Button*)window())->OnClick();
+    ((Button*)window())->ExecuteAction();
     ((Button*)window())->click(*((Button*)window()));
   }
 }

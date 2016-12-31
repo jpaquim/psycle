@@ -231,12 +231,10 @@ class HostExtensions {
   void Load(CMenu* view_menu);
   void StartScript();
   void Free();  
-
   typedef HostExtensions::List::iterator iterator;
   virtual iterator begin() { return extensions_.begin(); }
   virtual iterator end() { return extensions_.end(); }
   virtual bool empty() const { return true; }
-
   void Add(const LuaPluginPtr& ptr) { extensions_.push_back(ptr); }
   void Remove(const LuaPluginPtr& ptr) {         
     RemoveFromWindowsMenu(ptr.get());
@@ -248,20 +246,15 @@ class HostExtensions {
   void AddViewMenu(Link& link);
   void AddHelpMenu(Link& link);
   CMenu* FindSubMenu(CMenu* parent, const std::string& text);
-
   MenuMap& menuItemIdMap() { return menuItemIdMap_; }
   void OnDynamicMenuItems(UINT nID);
   void OnPluginCanvasChanged(LuaPlugin& plugin);
   void OnPluginViewPortChanged(LuaPlugin& plugin, int viewport);
-
   void HideActiveLua();
   void HideActiveLuaMenu();
   void InitWindowsMenu();
-
   void RemoveFromWindowsMenu(LuaPlugin* plugin);
-
   LuaPluginPtr Execute(Link& link);
-
   void ChangeWindowsMenuText(LuaPlugin* plugin);
   void AddToWindowsMenu(Link& link);
 

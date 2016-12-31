@@ -186,6 +186,20 @@ struct LuaSystemMetrics {
   static int screensize(lua_State *L);
 };
 
+class LuaCommand : public ui::Command, public LuaState {
+ public:
+  LuaCommand(lua_State* L) : ui::Command(), LuaState(L) {}
+
+  virtual void Execute();
+};
+
+struct LuaCommandBind {  
+  static std::string meta;
+  static int open(lua_State *L);  
+  static int create(lua_State *L); 
+  static int gc(lua_State* L);
+};
+
 template <class T>
 class CanvasItem : public T, public LuaState {
  public:    
@@ -2325,6 +2339,8 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
        {"linedown", linedown},
        {"charleft", charleft},
        {"charright", charright},
+       {"wordleft", wordleft},
+       {"wordright", wordright},
        {"length", length},
        {"loadfile", loadfile},
        {"reload", reload},
@@ -2363,7 +2379,7 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
        {"setfontinfo", setfontinfo},
        {"line", line},
        {"column", column},
-       {"ovrtype", ovrtype},
+       {"overtype", overtype},
        {"modified", modified},
        {"showcaretline", showcaretline},
        {"hidecaretline", hidecaretline},
@@ -2379,8 +2395,7 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
     };
     luaL_setfuncs(L, methods, 0);
     return 0;
-  }  
-
+  }
   template <typename T>
   static T win_param(lua_State* L, int idx) {  
     T result;  
@@ -2400,7 +2415,6 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
     }
     return result;
   }
-
   static int f(lua_State *L) {
     T::Ptr scintilla = LuaHelper::check_sptr<LuaScintilla>(L, 1, meta);    
     lua_pushinteger(L, scintilla->f(luaL_checkinteger(L, 2),
@@ -2408,7 +2422,6 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
                                     (void*) win_param<LPARAM>(L, 4)));
     return 1;
   }
-
   static int definemarker(lua_State *L) {
     boost::shared_ptr<T> item = LuaHelper::check_sptr<T>(L, 1, meta);
     int val1 = static_cast<int>(luaL_checkinteger(L, 2));
@@ -2438,6 +2451,8 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
   static int linedown(lua_State *L) { LUAEXPORT(L, &T::LineDown); }
   static int charleft(lua_State *L) { LUAEXPORT(L, &T::CharLeft); }
   static int charright(lua_State *L) { LUAEXPORT(L, &T::CharRight); }
+  static int wordleft(lua_State *L) { LUAEXPORT(L, &T::WordLeft); }
+  static int wordright(lua_State *L) { LUAEXPORT(L, &T::WordRight); }
   static int length(lua_State *L) { LUAEXPORT(L, &T::length); }  
   static int addtext(lua_State *L) { LUAEXPORT(L, &T::AddText); } 
   static int findtext(lua_State *L) { LUAEXPORT(L, &T::FindText); }  
@@ -2479,7 +2494,7 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
     return LuaHelper::chaining(L);
   }  
   static int column(lua_State *L) { LUAEXPORT(L, &T::column); }
-  static int ovrtype(lua_State *L) { LUAEXPORT(L, &T::ovr_type); }
+  static int overtype(lua_State *L) { LUAEXPORT(L, &T::over_type); }
   static int modified(lua_State *L) { LUAEXPORT(L, &T::modified); }
 	static int clearall(lua_State *L) { LUAEXPORT(L, &T::ClearAll); }
   static int undo(lua_State *L) { LUAEXPORT(L, &T::Undo); } 

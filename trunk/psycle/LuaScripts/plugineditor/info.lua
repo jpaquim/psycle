@@ -36,7 +36,7 @@ function info:init()
   self.dojump = signal:new()
   self.strobe = 0
   self.activated = 0
-  self.helplevel = 2
+  self.helplevel = 3
   self.title = text:new(self)
                    :setalign(item.ALTOP)
                    :setautosize(false, true)
@@ -168,7 +168,11 @@ function info:builddisplay()
             lines[#lines + 1] = ""            
             lines[#lines] = lpad(lines[#lines], (sectioncounter - 1)*30)            
           end
-          lines[linecounter] = lines[linecounter] .. value.shortdesc .. "    " .. value.desc;          
+          local space = ""
+          if value.shortdesc  ~= nil and value.shortdesc ~= "" then
+            space = lpad(space, 4)
+          end
+          lines[linecounter] = lines[linecounter] .. value.shortdesc .. space .. value.desc;          
           lines[linecounter] = lpad(lines[linecounter], sectioncounter*30)
           linecounter = linecounter + 1          
         end

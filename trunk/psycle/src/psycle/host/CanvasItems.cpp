@@ -332,12 +332,26 @@ std::auto_ptr<TerminalFrame> TerminalFrame::terminal_frame_(0);
 void TerminalFrame::Init() {
   set_title("Psycle Terminal");
   Canvas::Ptr view_port = Canvas::Ptr(new Canvas());
+  view_port->set_aligner(Aligner::Ptr(new DefaultAligner()));
   set_viewport(view_port);
   view_port->SetSave(false);
   terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
+  terminal_view_->set_auto_size(false, false);
   terminal_view_->set_align(AlignStyle::ALCLIENT);
-  view_port->Add(terminal_view_);  
-  view_port->set_aligner(Aligner::Ptr(new DefaultAligner()));
+  view_port->Add(terminal_view_);      
+  Group::Ptr option_panel(new Group());
+  option_panel->set_aligner(Aligner::Ptr(new DefaultAligner()));
+  option_panel->set_auto_size(false, true);
+  option_panel->set_align(AlignStyle::ALBOTTOM);  
+  option_background_.reset(OrnamentFactory::Instance().CreateFill(0xFFCACACA));
+  option_panel->add_ornament(option_background_);  
+  view_port->Add(option_panel);  
+  CheckBox::Ptr autoscroll_checkbox(new CheckBox());
+  autoscroll_checkbox->set_auto_size(false, false);
+  autoscroll_checkbox->set_align(AlignStyle::ALLEFT);
+  autoscroll_checkbox->set_text("Autoscroll");
+  autoscroll_checkbox->set_position(ui::Rect(ui::Point(), ui::Dimension(200, 20)));  
+  option_panel->Add(autoscroll_checkbox);
   set_position(Rect(Point(), Dimension(500, 400)));
 }
 

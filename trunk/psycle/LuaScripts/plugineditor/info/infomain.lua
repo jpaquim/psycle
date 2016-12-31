@@ -6,10 +6,9 @@ return {
   },
   display = {
     {section = "--Cursor Movement--"},
-    {shortdesc = "^S", desc = "char left"},
-    {shortdesc = "^D", desc = "char right"},
-    {shortdesc = "^E", desc = "line up"},
-    {shortdesc = "^X", desc = "line down"},
+    {shortdesc = "", desc = "^S char left ^D char right"},
+    {shortdesc = "", desc = "^A word left ^F word right"},
+    {shortdesc = "", desc = "^E line up   ^X line down"},    
     {section = "--Other Menus--"},
     {shortdesc = "^J", desc = "Help"},
     {shortdesc = "^K", desc = "Block"}

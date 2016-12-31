@@ -219,6 +219,7 @@ class TerminalFrame : public Frame {
   private:
    boost::shared_ptr<TerminalView> terminal_view_;
    static std::auto_ptr<TerminalFrame> terminal_frame_;
+   ui::Ornament::Ptr option_background_;
 };
 
 class HeaderGroup : public Group {

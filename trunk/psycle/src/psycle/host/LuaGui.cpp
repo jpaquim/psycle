@@ -503,6 +503,18 @@ int LuaSystemMetrics::screensize(lua_State* L) {
   return 1;
 }
 
+void LuaCommand::Execute() {
+  try {
+    LuaImport in(L, this, locker(L));
+    if (in.open("execute")) {      
+      in.pcall(0);
+      in.close();      
+    } 
+  } catch (std::exception& e) {
+    ui::alert(e.what());		
+  }
+}
+
 //  LuaCenterShowStrategyBind
 const char* LuaFrameAlignerBind::meta = "psyframealignermeta";
 
@@ -544,7 +556,7 @@ void LuaFrame::OnClose() {
     } 
   } catch (std::exception& e) {
     ui::alert(e.what());		
-  }        
+  }
 }
 
 void LuaFrame::OnShow() {
@@ -1710,6 +1722,25 @@ int LuaRunBind::create(lua_State* L) {
 
 int LuaRunBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<LuaRun>(L, meta);
+}
+
+std::string LuaCommandBind::meta = "psycommandbind";
+
+int LuaCommandBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaCommandBind::create(lua_State* L) {  
+  LuaHelper::new_shared_userdata(L, meta, new LuaCommand(L));
+  return 1;
+}
+
+int LuaCommandBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<LuaCommand>(L, meta);
 }
 
 // LuaItem + Bind

@@ -19,11 +19,13 @@ local scintilla = require("psycle.ui.scintilla")
 local settings = require("settings")
 local search = require("search")
 local serpent = require("psycle.serpent")
+local sci = require("scintilladef")
 local textpage = scintilla:new()
 
 textpage.windowtype = 95
 textpage.pagecounter = 0
-textpage.preventedkeys = {0x4A, 0x4B, 0x44, 0x45, 0x56, 0x45, 78, 79, 87, 70, 83, 87}
+textpage.preventedkeys = {0x41, 0x46, 0x4A, 0x4B, 0x44, 0x45, 0x56, 0x45, 78, 79, 87, 70, 83, 87}
+textpage.indicator = 14
 
 textpage.EDITMODE = 0
 textpage.INFOMODE = 1
@@ -41,7 +43,7 @@ end
 function textpage:init()
   self:setautosize(false, false)
   self.mode = textpage.EDITMODE
-  self.blockbegin, self.blockend = -1, -1  
+  self:initblockmodus()  
 end
 
 function textpage:onkeydown(ev)  
@@ -73,7 +75,7 @@ function textpage:status()
     line = that:line() + 1,
     column = that:column() + 1,
 	  modified = that:modified(),
-	  ovrtype = that:ovrtype()
+	  overtype = that:overtype()
   }  
 end
 
@@ -183,24 +185,48 @@ end
 
 function textpage:setblockbegin()
   self.blockbegin = self:selectionstart()
-  self:updatesel()
+  self:updateblock()
 end
 
 function textpage:setblockend()
   self.blockend = self:selectionstart()
-  self:updatesel()
+  self:updateblock()
 end
 
 function textpage:deleteblock()
   if self.blockbegin ~=-1 and self.blockend ~= -1 then
-    self:replacesel("")
+    self:clearblockselection()
+    self:f(sci.SCI_DELETERANGE, self.blockbegin,  self.blockend - self.blockbegin)
+    self.blockbegin, self.blockend = -1, -1
   end
 end
 
-function textpage:updatesel()
+function textpage:updateblock()
   if self.blockbegin ~=-1 and self.blockend ~= -1 then
-    self:setsel(self.blockbegin, self.blockend)
+     self:clearblockselection()
+     self:f(sci.SCI_SETINDICATORCURRENT, textpage.indicator, 0)
+     self:f(sci.SCI_INDICATORFILLRANGE, self.blockbegin, self.blockend - self.blockbegin)      
   end
+end
+
+function textpage:clearblockselection()
+  self:f(sci.SCI_SETINDICATORCURRENT, textpage.indicator, 0)
+  self:f(sci.SCI_INDICATORCLEARRANGE, textpage.indicator, self:length())
+end
+
+function textpage:initblockmodus()
+  self.blockbegin, self.blockend = -1, -1  
+  self:setupindicators()
+end
+
+function textpage:setupindicators()
+   self:f(sci.SCI_INDICSETSTYLE, 8, sci.INDIC_PLAIN)
+   self:f(sci.SCI_INDICSETSTYLE, 9, sci.INDIC_SQUIGGLE)
+   self:f(sci.SCI_INDICSETSTYLE, 10, sci.INDIC_TT)
+   self:f(sci.SCI_INDICSETSTYLE, 11, sci.INDIC_DIAGONAL)
+   self:f(sci.SCI_INDICSETSTYLE, 12, sci.INDIC_STRIKE)
+   self:f(sci.SCI_INDICSETSTYLE, 13, sci.INDIC_BOX)
+   self:f(sci.SCI_INDICSETSTYLE, 14, sci.INDIC_ROUNDBOX)
 end
 
 function textpage:oncmd(cmd)

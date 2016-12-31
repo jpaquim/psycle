@@ -292,11 +292,11 @@ namespace psycle
 				public:
 					/// Tells wether this machine has crashed.
 					bool const inline & crashed() const throw() { return crashed_; }
-					void reload() { 
-						try {
-						   OnReload(); crashed_=false; _standby = false; _bypass=false; } 
-						catch(std::exception e) {
-						}
+					void reload() { 						
+						OnReload();
+            crashed_=false;
+            _standby = false;
+            _bypass=false;            
 					}
 					virtual void OnReload() {}
           void set_crashed(bool on) {                         

@@ -2262,14 +2262,10 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       
     fn = (int (__cdecl *)(void *,int,int,int))
          SendMessage(SCI_GETDIRECTFUNCTION, 0, 0);
-    ptr = (void *)SendMessage(SCI_GETDIRECTPOINTER, 0, 0);   
-
+    ptr = (void *)SendMessage(SCI_GETDIRECTPOINTER, 0, 0);
     f(SCI_SETMARGINWIDTHN, 0, 32);
     f(SCI_SETMARGINWIDTHN, 1, 32);
     f(SCI_SETMARGINSENSITIVEN, 1, TRUE);
-    f(SCI_SETINDICATORCURRENT, 0, 1);
-    f(SCI_INDICATORFILLRANGE, 0, 200);
-
     return true;
   }
 
@@ -2290,9 +2286,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void DevAddText(const std::string& text) {       
     f(SCI_ADDTEXT, text.size(), text.c_str());
   }
-
 	void DevClearAll() { f(SCI_CLEARALL, 0, 0); }
-
   void DevFindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const {
     TextToFind txt;
     txt.chrg.cpMin = cpmin;      
@@ -2302,12 +2296,13 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     cpselstart = txt.chrgText.cpMin;
     cpselend = txt.chrgText.cpMax;
   }
-
   void DevGotoLine(int pos) { f(SCI_GOTOLINE, pos, 0); }
   virtual void DevLineUp() { f(SCI_LINEUP, 0, 0); }
   virtual void DevLineDown() { f(SCI_LINEDOWN, 0, 0); }
   virtual void DevCharLeft() { f(SCI_CHARLEFT, 0, 0); }
   virtual void DevCharRight() { f(SCI_CHARRIGHT, 0, 0); }
+  virtual void DevWordLeft() { f(SCI_WORDLEFT, 0, 0); }
+  virtual void DevWordRight() { f(SCI_WORDRIGHT, 0, 0); }
   int dev_length() const {
     return const_cast<ScintillaImp*>(this)->f(SCI_GETLENGTH, 0, 0);
   }
@@ -2449,8 +2444,8 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     Sci_Position pos = f(SCI_GETCURRENTPOS, 0, 0);    
     return f(SCI_LINEFROMPOSITION, pos, 0);
   }
-  bool dev_ovr_type() const {
-    return f(SCI_GETOVERTYPE, 0, 0) != 0;
+  bool dev_over_type() const {
+    return f(SCI_GETOVERTYPE, 0, 0);
   }
   bool dev_modified() const {
     return f(SCI_GETMODIFY, 0, 0) != 0;

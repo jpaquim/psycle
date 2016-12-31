@@ -40,13 +40,35 @@ function propertiesview:init(name, properties, setting)
   self.properties_ = properties  
   self.name_ = name  
   self:setautosize(false, false)
-  local lineborder = ornamentfactory:createlineborder(0x2F2F2F):setborderradius(borderradius:new(5))
+  local lineborder = ornamentfactory:createlineborder(0x2F2F2F)
+                                    :setborderradius(borderradius:new(5))
   self:addornament(lineborder)
   self:setpadding(boxspace:new(10))
   self:createproperties(name, properties)
   self:applysetting(setting)  
 end
 
+function propertiesview:createlabel(parent, label)
+  local result = text:new(parent)
+                     :setautosize(true, true)
+                     :setalign(item.ALLEFT)
+                     :settext(label)
+                     :setmargin(boxspace:new(0, 10, 0, 0))   
+  return result                      
+end
+
+function propertiesview:createedit(parent, text)
+   local result = edit:new(parent)
+                      :setautosize(false, false)
+                      :setposition(rect:new(point:new(),
+                                            dimension:new(100, 20)))
+                      :setalign(item.ALLEFT)
+                      :settext(text)
+                      :setbackgroundcolor(0xFF373533)
+                      :setcolor(0xFFFFFFFF)
+                      :setmargin(boxspace:new(0, 10, 0, 0))
+   return result
+end
 
 
 function propertiesview:createproperties(name, properties)  
@@ -60,57 +82,19 @@ function propertiesview:createproperties(name, properties)
                        :setposition(rect:new(point:new(), dimension:new(0, 20)))
                        :setmargin(boxspace:new(0, 0, 5, 0))
       if property:typename() == "fontinfo" then
-        text:new(div)
-            :setautosize(true, true)
-            :setalign(item.ALLEFT)
-            :settext(property:label())
-            :setmargin(boxspace:new(0, 10, 0, 0))              
+        self:createlabel(div, property:label())
         self[name] = {
-          family =  edit:new(div)
-                        :setautosize(false, false)
-                        :setposition(rect:new(point:new(), dimension:new(100, 20)))
-                        :setalign(item.ALLEFT)
-                        :settext(property:value():family())              
-                        :setbackgroundcolor(0xFF373533)  
-                        :setcolor(0xFFFFFFFF)
-                        :setmargin(boxspace:new(0, 10, 0, 0)),
-          size =  edit:new(div)
-                      :setautosize(false, false)
-                      :setposition(rect:new(point:new(), dimension:new(100, 20)))
-                      :setalign(item.ALLEFT)
-                      :settext(property:value():size() .. "")
-                      :setbackgroundcolor(0xFF373533)  
-                      :setcolor(0xFFFFFFFF)
-                      :setmargin(boxspace:new(0, 10, 0, 0)),
-          style =  edit:new(div)
-                       :setautosize(false, false)
-                       :setposition(rect:new(point:new(), dimension:new(100, 20)))
-                       :setalign(item.ALLEFT)
-                       :settext(property:value():style() .. "")
-                       :setbackgroundcolor(0xFF373533)  
-                       :setcolor(0xFFFFFFFF)
-                       :setmargin(boxspace:new(0, 10, 0, 0))                                                                   
+          family = self:createedit(div, property:value():family()),            
+          size = self:createedit(div, property:value():size()),
+          style = self:createedit(div, property:value():style() .. "")                       
       } 
       self.edits[#self.edits + 1] = self[name].family
       self.edits[#self.edits + 1] = self[name].size
       self.edits[#self.edits + 1] = self[name].style
-      text:new(div)
-          :setautosize(true, true)
-          :setalign(item.ALLEFT)
-          :settext("[family, size,style]")     
+      self:createlabel(div, "[family, size,style]")
     elseif property:typename() == "color" then          
-        text:new(div):setautosize(true, true)
-            :setalign(item.ALLEFT)
-            :settext(property:label())
-            :setmargin(boxspace:new(0, 10, 0, 0))
-        self[name] = edit:new(div)
-                         :setautosize(false, false)
-                         :setposition(rect:new(point:new(), dimension:new(100, 20)))
-                         :setalign(item.ALLEFT)
-                         :settext(property:tostring())               
-                         :setbackgroundcolor(0xFF373533)  
-                         :setcolor(0xFFFFFFFF)
-                         :setmargin(boxspace:new(0, 10, 0, 0))          
+        self:createlabel(div, property:label())
+        self[name] = self:createedit(div, property:tostring())
         local stock_color_box = combobox:new(div)
                                         :setautosize(false, false)
                                         :setposition(rect:new(point:new(), dimension:new(100, 20)))
@@ -136,10 +120,7 @@ function propertiesview:createproperties(name, properties)
           stock_color_box:setitembytext(stock.key(property:stockkey()):match("[^.]+$"))
         that[name].stockkey = property:stockkey()
         end
-        text:new(div)
-            :setautosize(true, true)
-            :setalign(item.ALLEFT)
-            :settext("[ARGB HEX]")            
+        self:createlabel(div, "[ARGB HEX]")
       elseif property:typename() == "boolean" then         
          self[name] = checkbox:new(div)
                               :setautosize(true, false)
@@ -148,18 +129,8 @@ function propertiesview:createproperties(name, properties)
                               :settext(property:label())
                               :setcheck(property:value())         
       else      
-        text:new(div)
-            :setautosize(true, true)
-            :setalign(item.ALLEFT)
-            :settext(property:label())            
-            :setmargin(boxspace:new(0, 10, 0, 0))             
-        self[name] = edit:new(div)
-                         :setautosize(false, false)
-                         :setposition(rect:new(point:new(), dimension:new(100, 20)))
-                         :setalign(item.ALLEFT)
-                         :settext(property:tostring())        
-                         :setbackgroundcolor(0xFF373533)
-                         :setcolor(0xFFFFFFFF)          
+        self:createlabel(div, property:label())
+        self[name] = self:createedit(div, property:tostring())                         
       end            
       end 
     end
