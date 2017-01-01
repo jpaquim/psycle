@@ -2157,9 +2157,7 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
     imp->dev_set_font(Font(FontInfo("Arial", 13)));
     return imp;
   }
-
   BOOL OnEraseBkgnd(CDC* pDC) { return CEdit::OnEraseBkgnd(pDC); }
-
   virtual void dev_set_text(const std::string& text) { 
 		SetWindowText(Charset::utf8_to_win(text).c_str());
 	}
@@ -2219,10 +2217,29 @@ protected:
 	COLORREF background_color_;	
 	CBrush background_brush_;	
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
-  void OnPaint() { CEdit::OnPaint(); }	  
+  void OnPaint() { CEdit::OnPaint(); }	
+  afx_msg void OnEnChange() { OnDevChange(); }  
   ui::Font font_;
 };
 
+class NumberEditImp : public EditImp {
+ public:
+  static NumberEditImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
+    NumberEditImp* imp = new NumberEditImp();
+    if (!imp->Create(WS_VISIBLE | WS_CHILD | WS_TABSTOP | WS_VISIBLE |
+                     ES_AUTOHSCROLL | ES_NUMBER,
+                     CRect(0, 0, 200, 20),
+                     parent, 
+                     nID)) {
+      TRACE0("Failed to create window\n");
+      return 0;
+    }    
+    imp->set_window(w);
+    imp->dev_set_font(Font(FontInfo("Arial", 13)));    
+    return imp;
+  }
+
+};
 
 class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
  public:  
@@ -2296,7 +2313,8 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     cpselstart = txt.chrgText.cpMin;
     cpselend = txt.chrgText.cpMax;
   }
-  void DevGotoLine(int pos) { f(SCI_GOTOLINE, pos, 0); }
+  void DevGotoLine(int line_pos) { f(SCI_GOTOLINE, line_pos, 0); }
+  void DevGotoPos(int char_pos) { f(SCI_GOTOPOS, char_pos, 0); }
   virtual void DevLineUp() { f(SCI_LINEUP, 0, 0); }
   virtual void DevLineDown() { f(SCI_LINEDOWN, 0, 0); }
   virtual void DevCharLeft() { f(SCI_CHARLEFT, 0, 0); }
@@ -2363,31 +2381,25 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       throw std::runtime_error("File Not Open Error!");
     }    
   }
-
   void DevReload() {
     if (has_file_) {
       DevClearAll();
       DevLoadFile(fname_);
     }
   }
-
   virtual void dev_set_lexer(const Lexer& lexer);
-
   void dev_set_foreground_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_DEFAULT, ToCOLORREF(color)); }  
   ARGB dev_foreground_color() const { return ToARGB(f(SCI_STYLEGETFORE, STYLE_DEFAULT, 0)); }
   void dev_set_background_color(ARGB color) { f(SCI_STYLESETBACK, STYLE_DEFAULT, ToCOLORREF(color)); }
   ARGB dev_background_color() const { return ToARGB(f(SCI_STYLEGETBACK, STYLE_DEFAULT, 0)); }
-
   void dev_set_linenumber_foreground_color(ARGB color) { f(SCI_STYLESETFORE, STYLE_LINENUMBER, ToCOLORREF(color)); }
   ARGB dev_linenumber_foreground_color() const { return ToARGB(f(SCI_STYLEGETFORE, STYLE_LINENUMBER, 0)); }
   void dev_set_linenumber_background_color(ARGB color) { f(SCI_STYLESETBACK, STYLE_LINENUMBER, ToCOLORREF(color)); }
   ARGB dev_linenumber_background_color() const { return ToARGB(f(SCI_STYLEGETBACK, STYLE_LINENUMBER, 0)); }
-
   void dev_set_folding_background_color(ARGB color) {
     f(SCI_SETFOLDMARGINCOLOUR, 1, ToCOLORREF(color));
     f(SCI_SETFOLDMARGINHICOLOUR, 1, ToCOLORREF(color));
-  }
-    
+  }    
   void dev_set_sel_foreground_color(ARGB color) { f(SCI_SETSELFORE, 1, ToCOLORREF(color)); }
  // COLORREF sel_foreground_color() const { return f(SCI_GETSELFORE, 0, 0); }
   void dev_set_sel_background_color(ARGB color) { f(SCI_SETSELBACK, 1, ToCOLORREF(color)); }
@@ -2398,7 +2410,6 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void dev_set_caret_color(ARGB color) { f(SCI_SETCARETFORE, ToCOLORREF(color), 0); }
   ARGB dev_caret_color() const { return ToARGB(f(SCI_GETCARETFORE, 0, 0)); }
   void DevStyleClearAll() { f(SCI_STYLECLEARALL, 0, 0); }
-
   void DevSaveFile(const std::string& filename) {
     //Get the length of the document
     int nDocLength = f(SCI_GETLENGTH, 0, 0);
@@ -2551,45 +2562,37 @@ class FileObserverImp : public ui::FileObserverImp {
    FileObserver* file_observer_;
 };
 
-
 extern "C" int CALLBACK enumerateFontsCallBack(ENUMLOGFONTEX *lpelf,
 												NEWTEXTMETRICEX *lpntm,
 												DWORD fontType, LPARAM lParam);
-
-  typedef	std::pair<LOGFONT, DWORD>	FontPair;
-   typedef	std::vector<FontPair> FontVec;
-
+typedef	std::pair<LOGFONT, DWORD>	FontPair;
+typedef	std::vector<FontPair> FontVec;
 
 class Fonts : public ui::Fonts {
   public:
-    Fonts() {
-      enumerateFonts();
-    }
-
+   Fonts() {
+     enumerateFonts();
+   }
    virtual void import_font(const std::string& path) {
      int result = AddFontResource(Charset::utf8_to_win(path).c_str());     
      if (result == 0) {
       throw std::exception("Failed to add font.");
     }
   }
- 
-
-   const std::vector<std::string>& font_list() const { return names_; }
-
-  void enumerateFonts()
-  {
+  const std::vector<std::string>& font_list() const { return names_; }
+  void enumerateFonts() {
 	  names_.clear();
-	LOGFONT		lf;
-	lf.lfFaceName[0] = _T('\0');
-	lf.lfCharSet = DEFAULT_CHARSET;
-	lf.lfPitchAndFamily = 0;
-  CClientDC dc(DummyWindow::dummy());
-	::EnumFontFamiliesEx(dc.m_hDC, &lf,
-						(FONTENUMPROC) enumerateFontsCallBack,
-						(LPARAM) &m_FontVec, 0);
-	// std::sort(m_FontVec.begin(), m_FontVec.end(), comp);	
-	for (FontVec::iterator it = m_FontVec.begin(); it != m_FontVec.end(); it++)
-		names_.push_back(it->first.lfFaceName);
+	  LOGFONT		lf;
+	  lf.lfFaceName[0] = _T('\0');
+	  lf.lfCharSet = DEFAULT_CHARSET;
+	  lf.lfPitchAndFamily = 0;
+    CClientDC dc(DummyWindow::dummy());
+	  ::EnumFontFamiliesEx(dc.m_hDC, &lf,
+						  (FONTENUMPROC) enumerateFontsCallBack,
+						  (LPARAM) &m_FontVec, 0);
+	  // std::sort(m_FontVec.begin(), m_FontVec.end(), comp);	
+	  for (FontVec::iterator it = m_FontVec.begin(); it != m_FontVec.end(); it++)
+		  names_.push_back(it->first.lfFaceName);
   }
 
   FontVec	m_FontVec;
@@ -2647,6 +2650,9 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::EditImp* CreateEditImp() {     
     return EditImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }  
+  virtual ui::EditImp* CreateNumberEditImp() {     
+    return NumberEditImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
+  }
   virtual ui::ScintillaImp* CreateScintillaImp() {     
     return ScintillaImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }  

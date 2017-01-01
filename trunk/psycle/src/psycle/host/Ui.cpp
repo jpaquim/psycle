@@ -1424,7 +1424,7 @@ Group::Group(WindowImp* imp) {
 void Group::Add(const Window::Ptr& window) {  
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
-  }  
+  }
   items_.push_back(window);
   window->set_parent(this);  
   window->needsupdate();
@@ -1433,7 +1433,8 @@ void Group::Add(const Window::Ptr& window) {
 void Group::Insert(iterator it, const Window::Ptr& window) {
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
-  }      
+  }
+        
   items_.insert(it, window); 
   window->set_parent(this);
   window->needsupdate(); 
@@ -2266,6 +2267,16 @@ Edit::Edit() : Window(ui::ImpFactory::instance().CreateEditImp()) {
   set_auto_size(false, false);
 }
 
+Edit::Edit(InputType::Type type) {
+  switch (type) {
+    case InputType::NUMBER:
+      set_imp(ui::ImpFactory::instance().CreateNumberEditImp());
+    break;
+    default:
+      set_imp(ui::ImpFactory::instance().CreateEditImp());
+  }
+}
+
 Edit::Edit(EditImp* imp) : Window(imp) {
 }
 
@@ -2284,6 +2295,10 @@ void Edit::set_text(const std::string& text) {
   if (imp()) {
     imp()->dev_set_text(text);
   }
+}
+
+void Edit::set_input_type(InputType::Type input_type) {
+  set_imp(ui::ImpFactory::instance().CreateNumberEditImp());
 }
 
 std::string Edit::text() const { 
@@ -2504,9 +2519,15 @@ void Scintilla::FindText(const std::string& text, int cpmin, int cpmax, int& pos
   }
 }
 
-void Scintilla::GotoLine(int pos) {
+void Scintilla::GotoLine(int line_pos) {
   if (imp()) {
-    imp()->DevGotoLine(pos);
+    imp()->DevGotoLine(line_pos);
+  }
+}
+
+void Scintilla::GotoPos(int char_pos) {
+  if (imp()) {
+    imp()->DevGotoPos(char_pos);
   }
 }
 
@@ -3453,6 +3474,20 @@ void ButtonImp::OnDevClick() {
   }
 }
 
+void EditImp::OnDevChange() {
+  if (window()) {
+    ((Edit*)window())->change(*((Edit*)window()));
+  }
+}
+
+void CheckBoxImp::OnDevClick() {
+  if (window()) {
+    ((CheckBox*)window())->OnClick();
+    ((CheckBox*)window())->ExecuteAction();
+    ((CheckBox*)window())->click(*((CheckBox*)window()));
+  }
+}
+
 // ImpFactory
 ImpFactory& ImpFactory::instance() {
   static ImpFactory instance_;
@@ -3514,6 +3549,11 @@ ui::ComboBoxImp* ImpFactory::CreateComboBoxImp() {
 ui::EditImp* ImpFactory::CreateEditImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateEditImp(); 
+}
+
+ui::EditImp* ImpFactory::CreateNumberEditImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateNumberEditImp(); 
 }
 
 ui::TreeViewImp* ImpFactory::CreateTreeViewImp() {
