@@ -179,18 +179,33 @@ class Splitter : public Window {
 
 class TerminalView : public Scintilla, public psycle::host::Timer {
  public: 
-  TerminalView();
-  void output(const std::string& text);   
-  virtual void OnTimerViewRefresh() { invokelater.Invoke(); }
+  typedef boost::shared_ptr<TerminalView> Ptr;
+  typedef boost::shared_ptr<const TerminalView> ConstPtr;
+  typedef boost::weak_ptr<TerminalView> WeakPtr;
+  typedef boost::weak_ptr<const TerminalView> ConstWeakPtr;
 
-  virtual void OnKeyDown(KeyEvent& ev) {
-    if (ev.keycode() == KeyCodes::VKDELETE) {
-      ClearAll();
-    }
-  }
+  TerminalView();
+  void output(const std::string& text);
+  void EnableAutoscroll() { autoscroll_prevented_ = false; }
+  void PreventAutoscroll() { autoscroll_prevented_ = true; } 
+  void EnableAutoClearText() { auto_clear_text_prevented_ = false; }
+  void PreventAutoClearText() { auto_clear_text_prevented_ = true; } 
+  void EnableLineLimit() { line_limit_prevented_ = false; }
+  void PreventLineLimit() { line_limit_prevented_ = true; } 
+  bool autoclear_text_prevented() const { return auto_clear_text_prevented_; }
+  bool autoscroll_prevented() const { return autoscroll_prevented_; }
+  bool line_limit_prevented() const { return line_limit_prevented_; }
+  void set_line_limit(int line_limit) { line_limit_ = line_limit; }
+  int line_limit() const { return line_limit_; }
+  virtual void OnTimerViewRefresh() { invokelater.Invoke(); }
+  virtual void OnKeyDown(KeyEvent& ev);
 
  private:
-   Commands invokelater;
+   Commands invokelater;   
+   bool autoscroll_prevented_;
+   int line_limit_;
+   bool line_limit_prevented_;
+   bool auto_clear_text_prevented_;
 };
 
 class TerminalFrame : public Frame {
@@ -217,8 +232,14 @@ class TerminalFrame : public Frame {
    }
 
   private:
-   boost::shared_ptr<TerminalView> terminal_view_;
+   void OnAutoscrollClick(CheckBox&);
+   void OnLimitLinesClick(CheckBox&);
+   void OnLineLimitChange(Edit&);
+   void OnClearTextAtLineLimitClick(CheckBox&);   
+   void AddOptionField(const ui::Window::Ptr& element, double width); 
+   TerminalView::Ptr terminal_view_;
    static std::auto_ptr<TerminalFrame> terminal_frame_;
+   Group::Ptr option_panel_;
    ui::Ornament::Ptr option_background_;
 };
 

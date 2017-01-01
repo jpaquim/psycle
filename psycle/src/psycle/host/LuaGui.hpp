@@ -2335,6 +2335,7 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
     static const luaL_Reg methods[] = {       
        {"f", f},       
        {"gotoline", gotoline},
+       {"gotopos", gotopos},
        {"lineup", lineup},
        {"linedown", linedown},
        {"charleft", charleft},
@@ -2445,7 +2446,8 @@ class LuaScintillaBind : public LuaItemBind<T>, public LuaBackgroundColorMixIn<T
   static int selectionend(lua_State *L) { LUAEXPORT(L, &T::selectionend); } 
   static int hasselection(lua_State *L) { LUAEXPORT(L, &T::has_selection); } 
   static int replacesel(lua_State *L) { LUAEXPORT(L, &T::ReplaceSel); } 
-  static int gotoline(lua_State *L) { LUAEXPORT(L, &T::GotoLine); }  
+  static int gotoline(lua_State *L) { LUAEXPORT(L, &T::GotoLine); }
+  static int gotopos(lua_State *L) { LUAEXPORT(L, &T::GotoPos); }
   static int line(lua_State *L) { LUAEXPORT(L, &T::line); }
   static int lineup(lua_State *L) { LUAEXPORT(L, &T::LineUp); }
   static int linedown(lua_State *L) { LUAEXPORT(L, &T::LineDown); }

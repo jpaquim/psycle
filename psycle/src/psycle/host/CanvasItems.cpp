@@ -304,14 +304,21 @@ void Splitter::OnMouseOut(MouseEvent& ev) {
 	}
 }
 
-TerminalView::TerminalView() : Scintilla(), Timer() {
+TerminalView::TerminalView() 
+     : Scintilla(),
+       Timer(),
+       autoscroll_prevented_(false),
+       auto_clear_text_prevented_(false),
+       line_limit_(4096),
+       line_limit_prevented_(false) {
   set_background_color(0xFF232323);
   set_foreground_color(0xFFFFBF00);      
   StyleClearAll();
   set_linenumber_foreground_color(0xFF939393);
   set_linenumber_background_color(0xFF232323);     
   f(SCI_SETWRAPMODE, (void*) SC_WRAP_CHAR, 0);
-	StartTimer();
+  f(SCI_SETREADONLY, (void*) true, 0);
+	StartTimer();  
 }
 
 void TerminalView::output(const std::string& text) {
@@ -319,13 +326,40 @@ void TerminalView::output(const std::string& text) {
     std::string text;
     TerminalView* that;
     void operator()() const {
-      that->AddText(text);
+      that->f(SCI_SETREADONLY, (void*) false, 0);
+      if (!that->line_limit_prevented()) {
+        int line_count = that->f(SCI_GETLINECOUNT, 0, 0);
+        int line_overflow = line_count - that->line_limit();
+        if (line_overflow >= 0) {
+          if (!that->autoclear_text_prevented()) {
+            int char_pos = that->f(SCI_POSITIONFROMLINE, (LPARAM*)line_overflow, 0);
+            that->f(SCI_DELETERANGE, 0, (WPARAM*)char_pos);
+            that->AddText(text);
+          }
+        } else {
+          that->AddText(text);
+        }
+      } else {     
+        that->AddText(text);
+      }
+      that->f(SCI_SETREADONLY, (void*) true, 0);
+      if (!that->autoscroll_prevented()) {
+        that->GotoPos(that->length());
+      }
     }
-   } f;   
+   } f;
   f.that = this;
   f.text = text;
   invokelater.Add(f);
 }
+
+void TerminalView::OnKeyDown(KeyEvent& ev) {
+  if (ev.keycode() == KeyCodes::VKDELETE) {
+    f(SCI_SETREADONLY, (void*) false, 0);
+    ClearAll();
+    f(SCI_SETREADONLY, (void*) true, 0);
+  }
+}  
 
 std::auto_ptr<TerminalFrame> TerminalFrame::terminal_frame_(0);
 
@@ -339,20 +373,95 @@ void TerminalFrame::Init() {
   terminal_view_->set_auto_size(false, false);
   terminal_view_->set_align(AlignStyle::ALCLIENT);
   view_port->Add(terminal_view_);      
-  Group::Ptr option_panel(new Group());
-  option_panel->set_aligner(Aligner::Ptr(new DefaultAligner()));
-  option_panel->set_auto_size(false, true);
-  option_panel->set_align(AlignStyle::ALBOTTOM);  
+  option_panel_.reset(new Group());
+  option_panel_->set_aligner(Aligner::Ptr(new DefaultAligner()));
+  option_panel_->set_auto_size(false, true);
+  option_panel_->set_align(AlignStyle::ALBOTTOM);  
   option_background_.reset(OrnamentFactory::Instance().CreateFill(0xFFCACACA));
-  option_panel->add_ornament(option_background_);  
-  view_port->Add(option_panel);  
-  CheckBox::Ptr autoscroll_checkbox(new CheckBox());
-  autoscroll_checkbox->set_auto_size(false, false);
-  autoscroll_checkbox->set_align(AlignStyle::ALLEFT);
-  autoscroll_checkbox->set_text("Autoscroll");
-  autoscroll_checkbox->set_position(ui::Rect(ui::Point(), ui::Dimension(200, 20)));  
-  option_panel->Add(autoscroll_checkbox);
+  option_panel_->add_ornament(option_background_);  
+  view_port->Add(option_panel_);  
+  CheckBox::Ptr autoscroll_checkbox(new CheckBox());  
+  autoscroll_checkbox->set_text("Autoscroll");  
+  autoscroll_checkbox->click.connect(boost::bind(&TerminalFrame::OnAutoscrollClick, this, _1));
+  autoscroll_checkbox->Check();
+  AddOptionField(autoscroll_checkbox, 140);  
+  CheckBox::Ptr limit_lines_checkbox(new CheckBox());
+  limit_lines_checkbox->set_text("Limit Lines To");
+  limit_lines_checkbox->Check();
+  limit_lines_checkbox->click.connect(boost::bind(&TerminalFrame::OnLimitLinesClick, this, _1));  
+  AddOptionField(limit_lines_checkbox, 100);
+  Edit::Ptr line_limit_input(new Edit(InputType::NUMBER));  
+  line_limit_input->set_text("4096");  
+  line_limit_input->change.connect(boost::bind(&TerminalFrame::OnLineLimitChange, this, _1));  
+  AddOptionField(line_limit_input, 60);
+  CheckBox::Ptr clear_text_checkbox(new CheckBox());
+  clear_text_checkbox->set_text("Clear first lines at line limit");
+  clear_text_checkbox->click.connect(boost::bind(&TerminalFrame::OnClearTextAtLineLimitClick, this, _1));
+  clear_text_checkbox->Check();
+  AddOptionField(clear_text_checkbox, 150);
   set_position(Rect(Point(), Dimension(500, 400)));
+}
+
+void TerminalFrame::AddOptionField(const Window::Ptr& element, double width) { 
+  element->set_auto_size(false, false);
+  element->set_align(AlignStyle::ALLEFT);  
+  element->set_position(Rect(Point(), Dimension(width, 20)));    
+  option_panel_->Add(element);
+}
+
+void TerminalFrame::OnAutoscrollClick(CheckBox& autoscroll_checkbox) {
+  if (autoscroll_checkbox.checked()) {
+    terminal_view_->EnableAutoscroll();
+  } else {
+    terminal_view_->PreventAutoscroll();
+  }
+}
+
+void TerminalFrame::OnLimitLinesClick(CheckBox& limit_lines_checkbox) {
+  if (limit_lines_checkbox.checked()) {
+    terminal_view_->EnableLineLimit();
+  } else {
+    terminal_view_->PreventLineLimit();
+  }
+}
+
+typedef enum {
+    STR2INT_SUCCESS,
+    STR2INT_OVERFLOW,
+    STR2INT_UNDERFLOW,
+    STR2INT_INCONVERTIBLE
+} str2int_errno;
+
+str2int_errno str2int(int *out, const char *s, int base) {
+    char *end;
+    if (s[0] == '\0' || isspace((unsigned char) s[0]))
+        return STR2INT_INCONVERTIBLE;
+    errno = 0;
+    long l = strtol(s, &end, base);
+    /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
+    if (l > INT_MAX || (errno == ERANGE && l == LONG_MAX))
+        return STR2INT_OVERFLOW;
+    if (l < INT_MIN || (errno == ERANGE && l == LONG_MIN))
+        return STR2INT_UNDERFLOW;
+    if (*end != '\0')
+        return STR2INT_INCONVERTIBLE;
+    *out = l;
+    return STR2INT_SUCCESS;
+}
+
+void TerminalFrame::OnLineLimitChange(Edit& edit) {
+  int val;
+  if (str2int(&val, edit.text().c_str(), 10) == STR2INT_SUCCESS) {
+    terminal_view_->set_line_limit(val);
+  }  
+}
+
+void TerminalFrame::OnClearTextAtLineLimitClick(CheckBox& clear_text_checkbox) {
+  if (clear_text_checkbox.checked()) {
+    terminal_view_->EnableAutoClearText();
+  } else {
+    terminal_view_->PreventAutoClearText();
+  }
 }
 
 HeaderGroup::HeaderGroup() {		
@@ -387,7 +496,6 @@ void HeaderGroup::Init() {
 	header_text_->set_align(AlignStyle::ALLEFT);
 	header_text_->set_auto_size(true, true);
 	header_text_->set_margin(BoxSpace(0, 5, 0, 0));
-
 	client_.reset(new Group());
 	Group::Add(client_);
 	client_->set_align(AlignStyle::ALCLIENT);

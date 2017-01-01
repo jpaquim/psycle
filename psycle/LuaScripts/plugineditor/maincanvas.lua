@@ -146,7 +146,7 @@ function maincanvas:onopenplugin(pluginpath, pluginname, info)
   self:openplugin(pluginpath, pluginname, info)
   psycle.proxy.project = project:new():setplugininfo(info)
   self:fillinstancecombobox()  
-  self.machine_:settitle(pluginname)      
+  self.machine_:settitle(pluginname)
 end
 
 function maincanvas:oncreateplugin(outputs, machinename)  
@@ -411,7 +411,7 @@ function maincanvas:savepage()
   end
 end
 
-function maincanvas:playplugin()  
+function maincanvas:playplugin()    
   local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
      machine = machine:new(pluginindex)

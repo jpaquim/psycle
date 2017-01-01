@@ -699,6 +699,7 @@ BOOL ComboBoxImp::OnSelect() {
 BEGIN_MESSAGE_MAP(EditImp, CEdit)  
 	ON_WM_PAINT()	  
   ON_WM_CTLCOLOR_REFLECT()  
+  ON_CONTROL_REFLECT(EN_CHANGE, OnEnChange)
 END_MESSAGE_MAP()
 
 HBRUSH EditImp::CtlColor(CDC* pDC, UINT nCtlColor) {

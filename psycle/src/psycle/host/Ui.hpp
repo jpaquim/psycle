@@ -2016,6 +2016,10 @@ class ComboBox : public Window {
 
 class EditImp;
 
+namespace InputType {
+enum Type { TEXT = 1, NUMBER = 2 };
+}
+
 class Edit : public Window {
  public:
   typedef boost::shared_ptr<Edit> Ptr;
@@ -2027,6 +2031,7 @@ class Edit : public Window {
   static WindowTypes::Type window_type() { return WindowTypes::EDIT; }
 
   Edit();
+  Edit(InputType::Type type);
   Edit(EditImp* imp);
 
   EditImp* imp() { return (EditImp*) Window::imp(); };
@@ -2040,7 +2045,10 @@ class Edit : public Window {
   virtual void set_color(ARGB color);
   virtual ARGB color() const;
   virtual void set_font(const Font& font);
-  virtual void set_sel(int cp_min, int cp_max);  
+  virtual void set_sel(int cp_min, int cp_max);
+  void set_input_type(InputType::Type input_type);
+
+  boost::signal<void (Edit&)> change;  
 };
 
 class ButtonImp;
@@ -2246,7 +2254,8 @@ class Scintilla : public Window {
                 int& pos,
                 int& caret_pos_selection_start,
                 int& caret_pos_selection_end) const;
-  void GotoLine(int pos);
+  void GotoLine(int line_pos);
+  void GotoPos(int char_pos);
   void LineUp();
   void LineDown();
   void CharLeft();
@@ -2309,7 +2318,6 @@ class Scintilla : public Window {
   virtual bool transparent() const { return true; }  
   virtual void OnFirstModified() {}
   virtual void OnMarginClick(int line_pos) {}
-
 
  private:
   static std::string dummy_str_;
@@ -2865,13 +2873,13 @@ class ButtonImp : public WindowImp {
 
   virtual void dev_set_text(const std::string& text)  = 0;
   virtual std::string dev_text() const = 0;
-
-  virtual void OnDevClick();
+  
 	virtual void DevCheck() = 0;
 	virtual void DevUnCheck() = 0;
 	virtual bool dev_checked() const = 0;
   virtual void dev_set_font(const Font& font) = 0;
   virtual const Font& dev_font() const = 0;
+  virtual void OnDevClick();  
 };
 
 class CheckBoxImp : public ui::ButtonImp {
@@ -2880,6 +2888,7 @@ class CheckBoxImp : public ui::ButtonImp {
   CheckBoxImp(Window* window) : ButtonImp(window) {}
 
   virtual void dev_set_background_color(ARGB color) = 0;
+  virtual void OnDevClick();
 };
 
 class RadioButtonImp : public ui::ButtonImp {
@@ -2920,6 +2929,8 @@ class EditImp : public WindowImp {
   virtual void dev_set_font(const Font& font) = 0;
   virtual const Font& dev_font() const = 0;
   virtual void dev_set_sel(int cpmin, int cpmax) = 0;
+  
+  virtual void OnDevChange();
 };
 
 class ScintillaImp : public WindowImp {
@@ -2931,7 +2942,8 @@ class ScintillaImp : public WindowImp {
   virtual void DevAddText(const std::string& text) {}
 	virtual void DevClearAll() = 0;
   virtual void DevFindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const {}
-  virtual void DevGotoLine(int pos) = 0;
+  virtual void DevGotoLine(int line_pos) = 0;
+  virtual void DevGotoPos(int char_pos) = 0;
   virtual void DevLineUp() = 0;
   virtual void DevLineDown() = 0;
   virtual void DevCharLeft() = 0;
@@ -3055,6 +3067,7 @@ class ImpFactory {
   virtual ui::ScrollBarImp* CreateScrollBarImp(Orientation::Type orientation);
   virtual ui::ComboBoxImp* CreateComboBoxImp();
   virtual ui::EditImp* CreateEditImp();
+  virtual ui::EditImp* CreateNumberEditImp();
   virtual ui::TreeViewImp* CreateTreeViewImp();
   virtual ui::ListViewImp* CreateListViewImp();
   virtual ui::MenuContainerImp* CreateMenuContainerImp();
