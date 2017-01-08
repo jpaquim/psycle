@@ -75,7 +75,7 @@ Text::Text() : Window(),
     vertical_alignment_(AlignStyle::ALTOP),
     justify_(JustifyStyle::LEFTJUSTIFY),
     color_(0xFFFFFFFF),    
-	  is_aligned_(false) {      
+	  is_aligned_(false) {   
 }
 
 Text::Text(const std::string& text) : 
@@ -317,7 +317,7 @@ TerminalView::TerminalView()
   set_linenumber_foreground_color(0xFF939393);
   set_linenumber_background_color(0xFF232323);     
   f(SCI_SETWRAPMODE, (void*) SC_WRAP_CHAR, 0);
-  f(SCI_SETREADONLY, (void*) true, 0);
+  PreventInput();
 	StartTimer();  
 }
 
@@ -326,7 +326,7 @@ void TerminalView::output(const std::string& text) {
     std::string text;
     TerminalView* that;
     void operator()() const {
-      that->f(SCI_SETREADONLY, (void*) false, 0);
+      that->EnableInput();
       if (!that->line_limit_prevented()) {
         int line_count = that->f(SCI_GETLINECOUNT, 0, 0);
         int line_overflow = line_count - that->line_limit();
@@ -342,7 +342,7 @@ void TerminalView::output(const std::string& text) {
       } else {     
         that->AddText(text);
       }
-      that->f(SCI_SETREADONLY, (void*) true, 0);
+      that->PreventInput();
       if (!that->autoscroll_prevented()) {
         that->GotoPos(that->length());
       }
@@ -355,9 +355,9 @@ void TerminalView::output(const std::string& text) {
 
 void TerminalView::OnKeyDown(KeyEvent& ev) {
   if (ev.keycode() == KeyCodes::VKDELETE) {
-    f(SCI_SETREADONLY, (void*) false, 0);
+    EnableInput();
     ClearAll();
-    f(SCI_SETREADONLY, (void*) true, 0);
+    PreventInput();
   }
 }  
 

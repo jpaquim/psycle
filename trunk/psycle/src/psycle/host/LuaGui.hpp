@@ -13,6 +13,7 @@ namespace host {
 namespace stock {  
 namespace color {
 enum type {
+  UNDEFINED = -1,
   PVBACKGROUND = 1,
   PVROW,
   PVROW4BEAT,
@@ -203,68 +204,68 @@ struct LuaCommandBind {
 template <class T>
 class CanvasItem : public T, public LuaState {
  public:    
-   CanvasItem(lua_State* L) : LuaState(L), T() {}
-   CanvasItem(lua_State* L, ui::WindowImp* imp) : LuaState(L), T(0) {}
+  CanvasItem(lua_State* L) : LuaState(L), T() {}
+  CanvasItem(lua_State* L, ui::WindowImp* imp) : LuaState(L), T(0) {}
 
-   virtual void OnMouseDown(ui::MouseEvent& ev) {
-     if (!SendMouseEvent(L, "onmousedown", ev, *this)) {
-       T::OnMouseDown(ev);
-     }
-   }
-   virtual void OnDblclick(ui::MouseEvent& ev) {
-     if (!SendMouseEvent(L, "ondblclick", ev, *this)) {
-       T::OnDblclick(ev);
-     }
-   }   
-   virtual void OnMouseUp(ui::MouseEvent& ev) {
-     if (!SendMouseEvent(L, "onmouseup", ev, *this)) {
-       T::OnMouseUp(ev);
-     }
-   }
-   virtual void OnMouseMove(ui::MouseEvent& ev) {
-     if (!SendMouseEvent(L, "onmousemove", ev, *this)) {
-       T::OnMouseMove(ev);
-     }
-   }
-   virtual void OnMouseEnter(ui::MouseEvent& ev) {
-     if (!SendMouseEvent(L, "onmouseenter", ev, *this)) {
-       T::OnMouseEnter(ev);
-     }
-   }
-   virtual void OnMouseOut(ui::MouseEvent& ev) {
-     if (!SendMouseEvent(L, "onmouseout", ev, *this)) {
-       T::OnMouseOut(ev);
-     }
-   }
-   virtual void OnKeyDown(ui::KeyEvent& ev) {
-     if (!SendKeyEvent(L, "onkeydown", ev, *this)) {
-       T::OnKeyDown(ev);
-     }
-   }
-   virtual void set_properties(const ui::Properties& properties);
-   virtual void OnKeyUp(ui::KeyEvent& ev) {
-     if (!SendKeyEvent(L, "onkeyup", ev, *this)) {
-       T::OnKeyUp(ev);
-     }
-   }
-   virtual void OnFocus(ui::Event& ev) {
-     if (!SendEvent(L, "onfocus", ev, *this)) {
-       T::OnFocus(ev);
-     }
-   }
-   virtual void OnKillFocus(ui::Event& ev) {
-     if (!SendEvent(L, "onkillfocus", ev, *this)) {
-       T::OnFocus(ev);
-     }
-   }   
-   virtual void OnSize(const ui::Dimension &dimension);   
-	 virtual ui::Dimension OnCalcAutoDimension() const; 
-   static bool SendEvent(lua_State* L, const::std::string method,
-                         ui::Event& ev, ui::Window& item);
-   static bool SendKeyEvent(lua_State* L, const::std::string method,
-                            ui::KeyEvent& ev, ui::Window& item);
-   static bool SendMouseEvent(lua_State* L, const::std::string method,
-                              ui::MouseEvent& ev, ui::Window& item);
+  virtual void OnMouseDown(ui::MouseEvent& ev) {
+    if (!SendMouseEvent(L, "onmousedown", ev, *this)) {
+      T::OnMouseDown(ev);
+    }
+  }
+  virtual void OnDblclick(ui::MouseEvent& ev) {
+    if (!SendMouseEvent(L, "ondblclick", ev, *this)) {
+      T::OnDblclick(ev);
+    }
+  }   
+  virtual void OnMouseUp(ui::MouseEvent& ev) {
+    if (!SendMouseEvent(L, "onmouseup", ev, *this)) {
+      T::OnMouseUp(ev);
+    }
+  }
+  virtual void OnMouseMove(ui::MouseEvent& ev) {
+    if (!SendMouseEvent(L, "onmousemove", ev, *this)) {
+      T::OnMouseMove(ev);
+    }
+  }
+  virtual void OnMouseEnter(ui::MouseEvent& ev) {
+    if (!SendMouseEvent(L, "onmouseenter", ev, *this)) {
+      T::OnMouseEnter(ev);
+    }
+  }
+  virtual void OnMouseOut(ui::MouseEvent& ev) {
+    if (!SendMouseEvent(L, "onmouseout", ev, *this)) {
+      T::OnMouseOut(ev);
+    }
+  }
+  virtual void OnKeyDown(ui::KeyEvent& ev) {
+    if (!SendKeyEvent(L, "onkeydown", ev, *this)) {
+      T::OnKeyDown(ev);
+    }
+  }
+  virtual void set_properties(const ui::Properties& properties);
+  virtual void OnKeyUp(ui::KeyEvent& ev) {
+    if (!SendKeyEvent(L, "onkeyup", ev, *this)) {
+      T::OnKeyUp(ev);
+    }
+  }
+  virtual void OnFocus(ui::Event& ev) {
+    if (!SendEvent(L, "onfocus", ev, *this)) {
+      T::OnFocus(ev);
+    }
+  }
+  virtual void OnKillFocus(ui::Event& ev) {
+    if (!SendEvent(L, "onkillfocus", ev, *this)) {
+      T::OnFocus(ev);
+    }
+  }   
+  virtual void OnSize(const ui::Dimension &dimension);   
+	virtual ui::Dimension OnCalcAutoDimension() const; 
+  static bool SendEvent(lua_State* L, const::std::string method,
+                        ui::Event& ev, ui::Window& item);
+  static bool SendKeyEvent(lua_State* L, const::std::string method,
+                           ui::KeyEvent& ev, ui::Window& item);
+  static bool SendMouseEvent(lua_State* L, const::std::string method,
+                             ui::MouseEvent& ev, ui::Window& item);
 };
 
 
@@ -284,9 +285,10 @@ struct LuaRunBind {
 class LuaItem : public CanvasItem<ui::Window> {
  public:  
   LuaItem(lua_State* L) : CanvasItem<ui::Window>(L) {}
+
   virtual void Draw(ui::Graphics* g, ui::Region& draw_rgn); 
   virtual void OnSize(double cw, double ch);  
-  virtual std::string GetType() const { return "luaitem"; }
+  virtual std::string GetType() const;
   virtual bool transparent() const;  
 };
 
@@ -1103,6 +1105,8 @@ class LuaItemBind {
       {"bringtotop", bringtotop},
       {"mapcapslocktoctrl", mapcapslocktoctrl},  
       {"enablecapslock", enablecapslock},
+      {"addsettings", addsettings},
+      {"addrule", addrule},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1308,7 +1312,130 @@ class LuaItemBind {
   }
   static int setcapture(lua_State* L) { LUAEXPORT(L, &T::SetCapture); }
   static int releasecapture(lua_State* L) { LUAEXPORT(L, &T::ReleaseCapture); }
-  static int setfocus(lua_State *L) { LUAEXPORT(L, &T::SetFocus) }  
+  static int setfocus(lua_State *L) { LUAEXPORT(L, &T::SetFocus) }
+  static int addsettings(lua_State* L) {
+    boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
+    return LuaHelper::chaining(L);
+  }
+  static int addrule(lua_State* L) {
+    boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
+    ui::Properties properties;
+    std::string selector = "";
+    luaL_checktype(L, 2, LUA_TTABLE);    
+    lua_pushnil(L);
+    while (lua_next(L, -2) != 0) {
+      lua_pushvalue(L, -2);
+      const char *key = lua_tostring(L, -1);      
+      if (strcmp(key, "selector") == 0) {
+        selector = std::string(lua_tostring(L, -2));
+      } else
+      if (strcmp(key, "properties") == 0) {
+        lua_pushvalue(L, -2);
+        luaL_checktype(L, -1, LUA_TTABLE);    
+        lua_pushnil(L);
+        ui::Property prop;
+        while (lua_next(L, -2) != 0) {
+          lua_pushvalue(L, -2);
+          const char *key = lua_tostring(L, -1);
+          const int idx = -2;
+          switch (lua_type(L, idx)) {
+            case LUA_TSTRING: {
+              const char* value = lua_tostring(L, idx);
+              if (strlen(value) > 0) {
+                char first_char = value[0];
+                if (first_char == '@') {
+                  std::string stock(value + 1);
+                  using namespace stock::color;
+                  stock::color::type stock_id = UNDEFINED;
+                  if (stock == "PVBACKGROUND") {
+                    stock_id = PVBACKGROUND;
+                  } else
+                  if (stock == "PVROW") {
+                    stock_id = PVROW;
+                  } else
+                  if (stock == "PVROW4BEAT") {
+                    stock_id = PVROW4BEAT;
+                  } else
+                  if (stock == "PVROWBEAT") {
+                    stock_id = PVROWBEAT;
+                  } else                  
+                  if (stock == "PVROWBEAT") {
+                    stock_id = PVROWBEAT;
+                  } else
+                  if (stock == "PVSEPARATOR") {
+                    stock_id = PVSEPARATOR;
+                  } else
+                  if (stock == "PVFONT") {
+                    stock_id = PVFONT;
+                  } else  
+                  if (stock == "PVCURSOR") {
+                    stock_id = PVCURSOR;
+                  } else  
+                  if (stock == "PVSELECTION") {
+                    stock_id = PVSELECTION;
+                  } else
+                  if (stock == "PVPLAYBAR") {
+                    stock_id = PVPLAYBAR;
+                  } else
+                  if (stock == "MVFONTBOTTOMCOLOR") {
+                    stock_id = MVFONTBOTTOMCOLOR;
+                  } else
+                  if (stock == "MVFONTHTOPCOLOR") {
+                    stock_id = MVFONTHTOPCOLOR;
+                  } else
+                  if (stock == "MVFONTHBOTTOMCOLOR") {
+                    stock_id = MVFONTHBOTTOMCOLOR;
+                  } else
+                  if (stock == "MVFONTTITLECOLOR") {
+                    stock_id = MVFONTTITLECOLOR;
+                  } else
+                  if (stock == "MVTOPCOLOR") {
+                    stock_id = MVTOPCOLOR;
+                  } else
+                  if (stock == "MVBOTTOMCOLOR") {
+                    stock_id = MVBOTTOMCOLOR;
+                  } else
+                  if (stock == "MVHTOPCOLOR") {
+                    stock_id = MVHTOPCOLOR;
+                  }  else
+                  if (stock == "MVHBOTTOMCOLOR") {
+                    stock_id = MVHBOTTOMCOLOR;
+                  } else
+                  if (stock == "MVTITLECOLOR") {
+                    stock_id = MVTITLECOLOR;
+                  }
+                  if (stock_id != UNDEFINED) {
+                    PsycleStock stock;
+                    ui::Property prop(stock);
+                    prop.set_stock_key(stock_id);
+                    properties.set(key, prop);
+                  }
+                }
+              }            
+            }
+			      break;
+			      case LUA_TBOOLEAN:
+              //prop.set_value(lua_toboolean(L, idx));
+              //properties.set(key, prop);
+			      break;
+			      case LUA_TNUMBER:{              
+              prop.set_value((ui::ARGB)lua_tonumber(L, idx));
+              properties.set(key, prop);
+            }
+			      break;        
+            default:          
+              luaL_error(L, "Wrong argument type");
+          }
+          lua_pop(L, 2);
+        }
+        lua_pop(L, 1);
+      }            
+      lua_pop(L, 2);
+    }
+    ui::Rule rule(selector, properties);
+    window->add_rule(rule);
+    return LuaHelper::chaining(L);
+  }
 };
 
 template <class T>

@@ -37,8 +37,12 @@ function toolicon:new(parent, filename, trans)
   return c
 end
 
-function toolicon:onclick() end
+function toolicon:typename()
+  return "toolicon"
+end
 
+function toolicon:onclick()
+end
 
 function weakref(data)
     local weak = setmetatable({content=data}, {__mode="v"})

@@ -63,7 +63,7 @@ class LuaControl : public LockIF {
 };
 
 class LuaStarter : public LuaControl {
- public:
+ public:  
   virtual void PrepareState();  
   static int addmenu(lua_State* L);
   static int replacemenu(lua_State* L);
@@ -157,8 +157,6 @@ class LuaProxy : public LuaControl {
   ui::Systems* systems();
   void update_systems_state(lua_State* L);    
 
-private:
-  void ExportCFunctions();
   static int invokelater(lua_State* L);
 	// script callbacks
   static int set_parameter(lua_State* L);
@@ -168,6 +166,8 @@ private:
   static int call_selmachine(lua_State* L);
   static int set_machine(lua_State* L);  
   static int set_menubar(lua_State* L);
+ private:
+  void ExportCFunctions();
   std::string ParDisplay(int par);
   std::string ParLabel(int par);
   const PluginInfo& cache_meta(const PluginInfo& meta) const {

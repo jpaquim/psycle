@@ -2484,7 +2484,12 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
 
   void dev_undo() { f(SCI_UNDO, 0, 0); }
   void dev_redo() { f(SCI_REDO, 0, 0); }
-
+  virtual void dev_prevent_input() {
+    f(SCI_SETREADONLY, (void*) true, 0);
+  }
+  virtual void dev_enable_input() {
+    f(SCI_SETREADONLY, (void*) false, 0);
+  }
   void dev_set_tab_width(int width_in_chars) {  
     f(SCI_SETTABWIDTH, width_in_chars, 0);
   }

@@ -27,7 +27,7 @@ local item = require("psycle.ui.item")
 local cfg = require("psycle.config"):new("PatternVisual")
 local project = require("project")
 local templateparser = require("templateparser")
-local settingsmanager = require("settingsmanager")
+local settingsmanager = require("psycle.settingsmanager")
   
 function machine:info()
   return { 

@@ -1,4 +1,31 @@
--- $(pluginname)
+-- $(machinename)
 -- register file for psycle's lua plugin system
 
-psycle.setmachine(require("$(pluginname).machine"))
+function psycle.install()
+  return 
+[[
+link = {
+  label = "$(machinename)",
+  plugin = "$(machinename).lua",
+  viewport = psycle.CHILDVIEWPORT,
+  userinterface = psycle.MDI
+}
+psycle.addmenu("view", link)
+]]  
+end
+
+function psycle.info()
+  local machine = require("psycle.machine")  
+  return {
+    vendor = "$(vendor)",
+    name = "$(machinename)",
+    mode = $(machmode),
+    version = 0,
+    api=0
+  }
+end
+
+function psycle.start()  
+  psycle.setmachine(require("$(machinename).machine"))
+end
+

@@ -6,7 +6,9 @@ local rect = require("psycle.ui.rect")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local boxspace = require("psycle.ui.boxspace")
 local item = require("psycle.ui.item")
+local group = require("psycle.ui.group")
 local canvas = require("psycle.ui.canvas")
+$(requirecode)
 
 local $(classname) = canvas:new()
 
@@ -19,6 +21,7 @@ function $(classname):new()
 end
 
 function $(classname):init()  
+  $(initcode)
 end
 
 return $(classname)

@@ -756,6 +756,43 @@ void Graphics::RestoreOrigin() {
   imp_->DevRestoreOrigin();
 }
 
+//Rules
+void Rules::ApplyTo(const Window::Ptr& window) {
+  struct {    
+    RuleContainer* rules;
+    bool operator()(Window& window) const {
+      RuleContainer::iterator it = rules->find(window.GetType());
+      if (it != rules->end()) {
+        Rule& rule = it->second;       
+        window.set_properties(rule.properties());        
+      }      
+      return false;
+    }
+  } recursive_apply;   
+  recursive_apply.rules = &rules_;
+  struct { 
+    bool operator()(Window& window) const { return false; }    
+  } no_abort;  
+  window->PreOrderTreeTraverse(recursive_apply, no_abort);
+}
+
+void Rule::InheritFrom(const Rule& rule) {
+  Properties::Container::const_iterator it = rule.properties().elements().begin();
+  for ( ; it != rule.properties().elements().end(); ++it) {    
+     Properties::Container::const_iterator result = properties_.elements().find(it->first);
+     if (result == properties_.elements().end()) {
+       properties_.set(it->first, it->second);
+     }
+  }
+}
+
+void Rules::InheritFrom(const Rule& parent_rule) {
+  RuleContainer::iterator it = rules_.begin();
+  for ( ; it != rules_.end(); ++it) {
+    it->second.InheritFrom(parent_rule);
+  }   
+}
+
 // Window
 Window::Window() :   
     parent_(0),
@@ -1411,8 +1448,7 @@ Window::Container Window::SubItems() {
 }     
 
 // Group
-Group::Group() {
-  set_imp(ui::ImpFactory::instance().CreateWindowImp());
+Group::Group() {  
   set_auto_size(false, false);
 }
 
@@ -1424,8 +1460,13 @@ Group::Group(WindowImp* imp) {
 void Group::Add(const Window::Ptr& window) {  
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
+  } 
+  items_.push_back(window);  
+  Rules::RuleContainer::iterator it = rules_.rules_.begin();
+  for (; it != rules_.rules_.end(); ++it) {    
+    window->add_rule(it->second);
   }
-  items_.push_back(window);
+  rules_.ApplyTo(window);
   window->set_parent(this);  
   window->needsupdate();
 }
@@ -1913,7 +1954,7 @@ TreeView::TreeView(TreeViewImp* imp) : Window(imp) {
 }
 
 void TreeView::set_properties(const Properties& properties) {
-  for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {
     if (it->first == "backgroundcolor") {
       set_background_color(boost::get<ARGB>(it->second.value()));
     } else
@@ -2033,7 +2074,7 @@ ListView::ListView(ListViewImp* imp) : Window(imp) {
 }
 
 void ListView::set_properties(const Properties& properties) {
-  for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {    
     if (it->first == "backgroundcolor") {
       set_background_color(boost::get<ARGB>(it->second.value()));
     } else
@@ -2267,7 +2308,7 @@ Edit::Edit() : Window(ui::ImpFactory::instance().CreateEditImp()) {
   set_auto_size(false, false);
 }
 
-Edit::Edit(InputType::Type type) {
+Edit::Edit(InputType::Type type) : Window(0) {
   switch (type) {
     case InputType::NUMBER:
       set_imp(ui::ImpFactory::instance().CreateNumberEditImp());
@@ -2281,7 +2322,7 @@ Edit::Edit(EditImp* imp) : Window(imp) {
 }
 
 void Edit::set_properties(const Properties& properties) {
-  for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {    
     if (it->first == "backgroundcolor") {
       set_background_color(boost::get<ARGB>(it->second.value()));
     } else
@@ -2821,6 +2862,18 @@ void Scintilla::Undo() {
 void Scintilla::Redo() {
   if (imp()) {
     imp()->dev_redo();
+  }
+}
+
+void Scintilla::PreventInput() {
+  if (imp()) {
+    imp()->dev_prevent_input();
+  }
+}
+
+void Scintilla::EnableInput() {
+  if (imp()) {
+    imp()->dev_enable_input();
   }
 }
 

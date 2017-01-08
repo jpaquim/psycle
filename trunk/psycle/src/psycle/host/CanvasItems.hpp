@@ -93,7 +93,7 @@ class Text : public Window {
   Text();
   Text(const std::string& text);
 
-  static std::string type() { return "text"; }
+  static std::string type() { return "text"; }  
   static WindowTypes::Type window_type() { return WindowTypes::TEXT; }
 
   virtual void set_property(const ConfigurationProperty& configuration_property);

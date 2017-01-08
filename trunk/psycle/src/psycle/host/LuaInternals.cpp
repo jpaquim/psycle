@@ -130,7 +130,7 @@ int LuaStockBind::value(lua_State* L) {
   int stock_key = luaL_checkinteger(L, 1);    
   PsycleStock stock;
   ui::MultiType result =stock.value(stock_key);  
-  if (result.which() == 0) {
+  if (result.which() == 1) {
     lua_pushnumber(L, boost::get<ARGB>(stock.value(stock_key)));
   } else {
     luaL_error(L, "Wrong Property type.");
