@@ -2,7 +2,8 @@ return {
   title = "MAIN MENU",
   keymap = {
     J = "helpmain",
-    K = "kmenu"
+    K = "kmenu",
+    Q = "quickmenu"
   },
   display = {
     {section = "--Cursor Movement--"},
@@ -11,6 +12,7 @@ return {
     {shortdesc = "", desc = "^E line up   ^X line down"},    
     {section = "--Other Menus--"},
     {shortdesc = "^J", desc = "Help"},
-    {shortdesc = "^K", desc = "Block"}
+    {shortdesc = "^K", desc = "Block"},
+    {shortdesc = "^Q", desc = "Quick"}
   }
 }

@@ -938,29 +938,31 @@ class ConfigurationProperty {
 
 class Window;
 
-typedef boost::variant<ARGB, std::string, bool, FontInfo> MultiType;
+typedef boost::variant<boost::blank, ARGB, std::string, bool, FontInfo> MultiType;
 
 class Stock {
  public:
   virtual ~Stock() {}
   virtual Stock* Clone() const { return new Stock(*this); }
-  virtual MultiType value(int stock_key) const { return MultiType(); }
+  virtual MultiType value(int stock_key) const { return MultiType(ARGB(0xFF000000)); }
   virtual std::string key_tostring(int stock_key) const { return ""; }
 };
 
 class Property {
  public:     
-  Property() : stock_(0), stock_key_(-1) {}
-  Property(const Stock& stock) : stock_(stock.Clone()), stock_key_(-1) {}
+  Property() : stock_(0), stock_key_(-1), inherit_(false) {}
+  Property(MultiType value) : stock_(0), stock_key_(-1), value_(value), inherit_(false) {}
+  Property(const Stock& stock) : stock_(stock.Clone()), stock_key_(-1), inherit_(false) {}
   Property(const Property& other) : 
        stock_((other.stock_) ? other.stock_->Clone() : 0),
        value_(other.value_), 
-       stock_key_(other.stock_key_) {       
+       stock_key_(other.stock_key_),
+       inherit_(false) {       
   }
   Property& operator=(Property other) {    
     swap(*this, other);
     return *this;
-  }  
+  }    
   // Property(Property&& other) : Property() {
   //  swap(*this, other);
   // }  
@@ -970,11 +972,12 @@ class Property {
     swap(first.value_, second.value_);
     swap(first.stock_key_, second.stock_key_);
     swap(first.stock_, second.stock_);
+    swap(first.inherit_, second.inherit_);
   }
 
   MultiType value() const { 
     MultiType result;
-    if (stock_key_ != -1) {
+    if (stock_ && stock_key_ != -1) {
       result = MultiType(stock_->value(stock_key_));
     } else {
       result = value_;
@@ -985,17 +988,29 @@ class Property {
   void set_stock_key(int stock_key) { stock_key_ = stock_key; }
   int stock_key() const { return stock_key_; }
   
+  ARGB ARGB_value() const { return boost::get<ARGB>(value_); }
+  void EnableInherit() { inherit_ = true; }
+  bool inherited() const { return inherit_; }
+  bool is_blank() const { return value_.which() == 0; }
+
  private:
   Stock* stock_;
   MultiType value_;  
   int stock_key_;
+  bool inherit_;
 };
 
 
 class Properties {
  public:
-  typedef std::map<std::string, Property> Container;
-  Container elements;
+  typedef std::map<std::string, Property> Container;  
+  void set(const std::string& key, const Property& prop) {
+    elements_[key] = prop;
+  }
+ // private:
+  const Container& elements() const { return elements_; }
+  private:
+   Container elements_;
 };
 
 namespace WindowTypes {
@@ -1031,6 +1046,35 @@ class Command {
 
   virtual ~Command() {}
   virtual void Execute() = 0; 
+};
+
+class Rule {
+ public:
+  Rule() {}
+  Rule(const std::string& selector, const Properties& properties) : 
+      selector_(selector),
+      properties_(properties) {
+  }  
+  ~Rule() {}
+
+  const std::string selector() const { return selector_; }
+  Properties& properties() { return properties_; }
+  const Properties& properties() const { return properties_; }
+  void InheritFrom(const Rule& rule);
+
+ private:
+  std::string selector_;
+  Properties properties_;
+};
+
+class Rules {
+  public:
+   typedef std::map<std::string, Rule> RuleContainer;
+   void add(Rule rule) { rules_[rule.selector()] = rule; }
+   void ApplyTo(const boost::shared_ptr<ui::Window>& window);
+   void InheritFrom(const Rule& rule);
+  // private:
+   RuleContainer rules_;
 };
 
 class Window : public boost::enable_shared_from_this<Window> {
@@ -1236,6 +1280,15 @@ class Window : public boost::enable_shared_from_this<Window> {
   } 
   virtual bool transparent() const;
 
+  virtual void add_rule(const Rule& rule) {
+    rules_.add(rule);
+    for (iterator i = begin(); i != end(); ++i) {
+      Window::Ptr window = *i;
+      window->rules_.InheritFrom(rule);
+      window->add_rule(rule);      
+    }
+  }  
+
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
   virtual void WorkMouseUp(MouseEvent& ev) { OnMouseUp(ev); }
@@ -1250,7 +1303,9 @@ class Window : public boost::enable_shared_from_this<Window> {
   mutable bool update_;
   mutable std::auto_ptr<Area> area_;  
   mutable std::auto_ptr<Area> fls_area_;
-    
+
+ // private    
+  Rules rules_;
  private:
 	ui::BoxSpace sum_border_space() const;
   std::auto_ptr<WindowImp> imp_;
@@ -1262,7 +1317,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   bool visible_, pointer_events_;  
   AlignStyle::Type align_;		
 	bool align_dimension_changed_;
-  ui::Dimension min_dimension_;
+  ui::Dimension min_dimension_;  
 };
 
 class ChildPosEvent : public Event {
@@ -1277,8 +1332,9 @@ class ChildPosEvent : public Event {
 
 class Group : public Window {
  public:  
-  static std::string type() { return "canvasgroup"; }
+  static std::string type() { return "group"; }
   static WindowTypes::Type window_type() { return WindowTypes::GROUP; }
+  virtual std::string GetType() const { return "group"; }
 
 	typedef boost::shared_ptr<Group> Ptr;
   typedef boost::shared_ptr<const Group> ConstPtr;
@@ -1799,6 +1855,7 @@ class TreeView : public Window {
   typedef boost::weak_ptr<const TreeView> ConstWeakPtr;
   
   static std::string type() { return "treeview"; }
+  virtual std::string GetType() const { return "treeview"; }
   static WindowTypes::Type window_type() { return WindowTypes::TREEVIEW; }
 
   TreeView();
@@ -1859,6 +1916,7 @@ class ListView : public Window {
  public:  
   static std::string type() { return "listview"; }  
   static WindowTypes::Type window_type() { return WindowTypes::LISTVIEW; }
+  virtual std::string GetType() const { return "listview"; }
 
   typedef boost::shared_ptr<ListView> Ptr;
   typedef boost::shared_ptr<const ListView> ConstPtr;
@@ -2028,7 +2086,8 @@ class Edit : public Window {
   typedef boost::weak_ptr<const Edit> ConstWeakPtr;
 
   static std::string type() { return "edit"; }
-  static WindowTypes::Type window_type() { return WindowTypes::EDIT; }
+  static WindowTypes::Type window_type() { return WindowTypes::EDIT; }  
+  virtual std::string GetType() const { return "edit"; }
 
   Edit();
   Edit(InputType::Type type);
@@ -2315,10 +2374,11 @@ class Scintilla : public Window {
   void ClearAll();
   void Undo();
   void Redo();
+  void EnableInput();
+  void PreventInput();
   virtual bool transparent() const { return true; }  
   virtual void OnFirstModified() {}
-  virtual void OnMarginClick(int line_pos) {}
-
+  virtual void OnMarginClick(int line_pos) {}  
  private:
   static std::string dummy_str_;
 };
@@ -3000,7 +3060,9 @@ class ScintillaImp : public WindowImp {
   virtual void dev_set_tab_width(int width_in_chars) = 0;
   virtual int dev_tab_width() const = 0;
   virtual void dev_undo() = 0;
-  virtual void dev_redo() = 0;  
+  virtual void dev_redo() = 0;
+  virtual void dev_enable_input() = 0;
+  virtual void dev_prevent_input() = 0;
 };
 
 enum FileAccess {  

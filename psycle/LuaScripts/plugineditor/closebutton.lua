@@ -12,7 +12,6 @@ local boxspace = require("psycle.ui.boxspace")
 local item = require("psycle.ui.item")
 local text = require("psycle.ui.text")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
-local signal = require("psycle.signal")
 local toolicon = require("psycle.ui.canvas.toolicon")
 
 local closebutton = {}

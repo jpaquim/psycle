@@ -32,6 +32,41 @@ machinecreate.generator.outputs = {
   {template = "plugin.lu$", path = "machine.lua"}
 }
 
+machinecreate.hostextension = {}
+machinecreate.hostextension.label = "hostextension"
+machinecreate.hostextension.isplugin = true
+machinecreate.hostextension.general = orderedtable.new()
+machinecreate.hostextension.general.machinename = property:new("", "machinename")
+machinecreate.hostextension.general.vendor = property:new("", "vendor")
+machinecreate.hostextension.general.machmode = property:new("machine.HOST", "machmode"):preventedit()
+machinecreate.hostextension.outputs = {
+  {template = "hostextension.lu$", path = "machine.lua"},  
+  {template = "canvas.lu$", path = "maincanvas.lua"},
+  {template = "defaultsetting.lu$", path = "defaultsetting.lua"},
+  {template = "global.lu$", path = "global.lua"}
+}
+machinecreate.hostextension.outputs[2].properties = orderedtable.new()
+machinecreate.hostextension.outputs[2].properties.classname = property:new("maincanvas", "classname")
+local maincanvasrequirecode =
+[[
+local titlebaricons = require("psycle.ui.canvas.titlebaricons")
+local systems = require("psycle.ui.systems")
+local toolicon = require("psycle.ui.canvas.toolicon")
+]]
+machinecreate.hostextension.outputs[2].properties.requirecode = property:new(maincanvasrequirecode):preventedit()
+local maincanvasinitcode = [[
+  self:invalidatedirect()
+  self:addornament(ornamentfactory:createfill(0xFFCACACA))
+  self.toolbar = group:new(self):setautosize(false, true):setalign(item.ALTOP)
+  self.titlebaricons = titlebaricons:new(self.toolbar):setalign(item.ALRIGHT)  
+  local systems = systems:new()  
+  local setting = psycle.proxy.settingsmanager:setting()
+  systems:setstyleclass(toolicon.windowtype, setting.general.children.ui.children.toolicon.properties) 
+  self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
+  systems:new():updatewindows()
+]]
+machinecreate.hostextension.outputs[2].properties.initcode = property:new(maincanvasinitcode):preventedit()
+
 machinecreate.class = {}
 machinecreate.class.label = "class"
 machinecreate.class.isplugin = false

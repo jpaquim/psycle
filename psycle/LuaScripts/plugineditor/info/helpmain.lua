@@ -10,6 +10,7 @@ return {
     {shortdesc = "S", desc = "Status line"},
     {section = "--Other Menus--"},
     {shortdesc = "^J", desc = "Help"},
-    {shortdesc = "^K", desc = "Block"}
+    {shortdesc = "^K", desc = "Block"},
+    {shortdesc = "^Q", desc = "Quick"}
   }
 }

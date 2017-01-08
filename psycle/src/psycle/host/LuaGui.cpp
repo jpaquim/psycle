@@ -477,7 +477,7 @@ int LuaSystemsBind::setstyleclass(lua_State* L) {
       Property p(stock);
       p.set_value(value);
       p.set_stock_key(stock_key);
-      properties.elements[key] = p;
+      properties.set(key, p);
     }
     lua_pop(L, 1);
   }  
@@ -699,21 +699,23 @@ void CanvasItem<T>::set_properties(const ui::Properties& properties) {
   try {
     if (in.open("setproperties")) {
       LuaHelper::new_lua_module(L, "psycle.orderedtable");      
-      for (Properties::Container::const_iterator it = properties.elements.begin(); it != properties.elements.end(); ++it) {    
+      for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {    
         const Property& p = it->second;
-        LuaHelper::new_lua_module(L, "property");        
-        MultiType value = p.value();
-        if (value.which() == 0) {
-          lua_pushnumber(L, boost::get<ARGB>(p.value()));
-        } else {
-          luaL_error(L, "Wrong Property type.");
+        if (!p.is_blank()) {
+          LuaHelper::new_lua_module(L, "property");        
+          MultiType value = p.value();        
+          if (value.which() == 1) {
+            lua_pushnumber(L, boost::get<ARGB>(p.value()));
+          } else {
+            luaL_error(L, "Wrong Property type.");
+          }
+          lua_setfield(L, -2, "value_");
+          if (p.stock_key() != -1) {
+            lua_pushinteger(L, p.stock_key());
+            lua_setfield(L, -2, "stock_key_");
+          }
+          lua_setfield(L, -2, it->first.c_str());
         }
-        lua_setfield(L, -2, "value_");
-        if (p.stock_key() != -1) {
-          lua_pushinteger(L, p.stock_key());
-          lua_setfield(L, -2, "stock_key_");
-        }
-        lua_setfield(L, -2, it->first.c_str());
       }
       in << pcall(0);
     }
@@ -969,6 +971,20 @@ bool LuaItem::transparent() const {
   return result;
 }
 
+std::string LuaItem::GetType() const {
+  std::string result;
+  LuaImport in(L, const_cast<LuaItem*>(this), locker(L));
+  try {
+    if (in.open("typename")) {
+      in << pcall(1) >> result;
+    } else {
+      result = CanvasItem<ui::Window>::GetType();
+    }
+  } catch(std::exception& e) {
+    ui::alert(e.what());
+  }
+  return result;
+}
 
 template <class T>
 boost::shared_ptr<ui::Group> LuaItemBind<T>::testgroup(lua_State* L) {
@@ -1215,17 +1231,17 @@ int LuaGroupBind<T>::removeall(lua_State* L) {
 template <class T>
 int LuaGroupBind<T>::remove(lua_State* L) {  
   using namespace ui;
-  boost::shared_ptr<T> group = LuaHelper::check_sptr<T>(L, 1, meta);    
-  Window::Ptr item = test(L, 2);
-  if (item) {
-    std::vector<Window::Ptr> subitems = item->SubItems();
+  T::Ptr group = LuaHelper::check_sptr<T>(L, 1, meta);    
+  Window::Ptr window = test(L, 2);
+  if (window) {
+    std::vector<Window::Ptr> subitems = window->SubItems();
     T::iterator it = subitems.begin();
     for ( ; it != subitems.end(); ++it) {
       Window::Ptr subitem = *it;
       LuaHelper::unregister_userdata<>(L, subitem.get());    
     }
-    LuaHelper::unregister_userdata<>(L, item.get());
-    group->Remove(item);      
+    LuaHelper::unregister_userdata<>(L, window.get());
+    group->Remove(window);      
   } else {
     luaL_error(L, "Argument is no canvas item.");
   }  
@@ -1237,12 +1253,12 @@ int LuaGroupBind<T>::add(lua_State* L) {
   using namespace ui;
   int err = LuaHelper::check_argnum(L, 2, "self, item");
   if (err!=0) return err;
-  boost::shared_ptr<T> group = LuaHelper::check_sptr<T>(L, 1, meta);
-  Window::Ptr item = test(L, 2);
-  if (item) {
-    try {
-      group->Add(item);
-      LuaHelper::register_userdata(L, item.get());
+  T::Ptr group = LuaHelper::check_sptr<T>(L, 1, meta);
+  Window::Ptr window = test(L, 2);
+  if (window) {
+    try {     
+      group->Add(window);
+      LuaHelper::register_userdata(L, window.get());
     } catch(std::exception &e) {
       luaL_error(L, e.what());
     }

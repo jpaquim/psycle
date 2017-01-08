@@ -1,0 +1,65 @@
+-- titlebaricons.lua
+
+local cfg = require("psycle.config"):new("PatternVisual")
+local signal = require("psycle.signal")
+local point = require("psycle.ui.point")
+local dimension = require("psycle.ui.dimension")
+local rect = require("psycle.ui.rect")
+local boxspace = require("psycle.ui.boxspace")
+local item = require("psycle.ui.item")
+local image = require("psycle.ui.image")
+local toolicon = require("psycle.ui.canvas.toolicon")
+local group = require("psycle.ui.group")
+local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
+
+local titlebaricons = group:new(parent)
+
+titlebaricons.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
+
+function titlebaricons:new(parent)
+  local m = group:new(parent)
+  setmetatable(m, self)
+  self.__index = self    
+  m:init()
+  return m
+end
+
+function titlebaricons:init() 
+  self:setautosize(false, false)
+      :setalign(item.ALRIGHT)
+  local icon = toolicon:new(self, titlebaricons.picdir .. "arrow_out.png", 0xFFFFFF)
+                       :setalign(item.ALRIGHT)
+  icon.is_toggle = true  
+  local windowinimg = image:new()
+                           :load(titlebaricons.picdir .. "arrow_in.png")
+                           :settransparent(0xFFFFFF)                                 
+  icon:settoggleimage(windowinimg)
+  local that = self
+  function icon:onclick()
+    self:resethover()    
+    psycle.proxy:toggleviewport()      
+  end
+  self:formattoolicon(icon)  
+  self.settingsicon = toolicon:new(self, titlebaricons.picdir .. "settings.png", 0xFFFFFF)
+                              :setalign(item.ALRIGHT)                
+  self:formattoolicon(self.settingsicon)    
+  local reloadicon = toolicon:new(self, titlebaricons.picdir .. "reload.png", 0xFFFFFF)
+                             :setalign(item.ALRIGHT)      
+                             :setdebugtext("reloadicon")
+  function reloadicon:onclick()
+    self:resethover()
+    psycle.proxy:reload()
+  end
+  self:formattoolicon(reloadicon)  
+  self:setposition(rect:new(point:new(), dimension:new(300, 20)))
+end
+ 
+function titlebaricons:formattoolicon(icon)    
+  icon:setautosize(false, false)
+  icon:setverticalalignment(toolicon.ALCENTER)
+  icon:setjustify(toolicon.CENTERJUSTIFY)
+  icon:setposition(rect:new(point:new(), dimension:new(40, 0)))
+  return self
+end
+
+return titlebaricons

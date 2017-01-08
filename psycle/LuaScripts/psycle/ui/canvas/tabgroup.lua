@@ -115,6 +115,10 @@ function tabgroup:init()
                        :setalign(window.ALCLIENT)    
 end
 
+function tabgroup:typename()
+  return "toolicon"
+end
+
 function tabgroup:initdefaultcolors()
   self.color_ = 0xffffffff  
   self.backgroundcolor_ = 0xFF333333

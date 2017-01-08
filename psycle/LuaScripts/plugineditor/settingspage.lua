@@ -41,7 +41,7 @@ function settingspage:new(parent, machine)
     setmetatable(result, self)
     self.__index = self
     result:init(machine)
-  settingspage.hasinstance = true
+    settingspage.hasinstance = true
   end
   return result
   

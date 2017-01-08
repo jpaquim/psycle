@@ -1,4 +1,4 @@
-local item = require("psycle.ui.canvas.item")
+local item = require("psycle.ui.item")
 local midi = require("psycle.midi")
 local keymap = require("psycle.ui.canvas.pianokeymap")
 local point = require("psycle.ui.point")
@@ -30,17 +30,17 @@ function pianokeys:init()
   self:initdefaultcolors()  
   self:viewpiano()  
   self:setevheight(10) 
-  self:setkeydirection(pianokeys.KEYDIRECTIONBOTTOM)  
+  self:setkeydirection(pianokeys.KEYDIRECTIONTOP)  
 end
 
 function pianokeys:initdefaultcolors()
   self.keycolors = {
-    whiteup = 0xFFFFFF,
-    whitedown = 0x000000,
-    blackup = 0x000000,
-    blackdown = 0x0000AA,
-    whiteseparator = 0x00000,
-    blackseparator = 0x00000
+    whiteup = 0xFFFFFFFF,
+    whitedown = 0xFF000000,
+    blackup = 0xFF000000,
+    blackdown = 0xFF0000AA,
+    whiteseparator = 0xFF00000,
+    blackseparator = 0xFF00000
   }
 end
 
@@ -56,8 +56,7 @@ function pianokeys:setkeydirection(keydirection)
   self.keydirection_ = keydirection
 end
 
-function pianokeys:setevheight(height)
-  local x, y, w, h = self:pos()
+function pianokeys:setevheight(height)  
   self.evheight = height
   self.octpx = (12.0*height) / 7.0;  
   self.bksmaller = math.floor(self.octpx*0.25)    
@@ -113,7 +112,7 @@ function pianokeys:drawkeymap(g, d)
 end
 
 function pianokeys:drawwhite(g, d)
-  local x, y, w, h = self:pos()
+  local w, h = self:position():width(), self:position():height()
   g:setcolor(self.keycolors.whiteup):fillrect(rect:new(point:new(), dimension:new(w, self.height)))  
   for note=d.from - d.from%12, d.to, 12 do
     local yos = (d.last - note + 1)*d.eh	
@@ -138,28 +137,28 @@ function pianokeys:drawwhite(g, d)
     psycle.output("a"..d.keymap:name(note))
     g:setcolor(self.keycolors.blackup)
     if self.keydirection_ == pianokeys.KEYDIRECTIONLEFT then 
-	    g:drawstring(d.keymap:name(note), 0, yos-d.eh)
+	    --g:drawstring(d.keymap:name(note), point:new(yos - d.eh))
     elseif self.keydirection_ == pianokeys.KEYDIRECTIONRIGHT then
-     local tw, th = g:textsize(d.keymap:name(note))
-     g:drawstring(d.keymap:name(note), w - tw, yos-d.eh)
+     --local tw, th = g:textsize(d.keymap:name(note))
+     --g:drawstring(d.keymap:name(note), w - tw, yos-d.eh)
     elseif self.keydirection_ == pianokeys.KEYDIRECTIONTOP then 
-     local tw, th = g:textsize(d.keymap:name(note))
-     g:drawstring(d.keymap:name(note), yos-d.eh, 0)    
+     --local tw, th = g:textsize(d.keymap:name(note))
+     --g:drawstring(d.keymap:name(note), yos-d.eh, 0)    
     elseif self.keydirection_ == pianokeys.KEYDIRECTIONBOTTOM then
-     local tw, th = g:textsize(d.keymap:name(note))
-     g:drawstring(d.keymap:name(note), yos-d.eh, h - th)
+     --local th = g:textdimension(d.keymap:name(note)):height()
+     --g:drawstring(d.keymap:name(note), yos-d.eh, h - th)
     end
   end    
 end
 
 function pianokeys:drawblack(g, d)
-  local x, y, w, h = self:pos()
+  local w, h = self:position():width(), self:position():height()
   for note=d.from, d.to do     
     local i = pianokeys.bk[note%12 + 1]
 	  if (i~=-1) then      
 	    local yp = (d.last-note)*d.eh --+ pianokeys.bkpos[i]*d.eh
 	    g:setcolor(self.keycolors.blackseparator)
-      g:drawrect(0, yp, self.bkwidth, self.bkheight)
+      --g:drawrect(rect:new(point:new(0, yp), dimension:new(self.bkwidth, self.bkheight)))
       self:setkeycolor(g, false, self.keydown == note)
       if self.keydirection_ == pianokeys.KEYDIRECTIONLEFT then
         g:fillrect(rect:new(point:new(0, yp), dimension:new(w * 0.75, self.bkheight)))

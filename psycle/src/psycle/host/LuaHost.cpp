@@ -232,6 +232,9 @@ void LuaStarter::PrepareState() {
     {"addmenu", addmenu},
     {"replacemenu", replacemenu},
     {"addextension", addextension},
+    {"output", LuaProxy::terminal_output},
+    {"alert", LuaProxy::alert},
+    {"confirm", LuaProxy::confirm},
     {NULL, NULL}
   };
   lua_newtable(L);
@@ -460,8 +463,8 @@ void LuaProxy::Reload() {
     lock();    
     host_->set_crashed(true);
     lua_State* old_state = L;
+    LuaMachine* old_machine = lua_mac_;
     ui::Systems* old_systems = systems_.get();    
-    lua_State* new_state = 0;
     try {
       L = LuaGlobal::load_script(host_->GetDllName());      
       systems_.release();
@@ -482,27 +485,32 @@ void LuaProxy::Reload() {
       }
       OnActivated(2);      
     } catch(std::exception &e) {
-      if (new_state) {        
-        lua_close(new_state);
+      if (L) {        
+        lua_close(L);
       }
       L = old_state;
       systems_.reset(old_systems);
+      lua_getglobal(L, "psycle");
+      lua_getfield(L, -1, "__self");
+      LuaProxy* proxy = *(LuaProxy**)luaL_checkudata(L, -1, "psyhostmeta");    
+      old_machine->set_mac(proxy->host_);
+      proxy->lua_mac_ = old_machine;
+      proxy->lua_mac_->setproxy(proxy);
       std::string s = std::string("Reload Error, old script still running!\n") + e.what();      
       unlock();
       throw std::exception(s.c_str());  
     }     
     host_->Mute(false);
-    host_->set_crashed(false);  
+    host_->set_crashed(false);    
     unlock();
   } CATCH_WRAP_AND_RETHROW(host())
 }
 
 int LuaProxy::alert(lua_State* L) {    
-  const char* msg = luaL_checkstring(L, 1);    
-  AfxMessageBox(msg);
+  const char* msg = luaL_checkstring(L, 1);  
+  ui::alert(msg);
   return 0;
 }
-
 
 int LuaProxy::confirm(lua_State* L) {    
   const char* msg = luaL_checkstring(L, 1);    
@@ -1147,11 +1155,10 @@ void HostExtensions::AutoInstall() {
   PluginCatcher* plug_catcher = dynamic_cast<PluginCatcher*>(&Global::machineload()); 
 	assert(plug_catcher);
   PluginInfoList list = plug_catcher->GetLuaExtensions();
-	if (list.size() > 0) {            
-	  PluginInfoList list = plug_catcher->GetLuaExtensions();
+	if (list.size() > 0) {	          
+    std::string start_script_path =
+        PsycleGlobal::configuration().GetAbsoluteLuaDir() + "\\start.lua";
     std::ofstream outfile;
-    std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
-    std::string start_script_path = script_path + "\\start.lua";
     outfile.open(start_script_path.c_str(), std::ios_base::app);
 	  PluginInfoList::iterator it = list.begin();	  
 	  for (; it != list.end(); ++it) {

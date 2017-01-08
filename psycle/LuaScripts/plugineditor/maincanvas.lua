@@ -43,6 +43,7 @@ local info = require("info")
 local toolicon = require("psycle.ui.canvas.toolicon")
 local toolbar = require("psycle.ui.canvas.toolbar")
 local tabgroup = require("psycle.ui.canvas.tabgroup")
+local titlebaricons = require("psycle.ui.canvas.titlebaricons")
 local separator = require("psycle.ui.canvas.separator")
 
 local project = require("project")
@@ -58,6 +59,7 @@ local serpent = require("psycle.serpent")
 local sci = require("scintilladef")
 
 local maincanvas = canvas:new()
+local standardsheet = require("psycle.ui.standarduisheet")
 
 maincanvas.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 
@@ -70,9 +72,12 @@ function maincanvas:new(machine)
   return c
 end
 
-function maincanvas:init()    
+function maincanvas:init()
+  for i = 1, #standardsheet do    
+    self:addrule(standardsheet[i])
+  end  
   self.machines = machines:new()  
-  self:invalidatedirect()  
+  self:invalidatedirect()
   self:initstyleclasses(self.machine_.settingsmanager:setting())
   self:setupfiledialogs()  
   self:createcreateeditplugin()  
@@ -106,7 +111,7 @@ function maincanvas:oncmdinfo(cmd)
       self.info.helplevel = 1
     elseif cmd == "sethelplevel2" then
       self.info.helplevel = 2
-    elseif cmd == "sethelplevel3" then      
+    elseif cmd == "sethelplevel3" then
       self.info.helplevel = 3
       if not self.info:visible() then
         self.info:show()      
@@ -124,9 +129,13 @@ function maincanvas:oncmdinfo(cmd)
       self.pages:removepage(self.pages:activepage())
     else    
       self.pages:activepage():oncmd(cmd)
+    end    
+    self.statusbar.status.prompttext:settext("")
+    if cmd == "findtext" then
+       self:displaysearch() 
+    else
+      self:onstatuslineescape()
     end
-    self.statusbar.status.prompttext:settext("")    
-    self:onstatuslineescape()    
   end  
 end
 
@@ -201,10 +210,7 @@ function maincanvas:createoutputs()
        = tabgroup:new(self)
                  :setposition(rect:new(point:new(), dimension:new(0, 180)))
                  :setalign(item.ALBOTTOM)
-  self.output = output:new()
-  local txt = "hello world, this a test. I love you all. Feliz año nuevo!"
-  self.output:f(sci.SCI_ADDTEXT, #txt, txt)
-  self:setindicator(self.output)    
+  self.output = output:new()  
   self.outputs:addpage(self.output, "Output")    
   self.callstack = self:createcallstack()  
   self.outputs:addpage(self.callstack, "Call stack")  
@@ -249,7 +255,7 @@ function maincanvas:setupfiledialogs()
   self.fileopen = fileopen:new()
   local that = self
   function self.fileopen:onok(fname)    
-  that:openfromfile(fname)   
+    that:openfromfile(fname)
   end
   self.filesaveas = filesave:new() 
 end
@@ -271,8 +277,8 @@ function maincanvas:dopageexist(fname)
   for i=1, #items do
     local page = items[i]
     if page:filename() == fname then
-       found = page
-       break
+      found = page
+      break
     end
   end
   return found
@@ -316,8 +322,8 @@ function maincanvas:onkeydown(ev)
       end
     end
     if not done then      
-      if ev:keycode() == 0x4A or ev:keycode() == 0x4B then
-        self.statusbar:setcontrolkey(ev:keycode())      
+      if ev:keycode() == 0x4A or ev:keycode() == 0x4B or ev:keycode() == 0x51 then
+        self.statusbar:setcontrolkey(ev:keycode())        
         self.info:jump(ev:keycode())
         self.statusbar.status.control:setfocus()
       elseif ev:keycode() == 0x47 then
@@ -411,7 +417,7 @@ function maincanvas:savepage()
   end
 end
 
-function maincanvas:playplugin()    
+function maincanvas:playplugin()  
   local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
      machine = machine:new(pluginindex)
@@ -431,7 +437,7 @@ function maincanvas:playplugin()
       self:setpluginindex(pluginindex)
     self.playicon:seton(true)   
     end
-  end
+  end  
 end
 
 function maincanvas:inittoolbar()  
@@ -442,20 +448,16 @@ function maincanvas:inittoolbar()
   self.tgsmall = group:new(self)
                       :setautosize(false, true)
                       :setalign(item.ALTOP)                 
-  self.windowtoolbar = self:initwindowtoolbar():setalign(item.ALRIGHT)
-  local settingsicon = toolicon:new(self.tg, maincanvas.picdir.."settings.png", 0xFFFFFF)
-  self:formattoolicon(settingsicon)
-  settingsicon:setalign(item.ALRIGHT)                
+  self.windowtoolbar = titlebaricons:new(self.tg)
   local that = self
-  function settingsicon:onclick()
+  function self.windowtoolbar.settingsicon:onclick()
     local settingspage = settingspage:new(nil, that.machine_)                                        
     if settingspage then 
       settingspage:setmargin(boxspace:new(2, 0, 0, 0))
-      settingspage.doapply:connect(maincanvas.onapplysetting, that)
+      settingspage.doapply:connect(maincanvas.onapplysetting, that)      
       that.pages:addpage(settingspage, "Settings")
-    end
-  end  
-  self:createreloadicon()
+    end    
+  end
   self:initmachineselector(self.tg)
   self:initfiletoolbar():setalign(item.ALLEFT)
   separator:new(self.tg):setalign(item.ALLEFT):setmargin(boxspace:new(10))
@@ -535,10 +537,10 @@ function maincanvas:onstatuslineescape(edit)
 end
 
 function maincanvas:initwindowtoolbar()    
-  local icon = toolicon:new(self.tg, maincanvas.picdir.."arrow_out.png", 0xFFFFFF)
+  local icon = toolicon:new(self.tg, maincanvas.picdir .. "arrow_out.png", 0xFFFFFF)
   icon.is_toggle = true  
   local windowinimg = image:new()
-                            :load(maincanvas.picdir.."arrow_in.png")
+                            :load(maincanvas.picdir .. "arrow_in.png")
                             :settransparent(0xFFFFFF)                                 
   icon:settoggleimage(windowinimg)
   self:formattoolicon(icon)
@@ -558,7 +560,7 @@ function maincanvas:fillinstancecombobox()
     for machineindex= 0, 255 do
       local machine = machine:new(machineindex);       
       if machine and machine:type() == machine.MACH_LUA and machine:pluginname() == psycle.proxy.project:plugininfo():name() then
-        items[#items + 1] = machine:pluginname().."["..machineindex.."]"
+        items[#items + 1] = machine:pluginname() .. "[" .. machineindex .. "]"
         self.cbxtopluginindex[#self.cbxtopluginindex + 1] = machineindex
       end
     end     
@@ -802,13 +804,13 @@ end
 
 function maincanvas:initstyleclasses(setting)  
   local systems = systems:new()
-  systems:setstyleclass(systems.windowtypes.EDIT, setting.general.children.ui.children.edit.properties)
-  systems:setstyleclass(systems.windowtypes.LISTVIEW, setting.general.children.ui.children.listview.properties)
-  systems:setstyleclass(systems.windowtypes.TREEVIEW, setting.general.children.ui.children.treeview.properties)
-  systems:setstyleclass(toolicon.windowtype, setting.general.children.ui.children.toolicon.properties)
+  --systems:setstyleclass(systems.windowtypes.EDIT, setting.general.children.ui.children.edit.properties)
+  --systems:setstyleclass(systems.windowtypes.LISTVIEW, setting.general.children.ui.children.listview.properties)
+  --systems:setstyleclass(systems.windowtypes.TREEVIEW, setting.general.children.ui.children.treeview.properties)
+  --systems:setstyleclass(toolicon.windowtype, setting.general.children.ui.children.toolicon.properties)
   systems:setstyleclass(advancededit.windowtype, setting.general.children.ui.children.advancededit.properties)
   systems:setstyleclass(statusbar.windowtype, setting.statusbar.properties)
-  systems:setstyleclass(tabgroup.windowtype, setting.general.children.ui.children.tabgroup.properties)
+  --systems:setstyleclass(tabgroup.windowtype, setting.general.children.ui.children.tabgroup.properties)
   systems:setstyleclass(output.windowtype, setting.output.properties)  
   systems:setstyleclass(textpage.windowtype, 
       self:mergeproperties(setting.textpage.properties, self:mergeproperties(
