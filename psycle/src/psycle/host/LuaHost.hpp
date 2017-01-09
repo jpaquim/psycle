@@ -107,10 +107,10 @@ class LuaProxy : public LuaControl {
   void OnTimer();
   void PutData(unsigned char* data, int size);
   int GetData(unsigned char **ptr, bool all);
-	uint32_t GetDataSize();
+  boost::uint32_t GetDataSize();
   void Command(int lastnote, int inst, int cmd, int val);
   void NoteOn(int note, int lastnote, int inst, int cmd, int val);
-	void NoteOff(int note, int lastnote, int inst, int cmd, int val);
+  void NoteOff(int note, int lastnote, int inst, int cmd, int val);
   bool DescribeValue(int parameter, char * txt);
   void SeqTick(int channel, int note, int ins, int cmd, int val);	
   double Val(int par);
