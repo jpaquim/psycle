@@ -244,7 +244,7 @@ end
 function maincanvas:createfileexplorer()
   local fileexplorer = fileexplorer:new(self, self.machine_.settingsmanager:setting().fileexplorer)
                                    :setposition(rect:new(point:new(), dimension:new(200, 0)))
-                   :setalign(item.ALLEFT)
+                                   :setalign(item.ALLEFT)
   fileexplorer:setpath(cfg:luapath())  
   fileexplorer.click:connect(maincanvas.onpluginexplorerclick, self)  
   --pluginexplorer.onremove:connect(maincanvas.onpluginexplorernoderemove, self)
@@ -813,9 +813,9 @@ function maincanvas:initstyleclasses(setting)
   --systems:setstyleclass(tabgroup.windowtype, setting.general.children.ui.children.tabgroup.properties)
   systems:setstyleclass(output.windowtype, setting.output.properties)  
   systems:setstyleclass(textpage.windowtype, 
-      self:mergeproperties(setting.textpage.properties, self:mergeproperties(
-          setting.lualexer.properties, setting.general.properties)))
-  systems:setstyleclass(info.windowtype, setting.general.properties)
+     self:mergeproperties(setting.textpage.properties, self:mergeproperties(
+  setting.lualexer.properties, setting.general.properties)))
+     systems:setstyleclass(info.windowtype, setting.general.properties)
   self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
 end
 

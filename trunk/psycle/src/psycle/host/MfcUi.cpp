@@ -289,9 +289,9 @@ void WindowTemplateImp<T, I>::OnDestroy() {
 template<class T, class I>
 void WindowTemplateImp<T, I>::dev_set_position(const ui::Rect& pos) {
 	ui::Point top_left = pos.top_left();
-	top_left.Offset(margin_.left(), margin_.top());
+	top_left.offset(margin_.left(), margin_.top());
   if (window() && window()->parent()) {
-	  top_left.Offset(window()->parent()->border_space().left() +
+	  top_left.offset(window()->parent()->border_space().left() +
 			                window()->parent()->padding().left(),
 									  window()->parent()->border_space().top() +
 			                window()->parent()->padding().top());
@@ -354,9 +354,9 @@ bool WindowTemplateImp<T, I>::dev_check_position(const ui::Rect& pos) const {
 	  ::MapWindowPoints(HWND_DESKTOP, GetParent()->m_hWnd, (LPPOINT)&rc, 2);	
 	}
   ui::Point top_left = pos.top_left();
-	top_left.Offset(margin_.left(), margin_.top());
+	top_left.offset(margin_.left(), margin_.top());
   if (window() && window()->parent()) {
-	  top_left.Offset(window()->parent()->border_space().left() +
+	  top_left.offset(window()->parent()->border_space().left() +
 			              window()->parent()->padding().left(),
 									  window()->parent()->border_space().top() +
 			              window()->parent()->padding().top());
@@ -373,7 +373,7 @@ template<class T, class I>
 ui::Rect WindowTemplateImp<T, I>::MapPosToBoxModel(const CRect& rc) const {
 	 ui::Point top_left(rc.left - margin_.left(), rc.top - margin_.top());   
 	   if (window() && window()->parent()) {       
-		   top_left.Offset(-window()->parent()->border_space().left() - 
+		   top_left.offset(-window()->parent()->border_space().left() - 
                        window()->parent()->padding().left(),
 			                 -window()->parent()->border_space().top() -
                        window()->parent()->padding().top());

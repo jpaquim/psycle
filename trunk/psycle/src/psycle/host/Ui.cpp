@@ -11,7 +11,6 @@
 
 namespace psycle {
 namespace host {
-
 namespace ui {
 
 const ui::Point ui::Point::zero_;
@@ -19,11 +18,11 @@ const ui::Rect ui::Rect::zero_;
 Window::Container Window::dummy_list_;
 int MenuContainer::id_counter = 0;
 
-MenuContainer::MenuContainer() : imp_(ui::ImpFactory::instance().CreateMenuContainerImp()) {
+MenuContainer::MenuContainer() : imp_(ImpFactory::instance().CreateMenuContainerImp()) {
   imp_->set_menu_bar(this);
 }
 
-MenuContainer::MenuContainer(ui::MenuContainerImp* imp) : imp_(imp) {
+MenuContainer::MenuContainer(MenuContainerImp* imp) : imp_(imp) {
   imp_->set_menu_bar(this);
 }
 
@@ -40,22 +39,22 @@ void MenuContainer::Invalidate() {
 }
 
 PopupMenu::PopupMenu() 
-  : MenuContainer(ui::ImpFactory::instance().CreatePopupMenuImp()) {
+  : MenuContainer(ImpFactory::instance().CreatePopupMenuImp()) {
 }
 
-void PopupMenu::Track(const ui::Point& pos) {
+void PopupMenu::Track(const Point& pos) {
   assert(imp());
   imp()->DevTrack(pos);
 }
 
-Region::Region() : imp_(ui::ImpFactory::instance().CreateRegionImp()) {
+Region::Region() : imp_(ImpFactory::instance().CreateRegionImp()) {
 }
 
-Region::Region(const ui::Rect& rect) : imp_(ui::ImpFactory::instance().CreateRegionImp()) {
+Region::Region(const Rect& rect) : imp_(ImpFactory::instance().CreateRegionImp()) {
   imp_->DevSetRect(rect);
 }
 
-Region::Region(ui::RegionImp* imp) : imp_(imp) {
+Region::Region(RegionImp* imp) : imp_(imp) {
 }
 
 Region& Region::operator = (const Region& other) {
@@ -146,7 +145,7 @@ Area* Area::Clone() const {
   return area;
 }
 
-const ui::Region& Area::region() const {     
+const Region& Area::region() const {     
   Update();  
   return region_cache_;
 }
@@ -159,7 +158,7 @@ const ui::Rect& Area::bounds() const {
 void Area::Offset(double dx, double dy) {  
   rect_iterator i = rect_shapes_.begin();
   for (; i != rect_shapes_.end(); ++i) {
-    i->Offset(dx, dy);
+    i->offset(dx, dy);
   }
   needs_update_ = true;  
 }
@@ -167,7 +166,7 @@ void Area::Offset(double dx, double dy) {
 void Area::Clear() {  
   rect_shapes_.clear();
   region_cache_.Clear();
-  bound_cache_.set(ui::Point(0, 0), ui::Point(0, 0));
+  bound_cache_.reset();
   needs_update_ = false;
 }
 
@@ -769,7 +768,8 @@ void Rules::ApplyTo(const Window::Ptr& window) {
       return false;
     }
   } recursive_apply;   
-  recursive_apply.rules = &rules_;
+  Rules rules(VirtualRules());
+  recursive_apply.rules = &rules.rules_;
   struct { 
     bool operator()(Window& window) const { return false; }    
   } no_abort;  
@@ -784,6 +784,50 @@ void Rule::InheritFrom(const Rule& rule) {
        properties_.set(it->first, it->second);
      }
   }
+}
+
+void Rule::merge(const Rule& rule) {
+  Properties::Container::const_iterator it = rule.properties().elements().begin();
+  for ( ; it != rule.properties().elements().end(); ++it) {
+	Properties::Container::const_iterator result = properties_.elements().find(it->first);
+	if (result == properties_.elements().end()) {
+       properties_.set(it->first, it->second);
+    }    
+  }
+}
+
+Rules Rules::VirtualRules() {  
+  if (virtual_rules_cache_.get() == 0) {
+    Rules* result = new Rules();
+    Window* window = owner_;
+    std::list<Rule*> rules;
+    while (window) {
+      RuleContainer::iterator it = window->rules_.begin();
+      for ( ; it != window->rules_.end(); ++it) {
+        Rule& rule = it->second;
+        rules.push_front(&rule);
+      }    
+      window = window->parent();
+    }  
+    Rule inherit;
+    std::list<Rule*>::iterator it = rules.begin();
+    for ( ; it != rules.end(); ++it) {
+      Rule* rule = *it;
+      if (rule->selector() == "group") {
+        inherit.merge(*rule);
+      }
+      rule->merge(inherit);    
+    }
+    it = rules.begin();
+    for ( ; it != rules.end(); ++it) {
+      Rule* rule = *it;
+      rule->merge(inherit);
+      result->add(*rule);		
+    }
+    virtual_rules_cache_.reset(result);	  
+  }  
+  assert(virtual_rules_cache_.get());
+  return *virtual_rules_cache_.get();
 }
 
 void Rules::InheritFrom(const Rule& parent_rule) {
@@ -1450,34 +1494,32 @@ Window::Container Window::SubItems() {
 // Group
 Group::Group() {  
   set_auto_size(false, false);
+  rules_.set_owner(this);
 }
 
 Group::Group(WindowImp* imp) {
   set_imp(imp);
   set_auto_size(false, false);
+  rules_.set_owner(this);
 }  
 
 void Group::Add(const Window::Ptr& window) {  
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
   } 
+  window->set_parent(this);
   items_.push_back(window);  
-  Rules::RuleContainer::iterator it = rules_.rules_.begin();
-  for (; it != rules_.rules_.end(); ++it) {    
-    window->add_rule(it->second);
-  }
-  rules_.ApplyTo(window);
-  window->set_parent(this);  
+  rules_.ApplyTo(window);    
   window->needsupdate();
 }
 
 void Group::Insert(iterator it, const Window::Ptr& window) {
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
-  }
-        
-  items_.insert(it, window); 
+  }        
+  items_.insert(it, window);
   window->set_parent(this);
+  rules_.ApplyTo(window);
   window->needsupdate(); 
 }
 
@@ -1492,13 +1534,13 @@ void Group::Remove(const Window::Ptr& window) {
 }
 
 ui::Dimension Group::OnCalcAutoDimension() const {	
-	ui::Rect result(ui::Point((std::numeric_limits<double>::max)(),
+	Rect result(Point((std::numeric_limits<double>::max)(),
 	 						    (std::numeric_limits<double>::max)()),
-                  ui::Point((std::numeric_limits<double>::min)(),
+                  Point((std::numeric_limits<double>::min)(),
                   (std::numeric_limits<double>::min)()));	      
   for (const_iterator i = begin(); i != end(); ++i) {		  
-		 ui::Rect item_pos = (*i)->position();
-		 item_pos.Increase(ui::BoxSpace((*i)->padding().top() + (*i)->border_space().top() + (*i)->margin().top(),
+		 Rect item_pos = (*i)->position();
+		 item_pos.increase(ui::BoxSpace((*i)->padding().top() + (*i)->border_space().top() + (*i)->margin().top(),
 			 (*i)->padding().right() + (*i)->border_space().right() + (*i)->margin().right(),
 			 (*i)->padding().bottom() + (*i)->border_space().bottom() + (*i)->margin().bottom(),
 			 (*i)->padding().left() + (*i)->border_space().left() + (*i)->margin().left()));

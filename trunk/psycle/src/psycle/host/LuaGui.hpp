@@ -108,7 +108,7 @@ struct LuaPointBind {
   static int x(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::x); }
   static int sety(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::set_y); }
   static int y(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::y); }
-  static int offset(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::Offset); }
+  static int offset(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::offset); }
 };
 
 struct LuaDimensionBind {
@@ -139,7 +139,7 @@ struct LuaUiRectBind {
     using namespace ui;
     Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
     Point::Ptr point = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
-    lua_pushboolean(L, rect->Intersect(*point.get()));
+    lua_pushboolean(L, rect->intersect(*point.get()));
     return 1;
   }
   static int topleft(lua_State *L);
@@ -206,6 +206,8 @@ class CanvasItem : public T, public LuaState {
  public:    
   CanvasItem(lua_State* L) : LuaState(L), T() {}
   CanvasItem(lua_State* L, ui::WindowImp* imp) : LuaState(L), T(0) {}
+
+  virtual std::string GetType() const;
 
   virtual void OnMouseDown(ui::MouseEvent& ev) {
     if (!SendMouseEvent(L, "onmousedown", ev, *this)) {
@@ -288,7 +290,6 @@ class LuaItem : public CanvasItem<ui::Window> {
 
   virtual void Draw(ui::Graphics* g, ui::Region& draw_rgn); 
   virtual void OnSize(double cw, double ch);  
-  virtual std::string GetType() const;
   virtual bool transparent() const;  
 };
 

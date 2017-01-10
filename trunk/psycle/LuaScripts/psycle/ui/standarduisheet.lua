@@ -5,26 +5,22 @@ local setting = {
     }
   },
   { selector = "edit",    
-    properties = {
-      color = "@PVFONT",
+    properties = {      
       backgroundcolor = "@PVROW"
     }
   },
   { selector = "listview",
     properties = {
-      color = "@PVFONT",
       backgroundcolor = "@PVBACKGROUND"
     }
   },  
   { selector = "treeview",
-    properties = {
-      color = "@PVFONT",
+    properties = {      
       backgroundcolor = "@PVROWBEAT"
     }
   },
   { selector = "toolicon",
-    properties = {
-      color = "@PVFONT",
+    properties = {      
       backgroundcolor = "@PVBACKGROUND",
       hovercolor = "@PVFONT",
       hoverbackgroundcolor = "@PVROW4BEAT",
@@ -42,7 +38,7 @@ local setting = {
       headerhovercolor = "@PVFONT",
       headerhoverbackgroundcolor = "@PVROW4BEAT",
       headeractivecolor = "@PVFONT",
-      headeractivebackgroundcolor = "@PVROW4BEAT",
+      headeractivebackgroundcolor = 0xFF444444,
       headerbordercolor = "@PVSELECTION",
       headerclosecolor = 0xffb0d8b1,
       headerclosehovercolor = 0xffffffff,
