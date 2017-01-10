@@ -33,15 +33,18 @@ tabgroup.windowtype = 70
 tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 
 function tabgroup:new(parent)  
-  local c = group:new(parent)  
+  local c = group:new()  
   setmetatable(c, self)  
   self.__index = self
+  if parent ~= nil then
+    parent:add(c)
+  end
   c:init()
   systems:new():changewindowtype(tabgroup.windowtype, c)
   return c
 end
 
-function tabgroup:init()
+function tabgroup:init()  
   self.frames = {}
   self:initdefaultcolors()
   self.oldflsprevented_ = {}
@@ -115,8 +118,8 @@ function tabgroup:init()
                        :setalign(window.ALCLIENT)    
 end
 
-function tabgroup:typename()
-  return "toolicon"
+function tabgroup:typename()  
+  return "tabgroup"
 end
 
 function tabgroup:initdefaultcolors()
@@ -491,12 +494,12 @@ function tabgroup:setbackgroundcolor(color)
   return self
 end
 
-function tabgroup:setproperties(properties)  
+function tabgroup:setproperties(properties) 
   if properties.color then    
-  self:setcolor(properties.color:value())
+    self:setcolor(properties.color:value())
   end  
   if properties.backgroundcolor then    
-  self:setbackgroundcolor(properties.backgroundcolor:value())
+    self:setbackgroundcolor(properties.backgroundcolor:value())
   end
   if properties.tabbarcolor then
     self.tabbarcolor_ = properties.tabbarcolor:value()
@@ -505,13 +508,13 @@ function tabgroup:setproperties(properties)
   if properties.headercolor then
     self.headercolor_ = properties.headercolor:value()
   end
-  if properties.headeractivebackgroundcolor then
+  if properties.headerbackgroundcolor then
     self.headerbackgroundcolor_ = properties.headerbackgroundcolor:value()
   end  
   if properties.headeractivecolor then
     self.headeractivecolor_ = properties.headeractivecolor:value()
   end
-  if properties.headeractivebackgroundcolor then
+  if properties.headeractivebackgroundcolor then    
     self.headeractivebackgroundcolor_ = properties.headeractivebackgroundcolor:value()
   end
   if properties.headerhovercolor then
@@ -532,14 +535,16 @@ function tabgroup:setproperties(properties)
   if properties.headerclosehoverbackgroundcolor then
     self.headerclosehoverbackgroundcolor_ = properties.headerclosehoverbackgroundcolor:value()
   end
-  local tabs = self.tabs:items()  
-  for i=1, #tabs do    
-    local header = tabs[i]
-    if header.page ~= self:activepage() then
-      header:setskinnormal()
-    else
-    header:setskinhighlight()
-    end
+  if self.tabs then
+	  local tabs = self.tabs:items()  
+	  for i=1, #tabs do    
+		local header = tabs[i]
+		if header.page ~= self:activepage() then
+		  header:setskinnormal()
+		else
+		header:setskinhighlight()
+		end
+	  end
   end      
   self:fls()  
 end

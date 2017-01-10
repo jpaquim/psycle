@@ -172,7 +172,7 @@ bool DefaultAligner::skip_item(const Window::Ptr& item) const {
 }
 
 void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
-	calc_non_content_dimension(window);
+  calc_non_content_dimension(window);
   calc_window_dim(window);
 	window->PreventAutoDimension();
 	switch (window->align()) {        
@@ -191,19 +191,19 @@ void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
 		default:				 				
 		break;		
   } // end switch	
-	window->RestoreAutoDimension();
+  window->RestoreAutoDimension();
 }
 
 void DefaultAligner::update_left(const Window::Ptr& window) {	
-	ui::Rect new_pos = calc_new_pos_left(window);
+  Rect new_pos = calc_new_pos_left(window);
   adjust_current_pos_left();
-	if (!window->check_position(new_pos)) {
+  if (!window->check_position(new_pos)) {
     window->set_position(new_pos);			
-	}
+  }
 }
 
 void DefaultAligner::update_top(const Window::Ptr& window) {
-	ui::Rect new_pos = calc_new_pos_top(window);
+  Rect new_pos = calc_new_pos_top(window);
   adjust_current_pos_top(window);           
 	if (!window->check_position(new_pos)) {	
 	  window->set_position(new_pos);		
@@ -211,7 +211,7 @@ void DefaultAligner::update_top(const Window::Ptr& window) {
 }
 
 void DefaultAligner::update_right(const Window::Ptr& window) {
-	ui::Rect new_pos = calc_new_pos_right(window);					
+  Rect new_pos = calc_new_pos_right(window);					
   adjust_current_pos_right();        
 	if (!window->check_position(new_pos)) {
 	   window->set_position(new_pos);		 		 
@@ -219,7 +219,7 @@ void DefaultAligner::update_right(const Window::Ptr& window) {
 }
 
 void DefaultAligner::update_bottom(const Window::Ptr& window) {
-	ui::Rect new_pos = calc_new_pos_bottom(window);					
+  Rect new_pos = calc_new_pos_bottom(window);					
   adjust_current_pos_bottom();
 	if (!window->check_position(new_pos)) {
 	  window->set_position(new_pos);		 
@@ -269,7 +269,7 @@ ui::Rect DefaultAligner::calc_new_pos_left(const Window::Ptr& window) const {
 	if (window->auto_size_height()) {
 		result.set_height(item_dim_.height());
 	} else {
-	  result.Decrease(ui::BoxSpace(0, 0, non_content_dimension_.height(), 0));
+	  result.decrease(ui::BoxSpace(0, 0, non_content_dimension_.height(), 0));
 	}
 	return result;
 }
@@ -280,7 +280,7 @@ ui::Rect DefaultAligner::calc_new_pos_top(const Window::Ptr& window) const {
 	if (window->auto_size_width()) {
 	  result.set_width(item_dim_.width());
   } else {
-    result.Decrease(ui::BoxSpace(0, non_content_dimension_.width(), 0, 0));
+    result.decrease(ui::BoxSpace(0, non_content_dimension_.width(), 0, 0));
   }
   return result;
 }
@@ -292,7 +292,7 @@ ui::Rect DefaultAligner::calc_new_pos_right(const Window::Ptr& window) const {
   if (window->auto_size_height()) {
 		result.set_height(item_dim_.height());
 	} else {
-	  result.Decrease(ui::BoxSpace(0, 0, non_content_dimension_.height(), 0));
+	  result.decrease(ui::BoxSpace(0, 0, non_content_dimension_.height(), 0));
 	}	
 	return result;
 }
@@ -304,7 +304,7 @@ ui::Rect DefaultAligner::calc_new_pos_bottom(const Window::Ptr& window) const {
   if (window->auto_size_width()) {
 		result.set_width(item_dim_.width());
 	} else {
-    result.Decrease(ui::BoxSpace(0, non_content_dimension_.width(), 0, 0));
+    result.decrease(ui::BoxSpace(0, non_content_dimension_.width(), 0, 0));
 	}
 	return result;
 }
@@ -326,7 +326,7 @@ void DefaultAligner::adjust_current_pos_bottom() {
 }
 
 void DefaultAligner::adjust_current_pos_client(const Window::Ptr& window) {	
-	current_pos_.Decrease(
+	current_pos_.decrease(
 		ui::BoxSpace(
 			0, 
 			non_content_dimension_.width(),
@@ -344,22 +344,19 @@ void WrapAligner::SetPositions() {
     return;
   }
   Window::Ptr client;
-  ui::Rect current_position(ui::Point(0, 0), group()->aligner()->dim());
-
+  Rect current_position(ui::Point(), group()->aligner()->dim());
   for (iterator it = begin(); it != end(); ++it) {
     Window::Ptr window = *it;
     if (!window->visible()) {
       continue;
     }    
     calc_window_dim(window);
-    window->set_position(ui::Rect(current_position.top_left(), item_dim_));
-
+    window->set_position(Rect(current_position.top_left(), item_dim_));
     if (current_position.left() > current_position.right()) {
       current_position.set_left(0);
-      current_position.Offset(0, 100);     
+      current_position.offset(0, 100);     
     }
   }
-  
 }
 
 void WrapAligner::calc_window_dim(const Window::Ptr& window) {
@@ -425,9 +422,9 @@ void GridAligner::SetPositions() {
                            ui::Dimension(cell_width, cell_height)));    
     ++pos;
     if (pos < col_num_) {            
-      current_position.Offset(cell_width, 0);      
+      current_position.offset(cell_width, 0);      
     } else {      
-      current_position.Offset(0, cell_height);
+      current_position.offset(0, cell_height);
       current_position.set_left(0);
       pos = 0;
     }  

@@ -71,7 +71,7 @@ struct Point {
   Point() : x_(0), y_(0) {}
   Point(double x, double y) : x_(x), y_(y) {}
 
-	inline static const Point& zero() { return zero_; }
+  inline static const Point& zero() { return zero_; }
   inline bool operator==(const Point& rhs) const { 
     return x_ == rhs.x()  && y_ == rhs.y();
   }
@@ -100,11 +100,11 @@ struct Point {
   double x() const { return x_; }
   void set_y(double y) { y_ = y; }
   double y() const { return y_; }
-	void Offset(double dx, double dy) {
-		x_ += dx;
-		y_ += dy;
-	}
-	void reset() { x_ = y_ = 0; }
+  void offset(double dx, double dy) {
+	x_ += dx;
+	y_ += dy;
+  }
+  void reset() { x_ = y_ = 0; }
 
  private:
   double x_, y_;
@@ -122,11 +122,10 @@ struct Dimension {
   Dimension(double val) : width_(val), height_(val) {}
   Dimension(double width, double height) : width_(width), height_(height) {}
 
-	inline static const Dimension& zero() {
-		static Dimension* zero_dimension = new Dimension();
+  inline static const Dimension& zero() {
+	static Dimension* zero_dimension = new Dimension();
     return *zero_dimension;
-	}
-
+  }
   inline bool operator==(const Dimension& rhs) const { 
     return width_ == rhs.width()  && height_ == rhs.height();
   }
@@ -176,9 +175,9 @@ struct Dimension {
   void set_height(double height) { height_ = height; }
   double width() const { return width_; }
   double height() const { return height_; }
-
-  ui::Point as_point() const { return ui::Point(width_, height_); }
-	void reset() { width_ = height_ = 0; }
+  Point as_point() const { return Point(width_, height_); }
+  void reset() { width_ = height_ = 0; }
+ 
  private:
   double width_, height_;
 };
@@ -190,53 +189,54 @@ struct BoxSpace {
   typedef boost::shared_ptr<const BoxSpace> ConstPtr;
   typedef boost::weak_ptr<BoxSpace> WeakPtr;
 
-	BoxSpace() {}
-	BoxSpace(double space) : top_left_(space, space), bottom_right_(space, space) {}
-	BoxSpace(double top, double right, double bottom, double left) :
-		top_left_(left, top),
-		bottom_right_(right, bottom) {	
-	}
-
-	inline static const BoxSpace& zero() {
-		static BoxSpace* zero_space = new BoxSpace();
-		return *zero_space;
-	}
-
-	inline BoxSpace operator+(const BoxSpace& rhs) const { 
-		return BoxSpace(top_left_.y() + rhs.top_left_.y(),
-			              bottom_right_.x() + rhs.bottom_right_.x(),
-			              bottom_right_.y() + rhs.bottom_right_.y(),
-			              top_left_.x() + rhs.top_left_.x());
+  BoxSpace() {}
+  BoxSpace(double space) : 
+      top_left_(space, space),
+	  bottom_right_(space, space) {
+  }
+  BoxSpace(double top, double right, double bottom, double left) :
+      top_left_(left, top),
+      bottom_right_(right, bottom) {	
   }
 
-	inline bool operator==(const BoxSpace& rhs) const { 
-		return top_left_ == rhs.top_left_ && bottom_right_ == rhs.bottom_right_;
+  inline static const BoxSpace& zero() {
+    static BoxSpace* zero_space = new BoxSpace();
+    return *zero_space;
+  }
+  inline BoxSpace operator+(const BoxSpace& rhs) const { 
+    return BoxSpace(top_left_.y() + rhs.top_left_.y(),
+			        bottom_right_.x() + rhs.bottom_right_.x(),
+			        bottom_right_.y() + rhs.bottom_right_.y(),
+			        top_left_.x() + rhs.top_left_.x());
+  }
+  inline bool operator==(const BoxSpace& rhs) const { 
+    return top_left_ == rhs.top_left_ && bottom_right_ == rhs.bottom_right_;
   }
   inline bool operator!=(const BoxSpace& rhs) const { return !(*this == rhs); }
-	inline bool empty() const { 
-		return top_left_ == ui::Point::zero() && bottom_right_ == Point::zero();
+  inline bool empty() const { 
+    return top_left_ == ui::Point::zero() && bottom_right_ == Point::zero();
   }
   void set(double space) { 
     top_left_.set_xy(space, space);
     bottom_right_.set_xy(space, space);
   }
   void set(double top, double right, double bottom, double left) {
-		top_left_.set_xy(left, top);
-		bottom_right_.set_xy(right, bottom);
-	}
-	void set_top(double top) { top_left_.set_y(top); }
-	double top() const { return top_left_.y(); }
-	void set_right(double right) { bottom_right_.set_x(right); }
-	double right() const { return bottom_right_.x(); }
-	void set_bottom(double bottom) { bottom_right_.set_y(bottom); }
-	double bottom() const { return bottom_right_.y(); }
-	void set_left(double left) { top_left_.set_x(left); }
-	double left() const { return top_left_.x(); }
-	double width() const { return top_left_.x() + bottom_right_.x(); }
-	double height() const { return top_left_.y() + bottom_right_.y(); }
+    top_left_.set_xy(left, top);
+    bottom_right_.set_xy(right, bottom);
+  }
+  void set_top(double top) { top_left_.set_y(top); }
+  double top() const { return top_left_.y(); }
+  void set_right(double right) { bottom_right_.set_x(right); }
+  double right() const { return bottom_right_.x(); }
+  void set_bottom(double bottom) { bottom_right_.set_y(bottom); }
+  double bottom() const { return bottom_right_.y(); }
+  void set_left(double left) { top_left_.set_x(left); }
+  double left() const { return top_left_.x(); }
+  double width() const { return top_left_.x() + bottom_right_.x(); }
+  double height() const { return top_left_.y() + bottom_right_.y(); }
 	
  private:
-	ui::Point top_left_, bottom_right_;
+  Point top_left_, bottom_right_;
 };
 
 struct Rect {
@@ -254,7 +254,7 @@ struct Rect {
      bottom_right_(top_left.x() + dim.width(), top_left.y() + dim.height()) {
   }
 
-	inline static const Rect& zero() { return zero_; }
+  inline static const Rect& zero() { return zero_; }
   inline bool operator==(const Rect& rhs) const { 
     return left() == rhs.left() && 
            top() == rhs.top() && 
@@ -262,17 +262,19 @@ struct Rect {
            bottom() == rhs.bottom();
   }
   inline bool operator!=(const Rect& rhs) const { return !(*this == rhs); }
-    
+  inline void reset() {
+    top_left_.reset();
+    bottom_right_.reset();
+  } 
   inline void set(const Point& top_left, const Point& bottom_right) {
     top_left_ = top_left;
     bottom_right_ = bottom_right;
   }
-
   inline void set(const Point& top_left, const Dimension& dim) {
     top_left_ = top_left;
-    bottom_right_.set_xy(top_left.x() + dim.width(), top_left.y() + dim.height());
-  }
-  
+    bottom_right_.set_xy(top_left.x() + dim.width(),
+		                 top_left.y() + dim.height());
+  }  
   inline void set_left(double left) { top_left_.set_x(left); }
   inline void set_top(double top) { top_left_.set_y(top); }
   inline void set_right(double right) { bottom_right_.set_x(right); }
@@ -290,63 +292,57 @@ struct Rect {
   inline double width() const { return bottom_right_.x() - top_left_.x(); }
   inline double height() const { return bottom_right_.y() - top_left_.y(); }
   inline const Point& top_left() const { return top_left_; }
-  inline const Point top_right() const { return ui::Point(right(), top()); }
+  inline const Point top_right() const { return Point(right(), top()); }
   inline const Point& bottom_right() const { return bottom_right_; }
-  inline const Point bottom_left() const { return ui::Point(left(), bottom()); }  
-  inline void set_dimension(const ui::Dimension& dimension) {
+  inline const Point bottom_left() const { return Point(left(), bottom()); }  
+  inline void set_dimension(const Dimension& dimension) {
     set_width(dimension.width());
     set_height(dimension.height());
   }
-  inline ui::Dimension dimension() const { 
+  inline Dimension dimension() const {
     return Dimension(width(), height());
   }
   inline bool empty() const { 
     return top_left_.x() == 0 && top_left_.y() == 0 && 
            bottom_right_.x() == 0 && bottom_right_.y() == 0;
   }
-
-	void Increase(const BoxSpace& space) {
-		top_left_.set_x(top_left_.x() - space.left());
-		top_left_.set_y(top_left_.y() - space.top());
-		bottom_right_.set_x(bottom_right_.x() + space.right());
-		bottom_right_.set_y(bottom_right_.y() + space.bottom());
-	}
-
-	void Decrease(const BoxSpace& space) {
-		top_left_.set_x(top_left_.x() + space.left());
-		top_left_.set_y(top_left_.y() + space.top());
-		bottom_right_.set_x(bottom_right_.x() - space.right());
-		bottom_right_.set_y(bottom_right_.y() - space.bottom());
-	}
-  
-  inline void Offset(double dx, double dy) {
+  void increase(const BoxSpace& space) {
+    top_left_.set_x(top_left_.x() - space.left());
+    top_left_.set_y(top_left_.y() - space.top());
+    bottom_right_.set_x(bottom_right_.x() + space.right());
+    bottom_right_.set_y(bottom_right_.y() + space.bottom());
+  }
+  void decrease(const BoxSpace& space) {
+    top_left_.set_x(top_left_.x() + space.left());
+    top_left_.set_y(top_left_.y() + space.top());
+    bottom_right_.set_x(bottom_right_.x() - space.right());
+    bottom_right_.set_y(bottom_right_.y() - space.bottom());
+  }
+  inline void offset(double dx, double dy) {
     top_left_.set_x(top_left_.x() + dx);
     top_left_.set_y(top_left_.y() + dy);
     bottom_right_.set_x(bottom_right_.x() + dx);
     bottom_right_.set_y(bottom_right_.y() + dy);    
   }
-
-  inline bool Intersect(const Point& point) {    
+  inline bool intersect(const Point& point) {    
     if (point.x() < left()) return false;
     if (point.y() < top()) return false;
     if (point.x() >= right()) return false;
     if (point.y() >= bottom()) return false;
     return true;
   }
-
-  inline void Offset(const ui::Point& delta) { Offset(delta.x(), delta.y()); }
-
-  std::auto_ptr<ui::Region> region() const;
-
+  inline void offset(const Point& delta) { offset(delta.x(), delta.y()); }
+  std::auto_ptr<Region> region() const;
   std::string str() const {
     std::stringstream str;
-    str << top_left_.x() << " " << top_left_.y() << " " << bottom_right_.x() << " " << bottom_right_.y();
+    str << top_left_.x() << " " << top_left_.y() << " " << bottom_right_.x()
+		<< " " << bottom_right_.y();
     return str.str();
   }
   
  private:
-  ui::Point top_left_, bottom_right_;  
-  static const ui::Rect zero_;
+  Point top_left_, bottom_right_;  
+  static const Rect zero_;
 };
 
 class SystemMetrics {
@@ -399,20 +395,20 @@ struct Shape {
   Shape() {}
   virtual ~Shape() {}
 
-  virtual void Offset(double dx, double dy) = 0;
-  virtual ui::Rect bounds() const = 0;
+  virtual void offset(double dx, double dy) = 0;
+  virtual Rect bounds() const = 0;
 };
 
 struct RectShape : public Shape {
   RectShape() {}
-  RectShape(const ui::Rect& rect) : rect_(rect) {}
+  RectShape(const Rect& rect) : rect_(rect) {}
   virtual ~RectShape() {}
-  virtual void Offset(double dx, double dy) { rect_.Offset(dx, dy); }
-  void SetRect(const ui::Rect& rect) { rect_ = rect; }
-  virtual ui::Rect bounds() const{ return rect_; }
+  virtual void offset(double dx, double dy) { rect_.offset(dx, dy); }
+  void SetRect(const Rect& rect) { rect_ = rect; }
+  virtual Rect bounds() const{ return rect_; }
 
  private:
-  ui::Rect rect_;
+  Rect rect_;
 };
 
 struct Area {
@@ -430,10 +426,10 @@ struct Area {
   void Offset(double dx, double dy);
   int Combine(const Area& other, int combinemode);
   bool Intersect(double x, double y) const;
-  const ui::Rect& bounds() const;
-  const ui::Region& region() const;
-
+  const Rect& bounds() const;
+  const Region& region() const;
   int size() const { return rect_shapes_.size(); }
+
  private:
   void Update() const {
     if (needs_update_) {
@@ -1057,10 +1053,11 @@ class Rule {
   }  
   ~Rule() {}
 
-  const std::string selector() const { return selector_; }
+  const std::string& selector() const { return selector_; }
   Properties& properties() { return properties_; }
   const Properties& properties() const { return properties_; }
   void InheritFrom(const Rule& rule);
+  void merge(const Rule& rule);
 
  private:
   std::string selector_;
@@ -1070,15 +1067,37 @@ class Rule {
 class Rules {
   public:
    typedef std::map<std::string, Rule> RuleContainer;
-   void add(Rule rule) { rules_[rule.selector()] = rule; }
+   typedef RuleContainer::iterator iterator;
+   typedef RuleContainer::const_iterator const_iterator;
+
+   Rules() : owner_(0) {}
+   void set_owner(Window* owner) { owner_ = owner; }
+
+   iterator begin() { return rules_.begin(); }
+   iterator end() { return rules_.end(); }	
+   const_iterator begin() const { return rules_.begin(); }
+   const_iterator end() const { return rules_.end(); }	
+   bool empty() const { return rules_.empty(); }
+   int size() const { return rules_.size(); }
+   
+   void add(Rule rule) { 
+	 rules_[rule.selector()] = rule; 
+     NeedsUpdate();
+   }
    void ApplyTo(const boost::shared_ptr<ui::Window>& window);
-   void InheritFrom(const Rule& rule);
+   void InheritFrom(const Rule& rule);   
+   Rules VirtualRules();
   // private:
    RuleContainer rules_;
+   class Window* owner_;
+   void NeedsUpdate() const { virtual_rules_cache_.reset(); }
+  private:   
+   mutable std::auto_ptr<Rules> virtual_rules_cache_;
 };
 
 class Window : public boost::enable_shared_from_this<Window> {
 	friend class WindowImp;
+	friend class Rules;
  public:
 	typedef boost::shared_ptr<Window> Ptr;
 	typedef boost::shared_ptr<const Window> ConstPtr;
@@ -1264,10 +1283,10 @@ class Window : public boost::enable_shared_from_this<Window> {
 			ui::Dimension(pos.width() + padding().width() + border_space().width(), 
 										pos.height() + padding().height() + border_space().height())
 		);
-		result.Offset(margin().left(), margin().top());
+		result.offset(margin().left(), margin().top());
 		if (parent()) {
-			result.Offset(parent()->border_space().left() + parent()->padding().left(),
-										parent()->border_space().top() + parent()->padding().top());
+		  result.offset(parent()->border_space().left() + parent()->padding().left(),
+						parent()->border_space().top() + parent()->padding().top());
 		}
 		return result;		
   }

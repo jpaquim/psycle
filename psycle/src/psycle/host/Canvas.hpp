@@ -197,13 +197,12 @@ class LineBorder : public ui::Ornament {
  private:  
   void DrawBorder(Window& item, Graphics* g, Region& draw_region) {
     g->set_color(color_);  
-		ui::Rect rc = item.area().bounds();
-		rc.Increase(ui::BoxSpace(0, 
-			                      item.padding().width() + item.border_space().width(),
-                            item.padding().height() + item.border_space().height(),
-			                      0));
+    Rect rc = item.area().bounds();
+    rc.increase(BoxSpace(0, item.padding().width() + item.border_space().width(),
+                         item.padding().height() + item.border_space().height(),
+			             0));  
     if (border_radius_.empty()) {			
-			g->SetPenWidth(border_width_.top() == 1 ? 0 : border_width_.top()*2);			
+      g->SetPenWidth(border_width_.top() == 1 ? 0 : border_width_.top()*2);			
       g->DrawRect(rc);
     } else { 
       if (border_style_.top != NONE) {

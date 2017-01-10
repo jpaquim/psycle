@@ -627,6 +627,23 @@ int LuaCanvasBind<T>::create(lua_State* L) {
 }
 
 template <class T>
+std::string CanvasItem<T>::GetType() const {
+  std::string result;
+  LuaImport in(L, (void*)(this), locker(L));
+  try {
+    if (in.open("typename")) {
+      in << pcall(1) >> result;
+    } else {
+      result = T::GetType();
+    }
+  } catch(std::exception& e) {
+    ui::alert(e.what());
+  }
+  return result;
+}
+
+
+template <class T>
 bool CanvasItem<T>::SendEvent(lua_State* L,
                               const::std::string method,
                               ui::Event& ev, 
@@ -964,21 +981,6 @@ bool LuaItem::transparent() const {
       in << pcall(1) >> result;
     } else {
       result = CanvasItem<ui::Window>::transparent();
-    }
-  } catch(std::exception& e) {
-    ui::alert(e.what());
-  }
-  return result;
-}
-
-std::string LuaItem::GetType() const {
-  std::string result;
-  LuaImport in(L, const_cast<LuaItem*>(this), locker(L));
-  try {
-    if (in.open("typename")) {
-      in << pcall(1) >> result;
-    } else {
-      result = CanvasItem<ui::Window>::GetType();
     }
   } catch(std::exception& e) {
     ui::alert(e.what());
