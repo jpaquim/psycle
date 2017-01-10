@@ -1608,7 +1608,7 @@ std::vector<LuaPlugin*> LuaGlobal::GetAllLuas() {
 
 namespace luaerrhandler {
 
-int error_handler(lua_State* L) {  
+int error_handler(lua_State* L) { 
   // first make sure that the error didn't occured in the plugineditor itself
   std::string edit_name = LuaGlobal::proxy(L)->host().GetEditName();
   if (edit_name == "Plugineditor") {

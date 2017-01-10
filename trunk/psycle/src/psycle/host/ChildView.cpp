@@ -1531,7 +1531,7 @@ namespace psycle { namespace host {
 				if (created)
 				{
 					ParamTranslator param(*_pSong._pMachine[fb]);
-					char name[128];
+					char name[255];
 					strcpy(name,_pSong._pMachine[fb]->GetDllName());
 					if (strcmp(name,"") == 0) { strcpy(name,_pSong._pMachine[fb]->GetName()); }
 					PresetIO::LoadDefaultMap(PsycleGlobal::conf().GetAbsolutePresetsDir() + "/" + name + ".map",param);
