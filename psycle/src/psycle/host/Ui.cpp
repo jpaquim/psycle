@@ -17,6 +17,8 @@ const ui::Point ui::Point::zero_;
 const ui::Rect ui::Rect::zero_;
 Window::Container Window::dummy_list_;
 int MenuContainer::id_counter = 0;
+Font Font::dummy_font;
+FontInfo FontInfo::dummy_font_info;
 
 MenuContainer::MenuContainer() : imp_(ImpFactory::instance().CreateMenuContainerImp()) {
   imp_->set_menu_bar(this);
@@ -755,6 +757,23 @@ void Graphics::RestoreOrigin() {
   imp_->DevRestoreOrigin();
 }
 
+InheritedProperties::InheritedProperties() {
+  inherited_["color"] = true;
+  inherited_["font_family"] = true;
+  inherited_["font_size"] = true;
+  inherited_["font_style"] = true;
+  inherited_["font_weight"] = true;
+}
+
+bool InheritedProperties::is_inherited(const std::string& name) const {
+  bool result(false);
+  std::map<std::string, bool>::const_iterator it = inherited_.find(name);
+  if (it != inherited_.end()) {
+      return it->second;
+  }
+  return result;
+}
+
 //Rules
 void Rules::ApplyTo(const Window::Ptr& window) {
   struct {    
@@ -764,11 +783,16 @@ void Rules::ApplyTo(const Window::Ptr& window) {
       if (it != rules->end()) {
         Rule& rule = it->second;       
         window.set_properties(rule.properties());        
-      }      
+      } else {
+        RuleContainer::iterator it = rules->find("inherit");
+        if (it != rules->end()) {
+          window.set_properties(it->second.properties());
+        }
+      }    
       return false;
     }
   } recursive_apply;   
-  Rules rules(VirtualRules());
+  Rules& rules = VirtualRules();
   recursive_apply.rules = &rules.rules_;
   struct { 
     bool operator()(Window& window) const { return false; }    
@@ -789,14 +813,16 @@ void Rule::InheritFrom(const Rule& rule) {
 void Rule::merge(const Rule& rule) {
   Properties::Container::const_iterator it = rule.properties().elements().begin();
   for ( ; it != rule.properties().elements().end(); ++it) {
-	Properties::Container::const_iterator result = properties_.elements().find(it->first);
-	if (result == properties_.elements().end()) {
-       properties_.set(it->first, it->second);
-    }    
+    if (InheritedProperties::instance().is_inherited(it->first)) {
+	    Properties::Container::const_iterator result = properties_.elements().find(it->first);
+	    if (result == properties_.elements().end()) {
+        properties_.set(it->first, it->second);
+      }
+    }
   }
 }
 
-Rules Rules::VirtualRules() {  
+Rules& Rules::VirtualRules() {  
   if (virtual_rules_cache_.get() == 0) {
     Rules* result = new Rules();
     Window* window = owner_;
@@ -809,7 +835,7 @@ Rules Rules::VirtualRules() {
       }    
       window = window->parent();
     }  
-    Rule inherit;
+    Rule inherit("inherit");
     std::list<Rule*>::iterator it = rules.begin();
     for ( ; it != rules.end(); ++it) {
       Rule* rule = *it;
@@ -824,6 +850,7 @@ Rules Rules::VirtualRules() {
       rule->merge(inherit);
       result->add(*rule);		
     }
+    result->add(inherit);
     virtual_rules_cache_.reset(result);	  
   }  
   assert(virtual_rules_cache_.get());
@@ -1506,7 +1533,7 @@ Group::Group(WindowImp* imp) {
 void Group::Add(const Window::Ptr& window) {  
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
-  } 
+  }
   window->set_parent(this);
   items_.push_back(window);  
   rules_.ApplyTo(window);    
@@ -2364,7 +2391,27 @@ Edit::Edit(EditImp* imp) : Window(imp) {
 }
 
 void Edit::set_properties(const Properties& properties) {
-  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {    
+  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {
+    if (it->first == "font_family") {
+      FontInfo fnt = font().font_info();
+      fnt.set_family(it->second.string_value());
+      set_font(fnt);
+    } else
+    if (it->first == "font_size") {
+      FontInfo fnt = font().font_info();
+      fnt.set_size(it->second.int_value());
+      set_font(fnt);
+    } else
+    if (it->first == "font_style") {
+      /*FontInfo fnt = font().font_info();
+      fnt.set_size(it->second.INT_value());
+      set_font(fnt);*/
+    } else
+    if (it->first == "font_weight") {
+      FontInfo fnt = font().font_info();
+      fnt.set_weight(it->second.int_value());
+      set_font(fnt);
+    } else
     if (it->first == "backgroundcolor") {
       set_background_color(boost::get<ARGB>(it->second.value()));
     } else
@@ -2414,6 +2461,10 @@ void Edit::set_font(const Font& font) {
   if (imp()) {
     imp()->dev_set_font(font);
   }  
+}
+
+const Font& Edit::font() const {
+  return imp() ? imp()->dev_font() : Font::dummy_font;  
 }
 
 void Edit::set_sel(int cpmin, int cpmax) {
@@ -2741,6 +2792,37 @@ void Scintilla::set_lexer(const Lexer& lexer) {
   }
 }
 
+void Scintilla::set_properties(const Properties& properties) {
+  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {
+    if (it->first == "font_family") {
+      FontInfo fnt = font_info();
+      fnt.set_family(it->second.string_value());
+      set_font_info(fnt);
+    } else
+    if (it->first == "font_size") {
+      FontInfo fnt = font_info();
+      fnt.set_size(it->second.int_value());
+      set_font_info(fnt);
+    } else
+    if (it->first == "font_style") {
+      /*FontInfo fnt = font().font_info();
+      fnt.set_size(it->second.INT_value());
+      set_font(fnt);*/
+    } else
+    if (it->first == "font_weight") {
+      FontInfo fnt = font_info();
+      fnt.set_weight(it->second.int_value());
+      set_font_info(fnt);
+    } else
+    if (it->first == "backgroundcolor") {
+      set_background_color(it->second.argb_value());
+    } else
+    if (it->first == "color") {
+      set_foreground_color(it->second.argb_value());
+    }    
+  }
+}
+
 void Scintilla::set_foreground_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_foreground_color(color);
@@ -2927,6 +3009,10 @@ void Scintilla::set_font_info(const FontInfo& font_info) {
   if (imp()) {
     imp()->dev_set_font_info(font_info);
   }
+}
+
+const FontInfo& Scintilla::font_info() const {
+  return imp() ? imp()->dev_font_info() : FontInfo::dummy_font_info;
 }
 
 GameController::GameController() : id_(-1) {
@@ -3751,8 +3837,7 @@ ui::FileObserverImp* ImpFactory::CreateFileObserverImp(FileObserver* file_observ
   return concrete_factory_->CreateFileObserverImp(file_observer); 
 }
 
-AlertBox::AlertBox() 
-	  : imp_(ui::ImpFactory::instance().CreateAlertImp()) {	
+AlertBox::AlertBox() : imp_(ImpFactory::instance().CreateAlertImp()) {
 }
 
 void AlertBox::OpenMessageBox(const std::string& text) {

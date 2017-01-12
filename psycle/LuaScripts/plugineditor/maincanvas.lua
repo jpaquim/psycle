@@ -59,7 +59,6 @@ local serpent = require("psycle.serpent")
 local sci = require("scintilladef")
 
 local maincanvas = canvas:new()
-local standardsheet = require("psycle.ui.standarduisheet")
 
 maincanvas.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 
@@ -73,9 +72,8 @@ function maincanvas:new(machine)
 end
 
 function maincanvas:init()
-  for i = 1, #standardsheet do    
-    self:addrule(standardsheet[i])
-  end  
+  self:link(require("psycle.ui.standarduisheet"))
+  self:link(require("skin"))
   self.machines = machines:new()  
   self:invalidatedirect()
   self:initstyleclasses(self.machine_.settingsmanager:setting())
@@ -815,7 +813,7 @@ function maincanvas:initstyleclasses(setting)
   systems:setstyleclass(textpage.windowtype, 
      self:mergeproperties(setting.textpage.properties, self:mergeproperties(
   setting.lualexer.properties, setting.general.properties)))
-     systems:setstyleclass(info.windowtype, setting.general.properties)
+     --systems:setstyleclass(info.windowtype, setting.general.properties)
   self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
 end
 

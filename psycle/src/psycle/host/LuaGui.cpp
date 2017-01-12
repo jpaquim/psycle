@@ -44,7 +44,7 @@ ui::MultiType PsycleStock::value(int stock_key) const {
 		case MVTITLECOLOR : result = mv_cfg->titleColor; break;
     default:
     break;
-  }    
+  }
   return ToARGB(result);  
 }
 
@@ -718,11 +718,17 @@ void CanvasItem<T>::set_properties(const ui::Properties& properties) {
       LuaHelper::new_lua_module(L, "psycle.orderedtable");      
       for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {    
         const Property& p = it->second;
-        if (!p.is_blank()) {
+        MultiType value = p.value();
+        if (value.which() != 0) {
           LuaHelper::new_lua_module(L, "property");        
-          MultiType value = p.value();        
           if (value.which() == 1) {
             lua_pushnumber(L, boost::get<ARGB>(p.value()));
+          } else 
+          if (value.which() == 2) {
+            lua_pushstring(L, p.string_value().c_str());            
+          } else
+          if (value.which() == 3) {
+            lua_pushboolean(L, boost::get<bool>(p.value()));            
           } else {
             luaL_error(L, "Wrong Property type.");
           }
@@ -1010,17 +1016,7 @@ boost::shared_ptr<ui::Group> LuaItemBind<T>::testgroup(lua_State* L) {
 template <class T>
 int LuaItemBind<T>::create(lua_State* L) {  
   ui::Group::Ptr group = testgroup(L);    
-  ui::Window::Ptr item = LuaHelper::new_shared_userdata(L, meta.c_str(), LuaGlobal::proxy(L)->systems()->Create(T::window_type()));  
-
-  if (item->debug_text() == "text") {
-     LuaHelper::find_weakuserdata(L, item.get());
-     if (lua_isnil(L, -1)) {
-       assert(0);
-     } else {
-       lua_pop(L, 1);
-     }
-  }
-
+  ui::Window::Ptr item = LuaHelper::new_shared_userdata(L, meta.c_str(), LuaGlobal::proxy(L)->systems()->Create(T::window_type()));
   if (group) {    
     group->Add(item);
     LuaHelper::register_userdata(L, item.get());

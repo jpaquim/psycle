@@ -14,13 +14,6 @@ settings.general = {}
 settings.general.children = orderedtable.new()
 settings.general.children.ui = {}
 settings.general.children.ui.children = orderedtable.new()
-settings.general.children.ui.children.edit = {}
-settings.general.children.ui.children.edit.properties = orderedtable.new()
-settings.general.children.ui.children.edit.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.edit.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROW)
-
-settings.general.children.ui.children.edit.label = "edit"
-
 settings.general.children.ui.children.advancededit = {}
 settings.general.children.ui.children.advancededit.properties = orderedtable.new()
 settings.general.children.ui.children.advancededit.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
@@ -31,50 +24,6 @@ settings.general.children.ui.children.advancededit.properties.activecolor = prop
 settings.general.children.ui.children.advancededit.properties.activebackgroundcolor = property:new(0xff323232, "Active Background Color", "color", stock.color.PVROW4BEAT)
 
 settings.general.children.ui.children.advancededit.label = "advancededit"
-
-settings.general.children.ui.children.tabgroup = {}
-settings.general.children.ui.children.tabgroup.properties = orderedtable.new()
-settings.general.children.ui.children.tabgroup.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.tabgroup.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROW)
-settings.general.children.ui.children.tabgroup.properties.tabbarcolor = property:new(0xff323232, "TabBar Color", "color", stock.color.PVROW)
-settings.general.children.ui.children.tabgroup.properties.headercolor = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.tabgroup.properties.headerbackgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROW)
-settings.general.children.ui.children.tabgroup.properties.headerhovercolor = property:new(0xffb0d8b1, "Hover Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.tabgroup.properties.headerhoverbackgroundcolor = property:new(0xff323232, "Hover Background Color", "color", stock.color.PVROW4BEAT)
-settings.general.children.ui.children.tabgroup.properties.headeractivecolor = property:new(0xffb0d8b1, "Active Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.tabgroup.properties.headeractivebackgroundcolor = property:new(0xff323232, "Active Background Color", "color", stock.color.PVROW4BEAT)
-settings.general.children.ui.children.tabgroup.properties.headerbordercolor = property:new(0xff323232, "Header Border Color", "color", stock.color.PVSELECTION)
-settings.general.children.ui.children.tabgroup.properties.headerclosecolor = property:new(0xffb0d8b1, "Header Close Background Color", "color")
-settings.general.children.ui.children.tabgroup.properties.headerclosehovercolor = property:new(0xffffffff, "Header Close Hover Color", "color")
-settings.general.children.ui.children.tabgroup.properties.headerclosehoverbackgroundcolor = property:new(0xffa8444c, "Header Close Background Color", "color")
-
-settings.general.children.ui.children.tabgroup.label = "tabgroup"
-
-settings.general.children.ui.children.toolicon = {}
-settings.general.children.ui.children.toolicon.properties = orderedtable.new()
-settings.general.children.ui.children.toolicon.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.toolicon.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVBACKGROUND)
-settings.general.children.ui.children.toolicon.properties.hovercolor = property:new(0xffb0d8b1, "Hover Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.toolicon.properties.hoverbackgroundcolor = property:new(0xff323232, "Hover Background Color", "color", stock.color.PVROW4BEAT)
-settings.general.children.ui.children.toolicon.properties.activecolor = property:new(0xffb0d8b1, "Active Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.toolicon.properties.activebackgroundcolor = property:new(0xff323232, "Active Background Color", "color", stock.color.PVSELECTION)
-
-settings.general.children.ui.children.toolicon.label = "toolicon"
-
-settings.general.children.ui.children.listview = {}
-settings.general.children.ui.children.listview.properties = orderedtable.new()
-settings.general.children.ui.children.listview.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.listview.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
-
-settings.general.children.ui.children.listview.label = "listview"
-
-settings.general.children.ui.children.treeview = {}
-settings.general.children.ui.children.treeview.properties = orderedtable.new()
-settings.general.children.ui.children.treeview.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
-settings.general.children.ui.children.treeview.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
-
-settings.general.children.ui.children.treeview.label = "treeview"
-
 settings.general.children.ui.label = "Ui Components"
 
 settings.general.properties = orderedtable.new()
@@ -117,9 +66,6 @@ settings.output.label = "output"
 settings.textpage = {}
 settings.textpage.properties = orderedtable.new()
 settings.textpage.properties.mapcapslocktoctrl = property:new(true, "Map Capslock to Control")
-settings.textpage.properties.color = property:new(0xffb0d8b1, "Text Color", "color", stock.color.PVFONT)
-settings.textpage.properties.backgroundcolor = property:new(0xff323232, "Background Color", "color", stock.color.PVROWBEAT)
-
 settings.textpage.label = "textpage"
 
 settings.lualexer = {}
@@ -138,6 +84,4 @@ settings.lualexer.properties.numbercolor = property:new(0xffffa54b, "Number Colo
 
 settings.lualexer.label = "Lua Lexer"
 
- 
 return settings
- 

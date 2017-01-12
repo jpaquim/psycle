@@ -95,7 +95,9 @@ class Text : public Window {
 
   static std::string type() { return "text"; }  
   static WindowTypes::Type window_type() { return WindowTypes::TEXT; }
+  virtual std::string GetType() const { return "text"; }
 
+  virtual void set_properties(const Properties& properties);
   virtual void set_property(const ConfigurationProperty& configuration_property);
 
   virtual void Draw(Graphics* cr, Region& draw_region);  
@@ -107,6 +109,7 @@ class Text : public Window {
   }
   ARGB color() const { return color_; }
   void set_font(const Font& font);
+  const Font& font() const { return font_; }
   void set_vertical_alignment(AlignStyle::Type vertical_alignment) { 
     vertical_alignment_ = vertical_alignment;
 		UpdateTextAlignment();
