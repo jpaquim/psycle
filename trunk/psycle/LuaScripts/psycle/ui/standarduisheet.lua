@@ -1,7 +1,9 @@
 local setting = {
   { selector = "group",
     properties = {
-      color = "@PVFONT"
+      color = "@PVFONT",
+      font_family = "courier",
+      font_size = 12
     }
   },
   { selector = "edit",    
@@ -30,7 +32,6 @@ local setting = {
   },  
   { selector = "tabgroup",
     properties = {
-      color = "@PVFONT",
       backgroundcolor = "@PVROW",
       tabbarcolor = "@PVROW",
       headercolor = "@PVFONT",
@@ -38,7 +39,7 @@ local setting = {
       headerhovercolor = "@PVFONT",
       headerhoverbackgroundcolor = "@PVROW4BEAT",
       headeractivecolor = "@PVFONT",
-      headeractivebackgroundcolor = 0xFF444444,
+      headeractivebackgroundcolor = "@PVROW4BEAT",
       headerbordercolor = "@PVSELECTION",
       headerclosecolor = 0xffb0d8b1,
       headerclosehovercolor = 0xffffffff,

@@ -1108,6 +1108,7 @@ class LuaItemBind {
       {"enablecapslock", enablecapslock},
       {"addsettings", addsettings},
       {"addrule", addrule},
+      {"link", link},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1283,13 +1284,11 @@ class LuaItemBind {
     window->add_ornament(ornament);
     return LuaHelper::chaining(L);
   }
-
 	static int removeornaments(lua_State* L) {		
 		lua_pushnil(L);
 		lua_setfield(L, 1, "_ornaments");
     LUAEXPORT(L, &T::RemoveOrnaments);
   }
-
   static int ornaments(lua_State* L) {
     boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
     if (window->ornaments().empty()) {
@@ -1318,11 +1317,26 @@ class LuaItemBind {
     boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
     return LuaHelper::chaining(L);
   }
-  static int addrule(lua_State* L) {
+  static int link(lua_State* L) {
     boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-    ui::Properties properties;
-    std::string selector = "";
+    luaL_checktype(L, 2, LUA_TTABLE);
+    const int size = lua_rawlen(L, 2);
+    for (int i = 1; i <= size; ++i) {
+      lua_rawgeti(L, 2, i);
+      processrule(L, window);
+      lua_pop(L, 1);
+    }
+    return LuaHelper::chaining(L);
+  }
+  static int addrule(lua_State* L) {
+    boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);    
     luaL_checktype(L, 2, LUA_TTABLE);    
+    processrule(L, window);
+    return LuaHelper::chaining(L);
+  }
+  static int processrule(lua_State* L, const ui::Window::Ptr& window) {
+    ui::Properties properties;
+    std::string selector = "";    
     lua_pushnil(L);
     while (lua_next(L, -2) != 0) {
       lua_pushvalue(L, -2);
@@ -1411,6 +1425,9 @@ class LuaItemBind {
                     prop.set_stock_key(stock_id);
                     properties.set(key, prop);
                   }
+                } else {
+                  prop.set_value(std::string(value));
+                  properties.set(key, prop);
                 }
               }            
             }
@@ -1435,7 +1452,7 @@ class LuaItemBind {
     }
     ui::Rule rule(selector, properties);
     window->add_rule(rule);
-    return LuaHelper::chaining(L);
+    return 0;   
   }
 };
 

@@ -40,6 +40,10 @@ function textpage:new(parent)
   return c
 end
 
+function textpage:typename()
+  return "textpage"
+end
+
 function textpage:init()
   self:setautosize(false, false)
   self.mode = textpage.EDITMODE
@@ -80,7 +84,7 @@ function textpage:status()
 end
 
 function textpage:createdefaultname()
-  return "new"..textpage.pagecounter  
+  return "new" .. textpage.pagecounter  
 end
 
 function textpage:findprevsearch(page, pos)
@@ -119,26 +123,26 @@ function textpage:onsearch(searchtext, dir, case, wholeword, regexp)
   local line, cpselstart, cpselend = self:findtext(searchtext, cpmin, cpmax)
   if line == -1 then      
     if dir == search.DOWN then
-	  self:setsel(0, 0)
-	  local cpmin, cpmax = self:findsearch(self, dir, 0)
-	  line, cpselstart, cpselend = self:findtext(searchtext, cpmin, cpmax)        
-	else
-	  self:setsel(0, 0)
-	  local cpmin, cpmax = self:findsearch(self, dir, self:length())
-	  line, cpselstart, cpselend = self:findtext(searchtext, cpmin, cpmax)
-	end             
+	    self:setsel(0, 0)
+	    local cpmin, cpmax = self:findsearch(self, dir, 0)
+	    line, cpselstart, cpselend = self:findtext(searchtext, cpmin, cpmax)        
+	  else
+	    self:setsel(0, 0)
+	    local cpmin, cpmax = self:findsearch(self, dir, self:length())
+	    line, cpselstart, cpselend = self:findtext(searchtext, cpmin, cpmax)
+	  end             
   end
   if line ~= -1 then
-	self:setsel(cpselstart, cpselend)
-	if self.searchbeginpos == cpselstart then
-	  self.searchbegin = -1        
-	  self.searchrestart = true
-	else
-	  self.searchrestart = false
-	end
-	if self.searchbeginpos == -1 then
-	  self.searchbeginpos = cpselstart        
-	end
+	  self:setsel(cpselstart, cpselend)
+	  if self.searchbeginpos == cpselstart then
+	    self.searchbegin = -1        
+	    self.searchrestart = true
+	  else
+	    self.searchrestart = false
+	  end
+	  if self.searchbeginpos == -1 then
+	    self.searchbeginpos = cpselstart        
+	  end
   end      
 end
 

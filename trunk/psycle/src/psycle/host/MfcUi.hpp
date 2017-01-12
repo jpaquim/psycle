@@ -8,7 +8,6 @@
 #include "Scintilla.h"
 #include "SciLexer.h"
 
-
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -2340,7 +2339,6 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       find_flags_ = find_flags_ & ~SCFIND_MATCHCASE;
     }
   }
-
   void dev_set_find_whole_word(bool on) {
     if (on) {
       find_flags_ = find_flags_ | SCFIND_WHOLEWORD;
@@ -2348,11 +2346,9 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
       find_flags_ = find_flags_ & ~SCFIND_WHOLEWORD;
     }
   }
-
   void dev_set_find_regexp(bool on) {     
     find_flags_ = (on) ? (find_flags_ | SCFIND_REGEXP) : (find_flags_ & ~SCFIND_REGEXP);    
   }
-
   void DevLoadFile(const std::string& filename) {
     using namespace std;    
     #if __cplusplus >= 201103L
@@ -2444,8 +2440,10 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   virtual const std::string& dev_filename() const { return fname_; }  
   virtual void dev_set_font_info(const FontInfo& font_info) {
     f(SCI_STYLESETSIZE, STYLE_DEFAULT, font_info.size());
-    f(SCI_STYLESETFONT, STYLE_DEFAULT, (LPARAM) (font_info.family().c_str())); 
-  }    
+    f(SCI_STYLESETFONT, STYLE_DEFAULT, (LPARAM) (font_info.family().c_str()));
+    font_info_ = font_info;
+  }
+  virtual const FontInfo& dev_font_info() const { return font_info_; }  
   boost::signal<void ()> modified;
   int dev_column() const {
     Sci_Position pos = f(SCI_GETCURRENTPOS, 0, 0);
@@ -2481,18 +2479,11 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void DevHideBreakpoints() { f(SCI_SETMARGINWIDTHN, 1, 0); }  
   void DevHideHorScrollbar() { f(SCI_SETHSCROLLBAR, 0, 0); }
   void dev_set_caret_line_background_color(ARGB color) { f(SCI_SETCARETLINEBACK, ToCOLORREF(color), 0); }
-
   void dev_undo() { f(SCI_UNDO, 0, 0); }
   void dev_redo() { f(SCI_REDO, 0, 0); }
-  virtual void dev_prevent_input() {
-    f(SCI_SETREADONLY, (void*) true, 0);
-  }
-  virtual void dev_enable_input() {
-    f(SCI_SETREADONLY, (void*) false, 0);
-  }
-  void dev_set_tab_width(int width_in_chars) {  
-    f(SCI_SETTABWIDTH, width_in_chars, 0);
-  }
+  virtual void dev_prevent_input() { f(SCI_SETREADONLY, (void*) true, 0); }
+  virtual void dev_enable_input() { f(SCI_SETREADONLY, (void*) false, 0); }
+  void dev_set_tab_width(int width_in_chars) { f(SCI_SETTABWIDTH, width_in_chars, 0); }
   int dev_tab_width() const { return f(SCI_GETTABWIDTH, 0, 0); }
             
  protected:
@@ -2514,6 +2505,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   DWORD find_flags_;
   std::string fname_;
   bool has_file_;
+  FontInfo font_info_;
 
   void SetupHighlighting(const Lexer& lexer);
   void SetupFolding(const Lexer& lexer);

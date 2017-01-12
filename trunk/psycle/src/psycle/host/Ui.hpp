@@ -537,7 +537,6 @@ struct FontInfo {
 	typedef boost::weak_ptr<FontInfo> WeakPtr;
 	typedef boost::weak_ptr<const FontInfo> ConstWeakPtr;
 
-
   FontInfo();
   FontInfo(const std::string& family);
   FontInfo(const std::string& family, int size);
@@ -560,15 +559,15 @@ struct FontInfo {
   std::string family() const;
   void set_stock_id(int id);
   int stock_id() const;
-
   std::string tostring() const {
     std::stringstream str;    
     str << "\"" << family() << "\", " << size() << ", " << static_cast<int>(style());
     return str.str();    
   }
+  static FontInfo dummy_font_info;
 
  private:
-   std::auto_ptr<FontInfoImp> imp_;  
+   std::auto_ptr<FontInfoImp> imp_;    
 };
 
 class FontImp;
@@ -591,6 +590,7 @@ class Font {
 
   virtual void set_font_info(const FontInfo& info);
   virtual FontInfo font_info() const;
+  static Font dummy_font;
 
  private:  
   std::auto_ptr<FontImp> imp_;
@@ -669,19 +669,17 @@ class Image {
   ImageImp* imp() { return imp_.get(); }
   const ImageImp* imp() const { return imp_.get(); }
 
-  virtual void Reset(const ui::Dimension& dimension);
+  virtual void Reset(const Dimension& dimension);
   virtual void Load(const std::string& filename);
   virtual void Save(const std::string& filename);
   virtual void Save();
   virtual void SetTransparent(bool on, ARGB color);
-  virtual ui::Dimension dim() const;  
-  std::auto_ptr<ui::Graphics> graphics();
-  void Cut(const ui::Rect& bounds);
-
-  void SetPixel(const ui::Point& pt, ARGB color);
-  ARGB GetPixel(const ui::Point& pt) const;
-
-  virtual void Resize(const ui::Dimension& dimension);
+  virtual Dimension dim() const;  
+  std::auto_ptr<Graphics> graphics();
+  void Cut(const Rect& bounds);
+  void SetPixel(const Point& pt, ARGB color);
+  ARGB GetPixel(const Point& pt) const;
+  virtual void Resize(const Dimension& dimension);
   virtual void Rotate(float radians);
 
  private:
@@ -699,14 +697,13 @@ class ImageImp {
   virtual void DevLoad(const std::string& filename) = 0;
   virtual void DevSave(const std::string& filename) = 0;
   virtual void DevSetTransparent(bool on, ARGB color) = 0;
-  virtual void DevReset(const ui::Dimension& dimension) = 0;	
-  virtual ui::Dimension dev_dim() const = 0;  
-  virtual ui::Graphics* dev_graphics() = 0;
-  virtual void DevCut(const ui::Rect& bounds) = 0;
-  virtual void DevSetPixel(const ui::Point& pt, ARGB color) = 0;
-  virtual ARGB DevGetPixel(const ui::Point& pt) const = 0;
-
-  virtual void DevResize(const ui::Dimension& dimension) = 0;
+  virtual void DevReset(const Dimension& dimension) = 0;	
+  virtual Dimension dev_dim() const = 0;  
+  virtual Graphics* dev_graphics() = 0;
+  virtual void DevCut(const Rect& bounds) = 0;
+  virtual void DevSetPixel(const Point& pt, ARGB color) = 0;
+  virtual ARGB DevGetPixel(const Point& pt) const = 0;
+  virtual void DevResize(const Dimension& dimension) = 0;
   virtual void DevRotate(float radians) = 0;
 };
 
@@ -923,12 +920,12 @@ class ConfigurationProperty {
   const std::string& value() const { return value_; }
   void set_int_value(int value) { int_value_ = value;  }
   int int_value() const { return int_value_; }
-  ui::FontInfo font_info_value() const { return font_info_value_; }
+  FontInfo font_info_value() const { return font_info_value_; }
 
  private:
   std::string value_;
   int int_value_;
-  ui::FontInfo font_info_value_;
+  FontInfo font_info_value_;
   std::string name_;
 };
 
@@ -984,9 +981,11 @@ class Property {
   void set_stock_key(int stock_key) { stock_key_ = stock_key; }
   int stock_key() const { return stock_key_; }
   
-  ARGB ARGB_value() const { return boost::get<ARGB>(value_); }
+  ARGB argb_value() const { return boost::get<ARGB>(value()); }
+  int int_value() const { return (int) boost::get<ARGB>(value()); }
+  std::string string_value() const { return boost::get<std::string>(value()); }
   void EnableInherit() { inherit_ = true; }
-  bool inherited() const { return inherit_; }
+  bool inherit() const { return inherit_; }
   bool is_blank() const { return value_.which() == 0; }
 
  private:
@@ -1044,9 +1043,24 @@ class Command {
   virtual void Execute() = 0; 
 };
 
+class InheritedProperties { 
+ public:
+  static InheritedProperties& instance() {
+    static InheritedProperties the_instance;
+    return the_instance;
+  }
+  
+  bool is_inherited(const std::string& name) const;
+ 
+ private:
+  InheritedProperties();
+  std::map<std::string, bool> inherited_;
+};
+
 class Rule {
  public:
   Rule() {}
+  Rule(const std::string& selector) : selector_(selector) {}
   Rule(const std::string& selector, const Properties& properties) : 
       selector_(selector),
       properties_(properties) {
@@ -1061,7 +1075,7 @@ class Rule {
 
  private:
   std::string selector_;
-  Properties properties_;
+  Properties properties_;  
 };
 
 class Rules {
@@ -1086,11 +1100,12 @@ class Rules {
    }
    void ApplyTo(const boost::shared_ptr<ui::Window>& window);
    void InheritFrom(const Rule& rule);   
-   Rules VirtualRules();
+   Rules& VirtualRules();
   // private:
    RuleContainer rules_;
    class Window* owner_;
    void NeedsUpdate() const { virtual_rules_cache_.reset(); }
+
   private:   
    mutable std::auto_ptr<Rules> virtual_rules_cache_;
 };
@@ -2123,6 +2138,7 @@ class Edit : public Window {
   virtual void set_color(ARGB color);
   virtual ARGB color() const;
   virtual void set_font(const Font& font);
+  virtual const Font& font() const;
   virtual void set_sel(int cp_min, int cp_max);
   void set_input_type(InputType::Type input_type);
 
@@ -2310,6 +2326,7 @@ class Scintilla : public Window {
  public:
   static std::string type() { return "scintilla"; }
   static WindowTypes::Type window_type() { return WindowTypes::SCINTILLA; }
+  virtual std::string GetType() const { return "scintilla"; }
 
   typedef boost::shared_ptr<Scintilla> Ptr;
   typedef boost::shared_ptr<const Scintilla> ConstPtr;
@@ -2320,9 +2337,7 @@ class Scintilla : public Window {
   Scintilla(ScintillaImp* imp);
 
   ScintillaImp* imp() { return (ScintillaImp*) Window::imp(); };
-  ScintillaImp* imp() const { return (ScintillaImp*) Window::imp(); };
-  
-  virtual std::string GetType() const { return "scintilla"; }
+  ScintillaImp* imp() const { return (ScintillaImp*) Window::imp(); };  
 
   int f(int sci_cmd, void* lparam, void* wparam);
   void AddText(const std::string& text);
@@ -2377,6 +2392,7 @@ class Scintilla : public Window {
   const std::string& filename() const;
   bool is_modified() const;  
   void set_font_info(const FontInfo& font_info);
+  const FontInfo& font_info() const;
   int column() const;    
   int line() const;
   bool over_type() const;
@@ -2398,6 +2414,8 @@ class Scintilla : public Window {
   virtual bool transparent() const { return true; }  
   virtual void OnFirstModified() {}
   virtual void OnMarginClick(int line_pos) {}  
+  virtual void set_properties(const Properties& properties);
+
  private:
   static std::string dummy_str_;
 };
@@ -3063,6 +3081,7 @@ class ScintillaImp : public WindowImp {
   virtual void DevStyleClearAll() {}
   virtual const std::string& dev_filename() const = 0;  
   virtual void dev_set_font_info(const FontInfo& font_info) = 0;
+  virtual const FontInfo& dev_font_info() const = 0;
   virtual int dev_column() const = 0;    
   virtual int dev_line() const = 0;
   virtual bool dev_over_type() const = 0;

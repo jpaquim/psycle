@@ -35,11 +35,11 @@ tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
 function tabgroup:new(parent)  
   local c = group:new()  
   setmetatable(c, self)  
-  self.__index = self
+  self.__index = self  
+  c:init()
   if parent ~= nil then
     parent:add(c)
   end
-  c:init()
   systems:new():changewindowtype(tabgroup.windowtype, c)
   return c
 end
@@ -514,7 +514,7 @@ function tabgroup:setproperties(properties)
   if properties.headeractivecolor then
     self.headeractivecolor_ = properties.headeractivecolor:value()
   end
-  if properties.headeractivebackgroundcolor then    
+  if properties.headeractivebackgroundcolor then  
     self.headeractivebackgroundcolor_ = properties.headeractivebackgroundcolor:value()
   end
   if properties.headerhovercolor then

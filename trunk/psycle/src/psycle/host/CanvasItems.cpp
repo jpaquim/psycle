@@ -101,6 +101,34 @@ void Text::set_property(const ConfigurationProperty& configuration_property) {
   }
 }
 
+void Text::set_properties(const Properties& properties) {
+  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {
+    if (it->first == "font_family") {
+      FontInfo fnt = font().font_info();
+      fnt.set_family(it->second.string_value());
+      set_font(fnt);
+    } else
+    if (it->first == "font_size") {
+      FontInfo fnt = font().font_info();
+      fnt.set_size(it->second.int_value());
+      set_font(fnt);
+    } else
+    if (it->first == "font_style") {
+      /*FontInfo fnt = font().font_info();
+      fnt.set_size(it->second.INT_value());
+      set_font(fnt);*/
+    } else
+    if (it->first == "font_weight") {
+      FontInfo fnt = font().font_info();
+      fnt.set_weight(it->second.int_value());
+      set_font(fnt);
+    } else
+    if (it->first == "color") {
+      set_color(boost::get<ARGB>(it->second.value()));
+    }    
+  }
+}
+
 void Text::set_text(const std::string& text) {
   if (text_ != text) {
     text_ = text;

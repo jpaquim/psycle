@@ -36,7 +36,7 @@ function info:init()
   self.dojump = signal:new()
   self.strobe = 0
   self.activated = 0
-  self.helplevel = 3
+  self.helplevel = 2
   self.title = text:new(self)
                    :setalign(item.ALTOP)
                    :setautosize(false, true)
@@ -45,12 +45,15 @@ function info:init()
                        :setalign(item.ALCLIENT)
                        :hidelinenumbers()  
                        :hidebreakpoints()
-                       :hidehorscrollbar()
-                       :setfontinfo(fontinfo:new("Lucida Sans Typewriter", 8))                        
+                       :hidehorscrollbar()                        
   self:loadrootlink()  
   if self.helplevel < 3 then                  
     self:hide()
   end
+end
+
+function info:typename()
+  return "info"
 end
 
 function info:loadrootlink()
