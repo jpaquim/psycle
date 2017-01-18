@@ -1678,12 +1678,20 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
     return Charset::win_to_utf8(s.GetString());
   }
 
-  virtual void dev_set_viewport(ui::Window::Ptr viewport) {
-    CWnd* wnd = dynamic_cast<CWnd*>(viewport->imp());
-    if (wnd) {      
-      wnd->SetParent(this);      
-      viewport_ = viewport;
+  virtual void dev_set_viewport(const ui::Window::Ptr& viewport) {
+    if (viewport_) {
+      CWnd* wnd = dynamic_cast<CWnd*>(viewport_->imp());
+      if (wnd) {
+        wnd->SetParent(DummyWindow::dummy());
+      }
     }
+    if (viewport) {
+      CWnd* wnd = dynamic_cast<CWnd*>(viewport->imp());
+      if (wnd) {      
+        wnd->SetParent(this);              
+      }
+    }
+    viewport_ = viewport;
   }
 
   virtual void DevShowDecoration();

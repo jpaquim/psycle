@@ -1535,7 +1535,7 @@ void Group::Add(const Window::Ptr& window) {
     throw std::runtime_error("Window already child of a group.");
   }
   window->set_parent(this);
-  items_.push_back(window);  
+  items_.push_back(window); 
   rules_.ApplyTo(window);    
   window->needsupdate();
 }
@@ -1587,7 +1587,7 @@ ui::Dimension Group::OnCalcAutoDimension() const {
 	return result.dimension();
 }
 
-void Group::set_zorder(Window::Ptr item, int z) {
+void Group::set_zorder(const Window::Ptr& item, int z) {
   assert(item);
   if (z<0 || z>= static_cast<int>(items_.size())) return;
   iterator it = find(items_.begin(), items_.end(), item);
@@ -1596,7 +1596,7 @@ void Group::set_zorder(Window::Ptr item, int z) {
   items_.insert(begin()+z, item);  
 }
 
-int Group::zorder(Window::Ptr item) const {
+int Group::zorder(const Window::Ptr& item) const {
 	int result = -1;
   for (Window::Container::size_type k = 0; k < items_.size(); ++k) {
     if (items_[k] == item) {
@@ -1638,7 +1638,6 @@ void Group::OnChildPosition(ChildPosEvent& ev) {
     // ev.StopPropagation();
   }
 }
-
 
 void Group::OnMessage(WindowMsg msg, int param) {
   for (iterator it = items_.begin(); it != items_.end(); ++it ) {
@@ -1873,13 +1872,13 @@ std::string Frame::title() const {
   return imp() ? imp()->dev_title() : "";
 }
 
-void Frame::set_viewport(ui::Window::Ptr viewport) {
-  viewport_ = viewport;
+void Frame::set_viewport(const Window::Ptr& viewport) { 
   if (imp()) {
-    imp()->dev_set_viewport(viewport);
+    imp()->dev_set_viewport(viewport);    
     if (viewport) {
       viewport->Show();
     }
+    viewport_ = viewport;
   }
 }
 
@@ -2023,16 +2022,16 @@ TreeView::TreeView(TreeViewImp* imp) : Window(imp) {
 }
 
 void TreeView::set_properties(const Properties& properties) {
-  for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {
+  Properties::Container::const_iterator it = properties.elements().begin();
+  for ( ; it != properties.elements().end(); ++it) {
     if (it->first == "backgroundcolor") {
-      set_background_color(boost::get<ARGB>(it->second.value()));
+      set_background_color(it->second.argb_value());
     } else
     if (it->first == "color") {
-      set_color(boost::get<ARGB>(it->second.value()));
+      set_color(it->second.argb_value());
     }    
   }
 }
-
 
 void TreeView::Clear() {
   if (!root_node_.expired()) {    
@@ -2050,7 +2049,7 @@ void TreeView::UpdateTree() {
   }  
 }
 
-boost::weak_ptr<Node> TreeView::selected() {
+Node::WeakPtr TreeView::selected() {
   return imp() ? imp()->dev_selected() : boost::weak_ptr<Node>();  
 }
 
@@ -2297,21 +2296,6 @@ ComboBox::ComboBox() : Window(ui::ImpFactory::instance().CreateComboBoxImp()) {
 }
 
 ComboBox::ComboBox(ComboBoxImp* imp) : Window(imp) {
-}
-
-void ComboBox::set_property(const ConfigurationProperty& configuration_property) {
-  if (configuration_property.name() == "color") {
-    // set_color(configuration_property.int_value());
-  } else
-  if (configuration_property.name() == "font") {
-    if (configuration_property.int_value() != -0) {
-      FontInfo info;
-      info.set_stock_id(configuration_property.int_value());
-      set_font(ui::Font(info));
-    } else {
-      set_font(ui::Font(configuration_property.font_info_value()));
-    }
-  }
 }
 
 void ComboBox::set_font(const Font& font) {
@@ -3067,145 +3051,6 @@ void FileObserver::SetDirectory(const std::string& path) {
     imp()->DevSetDirectory(path);
   }
 }
-
-// Ui Configuration
-void DefaultElementFinder::InitDefault() {
-  Properties text_properties;
-  text_properties.push_back(ConfigurationProperty("color", 0xFF0000));
-  elements_["text"] = text_properties;
-}
-
-ElementFinder::Properties DefaultElementFinder::FindElement(const std::string& name) {
-  Properties result;
-  Elements::iterator it = elements_.find(name);
-  if (it != elements_.end()) {
-    result = it->second;
-  }
-  return result;
-}
-
-// Lua Configuration Reader
-void LuaElementFinder::LoadSettingsFromLuaScript() {
-  std::string path = Systems::instance().config_path();
-  lua_State* L = load_script(Systems::instance().config_path());
-  int status = lua_pcall(L, 0, LUA_MULTRET, 0);
-  if (status) {         
-    const char* msg = lua_tostring(L, -1); 
-    ui::alert(msg);
-    throw std::runtime_error(msg);       
-  }
-  lua_getglobal(L, "require");
-  lua_pushstring(L, "uiconfiguration");  
-  status = lua_pcall(L, 1, 1, 0);
-  if (status) {
-    const char* msg =lua_tostring(L, -1);
-    std::ostringstream s; s
-      << "Failed: " << msg << std::endl;
-    throw std::runtime_error(s.str());
-  }  
-  ParseElements(L);  
-  lua_close(L);
-}
-
-void LuaElementFinder::ParseElements(lua_State* L) {   
-  if (lua_istable(L, -1)) {
-    for (lua_pushnil(L); lua_next(L, -2) != 0; lua_pop(L, 1)) {   
-      const char* key = lua_tostring(L, -2);
-      if (std::string(key)=="elements") {                
-        if (lua_istable(L, -1)) {
-          for (lua_pushnil(L); lua_next(L, -2) != 0; lua_pop(L, 1)) {   
-            const char* key = lua_tostring(L, -2);
-            ElementFinder::Properties element;      
-            lua_getfield(L, -1, "properties");          
-            for (lua_pushnil(L); lua_next(L, -2) != 0; lua_pop(L, 1)) {         
-              const char* name = lua_tostring(L, -2);           
-              lua_getfield(L, -1, "type");
-              const char* type_name = lua_tostring (L, -1);
-              lua_pop(L, 1); // pop type
-              lua_getfield(L, -1, "value");
-              if (std::string(type_name) == "int") {
-                int value = lua_tointeger(L, -1);                
-                ConfigurationProperty configuartion_property(name, value);
-                element.push_back(configuartion_property);        
-              } else 
-              if (std::string(type_name) == "stock") {
-                int value = lua_tointeger(L, -1);                
-                ConfigurationProperty configuartion_property(name, value);
-                element.push_back(configuartion_property);        
-              } else
-              if (std::string(type_name) == "font") {
-                ui::FontInfo font_info;
-                lua_getfield(L, -1, "size");
-                if (!lua_isnil(L, -1)) {
-                  int size = lua_tointeger(L, -1);
-                  font_info.set_size(size);
-                }
-                lua_pop(L, 1);
-                lua_getfield(L, -1, "name");
-                if (!lua_isnil(L, -1)) {
-                  const char* family = lua_tostring(L, -1);
-                  font_info.set_family(family);
-                }                
-                lua_pop(L, 1);
-                ConfigurationProperty configuartion_property(name, font_info);
-                element.push_back(configuartion_property);
-              }
-              lua_pop(L, 1); // pop value              
-            }
-            elements_[key] = element;      
-            lua_pop(L, 1); // properties
-          }
-        }        
-      }
-    }
-    lua_pop(L, 1);  // pop elements     
-  }
-}
-
-ElementFinder::Properties LuaElementFinder::FindElement(const std::string& name) {
-  Properties result;
-  Elements::iterator it = elements_.find(name);
-  if (it != elements_.end()) {
-    result = it->second;
-  }
-  return result;
-}
-
-lua_State*  LuaElementFinder::load_script(const std::string& dllpath) {
-  lua_State* L = luaL_newstate();
-  luaL_openlibs(L);
-  // set search path for require
-  std::string filename_noext;
-  boost::filesystem::path p(dllpath);
-  std::string dir = p.parent_path().string();
-  std::string fn = p.stem().string();
-  lua_getglobal(L, "package");
-  std::string path1 = dir + "/?.lua;" + dir + "/" + fn + "/?.lua;"+dir + "/"+ "psycle/?.lua";
-  std::replace(path1.begin(), path1.end(), '/', '\\' );
-  lua_pushstring(L, path1.c_str());
-  lua_setfield(L, -2, "path");
-
-  std::string path = dllpath;
-  /// This prevents loading problems
-  std::replace(path.begin(), path.end(), '\\', '/');
-  int status = luaL_loadfile(L, path.c_str());
-  if (status) {
-    const char* msg =lua_tostring(L, -1);
-    std::ostringstream s; s
-      << "Failed: " << msg << std::endl;
-    throw std::runtime_error(s.str());
-  }
-  return L;
-}
-
-void Configuration::InitWindow(ui::Window& element, const std::string& name) {
-  ElementFinder::Properties properties = finder_->FindElement(name);
-  ElementFinder::Properties::iterator it = properties.begin();
-  for ( ; it != properties.end(); ++it) {
-    element.set_property(*it); 
-  }  
-}
-
 
 void WindowStyler::set_class_properties(WindowTypes::Type window_type,
                                         const Properties& properties) {

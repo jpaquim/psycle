@@ -98,8 +98,6 @@ class Text : public Window {
   virtual std::string GetType() const { return "text"; }
 
   virtual void set_properties(const Properties& properties);
-  virtual void set_property(const ConfigurationProperty& configuration_property);
-
   virtual void Draw(Graphics* cr, Region& draw_region);  
   void set_text(const std::string& text);
   const std::string& text() const { return text_; }

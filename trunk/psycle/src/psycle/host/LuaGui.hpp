@@ -1326,6 +1326,7 @@ class LuaItemBind {
       processrule(L, window);
       lua_pop(L, 1);
     }
+    window->rules().ApplyTo(window);
     return LuaHelper::chaining(L);
   }
   static int addrule(lua_State* L) {

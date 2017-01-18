@@ -111,8 +111,9 @@ namespace psycle { namespace host {
 
   void LuaPlugin::OnReload() {    
     proxy().Reload();
-    if (((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]) {
-      ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[this->_macIndex]->OnReload();
+    if (_macIndex < MAX_MACHINES &&
+        ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[_macIndex]) {
+      ((CMainFrame*)::AfxGetMainWnd())->m_pWndMac[_macIndex]->OnReload();
     }    
   }
 

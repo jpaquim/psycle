@@ -22,7 +22,7 @@ function closebutton.new(parent)
                      :setposition(rect:new(point:new(), dimension:new(20, 15)))
                      :settext("X")
                      --:setverticalalignment(item.ALCENTER)
-                     --:setjustify(text.CENTERJUSTIFY)
+                     :setjustify(toolicon.CENTERJUSTIFY)
                      :setalign(item.ALRIGHT)    
   --t.hoverbackgroundcolor = 0xFFA8444C
   return t

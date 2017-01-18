@@ -33,7 +33,6 @@ local combobox = require("psycle.ui.combobox")
 
 local filehelper = require("psycle.file")
 local fileopen = require("psycle.ui.fileopen")
-local filesave = require("psycle.ui.filesave")
 local fileexplorer = require("fileexplorer")
 local settingspage = require("settingspage")
 local textpage = require("textpage")
@@ -55,12 +54,11 @@ local statusbar = require("statusbar")
 local templateparser = require("templateparser")
 local run = require("psycle.run")
 local serpent = require("psycle.serpent")
-
+local commandfactory = require("commandfactory")
 local sci = require("scintilladef")
-
 local maincanvas = canvas:new()
 
-maincanvas.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
+maincanvas.picdir = cfg:luapath() .. "\\psycle\\ui\\icons\\"
 
 function maincanvas:new(machine)
   local c = canvas:new()  
@@ -79,17 +77,19 @@ function maincanvas:init()
   self:initstyleclasses(self.machine_.settingsmanager:setting())
   self:setupfiledialogs()  
   self:createcreateeditplugin()  
+  self:createpagegroup()
+  self.fileexplorer = self:createfileexplorer()  
   self:inittoolbar()
   self:initinfo()  
   self:createsearch()
   self:createoutputs()
-  splitter:new(self, splitter.HORZ)  
-  self.fileexplorer = self:createfileexplorer()   
+  splitter:new(self, splitter.HORZ)    
+  self:add(self.fileexplorer)  
   self.pluginselector.fileexplorer = self.fileexplorer
   splitter:new(self, splitter.VERT)
-  self:createpagegroup()
+  self:add(self.pages)
   systems:new():updatewindows()
-  self.cursormovement = 1  
+  self.cursormovement = 1
 end
 
 function maincanvas:initinfo()
@@ -116,12 +116,12 @@ function maincanvas:oncmdinfo(cmd)
         self:updatealign();    
       end
     elseif cmd == "saveresume" then
-      self:savepage()
+      self.savepagecmd:execute()
     elseif cmd == "savedone" then
-      self:savepage()
+      self.savepagecmd:execute()
       self.pages:removepage(self.pages:activepage())
     elseif cmd == "saveexit" then
-      self:savepage()
+      self.savepagecmd:execute()
       dtesself.machine_:exit()
     elseif cmd == "abandonfile" then
       self.pages:removepage(self.pages:activepage())
@@ -234,13 +234,13 @@ function maincanvas:createcallstack()
 end
 
 function maincanvas:createpagegroup()
-  self.pages = tabgroup:new(self)
+  self.pages = tabgroup:new()
                        :setalign(item.ALCLIENT)             
   self.pages.dopageclose:connect(maincanvas.onclosepage, self)  
 end
 
 function maincanvas:createfileexplorer()
-  local fileexplorer = fileexplorer:new(self, self.machine_.settingsmanager:setting().fileexplorer)
+  local fileexplorer = fileexplorer:new(nil, self.machine_.settingsmanager:setting().fileexplorer)
                                    :setposition(rect:new(point:new(), dimension:new(200, 0)))
                                    :setalign(item.ALLEFT)
   fileexplorer:setpath(cfg:luapath())  
@@ -255,7 +255,6 @@ function maincanvas:setupfiledialogs()
   function self.fileopen:onok(fname)    
     that:openfromfile(fname)
   end
-  self.filesaveas = filesave:new() 
 end
 
 function maincanvas:setoutputtext(text)
@@ -283,7 +282,7 @@ function maincanvas:dopageexist(fname)
 end
 
 function maincanvas:createpage()
-  local page = textpage:new(nil, self.machine_.settingsmanager:setting())
+  local page = textpage:new(nil)
                        :setmargin(boxspace:new(2, 0, 0, 0))
   systems:new():updatewindow(textpage.windowtype, page)                         
   return page
@@ -329,7 +328,7 @@ function maincanvas:onkeydown(ev)
         ev:stoppropagation()
         self.info:deactivate()
       elseif ev:keycode() == 78 then
-        self:createnewpage()   
+        self.newpagecmd:execute()  
         ev:stoppropagation()
       elseif ev:keycode() == 79 then
         self.fileopen:setfolder(self.fileexplorer:path())      
@@ -341,8 +340,8 @@ function maincanvas:onkeydown(ev)
       elseif ev:keycode() == 70 then
         self:displaysearch() 
         ev:stoppropagation()
-      elseif ev:keycode() == 83 then             
-        self:savepage()
+      elseif ev:keycode() == 83 then
+        self.savepagecmd:execute()
         ev:stoppropagation()
       elseif ev:keycode() == ev.F5  then
         self:playplugin()
@@ -390,29 +389,6 @@ end
 function maincanvas:createnewpage()
   local page = self:createpage()
   self.pages:addpage(page, page:createdefaultname())  
-end
-
-function maincanvas:savepage()  
-  local page = self.pages:activepage()
-  if page then
-    local fname = ""     
-    if page:hasfile() then
-    fname = page:filename()    
-    local sep = "\\"  
-      local dir = fname:match("(.*"..sep..")")    
-      page:savefile(fname)
-      fname = fname:match("([^\\]+)$")
-      self.pages:setlabel(page, fname)
-    else    
-    self.filesaveas:setfolder(self.fileexplorer:path())
-    if self.filesaveas:show() then      
-      fname = self.filesaveas:filename()          
-      page:savefile(fname)
-      fname = fname:match("([^\\]+)$")
-      self.pages:setlabel(page, fname)
-    end
-    end 
-  end
 end
 
 function maincanvas:playplugin()  
@@ -618,21 +594,16 @@ function maincanvas:initfiletoolbar()
   }
   for _, icon in pairs(icons) do    
     self:formattoolicon(icon)
-  end
-  
-  self.newpagecommand = command:new()
-  local that = self
-  function self.newpagecommand:execute()
-    local page = that:createpage()
-    that.pages:addpage(page, page:createdefaultname())  
-  end
-  icons.inew:setcommand(self.newpagecommand)
-  
-  --icons.inew.click:connect(maincanvas.createnewpage, self)
-  icons.iopen.click:connect(maincanvas.onopenfile, self)
-  icons.isave.click:connect(maincanvas.savepage, self)
-  icons.iredo.click:connect(maincanvas.redo, self)
-  icons.iundo.click:connect(maincanvas.undo, self)  
+  end  
+  self.newpagecmd = commandfactory.build(commandfactory.NEWPAGE, self.pages)
+  self.savepagecmd = commandfactory.build(commandfactory.SAVEPAGE, self.pages, self.fileexplorer)
+  self.undopagecmd = commandfactory.build(commandfactory.UNDOPAGE, self.pages)
+  self.redopagecmd = commandfactory.build(commandfactory.REDOPAGE, self.pages)
+  icons.inew:setcommand(self.newpagecmd)  
+  icons.isave:setcommand(self.savepagecmd)  
+  icons.iundo:setcommand(self.undopagecmd) 
+  icons.iredo:setcommand(self.redopagecmd)
+  icons.iopen.click:connect(maincanvas.onopenfile, self)  
   return t
 end
 
@@ -699,11 +670,6 @@ function maincanvas:displaysearch(ev)
   self:updatealign()  
 end
 
-function findlast(haystack, needle)
-  local i=haystack:match(".*"..needle.."()")
-  if i==nil then return else return i end
-end
-
 function maincanvas:openplugin(pluginpath, pluginname, plugininfo)  
   self:preventdraw()
   self:closealltabs()      
@@ -723,7 +689,7 @@ end
 
 function maincanvas:onpluginexplorerclick(ev)
    if ev.filename ~= "" and ev.path then       
-     self:openfromfile(ev.path.."\\"..ev.filename, 0)
+     self:openfromfile(ev.path .. "\\" .. ev.filename, 0)
    end
 end
 
@@ -767,32 +733,9 @@ function maincanvas:onsearchhide()
 end
 
 function maincanvas:onclosepage(ev)  
-  if ev.page:modified() and psycle.confirm("Do you want to save changes to "..ev.page:filename().."?") then
+  if ev.page:modified() and psycle.confirm("Do you want to save changes to " .. ev.page:filename() .. "?") then
     --self:savepage()
   end
-end
-
-function maincanvas:undo()  
-  if self.pages:activepage() then
-    self.pages:activepage():undo()
-  end
-end
-
-function maincanvas:redo()
-  if self.pages:activepage() then
-    self.pages:activepage():redo()
-  end
-end
-
-function maincanvas:mergeproperties(source1, source2)
-  local result = orderedtable.new()
-  for name, property in source1:opairs() do    
-    result[name] = property:clone()    
-  end  
-  for name, property in source2:opairs() do
-    result[name] = property:clone()  
-  end
-  return result
 end
 
 function maincanvas:onapplysetting(setting)    
@@ -800,21 +743,8 @@ function maincanvas:onapplysetting(setting)
   systems:new():updatewindows()
 end
 
-function maincanvas:initstyleclasses(setting)  
-  local systems = systems:new()
-  --systems:setstyleclass(systems.windowtypes.EDIT, setting.general.children.ui.children.edit.properties)
-  --systems:setstyleclass(systems.windowtypes.LISTVIEW, setting.general.children.ui.children.listview.properties)
-  --systems:setstyleclass(systems.windowtypes.TREEVIEW, setting.general.children.ui.children.treeview.properties)
-  --systems:setstyleclass(toolicon.windowtype, setting.general.children.ui.children.toolicon.properties)
-  systems:setstyleclass(advancededit.windowtype, setting.general.children.ui.children.advancededit.properties)
-  systems:setstyleclass(statusbar.windowtype, setting.statusbar.properties)
-  --systems:setstyleclass(tabgroup.windowtype, setting.general.children.ui.children.tabgroup.properties)
-  systems:setstyleclass(output.windowtype, setting.output.properties)  
-  systems:setstyleclass(textpage.windowtype, 
-     self:mergeproperties(setting.textpage.properties, self:mergeproperties(
-  setting.lualexer.properties, setting.general.properties)))
-     --systems:setstyleclass(info.windowtype, setting.general.properties)
-  self:addornament(ornamentfactory:createfill(setting.general.properties.backgroundcolor:value()))
+function maincanvas:initstyleclasses(setting)
+  systems:new():setstyleclass(textpage.windowtype, setting.textpage.properties)
 end
 
 return maincanvas

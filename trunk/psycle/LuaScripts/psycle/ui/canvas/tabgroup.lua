@@ -29,8 +29,7 @@ local cfg = require("psycle.config"):new("MacParamVisual")
 local serpent = require("psycle.serpent")
 local systems = require("psycle.ui.systems")
 
-tabgroup.windowtype = 70
-tabgroup.picdir = cfg:luapath().."\\psycle\\ui\\icons\\"
+tabgroup.picdir = cfg:luapath() .. "\\psycle\\ui\\icons\\"
 
 function tabgroup:new(parent)  
   local c = group:new()  
@@ -40,40 +39,38 @@ function tabgroup:new(parent)
   if parent ~= nil then
     parent:add(c)
   end
-  systems:new():changewindowtype(tabgroup.windowtype, c)
   return c
 end
 
 function tabgroup:init()  
   self.frames = {}
-  self:initdefaultcolors()
-  self.oldflsprevented_ = {}
   self.dopageclose = signal:new()
   self.hasclosebutton_ = true 
   self:setautosize(false, false)
   self.tabbar = group:new(self)
                      :setautosize(false, true)
                      :setalign(window.ALTOP)
-                     :addornament(ornamentfactory:createfill(0xFF373737))
                      :setpadding(boxspace:new(0, 0, 3, 0))
-  self.tabbar.moreicon = toolicon:new(self.tabbar, tabgroup.picdir.."arrow_more.bmp", 0xFFFFFF)
+  self.tabbar.moreicon = toolicon:new(self.tabbar, tabgroup.picdir .. "arrow_more.bmp", 0xFFFFFF)
                                  :setautosize(false, false)                        
                                  :setverticalalignment(toolicon.ALCENTER)
                                  :setjustify(toolicon.CENTERJUSTIFY)
                                  :setalign(window.ALRIGHT)    
                                  :setmargin(boxspace:new(0, 2, 0, 2))
-  self.tabbar.moreicon.cc = 0xFF373737           
   local that = self
   self:inittabpopupmenu()
   self:initframepopupmenu()
   function self.tabbar.moreicon:onclick()    
     self.f = popupframe:new()    
-    self.c = canvas:new():invalidatedirect()
+    self.c = canvas:new()
+                   :invalidatedirect()
     local that1 = self    
     function self.c:onmousedown(ev)
       that1.f:hide()
     end
-    local g = group:new(self.c):setautosize(false, true):setalign(window.ALTOP)    
+    local g = group:new(self.c)
+                   :setautosize(false, true)
+                   :setalign(window.ALTOP)    
     self.f:setviewport(self.c)
     self.c:addornament(ornamentfactory:createfill(0xFF292929))
     self.c:addornament(ornamentfactory:createlineborder(0xFF696969))
@@ -99,44 +96,23 @@ function tabgroup:init()
       end
     end
     that:traverse(fun, that.tabs:items())
-    self.c:updatealign()  
-    local h = g:position():height() 
-    local x = self:desktopposition():left()
-    local y = self:desktopposition():top() 
-    local iw = self:desktopposition():width()
-    local ih = self:desktopposition():height()
+    self.c:updatealign()
     self.f:hidedecoration()
-          :setposition(rect:new(point:new(x + iw - 200, y + ih), dimension:new(200, h + 6)))    
-    self.f:show()            
+          :setposition(
+              rect:new(point:new(self:desktopposition():right() - 200,
+                                 self:desktopposition():bottom()),
+                                 dimension:new(200, g:position():height() + 6)))
+          :show()            
   end  
   self.tabs = group:new(self.tabbar)
                    :setautosize(false, true)
-                   :setalign(window.ALCLIENT)
-                   :addornament(ornamentfactory:createfill(self.tabbarcolor_))
-  self.children = group:new(self)
-                       :setautosize(false, false)
+                   :setalign(window.ALCLIENT)                   
+  self.children = group:new(self)                       
                        :setalign(window.ALCLIENT)    
 end
 
 function tabgroup:typename()  
   return "tabgroup"
-end
-
-function tabgroup:initdefaultcolors()
-  self.color_ = 0xffffffff  
-  self.backgroundcolor_ = 0xFF333333
-  self.tabbarcolor_ = 0xFF333333
-  self.headercolor_ = 0xFF999999    
-  self.headerbackgroundcolor_ = 0xFF333333
-  self.headeractivecolor_ = 0xFFCACACA
-  self.headeractivebackgroundcolor_ = 0xFF568857
-  self.headerhovercolor_ = 0xFF999999
-  self.headerhoverbackgroundcolor_ = 0xFF333333
-  self.headerbordercolor_ = 0xFFFFFFFF
-  self.headerclosecolor_ = 0xFFFFFFFF
-  self.headerclosehovercolor_ = 0xFFFFFFFF
-  self.headerclosehoverbackgroundcolor_ = 0xFFFFFFFF   
-  return self
 end
 
 function tabgroup:setlabel(page, text)
@@ -148,21 +124,6 @@ function tabgroup:setlabel(page, text)
   self:traverse(f, self.tabs:items())
   self.tabs:updatealign()
 end
-
-function tabgroup:saveflsstate()
-  self.oldflsprevented_[#self.oldflsprevented_+1] = self:flsprevented()  
-  return self
-end
-
-function tabgroup:restoreflsstate()  
-  if self.oldflsprevented_[#self.oldflsprevented_] then
-    self:preventfls()
-  else
-    self:enablefls()     
-  end
-  self.oldflsprevented_[#self.oldflsprevented_] = nil
-  return self            
-end                    
 
 function tabgroup:activepage()
   if self.activeframepage_ ~= nil then
@@ -503,7 +464,7 @@ function tabgroup:setproperties(properties)
   end
   if properties.tabbarcolor then
     self.tabbarcolor_ = properties.tabbarcolor:value()
-  self.tabs:removeornaments():addornament(ornamentfactory:createfill(self.tabbarcolor_))
+    self.tabs:removeornaments():addornament(ornamentfactory:createfill(self.tabbarcolor_))
   end
   if properties.headercolor then
     self.headercolor_ = properties.headercolor:value()

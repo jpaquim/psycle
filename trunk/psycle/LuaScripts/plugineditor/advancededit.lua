@@ -11,19 +11,22 @@ local item = require("psycle.ui.item")
 local group = require("psycle.ui.group")
 local edit = require("psycle.ui.edit")
 
-
 local advancededit = group:new()
 
-advancededit.windowtype = 51
-
 function advancededit:new(parent, setting)  
-  local c = group:new(parent)
+  local c = group:new()
                  :setautosize(false, false)  
   setmetatable(c, self)
   self.__index = self  
-  c:init(setting)  
-  systems:new():changewindowtype(advancededit.windowtype, c)
+  c:init(setting)
+  if parent ~= nil then
+    parent:add(c)
+  end  
   return c
+end
+
+function advancededit:typename()
+  return "advancededit"
 end
 
 function advancededit:init(setting)
@@ -32,7 +35,7 @@ function advancededit:init(setting)
   self:initdefaultcolors()	   
   self.edit_:setautosize(false, false)
             :settext("Name of Machine to Edit?")                
-	        :setcolor(self.color_)
+	          :setcolor(self.color_)
             :setbackgroundcolor(self.backgroundcolor_)
             :setmargin(boxspace:new(10))	    
   local that = self			  
@@ -61,12 +64,12 @@ end
 function advancededit:onkeydown(ev)
   if ev:keycode() == ev.RETURN then	  	  
   elseif ev:keycode() == ev.ESCAPE then
-	self.selectorhasfocus = nil
-	self:settext(self.oldtext)	  
+	  self.selectorhasfocus = nil
+	  self:settext(self.oldtext)	  
     self:parent():setfocus()
   elseif self.firstclick then
-	self:settext("")
-	self.firstclick = nil	   
+	  self:settext("")
+	  self.firstclick = nil	   
   end
 end
 
@@ -130,10 +133,10 @@ function advancededit:initdefaultcolors()
 end
 
 function advancededit:onmouseenter()
-    self.selectorhasmouseenter = true
-    if not self.selectorhasfocus then
+  self.selectorhasmouseenter = true
+  if not self.selectorhasfocus then
 	  self:setcolor(self.hovercolor_)
-      self:setbackgroundcolor(self.hoverbackgroundcolor_)
+    self:setbackgroundcolor(self.hoverbackgroundcolor_)
 	end
 end
 
@@ -148,9 +151,13 @@ end
 function advancededit:onmousedown(ev) 
   if not self.selectorhasfocus then
     ev:preventdefault()
-	ev:stoppropagation()
-	self:setfocus()
+	  ev:stoppropagation()
+	  self:setfocus()         
   end
+  if self.firstclick then
+      self.edit_:setsel(1, 1)
+      ev:preventdefault()
+    end  
 end
 
 function advancededit:setproperties(properties)  

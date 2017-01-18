@@ -18,15 +18,19 @@ local search = require("search")
 
 local output = scintilla:new()
 
-output.windowtype = 55
-
 function output:new(parent)    
-  local c = scintilla:new(parent)  
+  local c = scintilla:new()  
   setmetatable(c, self)
   self.__index = self
   c:init()
-  systems:new():changewindowtype(output.windowtype, c)
+  if parent ~= nil then
+    parent:add(c)
+  end
   return c
+end
+
+function output:typename()
+  return "output"
 end
 
 function output:init()

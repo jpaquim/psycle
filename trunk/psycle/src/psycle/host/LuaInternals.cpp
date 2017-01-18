@@ -490,7 +490,7 @@ void LuaMachine::reload() {
   }
 }
 
-void LuaMachine::set_canvas(boost::weak_ptr<ui::Canvas> canvas) { 
+void LuaMachine::set_canvas(const ui::Canvas::WeakPtr& canvas) { 
   canvas_ = canvas;
   proxy_->OnCanvasChanged();
 }

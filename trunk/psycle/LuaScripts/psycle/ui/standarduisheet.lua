@@ -1,9 +1,14 @@
-local setting = {
+return {
   { selector = "group",
     properties = {
       color = "@PVFONT",
       font_family = "courier",
       font_size = 12
+    }
+  },
+  { selector = "canvas",
+    properties = {
+      backgroundcolor = "@PVBACKGROUND"
     }
   },
   { selector = "edit",    
@@ -47,7 +52,3 @@ local setting = {
     }
   }
 }
-
-
-return setting
- 
