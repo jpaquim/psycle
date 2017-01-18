@@ -136,6 +136,9 @@ function toolicon:draw(g)
   self:updatecolor(g)    
   local ypos =
       (self:dimension():height() - g:textdimension(self.text_):height())/2
+  if self.justify_ == toolicon.CENTERJUSTIFY then
+    xpos = (self:dimension():width() - g:textdimension(self.text_):width()) / 2 - 2   
+  end  
   g:drawstring(self.text_, point:new(xpos + 2, ypos))
 end
 

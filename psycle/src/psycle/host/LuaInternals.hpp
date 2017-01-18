@@ -141,7 +141,7 @@ struct LuaActionListenerBind {
     int numchannels() const { return sampleV_.size(); }
     MachineUiType::Value ui_type() const { return ui_type_; }
     void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
-    void set_canvas(boost::weak_ptr<ui::Canvas> canvas);
+    void set_canvas(const boost::weak_ptr<ui::Canvas>& canvas);
     void ToggleViewPort();
     boost::weak_ptr<ui::Canvas> canvas() { return canvas_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }

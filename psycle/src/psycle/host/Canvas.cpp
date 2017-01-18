@@ -439,7 +439,7 @@ void Canvas::Init() {
   set_auto_size(false, false);
   set_position(ui::Rect(ui::Point::zero(), ui::Dimension(500, 500)));
   steal_focus_ = fls_prevented_ = false;
-  save_ = true;  
+  save_ = true; 
 }
 
 void Canvas::OnSize(const ui::Dimension& dimension) {
@@ -453,6 +453,18 @@ void Canvas::OnSize(const ui::Dimension& dimension) {
 
 void Canvas::StealFocus(const Window::Ptr& item) {  
   steal_focus_ = true;
+}
+
+void Canvas::set_properties(const Properties& properties) {
+  Properties::Container::const_iterator it = properties.elements().begin();
+  for ( ; it != properties.elements().end(); ++it) {
+    if (it->first == "backgroundcolor") {
+      background_.reset(
+          ui::OrnamentFactory::Instance().CreateFill(it->second.argb_value()));
+      RemoveOrnaments();
+      add_ornament(background_);
+    };   
+  }  
 }
 
 // Events

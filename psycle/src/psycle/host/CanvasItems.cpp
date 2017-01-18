@@ -86,21 +86,6 @@ Text::Text(const std::string& text) :
   is_aligned_(false) { 
 }
 
-void Text::set_property(const ConfigurationProperty& configuration_property) {
-  if (configuration_property.name() == "color") {
-    set_color(configuration_property.int_value());
-  } else
-  if (configuration_property.name() == "font") {
-    if (configuration_property.int_value() != -0) {
-      FontInfo info;
-      info.set_stock_id(configuration_property.int_value());
-      set_font(ui::Font(info));
-    } else {
-      set_font(ui::Font(configuration_property.font_info_value()));
-    }
-  }
-}
-
 void Text::set_properties(const Properties& properties) {
   for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {
     if (it->first == "font_family") {

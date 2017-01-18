@@ -872,6 +872,7 @@ class AlertBox {
 	 AlertBox();
 
 	 void OpenMessageBox(const std::string& text);
+
  private:
 	 std::auto_ptr<AlertImp> imp_;
 };
@@ -900,35 +901,6 @@ class WindowShowStrategy {
 inline WindowShowStrategy::~WindowShowStrategy() {}
 
 class ChildPosEvent;
-
-class ConfigurationProperty {
- public:
-  ConfigurationProperty() {}
-  ConfigurationProperty(const std::string& name, const std::string& value) 
-    : name_(name), value_(value), int_value_(0) {
-  }
-  ConfigurationProperty(const std::string& name, int value) 
-    : name_(name), int_value_(value) {
-  }
-  ConfigurationProperty(const std::string& name, const ui::FontInfo& font_info) 
-    : name_(name), font_info_value_(font_info), int_value_(0) {
-  }
-
-  void set_name(const std::string& name) { name_ = name;  }
-  const std::string& name() const { return name_; }
-  void set_value(const std::string& value) { value_ = value;  }
-  const std::string& value() const { return value_; }
-  void set_int_value(int value) { int_value_ = value;  }
-  int int_value() const { return int_value_; }
-  FontInfo font_info_value() const { return font_info_value_; }
-
- private:
-  std::string value_;
-  int int_value_;
-  FontInfo font_info_value_;
-  std::string name_;
-};
-
 class Window;
 
 typedef boost::variant<boost::blank, ARGB, std::string, bool, FontInfo> MultiType;
@@ -994,7 +966,6 @@ class Property {
   int stock_key_;
   bool inherit_;
 };
-
 
 class Properties {
  public:
@@ -1163,7 +1134,6 @@ class Window : public boost::enable_shared_from_this<Window> {
 	virtual void Insert(iterator it, const Window::Ptr& window) {}
 	virtual void Remove(const Window::Ptr& window) {}
 	virtual void RemoveAll() {}
-  virtual void set_property(const ConfigurationProperty& configuration_property) {}
 	virtual void set_position(const ui::Point& pos);
 	virtual void set_position(const ui::Rect& pos);
 	virtual void ScrollTo(int offsetx, int offsety);
@@ -1321,7 +1291,9 @@ class Window : public boost::enable_shared_from_this<Window> {
       window->rules_.InheritFrom(rule);
       window->add_rule(rule);      
     }
-  }  
+  } 
+  
+  Rules& rules() { return rules_; } 
 
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
@@ -1393,8 +1365,7 @@ class Group : public Window {
       throw std::exception("Index Out Of Bounds Error.");
     }
     return result;
-  }
-  
+  }  
   void Add(const Window::Ptr& window);
   void Insert(iterator it, const Window::Ptr& item);
   void Remove(const Window::Ptr& item);
@@ -1404,15 +1375,14 @@ class Group : public Window {
 		}
 		items_.clear();
     FLS();
-  }
-    
+  }    
   // appearence
   void set_aligner(const boost::shared_ptr<Aligner>& aligner); 
   virtual Window::Ptr HitTest(double x, double y);
-  void RaiseToTop(Window::Ptr item) {  Remove(item); Add(item); }
-  void set_zorder(Window::Ptr item, int z);
-  int zorder(Window::Ptr item) const;    
-	virtual ui::Dimension OnCalcAutoDimension() const;
+  void RaiseToTop(const Window::Ptr& item) {  Remove(item); Add(item); }
+  void set_zorder(const Window::Ptr& item, int z);
+  int zorder(const Window::Ptr& item) const;    
+	virtual Dimension OnCalcAutoDimension() const;
   virtual void OnMessage(WindowMsg msg, int param = 0);    
   virtual void UpdateAlign();
   void FlagNotAligned();
@@ -1448,34 +1418,25 @@ class Aligner {
     static CalcDim calc_dim;
     static AbortPos pos_abort;
     static SetPos set_position;    
-    static AbortDefault abort;
-        
+    static AbortDefault abort;        
 		if (group_) {
 			group_->PostOrderTreeTraverse(calc_dim, abort);
 			group_->PreOrderTreeTraverse(set_position, pos_abort);
 		}    
   }
-
   virtual void CalcDimensions() = 0;
   virtual void SetPositions() = 0;
-
-  virtual void set_group(ui::Group& group) { group_ = &group; }  
-  ui::Group* group() { return group_; }
-  const ui::Group* group() const { return group_; }
-
-
+  virtual void set_group(Group& group) { group_ = &group; }  
+  Group* group() { return group_; }
+  const Group* group() const { return group_; }
   void set_dimension(const ui::Dimension& dim) { dim_ = dim; }
-  const ui::Dimension& dim() const { return dim_; }
-  const ui::Rect& position() const { return pos_; }   
-
+  const Dimension& dim() const { return dim_; }
+  const Rect& position() const { return pos_; }   
   void set_aligned(bool aligned) { aligned_ = aligned; } 
   bool aligned() const { return aligned_; }
   bool full_align() const { return true; }
-
-  void CachePosition(const ui::Rect& pos) { pos_ = pos; }
-  
-   
-	
+  void CachePosition(const Rect& pos) { pos_ = pos; }
+     	
  protected:  
   typedef Window::Container::iterator iterator;
   iterator begin() { 
@@ -1491,13 +1452,13 @@ class Aligner {
     return group_ ? group_->size() : 0;
   }  
        
-  ui::Rect pos_;
+  Rect pos_;
    
  private: 
-  ui::Group* group_;
+  Group* group_;
   static Window::Container dummy;
   static bool full_align_;
-  ui::Dimension dim_;
+  Dimension dim_;
   bool aligned_;
 };
 
@@ -1574,7 +1535,7 @@ class Frame : public Window {
   FrameImp* imp() { return (FrameImp*) Window::imp(); };
   FrameImp* imp() const { return (FrameImp*) Window::imp(); };
 
-  virtual void set_viewport(ui::Window::Ptr viewport);
+  virtual void set_viewport(const Window::Ptr& viewport);
   ui::Window::Ptr viewport() { return viewport_.lock(); }
   virtual void set_title(const std::string& title);
   virtual std::string title() const;
@@ -1589,13 +1550,13 @@ class Frame : public Window {
 
   virtual void OnClose() {}
   virtual void OnShow() {}  
-  virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point) {}
-  virtual void WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point);
+  virtual void OnContextPopup(Event&, const Point& mouse_point) {}
+  virtual void WorkOnContextPopup(Event& ev, const Point& mouse_point);
   
   boost::signal<void (Frame&)> close;
 
  private:  
-  ui::Window::WeakPtr viewport_;
+  Window::WeakPtr viewport_;
   boost::weak_ptr<PopupMenu> popup_menu_;  
 };
 
@@ -1623,11 +1584,9 @@ class Ornament {
   virtual Ornament* Clone() = 0;
 
   virtual bool transparent() const { return true; }
-
   virtual void Draw(Window& item, Graphics* g, Region& draw_region) = 0;
-  virtual std::auto_ptr<ui::Rect> padding() const { return std::auto_ptr<ui::Rect>(); }
-
-  virtual ui::BoxSpace preferred_space() const { return ui::BoxSpace(); }  
+  virtual std::auto_ptr<Rect> padding() const { return std::auto_ptr<Rect>(); }
+  virtual BoxSpace preferred_space() const { return BoxSpace(); }  
 };
 
 inline Ornament::~Ornament() {}
@@ -1723,23 +1682,19 @@ class Node : public boost::enable_shared_from_this<Node> {
       prev = *it;
     }
   }
-
   void set_parent(Node* parent) { parent_ = parent; }
   Node* parent() const { return parent_; }
   boost::signal<void (Node&)> changed;
 	boost::signal<void (Window&)> dimension_changed;
-
   boost::ptr_list<NodeImp> imps;
-
   NodeImp* imp(NodeOwnerImp& imp);
-
 	void set_data(void* data) { data_ = data;  }
 	void* data() { return data_; }
   const void* data() const { return data_; }
 
  private:
   std::string text_;
-  ui::Image::WeakPtr image_;
+  Image::WeakPtr image_;
   int image_index_, selected_image_index_;
   Container children_;
   Node* parent_;
@@ -1749,7 +1704,7 @@ class Node : public boost::enable_shared_from_this<Node> {
 class recursive_node_iterator {
  friend class Node;
  public:
-  recursive_node_iterator(ui::Node::iterator& it) { i.push(it); }    
+  recursive_node_iterator(Node::iterator& it) { i.push(it); }
 
   bool operator==(const recursive_node_iterator& rhs) const {
     return i.size() == rhs.i.size() && i.top() == rhs.i.top();
@@ -1757,7 +1712,7 @@ class recursive_node_iterator {
   inline bool operator!=(const recursive_node_iterator& rhs) const { 
     return !(*this == rhs);
   }
-  ui::Node::Ptr& operator*() { return *(i.top()); }
+  Node::Ptr& operator*() { return *(i.top()); }
   recursive_node_iterator& operator++() {    
     Node* parent = (*i.top())->parent();
     if (i.top() != parent->end()) {
@@ -1785,7 +1740,7 @@ class recursive_node_iterator {
   int level() const { return i.size(); }
 
  private:  
-  std::stack<ui::Node::iterator> i;  
+  std::stack<Node::iterator> i;  
 };
 
 class NodeOwnerImp {
@@ -1806,7 +1761,7 @@ class MenuContainerImp : public NodeOwnerImp {
   void set_menu_bar(MenuContainer* bar) { bar_ = bar; }
   MenuContainer* menu_bar() { return bar_; }
   
-  virtual void DevTrack(const ui::Point& pos) = 0;
+  virtual void DevTrack(const Point& pos) = 0;
   virtual void DevInvalidate() = 0;
    
  private:
@@ -1839,8 +1794,7 @@ class MenuContainer {
   virtual MenuContainerImp* imp() const { return imp_.get(); }
 
   virtual void Update();
-  virtual void Invalidate();
-    
+  virtual void Invalidate();    
   void set_root_node(Node::Ptr& root_node) {
 		if (!root_node_.expired()) {
       root_node_.lock()->erase_imps(imp());
@@ -1848,7 +1802,6 @@ class MenuContainer {
     root_node_ = root_node;  
   }
   Node::WeakPtr root_node() { return root_node_; }
-
   virtual void OnMenuItemClick(boost::shared_ptr<Node> node) {}
 	boost::signal<void (MenuContainer&, const Node::Ptr& node)> menu_item_click;
 
@@ -1929,8 +1882,8 @@ class TreeView : public Window {
   virtual void OnRightClick(const Node::Ptr& node) {}
   virtual void OnEditing(const Node::Ptr& node, const std::string& text) {}
   virtual void OnEdited(const Node::Ptr& node, const std::string& text) {}  
-  virtual void OnContextPopup(ui::Event&, const ui::Point& mouse_point, const Node::Ptr& node) {}
-  virtual void WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point, const Node::Ptr& node) {
+  virtual void OnContextPopup(Event&, const Point& mouse_point, const Node::Ptr& node) {}
+  virtual void WorkOnContextPopup(Event& ev, const Point& mouse_point, const Node::Ptr& node) {
     OnContextPopup(ev, mouse_point, node);
 		context_popup(*this, ev, mouse_point, node);
     if (!ev.is_default_prevented() && !popup_menu_.expired()) {
@@ -1938,7 +1891,7 @@ class TreeView : public Window {
     }
   }
 	boost::signal<void (TreeView&, const Node::Ptr&, const std::string&)> edited;
-	boost::signal<void (TreeView&, ui::Event&, const ui::Point&, const Node::Ptr&)> context_popup;
+	boost::signal<void (TreeView&, Event&, const Point&, const Node::Ptr&)> context_popup;
 	boost::signal<void (TreeView&, const Node::Ptr& node)> change;
  private:     
   Node::WeakPtr root_node_;
@@ -2044,18 +1997,18 @@ class ScrollBox : public Group {
 
 	 virtual void ScrollTo(const ui::Point& top_left);
    virtual void ScrollBy(double dx, double dy);
-   virtual void OnSize(const ui::Dimension& dimension);
+   virtual void OnSize(const Dimension& dimension);
    virtual void Add(const Window::Ptr& item) { client_->Add(item); }
 	 void UpdateScrollRange();
 
   private:
     void Init();
-    void OnHScroll(ui::ScrollBar&);
-    void OnVScroll(ui::ScrollBar&);		
-    ui::ScrollBar::Ptr hscrollbar_, vscrollbar_;
-		ui::Window::Ptr pane_;
-    ui::Window::Ptr client_;
-    ui::Ornament::Ptr client_background_;
+    void OnHScroll(ScrollBar&);
+    void OnVScroll(ScrollBar&);		
+    ScrollBar::Ptr hscrollbar_, vscrollbar_;
+		Window::Ptr pane_;
+    Window::Ptr client_;
+    Ornament::Ptr client_background_;
 };
 
 class ComboBoxImp;
@@ -2090,19 +2043,13 @@ class ComboBox : public Window {
     }
   }
   virtual Items items() const;
-
   void set_item_index(int index);
   int item_index() const;
-
   void set_text(const std::string& text);
   std::string text() const;
   virtual void OnSelect() {}
   void set_font(const Font& font);
-
-  virtual void set_property(const ConfigurationProperty& configuration_property);
-
   void Clear();
-
   boost::signal<void (ComboBox&)> select;
 };
 
@@ -2142,7 +2089,7 @@ class Edit : public Window {
   virtual void set_sel(int cp_min, int cp_max);
   void set_input_type(InputType::Type input_type);
 
-  boost::signal<void (Edit&)> change;  
+  boost::signal<void (Edit&)> change;
 };
 
 class ButtonImp;
@@ -2516,74 +2463,7 @@ class GameControllersImp {
 
 inline GameControllersImp::~GameControllersImp() {}
 
-
 class MenuContainer;
-
-
-class ElementFinder {
- public:
-  typedef std::vector<ConfigurationProperty> Properties;  
-  typedef std::map<std::string, Properties> Elements;
-
-  ElementFinder() {}
-  virtual ~ElementFinder() = 0;
-
-  virtual Properties FindElement(const std::string& name) = 0;
-};
-
-inline ElementFinder::~ElementFinder() {}
-
-class DefaultElementFinder : public ElementFinder {
- public:
-  DefaultElementFinder() : ElementFinder() { InitDefault(); }
-  virtual ~DefaultElementFinder() {}
-  virtual Properties FindElement(const std::string& name);
-  void InitDefault();
-
- private: 
-  Elements elements_;
-};
-
-class LuaElementFinder : public ElementFinder {
- public:
-  LuaElementFinder() : ElementFinder() { LoadSettingsFromLuaScript(); }
-  virtual ~LuaElementFinder() {}
-  virtual Properties FindElement(const std::string& name);  
-
- private: 
-  void LoadSettingsFromLuaScript();
-  lua_State* load_script(const std::string& dllpath);
-  void ParseElements(struct lua_State* L);
-  Elements elements_;
-};
-
-
-class Configuration {
- public:
-  Configuration(ElementFinder* finder) : finder_(finder) {}
-  
-  static Configuration& instance() {
-    try {
-      static Configuration configuration(new LuaElementFinder());
-      return configuration;
-    } catch (std::exception& e) {
-      ui::alert(e.what());
-      static Configuration configuration(new DefaultElementFinder());
-      return configuration;
-    }
-  }        
-  void InitWindow(ui::Window& element, const std::string& name);
-
- private:   
-   std::auto_ptr<ElementFinder> finder_;
-};
-
-
-struct SystemsConfigVisitor {
-  virtual ~SystemsConfigVisitor() {}
-  virtual void visit(Window* window) = 0;
-};
-
 class Canvas;
 class RadioGroup;
 class RectangleBox;
@@ -2868,7 +2748,7 @@ class FrameImp : public WindowImp {
 
   virtual void dev_set_title(const std::string& title) = 0;
   virtual std::string dev_title() const = 0;
-  virtual void dev_set_viewport(ui::Window::Ptr viewport) = 0;
+  virtual void dev_set_viewport(const Window::Ptr& viewport) = 0;
   virtual void DevShowDecoration() = 0;
   virtual void DevHideDecoration() = 0;
   virtual void DevPreventResize() = 0;
@@ -2898,7 +2778,7 @@ class TreeViewImp : public WindowImp, public NodeOwnerImp {
   virtual void DevShowButtons() = 0;
   virtual void DevHideButtons() = 0;
 	virtual void DevExpandAll() = 0;
-  virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
+  virtual void dev_set_images(const Images::Ptr& images) = 0;
 };
 
 class ListViewImp : public WindowImp, public NodeOwnerImp {
@@ -2924,7 +2804,7 @@ class ListViewImp : public WindowImp, public NodeOwnerImp {
   virtual void DevViewSmallIcon() = 0;
   virtual void DevEnableRowSelect() = 0;  
   virtual void DevDisableRowSelect() = 0;
-  virtual void dev_set_images(const ui::Images::Ptr& images) = 0;
+  virtual void dev_set_images(const Images::Ptr& images) = 0;
   virtual int dev_top_index() const = 0;
   virtual void DevEnsureVisible(int index) = 0;
   virtual void DevEnableDraw() = 0;
@@ -2941,7 +2821,7 @@ class ScrollBarImp : public WindowImp {
   virtual void dev_scroll_range(int& minpos, int& maxpos) = 0;   
   virtual void dev_set_scroll_position(int pos) = 0;
   virtual int dev_scroll_position() const = 0;
-  virtual ui::Dimension dev_system_size() const = 0;
+  virtual Dimension dev_system_size() const = 0;
 
   virtual void OnDevScroll(int pos);
 };

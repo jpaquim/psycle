@@ -95,7 +95,8 @@ class Canvas : public ui::Group {
   }   
     
   static std::string type() { return "canvas"; }
-  static WindowTypes::Type window_type() { return WindowTypes::CANVAS; }       
+  static WindowTypes::Type window_type() { return WindowTypes::CANVAS; }
+  virtual std::string GetType() const { return "canvas"; }     
   void Flush();  
   void StealFocus(const Window::Ptr& item);  
   virtual void OnSize(const ui::Dimension& dimension);
@@ -111,6 +112,7 @@ class Canvas : public ui::Group {
   bool fls_prevented() const { return fls_prevented_; }
   virtual void OnFocusChange(int id) { OnMessage(FOCUS, id); }
   virtual bool is_root() const { return true; }
+  virtual void set_properties(const Properties& properties);
     
  private:  
   void Init();  
@@ -129,9 +131,10 @@ class Canvas : public ui::Group {
       }
     }
   }
-   
+ 
   bool save_, steal_focus_, fls_prevented_;  
-  std::auto_ptr<ui::Region> save_rgn_;  
+  std::auto_ptr<ui::Region> save_rgn_;
+  ui::Ornament::Ptr background_;  
 };
 
 enum LineFormat {

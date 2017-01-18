@@ -460,12 +460,13 @@ void LuaProxy::PrepareState() {
 
 void LuaProxy::Reload() {
   try {      
-    lock();    
+    lock();       
     host_->set_crashed(true);
     lua_State* old_state = L;
     LuaMachine* old_machine = lua_mac_;
     ui::Systems* old_systems = systems_.get();    
     try {
+      RemoveCanvasFromFrame();
       L = LuaGlobal::load_script(host_->GetDllName());      
       systems_.release();
       systems_.reset(new Systems(new LuaSystems(L)));
@@ -496,7 +497,8 @@ void LuaProxy::Reload() {
       old_machine->set_mac(proxy->host_);
       proxy->lua_mac_ = old_machine;
       proxy->lua_mac_->setproxy(proxy);
-      std::string s = std::string("Reload Error, old script still running!\n") + e.what();      
+      std::string s = std::string("Reload Error, old script still running!\n") + e.what(); 
+      UpdateFrameCanvas();
       unlock();
       throw std::exception(s.c_str());  
     }     
@@ -1074,6 +1076,10 @@ bool LuaProxy::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) {
   return res;
 }  
 
+bool LuaProxy::has_frame() const {
+  return frame_.get() != 0;
+}
+
 void LuaProxy::OpenInFrame() {
   using namespace ui;
   if (!frame_ && !canvas().expired()) {
@@ -1084,6 +1090,21 @@ void LuaProxy::OpenInFrame() {
     right_frame_aligner->SizeToScreen(0.4, 0.8);
     frame_->set_min_dimension(ui::Dimension(830, 600));
     frame_->Show(right_frame_aligner);
+  }
+}
+
+void LuaProxy::UpdateFrameCanvas() {
+  if (has_frame()) {
+    frame_->set_viewport(canvas().lock());
+    if (!canvas().expired()) {      
+     // canvas().lock()->OnSize(ui::Dimension(830, 600));
+    }
+  }
+}
+
+void LuaProxy::RemoveCanvasFromFrame() {
+  if (frame_ && !canvas().expired()) {
+    frame_->set_viewport(ui::Frame::Ptr());
   }
 }
 
@@ -1437,20 +1458,24 @@ LuaPluginPtr HostExtensions::Execute(Link& link) {
   return mac;
 }
 
-void HostExtensions::OnPluginCanvasChanged(LuaPlugin& plugin) {     
-  child_view_->ChangeCanvas(plugin.canvas().lock().get());
-  CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
-  if (plugin.canvas().expired()) {        
-    if (!child_view_->IsWindowVisible()) {              
-      pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
-      child_view_->ShowWindow(SW_SHOW);
+void HostExtensions::OnPluginCanvasChanged(LuaPlugin& plugin) { 
+  if (plugin.proxy().has_frame()) {
+    plugin.proxy().UpdateFrameCanvas();
+  } else {    
+    child_view_->ChangeCanvas(plugin.canvas().lock().get());
+    CMainFrame* pParentMain =(CMainFrame *)child_view_->pParentFrame;      
+    if (plugin.canvas().expired()) {        
+      if (!child_view_->IsWindowVisible()) {              
+        pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+        child_view_->ShowWindow(SW_SHOW);
+      }
+    } else {
+      if (child_view_->IsWindowVisible()) {        
+        child_view_->ShowWindow(SW_HIDE);
+        pParentMain->m_luaWndView->ShowWindow(SW_SHOW);            
+      }
     }
-  } else {
-    if (child_view_->IsWindowVisible()) {        
-      child_view_->ShowWindow(SW_HIDE);
-      pParentMain->m_luaWndView->ShowWindow(SW_SHOW);            
-    }
-  }      
+  }
 }
 
 void HostExtensions::OnPluginViewPortChanged(LuaPlugin& plugin, int viewport) {

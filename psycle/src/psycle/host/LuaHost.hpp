@@ -148,7 +148,10 @@ class LuaProxy : public LuaControl {
   }  
   bool IsPsyclePlugin() const;
   bool HasDirectMetaAccess() const;
+  void RemoveCanvasFromFrame();
+  bool has_frame() const;
   void OpenInFrame();
+  void UpdateFrameCanvas();
   void ToggleViewPort();
   void set_userinterface(int user_interface) { user_interface_ = user_interface; }
   int userinterface() const { return user_interface_; }

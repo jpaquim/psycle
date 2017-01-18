@@ -1,4 +1,3 @@
-
 --[[ 
 psycle plugineditor (c) 2016 by psycledelics
 File: statusbar.lua
@@ -22,16 +21,20 @@ local edit = require("psycle.ui.edit")
 
 local statusbar = group:new()
 
-statusbar.windowtype = 52
-
 function statusbar:new(parent, setting)  
-  local c = group:new(parent)
+  local c = group:new()
                  :setautosize(false, false)  
-  setmetatable(c, self)
-  self.__index = self  
-  c:init(setting)  
-  systems:new():changewindowtype(statusbar.windowtype, c)
+  setmetatable(c, self)  
+  self.__index = self
+  c:init(setting)
+  if parent ~= nil then
+    parent:add(c)
+  end
   return c
+end
+
+function statusbar:typename()
+  return "statusbar"
 end
 
 function statusbar:init(setting)  

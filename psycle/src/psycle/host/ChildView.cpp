@@ -2483,11 +2483,14 @@ namespace psycle { namespace host {
                 
     void CChildView::ChangeCanvas(ui::Window* canvas) {      
       if (canvas) { 
+        ShowScrollBar(SB_BOTH, FALSE);
+        viewMode = view_modes::machine;
+        ModifyStyle(WS_VSCROLL | WS_HSCROLL, 0, SWP_FRAMECHANGED);
         ResizeExtensionView();
         EraseOldExtensionWindow();
         AddNewExtensionWindow(canvas);
         ShowExtensionView();          
-        HideChildView();
+        HideChildView();        
         SetExtensionActive();
       } else {
         ShowChildView();
@@ -2500,7 +2503,7 @@ namespace psycle { namespace host {
       pParentMain->m_luaWndView->SetWindowPlacement(&wp);              
     }
 
-    void CChildView::ShowExtensionView() {
+    void CChildView::ShowExtensionView() {     
       pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
     }
        
@@ -2535,16 +2538,12 @@ namespace psycle { namespace host {
     }
 
     WINDOWPLACEMENT CChildView::adjusted_child_view_placement() {
-      CRect rcClient, rcWind;
-      POINT ptDiff;
-      GetClientRect(&rcClient);
-      GetWindowRect(&rcWind);
-      ptDiff.x = (rcWind.right - rcWind.left) - rcClient.right;
-      ptDiff.y = (rcWind.bottom - rcWind.top) - rcClient.bottom;      
+      CRect rcClient, rcWind;     
+      GetWindowRect(&rcWind);           
       WINDOWPLACEMENT wp;
       GetWindowPlacement(&wp);
-      wp.rcNormalPosition.left += ptDiff.x;
-      wp.rcNormalPosition.top += ptDiff.y;
+      wp.rcNormalPosition.right = wp.rcNormalPosition.left + rcWind.Width();
+      wp.rcNormalPosition.bottom = wp.rcNormalPosition.bottom + rcWind.Height();
       return wp;
     }
     

@@ -168,7 +168,7 @@ function textpage:setproperties(properties)
                       "identifiercolor", "numbercolor"}  
   local lex = lexer:new()  
   for _, setter in pairs(lexsetters) do        
-    local property = properties[setter]      
+    local property = properties["lua_lexer_" .. setter]      
     if property then            
       lex["set"..setter](lex, property:value())
     end
