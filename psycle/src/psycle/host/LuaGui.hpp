@@ -577,8 +577,12 @@ struct LuaRegionBind {
     lua_pushnumber(L, bounds.height());
     return 4;
   }
-  static int combine(lua_State *L) {
-    LUAEXPORTML(L, meta, &ui::Region::Combine);
+  static int Union(lua_State *L) {
+    using namespace ui;
+	  Region::Ptr rgn = LuaHelper::check_sptr<Region>(L, 1, meta);
+    Region::Ptr rgnsrc = LuaHelper::check_sptr<Region>(L, 2, meta);
+    rgn->Union(*rgnsrc.get());
+    return LuaHelper::chaining(L);
   }
   static int offset(lua_State *L) {
     LUAEXPORTML(L, meta, &ui::Region::Offset);

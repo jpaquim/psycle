@@ -51,10 +51,10 @@ void RegionImp::DevOffset(double dx, double dy) {
   rgn_.OffsetRgn(pt);
 }
 
-int RegionImp::DevCombine(const ui::Region& other, int combinemode) {
+void RegionImp::DevUnion(const ui::Region& other) {
   mfc::RegionImp* imp = dynamic_cast<mfc::RegionImp*>(other.imp());
   assert(imp);
-  return rgn_.CombineRgn(&rgn_, &imp->crgn(), combinemode);
+  rgn_.CombineRgn(&rgn_, &imp->crgn(), RGN_OR);
 } 
 
 ui::Rect RegionImp::DevBounds() const { 
@@ -868,9 +868,9 @@ ui::Node::Ptr TreeViewImp::dev_node_at(const ui::Point& pos) const {
   if (item) {
     std::map<HTREEITEM, boost::weak_ptr<ui::Node> >::const_iterator it;
     it = htreeitem_node_map_.find(item);
-    return (it != htreeitem_node_map_.end()) ? it->second.lock() : nullpointer;
+    return (it != htreeitem_node_map_.end()) ? it->second.lock() : ui::Node::Ptr();
   }
-  return nullpointer;
+  return ui::Node::Ptr();
 }
 
 ui::Node* TreeViewImp::find_selected_node() {  
@@ -1374,7 +1374,7 @@ void MenuContainerImp::set_menu_window(CWnd* menu_window,
     root_node->erase_imps(this);    
   } else {
     hmenu_ = menu_window->GetMenu()->m_hMenu;
-    DevUpdate(root_node, nullpointer);
+    DevUpdate(root_node, ui::Node::Ptr());
   }
 }
 

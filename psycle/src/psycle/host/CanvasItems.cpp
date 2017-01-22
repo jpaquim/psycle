@@ -5,15 +5,18 @@
 
 #include "CanvasItems.hpp"
 #include "Ui.hpp"
+#include <stdio.h>
+#ifdef _WIN32
 #include "Scintilla.h"
+#endif
 
 namespace psycle {
 namespace host  {
 namespace ui {
   
-void RectangleBox::Draw(Graphics* g, Region& draw_region) { 
+void RectangleBox::Draw(Graphics* g, Region& draw_region) {  
   g->set_color(fill_color_);
-  g->FillRect(ui::Rect(ui::Point(), dim())); 
+  g->FillRect(ui::Rect(ui::Point(), dim()));   
 }
 
 void Line::Draw(Graphics* g, Region& draw_region) {  
@@ -75,7 +78,7 @@ Text::Text() : Window(),
     vertical_alignment_(AlignStyle::ALTOP),
     justify_(JustifyStyle::LEFTJUSTIFY),
     color_(0xFFFFFFFF),    
-	  is_aligned_(false) {   
+    is_aligned_(false) {  
 }
 
 Text::Text(const std::string& text) : 
@@ -126,28 +129,28 @@ void Text::set_text(const std::string& text) {
 void Text::set_font(const Font& font) {  
   font_ = font;
   UpdateTextAlignment();
-	UpdateAutoDimension();
+  UpdateAutoDimension();
   FLSEX();
 }
 
-void Text::Draw(Graphics* g, Region& draw_region) {  	
-	g->SetFont(font_);  
-  g->set_color(color_);
-	g->DrawString(text_, text_alignment_position());  
+void Text::Draw(Graphics* g, Region& draw_region) {  	   
+   g->SetFont(font_);  
+   g->set_color(color_);
+   g->DrawString(text_, text_alignment_position());  
 }
 
 Dimension Text::text_dimension() const {
   Graphics g;		
-	g.SetFont(font_); 
-	return g.text_dimension(text_);
+  g.SetFont(font_); 
+  return g.text_dimension(text_);
 }
 
 const Point& Text::text_alignment_position() {
   if (!is_aligned_) { 
     ui::Dimension text_dim = text_dimension();
     alignment_position_.set_xy(justify_offset(text_dim),
-                               vertical_alignment_offset(text_dim));
-		is_aligned_ = true;
+                                               vertical_alignment_offset(text_dim));
+    is_aligned_ = true;
   }	
   return alignment_position_;
 }
@@ -155,30 +158,30 @@ const Point& Text::text_alignment_position() {
 double Text::justify_offset(const Dimension& text_dimension) {
   double result(0);
   switch (justify_) {	  
-		case JustifyStyle::CENTERJUSTIFY:
-			result = (dim().width() - text_dimension.width())/2;
-		break;
-		case JustifyStyle::RIGHTJUSTIFY:
-			result = dim().width() - text_dimension.width();
-		break;
-		default:
-		break;
+    case JustifyStyle::CENTERJUSTIFY:
+      result = (dim().width() - text_dimension.width())/2;
+    break;
+    case JustifyStyle::RIGHTJUSTIFY:
+      result = dim().width() - text_dimension.width();
+    break;
+    default:
+    break;
   }
   return result;
 }
 
 double Text::vertical_alignment_offset(const Dimension& text_dimension) {
   double result(0);
-	switch (vertical_alignment_) {	  
-		case AlignStyle::ALCENTER:        
+  switch (vertical_alignment_) {	  
+    case AlignStyle::ALCENTER:        
       result = (dim().height() - text_dimension.height())/2;
-		break;
-		case AlignStyle::ALBOTTOM:
-		  result = dim().height() - text_dimension.height();
-		break;
-		default:      
-		break;
-	}
+    break;
+    case AlignStyle::ALBOTTOM:
+      result = dim().height() - text_dimension.height();
+    break;
+    default:      
+    break;
+  }
   return result;
 }
 
@@ -233,7 +236,6 @@ Splitter::Splitter(Orientation::Type orientation) :
 	  set_position(Rect(Point(), Dimension(5, 0)));
   }
 }
-
 
 void Splitter::Draw(Graphics* g, Region& draw_region) { 
   g->set_color(fill_color_);
@@ -329,12 +331,15 @@ TerminalView::TerminalView()
   StyleClearAll();
   set_linenumber_foreground_color(0xFF939393);
   set_linenumber_background_color(0xFF232323);     
+#ifdef _WIN32	       
   f(SCI_SETWRAPMODE, (void*) SC_WRAP_CHAR, 0);
+#endif	       
   PreventInput();
-	StartTimer();  
+  StartTimer();  
 }
 
 void TerminalView::output(const std::string& text) {
+#ifdef _WIN32	
   struct {
     std::string text;
     TerminalView* that;
@@ -364,6 +369,7 @@ void TerminalView::output(const std::string& text) {
   f.that = this;
   f.text = text;
   invokelater.Add(f);
+#endif  
 }
 
 void TerminalView::OnKeyDown(KeyEvent& ev) {
@@ -446,12 +452,13 @@ typedef enum {
 } str2int_errno;
 
 str2int_errno str2int(int *out, const char *s, int base) {
+#ifdef _WIN32	
     char *end;
     if (s[0] == '\0' || isspace((unsigned char) s[0]))
         return STR2INT_INCONVERTIBLE;
     errno = 0;
     long l = strtol(s, &end, base);
-    /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
+    // Both checks are needed because INT_MAX == LONG_MAX is possible. 
     if (l > INT_MAX || (errno == ERANGE && l == LONG_MAX))
         return STR2INT_OVERFLOW;
     if (l < INT_MIN || (errno == ERANGE && l == LONG_MIN))
@@ -459,14 +466,17 @@ str2int_errno str2int(int *out, const char *s, int base) {
     if (*end != '\0')
         return STR2INT_INCONVERTIBLE;
     *out = l;
+#endif	
     return STR2INT_SUCCESS;
 }
 
 void TerminalFrame::OnLineLimitChange(Edit& edit) {
   int val;
+#ifdef _WIN32
   if (str2int(&val, edit.text().c_str(), 10) == STR2INT_SUCCESS) {
     terminal_view_->set_line_limit(val);
   }  
+#endif	
 }
 
 void TerminalFrame::OnClearTextAtLineLimitClick(CheckBox& clear_text_checkbox) {
@@ -478,7 +488,7 @@ void TerminalFrame::OnClearTextAtLineLimitClick(CheckBox& clear_text_checkbox) {
 }
 
 HeaderGroup::HeaderGroup() {		
-	Init();
+   Init();
 }
 
 HeaderGroup::HeaderGroup(const std::string& title) {
@@ -536,3 +546,4 @@ void HeaderGroup::FlsClient() {
 } // namespace ui
 } // namespace host
 } // namespace psycle
+

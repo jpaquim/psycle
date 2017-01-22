@@ -100,7 +100,7 @@ namespace psycle { namespace host {
       if (!canvas.expired()) {
         ChangeCanvas(canvas.lock());
       } else {
-        ChangeCanvas(nullpointer);
+        ChangeCanvas(Canvas::Ptr());
       }
     }
 
@@ -109,7 +109,7 @@ namespace psycle { namespace host {
       LuaPlugin* lp = (LuaPlugin*) (mac);
       ui::Canvas::WeakPtr canvas = lp->canvas();      
       if (!canvas.expired()) {
-        ChangeCanvas(nullpointer);        
+        ChangeCanvas(Canvas::Ptr());        
       }
     }
 

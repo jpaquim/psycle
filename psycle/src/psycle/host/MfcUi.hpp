@@ -119,6 +119,14 @@ class SystemMetrics : public ui::SystemMetrics {
   }
 };
 
+class AppImp : public ui::AppImp {
+ public:
+   AppImp() {}
+   virtual ~AppImp() {}
+
+   virtual void DevRun() {}   
+};
+
 class ImageImp : public ui::ImageImp {
  public:
   ImageImp() : bmp_(0), shared_(false) {}
@@ -2531,7 +2539,7 @@ class RegionImp : public ui::RegionImp {
   
   virtual RegionImp* DevClone() const;
   void DevOffset(double dx, double dy);
-  int DevCombine(const ui::Region& other, int combinemode);     
+  void DevUnion(const ui::Region& other);     
   ui::Rect DevBounds() const;
   bool DevIntersect(double x, double y) const;
   bool DevIntersectRect(const ui::Rect& rect) const;
@@ -2615,6 +2623,9 @@ class ImpFactory : public ui::ImpFactory {
       }
     }
     return false;     
+  }
+  virtual ui::AppImp* CreateAppImp() { 
+    return new AppImp(); 
   }
 	virtual ui::AlertImp* CreateAlertImp() {
 		return new AlertImp();

@@ -321,9 +321,9 @@ class Fill : public ui::Ornament {
   void DrawFill(Window& item, Graphics* g, Region& draw_region) {
     if (draw_region.bounds().height() > 0) {          
        g->set_color(color_);
-				//draw_region.bounds()
-			 g->FillRegion(draw_region); // use_bounds_ ? *item->area().bounds().region().get()
-                                  //: item->area().region());      
+       //draw_region.bounds()
+       g->FillRegion(draw_region); // use_bounds_ ? *item->area().bounds().region().get()
+       //: item->area().region());      
     }
   }
   ARGB color_;
@@ -372,7 +372,7 @@ class OrnamentFactory {
 
   LineBorder* CreateLineBorder() { return new LineBorder(); }
   LineBorder* CreateLineBorder(ARGB color) { return new LineBorder(color); }
-	LineBorder* CreateLineBorder(ARGB color, const BoxSpace& border_width) {
+  LineBorder* CreateLineBorder(ARGB color, const BoxSpace& border_width) {
     return new LineBorder(color, border_width);
   }  
   Fill* CreateFill() { return new Fill(); }

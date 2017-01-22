@@ -2670,7 +2670,7 @@ int LuaRegionBind::open(lua_State *L) {
 	  {"new", create},
     {"bounds", bounds},
     {"setrect", setrect},		
-    {"combine", combine},
+    {"union", Union},
     {"offset", offset},    
     {NULL, NULL}
   };

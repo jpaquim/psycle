@@ -471,7 +471,7 @@ void Canvas::set_properties(const Properties& properties) {
 void Canvas::Invalidate(const Region& rgn) {
   if (!fls_prevented_) {
     if (IsSaving()) {
-      save_rgn_->Combine(rgn, RGN_OR);
+      save_rgn_->Union(rgn);
     } else { 
       Window::Invalidate(rgn);      
     }
