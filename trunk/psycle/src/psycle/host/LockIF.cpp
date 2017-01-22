@@ -2,14 +2,20 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 //#include "stdafx.h"
+#include <algorithm>
 #include "LockIF.hpp"
 #include "MainFrm.hpp"
+
 
 namespace psycle {
 namespace host {  
 
 LockIF& LockIF::Instance() {
+#ifdef _WIN32	
   static mfc::WinLock locker;
+#else 	
+  static LockIF locker;
+#endif	
   return locker;  
 }
 
@@ -55,6 +61,7 @@ void GlobalTimer::OnViewRefresh() {
 }   
 
 void GlobalTimer::KillTimer() {
+#ifdef _WIN32	
   CMainFrame* fr = (CMainFrame*) ::AfxGetMainWnd();
   CChildView* cv = &fr->m_wndView;    
   MSG msg; 
@@ -66,13 +73,16 @@ void GlobalTimer::KillTimer() {
        (msg.wParam == 39))  {
     PeekMessage(&msg, hWnd, WM_TIMER, WM_TIMER, PM_REMOVE); 
   }
+#endif	
 }
 
 void GlobalTimer::StartTimer() {
+#ifdef _WIN32	
   CMainFrame* fr = (CMainFrame*) ::AfxGetMainWnd();
   CChildView* cv = &fr->m_wndView;
   started_ = true;
   cv->SetTimer(39, 30, NULL);
+#endif	
 }
 
 }  // namespace

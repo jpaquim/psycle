@@ -12,8 +12,13 @@ namespace ui {
 
 class RectangleBox : public Window {
  public:
+  typedef boost::shared_ptr<RectangleBox> Ptr;
+  typedef boost::shared_ptr<const RectangleBox> ConstPtr;
+  typedef boost::weak_ptr<RectangleBox> WeakPtr;
+  typedef boost::weak_ptr<const RectangleBox> ConstWeakPtr;
   static std::string type() { return "rectanglebox"; }
   static WindowTypes::Type window_type() { return WindowTypes::RECTANGLEBOX; }
+  virtual std::string GetType() const { return "rectanglebox"; }
 
   RectangleBox() : Window(), fill_color_(0) { set_auto_size(false, false); }
 
@@ -103,7 +108,7 @@ class Text : public Window {
   const std::string& text() const { return text_; }
   void set_color(ARGB color) {    
     color_ = color;
-		FLS();
+    FLS();
   }
   ARGB color() const { return color_; }
   void set_font(const Font& font);
@@ -113,26 +118,25 @@ class Text : public Window {
 		UpdateTextAlignment();
   }
   void set_justify(JustifyStyle::Type justify) { 
-		justify_ = justify;
-		UpdateTextAlignment();
-	}
-	virtual Dimension OnCalcAutoDimension() const { return text_dimension(); }
+    justify_ = justify;
+    UpdateTextAlignment();
+  }
+  virtual Dimension OnCalcAutoDimension() const { return text_dimension(); }
   virtual void OnSize(const Dimension& dimension) { UpdateTextAlignment(); }
 
  private:	
   void UpdateTextAlignment() { is_aligned_ = false; }
-	const Point& text_alignment_position();	
+  const Point& text_alignment_position();	
   double justify_offset(const Dimension& text_dimension);
   double vertical_alignment_offset(const Dimension& text_dimension);	
   Dimension text_dimension() const;
-
   std::string text_;
   AlignStyle::Type vertical_alignment_;
   JustifyStyle::Type justify_;
   ARGB color_;
   Font font_;		
-	bool is_aligned_;
-	Point alignment_position_;
+  bool is_aligned_;
+  Point alignment_position_;
 };
 
 class Splitter : public Window {

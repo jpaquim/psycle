@@ -14,13 +14,13 @@ class LockIF {
 
   static LockIF& Instance();
 
-  virtual ~LockIF() = 0;
-  virtual void lock() const = 0;
-  virtual void unlock() const = 0;
+  virtual ~LockIF() {} // = 0;
+  virtual void lock() const {} //= 0;
+  virtual void unlock() const {} //= 0;
 };
 
-inline LockIF::~LockIF() { }
 
+#ifdef _WIN32
 namespace mfc {
 
   class WinLock : public LockIF {
@@ -34,8 +34,8 @@ namespace mfc {
    private:
     mutable CRITICAL_SECTION cs;  
   };
-
 }
+#endif
 
 class Timer { 
  public:

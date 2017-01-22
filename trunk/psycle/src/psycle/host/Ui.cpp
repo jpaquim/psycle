@@ -1,13 +1,17 @@
-#pragma once
-
 // #include "stdafx.h"
 
 #include "Ui.hpp"
-#include <lua.hpp>
 #include "LockIF.hpp"
-#include "MfcUi.hpp"
+#ifdef __linux__ 
+  #include "XUi.hpp"
+#elif _WIN32
+  #include "MfcUi.hpp"
+#else
+  // platform not supported
+#endif
 #include "CanvasItems.hpp"
 #include <limits>
+#include <stdio.h>
 
 namespace psycle {
 namespace host {
@@ -17,8 +21,8 @@ const ui::Point ui::Point::zero_;
 const ui::Rect ui::Rect::zero_;
 Window::Container Window::dummy_list_;
 int MenuContainer::id_counter = 0;
-Font Font::dummy_font;
-FontInfo FontInfo::dummy_font_info;
+Font Font::dummy_font(0);
+FontInfo FontInfo::dummy_font_info(0);
 
 MenuContainer::MenuContainer() : imp_(ImpFactory::instance().CreateMenuContainerImp()) {
   imp_->set_menu_bar(this);
@@ -82,12 +86,10 @@ void Region::Offset(double dx, double dy) {
   }
 }
 
-int Region::Combine(const Region& other, int combinemode) {
-  int result(0);
+void Region::Union(const Region& other) {  
   if (imp_.get()) {
-    result = imp_.get()->DevCombine(other, combinemode);
-  }
-  return result;
+    imp_.get()->DevUnion(other);
+  }  
 }
 
 ui::Rect Region::bounds() const {
@@ -183,20 +185,24 @@ void Area::Add(const RectShape& rect) {
 }
 
 int Area::Combine(const Area& other, int combinemode) {  
-  if (combinemode == RGN_OR) {    
-    rect_shapes_.insert(rect_shapes_.end(), other.rect_shapes_.begin(),
-                        other.rect_shapes_.end());
-    needs_update_ = true;
-    return COMPLEXREGION;
-  }  
-  return ERROR;
+  // if (combinemode == RGN_OR) {    
+  rect_shapes_.insert(rect_shapes_.end(), other.rect_shapes_.begin(),
+       other.rect_shapes_.end());
+  needs_update_ = true;
+#ifdef __linux__ 
+  return 1;
+#elif _WIN32
+  return COMPLEXREGION;
+# endif
+    return 1;
+  //}	
 }
 
 void Area::ComputeRegion() const {
   region_cache_.Clear();
   rect_const_iterator i = rect_shapes_.begin();
   for (; i != rect_shapes_.end(); ++i) {    
-    region_cache_.Combine(ui::Region((*i).bounds()), RGN_OR);
+     region_cache_.Union(ui::Region((*i).bounds()));
   }
 }
 
@@ -227,25 +233,28 @@ void Area::ComputeBounds() const {
   }  
 }
 
+#ifdef _WIN32
 Commands::Commands() : locker_(new psycle::host::mfc::WinLock()), invalid_(false), addcount(0) {}
-
+#else
+Commands::Commands() : locker_(0), invalid_(false), addcount(0) {}
+#endif
 void Commands::Clear() {
-/*  locker_->lock();
+  locker_->lock();
   functors.clear();
-  locker_->unlock();  */
+  locker_->unlock();
 }
 
 void Commands::Invoke() {       
-//  locker_->lock();
+  locker_->lock();
   GlobalTimer::instance().KillTimer();
-  std::list<boost::function<void(void)>>::iterator it = functors.begin();
+  std::list<boost::function<void(void)> >::iterator it = functors.begin();
   while (it != functors.end()) { 
     boost::function<void(void)> func = *it;    
     it = functors.erase(it);    
     func();   
   }    
- GlobalTimer::instance().StartTimer();
-//  locker_->unlock();
+  GlobalTimer::instance().StartTimer();
+  locker_->unlock();
 }
 
 FontInfo::FontInfo() : imp_(ui::ImpFactory::instance().CreateFontInfoImp()) {
@@ -273,6 +282,9 @@ FontInfo::FontInfo(const std::string& family, int size, int weight, FontStyle::T
 FontInfo::FontInfo(const FontInfo& other) {    
   assert(other.imp());
   imp_.reset(other.imp()->DevClone());  
+}
+
+FontInfo::FontInfo(FontInfoImp* imp) : imp_(imp) {
 }
 
 FontInfo& FontInfo::operator=(const FontInfo& other) {
@@ -333,7 +345,7 @@ int FontInfo::stock_id() const {
   return imp()->dev_stock_id();
 }
 
-Font::Font() : imp_(ui::ImpFactory::instance().CreateFontImp()) {
+Font::Font()  : imp_(ui::ImpFactory::instance().CreateFontImp()) {
 }
 
 Font::Font(const ui::FontInfo& font_info)  {
@@ -348,6 +360,9 @@ Font::Font(const ui::FontInfo& font_info)  {
 Font::Font(const Font& other) {    
   assert(other.imp());
   imp_.reset(other.imp()->DevClone());  
+}
+
+Font::Font(FontImp* imp) : imp_(imp) {
 }
 
 Font& Font::operator= (const Font& other) {
@@ -421,12 +436,20 @@ ui::Dimension Image::dim() const {
 }
 
 std::auto_ptr<ui::Graphics> Image::graphics() {
+#ifdef __linux__ 
+  std::auto_ptr<ui::Graphics> paint_graphics;
+  // not implemented yet;
+  assert(0);
+#elif _WIN32
   assert(imp_.get());		
-	CDC* memDC = new CDC();
+  CDC* memDC = new CDC();
   memDC->CreateCompatibleDC(NULL);
-	std::auto_ptr<ui::Graphics> paint_graphics(new ui::Graphics(memDC));
-	paint_graphics->AttachImage(this);	
-	return paint_graphics;
+  std::auto_ptr<ui::Graphics> paint_graphics(new ui::Graphics(memDC));
+  paint_graphics->AttachImage(this);
+#else
+  // platform not supported
+#endif	  	
+  return paint_graphics;
 }
 
 void Image::Cut(const ui::Rect& bounds) {
@@ -461,9 +484,14 @@ Graphics::Graphics() : imp_(ui::ImpFactory::instance().CreateGraphicsImp()) {
 Graphics::Graphics(bool debug) : imp_(ui::ImpFactory::instance().CreateGraphicsImp(debug)) {
 }
 
+Graphics::Graphics(GraphicsImp* imp)  : imp_(imp) {
+}
+
+#ifdef _WIN32
 Graphics::Graphics(CDC* cr) 
 	: imp_(ui::ImpFactory::instance().CreateGraphicsImp(cr)) {
 }
+#endif
 
 void Graphics::CopyArea(const ui::Rect& rect, const ui::Point& delta) {
   assert(imp_.get());
@@ -499,7 +527,7 @@ void Graphics::DrawRect(const ui::Rect& rect) {
 }
 
 void Graphics::DrawRoundRect(const Rect& rect,
-                             const Dimension& arc_dimension) {
+     const Dimension& arc_dimension) {
   if (is_color_opaque()) {
     assert(imp_.get());
     imp_->DevDrawRoundRect(rect, arc_dimension);  
@@ -593,8 +621,7 @@ void Graphics::set_stroke(ARGB color) {
 }
 
 ARGB Graphics::color() const {
-  assert(imp_.get());
-  return imp_->dev_color();
+  return imp_.get()  ? imp_->dev_color() : 0;
 }
 
 void Graphics::SetPenWidth(double width) {
@@ -742,10 +769,11 @@ void Graphics::AttachImage(Image* image) {
   return imp_->DevAttachImage(image);	
 }
 
+/*
 CDC* Graphics::dc() {
   assert(imp_.get());
   return imp_->dev_dc();
-}
+}*/
 
 void Graphics::SaveOrigin() {
   assert(imp_.get());
@@ -776,6 +804,8 @@ bool InheritedProperties::is_inherited(const std::string& name) const {
 
 //Rules
 void Rules::ApplyTo(const Window::Ptr& window) {
+#ifdef _WIN32
+   // linux outcommented because gcc errors here
   struct {    
     RuleContainer* rules;
     bool operator()(Window& window) const {
@@ -798,6 +828,7 @@ void Rules::ApplyTo(const Window::Ptr& window) {
     bool operator()(Window& window) const { return false; }    
   } no_abort;  
   window->PreOrderTreeTraverse(recursive_apply, no_abort);
+#endif  
 }
 
 void Rule::InheritFrom(const Rule& rule) {
@@ -814,8 +845,8 @@ void Rule::merge(const Rule& rule) {
   Properties::Container::const_iterator it = rule.properties().elements().begin();
   for ( ; it != rule.properties().elements().end(); ++it) {
     if (InheritedProperties::instance().is_inherited(it->first)) {
-	    Properties::Container::const_iterator result = properties_.elements().find(it->first);
-	    if (result == properties_.elements().end()) {
+      Properties::Container::const_iterator result = properties_.elements().find(it->first);
+      if (result == properties_.elements().end()) {
         properties_.set(it->first, it->second);
       }
     }
@@ -916,11 +947,15 @@ void Window::set_imp(WindowImp* imp) {
 }
 
 void Window::lock() const {
+#ifdef _WIN32
   psycle::host::mfc::WinLock::Instance().lock();
+#endif	
 }
 
 void Window::unlock() const {
+#ifdef _WIN32	
   psycle::host::mfc::WinLock::Instance().unlock();
+#endif	
 }
 
 Window* Window::root() {   
@@ -967,6 +1002,7 @@ bool Window::IsInGroup(Window::WeakPtr group) const {
 }
 
 void Window::FLSEX() {  
+#ifdef _WIN32	
   ui::Window* root_window = root();
   if (root_window && visible() && imp()) {    
 		ui::Rect fls_pos = imp()->dev_absolute_system_position();
@@ -979,6 +1015,7 @@ void Window::FLSEX() {
     }  
     fls_area_ = tmp;  
   }
+#endif	
 }
 
 void Window::FLS() {
@@ -997,7 +1034,7 @@ void Window::FLS() {
         non_transparent_window->Invalidate(redraw_rgn.region());            
       }
     }
-  }
+  }	
 }
 
 bool Window::IsInGroupVisible() const {
@@ -1044,28 +1081,28 @@ void Window::set_position(const ui::Point& pos) {
 }
 
 void Window::set_position(const ui::Rect& pos) {  
-	ui::Rect new_pos = pos;
-	bool has_auto_dimension = (!prevent_auto_dimension_) && ((auto_size_width() || auto_size_height()));
-	if (imp_.get()) {    		
-		if (has_auto_dimension) {
-			ui::Dimension auto_dimension = OnCalcAutoDimension();
-			if (auto_size_width()) {
-				new_pos.set_width(auto_dimension.width());
-			}
-			if (auto_size_height()) {
-				new_pos.set_height(auto_dimension.height());
-			}
-	  }
-		bool size_changed = imp_->dev_position().dimension() != new_pos.dimension();
-		imp_->dev_set_position(new_pos);
+  ui::Rect new_pos = pos;
+  bool has_auto_dimension = (!prevent_auto_dimension_) && ((auto_size_width() || auto_size_height()));
+  if (imp_.get()) {
+    if (has_auto_dimension) {
+       ui::Dimension auto_dimension = OnCalcAutoDimension();
+       if (auto_size_width()) {
+	 new_pos.set_width(auto_dimension.width());
+       }
+       if (auto_size_height()) {
+	 new_pos.set_height(auto_dimension.height());
+       }
+    }
+    bool size_changed = imp_->dev_position().dimension() != new_pos.dimension();
+    imp_->dev_set_position(new_pos);
     if (size_changed) {			
       OnSize(new_pos.dimension());
     }
     FLSEX();    
     align_dimension_changed();    		
-		if (!prevent_auto_dimension_) {
-		  // WorkChildposition();
-		}
+    if (!prevent_auto_dimension_) {
+     // WorkChildposition();
+    }
   }
 }
 
@@ -1088,7 +1125,7 @@ ui::Rect Window::desktop_position() const {
 }
 
 ui::Dimension Window::dim() const {  
-	return (imp_.get()) ? imp_->dev_position().dimension() : ui::Dimension();
+  return (imp_.get()) ? imp_->dev_position().dimension() : ui::Dimension();
 }
 
 bool Window::check_position(const ui::Rect& pos) const {
@@ -1099,50 +1136,50 @@ void Window::UpdateAutoDimension() {
   ui::Dimension new_dimension = position().dimension();
   bool has_auto_dimension = auto_size_width() || auto_size_height();
   if (has_auto_dimension && imp_.get()) {    				
-	  ui::Dimension auto_dimension = OnCalcAutoDimension();
+    ui::Dimension auto_dimension = OnCalcAutoDimension();
     if (auto_size_width()) {
-		  new_dimension.set_width(auto_dimension.width());
+       new_dimension.set_width(auto_dimension.width());
     }
     if (auto_size_height()) {
-		  new_dimension.set_height(auto_dimension.height());      
-	  }  
-	  if (overall_position() != overall_position(ui::Rect(position().top_left(), new_dimension))) {
-	    imp_->dev_set_position(ui::Rect(position().top_left(), new_dimension));
+       new_dimension.set_height(auto_dimension.height());      
+    }  
+    if (overall_position() != overall_position(ui::Rect(position().top_left(), new_dimension))) {
+      imp_->dev_set_position(ui::Rect(position().top_left(), new_dimension));
       OnSize(new_dimension); 	
-	    WorkChildPosition();	  
+      WorkChildPosition();	  
       FLSEX();    
-	  }	  
+    }
   }
 }
 
 void Window::set_margin(const BoxSpace& margin) {
-	if (imp_.get()) {
-		imp_->dev_set_margin(margin);
-	}
+  if (imp_.get()) {
+    imp_->dev_set_margin(margin);
+  }
 }
 
 const BoxSpace& Window::margin() const {	
-	return imp() ? imp_->dev_margin() : BoxSpace::zero();
+   return imp() ? imp_->dev_margin() : BoxSpace::zero();
 }
 
 void Window::set_padding(const ui::BoxSpace& padding) {
-	if (imp_.get()) {
-		imp_->dev_set_padding(padding);
-	}	
+  if (imp_.get()) {
+    imp_->dev_set_padding(padding);
+  }	
 }
 
 const BoxSpace& Window::padding() const {
-	return imp() ? imp_->dev_padding() : BoxSpace::zero();
+   return imp() ? imp_->dev_padding() : BoxSpace::zero();
 }
 
 void Window::set_border_space(const ui::BoxSpace& border_space) {
-	if (imp_.get()) {
-		imp_->dev_set_border_space(border_space);
-	}
+  if (imp_.get()) {
+    imp_->dev_set_border_space(border_space);
+  }
 }
 
 const BoxSpace& Window::border_space() const {
-	return imp() ? imp_->dev_border_space() : BoxSpace::zero();
+  return imp() ? imp_->dev_border_space() : BoxSpace::zero();
 }
 
 bool Window::auto_size_width() const { 
@@ -1161,15 +1198,15 @@ void Window::needsupdate() {
 }
 
 ui::BoxSpace Window::sum_border_space() const {
-	ui::BoxSpace result;	
-	if (!ornaments_.empty()) {       
-			for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {				
-				if (!(*it).expired()) {
-					result = result + (*it).lock()->preferred_space();		
-				}
-			}
+  ui::BoxSpace result;	
+  if (!ornaments_.empty()) {       
+    for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {				
+      if (!(*it).expired()) {
+        result = result + (*it).lock()->preferred_space();		
+      }
     }
-	return result;
+  }
+  return result;
 }
 
 void Window::WorkChildPosition() {
@@ -1262,118 +1299,118 @@ void Window::Invalidate() {
 }
 
 void Window::Invalidate(const Region& rgn) {
-	if (imp_.get()) {
-		imp_->DevInvalidate(rgn);
-	}
+  if (imp_.get()) {
+    imp_->DevInvalidate(rgn);
+  }
 }
 
 void Window::SetCapture() {
-	if (imp_.get()) {
-		imp_->DevSetCapture();
-	}
+  if (imp_.get()) {
+    imp_->DevSetCapture();
+  }
 }
 
 void Window::ReleaseCapture() {
-	if (imp_.get()) {
-		imp_->DevReleaseCapture();
-	}
+  if (imp_.get()) {
+    imp_->DevReleaseCapture();
+  }
 }
 
 void Window::ShowCursor() {
-	if (imp_.get()) {
-		imp_->DevShowCursor();
-	}
+  if (imp_.get()) {
+    imp_->DevShowCursor();
+  }
 }
 
 void Window::HideCursor() {
-	if (imp_.get()) {
-		imp_->DevHideCursor();
-	}
+  if (imp_.get()) {
+    imp_->DevHideCursor();
+  }
 }
 
 void Window::SetCursorPosition(const ui::Point& position) {
-	if (imp_.get()) {
-		imp_->DevSetCursorPosition(position);
-	}
+  if (imp_.get()) {
+    imp_->DevSetCursorPosition(position);
+  }
 }
 
 void Window::SetCursor(CursorStyle::Type style) {
-	if (imp_.get()) {
-		imp_->DevSetCursor(style);
-	}
+  if (imp_.get()) {
+    imp_->DevSetCursor(style);
+  }
 }
 
 void Window::Enable() {
-	if (imp()) {
-		imp()->DevEnable();
-	}
+  if (imp()) {
+    imp()->DevEnable();
+  }
 }
 
 void Window::Disable() {
-	if (imp()) {
-		imp()->DevDisable();
-	}
+  if (imp()) {
+    imp()->DevDisable();
+  }
 }
 
 void Window::MapCapslockToCtrl() {
   if (imp()) {
-		imp()->DevMapCapslockToCtrl();
-	}
+    imp()->DevMapCapslockToCtrl();
+  }
 }
 
 void Window::EnableCapslock() {
   if (imp()) {
-		imp()->DevEnableCapslock();
-	}
+    imp()->DevEnableCapslock();
+  }
 }
 
 void Window::ViewDoubleBuffered() {
-	if (imp_.get()) {
-		imp_->DevViewDoubleBuffered();
-	}
+  if (imp_.get()) {
+    imp_->DevViewDoubleBuffered();
+  }
 }
 
 void Window::ViewSingleBuffered() {
-	if (imp_.get()) {
-		imp_->DevViewSingleBuffered();
-	}
+  if (imp_.get()) {
+    imp_->DevViewSingleBuffered();
+  }
 }
 
 bool Window::is_double_buffered() const {
-	return imp() ? imp_->dev_is_double_buffered() : false;
+  return imp() ? imp_->dev_is_double_buffered() : false;
 }
 
 void Window::set_parent(Window* window) {
-	if (imp_.get()) {
-		imp_->dev_set_parent(window);
-	}
-	parent_ = window;
+  if (imp_.get()) {   
+    imp_->dev_set_parent(window);
+  }
+  parent_ = window;
 }
 
 void Window::set_clip_children() {
-	if (imp_.get()) {
-		imp_->dev_set_clip_children();
-	}
+  if (imp_.get()) {
+    imp_->dev_set_clip_children();
+  }
 }
 
 void Window::add_style(UINT flag) {
-	if (imp_.get()) {
-		imp_->dev_add_style(flag);
-	}
+  if (imp_.get()) {
+    imp_->dev_add_style(flag);
+  }
 }
 
 void Window::remove_style(UINT flag) {
-	if (imp_.get()) {
-		imp_->dev_remove_style(flag);
-	}
+  if (imp_.get()) {
+    imp_->dev_remove_style(flag);
+  }
 }
 
 void Window::DrawBackground(Graphics* g, Region& draw_region) {
   if (draw_region.bounds().height() > 0) {					
     for (Ornaments::iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
-	  if (!(*it).expired()) {					
+      if (!(*it).expired()) {					
         (*it).lock()->Draw(*this, g, draw_region);
-	  }
+      }
     }
   }  
 }
@@ -1382,8 +1419,8 @@ bool Window::transparent() const {
   bool result = true;
   for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
     if (!(*it).expired() && !((*it).lock()->transparent())) {						  
-	   result = false;
-	   break;
+      result = false;
+      break;
     }
   }
   return result;
@@ -1501,8 +1538,6 @@ bool SetPos::operator()(Window& window) const {
   return false;
 };
 
-
-
 Window::Container Window::SubItems() {
   Window::Container allitems;
   iterator it = begin();
@@ -1614,7 +1649,7 @@ Window::Ptr Group::HitTest(double x, double y) {
     Window::Ptr item = *rev_it;
     item = item->visible() 
            ? item->HitTest(x-item->position().left(), y-item->position().top())
-		       : nullpointer; 
+		       : Window::Ptr(); 
     if (item) {
       result = item;
       break;
@@ -1961,7 +1996,8 @@ void Node::erase_imps(NodeOwnerImp* owner) {
     }
   } imp_eraser;
   imp_eraser.that = owner;
-  traverse(imp_eraser, nullpointer);
+  Node::Ptr nullnode;
+  // traverse(imp_eraser, nullnode);
 }
 
 void Node::clear() {
@@ -2477,15 +2513,15 @@ void Button::set_font(const Font& font) {
 }
 
 void Button::Check() {
-	if (imp()) {
-		imp()->DevCheck();
-	}
+  if (imp()) {
+    imp()->DevCheck();
+  }
 }
 
 void Button::UnCheck() {
-	if (imp()) {
-		imp()->DevUnCheck();
-	}
+  if (imp()) {
+    imp()->DevUnCheck();
+  }
 }
 
 
@@ -2570,38 +2606,38 @@ void RadioButton::set_font(const Font& font) {
 }
 
 GroupBox::GroupBox() : Button(ui::ImpFactory::instance().CreateGroupBoxImp()) {
-	set_auto_size(false, false);
+   set_auto_size(false, false);
 }
 
 GroupBox::GroupBox(const std::string& text) : Button(ui::ImpFactory::instance().CreateGroupBoxImp()) {
-	set_auto_size(false, false);
-	imp()->dev_set_text(text);
+  set_auto_size(false, false);
+  imp()->dev_set_text(text);
 }
 
 GroupBox::GroupBox(GroupBoxImp* imp) : Button(imp) {
-	set_auto_size(false, false);
+  set_auto_size(false, false);
 }
 
 bool GroupBox::checked() const {
-	return imp() ? imp()->dev_checked() : false;
+  return imp() ? imp()->dev_checked() : false;
 }
 
 void GroupBox::Check() {
-	if (imp()) {
-		imp()->DevCheck();
-	}
+  if (imp()) {
+    imp()->DevCheck();
+  }
 }
 
 void GroupBox::UnCheck() {
-	if (imp()) {
-		imp()->DevUnCheck();
-	}
+  if (imp()) {
+    imp()->DevUnCheck();
+  }
 }
 
 void GroupBox::set_background_color(ARGB color) {
-	if (imp()) {
-		imp()->dev_set_background_color(color);
-	}
+  if (imp()) {
+    imp()->dev_set_background_color(color);
+  }
 }
 
 void GroupBox::set_font(const Font& font) {
@@ -2609,6 +2645,7 @@ void GroupBox::set_font(const Font& font) {
     imp()->dev_set_font(font);
   }  
 }
+
 
 std::string Scintilla::dummy_str_ = "";
 
@@ -2789,9 +2826,9 @@ void Scintilla::set_properties(const Properties& properties) {
       set_font_info(fnt);
     } else
     if (it->first == "font_style") {
-      /*FontInfo fnt = font().font_info();
-      fnt.set_size(it->second.INT_value());
-      set_font(fnt);*/
+      // FontInfo fnt = font().font_info();
+      // fnt.set_size(it->second.INT_value());
+      // set_font(fnt);
     } else
     if (it->first == "font_weight") {
       FontInfo fnt = font_info();
@@ -3095,8 +3132,16 @@ void WindowStyler::RemoveWindow(Window& window) {
   }
 }
 
-// Ui Factory
+App::App() : imp_(ImpFactory::instance().CreateAppImp()) {
+}
 
+void App::Run() {
+  if (imp_.get()) {
+    imp_->DevRun();
+  }
+}
+
+// Ui Factory
 Systems& Systems::instance() {
   static Systems instance_(new DefaultSystems());  
   return instance_;
@@ -3104,15 +3149,27 @@ Systems& Systems::instance() {
 
 void Systems::InitInstance(const std::string& config_path) {
   config_path_ = config_path;
+  app_.reset(new App());
+#ifdef _WIN32
   TerminalFrame::InitInstance();
+#endif
 }
 
 void Systems::ExitInstance() {
+#ifdef _WIN32
   TerminalFrame::ExitInstance();
+#endif
 }
 
-SystemMetrics& Systems::metrics() {
-  static ui::mfc::SystemMetrics metrics_;  
+SystemMetrics& Systems::metrics() {  
+  #ifdef __linux__ 
+    static x::SystemMetrics metrics_;
+  #elif _WIN32
+     static ui::mfc::SystemMetrics metrics_;
+#else
+    printf("Platform not supported.\n");
+    exit(42);
+#endif	
   return metrics_;
 }
 
@@ -3226,6 +3283,7 @@ ui::RectangleBox* Systems::CreateRectangleBox() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateRectangleBox();
 }
+
 ui::HeaderGroup* Systems::CreateHeaderGroup() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateHeaderGroup();
@@ -3369,7 +3427,11 @@ Font* DefaultSystems::CreateFont() {
 }
 
 ui::Fonts* DefaultSystems::CreateFonts() {
+#ifdef _WIN32
   return new mfc::Fonts();
+#endif
+  assert(0);
+  return 0;
 }
 
 ui::Window* DefaultSystems::CreateWin() {
@@ -3468,14 +3530,23 @@ ui::PopupMenu* DefaultSystems::CreatePopupMenu() {
   return new PopupMenu();
 }
 
-
 // WindowImp
-
-void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {  
+void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {
+  assert(window_);	
   try {
-	  window_->Draw(g, draw_region);    
+    window_->Draw(g, draw_region);    
   } catch(std::exception&) {
   }  
+}
+
+void WindowImp::OnDevMouseDown(MouseEvent& ev) {
+  assert(window_);	
+   window_->OnMouseDown(ev);
+}
+
+void WindowImp::OnDevMouseUp(MouseEvent& ev) {
+  assert(window_);
+   window_->OnMouseUp(ev);	
 }
 
 void WindowImp::OnDevSize(const ui::Dimension& dimension) {
@@ -3515,10 +3586,19 @@ void CheckBoxImp::OnDevClick() {
 }
 
 // ImpFactory
-ImpFactory& ImpFactory::instance() {
+ImpFactory& ImpFactory::instance() {  
   static ImpFactory instance_;
-  if (!instance_.concrete_factory_.get()) {
+  if (!instance_.concrete_factory_.get()) {    
+if (!instance_.concrete_factory_.get()) {    
+  #ifdef __linux__ 
+    instance_.concrete_factory_.reset(new ui::x::ImpFactory());
+  #elif _WIN32
     instance_.concrete_factory_.reset(new ui::mfc::ImpFactory());
+  #else
+    printf("Platform not supported.\n");    
+    exit(42);
+  #endif
+  }
   }
   return instance_;
 } 
@@ -3530,6 +3610,16 @@ void ImpFactory::set_concret_factory(ImpFactory& concrete_factory) {
 ui::WindowImp* ImpFactory::CreateWindowImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateWindowImp(); 
+}
+
+ui::FrameImp* ImpFactory::CreateFrameImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFrameImp(); 
+}
+
+ui::AppImp* ImpFactory::CreateAppImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateAppImp(); 
 }
 
 bool ImpFactory::DestroyWindowImp(ui::WindowImp* imp) {
@@ -3545,11 +3635,6 @@ ui::AlertImp* ImpFactory::CreateAlertImp() {
 ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateWindowCompositedImp(); 
-}
-
-ui::FrameImp* ImpFactory::CreateFrameImp() {
-  assert(concrete_factory_.get());
-  return concrete_factory_->CreateFrameImp(); 
 }
 
 ui::FrameImp* ImpFactory::CreateMainFrameImp() {
@@ -3632,36 +3717,35 @@ ui::RegionImp* ImpFactory::CreateRegionImp() {
   return concrete_factory_->CreateRegionImp(); 
 }
 
-ui::FontInfoImp* ImpFactory::CreateFontInfoImp() {
+ui::FontInfoImp* ImpFactory::CreateFontInfoImp() {	
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateFontInfoImp();
+  return concrete_factory_->CreateFontInfoImp();  
 }
 
 ui::FontImp* ImpFactory::CreateFontImp() {  
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateFontImp();
+  return concrete_factory_->CreateFontImp();  
 }
 
 ui::FontImp* ImpFactory::CreateFontImp(int stock) {  
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateFontImp(stock);
+  return concrete_factory_->CreateFontImp(stock);  
 }
 
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(); 
 }
-
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp(bool debug) {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(debug); 
 }
-
+#ifdef _WIN32
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp(CDC* cr) {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(cr); 
 }
-
+#endif
 ui::ImageImp* ImpFactory::CreateImageImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateImageImp(); 
