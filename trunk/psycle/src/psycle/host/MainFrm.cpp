@@ -509,7 +509,7 @@ namespace psycle { namespace host {
 				filepath += "\\autosave.psy";
 				DeleteFile(filepath);
 				SaveBarState(_T("General"));        
-        m_wndView.host_extensions()->Free();
+        HostExtensions::Instance().Free();
 				CFrameWnd::OnClose();
 			}
 		}

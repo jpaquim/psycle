@@ -233,19 +233,15 @@ void Area::ComputeBounds() const {
   }  
 }
 
-#ifdef _WIN32
-Commands::Commands() : locker_(new psycle::host::mfc::WinLock()), invalid_(false), addcount(0) {}
-#else
-Commands::Commands() : locker_(0), invalid_(false), addcount(0) {}
-#endif
+Commands::Commands() : invalid_(false), addcount(0) {}
 void Commands::Clear() {
-  locker_->lock();
+  locker_.lock();
   functors.clear();
-  locker_->unlock();
+  locker_.unlock();
 }
 
 void Commands::Invoke() {       
-  locker_->lock();
+  locker_.lock();
   GlobalTimer::instance().KillTimer();
   std::list<boost::function<void(void)> >::iterator it = functors.begin();
   while (it != functors.end()) { 
@@ -254,7 +250,7 @@ void Commands::Invoke() {
     func();   
   }    
   GlobalTimer::instance().StartTimer();
-  locker_->unlock();
+  locker_.unlock();
 }
 
 FontInfo::FontInfo() : imp_(ui::ImpFactory::instance().CreateFontInfoImp()) {
@@ -944,18 +940,6 @@ void Window::set_imp(WindowImp* imp) {
   if (imp) {
     imp->set_window(this);
   }
-}
-
-void Window::lock() const {
-#ifdef _WIN32
-  psycle::host::mfc::WinLock::Instance().lock();
-#endif	
-}
-
-void Window::unlock() const {
-#ifdef _WIN32	
-  psycle::host::mfc::WinLock::Instance().unlock();
-#endif	
 }
 
 Window* Window::root() {   
@@ -3549,6 +3533,21 @@ void WindowImp::OnDevMouseUp(MouseEvent& ev) {
    window_->OnMouseUp(ev);	
 }
 
+void WindowImp::OnDevMouseMove(MouseEvent& ev) {
+  assert(window_);
+   window_->OnMouseMove(ev);	
+}
+
+void WindowImp::OnDevMouseEnter(MouseEvent& ev) {
+  assert(window_);
+   window_->OnMouseEnter(ev);	
+}
+
+void WindowImp::OnDevMouseOut(MouseEvent& ev) {
+  assert(window_);
+   window_->OnMouseOut(ev);	
+}
+
 void WindowImp::OnDevSize(const ui::Dimension& dimension) {
   if (window_) {
     window_->needsupdate();
@@ -3630,6 +3629,11 @@ bool ImpFactory::DestroyWindowImp(ui::WindowImp* imp) {
 ui::AlertImp* ImpFactory::CreateAlertImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateAlertImp(); 
+}
+
+ui::ConfirmImp* ImpFactory::CreateConfirmImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateConfirmImp(); 
 }
 
 ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
@@ -3766,11 +3770,24 @@ ui::FileObserverImp* ImpFactory::CreateFileObserverImp(FileObserver* file_observ
   return concrete_factory_->CreateFileObserverImp(file_observer); 
 }
 
+LockIF* ImpFactory::CreateLocker() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateLocker();
+}
+
 AlertBox::AlertBox() : imp_(ImpFactory::instance().CreateAlertImp()) {
 }
 
 void AlertBox::OpenMessageBox(const std::string& text) {
 	imp_->DevAlert(text);
+}
+
+ConfirmBox::ConfirmBox() : imp_(ImpFactory::instance().CreateConfirmImp()) {
+}
+
+bool ConfirmBox::OpenMessageBox(const std::string& text) {
+  assert(imp_.get());
+	return imp_->DevConfirm(text);
 }
 
 } // namespace ui

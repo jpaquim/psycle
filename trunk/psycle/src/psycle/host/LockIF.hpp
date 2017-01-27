@@ -4,6 +4,7 @@
 #pragma once
 
 #include <list>
+#include <memory>
 
 namespace psycle {
 namespace host {  
@@ -19,7 +20,16 @@ class LockIF {
   virtual void unlock() const {} //= 0;
 };
 
+class Lock : public LockIF {
+ public:
+  Lock();
+  virtual void lock() const;
+  virtual void unlock() const;
 
+ private:
+   std::auto_ptr<LockIF> imp_;
+};
+/*
 #ifdef _WIN32
 namespace mfc {
 
@@ -36,7 +46,7 @@ namespace mfc {
   };
 }
 #endif
-
+*/
 class Timer { 
  public:
   Timer();

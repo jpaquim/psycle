@@ -4,12 +4,28 @@
 //#include "stdafx.h"
 #include <algorithm>
 #include "LockIF.hpp"
+#include "Ui.hpp"
 #include "MainFrm.hpp"
 
 
 namespace psycle {
 namespace host {  
 
+Lock::Lock() : imp_(ui::ImpFactory::instance().CreateLocker()) {
+}
+
+void Lock::lock() const {
+  assert(imp_.get());
+  imp_->lock();
+}
+
+void Lock::unlock() const {
+  assert(imp_.get());
+  imp_->unlock();
+}
+
+
+/*
 LockIF& LockIF::Instance() {
 #ifdef _WIN32	
   static mfc::WinLock locker;
@@ -18,7 +34,7 @@ LockIF& LockIF::Instance() {
 #endif	
   return locker;  
 }
-
+*/
 Timer::Timer() : is_running_(false) { GlobalTimer::instance().AddListener(this); }
 Timer::~Timer() { GlobalTimer::instance().RemoveListener(this); }
 

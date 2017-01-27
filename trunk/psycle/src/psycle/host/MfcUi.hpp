@@ -1340,6 +1340,16 @@ class AlertImp : public ui::AlertImp {
 	}
 };
 
+class ConfirmImp : public ui::ConfirmImp {
+ public:
+	ConfirmImp() {}
+	virtual ~ConfirmImp() {}
+	virtual bool DevConfirm(const std::string& text) {
+		int result = AfxMessageBox(Charset::utf8_to_win(text).c_str(), MB_OK | MB_OKCANCEL | MB_TOPMOST);
+    return result == IDOK;
+	}
+};
+
 class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
  public:
   WindowImp() : 
@@ -2612,6 +2622,18 @@ class Fonts : public ui::Fonts {
   std::vector<std::string> names_;
 };
 
+class CriticalSectionLock : public LockIF {
+ public:
+  CriticalSectionLock() { ::InitializeCriticalSection(&cs); }
+  ~CriticalSectionLock() { ::DeleteCriticalSection(&cs); }
+
+  void lock() const { ::EnterCriticalSection(&cs); }
+  void unlock() const { ::LeaveCriticalSection(&cs); }
+
+ private:
+  mutable CRITICAL_SECTION cs; 
+};
+
 class ImpFactory : public ui::ImpFactory {
  public:
   virtual bool DestroyWindowImp(ui::WindowImp* imp) {
@@ -2630,6 +2652,9 @@ class ImpFactory : public ui::ImpFactory {
 	virtual ui::AlertImp* CreateAlertImp() {
 		return new AlertImp();
   }
+  virtual ui::ConfirmImp* CreateConfirmImp() {
+		return new ConfirmImp();
+  }  
   virtual ui::WindowImp* CreateWindowImp() {
     return WindowImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
   }
@@ -2712,6 +2737,9 @@ class ImpFactory : public ui::ImpFactory {
   }
   virtual ui::FileObserverImp* CreateFileObserverImp(FileObserver* file_observer) {
     return new FileObserverImp(file_observer);
+  }
+  virtual LockIF* CreateLocker() {
+    return new CriticalSectionLock();
   }
 };
 

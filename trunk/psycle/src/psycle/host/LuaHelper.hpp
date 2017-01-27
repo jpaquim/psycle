@@ -4,6 +4,8 @@
 #pragma once
 #include <lua.hpp>
 #include "LockIF.hpp"
+#include <boost/shared_ptr.hpp>
+#include <sstream>
 
 #include <boost/function.hpp>
 
@@ -282,39 +284,39 @@ inline LuaImport& operator>> (LuaImport& import, std::string& str) {
 }
 
 
-namespace LuaHelper {            	
+namespace LuaHelper {             
     // check for shared_ptr
-		template <class T>
-		static boost::shared_ptr<T> check_sptr(lua_State* L, int index, const std::string& meta) {
-			luaL_checktype(L, index, LUA_TTABLE);
-			lua_getfield(L, index, "__self");
+    template <class T>
+    static boost::shared_ptr<T> check_sptr(lua_State* L, int index, const std::string& meta) {
+      luaL_checktype(L, index, LUA_TTABLE);
+      lua_getfield(L, index, "__self");
       typedef boost::shared_ptr<T> SPtr;
-			SPtr* ud = (SPtr*) luaL_checkudata(L, -1, meta.c_str());
+      SPtr* ud = (SPtr*) luaL_checkudata(L, -1, meta.c_str());
       luaL_argcheck(L, (ud) != 0, 1, (meta+" expected").c_str());
-			lua_pop(L, 1);
-			//luaL_argcheck(L, (*SPTR) != 0, 1, (meta+" expected").c_str());			
-			return *ud;
-		}
+      lua_pop(L, 1);
+      // luaL_argcheck(L, (*SPTR) != 0, 1, (meta+" expected").c_str());     
+      return *ud;
+    }
 
     // mimics the bahaviour of luaL_testudata for our own userdata structure
-		template <class T>
-		static boost::shared_ptr<T> test_sptr(lua_State* L, int index, const std::string& meta) {
+    template <class T>
+    static boost::shared_ptr<T> test_sptr(lua_State* L, int index, const std::string& meta) {
       typedef boost::shared_ptr<T> SPtr;
-			boost::shared_ptr<T> nullpointer;
-      if (lua_istable(L, index)) {			  
-			  lua_getfield(L, index, "__self");			        
+      boost::shared_ptr<T> nullpointer;
+      if (lua_istable(L, index)) {        
+        lua_getfield(L, index, "__self");             
         SPtr* ud = (SPtr*) luaL_testudata(L, -1, meta.c_str());
         if (ud == NULL) {
           lua_pop(L, 1);
           return nullpointer;
         }
-			  luaL_argcheck(L, (ud) != 0, 1, (meta+" expected").c_str());
-			  lua_pop(L, 1);
+        luaL_argcheck(L, (ud) != 0, 1, (meta+" expected").c_str());
+        lua_pop(L, 1);
         return *ud;
       } else {
         return SPtr();
-      }			
-		}
+      }     
+    }
 
     static int check_argnum(lua_State* L, int num, const std::string& names) {
       int n = lua_gettop(L);
@@ -339,7 +341,7 @@ namespace LuaHelper {
       lua_call (L, 1, 1);
       lua_getfield(L, -1, "new");
       lua_pushvalue(L, -2);
-      lua_call (L, 1, 1);	
+      lua_call (L, 1, 1); 
       lua_remove(L, -2);
     }
 
@@ -386,8 +388,107 @@ namespace LuaHelper {
        lua_newtable(L);     
        setmethods(L);
        return 1;
+    }    
+    
+    struct NullDeleter {template<typename T> void operator()(T*) {} };
+    
+    // new userdata needs to be on the top of the stack
+    template <class UDT>
+    static void register_userdata(lua_State* L, UDT* ud) {
+       lua_getglobal(L, "psycle");
+       lua_getfield(L, -1, "userdata");
+       lua_pushlightuserdata(L, ud);
+       lua_pushvalue(L, -4);
+       lua_settable(L, -3);
+       lua_pop(L, 2);
     }
 
+    // new userdata needs to be on the top of the stack
+    template <class UserDataType>
+    static void register_weakuserdata(lua_State* L, UserDataType* ud) {
+       lua_getglobal(L, "psycle");
+       lua_getfield(L, -1, "weakuserdata");
+       lua_pushlightuserdata(L, ud);
+       lua_pushvalue(L, -4);
+       lua_settable(L, -3);
+       lua_pop(L, 2);
+    }
+
+     // needs to be registered with register_userdata
+    template <class UserDataType>
+    static void find_userdata(lua_State* L, UserDataType* ud) {
+      lua_getglobal(L, "psycle");
+      lua_getfield(L, -1, "userdata");
+      if (!lua_isnil(L, -1)) {
+        lua_pushlightuserdata(L, ud);
+        lua_gettable(L, -2);
+        if (lua_istable(L, -1)) {
+          lua_remove(L, -2);
+        }
+        lua_remove(L, -2);
+      } else {
+        assert(0);
+      }
+    }
+
+    // needs to be registered with register_weakuserdata
+    template <class UserDataType>
+    static void find_weakuserdata(lua_State* L, UserDataType* ud) {
+      lua_getglobal(L, "psycle");
+      lua_getfield(L, -1, "weakuserdata");
+      if (!lua_isnil(L, -1)) {
+        lua_pushlightuserdata(L, ud);
+        lua_gettable(L, -2);
+        if (lua_istable(L, -1)) {
+          lua_remove(L, -2);
+        }        
+        lua_remove(L, -2);
+      } else {
+        assert(0);
+      }
+    }
+
+    // creates userdata able to support inheritance
+    template <class T>
+    static boost::shared_ptr<T>& new_shared_userdata(lua_State* L, 
+        const std::string& meta,
+        T* ud,
+        int self=1,
+        bool null_deleter = false) {
+  lua_pushvalue(L, self);
+  int n = lua_gettop(L);
+  luaL_checktype(L, -1, LUA_TTABLE);  // self
+  lua_newtable(L);  // new
+  lua_pushvalue(L, self);
+  lua_setmetatable(L, -2);
+  lua_pushvalue(L, self);
+  lua_setfield(L, self, "__index");
+        typedef boost::shared_ptr<T> SPtr;
+      SPtr* p = (SPtr*)lua_newuserdata(L, sizeof(SPtr));  
+        if (ud) {        
+          if (null_deleter) {          
+            new(p) SPtr(ud, NullDeleter());
+          } else {
+            new(p) SPtr(ud);
+          }
+        } else {
+          new(p) SPtr();
+      }
+      luaL_getmetatable(L, meta.c_str());
+      lua_setmetatable(L, -2);
+      lua_setfield(L, -2, "__self");
+      lua_remove(L, n);
+      LuaHelper::register_weakuserdata(L, ud);
+      return *p;
+   }
+
+    template <class T>
+    static int delete_shared_userdata(lua_State* L, const std::string& meta) {
+      typedef boost::shared_ptr<T> SPtr;      
+      SPtr* ud = (SPtr*) luaL_checkudata(L, 1, meta.c_str());      
+      ud->~SPtr();
+      return 0;
+    }
     template <class T>
     static boost::shared_ptr<T> createwithstate(lua_State* L, const std::string& meta, bool reg = false) {
       int err = LuaHelper::check_argnum(L, 1, "self");
@@ -408,111 +509,10 @@ namespace LuaHelper {
         LuaHelper::register_userdata(L, obj.get());
       }
       return obj;
-    }
-
-    
-    struct NullDeleter {template<typename T> void operator()(T*) {} };
-
-		// creates userdata able to support inheritance
-		template <class T>
-		static boost::shared_ptr<T>& new_shared_userdata(lua_State* L, 
-                                    const std::string& meta,
-                                    T* ud,
-                                    int self=1,
-                                    bool null_deleter = false) {
-			lua_pushvalue(L, self);
-			int n = lua_gettop(L);
-			luaL_checktype(L, -1, LUA_TTABLE);  // self
-			lua_newtable(L);  // new
-			lua_pushvalue(L, self);
-			lua_setmetatable(L, -2);
-			lua_pushvalue(L, self);
-			lua_setfield(L, self, "__index");
-      typedef boost::shared_ptr<T> SPtr;
-			SPtr* p = (SPtr*)lua_newuserdata(L, sizeof(SPtr));  
-      if (ud) {        
-        if (null_deleter) {          
-          new(p) SPtr(ud, NullDeleter());
-        } else {
-          new(p) SPtr(ud);
-        }
-      } else {
-        new(p) SPtr();
-      }
-			luaL_getmetatable(L, meta.c_str());
-			lua_setmetatable(L, -2);
-			lua_setfield(L, -2, "__self");
-			lua_remove(L, n);			
-      LuaHelper::register_weakuserdata(L, ud);
-      return *p;
-		}
-
-    template <class T>
-		static int delete_shared_userdata(lua_State* L, const std::string& meta) {
-      typedef boost::shared_ptr<T> SPtr;      
-			SPtr* ud = (SPtr*) luaL_checkudata(L, 1, meta.c_str());      
-      ud->~SPtr();
-			return 0;
-		}
-
-    // new userdata needs to be on the top of the stack
-    template <class UDT>
-		static void register_userdata(lua_State* L, UDT* ud) {
-       lua_getglobal(L, "psycle");
-       lua_getfield(L, -1, "userdata");
-       lua_pushlightuserdata(L, ud);
-       lua_pushvalue(L, -4);
-       lua_settable(L, -3);
-       lua_pop(L, 2);
-    }
-
-    // new userdata needs to be on the top of the stack
-    template <class UserDataType>
-		static void register_weakuserdata(lua_State* L, UserDataType* ud) {
-       lua_getglobal(L, "psycle");
-       lua_getfield(L, -1, "weakuserdata");
-       lua_pushlightuserdata(L, ud);
-       lua_pushvalue(L, -4);
-       lua_settable(L, -3);
-       lua_pop(L, 2);
-    }
-
-     // needs to be registered with register_userdata
-    template <class UserDataType>
-		static void find_userdata(lua_State* L, UserDataType* ud) {
-      lua_getglobal(L, "psycle");
-      lua_getfield(L, -1, "userdata");
-      if (!lua_isnil(L, -1)) {
-        lua_pushlightuserdata(L, ud);
-        lua_gettable(L, -2);
-        if (lua_istable(L, -1)) {
-          lua_remove(L, -2);
-        }
-        lua_remove(L, -2);
-      } else {
-        assert(0);
-      }
-    }
-
-    // needs to be registered with register_weakuserdata
-    template <class UserDataType>
-		static void find_weakuserdata(lua_State* L, UserDataType* ud) {
-      lua_getglobal(L, "psycle");
-      lua_getfield(L, -1, "weakuserdata");
-      if (!lua_isnil(L, -1)) {
-        lua_pushlightuserdata(L, ud);
-        lua_gettable(L, -2);
-        if (lua_istable(L, -1)) {
-          lua_remove(L, -2);
-        }        
-        lua_remove(L, -2);
-      } else {
-        assert(0);
-      }
-    }
+    }    
 
     template <class UDB, class UD>
-		static void requirenew(lua_State* L, const::std::string& name, UD* ud, bool null_deleter = false) {
+    static void requirenew(lua_State* L, const::std::string& name, UD* ud, bool null_deleter = false) {
       luaL_requiref(L, name.c_str(), UDB::open, true);      
       LuaHelper::new_shared_userdata<>(L, UDB::meta, ud, lua_gettop(L), null_deleter);
       lua_remove(L, -2);        
@@ -525,7 +525,7 @@ namespace LuaHelper {
 
     // needs to be registered with register_userdata
     template <class UserDataType>
-		static void unregister_userdata(lua_State* L, UserDataType* ud) {
+    static void unregister_userdata(lua_State* L, UserDataType* ud) {
       lua_getglobal(L, "psycle");
       lua_getfield(L, -1, "userdata");
       lua_pushlightuserdata(L, ud);
@@ -536,7 +536,7 @@ namespace LuaHelper {
 
     // needs to be registered with register_userdata
     template <class UserDataType>
-		static void unregister_weakuserdata(lua_State* L, UserDataType* ud) {
+    static void unregister_weakuserdata(lua_State* L, UserDataType* ud) {
       lua_getglobal(L, "psycle");
       lua_getfield(L, -1, "weakuserdata");
       lua_pushlightuserdata(L, ud);
@@ -583,40 +583,40 @@ namespace LuaHelper {
     }
 
     // c iterator for orderedtable
-		static int luaL_orderednext(lua_State *L) {
-		  luaL_checkany(L, -1);                 // previous key
-		  luaL_checktype(L, -2, LUA_TTABLE);    // self
-		  luaL_checktype(L, -3, LUA_TFUNCTION); // iterator
-		  lua_pop(L, 1);                        // pop the key since
-												                    // opair doesn't use it
-		  // iter(self)
-		  lua_pushvalue(L, -2);
-		  lua_pushvalue(L, -2);
-		  lua_call(L, 1, 2);
+    static int luaL_orderednext(lua_State *L) {
+      luaL_checkany(L, -1);                 // previous key
+      luaL_checktype(L, -2, LUA_TTABLE);    // self
+      luaL_checktype(L, -3, LUA_TFUNCTION); // iterator
+      lua_pop(L, 1);                        // pop the key since
+                                            // opair doesn't use it
+      // iter(self)
+      lua_pushvalue(L, -2);
+      lua_pushvalue(L, -2);
+      lua_call(L, 1, 2);
 
-		  if(lua_isnil(L, -2)) {
-			  lua_pop(L, 2);
-			  return 0;
-		  }
-		  return 2;
-		}
+      if(lua_isnil(L, -2)) {
+        lua_pop(L, 2);
+        return 0;
+      }
+      return 2;
+    }
 
- 		static void get_proxy(lua_State* L) {
-			lua_getglobal(L, "psycle");      
-			  if (lua_isnil(L, -1)) {
-				 lua_pop(L, 1);
-				 throw std::runtime_error("no host found");
-			  }
-			  lua_getfield(L, -1, "proxy");
-			  if (lua_isnil(L, -1)) {
-				 lua_pop(L, 2);
-				 throw std::runtime_error("no proxy found");
-			  }
-		}
+    static void get_proxy(lua_State* L) {
+      lua_getglobal(L, "psycle");      
+        if (lua_isnil(L, -1)) {
+         lua_pop(L, 1);
+         throw std::runtime_error("no host found");
+        }
+        lua_getfield(L, -1, "proxy");
+        if (lua_isnil(L, -1)) {
+         lua_pop(L, 2);
+         throw std::runtime_error("no proxy found");
+        }
+    }
 
-		static void numargcheck(lua_State* L, int numargs) {
+    static void numargcheck(lua_State* L, int numargs) {
       int n = lua_gettop(L);
-			if (n != numargs) {
+      if (n != numargs) {
         std::stringstream what;
         what << "Got" << n << "arguments expected" << numargs;
         throw std::runtime_error(what.str());        
@@ -831,7 +831,7 @@ namespace LuaHelper {
     static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(int, bool), UserDataModel m = SPTR) {
       numargcheck(L, 3);
       T* ud = check<T>(L, 1, meta, m);
-      int val1 = luaL_checkintger(L, 2);
+      int val1 = luaL_checkinteger(L, 2);
       bool val2 = luaL_checkinteger(L, 3);
       (ud->*ptmember)(val1, val2);      
       return 0;
@@ -1182,7 +1182,7 @@ namespace LuaHelper {
       int result = (ud->*ptmember)(*ud1, val);
       lua_pushinteger(L, result);      
       return 1;
-    }
+    } 
 
     template <class T, class T1>
     static int bind(lua_State* L, const std::string& meta, T1* (T::*ptmember)(), UserDataModel m = SPTR) { 
@@ -1195,98 +1195,110 @@ namespace LuaHelper {
     template <class T, class T1>
     static int bind(lua_State* L, const std::string& meta, T1* (T::*ptmember)(int), UserDataModel m = SPTR) { 
       T* ud = check<T>(L, 1, meta, m); 
-      int val = lual_checkinteger(L, 2);
+      int val = luaL_checkinteger(L, 2);
       T1* result = (ud->*ptmember)(val);
       LuaHelper::find_weakuserdata(L, result);
       return 1;
     }
     
     template <class UDT, class T>
-		static int callstrict1(lua_State* L, const std::string& meta,
-						       void (UDT::*pt2Member)(T), bool dec1=false) { // function ptr
-			int n = lua_gettop(L);
-			if (n != 2) {
-        luaL_error(L, "Got %d arguments expected 2 (self, value)", n);
-      }
-			boost::shared_ptr<UDT> ud = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
-			T val = (T) luaL_checknumber(L, 2);
-      if (dec1) val--;
-			(ud.get()->*pt2Member)(val);
-      return 0;
-		}
+      static int callstrict1(lua_State* L, const std::string& meta,
+        void (UDT::*pt2Member)(T), bool dec1=false) { // function ptr
+        int n = lua_gettop(L);
+        if (n != 2) {
+          luaL_error(L, "Got %d arguments expected 2 (self, value)", n);
+        }
+        boost::shared_ptr<UDT> ud = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
+        T val = (T) luaL_checknumber(L, 2);
+        if (dec1) val--;
+        (ud.get()->*pt2Member)(val);
+       return 0;
+    }
 
     
-		template <class UDT, class T, class T2>
-		static int callstrict2(lua_State* L, const std::string& meta,
-						       void (UDT::*pt2Member)(T, T2), bool dec1 = false, bool dec2 = false) { // function ptr
-			int n = lua_gettop(L);
-			if (n != 3) {
+    template <class UDT, class T, class T2>
+    static int callstrict2(lua_State* L, const std::string& meta,
+                   void (UDT::*pt2Member)(T, T2), bool dec1 = false, bool dec2 = false) { // function ptr
+      int n = lua_gettop(L);
+      if (n != 3) {
         luaL_error(L, "Got %d arguments expected 3 (self, value, value)", n);
       }
-			boost::shared_ptr<UDT> ud = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
-			T val = luaL_checknumber(L, 2);
-			T2 val2 = luaL_checknumber(L, 3);
+      boost::shared_ptr<UDT> ud = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
+      T val = luaL_checknumber(L, 2);
+      T2 val2 = luaL_checknumber(L, 3);
       if (dec1) val--;
       if (dec2) val2--;
-			(ud.get()->*pt2Member)(val, val2);
+      (ud.get()->*pt2Member)(val, val2);
       return 0;
-		}
+    }
 
-		template <class UDT, class T>
-		static int callopt1(lua_State* L, const std::string& meta,
-						    void (UDT::*pt2Member)(T), T def) {
+    template <class UDT, class T>
+    static int callopt1(lua_State* L, const std::string& meta,
+                void (UDT::*pt2Member)(T), T def) {
             int n = lua_gettop(L);
-			boost::shared_ptr<UDT> ud = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
-			if (n == 1) {
-				(ud.get()->*pt2Member)(def);
-			} else
-			if (n == 2) {
-			  T val = luaL_checknumber(L, 2);
-			  (ud.get()->*pt2Member)(val);
-			} else {
+      boost::shared_ptr<UDT> ud = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
+      if (n == 1) {
+        (ud.get()->*pt2Member)(def);
+      } else
+      if (n == 2) {
+        T val = luaL_checknumber(L, 2);
+        (ud.get()->*pt2Member)(val);
+      } else {
         luaL_error(L, "Got %d arguments expected 1 or 2 (self [, value])", n);
       }
       return 0;
-		}
+    }
 
     template <class UDT, class RT>
-		static int getnumber(lua_State* L,
-			                const std::string& meta,
-						    RT (UDT::*pt2ConstMember)() const) { // function ptr
-			int n = lua_gettop(L);
+    static int getnumber(lua_State* L,
+                      const std::string& meta,
+                RT (UDT::*pt2ConstMember)() const) { // function ptr
+      int n = lua_gettop(L);
       if (n ==1) {
         typedef boost::shared_ptr<UDT> S;
-		    S m = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
-			  lua_pushnumber(L, (m.get()->*pt2ConstMember)());
-			}  else {
+        S m = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
+        lua_pushnumber(L, (m.get()->*pt2ConstMember)());
+      }  else {
         luaL_error(L, "Got %d arguments expected 1 (self)", n);
-	    }
-			return 1;
-		}
+      }
+      return 1;
+    }
     
     // useful for debugging to see the stack state
-		static void stackDump (lua_State *L) {
-			int top = lua_gettop(L);
-			for (int i = 1; i <= top; ++i) { // repeat for each level
-				int t = lua_type(L, i);
-				switch (t) {
-				  case LUA_TSTRING: // strings
-					  OutputDebugString(lua_tostring(L, i));
-					break;
-				  case LUA_TBOOLEAN: // booleans
-					  OutputDebugString(lua_toboolean(L, i) ? "true" : "false");
-					break;
-				  case LUA_TNUMBER: // numbers
-					  OutputDebugString("number"); // %g", lua_tonumber(L, i));
-					break;
-				  default: // other values
-					  OutputDebugString(lua_typename(L, t));
-					break;
-				}
-				OutputDebugString("  "); // put a separator
-			}
-			OutputDebugString("\n"); // end the listing
-		}
-	};
+    static void stackDump (lua_State *L) {
+      int top = lua_gettop(L);
+      for (int i = 1; i <= top; ++i) { // repeat for each level
+        int t = lua_type(L, i);
+        switch (t) {
+          case LUA_TSTRING: // strings
+#ifdef _WIN32           
+            OutputDebugString(lua_tostring(L, i));
+#endif          
+          break;
+          case LUA_TBOOLEAN: // booleans
+#ifdef _WIN32                       
+            OutputDebugString(lua_toboolean(L, i) ? "true" : "false");
+#endif                    
+          break;
+          case LUA_TNUMBER: // numbers
+#ifdef _WIN32                                   
+            OutputDebugString("number"); // %g", lua_tonumber(L, i));
+#endif                              
+          break;
+          default: // other values
+#ifdef _WIN32                                               
+            OutputDebugString(lua_typename(L, t));
+#endif                                        
+          break;
+        }
+#ifdef _WIN32       
+        OutputDebugString("  "); // put a separator
+#endif        
+      }
+#ifdef _WIN32     
+      OutputDebugString("\n"); // end the listing
+#endif      
+    }
+  };
 }  // namespace
 }  // namespace

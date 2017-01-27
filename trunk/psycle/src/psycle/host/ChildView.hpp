@@ -156,7 +156,7 @@ namespace host {
 		};
 
 		/// child view window
-		class CChildView : public CWnd
+		class CChildView : public CWnd, public HostViewPort
 		{
 		public:
 			//ADD_MFC_UTF_METHODS
@@ -483,9 +483,22 @@ namespace host {
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];            
     public:
-      class HostExtensions* host_extensions() { return host_extensions_.get(); }
+      virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
+      virtual void OnAddViewMenu(class Link& link);
+      virtual void OnAddHelpMenu(class Link& link);
+      virtual void HideExtensionView();
+      virtual void OnAddWindowsMenu(class Link& link);
+      virtual void OnRemoveWindowsMenu(class LuaPlugin* plugin);
+      virtual void OnReplaceHelpMenu(class Link& link, int pos);
+      virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin);
+      virtual void OnPluginCanvasChanged(class LuaPlugin& plugin);
     private:
-      std::auto_ptr<class HostExtensions> host_extensions_;           
+      typedef std::map<std::uint16_t, Link> MenuMap;
+      MenuMap menuItemIdMap_;
+      int menu_pos_;
+      HMENU windows_menu_;
+      CMenu* FindSubMenu(CMenu* parent, const std::string& text);
+      std::string menu_label(const Link& link) const;               
 		public:      
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
@@ -775,7 +788,6 @@ namespace host {
 				(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
 
-
-		
+   
 
 }}

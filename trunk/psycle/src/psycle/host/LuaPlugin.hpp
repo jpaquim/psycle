@@ -104,21 +104,11 @@ namespace psycle { namespace host {
     std::string dll_path_;
     bool usenoteon_;
     MachinePresetType::Value prsmode() const { return proxy_.prsmode(); }
-
     void lock() const { proxy_.lock(); }
     void unlock() const { proxy_.unlock(); }
-
     void InvalidateMenuBar() {}
-
     void DoExit() { do_exit_ = true; }
     void DoReload() { do_reload_ = true; }
-
-    bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) {
-      return proxy().OnKeyDown(nChar, nRepCnt, nFlags); }
-    bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) { 
-      return proxy().OnKeyUp(nChar, nRepCnt, nFlags);
-    }
-
     boost::shared_ptr<LuaPlugin> this_ptr() { return shared_from_this(); }
     virtual void OnCanvasChanged() { CanvasChanged(*this); }
     boost::signal<void (LuaPlugin&)> CanvasChanged;
