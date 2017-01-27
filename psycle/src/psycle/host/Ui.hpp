@@ -485,12 +485,14 @@ class Event {
   bool stop_propagation_;
 };
 
+class Window;
+
 class MouseEvent : public Event {
  public:
   typedef boost::shared_ptr<MouseEvent> Ptr;
-	typedef boost::shared_ptr<const MouseEvent> ConstPtr;
-	typedef boost::weak_ptr<MouseEvent> WeakPtr;
-	typedef boost::weak_ptr<const MouseEvent> ConstWeakPtr;
+  typedef boost::shared_ptr<const MouseEvent> ConstPtr;
+  typedef boost::weak_ptr<MouseEvent> WeakPtr;
+  typedef boost::weak_ptr<const MouseEvent> ConstWeakPtr;
 
   MouseEvent() : button_(0), shift_(0) {}
   MouseEvent(const Point& client_pos, int button, unsigned int shift) : 
@@ -498,11 +500,21 @@ class MouseEvent : public Event {
        button_(button), 
        shift_(shift) {
   }
+  MouseEvent(Window* sender,
+             const Point& client_pos,
+             int button, unsigned int shift) : 
+       sender_(sender),
+       client_pos_(client_pos),        
+       button_(button), 
+       shift_(shift) {
+  }
   const Point& client_pos() const { return client_pos_; }  
   int button() const { return button_; }
   int shift() const { return shift_; }
+  Window* sender() const { return sender_;  }
 
  private:  
+  Window* sender_;
   Point client_pos_;
   int button_, shift_;
 };
@@ -851,21 +863,20 @@ class Commands {
    
    template<typename T>
    void Add(T& f) {     
-     locker_->lock();
+     locker_.lock();
      functors.push_back(f);     
-     locker_->unlock();
+     locker_.unlock();
    }
    void Clear();     
    void Invoke();
 
    std::list<boost::function<void(void)> > functors;  
-   std::auto_ptr<LockIF> locker_;
+   Lock locker_;
    bool invalid_;
    int addcount;
 };
 
 class AlertImp;
-
 
 class AlertBox {
  public:	 
@@ -886,6 +897,29 @@ class AlertImp {
   AlertImp() {}
   virtual ~AlertImp() {}
   virtual void DevAlert(const std::string& text) = 0;
+};
+
+class ConfirmImp;
+
+class ConfirmBox {
+ public:	 
+  ConfirmBox();
+  bool OpenMessageBox(const std::string& text);
+
+ private:
+  std::auto_ptr<ConfirmImp> imp_;
+};
+
+inline bool confirm(const std::string& text) {
+  ConfirmBox confirm_box;
+  return confirm_box.OpenMessageBox(text);
+}
+
+class ConfirmImp {
+ public:
+  ConfirmImp() {}
+  virtual ~ConfirmImp() {}
+  virtual bool DevConfirm(const std::string& text) = 0;
 };
 
 class Window;
@@ -1101,6 +1135,13 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void release_imp() { imp_.release(); }
   WindowImp* imp() { return imp_.get(); };
   WindowImp* imp() const { return imp_.get(); };
+  
+  void set_command(const Command::Ptr& command) { command_ = command; }
+  void ExecuteAction() { 
+    if (!command_.expired()) {
+      command_.lock()->Execute();
+    }
+  }
 
   void set_debug_text(const std::string& text) { debug_text_ = text; }
   const std::string& debug_text() const { return debug_text_; }
@@ -1220,9 +1261,18 @@ class Window : public boost::enable_shared_from_this<Window> {
   }
   virtual void OnMouseUp(MouseEvent& ev) { ev.WorkParent(); }
   virtual void OnDblclick(MouseEvent& ev) { ev.WorkParent(); }
-  virtual void OnMouseMove(MouseEvent& ev) { ev.WorkParent(); }
-  virtual void OnMouseEnter(MouseEvent& ev) { ev.WorkParent(); }
-  virtual void OnMouseOut(MouseEvent& ev) { ev.WorkParent(); }
+  virtual void OnMouseMove(MouseEvent& ev) {
+    ev.WorkParent();
+    MouseMove(ev);
+  }
+  virtual void OnMouseEnter(MouseEvent& ev) {
+    ev.WorkParent();
+    MouseEnter(ev);
+  }
+  virtual void OnMouseOut(MouseEvent& ev) {
+    ev.WorkParent();
+    MouseOut(ev);
+  }
   virtual void OnShow() {}
   boost::signal<void(Window&)> BeforeDestruction;
   boost::signal<void(MouseEvent&)> MouseDown;
@@ -1243,9 +1293,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   boost::signal<void()> KillFocus;	
   bool has_align_dimension_changed() const { return align_dimension_changed_; }
   void reset_align_dimension_changed() { align_dimension_changed_ = false; }	
-  void align_dimension_changed() { align_dimension_changed_ = true; }
-  void lock() const;
-  void unlock() const;
+  void align_dimension_changed() { align_dimension_changed_ = true; }  
   virtual void Enable();
   virtual void Disable();
   void ViewDoubleBuffered();
@@ -1318,8 +1366,9 @@ class Window : public boost::enable_shared_from_this<Window> {
   Ornaments ornaments_;
   bool visible_, pointer_events_;  
   AlignStyle::Type align_;		
-	bool align_dimension_changed_;
-  ui::Dimension min_dimension_;  
+  bool align_dimension_changed_;
+  ui::Dimension min_dimension_;
+ Command::WeakPtr command_;
 };
 
 class ChildPosEvent : public Event {
@@ -1638,6 +1687,14 @@ class Node : public boost::enable_shared_from_this<Node> {
       parent_(0) {
   }
   virtual ~Node() {}
+	  
+  void set_command(const Command::Ptr& command) { command_ = command; }
+  Command::WeakPtr command() { return command_; }  
+  void ExecuteAction() { 
+    if (!command_.expired()) {
+      command_.lock()->Execute();
+    }
+  }
       
   virtual void set_text(const std::string& text) { 
     text_ = text;
@@ -1698,7 +1755,8 @@ class Node : public boost::enable_shared_from_this<Node> {
   int image_index_, selected_image_index_;
   Container children_;
   Node* parent_;
-	void* data_;
+  void* data_;
+  Command::WeakPtr command_;
 };
 
 class recursive_node_iterator {
@@ -2117,15 +2175,6 @@ class Button : public Window {
   void set_font(const Font& font);
 
   boost::signal<void (Button&)> click;
-  void set_command(const Command::Ptr& command) { command_ = command; }
-  void ExecuteAction() { 
-    if (!command_.expired()) {
-      command_.lock()->Execute();
-    }
-  }
-
- private: 
-   Command::WeakPtr command_;
 };
 
 class CheckBoxImp;
@@ -2395,70 +2444,6 @@ class GameController  {
   std::bitset<32> buttons_;
 };
 
-class GameControllersImp;
-
-template <class T>
-class GameControllers : public psycle::host::Timer {
- public:
-   GameControllers() {
-     imp_.reset(ImpFactory::instance().CreateGameControllersImp());
-     ScanPluggedControllers();
-     StartTimer();
-   }
-   virtual ~GameControllers() {}
-
-   typedef typename  std::vector<boost::shared_ptr<T> > Container;
-   typedef typename  std::vector<boost::shared_ptr<T> >::iterator iterator;
-
-   virtual iterator begin() { return plugged_controllers_.begin(); }
-   virtual iterator end() { return plugged_controllers_.end(); }
-   virtual bool empty() const { return plugged_controllers_.empty(); }
-   virtual int size() const { return plugged_controllers_.size(); }
-   
-   void set_imp(GameControllersImp* imp) { imp_.reset(imp); }
-   void release_imp() { imp_.release(); }
-   GameControllersImp* imp() { return imp_.get(); };
-   GameControllersImp* imp() const { return imp_.get(); };
-
-   void ScanPluggedControllers() {
-     std::vector<int> controller_ids;
-     imp_.get()->DevScanPluggedControllers(controller_ids);
-     std::vector<int>::iterator it = controller_ids.begin();
-     for ( ; it != controller_ids.end(); ++it) {       
-       boost::shared_ptr<T> game_controller_info(new T());
-       game_controller_info->set_id(*it);
-       plugged_controllers_.push_back(game_controller_info);
-     }
-   }
-   void Update() {
-     iterator it = plugged_controllers_.begin();
-     for ( ; it != plugged_controllers_.end(); ++it) {
-       boost::shared_ptr<T> controller = *it;
-       GameController old_state = *controller;
-       imp_->DevUpdateController(*controller.get()); 
-       controller->AfterUpdate(old_state);
-     }
-   }
-   virtual void OnTimerViewRefresh() { Update(); }
-
- private:
-   std::auto_ptr<GameControllersImp> imp_;
-   Container plugged_controllers_;   
-};
-
-template class GameControllers<GameController>;
-
-class GameControllersImp {
- public:
-   GameControllersImp() {}
-   virtual ~GameControllersImp() = 0;
-
-   virtual void DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) = 0;   
-   virtual void DevUpdateController(ui::GameController& controller) = 0;
-};
-
-inline GameControllersImp::~GameControllersImp() {}
-
 class MenuContainer;
 class Canvas;
 class RadioGroup;
@@ -2506,6 +2491,8 @@ class App {
    AppImp* imp() const { return imp_.get(); }
    
    void Run();
+   
+   boost::signal<void(MouseEvent&)> MouseDown;
   
   private:
    std::auto_ptr<AppImp> imp_;
@@ -2758,7 +2745,10 @@ class WindowImp {
   virtual void DevEnableCapslock()  {} //= 0;
   virtual void OnDevMouseDown(MouseEvent& ev);
   virtual void OnDevMouseUp(MouseEvent& ev);
-
+  virtual void OnDevMouseMove(MouseEvent& ev);  
+  virtual void OnDevMouseEnter(MouseEvent& ev);
+  virtual void OnDevMouseOut(MouseEvent& ev);
+  
  private:
   Window* window_;
 };
@@ -3047,6 +3037,15 @@ class FileObserverImp {
    FileObserver* file_observer_;
 };
 
+class GameControllersImp {
+ public:
+   GameControllersImp() {}
+   virtual ~GameControllersImp() = 0;
+
+   virtual void DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) = 0;   
+   virtual void DevUpdateController(GameController& controller) = 0;
+};
+
 class MenuContainerImp;
 class PopupMenuImp;
 class MenuItemImp;
@@ -3064,6 +3063,7 @@ class ImpFactory {
 	  
   virtual AppImp* CreateAppImp();	  
   virtual ui::AlertImp* CreateAlertImp();
+  virtual ui::ConfirmImp* CreateConfirmImp();
   virtual ui::WindowImp* CreateWindowImp();
   virtual bool DestroyWindowImp(ui::WindowImp* imp);
   virtual ui::WindowImp* CreateWindowCompositedImp();
@@ -3096,10 +3096,64 @@ class ImpFactory {
   virtual ui::ImageImp* CreateImageImp();
   virtual ui::GameControllersImp* CreateGameControllersImp();  
   virtual ui::FileObserverImp* CreateFileObserverImp(FileObserver* file_observer);  
+  virtual LockIF* CreateLocker();
 
  private:
   std::auto_ptr<ImpFactory> concrete_factory_;
 };
+
+inline GameControllersImp::~GameControllersImp() {}
+
+template <class T>
+class GameControllers : public psycle::host::Timer {
+ public:
+   GameControllers() {
+     imp_.reset(ImpFactory::instance().CreateGameControllersImp());
+     ScanPluggedControllers();
+     StartTimer();
+   }
+   virtual ~GameControllers() {}
+
+   typedef typename  std::vector<boost::shared_ptr<T> > Container;
+   typedef typename  std::vector<boost::shared_ptr<T> >::iterator iterator;
+
+   virtual iterator begin() { return plugged_controllers_.begin(); }
+   virtual iterator end() { return plugged_controllers_.end(); }
+   virtual bool empty() const { return plugged_controllers_.empty(); }
+   virtual int size() const { return plugged_controllers_.size(); }
+   
+   void set_imp(GameControllersImp* imp) { imp_.reset(imp); }
+   void release_imp() { imp_.release(); }
+   GameControllersImp* imp() { return imp_.get(); };
+   GameControllersImp* imp() const { return imp_.get(); };
+
+   void ScanPluggedControllers() {
+     std::vector<int> controller_ids;
+     imp_.get()->DevScanPluggedControllers(controller_ids);
+     std::vector<int>::iterator it = controller_ids.begin();
+     for ( ; it != controller_ids.end(); ++it) {       
+       boost::shared_ptr<T> game_controller_info(new T());
+       game_controller_info->set_id(*it);
+       plugged_controllers_.push_back(game_controller_info);
+     }
+   }
+   void Update() {
+     iterator it = plugged_controllers_.begin();
+     for ( ; it != plugged_controllers_.end(); ++it) {
+       boost::shared_ptr<T> controller = *it;
+       GameController old_state = *controller;
+       imp_->DevUpdateController(*controller.get()); 
+       controller->AfterUpdate(old_state);
+     }
+   }
+   virtual void OnTimerViewRefresh() { Update(); }
+
+ private:
+   std::auto_ptr<GameControllersImp> imp_;
+   Container plugged_controllers_;   
+};
+
+template class GameControllers<GameController>;
 
 } // namespace ui
 } // namespace host

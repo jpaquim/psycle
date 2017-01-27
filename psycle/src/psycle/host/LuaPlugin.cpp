@@ -93,8 +93,7 @@ namespace psycle { namespace host {
     }
     proxy().OnTimer();
     if (do_exit_) {
-      HostExtensions& host_extensions = *((CMainFrame*) ::AfxGetMainWnd())->m_wndView.host_extensions();
-      host_extensions.Remove(this_ptr());
+      HostExtensions::Instance().Remove(this_ptr());
     } else 
     if (do_reload_) {
       do_reload_ = false;

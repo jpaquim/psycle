@@ -27,9 +27,7 @@ class LuaPlugin;
 typedef boost::shared_ptr<LuaPlugin> LuaPluginPtr;
 extern boost::shared_ptr<LuaPlugin> nullPtr;
 
-class LuaPlugin;
-
-class LuaControl : public LockIF {
+class LuaControl : public Lock {
  public:
   LuaControl();
   virtual ~LuaControl();
@@ -39,17 +37,9 @@ class LuaControl : public LockIF {
   void Run();
   void Start();
   virtual void Free();  
-
-  
   lua_State* state() const { return L; }
-
-  // LockIF Implementation
-  void lock() const { ::EnterCriticalSection(&cs); }
-  void unlock() const { ::LeaveCriticalSection(&cs); }
-
   std::string install_script() const;
   virtual PluginInfo meta() const;
-
   void yield();
   void resume();
   
@@ -57,9 +47,7 @@ class LuaControl : public LockIF {
    lua_State* L;
    lua_State* LM;
    std::auto_ptr<ui::Commands> invokelater_;   
-   PluginInfo parse_info() const;
-  private:   
-   mutable CRITICAL_SECTION cs;   
+   PluginInfo parse_info() const;  
 };
 
 class LuaStarter : public LuaControl {
@@ -117,9 +105,7 @@ class LuaProxy : public LuaControl {
   std::string Id(int par);
 	std::string Name(int par);		
 	void Range(int par,int &minval, int &maxval);
-	int Type(int par);				
-  bool OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);  
-  bool OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
+	int Type(int par);
   void call_execute();
 	void call_sr_changed(int rate);
 	void call_aftertweaked(int idx);	  
@@ -183,8 +169,7 @@ class LuaProxy : public LuaControl {
   mutable bool is_meta_cache_updated_;
   mutable PluginInfo meta_cache_;
   LuaPlugin *host_;
-  LuaMachine* lua_mac_;	
-  mutable CRITICAL_SECTION cs;  
+  LuaMachine* lua_mac_;
   boost::weak_ptr<ui::MenuContainer> menu_bar_;
   boost::shared_ptr<ui::Frame> frame_;
   int user_interface_;
@@ -225,13 +210,14 @@ class Link {
 class HostExtensions {     
  public:
   typedef std::list<LuaPluginPtr> List;  
-  typedef std::map<std::uint16_t, Link> MenuMap;
-  //typedef std::map<std::uint16_t, LuaPlugin*> MenuMap;
-
-  HostExtensions(class CChildView* child_view) : child_view_(child_view), active_lua_(0), menu_pos_(8) {}
+ 
+  HostExtensions() : child_view_(0), active_lua_(0) {}
   ~HostExtensions() {}  
 
-  void Load(CMenu* view_menu);
+  static HostExtensions& Instance();
+  void InitInstance(class HostViewPort* child_view);
+  void ExitInstance();
+
   void StartScript();
   void Free();  
   typedef HostExtensions::List::iterator iterator;
@@ -248,31 +234,26 @@ class HostExtensions {
   void ReplaceHelpMenu(Link& link, int pos);
   void AddViewMenu(Link& link);
   void AddHelpMenu(Link& link);
-  CMenu* FindSubMenu(CMenu* parent, const std::string& text);
-  MenuMap& menuItemIdMap() { return menuItemIdMap_; }
-  void OnDynamicMenuItems(UINT nID);
+  void AddWindowsMenu(Link& link);
   void OnPluginCanvasChanged(LuaPlugin& plugin);
   void OnPluginViewPortChanged(LuaPlugin& plugin, int viewport);
   void HideActiveLua();
   void HideActiveLuaMenu();
-  void InitWindowsMenu();
   void RemoveFromWindowsMenu(LuaPlugin* plugin);
   LuaPluginPtr Execute(Link& link);
   void ChangeWindowsMenuText(LuaPlugin* plugin);
   void AddToWindowsMenu(Link& link);
+  LuaPlugin* active_lua() { return active_lua_; }
+  void set_active_lua(LuaPlugin* active_lua) { active_lua_ = active_lua; }
 
  private:   
-  lua_State*  load_script(const std::string& dllpath);
+  lua_State* load_script(const std::string& dllpath);
   void AutoInstall();
   std::vector<std::string> search_auto_install();
   std::string menu_label(const Link& link) const;
-
-  HostExtensions::List extensions_;  
-  MenuMap menuItemIdMap_;  
-  class CChildView* child_view_;
-  LuaPlugin* active_lua_;
-  int menu_pos_;
-  HMENU windows_menu_;
+  HostExtensions::List extensions_;
+  class HostViewPort* child_view_;
+  LuaPlugin* active_lua_;  
 };
 
 struct LuaGlobal {   
