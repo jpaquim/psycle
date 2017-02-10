@@ -32,7 +32,6 @@ local splitter = require("psycle.ui.splitter")
 local combobox = require("psycle.ui.combobox")
 
 local filehelper = require("psycle.file")
-local fileopen = require("psycle.ui.fileopen")
 local fileexplorer = require("fileexplorer")
 local settingspage = require("settingspage")
 local textpage = require("textpage")
@@ -55,7 +54,9 @@ local templateparser = require("templateparser")
 local run = require("psycle.run")
 local serpent = require("psycle.serpent")
 local commandfactory = require("commandfactory")
+local textpagecommandfactory = require("textpagecommandfactory")
 local sci = require("scintilladef")
+
 local maincanvas = canvas:new()
 
 maincanvas.picdir = cfg:luapath() .. "\\psycle\\ui\\icons\\"
@@ -75,13 +76,17 @@ function maincanvas:init()
   self.machines = machines:new()  
   self:invalidatedirect()
   self:initstyleclasses(self.machine_.settingsmanager:setting())
-  self:setupfiledialogs()  
   self:createcreateeditplugin()  
   self:createpagegroup()
-  self.fileexplorer = self:createfileexplorer()  
-  self:inittoolbar()
-  self:initinfo()  
+  self.fileexplorer = self:createfileexplorer()
+  self.info = info:new()
+                  :setalign(item.ALTOP)
+                  :setautosize(false, false)
+                  :setposition(rect:new(point:new(), dimension:new(0, 160)))
   self:createsearch()
+  self:createcommands();  
+  self:inittoolbar()  
+  self:initinfo()  
   self:createoutputs()
   splitter:new(self, splitter.HORZ)    
   self:add(self.fileexplorer)  
@@ -89,52 +94,43 @@ function maincanvas:init()
   splitter:new(self, splitter.VERT)
   self:add(self.pages)
   systems:new():updatewindows()
-  self.cursormovement = 1
 end
 
 function maincanvas:initinfo()
-  self.info = info:new(self)
-                  :setalign(item.ALTOP)
-                  :setautosize(false, false)
-                  :setposition(rect:new(point:new(), dimension:new(0, 160)))  
-  self.info.cmd:connect(maincanvas.oncmdinfo, self)
+  self.info:addcommands(self.commands_)
+  self.info:addcommands(self.textpagecommands_);  
   self.statusbar:setinfo(self.info)
+  self:add(self.info)  
 end
 
-function maincanvas:oncmdinfo(cmd)  
-  if (self.pages:activepage()) then    
-    if cmd == "sethelplevel0" then
-      self.info.helplevel = 0                 
-    elseif cmd == "sethelplevel1" then
-      self.info.helplevel = 1
-    elseif cmd == "sethelplevel2" then
-      self.info.helplevel = 2
-    elseif cmd == "sethelplevel3" then
-      self.info.helplevel = 3
-      if not self.info:visible() then
-        self.info:show()      
-        self:updatealign();    
-      end
-    elseif cmd == "saveresume" then
-      self.savepagecmd:execute()
-    elseif cmd == "savedone" then
-      self.savepagecmd:execute()
-      self.pages:removepage(self.pages:activepage())
-    elseif cmd == "saveexit" then
-      self.savepagecmd:execute()
-      dtesself.machine_:exit()
-    elseif cmd == "abandonfile" then
-      self.pages:removepage(self.pages:activepage())
-    else    
-      self.pages:activepage():oncmd(cmd)
-    end    
-    self.statusbar.status.prompttext:settext("")
-    if cmd == "findtext" then
-       self:displaysearch() 
-    else
-      self:onstatuslineescape()
-    end
-  end  
+function maincanvas:createcommands()
+  local that = self
+  self.commands_ = {
+    newpage = commandfactory.build(commandfactory.NEWPAGE, that.pages, nil, self.info:preventedkeys()),
+    loadpage = commandfactory.build(commandfactory.LOADPAGE, that.pages, that.fileexplorer),  
+    saveresume = commandfactory.build(commandfactory.SAVERESUMEPAGE, that.pages, that.fileexplorer),
+    savedone = commandfactory.build(commandfactory.SAVEDONEPAGE, that.pages, that.fileexplorer),
+    saveexit = commandfactory.build(commandfactory.SAVEEXITPAGE, that.pages, that.fileexplorer),
+    abandon = commandfactory.build(commandfactory.ABANDONPAGE, that.pages),
+    undopage = commandfactory.build(commandfactory.UNDOPAGE, that.pages),
+    redopage = commandfactory.build(commandfactory.REDOPAGE, that.pages),
+    displaysearch = commandfactory.build(commandfactory.DISPLAYSEARCH, that.search),
+    sethelplevel0 = commandfactory.build(commandfactory.HELPLEVEL, self.info, 0),  
+    sethelplevel1 = commandfactory.build(commandfactory.HELPLEVEL, self.info, 1),  
+    sethelplevel2 = commandfactory.build(commandfactory.HELPLEVEL, self.info, 2),  
+    sethelplevel3 = commandfactory.build(commandfactory.HELPLEVEL, self.info, 3)  
+  }
+  self.textpagecommands_ = {
+    deleteblock = textpagecommandfactory.build(textpagecommandfactory.DELETEBLOCK, that.pages),
+    setblockbegin = textpagecommandfactory.build(textpagecommandfactory.SETBLOCKBEGIN, that.pages),  
+    setblockend = textpagecommandfactory.build(textpagecommandfactory.SETBLOCKEND, that.pages),
+    charleft = textpagecommandfactory.build(textpagecommandfactory.CHARLEFT, that.pages),
+    charright = textpagecommandfactory.build(textpagecommandfactory.CHARRIGHT, that.pages),
+    lineup = textpagecommandfactory.build(textpagecommandfactory.LINEUP, that.pages),
+    linedown = textpagecommandfactory.build(textpagecommandfactory.LINEDOWN, that.pages),
+    wordleft = textpagecommandfactory.build(textpagecommandfactory.WORDLEFT, that.pages),
+    wordright = textpagecommandfactory.build(textpagecommandfactory.WORDRIGHT, that.pages)
+  } 
 end
 
 function maincanvas:createcreateeditplugin()  
@@ -145,36 +141,14 @@ function maincanvas:createcreateeditplugin()
                       :setautosize(false, false)
                       :setposition(rect:new(point:new(), dimension:new(0, 200)))
   self.pluginselector.doopen:connect(maincanvas.onopenplugin, self)
-  self.pluginselector.docreate:connect(maincanvas.oncreateplugin, self)
   self.pluginselector.docreatemodule:connect(maincanvas.oncreatemodule, self)
 end
 
-function maincanvas:onopenplugin(pluginpath, pluginname, info)  
-  self:openplugin(pluginpath, pluginname, info)
+function maincanvas:onopenplugin(info)  
+  self:openplugin(info)
   psycle.proxy.project = project:new():setplugininfo(info)
   self:fillinstancecombobox()  
-  self.machine_:settitle(pluginname)
-end
-
-function maincanvas:oncreateplugin(outputs, machinename)  
-  for _, output in pairs(outputs) do  
-    local fname = string.sub(output.path, 1, -5)    
-    self:openplugin(machinename.."\\"..fname, machinename)
-  end             
-  
-  local catcher = catcher:new():rescannew()
-  --local infos = catcher:infos()        
-  --for i=1, #infos do       
-   -- if infos[i]:type() == machine.MACH_LUA and
-   --    infos[i]:name():lower() == pluginname:lower() then      
-    --  psycle.proxy.project = project:new():setplugininfo(infos[i])
-    --  break;     
-  --  end
-  --end      
-  self.machineselector:settext(machinename)  
-  self.pluginselector:hide()
-  self:updatealign()
-  self:setfocus()
+  self.machine_:settitle(info:name())
 end
 
 function maincanvas:oncreatemodule(outputs)    
@@ -188,14 +162,12 @@ function maincanvas:oncreatemodule(outputs)
   self:invalidate()
 end
 
-function maincanvas:createsearch()
-  local setting = self.machine_.settingsmanager:setting()
+function maincanvas:createsearch() 
   self.search
-      = search:new(self, setting)
+      = search:new(self)
               :setposition(rect:new(point:new(), dimension:new(200, 200)))
               :hide()
-              :setalign(item.ALBOTTOM)
-  self.search:applysetting(setting)           
+              :setalign(item.ALBOTTOM)    
   self.search.dosearch:connect(maincanvas.onsearch, self)
   self.search.doreplace:connect(maincanvas.onreplace, self)
   self.search.dohide:connect(maincanvas.onsearchhide, self)
@@ -249,14 +221,6 @@ function maincanvas:createfileexplorer()
   return fileexplorer
 end
 
-function maincanvas:setupfiledialogs()
-  self.fileopen = fileopen:new()
-  local that = self
-  function self.fileopen:onok(fname)    
-    that:openfromfile(fname)
-  end
-end
-
 function maincanvas:setoutputtext(text)
   self.output:addtext(text)  
 end
@@ -290,74 +254,22 @@ end
 
 function maincanvas:onkeydown(ev)  
   if ev:ctrlkey() then
-    local done = false
-    if self.cursormovement == 1 and self.pages:activepage() then
-      if ev:keycode() == 0x41 then
-        self.pages:activepage():wordleft()
-        done = true      
-        ev:stoppropagation()
-      elseif ev:keycode() == 0x46 then
-        self.pages:activepage():wordright()
-        done = true      
-        ev:stoppropagation()
-      elseif ev:keycode() == 0x53 then                
-        self.pages:activepage():charleft()
-        done = true      
-        ev:stoppropagation()
-      elseif ev:keycode() == 0x44 then
-        self.pages:activepage():charright()
-        done = true      
-        ev:stoppropagation()
-      elseif ev:keycode() == 0x45 then
-        self.pages:activepage():lineup()
-        done = true      
-        ev:stoppropagation()             
-      elseif ev:keycode() == 0x58 then
-        self.pages:activepage():linedown()
-        done = true      
-        ev:stoppropagation()      
-      end
-    end
-    if not done then      
-      if ev:keycode() == 0x4A or ev:keycode() == 0x4B or ev:keycode() == 0x51 then
+      if self.info:haskeycode(ev:keycode()) then
         self.statusbar:setcontrolkey(ev:keycode())        
         self.info:jump(ev:keycode())
-        self.statusbar.status.control:setfocus()
-      elseif ev:keycode() == 0x47 then
-        self.statusbar.status.line:setfocus()
+        if self.info.activated == 1 then
+          self.statusbar.status.line:setfocus()
+        elseif self.pages:activepage() then   
+          self.pages:activepage():setfocus()          
+        end
         ev:stoppropagation()
-        self.info:deactivate()
-      elseif ev:keycode() == 78 then
-        self.newpagecmd:execute()  
-        ev:stoppropagation()
-      elseif ev:keycode() == 79 then
-        self.fileopen:setfolder(self.fileexplorer:path())      
-        self.fileopen:show()          
-        ev:stoppropagation()
-      elseif ev:keycode() == 87 then         
-        ev:stoppropagation()
-        self:closeandremovepage()
-      elseif ev:keycode() == 70 then
-        self:displaysearch() 
-        ev:stoppropagation()
-      elseif ev:keycode() == 83 then
-        self.savepagecmd:execute()
-        ev:stoppropagation()
+      end        
+     --[[     
       elseif ev:keycode() == ev.F5  then
         self:playplugin()
         ev:stoppropagation()
-      end
-    end  
+      end  ]]
   end  
-end
-
-function maincanvas:closeandremovepage()  
-  if (self.pages:activepage()) then
-    local e = {}
-    e.page = self.pages:activepage()
-    self:onclosepage(e);        
-    self.pages:removepage(e.page)   
-  end     
 end
 
 function maincanvas:openfromfile(fname, line)
@@ -386,11 +298,6 @@ function maincanvas:setcallstack(trace)
   end  
 end
 
-function maincanvas:createnewpage()
-  local page = self:createpage()
-  self.pages:addpage(page, page:createdefaultname())  
-end
-
 function maincanvas:playplugin()  
   local pluginindex = psycle.proxy.project:pluginindex()  
   if pluginindex ~= -1 then
@@ -409,7 +316,7 @@ function maincanvas:playplugin()
       psycle.proxy.project:setpluginindex(pluginindex)    
       self:fillinstancecombobox()
       self:setpluginindex(pluginindex)
-    self.playicon:seton(true)   
+      self.playicon:seton(true)   
     end
   end  
 end
@@ -491,9 +398,8 @@ function maincanvas:onmachineselectorreturnkey(text)
   end  
 end
 
-function maincanvas:initstatus()    
-  local setting = self.machine_.settingsmanager:setting()
-  self.statusbar = statusbar:new(self.tgsmall, setting)
+function maincanvas:initstatus()
+  self.statusbar = statusbar:new(self.tgsmall)
   self.statusbar.gotopage:connect(maincanvas.ongotopage, self)
   self.statusbar.escape:connect(maincanvas.onstatuslineescape, self)
 end
@@ -595,22 +501,12 @@ function maincanvas:initfiletoolbar()
   for _, icon in pairs(icons) do    
     self:formattoolicon(icon)
   end  
-  self.newpagecmd = commandfactory.build(commandfactory.NEWPAGE, self.pages)
-  self.savepagecmd = commandfactory.build(commandfactory.SAVEPAGE, self.pages, self.fileexplorer)
-  self.undopagecmd = commandfactory.build(commandfactory.UNDOPAGE, self.pages)
-  self.redopagecmd = commandfactory.build(commandfactory.REDOPAGE, self.pages)
-  icons.inew:setcommand(self.newpagecmd)  
-  icons.isave:setcommand(self.savepagecmd)  
-  icons.iundo:setcommand(self.undopagecmd) 
-  icons.iredo:setcommand(self.redopagecmd)
-  icons.iopen.click:connect(maincanvas.onopenfile, self)  
+  icons.inew:setcommand(self.commands_.newpage)  
+  icons.isave:setcommand(self.commands_.saveresume)  
+  icons.iundo:setcommand(self.commands_.undopage) 
+  icons.iredo:setcommand(self.commands_.redopage)
+  icons.iopen:setcommand(self.commands_.loadpage);  
   return t
-end
-
-function maincanvas:onopenfile(icon)
-  icon:resethover()
-  self.fileopen:setfolder(self.fileexplorer:path())  
-  self.fileopen:show()
 end
 
 function maincanvas:initplaytoolbar()
@@ -665,18 +561,13 @@ function maincanvas:onreplace()
   end
 end
 
-function maincanvas:displaysearch(ev)
-  self.search:show():onfocus()
-  self:updatealign()  
-end
-
-function maincanvas:openplugin(pluginpath, pluginname, plugininfo)  
+function maincanvas:openplugin(info)
   self:preventdraw()
   self:closealltabs()      
-  self.fileexplorer:sethomepath(cfg:luapath().."\\"..pluginpath:sub(1, pluginpath:find("\\") - 1))  
-  self:openfromfile(cfg:luapath().."\\"..pluginpath..".lua")
+  self.fileexplorer:sethomepath(cfg:luapath().. "\\" .. info.machinepath)  
+  self:openfromfile(cfg:luapath() .. "\\" .. info.machinepath .. "\\machine.lua")
   self:setfocus()
-  self.machineselector:settext(pluginname)
+  self.machineselector:settext(info:name())
   self:updatealign()
   self:enabledraw()  
   self:invalidate()

@@ -116,6 +116,7 @@ namespace psycle { namespace host {
 
     std::string install_script() const { return proxy_.install_script(); }
     std::string const title() { return proxy().title(); }
+    std::string machinepath() const { return proxy().machinepath(); }
 
   protected:
     LuaProxy proxy_;

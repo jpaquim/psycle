@@ -21,12 +21,12 @@ local edit = require("psycle.ui.edit")
 
 local statusbar = group:new()
 
-function statusbar:new(parent, setting)  
+function statusbar:new(parent)  
   local c = group:new()
                  :setautosize(false, false)  
   setmetatable(c, self)  
   self.__index = self
-  c:init(setting)
+  c:init()
   if parent ~= nil then
     parent:add(c)
   end
@@ -37,7 +37,7 @@ function statusbar:typename()
   return "statusbar"
 end
 
-function statusbar:init(setting)  
+function statusbar:init()  
   self.gotopage = signal:new()
   self.escape = signal:new()
   self:setalign(item.ALTOP)
@@ -58,7 +58,7 @@ function statusbar:init(setting)
     ev:preventdefault()
   end
   local that = self
-  function self.status.control:onkillfocus()
+  function self.status.control:onkillfocus()    
     that.info:jumpmain()
     that:clearcontrol()
     if that.info.helplevel < 3 then
@@ -72,6 +72,7 @@ end
 function statusbar:setinfo(info)
   self.info = info
   self.info.dojump:connect(statusbar.onjumpinfo, self)
+  info:setstatusbar(self)
   self:updatealign()
 end
 
@@ -126,8 +127,8 @@ function statusbar:onkeydown(ev)
     self.escape:emit(self)
     self:clearcontrol()
   else
-    self.info:jump(ev:keycode())
     self.status.control:settext(self.prefix .. string.char(ev:keycode()))
+    self.info:jump(ev:keycode())    
     ev:stoppropagation()
     ev:preventdefault()
   end  

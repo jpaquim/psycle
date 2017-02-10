@@ -379,6 +379,15 @@ FontInfo Font::font_info() const {
   return imp()->dev_font_info();
 }
 
+Fonts::Fonts() : imp_(ui::ImpFactory::instance().CreateFontsImp()) {
+  font_list_ = imp_->dev_font_list();
+}
+
+void Fonts::import_font(const std::string& path) {
+  assert(imp_.get());
+  imp_->dev_import_font(path);
+}
+
 //Image
 Image::Image() 
 	: imp_(ui::ImpFactory::instance().CreateImageImp()), 
@@ -1042,16 +1051,16 @@ void Window::add_ornament(boost::shared_ptr<Ornament> ornament) {
   FLSEX();
 }
 
+Window::Ornaments Window::ornaments() {
+  return ornaments_;
+}
+
 void Window::RemoveOrnaments() {
 	ornaments_.clear();
 	if (imp_.get()) {
 		imp_->dev_set_border_space(ui::BoxSpace());
 	}
 	FLSEX();
-}
-
-Window::Ornaments Window::ornaments() {
-  return ornaments_;
 }
 
 const Area& Window::area() const {	
@@ -1185,8 +1194,8 @@ ui::BoxSpace Window::sum_border_space() const {
   ui::BoxSpace result;	
   if (!ornaments_.empty()) {       
     for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {				
-      if (!(*it).expired()) {
-        result = result + (*it).lock()->preferred_space();		
+      if (*it) {
+        result = result + (*it)->preferred_space();		
       }
     }
   }
@@ -1392,8 +1401,8 @@ void Window::remove_style(UINT flag) {
 void Window::DrawBackground(Graphics* g, Region& draw_region) {
   if (draw_region.bounds().height() > 0) {					
     for (Ornaments::iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
-      if (!(*it).expired()) {					
-        (*it).lock()->Draw(*this, g, draw_region);
+      if (*it) {					
+        (*it)->Draw(*this, g, draw_region);
       }
     }
   }  
@@ -1402,7 +1411,7 @@ void Window::DrawBackground(Graphics* g, Region& draw_region) {
 bool Window::transparent() const {
   bool result = true;
   for (Ornaments::const_iterator it = ornaments_.begin(); it != ornaments_.end(); ++it) {
-    if (!(*it).expired() && !((*it).lock()->transparent())) {						  
+    if ((*it) && !((*it)->transparent())) {						  
       result = false;
       break;
     }
@@ -3125,6 +3134,12 @@ void App::Run() {
   }
 }
 
+void App::Stop() {
+  if (imp_.get()) {
+    imp_->DevStop();
+  }
+}
+
 // Ui Factory
 Systems& Systems::instance() {
   static Systems instance_(new DefaultSystems());  
@@ -3411,11 +3426,7 @@ Font* DefaultSystems::CreateFont() {
 }
 
 ui::Fonts* DefaultSystems::CreateFonts() {
-#ifdef _WIN32
-  return new mfc::Fonts();
-#endif
-  assert(0);
-  return 0;
+  return new Fonts();
 }
 
 ui::Window* DefaultSystems::CreateWin() {
@@ -3636,6 +3647,16 @@ ui::ConfirmImp* ImpFactory::CreateConfirmImp() {
   return concrete_factory_->CreateConfirmImp(); 
 }
 
+ui::FileDialogImp* ImpFactory::CreateFileOpenDialogImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFileOpenDialogImp(); 
+}
+
+ui::FileDialogImp* ImpFactory::CreateFileSaveDialogImp() {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFileSaveDialogImp(); 
+}
+
 ui::WindowImp* ImpFactory::CreateWindowCompositedImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateWindowCompositedImp(); 
@@ -3736,6 +3757,11 @@ ui::FontImp* ImpFactory::CreateFontImp(int stock) {
   return concrete_factory_->CreateFontImp(stock);  
 }
 
+ui::FontsImp* ImpFactory::CreateFontsImp() {  
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateFontsImp();  
+}
+
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(); 
@@ -3779,7 +3805,8 @@ AlertBox::AlertBox() : imp_(ImpFactory::instance().CreateAlertImp()) {
 }
 
 void AlertBox::OpenMessageBox(const std::string& text) {
-	imp_->DevAlert(text);
+  assert(imp_.get());
+  imp_->DevAlert(text);
 }
 
 ConfirmBox::ConfirmBox() : imp_(ImpFactory::instance().CreateConfirmImp()) {
@@ -3787,7 +3814,47 @@ ConfirmBox::ConfirmBox() : imp_(ImpFactory::instance().CreateConfirmImp()) {
 
 bool ConfirmBox::OpenMessageBox(const std::string& text) {
   assert(imp_.get());
-	return imp_->DevConfirm(text);
+  return imp_->DevConfirm(text);
+}
+
+FileOpenDialog::FileOpenDialog() {
+  imp_.reset(ImpFactory::instance().CreateFileOpenDialogImp());
+  assert(imp_.get());
+}
+
+FileSaveDialog::FileSaveDialog() {
+  imp_.reset(ImpFactory::instance().CreateFileSaveDialogImp()); 
+  assert(imp_.get());
+}
+
+void FileDialog::Show() {
+   assert(imp_.get());
+   imp_->DevShow();;
+}
+
+bool FileDialog::is_ok() const {
+   assert(imp_.get());
+   return imp_->dev_is_ok();
+}
+
+void FileDialog::set_folder(const std::string& folder) {
+   assert(imp_.get());
+   imp_->dev_set_folder(folder);
+}
+
+std::string FileDialog::folder() const {
+  assert(imp_.get());
+  return imp_->dev_folder();
+}
+
+void FileDialog::set_filename(const std::string& filename) {
+  assert(imp_.get());	
+  imp_->dev_set_filename(filename);
+}
+
+std::string FileDialog::filename() const {
+  assert(imp_.get());
+  return imp_->dev_filename();
 }
 
 } // namespace ui

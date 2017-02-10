@@ -1,9 +1,13 @@
-#ifdef __linux__
+//#ifdef __linux__
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/Xdbe.h>
 
-#include "Ui.hpp"
-#include <assert.h> 	
+typedef Window XWindow;
+
+#include "LockIF.hpp"
+#include "CanvasItems.hpp"
+#include <assert.h>   
 
 #define NIL (0)  
 
@@ -16,25 +20,40 @@ extern Display* display();
 
 struct DummyWindow {
   static ::Window dummy();
-	
+  
  private:
   static ::Window dummy_wnd_;
-};	
-		
+};  
+    
 class AppImp : public ui::AppImp {
  public:
    AppImp();
    virtual ~AppImp();
-  
-   Display* dpy() { return dpy_; }
-   Colormap default_colormap() const { return default_colormap_; }   
+ 
    virtual void DevRun();   
+   virtual void DevStop() { abort_ = true; }
+   Display* dpy() { return dpy_; }
+   Visual * visual() { return d_vis; }
+   Colormap default_colormap() const { return default_colormap_; }   
+   bool ProcessNextEvent(XEvent& e);
+   
    void RegisterWindow(::Window w, ui::WindowImp* imp) { windows_[w] = imp; }
    void UnregisterWindow(::Window w) { windows_[w] = 0; }
    ui::WindowImp* find(::Window w);
-   
+         
+   Atom wm_delete_window;
+         
  private:
+   void InitDisplay();
+   void InitXdbe();
+   void InitColormap();
+   void InitAtoms(); 
+   bool abort_;	 
    Display *dpy_;
+   Visual *d_vis;
+   int x11_fd;
+   fd_set in_fds;
+   struct timeval tv;
    Colormap default_colormap_;
    std::map< ::Window, ui::WindowImp*> windows_;
 };
@@ -93,12 +112,12 @@ class SystemMetrics : public ui::SystemMetrics {
 
   virtual ui::Dimension screen_dimension() const {
     return ui::Dimension(800, 600); 
-	  // GetSystemMetrics(SM_CXFULLSCREEN),
+    // GetSystemMetrics(SM_CXFULLSCREEN),
           // GetSystemMetrics(SM_CYFULLSCREEN));
   }
   virtual ui::Dimension scrollbar_size() const {
     return ui::Dimension(17, 17);
-	  // GetSystemMetrics(SM_CXHSCROLL),
+    // GetSystemMetrics(SM_CXHSCROLL),
           // GetSystemMetrics(SM_CXVSCROLL));
   }
 };
@@ -111,7 +130,7 @@ class FontImp : public ui::FontImp {
   }
 
   FontImp(int stock_id) : stock_id_(stock_id) {
-    // cfont_ = (HFONT) GetStockObject(stock_id);	  
+    // cfont_ = (HFONT) GetStockObject(stock_id);   
     xfont_ = NIL;
   }
   
@@ -146,11 +165,11 @@ class FontImp : public ui::FontImp {
 
   virtual FontInfo dev_font_info() const {
     /*LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));		
-	::GetObject(cfont_, sizeof(LOGFONT), &lfLogFont);    
+    memset(&lfLogFont, 0, sizeof(lfLogFont));   
+  ::GetObject(cfont_, sizeof(LOGFONT), &lfLogFont);    
     FontInfo info = TypeConverter::font_info(lfLogFont);    
     info.set_stock_id(stock_id_);*/
-    FontInfo info;	  
+    FontInfo info;    
     return info;
   }
 
@@ -162,21 +181,26 @@ class FontImp : public ui::FontImp {
 };
 
 class GraphicsImp : public ui::GraphicsImp {
- public:	
-   GraphicsImp() {gc_ = 0; }   
-   GraphicsImp(::Window w);         
-   virtual ~GraphicsImp() { DevDispose(); }
-	   
-   virtual void DevDispose();
-   void DevFillRect(const Rect& rect);
-   void DevSetColor(ARGB color);
-   ARGB dev_color() const { return argb_color_; }
-   void DevDrawString(const std::string& str, const Point& position) {
-      // check_pen_update();		
-      XDrawString(display(), w_, gc_, position.x(), position.y() + 10, str.c_str(), str.length());	   
-      //cr_->TextOut(static_cast<int>(position.x()), static_cast<int>(position.y()),
-      //Charset::utf8_to_win(str).c_str());
-  }   
+ public:  
+  GraphicsImp();
+  GraphicsImp(::Window w);         
+  virtual ~GraphicsImp() { DevDispose(); }
+     
+  virtual void DevDispose();
+  virtual void DevFillRegion(const ui::Region& rgn);
+  virtual void DevFillRect(const Rect& rect);
+  virtual void DevSetColor(ARGB color);
+  ARGB dev_color() const { return argb_color_; }
+  virtual void DevDrawString(const std::string& str, const Point& position);
+  virtual void DevSetFont(const Font& font) {
+    font_ = font;   
+    x::FontImp* imp = dynamic_cast<x::FontImp*>(font_.imp());
+    assert(imp);
+    assert(imp->xfont()); 
+    XSetFont(display(), gc_, imp->xfont()->fid);
+  }
+  virtual const Font& dev_font() const { return font_; }
+  virtual Dimension dev_text_dimension(const std::string& text) const;
    
   private:
    void Init();
@@ -184,6 +208,7 @@ class GraphicsImp : public ui::GraphicsImp {
    ARGB argb_color_;   
    ::Window w_;  
    ui::Font font_;
+   bool free_gc_;
 };
 
 class RegionImp : public ui::RegionImp {
@@ -208,27 +233,68 @@ class RegionImp : public ui::RegionImp {
 
 template <typename I>
 class WindowTemplateImp : public I {
-  public:    
-   ::Window x_window() { return x_window_; }
-    ::Window x_window() const { return x_window_; }
-  
-  virtual void DevShow() {
-    Display* dpy(display());
-    XMapWindow(dpy, x_window_);    
-    XFlush(dpy);
-  }
-  virtual void dev_set_parent(Window*  parent);  
+ public:    
+  ::Window x_window() { return x_window_; }
+  ::Window x_window() const { return x_window_; }
+        
+  ~WindowTemplateImp();
+  virtual ui::Graphics* DevGC();  
   virtual void dev_set_position(const ui::Rect& pos);
-  virtual ui::Rect dev_position() const;
+  virtual Rect dev_position() const;  
+  virtual Rect dev_absolute_position() const { return Rect(); } //= 0;
+  virtual Rect dev_absolute_system_position() const  { return Rect(); } //= 0;  
+  virtual Rect dev_desktop_position() const;
+  virtual Dimension dev_dim() const;
+  virtual bool dev_check_position(const Rect& pos) const  { return false; } //= 0;
+  virtual void dev_set_margin(const BoxSpace& margin) { margin_ = margin; }
+  virtual const BoxSpace& dev_margin() const { return margin_; }
+  virtual void dev_set_padding(const BoxSpace& padding) {
+     padding_ = padding;        
+     dev_set_position(dev_position());    
+  }
+  virtual const BoxSpace& dev_padding() const { return padding_; }
+  virtual void dev_set_border_space(const BoxSpace& border_space) { 
+     border_space_ = border_space;
+  }
+  virtual const BoxSpace& dev_border_space() const { return border_space_; }
+  virtual void DevScrollTo(int offsetx, int offsety)  {} //= 0;
+  virtual void DevShow();    
+  virtual void DevHide();
+  virtual bool dev_visible() const  { return false; } //= 0;
+  virtual void DevBringToTop()  {} //= 0;
+  virtual void DevInvalidate();
+  virtual void DevInvalidate(const Region& rgn)  {} //= 0;  
+  virtual void DevSetCapture();
+  virtual void DevReleaseCapture();
+  virtual void DevShowCursor()  {} //= 0;
+  virtual void DevHideCursor()  {} //= 0;
+  virtual void DevSetCursorPosition(const Point& position)  {} //= 0;
+  virtual void DevSetCursor(CursorStyle::Type style) {}  
+  virtual void dev_set_parent(ui::Window* window);
+  virtual void dev_set_clip_children() {}  
+  virtual void DevSetFocus() {} // = 0;
+  virtual bool dev_has_focus() const { return false; } // = 0;  
+  virtual void dev_add_style(UINT flag) {}
+  virtual void dev_remove_style(UINT flag) {}
+  virtual void DevEnable()  {} //= 0;
+  virtual void DevDisable()  {} //= 0;
+  virtual void DevViewDoubleBuffered()  {} //= 0;
+  virtual void DevViewSingleBuffered()  {} //= 0;
+  virtual bool dev_is_double_buffered() const  { return false; } //= 0;
+  virtual void DevMapCapslockToCtrl()  {} //= 0;
+  virtual void DevEnableCapslock()  {} //= 0;
+  
   
   protected:       
    ::Window x_window_;  
+   XdbeBackBuffer d_backBuf;
    bool is_double_buffered_;
    BoxSpace margin_;
    BoxSpace padding_;
    BoxSpace border_space_;
    bool capslock_on_;
    bool map_capslock_to_ctrl_;  
+   std::auto_ptr<ui::Graphics> gc_;
 };
 
 class WindowImp : public WindowTemplateImp<ui::WindowImp> {
@@ -239,13 +305,15 @@ class WindowImp : public WindowTemplateImp<ui::WindowImp> {
     imp->set_window(w);    
     return imp;
   }
+  virtual ui::Graphics* DevGC();
+  virtual void DevSwapBuffer();
 };
 
 class ButtonImp : public WindowTemplateImp<ui::ButtonImp> {
  public:    
-  ButtonImp(::Window parent);	 
+  ButtonImp(::Window parent);  
   static ButtonImp* Make(ui::Window* w, ::Window parent) {
-    ButtonImp* imp = new ButtonImp(parent);	
+    ButtonImp* imp = new ButtonImp(parent); 
     imp->set_window(w);  
     return imp;
   }
@@ -267,16 +335,32 @@ class ButtonImp : public WindowTemplateImp<ui::ButtonImp> {
 
 class FrameImp : public WindowTemplateImp<ui::FrameImp> {
  public:  
-  FrameImp();
-   
+  FrameImp();   
   static FrameImp* Make(ui::Window* w) {
     FrameImp* imp = new FrameImp();    
     imp->set_window(w);        
     return imp;
-  }
-  
+  }  
   virtual void DevShow();  
-  virtual void dev_set_viewport(const ui::Window::Ptr& viewport);
+  virtual void dev_set_viewport(const ui::Window::Ptr& viewport);  
+  virtual void OnDevSize(const ui::Dimension& dimension);       
+  virtual void dev_set_title(const std::string& title);
+};
+
+class PopupFrameImp : public FrameImp {
+ public:
+   PopupFrameImp();  
+     
+  static PopupFrameImp* Make(ui::Window* w) {
+    PopupFrameImp* imp = new PopupFrameImp();    
+    imp->set_window(w);        
+    return imp;
+  }
+ 
+  // virtual void DevShow();
+  // virtual void DevHide();
+  // HHOOK mouse_hook_;  
+  // static ui::FrameImp* popup_frame_;  
 };
 
 class ScintillaImp : public WindowTemplateImp<ui::ScintillaImp> {
@@ -493,15 +577,62 @@ class FileObserverImp : public ui::FileObserverImp {
    FileObserver* file_observer_;
 };
 
-	
+class MutexLockImp : public LockIF {
+ public:
+   virtual ~MutexLockImp() {}
+   virtual void lock() const {}
+   virtual void unlock() const {}
+ };
+ 
+class AlertImp : public ui::AlertImp {
+ public:
+   AlertImp() : abort_(false) { Init(); }
+   virtual ~AlertImp() {}
+   virtual void DevAlert(const std::string& text);
+  private:
+   void Init();
+   void OnOkButtonClick(Button&);
+   void WaitForOk();
+   int x11_fd;
+   bool abort_;
+   fd_set in_fds;
+   struct timeval tv;
+   Frame::Ptr frame_;
+   Canvas::Ptr canvas_;
+   Text::Ptr text_;
+   Button::Ptr ok_button_;
+   Ornament::Ptr background_;
+};
+
+class FileOpenDialogImp : public ui::FileDialogImp {
+ public:	
+  virtual void DevShow() {} // not implemented yet
+  virtual void dev_set_folder(const std::string& folder) {} // not implemented yet
+  virtual std::string dev_folder() const { return ""; } // not implemented yet
+  virtual void dev_set_filename(const std::string& filename) {} // not implemented yet
+  virtual std::string dev_filename() const { return ""; } // not implemented yet
+};
+
+class FileSaveDialogImp : public ui::FileDialogImp {
+ public:	
+  virtual void DevShow() {} // not implemented yet
+  virtual void dev_set_folder(const std::string& folder) {} // not implemented yet
+  virtual std::string dev_folder() const { return ""; } // not implemented yet
+  virtual void dev_set_filename(const std::string& filename) {} // not implemented yet
+  virtual std::string dev_filename() const { return ""; } // not implemented yet
+};
+
 class ImpFactory : public ui::ImpFactory {
  public:
-   virtual bool DestroyWindowImp(ui::WindowImp* imp) { return false; }
-   virtual ui::AppImp* CreateAppImp() { return new AppImp(); }
-   virtual ui::WindowImp* CreateWindowImp();
-   virtual ui::FrameImp* CreateFrameImp() {     
-     return FrameImp::Make(0);
-  }  
+  virtual bool DestroyWindowImp(ui::WindowImp* imp) { return false; }
+  virtual ui::AppImp* CreateAppImp() { return new AppImp(); }
+  virtual ui::WindowImp* CreateWindowImp();
+  virtual ui::FrameImp* CreateFrameImp() {     
+    return FrameImp::Make(0);
+  }
+  virtual ui::FrameImp* CreatePopupFrameImp() {     
+    return PopupFrameImp::Make(0);
+  }
   virtual ui::FontInfoImp* CreateFontInfoImp() { return new x::FontInfoImp(); }
   virtual ui::FontImp* CreateFontImp() { return new x::FontImp(); }
   virtual ui::FontImp* CreateFontImp(int stockid) {
@@ -512,12 +643,27 @@ class ImpFactory : public ui::ImpFactory {
   }
   virtual ui::RegionImp* CreateRegionImp() {     
     return new x::RegionImp();
-  }  
+  }
+  virtual ui::GraphicsImp* CreateGraphicsImp() {     
+    return new GraphicsImp();
+  }
   virtual ui::GameControllersImp* CreateGameControllersImp() {
     return new GameControllersImp();
   }
   virtual ui::FileObserverImp* CreateFileObserverImp(FileObserver* file_observer) {
     return new FileObserverImp(file_observer);
+  }  
+  virtual LockIF* CreateLocker() {
+    return new MutexLockImp();
+  }
+  virtual ui::AlertImp* CreateAlertImp() {
+     return new AlertImp();
+  }
+  virtual ui::FileDialogImp* CreateFileOpenDialogImp() {
+     return new FileOpenDialogImp();
+  }
+  virtual ui::FileDialogImp* CreateFileSaveDialogImp() {
+     return new FileSaveDialogImp();
   }
 };
 
@@ -526,4 +672,4 @@ class ImpFactory : public ui::ImpFactory {
 } // namespace host
 } // namespace psycle
 
-#endif
+// #endif

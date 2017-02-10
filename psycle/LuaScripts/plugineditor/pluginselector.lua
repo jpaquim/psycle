@@ -33,6 +33,265 @@ local propertiesview = require("propertiesview")
 local serpent = require("psycle.serpent")
 local tree = require("psycle.ui.treeview")
 
+
+local detailslistview = listview:new()
+
+function detailslistview:new(parent, setting)  
+  local c = listview:new(parent)
+  setmetatable(c, self)
+  self.__index = self
+  c:init(setting)
+  return c
+end
+
+function detailslistview:init(setting)
+   self.setting = setting
+   self:initlayout()
+   self:initnodes()
+end
+
+function detailslistview:initlayout()
+  self:setautosize(false, false)
+  self:setalign(item.ALLEFT)
+  self:setposition(rect:new(point:new(), dimension:new(200, 0)))
+  self:setbackgroundcolor(0xFF3E3E3E)
+  self:setcolor(0xFFFFFFFF)
+end
+
+function detailslistview:onchange(node)
+  self:parent():onchange(node)  
+end
+ 
+ function detailslistview:initnodes()
+  self.rootnode = node:new()    
+  if self.setting.general ~= nil then    
+    local node = node:new(self.rootnode):settext("general")
+    node.props = self.setting.general    
+  end
+  for _, output in pairs(self.setting.outputs) do
+    local label = output.label
+    if label == nil then
+      label = output.path
+    end
+    local node = node:new(self.rootnode):settext(label)
+    node.props = output.properties    
+  end
+  self:setrootnode(self.rootnode)  
+end
+
+function detailslistview:parseproperties()    
+  for node in recursivenodeiterator(self.rootnode).next do
+    if node.propertyview ~= nil then       
+       node.propertyview:parseproperties()
+    end    
+  end
+end
+
+local createdetails = group:new(parent)
+
+function createdetails:new(parent, setting)  
+  local c = group:new(parent)  
+  setmetatable(c, self)
+  self.__index = self
+  c:init(setting)
+  return c
+end
+
+function createdetails:init(setting)
+   self:initlayout()
+   self.listview = detailslistview:new(self, setting)
+   self.setting = setting
+end
+
+function createdetails:initlayout()
+  self:setalign(item.ALCLIENT)
+  self:setautosize(false, false) 
+end
+
+function createdetails:parseproperties()
+  self.listview:parseproperties()
+end
+
+function createdetails:isplugin()
+  return self.setting.isplugin;
+end
+
+function createdetails:onchange(node)
+  if self.propertyview ~= nil then
+    self.propertyview:hide()
+  end
+  if not node.propertyview then      
+    node.propertyview = propertiesview:new(self, "create", node.props)
+                                      :setautosize(false, false)                           
+                                      :setalign(item.ALCLIENT)
+                                      :addornament(ornamentfactory:createfill(0xFF444444))
+  else
+    node.propertyview:show();
+  end
+  self.propertyview = node.propertyview;
+  self:flagnotaligned():updatealign()
+end
+
+local createlistview = listview:new()
+
+function createlistview:new(parent)  
+  local c = listview:new(parent)  
+  setmetatable(c, self)
+  self.__index = self
+  c:init()
+  return c
+end
+
+function createlistview:init()
+   self:initlayout()
+   self:initnodes()
+end
+
+function createlistview:initlayout()
+  self:setautosize(false, false)
+  self:setalign(item.ALLEFT)
+  self:setposition(rect:new(point:new(), dimension:new(200, 0)))
+  self:setbackgroundcolor(0xFF3E3E3E)
+  self:setcolor(0xFFFFFFFF) 
+end
+
+function createlistview:onchange(node)
+  self:parent():onchange(node)  
+ end
+ 
+ function createlistview:initnodes()
+  self.rootnode = node:new()    
+  local f = loadfile(cfg:luapath() .. "\\plugineditor\\templates\\machinecreate.lua")
+  if f then
+    self.setting = f()    
+  end    
+  for name, setting in self.setting:opairs() do
+    if name ~= "meta" then  
+      local label = ""
+      if setting.label then    
+        label = setting.label    
+      else
+        label = name
+      end       
+      local node = node:new(self.rootnode):settext(label)    
+      node.setting = setting;
+    end
+  end    
+  self:setrootnode(self.rootnode)  
+end
+
+local creategroup = group:new()
+
+function creategroup:new(parent)  
+  local c = group:new(parent)  
+  setmetatable(c, self)
+  self.__index = self
+  c:init()
+  return c
+end
+
+function creategroup:init()
+   self:initlayout()  
+   self.createlist = createlistview:new(self); 
+   self:initbuttons()
+end
+
+function creategroup:initlayout()
+  self:setalign(item.ALCLIENT)
+  self:setautosize(false, false)  
+end
+
+function creategroup:initbuttons()
+  local group = group:new(self)
+                      :setalign(item.ALBOTTOM)
+                      :setautosize(false, true)
+                      :setmargin(boxspace:new(0, 0, 10, 0))
+  local createbutton = button:new(group)
+                             :settext("Create")
+                             :setalign(item.ALLEFT)
+                             :setmargin(boxspace:new(0, 10, 0, 0))
+                             :setposition(rect:new(point:new(), dimension:new(90, 20)))  
+  local that = self             
+  function createbutton:onclick()
+     local node = that.createlist:selected()
+     if node ~= nil and node.details then
+        node.details:parseproperties()               
+        if node.details:isplugin() then         
+           that:oncreateplugin(node.setting.general,
+                               node.setting.outputs,
+                               node.setting.general.machinename:value())
+        else
+           that:oncreatemodule(node.setting.properties,
+                               node.setting.outputs)
+        end      
+     end    
+  end                             
+end
+
+function creategroup:oncreateplugin(general, outputs, name)   
+  filehelper.mkdir(cfg:luapath().."\\" .. name)  
+  local env = { machinename = name, vendor = "psycle", machmode="machine.HOST"}
+  templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",
+                      cfg:luapath().."\\" .. name .. ".lua",
+                      env)                      
+  for _, output in pairs(outputs) do
+    local env = {}
+    if output.properties then
+      for name, property in output.properties:opairs() do    
+        env[name] = property:value()
+      end  
+    end
+    if general then
+      for name, property in general:opairs() do    
+        env[name] = property:value()
+      end  
+    end
+    local templatepath = cfg:luapath().."\\plugineditor\\templates\\" .. output.template
+    templateparser.work(templatepath,
+                        cfg:luapath().."\\" .. name .. "\\"..output.path,
+                        env)
+ end
+ local catcher = catcher:new()
+ catcher:rescannew()
+ local info = catcher:info(name);
+ info.machinepath = name
+ self.main:open(info)
+ self.main:updatepluginlist()
+end
+
+function creategroup:oncreatemodule(properties, outputs)
+  local env = {}  
+  for name, property in properties:opairs() do    
+    env[name] = property:value()
+  end     
+  for _, output in pairs(outputs) do      
+    local p = "(.-)$(%b())()"
+    local path = output.path
+    local text, propertyname = path:match(p)
+    if propertyname then
+      propertyname = propertyname:sub(2, -2)              
+      path = path:gsub(p, env[propertyname])      
+    end
+    output.realpath = self.main.fileexplorer:path() .. "\\" .. path    
+    local templatepath = cfg:luapath().."\\plugineditor\\templates\\"..output.template    
+    templateparser.work(templatepath,  output.realpath, env)                         
+  end 
+  self.main.docreatemodule:emit(outputs)  
+end
+
+function creategroup:onchange(node)
+  if self.details ~= nil then
+    self.details:hide()
+  end
+  if not node.details then   
+    node.details = createdetails:new(self, node.setting)   
+  else
+    node.details:show();
+  end
+  self.details = node.details;
+  self:flagnotaligned():updatealign()
+end
+
 local pluginselector = group:new()
 
 function pluginselector:new(parent)  
@@ -45,14 +304,11 @@ end
 
 function pluginselector:init()      
   self.doopen = signal:new()
-  self.docreate = signal:new()
   self.docreatemodule = signal:new()
   self.tg = tabgroup:new(self)
                     :setalign(item.ALCLIENT)
                     :disableclosebutton()   
-  self:initplugincreate()   
-  self:initpluginlist()
-  self:initcreategroup(self.pg)
+  self:initplugincreate()
   local closebutton = closebutton.new():setalign(item.ALRIGHT)
   self.tg.tabbar:insert(self.tg.tabbar.icon1, closebutton)
   local that = self                                    
@@ -91,212 +347,12 @@ function pluginselector:search(text)
 end
 
 function pluginselector:initplugincreate()
-  self.pg = group:new()
-                 :setalign(item.ALCLIENT)
-                 :setautosize(false, false)  
-  self.plugincreatelist = listview:new(self.pg)
-                                  :setalign(item.ALLEFT)
-                                  :setposition(rect:new(point:new(), dimension:new(200, 0)))
-                                  :setautosize(false, false)
-                                  :setbackgroundcolor(0xFF3E3E3E)
-                                  :setcolor(0xFFFFFFFF)  
-  self.tg:addpage(self.pg, "Create")
-  self.plugincreatelistrootnode = node:new()    
-  local f = loadfile(cfg:luapath().."\\plugineditor\\templates\\machinecreate.lua")
-  if f then
-    self.setting = f()    
-  end    
-  for name, settinggroup in self.setting:opairs() do
-    if name ~= "meta" then  
-      local label = ""
-      if settinggroup.label then    
-        label = settinggroup.label    
-      else
-        label = name
-      end       
-      local node = node:new(self.plugincreatelistrootnode)
-                       :settext(label)      
-      node.isplugin = settinggroup.isplugin                       
-      node.properties = settinggroup.properties
-      node.outputs = settinggroup.outputs
-      node.general = settinggroup.general
-    end
-  end    
-  self.plugincreatelist:setrootnode(self.plugincreatelistrootnode)  
-  local that = self
-  function self.plugincreatelist:onchange(node)  
-    local oldpropertypage = nil
-    if that.activenode then
-      oldpropertypage = that.activenode.propertypage
-    end
-    that.activenode = node        
-    that:showpropertypage(node)    
-    if oldpropertypage then      
-      oldpropertypage:hide()
-    end
-    that:parent():flagnotaligned():updatealign()  
-  end  
-  that:parent():flagnotaligned():updatealign()  
-  return self.plugincreatelist    
+  self.plugincreate = creategroup:new()
+  self.plugincreate.main = self  
+  self.tg:addpage(self.plugincreate, "Create")
+  self:initpluginlist()
+  return self 
 end
-
-function pluginselector:createpropertypage(parent, general, outputs)
-  local pp = group:new(parent)
-                 :setalign(item.ALCLIENT)
-                 :setautosize(false, false)
-  self:initpropertytree(pp, general, outputs)
-  return pp
-end
-
-function pluginselector:initpropertytree(propertypage, general, outputs)
-  propertypage.tree = tree:new(propertypage)
-                          :setautosize(false, false)
-                          :setalign(item.ALLEFT)
-                          :setposition(rect:new(point:new(), dimension:new(200, 0)))
-                          :showbuttons()
-                          :showlines()
-  propertypage.propertypagerootnode = node:new()  
-  if general ~= nil then    
-    local node = node:new(propertypage.propertypagerootnode):settext("general")
-    node.properties = general
-    node.propertypage = propertypage
-  end    
-  local pp = propertypage
-  for _, output in pairs(outputs) do    
-    local path = output.path
-    local node = node:new(propertypage.propertypagerootnode):settext(path)
-    node.properties = output.properties    
-    node.propertypage = pp;
-  end
-  local that = self
-  propertypage.tree:setrootnode(propertypage.propertypagerootnode)  
-  function propertypage.tree:onchange(node) 
-     if self.oldpropertyview then
-       self.oldpropertyview:hide()
-     end
-     self.oldpropertyview =  node.propertyview
-     that:showproperties(node)
-  end 
-end
-
-function pluginselector:initcreategroup(parent)
-  self.creategroup_ = group:new(parent)
-                           :setautosize(false, false)                                                   
-                           :setalign(item.ALCLIENT)
-                           :setmargin(boxspace:new(5))
-  self:initcreatebutton(self.creategroup_)  
-end
-
-function pluginselector:initcreatebutton(parent)
-  local group = group:new(parent)
-                     :setalign(item.ALBOTTOM)
-                     :setautosize(false, true)
-                     :setmargin(boxspace:new(0, 0, 10, 0))
-  local createbutton = button:new(group)
-                              :settext("Create")
-                              :setalign(item.ALLEFT)
-                              :setmargin(boxspace:new(0, 10, 0, 0))
-                              :setposition(rect:new(point:new(), dimension:new(90, 20)))  
-  local that = self             
-  function createbutton:onclick()
-    if that.activepropertypagerootnode then
-      that:parseproperties()              
-      if that.activenode.isplugin then        
-        that:oncreateplugin(that.activenode.general,
-                            that.activenode.outputs,
-                            that.activenode.general.machinename:value())
-      else
-        that:oncreatemodule(that.activenode.properties,
-                            that.activenode.outputs)
-      end      
-    end    
-  end
-  return group
-end
-
-function pluginselector:parseproperties()    
-  for node in recursivenodeiterator(self.activepropertypagerootnode).next do
-    if node.propertyview ~= nil then       
-       node.propertyview:parseproperties()
-    end    
-  end
-end
-
-function pluginselector:showpropertypage(node)  
-  if node.propertypage then    
-    node.propertypage:show()
-    self.activepropertypagerootnode = node.propertypage.propertypagerootnode
-  else       
-    node.propertypage = self:createpropertypage(self.creategroup_, node.general, node.outputs)
-    self.activepropertypagerootnode = node.propertypage.propertypagerootnode
-    self.activepropertypagerootnode.general = node.general
-    self.activepropertypagerootnode.outputs = node.outputs
-  end
-  self.creategroup_:show()
-  self:parent():flagnotaligned():updatealign()
-end
-
-
-function pluginselector:showproperties(node)  
-  if node.propertyview then       
-    node.propertyview:show()    
-  else       
-    node.propertyview = 
-        propertiesview:new(node.propertypage, "create", node.properties)
-                      :setautosize(false, false)                           
-                      :setalign(item.ALCLIENT)
-                      :addornament(ornamentfactory:createfill(0xFFFF2F2F))    
-  end  
-  node.propertypage:flagnotaligned():updatealign()
-end
-
-
-function pluginselector:oncreateplugin(general, outputs, name)  
-  filehelper.mkdir(cfg:luapath().."\\" .. name)  
-  local env = { machinename = name, vendor = "psycle", machmode="machine.HOST"}
-  templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",
-                      cfg:luapath().."\\" .. name .. ".lua",
-                      env)                      
-  for _, output in pairs(outputs) do
-    local env = {}
-    if output.properties then
-      for name, property in output.properties:opairs() do    
-        env[name] = property:value()
-      end  
-    end
-    if general then
-      for name, property in general:opairs() do    
-        env[name] = property:value()
-      end  
-    end
-    local templatepath = cfg:luapath().."\\plugineditor\\templates\\" .. output.template
-    templateparser.work(templatepath,
-                        cfg:luapath().."\\" .. name .. "\\"..output.path,
-                        env)
-  end
-  self.docreate:emit(outputs, name)
-  self:updatepluginlist()
-end  
-
-function pluginselector:oncreatemodule(properties, outputs)
-  local env = {}  
-  for name, property in properties:opairs() do    
-    env[name] = property:value()
-  end     
-  for _, output in pairs(outputs) do      
-    local p = "(.-)$(%b())()"
-    local path = output.path
-    local text, propertyname = path:match(p)
-    if propertyname then
-      propertyname = propertyname:sub(2, -2)              
-      path = path:gsub(p, env[propertyname])      
-    end
-    output.realpath = self.fileexplorer:path() .. "\\" .. path    
-    local templatepath = cfg:luapath().."\\plugineditor\\templates\\"..output.template    
-    templateparser.work(templatepath,  output.realpath, env)                         
-  end 
-  self.docreatemodule:emit(outputs)  
-end  
 
 function pluginselector:initpluginlist()
   self.pluginlist = listview:new()
@@ -310,34 +366,25 @@ function pluginselector:initpluginlist()
   local that = self  
   function self.pluginlist:onchange(node)
     if not that.openprevented then
-      that:open(node)    
+      that:open(node.info)    
   end
   end  
   self:updatepluginlist()
 end
 
-function pluginselector:open(node)
-  local dir = self:machinepath(node.info)        
-  self:hide()         
-  self.doopen:emit(dir, node.info:name(), node.info)  
+function pluginselector:open(info)
+  info.machinepath = self:machinepath(info)
+  self:hide()  
+  self.doopen:emit(info)  
 end
 
 function pluginselector:machinepath(info)  
-  local file = io.open(info:dllname(), "r")    
-  local str = ""
-  for line in file:lines() do
-    local pos = string.find(line, "psycle.setmachine")
-    if pos then
-      str, expr = string.match(line, "require(%b())")         
-      if str then
-        str = str:sub(3, -3)      
-        str = str:gsub("%.", "\\")      
-        break
-      end
-    end 
+  local catcher = catcher:new()
+  local result = catcher:machinepath(info:dllname())
+  if result == "" then
+    result = info:name():lower()
   end
-  file:close()    
-  return str
+  return result
 end
 
 function pluginselector:updatepluginlist()

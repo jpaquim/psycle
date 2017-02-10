@@ -325,6 +325,7 @@ int LuaPluginCatcherBind::open(lua_State *L) {
     {"infos", infos},
     {"rescanall", rescanall},
     {"rescannew", rescannew},
+    {"machinepath", machinepath},
     { NULL, NULL }
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -352,11 +353,11 @@ int LuaPluginCatcherBind::info(lua_State* L) {
     return luaL_error(L, "Got %d arguments expected 2 (self, name)", n);
   }
   boost::shared_ptr<PluginCatcher> ud = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
-  const char* name = luaL_checkstring(L, 2);  
-  luaL_requiref(L, "psycle.plugininfo", LuaPluginInfoBind::open, true);
+  const char* name = luaL_checkstring(L, 2); 
   PluginInfo* info = ud->info(name);
   if (info) {
-    LuaHelper::new_shared_userdata<PluginInfo>(L, LuaPluginInfoBind::meta, info, 2);
+    luaL_requiref(L, "psycle.plugininfo", LuaPluginInfoBind::open, true);
+    LuaHelper::new_shared_userdata<PluginInfo>(L, LuaPluginInfoBind::meta, info, 3);
   } else {
     lua_pushnil(L);
   }
@@ -389,6 +390,19 @@ int LuaPluginCatcherBind::rescannew(lua_State* L) {
   boost::shared_ptr<PluginCatcher> catcher = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
   catcher->ReScan(false);
   return LuaHelper::chaining(L);
+}
+
+int LuaPluginCatcherBind::machinepath(lua_State* L) {
+  boost::shared_ptr<PluginCatcher> catcher = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
+  const char* dllname = luaL_checkstring(L, 2);
+  try {
+    std::auto_ptr<LuaPlugin> dummy(new LuaPlugin(dllname, AUTOID, false));
+    std::string path = dummy->machinepath();
+    lua_pushstring(L, path.c_str());
+  } catch (std::exception& e) {
+    return luaL_error(L, e.what());
+  }
+  return 1;
 }
 
 

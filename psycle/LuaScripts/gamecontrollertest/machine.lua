@@ -15,7 +15,8 @@ function machine:info()
     name = "gamecontrollertest",
     mode = machine.FX,
     version = 0,
-    api=0
+    api=0,
+    machinepath = "gamecontrollertest"
   }
 end
 

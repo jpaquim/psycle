@@ -103,6 +103,7 @@ struct LuaActionListenerBind {
     static int gc(lua_State* L);
     static int rescanall(lua_State* L);
     static int rescannew(lua_State* L);
+    static int machinepath(lua_State* L);
   };
 
   class Machine;

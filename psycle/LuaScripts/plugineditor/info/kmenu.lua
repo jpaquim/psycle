@@ -4,7 +4,7 @@ return {
     S = "@saveresume",
     D = "@savedone",
     X = "@saveexit",
-    Q = "@abandonfile",
+    Q = "@abandon",
     B = "@setblockbegin",
     K = "@setblockend",
     Y = "@deleteblock"

@@ -37,6 +37,7 @@
 #ifdef __linux__ 
    typedef void* MSG;
    typedef uint32_t UINT;
+   typedef unsigned long COLORREF;
 #endif
 
 namespace psycle {
@@ -501,8 +502,8 @@ class MouseEvent : public Event {
        shift_(shift) {
   }
   MouseEvent(Window* sender,
-             const Point& client_pos,
-             int button, unsigned int shift) : 
+                      const Point& client_pos,
+                      int button, unsigned int shift) : 
        sender_(sender),
        client_pos_(client_pos),        
        button_(button), 
@@ -647,13 +648,33 @@ class FontInfoImp {
 
 inline FontInfoImp::~FontInfoImp() {}
 
+class FontsImp;
+
 class Fonts {
  public:
-  Fonts() {}
+  typedef std::vector<std::string> Container;
+  typedef std::vector<std::string>::iterator iterator;
+
+  Fonts();
   virtual ~Fonts() {}
-    
-  virtual const std::vector<std::string>& font_list() const = 0;
-  virtual void import_font(const std::string& path)  = 0;
+
+  virtual iterator begin() { return font_list_.begin(); }
+  virtual iterator end() { return font_list_.end(); }
+  virtual bool empty() const { return font_list_.empty(); }
+  virtual int size() const { return font_list_.size(); }
+      
+  virtual void import_font(const std::string& path);
+
+ private:
+  std::auto_ptr<FontsImp> imp_;
+  std::vector<std::string> font_list_;
+};
+
+class FontsImp {
+ public:
+  virtual ~FontsImp() {}
+  virtual Fonts::Container dev_font_list() const = 0;
+  virtual void dev_import_font(const std::string& path)  = 0;
 };
 
 class RegionImp {
@@ -895,6 +916,7 @@ inline void alert(const std::string& text) {
 class AlertImp {
  public:
   AlertImp() {}
+	  
   virtual ~AlertImp() {}
   virtual void DevAlert(const std::string& text) = 0;
 };
@@ -919,7 +941,47 @@ class ConfirmImp {
  public:
   ConfirmImp() {}
   virtual ~ConfirmImp() {}
+	  
   virtual bool DevConfirm(const std::string& text) = 0;
+};
+
+class FileDialogImp {
+ public:	
+  virtual ~FileDialogImp() {}
+	  
+  virtual void DevShow() = 0;
+  virtual void dev_set_folder(const std::string& folder) = 0;
+  virtual std::string dev_folder() const = 0;
+  virtual void dev_set_filename(const std::string& filename) = 0;
+  virtual std::string dev_filename() const = 0;
+  virtual bool dev_is_ok() const = 0; 
+};
+
+class FileDialog {
+ public:	
+  FileDialogImp* imp() { return imp_.get(); }
+  FileDialogImp* imp() const { return imp_.get(); }
+  virtual ~FileDialog() {}
+	  
+  void Show();
+  void set_folder(const std::string& folder);
+  std::string folder() const;
+  void set_filename(const std::string& filename);
+  std::string filename() const;        
+  bool is_ok() const;
+
+ protected:
+  std::auto_ptr<FileDialogImp> imp_;
+};
+
+class FileOpenDialog : public ui::FileDialog {
+ public:	
+  FileOpenDialog();
+};
+
+class FileSaveDialog : public ui::FileDialog {
+ public:	
+  FileSaveDialog();
 };
 
 class Window;
@@ -1125,7 +1187,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   typedef std::vector<Window::Ptr> Container;
   typedef Window::Container::iterator iterator;
   typedef Window::Container::const_iterator const_iterator;
-  typedef std::vector<boost::weak_ptr<Ornament> > Ornaments;
+  typedef std::vector<boost::shared_ptr<Ornament> > Ornaments;
 
   Window();
   Window(WindowImp* imp);
@@ -1174,16 +1236,16 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void Insert(iterator it, const Window::Ptr& window) {}
   virtual void Remove(const Window::Ptr& window) {}
   virtual void RemoveAll() {}
-  virtual void set_position(const ui::Point& pos);
-  virtual void set_position(const ui::Rect& pos);
+  virtual void set_position(const Point& pos);
+  virtual void set_position(const Rect& pos);
   virtual void ScrollTo(int offsetx, int offsety);
-  virtual ui::Rect position() const;
-  virtual ui::Rect absolute_position() const;
-  virtual ui::Rect desktop_position() const;
+  virtual Rect position() const;
+  virtual Rect absolute_position() const;
+  virtual Rect desktop_position() const;
   virtual bool check_position(const ui::Rect& pos) const;
-  virtual ui::Dimension dim() const;
-  virtual ui::Dimension min_dimension() const { return min_dimension_; }
-  virtual void set_min_dimension(const ui::Dimension& dimension) {
+  virtual Dimension dim() const;
+  virtual Dimension min_dimension() const { return min_dimension_; }
+  virtual void set_min_dimension(const Dimension& dimension) {
      min_dimension_ = dimension;
   }
   virtual ui::Dimension OnCalcAutoDimension() const { 
@@ -1194,9 +1256,9 @@ class Window : public boost::enable_shared_from_this<Window> {
   void RestoreAutoDimension() { prevent_auto_dimension_ = false; }
   void set_margin(const BoxSpace& margin);
   const BoxSpace& margin() const;
-  void set_padding(const ui::BoxSpace& padding);
+  void set_padding(const BoxSpace& padding);
   const BoxSpace& padding() const;
-  void set_border_space(const ui::BoxSpace& border_space);
+  void set_border_space(const BoxSpace& border_space);
   const BoxSpace& border_space() const;
   virtual void set_aligner(const boost::shared_ptr<Aligner>& aligner) {}
   virtual boost::shared_ptr<Aligner> aligner() const { return boost::shared_ptr<Aligner>(); }
@@ -1221,7 +1283,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void ReleaseCapture();
   virtual void ShowCursor();
   virtual void HideCursor();
-  virtual void SetCursorPosition(const ui::Point& position);
+  virtual void SetCursorPosition(const Point& position);
   virtual void SetCursor(CursorStyle::Type style);
   CursorStyle::Type cursor() const { return CursorStyle::DEFAULT; }
   virtual void needsupdate();
@@ -1237,20 +1299,20 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual bool auto_size_width() const;
   virtual bool auto_size_height() const;
   bool auto_size() const { return auto_size_width() && auto_size_height(); }
-  virtual void SetClip(const ui::Rect& rect) {}
+  virtual void SetClip(const Rect& rect) {}
   virtual bool has_clip() const { return false; }
   const Region& clip() const;
   virtual void RemoveClip() {}
   virtual void Draw(Graphics* g, Region& draw_region) {}
   virtual void DrawBackground(Graphics* g, Region& draw_region);
-  virtual void add_ornament(boost::shared_ptr<ui::Ornament> ornament);
+  virtual void add_ornament(boost::shared_ptr<Ornament> ornament);
   virtual void RemoveOrnaments();
   virtual Ornaments ornaments();
   void set_clip_children();	
   void add_style(UINT flag);
   void remove_style(UINT flag);
   virtual void OnMessage(WindowMsg msg, int param = 0) {}
-  virtual void OnSize(const ui::Dimension& dimension) {}
+  virtual void OnSize(const Dimension& dimension) {}
   virtual void OnChildPosition(ChildPosEvent& ev) {}
   virtual void EnablePointerEvents() { pointer_events_ = true; }
   virtual void DisablePointerEvents() { pointer_events_ = false; }
@@ -2481,6 +2543,7 @@ class AppImp {
    virtual ~AppImp() {}
 	   
    virtual void DevRun() = 0;
+   virtual void DevStop() = 0;	   
 };		
 	
 class App {
@@ -2491,11 +2554,15 @@ class App {
    AppImp* imp() const { return imp_.get(); }
    
    void Run();
+   void Stop();
+   void set_title(const std::string& title) { title_ = title; }
+   const std::string& title() const { return title_; }
    
    boost::signal<void(MouseEvent&)> MouseDown;
   
   private:
    std::auto_ptr<AppImp> imp_;
+   std::string title_;
 };
 
 // Ui Factory
@@ -2701,7 +2768,8 @@ class WindowImp {
   void set_window(Window* window) { window_ = window; }
   Window* window() { return window_; }
   Window* window() const { return window_; }
-
+  virtual ui::Graphics* DevGC() { return 0; }
+  virtual void DevSwapBuffer() {};
   virtual void dev_set_position(const Rect& pos)  = 0;  
   virtual Rect dev_position() const = 0;
   virtual Rect dev_absolute_position() const { return Rect(); } //= 0;
@@ -2740,7 +2808,7 @@ class WindowImp {
   virtual void DevDisable()  {} //= 0;
   virtual void DevViewDoubleBuffered()  {} //= 0;
   virtual void DevViewSingleBuffered()  {} //= 0;
-  virtual bool dev_is_double_buffered() const  { return false; } //= 0;
+  virtual bool dev_is_double_buffered() const { return false; }
   virtual void DevMapCapslockToCtrl()  {} //= 0;
   virtual void DevEnableCapslock()  {} //= 0;
   virtual void OnDevMouseDown(MouseEvent& ev);
@@ -2758,7 +2826,7 @@ class FrameImp : public WindowImp {
   FrameImp() {}
   FrameImp(Window* window) : WindowImp(window) {}
 
-  virtual void dev_set_title(const std::string& title)  {} //= 0;
+  virtual void dev_set_title(const std::string& title) = 0;
   virtual std::string dev_title() const { return ""; } //= 0;
   virtual void dev_set_viewport(const Window::Ptr& viewport)  = 0;
   virtual void DevShowDecoration()  {} //= 0;
@@ -3063,6 +3131,8 @@ class ImpFactory {
 	  
   virtual AppImp* CreateAppImp();	  
   virtual ui::AlertImp* CreateAlertImp();
+  virtual ui::FileDialogImp* CreateFileOpenDialogImp();
+  virtual ui::FileDialogImp* CreateFileSaveDialogImp();  
   virtual ui::ConfirmImp* CreateConfirmImp();
   virtual ui::WindowImp* CreateWindowImp();
   virtual bool DestroyWindowImp(ui::WindowImp* imp);
@@ -3085,6 +3155,7 @@ class ImpFactory {
   virtual ui::GroupBoxImp* CreateGroupBoxImp();
   virtual ui::ScintillaImp* CreateScintillaImp();
   virtual ui::RegionImp* CreateRegionImp();
+  virtual ui::FontsImp* CreateFontsImp();
   virtual ui::FontInfoImp* CreateFontInfoImp();
   virtual ui::FontImp* CreateFontImp();
   virtual ui::FontImp* CreateFontImp(int stockid);
