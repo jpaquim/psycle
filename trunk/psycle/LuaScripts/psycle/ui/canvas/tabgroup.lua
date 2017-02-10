@@ -42,6 +42,11 @@ function tabgroup:new(parent)
   return c
 end
 
+function weakref(data)
+    local weak = setmetatable({content=data}, {__mode="v"})
+    return function() return weak.content end
+end
+
 function tabgroup:init()  
   self.frames = {}
   self.dopageclose = signal:new()
@@ -108,7 +113,8 @@ function tabgroup:init()
                    :setautosize(false, true)
                    :setalign(window.ALCLIENT)                   
   self.children = group:new(self)                       
-                       :setalign(window.ALCLIENT)    
+                       :setalign(window.ALCLIENT)
+  self.lastinsert_ = nil;                      
 end
 
 function tabgroup:typename()  
@@ -220,7 +226,12 @@ function tabgroup:addpage(page, label)
   self.children:add(page)
   self:setactivepage(page, true)  
   self:flagnotaligned():updatealign()
-  self:root():invalidatedirect():flush()  
+  self:root():invalidatedirect():flush()
+  self.lastinsert_ = weakref(page);  
+end
+
+function tabgroup:lastinsert()
+  return self.lastinsert_();
 end
 
 function tabgroup:createheader(page, label)  

@@ -27,15 +27,15 @@ search.UP = 2
 
 search.iconpath = settings.picdir
                             
-function search:new(parent, setting)
+function search:new(parent)
   local c = group:new(parent)  
   setmetatable(c, self)
   self.__index = self  
-  c:init(setting)  
+  c:init()  
   return c
 end
 
-function search:init(setting)  
+function search:init()  
   self:setautosize(false, true)
   self:setpadding(boxspace:new(5))  
   self.dosearch = signal:new()
@@ -48,8 +48,7 @@ function search:init(setting)
     that.dohide:emit()
   end
   self:createeditgroup(self)  
-  self:createreplacegroup(self)    
-  self:applysetting(setting)
+  self:createreplacegroup(self)  
 end
 
 function search:createeditgroup(parent)       
@@ -209,9 +208,6 @@ end
 
 function search:onfocus()  
   self.edit:setfocus()
-end
-
-function search:applysetting(setting)    
 end
 
 return search

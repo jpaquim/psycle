@@ -4,8 +4,6 @@
 // #include "stdafx.h"
 #include "LuaGui.hpp"
 #include "LuaHost.hpp"
-#include "MfcUi.hpp"
-
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -168,8 +166,10 @@ int LuaFileOpenBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
     {"show", show},
+    {"setfilename", setfilename},
     {"filename", filename},
     {"setfolder", setfolder},
+    {"isok", isok},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -181,43 +181,28 @@ int LuaFileOpenBind::create(lua_State* L) {
   if (err!=0) {
     return err;
   }
-  LuaHelper::new_shared_userdata<>(L, meta, new LuaFileDialog(true));
+  LuaHelper::new_shared_userdata<>(L, meta, new ui::FileOpenDialog());
   return 1;
 }
 
 int LuaFileOpenBind::gc(lua_State* L) {
-  return LuaHelper::delete_shared_userdata<LuaFileDialog>(L, meta);
+  return LuaHelper::delete_shared_userdata<ui::FileOpenDialog>(L, meta);
 }
 
 int LuaFileOpenBind::show(lua_State* L) {
-  boost::shared_ptr<LuaFileDialog> luadlg = 
-      LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
-  char szFilters[]= 
-      "Text Files (*.NC)|*.NC|Text Files (*.lua)|*.lua|All Files (*.*)|*.*||";
-  CFileDialog dlg(luadlg->is_open_dlg(), "lua", "*.lua",
-              OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
-  if (luadlg->folder() != "") {
-    dlg.m_ofn.lpstrInitialDir  = luadlg->folder().c_str();
-  }
-  INT_PTR result = dlg.DoModal();  
-  luadlg->set_filename(dlg.GetPathName().GetString());
+  boost::shared_ptr<ui::FileOpenDialog> dlg
+      = LuaHelper::check_sptr<ui::FileOpenDialog>(L, 1, meta);
+  dlg->Show();
   try {
-    LuaImport import(L, luadlg.get(), 0);  
-    if (import.open(result == IDOK ? "onok" : "oncancel")) {
-      import << luadlg->filename() << pcall(0);
+    LuaImport import(L, dlg.get(), 0);  
+    if (import.open(dlg->is_ok() ? "onok" : "oncancel")) {
+      import << dlg->filename() << pcall(0);
     }
   } catch (std::exception& e) {
     return luaL_error(L, e.what());
   }
-  lua_pushboolean(L, result == IDOK);
-  return 1;
-}
-
-int LuaFileOpenBind::filename(lua_State* L) {
-  boost::shared_ptr<LuaFileDialog> luadlg 
-      = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
-  lua_pushstring(L, luadlg->filename().c_str());
-  return 1;
+  lua_pushboolean(L, dlg->is_ok());
+  return LuaHelper::chaining(L);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -230,8 +215,10 @@ int LuaFileSaveBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
     {"show", show},
+    {"setfilename", setfilename},
     {"filename", filename},
     {"setfolder", setfolder},
+    {"isok", isok},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods, gc);
@@ -243,47 +230,32 @@ int LuaFileSaveBind::create(lua_State* L) {
   if (err!=0) {
     return err;
   }  
-  LuaHelper::new_shared_userdata<>(L, meta, new LuaFileDialog(false));
+  LuaHelper::new_shared_userdata<>(L, meta, new ui::FileSaveDialog());
   return 1;
 }
 
 int LuaFileSaveBind::gc(lua_State* L) {
-  return LuaHelper::delete_shared_userdata<LuaFileDialog>(L, meta);
+  return LuaHelper::delete_shared_userdata<ui::FileSaveDialog>(L, meta);
 }
 
 int LuaFileSaveBind::show(lua_State* L) {
-  boost::shared_ptr<LuaFileDialog> luadlg
-      = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
-  char szFilters[]= "Text Files (*.NC)|*.NC|Lua Files (*.lua)|*.lua|All Files (*.*)|*.*||";
-  CFileDialog dlg(luadlg->is_open_dlg(), "lua", "*.lua",
-              OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
-  if (luadlg->folder() != "") {
-    dlg.m_ofn.lpstrInitialDir  = luadlg->folder().c_str();
-  }
-  INT_PTR result = dlg.DoModal();
-  luadlg->set_filename(dlg.GetPathName().GetString());
+  boost::shared_ptr<ui::FileSaveDialog> dlg
+      = LuaHelper::check_sptr<ui::FileSaveDialog>(L, 1, meta);
+  dlg->Show();
   try {
-    LuaImport import(L, luadlg.get(), 0);  
-    if (import.open(result == IDOK ? "onok" : "oncancel")) {
-      import << luadlg->filename() << pcall(0);
+    LuaImport import(L, dlg.get(), 0);  
+    if (import.open(dlg->is_ok() ? "onok" : "oncancel")) {
+      import << dlg->filename() << pcall(0);
     }
   } catch (std::exception& e) {
     return luaL_error(L, e.what());
   }
-  lua_pushboolean(L, result == IDOK);
-  return 1;
+  lua_pushboolean(L, dlg->is_ok());
+  return LuaHelper::chaining(L);
 }
-
-int LuaFileSaveBind::filename(lua_State* L) {
-  boost::shared_ptr<LuaFileDialog> luadlg
-      = LuaHelper::check_sptr<LuaFileDialog>(L, 1, meta);
-  lua_pushstring(L, luadlg->filename().c_str());
-  return 1;
-}
-
 // LuaFileObserver + Bind
 void LuaFileObserver::OnCreateFile(const std::string& path) { 
-  struct {
+  /*struct {
     std::string path;
     lua_State* L;
     LuaFileObserver* that;
@@ -302,11 +274,11 @@ void LuaFileObserver::OnCreateFile(const std::string& path) {
   f.L = L;
   f.that = this;
   f.path = path;
-  LuaGlobal::InvokeLater(L, f);
+  LuaGlobal::InvokeLater(L, f);  */
 }
 
 void LuaFileObserver::OnDeleteFile(const std::string& path) {
-  struct {
+  /*struct {
     std::string path;
     lua_State* L;
     LuaFileObserver* that;
@@ -325,11 +297,11 @@ void LuaFileObserver::OnDeleteFile(const std::string& path) {
   f.L = L;
   f.that = this;
   f.path = path;
-  LuaGlobal::InvokeLater(L, f);
+  LuaGlobal::InvokeLater(L, f);*/
 }
 
 void LuaFileObserver::OnChangeFile(const std::string& path) {   
-  struct {
+  /*struct {
     std::string path;
     lua_State* L;
     LuaFileObserver* that;
@@ -348,7 +320,7 @@ void LuaFileObserver::OnChangeFile(const std::string& path) {
   f.L = L;
   f.that = this;
   f.path = path;
-  LuaGlobal::InvokeLater(L, f);
+  LuaGlobal::InvokeLater(L, f);*/
 }
 
 const char* LuaFileObserverBind::meta = "psyfileobservermeta";
@@ -449,6 +421,9 @@ int LuaSystemsBind::updatewindow(lua_State* L) {
   WindowTypes::Type window_type =
       static_cast<WindowTypes::Type>(luaL_checkinteger(L, 2));
   Window::Ptr item = LuaGroupBind<>::test(L, 3);
+  if (item == 0) {
+    return luaL_error(L, "Window is nil");
+  }
   systems->UpdateWindow(window_type, item.get());
   return LuaHelper::chaining(L);
 }
@@ -1513,9 +1488,8 @@ int LuaFontsBind::fontlist(lua_State* L) {
   using namespace ui;
   boost::shared_ptr<Fonts> fonts = LuaHelper::check_sptr<Fonts>(L, 1, meta);  
   lua_newtable(L);
-  std::vector<std::string> list = fonts->font_list();
-  std::vector<std::string>::iterator it = list.begin();
-  for (int i = 0; it != list.end(); ++it, ++i) {    
+  Fonts::iterator it = fonts->begin();
+  for (int i = 0; it != fonts->end(); ++it, ++i) {    
     lua_pushstring(L, (*it).c_str());
     lua_rawseti(L, -2, i);
   }
@@ -2695,11 +2669,11 @@ int LuaRegionBind::open(lua_State *L) {
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods, gc);
-  LuaHelper::setfield(L, "OR", RGN_OR);
+  /*LuaHelper::setfield(L, "OR", RGN_OR);
   LuaHelper::setfield(L, "AND", RGN_AND);
   LuaHelper::setfield(L, "XOR", RGN_XOR);
   LuaHelper::setfield(L, "DIFF", RGN_DIFF);
-  LuaHelper::setfield(L, "COPY", RGN_COPY);
+  LuaHelper::setfield(L, "COPY", RGN_COPY);*/
   return 1;
 }
 
@@ -2727,11 +2701,11 @@ int LuaAreaBind::open(lua_State *L) {
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods, gc);
-  LuaHelper::setfield(L, "OR", RGN_OR);
+  /*LuaHelper::setfield(L, "OR", RGN_OR);
   LuaHelper::setfield(L, "AND", RGN_AND);
   LuaHelper::setfield(L, "XOR", RGN_XOR);
   LuaHelper::setfield(L, "DIFF", RGN_DIFF);
-  LuaHelper::setfield(L, "COPY", RGN_COPY);
+  LuaHelper::setfield(L, "COPY", RGN_COPY);*/
   return 1;
 }
 
@@ -2780,7 +2754,7 @@ ui::Font* LuaSystems::CreateFont() {
 }
 
 ui::Fonts* LuaSystems::CreateFonts() {
-  return new ui::mfc::Fonts();
+  return new ui::Fonts();
 }
 
 ui::Window* LuaSystems::CreateWin() {

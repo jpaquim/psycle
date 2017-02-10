@@ -112,8 +112,8 @@ namespace psycle { namespace host {
 		{
 			std::string n1(name);
 			std::string n2(b.name);
-			std::transform(n1.begin(),n1.end(),n1.begin(),std::tolower);
-			std::transform(n2.begin(),n2.end(),n2.begin(),std::tolower);
+			std::transform(n1.begin(),n1.end(),n1.begin(), ::tolower);
+			std::transform(n2.begin(),n2.end(),n2.begin(), ::tolower);
 			return n1.compare(n2) < 0;
 		}
 		CPreset& CPreset::operator=(const CPreset& newpreset)

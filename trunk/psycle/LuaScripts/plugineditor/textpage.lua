@@ -24,7 +24,6 @@ local textpage = scintilla:new()
 
 textpage.windowtype = 95
 textpage.pagecounter = 0
-textpage.preventedkeys = {0x41, 0x46, 0x4A, 0x4B, 0x44, 0x45, 0x51, 0x56, 0x45, 78, 79, 87, 70, 83, 87}
 textpage.indicator = 14
 
 textpage.EDITMODE = 0
@@ -47,17 +46,23 @@ end
 function textpage:init()
   self:setautosize(false, false)
   self.mode = textpage.EDITMODE
-  self:initblockmodus()  
+  self:initblockmodus()
+  self.preventedkeys = {0x41, 0x46, 0x4A, 0x4B, 0x44, 0x45, 0x51, 0x56, 0x45, 78, 79, 87, 70, 83, 87}  
+end
+
+function textpage:setpreventedkeys(preventedkeys)
+  self.preventedkeys = preventedkeys
+  return self
 end
 
 function textpage:onkeydown(ev)  
   if ev:ctrlkey() then     
-    self:preventkeys(ev)    
+    self:preventkeys(ev)      
   end        
 end
 
 function textpage:preventkeys(ev)
-  for _, key in pairs(textpage.preventedkeys) do
+  for _, key in pairs(self.preventedkeys) do
     if ev:keycode() == key then
       ev:preventdefault()
     end      
@@ -71,6 +76,7 @@ end
 function textpage:addbreakpoint(linepos)
   self:definemarker(1, 31, 0x0000FF, 0x0000FF)
   self:addmarker(linepos, 1)
+  return self
 end
 
 function textpage:status()  
@@ -184,17 +190,20 @@ function textpage:setproperties(properties)
     end
   end    
   self:setselalpha(75)    
-  self:showcaretline()  
+  self:showcaretline()
+  return self
 end
 
 function textpage:setblockbegin()
   self.blockbegin = self:selectionstart()
   self:updateblock()
+  return self
 end
 
 function textpage:setblockend()
   self.blockend = self:selectionstart()
   self:updateblock()
+  return self
 end
 
 function textpage:deleteblock()
@@ -203,6 +212,7 @@ function textpage:deleteblock()
     self:f(sci.SCI_DELETERANGE, self.blockbegin,  self.blockend - self.blockbegin)
     self.blockbegin, self.blockend = -1, -1
   end
+  return self
 end
 
 function textpage:updateblock()
@@ -216,11 +226,13 @@ end
 function textpage:clearblockselection()
   self:f(sci.SCI_SETINDICATORCURRENT, textpage.indicator, 0)
   self:f(sci.SCI_INDICATORCLEARRANGE, textpage.indicator, self:length())
+  return self
 end
 
 function textpage:initblockmodus()
   self.blockbegin, self.blockend = -1, -1  
   self:setupindicators()
+  return self
 end
 
 function textpage:setupindicators()
@@ -231,19 +243,7 @@ function textpage:setupindicators()
    self:f(sci.SCI_INDICSETSTYLE, 12, sci.INDIC_STRIKE)
    self:f(sci.SCI_INDICSETSTYLE, 13, sci.INDIC_BOX)
    self:f(sci.SCI_INDICSETSTYLE, 14, sci.INDIC_ROUNDBOX)
-end
-
-function textpage:oncmd(cmd)
-  if cmd == "setblockbegin" then      
-    self:setblockbegin()    
-  elseif cmd == "setblockend" then    
-    self:setblockend()      
-  elseif cmd == "deleteblock" then
-    self:deleteblock()
-  elseif cmd == "deleteblock" then
-  
-  elseif cmd == "deleteblock" then
-  end
+   return self
 end
 
 return textpage

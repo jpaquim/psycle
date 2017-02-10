@@ -10,7 +10,8 @@ function machine:info()
     name = "$(machinename)",
     mode = $(machmode),
     version = 0,
-    api=0
+    api=0,
+    machinepath = "$(machinename)"
   }
 end
 

@@ -143,49 +143,38 @@ END_MESSAGE_MAP()
 template<class T, class I>
 BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {  		
   if (pMsg->message==WM_KEYDOWN ) {
-    UINT nFlags = 0;
     if (map_capslock_to_ctrl_) {
       BYTE byKeybState[256];
-      ::GetKeyboardState(byKeybState);
-      byKeybState[VK_CAPITAL] = 0;
-      byKeybState[VK_CONTROL] = 0;
-      ::SetKeyboardState(byKeybState); 
-      if (pMsg->wParam == 20 || pMsg->wParam == 17) {     
-        capslock_on_ = true;      
-      }
-      if  (capslock_on_) {        
-        BYTE byKeybState[256];
-        ::GetKeyboardState(byKeybState);
-        byKeybState[VK_CAPITAL] = 0;      
+      ::GetKeyboardState(byKeybState);      
+      if (::GetKeyState(VK_CONTROL) & 0x80 || ::GetKeyState(VK_CAPITAL) & 0x80) {     
         byKeybState[VK_CONTROL] = 0x80;
-        ::SetKeyboardState(byKeybState);      
-      }    
-    }
-    UINT flags = Win32KeyFlags(nFlags);      
-    KeyEvent ev(pMsg->wParam, flags);    
+      }
+      byKeybState[VK_CAPITAL] = 0;
+      ::SetKeyboardState(byKeybState);        
+    }  
+    KeyEvent ev(pMsg->wParam, Win32KeyFlags(0));    
     return WorkEvent(ev, &Window::OnKeyDown, window(), pMsg);
   } else
-  if (pMsg->message == WM_KEYUP) {    
-    if (map_capslock_to_ctrl_) {
-      BYTE byKeybState[256];
-      ::GetKeyboardState(byKeybState);
-      byKeybState[VK_CAPITAL] = 0;
-      byKeybState[VK_CONTROL] = 0;
-      ::SetKeyboardState(byKeybState);
-      if (capslock_on_) {    
-        BYTE byKeybState[256];
-        ::GetKeyboardState(byKeybState);
-        byKeybState[VK_CAPITAL] = 0;
-        byKeybState[VK_CONTROL] = VK_CONTROL;
-        ::SetKeyboardState(byKeybState);
-      }
+  if (pMsg->message == WM_KEYUP) {
+    UINT flags(0);       
+    if (map_capslock_to_ctrl_) { 
+      BYTE byKeybState[256];   
+      bool release_ctrl = false;       
+      ::GetKeyboardState(byKeybState);         
       if (pMsg->wParam == 20 || pMsg->wParam == 17) {
-        capslock_on_ = false;
+        byKeybState[VK_CONTROL] = 0x80;
+        release_ctrl = true;
+      }      
+      byKeybState[VK_CAPITAL] = 0;
+      flags = Win32KeyFlags(0);
+      if (release_ctrl) {
+        byKeybState[VK_CONTROL] = 0;
       }
+      ::SetKeyboardState(byKeybState);
+    } else {
+      flags = Win32KeyFlags(0);
     }
-    UINT nFlags = 0;
-    UINT flags = Win32KeyFlags(nFlags);      
-    KeyEvent ev(pMsg->wParam, flags);      
+    KeyEvent ev(pMsg->wParam, flags);            
     return WorkEvent(ev, &Window::OnKeyUp, window(), pMsg);    
   } else
   if (pMsg->message == WM_MOUSELEAVE) {	
@@ -270,7 +259,6 @@ BOOL WindowTemplateImp<T, I>::prevent_propagate_event(ui::Event& ev, MSG* pMsg) 
 
 template<class T, class I>
 void WindowTemplateImp<T, I>::OnKillFocus(CWnd* pNewWnd) {  
-  capslock_on_ = false;
 }
 
 template<class T, class I>
@@ -288,7 +276,7 @@ void WindowTemplateImp<T, I>::OnDestroy() {
 
 template<class T, class I>
 void WindowTemplateImp<T, I>::dev_set_position(const ui::Rect& pos) {
-	ui::Point top_left = pos.top_left();
+	Point top_left = pos.top_left();
 	top_left.offset(margin_.left(), margin_.top());
   if (window() && window()->parent()) {
 	  top_left.offset(window()->parent()->border_space().left() +
@@ -305,7 +293,7 @@ void WindowTemplateImp<T, I>::dev_set_position(const ui::Rect& pos) {
 }
 
 template<class T, class I>
-ui::Rect WindowTemplateImp<T, I>::dev_position() const {
+Rect WindowTemplateImp<T, I>::dev_position() const {
 	CRect rc;
 	GetWindowRect(&rc);
 	if (GetParent()) {
@@ -315,7 +303,7 @@ ui::Rect WindowTemplateImp<T, I>::dev_position() const {
 }
 
 template<class T, class I>
-ui::Rect WindowTemplateImp<T, I>::dev_absolute_position() const {
+Rect WindowTemplateImp<T, I>::dev_absolute_position() const {
   CRect rc;
 	GetWindowRect(&rc);  
 	if (window() && window()->root()) {
@@ -323,11 +311,11 @@ ui::Rect WindowTemplateImp<T, I>::dev_absolute_position() const {
 		::MapWindowPoints(NULL, root->m_hWnd, (LPPOINT)&rc, 2);    
 		return MapPosToBoxModel(rc);
 	}
-	return ui::Rect::zero();
+	return Rect::zero();
 }
 
 template<class T, class I>
-ui::Rect WindowTemplateImp<T, I>::dev_absolute_system_position() const {
+Rect WindowTemplateImp<T, I>::dev_absolute_system_position() const {
   CRect rc;
 	GetWindowRect(&rc);  
 	if (window() && window()->root()) {
@@ -336,11 +324,11 @@ ui::Rect WindowTemplateImp<T, I>::dev_absolute_system_position() const {
 		return ui::Rect(ui::Point(rc.left, rc.top),
                     ui::Point(rc.right, rc.bottom));
 	}
-	return ui::Rect::zero();
+	return Rect::zero();
 }
 
 template<class T, class I>
-ui::Rect WindowTemplateImp<T, I>::dev_desktop_position() const {
+Rect WindowTemplateImp<T, I>::dev_desktop_position() const {
   CRect rc;
   GetWindowRect(&rc);
 	return MapPosToBoxModel(rc);  
@@ -361,28 +349,27 @@ bool WindowTemplateImp<T, I>::dev_check_position(const ui::Rect& pos) const {
 									  window()->parent()->border_space().top() +
 			              window()->parent()->padding().top());
   }	
-  ui::Rect pos1 = ui::Rect(top_left,
-                           ui::Dimension(pos.width() + padding_.width() +
-                                         border_space_.width(),
-		                                     pos.height() + padding_.height() +
-                                         border_space_.height()));
+  Rect pos1 = ui::Rect(top_left,
+                       ui::Dimension(pos.width() + padding_.width() +
+                                     border_space_.width(),
+	                                   pos.height() + padding_.height() +
+                                     border_space_.height()));
   return TypeConverter::rect(pos1).EqualRect(rc);
 }
 
 template<class T, class I>
-ui::Rect WindowTemplateImp<T, I>::MapPosToBoxModel(const CRect& rc) const {
-	 ui::Point top_left(rc.left - margin_.left(), rc.top - margin_.top());   
-	   if (window() && window()->parent()) {       
-		   top_left.offset(-window()->parent()->border_space().left() - 
-                       window()->parent()->padding().left(),
-			                 -window()->parent()->border_space().top() -
-                       window()->parent()->padding().top());
-	   }
-		 return ui::Rect(top_left,
-		              ui::Dimension(rc.Width() - padding_.width() -
-										              border_space_.width(),
-										            rc.Height() - padding_.height() -
-										              border_space_.height()));
+Rect WindowTemplateImp<T, I>::MapPosToBoxModel(const CRect& rc) const {
+	 Point top_left(rc.left - margin_.left(), rc.top - margin_.top());   
+	 if (window() && window()->parent()) {       
+		 top_left.offset(-window()->parent()->border_space().left() - 
+                     window()->parent()->padding().left(),
+		                -window()->parent()->border_space().top() -
+                     window()->parent()->padding().top());
+	 }
+	 return Rect(top_left, ui::Dimension(rc.Width() - padding_.width() -
+										                   border_space_.width(),
+										                   rc.Height() - padding_.height() -
+										                   border_space_.height()));
 }
 
 template<class T, class I>
@@ -429,8 +416,8 @@ void WindowTemplateImp<T, I>::OnPaint() {
 	  CDC bufDC;
 	  bufDC.CreateCompatibleDC(&dc);
 	  CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);
-	  ui::Graphics g(&bufDC);
-	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
+	  Graphics g(&bufDC);
+	  Region draw_rgn(new ui::mfc::RegionImp(rgn));
     window()->DrawBackground(&g, draw_rgn);	  
 	  OnDevDraw(&g, draw_rgn);
 	  g.Dispose();

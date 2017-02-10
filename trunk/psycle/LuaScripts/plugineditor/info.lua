@@ -1,3 +1,9 @@
+-- psycle pluginselector (c) 2017 by psycledelics
+-- File: info.lua
+-- copyright 2016 members of the psycle project http://psycle.sourceforge.net
+-- This source is free software ; you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation ; either version 2, or (at your option) any later version.  
 -- info.lua
 
 local signal = require("psycle.signal")
@@ -20,23 +26,23 @@ local info = group:new(parent)
 info.windowtype = 96
 info.infodir = cfg:luapath().."\\plugineditor\\info\\"
 info.timeout = 25
+info.main = "infomsmain.lua"
 
 function info:new(parent)
   local m = group:new(parent)
   setmetatable(m, self)
   self.__index = self    
   m:init()
-  systems:new():changewindowtype(info.windowtype, m)
   return m
 end
 
 function info:init()
+  self.commands = {}
   self.timercounter = 0
-  self.cmd = signal:new()
   self.dojump = signal:new()
   self.strobe = 0
   self.activated = 0
-  self.helplevel = 2
+  self.helplevel = 1
   self.title = text:new(self)
                    :setalign(item.ALTOP)
                    :setautosize(false, true)
@@ -52,12 +58,26 @@ function info:init()
   end
 end
 
+function info:addcommands(commands)
+  self.commands[#self.commands + 1] = commands
+  return self
+end
+
+function info:setstatusbar(statusbar)
+  self.statusbar_ = statusbar
+end
+
+function info:setpagecontainer(container)
+  self.pagecontainer_ = container
+  return self
+end
+
 function info:typename()
   return "info"
 end
 
 function info:loadrootlink()
-  local path = info.infodir.."infomain.lua"    
+  local path = info.infodir .. info.main    
   local f = loadfile(path)
   if f then
     self.link = f()
@@ -117,7 +137,28 @@ end
 function info:deactivate()
   self.strobe = 0
   self.activated = 0
-end  
+  self:jumpmain()
+  if self.statusbar_ then
+    self.statusbar_:clearcontrol()
+  end
+  if self.helplevel < 3 then
+    self:hide():parent():updatealign()
+  end
+end
+
+function info:haskeycode(keycode)
+  return self.link.keymap[string.char(keycode)] ~= nil
+end
+
+function info:preventedkeys()
+  local prevented = {}
+  if self.link.keymap ~= nil then
+    for key, _ in pairs(self.link.keymap) do
+      prevented[#prevented +1] = string.byte(key)
+    end
+  end 
+  return prevented;  
+end
 
 function info:jump(keycode)
   if self.link.keymap then
@@ -125,7 +166,13 @@ function info:jump(keycode)
     if src then
       if src:sub(1, 1) == "@" then
         self:jumpmain()
-        self.cmd:emit(src:sub(2, -1));
+        for i = 1, #self.commands do
+          local f = self.commands[i][src:sub(2, -1)];          
+          if f then
+            f:execute()
+            break
+          end
+        end
         self:deactivate()        
       else
         path = info.infodir .. src .. ".lua"        

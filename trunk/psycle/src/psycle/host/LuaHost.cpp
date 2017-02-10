@@ -208,6 +208,10 @@ PluginInfo LuaControl::parse_info() const {
                 if (strcmp(key, "noteon") == 0) {
                   int value = luaL_checknumber(L, -1);
                   result.flags = value;
+                } else if (strcmp(key, "machinepath") == 0) {
+                    const char* value = luaL_checklstring(L, -1, &len);
+                    assert(value);
+                    machinepath_ = value;
                 }
     }
   }   
@@ -1072,7 +1076,6 @@ ui::Systems* LuaProxy::systems() {
   } 
   return systems_.get();
 }
-
 
 // End of Class Proxy
 

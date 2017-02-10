@@ -124,7 +124,8 @@ class AppImp : public ui::AppImp {
    AppImp() {}
    virtual ~AppImp() {}
 
-   virtual void DevRun() {}   
+   virtual void DevRun() {}
+   virtual void DevStop() {}   
 };
 
 class ImageImp : public ui::ImageImp {
@@ -1157,10 +1158,10 @@ template <class T, class I>
 class WindowTemplateImp : public T, public I {
  public:  
   WindowTemplateImp() : I(), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false),
-      capslock_on_(false), map_capslock_to_ctrl_(false) {
+      map_capslock_to_ctrl_(false) {
   }
   WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false),
-      capslock_on_(false), map_capslock_to_ctrl_(false) {    
+      map_capslock_to_ctrl_(false) {    
   }
     
   virtual void dev_set_position(const ui::Rect& pos);
@@ -1241,7 +1242,6 @@ class WindowTemplateImp : public T, public I {
   virtual ARGB dev_fill_color() const { return color_; }
   // virtual ui::Window* dev_focus_window();
   virtual void DevSetFocus() {
-    capslock_on_ = false;
     if (GetFocus() != this) {      
       SetFocus();
     }
@@ -1271,10 +1271,10 @@ protected:
   
   int Win32KeyFlags(UINT nFlags) {
     UINT flags = 0;
-    if (GetKeyState(VK_SHIFT) & 0x8000) {
+    if (GetKeyState(VK_SHIFT) & 0x80) {
       flags |= MK_SHIFT;
     }
-    if (GetKeyState(VK_CONTROL) & 0x8000) {
+    if (GetKeyState(VK_CONTROL) & 0x80) {
       flags |= MK_CONTROL;
     }
     if (nFlags == 13) {
@@ -1326,8 +1326,7 @@ protected:
   bool is_double_buffered_;
 	BoxSpace margin_;
 	BoxSpace padding_;
-	BoxSpace border_space_;
-  bool capslock_on_;
+	BoxSpace border_space_;  
   bool map_capslock_to_ctrl_;
 };
 
@@ -1348,6 +1347,57 @@ class ConfirmImp : public ui::ConfirmImp {
 		int result = AfxMessageBox(Charset::utf8_to_win(text).c_str(), MB_OK | MB_OKCANCEL | MB_TOPMOST);
     return result == IDOK;
 	}
+};
+
+class FileOpenDialogImp : public ui::FileDialogImp {
+ public:	
+  FileOpenDialogImp() : ok_(false) {}
+  virtual void DevShow() {  
+    char szFilters[]= 
+      "Text Files (*.NC)|*.NC|Text Files (*.lua)|*.lua|All Files (*.*)|*.*||";
+    CFileDialog dlg(1, "lua", "*.lua",
+              OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
+    if (folder_ != "") {
+      dlg.m_ofn.lpstrInitialDir = folder_.c_str();
+    }
+    ok_ = (dlg.DoModal() == IDOK);
+    dev_set_filename(dlg.GetPathName().GetString());    
+  }
+  virtual void dev_set_folder(const std::string& folder) { folder_ = folder; }
+  virtual std::string dev_folder() const { return folder_; }
+  virtual void dev_set_filename(const std::string& filename) { filename_ = filename; }
+  virtual std::string dev_filename() const { return filename_; }
+  virtual bool dev_is_ok() const { return ok_; }
+
+ private:
+  std::string filename_;
+  std::string folder_;
+  bool ok_;
+};
+
+class FileSaveDialogImp : public ui::FileDialogImp {
+ public:	
+  FileSaveDialogImp() : ok_(false) {}
+  virtual void DevShow() {
+    char szFilters[]= "Text Files (*.NC)|*.NC|Lua Files (*.lua)|*.lua|All Files (*.*)|*.*||";
+    CFileDialog dlg(0, "lua", "*.lua",
+              OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());
+    if (folder_ != "") {
+      dlg.m_ofn.lpstrInitialDir = folder_.c_str();
+    }
+    ok_ = (dlg.DoModal() == IDOK);
+    dev_set_filename(dlg.GetPathName().GetString());
+  }
+  virtual void dev_set_folder(const std::string& folder) { folder_ = folder; }
+  virtual std::string dev_folder() const { return folder_; }
+  virtual void dev_set_filename(const std::string& filename) { filename_ = filename; }
+  virtual std::string dev_filename() const { return filename_; }
+  virtual bool dev_is_ok() const { return ok_; }
+
+ private:
+  std::string filename_;
+  std::string folder_;
+  bool ok_;
 };
 
 class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
@@ -2591,18 +2641,18 @@ extern "C" int CALLBACK enumerateFontsCallBack(ENUMLOGFONTEX *lpelf,
 typedef	std::pair<LOGFONT, DWORD>	FontPair;
 typedef	std::vector<FontPair> FontVec;
 
-class Fonts : public ui::Fonts {
+class FontsImp : public ui::FontsImp {
   public:
-   Fonts() {
+   FontsImp() {
      enumerateFonts();
    }
-   virtual void import_font(const std::string& path) {
+   virtual void dev_import_font(const std::string& path) {
      int result = AddFontResource(Charset::utf8_to_win(path).c_str());     
      if (result == 0) {
       throw std::exception("Failed to add font.");
     }
   }
-  const std::vector<std::string>& font_list() const { return names_; }
+  Fonts::Container dev_font_list() const { return names_; }
   void enumerateFonts() {
 	  names_.clear();
 	  LOGFONT		lf;
@@ -2654,6 +2704,12 @@ class ImpFactory : public ui::ImpFactory {
   }
   virtual ui::ConfirmImp* CreateConfirmImp() {
 		return new ConfirmImp();
+  }
+  virtual ui::FileDialogImp* CreateFileOpenDialogImp() {
+     return new FileOpenDialogImp();
+  }
+  virtual ui::FileDialogImp* CreateFileSaveDialogImp() {
+     return new FileSaveDialogImp();
   }  
   virtual ui::WindowImp* CreateWindowImp() {
     return WindowImp::Make(0, DummyWindow::dummy(), WindowID::auto_id());    
@@ -2706,6 +2762,7 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::RegionImp* CreateRegionImp() {     
     return new ui::mfc::RegionImp();
   }
+  virtual ui::FontsImp* CreateFontsImp() { return new mfc::FontsImp(); }
   virtual ui::FontInfoImp* CreateFontInfoImp() { return new mfc::FontInfoImp(); }
   virtual ui::FontImp* CreateFontImp() { return new ui::mfc::FontImp(); }
   virtual ui::FontImp* CreateFontImp(int stockid) {    

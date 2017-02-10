@@ -40,14 +40,16 @@ class LuaControl : public Lock {
   lua_State* state() const { return L; }
   std::string install_script() const;
   virtual PluginInfo meta() const;
+  std::string machinepath() const { return machinepath_; } 
   void yield();
   void resume();
-  
+ 
   protected:
    lua_State* L;
    lua_State* LM;
    std::auto_ptr<ui::Commands> invokelater_;   
-   PluginInfo parse_info() const;  
+   PluginInfo parse_info() const;
+   mutable std::string machinepath_;  
 };
 
 class LuaStarter : public LuaControl {
@@ -144,8 +146,8 @@ class LuaProxy : public LuaControl {
   std::string title() const { return lua_mac_ ? lua_mac_->title() : "noname"; }
   void UpdateWindowsMenu();
   ui::Systems* systems();
-  void update_systems_state(lua_State* L);    
-
+  void update_systems_state(lua_State* L);  
+  
   static int invokelater(lua_State* L);
 	// script callbacks
   static int set_parameter(lua_State* L);
@@ -167,7 +169,7 @@ class LuaProxy : public LuaControl {
   void OnFrameClose(ui::Frame&);
       
   mutable bool is_meta_cache_updated_;
-  mutable PluginInfo meta_cache_;
+  mutable PluginInfo meta_cache_; 
   LuaPlugin *host_;
   LuaMachine* lua_mac_;
   boost::weak_ptr<ui::MenuContainer> menu_bar_;

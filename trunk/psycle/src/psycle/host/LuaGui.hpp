@@ -43,29 +43,16 @@ class PsycleStock : public ui::Stock {
    std::string key_tostring(int stock_key) const;
 };
 
-struct LuaFileDialog { 
-  LuaFileDialog(bool is_open_dlg) : is_open_dlg_(is_open_dlg) { }
-  
-  void set_folder(const std::string& folder) { folder_ = folder; }
-  const std::string& folder() const { return folder_; }
-  void set_filename(const std::string& filename) { filename_ = filename; }  
-  const std::string& filename() const { return filename_; }  
-  bool is_open_dlg() const { return is_open_dlg_; }
-    
- private:
-  std::string filename_;
-  std::string folder_;
-  bool is_open_dlg_;
-};
-
 struct LuaFileOpenBind {
   static const char* meta;
   static int open(lua_State *L);
   static int create(lua_State *L);
   static int gc(lua_State* L);
   static int show(lua_State *L);
-  static int filename(lua_State *L);  
-  static int setfolder(lua_State *L) { LUAEXPORTM(L, meta, &LuaFileDialog::set_folder); }
+  static int filename(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::filename); }
+  static int setfilename(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::set_filename); }
+  static int setfolder(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::set_folder); }
+  static int isok(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::is_ok); }
 };
 
 struct LuaFileSaveBind {
@@ -74,8 +61,10 @@ struct LuaFileSaveBind {
   static int create(lua_State *L);
   static int gc(lua_State* L);
   static int show(lua_State *L);
-  static int filename(lua_State *L);
-  static int setfolder(lua_State *L) { LUAEXPORTM(L, meta, &LuaFileDialog::set_folder); }
+  static int filename(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::filename); }
+  static int setfilename(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::set_filename); }
+  static int setfolder(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::set_folder); }
+  static int isok(lua_State *L) { LUAEXPORTM(L, meta, &ui::FileDialog::is_ok); }
 };
 
 class LuaFileObserver : public ui::FileObserver, public LuaState {
@@ -1475,6 +1464,7 @@ class LuaGroupBind : public LuaItemBind<T> {
       {"updatealign", updatealign},
       {"flagnotaligned", flagnotaligned},
       {"at", at},
+      {"empty", empty},
       {NULL, NULL}
     };
     luaL_setfuncs(L, methods, 0);
@@ -1491,6 +1481,7 @@ class LuaGroupBind : public LuaItemBind<T> {
   static int zorder(lua_State* L);
   static int intersect(lua_State* L);
   static int updatealign(lua_State* L) { LUAEXPORT(L, &T::UpdateAlign); }
+  static int empty(lua_State* L) { LUAEXPORT(L, &T::empty); }
   static int flagnotaligned(lua_State* L) { LUAEXPORT(L, &T::FlagNotAligned); }
   static ui::Window::Ptr test(lua_State* L, int index); 
   static int at(lua_State* L);  

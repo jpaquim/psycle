@@ -1076,7 +1076,7 @@ namespace psycle { namespace host {
 		/// Tool bar buttons and View Commands
 		void CChildView::OnMachineview() 
 		{
-      if (!this->IsWindowVisible()) {        
+       if (!this->IsWindowVisible()) {        
         HostExtensions::Instance().HideActiveLua();
         this->ShowWindow(SW_SHOW);
       }

@@ -26,7 +26,6 @@
 --}
 --psycle.replacemenu("help", 2, link)
 
-
 local link = {
   label = "New Plugin Editor",
   plugin = "plugineditor.lua",
@@ -35,22 +34,4 @@ local link = {
 }
 psycle.addmenu("view", link)  
 
--- @type.lua
 
--- @p2.lua
-link = {
-  label = "p2",
-  plugin = "p2.lua",
-  viewport = psycle.CHILDVIEWPORT,
-  userinterface = psycle.MDI
-}
-psycle.addmenu("view", link)
-
--- @p3.lua
-link = {
-  label = "p3",
-  plugin = "p3.lua",
-  viewport = psycle.CHILDVIEWPORT,
-  userinterface = psycle.MDI
-}
-psycle.addmenu("view", link)
