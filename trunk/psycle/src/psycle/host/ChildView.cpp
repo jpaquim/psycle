@@ -37,7 +37,7 @@
 #include <cmath> // SwingFill
 
 
-
+const int VIEWINSERTSTARTPOS = 8;
 
 namespace psycle { namespace host {
 
@@ -113,7 +113,8 @@ namespace psycle { namespace host {
 			,patBufferLines(0)
 			,patBufferCopy(false)
 			,_pSong(Global::song())
-      ,menu_pos_(8)               
+      ,menu_pos_(VIEWINSERTSTARTPOS)
+      ,menu_container_(new ui::MenuContainer())               
 		{
       HostExtensions::Instance().InitInstance(this);
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
@@ -336,7 +337,7 @@ namespace psycle { namespace host {
 		{      
 			KillTimer(ID_TIMER_VIEW_REFRESH);
 			KillTimer(ID_TIMER_AUTOSAVE);
-			if (!SetTimer(ID_TIMER_VIEW_REFRESH,30,NULL)) // GUI update. 
+			if (!SetTimer(ID_TIMER_VIEW_REFRESH, GlobalTimer::refresh_rate, NULL)) // GUI update. 
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
@@ -2482,14 +2483,27 @@ namespace psycle { namespace host {
 
     void CChildView::OnAddViewMenu(Link& link) {
       CMainFrame* pParentMain =(CMainFrame *)pParentFrame;      
-      CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);	
-      int win32_menu_id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
-      view_menu->InsertMenu(
-         menu_pos_++,
-         MF_STRING | MF_BYPOSITION,
-         win32_menu_id,
-         ui::mfc::Charset::utf8_to_win(link.label()).c_str());  
-       menuItemIdMap_[win32_menu_id] = link;
+      CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);
+      if (view_menu) {
+        int win32_menu_id = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
+        view_menu->InsertMenu(
+          menu_pos_++,
+          MF_STRING | MF_BYPOSITION,
+          win32_menu_id,
+          ui::mfc::Charset::utf8_to_win(link.label()).c_str());  
+        menuItemIdMap_[win32_menu_id] = link;
+      }
+    }
+
+    void CChildView::OnRestoreViewMenu() { 
+      CMenu* view_menu = pParentFrame->GetMenu()->GetSubMenu(3);	
+      if (view_menu) {
+        int count = menu_pos_ - VIEWINSERTSTARTPOS;
+        while (count--) {
+          RemoveMenu(view_menu->GetSafeHmenu(), VIEWINSERTSTARTPOS, MF_BYPOSITION);    
+        }
+        menu_pos_ = VIEWINSERTSTARTPOS;
+      }
     }
 
     void CChildView::OnAddHelpMenu(Link& link) {
@@ -2588,25 +2602,24 @@ namespace psycle { namespace host {
       }
     }
 
-    void CChildView::OnPluginCanvasChanged(LuaPlugin& plugin) {
-      if (plugin.proxy().has_frame()) {
-        plugin.proxy().UpdateFrameCanvas();
-      } else {    
-       ChangeCanvas(plugin.canvas().lock().get());
-       CMainFrame* pParentMain =(CMainFrame *)pParentFrame;      
-       if (plugin.canvas().expired()) {        
-         if (!IsWindowVisible()) {              
-           pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
-           ShowWindow(SW_SHOW);
-         }
-       } else {
-         if (IsWindowVisible()) {        
-           ShowWindow(SW_HIDE);
-           pParentMain->m_luaWndView->ShowWindow(SW_SHOW);            
-         }
-       }
-     }
-   }
+    void CChildView::OnHostViewportChange(LuaPlugin& plugin, int viewport) {
+      CMainFrame* pParentMain = (CMainFrame *)pParentFrame;      
+      if (viewport == CHILDVIEWPORT) {
+        ChangeViewport(plugin.viewport().lock().get());
+        if (!IsWindowVisible()) {      
+          ShowWindow(SW_HIDE);
+          pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
+          ShowExtensionMenu(plugin);
+        }
+      } else 
+      if (viewport == FRAMEVIEWPORT) {
+        if (!IsWindowVisible()) {              
+          pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+          ShowWindow(SW_SHOW);
+          HideExtensionMenu();   
+        }
+      }
+    }
 
     void CChildView::OnDynamicMenuItems(UINT nID) {
       ui::mfc::MenuContainerImp* mbimp =  ui::mfc::MenuContainerImp::MenuContainerImpById(nID);
@@ -2633,19 +2646,14 @@ namespace psycle { namespace host {
           viewport = link.viewport();
         } else {
           plug = link.plugin.lock();
-          ui::Canvas::WeakPtr user_view = plug->canvas();      
+          ui::Viewport::WeakPtr user_view = plug->viewport();      
         }        
         if (plug->crashed()) return;
         if (HostExtensions::Instance().active_lua() != plug.get()) {
-          ui::Canvas::WeakPtr user_view = plug->canvas();        
+          ui::Viewport::WeakPtr user_view = plug->viewport();        
           if (!user_view.expired()) {            
             HostExtensions::Instance().set_active_lua(plug.get());
-            try {
-              boost::weak_ptr<ui::MenuContainer> menu_bar = plug->proxy().menu_bar();
-              if (!menu_bar.expired()) {
-                ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
-                menubar_imp->set_menu_window(::AfxGetMainWnd(), menu_bar.lock()->root_node().lock());
-              }
+            try {                                 
               plug->ViewPortChanged(*plug.get(), viewport);
               plug->OnActivated(viewport);
             } catch (std::exception&) {               
@@ -2664,7 +2672,7 @@ namespace psycle { namespace host {
       }    
     }              
                     
-    void CChildView::ChangeCanvas(ui::Window* canvas) {      
+    void CChildView::ChangeViewport(ui::Window* canvas) {      
       if (canvas) { 
         ShowScrollBar(SB_BOTH, FALSE);
         viewMode = view_modes::machine;
@@ -2681,21 +2689,24 @@ namespace psycle { namespace host {
       }
     }
 
-    void CChildView::OnHostViewportChange(LuaPlugin& plugin, int viewport) {
-      CMainFrame* pParentMain = (CMainFrame *)pParentFrame;      
-      if (viewport == CHILDVIEWPORT) {
-        ChangeCanvas(plugin.canvas().lock().get());
-        if (!IsWindowVisible()) {      
-          ShowWindow(SW_HIDE);
-          pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
-        }
-      } else 
-      if (viewport == FRAMEVIEWPORT) {
-        if (!IsWindowVisible()) {              
-          pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
-          ShowWindow(SW_SHOW);
-        }
+    void CChildView::ShowExtensionMenu(LuaPlugin& plugin) {
+      using namespace ui;
+      menu_container_->clear();
+      Node::WeakPtr menu_root_node = plugin.proxy().menu_root_node();
+      extension_menu_.reset();
+      if (!menu_root_node.expired()) {
+        extension_menu_.reset(new Node());        
+        extension_menu_->AddNode(menu_root_node.lock());              
+        menu_container_->set_root_node(extension_menu_);
+        mfc::MenuContainerImp* menucontainer_imp = dynamic_cast<mfc::MenuContainerImp*>(menu_container_->imp());
+        assert(menucontainer_imp);
+        menucontainer_imp->set_menu_window(::AfxGetMainWnd(), extension_menu_);
       }
+    }
+
+    void CChildView::HideExtensionMenu() {
+      menu_container_->clear();
+      pParentFrame->DrawMenuBar(); 
     }
 
     void CChildView::ResizeExtensionView() {
@@ -2740,6 +2751,7 @@ namespace psycle { namespace host {
     void CChildView::HideExtensionView() {
       CMainFrame* pParentMain =(CMainFrame *)pParentFrame;    
       pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
+      HideExtensionMenu();
     }
 
     WINDOWPLACEMENT CChildView::adjusted_child_view_placement() {

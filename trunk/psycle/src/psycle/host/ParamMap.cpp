@@ -39,7 +39,7 @@ ParamMap::ParamMap(Machine* machine,ParamMap** windowVar)
   set_title("Parameter map");
   PreventResize();
   using namespace ui;
-  Canvas::Ptr view_(new Canvas());
+  Viewport::Ptr view_(new Viewport());
   view_->SetSave(false);  
   LineBorder* border = new LineBorder(skin_.font_color);
   border->set_border_radius(BorderRadius(5, 5, 5, 5));

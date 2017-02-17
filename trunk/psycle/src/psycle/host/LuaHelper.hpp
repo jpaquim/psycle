@@ -52,6 +52,8 @@ struct LuaState {
   virtual ~LuaState() {}
 
   void set_lua_state(lua_State* state) { L = state; }
+  lua_State* state() { return L; }
+  lua_State* state() const { return L; }
 
  protected:
   mutable lua_State* L;
@@ -890,7 +892,7 @@ namespace LuaHelper {
       return 0;
     }
 
-     // double -> void
+    // double -> void
     template <class T>
     static int bind(lua_State* L, const std::string& meta, double (T::*ptmember)() const, UserDataModel m = SPTR) {      
       numargcheck(L, 1);
@@ -1054,7 +1056,7 @@ namespace LuaHelper {
       return 4;
     }
 
-    // void -> int, const std::string&
+    // void -> int X const std::string&
     template <class T>
     static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(int, const std::string&), UserDataModel m = SPTR) {
       numargcheck(L, 3);
@@ -1062,6 +1064,17 @@ namespace LuaHelper {
       int val = luaL_checkinteger(L, 2);
       const char* str = luaL_checkstring(L, 3);
       (ud->*ptmember)(val, str);      
+      return 0;
+    }
+
+    // void -> const std::string& X int
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, void (T::*ptmember)(const std::string&, int), UserDataModel m = SPTR) {
+      numargcheck(L, 3);
+      T* ud = check<T>(L, 1, meta, m);
+      const char* str = luaL_checkstring(L, 2);
+      int val = luaL_checkinteger(L, 3);      
+      (ud->*ptmember)(str, val);      
       return 0;
     }
 
@@ -1259,7 +1272,7 @@ namespace LuaHelper {
         S m = LuaHelper::check_sptr<UDT>(L, 1, meta.c_str());
         lua_pushnumber(L, (m.get()->*pt2ConstMember)());
       }  else {
-        luaL_error(L, "Got %d arguments expected 1 (self)", n);
+        luaL_error(L, "Got %d arguments expected 2 (self)", n);
       }
       return 1;
     }

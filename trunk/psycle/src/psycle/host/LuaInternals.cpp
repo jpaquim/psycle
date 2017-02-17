@@ -266,6 +266,7 @@ int LuaPluginInfoBind::open(lua_State *L) {
     {"dllname", dllname},
     {"name", name},
     {"type", type},
+    {"mode", mode},    
     { NULL, NULL }
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -315,6 +316,16 @@ int LuaPluginInfoBind::type(lua_State* L) {
   return 1;
 }
 
+int LuaPluginInfoBind::mode(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushnumber(L, ud->mode);
+  return 1;
+}
+
 // LuaPluginCatcherBind
 const char* LuaPluginCatcherBind::meta = "psyplugincatchermeta";
 
@@ -325,8 +336,7 @@ int LuaPluginCatcherBind::open(lua_State *L) {
     {"infos", infos},
     {"rescanall", rescanall},
     {"rescannew", rescannew},
-    {"machinepath", machinepath},
-    { NULL, NULL }
+    {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
 }
@@ -357,7 +367,7 @@ int LuaPluginCatcherBind::info(lua_State* L) {
   PluginInfo* info = ud->info(name);
   if (info) {
     luaL_requiref(L, "psycle.plugininfo", LuaPluginInfoBind::open, true);
-    LuaHelper::new_shared_userdata<PluginInfo>(L, LuaPluginInfoBind::meta, info, 3);
+    LuaHelper::new_shared_userdata<PluginInfo>(L, LuaPluginInfoBind::meta, new PluginInfo(*info), 3);
   } else {
     lua_pushnil(L);
   }
@@ -390,19 +400,6 @@ int LuaPluginCatcherBind::rescannew(lua_State* L) {
   boost::shared_ptr<PluginCatcher> catcher = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
   catcher->ReScan(false);
   return LuaHelper::chaining(L);
-}
-
-int LuaPluginCatcherBind::machinepath(lua_State* L) {
-  boost::shared_ptr<PluginCatcher> catcher = LuaHelper::check_sptr<PluginCatcher>(L, 1, meta);
-  const char* dllname = luaL_checkstring(L, 2);
-  try {
-    std::auto_ptr<LuaPlugin> dummy(new LuaPlugin(dllname, AUTOID, false));
-    std::string path = dummy->machinepath();
-    lua_pushstring(L, path.c_str());
-  } catch (std::exception& e) {
-    return luaL_error(L, e.what());
-  }
-  return 1;
 }
 
 
@@ -504,9 +501,9 @@ void LuaMachine::reload() {
   }
 }
 
-void LuaMachine::set_canvas(const ui::Canvas::WeakPtr& canvas) { 
-  canvas_ = canvas;
-  proxy_->OnCanvasChanged();
+void LuaMachine::set_viewport(const ui::Viewport::WeakPtr& viewport) { 
+  viewport_ = viewport;
+ // proxy_->OnCanvasChanged();
 }
 
 void LuaMachine::ToggleViewPort() {
@@ -636,7 +633,7 @@ int LuaMachineBind::open(lua_State *L) {
     {"setbuffer", setbuffer},
     {"addparameters", add_parameters},
     {"setparameters", set_parameters},
-    {"setmenus", set_menus},
+    {"setmenurootnode", setmenurootnode},
     {"setnumcols", set_numcols},
     {"numcols", numcols},
     {"shownativegui", show_native_gui},
@@ -647,10 +644,14 @@ int LuaMachineBind::open(lua_State *L) {
     {"addhostlistener", addhostlistener},
     {"exit", exit},
     {"reload", reload},
-    {"setcanvas", setcanvas},
+    {"setviewport", setviewport},
     {"toggleviewport", toggleviewport},
     {"type", type},  
-    {"settitle", settitle},    
+    {"settitle", settitle},
+    {"settimeout", settimeout},
+    {"setinterval", setinterval},
+    {"cleartimeout", cleartimer},
+    {"clearinterval", cleartimer},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -994,9 +995,9 @@ int LuaMachineBind::add_parameters(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
-int LuaMachineBind::set_menus(lua_State* L) {
+int LuaMachineBind::setmenurootnode(lua_State* L) {
   boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
-  lua_setfield(L, 1, "__menus");
+  lua_setfield(L, 1, "__menurootnode");
   return LuaHelper::chaining(L);
 }
 
@@ -1024,13 +1025,13 @@ int LuaMachineBind::addhostlistener(lua_State* L) {
   return 0;
 }
 
-int LuaMachineBind::setcanvas(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+int LuaMachineBind::setviewport(lua_State* L) {
+  boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   if (!lua_isnil(L, 2)) {
-    LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
-    plugin->set_canvas(canvas);
+    LuaViewport::Ptr viewport = LuaHelper::check_sptr<LuaViewport>(L, 2, LuaViewportBind<>::meta);
+    machine->set_viewport(viewport);
   } else {
-    plugin->set_canvas(boost::weak_ptr<ui::Canvas>());
+    machine->set_viewport(boost::weak_ptr<ui::Viewport>());
   }
   return LuaHelper::chaining(L);
 }
@@ -1046,6 +1047,45 @@ int LuaMachineBind::toggleviewport(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+LuaRun* LuaMachineBind::createtimercallback(lua_State* L) {
+  LuaRun* result(0);
+  if (lua_isfunction(L, 2)) {
+     LuaRun* runnable = new LuaRun(L);
+     LuaHelper::requirenew<LuaRunBind>(L, "psycle.run", runnable);
+     LuaHelper::register_userdata(L, runnable);
+     lua_pushvalue(L, 2);
+     lua_setfield(L, -2, "run");
+     result = runnable;
+  } else {
+    luaL_error(L, "Argument must be a function.");
+  }
+  return result;
+}
+
+int LuaMachineBind::settimeout(lua_State* L) {
+   boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+   int interval = luaL_checkinteger(L, 3);
+   LuaRun* runnable = createtimercallback(L);
+   int id = machine->proxy()->set_time_out(runnable, interval);
+   lua_pushinteger(L, id);
+   return 1;
+}
+
+int LuaMachineBind::setinterval(lua_State* L) {
+   boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+   int interval = luaL_checkinteger(L, 3);
+   LuaRun* runnable = createtimercallback(L);
+   int id = machine->proxy()->set_interval(runnable, interval);
+   lua_pushinteger(L, id);
+   return 1;
+}
+
+int LuaMachineBind::cleartimer(lua_State* L) {
+  boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  int id = luaL_checkinteger(L, 2);
+  machine->proxy()->clear_timer(id);
+  return LuaHelper::chaining(L);
+}
 // LuaMachinesBind
 const char* LuaMachinesBind::meta = "psyluamachinesbind";
 
@@ -2350,9 +2390,9 @@ int LuaDspFilterBind::open(lua_State *L) {
     {"new", create},
     {"work", work},
     {"setcutoff", setcutoff},
-    {"cutoff", getcutoff},
+    {"cutoff", cutoff},
     {"setresonance", setresonance},
-    {"resonance", getresonance},
+    {"resonance", resonance},
     {"settype", setfiltertype},
     {"tostring", tostring},
     { NULL, NULL }
@@ -2422,18 +2462,20 @@ int LuaDspFilterBind::work(lua_State* L) {
 }
 
 int LuaDspFilterBind::setcutoff(lua_State* L) {
-  return LuaHelper::getnumber(L, meta, &Filter::Cutoff);
+  LuaHelper::callstrict1<Filter, int>(L, meta, &Filter::Cutoff);
+  return LuaHelper::chaining(L);
 }
 
-int LuaDspFilterBind::getcutoff(lua_State* L) {
+int LuaDspFilterBind::cutoff(lua_State* L) {
   return LuaHelper::getnumber(L, meta, &Filter::Cutoff);
 }
 
 int LuaDspFilterBind::setresonance(lua_State* L) {
-  return LuaHelper::callstrict1<Filter, int>(L, meta, &Filter::Ressonance);
+  LuaHelper::callstrict1<Filter, int>(L, meta, &Filter::Ressonance);
+  return LuaHelper::chaining(L);
 }
 
-int LuaDspFilterBind::getresonance(lua_State* L) {
+int LuaDspFilterBind::resonance(lua_State* L) {
   return LuaHelper::getnumber(L, meta, &Filter::Ressonance);
 }
 

@@ -72,7 +72,7 @@ namespace psycle { namespace host {
     std::string help();
     virtual MachineUiType::Value ui_type() const { return proxy_.ui_type(); }    
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
-    boost::weak_ptr<ui::Canvas> canvas() { return proxy().canvas(); }
+    boost::weak_ptr<ui::Viewport> viewport() { return proxy().viewport(); }
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);
@@ -109,14 +109,10 @@ namespace psycle { namespace host {
     void InvalidateMenuBar() {}
     void DoExit() { do_exit_ = true; }
     void DoReload() { do_reload_ = true; }
-    boost::shared_ptr<LuaPlugin> this_ptr() { return shared_from_this(); }
-    virtual void OnCanvasChanged() { CanvasChanged(*this); }
-    boost::signal<void (LuaPlugin&)> CanvasChanged;
+    boost::shared_ptr<LuaPlugin> this_ptr() { return shared_from_this(); }    
     boost::signal<void (LuaPlugin&, int)> ViewPortChanged;
-
     std::string install_script() const { return proxy_.install_script(); }
     std::string const title() { return proxy().title(); }
-    std::string machinepath() const { return proxy().machinepath(); }
 
   protected:
     LuaProxy proxy_;

@@ -16,8 +16,7 @@ class RectangleBox : public Window {
   typedef boost::shared_ptr<const RectangleBox> ConstPtr;
   typedef boost::weak_ptr<RectangleBox> WeakPtr;
   typedef boost::weak_ptr<const RectangleBox> ConstWeakPtr;
-  static std::string type() { return "rectanglebox"; }
-  static WindowTypes::Type window_type() { return WindowTypes::RECTANGLEBOX; }
+  static std::string type() { return "rectanglebox"; }  
   virtual std::string GetType() const { return "rectanglebox"; }
 
   RectangleBox() : Window(), fill_color_(0) { set_auto_size(false, false); }
@@ -99,7 +98,6 @@ class Text : public Window {
   Text(const std::string& text);
 
   static std::string type() { return "text"; }  
-  static WindowTypes::Type window_type() { return WindowTypes::TEXT; }
   virtual std::string GetType() const { return "text"; }
 
   virtual void set_properties(const Properties& properties);
@@ -250,8 +248,7 @@ class TerminalFrame : public Frame {
 
 class HeaderGroup : public Group {
  public:
-	static std::string type() { return "headergroup"; }
-  static WindowTypes::Type window_type() { return WindowTypes::HEADERGROUP; }
+	static std::string type() { return "headergroup"; }  
   
 	HeaderGroup();
 	HeaderGroup(const std::string& title);

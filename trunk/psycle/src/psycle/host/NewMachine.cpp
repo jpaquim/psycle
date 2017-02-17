@@ -162,8 +162,10 @@ namespace psycle { namespace host {
 							}
 							else if ( pInfo->type == MACH_LUA) 
 							{ 
-								imgindex = 7; 
-								hitem=hNodes[3]; 
+                if( pInfo->mode != MACHMODE_HOST) {             
+								  imgindex = 7; 
+								  hitem=hNodes[3]; 
+                }
 							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
 								imgindex = 9; 
@@ -228,8 +230,10 @@ namespace psycle { namespace host {
 							}
 							else if ( pInfo->type == MACH_LUA) 
 							{ 
-								imgindex = 6; 
-								hitem=hNodes[0]; 
+                if( pInfo->mode != MACHMODE_HOST) {  
+								  imgindex = 6; 
+								  hitem=hNodes[0]; 
+                }
 							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
 								imgindex = 8; 
@@ -250,8 +254,10 @@ namespace psycle { namespace host {
 							}
 							else if ( pInfo->type == MACH_LUA) 
 							{ 
-								imgindex = 7; 
-								hitem=hNodes[1]; 
+                if( pInfo->mode != MACHMODE_HOST) {  
+								  imgindex = 7; 
+								  hitem=hNodes[1]; 
+                }
 							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
 								imgindex = 9; 
@@ -270,20 +276,23 @@ namespace psycle { namespace host {
 						hitem=hNodes[2];
 					}
 					if(pluginName && pInfo->error.empty())
-						hPlug[i] = m_browser.InsertItem(pInfo->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+            if( pInfo->mode != MACHMODE_HOST) {  
+						  hPlug[i] = m_browser.InsertItem(pInfo->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+            }
 					else {
-						boost::filesystem::path path(pInfo->dllname);
-						if (path.filename() != "blwtbl.dll"
+            if( pInfo->mode != MACHMODE_HOST) {  
+						  boost::filesystem::path path(pInfo->dllname);
+						  if (path.filename() != "blwtbl.dll"
 								&& path.filename() != "fluidsynth.dll"
 								&& path.filename() != "asio.dll"
 								&& path.filename() != "msvcp71.dll"
 								&& path.filename() != "msvcr71.dll"
 								&& path.filename() != "msvcp80.dll"
 								&& path.filename() != "msvcr80.dll") {
-							hPlug[i] = m_browser.InsertItem(pInfo->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+							  hPlug[i] = m_browser.InsertItem(pInfo->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+              }
 						}
 					}
-
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);

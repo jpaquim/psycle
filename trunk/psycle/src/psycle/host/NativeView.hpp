@@ -9,20 +9,23 @@
 namespace psycle {
 namespace host {
 
-  namespace ui { 
+  namespace ui {
+    class Node;
+    class MenuContainer;
     class Window; 
-    class Canvas;
+    class Viewport;
   }
 
   class Machine;
 
-    class CanvasParamView : public CBaseParamView {
+    class PsycleUiParamView : public CBaseParamView {
      public:
-       CanvasParamView(CFrameMachine* frame, Machine* effect);
+       PsycleUiParamView(CFrameMachine* frame, Machine* effect);
 
        BOOL PreCreateWindow(CREATESTRUCT& cs);
 
-       void set_canvas(boost::weak_ptr<ui::Canvas> canvas);
+       void set_viewport(const boost::shared_ptr<ui::Viewport>& canvas); 
+       void set_menu(const boost::shared_ptr<ui::Node>& root_node);
 
 	   virtual void Close(Machine* mac);
      virtual void WindowIdle();
@@ -35,9 +38,10 @@ namespace host {
        
        void OnReload(Machine* mac);      
        virtual bool GetViewSize(CRect& rect);
-     private:
-      void ChangeCanvas(const boost::shared_ptr<ui::Canvas>& canvas);     
-      boost::weak_ptr<ui::Canvas> canvas_;
+     private:              
+      boost::weak_ptr<ui::Viewport> viewport_;
+      boost::shared_ptr<ui::Node> machine_menu_;
+      boost::shared_ptr<ui::MenuContainer> menu_container_;
     };
 
 		/// Native Knob-based UI for psycle plugins and non-GUI VSTs

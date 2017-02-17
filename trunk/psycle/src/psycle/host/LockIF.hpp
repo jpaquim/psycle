@@ -29,24 +29,7 @@ class Lock : public LockIF {
  private:
    std::auto_ptr<LockIF> imp_;
 };
-/*
-#ifdef _WIN32
-namespace mfc {
 
-  class WinLock : public LockIF {
-   public:     
-     WinLock() {  InitializeCriticalSection(&cs); }
-     virtual ~WinLock() { DeleteCriticalSection(&cs); }
-
-    virtual void lock() const { ::EnterCriticalSection(&cs); }
-    virtual void unlock() const { ::LeaveCriticalSection(&cs); }
-
-   private:
-    mutable CRITICAL_SECTION cs;  
-  };
-}
-#endif
-*/
 class Timer { 
  public:
   Timer();
@@ -67,6 +50,8 @@ class GlobalTimer {
   friend class CChildView;
   friend Timer;
  public:
+  static const int refresh_rate;
+
   static GlobalTimer& instance() {
     static GlobalTimer instance;
     return instance;
@@ -91,5 +76,5 @@ class GlobalTimer {
   bool started_;
 };
 
-}  // namespace
-}  // namespace
+}  // namespace host
+}  // namespace psycle

@@ -22,7 +22,8 @@ namespace host {
 
 		class CTransformPatternDlg;
 
-    namespace ui {      
+    namespace ui {
+      class Node;          
       class Window;
 	    class MenuContainer;
     }
@@ -247,7 +248,7 @@ namespace host {
 			void RestoreRecent();
     public:      
       WINDOWPLACEMENT adjusted_child_view_placement();
-      void ChangeCanvas(ui::Window* canvas);
+      void ChangeViewport(ui::Window* canvas);
       void EraseOldExtensionWindow();
       void ResizeExtensionView();
       void ShowExtensionView();
@@ -482,23 +483,27 @@ namespace host {
 			COLORREF pvc_fontSel[MAX_TRACKS+1];
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];            
-    public:
-      virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
+    public:      
       virtual void OnAddViewMenu(class Link& link);
+      virtual void OnRestoreViewMenu();
       virtual void OnAddHelpMenu(class Link& link);
       virtual void HideExtensionView();
       virtual void OnAddWindowsMenu(class Link& link);
       virtual void OnRemoveWindowsMenu(class LuaPlugin* plugin);
       virtual void OnReplaceHelpMenu(class Link& link, int pos);
       virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin);
-      virtual void OnPluginCanvasChanged(class LuaPlugin& plugin);
+      virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
     private:
+      void ShowExtensionMenu(LuaPlugin& plugin);
+      void HideExtensionMenu();
       typedef std::map<std::uint16_t, Link> MenuMap;
       MenuMap menuItemIdMap_;
       int menu_pos_;
+      boost::shared_ptr<ui::Node> extension_menu_;
       HMENU windows_menu_;
       CMenu* FindSubMenu(CMenu* parent, const std::string& text);
-      std::string menu_label(const Link& link) const;               
+      std::string menu_label(const Link& link) const;   
+      boost::shared_ptr<ui::MenuContainer> menu_container_;             
 		public:      
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);

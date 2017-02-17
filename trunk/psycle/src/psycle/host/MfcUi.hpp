@@ -11,6 +11,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include <map>
 
 namespace psycle {
@@ -1698,6 +1699,11 @@ public:
 class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
  public:  
   FrameImp() : WindowTemplateImp<CFrameWnd, ui::FrameImp>() {}
+  virtual ~FrameImp() {
+    if (viewport_) {
+      viewport_->set_parent(0);
+    }
+  }
 
   static FrameImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     FrameImp* imp = new FrameImp();    
@@ -1756,11 +1762,19 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
     if (viewport) {
       CWnd* wnd = dynamic_cast<CWnd*>(viewport->imp());
       if (wnd) {      
-        wnd->SetParent(this);              
+        wnd->SetParent(this);
+        CRect rect;
+        this->GetClientRect(rect);      
+        if (::IsWindow(wnd->m_hWnd)) {
+          wnd->MoveWindow(&rect);
+        }
+        wnd->ShowWindow(SW_SHOW);
       }
     }
     viewport_ = viewport;
   }
+  virtual Window::Ptr& dev_viewport() { return viewport_; }
+  void DevSetMenuRootNode(const Node::Ptr& node);
 
   virtual void DevShowDecoration();
   virtual void DevHideDecoration();
@@ -1807,7 +1821,9 @@ class FrameImp : public WindowTemplateImp<CFrameWnd, ui::FrameImp> {
       ui::Event ev;
       window()->OnKillFocus(ev);
     }
-  }
+  }  
+  ui::MenuContainer menu_container_;
+  CMenu frame_menu_;
 };
 
 class PopupFrameImp : public FrameImp {
@@ -1868,7 +1884,8 @@ class PopupMenuImp : public MenuContainerImp {
    HMENU popup_menu_;
 };
 
-class MenuImp : public ui::MenuImp {  
+class MenuImp : public ui::MenuImp {
+ friend MenuContainerImp;  
  public:
   MenuImp() : hmenu_(0), parent_(0), pos_(0), id_(0) {}
   MenuImp(HMENU parent) : hmenu_(0), parent_(parent), pos_(0), id_(0) {}
@@ -1876,22 +1893,24 @@ class MenuImp : public ui::MenuImp {
     
   void set_parent(HMENU parent) { parent_ = parent; }
   HMENU parent() { return parent_; }
-  virtual void dev_set_text(const std::string& text) {    
-    ::ModifyMenu(parent_, pos_, MF_BYPOSITION, 0, Charset::utf8_to_win(text).c_str());    
-  }
+  virtual void dev_set_text(const std::string& text);
   void dev_set_position(int pos) { pos_ = pos; }
   int dev_position() const { return pos_; }
   void CreateMenu(const std::string& text);
-  void CreateMenuItem(const std::string& text, ui::Image* image);
+  void CreateMenuItem(const std::string& text, ui::Image* image, bool selected);
+  void dev_set_text_and_select(const std::string& text);
+  void dev_set_text_and_deselect(const std::string& text);
+  bool dev_selected() const;
 
   HMENU hmenu() { return hmenu_; }
   int id() const { return id_; }
   
  private:
-    HMENU hmenu_;
-    HMENU parent_;    
-    int pos_;
-    int id_;
+   void OnNodeChanged(Node& node);  
+   HMENU hmenu_;
+   HMENU parent_;    
+   int pos_;
+   int id_;
 };
 
 class TreeViewImp;
@@ -2378,6 +2397,9 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void DevAddText(const std::string& text) {       
     f(SCI_ADDTEXT, text.size(), text.c_str());
   }
+  void DevInsertText(const std::string& text, int pos) {       
+    f(SCI_INSERTTEXT, pos, text.c_str());
+  }
 	void DevClearAll() { f(SCI_CLEARALL, 0, 0); }
   void DevFindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const {
     TextToFind txt;
@@ -2388,6 +2410,22 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
     cpselstart = txt.chrgText.cpMin;
     cpselend = txt.chrgText.cpMax;
   }
+  std::string dev_text_range(int cpmin, int cpmax) const {
+    if (cpmin < cpmax) {
+      TextRange tr;
+      tr.chrg.cpMin = cpmin;
+      tr.chrg.cpMax = cpmax;
+      std::vector<char> buffer((std::max)(0, cpmax - cpmin + 1));    
+      tr.lpstrText = &buffer[0];
+      f(SCI_GETTEXTRANGE, 0, &tr);
+      return std::string(&buffer[0]);
+    } else {
+      return "";
+    }
+  }
+  void dev_delete_text_range(int pos, int length) {
+    f(SCI_DELETERANGE, pos, length);
+  }
   void DevGotoLine(int line_pos) { f(SCI_GOTOLINE, line_pos, 0); }
   void DevGotoPos(int char_pos) { f(SCI_GOTOPOS, char_pos, 0); }
   virtual void DevLineUp() { f(SCI_LINEUP, 0, 0); }
@@ -2396,6 +2434,9 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   virtual void DevCharRight() { f(SCI_CHARRIGHT, 0, 0); }
   virtual void DevWordLeft() { f(SCI_WORDLEFT, 0, 0); }
   virtual void DevWordRight() { f(SCI_WORDRIGHT, 0, 0); }
+  virtual void DevCopy() { f(SCI_COPY, 0, 0); }
+  virtual void DevCut() { f(SCI_CUT, 0, 0); }
+  virtual void DevPaste() { f(SCI_PASTE, 0, 0); }
   int dev_length() const {
     return const_cast<ScintillaImp*>(this)->f(SCI_GETLENGTH, 0, 0);
   }
@@ -2471,7 +2512,10 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void dev_set_folding_background_color(ARGB color) {
     f(SCI_SETFOLDMARGINCOLOUR, 1, ToCOLORREF(color));
     f(SCI_SETFOLDMARGINHICOLOUR, 1, ToCOLORREF(color));
-  }    
+  }
+  void DevSetFoldingMarkerColors(ARGB fore, ARGB back) {
+    SetFoldingColors(fore, back);
+  }
   void dev_set_sel_foreground_color(ARGB color) { f(SCI_SETSELFORE, 1, ToCOLORREF(color)); }
  // COLORREF sel_foreground_color() const { return f(SCI_GETSELFORE, 0, 0); }
   void dev_set_sel_background_color(ARGB color) { f(SCI_SETSELBACK, 1, ToCOLORREF(color)); }
@@ -2528,6 +2572,10 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   int dev_line() const {  
     Sci_Position pos = f(SCI_GETCURRENTPOS, 0, 0);    
     return f(SCI_LINEFROMPOSITION, pos, 0);
+  }
+  int dev_current_pos() const {  
+    Sci_Position pos = f(SCI_GETCURRENTPOS, 0, 0);    
+    return f(SCI_GETCURRENTPOS, pos, 0);
   }
   bool dev_over_type() const {
     return f(SCI_GETOVERTYPE, 0, 0);
@@ -2586,7 +2634,7 @@ class ScintillaImp : public WindowTemplateImp<CWnd, ui::ScintillaImp> {
   void SetupHighlighting(const Lexer& lexer);
   void SetupFolding(const Lexer& lexer);
   void SetFoldingBasics();
-  void SetFoldingColors(const Lexer& lexer);
+  void SetFoldingColors(ARGB fore, ARGB back);
   void SetFoldingMarkers();
   void SetupLexerType();
 };

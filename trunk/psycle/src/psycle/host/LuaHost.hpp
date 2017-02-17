@@ -14,15 +14,16 @@ struct luaL_Reg;
 namespace psycle {
 namespace host {
 
-namespace ui { 
+namespace ui {
+  class Node;
   class Commands; 
-  class Canvas;  
+  class Viewport;  
   class Frame;
-  class MenuContainer;
-  class Systems;
+  class MenuContainer; 
 }
     
 class LuaPlugin;
+class LuaRun;
 
 typedef boost::shared_ptr<LuaPlugin> LuaPluginPtr;
 extern boost::shared_ptr<LuaPlugin> nullPtr;
@@ -40,16 +41,16 @@ class LuaControl : public Lock {
   lua_State* state() const { return L; }
   std::string install_script() const;
   virtual PluginInfo meta() const;
-  std::string machinepath() const { return machinepath_; } 
   void yield();
   void resume();
  
   protected:
    lua_State* L;
    lua_State* LM;
-   std::auto_ptr<ui::Commands> invokelater_;   
+   std::auto_ptr<ui::Commands> invokelater_;
+   std::auto_ptr<ui::Commands> timer_;
+   std::set<int> clear_timers_;       
    PluginInfo parse_info() const;
-   mutable std::string machinepath_;  
 };
 
 class LuaStarter : public LuaControl {
@@ -87,7 +88,7 @@ class LuaProxy : public LuaControl {
     frame_.reset();
   }
 
-  boost::weak_ptr<ui::Canvas> canvas() {  return lua_mac_->canvas(); }
+  boost::weak_ptr<ui::Viewport> viewport() {  return lua_mac_->viewport(); }
 
   // Plugin calls
   void SequencerTick();
@@ -120,13 +121,11 @@ class LuaProxy : public LuaControl {
   std::string get_program_name(int bnkidx, int idx);
   MachinePresetType::Value prsmode() const { return lua_mac_->prsmode(); }  
   int num_cols() const { return lua_mac_->numcols(); }
-	int num_parameter() const { return lua_mac_->numparams(); }
-        
-  void OnCanvasChanged();
+	int num_parameter() const { return lua_mac_->numparams(); }          
   void OnActivated(int viewport);
   void OnDeactivated();
   
-  boost::weak_ptr<ui::MenuContainer> menu_bar() { return menu_bar_; }
+  boost::weak_ptr<ui::Node> menu_root_node() { return menu_root_node_; }
 
   template<typename T>   
   void InvokeLater(T& f) { 
@@ -145,8 +144,6 @@ class LuaProxy : public LuaControl {
   int userinterface() const { return user_interface_; }
   std::string title() const { return lua_mac_ ? lua_mac_->title() : "noname"; }
   void UpdateWindowsMenu();
-  ui::Systems* systems();
-  void update_systems_state(lua_State* L);  
   
   static int invokelater(lua_State* L);
 	// script callbacks
@@ -156,7 +153,24 @@ class LuaProxy : public LuaControl {
   static int terminal_output(lua_State* L);  
   static int call_selmachine(lua_State* L);
   static int set_machine(lua_State* L);  
-  static int set_menubar(lua_State* L);
+  static int setmenurootnode(lua_State* L);
+  static int setsetting(lua_State* L);
+  static int setting(lua_State* L);
+  static int reloadstartscript(lua_State* L);
+  int set_time_out(LuaRun* runnable, int interval);
+  int set_interval(LuaRun* runnable, int interval);
+  void clear_timer(int id);
+
+  bool has_timer_clear(int id) {
+    bool result(false);
+    std::set<int>::iterator it = clear_timers_.find(id);
+    if (it != clear_timers_.end()) {
+      clear_timers_.erase(it);
+      result = true;
+    }
+    return result;
+  }
+
  private:
   void ExportCFunctions();
   std::string ParDisplay(int par);
@@ -170,12 +184,12 @@ class LuaProxy : public LuaControl {
       
   mutable bool is_meta_cache_updated_;
   mutable PluginInfo meta_cache_; 
-  LuaPlugin *host_;
+  LuaPlugin* host_;
   LuaMachine* lua_mac_;
-  boost::weak_ptr<ui::MenuContainer> menu_bar_;
+  boost::weak_ptr<ui::Node> menu_root_node_;
   boost::shared_ptr<ui::Frame> frame_;
   int user_interface_;
-  std::auto_ptr<ui::Systems> systems_;  
+  int clock_;  
 };
 
 class LuaPluginBind {
@@ -234,13 +248,12 @@ class HostExtensions {
   HostExtensions::List Get(const std::string& name);
   LuaPluginPtr Get(int idx);  
   void ReplaceHelpMenu(Link& link, int pos);
+  void RestoreViewMenu();
   void AddViewMenu(Link& link);
   void AddHelpMenu(Link& link);
   void AddWindowsMenu(Link& link);
-  void OnPluginCanvasChanged(LuaPlugin& plugin);
   void OnPluginViewPortChanged(LuaPlugin& plugin, int viewport);
   void HideActiveLua();
-  void HideActiveLuaMenu();
   void RemoveFromWindowsMenu(LuaPlugin* plugin);
   LuaPluginPtr Execute(Link& link);
   void ChangeWindowsMenuText(LuaPlugin* plugin);
