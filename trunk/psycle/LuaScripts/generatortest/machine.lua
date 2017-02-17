@@ -19,31 +19,10 @@ local arp = require("psycle.arp")
 local param = require("psycle.parameter")
   
 -- plugin info
-function machine:info()
-  return  {
-       vendor="psycle",
-       name="luaris",
-       generator=1, --machine.GENERATOR,
-       mode = machine.GENERATOR,
-       version=0,
-       api=0} -- noteon = 1
-end
+-- moved to register file /LuaScripts/generatortest.lua
 
 -- help text displayed by the host
-function machine:h3()
-  a = 2 + "s"
-end
-
-function machine:h2()
-  self:h3()
-end
-
-function machine:h1()
-  self:h2()
-end
-
 function machine:help()
-  self:h1()
   return "01xx : slide up\n"..
             "02xx : slide down\n"..
             "04xy : vibrato(frq,gain)\n"..
