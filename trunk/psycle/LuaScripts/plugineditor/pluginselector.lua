@@ -216,7 +216,7 @@ function creategroup:initbuttons()
   function createbutton:onclick()
      local node = that.createlist:selected()
      if node ~= nil and node.details then
-        if node.setting.general.machinename:value() == "" then
+        if node.details:isplugin() and node.setting.general.machinename:value() == "" then
           psycle.alert("Field general-machinename required.")
         else
           node.details:parseproperties()               
