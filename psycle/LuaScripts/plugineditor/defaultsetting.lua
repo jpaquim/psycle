@@ -16,7 +16,7 @@ help.properties.helplevel = property:new(3, "Help Level")
 
 local tab = node:new(setting):settext("Tab"):setname("tab")
 tab.properties = orderedtable.new()
-tab.properties.tabwidth = property:new(32, "Tabwidth")
+tab.properties.tabwidth = property:new(4, "Tabwidth")
 
 local textpage = node:new(setting):settext("Textpage"):setname("textpage")
 textpage.properties = orderedtable.new()
