@@ -1,13 +1,19 @@
--- plugloaddemo/machine.lua
--- demo module that loads and uses a vst plugin inside
+--[[ 
+psycle plugloaddemo (c) 2014 by psycledelics
+File:  plugloaddemo/machine.lua.lua
+Description: demo module that loads and uses a vst plugin inside
+             freeverb3vst must be installed
+copyright 2014 members of the psycle project http://psycle.sourceforge.net
+This source is free software ; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation ; either version 2, or (at your option) any later version.
+]]
 
 -- get machine base
 machine = require("psycle.machine"):new()
 
-function machine:info()
-  return {vendor="psycle examples", name="pluginloaddemo", generator = 0, version=0,
-	      api=0}   
-end
+-- plugin info
+-- moved to register file /LuaScripts/plugloaddemo.lua
 
 -- plugin constructor
 function machine:init()   

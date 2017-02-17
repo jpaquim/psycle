@@ -1,18 +1,23 @@
--- resamplerdemo/machine.lua
--- creates a wavetable with 10 saws at 261 hz and
--- a different set of harmonics
--- additional a slide up from the noton pitch 
--- is added
+--[[ 
+psycle resamplerdemo (c) 2014 by psycledelics
+File:  resamplerdemo/machine.lua
+Description: creates a wavetable with 10 saws at 261 hz and
+             a different set of harmonics
+             additional a slide up from the noton pitch is added
+copyright 2014 members of the psycle project http://psycle.sourceforge.net
+This source is free software ; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation ; either version 2, or (at your option) any later version.
+]]
 
 --require('mobdebug').start()
 
-machine = require("psycle.machine"):new()
+local machine = require("psycle.machine"):new()
 
-array = require("psycle.array");
+local array = require("psycle.array");
 
-function machine:info()
-  return { vendor="psycle", name="resamplerdemo", generator=1, version=0, api=0 }
-end
+-- plugin info
+-- moved to register file /LuaScripts/resamplerdemo.lua
 
 function machine.saw(num, maxharmonic)
   local data = array.new(num)  
@@ -87,15 +92,3 @@ function machine:onsrchanged(rate)
 end
 
 return machine
-
-
--- todo
--- To eliminate these problems, we can gradually taper off the higher order partials by multiplying them by a raised cosine window. The raised cosine can be calculated as follows:
--- This can be calculated once for each table
--- double kGibbs = PI / (2 * numPartials);
--- This is calculated once for each partial in each table
--- double temp = cos((partial-1)*kGibbs);
--- double raisedCosine = temp * temp;; // Square it
--- Calculate windowed amplitude for Nth partial
--- ampl = raisedCosine / partial; 
--- aus dem buch audio anecdotes 2
