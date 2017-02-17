@@ -12,7 +12,7 @@ setting.meta = {
 
 local help = node:new(setting):settext("Help"):setname("help")
 help.properties = orderedtable.new()
-help.properties.helplevel = property:new(3, "Help Level")
+help.properties.helplevel = property:new(2, "Help Level")
 
 local tab = node:new(setting):settext("Tab"):setname("tab")
 tab.properties = orderedtable.new()
