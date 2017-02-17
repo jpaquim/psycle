@@ -263,10 +263,17 @@ const char* LuaPluginInfoBind::meta = "psyplugininfometa";
 int LuaPluginInfoBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
+    {"identifier", identifier},
     {"dllname", dllname},
+    {"error", error},
     {"name", name},
     {"type", type},
-    {"mode", mode},    
+    {"mode", mode},   
+    {"vendor", vendor},
+    {"description", description},
+    {"version", version},
+    {"apiversion", apiversion},
+    {"allow", allow},	 
     { NULL, NULL }
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -295,6 +302,76 @@ int LuaPluginInfoBind::dllname(lua_State* L) {
   lua_pushstring(L, ud->dllname.c_str());
   return 1;
 }
+
+int LuaPluginInfoBind::description(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushstring(L, ud->desc.c_str());
+  return 1;
+}
+
+int LuaPluginInfoBind::version(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushstring(L, ud->version.c_str());
+  return 1;
+}
+
+int LuaPluginInfoBind::identifier(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushinteger(L, ud->identifier);
+  return 1;
+}
+
+int LuaPluginInfoBind::vendor(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushstring(L, ud->vendor.c_str());
+  return 1;
+}
+
+int LuaPluginInfoBind::error(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushstring(L, ud->error.c_str());
+  return 1;
+}
+
+int LuaPluginInfoBind::apiversion(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushinteger(L, ud->APIversion);
+  return 1;
+}
+
+int LuaPluginInfoBind::allow(lua_State* L) {  
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }
+  boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(L, 1, meta);  
+  lua_pushboolean(L, ud->allow);
+  return 1;
+}    
 
 int LuaPluginInfoBind::name(lua_State* L) {  
   int n = lua_gettop(L);  // Number of arguments

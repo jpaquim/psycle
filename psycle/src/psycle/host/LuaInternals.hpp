@@ -93,6 +93,13 @@ struct LuaActionListenerBind {
     static int name(lua_State* L);
     static int type(lua_State* L);
     static int mode(lua_State* L);
+    static int version(lua_State* L);
+    static int apiversion(lua_State* L);
+    static int description(lua_State* L);
+    static int identifier(lua_State* L);
+    static int error(lua_State* L);
+    static int vendor(lua_State* L);
+    static int allow(lua_State* L);
   };
 
   struct LuaPluginCatcherBind {
