@@ -110,6 +110,17 @@ function mainviewport:onapplysetting()
   if f then
     self:link(f()) 
   end
+  if self.filecommands_ and self.pages and self.commandhandler then 
+    local preventedkeys = self.commandhandler:preventedkeys() 
+    self.filecommands_.newpage.preventedkeys = preventedkeys
+    self.filecommands_.loadpage.preventedkeys = preventedkeys
+    local pages = self.pages.children:windows()
+    for i=1, #self.pages do
+      if self.pages[i].setpreventedkeys then
+         self.pages[i]:setpreventedkeys(preventedkeys)
+      end
+    end
+  end
 end  
 
 function mainviewport:initcommandhandler()
