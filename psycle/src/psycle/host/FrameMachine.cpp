@@ -124,13 +124,7 @@ namespace psycle { namespace host {
 
 				GetMenu()->GetSubMenu(1)->ModifyMenu(5, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
 					((Plugin*)_machine)->GetInfo()->Command);
-			}
-      
-			if (_machine->_type == MACH_LUA)
-			{        
-        /*barmenu.setcmenu(GetMenu());
-        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(&barmenu).get();*/
-			}
+			}      			
 
 			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!toolBar.LoadToolBar(IDR_FRAMEMACHINE))
@@ -648,12 +642,12 @@ namespace psycle { namespace host {
 
     void CFrameMachine::OnReload() {
       pView->OnReload(_machine);
-      boost::weak_ptr<ui::MenuContainer> menu_bar = dynamic_cast<LuaPlugin*>(_machine)->proxy().menu_bar();
+/*      boost::weak_ptr<ui::MenuContainer> menu_bar = dynamic_cast<LuaPlugin*>(_machine)->proxy().menu_bar();
       if (!menu_bar.expired()) {
         ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
         menubar_imp->set_menu_window(this, menu_bar.lock()->root_node().lock());
         menu_bar.lock()->Invalidate();
-      }       
+      }*/       
       ResizeWindow(0);
       pView->Invalidate(false);
     }
@@ -781,20 +775,19 @@ namespace psycle { namespace host {
 				gui = new MixerFrameView(this,&machine());
 			} else 
       if(machine()._type == MACH_LUA) {
-        CanvasParamView* cpv;
-        gui = cpv = new CanvasParamView(this, &machine());
+        PsycleUiParamView* psyclegui = new PsycleUiParamView(this, &machine());
+        gui = psyclegui;
         LuaPlugin* lp = (LuaPlugin*) _machine;
-        ui::Canvas::WeakPtr user_view = lp->canvas();
-        if (!user_view.expired()) {
+        ui::Node::Ptr menu_root_node;
+        if (!lp->proxy().menu_root_node().expired()) {
+           menu_root_node = lp->proxy().menu_root_node().lock();
+        }
+        psyclegui->set_menu(menu_root_node);
+        ui::Viewport::WeakPtr viewport = lp->viewport();
+        if (!viewport.expired()) {
           gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
-				    CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
-          cpv->set_canvas(user_view);
-          boost::weak_ptr<ui::MenuContainer> menu_bar = lp->proxy().menu_bar();
-          if (!menu_bar.expired()) {
-            ui::mfc::MenuContainerImp* menubar_imp = (ui::mfc::MenuContainerImp*) menu_bar.lock()->imp();
-            menubar_imp->set_menu_window(this, menu_bar.lock()->root_node().lock());
-            menu_bar.lock()->Invalidate();
-          }          
+				    CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);            
+          psyclegui->set_viewport(viewport.lock()); 
           return gui;
         } else {
           gui = new CNativeView(this,&machine());
@@ -836,9 +829,10 @@ namespace psycle { namespace host {
 			}
 
 			if (_machine->_type == MACH_LUA) {
-			  LuaPlugin* lp = (LuaPlugin*) _machine;
-			  Canvas* user_view = lp->canvas().lock().get();
-			  if (user_view !=0 && lp->ui_type() == MachineUiType::CUSTOMWND) {
+			  LuaPlugin* plugin = dynamic_cast<LuaPlugin*>(_machine);
+        assert(plugin);
+			  ui::Viewport* user_view = plugin->viewport().lock().get();
+			  if (user_view != 0 && plugin->ui_type() == MachineUiType::CUSTOMWND) {
 			    user_view->OnSize(ui::Dimension(rcClient.right, rcClient.bottom));
 			  }
 			}  

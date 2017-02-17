@@ -24,7 +24,7 @@ namespace psycle { namespace host {
 		
 	PsycleConfig::MachineParam* CNativeView::uiSetting;
 
-    BEGIN_MESSAGE_MAP(CanvasParamView, CWnd)
+    BEGIN_MESSAGE_MAP(PsycleUiParamView, CWnd)
 			ON_WM_CREATE()	
       ON_WM_DESTROY()
 			ON_WM_PAINT()
@@ -36,11 +36,11 @@ namespace psycle { namespace host {
 			ON_WM_RBUTTONUP()      
 		END_MESSAGE_MAP()
 
-    CanvasParamView::CanvasParamView(CFrameMachine* frame, Machine* effect) :
-          CBaseParamView(frame) {         
+    PsycleUiParamView::PsycleUiParamView(CFrameMachine* frame, Machine* effect) :
+          CBaseParamView(frame), menu_container_(new ui::MenuContainer())  {         
     }
 
-    int CanvasParamView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
+    int PsycleUiParamView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 		{
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
 			{
@@ -49,10 +49,10 @@ namespace psycle { namespace host {
 			return 0;
 		}
 
-    void CanvasParamView::OnDestroy() {       
+    void PsycleUiParamView::OnDestroy() {       
     }
 
-		BOOL CanvasParamView::PreCreateWindow(CREATESTRUCT& cs)
+		BOOL PsycleUiParamView::PreCreateWindow(CREATESTRUCT& cs)
 		{
 			if (!CWnd::PreCreateWindow(cs))
 				return FALSE;
@@ -60,70 +60,78 @@ namespace psycle { namespace host {
 			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 			cs.style &= ~WS_BORDER;
 			return TRUE;
-		}				
+		}				    
 
-    void CanvasParamView::set_canvas(boost::weak_ptr<ui::Canvas> canvas) {
-      if (!canvas.expired()) {
-        ChangeCanvas(canvas.lock());
-      }
-    }
-
-    void CanvasParamView::WindowIdle() {       
-      if (!canvas_.expired()) {
-        canvas_.lock()->Flush();
+    void PsycleUiParamView::WindowIdle() {       
+      if (!viewport_.expired() && viewport_.lock()->IsSaving()) {
+        viewport_.lock()->Flush();
       }      
     }
 
-    void CanvasParamView::OnSize(UINT nType, int cx, int cy) {
+    void PsycleUiParamView::OnSize(UINT nType, int cx, int cy) {
       CWnd* child = GetWindow(GW_CHILD);
       if (child) {
         child->MoveWindow(0, 0, cx, cy);
       }      
     }
 
-    bool CanvasParamView::GetViewSize(CRect& rect) {
+    bool PsycleUiParamView::GetViewSize(CRect& rect) {
       rect.top = 0;
       rect.left = 0;
       rect.right = 1000;
       rect.bottom = 1000;
-      if (!canvas_.expired()) {
-        rect.right = canvas_.lock()->dim().width();  
-        rect.bottom = canvas_.lock()->dim().height();
+      if (!viewport_.expired()) {
+        rect.right = viewport_.lock()->dim().width();  
+        rect.bottom = viewport_.lock()->dim().height();
       }
       return true;
     }
 
-    void CanvasParamView::OnReload(Machine* mac)
+    void PsycleUiParamView::OnReload(Machine* mac)
     {      
-      LuaPlugin* lp = (LuaPlugin*) (mac);
-      ui::Canvas::WeakPtr canvas = lp->canvas();      
-      if (!canvas.expired()) {
-        ChangeCanvas(canvas.lock());
-      } else {
-        ChangeCanvas(Canvas::Ptr());
+      LuaPlugin* plugin = dynamic_cast<LuaPlugin*>(mac);
+      assert(plugin);
+      using namespace ui;
+      set_viewport(!plugin->viewport().expired() ? plugin->viewport().lock() 
+                                                 : Viewport::Ptr());      
+      Node::Ptr menu_root_node;
+      if (!plugin->proxy().menu_root_node().expired()) {
+        menu_root_node = plugin->proxy().menu_root_node().lock();
+      }
+      set_menu(menu_root_node);
+    }
+
+	  void PsycleUiParamView::Close(Machine* mac)
+    {     
+      if (!viewport_.expired()) {
+        set_viewport(Viewport::Ptr());        
       }
     }
 
-	void CanvasParamView::Close(Machine* mac)
-    {
-      LuaPlugin* lp = (LuaPlugin*) (mac);
-      ui::Canvas::WeakPtr canvas = lp->canvas();      
-      if (!canvas.expired()) {
-        ChangeCanvas(Canvas::Ptr());        
-      }
+    void PsycleUiParamView::set_menu(const ui::Node::Ptr& root_node) {
+      using namespace ui;
+      menu_container_->clear();              
+      machine_menu_.reset(new Node());
+      if (root_node) {        
+        machine_menu_->AddNode(root_node);              
+        menu_container_->set_root_node(machine_menu_);
+        mfc::MenuContainerImp* menucontainer_imp = dynamic_cast<mfc::MenuContainerImp*>(menu_container_->imp());
+        assert(menucontainer_imp);
+        menucontainer_imp->set_menu_window(parentFrame, machine_menu_);
+      }      
     }
 
-    void CanvasParamView::ChangeCanvas(const ui::Canvas::Ptr& canvas) {      
-      if (!canvas_.expired()) {
-        canvas_.lock()->set_parent(0);        
+    void PsycleUiParamView::set_viewport(const ui::Viewport::Ptr& viewport) {      
+      if (!viewport_.expired()) {
+        viewport_.lock()->set_parent(0);        
       }
-      if (canvas) {
-        ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) canvas->imp();            
+      if (viewport) {
+        ui::mfc::WindowImp* imp = (ui::mfc::WindowImp*) viewport->imp();            
         imp->SetParent(this);       
-        canvas->Show();
-        canvas->UpdateAlign();
+        viewport->Show();
+        viewport->UpdateAlign();
         SetActiveWindow();
-        canvas_ = canvas;
+        viewport_ = viewport;
       }
     }
 
@@ -386,7 +394,12 @@ namespace psycle { namespace host {
 		}
 
 		void CNativeView::OnMouseMove(UINT nFlags, CPoint point) 
-		{      
+		{   
+      ///\todo: positioning true causes a lag tweaking lua machines 
+      /// Reason ?  
+      if (_pMachine->_type == MACH_LUA) {        
+        positioning = false;
+      }
 			if (istweak && !positioning && _pMachine->GetParamType(tweakpar)!=4)
 			{
 				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
@@ -431,7 +444,7 @@ namespace psycle { namespace host {
 				visualtweakvalue = nv;
 				prevval=helpers::math::round<int,float>(nv);
 				_pMachine->SetParameter(tweakpar,prevval);
-				parentFrame->Automate(tweakpar, prevval, false, minval);
+			  parentFrame->Automate(tweakpar, prevval, false, minval);
 				Invalidate(false);
 			}
 			positioning=false;

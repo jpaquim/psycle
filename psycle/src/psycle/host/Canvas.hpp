@@ -78,24 +78,23 @@ class GridAligner : public Aligner {
 };
 
 // canvas
-class Canvas : public ui::Group {  
+class Viewport : public ui::Group {  
  public:
-  typedef boost::shared_ptr<Canvas> Ptr;
-  typedef boost::shared_ptr<const Canvas> ConstPtr;
-  typedef boost::weak_ptr<Canvas> WeakPtr;
-  typedef boost::weak_ptr<const Canvas> ConstWeakPtr;
+  typedef boost::shared_ptr<Viewport> Ptr;
+  typedef boost::shared_ptr<const Viewport> ConstPtr;
+  typedef boost::weak_ptr<Viewport> WeakPtr;
+  typedef boost::weak_ptr<const Viewport> ConstWeakPtr;
   
-  Canvas() : Group(), save_rgn_(ui::Systems::instance().CreateRegion()) {    
+  Viewport() : Group(), save_rgn_(ui::Systems::instance().CreateRegion()) {    
     Init();
   }
-  Canvas(ui::Window* parent) : 
+  Viewport(ui::Window* parent) : 
       Group(),
       save_rgn_(ui::Systems::instance().CreateRegion()) {    
     Init(); 
   }   
     
-  static std::string type() { return "canvas"; }
-  static WindowTypes::Type window_type() { return WindowTypes::CANVAS; }
+  static std::string type() { return "canvas"; }  
   virtual std::string GetType() const { return "canvas"; }     
   void Flush();  
   void StealFocus(const Window::Ptr& item);  
@@ -116,8 +115,8 @@ class Canvas : public ui::Group {
     
  private:  
   void Init();  
-  Canvas(const Canvas& other) {}
-  Canvas& operator=(Canvas rhs) {}
+  Viewport(const Viewport& other) {}
+  Viewport& operator=(Viewport rhs) {}
  
   template <class T, class T1>
   void WorkEvent(T& ev, void (T1::*ptmember)(T&), Window::Ptr& item) {

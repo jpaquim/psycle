@@ -24,19 +24,10 @@ void Lock::unlock() const {
   imp_->unlock();
 }
 
-
-/*
-LockIF& LockIF::Instance() {
-#ifdef _WIN32	
-  static mfc::WinLock locker;
-#else 	
-  static LockIF locker;
-#endif	
-  return locker;  
-}
-*/
 Timer::Timer() : is_running_(false) { GlobalTimer::instance().AddListener(this); }
 Timer::~Timer() { GlobalTimer::instance().RemoveListener(this); }
+
+const int GlobalTimer::refresh_rate = 30;
 
 void GlobalTimer::AddListener(Timer* listener) {                
   listeners_.push_back(listener);

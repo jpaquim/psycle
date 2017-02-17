@@ -14,7 +14,7 @@ namespace ui {
 
 void DefaultAligner::CalcDimensions() {	
   Dimension current_dim;  
-  ui::Rect current_pos;    
+  Rect current_pos;    
 
   for (iterator i = begin(); i != end(); ++i) {
     Window::Ptr item = *i;
@@ -22,7 +22,7 @@ void DefaultAligner::CalcDimensions() {
       continue;
     }	    
 		calc_window_dim(item);	
-		ui::Dimension item_dim = item_dim_;
+		Dimension item_dim = item_dim_;
     // width		
     {
       double diff = current_pos.width();
@@ -164,7 +164,7 @@ void DefaultAligner::SetPositions() {
 }
 
 void DefaultAligner::prepare_pos_set() {
-	current_pos_.set(ui::Point::zero(), group()->position().dimension());
+	current_pos_.set(Point::zero(), group()->position().dimension());
 }
 
 bool DefaultAligner::skip_item(const Window::Ptr& item) const {
@@ -252,7 +252,7 @@ void DefaultAligner::calc_window_dim(const Window::Ptr& window) {
  } else {
 	  item_dim_ = window->dim();
     if (window->auto_size()) {
-      ui::Dimension auto_dim = window->OnCalcAutoDimension();
+      Dimension auto_dim = window->OnCalcAutoDimension();
       if (window->auto_size_width()) {
         item_dim_.set_width(auto_dim.width());
       }
@@ -263,48 +263,48 @@ void DefaultAligner::calc_window_dim(const Window::Ptr& window) {
   }  
 }
 
-ui::Rect DefaultAligner::calc_new_pos_left(const Window::Ptr& window) const {
-	ui::Rect result = current_pos_;  
+Rect DefaultAligner::calc_new_pos_left(const Window::Ptr& window) const {
+	Rect result = current_pos_;  
 	result.set_width(item_dim_.width());
 	if (window->auto_size_height()) {
 		result.set_height(item_dim_.height());
 	} else {
-	  result.decrease(ui::BoxSpace(0, 0, non_content_dimension_.height(), 0));
+	  result.decrease(BoxSpace(0, 0, non_content_dimension_.height(), 0));
 	}
 	return result;
 }
 
-ui::Rect DefaultAligner::calc_new_pos_top(const Window::Ptr& window) const {
-  ui::Rect result = current_pos_;  
+Rect DefaultAligner::calc_new_pos_top(const Window::Ptr& window) const {
+  Rect result = current_pos_;  
   result.set_height(item_dim_.height());
 	if (window->auto_size_width()) {
 	  result.set_width(item_dim_.width());
   } else {
-    result.decrease(ui::BoxSpace(0, non_content_dimension_.width(), 0, 0));
+    result.decrease(BoxSpace(0, non_content_dimension_.width(), 0, 0));
   }
   return result;
 }
 
-ui::Rect DefaultAligner::calc_new_pos_right(const Window::Ptr& window) const {
-	ui::Rect result = current_pos_;	    
+Rect DefaultAligner::calc_new_pos_right(const Window::Ptr& window) const {
+	Rect result = current_pos_;	    
   result.set_left(current_pos_.right() - item_dim_.width() - non_content_dimension_.width());
   result.set_right(current_pos_.right() - non_content_dimension_.width());
   if (window->auto_size_height()) {
 		result.set_height(item_dim_.height());
 	} else {
-	  result.decrease(ui::BoxSpace(0, 0, non_content_dimension_.height(), 0));
+	  result.decrease(BoxSpace(0, 0, non_content_dimension_.height(), 0));
 	}	
 	return result;
 }
 
-ui::Rect DefaultAligner::calc_new_pos_bottom(const Window::Ptr& window) const {
-	ui::Rect result = current_pos_;		
+Rect DefaultAligner::calc_new_pos_bottom(const Window::Ptr& window) const {
+	Rect result = current_pos_;		
 	result.set_top(current_pos_.bottom() - item_dim_.height() - non_content_dimension_.height());
 	result.set_bottom(current_pos_.bottom() - non_content_dimension_.height());
   if (window->auto_size_width()) {
 		result.set_width(item_dim_.width());
 	} else {
-    result.decrease(ui::BoxSpace(0, non_content_dimension_.width(), 0, 0));
+    result.decrease(BoxSpace(0, non_content_dimension_.width(), 0, 0));
 	}
 	return result;
 }
@@ -327,7 +327,7 @@ void DefaultAligner::adjust_current_pos_bottom() {
 
 void DefaultAligner::adjust_current_pos_client(const Window::Ptr& window) {	
 	current_pos_.decrease(
-		ui::BoxSpace(
+		BoxSpace(
 			0, 
 			non_content_dimension_.width(),
 			non_content_dimension_.height(),
@@ -344,7 +344,7 @@ void WrapAligner::SetPositions() {
     return;
   }
   Window::Ptr client;
-  Rect current_position(ui::Point(), group()->aligner()->dim());
+  Rect current_position(Point(), group()->aligner()->dim());
   for (iterator it = begin(); it != end(); ++it) {
     Window::Ptr window = *it;
     if (!window->visible()) {
@@ -379,7 +379,7 @@ void GridAligner::CalcDimensions() {
     if (!item->visible()) {
       continue;
     }        
-    ui::Dimension item_dim = item->aligner() ? item->aligner()->dim() : item->dim();   
+    Dimension item_dim = item->aligner() ? item->aligner()->dim() : item->dim();   
     if (item->aligner()) {
       if (!item->auto_size_width()) {
         item_dim.set_width(item->dim().width());
@@ -400,26 +400,21 @@ void GridAligner::CalcDimensions() {
 }
 
 void GridAligner::SetPositions() {
-  if (!group()) {
-    return;
-  }
-  if (group()->area().bounds().empty()) {
+  if (!group() || group()->area().bounds().empty()) {
     return;
   }
   Window::Ptr client;
-  ui::Rect current_position(ui::Point(0, 0), group()->aligner()->dim());
-
+  Rect current_position(Point(), group()->aligner()->dim());
   double cell_width = current_position.width() / col_num_;
   double cell_height = current_position.height() / row_num_;
-
-  int pos = 0;
+  int pos(0);
   for (iterator i = begin(); i != end(); ++i) {
     Window::Ptr item = *i;
     if (!item->visible()) {
       continue;
     }    
-    item->set_position(ui::Rect(current_position.top_left(), 
-                           ui::Dimension(cell_width, cell_height)));    
+    item->set_position(Rect(current_position.top_left(), 
+                       Dimension(cell_width, cell_height)));    
     ++pos;
     if (pos < col_num_) {            
       current_position.offset(cell_width, 0);      
@@ -435,32 +430,32 @@ void GridAligner::Realign() {}
 
 
 // Canvas
-void Canvas::Init() {
+void Viewport::Init() {
   set_auto_size(false, false);
-  set_position(ui::Rect(ui::Point::zero(), ui::Dimension(500, 500)));
+  set_position(Rect(Point::zero(), Dimension(500, 500)));
   steal_focus_ = fls_prevented_ = false;
   save_ = true; 
 }
 
-void Canvas::OnSize(const ui::Dimension& dimension) {
+void Viewport::OnSize(const Dimension& dimension) {
   Group::OnSize(dimension);
   try {    
     UpdateAlign();    
   } catch (std::exception& e) {
-    ui::alert(e.what());
+    alert(e.what());
   }
 }
 
-void Canvas::StealFocus(const Window::Ptr& item) {  
+void Viewport::StealFocus(const Window::Ptr& item) {  
   steal_focus_ = true;
 }
 
-void Canvas::set_properties(const Properties& properties) {
+void Viewport::set_properties(const Properties& properties) {
   Properties::Container::const_iterator it = properties.elements().begin();
   for ( ; it != properties.elements().end(); ++it) {
     if (it->first == "backgroundcolor") {
       background_.reset(
-          ui::OrnamentFactory::Instance().CreateFill(it->second.argb_value()));
+          OrnamentFactory::Instance().CreateFill(it->second.argb_value()));
       RemoveOrnaments();
       add_ornament(background_);
     };   
@@ -468,7 +463,7 @@ void Canvas::set_properties(const Properties& properties) {
 }
 
 // Events
-void Canvas::Invalidate(const Region& rgn) {
+void Viewport::Invalidate(const Region& rgn) {
   if (!fls_prevented_) {
     if (IsSaving()) {
       save_rgn_->Union(rgn);
@@ -478,20 +473,20 @@ void Canvas::Invalidate(const Region& rgn) {
   }  
 }
 
-void Canvas::Flush() {    
+void Viewport::Flush() {    
   if (!fls_prevented_) {  
     Window::Invalidate(*save_rgn_.get());
   }  
   save_rgn_->Clear();    
 }
 
-void Canvas::Invalidate() {  
+void Viewport::Invalidate() {  
   if (!fls_prevented_) {
     Window::Invalidate();    
   }  
 }  
 
-void Canvas::InvalidateSave() {
+void Viewport::InvalidateSave() {
   if (!fls_prevented_) {     
     Invalidate(*save_rgn_.get());
   }

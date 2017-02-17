@@ -14,7 +14,7 @@
 namespace psycle { 
 namespace host {
 namespace ui { 
-	class Canvas; 
+	class Viewport; 
 }
 }
 }
@@ -92,6 +92,7 @@ struct LuaActionListenerBind {
     static int dllname(lua_State* L);
     static int name(lua_State* L);
     static int type(lua_State* L);
+    static int mode(lua_State* L);
   };
 
   struct LuaPluginCatcherBind {
@@ -103,7 +104,6 @@ struct LuaActionListenerBind {
     static int gc(lua_State* L);
     static int rescanall(lua_State* L);
     static int rescannew(lua_State* L);
-    static int machinepath(lua_State* L);
   };
 
   class Machine;
@@ -142,9 +142,9 @@ struct LuaActionListenerBind {
     int numchannels() const { return sampleV_.size(); }
     MachineUiType::Value ui_type() const { return ui_type_; }
     void set_ui_type(MachineUiType::Value ui_type) { ui_type_ = ui_type; }
-    void set_canvas(const boost::weak_ptr<ui::Canvas>& canvas);
+    void set_viewport(const boost::weak_ptr<ui::Viewport>& viewport);
     void ToggleViewPort();
-    boost::weak_ptr<ui::Canvas> canvas() { return canvas_; }
+    boost::weak_ptr<ui::Viewport> viewport() { return viewport_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
     void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
@@ -163,7 +163,7 @@ struct LuaActionListenerBind {
     MachineUiType::Value ui_type_;    
     MachinePresetType::Value prsmode_;
     LuaProxy* proxy_; 
-    boost::weak_ptr<ui::Canvas> canvas_;
+    boost::weak_ptr<ui::Viewport> viewport_;
     std::string title_;
   };
 
@@ -185,8 +185,8 @@ struct LuaActionListenerBind {
     static int display(lua_State* L);
     static int getrange(lua_State* L);
     static int add_parameters(lua_State* L);
-    static int set_parameters(lua_State* L);
-    static int set_menus(lua_State* L);
+    static int set_parameters(lua_State* L);    
+    static int setmenurootnode(lua_State* L);
     static int addhostlistener(lua_State* L);
     static int set_numchannels(lua_State* L);
     static int numchannels(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::numchannels); }
@@ -201,13 +201,17 @@ struct LuaActionListenerBind {
     static int setpresetmode(lua_State* L);
     static int exit(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::doexit); }
     static int reload(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::reload); }
-    static int setcanvas(lua_State* L);
+    static int setviewport(lua_State* L);
     static int toggleviewport(lua_State* L);
     static int type(lua_State* L);
     static int info2(lua_State* L);
     static int name(lua_State* L);
     static int pluginname(lua_State* L);
-    static int settitle(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::set_title); }    
+    static int settitle(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::set_title); }
+    static int settimeout(lua_State* L);  
+    static int setinterval(lua_State* L);
+    static int cleartimer(lua_State* L);
+    static class LuaRun* createtimercallback(lua_State* L);
   };
 
   struct LuaMachines {};
@@ -733,9 +737,9 @@ struct LuaActionListenerBind {
   private:
     static int create(lua_State *L);
     static int setcutoff(lua_State* L);
-    static int getcutoff(lua_State* L);
+    static int cutoff(lua_State* L);
     static int setresonance(lua_State* L);
-    static int getresonance(lua_State* L);
+    static int resonance(lua_State* L);
     static int setfiltertype(lua_State* L);
     static int work(lua_State* L);
     static int tostring(lua_State* L);

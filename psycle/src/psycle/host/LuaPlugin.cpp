@@ -87,11 +87,13 @@ namespace psycle { namespace host {
     }     
   }
 
-  void LuaPlugin::OnTimerViewRefresh() {
-    if (crashed()) {
+  void LuaPlugin::OnTimerViewRefresh() {    
+    if (!do_reload_ && crashed()) {
       return;
     }
-    proxy().OnTimer();
+    if (!do_reload_) {
+      proxy().OnTimer();
+    }
     if (do_exit_) {
       HostExtensions::Instance().Remove(this_ptr());
     } else 
@@ -556,23 +558,24 @@ namespace psycle { namespace host {
     try {
       int minval; int maxval;
       proxy().Range(numparam, minval, maxval);
-      int quantization = (maxval-minval);
-      proxy().ParameterTweak(numparam,double(value)/double(quantization));
+      int quantization = (maxval - minval);
+      proxy().ParameterTweak(numparam, value / static_cast<double>(quantization));
       return true;
-    } catch(std::exception &e) { e; } //do nothing.
+    } catch(std::exception&) {} //do nothing.
     return false;
   }
 
   void LuaPlugin::GetParamRange(int numparam,int &minval, int &maxval) {
     if (crashed() || numparam < 0) {
-      minval = 0; maxval = 0xFFFF;
+      minval = 0;
+      maxval = 0xFFFF;
       return;
     }
     try {
       if( numparam < GetNumParams() ) {
         proxy().Range(numparam, minval, maxval);
       }
-    } catch(std::exception &e) { e; }
+    } catch(std::exception&) {}
   }
 
   int LuaPlugin::GetParamType(int numparam) {
@@ -584,7 +587,7 @@ namespace psycle { namespace host {
       if( numparam < GetNumParams() ) {
         mpf = proxy().Type(numparam);
       }
-    } catch(std::exception &e) { e; }
+    } catch(std::exception&) {}
     return mpf;
   }
 
@@ -609,9 +612,9 @@ namespace psycle { namespace host {
       int minval; int maxval;
       try {
         proxy_.Range(numparam, minval, maxval);
-        int quantization = (maxval-minval);
+        int quantization = (maxval - minval);
         return proxy().Val(numparam) * quantization;
-      } catch(std::exception &e) { e; } //do nothing.
+      } catch(std::exception&) {} //do nothing.
     } else {
       // out of range
     }
@@ -658,10 +661,7 @@ namespace psycle { namespace host {
     if(numparam < GetNumParams()) {
       try {
         proxy_.call_aftertweaked(numparam);
-      } catch(const std::exception &e) {
-        e;
-        return;
-      }
+      } catch(const std::exception&) {}
     }
   }
 

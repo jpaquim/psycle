@@ -343,7 +343,7 @@ void TerminalView::output(const std::string& text) {
   struct {
     std::string text;
     TerminalView* that;
-    void operator()() const {
+    bool operator()() const {
       that->EnableInput();
       if (!that->line_limit_prevented()) {
         int line_count = that->f(SCI_GETLINECOUNT, 0, 0);
@@ -364,6 +364,7 @@ void TerminalView::output(const std::string& text) {
       if (!that->autoscroll_prevented()) {
         that->GotoPos(that->length());
       }
+      return true;
     }
    } f;
   f.that = this;
@@ -384,7 +385,7 @@ std::auto_ptr<TerminalFrame> TerminalFrame::terminal_frame_(0);
 
 void TerminalFrame::Init() {
   set_title("Psycle Terminal");
-  Canvas::Ptr view_port = Canvas::Ptr(new Canvas());
+  Viewport::Ptr view_port = Viewport::Ptr(new Viewport());
   view_port->set_aligner(Aligner::Ptr(new DefaultAligner()));
   set_viewport(view_port);
   view_port->SetSave(false);

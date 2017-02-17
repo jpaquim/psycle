@@ -12,7 +12,6 @@
 #include <boost/tokenizer.hpp>
 #include <lua.hpp>
 #include "LuaGui.hpp"
-#include "CanvasItems.hpp"
 #include "NewMachine.hpp"
 #include <algorithm>
 #include "resources\resources.hpp"
@@ -34,8 +33,11 @@ namespace host {
 
 using namespace ui;
 
-LuaControl::LuaControl() : L(0), LM(0) {
-  invokelater_.reset(new ui::Commands());
+LuaControl::LuaControl() :
+    L(0), 
+    LM(0),
+    invokelater_(new ui::Commands()),
+    timer_(new ui::Commands()) {  
 }
 
 LuaControl::~LuaControl() {
@@ -80,6 +82,8 @@ void LuaControl::Start() {
 void LuaControl::Free() {
   if (L) {
     invokelater_->Clear();
+    timer_->Clear();
+    clear_timers_.clear();
     lua_close(L);    
   }
   L = 0;
@@ -208,10 +212,6 @@ PluginInfo LuaControl::parse_info() const {
                 if (strcmp(key, "noteon") == 0) {
                   int value = luaL_checknumber(L, -1);
                   result.flags = value;
-                } else if (strcmp(key, "machinepath") == 0) {
-                    const char* value = luaL_checklstring(L, -1, &len);
-                    assert(value);
-                    machinepath_ = value;
                 }
     }
   }   
@@ -231,7 +231,7 @@ void LuaStarter::PrepareState() {
     {"addextension", addextension},
     {"output", LuaProxy::terminal_output},
     {"alert", LuaProxy::alert},
-    {"confirm", LuaProxy::confirm},
+    {"confirm", LuaProxy::confirm},   
     {NULL, NULL}
   };
   lua_newtable(L);
@@ -280,8 +280,7 @@ int LuaStarter::addmenu(lua_State* L) {
   if (plugin) {
     link.plugin = plugin;
     plugin->proxy().set_userinterface(link.user_interface());
-	  plugin->Init();			    
-    plugin->CanvasChanged.connect(boost::bind(&HostExtensions::OnPluginCanvasChanged, &host_extensions,  _1));
+	  plugin->Init();
     plugin->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, &host_extensions,  _1, _2));     
     if (link.user_interface() == MDI) {
       host_extensions.AddToWindowsMenu(link); 
@@ -315,7 +314,6 @@ int LuaStarter::replacemenu(lua_State* L) {
     link.plugin = plugin;
     plugin->proxy().set_userinterface(link.user_interface());
 	  plugin->Init();			    
-    plugin->CanvasChanged.connect(boost::bind(&HostExtensions::OnPluginCanvasChanged, &host_extensions,  _1));
     plugin->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, &host_extensions,  _1, _2));     
     if (link.user_interface() == MDI) {
       host_extensions.AddToWindowsMenu(link); 
@@ -357,25 +355,32 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     host_(host),
     is_meta_cache_updated_(false),
     lua_mac_(0),
-    user_interface_(SDI) {     
+    user_interface_(SDI),
+    clock_(0) {     
   Load(dllname);
 }
 
-LuaProxy::~LuaProxy() {}
+LuaProxy::~LuaProxy() {
+}
+
+struct Invoke {
+  Invoke(LuaRun* run) : run_(run) {}  
+  
+  bool operator()() const { 
+    run_->Run();
+    return true;
+  }
+
+ private:
+  LuaRun* run_;
+};
 
 int LuaProxy::invokelater(lua_State* L) {
   if lua_isnil(L, 1) {
     return luaL_error(L, "Argument is nil.");
   }
   boost::shared_ptr<LuaRun> run = LuaHelper::check_sptr<LuaRun>(L, 1, LuaRunBind::meta);  
-  struct {
-    LuaRun* run;
-    void operator()() const
-    {
-      run->Run();
-    }
-   } f;   
-  f.run = run.get();  
+  Invoke f(run.get());   
   LuaProxy* proxy = LuaGlobal::proxy(L);  
   if (!proxy) {
     return luaL_error(L, "invokelater: Proxy not found.");
@@ -387,22 +392,20 @@ int LuaProxy::invokelater(lua_State* L) {
 void LuaProxy::OnTimer() {      
   try {
     lock();    
-    invokelater_->Invoke();              
-    lua_gc(L, LUA_GCCOLLECT, 0);
+    invokelater_->Invoke();
+    timer_->Invoke();
+    if (clock_ >= 100) { 
+      clock_ = 0;            
+      lua_gc(L, LUA_GCCOLLECT, 0);           
+    }
+    ++clock_;
     unlock();
   } catch(std::exception& e) {    
     std::string msg = std::string("LuaRun Errror.") + e.what();
     ui::alert(msg);
     unlock();
     throw std::runtime_error(msg.c_str());
-  }  
-  try {
-    LuaImport in(L, lua_mac_, this);
-    if (in.open("ontimer")) {
-      in.pcall(0);      
-    }
-  } catch(std::exception&) {
-  }
+  }     
 }
 
 void LuaProxy::OnFrameClose(ui::Frame&) {
@@ -459,34 +462,35 @@ void LuaProxy::Reload() {
     lock();       
     host_->set_crashed(true);
     lua_State* old_state = L;
-    LuaMachine* old_machine = lua_mac_;
-    ui::Systems* old_systems = systems_.get();    
+    LuaMachine* old_machine = lua_mac_;    
     try {
-      RemoveCanvasFromFrame();
-      L = LuaGlobal::load_script(host_->GetDllName());      
-      systems_.release();
-      systems_.reset(new Systems(new LuaSystems(L)));
+      int oldviewportmode = 
+      frame_ && !viewport().expired() ? FRAMEVIEWPORT : CHILDVIEWPORT;     
+      RemoveCanvasFromFrame();      
+      L = LuaGlobal::load_script(host_->GetDllName());          
       PrepareState();
       Run();
       Start();
-      Init();      
       if (old_state) {
         LuaGlobal::proxy(old_state)->invokelater_->Clear();
-        boost::weak_ptr<ui::MenuContainer> menu_bar = LuaGlobal::proxy(old_state)->menu_bar();
-        if (!menu_bar.expired()) {
-          menu_bar.lock()->root_node().lock()->erase_imps(menu_bar.lock()->imp());
-          menu_bar.lock()->Invalidate();           
-        }
-        lua_close(old_state);
-        delete old_systems;
+        LuaGlobal::proxy(old_state)->timer_->Clear();
+        LuaGlobal::proxy(old_state)->clear_timers_.clear();                   
       }
-      OnActivated(2);      
+      Init();
+      if (old_state) {
+        lua_close(old_state); 
+      }
+      assert(host_);
+      UpdateFrameCanvas();
+      if (oldviewportmode == CHILDVIEWPORT) {
+        host_->ViewPortChanged(*host_, oldviewportmode);      
+      }
+      OnActivated(2);            
     } catch(std::exception &e) {
       if (L) {        
         lua_close(L);
       }
-      L = old_state;
-      systems_.reset(old_systems);
+      L = old_state;      
       lua_getglobal(L, "psycle");
       lua_getfield(L, -1, "__self");
       LuaProxy* proxy = *(LuaProxy**)luaL_checkudata(L, -1, "psyhostmeta");    
@@ -494,7 +498,7 @@ void LuaProxy::Reload() {
       proxy->lua_mac_ = old_machine;
       proxy->lua_mac_->setproxy(proxy);
       std::string s = std::string("Reload Error, old script still running!\n") + e.what(); 
-      UpdateFrameCanvas();
+      UpdateFrameCanvas();      
       unlock();
       throw std::runtime_error(s.c_str());  
     }     
@@ -504,9 +508,15 @@ void LuaProxy::Reload() {
   } CATCH_WRAP_AND_RETHROW(host())
 }
 
-int LuaProxy::alert(lua_State* L) {    
-  const char* msg = luaL_checkstring(L, 1);  
-  ui::alert(msg);
+int LuaProxy::alert(lua_State* L) {
+  if (lua_isboolean(L, 1)) {
+    std::string out;
+    int v = lua_toboolean(L, 1);   
+    ui::alert(v == 1 ? "true" : "false");
+  } else {    
+    const char* msg = luaL_checkstring(L, 1);  
+    ui::alert(msg);
+  }
   return 0;
 }
 
@@ -576,13 +586,36 @@ int LuaProxy::set_machine(lua_State* L) {
   return 0;
 }
 
-int LuaProxy::set_menubar(lua_State* L) {
-  boost::shared_ptr<LuaMenuBar> menu_bar = LuaHelper::check_sptr<LuaMenuBar>(L, 1, LuaMenuBarBind::meta);  
+int LuaProxy::setmenurootnode(lua_State* L) {
+  boost::shared_ptr<ui::Node> node = LuaHelper::check_sptr<ui::Node>(L, 1, LuaNodeBind::meta);  
   lua_getglobal(L, "psycle");
   lua_getfield(L, -1, "__self");
   LuaProxy* proxy = *(LuaProxy**)luaL_checkudata(L, -1, "psyhostmeta");    
-  proxy->menu_bar_ = menu_bar;
+  proxy->menu_root_node_ = node;
   return 0;
+}
+
+int LuaProxy::setsetting(lua_State* L) {
+  if (!lua_istable(L, 1)) {
+    return luaL_error(L, "Setting must be a table.");
+  }
+  lua_getglobal(L, "psycle");
+  lua_pushvalue(L, 1);
+  lua_setfield(L, -2, "__setting");  
+  return LuaHelper::chaining(L);
+}
+
+int LuaProxy::setting(lua_State* L) {
+  lua_getglobal(L, "psycle"); 
+  lua_getfield(L, -1, "__setting");
+  return 1;
+}
+
+int LuaProxy::reloadstartscript(lua_State* L) {
+  lua_getglobal(L, "psycle");
+  HostExtensions::Instance().RestoreViewMenu();
+  HostExtensions::Instance().StartScript();
+  return 1;
 }
 
 void LuaProxy::ExportCFunctions() {
@@ -591,10 +624,13 @@ void LuaProxy::ExportCFunctions() {
     {"output", terminal_output },
     {"alert", alert},
     {"confirm", confirm},
-    {"setmachine", set_machine},
-    {"setmenubar", set_menubar},    
-    {"selmachine", call_selmachine},    
-    { NULL, NULL }
+    {"setmachine", set_machine},    
+    {"setmenurootnode", setmenurootnode},
+    {"selmachine", call_selmachine},
+    {"setsetting", setsetting},
+    {"setting", setting},
+    {"reloadstartscript", reloadstartscript}, 
+    {NULL, NULL}
   };
   lua_newtable(L);
   luaL_setfuncs(L, methods, 0);
@@ -677,8 +713,9 @@ PluginInfo LuaProxy::meta() const {
 void LuaProxy::Init() {
   try {
     LuaImport in(L, lua_mac_, this);
-    if (in.open("init")) {      
-      in.pcall(0);          
+    if (in.open("init")) {
+      lua_pushnumber(L, Global::player().SampleRate());
+      in.pcall(1);          
     } else {    
       const char* msg = "no init found";        
       throw std::runtime_error(msg);
@@ -697,10 +734,6 @@ void LuaProxy::call_execute() {
       in.pcall(0);      
     }
   } CATCH_WRAP_AND_RETHROW(host())
-}
-
-void LuaProxy::OnCanvasChanged() { 
-  host_->OnCanvasChanged();
 }
 
 void LuaProxy::OnActivated(int viewport) {
@@ -812,16 +845,16 @@ void LuaProxy::NoteOff(int note, int lastnote, int inst, int cmd, int val) {
   } CATCH_WRAP_AND_RETHROW(host())
 }
 
-std::string LuaProxy::call_help() {    
+std::string LuaProxy::call_help() { 
+  std::string str;   
   try {
     LuaImport in(L, lua_mac_, this);
-    if (in.open("help")) {  
-      std::string str;
-      in << pcall(1) >> str;
-      return str;
+    if (in.open("help")) {        
+      in << pcall(1) >> str;   
     }       
   } CATCH_WRAP_AND_RETHROW(host())
-  return "";
+  ui::alert(str);
+  return str;
 }
 
 int LuaProxy::GetData(unsigned char **ptr, bool all) {
@@ -1026,43 +1059,46 @@ bool LuaProxy::has_frame() const {
 
 void LuaProxy::OpenInFrame() {
   using namespace ui;
-  if (!frame_ && !canvas().expired()) {
+  if (!frame_ && !viewport().expired()) {
     frame_.reset(new Frame());    
-    frame_->set_viewport(canvas().lock());
+    frame_->set_viewport(viewport().lock());
     frame_->close.connect(boost::bind(&LuaProxy::OnFrameClose, this, _1));
     FrameAligner::Ptr right_frame_aligner(new FrameAligner(AlignStyle::ALRIGHT));
     right_frame_aligner->SizeToScreen(0.4, 0.8);
     frame_->set_min_dimension(ui::Dimension(830, 600));
     frame_->Show(right_frame_aligner);
+    Node::Ptr tmp = menu_root_node_.lock();
+    frame_->SetMenuRootNode(tmp);
   }
 }
 
 void LuaProxy::UpdateFrameCanvas() {
   if (has_frame()) {
-    frame_->set_viewport(canvas().lock());
-    if (!canvas().expired()) {      
-     // canvas().lock()->OnSize(ui::Dimension(830, 600));
+    if (!menu_root_node().expired()) {
+      frame_->SetMenuRootNode(menu_root_node().lock());
+    } else {
+      Node::Ptr empty_menu;
+      frame_->SetMenuRootNode(empty_menu);
     }
+    frame_->set_viewport(viewport().lock());    
   }
 }
 
 void LuaProxy::RemoveCanvasFromFrame() {
-  if (frame_ && !canvas().expired()) {
+  if (frame_ && !viewport().expired()) {
     frame_->set_viewport(ui::Frame::Ptr());
   }
 }
 
 void LuaProxy::ToggleViewPort() {    
-  if (!frame_) {
+  if (!has_frame()) {
     OpenInFrame();
-    if (host_) {
-      host_->ViewPortChanged(*host_, FRAMEVIEWPORT);
-    }
+    assert(host_);
+    host_->ViewPortChanged(*host_, FRAMEVIEWPORT);    
   } else {
     frame_.reset();
-    if (host_) {
-      host_->ViewPortChanged(*host_, CHILDVIEWPORT);
-    }
+    assert(host_);
+    host_->ViewPortChanged(*host_, CHILDVIEWPORT);    
   }
 }
 
@@ -1070,11 +1106,60 @@ void LuaProxy::UpdateWindowsMenu() {
   HostExtensions::Instance().ChangeWindowsMenuText(host_);
 }
 
-ui::Systems* LuaProxy::systems() { 
-  if (!systems_.get()) {    
-    systems_.reset(new Systems(new LuaSystems(L)));
-  } 
-  return systems_.get();
+struct InvokeTimer {
+  InvokeTimer(LuaRun* runnable, LuaProxy* proxy, int interval, bool timeout) : 
+      interval_(static_cast<int>(interval / static_cast<double>(GlobalTimer::refresh_rate) + 0.5)),
+      clock_(0),
+      timeout_(timeout),
+      runnable_(runnable),
+      id_(++idcount),
+      proxy_(proxy) {
+  }  
+  
+  bool operator()() const {   
+    bool result = proxy_->has_timer_clear(id_);
+    if (!result) {
+      ++clock_ ;
+      if (clock_ >= interval_) {
+        runnable_->Run();
+        clock_ = 0;
+        if (timeout_) {
+          LuaHelper::unregister_userdata(runnable_->state(), runnable_);
+        }
+        result = timeout_;
+      }
+    }
+    return result;
+  }
+
+  int id() const { return id_; }
+
+ private:
+   static int idcount;
+   mutable int clock_;
+   int interval_;
+   bool timeout_;
+   LuaRun* runnable_;
+   int id_;
+   LuaProxy* proxy_;
+};
+
+int InvokeTimer::idcount(0);
+
+int LuaProxy::set_time_out(LuaRun* runnable, int interval) {
+  InvokeTimer timeout(runnable, this, interval, true);
+  timer_->Add(timeout);
+  return timeout.id();
+}
+
+int LuaProxy::set_interval(LuaRun* runnable, int interval) {
+  InvokeTimer timeinterval(runnable, this, interval, false);
+  timer_->Add(timeinterval);
+  return timeinterval.id();
+}
+
+void LuaProxy::clear_timer(int id) {
+  clear_timers_.insert(id);
 }
 
 // End of Class Proxy
@@ -1183,6 +1268,10 @@ void HostExtensions::AddViewMenu(Link& link) {
   child_view_->OnAddViewMenu(link);  
 }
 
+void HostExtensions::RestoreViewMenu() {
+  child_view_->OnRestoreViewMenu();  
+}
+
 void HostExtensions::AddHelpMenu(Link& link) {  
   child_view_->OnAddHelpMenu(link);
 }
@@ -1218,17 +1307,12 @@ LuaPluginPtr HostExtensions::Execute(Link& link) {
   mac->proxy().set_userinterface(link.user_interface());
 	mac->Init();			
   Add(mac); 
-  mac->CanvasChanged.connect(boost::bind(&HostExtensions::OnPluginCanvasChanged, this,  _1));
   mac->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, this,  _1, _2));  
   link.plugin = mac;
   if (link.user_interface() == MDI) {
     AddToWindowsMenu(link); 
   }
   return mac;
-}
-
-void HostExtensions::OnPluginCanvasChanged(LuaPlugin& plugin) { 
-  child_view_->OnPluginCanvasChanged(plugin);
 }
 
 void HostExtensions::OnPluginViewPortChanged(LuaPlugin& plugin, int viewport) {
@@ -1239,20 +1323,8 @@ void HostExtensions::HideActiveLua() {
   child_view_->HideExtensionView();  
   if (active_lua_) {
     active_lua_->OnDeactivated();
-    HideActiveLuaMenu();
   }
   active_lua_ = 0;
-}
-
-void HostExtensions::HideActiveLuaMenu() {
-  if (active_lua_) {
-    boost::weak_ptr<ui::MenuContainer> menu_bar = active_lua_->proxy().menu_bar();
-    if (!menu_bar.expired() && !menu_bar.lock()->root_node().expired()) {
-      ui::Node::Ptr root = menu_bar.lock()->root_node().lock();
-      root->erase_imps(menu_bar.lock()->imp());
-      menu_bar.lock()->Invalidate();           
-    }
-  }
 }
 
 void HostExtensions::Free() {

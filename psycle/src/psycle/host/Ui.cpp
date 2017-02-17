@@ -243,12 +243,14 @@ void Commands::Clear() {
 void Commands::Invoke() {       
   locker_.lock();
   GlobalTimer::instance().KillTimer();
-  std::list<boost::function<void(void)> >::iterator it = functors.begin();
+  std::list<boost::function<bool(void)> >::iterator it = functors.begin();
   while (it != functors.end()) { 
-    boost::function<void(void)> func = *it;    
-    it = functors.erase(it);    
-    func();   
-  }    
+    if ((*it)()) {
+      functors.erase(it++);
+    } else {
+      ++it;
+    }
+  }
   GlobalTimer::instance().StartTimer();
   locker_.unlock();
 }
@@ -1204,17 +1206,17 @@ ui::BoxSpace Window::sum_border_space() const {
 
 void Window::WorkChildPosition() {
   needsupdate();
-  std::vector<Window*> items;
+  std::vector<Window*> windows;
   Window* p = parent();
   while (p) {
-    items.push_back(p);
+    windows.push_back(p);
     p = p->parent();
   }  
-  std::vector<Window*>::reverse_iterator rev_it = items.rbegin();
-  for (; rev_it != items.rend(); ++rev_it) {
-    Window* item = *rev_it;
+  std::vector<Window*>::reverse_iterator rev_it = windows.rbegin();
+  for (; rev_it != windows.rend(); ++rev_it) {
+    Window* window = *rev_it;
     ChildPosEvent ev(*this);
-    item->OnChildPosition(ev);
+    window->OnChildPosition(ev);
     if (ev.is_propagation_stopped()) {
       break;
     }
@@ -1532,18 +1534,18 @@ bool SetPos::operator()(Window& window) const {
 };
 
 Window::Container Window::SubItems() {
-  Window::Container allitems;
+  Window::Container allwindows;
   iterator it = begin();
   for (; it != end(); ++it) {
-    Window::Ptr item = *it;
-    allitems.push_back(item);
-    Window::Container subs = item->SubItems();
+    Window::Ptr window = *it;
+    allwindows.push_back(window);
+    Window::Container subs = window->SubItems();
     iterator itsub = subs.begin();
     for (; itsub != subs.end(); ++itsub) {
-      allitems.push_back(*it);
+      allwindows.push_back(*it);
     }
   }
-  return allitems;
+  return allwindows;
 }     
 
 // Group
@@ -1563,7 +1565,7 @@ void Group::Add(const Window::Ptr& window) {
     throw std::runtime_error("Window already child of a group.");
   }
   window->set_parent(this);
-  items_.push_back(window); 
+  windows_.push_back(window); 
   rules_.ApplyTo(window);    
   window->needsupdate();
 }
@@ -1572,7 +1574,7 @@ void Group::Insert(iterator it, const Window::Ptr& window) {
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
   }        
-  items_.insert(it, window);
+  windows_.insert(it, window);
   window->set_parent(this);
   rules_.ApplyTo(window);
   window->needsupdate(); 
@@ -1580,11 +1582,11 @@ void Group::Insert(iterator it, const Window::Ptr& window) {
 
 void Group::Remove(const Window::Ptr& window) {
   assert(window);
-  iterator it = find(items_.begin(), items_.end(), window);
-  if (it == items_.end()) {
+  iterator it = find(windows_.begin(), windows_.end(), window);
+  if (it == windows_.end()) {
     throw std::runtime_error("Window is no child of the group");
   }  
-  items_.erase(it);  
+  windows_.erase(it);  
   window->set_parent(0);  
 }
 
@@ -1594,40 +1596,40 @@ ui::Dimension Group::OnCalcAutoDimension() const {
                   Point((std::numeric_limits<double>::min)(),
                   (std::numeric_limits<double>::min)()));	      
   for (const_iterator i = begin(); i != end(); ++i) {		  
-		 Rect item_pos = (*i)->position();
-		 item_pos.increase(ui::BoxSpace((*i)->padding().top() + (*i)->border_space().top() + (*i)->margin().top(),
+		 Rect window_pos = (*i)->position();
+		 window_pos.increase(ui::BoxSpace((*i)->padding().top() + (*i)->border_space().top() + (*i)->margin().top(),
 			 (*i)->padding().right() + (*i)->border_space().right() + (*i)->margin().right(),
 			 (*i)->padding().bottom() + (*i)->border_space().bottom() + (*i)->margin().bottom(),
 			 (*i)->padding().left() + (*i)->border_space().left() + (*i)->margin().left()));
-		  if (item_pos.left() < result.left()) {
-        result.set_left(item_pos.left());
+		  if (window_pos.left() < result.left()) {
+        result.set_left(window_pos.left());
       }
-      if (item_pos.top() < result.top()) {
-        result.set_top(item_pos.top());
+      if (window_pos.top() < result.top()) {
+        result.set_top(window_pos.top());
       }
-      if (item_pos.right() > result.right()) {
-        result.set_right(item_pos.right());
+      if (window_pos.right() > result.right()) {
+        result.set_right(window_pos.right());
       }
-      if (item_pos.bottom() > result.bottom()) {
-        result.set_bottom(item_pos.bottom());
+      if (window_pos.bottom() > result.bottom()) {
+        result.set_bottom(window_pos.bottom());
       }
     }
 	return result.dimension();
 }
 
-void Group::set_zorder(const Window::Ptr& item, int z) {
-  assert(item);
-  if (z<0 || z>= static_cast<int>(items_.size())) return;
-  iterator it = find(items_.begin(), items_.end(), item);
-  assert(it != items_.end());  
-  items_.erase(it);
-  items_.insert(begin()+z, item);  
+void Group::set_zorder(const Window::Ptr& window, int z) {
+  assert(window);
+  if (z<0 || z>= static_cast<int>(windows_.size())) return;
+  iterator it = find(windows_.begin(), windows_.end(), window);
+  assert(it != windows_.end());  
+  windows_.erase(it);
+  windows_.insert(begin()+z, window);  
 }
 
-int Group::zorder(const Window::Ptr& item) const {
+int Group::zorder(const Window::Ptr& window) const {
 	int result = -1;
-  for (Window::Container::size_type k = 0; k < items_.size(); ++k) {
-    if (items_[k] == item) {
+  for (Window::Container::size_type k = 0; k < windows_.size(); ++k) {
+    if (windows_[k] == window) {
       result = k;
       break;
     }
@@ -1637,14 +1639,14 @@ int Group::zorder(const Window::Ptr& item) const {
 
 Window::Ptr Group::HitTest(double x, double y) {
   Window::Ptr result;
-  Window::Container::const_reverse_iterator rev_it = items_.rbegin();
-  for (; rev_it != items_.rend(); ++rev_it) {
-    Window::Ptr item = *rev_it;
-    item = item->visible() 
-           ? item->HitTest(x-item->position().left(), y-item->position().top())
+  Window::Container::const_reverse_iterator rev_it = windows_.rbegin();
+  for (; rev_it != windows_.rend(); ++rev_it) {
+    Window::Ptr window = *rev_it;
+    window = window->visible() 
+           ? window->HitTest(x-window->position().left(), y-window->position().top())
 		       : Window::Ptr(); 
-    if (item) {
-      result = item;
+    if (window) {
+      result = window;
       break;
     }
   }
@@ -1668,7 +1670,7 @@ void Group::OnChildPosition(ChildPosEvent& ev) {
 }
 
 void Group::OnMessage(WindowMsg msg, int param) {
-  for (iterator it = items_.begin(); it != items_.end(); ++it ) {
+  for (iterator it = windows_.begin(); it != windows_.end(); ++it ) {
     (*it)->OnMessage(msg, param);
   }
 }
@@ -1688,15 +1690,15 @@ void Group::UpdateAlign() {
       old_fls_prevented = fls_prevented();      
       old_is_saving = root()->IsSaving();
       if (!old_fls_prevented) {        
-        dynamic_cast<Canvas*>(root())->SetSave(true);
+        dynamic_cast<Viewport*>(root())->SetSave(true);
       }
     }         
     aligner_->Align();
     if (root()) {    
       if (!old_is_saving && !old_fls_prevented) {    
-       dynamic_cast<Canvas*>(root())->Flush();
+       dynamic_cast<Viewport*>(root())->Flush();
       }  
-      dynamic_cast<Canvas*>(root())->SetSave(old_is_saving);    
+      dynamic_cast<Viewport*>(root())->SetSave(old_is_saving);    
     }
   }
 }
@@ -1891,47 +1893,48 @@ Frame::Frame(FrameImp* imp) : Window(imp) {
 }
 
 void Frame::set_title(const std::string& title) {
-  if (imp()) {
-    imp()->dev_set_title(title);
-  }
+  assert(imp());
+  imp()->dev_set_title(title);  
 }
 
 std::string Frame::title() const {
-  return imp() ? imp()->dev_title() : "";
+  assert(imp());
+  return imp()->dev_title();
 }
 
 void Frame::set_viewport(const Window::Ptr& viewport) { 
-  if (imp()) {
-    imp()->dev_set_viewport(viewport);    
-    if (viewport) {
-      viewport->Show();
-    }
-    viewport_ = viewport;
-  }
+  assert(imp());
+  imp()->dev_set_viewport(viewport);  
+}
+
+Window::Ptr Frame::viewport() { 
+  assert(imp());
+  return imp()->dev_viewport();  
+}
+
+void Frame::SetMenuRootNode(const Node::Ptr& root_node) {
+  assert(imp());
+  imp()->DevSetMenuRootNode(root_node);
 }
 
 void Frame::ShowDecoration() {
-  if (imp()) {
-    imp()->DevShowDecoration();
-  }
+  assert(imp());
+  imp()->DevShowDecoration();
 }
 
 void Frame::HideDecoration() {
-  if (imp()) {
-    imp()->DevHideDecoration();
-  }
+  assert(imp());
+  imp()->DevHideDecoration();
 }
 
 void Frame::PreventResize() {
-  if (imp()) {
-    imp()->DevPreventResize();
-  }
+  assert(imp());
+  imp()->DevPreventResize();
 }
 
 void Frame::AllowResize() {
-  if (imp()) {
-    imp()->DevAllowResize();
-  }
+  assert(imp());
+  imp()->DevAllowResize();
 }
 
 void Frame::WorkOnContextPopup(ui::Event& ev, const ui::Point& mouse_point) {
@@ -1990,7 +1993,7 @@ void Node::erase_imps(NodeOwnerImp* owner) {
   } imp_eraser;
   imp_eraser.that = owner;
   Node::Ptr nullnode;
-  // traverse(imp_eraser, nullnode);
+  traverse(imp_eraser, nullnode);
 }
 
 void Node::clear() {
@@ -2655,11 +2658,33 @@ int Scintilla::f(int sci_cmd, void* lparam, void* wparam) {
   }
   return 0;
 }
+
 void Scintilla::AddText(const std::string& text) {
   if (imp()) {
     imp()->DevAddText(text);
   }
 }
+
+void Scintilla::InsertText(const std::string& text, int pos) {
+  if (imp()) {
+    imp()->DevInsertText(text, pos);
+  }
+}
+
+std::string Scintilla::text_range(int cpmin, int cpmax) const {
+  if (imp()) {
+    return imp()->dev_text_range(cpmin, cpmax);
+  } else {
+    return "";
+  }
+}
+
+void Scintilla::delete_text_range(int pos, int length) {
+  if (imp()) {
+    imp()->dev_delete_text_range(pos, length);
+  }
+}
+
 
 void Scintilla::FindText(const std::string& text, int cpmin, int cpmax, int& pos, int& cpselstart, int& cpselend) const {
   if (imp()) {
@@ -2715,6 +2740,24 @@ void Scintilla::WordRight() {
   }
 }
 
+void Scintilla::Cut() {
+  if (imp()) {
+    imp()->DevCut();
+  }
+}
+
+void Scintilla::Copy() {
+  if (imp()) {
+    imp()->DevCopy();
+  }
+}
+
+void Scintilla::Paste() {
+  if (imp()) {
+    imp()->DevPaste();
+  }
+}
+
 int Scintilla::length() const  { 
   return imp() ? imp()->dev_length() : 0;
 }
@@ -2749,6 +2792,10 @@ int Scintilla::column() const {
 
 int Scintilla::line() const {
   return imp() ? imp()->dev_line() : 0; 
+}
+
+int Scintilla::current_pos() const {
+  return imp() ? imp()->dev_current_pos() : 0; 
 }
 
 bool Scintilla::over_type() const {
@@ -2880,6 +2927,12 @@ ARGB Scintilla::linenumber_background_color() const {
 void Scintilla::set_folding_background_color(ARGB color) {
   if (imp()) {
     imp()->dev_set_folding_background_color(color);
+  }
+}
+
+void Scintilla::set_folding_marker_colors(ARGB fore, ARGB back) {
+  if (imp()) {
+    imp()->DevSetFoldingMarkerColors(fore, back);
   }
 }
 
@@ -3082,49 +3135,6 @@ void FileObserver::SetDirectory(const std::string& path) {
   }
 }
 
-void WindowStyler::set_class_properties(WindowTypes::Type window_type,
-                                        const Properties& properties) {
-    class_properties_[window_type] = properties;
-}
-
-Properties WindowStyler::class_properties(WindowTypes::Type window_type) {
-  ClassProperties::iterator it = class_properties_.find(window_type);
-  return (it != class_properties_.end()) ? it->second : Properties();
-}
-
-void WindowStyler::UpdateWindows() {
-  Windows::iterator it = windows_.begin();
-  for (; it != windows_.end(); ++it) {                  
-    it->second->set_properties(class_properties(it->first));
-  }
-}
-
-void WindowStyler::UpdateWindow(WindowTypes::Type window_type, Window* window) {
-  assert(window);    
-  window->set_properties(class_properties(window_type));
-}    
-
-void WindowStyler::ChangeWindowType(int extended_window_type, Window* window) {
-  assert(window);
-  RemoveWindow(*window);
-  AddWindow(static_cast<WindowTypes::Type>(extended_window_type), *window);
-}
-
-void WindowStyler::AddWindow(WindowTypes::Type window_type, Window& window) {
-  windows_.insert(std::pair<WindowTypes::Type, Window*>(
-  window_type, &window));
-}
-
-void WindowStyler::RemoveWindow(Window& window) {      
-  Windows::iterator it = windows_.begin();
-  for (; it != windows_.end(); ++it) {
-    if (it->second == &window) {
-      windows_.erase(it);
-      break;
-    }
-  }
-}
-
 App::App() : imp_(ImpFactory::instance().CreateAppImp()) {
 }
 
@@ -3176,41 +3186,6 @@ void Systems::set_concret_factory(Systems& concrete_factory) {
   concrete_factory_.reset(&concrete_factory);
 }
 
-ui::Window* Systems::Create(WindowTypes::Type type) {  
-  using namespace WindowTypes;
-  assert(concrete_factory_.get());
-  Window* result(0);
-  switch (type) {    
-    case WindowTypes::WINDOW : result = CreateWin(); break;
-    case WindowTypes::TEXT : result = CreateText(); break;
-    case GROUP : result = CreateGroup(); break;
-    case FRAME : result = CreateFrame(); break;
-    case CANVAS : result = CreateCanvas(); break;
-    case POPUPFRAME : result = CreatePopupFrame(); break;
-    case RECTANGLEBOX : result = CreateRectangleBox(); break;
-    case HEADERGROUP : result = CreateHeaderGroup(); break;
-    case LINE : result = CreateLine(); break;
-    case PIC : result = CreatePic(); break;    
-    case EDIT : result = CreateEdit();  break;
-    case BUTTON : result = CreateButton(); break;
-    case COMBOBOX : result = CreateComboBox(); break;
-    case CHECKBOX : result = CreateCheckBox(); break;
-    case RADIOBUTTON : result = CreateRadioButton(); break;
-    case GROUPBOX : result = CreateGroupBox(); break;
-    case LISTVIEW : result = CreateListView(); break;
-    case TREEVIEW : result = CreateTreeView(); break;
-    case SCROLLBAR : result = CreateScrollBar(); break;
-    case SCROLLBOX : result = CreateScrollBox(); break;
-    case SCINTILLA : result = CreateScintilla(); break;    
-    break;
-  }
-  if (result) {        
-    OnWindowCreate(type, *result);
-    result->BeforeDestruction.connect(boost::bind(&Systems::OnWindowDestruction, this, _1));
-  }
-  return result;
-}
-
 ui::Region* Systems::CreateRegion() { 
   assert(concrete_factory_.get());
   return concrete_factory_->CreateRegion(); 
@@ -3250,9 +3225,9 @@ ui::Window* Systems::CreateWin() {
   return concrete_factory_->CreateWin(); 
 }
 
-ui::Canvas* Systems::CreateCanvas() {
+ui::Viewport* Systems::CreateViewport() {
   assert(concrete_factory_.get());
-  return concrete_factory_->CreateCanvas();
+  return concrete_factory_->CreateViewport();
 }
 
 ui::Group* Systems::CreateGroup() {
@@ -3353,50 +3328,9 @@ ui::ListView* Systems::CreateListView() {
   return concrete_factory_->CreateListView(); 
 }
 
-ui::MenuContainer* Systems::CreateMenuBar() {
-  assert(concrete_factory_.get());
-  return concrete_factory_->CreateMenuBar(); 
-}
-
 ui::PopupMenu* Systems::CreatePopupMenu() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreatePopupMenu(); 
-}
-
-void Systems::OnWindowCreate(WindowTypes::Type window_type, Window& e) {
-  assert(concrete_factory_.get());
-  concrete_factory_->OnWindowCreate(window_type, e); 
-}
-
-void Systems::OnWindowDestruction(Window& e) {
-  assert(concrete_factory_.get());
-  concrete_factory_->OnWindowDestruction(e); 
-}
-
-void Systems::UpdateWindows() {
-  assert(concrete_factory_.get());
-  concrete_factory_->UpdateWindows();
-}
-
-void Systems::UpdateWindow(WindowTypes::Type window_type, Window* window) {
-  assert(concrete_factory_.get());
-  concrete_factory_->UpdateWindow(window_type, window);
-}
-
-void Systems::ChangeWindowType(int extended_window_type, Window* window) {
-  assert(concrete_factory_.get());
-  concrete_factory_->ChangeWindowType(extended_window_type, window);
-}
-
-void Systems::set_class_properties(WindowTypes::Type window_type,
-                                    const Properties& properties) {
-  assert(concrete_factory_.get());
-  concrete_factory_->set_class_properties(window_type, properties);
-}
-
-Properties Systems::class_properties(WindowTypes::Type window_type) {
-  assert(concrete_factory_.get());
-  return concrete_factory_->class_properties(window_type);
 }
 
 // DefaultSystems
@@ -3449,8 +3383,8 @@ ui::ComboBox* DefaultSystems::CreateComboBox() {
   return new ComboBox();
 }
 
-ui::Canvas* DefaultSystems::CreateCanvas() {
-  return new Canvas();
+ui::Viewport* DefaultSystems::CreateViewport() {
+  return new Viewport();
 }
 
 ui::Group* DefaultSystems::CreateGroup() {
@@ -3515,10 +3449,6 @@ ui::TreeView* DefaultSystems::CreateTreeView() {
 
 ui::ListView* DefaultSystems::CreateListView() {
   return new ListView();
-}
-
-ui::MenuContainer* DefaultSystems::CreateMenuBar() {
-  return new MenuBar();
 }
 
 ui::PopupMenu* DefaultSystems::CreatePopupMenu() {

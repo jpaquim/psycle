@@ -563,6 +563,21 @@ void FrameImp::OnDynamicMenuItems(UINT nID) {
   }
 }
 
+void FrameImp::DevSetMenuRootNode(const Node::Ptr& node) {    
+    if (frame_menu_.m_hMenu) {
+      frame_menu_.DestroyMenu();
+    }    
+    menu_container_.set_root_node(node);
+    if (node) {
+      VERIFY(frame_menu_.CreateMenu());    
+      SetMenu(&frame_menu_);
+      MenuContainerImp* menubar_imp = dynamic_cast<MenuContainerImp*>(menu_container_.imp());
+      assert(menubar_imp);
+      menubar_imp->set_menu_window(this, node);
+    } 
+    DrawMenuBar();       
+}
+
 ui::FrameImp* PopupFrameImp::popup_frame_ = 0;
 
 LRESULT CALLBACK MouseHook(int Code, WPARAM wParam, LPARAM lParam) {
@@ -1299,7 +1314,7 @@ void ScintillaImp::SetupHighlighting(const Lexer& lexer) {
 
 void ScintillaImp::SetupFolding(const Lexer& lexer) {
   SetFoldingBasics();
-  SetFoldingColors(lexer);
+  SetFoldingColors(0xFF000000, 0xFFFFFFFF);
   SetFoldingMarkers();
   SetupLexerType();
 }
@@ -1316,10 +1331,10 @@ void ScintillaImp::SetFoldingBasics() {
     0);
 }
 
-void ScintillaImp::SetFoldingColors(const Lexer& lexer) {
+void ScintillaImp::SetFoldingColors(ARGB fore, ARGB back) {
  for (int i = 25; i <= 31; i++) {    
-   f(SCI_MARKERSETFORE, i, 0x0); //ToCOLORREF(lexer.folding_marker_fore_color()));
-   f(SCI_MARKERSETBACK, i, 0xFFFFFF); // ToCOLORREF(lexer.folding_marker_back_color()));
+   f(SCI_MARKERSETFORE, i, ToCOLORREF(fore));
+   f(SCI_MARKERSETBACK, i, ToCOLORREF(back));
  }
 }
 
@@ -1405,7 +1420,8 @@ void MenuContainerImp::UpdateNodes(const Node::Ptr& parent_node, HMENU parent,
       menu_imp->dev_set_position(pos);      
       if (node->size() == 0) {        
         ui::Image* img = !node->image().expired() ? node->image().lock().get() : 0;
-        menu_imp->CreateMenuItem(node->text(), img);
+        menu_imp->CreateMenuItem(node->text(), img, node->selected());        
+        node->changed.connect(boost::bind(&MenuImp::OnNodeChanged, menu_imp, _1));
         RegisterMenuEvent(menu_imp->id(), menu_imp);
       } else {
         menu_imp->CreateMenu(node->text());        
@@ -1452,6 +1468,7 @@ void MenuContainerImp::WorkMenuItemEvent(int id) {
             if (imp->id() == selectedItemID) {
              bar->OnMenuItemClick(node->shared_from_this());
 						 bar->menu_item_click(*bar, node->shared_from_this());
+             node->ExecuteAction();
             }
           }
         }
@@ -1503,12 +1520,12 @@ void MenuImp::CreateMenu(const std::string& text) {
   pos_ = count - 1;
 }
 
-void MenuImp::CreateMenuItem(const std::string& text, ui::Image* image) {
+void MenuImp::CreateMenuItem(const std::string& text, ui::Image* image, bool selected) {
   if (text == "-") {
     ::AppendMenu(parent_, MF_SEPARATOR, 0, NULL);  
   } else {
-    id_ = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;
-    ::AppendMenu(parent_, MF_STRING |  MF_ENABLED, id_,
+    id_ = ID_DYNAMIC_MENUS_START + ui::MenuContainer::id_counter++;    
+    ::AppendMenu(parent_, MF_STRING |  MF_ENABLED | ((selected) ? MF_CHECKED : MF_UNCHECKED), id_,
                  Charset::utf8_to_win(text).c_str());
     if (image) {  
 			assert(image->imp());			
@@ -1518,6 +1535,34 @@ void MenuImp::CreateMenuItem(const std::string& text, ui::Image* image) {
                            (HBITMAP)imp->dev_source()->m_hObject,
                            (HBITMAP)imp->dev_source()->m_hObject);
     }
+  }
+}
+
+void MenuImp::dev_set_text(const std::string& text) {    
+  ::ModifyMenu(parent_, pos_, MF_BYPOSITION, 0, Charset::utf8_to_win(text).c_str());    
+}
+
+void MenuImp::dev_set_text_and_select(const std::string& text) {
+  ::ModifyMenu(parent_, pos_, MF_BYPOSITION | MF_CHECKED, 0, Charset::utf8_to_win(text).c_str());
+}
+
+void MenuImp::dev_set_text_and_deselect(const std::string& text) {    
+  ::ModifyMenu(parent_, pos_, MF_BYPOSITION | MF_UNCHECKED, 0, Charset::utf8_to_win(text).c_str());    
+}
+
+bool MenuImp::dev_selected() const {
+  MENUITEMINFO menu_info;
+  menu_info.cbSize = sizeof(MENUITEMINFO);
+  menu_info.fMask = MIIM_DATA,
+  GetMenuItemInfo(parent_, pos_, TRUE, &menu_info);
+  return menu_info.fState & MFS_CHECKED; 
+}
+
+void MenuImp::OnNodeChanged(Node& node) {
+  if (node.selected()) {
+    dev_set_text_and_select(node.text());
+  } else {
+    dev_set_text_and_deselect(node.text());
   }
 }
 
