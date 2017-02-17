@@ -215,21 +215,21 @@ function creategroup:initbuttons()
   local that = self             
   function createbutton:onclick()
      local node = that.createlist:selected()
-     if node ~= nil and node.details then
-        if node.details:isplugin() and node.setting.general.machinename:value() == "" then
-          psycle.alert("Field general-machinename required.")
-        else
-          node.details:parseproperties()               
-          if node.details:isplugin() then         
-             that:oncreateplugin(node.setting.general,
-                                 node.setting.outputs,
-                                 node.setting.general.machinename:value())
-          else
-             that:oncreatemodule(node.setting.properties,
-                                 node.setting.outputs)
+     if node ~= nil and node.details then        
+        node.details:parseproperties()               
+        if node.details:isplugin() then
+          if node.setting.general.machinename:value() == "" then
+            psycle.alert("Field general-machinename required.")
+          else        
+           that:oncreateplugin(node.setting.general,
+                               node.setting.outputs,
+                               node.setting.general.machinename:value())
           end
-        end          
-     end    
+        else
+           that:oncreatemodule(node.setting.properties,
+                               node.setting.outputs)
+        end
+      end            
   end                             
 end
 
