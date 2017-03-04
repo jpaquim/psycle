@@ -230,7 +230,11 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 				GenerateSongTitle(title, file, global_.song().author.c_str(), global_.song().name.c_str());
 			}
 			
-			if (length_in_ms) { *length_in_ms = global_.player().CalcOrSeek(global_.song()); }
+			if (length_in_ms) { 
+				int inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount = -1;
+				global_.player().CalcPosition(global_.song(), inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount);
+				*length_in_ms = inoutseektime_ms;
+			}
 		}
 	}
 	else
@@ -256,7 +260,9 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 				if (title) { GenerateSongTitle(title, file, pSong->author.c_str(), pSong->name.c_str()); }
 				if (length_in_ms)
 				{
-					*length_in_ms = global_.player().CalcOrSeek(*pSong);
+					int inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount = -1;
+					global_.player().CalcPosition(*pSong, inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount);
+					*length_in_ms = inoutseektime_ms;
 				}
 				songfile.Close();
 				delete pSong;
@@ -405,7 +411,11 @@ void stop()
 }
 
 
-int getlength() { return global_.player().CalcOrSeek(global_.song()); }
+int getlength() { 
+	int inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount = -1;
+	global_.player().CalcPosition(global_.song(), inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount);
+	return inoutseektime_ms;
+}
 int getoutputtime() { return mod.outMod->GetOutputTime(); }
 void setoutputtime(int time_in_ms)
 {
@@ -783,8 +793,11 @@ INT_PTR CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				j++;
 			}
 		}
-		
-		i=global_.player().CalcOrSeek(*pSong)/1000;
+		{
+			int inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount = -1;
+			global_.player().CalcPosition(*pSong, inoutseqPos, inoutpatLine, inoutseektime_ms, inoutlinecount);
+			i = inoutseektime_ms/1000;
+		}
 
 		if(usewasabi) 
 		{

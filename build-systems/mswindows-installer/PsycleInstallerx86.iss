@@ -8,7 +8,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppID={{8E7D0A7F-B85F-44DC-8C1C-2A2C27BAEA0B}
 AppName=Psycle Modular Music Creation Studio
-AppVersion=1.12.0
+AppVersion=1.12.2 beta
 ;AppVerName=Psycle Modular Music Creation Studio 1.8.8
 AppPublisher=psycledelics
 AppPublisherURL=http://psycle.sourceforge.net/
@@ -24,8 +24,8 @@ SetupIconFile=..\..\psycle\pixmaps\psycleinstaler.ico
 Compression=lzma/Max
 SolidCompression=true
 MinVersion=0,5.0.2195sp4
-AppCopyright=2000-2014 psycledelics
-AppVerName=Psycle 1.12.0 32 bits
+AppCopyright=2000-2017 psycledelics
+AppVerName=Psycle 1.12.2 beta 32 bits
 PrivilegesRequired=poweruser
 TimeStampsInUTC=true
 DisableReadyPage=true
@@ -46,14 +46,10 @@ Name: deleteCacheFile; Description: deletes the cache of plugin names to force i
 Name: deleteRegistrySettings; Description: deletes the existing settings in the registry, allowing psycle to regenerate the defaults.; Flags: unchecked
 
 [Files]
-Source: ..\msvc\output\Win32\release\bin\boost_date_time-vc90-mt-1_55.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application;
-Source: ..\msvc\output\Win32\release\bin\boost_filesystem-vc90-mt-1_55.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application;
-Source: ..\msvc\output\Win32\release\bin\boost_system-vc90-mt-1_55.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application;
-Source: ..\msvc\output\Win32\release\bin\boost_thread-vc90-mt-1_55.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application;
-Source: ..\msvc\output\Win32\release\bin\boost_chrono-vc90-mt-1_55.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application; 
-Source: ..\msvc\output\Win32\release\bin\boost_signals-vc90-mt-1_55.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application; 
+Source: ..\msvc\output\Win32\release\bin\boost_*.dll; DestDir: {app}; Flags: 32bit ignoreversion; Excludes: boost_unit_test_framework-*.dll; Components: Application;
 Source: ..\msvc\output\Win32\release\bin\psycle.exe; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application;
 Source: ..\msvc\output\Win32\release\bin\universalis.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application;
+Source: ..\msvc\output\Win32\release\bin\SciLexer.dll; DestDir: {app}; Flags: 32bit ignoreversion; Components: Application;
 Source: ..\msvc\output\Win32\release\bin\psycle-plugins\*.dll; DestDir: {app}\PsyclePlugins; Flags: 32bit ignoreversion; Excludes: crasher.dll; Components: Open_Source_Plugins;
 Source: ..\..\psycle\doc\for-end-users\*; DestDir: {app}\Docs; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: .svn, Log1.log; Components: Documentation;
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -62,8 +58,10 @@ Source: ..\..\psycle-plugins\src\psycle\plugins\*.txt; DestDir: {app}\Docs; Excl
 Source: ..\..\psycle\Skins\*; DestDir: {app}\Skins; Excludes: *.txt; Flags: recursesubdirs ignoreversion createallsubdirs; Components: Skins;
 Source: ..\..\psycle\doc\*.psy; DestDir: "{commondocs}\Psycle Songs"; Flags: ignoreversion; Components: Demo_Songs; 
 Source: ..\..\psycle-plugins\presets\*.prs; DestDir: {app}\PsyclePlugins; Flags: ignoreversion onlyifdoesntexist; Components: Presets;
-Source: "Output\Psycle Winamp plugin_v1_11.exe"; DestDir: {tmp}; Components: "Winamp_plugin"; 
-Source: ..\..\psycle\LuaScripts\*.lua; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Components: LuaScripts; 
+Source: "Output\Psycle Winamp plugin_v1_12.exe"; DestDir: {tmp}; Components: "Winamp_plugin"; 
+Source: ..\..\psycle\LuaScripts\psycle\*.*; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Components: Application; 
+Source: ..\..\psycle\LuaScripts\start.lua; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Components: Application; 
+Source: ..\..\psycle\LuaScripts\*.*; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Excludes: psycle, start.lua; Components: LuaScripts; 
 
 [Icons]
 Name: {group}\Psycle Modular Music Creation Studio; Filename: {app}\psycle.exe
@@ -84,7 +82,7 @@ Name: "{group}\Demo Songs Folder"; Filename: "{commondocs}\Psycle Songs\";
 Filename: {app}\psycle.exe; Description: {cm:LaunchProgram,Psycle Modular Music Creation Studio}; Flags: nowait postinstall skipifsilent; Tasks: ; Components: Application
 Filename: {tmp}\Vst-Bundle.exe; WorkingDir: {tmp}; StatusMsg: Select the location of your 32bit VST Plugins Dir (use Psycle\VstPlugins if in doubt); Flags: runascurrentuser; Components: " VstPack"; Tasks: ; Languages: 
 Filename: {tmp}\vcredist_x86.exe; WorkingDir: {tmp}; Flags: 32bit runascurrentuser; Components: InstallMSRuntimes_x86
-Components: Winamp_plugin; Filename: "{tmp}\Psycle Winamp plugin_v1_11.exe"; WorkingDir: {tmp}; Flags: RunAsCurrentUser; 
+Components: Winamp_plugin; Filename: "{tmp}\Psycle Winamp plugin_v1_12.exe"; WorkingDir: {tmp}; Flags: RunAsCurrentUser; 
 
 [Components]
 Name: Application; Description: Main Application and needed dlls; Flags: fixed; Types: custom compact full; Languages: 
@@ -95,7 +93,7 @@ Name: VstPack; Description: Download and install the freely available VST Pack.;
 Name: Presets; Description: Install presets for selected plugins (does not overwrite existing files); Types: custom full
 Name: Documentation; Description: Install the documentation of the project; Types: custom full
 Name: Skins; Description: Skins that change the look and feel of Psycle; Types: custom full
-Name: Demo_Songs; Description: Demo songs to show what psycle can do; Types: custom full; Languages: 
+Name: Demo_Songs; Description: Demo songs to show what psycle can do; Types: custom full
 Name: "Winamp_plugin"; Description: "Installs the winamp plugin to play .psy files with this player.";Types: custom full; Languages: 
 Name: LuaScripts; Description: Lua utility and example scripts; Types: custom compact full
 [Dirs]
