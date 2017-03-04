@@ -191,10 +191,11 @@ int Area::Combine(const Area& other, int combinemode) {
   needs_update_ = true;
 #ifdef __linux__ 
   return 1;
-#elif _WIN32
+#elif defined _WIN32
   return COMPLEXREGION;
-# endif
+#else
     return 1;
+#endif
   //}	
 }
 

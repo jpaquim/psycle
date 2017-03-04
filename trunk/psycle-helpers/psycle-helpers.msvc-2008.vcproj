@@ -264,6 +264,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\psycle\helpers\pathname_validate.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\psycle\helpers\ring_buffer.hpp"
 					>
 				</File>
@@ -469,10 +473,6 @@
 				</Filter>
 			</Filter>
 		</Filter>
-		<File
-			RelativePath=".\src\psycle\helpers\pathname_validate.hpp"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
