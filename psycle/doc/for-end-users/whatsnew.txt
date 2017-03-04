@@ -49,7 +49,7 @@ Legend :       + = addition        * = change        ! = bugfix
 v1.12.2 beta
 -------
 + Parameter remapping for all types of plugins. It is mainly useful for VST plugins that have more than 256 parameters
-+ Lua Host: Integrated plugin editor that is even used for debugging code.
++ Lua Host: Integrated plugin editor that can show the line of code in case of exception.
 * Sampler: There is a new option (enabled by default) in the machine configuration to select a better slide algorithm. See tweaking.txt for more information.
 * Lua Host: Many more changes in the implementation. Compatibility with existing plugins is kept, but there are a couple of small changes (like in the ahdsr)
 

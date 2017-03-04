@@ -25,6 +25,7 @@
 }*/
 
 
+// Visual Leak Detector ( vld.codeplex.com )
 // #include <vld.h>
 
 #include <sstream>

@@ -13,7 +13,7 @@ namespace psycle
 	namespace host
 	{
 
-		const int MAX_BROWSER_PLUGINS = 2048;
+		const int MAX_BROWSER_PLUGINS = 10000;
 		class CProgressDialog;
 		class PluginCatcher;
 
