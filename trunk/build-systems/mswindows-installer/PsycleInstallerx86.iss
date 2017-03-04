@@ -59,9 +59,9 @@ Source: ..\..\psycle\Skins\*; DestDir: {app}\Skins; Excludes: *.txt; Flags: recu
 Source: ..\..\psycle\doc\*.psy; DestDir: "{commondocs}\Psycle Songs"; Flags: ignoreversion; Components: Demo_Songs; 
 Source: ..\..\psycle-plugins\presets\*.prs; DestDir: {app}\PsyclePlugins; Flags: ignoreversion onlyifdoesntexist; Components: Presets;
 Source: "Output\Psycle Winamp plugin_v1_12.exe"; DestDir: {tmp}; Components: "Winamp_plugin"; 
-Source: ..\..\psycle\LuaScripts\psycle\*.*; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Components: Application; 
-Source: ..\..\psycle\LuaScripts\start.lua; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Components: Application; 
 Source: ..\..\psycle\LuaScripts\*.*; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Excludes: psycle, start.lua; Components: LuaScripts; 
+Source: ..\..\psycle\LuaScripts\psycle\*.*; DestDir: {app}\LuaScripts\psycle\; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Components: Application; 
+Source: ..\..\psycle\LuaScripts\start.lua; DestDir: {app}\LuaScripts; Flags: IgnoreVersion recursesubdirs promptifolder createallsubdirs; Components: Application; 
 
 [Icons]
 Name: {group}\Psycle Modular Music Creation Studio; Filename: {app}\psycle.exe
