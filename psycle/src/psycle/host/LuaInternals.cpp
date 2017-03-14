@@ -2205,10 +2205,15 @@ int LuaFileHelper::open(lua_State *L) {
 }
 
 int LuaFileHelper::mkdir(lua_State* L) {
-  const char* dir_str = luaL_checkstring(L, 1);  
-  boost::filesystem::path dir(dir_str);
-	lua_pushboolean(L, (boost::filesystem::create_directories(dir)));
-  return 1;
+  const char* dir_str = luaL_checkstring(L, 1); 
+  try { 
+    boost::filesystem::path dir(dir_str);
+	boost::filesystem::create_directories(dir);
+  } catch (boost::filesystem::filesystem_error& e) {
+	lua_pushstring(L, e.what());
+	return 1;
+  }
+  return 0;
 }
 
 int LuaFileHelper::isdirectory(lua_State* L) {

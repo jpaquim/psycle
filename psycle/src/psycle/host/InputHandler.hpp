@@ -12,6 +12,7 @@ namespace psycle
 	{
 		class CChildView;
 		class Machine;
+		class ParamTranslator;
 
 		class SPatternUndo
 		{
@@ -54,6 +55,7 @@ namespace psycle
 		private:
 			CChildView* pChildView;
 			CMainFrame* pMainFrame;
+			std::auto_ptr<ParamTranslator> param_translator_dummy;
 		public:	
 			///\name translation
 			///\{
@@ -72,7 +74,7 @@ namespace psycle
 			///\{
 			/// .
 			PatternEntry BuildNote(int note, int instr=255, int velocity=127, bool bTranspose=true, Machine* mac=NULL, bool forcevolume=false);
-			PatternEntry BuildTweak(int machine, int tweakidx, int value, bool slide);
+			PatternEntry BuildTweak(int machine, int tweakidx, int value, bool slide, const ParamTranslator& translator);
 			void PlayNote(int note,int instr=255, int velocity=127,bool bTranspose=true,Machine*pMachine=NULL);
 			void PlayNote(PatternEntry * entry, int track);
 			/// .
@@ -90,7 +92,7 @@ namespace psycle
 			void MidiPatternCommand(int busMachine, int command, int value); // called by midi to insert pattern commands
 			void MidiPatternTweak(int busMachine, int command, int value, bool slide=false); // called by midi to insert pattern commands
 			void MidiPatternMidiCommand(int busMachine, int command, int value); // called by midi to insert midi pattern commands
-			void Automate(int macIdx, int param, int value, bool undo);
+			void Automate(int macIdx, int param, int value, bool undo, const ParamTranslator& translator);
 
 			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);

@@ -195,8 +195,7 @@ namespace psycle
 
 
 
-		Machine::Machine(MachineType msubclass, MachineMode mode, int id)
-        : param_translator_(*this)
+		Machine::Machine(MachineType msubclass, MachineMode mode, int id)       
 		{
 		//	Machine();
 			_type=msubclass;
@@ -236,8 +235,7 @@ namespace psycle
 			, _pScopeBufferR(0)
 			, _scopeBufferIndex(0)
 			, _scopePrevNumSamples(0)
-			, _sharedBuf(false)
-      , param_translator_(*this)
+			, _sharedBuf(false)     
 		{
 			_editName[0] = '\0';
 
@@ -307,8 +305,7 @@ namespace psycle
 			, _pScopeBufferR(0)
 			, _scopeBufferIndex(0)
 			, _scopePrevNumSamples(0)
-			, _sharedBuf(false)
-      , param_translator_(*this)
+			, _sharedBuf(false)    
 		{
 			strcpy(_editName,mac->_editName);
 

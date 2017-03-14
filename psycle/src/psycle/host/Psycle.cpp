@@ -58,17 +58,6 @@ namespace psycle { namespace host {
 		{
 		}
 
-   /* static int callback(void *NotUsed, int argc, char **argv, char **azColName){
-  int i;
-  for(i=0; i<argc; i++){
-		char s[2048];
-    sprintf_s(s, "%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-		OutputDebugString(s);
-   }
-   printf("\n");
-   return 0;
-}*/
-
               
 		BOOL CPsycleApp::InitInstance()			
 		{           

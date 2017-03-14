@@ -1147,13 +1147,13 @@ namespace psycle { namespace host {
 		}
 		void CFrameMachine::Automate(int param, int value, bool undo, int min)
 		{
-			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value-min, undo);
+			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value-min, undo, machine().param_translator());
 			if (pParamGui) {
 				pParamGui->UpdateNew(param, value);
-      }
-      if (pParamMapGui) {
-        pParamMapGui->UpdateNew(param, value);
-      }
+			}
+			if (pParamMapGui) {
+				pParamMapGui->UpdateNew(param, value);
+			}
 	}
     void CFrameMachine::OnParamMapClose(ui::Frame&) {
       pParamMapGui = 0;

@@ -233,42 +233,54 @@ function creategroup:initbuttons()
   end                             
 end
 
-function creategroup:oncreateplugin(general, outputs, name)   
-  filehelper.mkdir(cfg:luapath().."\\" .. name)  
-  local env = { machinename = name, vendor = "psycle", machmode = general.machmode:value()}
-  env.link = templateparser.replaceline(general.link:value(), env)  
-  templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",
-                      cfg:luapath().."\\" .. name .. ".lua",
-                      env)                      
-  for _, output in pairs(outputs) do
-    local env = {}
-    if output.properties then
-      for name, property in output.properties:opairs() do    
-        env[name] = property:value()
-      end  
-    end
-    if general then
-      for name, property in general:opairs() do    
-        env[name] = property:value()
-      end  
-    end
-    local templatepath = cfg:luapath().."\\plugineditor\\templates\\" .. output.template
-    templateparser.work(templatepath,
-                        cfg:luapath().."\\" .. name .. "\\"..output.path,
-                        env)
+function creategroup:oncreateplugin(general, outputs, name)
+  local env = { machinename = name, vendor = "psycle", machmode = general.machmode:value()}   
+  local err = filehelper.mkdir(cfg:luapath().."\\" .. name)  
+  if not err then   
+    env.link = templateparser.replaceline(general.link:value(), env)
+    err = templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",
+                              cfg:luapath().."\\" .. name .. ".lua",
+                              env) 
+  end                        
+  if not err then
+    for _, output in pairs(outputs) do
+      local env = {}
+      if output.properties then
+        for name, property in output.properties:opairs() do    
+          env[name] = property:value()
+        end  
+      end
+      if general then
+        for name, property in general:opairs() do    
+          env[name] = property:value()
+        end  
+      end
+      local templatepath = cfg:luapath().."\\plugineditor\\templates\\" .. output.template
+      err = templateparser.work(templatepath,
+                                cfg:luapath().."\\" .. name .. "\\"..output.path,
+                                env)
+      if err then
+        break
+      end
+    end  
  end
- local catcher = catcher:new()
- catcher:rescannew()
- if (env.machmode == "machinemodes.HOST") then
-    psycle.reloadstartscript()
+ if err then
+    psycle.alert("File Error " .. err)
+ else
+   local catcher = catcher:new()
+   catcher:rescannew()
+   if (env.machmode == "machinemodes.HOST") then
+      psycle.reloadstartscript()
+   end
+   local machinemeta = catcher:info(name);
+   machinemeta.machinepath = self.main:machinepath(machinemeta)
+   self.main:open(machinemeta)
+   self.main:updatepluginlist()
  end
- local machinemeta = catcher:info(name);
- machinemeta.machinepath = self.main:machinepath(machinemeta)
- self.main:open(machinemeta)
- self.main:updatepluginlist()
 end
 
 function creategroup:oncreatemodule(properties, outputs)
+  local err = nil
   local env = {}  
   for name, property in properties:opairs() do    
     env[name] = property:value()
@@ -283,9 +295,13 @@ function creategroup:oncreatemodule(properties, outputs)
     end
     output.realpath = self.main.fileexplorer:path() .. "\\" .. path    
     local templatepath = cfg:luapath().."\\plugineditor\\templates\\"..output.template    
-    templateparser.work(templatepath,  output.realpath, env)                         
+    err = templateparser.work(templatepath,  output.realpath, env)                         
   end 
-  self.main.docreatemodule:emit(outputs)  
+  if err then
+    psycle.alert("File Error " .. err)
+  else
+    self.main.docreatemodule:emit(outputs)
+  end
 end
 
 function creategroup:onchange(node)
