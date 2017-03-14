@@ -269,7 +269,7 @@ void ParamMap::FillComboBox() {
 
 void ParamMap::RefreshParamMap() {  
   list_view_->PreventDraw();
-  ParamTranslator param(*machine_);   
+  ParamTranslator param;   
   std::vector<ui::Node::Ptr>::iterator it = root_node_->begin();
   for (int i = 0; it != root_node_->end(); ++i, ++it) {
     std::stringstream str;
@@ -336,16 +336,15 @@ std::string ParamMap::param_name(int index) const {
 }
 
 void ParamMap::OnSaveDefaultButtonClick(ui::Button&) {
-	ParamTranslator param(*machine_);
-	machine_->get_virtual_param_map(param);
+	ParamTranslator param(machine_->param_translator());
 	char name[128];
 	strcpy(name,machine_->GetDllName());
 	if (strcmp(name,"") == 0) { strcpy(name,machine_->GetName()); }
-	PresetIO::SaveDefaultMap(PsycleGlobal::conf().GetAbsolutePresetsDir() + "/" + name + ".map",param, machine_->GetNumParams());
+	PresetIO::SaveDefaultMap(PsycleGlobal::conf().GetAbsolutePresetsDir() + "/" + name + ".map", param, machine_->GetNumParams());
 }
 
 void ParamMap::OnLoadDefaultButtonClick(ui::Button&) {
-	ParamTranslator param(*machine_);
+	ParamTranslator param;
 	char name[128];
 	strcpy(name,machine_->GetDllName());
 	if (strcmp(name,"") == 0) { strcpy(name,machine_->GetName()); }

@@ -66,6 +66,7 @@ namespace psycle
 			,UndoSaved(0)
 			,UndoMacCounter(0)
 			,UndoMacSaved(0)
+			,param_translator_dummy(new ParamTranslator())
 		{
 			bDoingSelection = false;
 
@@ -1174,14 +1175,18 @@ namespace psycle
 			return entry;
 		}
 
-		PatternEntry InputHandler::BuildTweak(int machine, int tweakidx, int value, bool slide)
+		PatternEntry InputHandler::BuildTweak(int machine, int tweakidx, int value, bool slide, const ParamTranslator& translator)
 		{
 			if (value < 0) value = 0;
 			if (value > 0xffff) value = 0xffff;
 			PatternEntry newentry;
 			newentry._cmd = (value>>8)&0xFF;
 			newentry._parameter = value&0xFF;
-			newentry._inst = tweakidx;
+			try {
+				newentry._inst = translator.virtual_index(tweakidx);
+			} catch(std::exception& e) {				
+				newentry._inst = tweakidx;						
+			}
 			newentry._mach = machine;
 			newentry._note = (slide)?notecommands::tweakslide : notecommands::tweak;
 			return newentry;
@@ -1232,7 +1237,7 @@ namespace psycle
 		}
 
 		void InputHandler::MidiPatternTweak(int busMachine, int tweakidx, int value, bool slide) {
-			PatternEntry entry = BuildTweak(busMachine, tweakidx, value, slide);
+			PatternEntry entry = BuildTweak(busMachine, tweakidx, value, slide, *(param_translator_dummy.get()));
 			bool recording = Global::player()._playing && PsycleGlobal::conf()._followSong;
 			int line=0;
 			int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
@@ -1264,7 +1269,7 @@ namespace psycle
 			PlayNote(&entry, track);
 		}
 
-		void InputHandler::Automate(int macIdx, int param, int value, bool undo)
+		void InputHandler::Automate(int macIdx, int param, int value, bool undo, const ParamTranslator& param_translator)
 		{
 			PsycleConfig::InputHandler& settings = PsycleGlobal::conf().inputHandler();
 
@@ -1274,7 +1279,7 @@ namespace psycle
 
 			if(settings._RecordTweaks)
 			{
-				PatternEntry entry = BuildTweak(macIdx, param, value, settings._RecordMouseTweaksSmooth);
+				PatternEntry entry = BuildTweak(macIdx, param, value, settings._RecordMouseTweaksSmooth, param_translator);
 				bool recording = Global::player()._playing && PsycleGlobal::conf()._followSong;
 				int line=0;
 				int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);

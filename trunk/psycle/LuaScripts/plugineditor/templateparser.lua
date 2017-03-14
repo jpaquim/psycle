@@ -42,7 +42,7 @@ function templateparser.replaceline(line, env)
 end
 
 function templateparser.work(templatepath, outputpath, env)     
-  templateparser.write(outputpath, 
+    return templateparser.write(outputpath, 
       templateparser.processtemplate(templatepath, env))
 end
 
@@ -74,16 +74,24 @@ function templateparser.processtemplate(templatepath, env)
 end
 
 function templateparser.readfile(templatepath, fun, var1)
-  local file = io.open(templatepath, "r")
-  result = fun(file, var1)
-  file:close()  
-  return result
+  local file, err = io.open(templatepath, "r")
+  if file then
+    result = fun(file, var1)
+    file:close() 
+  else
+    result = nil
+  end  
+  return result, err
 end
 
 function templateparser.write(filepath, text)
-   local file = io.open(filepath, "w")
-   file:write(text)
-   file:close()   
+  local file, err = io.open(filepath, "w")
+  if file then
+    file:write(text)
+    file:close() 
+  else
+    return err
+  end   
 end
 
 return templateparser

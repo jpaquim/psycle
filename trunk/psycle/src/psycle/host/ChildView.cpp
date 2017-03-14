@@ -1534,7 +1534,7 @@ namespace psycle { namespace host {
 				}
 				if (created)
 				{
-					ParamTranslator param(*_pSong._pMachine[fb]);
+					ParamTranslator param;
 					char name[255];
 					strcpy(name,_pSong._pMachine[fb]->GetDllName());
 					if (strcmp(name,"") == 0) { strcpy(name,_pSong._pMachine[fb]->GetName()); }
