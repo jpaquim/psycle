@@ -170,6 +170,7 @@ class Splitter : public Window {
 	virtual void OnMouseUp(MouseEvent& ev);
 	virtual void OnMouseMove(MouseEvent& ev);
 	virtual void OnMouseOut(MouseEvent& ev);
+	virtual void OnMouseEnter(MouseEvent& ev);
 
  private:
    ARGB fill_color_;

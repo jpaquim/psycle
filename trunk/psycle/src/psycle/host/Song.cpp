@@ -212,12 +212,14 @@ namespace psycle
 			if (pMachine) {
 				pMachine->Init();
 			}
+			machines_->RegisterMachine(pMachine);			
 			return pMachine;
 		}
 
 
 		Song::Song()
 			:semaphore(2,2,NULL,NULL)
+			,machines_(new MachineGroup())
 		{
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
@@ -770,6 +772,7 @@ namespace psycle
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{
+				machines_->UnregisterMachine(iMac);
 				iMac->DeleteWires();
 				DeleteVirtualsOfMachine(mac);
 				if(mac == machineSoloed) machineSoloed = -1;

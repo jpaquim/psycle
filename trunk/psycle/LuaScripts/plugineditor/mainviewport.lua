@@ -10,7 +10,6 @@ Foundation ; either version 2, or (at your option) any later version.
 -- local serpent = require("psycle.serpent")
 
 local machine = require("psycle.machine")
-local machines = require("psycle.machines")
 local machinemodes = require("psycle.machinemodes")
 local catcher = require("psycle.plugincatcher")
 local keycodes = require("psycle.ui.keycodes")
@@ -72,7 +71,7 @@ function mainviewport:init()
   psycle.setting():addlistener(self)  
   self:link(require("psycle.ui.standarduisheet"))
   self:onapplysetting()  
-  self.machines = machines:new()  
+  self.machines = machine:new("maingroup")  
   self:invalidatedirect()
   self:createpluginselector()  
   self:createpagegroup()
@@ -623,7 +622,7 @@ function mainviewport:updatepowericon()
   if self.cbxtopluginindex ~= nil then    
     local isselectedmachinemute = self.machines:muted(self.cbxtopluginindex[self.cbx:itemindex()])  
     if self.playicon:on() == isselectedmachinemute then      
-    self.playicon:toggle()
+      self.playicon:toggle()
     end
   end  
 end

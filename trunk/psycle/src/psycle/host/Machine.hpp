@@ -12,6 +12,7 @@
 #include <universalis/stdlib/chrono.hpp>
 #include <universalis/os/loggers.hpp>
 #include <stdexcept>
+#include <vector>
 
 namespace psycle
 {
@@ -159,41 +160,41 @@ namespace psycle
 			int maxValue;
 		};
 
-    class ParamTranslator
-    {
-    public:
-      typedef std::vector<int> TranslateContainer;
+		class ParamTranslator
+		{
+		public:
+			typedef std::vector<int> TranslateContainer;
 
-      ParamTranslator() {
-        translate_container_.reserve(256);
-        for (int i = 0; i < 256; ++i) {
-          translate_container_.push_back(i);
-        }
-      }
+			ParamTranslator() {
+				translate_container_.reserve(256);
+				for (int i = 0; i < 256; ++i) {
+					translate_container_.push_back(i);
+				}
+			}
 
-     inline void set_virtual_index(int virtual_index, int machine_index) {
-       translate_container_[virtual_index] = machine_index;
-     }
-	inline int translate(int virtual_index) const {
-		if (virtual_index >=0 && virtual_index < 256) {
-			return translate_container_[virtual_index]; 
-		} else {
-			throw std::runtime_error("Plugin Index Out of Range");
-		}
-	}
-	inline int virtual_index(int machine_index) const {
-		TranslateContainer::const_iterator it =
-			std::find(translate_container_.begin(), translate_container_.end(), machine_index);
-		if (it != translate_container_.end()) {
-			return std::distance(translate_container_.begin(), it);
-		} else {
-			throw std::runtime_error("Plugin Index Out of Range");
-		}
-	}	     
+			inline void set_virtual_index(int virtual_index, int machine_index) {
+				translate_container_[virtual_index] = machine_index;
+			}
+			inline int translate(int virtual_index) const {
+				if (virtual_index >=0 && virtual_index < 256) {
+					return translate_container_[virtual_index]; 
+				} else {
+					throw std::runtime_error("Plugin Index Out of Range");
+				}
+			}
+			inline int virtual_index(int machine_index) const {
+				TranslateContainer::const_iterator it =
+					std::find(translate_container_.begin(), translate_container_.end(), machine_index);
+				if (it != translate_container_.end()) {
+					return std::distance(translate_container_.begin(), it);
+				} else {
+					throw std::runtime_error("Plugin Index Out of Range");
+				}
+			}	     
     
-    private:
-      TranslateContainer translate_container_;
-    };
+		private:
+			TranslateContainer translate_container_;
+		};
 
 		class Wire
 		{
@@ -275,7 +276,8 @@ namespace psycle
 
 		} LegacyWire;
 		class WireDlg;
-		class Mixer;
+		class Mixer;		
+
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
 		{
@@ -284,6 +286,24 @@ namespace psycle
 			friend class Mixer;
 			///\name crash handling
 			///\{
+				public:
+					typedef std::vector<Machine*> Container;
+					typedef Container::iterator iterator;
+					typedef Container::const_iterator const_iterator;
+
+					virtual iterator begin() { return dummy_container_.begin(); }
+					virtual iterator end() { return dummy_container_.end(); }	
+					virtual const_iterator begin() const { return dummy_container_.begin(); }
+					virtual const_iterator end() const { return dummy_container_.end(); }	
+					virtual bool empty() const { return true; }
+					virtual int size() const { return 0; }
+
+					virtual void AddMachineListener(class MachineListener* listener) {}
+					virtual void RemoveMachineListener(class MachineListener* listener) {}
+
+				private:
+					Container dummy_container_;
+
 				public:
 					/// This function should be called when an exception was thrown from the machine.
 					/// This will mark the machine as crashed, i.e. crashed() will return true,
@@ -296,14 +316,14 @@ namespace psycle
 					bool const inline & crashed() const throw() { return crashed_; }
 					void reload() { 						
 						OnReload();
-            crashed_=false;
-            _standby = false;
-            _bypass=false;            
+						crashed_=false;
+						_standby = false;
+						_bypass=false;            
 					}
 					virtual void OnReload() {}
-          void set_crashed(bool on) {                         
-            crashed_ = _bypass = _mute =  on;            
-          }
+					void set_crashed(bool on) {                         
+						crashed_ = _bypass = _mute =  on;            
+					}
 				private:
 					bool                crashed_;
 			///\}
@@ -709,11 +729,11 @@ namespace psycle
 
 		inline int Wire::GetSrcWireIndex() const { return (enabled) ? GetSrcMachine().FindOutputWire(this) : -1; };
 		inline int Wire::GetDstWireIndex() const { return GetDstMachine().FindInputWire(this); };
-
-
+		
 		/// master machine.
 		class Master : public Machine
 		{
+		friend class Song;
 		public:
 			Master();
 			Master(int index);
@@ -741,8 +761,58 @@ namespace psycle
 			int volumeDisplayLeft;
 			int volumeDisplayRight;
 			static float* _pMasterSamples;
+
+			
 		protected:
-			static char* _psName;
+			static char* _psName;		
+		};
+
+		class MachineListener {
+		friend class MachineGroup;
+			public:
+				virtual ~MachineListener() {}
+			protected:
+				virtual void OnMachineCreate(Machine& machine) = 0;
+				virtual void BeforeMachineDelete(Machine& machine) = 0;
+		};
+
+		/// master machine.
+		class MachineGroup : public Machine, public MachineListener
+		{
+		friend class Song;
+		public:
+			virtual void Init(void) {}
+			virtual int GenerateAudio(int numsamples, bool measure_cpu_usage) { return 0; }
+			virtual void UpdateVuAndStanbyFlag(int numSamples) {}
+			virtual float GetAudioRange() const { return 32768.0f; }
+			virtual const char* const GetName(void) const { return ""; }
+			virtual bool Load(RiffFile * pFile) { return false; }
+			virtual bool LoadSpecificChunk(RiffFile * pFile, int version) { return false; }
+			virtual void SaveSpecificChunk(RiffFile * pFile) {}
+
+			float* getLeft() const { return 0; }
+			float* getRight() const { return 0; }
+
+			virtual iterator begin() { return children_.begin(); }
+			virtual iterator end() { return children_.end(); }
+			virtual const_iterator begin() const { return children_.begin(); }
+			virtual const_iterator end() const { return children_.end(); }
+			virtual bool empty() const { return children_.empty(); }
+			virtual int size() const { return children_.size(); }
+			
+			void AddMachineListener(MachineListener* listener);
+			void RemoveMachineListener(MachineListener* listener);
+
+			virtual void OnMachineCreate(Machine& machine) { NotifyMachineCreate(machine); }
+			virtual void BeforeMachineDelete(Machine& machine) { NotifyMachineDelete(machine); }
+		private:
+			void RegisterMachine(Machine* machine);
+			void UnregisterMachine(Machine* machine);
+			void NotifyMachineCreate(Machine& machine);
+			void NotifyMachineDelete(Machine& machine);
+			Machine::Container children_;
+			typedef std::vector<MachineListener*> MachineListeners;
+			MachineListeners machine_listeners_;
 		};
     
 	}

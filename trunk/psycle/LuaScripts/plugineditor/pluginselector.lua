@@ -235,7 +235,10 @@ end
 
 function creategroup:oncreateplugin(general, outputs, name)
   local env = { machinename = name, vendor = "psycle", machmode = general.machmode:value()}   
-  local err = filehelper.mkdir(cfg:luapath().."\\" .. name)  
+  local err = filehelper.mkdir(cfg:luapath().."\\" .. name)
+  if type(err) == "boolean" then
+    err = nil
+  end  
   if not err then   
     env.link = templateparser.replaceline(general.link:value(), env)
     err = templateparser.work(cfg:luapath().."\\plugineditor\\templates\\pluginregister.lu$",

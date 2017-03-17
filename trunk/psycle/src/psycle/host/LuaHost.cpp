@@ -426,7 +426,7 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaArrayBind>(L, "psycle.array");
   LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");  
   LuaHelper::require<LuaMachineBind>(L, "psycle.machine");
-  LuaHelper::require<LuaMachinesBind>(L, "psycle.machines");
+  // LuaHelper::require<LuaMachinesBind>(L, "psycle.machines");
   LuaHelper::require<LuaWaveOscBind>(L, "psycle.osc");
   LuaHelper::require<LuaResamplerBind>(L, "psycle.dsp.resampler");
   LuaHelper::require<LuaDelayBind>(L, "psycle.delay");
@@ -1446,6 +1446,7 @@ int error_handler(lua_State* L) {
   HostExtensions::List uilist = host_extensions.Get("Plugineditor");
   HostExtensions::iterator uit = uilist.begin();
   LuaPluginPtr editor;
+  int viewportmode(FRAMEVIEWPORT);
   // try to find an open instance of plugineditor
   // editing the error plugin
   int macIdx = LuaGlobal::proxy(L)->host()._macIndex;    
@@ -1458,9 +1459,27 @@ int error_handler(lua_State* L) {
       in << pcall(1) >> idx;
       if (macIdx == idx) {
         editor = plug;
+		viewportmode = editor->proxy().has_frame() ? FRAMEVIEWPORT : CHILDVIEWPORT; 
         break;
       }
+	  in.close();
     }
+	if (!editor.get()) {
+		LuaImport in(proxy.state(), proxy.lua_mac(), 0);
+		if (in.open("projectinfo")) {
+		  in.pcall(1);
+		  if (!lua_isnil(L, -1)) {
+		    int n = lua_gettop(proxy.state());
+		    boost::shared_ptr<PluginInfo> ud = LuaHelper::check_sptr<PluginInfo>(proxy.state(), n, LuaPluginInfoBind::meta);						
+			if (ud->dllname == LuaGlobal::proxy(L)->host().GetDllName()) {
+				editor = plug;
+				viewportmode = editor->proxy().has_frame() ? FRAMEVIEWPORT : CHILDVIEWPORT;
+				break;
+			}
+		  }	
+		  in.close();
+		}
+	}
   }
   if (!editor.get()) {    
     Link link("plugineditor.lua",
@@ -1519,9 +1538,11 @@ int error_handler(lua_State* L) {
         ++depth;
       }              
       in.pcall(0);          
-      editor->ViewPortChanged(*editor.get(), FRAMEVIEWPORT);          
-      editor->OnActivated(FRAMEVIEWPORT);
-      editor->proxy().OpenInFrame();
+      editor->ViewPortChanged(*editor.get(), viewportmode);          
+      editor->OnActivated(viewportmode);
+	  if (viewportmode == FRAMEVIEWPORT) {
+        editor->proxy().OpenInFrame();
+	  }
       host_extensions.ChangeWindowsMenuText(editor.get());
       return 1;
     }

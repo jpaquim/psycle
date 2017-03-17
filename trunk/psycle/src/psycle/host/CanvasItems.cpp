@@ -316,7 +316,14 @@ void Splitter::OnMouseMove(MouseEvent& ev) {
 void Splitter::OnMouseOut(MouseEvent& ev) {
 	if (!do_split_) {
 		SetCursor(CursorStyle::DEFAULT);
+		fill_color_ = 0x404040;
+		FLS();
 	}
+}
+
+void Splitter::OnMouseEnter(MouseEvent& ev) {
+  fill_color_ = 0xFF444444;
+  FLS();
 }
 
 TerminalView::TerminalView() 

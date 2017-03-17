@@ -486,7 +486,8 @@ int LuaPluginCatcherBind::rescannew(lua_State* L) {
 
 
 LuaMachine::LuaMachine(lua_State* L) 
-    : proxy_(0),
+    : L(L),
+	  proxy_(0),
       mac_(0),
       shared_(false),
       num_parameter_(0),
@@ -498,9 +499,13 @@ LuaMachine::LuaMachine(lua_State* L)
 
 
 LuaMachine::~LuaMachine() {
-  if (mac_!=0 && !shared_) {
+  if (mac_ != 0) {
+     mac_->RemoveMachineListener(this);
+  }
+  if (mac_ != 0 && !shared_) {   
     delete mac_;
   }
+  mac_ = 0;
 }
 
 void LuaMachine::lock() const {
@@ -625,6 +630,36 @@ void LuaMachine::set_title(const std::string& title) {
   }
 }
 
+void LuaMachine::OnMachineCreate(Machine& machine) {
+	try {
+		LuaImport in(L, this, LuaGlobal::proxy(L));
+		if (in.open("onmachinecreate")) {
+			LuaMachine* lua_machine = new LuaMachine(L);
+			lua_machine->set_mac(&machine);
+			LuaHelper::requirenew<LuaMachineBind>(L, "psycle.machine", lua_machine);
+			LuaMachineBind::createparams(L, lua_machine);
+			in << pcall(0);
+		}
+	}  catch (std::exception& e) {
+		ui::alert(e.what());   
+	}
+}
+
+void LuaMachine::BeforeMachineDelete(Machine& machine) {
+	try {
+		LuaImport in(L, this, LuaGlobal::proxy(L));
+		if (in.open("beforemachinedelete")) {
+			LuaMachine* lua_machine = new LuaMachine(L);
+			lua_machine->set_mac(&machine);
+			LuaHelper::requirenew<LuaMachineBind>(L, "psycle.machine", lua_machine);
+			LuaMachineBind::createparams(L, lua_machine);
+			in << pcall(0);
+		}
+	}  catch (std::exception& e) {
+		ui::alert(e.what());   
+	}
+}
+
 int LuaCmdDefBind::keytocmd(lua_State* L) {
   luaL_checktype(L, 1, LUA_TTABLE);
   lua_getfield(L, 1, "keycode");
@@ -729,6 +764,10 @@ int LuaMachineBind::open(lua_State *L) {
     {"setinterval", setinterval},
     {"cleartimeout", cleartimer},
     {"clearinterval", cleartimer},
+	{"automate", automate},
+	{"insert", insert},
+	{"muted", muted},
+	{"at", at},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -743,7 +782,8 @@ int LuaMachineBind::open(lua_State *L) {
 	LuaHelper::setfield(L, "MACH_SINE", 1); ///< now a plugin
 	LuaHelper::setfield(L, "MACH_DIST", 2); ///< now a plugin
   LuaHelper::setfield(L, "MACH_SAMPLER", 3);
-  LuaHelper::setfield(L, "MACH_DELAY", 4); ///< now a plugin
+  LuaHelper::setfield(
+  L, "MACH_DELAY", 4); ///< now a plugin
 	LuaHelper::setfield(L, "MACH_2PFILTER", 5); ///< now a plugin
 	LuaHelper::setfield(L, "MACH_GAIN", 6); ///< now a plugin
 	LuaHelper::setfield(L, "MACH_FLANGER", 7); ///< now a plugin
@@ -792,17 +832,37 @@ int LuaMachineBind::create(lua_State* L) {
     try {
       size_t len;
       const char* plug_name = luaL_checklstring(L, 2, &len);
-      udata = new LuaMachine(L);      
-      udata->load(plug_name);
-      LuaHelper::new_shared_userdata<LuaMachine>(L, meta, udata);
+	  udata = new LuaMachine(L);
+	  if (std::string(plug_name) == "maingroup") {
+	    MachineGroup* machine_group = Global::song().machines_.get();
+		udata->set_mac(machine_group);
+		udata->set_shared(true);
+		machine_group->AddMachineListener(udata);
+	  } else {   
+		udata->load(plug_name);		
+	  }
+	  LuaHelper::new_shared_userdata<LuaMachine>(L, meta, udata);
     } catch (std::exception &e) {
       e; luaL_error(L, "plugin not found error");
     }
   }
-  assert(udata);
-  lua_createtable(L, udata->mac()->GetNumParams(), 0);
-  for (int idx = 0; idx < udata->mac()->GetNumParams(); ++idx) {
-    lua_getglobal(L, "require");
+  createparams(L, udata);
+  return 1;
+}
+
+int LuaMachineBind::createparams(lua_State* L, LuaMachine* machine) {
+  assert(machine);
+  lua_createtable(L, machine->mac()->GetNumParams(), 0);
+  for (int idx = 0; idx < machine->mac()->GetNumParams(); ++idx) {
+    createparam(L, idx, machine);
+    lua_rawseti(L, -2, idx+1);
+  }  
+  lua_setfield(L, -2, "params");  
+  return 0;
+}
+
+int LuaMachineBind::createparam(lua_State* L, int idx, LuaMachine* machine) {
+	lua_getglobal(L, "require");
     lua_pushstring(L, "parameter");
     lua_pcall(L, 1, 1, 0);
     lua_getfield(L, -1, "new");
@@ -815,11 +875,13 @@ int LuaMachineBind::create(lua_State* L) {
     lua_pushnumber(L, 1);
     lua_pushnumber(L, 2); // mpf state
     std::string id;
-    udata->mac()->GetParamId(idx, id);
+    machine->mac()->GetParamId(idx, id);
     lua_pushstring(L, id.c_str());
     lua_pcall(L, 9, 1, 0);
     lua_pushcclosure(L, setnorm, 0);
     lua_setfield(L, -2, "setnorm");
+	lua_pushcclosure(L, automate, 0);
+    lua_setfield(L, -2, "automate");
     lua_pushcclosure(L, name, 0);
     lua_setfield(L, -2, "name");
     lua_pushcclosure(L, display, 0);
@@ -832,33 +894,29 @@ int LuaMachineBind::create(lua_State* L) {
     lua_setfield(L, -2, "plugin");
     lua_pushnumber(L, idx);
     lua_setfield(L, -2, "idx");
-    lua_rawseti(L, 4, idx+1);
-  }
-  lua_pushvalue(L, 4);
-  lua_setfield(L, 3, "params");
-  lua_pushvalue(L, 3);
-  
-  return 1;
+	lua_remove(L, -2);
+	return 1;
+	return 0;
 }
 
-int LuaMachineBind::gc(lua_State* L) {
+int LuaMachineBind::gc(lua_State* L) {  
   return LuaHelper::delete_shared_userdata<LuaMachine>(L, meta);
 }
 
 int LuaMachineBind::show_native_gui(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   plug->set_ui_type(MachineUiType::NATIVE);
   return 0;
 }
 
 int LuaMachineBind::type(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   lua_pushinteger(L, (int)plug->mac()->_type);
   return 1;
 }
 
 int LuaMachineBind::info2(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   const PluginInfo& info = LuaGlobal::GetLuaPlugin(plug->mac()->_macIndex)->info();
   lua_newtable(L);
   LuaHelper::setfield(L, "dllname", info.dllname);
@@ -867,19 +925,19 @@ int LuaMachineBind::info2(lua_State* L) {
 }
 
 int LuaMachineBind::pluginname(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   lua_pushstring(L, plug->mac()->GetName());
   return 1;
 }
 
 int LuaMachineBind::show_custom_gui(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   plug->set_ui_type(MachineUiType::CUSTOMWND);
   return 0;
 }
 
 int LuaMachineBind::show_childview_gui(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   plug->set_ui_type(MachineUiType::CHILDVIEW);
   return 0;
 }
@@ -887,7 +945,7 @@ int LuaMachineBind::show_childview_gui(lua_State* L) {
 int LuaMachineBind::tick(lua_State* L) {
   int n = lua_gettop(L);
   if (n == 7) {
-    boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+    LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
     int track = luaL_checknumber(L, 2);
     int note = luaL_checknumber(L, 3);
     int inst = luaL_checknumber(L, 4);
@@ -910,12 +968,29 @@ int LuaMachineBind::setnorm(lua_State* L) {
   lua_pop(L,1);
   lua_getfield(L, -1, "plugin");
   lua_getfield(L, -1, "__self");
-  boost::shared_ptr<LuaMachine> ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
+  LuaMachine::Ptr ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
   int minval; int maxval;
   ud->mac()->GetParamRange(idx, minval, maxval);
   int quantization = (maxval-minval);
   ud->mac()->SetParameter(idx, newval*quantization);
   return 0;
+}
+
+int LuaMachineBind::automate(lua_State* L) {
+	double newval = luaL_checknumber(L, 2);
+	lua_pushvalue(L, 1);
+	lua_getfield(L, -1, "idx");
+	int idx = luaL_checknumber(L, -1);
+	lua_pop(L,1);
+	lua_getfield(L, -1, "plugin");
+	lua_getfield(L, -1, "__self");
+	LuaMachine::Ptr ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
+	Machine* machine = ud->mac();
+	int minval; int maxval;
+	machine->GetParamRange(idx, minval, maxval);
+	int quantization = (maxval-minval);
+	PsycleGlobal::inputHandler().Automate(machine->_macIndex, idx, newval*quantization - minval, true, machine->param_translator());
+	return LuaHelper::chaining(L);
 }
 
 int LuaMachineBind::name(lua_State* L) {
@@ -924,7 +999,7 @@ int LuaMachineBind::name(lua_State* L) {
   lua_pop(L,1);
   lua_getfield(L, -1, "plugin");
   lua_getfield(L, -1, "__self");
-  boost::shared_ptr<LuaMachine> ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
+  LuaMachine::Ptr ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
   char buf[128];
   ud->mac()->GetParamName(idx, buf);
   lua_pushstring(L, buf);
@@ -937,7 +1012,7 @@ int LuaMachineBind::display(lua_State* L) {
   lua_pop(L,1);
   lua_getfield(L, -1, "plugin");
   lua_getfield(L, -1, "__self");
-  boost::shared_ptr<LuaMachine> ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
+  LuaMachine::Ptr ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
   char buf[128];
   ud->mac()->GetParamValue(idx, buf);
   lua_pushstring(L, buf);
@@ -950,7 +1025,7 @@ int LuaMachineBind::getnorm(lua_State* L) {
   lua_pop(L,1);
   lua_getfield(L, -1, "plugin");
   lua_getfield(L, -1, "__self");
-  boost::shared_ptr<LuaMachine> ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
+  LuaMachine::Ptr ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
   int minval; int maxval;
   ud->mac()->GetParamRange(idx, minval, maxval);
   int quantization = (maxval-minval);
@@ -966,7 +1041,7 @@ int LuaMachineBind::getrange(lua_State* L) {
   lua_pop(L,1);
   lua_getfield(L, -1, "plugin");
   lua_getfield(L, -1, "__self");
-  boost::shared_ptr<LuaMachine> ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
+  LuaMachine::Ptr ud = *(boost::shared_ptr<LuaMachine>*) luaL_checkudata(L, -1, meta);
   int minval; int maxval;
   ud->mac()->GetParamRange(idx, minval, maxval);
   lua_pushnumber(L, 0);
@@ -985,7 +1060,7 @@ int LuaMachineBind::work(lua_State* L) {
 int LuaMachineBind::channel(lua_State* L) {
   int n = lua_gettop(L);
   if (n == 2) {
-    boost::shared_ptr<LuaMachine> plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+    LuaMachine::Ptr plug = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
     int idx = luaL_checknumber(L, 2);
     PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
     PSArray* a = plug->channel(idx);
@@ -1000,7 +1075,7 @@ int LuaMachineBind::channel(lua_State* L) {
 int LuaMachineBind::getparam(lua_State* L) {
   int n = lua_gettop(L);
   if (n == 2) {
-    boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+    LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
     std::string search = luaL_checkstring(L, 2);
     lua_getfield(L, -2, "params");
     size_t len = lua_rawlen(L, -1);
@@ -1025,7 +1100,7 @@ int LuaMachineBind::getparam(lua_State* L) {
 }
 
 int LuaMachineBind::set_numchannels(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   int num = luaL_checknumber(L, 2);
   plugin->mac()->InitializeSamplesVector(num);
   plugin->build_buffer(plugin->mac()->samplesV, 256);
@@ -1035,7 +1110,7 @@ int LuaMachineBind::set_numchannels(lua_State* L) {
 int LuaMachineBind::setbuffer(lua_State* L) {
   int n = lua_gettop(L);
   if (n == 2) {
-    boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+    LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
     luaL_checktype(L, 2, LUA_TTABLE);
     lua_pushvalue(L, 2);
     std::vector<float*> sampleV;
@@ -1051,7 +1126,7 @@ int LuaMachineBind::setbuffer(lua_State* L) {
 }
 
 int LuaMachineBind::add_parameters(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   lua_getfield(L, 1, "params");
   lua_pushvalue(L, 2);
   luaL_checktype(L, 2, LUA_TTABLE);
@@ -1073,13 +1148,13 @@ int LuaMachineBind::add_parameters(lua_State* L) {
 }
 
 int LuaMachineBind::setmenurootnode(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   lua_setfield(L, 1, "__menurootnode");
   return LuaHelper::chaining(L);
 }
 
 int LuaMachineBind::set_parameters(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   plugin->set_numparams(lua_rawlen(L, 2));
   lua_pushvalue(L, 1);
   lua_pushvalue(L, 2);
@@ -1088,14 +1163,14 @@ int LuaMachineBind::set_parameters(lua_State* L) {
 }
 
 int LuaMachineBind::setpresetmode(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   MachinePresetType::Value mode = (MachinePresetType::Value) ((int) luaL_checknumber(L, 2));
   plugin->setprsmode(mode);
   return 0;
 }
 
 int LuaMachineBind::addhostlistener(lua_State* L) {  
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   boost::shared_ptr<LuaActionListener> listener = LuaHelper::check_sptr<LuaActionListener>(L, 2, LuaActionListenerBind::meta);
   listener->setmac(plugin.get());
   PsycleGlobal::actionHandler().AddListener(listener.get());
@@ -1103,7 +1178,7 @@ int LuaMachineBind::addhostlistener(lua_State* L) {
 }
 
 int LuaMachineBind::setviewport(lua_State* L) {
-  boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   if (!lua_isnil(L, 2)) {
     LuaViewport::Ptr viewport = LuaHelper::check_sptr<LuaViewport>(L, 2, LuaViewportBind<>::meta);
     machine->set_viewport(viewport);
@@ -1114,7 +1189,7 @@ int LuaMachineBind::setviewport(lua_State* L) {
 }
 
 int LuaMachineBind::toggleviewport(lua_State* L) {
-  boost::shared_ptr<LuaMachine> plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   /*if (!lua_isnil(L, 2)) {
     LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
     plugin->set_canvas(canvas);
@@ -1140,7 +1215,7 @@ LuaRun* LuaMachineBind::createtimercallback(lua_State* L) {
 }
 
 int LuaMachineBind::settimeout(lua_State* L) {
-   boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+   LuaMachine::Ptr machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
    int interval = luaL_checkinteger(L, 3);
    LuaRun* runnable = createtimercallback(L);
    int id = machine->proxy()->set_time_out(runnable, interval);
@@ -1149,7 +1224,7 @@ int LuaMachineBind::settimeout(lua_State* L) {
 }
 
 int LuaMachineBind::setinterval(lua_State* L) {
-   boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+   LuaMachine::Ptr machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
    int interval = luaL_checkinteger(L, 3);
    LuaRun* runnable = createtimercallback(L);
    int id = machine->proxy()->set_interval(runnable, interval);
@@ -1158,51 +1233,29 @@ int LuaMachineBind::setinterval(lua_State* L) {
 }
 
 int LuaMachineBind::cleartimer(lua_State* L) {
-  boost::shared_ptr<LuaMachine> machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  LuaMachine::Ptr machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   int id = luaL_checkinteger(L, 2);
   machine->proxy()->clear_timer(id);
   return LuaHelper::chaining(L);
 }
-// LuaMachinesBind
-const char* LuaMachinesBind::meta = "psyluamachinesbind";
 
-int LuaMachinesBind::open(lua_State *L) {
-  static const luaL_Reg methods[] = {
-    {"new", create},    
-    {"insert", insert},
-    {"at", at},
-    {"muted", muted},
-    {"master", master},
-    {NULL, NULL}
-  };
-  return LuaHelper::open(L, meta, methods);
-}
-
-int LuaMachinesBind::create(lua_State* L) {
-  LuaHelper::new_shared_userdata(L, meta, new LuaMachines());
-  return 1;
-}
-
-int LuaMachinesBind::gc(lua_State* L) {
-  return LuaHelper::delete_shared_userdata<LuaMachines>(L, meta);
-}
-
-int LuaMachinesBind::at(lua_State* L) {
-  boost::shared_ptr<LuaMachines> p = LuaHelper::check_sptr<LuaMachines>(L, 1, meta);
+int LuaMachineBind::at(lua_State* L) {
+  LuaMachine::Ptr p = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   int machine_index = luaL_checkinteger(L, 2);
   Machine* machine = LuaGlobal::GetMachine(machine_index);
   if (machine) {    
     LuaMachine* lua_machine = new LuaMachine(L);
     lua_machine->set_mac(machine);
     LuaHelper::requirenew<LuaMachineBind>(L, "psycle.machine", lua_machine);
+	LuaMachineBind::createparams(L, lua_machine);
   } else {
     lua_pushnil(L);
   }
   return 1;
 }
 
-int LuaMachinesBind::muted(lua_State* L) {  
-  boost::shared_ptr<LuaMachines> p = LuaHelper::check_sptr<LuaMachines>(L, 1, meta);
+int LuaMachineBind::muted(lua_State* L) {  
+  LuaMachine::Ptr p = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   int machine_index = luaL_checkinteger(L, 2);
   Machine* machine(0);
   if (machine_index >= 0 && machine_index < 256) {
@@ -1212,14 +1265,14 @@ int LuaMachinesBind::muted(lua_State* L) {
   return 1;
 }
 
-int LuaMachinesBind::insert(lua_State* L) {
-  boost::shared_ptr<LuaMachines> p = LuaHelper::check_sptr<LuaMachines>(L, 1, meta);
+int LuaMachineBind::insert(lua_State* L) {
+  LuaMachine::Ptr p = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
   int n = lua_gettop(L);
   int slot = 0;
   if (n == 3) {
     slot = luaL_checkinteger(L, 2);    
   }  
-  boost::shared_ptr<LuaMachine> lua_machine = LuaHelper::check_sptr<LuaMachine>(L, n, LuaMachineBind::meta);
+  LuaMachine::Ptr lua_machine = LuaHelper::check_sptr<LuaMachine>(L, n, LuaMachineBind::meta);
   lua_machine->set_shared(true);
   if (n==2) {
     if (lua_machine->mac()->_mode == MACHMODE_FX) {
@@ -1234,11 +1287,6 @@ int LuaMachinesBind::insert(lua_State* L) {
   view->CreateNewMachine(-1, -1, slot, mode, lua_machine->mac()->_type, lua_machine->mac()->GetDllName(), 0, lua_machine->mac());
   lua_pushinteger(L, slot);
   return 1;
-}
-
-int LuaMachinesBind::master(lua_State* L) {
-  lua_pushnumber(L, MASTER_INDEX);
-  return at(L);
 }
 
 
