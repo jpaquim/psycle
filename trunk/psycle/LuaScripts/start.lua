@@ -23,31 +23,3 @@ local link = {
   userinterface = psycle.MDI
 }
 psycle.addmenu("view", link)  
-
-
--- @test.lua
-  link = {
-    label = "test",
-    plugin = "test.lua",
-    viewport = psycle.CHILDVIEWPORT,
-    userinterface = psycle.SDI
-  }
-  psycle.addmenu("view", link)
-
--- @test2.lua
-  link = {
-    label = "test2",
-    plugin = "test2.lua",
-    viewport = psycle.CHILDVIEWPORT,
-    userinterface = psycle.SDI
-  }
-  psycle.addmenu("view", link)
-
--- @gamecontrollertest.lua
-  link = {
-    label = "gamecontrollertest",
-    plugin = "gamecontrollertest.lua",
-    viewport = psycle.CHILDVIEWPORT,
-    userinterface = psycle.SDI
-  }
-  psycle.addmenu("view", link)
