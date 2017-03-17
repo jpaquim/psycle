@@ -936,12 +936,21 @@ struct LuaGameControllerBind {
   static int buttons(lua_State* L);    
 };
 
+class LuaGameControllers : public ui::GameControllers<LuaGameController>, public LuaState {
+  public:
+   LuaGameControllers() : ui::GameControllers<LuaGameController>(), LuaState(0) {}
+   LuaGameControllers(lua_State* L) : ui::GameControllers<LuaGameController>(), LuaState(L) {}
+   
+   virtual void OnConnect(LuaGameController& controller);
+   virtual void OnDisconnect(LuaGameController& controller);  
+};
+
 struct LuaGameControllersBind {
   static std::string meta;
   static int open(lua_State *L);  
   static int create(lua_State *L); 
   static int gc(lua_State* L);  
-  static int update(lua_State* L) { LUAEXPORTM(L, LuaGameControllersBind::meta, &ui::GameControllers<LuaGameController>::Update); }
+  static int update(lua_State* L) { LUAEXPORTM(L, LuaGameControllersBind::meta, &LuaGameControllers::Update); }
   static int controllers(lua_State* L);
 };
 

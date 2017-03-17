@@ -14,6 +14,7 @@ local mainmenu = require("mainmenu")
 local project = require("project")
 local templateparser = require("templateparser")
 local settingsmanager = require("psycle.settingsmanager")
+local serpent = require("psycle.serpent")
   
 function machine:info()
   return { 
@@ -55,21 +56,30 @@ function machine:editmachineindex()
   return result;
 end
 
+function machine:projectinfo()
+  local result = nil
+  if self.project and self.project:plugininfo() then          
+    result = self.project:plugininfo()
+  end
+  --psycle.alert(serpent.dump(result))
+  return result;
+end
+
 function machine:onexecute(msg, macidx, plugininfo, trace)    
   if msg ~= nil then
-	self.project:setplugininfo(plugininfo):setpluginindex(macidx)
-	self.mainviewport:fillinstancecombobox():setpluginindex(macidx)
-	self.mainviewport:setoutputtext(msg)
-	self.mainviewport:setcallstack(trace)
-	for i=1, #trace do
-    if self.mainviewport:openinfo(trace[i]) then
-		break
-	  end
-	end      
-	self.mainviewport:setplugindir(plugininfo)
-	if plugininfo then
+	  self.project:setplugininfo(plugininfo):setpluginindex(macidx)
+	  self.mainviewport:fillinstancecombobox():setpluginindex(macidx)
+	  self.mainviewport:setoutputtext(msg)
+	  self.mainviewport:setcallstack(trace)
+	  for i=1, #trace do
+      if self.mainviewport:openinfo(trace[i]) then
+		    break
+	    end
+	  end      
+	  self.mainviewport:setplugindir(plugininfo)
+	  if plugininfo then
       self:settitle(plugininfo:name())
-	end
+	  end
   end
 end
 

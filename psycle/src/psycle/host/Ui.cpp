@@ -3085,31 +3085,35 @@ const FontInfo& Scintilla::font_info() const {
   return imp() ? imp()->dev_font_info() : FontInfo::dummy_font_info;
 }
 
-GameController::GameController() : id_(-1) {
+GameController::GameController() : id_(-1), prevented_(false) {
   xpos_ = ypos_ = zpos_ = 0;
 }
 
 void GameController::AfterUpdate(const GameController& old_state) {
-  for (int b = 0; b < 32; ++b) {
-    bool old_btn_set = old_state.buttons().test(b);
-    bool current_btn_set = buttons().test(b);
-    if (current_btn_set != old_btn_set) {
-      if (current_btn_set) {
-        OnButtonDown(b);
-      } else {
-        OnButtonUp(b);
-      }
-    }
-    if (xposition() != old_state.xposition()) {
-      OnXAxis(xposition(), old_state.xposition());
-    }
-    if (yposition() != old_state.yposition()) {
-      OnYAxis(yposition(), old_state.yposition());
-    }
-    if (zposition() != old_state.zposition()) {
-      OnZAxis(zposition(), old_state.zposition());
-    }
-  }  
+  try {
+	  for (int b = 0; b < 32; ++b) {
+		bool old_btn_set = old_state.buttons().test(b);
+		bool current_btn_set = buttons().test(b);
+		if (current_btn_set != old_btn_set) {
+		  if (current_btn_set) {
+			OnButtonDown(b);
+		  } else {
+			OnButtonUp(b);
+		  }
+		}
+		if (xposition() != old_state.xposition()) {
+		  OnXAxis(xposition(), old_state.xposition());
+		}
+		if (yposition() != old_state.yposition()) {
+		  OnYAxis(yposition(), old_state.yposition());
+		}
+		if (zposition() != old_state.zposition()) {
+		  OnZAxis(zposition(), old_state.zposition());
+		}
+	  }  
+	} catch(std::exception& e) {
+		throw std::runtime_error(e.what());
+	}
 }
 
 FileObserver::FileObserver() : 

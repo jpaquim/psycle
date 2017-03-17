@@ -9,6 +9,7 @@
 #include <psycle/helpers/resampler.hpp>
 #include "LuaHelper.hpp"
 #include "InputHandler.hpp"
+#include "Song.hpp"
 
 
 namespace psycle { 
@@ -122,8 +123,11 @@ struct LuaActionListenerBind {
     };
   };
   
-  class LuaMachine {
+  class LuaMachine : public MachineListener {
   public:
+	typedef boost::shared_ptr<LuaMachine> Ptr;
+	typedef boost::shared_ptr<const LuaMachine> ConstPtr;
+	typedef boost::weak_ptr<LuaMachine> WeakPtr;
     LuaMachine(lua_State* L);    
     ~LuaMachine();
     bool shared() const { return shared_; }
@@ -160,10 +164,15 @@ struct LuaActionListenerBind {
     void reload();    
     void set_title(const std::string& title);    
     std::string title() const { return title_; }
+
+	virtual void OnMachineCreate(Machine& machine);
+	virtual void BeforeMachineDelete(Machine& machine);
+
   private:
     //LuaMachine(LuaMachine&)  {}
     //LuaMachine& operator=(LuaMachine) {}
     Machine* mac_;
+	lua_State* L;
     psybuffer sampleV_;
     bool shared_;
     int num_parameter_, num_cols_, num_programs_;
@@ -173,11 +182,10 @@ struct LuaActionListenerBind {
     boost::weak_ptr<ui::Viewport> viewport_;
     std::string title_;
   };
-
+ 
   struct LuaMachineBind {
     static int open(lua_State *L);
     static const char* meta;
-  private:
     static int create(lua_State* L);
     static int gc(lua_State* L);
     static int work(lua_State* L);
@@ -218,10 +226,24 @@ struct LuaActionListenerBind {
     static int settimeout(lua_State* L);  
     static int setinterval(lua_State* L);
     static int cleartimer(lua_State* L);
+	static int automate(lua_State* L);
     static class LuaRun* createtimercallback(lua_State* L);
+	static int createparams(lua_State* L, LuaMachine* machine);
+	static int createparam(lua_State* L, int idx, LuaMachine* machine);
+	static int insert(lua_State* L);
+    static int at(lua_State* L);
+    static int muted(lua_State* L);    
   };
+  /*
+  class LuaMachines : public MachineListener, public LuaState {
+	public:
+		LuaMachines() : LuaState(0) {}
+		LuaMachines(lua_State* L) : LuaState(L) {}
 
-  struct LuaMachines {};
+	protected:		
+		virtual void OnMachineCreate(Machine& machine);
+		virtual void BeforeMachineDelete(Machine& machine);
+  };
 
   struct LuaMachinesBind {
     static int open(lua_State *L);
@@ -233,7 +255,7 @@ struct LuaActionListenerBind {
     static int master(lua_State* L);
     static int muted(lua_State* L);        
   };
-
+  */
   struct LuaSetting {
     LuaSetting(Machine* machine) : machine_(machine) {}
    private:

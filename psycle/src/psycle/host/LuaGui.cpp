@@ -2382,6 +2382,59 @@ int LuaGameControllerBind::buttons(lua_State* L) {
   return 1;
 }
 
+void LuaGameControllers::OnConnect(LuaGameController& controller) {
+	LuaImport in(L, this, locker(L));
+	if (in.open("onconnect")) {
+		lua_getfield(L, -1, "_controllers");
+		int size = luaL_len(L, -1);
+		LuaHelper::requirenew<LuaGameControllerBind>(L, "psycle.ui.gamecontroller",
+                                                 &controller, true);
+		lua_pushvalue(L, -1);
+		controller.set_lua_state(L);
+		lua_rawseti(L, -3, size + 1);
+		lua_remove(L, -2);
+		in << pcall(0);            
+	}	
+}
+
+void LuaGameControllers::OnDisconnect(LuaGameController& controller) {
+  LuaImport in(L, this, locker(L));
+  if (in.open("ondisconnect")) {
+	LuaHelper::find_weakuserdata(L, this);
+    in << pcall(0);            
+  }
+  in.close();
+  LuaHelper::find_weakuserdata(L, this);  
+  if (lua_isnil(L, -1)) {
+     assert(0);
+     lua_pop(L, 1);
+     throw std::runtime_error("no proxy found");
+  }
+  lua_getfield(L, -1, "_controllers");
+  int tbl_idx = lua_gettop(L);
+  int size = luaL_len(L, -1);
+  if (size != 0) {
+    int pos = 1;  
+	bool remove(false);  
+	for (int pos = 1; pos < size; pos++) {
+	  lua_rawgeti(L, tbl_idx, pos);
+	  if (!remove) {
+		int n = lua_gettop(L);
+		boost::shared_ptr<LuaGameController> controller_cache = LuaHelper::check_sptr<LuaGameController>(L, n, LuaGameControllerBind::meta);
+		if (controller_cache.get() == &controller) {
+			remove = true;
+		}
+	  }
+	  if (remove) {
+		lua_rawgeti(L, tbl_idx, pos+1);
+		lua_rawseti(L, tbl_idx, pos);  /* t[pos] = t[pos+1] */
+	  }
+    }
+	lua_pushnil(L);
+    lua_rawseti(L, tbl_idx, pos);  /* t[pos] = nil */
+  }    
+}
+
 // GameControllersBind
 std::string LuaGameControllersBind::meta = "gamecontrollerbind";
 
@@ -2400,12 +2453,11 @@ int LuaGameControllersBind::create(lua_State* L) {
   using namespace ui;
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;    
-  GameControllers<LuaGameController>* controller = 
-    new GameControllers<LuaGameController>();  
-  LuaHelper::new_shared_userdata<>(L, meta, controller);
+  LuaGameControllers* controllers = new LuaGameControllers(L);  
+  LuaHelper::new_shared_userdata<>(L, meta, controllers);
   lua_newtable(L);  
-  ui::GameControllers<LuaGameController>::iterator it = controller->begin();
-  for (; it != controller->end(); ++it) {
+  LuaGameControllers::iterator it = controllers->begin();
+  for (; it != controllers->end(); ++it) {
     (*it)->set_lua_state(L);
     LuaHelper::requirenew<LuaGameControllerBind>(L, "psycle.ui.gamecontroller",
                                                  (*it).get(), true);

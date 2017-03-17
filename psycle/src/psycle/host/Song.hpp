@@ -20,10 +20,12 @@ namespace psycle
 	namespace host
 	{
 		class Machine; // forward declaration
+		class MachineGroup;
 		class CProgressDialog;
 
 		/// songs hold everything comprising a "tracker module",
-		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
+		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...		
+
 		class Song
 		{
 			static int defaultPatLines;
@@ -135,8 +137,9 @@ namespace psycle
 			///\{
 			/// the array of machines.
 			Machine* _pMachine[MAX_MACHINES];
+			std::auto_ptr<MachineGroup> machines_;
 			/// Current selected machine number in the GUI
-			/// \todo This is a gui thing... should not be here.
+			/// \todo This is a gui thing... should not be here.			
 			int seqBus;
 			///\name wavetable
 			///\{
@@ -168,7 +171,7 @@ namespace psycle
 			int GetFreeMachine() const ;
 			/// creates a new machine in this song.
 		public:
-			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx);
+			Machine* CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx);
 		public:
 			/// creates a new machine in this song.
 			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx=0);
@@ -401,6 +404,7 @@ namespace psycle
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			} else accumulated_routing_time_ += d;
 		}
+		
 		};
 	}
 }

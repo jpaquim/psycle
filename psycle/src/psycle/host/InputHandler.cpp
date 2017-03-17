@@ -1184,7 +1184,7 @@ namespace psycle
 			newentry._parameter = value&0xFF;
 			try {
 				newentry._inst = translator.virtual_index(tweakidx);
-			} catch(std::exception& e) {				
+			} catch(std::exception&) {				
 				newentry._inst = tweakidx;						
 			}
 			newentry._mach = machine;

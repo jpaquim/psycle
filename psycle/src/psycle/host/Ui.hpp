@@ -2439,7 +2439,10 @@ class GameController  {
   GameController();
 
   void set_id(int id) { id_ = id; }
-  int id() const { return id_; }  
+  int id() const { return id_; }
+  void Prevent() { prevented_ = true; }
+  void Enable() { prevented_ = false; }  
+  bool prevented() const { return prevented_; }
   void set(int xpos, int ypos, int zpos, std::bitset<32> buttons) {
     xpos_ = xpos;
     ypos_ = ypos;
@@ -2461,7 +2464,8 @@ class GameController  {
 
  private:  
   int id_;  
-  int xpos_, ypos_, zpos_;  
+  int xpos_, ypos_, zpos_;
+  bool prevented_;  
   std::bitset<32> buttons_;
 };
 
@@ -3024,6 +3028,7 @@ class GameControllersImp {
    GameControllersImp() {}
    virtual ~GameControllersImp() = 0;
 
+   virtual int dev_size() const = 0;
    virtual void DevScanPluggedControllers(std::vector<int>& plugged_controller_ids) = 0;   
    virtual void DevUpdateController(GameController& controller) = 0;
 };
@@ -3092,7 +3097,7 @@ inline GameControllersImp::~GameControllersImp() {}
 template <class T>
 class GameControllers : public psycle::host::Timer {
  public:
-   GameControllers() {
+   GameControllers() : prevented_(false) {
      imp_.reset(ImpFactory::instance().CreateGameControllersImp());
      ScanPluggedControllers();
      StartTimer();
@@ -3114,7 +3119,7 @@ class GameControllers : public psycle::host::Timer {
 
    void ScanPluggedControllers() {
      std::vector<int> controller_ids;
-     imp_.get()->DevScanPluggedControllers(controller_ids);
+     imp_->DevScanPluggedControllers(controller_ids);
      std::vector<int>::iterator it = controller_ids.begin();
      for ( ; it != controller_ids.end(); ++it) {       
        boost::shared_ptr<T> game_controller_info(new T());
@@ -3122,20 +3127,60 @@ class GameControllers : public psycle::host::Timer {
        plugged_controllers_.push_back(game_controller_info);
      }
    }
-   void Update() {
-     iterator it = plugged_controllers_.begin();
-     for ( ; it != plugged_controllers_.end(); ++it) {
-       boost::shared_ptr<T> controller = *it;
-       GameController old_state = *controller;
-       imp_->DevUpdateController(*controller.get()); 
-       controller->AfterUpdate(old_state);
-     }
-   }
-   virtual void OnTimerViewRefresh() { Update(); }
+	void Update() {
+		if (!prevented()) try {
+			if (size() < imp_->dev_size()) {
+				std::vector<int> controller_ids;
+				imp_->DevScanPluggedControllers(controller_ids);
+				std::vector<int>::iterator id_it = controller_ids.begin();
+				for (; id_it != controller_ids.end(); ++id_it) {
+					int id = *id_it;
+					bool found(false);
+					for (iterator it = plugged_controllers_.begin(); it != plugged_controllers_.end(); ++it) {
+						if ((*it)->id() == id) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {				
+						boost::shared_ptr<T> game_controller_info(new T());
+						game_controller_info->set_id(id);
+						plugged_controllers_.push_back(game_controller_info);					
+						OnConnect(*game_controller_info.get());
+					}
+				}			
+			}
+			iterator it = plugged_controllers_.begin();
+			while (it != plugged_controllers_.end()) {
+				boost::shared_ptr<T> controller = *it;
+				GameController old_state = *controller;
+				imp_->DevUpdateController(*controller.get());
+				if (controller->id() == -1) {
+					OnDisconnect(*controller.get());
+					it = plugged_controllers_.erase(it);
+				} else {
+					controller->AfterUpdate(old_state);
+					++it;
+				}
+			}      
+		} catch(std::exception&) {
+			Prevent();
+		}
+	}
+	
+	virtual void OnTimerViewRefresh() { Update(); }
+	void Prevent() { prevented_ = true; }
+	void Enable() { prevented_ = false; }  
+	bool prevented() const { return prevented_; }
+
+  protected:
+   virtual void OnConnect(T& controller) {}
+   virtual void OnDisconnect(T& controller) {}
 
  private:
    std::auto_ptr<GameControllersImp> imp_;
-   Container plugged_controllers_;   
+   Container plugged_controllers_;
+   bool prevented_;
 };
 
 template class GameControllers<GameController>;

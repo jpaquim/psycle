@@ -1569,6 +1569,18 @@ void MenuImp::OnNodeChanged(Node& node) {
 }
 
 // GameController
+
+int GameControllersImp::dev_size() const {
+	int counter(0);
+	JOYINFO joyinfo;
+	for (UINT i = 0; i < joyGetNumDevs(); ++i) {
+		if (joyGetPos(i, &joyinfo) == JOYERR_NOERROR) {
+			++counter;
+		}
+	}
+	return counter;
+}
+
 void GameControllersImp::DevScanPluggedControllers(
      std::vector<int>& plugged_controller_ids) {
   UINT num = joyGetNumDevs();
@@ -1583,10 +1595,16 @@ void GameControllersImp::DevScanPluggedControllers(
 }
 
 void GameControllersImp::DevUpdateController(ui::GameController& controller) {  
-  JOYINFO joy_info;
-  joyGetPos(controller.id(), &joy_info);
-  controller.set(joy_info.wXpos, joy_info.wYpos, joy_info.wZpos,
-                 static_cast<int>(joy_info.wButtons));
+	if (controller.id() != -1) {
+		JOYINFO joy_info;
+		int err = joyGetPos(controller.id(), &joy_info);
+		if (err == JOYERR_NOERROR) {
+			controller.set(joy_info.wXpos, joy_info.wYpos, joy_info.wZpos,
+							static_cast<int>(joy_info.wButtons));
+		} else {
+			controller.set_id(-1);
+		}
+	}
 }
 
 

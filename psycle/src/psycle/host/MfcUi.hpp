@@ -2664,6 +2664,7 @@ class GameControllersImp : public ui::GameControllersImp {
    GameControllersImp() {}
    virtual ~GameControllersImp() {}
    
+   virtual int dev_size() const;
    virtual void DevScanPluggedControllers(std::vector<int>& plugged_controller_ids);
    virtual void DevUpdateController(ui::GameController& controller);
 };
