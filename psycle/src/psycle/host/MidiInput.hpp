@@ -134,6 +134,13 @@ namespace psycle
 		};
 
 		/// midi input handler.
+
+		class MidiInputListener {
+			public:
+				virtual ~MidiInputListener() {}
+				virtual void OnMidiData(uint32_t, DWORD_PTR dwParam1, DWORD_PTR dwParam2) = 0;
+		};
+
 		class CMidiInput
 		{
 		public:
@@ -188,6 +195,8 @@ namespace psycle
 			/// the master MIDI handler mode (see enum MODES), external objects can change this at will
 			int m_midiMode;	
 
+			void SetListener(MidiInputListener* listener) { listener_ = listener; }
+
 		private:
 			/// the midi callback functions (just a static linker to the instance one)
 			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
@@ -196,6 +205,7 @@ namespace psycle
 			/// the real callbacks
 			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, DWORD_PTR dwInstance, int p1HiWordLB, int p1LowWordHB, int p1LowWordLB, DWORD_PTR dwTime);
 
+			void OnMidiData(uint32_t, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
 			/// return the current device handle
 			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
 
@@ -271,6 +281,7 @@ namespace psycle
 				int m_bufCount;
 
 			///\}
+			MidiInputListener* listener_;
 		};
 	}
 }

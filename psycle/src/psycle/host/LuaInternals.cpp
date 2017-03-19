@@ -2506,6 +2506,167 @@ int LuaMidiHelper::combine(lua_State* L) {
   return 1;
 }
 
+// LuaMidiInput
+LuaMidiInput::LuaMidiInput() : LuaState(0), imp_(new CMidiInput()) {
+	imp_->SetListener(this);
+}
+LuaMidiInput::LuaMidiInput(lua_State* L) : LuaState(L), imp_(new CMidiInput()) {
+	imp_->SetListener(this);
+}	
+
+void LuaMidiInput::SetDeviceId(unsigned int driver, int devId) {
+	assert(imp_.get());
+	return imp_->SetDeviceId(driver, devId);
+}
+
+bool LuaMidiInput::Open() {
+	assert(imp_.get());
+	return imp_->Open();
+}
+
+bool LuaMidiInput::Close() {
+	assert(imp_.get());
+	return imp_->Close();
+}
+
+bool LuaMidiInput::Active() {
+	assert(imp_.get());
+	return imp_->Active();
+}
+
+void LuaMidiInput::OnMidiData(uint32_t uMsg, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
+	try {
+		switch(uMsg) {
+			// normal data message
+			case MIM_OPEN: {
+				LuaImport in(L, this, LuaGlobal::proxy(L));
+				if (in.open("onopen")) {			
+					in << pcall(0);
+				}
+			}
+			break;
+			case MIM_CLOSE: {
+				LuaImport in(L, this, LuaGlobal::proxy(L));
+				if (in.open("onclose")) {			
+					in << pcall(0);
+				}
+			}
+			break;
+			case MIM_DATA: {// split the first parameter DWORD into bytes
+				int p1HiWordHB = (dwParam1 & 0xFF000000) >>24; p1HiWordHB; // not used
+				int p1HiWordLB = (dwParam1 & 0xFF0000) >>16;
+				int p1LowWordHB = (dwParam1 & 0xFF00) >>8;
+				int p1LowWordLB = (dwParam1 & 0xFF);	
+				// assign uses
+				int note = p1LowWordHB;
+				int program = p1LowWordHB;
+				int data1 = p1LowWordHB;
+				int velocity = p1HiWordLB;
+				int data2 = p1HiWordLB;
+				//int data = ((data2&0x7f)<<7)|(data1&0x7f);
+				int status = p1LowWordLB;
+				// and a bit more...
+				int statusHN = (status & 0xF0) >> 4;
+				int statusLN = (status & 0x0F);
+				int channel = statusLN;
+				
+				LuaImport in(L, this, LuaGlobal::proxy(L));
+				if (in.open("onmididata")) {			
+					in << note << channel << velocity << program << statusHN << statusLN << data1 << data2 << pcall(0);
+				}
+			}
+			break;
+			default:;
+		}			
+	}  catch (std::exception& e) {
+		ui::alert(e.what());   
+	}
+}
+
+// LuaMidiInputBind
+std::string LuaMidiInputBind::meta = "psymidiinput";
+
+int LuaMidiInputBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+	{"numdevices", numdevices},
+	{"devicedescription", devicedescription},
+	{"finddevicebyname", finddevicebyname},
+	{"setdevice", setdevice},
+	{"open", openinput},
+	{"close", closeinput},
+	{"active", active},
+    {NULL, NULL}
+  }; 
+  LuaHelper::open(L, meta, methods, gc);
+  LuaHelper::setfield(L, "DRIVER_MIDI", DRIVER_MIDI);
+  LuaHelper::setfield(L, "DRIVER_SYNC", DRIVER_SYNC);
+  return 1;
+}
+
+int LuaMidiInputBind::create(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::new_shared_userdata<LuaMidiInput>(L, meta, new LuaMidiInput(L));
+	return 1;
+}
+
+int LuaMidiInputBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<LuaMidiInput>(L, meta);
+}
+
+int LuaMidiInputBind::numdevices(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::check_sptr<LuaMidiInput>(L, 1,  meta);
+	lua_pushinteger(L, CMidiInput::GetNumDevices());
+	return 1;
+}
+
+int LuaMidiInputBind::devicedescription(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::check_sptr<LuaMidiInput>(L, 1,  meta);
+	int index = luaL_checkinteger(L, 2);	
+	if (index < 1 || index > CMidiInput::GetNumDevices()) {
+	  luaL_error(L, "Device index out of bounds.");
+	}
+	std::string desc;
+	CMidiInput::GetDeviceDesc(index -1, desc);
+	lua_pushstring(L, desc.c_str());
+	return 1;
+}
+
+int LuaMidiInputBind::finddevicebyname(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::check_sptr<LuaMidiInput>(L, 1,  meta);
+	const char* name = luaL_checkstring(L, 2);	
+	CString nameString(name);
+	int device_id = CMidiInput::FindDevByName(nameString);
+	lua_pushinteger(L, device_id);
+	return 1;
+}
+
+int LuaMidiInputBind::setdevice(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::check_sptr<LuaMidiInput>(L, 1,  meta);
+	int driver_id = luaL_checkinteger(L, 2);
+	int device_id = luaL_checkinteger(L, 3) - 1;
+	midi_input->SetDeviceId(driver_id, device_id);
+	return LuaHelper::chaining(L);
+}
+
+int LuaMidiInputBind::openinput(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::check_sptr<LuaMidiInput>(L, 1, meta);
+	midi_input->Open();
+	return LuaHelper::chaining(L);
+}
+
+int LuaMidiInputBind::closeinput(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::check_sptr<LuaMidiInput>(L, 1,  meta);
+	midi_input->Close();
+	return LuaHelper::chaining(L);
+}
+
+int LuaMidiInputBind::active(lua_State* L) {
+	boost::shared_ptr<LuaMidiInput> midi_input = LuaHelper::check_sptr<LuaMidiInput>(L, 1,  meta);
+	lua_pushboolean(L, midi_input->Active());
+	return 1;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // DspFilterBind
 ///////////////////////////////////////////////////////////////////////////////

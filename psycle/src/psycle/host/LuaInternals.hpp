@@ -9,6 +9,7 @@
 #include <psycle/helpers/resampler.hpp>
 #include "LuaHelper.hpp"
 #include "InputHandler.hpp"
+#include "MidiInput.hpp"
 #include "Song.hpp"
 
 
@@ -736,16 +737,16 @@ struct LuaActionListenerBind {
 
   class LuaFileHelper {
    public:
-    static int open(lua_State *L);
-    static int mkdir(lua_State* L);
-    static int isdirectory(lua_State* L);
-    static int filetree(lua_State* L);
-	  static int directorylist(lua_State* L);
-    static int fileinfo(lua_State* L);
-	  static int parentdirectory(lua_State* L);
-    static int remove(lua_State* L);
-    static int rename(lua_State* L);
-	  static int createfileinfo(lua_State* L, boost::filesystem::path curr);
+	static int open(lua_State *L);
+	static int mkdir(lua_State* L);
+	static int isdirectory(lua_State* L);
+	static int filetree(lua_State* L);
+	static int directorylist(lua_State* L);
+	static int fileinfo(lua_State* L);
+	static int parentdirectory(lua_State* L);
+	static int remove(lua_State* L);
+	static int rename(lua_State* L);
+	static int createfileinfo(lua_State* L, boost::filesystem::path curr);
   };
 
   struct LuaMidiHelper {
@@ -754,6 +755,36 @@ struct LuaActionListenerBind {
     static int gmpercussionnames(lua_State* L);
     static int notename(lua_State* L);
     static int combine(lua_State* L);
+  };
+
+class LuaMidiInput : public LuaState, public MidiInputListener {
+	public:
+		LuaMidiInput();
+		LuaMidiInput(lua_State* L);
+		
+		void SetDeviceId(unsigned int driver, int devId);
+		bool Open();
+		bool Close();
+		bool Active();
+		
+		void OnMidiData(uint32_t, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+
+	private:
+		std::auto_ptr<CMidiInput> imp_;						
+};
+
+  struct LuaMidiInputBind {
+	static std::string meta;
+	static int open(lua_State *L);
+	static int create(lua_State *L);
+	static int gc(lua_State* L);
+	static int numdevices(lua_State* L);
+	static int devicedescription(lua_State* L);
+	static int finddevicebyname(lua_State* L);
+	static int setdevice(lua_State* L);
+	static int openinput(lua_State* L);
+	static int closeinput(lua_State* L);
+	static int active(lua_State* L);
   };
 
   struct LuaDspFilterBind {

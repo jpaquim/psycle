@@ -32,7 +32,8 @@ namespace psycle
 			m_resyncAdjStampTime( 0 ),
 			m_reSync( false ),
 			m_synced( false ),
-			m_syncing( false )
+			m_syncing( false ),
+			listener_(0)
 		{
 			// clear down buffers
 			std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
@@ -103,7 +104,7 @@ namespace psycle
 			// open the main input driver
 			if( !m_midiInHandle[ DRIVER_MIDI ] && m_devId[ DRIVER_MIDI ] != -1 )
 			{
-				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD_PTR)fnMidiCallbackStatic, (DWORD_PTR) this, CALLBACK_FUNCTION );
 				BREAK_ON_ERROR(result, 0x01)
 
 				opened = true;
@@ -119,7 +120,7 @@ namespace psycle
 				else
 				{
 					// open
-					result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+					result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD_PTR)fnMidiCallbackStatic, (DWORD_PTR) this, CALLBACK_FUNCTION );
 					BREAK_ON_ERROR(result, 0x04)
 
 					result = midiInStart( m_midiInHandle[ DRIVER_SYNC ] );
@@ -409,6 +410,10 @@ Exit:
 		{
 			CMidiInput& midiInput = PsycleGlobal::midi();
 
+			if (dwInstance) {
+			  ((CMidiInput*)(dwInstance))->OnMidiData(uMsg, dwParam1, dwParam2);
+			}
+
 			// do nothing if there is no reference object or the object is not active
 			if((!midiInput.GetHandle( DRIVER_MIDI ) && !midiInput.GetHandle( DRIVER_SYNC )))
 			{
@@ -453,6 +458,12 @@ Exit:
 				break;
 				default: break;
 			}	// end of.. uMsg switch
+		}
+
+		void CMidiInput::OnMidiData(uint32_t uMsg, DWORD_PTR dwParam1, DWORD_PTR dwParam2) {
+			if (listener_) {
+				listener_->OnMidiData(uMsg, dwParam1, dwParam2);
+			}
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
