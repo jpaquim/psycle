@@ -375,15 +375,18 @@ struct Invoke {
   LuaRun* run_;
 };
 
-int LuaProxy::invokelater(lua_State* L) {
+int LuaProxy::invokelater(lua_State* L) { 
   if lua_isnil(L, 1) {
     return luaL_error(L, "Argument is nil.");
   }
   boost::shared_ptr<LuaRun> run = LuaHelper::check_sptr<LuaRun>(L, 1, LuaRunBind::meta);  
   Invoke f(run.get());   
-  LuaProxy* proxy = LuaGlobal::proxy(L);  
+  LuaProxy* proxy = LuaGlobal::proxy(L);    
   if (!proxy) {
     return luaL_error(L, "invokelater: Proxy not found.");
+  }
+  if (proxy->host_->crashed()) {
+    return 0;
   }
   proxy->invokelater_->Add(f);  
   return 0;
@@ -425,7 +428,7 @@ void LuaProxy::PrepareState() {
   // sound engine
   LuaHelper::require<LuaArrayBind>(L, "psycle.array");
   LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");  
-  LuaHelper::require<LuaMachineBind>(L, "psycle.machine");
+  LuaHelper::require<LuaMachineBind>(L, "psycle.machine");  
   // LuaHelper::require<LuaMachinesBind>(L, "psycle.machines");
   LuaHelper::require<LuaWaveOscBind>(L, "psycle.osc");
   LuaHelper::require<LuaResamplerBind>(L, "psycle.dsp.resampler");
@@ -436,6 +439,7 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaFileHelper>(L, "psycle.file");
   LuaHelper::require<LuaFileObserverBind>(L, "psycle.fileobserver");
   LuaHelper::require<LuaMidiHelper>(L, "psycle.midi");
+  LuaHelper::require<LuaMidiInputBind>(L, "psycle.midiinput");
   LuaHelper::require<LuaPlayerBind>(L, "psycle.player");
   LuaHelper::require<LuaPatternDataBind>(L, "psycle.pattern");
   // ui host interaction
