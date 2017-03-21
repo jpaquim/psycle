@@ -141,13 +141,21 @@ end
 function tabgroup:setactiveheader(page)  
    if page ~= self.activepage_ then    
     local tabs = self.tabs:windows()
-    if self.activepage_ then
-      local index = self.children:windowindex(self.activepage_)
-      if index ~= 0 then
-        tabs[index]:setskinnormal()
+    local index, oldindex = 0, 0
+    for i=1, #tabs do
+      local tab = tabs[i]
+      if tab.page == page then
+        index = i       
+      end      
+      if tab.page == self.activepage_ then
+        oldindex = i       
       end
-    end
-    local index = self.children:windowindex(page)
+    end        
+    if self.activepage_ then      
+      if oldindex ~= 0 then
+        tabs[oldindex]:setskinnormal()
+      end
+    end    
     if index ~= 0 then    
       tabs[index]:setskinhighlight()
     end
@@ -240,7 +248,8 @@ function tabgroup:createheader(page, label, preventclose)
   local header = group:new()
                       :setautosize(true, true)
                       :setalign(alignstyle.LEFT)
-                      :setposition(rect:new(point:new(), dimension:new(100, 20)))           
+                      :setposition(rect:new(point:new(), dimension:new(100, 20)))
+                      :viewdoublebuffered()
   header.page = page    
   local font = font:new():setfontinfo(fontinfo:new():setsize(13))  
   header.text = text:new(header)
@@ -299,17 +308,54 @@ function tabgroup:createheader(page, label, preventclose)
       self.text:setcolor(that.headercolor_)   
     end
   end  
-  function header:onmousedown(ev)         
-    that:setactivepage(self.page)
-    if ev:button() == 2 then
+  function header:onmousedown(ev)
+    that:setactivepage(self.page)    
+    if ev:button() == 1 then          
+      self.isdragactive = false
+    elseif ev:button() == 2 then
       that.tabpopupmenu:track(self:desktopposition():topleft():offset(5, 5))
       that.tabpopupmenu.headertext = self.text:text()
     end    
   end
+  function header:onmousemove(ev)   
+   if ev:button() == 1 then
+      local diff = ev:clientpos():x()- self:absoluteposition():left()
+      if not self.isdragactive then
+        self.dragbase = diff
+        self:bringtotop()
+        self:mousecapture()
+        self.isdragactive = true
+      end        
+      self:setposition(self:position():setleft(self:position():left() + diff - self.dragbase))
+          :setalign(alignstyle.NONE) 
+    end    
+  end
   function header:onmouseup(ev)
+    if ev:button() == 1 and self.isdragactive then
+      self:mouserelease()
+      local tabs = that.tabs:windows()
+      local swaptab = nil
+      for i=1, #tabs do
+        local tab = tabs[i]
+        if tab ~= self and (tab:position():left() + (tab:position():width() / 2)) > self:position():left() then
+          swaptab = tab          
+          break           
+        end
+      end
+      local p = self:parent()
+      p:remove(self)
+     if swaptab then
+       p:insert(swaptab, self) 
+     else
+       p:add(self)
+     end   
+     self:setalign(alignstyle.LEFT)
+     that.tabs:updatealign()
+    end
   end
   return header
 end
+
 
 function tabgroup:inittabpopupmenu() 
   self.tabpopuprootnode = node:new()

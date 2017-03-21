@@ -191,43 +191,49 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
 		}
   }  else
   if (pMsg->message == WM_LBUTTONDOWN) {    
-    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
+    previous_mouse_pos_ = MousePos(pMsg->pt);
+    MouseEvent ev(previous_mouse_pos_, 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
 	} else
-  if (pMsg->message == WM_LBUTTONDBLCLK) {    
-    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
+  if (pMsg->message == WM_LBUTTONDBLCLK) {
+    previous_mouse_pos_ = MousePos(pMsg->pt); 
+    MouseEvent ev(previous_mouse_pos_, 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
-  if (pMsg->message == WM_LBUTTONUP) {    
-    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
+  if (pMsg->message == WM_LBUTTONUP) {
+    previous_mouse_pos_ = MousePos(pMsg->pt);    
+    MouseEvent ev(previous_mouse_pos_, 1, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else
-  if (pMsg->message == WM_RBUTTONDOWN) {        
-    MouseEvent ev(MousePos(pMsg->pt), 2, pMsg->wParam);
+  if (pMsg->message == WM_RBUTTONDOWN) {
+    previous_mouse_pos_ = MousePos(pMsg->pt);        
+    MouseEvent ev(previous_mouse_pos_, 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseDown, window(), pMsg);
   } else    
-  if (pMsg->message == WM_RBUTTONDBLCLK) {    
-    MouseEvent ev(MousePos(pMsg->pt), 2, pMsg->wParam);
+  if (pMsg->message == WM_RBUTTONDBLCLK) {
+    previous_mouse_pos_ = MousePos(pMsg->pt);    
+    MouseEvent ev(previous_mouse_pos_, 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnDblclick, window(), pMsg);
   } else
-  if (pMsg->message == WM_RBUTTONUP) {    
-    MouseEvent ev(MousePos(pMsg->pt), 2, pMsg->wParam);
+  if (pMsg->message == WM_RBUTTONUP) {
+    previous_mouse_pos_ = MousePos(pMsg->pt);    
+    MouseEvent ev(previous_mouse_pos_, 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
-  } else  
-	if (pMsg->message == WM_MOUSEHOVER) {
-
-	} else
+  } else
   if (pMsg->message == WM_MOUSEMOVE) {    
+   Point mouse_pos = MousePos(pMsg->pt);
+   if (mouse_pos != previous_mouse_pos_) {
+    previous_mouse_pos_ = mouse_pos;
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(tme);
     tme.hwndTrack = m_hWnd;
     tme.dwFlags = TME_LEAVE;
     tme.dwHoverTime = 1;    
-    m_bTracking = _TrackMouseEvent(&tme);         
-    MouseEvent ev(MousePos(pMsg->pt), 1, pMsg->wParam);
+    m_bTracking = _TrackMouseEvent(&tme);
+    MouseEvent ev(mouse_pos, button_state(pMsg->wParam), pMsg->wParam);
     if (mouse_enter_) {
       mouse_enter_ = false;
-      if (window()) {
+     if (window()) {
         try {
           window()->OnMouseEnter(ev);
         } catch (std::exception& e) {
@@ -235,7 +241,8 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
         }      
       }
     }
-   return WorkEvent(ev, &Window::OnMouseMove, window(), pMsg);    
+   return WorkEvent(ev, &Window::OnMouseMove, window(), pMsg); 
+   }   
   }
   return CWnd::PreTranslateMessage(pMsg);
 }

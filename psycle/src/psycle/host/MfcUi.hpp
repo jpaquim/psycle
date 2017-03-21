@@ -1283,6 +1283,21 @@ protected:
     }
     return flags;
   }    
+
+  static int button_state(UINT uFlags) {
+    int button(0);
+	if (MK_LBUTTON & uFlags) {
+	  button = 1;
+	} else
+	if (MK_MBUTTON & uFlags) {
+	  button = 3;
+	} else
+	if (MK_RBUTTON & uFlags) {
+	  button = 2;
+	}
+	return button;
+  }
+
   void MapPointToRoot(CPoint& pt) const {
     if (window() && window()->root()) {
       CWnd* root = dynamic_cast<CWnd*>(window()->root()->imp());
@@ -1329,6 +1344,7 @@ protected:
 	BoxSpace padding_;
 	BoxSpace border_space_;  
   bool map_capslock_to_ctrl_;
+  Point previous_mouse_pos_;
 };
 
 class AlertImp : public ui::AlertImp {

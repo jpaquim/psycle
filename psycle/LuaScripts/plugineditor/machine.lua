@@ -43,9 +43,9 @@ function machine:init(samplerate)
    psycle.setmenurootnode(self.mainmenu:rootnode())
    local that = self
    local function f()
-     that.mainviewport:onidle()
+     --that.mainviewport:onidle()
    end
-   self.timerid = self:setinterval(f, 300)   
+  -- self.timerid = self:setinterval(f, 300)   
 end
 
 function machine:editmachineindex()
