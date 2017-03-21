@@ -1,4 +1,4 @@
--- test2.lua
+-- miditest.lua
 
 machine = require("psycle.machine"):new()
 
@@ -8,7 +8,7 @@ local run = require("psycle.run")
 
 function machine:info()
   return {
-    vendor = "",
+    vendor = "psycle",
     name = "miditest",
     mode = machine.GENERATOR,
     version = 0,

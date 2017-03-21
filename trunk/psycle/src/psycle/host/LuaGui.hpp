@@ -117,6 +117,7 @@ struct LuaUiRectBind {
   static int create(lua_State *L);
   static int gc(lua_State* L);
   static int set(lua_State* L);
+  static int setleft(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_left); }
   static int left(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::left); }
   static int top(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::top); }
   static int right(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::right); }
@@ -871,6 +872,26 @@ class LuaScrollBar : public ui::ScrollBar, public LuaState {
   virtual void OnScroll(int pos);   
 };
 
+class LuaOrnament : public ui::Ornament, public LuaState {
+ public:
+  LuaOrnament() : Ornament(), LuaState(0) {}
+  LuaOrnament(lua_State* L) : Ornament(), LuaState(L) {}
+  virtual ~LuaOrnament() {};
+  virtual ui::Ornament* Clone();
+
+  virtual bool transparent() const;
+  virtual void Draw(ui::Window& window, ui::Graphics* g, ui::Region& draw_region);
+  virtual std::auto_ptr<ui::Rect> padding() const;
+  virtual ui::BoxSpace preferred_space() const;
+};
+
+struct LuaOrnamentBind {
+  static std::string meta;
+  static int open(lua_State *L);  
+  static int create(lua_State *L); 
+  static int gc(lua_State* L);
+};
+
 struct OrnamentFactoryBind {
   static int open(lua_State *L);
   static std::string meta;
@@ -1228,6 +1249,9 @@ class LuaWindowBind {
         ornament = LuaHelper::test_sptr<ui::Wallpaper>(L, 2, WallpaperBind::meta);
         if (!ornament) {
           ornament = LuaHelper::test_sptr<ui::Fill>(L, 2, FillBind::meta);
+		  if (!ornament) {
+		    ornament = LuaHelper::check_sptr<LuaOrnament>(L, 2, LuaOrnamentBind::meta);
+		  }
         }
       }            
     }    
@@ -2806,6 +2830,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaEventBind>(L, "psycle.ui.event");
   LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.keyevent");
   LuaHelper::require<LuaMouseEventBind>(L, "psycle.ui.mouseevent");
+  LuaHelper::require<LuaOrnamentBind>(L, "psycle.ui.ornament");
   LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.ornamentfactory");
   LuaHelper::require<LineBorderBind>(L, "psycle.ui.lineborder");
   LuaHelper::require<WallpaperBind>(L, "psycle.ui.wallpaper");

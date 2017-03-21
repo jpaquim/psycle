@@ -6,7 +6,7 @@ local property = require("psycle.property")
 local setting = node:new():setname("setting")
 
 setting.meta = {
-  name = "test2",
+  name = "miditest",
   version = 0.1
 }
 

@@ -653,7 +653,7 @@ void LuaTreeView::OnEdited(const ui::Node::Ptr& node, const std::string& text) {
     if (in.open("onedited")) {
       LuaHelper::find_weakuserdata<>(L, node.get());
       in << text << pcall(0);      
-    } 
+    }
   } catch (std::exception& e) {
       ui::alert(e.what());   
   }
@@ -1866,6 +1866,7 @@ std::string LuaUiRectBind::meta = "psyuirectmeta";
 int LuaUiRectBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
+	{"setleft", setleft},
     {"left", left},
     {"top", top},
     {"right", right},
@@ -2090,6 +2091,38 @@ int LuaMouseEventBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<ui::MouseEvent>(L, meta);
 }
 
+ui::Ornament* LuaOrnament::Clone() { 
+	return new LuaOrnament(state());
+}
+
+bool LuaOrnament::transparent() const {
+	bool result(true);
+	LuaImport in(state(), (void*)this, locker(state()));
+	if (in.open("transparent")) {
+		in << pcall(1) >> result;            
+	}
+	return result;
+}
+
+void LuaOrnament::Draw(ui::Window& window, ui::Graphics* g, ui::Region& draw_region) {
+  LuaImport in(state(), this, locker(state()));  
+  if (in.open("draw")) {
+    LuaHelper::find_weakuserdata(state(), &window);      
+    LuaHelper::requirenew<LuaGraphicsBind>(state(), "psycle.ui.canvas.graphics", g, true);
+    LuaHelper::requirenew<LuaRegionBind>(state(), "psycle.ui.region", &draw_region, true);
+    in.pcall(0);    
+    LuaHelper::collect_full_garbage(state());
+  }
+}
+
+std::auto_ptr<ui::Rect> LuaOrnament::padding() const {    
+	return std::auto_ptr<ui::Rect>();
+}
+
+ui::BoxSpace LuaOrnament::preferred_space() const {
+	return ui::BoxSpace();
+}  
+
 // OrnamentFactoryBind
 std::string OrnamentFactoryBind::meta = "canvasembelissherfactory";
 
@@ -2186,6 +2219,28 @@ int OrnamentFactoryBind::createboundfill(lua_State* L) {
                                          static_cast<ARGB>(luaL_checknumber(L, 2))));
   return 1;  
 }
+
+std::string LuaOrnamentBind::meta = "ornamentbind";
+
+int LuaOrnamentBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},  
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods, gc);   
+  return 1;
+}
+
+int LuaOrnamentBind::create(lua_State* L) {
+  LuaHelper::new_shared_userdata<>(L, meta, new LuaOrnament(L));
+  return 1;
+}
+
+int LuaOrnamentBind::gc(lua_State* L) {
+  using namespace ui;
+  return LuaHelper::delete_shared_userdata<LuaOrnament>(L, meta);  
+}
+
 
 std::string LineBorderBind::meta = "canvaslineborder";
 
