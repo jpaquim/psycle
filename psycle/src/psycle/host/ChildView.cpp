@@ -647,7 +647,8 @@ namespace psycle { namespace host {
 				GetClientRect(&rcClient);
 				m_luaWndView->MoveWindow(&rcClient);
 				AlignExtensionChild(m_luaWndView.get());
-			}     			
+			}  
+			Repaint();   			
 		}
 
 		/// "Save Song" Function
