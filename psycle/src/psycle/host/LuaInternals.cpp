@@ -896,7 +896,6 @@ int LuaMachineBind::createparam(lua_State* L, int idx, LuaMachine* machine) {
     lua_setfield(L, -2, "idx");
 	lua_remove(L, -2);
 	return 1;
-	return 0;
 }
 
 int LuaMachineBind::gc(lua_State* L) {  
@@ -1302,6 +1301,7 @@ int LuaPlayerBind::open(lua_State *L) {
     {"rline", rline},
     {"line", line},
     {"playing", playing},
+	{"playpattern", playpattern},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods, gc);
@@ -1356,6 +1356,14 @@ int LuaPlayerBind::line(lua_State* L) {
   return 1;
 }
 
+int LuaPlayerBind::playpattern(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  lua_pushnumber(L, p->_playPattern);
+  return 1;
+}
+
 int LuaPlayerBind::playing(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;
@@ -1398,12 +1406,17 @@ int LuaSequenceBarBind::currpattern(lua_State* L) {
 ///////////////////////////////////////////////////////////////////////////////
 
   int LuaPatternData::numlines(int ps) const {
-    return Global::song().patternLines[ps];
+    return song_->patternLines[ps];
   }
 
   int LuaPatternData::numtracks() const {
     return song_->SONGTRACKS;
   }
+
+  bool LuaPatternData::has_pattern(int ps) const {    
+    return song_->ppPatternData[ps] != 0;	
+  }
+
 
 const char* LuaPatternDataBind::meta = "psypatterndatameta";
 
@@ -1418,6 +1431,7 @@ int LuaPatternDataBind::open(lua_State *L) {
     {"pattern", create},
     {"numtracks", numtracks},
     {"numlines", numlines},
+	{"playorder", playorder},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods);
@@ -1476,30 +1490,24 @@ int LuaPatternDataBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<LuaPatternData>(L, meta);
 }
 
-
-int LuaPatternDataBind::numtracks(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaPatternData::numtracks);
-  return 1;
-}
-
-int LuaPatternDataBind::numlines(lua_State* L) {
-  LuaHelper::bind(L, meta, &LuaPatternData::numlines);
-  return 1;
-}
-
 int LuaPatternDataBind::eventat(lua_State* L) {
-  boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
-  int ps = luaL_checknumber(L, 2);
-  int trk = luaL_checknumber(L, 3);
-  int pos = luaL_checknumber(L, 4);
-  unsigned char* e = pattern->ptrackline(ps, trk, pos);
-  LuaPatternEvent ev;
-  ev.entry._note = *e++;
-  ev.entry._inst = *e++;
-  ev.entry._mach = *e++;
-  ev.entry._cmd = *e++;
-  ev.entry._parameter = *e++;
-  return createevent(L, ev);
+	try {
+		boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
+		int ps = luaL_checknumber(L, 2);  
+		int trk = luaL_checknumber(L, 3);
+		int pos = luaL_checknumber(L, 4);
+		unsigned char* e = pattern->ptrackline(ps, trk, pos);
+		LuaPatternEvent ev;
+		ev.entry._note = *e++;
+		ev.entry._inst = *e++;
+		ev.entry._mach = *e++;
+		ev.entry._cmd = *e++;
+		ev.entry._parameter = *e++;
+		return createevent(L, ev);
+	} catch (std::exception& e) {
+		luaL_error(L, e.what());
+		return 0;
+	}
 }
 
 int LuaPatternDataBind::pattern(lua_State* L) {
@@ -1617,6 +1625,16 @@ int LuaPatternDataBind::buildevent(lua_State* L) {
   unsigned char* e = pattern->ptrackline(ps, trk, pos);
   *e = entry._note;
   return 0;
+}
+
+int LuaPatternDataBind::playorder(lua_State* L) {
+  boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
+  lua_newtable(L);
+  for (int i = 0; i < Global:: song().playLength; ++i) {
+     lua_pushinteger(L, Global::song().playOrder[i]);
+	 lua_rawseti(L, -2, i + 1);
+  }
+  return 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

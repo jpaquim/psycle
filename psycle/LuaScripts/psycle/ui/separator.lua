@@ -70,7 +70,7 @@ function separator:draw(g)
 end
 
 function separator:oncalcautodimension()  
-  return 20, 20
+  return dimension:new(20, 20)
 end
 
 function separator:transparent()  

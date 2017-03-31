@@ -113,10 +113,12 @@ namespace psycle { namespace host {
 			,patBufferLines(0)
 			,patBufferCopy(false)
 			,_pSong(Global::song())
-      ,menu_pos_(VIEWINSERTSTARTPOS)
-      ,menu_container_(new ui::MenuContainer())               
+			,menu_pos_(VIEWINSERTSTARTPOS)
+			,menu_container_(new ui::MenuContainer())  
+			,oldViewMode(view_modes::machine)
+			,m_luaWndView(new CWnd())
 		{
-      HostExtensions::Instance().InitInstance(this);
+			HostExtensions::Instance().InitInstance(this);						 
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
 				WireDialog[c] = NULL;
@@ -157,6 +159,7 @@ namespace psycle { namespace host {
 		BEGIN_MESSAGE_MAP(CChildView,CWnd)      
 			ON_WM_TIMER()
 			ON_WM_PAINT()
+			ON_WM_CREATE()
 			ON_WM_DESTROY()
 			ON_WM_SIZE()
 			ON_WM_CONTEXTMENU()
@@ -281,7 +284,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POPUPMAC_OPENBANKMANAGER, OnPopMacOpenBankManager)
 			ON_COMMAND_RANGE(ID_CONNECTTO_MACHINE0, ID_CONNECTTO_MACHINE64, OnPopMacConnecTo)
 			ON_COMMAND_RANGE(ID_CONNECTIONS_CONNECTION0, ID_CONNECTIONS_CONNECTION24, OnPopMacShowWire)
-      ON_COMMAND_RANGE(ID_DYNAMIC_MENUS_START, ID_DYNAMIC_MENUS_END, OnDynamicMenuItems)
+			ON_COMMAND_RANGE(ID_DYNAMIC_MENUS_START, ID_DYNAMIC_MENUS_END, OnDynamicMenuItems)
 			ON_COMMAND(ID_POPUPMAC_REPLACEMACHINE, OnPopMacReplaceMac)
 			ON_COMMAND(ID_POPUPMAC_CLONEMACHINE, OnPopMacCloneMac)
 			ON_COMMAND(ID_POPUPMAC_INSERTEFFECTBEFORE, OnPopMacInsertBefore)
@@ -322,6 +325,14 @@ namespace psycle { namespace host {
 			return TRUE;
 		}
 
+		int CChildView::OnCreate(LPCREATESTRUCT lpCreateStruct) {
+		  if (CWnd::OnCreate(lpCreateStruct) == -1)
+				return -1;
+			m_luaWndView->Create(NULL, NULL, WS_CHILD,
+				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST + 1, NULL);
+			return 0;
+		}
+
 		/// This function gives to the pParentMain the pointer to a CMainFrame
 		/// object. Call this function from the CMainFrm side object to
 		/// allow CChildView call functions of the CMainFrame parent object
@@ -360,7 +371,7 @@ namespace psycle { namespace host {
 			{            
 				CSingleLock lock(&_pSong.semaphore, FALSE);
 				if (!lock.Lock(50)) return;
-        GlobalTimer::instance().OnViewRefresh();
+				GlobalTimer::instance().OnViewRefresh();
 				Master* master = ((Master*)_pSong._pMachine[MASTER_INDEX]);
 				if (master)
 				{
@@ -496,8 +507,8 @@ namespace psycle { namespace host {
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
-      HostExtensions::Instance().ExitInstance();
-      GlobalTimer::instance().Clear();
+			HostExtensions::Instance().ExitInstance();
+			GlobalTimer::instance().Clear();
 			if (PsycleGlobal::conf()._pOutputDriver->Initialized())
 			{
 				PsycleGlobal::conf()._pOutputDriver->Reset();
@@ -508,9 +519,9 @@ namespace psycle { namespace host {
 			Global::song().New();
 		}
 
-    void CChildView::OnPaint() 
+		void CChildView::OnPaint() 
 		{
-      CRgn rgn;
+			CRgn rgn;
 			rgn.CreateRectRgn(0, 0, 0, 0);
 			GetUpdateRgn(&rgn, FALSE);
 
@@ -576,7 +587,7 @@ namespace psycle { namespace host {
 			dc.BitBlt(0,0,rc.right-rc.left,rc.bottom-rc.top,&bufDC,0,0,SRCCOPY);
 			bufDC.SelectObject(oldbmp);
 			bufDC.DeleteDC();
-      rgn.DeleteObject();
+			rgn.DeleteObject();
 		}
 
 		void CChildView::Repaint(draw_modes::draw_mode drawMode)
@@ -629,9 +640,14 @@ namespace psycle { namespace host {
 			if (viewMode == view_modes::pattern)
 			{
 				RecalcMetrics();
-			}			
-      CPoint cs(cx, cy);
-      Repaint();      
+			}						
+			if (m_luaWndView && m_luaWndView->m_hWnd)
+			{
+				CRect rcClient;     
+				GetClientRect(&rcClient);
+				m_luaWndView->MoveWindow(&rcClient);
+				AlignExtensionChild(m_luaWndView.get());
+			}     			
 		}
 
 		/// "Save Song" Function
@@ -1076,13 +1092,10 @@ namespace psycle { namespace host {
         
 		/// Tool bar buttons and View Commands
 		void CChildView::OnMachineview() 
-		{
-       if (!this->IsWindowVisible()) {        
-        HostExtensions::Instance().HideActiveLua();
-        this->ShowWindow(SW_SHOW);
-      }
+		{			        						
 			if (viewMode != view_modes::machine)
 			{        
+				HostExtensions::Instance().HideActiveLua();	
 				viewMode = view_modes::machine;
 				ShowScrollBar(SB_BOTH,FALSE);
 
@@ -1109,13 +1122,10 @@ namespace psycle { namespace host {
 		}
 
 		void CChildView::OnPatternView() 
-		{
-      if (!this->IsWindowVisible()) {
-        HostExtensions::Instance().HideActiveLua();
-        ShowWindow(SW_SHOW);
-      }
+		{								
 			if (viewMode != view_modes::pattern)
-			{        
+			{     
+				HostExtensions::Instance().HideActiveLua();	   
 				RecalcMetrics();
 
 				viewMode = view_modes::pattern;
@@ -2602,22 +2612,54 @@ namespace psycle { namespace host {
       }
     }
 
-    void CChildView::OnHostViewportChange(LuaPlugin& plugin, int viewport) {
-      CMainFrame* pParentMain = (CMainFrame *)pParentFrame;      
+    void CChildView::OnHostViewportChange(LuaPlugin& plugin, int viewport) {           
       if (viewport == CHILDVIEWPORT) {
-        ChangeViewport(plugin.viewport().lock().get());
-        if (!IsWindowVisible()) {      
-          ShowWindow(SW_HIDE);
-          pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
-          ShowExtensionMenu(plugin);
-        }
+	    if (!extensions_view_stack_.empty()) {
+			boost::weak_ptr<LuaPlugin> top_view = extensions_view_stack_.top();
+			if (!top_view.expired() && top_view.lock().get() == &plugin) {				
+			} else {
+			  extensions_view_stack_.push(plugin.shared_from_this());
+			}
+		} else {
+		  extensions_view_stack_.push(plugin.shared_from_this());
+		}
+        ChangeViewport(plugin.viewport().lock().get());	
+		if (viewMode != view_modes::extension) {
+		  oldViewMode = viewMode;	    
+		}
+		viewMode = view_modes::extension;		
+        ShowExtensionMenu(plugin);				        
       } else 
       if (viewport == FRAMEVIEWPORT) {
-        if (!IsWindowVisible()) {              
-          pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
-          ShowWindow(SW_SHOW);
-          HideExtensionMenu();   
-        }
+	    if (!extensions_view_stack_.empty()) {
+			extensions_view_stack_.pop();
+		}
+		if (!extensions_view_stack_.empty()) {
+			boost::weak_ptr<LuaPlugin> top_view = extensions_view_stack_.top();
+			if (!top_view.expired()) {
+				ChangeViewport(top_view.lock()->viewport().lock().get());
+			}
+			extensions_view_stack_.pop();								         
+			HideExtensionMenu();		     
+        } else {
+		   viewMode = oldViewMode;
+		   Repaint();
+		}
+      }
+    }
+
+	void CChildView::ChangeViewport(ui::Window* canvas) {      
+      if (canvas) { 
+        ShowScrollBar(SB_BOTH, FALSE);       
+        ModifyStyle(WS_VSCROLL | WS_HSCROLL, 0, SWP_FRAMECHANGED);
+        ResizeExtensionView();
+        EraseOldExtensionWindow();
+        AddNewExtensionWindow(canvas);
+        ShowExtensionView();        
+        m_luaWndView->SetActiveWindow();
+      } else {
+        viewMode = view_modes::pattern;
+        EraseOldExtensionWindow();        
       }
     }
 
@@ -2635,7 +2677,7 @@ namespace psycle { namespace host {
         if (link.plugin.expired()) {
           std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
           try {
-            link.plugin = plug = HostExtensions::Instance().Execute(link);      
+            link.plugin = plug = HostExtensions::Instance().Execute(link);			
           } catch(std::exception& e) {
             ui::alert(e.what());
             return;
@@ -2645,13 +2687,15 @@ namespace psycle { namespace host {
           }
           viewport = link.viewport();
         } else {
+		  if (link.plugin.lock()->proxy().has_frame()) {			 
+			return;			  
+		  }
           plug = link.plugin.lock();
           ui::Viewport::WeakPtr user_view = plug->viewport();      
         }        
-        if (plug->crashed()) return;
-        if (HostExtensions::Instance().active_lua() != plug.get()) {
-          ui::Viewport::WeakPtr user_view = plug->viewport();        
-          if (!user_view.expired()) {            
+        if (plug->crashed()) return;        
+        ui::Viewport::WeakPtr user_view = plug->viewport();        
+        if (!user_view.expired()) {            
             HostExtensions::Instance().set_active_lua(plug.get());
             try {                                 
               plug->ViewPortChanged(*plug.get(), viewport);
@@ -2660,35 +2704,18 @@ namespace psycle { namespace host {
               // AfxMessageBox(e.what());
             }
             Invalidate(false);
-          } else {  
+        } else {  
             try {
               plug->OnExecute();
             } catch (std::exception& e) {
               ui::alert(e.what());
               // LuaGlobal::onexception(plug->proxy().state());        
             }
-          }
-        }
+        } 
+		pParentFrame->DrawMenuBar();
       }    
     }              
-                    
-    void CChildView::ChangeViewport(ui::Window* canvas) {      
-      if (canvas) { 
-        ShowScrollBar(SB_BOTH, FALSE);
-        viewMode = view_modes::machine;
-        ModifyStyle(WS_VSCROLL | WS_HSCROLL, 0, SWP_FRAMECHANGED);
-        ResizeExtensionView();
-        EraseOldExtensionWindow();
-        AddNewExtensionWindow(canvas);
-        ShowExtensionView();          
-        HideChildView();        
-        SetExtensionActive();
-      } else {
-        ShowChildView();
-        EraseOldExtensionWindow();        
-      }
-    }
-
+   
     void CChildView::ShowExtensionMenu(LuaPlugin& plugin) {
       using namespace ui;
       menu_container_->clear();
@@ -2706,20 +2733,21 @@ namespace psycle { namespace host {
 
     void CChildView::HideExtensionMenu() {
       menu_container_->clear();
-      pParentFrame->DrawMenuBar(); 
+      pParentFrame->DrawMenuBar();
     }
 
     void CChildView::ResizeExtensionView() {
-      WINDOWPLACEMENT wp = adjusted_child_view_placement();
-      pParentMain->m_luaWndView->SetWindowPlacement(&wp);              
+      CRect rcClient;     
+      GetClientRect(&rcClient);
+      m_luaWndView->MoveWindow(&rcClient);              
     }
 
     void CChildView::ShowExtensionView() {     
-      pParentMain->m_luaWndView->ShowWindow(SW_SHOW);
+      m_luaWndView->ShowWindow(SW_SHOW);
     }
        
     void CChildView::EraseOldExtensionWindow() {
-      CWnd* child = pParentMain->m_luaWndView->GetWindow(GW_CHILD);
+      CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
       if (child) {                  
         child->SetParent(ui::mfc::DummyWindow::dummy());                  
       }
@@ -2729,8 +2757,8 @@ namespace psycle { namespace host {
       ui::mfc::WindowImp* imp = canvas ? (ui::mfc::WindowImp*) canvas->imp() : 0;      
       if (imp) {
         imp->ShowWindow(SW_HIDE);
-        imp->SetParent(pParentMain->m_luaWndView.get());
-        AlignExtensionChild(pParentMain->m_luaWndView.get());
+        imp->SetParent(m_luaWndView.get());
+        AlignExtensionChild(m_luaWndView.get());
         imp->ShowWindow(SW_SHOW);                     
       }      
     }
@@ -2744,25 +2772,14 @@ namespace psycle { namespace host {
       }      
     }
 
-    void CChildView::SetExtensionActive() {
-      pParentMain->m_luaWndView->SetActiveWindow();
-    }
-
     void CChildView::HideExtensionView() {
-      CMainFrame* pParentMain =(CMainFrame *)pParentFrame;    
-      pParentMain->m_luaWndView->ShowWindow(SW_HIDE);
-      HideExtensionMenu();
-    }
-
-    WINDOWPLACEMENT CChildView::adjusted_child_view_placement() {
-      CRect rcClient, rcWind;     
-      GetWindowRect(&rcWind);           
-      WINDOWPLACEMENT wp;
-      GetWindowPlacement(&wp);
-      wp.rcNormalPosition.right = wp.rcNormalPosition.left + rcWind.Width();
-      wp.rcNormalPosition.bottom = wp.rcNormalPosition.bottom + rcWind.Height();
-      return wp;
-    }
+	  if (viewMode == view_modes::extension) {		 
+		  m_luaWndView->ShowWindow(SW_HIDE);
+		  HideExtensionMenu();
+		  extensions_view_stack_ = std::stack<boost::weak_ptr<LuaPlugin> >();
+		  viewMode = oldViewMode;
+	  }
+    }  
     
 }}
 

@@ -22,12 +22,12 @@ local keycodes = require("psycle.ui.keycodes")
 
 local advancededit = group:new()
 
-function advancededit:new(parent, setting)  
+function advancededit:new(parent)  
   local c = group:new()
                  :setautosize(false, false)  
   setmetatable(c, self)
   self.__index = self  
-  c:init(setting)
+  c:init()
   if parent ~= nil then
     parent:add(c)
   end  
@@ -38,7 +38,7 @@ function advancededit:typename()
   return "advancededit"
 end
 
-function advancededit:init(setting)
+function advancededit:init()
   self.edit_ = edit:new(self)
                    :setalign(alignstyle.CLIENT)   
   self:initdefaultcolors()	   

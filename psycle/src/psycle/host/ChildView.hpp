@@ -90,9 +90,10 @@ namespace host {
 			{
 				machine,
 				pattern,
-				sequence        
+				sequence,
+				extension        
 			};
-		};
+		};		
 
 		class CCursor
 		{
@@ -154,7 +155,7 @@ namespace host {
 			int drawTrackEnd;
 			int drawLineStart;
 			int drawLineEnd;
-		};
+		};		
 
 		/// child view window
 		class CChildView : public CWnd, public HostViewPort
@@ -238,7 +239,7 @@ namespace host {
 			void KeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void NewMachine(int x = -1, int y = -1, int mac = -1);
-      void CreateNewMachine(int x, int y, int mac, int selectedMode, int Outputmachine, const std::string& psOutputDll, int shellIdx, Machine* insert = 0);
+			void CreateNewMachine(int x, int y, int mac, int selectedMode, int Outputmachine, const std::string& psOutputDll, int shellIdx, Machine* insert = 0);
 			void DoMacPropDialog(int propMac);
 			void FileLoadsongNamed(const std::string& fName);
 			void ImportPatternBlock(const std::string& fName, bool newpattern=false);
@@ -246,22 +247,18 @@ namespace host {
 
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
-    public:      
-      WINDOWPLACEMENT adjusted_child_view_placement();
-      void ChangeViewport(ui::Window* canvas);
-      void EraseOldExtensionWindow();
-      void ResizeExtensionView();
-      void ShowExtensionView();
-      void HideChildView() { ShowWindow(SW_HIDE); }
-      void ShowChildView() { ShowWindow(SW_SHOW); }
-      void SetExtensionActive();
-      void AddNewExtensionWindow(ui::Window* canvas);
-      void AlignExtensionChild(CWnd* extension_wnd);
-      void UpdateExtensionPosition();
-      bool child_size_changed() const;
+		public:			
+			void ChangeViewport(ui::Window* canvas);
+			void EraseOldExtensionWindow();
+			void ResizeExtensionView();
+			void ShowExtensionView();						
+			void AddNewExtensionWindow(ui::Window* canvas);
+			void AlignExtensionChild(CWnd* extension_wnd);
+			void UpdateExtensionPosition();
+			bool child_size_changed() const;
       
-      void LoadHostExtensions();
-      void InitWindowMenu();      
+			void LoadHostExtensions();
+			void InitWindowMenu();      
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;
@@ -294,6 +291,7 @@ namespace host {
 			int updateMode;
 			int updatePar;			// view_modes::pattern: Display update mode. view_modes::machine: Machine number to update.
 			int viewMode;
+			int oldViewMode;
 			int XOFFSET;
 			int YOFFSET;
 			int ROWWIDTH;
@@ -325,7 +323,7 @@ namespace host {
 		// Overrides
 		protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-
+			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 		//////////////////////////////////////////////////////////////////////
 		// Private operations
 
@@ -483,27 +481,29 @@ namespace host {
 			COLORREF pvc_fontSel[MAX_TRACKS+1];
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];            
-    public:      
-      virtual void OnAddViewMenu(class Link& link);
-      virtual void OnRestoreViewMenu();
-      virtual void OnAddHelpMenu(class Link& link);
-      virtual void HideExtensionView();
-      virtual void OnAddWindowsMenu(class Link& link);
-      virtual void OnRemoveWindowsMenu(class LuaPlugin* plugin);
-      virtual void OnReplaceHelpMenu(class Link& link, int pos);
-      virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin);
-      virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
-    private:
-      void ShowExtensionMenu(LuaPlugin& plugin);
-      void HideExtensionMenu();
-      typedef std::map<std::uint16_t, Link> MenuMap;
-      MenuMap menuItemIdMap_;
-      int menu_pos_;
-      boost::shared_ptr<ui::Node> extension_menu_;
-      HMENU windows_menu_;
-      CMenu* FindSubMenu(CMenu* parent, const std::string& text);
-      std::string menu_label(const Link& link) const;   
-      boost::shared_ptr<ui::MenuContainer> menu_container_;             
+		public:      
+			virtual void OnAddViewMenu(class Link& link);
+			virtual void OnRestoreViewMenu();
+			virtual void OnAddHelpMenu(class Link& link);
+			virtual void HideExtensionView();
+			virtual void OnAddWindowsMenu(class Link& link);
+			virtual void OnRemoveWindowsMenu(class LuaPlugin* plugin);
+			virtual void OnReplaceHelpMenu(class Link& link, int pos);
+			virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin);
+			virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
+		private:
+			void ShowExtensionMenu(LuaPlugin& plugin);
+			void HideExtensionMenu();
+			typedef std::map<std::uint16_t, Link> MenuMap;
+			MenuMap menuItemIdMap_;
+			int menu_pos_;
+			boost::shared_ptr<ui::Node> extension_menu_;
+			HMENU windows_menu_;
+			CMenu* FindSubMenu(CMenu* parent, const std::string& text);
+			std::string menu_label(const Link& link) const;   
+			boost::shared_ptr<ui::MenuContainer> menu_container_;
+			std::stack<boost::weak_ptr<class LuaPlugin> > extensions_view_stack_;
+			boost::shared_ptr<CWnd> m_luaWndView;
 		public:      
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);

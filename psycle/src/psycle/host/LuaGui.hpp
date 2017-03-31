@@ -2716,9 +2716,8 @@ class LuaScrollBarBind : public LuaWindowBind<T> {
     B::setmethods(L);
     static const luaL_Reg methods[] = {
       {"new", create},
-      // {"setpos", setposition},
-      {"setscrollpos", setscrollposition},
-      {"scrollpos", scrollposition},
+      {"setscrollposition", setscrollposition},
+      {"scrollposition", scrollposition},
       {"setscrollrange", setscrollrange},
       {"scrollrange", scrollrange},
       {"systemsize", systemsize},
