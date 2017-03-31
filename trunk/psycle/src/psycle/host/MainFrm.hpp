@@ -97,8 +97,7 @@ namespace psycle { namespace host {
 			void UpdateSequencer(int bottom = -1);
       
 			
-			CChildView  m_wndView;
-      boost::shared_ptr<CWnd> m_luaWndView;
+			CChildView  m_wndView;      
 			//CRebar      m_rebar;
 			CToolBar    m_wndToolBar;
 			CBitmap     m_tbBm;
@@ -138,7 +137,7 @@ namespace psycle { namespace host {
 			afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 			afx_msg void OnDestroy();
 			afx_msg void OnDropFiles(HDROP hDropInfo);
-      afx_msg void OnSize(UINT nType, int cx, int cy);
+
 //SongBar start
 			afx_msg void OnSelchangeTrackcombo();
 			afx_msg void OnCloseupTrackcombo();

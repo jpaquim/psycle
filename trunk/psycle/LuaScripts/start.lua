@@ -24,4 +24,3 @@ local link = {
 }
 psycle.addmenu("view", link)  
 
-

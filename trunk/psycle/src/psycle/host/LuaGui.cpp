@@ -592,15 +592,17 @@ void LuaWindowBase<T>::set_properties(const ui::Properties& properties) {
   }  
 }
 
-
 template<class T>
 ui::Dimension LuaWindowBase<T>::OnCalcAutoDimension() const {
-  ui::Dimension result; 
+  using namespace ui;
+  Dimension result; 
   LuaImport in(L, (void*) this, locker(L));
   try {
     if (in.open("oncalcautodimension")) {     
-      in.pcall(2);
-      result.set(luaL_checknumber(L, -1), luaL_checknumber(L, -2));
+      in.pcall(1);
+	  Dimension::Ptr dimension =
+        LuaHelper::check_sptr<Dimension>(L, -1, LuaDimensionBind::meta);
+      result = *dimension.get();
     } else {
       result = T::OnCalcAutoDimension();
     }
@@ -1832,9 +1834,9 @@ int LuaDimensionBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
     {"set", set},
-    {"set_width", setwidth},
+    {"setwidth", setwidth},
     {"width", width},
-    {"set_height", setheight},
+    {"setheight", setheight},
     {"height", height},
     {NULL, NULL}
   };
@@ -2596,11 +2598,16 @@ void LuaComboBox::OnSelect() {
   }
 }
 
-void LuaScrollBar::OnScroll(int pos) {  
-  LuaImport in(L, this, locker(L));
-  if (in.open("onscroll")) {
-    in << pos << pcall(0);
-  }  
+void LuaScrollBar::OnScroll(int pos) {
+  try {
+	  LuaImport in(L, this, locker(L));
+	  if (in.open("onscroll")) {
+	    LuaHelper::find_weakuserdata(L, this);
+        in.pcall(0);		
+	  }  
+  } catch (std::exception& e) {
+    ui::alert(e.what());   
+  }
 }
 
 

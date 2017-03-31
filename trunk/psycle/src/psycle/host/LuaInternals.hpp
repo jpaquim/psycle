@@ -280,8 +280,8 @@ struct LuaActionListenerBind {
     static int spt(lua_State* L);
     static int line(lua_State* L);
     static int rline(lua_State* L);
-    static int playing(lua_State* L);
-    static int ps(lua_State* L);
+    static int playing(lua_State* L);    
+	static int playpattern(lua_State* L);
   };
 
   struct LuaPatternEvent {
@@ -297,11 +297,17 @@ struct LuaActionListenerBind {
       : L(state), data_(data), song_(song) {}
     unsigned char** data() { return data_; }
     inline unsigned char * ptrackline(int ps, int track, int line) {
-			return data_[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
+	  if (!has_pattern(ps)) {
+	    std::stringstream str;
+		str << "Index out of bound error. No pattern at pos " << ps << ".";
+		std::string tmp(str.str());
+	    throw std::runtime_error(tmp.c_str());
 	  }
+	  return data_[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
+	}
     int numlines(int ps) const;
     int numtracks() const;
-
+	bool has_pattern(int ps) const;
    private:
      lua_State* L;
      unsigned char** data_;
@@ -315,14 +321,15 @@ struct LuaActionListenerBind {
     static int pattern(lua_State* L);
     static int settrack(lua_State* L);
     static int track(lua_State* L);
-    static int numtracks(lua_State *L);
-    static int numlines(lua_State *L);
+    static int numtracks(lua_State *L) { LUAEXPORTM(L, meta, &LuaPatternData::numtracks); }
+    static int numlines(lua_State *L) { LUAEXPORTM(L, meta, &LuaPatternData::numlines); }
     static int eventat(lua_State* L);
     static int setevent(lua_State* L);
     static int buildevent(lua_State* L);
     static const char* meta;
     static int createevent(lua_State* L, LuaPatternEvent& ev);
     static int getevent(lua_State* L, int idx, LuaPatternEvent& ev);
+	static int playorder(lua_State* L);
   };
 
    struct LuaSequenceBarBind {

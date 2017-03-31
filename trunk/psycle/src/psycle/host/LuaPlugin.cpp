@@ -92,7 +92,12 @@ namespace psycle { namespace host {
       return;
     }
     if (!do_reload_) {
-      proxy().OnTimer();
+	  try {
+        proxy().OnTimer();
+	  } catch (std::exception& ) {       
+        set_crashed(true);
+		return; 
+      }
     }
     if (do_exit_) {
       HostExtensions::Instance().Remove(this_ptr());

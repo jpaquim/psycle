@@ -210,10 +210,7 @@ namespace psycle { namespace host {
 				TRACE0("Failed to create view window\n");
 				return -1;
 			}
-			m_wndView.ValidateParent();
-      m_luaWndView.reset(new CWnd());
-      m_luaWndView->Create(NULL, NULL, WS_CHILD | WS_VISIBLE, // | WS_EX_COMPOSITED,
-				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST + 1, NULL);     
+			m_wndView.ValidateParent();			    
 
 			// Create Toolbars.
 			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
@@ -259,7 +256,7 @@ namespace psycle { namespace host {
 			{
 				TRACE0("Failed to create status bar\n");
 				return -1;      // fail to create
-			}
+			}			
 
 			// sequence bar (created after status bar since UpdatePlayOrder refreshes the status bar)
 			m_seqBar.InitializeValues(this, &m_wndView, *_pSong);
@@ -1202,16 +1199,6 @@ namespace psycle { namespace host {
 			}
 			return FALSE;
 		}
-
-    void CMainFrame::OnSize(UINT nType, int cx, int cy)
-    {        
-       CFrameWnd::OnSize(nType, cx, cy);
-       if (m_luaWndView && m_luaWndView->IsWindowVisible())
-       {
-         WINDOWPLACEMENT wp = m_wndView.adjusted_child_view_placement();
-         m_luaWndView->SetWindowPlacement(&wp);
-         m_wndView.AlignExtensionChild(m_luaWndView.get());
-       }       
-    }
+   
         
 }}

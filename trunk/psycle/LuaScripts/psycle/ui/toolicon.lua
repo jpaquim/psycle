@@ -274,7 +274,7 @@ function toolicon:text()
 end
 
 function toolicon:oncalcautodimension()
-  return 20, 20
+  return dimension:new(20, 10)
 end
 
 function toolicon:transparent()  
