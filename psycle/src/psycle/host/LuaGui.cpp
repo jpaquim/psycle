@@ -4,10 +4,12 @@
 // #include "stdafx.h"
 #include "LuaGui.hpp"
 #include "LuaHost.hpp"
+#include "Player.hpp"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "MfcUi.hpp"
 
 namespace psycle {
 namespace host {
@@ -359,6 +361,93 @@ void LuaCommand::Execute() {
     ui::alert(e.what());    
   }
 }
+
+void LuaAligner::CalcDimensions() {
+  try {
+    LuaImport in(L, this, locker(L));
+    if (in.open("calcdimensions")) {      
+      in.pcall(0);
+      in.close();      
+    } 
+  } catch (std::exception& e) {
+    ui::alert(e.what());    
+  }
+}
+
+void LuaAligner::SetPositions() {
+	if (group() && group()->size() != 0) {		
+		for (iterator i = begin(); i != end(); ++i) {
+			(*i)->reset_align_dimension_changed();			
+		}
+	}
+
+  try {
+    LuaImport in(L, this, locker(L));
+    if (in.open("setpositions")) {      
+      in.pcall(0);
+      in.close();      
+    } 
+  } catch (std::exception& e) {
+    ui::alert(e.what());    
+  }
+}
+
+//  LuaAlignerBind
+const char* LuaAlignerBind::meta = "psyalignermeta";
+
+int LuaAlignerBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+	{"windows", windows},
+	{"setdimension", setdimension},
+	{"groupdimension", groupdimension},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods,  gc);
+}
+
+int LuaAlignerBind::create(lua_State* L) {
+  using namespace ui;  
+  int n = lua_gettop(L);    
+  if (n != 1) {
+    luaL_error(L, "Aligner create. Wrong number of arguments.");
+  }    
+  LuaHelper::new_shared_userdata<>(L, meta, new LuaAligner(L));
+  return 1;
+}
+
+int LuaAlignerBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<LuaAligner>(L, meta);
+}
+
+int LuaAlignerBind::windows(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<LuaAligner> aligner = LuaHelper::check_sptr<LuaAligner>(L, 1, LuaAlignerBind::meta);
+  lua_newtable(L); // create window table  
+  ui::Window::iterator it = aligner->group()->begin();
+  for (; it != aligner->group()->end(); ++it) {
+    LuaHelper::find_userdata(L, (*it).get());
+    lua_rawseti(L, 2, lua_rawlen(L, 2)+1); // windows[#windows+1] = newwindow
+  }
+  lua_pushvalue(L, 2);
+  return 1;
+}
+
+int LuaAlignerBind::setdimension(lua_State* L) {
+  boost::shared_ptr<LuaAligner> aligner = LuaHelper::check_sptr<LuaAligner>(L, 1, meta);
+  boost::shared_ptr<ui::Dimension> dimension = LuaHelper::check_sptr<ui::Dimension>(L, 2, LuaDimensionBind::meta);
+  aligner->set_dimension(*dimension);    
+  return LuaHelper::chaining(L);
+}
+
+int LuaAlignerBind::groupdimension(lua_State* L) {
+  boost::shared_ptr<LuaAligner> aligner = LuaHelper::check_sptr<LuaAligner>(L, 1, meta);
+  LuaHelper::requirenew<LuaDimensionBind>(L, "psycle.ui.dimension",
+      new ui::Dimension(aligner->group()->dim()));
+  return 1;
+}
+
 
 //  LuaCenterShowStrategyBind
 const char* LuaFrameAlignerBind::meta = "psyframealignermeta";
@@ -1367,6 +1456,7 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"setfill", setfill},
     {"setstroke", setstroke},
     {"color", color},
+	{"plot", plot},
     {"drawline", drawline},
     {"drawcurve", drawcurve},
     {"drawarc", drawarc},    
@@ -1565,6 +1655,27 @@ int LuaGraphicsBind::drawimage(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+int LuaGraphicsBind::plot(lua_State *L) {
+    int n = lua_gettop(L);
+	using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+	PSArray* y = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);		
+	double zoom = 1;
+	if (n==3) {
+	  zoom = luaL_checknumber(L, 3);
+	}
+	int num = y->len();
+	if (num > 0) {
+		g->MoveTo(Point(0, y->get_val(0)));	
+		int xl = 0;
+		int step = 1;
+		for (int x = 1; x < num; x = x + step, ++xl) {
+		  g->LineTo(Point(xl * zoom, y->get_val(x)));
+		}
+	}
+	return LuaHelper::chaining(L);
+}
+
 // LuaRun + Bind
 void LuaRun::Run() {  
   LuaImport in(L, this, 0);  
@@ -1618,8 +1729,231 @@ void LuaWindow::Draw(ui::Graphics* g, ui::Region& draw_rgn) {
     LuaHelper::requirenew<LuaGraphicsBind>(L, "psycle.ui.canvas.graphics", g, true);
     LuaHelper::requirenew<LuaRegionBind>(L, "psycle.ui.region", &draw_rgn, true);
     in.pcall(0);    
-    LuaHelper::collect_full_garbage(L);
+//    LuaHelper::collect_full_garbage(L);
   }
+}
+
+// LuaScopeWindow
+
+LuaScopeWindow::LuaScopeWindow(lua_State* L) : LuaWindow(L), scope_width_(88), scope_height_(50), scale_x_(10), scope_mid_(25), clip_(false), hold(false) {
+	for(int c=0; c<MAX_MACHINES; ++c) {
+		scope_memories_.push_back(boost::shared_ptr<ScopeMemory>());
+	}  
+	add_ornament(ui::Ornament::Ptr(ui::OrnamentFactory::Instance().CreateFill(0xFF232323)));
+	ViewDoubleBuffered();
+	scope_peak_rate = 20;
+	scope_osc_freq = 14;
+	scope_osc_rate = 20;
+	scope_spec_rate = 20;
+	scope_spec_mode = 2;
+	scope_spec_samples = 2048;
+	scope_phase_rate = 20;
+	StartTimer();
+}
+
+void LuaScopeWindow::Draw(ui::Graphics* g, ui::Region& draw_rgn) {    
+  using namespace ui;  
+  g->set_color(0xFFFFFFFF);  
+  Song& song = Global::song();
+  double y = 0;
+  double x = 0;  
+  for(int c=0; c<MAX_MACHINES; ++c) {	
+    Machine* mac = song._pMachine[c];
+	if (mac) {	  
+	  if (!mac->HasScopeMemories()) {	    
+		scope_memories_[c] = boost::shared_ptr<ScopeMemory>(new ScopeMemory());
+        mac->AddScopeMemory(scope_memories_[c]);  
+	  }	  
+	  DrawScope(g, x, y, mac);	  	  
+	  x += scope_width_;
+	  if (x >= position().width()) {
+	    x = 0;
+		y += scope_height_;
+	  } 
+	 }
+  }
+  g->set_color(0xFF666666);
+  g->DrawLine(Point(0, scope_height_),  Point(position().width(),scope_height_));
+}
+
+const COLORREF CLBARDC =   0x1010DC;
+const COLORREF CLBARPEAK = 0xC0C0C0;
+const COLORREF CLLEFT =    0xC06060;
+const COLORREF CLRIGHT =   0x60C060;
+const COLORREF CLBOTH =    0xC0C060;
+
+void LuaScopeWindow::DrawScope(ui::Graphics* g, double x, double y, Machine* mac) {    
+	using namespace ui;  
+	char buf[4];
+	sprintf(buf, "%02X:", mac->_macIndex);	
+	g->set_color(0xFFFFFFFF);	  
+	g->DrawString(buf + std::string(mac->GetEditName()), Point(x + 4, y + 10));
+	if (!mac->Mute()) {	    
+	    g->Translate(Point(x, y - scope_height_/2));
+		ScopeMemory& scope_memory = *scope_memories_[mac->_macIndex].get();
+		pSamplesL = scope_memory.samples_left->data();
+		pSamplesR = scope_memory.samples_right->data();	
+	    ui::mfc::GraphicsImp* mfc_dc = (ui::mfc::GraphicsImp*) (g->imp());
+	    CDC& bufDC = *mfc_dc->dev_dc();
+		Machine& srcMachine = *mac;
+		float invol = 1.0f;
+		float mult = 1.0f / srcMachine.GetAudioRange();
+		const int SCOPE_BUF_SIZE = scope_memory.scope_buf_size;
+		// ok this is a little tricky - it chases the wrapping buffer, starting at the last sample 
+		// buffered and working backwards - it does it this way to minimize chances of drawing 
+		// erroneous data across the buffering point
+		// scopeBufferIndex is the position where it will write new data. Pos is the buffer position on Hold.
+		// keeping nOrig, since the buffer can change while we draw it.
+		int nOrig  = (scope_memory.scopeBufferIndex == 0) ? scope_memory.scope_buf_size-scope_memory.pos 
+														  : scope_memory.scopeBufferIndex-scope_memory.pos;
+		if (nOrig < 0.f) { nOrig+=scope_memory.scope_buf_size; }
+		// osc_freq range 5..100, freq range 12..5K
+		float num_samples = (float) scope_width_;
+		const int freq = (scope_osc_freq*scope_osc_freq)>>1;
+		const float add = (float(Global::player().SampleRate())/float(freq))/num_samples;
+		const float multleft= invol*mult *srcMachine._lVol;
+		const float multright= invol*mult *srcMachine._rVol;
+
+		int sizey = scope_height_;
+
+		RECT rect = {0,0,1,0};
+		float n=nOrig;
+		for (int x = static_cast<int>(num_samples); x >= 0; x--, rect.left += 1, rect.right += 1) {		    
+			n -= add;
+			if (n < 0.f) { n+=SCOPE_BUF_SIZE; }							
+			int aml = GetY(resampler.work_float(pSamplesL,n,SCOPE_BUF_SIZE, NULL,pSamplesL, pSamplesL+SCOPE_BUF_SIZE-1),multleft);
+			int amr = GetY(resampler.work_float(pSamplesR,n,SCOPE_BUF_SIZE, NULL,pSamplesR, pSamplesR+SCOPE_BUF_SIZE-1),multright);
+			int smaller, bigger, halfbottom, bottompeak;
+			COLORREF colourtop, colourbottom;
+			if (aml < amr) { smaller=aml; bigger=amr; colourtop=CLLEFT; colourbottom=CLRIGHT; }
+			else {			smaller=amr; bigger=aml; colourtop=CLRIGHT; colourbottom=CLLEFT; }
+			if (smaller < sizey ){
+				rect.top=smaller;
+				if (bigger < sizey) {
+					rect.bottom=bigger;
+					halfbottom=bottompeak=sizey;
+				}
+				else {
+					rect.bottom=halfbottom=sizey;
+					bottompeak=bigger;
+				}
+			}
+			else {
+				rect.top=rect.bottom=sizey;
+				halfbottom=smaller;
+				bottompeak=bigger;
+			}
+			if (x % 2 == 0) { // raster scope				
+				bufDC.FillSolidRect(&rect,colourtop);
+				rect.top = rect.bottom;
+				rect.bottom = halfbottom;
+				bufDC.FillSolidRect(&rect,CLBOTH);
+				rect.top = rect.bottom;
+				rect.bottom = bottompeak;
+				bufDC.FillSolidRect(&rect,colourbottom);
+			}
+		}
+		// red line if last frame was clipping
+		if (clip_)
+		{
+			RECT rect = {0,32,256,34};
+			bufDC.FillSolidRect(&rect,0x00202040);
+			rect.top = sizey + 31;
+			rect.bottom = rect.top+2;
+			bufDC.FillSolidRect(&rect,0x00202040);
+			rect.top = sizey-4;
+			rect.bottom = rect.top+8;
+			bufDC.FillSolidRect(&rect,0x00202050);
+			rect.top = sizey-2;
+			rect.bottom = rect.top+4;
+			bufDC.FillSolidRect(&rect,0x00101080);
+			clip_ = FALSE;
+		}
+		scope_memory.pos = 1;
+		g->Translate(Point(-x, -y + scope_height_/2));
+	} else {		
+		ui::Dimension text_dimension = g->text_dimension("Muted");
+		Point center = Point(x + (scope_width_ - text_dimension.width()) / 2,
+							 y + (scope_height_ - text_dimension.height()) / 2);
+		g->set_color(0xFFFFD24D);
+		g->DrawString("Muted", center);
+	}
+	g->set_color(0xFF666666);
+	g->DrawLine(Point(x + scope_width_, 0),  Point(x + scope_width_, y + scope_height_));
+}
+
+int LuaScopeWindow::GetY(float f, float mult) {	
+	f=scope_height_-(f*scope_height_*mult);
+	if (f < 1.f)  {
+		clip_ = TRUE;
+		return 1;
+	} else if (f > scope_height_*2) {
+		clip_ = TRUE;
+		return 2*scope_height_;
+	}
+	return int(f);
+}
+
+void LuaScopeWindow::OnSize(const ui::Dimension& dimension) {    
+  MachineGroup* machine_group = Global::song().machines_.get();
+  int mac_num = machine_group->size();
+  if ((mac_num % 2) != 0) {
+      mac_num++;
+  }
+  scope_width_ = dimension.width() / mac_num * 2;
+  scope_height_ = dimension.height() / 2;
+  scope_mid_ = scope_height_ / 2;
+  scale_x_ = 880 / scope_width_;
+}
+
+void LuaScopeWindow::OnTimerViewRefresh() {
+  FLS();
+}
+
+void LuaScopeWindow::OnMouseDown(ui::MouseEvent& ev) {
+  ui::Point pt = ev.client_pos() - absolute_position().top_left();
+  Machine* machine = HitTest(pt);
+  if (machine) {
+	if (ev.button() == 1) {	  	  	  
+	  machine->Mute(!machine->Mute());
+	} else {
+		Song& song = Global::song();
+		bool mute(true);
+		if (machine->Mute()) {		  
+		  mute = !machine->Mute();		  
+		}
+		for(int c=0; c<MAX_MACHINES; ++c) {  
+			if (c != 128 && machine->_macIndex != c) {
+				Machine* mac = song._pMachine[c];     
+				if (mac) {
+					mac->Mute(mute);
+				}
+			}
+		}
+	}
+  }
+  HostExtensions::Instance().FlsMain();
+}
+
+Machine* LuaScopeWindow::HitTest(const ui::Point& pos) const {
+  Song& song = Global::song();
+  Machine* result(0);
+  int offset = position().width() / scope_width_;
+  int col = pos.x() / scope_width_;
+  int row = pos.y() / scope_height_;  
+  int scope_idx = offset*row + col;
+  int n(0);
+  for(int c=0; c<MAX_MACHINES; ++c) {	
+    Machine* mac = song._pMachine[c];
+	if (mac) {
+	 if (n == scope_idx) {
+	   result = mac;
+	   break;
+	 }
+	 ++n;
+	}
+  }
+  return result;
 }
 
 // LuaImageBind
@@ -1870,10 +2204,15 @@ int LuaUiRectBind::open(lua_State *L) {
     {"new", create},
 	{"setleft", setleft},
     {"left", left},
+	{"settop", settop},
     {"top", top},
+	{"setright", setright},
     {"right", right},
+	{"setbottom", setbottom},
     {"bottom", bottom},
+	{"setwidth", setwidth},
     {"width", width},
+	{"setheight", setheight},
     {"height", height},
     {"topleft", topleft},
     {"bottomright", bottomright},
@@ -2052,7 +2391,7 @@ int LuaKeyEventBind::open(lua_State *L) {
     {"ispropagationstopped", ispropagationstopped},
     {NULL, NULL}
   };  
-  LuaHelper::open(L, meta, methods,  gc);        
+  LuaHelper::open(L, meta, methods,  gc);
   return 1;
 }
 
@@ -2633,7 +2972,18 @@ int LuaRegionBind::open(lua_State *L) {
 }
 
 int LuaRegionBind::create(lua_State* L) {
-  LuaHelper::new_shared_userdata<>(L, meta, ui::Systems::instance().CreateRegion());  
+  ui::Region* region(0);
+  int n = lua_gettop(L);
+  if (n == 1) {
+    region = new ui::Region();
+  } else
+  if (n == 2) {
+    boost::shared_ptr<ui::Region> src = LuaHelper::check_sptr<ui::Region>(L, 2, meta);
+	region = new ui::Region(*(src.get()));
+  } else {
+    luaL_error(L, "Wrong number of arguments.");
+  }
+  LuaHelper::new_shared_userdata<>(L, meta, region);
   return 1;
 }
 

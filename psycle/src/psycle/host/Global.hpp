@@ -78,7 +78,9 @@ namespace psycle
       virtual void OnReplaceHelpMenu(class Link& link, int pos) {}
       virtual void OnAddWindowsMenu(class Link& link) {}
       virtual void OnRemoveWindowsMenu(class LuaPlugin* plugin) {}
-      virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin) {}     
+      virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin) {}   
+	  virtual void OnExecuteLink(class Link& Link) {}
+	  virtual void OnFlsMain() {}  
     };
  
 	} // host

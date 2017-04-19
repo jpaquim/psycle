@@ -630,19 +630,15 @@ void LuaMachine::set_title(const std::string& title) {
   }
 }
 
-void LuaMachine::OnMachineCreate(Machine& machine) {
-	try {
-		LuaImport in(L, this, LuaGlobal::proxy(L));
-		if (in.open("onmachinecreate")) {
-			LuaMachine* lua_machine = new LuaMachine(L);
-			lua_machine->set_mac(&machine);
-			LuaHelper::requirenew<LuaMachineBind>(L, "psycle.machine", lua_machine);
-			LuaMachineBind::createparams(L, lua_machine);
-			in << pcall(0);
-		}
-	}  catch (std::exception& e) {
-		ui::alert(e.what());   
-	}
+void LuaMachine::OnMachineCreate(Machine& machine) {	
+	LuaImport in(L, this, LuaGlobal::proxy(L));
+	if (in.open("onmachinecreate")) {
+		LuaMachine* lua_machine = new LuaMachine(L);
+		lua_machine->set_mac(&machine);
+		LuaHelper::requirenew<LuaMachineBind>(L, "psycle.machine", lua_machine);
+		LuaMachineBind::createparams(L, lua_machine);
+		in << pcall(0);
+	}	
 }
 
 void LuaMachine::BeforeMachineDelete(Machine& machine) {
@@ -650,14 +646,17 @@ void LuaMachine::BeforeMachineDelete(Machine& machine) {
 		LuaImport in(L, this, LuaGlobal::proxy(L));
 		if (in.open("beforemachinedelete")) {
 			LuaMachine* lua_machine = new LuaMachine(L);
-			lua_machine->set_mac(&machine);
+			lua_machine->set_mac(&machine);			
 			LuaHelper::requirenew<LuaMachineBind>(L, "psycle.machine", lua_machine);
 			LuaMachineBind::createparams(L, lua_machine);
 			in << pcall(0);
+			lua_machine->set_mac(0);					 
 		}
 	}  catch (std::exception& e) {
-		ui::alert(e.what());   
+	    LuaHelper::collect_full_garbage(L);
+		throw std::runtime_error(e.what());
 	}
+	LuaHelper::collect_full_garbage(L);
 }
 
 int LuaCmdDefBind::keytocmd(lua_State* L) {
@@ -705,7 +704,7 @@ int LuaActionListenerBind::open(lua_State *L) {
   LuaHelper::open(L, meta, methods,  gc);
   static const char* const e[] = {
     "TPB", "BPM", "TRKNUM", "PLAY", "PLAYSTART", "PLAYSEQ", "STOP", "REC",
-    "SEQSEL", "SEQFOLLOWSONG"
+    "SEQSEL", "SEQMODIFIED", "SEQFOLLOWSONG"
   };
   LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]), 1);
   return 1;
@@ -721,6 +720,53 @@ int LuaActionListenerBind::gc(lua_State* L) {
   T listener = *(T *)luaL_checkudata(L, 1, meta);
   PsycleGlobal::actionHandler().RemoveListener(listener.get());
   return LuaHelper::delete_shared_userdata<LuaActionListener>(L, meta);
+}
+
+
+const char* LuaScopeMemoryBind::meta = "psyscopemeta";
+
+int LuaScopeMemoryBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+	{"channel", channel},
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods,  gc);  
+  return 1;
+}
+
+int LuaScopeMemoryBind::create(lua_State *L) {
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected 1 (self)", n);
+  }  
+  LuaHelper::new_shared_userdata<ScopeMemory>(L, meta, new ScopeMemory());
+  return 1;
+}
+
+int LuaScopeMemoryBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ScopeMemory>(L, meta);
+}
+
+int LuaScopeMemoryBind::channel(lua_State* L) {
+  int n = lua_gettop(L);
+  if (n == 2) {
+    boost::shared_ptr<ScopeMemory> scope_memory = LuaHelper::check_sptr<ScopeMemory>(L, 1, meta);
+    int idx = luaL_checknumber(L, 2);
+    PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));  
+	if (idx == 0)  {
+      *udata = new PSArray(scope_memory->samples_left->data(), scope_memory->samples_left->len());
+	} else
+	if (idx == 1)  {
+	  *udata = new PSArray(scope_memory->samples_right->data(), scope_memory->samples_right->len());
+	} else {
+	  luaL_error(L, "Wrong channel index. Only stereo so far supported.");
+	}
+    luaL_setmetatable(L, LuaArrayBind::meta);
+  }  else {
+    luaL_error(L, "Got %d arguments expected 2 (self, index)", n);
+  }
+  return 1;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -768,6 +814,10 @@ int LuaMachineBind::open(lua_State *L) {
 	{"insert", insert},
 	{"muted", muted},
 	{"at", at},
+	{"buildbuffer", buildbuffer},
+	{"addscopememory", addscopememory},
+	{"index", index},
+	{"audiorange", audiorange},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -1071,6 +1121,26 @@ int LuaMachineBind::channel(lua_State* L) {
   return 1;
 }
 
+int LuaMachineBind::buildbuffer(lua_State* L) {
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  plugin->build_buffer(plugin->mac()->samplesV, 256);
+  return LuaHelper::chaining(L);
+}
+
+int LuaMachineBind::addscopememory(lua_State* L) {
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  boost::shared_ptr<ScopeMemory> scope_memory = LuaHelper::check_sptr<ScopeMemory>(L, 2, LuaScopeMemoryBind::meta);
+  plugin->mac()->AddScopeMemory(scope_memory);
+  return LuaHelper::chaining(L);
+}
+
+int LuaMachineBind::audiorange(lua_State* L) {
+  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  float audio_range = plugin->mac()->GetAudioRange();
+  lua_pushnumber(L, audio_range);
+  return 1;
+}
+
 int LuaMachineBind::getparam(lua_State* L) {
   int n = lua_gettop(L);
   if (n == 2) {
@@ -1188,13 +1258,8 @@ int LuaMachineBind::setviewport(lua_State* L) {
 }
 
 int LuaMachineBind::toggleviewport(lua_State* L) {
-  LuaMachine::Ptr plugin = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
-  /*if (!lua_isnil(L, 2)) {
-    LuaCanvas::Ptr canvas = LuaHelper::check_sptr<LuaCanvas>(L, 2, LuaCanvasBind<>::meta);
-    plugin->set_canvas(canvas);
-  } else {*/
-  plugin->ToggleViewPort(); // set_canvas(boost::weak_ptr<ui::Canvas>());
-  //}
+  LuaMachine::Ptr machine = LuaHelper::check_sptr<LuaMachine>(L, 1, meta);
+  machine->ToggleViewPort();
   return LuaHelper::chaining(L);
 }
 
@@ -1302,6 +1367,7 @@ int LuaPlayerBind::open(lua_State *L) {
     {"line", line},
     {"playing", playing},
 	{"playpattern", playpattern},
+	{"setplayline", setplayline},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods, gc);
@@ -1354,6 +1420,13 @@ int LuaPlayerBind::line(lua_State* L) {
   boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
   lua_pushnumber(L, p->_lineCounter);
   return 1;
+}
+
+int LuaPlayerBind::setplayline(lua_State* L) {
+  boost::shared_ptr<Player> player = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int val = luaL_checkinteger(L, 2);
+  player->_lineCounter = val;
+  return LuaHelper::chaining(L);
 }
 
 int LuaPlayerBind::playpattern(lua_State* L) {
@@ -2468,9 +2541,25 @@ int LuaFileHelper::filetree(lua_State* L) {
 }
 
 // MidiHelperBind
+const char* gm_percusssion_names[]=
+    {"Acoustic Bass Drum","Bass Drum 1","Side Stick","Acoustic Snare",
+      "Hand Clap","Electric Snare","Low Floor Tom","Closed Hi Hat",
+      "High Floor Tom","Pedal Hi-Hat","Low Tom","Open Hi-Hat",
+      "Low-Mid Tom", "Hi Mid Tom", "Crash Cymbal 1", "High Tom",
+      "Ride Cymbal 1", "Chinese Cymbal", "Ride Bell", "Tambourine",
+      "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibraslap",
+      "Ride Cymbal 2", "Hi Bongo", "Low Bongo", "Mute Hi Conga",
+      "Open Hi Conga", "Low Bongo", "Mute Hi Conga", "Open Hi Conga",
+      "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo",
+      "Cabasa", "Maracas", "Short Whistle", "Long Whistle", "Short Guiro",
+      "Long Guiro", "Claves", "Hi Wood Block", "Low Wood Block",
+      "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle"
+    };
+
 int LuaMidiHelper::open(lua_State *L) {
   static const luaL_Reg funcs[] = {
     {"notename", notename},
+	{"gmpercussionname", gmpercussionname},
     {"gmpercussionnames", gmpercussionnames},
     {"combine", combine},
     {NULL, NULL}
@@ -2493,26 +2582,18 @@ int LuaMidiHelper::notename(lua_State* L) {
   return 1;
 }
 
-int LuaMidiHelper::gmpercussionnames(lua_State* L) {
-  const char* names[]=
-    {"Acoustic Bass Drum","Bass Drum 1","Side Stick","Acoustic Snare",
-      "Hand Clap","Electric Snare","Low Floor Tom","Closed Hi Hat",
-      "High Floor Tom","Pedal Hi-Hat","Low Tom","Open Hi-Hat",
-      "Low-Mid Tom", "Hi Mid Tom", "Crash Cymbal 1", "High Tom",
-      "Ride Cymbal 1", "Chinese Cymbal", "Ride Bell", "Tambourine",
-      "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibraslap",
-      "Ride Cymbal 2", "Hi Bongo", "Low Bongo", "Mute Hi Conga",
-      "Open Hi Conga", "Low Bongo", "Mute Hi Conga", "Open Hi Conga",
-      "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo",
-      "Cabasa", "Maracas", "Short Whistle", "Long Whistle", "Short Guiro",
-      "Long Guiro", "Claves", "Hi Wood Block", "Low Wood Block",
-      "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle"
-    };
+int LuaMidiHelper::gmpercussionnames(lua_State* L) {  
   lua_createtable(L, 127, 0);
-  for (int i = 1; i<128; ++i) {
-    lua_pushstring(L, i>34 && i<82 ? names[i-35] : "");
+  for (int i = 1; i < 128; ++i) {
+    lua_pushstring(L, i > 34 && i < 82 ? gm_percusssion_names[i - 35] : "");
     lua_rawseti(L, -2, i);
   }
+  return 1;
+}
+
+int LuaMidiHelper::gmpercussionname(lua_State* L) { 
+  int note = luaL_checknumber(L, 1); 
+  lua_pushstring(L, note > 34 && note < 82 ? gm_percusssion_names[note - 35] : "");
   return 1;
 }
 

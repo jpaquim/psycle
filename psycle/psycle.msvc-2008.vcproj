@@ -683,6 +683,14 @@
 					RelativePath="src\psycle\host\ChildView.hpp"
 					>
 				</File>
+        <File
+					RelativePath="src\psycle\host\ExtensionBar.cpp"
+					>
+				</File>
+				<File
+					RelativePath="src\psycle\host\ExtensionBar.hpp"
+					>
+				</File>
 				<File
 					RelativePath="src\psycle\host\ExclusiveLock.cpp"
 					>

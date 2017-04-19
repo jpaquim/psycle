@@ -2754,10 +2754,10 @@ class ImpFactory : public ui::ImpFactory {
   virtual bool DestroyWindowImp(ui::WindowImp* imp) {
     if (imp) {    
       CWnd* wnd = (CWnd*) imp;
-      if (::IsWindow(wnd->m_hWnd)) { 
-        wnd->DestroyWindow();
-        return true;
-      }
+      if (IsWindow(wnd->m_hWnd)) { 
+        wnd->DestroyWindow();        
+		return true;
+      }	  
     }
     return false;     
   }

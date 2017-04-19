@@ -269,6 +269,7 @@ function mainviewport:createfileexplorer()
 end
 
 function mainviewport:setoutputtext(text)
+  self.output:clearall()
   self.output:addtext(text)  
 end
 
@@ -486,8 +487,8 @@ function mainviewport:createinstanceselect(parent)
   self.cbx = combobox:new(parent)
                      :setautosize(false, false)
                      :setposition(rect:new(point:new(0, 0), dimension:new(150, 0)))
-           :setalign(alignstyle.LEFT)
-           :setmargin(boxspace:new(10))
+                     :setalign(alignstyle.LEFT)
+                     :setmargin(boxspace:new(10))
   local that = self
   function self.cbx:onselect()    
     local pluginindex = that.cbxtopluginindex[self:itemindex()]

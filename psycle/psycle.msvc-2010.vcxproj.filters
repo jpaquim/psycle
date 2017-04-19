@@ -541,6 +541,9 @@
     <ClInclude Include="src\psycle\host\ParamMap.hpp">
       <Filter>psycle\mfc\machine</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\ExtensionBar.hpp">
+      <Filter>psycle\mfc\toolbars</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">
@@ -920,6 +923,9 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\ParamMap.cpp">
       <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ExtensionBar.cpp">
+      <Filter>psycle\mfc\toolbars</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

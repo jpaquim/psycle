@@ -491,6 +491,8 @@ namespace host {
 			virtual void OnReplaceHelpMenu(class Link& link, int pos);
 			virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin);
 			virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
+			virtual void OnExecuteLink(class Link& Link);
+			virtual void OnFlsMain() { Repaint(); }
 		private:
 			void ShowExtensionMenu(LuaPlugin& plugin);
 			void HideExtensionMenu();
@@ -639,9 +641,9 @@ namespace host {
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
-      afx_msg void OnDynamicMenuItems(UINT nID);  
+			afx_msg void OnDynamicMenuItems(UINT nID);  
       
-};
+		};
 
 
 		/////////////////////////////////////////////////////////////////////////////

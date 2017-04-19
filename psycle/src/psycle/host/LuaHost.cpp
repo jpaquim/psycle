@@ -104,10 +104,16 @@ void LuaControl::PrepareState() {
   lua_setfield(L, -2, "CHILDVIEWPORT");
   lua_pushinteger(L, FRAMEVIEWPORT);
   lua_setfield(L, -2, "FRAMEVIEWPORT");
+  lua_pushinteger(L, TOOLBARVIEWPORT);
+  lua_setfield(L, -2, "TOOLBARVIEWPORT");
   lua_pushinteger(L, MDI);
   lua_setfield(L, -2, "MDI");
   lua_pushinteger(L, SDI);
   lua_setfield(L, -2, "SDI");
+  lua_pushinteger(L, CREATELAZY);
+  lua_setfield(L, -2, "CREATELAZY");
+  lua_pushinteger(L, CREATEATSTART);
+  lua_setfield(L, -2, "CREATEATSTART");
   lua_newtable(L); // table for canvasdata
   lua_setfield(L, -2, "userdata");
   lua_newtable(L); // table for canvasdata
@@ -231,7 +237,7 @@ void LuaStarter::PrepareState() {
     {"addextension", addextension},
     {"output", LuaProxy::terminal_output},
     {"alert", LuaProxy::alert},
-    {"confirm", LuaProxy::confirm},   
+    {"confirm", LuaProxy::confirm},	
     {NULL, NULL}
   };
   lua_newtable(L);
@@ -247,10 +253,16 @@ void LuaStarter::PrepareState() {
   lua_setfield(L, -2, "CHILDVIEWPORT");
   lua_pushinteger(L, FRAMEVIEWPORT);
   lua_setfield(L, -2, "FRAMEVIEWPORT");
+  lua_pushinteger(L, TOOLBARVIEWPORT);
+  lua_setfield(L, -2, "TOOLBARVIEWPORT");
   lua_pushinteger(L, MDI);
   lua_setfield(L, -2, "MDI");
   lua_pushinteger(L, SDI);
   lua_setfield(L, -2, "SDI");
+  lua_pushinteger(L, CREATELAZY);
+  lua_setfield(L, -2, "CREATELAZY");
+  lua_pushinteger(L, CREATEATSTART);
+  lua_setfield(L, -2, "CREATEATSTART");
   lua_newtable(L); // table for canvasdata
   lua_setfield(L, -2, "userdata");
   lua_newtable(L); // table for canvasdata
@@ -268,7 +280,7 @@ int LuaStarter::addmenu(lua_State* L) {
   lua_getfield(L, 2, "plugin");
   lua_getfield(L, 2, "label");    
   lua_getfield(L, 2, "viewport");
-  lua_getfield(L, 2, "userinterface");
+  lua_getfield(L, 2, "userinterface");  
 
   LuaPluginPtr plugin = LuaHelper::test_sptr<LuaPlugin>(L, -4, LuaPluginBind::meta);
   std::string plugin_name = !plugin ? luaL_checkstring(L, -4) : "test";  
@@ -280,7 +292,7 @@ int LuaStarter::addmenu(lua_State* L) {
   if (plugin) {
     link.plugin = plugin;
     plugin->proxy().set_userinterface(link.user_interface());
-	  plugin->Init();
+	plugin->Init();
     plugin->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, &host_extensions,  _1, _2));     
     if (link.user_interface() == MDI) {
       host_extensions.AddToWindowsMenu(link); 
@@ -292,6 +304,14 @@ int LuaStarter::addmenu(lua_State* L) {
   if (menu_name == "help") {
     host_extensions.AddHelpMenu(link);
   }
+  lua_getfield(L, 2, "creation");  
+  if (!lua_isnil(L, -1)) {
+    int mode = luaL_checkinteger(L, -1);
+	if (mode == CREATEATSTART) {
+	  host_extensions.OnExecuteLink(link);
+	}
+  }
+  lua_pop(L, 1);
   return 0;
 }
 
@@ -356,6 +376,7 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     is_meta_cache_updated_(false),
     lua_mac_(0),
     user_interface_(SDI),
+	default_viewport_mode_(CHILDVIEWPORT),
     clock_(0) {     
   Load(dllname);
 }
@@ -427,6 +448,7 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaPluginCatcherBind>(L, "psycle.plugincatcher");  
   // sound engine
   LuaHelper::require<LuaArrayBind>(L, "psycle.array");
+  LuaHelper::require<LuaScopeMemoryBind>(L, "psycle.scopememory");
   LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");  
   LuaHelper::require<LuaMachineBind>(L, "psycle.machine");  
   // LuaHelper::require<LuaMachinesBind>(L, "psycle.machines");
@@ -468,8 +490,8 @@ void LuaProxy::Reload() {
     lua_State* old_state = L;
     LuaMachine* old_machine = lua_mac_;    
     try {
-      int oldviewportmode = 
-      frame_ && !viewport().expired() ? FRAMEVIEWPORT : CHILDVIEWPORT;     
+      int oldviewportmode = frame_ && !viewport().expired() ? FRAMEVIEWPORT 
+															: default_viewport_mode();     
       RemoveCanvasFromFrame();      
       L = LuaGlobal::load_script(host_->GetDllName());          
       PrepareState();
@@ -486,7 +508,7 @@ void LuaProxy::Reload() {
       }
       assert(host_);
       UpdateFrameCanvas();
-      if (oldviewportmode == CHILDVIEWPORT) {
+      if (oldviewportmode != FRAMEVIEWPORT) {
         host_->ViewPortChanged(*host_, oldviewportmode);      
       }
       OnActivated(2);            
@@ -521,6 +543,11 @@ int LuaProxy::alert(lua_State* L) {
     const char* msg = luaL_checkstring(L, 1);  
     ui::alert(msg);
   }
+  return 0;
+}
+
+int LuaProxy::flsmain(lua_State* L) {
+  HostExtensions::Instance().FlsMain();
   return 0;
 }
 
@@ -634,6 +661,7 @@ void LuaProxy::ExportCFunctions() {
     {"setsetting", setsetting},
     {"setting", setting},
     {"reloadstartscript", reloadstartscript}, 
+	{"flsmain", flsmain},
     {NULL, NULL}
   };
   lua_newtable(L);
@@ -650,10 +678,16 @@ void LuaProxy::ExportCFunctions() {
   lua_setfield(L, -2, "CHILDVIEWPORT");
   lua_pushinteger(L, FRAMEVIEWPORT);
   lua_setfield(L, -2, "FRAMEVIEWPORT");
+  lua_pushinteger(L, TOOLBARVIEWPORT);
+  lua_setfield(L, -2, "TOOLBARVIEWPORT");
   lua_pushinteger(L, MDI);
   lua_setfield(L, -2, "MDI");
   lua_pushinteger(L, SDI);
   lua_setfield(L, -2, "SDI");
+  lua_pushinteger(L, CREATELAZY);
+  lua_setfield(L, -2, "CREATELAZY");
+  lua_pushinteger(L, CREATEATSTART);
+  lua_setfield(L, -2, "CREATEATSTART");
 
   lua_newtable(L); // table for canvasdata
   lua_setfield(L, -2, "userdata");
@@ -1268,6 +1302,10 @@ std::vector<std::string> HostExtensions::search_auto_install() {
   return result;
 }
 
+void HostExtensions::OnExecuteLink(Link& link) {
+  child_view_->OnExecuteLink(link);  
+}
+
 void HostExtensions::AddViewMenu(Link& link) {
   child_view_->OnAddViewMenu(link);  
 }
@@ -1306,17 +1344,25 @@ void HostExtensions::RemoveFromWindowsMenu(LuaPlugin* plugin) {
 }
 
 LuaPluginPtr HostExtensions::Execute(Link& link) {
-  std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
-  LuaPluginPtr mac(new LuaPlugin(script_path + "\\" + link.dll_name().c_str(), -1));
-  mac->proxy().set_userinterface(link.user_interface());
+	std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
+	LuaPluginPtr mac(new LuaPlugin(script_path + "\\" + link.dll_name().c_str(), -1));
+	mac->proxy().set_userinterface(link.user_interface());
+	mac->proxy().set_default_viewport_mode(link.viewport());
 	mac->Init();			
-  Add(mac); 
-  mac->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, this,  _1, _2));  
-  link.plugin = mac;
-  if (link.user_interface() == MDI) {
-    AddToWindowsMenu(link); 
-  }
-  return mac;
+	Add(mac); 
+	mac->ViewPortChanged.connect(boost::bind(&HostExtensions::OnPluginViewPortChanged, this,  _1, _2));  
+	link.plugin = mac;
+	if (link.user_interface() == MDI) {
+		AddToWindowsMenu(link); 
+	}
+	if (link.viewport() == TOOLBARVIEWPORT) {
+		has_toolbar_extension_ = true;
+	}
+	return mac;
+}
+
+void HostExtensions::FlsMain() {
+   child_view_->OnFlsMain();
 }
 
 void HostExtensions::OnPluginViewPortChanged(LuaPlugin& plugin, int viewport) {
@@ -1329,6 +1375,10 @@ void HostExtensions::HideActiveLua() {
     active_lua_->OnDeactivated();
   }
   active_lua_ = 0;
+}
+
+bool HostExtensions::HasToolBarExtension() const {
+  return has_toolbar_extension_;
 }
 
 void HostExtensions::Free() {

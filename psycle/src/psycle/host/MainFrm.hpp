@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "ChildView.hpp"
+#include "ExtensionBar.hpp"
 #include "SequenceBar.hpp"
 #include "SongBar.hpp"
 #include "MachineBar.hpp"
@@ -106,6 +107,7 @@ namespace psycle { namespace host {
 			SongBar		m_songBar;
 			MachineBar	m_machineBar;
 			SequenceBar  m_seqBar;
+			ExtensionBar  m_extensionBar;
 			CStatusBar  m_wndStatusBar;
 			std::string		szStatusIdle;
       int defmainmenuitemcount;

@@ -226,7 +226,7 @@ void DefaultAligner::update_bottom(const Window::Ptr& window) {
 	}
 }
 
-void DefaultAligner::update_client_position(const Window::Ptr& client) {
+void DefaultAligner::update_client_position(const Window::Ptr& client) { 
   calc_non_content_dimension(client);
   adjust_current_pos_client(client);   
 	if (!client->check_position(current_pos_)) {

@@ -276,8 +276,22 @@ namespace psycle
 
 		} LegacyWire;
 		class WireDlg;
-		class Mixer;		
+		class Mixer;
+		class PSArray;
 
+		class ScopeMemory {			
+		public:
+			ScopeMemory();
+			~ScopeMemory();
+												
+			int scope_buf_size;
+			int scopePrevNumSamples;
+			int scopeBufferIndex;
+			int pos;			
+			std::auto_ptr<PSArray> samples_left;
+			std::auto_ptr<PSArray> samples_right;
+		};
+		
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
 		{
@@ -389,8 +403,11 @@ namespace psycle
 
 			///\name the life cycle of a mahine
 			///\{
+				private:
+					void FillScopeBuffer(float* scope_left, float* scope_right, int numSamples,
+										 int& scopePrevNumSamples, int& scopeBufferIndex);
 				public:
-					virtual void Init();
+					virtual void Init();					
 					virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage);
 					virtual int GenerateAudio(int numsamples, bool measure_cpu_usage);
 					virtual int GenerateAudioInTicks(int startSample, int numsamples);
@@ -670,6 +687,13 @@ namespace psycle
 				float *_pScopeBufferL;
 				/// scope buffer, right channel
 				float *_pScopeBufferR;
+
+				void AddScopeMemory(const boost::shared_ptr<ScopeMemory>& scope_memory);
+				void RemoveScopeMemory(const boost::shared_ptr<ScopeMemory>& scope_memory);
+				bool HasScopeMemories() const { return !scope_memories_.empty(); }
+				typedef std::vector<boost::shared_ptr<ScopeMemory> > ScopeMemories;				
+				ScopeMemories scope_memories_;
+
 			///\}
 
 			///\name misc

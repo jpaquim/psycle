@@ -212,7 +212,7 @@ namespace psycle
 			if (pMachine) {
 				pMachine->Init();
 			}
-			machines_->RegisterMachine(pMachine);			
+			machines_->RegisterMachine(pMachine);
 			return pMachine;
 		}
 
@@ -1664,6 +1664,7 @@ namespace psycle
 							{
 								// we had better load it
 								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
+								machines_->RegisterMachine(_pMachine[index]);
 								//Bugfix.
 								if (fullopen) {
 									if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
@@ -1871,6 +1872,7 @@ namespace psycle
 				{
 					_pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
 					_pMachine[MASTER_INDEX]->Init();
+					machines_->RegisterMachine(_pMachine[MASTER_INDEX]);
 				}
 				
 				if(chunkcount) return false;

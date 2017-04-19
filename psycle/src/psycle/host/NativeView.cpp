@@ -200,7 +200,7 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnPaint() 
 		{
-      CRgn pRgn;
+			CRgn pRgn;
 			pRgn.CreateRectRgn(0, 0, 0, 0);
 			GetUpdateRgn(&pRgn, FALSE);
 
@@ -237,32 +237,32 @@ namespace psycle { namespace host {
 
 				if(type == 5) // ON/OFF Switch
 				{
-				  char buffer[64];					
-				  _pMachine->GetParamValue(c, buffer);
-				  int min_v, max_v;
-				  min_v = max_v = 0;				  
-				  _pMachine->GetParamRange(c,min_v,max_v);				  				  
-				  float rel_v = _pMachine->GetParamValue(c) - min_v;				  
-				  int koffset = K_XSIZE2;
-				  int maxf = 5;				  
-				  int oldoffset = InfoLabel::xoffset;
-				  InfoLabel::xoffset += koffset;
-				  InfoLabel::Draw(bufferDC,x_knob,y_knob,colwidth,parName,"");
-				  InfoLabel::xoffset = oldoffset;
-				  std::vector<int> on;
-				  on.push_back(rel_v);
-				  InfoLabel::DrawLEDs(bufferDC,x_knob+koffset,y_knob, colwidth-koffset, maxf, on, blink[c]);
+					char buffer[64];					
+					_pMachine->GetParamValue(c, buffer);
+					int min_v, max_v;
+					min_v = max_v = 0;				  
+					_pMachine->GetParamRange(c,min_v,max_v);				  				  
+					float rel_v = _pMachine->GetParamValue(c) - min_v;				  
+					int koffset = K_XSIZE2;
+					int maxf = 5;				  
+					int oldoffset = InfoLabel::xoffset;
+					InfoLabel::xoffset += koffset;
+					InfoLabel::Draw(bufferDC,x_knob,y_knob,colwidth,parName,"");
+					InfoLabel::xoffset = oldoffset;
+					std::vector<int> on;
+					on.push_back(rel_v);
+					InfoLabel::DrawLEDs(bufferDC,x_knob+koffset,y_knob, colwidth-koffset, maxf, on, blink[c]);
 				} else
 				if(type == 4) // LED
 				{
-          if (painttimer % 15 == 0) blink[c] = !blink[c];			    
-          int maxf, koffset, amp_v, x_knob, y_knob;        
-          std::vector<int> on;
-          ComputeLeds(c, on, maxf, koffset, amp_v, x_knob, y_knob);				  
-				  InfoLabel::xoffset += koffset;
-				  InfoLabel::Draw(bufferDC, x_knob, y_knob, colwidth, parName, "");
-				  InfoLabel::xoffset -= koffset;;
-				  InfoLabel::DrawLEDs(bufferDC,x_knob+koffset,y_knob, colwidth-koffset, maxf, on, blink[c]);
+					if (painttimer % 15 == 0) blink[c] = !blink[c];			    
+					int maxf, koffset, amp_v, x_knob, y_knob;        
+					std::vector<int> on;
+					ComputeLeds(c, on, maxf, koffset, amp_v, x_knob, y_knob);				  
+					InfoLabel::xoffset += koffset;
+					InfoLabel::Draw(bufferDC, x_knob, y_knob, colwidth, parName, "");
+					InfoLabel::xoffset -= koffset;;
+					InfoLabel::DrawLEDs(bufferDC,x_knob+koffset,y_knob, colwidth-koffset, maxf, on, blink[c]);
 				} else
 				if(type == 3) // INFO unformatted
 				{
@@ -345,8 +345,8 @@ namespace psycle { namespace host {
 				point.y = sourcepoint;
 				tweakbase = helpers::math::round<int,float>(visualtweakvalue);
 				ClientToScreen(&point);
-				positioning=true;
-				SetCursorPos(point.x,point.y);
+				positioning = true;
+				SetCursorPos(point.x, point.y);
 			}
 		}
 
@@ -395,11 +395,11 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnMouseMove(UINT nFlags, CPoint point) 
 		{   
-      ///\todo: positioning true causes a lag tweaking lua machines 
-      /// Reason ?  
-      if (_pMachine->_type == MACH_LUA) {        
-        positioning = false;
-      }
+			///\todo: positioning true causes a lag tweaking lua machines 
+			/// Reason ?  
+			if (_pMachine->_type == MACH_LUA) {        
+			  positioning = false;
+			}
 			if (istweak && !positioning && _pMachine->GetParamType(tweakpar)!=4)
 			{
 				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
@@ -444,7 +444,7 @@ namespace psycle { namespace host {
 				visualtweakvalue = nv;
 				prevval=helpers::math::round<int,float>(nv);
 				_pMachine->SetParameter(tweakpar,prevval);
-			  parentFrame->Automate(tweakpar, prevval, false, minval);
+				parentFrame->Automate(tweakpar, prevval, false, minval);
 				Invalidate(false);
 			}
 			positioning=false;
@@ -484,14 +484,14 @@ namespace psycle { namespace host {
 			} else
 			if (_pMachine->GetParamType(tweakpar)==4) {																
 				int realheight = uiSetting->dialheight+1;			  
-        int maxf, koffset, amp_v, x_knob, y_knob;
-        std::vector<int> on;
-        ComputeLeds(tweakpar, on, maxf, koffset, amp_v, x_knob, y_knob);
+				int maxf, koffset, amp_v, x_knob, y_knob;
+				std::vector<int> on;
+				ComputeLeds(tweakpar, on, maxf, koffset, amp_v, x_knob, y_knob);
 				const int maxw = (colwidth-koffset)/maxf;
 				const int w = std::min(maxw, (colwidth-koffset)/amp_v);
 				const int border = w/5;				
-        bool found = false;
-        int val = -1;
+				bool found = false;
+				int val = -1;
 				for (int i=0; i < amp_v; ++i) {
 				  CRect r = CRect(koffset+x_knob+i*w+border, y_knob, koffset+x_knob+i*w+border+w-2*border, y_knob+realheight);
 				  if (r.PtInRect(point)) {

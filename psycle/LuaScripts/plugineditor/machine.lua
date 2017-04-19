@@ -15,6 +15,7 @@ local project = require("project")
 local templateparser = require("templateparser")
 local settingsmanager = require("psycle.settingsmanager")
 local serpent = require("psycle.serpent")
+local lexer = require("lexer")
   
 function machine:info()
   return { 
@@ -45,6 +46,9 @@ function machine:init(samplerate)
    local function f()
      that.mainviewport:onidle()
    end
+   --self.lexer = lexer:new()
+   --self.lexer:load("Hallo this a test.")
+  -- local token = self.lexer:nexttoken()
    self.timerid = self:setinterval(f, 300)   
 end
 

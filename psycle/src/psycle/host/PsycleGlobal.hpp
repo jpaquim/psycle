@@ -13,7 +13,7 @@ namespace psycle
 		class CMidiInput;
 		class InputHandler;
 		class PsycleConfig;
-    class ActionHandler;
+		class ActionHandler;
 
 		class PsycleGlobal : public Global
 		{
@@ -25,12 +25,12 @@ namespace psycle
 			static inline CMidiInput   & midi()   { return *pMidiInput; }
 			static inline InputHandler & inputHandler() { return *pInputHandler; }
 			static inline CDPI		   & dpiSetting()   { return dpi; }
-      static inline ActionHandler & actionHandler() { return *pActions; }
+			static inline ActionHandler & actionHandler() { return *pActions; }
 
 		protected:
 			static CMidiInput * pMidiInput;
 			static InputHandler* pInputHandler;
-      static ActionHandler* pActions;
+			static ActionHandler* pActions;
 			static CDPI dpi;
 		};
 	}

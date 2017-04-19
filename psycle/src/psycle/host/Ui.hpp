@@ -324,13 +324,14 @@ struct Rect {
     top_left_.set_y(top_left_.y() + space.top());
     bottom_right_.set_x(bottom_right_.x() - space.right());
     bottom_right_.set_y(bottom_right_.y() - space.bottom());
-  }
+  }  
   inline void offset(double dx, double dy) {
     top_left_.set_x(top_left_.x() + dx);
     top_left_.set_y(top_left_.y() + dy);
     bottom_right_.set_x(bottom_right_.x() + dx);
     bottom_right_.set_y(bottom_right_.y() + dy);    
   }
+  inline void offset(const Point& delta) { offset(delta.x(), delta.y()); }
   inline bool intersect(const Point& point) {    
     if (point.x() < left()) return false;
     if (point.y() < top()) return false;
@@ -338,7 +339,7 @@ struct Rect {
     if (point.y() >= bottom()) return false;
     return true;
   }
-  inline void offset(const Point& delta) { offset(delta.x(), delta.y()); }
+ 
   std::auto_ptr<Region> region() const;
   std::string str() const {
     std::stringstream str;
@@ -1401,7 +1402,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   ui::BoxSpace sum_border_space() const;
   std::auto_ptr<WindowImp> imp_;
   Window* parent_;  
-  static Container dummy_list_;  
+  Container dummy_list_;  
   std::string debug_text_;  
   bool auto_size_width_, auto_size_height_, prevent_auto_dimension_;
   Ornaments ornaments_;

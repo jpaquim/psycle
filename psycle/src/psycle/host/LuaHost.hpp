@@ -63,9 +63,13 @@ class LuaStarter : public LuaControl {
 
 static const int CHILDVIEWPORT = 1;
 static const int FRAMEVIEWPORT = 2;
+static const int TOOLBARVIEWPORT = 3;
 
 static const int MDI = 3;
 static const int SDI = 4;
+
+static const int CREATELAZY = 5;
+static const int CREATEATSTART = 5;
 
 class LuaProxy : public LuaControl {
  public:
@@ -142,6 +146,8 @@ class LuaProxy : public LuaControl {
   void ToggleViewPort();
   void set_userinterface(int user_interface) { user_interface_ = user_interface; }
   int userinterface() const { return user_interface_; }
+  void set_default_viewport_mode(int viewport_mode) { default_viewport_mode_ = viewport_mode; }
+  int default_viewport_mode() const { return default_viewport_mode_; }
   std::string title() const { return lua_mac_ ? lua_mac_->title() : "noname"; }
   void UpdateWindowsMenu();
   
@@ -149,6 +155,7 @@ class LuaProxy : public LuaControl {
 	// script callbacks
   static int set_parameter(lua_State* L);
   static int alert(lua_State* L);
+  static int flsmain(lua_State* L);
   static int confirm(lua_State* L);  
   static int terminal_output(lua_State* L);  
   static int call_selmachine(lua_State* L);
@@ -189,7 +196,8 @@ class LuaProxy : public LuaControl {
   boost::weak_ptr<ui::Node> menu_root_node_;
   boost::shared_ptr<ui::Frame> frame_;
   int user_interface_;
-  int clock_;  
+  int clock_;
+  int default_viewport_mode_;  
 };
 
 class LuaPluginBind {
@@ -227,7 +235,7 @@ class HostExtensions {
  public:
   typedef std::list<LuaPluginPtr> List;  
  
-  HostExtensions() : child_view_(0), active_lua_(0) {}
+  HostExtensions() : child_view_(0), active_lua_(0), has_toolbar_extension_(false) {}
   ~HostExtensions() {}  
 
   static HostExtensions& Instance();
@@ -260,6 +268,9 @@ class HostExtensions {
   void AddToWindowsMenu(Link& link);
   LuaPlugin* active_lua() { return active_lua_; }
   void set_active_lua(LuaPlugin* active_lua) { active_lua_ = active_lua; }
+  void OnExecuteLink(Link& link);
+  void FlsMain();
+  bool HasToolBarExtension() const;
 
  private:   
   lua_State* load_script(const std::string& dllpath);
@@ -268,7 +279,8 @@ class HostExtensions {
   std::string menu_label(const Link& link) const;
   HostExtensions::List extensions_;
   class HostViewPort* child_view_;
-  LuaPlugin* active_lua_;  
+  LuaPlugin* active_lua_;
+  bool has_toolbar_extension_;
 };
 
 struct LuaGlobal {   

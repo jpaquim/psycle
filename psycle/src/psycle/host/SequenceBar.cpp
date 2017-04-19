@@ -218,6 +218,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		}
 		((CButton*)GetDlgItem(IDC_SEQNEW))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnSeqduplicate()
@@ -276,6 +277,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 		delete [] litems; litems = 0;
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnSeqins()
@@ -299,6 +301,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		}
 		((CButton*)GetDlgItem(IDC_SEQINS))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnSeqdelete()
@@ -352,6 +355,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		((CButton*)GetDlgItem(IDC_SEQDELETE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->Repaint(draw_modes::pattern);
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnSeqcut()
@@ -381,6 +385,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			seqcopybuffer[i] = m_pSong->playOrder[seqcopybuffer[i]];
 		}
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnSeqpasteAbove()
@@ -423,6 +428,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			m_pWndView->Repaint(draw_modes::pattern);
 		}
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 	void SequenceBar::OnSeqclear()
 	{
@@ -449,6 +455,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			m_pWndView->Repaint(draw_modes::pattern);
 		}
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnSeqsort()
@@ -539,6 +546,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		UpdateSequencer();
 		m_pWndView->Repaint(draw_modes::pattern);
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnFollow()

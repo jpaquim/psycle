@@ -38,9 +38,7 @@ class DefaultAligner : public Aligner {
 	 void adjust_current_pos_right();
 	 void adjust_current_pos_bottom();
 	 void adjust_current_pos_client(const Window::Ptr& window);	 	 
-
-	 void OnWindowDimensionChanged(ui::Window& window);
-
+	 
 	 Rect current_pos_;
 	 Dimension non_content_dimension_;
 	 Dimension item_dim_;
