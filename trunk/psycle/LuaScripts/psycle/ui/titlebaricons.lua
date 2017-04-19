@@ -27,19 +27,19 @@ end
 function titlebaricons:init() 
   self:setautosize(false, false)
       :setalign(alignstyle.RIGHT)
-  local icon = toolicon:new(self, titlebaricons.picdir .. "arrow_out.png", 0xFFFFFF)
-                       :setalign(alignstyle.RIGHT)
-  icon.usetoggleimage_ = true  
+  self.windowtoogleicon = toolicon:new(self, titlebaricons.picdir .. "arrow_out.png", 0xFFFFFF)
+                                  :setalign(alignstyle.RIGHT)
+  self.windowtoogleicon.usetoggleimage_ = true  
   local windowinimg = image:new()
                            :load(titlebaricons.picdir .. "arrow_in.png")
                            :settransparent(0xFFFFFF)                                 
-  icon:settoggleimage(windowinimg)
+  self.windowtoogleicon:settoggleimage(windowinimg)
   local that = self
-  function icon:onclick()
+  function self.windowtoogleicon:onclick()
     self:resethover()    
     psycle.proxy:toggleviewport()
   end
-  self:formattoolicon(icon)  
+  self:formattoolicon(self.windowtoogleicon)  
   self.settingsicon = toolicon:new(self, titlebaricons.picdir .. "settings.png", 0xFFFFFF)
                               :setalign(alignstyle.RIGHT)                
   self:formattoolicon(self.settingsicon)    

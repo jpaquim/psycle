@@ -36,7 +36,7 @@ namespace psycle
 	namespace host
 	{
 		char* Master::_psName = "Master";
-		bool Machine::autoStopMachine = false;
+		bool Machine::autoStopMachine = false;		
 
 		Wire::Wire(Machine * const dstMac)
 			:enabled(false),srcMachine(NULL),volume(1.0f),volMultiplier(1.0f),dstMachine(dstMac)
@@ -193,7 +193,17 @@ namespace psycle
 			MessageBox(NULL, s.str().c_str(), "Error", MB_OK | MB_ICONERROR);
 		}
 
+		ScopeMemory::ScopeMemory() :
+				samples_left(new PSArray(SCOPE_BUF_SIZE, 0.0)),
+				samples_right(new PSArray(SCOPE_BUF_SIZE, 0.0)),
+				scopePrevNumSamples(0),
+				scopeBufferIndex(0),
+				pos(0),
+				scope_buf_size(SCOPE_BUF_SIZE) {
+		}												
 
+		ScopeMemory::~ScopeMemory() {
+		}
 
 		Machine::Machine(MachineType msubclass, MachineMode mode, int id)       
 		{
@@ -654,54 +664,36 @@ namespace psycle
 				}
 			}
 		}
+
+		void Machine::AddScopeMemory(const boost::shared_ptr<ScopeMemory>& scope_memory) {			
+			scope_memories_.push_back(scope_memory);
+		}
+		void Machine::RemoveScopeMemory(const boost::shared_ptr<ScopeMemory>& scope_memory) {
+			ScopeMemories::iterator it = scope_memories_.begin();
+			for ( ; it != scope_memories_.end(); ++it) {
+			  if (*it == scope_memory) {
+				scope_memories_.erase(it);
+				break;
+			  }
+			}
+		}
+
 		void Machine::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 		{
 			sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
 			cpu_time_clock::time_point t0;
 			if(measure_cpu_usage) t0 = cpu_time_clock::now();
 #if !defined WINAMP_PLUGIN
-			if (_pScopeBufferL && _pScopeBufferR)
-			{
-				float *pL = samplesV[0];
-				float *pR = (samplesV.size() == 1) ? samplesV[0] : samplesV[1];
-
-				int i = _scopePrevNumSamples;
-				int diff = 0;
-				if (i+_scopeBufferIndex > SCOPE_BUF_SIZE)   
-				{   
-					int const amountSamples=(SCOPE_BUF_SIZE-_scopeBufferIndex);
-					helpers::dsp::Mov(pL,&_pScopeBufferL[_scopeBufferIndex], amountSamples);
-					helpers::dsp::Mov(pR,&_pScopeBufferR[_scopeBufferIndex], amountSamples);
-					diff = 4 - (amountSamples&0x3); // check for alignment.
-					pL+=amountSamples;
-					pR+=amountSamples;
-					i -= amountSamples;
-					_scopeBufferIndex = 0;
-				}
-				if (diff) { //If not aligned, realign the source buffer.
-					if (i <= diff) {
-						std::memcpy(&_pScopeBufferL[_scopeBufferIndex], pL, i * sizeof(float));
-						std::memcpy(&_pScopeBufferR[_scopeBufferIndex], pR, i * sizeof(float));
-					} else {
-						std::memcpy(&_pScopeBufferL[_scopeBufferIndex], pL, diff * sizeof(float));
-						std::memcpy(&_pScopeBufferR[_scopeBufferIndex], pR, diff * sizeof(float));
-						pL+=diff;
-						pR+=diff;
-						_scopeBufferIndex += diff;
-						i-=diff;
-						helpers::dsp::Mov(pL,&_pScopeBufferL[_scopeBufferIndex], i);
-						helpers::dsp::Mov(pR,&_pScopeBufferR[_scopeBufferIndex], i);
-					}
-				}
-				else {
-					helpers::dsp::Mov(pL,&_pScopeBufferL[_scopeBufferIndex], i);
-					helpers::dsp::Mov(pR,&_pScopeBufferR[_scopeBufferIndex], i);
-				}
-				_scopeBufferIndex += i;
-				if (_scopeBufferIndex == SCOPE_BUF_SIZE) _scopeBufferIndex = 0;
-				i = 0;
+			FillScopeBuffer(_pScopeBufferL, _pScopeBufferR, numSamples, _scopePrevNumSamples, _scopeBufferIndex);
+			ScopeMemories::iterator it = scope_memories_.begin();
+			for (; it != scope_memories_.end(); ++it) {
+				boost::shared_ptr<ScopeMemory>& scope_memory = *it;
+				FillScopeBuffer(scope_memory->samples_left->data(),
+							scope_memory->samples_right->data(),
+							numSamples,
+							scope_memory->scopePrevNumSamples,
+							scope_memory->scopeBufferIndex);
 			}
-			_scopePrevNumSamples=numSamples;
 #endif //!defined WINAMP_PLUGIN
 			if (clear)
 			{
@@ -715,7 +707,53 @@ namespace psycle
 			}
 		}
 
+		void Machine::FillScopeBuffer(float* scope_left, float* scope_right,
+									  int numSamples, 
+									  int& scopePrevNumSamples,
+									  int& scopeBufferIndex) {
+			if (scope_left && scope_right)
+			{
+				float *pL = samplesV[0];
+				float *pR = (samplesV.size() == 1) ? samplesV[0] : samplesV[1];
 
+				int i = scopePrevNumSamples;
+				int diff = 0;
+				if (i+scopeBufferIndex > SCOPE_BUF_SIZE)   
+				{   
+					int const amountSamples=(SCOPE_BUF_SIZE - scopeBufferIndex);
+					helpers::dsp::Mov(pL,&scope_left[scopeBufferIndex], amountSamples);
+					helpers::dsp::Mov(pR,&scope_right[scopeBufferIndex], amountSamples);
+					diff = 4 - (amountSamples&0x3); // check for alignment.
+					pL+=amountSamples;
+					pR+=amountSamples;
+					i -= amountSamples;
+					scopeBufferIndex = 0;
+				}
+				if (diff) { //If not aligned, realign the source buffer.
+					if (i <= diff) {
+						std::memcpy(&scope_left[scopeBufferIndex], pL, i * sizeof(float));
+						std::memcpy(&scope_right[scopeBufferIndex], pR, i * sizeof(float));
+					} else {
+						std::memcpy(&scope_left[scopeBufferIndex], pL, diff * sizeof(float));
+						std::memcpy(&scope_right[scopeBufferIndex], pR, diff * sizeof(float));
+						pL+=diff;
+						pR+=diff;
+						_scopeBufferIndex += diff;
+						i-=diff;
+						helpers::dsp::Mov(pL,&scope_left[scopeBufferIndex], i);
+						helpers::dsp::Mov(pR,&scope_right[scopeBufferIndex], i);
+					}
+				}
+				else {
+					helpers::dsp::Mov(pL,&scope_left[scopeBufferIndex], i);
+					helpers::dsp::Mov(pR,&scope_right[scopeBufferIndex], i);
+				}
+				scopeBufferIndex += i;
+				if (scopeBufferIndex == SCOPE_BUF_SIZE) scopeBufferIndex = 0;
+				i = 0;
+			}
+			scopePrevNumSamples=numSamples;
+		}
 // Low level process function of machines. Takes care of audio generation and routing.
 // Each machine is expected to produce its output in its own _pSamplesX buffers.
 void Machine::recursive_process(unsigned int frames, bool measure_cpu_usage) {
@@ -1678,14 +1716,20 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		}	
 		
 		void MachineGroup::NotifyMachineCreate(Machine& machine) {
-			for (MachineListeners::iterator it = machine_listeners_.begin(); it != machine_listeners_.end(); ++it) {
-				(*it)->OnMachineCreate(machine);
+		    try {
+				for (MachineListeners::iterator it = machine_listeners_.begin(); it != machine_listeners_.end(); ++it) {
+					(*it)->OnMachineCreate(machine);
+				}
+			} catch(std::exception&) {				
 			}
 		}
 
 		void MachineGroup::NotifyMachineDelete(Machine& machine) {
-			for (MachineListeners::iterator it = machine_listeners_.begin(); it != machine_listeners_.end(); ++it) {
-				(*it)->BeforeMachineDelete(machine);
+			try {
+				for (MachineListeners::iterator it = machine_listeners_.begin(); it != machine_listeners_.end(); ++it) {
+					(*it)->BeforeMachineDelete(machine);
+				}
+			} catch(std::exception&) {				
 			}
 		}	
 

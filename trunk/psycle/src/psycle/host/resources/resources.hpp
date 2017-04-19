@@ -17,6 +17,7 @@
 #define IDD_WAVED_ZOOMBAR               103
 #define IDD_MACHINEBAR                  108
 #define IDD_SEQUENCER                   112
+#define IDD_EXTENSIONBAR                113
 #define IDD_SONGPROP                    118
 #define IDD_NEWMACHINE                  120
 #define IDB_MACHINETYPE                 121

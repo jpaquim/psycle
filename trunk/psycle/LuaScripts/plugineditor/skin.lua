@@ -41,7 +41,7 @@ return {
     properties = {
       backgroundcolor = "@PVROWBEAT",
       font_family = "courier",
-      font_size =  12,
+      font_size =  10,
       backgroundcolor = "@PVROW",
       hovercolor = "@PVFONT",
       hoverbackgroundcolor = "@PVROW4BEAT",

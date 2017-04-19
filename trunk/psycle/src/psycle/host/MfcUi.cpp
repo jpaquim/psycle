@@ -390,7 +390,9 @@ void WindowTemplateImp<T, I>::dev_set_parent(Window* parent) {
       DevShow();    
     }
   } else {
-    SetParent(DummyWindow::dummy());
+    if (m_hWnd != 0) {
+      SetParent(DummyWindow::dummy());
+	}
   }
 }
 
@@ -479,7 +481,9 @@ void WindowImp::DevSetCursor(CursorStyle::Type style) {
     case SW_RESIZE   : c = IDC_SIZENESW; break;
     default          : c = IDC_ARROW; break;
   }
-  cursor_ = (c!=0) ? LoadCursor(0, c) : ::LoadCursor(0, MAKEINTRESOURCE(ac));
+  cursor_ = (c != 0) ? LoadCursor(0, c) 
+                     : ::LoadCursor(AfxFindResourceHandle(MAKEINTRESOURCE(ac),
+				                    RT_GROUP_CURSOR), MAKEINTRESOURCE(ac));
 }
 
 template class WindowTemplateImp<CWnd, ui::WindowImp>;

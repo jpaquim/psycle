@@ -139,6 +139,7 @@ struct LuaActionListenerBind {
     void work(int samples);
     Machine* mac() { return mac_; }
     void set_mac(Machine* mac) { mac_ = mac; shared_=true; }
+	int index() const { return mac_ ? mac_->_macIndex : -1; }
     PSArray* channel(int idx) { return &sampleV_[idx]; }
     void update_num_samples(int num);
     void offset(int offset);
@@ -159,7 +160,7 @@ struct LuaActionListenerBind {
     boost::weak_ptr<ui::Viewport> viewport() { return viewport_; }
     MachinePresetType::Value prsmode() const { return prsmode_; }
     void setprsmode(MachinePresetType::Value prsmode) { prsmode_ = prsmode; }
-    void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
+    void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }	
     LuaProxy* proxy() { return proxy_; }
     void doexit();
     void reload();    
@@ -184,6 +185,14 @@ struct LuaActionListenerBind {
     std::string title_;
   };
  
+ struct LuaScopeMemoryBind {
+    static int open(lua_State *L);
+    static const char* meta;
+    static int create(lua_State* L);
+    static int gc(lua_State* L);
+	static int channel(lua_State* L);	
+};
+
   struct LuaMachineBind {
     static int open(lua_State *L);
     static const char* meta;
@@ -218,7 +227,7 @@ struct LuaActionListenerBind {
     static int exit(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::doexit); }
     static int reload(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::reload); }
     static int setviewport(lua_State* L);
-    static int toggleviewport(lua_State* L);
+    static int toggleviewport(lua_State* L);	
     static int type(lua_State* L);
     static int info2(lua_State* L);
     static int name(lua_State* L);
@@ -233,7 +242,11 @@ struct LuaActionListenerBind {
 	static int createparam(lua_State* L, int idx, LuaMachine* machine);
 	static int insert(lua_State* L);
     static int at(lua_State* L);
-    static int muted(lua_State* L);    
+    static int muted(lua_State* L);
+	static int buildbuffer(lua_State* L);
+	static int addscopememory(lua_State* L);
+	static int index(lua_State* L) { LUAEXPORTM(L, meta, &LuaMachine::index); }   
+	static int audiorange(lua_State* L);
   };
   /*
   class LuaMachines : public MachineListener, public LuaState {
@@ -282,6 +295,7 @@ struct LuaActionListenerBind {
     static int rline(lua_State* L);
     static int playing(lua_State* L);    
 	static int playpattern(lua_State* L);
+	static int setplayline(lua_State* L);
   };
 
   struct LuaPatternEvent {
@@ -760,6 +774,7 @@ struct LuaActionListenerBind {
     static int open(lua_State *L);
   private:
     static int gmpercussionnames(lua_State* L);
+	static int gmpercussionname(lua_State* L);
     static int notename(lua_State* L);
     static int combine(lua_State* L);
   };

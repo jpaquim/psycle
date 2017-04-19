@@ -248,7 +248,7 @@ namespace psycle { namespace host {
 			{
 				TRACE0("Failed to create machinebar\n");
 				return -1;		// fail to create
-			}
+			}			
 
 			// Status bar
 			if (!m_wndStatusBar.Create(this) ||
@@ -263,6 +263,14 @@ namespace psycle { namespace host {
 			if (!m_seqBar.Create(this,IDD_SEQUENCER,CBRS_LEFT|CBRS_FLYBY| CBRS_GRIPPER, IDD_SEQUENCER))
 			{
 				TRACE0("Failed to create sequencebar\n");
+				return -1;		// fail to create
+			}
+
+			//Extension Bar
+			m_extensionBar.InitializeValues(this, &m_wndView);
+			if (!m_extensionBar.Create(this, IDD_EXTENSIONBAR, CBRS_TOP | CBRS_FLYBY| CBRS_SIZE_DYNAMIC, IDD_EXTENSIONBAR))
+			{
+				TRACE0("Failed to create songbar\n");
 				return -1;		// fail to create
 			}
 
@@ -295,18 +303,21 @@ namespace psycle { namespace host {
 			m_songBar.SetWindowText("Psycle song controls bar");
 			m_machineBar.SetWindowText("Psycle machine controls bar");
 			m_seqBar.SetWindowText("Psycle sequence controls bar");
+			m_seqBar.SetWindowText("Psycle extension controls bar");
 
 			m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
 			m_songBar.EnableDocking(CBRS_ALIGN_TOP|CBRS_ALIGN_BOTTOM);
 			m_machineBar.EnableDocking(CBRS_ALIGN_TOP|CBRS_ALIGN_BOTTOM);
 			m_seqBar.EnableDocking(CBRS_ALIGN_LEFT|CBRS_ALIGN_RIGHT);
+			m_extensionBar.EnableDocking(CBRS_ALIGN_TOP);
 
 			EnableDocking(CBRS_ALIGN_ANY);
 			DockControlBar(&m_wndToolBar);
 			DockControlBar(&m_songBar);
 			DockControlBar(&m_machineBar);
 			DockControlBar(&m_seqBar);
-			LoadBarState(_T("General"));
+			DockControlBar(&m_extensionBar);
+			LoadBarState(_T("General"));			
 
 			// Sets Icon
 			HICON tIcon;

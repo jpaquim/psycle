@@ -21,7 +21,6 @@ namespace ui {
 
 const ui::Point ui::Point::zero_;
 const ui::Rect ui::Rect::zero_;
-Window::Container Window::dummy_list_;
 int MenuContainer::id_counter = 0;
 Font Font::dummy_font(0);
 FontInfo FontInfo::dummy_font_info(0);

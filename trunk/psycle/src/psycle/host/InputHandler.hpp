@@ -156,7 +156,8 @@ namespace psycle
         stop = 7,
         rec = 8,
         seqsel = 9,
-        seqfollowsong = 10     
+		seqmodified = 10,
+        seqfollowsong = 11     
       };
     };
 

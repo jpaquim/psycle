@@ -121,6 +121,16 @@ function toolicon:verticalalignmentoffset()
   return result
 end
 
+function toolicon:enabletoggle()
+  self.is_toggle = true
+  return self
+end
+
+function toolicon:preventtoggle()
+  self.is_toggle = false
+  return self
+end
+
 function toolicon:settoggleimage(image)
   self.toggleimage_ = image
   self.oldimage = nil  
@@ -162,11 +172,11 @@ end
 
 function toolicon:updatebackgroundcolor(g)
   if self.on_ then
-    if self.hover then
+   -- if self.hover then
       g:setcolor(self.activebackgroundcolor)
-    else
-      g:setcolor(self.backgroundcolor)
-    end
+    --else
+    --  g:setcolor(self.backgroundcolor)
+   -- end
   else
     if self.hover then
       g:setcolor(self.hoverbackgroundcolor)

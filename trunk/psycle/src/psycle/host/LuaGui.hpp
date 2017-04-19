@@ -5,6 +5,7 @@
 // #include <psycle/host/detail/project.hpp>
 #include "CanvasItems.hpp"
 #include "LuaHelper.hpp"
+#include <psycle/helpers/resampler.hpp>
 
 namespace psycle {
 namespace host {
@@ -119,10 +120,15 @@ struct LuaUiRectBind {
   static int set(lua_State* L);
   static int setleft(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_left); }
   static int left(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::left); }
+  static int settop(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_top); }
   static int top(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::top); }
+  static int setright(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_right); }
   static int right(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::right); }
+  static int setbottom(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_bottom); }
   static int bottom(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::bottom); }
+  static int setwidth(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_width); }
   static int width(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::width); }
+  static int setheight(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_height); }
   static int height(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::height); }
   static int intersect(lua_State* L) {
     using namespace ui;
@@ -130,6 +136,13 @@ struct LuaUiRectBind {
     Point::Ptr point = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
     lua_pushboolean(L, rect->intersect(*point.get()));
     return 1;
+  }
+  static int offset(lua_State* L) {
+    using namespace ui;
+    Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+    Point::Ptr delta = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
+    rect->offset(*delta.get());
+    return LuaHelper::chaining(L);
   }
   static int topleft(lua_State *L);
   static int bottomright(lua_State *L);
@@ -269,6 +282,44 @@ class LuaWindow : public LuaWindowBase<ui::Window> {
   virtual void Draw(ui::Graphics* g, ui::Region& draw_rgn); 
   virtual void OnSize(double cw, double ch);  
   virtual bool transparent() const;  
+};
+
+class Machine;
+class ScopeMemory;
+
+class LuaScopeWindow : public LuaWindow, public Timer {
+  public:
+   static std::string type() { return "scope"; }  
+   LuaScopeWindow(lua_State* L);
+   
+   virtual void Draw(ui::Graphics* g, ui::Region& draw_rgn);
+   virtual void DrawScope(ui::Graphics* g, double x, double y, Machine* mac);
+   virtual void OnTimerViewRefresh();
+   virtual void OnSize(const ui::Dimension& dimension);   
+
+  protected:
+   virtual void OnMouseDown(ui::MouseEvent& ev);
+
+  private:   
+    int GetY(float f, float mult);
+	Machine* HitTest(const ui::Point& pos) const;
+	double scope_width_, scope_height_, scope_mid_;
+	double scale_x_;
+
+	int scope_mode;
+	int scope_peak_rate;
+	int scope_osc_freq;
+	int scope_osc_rate;
+	int scope_spec_samples;
+	int scope_spec_rate;
+	int scope_spec_mode;
+	int scope_phase_rate;
+	float *pSamplesL;
+	float *pSamplesR;
+	BOOL hold;
+	BOOL clip_;
+    std::vector<boost::shared_ptr<ScopeMemory> > scope_memories_;   
+	helpers::dsp::cubic_resampler resampler;
 };
 
 typedef LuaWindowBase<ui::Group> LuaGroup;
@@ -661,6 +712,7 @@ struct LuaGraphicsBind {
     return LuaHelper::chaining(L);    
   }
   static int color(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::color); }
+  static int plot(lua_State *L);
   static int drawline(lua_State *L) {
     using namespace ui;
     Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);    
@@ -1019,6 +1071,26 @@ class LuaBackgroundColorMixIn {
   static int backgroundcolor(lua_State* L) { LUAEXPORT(L, &T::background_color); }
 };
 
+class LuaAligner : public ui::Aligner, public LuaState {
+ public:
+  LuaAligner() : LuaState(0) {}
+  LuaAligner(lua_State* L) : LuaState(L) {}
+  ~LuaAligner() {}
+
+  virtual void CalcDimensions();
+  virtual void SetPositions();
+};
+
+struct LuaAlignerBind {
+  static int open(lua_State *L);
+  static const char* meta;
+  static int create(lua_State *L);
+  static int gc(lua_State* L);
+  static int windows(lua_State* L);
+  static int setdimension(lua_State* L);
+  static int groupdimension(lua_State* L);
+};
+
 template<class T = LuaWindow>
 class LuaWindowBind {
  public:
@@ -1287,10 +1359,10 @@ class LuaWindowBind {
   }
   static int setaligner(lua_State* L) {
     boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
-    int row_num = static_cast<int>(luaL_checkinteger(L, 2));
-    int col_num = static_cast<int>(luaL_checkinteger(L, 3));
-    boost::shared_ptr<ui::GridAligner> aligner(new ui::GridAligner(row_num, col_num));
-    window->set_aligner(aligner);
+    boost::shared_ptr<LuaAligner> aligner = LuaHelper::test_sptr<LuaAligner>(L, 2, LuaAlignerBind::meta);
+	if (aligner) {
+      window->set_aligner(aligner);
+	}
     return LuaHelper::chaining(L);
   }
   static int setcapture(lua_State* L) { LUAEXPORT(L, &T::SetCapture); }
@@ -1762,6 +1834,27 @@ class LuaButtonBind : public LuaWindowBind<T>, public LuaTextMixIn<T> {
     B::setmethods(L);
     LuaTextMixIn<T>::setmethods(L);
     return 0;
+  }
+};
+
+template <class T = LuaScopeWindow>
+class LuaScopeBind : public LuaWindowBind<T> {
+ public:
+  typedef LuaWindowBind<T> B;  
+  static int open(lua_State *L) { return LuaHelper::openex(L, B::meta, setmethods, B::gc); }
+  static int setmethods(lua_State* L) {
+    B::setmethods(L);  
+	static const luaL_Reg methods[] = {		
+	    {"resize", resize},
+		{NULL, NULL}
+	};
+	luaL_setfuncs(L, methods, 0);
+    return 0;
+  }  
+  static int resize(lua_State* L) {
+    boost::shared_ptr<LuaScopeWindow> scopes = LuaHelper::check_sptr<LuaScopeWindow>(L, 1, meta);	
+	scopes->OnSize(scopes->parent()->dim());
+    return LuaHelper::chaining(L);
   }
 };
 
@@ -2768,6 +2861,7 @@ template class LuaButtonBind<LuaButton>;
 template class LuaRadioButtonBind<LuaRadioButton>;
 template class LuaGroupBoxBind<LuaGroupBox>;
 template class LuaEditBind<LuaEdit>;
+template class LuaScopeBind<LuaScopeWindow>;
 template class LuaScrollBarBind<LuaScrollBar>;
 template class LuaScintillaBind<LuaScintilla>;
 template class LuaComboBoxBind<LuaComboBox>;
@@ -2806,6 +2900,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaFrameBind<> >(L, "psycle.ui.frame");
   LuaHelper::require<LuaPopupFrameItemBind >(L, "psycle.ui.popupframe");
   LuaHelper::require<LuaFrameAlignerBind>(L, "psycle.ui.framealigner");
+  LuaHelper::require<LuaAlignerBind>(L, "psycle.ui.aligner");
   LuaHelper::require<LuaGroupBind<> >(L, "psycle.ui.group");
   LuaHelper::require<LuaHeaderGroupBind<> >(L, "psycle.ui.headergroup");
   LuaHelper::require<LuaScrollBoxBind<> >(L, "psycle.ui.scrollbox");
@@ -2823,6 +2918,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaGroupBoxBind<> >(L, "psycle.ui.groupbox");
   LuaHelper::require<LuaComboBoxBind<> >(L, "psycle.ui.combobox");
   LuaHelper::require<LuaEditBind<> >(L, "psycle.ui.edit");
+  LuaHelper::require<LuaScopeBind<> >(L, "psycle.ui.scope");
   LuaHelper::require<LuaLexerBind>(L, "psycle.ui.lexer");
   LuaHelper::require<LuaScintillaBind<> >(L, "psycle.ui.scintilla");
   LuaHelper::require<LuaScrollBarBind<> >(L, "psycle.ui.scrollbar");
@@ -2833,7 +2929,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.ornamentfactory");
   LuaHelper::require<LineBorderBind>(L, "psycle.ui.lineborder");
   LuaHelper::require<WallpaperBind>(L, "psycle.ui.wallpaper");
-  LuaHelper::require<FillBind>(L, "psycle.ui.fill");
+  LuaHelper::require<FillBind>(L, "psycle.ui.fill");  
   LuaHelper::require<CircleFillBind>(L, "psycle.ui.circlefill");
   return 0;
 }

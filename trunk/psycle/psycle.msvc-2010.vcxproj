@@ -150,6 +150,7 @@
     <ClInclude Include="src\psycle\host\Canvas.hpp" />
     <ClInclude Include="src\psycle\host\CanvasItems.hpp" />
     <ClInclude Include="src\psycle\host\Constants.hpp" />
+    <ClInclude Include="src\psycle\host\ExtensionBar.hpp" />
     <ClInclude Include="src\psycle\host\Global.hpp" />
     <ClInclude Include="src\psycle\host\InputHandler.hpp" />
     <ClInclude Include="src\psycle\host\InstrIndividualMap.hpp" />
@@ -301,6 +302,7 @@
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Canvas.cpp" />
     <ClCompile Include="src\psycle\host\CanvasItems.cpp" />
+    <ClCompile Include="src\psycle\host\ExtensionBar.cpp" />
     <ClCompile Include="src\psycle\host\Global.cpp" />
     <ClCompile Include="src\psycle\host\InputHandler.cpp" />
     <ClCompile Include="src\psycle\host\ASIOInterface.cpp" />
