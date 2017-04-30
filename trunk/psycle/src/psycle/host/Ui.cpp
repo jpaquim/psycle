@@ -1247,6 +1247,22 @@ bool Window::fls_prevented() const {
   return root() ? root()->fls_prevented() : false; 
 }
 
+void Window::PreventDrawBackground() {
+  if (root()) {
+    root()->PreventDrawBackground();
+  }
+}
+
+void Window::EnableDrawBackground() {
+  if (root()) {
+    root()->EnableDrawBackground();
+  }
+}
+
+bool Window::draw_background_prevented() const { 
+  return root() ? root()->draw_background_prevented() : false; 
+}
+
 void Window::Show() {
   if (imp_.get()) {
     imp_->DevShow();
@@ -1562,13 +1578,15 @@ Group::Group(WindowImp* imp) {
   rules_.set_owner(this);
 }  
 
-void Group::Add(const Window::Ptr& window) {  
+void Group::Add(const Window::Ptr& window, bool apply_rules) {  
   if (window->parent()) {
     throw std::runtime_error("Window already child of a group.");
   }
   window->set_parent(this);
   windows_.push_back(window); 
-  rules_.ApplyTo(window);    
+  if (apply_rules) {
+	rules_.ApplyTo(window);    
+  }
   window->needsupdate();
 }
 
@@ -1875,10 +1893,10 @@ void FrameAligner::set_position(Window& window) {
   );
   Point top_left;
   switch (alignment_) {    
-    case AlignStyle::ALRIGHT:      
+    case AlignStyle::RIGHT:      
       top_left.set_xy(Systems::instance().metrics().screen_dimension().width() - win_dim.width(), (Systems::instance().metrics().screen_dimension().height() - win_dim.height()) /2);
     break;    
-    case AlignStyle::ALCENTER:
+    case AlignStyle::CENTER:
       top_left = ((Systems::instance().metrics().screen_dimension() - win_dim) / 2.0).as_point();
     break;
     default:;    
@@ -3472,27 +3490,32 @@ void WindowImp::OnDevDraw(Graphics* g, Region& draw_region) {
 
 void WindowImp::OnDevMouseDown(MouseEvent& ev) {
   assert(window_);	
-   window_->OnMouseDown(ev);
+  window_->OnMouseDown(ev);
 }
 
 void WindowImp::OnDevMouseUp(MouseEvent& ev) {
   assert(window_);
-   window_->OnMouseUp(ev);	
+  window_->OnMouseUp(ev);	
 }
 
 void WindowImp::OnDevMouseMove(MouseEvent& ev) {
   assert(window_);
-   window_->OnMouseMove(ev);	
+  window_->OnMouseMove(ev);	
 }
 
 void WindowImp::OnDevMouseEnter(MouseEvent& ev) {
   assert(window_);
-   window_->OnMouseEnter(ev);	
+  window_->OnMouseEnter(ev);	
 }
 
 void WindowImp::OnDevMouseOut(MouseEvent& ev) {
   assert(window_);
-   window_->OnMouseOut(ev);	
+  window_->OnMouseOut(ev);	
+}
+
+void WindowImp::OnDevWheel(WheelEvent& ev) {
+  assert(window_);
+  window_->OnWheel(ev);	
 }
 
 void WindowImp::OnDevSize(const ui::Dimension& dimension) {

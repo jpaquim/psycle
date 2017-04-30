@@ -463,7 +463,7 @@ int LuaFrameAlignerBind::open(lua_State *L) {
 
 int LuaFrameAlignerBind::create(lua_State* L) {
   using namespace ui;  
-  AlignStyle::Type alignment(AlignStyle::ALCENTER);
+  AlignStyle::Type alignment(AlignStyle::CENTER);
   int n = lua_gettop(L);  
   if (n == 2) {
     alignment = static_cast<AlignStyle::Type>(luaL_checkinteger(L, 2));
@@ -621,6 +621,23 @@ bool LuaWindowBase<T>::SendMouseEvent(lua_State* L,
   if (has_method) {
     ev.StopWorkParent();
     LuaHelper::requirenew<LuaMouseEventBind>(L, "psycle.ui.canvas.mouseevent", &ev, true);
+    in.pcall(0);
+    LuaHelper::collect_full_garbage(L);
+    in.close();
+  }   
+  return has_method;
+}
+
+template <class T>
+bool LuaWindowBase<T>::SendWheelEvent(lua_State* L,
+                                      const::std::string method,
+                                      ui::WheelEvent& ev, 
+                                      ui::Window& window) {  
+  LuaImport in(L, &window, locker(L));
+  bool has_method = in.open(method);
+  if (has_method) {
+    ev.StopWorkParent();
+    LuaHelper::requirenew<LuaWheelEventBind>(L, "psycle.ui.canvas.mouseevent", &ev, true);
     in.pcall(0);
     LuaHelper::collect_full_garbage(L);
     in.close();
@@ -2229,10 +2246,15 @@ int LuaUiRectBind::create(lua_State* L) {
     LuaHelper::new_shared_userdata<>(L, meta, new Rect());
   } else
   if (n==3) {    
-    Point::Ptr point = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
-    Dimension::Ptr dimension =
+    Point::Ptr top_left = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+	Point::Ptr bottom_right = LuaHelper::test_sptr<Point>(L, 3, LuaPointBind::meta);
+	if (bottom_right) {
+	  LuaHelper::new_shared_userdata<>(L, meta, new Rect(*top_left.get(), *bottom_right.get()));
+	} else {
+      Dimension::Ptr dimension =
         LuaHelper::check_sptr<Dimension>(L, 3, LuaDimensionBind::meta);
-    LuaHelper::new_shared_userdata<>(L, meta, new Rect(*point.get(), *dimension.get()));    
+      LuaHelper::new_shared_userdata<>(L, meta, new Rect(*top_left.get(), *dimension.get()));
+	}   
   } else {
     luaL_error(L, "Wrong number of arguments");
   }  
@@ -2244,6 +2266,22 @@ int LuaUiRectBind::gc(lua_State* L) {
 }
 
 int LuaUiRectBind::set(lua_State* L) {
+  using namespace ui;
+  Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+  int n = lua_gettop(L);
+  if (n==3) {    
+    Point::Ptr top_left = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
+	Point::Ptr bottom_right = LuaHelper::test_sptr<Point>(L, 3, LuaPointBind::meta);
+	if (bottom_right) {
+	  rect->set(*top_left.get(), *bottom_right.get());
+	} else {
+      Dimension::Ptr dimension =
+        LuaHelper::check_sptr<Dimension>(L, 3, LuaDimensionBind::meta);
+      rect->set(*top_left.get(), *dimension.get());
+	}   
+  } else {
+    luaL_error(L, "Wrong number of arguments");
+  }  
   return LuaHelper::chaining(L);
 }
 
@@ -2430,6 +2468,34 @@ int LuaMouseEventBind::create(lua_State* L) {
 
 int LuaMouseEventBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<ui::MouseEvent>(L, meta);
+}
+
+// LuaWheelEventBind
+const char* LuaWheelEventBind::meta = "psywheeleventbind";
+
+int LuaWheelEventBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+	{"wheeldelta", wheeldelta},
+    {"button", button},   
+    {"clientpos", clientpos},
+    {"preventdefault", preventdefault},
+    {"isdefaultprevented", isdefaultprevented},
+    {"stoppropagation", stoppropagation},
+    {"ispropagationstopped", ispropagationstopped},
+    {NULL, NULL}
+  };
+  LuaHelper::open(L, meta, methods, gc);  
+  return 1;
+}
+
+int LuaWheelEventBind::create(lua_State* L) { 
+  LuaHelper::new_shared_userdata<>(L, meta, new ui::WheelEvent());
+  return 1;
+}
+
+int LuaWheelEventBind::gc(lua_State* L) {
+  return LuaHelper::delete_shared_userdata<ui::WheelEvent>(L, meta);
 }
 
 ui::Ornament* LuaOrnament::Clone() { 

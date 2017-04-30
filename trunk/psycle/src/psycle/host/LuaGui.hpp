@@ -220,6 +220,11 @@ class LuaWindowBase : public T, public LuaState {
       T::OnMouseMove(ev);
     }
   }
+  virtual void OnWheel(ui::WheelEvent& ev) {
+    if (!SendWheelEvent(L, "onwheel", ev, *this)) {
+      T::OnWheel(ev);
+    }
+  }
   virtual void OnMouseEnter(ui::MouseEvent& ev) {
     if (!SendMouseEvent(L, "onmouseenter", ev, *this)) {
       T::OnMouseEnter(ev);
@@ -259,6 +264,8 @@ class LuaWindowBase : public T, public LuaState {
                            ui::KeyEvent& ev, ui::Window& window);
   static bool SendMouseEvent(lua_State* L, const::std::string method,
                              ui::MouseEvent& ev, ui::Window& window);
+  static bool SendWheelEvent(lua_State* L, const::std::string method,
+                             ui::WheelEvent& ev, ui::Window& window);
 };
 
 
@@ -469,6 +476,38 @@ struct LuaMouseEventBind {
   }
   static int ispropagationstopped(lua_State* L) {
     LUAEXPORTM(L, meta, &ui::MouseEvent::is_propagation_stopped);
+  }
+};
+
+struct LuaWheelEventBind {
+  static int open(lua_State *L);
+  static const char* meta;
+  static int create(lua_State *L);
+  static int gc(lua_State* L);  
+  static int clientpos(lua_State* L) { 
+    using namespace ui;
+    WheelEvent::Ptr ev = LuaHelper::check_sptr<WheelEvent>(L, 1, meta);
+    LuaHelper::requirenew<LuaPointBind>(L, "psycle.ui.point",
+                                        new Point(ev->client_pos()));
+    return 1;
+  }
+  static int wheeldelta(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::wheel_delta);
+  }
+  static int button(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::button);
+  }
+  static int preventdefault(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::PreventDefault);
+  }
+  static int isdefaultprevented(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::is_default_prevented);
+  }
+  static int stoppropagation(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::StopPropagation);
+  }
+  static int ispropagationstopped(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::is_propagation_stopped);
   }
 };
 
@@ -1137,7 +1176,10 @@ class LuaWindowBind {
       {"invalidate", invalidate},
       {"preventdraw", preventdraw},
       {"enabledraw", enabledraw},      
-      {"flsprevented", flsprevented},      
+      {"flsprevented", flsprevented},
+	  {"preventdrawbackground", preventdrawbackground},
+      {"enabledrawbackground", enabledrawbackground},      
+      {"drawbackgroundprevented", drawbackgroundprevented},     
       {"area", area},
       {"drawregion", drawregion},
       {"setclip", setclip},
@@ -1255,7 +1297,10 @@ class LuaWindowBind {
   static int fls(lua_State *L);
   static int preventdraw(lua_State *L) { LUAEXPORT(L, &T::PreventFls) }
   static int enabledraw(lua_State *L) { LUAEXPORT(L, &T::EnableFls) }
-  static int flsprevented(lua_State *L) { LUAEXPORT(L, &T::fls_prevented) }    
+  static int flsprevented(lua_State *L) { LUAEXPORT(L, &T::fls_prevented) }
+  static int preventdrawbackground(lua_State *L) { LUAEXPORT(L, &T::PreventDrawBackground) }
+  static int enabledrawbackground(lua_State *L) { LUAEXPORT(L, &T::EnableDrawBackground) }
+  static int drawbackgroundprevented(lua_State *L) { LUAEXPORT(L, &T::draw_background_prevented) }    
   static int show(lua_State* L);
   static int hide(lua_State* L) { LUAEXPORT(L, &T::Hide) }
   static int enablepointerevents(lua_State* L) { LUAEXPORT(L, &T::EnablePointerEvents); }
@@ -2925,6 +2970,7 @@ static int lua_ui_requires(lua_State* L) {
   LuaHelper::require<LuaEventBind>(L, "psycle.ui.event");
   LuaHelper::require<LuaKeyEventBind>(L, "psycle.ui.keyevent");
   LuaHelper::require<LuaMouseEventBind>(L, "psycle.ui.mouseevent");
+  LuaHelper::require<LuaMouseEventBind>(L, "psycle.ui.wheelevent");
   LuaHelper::require<LuaOrnamentBind>(L, "psycle.ui.ornament");
   LuaHelper::require<OrnamentFactoryBind>(L, "psycle.ui.ornamentfactory");
   LuaHelper::require<LineBorderBind>(L, "psycle.ui.lineborder");

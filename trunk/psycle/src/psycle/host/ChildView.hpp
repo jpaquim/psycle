@@ -6,6 +6,7 @@
 #include "Psycle.hpp"
 #include "PsycleConfig.hpp"
 #include "Song.hpp"
+#include "Ui.hpp"
 
 
 namespace psycle {
@@ -22,11 +23,12 @@ namespace host {
 
 		class CTransformPatternDlg;
 
-    namespace ui {
-      class Node;          
-      class Window;
-	    class MenuContainer;
-    }
+		namespace ui {
+			class Node;          
+			class Window;
+			class MenuContainer;
+			class Viewport;
+		}
 
 		#define MAX_WIRE_DIALOGS 16
 		#define MAX_DRAW_MESSAGES 32
@@ -155,7 +157,59 @@ namespace host {
 			int drawTrackEnd;
 			int drawLineStart;
 			int drawLineEnd;
-		};		
+		};
+
+		class LuaPlugin;
+
+		class ExtensionWindow : public ui::Group {
+		  public:
+			ExtensionWindow();
+			~ExtensionWindow() {}
+
+			void Push(LuaPlugin& plugin);			   
+			
+			void Push();
+			void Pop();
+			void DisplayTop();
+			bool HasViewport() const { return !viewports_.empty(); }
+			void RemoveViewports();
+			void UpdateMenu(class MenuHandle& menu_handle);
+
+		  protected:
+			virtual void OnSize(const ui::Dimension& dimension) { UpdateAlign(); }
+
+		  private:
+			typedef std::stack<boost::weak_ptr<class LuaPlugin> > Viewports;
+			Viewports viewports_;
+		};
+
+		class MenuHandle {
+		  public:
+			MenuHandle();
+
+			void set_menu(const boost::weak_ptr<ui::Node>& menu_root_node);
+			void clear();
+
+			void add_view_menu_item(Link& link);
+			void add_help_menu_item(Link& link);
+			void add_windows_menu_item(Link& link);
+			void remove_windows_menu_item(class LuaPlugin* plugin);
+			void change_windows_menu_item_text(LuaPlugin* plugin);
+			void replace_help_menu_item(Link& link, int pos);
+			std::string menu_label(const Link& link) const;  
+			void restore_view_menu();
+			CMenu* FindSubMenu(CMenu* parent, const std::string& text);
+
+			boost::shared_ptr<ui::MenuContainer> menu_container_;
+			boost::shared_ptr<ui::Node> extension_menu_;
+			typedef std::map<std::uint16_t, Link> MenuMap;
+			MenuMap menuItemIdMap_;
+			int menu_pos_;
+			HMENU windows_menu_;
+			void InitWindowsMenu();
+			void HandleInput(UINT nID);
+			void ExecuteLink(Link& link);
+		};
 
 		/// child view window
 		class CChildView : public CWnd, public HostViewPort
@@ -247,16 +301,7 @@ namespace host {
 
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
-		public:			
-			void ChangeViewport(ui::Window* canvas);
-			void EraseOldExtensionWindow();
-			void ResizeExtensionView();
-			void ShowExtensionView();						
-			void AddNewExtensionWindow(ui::Window* canvas);
-			void AlignExtensionChild(CWnd* extension_wnd);
-			void UpdateExtensionPosition();
-			bool child_size_changed() const;
-      
+		public:					
 			void LoadHostExtensions();
 			void InitWindowMenu();      
 		public:
@@ -484,8 +529,7 @@ namespace host {
 		public:      
 			virtual void OnAddViewMenu(class Link& link);
 			virtual void OnRestoreViewMenu();
-			virtual void OnAddHelpMenu(class Link& link);
-			virtual void HideExtensionView();
+			virtual void OnAddHelpMenu(class Link& link);			
 			virtual void OnAddWindowsMenu(class Link& link);
 			virtual void OnRemoveWindowsMenu(class LuaPlugin* plugin);
 			virtual void OnReplaceHelpMenu(class Link& link, int pos);
@@ -493,19 +537,11 @@ namespace host {
 			virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
 			virtual void OnExecuteLink(class Link& Link);
 			virtual void OnFlsMain() { Repaint(); }
-		private:
-			void ShowExtensionMenu(LuaPlugin& plugin);
-			void HideExtensionMenu();
-			typedef std::map<std::uint16_t, Link> MenuMap;
-			MenuMap menuItemIdMap_;
-			int menu_pos_;
-			boost::shared_ptr<ui::Node> extension_menu_;
-			HMENU windows_menu_;
-			CMenu* FindSubMenu(CMenu* parent, const std::string& text);
-			std::string menu_label(const Link& link) const;   
-			boost::shared_ptr<ui::MenuContainer> menu_container_;
-			std::stack<boost::weak_ptr<class LuaPlugin> > extensions_view_stack_;
-			boost::shared_ptr<CWnd> m_luaWndView;
+		private:		
+			void UpdateViewMode();
+			void RestoreViewMode();													 					
+			boost::shared_ptr<ExtensionWindow> m_luaWndView;			
+			MenuHandle extension_menu_handle_;
 		public:      
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);

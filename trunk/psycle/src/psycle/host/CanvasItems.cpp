@@ -75,14 +75,14 @@ Window::Ptr Line::Intersect(double x, double y, Event* ev, bool &worked) {
 
 // Text
 Text::Text() : Window(), 
-    vertical_alignment_(AlignStyle::ALTOP),
+    vertical_alignment_(AlignStyle::TOP),
     justify_(JustifyStyle::LEFTJUSTIFY),
     color_(0xFFFFFFFF),    
     is_aligned_(false) {  
 }
 
 Text::Text(const std::string& text) : 
-  vertical_alignment_(AlignStyle::ALTOP),
+  vertical_alignment_(AlignStyle::TOP),
   justify_(JustifyStyle::LEFTJUSTIFY),
   color_(0xFFFFFFFF),
   text_(text),  
@@ -173,10 +173,10 @@ double Text::justify_offset(const Dimension& text_dimension) {
 double Text::vertical_alignment_offset(const Dimension& text_dimension) {
   double result(0);
   switch (vertical_alignment_) {	  
-    case AlignStyle::ALCENTER:        
+    case AlignStyle::CENTER:        
       result = (dim().height() - text_dimension.height())/2;
     break;
-    case AlignStyle::ALBOTTOM:
+    case AlignStyle::BOTTOM:
       result = dim().height() - text_dimension.height();
     break;
     default:      
@@ -215,7 +215,7 @@ Splitter::Splitter() :
 	item_(0) {
   set_auto_size(false, false);
   set_orientation(Orientation::HORZ);
-  set_align(AlignStyle::ALBOTTOM);
+  set_align(AlignStyle::BOTTOM);
   set_position(Rect(Point(), Dimension(0, 5)));
 }
 
@@ -229,10 +229,10 @@ Splitter::Splitter(Orientation::Type orientation) :
   set_auto_size(false, false);
   set_orientation(orientation);
   if (orientation == Orientation::HORZ) {
-	  set_align(AlignStyle::ALBOTTOM);
+	  set_align(AlignStyle::BOTTOM);
 	  set_position(Rect(Point(), Dimension(0, 5)));
   } else {
-	  set_align(AlignStyle::ALLEFT);
+	  set_align(AlignStyle::LEFT);
 	  set_position(Rect(Point(), Dimension(5, 0)));
   }
 }
@@ -266,7 +266,7 @@ void Splitter::OnMouseUp(MouseEvent& ev) {
 	do_split_ = false;
 	ReleaseCapture();
   if (orientation_ == Orientation::VERT) {   
-    if (align() == AlignStyle::ALLEFT) {
+    if (align() == AlignStyle::LEFT) {
       item_->set_position(Rect(item_->position().top_left(),
                                Dimension(position().top_left().x() -
                                item_->position().top_left().x(),
@@ -274,7 +274,7 @@ void Splitter::OnMouseUp(MouseEvent& ev) {
     }
   } else      
   if (orientation_ == Orientation::HORZ) {    
-    if (align() == AlignStyle::ALBOTTOM) {
+    if (align() == AlignStyle::BOTTOM) {
 		  item_->set_position(Rect(item_->position().top_left(),
                                Dimension(item_->position().width(),
                                item_->position().bottom_right().y() -
@@ -398,12 +398,12 @@ void TerminalFrame::Init() {
   view_port->SetSave(false);
   terminal_view_ = boost::shared_ptr<TerminalView>(new TerminalView());
   terminal_view_->set_auto_size(false, false);
-  terminal_view_->set_align(AlignStyle::ALCLIENT);
+  terminal_view_->set_align(AlignStyle::CLIENT);
   view_port->Add(terminal_view_);      
   option_panel_.reset(new Group());
   option_panel_->set_aligner(Aligner::Ptr(new DefaultAligner()));
   option_panel_->set_auto_size(false, true);
-  option_panel_->set_align(AlignStyle::ALBOTTOM);  
+  option_panel_->set_align(AlignStyle::BOTTOM);  
   option_background_.reset(OrnamentFactory::Instance().CreateFill(0xFFCACACA));
   option_panel_->add_ornament(option_background_);  
   view_port->Add(option_panel_);  
@@ -431,7 +431,7 @@ void TerminalFrame::Init() {
 
 void TerminalFrame::AddOptionField(const Window::Ptr& element, double width) { 
   element->set_auto_size(false, false);
-  element->set_align(AlignStyle::ALLEFT);  
+  element->set_align(AlignStyle::LEFT);  
   element->set_position(Rect(Point(), Dimension(width, 20)));    
   option_panel_->Add(element);
 }
@@ -513,7 +513,7 @@ void HeaderGroup::Init() {
 	set_aligner(Aligner::Ptr(new DefaultAligner()));
 	set_auto_size(false, false);
 	Group::Ptr header(new Group());
-	header->set_align(AlignStyle::ALTOP);
+	header->set_align(AlignStyle::TOP);
 	header->set_auto_size(false, true);
 	header->set_aligner(Aligner::Ptr(new DefaultAligner()));
 	header->add_ornament(header_background_);
@@ -524,12 +524,12 @@ void HeaderGroup::Init() {
 	header->Add(header_text_);	
 	header_text_->set_font(Font(FontInfo("Tahoma", 12, 500, FontStyle::ITALIC)));
 	header_text_->set_color(0xFFFFFFFF);
-	header_text_->set_align(AlignStyle::ALLEFT);
+	header_text_->set_align(AlignStyle::LEFT);
 	header_text_->set_auto_size(true, true);
 	header_text_->set_margin(BoxSpace(0, 5, 0, 0));
 	client_.reset(new Group());
 	Group::Add(client_);
-	client_->set_align(AlignStyle::ALCLIENT);
+	client_->set_align(AlignStyle::CLIENT);
 	client_->set_auto_size(false, false);
 	client_->set_aligner(Aligner::Ptr(new DefaultAligner()));
 	client_->set_margin(BoxSpace(0, 5, 5, 5));
