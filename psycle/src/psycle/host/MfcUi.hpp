@@ -1223,9 +1223,9 @@ class WindowTemplateImp : public T, public I {
       assert(imp);	
       int flag =  RDW_INVALIDATE | RDW_UPDATENOW | RDW_NOERASE;     
       if (window() && window()->transparent()) {
-         flag |= RDW_ERASE;      
+        // flag |= RDW_ERASE;      
        }      
-		  ::RedrawWindow(m_hWnd, NULL, imp->crgn(), flag);      
+	   ::RedrawWindow(m_hWnd, NULL, imp->crgn(), flag);      
     }
   }
   

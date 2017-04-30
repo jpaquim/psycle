@@ -27,7 +27,7 @@ void DefaultAligner::CalcDimensions() {
     {
       double diff = current_pos.width();
       switch (item->align()) {
-        case AlignStyle::ALLEFT:
+        case AlignStyle::LEFT:
           current_pos.set_left(current_pos.left() + item_dim.width() + item->non_content_dimension().width());
           if (diff == 0) {          
             current_dim.set_width(current_dim.width() + item_dim.width() + item->non_content_dimension().width());
@@ -40,7 +40,7 @@ void DefaultAligner::CalcDimensions() {
             }
           }          
         break;
-        case AlignStyle::ALRIGHT:        
+        case AlignStyle::RIGHT:        
           if (diff == 0) {          
             current_dim.set_width(current_dim.width() + item_dim.width() + item->margin().width());
             current_pos.set_right(current_pos.right() + item_dim.width() + item->margin().width());
@@ -56,8 +56,8 @@ void DefaultAligner::CalcDimensions() {
 						}
 					}
 					break;
-        case AlignStyle::ALTOP:
-				case AlignStyle::ALBOTTOM:
+        case AlignStyle::TOP:
+				case AlignStyle::BOTTOM:
 					if (diff == 0) {
 						current_dim.set_width(current_dim.width() + item_dim.width() - item->margin().width());
 						current_pos.set_right(current_pos.right() + item_dim.width());
@@ -71,7 +71,7 @@ void DefaultAligner::CalcDimensions() {
 					}
 					current_dim.set_width(current_dim.width());
 					break;
-				case AlignStyle::ALCLIENT:
+				case AlignStyle::CLIENT:
 					current_dim.set_width(current_dim.width());
 					break;
 				default:
@@ -84,7 +84,7 @@ void DefaultAligner::CalcDimensions() {
 		{
 			double old_height = current_pos.height();
 			switch (item->align()) {
-			case AlignStyle::ALTOP:
+			case AlignStyle::TOP:
 				current_pos.set_top(current_pos.top() + item_dim.height() + item->non_content_dimension().height());
 				if (old_height == 0) {
 					current_dim.set_height(current_dim.height() + item_dim.height() + item->non_content_dimension().height());
@@ -97,8 +97,8 @@ void DefaultAligner::CalcDimensions() {
 				}
 				// current_dim.set_height(current_dim.height() + item->margin().height());
 				break;
-			case AlignStyle::ALLEFT:
-			case AlignStyle::ALRIGHT:
+			case AlignStyle::LEFT:
+			case AlignStyle::RIGHT:
 				if (old_height == 0) {
 					current_dim.set_height(current_dim.height() + item_dim.height() + item->non_content_dimension().height());
 					current_pos.set_bottom(current_pos.bottom() + item_dim.height() + item->non_content_dimension().height());
@@ -111,7 +111,7 @@ void DefaultAligner::CalcDimensions() {
 					}
 				}
 				break;
-			case AlignStyle::ALBOTTOM:
+			case AlignStyle::BOTTOM:
 				if (old_height == 0) {
 					current_dim.set_height(current_dim.height() + item_dim.height());
 					current_pos.set_bottom(current_pos.bottom() + item_dim.height());
@@ -125,7 +125,7 @@ void DefaultAligner::CalcDimensions() {
 				}
 				current_dim.set_height(current_dim.height() + item->margin().height());
 				break;
-			case AlignStyle::ALCLIENT:
+			case AlignStyle::CLIENT:
 				if (item->auto_size_height()) {
 					current_dim.set_height(item_dim.height() + item->non_content_dimension().height());
 				}
@@ -150,7 +150,7 @@ void DefaultAligner::SetPositions() {
 		for (iterator i = begin(); i != end(); ++i) {
 			(*i)->reset_align_dimension_changed();			
 			if (!skip_item(*i)) {				
-				if ((*i)->align() == AlignStyle::ALCLIENT) {
+				if ((*i)->align() == AlignStyle::CLIENT) {
 					client = *i;
 				} else {				
 					update_item_pos_except_client(*i);
@@ -176,16 +176,16 @@ void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
   calc_window_dim(window);
 	window->PreventAutoDimension();
 	switch (window->align()) {        
-		case AlignStyle::ALLEFT: 				  				  					
+		case AlignStyle::LEFT: 				  				  					
 			update_left(window);
 		break;      
-		case AlignStyle::ALTOP:        
+		case AlignStyle::TOP:        
 			update_top(window);
 		break;
-		case AlignStyle::ALRIGHT:        
+		case AlignStyle::RIGHT:        
 			update_right(window);
 		break;
-		case AlignStyle::ALBOTTOM:        					
+		case AlignStyle::BOTTOM:        					
 			update_bottom(window);
 		break;
 		default:				 				
@@ -433,7 +433,7 @@ void GridAligner::Realign() {}
 void Viewport::Init() {
   set_auto_size(false, false);
   set_position(Rect(Point::zero(), Dimension(500, 500)));
-  steal_focus_ = fls_prevented_ = false;
+  steal_focus_ = fls_prevented_ = draw_background_prevented_ = false;
   save_ = true; 
 }
 

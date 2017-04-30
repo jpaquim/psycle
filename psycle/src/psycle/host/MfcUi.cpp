@@ -119,27 +119,28 @@ CWnd DummyWindow::dummy_wnd_;
 
 // CanvasView
 BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
-  ON_WM_CREATE()
-  ON_WM_DESTROY()
-  //ON_WM_SETFOCUS()
-  ON_WM_KILLFOCUS()
+	ON_WM_CREATE()
+	ON_WM_DESTROY()
+	//ON_WM_SETFOCUS()
+	ON_WM_KILLFOCUS()
 	ON_WM_PAINT()
-  ON_WM_ERASEBKGND()
+	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN()	
-  ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
-  ON_WM_MOUSELEAVE()
+	ON_WM_MOUSELEAVE()
 	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSEWHEEL()
 	ON_WM_MOUSEHOVER()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
-  ON_WM_KEYDOWN()
+	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
-  ON_WM_SETCURSOR()
-  ON_WM_HSCROLL()
-  ON_WM_VSCROLL()
-  ON_WM_SIZE()  
-  ON_WM_MOUSEACTIVATE()	
+	ON_WM_SETCURSOR()
+	ON_WM_HSCROLL()
+	ON_WM_VSCROLL()
+	ON_WM_SIZE()  
+	ON_WM_MOUSEACTIVATE()	
 END_MESSAGE_MAP()
 
 template<class T, class I>
@@ -220,6 +221,14 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
     MouseEvent ev(previous_mouse_pos_, 2, pMsg->wParam);
     return WorkEvent(ev, &Window::OnMouseUp, window(), pMsg);
   } else
+  if (pMsg->message == WM_MOUSEWHEEL) {
+    previous_mouse_pos_ = MousePos(pMsg->pt);   
+	short x = GET_X_LPARAM(pMsg->lParam);     
+	short y = GET_Y_LPARAM(pMsg->lParam);
+	short zDelta = GET_WHEEL_DELTA_WPARAM(pMsg->wParam);	
+    WheelEvent ev(Point((int)x, (int)y), (int) zDelta, button_state(pMsg->wParam), pMsg->wParam);
+    return WorkEvent(ev, &Window::OnWheel, window(), pMsg);
+  } else 
   if (pMsg->message == WM_MOUSEMOVE) {    
    Point mouse_pos = MousePos(pMsg->pt);
    if (mouse_pos != previous_mouse_pos_) {
@@ -407,8 +416,10 @@ void WindowTemplateImp<T, I>::OnPaint() {
   CPaintDC dc(this);
   if (!is_double_buffered_) {    
 	  ui::Graphics g(&dc);
-	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));    
-    window()->DrawBackground(&g, draw_rgn);    
+	  ui::Region draw_rgn(new ui::mfc::RegionImp(rgn));
+	  if (!window()->draw_background_prevented()) {
+        window()->DrawBackground(&g, draw_rgn);    
+	  }
 	  g.Translate(Point(padding_.left() + border_space_.left(),
                       padding_.top() + border_space_.top()));
 	  OnDevDraw(&g, draw_rgn);
@@ -429,7 +440,9 @@ void WindowTemplateImp<T, I>::OnPaint() {
 	  CBitmap* oldbmp = bufDC.SelectObject(&bmpDC);
 	  Graphics g(&bufDC);
 	  Region draw_rgn(new ui::mfc::RegionImp(rgn));
-    window()->DrawBackground(&g, draw_rgn);	  
+      if (!window()->draw_background_prevented()) {
+        window()->DrawBackground(&g, draw_rgn);    
+	  }  
 	  OnDevDraw(&g, draw_rgn);
 	  g.Dispose();
 	  CRect rc;

@@ -522,6 +522,43 @@ class MouseEvent : public Event {
   int button_, shift_;
 };
 
+class WheelEvent : public Event {
+ public:
+  typedef boost::shared_ptr<WheelEvent> Ptr;
+  typedef boost::shared_ptr<const WheelEvent> ConstPtr;
+  typedef boost::weak_ptr<WheelEvent> WeakPtr;
+  typedef boost::weak_ptr<const WheelEvent> ConstWeakPtr;
+
+  WheelEvent() : button_(0), shift_(0) {}
+  WheelEvent(const Point& client_pos, int wheel_delta, int button, unsigned int shift) : 
+       client_pos_(client_pos),
+	   wheel_delta_(wheel_delta),        
+       button_(button), 
+       shift_(shift) {
+  }
+  WheelEvent(Window* sender,
+             const Point& client_pos,
+			 int wheel_delta,
+             int button,
+			 unsigned int shift) : 
+       sender_(sender),
+       client_pos_(client_pos),
+	   wheel_delta_(wheel_delta),      
+       button_(button), 
+       shift_(shift) {
+  }
+  const Point& client_pos() const { return client_pos_; }
+  int wheel_delta() const { return wheel_delta_; }  
+  int button() const { return button_; }
+  int shift() const { return shift_; }
+  Window* sender() const { return sender_;  }
+
+ private:  
+  Window* sender_;
+  Point client_pos_;
+  int wheel_delta_, button_, shift_;
+};
+
 namespace KeyCodes {
 enum Type { 
   CK_SHIFT = 4,
@@ -866,7 +903,7 @@ friend class Group;
 enum WindowMsg { ONWND, SHOW, HIDE, FOCUS };
 
 namespace AlignStyle {
-enum Type { ALNONE = 1, ALTOP, ALLEFT, ALRIGHT, ALBOTTOM, ALCLIENT, ALCENTER };
+enum Type { ALNONE = 1, TOP, LEFT, RIGHT, BOTTOM, CLIENT, CENTER };
 }
 
 namespace JustifyStyle {
@@ -1212,7 +1249,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   template <class T, class T1>
   void PostOrderTreeTraverse(T& functor, T1& cond);
   Window::Container SubItems();
-  virtual void Add(const Window::Ptr& window) {}
+  virtual void Add(const Window::Ptr& window, bool apply_rules = true) {}
   virtual void Insert(iterator it, const Window::Ptr& window) {}
   virtual void Remove(const Window::Ptr& window) {}
   virtual void RemoveAll() {}
@@ -1258,6 +1295,9 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void PreventFls();
   virtual void EnableFls();
   virtual bool fls_prevented() const;
+  virtual void PreventDrawBackground();
+  virtual void EnableDrawBackground();
+  virtual bool draw_background_prevented() const;
   virtual bool IsSaving() const { return false; }
   virtual void SetCapture();
   virtual void ReleaseCapture();
@@ -1307,6 +1347,10 @@ class Window : public boost::enable_shared_from_this<Window> {
     ev.WorkParent();
     MouseMove(ev);
   }
+  virtual void OnWheel(WheelEvent& ev) {
+    ev.WorkParent();
+    Wheel(ev);
+  }
   virtual void OnMouseEnter(MouseEvent& ev) {
     ev.WorkParent();
     MouseEnter(ev);
@@ -1323,6 +1367,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   boost::signal<void(MouseEvent&)> MouseMove;
   boost::signal<void(MouseEvent&)> MouseEnter;
   boost::signal<void(MouseEvent&)> MouseOut;
+  boost::signal<void(WheelEvent&)> Wheel;
   virtual void OnKeyDown(KeyEvent& ev) { ev.WorkParent(); }
   virtual void OnKeyUp(KeyEvent& ev) { ev.WorkParent(); }
   boost::signal<void(KeyEvent&)> KeyDown;
@@ -1452,7 +1497,7 @@ class Group : public Window {
     }
     return result;
   }  
-  void Add(const Window::Ptr& window);
+  void Add(const Window::Ptr& window, bool apply_rules = true);
   void Insert(iterator it, const Window::Ptr& window);
   void Remove(const Window::Ptr& window);
   void RemoveAll() {        
@@ -1562,7 +1607,7 @@ class FrameAligner : public WindowShowStrategy {
    FrameAligner() :
        width_perc_(-1),
        height_perc_(-1),
-       alignment_(AlignStyle::ALCENTER) {
+       alignment_(AlignStyle::CENTER) {
    }
    FrameAligner(AlignStyle::Type alignment) : 
        width_perc_(-1),
@@ -2725,6 +2770,7 @@ class WindowImp {
   virtual void OnDevMouseMove(MouseEvent& ev);  
   virtual void OnDevMouseEnter(MouseEvent& ev);
   virtual void OnDevMouseOut(MouseEvent& ev);
+  virtual void OnDevWheel(WheelEvent& ev);
   
  private:
   Window* window_;

@@ -509,7 +509,10 @@ void LuaProxy::Reload() {
       assert(host_);
       UpdateFrameCanvas();
       if (oldviewportmode != FRAMEVIEWPORT) {
-        host_->ViewPortChanged(*host_, oldviewportmode);      
+        host_->ViewPortChanged(*host_, oldviewportmode); 
+		if (!host_->viewport().expired()) {
+			host_->viewport().lock()->FLS();
+		}
       }
       OnActivated(2);            
     } catch(std::exception &e) {
@@ -1101,7 +1104,7 @@ void LuaProxy::OpenInFrame() {
     frame_.reset(new Frame());    
     frame_->set_viewport(viewport().lock());
     frame_->close.connect(boost::bind(&LuaProxy::OnFrameClose, this, _1));
-    FrameAligner::Ptr right_frame_aligner(new FrameAligner(AlignStyle::ALRIGHT));
+    FrameAligner::Ptr right_frame_aligner(new FrameAligner(AlignStyle::RIGHT));
     right_frame_aligner->SizeToScreen(0.4, 0.8);
     frame_->set_min_dimension(ui::Dimension(830, 600));
     frame_->Show(right_frame_aligner);
@@ -1129,10 +1132,10 @@ void LuaProxy::RemoveCanvasFromFrame() {
 }
 
 void LuaProxy::ToggleViewPort() {    
-  if (!has_frame()) {
-    OpenInFrame();
+  if (!has_frame()) {    
     assert(host_);
-    host_->ViewPortChanged(*host_, FRAMEVIEWPORT);    
+    host_->ViewPortChanged(*host_, FRAMEVIEWPORT); 
+	OpenInFrame();   
   } else {
     frame_.reset();
     assert(host_);
@@ -1367,14 +1370,6 @@ void HostExtensions::FlsMain() {
 
 void HostExtensions::OnPluginViewPortChanged(LuaPlugin& plugin, int viewport) {
   child_view_->OnHostViewportChange(plugin, viewport);
-}
-
-void HostExtensions::HideActiveLua() {
-  child_view_->HideExtensionView();  
-  if (active_lua_) {
-    active_lua_->OnDeactivated();
-  }
-  active_lua_ = 0;
 }
 
 bool HostExtensions::HasToolBarExtension() const {

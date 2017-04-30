@@ -156,11 +156,11 @@ class Splitter : public Window {
 	void set_orientation(Orientation::Type orientation) {
 		orientation_ = orientation; 
 		if (orientation == Orientation::HORZ) {
-			set_align(AlignStyle::ALBOTTOM);
+			set_align(AlignStyle::BOTTOM);
 			set_position(ui::Rect(Point(), Dimension(0, 5)));
 		} else 
 	  if (orientation == Orientation::VERT) {
-			set_align(AlignStyle::ALLEFT);
+			set_align(AlignStyle::LEFT);
 		  set_position(Rect(Point(), Dimension(5, 0)));
 	  }  		
 	}

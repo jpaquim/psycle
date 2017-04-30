@@ -261,7 +261,6 @@ class HostExtensions {
   void AddHelpMenu(Link& link);
   void AddWindowsMenu(Link& link);
   void OnPluginViewPortChanged(LuaPlugin& plugin, int viewport);
-  void HideActiveLua();
   void RemoveFromWindowsMenu(LuaPlugin* plugin);
   LuaPluginPtr Execute(Link& link);
   void ChangeWindowsMenuText(LuaPlugin* plugin);

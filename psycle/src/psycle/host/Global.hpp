@@ -71,7 +71,6 @@ namespace psycle
      public:
       virtual ~HostViewPort() {}
       virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport) {}
-      virtual void HideExtensionView() {}
       virtual void OnAddViewMenu(class Link& link) {}
       virtual void OnRestoreViewMenu() {} 
       virtual void OnAddHelpMenu(class Link& link) {}

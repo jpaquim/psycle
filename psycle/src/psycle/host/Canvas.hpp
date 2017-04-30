@@ -106,7 +106,10 @@ class Viewport : public ui::Group {
   void InvalidateSave();
   virtual void PreventFls() { fls_prevented_ = true; }
   virtual void EnableFls() { fls_prevented_ = false; }
+  virtual void PreventDrawBackground() { draw_background_prevented_ = true; }
+  virtual void EnableDrawBackground() { draw_background_prevented_ = false; }
   bool fls_prevented() const { return fls_prevented_; }
+  bool draw_background_prevented() const { return draw_background_prevented_; }
   virtual void OnFocusChange(int id) { OnMessage(FOCUS, id); }
   virtual bool is_root() const { return true; }
   virtual void set_properties(const Properties& properties);
@@ -129,7 +132,7 @@ class Viewport : public ui::Group {
     }
   }
  
-  bool save_, steal_focus_, fls_prevented_;  
+  bool save_, steal_focus_, fls_prevented_, draw_background_prevented_;  
   std::auto_ptr<ui::Region> save_rgn_;
   ui::Ornament::Ptr background_;  
 };
