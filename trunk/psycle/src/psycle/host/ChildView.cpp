@@ -33,6 +33,7 @@
 #include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
 #include "LuaPlugin.hpp"
 #include "CanvasItems.hpp"
+#include "ExtensionBar.hpp"
 
 #include <cmath> // SwingFill
 
@@ -303,68 +304,7 @@ namespace psycle { namespace host {
 				}
 			}
 		}
-
-		ExtensionWindow::ExtensionWindow()
-		{
-			using namespace ui;
-			set_aligner(Aligner::Ptr(new DefaultAligner()));
-		}
-					
-		void ExtensionWindow::Pop()
-		{
-			if (HasViewport()) {			
-				RemoveAll();
-				viewports_.pop();
-			}
-			if (viewports_.empty()) {
-				Hide();
-			}
-		}
 		
-		void ExtensionWindow::DisplayTop()
-		{
-			if (HasViewport()) {
-				using namespace ui;	
-				Viewport::Ptr top = viewports_.top().lock()->viewport().lock();
-				top->set_align(AlignStyle::CLIENT);
-				Add(top, false);
-				top->PreventFls();			
-				UpdateAlign();
-				top->EnableFls();
-			}
-		}	
-
-		void ExtensionWindow::Push(LuaPlugin& plugin)
-		{						 					 		 
-			if (!plugin.viewport().expired()) {
-				if (HasViewport()) {
-					RemoveAll();
-				} else {
-					Show();
-				}
-				if (!HasViewport() || viewports_.top().lock().get() != &plugin) {
-					viewports_.push(plugin.shared_from_this());
-				}
-			}			
-		}
-		
-		void ExtensionWindow::RemoveViewports()
-		{						
-			if (HasViewport()) {			
-				RemoveAll();
-				viewports_ = Viewports();
-			}
-		}
-		
-		void ExtensionWindow::UpdateMenu(MenuHandle& menu_handle)
-		{
-			menu_handle.clear();
-			if (HasViewport()) {
-				menu_handle.set_menu(viewports_.top().lock()->proxy().menu_root_node());
-			}
-			::AfxGetMainWnd()->DrawMenuBar();
-		}						
-
 		CChildView::CChildView()
 			:pParentFrame(0)
 			,hRecentMenu(0)
@@ -637,6 +577,7 @@ namespace psycle { namespace host {
 		  if (CWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
 			m_luaWndView.reset(new ExtensionWindow());
+			m_luaWndView->Hide();
 			ui::mfc::WindowImp* mfc_imp = (ui::mfc::WindowImp*) m_luaWndView->imp();
 			mfc_imp->SetParent(this);
 			return 0;
@@ -1402,7 +1343,7 @@ namespace psycle { namespace host {
 		{			        						
 			if (viewMode != view_modes::machine)
 			{        
-				m_luaWndView->RemoveViewports();
+				m_luaWndView->RemoveExtensions();
 				viewMode = view_modes::machine;
 				ShowScrollBar(SB_BOTH,FALSE);
 
@@ -1432,7 +1373,7 @@ namespace psycle { namespace host {
 		{								
 			if (viewMode != view_modes::pattern)
 			{     
-				m_luaWndView->RemoveViewports();	   
+				m_luaWndView->RemoveExtensions();	   
 				RecalcMetrics();
 
 				viewMode = view_modes::pattern;
@@ -2824,27 +2765,18 @@ namespace psycle { namespace host {
 		extension_menu_handle_.remove_windows_menu_item(plugin);     
     }           
 
-    void CChildView::OnChangeWindowsMenuText(LuaPlugin* plugin) {
+    void CChildView::OnChangeWindowsMenuText(LuaPlugin* plugin)
+	{
 		extension_menu_handle_.change_windows_menu_item_text(plugin);
     }
 
+	void CChildView::ShowExtensionInToolbar(LuaPlugin& plugin)
+	{
+		((CMainFrame*)::AfxGetMainWnd())->m_extensionBar.Add(plugin);
+	}
+
     void CChildView::OnHostViewportChange(LuaPlugin& plugin, int viewport) {           
-		switch (viewport) {
-			case TOOLBARVIEWPORT:		{		
-				ui::Window* canvas = plugin.viewport().lock().get();
-				ui::mfc::WindowImp* imp = canvas ? (ui::mfc::WindowImp*) canvas->imp() : 0;      
-				if (imp) {
-				    CWnd* parent = ((CMainFrame*)::AfxGetMainWnd())->m_extensionBar.m_luaWndView.get();
-					ui::mfc::WindowImp* viewport_mfc_imp = (ui::mfc::WindowImp*) imp;
-					viewport_mfc_imp->ShowWindow(SW_HIDE);			
-					viewport_mfc_imp->SetParent(parent);
-					viewport_mfc_imp->ShowWindow(SW_SHOW);
-					((CMainFrame*)::AfxGetMainWnd())->m_extensionBar.set_minimum_dimension(canvas->min_dimension());
-					((CMainFrame*)::AfxGetMainWnd())->m_extensionBar.Resize();
-					canvas->UpdateAlign();
-				}    
-				}
-			break;
+		switch (viewport) {			
 			case CHILDVIEWPORT:
 				UpdateViewMode();				
 				ShowScrollBar(SB_BOTH,FALSE);							
@@ -2871,7 +2803,7 @@ namespace psycle { namespace host {
 
 	void CChildView::RestoreViewMode()
 	{
-		if (!m_luaWndView->HasViewport()) {				
+		if (!m_luaWndView->HasExtensions()) {				
 			viewMode = oldViewMode;
 			Repaint();			
 		}		

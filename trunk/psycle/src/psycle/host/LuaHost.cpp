@@ -1369,7 +1369,14 @@ void HostExtensions::FlsMain() {
 }
 
 void HostExtensions::OnPluginViewPortChanged(LuaPlugin& plugin, int viewport) {
-  child_view_->OnHostViewportChange(plugin, viewport);
+	switch (viewport) {
+		case TOOLBARVIEWPORT:
+			child_view_->ShowExtensionInToolbar(plugin);
+		break;
+		default:
+			child_view_->OnHostViewportChange(plugin, viewport);
+		break;
+	}	
 }
 
 bool HostExtensions::HasToolBarExtension() const {

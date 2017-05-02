@@ -23,6 +23,8 @@ namespace host {
 
 		class CTransformPatternDlg;
 
+		class ExtensionWindow;
+
 		namespace ui {
 			class Node;          
 			class Window;
@@ -159,29 +161,7 @@ namespace host {
 			int drawLineEnd;
 		};
 
-		class LuaPlugin;
-
-		class ExtensionWindow : public ui::Group {
-		  public:
-			ExtensionWindow();
-			~ExtensionWindow() {}
-
-			void Push(LuaPlugin& plugin);			   
-			
-			void Push();
-			void Pop();
-			void DisplayTop();
-			bool HasViewport() const { return !viewports_.empty(); }
-			void RemoveViewports();
-			void UpdateMenu(class MenuHandle& menu_handle);
-
-		  protected:
-			virtual void OnSize(const ui::Dimension& dimension) { UpdateAlign(); }
-
-		  private:
-			typedef std::stack<boost::weak_ptr<class LuaPlugin> > Viewports;
-			Viewports viewports_;
-		};
+		class LuaPlugin;		
 
 		class MenuHandle {
 		  public:
@@ -536,6 +516,7 @@ namespace host {
 			virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin);
 			virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport);
 			virtual void OnExecuteLink(class Link& Link);
+			virtual void ShowExtensionInToolbar(class LuaPlugin& plugin);
 			virtual void OnFlsMain() { Repaint(); }
 		private:		
 			void UpdateViewMode();

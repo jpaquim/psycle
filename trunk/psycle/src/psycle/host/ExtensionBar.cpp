@@ -9,18 +9,83 @@
 #include "PsycleConfig.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
+#include "Canvas.hpp"
+#include "LuaPlugin.hpp"
+#include "MfcUi.hpp"
 
-namespace psycle{ namespace host{
+namespace psycle {
+namespace host {
+
+	ExtensionWindow::ExtensionWindow()
+	{
+		using namespace ui;
+		set_aligner(Aligner::Ptr(new DefaultAligner()));
+	}
+					
+	void ExtensionWindow::Pop()
+	{
+		if (HasExtensions()) {			
+			RemoveAll();
+			extensions_.pop();
+		}
+		if (extensions_.empty()) {
+			Hide();
+		}
+	}
+		
+	void ExtensionWindow::DisplayTop()
+	{
+		if (HasExtensions()) {
+			using namespace ui;	
+			Viewport::Ptr top = extensions_.top().lock()->viewport().lock();
+			top->set_align(AlignStyle::CLIENT);
+			Add(top, false);
+			top->PreventFls();			
+			UpdateAlign();
+			top->EnableFls();
+		}
+	}	
+
+	void ExtensionWindow::Push(LuaPlugin& plugin)
+	{						 					 		 
+		if (!plugin.viewport().expired()) {
+			if (HasExtensions()) {
+				RemoveAll();
+			} else {
+				Show();
+			}
+			if (!HasExtensions() || extensions_.top().lock().get() != &plugin) {
+				extensions_.push(plugin.shared_from_this());
+			}
+		}			
+	}
+		
+	void ExtensionWindow::RemoveExtensions()
+	{						
+		if (HasExtensions()) {			
+			RemoveAll();
+			extensions_ = Extensions();
+			Hide();
+		}
+	}
+		
+	void ExtensionWindow::UpdateMenu(MenuHandle& menu_handle)
+	{
+		menu_handle.clear();
+		if (HasExtensions()) {
+			menu_handle.set_menu(extensions_.top().lock()->proxy().menu_root_node());
+		}
+		::AfxGetMainWnd()->DrawMenuBar();
+	}						
+
 
 	extern CPsycleApp theApp;
 
 	IMPLEMENT_DYNAMIC(ExtensionBar, CDialogBar)
 
 	ExtensionBar::ExtensionBar()
-	   : m_luaWndView(new CWnd()),
-		 minimum_dimension_(ui::Dimension(500, 200))
 	{
-	  m_sizeFloating.SetSize(500, 200);
+		m_sizeFloating.SetSize(500, 200);
 	}
 
 	ExtensionBar::~ExtensionBar()
@@ -28,10 +93,12 @@ namespace psycle{ namespace host{
 	}
 
 	int ExtensionBar::OnCreate(LPCREATESTRUCT lpCreateStruct) {
-		if (CDialogBar::OnCreate(lpCreateStruct) == -1)
+		if (CDialogBar::OnCreate(lpCreateStruct) == -1) {
 			return -1;
-		m_luaWndView->Create(NULL, NULL, WS_CHILD | WS_VISIBLE,
-			CRect(10, 0, 1024, 60), this, AFX_IDW_PANE_FIRST + 1, NULL);		
+		}
+		m_luaWndView.reset(new ExtensionWindow());
+		ui::mfc::WindowImp* mfc_imp = (ui::mfc::WindowImp*) m_luaWndView->imp();
+		mfc_imp->SetParent(this);		
 		return 0;
 	}
 
@@ -45,12 +112,6 @@ namespace psycle{ namespace host{
 		ON_WM_CREATE()
 		ON_MESSAGE(WM_INITDIALOG, OnInitDialog )
 	END_MESSAGE_MAP()
-
-	void ExtensionBar::InitializeValues(CMainFrame* frame, CChildView* view)
-	{
-		m_pParentMain = frame;
-		m_pWndView = view;		
-	}
 
 	// SequenceBar message handlers
 	LRESULT ExtensionBar::OnInitDialog ( WPARAM wParam, LPARAM lParam)
@@ -66,64 +127,36 @@ namespace psycle{ namespace host{
 	}
 
 	CSize ExtensionBar::CalcDynamicLayout(int length, DWORD dwMode) {
+		using namespace ui;
 	    if (docked(dwMode)) {
 			CRect rc;
 			m_pDockBar->GetParent()->GetClientRect(&rc);
-			int min_height = minimum_dimension_.height();
-			m_luaWndView->MoveWindow(CRect(10, 0, rc.Width(), min_height));
-			Resize();
-			return CSize(rc.Width(), min_height);
+			m_luaWndView->set_position(Rect(Point(10, 0),
+				Dimension(rc.Width(), m_luaWndView->min_dimension().height())));
+			return CSize(rc.Width(), m_luaWndView->min_dimension().height());
 		}
 		if (dwMode & LM_MRUWIDTH) {
-			m_luaWndView->MoveWindow(CRect(0, 0, m_sizeFloating.cx, m_sizeFloating.cy));
-			CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
-			if (child) {
-				child->MoveWindow(0, 0,  m_sizeFloating.cx, m_sizeFloating.cy);       
-			}
+			m_luaWndView->set_position(Rect(Point(), Dimension(m_sizeFloating.cx, m_sizeFloating.cy)));			
 			return m_sizeFloating;
 		} 
 		if (dwMode & LM_LENGTHY) {
 			m_sizeFloating.cy = length;
-			m_luaWndView->MoveWindow(CRect(0, 0, m_sizeFloating.cx, m_sizeFloating.cy));
-			CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
-			if (child) {
-				child->MoveWindow(0, 0,  m_sizeFloating.cx, m_sizeFloating.cy);       
-			}
+			m_luaWndView->set_position(Rect(Point(), Dimension(m_sizeFloating.cx, m_sizeFloating.cy)));			
 			return CSize(m_sizeFloating.cx, m_sizeFloating.cy);
 		}
 		else {
 			m_sizeFloating.cx = length;
-			m_luaWndView->MoveWindow(CRect(0, 0, m_sizeFloating.cx, m_sizeFloating.cy));
-			CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
-			if (child) {
-				child->MoveWindow(0, 0,  m_sizeFloating.cx, m_sizeFloating.cy);       
-			}
+			m_luaWndView->set_position(Rect(Point(), Dimension(m_sizeFloating.cx, m_sizeFloating.cy)));			
 			return CSize(m_sizeFloating.cx, m_sizeFloating.cy);
 		}		
 	}
-
-	void ExtensionBar::Resize() {	 
-		CRect rc;
-		m_pDockBar->GetParent()->GetClientRect(&rc);
-		int min_height = minimum_dimension_.height();
-		CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
-		if (child) {
-			child->MoveWindow(0, 0,  rc.Width(), min_height);        
-		}
-	}
-
-	void ExtensionBar::set_minimum_dimension(const ui::Dimension& dimension) {
-		minimum_dimension_ = dimension;
-		CFrameWnd* frm = (CFrameWnd*) (::AfxGetMainWnd());
-		frm->RecalcLayout();
-	}
-
-	void ExtensionBar::ResizeFloating() {
-		m_luaWndView->MoveWindow(CRect(0, 0, m_sizeFloating.cx, m_sizeFloating.cy));
-		CWnd* child = m_luaWndView->GetWindow(GW_CHILD);
-		if (child) {
-			child->MoveWindow(0, 0,  m_sizeFloating.cx, m_sizeFloating.cy);       
-		}
-	}
+	
+	void ExtensionBar::Add(LuaPlugin& plugin)
+	{
+		m_luaWndView->set_min_dimension(plugin.viewport().lock()->min_dimension());									
+		m_luaWndView->Push(plugin);				
+		m_luaWndView->DisplayTop();
+		((CMainFrame*)::AfxGetMainWnd())->RecalcLayout();		
+	}	
 
 }}

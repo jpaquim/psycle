@@ -267,7 +267,6 @@ namespace psycle { namespace host {
 			}
 
 			//Extension Bar
-			m_extensionBar.InitializeValues(this, &m_wndView);
 			if (!m_extensionBar.Create(this, IDD_EXTENSIONBAR, CBRS_TOP | CBRS_FLYBY| CBRS_SIZE_DYNAMIC, IDD_EXTENSIONBAR))
 			{
 				TRACE0("Failed to create songbar\n");

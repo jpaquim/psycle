@@ -67,20 +67,24 @@ namespace psycle
 				static MachineLoader * pMacLoad;
 		};
 
-    class HostViewPort {
-     public:
-      virtual ~HostViewPort() {}
-      virtual void OnHostViewportChange(class LuaPlugin& plugin, int viewport) {}
-      virtual void OnAddViewMenu(class Link& link) {}
-      virtual void OnRestoreViewMenu() {} 
-      virtual void OnAddHelpMenu(class Link& link) {}
-      virtual void OnReplaceHelpMenu(class Link& link, int pos) {}
-      virtual void OnAddWindowsMenu(class Link& link) {}
-      virtual void OnRemoveWindowsMenu(class LuaPlugin* plugin) {}
-      virtual void OnChangeWindowsMenuText(class LuaPlugin* plugin) {}   
-	  virtual void OnExecuteLink(class Link& Link) {}
-	  virtual void OnFlsMain() {}  
-    };
+		class LuaPlugin;
+		class Link;
+
+		class HostViewPort {
+			public:
+				virtual ~HostViewPort() {}
+				virtual void OnHostViewportChange(LuaPlugin& plugin, int viewport) {}
+				virtual void OnAddViewMenu(Link& link) {}
+				virtual void OnRestoreViewMenu() {} 
+				virtual void OnAddHelpMenu(Link& link) {}
+				virtual void OnReplaceHelpMenu(Link& link, int pos) {}
+				virtual void OnAddWindowsMenu(Link& link) {}
+				virtual void OnRemoveWindowsMenu(LuaPlugin* plugin) {}
+				virtual void OnChangeWindowsMenuText(LuaPlugin* plugin) {}   
+				virtual void OnExecuteLink(Link& Link) {}
+				virtual void OnFlsMain() {}
+				virtual void ShowExtensionInToolbar(LuaPlugin& plugin) {}
+		};
  
 	} // host
 } // psycle

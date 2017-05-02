@@ -23,3 +23,4 @@ local link = {
   userinterface = psycle.MDI
 }
 psycle.addmenu("view", link)  
+
