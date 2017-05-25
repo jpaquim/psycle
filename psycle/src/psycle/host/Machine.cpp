@@ -1414,7 +1414,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 		bool Machine::LoadParamMapping(RiffFile* pFile, int version)
 		{
-			int nummaps=0;
+			uint8_t nummaps=0;
 			if (!pFile->Expect("PMAP",4)) {
 				return false;
 			}
