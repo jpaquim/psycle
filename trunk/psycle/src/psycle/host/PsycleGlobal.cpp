@@ -45,7 +45,7 @@ namespace psycle
 			delete pMidiInput; pMidiInput = 0;
 			delete pInputHandler; pInputHandler = 0;
 			delete pConfig; pConfig = 0;
-      delete pActions; pActions = 0;
+			delete pActions; pActions = 0;
 		}
 	}
 }

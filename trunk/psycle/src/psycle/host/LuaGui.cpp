@@ -28,6 +28,8 @@ ui::MultiType PsycleStock::value(int stock_key) const {
     case PVROWBEAT: result = pv_cfg->rowbeat; break;
     case PVSEPARATOR: result = pv_cfg->separator; break;
     case PVFONT: result = pv_cfg->font; break;
+	case PVFONTSEL: result = pv_cfg->fontSel; break;
+	case PVFONTPLAY : result = pv_cfg->fontPlay; break;
     case PVCURSOR: result = pv_cfg->cursor; break;
     case PVSELECTION: result = pv_cfg->selection; break;
     case PVPLAYBAR: result = pv_cfg->playbar; break;    
@@ -57,6 +59,8 @@ std::string PsycleStock::key_tostring(int stock_key) const {
     case PVROWBEAT: result = "stock.color.PVROWBEAT"; break;
     case PVSEPARATOR: result = "stock.color.PVSEPARATOR"; break;
     case PVFONT: result = "stock.color.PVFONT"; break;
+	case PVFONTSEL: result = "stock.color.PVFONTSEL"; break;
+	case PVFONTPLAY : result = "stock.color.PVFONTPLAY"; break;
     case PVCURSOR: result = "stock.color.PVCURSOR"; break;
     case PVSELECTION: result = "stock.color.PVSELECTION"; break;
     case PVPLAYBAR: result = "stock.color.PVPLAYBAR"; break;
@@ -335,14 +339,14 @@ int LuaFileObserverBind::stopwatching(lua_State* L) {
 // LuaSystemMetricsBind
 int  LuaSystemMetrics::open(lua_State *L) {
   static const luaL_Reg funcs[] = {
-    {"screensize", screensize},    
+    {"screendimension", screendimension},    
     {NULL, NULL}
   };
   luaL_newlib(L, funcs);
   return 1;
 }
 
-int LuaSystemMetrics::screensize(lua_State* L) {
+int LuaSystemMetrics::screendimension(lua_State* L) {
   using namespace ui;
   LuaHelper::requirenew<LuaDimensionBind>(
       L, "psycle.ui.dimension", 
@@ -667,7 +671,7 @@ void LuaWindowBase<T>::set_properties(const ui::Properties& properties) {
   try {
     if (in.open("setproperties")) {
       LuaHelper::new_lua_module(L, "psycle.orderedtable");      
-      for (Properties::Container::const_iterator it = properties.elements().begin(); it != properties.elements().end(); ++it) {    
+      for (Properties::const_iterator it = properties.begin(); it != properties.end(); ++it) {    
         const Property& p = it->second;
         MultiType value = p.value();
         if (value.which() != 0) {
@@ -1008,11 +1012,18 @@ int LuaWindowBind<T>::align(lua_State* L) {
 
 template <class T>
 int LuaWindowBind<T>::setcursorposition(lua_State* L) {
-  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);  
-  window->SetCursorPosition(ui::Point(luaL_checknumber(L, 2),
-                                      luaL_checknumber(L, 3)));
+  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);    
+  boost::shared_ptr<ui::Point> pt = LuaHelper::check_sptr<ui::Point>(L, 2, LuaPointBind::meta);
+  window->SetCursorPosition(*pt.get());  
   return LuaHelper::chaining(L);
-} 
+}
+
+template <class T>
+int LuaWindowBind<T>::cursorposition(lua_State* L) {   
+	boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);    
+	LuaHelper::requirenew<LuaPointBind>(L, "psycle.ui.point", new ui::Point(window->CursorPosition()));
+	return 1;    
+}
 
 template <class T>
 int LuaWindowBind<T>::setpadding(lua_State* L) {
@@ -1054,6 +1065,16 @@ int LuaWindowBind<T>::setcursor(lua_State* L) {
   CursorStyle::Type style = (CursorStyle::Type) (int) luaL_checknumber(L, 2);
   window->SetCursor(style);
   return LuaHelper::chaining(L);
+}
+
+template <class T>
+int LuaWindowBind<T>::cursor(lua_State* L) {
+  using namespace ui;
+  int err = LuaHelper::check_argnum(L, 1, "Wrong number of arguments.");
+  if (err!=0) return err;
+  boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
+  lua_pushinteger(L, static_cast<int>(window->cursor()));
+  return 1;
 }
 
 template <class T>
@@ -1469,6 +1490,8 @@ int LuaGraphicsBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {  
     {"new", create},
     {"translate", translate},
+	{"retranslate", retranslate},
+	{"cleartranslation", cleartranslations},
     {"setcolor", setcolor},
     {"setfill", setfill},
     {"setstroke", setstroke},
@@ -1505,6 +1528,7 @@ int LuaGraphicsBind::open(lua_State *L) {
     {"lineto", lineto},
     {"curveto", curveto},
     {"arcto", arcto},
+	{"dispose", dispose},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);  
@@ -1512,7 +1536,16 @@ int LuaGraphicsBind::open(lua_State *L) {
 
 int LuaGraphicsBind::create(lua_State* L) {
   using namespace ui;
-  Graphics* g = Systems::instance().CreateGraphics();  
+  Graphics* g(0);
+  int n = lua_gettop(L);
+  if (n==1) {
+    g = Systems::instance().CreateGraphics(); 
+  } else if (n==2) {
+    Image::Ptr image = LuaHelper::check_sptr<Image>(L, 2, LuaImageBind::meta);
+	g = Systems::instance().CreateGraphics(image);
+  } else {
+    luaL_error(L, "Wrong number of arguments. (self [, psycle.ui.image])");
+  }
   LuaHelper::new_shared_userdata<>(L, meta, g);
   return 1;  
 }
@@ -1752,7 +1785,15 @@ void LuaWindow::Draw(ui::Graphics* g, ui::Region& draw_rgn) {
 
 // LuaScopeWindow
 
-LuaScopeWindow::LuaScopeWindow(lua_State* L) : LuaWindow(L), scope_width_(88), scope_height_(50), scale_x_(10), scope_mid_(25), clip_(false), hold(false) {
+LuaScopeWindow::LuaScopeWindow(lua_State* L) : 
+		LuaWindow(L),
+		scope_width_(88),
+		scope_height_(50),
+		scale_x_(10),
+		scope_mid_(25), 		
+		mac_count_(0),
+		clip_(false),
+		hold(false) {
 	for(int c=0; c<MAX_MACHINES; ++c) {
 		scope_memories_.push_back(boost::shared_ptr<ScopeMemory>());
 	}  
@@ -1773,8 +1814,13 @@ void LuaScopeWindow::Draw(ui::Graphics* g, ui::Region& draw_rgn) {
   g->set_color(0xFFFFFFFF);  
   Song& song = Global::song();
   double y = 0;
-  double x = 0;  
-  for(int c=0; c<MAX_MACHINES; ++c) {	
+  double x = 0;   
+  int count = MachineCount();
+  if (count != mac_count_) {
+    CalcScopeSize(count, position().dimension());
+	mac_count_ = count;
+  }   
+  for(int c=0; c<MAX_MACHINES; ++c) {
     Machine* mac = song._pMachine[c];
 	if (mac) {	  
 	  if (!mac->HasScopeMemories()) {	    
@@ -1911,16 +1957,28 @@ int LuaScopeWindow::GetY(float f, float mult) {
 	return int(f);
 }
 
-void LuaScopeWindow::OnSize(const ui::Dimension& dimension) {    
-  MachineGroup* machine_group = Global::song().machines_.get();
-  int mac_num = machine_group->size();
+void LuaScopeWindow::OnSize(const ui::Dimension& dimension) {
+  CalcScopeSize(MachineCount(), dimension);
+}
+
+void LuaScopeWindow::CalcScopeSize(int mac_num, const ui::Dimension& dimension) {
   if ((mac_num % 2) != 0) {
-      mac_num++;
+      ++mac_num;
   }
   scope_width_ = dimension.width() / mac_num * 2;
   scope_height_ = dimension.height() / 2;
   scope_mid_ = scope_height_ / 2;
   scale_x_ = 880 / scope_width_;
+}
+
+int LuaScopeWindow::MachineCount() const {
+	int result(0);
+	for (int i = 0; i < MAX_MACHINES; ++i) {
+		if (Global::song()._pMachine[i] != 0) {
+			++result;
+		}
+	}
+	return result;
 }
 
 void LuaScopeWindow::OnTimerViewRefresh() {
@@ -1984,7 +2042,7 @@ int LuaImageBind::open(lua_State *L) {
     {"cut", cut},
     {"save", save},
     {"settransparent", settransparent},
-    {"size", size},
+    {"dimension", dimension},
     {"resize", resize},
     {"rotate", rotate},
     {"graphics", graphics},
@@ -2117,26 +2175,28 @@ int LuaImageBind::settransparent(lua_State* L) {
 
 int LuaImageBind::reset(lua_State* L) {
   using namespace ui;
-  int err = LuaHelper::check_argnum(L, 3, "self, x, y");
-  if (err!=0) {
+  int err = LuaHelper::check_argnum(L, 2, "self, dimension");
+  if (err != 0) {
     return err;
   }
-  Image::Ptr img = LuaHelper::check_sptr<Image>(L, 1, meta);  
-  img->Reset(Dimension(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+  Image::Ptr image = LuaHelper::check_sptr<Image>(L, 1, meta); 
+  Dimension::Ptr dimension =
+        LuaHelper::check_sptr<Dimension>(L, 2, LuaDimensionBind::meta); 
+  image->Reset(*dimension.get());
   return LuaHelper::chaining(L);
 }
 
-int LuaImageBind::size(lua_State* L) {
+int LuaImageBind::dimension(lua_State* L) {
   using namespace ui;
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err != 0) {
     return err;
   }
-  Image::Ptr img = LuaHelper::check_sptr<Image>(L, 1, meta);  
-  Dimension dim = img->dim();
-  lua_pushnumber(L, dim.width());
-  lua_pushnumber(L, dim.height());
-  return 2;
+  Image::Ptr image = LuaHelper::check_sptr<Image>(L, 1, meta);
+  LuaHelper::requirenew<LuaDimensionBind>(
+      L, "psycle.ui.dimension", 
+      new Dimension(image->dim()));
+  return 1;
 }
 
 std::string LuaImagesBind::meta = "psyimagesbind";
@@ -2152,7 +2212,11 @@ int LuaPointBind::open(lua_State *L) {
     {"x", x},
     {"sety", sety},
     {"y", y},
-    {"offset", offset},
+	{"offset", offset},
+    {"add", add},
+	{"sub", sub},
+	{"mul", mul},
+	{"div", div},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -2163,6 +2227,10 @@ int LuaPointBind::create(lua_State* L) {
   int n = lua_gettop(L);
   if (n == 1) {
     LuaHelper::new_shared_userdata<>(L, meta, new Point());
+  } else
+  if (n == 2) {
+    Point::Ptr other = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta); 
+    LuaHelper::new_shared_userdata<>(L, meta, new Point(*other.get()));
   } else
   if (n == 3) {
     double x = luaL_checknumber(L, 2);
@@ -2176,6 +2244,64 @@ int LuaPointBind::create(lua_State* L) {
 
 int LuaPointBind::gc(lua_State* L) {
   return LuaHelper::delete_shared_userdata<ui::Point>(L, meta);
+}
+
+int LuaPointBind::add(lua_State *L) {
+	using namespace ui;
+	Point::Ptr self = LuaHelper::check_sptr<Point>(L, 1, LuaPointBind::meta);
+	Point::Ptr rhs = LuaHelper::test_sptr<Point>(L, 2, LuaPointBind::meta); 
+	if (rhs) {
+	  *self.get() += *rhs.get();
+	} else {
+	  double a = luaL_checknumber(L, 2);
+	  *self.get() += Point(a, a);
+	}
+	return LuaHelper::chaining(L);
+}
+
+int LuaPointBind::sub(lua_State *L) {
+	using namespace ui;
+	Point::Ptr self = LuaHelper::check_sptr<Point>(L, 1, LuaPointBind::meta);
+	Point::Ptr rhs = LuaHelper::test_sptr<Point>(L, 2, LuaPointBind::meta); 
+	if (rhs) {
+	  *self.get() -= *rhs.get();
+	} else {
+	  double a = luaL_checknumber(L, 2);
+	  *self.get() -= Point(a, a);
+	}
+	return LuaHelper::chaining(L);
+}
+
+int LuaPointBind::mul(lua_State *L) {
+	using namespace ui;
+	Point::Ptr self = LuaHelper::check_sptr<Point>(L, 1, LuaPointBind::meta);
+	Point::Ptr rhs = LuaHelper::test_sptr<Point>(L, 2, LuaPointBind::meta); 
+	if (rhs) {
+	  *self.get() *= *rhs.get();
+	} else {
+	  double a = luaL_checknumber(L, 2);
+	  *self.get() *= Point(a, a);
+	}
+	return LuaHelper::chaining(L);
+}
+
+int LuaPointBind::div(lua_State *L) {
+	using namespace ui;
+	Point::Ptr self = LuaHelper::check_sptr<Point>(L, 1, LuaPointBind::meta);
+	Point::Ptr rhs = LuaHelper::test_sptr<Point>(L, 2, LuaPointBind::meta); 
+	if (rhs) {
+	  if (rhs->x() == 0 || rhs->y() == 0) {
+	    return luaL_error(L, "Math error. Division by zero."); 
+	  }
+	  *self.get() /= *rhs.get();
+	} else {
+	  double a = luaL_checknumber(L, 2);
+	  if (a == 0) {
+	    return luaL_error(L, "Math error. Division by zero."); 
+	  }
+	  *self.get() /= Point(a, a);
+	}
+	return LuaHelper::chaining(L);
 }
 
 // DimensionBind
@@ -2231,9 +2357,14 @@ int LuaUiRectBind::open(lua_State *L) {
     {"width", width},
 	{"setheight", setheight},
     {"height", height},
+	{"dimension", dimension},
+	{"settopleft", settopleft},
     {"topleft", topleft},
+	{"setbottomright", setbottomright},
     {"bottomright", bottomright},
     {"intersect", intersect},
+	{"offset", offset},
+	{"move", move},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods,  gc);
@@ -2242,10 +2373,14 @@ int LuaUiRectBind::open(lua_State *L) {
 int LuaUiRectBind::create(lua_State* L) {
   using namespace ui;
   int n = lua_gettop(L);
-  if (n==1) {
+  if (n == 1) {
     LuaHelper::new_shared_userdata<>(L, meta, new Rect());
   } else
-  if (n==3) {    
+  if (n == 2) {
+    Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 2, LuaUiRectBind::meta);
+	LuaHelper::new_shared_userdata<>(L, meta, new Rect(*rect.get()));
+  } else
+  if (n == 3) {    
     Point::Ptr top_left = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
 	Point::Ptr bottom_right = LuaHelper::test_sptr<Point>(L, 3, LuaPointBind::meta);
 	if (bottom_right) {
@@ -2285,6 +2420,14 @@ int LuaUiRectBind::set(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+int LuaUiRectBind::settopleft(lua_State *L) {
+	using namespace ui;
+	Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+	Point::Ptr topleft = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
+	rect->set_top_left(*topleft.get());
+	return LuaHelper::chaining(L);
+}
+
 int LuaUiRectBind::topleft(lua_State *L) {
   using namespace ui;
   Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
@@ -2292,6 +2435,14 @@ int LuaUiRectBind::topleft(lua_State *L) {
                                       "psycle.ui.point", 
                                        new Point(rect->top_left()));
   return 1;
+}
+
+int LuaUiRectBind::setbottomright(lua_State *L) {
+	using namespace ui;
+	Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+	Point::Ptr bottomright = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
+	rect->set_bottom_right(*bottomright.get());
+	return LuaHelper::chaining(L);
 }
 
 int LuaUiRectBind::bottomright(lua_State *L) {
@@ -2423,6 +2574,7 @@ int LuaKeyEventBind::open(lua_State *L) {
     {"keycode", keycode},
     {"shiftkey", shiftkey},
     {"ctrlkey", ctrlkey},
+	{"extendedkey", extendedkey},
     {"preventdefault", preventdefault},
     {"isdefaultprevented", isdefaultprevented},
     {"stoppropagation", stoppropagation},
@@ -2451,6 +2603,7 @@ int LuaMouseEventBind::open(lua_State *L) {
     {"new", create},
     {"button", button},   
     {"clientpos", clientpos},
+	{"windowpos", windowpos},
     {"preventdefault", preventdefault},
     {"isdefaultprevented", isdefaultprevented},
     {"stoppropagation", stoppropagation},
@@ -2477,7 +2630,9 @@ int LuaWheelEventBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
 	{"wheeldelta", wheeldelta},
-    {"button", button},   
+    {"button", button},
+	{"shiftkey", shiftkey}, 
+	{"ctrlkey", ctrlkey},    
     {"clientpos", clientpos},
     {"preventdefault", preventdefault},
     {"isdefaultprevented", isdefaultprevented},

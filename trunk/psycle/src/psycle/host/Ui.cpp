@@ -490,10 +490,14 @@ void Image::Rotate(float radians) {
 Graphics::Graphics() : imp_(ui::ImpFactory::instance().CreateGraphicsImp()) {
 }
 
-Graphics::Graphics(bool debug) : imp_(ui::ImpFactory::instance().CreateGraphicsImp(debug)) {
-}
+/*Graphics::Graphics(bool debug) : imp_(ui::ImpFactory::instance().CreateGraphicsImp(debug)) {
+}*/
 
 Graphics::Graphics(GraphicsImp* imp)  : imp_(imp) {
+}
+
+Graphics::Graphics(const Image::Ptr& image) : imp_(ui::ImpFactory::instance().CreateGraphicsImp(image)) {
+  
 }
 
 #ifdef _WIN32
@@ -641,6 +645,22 @@ void Graphics::SetPenWidth(double width) {
 void Graphics::Translate(const Point& delta) {
   assert(imp_.get()); 
   imp_->DevTranslate(delta);
+  translations_.push(delta);
+}
+
+void Graphics::Retranslate() {
+  if (translations_.size() > 0) {
+	  ui::Point& top = translations_.top();
+	  assert(imp_.get()); 
+	  imp_->DevTranslate(ui::Point(-top.x(), -top.y()));
+	  translations_.pop();
+  }
+}
+
+void Graphics::ClearTranslations() {
+  while (translations_.size() > 0) {
+    Retranslate();
+  }
 }
 
 void Graphics::SetFont(const Font& font) {
@@ -812,7 +832,7 @@ bool InheritedProperties::is_inherited(const std::string& name) const {
 }
 
 //Rules
-void Rules::ApplyTo(const Window::Ptr& window) {
+void Rules::ApplyTo(Window* window) {
 #ifdef _WIN32
    // linux outcommented because gcc errors here
   struct {    
@@ -1347,6 +1367,10 @@ void Window::SetCursorPosition(const ui::Point& position) {
   }
 }
 
+Point Window::CursorPosition() const {
+  return imp() ? imp_->DevCursorPosition() : Point();
+}
+
 void Window::SetCursor(CursorStyle::Type style) {
   if (imp_.get()) {
     imp_->DevSetCursor(style);
@@ -1585,7 +1609,7 @@ void Group::Add(const Window::Ptr& window, bool apply_rules) {
   window->set_parent(this);
   windows_.push_back(window); 
   if (apply_rules) {
-	rules_.ApplyTo(window);    
+	rules_.ApplyTo(window.get());    
   }
   window->needsupdate();
 }
@@ -1596,7 +1620,7 @@ void Group::Insert(iterator it, const Window::Ptr& window) {
   }        
   windows_.insert(it, window);
   window->set_parent(this);
-  rules_.ApplyTo(window);
+  rules_.ApplyTo(window.get());
   window->needsupdate(); 
 }
 
@@ -3220,14 +3244,21 @@ ui::Graphics* Systems::CreateGraphics() {
   return concrete_factory_->CreateGraphics(); 
 }
 
-ui::Graphics* Systems::CreateGraphics(void* dc) { 
+#ifdef _WIN32_
+ui::Graphics* Systems::CreateGraphics(CDC* dc) { 
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphics(dc); 
 }
+#endif
 
-ui::Graphics* Systems::CreateGraphics(bool debug) { 
+/*ui::Graphics* Systems::CreateGraphics(bool debug) { 
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphics(debug); 
+}*/
+
+ui::Graphics* Systems::CreateGraphics(const Image::Ptr& image) {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateGraphics(image); 
 }
 
 ui::Image* Systems::CreateImage() { 
@@ -3367,12 +3398,18 @@ Graphics* DefaultSystems::CreateGraphics() {
   return new Graphics();
 }
 
-Graphics* DefaultSystems::CreateGraphics(bool debug) {
+/*Graphics* DefaultSystems::CreateGraphics(bool debug) {
   return new Graphics(debug);
-}
+}*/
 
-Graphics* DefaultSystems::CreateGraphics(void* dc) {
+#ifdef _WIN32_
+Graphics* DefaultSystems::CreateGraphics(CDC* dc) {
   return new Graphics(dc);
+}
+#endif
+
+ui::Graphics* DefaultSystems::CreateGraphics(const Image::Ptr& image) {
+  return new Graphics(image);
 }
 
 Image* DefaultSystems::CreateImage() {
@@ -3725,16 +3762,20 @@ ui::GraphicsImp* ImpFactory::CreateGraphicsImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(); 
 }
-ui::GraphicsImp* ImpFactory::CreateGraphicsImp(bool debug) {
+/*ui::GraphicsImp* ImpFactory::CreateGraphicsImp(bool debug) {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(debug); 
-}
+}*/
 #ifdef _WIN32
 ui::GraphicsImp* ImpFactory::CreateGraphicsImp(CDC* cr) {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateGraphicsImp(cr); 
 }
 #endif
+ui::GraphicsImp* ImpFactory::CreateGraphicsImp(const Image::Ptr& image) {
+  assert(concrete_factory_.get());
+  return concrete_factory_->CreateGraphicsImp(image);
+}
 ui::ImageImp* ImpFactory::CreateImageImp() {
   assert(concrete_factory_.get());
   return concrete_factory_->CreateImageImp(); 

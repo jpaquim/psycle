@@ -151,17 +151,21 @@ struct LuaImport {
   void* target() const { return target_; }
   void find_weakuserdata() {
       lua_getglobal(L_, "psycle");
-      lua_getfield(L_, -1, "weakuserdata");
-      if (!lua_isnil(L_, -1)) {
-        lua_pushlightuserdata(L_, target_);
-        lua_gettable(L_, -2);
-        if (lua_istable(L_, -1)) {
-          lua_remove(L_, -2);
-        }        
-        lua_remove(L_, -2);
-      } else {
-        assert(0);
-      }
+	  if (!lua_isnil(L_, -1)) {
+		  lua_getfield(L_, -1, "weakuserdata");
+		  if (!lua_isnil(L_, -1)) {
+			lua_pushlightuserdata(L_, target_);
+			lua_gettable(L_, -2);
+			if (lua_istable(L_, -1)) {
+			  lua_remove(L_, -2);
+			}        
+			lua_remove(L_, -2);
+		  } else {
+			assert(0);
+		  }
+	  } else {
+		  assert(0);
+	  }	  
     }
  private:
   bool get_method_optional(const std::string& method) {    
@@ -790,6 +794,18 @@ namespace LuaHelper {
       int val2 = luaL_checkinteger(L, 3);
       (ud->*ptmember)(val1, val2);      
       return 0;
+    }
+
+	// bool -> int X int
+    template <class T>
+    static int bind(lua_State* L, const std::string& meta, bool (T::*ptmember)(int, int) const, UserDataModel m = SPTR) {
+      numargcheck(L, 3);
+      T* ud = check<T>(L, 1, meta, m);
+	  int val1 = luaL_checkinteger(L, 2);
+      int val2 = luaL_checkinteger(L, 3);
+      bool val = (ud->*ptmember)(val1, val2);
+      lua_pushboolean(L, val);
+      return 1;
     }
 
     // int -> int X int

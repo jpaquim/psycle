@@ -106,7 +106,8 @@ namespace host {
 			char col;
 			char track;
 
-			CCursor() { line=0; col=0; track=0; }
+			CCursor() : line(0), col(0), track(0) {}
+			CCursor(int line, char col, char track) : line(line), col(col), track(track) {}
 		};
 
 		class CSelection
@@ -166,6 +167,7 @@ namespace host {
 		class MenuHandle {
 		  public:
 			MenuHandle();
+			~MenuHandle();
 
 			void set_menu(const boost::weak_ptr<ui::Node>& menu_root_node);
 			void clear();
@@ -344,6 +346,10 @@ namespace host {
 
 			bool maxView;	//maximise pattern state
 			int textLeftEdge;
+
+		public:
+			void SetSelection(const CSelection& selection) { blockSel = selection; }
+			const CSelection& selection() const { return blockSel; }
 
 		// Overrides
 		protected:
@@ -657,7 +663,9 @@ namespace host {
 			afx_msg void OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI);
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
+public:
 			afx_msg void OnPopInterpolateCurve();
+private:
 			afx_msg void OnDynamicMenuItems(UINT nID);  
       
 		};

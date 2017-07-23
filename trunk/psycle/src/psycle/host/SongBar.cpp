@@ -11,6 +11,7 @@
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "Player.hpp"
+#include "InputHandler.hpp"
 
 namespace psycle{ namespace host{
 
@@ -96,6 +97,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		m_pWndView->RecalculateColourGrid();
 		m_pWndView->Repaint();
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::tracknumchanged);
 	}
 
 	void SongBar::OnCloseupTrackcombo() 

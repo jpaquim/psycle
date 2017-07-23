@@ -1698,57 +1698,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			pFile->Write(&decreaseOnClip, sizeof decreaseOnClip); 
 		}
 		
-		/// MachineGroup
-		void MachineGroup::AddMachineListener(MachineListener* listener) {
-			MachineListeners::iterator it =
-				std::find(machine_listeners_.begin(), machine_listeners_.end(), listener);
-			if (it == machine_listeners_.end()) {
-				machine_listeners_.push_back(listener);
-			}
-		}
-
-		void MachineGroup::RemoveMachineListener(MachineListener* listener) {
-			MachineListeners::iterator it =
-				std::find(machine_listeners_.begin(), machine_listeners_.end(), listener);
-			if (it != machine_listeners_.end()) {
-				machine_listeners_.erase(it);
-			}
-		}	
-		
-		void MachineGroup::NotifyMachineCreate(Machine& machine) {
-		    try {
-				for (MachineListeners::iterator it = machine_listeners_.begin(); it != machine_listeners_.end(); ++it) {
-					(*it)->OnMachineCreate(machine);
-				}
-			} catch(std::exception&) {				
-			}
-		}
-
-		void MachineGroup::NotifyMachineDelete(Machine& machine) {
-			try {
-				for (MachineListeners::iterator it = machine_listeners_.begin(); it != machine_listeners_.end(); ++it) {
-					(*it)->BeforeMachineDelete(machine);
-				}
-			} catch(std::exception&) {				
-			}
-		}	
-
-		void MachineGroup::RegisterMachine(Machine* machine)		  
-		{
-			assert(machine);
-			children_.push_back(machine);
-			OnMachineCreate(*machine);
-		}
-
-		void MachineGroup::UnregisterMachine(Machine* machine)
-		{
-			assert(machine);
-			iterator it = std::find(children_.begin(), children_.end(), machine);
-			if (it != children_.end()) {
-				BeforeMachineDelete(*machine);
-				children_.erase(it);
-			}
-		}
+	
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

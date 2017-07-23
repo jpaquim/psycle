@@ -116,7 +116,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			}		
 		}
 		m_pParentMain->StatusBarIdle();
-		m_pWndView->SetFocus();
+		m_pWndView->SetFocus();		
 	}
 
 	void SequenceBar::OnDblclkSeqlist() 
@@ -164,6 +164,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		((CButton*)GetDlgItem(IDC_INCSHORT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->Repaint(draw_modes::pattern);
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnDecshort()
@@ -186,6 +187,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		((CButton*)GetDlgItem(IDC_DECSHORT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->Repaint(draw_modes::pattern);
 		m_pWndView->SetFocus();
+		ANOTIFY(Actions::seqmodified);
 	}
 
 	void SequenceBar::OnSeqnew()

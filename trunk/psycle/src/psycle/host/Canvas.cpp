@@ -172,8 +172,8 @@ bool DefaultAligner::skip_item(const Window::Ptr& item) const {
 }
 
 void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
-  calc_non_content_dimension(window);
-  calc_window_dim(window);
+	calc_non_content_dimension(window);	
+	calc_window_dim(window);
 	window->PreventAutoDimension();
 	switch (window->align()) {        
 		case AlignStyle::LEFT: 				  				  					
@@ -182,7 +182,7 @@ void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
 		case AlignStyle::TOP:        
 			update_top(window);
 		break;
-		case AlignStyle::RIGHT:        
+		case AlignStyle::RIGHT:			       
 			update_right(window);
 		break;
 		case AlignStyle::BOTTOM:        					
@@ -190,8 +190,8 @@ void DefaultAligner::update_item_pos_except_client(const Window::Ptr& window) {
 		break;
 		default:				 				
 		break;		
-  } // end switch	
-  window->RestoreAutoDimension();
+	} // end switch	
+	window->RestoreAutoDimension();
 }
 
 void DefaultAligner::update_left(const Window::Ptr& window) {	
@@ -250,8 +250,8 @@ void DefaultAligner::calc_window_dim(const Window::Ptr& window) {
       item_dim_.set_height(window->dim().height());        
     }
  } else {
-	  item_dim_ = window->dim();
-    if (window->auto_size()) {
+	item_dim_ = window->dim();
+    if (window->auto_size_width() || window->auto_size_height()) {
       Dimension auto_dim = window->OnCalcAutoDimension();
       if (window->auto_size_width()) {
         item_dim_.set_width(auto_dim.width());
@@ -269,30 +269,30 @@ Rect DefaultAligner::calc_new_pos_left(const Window::Ptr& window) const {
 	if (window->auto_size_height()) {
 		result.set_height(item_dim_.height());
 	} else {
-	  result.decrease(BoxSpace(0, 0, non_content_dimension_.height(), 0));
+		result.decrease(BoxSpace(0, 0, non_content_dimension_.height(), 0));
 	}
 	return result;
 }
 
 Rect DefaultAligner::calc_new_pos_top(const Window::Ptr& window) const {
-  Rect result = current_pos_;  
-  result.set_height(item_dim_.height());
+	Rect result = current_pos_;  
+	result.set_height(item_dim_.height());
 	if (window->auto_size_width()) {
-	  result.set_width(item_dim_.width());
-  } else {
-    result.decrease(BoxSpace(0, non_content_dimension_.width(), 0, 0));
-  }
-  return result;
+		result.set_width(item_dim_.width());
+	} else {
+		result.decrease(BoxSpace(0, non_content_dimension_.width(), 0, 0));
+	}
+	return result;
 }
 
 Rect DefaultAligner::calc_new_pos_right(const Window::Ptr& window) const {
 	Rect result = current_pos_;	    
-  result.set_left(current_pos_.right() - item_dim_.width() - non_content_dimension_.width());
-  result.set_right(current_pos_.right() - non_content_dimension_.width());
-  if (window->auto_size_height()) {
+	result.set_left(current_pos_.right() - item_dim_.width() - non_content_dimension_.width());
+	result.set_right(current_pos_.right() - non_content_dimension_.width());
+	if (window->auto_size_height()) {
 		result.set_height(item_dim_.height());
 	} else {
-	  result.decrease(BoxSpace(0, 0, non_content_dimension_.height(), 0));
+		result.decrease(BoxSpace(0, 0, non_content_dimension_.height(), 0));
 	}	
 	return result;
 }
@@ -462,7 +462,6 @@ void Viewport::set_properties(const Properties& properties) {
   }  
 }
 
-// Events
 void Viewport::Invalidate(const Region& rgn) {
   if (!fls_prevented_) {
     if (IsSaving()) {

@@ -20,7 +20,6 @@ namespace psycle
 	namespace host
 	{
 		class Machine; // forward declaration
-		class MachineGroup;
 		class CProgressDialog;
 
 		/// songs hold everything comprising a "tracker module",
@@ -122,11 +121,25 @@ namespace psycle
 			int auxcolSelected;
 			/// Wether each of the tracks is muted.
 			bool _trackMuted[MAX_TRACKS];
+			void ToggleTrackMuted(int ttm) { _trackMuted[ttm] = !_trackMuted[ttm]; }
 			/// The number of tracks Armed (enabled for record)
 			/// \todo should this be here? (used exclusively in childview)
 			int _trackArmedCount;
 			/// Wether each of the tracks is armed (selected for recording data in)
 			bool _trackArmed[MAX_TRACKS];
+
+			void ToggleTrackArmed(int ttm) {
+				_trackArmed[ttm] = !_trackArmed[ttm];
+				_trackArmedCount = 0;
+				for (int i=0; i < MAX_TRACKS; i++)
+				{
+					if (_trackArmed[i])
+					{
+						_trackArmedCount++;
+					}
+				}
+			}
+
 			/// The names of the trakcs
 			std::string _trackNames[MAX_PATTERNS][MAX_TRACKS];
 			void ChangeTrackName(int patIdx, int trackidx, std::string name);
@@ -137,7 +150,6 @@ namespace psycle
 			///\{
 			/// the array of machines.
 			Machine* _pMachine[MAX_MACHINES];
-			std::auto_ptr<MachineGroup> machines_;
 			/// Current selected machine number in the GUI
 			/// \todo This is a gui thing... should not be here.			
 			int seqBus;
@@ -371,7 +383,25 @@ namespace psycle
 			bool _saved;
 			/// The index of the track which plays in solo.
 			int _trackSoloed;
-			
+			void ToggleTrackSoloed(int ttm) {
+				if (_trackSoloed != ttm )
+				{
+					for ( int i=0;i<MAX_TRACKS;i++ )
+					{
+						_trackMuted[i] = true;
+					}
+					_trackMuted[ttm] = false;
+					_trackSoloed = ttm;
+				}
+				else
+				{
+					for ( int i=0;i<MAX_TRACKS;i++ )
+					{
+						_trackMuted[i] = false;
+					}
+					_trackSoloed = -1;
+				}
+			}
 			//Semaphore used for song (and machine) manipulation. The semaphore accepts at much two threads to run:
 			//Player::Work and ChildView::OnTimer (GUI update).
 			//There is a third CSingleLock in InfoDlg (which is not a perfect situation, but it's fast enough so it shouldn't disturb Player::Work).

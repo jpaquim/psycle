@@ -99,7 +99,7 @@ namespace psycle { namespace host {
 
 			CString text;
 			m_trackedit.GetWindowText(text);
-			tracknames[prevsel] = static_cast<LPCTSTR>(text);
+			tracknames[prevsel] = static_cast<LPCTSTR>(text);			
 
 			CDialog::OnOK();
 		}

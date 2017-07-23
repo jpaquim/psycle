@@ -61,6 +61,11 @@ namespace psycle { namespace host {
 		{
 		}
 
+		MenuHandle::~MenuHandle()
+		{
+		  ::DeleteObject(windows_menu_);
+		}
+
 		void MenuHandle::set_menu(const ui::Node::WeakPtr& menu_root_node)
 		{
 			using namespace ui;
@@ -211,9 +216,9 @@ namespace psycle { namespace host {
 			int viewport = CHILDVIEWPORT;
 			if (it != menuItemIdMap_.end()) {        
 				Link link = it->second;
-				boost::shared_ptr<LuaPlugin> plug;
-				if (link.plugin.expired()) {
-					std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
+				LuaPlugin::Ptr plug;
+				bool expired = link.plugin.expired();
+				if (expired) {
 					try {
 						link.plugin = plug = HostExtensions::Instance().Execute(link);			
 					} catch(std::exception& e) {
@@ -224,43 +229,49 @@ namespace psycle { namespace host {
 						menuItemIdMap_[nID] = link;
 					}
 					viewport = link.viewport();
-				} else {
+				} else {					
 					if (link.plugin.lock()->proxy().has_frame()) {			 
 						return;			  
-				}
-				if (link.viewport() == TOOLBARVIEWPORT) {		     
-					CDialogBar* bar = &((CMainFrame*)::AfxGetMainWnd())->m_extensionBar;
-					if (bar->IsWindowVisible()) {
-					((CMainFrame*)::AfxGetMainWnd())->ShowControlBar(bar, FALSE,FALSE);
+					}
+					if (link.viewport() == TOOLBARVIEWPORT) {		     
+						CDialogBar* bar = &((CMainFrame*)::AfxGetMainWnd())->m_extensionBar;
+						if (bar->IsWindowVisible()) {
+							((CMainFrame*)::AfxGetMainWnd())->ShowControlBar(bar, FALSE,FALSE);
+						} else {
+							((CMainFrame*)::AfxGetMainWnd())->ShowControlBar(bar, TRUE,FALSE);
+						}
+						viewport = TOOLBARVIEWPORT; 
 					} else {
-					((CMainFrame*)::AfxGetMainWnd())->ShowControlBar(bar, TRUE,FALSE);
+					  viewport = CHILDVIEWPORT;
 					}
-				}
-				plug = link.plugin.lock();
-				ui::Viewport::WeakPtr user_view = plug->viewport();
-				viewport = link.viewport();      
-			}        
-			if (plug->crashed()) return;        
-				ui::Viewport::WeakPtr user_view = plug->viewport();        
-				if (!user_view.expired()) {            
-					HostExtensions::Instance().set_active_lua(plug.get());
-					try {                                 
-						plug->ViewPortChanged(*plug.get(), viewport);
-						plug->OnActivated(viewport);
-					} catch (std::exception&) {               
-						// AfxMessageBox(e.what());
-					}
-					::AfxGetMainWnd()->Invalidate(false);
-				} else {  
-					try {
-						plug->OnExecute();
-					} catch (std::exception& e) {
-						ui::alert(e.what());
+					plug = link.plugin.lock();
+					ui::Viewport::WeakPtr user_view = plug->viewport();
+					    
+				}        
+				if (!plug || plug->crashed()) return;        
+					ui::Viewport::WeakPtr user_view = plug->viewport();        
+					if (!user_view.expired()) {            
+						HostExtensions::Instance().set_active_lua(plug.get());
+						try {                                 
+							plug->ViewPortChanged(*plug.get(), viewport);
+							if (expired && viewport == FRAMEVIEWPORT) {						
+								plug->proxy().OpenInFrame();
+							}
+							plug->OnActivated(viewport);
+						} catch (std::exception&) {               
+							// AfxMessageBox(e.what());
+						}
+						::AfxGetMainWnd()->Invalidate(false);
+					} else {  
+						try {
+							plug->OnExecute();
+						} catch (std::exception& e) {
+							ui::alert(e.what());
 						// LuaGlobal::onexception(plug->proxy().state());        
-					}
-				} 
-				::AfxGetMainWnd()->DrawMenuBar();
-			}    
+						}
+					} 
+					::AfxGetMainWnd()->DrawMenuBar();
+				}    
 		}   
 		
 		void MenuHandle::ExecuteLink(Link& link) {       
@@ -401,7 +412,6 @@ namespace psycle { namespace host {
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd)      
@@ -764,7 +774,8 @@ namespace psycle { namespace host {
 				PsycleGlobal::conf()._pOutputDriver->Reset();
 			}
 			pParentMain->KillTimer(ID_TIMER_VIEW_REFRESH);
-			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);      
+			pParentMain->KillTimer(ID_TIMER_AUTOSAVE);			
+
 			//This prevents some rare cases with LUA plugins and the LuaWaveOscBind::oscs being deleted before Song instance.
 			Global::song().New();
 		}
@@ -1101,8 +1112,8 @@ namespace psycle { namespace host {
 			
 			// Display the Open dialog box. 
 			if(::GetOpenFileName(&ofn)==TRUE)
-			{
-				FileLoadsongNamed(szFile);
+			{				
+				FileLoadsongNamed(szFile);				
 			}
 			else
 			{
@@ -1178,6 +1189,7 @@ namespace psycle { namespace host {
 				RecalculateColourGrid();
 				Repaint();
 				SetTitleBarText();
+				ANOTIFY(Actions::songnew); 
 			}
 			pParentMain->StatusBarIdle();
 		}
@@ -1344,6 +1356,7 @@ namespace psycle { namespace host {
 			if (viewMode != view_modes::machine)
 			{        
 				m_luaWndView->RemoveExtensions();
+				m_luaWndView->UpdateMenu(extension_menu_handle_);
 				viewMode = view_modes::machine;
 				ShowScrollBar(SB_BOTH,FALSE);
 
@@ -1373,7 +1386,8 @@ namespace psycle { namespace host {
 		{								
 			if (viewMode != view_modes::pattern)
 			{     
-				m_luaWndView->RemoveExtensions();	   
+				m_luaWndView->RemoveExtensions();
+				m_luaWndView->UpdateMenu(extension_menu_handle_);	   
 				RecalcMetrics();
 
 				viewMode = view_modes::pattern;
@@ -1677,6 +1691,7 @@ namespace psycle { namespace host {
 						pParentMain->StatusBarIdle();
 					}
 					Repaint();
+					ANOTIFY(Actions::patternlength);
 				}
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{
@@ -2303,6 +2318,7 @@ namespace psycle { namespace host {
 		}
 		void CChildView::FileLoadsongNamed(const std::string& fName)
 		{
+		    ANOTIFY(Actions::songload);
 			PsycleGlobal::inputHandler().KillUndo();
 			PsycleGlobal::inputHandler().KillRedo();
 			pParentMain->CloseAllMacGuis();
@@ -2404,6 +2420,7 @@ namespace psycle { namespace host {
 				dlg.DoModal();
 			}
 			delete file;
+			ANOTIFY(Actions::songloaded);
 		}
 
 
@@ -2667,15 +2684,7 @@ namespace psycle { namespace host {
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				_pSong._trackArmed[editcur.track] = !_pSong._trackArmed[editcur.track];
-				_pSong._trackArmedCount = 0;
-				for ( int i=0;i<MAX_TRACKS;i++ )
-				{
-					if (_pSong._trackArmed[i])
-					{
-						_pSong._trackArmedCount++;
-					}
-				}
+				_pSong.ToggleTrackArmed(editcur.track);
 				Repaint(draw_modes::track_header);
 			}
 		}
@@ -2779,18 +2788,22 @@ namespace psycle { namespace host {
 		switch (viewport) {			
 			case CHILDVIEWPORT:
 				UpdateViewMode();				
-				ShowScrollBar(SB_BOTH,FALSE);							
+				ShowScrollBar(SB_BOTH,FALSE);									
 				m_luaWndView->Push(plugin);				
 				m_luaWndView->DisplayTop();								
 				m_luaWndView->UpdateMenu(extension_menu_handle_);
 			break;
 			case FRAMEVIEWPORT:
-				m_luaWndView->Pop();
-				m_luaWndView->DisplayTop();
-				m_luaWndView->UpdateMenu(extension_menu_handle_);				
-				RestoreViewMode();								
+				if (m_luaWndView->IsTopDisplay(plugin)) {
+					m_luaWndView->Pop();					
+					m_luaWndView->DisplayTop();
+					if (!plugin.has_error()) {
+					  m_luaWndView->UpdateMenu(extension_menu_handle_);				
+					  RestoreViewMode();
+					}
+				}								
 			break;
-		};
+		};	
     }
 
 	void CChildView::UpdateViewMode()

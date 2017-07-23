@@ -207,7 +207,7 @@ class ImageImp : public ui::ImageImp {
       PrepareMask(bmp_, &mask_, ToCOLORREF(color));
     }
   }
-	CBitmap* dev_source() { return bmp_; }
+  CBitmap* dev_source() { return bmp_; }
   CBitmap* dev_source() const { return bmp_; }
   CBitmap* dev_mask() { return mask_.m_hObject ? &mask_ : 0; }
   const CBitmap* dev_mask() const { return mask_.m_hObject ? &mask_ : 0; }
@@ -639,7 +639,9 @@ class GraphicsImp : public ui::GraphicsImp {
         updatepen_(false),
         updatebrush_(false),
         pen_width_(1),
-        debug_flag_(false) {       
+        debug_flag_(false),
+		old_image_bpm_(0),
+		image_dc_(false) {       
     Init();     
   }
   GraphicsImp(CDC* cr) 
@@ -650,10 +652,12 @@ class GraphicsImp : public ui::GraphicsImp {
         updatepen_(false),
         updatebrush_(false),
         pen_width_(1),
-        debug_flag_(false) {
+        debug_flag_(false),
+		old_image_bpm_(0),
+		image_dc_(false) {
     Init();
   }
-  GraphicsImp(bool debug) : 
+  /*GraphicsImp(bool debug) : 
 	    hScreenDC(::GetDC(0)),
         cr_(CDC::FromHandle(hScreenDC)),      
         rgb_color_(0xFFFFFF),
@@ -665,7 +669,8 @@ class GraphicsImp : public ui::GraphicsImp {
         updatepen_(false),
         updatebrush_(false),
         pen_width_(1),
-        debug_flag_(true) {	
+        debug_flag_(true),
+		old_image_bpm_(0) {	
     cr_->SetTextColor(rgb_color_);
 	  pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
     old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
@@ -676,23 +681,9 @@ class GraphicsImp : public ui::GraphicsImp {
     old_font = (HFONT) SelectObject(cr_->m_hDC, imp->cfont());
 	  old_rgn_ =  ::CreateRectRgn(0, 0, 0, 0);
     clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);    
-  }
-  virtual ~GraphicsImp() {    
-	  if (debug_flag_) {
-	    ::SelectObject(cr_->m_hDC, old_pen);
-      ::DeleteObject(pen);
-	    ::SelectObject(cr_->m_hDC, old_brush);
-      ::DeleteObject(brush);
-	    ::SelectObject(cr_->m_hDC, old_font);
-	    ::DeleteObject(old_rgn_);
-	    ::DeleteObject(clp_rgn_);      
-	/*  cr_->SelectObject(old_brush);
-      brush.DeleteObject();*/
-	    if (hScreenDC) {      
-        ReleaseDC(0, hScreenDC);      
-      }
-	    return;
-	  }
+  }*/
+  GraphicsImp(const boost::shared_ptr<Image>& image);
+  virtual ~GraphicsImp() {
     if (cr_) {
       DevDispose();
     }
@@ -701,24 +692,7 @@ class GraphicsImp : public ui::GraphicsImp {
     }
   }
 
-  virtual void DevDispose() {
-    ::SelectObject(cr_->m_hDC, old_pen);
-    ::DeleteObject(pen);
-	  ::SelectObject(cr_->m_hDC, old_brush);
-    ::DeleteObject(brush);
-	  ::SelectObject(cr_->m_hDC, old_font);
-    cr_->SetGraphicsMode(GM_ADVANCED);
-    cr_->SetWorldTransform(&rXform);
-    cr_->SelectObject(old_font);
-    cr_->SetBkMode(OPAQUE);
-    ::SelectClipRgn(cr_->m_hDC, old_rgn_);
-    if (old_bpm_) {
-       cr_->SelectObject(old_bpm_);
-     }
-    ::DeleteObject(old_rgn_);
-	  ::DeleteObject(clp_rgn_);    
-    cr_ = 0;
-  }
+  virtual void DevDispose();
   virtual void DevSetDebugFlag() {
 	  debug_flag_ = true;
   }  
@@ -769,9 +743,9 @@ class GraphicsImp : public ui::GraphicsImp {
     CRect rc = TypeConverter::rect(rect);
     cr_->Arc(&rc, TypeConverter::point(start), TypeConverter::point(end));
   }
-  void DevDrawLine(const Point& p1, const Point& p2) {
+  void DevDrawLine(const Point& p1, const Point& p2)  {
     check_pen_update();
-		cr_->MoveTo(TypeConverter::point(p1));
+	cr_->MoveTo(TypeConverter::point(p1));
     cr_->LineTo(TypeConverter::point(p2));
   }  
   virtual void DevDrawCurve(const Point& p1, const Point& control_p1, const Point& control_p2, const Point& p2) {
@@ -792,7 +766,7 @@ class GraphicsImp : public ui::GraphicsImp {
     check_pen_update();
     check_brush_update();
     cr_->SelectStockObject(NULL_BRUSH);
-		cr_->RoundRect(TypeConverter::rect(rect), TypeConverter::point(arc_dim));      
+    cr_->RoundRect(TypeConverter::rect(rect), TypeConverter::point(arc_dim));      
     cr_->SelectObject(&brush);
   }  
   void DevDrawOval(const Rect& rect) {
@@ -872,7 +846,7 @@ class GraphicsImp : public ui::GraphicsImp {
 		updatepen_ = true;
 	}	      
 	void DevDrawImage(Image* image, const Rect& destination_position,
-                    const Point& src) {
+			const Point& src) {
 		if (image) {
 			assert(image->imp());
 			CDC memDC;
@@ -883,27 +857,28 @@ class GraphicsImp : public ui::GraphicsImp {
 			oldbmp = memDC.SelectObject(imp->dev_source());
 			if (!imp->dev_mask()) {
 				cr_->BitBlt(static_cast<int>(destination_position.left()), 
-					          static_cast<int>(destination_position.top()),
-						        static_cast<int>(destination_position.width()),
-										static_cast<int>(destination_position.height()),
-					          &memDC, 
-					          static_cast<int>(src.x()),
-					          static_cast<int>(src.y()),
-					          SRCCOPY);
+					static_cast<int>(destination_position.top()),
+					static_cast<int>(destination_position.width()),
+					static_cast<int>(destination_position.height()),
+					&memDC, 
+					static_cast<int>(src.x()),
+					static_cast<int>(src.y()),
+					SRCCOPY);
 			} else {
 				TransparentBlt(cr_,
-					             static_cast<int>(destination_position.left()),
-						           static_cast<int>(destination_position.top()),
-							         static_cast<int>(destination_position.width()),
-								       static_cast<int>(destination_position.height()),
-					             &memDC,
-					             imp->dev_mask(),
-									     static_cast<int>(src.x()),
-										   static_cast<int>(src.y()));
+					static_cast<int>(destination_position.left()),
+					static_cast<int>(destination_position.top()),
+					static_cast<int>(destination_position.width()),
+					static_cast<int>(destination_position.height()),
+					&memDC,
+					imp->dev_mask(),
+					static_cast<int>(src.x()),
+					static_cast<int>(src.y()));
+					updatepen_ = true;
 			}
 			memDC.SelectObject(oldbmp);
-			memDC.DeleteDC();
-	  }
+			memDC.DeleteDC();			
+		}
   }
 
 	void DevDrawImage(ui::Image* image,
@@ -945,8 +920,14 @@ class GraphicsImp : public ui::GraphicsImp {
 	  }
   }
 
-  virtual void DevMoveTo(const Point& pt) { cr_->MoveTo(TypeConverter::point(pt)); }  
-  virtual void DevLineTo(const Point& pt) { cr_->LineTo(TypeConverter::point(pt)); }    
+  virtual void DevMoveTo(const Point& pt) {
+    check_pen_update();
+	cr_->MoveTo(TypeConverter::point(pt));
+  }  
+  virtual void DevLineTo(const Point& pt) {
+    check_pen_update();
+	cr_->LineTo(TypeConverter::point(pt));
+  }    
   virtual void DevCurveTo(const Point& control_p1, const Point& control_p2, const Point& p) {
     check_pen_update();
     POINT Pt[3] = {TypeConverter::point(control_p1),
@@ -1051,28 +1032,7 @@ class GraphicsImp : public ui::GraphicsImp {
    }
     
   private:
-   void Init() {
-     assert(cr_);
-	 old_bpm_ = 0;
-	 cr_->SetTextColor(rgb_color_);
-	 pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
-     old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
-	 brush = ::CreateSolidBrush(rgb_color_);			      	 
-     old_brush = (HBRUSH)::SelectObject(cr_->m_hDC, brush);
-     cr_->GetWorldTransform(&rXform);    
-     cr_->SetBkMode(TRANSPARENT);
-    
-     mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
-     assert(imp);
-     old_font = (HFONT) ::SelectObject(cr_->m_hDC, imp->cfont());
-     old_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
-     clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
-     ::GetRandomRgn(cr_->m_hDC, old_rgn_, SYSRGN);
-     POINT pt = {0,0};
-     HWND hwnd = ::WindowFromDC(cr_->m_hDC);
-     ::MapWindowPoints(NULL, hwnd, &pt, 1);
-     ::OffsetRgn(old_rgn_, pt.x, pt.y);  		 
-   }
+   void Init();
            
    void TransparentBlt(CDC* pDC,
      int xStart,
@@ -1101,8 +1061,10 @@ class GraphicsImp : public ui::GraphicsImp {
    std::stack<XFORM> saveXform;
    HRGN old_rgn_, clp_rgn_;
    CBitmap* old_bpm_;
+   CBitmap* old_image_bpm_;
    int pen_width_;
-   bool debug_flag_;   
+   bool debug_flag_;  
+   bool image_dc_; 
 };
 
 inline void GraphicsImp::TransparentBlt(CDC* pDC,
@@ -1159,10 +1121,10 @@ template <class T, class I>
 class WindowTemplateImp : public T, public I {
  public:  
   WindowTemplateImp() : I(), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false),
-      map_capslock_to_ctrl_(false) {
+      map_capslock_to_ctrl_(false), cursor_(LoadCursor(0, IDC_ARROW)) {
   }
   WindowTemplateImp(ui::Window* w) : I(w), color_(0xFF000000), mouse_enter_(true), is_double_buffered_(false),
-      map_capslock_to_ctrl_(false) {    
+      map_capslock_to_ctrl_(false), cursor_(LoadCursor(0, IDC_ARROW)) {    
   }
     
   virtual void dev_set_position(const ui::Rect& pos);
@@ -1229,15 +1191,13 @@ class WindowTemplateImp : public T, public I {
     }
   }
   
-  virtual void DevSetCapture() { SetCapture(); }  
-  virtual void DevReleaseCapture() { ReleaseCapture(); }  
-  virtual void DevShowCursor() { while (::ShowCursor(TRUE) < 0); }  
-  virtual void DevHideCursor() { while (::ShowCursor(FALSE) >= 0); }
-  virtual void DevSetCursorPosition(const ui::Point& position) {    
-    CPoint point = TypeConverter::point(position);    
-    ClientToScreen(&point);
-		::SetCursorPos(point.x, point.y);
-  }  
+  virtual void DevSetCapture();
+  virtual void DevReleaseCapture();  
+  virtual void DevShowCursor();  
+  virtual void DevHideCursor();
+  virtual void DevSetCursorPosition(const ui::Point& position);
+  virtual Point DevCursorPosition() const;
+  virtual void DevSetCursor(CursorStyle::Type style);
   virtual void dev_set_parent(Window* window);  
   virtual void dev_set_fill_color(ARGB color) { color_ = color; }
   virtual ARGB dev_fill_color() const { return color_; }
@@ -1257,6 +1217,14 @@ class WindowTemplateImp : public T, public I {
 protected:  
   virtual BOOL PreTranslateMessage(MSG* pMsg);
   DECLARE_MESSAGE_MAP()
+  BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {  
+    if (cursor_) {
+      ::SetCursor(cursor_);
+	  return TRUE;
+	} else {
+     return CWnd::OnSetCursor(pWnd, nHitTest, message);    
+	}
+  }  
   int OnCreate(LPCREATESTRUCT lpCreateStruct);
   void OnDestroy();	
   void OnPaint();
@@ -1281,6 +1249,9 @@ protected:
     if (nFlags == 13) {
       flags |= MK_ALT;
     }
+	if (nFlags&(1<<24)) {
+	  flags |= KeyCodes::CK_EXTENDED;
+	}
     return flags;
   }    
 
@@ -1313,6 +1284,7 @@ protected:
   bool WorkEvent(T& ev, void (T1::*ptmember)(T&), Window* window, MSG* msg) {
     if (window) {
       try {
+	    ev.set_relative_offset(window->absolute_position().top_left());
         (window->*ptmember)(ev);        
       } catch (std::exception& e) {
         alert(e.what());
@@ -1335,16 +1307,17 @@ protected:
   }
   
  private:
-  CBitmap bmpDC;
-  ARGB color_;
-  BOOL m_bTracking;
-  bool mouse_enter_;  
-  bool is_double_buffered_;
+	CBitmap bmpDC;
+	ARGB color_;
+	BOOL m_bTracking;
+	bool mouse_enter_;  
+	bool is_double_buffered_;
 	BoxSpace margin_;
 	BoxSpace padding_;
 	BoxSpace border_space_;  
-  bool map_capslock_to_ctrl_;
-  Point previous_mouse_pos_;
+	bool map_capslock_to_ctrl_;
+	Point previous_mouse_pos_;
+    HCURSOR cursor_;
 };
 
 class AlertImp : public ui::AlertImp {
@@ -1419,14 +1392,8 @@ class FileSaveDialogImp : public ui::FileDialogImp {
 
 class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
  public:
-  WindowImp() : 
-      WindowTemplateImp<CWnd, ui::WindowImp>(),
-      cursor_(LoadCursor(0, IDC_ARROW)) {
-  }
-  WindowImp(ui::Window* w) :
-      WindowTemplateImp<CWnd, ui::WindowImp>(w),
-      cursor_(LoadCursor(0, IDC_ARROW)) {
-  }
+  WindowImp() : WindowTemplateImp<CWnd, ui::WindowImp>() {}
+  WindowImp(ui::Window* w) : WindowTemplateImp<CWnd, ui::WindowImp>(w) {}
 
   static WindowImp* Make(ui::Window* w, CWnd* parent, UINT nID) {
     WindowImp* imp = new WindowImp();
@@ -1442,7 +1409,7 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
 	  }            
     imp->set_window(w);    
     return imp;
-  } 
+  }
 
   static WindowImp* MakeComposited(ui::Window* w, CWnd* parent, UINT nID) {
     WindowImp* imp = new WindowImp();
@@ -1459,25 +1426,17 @@ class WindowImp : public WindowTemplateImp<CWnd, ui::WindowImp> {
     imp->set_window(w);
     return imp;
   }
-  
-  virtual void dev_set_clip_children() {
-    ModifyStyle(0, WS_CLIPCHILDREN);
-  }
 
+  virtual void dev_set_clip_children() { ModifyStyle(0, WS_CLIPCHILDREN); }
   virtual void dev_add_style(UINT flag) { ModifyStyle(0, flag); }
   virtual void dev_remove_style(UINT flag) { ModifyStyle(flag, 0); }
- 
 
  protected:
-  virtual void DevSetCursor(CursorStyle::Type style);
+ 
   // BOOL OnEraseBkgnd(CDC* pDC);
-  BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {   
-    ::SetCursor(cursor_);
-    return TRUE;   
-  }  
-  DECLARE_MESSAGE_MAP()  
- private:
-   HCURSOR cursor_;
+  
+  DECLARE_MESSAGE_MAP()
+ 
 };
 
 class ScrollBarImp : public WindowTemplateImp<CScrollBar, ui::ScrollBarImp> {  
@@ -2755,7 +2714,7 @@ class ImpFactory : public ui::ImpFactory {
     if (imp) {    
       CWnd* wnd = (CWnd*) imp;
       if (IsWindow(wnd->m_hWnd)) { 
-        wnd->DestroyWindow();        
+	    SendMessage(wnd->m_hWnd, WM_CLOSE, 0, 0);      
 		return true;
       }	  
     }
@@ -2836,11 +2795,14 @@ class ImpFactory : public ui::ImpFactory {
   virtual ui::GraphicsImp* CreateGraphicsImp() {     
     return new ui::mfc::GraphicsImp();
   }  
-  virtual ui::GraphicsImp* CreateGraphicsImp(bool debug) {     
+ /* virtual ui::GraphicsImp* CreateGraphicsImp(bool debug) {     
     return new ui::mfc::GraphicsImp(debug);
-  }  
+  }  */
   virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr) {     
     return new ui::mfc::GraphicsImp(cr);
+  }
+  virtual ui::GraphicsImp* CreateGraphicsImp(const boost::shared_ptr<Image>& image) {   
+     return new ui::mfc::GraphicsImp(image);
   }
   virtual ui::ImageImp* CreateImageImp() {     
     return new ui::mfc::ImageImp();

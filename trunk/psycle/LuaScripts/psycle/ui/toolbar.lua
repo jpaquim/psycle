@@ -26,13 +26,15 @@ end
 function toolbar:init()
   self:setautosize(true, true)
   self.icontable = {}
+  self.groupindex = nil
 end
 
-function toolbar:add(icon)
+function toolbar:add(icon)  
   icon:settoolbar(self)
   icon:setalign(alignstyle.LEFT)
   icon:setmargin(boxspace:new(0, 5, 0, 0))
-  group.add(self, icon)	
+  group.add(self, icon)
+  return self
 end
 
 function toolbar:seticons(icontable)
@@ -42,11 +44,16 @@ function toolbar:seticons(icontable)
   return self
 end
 
-function toolbar:onnotify(sender)  
+function toolbar:setgroupindex(index)
+  self.groupindex = index
+  return self
+end
+
+function toolbar:onnotify(sender)
   local windows = self:windows()
   for i=1, #windows do
-    local icon = items[i]
-	  if icon.istoggle_ and icon ~= sender then
+    local icon = windows[i]
+	  if icon ~= sender and icon.seton and icon.groupindex == sender.groupindex then
 	    icon:seton(false)
 	  end
   end

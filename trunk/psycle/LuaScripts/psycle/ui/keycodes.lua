@@ -70,6 +70,7 @@ return {
   ENTER = 0x0D,
   SPACE = 0x20,
   TAB = 0x09,
+  BACK = 0x08,
   DELETE = 0x2E,
   ENDKEY = 0x23,
   INSERT = 0x2D,

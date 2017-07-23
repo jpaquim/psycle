@@ -20,6 +20,8 @@ enum type {
   PVROWBEAT,
   PVSEPARATOR ,
   PVFONT,
+  PVFONTSEL,
+  PVFONTPLAY,
   PVCURSOR,
   PVSELECTION ,
   PVPLAYBAR,
@@ -92,12 +94,16 @@ struct LuaPointBind {
   static int open(lua_State *L);  
   static int create(lua_State *L);
   static int gc(lua_State* L);  
-  static int setxy(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::set_xy); }
+  static int setxy(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::set_xy);  }
   static int setx(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::set_x); }
   static int x(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::x); }
   static int sety(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::set_y); }
   static int y(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::y); }
   static int offset(lua_State* L) { LUAEXPORTM(L, meta, &ui::Point::offset); }
+  static int add(lua_State* L);
+  static int sub(lua_State* L);
+  static int mul(lua_State* L);
+  static int div(lua_State* L);
 };
 
 struct LuaDimensionBind {
@@ -129,7 +135,14 @@ struct LuaUiRectBind {
   static int setwidth(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_width); }
   static int width(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::width); }
   static int setheight(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::set_height); }
-  static int height(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::height); }
+  static int height(lua_State *L) { LUAEXPORTM(L, meta, &ui::Rect::height); } 
+  static int dimension(lua_State* L) {
+    using namespace ui;
+    Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+    LuaHelper::requirenew<LuaDimensionBind>(L, "psycle.ui.dimension",
+      new Dimension(rect->dimension()));
+    return 1;
+  } 
   static int intersect(lua_State* L) {
     using namespace ui;
     Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
@@ -144,7 +157,16 @@ struct LuaUiRectBind {
     rect->offset(*delta.get());
     return LuaHelper::chaining(L);
   }
-  static int topleft(lua_State *L);
+  static int move(lua_State* L) {
+    using namespace ui;
+    Rect::Ptr rect = LuaHelper::check_sptr<Rect>(L, 1, LuaUiRectBind::meta);
+    Point::Ptr pos = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);    
+    rect->move(*pos.get());
+    return LuaHelper::chaining(L);
+  }
+  static int settopleft(lua_State *L);
+  static int topleft(lua_State *L);  
+  static int setbottomright(lua_State *L);
   static int bottomright(lua_State *L);
 };
 
@@ -175,7 +197,7 @@ struct LuaBorderRadiusBind {
 struct LuaSystemMetrics {  
   static std::string meta;
   static int open(lua_State *L); 
-  static int screensize(lua_State *L);
+  static int screendimension(lua_State *L);
 };
 
 class LuaCommand : public ui::Command, public LuaState {
@@ -310,9 +332,11 @@ class LuaScopeWindow : public LuaWindow, public Timer {
   private:   
     int GetY(float f, float mult);
 	Machine* HitTest(const ui::Point& pos) const;
+	int MachineCount() const;
+	void CalcScopeSize(int mac_num, const ui::Dimension& dimension);
 	double scope_width_, scope_height_, scope_mid_;
 	double scale_x_;
-
+	int mac_count_;
 	int scope_mode;
 	int scope_peak_rate;
 	int scope_osc_freq;
@@ -436,6 +460,9 @@ struct LuaKeyEventBind {
   static int ctrlkey(lua_State* L) {
     LUAEXPORTM(L, meta, &ui::KeyEvent::ctrlkey);
   }
+  static int extendedkey(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::KeyEvent::extendedkey);
+  }
   static int preventdefault(lua_State* L) {
     LUAEXPORTM(L, meta, &ui::KeyEvent::PreventDefault);
   }
@@ -460,6 +487,13 @@ struct LuaMouseEventBind {
     MouseEvent::Ptr ev = LuaHelper::check_sptr<MouseEvent>(L, 1, meta);
     LuaHelper::requirenew<LuaPointBind>(L, "psycle.ui.point",
                                         new Point(ev->client_pos()));
+    return 1;
+  }
+  static int windowpos(lua_State* L) { 
+    using namespace ui;
+    MouseEvent::Ptr ev = LuaHelper::check_sptr<MouseEvent>(L, 1, meta);
+    LuaHelper::requirenew<LuaPointBind>(L, "psycle.ui.point",
+                                        new Point(ev->window_pos()));
     return 1;
   } 
   static int button(lua_State* L) {
@@ -497,6 +531,12 @@ struct LuaWheelEventBind {
   static int button(lua_State* L) {
     LUAEXPORTM(L, meta, &ui::WheelEvent::button);
   }
+  static int shiftkey(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::shiftkey);
+  }
+  static int ctrlkey(lua_State* L) {
+    LUAEXPORTM(L, meta, &ui::WheelEvent::ctrlkey);
+  }
   static int preventdefault(lua_State* L) {
     LUAEXPORTM(L, meta, &ui::WheelEvent::PreventDefault);
   }
@@ -517,7 +557,7 @@ struct LuaImageBind {
   static int create(lua_State *L);
   static int gc(lua_State* L);
   static int graphics(lua_State* L);
-  static int size(lua_State* L);
+  static int dimension(lua_State* L);
   static int resize(lua_State* L);  
   static int rotate(lua_State* L);
   static int reset(lua_State *L);
@@ -722,11 +762,24 @@ struct LuaGraphicsBind {
   static int open(lua_State *L);
   static int create(lua_State *L);  
   static int gc(lua_State* L);
+  static int dispose(lua_State* L) { LUAEXPORTM(L, meta, &ui::Graphics::Dispose); }
   static int translate(lua_State *L) {
     using namespace ui;
     Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
     Point::Ptr delta = LuaHelper::check_sptr<Point>(L, 2, LuaPointBind::meta);
     g->Translate(*delta.get());
+    return LuaHelper::chaining(L);    
+  }
+  static int retranslate(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);   
+    g->Retranslate();
+    return LuaHelper::chaining(L);    
+  }
+  static int cleartranslations(lua_State *L) {
+    using namespace ui;
+    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);   
+    g->ClearTranslations();
     return LuaHelper::chaining(L);    
   }
   static int setcolor(lua_State* L) {
@@ -827,9 +880,19 @@ struct LuaGraphicsBind {
   }
   static int fillrect(lua_State *L) {
     using namespace ui;
-    Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
-    Rect::Ptr pos = LuaHelper::check_sptr<Rect>(L, 2, LuaUiRectBind::meta);
-    g->FillRect(*pos.get());
+	int n = lua_gettop(L);
+	if (n == 2) {
+      Graphics::Ptr g = LuaHelper::check_sptr<Graphics>(L, 1, meta);
+      Rect::Ptr pos = LuaHelper::test_sptr<Rect>(L, 2, LuaUiRectBind::meta);
+	  if (pos) {
+        g->FillRect(*pos.get());
+	  } else {
+	    Dimension::Ptr dimension = LuaHelper::check_sptr<Dimension>(L, 2, LuaDimensionBind::meta);
+		g->FillRect(Rect(Point(), *dimension.get()));
+	  }
+	} else {	
+	  return luaL_error(L, "Wrong number of arguments.");
+	}
     return LuaHelper::chaining(L);
   }
   static int fillroundrect(lua_State *L) {
@@ -1155,6 +1218,7 @@ class LuaWindowBind {
       {"position", position},
       {"absoluteposition", absoluteposition},
       {"desktopposition", desktopposition},
+	  {"setdimension", setdimension},
       {"dimension", dimension},
       {"setmindimension", setmindimension},
       {"setautosize", setautosize},
@@ -1189,6 +1253,7 @@ class LuaWindowBind {
       {"removeornaments", removeornaments},
       {"ornaments", ornaments},
       {"setcursor", setcursor},
+	  {"cursor", cursor},
       {"setclipchildren", setclipchildren},
       {"addstyle", addstyle},
       {"removestyle", removestyle},      
@@ -1198,14 +1263,15 @@ class LuaWindowBind {
       {"setpadding", setpadding},
       {"padding", padding},
       {"align", align},
-      {"mousecapture", setcapture},
-      {"mouserelease", releasecapture},
+      {"capturemouse", setcapture},
+      {"releasemouse", releasecapture},
       {"setaligner", setaligner},
       {"enable", enable},
       {"disable", disable},
       {"showcursor", showcursor},
       {"hidecursor", hidecursor},
       {"setcursorpos", setcursorposition},      
+	  {"cursorposition", cursorposition},
       {"viewdoublebuffered", viewdoublebuffered},
       {"viewsinglebuffered", viewsinglebuffered},
       {"bringtotop", bringtotop},
@@ -1225,6 +1291,7 @@ class LuaWindowBind {
   static int draw(lua_State* L) { return 0; }
   static int invalidate(lua_State* L) { LUAEXPORT(L, &T::Invalidate); }
   static int setcursor(lua_State* L);
+  static int cursor(lua_State* L);
   static int setalign(lua_State* L);
   static int align(lua_State* L);
   static int setmargin(lua_State* L);
@@ -1236,6 +1303,7 @@ class LuaWindowBind {
   static int showcursor(lua_State* L) { LUAEXPORT(L, &T::ShowCursor); }
   static int hidecursor(lua_State* L) { LUAEXPORT(L, &T::HideCursor); }
   static int setcursorposition(lua_State* L);
+  static int cursorposition(lua_State* L);
   static int viewdoublebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewDoubleBuffered); }
   static int viewsinglebuffered(lua_State* L) { LUAEXPORT(L, &T::ViewSingleBuffered); }
   static int bringtotop(lua_State* L) { LUAEXPORT(L, &T::BringToTop); }
@@ -1282,6 +1350,13 @@ class LuaWindowBind {
     boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);    
     LuaHelper::requirenew<LuaUiRectBind>(L, "psycle.ui.rect", new ui::Rect(window->desktop_position()));
     return 1;    
+  }
+  static int setdimension(lua_State *L) {
+    using namespace ui;        
+    boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);
+    boost::shared_ptr<Dimension> dimension = LuaHelper::check_sptr<Dimension>(L, 2, LuaDimensionBind::meta);
+    window->set_position(Rect(Point(), *dimension));    
+    return LuaHelper::chaining(L);
   }
   static int dimension(lua_State* L) {    
     boost::shared_ptr<T> window = LuaHelper::check_sptr<T>(L, 1, meta);    
@@ -1426,7 +1501,7 @@ class LuaWindowBind {
       processrule(L, window);
       lua_pop(L, 1);
     }
-    window->rules().ApplyTo(window);
+    window->RefreshRules();
     return LuaHelper::chaining(L);
   }
   static int addrule(lua_State* L) {
@@ -1483,7 +1558,13 @@ class LuaWindowBind {
                   } else
                   if (stock == "PVFONT") {
                     stock_id = PVFONT;
-                  } else  
+                  } else
+				  if (stock == "PVFONTSEL") {
+                    stock_id = PVFONTSEL;
+                  } else
+                  if (stock == "PVFONTPLAY") {
+                    stock_id = PVFONTPLAY;
+                  } else   
                   if (stock == "PVCURSOR") {
                     stock_id = PVCURSOR;
                   } else  
@@ -1918,19 +1999,19 @@ class LuaSplitterBind : public LuaWindowBind<T> {
     boost::shared_ptr<LuaGroup> group;
     ui::Orientation::Type orientation = ui::Orientation::VERT;
     if (n>=2 && !lua_isnil(L, 2)) {
-      group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
-      if (!group) {
-        group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaViewportBind<>::meta);
-    if (!group) {
-          group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaHeaderGroupBind<>::meta);
-      if (!group) {
-      group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaScrollBoxBind<>::meta);
-      }
-        }
-      }    
-    if (n==3) {
-      orientation = (ui::Orientation::Type) luaL_checkinteger(L, 3);
-    }
+		group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaGroupBind<>::meta);
+		if (!group) {
+				group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaViewportBind<>::meta);
+			if (!group) {
+				group = LuaHelper::test_sptr<LuaGroup>(L, 2, LuaHeaderGroupBind<>::meta);
+				if (!group) {
+					group = LuaHelper::check_sptr<LuaGroup>(L, 2, LuaScrollBoxBind<>::meta);
+				}
+			}
+		}    
+		if (n==3) {
+		  orientation = (ui::Orientation::Type) luaL_checkinteger(L, 3);
+		}
     }
     boost::shared_ptr<T> window = LuaHelper::new_shared_userdata(L, B::meta.c_str(), new T(L, orientation));    
     LuaHelper::register_weakuserdata(L, window.get());
@@ -2855,6 +2936,8 @@ class LuaScrollBarBind : public LuaWindowBind<T> {
     static const luaL_Reg methods[] = {
       {"new", create},
       {"setscrollposition", setscrollposition},
+	  {"incscrollposition", incscrollposition},
+	  {"decscrollposition", decscrollposition},
       {"scrollposition", scrollposition},
       {"setscrollrange", setscrollrange},
       {"scrollrange", scrollrange},
@@ -2892,6 +2975,8 @@ class LuaScrollBarBind : public LuaWindowBind<T> {
     return 1;   
   }
   static int setscrollposition(lua_State* L) { LUAEXPORT(L, &T::set_scroll_position); }
+  static int incscrollposition(lua_State* L) { LUAEXPORT(L, &T::inc_scroll_position); }
+  static int decscrollposition(lua_State* L) { LUAEXPORT(L, &T::dec_scroll_position); }
   static int scrollposition(lua_State* L) { LUAEXPORT(L, &T::scroll_position); }
   static int setscrollrange(lua_State* L) { LUAEXPORT(L, &T::set_scroll_range); }
   static int scrollrange(lua_State* L) { LUAEXPORT(L, &T::scroll_range); }

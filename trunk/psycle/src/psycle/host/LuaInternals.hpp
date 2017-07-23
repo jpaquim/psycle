@@ -22,31 +22,34 @@ namespace ui {
 }
 
 namespace psycle { namespace host {
-  class ConfigStorage;
 
-  class LuaMachine;
+class ConfigStorage;
+class LuaMachine;
 
 class LuaCmdDefBind {
  public:
   static int open(lua_State* L);
-  static int keytocmd(lua_State* L);  
+  static int keytocmd(lua_State* L);
+  static int cmdtokey(lua_State* L); 
+  static int currentoctave(lua_State* L);
 };
 
 class LuaActionListener : public ActionListener,  public LuaState {
  public:
   LuaActionListener(lua_State* L) : ActionListener(), LuaState(L), mac_(0) {}
-  virtual void OnNotify(ActionType action);
+  virtual void OnNotify(const ActionHandler&, ActionType action);
   void setmac(LuaMachine* mac) { mac_ = mac; }
+
  private:  
   LuaMachine* mac_;
 };
 
 
 struct LuaActionListenerBind {
-  static const char* meta;
-  static int open(lua_State *L);
-  static int create(lua_State *L);
-  static int gc(lua_State* L);
+	static const char* meta;
+	static int open(lua_State *L);
+	static int create(lua_State *L);
+	static int gc(lua_State* L);
 };
   
   class LuaConfig {
@@ -124,7 +127,7 @@ struct LuaActionListenerBind {
     };
   };
   
-  class LuaMachine : public MachineListener {
+  class LuaMachine {
   public:
 	typedef boost::shared_ptr<LuaMachine> Ptr;
 	typedef boost::shared_ptr<const LuaMachine> ConstPtr;
@@ -167,8 +170,8 @@ struct LuaActionListenerBind {
     void set_title(const std::string& title);    
     std::string title() const { return title_; }
 
-	virtual void OnMachineCreate(Machine& machine);
-	virtual void BeforeMachineDelete(Machine& machine);
+	// virtual void OnMachineCreate(Machine& machine);
+	// virtual void BeforeMachineDelete(Machine& machine);
 
   private:
     //LuaMachine(LuaMachine&)  {}
@@ -242,6 +245,8 @@ struct LuaActionListenerBind {
 	static int createparam(lua_State* L, int idx, LuaMachine* machine);
 	static int insert(lua_State* L);
     static int at(lua_State* L);
+	static int paramrange(lua_State* L);
+	static int paramname(lua_State* L);
     static int muted(lua_State* L);
 	static int buildbuffer(lua_State* L);
 	static int addscopememory(lua_State* L);
@@ -290,12 +295,24 @@ struct LuaActionListenerBind {
     static int gc(lua_State* L);
     static int samplerate(lua_State* L);
     static int tpb(lua_State* L);
+	static int bpt(lua_State* L);
     static int spt(lua_State* L);
     static int line(lua_State* L);
     static int rline(lua_State* L);
     static int playing(lua_State* L);    
 	static int playpattern(lua_State* L);
 	static int setplayline(lua_State* L);
+	static int setplayposition(lua_State* L);
+	static int playnote(lua_State* L);
+	static int stopnote(lua_State* L);
+	static int toggletrackarmed(lua_State* L);
+	static int istrackarmed(lua_State* L);
+	static int toggletrackmuted(lua_State* L);
+	static int istrackmuted(lua_State* L);
+	static int toggletracksoloed(lua_State* L);
+	static int istracksoloed(lua_State* L);
+	static int playorder(lua_State* L);
+	static int playposition(lua_State* L);	
   };
 
   struct LuaPatternEvent {
@@ -322,11 +339,40 @@ struct LuaActionListenerBind {
     int numlines(int ps) const;
     int numtracks() const;
 	bool has_pattern(int ps) const;
+	bool IsTrackEmpty(int ps, int trk) const;
    private:
      lua_State* L;
      unsigned char** data_;
      Song* song_;
   };
+
+  class Tweak {
+	public:
+		Tweak() {}
+		~Tweak() {}
+		virtual void OnAutomate(int macIdx, int param, int value, bool undo,
+		    const ParamTranslator& translator, int track, int line) {
+		}
+  };
+
+	class LuaTweak : public Tweak {
+		public:
+			LuaTweak(lua_State* L) : L(L) {}
+			~LuaTweak() {}
+  
+			virtual void OnAutomate(int macIdx, int param, int value, bool undo,
+			    const ParamTranslator& translator, int track, int line);
+				
+		private:
+			lua_State* L;
+	};
+
+	struct LuaTweakBind {
+		static const char* meta;
+		static int open(lua_State *L);
+		static int create(lua_State* L);
+		static int gc(lua_State* L);
+	};
 
   struct LuaPatternDataBind {
     static int open(lua_State *L);
@@ -335,22 +381,50 @@ struct LuaActionListenerBind {
     static int pattern(lua_State* L);
     static int settrack(lua_State* L);
     static int track(lua_State* L);
+	static int line(lua_State* L);
     static int numtracks(lua_State *L) { LUAEXPORTM(L, meta, &LuaPatternData::numtracks); }
     static int numlines(lua_State *L) { LUAEXPORTM(L, meta, &LuaPatternData::numlines); }
     static int eventat(lua_State* L);
     static int setevent(lua_State* L);
-    static int buildevent(lua_State* L);
-    static const char* meta;
+    static int buildevent(lua_State* L);    
     static int createevent(lua_State* L, LuaPatternEvent& ev);
     static int getevent(lua_State* L, int idx, LuaPatternEvent& ev);
-	static int playorder(lua_State* L);
+	static int istrackempty(lua_State* L) { LUAEXPORTM(L, meta, &LuaPatternData::IsTrackEmpty); }
+	static int patstep(lua_State* L);
+	static int editquantizechange(lua_State* L);
+	static int deleterow(lua_State* L);
+	static int clearrow(lua_State* L);
+	static int insertrow(lua_State* L);
+	static int interpolate(lua_State* L);
+	static int interpolatecurve(lua_State* L);
+	static int loadblock(lua_State* L);
+	static int addundo(lua_State* L);
+	static int undo(lua_State* L);
+	static int redo(lua_State* L);	
+	static int movecursorpaste(lua_State* L);
+	static int settrackedit(lua_State* L);
+	static int settrackline(lua_State* L);
+	static const char* meta;
   };
 
-   struct LuaSequenceBarBind {
+  struct LuaSequenceBarBind {
     static int open(lua_State *L);
     static int create(lua_State* L);
+	static int gc(lua_State* L);
     static int currpattern(lua_State* L);
+	static int editposition(lua_State* L);
+	static int followsong(lua_State* L);
     static const char* meta;
+  };
+
+  struct LuaMachineBarBind {    
+    static int open(lua_State *L);
+    static int create(lua_State* L);
+	static int gc(lua_State* L);
+    static int currmachine(lua_State* L);
+	static int currinst(lua_State* L);
+	static int curraux(lua_State* L);
+	static const char* meta; 
   };
 
   template <typename T>

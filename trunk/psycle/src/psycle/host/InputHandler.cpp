@@ -13,6 +13,8 @@
 #include "Sampler.hpp"
 // For Alert
 #include "Ui.hpp"
+// For Tweak
+#include "LuaInternals.hpp"
 
 namespace psycle
 {
@@ -89,8 +91,8 @@ namespace psycle
 		// KeyToCmd
 		// IN: key + modifiers from OnKeyDown
 		// OUT: command mapped to key
-		CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags)
-		{
+		CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags, bool has_shift, bool has_ctrl)
+		{			
 			PsycleConfig::InputHandler& settings = PsycleGlobal::conf().inputHandler();
 			PsycleConfig& config = PsycleGlobal::conf();
 			bDoingSelection=false;
@@ -175,13 +177,13 @@ namespace psycle
 				}
 				nFlags= nFlags & ~MK_LBUTTON;
 				// This comparison is to allow the "Shift+Note" (chord mode) to work.
-				std::pair<int, int> pair(GetModifierIdx(nFlags), nChar);
+				std::pair<int, int> pair(GetModifierIdx(nFlags, has_shift, has_ctrl), nChar);
 				CmdDef& thisCmd = settings.keyMap[pair];
 
 				if ( thisCmd.GetType() == CT_Note ) {
 					return thisCmd;
 				} else if ( thisCmd.GetID() == cdefNull) {
-					std::pair<int, int> pair2(GetModifierIdx(nFlags) & ~MOD_S, nChar);
+					std::pair<int, int> pair2(GetModifierIdx(nFlags, has_shift, has_ctrl) & ~MOD_S, nChar);
 					thisCmd = settings.keyMap[pair2];
 					return thisCmd;
 				} else {
@@ -713,10 +715,12 @@ namespace psycle
 
 			case cdefOctaveUp:
 				pMainFrame->ShiftOctave(1);
+				ANOTIFY(Actions::octaveup);
 				break;
 
 			case cdefOctaveDn:
 				pMainFrame->ShiftOctave(-1);
+				ANOTIFY(Actions::octavedown);
 				break;
 
 			case cdefPlaySong:
@@ -822,11 +826,13 @@ namespace psycle
 			case cdefPatternInc:
 				pChildView->ChordModeOffs = 0;
 				pChildView->IncCurPattern();
+				ANOTIFY(Actions::seqmodified);
 				break;
 
 			case cdefPatternDec:
 				pChildView->ChordModeOffs = 0;
 				pChildView->DecCurPattern();
+				ANOTIFY(Actions::seqmodified);
 				break;
 
 			case cdefSongPosInc:
@@ -838,7 +844,7 @@ namespace psycle
 			case cdefSongPosDec:
 				pChildView->ChordModeOffs = 0;
 				pChildView->DecPosition();
-				pMainFrame->StatusBarIdle(); 
+				pMainFrame->StatusBarIdle();
 				break;
 
 			case cdefUndo:
@@ -1036,7 +1042,6 @@ namespace psycle
 			}
 		}
 
-
 		void InputHandler::StopNote(int note, int instr/*=255*/, bool bTranspose/*=true*/,Machine* pMachine/*=NULL*/)
 		{
 			assert(note>=0 && note < notecommands::invalid);
@@ -1091,8 +1096,6 @@ namespace psycle
 			}
 			PlayNote(&entry,track);
 		}
-
-
 
 
 		PatternEntry InputHandler::BuildNote(int note, int instr/*=255*/, int velocity/*=127*/, bool bTranspose/*=true*/, Machine* mac/*=NULL*/, bool forcevolume/*=false*/)
@@ -1286,7 +1289,13 @@ namespace psycle
 				bool write = (!recording || track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
 				if (track == -1) track = pChildView->editcur.track;
 				if (write) pChildView->EnterData(&entry,  track, line, true, false);
-			}
+				std::vector<boost::weak_ptr<Tweak> >::iterator it = tweak_listeners_.begin();
+				for (; it != tweak_listeners_.end(); ++it) {
+				  if (!(*it).expired()) {
+					(*it).lock()->OnAutomate(macIdx, param, value, undo, param_translator, track, line);
+				  } 
+				}
+			}			
 		}
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// undo/redo code
@@ -1676,7 +1685,7 @@ namespace psycle
 		{
 			if(pRedoList.empty()) {
 				return false;
-			}
+			}			
 			else {
 				SPatternUndo& redo = pRedoList.back();
 				switch (redo.type)
@@ -1701,7 +1710,7 @@ namespace psycle
 		{
 			if(pUndoList.empty()) {
 				return false;
-			}
+			}			
 			else {
 				SPatternUndo& undo = pUndoList.back();
 				switch (undo.type)
@@ -1723,15 +1732,45 @@ namespace psycle
 			}
 		}
 
-   void ActionHandler::Notify(ActionType action) {
-        ActionListenerList::iterator it = listeners_.begin();
-        for (; it!=listeners_.end(); ++it) {
-          try {
-            (*it)->OnNotify(action);
-          } catch (std::exception& e) {
-            ui::alert(e.what());
-          }
-        }
-      }
+		void ActionHandler::Notify(ActionType action) {
+			ActionListenerList::iterator it = listeners_.begin();
+			for (; it!=listeners_.end(); ++it) {
+				try {
+					(*it)->OnNotify(*this, action);
+				} catch (std::exception& e) {
+					ui::alert(e.what());
+				}
+			}
+		}
+
+		std::string ActionHandler::ActionAsString(ActionType action) const {
+			std::string result;
+			switch (action) {		
+				case Actions::tpb: result = "ticksperbeatchanged"; break;
+				case Actions::bpm: result = "bpm"; break;
+				case Actions::trknum: result = "trknum"; break;
+				case Actions::play: result = "play"; break;
+				case Actions::playstart: result = "playstart"; break;
+				case Actions::playseq: result = "playseq"; break;
+				case Actions::stop: result = "stop"; break;
+				case Actions::rec: result = "rec"; break;
+				case Actions::seqsel: result = "seqsel"; break;
+				case Actions::seqmodified: result = "seqmodified"; break;
+				case Actions::seqfollowsong: result = "seqfollowsong"; break;
+				case Actions::patkeydown: result = "patkeydown"; break;
+				case Actions::patkeyup: result = "patkeyup"; break;
+				case Actions::songload: result = "songload"; break;
+				case Actions::songloaded: result = "songloaded"; break;
+				case Actions::songnew: result = "songnew"; break;
+				case Actions::tracknumchanged: result = "tracknumchanged"; break;
+				case Actions::octaveup: result = "octaveup"; break;
+				case Actions::octavedown: result = "octavedown"; break;
+				case Actions::undopattern: result = "undopattern"; break;
+				case Actions::patternlength: result = "patternlength"; break;
+				default: result = "unknown"; break;
+			}
+			return result;
+		}
+
 	}
 }
