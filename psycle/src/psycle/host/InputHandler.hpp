@@ -13,6 +13,7 @@ namespace psycle
 		class CChildView;
 		class Machine;
 		class ParamTranslator;
+		class Tweak;
 
 		class SPatternUndo
 		{
@@ -62,7 +63,11 @@ namespace psycle
 			/// .
 			void CmdToKey(CmdSet cse,WORD & key,WORD & mods);	
 			/// .
-			CmdDef KeyToCmd(UINT nChar, UINT nFlags);
+			CmdDef KeyToCmd(UINT nChar, UINT nFlags) { 
+				return KeyToCmd(nChar, nFlags, GetKeyState(VK_SHIFT)<0,
+								GetKeyState(VK_CONTROL)<0);
+			}
+			CmdDef KeyToCmd(UINT nChar, UINT nFlags, bool has_shift, bool has_ctrl);			
 			/// .
 			CmdDef StringToCmd(LPCTSTR str);
 			///\}
@@ -109,20 +114,24 @@ namespace psycle
 			bool HasUndo(int viewMode);
 			bool HasRedo(int viewMode);
 			void SafePoint();
-
+			void AddTweakListener(const boost::shared_ptr<Tweak>& listener) {
+			  tweak_listeners_.push_back(listener);
+			}
+			
 		private:
 			/// get key modifier index.
-			UINT GetModifierIdx(UINT nFlags)
+			UINT GetModifierIdx(UINT nFlags, bool has_shift, bool has_ctrl)
 			{
 				UINT idx=0;
-				if(GetKeyState(VK_SHIFT)<0) idx|=MOD_S;		// shift
-				if(GetKeyState(VK_CONTROL)<0) idx|=MOD_C;	// ctrl
-				if(nFlags&(1<<8)) idx|=MOD_E;				// extended
+				if (has_shift) idx|=MOD_S;		// shift
+				if (has_ctrl) idx|=MOD_C;		// ctrl
+				if (nFlags&(1<<8)) idx|=MOD_E;	// extended
 				//todo: detection of alt? (simple alt is captured by windows. alt-gr could be captured)
 				return idx;
 			}
 			typedef class std::unique_lock<std::mutex> scoped_lock;
 			std::mutex mutable mutex_;
+			std::vector<boost::weak_ptr<Tweak> > tweak_listeners_;
 
 		public:	
 			/// Indicates that Shift+Arrow is Selection.
@@ -145,56 +154,75 @@ namespace psycle
 			int UndoMacSaved;
 		};
     
-    namespace Actions {
-      enum {
-        tpb = 1,
-        bpm = 2,
-        trknum = 3,
-        play = 4,
-        playstart = 5,
-        playseq = 6,
-        stop = 7,
-        rec = 8,
-        seqsel = 9,
-		seqmodified = 10,
-        seqfollowsong = 11     
-      };
-    };
+		namespace Actions {
+			enum {
+				tpb = 1,
+				bpm = 2,
+				trknum = 3,
+				play = 4,
+				playstart = 5,
+				playseq = 6,
+				stop = 7,
+				rec = 8,
+				seqsel = 9,
+				seqmodified = 10,
+				seqfollowsong = 11,
+				patkeydown = 12,
+				patkeyup = 13,
+				songload = 14,
+				songloaded = 15,
+				songnew = 16,
+				tracknumchanged = 17,
+				octaveup = 18,
+				octavedown = 19,
+				undopattern = 20,
+				patternlength = 21
+			};
+		};
 
-    typedef int ActionType;
+		typedef int ActionType;
+
+		class ActionHandler;
     
-    class ActionListener {
-    public:
-      ActionListener() {};
-      virtual ~ActionListener() = 0;
-      virtual void OnNotify(ActionType action) = 0;
-    };
+		class ActionListener {
+			public:
+				ActionListener() {};
+				virtual ~ActionListener() = 0;
+				virtual void OnNotify(const ActionHandler&, ActionType action) = 0;
+		};
 
-    typedef std::vector<ActionListener*> ActionListenerList;
+		typedef std::vector<ActionListener*> ActionListenerList;
 
-    inline ActionListener::~ActionListener() {}
+		inline ActionListener::~ActionListener() {}
 
-    class ActionHandler {
-    public:
-      ActionHandler() {}
-      void AddListener(ActionListener* listener) {
-        ActionListenerList::iterator it = std::find(listeners_.begin(), listeners_.end(), listener);
-        if (it!=listeners_.end()) {
-          throw std::runtime_error("Listener already in PsycleActions.");
-        }
-        listeners_.push_back(listener);
-      }
-      void RemoveListener(ActionListener* listener) {
-        ActionListenerList::iterator it = std::find(listeners_.begin(), listeners_.end(), listener);
-        if (it!=listeners_.end()) {
-          listeners_.erase(it);
-        }
-      }            
-      void Notify(ActionType action);
-    private:        
-       ActionListenerList listeners_;
-    };
-	}
+		class ActionHandler {
+			public:
+				ActionHandler() {}
+				void AddListener(ActionListener* listener) {
+					using namespace std;
+					ActionListenerList::iterator it = 
+						find(listeners_.begin(), listeners_.end(), listener);
+					if (it!=listeners_.end()) {
+						throw runtime_error("Listener already in PsycleActions.");
+					}
+					listeners_.push_back(listener);
+				}
+				void RemoveListener(ActionListener* listener) {
+					using namespace std;
+					ActionListenerList::iterator it = 
+						find(listeners_.begin(), listeners_.end(), listener);
+					if (it!=listeners_.end()) {
+						listeners_.erase(it);
+					}
+				}            				
+				void Notify(ActionType action);
+				std::string ActionAsString(ActionType action) const;
+
+			private:        
+				ActionListenerList listeners_;
+			};
+		}
 }
 
 #define ANOTIFY(action) (PsycleGlobal::actionHandler().Notify(action))
+#define BNOTIFY(action) (PsycleGlobal::actionHandler().NotifyBefore(action))

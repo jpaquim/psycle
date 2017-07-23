@@ -492,39 +492,15 @@ namespace psycle { namespace host {
 					}
 					if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOnTrack,PatHeaderCoords->sRecordOnTracking))
 					{
-						_pSong._trackArmed[ttm] = !_pSong._trackArmed[ttm];
-						_pSong._trackArmedCount = 0;
-						for ( int i=0;i<MAX_TRACKS;i++ )
-						{
-							if (_pSong._trackArmed[i])
-							{
-								_pSong._trackArmedCount++;
-							}
-						}
+						_pSong.ToggleTrackArmed(ttm);
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords->dMuteOnTrack,PatHeaderCoords->sMuteOnTracking))
 					{
-						_pSong._trackMuted[ttm] = !_pSong._trackMuted[ttm];
+						_pSong.ToggleTrackMuted(ttm);
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords->dSoloOnTrack,PatHeaderCoords->sSoloOnTracking))
 					{
-						if (Global::song()._trackSoloed != ttm )
-						{
-							for ( int i=0;i<MAX_TRACKS;i++ )
-							{
-								_pSong._trackMuted[i] = true;
-							}
-							_pSong._trackMuted[ttm] = false;
-							_pSong._trackSoloed = ttm;
-						}
-						else
-						{
-							for ( int i=0;i<MAX_TRACKS;i++ )
-							{
-								_pSong._trackMuted[i] = false;
-							}
-							_pSong._trackSoloed = -1;
-						}
+						_pSong.ToggleTrackSoloed(ttm);
 					}
 					oldm.track = -1;
 					Repaint(draw_modes::track_header);

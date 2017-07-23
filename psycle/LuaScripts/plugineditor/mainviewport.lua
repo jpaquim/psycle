@@ -71,7 +71,7 @@ function mainviewport:init()
   psycle.setting():addlistener(self)  
   self:link(require("psycle.ui.standarduisheet"))
   self:onapplysetting()  
-  self.machines = machine:new("maingroup")  
+  self.machines = machine:new()  
   self:invalidatedirect()
   self:createpluginselector()  
   self:createpagegroup()
@@ -304,7 +304,8 @@ function mainviewport:onkeydown(ev)
         ev:stoppropagation()
       end    
   end
-  self:onidle() 
+  self:onidle()
+  ev:stoppropagation()  
 end
 
 function mainviewport:openfromfile(fname, line)

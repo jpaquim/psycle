@@ -15,11 +15,12 @@ namespace psycle {
 namespace host {
 
 namespace ui {
+  class KeyEvent;
   class Node;
-  class Commands; 
+  class Commands;
   class Viewport;  
   class Frame;
-  class MenuContainer; 
+  class MenuContainer;
 }
     
 class LuaPlugin;
@@ -92,7 +93,8 @@ class LuaProxy : public LuaControl {
     frame_.reset();
   }
 
-  boost::weak_ptr<ui::Viewport> viewport() {  return lua_mac_->viewport(); }
+  boost::weak_ptr<ui::Viewport> viewport() { return lua_mac_->viewport(); }
+  boost::weak_ptr<class PsycleMeditation> psycle_meditation() { return psycle_meditation_;  }
 
   // Plugin calls
   void SequencerTick();
@@ -157,13 +159,15 @@ class LuaProxy : public LuaControl {
   static int alert(lua_State* L);
   static int flsmain(lua_State* L);
   static int confirm(lua_State* L);  
-  static int terminal_output(lua_State* L);  
+  static int terminal_output(lua_State* L);
+  static int cursor_test(lua_State* L);    
   static int call_selmachine(lua_State* L);
   static int set_machine(lua_State* L);  
   static int setmenurootnode(lua_State* L);
   static int setsetting(lua_State* L);
   static int setting(lua_State* L);
   static int reloadstartscript(lua_State* L);
+  static int addtweaklistener(lua_State* L);
   int set_time_out(LuaRun* runnable, int interval);
   int set_interval(LuaRun* runnable, int interval);
   void clear_timer(int id);
@@ -178,6 +182,10 @@ class LuaProxy : public LuaControl {
     return result;
   }
 
+  void ShowPsycleMeditation(const std::string& message);
+  bool has_error() const { return has_error_; }
+  std::string last_error() const { return last_error_; }
+
  private:
   void ExportCFunctions();
   std::string ParDisplay(int par);
@@ -188,6 +196,7 @@ class LuaProxy : public LuaControl {
      return meta_cache_;
   }  
   void OnFrameClose(ui::Frame&);
+  void OnFrameKeyDown(ui::KeyEvent&);
       
   mutable bool is_meta_cache_updated_;
   mutable PluginInfo meta_cache_; 
@@ -198,6 +207,10 @@ class LuaProxy : public LuaControl {
   int user_interface_;
   int clock_;
   int default_viewport_mode_;  
+  bool has_error_;
+  std::string last_error_;
+  public:
+  boost::shared_ptr<class PsycleMeditation> psycle_meditation_;
 };
 
 class LuaPluginBind {
@@ -270,6 +283,7 @@ class HostExtensions {
   void OnExecuteLink(Link& link);
   void FlsMain();
   bool HasToolBarExtension() const;
+  void UpdateStyles();
 
  private:   
   lua_State* load_script(const std::string& dllpath);
@@ -303,7 +317,7 @@ struct LuaGlobal {
    template<typename T>   
    static void InvokeLater(lua_State* L, T& f) {
      LuaGlobal::proxy(L)->InvokeLater(f); 
-   }   
+   }      
 };
 
  

@@ -190,7 +190,7 @@ namespace psycle
 				} else {
 					throw std::runtime_error("Plugin Index Out of Range");
 				}
-			}	     
+			}
     
 		private:
 			TranslateContainer translate_container_;
@@ -312,8 +312,8 @@ namespace psycle
 					virtual bool empty() const { return true; }
 					virtual int size() const { return 0; }
 
-					virtual void AddMachineListener(class MachineListener* listener) {}
-					virtual void RemoveMachineListener(class MachineListener* listener) {}
+					// virtual void AddMachineListener(class MachineListener* listener) {}
+					// virtual void RemoveMachineListener(class MachineListener* listener) {}
 
 				private:
 					Container dummy_container_;
@@ -790,54 +790,7 @@ namespace psycle
 		protected:
 			static char* _psName;		
 		};
-
-		class MachineListener {
-		friend class MachineGroup;
-			public:
-				virtual ~MachineListener() {}
-			protected:
-				virtual void OnMachineCreate(Machine& machine) = 0;
-				virtual void BeforeMachineDelete(Machine& machine) = 0;
-		};
-
-		/// master machine.
-		class MachineGroup : public Machine, public MachineListener
-		{
-		friend class Song;
-		public:
-			virtual void Init(void) {}
-			virtual int GenerateAudio(int numsamples, bool measure_cpu_usage) { return 0; }
-			virtual void UpdateVuAndStanbyFlag(int numSamples) {}
-			virtual float GetAudioRange() const { return 32768.0f; }
-			virtual const char* const GetName(void) const { return ""; }
-			virtual bool Load(RiffFile * pFile) { return false; }
-			virtual bool LoadSpecificChunk(RiffFile * pFile, int version) { return false; }
-			virtual void SaveSpecificChunk(RiffFile * pFile) {}
-
-			float* getLeft() const { return 0; }
-			float* getRight() const { return 0; }
-
-			virtual iterator begin() { return children_.begin(); }
-			virtual iterator end() { return children_.end(); }
-			virtual const_iterator begin() const { return children_.begin(); }
-			virtual const_iterator end() const { return children_.end(); }
-			virtual bool empty() const { return children_.empty(); }
-			virtual int size() const { return children_.size(); }
-			
-			void AddMachineListener(MachineListener* listener);
-			void RemoveMachineListener(MachineListener* listener);
-
-			virtual void OnMachineCreate(Machine& machine) { NotifyMachineCreate(machine); }
-			virtual void BeforeMachineDelete(Machine& machine) { NotifyMachineDelete(machine); }
-		private:
-			void RegisterMachine(Machine* machine);
-			void UnregisterMachine(Machine* machine);
-			void NotifyMachineCreate(Machine& machine);
-			void NotifyMachineDelete(Machine& machine);
-			Machine::Container children_;
-			typedef std::vector<MachineListener*> MachineListeners;
-			MachineListeners machine_listeners_;
-		};
+		
     
 	}
 }

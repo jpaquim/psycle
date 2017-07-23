@@ -99,6 +99,16 @@ struct Point {
     y_ -= rhs.y();
     return *this;
   }
+  Point& operator*=(const Point& rhs) {
+    x_ *= rhs.x();
+    y_ *= rhs.y();
+    return *this;
+  }
+  Point& operator/=(const Point& rhs) {
+    x_ /= rhs.x();
+    y_ /= rhs.y();
+    return *this;
+  }
   void set_xy(double x, double y) { 
     x_ = x; 
     y_ = y;    
@@ -151,7 +161,7 @@ struct Dimension {
   inline Dimension operator*(const Dimension& rhs) const {
     return Dimension(width_*rhs.width(), height_*rhs.height());
   }
-  inline Dimension operator*(const ui::Point& rhs) const {
+  inline Dimension operator*(const Point& rhs) const {
 	  return Dimension(width_*rhs.x(), height_*rhs.y());
   }
   Dimension& operator+=(const Dimension& rhs) {
@@ -221,7 +231,7 @@ struct BoxSpace {
   }
   inline bool operator!=(const BoxSpace& rhs) const { return !(*this == rhs); }
   inline bool empty() const { 
-    return top_left_ == ui::Point::zero() && bottom_right_ == Point::zero();
+    return top_left_ == Point::zero() && bottom_right_ == Point::zero();
   }
   void set(double space) { 
     top_left_.set_xy(space, space);
@@ -298,8 +308,10 @@ struct Rect {
   inline double bottom() const { return bottom_right_.y(); }
   inline double width() const { return bottom_right_.x() - top_left_.x(); }
   inline double height() const { return bottom_right_.y() - top_left_.y(); }
+  inline void set_top_left(const Point& top_left) { top_left_ = top_left; }
   inline const Point& top_left() const { return top_left_; }
   inline const Point top_right() const { return Point(right(), top()); }
+  inline void set_bottom_right(const Point& bottom_right) { bottom_right_ = bottom_right; }
   inline const Point& bottom_right() const { return bottom_right_; }
   inline const Point bottom_left() const { return Point(left(), bottom()); }  
   inline void set_dimension(const Dimension& dimension) {
@@ -332,6 +344,7 @@ struct Rect {
     bottom_right_.set_y(bottom_right_.y() + dy);    
   }
   inline void offset(const Point& delta) { offset(delta.x(), delta.y()); }
+  inline void move(const Point& to) { set(to, dimension()); }
   inline bool intersect(const Point& point) {    
     if (point.x() < left()) return false;
     if (point.y() < top()) return false;
@@ -481,11 +494,14 @@ class Event {
   bool is_default_prevented() const { return default_prevented_; }  
   void StopPropagation() { stop_propagation_ = true; }
   bool is_propagation_stopped() const { return stop_propagation_; }
+  void set_relative_offset(const Point& offset) { relative_offset_ = offset; }
+  const Point& relative_offset() const { return relative_offset_; }
   
  private:    
   bool work_parent_;
   bool default_prevented_;
   bool stop_propagation_;
+  Point relative_offset_;
 };
 
 class Window;
@@ -512,13 +528,15 @@ class MouseEvent : public Event {
        shift_(shift) {
   }
   const Point& client_pos() const { return client_pos_; }  
+  Point window_pos() const { return client_pos_ - relative_offset(); }
   int button() const { return button_; }
   int shift() const { return shift_; }
-  Window* sender() const { return sender_;  }
+  Window* sender() const { return sender_;  }  
 
  private:  
   Window* sender_;
   Point client_pos_;
+  
   int button_, shift_;
 };
 
@@ -530,17 +548,19 @@ class WheelEvent : public Event {
   typedef boost::weak_ptr<const WheelEvent> ConstWeakPtr;
 
   WheelEvent() : button_(0), shift_(0) {}
-  WheelEvent(const Point& client_pos, int wheel_delta, int button, unsigned int shift) : 
+  WheelEvent(const Point& client_pos, int wheel_delta, int button, bool shift, bool ctrl) : 
        client_pos_(client_pos),
 	   wheel_delta_(wheel_delta),        
        button_(button), 
-       shift_(shift) {
+       shift_(shift),
+	   ctrl_(ctrl) {
   }
   WheelEvent(Window* sender,
              const Point& client_pos,
 			 int wheel_delta,
              int button,
-			 unsigned int shift) : 
+			 bool shift,
+			 bool ctrl) : 
        sender_(sender),
        client_pos_(client_pos),
 	   wheel_delta_(wheel_delta),      
@@ -550,20 +570,23 @@ class WheelEvent : public Event {
   const Point& client_pos() const { return client_pos_; }
   int wheel_delta() const { return wheel_delta_; }  
   int button() const { return button_; }
-  int shift() const { return shift_; }
+  bool shiftkey() const { return shift_; }
+  bool ctrlkey() const { return ctrl_; }
   Window* sender() const { return sender_;  }
 
  private:  
   Window* sender_;
   Point client_pos_;
-  int wheel_delta_, button_, shift_;
+  int wheel_delta_, button_;
+  bool shift_, ctrl_;
 };
 
 namespace KeyCodes {
 enum Type { 
   CK_SHIFT = 4,
   CK_CONTROL = 8,
-  VKDELETE = 46
+  VKDELETE = 46,
+  CK_EXTENDED = 256
 };  
 }
 
@@ -575,6 +598,7 @@ class KeyEvent : public Event {
   int flags() const { return flags_; }
   bool shiftkey() const { return (KeyCodes::CK_SHIFT & flags_) == KeyCodes::CK_SHIFT; }
   bool ctrlkey() const { return (KeyCodes::CK_CONTROL & flags_) == KeyCodes::CK_CONTROL; }    
+  bool extendedkey() const { return (KeyCodes::CK_EXTENDED & flags_) == KeyCodes::CK_EXTENDED; }
 
  private:
    int keycode_, flags_;
@@ -826,11 +850,12 @@ friend class Group;
   typedef boost::weak_ptr<Graphics> WeakPtr;
   typedef boost::weak_ptr<const Graphics> ConstWeakPtr;
   Graphics(); 
-  Graphics(bool); 
+  //Graphics(bool); 
   Graphics(GraphicsImp* imp);
 #ifdef _WIN32
   Graphics(CDC* cr);
 #endif
+  Graphics(const boost::shared_ptr<Image>& image);
 
   virtual ~Graphics() {}
   
@@ -859,6 +884,8 @@ friend class Group;
   virtual ARGB color() const;
   virtual void SetPenWidth(double width);
   virtual void Translate(const Point& delta);
+  virtual void Retranslate();
+  virtual void ClearTranslations();
   virtual void SetFont(const Font& font);
   virtual const Font& font() const;
   virtual Dimension text_dimension(const std::string& text) const;
@@ -898,6 +925,8 @@ friend class Group;
   std::auto_ptr<GraphicsImp> imp_;
   virtual void SaveOrigin();
   virtual void RestoreOrigin();
+
+  std::stack<Point> translations_;
 };
 
 enum WindowMsg { ONWND, SHOW, HIDE, FOCUS };
@@ -1108,7 +1137,17 @@ class Property {
 
 class Properties {
  public:
-  typedef std::map<std::string, Property> Container;  
+	typedef std::map<std::string, Property> Container;
+	typedef Container::iterator iterator;
+    typedef Container::const_iterator const_iterator;
+
+	iterator begin() { return elements_.begin(); }
+	iterator end() { return elements_.end(); }	
+	const_iterator begin() const { return elements_.begin(); }
+	const_iterator end() const { return elements_.end(); }	
+	bool empty() const { return elements_.empty(); }
+	int size() const { return elements_.size(); }
+
   void set(const std::string& key, const Property& prop) {
     elements_[key] = prop;
   }
@@ -1182,7 +1221,7 @@ class Rules {
 	 rules_[rule.selector()] = rule; 
      NeedsUpdate();
    }
-   void ApplyTo(const boost::shared_ptr<ui::Window>& window);
+   void ApplyTo(Window* window);
    void InheritFrom(const Rule& rule);   
    Rules& VirtualRules();
   // private:
@@ -1304,6 +1343,7 @@ class Window : public boost::enable_shared_from_this<Window> {
   virtual void ShowCursor();
   virtual void HideCursor();
   virtual void SetCursorPosition(const Point& position);
+  virtual Point CursorPosition() const;
   virtual void SetCursor(CursorStyle::Type style);
   CursorStyle::Type cursor() const { return CursorStyle::DEFAULT; }
   virtual void needsupdate();
@@ -1422,9 +1462,9 @@ class Window : public boost::enable_shared_from_this<Window> {
       window->rules_.InheritFrom(rule);
       window->add_rule(rule);      
     }
-  } 
-  
+  }  
   Rules& rules() { return rules_; } 
+  void RefreshRules() { rules_.ApplyTo(this); }
 
  protected:  
   virtual void WorkMouseDown(MouseEvent& ev) { OnMouseDown(ev); }
@@ -1962,7 +2002,7 @@ class PopupMenu : public MenuContainer {
 
   PopupMenu();
 
-  virtual void Track(const ui::Point& pos); 
+  virtual void Track(const Point& pos); 
 };      
 
 class TreeView : public Window {
@@ -2115,6 +2155,8 @@ class ScrollBar : public Window {
   void scroll_range(int& minpos, int& maxpos); 
   void set_scroll_position(int pos);
   int scroll_position() const;
+  void inc_scroll_position() { set_scroll_position(scroll_position() + 1); }
+  void dec_scroll_position() { set_scroll_position(scroll_position() - 1); }
   void system_size(int& width, int& height) const;  
 };
 
@@ -2123,7 +2165,7 @@ class ScrollBox : public Group {
    ScrollBox();
    static std::string type() { return "scrollbox"; }
 
-	 virtual void ScrollTo(const ui::Point& top_left);
+   virtual void ScrollTo(const Point& top_left);
    virtual void ScrollBy(double dx, double dy);
    virtual void OnSize(const Dimension& dimension);
    virtual void Add(const Window::Ptr& window) { client_->Add(window); }
@@ -2569,8 +2611,11 @@ class Systems {
    
   virtual Region* CreateRegion();
   virtual Graphics* CreateGraphics();
-  virtual Graphics* CreateGraphics(bool debug);
-  virtual Graphics* CreateGraphics(void* dc);
+  // virtual Graphics* CreateGraphics(bool debug);
+#ifdef _WIN32_
+  virtual Graphics* CreateGraphics(CDC* dc);
+#endif
+  virtual Graphics* CreateGraphics(const Image::Ptr& image);
   virtual Image* CreateImage();
   virtual Font* CreateFont();  
   virtual Fonts* CreateFonts();
@@ -2614,8 +2659,11 @@ class DefaultSystems : public Systems {
  public:  
   virtual Region* CreateRegion();
   virtual Graphics* CreateGraphics();
-  virtual Graphics* CreateGraphics(bool debug);
-  virtual Graphics* CreateGraphics(void* dc);
+  //virtual Graphics* CreateGraphics(bool debug);
+#ifdef _WIN32_
+  virtual Graphics* CreateGraphics(CDC* dc);
+#endif
+  virtual Graphics* CreateGraphics(const Image::Ptr& image);
   virtual Image* CreateImage();
   virtual Font* CreateFont();  
   virtual Fonts* CreateFonts();
@@ -2648,6 +2696,7 @@ class DefaultSystems : public Systems {
 class GraphicsImp {
  public:
   GraphicsImp() {}
+  GraphicsImp(const boost::shared_ptr<Image>& image) {}
   virtual ~GraphicsImp() {}
 
   virtual void DevSetDebugFlag()  {} //= 0;
@@ -2738,17 +2787,18 @@ class WindowImp {
   virtual void dev_set_border_space(const BoxSpace& border_space)  {} //= 0;
   virtual const BoxSpace& dev_border_space() const = 0;
   virtual void DevScrollTo(int offsetx, int offsety)  {} //= 0;
-  virtual void DevShow()  {} //= 0;
-  virtual void DevHide()  {} //= 0;
+  virtual void DevShow() = 0;
+  virtual void DevHide() = 0;
   virtual bool dev_visible() const  { return false; } //= 0;
   virtual void DevBringToTop()  {} //= 0;
   virtual void DevInvalidate()  {} //= 0;
   virtual void DevInvalidate(const Region& rgn)  {} //= 0;  
-  virtual void DevSetCapture()  {} //= 0;
-  virtual void DevReleaseCapture()  {} //= 0;
-  virtual void DevShowCursor()  {} //= 0;
-  virtual void DevHideCursor()  {} //= 0;
-  virtual void DevSetCursorPosition(const Point& position)  {} //= 0;
+  virtual void DevSetCapture() = 0;
+  virtual void DevReleaseCapture() = 0;
+  virtual void DevShowCursor() = 0;
+  virtual void DevHideCursor() = 0;
+  virtual void DevSetCursorPosition(const Point& position) = 0;
+  virtual Point DevCursorPosition() const = 0;
   virtual void DevSetCursor(CursorStyle::Type style) {}  
   virtual void dev_set_parent(Window* window) {} 
   virtual void dev_set_clip_children() {}  
@@ -3125,13 +3175,14 @@ class ImpFactory {
   virtual ui::FontInfoImp* CreateFontInfoImp();
   virtual ui::FontImp* CreateFontImp();
   virtual ui::FontImp* CreateFontImp(int stockid);
-  virtual ui::GraphicsImp* CreateGraphicsImp(bool debug);
+  // virtual ui::GraphicsImp* CreateGraphicsImp(bool debug);
   virtual ui::GraphicsImp* CreateGraphicsImp();
+  virtual ui::GraphicsImp* CreateGraphicsImp(const boost::shared_ptr<Image>& image);
 #ifdef _WIN32
   virtual ui::GraphicsImp* CreateGraphicsImp(CDC* cr);
 #endif
   virtual ui::ImageImp* CreateImageImp();
-  virtual ui::GameControllersImp* CreateGameControllersImp();  
+  virtual ui::GameControllersImp* CreateGameControllersImp();
   virtual ui::FileObserverImp* CreateFileObserverImp(FileObserver* file_observer);  
   virtual LockIF* CreateLocker();
 

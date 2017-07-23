@@ -6,8 +6,8 @@ namespace psycle { namespace host {
 
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{    
-			// undo code not required, enter note handles it
-			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);	
+			// undo code not required, enter note handles it		
+			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar, nFlags);	
 			PsycleConfig& config = PsycleGlobal::conf();
 			if(viewMode == view_modes::pattern && bEditMode)
 			{
@@ -41,6 +41,7 @@ namespace psycle { namespace host {
 			//		pParentMain->StatusBarIdle();
 			//		Repaint(draw_modes::cursor);
 				}
+				ANOTIFY(Actions::patkeyup);
 			}
 			/*else if (){ }*/
 			else if (cmd.GetType() == CT_Note && cmd.GetNote() < notecommands::release)
@@ -51,7 +52,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
-      KeyUp(nChar, nRepCnt, nFlags);
+			KeyUp(nChar, nRepCnt, nFlags);
 			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
@@ -60,8 +61,8 @@ namespace psycle { namespace host {
 			PsycleConfig& config = PsycleGlobal::conf();
 			// undo code not required, enternote and msbput handle it
 			BOOL bRepeat = nFlags&0x4000;
-			// get command
-			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);
+			// get command		
+			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar, nFlags);
 
 			bool success = false;
 			//If editing in the pattern
@@ -102,6 +103,7 @@ namespace psycle { namespace host {
 				{
 					success = MSBPut(nChar);
 				}
+				ANOTIFY(Actions::patkeydown);
 			}
 			/*else if (viewMode == view_modes::sequence && bEditMode)
 			{
@@ -135,7 +137,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		{ 
-      KeyDown(nChar, nRepCnt, nFlags);
+			KeyDown(nChar, nRepCnt, nFlags);
 			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 		}
 
@@ -1538,10 +1540,11 @@ namespace psycle { namespace host {
 					Repaint(draw_modes::playback);
 				}
 			}
+			ANOTIFY(Actions::seqsel);
 		}
 
 		void CChildView::IncPosition(bool bRepeat)
-		{
+		{	    
 		//	case cdefPlaySkipAhead:
 			if (Global::player()._playing && PsycleGlobal::conf()._followSong)
 			{
@@ -1595,6 +1598,7 @@ namespace psycle { namespace host {
 					Repaint(draw_modes::playback);
 				}
 			}
+			ANOTIFY(Actions::seqsel);
 		}
 
 		void CChildView::SelectMachineUnderCursor()
@@ -1653,6 +1657,7 @@ namespace psycle { namespace host {
 						}
 						// delete undo from list
 						PsycleGlobal::inputHandler().pUndoList.pop_back();
+						ANOTIFY(Actions::undopattern);
 					}
 					break;
 				case UNDO_LENGTH:

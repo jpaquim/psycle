@@ -20,10 +20,6 @@
 #include <universalis/os/terminal.hpp>
 
 #include "Ui.hpp"
-/*extern "C" {
-  #include <sqlite3.h>  
-}*/
-
 
 // Visual Leak Detector ( vld.codeplex.com )
 // #include <vld.h>

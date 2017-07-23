@@ -74,7 +74,8 @@ namespace psycle { namespace host {
     }   
   }
 
-  LuaPlugin::~LuaPlugin() {    
+  LuaPlugin::~LuaPlugin() {
+    StopTimer();
     Free();    
   }
 
@@ -84,7 +85,7 @@ namespace psycle { namespace host {
       proxy().Free();
     } catch(std::exception& e) {
       ui::alert(e.what());
-    }     
+    }
   }
 
   void LuaPlugin::OnTimerViewRefresh() {    

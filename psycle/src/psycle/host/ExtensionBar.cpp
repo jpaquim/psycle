@@ -9,24 +9,102 @@
 #include "PsycleConfig.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
-#include "Canvas.hpp"
+#include "CanvasItems.hpp"
 #include "LuaPlugin.hpp"
 #include "MfcUi.hpp"
 
 namespace psycle {
 namespace host {
 
+	PsycleMeditation::PsycleMeditation() : plugin_(0)
+	{
+		using namespace ui;		
+		InvalidateDirect();
+		set_aligner(Aligner::Ptr(new DefaultAligner()));				
+		add_ornament(Ornament::Ptr(OrnamentFactory::Instance().CreateFill(0xFF222222)));				
+		ui::Group::Ptr top(new Group());
+		top->set_auto_size(false, true);
+		//top->set_position(Rect(Point(), Dimension(500, 200)));
+		top->set_align(AlignStyle::TOP);		
+		top->set_aligner(Aligner::Ptr(new DefaultAligner()));
+		top->set_margin(ui::BoxSpace(10));
+		top->add_ornament(Ornament::Ptr(OrnamentFactory::Instance().CreateLineBorder(0xFFFF3322, 3)));
+		Add(top);		
+		AddText(top, "Software Failure.   Press left mouse button to continue.");				
+		meditation_field_ = AddText(top, "");
+		meditation_field_->set_margin(ui::BoxSpace(5, 0, 5, 0));				
+		error_box_.reset(new Scintilla());
+	    error_box_->set_align(AlignStyle::CLIENT);
+		error_box_->set_background_color(0xFF232323);
+		error_box_->set_foreground_color(0xFFFFBF00);	
+		error_box_->StyleClearAll();
+		error_box_->set_linenumber_foreground_color(0xFF939393);
+		error_box_->set_linenumber_background_color(0xFF232323);  
+		error_box_->PreventInput();
+		error_box_->f(SCI_SETWRAPMODE, (void*) SC_WRAP_CHAR, 0);
+		Add(error_box_);		
+	}
+
+	ui::Text::Ptr PsycleMeditation::AddText(const ui::Window::Ptr& parent, const std::string& text)
+	{
+		using namespace ui;
+		Text::Ptr text_field = Text::Ptr(new Text(text));
+		text_field->set_auto_size(false, true);
+		text_field->set_position(Rect(Point(), Dimension(500, 20)));
+		text_field->set_color(0xFFFF3322);
+		text_field->set_align(AlignStyle::TOP);
+		text_field->set_justify(ui::JustifyStyle::CENTERJUSTIFY);
+		text_field->set_vertical_alignment(ui::AlignStyle::CENTER);
+		text_field->set_margin(ui::BoxSpace(5, 0, 0, 0));
+		parent->Add(text_field);
+		return text_field;
+	}
+
+	void PsycleMeditation::set_plugin(LuaPlugin& plugin)
+	{
+		plugin_ = &plugin;
+		meditation_field_->set_text("Psycle Meditation #" + std::string(plugin.GetEditName()) + "." + std::string(plugin.GetDllName()));
+	}
+
+	void PsycleMeditation::set_error_text(const std::string& text) {		
+		error_box_->EnableInput();
+		error_box_->ClearAll();
+		error_box_->AddText(text);
+		error_box_->PreventInput();
+	}
+
+	void PsycleMeditation::OnMouseDown(ui::MouseEvent& ev) {
+	  if (plugin_) {
+	    plugin_->DoReload();
+	  }
+	}
+
 	ExtensionWindow::ExtensionWindow()
 	{
 		using namespace ui;
 		set_aligner(Aligner::Ptr(new DefaultAligner()));
+	}
+
+	void ExtensionWindow::Push(LuaPlugin& plugin)
+	{									 					 		 
+		if (!plugin.viewport().expired()) {
+			if (HasExtensions()) {
+				RemoveAll();
+				RemoveExtension(plugin);
+			} else {
+				Show();				
+			}
+			if (!HasExtensions() || extensions_.back().lock().get() != &plugin) {
+				extensions_.push_back(plugin.shared_from_this());
+			}
+		}			
 	}
 					
 	void ExtensionWindow::Pop()
 	{
 		if (HasExtensions()) {			
 			RemoveAll();
-			extensions_.pop();
+			extensions_.pop_back();
 		}
 		if (extensions_.empty()) {
 			Hide();
@@ -36,36 +114,45 @@ namespace host {
 	void ExtensionWindow::DisplayTop()
 	{
 		if (HasExtensions()) {
-			using namespace ui;	
-			Viewport::Ptr top = extensions_.top().lock()->viewport().lock();
-			top->set_align(AlignStyle::CLIENT);
+			assert(!extensions_.back().expired());	
+			LuaPlugin::Ptr extension(extensions_.back().lock());
+			ui::Viewport::Ptr top(extension->has_error()
+							      ? extension->proxy().psycle_meditation().lock()
+							      : extension->viewport().lock());
+			top->set_align(ui::AlignStyle::CLIENT);
 			Add(top, false);
 			top->PreventFls();			
 			UpdateAlign();
 			top->EnableFls();
+			if (extension->has_error()) {
+			  top->FLS();
+			}            
+			top->SetFocus();
 		}
 	}	
 
-	void ExtensionWindow::Push(LuaPlugin& plugin)
-	{						 					 		 
-		if (!plugin.viewport().expired()) {
-			if (HasExtensions()) {
-				RemoveAll();
-			} else {
-				Show();
+	bool ExtensionWindow::IsTopDisplay(LuaPlugin& plugin) const
+	{		
+		return HasExtensions() && extensions_.back().lock().get() == &plugin;
+	}
+	
+	void ExtensionWindow::RemoveExtension(LuaPlugin& plugin)
+	{
+		Extensions::iterator it = extensions_.begin();
+		for (; it != extensions_.end(); ++it) {
+			if (!(*it).expired() && (*it).lock().get() == &plugin) {
+				extensions_.erase(it);
+				break;
 			}
-			if (!HasExtensions() || extensions_.top().lock().get() != &plugin) {
-				extensions_.push(plugin.shared_from_this());
-			}
-		}			
+		}
 	}
 		
 	void ExtensionWindow::RemoveExtensions()
 	{						
 		if (HasExtensions()) {			
 			RemoveAll();
-			extensions_ = Extensions();
-			Hide();
+			extensions_.clear();
+			Hide();			
 		}
 	}
 		
@@ -73,9 +160,20 @@ namespace host {
 	{
 		menu_handle.clear();
 		if (HasExtensions()) {
-			menu_handle.set_menu(extensions_.top().lock()->proxy().menu_root_node());
+			menu_handle.set_menu(extensions_.back().lock()->proxy().menu_root_node());
 		}
 		::AfxGetMainWnd()->DrawMenuBar();
+	}
+	
+	void ExtensionWindow::OnKeyDown(ui::KeyEvent& ev)
+	{
+		CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+		CChildView* view = &main->m_wndView;
+		UINT nFlags(0);		
+		if (ev.extendedkey()) {
+	      nFlags |= 0x100;
+	    }
+		view->KeyDown(ev.keycode(), 0, nFlags);
 	}						
 
 
@@ -153,10 +251,12 @@ namespace host {
 	
 	void ExtensionBar::Add(LuaPlugin& plugin)
 	{
-		m_luaWndView->set_min_dimension(plugin.viewport().lock()->min_dimension());									
-		m_luaWndView->Push(plugin);				
-		m_luaWndView->DisplayTop();
-		((CMainFrame*)::AfxGetMainWnd())->RecalcLayout();		
+		if (!m_luaWndView->IsTopDisplay(plugin)) {
+			m_luaWndView->set_min_dimension(plugin.viewport().lock()->min_dimension());									
+			m_luaWndView->Push(plugin);				
+			m_luaWndView->DisplayTop();
+			((CMainFrame*)::AfxGetMainWnd())->RecalcLayout();
+		}		
 	}	
 
 }}

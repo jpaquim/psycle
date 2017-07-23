@@ -211,15 +211,13 @@ namespace psycle
 			}
 			if (pMachine) {
 				pMachine->Init();
-			}
-			machines_->RegisterMachine(pMachine);
+			}			
 			return pMachine;
 		}
 
 
 		Song::Song()
-			:semaphore(2,2,NULL,NULL)
-			,machines_(new MachineGroup())
+			:semaphore(2,2,NULL,NULL)			
 		{
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
@@ -771,8 +769,7 @@ namespace psycle
 		{
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
-			{
-				machines_->UnregisterMachine(iMac);
+			{				
 				iMac->DeleteWires();
 				DeleteVirtualsOfMachine(mac);
 				if(mac == machineSoloed) machineSoloed = -1;
@@ -1663,8 +1660,7 @@ namespace psycle
 							if(index < MAX_MACHINES)
 							{
 								// we had better load it
-								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
-								machines_->RegisterMachine(_pMachine[index]);
+								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);								
 								//Bugfix.
 								if (fullopen) {
 									if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
@@ -1871,8 +1867,7 @@ namespace psycle
 				if (!_pMachine[MASTER_INDEX] )
 				{
 					_pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
-					_pMachine[MASTER_INDEX]->Init();
-					machines_->RegisterMachine(_pMachine[MASTER_INDEX]);
+					_pMachine[MASTER_INDEX]->Init();				
 				}
 				
 				if(chunkcount) return false;

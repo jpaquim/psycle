@@ -9,6 +9,8 @@
 #include "Song.hpp"
 #include "Player.hpp"
 #include "VstHost24.hpp"
+#include "LuaPlugin.hpp" // Refresh settings
+
 namespace psycle { namespace host {
 
 		/////////////////////////////////////////////
@@ -153,7 +155,7 @@ namespace psycle { namespace host {
 					s >> thread_count;
 				}
 			}
-
+			HostExtensions::Instance().UpdateStyles();
 			Global::player().start_threads(thread_count);
 		}
 

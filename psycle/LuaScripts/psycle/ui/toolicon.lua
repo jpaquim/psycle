@@ -73,6 +73,12 @@ function toolicon:init(filename, trans)
   self.hover = false
   self.usetoggleimage_ = false
   self.is_toggle = false 
+  self.groupindex = -1
+end
+
+function toolicon:setgroupindex(index)
+  self.groupindex = index
+  return self
 end
 
 function toolicon:initdefaultcolors()
@@ -98,11 +104,10 @@ end
 function toolicon:justifyoffset()
   local result = 0
   if self.img then
-    local imagewidth, imageheight = self.img:size()
     if self.justify_ == toolicon.CENTERJUSTIFY then
-      result = (self:dimension():width() - imagewidth)/2
+      result = (self:dimension():width() - self.img:dimension():width())/2
      elseif self.justify_ == toolicon.RIGHTJUSTIFY then
-       result = self:dimesion():width() - imagewidth
+       result = self:dimesion():width() - self.img:dimension():width()
      end
   end
   return result
@@ -111,11 +116,10 @@ end
 function toolicon:verticalalignmentoffset()
   local result = 0
   if self.img then
-    local imagewidth, imageheight = self.img:size()
     if self.verticalalignment_ == toolicon.CENTER then	  		
-      result = (self:dimension():height() - imageheight)/2
+      result = (self:dimension():height() - self.img:dimension():height())/2
     elseif self.verticalalignment_ == toolicon.BOTTOM then 				
-	  result = self:dimension():height() - imageheight
+	  result = self:dimension():height() - self.img:dimension():height()
     end	
   end
   return result
@@ -142,8 +146,7 @@ function toolicon:draw(g)
   local xpos = 0
   if self.img then
     g:drawimage(self.img, point:new(self:justifyoffset(), self:verticalalignmentoffset())) 
-    local ix, iy = self.img:size()    
-    xpos = xpos + ix
+    xpos = xpos + self.img:dimension():width()
   end    
   self:updatecolor(g)    
   local ypos =
@@ -187,7 +190,7 @@ function toolicon:updatebackgroundcolor(g)
 end
 
 function toolicon:onmousedown(ev) 
-  self:mousecapture()
+  self:capturemouse()
   self:seton(not self.on_)
   self:swapimage():fls()
   self.clicklistener_:notify(self)  
@@ -216,7 +219,7 @@ function toolicon:onmouseout(ev)
 end
 
 function toolicon:onmouseup(ev)  
-  self:mouserelease()
+  self:releasemouse()
   if not self.is_toggle then
     self:seton(false)
     if not self.usetoggleimage_ then
@@ -225,7 +228,7 @@ function toolicon:onmouseup(ev)
   end
   if (self.hover) then
     self:onclick()       
-    if self.command_ then
+    if self.command_  and self.command_ ~= nil then
       self.command_():execute()
     end
     self.click:emit(self)        
@@ -239,9 +242,10 @@ end
 function toolicon:seton(on)  
   if self.on_ ~= on then
     self.on_ = on       
-    if self.toolbar~=nil and on and self.istoggle_ then
+    if self.toolbar~=nil and on and self.groupindex == self.toolbar.groupindex then
       self.toolbar:onnotify(self)      
-    end  
+    end
+    self:fls()    
   end
   return self
 end
@@ -260,7 +264,7 @@ function toolicon:swapimage()
 end
 
 function toolicon:on()
-  return self.on_;
+  return self.on_
 end
 
 function toolicon:settoolbar(toolbar)
@@ -284,7 +288,7 @@ function toolicon:text()
 end
 
 function toolicon:oncalcautodimension()
-  return dimension:new(20, 10)
+  return dimension:new(20, 17)
 end
 
 function toolicon:transparent()  

@@ -97,6 +97,7 @@ class Viewport : public ui::Group {
   void Flush();  
   void StealFocus(const Window::Ptr& item);  
   virtual void OnSize(const ui::Dimension& dimension);
+  void InvalidateDirect() { save_ = false; }
   void SetSave(bool on) { save_ = on; }
   virtual bool IsSaving() const { return save_; }    
   void ClearSave() { save_rgn_->Clear(); }           

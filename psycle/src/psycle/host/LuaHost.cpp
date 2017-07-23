@@ -6,6 +6,7 @@
 #include "LuaInternals.hpp"
 #include "LuaPlugin.hpp"
 #include "Player.hpp"
+#include "ExtensionBar.hpp"
 #include "plugincatcher.hpp"
 #include "Song.hpp"
 #include <boost/filesystem.hpp>
@@ -15,6 +16,8 @@
 #include "NewMachine.hpp"
 #include <algorithm>
 #include "resources\resources.hpp"
+
+#include "MainFrm.hpp"
 
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 extern "C" {
@@ -236,6 +239,7 @@ void LuaStarter::PrepareState() {
     {"replacemenu", replacemenu},
     {"addextension", addextension},
     {"output", LuaProxy::terminal_output},
+	{"cursortest", LuaProxy::cursor_test},
     {"alert", LuaProxy::alert},
     {"confirm", LuaProxy::confirm},	
     {NULL, NULL}
@@ -377,7 +381,9 @@ LuaProxy::LuaProxy(LuaPlugin* host, const std::string& dllname) :
     lua_mac_(0),
     user_interface_(SDI),
 	default_viewport_mode_(CHILDVIEWPORT),
-    clock_(0) {     
+    clock_(0),
+	has_error_(false),
+	psycle_meditation_(new PsycleMeditation()) {     
   Load(dllname);
 }
 
@@ -450,7 +456,8 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaArrayBind>(L, "psycle.array");
   LuaHelper::require<LuaScopeMemoryBind>(L, "psycle.scopememory");
   LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");  
-  LuaHelper::require<LuaMachineBind>(L, "psycle.machine");  
+  LuaHelper::require<LuaMachineBind>(L, "psycle.machine");
+  LuaHelper::require<LuaTweakBind>(L, "psycle.tweak"); 
   // LuaHelper::require<LuaMachinesBind>(L, "psycle.machines");
   LuaHelper::require<LuaWaveOscBind>(L, "psycle.osc");
   LuaHelper::require<LuaResamplerBind>(L, "psycle.dsp.resampler");
@@ -466,6 +473,7 @@ void LuaProxy::PrepareState() {
   LuaHelper::require<LuaPatternDataBind>(L, "psycle.pattern");
   // ui host interaction
   LuaHelper::require<LuaSequenceBarBind>(L, "psycle.sequencebar");
+  LuaHelper::require<LuaMachineBarBind>(L, "psycle.machinebar");
   LuaHelper::require<LuaActionListenerBind>(L, "psycle.ui.hostactionlistener");
   LuaHelper::require<LuaCmdDefBind>(L, "psycle.ui.cmddef");
   LuaHelper::require<LuaRunBind>(L, "psycle.run");
@@ -487,11 +495,12 @@ void LuaProxy::Reload() {
   try {      
     lock();       
     host_->set_crashed(true);
+	has_error_ = false;
     lua_State* old_state = L;
-    LuaMachine* old_machine = lua_mac_;    
-    try {
-      int oldviewportmode = frame_ && !viewport().expired() ? FRAMEVIEWPORT 
+    LuaMachine* old_machine = lua_mac_;
+	int oldviewportmode = frame_ && !viewport().expired() ? FRAMEVIEWPORT 
 															: default_viewport_mode();     
+    try {          	 
       RemoveCanvasFromFrame();      
       L = LuaGlobal::load_script(host_->GetDllName());          
       PrepareState();
@@ -502,18 +511,18 @@ void LuaProxy::Reload() {
         LuaGlobal::proxy(old_state)->timer_->Clear();
         LuaGlobal::proxy(old_state)->clear_timers_.clear();                   
       }
-      Init();
-      if (old_state) {
-        lua_close(old_state); 
-      }
+      Init();      
       assert(host_);
-      UpdateFrameCanvas();
+      UpdateFrameCanvas();	 
       if (oldviewportmode != FRAMEVIEWPORT) {
-        host_->ViewPortChanged(*host_, oldviewportmode); 
+        host_->ViewPortChanged(*host_, oldviewportmode);	
 		if (!host_->viewport().expired()) {
 			host_->viewport().lock()->FLS();
 		}
       }
+	  if (old_state) {
+        lua_close(old_state); 
+      }	  
       OnActivated(2);            
     } catch(std::exception &e) {
       if (L) {        
@@ -527,14 +536,24 @@ void LuaProxy::Reload() {
       proxy->lua_mac_ = old_machine;
       proxy->lua_mac_->setproxy(proxy);
       std::string s = std::string("Reload Error, old script still running!\n") + e.what(); 
-      UpdateFrameCanvas();      
-      unlock();
+      UpdateFrameCanvas();
+	  assert(host_);
+	  psycle_meditation_->set_plugin(*host_);
+	  ShowPsycleMeditation(e.what());
+	  host_->ViewPortChanged(*host_, oldviewportmode); 
+	  psycle_meditation_->FLS();
+      unlock();	  
       throw std::runtime_error(s.c_str());  
     }     
     host_->Mute(false);
     host_->set_crashed(false);    
     unlock();
   } CATCH_WRAP_AND_RETHROW(host())
+}
+
+void LuaProxy::ShowPsycleMeditation(const std::string& message) {
+  psycle_meditation_->set_error_text(message);
+  has_error_ = true;
 }
 
 int LuaProxy::alert(lua_State* L) {
@@ -585,6 +604,18 @@ int LuaProxy::terminal_output(lua_State* L) {
       ui::TerminalFrame::instance().output(s);
     }
   }
+  return 0;
+}
+
+int LuaProxy::addtweaklistener(lua_State* L) {
+	boost::shared_ptr<Tweak> tweak = LuaHelper::check_sptr<Tweak>(L, 1, LuaTweakBind::meta);
+	PsycleGlobal::inputHandler().AddTweakListener(tweak);
+	return LuaHelper::chaining(L);
+}
+
+int LuaProxy::cursor_test(lua_State* L) {
+  HCURSOR c = ::LoadCursor(0, IDC_ARROW);
+  ::SetCursor(c);
   return 0;
 }
 
@@ -656,6 +687,7 @@ void LuaProxy::ExportCFunctions() {
   static const luaL_Reg methods[] = {
     {"invokelater", invokelater},
     {"output", terminal_output },
+	{"cursortest", cursor_test },
     {"alert", alert},
     {"confirm", confirm},
     {"setmachine", set_machine},    
@@ -665,6 +697,7 @@ void LuaProxy::ExportCFunctions() {
     {"setting", setting},
     {"reloadstartscript", reloadstartscript}, 
 	{"flsmain", flsmain},
+	{"addtweaklistener", addtweaklistener},
     {NULL, NULL}
   };
   lua_newtable(L);
@@ -1110,7 +1143,18 @@ void LuaProxy::OpenInFrame() {
     frame_->Show(right_frame_aligner);
     Node::Ptr tmp = menu_root_node_.lock();
     frame_->SetMenuRootNode(tmp);
+	frame_->KeyDown.connect(boost::bind(&LuaProxy::OnFrameKeyDown, this, _1));
   }
+}
+
+void LuaProxy::OnFrameKeyDown(ui::KeyEvent& ev) {
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  int flags = 0;
+  if (ev.shiftkey()) {
+    flags |= 0x80 | 0x100;
+  } 
+  view->KeyDown(ev.keycode(), 0, flags);
 }
 
 void LuaProxy::UpdateFrameCanvas() {
@@ -1165,7 +1209,7 @@ struct InvokeTimer {
         runnable_->Run();
         clock_ = 0;
         if (timeout_) {
-          LuaHelper::unregister_userdata(runnable_->state(), runnable_);
+          LuaHelper::unregister_userdata(runnable_->state(), runnable_);		 
         }
         result = timeout_;
       }
@@ -1348,7 +1392,8 @@ void HostExtensions::RemoveFromWindowsMenu(LuaPlugin* plugin) {
 
 LuaPluginPtr HostExtensions::Execute(Link& link) {
 	std::string script_path = PsycleGlobal::configuration().GetAbsoluteLuaDir();
-	LuaPluginPtr mac(new LuaPlugin(script_path + "\\" + link.dll_name().c_str(), -1));
+	LuaPluginPtr mac;	
+	mac.reset(new LuaPlugin(script_path + "\\" + link.dll_name().c_str(), -1));
 	mac->proxy().set_userinterface(link.user_interface());
 	mac->proxy().set_default_viewport_mode(link.viewport());
 	mac->Init();			
@@ -1360,7 +1405,7 @@ LuaPluginPtr HostExtensions::Execute(Link& link) {
 	}
 	if (link.viewport() == TOOLBARVIEWPORT) {
 		has_toolbar_extension_ = true;
-	}
+	}	
 	return mac;
 }
 
@@ -1376,7 +1421,7 @@ void HostExtensions::OnPluginViewPortChanged(LuaPlugin& plugin, int viewport) {
 		default:
 			child_view_->OnHostViewportChange(plugin, viewport);
 		break;
-	}	
+	}		
 }
 
 bool HostExtensions::HasToolBarExtension() const {
@@ -1419,6 +1464,17 @@ LuaPluginPtr HostExtensions::Get(int idx) {
 
 void HostExtensions::ChangeWindowsMenuText(LuaPlugin* plugin) {
   child_view_->OnChangeWindowsMenuText(plugin);
+}
+
+void HostExtensions::UpdateStyles() {
+	HostExtensions::List::iterator it = extensions_.begin();
+	for (; it != extensions_.end(); ++it) {
+		LuaPluginPtr ptr = *it;
+		if (!ptr->viewport().expired()) {
+			ptr->viewport().lock()->RefreshRules();
+			ptr->viewport().lock()->FLS();
+		}
+	}
 }
    
 // Host
@@ -1485,7 +1541,17 @@ std::vector<LuaPlugin*> LuaGlobal::GetAllLuas() {
 
 namespace luaerrhandler {
 
-int error_handler(lua_State* L) { 
+int error_handler(lua_State* L) {
+	LuaProxy* proxy = LuaGlobal::proxy(L);
+	if (proxy) {	 
+		int oldviewportmode = CHILDVIEWPORT;   
+		LuaGlobal::proxy(L)->psycle_meditation_->set_plugin(proxy->host());
+		LuaGlobal::proxy(L)->ShowPsycleMeditation(lua_tostring(L, -1));
+		LuaGlobal::proxy(L)->host().ViewPortChanged(proxy->host(), oldviewportmode); 
+		LuaGlobal::proxy(L)->psycle_meditation_->FLS();		
+	}
+
+
   // first make sure that the error didn't occured in the plugineditor itself
   std::string edit_name = LuaGlobal::proxy(L)->host().GetEditName();
   if (edit_name == "Plugineditor") {

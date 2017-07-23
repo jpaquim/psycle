@@ -95,7 +95,7 @@ function parameter:hasvelrange() return self.velrange_ ~= 0 end
 function parameter:velrange() return self.velrange_ end
 function parameter:hasvel() return self.hasvel_ end
 function parameter:start() return self.start_ end
-function parameter:range()  return self.min_, self.max_, self.step_ end
+function parameter:range() return self.min_, self.max_, self.step_ end
 function parameter:mpf() return self.mpf_ end
 function parameter:setid(id) self.id_ = id end
 function parameter:id() return self.id_ end
@@ -107,7 +107,7 @@ function parameter:minval() return self.min_ end
 function parameter:setmaxval(max) local tmp = self:val() self.max_ = max if tmp > max then tmp = max end self:setval(tmp) end
 function parameter:maxval() return self.max_ end
 function parameter:setsteps(steps) local tmp = self:val() self.step_ = steps self:setval(tmp) end
-function parameter:steps() return self.step_; end
+function parameter:steps() return self.step_ end
 function parameter:val()
   local tmp = self.val_*(self.max_ - self.min_)+self.min_
   if vel == nil then

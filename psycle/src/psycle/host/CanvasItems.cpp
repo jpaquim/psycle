@@ -242,23 +242,66 @@ void Splitter::Draw(Graphics* g, Region& draw_region) {
   g->FillRect(ui::Rect(Point(), dim()));   
 }
 
-void Splitter::OnMouseDown(MouseEvent& ev) {	
-	Window* last = item_ = 0;
-	drag_pos_ = -1;
-  for (iterator it = parent()->begin(); it!=parent()->end(); ++it) {
-    if ((*it).get() == this) {
-			item_ = last;
-      break;
-    }
-		last = (*it).get();
+void Splitter::OnMouseDown(MouseEvent& ev) {
+  UpdateResizeWindow();  
+  if (ev.button() == 1)	{
+	 StartDrag();
+  } else if (item_ && ev.button() == 2) {
+	if (orientation_ == Orientation::VERT) {   
+		if (align() == AlignStyle::LEFT) {
+			if (restore_position_.width() == 0) {
+				restore_position_ = item_->position().dimension();
+				item_->set_position(Rect(item_->position().top_left(),
+									Dimension(0, item_->position().height())));      
+			} else {				
+				item_->set_position(Rect(item_->position().top_left(),
+									Dimension(restore_position_.width(),
+											  item_->position().height())));
+				restore_position_.set(0, 0);
+			}
+		}
+	} else      
+	if (orientation_ == Orientation::HORZ) {
+		if (restore_position_.height() == 0) {
+			restore_position_ = item_->position().dimension();    
+			if (align() == AlignStyle::BOTTOM) {
+				item_->set_position(Rect(item_->position().top_left(),
+									Dimension(item_->position().width(), 0)));
+			}
+		} else {
+			if (align() == AlignStyle::BOTTOM) {
+				item_->set_position(Rect(item_->position().top_left(),
+									Dimension(item_->position().width(),
+									restore_position_.height())));
+			}
+			restore_position_.set(0, 0);
+		}
+	}  
+	((Group*)parent())->FlagNotAligned();
+	parent()->UpdateAlign();   
   }
+}
+
+void Splitter::StartDrag() {	
 	if (item_) {		
 		parent_abs_pos_ = (orientation_ == Orientation::HORZ) 
-                      ? parent()->absolute_position().top()
-                      : parent()->absolute_position().left();
-    do_split_ = true;		
-    BringToTop();
-	  SetCapture();	
+		? parent()->absolute_position().top()
+		: parent()->absolute_position().left();
+		do_split_ = true;		
+		BringToTop();
+		SetCapture();	
+	}
+}
+
+void Splitter::UpdateResizeWindow() {
+	Window* last = item_ = 0;
+	drag_pos_ = -1;
+	for (iterator it = parent()->begin(); it!=parent()->end(); ++it) {
+		if ((*it).get() == this) {
+			item_ = last;
+			break;
+		}
+		last = (*it).get();
 	}
 }
 

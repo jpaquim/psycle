@@ -12,6 +12,114 @@ namespace host {
 namespace ui {
 namespace mfc {
 
+GraphicsImp::GraphicsImp(const boost::shared_ptr<Image>& image)  
+	:   hScreenDC(0),
+	    rgb_color_(0xFFFFFF),
+		argb_color_(0xFFFFFFFF),
+		updatepen_(false),
+		updatebrush_(false),
+		pen_width_(1),
+		debug_flag_(false),
+		image_dc_(true) {
+    cr_ = new CDC();
+	ImageImp* image_imp = (ImageImp*) image->imp();
+	CDC* dc = DummyWindow::dummy()->GetDC();
+	cr_->CreateCompatibleDC(dc);
+	old_image_bpm_ = cr_->SelectObject(image_imp->dev_source());
+	cr_->SetTextColor(rgb_color_);
+	pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
+    old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
+	brush = ::CreateSolidBrush(rgb_color_);			      	 
+    old_brush = (HBRUSH)::SelectObject(cr_->m_hDC, brush);
+    cr_->GetWorldTransform(&rXform);    
+    cr_->SetBkMode(TRANSPARENT);    
+    mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+    assert(imp);
+    old_font = (HFONT) ::SelectObject(cr_->m_hDC, imp->cfont());
+    old_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
+    clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
+	
+/*
+	hScreenDC = 0;
+	cr_ = new CDC();
+	cr_->CreateCompatibleDC(DummyWindow::dummy()->GetDC());
+	Init();*/
+	
+	// old_image_bpm_ = 0;
+	//old_image_bpm_ = cr_->SelectObject(image_imp->dev_source());
+	//const std::string path = "C:\\Users\\User\\Documents\\Visual Studio 2010\\Projects\\psycle\\psycle-code\\psycle\\LuaScripts\\psycle\\ui\\icons\\";
+	//image->Load(path + "pen.png");
+	//ImageImp* image_imp = (ImageImp*) image->imp();
+	//old_image_bpm_ = cr_->SelectObject(image_imp->dev_source());
+	// cr_->SelectObject(old_image_bpm_);
+	//old_image_bpm_ = 0;
+	/*CBrush brush;
+	brush.CreateSolidBrush(RGB(255,0,0));
+	CRect rect;
+	rect.SetRect (0,0,40,40);
+	cr_->SelectObject(&brush);
+	cr_->SetTextColor(RGB(0,0,255));
+	cr_->DrawText("Hello",6, &rect, DT_CENTER );*/
+}
+
+void GraphicsImp::Init() {
+    assert(cr_);
+	old_bpm_ = 0;
+	cr_->SetTextColor(rgb_color_);
+	pen = ::CreatePen(PS_SOLID, 1, rgb_color_);     
+    old_pen = (HPEN) ::SelectObject(cr_->m_hDC, pen);
+	brush = ::CreateSolidBrush(rgb_color_);			      	 
+    old_brush = (HBRUSH)::SelectObject(cr_->m_hDC, brush);
+    cr_->GetWorldTransform(&rXform);    
+    cr_->SetBkMode(TRANSPARENT);    
+    mfc::FontImp* imp = dynamic_cast<mfc::FontImp*>(font_.imp());
+    assert(imp);
+    old_font = (HFONT) ::SelectObject(cr_->m_hDC, imp->cfont());
+    old_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
+    clp_rgn_ = ::CreateRectRgn(0, 0, 0, 0);
+   // ::GetRandomRgn(cr_->m_hDC, old_rgn_, SYSRGN);
+  //  POINT pt = {0,0};
+   // HWND hwnd = ::WindowFromDC(cr_->m_hDC);
+  //  ::MapWindowPoints(NULL, hwnd, &pt, 1);
+ //   ::OffsetRgn(old_rgn_, pt.x, pt.y);  		 
+}
+
+ void GraphicsImp::DevDispose() {
+   if (image_dc_) {
+   ::SelectObject(cr_->m_hDC, old_pen);
+	::DeleteObject(pen);
+	::SelectObject(cr_->m_hDC, old_brush);
+	::DeleteObject(brush);
+	::SelectObject(cr_->m_hDC, old_font);
+	cr_->SetGraphicsMode(GM_ADVANCED);
+	cr_->SetWorldTransform(&rXform);
+	cr_->SelectObject(old_font);
+	cr_->SetBkMode(OPAQUE);
+    cr_->SelectObject(old_image_bpm_);
+	DummyWindow::dummy()->ReleaseDC(cr_);
+	delete cr_;
+	cr_ = 0;
+    return;
+	}
+
+	::SelectObject(cr_->m_hDC, old_pen);
+	::DeleteObject(pen);
+	::SelectObject(cr_->m_hDC, old_brush);
+	::DeleteObject(brush);
+	::SelectObject(cr_->m_hDC, old_font);
+	cr_->SetGraphicsMode(GM_ADVANCED);
+	cr_->SetWorldTransform(&rXform);
+	cr_->SelectObject(old_font);
+	cr_->SetBkMode(OPAQUE);
+	//::SelectClipRgn(cr_->m_hDC, old_rgn_);
+	if (old_bpm_) {
+		cr_->SelectObject(old_bpm_);
+	}
+	::DeleteObject(old_rgn_);
+	::DeleteObject(clp_rgn_);	
+	cr_ = 0;
+  }
+
 void GraphicsImp::DevFillRegion(const ui::Region& rgn) {    
   check_pen_update();
   check_brush_update();        
@@ -82,21 +190,19 @@ void RegionImp::DevClear() {
 }
 
 void ImageImp::DevReset(const ui::Dimension& dimension) {
-	Dispose();
+	Dispose();	
 	bmp_ = new CBitmap();
-	CDC dc;
-	dc.CreateCompatibleDC(NULL);
-	bmp_->CreateCompatibleBitmap(&dc, static_cast<int>(dimension.width()),
-                               static_cast<int>(dimension.height()));
-	::ReleaseDC(NULL, dc);
+	CDC *pDC = DummyWindow::dummy()->GetDC();		
+	bmp_->CreateCompatibleBitmap(pDC, static_cast<int>(dimension.width()),
+                               static_cast<int>(dimension.height()));   
+	DummyWindow::dummy()->ReleaseDC(pDC);
 }
 
 ui::Graphics* ImageImp::dev_graphics() {
-	if (!paint_graphics_.get()) {		
-		CDC* memDC = new CDC();
-        memDC->CreateCompatibleDC(NULL);
-		paint_graphics_.reset(new ui::Graphics(memDC));
-		memDC->SelectObject(bmp_);	
+	if (!paint_graphics_.get()) {	
+	    CDC *pDC = DummyWindow::dummy()->GetDC();	            
+		paint_graphics_.reset(new ui::Graphics(pDC));
+		pDC->SelectObject(bmp_);	
 	}
 	return paint_graphics_.get();
 }
@@ -136,11 +242,11 @@ BEGIN_TEMPLATE_MESSAGE_MAP2(WindowTemplateImp, T, I, T)
 	ON_WM_RBUTTONUP()
 	ON_WM_KEYDOWN()
 	ON_WM_KEYUP()
-	ON_WM_SETCURSOR()
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_WM_SIZE()  
-	ON_WM_MOUSEACTIVATE()	
+	ON_WM_MOUSEACTIVATE()
+	ON_WM_SETCURSOR()
 END_MESSAGE_MAP()
 
 template<class T, class I>
@@ -155,7 +261,7 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
       byKeybState[VK_CAPITAL] = 0;
       ::SetKeyboardState(byKeybState);        
     }  
-    KeyEvent ev(pMsg->wParam, Win32KeyFlags(0));    
+    KeyEvent ev(pMsg->wParam, Win32KeyFlags(pMsg->lParam));    
     return WorkEvent(ev, &Window::OnKeyDown, window(), pMsg);
   } else
   if (pMsg->message == WM_KEYUP) {
@@ -226,7 +332,11 @@ BOOL WindowTemplateImp<T, I>::PreTranslateMessage(MSG* pMsg) {
 	short x = GET_X_LPARAM(pMsg->lParam);     
 	short y = GET_Y_LPARAM(pMsg->lParam);
 	short zDelta = GET_WHEEL_DELTA_WPARAM(pMsg->wParam);	
-    WheelEvent ev(Point((int)x, (int)y), (int) zDelta, button_state(pMsg->wParam), pMsg->wParam);
+    WheelEvent ev(Point((int)x, (int)y), 
+	              (int) zDelta,
+				  button_state(pMsg->wParam),
+				  GetKeyState(VK_SHIFT)<0,
+				  GetKeyState(VK_CONTROL)<0);
     return WorkEvent(ev, &Window::OnWheel, window(), pMsg);
   } else 
   if (pMsg->message == WM_MOUSEMOVE) {    
@@ -290,6 +400,7 @@ int WindowTemplateImp<T, I>::OnCreate(LPCREATESTRUCT lpCreateStruct) {
 template<class T, class I>
 void WindowTemplateImp<T, I>::OnDestroy() {    
   bmpDC.DeleteObject();
+  cursor_ = NULL;
 }
 
 template<class T, class I>
@@ -392,7 +503,7 @@ Rect WindowTemplateImp<T, I>::MapPosToBoxModel(const CRect& rc) const {
 
 template<class T, class I>
 void WindowTemplateImp<T, I>::dev_set_parent(Window* parent) {  
-  if (parent && parent->imp()) {    
+  if (parent && parent->imp()) {
     DevHide();
     SetParent(dynamic_cast<CWnd*>(parent->imp()));
     if (window() && window()->visible()) {
@@ -466,7 +577,40 @@ void WindowTemplateImp<T, I>::OnSize(UINT nType, int cw, int ch) {
   CWnd::OnSize(nType, cw, ch);
 }
 
-void WindowImp::DevSetCursor(CursorStyle::Type style) {
+template<class T, class I>
+void WindowTemplateImp<T, I>::DevSetCapture() {
+	SetCapture();
+}
+
+template<class T, class I>
+void WindowTemplateImp<T, I>::DevReleaseCapture() {
+	ReleaseCapture();
+} 
+
+template<class T, class I>
+void WindowTemplateImp<T, I>::DevShowCursor() {
+	while (::ShowCursor(TRUE) < 0);
+}
+  
+template<class T, class I>
+void WindowTemplateImp<T, I>::DevHideCursor() {
+	while (::ShowCursor(FALSE) >= 0);
+}
+
+template<class T, class I>
+void WindowTemplateImp<T, I>::DevSetCursorPosition(const ui::Point& position) {    
+	::SetCursorPos(static_cast<int>(position.x()), static_cast<int>(position.y()));
+}
+
+template<class T, class I>
+Point WindowTemplateImp<T, I>::DevCursorPosition() const {
+  POINT pt;
+  ::GetCursorPos(&pt);
+  return Point(pt.x, pt.y);
+}
+
+template<class T, class I>
+void WindowTemplateImp<T, I>::DevSetCursor(CursorStyle::Type style) {
   LPTSTR c = 0;
   int ac = 0;
   using namespace CursorStyle;
@@ -497,6 +641,9 @@ void WindowImp::DevSetCursor(CursorStyle::Type style) {
   cursor_ = (c != 0) ? LoadCursor(0, c) 
                      : ::LoadCursor(AfxFindResourceHandle(MAKEINTRESOURCE(ac),
 				                    RT_GROUP_CURSOR), MAKEINTRESOURCE(ac));
+  if (cursor_) {
+    ::SetCursor(cursor_);
+  }
 }
 
 template class WindowTemplateImp<CWnd, ui::WindowImp>;
@@ -513,41 +660,50 @@ template class WindowTemplateImp<CListCtrl, ui::ListViewImp>;
 template class WindowTemplateImp<CFrameWnd, ui::FrameImp>;
 
 BEGIN_MESSAGE_MAP(WindowImp, CWnd)
-  ON_WM_CREATE()
-  ON_WM_DESTROY()
-  //ON_WM_SETFOCUS()
+	ON_WM_CREATE()
+	ON_WM_DESTROY()
+	//ON_WM_SETFOCUS()
 	ON_WM_PAINT()
-  ON_WM_ERASEBKGND()
+	ON_WM_ERASEBKGND()
 	ON_WM_LBUTTONDOWN()	
-  ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()	
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_RBUTTONUP()
-  ON_WM_KEYDOWN()
-	ON_WM_KEYUP()
-  ON_WM_SETCURSOR()
-  ON_WM_HSCROLL()
-  ON_WM_VSCROLL()
-  ON_WM_SIZE()  	
+	ON_WM_KEYDOWN()
+	ON_WM_KEYUP()	
+	ON_WM_HSCROLL()
+	ON_WM_VSCROLL()
+	ON_WM_SIZE()
+	ON_WM_SETCURSOR()	
 END_MESSAGE_MAP()
 
 
 BEGIN_MESSAGE_MAP(FrameImp, CFrameWnd)
-  ON_WM_SIZE()
+	ON_WM_SIZE()
 	ON_WM_PAINT()
-  ON_WM_CLOSE()
-  ON_WM_HSCROLL()
-  ON_WM_ERASEBKGND()
-  ON_WM_KILLFOCUS()
-  ON_WM_SETFOCUS()
-  ON_WM_NCRBUTTONDOWN()
+	ON_WM_CLOSE()
+	ON_WM_HSCROLL()
+	ON_WM_ERASEBKGND()
+	ON_WM_KILLFOCUS()
+	ON_WM_SETFOCUS()
+	ON_WM_NCRBUTTONDOWN()
 	ON_WM_LBUTTONDOWN()	
 	ON_WM_NCHITTEST()
+	ON_WM_KEYDOWN()
 	ON_COMMAND_RANGE(ID_DYNAMIC_MENUS_START, ID_DYNAMIC_MENUS_END, OnDynamicMenuItems)
 END_MESSAGE_MAP()
 
 BOOL FrameImp::PreTranslateMessage(MSG* pMsg) {	
+  if (pMsg->message==WM_KEYDOWN) {
+    KeyEvent ev(pMsg->wParam, Win32KeyFlags(0));    
+    bool result = WorkEvent(ev, &Window::OnKeyDown, window(), pMsg);
+	if (window()) {
+	  window()->KeyDown(ev);
+	}
+	return result;
+  } else
   if (pMsg->message==WM_NCRBUTTONDOWN) {    
     ui::Event ev;
     ui::Point point(pMsg->pt.x, pMsg->pt.y);
@@ -1495,6 +1651,7 @@ void MenuContainerImp::WorkMenuItemEvent(int id) {
              bar->OnMenuItemClick(node->shared_from_this());
 						 bar->menu_item_click(*bar, node->shared_from_this());
              node->ExecuteAction();
+			 break;
             }
           }
         }

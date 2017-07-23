@@ -51,7 +51,7 @@ function titlebaricons:init()
     psycle.proxy:reload()
   end
   self:formattoolicon(reloadicon)  
-  self:setposition(rect:new(point:new(), dimension:new(300, 20)))
+  self:setposition(rect:new(point:new(), dimension:new(120, 20)))
 end
  
 function titlebaricons:formattoolicon(icon)    

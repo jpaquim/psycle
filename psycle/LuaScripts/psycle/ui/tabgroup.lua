@@ -323,7 +323,7 @@ function tabgroup:createheader(page, label, preventclose)
       if not self.isdragactive then
         self.dragbase = diff
         self:bringtotop()
-        self:mousecapture()
+        self:capturemouse()
         self.isdragactive = true
       end        
       self:setposition(self:position():setleft(self:position():left() + diff - self.dragbase))
@@ -332,7 +332,7 @@ function tabgroup:createheader(page, label, preventclose)
   end
   function header:onmouseup(ev)
     if ev:button() == 1 and self.isdragactive then
-      self:mouserelease()
+      self:releasemouse()
       local tabs = that.tabs:windows()
       local swaptab = nil
       for i=1, #tabs do

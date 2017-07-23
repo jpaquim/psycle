@@ -26,6 +26,11 @@ namespace psycle { namespace host {
                     public psycle::host::Timer
   {
   public:
+    typedef boost::shared_ptr<LuaPlugin> Ptr;
+	typedef boost::shared_ptr<const LuaPlugin> ConstPtr;
+	typedef boost::weak_ptr<LuaPlugin> WeakPtr;
+	typedef boost::weak_ptr<const LuaPlugin> ConstWeakPtr;
+
     LuaPlugin(const std::string& dllpath, int index, bool full=true);    
     virtual ~LuaPlugin();
     void Free();
@@ -113,6 +118,8 @@ namespace psycle { namespace host {
     boost::signal<void (LuaPlugin&, int)> ViewPortChanged;
     std::string install_script() const { return proxy_.install_script(); }
     std::string const title() { return proxy().title(); }
+	bool has_error() const { return proxy().has_error(); }
+	std::string last_error() const { return proxy().last_error(); }
 
   protected:
     LuaProxy proxy_;

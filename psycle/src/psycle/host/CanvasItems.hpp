@@ -173,12 +173,15 @@ class Splitter : public Window {
 	virtual void OnMouseEnter(MouseEvent& ev);
 
  private:
-   ARGB fill_color_;
-	 bool do_split_;
-	 Orientation::Type orientation_;
-	 double drag_pos_;
-	 double parent_abs_pos_;
-	 ui::Window* item_;
+	void StartDrag();
+	void UpdateResizeWindow();
+	ARGB fill_color_;
+	bool do_split_;
+	Orientation::Type orientation_;
+	double drag_pos_;
+	double parent_abs_pos_;
+	ui::Window* item_;
+	ui::Dimension restore_position_;
 };
 
 class TerminalView : public Scintilla, public psycle::host::Timer {

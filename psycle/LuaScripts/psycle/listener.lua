@@ -15,6 +15,7 @@ function listener:new(methodname)
   m.listener_ = {}    
   setmetatable(m.listener_, {__mode ="kv"})  -- weak table  
   m.methodname_ = methodname
+  m.prevented_ = false
   return m
 end
 
@@ -33,16 +34,32 @@ function listener:addlistener(listener)
 end
 
 function listener:notify(val, method)
-  if method==nil then
-    method = self.methodname_
-  end    
-  for k, v in pairs(self.listener_) do    
-    local m = v[method]
-	  if m ~= nil then      
-      m(v, val)
-	  end	  
+  if not self.prevented_ then
+    if method==nil then
+      method = self.methodname_
+    end    
+    for k, v in pairs(self.listener_) do    
+      local m = v[method]
+      if m ~= nil then      
+        m(v, val)
+      end	  
+    end
   end
   return self
+end
+
+function listener:enable()
+  self.prevented_ = false
+  return self
+end
+
+function listener:prevent()
+  self.prevented_ = true
+  return self
+end
+
+function listener:isprevented()
+  return self.prevented_
 end
 
 return listener

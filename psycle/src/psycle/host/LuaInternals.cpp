@@ -232,9 +232,7 @@ int LuaConfigBind::keys(lua_State* L) {
 
 int LuaConfigBind::keytocmd(lua_State* L) {
   boost::shared_ptr<LuaConfig> cfg = LuaHelper::check_sptr<LuaConfig>(L, 1, meta);
-  char c = luaL_checknumber(L, 2);
-  CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(c, 0);
-  lua_pushnumber(L, cmd.GetNote());
+  ui::alert("in cmddef implemented.");
   return 1;
 }
 
@@ -498,10 +496,7 @@ LuaMachine::LuaMachine(lua_State* L)
 }
 
 
-LuaMachine::~LuaMachine() {
-  if (mac_ != 0) {
-     mac_->RemoveMachineListener(this);
-  }
+LuaMachine::~LuaMachine() {  
   if (mac_ != 0 && !shared_) {   
     delete mac_;
   }
@@ -595,30 +590,60 @@ void LuaMachine::ToggleViewPort() {
 // PsycleCmdDefBind
 int LuaCmdDefBind::open(lua_State* L) {   
   static const luaL_Reg funcs[] = {
-    {"keytocmd", keytocmd},           
+    {"keytocmd", keytocmd},
+	{"cmdtokey", cmdtokey},
+	{"currentoctave", currentoctave},        
     {NULL, NULL}
   };
   luaL_newlib(L, funcs);
-  static const char* const e[] = {
-		"TRANSPOSECHANNELINC", "TRANSPOSECHANNELDEC", "TRANSPOSECHANNELINC12", 
-    "TRANSPOSECHANNELDEC12", "TRANSPOSEBLOCKINC", "TRANSPOSEBLOCKDEC",
-    "TRANSPOSEBLOCKINC12", "TRANSPOSEBLOCKDEC12", "PATTERNCUT",
-    "PATTERNCOPY", "PATTERNPASTE", "ROWINSERT", "ROWDELETE", "ROWCLEAR",
-    "BLOCKSTART", "BLOCKEND", "BLOCKUNMARK", "BLOCKDOUBLE", "BLOCKHALVE",
-    "BLOCKCUT", "BLOCKCOPY", "BLOCKPASTE", "BLOCKMIX", "BLOCKINTERPOLATE",
-    "BLOCKSETMACHINE", "BLOCKSETINSTR", "SELECTALL", "SELECTCOL",
-    "EDITQUANTIZEDEC", "EDITQUANTIZEINC", "PATTERNMIXPASTE",
-    "PATTERNTRACKMUTE", "KEYSTOPANY", "PATTERNDELETE", "BLOCKDELETE",
-    "PATTERNTRACKSOLO", "PATTERNTRACKRECORD", "SELECTBAR"
-	};
   {
-    size_t size = sizeof(e)/sizeof(e[0]);    
-    LuaHelper::buildenum(L, e, size, CS_EDT_START);      
+	static const char* const e[] = {
+		"KEYC_0", "KEYCS0", "KEYD_0", "KEYDS0", "KEYE_0", "KEYF_0",
+		"KEYFS0", "KEYG_0", "KEYGS0", "KEYA_0", "KEYAS0", "KEYB_0",
+		"KEYC_1", "KEYCS1", "KEYD_1", "KEYDS1", "KEYE_1", "KEYF_1",
+		"KEYFS1", "KEYG_1", "KEYGS1", "KEYA_1", "KEYAS1", "KEYB_1",
+		"KEYC_2", "KEYCS2", "KEYD_2", "KEYDS2", "KEYE_2", "KEYF_2",
+		"KEYFS2", "KEYG_2", "KEYGS2", "KEYA_2", "KEYAS2", "KEYB_2",
+		"KEYC_3", "KEYCS3", "KEYD_3", "KEYDS3", "KEYE_3", "KEYF_3",
+		"KEYFS3", "KEYG_3", "KEYGS3", "KEYA_3", "KEYAS3", "KEYB_3"
+	};
+	size_t size = sizeof(e)/sizeof(e[0]);    
+	LuaHelper::buildenum(L, e, size, CS_KEY_START);
+  }
+  {	 
+	  static const char* const e[] = {
+		"TRANSPOSECHANNELINC", "TRANSPOSECHANNELDEC", "TRANSPOSECHANNELINC12", 
+		"TRANSPOSECHANNELDEC12", "TRANSPOSEBLOCKINC", "TRANSPOSEBLOCKDEC",
+		"TRANSPOSEBLOCKINC12", "TRANSPOSEBLOCKDEC12", "PATTERNCUT",
+		"PATTERNCOPY", "PATTERNPASTE", "ROWINSERT", "ROWDELETE", "ROWCLEAR",
+		"BLOCKSTART", "BLOCKEND", "BLOCKUNMARK", "BLOCKDOUBLE", "BLOCKHALVE",
+		"BLOCKCUT", "BLOCKCOPY", "BLOCKPASTE", "BLOCKMIX", "BLOCKINTERPOLATE",
+		"BLOCKSETMACHINE", "BLOCKSETINSTR", "SELECTALL", "SELECTCOL",
+		"EDITQUANTIZEDEC", "EDITQUANTIZEINC", "PATTERNMIXPASTE",
+		"PATTERNTRACKMUTE", "KEYSTOPANY", "PATTERNDELETE", "BLOCKDELETE",
+		"PATTERNTRACKSOLO", "PATTERNTRACKRECORD", "SELECTBAR"
+		};
+		size_t size = sizeof(e)/sizeof(e[0]);    
+		LuaHelper::buildenum(L, e, size, CS_EDT_START);
   }
   {
-    static const char* const e[] = {"NULL", "NOTE", "EDITOR", "IMMEDIATE"};
-    size_t size = sizeof(e)/sizeof(e[0]);
-    LuaHelper::buildenum(L, e, size, 0);
+		static const char* const e[] = {"NULL", "NOTE", "EDITOR", "IMMEDIATE"};
+		size_t size = sizeof(e)/sizeof(e[0]);
+		LuaHelper::buildenum(L, e, size, 0);
+	  }
+  {
+	  static const char* const e[] = {
+		"EDITTOGGLE", "OCTAVEUP", "OCTAVEDN", "MACHINEDEC", "MACHINEINC",
+		"INSTRDEC", "INSTRINC", "PLAYROWTRACK", "PLAYROWPATTERN", "PLAYSTART",
+		"PLAYSONG", "PLAYFROMPOS", "PLAYBLOCK", "PLAYSTOP", "INFOPATTERN",
+		"INFOMACHINE", "EDITMACHINE", "EDITPATTERN", "EDITINSTR", "ADDMACHINE",
+		"PATTERNINC", "PATTERNDEC",	"SONGPOSINC", "SONGPOSDEC", "COLUMNPREV",
+		"COLUMNNEXT", "NAVUP", "NAVDN", "NAVLEFT", "NAVRIGHT",
+		"NAVPAGEUP", "NAVPAGEDN", "NAVTOP", "NAVBOTTOM", "SELECTMACHINE",
+		"UNDO", "REDO", "FOLLOWSONG", "MAXPATTERN",
+	  };	  
+	  size_t size = sizeof(e)/sizeof(e[0]);    
+	  LuaHelper::buildenum(L, e, size, CS_IMM_START);	 	  
   }
   return 1;
 };
@@ -630,7 +655,7 @@ void LuaMachine::set_title(const std::string& title) {
   }
 }
 
-void LuaMachine::OnMachineCreate(Machine& machine) {	
+/*void LuaMachine::OnMachineCreate(Machine& machine) {	
 	LuaImport in(L, this, LuaGlobal::proxy(L));
 	if (in.open("onmachinecreate")) {
 		LuaMachine* lua_machine = new LuaMachine(L);
@@ -639,9 +664,9 @@ void LuaMachine::OnMachineCreate(Machine& machine) {
 		LuaMachineBind::createparams(L, lua_machine);
 		in << pcall(0);
 	}	
-}
+}*/
 
-void LuaMachine::BeforeMachineDelete(Machine& machine) {
+/*void LuaMachine::BeforeMachineDelete(Machine& machine) {
 	try {
 		LuaImport in(L, this, LuaGlobal::proxy(L));
 		if (in.open("beforemachinedelete")) {
@@ -657,41 +682,68 @@ void LuaMachine::BeforeMachineDelete(Machine& machine) {
 		throw std::runtime_error(e.what());
 	}
 	LuaHelper::collect_full_garbage(L);
-}
+}*/
 
 int LuaCmdDefBind::keytocmd(lua_State* L) {
-  luaL_checktype(L, 1, LUA_TTABLE);
-  lua_getfield(L, 1, "keycode");
-  char c = luaL_checknumber(L, -1);
-  lua_pop(L, 1);
-  UINT nFlags = 0;
-  CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(c, nFlags);
-  if (cmd.GetID() == -1) {
-    // try again with extended key (bit 8)
-    cmd = PsycleGlobal::inputHandler().KeyToCmd(c, nFlags | 256);
+  int n = lua_gettop(L);
+  if (n == 0 || n > 4) {
+    return luaL_error(L, "Wrong number of arguments.");
   }
+  int keycode = luaL_checknumber(L, 1);
+  UINT nFlags(0);
+  bool hasshift(false);
+  bool hasctrl(false);
+  if (lua_gettop(L) > 1) {
+    hasshift = lua_toboolean(L, 2);    
+  }
+  if (lua_gettop(L) > 2) {
+    hasctrl = lua_toboolean(L, 3);	
+  }
+  if (lua_gettop(L) > 3) {
+    bool hasextended = lua_toboolean(L, 4);
+	if (hasextended) {
+	  nFlags |= (1<<8); // set extended keyboard
+	}
+  }
+  CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(keycode, nFlags, hasshift,
+      hasctrl); 
   lua_createtable(L, 0, 3);
   LuaHelper::setfield(L, "note", cmd.GetNote());
   LuaHelper::setfield(L, "id", cmd.GetID());
   LuaHelper::setfield(L, "type", cmd.GetType());  
   return 1;
 }
+
+int LuaCmdDefBind::cmdtokey(lua_State* L) {
+  int id = luaL_checkinteger(L, -1);
+  WORD key(0);
+  WORD mods(0);
+  PsycleGlobal::inputHandler().CmdToKey((CmdSet)id, key, mods);
+  lua_pushinteger(L, key);
+  bool has_shift = mods&HOTKEYF_SHIFT;
+  bool has_ctrl = mods&HOTKEYF_CONTROL;
+  bool is_extended = mods&HOTKEYF_EXT;
+  lua_pushboolean(L, has_shift);
+  lua_pushboolean(L, has_ctrl);
+  lua_pushboolean(L, is_extended);
+  return 4;
+}
+
+int LuaCmdDefBind::currentoctave(lua_State* L) {
+  int octave = Global::song().currentOctave;
+  lua_pushinteger(L, octave);
+  return 1;
+}
   
 // PsycleActions + Lua Bind
-void LuaActionListener::OnNotify(ActionType action) {
-  LuaGlobal::proxy(L)->lock();
-  LuaHelper::find_userdata<>(L, this);
-  lua_getfield(L, -1, "onnotify");
-  lua_pushvalue(L, -2);
-  lua_remove(L, -3);
-  lua_pushnumber(L, action);
-  int status = lua_pcall(L, 2, 0, 0);
-  if (status) {
-    LuaGlobal::proxy(L)->unlock();
-    const char* msg = lua_tostring(L, -1);
-    throw psycle::host::exceptions::library_error::runtime_error(std::string(msg));
-  }
-  LuaGlobal::proxy(L)->unlock();
+void LuaActionListener::OnNotify(const ActionHandler& handler, ActionType action) {   
+	std::string action_str = handler.ActionAsString(action);
+	if (action_str != "") {
+		LuaImport in(L, this, LuaGlobal::proxy(L));
+		if (in.open("on" + action_str)) {
+			in << static_cast<int>(action) << pcall(0);
+		} 
+	}
 }
 
 const char* LuaActionListenerBind::meta = "psyactionlistenermeta";
@@ -704,7 +756,9 @@ int LuaActionListenerBind::open(lua_State *L) {
   LuaHelper::open(L, meta, methods,  gc);
   static const char* const e[] = {
     "TPB", "BPM", "TRKNUM", "PLAY", "PLAYSTART", "PLAYSEQ", "STOP", "REC",
-    "SEQSEL", "SEQMODIFIED", "SEQFOLLOWSONG"
+    "SEQSEL", "SEQMODIFIED", "SEQFOLLOWSONG", "PATKEYDOWN", "PATKEYUP",
+	"SONGLOAD", "SONGLOADED", "SONGNEW", "TRACKNUMCHANGED", "OCTAVEUP", 
+	"OCTAVEDOWN", "UNDOPATTERN", "PATTERNLENGTH"
   };
   LuaHelper::buildenum(L, e, sizeof(e)/sizeof(e[0]), 1);
   return 1;
@@ -818,6 +872,8 @@ int LuaMachineBind::open(lua_State *L) {
 	{"addscopememory", addscopememory},
 	{"index", index},
 	{"audiorange", audiorange},
+	{"paramrange", paramrange},
+	{"paramname", paramname},
     {NULL, NULL}
   };
   LuaHelper::open(L, meta, methods,  gc);
@@ -882,15 +938,8 @@ int LuaMachineBind::create(lua_State* L) {
     try {
       size_t len;
       const char* plug_name = luaL_checklstring(L, 2, &len);
-	  udata = new LuaMachine(L);
-	  if (std::string(plug_name) == "maingroup") {
-	    MachineGroup* machine_group = Global::song().machines_.get();
-		udata->set_mac(machine_group);
-		udata->set_shared(true);
-		machine_group->AddMachineListener(udata);
-	  } else {   
-		udata->load(plug_name);		
-	  }
+	  udata = new LuaMachine(L);	
+	  udata->load(plug_name);		
 	  LuaHelper::new_shared_userdata<LuaMachine>(L, meta, udata);
     } catch (std::exception &e) {
       e; luaL_error(L, "plugin not found error");
@@ -909,6 +958,42 @@ int LuaMachineBind::createparams(lua_State* L, LuaMachine* machine) {
   }  
   lua_setfield(L, -2, "params");  
   return 0;
+}
+
+int LuaMachineBind::paramrange(lua_State* L) {
+  int mac = luaL_checkinteger(L, 1);
+  int numparam = luaL_checkinteger(L, 2);
+  if (!(mac >=0 && mac < MAX_MACHINES)) {
+    luaL_error(L, "Mac index out of range.");
+  }
+  if (Global::song()._pMachine[mac]) {
+    int minrange(0);
+	int maxrange(0);
+    Global::song()._pMachine[mac]->GetParamRange(numparam, minrange, maxrange);
+	lua_pushinteger(L, minrange);
+	lua_pushinteger(L, maxrange);
+	lua_pushinteger(L, Global::song()._pMachine[mac]->_type);
+  } else {
+    lua_pushnil(L); lua_pushnil(L); lua_pushnil(L);
+  }
+  return 3;
+}
+
+int LuaMachineBind::paramname(lua_State* L) {
+  int mac = luaL_checkinteger(L, 1);
+  int numparam = luaL_checkinteger(L, 2);
+  if (!(mac >=0 && mac < MAX_MACHINES)) {
+    luaL_error(L, "Mac index out of range.");
+  }
+  if (Global::song()._pMachine[mac]) { 
+	char buf[1024];
+    Global::song()._pMachine[mac]->GetParamName(numparam, buf);
+	std::string tmp(buf);
+	lua_pushstring(L, tmp.c_str());	
+  } else {
+    lua_pushnil(L);
+  }
+  return 1;
 }
 
 int LuaMachineBind::createparam(lua_State* L, int idx, LuaMachine* machine) {
@@ -1362,12 +1447,24 @@ int LuaPlayerBind::open(lua_State *L) {
     {"new", create},
     {"samplerate", samplerate},
     {"tpb", tpb},
+	{"bpt", bpt},
     {"spt", spt},
     {"rline", rline},
     {"line", line},
     {"playing", playing},
 	{"playpattern", playpattern},
+	{"playposition", playposition},
 	{"setplayline", setplayline},
+	{"setplayposition", setplayposition},
+	{"playnote", playnote},
+	{"stopnote", stopnote},
+	{"toggletrackarmed", toggletrackarmed},
+	{"istrackarmed", istrackarmed},
+	{"toggletrackmuted", toggletrackmuted},
+	{"istrackmuted", istrackmuted},
+	{"toggletracksoloed", toggletracksoloed},
+	{"istracksoloed", istracksoloed},
+	{"playorder", playorder},
     {NULL, NULL}
   };
   return LuaHelper::open(L, meta, methods, gc);
@@ -1393,7 +1490,15 @@ int LuaPlayerBind::tpb(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;
   boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
-  lua_pushnumber(L, p->lpb);
+  lua_pushinteger(L, p->lpb);
+  return 1;
+}
+
+int LuaPlayerBind::bpt(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  lua_pushnumber(L, 1.0/p->lpb);
   return 1;
 }
 
@@ -1418,7 +1523,7 @@ int LuaPlayerBind::line(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;
   boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
-  lua_pushnumber(L, p->_lineCounter);
+  lua_pushinteger(L, p->_lineCounter);
   return 1;
 }
 
@@ -1429,11 +1534,27 @@ int LuaPlayerBind::setplayline(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+int LuaPlayerBind::setplayposition(lua_State* L) {
+  boost::shared_ptr<Player> player = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int val = luaL_checkinteger(L, 2);
+  player->_playPosition = val;
+  player->_playPattern = Global::song().playOrder[val];
+  return LuaHelper::chaining(L);
+}
+
 int LuaPlayerBind::playpattern(lua_State* L) {
   int err = LuaHelper::check_argnum(L, 1, "self");
   if (err!=0) return err;
   boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
-  lua_pushnumber(L, p->_playPattern);
+  lua_pushinteger(L, p->_playPattern);
+  return 1;
+}
+
+int LuaPlayerBind::playposition(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  lua_pushinteger(L, p->_playPosition);
   return 1;
 }
 
@@ -1445,15 +1566,103 @@ int LuaPlayerBind::playing(lua_State* L) {
   return 1;
 }
 
+int LuaPlayerBind::playnote(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int note = luaL_checkinteger(L, 2);
+  if (!(note>=0 && note < notecommands::invalid)) {
+    return luaL_error(L, "Note is invalid.");
+  }
+  int track = luaL_checkinteger(L, 3);
+  PatternEntry entry = PsycleGlobal::inputHandler().BuildNote(note, 255, 127, false);
+  PsycleGlobal::inputHandler().PlayNote(&entry, track); 
+  return LuaHelper::chaining(L);
+}
+
+int LuaPlayerBind::stopnote(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int note = luaL_checkinteger(L, 2);
+  if (!(note>=0 && note < notecommands::invalid)) {
+    return luaL_error(L, "Note is invalid.");
+  }
+  PsycleGlobal::inputHandler().StopNote(note, 255, false); 
+  return LuaHelper::chaining(L);
+}
+
+int LuaPlayerBind::toggletrackarmed(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int ttm = luaL_checkinteger(L, 2);
+  Global::song().ToggleTrackArmed(ttm);
+  return LuaHelper::chaining(L);
+}
+
+int LuaPlayerBind::istrackarmed(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int ttm = luaL_checkinteger(L, 2);
+  if (ttm >=0 && ttm < MAX_TRACKS) {
+	lua_pushboolean(L, Global::song()._trackArmed[ttm]);
+  } else {
+    return luaL_error(L, "Track index out of bounds.");
+  }
+  return 1;
+}
+
+int LuaPlayerBind::toggletrackmuted(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int ttm = luaL_checkinteger(L, 2);
+  Global::song().ToggleTrackMuted(ttm);
+  return LuaHelper::chaining(L);
+}
+
+int LuaPlayerBind::istrackmuted(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int ttm = luaL_checkinteger(L, 2);
+  if (ttm >=0 && ttm < MAX_TRACKS) {
+	lua_pushboolean(L, Global::song()._trackMuted[ttm]);
+  } else {
+    return luaL_error(L, "Track index out of bounds.");
+  }
+  return 1;
+}
+
+int LuaPlayerBind::toggletracksoloed(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int ttm = luaL_checkinteger(L, 2);
+  Global::song().ToggleTrackSoloed(ttm);
+  return LuaHelper::chaining(L);
+}
+
+int LuaPlayerBind::istracksoloed(lua_State* L) {
+  boost::shared_ptr<Player> p = LuaHelper::check_sptr<Player>(L, 1, meta);
+  int ttm = luaL_checkinteger(L, 2);
+  if (ttm >=0 && ttm < MAX_TRACKS) {
+	lua_pushboolean(L, ttm == Global::song()._trackSoloed);
+  } else {
+    return luaL_error(L, "Track index out of bounds.");
+  }
+  return 1;
+}
+
+int LuaPlayerBind::playorder(lua_State* L) {
+  boost::shared_ptr<Player> pattern = LuaHelper::check_sptr<Player>(L, 1, meta);
+  lua_newtable(L);
+  for (int i = 0; i < Global:: song().playLength; ++i) {
+     lua_pushinteger(L, Global::song().playOrder[i]);
+	 lua_rawseti(L, -2, i + 1);
+  }
+  return 1;
+}
+
 const char* LuaSequenceBarBind::meta = "psysequencebarmeta";
 
 int LuaSequenceBarBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
     {"new", create},
     {"currpattern", currpattern},
+	{"editposition", editposition},
+	{"followsong", followsong},
     {NULL, NULL}
   };
-  return LuaHelper::open(L, meta, methods);
+  return LuaHelper::open(L, meta, methods, gc);
 }
 
 int LuaSequenceBarBind::create(lua_State* L) {
@@ -1461,8 +1670,12 @@ int LuaSequenceBarBind::create(lua_State* L) {
   if (err!=0) return err;
   CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
   CChildView* view = &main->m_wndView;
-  LuaHelper::new_shared_userdata<CChildView>(L, meta, view);
+  LuaHelper::new_shared_userdata<CChildView>(L, meta, view, 1, true);
   return 1;
+}
+
+int  LuaSequenceBarBind::gc(lua_State* L) {
+   return LuaHelper::delete_shared_userdata<CChildView>(L, meta); 
 }
 
 int LuaSequenceBarBind::currpattern(lua_State* L) {
@@ -1470,7 +1683,76 @@ int LuaSequenceBarBind::currpattern(lua_State* L) {
   if (err!=0) return err;
   boost::shared_ptr<CChildView> view = LuaHelper::check_sptr<CChildView>(L, 1, meta);
   int pos = Global::song().playOrder[view->editPosition];
-  lua_pushnumber(L, pos);
+  lua_pushinteger(L, pos);
+  return 1;
+}
+
+int LuaSequenceBarBind::editposition(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<CChildView> view = LuaHelper::check_sptr<CChildView>(L, 1, meta);
+  lua_pushinteger(L, view->editPosition);
+  return 1;
+}
+
+int LuaSequenceBarBind::followsong(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<CChildView> view = LuaHelper::check_sptr<CChildView>(L, 1, meta);
+  lua_pushboolean(L, PsycleGlobal::conf()._followSong);
+  return 1;
+}
+
+const char* LuaMachineBarBind::meta = "psymachinebarmeta";
+
+int LuaMachineBarBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},
+    {"currmachine", currmachine},
+	{"currinst", currinst},
+	{"curraux", curraux},
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods, gc);
+}
+
+int LuaMachineBarBind::create(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  LuaHelper::new_shared_userdata<CChildView>(L, meta, view, 1, true);
+  return 1;
+}
+
+int LuaMachineBarBind::gc(lua_State* L) {
+   return LuaHelper::delete_shared_userdata<CChildView>(L, meta); 
+}
+
+int LuaMachineBarBind::currmachine(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<CChildView> view = LuaHelper::check_sptr<CChildView>(L, 1, meta);
+  int mach = Global::song().seqBus;
+  lua_pushinteger(L, mach);
+  return 1;
+}
+
+int LuaMachineBarBind::currinst(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<CChildView> view = LuaHelper::check_sptr<CChildView>(L, 1, meta);
+  int inst = Global::song().instSelected;
+  lua_pushinteger(L, inst);
+  return 1;
+}
+
+int LuaMachineBarBind::curraux(lua_State* L) {
+  int err = LuaHelper::check_argnum(L, 1, "self");
+  if (err!=0) return err;
+  boost::shared_ptr<CChildView> view = LuaHelper::check_sptr<CChildView>(L, 1, meta);
+  int aux =  Global::song().auxcolSelected;
+  lua_pushinteger(L, aux);
   return 1;
 }
 
@@ -1490,6 +1772,23 @@ int LuaSequenceBarBind::currpattern(lua_State* L) {
     return song_->ppPatternData[ps] != 0;	
   }
 
+  bool LuaPatternData::IsTrackEmpty(int ps, int trk) const {
+    bool result(true);
+	if (song_->ppPatternData[ps] != 0) {
+		for (size_t i = 0; i < song_->patternLines[ps]; ++i) {
+			unsigned char* e = song_->_ptrackline(ps, trk, i);
+			PatternEntry* entry = (PatternEntry*)(e);
+			if (entry->_note != notecommands::empty ||
+			    entry->_inst != 0xFF || entry->_cmd != 0 || entry->_parameter != 0
+			) {
+			  result = false;
+			  break;
+			}
+		}
+	}    
+    return result;
+  }
+
 
 const char* LuaPatternDataBind::meta = "psypatterndatameta";
 
@@ -1504,14 +1803,29 @@ int LuaPatternDataBind::open(lua_State *L) {
     {"pattern", create},
     {"numtracks", numtracks},
     {"numlines", numlines},
-	{"playorder", playorder},
+	{"istrackempty", istrackempty},
+	{"line", line},
+	{"patstep", patstep},
+	{"editquantizechange", editquantizechange},
+	{"deleterow", deleterow},
+	{"clearrow", clearrow},
+	{"insertrow", insertrow},
+	{"interpolate", interpolate},
+	{"interpolatecurve", interpolatecurve},
+	{"loadblock", loadblock},
+	{"addundo", addundo},
+	{"undo", undo},
+	{"redo", redo},
+	{"movecursorpaste", movecursorpaste},
+	{"settrackedit", settrackedit},
+	{"settrackline", settrackline},
     {NULL, NULL}
   };
-  return LuaHelper::open(L, meta, methods);
+  return LuaHelper::open(L, meta, methods, gc);
 }
 
 int LuaPatternDataBind::createevent(lua_State* L, LuaPatternEvent& ev) {
-  lua_createtable(L, 0, 7);
+  lua_createtable(L, 0, 8);
   LuaHelper::setfield(L, "pos", ev.pos);
   LuaHelper::setfield(L, "len", ev.len);
   LuaHelper::setfield(L, "hasoff", ev.has_off);
@@ -1519,7 +1833,8 @@ int LuaPatternDataBind::createevent(lua_State* L, LuaPatternEvent& ev) {
   LuaHelper::setfield(L, "inst", static_cast<int>(ev.entry._inst));
   LuaHelper::setfield(L, "mach", static_cast<int>(ev.entry._mach));
   LuaHelper::setfield(L, "cmd", static_cast<int>(ev.entry._cmd));
-  LuaHelper::setfield(L, "parameter", static_cast<int>(ev.entry._parameter));  
+  LuaHelper::setfield(L, "parameter", static_cast<int>(ev.entry._parameter)); 
+  LuaHelper::setfield(L, "dummy", 0);   
   return 1;
 }
 
@@ -1530,7 +1845,7 @@ int LuaPatternDataBind::getevent(lua_State* L, int idx, LuaPatternEvent& ev) {
   lua_getfield(L, idx, "val");  
   lua_getfield(L, idx, "inst");  
   lua_getfield(L, idx, "mach");  
-  lua_getfield(L, idx, "cmd");  
+  lua_getfield(L, idx, "cmd");
   lua_getfield(L, idx, "parameter");
   ev.entry._parameter = luaL_checknumber(L, -1);
   lua_pop(L, 1);
@@ -1583,6 +1898,30 @@ int LuaPatternDataBind::eventat(lua_State* L) {
 	}
 }
 
+int LuaPatternDataBind::line(lua_State* L) {
+	boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta); 
+	int ps = luaL_checknumber(L, 2); 
+	int line = luaL_checknumber(L, 3);
+	lua_newtable(L);
+	int n = 1;
+	for (int track = 0; track < pattern->numtracks() ; ++track) {
+		unsigned char* e = pattern->ptrackline(ps, track, line);
+		LuaPatternEvent ev;
+		ev.entry._note = *e++;
+		ev.entry._inst = *e++;
+		ev.entry._mach = *e++;
+		ev.entry._cmd = *e++;
+		ev.entry._parameter = *e++;
+		if (ev.entry._note != notecommands::empty ||
+			ev.entry._inst != 0xFF || ev.entry._cmd != 0 || ev.entry._parameter != 0) {
+				createevent(L, ev);
+				LuaHelper::setfield(L, "track", track);   
+				lua_rawseti(L, 4, n++);
+		}
+	}
+    return 1;
+}
+
 int LuaPatternDataBind::pattern(lua_State* L) {
   // LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
   lua_newtable(L);
@@ -1617,6 +1956,22 @@ int LuaPatternDataBind::settrack(lua_State* L) {
   return LuaHelper::chaining(L);
 }
 
+int LuaPatternDataBind::settrackedit(lua_State* L) {
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  int track = luaL_checkinteger(L, 1);
+  view->editcur.track = track;
+  return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::settrackline(lua_State* L) {
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  int line = luaL_checkinteger(L, 1);
+  view->editcur.line = line;
+  return LuaHelper::chaining(L);
+}
+
 int LuaPatternDataBind::track(lua_State* L) {
   boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
   int ps = luaL_checknumber(L, 2);
@@ -1626,7 +1981,7 @@ int LuaPatternDataBind::track(lua_State* L) {
   LuaPatternEvent* last = 0;
   int lastpos = 0;
   int pos = 0;
-  for (size_t i = 0; i < pattern->numlines(trk); ++i, ++pos) {
+  for (size_t i = 0; i < pattern->numlines(ps); ++i, ++pos) {
     unsigned char* e = pattern->ptrackline(ps, trk, i);
     int note = static_cast<int>(*e);
     if (note == notecommands::empty) continue;
@@ -1684,8 +2039,8 @@ int LuaPatternDataBind::setevent(lua_State* L) {
   for (int i = 0; i < 5; ++i) {
     *e++ = luaL_checknumber(L, -1);
     lua_pop(L, 1);
-  }
-  return 0;
+  } 
+  return LuaHelper::chaining(L);
 }
 
 int LuaPatternDataBind::buildevent(lua_State* L) {
@@ -1697,17 +2052,274 @@ int LuaPatternDataBind::buildevent(lua_State* L) {
   PatternEntry entry = PsycleGlobal::inputHandler().BuildNote(note);
   unsigned char* e = pattern->ptrackline(ps, trk, pos);
   *e = entry._note;
-  return 0;
+  return LuaHelper::chaining(L);;
 }
 
-int LuaPatternDataBind::playorder(lua_State* L) {
+int LuaPatternDataBind::patstep(lua_State* L) {
   boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
-  lua_newtable(L);
-  for (int i = 0; i < Global:: song().playLength; ++i) {
-     lua_pushinteger(L, Global::song().playOrder[i]);
-	 lua_rawseti(L, -2, i + 1);
-  }
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  lua_pushinteger(L, view->patStep);
   return 1;
+}
+
+int LuaPatternDataBind::editquantizechange(lua_State* L) {
+  boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  int diff = luaL_checknumber(L, 2);
+  main->EditQuantizeChange(diff);
+  return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::deleterow(lua_State* L) {
+	boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
+	int ps = luaL_checknumber(L, 2);
+	int trk = luaL_checknumber(L, 3);
+	int pos = luaL_checknumber(L, 4);
+	unsigned char * offset = Global::song()._ptrack(ps, trk);
+	int patlines = Global::song().patternLines[ps];
+	int i;
+	for (i=pos; i < patlines-1; i++)
+		memcpy(offset+(i*MULTIPLY), offset+((i+1)*MULTIPLY), EVENT_SIZE);
+
+	PatternEntry blank;
+	memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);  			
+	return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::clearrow(lua_State* L) {
+	boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
+	ui::alert("clearrow not yet implemented.");		
+	return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::insertrow(lua_State* L) {
+	boost::shared_ptr<LuaPatternData> pattern = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
+	int ps = luaL_checknumber(L, 2);
+	int trk = luaL_checknumber(L, 3);
+	int pos = luaL_checknumber(L, 4);
+	unsigned char * offset = Global::song()._ptrack(ps, trk);
+	int patlines = Global::song().patternLines[ps];
+	int i;
+	for (i=patlines-1; i > pos; i--)
+		memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), EVENT_SIZE);
+	PatternEntry blank;
+	memcpy(offset+(pos*MULTIPLY),&blank,EVENT_SIZE);
+    return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::interpolate(lua_State* L) {
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  int track = luaL_checkinteger(L, 2);
+  int startline = luaL_checkinteger(L, 3);
+  int endline = luaL_checkinteger(L, 4);  
+  CSelection sel;
+  sel.start = CCursor(startline, 0, track);
+  sel.end = CCursor(endline, 0, track);
+  CSelection old_selection = view->selection();
+  bool old_sel_status = view->blockSelected;
+  view->SetSelection(sel);
+  view->blockSelected = true;
+  view->BlockParamInterpolate();
+  view->SetSelection(old_selection);
+  view->blockSelected = old_sel_status;
+  return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::interpolatecurve(lua_State* L) {
+  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+  CChildView* view = &main->m_wndView;
+  int track = luaL_checkinteger(L, 2);
+  int startline = luaL_checkinteger(L, 3);
+  int endline = luaL_checkinteger(L, 4);  
+  CSelection sel;
+  sel.start = CCursor(startline, 0, track);
+  sel.end = CCursor(endline, 0, track);
+  CSelection old_selection = view->selection();
+  bool old_sel_status = view->blockSelected;
+  view->SetSelection(sel);
+  view->blockSelected = true;
+  view->OnPopInterpolateCurve();
+  view->SetSelection(old_selection);
+  view->blockSelected = old_sel_status;
+  return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::loadblock(lua_State* L) {
+    boost::shared_ptr<LuaPatternData> patterndata = LuaHelper::check_sptr<LuaPatternData>(L, 1, meta);
+	const char* filename = luaL_checkstring(L, 2);
+	FILE* file = fopen(filename, "rb");
+	if (!file) {
+	  return luaL_error(L, "Load block file error.");
+	}
+	int nt, nl;
+	int ps = -1;
+	fread(&nt, sizeof(int), 1, file);
+	fread(&nl, sizeof(int), 1, file);
+
+	if ((nt > 0) && (nl > 0))
+	{
+		ps =  Global::song().GetBlankPatternUnused();
+		Global::song().AllocNewPattern(ps, "",
+					Global::configuration().GetDefaultPatLines(),FALSE);
+
+		int nlines = Global::song().patternLines[ps];
+		if (nlines != nl)
+		{			
+			Global::song().patternLines[ps] = nl;
+		}
+
+		for (int t=0; t<nt; t++)
+		{
+			for (int l=0; l<nl; l++)
+			{
+				if(l<MAX_LINES && t<MAX_TRACKS)
+				{
+					unsigned char* offset_target = Global::song()._ptrackline(ps, t, l);
+					fread(offset_target, sizeof(char), EVENT_SIZE, file);
+				}
+			}
+		}
+		PatternEntry blank;
+
+		for (int t = nt; t < MAX_TRACKS;t++)
+		{
+			for (int l = nl; l < MAX_LINES; l++)
+			{
+				unsigned char* offset_target =  Global::song()._ptrackline(ps, t, l);
+				memcpy(offset_target, &blank, EVENT_SIZE);
+			}
+		}	
+		lua_pushinteger(L, ps);	
+    } else {
+		lua_pushnil(L);
+	}   
+	fclose(file);
+    return 1;
+}
+
+int LuaPatternDataBind::addundo(lua_State* L) {
+  int pattern = luaL_checkinteger(L, 1);
+  int x = luaL_checkinteger(L, 2);
+  int y = luaL_checkinteger(L, 3);
+  int tracks = luaL_checkinteger(L, 4);
+  int lines = luaL_checkinteger(L, 5);
+  int edittrack = luaL_checkinteger(L, 6);
+  int editline = luaL_checkinteger(L, 7);
+  int editcol = luaL_checkinteger(L, 8);
+  int seqpos = luaL_checkinteger(L, 9);
+  PsycleGlobal::inputHandler().
+    AddUndo(pattern, x, y, tracks, lines, edittrack, editline, editcol, seqpos); // , BOOL bWipeRedo=true, int counter=0);
+  return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::undo(lua_State* L) {
+	if (!PsycleGlobal::inputHandler().pUndoList.empty()) {
+		int edittrack = luaL_checkinteger(L, 1);
+		int editline = luaL_checkinteger(L, 2);
+		int editcol = luaL_checkinteger(L, 3);
+		int seqpos = luaL_checkinteger(L, 4);
+		SPatternUndo& pUndo = PsycleGlobal::inputHandler().pUndoList.back();
+		if (pUndo.type == UNDO_PATTERN) {		
+			PsycleGlobal::inputHandler().AddRedo(pUndo.pattern,pUndo.x,pUndo.y,pUndo.tracks,pUndo.lines,
+			edittrack,
+			editline,
+			editcol,
+			seqpos,
+			pUndo.counter);		
+			unsigned char* pData = pUndo.pData;
+			for (int t=pUndo.x;t<pUndo.x+pUndo.tracks;t++)
+			{
+				for (int l=pUndo.y;l<pUndo.y+pUndo.lines;l++)
+				{
+					unsigned char *offset_source= Global::song()._ptrackline(pUndo.pattern,t,l);								
+					memcpy(offset_source,pData,EVENT_SIZE);
+					pData+=EVENT_SIZE;
+				}
+			}
+			PsycleGlobal::inputHandler().pUndoList.pop_back();
+		}
+	}
+	return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::redo(lua_State* L) {
+	if (!PsycleGlobal::inputHandler().pRedoList.empty()) {
+	    int edittrack = luaL_checkinteger(L, 1);
+		int editline = luaL_checkinteger(L, 2);
+		int editcol = luaL_checkinteger(L, 3);		
+		SPatternUndo& pRedo = PsycleGlobal::inputHandler().pRedoList.back();
+		if (pRedo.type == UNDO_PATTERN) {
+			PsycleGlobal::inputHandler().AddUndo(
+			    pRedo.pattern,
+			    pRedo.x,
+			    pRedo.y,
+			    pRedo.tracks,
+		 	    pRedo.lines,
+			    edittrack,
+			    editline,
+			    editcol,
+			    pRedo.seqpos,
+			    false,
+			    pRedo.counter);
+			unsigned char* pData = pRedo.pData;
+			for (int t=pRedo.x;t<pRedo.x+pRedo.tracks;t++)
+			{
+				for (int l=pRedo.y;l<pRedo.y+pRedo.lines;l++)
+				{
+					unsigned char *offset_source=Global::song()._ptrackline(pRedo.pattern,t,l);					
+					memcpy(offset_source,pData,EVENT_SIZE);
+					pData+=EVENT_SIZE;
+				}
+			}
+		}
+		PsycleGlobal::inputHandler().pRedoList.pop_back();
+	}
+	return LuaHelper::chaining(L);
+}
+
+int LuaPatternDataBind::movecursorpaste(lua_State* L) {
+  lua_pushboolean(L, PsycleGlobal::conf().inputHandler().bMoveCursorPaste);
+  return 1;
+}
+
+
+// Tweak + Bind
+
+void LuaTweak::OnAutomate(int macIdx, int param, int value, bool undo,
+    const ParamTranslator& translator, int track, int line) {
+	try {
+		LuaImport in(L, this, LuaGlobal::proxy(L));
+		if (in.open("onautomate")) {			
+			in << macIdx << param << value << track << line << pcall(0);
+		}
+	} catch (std::exception& e) {
+	  ui::alert(e.what());
+	}
+}
+
+const char* LuaTweakBind::meta = "tweakmeta";
+
+int  LuaTweakBind::open(lua_State *L) {
+  static const luaL_Reg methods[] = {
+    {"new", create},    
+    {NULL, NULL}
+  };
+  return LuaHelper::open(L, meta, methods, gc);
+}
+
+int LuaTweakBind::create(lua_State *L) {
+  int n = lua_gettop(L);  // Number of arguments
+  if (n != 1) {
+    return luaL_error(L, "Got %d arguments expected (self)", n);
+  } 
+  LuaHelper::new_shared_userdata<LuaTweak>(L, meta, new LuaTweak(L));
+  return 1;
+}
+
+int LuaTweakBind::gc(lua_State *L) {
+  return LuaHelper::delete_shared_userdata<LuaTweak>(L, meta);	  
 }
 
 ///////////////////////////////////////////////////////////////////////////////

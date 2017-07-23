@@ -27,14 +27,7 @@ function mainviewport:init()
   self:invalidatedirect()
   self:setmindimension(dimension:new(500, 120))
   self:initscopes()  
-  self.machines = machine:new("maingroup")
-  local that = self
-  function self.machines:onmachinecreate()
-    that.scopes:resize()
-  end
-  function self.machines:beforemachinedelete()
-    that.scopes:resize()
-  end
+  self.machines = machine:new()  
 end
 
 function mainviewport:initscopes()
