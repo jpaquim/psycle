@@ -197,6 +197,7 @@ class LuaProxy : public LuaControl {
   }  
   void OnFrameClose(ui::Frame&);
   void OnFrameKeyDown(ui::KeyEvent&);
+  void OnFrameKeyUp(ui::KeyEvent&);
       
   mutable bool is_meta_cache_updated_;
   mutable PluginInfo meta_cache_; 

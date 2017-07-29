@@ -75,7 +75,7 @@ function pattern:import()
           elseif ev.inst ~= 0xFF  or ev.cmd ~= 0 or ev.parameter ~= 0 then          
             self.cmdlist_:append(event)              
             event.line = line
-            event.length = self.player_:bpt()
+            event:setlength(self.player_:bpt())
             event.ps = self.ps_
           end      
         end
@@ -84,7 +84,7 @@ function pattern:import()
     for track=1, rawpattern:numtracks() do
       local prev = prevev[track]
       if prev and not prev:hasstop() then
-        prev.length = self:numbeats() - prev:position()
+        prev:setlength(self:numbeats() - prev:position())
       end    
     end
   end
@@ -141,7 +141,7 @@ function pattern:importpsb(filename)
           elseif inst ~= 0xFF  or cmd ~= 0 or parameter ~= 0 then          
             self.cmdlist_:append(event)              
             event.line = line
-            event.length = self.player_:bpt()            
+            event:setlength(self.player_:bpt())         
           end 
         end          
       end
@@ -150,7 +150,7 @@ function pattern:importpsb(filename)
     for track=1, numtracks do
       local prev = prevev[track]
       if prev and not prev:hasstop() then
-        prev.length = self:numbeats() - prev:position()
+        prev:setlength(self:numbeats() - prev:position())
       end    
     end
     self.numlines_ = numlines     
@@ -171,8 +171,7 @@ function pattern:changelength(event, length)
   if oldev.val ~= 255 then
     event.stopoffset = 0
   else     
-    event.stopoffset = self:linetobeat(line - event.line)   
-    event.length = event.stopoffset
+    event:setstopoffset(self:linetobeat(line - event.line))
     stopnote.inst = event:inst()
     stopnote.mach = event:mach()
     rawpattern:setevent(self.ps_, event:track(), line, stopnote)
@@ -251,7 +250,7 @@ function pattern:erasenote(event)
     local prev = self:prevevent(event:track(), event)      
     if prev and not prev:hasstop() then 
       local next = self:nextevent(event:track(), event)
-      prev.length = (next and next:position() or self:numbeats()) - prev:position()
+      prev:setlength((next and next:position() or self:numbeats()) - prev:position())
     end
     self.notelist_:erase(event)
     if self.ps_ then
@@ -274,7 +273,7 @@ end
 function pattern:erasestopoffset(event)   
   if event:hasstop() then   
     local next = self:nextevent(event:track(), event)
-    event.length = (next and next:position() or self:numbeats()) - event:position()    
+    event:setlength((next and next:position() or self:numbeats()) - event:position())   
     rawpattern:setevent(self.ps_, event:track(), event.line + self:beattoline(event.stopoffset), blank) 
     event:clearstop()
   end
@@ -311,12 +310,12 @@ function pattern:insertnote(ev, start)
     end    
     if prev then      
       if not prev:hasstop() then
-        prev.length = ev:position() - prev:position()
+        prev:setlength(ev:position() - prev:position())
       elseif prev:position() + prev.stopoffset == ev:position() then
         if prev.line + 1 == ev.line then
           prev:clearstop()
         else
-          prev:setstopoffset(prev.length - self.player_:bpt())
+          prev:setstopoffset(prev:length() - self.player_:bpt())
         end
       elseif prev:position() + prev.stopoffset > ev:position() then
         prev:clearstop()
@@ -325,13 +324,13 @@ function pattern:insertnote(ev, start)
     end
   end
   local next = self:nextevent(ev:track(), ev)
-  ev.length = (next and next:position() or self:numbeats()) - ev:position()   
+  ev:setlength((next and next:position() or self:numbeats()) - ev:position())  
   self:syncevent(ev)
   if ev:hasstop() then  
     if next and ev.line + self:beattoline(ev.stopoffset) >= next.line then
       ev:clearstop()
     else    
-      ev.length = ev.stopoffset
+      ev:setlength(ev.stopoffset)
       stopnote.inst = ev:inst()
       stopnote.mach = ev:mach()
       if self.ps_ then
@@ -346,7 +345,7 @@ end
 function pattern:insertcmd(ev, start)   
   self.cmdlist_:insert(ev, ev:position())  
   ev:clearstop()
-  ev.length = self.player_:bpt()
+  ev:setlength(self.player_:bpt())
   if self.ps_ then
     local raw = rawpattern:eventat(self.ps_, ev.track_, ev.line)
     if raw.val < 120 then
@@ -422,8 +421,8 @@ function pattern:beattoline(beat)
 end 
 
 function pattern:selectall()
-  self:work(function(event) event:select() end, self:firstnote())
-  self:work(function(event) event:select() end, self:firstcmd())
+  self:work(function(event) event:select(self) end, self:firstnote())
+  self:work(function(event) event:select(self) end, self:firstcmd())
   return self
 end
 
@@ -455,7 +454,7 @@ function pattern:setselection(events)
   self:deselectall()
   if events then
     for i = 1, #events do    
-      events[i]:select()
+      events[i]:select(self)
     end
   end
   return self
@@ -499,7 +498,7 @@ function pattern:insertrow(pos, track)
   return self:import()
 end
 
-function pattern:copy(source, note, pos, track)
+function pattern:copy(source, note, pos, track, stopoffset)
   local events = {} 
   self:work(
     function(event)
@@ -507,6 +506,9 @@ function pattern:copy(source, note, pos, track)
                         :setposition(event:position() + pos)
                         :setnote(event:note() + note)
                         :settrack(event:track() + track)
+      if stopoffset then
+        copy:setstopoffset(stopoffset)
+      end
       self:insert(copy)
       events[#events + 1] = copy      
     end,
@@ -523,6 +525,10 @@ end
 function pattern:enablenotify()
   self.changed:enable()
   return self
+end
+
+function pattern:notify()
+  self.changed:emit(self)
 end
 
 return pattern

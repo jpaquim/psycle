@@ -43,18 +43,19 @@ end
 
 function cursor:reset()
   self.position_, self.seqpos_ = 0, 1
-  self.column_, self.track_ = 1, 0
+  self.column_, self.track_, self.prevtrack_ = 1, 0, 0  
   self.trackmodes_ = {}
   for i=1, 65 do
     self.trackmodes_[i] = cursor.NOTES
   end
-  self.scrolloffset_ = 0
+  self.scrolloffset_, self.prevscrolloffset_ = 0
   rawpattern.settrackedit(self.track_)
   return self
 end
 
 function cursor:settrack(track)
   if track ~= self.track_ then
+    self:storetrack()
     self.track_ = math.max(0, math.min(track, rawpattern:numtracks() - 1))
     rawpattern.settrackedit(self.track_)
     self:notify()
@@ -66,12 +67,30 @@ function cursor:track()
   return self.track_
 end
 
+function cursor:prevtrack()
+  return self.prevtrack_
+end
+
+function cursor:setscrolloffset(scrolloffset)
+  self.scrolloffset_ = scrolloffset
+end
+
+function cursor:scrolloffset()
+  return self.scrolloffset_
+end
+
+function cursor:prevscrolloffset()
+  return self.prevscrolloffset_
+end
+
 function cursor:inctrack()
-  self.column_ = 1    
+  self.column_ = 1
+  self:storetrack()
   self.track_ = self.track_ + 1
   if self.track_ >= rawpattern:numtracks() then
-    self.track_ = 0
+    self.track_ = 0    
     self.scrolloffset_ = 0
+    self.listeners_:notify(self, "ontrackscroll")
   elseif self.trackview_ and self.track_ - self.scrolloffset_ >= self.trackview_:visibletracks() then
     self:scrollright(self.trackview_:visibletracks())
   end
@@ -81,11 +100,13 @@ function cursor:inctrack()
 end
 
 function cursor:dectrack(column)
-  self.column_ = column and column or 1  
+  self.column_ = column and column or 1
+  self:storetrack()   
   self.track_ = self.track_ - 1
   if self.track_ < 0 then
     if self.trackview_ then
       self.scrolloffset_ = math.max(0, rawpattern:numtracks() - self.trackview_:visibletracks())
+      self.listeners_:notify(self, "ontrackscroll")
     end
     self.track_ = rawpattern:numtracks() - 1
   elseif self.track_ - self.scrolloffset_ < 0  then
@@ -124,7 +145,10 @@ function cursor:column()
   return self.column_
 end
 
-function cursor:setposition(pos)  
+function cursor:setposition(pos, keepselection)
+  if not keepselection then  
+    self.sequence_:deselectall()
+  end
   self.position_ = math.floor(pos / player:bpt()) * player:bpt()
   rawpattern.settrackline(math.floor(self.position_ * player:tpb()))
   self:notify()
@@ -145,6 +169,7 @@ function cursor:seqpos()
 end
 
 function cursor:incrow()
+  self.sequence_:deselectall()
   local newpos = self.position_ + player:bpt()
   local scroll = true
   if newpos < self.sequence_:at(self.seqpos_):numbeats() then
@@ -164,12 +189,11 @@ function cursor:incrow()
   end
   if self.gridgroup_ and scroll then
     local range = self.gridgroup_.patternview:screenrange(self:seqpos())
-    if self:position() >= range.right then         
-      local visi = range.right - math.max(0, range.left)      
+    if range and self:position() >= range:right() then
       self.gridgroup_.patternview.scroller:setdx(
           -(self.gridgroup_.patternview:gridpositions():pos(self:seqpos()) + 
           self.gridgroup_.patternview:zoom():beatwidth(
-              range.left + (self:position() + player:bpt() - range.right))))
+              range:left() + (self:position() + player:bpt() - range:right()))))
     end 
   end
   rawpattern.settrackline(math.floor(self.position_ * player:tpb())) 
@@ -178,6 +202,7 @@ function cursor:incrow()
 end
 
 function cursor:decrow()
+  self.sequence_:deselectall()
   self.position_ = self.position_ - player:bpt()
   scroll = true
   if self.position_ < 0 then
@@ -198,8 +223,8 @@ function cursor:decrow()
   end  
   if self.gridgroup_ and scroll then  
     local range = self.gridgroup_.patternview:screenrange(self:seqpos())
-    if self:position() < math.max(0, range.left) then         
-       local newpos =  math.max(0, math.max(0, range.left) - player:bpt())
+    if range and self:position() < math.max(0, range:left()) then         
+       local newpos =  math.max(0, math.max(0, range:left()) - player:bpt())
        self.gridgroup_.patternview.scroller:setdx(
           -(self.gridgroup_.patternview:gridpositions():pos(self:seqpos()) +
           self.gridgroup_.patternview:zoom():beatwidth(newpos)))
@@ -210,6 +235,7 @@ function cursor:decrow()
 end
 
 function cursor:steprow()
+  self.sequence_:deselectall()
   self.position_ = self.position_ + rawpattern:patstep()*player:bpt()
   rawpattern.settrackline(math.floor(self.position_ * player:tpb()))
   self:notify()
@@ -219,7 +245,7 @@ end
 function cursor:scrollleft()
   if self.scrolloffset_ > 0 then
     self.scrolloffset_ = self.scrolloffset_ - 1
-    self:notify()
+    self.listeners_:notify(self, "ontrackscroll")
   end
   return self
 end
@@ -227,7 +253,7 @@ end
 function cursor:scrollright(visibletracks)
   if self.scrolloffset_ < rawpattern:numtracks() - visibletracks then
     self.scrolloffset_ = self.scrolloffset_ + 1
-    self:notify()
+    self.listeners_:notify(self, "ontrackscroll")
   end
   return self
 end
@@ -250,6 +276,21 @@ end
 function cursor:enablenotify()
   self.listeners_:enable()
   return self
+end
+
+function cursor:storetrack()
+  self.prevtrack_ = self.track_
+  self.prevscrolloffset_ = self.scrolloffset_  
+end
+
+function cursor:toggletrackmode(track)
+  self.trackmodes_[track + 1] = self.trackmodes_[track + 1] == self.NOTES
+                                and self.DRUMS or self.NOTES
+  self.listeners_:notify(self, "ontrackmodechanged")                                
+end
+
+function cursor:trackmode(track)
+  return self.trackmodes_[track + 1]
 end
 
 return cursor

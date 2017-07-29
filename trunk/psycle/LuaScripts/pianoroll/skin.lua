@@ -63,6 +63,7 @@ return {
       keycolor = "@PVROW",
       keyplaycolor = "@PVPLAYBAR",
       octavekeycolor = "@PVROWBEAT",
+      keyhighlightcolor = "@PVPLAYBAR"
     }
   },
   { selector = "controlboard",

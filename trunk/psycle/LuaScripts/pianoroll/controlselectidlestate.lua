@@ -58,8 +58,8 @@ end
 
 function controlselectidlestate:updatehitarea(view)
   local hittest = view:hittest(view:mousepos()) 
-  if hittest and self.hitarea ~= hittest.hitarea then    
-    self.hitarea = hittest.hitarea     
+  if hittest and self.hitarea ~= hittest:hitarea() then    
+    self.hitarea = hittest:hitarea()    
     view:setcursor(self.cursor[self.hitarea])      
   end
   self.hittest = hittest
@@ -72,20 +72,16 @@ function controlselectidlestate:handlemousedown(view, button)
       nextstate = nil
     elseif self.hitarea  == hitarea.LEFT then         
       nextstate = nil
-    elseif self.hitarea == hitarea.FIRST or self.hitarea == hitarea.MIDDLESTOP then    
-      patternview.dragstartpos = self.hittest.startpos - view:mousepos():x()   
-      nextstate = patternview.dragging     
+    elseif self.hitarea == hitarea.FIRST or self.hitarea == hitarea.MIDDLESTOP then
     elseif self.hitarea == hitarea.NONE or self.hitarea == hitarea.MIDDLE then
      view:deselectall()
      nextstate = view.states.selectingevents
     elseif self.hitarea == hitarea.PLAYBAR then
-      nextstate = view.states.movingplaybar
-    elseif self.hitarea == hitarea.STOP then
-      self:erasestopnote(patternview, mousepos)   
+      nextstate = view.states.movingplaybar     
     end
   elseif button == 2 then
     if self.hitarea ~= hitarea.NONE then
-      self.hittest.pattern:erasecmd(self.hittest.event)      
+      self.hittest:pattern():erasecmd(self.hittest:event())      
       view:fls()
     end  
   end 
@@ -112,32 +108,16 @@ end
 function controlselectidlestate:insert(view)
   self.hittest.note = 255 --
   --view:keyfrom(mousepos:y())  
-  self.hittest.event = patternevent:new(self.hittest.note,
-                                        self.hittest.beat,
+  self.hittest:setevent(patternevent:new(self.hittest:note(),
+                                        self.hittest:position(),
                                         view.cursor:track(),
                                         machinebar:currmachine(),
                                         machinebar:curraux())
-                                   :setstopoffset(0)      
-  self.hittest.eventsetparameter(math.floor(255*(1 - view:mousepos():y()/40)))                                  
-  self.hittest.pattern:insert(self.hittest.event, self.hittest.beat)   
-  view.drag:sethittest(self.hittest, self.hittest.event)
+                                    :setstopoffset(0))      
+  self.hittest:event():setparameter(math.floor(255*(1 - view:mousepos():y()/40)))                                  
+  self.hittest:pattern():insert(self.hittest:event(), self.hittest:position())   
+  view.drag:sethittest(self.hittest, self.hittest:event())
   view:fls()
-end
-
-function controlselectidlestate:erasestopnote(view) 
-  self.hittest.pattern:erasestopoffset(self.hittest.event)
-  view.laststopoffset_ = 0
-  view:fls()
-  self:updatehitarea(view)
-  return self
-end
-
-function controlselectidlestate:erasestopnote(view, mousepos)
- local grid = patternview:hittestgrid(mousepos)
- local hittest = grid:hittest(mousepos)
- grid.pattern:erasestopoffset(hittest.index)
- patternview.laststopoffset_ = 0
- patternview:fls()
 end
 
 return controlselectidlestate

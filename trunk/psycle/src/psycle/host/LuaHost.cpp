@@ -1144,17 +1144,28 @@ void LuaProxy::OpenInFrame() {
     Node::Ptr tmp = menu_root_node_.lock();
     frame_->SetMenuRootNode(tmp);
 	frame_->KeyDown.connect(boost::bind(&LuaProxy::OnFrameKeyDown, this, _1));
+	frame_->KeyUp.connect(boost::bind(&LuaProxy::OnFrameKeyUp, this, _1));
   }
 }
 
-void LuaProxy::OnFrameKeyDown(ui::KeyEvent& ev) {
-  CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
-  CChildView* view = &main->m_wndView;
-  int flags = 0;
-  if (ev.shiftkey()) {
-    flags |= 0x80 | 0x100;
-  } 
-  view->KeyDown(ev.keycode(), 0, flags);
+void LuaProxy::OnFrameKeyDown(ui::KeyEvent& ev) {  
+	CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+	CChildView* view = &main->m_wndView;
+	UINT nFlags(0);		
+	if (ev.extendedkey()) {
+		nFlags |= 0x100;
+	}
+	view->KeyDown(ev.keycode(), 0, nFlags);
+}
+
+void LuaProxy::OnFrameKeyUp(ui::KeyEvent& ev) {  
+	CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+	CChildView* view = &main->m_wndView;
+	UINT nFlags(0);		
+	if (ev.extendedkey()) {
+		nFlags |= 0x100;
+	}
+	view->KeyUp(ev.keycode(), 0, nFlags);
 }
 
 void LuaProxy::UpdateFrameCanvas() {

@@ -70,23 +70,18 @@ function trackview:new(parent, ...)
 end
 
 function trackview:init(sequence, cursor, scroller)
+  self.sequence_ = sequence
+  self.sequence_:addlistener(self)
   self:setautosize(true, false)
   self.statuslisteners_ = listener:new()    
   self.cursor = cursor
-  self.cursor:settrackview(self)
-  self.trackmodes_ = {}
-  for i=0, 64 do
-    self.trackmodes_[i] = trackedit.NOTES
-  end
-  self.trackedit = trackedit:new(cursor, self)  
-  self.cursor = cursor
-  self.cursor.modes = self.trackmodes_
+  self.cursor:settrackview(self)  
+  self.trackedit = trackedit:new(cursor, self)
   self:viewdoublebuffered()
   self.player_ = player  
   self.activeevents_ = {}
   self.repaintmode = trackview.DRAWALL 
   self.trackeditmode = self.EDITCURSOR
-  self.oldtrack_ = 0
 end
 
 function trackview:transparent()
@@ -100,8 +95,8 @@ end
 
 function trackview:draw(g, region)
   tracks = {
-    from = self.cursor.scrolloffset_,
-    to = math.min(self.cursor.scrolloffset_ + self:visibletracks(), rawpattern:numtracks()-1)
+    from = self.cursor:scrolloffset(),
+    to = math.min(self.cursor:scrolloffset() + self:visibletracks(), rawpattern:numtracks()-1)
   }
   g:setcolor(self.colors.BG)
   g:fillrect(region:bounds())  
@@ -110,13 +105,13 @@ function trackview:draw(g, region)
 end 
 
 function trackview:trackposition(track)
-  return rect:new(point:new(self.trackedit.trackwidth_*(track - self.cursor.scrolloffset_), 0),
+  return rect:new(point:new(self.trackedit.trackwidth_*(track - self.cursor:scrolloffset()), 0),
                   dimension:new(self.trackedit.trackwidth_, self:position():height()))
 end
 
 function trackview:drawbackground(g, tracks)  
   for track = tracks.from, tracks.to do    
-    self.trackedit:draw(g, track, self.cursor, self.trackmodes_[track])      
+    self.trackedit:draw(g, track, self.cursor)      
   end  
 end
 
@@ -126,13 +121,13 @@ end
 
 function trackview:drawevents(g, tracks)
   if self.trackeditmode == trackview.EDITCURSOR then
-    local pattern = self.patternview.sequence:at(self.cursor:seqpos())
+    local pattern = self.sequence_:at(self.cursor:seqpos())
     if pattern then
       local numtracks = rawpattern:numtracks()
       local event = pattern:firstnote()
       while event and event:track() >= tracks.from and event:track() <= tracks.to do
         if event:position() == self.cursor:position() then
-          local trackoffset = self.trackedit:headerleft(event:track(), self.cursor.scrolloffset_)    
+          local trackoffset = self.trackedit:headerleft(event:track(), self.cursor:scrolloffset())    
           g:translate(point:new(trackoffset, 0))
           self.trackedit:drawpatternevent(g, event)
           g:retranslate()
@@ -142,7 +137,7 @@ function trackview:drawevents(g, tracks)
       local event = pattern:firstcmd()
       while event and event:track() >= tracks.from and event:track() <= tracks.to do
         if event:position() == self.cursor:position() then
-          local trackoffset = self.trackedit:headerleft(event:track(), self.cursor.scrolloffset_)    
+          local trackoffset = self.trackedit:headerleft(event:track(), self.cursor:scrolloffset())    
           g:translate(point:new(trackoffset, 0))        
           self.trackedit:drawpatternevent(g, event)
           g:retranslate()
@@ -153,7 +148,7 @@ function trackview:drawevents(g, tracks)
   else
     for i=1, #self.activeevents_ do
       local event = self.activeevents_[i]
-      local trackoffset = self.trackedit:headerleft(event:track(), self.cursor.scrolloffset_)    
+      local trackoffset = self.trackedit:headerleft(event:track(), self.cursor:scrolloffset())    
       g:translate(point:new(trackoffset, 0))        
       self.trackedit:drawpatternevent(g, event, event:track(), self.cursor)
       g:retranslate()
@@ -194,26 +189,27 @@ function trackview:oncalcautodimension()
   return dimension:new(200, 200)
 end
 
-function trackview:onmousedown(ev)  
-  local track = self.trackedit:hittesttrack(ev:windowpos(), self.cursor.scrolloffset_)
+function trackview:onmousedown(ev)   
+  local track = self.trackedit:hittesttrack(ev:windowpos(), self.cursor:scrolloffset())
   local trackchanged = self.cursor:track() ~= track 
   local col = self.trackedit:hittestcol(
-      point:new(ev:windowpos():x() - self.trackedit:headerleft(track, self.cursor.scrolloffset_),
+      point:new(ev:windowpos():x() - self.trackedit:headerleft(track, self.cursor:scrolloffset()),
                 ev:windowpos():y()))     
   self.cursor:setcolumn(col ~= -1 and col or 1)   
   if trackchanged then
     self.cursor:settrack(track)
+  else
+    self:redrawtrack(track)
   end
   if col ~= -1 then
     self:setstatus("Enter " .. self.trackedit.colpositions[col].label)
-    self:fls()
-  end 
+  end
 end
 
 function trackview:onmousemove(ev) 
-  local track = self.trackedit:hittesttrack(ev:windowpos(), self.cursor.scrolloffset_)
+  local track = self.trackedit:hittesttrack(ev:windowpos(), self.cursor:scrolloffset())
   local col = self.trackedit:hittestcol(
-      point:new(ev:windowpos():x() - self.trackedit:headerleft(track, self.cursor.scrolloffset_),
+      point:new(ev:windowpos():x() - self.trackedit:headerleft(track, self.cursor:scrolloffset()),
                 ev:windowpos():y()))
   if col ~= -1 then
     self:setstatus("Enter " .. self.trackedit.colpositions[col].label)
@@ -241,7 +237,7 @@ function trackview:dectrackoffset()
   self:fls()
 end
 
-function trackview:handlekeyinput(ev, patternview)
+function trackview:handlekeyinput(ev)
   if not ev:ispropagationstopped() and not ev:shiftkey() and not ev:ctrlkey() and self.cursor:column() > 1 then    
     local event = self:editpatternevent()   
     if event then      
@@ -263,18 +259,10 @@ function trackview:handlekeyinput(ev, patternview)
   end
 end
 
-function trackview:advanceplayposition()  
-  player:setplayline(player:line() + 1)
-end
-
-function trackview:decplayposition()  
-  player:setplayline(math.max(0, player:line() - 1))
-end
-
 function trackview:editpatternevent()
   local result = nil
   if self.trackeditmode == self.EDITCURSOR then
-    local pattern = self.patternview.sequence:at(self.cursor:seqpos())
+    local pattern = self.sequence_:at(self.cursor:seqpos())
     if pattern then
       local event = pattern:firstnote()
       while event do
@@ -315,11 +303,6 @@ function trackview:playpatternevent()
   return result
 end
 
-function trackview:playposition()
-  local sequence = player:playpattern()
-  return sequence, self.patternview.grids[sequence + 1].pattern:linetobeat(player:line())
-end
-
 function trackview:setstatus(text)
   self.statuslisteners_:notify(text, "onstatus")
 end
@@ -333,7 +316,19 @@ function trackview:oncalcautodimension()
 end
 
 function trackview:ontrackchanged()
+  if self.cursor:track() ~= self.cursor:prevtrack() then   
+    self:redrawtrack(self.cursor:prevtrack())
+  end
+  self:redrawtrack(self.cursor:track())
+end
+
+function trackview:ontrackscroll()
   self:fls()
+end
+
+function trackview:redrawtrack(track)
+  self:fls(region:new():setrect(
+    self.trackedit:trackposition(track, self.cursor:scrolloffset())))
 end
 
 function trackview:setproperties(properties)  
@@ -346,6 +341,12 @@ end
 function trackview:addstatuslistener(listener)
   self.statuslisteners_:addlistener(listener)
   return self
+end
+
+function trackview:onpatternchanged(pattern)
+  if self.sequence_:at(self.cursor:seqpos()) == pattern then
+    self:fls()
+  end
 end
 
 return trackview

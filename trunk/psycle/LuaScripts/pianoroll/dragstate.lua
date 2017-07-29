@@ -22,7 +22,7 @@ end
 
 function dragstate:statustext(view)
   return "Note will has be the key " .. view:eventmousepos():note() .. 
-         " and beat at " .. view:eventmousepos():position() .. 
+         " and beat at " .. view:eventmousepos():rasterposition() .. 
          ". Move the note and release mouse button to commit." 
 end
 
@@ -35,8 +35,9 @@ end
 
 function dragstate:updateplaynote(view)
   if view:eventmousepos():note() < 120 and
-     self.playnote ~= view:eventmousepos():note() then
-    self.playnote = view:eventmousepos():note() 
+    self.playnote ~= view:eventmousepos():note() then
+    self.playnote = view:eventmousepos():note()
+    player:playnote(self.playnote, 6)    
   end
 end
 

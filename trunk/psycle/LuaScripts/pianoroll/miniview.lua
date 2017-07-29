@@ -185,10 +185,9 @@ function miniview:mapscreentowindow(screenpos)
 end
 
 function miniview:onsize(dimension)  
-  if self.keymap then
-    self.noteheight = self:position():height() / self.keymap:numkeys()
-    self:createpatternimage(dimension)
-  end
+  self.noteheight = self:position():height() / self.keymap:numkeys()
+  self.evwidth = self:position():width() / self:numbeats()
+  self:createpatternimage(dimension)
 end
 
 function miniview:onsequenceupdated()
@@ -249,7 +248,7 @@ function miniview:drawevents(g)
     while curr do
        g:fillrect(rect:new(point:new(gridpos + curr:position()*self.evwidth,
                            self:keypos(curr:note()) + 3),
-                           dimension:new(curr.length*self.evwidth, self.evheight)))                              
+                           dimension:new(curr:length()*self.evwidth, self.evheight)))                              
        curr = curr.next                                           
      end     
      gridpos = gridpos + pattern:numbeats()*self.evwidth    
@@ -257,7 +256,7 @@ function miniview:drawevents(g)
 end
 
 function miniview:keypos(key)
-  return self.noteheight * (self.keymap.range.to - key)
+  return self.noteheight * (self.keymap.range.to_ - key)
 end
 
 function miniview:displayrange()
@@ -309,7 +308,7 @@ function miniview:updatepatterns()
           while curr do
             g:fillrect(rect:new(point:new(gridpos + curr:position()*self.evwidth,
                             self:keypos(curr:note()) + 3),
-                            dimension:new(curr.length*self.evwidth, self.evheight)))                              
+                            dimension:new(curr:length()*self.evwidth, self.evheight)))                              
             curr = curr.next                                          
           end
         end
@@ -323,11 +322,6 @@ end
 
 function miniview:transparent()
   return false
-end
-
-function miniview:onsizegridview(view)
-  self:createpatternimage(self:dimension())
-  self.evwidth = self:position():width() / self:numbeats()
 end
 
 function miniview:setproperties(properties)

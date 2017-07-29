@@ -9,28 +9,42 @@ Foundation ; either version 2, or (at your option) any later version.
 
 local screenrange = {}
 
-function screenrange:new()
+function screenrange:new(...)
   local m = {}                
   setmetatable(m, self)
   self.__index = self    
-  m:init()  
+  m:init(...)  
   return m
 end
 
-function screenrange:init()
-  self.left, self.right = 0, 0 
+function screenrange:init(seqpos, left, right)
+  self.seqpos = seqpos
+  self.left_, self.right_ = left, right
 end
 
 function screenrange:has(event)
-  return event:position() + event.length >= self.left and event:position() < self.right
+  return event:position() + event:length() >= self.left_ and event:position() < self.right_
 end
 
 function screenrange:haspos(pos)
-  return pos >= self.left and pos < self.right
+  return pos >= self.left_ and pos < self.right_
 end
 
 function screenrange:onscreen()
-  return self.right >= 0 and self.left ~= self.right
+  return self.right_ >= 0 and self.left_ ~= self.right_
 end
+
+function screenrange:reset(left, right)
+  self.left_, self.right_ = left, right
+end
+
+function screenrange:left()
+  return self.left_
+end
+
+function screenrange:right()
+  return self.right_
+end
+
 
 return screenrange

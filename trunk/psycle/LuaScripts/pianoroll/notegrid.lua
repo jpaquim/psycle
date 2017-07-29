@@ -11,6 +11,7 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local hitarea = require("hitarea")
+local hittest = require("hittest")
 local midihelper = require("psycle.midi")
 local rastergrid = require("rastergrid")
 local patternevent = require("patternevent")
@@ -46,28 +47,24 @@ function notegrid:drawevents(g, screenrange, pattern, seqpos)
     local timer = self.view.playtimer   
     if timer:currsequence() + 1 == seqpos then    
       for _, event in pairs(timer:outdatedevents()) do
-        if event:position() >= screenrange.right then      
+        if event:position() >= screenrange:right() then      
           break
         end
-        if event:isnote() then      
-          if self:checkevent(g, event, seqpos, screenrange) then
-            self:drawcolorevent(g, event, seqpos, screenrange, false)
-          end      
-        end   
+        if event:isnote() and self:checkevent(g, event, seqpos, screenrange) then
+          self:drawcolorevent(g, event, seqpos, screenrange, false)
+        end      
       end         
       for _, event in pairs(timer:activeevents()) do
-        if event:position() >= screenrange.right then      
+        if event:position() >= screenrange:right() then      
           break
-        elseif event:isnote() then
-          if self:checkevent(g, event, seqpos, screenrange) then
-            self:drawcolorevent(g, event, seqpos, screenrange,true)
-          end               
+        elseif event:isnote() and self:checkevent(g, event, seqpos, screenrange) then
+          self:drawcolorevent(g, event, seqpos, screenrange,true)          
         end   
       end      
     end
   else
     local event = self.view.gridpositions_:firstnote(screenrange, pattern, seqpos)       
-    while event and event:position() < screenrange.right do        
+    while event and event:position() < screenrange:right() do        
       if self:checkevent(g, event, seqpos, screenrange) then
         local events, trackevent = nil, nil
         event, events, trackevent = self:orderbytrack(event)        
@@ -135,11 +132,11 @@ function notegrid:drawdragging(g, seqpos)
     local dragnote = self.view.drag:dragnote(self.view:eventmousepos():note())
     local dragposition = self.view:eventmousepos():seqpos() == 0 and
                          self.view.drag:dragposition(0.0) or
-                         self.view.drag:dragposition(self.view:eventmousepos():position())
+                         self.view.drag:dragposition(self.view:eventmousepos():rasterposition())
     for i=1, #self.view.drag:source() do
       local dragevent = patternevent:new(
           self.view.drag:source()[i]:note() - self.view.drag.dragstart_:note() + dragnote, 
-          self.view.drag:source()[i]:position() - self.view.drag.dragstart_:position() + dragposition)          
+          self.view.drag:source()[i]:position() - self.view.drag.dragstart_:rasterposition() + dragposition)          
       dragevent:setlength(self.view.player_:bpt())
       g:setcolor(0xFFA0A0A0)
       self:drawevent(g, dragevent, self.view.cursor.trackmodes_[self.view.cursor:track() + 1])
@@ -151,41 +148,35 @@ function notegrid:iseventonscreen(event)
   return event:note() >= self.visiblenotes.bottom  and event:note() <= self.visiblenotes.top
 end
 
-function notegrid:hittest(position, gridpos_, pattern_, seqpos_)
-  local result = { 
-    hitarea = hitarea.NONE, pattern = pattern_, seqpos = seqpos_, 
-    mousepos = position, gridpos = gridpos_,
-    note = self.view.keyboard:note(position:y()),
-    beat = self.view:zoom():beat(position:x() - gridpos_)        
-  }
-  local event = nil
-  if pattern_ then
-    event = pattern_:firstnote()
+function notegrid:hittest(eventposition, pattern)
+  local result = hittest:new(eventposition, pattern)  
+  if pattern then
+    local event = pattern:firstnote()
     while event do
-       if event:note() == result.note then
+       if event:note() == result:note() then
          event = self:updatetrackorder(self.view.cursor:track(), event)
-         if event:overstop(result.beat) then
-           result.hitarea = hitarea.STOP              
+         if event:overstop(result:position()) then
+           result:sethitarea(hitarea.STOP)              
            break
-         elseif event:over(result.beat) then                 
-           if position:x() - gridpos_ - self.view:zoom():beatwidth(event:position()) < 4 then
-             result.hitarea = hitarea.LEFT
-           elseif gridpos_ + self.view:zoom():beatwidth(event:position() + event.length) - position:x() < 4 then          
-             result.hitarea = hitarea.RIGHT
-           elseif result.beat < event:position() + self.view.player_:bpt() then
-             result.hitarea = hitarea.FIRST
+         elseif event:over(result:position()) then
+           if self.view:zoom():beatwidth(eventposition:position() - event:position()) < 4 then         
+             result:sethitarea(hitarea.LEFT)
+           elseif self.view:zoom():beatwidth(event:position() + event:length() - eventposition:position()) < 4 and
+                  self.view:zoom():beatwidth(event:position() + event:length() - eventposition:position()) >= 0 then            
+             result:sethitarea(hitarea.RIGHT)
+           elseif result:position() < event:position() + self.view.player_:bpt() then
+             result:sethitarea(hitarea.FIRST)
            else 
-             result.hitarea = event:hasstop() and hitarea.MIDDLESTOP or hitarea.MIDDLE             
+             result:sethitarea(event:hasstop() and hitarea.MIDDLESTOP or hitarea.MIDDLE)             
            end
            break
          end  
        end
        event = event.next     
     end
-  end
-  if result.hitarea ~= hitarea.NONE then
-    result.event = event
-    result.startpos = self.view:zoom():beatwidth(event:position())
+    if result:hitarea() ~= hitarea.NONE then
+      result:setevent(event)   
+    end
   end
   return result
 end
@@ -208,8 +199,8 @@ function notegrid:hittestselrect()
     local num = self.view.sequence:len()
     for i=1, num do         
       local gridpos = self.view:gridpositions():pos(i)
-      local top = self.view.keyboard.keymap.range.to - math.floor((rect:top()) / self.view:zoom():height())
-      local bottom = self.view.keyboard.keymap.range.to - math.floor((rect:bottom()) / self.view:zoom():height())
+      local top = self.view.keyboard.keymap.range.to_ - math.floor((rect:top()) / self.view:zoom():height())
+      local bottom = self.view.keyboard.keymap.range.to_ - math.floor((rect:bottom()) / self.view:zoom():height())
       notetop = math.max(top, bottom)
       notebottom = math.min(top, bottom)
       local left = (rect:left() - gridpos)  / self.view:zoom():width()
@@ -219,7 +210,7 @@ function notegrid:hittestselrect()
       local event = self.view.sequence:at(i):firstnote()
       while event do        
         if (event:note() <= notetop and event:note() >= notebottom) and 
-          event:position() + event.length >= beatleft and
+          event:position() + event:length() >= beatleft and
           event:position() <= beatright and
          (self.view.sequence.trackviewmode == self.view.sequence.VIEWALLTRACKS or event:track() == self.view.cursor:track())
           then
@@ -242,7 +233,7 @@ end
 function notegrid:drawevent(g, event, trackmode, iseventplayed)
   local y = self.view.keyboard:keypos(event:note())  
   local position = rect:new(point:new(self.view:zoom():beatwidth(event:position()), y + 1),
-                            point:new(self.view:zoom():beatwidth(event:position() + event.length),
+                            point:new(self.view:zoom():beatwidth(event:position() + event:length()),
                                       y + self.view:zoom():height() - 1))       
   if trackmode == trackmodes.NOTES then    
     self:drawnote(g, event, position, iseventplayed)
@@ -300,8 +291,8 @@ end
 
 function notegrid:drawkeylines(g) 
   local w = self.bgbeats * self.view:zoom():width()
-  g:setcolor(self.view.colors.backgroundcolor) 
-  for note=self.view.keyboard.keymap.range.from, self.view.keyboard.keymap.range.to do
+  g:setcolor(self.view.colors.backgroundcolor)  
+  for note=self.view.keyboard.keymap.range.from_, self.view.keyboard.keymap.range.to_ do
     local y = self.view.keyboard:keypos(note) 
     if self.view.keyboard:isoctave(note) then
       g:setcolor(self.view.colors.octaverowcolor)
@@ -315,7 +306,7 @@ end
 
 function notegrid:bardimension()
    return dimension:new(math.floor(self.beatsperbar * self.view:zoom():width()),
-                        math.floor(self.view.keyboard.keymap:numkeys() * self.view:zoom():height()))
+                        math.floor(self:preferredheight()))
 end
 
 function notegrid:preferredheight()

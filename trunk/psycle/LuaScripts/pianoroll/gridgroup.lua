@@ -48,13 +48,14 @@ function gridgroup:new(parent, ...)
   return m
 end
 
-function gridgroup:init(sequence, scroller, keymap, cursor)
+function gridgroup:init(sequence, scroller, keymap, cursor, playtimer)
   self.scroller = scroller
   self.zoom_ = zoom:new()
   self.gridpositions = gridpositions:new(sequence, self.zoom_)
   self.cursor = cursor
   self.cursor:setgridgroup(self)
-  self.cursor:addlistener(self.gridpositions)  
+  self.cursor:addlistener(self.gridpositions)
+  self.cursor:addlistener(self)
   self.keyboard = keyboard:new(nil, keymap, scroller, self.zoom_)
                         :setalign(alignstyle.LEFT)
                         :setmargin(boxspace:new(0, 3, 0, 1))
@@ -72,7 +73,7 @@ function gridgroup:init(sequence, scroller, keymap, cursor)
                     :setmargin(boxspace:new(0, 0, 2, 49))                    
                     :preventscrolly()
                     :setstates(rulergridstates)
-  self.controlgroup = controlgroup:new(self, cursor, self.zoom_, scroller, self.gridpositions, sequence)
+  self.controlgroup = controlgroup:new(self, cursor, self.zoom_, scroller, self.gridpositions, sequence, playtimer)
                                   :setalign(alignstyle.BOTTOM)
                                   :setdimension(dimension:new(0, 50))
   splitter:new(self, splitter.HORZ)                                     
@@ -143,6 +144,7 @@ end
 function gridgroup:addstatuslistener(listener)
   self.patternview:addstatuslistener(listener)
   self.ruler:addstatuslistener(listener)
+  self.controlgroup.controlview:addstatuslistener(listener)  
   return self
 end
 
@@ -163,6 +165,10 @@ end
 
 function gridgroup:flscontrolview()
   self.controlgroup.controlview:fls()
+end
+
+function gridgroup:ontrackmodechanged()
+  self.patternview:fls()
 end
 
 return gridgroup

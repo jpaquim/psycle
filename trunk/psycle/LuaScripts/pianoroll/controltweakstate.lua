@@ -42,7 +42,7 @@ function controltweakstate:handlemousemove(view)
       end
       view:setcursorpos(self.centermousepos_)
       view:redrawsection(self.sectionindex_)
-      view.trackview:fls()
+      view.drag:pattern(view):notify()
     end
   end
   return nil

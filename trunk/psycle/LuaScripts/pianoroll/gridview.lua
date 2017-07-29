@@ -38,6 +38,7 @@ gridview.colorkeys = {
 
 gridview.DRAWALL = 1
 gridview.DRAWEVENTS = 2
+gridview.DRAWAUTOMATION = 3
 
 gridview.EDITMODE = 1
 gridview.SELECTMODE = 2
@@ -91,7 +92,7 @@ function gridview:init(grid, sequence, keyboard, scroller, zoom, cursor, gridpos
   self.zoom_ = zoom:addlistener(self) 
   self.gridpositions_ = gridpositions  
   self:viewdoublebuffered()
-  self.laststopoffset_ = 0
+  self.laststopoffset_ = 0.75
   self.statehandler = statehandler:new(self)
   self.sizelisteners_ = listeners:new()
   self.oldseq = 1
@@ -181,7 +182,7 @@ function gridview:draw(g, region)
       to = math.max(1, math.min(#self.sections, self:sectionindex(region:bounds():bottom() - self:dy() - 1)))
     }
   end
-  g:translate(point:new(self.scroller:dx(), self:dy()))
+  g:translate(point:new(self.scroller:dx(), self:dy()))  
   self:clearplaybar(g)      
   self:drawgrids(g, sections)
   self:drawslice(g)
@@ -216,11 +217,9 @@ end
 function gridview:drawdefaultgrids(g, j)
   for i= self.gridpositions_:displayrange().from, self.gridpositions_:displayrange().to do 
     local screenrange = self.gridpositions_:screenrange(i)
-    if screenrange and screenrange.right >= 0 and screenrange.left ~= screenrange.right then
-      g:translate(point:new(self.gridpositions_:pos(i), 0))
-      if self.paintmode == gridview.DRAWALL then
-        self.grid:drawbars(g, screenrange, self.sequence:at(i), i)  
-      end      
+    if screenrange and screenrange:right() >= 0 and screenrange:left() ~= screenrange:right() then
+      g:translate(point:new(self.gridpositions_:pos(i), 0))     
+      self.grid:clearbackground(g, screenrange, i, self.sections[j])      
       self.grid:draw(g, screenrange, self.sequence:at(i), i, self.sections[j])                
       if player:playing() and self.playtimer:currsequence() == (i - 1) then       
         self.grid:drawplaybar(g, self.playtimer:currposition())                
@@ -234,9 +233,9 @@ function gridview:drawselgrids(g, j)
   if gridview.DRAWALL then 
     for i = self.gridpositions_:displayrange().from, self.gridpositions_:displayrange().to do
       local screenrange = self.gridpositions_:screenrange(i)
-      if screenrange:onscreen() then                     
+      if screenrange and screenrange:onscreen() then                     
         g:translate(point:new(self.gridpositions_:pos(i), 0))             
-        self.grid:drawbars(g, screenrange, self.sequence:at(i), i)        
+        self.grid:drawbars(g, screenrange, self.sequence:at(i))        
         g:retranslate()
       end
     end
@@ -244,7 +243,7 @@ function gridview:drawselgrids(g, j)
   self:drawselectionrect(g, j)
   for i = self.gridpositions_:displayrange().from, self.gridpositions_:displayrange().to do 
     local screenrange = self.gridpositions_:screenrange(i)
-    if screenrange:onscreen() then 
+    if screenrange and screenrange:onscreen() then 
       g:translate(point:new(self.gridpositions_:pos(i), 0))      
       self.grid:draw(g, screenrange, self.sequence:at(i), i, self.sections[j])
       if self.playtimer:currsequence() == (i - 1) then       
@@ -314,19 +313,12 @@ function gridview:onsize(size)
   self.gridpositions_:updatedisplayrange(self.scroller:dx(), self:position():width())
 end
 
-function gridview:onplaybarupdate(playtimer) 
-  local range = self.gridpositions_:screenrange(sequencebar:editposition() + 1)
-  local visi = (-self:position():width() + self.scroller:dx()) / self.zoom_:width()
-  --if self.sequence:startbeat(playtimer:currsequence() + 1) + playtimer:currposition() >= -visi then              
-    -- local newpos =  self.scroller:dx() - self:position():width()
-    -- self.scroller:setdx(newpos)
- -- else
+function gridview:onplaybarupdate(playtimer)   
   if sequencebar:followsong() and player:playing() then
     self.cursor:preventnotify()
                :setseqpos(playtimer:currsequence() + 1)
                :setposition(playtimer:currposition())
                :enablenotify()
-   --self:updatedisplayrange()
   end
   if self.displaymode == gridview.DISPLAYSEQPOS then    
     if self.oldseq ~= sequencebar:editposition() then
@@ -346,7 +338,6 @@ function gridview:onplaybarupdate(playtimer)
       self.paintmode = gridview.DRAWALL  
     end
   end
- -- end --]]
 end
 
 function gridview:setproperties(properties)
@@ -370,17 +361,21 @@ function gridview:computecolors()
 end
 
 function gridview:hittest(position)
-  position = position and position or self:mousepos()
+  local pos = position
+              and eventposition:new(
+                  self:beat(position:x()),
+                  self.keyboard:note(position:y()),
+                  self:seqposfrom(position:x()))
+               or self:eventmousepos()
+  position = position and position or self:mousepos()                
   local result = nil
-  if self.sequence then
-    local seqpos = self:seqposfrom(position:x())                                                   
-    if seqpos then
-      local sectionindex = self:sectionindex(position:y())
-      result = self.grid:hittest(position, self.gridpositions_:pos(seqpos), self.sequence:at(seqpos), seqpos)
-      result.section = self.sections[sectionindex]
-      result.sectionoffset = self:sectiontop(sectionindex)  
-      result.view = self
-    end
+  if self.sequence and pos:seqpos() then
+    local sectionindex = position 
+                         and self:sectionindex(position:y()) 
+                         or self:sectionindex(self:mousepos():y())
+    result = self.grid:hittest(pos, self.sequence:at(pos:seqpos()), sectionindex)
+    result.section = self.sections[sectionindex]
+    result.sectionoffset = self:sectiontop(sectionindex)        
   end
   return result
 end
@@ -457,7 +452,8 @@ function gridview:clearplaybar(g)
         self.grid:rendercursorbar(g, playposition)
       end  
       self.grid:setclearcolor(g, playposition)          
-      self.grid:renderplaybar(g, playposition)      
+      self.grid:renderplaybar(g, playposition)
+      self.grid:clearplaybar(g, playposition)
       g:retranslate()
     end   
   end 
@@ -474,10 +470,16 @@ function gridview:onmousedown(ev)
 end
 
 function gridview:onmousemove(ev)
+  local oldnote = self:eventmousepos():note()
+  local oldposition = self:eventmousepos():rasterposition()
   self:updatemouse(ev)
-  self.keyboard:onviewmousemove(self.mousepos_:y())
+  self.keyboard:onviewmousemove(self:eventmousepos():note())
   self.statehandler:transition("handlemousemove", self, ev:button())
   ev:stoppropagation()
+  if oldnote ~= self:eventmousepos():note() or
+     oldposition ~= self:eventmousepos():rasterposition() then
+    self:fls()
+  end
 end
 
 function gridview:onmouseup(ev)
@@ -503,17 +505,6 @@ function gridview:mousepos()
   return self:mapscreentowindow(self.mousepos_)
 end
 
-function gridview:eventmousepos()
-  return eventposition:new(
-      self:beat(x),
-      self.keyboard:note(y),
-      self:seqposfrom(x))
-end
-
-function gridview:eventmousepos()
-  return self.eventmousepos_
-end
-
 function gridview:beat(x)
   local result = 0
   local seqpos = self:seqposfrom(x)                                                   
@@ -535,20 +526,20 @@ function gridview:stopdrag()
   else
     self.drag:copy(self)
   end
-  self:adjustcursor()
+  self:adjustcursor(true)
   self.drag:stop(self)
   return self
 end
 
-function gridview:adjustcursor()
+function gridview:adjustcursor(keepselection)
   self.cursor:setseqpos(self:seqposfrom(self:mousepos():x()))
-             :setposition(self:beat(self:mousepos():x()))
+             :setposition(self:beat(self:mousepos():x()), keepselection)
 end
 
 function gridview:eventmousepos()
   local pos = self:mapscreentowindow(self.mousepos_)  
   return eventposition:new(
-    self:raster(self:beat(pos:x())),
+    self:beat(pos:x()),
     self.keyboard:note(pos:y()),
     self:seqposfrom(pos:x()))
 end
@@ -563,9 +554,9 @@ function gridview:doautoscroll()
       self:fls()
     end
     local screenrange = self.gridpositions_:screenrange(self:eventmousepos():seqpos())
-    if screenrange and self:eventmousepos():position() + player:bpt() > screenrange.right then
+    if screenrange and self:eventmousepos():rasterposition() + player:bpt() > screenrange:right() then
       self:startscrollright()
-    elseif screenrange and self:eventmousepos():position() - player:bpt() < screenrange.left then
+    elseif screenrange and self:eventmousepos():rasterposition() - player:bpt() < screenrange:left() then
       self:startscrollleft()
     else
       self:fls()
@@ -627,7 +618,7 @@ function gridview:stopslice()
     local curr = self:pattern():firstnote()
     while curr do
       local slice = slicepositions[curr:note()]
-      if slice and slice > curr:position() and slice < curr:position() + curr.length then
+      if slice and slice > curr:position() and slice < curr:position() + curr:length() then
         self:pattern():insert(curr:clone(), slice)
       end
       curr = curr.next
@@ -683,8 +674,8 @@ function gridview:startscrollleft()
     function scrollleft()
       if self:eventmousepos():seqpos() and self.timeridscrollleftright ~= - 1 then
         local screenrange = self.gridpositions_:screenrange(self:eventmousepos():seqpos())
-        if screenrange and self:pattern() and self:eventmousepos():position() > 0
-           and self:eventmousepos():position() - player:bpt() < screenrange.left
+        if screenrange and self:pattern() and self:eventmousepos():rasterposition() > 0
+           and self:eventmousepos():rasterposition() - player:bpt() < screenrange:left()
         then           
           self.scroller:setdx(self.scroller:dx() + self.zoom_:rasterwidth())  
           self.timeridscrollleftright = psycle.proxy:settimeout(scrollleft, 45)
@@ -705,8 +696,8 @@ function gridview:startscrollright()
     function scrollright()
       if self:eventmousepos():seqpos() and self.timeridscrollleftright ~= - 1 then
         local screenrange = self.gridpositions_:screenrange(self:eventmousepos():seqpos())
-        if screenrange and self:pattern() and self:eventmousepos():position() < self:pattern():numbeats()
-           and self:eventmousepos():position() + player:bpt() > screenrange.right
+        if screenrange and self:pattern() and self:eventmousepos():rasterposition() < self:pattern():numbeats()
+           and self:eventmousepos():rasterposition() + player:bpt() > screenrange:right()
         then        
           self.scroller:setdx(self.scroller:dx() - self.zoom_:rasterwidth())      
           self.timeridscrollleftright = psycle.proxy:settimeout(scrollright, 45)

@@ -14,7 +14,7 @@ local viewport = require("psycle.ui.viewport")
 local titlebaricons = require("psycle.ui.titlebaricons")
 local text = require("psycle.ui.text")
 local gridview = require("gridview")
-local trackviewgroup = require("trackgroup")
+local trackgroup = require("trackgroup")
 local hostlistener = require("psycle.ui.hostactionlistener")
 local editcommands = require("editcommands")
 local selectioncommands = require("selectioncommands")
@@ -55,23 +55,19 @@ function mainviewport:init()
   self.cursor = cursor:new(self.sequence)
   self.scroller = scroller:new()
   self.keymap = keymap:new()
+  self.playtimer = playtimer:new(self.sequence)
   self:inittoolbars()
-  self.trackviewgroup = trackviewgroup:new(self, self, self.keymap, self.sequence, self.cursor, self.scroller)
+  self.trackgroup = trackgroup:new(self, self, self.keymap, self.sequence, self.cursor, self.scroller)
                                       :addstatuslistener(self)
   self.chordselector = chordselector:new(self)
                                     :setalign(alignstyle.RIGHT)
                                     :addlistener(self)                                    
                                     :addstatuslistener(self)
                                     :hide()                                    
-  self.gridgroup = gridgroup:new(self, self.sequence, self.scroller, self.keymap, self.cursor)
+  self.gridgroup = gridgroup:new(self, self.sequence, self.scroller, self.keymap, self.cursor, self.playtimer)
                             :setalign(alignstyle.CLIENT)
                             :setchord(self.chordselector:chord()) 
-                            :addstatuslistener(self)                            
-  self.gridgroup.patternview:addsizelistener(self.trackviewgroup.miniview) 
-  self.trackviewgroup.trackview.patternview = self.gridgroup.patternview
-  self.trackviewgroup.trackheaderview.patternview = self.gridgroup.patternview
-  self.gridgroup.controlgroup.controlview.trackview = self.trackviewgroup.trackview
-  self.gridgroup.controlgroup.controlview:addstatuslistener(self)  
+                            :addstatuslistener(self)  
   self:inithostlistener()
   self:initcommands()  
   self:initplaytimer()
@@ -93,7 +89,7 @@ function mainviewport:initsequence()
   self.sequence:addlistener(self.gridgroup.patternview)
                :addlistener(self.ruler)
                :addlistener(self.gridgroup.controlgroup.controlview)
-               :addlistener(self.trackviewgroup.miniview)
+               :addlistener(self.trackgroup.miniview)
                :addlistener(self)
   self.cursor:setseqpos(self.sequencebar:editposition() + 1)                 
   self.scroller:scrolltoseqpos(self.sequencebar:editposition() + 1)               
@@ -120,30 +116,30 @@ function mainviewport:inittoolbars()
 end
 
 function mainviewport:initplaytimer()
-  self.playtimer = playtimer:new(self.sequence)
+  self.playtimer
       :addlistener(self.gridgroup.ruler)  
       :addlistener(self.gridgroup.patternview)
       :addlistener(self.gridgroup.controlgroup.controlview)
-      :addlistener(self.trackviewgroup.trackview)
+      :addlistener(self.trackgroup.trackview)
       :addlistener(self.ruler)
       :addlistener(self.gridgroup.keyboard)
-      :addlistener(self.trackviewgroup.miniview)
+      :addlistener(self.trackgroup.miniview)
   gridview.setplaytimer(self.playtimer)
-  self.trackviewgroup.miniview:setplaytimer(self.playtimer)
+  self.trackgroup.miniview:setplaytimer(self.playtimer)
   self.playtimer:start()
 end
 
 function mainviewport:initcommands()
   local that = self
   self.editcommands_ = {
-    selectnote = editcommands.build(editcommands.SELECTNOTE, that.trackviewgroup.trackview),
+    selectnote = editcommands.build(editcommands.SELECTNOTE, that.trackgroup.trackview),
     editmode = editcommands.build(editcommands.EDITMODE, that.gridgroup.patternview, that, that.editicons),
     selectmode = editcommands.build(editcommands.SELECTMODE, that.gridgroup.patternview, that),
     slicemode = editcommands.build(editcommands.SLICEMODE, that.gridgroup.patternview, that),
     copymode = editcommands.build(editcommands.COPYMODE, that.gridgroup.patternview),
     movemode = editcommands.build(editcommands.MOVEMODE, that.gridgroup.patternview),
     trackviewmode = editcommands.build(editcommands.TRACKVIEWMODE, that.gridgroup.patternview),
-    trackeditmode = editcommands.build(editcommands.TRACKEDITMODE, that.trackviewgroup.trackview),
+    trackeditmode = editcommands.build(editcommands.TRACKEDITMODE, that.trackgroup.trackview),
     keyboardmode = editcommands.build(editcommands.KEYBOARDMODE, that.gridgroup.keyboard, that.gridgroup.keyboardmodeselect),
     hzoomfit = editcommands.build(editcommands.HZOOMFIT, that.gridgroup.patternview),
     hzoomin = editcommands.build(editcommands.HZOOMIN, that.gridgroup.patternview),
@@ -163,13 +159,13 @@ function mainviewport:initcommands()
   self.undoicons.redo:setcommand(self.editcommands_.redo) 
   self.dragicons.copy:setcommand(self.editcommands_.copymode)
   self.dragicons.move:setcommand(self.editcommands_.movemode) 
-  self.trackviewgroup.trackicons.itrackfilter:setcommand(self.editcommands_.trackviewmode)
-  self.trackviewgroup.trackicons.itrackeditmode:setcommand(self.editcommands_.trackeditmode)
+  self.trackgroup.trackicons.itrackfilter:setcommand(self.editcommands_.trackviewmode)
+  self.trackgroup.trackicons.itrackeditmode:setcommand(self.editcommands_.trackeditmode)
   self.redrawnotescommand = redrawcommand:new(self.gridgroup.patternview)
   self.redrawnotesandcontrolscommand = redrawgridcommand:new(self.gridgroup,
       redrawgridcommand.NOTES + redrawgridcommand.CONTROLS)
-  self.redrawtrackview = redrawcommand:new(self.trackviewgroup.trackview,
-      self.trackviewgroup.trackheaderview)       
+  self.redrawtrackview = redrawcommand:new(self.trackgroup.trackview,
+      self.trackgroup.trackheaderview)       
   self.selectioncommands_= {
     transpose1 = multicommand:new(selectioncommands.build(selectioncommands.TRANSPOSE,
                                                           that.sequence,
@@ -264,14 +260,14 @@ function mainviewport:inithostlistener()
     end      
     that.gridgroup.gridpositions:update()  
     that.gridgroup:updatedisplayrange()    
-    that.trackviewgroup.miniview:onsequenceupdated()
+    that.trackgroup.miniview:onsequenceupdated()
     that.scroller:updatehscrollrange(that.gridgroup.patternview)
                  :scrolltoseqpos(that.sequencebar:editposition() + 1)        
   end
   function self.hostlistener:onpatternlength()    
     that.gridgroup.gridpositions:update()  
     that.gridgroup:updatedisplayrange()    
-    that.trackviewgroup.miniview:onsequenceupdated()
+    that.trackgroup.miniview:onsequenceupdated()
     that.scroller:updatehscrollrange(that.gridgroup.patternview)
                  :scrolltoseqpos(that.sequencebar:editposition() + 1)
     --that.gridgroup.patternview:createbackground()                 
@@ -316,7 +312,7 @@ end
 
 function mainviewport:toggleseqdisplay()
   self.gridgroup:toggleseqdisplay()  
-  self.trackviewgroup.miniview:toggleseqdisplay()
+  self.trackgroup.miniview:toggleseqdisplay()
   self.scroller:updatehscrollrange()
                :scrolltoseqpos(self.sequencebar:editposition() + 1 )   
 end
@@ -345,7 +341,7 @@ function mainviewport:onwheel(ev)
 end
 
 function mainviewport:onkeydown(ev)
-  self.trackviewgroup.trackview:handlekeyinput(ev, self.gridgroup.patternview)
+  self.trackgroup.trackview:handlekeyinput(ev, self.gridgroup.patternview)
   if not ev:ispropagationstopped() then
     self.inputhandler:handlekeyinput(ev)
     if not ev:ispropagationstopped() then
@@ -430,7 +426,7 @@ function mainviewport:oninsertchordchanged(chordselector)
   self.optionicons.chords:settext("Insert " .. chordselector:chord():name())
   self.gridgroup.patternview:setchord(chordselector:chord())
 end
-
+ 
 function mainviewport:formattoolicon(icon)    
   icon:setautosize(false, false)
       :setverticalalignment(toolicon.CENTER)

@@ -20,16 +20,16 @@ end
 function keymap:init(from, to)
   if from and to then
     self.range = {}
-    self.range.from = from
-    self.range.to = to
+    self.range.from_ = from
+    self.range.to_ = to
   else
-    self.range = { from = 12, to = 119 }
+    self.range = { from_ = 12, to_ = 119 }
   end
-  self.numkeys_ = self.range.to - self.range.from
+  self.numkeys_ = self.range.to_ - self.range.from_
 end
   
 function keymap:has(key)
-  return key >= self.range.from and key <= self.range.to
+  return key >= self.range.from_ and key <= self.range.to_
 end
 
 function keymap:numkeys()

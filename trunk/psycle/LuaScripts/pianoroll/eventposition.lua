@@ -7,6 +7,8 @@ the terms of the GNU General Public License as published by the Free Software
 Foundation ; either version 2, or (at your option) any later version.
 ]]
 
+local player = require("psycle.player"):new()
+
 local eventposition = {}
 
 function eventposition:new(...)
@@ -45,6 +47,10 @@ end
 
 function eventposition:position()
   return self.position_
+end
+
+function eventposition:rasterposition()
+  return math.floor(self.position_*player:tpb())/player:tpb()
 end
 
 function eventposition:setnote(note)

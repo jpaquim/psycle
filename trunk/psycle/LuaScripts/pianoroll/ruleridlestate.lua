@@ -23,7 +23,7 @@ end
 function ruleridlestate:handlemousedown(view, mousepos, button)  
   if view:eventmousepos():seqpos() then
     view.cursor:setseqpos(view:eventmousepos():seqpos())
-               :setposition(view:eventmousepos():position())    
+               :setposition(view:eventmousepos():rasterposition())    
   end  
   return nil
 end

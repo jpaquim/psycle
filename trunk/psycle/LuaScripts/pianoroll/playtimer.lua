@@ -25,7 +25,8 @@ function playtimer:init(sequence)
   self.listeners_ = listener:new()  
   self.currplayline_, self.prevplayline_ = 0.0, 0.0
   self.currsequence_, self.prevsequence_ = 0, 0
-  self.activeevents_, self.activemap_ = {}, {} 
+  self.activeevents_, self.activemap_ = {}, {}
+  self.automationevents_ = {}
   self.outdatedevents_, self.newevents_ = {}, {}
   self.newnote_ = false
 end
@@ -88,11 +89,11 @@ function playtimer:updateactiveevents()
     self.activeevents_ = {}
     local event = pattern:firstnote()
     while event do       
-      if playposition >= event:position() and playposition < event:position() + event.length
+      if playposition >= event:position() and playposition < event:position() + event:length()
          and event:note() >= 0 and event:note() < 120 then   
         self.activeevents_[#self.activeevents_ + 1] = event
         event.pattern = pattern  
-      elseif event:hasstop() and playposition == event:position() + event.length then    
+      elseif event:hasstop() and playposition == event:position() + event:length() then    
         event.pattern = pattern      
       end      
       event = event.next
@@ -119,6 +120,18 @@ function playtimer:calceventchange()
   self.outdatedevents_ = self:changed(self.activemap_, prev) 
   self.newevents_ = self:changed(prev, self.activemap_)
   self.newnote_ = self:hasnewnote(self.newevents_)
+end
+
+function playtimer:addautomation(ev)
+  self.automationevents_[#self.automationevents_ + 1] = ev
+end
+
+function playtimer:clearautomation()
+  self.automationevents_ = {}
+end
+
+function playtimer:automationevents()
+  return self.automationevents_
 end
 
 function playtimer:eventmap(events)
@@ -173,7 +186,7 @@ function playtimer:playposition()
 end
 
 function playtimer:isnoteplayed(event)
-  return self:currposition() >= event:position() and self:currposition() < event:position() + event.length
+  return self:currposition() >= event:position() and self:currposition() < event:position() + event:length()
 end
 
 return playtimer

@@ -56,8 +56,8 @@ end
 
 function controlidlestate:updatehitarea(view)
   local hittest = view:hittest(view:mousepos()) 
-  if hittest and self.hitarea ~= hittest.hitarea then    
-    self.hitarea = hittest.hitarea     
+  if hittest and self.hitarea ~= hittest:hitarea() then    
+    self.hitarea = hittest:hitarea()   
     view:setcursor(self.cursor[self.hitarea])    
   end
   self.hittest = hittest
@@ -67,33 +67,27 @@ function controlidlestate:handlemousedown(view, button)
   local nextstate = nil 
   if self.hittest then
     if button == 1 then 
-      if self.hitarea == hitarea.RIGHT then    
-        nextstate = nil
-      elseif self.hitarea  == hitarea.LEFT then         
-        nextstate = nil
-      elseif self.hitarea == hitarea.FIRST or self.hitarea == hitarea.MIDDLESTOP or self.hitarea == hitarea.MIDDLE then
-        if not self.hittest.event:selected() then       
+      if self.hitarea == hitarea.FIRST or self.hitarea == hitarea.MIDDLESTOP or 
+         self.hitarea == hitarea.MIDDLE then
+        view:adjustcursor(true)
+        if not self.hittest:event():selected() then       
           view.drag.sequence_:deselectall()
-          self.hittest.event:select()
-        end
-        view:adjustcursor()
+          self.hittest:select()
+        end        
         nextstate = view.states.tweaking 
       elseif self.hitarea == hitarea.NONE then        
         self:insert(view)
         view:adjustcursor()
-        view.drag.sequence_:deselectall()
-        self.hittest.event:select()
+        self.hittest:select()
         nextstate = view.states.tweaking
-      elseif self.hitarea == hitarea.STOP then
-        self:erasestopnote(view)   
       end
     elseif button == 2 then
       if self.hitarea ~= hitarea.NONE then    
-        self.hittest.event:select()
-        self.hittest.pattern:eraseselection() 
+        self.hittest:select()
+        self.hittest:pattern():eraseselection() 
       end
       if self.hittest then
-        self.hittest.pattern:deselectall()
+        self.hittest:pattern():deselectall()
       end       
       view:fls()    
     end 
@@ -107,31 +101,15 @@ function controlidlestate:enter(view)
 end
 
 function controlidlestate:insert(view)
-  self.hittest.event = patternevent:new(self.hittest.note,
-                                        self.hittest.beat,
-                                        self.hittest.section:track(),
-                                        machinebar:currmachine(),
-                                        machinebar:curraux())                       
-  self.hittest.event:clearstop()
-  self.hittest.event:setnorm(1 - (view:mousepos():y() - self.hittest.sectionoffset) / view.grid:preferredheight())  
-  self.hittest.pattern:insert(self.hittest.event, self.hittest.beat)  
+  self.hittest:setevent(patternevent:new(self.hittest:note(),
+                                         self.hittest:position(),
+                                         self.hittest.section:track(),
+                                         machinebar:currmachine(),
+                                         machinebar:curraux()))                       
+  self.hittest:event():clearstop()
+  self.hittest:event():setnorm(1 - (view:mousepos():y() - self.hittest.sectionoffset) / view.grid:preferredheight())  
+  self.hittest:pattern():insert(self.hittest:event(), self.hittest:position())  
   view:fls()
-end
-
-function controlidlestate:erasestopnote(view) 
-  self.hittest.pattern:erasestopoffset(self.hittest.event)
-  view.laststopoffset_ = 0
-  view:fls()
-  self:updatehitarea(view)
-  return self
-end
-
-function controlidlestate:erasestopnote(view)
- local grid = patternview:hittestgrid(view:mousepos())
- local hittest = grid:hittest(view:mousepos())
- grid.pattern:erasestopoffset(hittest.index)
- patternview.laststopoffset_ = 0
- patternview:fls()
 end
 
 return controlidlestate

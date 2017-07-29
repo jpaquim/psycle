@@ -23,6 +23,7 @@ namespace psycle { namespace host {
 			
 		protected:
 			virtual void OnKeyDown(ui::KeyEvent& ev);
+			virtual void OnKeyUp(ui::KeyEvent& ev);
 			virtual void OnSize(const ui::Dimension&) { UpdateAlign(); }
 
 		private:

@@ -9,6 +9,7 @@ Foundation ; either version 2, or (at your option) any later version.
 
 local player = require("psycle.player"):new()
 local machines = require("psycle.machine")
+local rawpattern = require("psycle.pattern"):new()
 
 local patternevent = {}
 
@@ -30,8 +31,8 @@ function patternevent:init(note, pos, track, mach, inst)
   self:set("note_", note, 80)
   self:set("pos_", pos, 0.0)
   self:set("track_", track, 0)
-  self.length = 0.5
-  self.selected_ = false
+  self.length_ = 0.5
+  self.selected_ = nil
   self.prev, self.next = nil, nil
 end
 
@@ -48,7 +49,7 @@ function patternevent:clone()
   local clone = patternevent:new(self.note_, self.pos_)
   clone.line = self.line
   clone.stopoffset = self.stopoffset
-  clone.length = self.length
+  clone.length_ = self.length_
   clone.track_ = self.track_
   clone.parameter_ = self.parameter_
   clone.cmd_ = self.cmd_
@@ -112,7 +113,7 @@ end
 
 function patternevent:setstopoffset(offset)
   self.stopoffset = offset
-  self.length = offset
+  self.length_ = offset
   return self
 end
 
@@ -121,7 +122,7 @@ function patternevent:clearstop()
 end
 
 function patternevent:setlength(length)
-  self.length = length
+  self.length_ = length
 end  
 
 function patternevent:setcmd(cmd)
@@ -140,6 +141,10 @@ end
 
 function patternevent:note()
   return self.note_
+end
+
+function patternevent:length()
+  return self.length_
 end
 
 function patternevent:setposition(pos)
@@ -200,11 +205,11 @@ function patternevent:equal(event)
 end
 
 function patternevent:over(beat)
-  return self.pos_ <= beat and beat <= self.pos_ + self.length
+  return self.pos_ <= beat and beat <= self.pos_ + self.length_
 end
 
 function patternevent:overstop(beat)
-  return self.stopoffset ~= 0 and self.pos_ + self.length <= beat and beat <= self.pos_ + self.length + 1/player:tpb()
+  return self.stopoffset ~= 0 and self.pos_ + self.length_ <= beat and beat <= self.pos_ + self.length_ + 1/player:tpb()
 end
 
 function patternevent:hasstop()
@@ -237,20 +242,24 @@ function patternevent:dump()
       .. self.pos_ .. "," 
       .. self.note_ .. ","
       .. self.stopoffset .. ","
-      .. self.length)
+      .. self.length_)
 end
 
 function patternevent:selected()
+  return self.selected_ ~= nil
+end
+
+function patternevent:selectedpattern()
   return self.selected_
 end
 
-function patternevent:select()
-  self.selected_ = true
+function patternevent:select(pattern)
+  self.selected_ = pattern
   return self
 end
 
 function patternevent:deselect()
-  self.selected_ = false
+  self.selected_ = nil
   return self
 end
 
@@ -285,6 +294,14 @@ end
 
 function patternevent:transpose(offset)
   self.note_ = self.note_ + offset
+  return self
+end
+
+function patternevent:sync(pattern)
+  local target = pattern and pattern or self.selected_
+  if target and target.ps_ then
+    rawpattern:setevent(target.ps_, self.track_, self.line, self:raw())
+  end
   return self
 end
 

@@ -99,7 +99,6 @@ function trackviewgroup:formattoolicon(icon)
   return self
 end
 
-
 function trackviewgroup:addstatuslistener(listener)
   self.trackview:addstatuslistener(listener)
   self.trackheaderview:addstatuslistener(listener)
