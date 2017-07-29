@@ -17,9 +17,9 @@ local idlestate = {
     [hitarea.LEFT] = cursorstyle.E_RESIZE,
     [hitarea.FIRST] = cursorstyle.MOVE,
     [hitarea.MIDDLE] = cursorstyle.DEFAULT,
-    [hitarea.MIDDLESTOP] = cursorstyle.MOVE,
+    [hitarea.MIDDLESTOP] = cursorstyle.DEFAULT,
     [hitarea.RIGHT]  = cursorstyle.E_RESIZE,
-    [hitarea.STOP]  = cursorstyle.CROSSHAIR    
+    [hitarea.STOP]  = cursorstyle.DEFAULT    
   },
   status = {
     [hitarea.NONE] = "Press left mouse button to insert a note and set the cursor.",
@@ -61,7 +61,7 @@ end
 
 function idlestate:updatecursor(view)
   self.hittest = view:hittest()
-  self.hitarea = self.hittest and self.hittest.hitarea or hitarea.NONE
+  self.hitarea = self.hittest and self.hittest:hitarea() or hitarea.NONE
   view:setcursor(self.cursor[self.hitarea])
 end
 
@@ -71,39 +71,39 @@ function idlestate:handlemousedown(view, button)
     if button == 1 then
       if self.hitarea == hitarea.RIGHT then 
         view.sequence:deselectall()
-        self.hittest.event:select()
+        self.hittest:select()
         nextstate = view.states.resizingright  
       elseif self.hitarea  == hitarea.LEFT then 
         view.sequence:deselectall()
-        self.hittest.event:select()
+        self.hittest:select()
         nextstate = view.states.resizingleft
       elseif self.hitarea == hitarea.FIRST or self.hitarea == hitarea.MIDDLESTOP then        
-        view.cursor:settrack(self.hittest.event:track())
-        if not self.hittest.event:selected() then
-          self.hittest.pattern:deselectall()
+        view.cursor:settrack(self.hittest:event():track())
+        if not self.hittest:event():selected() then
+          self.hittest:pattern():deselectall()
         end
-        self.hittest.event:select()
-        view:startdrag(self.hittest.pattern:selection())
+        self.hittest:select()
+        view:startdrag(self.hittest:pattern():selection())
         self.player_:playnote(view:eventmousepos():note(), 6)
         view.keyboard:playnote(view:eventmousepos():note())        
         nextstate = view.states.dragging     
-      elseif self.hitarea == hitarea.NONE or self.hitarea == hitarea.MIDDLE then
-        view.sequence:deselectall()        
-        self:insert(view)
-        view:adjustcursor()
+      elseif self.hitarea == hitarea.NONE or self.hitarea == hitarea.MIDDLE or
+        (self.hitarea == hitarea.STOP and button == 1) then
+        view:adjustcursor()        
+        self:insert(view)        
         view:startdrag(view.drag:pattern(view):selection())
         nextstate = view.states.dragging   
-      elseif self.hitarea == hitarea.STOP then
-        self.hittest.pattern:erasestopoffset(self.hittest.event)
-        view:setlaststop(0)           
       end
     elseif button == 2 then
-      if self.hitarea ~= hitarea.NONE then
-        if not self.hittest.event:selected() then
-          self.hittest.pattern:deselectall()
+      if self.hitarea == hitarea.STOP then        
+        self.hittest:pattern():erasestopoffset(self.hittest:event())
+        view:setlaststop(0)      
+      elseif self.hitarea ~= hitarea.NONE then
+        if not self.hittest:event():selected() then
+          self.hittest:pattern():deselectall()
         end        
-        self.hittest.event:select()
-        self.hittest.pattern:eraseselection() 
+        self.hittest:select()
+        self.hittest:pattern():eraseselection() 
       end
       view.sequence:deselectall()
     end
@@ -122,8 +122,9 @@ function idlestate:insert(view)
   if view.drag:pattern(view) then
     local events = view.drag:pattern(view):copy(view:chord():pattern(),
                                                 view:eventmousepos():note() - view:chord():offset(),
-                                                view:eventmousepos():position(),
-                                                view.cursor:track())
+                                                view:eventmousepos():rasterposition(),
+                                                view.cursor:track(),
+                                                view.laststopoffset_)
     for i=1, #events do
       events[i]:setmach(machinebar:currmachine())
                :setinst(machinebar:curraux())               

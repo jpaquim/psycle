@@ -24,7 +24,7 @@ function gridpositions:init(sequence, zoom)
   self.dimensions = {}
   self.displayrange_ = { from = 1, to = 1}
   self.screenranges_ = {}
-  self.seqrange = screenrange:new()
+  self.seqrange = screenrange:new(0, 0, 0)
   self:update()
   self.lastdx = 0
 end
@@ -110,15 +110,17 @@ function gridpositions:update()
   self.lastevent = nil
 end
 
-function gridpositions:calcscreenrange(index, dx, width)   
-  local screenrange = screenrange:new()  
-  local pattern = self.sequence:at(index)  
+function gridpositions:calcscreenrange(seqpos, dx, width)   
+  local result = nil
+  local pattern = self.sequence:at(seqpos)  
   if pattern then
-    local gridpos = self:pos(index)
-    screenrange.left = math.min(pattern:numbeats(), (-gridpos - dx) / self.zoom_:width())
-    screenrange.right = math.min(pattern:numbeats(), (-gridpos - dx + width) / self.zoom_:width())
+    local gridpos = self:pos(seqpos)
+    result = screenrange:new(
+      seqpos, 
+      math.min(pattern:numbeats(), (-gridpos - dx) / self.zoom_:width()),
+      math.min(pattern:numbeats(), (-gridpos - dx + width) / self.zoom_:width()))
   end
-  return screenrange
+  return result
 end
 
 function gridpositions:updatedisplayrange(dx, width, keeplastevent)
@@ -136,11 +138,12 @@ function gridpositions:updatedisplayrange(dx, width, keeplastevent)
     for i = self.displayrange_.from, self.displayrange_.to do
       self.screenranges_[#self.screenranges_ + 1] = self:calcscreenrange(i, dx, width)
     end
-  else
-    self.seqrange = screenrange:new()
-    local pattern = self.sequence:at(seqpos)  
-    self.seqrange.left = math.min(pattern:numbeats(), (-dx) / self.zoom_:width())
-    self.seqrange.right = math.min(pattern:numbeats(), (-dx + width) / self.zoom_:width())
+  else    
+    local pattern = self.sequence:at(seqpos)
+    self.seqrange = screenrange:new(
+      seqpos,
+      math.min(pattern:numbeats(), (-dx) / self.zoom_:width()),
+      math.min(pattern:numbeats(), (-dx + width) / self.zoom_:width()))
   end
   if not keeplastevent then
     self.lastleftevent = nil
@@ -165,7 +168,7 @@ end
 function gridpositions:firstnote(screenrange, pattern, seqpos)
   return self.lastleftevent 
          and self.lasteventseqpos == seqpos 
-         and screenrange.left >= 0
+         and screenrange:left() >= 0
          and self.lastleftevent
          or pattern:firstnote()   
 end

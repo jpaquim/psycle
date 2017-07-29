@@ -10,7 +10,6 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
-local midihelper = require("psycle.midi")
 local image = require("psycle.ui.image")
 local graphics = require("psycle.ui.graphics")
 local cfg = require("psycle.config"):new("PatternVisual")
@@ -53,10 +52,12 @@ function trackheader:init(view)
 end
 
 function trackheader:loadicons()
-  self.noteimg = image:new():load(icondir .. "note.png")
-  self.noteimg:settransparent(0xFFFFFFFF)
-  self.drumimg = image:new():load(icondir .. "drums.png")
-  self.drumimg:settransparent(0xFFFFFFFF)   
+  self.noteimg = image:new()
+                      :load(icondir .. "note.png")
+                      :settransparent(0xFFFFFFFF)
+  self.drumimg = image:new()
+                      :load(icondir .. "drums.png")
+                      :settransparent(0xFFFFFFFF)   
 end
 
 trackheader.fields = {
@@ -122,11 +123,10 @@ function trackheader:drawactivefields(g, track)
     player:istrackmuted(track),
     player:istrackarmed(track)
   }      
-  if self.hover.track_ == track and self.hover.icon > 1 then   
-    activeicons[self.hover.icon] = true
-  end 
-  for i=1, #activeicons do
-    if activeicons[i] == true then              
+  activeicons[self.hover.icon] = 
+      self.hover.track_ == track and self.hover.icon > 1
+  for i, icon in pairs(activeicons) do
+    if icon then              
       self:drawfieldactive(g, i)          
     end
   end
@@ -189,6 +189,15 @@ function trackheader:hittesttrack(point, scrolloffset)
   local result = 0
   result = math.floor(point:x() / (self.fieldwidth_)) + scrolloffset
   return result
+end
+
+function trackheader:trackwidth()
+  return self.fieldwidth_
+end
+
+function trackheader:trackposition(track, scrolloffset)
+  return rect:new(point:new(self:headerleft(track, scrolloffset), 0),
+         dimension:new(self.fieldwidth_, self.view:position():height()))
 end
 
 return trackheader

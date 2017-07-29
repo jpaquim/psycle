@@ -26,10 +26,12 @@ end
 function resizerightstate:update(view)  
   for i=1, #self.selection.events do
     local event = self.selection.events[i]
-    if not self.selection.next[i] or view:eventmousepos():position() < self.selection.next[i]:position() then
-      local length = view:eventmousepos():position() - event:position()
-      self.selection.pattern:changelength(event, length)
-      view.laststopoffset_ = length
+    if not self.selection.next[i] or view:eventmousepos():rasterposition() < self.selection.next[i]:position() then
+      local length = view:eventmousepos():rasterposition() - event:position()
+      if length > 0 then
+        self.selection.pattern:changelength(event, length)
+        view:setlaststop(length)
+      end
     end
   end
   view:fls()

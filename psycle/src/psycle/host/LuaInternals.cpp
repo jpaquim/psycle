@@ -609,6 +609,7 @@ int LuaCmdDefBind::open(lua_State* L) {
 	};
 	size_t size = sizeof(e)/sizeof(e[0]);    
 	LuaHelper::buildenum(L, e, size, CS_KEY_START);
+	LuaHelper::setfield(L, "KEYSTOP", cdefKeyStop);
   }
   {	 
 	  static const char* const e[] = {

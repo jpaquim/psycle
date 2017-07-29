@@ -18,7 +18,7 @@ end
 function deleterowcommand:execute()
   if self.cursor_:position() > 0 then  
     local pattern = self.sequence_:at(self.cursor_:seqpos()) 
-    local pos = self.cursor_:position() - player:bpt()    
+    local pos = self.cursor_:position() - player:bpt()   
     pattern:deleterow(pos, self.cursor_:track())
     self.sequence_:notifypatternchange()
     self.cursor_:setposition(math.max(0, pos))

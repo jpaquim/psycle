@@ -14,6 +14,7 @@ local clearrowcommand = require("clearrowcommand")
 local deleterowcommand = require("deleterowcommand")
 local insertrowcommand = require("insertrowcommand")
 local insertnotecommand = require("insertnotecommand")
+local insertstopcommand = require("insertstopcommand")
 local sequenceupdatecommand = require("sequenceupdatecommand")
 local editquantizecommand = require("editquantizecommand")
 local selectioncommands = require("selectioncommands")
@@ -99,7 +100,7 @@ function inputhandler:createkeydowncommands(sequence, cursor, scroller)
     :addkeydowncommand(cmddef.COLUMNPREV,
                        cursorcommands.build(cursorcommands.TRACKPREV, cursor))
     :addkeydowncommand(cmddef.COLUMNNEXT,
-                       cursorcommands.build(cursorcommands.TRACKNEXT, cursor))
+                       cursorcommands.build(cursorcommands.TRACKNEXT, cursor))                      
 end
 
 function inputhandler:createnotecommands(sequence, cursor, scroller)
@@ -115,6 +116,8 @@ function inputhandler:createnotecommands(sequence, cursor, scroller)
   for note=1, #notes do
     self:addkeydowncommand(cmddef[notes[note]], insertnotecommand:new(self, sequence, cursor, (note-1), scroller))
   end
+  self:addkeydowncommand(cmddef.KEYSTOP,
+                         insertstopcommand:new(self, sequence, cursor, scroller))     
 end
 
 function inputhandler:addkeydowncommand(cmd, command)

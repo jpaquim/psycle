@@ -30,11 +30,13 @@ function clearrowcommand:execute()
     self.cursor_:notify()
   else
     local pattern = self.sequence_:at(self.cursor_:seqpos()) 
-    local event = self:search(pattern)
+    local event, stop = self:search(pattern)
     if event and event:position() == self.cursor_:position() then
-      pattern:erase(event)
+      pattern:erase(event)    
+    elseif stop then
+      pattern:erasestopoffset(stop)
     end
-    self.cursor_:setposition(math.max(0, self.cursor_:position() +  player:bpt()))
+    self.cursor_:incrow()
   end
 end
 
@@ -43,13 +45,19 @@ function clearrowcommand:search(pattern)
   if e and e:track() ~= self.cursor_:track() then
     e = pattern:nextevent(self.cursor_:track(), e)
   end
-  while e and e:position() < self.cursor_:position() do   
+  local stop = nil
+  while e and e:position() < self.cursor_:position() do
+    if e and e:hasstop() and e:position() + e:length() == self.cursor_:position() then
+      stop = e
+      e = nil
+      break
+    end
     e = pattern:nextevent(self.cursor_:track(), e)
-  end 
+  end  
   if e then
-    e = e:position() == self.cursor_:position() and e or nil
-  end
-  return e
+    e = e:position() == self.cursor_:position() and e or nil   
+  end  
+  return e, stop
 end
 
 return clearrowcommand

@@ -1110,11 +1110,11 @@ void Window::set_position(const ui::Rect& pos) {
 	 new_pos.set_height(auto_dimension.height());
        }
     }
-    bool size_changed = imp_->dev_position().dimension() != new_pos.dimension();
+   // bool size_changed = imp_->dev_position().dimension() != new_pos.dimension();
     imp_->dev_set_position(new_pos);
-    if (size_changed) {			
-      OnSize(new_pos.dimension());
-    }
+    //if (size_changed) {			
+     // OnSize(new_pos.dimension());
+    //}
     FLSEX();    
     align_dimension_changed();    		
     if (!prevent_auto_dimension_) {

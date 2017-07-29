@@ -35,7 +35,7 @@ function controlselecteventsstate:handlemousemove(view)
 end
 
 function controlselecteventsstate:handlemouseup(view) 
-  view:adjustcursor()
+  view:adjustcursor(true)
   view.selectionrect = nil
   view.editcommands.editmode:execute()
   view.patternview:fls()

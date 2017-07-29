@@ -191,12 +191,12 @@ end
 
 function scroller:centertokey(key)
   local visiblekeys = self.view_:position():height() / self.view_:zoom():height()
-  local center = self.view_.keyboard.keymap.range.to - key - math.floor(visiblekeys/2) 
+  local center = self.view_.keyboard.keymap.range.to_ - key - math.floor(visiblekeys/2) 
   self:setdy(-math.max(0, math.min(self.view_:zoom():height() * self.vmax_, self.view_:zoom():height() * center)))
 end
 
 function scroller:midkey()
-  return self.view_.keyboard.keymap.range.to - (0.5*self.view_:position():height() - self:dy())/self.view_:zoom():height() 
+  return self.view_.keyboard.keymap.range.to_ - (0.5*self.view_:position():height() - self:dy())/self.view_:zoom():height() 
 end
 
 function scroller:restoremidkey()

@@ -52,17 +52,17 @@ function rulergrid:hittestrect(rect)
   return result
 end
 
-function rulergrid:drawbarendings(g, screenrange, seqpos, height) 
-  for i=0, screenrange.right, self.beatsperbar do     
+function rulergrid:drawbarendings(g, screenrange) 
+  for i=0, screenrange:right(), self.beatsperbar do     
     local x = i*self.view:zoom():width() 
     g:setcolor(self.view.colors.line4beatcolor)
     g:drawline(point:new(x, 0), point:new(x, 20))    
     g:setcolor(self.view.colors.fontcolor)
-    local startbeat = self.view.sequence:startbeat(seqpos)   
+    local startbeat = self.view.sequence:startbeat(screenrange.seqpos)   
     g:drawstring((startbeat + i), point:new(x + 3, 0))
     if i == 0 then
-      local seqhex = string.format("%02X", (seqpos - 1).."")
-      local pathex = string.format("%02X", self.view.sequence:patternindex(seqpos).."")
+      local seqhex = string.format("%02X", (screenrange.seqpos - 1).."")
+      local pathex = string.format("%02X", self.view.sequence:patternindex(screenrange.seqpos).."")
       g:drawstring(i .. " [" .. seqhex .. ": " .. pathex .. "]", point:new(x + 3, 10)) 
     else
       g:drawstring((i), point:new(x + 3, 10))
@@ -71,7 +71,7 @@ function rulergrid:drawbarendings(g, screenrange, seqpos, height)
 end
 
 function rulergrid:bardimension()
-   return dimension:new(math.floor(self.beatsperbar * self.view:zoom():width()), 30)
+   return dimension:new(math.floor(self.beatsperbar * self.view:zoom():width()), self:preferredheight())
 end
 
 function rulergrid:rendercursorbar(g, pos)

@@ -652,6 +652,9 @@ bool LuaWindowBase<T>::SendWheelEvent(lua_State* L,
 template <class T>
 void LuaWindowBase<T>::OnSize(const ui::Dimension& dimension) {
   T::OnSize(dimension);
+  if (dimension.width() == 1235) {
+    int d(0);
+  }
   try {
     LuaImport in(L, this, locker(L));
     if (in.open("onsize")) {

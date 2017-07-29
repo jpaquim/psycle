@@ -43,10 +43,11 @@ function controlgroup:new(parent, ...)
   return m
 end
 
-function controlgroup:init(cursor, zoom, scroller, gridpositions, sequence) 
+function controlgroup:init(cursor, zoom, scroller, gridpositions, sequence, playtimer) 
   self.cursor = cursor
   self.zoom_ = zoom
   self.sequence = sequence
+  self.playtimer = playtimer
   self.controlboard = controlboard:new(self, cursor, zoom)
                                   :setalign(alignstyle.LEFT)
                                   :setmargin(boxspace:new(0, 3, 0, 1))
@@ -102,7 +103,13 @@ function controlgroup:inittweak()
     local twk = patternevent:new(124, pos, track, macIdx)
                             :setval16(value)
     pattern:preventnotify():insert(twk, pos):enablenotify()
-    --that.controlview:fls()
+    that.playtimer:addautomation(twk)
+    if not player:playing() then
+      local oldpaintmode = that.controlview.paintmode
+      that.controlview.paintmode = that.controlview.DRAWAUTOMATION
+      that.controlview:fls()
+      that.controlview.paintmode = oldpaintmode
+    end
   end
   psycle.addtweaklistener(self.tweak)
 end

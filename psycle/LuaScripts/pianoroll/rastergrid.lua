@@ -24,68 +24,69 @@ function rastergrid:setview(view)
 end
 
 function rastergrid:createbackground()  
-  self.barbg = image:new():reset(self:bardimension())
-  local g = graphics:new(self.barbg)
+  self.barimage_ = image:new():reset(self:bardimension())
+  local g = graphics:new(self.barimage_)
   self:drawbar(g)
   g:dispose()
 end
 
 function rastergrid:drawbar(g)
-  if self.barbg then 
-    local bardimension = self:bardimension()  
+  if self.barimage_ then
     g:setcolor(self.view.colors.rowcolor)
-    g:fillrect(rect:new(point:new(), bardimension))
-    self:drawkeylines(g, bardimension)     
-    self:drawlines(g, bardimension)   
-  end
-end
-
-function rastergrid:drawlines(g, bardimension)
-  g:setcolor(self.view.colors.rastercolor) 
-  local ticks = self.player:tpb() 
-  for i=0, ticks * self.bgbeats do    
-    local x = i * self.view:zoom():width() / ticks  
-    g:drawline(point:new(x, 0), point:new(x, bardimension:height()))      
+    g:fillrect(self:bardimension())
+    self:drawkeylines(g)     
+    self:drawlines(g)   
   end
 end
 
 function rastergrid:drawkeylines(g) 
 end
 
-function rastergrid:drawbars(g, screenrange, pattern, seqpos)
+function rastergrid:drawlines(g)
+  g:setcolor(self.view.colors.rastercolor) 
+  local ticks = self.player:tpb()
+  local p1, p2 = point:new(), point:new(0, self:preferredheight())
+  for i=0, ticks * self.bgbeats do    
+    local x = i * self.view:zoom():width() / ticks  
+    g:drawline(p1:setx(x), p2:setx(x))     
+  end
+end
+
+function rastergrid:drawbars(g, screenrange, pattern)
   self:drawimages(g, screenrange, pattern)
-  self:drawbeatlines(g, screenrange, self:bardimension():height())
-  self:drawbarendings(g, screenrange, seqpos)
+  self:drawbeatlines(g, screenrange)
+  self:drawbarendings(g, screenrange)
   self:drawpatternend(g, self.view:zoom():beatwidth(pattern:numbeats())) 
 end
 
 function rastergrid:drawimages(g, screenrange, pattern)
-  if self.barbg then
+  if self.barimage_ then
     local bgwidth = math.floor(self.bgbeats * self.view:zoom():width())
     local numbgs = pattern:numbeats() / self.bgbeats 
-    local from = math.max(0, math.floor(screenrange.left / self.bgbeats))
-    local to = math.min(numbgs, math.ceil(screenrange.right / self.bgbeats)) 
+    local from = math.max(0, math.floor(screenrange:left() / self.bgbeats))
+    local to = math.min(numbgs, math.ceil(screenrange:right() / self.bgbeats)) 
     for i=from, to do
-      g:drawimage(self.barbg, point:new(i*bgwidth, 0 ))    
+      g:drawimage(self.barimage_, point:new(i*bgwidth, 0))    
     end
   end
 end
 
-function rastergrid:drawbeatlines(g, screenrange, height)
+function rastergrid:drawbeatlines(g, screenrange)
   g:setcolor(self.view.colors.linebeatcolor)
-  for i=0, screenrange.right do
-    local x = i * self.view:zoom():width()    
-    g:drawline(point:new(x, 0), point:new(x, height))      
+  local p1, p2 = point:new(), point:new(0, self:preferredheight())
+  for i=0, screenrange:right() do
+    local x = i * self.view:zoom():width()
+    g:drawline(p1:setx(x), p2:setx(x))      
   end
 end
 
 function rastergrid:drawbarendings(g, screenrange)
   local h = self:bardimension():height()
   g:setcolor(self.view.colors.linebarcolor)
-  local start = 0 --math.floor(screenrange.left / self.beatsperbar) * self.beatsperbar
-  for i=start, screenrange.right, self.beatsperbar do 
-    local x = i*self.view:zoom():width() 
-    g:drawline(point:new(x, 0), point:new(x, h))
+  local p1, p2 = point:new(), point:new(0, self:preferredheight())
+  for i=0, screenrange:right(), self.beatsperbar do 
+    local x = i * self.view:zoom():width()
+    g:drawline(p1:setx(x), p2:setx(x))
   end
 end
 
@@ -95,7 +96,7 @@ function rastergrid:drawpatternend(g, patternwidth, height)
 end
 
 function rastergrid:bardimension()
-   return dimension:new(math.floor(self.beatsperbar * self.view:zoom():width()), 30)
+   return dimension:new(math.floor(self.beatsperbar * self.view:zoom():width()), self:preferredheight())
 end
 
 function rastergrid:drawcursorbar(g, seqpos) 
@@ -126,6 +127,15 @@ function rastergrid:seteventcolor(g, event, seltrack, isplayed)
    color = self.view.colors.eventplaycolor
   end
   g:setcolor(color)
+end
+
+function rastergrid:clearplaybar(g, playposition)
+end
+
+function rastergrid:clearbackground(g, screenrange, seqpos)
+  if self.view.paintmode == self.view.DRAWALL then
+    self:drawbars(g, screenrange, self.view.sequence:at(seqpos))  
+  end
 end
 
 function rastergrid:drawplaybar(g, playposition) 

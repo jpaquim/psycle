@@ -58,7 +58,7 @@ trackedit.colpositions = {
   {x = 81, width = 8, label = "Parameter"}
 }
 
-function trackedit:draw(g, track, cursor, trackmode)
+function trackedit:draw(g, track, cursor)
   local offset = point:new(self:headerleft(track, cursor.scrolloffset_), 0)
   g:translate(offset)
   g:setcolor(lighten(self.view.colors.BG, 5))      
@@ -137,6 +137,11 @@ function trackedit:hittestcol(point)
     end
   end
   return result
+end
+
+function trackedit:trackposition(track, scrolloffset)
+  return rect:new(point:new(self:headerleft(track, scrolloffset), 0),
+         dimension:new(self.trackwidth_, self.view:position():height()))
 end
 
 return trackedit

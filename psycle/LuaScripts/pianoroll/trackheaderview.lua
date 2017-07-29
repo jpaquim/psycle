@@ -10,6 +10,7 @@ local point = require("psycle.ui.point")
 local dimension = require("psycle.ui.dimension")
 local rect = require("psycle.ui.rect")
 local boxspace = require("psycle.ui.boxspace")
+local region = require("psycle.ui.region")
 local alignstyle = require("psycle.ui.alignstyle")
 local window = require("psycle.ui.window")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
@@ -64,24 +65,32 @@ end
 function trackheaderview:init(cursor) 
   self:setautosize(true, false)  
   self.cursor = cursor
-  self.trackheader = trackheader:new(self)  
-  self.cursor = cursor
-  self:viewdoublebuffered()
   self.player_ = player
-  self.statuslisteners_ = listener:new()  
-  self.activeevents_ = {}  
+  self.trackheader = trackheader:new(self)  
+  self.statuslisteners_ = listener:new()
+  self:viewdoublebuffered() 
 end
 
 function trackheaderview:transparent()
   return false
 end
 
-function trackheaderview:draw(g)
+function trackheaderview:draw(g, region)
   self:clearbg(g)
-  local from, to = self.cursor.scrolloffset_, math.min(self.cursor.scrolloffset_ + self:visibletracks(), rawpattern:numtracks()-1)
+  local from, to = self:trackrange(region)
   for track = from, to do       
     self.trackheader:draw(g, track, self.cursor)      
   end  
+end
+
+function trackheaderview:trackrange(region)
+  return
+    math.min(rawpattern:numtracks() - 1,
+             math.floor(region:bounds():left() / self.trackheader:trackwidth())
+             + self.cursor:scrolloffset()),
+    math.min(rawpattern:numtracks() - 1,
+             math.floor((region:bounds():right() - 1) / self.trackheader:trackwidth())
+             + self.cursor:scrolloffset())  
 end
 
 function trackheaderview:clearbg(g)   
@@ -104,29 +113,32 @@ function trackheaderview:oncalcautodimension()
 end
 
 function trackheaderview:onmousedown(ev)  
-  local track = self.trackheader:hittesttrack(ev:windowpos(), self.cursor.scrolloffset_)
+  local track = self.trackheader:hittesttrack(ev:windowpos(), self.cursor:scrolloffset())
   local trackchanged = self.cursor:track() ~= track
   self.cursor:settrack(track)
   local icon = self:hittesticon(ev:windowpos())
   self:toggleicon(icon, track) 
-  if trackchanged then
-    self.cursor:settrack(track)
-    self.patternview:fls()
+  if trackchanged then    
+    self.cursor:settrack(track)    
   end
   self:fls()
 end
 
 function trackheaderview:onmousemove(ev)
-  local track = self.trackheader:hittesttrack(ev:windowpos(), self.cursor.scrolloffset_)
+  local track = self.trackheader:hittesttrack(ev:windowpos(), self.cursor:scrolloffset())  
   local icon = self:hittesticon(ev:windowpos())
   local oldicon = self.trackheader.hover.icon
+  local oldhovertrack = self.trackheader.hover.track_
   self.trackheader.hover.track_ = track
   self.trackheader.hover.icon = icon
-  if oldicon ~= icon then
+  if oldicon ~= icon or oldhovertrack ~= track then
     if icon > 0 and icon < 5 then
       self:setstatus(status[icon])
     end
-    self:fls()
+    if oldhovertrack and oldhovertrack ~= track then
+      self:redrawtrack(oldhovertrack)
+    end    
+    self:redrawtrack(track)
   end
 end
 
@@ -138,10 +150,10 @@ function trackheaderview:onmouseout(ev)
 end
 
 function trackheaderview:hittesticon(point)
-  local track = self.trackheader:hittesttrack(point, self.cursor.scrolloffset_)
+  local track = self.trackheader:hittesttrack(point, self.cursor:scrolloffset())
   local result = -1  
   for i, field in pairs(self.trackheader.fields) do     
-    local fieldrect = rect:new(point:new(self.trackheader:headerleft(track, self.cursor.scrolloffset_) + field.left + 3, 3),
+    local fieldrect = rect:new(point:new(self.trackheader:headerleft(track, self.cursor:scrolloffset()) + field.left + 3, 3),
       dimension:new(field.width, 15))
     if fieldrect:intersect(point) then
       result = i
@@ -154,9 +166,7 @@ end
 function trackheaderview:toggleicon(icon, track)
   if icon ~= -1 then
     if icon == 1 then
-      self.cursor.trackmodes_[track + 1] = self.cursor.trackmodes_[track + 1] == trackheader.NOTES
-                                          and trackheader.DRUMS or trackheader.NOTES       
-      self.patternview:fls()
+      self.cursor:toggletrackmode(track)
     elseif icon == 2 then
       player:toggletracksoloed(track)
     elseif icon == 3 then
@@ -185,7 +195,19 @@ function trackheaderview:oncalcautodimension()
 end
 
 function trackheaderview:ontrackchanged()
+ if self.cursor:track() ~= self.cursor:prevtrack() then   
+    self:redrawtrack(self.cursor:prevtrack())
+  end
+  self:redrawtrack(self.cursor:track())
+end
+
+function trackheaderview:ontrackscroll()
   self:fls()
+end
+
+function trackheaderview:redrawtrack(track)
+  self:fls(region:new():setrect(
+    self.trackheader:trackposition(track, self.cursor:scrolloffset())))
 end
 
 function trackheaderview:setproperties(properties)
@@ -196,8 +218,8 @@ function trackheaderview:setproperties(properties)
 end
 
 function trackheaderview:onsize()
-  if self.cursor.scrolloffset_ + self:visibletracks() > rawpattern:numtracks() then
-    self.cursor.scrolloffset_ = rawpattern:numtracks() - self:visibletracks()
+  if self.cursor:scrolloffset() + self:visibletracks() > rawpattern:numtracks() then
+    self.cursor:setscrolloffset(rawpattern:numtracks() - self:visibletracks())
   end
 end
 

@@ -697,10 +697,18 @@ END_MESSAGE_MAP()
 
 BOOL FrameImp::PreTranslateMessage(MSG* pMsg) {	
   if (pMsg->message==WM_KEYDOWN) {
-    KeyEvent ev(pMsg->wParam, Win32KeyFlags(0));    
+    KeyEvent ev(pMsg->wParam, Win32KeyFlags(pMsg->lParam));    
     bool result = WorkEvent(ev, &Window::OnKeyDown, window(), pMsg);
 	if (window()) {
 	  window()->KeyDown(ev);
+	}
+	return result;
+  } else
+  if (pMsg->message==WM_KEYUP) {
+    KeyEvent ev(pMsg->wParam, Win32KeyFlags(pMsg->lParam));    
+    bool result = WorkEvent(ev, &Window::OnKeyUp, window(), pMsg);
+	if (window()) {
+	  window()->KeyUp(ev);
 	}
 	return result;
   } else

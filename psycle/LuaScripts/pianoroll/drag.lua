@@ -56,8 +56,9 @@ function drag:abort(view)
 end
 
 function drag:copy(view)
+  local pattern = self.sequence_:at(view:eventmousepos():seqpos())
   for i=1, #self.source_ do 
-    self.source_[i] = self.source_[i]:deselect():clone():select()
+    self.source_[i] = self.source_[i]:deselect():clone():select(pattern)    
   end
   self:insert(view)
   return self
@@ -77,7 +78,7 @@ function drag:insert(view)
   local seqpos = view:eventmousepos():seqpos()
   if seqpos then
     local note = self:dragnote(view:eventmousepos():note())
-    local position = self:dragposition(view:eventmousepos():position())
+    local position = self:dragposition(view:eventmousepos():rasterposition())
     if view:eventmousepos():seqpos() == 0 then
       seqpos = 1
       position = self:dragposition(0.0)
@@ -89,7 +90,7 @@ function drag:insert(view)
         event:setnote(event:note() - self.dragstart_:note() + note)
         rawpattern.addundo(targetpattern.ps_, event:track(), event.line,
             1, 1, event:track(), event.line, 0, seqpos - 1);      
-        targetpattern:insert(event, event:position() - self.dragstart_:position() + position)
+        targetpattern:insert(event, event:position() - self.dragstart_:rasterposition() + position)
       end
     end
   end
@@ -132,8 +133,8 @@ end
 
 function drag:calcminmaxpositions()
   local minposition, maxposition = self:minmaxpositions()
-  self.minposition_ = self.dragstart_:position() - minposition 
-  self.maxposition_ = self.sequence_:numbeats() + self.dragstart_:position() - maxposition 
+  self.minposition_ = self.dragstart_:rasterposition() - minposition 
+  self.maxposition_ = self.sequence_:numbeats() + self.dragstart_:rasterposition() - maxposition 
 end
 
 function drag:dragnote(note)

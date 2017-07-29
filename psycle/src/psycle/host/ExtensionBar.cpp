@@ -176,6 +176,16 @@ namespace host {
 		view->KeyDown(ev.keycode(), 0, nFlags);
 	}						
 
+	void ExtensionWindow::OnKeyUp(ui::KeyEvent& ev)
+	{
+		CMainFrame* main = (CMainFrame*) AfxGetMainWnd();
+		CChildView* view = &main->m_wndView;
+		UINT nFlags(0);		
+		if (ev.extendedkey()) {
+	      nFlags |= 0x100;
+	    }
+		view->KeyUp(ev.keycode(), 0, nFlags);
+	}
 
 	extern CPsycleApp theApp;
 

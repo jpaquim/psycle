@@ -5,6 +5,7 @@ local boxspace = require("psycle.ui.boxspace")
 local window = require("psycle.ui.window")
 local ornamentfactory = require("psycle.ui.ornamentfactory"):new()
 local switch = require("switch")
+local keymap = require("keymap")
 
 local controlboard = window:new()
 
@@ -44,18 +45,6 @@ local cmdpos = {
   [255] = 45 -- CMD
 }
 
-local keymap = {
-  range = { from = 121, to = 255},
-  has = function(self, key)
-    return key >= self.range.from and key <= self.range.to
-  end,
-  numkeys = function(self)
-    return self.numkeys_
-  end
-}
-
-keymap.numkeys_ = keymap.range.to - keymap.range.from
-
 function controlboard:new(parent, ...)
   local m = window:new()                
   setmetatable(m, self)
@@ -72,7 +61,7 @@ function controlboard:init(cursor, zoom)
   self.track_ = cursor:track()
   self.insertnote = self.INSTWK
   cursor:addlistener(self)
-  self.keymap = keymap
+  self.keymap = keymap:new(121, 255)
   self.zoom_ = zoom  
   self:viewdoublebuffered()
   self:addornament(ornamentfactory:createfill(controlboard.colors.KEY))
@@ -265,7 +254,7 @@ function controlboard:dy()
   return self.view:dy()
 end
 
-function controlboard:onviewmousemove(y)
+function controlboard:onviewmousemove(key)
 end
 
 return controlboard

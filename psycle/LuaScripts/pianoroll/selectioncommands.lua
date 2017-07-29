@@ -30,6 +30,7 @@ function transposecommand:execute()
   local selection = self.sequence_:selection()
   for i=1, #selection do
     selection[i]:setnote(selection[i]:note() + self.offset_)
+                :sync()
   end
 end
 
@@ -202,15 +203,12 @@ function changetrackcommand:mintrack(selection)
 end
 
 function changetrackcommand:execute()
-  local target = self.sequence_:at(self.cursor_:seqpos())
-  local events = target:selection()
-  local mintrack = self:mintrack(events)
-  for i=1, #events do
-    local event = events[i]   
-    target:erase(event)   
-  end
-  for i=1, #events do
-    local event = events[i]
+  local selection = self.sequence_:selection()
+  local mintrack = self:mintrack(selection)
+  for i=1, #selection do
+    local event = selection[i]
+    local target = event:selectedpattern()
+    target:erase(event)
     event:settrack(math.max(0, math.min(event:track() - mintrack + self.cursor_:track(), 64)))    
     target:insert(event, event:position())
   end
@@ -230,13 +228,11 @@ function changegeneratorcommand:init(sequence)
   self.sequence_ = sequence
 end
 
-function changegeneratorcommand:execute()
-  local events = self.sequence_:selection()
-  for i=1, #events do
-    local event = events[i]
-    event:setmach(machinebar:currmachine())
-    self.sequence_:at(event.seqpos)
-                  :syncevent(event)        
+function changegeneratorcommand:execute() 
+  local selection = self.sequence_:selection()
+  for i=1, #selection do
+    selection[i]:setmach(machinebar:currmachine())
+                :sync()
   end  
 end
 
@@ -254,14 +250,12 @@ function changeinstrumentcommand:init(sequence)
   self.sequence_ = sequence
 end
 
-function changeinstrumentcommand:execute()
-  local events = self.sequence_:selection()
-  for i=1, #events do
-    local event = events[i]
-    event:setinst(machinebar:curraux())
-    self.sequence_:at(event.seqpos)
-                  :syncevent(event)        
-  end  
+function changeinstrumentcommand:execute() 
+  local selection = self.sequence_:selection()
+  for i=1, #selection do
+    selection[i]:setinst(machinebar:curraux())
+                :sync()
+  end 
 end
 
 local blockstartcommand = command:new()
@@ -325,7 +319,7 @@ function selectallcommand:execute()
   local function select(event)
     if self.sequence_.trackviewmode == self.sequence_.VIEWALLTRACKS or 
        self.cursor_:track() == event:track() then
-      event:select()
+      event:select(pattern)
     end
   end
   pattern:work(select, pattern:firstnote())

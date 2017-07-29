@@ -184,14 +184,15 @@ function sequence:selectblock()
     local events = {}
     for i=from:seqpos(), to:seqpos() do 
       local isstartseqpos, isendseqpos = from:seqpos() == i, to:seqpos() == i
-      local event = self:at(i):firstnote()
+      local pattern = self:at(i)
+      local event = pattern:firstnote()
       while event do                   
         if (event:position() >= from:position() or not isstartseqpos) and
            (event:position() <= to:position() or not isendseqpos) then 
           if not events[i] then
             events[i] = {}
           end
-          event:select()
+          event:select(pattern)
         end
         event = event.next        
       end

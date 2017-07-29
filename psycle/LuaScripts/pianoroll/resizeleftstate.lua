@@ -27,7 +27,7 @@ function resizeleftstate:update(view)
     local event = self.selection.events[i]
     local prev = self.selection.prev[i]
     local next = self.selection.next[i]
-    local pos = view:eventmousepos():position()
+    local pos = view:eventmousepos():rasterposition()
     if prev == nil or 
        (pos >= 0 and ((prev.stopoffset == 0 and pos > prev:position()) or (prev:hasstop() and pos > prev:position() + prev.stopoffset)) and 
           (nextevent==nil or ((event.stopoffset == 0 and pos < next:position()) or

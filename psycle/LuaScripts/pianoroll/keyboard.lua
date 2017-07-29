@@ -33,7 +33,8 @@ keyboard.colors = {
   BG = 0xFF333333,
   ROW = 0xFF333333,
   KEY = 0xFF333333,
-  OCTAVEKEY = 0xFFFF00FF
+  OCTAVEKEY = 0xFFFF00FF,
+  KEYHIGHLIGHT = 0xFFFF69B4
 }
 
 keyboard.displaylabels = {
@@ -87,7 +88,7 @@ end
 function keyboard:drawmousekey(g)
   if self.mousekey ~= -1 then
     local pos = self:keypos(self.mousekey)
-    g:setcolor(0xFFFFFFFF)   
+    g:setcolor(keyboard.colors.KEYHIGHLIGHT)   
     g:drawstring(midihelper.notename(self.mousekey - 12), point:new(2, pos + 1))
   end
 end
@@ -109,14 +110,14 @@ function keyboard:displayname()
 end
 
 function keyboard:drawkeys(g)
-  for note = self.keymap.range.from, self.keymap.range.to do
+  for note = self.keymap.range.from_, self.keymap.range.to_ do
     self:drawkey(g, note)
   end
 end
 
 function keyboard:drawkeydeviders(g)
   g:setcolor(keyboard.colors.BG)
-  for note = self.keymap.range.from, self.keymap.range.to do
+  for note = self.keymap.range.from_, self.keymap.range.to_ do
     local pos = self:keypos(note)
     g:drawline(point:new(0, pos), point:new(self:position():width(), pos))
   end
@@ -219,6 +220,7 @@ function keyboard:setproperties(properties)
   if properties.octavekeycolor then
     keyboard.colors.OCTAVEKEY = properties.octavekeycolor:value() 
   end
+  keyboard.colors.KEYHIGHLIGHT = properties.keyhighlightcolor and  properties.keyhighlightcolor:value() or keyboard.colors.KEYHIGHLIGHT 
   keyboard.colors.BG = properties.backgroundcolor and  properties.backgroundcolor:value() or keyboard.colors.BG   
   self.keyplaycolor_ = properties.keyplaycolor and properties.keyplaycolor:value() or 0xFF0000FF
   self:createkeys()
@@ -230,12 +232,12 @@ function keyboard:onpatterneventheightchanged()
 end
 
 function keyboard:note(y)
-   return math.min(math.max(self.keymap.range.to - math.floor(y / self.zoom_:height()),
-      self.keymap.range.from), self.keymap.range.to)            
+   return math.min(math.max(self.keymap.range.to_ - math.floor(y / self.zoom_:height()),
+      self.keymap.range.from_), self.keymap.range.to_)            
 end
 
 function keyboard:keypos(key)
-  return self.zoom_:height() * (self.keymap.range.to - key)
+  return self.zoom_:height() * (self.keymap.range.to_ - key)
 end   
 
 function keyboard:playnote(note)
@@ -293,8 +295,7 @@ function keyboard:onplaybarupdate(timer)
   end  
 end
 
-function keyboard:onviewmousemove(y)
-  local key = self:note(y)
+function keyboard:onviewmousemove(key)
   if key ~= self.mousekey then
     self.mousekey = key
     self:fls()

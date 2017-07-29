@@ -30,7 +30,7 @@ end
 
 function selectidlestate:handlemousedown(view)
   local nextstate = nil
-  if self.hittest and self.hittest.hitarea == hitarea.NONE then  
+  if self.hittest and self.hittest:hitarea() == hitarea.NONE then  
     view:deselectall()   
     nextstate = view.states.selectingevents    
   end
