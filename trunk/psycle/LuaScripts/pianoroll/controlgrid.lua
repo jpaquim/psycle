@@ -114,12 +114,6 @@ function controlgrid:drawevent(g, event, seqpos)
   g:drawrect(rect:new(point:new(x - 2, (self:preferredheight() - 4) * (1 - event:norm())),dimension:new(4, 4)))                                  
 end
 
-function controlgrid:clearplaybar(g, playposition)
-  local x = playposition * self.view:zoom():width()
-  g:setcolor(self.view.colors.rowcolor)
-  g:fillrect(rect:new(point:new(x - 2, 0), point:new(x + 3, self:preferredheight())))   
-end
-
 function controlgrid:drawdragging(g)                                     
 end
 

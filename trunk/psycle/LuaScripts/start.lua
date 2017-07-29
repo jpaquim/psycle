@@ -46,3 +46,30 @@ psycle.addmenu("view", link)
 
 
 
+
+-- @closetest.lua
+  link = {
+    label = "closetest",
+    plugin = "closetest.lua",
+    viewport = psycle.CHILDVIEWPORT,
+    userinterface = psycle.SDI
+  }
+  psycle.addmenu("view", link)
+
+-- @Stefano Rack.lua
+  link = {
+    label = "Stefano Rack",
+    plugin = "Stefano Rack.lua",
+    viewport = psycle.CHILDVIEWPORT,
+    userinterface = psycle.SDI
+  }
+  psycle.addmenu("view", link)
+
+-- @stefanorack.lua
+  link = {
+    label = "stefanorack",
+    plugin = "stefanorack.lua",
+    viewport = psycle.CHILDVIEWPORT,
+    userinterface = psycle.SDI
+  }
+  psycle.addmenu("view", link)
