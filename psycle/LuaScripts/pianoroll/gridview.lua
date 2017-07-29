@@ -476,10 +476,6 @@ function gridview:onmousemove(ev)
   self.keyboard:onviewmousemove(self:eventmousepos():note())
   self.statehandler:transition("handlemousemove", self, ev:button())
   ev:stoppropagation()
-  if oldnote ~= self:eventmousepos():note() or
-     oldposition ~= self:eventmousepos():rasterposition() then
-    self:fls()
-  end
 end
 
 function gridview:onmouseup(ev)

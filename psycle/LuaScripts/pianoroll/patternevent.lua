@@ -237,12 +237,12 @@ function patternevent:ismcm()
 end
 
 function patternevent:dump()
-  println("Event trk, pos, key, stop, len "
+  psycle.output("Event trk, pos, key, stop, len "
       .. self.track_ .. "," 
       .. self.pos_ .. "," 
       .. self.note_ .. ","
       .. self.stopoffset .. ","
-      .. self.length_)
+      .. self.length_ .. "\n")
 end
 
 function patternevent:selected()
