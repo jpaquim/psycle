@@ -48,7 +48,7 @@ class Wonderbuild(ScriptTask):
 		def __call__(self, sched_ctx):
 			from wonderbuild.cxx_tool_chain import PkgConfigCheckTask
 			from wonderbuild.std_checks.std_math import StdMathCheckTask
-			from wonderbuild.std_checks.std_cxx11 import StdCxx11CheckTask
+			from wonderbuild.std_checks.std_cxx import StdCxxCheckTask
 			from wonderbuild.std_checks.boost import BoostCheckTask
 			from wonderbuild.std_checks.multithreading_support import MultithreadingSupportCheckTask
 			from wonderbuild.std_checks.openmp import OpenMPCheckTask
@@ -56,7 +56,7 @@ class Wonderbuild(ScriptTask):
 
 			check_cfg = self.cfg.clone()
 			std_math = StdMathCheckTask.shared(check_cfg)
-			std_cxx11 = StdCxx11CheckTask.shared(check_cfg)
+			std_cxx11 = StdCxxCheckTask.shared(check_cfg, 11)
 			self._boost = boost = BoostCheckTask.shared(check_cfg, (1, 40, 0), ('system', 'thread', 'filesystem', 'date_time'))
 			mt = MultithreadingSupportCheckTask.shared(check_cfg)
 			openmp = OpenMPCheckTask.shared(check_cfg)
