@@ -8,11 +8,11 @@ if __name__ == '__main__':
 	sys.argv.append('--src-dir=' + dir)
 	try: from wonderbuild.main import main
 	except ImportError:
-		dir = os.path.abspath(os.path.join(dir, os.pardir, 'build-systems', 'wonderbuild'))
+		dir = os.path.abspath(os.path.join(dir, os.pardir, 'external-packages', 'wonderbuild'))
 		if dir not in sys.path: sys.path.append(dir)
 		try: from wonderbuild.main import main
 		except ImportError:
-			print >> sys.stderr, 'could not find wonderbuild'
+			print >> sys.stderr, 'could not import wonderbuild module with path', sys.path
 			sys.exit(1)
 		else: main()
 	else: main()
@@ -35,7 +35,7 @@ class Wonderbuild(ScriptTask):
 		self._cfg = cfg = cfg.clone()
 
 		check_cfg = cfg.clone()
-		clutter = PkgConfigCheckTask.shared(check_cfg, ['clutter-gtk-0.10'])
+		clutter = PkgConfigCheckTask.shared(check_cfg, ['clutter-gtk-0.10']) # TODO seems they broke backward compatibility again ... not a simple fix since we need to change the layer from GTK down to GDK or other backends ... grrrr
 
 		class UniformMod(ModTask):
 			def __init__(self, name, path, deps=None, kind=ModTask.Kinds.LOADABLE):

@@ -7,7 +7,7 @@
 
 #include "scene.hpp"
 #include "pixels.hpp"
-#include <boost/signal.hpp>
+#include <boost/signal.hpp> // TODO they managed to break backward compatibility ... need to upgrade to "signals2" ... grrr
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition_variable.hpp>
