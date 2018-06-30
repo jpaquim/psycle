@@ -2245,6 +2245,17 @@ void ListView::UpdateList() {
     EnableDraw();    
   }  
 }
+/* Alternate, if above fails
+void ListView::UpdateList() {
+	if (imp() && !root_node_.expired()) {
+		ui::mfc::ListViewImp* mfc_imp = (ui::mfc::ListViewImp*)imp();
+		mfc_imp->SetRedraw(false);
+		imp()->DevClear();
+		imp()->DevUpdate(root_node_.lock());
+		mfc_imp->SetRedraw(true);
+		mfc_imp->Invalidate();
+	}
+}*/
 
 void ListView::EnableDraw() {
   if (imp()) {

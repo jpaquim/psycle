@@ -23,8 +23,8 @@ path const & process_executable_file_path() {
 	struct once {
 		path const static get_it() throw(std::exception) {
 			#if defined DIVERSALIS__OS__MICROSOFT
-				char module_file_name[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
-				if(!::GetModuleFileNameA(0, module_file_name, sizeof module_file_name))
+				wchar_t module_file_name[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
+				if(!::GetModuleFileNameW(0, module_file_name, sizeof module_file_name))
 					throw
 						///\todo the following is making link error on mingw
 						//exceptions::runtime_error(exceptions::code_description(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
@@ -50,8 +50,8 @@ path const & process_executable_file_path() {
 			// CSIDL_LOCAL_APPDATA <==> FOLDERID_LocalAppData
 			// CSIDL_MYDOCUMENTS == CSIDL_PERSONAL <==> FOLDERID_Documents
 			// CSIDL_PROFILE <==> FOLDERID_Profile
-			char p[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
-			if(SUCCEEDED(SHGetFolderPath(0, id, 0, 0, p))) nvr = p;
+			wchar_t p[UNIVERSALIS__OS__MICROSOFT__MAX_PATH];
+			if(SUCCEEDED(SHGetFolderPathW(0, id, 0, 0, p))) nvr = p;
 			else throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 			return nvr;
 		}

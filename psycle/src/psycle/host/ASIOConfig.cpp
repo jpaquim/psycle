@@ -35,13 +35,14 @@ namespace psycle { namespace host {
 		void CASIOConfig::RecalcLatency()
 		{
 			CString str;
+			int sbuf, sr;
 			m_bufferSizeCombo.GetWindowText(str);
-			int sbuf = atoi(str);
+			{ std::stringstream ss; ss << str; ss >> sbuf; }
 			m_sampleRateCombo.GetWindowText(str);
-			int sr = atoi(str);
-			//Multiplied by two becauase we have two buffers
+			{ std::stringstream ss; ss << str; ss >> sr; }
+			//Multiplied by two because we have two buffers
 			int lat = (sbuf * 2 * 1000) / sr;
-			str.Format("Latency: %dms", lat);
+			str.Format(__T("Latency: %dms"), lat); 
 			m_latency.SetWindowText(str);
 		}
 
@@ -55,7 +56,8 @@ namespace psycle { namespace host {
 			std::vector<std::string>::const_iterator it;
 			for (it = ports.begin(); it != ports.end(); ++it)
 			{
-				m_driverComboBox.AddString(it->c_str());
+				CString bla(it->c_str());
+				m_driverComboBox.AddString(bla);
 			}
 
 			if (m_driverIndex < 0)
@@ -70,11 +72,11 @@ namespace psycle { namespace host {
 			m_driverComboBox.SetCurSel(m_driverIndex);
 
 			// Sample rate
-			str.Format("%d", m_sampleRate);
+			str.Format(__T("%d"), m_sampleRate);
 			int i = m_sampleRateCombo.SelectString(-1, str);
 			if (i == CB_ERR)
 			{
-				i = m_sampleRateCombo.SelectString(-1, "44100");
+				i = m_sampleRateCombo.SelectString(-1, __T("44100"));
 			}
 
 			// Check boxes
@@ -92,12 +94,18 @@ namespace psycle { namespace host {
 			{
 
 				CString str;
-				m_sampleRateCombo.GetWindowText(str);
-				m_sampleRate = atoi(str);
-
-				m_bufferSizeCombo.GetWindowText(str);
-				m_bufferSize = atoi(str);
-
+				{
+					std::stringstream ss;
+					m_sampleRateCombo.GetWindowText(str);
+					ss << str;
+					ss >> m_sampleRate;
+				}
+				{
+					std::stringstream ss;
+					m_bufferSizeCombo.GetWindowText(str);
+					ss << str;
+					ss >> m_bufferSize;
+				}
 				CDialog::OnOK();
 				return;
 			}
@@ -141,7 +149,7 @@ namespace psycle { namespace host {
 		{
 			// hmm we had better recalc our buffer options
 			int prefindex = 0;
-			char buf[8];
+			CString buf;
 			m_bufferSizeCombo.ResetContent();
 			ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
 			int g = driver.granularity;
@@ -153,7 +161,7 @@ namespace psycle { namespace host {
 					{
 						prefindex++;
 					}
-					sprintf(buf,"%d",i);
+					buf.Format(__T("%d"), i);
 					m_bufferSizeCombo.AddString(buf);
 				}
 			}
@@ -170,7 +178,7 @@ namespace psycle { namespace host {
 					{
 						prefindex++;
 					}
-					sprintf(buf,"%d",i);
+					buf.Format(__T("%d"), i);
 					m_bufferSizeCombo.AddString(buf);
 				}
 			}

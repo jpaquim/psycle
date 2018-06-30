@@ -87,11 +87,13 @@ void CExListBox::OnChangePatternName()
 {
 	CString string;
 	myedit.GetWindowText(string);
+	std::stringstream ss;
+	ss << string;
 	if(isName) {
-		strncpy(Global::song().patternName[Global::song().playOrder[GetCurSel()]],string,32);
+		strncpy(Global::song().patternName[Global::song().playOrder[GetCurSel()]],ss.str().c_str(),32);
 	}
 	else {
-		int val = hexstring_to_integer(static_cast<LPCTSTR>(string));
+		int val = hexstring_to_integer(ss.str());
 		if(val < MAX_PATTERNS) {
 			Global::song().playOrder[GetCurSel()] = val;
 		}
