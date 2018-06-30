@@ -219,7 +219,7 @@ end
 
 function trackheaderview:onsize()
   if self.cursor:scrolloffset() + self:visibletracks() > rawpattern:numtracks() then
-    self.cursor:setscrolloffset(rawpattern:numtracks() - self:visibletracks())
+    self.cursor:setscrolloffset(math.max(0,rawpattern:numtracks() - self:visibletracks()))
   end
 end
 
