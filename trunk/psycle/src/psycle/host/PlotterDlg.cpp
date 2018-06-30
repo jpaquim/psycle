@@ -145,9 +145,9 @@ namespace psycle { namespace host {
 				}			
 				for (double i = start; i <= stop; i+=0.5) {
 				  CString str; 
-				  str.Format("%0.1f", i); 
+				  str.Format(_T("%0.1f"), i); 
 				  int y = drawing_area.Height() - yident - step_height*(i-minpeak_);
-				  dc.TextOutA(0, y-fonth2, str);
+				  dc.TextOut(0, y-fonth2, str);
 				  dc.MoveTo(15, y);
 				  dc.LineTo(20, y);
 				}

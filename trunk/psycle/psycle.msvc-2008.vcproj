@@ -1507,6 +1507,10 @@
 						>
 					</File>
 					<File
+						RelativePath=".\src\psycle\host\ladspa.h"
+						>
+					</File>
+					<File
 						RelativePath="src\psycle\host\Machine.cpp"
 						>
 					</File>
@@ -1673,10 +1677,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\src\psycle\host\Zap.hpp"
-			>
-		</File>
 	</Files>
 	<Globals>
 		<Global

@@ -21,8 +21,10 @@
 
 #include "Ui.hpp"
 
+#if defined COMPILE_WITH_VLD
 // Visual Leak Detector ( vld.codeplex.com )
-// #include <vld.h>
+#include <vld.h>
+#endif
 
 #include <sstream>
 

@@ -1193,7 +1193,7 @@ XMSampler::Channel::PerformFX().
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 protected:
 
-	static TCHAR* _psName;
+	static char* _psName;
 	int _numVoices;
 
 	Voice m_Voices[MAX_POLYPHONY];

@@ -99,7 +99,9 @@ namespace psycle { namespace host {
 
 			CString text;
 			m_trackedit.GetWindowText(text);
-			tracknames[prevsel] = static_cast<LPCTSTR>(text);			
+			std::stringstream ss;
+			ss << text;
+			tracknames[prevsel] = ss.str();
 
 			CDialog::OnOK();
 		}
@@ -180,7 +182,9 @@ namespace psycle { namespace host {
 		{
 			CString text;
 			m_trackedit.GetWindowText(text);
-			tracknames[prevsel] = static_cast<LPCTSTR>(text);
+			std::stringstream ss;
+			ss << text;
+			tracknames[prevsel] = ss.str();
 
 			prevsel = m_tracklist.GetCurSel();
 			bInit = false;

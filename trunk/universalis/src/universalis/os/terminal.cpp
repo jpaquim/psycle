@@ -239,7 +239,7 @@ terminal::terminal()
 		{
 			std::ostringstream title; title << "error in " << types.str();
 			std::ostringstream message; message << "could not allocate a console!\n" << types.str() << '\n' << e.what();
-			::MessageBox(0, message.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
+			::MessageBox(NULL, message.str().c_str(), title.str().c_str(), MB_OK | MB_ICONWARNING);
 		}
 		throw;
 	}

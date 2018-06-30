@@ -11,7 +11,7 @@ namespace psycle
 {
 	namespace host
 	{
-		TCHAR* XMSampler::_psName = _T("Sampulse");
+		char* XMSampler::_psName = "Sampulse";
 
 		const char XMSampler::E8VolMap[16]={0,4,9,13,17,21,26,30,34,38,43,47,51,55,60,64};
 

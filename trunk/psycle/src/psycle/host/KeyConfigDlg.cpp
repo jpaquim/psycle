@@ -97,17 +97,24 @@ namespace psycle { namespace host {
 
 			m_autosave.SetCheck(config.autosaveSong?1:0);
 			m_autosave_spin.SetRange(1,60);
-			char buffer[16];
-			itoa(config.autosaveSongTime,buffer,10);
-			m_autosave_mins.SetWindowText(buffer);
+			{
+				std::stringstream ss;
+				ss << config.autosaveSongTime;
+				CString buf(ss.str().c_str());
+				m_autosave_mins.SetWindowText(buf);
+			}
 
 			m_save_reminders.SetCheck(config.bFileSaveReminders?1:0);
 			m_show_info.SetCheck(config.bShowSongInfoOnLoad?1:0);
 			m_allowinstances.SetCheck(config._allowMultipleInstances?1:0);
 			m_storeplaces.SetCurSel(config.store_place_);
 
-			itoa(PsycleGlobal::conf().GetDefaultPatLines(),buffer,10);
-			m_numlines.SetWindowText(buffer);
+			{
+				std::stringstream ss;
+				ss << PsycleGlobal::conf().GetDefaultPatLines();
+				CString buf(ss.str().c_str());
+				m_numlines.SetWindowText(buf);
+			}
 			bInit = TRUE;
 			OnUpdateNumLines();
 			FillCmdList();
@@ -146,17 +153,20 @@ namespace psycle { namespace host {
 			config._allowMultipleInstances = m_allowinstances.GetCheck()?true:false;
 			config.store_place_ = static_cast<PsycleConfig::store_t>(m_storeplaces.GetCurSel());
 
-			char buffer[32];
-			m_autosave_mins.GetWindowText(buffer,16);
-			int nlines = atoi(buffer);
-			if (nlines < 1)
-			{ nlines = 1; }
-			else if (nlines > 60)
-			{ nlines = 60; }
-			config.autosaveSongTime = nlines;
-			
-			m_numlines.GetWindowText(buffer,16);
-			nlines = atoi(buffer);
+			CString buf;
+			int time, nlines;
+			m_autosave_mins.GetWindowText(buf);
+			{ std::stringstream ss; ss << buf; ss >> time; }
+			if (time < 1) { 
+				time = 1;
+			}
+			else if (time > 60) {
+				time = 60;
+			}
+			config.autosaveSongTime = time;
+
+			m_numlines.GetWindowText(buf);
+			{ std::stringstream ss; ss << buf; ss >> nlines;}
 			if (nlines < 1) {
 				nlines = 1;
 			}
@@ -189,7 +199,7 @@ namespace psycle { namespace host {
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Psycle Keymap Presets\0*.psk\0";
+			ofn.lpstrFilter = _T("Psycle Keymap Presets\0*.psk\0");
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -220,7 +230,7 @@ namespace psycle { namespace host {
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Psycle Keymap Presets\0*.psk\0";
+			ofn.lpstrFilter = _T("Psycle Keymap Presets\0*.psk\0");
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -243,10 +253,10 @@ namespace psycle { namespace host {
 		}
 		void CKeyConfigDlg::OnSelchangeStore()
 		{
-			UINT result = MessageBox("This setting only affects where Psycle is going to save the settings.\n"
-				"The loader checks each location in the order defined in this dropdown list and uses the first that it finds.\n\n"
-				"Do you want to also REMOVE the settings located in the other places?",
-				"Places of the configuration stores", MB_YESNO|MB_ICONQUESTION);
+			UINT result = MessageBox(_T("This setting only affects where Psycle is going to save the settings.\n")
+				_T("The loader checks each location in the order defined in this dropdown list and uses the first that it finds.\n\n")
+				_T("Do you want to also REMOVE the settings located in the other places?"),
+				_T("Places of the configuration stores"), MB_YESNO | MB_ICONQUESTION);
 
 			PsycleConfig& config = PsycleGlobal::conf();
 			if (result == IDYES) {
@@ -293,19 +303,20 @@ namespace psycle { namespace host {
 
 		void CKeyConfigDlg::OnUpdateNumLines() 
 		{
-			char buffer[256];
+			CString buf;
 			if (bInit)
 			{
-				m_numlines.GetWindowText(buffer,16);
-				int val=atoi(buffer);
+				m_numlines.GetWindowText(buf);
+				int val;
+				{ std::stringstream ss; ss << buf; ss >> val; }
 				if (val < 0) {
 					val = 0;
 				}
 				else if(val > MAX_LINES) {
 					val = MAX_LINES-1;
 				}
-				sprintf(buffer,"HEX: %x",val);
-				m_textlines.SetWindowText(buffer);
+				buf.Format(_T("HEX: %x"), val);
+				m_textlines.SetWindowText(buf);
 			}
 		}
 

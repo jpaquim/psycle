@@ -2221,7 +2221,13 @@ class EditImp : public WindowTemplateImp<CEdit, ui::EditImp> {
                      nID)) {
       TRACE0("Failed to create window\n");
       return 0;
-    }    
+    }
+/*
+    HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+	  CFont font;
+	  font.Attach( hFont );
+	  imp->SetFont(&font); 
+*/   
     imp->set_window(w);    
     imp->dev_set_font(Font(FontInfo("Arial", 13)));
     return imp;
