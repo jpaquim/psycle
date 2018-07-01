@@ -1110,6 +1110,8 @@ namespace psycle { namespace host {
 
 		void CWireDlg::SetMode()
 		{
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+
 			CClientDC dc(this);
 
 			CDC bufDC;
