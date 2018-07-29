@@ -40,13 +40,13 @@ class Wonderbuild(ScriptTask):
 
 		from wonderbuild import UserReadableException
 		from wonderbuild.cxx_tool_chain import PkgConfigCheckTask, ModTask
-		from wonderbuild.std_checks.std_cxx11 import StdCxx11CheckTask
+		from wonderbuild.std_checks.std_cxx import StdCxxCheckTask
 		from wonderbuild.std_checks.boost import BoostCheckTask
 		from wonderbuild.std_checks.dsound import DSoundCheckTask
 		from wonderbuild.install import InstallTask
 
 		check_cfg = cfg.clone()
-		std_cxx11 = StdCxx11CheckTask.shared(check_cfg)
+		std_cxx11 = StdCxxCheckTask.shared(check_cfg, 11)
 		boost = BoostCheckTask.shared(check_cfg, (1, 40, 0), ('system', 'signals', 'thread', 'filesystem', 'date_time'))
 		# TODO upgrade to boost signals2
 		cfg.defines['BOOST_SIGNALS_NO_DEPRECATION_WARNING'] = None
