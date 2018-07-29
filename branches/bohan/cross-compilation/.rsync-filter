@@ -1,3 +1,0 @@
-hide, /llvm
-hide, /nacl/native_client_sdk
-hide, /nacl/native_client_sdk_*
