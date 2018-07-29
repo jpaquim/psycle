@@ -31,6 +31,8 @@
 	-- johan-boule@users.sourceforge.net
 */
 
+#if 0
+
 #include <chrono>
 #include <limits>
 #include <iostream>
@@ -82,3 +84,44 @@ int main() {
 	assert(t2 - t1 < t3 - t2);
 }
 
+#else
+
+#include <chrono>
+#include <iostream>
+#undef NDEBUG
+#include <cassert>
+float inline uint8_t_to_float(uint8_t x) {
+        union { float f; uint32_t i; } u = { 8388608.0f }; u.i |= x;
+        return u.f - 8388608.0f;
+}
+int main() {
+        typedef std::uint8_t int_type;
+        typedef float real;
+        typedef std::chrono::high_resolution_clock clock;
+        std::size_t const datasize = 200000;
+        std::size_t const iterations = 1000;
+        int_type *data = new int_type[datasize];
+        for (std::size_t i = 0; i < datasize; ++i)
+                data[i] = static_cast<int_type>((i * 17) ^ 101);
+        clock::time_point const t0 = clock::now();
+        // specialized conversion
+        real r1(0);
+        #pragma omp parallel for
+        for(std::size_t count = 0; count < iterations; ++count)
+                for (std::size_t i = 0; i < datasize; ++i)
+                        r1 += uint8_t_to_float(data[i]);
+        clock::time_point const t1 = clock::now();
+        // standard conversion
+        real r2(0);
+        #pragma omp parallel for
+        for(std::size_t count = 0; count < iterations; ++count)
+                for (std::size_t i = 0; i < datasize; ++i)
+                        r2 += static_cast<real>(data[i]);
+        clock::time_point const t2 = clock::now();
+        std::cout <<
+                "specialized  : sum: " << r1 << ", time: " << std::chrono::nanoseconds(t1 - t0).count() * 1e-9 << "s\n"
+                "standard     : sum: " << r2 << ", time: " << std::chrono::nanoseconds(t2 - t1).count() * 1e-9 << "s\n";
+        assert(r1 == r2);
+        delete data;
+}
+#endif
