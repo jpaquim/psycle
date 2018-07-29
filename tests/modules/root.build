@@ -1,0 +1,8 @@
+cxx.std = experimental
+
+using cxx
+
+assert $cxx.features.modules 'compiler does not support modules'
+
+mxx{*}: extension = cppm
+cxx{*}: extension = cxx
