@@ -35,6 +35,7 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	build-systems/wonderbuild/wonderbuild_script.py \
+		--tasks=default,psycle-helpers-unit-tests,universalis-unit-tests \
 		$(CROSS_COMPILE) \
 		--cxx-flags='$(CXXFLAGS)' \
 		--bld-dir=debian/++wonderbuild \
@@ -64,6 +65,9 @@ override_dh_install:
 		mv debian/libpsycle-helpers-math1-dev/$$i debian/++wonderbuild/staged-install/$$i; \
 	done; \
 	dh_install --sourcedir=debian/++wonderbuild/staged-install --remaining-packages
+
+override_dh_shlibdeps: # default does not support -Wl,-rpath=$ORIGIN/../lib
+	dh_shlibdeps --dpkg-shlibdeps-params=--ignore-missing-info
 
 override_dh_auto_clean:
 	rm -Rf debian/++wonderbuild

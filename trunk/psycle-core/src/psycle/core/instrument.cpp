@@ -208,7 +208,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int /*version*/,bool fullopen)
 						s << "sample data: unpacked length mismatch: " << waveLength << " versus " << pDataLength << std::endl;
 						s << "You should reload this wave sample and all the samples after this one!";
 						//loggers::warning(s.str());
-						std::cout << "Warning: " << s << std::endl;
+						std::cout << "Warning: " << s.str() << std::endl;
 						//MessageBox(0, s.str().c_str(), "Loading wave sample data", MB_ICONWARNING | MB_OK);
 					}
 					DataCompression::SoundDesquash(pData,&waveDataL);
@@ -236,7 +236,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int /*version*/,bool fullopen)
 							s << "stereo wave sample data: unpacked length mismatch: " << waveLength << " versus " << pDataLength << std::endl;
 							s << "You should reload this wave sample and all the samples after this one!";
 							//loggers::warning(s.str());
-							std::cout << "Warning: " << s << std::endl;
+							std::cout << "Warning: " << s.str() << std::endl;
 							//MessageBox(0, s.str().c_str(), "Loading stereo wave sample data", MB_ICONWARNING | MB_OK);
 						}
 						DataCompression::SoundDesquash(pData,&waveDataR);

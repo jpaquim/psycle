@@ -206,7 +206,7 @@ class Wonderbuild(ScriptTask):
 			def do_mod_phase(self):
 				self._apply_defines_to(self.cfg)
 				self.cfg.include_paths.appendleft(src_dir)
-				self.cfg.defines['UNIVERSALIS__META__MODULE__NAME'] = '"' + self.name +'"'
+				self.cfg.defines['UNIVERSALIS__META__MODULE__NAME'] = '"' + self.name + '"'
 				self.cfg.defines['UNIVERSALIS__META__MODULE__VERSION'] = 0
 				s = self.sources
 				dir = src_dir / 'psycle' / 'audiodrivers'

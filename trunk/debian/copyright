@@ -1,12 +1,10 @@
-Format: http://anonscm.debian.org/viewvc/dep/web/deps/dep5.mdwn?revision=174&view=co
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: psycle
-Upstream-Contact: Johan Boule <bohan.debian@retropaganda.info>
+Upstream-Contact: Johan Boule <johan.boule@retropaganda.info>
 Source: http://psycle.sourceforge.net
 
 Files: *
-Copyright: copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net
-License: GPL-2+
-
+Copyright: copyright 1999-2019 members of the psycle project http://psycle.sourceforge.net
 License: GPL-2+
  This program is free software; you can redistribute it
  and/or modify it under the terms of the GNU General Public

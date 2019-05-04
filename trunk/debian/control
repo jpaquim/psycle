@@ -2,9 +2,9 @@ Source: psycle
 Standards-Version: 3.9.2.0
 Section: sound
 Priority: optional
-Maintainer: Johan Boule <bohan.debian@retropaganda.info>
-Vcs-Svn: https://psycle.svn.sourceforge.net/svnroot/psycle
-Vcs-Browser: http://psycle.svn.sourceforge.net/viewvc/psycle
+Maintainer: Johan Boule <johan.boule@retropaganda.info>
+Vcs-Svn: svn://svn.code.sf.net/p/psycle/code/trunk https://svn.code.sf.net/p/psycle/code/trunk
+Vcs-Browser: https://sourceforge.net/p/psycle/code/HEAD/tree/
 Homepage: http://psycle.sourceforge.net
 Build-Depends:
  debhelper (>= 7.4.15),

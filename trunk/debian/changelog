@@ -1,11 +1,17 @@
+psycle (1.12.0-1) unstable; urgency=low
+
+  * repaired the building of the debian packages
+
+ -- Johan Boule <johan.boule@retropaganda.info>  Sat, 04 May 2019 08:38:15 +0000
+
 psycle (1.10.0-1) unstable; urgency=low
 
   * bumping version since 1.10 is released
 
- -- Johan Boule <bohan.debian@retropaganda.info>  Sat, 5 Nov 2011 11:04:47 +0000
+ -- Johan Boule <johan.boule@retropaganda.info>  Sat, 5 Nov 2011 11:04:47 +0000
 
 psycle (1.9.0-1) unstable; urgency=low
 
   * initial debian packaging
 
- -- Johan Boule <bohan.debian@retropaganda.info>  Wed, 4 Aug 2004 00:29:15 +0000
+ -- Johan Boule <johan.boule@retropaganda.info>  Wed, 4 Aug 2004 00:29:15 +0000
