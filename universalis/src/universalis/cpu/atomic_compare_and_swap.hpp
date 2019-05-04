@@ -74,6 +74,7 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/stdlib/thread.hpp>
+	#include <universalis/stdlib/mutex.hpp>
 	#include <universalis/stdlib/chrono.hpp>
 	#include <universalis/os/sched.hpp>
 	#include <universalis/os/clocks.hpp>
@@ -120,20 +121,27 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 
 				void thread_function(tls * const tls_pointer) {
 					tls & tls(*tls_pointer);
-					--shared_start; ///\todo doesn't look right!
-					while(!atomic_compare_and_swap(shared_start, 0, 0));
+					{ lock_guard_type l(m);
+						--shared_start;
+						while(shared_start) c.wait(l);
+					}
+					c.notify_all();
 					while(tls.count < end) {
 						clock::time_point const t0(clock::now());
 						for(unsigned int i(0); i < inner_loop; ++i) {
-							if(atomic_compare_and_swap(shared, -1, -1)) return;
-							shared = tls.i;
-							while(atomic_compare_and_swap(shared, tls.i, tls.i));
+							do {
+								shared = tls.i;
+							} while(!atomic_compare_and_swap(shared, tls.i, tls.i));
 						}
 						clock::time_point const t1(clock::now());
 						if(++tls.count > start) tls.d += t1 - t0;
 					}
 					shared = -1;
 				}
+
+				mutex m;
+				condition_variable c;
+				typedef unique_lock<mutex> lock_guard_type;
 
 				unsigned int inner_loop, start, end;
 				int shared, shared_start;
