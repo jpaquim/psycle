@@ -75,6 +75,7 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/stdlib/thread.hpp>
 	#include <universalis/stdlib/mutex.hpp>
+	#include <universalis/stdlib/condition_variable.hpp>
 	#include <universalis/stdlib/chrono.hpp>
 	#include <universalis/os/sched.hpp>
 	#include <universalis/os/clocks.hpp>
