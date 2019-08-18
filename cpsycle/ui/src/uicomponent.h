@@ -1,0 +1,51 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
+
+#if !defined(UICOMPONENT)
+#define UICOMPONENT
+
+#include <windows.h>
+#include "uidef.h"
+#include "uievents.h"
+#include "uimenu.h"
+
+
+void ui_init(HINSTANCE hInstance);
+void ui_dispose();
+
+typedef struct {
+   HWND hwnd;
+   HMENU winid;
+   ui_events events;
+   int align;   
+   int doublebuffered;
+} ui_component;
+
+void ui_component_init(void* self, ui_component* component, ui_component* parent);
+void ui_frame_init(void* self, ui_component* frame, ui_component* parent);
+void ui_classcomponent_init(void* self, ui_component* component, ui_component* parent, const char* classname);
+
+void ui_component_show(ui_component* self);
+void ui_component_hide(ui_component* self);
+void ui_component_show_state(ui_component* self, int cmd);
+void ui_component_showhorizontallscrollbar(ui_component* self);
+void ui_component_hidehorizontallscrollbar(ui_component* self);
+void ui_component_sethorizontalscrollrange(ui_component* self, int min, int max);
+void ui_component_showverticalscrollbar(ui_component* self);
+void ui_component_hideverticalscrollbar(ui_component* self);
+void ui_component_setverticalscrollrange(ui_component* self, int min, int max);
+void ui_component_move(ui_component* self, int left, int top);
+void ui_component_resize(ui_component* self, int width, int height);
+void ui_component_setmenu(ui_component* self, ui_menu* menu);
+void ui_component_settitle(ui_component* self, const char* title);
+void ui_component_enum_children(ui_component* self);
+void ui_component_capture(ui_component* self);
+void ui_component_releasecapture();
+ui_size ui_component_size(ui_component* self);
+void ui_invalidate(ui_component* self);
+void ui_component_setfocus(ui_component* self);
+void ui_component_setfont(ui_component* self, HFONT font);
+
+
+#endif
