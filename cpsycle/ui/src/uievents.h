@@ -6,20 +6,9 @@
 #define UIEVENTS
 
 #include "graphics.h"
+#include <signal.h>
 
-typedef struct {		
-   void (*draw)(void*, ui_graphics*);
-   void (*timer)(void*, int timer);
-   void (*size)(void*, int width, int height);
-   int (*keydown)(void*, int keycode, int keydata);
-   void (*keyup)(void*, int keycode, int keydata);
-   void (*mousedown)(void*, int x, int y, int button);
-   void (*mouseup)(void*, int x, int y, int button);
-   void (*mousemove)(void*, int x, int y, int button);
-   void (*mousedoubleclick)(void*, int x, int y, int button);   
-   void (*scroll)(void*, int dx, int dy);
-   void (*create)(void*);
-   void (*destroy)(void*, void*);
+typedef struct {		            
    void (*command)(void*, WPARAM wparam, LPARAM lparam);
    int (*childenum)(void*, void*);
    void* target;

@@ -5,6 +5,7 @@
 #define MAINFRAME_H
 
 #include "uicomponent.h"
+#include "machinebar.h"
 #include "machineview.h"
 #include "patternview.h"
 #include "sequenceview.h"
@@ -14,6 +15,7 @@
 
 typedef struct {
 	ui_component component;
+	MachineBar machinebar;
 	MachineView machineview;
 	PatternView patternview;
 	SequenceView sequenceview;

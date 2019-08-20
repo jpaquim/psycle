@@ -18,11 +18,26 @@ typedef struct {
    HWND hwnd;
    HMENU winid;
    ui_events events;
+   Signal signal_size;
+   Signal signal_draw;
+   Signal signal_timer;
+   Signal signal_keydown;
+   Signal signal_keyup;
+   Signal signal_mousedown;
+   Signal signal_mouseup;
+   Signal signal_mousemove;
+   Signal signal_mousedoubleclick;
+   Signal signal_scroll;
+   Signal signal_create;
+   Signal signal_destroy;   
+
    int align;   
    int doublebuffered;
+   int propagateevent;
 } ui_component;
 
 void ui_component_init(void* self, ui_component* component, ui_component* parent);
+void ui_component_dispose(ui_component* component);
 void ui_frame_init(void* self, ui_component* frame, ui_component* parent);
 void ui_classcomponent_init(void* self, ui_component* component, ui_component* parent, const char* classname);
 
@@ -46,6 +61,8 @@ ui_size ui_component_size(ui_component* self);
 void ui_invalidate(ui_component* self);
 void ui_component_setfocus(ui_component* self);
 void ui_component_setfont(ui_component* self, HFONT font);
+
+void ui_component_init_signals(ui_component* component);
 
 
 #endif

@@ -10,6 +10,7 @@ extern IntHashTable selfmap;
 void ui_statusbar_init(void* self, ui_statusbar* statusbar, ui_component* parent)
 {  
     memset(&statusbar->component.events, 0, sizeof(ui_events));
+	ui_component_init_signals(&statusbar->component);	
 	statusbar->component.doublebuffered = 0;
 	statusbar->component.hwnd = CreateWindowEx(
         0,

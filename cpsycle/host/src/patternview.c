@@ -5,16 +5,16 @@
 #include <string.h>
 #include <math.h>
 
-static void Draw(PatternView* self, ui_graphics* g);
+static void OnDraw(PatternView* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(PatternView* self, ui_graphics* g);
 static void DrawTrackBackground(PatternView* self, ui_graphics* g, int track);
 static void DrawEvents(PatternView* self, ui_graphics* g);
 static void DrawPatternEvent(PatternView* self, ui_graphics* g, PatternEvent* event, int x, int y, int cursor, int beat, int beat4);
-static int OnKeyDown(PatternView* self, int keycode, int keydata);
-static void OnSize(PatternView* self, int width, int height);
-static void OnScroll(PatternView* self, int cx, int cy);
+static void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata);
+static void OnSize(PatternView* self, ui_component* sender, int width, int height);
+static void OnScroll(PatternView* self, ui_component* sende, int cx, int cy);
 static void SetDefaultSkin(PatternView* self);
-static void OnMouseDown(PatternView* self, int x, int y, int button);
+static void OnMouseDown(PatternView* self, ui_component* sender, int x, int y, int button);
 
 char* notes_tab_a440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
@@ -64,12 +64,12 @@ void InitPatternView(PatternView* self, ui_component* parent, Player* player)
 	if (self->skin.hfont == NULL) {
 		self->skin.hfont = ui_createfont("Tahoma", 12);
 	}
-	ui_component_init(self, &self->component, parent);
-	self->component.events.size = OnSize;
-	self->component.events.keydown = OnKeyDown;
-	self->component.events.mousedown = OnMouseDown;
-	self->component.events.draw = Draw;
-	self->component.events.scroll = OnScroll;
+	ui_component_init(self, &self->component, parent);	
+	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
+	signal_connect(&self->component.signal_mousedown, self,OnMouseDown);
+	signal_connect(&self->component.signal_draw, self, OnDraw);
+	signal_connect(&self->component.signal_scroll, self, OnScroll);	
 	ui_component_move(&self->component, 0, 0);
 
 	self->player = player;
@@ -131,7 +131,7 @@ void PatternViewApplyProperties(PatternView* self, Properties* properties)
 	ui_invalidate(&self->component);
 }
 
-void Draw(PatternView* self, ui_graphics* g)
+void OnDraw(PatternView* self, ui_component* sender, ui_graphics* g)
 {	   	
 	if (self->skin.hfont) {
 		ui_setfont(g, self->skin.hfont);
@@ -249,19 +249,18 @@ void DrawPatternEvent(PatternView* self, ui_graphics* g, PatternEvent* event, in
 	}	
 }
 
-void OnSize(PatternView* self, int width, int height)
+void OnSize(PatternView* self, ui_component* sender, int width, int height)
 {
 	self->cx = width;
 	self->cy = height;
 }
 
-int OnKeyDown(PatternView* self, int keycode, int keydata)
+void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata)
 {		
 	int cmd;
 
 	if (keycode == VK_F5) {
-		player_start(self->player);
-		return 0;
+		player_start(self->player);		
 	} else
 	if (keycode == VK_UP) {
 		self->cursor.offset -= self->bpl;		
@@ -280,13 +279,12 @@ int OnKeyDown(PatternView* self, int keycode, int keydata)
 		ui_invalidate(&self->component);		
 	} else
 	if (keycode == VK_F8) {
-		player_stop(self->player);
-		return 0;
+		player_stop(self->player);		
 	} else {
 		cmd = Cmd(&self->noteinputs->map, keycode);
 		if (cmd != -1) {		
 			float offset;
-			PatternEvent ev = { 0, 0, 0, 0, 0 };
+			PatternEvent ev = { 0, 0, 1, 0, 0 };
 			int base = 48;
 
 			ev.note = (unsigned char)(base + cmd);
@@ -296,15 +294,15 @@ int OnKeyDown(PatternView* self, int keycode, int keydata)
 			ui_invalidate(&self->component);			
 		}		
 	}
-	return 1;
+	sender->propagateevent = 1;
 }
 
-void OnScroll(PatternView* self, int cx, int cy)
+void OnScroll(PatternView* self, ui_component* sender, int cx, int cy)
 {
 	self->dy += cy;
 }
 
-void OnMouseDown(PatternView* self, int x, int y, int button)
+void OnMouseDown(PatternView* self, ui_component* sender, int x, int y, int button)
 {
 	ui_component_setfocus(&self->component);
 }

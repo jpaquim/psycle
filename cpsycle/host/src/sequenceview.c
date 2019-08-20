@@ -4,19 +4,19 @@
 #include "sequenceview.h"
 #include <stdio.h>
 
-static void Draw(SequenceListView* self, ui_graphics* g);
+static void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(SequenceListView* self, ui_graphics* g);
 static void DrawSequence(SequenceListView* self, ui_graphics* g);
 
 static void OnControllerNewEntry(SequenceListView* self);
 static void OnNewEntry(SequenceButtons* self);
-void OnSize(SequenceView* self, int width, int height);
-static void OnMouseDown(SequenceListView* self, int x, int y, int button);
+static void OnSize(SequenceView* self, ui_component* sender, int width, int height);
+static void OnMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int button);
 
 void InitSequenceView(SequenceView* self, ui_component* parent, Sequence* sequence, Patterns* patterns)
 {	
-	ui_component_init(self, &self->component, parent);
-	self->component.events.size = OnSize;
+	ui_component_init(self, &self->component, parent);		
+	signal_connect(&self->component.signal_size, self, OnSize);
 	InitSequenceListView(&self->listview, &self->component, sequence, patterns);			
 	ui_component_move(&self->listview.component, 0, 20);	
 	self->buttons.context = &self->listview;
@@ -28,9 +28,9 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent, Sequence
 {				
 	self->sequence = sequence;
 	self->patterns = patterns;
-	ui_component_init(self, &self->component, parent);
-	self->component.events.draw = Draw;
-	self->component.events.mousedown = OnMouseDown;
+	ui_component_init(self, &self->component, parent);	
+	signal_connect(&self->component.signal_draw, self, OnDraw);
+	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	self->selchanged = 0;
 	self->selected = 0;
 	self->skin.font = ui_createfont("Tahoma", 12);
@@ -49,7 +49,7 @@ void InitSequenceButtons(SequenceButtons* self, ui_component* parent)
 	ui_button_settext(&self->newentry, "New");
 }
 
-void Draw(SequenceListView* self, ui_graphics* g)
+void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g)
 {	
 	if (self->skin.font) {
 		ui_setfont(g, self->skin.font);
@@ -97,7 +97,7 @@ void DrawSequence(SequenceListView* self, ui_graphics* g)
 	}
 }
 
-void OnSize(SequenceView* self, int width, int height)
+void OnSize(SequenceView* self, ui_component* sender, int width, int height)
 {
 	ui_component_resize(&self->buttons.component, width, 20);
 	ui_component_resize(&self->listview.component, width, height - 20);
@@ -122,7 +122,7 @@ void OnControllerNewEntry(SequenceListView* self)
 	}	
 }
 
-void OnMouseDown(SequenceListView* self, int x, int y, int button)
+void OnMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int button)
 {
 	unsigned int selected;
 

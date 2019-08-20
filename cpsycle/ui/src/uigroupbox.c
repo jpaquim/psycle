@@ -9,6 +9,7 @@ extern IntHashTable selfmap;
 void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 {  
     memset(&groupbox->component.events, 0, sizeof(ui_events));
+	ui_component_init_signals(&groupbox->component);	
 	groupbox->component.doublebuffered = 0;
 	groupbox->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
 		WS_CHILD | WS_VISIBLE | BS_GROUPBOX,

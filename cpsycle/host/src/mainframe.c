@@ -14,11 +14,11 @@
 static void Create(MainFrame* self);
 static void InitMenu(MainFrame* self);
 static void OnFileMenu(ui_menu* menu);
-static void Draw(MainFrame* self, ui_graphics* g);
+static void OnDraw(MainFrame* self, ui_component* sender, ui_graphics* g);
 static void Destroy(MainFrame* self, ui_component* component);
-static void OnSize(MainFrame* self, int width, int height);
-static int OnKeyDown(MainFrame* self, int keycode, int keydata);
-static void OnTimer(MainFrame* self, int timerid);
+static void OnSize(MainFrame* self, ui_component* sender, int width, int height);
+static void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata);
+static void OnTimer(MainFrame* self, ui_component* sender, int timerid);
 static void OnSequenceSelChange(MainFrame* self, SequenceEntry* entry);
 static void SetActiveView(MainFrame* self, ui_component* view);
 
@@ -37,29 +37,31 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	int iStatusWidths[] = {100, 200, -1};
 
 	ui_frame_init(self, &self->component, 0);	 
-	self->component.events.destroy = Destroy;
-	self->component.events.draw = Draw;
-	self->component.events.destroy = Destroy;	
-	self->component.events.size = OnSize;
-	self->component.events.timer = OnTimer;
-	self->component.events.keydown = OnKeyDown;
+	signal_connect(&self->component.signal_destroy, self, Destroy);
+	signal_connect(&self->component.signal_draw, self, OnDraw);
+	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&self->component.signal_timer, self, OnTimer);	
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
+	InitMachineBar(&self->machinebar, &self->component, player);	
+	ui_component_move(&self->machinebar.component, 100, 0);
 	InitSettingsView(&self->settingsview, &self->component, properties);
-	ui_component_move(&self->settingsview.component, 150, 0);
+	ui_component_move(&self->settingsview.component, 150, 25);
 	ui_component_hide(&self->settingsview.component);
-	InitMachineView(&self->machineview, &self->component, player, properties);	
-	ui_component_move(&self->machineview.component, 150, 0);	
+	InitMachineView(&self->machineview, &self->component, &self->machinebar, player, properties);	
+	ui_component_move(&self->machineview.component, 150, 25);	
 	ui_component_hide(&self->machineview.component);
 	self->patternview.noteinputs = &self->noteinputs;
 	self->patternview.pattern = patterns_at(&player->song->patterns, 0);
 	InitPatternView(&self->patternview, &self->component, player);
 	ui_component_hide(&self->machineview.component);
-	ui_component_move(&self->patternview.component, 150, 0);
+	ui_component_move(&self->patternview.component, 150, 25);
 	self->activeview = &self->patternview.component;
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, player->sequencer.sequence, &player->song->patterns);	
+	ui_component_move(&self->sequenceview.component, 0, 20);
 	SequenceViewConnect(&self->sequenceview, self);	
 	self->sequenceview.listview.selchanged = OnSequenceSelChange;
-	SetActiveView(self, &self->machineview);
+	SetActiveView(self, &self->machineview.component);
 	/*InitSongProperties(&songproperties, &self->component);	
 	ui_menu_init(&menu, "", 0);
 	ui_menu_init(&menu_file, "File", OnFileMenu);		
@@ -80,7 +82,7 @@ void InitMenu(MainFrame* self)
 {
 }
 
-void Draw(MainFrame* self, ui_graphics* g)
+void OnDraw(MainFrame* self, ui_component* sender, ui_graphics* g)
 {
 	ui_size size = ui_component_size(&self->component);    
 	ui_rectangle r;
@@ -93,13 +95,13 @@ void Destroy(MainFrame* self, ui_component* component)
 	PostQuitMessage (0) ;
 }
 
-void OnSize(MainFrame* self, int width, int height)
+void OnSize(MainFrame* self, ui_component* sender, int width, int height)
 {
 	int statusbarheight = 30;
 	self->cx = width;
 	self->cy = height;
-	ui_component_resize(&self->sequenceview.component, 150, height - statusbarheight);
-	ui_component_resize(self->activeview, width - 150, height - statusbarheight);
+	ui_component_resize(&self->sequenceview.component, 150, height - statusbarheight - 25);
+	ui_component_resize(self->activeview, width - 150, height - statusbarheight - 25);
 	SendMessage(statusbar.component.hwnd, WM_SIZE, 0, 0);
 }
 
@@ -115,11 +117,12 @@ void SetActiveView(MainFrame* self, ui_component* view)
 	}
 	self->activeview = view;
 	ui_component_show(self->activeview);
-	ui_component_resize(self->activeview, self->cx - 150, self->cy - 30);		
+	ui_component_resize(self->activeview, self->cx - 150, self->cy - 30);
+	ui_component_resize(&self->machinebar.component, self->cx, 20);
 	ui_component_setfocus(self->activeview);
 }
 
-int OnKeyDown(MainFrame* self, int keycode, int keydata)
+void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata)
 {	
 	if (keycode == VK_F2) {
 		SetActiveView(self, &self->machineview.component);
@@ -153,16 +156,14 @@ int OnKeyDown(MainFrame* self, int keycode, int keydata)
 				machine->seqtick(machine, 0, cmd + base, 0, 0, 0);
 			}
 		}
-	}	
-	return 0;
+	}		
 }
 
-
-void OnTimer(MainFrame* self, int timerid)
+void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 {
 	char buffer[20];
 
-	_snprintf(buffer, 20, "%.4f", self->patternview.player->pos); 
+	_snprintf(buffer, 20, "%.4f", player_position(self->patternview.player)); 
 	ui_statusbar_settext(&statusbar, 0, buffer);	
 }
 

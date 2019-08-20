@@ -9,33 +9,32 @@ static int cpy;
 static int cpx;
 static int fillchoice;
 
-
-static void Draw(SettingsView* self, ui_graphics* g);
+static void OnDraw(SettingsView* self, ui_component* sender, ui_graphics* g);
 static int OnPropertiesEnum(SettingsView* self, Properties* property, int level);
 static int OnPropertiesHitTestEnum(SettingsView* self, Properties* property, int level);
-static int OnKeyDown(SettingsView* self, int keycode, int keydata);
-static void OnMouseDown(SettingsView* self, int x, int y, int button);
-static void OnMouseDoubleClick(SettingsView* self, int x, int y, int button);
-static void OnEditChange(SettingsView* self);
+static void OnKeyDown(SettingsView* self, ui_component* sender, int keycode, int keydata);
+static void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int button);
+static void OnMouseDoubleClick(SettingsView* self, ui_component* sender, int x, int y, int button);
+static void OnEditChange(SettingsView* self, ui_edit* sender);
 
 void InitSettingsView(SettingsView* self, ui_component* parent, Properties* properties)
 {			
 	ui_component_init(self, &self->component, parent);
-	self->component.events.draw = Draw;
-	self->component.events.keydown = OnKeyDown;
-	self->component.events.mousedown = OnMouseDown;
-	self->component.events.mousedoubleclick = OnMouseDoubleClick;
+	signal_connect(&self->component.signal_draw, self, OnDraw);
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
+	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	signal_connect(&self->component.signal_mousedoubleclick, self, OnMouseDoubleClick);
 	ui_component_move(&self->component, 10, 10);
 	ui_component_resize(&self->component, 400, 400);
 	self->properties = properties;	
 	self->selected = 0;
 	ui_edit_init(&self->edit, &self->component, 0);
 	self->edit.component.events.target = self;
-	ui_component_hide(&self->edit);
-	self->edit.editevents.change = OnEditChange;
+	ui_component_hide(&self->edit.component);
+	signal_connect(&self->edit.signal_change, self, OnEditChange);
 }
 
-void Draw(SettingsView* self, ui_graphics* g)
+void OnDraw(SettingsView* self, ui_component* sender, ui_graphics* g)
 {	   	
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);    
@@ -97,12 +96,11 @@ int OnPropertiesEnum(SettingsView* self, Properties* property, int level)
 	return 1;
 }
 
-int OnKeyDown(SettingsView* self, int keycode, int keydata)
-{
-	return 1;
+void OnKeyDown(SettingsView* self, ui_component* sender, int keycode, int keydata)
+{	
 }
 
-void OnMouseDown(SettingsView* self, int x, int y, int button)
+void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int button)
 {
 	ui_component_hide(&self->edit.component);
 	self->selected = 0;
@@ -170,18 +168,18 @@ int OnPropertiesHitTestEnum(SettingsView* self, Properties* property, int level)
 	return 1;
 }
 
-void OnMouseDoubleClick(SettingsView* self, int x, int y, int button)
+void OnMouseDoubleClick(SettingsView* self, ui_component* sender, int x, int y, int button)
 {
 	if (self->selected) {
-		ui_component_move(&self->edit, self->selrect.left, self->selrect.top);
-		ui_component_resize(&self->edit, self->selrect.right - self->selrect.left, 
+		ui_component_move(&self->edit.component, self->selrect.left, self->selrect.top);
+		ui_component_resize(&self->edit.component, self->selrect.right - self->selrect.left, 
 			self->selrect.bottom - self->selrect.top);
 		ui_edit_settext(&self->edit, self->selected->item.value.s);
 		ui_component_show(&self->edit.component);
 	}
 }
 
-void OnEditChange(SettingsView* self)
+void OnEditChange(SettingsView* self, ui_edit* sender)
 {
 	if (self->selected) {
 		properties_write_string(self->selected, self->selected->item.key, ui_edit_text(&self->edit));

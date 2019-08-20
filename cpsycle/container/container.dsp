@@ -91,6 +91,10 @@ SOURCE=.\src\hashtbl.c
 
 SOURCE=.\src\list.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\signal.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -102,6 +106,10 @@ SOURCE=.\src\hashtbl.h
 # Begin Source File
 
 SOURCE=.\src\list.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\signal.h
 # End Source File
 # End Group
 # End Target

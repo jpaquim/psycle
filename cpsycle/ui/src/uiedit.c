@@ -9,11 +9,13 @@ extern IntHashTable winidmap;
 extern int winid;
 
 static void OnCommand(ui_edit* self, WPARAM wParam, LPARAM lParam);
+static void OnDestroy(ui_edit* self, ui_component* sender);
 
 void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 {  
-    memset(&edit->component.events, 0, sizeof(ui_events));
-	memset(&edit->editevents, 0, sizeof(ui_editevents));
+    memset(&edit->component.events, 0, sizeof(ui_events));	
+	ui_component_init_signals(&edit->component);	
+	signal_init(&edit->signal_change);
 	edit->component.doublebuffered = 0;
 	edit->component.hwnd = CreateWindow (TEXT("EDIT"), NULL,
 		WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | styles,
@@ -29,6 +31,12 @@ void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 	edit->component.events.target = edit;
 	edit->component.events.cmdtarget = edit;
 	edit->component.events.command = OnCommand;
+	signal_connect(&edit->component.signal_destroy, edit,  OnDestroy);
+}
+
+void OnDestroy(ui_edit* self, ui_component* sender)
+{
+	signal_dispose(&self->signal_change);
 }
 
 void ui_edit_connect(ui_edit* edit, void* target)
@@ -53,8 +61,8 @@ void OnCommand(ui_edit* self, WPARAM wParam, LPARAM lParam) {
     {
         case EN_CHANGE:
         {
-            if (self->editevents.change) {
-				self->editevents.change(self->component.events.target);
+            if (self->signal_change.slots) {
+				signal_emit(&self->signal_change, self, 0);				
 			}
         }
 		break;

@@ -5,6 +5,7 @@
 // © 2006, Steinberg Media Technologies, All Rights Reserved
 //-------------------------------------------------------------------------------------------------------
 
+
 #ifndef __aeffect__
 #define __aeffect__
 
