@@ -101,6 +101,10 @@ SOURCE=.\src\uibutton.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uicombobox.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uicomponent.c
 # End Source File
 # Begin Source File
@@ -154,6 +158,10 @@ SOURCE=.\src\ui_app.h
 # Begin Source File
 
 SOURCE=.\src\uibutton.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicombobox.h
 # End Source File
 # Begin Source File
 

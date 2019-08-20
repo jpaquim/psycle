@@ -12,8 +12,19 @@ typedef struct {
 } SequenceEntry;
 
 typedef struct {
+	PatternNode* (*next)(void*);
+	void (*unget)(void*);
+	List* sequence;
+	PatternNode* pattern;
+	List* prevsequence;
+	PatternNode* prevpattern;
+} SequencePtr;
+
+typedef struct {
 	List* entries;
 	Patterns* patterns;
+	SequencePtr pos;
+	SequencePtr prev;
 } Sequence;
 
 void sequence_init(Sequence*, Patterns*);
@@ -22,6 +33,7 @@ void sequence_insert(Sequence*, float offset, int pattern);
 SequenceEntry* sequence_append(Sequence*, int pattern);
 unsigned int sequence_size(Sequence*);
 SequenceEntry* sequence_at(Sequence*, unsigned int position);
-
+void sequence_seek(Sequence*, float pos);
+SequencePtr sequence_begin(Sequence* self, float offset);
 #endif
 

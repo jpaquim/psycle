@@ -12,7 +12,7 @@ static float right[65535];
 
 static float* Work(Player* player, int* numsamples);
 static void Interleave(float* dst, float* left, float* right, int num);
-static void OnEnumerateSequencer(Machine* machine, PatternNode* events);
+static void OnEnumerateSequencer(Machine* machine, int slot, PatternNode* events);
 
 extern HANDLE hGuiEvent;
 extern HANDLE hWorkDoneEvent;
@@ -30,6 +30,7 @@ void player_init(Player* self, Song* song)
 	sequencer_init(&self->sequencer);
 	self->sequencer.sequence = &song->sequence;
 	self->driver = (Driver*) malloc(sizeof(Driver));
+	self->t = 125 / (44100 * 60.0f);
 	driver_init(self->driver);
 	driver_connect(self->driver, self, Work);	
 
@@ -64,7 +65,12 @@ void player_stop(Player* self)
 
 float player_position(Player* self)
 {
-	return self->pos;
+	return self->sequencer.pos;
+}
+
+float Offset(Player* self, int numsamples)
+{
+	return numsamples * self->t;
 }
 
 float* Work(Player* self, int* numsamples)
@@ -83,14 +89,18 @@ float* Work(Player* self, int* numsamples)
 		amount = numSamplex;
 	}
 	do
-	{			
+	{							
 		MachinePath* path = self->song->machines.path;
+		if (self->playing) {
+			sequencer_tick(&self->sequencer, Offset(self, amount));			
+		}		
 		if (path) {
-			MachinePath* pathptr;			
+			MachinePath* pathptr;						
+			SequencePtr curr = self->sequencer.curr;
 			pathptr = path;
 			while (pathptr != NULL) {
 				Machine* machine;
-				MachineConnections* connections;
+				MachineConnections* connections;				
 				int i;
 
 				machine = machines_at(&self->song->machines, (int)pathptr->node);
@@ -115,13 +125,47 @@ float* Work(Player* self, int* numsamples)
 					}								
 				}				
 				if ((int)(pathptr->node) != 0) {
+					if (self->playing) {												
+						self->sequencer.curr = curr;
+						sequencer_enumerate(&self->sequencer, machine, (int)(pathptr->node), OnEnumerateSequencer);						
+					}
 					machine->work(machine, amount, 16);				
 				}
 				pathptr = pathptr->next;
 			}
+							
+		}
+		master = machines_at(&self->song->machines, 0);
+		if (master && master->outputs[0] && master->outputs[1]) {				
+			dsp_interleave(pSamples, master->outputs[0], master->outputs[1], amount);			
+		}
+		numSamplex -= amount;		
+		pSamples  += 2*amount;
+	
+	} 
+	while (numSamplex);
+	SetEvent(hWorkDoneEvent);
+	WaitForSingleObject(hGuiEvent, INFINITE);	
+	
+//	dsp_mul(buffer, *numsamples, 0.5);
+	return buffer;
+}
+
+void OnEnumerateSequencer(Machine* machine, int slot, PatternNode* node)
+{
+	if (node->event.mach == slot) {
+		machine->seqtick(machine,
+			0,
+			node->event.note,
+			node->event.inst, 
+			node->event.cmd,
+			node->event.parameter);	
+	}
+}
 
 
-			/*while (pathptr != NULL) {
+
+/*while (pathptr != NULL) {
 				MachineList* machineptr = (MachineList*)pathptr->node;
 				while (machineptr != NULL) {
 					Machine* machine;				
@@ -150,53 +194,6 @@ float* Work(Player* self, int* numsamples)
 					machineptr = machineptr->next;
 				}
 				pathptr = pathptr->next;
-			}*/						
-		}
-		master = machines_at(&self->song->machines, 0);
-		if (master && master->outputs[0] && master->outputs[1]) {				
-			Interleave(pSamples, master->outputs[0], master->outputs[1], amount);			
-		}
-		numSamplex -= amount;		
-		pSamples  += 2*amount;
-	
-	} 
-	while (numSamplex);
-	SetEvent(hWorkDoneEvent);
-	WaitForSingleObject(hGuiEvent, INFINITE);	
-	
-//	dsp_mul(buffer, *numsamples, 0.5);
-	return buffer;
-}
-
-void OnEnumerateSequencer(Machine* machine, PatternNode* events)
-{
-	PatternNode* ptr;
-
-	ptr = events;
-	while (ptr != NULL) {		
-		machine->seqtick(machine, 0, ptr->event.note, ptr->event.inst, 
-			ptr->event.cmd, ptr->event.parameter);
-		ptr = ptr->next;
-	}
-}
-
-void Interleave(float* dst, float* left, float* right, int num)
-{
-	int i;		
-	--dst;
-	--left;
-	--right;	
-	i = num;
-	do {
-		++dst;
-		++left;
-		++right;
-		*dst = *left;
-		++dst;
-		*dst = *right;
-	}
-	while (--i);
-}
-
+			}*/		
 
 

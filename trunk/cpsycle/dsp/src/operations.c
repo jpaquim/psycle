@@ -39,3 +39,21 @@ void dsp_clear(float *dst, int num)
 {
 	memset(dst,0,num*sizeof(float));
 }
+
+void dsp_interleave(float* dst, float* left, float* right, int num)
+{
+	int i;		
+	--dst;
+	--left;
+	--right;	
+	i = num;
+	do {
+		++dst;
+		++left;
+		++right;
+		*dst = *left;
+		++dst;
+		*dst = *right;
+	}
+	while (--i);
+}

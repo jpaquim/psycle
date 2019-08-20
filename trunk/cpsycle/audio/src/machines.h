@@ -6,6 +6,7 @@
 #include <hashtbl.h>
 #include <list.h>
 #include "machine.h"
+#include <signal.h>
 
 struct MachineConnectionStruct {
 	int slot;	
@@ -30,6 +31,10 @@ typedef struct {
 	float* buffers;
 	int numbuffers;
 	int currbuffer;
+	int slot;
+
+	Signal signal_insert;
+	Signal signal_slotchange;		
 } Machines;
 
 void machines_init(Machines*);
@@ -42,4 +47,8 @@ void machines_connect(Machines* self, int outputslot, int inputslot);
 MachineConnections* machines_connections(Machines* self, int slot);
 MachineList* calc_list(Machines* self, int slot);
 float* machines_nextbuffer(Machines* self);
+void machines_changeslot(Machines* self, int slot);
+int machines_slot(Machines* self);
+
+
 #endif

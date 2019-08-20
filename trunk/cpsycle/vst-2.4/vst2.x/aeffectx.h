@@ -1,7 +1,12 @@
 //-------------------------------------------------------------------------------------------------------
-// based on VST Plug-Ins SDK Version 2.4
-// Modified for C include
-// see copyright at
+// VST Plug-Ins SDK
+// Version 2.4		$Date: 2006/01/12 09:04:56 $
+//
+// Category     : VST 2.x Interfaces
+// Filename     : aeffectx.h
+// Created by   : Steinberg Media Technologies
+// Description  : Definition of auxiliary structures, extensions from VST 1.0 to VST 2.4
+//
 // © 2006, Steinberg Media Technologies, All Rights Reserved
 //-------------------------------------------------------------------------------------------------------
 

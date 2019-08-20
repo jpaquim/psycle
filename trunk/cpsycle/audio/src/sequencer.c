@@ -20,22 +20,31 @@ void sequencer_connect(Sequencer* self, void* context, void (*callback)(void*, P
 void sequencer_setposition(Sequencer* self, float position)
 {
 	self->pos = 0.0f;
-	self->curr = 0; // ((SequenceEntry*)(self->sequence->entries->node))->pattern->events;
+	self->window = 0.0f;
+	self->curr = sequence_begin(self->sequence, 0.0f);		
 }
 
 void sequencer_tick(Sequencer* self, float offset)
 {		
-	self->pos += offset;	
+	self->pos += self->window;
+	self->window = offset;		
 }
 
-
-void sequencer_enumerate(Sequencer* self, void* context, float offset,
-	void (*callback)(void*, PatternNode*))
+SequencePtr sequencer_curr(Sequencer* self)
 {
-	while (self->curr && 
-		self->curr->offset >= self->pos && self->curr->offset < self->pos + offset) {
-		self->curr->delta = self->curr->offset - self->pos;
-		callback(context, self->curr);
-		self->curr = self->curr->next;
+	return self->curr;
+}
+
+void sequencer_enumerate(Sequencer* self, void* context, int slot, void (*callback)(void*, int, PatternNode*))
+{
+	PatternNode* node;	
+	while (node = self->curr.next(&self->curr)) {
+		if (node->offset >= self->pos && node->offset < self->pos + self->window) {
+			callback(context, slot, node);
+		} else {
+			self->curr.unget(&self->curr);
+			break;
+		}
 	}
+
 }

@@ -1,6 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
-#include "FileIO.h"
+#include "fileio.h"
 
 #if defined(_WINAMP_PLUGIN_)
 //#include <windows.h>
@@ -14,7 +14,7 @@ ULONG FourCC(char *psName)
 	long retbuf = 0x20202020;   // four spaces (padding)
 	char *ps = ((char *)&retbuf);
 	int i;
-
+	
 	// Remember, this is Intel format!
 	// The first character goes in the LSB
 	for (i=0; i<4 && psName[i]; i++ )
@@ -26,7 +26,7 @@ ULONG FourCC(char *psName)
 
 
 BOOL rifffile_open(RiffFile* self,
-	char* psFileName)
+				   char* psFileName)
 {
 	strcpy(self->szName,psFileName);
 	self->_file = fopen(psFileName, "rb");
@@ -34,8 +34,8 @@ BOOL rifffile_open(RiffFile* self,
 }
 
 BOOL rifffile_create(RiffFile* self,
-	char* psFileName,
-	BOOL overwrite)
+					 char* psFileName,
+					 BOOL overwrite)
 {
 	strcpy(self->szName,psFileName);
 	self->_file = fopen(psFileName, "rb");
@@ -47,7 +47,7 @@ BOOL rifffile_create(RiffFile* self,
 			return FALSE;
 		}
 	}
-
+	
 	self->_file = fopen(psFileName, "wb");
 	return (self->_file != NULL);
 }
@@ -64,37 +64,37 @@ BOOL rifffile_close(RiffFile* self)
 		return b;
 	}
 	return TRUE;
-
-
+	
+	
 }
 
 BOOL rifffile_read(RiffFile* self,
-	void* pData,
-	ULONG numBytes)
+				   void* pData,
+				   ULONG numBytes)
 {
 	DWORD bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
 	return (bytesRead == numBytes);
-
+	
 }
 
 BOOL rifffile_write(RiffFile* self,
-	void* pData,
-	ULONG numBytes)
+					void* pData,
+					ULONG numBytes)
 {
 	DWORD bytesWritten;
 	fflush(self->_file);
 	bytesWritten = fwrite(pData, sizeof(char), numBytes, self->_file);
 	return (bytesWritten == numBytes);
-
-
+	
+	
 }
 
 BOOL rifffile_expect(RiffFile* self,
-	void* pData,
-	ULONG numBytes)
+					 void* pData,
+					 ULONG numBytes)
 {
 	UCHAR c;
-
+	
 	while (numBytes-- != 0)
 	{
 		if (fread(&c, sizeof(c), 1, self->_file) != 1)
@@ -108,23 +108,23 @@ BOOL rifffile_expect(RiffFile* self,
 		pData = (char*)pData + 1;
 	}
 	return TRUE;
-
-
+	
+	
 }
 
 long rifffile_seek(RiffFile* self,
-	long offset)
+				   long offset)
 {
 	if (fseek(self->_file, offset, SEEK_SET) != 0)
 	{
 		return -1;
 	}
 	return ftell(self->_file);
-
+	
 }
 
 long rifffile_skip(RiffFile* self,
-	long numBytes)
+				   long numBytes)
 {
 	if (fseek(self->_file, numBytes, SEEK_CUR) != 0) return -1;
 	return ftell(self->_file);
@@ -133,7 +133,7 @@ long rifffile_skip(RiffFile* self,
 BOOL rifffile_eof(RiffFile* self)
 {
 	return feof(self->_file);
-
+	
 }
 
 long rifffile_getpos(RiffFile* self)
@@ -150,12 +150,12 @@ long rifffile_filesize(RiffFile* self)
 	end = ftell(self->_file);
 	fseek(self->_file,init,SEEK_SET);
 	return end;
-
+	
 }
 
 BOOL rifffile_readstring(RiffFile* self, char* pData, ULONG maxBytes)
 {
-if (maxBytes > 0)
+	if (maxBytes > 0)
 	{		
 		char c;
 		ULONG index;
@@ -185,7 +185,7 @@ if (maxBytes > 0)
 		return TRUE;
 	}
 	return FALSE;
-
+	
 }
 
 FILE* rifffile_getfile(RiffFile* self)

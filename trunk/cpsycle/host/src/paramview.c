@@ -4,17 +4,17 @@
 #include <bitmap.h>
 #include "resources/resource.h"
 
-static void Draw(ParamView* self, ui_graphics* g);
+static void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(ParamView* self, ui_graphics* g);
-static void OnSize(ParamView* self, int width, int height);
+static void OnSize(ParamView* self, ui_component* sender, int width, int height);
 static void DrawParam(ParamView* self, ui_graphics* g, int param, int row, int col);
 static void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col);
 static void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col);
 static void cellsize(ParamView* self, int* width, int* height);
 static void cellposition(ParamView* self, int row, int col, int* x, int* y);
-static void OnMouseDown(ParamView* self, int x, int y, int button);
-static void OnMouseUp(ParamView* self, int x, int y, int button);
-static void OnMouseMove(ParamView* self, int x, int y, int button);
+static void OnMouseDown(ParamView* self, ui_component* sender, int x, int y, int button);
+static void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int button);
+static void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button);
 static int HitTest(ParamView* self, int x, int y);
 
 static ui_bitmap knobs;
@@ -30,12 +30,12 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 		hfont = ui_createfont("Tahoma", 12);
 	}
 	self->machine = machine;
-	ui_component_init(self, &self->component, parent);
-	self->component.events.draw = Draw;
-	self->component.events.size = OnSize;
-	self->component.events.mousedown = OnMouseDown;
-	self->component.events.mouseup = OnMouseUp;
-	self->component.events.mousemove = OnMouseMove;
+	ui_component_init(self, &self->component, parent);	
+	signal_connect(&self->component.signal_draw, self, OnDraw);
+	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
+	signal_connect(&self->component.signal_mousemove,self,OnMouseMove);
 	ui_component_move(&self->component, 0, 0);
 	ui_component_resize(&self->component, 800, 400);
 
@@ -54,7 +54,7 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	self->component.doublebuffered = TRUE;
 }
 
-void Draw(ParamView* self, ui_graphics* g)
+void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
 {			
 	if (self->params) {								
 		int row = 0;
@@ -162,13 +162,13 @@ void ParamViewSize(ParamView* self, int* width, int* height)
 	*height = self->numrows * cellheight;
 }
 
-void OnSize(ParamView* self, int width, int height)
+void OnSize(ParamView* self, ui_component* sender, int width, int height)
 {
 	self->cx = width;
 	self->cy = height;
 }
 
-void OnMouseDown(ParamView* self, int x, int y, int button)
+void OnMouseDown(ParamView* self, ui_component* sender, int x, int y, int button)
 {
 	self->tweak = HitTest(self, x, y);
 	if (self->tweak != -1) {
@@ -193,7 +193,7 @@ int HitTest(ParamView* self, int x, int y)
 	return (rv >= 0 && rv < self->numparams) ? rv : -1;
 }
 
-void OnMouseUp(ParamView* self, int x, int y, int button)
+void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int button)
 {
 	if (self->tweak != -1) {
 		ui_component_releasecapture();
@@ -201,7 +201,7 @@ void OnMouseUp(ParamView* self, int x, int y, int button)
 	self->tweak = -1;
 }
 
-void OnMouseMove(ParamView* self, int x, int y, int button)
+void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button)
 {
 	if (self->tweak != -1) {
 		const CMachineParameter* param;

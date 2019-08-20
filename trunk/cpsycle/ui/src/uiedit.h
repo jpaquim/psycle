@@ -7,12 +7,8 @@
 #include "uicomponent.h"
 
 typedef struct {
-	void (*change)(void* self);
-} ui_editevents;
-
-typedef struct {
-   ui_component component;
-   ui_editevents editevents;
+   ui_component component;   
+   Signal signal_change;
 } ui_edit;
 
 

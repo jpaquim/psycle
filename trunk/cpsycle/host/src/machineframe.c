@@ -3,16 +3,16 @@
 #include "machineframe.h"
 
 static void OnDestroy(MachineFrame* self, ui_component* frame);
-static void OnSize(MachineFrame* self, int width, int height);
+static void OnSize(MachineFrame* self, ui_component* sender, int width, int height);
 
 void InitMachineFrame(MachineFrame* self, ui_component* parent)
 {		
 	self->view = 0;
 	ui_frame_init(self, &self->component, parent);	
 	ui_component_move(&self->component, 200, 150);
-	ui_component_resize(&self->component, 400, 400);
-	self->component.events.destroy = OnDestroy;
-	self->component.events.size = OnSize;
+	ui_component_resize(&self->component, 400, 400);	
+	signal_connect(&self->component.signal_destroy, self, OnDestroy);
+	signal_connect(&self->component.signal_size, self, OnSize);
 	//ui_frame_init(self, &self->component, &self->component);	
 	//ui_component_resize(&self->component, 400, 400);		
 }
@@ -33,7 +33,7 @@ void OnDestroy(MachineFrame* self, ui_component* frame)
 	self->component.hwnd = 0;		
 }
 
-void OnSize(MachineFrame* self, int width, int height)
+void OnSize(MachineFrame* self, ui_component* sender, int width, int height)
 {
 	if (self->view) {
 		ui_component_resize(self->view, width, height);

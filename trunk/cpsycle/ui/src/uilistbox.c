@@ -13,6 +13,7 @@ extern int winid;
 void ui_listbox_init(void* self, ui_listbox* listbox, ui_component* parent)
 {  
     memset(&listbox->component.events, 0, sizeof(ui_events));
+	ui_component_init_signals(&listbox->component);	
 	listbox->component.doublebuffered = 0;
 	listbox->component.hwnd = CreateWindow (TEXT("LISTBOX"), NULL,
 		WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY,
@@ -32,5 +33,7 @@ void ui_listbox_addstring(ui_listbox* listbox, const char* text)
 {
 	SendMessage(listbox->component.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
 }
+
+
 
 

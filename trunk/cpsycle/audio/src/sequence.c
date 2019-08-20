@@ -3,11 +3,15 @@
 #include "sequence.h"
 #include <stdlib.h>
 
+static PatternNode* sequenceptr_next(SequencePtr* self);
+static void sequenceptr_unget(SequencePtr* self);
 
 void sequence_init(Sequence* self, Patterns* patterns)
 {
 	self->entries = 0;
 	self->patterns = patterns;
+	self->pos.pattern = 0;
+	self->pos.sequence = 0;
 }
 
 void sequence_dispose(Sequence* self)
@@ -85,3 +89,47 @@ SequenceEntry* sequence_at(Sequence* self, unsigned int position)
 	}
 	return entry;
 }
+
+void sequence_seek(Sequence* self, float pos)
+{	
+	self->pos.sequence = self->entries;
+	if (self->pos.sequence) {
+		Pattern* pattern;
+		SequenceEntry* entry = (SequenceEntry*) self->pos.sequence->node;
+		pattern = patterns_at(self->patterns, entry->pattern);
+		self->pos.pattern = pattern->events;
+	}
+}
+
+SequencePtr sequence_begin(Sequence* self, float pos)
+{	
+	SequencePtr ptr;
+	ptr.sequence = self->entries;
+	if (ptr.sequence) {
+		Pattern* pattern;
+		SequenceEntry* entry = (SequenceEntry*) ptr.sequence->node;
+		pattern = patterns_at(self->patterns, entry->pattern);
+		ptr.pattern = pattern->events;
+		ptr.next = sequenceptr_next;
+		ptr.unget = sequenceptr_unget;
+	}
+	return ptr;
+}
+
+PatternNode* sequenceptr_next(SequencePtr* self) {
+	PatternNode* node = 0;	
+	self->prevsequence = self->sequence;
+	self->prevpattern = self->pattern;	
+	if (self->pattern) {		
+		node = self->pattern;	
+		self->pattern = self->pattern->next;
+	}
+	return node;
+}
+
+void sequenceptr_unget(SequencePtr* self)
+{
+	self->sequence = self->prevsequence;
+	self->pattern = self->prevpattern;
+}
+

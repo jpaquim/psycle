@@ -23,10 +23,13 @@ void machines_init(Machines* self)
 	self->numbuffers = 20;
 	self->buffers = (float*) malloc(sizeof(float)*BUFFER_SIZE * self->numbuffers);
 	self->currbuffer = 0;
+	self->slot = 0;		
+	signal_init(&self->signal_insert);
 }
 
 void machines_dispose(Machines* self)
 {	
+	signal_dispose(&self->signal_insert);
 	machines_enumerate(self, self, OnEnumMachine);
 	free_machinepath(self->path);
 	DisposeIntHashTable(&self->slots);
@@ -50,6 +53,7 @@ void machines_insert(Machines* self, int slot, Machine* machine)
 	connections->outputs.slot = -1;
 	connections->inputs.slot = -1;
 	InsertIntHashTable(&self->connections, slot, connections);
+	signal_emit(&self->signal_insert, self, 1, slot);	
 }
 
 int machines_append(Machines* self, Machine* machine)
@@ -69,6 +73,7 @@ int machines_append(Machines* self, Machine* machine)
 		connections->inputs.slot = -1;
 	}
 	InsertIntHashTable(&self->connections, slot, connections);
+	signal_emit(&self->signal_insert, self, 1, slot);
 	return slot;
 }
 
@@ -220,6 +225,17 @@ float* machines_nextbuffer(Machines* self)
 		self->currbuffer = 0;
 	}	
 	return buffer;
+}
+
+void machines_changeslot(Machines* self, int slot)
+{
+	self->slot = slot;	
+	signal_emit(&self->signal_slotchange, self, 1, slot);
+}
+
+int machines_slot(Machines* self)
+{
+	return self->slot;
 }
 
 

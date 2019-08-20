@@ -13,7 +13,8 @@ static void OnCommand(ui_button* self, WPARAM wParam, LPARAM lParam);
 
 void ui_button_init(ui_button* button, ui_component* parent)
 {  
-    memset(&button->component.events, 0, sizeof(ui_events));
+    memset(&button->component.events, 0, sizeof(ui_events));	
+	ui_component_init_signals(&button->component);
 	button->component.doublebuffered = 0;
 	button->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
 		WS_CHILD | WS_VISIBLE,

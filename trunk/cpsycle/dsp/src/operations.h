@@ -8,5 +8,6 @@ void dsp_add(float *src, float *dst, int num, float vol);
 void dsp_mul(float *dst, int numSamples, float mul);
 void dsp_movmul(float *src, float *dst, int num, float mul);		
 void dsp_clear(float *dst, int num);
+void dsp_interleave(float* dst, float* left, float* right, int num);
 
 #endif

@@ -1,7 +1,12 @@
 //-------------------------------------------------------------------------------------------------------
-// based on VST Plug-Ins SDK Version 2.4
-// Modified for C include
-// see copyright at
+// VST Plug-Ins SDK
+// Version 2.4		$Date: 2006/01/12 09:04:56 $
+//
+// Category     : VST 2.x Interfaces
+// Filename     : aeffect.h
+// Created by   : Steinberg Media Technologies
+// Description  : Definition of AEffect structure
+//
 // © 2006, Steinberg Media Technologies, All Rights Reserved
 //-------------------------------------------------------------------------------------------------------
 

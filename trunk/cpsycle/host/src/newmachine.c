@@ -4,16 +4,16 @@
 #include <plugin_interface.h>
 
 static void OnDestroy(NewMachine* self, ui_component* component);
-static void Draw(NewMachine* self, ui_graphics* g);
+static void OnDraw(NewMachine* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(NewMachine* self, ui_graphics* g);
-static void OnSize(NewMachine* self, int width, int height);
-static void OnMouseDown(NewMachine* self, int x, int y, int button);
+static void OnSize(NewMachine* self, ui_component* sender, int width, int height);
+static void OnMouseDown(NewMachine* self, ui_component* sender, int x, int y, int button);
 static void HitTest(NewMachine* self, int x, int y);
 static int OnPropertiesEnum(NewMachine* self, Properties* curr_properties, int level);
-static void OnScroll(NewMachine* self, int cx, int cy);
+static void OnScroll(NewMachine* self, ui_component* sender, int cx, int cy);
 static int OnPropertiesCount(NewMachine* self, Properties* property, int level);
-static void OnMouseDoubleClick(NewMachine* self, int x, int y, int button);
-static int OnKeyDown(NewMachine* self, int keycode, int keydata);
+static void OnMouseDoubleClick(NewMachine* self, ui_component* sender, int x, int y, int button);
+static void OnKeyDown(NewMachine* self, ui_component* sender, int keycode, int keydata);
 
 static int cpy;
 static int dy;
@@ -24,13 +24,13 @@ void InitNewMachine(NewMachine* self, ui_component* parent, Player* player, Prop
 	Properties* property;
 	ui_component_init(self, &self->component, parent);	
 	ui_component_showverticalscrollbar(&self->component);
-	self->component.events.destroy = OnDestroy;
-	self->component.events.size = OnSize;
-	self->component.events.scroll = OnScroll;
-	self->component.events.keydown = OnKeyDown;
-	self->component.events.mousedown = OnMouseDown;
-	self->component.events.mousedoubleclick = OnMouseDoubleClick;
-	self->component.events.draw = Draw;
+	signal_connect(&self->component.signal_destroy, self,OnDestroy);	
+	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&self->component.signal_scroll, self, OnScroll);	
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
+	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	signal_connect(&self->component.signal_mousedoubleclick, self, OnMouseDoubleClick);
+	signal_connect(&self->component.signal_draw, self, OnDraw);
 	ui_component_move(&self->component, 0, 0);	
 	self->selectedplugin = 0;
 	plugincatcher_init(&self->plugincatcher);
@@ -51,7 +51,7 @@ void OnDestroy(NewMachine* self, ui_component* component)
 	plugincatcher_dispose(&self->plugincatcher);
 }
 
-void Draw(NewMachine* self, ui_graphics* g)
+void OnDraw(NewMachine* self, ui_component* sender, ui_graphics* g)
 {	   	
 	DrawBackground(self, g);
 	self->g = g;
@@ -89,7 +89,7 @@ int OnPropertiesEnum(NewMachine* self, Properties* property, int level)
 	return 1;
 }
 
-void OnSize(NewMachine* self, int width, int height)
+void OnSize(NewMachine* self, ui_component* sender, int width, int height)
 {
 	self->cx = width;
 	self->cy = height;
@@ -102,7 +102,7 @@ void OnScroll(NewMachine* self, int cx, int cy)
 	dy += cy;
 }
 
-void OnMouseDown(NewMachine* self, int x, int y, int button)
+void OnMouseDown(NewMachine* self, ui_component* sender, int x, int y, int button)
 {
 	HitTest(self, x, y);
 }
@@ -125,7 +125,7 @@ int OnPropertiesCount(NewMachine* self, Properties* property, int level)
 	return 1;
 }
 
-void OnMouseDoubleClick(NewMachine* self, int x, int y, int button)
+void OnMouseDoubleClick(NewMachine* self, ui_component* sender, int x, int y, int button)
 {
 	if (self->selectedplugin && self->selected) {
 		self->selected(self->selectioncontext,
@@ -135,11 +135,10 @@ void OnMouseDoubleClick(NewMachine* self, int x, int y, int button)
 	ui_component_hide(&self->component);
 }
 
-int OnKeyDown(NewMachine* self, int keycode, int keydata)
+void OnKeyDown(NewMachine* self, ui_component* sender, int keycode, int keydata)
 {
 	if (keycode == VK_ESCAPE) {
 		ui_component_hide(&self->component);
 	}
-	return 0;
 }
 

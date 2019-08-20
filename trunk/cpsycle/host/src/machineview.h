@@ -12,6 +12,7 @@
 #include "newmachine.h"
 #include "machineframe.h"
 #include "paramview.h"
+#include "machinebar.h"
 
 typedef struct {
 	int srcx;
@@ -67,7 +68,7 @@ typedef struct {
 	int effect_font_point;
 	unsigned int effect_font_flags;	
 	unsigned int effect_fontcolour;
-	ui_bitmap skinbmp;
+	ui_bitmap skinbmp;	
 	HFONT hfont;
 } MachineSkin;
 
@@ -98,13 +99,15 @@ typedef struct {
    int my;
    int dragslot;
    int dragmode;
+   int selectedslot;
    MachineFrame machine_frames[256];
    ParamView machine_paramviews[256];
    PluginCatcher plugincatcher;
    MachineSkin skin;
+   MachineBar* machinebar;
 } MachineView;
 
-void InitMachineView(MachineView* machineView, ui_component* parent, Player* player, Properties* properties);
+void InitMachineView(MachineView* machineView, ui_component* parent, MachineBar* machinebar, Player* player, Properties* properties);
 void MachineViewApplyProperties(MachineView* self, Properties* properties);
 
 #endif

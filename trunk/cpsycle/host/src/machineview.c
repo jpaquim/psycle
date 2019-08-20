@@ -6,20 +6,22 @@
 #include "vstplugin.h"
 #include "resources/resource.h"
 
+static void OnDraw(MachineView* self, ui_component* sender, ui_graphics* g);
 static void Draw(MachineView* self, ui_graphics* g);
 static void DrawBackground(MachineView* self, ui_graphics* g);
 static void DrawTrackBackground(MachineView* self, ui_graphics* g, int track);
 static void DrawMachines(MachineView* self, ui_graphics* g);
 static void DrawMachine(MachineView* self, ui_graphics* g, int slot, Machine* machine, int x, int y);
+static void DrawMachineHighlight(MachineView* self, ui_graphics* g, int slot);
 static void DrawNewConnectionWire(MachineView* self, ui_graphics* g);
 static void DrawWires(MachineView* self, ui_graphics* g);
-static void OnSize(MachineView* self, int width, int height);
+static void OnSize(MachineView* self, ui_component* sender, int width, int height);
 static void OnDestroy(MachineView* self, ui_component* component);
-static void OnMouseDown(MachineView* self, int x, int y, int button);
-static void OnMouseUp(MachineView* self, int x, int y, int button);
-static void OnMouseMove(MachineView* self, int x, int y, int button);
-static void OnMouseDoubleClick(MachineView* self, int x, int y, int button);
-static int OnKeyDown(MachineView* self, int keycode, int keydata);
+static void OnMouseDown(MachineView* self, ui_component* sender, int x, int y, int button);
+static void OnMouseUp(MachineView* self, ui_component* sender, int x, int y, int button);
+static void OnMouseMove(MachineView* self, ui_component* sender,int x, int y, int button);
+static void OnMouseDoubleClick(MachineView* self, ui_component* sender, int x, int y, int button);
+static void OnKeyDown(MachineView* self, ui_component* sender, int keycode, int keydata);
 static void HitTest(MachineView* self, int x, int y);
 static int OnEnumDrawMachine(MachineView* self, int slot, Machine* machine);
 static int OnEnumDrawWires(MachineView* self, int slot, Machine* machine);
@@ -29,11 +31,12 @@ static void InitMachineCoords(MachineView* self);
 static void BlitSkinPart(MachineView* self, ui_graphics* g, int x, int y,
 	SkinCoord* coord);
 static void MachineUiSize(MachineView* self, int mode, int* width, int* height);
+static void OnMachinesChangeSlot(MachineView* self, Machines* machines, int slot);
 
 extern HINSTANCE appInstance;
 
 void MachineUiSet(MachineUi* self, int x, int y, const char* editname)
-{
+{	
 	self->x = x;
 	self->y = y;
 	if (self->editname) {
@@ -42,8 +45,11 @@ void MachineUiSet(MachineUi* self, int x, int y, const char* editname)
 	self->editname = strdup(editname);
 }
 
-void InitMachineView(MachineView* self, ui_component* parent, Player* player, Properties* properties)
+void InitMachineView(MachineView* self, ui_component* parent, MachineBar* machinebar, Player* player, Properties* properties)
 {				
+	self->cx = 0;
+	self->cy = 0;
+	self->machinebar = machinebar;
 	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, IDB_MACHINESKIN);	
 	if (self->skin.hfont == NULL) {
 		self->skin.hfont = ui_createfont("Tahoma", 12);
@@ -53,23 +59,33 @@ void InitMachineView(MachineView* self, ui_component* parent, Player* player, Pr
 	memset(&self->machine_frames, 0, sizeof(ui_component[256]));
 	memset(&self->machine_paramviews, 0, sizeof(ParamView[256]));
 	ui_component_init(self, &self->component, parent);	
-	self->component.events.destroy = OnDestroy;
-	self->component.events.size = OnSize;
-	self->component.events.mousedown = OnMouseDown;
-	self->component.events.mouseup = OnMouseUp;
-	self->component.events.mousemove = OnMouseMove;
-	self->component.events.mousedoubleclick = OnMouseDoubleClick;
-	self->component.events.keydown = OnKeyDown;
-	self->component.events.draw = Draw;
+	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
+	signal_connect(&self->component.signal_size, self, OnSize);			
+
+
+	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
+	signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
+	signal_connect(&self->component.signal_mousedoubleclick, self,OnMouseDoubleClick);
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);	
+	signal_connect(&self->component.signal_draw, self, OnDraw);
 	ui_component_move(&self->component, 0, 0);
 	self->player = player;			
 	self->dragslot = -1;
 	self->dragmode = MACHINEVIEW_DRAG_MACHINE;
+	self->selectedslot = 0;
 	InitNewMachine(&self->newmachine, &self->component, player, properties);
 	ui_component_hide(&self->newmachine.component);
 	self->newmachine.selected = OnPluginSelected;
 	self->component.doublebuffered = TRUE;
 	InitMachineCoords(self);
+	self->machinebar = machinebar;	
+	signal_connect(&self->player->song->machines.signal_slotchange, self, OnMachinesChangeSlot);
+}
+
+void Draw(MachineView* self, ui_graphics* g)
+{
+
 }
 
 void OnDestroy(MachineView* self, ui_component* component)
@@ -123,14 +139,16 @@ void MachineViewApplyProperties(MachineView* self, Properties* properties)
 		  (((((self->skin.wirecolour&0x00ff)) + ((self->skin.colour&0x00ff)))/2)&0x00ff);
 }
 
-void Draw(MachineView* self, ui_graphics* g)
+
+void OnDraw(MachineView* self, ui_component* sender, ui_graphics* g)
 {	   	
 	if (self->skin.hfont) {
 		ui_setfont(g, self->skin.hfont);
 	}
 	DrawBackground(self, g);
-	DrawWires(self, g);
-	DrawMachines(self, g);
+	DrawWires(self, g);	
+	DrawMachines(self, g);	
+	DrawMachineHighlight(self, g, self->selectedslot);
 	DrawNewConnectionWire(self, g);	
 }
 
@@ -232,7 +250,38 @@ void DrawMachine(MachineView* self, ui_graphics* g, int slot, Machine* machine, 
 	} else
 	if (machine->mode(machine) == MACHMODE_MASTER) {
 		BlitSkinPart(self, g, x, y, &self->skin.master.background);
-	}	
+	}		
+}
+
+void DrawMachineLine(ui_graphics* g, int xdir, int ydir, int x, int y)
+{
+	int hlength = 9; //the length of the selected machine highlight	
+
+	ui_drawline(g, x, y, x + xdir*hlength, y + ydir*hlength);
+}
+
+void DrawMachineHighlight(MachineView* self, ui_graphics* g, int slot)
+{	
+	if (slot != 0) {
+		int width;
+		int height;
+		int hdistance = 5; //the distance of the highlight from the machine	
+		Machine* machine;
+
+		machine = machines_at(&self->player->song->machines, slot);
+		if (machine) {
+			MachineUi* ui = &self->machineuis[slot];
+			MachineUiSize(self, machine->mode(machine), &width, &height);		           
+			DrawMachineLine(g, 1, 0, ui->x - hdistance, ui->y - hdistance);
+			DrawMachineLine(g, 0, 1, ui->x - hdistance, ui->y - hdistance);
+			DrawMachineLine(g, -1, 0, ui->x + width + hdistance, ui->y - hdistance);
+			DrawMachineLine(g, 0, 1, ui->x + width + hdistance, ui->y - hdistance);
+			DrawMachineLine(g, 0, -1, ui->x + width + hdistance, ui->y + height + hdistance);
+			DrawMachineLine(g, -1, 0, ui->x + width + hdistance, ui->y + height + hdistance);
+			DrawMachineLine(g, 1, 0, ui->x - hdistance, ui->y + height + hdistance);
+			DrawMachineLine(g, 0, -1, ui->x - hdistance, ui->y + height + hdistance);
+		}
+	}
 }
 
 void BlitSkinPart(MachineView* self, ui_graphics* g, int x, int y, SkinCoord* coord)
@@ -257,15 +306,14 @@ void MachineUiSize(MachineView* self, int mode, int* width, int* height)
 	}	
 }
 
-void OnSize(MachineView* self, int width, int height)
+void OnSize(MachineView* self, ui_component* sender, int width, int height)
 {
 	self->cx = width;
 	self->cy = height;
-
 	ui_component_resize(&self->newmachine.component, width, height);
 }
 
-void OnMouseDown(MachineView* self, int x, int y, int button)
+void OnMouseDown(MachineView* self, ui_component* sender, int x, int y, int button)
 {
 	ui_component_setfocus(&self->component);
 	self->mx = x;
@@ -273,9 +321,15 @@ void OnMouseDown(MachineView* self, int x, int y, int button)
 	HitTest(self, x, y);
 	if (self->dragslot != -1) {		
 		if (button == 1) {
-			self->dragmode = MACHINEVIEW_DRAG_MACHINE;
+			if (self->dragslot != 0) {
+				self->selectedslot = self->dragslot;
+				if (self->machinebar) {
+					machines_changeslot(&self->player->song->machines, self->selectedslot);					
+				}
+			}
+			self->dragmode = MACHINEVIEW_DRAG_MACHINE;			
 			self->mx = x - self->machineuis[self->dragslot].x;
-			self->my = y - self->machineuis[self->dragslot].y;
+			self->my = y - self->machineuis[self->dragslot].y;			
 		} else
 		if (button == 2) {
 			self->dragmode = MACHINEVIEW_DRAG_NEWCONNECTION;		
@@ -304,7 +358,7 @@ int OnEnumHitTestMachine(MachineView* self, int slot, Machine* machine)
 	return 1;
 }
 
-void OnMouseUp(MachineView* self, int x, int y, int button)
+void OnMouseUp(MachineView* self, ui_component* sender, int x, int y, int button)
 {	
 	if (self->dragslot != -1) {
 		if (self->dragmode == MACHINEVIEW_DRAG_NEWCONNECTION) {
@@ -322,7 +376,7 @@ void OnMouseUp(MachineView* self, int x, int y, int button)
 	InvalidateRect(self->component.hwnd, NULL, FALSE);
 }
 
-void OnMouseMove(MachineView* self, int x, int y, int button)
+void OnMouseMove(MachineView* self, ui_component* sender, int x, int y, int button)
 {
 	if (self->dragslot != -1) {
 		if (self->dragmode == MACHINEVIEW_DRAG_MACHINE) {
@@ -337,7 +391,7 @@ void OnMouseMove(MachineView* self, int x, int y, int button)
 	}
 }
 
-void OnMouseDoubleClick(MachineView* self, int x, int y, int button)
+void OnMouseDoubleClick(MachineView* self, ui_component* sender, int x, int y, int button)
 {
 	self->mx = x;
 	self->my = y;	
@@ -372,9 +426,9 @@ void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 
 		plugin = (VstPlugin*)malloc(sizeof(VstPlugin));
 		vstplugin_init(plugin, path);	
-		if (plugin->machine.info(&plugin->machine)) {
+		if (plugin->machine.info(&plugin->machine)) {			
 			slot = machines_append(&self->player->song->machines, (Machine*)plugin);
-			MachineUiSet(&self->machineuis[slot], 0, 0, plugin->machine.info(&plugin->machine)->ShortName);
+			MachineUiSet(&self->machineuis[slot], 0, 0, plugin->machine.info(&plugin->machine)->ShortName);			
 			InvalidateRect(self->component.hwnd, NULL, TRUE);
 		} else {
 			plugin->machine.dispose(plugin);
@@ -387,9 +441,9 @@ void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 
 		plugin = (Plugin*)malloc(sizeof(Plugin));
 		plugin_init(plugin, path);	
-		if (plugin->machine.info(&plugin->machine)) {
+		if (plugin->machine.info(&plugin->machine)) {			
 			slot = machines_append(&self->player->song->machines, (Machine*)plugin);
-			MachineUiSet(&self->machineuis[slot], 0, 0, plugin->machine.info(&plugin->machine)->ShortName);
+			MachineUiSet(&self->machineuis[slot], 0, 0, plugin->machine.info(&plugin->machine)->ShortName);			
 			InvalidateRect(self->component.hwnd, NULL, TRUE);
 		} else {
 			plugin->machine.dispose(plugin);
@@ -398,7 +452,14 @@ void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 	}
 }
 
-int OnKeyDown(MachineView* self, int keycode, int keydata)
+void OnKeyDown(MachineView* self, ui_component* sender, int keycode, int keydata)
 {
-	return 1;
+	sender->propagateevent = 1;
+}
+
+void OnMachinesChangeSlot(MachineView* self, Machines* machines, int slot)
+{
+	self->selectedslot = slot;
+	ui_invalidate(&self->component);
+	ui_component_setfocus(&self->component);
 }

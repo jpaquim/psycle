@@ -29,7 +29,7 @@ void ui_init(HINSTANCE hInstance)
 	int succ;
 	
 	InitIntHashTable(&selfmap, 100);
-	InitIntHashTable(&winidmap, 100);
+	InitIntHashTable(&winidmap, 100);	
 
 	wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
     wndclass.lpfnWndProc   = ui_winproc ;
@@ -93,15 +93,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
     {		
 		case WM_SIZE:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.size) {				                    
-				component->events.size(component->events.target, LOWORD (lParam), HIWORD (lParam));
+			if (component) {				                    
+				signal_emit(&component->signal_size, component, 2, LOWORD (lParam), HIWORD (lParam));
 				return 0 ;
 			}			
 		break;
 		case WM_TIMER:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.timer) {
-				component->events.timer(component->events.target, (int) wParam);
+			if (component && component->signal_timer.slots) {
+				signal_emit(&component->signal_timer, component, 1, (int) wParam);				
 				return 0 ;
 			}
 		break;
@@ -121,14 +121,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;          
 		case WM_CREATE:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.create) {	
-				component->events.create(component->events.target);
+			if (component && component->signal_create.slots) {	
+				signal_emit(&component->signal_create, component, 0);
 			}
 			return 0 ;
 		break;
 		case WM_PAINT :			
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.draw) {		
+			if (component && component->signal_draw.slots) {		
 				HDC bufferDC;
 				HBITMAP bufferBmp;
 				HBITMAP oldBmp;
@@ -144,8 +144,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						rect.bottom);
 					oldBmp = SelectObject(bufferDC, bufferBmp);
 					g.hdc = bufferDC;					
-				}
-				component->events.draw(component->events.target, &g);				
+				}				
+				signal_emit(&component->signal_draw, component, 1, (int)&g);
 				if (component->doublebuffered) {
 					g.hdc = hdc;
 					BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom,
@@ -161,96 +161,98 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;
 		case WM_DESTROY:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.destroy) {	
-				component->events.destroy(component->events.target, component);				
-			}
+			if (component && component->signal_destroy.slots) {
+				signal_emit(&component->signal_destroy, component, 0);
+				ui_component_dispose(component);
+			}			
 			return 0;
 		break;
 		case WM_KEYDOWN:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.keydown) {	
-				int propagate = component->events.keydown(component->events.target, (int)wParam, lParam);
-				if (!propagate) {
+			if (component && component->signal_keydown.slots) {
+				signal_emit(&component->signal_keydown, component, 2, (int)wParam, lParam);
+				if (!component->propagateevent) {
 					return 0;
 				} else {					
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;               
 				}
+				component->propagateevent = 0;
 			}			
 		break;
 		case WM_KEYUP:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.keyup) {	
-				component->events.keyup(component->events.target, (int)wParam, lParam);				
+			if (component && component->signal_keyup.slots) {
+				signal_emit(&component->signal_keyup, component, 2, (int)wParam, lParam);			
 			}
 			return 0;
 		break;
 		case WM_LBUTTONUP:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mouseup) {				
-				component->events.mouseup(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
+			if (component && component->signal_mouseup.slots) {
+				signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
 				return 0 ;
 			}
 		break;
 		case WM_RBUTTONUP:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mouseup) {				
-				component->events.mouseup(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
+			if (component && component->signal_mouseup.slots) {			
+				signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);				
 				return 0 ;
 			}			
 		break;
 		case WM_MBUTTONUP:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mouseup) {				
-				component->events.mouseup(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);
+			if (component && component->signal_mouseup.slots) {			
+				signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);				
 				return 0 ;
 			}
 		break;
 		case WM_LBUTTONDOWN:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mousedown) {				
-				component->events.mousedown(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
+			if (component && component->signal_mousedown.slots) {
+				signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
 				return 0 ;
 			}			
 		break;
 		case WM_RBUTTONDOWN:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mousedown) {				
-				component->events.mousedown(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
+			if (component && component->signal_mousedown.slots) {		
+				signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
 				return 0 ;
 			}
 		break;
 		case WM_MBUTTONDOWN:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mousedown) {				
-				component->events.mousedown(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);
+			if (component && component->signal_mousedown.slots) {		
+				signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);				
 				return 0 ;
 			}
 		break;
 		case WM_LBUTTONDBLCLK:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mousedown) {				
-				component->events.mousedoubleclick(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
+			if (component && component->signal_mousedoubleclick.slots) {
+				signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
 				return 0 ;
 			}
 		break;
 		case WM_MBUTTONDBLCLK:
-			
+			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			if (component && component->signal_mousedoubleclick.slots) {
+				signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
+				return 0 ;
+			}
 		break;
 		case WM_RBUTTONDBLCLK:
-			
+			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			if (component && component->signal_mousedoubleclick.slots) {
+				signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);
+				return 0 ;
+			}
 		break;
 		case WM_MOUSEMOVE:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mousemove) {
-				component->events.mousemove(component->events.target,
-					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
+			if (component && component->signal_mousemove.slots) {
+				signal_emit(&component->signal_mousemove, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
 				return 0 ;
 			}
 		break;
@@ -259,12 +261,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			return 0;
 		break;
 		case WM_HSCROLL:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->events.mousemove) {
-				component->events.scroll(component->events.target,
-					LOWORD (lParam), HIWORD (lParam), 1);
-				return 0 ;
-			}
+			return 0;
 		break;
 		default:
 		break;
@@ -334,8 +331,8 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	if (si.nPos != iVertPos)
 	{                    
 		component = SearchIntHashTable(&selfmap, (int) hwnd);
-		if (component && component->events.scroll) {
-			component->events.scroll(component->events.target,
+		if (component && component->signal_scroll.slots) {
+			signal_emit(&component->signal_scroll, component, 2, 
 				0, cyChar * (iVertPos - si.nPos));			
 		}
 		ScrollWindow (hwnd, 0, cyChar * (iVertPos - si.nPos), 
@@ -355,13 +352,14 @@ void ui_frame_init(void* context, ui_component* frame, ui_component* parent)
 	  // style  |= WS_CHILD;
 	}
 	memset(&frame->events, 0, sizeof(ui_events));	
+	ui_component_init_signals(frame);
 	frame->doublebuffered = 0;
 	frame->hwnd = CreateWindow (szAppClass, TEXT ("Psycle"),
                           WS_OVERLAPPEDWINDOW,
                           CW_USEDEFAULT, CW_USEDEFAULT,
                           CW_USEDEFAULT, CW_USEDEFAULT | style,
                           hWndParent, NULL, appInstance, NULL);     	
-	InsertIntHashTable(&selfmap, (int)frame->hwnd, frame);		
+	InsertIntHashTable(&selfmap, (int)frame->hwnd, frame);	
 	frame->events.target = context;
 	frame->events.cmdtarget = frame;	
 }
@@ -369,6 +367,7 @@ void ui_frame_init(void* context, ui_component* frame, ui_component* parent)
 void ui_component_init(void* self, ui_component* component, ui_component* parent)
 {		
 	memset(&component->events, 0, sizeof(ui_events));
+	ui_component_init_signals(component);	
 	component->doublebuffered = 0;
 	component->hwnd = CreateWindow (szComponentClass, NULL,
 		WS_CHILDWINDOW | WS_VISIBLE,
@@ -380,9 +379,44 @@ void ui_component_init(void* self, ui_component* component, ui_component* parent
 	component->events.target = self;	
 }
 
+void ui_component_init_signals(ui_component* component)
+{
+	signal_init(&component->signal_size);
+	signal_init(&component->signal_draw);
+	signal_init(&component->signal_timer);
+	signal_init(&component->signal_keydown);
+	signal_init(&component->signal_keyup);
+	signal_init(&component->signal_mousedown);
+	signal_init(&component->signal_mouseup);
+	signal_init(&component->signal_mousemove);
+	signal_init(&component->signal_mousedoubleclick);
+	signal_init(&component->signal_scroll);
+	signal_init(&component->signal_create);
+	signal_init(&component->signal_destroy);
+
+	component->propagateevent = 0;
+}
+
+void ui_component_dispose(ui_component* component)
+{	
+	signal_dispose(&component->signal_size);
+	signal_dispose(&component->signal_draw);
+	signal_dispose(&component->signal_timer);
+	signal_dispose(&component->signal_keydown);
+	signal_dispose(&component->signal_keyup);
+	signal_dispose(&component->signal_mousedown);
+	signal_dispose(&component->signal_mouseup);
+	signal_dispose(&component->signal_mousemove);
+	signal_dispose(&component->signal_mousedoubleclick);
+	signal_dispose(&component->signal_scroll);
+	signal_dispose(&component->signal_create);
+	signal_dispose(&component->signal_destroy);
+}
+
 void ui_classcomponent_init(void* self, ui_component* component, ui_component* parent, const char* classname)
 {
-	memset(&component->events, 0, sizeof(ui_events));
+	memset(&component->events, 0, sizeof(ui_events));	
+	ui_component_init_signals(component);
 	component->doublebuffered = 0;
 	component->hwnd = CreateWindow (classname, NULL,
 		WS_CHILDWINDOW | WS_VISIBLE,

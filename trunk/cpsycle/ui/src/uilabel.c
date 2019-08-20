@@ -10,6 +10,7 @@ extern IntHashTable selfmap;
 void ui_label_init(ui_label* label, ui_component* parent)
 {  
     memset(&label->component.events, 0, sizeof(ui_events));
+	ui_component_init_signals(&label->component);	
 	label->component.doublebuffered = 0;
 	label->component.hwnd = CreateWindow (TEXT("STATIC"), NULL,
 		WS_CHILD | WS_VISIBLE | SS_CENTER,
