@@ -10,7 +10,7 @@ extern IntHashTable winidmap;
 extern int winid;
 
 
-void ui_listbox_init(void* self, ui_listbox* listbox, ui_component* parent)
+void ui_listbox_init(ui_listbox* listbox, ui_component* parent)
 {  
     memset(&listbox->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&listbox->component);	

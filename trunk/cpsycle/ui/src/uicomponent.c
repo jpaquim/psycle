@@ -143,8 +143,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					bufferBmp = CreateCompatibleBitmap(hdc, rect.right,
 						rect.bottom);
 					oldBmp = SelectObject(bufferDC, bufferBmp);
-					g.hdc = bufferDC;					
+					g.hdc = bufferDC;
 				}				
+				ui_setrectangle(&g.clip,
+					ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
+					ps.rcPaint.bottom - ps.rcPaint.top);
 				signal_emit(&component->signal_draw, component, 1, (int)&g);
 				if (component->doublebuffered) {
 					g.hdc = hdc;
@@ -342,7 +345,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 //	return 0 ;          
 }
 
-void ui_frame_init(void* context, ui_component* frame, ui_component* parent)
+void ui_frame_init(ui_component* frame, ui_component* parent)
 {		
 	HWND hWndParent = 0;
 	int style = 0;
@@ -360,11 +363,11 @@ void ui_frame_init(void* context, ui_component* frame, ui_component* parent)
                           CW_USEDEFAULT, CW_USEDEFAULT | style,
                           hWndParent, NULL, appInstance, NULL);     	
 	InsertIntHashTable(&selfmap, (int)frame->hwnd, frame);	
-	frame->events.target = context;
+	frame->events.target = frame;
 	frame->events.cmdtarget = frame;	
 }
 
-void ui_component_init(void* self, ui_component* component, ui_component* parent)
+void ui_component_init(ui_component* component, ui_component* parent)
 {		
 	memset(&component->events, 0, sizeof(ui_events));
 	ui_component_init_signals(component);	
@@ -376,7 +379,7 @@ void ui_component_init(void* self, ui_component* component, ui_component* parent
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)component->hwnd, component);
-	component->events.target = self;	
+	component->events.target = component;	
 }
 
 void ui_component_init_signals(ui_component* component)
@@ -413,7 +416,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_destroy);
 }
 
-void ui_classcomponent_init(void* self, ui_component* component, ui_component* parent, const char* classname)
+void ui_classcomponent_init(ui_component* component, ui_component* parent, const char* classname)
 {
 	memset(&component->events, 0, sizeof(ui_events));	
 	ui_component_init_signals(component);
@@ -425,7 +428,7 @@ void ui_classcomponent_init(void* self, ui_component* component, ui_component* p
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)component->hwnd, component);	
-	component->events.target = self;
+	component->events.target = component;
 	component->align = 0;
 }
 
@@ -530,16 +533,18 @@ void ui_component_settitle(ui_component* self, const char* title)
 	SetWindowText(self->hwnd, title);
 }
 
-void ui_component_enum_children(ui_component* self)
+void ui_component_enumerate_children(ui_component* self, void* context, int (*childenum)(void*, void*))
 {
-	EnumChildWindows (self->hwnd, ChildEnumProc, (LPARAM) self) ;
+	self->events.childenum = childenum;
+	self->events.target = context;
+	EnumChildWindows (self->hwnd, ChildEnumProc, (LPARAM) self);    
 }
 
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam)
 {
 	ui_component* self = (ui_component*) lParam;
 	ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
-	if (child && self->events.childenum) {
+	if (child &&  self->events.childenum) {
 	  return self->events.childenum(self->events.target, child);		  
 	}     
     return FALSE ;
@@ -568,4 +573,9 @@ void ui_component_setfocus(ui_component* self)
 void ui_component_setfont(ui_component* self, HFONT hFont)
 {
      SendMessage (self->hwnd, WM_SETFONT, (WPARAM) hFont, 0) ;
+}
+
+void ui_component_propagateevent(ui_component* self)
+{
+	self->propagateevent = 1;
 }

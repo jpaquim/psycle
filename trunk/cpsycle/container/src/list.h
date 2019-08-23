@@ -4,16 +4,18 @@
 #define LIST
 
 struct ListStruct {
-	void* node;
+	void* node;	
 	struct ListStruct* next;
+	struct ListStruct* prev;
 	struct ListStruct* tail;
 };
 
 typedef struct ListStruct List;
 
-List* list_create(void);
+List* list_create(void* node);
 void list_free(List* list);
 List* list_append(List*, void* node);
-List* list_front(List*, void* node);
+List* list_insert(List*, List* ptr, void* node);
+List* list_remove(List**, List* ptr);
 
 #endif

@@ -11,8 +11,8 @@ typedef struct {
    ui_component component;
 } ui_statusbar;
 
-void ui_statusbar_init(void* self, ui_statusbar* statusbar, ui_component* parent);
-void ui_statusbar_setfields(ui_statusbar* self, int parts, int iStatusWidths[]);
-void ui_statusbar_settext(ui_statusbar* self, int field, const char* text);
+void ui_statusbar_init(ui_statusbar*, ui_component* parent);
+void ui_statusbar_setfields(ui_statusbar*, int parts, int iStatusWidths[]);
+void ui_statusbar_settext(ui_statusbar*, int field, const char* text);
 
 #endif

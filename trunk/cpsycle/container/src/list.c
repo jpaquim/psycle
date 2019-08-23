@@ -3,35 +3,61 @@
 #include "list.h"
 #include <stdlib.h>
 
-List* list_create(void)
+List* list_create(void* node)
 {
 	List* list;
 
 	list = (List*) malloc(sizeof(List));
+	list->prev = 0;
 	list->next = 0;
 	list->tail = list;
-	list->node = 0;
+	list->node = node;
 	return list;
 }
 
 List* list_append(List* self, void* node)
-{
-	self->tail->next = list_create();	
+{		
+	self->tail->next = list_create(node);
+	self->tail->next->prev = self->tail;
 	self->tail = self->tail->next;	
-	self->tail->node = node;
 	return self->tail;
 }
 
-
-List* list_front(List* self, void* node)
+List* list_insert(List* self, List* ptr, void* node)
 {
-	List* first;
+	List* next = ptr->next;	
+	if (next == NULL) {
+		return list_append(self, node);
+	}
+	ptr->next = list_create(node);	
+	ptr->next->prev = ptr;	
+	next->prev = ptr->next;
+	ptr->next->next = next;
+	return ptr->next;
+}
 
-	first = list_create();
-	first->node = node;
-	first->tail = self->tail;
-	first->next = self;
-	return first;
+List* list_remove(List** self, List* ptr)
+{	
+	List* rv;
+	if (ptr->prev == NULL && ptr->next == NULL) {
+		*self = NULL;
+		free(ptr);
+		return 0;
+	}
+	if (ptr->prev != NULL) {
+		ptr->prev->next = ptr->next;
+	} else {
+		*self = ptr->next;		
+		(*self)->tail = ptr->tail;
+	}
+	if (ptr->next != NULL) {
+		ptr->next->prev = ptr->prev;
+	} else {
+		(*self)->tail = ptr->prev;		
+	}
+	rv = ptr->next;
+	free(ptr);
+	return rv;
 }
 
 void list_free(List* list)

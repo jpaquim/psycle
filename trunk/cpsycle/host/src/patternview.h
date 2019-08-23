@@ -42,7 +42,13 @@ typedef struct {
 	int track;
 	float offset;
 	int col;
-} Cursor;
+} PatternViewCursor;
+
+typedef struct
+{
+	PatternViewCursor topleft;
+	PatternViewCursor bottomright;
+} PatternViewBlock;
 
 typedef struct {
    ui_component component;   
@@ -59,7 +65,7 @@ typedef struct {
    PatternNode* curr_event;
    NoteInputs* noteinputs;
    char** notestab;
-   Cursor cursor;
+   PatternViewCursor cursor;
    float cursorstep;
    Pattern* pattern;
    Player* player;

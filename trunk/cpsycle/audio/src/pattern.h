@@ -4,16 +4,17 @@
 #define PATTERN_H
 
 #include "event.h"
+#include "list.h"
 
-struct PatternNodeStruct {	
+typedef struct 
+{
 	PatternEvent event;
 	float offset;
 	float delta;
 	int track;
-	struct PatternNodeStruct* next;
-};
+} PatternEntry;
 
-typedef struct PatternNodeStruct PatternNode;
+typedef List PatternNode;
 
 typedef struct {
 	PatternNode* events;
@@ -23,7 +24,8 @@ typedef struct {
 void pattern_init(Pattern* self);
 void pattern_free(Pattern* self);
 void pattern_write(Pattern* self, int track, float offset, PatternEvent);
-
+void pattern_remove(Pattern* self, int track, float offset);
+PatternNode* pattern_greaterequal(Pattern* self, float offset);
 
 #endif
 

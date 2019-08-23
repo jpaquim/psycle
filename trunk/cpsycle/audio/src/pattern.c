@@ -20,24 +20,28 @@ void pattern_free(Pattern* self)
 		free (ptr);
 		ptr = next;
 	}
+	list_free(self->events);
 }
 
 void pattern_write(Pattern* self, int track, float offset, PatternEvent event)
 {
 	PatternNode* ptr;	
 	PatternNode* prev;
-		
+	PatternEntry* entry;
+	
 	prev = 0;
 	ptr = self->events;
 	while (ptr != 0) {
-		if (ptr->offset > offset) {
+		PatternEntry* entry = (PatternEntry*) ptr->node;
+		if (entry->offset > offset) {
 			ptr = prev;
 			break;
 		} else
-		if (ptr->offset == offset) {						
-			while (ptr != 0 && ptr->offset == offset && track >= ptr->track) {
-				if (ptr->track == track) {
-					ptr->event = event;
+		if (entry->offset == offset) {						
+			while (ptr != 0 && ((PatternEntry*)(ptr->node))->offset == offset && track >= ((PatternEntry*)(ptr->node))->track) {
+				PatternEntry* entry = (PatternEntry*) ptr->node;
+				if (entry->track == track) {
+					entry->event = event;
 					return;
 				}
 				prev = ptr;
@@ -47,23 +51,44 @@ void pattern_write(Pattern* self, int track, float offset, PatternEvent event)
 		}
 		prev = ptr;					
 		ptr = ptr->next;
-	}	
-	ptr = (PatternNode*)malloc(sizeof(PatternNode));
-	ptr->event = event;
-	ptr->offset = offset;
-	ptr->delta = 0;
-	ptr->next = 0;
-	ptr->track = track;
-	if (!self->events) {		
-		self->events = ptr;		
-	} else 
-	if (prev != 0) {
-		PatternNode* tmp;
-		tmp = prev->next;
-		prev->next = ptr;
-		ptr->next = tmp;
-	} else {
-	   ptr->next = self->events;
-	   self->events = ptr;
+	}		
+	entry = (PatternEntry*)malloc(sizeof(PatternEntry));
+	entry->event = event;
+	entry->offset = offset;
+	entry->delta = 0;
+	entry->track = track;
+
+	if (!self->events) {
+		self->events = list_create(entry);
+	} else {	
+		list_insert(self->events, prev, entry);		
 	}
+}
+
+void pattern_remove(Pattern* self, int track, float offset)
+{
+	PatternNode* node = pattern_greaterequal(self, offset);
+	if (node) {
+		PatternEntry* entry = (PatternEntry*)(node->node);
+		if (node && entry->offset < offset + 0.25) {
+			list_remove(&self->events, node);
+			free(entry);
+		}
+	}
+}
+
+
+PatternNode* pattern_greaterequal(Pattern* self, float offset)
+{
+	PatternNode* ptr;	
+	
+	ptr = self->events;
+	while (ptr != 0) {
+		PatternEntry* entry = (PatternEntry*)ptr->node;
+		if (entry->offset >= offset) {			
+			break;
+		}		
+		ptr = ptr->next;
+	}	
+	return ptr;
 }

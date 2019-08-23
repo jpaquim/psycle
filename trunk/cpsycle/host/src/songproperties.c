@@ -6,7 +6,7 @@
 static int Align(SongProperties* self, ui_component* child);
 static void ReadProperties(SongProperties* self, Song* song);
 static void WriteProperties(SongProperties* self, Song* song);
-static void OnOkClicked(SongProperties* self);
+static void OnOkClicked(SongProperties* self, ui_component* sender);
 
 static int fieldheight = 20;
 static int linestep = 30;
@@ -19,7 +19,7 @@ void InitSongProperties(SongProperties* self, ui_component* parent, Song* song)
 	properties_append_string(song->properties, "title", "a title");
 	properties_append_string(song->properties, "credits", "the credits");
 	properties_append_string(song->properties, "comments", "the comments");
-	ui_component_init(self, &self->component, parent);	
+	ui_component_init(&self->component, parent);	
 	ui_component_move(&self->component, 200, 150);
 	ui_component_resize(&self->component, 400, 400);
 
@@ -36,12 +36,10 @@ void InitSongProperties(SongProperties* self, ui_component* parent, Song* song)
 	self->edit_comments.component.align = 1;	
 	ui_button_init(&self->button_ok, &self->component);
 	ui_button_connect(&self->button_ok, self);
-	self->button_ok.events.clicked = OnOkClicked;
+	signal_connect(&self->button_ok.signal_clicked, self, OnOkClicked);
 	ui_button_settext(&self->button_ok, "OK");
-	ReadProperties(self, song);
-
-	self->component.events.childenum = Align;
-	ui_component_enum_children(&self->component);
+	ReadProperties(self, song);	
+	ui_component_enumerate_children(&self->component, self, Align);
 }
 
 void ReadProperties(SongProperties* self, Song* song)
@@ -69,7 +67,7 @@ int Align(SongProperties* self, ui_component* child)
 	return 1;
 }
 
-void OnOkClicked(SongProperties* self)
+void OnOkClicked(SongProperties* self, ui_component* sender)
 {
 	WriteProperties(self, self->song);
 }

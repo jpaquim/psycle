@@ -12,6 +12,7 @@
 typedef struct {
   HDC hdc;  
   HFONT hfont;
+  ui_rectangle clip;
 } ui_graphics;
 
 void ui_textout(ui_graphics*, int x, int y,  const char*, int);

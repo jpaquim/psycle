@@ -8,13 +8,15 @@
 static void OnDraw(PatternView* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(PatternView* self, ui_graphics* g);
 static void DrawTrackBackground(PatternView* self, ui_graphics* g, int track);
-static void DrawEvents(PatternView* self, ui_graphics* g);
+static void DrawEvents(PatternView* self, ui_graphics* g, PatternViewBlock* clip);
 static void DrawPatternEvent(PatternView* self, ui_graphics* g, PatternEvent* event, int x, int y, int cursor, int beat, int beat4);
 static void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata);
 static void OnSize(PatternView* self, ui_component* sender, int width, int height);
 static void OnScroll(PatternView* self, ui_component* sende, int cx, int cy);
 static void SetDefaultSkin(PatternView* self);
 static void OnMouseDown(PatternView* self, ui_component* sender, int x, int y, int button);
+static void OnEditPositionChanged(PatternView* self, Sequence* sender);
+static void ClipBlock(PatternView* self, ui_graphics* g, PatternViewBlock* block);
 
 char* notes_tab_a440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
@@ -64,7 +66,7 @@ void InitPatternView(PatternView* self, ui_component* parent, Player* player)
 	if (self->skin.hfont == NULL) {
 		self->skin.hfont = ui_createfont("Tahoma", 12);
 	}
-	ui_component_init(self, &self->component, parent);	
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
 	signal_connect(&self->component.signal_mousedown, self,OnMouseDown);
@@ -100,6 +102,9 @@ void InitPatternView(PatternView* self, ui_component* parent, Player* player)
 	ui_component_showverticalscrollbar(&self->component);
 	self->component.doublebuffered = 1;
 	PatternViewApplyProperties(self, 0);	
+
+	signal_connect(&self->player->song->sequence.signal_editposchanged,
+		self, OnEditPositionChanged);
 }
 
 void PatternViewApplyProperties(PatternView* self, Properties* properties)
@@ -132,13 +137,32 @@ void PatternViewApplyProperties(PatternView* self, Properties* properties)
 }
 
 void OnDraw(PatternView* self, ui_component* sender, ui_graphics* g)
-{	   	
+{	   		
 	if (self->skin.hfont) {
 		ui_setfont(g, self->skin.hfont);
 	}
 	DrawBackground(self, g);
-	DrawEvents(self, g);
+	if (self->pattern) {
+		//char buf[20];
+		PatternViewBlock clip;
+		ClipBlock(self, g, &clip);
+		//sprintf(buf, "%f\n", clip.topleft.offset); 
+		//OutputDebugString(buf);
+		DrawEvents(self, g, &clip);
+	}
 }
+
+void ClipBlock(PatternView* self, ui_graphics* g, PatternViewBlock* block)
+{
+	block->topleft.track = g->clip.left / self->trackwidth;
+	block->topleft.col = 0;
+	block->topleft.offset = (g->clip.top - self->dy) / self->lineheight * self->bpl;
+	block->bottomright.track = g->clip.right / self->trackwidth;
+	block->bottomright.col = 0;
+	block->bottomright.offset = (g->clip.bottom - self->dy) / self->lineheight * self->bpl;
+}
+
+
 
 void DrawBackground(PatternView* self, ui_graphics* g)
 {
@@ -164,28 +188,35 @@ int TestCursor(PatternView* self, int track, float offset)
 		self->cursor.offset >= offset && self->cursor.offset < offset + self->bpl;
 }
 
-void DrawEvents(PatternView* self, ui_graphics* g)
+void DrawEvents(PatternView* self, ui_graphics* g, PatternViewBlock* clip)
 {
 	int line;	
 	int track;
-	int cpx = 0;
-	int cpy = self->dy;
+	int cpx = 0;	
+	int cpy;
 
-	self->curr_event = self->pattern->events;
-	for (line = 0; line < self->numlines; ++line) {
-		float offset = line* self->bpl;
-		int beat = fmod(offset, 1.0f) == 0.0f;
-		int beat4 = fmod(offset, 4.0f) == 0.0f;
+	self->curr_event = pattern_greaterequal(self->pattern, clip->topleft.offset);
+	line = (int) clip->topleft.offset * self->lpb;
+	cpy = line * self->lineheight + self->dy;
+	for (; line < self->numlines; ++line) {
+		float offset = line * self->bpl;				
+		int beat;
+		int beat4;
+		if (offset > clip->bottomright.offset) {
+			break;
+		}
+		beat = fmod(offset, 1.0f) == 0.0f;
+		beat4 = fmod(offset, 4.0f) == 0.0f;
 		for (track = 0; track < self->numtracks; ++track) {						
 			int hasevent = 0;
 			int cursor = -1;
 			if (TestCursor(self, track, offset)) {
 				cursor = 0;
 			}
-			while (self->curr_event && self->curr_event->track == track &&
-				self->curr_event->offset >= offset && 				
-				self->curr_event->offset < offset + self->bpl) {				
-				DrawPatternEvent(self, g, &self->curr_event->event, cpx, cpy, cursor, beat, beat4);
+			while (self->curr_event && ((PatternEntry*)(self->curr_event->node))->track == track &&
+				((PatternEntry*)(self->curr_event->node))->offset >= offset && 				
+				((PatternEntry*)(self->curr_event->node))->offset < offset + self->bpl) {				
+				DrawPatternEvent(self, g, &((PatternEntry*)(self->curr_event->node))->event, cpx, cpy, cursor, beat, beat4);
 				self->curr_event = self->curr_event->next;
 				hasevent = 1;
 			}
@@ -197,7 +228,7 @@ void DrawEvents(PatternView* self, ui_graphics* g)
 			}
 			cpx += self->trackwidth;			
 		}
-		cpx = 0;
+		cpx = 0;				
 		cpy += self->lineheight;
 	}
 }
@@ -258,10 +289,7 @@ void OnSize(PatternView* self, ui_component* sender, int width, int height)
 void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata)
 {		
 	int cmd;
-
-	if (keycode == VK_F5) {
-		player_start(self->player);		
-	} else
+	
 	if (keycode == VK_UP) {
 		self->cursor.offset -= self->bpl;		
 		ui_invalidate(&self->component);
@@ -278,8 +306,9 @@ void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata
 		self->cursor.track += 1;
 		ui_invalidate(&self->component);		
 	} else
-	if (keycode == VK_F8) {
-		player_stop(self->player);		
+	if (keycode == VK_DELETE) {
+		pattern_remove(self->pattern, self->cursor.track, self->cursor.offset);
+		ui_invalidate(&self->component);
 	} else {
 		cmd = Cmd(&self->noteinputs->map, keycode);
 		if (cmd != -1) {		
@@ -293,8 +322,8 @@ void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata
 			self->cursor.offset += self->cursorstep;
 			ui_invalidate(&self->component);			
 		}		
-	}
-	sender->propagateevent = 1;
+	}	
+	ui_component_propagateevent(sender);
 }
 
 void OnScroll(PatternView* self, ui_component* sender, int cx, int cy)
@@ -304,5 +333,21 @@ void OnScroll(PatternView* self, ui_component* sender, int cx, int cy)
 
 void OnMouseDown(PatternView* self, ui_component* sender, int x, int y, int button)
 {
+	int line;
+	line = (y + self->dy) / self->lineheight;
+	self->cursor.offset = line * self->bpl;
+	self->cursor.track = x / self->trackwidth;
+	ui_invalidate(&self->component);
 	ui_component_setfocus(&self->component);
+}
+
+void OnEditPositionChanged(PatternView* self, Sequence* sender)
+{	
+	if (sender->editpos.sequence) {
+		SequenceEntry* entry = (SequenceEntry*)sender->editpos.sequence->node;	
+		self->pattern = patterns_at(&self->player->song->patterns, entry->pattern);
+	} else {
+		self->pattern = 0;
+	}
+	ui_invalidate(&self->component);
 }

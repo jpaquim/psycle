@@ -5,7 +5,7 @@
 #include <string.h>
 
 
-static int properties_enumarate_rec(Properties* self);
+static int properties_enumerate_rec(Properties* self);
 static void* target;
 static int (*callback)(void* self, struct PropertiesStruct* properties, int level);
 static int level;
@@ -49,7 +49,7 @@ void properties_free(Properties* self)
 	}	
 }
 
-Properties* properties_append_string(Properties* self, char* key, char* value)
+Properties* properties_append_string(Properties* self, const char* key, const char* value)
 {		
 	Properties* ptr;
 
@@ -89,7 +89,7 @@ Properties* properties_append_userdata(Properties* self, const char* key,
 	return ptr->next;
 }
 
-Properties* properties_append_int(Properties* self, char* key, int value, int min, int max)
+Properties* properties_append_int(Properties* self, const char* key, int value, int min, int max)
 {		
 	Properties* ptr;
 
@@ -108,7 +108,7 @@ Properties* properties_append_int(Properties* self, char* key, int value, int mi
 }
 
 
-Properties* properties_append_choice(Properties* self, char* key, int value)
+Properties* properties_append_choice(Properties* self, const char* key, int value)
 {
 	Properties* ptr;
 
@@ -128,7 +128,7 @@ Properties* properties_append_choice(Properties* self, char* key, int value)
 	return ptr->next;
 }
 
-Properties* properties_read(Properties* self, char* key)
+Properties* properties_read(Properties* self, const char* key)
 {
 	Properties* ptr;	
 
@@ -157,7 +157,7 @@ void properties_readint(Properties* properties, const char* key, int* value, int
 }
 
 
-void properties_write_string(Properties* self, char* key, char* value)
+void properties_write_string(Properties* self, const char* key, const char* value)
 {
 	Properties* ptr = properties_read(self, key);
 	if (ptr) {
@@ -171,7 +171,7 @@ void properties_write_string(Properties* self, char* key, char* value)
 	}
 }
 
-void properties_write_int(Properties* self, char* key, int value)
+void properties_write_int(Properties* self, const char* key, int value)
 {
 	Properties* ptr = properties_read(self, key);
 	if (ptr) {		
@@ -182,15 +182,15 @@ void properties_write_int(Properties* self, char* key, int value)
 	}
 }
 
-void properties_enumarate(Properties* self, void* t, int (*enumproc)(void* self, struct PropertiesStruct* properties, int level))
+void properties_enumerate(Properties* self, void* t, int (*enumproc)(void* self, struct PropertiesStruct* properties, int level))
 {
 	target = t;
 	level = 0;
 	callback = enumproc;
-	properties_enumarate_rec(self);
+	properties_enumerate_rec(self);
 }
 
-int properties_enumarate_rec(Properties* self)
+int properties_enumerate_rec(Properties* self)
 {
 	Properties* ptr;
 	ptr = self;
@@ -200,7 +200,7 @@ int properties_enumarate_rec(Properties* self)
 		}		
 		if (ptr->children) {
 			++level;
-			if (!properties_enumarate_rec(ptr->children)) {
+			if (!properties_enumerate_rec(ptr->children)) {
 				--level;
 				return 0;
 			}

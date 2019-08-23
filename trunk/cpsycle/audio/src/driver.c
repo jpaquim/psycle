@@ -141,7 +141,7 @@ int driver_open(Driver* self)
 	format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
 	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
 
-	if (waveOutOpen(&self->_handle, self->_deviceId, &format, NULL, 0, 
+	if (waveOutOpen(&self->_handle, self->_deviceId, &format, 0UL, 0, 
 		CALLBACK_NULL) != MMSYSERR_NOERROR)
 	{
 		self->error(1, "waveOutOpen() failed");

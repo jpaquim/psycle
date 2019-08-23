@@ -8,7 +8,7 @@ static void OnSize(MachineFrame* self, ui_component* sender, int width, int heig
 void InitMachineFrame(MachineFrame* self, ui_component* parent)
 {		
 	self->view = 0;
-	ui_frame_init(self, &self->component, parent);	
+	ui_frame_init(&self->component, parent);	
 	ui_component_move(&self->component, 200, 150);
 	ui_component_resize(&self->component, 400, 400);	
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
@@ -22,7 +22,7 @@ void MachineFrameSetParamView(MachineFrame* self, ParamView* view)
 	int width;
 	int height;
 
-	self->view = view;
+	self->view = (ui_component*) view;
 	ParamViewSize(view, &width, &height);
 	ui_component_resize(&self->component, width, height);
 }

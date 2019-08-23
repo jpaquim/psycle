@@ -37,14 +37,18 @@ SequencePtr sequencer_curr(Sequencer* self)
 
 void sequencer_enumerate(Sequencer* self, void* context, int slot, void (*callback)(void*, int, PatternNode*))
 {
-	PatternNode* node;	
-	while (node = self->curr.next(&self->curr)) {
-		if (node->offset >= self->pos && node->offset < self->pos + self->window) {
+	PatternNode* node = sequenceptr_patternnode(&self->curr);
+	SequenceEntry* entry = sequenceptr_entry(&self->curr);
+	while (node) {
+		PatternEntry* patternentry = (PatternEntry*)node->node;
+		if (entry->offset + patternentry->offset >= self->pos && entry->offset + patternentry->offset < self->pos + self->window) {
 			callback(context, slot, node);
-		} else {
-			self->curr.unget(&self->curr);
+			sequenceptr_inc(&self->curr);
+			node = sequenceptr_patternnode(&self->curr);
+			entry = sequenceptr_entry(&self->curr);
+		} else {			
 			break;
-		}
+		}				
 	}
 
 }

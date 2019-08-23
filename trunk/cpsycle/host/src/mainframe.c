@@ -20,7 +20,10 @@ static void OnSize(MainFrame* self, ui_component* sender, int width, int height)
 static void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata);
 static void OnTimer(MainFrame* self, ui_component* sender, int timerid);
 static void OnSequenceSelChange(MainFrame* self, SequenceEntry* entry);
+static void OnTabBarChange(MainFrame* self, ui_component* sender, int tabindex);
 static void SetActiveView(MainFrame* self, ui_component* view);
+static void OnPlay(MainFrame* self, ui_component* sender);
+static void OnStop(MainFrame* self, ui_component* sender);
 
 static ui_statusbar statusbar;
 static ui_menu menu;    
@@ -35,41 +38,53 @@ extern Song song;
 void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 {	
 	int iStatusWidths[] = {100, 200, -1};
-
-	ui_frame_init(self, &self->component, 0);	 
+	self->player = player;
+	ui_frame_init(&self->component, 0);	 
 	signal_connect(&self->component.signal_destroy, self, Destroy);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
-	InitMachineBar(&self->machinebar, &self->component, player);	
+	InitMachineBar(&self->machinebar, &self->component, player);
 	ui_component_move(&self->machinebar.component, 100, 0);
+	ui_component_resize(&self->machinebar.component, 200, 20);
+
+	InitTabBar(&self->tabbar, &self->component);
+	ui_component_move(&self->tabbar.component, 150, 25);
+	ui_component_resize(&self->tabbar.component, 400, 20);	
+	tabbar_append(&self->tabbar, "Machines");
+	tabbar_append(&self->tabbar, "Pattern");
+	tabbar_append(&self->tabbar, "Settings");
+	tabbar_select(&self->tabbar, 0);
+	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
+	InitPlayBar(&self->playbar, &self->component);
+	ui_component_move(&self->playbar.component, 550, 25);
+	ui_component_resize(&self->playbar.component, 400, 20);	
+	signal_connect(&self->playbar.signal_play, self, OnPlay);
+	signal_connect(&self->playbar.signal_stop, self, OnStop);
 	InitSettingsView(&self->settingsview, &self->component, properties);
-	ui_component_move(&self->settingsview.component, 150, 25);
+	ui_component_move(&self->settingsview.component, 150, 45);
 	ui_component_hide(&self->settingsview.component);
 	InitMachineView(&self->machineview, &self->component, &self->machinebar, player, properties);	
-	ui_component_move(&self->machineview.component, 150, 25);	
+	ui_component_move(&self->machineview.component, 150, 45);	
 	ui_component_hide(&self->machineview.component);
 	self->patternview.noteinputs = &self->noteinputs;
 	self->patternview.pattern = patterns_at(&player->song->patterns, 0);
 	InitPatternView(&self->patternview, &self->component, player);
 	ui_component_hide(&self->machineview.component);
-	ui_component_move(&self->patternview.component, 150, 25);
+	ui_component_move(&self->patternview.component, 150, 45);
 	self->activeview = &self->patternview.component;
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, player->sequencer.sequence, &player->song->patterns);	
 	ui_component_move(&self->sequenceview.component, 0, 20);
-	SequenceViewConnect(&self->sequenceview, self);	
-	self->sequenceview.listview.selchanged = OnSequenceSelChange;
 	SetActiveView(self, &self->machineview.component);
 	/*InitSongProperties(&songproperties, &self->component);	
 	ui_menu_init(&menu, "", 0);
 	ui_menu_init(&menu_file, "File", OnFileMenu);		
 	ui_menu_append(&menu, &menu_file, 0);
 	ui_component_setmenu(&self->component, &menu);
-	*/
-	
-	ui_statusbar_init(&statusbar, &statusbar, &self->component);
+	*/	
+	ui_statusbar_init(&statusbar, &self->component);
 	ui_statusbar_setfields(&statusbar, 3, iStatusWidths);
 	ui_statusbar_settext(&statusbar, 0, "Field1");
 	ui_statusbar_settext(&statusbar, 1, "Field2");
@@ -100,8 +115,8 @@ void OnSize(MainFrame* self, ui_component* sender, int width, int height)
 	int statusbarheight = 30;
 	self->cx = width;
 	self->cy = height;
-	ui_component_resize(&self->sequenceview.component, 150, height - statusbarheight - 25);
-	ui_component_resize(self->activeview, width - 150, height - statusbarheight - 25);
+	ui_component_resize(&self->sequenceview.component, 100, height - statusbarheight - 25 - 20);
+	ui_component_resize(self->activeview, width - 150, height - statusbarheight - 25 - 20);
 	SendMessage(statusbar.component.hwnd, WM_SIZE, 0, 0);
 }
 
@@ -117,9 +132,8 @@ void SetActiveView(MainFrame* self, ui_component* view)
 	}
 	self->activeview = view;
 	ui_component_show(self->activeview);
-	ui_component_resize(self->activeview, self->cx - 150, self->cy - 30);
-	ui_component_resize(&self->machinebar.component, self->cx, 20);
-	ui_component_setfocus(self->activeview);
+	ui_component_resize(self->activeview, self->cx - 150, self->cy - 30 - 20 - 25);	
+	ui_component_setfocus(self->activeview);	
 }
 
 void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata)
@@ -127,11 +141,17 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 	if (keycode == VK_F2) {
 		SetActiveView(self, &self->machineview.component);
 	} else
+	if (keycode == VK_F5) {
+		player_start(self->player);		
+	} else
 	if (keycode == VK_F3) {
 		SetActiveView(self, &self->patternview.component);
 	} else	 
 	if (keycode == VK_F6) {
 		SetActiveView(self, &self->settingsview.component);		
+	} else
+	if (keycode == VK_F8) {
+		player_stop(self->player);		
 	} else
 	if (keycode == VK_F9) {
 		song_load(&song, "Example - mixerdemo.psy");
@@ -144,8 +164,7 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		MachineViewApplyProperties(&self->machineview, properties);
 		properties_free(properties);
 	} else {
-		int cmd;
-		
+		int cmd;		
 		cmd = Cmd(&self->noteinputs.map, keycode);
 		if (cmd != -1) {
 			Machine* machine;
@@ -167,11 +186,30 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 	ui_statusbar_settext(&statusbar, 0, buffer);	
 }
 
-void OnSequenceSelChange(MainFrame* self, SequenceEntry* entry)
+void OnTabBarChange(MainFrame* self, ui_component* sender, int tabindex)
 {
-	Pattern* pattern = patterns_at(&song.patterns, entry->pattern);
-	if (pattern) {
-		self->patternview.pattern = pattern;
-		ui_invalidate(&self->patternview.component);
-	}
+	switch (tabindex) {
+	case 0:
+		SetActiveView(self, &self->machineview.component);
+	break;
+	case 1:
+		SetActiveView(self, &self->patternview.component);
+	break;
+	case 2:
+		SetActiveView(self, &self->settingsview.component);
+	break;
+	default:;
+	break;
+
+	};
+}
+
+void OnPlay(MainFrame* self, ui_component* sender)
+{	
+	player_start(self->player);		
+}
+
+void OnStop(MainFrame* self, ui_component* sender)
+{
+	player_stop(self->player);		
 }

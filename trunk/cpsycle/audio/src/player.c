@@ -153,47 +153,14 @@ float* Work(Player* self, int* numsamples)
 
 void OnEnumerateSequencer(Machine* machine, int slot, PatternNode* node)
 {
-	if (node->event.mach == slot) {
-		machine->seqtick(machine,
-			0,
-			node->event.note,
-			node->event.inst, 
-			node->event.cmd,
-			node->event.parameter);	
+	PatternEvent* event = &((PatternEntry*)(node->node))->event;
+	if (event->mach == slot) {
+		machine->seqtick(machine, 0, event->note, event->inst, event->cmd,
+			event->parameter);	
 	}
 }
 
 
 
-/*while (pathptr != NULL) {
-				MachineList* machineptr = (MachineList*)pathptr->node;
-				while (machineptr != NULL) {
-					Machine* machine;				
-					MachineConnections* connections;
-					float offset = (125 * amount) / (44100*3600.0f);
-					machine = machines_at(self->machines, (int)machineptr->node);
-					if (self->playing) {
-						sequencer_enumerate(self->sequencer, machine, offset, OnEnumerateSequencer);
-					}
-					machine->work(machine, pSamplesL, pSamplesR, amount, 16);
-					connections = machines_connections(self->machines, (int)machineptr->node);
-					if (connections) {
-						MachineConnection* connectionptr;
-						connectionptr = &connections->outputs;
-						while (connectionptr) {
-							if (connectionptr->slot != -1) {
-										
-							}
-							connectionptr = connectionptr->next;
-						}				   
-					}
-					if (self->playing) {					
-						sequencer_tick(self->sequencer, offset);					
-						self->pos += offset;
-					}				
-					machineptr = machineptr->next;
-				}
-				pathptr = pathptr->next;
-			}*/		
 
 

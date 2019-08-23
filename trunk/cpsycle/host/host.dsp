@@ -144,7 +144,7 @@ SOURCE=.\src\patternview.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\audio\src\player.c
+SOURCE=.\src\playbar.c
 # End Source File
 # Begin Source File
 
@@ -169,6 +169,10 @@ SOURCE=.\src\skinio.c
 # Begin Source File
 
 SOURCE=.\src\songproperties.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\tabbar.c
 # End Source File
 # Begin Source File
 
@@ -236,6 +240,10 @@ SOURCE=.\src\patternview.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\playbar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\resources\resource.h
 # End Source File
 # Begin Source File
@@ -253,6 +261,10 @@ SOURCE=.\src\skinio.h
 # Begin Source File
 
 SOURCE=.\src\songproperties.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\tabbar.h
 # End Source File
 # End Group
 # End Target

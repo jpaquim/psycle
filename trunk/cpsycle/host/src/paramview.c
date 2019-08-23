@@ -24,13 +24,13 @@ extern HINSTANCE appInstance;
 void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 {		
 	if (knobs.hBitmap == NULL) {
-		knobs.hBitmap = LoadBitmap (appInstance, IDB_PARAMKNOB);		
+		knobs.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_PARAMKNOB));
 	}
 	if (hfont == NULL) {
 		hfont = ui_createfont("Tahoma", 12);
 	}
 	self->machine = machine;
-	ui_component_init(self, &self->component, parent);	
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);

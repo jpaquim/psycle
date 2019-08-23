@@ -12,10 +12,14 @@
 #include "settingsview.h"
 #include "properties.h"
 #include "noteinputs.h"
+#include "tabbar.h"
+#include "playbar.h"
 
 typedef struct {
 	ui_component component;
+	TabBar tabbar;
 	MachineBar machinebar;
+	PlayBar playbar;
 	MachineView machineview;
 	PatternView patternview;
 	SequenceView sequenceview;
@@ -23,6 +27,7 @@ typedef struct {
 	ui_component* activeview;
 	int cx;
 	int cy;
+	Player* player;
 	NoteInputs noteinputs;
 } MainFrame;
 
