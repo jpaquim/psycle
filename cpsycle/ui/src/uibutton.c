@@ -10,11 +10,13 @@ extern IntHashTable winidmap;
 extern int winid;
 
 static void OnCommand(ui_button* self, WPARAM wParam, LPARAM lParam);
+static void OnDestroy(ui_button* self, ui_component* sender);
 
 void ui_button_init(ui_button* button, ui_component* parent)
 {  
     memset(&button->component.events, 0, sizeof(ui_events));	
 	ui_component_init_signals(&button->component);
+	signal_init(&button->signal_clicked);
 	button->component.doublebuffered = 0;
 	button->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
 		WS_CHILD | WS_VISIBLE,
@@ -29,6 +31,12 @@ void ui_button_init(ui_button* button, ui_component* parent)
 	winid++;
 	button->component.align = 0;
 	button->component.events.command = OnCommand;
+	signal_connect(&button->component.signal_destroy, button,  OnDestroy);
+}
+
+void OnDestroy(ui_button* self, ui_component* sender)
+{
+	signal_dispose(&self->signal_clicked);
 }
 
 void ui_button_settext(ui_button* button, const char* text)
@@ -46,9 +54,9 @@ static void OnCommand(ui_button* self, WPARAM wParam, LPARAM lParam)
 	switch(HIWORD(wParam))
     {
         case BN_CLICKED:
-        {
-            if (self->events.clicked) {
-				self->events.clicked(self->component.events.target);
+        {            
+			if (self->signal_clicked.slots) {
+				signal_emit(&self->signal_clicked, self, 0);				
 			}
         }
 		break;

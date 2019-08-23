@@ -10,12 +10,14 @@
 
 typedef struct {
    void (*newentry)(void*);
+   void (*delentry)(void*);
 } SequenceController;
 
 typedef struct {
 	ui_component component;
 	SequenceController controller;
 	ui_button newentry;
+	ui_button delentry;
 	void* context;
 	HFONT font;
 } SequenceButtons;
@@ -31,9 +33,7 @@ typedef struct {
 	SequenceController* controller;
 	int selected;
 	int lineheight;
-	SequenceListViewSkin skin;
-	void (*selchanged)(void*, SequenceEntry*);
-	void* selcontext;
+	SequenceListViewSkin skin;		
 } SequenceListView;
 
 typedef struct {
@@ -46,6 +46,5 @@ typedef struct {
 void InitSequenceView(SequenceView*, ui_component* parent, Sequence* sequence, Patterns* patterns);
 void InitSequenceListView(SequenceListView*, ui_component* parent, Sequence* sequence, Patterns* patterns);
 void InitSequenceButtons(SequenceButtons* self, ui_component* parent);
-void SequenceViewConnect(SequenceView*, void* context);
 
 #endif

@@ -27,12 +27,10 @@ void signal_connect(Signal* self, void* context, void* fp)
 		node->fp = fp;
 		list_append(self->slots, node);
 	} else {
-		Slot* node;
-		self->slots = list_create();
-		node = (Slot*)malloc(sizeof(Slot));
+		Slot* node = (Slot*)malloc(sizeof(Slot));
 		node->context = context;
 		node->fp = fp;
-		self->slots->node = node;
+		self->slots = list_create(node);			
 	}
 }
 
@@ -102,7 +100,7 @@ void signal_notify3(Signal* self, void* sender, int param1, int param2, int para
 		List* ptr = self->slots;
 		while (ptr) {				
 			Slot* slot = (Slot*) ptr->node;			
-			((signalcallback2)slot->fp)(slot->context, sender, param1, param2, param3);
+			((signalcallback3)slot->fp)(slot->context, sender, param1, param2, param3);
 			ptr = ptr->next;
 		}
 	}

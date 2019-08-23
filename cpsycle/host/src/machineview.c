@@ -50,7 +50,7 @@ void InitMachineView(MachineView* self, ui_component* parent, MachineBar* machin
 	self->cx = 0;
 	self->cy = 0;
 	self->machinebar = machinebar;
-	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, IDB_MACHINESKIN);	
+	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_MACHINESKIN));	
 	if (self->skin.hfont == NULL) {
 		self->skin.hfont = ui_createfont("Tahoma", 12);
 	}	
@@ -58,11 +58,9 @@ void InitMachineView(MachineView* self, ui_component* parent, MachineBar* machin
 	MachineUiSet(&self->machineuis[0], 200, 200, 0);
 	memset(&self->machine_frames, 0, sizeof(ui_component[256]));
 	memset(&self->machine_paramviews, 0, sizeof(ParamView[256]));
-	ui_component_init(self, &self->component, parent);	
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
-	signal_connect(&self->component.signal_size, self, OnSize);			
-
-
+	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
 	signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
@@ -85,7 +83,6 @@ void InitMachineView(MachineView* self, ui_component* parent, MachineBar* machin
 
 void Draw(MachineView* self, ui_graphics* g)
 {
-
 }
 
 void OnDestroy(MachineView* self, ui_component* component)
@@ -453,8 +450,8 @@ void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 }
 
 void OnKeyDown(MachineView* self, ui_component* sender, int keycode, int keydata)
-{
-	sender->propagateevent = 1;
+{	
+	ui_component_propagateevent(sender);
 }
 
 void OnMachinesChangeSlot(MachineView* self, Machines* machines, int slot)

@@ -22,7 +22,7 @@ static int count;
 void InitNewMachine(NewMachine* self, ui_component* parent, Player* player, Properties* properties)
 {	
 	Properties* property;
-	ui_component_init(self, &self->component, parent);	
+	ui_component_init(&self->component, parent);	
 	ui_component_showverticalscrollbar(&self->component);
 	signal_connect(&self->component.signal_destroy, self,OnDestroy);	
 	signal_connect(&self->component.signal_size, self, OnSize);
@@ -58,7 +58,7 @@ void OnDraw(NewMachine* self, ui_component* sender, ui_graphics* g)
 	cpy = 0;
 	ui_setbackgroundcolor(g, 0x009a887c);
 	ui_settextcolor(g, 0x00000000);
-	properties_enumarate(self->plugincatcher.plugins, self, OnPropertiesEnum);
+	properties_enumerate(self->plugincatcher.plugins, self, OnPropertiesEnum);
 }
 
 
@@ -97,7 +97,7 @@ void OnSize(NewMachine* self, ui_component* sender, int width, int height)
 	ui_component_setverticalscrollrange(&self->component, 0, 100);
 }
 
-void OnScroll(NewMachine* self, int cx, int cy)
+void OnScroll(NewMachine* self, ui_component* sender, int cx, int cy)
 {
 	dy += cy;
 }
@@ -111,7 +111,7 @@ void HitTest(NewMachine* self, int x, int y)
 {	
 	self->pluginpos = (y - dy) / 20;
 	count = 0;	
-	properties_enumarate(self->plugincatcher.plugins, self, OnPropertiesCount);
+	properties_enumerate(self->plugincatcher.plugins, self, OnPropertiesCount);
 	InvalidateRect(self->component.hwnd, NULL, TRUE);
 }
 

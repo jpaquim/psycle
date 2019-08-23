@@ -19,7 +19,7 @@ static void OnEditChange(SettingsView* self, ui_edit* sender);
 
 void InitSettingsView(SettingsView* self, ui_component* parent, Properties* properties)
 {			
-	ui_component_init(self, &self->component, parent);
+	ui_component_init(&self->component, parent);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
@@ -28,8 +28,7 @@ void InitSettingsView(SettingsView* self, ui_component* parent, Properties* prop
 	ui_component_resize(&self->component, 400, 400);
 	self->properties = properties;	
 	self->selected = 0;
-	ui_edit_init(&self->edit, &self->component, 0);
-	self->edit.component.events.target = self;
+	ui_edit_init(&self->edit, &self->component, 0);	
 	ui_component_hide(&self->edit.component);
 	signal_connect(&self->edit.signal_change, self, OnEditChange);
 }
@@ -46,7 +45,7 @@ void OnDraw(SettingsView* self, ui_component* sender, ui_graphics* g)
 	cpx = 0;
 	cpy = 0;
 	self->lastlevel = 0;
-	properties_enumarate(self->properties, self, OnPropertiesEnum);
+	properties_enumerate(self->properties, self, OnPropertiesEnum);
 }
 
 int OnPropertiesEnum(SettingsView* self, Properties* property, int level)
@@ -109,7 +108,7 @@ void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int but
 	self->lastlevel = 0;
 	cpx = 0;
 	cpy = 0;
-	properties_enumarate(self->properties, self, OnPropertiesHitTestEnum);
+	properties_enumerate(self->properties, self, OnPropertiesHitTestEnum);
 	ui_invalidate(&self->component);
 }
 

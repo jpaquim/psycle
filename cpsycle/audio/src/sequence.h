@@ -5,6 +5,7 @@
 
 #include "patterns.h"
 #include <list.h>
+#include <signal.h>
 
 typedef struct {
 	int pattern;
@@ -12,28 +13,33 @@ typedef struct {
 } SequenceEntry;
 
 typedef struct {
-	PatternNode* (*next)(void*);
-	void (*unget)(void*);
+	Patterns* patterns;	
 	List* sequence;
-	PatternNode* pattern;
-	List* prevsequence;
-	PatternNode* prevpattern;
+	PatternNode* patternnode;		
 } SequencePtr;
 
+void sequenceptr_inc(SequencePtr*);
+PatternNode* sequenceptr_patternnode(SequencePtr*);
+SequenceEntry* sequenceptr_entry(SequencePtr*);
+
+typedef List Track;
+
 typedef struct {
-	List* entries;
+	Track* entries;
 	Patterns* patterns;
-	SequencePtr pos;
-	SequencePtr prev;
+	SequencePtr editpos;
+	Signal signal_editposchanged;
 } Sequence;
 
 void sequence_init(Sequence*, Patterns*);
 void sequence_dispose(Sequence*);
-void sequence_insert(Sequence*, float offset, int pattern);
-SequenceEntry* sequence_append(Sequence*, int pattern);
+SequenceEntry* sequence_insert(Sequence*, SequencePtr position, int pattern);
+void sequence_remove(Sequence*, SequencePtr position);
 unsigned int sequence_size(Sequence*);
-SequenceEntry* sequence_at(Sequence*, unsigned int position);
-void sequence_seek(Sequence*, float pos);
+SequencePtr sequence_at(Sequence*, unsigned int position);
 SequencePtr sequence_begin(Sequence* self, float offset);
+SequencePtr sequence_last(Sequence* self);
+void sequence_seteditposition(Sequence* self, SequencePtr position);
+SequencePtr sequence_editposition(Sequence* self);
 #endif
 

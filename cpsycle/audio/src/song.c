@@ -17,8 +17,8 @@ void song_init(Song* self)
 	sequence_init(&self->sequence, &self->patterns);
 	pattern = (Pattern*) malloc(sizeof(Pattern));
 	patterns_insert(&self->patterns, 0, pattern);
-	pattern_init(pattern);
-	sequence_insert(&self->sequence, 0, 0);
+	pattern_init(pattern);	
+	sequence_insert(&self->sequence, sequence_begin(&self->sequence, 0), 0);
 }
 
 void song_dispose(Song* self)

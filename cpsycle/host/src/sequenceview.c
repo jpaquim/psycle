@@ -9,29 +9,31 @@ static void DrawBackground(SequenceListView* self, ui_graphics* g);
 static void DrawSequence(SequenceListView* self, ui_graphics* g);
 
 static void OnControllerNewEntry(SequenceListView* self);
-static void OnNewEntry(SequenceButtons* self);
+static void OnControllerDelEntry(SequenceListView* self);
+static void OnNewEntry(SequenceButtons* self, ui_component* sender);
+static void OnDelEntry(SequenceButtons* self, ui_component* sender);
 static void OnSize(SequenceView* self, ui_component* sender, int width, int height);
 static void OnMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int button);
 
 void InitSequenceView(SequenceView* self, ui_component* parent, Sequence* sequence, Patterns* patterns)
 {	
-	ui_component_init(self, &self->component, parent);		
+	ui_component_init(&self->component, parent);		
 	signal_connect(&self->component.signal_size, self, OnSize);
 	InitSequenceListView(&self->listview, &self->component, sequence, patterns);			
 	ui_component_move(&self->listview.component, 0, 20);	
 	self->buttons.context = &self->listview;
 	InitSequenceButtons(&self->buttons, &self->component);			
 	self->buttons.controller.newentry = OnControllerNewEntry;
+	self->buttons.controller.delentry = OnControllerDelEntry;
 }
 
 void InitSequenceListView(SequenceListView* self, ui_component* parent, Sequence* sequence, Patterns* patterns)
 {				
 	self->sequence = sequence;
 	self->patterns = patterns;
-	ui_component_init(self, &self->component, parent);	
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	self->selchanged = 0;
+	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);	
 	self->selected = 0;
 	self->skin.font = ui_createfont("Tahoma", 12);
 	self->lineheight = 12;
@@ -40,13 +42,21 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent, Sequence
 void InitSequenceButtons(SequenceButtons* self, ui_component* parent)
 {
 	self->font = ui_createfont("Tahoma", 12);	
-	ui_component_init(self, &self->component, parent);
-	ui_button_init(&self->newentry, &self->component);
-	ui_component_setfont(&self->newentry, self->font);
+	ui_component_init(&self->component, parent);
+	ui_button_init(&self->newentry, &self->component);	
+	ui_component_setfont(&self->newentry.component, self->font);
 	ui_button_connect(&self->newentry, self);
-	self->newentry.events.clicked = OnNewEntry;
+	signal_connect(&self->newentry.signal_clicked, self, OnNewEntry);	
 	ui_component_resize(&self->newentry.component, 40, 20);
 	ui_button_settext(&self->newentry, "New");
+	ui_button_init(&self->delentry, &self->component);	
+	ui_component_setfont(&self->delentry.component, self->font);
+	ui_button_connect(&self->delentry, self);
+	signal_connect(&self->delentry.signal_clicked, self, OnDelEntry);	
+	ui_component_move(&self->delentry.component, 45, 0);
+	ui_component_resize(&self->delentry.component, 40, 20);
+	ui_button_settext(&self->delentry, "Del");
+
 }
 
 void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g)
@@ -103,8 +113,12 @@ void OnSize(SequenceView* self, ui_component* sender, int width, int height)
 	ui_component_resize(&self->listview.component, width, height - 20);
 }
 
-void OnNewEntry(SequenceButtons* self) {
+void OnNewEntry(SequenceButtons* self, ui_component* sender) {
 	self->controller.newentry(self->context);	
+}
+
+void OnDelEntry(SequenceButtons* self, ui_component* sender) {
+	self->controller.delentry(self->context);	
 }
 
 void OnControllerNewEntry(SequenceListView* self)
@@ -113,13 +127,24 @@ void OnControllerNewEntry(SequenceListView* self)
 	Pattern* pattern = (Pattern*) malloc(sizeof(Pattern));
 	pattern_init(pattern);
 	slot = patterns_append(self->patterns, pattern);
-	sequence_append(self->sequence, slot);
-	self->selected = sequence_size(self->sequence) - 1;
-	ui_invalidate(&self->component);
-	if (self->selchanged) {
-		SequenceEntry* entry = sequence_at(self->sequence, self->selected);
-		self->selchanged(self->selcontext, entry);
-	}	
+	sequence_insert(self->sequence, sequence_editposition(self->sequence), slot);
+	++self->selected;
+	ui_invalidate(&self->component);	
+}
+
+void OnControllerDelEntry(SequenceListView* self)
+{
+	if (self->selected != -1) {
+		SequencePtr ptr = sequence_editposition(self->sequence);
+		sequence_remove(self->sequence, ptr);
+		if (sequence_size(self->sequence) == 0) {
+			sequence_insert(self->sequence, sequence_begin(self->sequence, 0), 0);
+		}
+		if (self->selected >= (int)sequence_size(self->sequence)) {
+			self->selected = sequence_size(self->sequence) - 1;
+		}
+		ui_invalidate(&self->component);
+	}
 }
 
 void OnMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int button)
@@ -130,14 +155,6 @@ void OnMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int
 	if (selected < sequence_size(self->sequence)) {
 		self->selected = selected;
 	}
-	ui_invalidate(&self->component);
-	if (self->selchanged) {
-		SequenceEntry* entry = sequence_at(self->sequence, self->selected);
-		self->selchanged(self->selcontext, entry);
-	}
-}
-
-void SequenceViewConnect(SequenceView* self, void* context)
-{
-	self->listview.selcontext = context;	
+	ui_invalidate(&self->component);		
+	sequence_seteditposition(self->sequence, sequence_at(self->sequence, self->selected));
 }

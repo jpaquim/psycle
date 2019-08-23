@@ -7,7 +7,6 @@
 static int OnEnumMachine(Machines* self, int slot, Machine* machine);
 static int OnEnumPathMachines(Machines* self, int slot, Machine* machine);
 static MachineConnection* connection_tail(MachineConnection* first);
-static List* compute_path(Machines* self, MachinePath* path);
 static void free_machinepath(List* path);
 
 HANDLE hGuiEvent;
@@ -150,9 +149,7 @@ MachineList* calc_list(Machines* self, int slot)
 	MachineConnections* connections;
 
 	MachineList* list;
-	list = list_create();
-	list->node = (void*)slot;
-
+	list = list_create((void*)slot);
 	connections = machines_connections(self, slot);
 	ptr = &connections->inputs;
 	if (!ptr) {		
@@ -173,34 +170,6 @@ MachineList* calc_list(Machines* self, int slot)
 	return list;
 }
 
-
-List* compute_path(Machines* self, MachinePath* path)
-{
-	int masterslot = 0;
-	MachineConnection* ptr;	
-	MachineConnections* connections;
-		
-	connections = machines_connections(self, masterslot);	
-	if (connections) {
-		if (path == 0) {
-			path = list_create();
-		}
-		ptr = &connections->inputs;
-		while (ptr) {
-			if (ptr->slot != -1) {
-				
-				if (path->node) {
-					list_append(path->node, (void*) ptr->slot);
-				} else {					
-					path->node = list_create();
-					((List*)path->node)->node = (void*) ptr->slot;
-				}
-			}
-			ptr = ptr->next;		
-		}		
-	}
-	return path;
-}
 
 void free_machinepath(List* path)
 {

@@ -44,7 +44,7 @@ Pattern* patterns_at(Patterns* self, unsigned int slot)
 	return SearchIntHashTable(&self->slots, slot);
 }
 
-void patterns_enumerate(Patterns* self, void* context, unsigned int (*enumproc)(void*, unsigned int, Pattern*))
+void patterns_enumerate(Patterns* self, void* context, int (*enumproc)(void*, unsigned int, Pattern*))
 {
 	Pattern* pattern;
 	int slot;

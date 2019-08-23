@@ -6,14 +6,14 @@ void AddString(Greet* self, const char* text);
 
 void greet_init(Greet* self, ui_component* parent)
 {
-	ui_frame_init(&self->component, &self->component, parent);	
+	ui_frame_init(&self->component, parent);	
 	ui_component_settitle(&self->component, "Greetings and info");
 	ui_component_resize(&self->component, 242, 237);
 	ui_label_init(&self->header, &self->component);
 	ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
 	ui_component_move(&self->header.component, 5,4);
 	ui_component_resize(&self->header.component, 232, 17);
-	ui_listbox_init(&self->greetz.component, &self->greetz, &self->component);
+	ui_listbox_init(&self->greetz, &self->component);
 	ui_component_move(&self->greetz.component, 11, 33);
 	ui_component_resize(&self->greetz.component, 220,174);
 	ui_button_init(&self->ok, &self->component);

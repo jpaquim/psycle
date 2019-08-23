@@ -12,7 +12,7 @@ extern int winid;
 static void OnCommand(ui_combobox* self, WPARAM wParam, LPARAM lParam);
 static void OnDestroy(ui_combobox* self, ui_component* sender);
 
-void ui_combobox_init(void* self, ui_combobox* combobox, ui_component* parent)
+void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 {  
     memset(&combobox->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&combobox->component);

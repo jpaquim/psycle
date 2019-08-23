@@ -36,4 +36,3 @@ void InitNoteInputs(NoteInputs* self)
 	DefineInput(&self->map, '0', CMD_NOTE_DS2);
 	DefineInput(&self->map, 'P', CMD_NOTE_E_2);
 }
-

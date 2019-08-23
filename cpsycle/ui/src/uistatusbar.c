@@ -7,7 +7,7 @@
 
 extern IntHashTable selfmap;
 
-void ui_statusbar_init(void* self, ui_statusbar* statusbar, ui_component* parent)
+void ui_statusbar_init(ui_statusbar* statusbar, ui_component* parent)
 {  
     memset(&statusbar->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&statusbar->component);	
@@ -31,7 +31,7 @@ void ui_statusbar_init(void* self, ui_statusbar* statusbar, ui_component* parent
         MessageBox(NULL, "Failed To Create The Status Bar", "Error", MB_OK | MB_ICONERROR);
     }
 	InsertIntHashTable(&selfmap, (int)statusbar->component.hwnd, &statusbar->component);	
-	statusbar->component.events.target = self;
+	statusbar->component.events.target = statusbar;
 }
 
 void ui_statusbar_setfields(ui_statusbar* self, int parts, int iStatusWidths[])

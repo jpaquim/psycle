@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct {
    ui_component component;
-   ui_buttonevents events;
+   Signal signal_clicked;
 } ui_button;
 
 void ui_button_init(ui_button* button, ui_component* parent);
