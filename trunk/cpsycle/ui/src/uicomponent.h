@@ -34,6 +34,8 @@ typedef struct {
 	int align;   
 	int doublebuffered;
 	int propagateevent;
+	int scrollstepx;
+	int scrollstepy;
 } ui_component;
 
 void ui_component_init(ui_component* component, ui_component* parent);
@@ -44,8 +46,8 @@ void ui_classcomponent_init(ui_component* component, ui_component* parent, const
 void ui_component_show(ui_component* self);
 void ui_component_hide(ui_component* self);
 void ui_component_show_state(ui_component* self, int cmd);
-void ui_component_showhorizontallscrollbar(ui_component* self);
-void ui_component_hidehorizontallscrollbar(ui_component* self);
+void ui_component_showhorizontalscrollbar(ui_component* self);
+void ui_component_hidehorizontalscrollbar(ui_component* self);
 void ui_component_sethorizontalscrollrange(ui_component* self, int min, int max);
 void ui_component_showverticalscrollbar(ui_component* self);
 void ui_component_hideverticalscrollbar(ui_component* self);
@@ -63,6 +65,7 @@ void ui_component_setfocus(ui_component* self);
 void ui_component_setfont(ui_component* self, HFONT font);
 void ui_component_propagateevent(ui_component* self);
 void ui_component_init_signals(ui_component* component);
+int ui_component_visible(ui_component* component);
 
 
 #endif

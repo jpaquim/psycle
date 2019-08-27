@@ -140,6 +140,10 @@ SOURCE=.\src\paramview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\patternproperties.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\patternview.c
 # End Source File
 # Begin Source File
@@ -236,6 +240,10 @@ SOURCE=.\src\paramview.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\patternproperties.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\patternview.h
 # End Source File
 # Begin Source File
@@ -256,6 +264,10 @@ SOURCE=.\src\settingsview.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\skincoord.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\skinio.h
 # End Source File
 # Begin Source File
@@ -267,5 +279,13 @@ SOURCE=.\src\songproperties.h
 SOURCE=.\src\tabbar.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\src\resources\machine_skin.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\resources\pattern_header_skin.bmp
+# End Source File
 # End Target
 # End Project

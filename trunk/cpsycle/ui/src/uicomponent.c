@@ -19,6 +19,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
                            WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
+static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
+static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
 
 HINSTANCE appInstance = 0;
 
@@ -264,6 +266,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			return 0;
 		break;
 		case WM_HSCROLL:
+			handle_hscroll(hwnd, wParam, lParam);
 			return 0;
 		break;
 		default:
@@ -276,73 +279,96 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	SCROLLINFO		si;	
-    int				iVertPos; //, iHorzPos;
-	int				cyChar;
+    int				iPos; //, iHorzPos;	
 	ui_component*   component;
      
 	si.cbSize = sizeof (si) ;
     si.fMask  = SIF_ALL ;
-    GetScrollInfo (hwnd, SB_VERT, &si) ;
-	cyChar = 20;
-
+    GetScrollInfo (hwnd, SB_VERT, &si) ;	
 	// Save the position for comparison later on
+	iPos = si.nPos ;
 
-	iVertPos = si.nPos ;
-
-	switch (LOWORD (wParam))
-	{
-		case SB_TOP:
-		   si.nPos = si.nMin ;
-		   break ;
-
-		case SB_BOTTOM:
-		   si.nPos = si.nMax ;
-		   break ;
-
-		case SB_LINEUP:
-		   si.nPos -= 1 ;
-		   break ;
-
-		case SB_LINEDOWN:
-		   si.nPos += 1 ;
-		   break ;
-
-		case SB_PAGEUP:
-		   si.nPos -= si.nPage ;
-		   break ;
-
-		case SB_PAGEDOWN:
-		   si.nPos += si.nPage ;
-		   break ;
-
-		case SB_THUMBTRACK:
-		   si.nPos = si.nTrackPos ;
-		   break ;
-
-		default:
-		   break ;         
-	}
+	handle_scrollparam(&si, wParam);	
 	// Set the position and then retrieve it.  Due to adjustments
 	//   by Windows it may not be the same as the value set.
-
 	si.fMask = SIF_POS ;
 	SetScrollInfo (hwnd, SB_VERT, &si, TRUE) ;
 	GetScrollInfo (hwnd, SB_VERT, &si) ;
-
 	// If the position has changed, scroll the window and update it
-
-	if (si.nPos != iVertPos)
+	if (si.nPos != iPos)
 	{                    
 		component = SearchIntHashTable(&selfmap, (int) hwnd);
 		if (component && component->signal_scroll.slots) {
 			signal_emit(&component->signal_scroll, component, 2, 
-				0, cyChar * (iVertPos - si.nPos));			
+				0, component->scrollstepy * (iPos - si.nPos));			
 		}
-		ScrollWindow (hwnd, 0, cyChar * (iVertPos - si.nPos), 
+		ScrollWindow (hwnd, 0, component->scrollstepy * (iPos - si.nPos), 
                                    NULL, NULL) ;
 		UpdateWindow (hwnd) ;
 	}
-//	return 0 ;          
+}
+
+void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+	SCROLLINFO		si;	
+    int				iPos; 
+	ui_component*   component;
+     
+	si.cbSize = sizeof (si) ;
+    si.fMask  = SIF_ALL ;
+    GetScrollInfo (hwnd, SB_HORZ, &si) ;	
+
+	// Save the position for comparison later on
+	iPos = si.nPos ;
+	handle_scrollparam(&si, wParam);
+	// Set the position and then retrieve it.  Due to adjustments
+	// by Windows it may not be the same as the value set.
+	si.fMask = SIF_POS ;
+	SetScrollInfo (hwnd, SB_HORZ, &si, TRUE) ;
+	GetScrollInfo (hwnd, SB_HORZ, &si) ;
+
+	// If the position has changed, scroll the window and update it
+
+	if (si.nPos != iPos)
+	{                    
+		component = SearchIntHashTable(&selfmap, (int) hwnd);
+		if (component && component->signal_scroll.slots) {
+			signal_emit(&component->signal_scroll, component, 2, 
+				component->scrollstepx * (iPos - si.nPos), 0);			
+		}
+		ScrollWindow (hwnd, component->scrollstepx * (iPos - si.nPos), 0, 
+                                   NULL, NULL) ;
+		UpdateWindow (hwnd) ;
+	}
+}
+
+void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
+{
+	switch (LOWORD (wParam)) {
+		case SB_TOP:
+		   si->nPos = si->nMin ;
+		break ;
+		case SB_BOTTOM:
+		   si->nPos = si->nMax ;
+		break ;
+		case SB_LINEUP:
+		   si->nPos -= 1 ;
+		break ;
+		case SB_LINEDOWN:
+		   si->nPos += 1 ;
+		break ;
+		case SB_PAGEUP:
+		   si->nPos -= si->nPage ;
+		break ;
+		case SB_PAGEDOWN:
+		   si->nPos += si->nPage ;
+		break ;
+		case SB_THUMBTRACK:
+		   si->nPos = si->nTrackPos ;
+		break ;
+		default:
+		break ;         
+	}
 }
 
 void ui_frame_init(ui_component* frame, ui_component* parent)
@@ -379,7 +405,9 @@ void ui_component_init(ui_component* component, ui_component* parent)
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)component->hwnd, component);
-	component->events.target = component;	
+	component->events.target = component;			
+	component->scrollstepx = 100;
+	component->scrollstepy = 12; 
 }
 
 void ui_component_init_signals(ui_component* component)
@@ -461,14 +489,14 @@ void ui_component_hide(ui_component* self)
 	UpdateWindow(self->hwnd) ;
 }
 
-void ui_component_showhorizontallscrollbar(ui_component* self)
+void ui_component_showhorizontalscrollbar(ui_component* self)
 {
 	SetWindowLong(self->hwnd, GWL_STYLE, 
 		GetWindowLong(self->hwnd, GWL_STYLE) | WS_HSCROLL);
 }
 
 
-void ui_component_hidehorizontallscrollbar(ui_component* self)
+void ui_component_hidehorizontalscrollbar(ui_component* self)
 {
 	SetWindowLong(self->hwnd, GWL_STYLE, 
 		GetWindowLong(self->hwnd, GWL_STYLE) & ~WS_HSCROLL);
@@ -480,7 +508,7 @@ void ui_component_sethorizontalscrollrange(ui_component* self, int min, int max)
 	si.cbSize = sizeof(si);
 	si.nMin = min;
 	si.nMax = max;
-	si.fMask = SIF_RANGE;
+	si.fMask = SIF_RANGE;	
 	SetScrollInfo(self->hwnd, SB_HORZ, &si, TRUE);
 }
 
@@ -578,4 +606,9 @@ void ui_component_setfont(ui_component* self, HFONT hFont)
 void ui_component_propagateevent(ui_component* self)
 {
 	self->propagateevent = 1;
+}
+
+int ui_component_visible(ui_component* component)
+{
+	return IsWindowVisible(component->hwnd);
 }

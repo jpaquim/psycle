@@ -68,9 +68,9 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	InitMachineView(&self->machineview, &self->component, &self->machinebar, player, properties);	
 	ui_component_move(&self->machineview.component, 150, 45);	
 	ui_component_hide(&self->machineview.component);
-	self->patternview.noteinputs = &self->noteinputs;
-	self->patternview.pattern = patterns_at(&player->song->patterns, 0);
+	self->patternview.grid.noteinputs = &self->noteinputs;	
 	InitPatternView(&self->patternview, &self->component, player);
+	PatternViewSetPattern(&self->patternview, patterns_at(&player->song->patterns, 0));
 	ui_component_hide(&self->machineview.component);
 	ui_component_move(&self->patternview.component, 150, 45);
 	self->activeview = &self->patternview.component;
@@ -160,7 +160,7 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		Properties* properties = properties_create();
 		properties_init(properties);
 		skin_load(properties, "old Psycle.psv");
-		PatternViewApplyProperties(&self->patternview, properties);
+		PatternGridApplyProperties(&self->patternview.grid, properties);
 		MachineViewApplyProperties(&self->machineview, properties);
 		properties_free(properties);
 	} else {
@@ -182,7 +182,7 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 {
 	char buffer[20];
 
-	_snprintf(buffer, 20, "%.4f", player_position(self->patternview.player)); 
+	_snprintf(buffer, 20, "%.4f", player_position(self->patternview.grid.player)); 
 	ui_statusbar_settext(&statusbar, 0, buffer);	
 }
 

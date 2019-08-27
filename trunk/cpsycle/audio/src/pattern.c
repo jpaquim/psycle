@@ -2,25 +2,29 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "pattern.h"
 #include <stdlib.h>
+#include <string.h>
 
 void pattern_init(Pattern* self)
 {
 	self->events = 0;
 	self->length = 16;
+	self->label = strdup("Untitled");
 }
 
 void pattern_free(Pattern* self)
 {
-	PatternNode* ptr;
+	PatternNode* p;
 	PatternNode* next;
 
-	ptr = self->events;
-	while (ptr != 0) {
-		next = ptr->next;
-		free (ptr);
-		ptr = next;
+	free(self->label);
+	self->label = 0;
+	p = self->events;
+	while (p != 0) {
+		next = p->next;
+		free (p);
+		p = next;
 	}
-	list_free(self->events);
+	list_free(self->events);	
 }
 
 void pattern_write(Pattern* self, int track, float offset, PatternEvent event)
@@ -65,30 +69,40 @@ void pattern_write(Pattern* self, int track, float offset, PatternEvent event)
 	}
 }
 
-void pattern_remove(Pattern* self, int track, float offset)
+void pattern_remove(Pattern* self, PatternNode* node)
 {
-	PatternNode* node = pattern_greaterequal(self, offset);
 	if (node) {
 		PatternEntry* entry = (PatternEntry*)(node->node);
-		if (node && entry->offset < offset + 0.25) {
-			list_remove(&self->events, node);
-			free(entry);
-		}
+		list_remove(&self->events, node);
+		free(entry);		
 	}
 }
 
 
 PatternNode* pattern_greaterequal(Pattern* self, float offset)
 {
-	PatternNode* ptr;	
+	PatternNode* p;	
 	
-	ptr = self->events;
-	while (ptr != 0) {
-		PatternEntry* entry = (PatternEntry*)ptr->node;
+	p = self->events;
+	while (p != 0) {
+		PatternEntry* entry = (PatternEntry*)p->node;
 		if (entry->offset >= offset) {			
 			break;
 		}		
-		ptr = ptr->next;
+		p = p->next;
 	}	
-	return ptr;
+	return p;
+}
+
+void pattern_setlabel(Pattern* self, const char* text)
+{
+	if (self->label) {
+		free(self->label);
+		self->label = strdup(text);
+	}
+}
+
+void pattern_setlength(Pattern* self, float length)
+{
+	self->length = length;
 }
