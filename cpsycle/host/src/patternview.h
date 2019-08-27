@@ -9,6 +9,18 @@
 #include <pattern.h>
 #include "noteinputs.h"
 #include "player.h"
+#include "skincoord.h"
+#include "patternproperties.h"
+
+
+typedef struct {
+	SkinCoord background;	
+	SkinCoord record;
+	SkinCoord mute;
+	SkinCoord solo;
+	SkinCoord digitx0;
+	SkinCoord digit0x;	
+} PatternHeaderCoords;
 
 typedef struct {
 	unsigned int separator;
@@ -35,6 +47,8 @@ typedef struct {
 	unsigned int playbar2;
 	unsigned int cursor;
 	unsigned int cursor2;
+	PatternHeaderCoords headercoords;
+	ui_bitmap skinbmp;
 	HFONT hfont;
 } PatternSkin;
 
@@ -42,39 +56,77 @@ typedef struct {
 	int track;
 	float offset;
 	int col;
-} PatternViewCursor;
+} PatternGridCursor;
 
 typedef struct
 {
-	PatternViewCursor topleft;
-	PatternViewCursor bottomright;
-} PatternViewBlock;
+	PatternGridCursor topleft;
+	PatternGridCursor bottomright;
+} PatternGridBlock;
+
+typedef struct {
+	ui_component component;
+	int dx;
+	int trackwidth;
+	PatternSkin* skin;
+} PatternHeader;
+
+typedef struct {
+	ui_component component;
+} PatternLineNumbersLabel;
+
+typedef struct {
+	ui_component component;
+	PatternSkin* skin;
+	int dy;
+	int lineheight;
+	struct PatternView* view;
+} PatternLineNumbers;
+
+#define PatternGrid_NUMCOLS 10
 
 typedef struct {
    ui_component component;   
    int cx;
    int cy;
+   int dx;
    int dy;
    int trackwidth;
    int lineheight;
-   int numtracks;
-   int numlines;
+   int numtracks;   
    int lpb;
    float bpl;
    float cbpl;
    PatternNode* curr_event;
    NoteInputs* noteinputs;
    char** notestab;
-   PatternViewCursor cursor;
+   PatternGridCursor cursor;
    float cursorstep;
    Pattern* pattern;
    Player* player;
    int textwidth;
-   int colx[10];
+   int colx[PatternGrid_NUMCOLS];
    PatternSkin skin;
+   PatternHeader* header;
+   PatternLineNumbers* linenumbers;
+   struct PatternView* view;
+} PatternGrid;
+
+typedef struct PatternView {
+	ui_component component;
+	PatternHeader header;
+	PatternLineNumbersLabel linenumberslabel;
+	PatternLineNumbers linenumbers;
+	PatternGrid grid;
+	PatternProperties properties;
 } PatternView;
 
-void InitPatternView(PatternView* patternview, ui_component* parent, Player* player);
-void PatternViewApplyProperties(PatternView* self, Properties* properties);
+void InitPatternGrid(PatternGrid*, ui_component* parent, Player* player);
+void PatternGridApplyProperties(PatternGrid* self, Properties* properties);
+void InitPatternHeader(PatternHeader*, ui_component* parent);
+void InitPatternLineNumbersLabel(PatternLineNumbersLabel* self, ui_component* parent);
+void InitPatternLineNumbers(PatternLineNumbers* self, ui_component* parent);
+void InitPatternView(PatternView*, ui_component* parent, Player* player);
+void PatternViewSetPattern(PatternView*, Pattern*);
 
 #endif

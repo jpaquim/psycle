@@ -19,13 +19,16 @@ typedef List PatternNode;
 typedef struct {
 	PatternNode* events;
 	float length;
+	char* label;
 } Pattern;
 
-void pattern_init(Pattern* self);
-void pattern_free(Pattern* self);
-void pattern_write(Pattern* self, int track, float offset, PatternEvent);
-void pattern_remove(Pattern* self, int track, float offset);
-PatternNode* pattern_greaterequal(Pattern* self, float offset);
+void pattern_init(Pattern*);
+void pattern_free(Pattern*);
+void pattern_write(Pattern*, int track, float offset, PatternEvent);
+void pattern_remove(Pattern*, PatternNode*);
+PatternNode* pattern_greaterequal(Pattern*, float offset);
+void pattern_setlabel(Pattern*, const char*);
+void pattern_setlength(Pattern*, float length);
 
 #endif
 

@@ -13,17 +13,7 @@
 #include "machineframe.h"
 #include "paramview.h"
 #include "machinebar.h"
-
-typedef struct {
-	int srcx;
-	int srcy;
-	int srcwidth;
-	int srcheight;
-	int destx;
-	int desty;
-	int destwidth;
-	int destheight;	
-} SkinCoord; 
+#include "skincoord.h"
 
 typedef struct {
 	SkinCoord background;	

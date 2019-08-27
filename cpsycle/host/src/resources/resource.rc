@@ -28,6 +28,7 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 
 IDB_MACHINESKIN         BITMAP  DISCARDABLE     "machine_skin.bmp"
 IDB_PARAMKNOB           BITMAP  DISCARDABLE     "TbMainKnob.bmp"
+IDB_HEADERSKIN          BITMAP  DISCARDABLE     "pattern_header_skin.bmp"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
