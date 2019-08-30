@@ -25,7 +25,7 @@ void sequence_dispose(Sequence* self)
 	ptr = self->entries;
 	while (ptr) {
 		next = ptr->next;
-		free(ptr->node);
+		free(ptr->entry);
 		ptr = next;
 	}
 	list_free(self->entries);
@@ -40,7 +40,7 @@ SequenceEntry* sequence_insert(Sequence* self, SequencePtr position, int pattern
 	if (self->entries) {
 		Track* ptr = position.sequence;
 		if (ptr) {			
-			self->editpos = sequence_makeptr(self, list_insert(self->entries, position.sequence, entry));
+			self->editpos = sequence_makeptr(self, list_insert(&self->entries, position.sequence, entry));
 			sequence_reposition(self);						
 		}
 	} else {		
@@ -55,7 +55,7 @@ SequenceEntry* sequence_insert(Sequence* self, SequencePtr position, int pattern
 void sequence_remove(Sequence* self, SequencePtr position)
 {				
 	Track* ptr = position.sequence;					
-	SequenceEntry* entry = (SequenceEntry*)ptr->node;
+	SequenceEntry* entry = (SequenceEntry*)ptr->entry;
 	ptr = list_remove(&self->entries, ptr);	
 	if (self->entries != NULL) {
 		sequence_reposition(self);	
@@ -77,7 +77,7 @@ SequencePtr sequence_last(Sequence* self)
 	ptr.sequence = self->entries->tail;
 	if (ptr.sequence) {
 		Pattern* pattern;
-		SequenceEntry* entry = (SequenceEntry*) ptr.sequence->node;
+		SequenceEntry* entry = (SequenceEntry*) ptr.sequence->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);		
 		ptr.patternnode = pattern->events;
 	}
@@ -90,7 +90,7 @@ void sequence_reposition(Sequence* self)
 	Track* ptr = self->entries;	
 	while (ptr) {
 		Pattern* pattern;
-		SequenceEntry* entry = (SequenceEntry*) ptr->node;
+		SequenceEntry* entry = (SequenceEntry*) ptr->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
 		entry->offset = curroffset;
 		curroffset += pattern->length;
@@ -137,7 +137,7 @@ Track* sequence_at_offset(Sequence* self, float offset)
 	Track* ptr = self->entries;	
 	while (ptr) {
 		Pattern* pattern;
-		SequenceEntry* entry = (SequenceEntry*) ptr->node;
+		SequenceEntry* entry = (SequenceEntry*) ptr->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
 		if (offset >= curroffset && offset < curroffset + pattern->length) {
 			break;
@@ -161,7 +161,7 @@ void sequenceptr_inc(SequencePtr* self) {
 				SequenceEntry* entry;
 				Pattern* pattern;
 				self->sequence = self->sequence->next;			
-				entry = (SequenceEntry*) self->sequence->node;
+				entry = (SequenceEntry*) self->sequence->entry;
 				pattern = patterns_at(self->patterns, entry->pattern);
 				self->patternnode = pattern->events;
 			}
@@ -187,7 +187,7 @@ SequencePtr sequence_makeptr(Sequence* self, List* entries)
 	rv.patterns = self->patterns;
 	rv.sequence = entries;
 	if (entries) {
-		SequenceEntry* entry = (SequenceEntry*) entries->node;
+		SequenceEntry* entry = (SequenceEntry*) entries->entry;
 		pPattern = patterns_at(self->patterns, entry->pattern);
 		rv.patternnode = pPattern->events;
 	}		
@@ -201,5 +201,5 @@ PatternNode* sequenceptr_patternnode(SequencePtr* self)
 
 SequenceEntry* sequenceptr_entry(SequencePtr* self)
 {
-	return self->sequence ? (SequenceEntry*) self->sequence->node : 0;
+	return self->sequence ? (SequenceEntry*) self->sequence->entry : 0;
 }

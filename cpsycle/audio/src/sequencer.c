@@ -40,7 +40,7 @@ void sequencer_enumerate(Sequencer* self, void* context, int slot, void (*callba
 	PatternNode* node = sequenceptr_patternnode(&self->curr);
 	SequenceEntry* entry = sequenceptr_entry(&self->curr);
 	while (node) {
-		PatternEntry* patternentry = (PatternEntry*)node->node;
+		PatternEntry* patternentry = (PatternEntry*)node->entry;
 		if (entry->offset + patternentry->offset >= self->pos && entry->offset + patternentry->offset < self->pos + self->window) {
 			callback(context, slot, node);
 			sequenceptr_inc(&self->curr);

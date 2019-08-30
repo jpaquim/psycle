@@ -25,7 +25,7 @@ void OnDestroy(TabBar* self, ui_component* component)
 	ptr = self->tabs;
 	while (ptr) {
 		next = ptr->next;
-		free(ptr->node);
+		free(ptr->entry);
 		ptr = next;
 	}
 	list_free(self->tabs);
@@ -40,7 +40,7 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 
 	ptr = self->tabs;
 	while (ptr) {
-		const char* str = (const char*)ptr->node;
+		const char* str = (const char*)ptr->entry;
 		if (self->selected == c) {
 			ui_settextcolor(g, 0xFFFF0000);
 		} else {

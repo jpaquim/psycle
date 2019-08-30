@@ -90,7 +90,7 @@ void DrawSequence(SequenceListView* self, ui_graphics* g)
 	while (ptr != 0) {
 		SequenceEntry* entry;
 		// Pattern* pattern;
-		entry = (SequenceEntry*)ptr->node;
+		entry = (SequenceEntry*)ptr->entry;
 		//pattern = patterns_at(&self->sequence->patterns, entry->pattern);
 		//if (pattern) {
 			_snprintf(buffer,20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);

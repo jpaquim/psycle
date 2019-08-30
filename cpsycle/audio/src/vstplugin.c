@@ -33,6 +33,7 @@ void vstplugin_init(VstPlugin* self, const char* path)
 	int err;
 	PluginEntryProc mainProc;	
 
+	machine_init(&self->machine);
 	self->machine.work = work;
 	self->machine.mi_hostevent = hostevent;
 	self->machine.seqtick = seqtick;
@@ -97,6 +98,7 @@ void dispose(VstPlugin* self)
 		}
 		self->info = 0;
 	}
+	machine_dispose(&self->machine);
 }
 
 PluginEntryProc getMainEntry (HINSTANCE module)

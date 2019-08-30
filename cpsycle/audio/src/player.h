@@ -13,7 +13,7 @@ typedef struct {
 	Sequencer sequencer;
 	float pos; 
 	int playing;
-	float t;
+	float t;	
 } Player;
 
 void player_init(Player* player, Song*);
@@ -21,5 +21,6 @@ void player_dispose(Player* player);
 void player_start(Player* player);
 void player_stop(Player* player);
 float player_position(Player* player);
+void player_setbpm(Player* player, float bpm);
 
 #endif

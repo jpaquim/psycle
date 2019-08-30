@@ -3,7 +3,7 @@
 #include "list.h"
 #include <stdlib.h>
 
-List* list_create(void* node)
+List* list_create(void* entry)
 {
 	List* list;
 
@@ -11,25 +11,35 @@ List* list_create(void* node)
 	list->prev = 0;
 	list->next = 0;
 	list->tail = list;
-	list->node = node;
+	list->entry = entry;
 	return list;
 }
 
-List* list_append(List* self, void* node)
+List* list_append(List* self, void* entry)
 {		
-	self->tail->next = list_create(node);
+	self->tail->next = list_create(entry);
 	self->tail->next->prev = self->tail;
 	self->tail = self->tail->next;	
 	return self->tail;
 }
 
-List* list_insert(List* self, List* ptr, void* node)
+List* list_insert(List** self, List* ptr, void* entry)
 {
-	List* next = ptr->next;	
+	List* next;
+	if (ptr == NULL) {
+		ptr = list_create(entry);
+		(*self)->prev = ptr;
+		ptr->next = *self;
+		ptr->tail = (*self)->tail;
+		(*self)->tail = 0;
+		*self = ptr;
+		return ptr;
+	}	
+	next = ptr->next;	
 	if (next == NULL) {
-		return list_append(self, node);
+		return list_append(*self, entry);
 	}
-	ptr->next = list_create(node);	
+	ptr->next = list_create(entry);	
 	ptr->next->prev = ptr;	
 	next->prev = ptr->next;
 	ptr->next->next = next;

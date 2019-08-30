@@ -21,6 +21,7 @@ static int mode(LuaPlugin* self);
 		
 void luaplugin_init(LuaPlugin* self, const char* path)
 {
+	machine_init(&self->machine);
 	self->L = luaL_newstate();   
 	luaL_openlibs(self->L);	
 }
@@ -29,6 +30,7 @@ void dispose(LuaPlugin* self)
 {	
     lua_close(self->L);
 	self->L = 0;
+	machine_dispose(&self->machine);
 }
 
 CMachineInfo* luaplugin_psycle_test(const char* path)

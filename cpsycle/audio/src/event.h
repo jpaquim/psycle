@@ -19,4 +19,5 @@ void pattern_setevent(PatternEvent* self,
 	unsigned char cmd,
 	unsigned char parameter);
 
+
 #endif

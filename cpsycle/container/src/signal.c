@@ -63,7 +63,7 @@ void signal_notify(Signal* self, void* sender)
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->node;			
+			Slot* slot = (Slot*) ptr->entry;
 			((signalcallback0)slot->fp)(slot->context, sender);
 			ptr = ptr->next;
 		}
@@ -75,7 +75,7 @@ void signal_notify1(Signal* self, void* sender, int param)
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->node;			
+			Slot* slot = (Slot*) ptr->entry;
 			((signalcallback1)slot->fp)(slot->context, sender, param);
 			ptr = ptr->next;
 		}
@@ -87,7 +87,7 @@ void signal_notify2(Signal* self, void* sender, int param1, int param2)
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->node;			
+			Slot* slot = (Slot*) ptr->entry;
 			((signalcallback2)slot->fp)(slot->context, sender, param1, param2);
 			ptr = ptr->next;
 		}
@@ -99,7 +99,7 @@ void signal_notify3(Signal* self, void* sender, int param1, int param2, int para
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->node;			
+			Slot* slot = (Slot*) ptr->entry;
 			((signalcallback3)slot->fp)(slot->context, sender, param1, param2, param3);
 			ptr = ptr->next;
 		}
@@ -111,7 +111,7 @@ void signal_dispose(Signal* self)
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->node;			
+			Slot* slot = (Slot*) ptr->entry;
 			free(slot);
 			ptr = ptr->next;
 		}

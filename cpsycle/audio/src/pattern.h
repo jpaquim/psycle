@@ -24,9 +24,10 @@ typedef struct {
 
 void pattern_init(Pattern*);
 void pattern_free(Pattern*);
-void pattern_write(Pattern*, int track, float offset, PatternEvent);
+PatternEntry* pattern_write(Pattern*, int track, float offset, PatternEvent);
+PatternNode* pattern_insert(Pattern*, PatternNode* prev, int track, float offset, PatternEvent*);
 void pattern_remove(Pattern*, PatternNode*);
-PatternNode* pattern_greaterequal(Pattern*, float offset);
+PatternNode* pattern_greaterequal(Pattern*, float offset, PatternNode** prev);
 void pattern_setlabel(Pattern*, const char*);
 void pattern_setlength(Pattern*, float length);
 

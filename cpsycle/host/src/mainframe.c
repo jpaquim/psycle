@@ -62,6 +62,12 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	ui_component_resize(&self->playbar.component, 400, 20);	
 	signal_connect(&self->playbar.signal_play, self, OnPlay);
 	signal_connect(&self->playbar.signal_stop, self, OnStop);
+	InitVumeter(&self->vumeter, &self->component, player);
+	ui_component_move(&self->vumeter.component, 320, 0);
+	ui_component_resize(&self->vumeter.component, 200, 20);	
+	InitTimeBar(&self->timebar, &self->component, player);
+	ui_component_move(&self->timebar.component, 530, 0);
+	ui_component_resize(&self->timebar.component, 250, 20);	
 	InitSettingsView(&self->settingsview, &self->component, properties);
 	ui_component_move(&self->settingsview.component, 150, 45);
 	ui_component_hide(&self->settingsview.component);
@@ -160,7 +166,7 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		Properties* properties = properties_create();
 		properties_init(properties);
 		skin_load(properties, "old Psycle.psv");
-		PatternGridApplyProperties(&self->patternview.grid, properties);
+		PatternViewApplyProperties(&self->patternview, properties);
 		MachineViewApplyProperties(&self->machineview, properties);
 		properties_free(properties);
 	} else {
