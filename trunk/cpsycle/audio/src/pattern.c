@@ -27,7 +27,7 @@ void pattern_free(Pattern* self)
 	list_free(self->events);	
 }
 
-void pattern_write(Pattern* self, int track, float offset, PatternEvent event)
+PatternEntry* pattern_write(Pattern* self, int track, float offset, PatternEvent event)
 {
 	PatternNode* ptr;	
 	PatternNode* prev;
@@ -36,17 +36,17 @@ void pattern_write(Pattern* self, int track, float offset, PatternEvent event)
 	prev = 0;
 	ptr = self->events;
 	while (ptr != 0) {
-		PatternEntry* entry = (PatternEntry*) ptr->node;
+		PatternEntry* entry = (PatternEntry*) ptr->entry;
 		if (entry->offset > offset) {
 			ptr = prev;
 			break;
 		} else
 		if (entry->offset == offset) {						
-			while (ptr != 0 && ((PatternEntry*)(ptr->node))->offset == offset && track >= ((PatternEntry*)(ptr->node))->track) {
-				PatternEntry* entry = (PatternEntry*) ptr->node;
+			while (ptr != 0 && ((PatternEntry*)(ptr->entry))->offset == offset && track >= ((PatternEntry*)(ptr->entry))->track) {
+				PatternEntry* entry = (PatternEntry*) ptr->entry;
 				if (entry->track == track) {
 					entry->event = event;
-					return;
+					return entry;
 				}
 				prev = ptr;
 				ptr = ptr->next;
@@ -65,30 +65,49 @@ void pattern_write(Pattern* self, int track, float offset, PatternEvent event)
 	if (!self->events) {
 		self->events = list_create(entry);
 	} else {	
-		list_insert(self->events, prev, entry);		
+		list_insert(&self->events, prev, entry);		
 	}
+	return entry;
 }
 
 void pattern_remove(Pattern* self, PatternNode* node)
 {
 	if (node) {
-		PatternEntry* entry = (PatternEntry*)(node->node);
+		PatternEntry* entry = (PatternEntry*)(node->entry);
 		list_remove(&self->events, node);
 		free(entry);		
 	}
 }
 
+PatternNode* pattern_insert(Pattern* self, PatternNode* prev, int track, float offset, PatternEvent* event)
+{
+	PatternNode* rv;
+	PatternEntry* entry;
 
-PatternNode* pattern_greaterequal(Pattern* self, float offset)
+	entry = (PatternEntry*)malloc(sizeof(PatternEntry));
+	entry->event = *event;
+	entry->offset = offset;
+	entry->delta = 0;
+	entry->track = track;
+	if (!self->events) {
+		rv = self->events = list_create(entry);
+	} else {	
+		rv = list_insert(&self->events, prev, entry);		
+	}
+	return rv;
+}
+
+PatternNode* pattern_greaterequal(Pattern* self, float offset, PatternNode** prev)
 {
 	PatternNode* p;	
-	
+	*prev = 0;
 	p = self->events;
 	while (p != 0) {
-		PatternEntry* entry = (PatternEntry*)p->node;
+		PatternEntry* entry = (PatternEntry*)p->entry;
 		if (entry->offset >= offset) {			
 			break;
-		}		
+		}	
+		*prev = p;
 		p = p->next;
 	}	
 	return p;

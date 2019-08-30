@@ -21,6 +21,8 @@ void plugin_init(Plugin* self, const char* path)
 {
 	CMachineInfo* pInfo;
 	int err;
+
+	machine_init(&self->machine);	
 ///	CMachineInterface* _pInterface;
 	self->dll = LoadLibrary(path);
 	err = GetLastError();	
@@ -68,6 +70,7 @@ void dispose(Plugin* self)
 		free(self->machine.inputs);
 		free(self->machine.outputs);
 	}		
+	machine_dispose(&self->machine);
 }
 
 

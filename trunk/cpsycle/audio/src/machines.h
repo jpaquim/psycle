@@ -49,6 +49,7 @@ MachineList* calc_list(Machines* self, int slot);
 float* machines_nextbuffer(Machines* self);
 void machines_changeslot(Machines* self, int slot);
 int machines_slot(Machines* self);
+Machine* machines_master(Machines* self);
 
 
 #endif

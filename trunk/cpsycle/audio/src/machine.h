@@ -5,7 +5,7 @@
 
 #include "plugin_interface.h"
 #include <windows.h>
-
+#include <signal.h>
 
 typedef enum {
 	MACHMODE_GENERATOR = 0,
@@ -29,7 +29,8 @@ typedef struct {
 	float** inputs;
 	float** outputs;
 	int numInputs;
-	int numOutputs;
+	int numOutputs;	
+	Signal signal_worked;
 } Machine;
 
 typedef struct {
@@ -37,6 +38,8 @@ typedef struct {
 } Master;
 
 void machine_init(Machine* self);
+void machine_dispose(Machine* self);
+
 void master_init(Master* self);
 
 #endif

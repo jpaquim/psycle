@@ -15,7 +15,8 @@ static void DrawBackground(PatternGrid* self, ui_graphics* g, PatternGridBlock* 
 static void DrawTrackBackground(PatternGrid* self, ui_graphics* g, int track);
 static void DrawEvents(PatternGrid* self, ui_graphics* g, PatternGridBlock* clip);
 static void DrawPatternEvent(PatternGrid* self, ui_graphics* g, PatternEvent* event, int x, int y, int playbar, int cursor, int beat, int beat4);
-static void OnKeyDown(PatternGrid* self, ui_component* sender, int keycode, int keydata);
+static void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata);
+static void OnGridKeyDown(PatternGrid* self, ui_component* sender, int keycode, int keydata);
 static void OnGridSize(PatternGrid* self, ui_component* sender, int width, int height);
 static void OnViewSize(PatternView* self, ui_component* sender, int width, int height);
 static void OnScroll(PatternGrid* self, ui_component* sende, int cx, int cy);
@@ -35,6 +36,7 @@ static void OnPropertiesClose(PatternView* self, ui_component* sender);
 static void OnPropertiesApply(PatternView* self, ui_component* sender);
 static int NumLines(PatternView* self);
 static void AdjustScrollranges(self, width, height);
+static float Offset(PatternGrid* self, int y, int* lines, int* sublines, int* subline);
 
 char* notes_tab_a440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
@@ -79,15 +81,16 @@ char* notes_tab_a220[256] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 };
 
-void InitPatternGrid(PatternGrid* self, ui_component* parent, Player* player)
+void InitPatternGrid(PatternGrid* self, ui_component* parent, PatternView* view, Player* player)
 {		
+	self->view = view;
 	self->header = 0;
-	if (self->skin.hfont == NULL) {
-		self->skin.hfont = ui_createfont("Tahoma", 12);
+	if (self->view->skin.hfont == NULL) {
+		self->view->skin.hfont = ui_createfont("Tahoma", 12);
 	}
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_size, self, OnGridSize);
-	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
+	signal_connect(&self->component.signal_keydown,self, OnGridKeyDown);
 	signal_connect(&self->component.signal_mousedown, self,OnMouseDown);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_scroll, self, OnScroll);	
@@ -99,7 +102,8 @@ void InitPatternGrid(PatternGrid* self, ui_component* parent, Player* player)
 	self->bpl = 1.0f / self->lpb;
 	self->notestab = notes_tab_a220;	
 	self->cursor.track = 0;
-	self->cursor.offset = 0;	
+	self->cursor.offset = 0;
+	self->cursor.subline = 0;
 	self->cursor.col = 0;
 	self->cursorstep = 0.25;
 	self->dx = 0;
@@ -123,13 +127,12 @@ void InitPatternGrid(PatternGrid* self, ui_component* parent, Player* player)
 	ui_component_showhorizontalscrollbar(&self->component);
 	ui_component_showverticalscrollbar(&self->component);
 	ui_component_sethorizontalscrollrange(&self->component, 0, 16);
-	self->component.doublebuffered = 1;
-	PatternGridApplyProperties(self, 0);
+	self->component.doublebuffered = 1;	
 	signal_connect(&self->player->song->sequence.signal_editposchanged,
 		self, OnEditPositionChanged);	
 }
 
-void PatternGridApplyProperties(PatternGrid* self, Properties* properties)
+void PatternViewApplyProperties(PatternView* self, Properties* properties)
 {
 	properties_readint(properties, "pvc_separator", &self->skin.separator, 0x00400000);
 	properties_readint(properties, "pvc_separator2", &self->skin.separator2, 0x00004000);
@@ -161,27 +164,83 @@ void PatternGridApplyProperties(PatternGrid* self, Properties* properties)
 void OnDraw(PatternGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	PatternGridBlock clip;
-	if (self->skin.hfont) {
-		ui_setfont(g, self->skin.hfont);
+	if (self->view->skin.hfont) {
+		ui_setfont(g, self->view->skin.hfont);
 	}	
 	ClipBlock(self, g, &clip);
 	DrawBackground(self, g, &clip);
-	if (self->pattern) {		
+	if (self->view->pattern) {		
 		DrawEvents(self, g, &clip);
 	}
 }
 
-void ClipBlock(PatternGrid* self, ui_graphics* g, PatternGridBlock* block)
+float Offset(PatternGrid* self, int y, int* lines, int* sublines, int* subline)
 {
+	float offset = 0;	
+	int cpy = 0;		
+	int first = 1;
+	int count = y / self->lineheight;
+	int remaininglines = 0;
+	PatternNode* curr = self->view->pattern->events;
+	*lines = 0;
+	*sublines = 0;	
+	*subline = 0;
+	while (curr) {		
+		PatternEntry* entry;		
+		first = 1;
+		do {
+			entry = (PatternEntry*)curr->entry;			
+			if ((entry->offset >= offset) && (entry->offset < offset + self->bpl))
+			{
+				if (*lines + *sublines >= count) {
+					break;
+				}
+				if (entry->track == 0 && !first) {
+					++(*sublines);
+					++*subline;
+				}							
+				first = 0;
+				curr = curr->next;
+			} else {
+				*subline = 0;
+				break;
+			}
+			if (*lines + *sublines >= count) {
+				break;
+			}
+		} while (curr);
+		if (!curr || (*lines + *sublines >= count)) {
+			break;
+		}
+		++(*lines);
+		*subline = 0;		
+		offset += self->bpl;
+	}	
+	remaininglines =  (count - (*lines + *sublines));
+	*lines += remaininglines;
+	return offset + remaininglines * self->bpl;
+}
+
+void ClipBlock(PatternGrid* self, ui_graphics* g, PatternGridBlock* block)
+{	
+	int lines;
+	int sublines;
+	int subline;
 	block->topleft.track = (g->clip.left - self->dx) / self->trackwidth;
 	block->topleft.col = 0;
-	block->topleft.offset = (g->clip.top - self->dy) / self->lineheight * self->bpl;
+	block->topleft.offset =  Offset(self, g->clip.top - self->dy, &lines, &sublines, &subline);
+	block->topleft.line = lines;
+	block->topleft.subline = subline;
+	block->topleft.totallines = lines + sublines;
 	block->bottomright.track = (g->clip.right - self->dx + self->trackwidth) / self->trackwidth;
 	if (block->bottomright.track > self->numtracks) {
 		block->bottomright.track = self->numtracks;
 	}
 	block->bottomright.col = 0;
-	block->bottomright.offset = (g->clip.bottom - self->dy) / self->lineheight * self->bpl;
+	block->bottomright.offset = Offset(self, g->clip.bottom - self->dy, &lines, &sublines, &subline);
+	block->bottomright.line = lines;
+	block->bottomright.totallines = lines + sublines;
+	block->bottomright.subline = subline;
 }
 
 void DrawBackground(PatternGrid* self, ui_graphics* g, PatternGridBlock* clip)
@@ -197,66 +256,76 @@ void DrawTrackBackground(PatternGrid* self, ui_graphics* g, int track)
 	ui_rectangle r;
 	
 	ui_setrectangle(&r, track * self->trackwidth + self->dx, 0, self->trackwidth, self->cy);
-	ui_drawsolidrectangle(g, r, self->skin.background);
-	//ui_setrectangle(&r, r.left, 0, 1, r.bottom);
-	// ui_drawsolidrectangle(g, r, 0x000000);
+	ui_drawsolidrectangle(g, r, self->view->skin.background);	
 }
 
-int TestCursor(PatternGrid* self, int track, float offset)
+int TestCursor(PatternGrid* self, int track, float offset, int subline)
 {
 	return self->cursor.track == track && 
-		self->cursor.offset >= offset && self->cursor.offset < offset + self->bpl;
+		self->cursor.offset >= offset && self->cursor.offset < offset + self->bpl
+		&& self->cursor.subline == subline;
 }
 
 void DrawEvents(PatternGrid* self, ui_graphics* g, PatternGridBlock* clip)
-{
-	int line;	
+{	
 	int track;
 	int cpx = 0;	
 	int cpy;
-	int numlines;
-
-	self->curr_event = pattern_greaterequal(self->pattern, clip->topleft.offset);
-	line = (int) clip->topleft.offset * self->lpb;
-	cpy = line * self->lineheight + self->dy;
-	numlines = NumLines(self->view);
-	for (; line < numlines; ++line) {
-		float offset = line * self->bpl;				
+	float offset;
+	int subline;	
+	PatternNode* prev;
+	
+	cpy = (clip->topleft.totallines - clip->topleft.subline) * self->lineheight + self->dy;	
+	offset = clip->topleft.offset;	
+	self->curr_event = pattern_greaterequal(self->view->pattern, offset, &prev);
+	subline = 0;	
+	while (offset <= clip->bottomright.offset && offset < self->view->pattern->length) {	
 		int beat;
 		int beat4;
-		if (offset > clip->bottomright.offset) {
-			break;
-		}
+		int fill;			
 		beat = fmod(offset, 1.0f) == 0.0f;
-		beat4 = fmod(offset, 4.0f) == 0.0f;
-		cpx = clip->topleft.track * self->trackwidth + self->dx;		
-		for (track =  clip->topleft.track; track < clip->bottomright.track; ++track) {						
-			int hasevent = 0;
-			int cursor = TestCursor(self, track, offset);
-			int playbar = 0;
-			playbar = (self->player->playing &&
-					   self->player->sequencer.pos >= offset &&
-					   self->player->sequencer.pos < offset + self->bpl) ? 1 : 0;
-			while (self->curr_event && ((PatternEntry*)(self->curr_event->node))->track <= track &&
-				((PatternEntry*)(self->curr_event->node))->offset >= offset && 				
-				((PatternEntry*)(self->curr_event->node))->offset < offset + self->bpl) {
-					if (((PatternEntry*)(self->curr_event->node))->track == track) {
-						DrawPatternEvent(self, g, &((PatternEntry*)(self->curr_event->node))->event, cpx, cpy, playbar, cursor, beat, beat4);
+		beat4 = fmod(offset, 4.0f) == 0.0f;		
+		do {
+			fill = 0;
+			cpx = clip->topleft.track * self->trackwidth + self->dx;						
+			for (track =  clip->topleft.track; track < clip->bottomright.track; ++track) {						
+				int hasevent = 0;
+				int cursor = TestCursor(self, track, offset, subline);
+				int playbar = 0;
+				playbar = (self->player->playing &&
+						   self->player->sequencer.pos >= offset &&
+						   self->player->sequencer.pos < offset + self->bpl) ? 1 : 0;
+
+				while (!fill && self->curr_event &&
+					((PatternEntry*)(self->curr_event->entry))->track <= track &&
+					((PatternEntry*)(self->curr_event->entry))->offset >= offset && 				
+					((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl) {
+					if (((PatternEntry*)(self->curr_event->entry))->track == track) {
+						DrawPatternEvent(self, g, &((PatternEntry*)(self->curr_event->entry))->event, cpx, cpy, playbar, cursor, beat, beat4);
 						hasevent = 1;
+						self->curr_event = self->curr_event->next;
+						break;
 					}
-				self->curr_event = self->curr_event->next;				
+					self->curr_event = self->curr_event->next;
+				}
+				if (!hasevent) {
+					PatternEvent event;
+					memset(&event, 0xFF, sizeof(PatternEvent));
+					event.cmd = 0;
+					event.parameter = 0;
+					DrawPatternEvent(self, g, &event, cpx, cpy, playbar, cursor, beat, beat4);
+				} else
+				if (self->curr_event && ((PatternEntry*)(self->curr_event->entry))->track <= track) {
+					fill = 1;					
+				}
+				cpx += self->trackwidth;			
 			}
-			if (!hasevent) {
-				PatternEvent event;
-				memset(&event, 0xFF, sizeof(PatternEvent));
-				event.cmd = 0;
-				event.parameter = 0;
-				DrawPatternEvent(self, g, &event, cpx, cpy, playbar, cursor, beat, beat4);
-			}
-			cpx += self->trackwidth;			
-		}
-		cpx = clip->topleft.track * self->trackwidth + self->dx;				
-		cpy += self->lineheight;
+			cpy += self->lineheight;
+			subline++;
+		} while (self->curr_event &&
+			((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl);
+		offset += self->bpl;
+		subline = 0;
 	}
 }
 
@@ -297,7 +366,7 @@ void DrawPatternEvent(PatternGrid* self, ui_graphics* g, PatternEvent* event, in
 {					
 	ui_rectangle r;	
 
-	SetColColor(&self->skin, g, 0, playbar, cursor && self->cursor.col == 0, beat, beat4);
+	SetColColor(&self->view->skin, g, 0, playbar, cursor && self->cursor.col == 0, beat, beat4);
 	ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->lineheight);
 	ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r,
 	self->notestab[event->note],
@@ -310,9 +379,9 @@ void DrawPatternEvent(PatternGrid* self, ui_graphics* g, PatternEvent* event, in
 			hi = -1;
 			lo = -1;
 		}
-		SetColColor(&self->skin, g, 1, playbar, cursor && (self->cursor.col == 1), beat, beat4);
+		SetColColor(&self->view->skin, g, 1, playbar, cursor && (self->cursor.col == 1), beat, beat4);
 		DrawDigit(self, g, hi, 1, x, y);
-		SetColColor(&self->skin, g, 2, playbar, cursor && (self->cursor.col == 2), beat, beat4);
+		SetColColor(&self->view->skin, g, 2, playbar, cursor && (self->cursor.col == 2), beat, beat4);
 		DrawDigit(self, g, lo, 2, x, y);
 	}
 	{	// mach
@@ -322,9 +391,9 @@ void DrawPatternEvent(PatternGrid* self, ui_graphics* g, PatternEvent* event, in
 			hi = -1;
 			lo = -1;
 		}
-		SetColColor(&self->skin, g, 3, playbar, cursor && (self->cursor.col == 3), beat, beat4);
+		SetColColor(&self->view->skin, g, 3, playbar, cursor && (self->cursor.col == 3), beat, beat4);
 		DrawDigit(self, g, hi, 3, x, y);
-		SetColColor(&self->skin, g, 4, playbar, cursor && (self->cursor.col == 4), beat, beat4);
+		SetColColor(&self->view->skin, g, 4, playbar, cursor && (self->cursor.col == 4), beat, beat4);
 		DrawDigit(self, g, lo, 4, x, y);
 	}
 	{	// cmd
@@ -334,9 +403,9 @@ void DrawPatternEvent(PatternGrid* self, ui_graphics* g, PatternEvent* event, in
 			hi = -1;
 			lo = -1;
 		}
-		SetColColor(&self->skin, g, 5, playbar, cursor && (self->cursor.col == 5), beat, beat4);
+		SetColColor(&self->view->skin, g, 5, playbar, cursor && (self->cursor.col == 5), beat, beat4);
 		DrawDigit(self, g, hi, 5, x, y);
-		SetColColor(&self->skin, g, 6, playbar, cursor && (self->cursor.col == 6), beat, beat4);
+		SetColColor(&self->view->skin, g, 6, playbar, cursor && (self->cursor.col == 6), beat, beat4);
 		DrawDigit(self, g, lo, 6, x, y);
 	}
 	{	// parameter
@@ -346,9 +415,9 @@ void DrawPatternEvent(PatternGrid* self, ui_graphics* g, PatternEvent* event, in
 			hi = -1;
 			lo = -1;
 		}
-		SetColColor(&self->skin, g, 7, playbar, cursor && (self->cursor.col == 7), beat, beat4);
+		SetColColor(&self->view->skin, g, 7, playbar, cursor && (self->cursor.col == 7), beat, beat4);
 		DrawDigit(self, g, hi, 7, x, y);
-		SetColColor(&self->skin, g, 8, playbar, cursor && (self->cursor.col == 8), beat, beat4);
+		SetColColor(&self->view->skin, g, 8, playbar, cursor && (self->cursor.col == 8), beat, beat4);
 		DrawDigit(self, g, lo, 8, x, y);
 	}		
 }
@@ -384,85 +453,155 @@ void AdjustScrollranges(PatternGrid* self, int width, int height)
 	ui_component_setverticalscrollrange(&self->component, 0, NumLines(self->view) - visiblelines);	
 }
 
-PatternNode* FindNode(Pattern* pattern, int track, float offset, float bpl)
+
+int NumSublines(Pattern* pattern, float offset, float bpl)
 {
-	PatternNode* node = pattern_greaterequal(pattern, offset);
+	PatternNode* prev;
+	PatternNode* node = pattern_greaterequal(pattern, offset, &prev);		
+	int currsubline = -1;
 	while (node) {
-		PatternEntry* entry = (PatternEntry*)(node->node);
-		if (entry->offset >= offset + bpl) {
+		PatternEntry* entry = (PatternEntry*)(node->entry);
+		if (entry->offset >= offset + bpl) {			
+			break;
+		}				
+		if (entry->track == 0) {
+			++currsubline;					
+		}
+		node = node->next;
+	}
+	return currsubline;
+}
+
+PatternNode* FindNode(Pattern* pattern, int track, float offset, int subline, float bpl, PatternNode** prev)
+{
+	PatternNode* node = pattern_greaterequal(pattern, offset, prev);	
+	int currsubline = 0;
+	int first = 1;	
+	while (node) {
+		PatternEntry* entry = (PatternEntry*)(node->entry);
+		if (entry->offset >= offset + bpl) {			
 			node = 0;
 			break;
-		}					  
-		if (entry->track == track) {
+		}
+		if (entry->track == 0 && !first) {
+			++currsubline;				
+		}
+		if (subline < currsubline) {			
+			node = 0;
 			break;
-		}						  
+		}
+		if (entry->track > track && subline == currsubline) {			
+			node = 0;
+			break;
+		}		
+		if (entry->track == track && subline == currsubline) {
+			break;
+		}				
+		*prev = node;		
 		node = node->next;
+		first = 0;
 	}
 	return node;
 }
 
-void OnKeyDown(PatternGrid* self, ui_component* sender, int keycode, int keydata)
+void OnGridKeyDown(PatternGrid* self, ui_component* sender, int keycode, int keydata)
+{
+	sender->propagateevent = 1;	
+}
+
+void AdvanceCursor(PatternView* self)
+{
+	if (self->grid.cursor.subline < NumSublines(self->pattern, self->grid.cursor.offset, self->grid.bpl)) {
+		++self->grid.cursor.subline;
+	} else {
+		self->grid.cursor.offset += self->grid.bpl;
+		self->grid.cursor.subline = 0;
+	}
+}
+
+void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata)
 {		
 	int cmd;
 	
 	if (keycode == VK_UP) {
-		self->cursor.offset -= self->bpl;		
+		if (self->grid.cursor.subline > 0) {
+			--self->grid.cursor.subline;
+		} else {
+			self->grid.cursor.offset -= self->grid.bpl;
+		}
 		ui_invalidate(&self->component);
 	} else
-	if (keycode == VK_DOWN) {
-		self->cursor.offset += self->bpl;
+	if (keycode == VK_DOWN) {		
+		AdvanceCursor(self);
 		ui_invalidate(&self->component);
 	} else
 	if (keycode == VK_LEFT) {
-		if (self->cursor.col == 0) {
-			self->cursor.col = PatternGrid_NUMCOLS - 2;
-			--self->cursor.track;
+		if (self->grid.cursor.col == 0) {
+			self->grid.cursor.col = PatternGrid_NUMCOLS - 2;
+			--self->grid.cursor.track;
 		} else {
-			--self->cursor.col;
+			--self->grid.cursor.col;
 		}
 		ui_invalidate(&self->component);
 	} else
 	if (keycode == VK_RIGHT) {
-		if (self->cursor.col == PatternGrid_NUMCOLS - 2) {
-			self->cursor.col = 0;
-			++self->cursor.track;
+		if (self->grid.cursor.col == PatternGrid_NUMCOLS - 2) {
+			self->grid.cursor.col = 0;
+			++self->grid.cursor.track;
 		} else {
-			++self->cursor.col;
+			++self->grid.cursor.col;
 		}
 		ui_invalidate(&self->component);
 	} else
 	if (keycode == VK_TAB && GetKeyState (VK_SHIFT) < 0) {
-		self->cursor.track -= 1;
+		self->grid.cursor.track -= 1;
 		ui_invalidate(&self->component);		
 	} else
 	if (keycode == VK_TAB) {
-		self->cursor.track += 1;
+		self->grid.cursor.track += 1;
 		ui_invalidate(&self->component);		
 	} else
 	if (keycode == VK_DELETE) {
-		PatternNode* node = FindNode(self->pattern, self->cursor.track, self->cursor.offset, self->bpl);
+		PatternNode* prev;
+		PatternNode* node = FindNode(self->pattern, self->grid.cursor.track,
+			self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
 		if (node) {
 			pattern_remove(self->pattern, node);
 			ui_invalidate(&self->component);
 		}
+	} else
+	if (keycode == VK_RETURN) {
+		PatternNode* prev;
+		PatternNode* node = FindNode(self->pattern, 0,
+			self->grid.cursor.offset, self->grid.cursor.subline + 1, self->grid.bpl, &prev);		
+		if (prev && ((PatternEntry*)prev->entry)->offset >= self->grid.cursor.offset) {
+			PatternEvent ev = { 255, 255, 255, 0, 0 };
+			float offset;
+			++self->grid.cursor.subline;
+			offset = self->grid.cursor.offset + self->grid.cursor.subline*self->grid.bpl/4;
+			pattern_insert(self->pattern, prev, 0, offset, &ev);			
+			AdjustScrollranges(&self->grid, self->grid.cx, self->grid.cy);
+			ui_invalidate(&self->component);			
+		}		
 	} else {
-		if (self->cursor.col == 0) {
-			cmd = Cmd(&self->noteinputs->map, keycode);
+		if (self->grid.cursor.col == 0) {
+			cmd = Cmd(&self->grid.noteinputs->map, keycode);
 			if (cmd != -1) {		
 				int base = 48;
-				PatternNode* node = FindNode(self->pattern, self->cursor.track, self->cursor.offset, self->bpl);
+				PatternNode* prev;
+				PatternNode* node = FindNode(self->pattern, self->grid.cursor.track, self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
 				if (node) {					
-					PatternEntry* entry = (PatternEntry*)(node->node);
+					PatternEntry* entry = (PatternEntry*)(node->entry);
 					entry->event.note = (unsigned char)(base + cmd);					
 				} else {
 					float offset;
 					PatternEvent ev = { 0, 255, 255, 0, 0 };
 					ev.note = (unsigned char)(base + cmd);
-					ev.mach = machines_slot(&self->player->song->machines);
-					offset = self->cursor.offset;
-					pattern_write(self->pattern, self->cursor.track, offset, ev);					
+					ev.mach = machines_slot(&self->grid.player->song->machines);
+					offset = self->grid.cursor.offset;					
+					pattern_insert(self->pattern, prev, self->grid.cursor.track, offset, &ev);
 				}
-				self->cursor.offset += self->cursorstep;
+				AdvanceCursor(self);				
 				ui_invalidate(&self->component);			
 			}		
 		} else {
@@ -474,10 +613,20 @@ void OnKeyDown(PatternGrid* self, ui_component* sender, int keycode, int keydata
 				val = keycode - 'A' + 10;
 			}
 			if (val != -1 && self->pattern) {
-				PatternNode* node = pattern_greaterequal(self->pattern, self->cursor.offset);
-				if (node) {
-					PatternEntry* entry = (PatternEntry*)(node->node);										
-					switch (self->cursor.col) {
+				PatternNode* prev;
+				PatternEntry* entry = 0;
+				PatternNode* node = FindNode(self->pattern, self->grid.cursor.track, self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
+				if (node) {					
+					entry = (PatternEntry*)(node->entry);					
+				} else {
+					float offset;
+					int base = 48;
+					PatternEvent ev = { 255, 255, 255, 0, 0 };					
+					offset = self->grid.cursor.offset;
+					entry = pattern_write(self->pattern, self->grid.cursor.track, offset, ev);					
+				}				
+				if (entry) {					
+					switch (self->grid.cursor.col) {
 						case 1: 
 							if ((entry->event.inst == 0xFF) && (val != 0x0F)) {
 								entry->event.inst = 0;
@@ -554,10 +703,13 @@ void OnScroll(PatternGrid* self, ui_component* sender, int cx, int cy)
 void OnMouseDown(PatternGrid* self, ui_component* sender, int x, int y, int button)
 {
 	if (button == 1) {
-		int line;
-		int coloffset;
-		line = (y - self->dy) / self->lineheight;
-		self->cursor.offset = line * self->bpl;
+		int lines;
+		int sublines;
+		int subline;		
+		int coloffset;				
+		self->cursor.offset = Offset(self, y - self->dy, &lines, &sublines, &subline);
+		self->cursor.totallines = lines + sublines;
+		self->cursor.subline = subline;
 		self->cursor.track = (x - self->dx) / self->trackwidth;
 		coloffset = (x - self->dx) - self->cursor.track * self->trackwidth;
 		if (coloffset < 3*self->textwidth) {
@@ -582,7 +734,7 @@ void OnMouseDown(PatternGrid* self, ui_component* sender, int x, int y, int butt
 void OnEditPositionChanged(PatternGrid* self, Sequence* sender)
 {	
 	if (sender->editpos.sequence) {
-		SequenceEntry* entry = (SequenceEntry*)sender->editpos.sequence->node;	
+		SequenceEntry* entry = (SequenceEntry*)sender->editpos.sequence->entry;	
 		PatternViewSetPattern(self->view, patterns_at(&self->player->song->patterns, entry->pattern));
 	} else {
 		PatternViewSetPattern(self->view, 0);		
@@ -593,19 +745,18 @@ void OnEditPositionChanged(PatternGrid* self, Sequence* sender)
 void InitPatternView(PatternView* self, ui_component* parent, Player* player)
 {	
 	ui_component_init(&self->component, parent);
-	self->grid.skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_HEADERSKIN));
+	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_HEADERSKIN));
 	InitDefaultSkin(self);
-	InitPatternHeader(&self->header, &self->component);
-	self->grid.view = self;
-	self->linenumbers.skin = &self->grid.skin;
-	InitPatternGrid(&self->grid, &self->component, player);
+	InitPatternHeader(&self->header, &self->component);	
+	self->linenumbers.skin = &self->skin;
+	InitPatternGrid(&self->grid, &self->component, self, player);
 	InitPatternLineNumbersLabel(&self->linenumberslabel, &self->component);	
 	InitPatternLineNumbers(&self->linenumbers, &self->component);
 	self->linenumbers.view = self;
 	self->grid.header = &self->header;
 	self->grid.linenumbers = &self->linenumbers;
 	self->header.trackwidth = self->grid.trackwidth;
-	self->header.skin = &self->grid.skin;
+	self->header.skin = &self->skin;
 	self->linenumbers.lineheight = 12;
 	signal_connect(&self->component.signal_size, self, OnViewSize);
 	InitPatternProperties(&self->properties, &self->component, 0);	
@@ -613,13 +764,15 @@ void InitPatternView(PatternView* self, ui_component* parent, Player* player)
 	signal_connect(&self->properties.closebutton.signal_clicked, self, OnPropertiesClose);
 	signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);
 	signal_connect(&self->component.signal_timer, self, OnTimer);
+	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
+	PatternViewApplyProperties(self, 0);
 	SetTimer(self->component.hwnd, 200, 50, 0);
 }
 
 void PatternViewSetPattern(PatternView* self, Pattern* pattern)
 {
 	ui_size size;
-	self->grid.pattern = pattern;
+	self->pattern = pattern;
 	PatternPropertiesSetPattern(&self->properties, pattern);
 	size = ui_component_size(&self->grid.component);
 	AdjustScrollranges(&self->grid, size.width, size.height);
@@ -634,12 +787,12 @@ void InitDefaultSkin(PatternView* self)
 	SkinCoord digitx0 = { 0, 18, 7, 12, 24, 3, 7, 12 };
 	SkinCoord digit0x = { 0, 18, 7, 12, 31, 3, 7, 12 };
 		
-	self->grid.skin.headercoords.background = background;	
-	self->grid.skin.headercoords.record = record;
-	self->grid.skin.headercoords.mute = mute;
-	self->grid.skin.headercoords.solo = solo;
-	self->grid.skin.headercoords.digit0x = digit0x;
-	self->grid.skin.headercoords.digitx0 = digitx0;	
+	self->skin.headercoords.background = background;	
+	self->skin.headercoords.record = record;
+	self->skin.headercoords.mute = mute;
+	self->skin.headercoords.solo = solo;
+	self->skin.headercoords.digit0x = digit0x;
+	self->skin.headercoords.digitx0 = digitx0;	
 }
 
 void OnViewSize(PatternView* self, ui_component* sender, int width, int height)
@@ -704,41 +857,52 @@ void InitPatternLineNumbers(PatternLineNumbers* self, ui_component* parent)
 	self->component.doublebuffered = 1;
 }
 
-
-
-
 void OnLineNumbersDraw(PatternLineNumbers* self, ui_component* sender, ui_graphics* g)
 {
 	char buffer[20];		
 	int cpy = self->dy;
 	int line;		
+	float offset;
 	PatternGridBlock clip;
 	ClipBlock(&self->view->grid, g, &clip);
 	LineNumbersDrawBackground(self, g);
-	if (self->view->grid.pattern) {
-		int numlines;
-		ui_setfont(g, self->skin->hfont);
-		line = (int) clip.topleft.offset * self->view->grid.lpb;
-		cpy = line * self->lineheight + self->dy;				
-		numlines = NumLines(self->view);				
-		for (; line < numlines; ++line) {			
-			ui_rectangle r;
-			float offset = line * 0.25f;	
+	if (self->view->pattern) {		
+		ui_setfont(g, self->skin->hfont);				
+		cpy = (clip.topleft.totallines - clip.topleft.subline) * self->lineheight + self->dy;
+		offset = clip.topleft.offset;				
+		line = clip.topleft.line;
+		while (offset <= clip.bottomright.offset && offset < self->view->pattern->length) {
+			ui_rectangle r;			
 			int beat;
 			int beat4;
-			if (offset > clip.bottomright.offset) {
-				break;
-			}
+			int subline;
+			int numsublines;
+			int ystart;
 			beat = fmod(offset, 1.0f) == 0.0f;
 			beat4 = fmod(offset, 4.0f) == 0.0f;
 			SetColColor(self->skin, g, 0, 0, 0, beat, beat4);
 			// %3i
-			_snprintf(buffer, 10, "%.2X", line);			
+			_snprintf(buffer, 10, "%.2X %.2f", line, offset);
 			ui_setrectangle(&r, 0, cpy, 40-2, self->lineheight);
 			ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 				strlen(buffer));		
 			cpy += self->lineheight;
-		}
+			ystart = cpy;
+			numsublines = NumSublines(self->view->pattern, offset, self->view->grid.bpl);
+			for (subline = 0; subline < numsublines; ++subline) {
+				_snprintf(buffer, 10, "  %.2X", subline);	
+				ui_setrectangle(&r, 0, cpy, 40-2, self->lineheight);
+				ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
+					strlen(buffer));		
+				cpy += self->lineheight;
+			}
+			if (ystart != cpy) {
+				ui_drawline(g, 1, ystart, 1, cpy - self->lineheight / 2);
+				ui_drawline(g, 1, cpy - self->lineheight / 2, 4, cpy - self->lineheight / 2);
+			}
+			offset += self->view->grid.bpl;
+			++line;
+		}		
 	}
 }
 
@@ -747,7 +911,7 @@ void LineNumbersDrawBackground(PatternLineNumbers* self, ui_graphics* g)
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, self->view->grid.skin.background);
+	ui_drawsolidrectangle(g, r, self->view->skin.background);
 }
 
 void InitPatternLineNumbersLabel(PatternLineNumbersLabel* self, ui_component* parent)
@@ -794,5 +958,44 @@ void OnPropertiesApply(PatternView* self, ui_component* sender)
 
 int NumLines(PatternView* self)
 {
-	return self->grid.pattern ? (int) (self->grid.pattern->length * self->grid.lpb) : 0;
+	int lines = 0;
+	int sublines = 0;	
+	int remaininglines = 0;
+	float offset = 0;
+
+	if (!self->pattern) {
+		return 0;
+	} else {		
+		int first = 1;		
+		PatternNode* curr = self->pattern->events;
+		int subline = 0;
+
+		while (curr && offset < self->pattern->length) {		
+			PatternEntry* entry;		
+			first = 1;
+			do {
+				entry = (PatternEntry*)curr->entry;			
+				if ((entry->offset >= offset) && (entry->offset < offset + self->grid.bpl))
+				{					
+					if (entry->track == 0 && !first) {
+						++(sublines);
+						++subline;
+					}							
+					first = 0;
+					curr = curr->next;
+				} else {
+					subline = 0;
+					break;
+				}	
+			} while (curr);		
+			++(lines);
+			subline = 0;		
+			offset += self->grid.bpl;
+		}
+	}			
+	offset = self->pattern->length - offset;
+	if (offset > 0) {
+		remaininglines = (int)(offset * self->grid.lpb);
+	}
+	return lines + sublines + remaininglines;
 }

@@ -14,6 +14,8 @@
 #include "noteinputs.h"
 #include "tabbar.h"
 #include "playbar.h"
+#include "vumeter.h"
+#include "timebar.h"
 
 typedef struct {
 	ui_component component;
@@ -24,6 +26,8 @@ typedef struct {
 	PatternView patternview;
 	SequenceView sequenceview;
 	SettingsView settingsview;
+	Vumeter vumeter;
+	TimeBar timebar;
 	ui_component* activeview;
 	int cx;
 	int cy;

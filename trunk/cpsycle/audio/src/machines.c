@@ -208,4 +208,7 @@ int machines_slot(Machines* self)
 }
 
 
-
+Machine* machines_master(Machines* self)
+{
+	return machines_at(self, 0);	
+}

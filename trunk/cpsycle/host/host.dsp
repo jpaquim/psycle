@@ -180,7 +180,15 @@ SOURCE=.\src\tabbar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\timebar.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\audio\src\vstplugin.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vumeter.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -277,6 +285,14 @@ SOURCE=.\src\songproperties.h
 # Begin Source File
 
 SOURCE=.\src\tabbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\timebar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vumeter.h
 # End Source File
 # End Group
 # Begin Source File

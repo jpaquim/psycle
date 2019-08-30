@@ -55,7 +55,10 @@ typedef struct {
 typedef struct {
 	int track;
 	float offset;
-	int col;
+	int line;
+	int subline;
+	int totallines;
+	int col;	
 } PatternGridCursor;
 
 typedef struct
@@ -101,12 +104,10 @@ typedef struct {
    NoteInputs* noteinputs;
    char** notestab;
    PatternGridCursor cursor;
-   float cursorstep;
-   Pattern* pattern;
+   float cursorstep;   
    Player* player;
    int textwidth;
-   int colx[PatternGrid_NUMCOLS];
-   PatternSkin skin;
+   int colx[PatternGrid_NUMCOLS];   
    PatternHeader* header;
    PatternLineNumbers* linenumbers;
    struct PatternView* view;
@@ -119,10 +120,12 @@ typedef struct PatternView {
 	PatternLineNumbers linenumbers;
 	PatternGrid grid;
 	PatternProperties properties;
+	Pattern* pattern;
+	PatternSkin skin;
 } PatternView;
 
-void InitPatternGrid(PatternGrid*, ui_component* parent, Player* player);
-void PatternGridApplyProperties(PatternGrid* self, Properties* properties);
+void InitPatternGrid(PatternGrid*, ui_component* parent, PatternView* view, Player* player);
+void PatternViewApplyProperties(PatternView* self, Properties* properties);
 void InitPatternHeader(PatternHeader*, ui_component* parent);
 void InitPatternLineNumbersLabel(PatternLineNumbersLabel* self, ui_component* parent);
 void InitPatternLineNumbers(PatternLineNumbers* self, ui_component* parent);

@@ -11,6 +11,12 @@ void machine_init(Machine* self)
 	memset(self, 0, sizeof(Machine));
 	self->dispose = OnMachineDispose;	
 	self->mode = OnMachineMode;
+	signal_init(&self->signal_worked);
+}
+
+void machine_dispose(Machine* self)
+{
+	signal_dispose(&self->signal_worked);
 }
 
 void master_init(Master* self)
@@ -23,13 +29,14 @@ void master_init(Master* self)
 	self->machine.inputs = (float**)malloc(sizeof(float*)*self->machine.numInputs);
 	self->machine.outputs = (float**)malloc(sizeof(float*)*self->machine.numOutputs);
 	self->machine.outputs[0] = 0;
-	self->machine.outputs[1] = 0;
+	self->machine.outputs[1] = 0;	
 }
 
 void master_dispose(Master* self)
 {
 	free(self->machine.inputs);
-	free(self->machine.outputs);
+	free(self->machine.outputs);	
+	machine_dispose(&self->machine);
 }
 
 
