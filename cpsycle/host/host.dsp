@@ -112,6 +112,10 @@ SOURCE=.\src\library.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\linesperbeatbar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\machinebar.c
 # End Source File
 # Begin Source File
@@ -145,6 +149,10 @@ SOURCE=.\src\patternproperties.c
 # Begin Source File
 
 SOURCE=.\src\patternview.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\pionoroll.c
 # End Source File
 # Begin Source File
 
@@ -220,6 +228,10 @@ SOURCE=.\src\library.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\linesperbeatbar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\machinebar.h
 # End Source File
 # Begin Source File
@@ -253,6 +265,10 @@ SOURCE=.\src\patternproperties.h
 # Begin Source File
 
 SOURCE=.\src\patternview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\pianoroll.h
 # End Source File
 # Begin Source File
 

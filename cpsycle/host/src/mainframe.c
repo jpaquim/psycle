@@ -38,6 +38,8 @@ extern Song song;
 void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 {	
 	int iStatusWidths[] = {100, 200, -1};
+	int toolbarheight = 40;
+	int tabbarheight = 20;
 	self->player = player;
 	ui_frame_init(&self->component, 0);	 
 	signal_connect(&self->component.signal_destroy, self, Destroy);
@@ -48,17 +50,17 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	InitMachineBar(&self->machinebar, &self->component, player);
 	ui_component_move(&self->machinebar.component, 100, 0);
 	ui_component_resize(&self->machinebar.component, 200, 20);
-
 	InitTabBar(&self->tabbar, &self->component);
-	ui_component_move(&self->tabbar.component, 150, 25);
+	ui_component_move(&self->tabbar.component, 150, toolbarheight);
 	ui_component_resize(&self->tabbar.component, 400, 20);	
 	tabbar_append(&self->tabbar, "Machines");
 	tabbar_append(&self->tabbar, "Pattern");
+	tabbar_append(&self->tabbar, "Pianoroll");
 	tabbar_append(&self->tabbar, "Settings");
 	tabbar_select(&self->tabbar, 0);
 	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
 	InitPlayBar(&self->playbar, &self->component);
-	ui_component_move(&self->playbar.component, 550, 25);
+	ui_component_move(&self->playbar.component, 550, toolbarheight);
 	ui_component_resize(&self->playbar.component, 400, 20);	
 	signal_connect(&self->playbar.signal_play, self, OnPlay);
 	signal_connect(&self->playbar.signal_stop, self, OnStop);
@@ -66,23 +68,30 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	ui_component_move(&self->vumeter.component, 320, 0);
 	ui_component_resize(&self->vumeter.component, 200, 20);	
 	InitTimeBar(&self->timebar, &self->component, player);
-	ui_component_move(&self->timebar.component, 530, 0);
+	ui_component_move(&self->timebar.component, 0, 20);
 	ui_component_resize(&self->timebar.component, 250, 20);	
+	InitLinesPerBeatBar(&self->linesperbeatbar, &self->component, player);
+	ui_component_move(&self->linesperbeatbar.component, 220, 20);
+	ui_component_resize(&self->linesperbeatbar.component, 250, 20);	
 	InitSettingsView(&self->settingsview, &self->component, properties);
-	ui_component_move(&self->settingsview.component, 150, 45);
+	ui_component_move(&self->settingsview.component, 150, toolbarheight + tabbarheight);
 	ui_component_hide(&self->settingsview.component);
 	InitMachineView(&self->machineview, &self->component, &self->machinebar, player, properties);	
-	ui_component_move(&self->machineview.component, 150, 45);	
+	ui_component_move(&self->machineview.component, 150, toolbarheight + tabbarheight);	
 	ui_component_hide(&self->machineview.component);
 	self->patternview.grid.noteinputs = &self->noteinputs;	
 	InitPatternView(&self->patternview, &self->component, player);
-	PatternViewSetPattern(&self->patternview, patterns_at(&player->song->patterns, 0));
-	ui_component_hide(&self->machineview.component);
-	ui_component_move(&self->patternview.component, 150, 45);
+	PatternViewSetPattern(&self->patternview, patterns_at(&player->song->patterns, 0));	
+	InitPianoroll(&self->pianoroll, &self->component);	
+	self->pianoroll.pattern = patterns_at(&player->song->patterns, 0);
+	ui_component_move(&self->pianoroll.component, 150, toolbarheight + tabbarheight);
+	ui_component_hide(&self->pianoroll.component);
+	ui_component_hide(&self->machineview.component);	
+	ui_component_move(&self->patternview.component, 150, toolbarheight + tabbarheight);
 	self->activeview = &self->patternview.component;
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, player->sequencer.sequence, &player->song->patterns);	
-	ui_component_move(&self->sequenceview.component, 0, 20);
+	ui_component_move(&self->sequenceview.component, 0, toolbarheight);
 	SetActiveView(self, &self->machineview.component);
 	/*InitSongProperties(&songproperties, &self->component);	
 	ui_menu_init(&menu, "", 0);
@@ -119,10 +128,12 @@ void Destroy(MainFrame* self, ui_component* component)
 void OnSize(MainFrame* self, ui_component* sender, int width, int height)
 {
 	int statusbarheight = 30;
+	int toolbarheight = 40;
+	int tabbarheight = 20;
 	self->cx = width;
 	self->cy = height;
-	ui_component_resize(&self->sequenceview.component, 100, height - statusbarheight - 25 - 20);
-	ui_component_resize(self->activeview, width - 150, height - statusbarheight - 25 - 20);
+	ui_component_resize(&self->sequenceview.component, 100, height - statusbarheight - toolbarheight);
+	ui_component_resize(self->activeview, width - 150, height - statusbarheight - toolbarheight - tabbarheight);
 	SendMessage(statusbar.component.hwnd, WM_SIZE, 0, 0);
 }
 
@@ -133,12 +144,16 @@ void OnFileMenu(ui_menu* menu)
 
 void SetActiveView(MainFrame* self, ui_component* view)
 {
+	int statusbarheight = 30;
+	int toolbarheight = 40;
+	int tabbarheight = 20;
+
 	if (self->activeview) {
 		ui_component_hide(self->activeview);
 	}
 	self->activeview = view;
 	ui_component_show(self->activeview);
-	ui_component_resize(self->activeview, self->cx - 150, self->cy - 30 - 20 - 25);	
+	ui_component_resize(self->activeview, self->cx - 150, self->cy - toolbarheight - statusbarheight - tabbarheight);	
 	ui_component_setfocus(self->activeview);	
 }
 
@@ -195,18 +210,20 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 void OnTabBarChange(MainFrame* self, ui_component* sender, int tabindex)
 {
 	switch (tabindex) {
-	case 0:
-		SetActiveView(self, &self->machineview.component);
-	break;
-	case 1:
-		SetActiveView(self, &self->patternview.component);
-	break;
-	case 2:
-		SetActiveView(self, &self->settingsview.component);
-	break;
-	default:;
-	break;
-
+		case 0:
+			SetActiveView(self, &self->machineview.component);
+		break;
+		case 1:
+			SetActiveView(self, &self->patternview.component);
+		break;
+		case 2:
+			SetActiveView(self, &self->pianoroll.component);
+		break;
+		case 3:
+			SetActiveView(self, &self->settingsview.component);
+		break;
+		default:;
+		break;
 	};
 }
 

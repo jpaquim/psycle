@@ -41,8 +41,13 @@ void PatternPropertiesSetPattern(PatternProperties* self, Pattern* pattern)
 {
 	char buffer[20];
 	self->pattern = pattern;
-	ui_edit_settext(&self->nameedit, pattern->label);
-	_snprintf(buffer, 10, "%.4f", self->pattern->length);
+	if (self->pattern) {
+		ui_edit_settext(&self->nameedit, pattern->label);
+		_snprintf(buffer, 10, "%.4f", self->pattern->length);
+	} else {
+		ui_edit_settext(&self->nameedit, "");
+		_snprintf(buffer, 10, "");
+	}
 	ui_edit_settext(&self->lengthedit, buffer);
 }
 

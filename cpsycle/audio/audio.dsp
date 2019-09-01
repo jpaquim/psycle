@@ -85,10 +85,6 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\src\driver.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\event.c
 # End Source File
 # Begin Source File
@@ -141,6 +137,10 @@ SOURCE=.\src\sequencer.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\silentdriver.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\song.c
 # End Source File
 # Begin Source File
@@ -151,10 +151,6 @@ SOURCE=.\src\vstplugin.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=.\src\driver.h
-# End Source File
 # Begin Source File
 
 SOURCE=.\src\event.h
@@ -202,6 +198,10 @@ SOURCE=.\src\sequence.h
 # Begin Source File
 
 SOURCE=.\src\sequencer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\silentdriver.h
 # End Source File
 # Begin Source File
 

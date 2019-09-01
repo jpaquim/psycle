@@ -3,6 +3,7 @@
 
 #include "patternview.h"
 #include <pattern.h>
+#include "cmdsnotes.h"
 #include <string.h>
 #include <math.h>
 #include "resources/resource.h"
@@ -37,6 +38,7 @@ static void OnPropertiesApply(PatternView* self, ui_component* sender);
 static int NumLines(PatternView* self);
 static void AdjustScrollranges(self, width, height);
 static float Offset(PatternGrid* self, int y, int* lines, int* sublines, int* subline);
+static int TestCursor(PatternGrid* self, int track, double offset, int subline);
 
 char* notes_tab_a440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
@@ -98,7 +100,7 @@ void InitPatternGrid(PatternGrid* self, ui_component* parent, PatternView* view,
 
 	self->player = player;
 	self->numtracks = 16;	
-	self->lpb = 4;
+	self->lpb = self->player->lpb;
 	self->bpl = 1.0f / self->lpb;
 	self->notestab = notes_tab_a220;	
 	self->cursor.track = 0;
@@ -164,6 +166,7 @@ void PatternViewApplyProperties(PatternView* self, Properties* properties)
 void OnDraw(PatternGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	PatternGridBlock clip;
+	self->bpl = 1.0f / self->player->lpb;
 	if (self->view->skin.hfont) {
 		ui_setfont(g, self->view->skin.hfont);
 	}	
@@ -259,7 +262,7 @@ void DrawTrackBackground(PatternGrid* self, ui_graphics* g, int track)
 	ui_drawsolidrectangle(g, r, self->view->skin.background);	
 }
 
-int TestCursor(PatternGrid* self, int track, float offset, int subline)
+int TestCursor(PatternGrid* self, int track, double offset, int subline)
 {
 	return self->cursor.track == track && 
 		self->cursor.offset >= offset && self->cursor.offset < offset + self->bpl
@@ -271,20 +274,21 @@ void DrawEvents(PatternGrid* self, ui_graphics* g, PatternGridBlock* clip)
 	int track;
 	int cpx = 0;	
 	int cpy;
-	float offset;
+	double offset;
 	int subline;	
 	PatternNode* prev;
 	
 	cpy = (clip->topleft.totallines - clip->topleft.subline) * self->lineheight + self->dy;	
 	offset = clip->topleft.offset;	
-	self->curr_event = pattern_greaterequal(self->view->pattern, offset, &prev);
+	self->curr_event = pattern_greaterequal(self->view->pattern, (float)offset, &prev);
 	subline = 0;	
 	while (offset <= clip->bottomright.offset && offset < self->view->pattern->length) {	
 		int beat;
 		int beat4;
-		int fill;			
-		beat = fmod(offset, 1.0f) == 0.0f;
-		beat4 = fmod(offset, 4.0f) == 0.0f;		
+		int fill;
+		
+		beat = fabs(fmod(offset, 1.0f)) < 0.01f ;
+		beat4 = fabs(fmod(offset, 4.0f)) < 0.01f;		
 		do {
 			fill = 0;
 			cpx = clip->topleft.track * self->trackwidth + self->dx;						
@@ -522,7 +526,7 @@ void AdvanceCursor(PatternView* self)
 void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata)
 {		
 	int cmd;
-	
+		
 	if (keycode == VK_UP) {
 		if (self->grid.cursor.subline > 0) {
 			--self->grid.cursor.subline;
@@ -584,7 +588,7 @@ void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata
 			ui_invalidate(&self->component);			
 		}		
 	} else {
-		if (self->grid.cursor.col == 0) {
+		if (self->grid.cursor.col == 0) {			
 			cmd = Cmd(&self->grid.noteinputs->map, keycode);
 			if (cmd != -1) {		
 				int base = 48;
@@ -592,11 +596,19 @@ void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata
 				PatternNode* node = FindNode(self->pattern, self->grid.cursor.track, self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
 				if (node) {					
 					PatternEntry* entry = (PatternEntry*)(node->entry);
-					entry->event.note = (unsigned char)(base + cmd);					
+					if (cmd == CMD_NOTE_Stop) {
+						entry->event.note = 120;
+					} else {
+						entry->event.note = (unsigned char)(base + cmd);					
+					}
 				} else {
 					float offset;
 					PatternEvent ev = { 0, 255, 255, 0, 0 };
-					ev.note = (unsigned char)(base + cmd);
+					if (cmd == CMD_NOTE_Stop) {
+						ev.note = 120;
+					} else {
+						ev.note = (unsigned char)(base + cmd);
+					}
 					ev.mach = machines_slot(&self->grid.player->song->machines);
 					offset = self->grid.cursor.offset;					
 					pattern_insert(self->pattern, prev, self->grid.cursor.track, offset, &ev);
@@ -882,7 +894,7 @@ void OnLineNumbersDraw(PatternLineNumbers* self, ui_component* sender, ui_graphi
 			beat4 = fmod(offset, 4.0f) == 0.0f;
 			SetColColor(self->skin, g, 0, 0, 0, beat, beat4);
 			// %3i
-			_snprintf(buffer, 10, "%.2X %.2f", line, offset);
+			_snprintf(buffer, 10, "%.2X %.3f", line, offset);
 			ui_setrectangle(&r, 0, cpy, 40-2, self->lineheight);
 			ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 				strlen(buffer));		
@@ -995,7 +1007,7 @@ int NumLines(PatternView* self)
 	}			
 	offset = self->pattern->length - offset;
 	if (offset > 0) {
-		remaininglines = (int)(offset * self->grid.lpb);
+		remaininglines = (int)(offset * self->grid.player->lpb);
 	}
 	return lines + sublines + remaininglines;
 }

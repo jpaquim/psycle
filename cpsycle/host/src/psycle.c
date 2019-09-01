@@ -28,21 +28,27 @@ static Player player;
 Song song;
 static Sequencer sequencer;
 
+
 UIMAIN
 {    	
 	static MainFrame main;		
 	static ui_component sci;	 
 //	library scilib;
-	int err = 0;
+	int err = 0;	
 
 	UIINIT;	
 /*	scilib = loadlibrary("SciLexer.dll");
 	if (scilib.lib == 0) {
 		ui_error("The Scintilla Module could not be loaded", "Error loading Scintilla");			 
 	}	*/
+
 	InitConfig();	
-	song_init(&song);	
-	player_init(&player, &song);		
+	song_init(&song);		
+#if defined(DEBUG)
+	player_init(&player, &song, "..\\driver\\mme\\Debug\\");
+#else
+	player_init(&player, &song, "..\\driver\\mme\\Release\\");
+#endif
 	InitMainFrame(&main, hostconfig, &player);
 	ui_component_settitle(&main.component, "Psycle");
 	/*if (scilib.lib) {

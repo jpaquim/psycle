@@ -8,6 +8,7 @@
 #include "machinebar.h"
 #include "machineview.h"
 #include "patternview.h"
+#include "pianoroll.h"
 #include "sequenceview.h"
 #include "settingsview.h"
 #include "properties.h"
@@ -16,6 +17,7 @@
 #include "playbar.h"
 #include "vumeter.h"
 #include "timebar.h"
+#include "linesperbeatbar.h"
 
 typedef struct {
 	ui_component component;
@@ -24,10 +26,12 @@ typedef struct {
 	PlayBar playbar;
 	MachineView machineview;
 	PatternView patternview;
+	Pianoroll pianoroll;
 	SequenceView sequenceview;
 	SettingsView settingsview;
 	Vumeter vumeter;
 	TimeBar timebar;
+	LinesPerBeatBar linesperbeatbar;
 	ui_component* activeview;
 	int cx;
 	int cy;

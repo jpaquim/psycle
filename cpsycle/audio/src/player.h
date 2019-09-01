@@ -3,24 +3,28 @@
 #if !defined(PLAYER_H)
 #define PLAYER_H
 
-#include "driver.h"
+#include "../../driver/driver.h"
 #include "song.h"
 #include "sequencer.h"
 
 typedef struct {	
 	Driver* driver;
+	Driver* silentdriver;
 	Song* song;
 	Sequencer sequencer;
 	float pos; 
 	int playing;
-	float t;	
+	float t;
+	unsigned int lpb;
+	HMODULE module;
 } Player;
 
-void player_init(Player* player, Song*);
-void player_dispose(Player* player);
-void player_start(Player* player);
-void player_stop(Player* player);
-float player_position(Player* player);
-void player_setbpm(Player* player, float bpm);
+void player_init(Player*, Song*, const char* driverpath);
+void player_dispose(Player*);
+void player_start(Player*);
+void player_stop(Player*);
+float player_position(Player*);
+void player_setbpm(Player*, float bpm);
+void player_setlpb(Player*, unsigned int lpb);
 
 #endif
