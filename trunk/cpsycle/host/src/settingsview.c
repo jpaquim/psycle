@@ -2,7 +2,6 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "settingsview.h"
-#include <driver.h>
 #include <stdio.h>
 
 static int cpy;

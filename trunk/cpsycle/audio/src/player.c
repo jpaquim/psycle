@@ -4,6 +4,7 @@
 #include "math.h"
 #include "plugin.h"
 #include "vstplugin.h"
+#include "silentdriver.h"
 #include <operations.h>
 
 static float buffer[65535];
@@ -14,42 +15,84 @@ static float* Work(Player* player, int* numsamples);
 static void Interleave(float* dst, float* left, float* right, int num);
 static void OnEnumerateSequencer(Machine* machine, int slot, PatternNode* events);
 static float Offset(Player* self, int numsamples);
+static void player_loaddriver(Player* self, const char* path);
+static void player_unloaddriver(Player* self);
 
 extern HANDLE hGuiEvent;
 extern HANDLE hWorkDoneEvent;
 
 #define STREAM_SIZE 256
 
-void player_init(Player* self, Song* song)
+typedef EXPORT void (CALLBACK  *ptest)(void);
+
+void player_init(Player* self, Song* song, const char* driverpath)
 {
-	Master* master;		
-	
+	char path[MAX_PATH];
+	Master* master;
+		
 	self->song = song;	
 	self->pos = 0.0f;
-	self->playing = FALSE;	
+	self->playing = FALSE;
+	self->lpb = 4;
 	
 	sequencer_init(&self->sequencer);
 	self->sequencer.sequence = &song->sequence;
-	self->driver = (Driver*) malloc(sizeof(Driver));
+	self->silentdriver = create_silent_driver();
+	self->silentdriver->init(self->silentdriver);	
+	
+	strcpy(path, driverpath);
+	strcat(path, "mme.dll");
+	player_loaddriver(self, path);
+	
 	self->t = 125 / (44100 * 60.0f);
-	driver_init(self->driver);
-	driver_connect(self->driver, self, Work);	
-
 	master = malloc(sizeof(Master));
 	master_init(master);
-	machines_insert(&self->song->machines, 0, (Machine*)master);	
-	
-	driver_open(self->driver);		
+	machines_insert(&self->song->machines, 0, (Machine*)master);
+		
+	self->driver->open(self->driver);
+}
+
+void player_loaddriver(Player* self, const char* path)
+{
+	Driver* driver = 0;	
+	self->module = LoadLibrary(path);
+	if (self->module) {
+		pfndriver_create pdrivercreate;			
+		pdrivercreate = (pfndriver_create) GetProcAddress (self->module, "driver_create");
+		if (pdrivercreate) {
+			driver = pdrivercreate();					
+			driver->init(driver);
+			driver->connect(driver, self, Work);
+		}
+	}
+	if (!driver) {
+		driver = self->silentdriver;
+	}
+	self->driver = driver;
+}
+
+void player_unloaddriver(Player* self)
+{
+	if (self->driver && self->driver != self->silentdriver && self->module) {
+		self->driver->dispose(self->driver);
+		self->driver->free(self->driver);
+		FreeLibrary(self->module);
+		self->module = 0;
+	}
 }
 
 void player_dispose(Player* self)
-{			
-	ResetEvent(hGuiEvent);
-	WaitForSingleObject(hWorkDoneEvent, INFINITE);
-	driver_close(self->driver);
-	SetEvent(hGuiEvent);		
-	driver_dispose(self->driver);
-	free(self->driver);
+{		
+	if (self->driver != self->silentdriver) {
+		ResetEvent(hGuiEvent);
+		WaitForSingleObject(hWorkDoneEvent, INFINITE);
+		self->driver->close(self->driver);
+		SetEvent(hGuiEvent);		
+		player_unloaddriver(self);
+	}	
+	self->silentdriver->dispose(self->silentdriver);
+	self->silentdriver->free(self->silentdriver);
+	self->silentdriver = 0;	
 }
 
 void player_start(Player* self)
@@ -80,6 +123,11 @@ void player_setbpm(Player* self, float bpm)
 		self->sequencer.bpm = bpm;
 	}
 	self->t = self->sequencer.bpm / (44100 * 60.0f);
+}
+
+void player_setlpb(Player* self, unsigned int lpb)
+{
+	self->lpb = lpb;
 }
 
 float Offset(Player* self, int numsamples)
