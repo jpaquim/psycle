@@ -1,0 +1,47 @@
+// resources.rc2 - resources Microsoft Visual C++ does not edit directly
+
+#if defined APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif // APSTUDIO_INVOKED
+
+#include "../version.hpp"
+
+// http://msdn.microsoft.com/library/default.asp?url=/library/en-us/tools/tools/versioninfo_resource.asp
+VS_VERSION_INFO VERSIONINFO
+	PRODUCTVERSION PSYCLE__VERSION__MAJOR,PSYCLE__VERSION__MINOR,PSYCLE__VERSION__PATCH
+	FILEVERSION PSYCLE__VERSION__MAJOR,PSYCLE__VERSION__MINOR,PSYCLE__VERSION__PATCH
+	FILEFLAGSMASK VS_FF_DEBUG
+	#if defined NDEBUG
+		FILEFLAGS 0
+	#else
+		FILEFLAGS VS_FF_DEBUG
+	#endif
+	FILEOS VOS_NT
+	FILETYPE VFT_UNKNOWN
+	FILESUBTYPE VFT2_UNKNOWN
+	{
+		BLOCK "StringFileInfo"
+		{
+			BLOCK "040904b0" // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
+			{
+				VALUE "CompanyName", RC__CompanyName
+				VALUE "LegalCopyright", RC__LegalCopyright
+				VALUE "License", RC__License
+
+				VALUE "InternalName", RC__InternalName
+				VALUE "ProductName", RC__ProductName
+				VALUE "ProductVersion", RC__ProductVersion
+
+				VALUE "OriginalFilename", RC__OriginalFilename
+				VALUE "FileDescription", RC__FileDescription
+				VALUE "FileVersion", RC__FileVersion
+
+				VALUE "SpecialBuild", RC__SpecialBuild
+				VALUE "PrivateBuild", RC__PrivateBuild
+			}
+	}
+	BLOCK "VarFileInfo"
+	{
+		VALUE "Translation", 0x409, 1200 // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
+	}
+END

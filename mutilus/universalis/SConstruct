@@ -1,0 +1,124 @@
+#! /usr/bin/env scons
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006-2007 johan boule <bohan@jabber.org>
+# copyright 2006-2007 psycledelics http://psycle.pastnotecut.org
+
+# To be able to import the packageneric package, we add the parent dir of this SConstruct file to the python path:
+import sys, os ; sys.path.append(os.path.split(os.getcwd())[0]) # SCons always makes the dir of the SConstruct file the current dir.
+
+# project
+
+from packageneric.generic.scons.project import project
+project = project(name = 'universalis')
+
+# source package
+
+from packageneric.generic.scons.source_package import source_package
+from packageneric.generic.scons.version import version
+
+source_package = source_package(project,
+	name = project.name(),
+	version = version(2, 0),
+	description_file = 'README'
+)
+
+source_package.add_files(['README', 'NEWS', 'ChangeLog', 'AUTHORS', 'COPYING', 'TODO'])
+
+# external packages
+
+from packageneric.generic.scons.check.external_package import external_package as external_package_check
+from packageneric.generic.scons.check.pkg_config import pkg_config as pkg_config_check
+from packageneric.generic.scons.check.cxx_build import cxx_build as cxx_build_check
+
+diversalis = os.path.join(os.pardir, 'diversalis', 'SConstruct')
+if os.path.exists(diversalis): diversalis = project.subscript(diversalis).local_package()
+else:
+	diversalis = external_package_check(project, name = 'diversalis', url = 'http://psycle.sourceforge.net',
+		distribution_packages = {
+			'zero-install': 'http://psycle.sourceforge.net/packages/0install/interfaces/diversalis-dev.xml',
+			'debian and ubuntu': 'lib-diversalis-dev (>= 0)',
+			'gentoo': '...',
+			'fedora': '...',
+			'cygwin': '...'
+		},
+		dependencies = [pkg_config_check(project, name = 'diversalis >= 0')]
+	)
+
+from packageneric.pool.boost import boost
+boost = boost(project, 103300, ['signals', 'thread', 'filesystem'])
+
+microsoft_mm_system = external_package_check(project, name = 'microsoft mm system', url = 'http://msdn.microsoft.com',
+	distribution_packages = {'microsoft (maybe windows updates?)': 'mm system'},
+	dependencies = [
+		cxx_build_check(project, name = 'microsoft mm system', libraries = ['winmm'], source_text = \
+			"""\
+				#include <windows.h>
+				#include <mmsystem.h>
+				void microsoft_mm_system()
+				{
+					::UINT milliseconds(10);
+					::timeBeginPeriod(milliseconds);
+					::timeGetTime();
+					::timeEndPeriod(milliseconds);
+				}
+			"""
+		)
+	]
+)
+
+# modules
+
+from packageneric.generic.scons.module import module as base_module
+
+class module(base_module):
+	def __init__(self):
+		base_module.__init__(self, source_package,
+			name = source_package.name(),
+			dependencies = [diversalis, boost]
+	)
+
+	def dynamic_dependencies(self):
+		quaquaversalis = True
+
+		glibmm = external_package_check(self.project(), name = 'glibmm', url = 'http://freedesktops.org',
+			distribution_packages = {
+				'zero-install': 'http://0install.net/interfaces/2006/GLibmm-dev.xml',
+				'debian and ubuntu': 'libglibmm-2.4-dev (>= 2.4)',
+				'gentoo': '...',
+				'fedora': '...',
+				'cygwin': 'glib2-devel (>= 2.6.6-2)' # mm!
+			},
+			dependencies = [pkg_config_check(self.project(), name = 'glibmm-2.4 >= 2.4 gmodule-2.0 >= 2.0 gthread-2.0 >= 2.0')]
+		)
+		if glibmm.result(): self.add_dependency(glibmm)
+		else: quaquaversalis = False
+		
+		from packageneric.pool.dlfcn import dlfcn
+		dlfcn = dlfcn(self.project())
+		if dlfcn.result(): self.add_dependency(dlfcn)
+		else: quaquaversalis = False
+		
+		if microsoft_mm_system.result(): self.add_dependency(microsoft_mm_system)
+
+		if not quaquaversalis: self.contexes().build().compilers().cxx().defines().add({'UNIVERSALIS__QUAQUAVERSALIS': None})
+		
+		from packageneric.generic.scons.find import find
+		self.add_sources(find(self.project(), 'src', [os.path.join('universalis', '*.cpp')]))
+		self.add_headers(find(self.project(), 'src', [os.path.join('universalis', '*.hpp')]))
+		self.contexes().source().compilers().cxx().paths().add(['src'])
+module = module()
+
+# pkg-config packages
+
+from packageneric.generic.scons.pkg_config_package import pkg_config_package
+pkg_config_package = pkg_config_package(project,
+	name = module.name(),
+	version = module.version(),
+	description = module.description(),
+	modules = [module]
+)
+
+project.default_targets([pkg_config_package])
+
+Return('pkg_config_package')

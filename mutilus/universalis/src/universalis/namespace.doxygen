@@ -1,0 +1,37 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// Copyright (C) 1999-2005 Psycledelics http://psycle.pastnotecut.org : Johan Boule
+
+/// provides a unified interface for common functionalities of different
+/// compilers, standard library implementation, operating systems, and processors,
+/// abstracting the specificities of each.
+namespace universalis
+{
+	/// provides a unified interface for common functionalities of different
+	/// compilers,
+	/// abstracting the specificities of each.
+	namespace compiler
+	{
+	}
+	
+	/// provides a unified interface for common functionalities of different
+	/// operating systems,
+	/// abstracting the specificities of each.
+	namespace operating_system
+	{
+	}
+	
+	/// provides a unified interface for common functionalities of different
+	/// processors,
+	/// abstracting the specificities of each.
+	namespace processor
+	{
+	}
+	
+	/// provides patches to defficient implementations of the
+	/// standard library
+	namespace standard_library
+	{
+	}
+}
+
+// arch-tag: daaac753-a4f5-481c-adbe-4d6225065ab7
