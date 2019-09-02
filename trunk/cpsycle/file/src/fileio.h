@@ -32,7 +32,7 @@ typedef struct {
 	FILE* _file;
 } RiffFile; 
 
-BOOL rifffile_open(RiffFile*, char* psFileName);
+BOOL rifffile_open(RiffFile*, const char* psFileName);
 BOOL rifffile_create(RiffFile*, char* psFileName, BOOL overwrite);
 BOOL rifffile_close(RiffFile*);
 BOOL rifffile_read(RiffFile*, void* pData, ULONG numBytes);
@@ -48,30 +48,6 @@ FILE* rifffile_getfile(RiffFile*);
 
 static unsigned long FourCC(char *psName);
 	
-/*
 
-class OldPsyFile : public RiffFile
-{
-public:
-	 BOOL Open(char* psFileName);
-	 BOOL Create(char* psFileName, BOOL overwrite);
-	 BOOL Close(void);
-	 BOOL Error();
-	 BOOL Read(void* pData, ULONG numBytes);
-	 BOOL Write(void* pData, ULONG numBytes);
-	 BOOL Expect(void* pData, ULONG numBytes);
-	 long Seek(long offset);
-	 long Skip(long numBytes);
-	 BOOL Eof(void);
-	 long FileSize(void);
-	 long GetPos(void);
-	
-
-	 FILE* GetFile(void) { return _file; };
-
-protected:
-	FILE* _file;
-};
-*/
 #endif
 

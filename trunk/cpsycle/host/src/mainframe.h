@@ -8,8 +8,8 @@
 #include "machinebar.h"
 #include "machineview.h"
 #include "patternview.h"
-#include "pianoroll.h"
 #include "sequenceview.h"
+#include "samplesview.h"
 #include "settingsview.h"
 #include "properties.h"
 #include "noteinputs.h"
@@ -25,9 +25,9 @@ typedef struct {
 	MachineBar machinebar;
 	PlayBar playbar;
 	MachineView machineview;
-	PatternView patternview;
-	Pianoroll pianoroll;
+	PatternView patternview;	
 	SequenceView sequenceview;
+	SamplesView samplesview;
 	SettingsView settingsview;
 	Vumeter vumeter;
 	TimeBar timebar;

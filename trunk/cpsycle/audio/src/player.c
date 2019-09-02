@@ -8,12 +8,10 @@
 #include <operations.h>
 
 static float buffer[65535];
-static float left[65535];
-static float right[65535];
+
 
 static float* Work(Player* player, int* numsamples);
 static void Interleave(float* dst, float* left, float* right, int num);
-static void OnEnumerateSequencer(Machine* machine, int slot, PatternNode* events);
 static float Offset(Player* self, int numsamples);
 static void player_loaddriver(Player* self, const char* path);
 static void player_unloaddriver(Player* self);
@@ -48,8 +46,9 @@ void player_init(Player* self, Song* song, const char* driverpath)
 	master = malloc(sizeof(Master));
 	master_init(master);
 	machines_insert(&self->song->machines, 0, (Machine*)master);
-		
-	self->driver->open(self->driver);
+	
+	signal_init(&self->signal_lpbchanged);
+	self->driver->open(self->driver);	
 }
 
 void player_loaddriver(Player* self, const char* path)
@@ -93,6 +92,7 @@ void player_dispose(Player* self)
 	self->silentdriver->dispose(self->silentdriver);
 	self->silentdriver->free(self->silentdriver);
 	self->silentdriver = 0;	
+	signal_dispose(&self->signal_lpbchanged);
 }
 
 void player_start(Player* self)
@@ -128,6 +128,7 @@ void player_setbpm(Player* self, float bpm)
 void player_setlpb(Player* self, unsigned int lpb)
 {
 	self->lpb = lpb;
+	signal_emit(&self->signal_lpbchanged, self, 1, lpb);
 }
 
 float Offset(Player* self, int numsamples)
@@ -135,19 +136,21 @@ float Offset(Player* self, int numsamples)
 	return numsamples * self->t;
 }
 
-float* Work(Player* self, int* numsamples)
+unsigned int Frames(Player* self, float offset)
+{
+	return (unsigned int)(offset / self->t);
+}
+
+real* Work(Player* self, int* numsamples)
 {		
-	int amount;
-	int numSamplex = *numsamples;
+	unsigned int amount;
+	unsigned int numSamplex = *numsamples;
 	float* pSamples = buffer;
 	Machine* master;
 		
-	if (numSamplex > STREAM_SIZE)
-	{
+	if (numSamplex > STREAM_SIZE) {
 		amount = STREAM_SIZE;
-	}
-	else
-	{
+	} else {
 		amount = numSamplex;
 	}
 	do
@@ -157,20 +160,21 @@ float* Work(Player* self, int* numsamples)
 			sequencer_tick(&self->sequencer, Offset(self, amount));			
 		}		
 		if (path) {
-			MachinePath* pathptr;						
-			SequencePtr curr = self->sequencer.curr;
-			pathptr = path;
+			MachinePath* pathptr;			
+			pathptr = path;			
 			while (pathptr != NULL) {
 				Machine* machine;
 				MachineConnections* connections;				
 				int i;
+				int slot;
 
-				machine = machines_at(&self->song->machines, (int)pathptr->entry);
-				connections = machines_connections(&self->song->machines, (int)pathptr->entry);				
+				slot = (int)pathptr->entry;
+				machine = machines_at(&self->song->machines, slot);
+				connections = machines_connections(&self->song->machines, slot);				
 
 				for (i = 0; i < 2; ++i) {
-					machine->outputs[i] = machines_nextbuffer(&self->song->machines);				
-					dsp_clear(machine->outputs[i], amount);					
+					machine->outputs.samples[i] = machines_nextbuffer(&self->song->machines);				
+					dsp_clear(machine->outputs.samples[i], amount);					
 				}
 
 				if (connections) {
@@ -180,18 +184,36 @@ float* Work(Player* self, int* numsamples)
 						if (connectionptr->slot != -1) {
 							Machine* source = machines_at(&self->song->machines, connectionptr->slot);
 							for (i = 0; i < 2; ++i) {
-								dsp_add(source->outputs[i], machine->outputs[i], amount, 1.0f);							
+								dsp_add(source->outputs.samples[i], machine->outputs.samples[i], amount, 1.0f);
 							}
 						}
 						connectionptr = connectionptr->next;
 					}								
 				}				
-				if ((int)(pathptr->entry) != 0) {
+				if (slot != 0) {
+					List* events = 0;
 					if (self->playing) {												
-						self->sequencer.curr = curr;
-						sequencer_enumerate(&self->sequencer, machine, (int)(pathptr->entry), OnEnumerateSequencer);						
+						List* node = self->sequencer.events;
+						while (node) {
+							PatternEntry* entry = (PatternEntry*)node->entry;
+							if (entry->event.mach == slot) {
+								unsigned int deltaframes;
+								if (!events) {
+									events = list_create(entry);
+								} else {
+									list_append(events, entry);
+								}
+								deltaframes = Frames(self, entry->delta);
+								if (deltaframes >= amount) {
+									deltaframes = amount - 1;
+								}
+								entry->delta = (float) deltaframes;
+							}
+							node = node->next;
+						}						
 					}
-					machine->work(machine, amount, 16);
+					machine->work(machine, events, amount, 16);
+					list_free(events);
 					signal_emit(&machine->signal_worked, machine, 1, amount);
 				}
 				pathptr = pathptr->next;
@@ -199,9 +221,9 @@ float* Work(Player* self, int* numsamples)
 							
 		}
 		master = machines_at(&self->song->machines, 0);
-		if (master && master->outputs[0] && master->outputs[1]) {	
+		if (master && master->outputs.samples[0] && master->outputs.samples[1]) {	
 			signal_emit(&master->signal_worked, master, 1, amount);
-			dsp_interleave(pSamples, master->outputs[0], master->outputs[1], amount);			
+			dsp_interleave(pSamples, master->outputs.samples[0], master->outputs.samples[1], amount);			
 		}
 		numSamplex -= amount;		
 		pSamples  += 2*amount;
@@ -213,15 +235,6 @@ float* Work(Player* self, int* numsamples)
 	
 //	dsp_mul(buffer, *numsamples, 0.5);
 	return buffer;
-}
-
-void OnEnumerateSequencer(Machine* machine, int slot, PatternNode* node)
-{
-	PatternEvent* event = &((PatternEntry*)(node->entry))->event;
-	if (event->mach == slot) {
-		machine->seqtick(machine, 0, event->note, event->inst, event->cmd,
-			event->parameter);	
-	}
 }
 
 

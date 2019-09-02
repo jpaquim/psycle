@@ -15,6 +15,7 @@ void InitTabBar(TabBar* self, ui_component* parent)
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	self->tabs = 0;
+	self->tabwidth = 90;
 	self->selected = -1;
 }
 
@@ -34,21 +35,21 @@ void OnDestroy(TabBar* self, ui_component* component)
 
 void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 {	
-	List* ptr;
+	List* tab;
 	int cpx = 0;
 	int c = 0;
 
-	ptr = self->tabs;
-	while (ptr) {
-		const char* str = (const char*)ptr->entry;
+	tab = self->tabs;
+	while (tab) {
+		const char* str = (const char*)tab->entry;
 		if (self->selected == c) {
 			ui_settextcolor(g, 0xFFFF0000);
 		} else {
 			ui_settextcolor(g, 0x00000000);
 		}
 		ui_textout(g, cpx, 0, str, strlen(str));
-		cpx += 100;
-		ptr = ptr->next;
+		cpx += self->tabwidth;
+		tab = tab->next;
 		++c;
 	}
 	ui_drawline(g, 0, 19, 600, 19);
@@ -60,7 +61,7 @@ void OnSize(TabBar* self, ui_component* sender, int width, int height)
 
 void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button)
 {
-	self->selected = x / 100;
+	self->selected = x / self->tabwidth;
 	ui_invalidate(&self->component);
 	signal_emit(&self->signal_change, self, 1, self->selected);
 }

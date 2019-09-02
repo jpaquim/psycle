@@ -16,30 +16,30 @@ typedef struct {
 	Patterns* patterns;	
 	List* sequence;
 	PatternNode* patternnode;		
-} SequencePtr;
+} SequenceIterator;
 
-void sequenceptr_inc(SequencePtr*);
-PatternNode* sequenceptr_patternnode(SequencePtr*);
-SequenceEntry* sequenceptr_entry(SequencePtr*);
+void sequenceiterator_inc(SequenceIterator*);
+PatternNode* sequenceiterator_patternnode(SequenceIterator*);
+SequenceEntry* sequenceiterator_entry(SequenceIterator*);
 
 typedef List Track;
 
 typedef struct {
 	Track* entries;
 	Patterns* patterns;
-	SequencePtr editpos;
+	SequenceIterator editpos;
 	Signal signal_editposchanged;
 } Sequence;
 
 void sequence_init(Sequence*, Patterns*);
 void sequence_dispose(Sequence*);
-SequenceEntry* sequence_insert(Sequence*, SequencePtr position, int pattern);
-void sequence_remove(Sequence*, SequencePtr position);
+SequenceEntry* sequence_insert(Sequence*, SequenceIterator position, int pattern);
+void sequence_remove(Sequence*, SequenceIterator position);
 unsigned int sequence_size(Sequence*);
-SequencePtr sequence_at(Sequence*, unsigned int position);
-SequencePtr sequence_begin(Sequence* self, float offset);
-SequencePtr sequence_last(Sequence* self);
-void sequence_seteditposition(Sequence* self, SequencePtr position);
-SequencePtr sequence_editposition(Sequence* self);
+SequenceIterator sequence_at(Sequence*, unsigned int position);
+SequenceIterator sequence_begin(Sequence* self, float offset);
+SequenceIterator sequence_last(Sequence* self);
+void sequence_seteditposition(Sequence* self, SequenceIterator position);
+SequenceIterator sequence_editposition(Sequence* self);
 #endif
 

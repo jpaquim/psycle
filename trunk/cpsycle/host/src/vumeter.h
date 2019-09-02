@@ -5,7 +5,7 @@
 #define VUMETER_H
 
 #include "uicomponent.h"
-#include "player.h"
+#include <player.h>
 
 typedef struct {	
 	ui_component component;

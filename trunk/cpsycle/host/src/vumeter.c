@@ -60,18 +60,17 @@ void OnTimer(Vumeter* self, ui_component* sender, int timerid)
 
 void OnMasterWorked(Vumeter* self, Machine* master, unsigned int numsamples)
 {
-	float* left = master->outputs[0];
-	float* right = master->outputs[1];
-	float leftavg = 0;
-	float rightavg = 0;
+	real* left = master->outputs.samples[0];
+	real* right = master->outputs.samples[1];
+	real leftavg = 0;
+	real rightavg = 0;
 	char buffer[20];
 	unsigned int sample = 0;
 	for ( ; sample < numsamples; ++sample) {
-		leftavg += (float) fabs(left[sample]);
-		rightavg += (float) fabs(right[sample]);
+		leftavg += (real) fabs(left[sample]);
+		rightavg += (real) fabs(right[sample]);
 	}
 	self->leftavg = leftavg / numsamples / 32768;
 	self->rightavg = rightavg / numsamples / 32768;
-	_snprintf(buffer, 10, "%.4f, ", self->leftavg);
-	OutputDebugString(buffer);
+	_snprintf(buffer, 10, "%.4f, ", self->leftavg);	
 }

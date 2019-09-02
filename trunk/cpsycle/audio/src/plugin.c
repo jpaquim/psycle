@@ -1,11 +1,12 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "plugin.h"
+#include "pattern.h"
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-static void work(Plugin* self, int numsamples, int tracks);
+static void work(Plugin* self, List* events, int numsamples, int tracks);
 static int hostevent(Plugin* self, int const eventNr, int const val1, float const val2);
 static void seqtick(Plugin* self, int channel, int note, int ins, int cmd, int val);
 static void sequencertick(Plugin* self);
@@ -48,15 +49,13 @@ void plugin_init(Plugin* self, const char* path)
 		if (!self->mi) {
 			FreeLibrary(self->dll);			
 		} else {
-			int gbp;			
-			self->machine.numInputs = 2; //self->machine.mode(self) == MACHMODE_FX ? 2 : 0;;
-			self->machine.numOutputs = 2;
-			self->machine.inputs = (float**)malloc(sizeof(float*)*self->machine.numInputs);
-			self->machine.outputs = (float**)malloc(sizeof(float*)*self->machine.numOutputs);
+			int gbp;	
 			mi_init(self->mi);
 			for (gbp = 0; gbp< pInfo->numParameters; gbp++) {
 				mi_parametertweak(self->mi, gbp, pInfo->Parameters[gbp]->DefValue);
-			}			
+			}		
+			buffer_init(&self->machine.inputs, 2);
+			buffer_init(&self->machine.outputs, 2);	
 		}
 	}	
 }
@@ -67,9 +66,9 @@ void dispose(Plugin* self)
 		FreeLibrary(self->dll);
 		self->mi = 0;
 		self->dll = 0;
-		free(self->machine.inputs);
-		free(self->machine.outputs);
 	}		
+	buffer_dispose(&self->machine.inputs);
+	buffer_dispose(&self->machine.outputs);	
 	machine_dispose(&self->machine);
 }
 
@@ -103,9 +102,27 @@ CMachineInfo* plugin_psycle_test(const char* path)
 	return rv;
 }
 
-void work(Plugin* self, int numsamples, int tracks)
-{	
-	mi_work(self->mi, self->machine.outputs[0], self->machine.outputs[1], numsamples, tracks);	
+void work(Plugin* self, List* events, int numsamples, int tracks)
+{		
+	List* p = events;
+	unsigned int amount = numsamples;
+	while (p) {			
+		PatternEntry* entry = (PatternEntry*)p->entry;
+		int numworksamples = amount - entry->delta;
+		if (numworksamples > 0) {
+			mi_work(self->mi, self->machine.outputs.samples[0],
+				self->machine.outputs.samples[1], numworksamples, tracks);	
+			amount -= numworksamples;
+		}
+		mi_seqtick(self->mi, entry->track, entry->event.note, entry->event.inst, 
+			entry->event.cmd, entry->event.cmd,
+			entry->event.parameter);
+		p = p->next;
+	}
+	if (amount > 0) {
+		mi_work(self->mi, self->machine.outputs.samples[0],
+				self->machine.outputs.samples[1], amount, tracks);		
+	}	
 }
 
 void seqtick(Plugin* self, int channel, int note, int ins, int cmd, int val)

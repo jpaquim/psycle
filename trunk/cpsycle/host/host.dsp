@@ -168,6 +168,10 @@ SOURCE=.\src\resources\resource.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\samplesview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sequenceview.c
 # End Source File
 # Begin Source File
@@ -192,11 +196,19 @@ SOURCE=.\src\timebar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\trackerview.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\audio\src\vstplugin.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\vumeter.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\wavebox.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -280,6 +292,10 @@ SOURCE=.\src\resources\resource.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\samplesview.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sequenceview.h
 # End Source File
 # Begin Source File
@@ -308,7 +324,15 @@ SOURCE=.\src\timebar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\trackerview.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\vumeter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\wavebox.h
 # End Source File
 # End Group
 # Begin Source File

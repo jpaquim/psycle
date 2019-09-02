@@ -11,6 +11,7 @@ typedef struct {
 	List* tabs;
 	ui_component component;
 	int selected;
+	int tabwidth;
 	Signal signal_change;
 } TabBar;
 

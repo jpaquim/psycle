@@ -135,7 +135,7 @@ void OnControllerNewEntry(SequenceListView* self)
 void OnControllerDelEntry(SequenceListView* self)
 {
 	if (self->selected != -1) {
-		SequencePtr ptr = sequence_editposition(self->sequence);
+		SequenceIterator ptr = sequence_editposition(self->sequence);
 		sequence_remove(self->sequence, ptr);
 		if (sequence_size(self->sequence) == 0) {
 			sequence_insert(self->sequence, sequence_begin(self->sequence, 0), 0);

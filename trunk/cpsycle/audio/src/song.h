@@ -7,12 +7,14 @@
 #include "machines.h"
 #include "patterns.h"
 #include "sequence.h"
+#include "samples.h"
 
 typedef struct {
 	Properties* properties;
 	Machines machines;
 	Patterns patterns;
-	Sequence sequence;	
+	Sequence sequence;
+	Samples samples;
 } Song;
 
 void song_init(Song* self);

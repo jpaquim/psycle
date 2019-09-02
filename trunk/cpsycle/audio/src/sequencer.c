@@ -1,6 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "sequencer.h"
+#include "pattern.h"
 
 void sequencer_init(Sequencer* self)
 {
@@ -9,6 +10,7 @@ void sequencer_init(Sequencer* self)
 	self->samplerate = 44100;
 	self->bpm = 125;	
 	self->window = 0;
+	self->events = 0;
 }
 
 void sequencer_connect(Sequencer* self, void* context, void (*callback)(void*, PatternNode*))
@@ -26,29 +28,35 @@ void sequencer_setposition(Sequencer* self, float position)
 
 void sequencer_tick(Sequencer* self, float offset)
 {		
+	SequenceEntry* entry = sequenceiterator_entry(&self->curr);
+	PatternNode* node;
 	self->pos += self->window;
-	self->window = offset;		
-}
-
-SequencePtr sequencer_curr(Sequencer* self)
-{
-	return self->curr;
-}
-
-void sequencer_enumerate(Sequencer* self, void* context, int slot, void (*callback)(void*, int, PatternNode*))
-{
-	PatternNode* node = sequenceptr_patternnode(&self->curr);
-	SequenceEntry* entry = sequenceptr_entry(&self->curr);
+	self->window = offset;			
+	list_free(self->events);
+	self->events = 0;
+	node = sequenceiterator_patternnode(&self->curr);
+	
 	while (node) {
 		PatternEntry* patternentry = (PatternEntry*)node->entry;
+
 		if (entry->offset + patternentry->offset >= self->pos && entry->offset + patternentry->offset < self->pos + self->window) {
-			callback(context, slot, node);
-			sequenceptr_inc(&self->curr);
-			node = sequenceptr_patternnode(&self->curr);
-			entry = sequenceptr_entry(&self->curr);
+			patternentry->delta = entry->offset - self->pos;
+			if (!self->events) {
+				self->events = list_create(patternentry);
+			} else {
+				list_append(self->events, patternentry);
+			}
+			sequenceiterator_inc(&self->curr);
+			node = sequenceiterator_patternnode(&self->curr);
+			entry = sequenceiterator_entry(&self->curr);
 		} else {			
 			break;
 		}				
 	}
-
 }
+
+SequenceIterator sequencer_curr(Sequencer* self)
+{
+	return self->curr;
+}
+

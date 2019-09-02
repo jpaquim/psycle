@@ -24,18 +24,14 @@ void master_init(Master* self)
 	memset(self, 0, sizeof(Master));
 	machine_init(&self->machine);	
 	self->machine.mode = OnMasterMode;
-	self->machine.numInputs = 2; //self->machine.mode(self) == MACHMODE_FX ? 2 : 0;;
-	self->machine.numOutputs = 2;
-	self->machine.inputs = (float**)malloc(sizeof(float*)*self->machine.numInputs);
-	self->machine.outputs = (float**)malloc(sizeof(float*)*self->machine.numOutputs);
-	self->machine.outputs[0] = 0;
-	self->machine.outputs[1] = 0;	
+	buffer_init(&self->machine.inputs, 2);
+	buffer_init(&self->machine.outputs, 2);	
 }
 
 void master_dispose(Master* self)
-{
-	free(self->machine.inputs);
-	free(self->machine.outputs);	
+{	
+	buffer_dispose(&self->machine.inputs);
+	buffer_dispose(&self->machine.outputs);	
 	machine_dispose(&self->machine);
 }
 

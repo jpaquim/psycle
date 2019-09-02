@@ -6,6 +6,8 @@
 #include "plugin_interface.h"
 #include <windows.h>
 #include <signal.h>
+#include "buffer.h"
+#include <list.h>
 
 typedef enum {
 	MACHMODE_GENERATOR = 0,
@@ -15,7 +17,7 @@ typedef enum {
 
 typedef struct {	
 	void (*init)(void*);	
-	void (*work)(void *, int numsamples, int tracks);
+	void (*work)(void *, List* events, int numsamples, int tracks);
 	int (*mi_hostevent)(void*, int const eventNr, int const val1, float const val2);
 	void (*seqtick)(void*, int channel, int note, int ins, int cmd, int val);
 	void (*sequencertick)(void*);
@@ -26,10 +28,8 @@ typedef struct {
 	CMachineInfo* (*info)(void*);
 	void (*dispose)(void*);
 	int (*mode)(void*);	
-	float** inputs;
-	float** outputs;
-	int numInputs;
-	int numOutputs;	
+	Buffer inputs;
+	Buffer outputs;	
 	Signal signal_worked;
 } Machine;
 
