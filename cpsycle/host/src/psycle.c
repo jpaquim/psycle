@@ -15,6 +15,7 @@
 #include <math.h>
 #include <plugin_interface.h>
 #include <sequence.h>
+#include <sample.h>
 
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
@@ -34,7 +35,9 @@ UIMAIN
 	static MainFrame main;		
 	static ui_component sci;	 
 //	library scilib;
-	int err = 0;	
+	int err = 0;
+	
+	// Sample sample;
 
 	UIINIT;	
 /*	scilib = loadlibrary("SciLexer.dll");
@@ -43,13 +46,17 @@ UIMAIN
 	}	*/
 
 	InitConfig();	
-	song_init(&song);		
+	song_init(&song);			
 #if defined(DEBUG)
 	player_init(&player, &song, "..\\driver\\mme\\Debug\\");
 #else
 	player_init(&player, &song, "..\\driver\\mme\\Release\\");
 #endif
+	// sample_init(&sample);
+	// sample_load(&sample, "Chord.wav");
+	// samples_insert(&player.song->samples, &sample, 0);
 	InitMainFrame(&main, hostconfig, &player);
+	// ui_component_resize(&main, 1000, 600);
 	ui_component_settitle(&main.component, "Psycle");
 	/*if (scilib.lib) {
 		ui_classcomponent_init(&sci, &sci, &main.component, "Scintilla");

@@ -2,7 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "greet.h"
 
-void AddString(Greet* self, const char* text);
+static void AddString(Greet* self, const char* text);
 
 void greet_init(Greet* self, ui_component* parent)
 {

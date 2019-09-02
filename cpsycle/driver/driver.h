@@ -7,11 +7,9 @@
 #define EXPORT __declspec (dllexport)
 #endif
 
-#if !defined(MME_H)
-#define MME_H
+#if !defined(DRIVER_H)
+#define DRIVER_H
 
-#include <windows.h>
-#include <mmsystem.h>
 #include <properties.h>
 
 typedef struct {

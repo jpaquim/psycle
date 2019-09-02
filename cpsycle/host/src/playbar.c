@@ -52,7 +52,7 @@ void OnDraw(PlayBar* self, ui_component* sender, ui_graphics* g)
 			ui_settextcolor(g, 0x00000000);
 		}
 		ui_textout(g, cpx, 0, str, strlen(str));
-		cpx += 100;
+		cpx += 50;
 		ptr = ptr->next;
 		++c;
 	}
@@ -65,7 +65,7 @@ void OnSize(PlayBar* self, ui_component* sender, int width, int height)
 
 void OnMouseDown(PlayBar* self, ui_component* sender, int x, int y, int button)
 {
-	self->selected = x / 100;	
+	self->selected = x / 50;	
 	if (self->selected == 0) {
 		signal_emit(&self->signal_play, self, 0);
 	} else

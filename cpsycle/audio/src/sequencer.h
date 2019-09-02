@@ -4,6 +4,7 @@
 #define SEQUENCER_H
 
 #include "sequence.h"
+#include <list.h>
 
 typedef struct {
 	Sequence* sequence;
@@ -11,16 +12,16 @@ typedef struct {
 	float bpm;
 	float window;
 	unsigned int samplerate;
-	SequencePtr curr;
+	SequenceIterator curr;
 	void* context;
 	void (*callback)(void*, PatternNode*);
+	List* events;
 } Sequencer;
 
 void sequencer_init(Sequencer* self);
 void sequencer_connect(Sequencer*, void* context, void (*callback)(void*, PatternNode*));
 void sequencer_tick(Sequencer*, float offset);
-void sequencer_enumerate(Sequencer*, void* context, int slot, void (*callback)(void*, int, PatternNode*));
 void sequencer_setposition(Sequencer*, float position);
-SequencePtr sequencer_curr(Sequencer*);
+SequenceIterator sequencer_curr(Sequencer*);
 
 #endif

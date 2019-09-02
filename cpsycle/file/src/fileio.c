@@ -26,7 +26,7 @@ ULONG FourCC(char *psName)
 
 
 BOOL rifffile_open(RiffFile* self,
-				   char* psFileName)
+				   const char* psFileName)
 {
 	strcpy(self->szName,psFileName);
 	self->_file = fopen(psFileName, "rb");

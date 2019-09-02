@@ -30,7 +30,9 @@ typedef struct {
 	Signal signal_scroll;
 	Signal signal_create;
 	Signal signal_destroy;
-	Signal signal_childenum;	
+	Signal signal_childenum;
+	Signal signal_show;
+	Signal signal_hide;
 	int align;   
 	int doublebuffered;
 	int propagateevent;

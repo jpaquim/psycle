@@ -7,7 +7,7 @@
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-static void work(LuaPlugin* self, int numsamples, int tracks);
+static void work(LuaPlugin* self, List* events, int numsamples, int tracks);
 static int hostevent(LuaPlugin* self, int const eventNr, int const val1, float const val2);
 static void seqtick(LuaPlugin* self, int channel, int note, int ins, int cmd, int val);
 static void sequencertick(LuaPlugin* self);
@@ -38,7 +38,7 @@ CMachineInfo* luaplugin_psycle_test(const char* path)
 	return 0;
 }
 
-void work(LuaPlugin* self, int numsamples, int tracks)
+void work(LuaPlugin* self, List* events, int numsamples, int tracks)
 {
 	
 }

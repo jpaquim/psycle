@@ -85,6 +85,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\src\buffer.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\event.c
 # End Source File
 # Begin Source File
@@ -129,6 +133,14 @@ SOURCE=.\src\plugincatcher.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sample.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\samples.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sequence.c
 # End Source File
 # Begin Source File
@@ -147,10 +159,18 @@ SOURCE=.\src\song.c
 
 SOURCE=.\src\vstplugin.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\waveio.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\src\buffer.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\src\event.h
@@ -193,6 +213,14 @@ SOURCE=.\src\plugincatcher.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sample.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\samples.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sequence.h
 # End Source File
 # Begin Source File
@@ -210,6 +238,10 @@ SOURCE=.\src\song.h
 # Begin Source File
 
 SOURCE=.\src\vstplugin.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\waveio.h
 # End Source File
 # End Group
 # End Target

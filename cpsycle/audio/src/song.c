@@ -15,6 +15,7 @@ void song_init(Song* self)
 	machines_init(&self->machines);
 	patterns_init(&self->patterns);
 	sequence_init(&self->sequence, &self->patterns);
+	samples_init(&self->samples);
 	pattern = (Pattern*) malloc(sizeof(Pattern));
 	patterns_insert(&self->patterns, 0, pattern);
 	pattern_init(pattern);	
@@ -28,6 +29,7 @@ void song_dispose(Song* self)
 	machines_dispose(&self->machines);
 	patterns_dispose(&self->patterns);
 	sequence_dispose(&self->sequence);		
+	samples_dispose(&self->samples);
 }
 
 void song_load(Song* self, const char* path)

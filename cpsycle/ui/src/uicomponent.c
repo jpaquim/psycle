@@ -93,6 +93,17 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 	switch (message)
     {		
+		case WM_SHOWWINDOW:
+			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			if (component) {				                    
+				if (wParam == TRUE) {
+					signal_emit(&component->signal_show, component, 0);
+				} else {
+					signal_emit(&component->signal_hide, component, 0);
+				}
+				return 0 ;
+			}
+		break;		
 		case WM_SIZE:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
 			if (component) {				                    
@@ -424,7 +435,8 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_scroll);
 	signal_init(&component->signal_create);
 	signal_init(&component->signal_destroy);
-
+	signal_init(&component->signal_show);
+	signal_init(&component->signal_hide);
 	component->propagateevent = 0;
 }
 
@@ -442,6 +454,8 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_scroll);
 	signal_dispose(&component->signal_create);
 	signal_dispose(&component->signal_destroy);
+	signal_dispose(&component->signal_show);
+	signal_dispose(&component->signal_hide);
 }
 
 void ui_classcomponent_init(ui_component* component, ui_component* parent, const char* classname)

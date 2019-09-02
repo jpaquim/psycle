@@ -6,7 +6,7 @@
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-static void work(VstPlugin* self, int numsamples, int tracks);
+static void work(VstPlugin* self, List* events, int numsamples, int tracks);
 static int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2);
 static void seqtick(VstPlugin* self, int channel, int note, int ins, int cmd, int val);
 static void sequencertick(VstPlugin* self);
@@ -46,8 +46,6 @@ void vstplugin_init(VstPlugin* self, const char* path)
 	self->machine.dispose = dispose;
 	self->machine.mode = mode;
 	self->info = 0;
-	self->machine.inputs = 0;
-	self->machine.outputs = 0;
 	self->module = LoadLibrary(path);
 	err = GetLastError();
 	mainProc = getMainEntry(self->module);
@@ -63,10 +61,8 @@ void vstplugin_init(VstPlugin* self, const char* path)
 			VstInt32 numOutputs;
 			numInputs = self->effect->numInputs;
 			numOutputs = self->effect->numOutputs;
-			self->machine.numInputs = numInputs;
-			self->machine.numOutputs = numOutputs;
-			self->machine.inputs = (float**)malloc(sizeof(float*)*numInputs);
-			self->machine.outputs = (float**)malloc(sizeof(float*)*numOutputs);
+			buffer_init(&self->machine.inputs, numInputs);
+			buffer_init(&self->machine.outputs, numOutputs);
 
 			self->effect->user = self;
 			self->effect->dispatcher (self->effect, effOpen, 0, 0, 0, 0);
@@ -84,9 +80,7 @@ void dispose(VstPlugin* self)
 	if (self->module) {
 		if (self->effect) {
 			self->effect->dispatcher (self->effect, effClose, 0, 0, 0, 0);
-			self->effect = 0;
-			free(self->machine.inputs);
-			free(self->machine.outputs);
+			self->effect = 0;			
 		}
 		FreeLibrary(self->module);		
 		self->module = 0;
@@ -98,6 +92,8 @@ void dispose(VstPlugin* self)
 		}
 		self->info = 0;
 	}
+	buffer_dispose(&self->machine.inputs);
+	buffer_dispose(&self->machine.outputs);			
 	machine_dispose(&self->machine);
 }
 
@@ -133,9 +129,10 @@ CMachineInfo* plugin_vst_test(const char* path)
 	return rv;
 }
 
-void work(VstPlugin* self, int numsamples, int tracks)
+void work(VstPlugin* self, List* events, int numsamples, int tracks)
 {	
-	self->effect->processReplacing(self->effect, self->machine.inputs, self->machine.outputs, numsamples);
+	self->effect->processReplacing(self->effect, self->machine.inputs.samples,
+		self->machine.outputs.samples, numsamples);
 }
 
 void seqtick(VstPlugin* self, int channel, int note, int ins, int cmd, int val)

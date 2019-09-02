@@ -6,6 +6,7 @@
 #include "../../driver/driver.h"
 #include "song.h"
 #include "sequencer.h"
+#include <signal.h>
 
 typedef struct {	
 	Driver* driver;
@@ -16,6 +17,8 @@ typedef struct {
 	int playing;
 	float t;
 	unsigned int lpb;
+
+	Signal signal_lpbchanged;	
 	HMODULE module;
 } Player;
 
