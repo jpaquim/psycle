@@ -21,10 +21,14 @@
 // #include <crtdbg.h>
 
 void InitConfig(void);
+void InitMachineCallback(void);
 
 static Properties* hostconfig;
 static Greet greet;
 static Player player;
+MachineCallback machinecallback;
+
+static Samples* machinecallback_samples(void* callbackcontext);
 
 Song song;
 static Sequencer sequencer;
@@ -37,8 +41,6 @@ UIMAIN
 //	library scilib;
 	int err = 0;
 	
-	// Sample sample;
-
 	UIINIT;	
 /*	scilib = loadlibrary("SciLexer.dll");
 	if (scilib.lib == 0) {
@@ -52,11 +54,9 @@ UIMAIN
 #else
 	player_init(&player, &song, "..\\driver\\mme\\Release\\");
 #endif
-	// sample_init(&sample);
-	// sample_load(&sample, "Chord.wav");
-	// samples_insert(&player.song->samples, &sample, 0);
+	InitMachineCallback();	
 	InitMainFrame(&main, hostconfig, &player);
-	// ui_component_resize(&main, 1000, 600);
+	// ui_component_resize(&main, 800, 600);
 	ui_component_settitle(&main.component, "Psycle");
 	/*if (scilib.lib) {
 		ui_classcomponent_init(&sci, &sci, &main.component, "Scintilla");
@@ -83,5 +83,15 @@ void InitConfig(void)
 	properties_append_string(hostconfig, "version", "alpha");
 	properties_append_string(hostconfig, "plugindir", "C:\\Programme\\Psycle\\PsyclePlugins");
 	properties_append_string(hostconfig, "vstdir", "C:\\Programme\\Psycle\\VstPlugins");
+}
+
+void InitMachineCallback(void)
+{
+	machinecallback.samples = machinecallback_samples;
+}
+
+Samples* machinecallback_samples(void* callbackcontext)
+{
+	return &song.samples;
 }
 

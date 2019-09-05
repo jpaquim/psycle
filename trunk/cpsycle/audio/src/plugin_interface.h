@@ -39,16 +39,28 @@ typedef struct {
 } CMachineParameter;
 
 typedef struct {
-	int Version;							// VERSION
-	int Flags;								// Flags
+	/// API version. Use MI_VERSION
+	short APIVersion;
+	/// plug version. Your machine version. Shown in Hexadecimal.
+	short PlugVersion;
+	/// Machine flags. Defines the type of machine
+	int Flags;
+	/// number of parameters.
 	int numParameters;
-	CMachineParameter const **Parameters;
-	char const *Name;						// "Rambo Delay"
-	char const *ShortName;					// "Delay"
-	char const *Author;						// "John Rambo"
-	char const *Command;					// "About"
+	/// a pointer to an array of pointers to parameter infos
+	CMachineParameter const * const * const Parameters;
+	/// "Name of the machine in listing"
+	char  * Name;
+	/// "Name of the machine in machine Display"
+	char  * ShortName;
+	/// "Name of author"
+	char  * Author;
+	/// "Text to show as custom command (see Command method)"
+	char  * Command;
+	/// number of columns to display in the parameters' window
 	int numCols;
 } CMachineInfo;
+		
 
 #ifdef __cplusplus
 class CFxCallback

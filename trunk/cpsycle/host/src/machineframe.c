@@ -24,7 +24,7 @@ void MachineFrameSetParamView(MachineFrame* self, ParamView* view)
 
 	self->view = (ui_component*) view;
 	ParamViewSize(view, &width, &height);
-	ui_component_resize(&self->component, width, height);
+	ui_component_resize(&self->component, width, height + 28);
 }
 
 

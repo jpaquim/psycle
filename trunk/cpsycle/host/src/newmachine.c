@@ -22,6 +22,7 @@ static int count;
 void InitNewMachine(NewMachine* self, ui_component* parent, Player* player, Properties* properties)
 {	
 	Properties* property;
+	
 	ui_component_init(&self->component, parent);	
 	ui_component_showverticalscrollbar(&self->component);
 	signal_connect(&self->component.signal_destroy, self,OnDestroy);	
@@ -34,6 +35,7 @@ void InitNewMachine(NewMachine* self, ui_component* parent, Player* player, Prop
 	ui_component_move(&self->component, 0, 0);	
 	self->selectedplugin = 0;
 	plugincatcher_init(&self->plugincatcher);
+	plugincatcher_scan(&self->plugincatcher, 0, 3);		
 	property = properties_read(properties, "vstdir");
 	if (property) {
 		plugincatcher_scan(&self->plugincatcher, property->item.value.s, 1);

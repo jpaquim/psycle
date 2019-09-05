@@ -44,14 +44,12 @@ void InitSequenceButtons(SequenceButtons* self, ui_component* parent)
 	self->font = ui_createfont("Tahoma", 12);	
 	ui_component_init(&self->component, parent);
 	ui_button_init(&self->newentry, &self->component);	
-	ui_component_setfont(&self->newentry.component, self->font);
-	ui_button_connect(&self->newentry, self);
+	ui_component_setfont(&self->newentry.component, self->font);	
 	signal_connect(&self->newentry.signal_clicked, self, OnNewEntry);	
 	ui_component_resize(&self->newentry.component, 40, 20);
 	ui_button_settext(&self->newentry, "New");
 	ui_button_init(&self->delentry, &self->component);	
-	ui_component_setfont(&self->delentry.component, self->font);
-	ui_button_connect(&self->delentry, self);
+	ui_component_setfont(&self->delentry.component, self->font);	
 	signal_connect(&self->delentry.signal_clicked, self, OnDelEntry);	
 	ui_component_move(&self->delentry.component, 45, 0);
 	ui_component_resize(&self->delentry.component, 40, 20);

@@ -96,6 +96,10 @@ SOURCE=.\src\config.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\envelopeview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\file.c
 # End Source File
 # Begin Source File
@@ -105,6 +109,10 @@ SOURCE=.\src\greet.c
 # Begin Source File
 
 SOURCE=.\src\inputmap.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\instrumentsview.c
 # End Source File
 # Begin Source File
 
@@ -140,6 +148,10 @@ SOURCE=.\src\noteinputs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\notemapedit.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\paramview.c
 # End Source File
 # Begin Source File
@@ -168,7 +180,15 @@ SOURCE=.\src\resources\resource.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\samplerinstrumentview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\samplesview.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sampulseinstrumentsview.c
 # End Source File
 # Begin Source File
 
@@ -181,6 +201,10 @@ SOURCE=.\src\settingsview.c
 # Begin Source File
 
 SOURCE=.\src\skinio.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\slidergroup.c
 # End Source File
 # Begin Source File
 
@@ -224,6 +248,10 @@ SOURCE=.\src\config.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\envelopeview.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\file.h
 # End Source File
 # Begin Source File
@@ -233,6 +261,10 @@ SOURCE=.\src\greet.h
 # Begin Source File
 
 SOURCE=.\src\inputmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\instrumentsview.h
 # End Source File
 # Begin Source File
 
@@ -268,6 +300,10 @@ SOURCE=.\src\noteinputs.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\notemapedit.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\paramview.h
 # End Source File
 # Begin Source File
@@ -292,7 +328,15 @@ SOURCE=.\src\resources\resource.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\samplerinstrumentview.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\samplesview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sampulseinstrumentview.h
 # End Source File
 # Begin Source File
 
@@ -309,6 +353,10 @@ SOURCE=.\src\skincoord.h
 # Begin Source File
 
 SOURCE=.\src\skinio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\slidergroup.h
 # End Source File
 # Begin Source File
 

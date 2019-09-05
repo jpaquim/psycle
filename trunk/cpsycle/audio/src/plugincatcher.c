@@ -21,7 +21,19 @@ void plugincatcher_dispose(PluginCatcher* self)
 
 void plugincatcher_scan(PluginCatcher* self, const char* path, int type)
 {
-	dir_enum(self, path, "*.dll", type, OnEnumDir);
+	if (type == 3) {
+		CMachineInfo* pInfo;
+		pInfo = malloc(sizeof(CMachineInfo));
+		memset(pInfo, 0, sizeof(CMachineInfo));
+		pInfo->Flags = GENERATOR | 32;
+		pInfo->Name = strdup("Sampler");
+		pInfo->ShortName = strdup("Sampler");
+		pInfo->Author = strdup("psycledelics");
+		pInfo->Command = strdup("");
+		properties_append_userdata(self->plugins, "internal", pInfo, OnDestroyMachineInfo);	
+	} else {
+		dir_enum(self, path, "*.dll", type, OnEnumDir);
+	}
 }
 
 int OnEnumDir(PluginCatcher* self, const char* path, int flag)

@@ -91,6 +91,17 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	ui_menu*	 menu;
 	int			 menu_id;		
 
+
+	component = SearchIntHashTable(&selfmap, (int) hwnd);
+	if (component && component->signal_windowproc.slots) {				
+		signal_emit(&component->signal_windowproc, component, 3, (LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
+		if (component->preventdefault) {					
+			return 0;
+		} else {
+			return DefWindowProc (hwnd, message, wParam, lParam);
+		}
+	}
+
 	switch (message)
     {		
 		case WM_SHOWWINDOW:
@@ -268,7 +279,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		case WM_MOUSEMOVE:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
 			if (component && component->signal_mousemove.slots) {
-				signal_emit(&component->signal_mousemove, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
+				signal_emit(&component->signal_mousemove, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
 				return 0 ;
 			}
 		break;
@@ -277,10 +288,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			return 0;
 		break;
 		case WM_HSCROLL:
+			component = SearchIntHashTable(&selfmap, (int) lParam);
+			if (component && component->signal_windowproc.slots) {				                    
+				signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
+				return DefWindowProc (hwnd, message, wParam, lParam);
+			}
 			handle_hscroll(hwnd, wParam, lParam);
 			return 0;
 		break;
-		default:
+		default:			
 		break;
 	}	
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
@@ -437,7 +453,9 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_destroy);
 	signal_init(&component->signal_show);
 	signal_init(&component->signal_hide);
+	signal_init(&component->signal_windowproc);
 	component->propagateevent = 0;
+	component->preventdefault = 0;
 }
 
 void ui_component_dispose(ui_component* component)
@@ -456,6 +474,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_destroy);
 	signal_dispose(&component->signal_show);
 	signal_dispose(&component->signal_hide);
+	signal_dispose(&component->signal_windowproc);
 }
 
 void ui_classcomponent_init(ui_component* component, ui_component* parent, const char* classname)
@@ -508,7 +527,6 @@ void ui_component_showhorizontalscrollbar(ui_component* self)
 	SetWindowLong(self->hwnd, GWL_STYLE, 
 		GetWindowLong(self->hwnd, GWL_STYLE) | WS_HSCROLL);
 }
-
 
 void ui_component_hidehorizontalscrollbar(ui_component* self)
 {
@@ -563,6 +581,12 @@ void ui_component_resize(ui_component* self, int width, int height)
 	   0,
 	   0,
 	   width, height, SWP_NOZORDER | SWP_NOMOVE) ;
+}
+
+void ui_component_setposition(ui_component* component, int x, int y, int width, int height)
+{
+	ui_component_move(component, x, y);
+	ui_component_resize(component, width, height);
 }
 
 void ui_component_setmenu(ui_component* self, ui_menu* menu)
@@ -620,6 +644,11 @@ void ui_component_setfont(ui_component* self, HFONT hFont)
 void ui_component_propagateevent(ui_component* self)
 {
 	self->propagateevent = 1;
+}
+
+void ui_component_preventdefault(ui_component* self)
+{
+	self->preventdefault = 1;
 }
 
 int ui_component_visible(ui_component* component)

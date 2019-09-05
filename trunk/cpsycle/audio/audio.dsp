@@ -93,11 +93,23 @@ SOURCE=.\src\event.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\instrument.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\instruments.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\luaplugin.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\machine.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machinefactory.c
 # End Source File
 # Begin Source File
 
@@ -137,6 +149,10 @@ SOURCE=.\src\sample.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sampler.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\samples.c
 # End Source File
 # Begin Source File
@@ -163,6 +179,14 @@ SOURCE=.\src\vstplugin.c
 
 SOURCE=.\src\waveio.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\xminstrument.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\xminstruments.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -177,11 +201,23 @@ SOURCE=.\src\event.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\instrument.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\instruments.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\luaplugin.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\machine.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machinefactory.h
 # End Source File
 # Begin Source File
 
@@ -217,6 +253,10 @@ SOURCE=.\src\sample.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sampler.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\samples.h
 # End Source File
 # Begin Source File
@@ -242,6 +282,14 @@ SOURCE=.\src\vstplugin.h
 # Begin Source File
 
 SOURCE=.\src\waveio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\xminstrument.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\xminstruments.h
 # End Source File
 # End Group
 # End Target

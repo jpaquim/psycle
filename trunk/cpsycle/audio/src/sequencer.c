@@ -21,9 +21,10 @@ void sequencer_connect(Sequencer* self, void* context, void (*callback)(void*, P
 
 void sequencer_setposition(Sequencer* self, float position)
 {
+	list_free(self->events);
 	self->pos = 0.0f;
 	self->window = 0.0f;
-	self->curr = sequence_begin(self->sequence, 0.0f);		
+	self->curr = sequence_begin(self->sequence, 0.0f);	
 }
 
 void sequencer_tick(Sequencer* self, float offset)

@@ -137,6 +137,10 @@ SOURCE=.\src\uimenu.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uislider.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uistatusbar.c
 # End Source File
 # End Group
@@ -194,6 +198,10 @@ SOURCE=.\src\uilistbox.h
 # Begin Source File
 
 SOURCE=.\src\uimenu.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uislider.h
 # End Source File
 # Begin Source File
 

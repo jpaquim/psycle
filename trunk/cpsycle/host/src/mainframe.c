@@ -83,11 +83,15 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	ui_component_hide(&self->machineview.component);
 	self->patternview.trackerview.grid.noteinputs = &self->noteinputs;	
 	InitPatternView(&self->patternview, &self->component, player);
-	InitSamplesView(&self->samplesview, &self->component, player);
-	ui_component_hide(&self->machineview.component);	
+	InitSamplesView(&self->samplesview, &self->component, player);	
+	InitInstrumentsView(&self->instrumentsview, &self->component, player);
+	self->instrumentsview.sampulseview.notemapedit.noteinputs = &self->noteinputs;	
+	ui_component_hide(&self->machineview.component);
 	ui_component_move(&self->patternview.component, 150, toolbarheight + tabbarheight);
 	ui_component_move(&self->samplesview.component, 150, toolbarheight + tabbarheight);
 	ui_component_hide(&self->samplesview.component);
+	ui_component_move(&self->instrumentsview.component, 150, toolbarheight + tabbarheight);
+	ui_component_hide(&self->instrumentsview.component);
 	self->activeview = &self->patternview.component;
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, player->sequencer.sequence, &player->song->patterns);	
@@ -188,8 +192,9 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 			int base;
 			base = 48;
 			machine = machines_at(&self->machineview.player->song->machines, 1);
-			if (machine) {
-				machine->seqtick(machine, 0, cmd + base, 0, 0, 0);
+			if (machine) {				
+				PatternEvent event = { cmd + base, 0, 0, 0, 0 };
+				machine->seqtick(machine, 0, &event);
 			}
 		}
 	}		
@@ -216,7 +221,7 @@ void OnTabBarChange(MainFrame* self, ui_component* sender, int tabindex)
 			SetActiveView(self, &self->samplesview.component);
 		break;
 		case 3:
-			// SetActiveView(self, &self->instrumentsview.component);
+			SetActiveView(self, &self->instrumentsview.component);
 		break;
 		case 4:
 			SetActiveView(self, &self->settingsview.component);

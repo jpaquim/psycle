@@ -48,7 +48,7 @@ void OnMachinesInsert(MachineBar* self, Machines* machines, int slot)
 
 int OnEnumMachines(MachineBar* self, int slot, Machine* machine)
 {			
-	if (machine->info && machine->info(machine)->ShortName) {
+	if (machine->info(machine) && machine->info(machine)->ShortName) {
 		char buffer[128];
 		_snprintf(buffer, 128, "%02X: %s", slot, machine->info(machine)->ShortName); 
 		ui_combobox_addstring(&self->machinebox, buffer);

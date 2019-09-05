@@ -2,9 +2,10 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "machineview.h"
 #include "machines.h"
-#include "plugin.h"
-#include "vstplugin.h"
+#include <machinefactory.h>
 #include "resources/resource.h"
+
+extern MachineCallback machinecallback;
 
 static void OnDraw(MachineView* self, ui_component* sender, ui_graphics* g);
 static void Draw(MachineView* self, ui_graphics* g);
@@ -417,35 +418,15 @@ void OnMouseDoubleClick(MachineView* self, ui_component* sender, int x, int y, i
 
 void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 {
-	if (info && ((info->Flags & 16) == 16)) {
-		VstPlugin* plugin;
+	Machine* machine;
+	
+	machine = machinefactory_make(machinecallback, info, path);
+	if (machine) {
 		int slot;
-
-		plugin = (VstPlugin*)malloc(sizeof(VstPlugin));
-		vstplugin_init(plugin, path);	
-		if (plugin->machine.info(&plugin->machine)) {			
-			slot = machines_append(&self->player->song->machines, (Machine*)plugin);
-			MachineUiSet(&self->machineuis[slot], 0, 0, plugin->machine.info(&plugin->machine)->ShortName);			
-			InvalidateRect(self->component.hwnd, NULL, TRUE);
-		} else {
-			plugin->machine.dispose(plugin);
-			free(plugin);
-		}
-	} else 
-	{
-		Plugin* plugin;
-		int slot;
-
-		plugin = (Plugin*)malloc(sizeof(Plugin));
-		plugin_init(plugin, path);	
-		if (plugin->machine.info(&plugin->machine)) {			
-			slot = machines_append(&self->player->song->machines, (Machine*)plugin);
-			MachineUiSet(&self->machineuis[slot], 0, 0, plugin->machine.info(&plugin->machine)->ShortName);			
-			InvalidateRect(self->component.hwnd, NULL, TRUE);
-		} else {
-			plugin->machine.dispose(plugin);
-			free(plugin);
-		}
+		
+		slot = machines_append(&self->player->song->machines, machine);
+		MachineUiSet(&self->machineuis[slot], 0, 0, info->ShortName);
+		ui_invalidate(&self->component);		
 	}
 }
 
