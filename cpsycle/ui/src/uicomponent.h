@@ -33,9 +33,11 @@ typedef struct {
 	Signal signal_childenum;
 	Signal signal_show;
 	Signal signal_hide;
+	Signal signal_windowproc;
 	int align;   
 	int doublebuffered;
 	int propagateevent;
+	int preventdefault;
 	int scrollstepx;
 	int scrollstepy;
 } ui_component;
@@ -56,6 +58,7 @@ void ui_component_hideverticalscrollbar(ui_component* self);
 void ui_component_setverticalscrollrange(ui_component* self, int min, int max);
 void ui_component_move(ui_component* self, int left, int top);
 void ui_component_resize(ui_component* self, int width, int height);
+void ui_component_setposition(ui_component* component, int x, int y, int width, int height);
 void ui_component_setmenu(ui_component* self, ui_menu* menu);
 void ui_component_settitle(ui_component* self, const char* title);
 void ui_component_enumerate_children(ui_component* self, void* context, int (*childenum)(void*, void*));
@@ -66,6 +69,7 @@ void ui_invalidate(ui_component* self);
 void ui_component_setfocus(ui_component* self);
 void ui_component_setfont(ui_component* self, HFONT font);
 void ui_component_propagateevent(ui_component* self);
+void ui_component_preventdefault(ui_component* self);
 void ui_component_init_signals(ui_component* component);
 int ui_component_visible(ui_component* component);
 

@@ -11,6 +11,9 @@ void sample_init(Sample* self)
 	buffer_init(&self->channels, 2);
 	self->numframes = 0;
 	self->samplerate = 44100;
+	self->defaultvolume = 1.f;
+	self->globalvolume = 1.f;
+	self->tune = 0;
 	self->name = strdup("");
 }
 
@@ -23,6 +26,7 @@ void sample_dispose(Sample* self)
 	}
 	buffer_dispose(&self->channels);
 	self->numframes = 0;
+	free(self->name);
 }
 
 void sample_load(Sample* self, const char* path)

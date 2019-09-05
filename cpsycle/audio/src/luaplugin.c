@@ -9,7 +9,7 @@ typedef CMachineInterface * (*CREATEMACHINE)(void);
 
 static void work(LuaPlugin* self, List* events, int numsamples, int tracks);
 static int hostevent(LuaPlugin* self, int const eventNr, int const val1, float const val2);
-static void seqtick(LuaPlugin* self, int channel, int note, int ins, int cmd, int val);
+static void seqtick(LuaPlugin* self, int channel, const PatternEvent* event);
 static void sequencertick(LuaPlugin* self);
 static CMachineInfo* info(LuaPlugin* self);
 static void parametertweak(LuaPlugin* self, int par, int val);
@@ -43,7 +43,7 @@ void work(LuaPlugin* self, List* events, int numsamples, int tracks)
 	
 }
 
-void seqtick(LuaPlugin* self, int channel, int note, int ins, int cmd, int val)
+void seqtick(LuaPlugin* self, int channel, const PatternEvent* event)
 {
 	
 }

@@ -8,16 +8,13 @@
 #include "uicomponent.h"
 
 typedef struct {
-	void (*clicked)(void* self);
-} ui_buttonevents;
-
-typedef struct {
    ui_component component;
    Signal signal_clicked;
 } ui_button;
 
 void ui_button_init(ui_button* button, ui_component* parent);
-void ui_button_connect(ui_button* edit, void* target);
 void ui_button_settext(ui_button* button, const char* text);
+void ui_button_highlight(ui_button* button);
+void ui_button_disablehighlight(ui_button* button);
 
 #endif

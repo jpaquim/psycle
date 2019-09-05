@@ -24,11 +24,13 @@ void machines_init(Machines* self)
 	self->currbuffer = 0;
 	self->slot = 0;		
 	signal_init(&self->signal_insert);
+	signal_init(&self->signal_slotchange);
 }
 
 void machines_dispose(Machines* self)
 {	
 	signal_dispose(&self->signal_insert);
+	signal_dispose(&self->signal_slotchange);
 	machines_enumerate(self, self, OnEnumMachine);
 	free_machinepath(self->path);
 	DisposeIntHashTable(&self->slots);

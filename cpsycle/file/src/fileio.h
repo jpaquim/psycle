@@ -3,11 +3,11 @@
 #ifndef _FILEIO_H
 #define _FILEIO_H
 
-// #if defined(_WINAMP_PLUGIN_)
-	#include <stdio.h>
-// #endif // defined(_WINAMP_PLUGIN_)
+#include <stdio.h>
 
-#include <windows.h>
+#if !defined(BOOL)
+#define BOOL int
+#endif
 
 typedef struct TYPEULONGINV {
   unsigned char hihi;
@@ -25,24 +25,23 @@ typedef struct
 RiffChunkHeader;
 
 
-typedef struct {
-	HANDLE _handle;
+typedef struct {	
 	BOOL _modified;
-	char szName[MAX_PATH];
+	char szName[1024];
 	FILE* _file;
 } RiffFile; 
 
 BOOL rifffile_open(RiffFile*, const char* psFileName);
 BOOL rifffile_create(RiffFile*, char* psFileName, BOOL overwrite);
 BOOL rifffile_close(RiffFile*);
-BOOL rifffile_read(RiffFile*, void* pData, ULONG numBytes);
-BOOL rifffile_write(RiffFile*, void* pData, ULONG numBytes);
-BOOL rifffile_expect(RiffFile*, void* pData, ULONG numBytes);
+BOOL rifffile_read(RiffFile*, void* pData, unsigned long numBytes);
+BOOL rifffile_write(RiffFile*, void* pData, unsigned long numBytes);
+BOOL rifffile_expect(RiffFile*, void* pData, unsigned long numBytes);
 long rifffile_seek(RiffFile*,long offset);
 long rifffile_skip(RiffFile*, long numBytes);
 BOOL rifffile_eof(RiffFile*);
 long rifffile_filesize(RiffFile*);
-BOOL rifffile_readString(RiffFile*, char* pData, ULONG maxBytes);
+BOOL rifffile_readstring(RiffFile*, char* pData, unsigned long maxBytes);
 long rifffile_getpos(RiffFile*);	
 FILE* rifffile_getfile(RiffFile*);
 

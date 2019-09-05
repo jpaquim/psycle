@@ -10,6 +10,7 @@
 #include "patternview.h"
 #include "sequenceview.h"
 #include "samplesview.h"
+#include "instrumentsview.h"
 #include "settingsview.h"
 #include "properties.h"
 #include "noteinputs.h"
@@ -28,6 +29,7 @@ typedef struct {
 	PatternView patternview;	
 	SequenceView sequenceview;
 	SamplesView samplesview;
+	InstrumentsView instrumentsview;
 	SettingsView settingsview;
 	Vumeter vumeter;
 	TimeBar timebar;

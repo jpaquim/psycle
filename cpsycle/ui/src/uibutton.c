@@ -39,14 +39,19 @@ void OnDestroy(ui_button* self, ui_component* sender)
 	signal_dispose(&self->signal_clicked);
 }
 
-void ui_button_settext(ui_button* button, const char* text)
+void ui_button_settext(ui_button* self, const char* text)
 {
-	SetWindowText(button->component.hwnd, text);
+	SetWindowText(self->component.hwnd, text);
 }
 
-void ui_button_connect(ui_button* button, void* target)
+void ui_button_highlight(ui_button* self)
 {
-	button->component.events.target = target;
+	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+}
+
+void ui_button_disablehighlight(ui_button* self)
+{
+	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
 }
 
 static void OnCommand(ui_button* self, WPARAM wParam, LPARAM lParam)

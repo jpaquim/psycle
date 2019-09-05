@@ -7,7 +7,7 @@
 #include "sample.h"
 #include <hashtbl.h>
 
-typedef struct {
+typedef struct Samples {
 	IntHashTable container;
 } Samples;
 

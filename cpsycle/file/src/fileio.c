@@ -1,15 +1,22 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "fileio.h"
+#include <string.h> 
 
 #if defined(_WINAMP_PLUGIN_)
 //#include <windows.h>
 #include <stdio.h>
 #endif // _WINAMP_PLUGIN_
 
+#if !defined(TRUE)
+#define TRUE 1
+#endif
 
+#if !defined(FALSE)
+#define FALSE 0
+#endif
 
-ULONG FourCC(char *psName)
+unsigned long FourCC(char *psName)
 {
 	long retbuf = 0x20202020;   // four spaces (padding)
 	char *ps = ((char *)&retbuf);
@@ -70,18 +77,18 @@ BOOL rifffile_close(RiffFile* self)
 
 BOOL rifffile_read(RiffFile* self,
 				   void* pData,
-				   ULONG numBytes)
+				   unsigned long numBytes)
 {
-	DWORD bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
+	unsigned long bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
 	return (bytesRead == numBytes);
 	
 }
 
 BOOL rifffile_write(RiffFile* self,
 					void* pData,
-					ULONG numBytes)
+					unsigned long numBytes)
 {
-	DWORD bytesWritten;
+	unsigned long bytesWritten;
 	fflush(self->_file);
 	bytesWritten = fwrite(pData, sizeof(char), numBytes, self->_file);
 	return (bytesWritten == numBytes);
@@ -91,9 +98,9 @@ BOOL rifffile_write(RiffFile* self,
 
 BOOL rifffile_expect(RiffFile* self,
 					 void* pData,
-					 ULONG numBytes)
+					 unsigned long numBytes)
 {
-	UCHAR c;
+	unsigned char c;
 	
 	while (numBytes-- != 0)
 	{
@@ -153,12 +160,12 @@ long rifffile_filesize(RiffFile* self)
 	
 }
 
-BOOL rifffile_readstring(RiffFile* self, char* pData, ULONG maxBytes)
+BOOL rifffile_readstring(RiffFile* self, char* pData, unsigned long maxBytes)
 {
 	if (maxBytes > 0)
 	{		
 		char c;
-		ULONG index;
+		unsigned long index;
 		memset(pData,0,maxBytes);
 		for (index = 0; index < maxBytes; index++)
 		{

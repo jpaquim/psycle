@@ -5,14 +5,16 @@
 #define SAMPLESVIEW_H
 
 #include <player.h>
-#include <uilabel.h>
-#include <uiedit.h>
 #include <uibutton.h>
+#include <uicombobox.h>
+#include <uiedit.h>
+#include <uilabel.h>
 #include <uilistbox.h>
+#include <uislider.h>
 #include <uigroupbox.h>
 #include "wavebox.h"
+#include "slidergroup.h"
 #include "tabbar.h"
-
 
 typedef struct {
 	ui_component component;
@@ -30,21 +32,22 @@ typedef struct {
 	ui_component component;
 	Sample* sample;
 	ui_groupbox groupbox;
-	ui_label defaultvolumeheaderlabel;
-	ui_label globalvolumeheaderlabel;
-	ui_label panpositionheaderlabel;
-	ui_label samplednoteheaderlabel;
-	ui_label pitchfinetuneheaderslabel;
+	SliderGroup defaultvolume;
+	SliderGroup globalvolume;
+	SliderGroup panposition;
+	SliderGroup samplednote; 
+	SliderGroup pitchfinetune;	
 } SamplesGeneralView;
 
 typedef struct {
 	ui_component component;
 	Sample* sample;
-	ui_groupbox groupbox;
+	ui_groupbox groupbox;	
 	ui_label waveformheaderlabel;
-	ui_label attackheaderlabel;
-	ui_label speedheaderlabel;
-	ui_label depthheaderlabel;	
+	ui_combobox waveformbox;
+	SliderGroup attack;
+	SliderGroup speed;
+	SliderGroup depth;	
 } SamplesVibratoView;
 
 typedef struct {
@@ -64,6 +67,7 @@ typedef struct {
 	ui_button deletebutton;
 	ui_button waveeditorbutton;
 	SamplesHeaderView header;
+	TabBar tabbar;
 	SamplesGeneralView general;
 	SamplesVibratoView vibrato;
 	SamplesWaveLoopView waveloop;

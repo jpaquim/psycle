@@ -20,7 +20,7 @@ void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 	signal_connect(&combobox->component.signal_destroy, combobox, OnDestroy);
 	combobox->component.doublebuffered = 0;
 	combobox->component.hwnd = CreateWindow (TEXT("COMBOBOX"), NULL,
-		WS_CHILD | WS_VISIBLE | CBS_SIMPLE  | CBS_DROPDOWN,
+		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
 		0, 0, 90, 90,
 		parent->hwnd, (HMENU)winid,
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),

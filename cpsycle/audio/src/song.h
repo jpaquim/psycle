@@ -8,6 +8,8 @@
 #include "patterns.h"
 #include "sequence.h"
 #include "samples.h"
+#include "instruments.h"
+#include "xminstruments.h"
 
 typedef struct {
 	Properties* properties;
@@ -15,6 +17,8 @@ typedef struct {
 	Patterns patterns;
 	Sequence sequence;
 	Samples samples;
+	Instruments instruments;
+	XMInstruments xminstruments;
 } Song;
 
 void song_init(Song* self);

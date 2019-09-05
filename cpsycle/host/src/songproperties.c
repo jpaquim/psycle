@@ -34,8 +34,7 @@ void InitSongProperties(SongProperties* self, ui_component* parent, Song* song)
 	ui_edit_init(&self->edit_comments, &self->component,
 		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL);
 	self->edit_comments.component.align = 1;	
-	ui_button_init(&self->button_ok, &self->component);
-	ui_button_connect(&self->button_ok, self);
+	ui_button_init(&self->button_ok, &self->component);	
 	signal_connect(&self->button_ok.signal_clicked, self, OnOkClicked);
 	ui_button_settext(&self->button_ok, "OK");
 	ReadProperties(self, song);	

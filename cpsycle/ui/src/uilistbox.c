@@ -57,6 +57,11 @@ void ui_listbox_setcursel(ui_listbox* listbox, int index)
 	
 }
 
+int ui_listbox_cursel(ui_listbox* listbox)
+{
+	return SendMessage(listbox->component.hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+}
+
 void OnCommand(ui_listbox* self, WPARAM wParam, LPARAM lParam) {
 	switch(HIWORD(wParam))
     {

@@ -8,7 +8,7 @@ typedef CMachineInterface * (*CREATEMACHINE)(void);
 
 static void work(VstPlugin* self, List* events, int numsamples, int tracks);
 static int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2);
-static void seqtick(VstPlugin* self, int channel, int note, int ins, int cmd, int val);
+static void seqtick(VstPlugin* self, int channel, const PatternEvent* event);
 static void sequencertick(VstPlugin* self);
 static CMachineInfo* info(VstPlugin* self);
 static void parametertweak(VstPlugin* self, int par, int val);
@@ -35,7 +35,7 @@ void vstplugin_init(VstPlugin* self, const char* path)
 
 	machine_init(&self->machine);
 	self->machine.work = work;
-	self->machine.mi_hostevent = hostevent;
+	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
 	self->machine.sequencertick = sequencertick;
 	self->machine.info = info;
@@ -135,7 +135,7 @@ void work(VstPlugin* self, List* events, int numsamples, int tracks)
 		self->machine.outputs.samples, numsamples);
 }
 
-void seqtick(VstPlugin* self, int channel, int note, int ins, int cmd, int val)
+void seqtick(VstPlugin* self, int channel, const PatternEvent* event)
 {
 	struct VstMidiEvent e;
 	struct VstEvents ve;
@@ -150,7 +150,7 @@ void seqtick(VstPlugin* self, int channel, int note, int ins, int cmd, int val)
 	e.byteSize      = sizeof(e);
 	e.flags         = kVstMidiEventIsRealtime;
 	e.midiData[0]   = (char)(channel + (1 ? 0x90 : 0x80));
-	e.midiData[1]   = (char)(note);
+	e.midiData[1]   = (char)(event->note);
 	e.midiData[2]   = (char)(127);
 
 	ve.events[0] = (VstEvent*)&e;
@@ -187,7 +187,8 @@ void DispatchMachineInfo(AEffect* effect, CMachineInfo* info)
 	info->numCols = 6; // pInfo->numCols;
 	info->numParameters = 0; //pInfo->numParameters;
 	info->ShortName = strdup(effectName);
-	info->Version = 0; //pInfo->Version;
+	info->APIVersion = 0; //pInfo->Version;
+	info->PlugVersion = 0;
 }
 
 CMachineInfo* info(VstPlugin* self)

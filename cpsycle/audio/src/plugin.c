@@ -8,7 +8,8 @@ typedef CMachineInterface * (*CREATEMACHINE)(void);
 
 static void work(Plugin* self, List* events, int numsamples, int tracks);
 static int hostevent(Plugin* self, int const eventNr, int const val1, float const val2);
-static void seqtick(Plugin* self, int channel, int note, int ins, int cmd, int val);
+static void generateaudio(Plugin* self, Buffer* input, Buffer* output, int numsamples, int tracks);
+static void seqtick(Plugin* self, int channel, const PatternEvent* event);
 static void sequencertick(Plugin* self);
 static CMachineInfo* info(Plugin* self);
 static void parametertweak(Plugin* self, int par, int val);
@@ -28,8 +29,7 @@ void plugin_init(Plugin* self, const char* path)
 	self->dll = LoadLibrary(path);
 	err = GetLastError();	
 	self->mi = 0;
-	self->machine.work = work;
-	self->machine.mi_hostevent = hostevent;
+	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
 	self->machine.sequencertick = sequencertick;
 	self->machine.info = info;
@@ -39,6 +39,7 @@ void plugin_init(Plugin* self, const char* path)
 	self->machine.value = value;
 	self->machine.dispose = dispose;
 	self->machine.mode = mode;
+	self->machine.generateaudio = generateaudio;
 	pInfo = info(self);	
 	if (!pInfo)
 	{
@@ -95,39 +96,23 @@ CMachineInfo* plugin_psycle_test(const char* path)
 			rv->numCols = pInfo->numCols;
 			rv->numParameters = pInfo->numParameters;
 			rv->ShortName = strdup(pInfo->ShortName);
-			rv->Version = pInfo->Version;
+			rv->APIVersion = pInfo->APIVersion;
+			rv->PlugVersion = pInfo->PlugVersion;
 		}
 	}
 	FreeLibrary(dll);	
 	return rv;
 }
 
-void work(Plugin* self, List* events, int numsamples, int tracks)
-{		
-	List* p = events;
-	unsigned int amount = numsamples;
-	while (p) {			
-		PatternEntry* entry = (PatternEntry*)p->entry;
-		int numworksamples = amount - entry->delta;
-		if (numworksamples > 0) {
-			mi_work(self->mi, self->machine.outputs.samples[0],
-				self->machine.outputs.samples[1], numworksamples, tracks);	
-			amount -= numworksamples;
-		}
-		mi_seqtick(self->mi, entry->track, entry->event.note, entry->event.inst, 
-			entry->event.cmd, entry->event.cmd,
-			entry->event.parameter);
-		p = p->next;
-	}
-	if (amount > 0) {
-		mi_work(self->mi, self->machine.outputs.samples[0],
-				self->machine.outputs.samples[1], amount, tracks);		
-	}	
+void seqtick(Plugin* self, int channel, const PatternEvent* event)
+{
+	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd, event->parameter);
 }
 
-void seqtick(Plugin* self, int channel, int note, int ins, int cmd, int val)
+void generateaudio(Plugin* self, Buffer* input, Buffer* output, int numsamples, int tracks)
 {
-	mi_seqtick(self->mi, channel, note, ins, cmd, val);
+	mi_work(self->mi, buffer_at(output, 0), buffer_at(output, 1), numsamples,
+		tracks);
 }
 
 int hostevent(Plugin* self, int const eventNr, int const val1, float const val2)

@@ -1,5 +1,7 @@
 #include "waveio.h"
 #include "fileio.h"
+#include <string.h>
+#include <stdlib.h> 
 
 void wave_load(Sample* sample, const char* path)
 {
@@ -13,9 +15,7 @@ void wave_load(Sample* sample, const char* path)
 	header[4] = 0;		
 	if (strcmp(&header[0],"RIFF") == 0) {
 		unsigned long chunksize;
-		unsigned long pcmsize;
-
-		unsigned long size = sizeof(WAVEFORMATEX);
+		unsigned long pcmsize;		
 
 		rifffile_read(&file, &chunksize, sizeof(chunksize));
 		rifffile_read(&file, header, 8);

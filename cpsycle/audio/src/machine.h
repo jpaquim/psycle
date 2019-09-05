@@ -4,8 +4,8 @@
 #define MACHINE_H
 
 #include "plugin_interface.h"
-#include <windows.h>
 #include <signal.h>
+#include "event.h"
 #include "buffer.h"
 #include <list.h>
 
@@ -15,11 +15,17 @@ typedef enum {
 	MACHMODE_MASTER = 2,
 } MachineMode;
 
+
+typedef struct {
+	struct Samples* (*samples)(void* callbackcontext);
+} MachineCallback;
+
 typedef struct {	
 	void (*init)(void*);	
 	void (*work)(void *, List* events, int numsamples, int tracks);
-	int (*mi_hostevent)(void*, int const eventNr, int const val1, float const val2);
-	void (*seqtick)(void*, int channel, int note, int ins, int cmd, int val);
+	void (*generateaudio)(void *, Buffer* input, Buffer* output, int numsamples, int tracks);
+	int (*hostevent)(void*, int const eventNr, int const val1, float const val2);
+	void (*seqtick)(void*, int channel, const PatternEvent*);
 	void (*sequencertick)(void*);
 	void (*parametertweak)(void*, int par, int val);
 	int (*describevalue)(void*, char* txt, int const param, int const value);
@@ -31,6 +37,8 @@ typedef struct {
 	Buffer inputs;
 	Buffer outputs;	
 	Signal signal_worked;
+	MachineCallback machinecallback;
+	void* callbackcontext;
 } Machine;
 
 typedef struct {

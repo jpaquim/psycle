@@ -6,11 +6,28 @@
 
 #include "buffer.h"
 
+/// Wave Form Types
+typedef struct {
+	enum {
+		SINUS = 0x0,
+		SQUARE = 0x1,
+		SAWUP = 0x2,
+		SAWDOWN = 0x3,
+		RANDOM = 0x4
+	} Type;	
+} WaveForms;
+
 typedef struct {
 	Buffer channels;
 	unsigned int numframes;
 	unsigned int samplerate;
 	char* name;
+	float defaultvolume;
+	float globalvolume;
+	/// Tuning for the center note (value that is added to the note received).
+	/// values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed
+	/// with note C-5);
+	short tune;
 } Sample;
 
 void sample_init(Sample*);

@@ -8,11 +8,15 @@ typedef float real;
 
 typedef struct {
 	unsigned int numchannels;	
-	real** samples;	
+	real** samples;
+	unsigned int pos;
 } Buffer;
 
 void buffer_init(Buffer*, unsigned int channels);
+void buffer_init_shared(Buffer*, Buffer* src, unsigned int offset);
 void buffer_dispose(Buffer*);
 void buffer_resize(Buffer*, unsigned int channels);
+void buffer_move(Buffer*, unsigned int offset);
+real* buffer_at(Buffer*, unsigned int channel);
 
 #endif
