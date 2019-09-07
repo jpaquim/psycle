@@ -371,7 +371,7 @@ void OnMouseUp(MachineView* self, ui_component* sender, int x, int y, int button
 		}
 	}
 	self->dragslot = -1;	
-	InvalidateRect(self->component.hwnd, NULL, FALSE);
+	ui_invalidate(&self->component);	
 }
 
 void OnMouseMove(MachineView* self, ui_component* sender, int x, int y, int button)
@@ -385,7 +385,7 @@ void OnMouseMove(MachineView* self, ui_component* sender, int x, int y, int butt
 			self->mx = x;
 			self->my = y;			
 		}
-		InvalidateRect(self->component.hwnd, NULL, FALSE);
+		ui_invalidate(&self->component);		
 	}
 }
 

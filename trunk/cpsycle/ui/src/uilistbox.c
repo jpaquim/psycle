@@ -46,6 +46,16 @@ void ui_listbox_addstring(ui_listbox* listbox, const char* text)
 	SendMessage(listbox->component.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
 }
 
+void ui_listbox_setstring(ui_listbox* self, const char* text, int index)
+{
+	int sel;
+
+	sel = ui_listbox_cursel(self);
+	SendMessage(self->component.hwnd, LB_DELETESTRING, (WPARAM)index, (LPARAM)text);
+	SendMessage(self->component.hwnd, LB_INSERTSTRING, (WPARAM)index, (LPARAM)text);
+	ui_listbox_setcursel(self, sel);
+}
+
 void ui_listbox_clear(ui_listbox* listbox)
 {
 	SendMessage(listbox->component.hwnd, LB_RESETCONTENT, 0, (LPARAM)0);

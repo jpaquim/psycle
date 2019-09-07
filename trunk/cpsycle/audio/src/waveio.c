@@ -41,7 +41,9 @@ void wave_load(Sample* sample, const char* path)
 				char frame8;
 				short frame16;
 				rifffile_read(&file, &numsamples, 4);
-				sample->numframes = numsamples;
+				sample->numframes = numsamples / 
+					format.nChannels / (format.wBitsPerSample / 8);	
+
 				for (channel = 0; channel < format.nChannels; ++channel) {
 					sample->channels.samples[channel] = malloc(numsamples*sizeof(real));
 				}

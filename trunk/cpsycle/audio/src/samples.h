@@ -13,7 +13,7 @@ typedef struct Samples {
 
 void samples_init(Samples*);
 void samples_dispose(Samples*);
-void samples_insert(Samples* samples, Sample* sample, int slot);
-
+void samples_insert(Samples*, Sample* sample, int slot);
+Sample* samples_at(Samples*, int slot);
 
 #endif

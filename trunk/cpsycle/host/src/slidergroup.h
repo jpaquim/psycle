@@ -13,9 +13,16 @@ typedef struct {
 	ui_slider slider;
 	ui_label label;	
 	Signal signal_describevalue;
+	Signal signal_tweakvalue;
+	Signal signal_value;
 } SliderGroup;
 
+typedef void (*SliderGroupDescribe)(void* context, SliderGroup*, char* txt);
+typedef void (*SliderGroupTweak)(void* context, SliderGroup*, float value);
+typedef void (*SliderGroupValue)(void* context, SliderGroup*, float* value);
+
 void InitSliderGroup(SliderGroup*, ui_component* parent, const char* desc);
-float SliderGroupValue(SliderGroup*);
+void SliderGroupConnect(SliderGroup*, void* context, SliderGroupDescribe,
+	SliderGroupTweak, SliderGroupValue);
 
 #endif

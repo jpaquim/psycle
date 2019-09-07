@@ -4,6 +4,7 @@
 #include "samplerinstrumentview.h"
 
 static void OnDraw(SamplerInstrumentView* self, ui_component* sender, ui_graphics* g);
+static void OnSize(SamplerInstrumentView*, ui_component* sender, int width, int height);
 static void AddString(SamplerInstrumentView* self, const char* text);
 static void AlignInstrumentView(SamplerInstrumentView* self);
 static void OnInstrumentInsert(SamplerInstrumentView* self, ui_component* sender, int slot);
@@ -37,6 +38,7 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	self->player = player;
 	ui_component_init(&self->component, parent);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
+	signal_connect(&self->component.signal_size, self, OnSize);
 	InitSamplerInstrumentHeaderView(&self->header, &self->component, &player->song->instruments);
 	InitSamplerInstrumentGeneralView(&self->general, &self->component, &player->song->instruments);
 	InitSamplerInstrumentVolumeView(&self->volume, &self->component, &player->song->instruments);
@@ -68,14 +70,21 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 
 void AlignInstrumentView(SamplerInstrumentView* self)
 {
+	ui_size size = ui_component_size(&self->component);
+
 	ui_component_setposition(&self->instrumentlist.component,		 5,   5, 210, 400);
 	ui_component_setposition(&self->header.component,			   220,   5, 500,  20);
 	ui_component_setposition(&self->tabbar.component,			   220,  30, 500,  20);
-	ui_component_setposition(&self->general.component,			   220,  60, 500, 400);
-	ui_component_setposition(&self->volume.component,			   220,  60, 500, 400);
-	ui_component_setposition(&self->pan.component,				   220,  60, 500, 400);
-	ui_component_setposition(&self->filter.component,			   220,  60, 500, 400);
-	ui_component_setposition(&self->pitch.component,				   220,  60, 500, 400);
+	ui_component_setposition(&self->general.component,			   220,  60, size.width - 220, size.height - 60);
+	ui_component_setposition(&self->volume.component,			   220,  60, size.width - 220, size.height - 60);
+	ui_component_setposition(&self->pan.component,				   220,  60, size.width - 220, size.height - 60);
+	ui_component_setposition(&self->filter.component,			   220,  60, size.width - 220, size.height - 60);
+	ui_component_setposition(&self->pitch.component,			   220,  60, size.width - 220, size.height - 60);
+}
+
+void OnSize(SamplerInstrumentView* self, ui_component* sender, int width, int height)
+{
+	AlignInstrumentView(self);
 }
 
 void OnInstrumentInsert(SamplerInstrumentView* self, ui_component* sender, int slot)
@@ -319,24 +328,41 @@ void OnNNANone(SamplerInstrumentGeneralView* self)
 
 void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_component* parent, Instruments* instruments)
 {
+	ui_margin margin;
+	int i;
+	SliderGroup* sliders[] = {
+		&self->attack,
+		&self->decay,
+		&self->sustain,
+		&self->release
+	};
+
 	self->instruments = instruments;	
 	ui_component_init(&self->component, parent);
-	InitEnvelopeView(&self->envelopeview, &self->component);
-	ui_component_setposition(&self->envelopeview.component, 0, 0, 300, 200);
+	ui_component_enablealign(&self->component);
+	ui_groupbox_init(&self->groupbox, &self->component);	
+	ui_groupbox_settext(&self->groupbox, "Amplitude envelope");	
+	ui_component_setalign(&self->groupbox.component, UI_ALIGN_FILL);
 
-	ui_groupbox_init(&self->groupbox, &self->component);
-	ui_groupbox_settext(&self->groupbox, "Amplitude envelope");
-	ui_component_setposition(&self->groupbox.component, 0, 0, 300, 200);
+	InitEnvelopeView(&self->envelopeview, &self->component);
+	ui_component_setalign(&self->envelopeview.component, UI_ALIGN_TOP);
+	ui_setmargin(&margin, 20, 5, 5, 5);
+	ui_component_setmargin(&self->envelopeview.component, &margin);	
+	ui_component_resize(&self->envelopeview.component, 0, 200);	
 
 	InitSliderGroup(&self->attack, &self->component, "Attack");
 	InitSliderGroup(&self->decay, &self->component, "Decay");
 	InitSliderGroup(&self->sustain, &self->component, "Sustain Level");
 	InitSliderGroup(&self->release, &self->component, "Release");
-
-	ui_component_setposition(&self->attack.component, 10, 210, 310, 20);
-	ui_component_setposition(&self->decay.component, 10, 235, 310, 20);
-	ui_component_setposition(&self->sustain.component, 10, 260, 310, 20);
-	ui_component_setposition(&self->release.component, 10, 285, 310, 20);	
+	
+	ui_setmargin(&margin, 0, 5, 5, 5);
+	for (i = 0; i < 4; ++i) {		
+		ui_component_resize(&sliders[i]->component, 100, 20);		
+		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
+		ui_component_setmargin(&sliders[i]->component, &margin);
+	//	SliderGroupConnect(sliders[i], self, OnGeneralViewDescribe,
+	//		OnGeneralViewTweak, OnGeneralViewValue);		
+	}	
 }
 
 void SetInstrumentInstrumentVolumeView(SamplerInstrumentVolumeView* self, Instrument* instrument)
@@ -359,25 +385,41 @@ void SetInstrumentInstrumentPanView(SamplerInstrumentPanView* self, Instrument* 
 
 void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_component* parent, Instruments* instruments)
 {
+	ui_margin margin;
+	int i;
+	SliderGroup* sliders[] = {
+		&self->attack,
+		&self->decay,
+		&self->sustain,
+		&self->release
+	};
+
 	self->instruments = instruments;	
 	ui_component_init(&self->component, parent);
-	InitEnvelopeView(&self->envelopeview, &self->component);
-	ui_component_setposition(&self->envelopeview.component, 0, 0, 300, 200);
+	ui_component_enablealign(&self->component);
+	ui_groupbox_init(&self->groupbox, &self->component);	
+	ui_groupbox_settext(&self->groupbox, "Filter envelope");	
+	ui_component_setalign(&self->groupbox.component, UI_ALIGN_FILL);
 
-	ui_groupbox_init(&self->groupbox, &self->component);
-	ui_groupbox_settext(&self->groupbox, "Filter envelope");
-	ui_component_setposition(&self->groupbox.component, 0, 0, 300, 200);
-	
+	InitEnvelopeView(&self->envelopeview, &self->component);
+	ui_component_setalign(&self->envelopeview.component, UI_ALIGN_TOP);
+	ui_setmargin(&margin, 20, 5, 5, 5);
+	ui_component_setmargin(&self->envelopeview.component, &margin);	
+	ui_component_resize(&self->envelopeview.component, 0, 200);	
 
 	InitSliderGroup(&self->attack, &self->component, "Attack");
 	InitSliderGroup(&self->decay, &self->component, "Decay");
 	InitSliderGroup(&self->sustain, &self->component, "Sustain Level");
 	InitSliderGroup(&self->release, &self->component, "Release");
-
-	ui_component_setposition(&self->attack.component, 10, 210, 310, 20);
-	ui_component_setposition(&self->decay.component, 10, 235, 310, 20);
-	ui_component_setposition(&self->sustain.component, 10, 260, 310, 20);
-	ui_component_setposition(&self->release.component, 10, 285, 310, 20);	
+	
+	ui_setmargin(&margin, 0, 5, 5, 5);
+	for (i = 0; i < 4; ++i) {		
+		ui_component_resize(&sliders[i]->component, 100, 20);		
+		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
+		ui_component_setmargin(&sliders[i]->component, &margin);
+	//	SliderGroupConnect(sliders[i], self, OnGeneralViewDescribe,
+	//		OnGeneralViewTweak, OnGeneralViewValue);		
+	}	
 }
 
 void SetInstrumentInstrumentFilterView(SamplerInstrumentFilterView* self, Instrument* instrument)

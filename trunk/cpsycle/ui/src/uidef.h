@@ -7,8 +7,10 @@
 typedef struct { int x, y; } ui_point;
 typedef struct { int left, top, right, bottom; } ui_rectangle;
 typedef struct { int width, height; } ui_size;
+typedef struct { int top, right, bottom, left; } ui_margin;
 
-void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int height);
+void ui_setrectangle(ui_rectangle*, int left, int top, int width, int height);
+void ui_setmargin(ui_margin*, int top, int right, int bottom, int left);
 void ui_error(const char* err, const char* shorterr);
 
 #endif

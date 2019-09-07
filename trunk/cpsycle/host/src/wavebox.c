@@ -23,20 +23,25 @@ void OnDestroy(WaveBox* self, ui_component* component)
 void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 {	
 	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);
+	ui_size size = ui_component_size(&self->component);	
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ui_drawsolidrectangle(g, r, 0xFFAAAAA);
 	if (self->sample) {
-		unsigned int frame;
-		for (frame = 0; frame < self->sample->numframes; ++frame) {
-			float framevalue = self->sample->channels.samples[0][frame]; 
-			ui_drawline(g, (int)(frame * 0.1f), 100, (int)(frame * 0.1f), (int) (100 + framevalue / 1000));	
+		int x;
+		int centery = size.height / 2;
+		float offsetstep;
+
+		offsetstep = (float) self->sample->numframes / size.width;
+		for (x = 0; x < size.width; ++x) {			
+			int frame = (int)(offsetstep * x);
+			float framevalue = self->sample->channels.samples[0][frame];
+			ui_drawline(g, x, centery, x, (int) (centery + framevalue / 1000));
 		}
 	}
 }
 
 void OnSize(WaveBox* self, ui_component* sender, int width, int height)
-{
+{	
 }
 
 void OnMouseDown(WaveBox* self, ui_component* sender, int x, int y, int button)
