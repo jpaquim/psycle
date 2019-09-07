@@ -18,9 +18,11 @@ extern IntHashTable menumap;
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
                            WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam);
+BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
+static void enableinput(ui_component* self, int enable, int recursive);
 
 HINSTANCE appInstance = 0;
 
@@ -118,6 +120,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		case WM_SIZE:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
 			if (component) {				                    
+				if (component->alignchildren == 1) {
+					ui_component_align(component);
+				}
 				signal_emit(&component->signal_size, component, 2, LOWORD (lParam), HIWORD (lParam));
 				return 0 ;
 			}			
@@ -456,6 +461,10 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_windowproc);
 	component->propagateevent = 0;
 	component->preventdefault = 0;
+	component->align = UI_ALIGN_NONE;
+	component->alignchildren = 0;
+	memset(&component->margin, 0, sizeof(ui_margin));
+	component->debugflag = 0;
 }
 
 void ui_component_dispose(ui_component* component)
@@ -576,7 +585,6 @@ void ui_component_move(ui_component* self, int left, int top)
 
 void ui_component_resize(ui_component* self, int width, int height)
 {
-
 	SetWindowPos (self->hwnd, NULL, 
 	   0,
 	   0,
@@ -611,9 +619,53 @@ BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam)
 	ui_component* self = (ui_component*) lParam;
 	ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
 	if (child &&  self->events.childenum) {
-	  return self->events.childenum(self->events.target, child);		  
+		return self->events.childenum(self->events.target, child);		  
 	}     
     return FALSE ;
+}
+
+List* ui_component_children(ui_component* self, int recursive)
+{	
+	List* children = 0;	
+	if (recursive == 1) {
+		EnumChildWindows (self->hwnd, AllChildEnumProc, (LPARAM) &children);
+	} else {
+		HWND hwnd = GetWindow(self->hwnd, GW_CHILD);
+		if (hwnd) {
+			ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
+			if (child) {				
+				children = list_create(child);				
+			}
+		}
+		while (hwnd) {
+			hwnd = GetNextWindow(hwnd, GW_HWNDNEXT);
+			if (hwnd) {
+				ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
+				if (child) {
+					if (children == 0) {
+						children = list_create(child);
+					} else {
+						list_append(children, child);
+					}		
+				}
+			}
+		}
+	}
+	return children;
+}
+
+BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam)
+{
+	List** pChildren = (List**) lParam;
+	ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
+	if (child) {
+		if (*pChildren == 0) {
+			*pChildren = list_create(child);
+		} else {
+			list_append(*pChildren, child);
+		}		
+	}     
+    return TRUE;
 }
 
 void ui_component_capture(ui_component* self)
@@ -651,7 +703,114 @@ void ui_component_preventdefault(ui_component* self)
 	self->preventdefault = 1;
 }
 
-int ui_component_visible(ui_component* component)
+int ui_component_visible(ui_component* self)
 {
-	return IsWindowVisible(component->hwnd);
+	return IsWindowVisible(self->hwnd);
+}
+
+void ui_component_align(ui_component* self)
+{	
+	int cpy = 0;
+	List* p;
+	ui_size size;
+
+	size = ui_component_size(self);	
+	for (p = ui_component_children(self, 0); p != 0; p = p->next) {
+		ui_component* component = (ui_component*)p->entry;
+		if (component->debugflag == 1) {
+			cpy = cpy;
+		}
+		if (IsWindowVisible(component->hwnd)) {
+			if (component->align == UI_ALIGN_FILL) {
+				ui_component_setposition(component,
+					component->margin.left,
+					component->margin.top,				
+					size.width - component->margin.left - component->margin.right,
+					size.height - component->margin.top - component->margin.bottom);
+			} else
+			if (component->align == UI_ALIGN_TOP) {			
+				ui_size componentsize = ui_component_size(component);		
+				cpy += component->margin.top;
+				ui_component_setposition(component, component->margin.left, cpy,
+					size.width - component->margin.left - component->margin.right,
+					componentsize.height);
+				cpy += component->margin.bottom;
+				cpy += componentsize.height;
+			}		
+		}
+	}
+	list_free(p);
+}
+
+void ui_component_setmargin(ui_component* self, const ui_margin* margin)
+{
+	if (margin) {
+		self->margin = *margin;
+	} else {
+		memset(&self->margin, 0, sizeof(ui_margin));
+	}
+}
+
+void ui_component_setalign(ui_component* self, UiAlignType align)
+{
+	self->align = align;
+}
+
+void ui_component_enablealign(ui_component* self)
+{
+	self->alignchildren = 1;
+}
+
+void ui_component_preventalign(ui_component* self)
+{
+	self->alignchildren = 0;
+}
+
+void ui_component_enableinput(ui_component* self, int recursive)
+{
+	enableinput(self, TRUE, recursive);
+}
+
+void ui_component_preventinput(ui_component* self, int recursive)
+{
+	enableinput(self, FALSE, recursive);
+}
+
+void enableinput(ui_component* self, int enable, int recursive)
+{	
+	EnableWindow(self->hwnd, enable);
+	if (recursive) {
+		List* p;
+		
+		for (p = ui_component_children(self, recursive); p != 0; p = p->next) {
+			EnableWindow(((ui_component*)(p->entry))->hwnd, enable);
+		}
+		list_free(p);
+	}
+}
+
+int ui_openfile(ui_component* self, char* szTitle, char* szFilter,
+	char* szDefExtension, char* szOpenName)
+{
+	OPENFILENAME ofn;
+
+	*szOpenName = '\0'; 
+	ofn.lStructSize= sizeof(OPENFILENAME); 
+	ofn.hwndOwner= self->hwnd; 
+	ofn.lpstrFilter= szFilter; 
+	ofn.lpstrCustomFilter= (LPSTR)NULL; 
+	ofn.nMaxCustFilter= 0L; 
+	ofn.nFilterIndex= 1L; 
+	ofn.lpstrFile= szOpenName; 
+	ofn.nMaxFile= MAX_PATH; 
+	ofn.lpstrFileTitle= szTitle; 
+	ofn.nMaxFileTitle= MAX_PATH; 
+	ofn.lpstrTitle= (LPSTR)NULL; 
+	ofn.lpstrInitialDir= (LPSTR)NULL; 
+	ofn.Flags= OFN_HIDEREADONLY|OFN_FILEMUSTEXIST; 
+	ofn.nFileOffset= 0; 
+	ofn.nFileExtension= 0; 
+	ofn.lpstrDefExt= szDefExtension; 
+
+	return GetOpenFileName(&ofn);
 }

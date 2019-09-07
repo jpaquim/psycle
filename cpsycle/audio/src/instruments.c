@@ -35,5 +35,10 @@ int instruments_slot(Instruments* self)
 	return self->slot;
 }
 
+Instrument* instruments_at(Instruments* self, int slot)
+{
+	return SearchIntHashTable(&self->container, slot);
+}
+
 
 

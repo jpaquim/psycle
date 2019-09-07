@@ -6,6 +6,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+void vibrato_init(Vibrato* self)
+{
+	self->attack = 0;
+	self->depth = 0;
+	self->speed = 0;
+	self->type = WAVEFORMS_SINUS;
+}
+
 void sample_init(Sample* self)
 {
 	buffer_init(&self->channels, 2);
@@ -13,8 +21,19 @@ void sample_init(Sample* self)
 	self->samplerate = 44100;
 	self->defaultvolume = 1.f;
 	self->globalvolume = 1.f;
+	self->loopstart = 0;
+	self->loopend = 0;
+	self->looptype  = LOOP_DO_NOT;
+	self->sustainloopstart = 0;
+	self->sustainloopend = 0;
+	self->sustainlooptype = LOOP_DO_NOT;
 	self->tune = 0;
+	self->finetune = 0;
+	self->panfactor = 0.5f;
+	self->panenabled = 0;
+	self->surround = 0;
 	self->name = strdup("");
+	vibrato_init(&self->vibrato);
 }
 
 void sample_dispose(Sample* self)

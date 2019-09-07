@@ -4,9 +4,14 @@
 #include "slidergroup.h"
 #include <stdio.h>
 
-static void OnDestroy(SliderGroup* self);
-static void OnSize(SliderGroup* self, ui_component* sender, int width, int height);
-static void OnSliderChanged(SliderGroup* self, ui_component* sender);
+static void OnDestroy(SliderGroup*);
+static void OnSize(SliderGroup*, ui_component* sender, int width, int height);
+static void OnSliderChanged(SliderGroup*, ui_component* sender);
+static void DescribeValue(SliderGroup*);
+static float Value(SliderGroup* self);
+static void OnTimer(SliderGroup* self, ui_component* sender, int timerid);
+
+static int timerid = 600;
 
 void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 {
@@ -18,14 +23,18 @@ void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 	ui_label_settext(&self->desclabel, desc);
 	ui_label_settext(&self->label, "-");	
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
+	signal_connect(&self->component.signal_timer, self, OnTimer);
 	signal_connect(&self->component.signal_size, self, OnSize);
-	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
+	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);	
 	signal_init(&self->signal_describevalue);
+	signal_init(&self->signal_tweakvalue);	
+	SetTimer(self->component.hwnd, timerid, 50, 0);
 }
 
 void OnDestroy(SliderGroup* self)
 {
 	signal_dispose(&self->signal_describevalue);
+	signal_dispose(&self->signal_tweakvalue);
 }
 
 void OnSize(SliderGroup* self, ui_component* sender, int width, int height)
@@ -41,17 +50,47 @@ void OnSize(SliderGroup* self, ui_component* sender, int width, int height)
 }
 
 void OnSliderChanged(SliderGroup* self, ui_component* sender)
+{	
+	signal_emit_float(&self->signal_tweakvalue, self, Value(self));
+	DescribeValue(self);
+}
+
+float Value(SliderGroup* self)
+{	
+	return (ui_slider_value(&self->slider) + 32768) / 65535.f;
+}
+
+void DescribeValue(SliderGroup* self)
 {
 	char buffer[20];
 	buffer[0] = '\0';
-	signal_emit(&self->signal_describevalue, self, 1, buffer);
+	signal_emit(&self->signal_describevalue, self, 2, buffer);
 	if (buffer[0] == '\0') {
-	  _snprintf(buffer, 20, "%f", SliderGroupValue(self));	  
+	  _snprintf(buffer, 20, "%f", Value(self));	  
 	}
 	ui_label_settext(&self->label, buffer);
 }
 
-float SliderGroupValue(SliderGroup* self)
-{	
-	return (ui_slider_value(&self->slider) + 32768) / 65535.f;
+void OnTimer(SliderGroup* self, ui_component* sender, int timerid)
+{
+	float value = 0;
+	float* pValue;
+	int intvalue;
+
+	pValue = &value;
+	signal_emit(&self->signal_value, self, 1, pValue);
+
+	if (Value(self) != value) {
+		intvalue = (int)((value * 65535.f) - 32768.f);
+		ui_slider_setvalue(&self->slider, intvalue);
+		DescribeValue(self);
+	}
+}
+
+void SliderGroupConnect(SliderGroup* self, void* context, SliderGroupDescribe describe,
+	SliderGroupTweak tweak, SliderGroupValue value)
+{
+	signal_connect(&self->signal_describevalue, context, describe);
+	signal_connect(&self->signal_tweakvalue, context, tweak);
+	signal_connect(&self->signal_value, context, value);
 }

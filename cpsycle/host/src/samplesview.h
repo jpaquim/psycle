@@ -11,7 +11,6 @@
 #include <uilabel.h>
 #include <uilistbox.h>
 #include <uislider.h>
-#include <uigroupbox.h>
 #include "wavebox.h"
 #include "slidergroup.h"
 #include "tabbar.h"
@@ -19,8 +18,13 @@
 typedef struct {
 	ui_component component;
 	Sample* sample;
+	Instruments* instruments;
+	ui_listbox* samplelist;
 	ui_label namelabel;
 	ui_edit nameedit;
+	ui_button prevbutton;
+	ui_button nextbutton;
+	ui_button deletebutton;
 	ui_label srlabel;
 	ui_edit sredit;
 	ui_label numsamplesheaderlabel;
@@ -30,8 +34,7 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
-	Sample* sample;
-	ui_groupbox groupbox;
+	Sample* sample;	
 	SliderGroup defaultvolume;
 	SliderGroup globalvolume;
 	SliderGroup panposition;
@@ -41,21 +44,30 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
-	Sample* sample;
-	ui_groupbox groupbox;	
+	Sample* sample;	
 	ui_label waveformheaderlabel;
 	ui_combobox waveformbox;
 	SliderGroup attack;
 	SliderGroup speed;
-	SliderGroup depth;	
+	SliderGroup depth;
+	Player* player;
 } SamplesVibratoView;
 
 typedef struct {
 	ui_component component;
-	Sample* sample;
-	ui_groupbox groupbox;
-	ui_label waveloopheaderlabel;
+	Sample* sample;	
+	ui_label loopheaderlabel;
+	ui_combobox loopdir;
+	ui_label loopstartlabel;
+	ui_edit loopstartedit;
+	ui_label loopendlabel;
+	ui_edit loopendedit;
 	ui_label sustainloopheaderlabel;
+	ui_combobox sustainloopdir;
+	ui_label sustainloopstartlabel;
+	ui_edit sustainloopstartedit;
+	ui_label sustainloopendlabel;
+	ui_edit sustainloopendedit;		
 } SamplesWaveLoopView;
 
 typedef struct {
@@ -64,13 +76,14 @@ typedef struct {
 	ui_button loadbutton;
 	ui_button savebutton;
 	ui_button duplicatebutton;
-	ui_button deletebutton;
-	ui_button waveeditorbutton;
+	ui_button deletebutton;	
+	ui_component client;
 	SamplesHeaderView header;
 	TabBar tabbar;
 	SamplesGeneralView general;
 	SamplesVibratoView vibrato;
 	SamplesWaveLoopView waveloop;
+	ui_button waveeditorbutton;
 	WaveBox wavebox;
 	Player* player;
 } SamplesView;

@@ -8,15 +8,20 @@
 typedef struct {
 	void* fp;
 	void* context;
+	int prevented;
 } Slot;
 
 typedef struct {
 	List* slots;
 } Signal;
 
-void signal_init(Signal* self);
-void signal_connect(Signal* self, void* context, void* fp);
-void signal_emit(Signal* self, void* context, int num, ...);
-void signal_dispose(Signal* self);
+void signal_init(Signal*);
+void signal_connect(Signal*, void* context, void* fp);
+void signal_prevent(Signal*, void* context, void* fp);
+void signal_enable(Signal*, void* context, void* fp);
+void signal_emit(Signal*, void* context, int num, ...);
+void signal_emit_int(Signal*, void* context, int param);
+void signal_emit_float(Signal*, void* context, float param);
+void signal_dispose(Signal*);
 
 #endif

@@ -14,6 +14,14 @@ void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int heigh
    self->bottom = top + height;   
 }
 
+void ui_setmargin(ui_margin* self, int top, int right, int bottom, int left)
+{   
+   self->top = top;
+   self->right = right;
+   self->bottom = bottom;   
+   self->left = left;
+}
+
 void ui_error(const char* err, const char* shorterr)
 {
 	MessageBox(NULL, err, shorterr, MB_OK | MB_ICONERROR);

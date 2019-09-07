@@ -18,3 +18,7 @@ void samples_insert(Samples* self, Sample* sample, int slot)
 	InsertIntHashTable(&self->container, slot, sample);
 }
 
+Sample* samples_at(Samples* self, int slot)
+{
+	return SearchIntHashTable(&self->container, slot);
+}
