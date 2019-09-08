@@ -3,23 +3,24 @@
 #include "plugin_interface.h"
 #include "samples.h"
 #include <operations.h>
+#include <math.h>
 
-static void generateaudio(Sampler* self, Buffer* input, Buffer* output, int numsamples, int tracks);
+static void generateaudio(Sampler* self, Buffer* input, Buffer* output,
+	int numsamples, int tracks);
 static void seqtick(Sampler* self, int channel, const PatternEvent* event);
-static CMachineInfo* info(Sampler* self);
+static const CMachineInfo* info(Sampler* self);
 static void parametertweak(Sampler* self, int par, int val);
 static int describevalue(Sampler*, char* txt, int const param, int const value);
 static int value(Sampler*, int const param);
 static void setvalue(Sampler*, int const param, int const value);
 static void dispose(Sampler* self);
 static int mode(Sampler* self) { return MACHMODE_GENERATOR; }
-
 static int unused_voice(Sampler* self);
 static void release_voices(Sampler* self, int channel);
 
 static void voice_init(Voice* self, Sample* sample, int channel);
 static void voice_dispose(Voice* self);
-static void voice_start(Voice* self);
+static void voice_seqtick(Voice* self, const PatternEvent* event);
 static void voice_work(Voice* self, Buffer* buffer, int numsamples);
 static void voice_release(Voice* self);
 static void voice_fastrelease(Voice* self);
@@ -64,7 +65,7 @@ static CMachineParameter const *pParameters[] = {
 static CMachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
-	GENERATOR | 32,
+	GENERATOR | 32 | 64,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"Sampler"
@@ -124,18 +125,19 @@ void generateaudio(Sampler* self, Buffer* input, Buffer* output, int numsamples,
 }
 
 void seqtick(Sampler* self, int channel, const PatternEvent* event)
-{			
-	int voice;
-		
+{
 	Samples* samples = self->machine.machinecallback.samples(0);
-	Sample* sample = SearchIntHashTable(&samples->container, 0);		
+	Sample* sample = SearchIntHashTable(&samples->container, event->inst);
 	release_voices(self, channel);
-	voice = unused_voice(self);
 
-	if (voice != -1) {
-		voice_init(&self->voices[voice], sample, channel);
-		adsr_start(&self->voices[voice].env);
-		adsr_start(&self->voices[voice].filterenv);
+	if (sample) {
+		int voice;
+
+		voice = unused_voice(self);
+		if (voice != -1) {
+			voice_init(&self->voices[voice], sample, channel);
+			voice_seqtick(&self->voices[voice], event);			
+		}
 	}
 }
 
@@ -162,7 +164,7 @@ void release_voices(Sampler* self, int channel)
 	}
 }
 
-CMachineInfo* info(Sampler* self)
+const CMachineInfo* info(Sampler* self)
 {	
 	return &MacInfo;
 }
@@ -217,7 +219,7 @@ void setvalue(Sampler* self, int const param, int const value)
 
 void voice_init(Voice* self, Sample* sample, int channel)
 {
-	self->pos = 0;	
+	self->position = sample_begin(self->sample);
 	self->sample = sample;
 	self->channel = channel;
 	adsr_init(&self->env);
@@ -228,9 +230,17 @@ void voice_dispose(Voice* self)
 {
 }
 
-void voice_start(Voice* self)
+void voice_seqtick(Voice* self, const PatternEvent* event)
 {
-	self->pos = 0;
+	int baseC;	
+	
+	baseC = 60;	
+	self->position = sample_begin(self->sample);
+	double_setvalue(&self->position.speed,
+		pow(2.0f,
+			(event->note + self->sample->tune - baseC + 
+				((float)self->sample->finetune * 0.01f)) / 12.0f) *
+			((float)self->sample->samplerate / 44100));
 	adsr_start(&self->env);
 	adsr_start(&self->filterenv);
 }
@@ -244,12 +254,12 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 		float* src = self->sample->channels.samples[0];
 		int i;		
 		for (i = 0; i < numsamples; ++i) {
-			left[i] += src[self->pos] * self->env.value;
+			left[i] += src[sampleiterator_frameposition(&self->position)] * self->env.value;
 			adsr_tick(&self->env);
 			adsr_tick(&self->filterenv);
-			++self->pos;
-			if (self->pos >= self->sample->numframes) {
-				self->pos = 0;
+			if (!sampleiterator_inc(&self->position)) {			
+				voice_init(self, self->sample, self->channel);
+				break;				
 			}		
 		}									
 	}

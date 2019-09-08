@@ -297,8 +297,8 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 				int cursor = TestCursor(self, track, offset, subline);
 				int playbar = 0;
 				playbar = (self->player->playing &&
-						   self->player->sequencer.pos >= offset &&
-						   self->player->sequencer.pos < offset + self->bpl) ? 1 : 0;
+						   self->player->sequencer.position >= offset &&
+						   self->player->sequencer.position < offset + self->bpl) ? 1 : 0;
 
 				while (!fill && self->curr_event &&
 					((PatternEntry*)(self->curr_event->entry))->track <= track &&
@@ -602,14 +602,20 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 						entry->event.note = (unsigned char)(base + cmd);					
 					}
 				} else {
+					Machine* machine;
 					float offset;
 					PatternEvent ev = { 0, 255, 255, 0, 0 };
+
 					if (cmd == CMD_NOTE_Stop) {
 						ev.note = 120;
 					} else {
 						ev.note = (unsigned char)(base + cmd);
 					}
 					ev.mach = machines_slot(&self->grid.player->song->machines);
+					machine = machines_at(&self->grid.player->song->machines, ev.mach);
+					if (machine && machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
+						ev.inst = self->grid.player->song->instruments.slot;
+					}
 					offset = self->grid.cursor.offset;					
 					pattern_insert(self->pattern, prev, self->grid.cursor.track, offset, &ev);
 				}

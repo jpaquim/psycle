@@ -75,6 +75,14 @@ void work(Machine* self, List* events, int numsamples, int tracks)
 	self->outputs.pos = 0;
 }
 
+int machine_supports(Machine* self, int option)
+{
+	if (self->info(self)) {
+		return (self->info(self)->Flags & option) == option;
+	}
+	return 0;
+}
+
 void master_init(Master* self)
 {
 	memset(self, 0, sizeof(Master));

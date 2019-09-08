@@ -93,6 +93,7 @@ void player_dispose(Player* self)
 	self->silentdriver->free(self->silentdriver);
 	self->silentdriver = 0;	
 	signal_dispose(&self->signal_lpbchanged);
+	sequencer_dispose(&self->sequencer);
 }
 
 void player_start(Player* self)
@@ -109,7 +110,7 @@ void player_stop(Player* self)
 
 float player_position(Player* self)
 {
-	return self->sequencer.pos;
+	return self->sequencer.position;
 }
 
 void player_setbpm(Player* self, float bpm)

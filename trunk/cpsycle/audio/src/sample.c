@@ -6,6 +6,36 @@
 #include <string.h>
 #include <stdlib.h>
 
+void double_setvalue(Double* self, double value)
+{
+	self->QuadPart = (unsigned __int64)(value * 4294967296.0f);
+}
+
+void sampleiterator_init(SampleIterator* self, Sample* sample)
+{
+	self->sample = sample;
+	double_setvalue(&self->pos, 0.0);
+	double_setvalue(&self->speed, 1.0);
+}
+
+int sampleiterator_inc(SampleIterator* self)
+{	
+	self->pos.QuadPart += self->speed.QuadPart;
+	if (self->pos.HighPart >= self->sample->numframes) {				
+		self->pos.LowPart = 0;
+		self->pos.HighPart = 0;
+		if (self->sample->looptype == LOOP_DO_NOT) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
+unsigned int sampleiterator_frameposition(SampleIterator* self)
+{
+	return self->pos.HighPart;
+}
+
 void vibrato_init(Vibrato* self)
 {
 	self->attack = 0;
@@ -65,4 +95,12 @@ void sample_setname(Sample* self, const char* name)
 const char* sample_name(Sample* self)
 {
 	return self->name;
+}
+
+SampleIterator sample_begin(Sample* self)
+{
+	SampleIterator rv;
+
+	sampleiterator_init(&rv, self);
+	return rv;
 }

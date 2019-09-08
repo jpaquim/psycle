@@ -35,7 +35,7 @@ static SongProperties songproperties;
 
 extern Song song;
 
-static int toolbarheight = 50;
+static int toolbarheight = 75;
 static int tabbarheight = 20;
 
 void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
@@ -49,8 +49,8 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	InitMachineBar(&self->machinebar, &self->component, player);
-	ui_component_move(&self->machinebar.component, 100, 0);
-	ui_component_resize(&self->machinebar.component, 200, 25);
+	ui_component_move(&self->machinebar.component, 3, 50);
+	ui_component_resize(&self->machinebar.component, 410, 25);
 	InitTabBar(&self->tabbar, &self->component);
 	ui_component_move(&self->tabbar.component, 150, toolbarheight);
 	ui_component_resize(&self->tabbar.component, 430, 20);	
@@ -59,7 +59,7 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	tabbar_append(&self->tabbar, "Samples");
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Settings");
-	tabbar_select(&self->tabbar, 0);
+	tabbar_select(&self->tabbar, 0);	
 	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
 	InitPlayBar(&self->playbar, &self->component);
 	ui_component_move(&self->playbar.component, 320, 2);
@@ -78,7 +78,7 @@ void InitMainFrame(MainFrame* self, Properties* properties, Player* player)
 	InitSettingsView(&self->settingsview, &self->component, properties);
 	ui_component_move(&self->settingsview.component, 150, toolbarheight + tabbarheight);
 	ui_component_hide(&self->settingsview.component);
-	InitMachineView(&self->machineview, &self->component, &self->machinebar, player, properties);	
+	InitMachineView(&self->machineview, &self->component, player, properties);
 	ui_component_move(&self->machineview.component, 150, toolbarheight + tabbarheight);	
 	ui_component_hide(&self->machineview.component);
 	self->patternview.trackerview.grid.noteinputs = &self->noteinputs;	

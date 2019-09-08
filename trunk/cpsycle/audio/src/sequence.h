@@ -21,6 +21,8 @@ typedef struct {
 void sequenceiterator_inc(SequenceIterator*);
 PatternNode* sequenceiterator_patternnode(SequenceIterator*);
 SequenceEntry* sequenceiterator_entry(SequenceIterator*);
+PatternEntry* sequenceiterator_patternentry(SequenceIterator*);
+float sequenceiterator_offset(SequenceIterator*);
 
 typedef List Track;
 

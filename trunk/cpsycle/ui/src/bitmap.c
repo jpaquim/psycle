@@ -4,7 +4,7 @@
 #include "bitmap.h"
 
 extern HINSTANCE appInstance;
-static BOOL LoadBitmapFromBMPFile( LPTSTR szFileName, HBITMAP *phBitmap,
+static BOOL LoadBitmapFromBMPFile(LPTSTR szFileName, HBITMAP *phBitmap,
 	HPALETTE *phPalette );
 
 void ui_bitmap_init(ui_bitmap* self, int width, int height)
@@ -17,7 +17,7 @@ void ui_bitmap_load(ui_bitmap* self, const char* path)
 	int err;	
 	if (appInstance) {		
 		HPALETTE hPalette;
-		LoadBitmapFromBMPFile(path, &self->hBitmap, &hPalette);		
+		LoadBitmapFromBMPFile((LPTSTR)path, &self->hBitmap, &hPalette);		
 		err = GetLastError();
 	}
 }

@@ -7,6 +7,9 @@
 
 extern MachineCallback machinecallback;
 
+static void OnTabBarChange(MachineView* self, ui_component* sender, int tabindex);
+static void OnShow(MachineView* self, ui_component* sender);
+static void OnHide(MachineView* self, ui_component* sender);
 static void OnDraw(MachineView* self, ui_component* sender, ui_graphics* g);
 static void Draw(MachineView* self, ui_graphics* g);
 static void DrawBackground(MachineView* self, ui_graphics* g);
@@ -33,6 +36,7 @@ static void BlitSkinPart(MachineView* self, ui_graphics* g, int x, int y,
 	SkinCoord* coord);
 static void MachineUiSize(MachineView* self, int mode, int* width, int* height);
 static void OnMachinesChangeSlot(MachineView* self, Machines* machines, int slot);
+static void OnMachinesInsert(MachineView* self, Machines* machines, int slot);
 
 extern HINSTANCE appInstance;
 
@@ -46,11 +50,10 @@ void MachineUiSet(MachineUi* self, int x, int y, const char* editname)
 	self->editname = strdup(editname);
 }
 
-void InitMachineView(MachineView* self, ui_component* parent, MachineBar* machinebar, Player* player, Properties* properties)
+void InitMachineView(MachineView* self, ui_component* parent, Player* player, Properties* properties)
 {				
 	self->cx = 0;
-	self->cy = 0;
-	self->machinebar = machinebar;
+	self->cy = 0;	
 	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_MACHINESKIN));	
 	if (self->skin.hfont == NULL) {
 		self->skin.hfont = ui_createfont("Tahoma", 12);
@@ -77,9 +80,21 @@ void InitMachineView(MachineView* self, ui_component* parent, MachineBar* machin
 	ui_component_hide(&self->newmachine.component);
 	self->newmachine.selected = OnPluginSelected;
 	self->component.doublebuffered = TRUE;
-	InitMachineCoords(self);
-	self->machinebar = machinebar;	
+	InitMachineCoords(self);	
 	signal_connect(&self->player->song->machines.signal_slotchange, self, OnMachinesChangeSlot);
+	signal_connect(&self->player->song->machines.signal_insert, self, OnMachinesInsert);
+
+	InitTabBar(&self->tabbar, parent);
+	ui_component_move(&self->tabbar.component, 600, 50);
+	ui_component_resize(&self->tabbar.component, 160, 20);
+	ui_component_hide(&self->tabbar.component);	
+	tabbar_append(&self->tabbar, "Wires");
+	tabbar_append(&self->tabbar, "New Machine");
+	self->tabbar.tabwidth = 70;
+	self->tabbar.selected = 0;
+	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
+	signal_connect(&self->component.signal_show, self, OnShow);
+	signal_connect(&self->component.signal_hide, self, OnHide);
 }
 
 void Draw(MachineView* self, ui_graphics* g)
@@ -320,10 +335,8 @@ void OnMouseDown(MachineView* self, ui_component* sender, int x, int y, int butt
 	if (self->dragslot != -1) {		
 		if (button == 1) {
 			if (self->dragslot != 0) {
-				self->selectedslot = self->dragslot;
-				if (self->machinebar) {
-					machines_changeslot(&self->player->song->machines, self->selectedslot);					
-				}
+				self->selectedslot = self->dragslot;				
+				machines_changeslot(&self->player->song->machines, self->selectedslot);
 			}
 			self->dragmode = MACHINEVIEW_DRAG_MACHINE;			
 			self->mx = x - self->machineuis[self->dragslot].x;
@@ -423,10 +436,11 @@ void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 	machine = machinefactory_make(machinecallback, info, path);
 	if (machine) {
 		int slot;
-		
+
 		slot = machines_append(&self->player->song->machines, machine);
-		MachineUiSet(&self->machineuis[slot], 0, 0, info->ShortName);
-		ui_invalidate(&self->component);		
+		machines_changeslot(&self->player->song->machines, slot);
+		self->tabbar.selected = 0;
+		ui_invalidate(&self->tabbar.component);
 	}
 }
 
@@ -440,4 +454,43 @@ void OnMachinesChangeSlot(MachineView* self, Machines* machines, int slot)
 	self->selectedslot = slot;
 	ui_invalidate(&self->component);
 	ui_component_setfocus(&self->component);
+}
+
+void OnMachinesInsert(MachineView* self, Machines* machines, int slot)
+{
+	Machine* machine;
+
+	machine = machines_at(&self->player->song->machines, slot);
+	if (machine) {
+		MachineUiSet(&self->machineuis[slot], 0, 0,
+			machine->info(machine)
+			? machine->info(machine)->ShortName
+			: "");
+	}
+}
+
+void OnTabBarChange(MachineView* self, ui_component* sender, int tabindex)
+{	
+	switch (tabindex) {
+		case 0:
+			ui_component_hide(&self->newmachine.component);
+			ui_component_setfocus(&self->component);
+		break;
+		case 1:			
+			ui_component_show(&self->newmachine.component);
+			ui_component_setfocus(&self->newmachine.component);
+		break;
+		default:;
+		break;
+	};
+}
+
+void OnShow(MachineView* self, ui_component* sender)
+{	
+	ui_component_show(&self->tabbar.component);
+}
+
+void OnHide(MachineView* self, ui_component* sender)
+{
+	ui_component_hide(&self->tabbar.component);
 }

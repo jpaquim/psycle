@@ -401,7 +401,7 @@ void OnGeneralViewTweak(SamplesGeneralView* self, SliderGroup* slidergroup, floa
 		self->sample->panfactor = value;
 	} else
 	if (slidergroup == &self->samplednote) {
-		self->sample->tune = (int)(value * 119.f);
+		self->sample->tune = (int)(value * 119.f) - 60;
 	} else
 	if (slidergroup == &self->pitchfinetune) {
 		self->sample->finetune = (int)(value * 200.f) - 100;
@@ -425,7 +425,7 @@ void OnGeneralViewValue(SamplesGeneralView* self, SliderGroup* slidergroup,
 		*value = self->sample ? self->sample->panfactor : 0.5f;
 	} else
 	if (slidergroup == &self->samplednote) {
-		*value = self->sample ? self->sample->tune / 119.f : 0.5f;
+		*value = self->sample ? (self->sample->tune + 60) / 119.f : 0.5f;
 	} else
 	if (slidergroup == &self->pitchfinetune) {
 		*value = self->sample ? self->sample->finetune / 200.f + 0.5f : 0.f;
@@ -455,7 +455,7 @@ void OnGeneralViewDescribe(SamplesGeneralView* self, SliderGroup* slidergroup, c
 	} else
 	if (slidergroup == &self->samplednote) {		
 		_snprintf(txt, 10, "%s", self->sample
-			? notes_tab_a440[self->sample->tune]
+			? notes_tab_a440[self->sample->tune + 60]
 			: "C4");		
 	} else
 	if (slidergroup == &self->pitchfinetune) {

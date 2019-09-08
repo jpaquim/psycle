@@ -14,6 +14,7 @@
 #include "paramview.h"
 #include "machinebar.h"
 #include "skincoord.h"
+#include "tabbar.h"
 
 typedef struct {
 	SkinCoord background;	
@@ -78,26 +79,26 @@ enum {
 };
 
 typedef struct {
-   ui_component component;
-   NewMachine newmachine;
-   ui_graphics* g;
-   int cx;
-   int cy;
-   Player* player;
-   MachineUi machineuis[256];
-   int mx;
-   int my;
-   int dragslot;
-   int dragmode;
-   int selectedslot;
-   MachineFrame machine_frames[256];
-   ParamView machine_paramviews[256];
-   PluginCatcher plugincatcher;
-   MachineSkin skin;
-   MachineBar* machinebar;
+	ui_component component;
+	NewMachine newmachine;
+	ui_graphics* g;
+	int cx;
+	int cy;
+	Player* player;
+	MachineUi machineuis[256];
+	int mx;
+	int my;
+	int dragslot;
+	int dragmode;
+	int selectedslot;
+	MachineFrame machine_frames[256];
+	ParamView machine_paramviews[256];
+	PluginCatcher plugincatcher;
+	MachineSkin skin;
+	TabBar tabbar;   
 } MachineView;
 
-void InitMachineView(MachineView* machineView, ui_component* parent, MachineBar* machinebar, Player* player, Properties* properties);
+void InitMachineView(MachineView* machineView, ui_component* parent, Player* player, Properties* properties);
 void MachineViewApplyProperties(MachineView* self, Properties* properties);
 
 #endif
