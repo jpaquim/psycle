@@ -8,18 +8,17 @@
 
 typedef struct {
 	Sequence* sequence;
-	float pos;
+	float position;
 	float bpm;
 	float window;
 	unsigned int samplerate;
-	SequenceIterator curr;
-	void* context;
-	void (*callback)(void*, PatternNode*);
+	SequenceIterator curr;	
 	List* events;
+	List* delayedevents;
 } Sequencer;
 
-void sequencer_init(Sequencer* self);
-void sequencer_connect(Sequencer*, void* context, void (*callback)(void*, PatternNode*));
+void sequencer_init(Sequencer*);
+void sequencer_dispose(Sequencer*);
 void sequencer_tick(Sequencer*, float offset);
 void sequencer_setposition(Sequencer*, float position);
 SequenceIterator sequencer_curr(Sequencer*);

@@ -16,6 +16,7 @@
 #include <plugin_interface.h>
 #include <sequence.h>
 #include <sample.h>
+#include <math.h>
 
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
@@ -39,14 +40,13 @@ UIMAIN
 	static MainFrame main;		
 	static ui_component sci;	 
 //	library scilib;
-	int err = 0;
+	int err = 0;	
 	
 	UIINIT;	
 /*	scilib = loadlibrary("SciLexer.dll");
 	if (scilib.lib == 0) {
 		ui_error("The Scintilla Module could not be loaded", "Error loading Scintilla");			 
 	}	*/
-
 	InitConfig();	
 	song_init(&song);			
 #if defined(DEBUG)

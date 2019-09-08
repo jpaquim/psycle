@@ -15,6 +15,7 @@ typedef enum {
 	MACHMODE_MASTER = 2,
 } MachineMode;
 
+#define MACHINE_USES_INSTRUMENTS 64
 
 typedef struct {
 	struct Samples* (*samples)(void* callbackcontext);
@@ -31,7 +32,7 @@ typedef struct {
 	int (*describevalue)(void*, char* txt, int const param, int const value);
 	int (*value)(void*, int const param);
 	void (*setvalue)(void*, int const param, int const value);	
-	CMachineInfo* (*info)(void*);
+	const CMachineInfo* (*info)(void*);
 	void (*dispose)(void*);
 	int (*mode)(void*);	
 	Buffer inputs;
@@ -47,6 +48,7 @@ typedef struct {
 
 void machine_init(Machine* self);
 void machine_dispose(Machine* self);
+int machine_supports(Machine* self, int option);
 
 void master_init(Master* self);
 

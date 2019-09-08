@@ -10,7 +10,7 @@ static void work(VstPlugin* self, List* events, int numsamples, int tracks);
 static int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2);
 static void seqtick(VstPlugin* self, int channel, const PatternEvent* event);
 static void sequencertick(VstPlugin* self);
-static CMachineInfo* info(VstPlugin* self);
+static const CMachineInfo* info(VstPlugin* self);
 static void parametertweak(VstPlugin* self, int par, int val);
 static int describevalue(VstPlugin*, char* txt, int const param, int const value);
 static int value(VstPlugin*, int const param);
@@ -191,7 +191,7 @@ void DispatchMachineInfo(AEffect* effect, CMachineInfo* info)
 	info->PlugVersion = 0;
 }
 
-CMachineInfo* info(VstPlugin* self)
+const CMachineInfo* info(VstPlugin* self)
 {	
 	if (self->info == 0 && self->effect) {
 		self->info = (CMachineInfo*) malloc(sizeof(CMachineInfo));	

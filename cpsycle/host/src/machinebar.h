@@ -11,10 +11,12 @@
 typedef struct {
 	ui_component component;
 	ui_combobox machinebox;
+	ui_combobox instparambox;
 	Player* player;	
 	void (*selchange)(void*, int);
 	void* eventcontext;
 	Machines* machines;
+	Instruments* instruments;
 	int prevent_selchange_notify;
 } MachineBar;
 

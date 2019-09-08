@@ -6,6 +6,16 @@
 
 #include "buffer.h"
 
+typedef union _Double { 
+    struct {
+        unsigned long LowPart;
+        unsigned long HighPart; 
+    };	
+    unsigned __int64 QuadPart;
+} Double;
+
+void double_setvalue(Double*, double value);
+
 /// Sample Loop Types
 typedef enum {
 	LOOP_DO_NOT	= 0x0,	/// < Do Nothing
@@ -37,6 +47,16 @@ typedef struct {
 void vibrato_init(Vibrato*);
 
 typedef struct {
+	struct Sample* sample;
+	Double pos;
+	Double speed;	
+} SampleIterator;
+
+void sampleiterator_init(SampleIterator*, struct Sample*);
+int sampleiterator_inc(SampleIterator*);
+unsigned int sampleiterator_frameposition(SampleIterator*);
+
+typedef struct Sample {
 	Buffer channels;
 	unsigned int numframes;
 	unsigned int samplerate;
@@ -45,7 +65,7 @@ typedef struct {
 	///	determines the volume if no volume is specified in the pattern, while
 	/// globVolume is an attenuator for all notes of this sample.
 	float defaultvolume;
-	// range ( 0..4 ) (-inf to +12dB)
+	/// range ( 0..4 ) (-inf to +12dB)
 	float globalvolume;
 	unsigned int loopstart;
 	unsigned int loopend;
@@ -54,8 +74,8 @@ typedef struct {
 	unsigned int sustainloopend;
 	LoopType sustainlooptype;
 	/// Tuning for the center note (value that is added to the note received).
-	/// values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed
-	/// with note C-5);
+	/// values from -60 to 59.
+	/// 0 = C-5 (middle C, i.e. play at original speed with note C-5);
 	short tune;
 	short finetune;
 	float panfactor;
@@ -68,6 +88,7 @@ void sample_init(Sample*);
 void sample_dispose(Sample*);
 void sample_load(Sample*, const char* path);
 void sample_setname(Sample*, const char* name);
+SampleIterator sample_begin(Sample*);
 const char* sample_name(Sample*);
 
 #endif

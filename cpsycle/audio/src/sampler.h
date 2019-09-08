@@ -39,10 +39,9 @@ typedef struct {
 	Sample* sample;
 	ADSR env;
 	ADSR filterenv;
-	unsigned int pos;
+	SampleIterator position;
 	int channel;
 } Voice;
-
 
 typedef struct {
 	Machine machine;		

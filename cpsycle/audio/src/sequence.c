@@ -203,3 +203,16 @@ SequenceEntry* sequenceiterator_entry(SequenceIterator* self)
 {
 	return self->sequence ? (SequenceEntry*) self->sequence->entry : 0;
 }
+
+PatternEntry* sequenceiterator_patternentry(SequenceIterator* self)
+{
+	return self->patternnode ? (PatternEntry*)(self->patternnode)->entry : 0;
+}
+
+float sequenceiterator_offset(SequenceIterator* self)
+{	
+	return sequenceiterator_patternentry(self)
+		? sequenceiterator_entry(self)->offset +
+		  sequenceiterator_patternentry(self)->offset
+		: 0.f;	
+}
