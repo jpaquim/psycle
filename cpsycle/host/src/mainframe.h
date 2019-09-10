@@ -4,7 +4,8 @@
 #if !defined(MAINFRAME_H)
 #define MAINFRAME_H
 
-#include "uicomponent.h"
+#include "workspace.h"
+#include "uibutton.h"
 #include "machinebar.h"
 #include "machineview.h"
 #include "patternview.h"
@@ -19,9 +20,12 @@
 #include "vumeter.h"
 #include "timebar.h"
 #include "linesperbeatbar.h"
+#include "greet.h"
 
 typedef struct {
 	ui_component component;
+	ui_button newsongbutton;
+	ui_button loadsongbutton;
 	TabBar tabbar;
 	MachineBar machinebar;
 	PlayBar playbar;
@@ -34,13 +38,15 @@ typedef struct {
 	Vumeter vumeter;
 	TimeBar timebar;
 	LinesPerBeatBar linesperbeatbar;
+	Greet greet;
 	ui_component* activeview;
 	int cx;
 	int cy;
 	Player* player;
-	NoteInputs noteinputs;
+	NoteInputs noteinputs;	
+	Workspace workspace;
 } MainFrame;
 
-void InitMainFrame(MainFrame* self, Properties* properties, Player* player);
+void InitMainFrame(MainFrame* self);
 
 #endif

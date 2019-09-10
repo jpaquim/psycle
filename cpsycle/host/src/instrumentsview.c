@@ -3,7 +3,6 @@
 
 #include "instrumentsview.h"
 
-static void OnDraw(InstrumentsView* self, ui_component* sender, ui_graphics* g);
 static void OnSize(InstrumentsView* self, ui_component* sender, int width, int height);
 static void Align(InstrumentsView* self);
 static void OnInstrumentsViewSize(InstrumentsView* self, ui_component* sender, int width, int height);
@@ -11,15 +10,16 @@ static void OnTabBarChange(InstrumentsView* self, ui_component* sender, int tabi
 static void OnShow(InstrumentsView* self, ui_component* sender);
 static void OnHide(InstrumentsView* self, ui_component* sender);
 
-void InitInstrumentsView(InstrumentsView* self, ui_component* parent, Player* player)
+void InitInstrumentsView(InstrumentsView* self, ui_component* parent, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
-	signal_connect(&self->component.signal_draw, self, OnDraw);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);		
 	signal_connect(&self->component.signal_size, self, OnSize);
-	InitSampulseInstrumentView(&self->sampulseview, &self->component, player);
-	InitSamplerInstrumentView(&self->samplerview, &self->component, player);	
+	InitSampulseInstrumentView(&self->sampulseview, &self->component, workspace);
+	InitSamplerInstrumentView(&self->samplerview, &self->component, workspace);	
 	InitTabBar(&self->tabbar, parent);
-	ui_component_move(&self->tabbar.component, 600, 50);
+	ui_component_move(&self->tabbar.component, 600, 75);
 	ui_component_resize(&self->tabbar.component, 160, 20);
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "Sampulse");
@@ -65,14 +65,6 @@ void OnShow(InstrumentsView* self, ui_component* sender)
 void OnHide(InstrumentsView* self, ui_component* sender)
 {
 	ui_component_hide(&self->tabbar.component);
-}
-
-void OnDraw(InstrumentsView* self, ui_component* sender, ui_graphics* g)
-{
-	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);	
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0x009a887c);
 }
 
 void OnSize(InstrumentsView* self, ui_component* sender, int width, int height)

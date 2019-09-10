@@ -12,7 +12,7 @@
 #include "skincoord.h"
 #include "patternproperties.h"
 #include "tabbar.h"
-
+#include "workspace.h"
 
 typedef struct {
 	SkinCoord background;	
@@ -83,6 +83,7 @@ typedef struct {
 	ui_component component;
 	TrackerSkin* skin;
 	int dy;
+	int textheight;
 	int lineheight;
 	struct TrackerView* view;
 } TrackerLineNumbers;
@@ -107,7 +108,9 @@ typedef struct {
    TrackerGridCursor cursor;
    float cursorstep;   
    Player* player;
+   int textheight;
    int textwidth;
+   int textleftedge;
    int colx[TrackerGrid_NUMCOLS];   
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
@@ -130,7 +133,8 @@ void TrackerViewApplyProperties(TrackerView* self, Properties* properties);
 void InitTrackerHeader(TrackerHeader*, ui_component* parent);
 void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self, ui_component* parent);
 void InitTrackerLineNumbers(TrackerLineNumbers* self, ui_component* parent);
-void InitTrackerView(TrackerView*, ui_component* parent, Player* player);
+void InitTrackerView(TrackerView*, ui_component* parent, Player*);
 void TrackerViewSetPattern(TrackerView*, Pattern*);
+void TrackerViewSongChanged(TrackerView*, Workspace*);
 
 #endif

@@ -78,7 +78,7 @@ int OnPropertiesEnum(NewMachine* self, Properties* property, int level)
 		CMachineInfo* pInfo;		
 	//	ui_textout(self->g, 20, 40 + cpy + dy, property->item.key, strlen(property->item.key));				
 		if (property == self->selectedplugin) {
-			ui_rectangle r = { 19, 19, 200, 37 };
+			ui_rectangle r = { 19, 19, 300, 37 };
 			r.top += cpy + dy;
 			r.bottom += cpy + dy;
 			ui_drawrectangle(self->g, r);

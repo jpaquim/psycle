@@ -3,22 +3,30 @@
 #include "patterns.h"
 #include <stdlib.h>
 
-static int OnEnumPattern(Patterns* self, unsigned int slot, Pattern* Pattern);
+static int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* Pattern);
 
 void patterns_init(Patterns* self)
 {
 	InitIntHashTable(&self->slots, 256);
+	self->songtracks = 16;
+	self->sharetracknames = 0;
 }
 
 void patterns_dispose(Patterns* self)
 {	
-	patterns_enumerate(self, self, OnEnumPattern);
+	patterns_enumerate(self, self, OnEnumFreePattern);
 	DisposeIntHashTable(&self->slots);
 }
 
-int OnEnumPattern(Patterns* self, unsigned int slot, Pattern* pattern)
+void patterns_clear(Patterns* self)
 {
-	//pattern_dispose( ->dispose(pattern);
+	patterns_enumerate(self, self, OnEnumFreePattern);
+	DisposeIntHashTable(&self->slots);
+	InitIntHashTable(&self->slots, 256);	
+}
+
+int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* pattern)
+{	
 	free(pattern);
 	return 1;
 }

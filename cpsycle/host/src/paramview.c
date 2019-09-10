@@ -120,7 +120,7 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx, height / 2);
 	ui_setrectangle(&r_bottom, left + knob_cx, top + height/2, width - knob_cx, height / 2);
 		
-	ui_drawrectangle(g, r);
+	ui_drawsolidrectangle(g, r, 0xFFFFFFFF);
 	par = self->params[param];
 	if (self->machine->describevalue(
 		self->machine, str, param, self->machine->value(self->machine, param)) == FALSE) {

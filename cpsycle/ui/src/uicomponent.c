@@ -155,9 +155,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			return 0 ;
 		break;
-		case WM_PAINT :			
+		case WM_PAINT :
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->signal_draw.slots) {		
+			if (component && (component->signal_draw.slots ||
+					component->backgroundmode != BACKGROUND_NONE)) {		
 				HDC bufferDC;
 				HBITMAP bufferBmp;
 				HBITMAP oldBmp;
@@ -173,10 +174,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						rect.bottom);
 					oldBmp = SelectObject(bufferDC, bufferBmp);
 					g.hdc = bufferDC;
-				}				
+				}									
 				ui_setrectangle(&g.clip,
 					ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
-					ps.rcPaint.bottom - ps.rcPaint.top);
+					ps.rcPaint.bottom - ps.rcPaint.top);				
+				if (component->backgroundmode == BACKGROUND_SET) {
+					ui_drawsolidrectangle(&g, g.clip, component->backgroundcolor);
+				}
 				signal_emit(&component->signal_draw, component, 1, (int)&g);
 				if (component->doublebuffered) {
 					g.hdc = hdc;
@@ -439,7 +443,9 @@ void ui_component_init(ui_component* component, ui_component* parent)
 	InsertIntHashTable(&selfmap, (int)component->hwnd, component);
 	component->events.target = component;			
 	component->scrollstepx = 100;
-	component->scrollstepy = 12; 
+	component->scrollstepy = 12;
+	component->backgroundcolor = 0xFFFFFFFF;
+	component->backgroundmode = BACKGROUND_NONE;
 }
 
 void ui_component_init_signals(ui_component* component)
@@ -813,4 +819,14 @@ int ui_openfile(ui_component* self, char* szTitle, char* szFilter,
 	ofn.lpstrDefExt= szDefExtension; 
 
 	return GetOpenFileName(&ofn);
+}
+
+void ui_component_setbackgroundmode(ui_component* self, BackgroundMode mode)
+{
+	self->backgroundmode = mode;
+}
+
+void ui_component_setbackgroundcolor(ui_component* self, unsigned int color)
+{
+	self->backgroundcolor = color;
 }

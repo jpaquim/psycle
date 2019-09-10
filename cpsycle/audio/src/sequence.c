@@ -70,16 +70,41 @@ void sequence_remove(Sequence* self, SequenceIterator position)
 	signal_emit(&self->signal_editposchanged, self, 0);
 }
 
+void sequence_clear(Sequence* self)
+{
+	Track* ptr;
+	List* next;
+
+	ptr = self->entries;
+	while (ptr) {
+		next = ptr->next;
+		free(ptr->entry);
+		ptr = next;
+	}
+	list_free(self->entries);
+	self->entries = 0;
+	self->editpos.patternnode = 0;
+	self->editpos.sequence = 0;
+}
+
 SequenceIterator sequence_last(Sequence* self)
 {
 	SequenceIterator ptr;
+
+	if (self->entries == 0) {
+		return sequence_begin(self, 0);
+	}
 	ptr.patternnode = 0;		
 	ptr.sequence = self->entries->tail;
 	if (ptr.sequence) {
 		Pattern* pattern;
 		SequenceEntry* entry = (SequenceEntry*) ptr.sequence->entry;
-		pattern = patterns_at(self->patterns, entry->pattern);		
-		ptr.patternnode = pattern->events;
+		pattern = patterns_at(self->patterns, entry->pattern);
+		if (pattern) {
+			ptr.patternnode = pattern->events;
+		} else {
+			ptr.patternnode = 0;
+		}
 	}
 	return ptr;	
 }
@@ -92,8 +117,12 @@ void sequence_reposition(Sequence* self)
 		Pattern* pattern;
 		SequenceEntry* entry = (SequenceEntry*) ptr->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
-		entry->offset = curroffset;
-		curroffset += pattern->length;
+		if (pattern) {
+			entry->offset = curroffset;
+			curroffset += pattern->length;
+		} else {
+			entry->offset = curroffset;
+		}
 		ptr = ptr->next;
 	}
 }
@@ -139,10 +168,12 @@ Track* sequence_at_offset(Sequence* self, float offset)
 		Pattern* pattern;
 		SequenceEntry* entry = (SequenceEntry*) ptr->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
-		if (offset >= curroffset && offset < curroffset + pattern->length) {
-			break;
+		if (pattern) {
+			if (offset >= curroffset && offset < curroffset + pattern->length) {
+				break;
+			}
+			curroffset += pattern->length;
 		}
-		curroffset += pattern->length;
 		ptr = ptr->next;
 	}
 	return ptr;
@@ -189,7 +220,11 @@ SequenceIterator sequence_makeiterator(Sequence* self, List* entries)
 	if (entries) {
 		SequenceEntry* entry = (SequenceEntry*) entries->entry;
 		pPattern = patterns_at(self->patterns, entry->pattern);
-		rv.patternnode = pPattern->events;
+		if (pPattern) {
+			rv.patternnode = pPattern->events;
+		} else {
+			rv.patternnode = 0;
+		}
 	}		
 	return rv;
 }

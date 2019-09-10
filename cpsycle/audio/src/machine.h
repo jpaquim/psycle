@@ -19,6 +19,7 @@ typedef enum {
 
 typedef struct {
 	struct Samples* (*samples)(void* callbackcontext);
+	void* context;
 } MachineCallback;
 
 typedef struct {	

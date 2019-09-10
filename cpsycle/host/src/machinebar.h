@@ -4,9 +4,8 @@
 #if !defined(MACHINEBAR_H)
 #define MACHINEBAR_H
 
-#include "uicomponent.h"
 #include "uicombobox.h"
-#include "player.h"
+#include "workspace.h"
 
 typedef struct {
 	ui_component component;
@@ -20,7 +19,7 @@ typedef struct {
 	int prevent_selchange_notify;
 } MachineBar;
 
-void InitMachineBar(MachineBar*, ui_component* parent, Player* player);
+void InitMachineBar(MachineBar*, ui_component* parent, Workspace* );
 void SelectMachineBarSlot(MachineBar*, int slot);
 
 #endif

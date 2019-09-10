@@ -5,7 +5,7 @@
 void buffer_init(Buffer* self, unsigned int channels)
 {
 	self->samples = 0;	
-	self->pos = 0;
+	self->offset = 0;
 	buffer_resize(self, channels);
 }
 
@@ -44,7 +44,17 @@ void buffer_resize(Buffer* self, unsigned int channels)
 	}	
 }
 
+void buffer_setoffset(Buffer* self, unsigned int offset)
+{
+	self->offset = offset;
+}
+
+unsigned int buffer_offset(Buffer* self)
+{
+	return self->offset;
+}
+
 real* buffer_at(Buffer* self, unsigned int channel)
 {
-	return self->samples[channel] + self->pos;
+	return self->samples[channel] + self->offset;
 }

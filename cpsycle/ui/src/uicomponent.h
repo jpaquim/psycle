@@ -25,6 +25,12 @@ typedef enum {
 	UI_ALIGN_FILL
 } UiAlignType;
 
+typedef enum {
+	BACKGROUND_NONE,
+	BACKGROUND_SET,
+	BACKGROUND_PARENT,
+} BackgroundMode;
+
 typedef struct {
 	HWND hwnd;
 	HMENU winid;
@@ -54,6 +60,8 @@ typedef struct {
 	int scrollstepx;
 	int scrollstepy;
 	int debugflag;
+	unsigned int backgroundcolor;
+	BackgroundMode backgroundmode;
 } ui_component;
 
 void ui_component_init(ui_component* component, ui_component* parent);
@@ -94,6 +102,8 @@ void ui_component_enablealign(ui_component*);
 void ui_component_preventalign(ui_component*);
 void ui_component_enableinput(ui_component*, int recursive);
 void ui_component_preventinput(ui_component*, int recursive);
+void ui_component_setbackgroundmode(ui_component*, BackgroundMode);
+void ui_component_setbackgroundcolor(ui_component*, unsigned int color);
 
 int ui_openfile(ui_component* self, char* title, char* filter, char* defextension, char* filename);
 #endif

@@ -15,6 +15,9 @@ typedef struct IntHashEntryStruct* PIntHashEntry;
 struct IntHashTableStruct {
   PIntHashEntry keys[256];
   int size;
+  int count;
+  int keymax;
+  int keymin;
 };
 
 typedef struct IntHashTableStruct IntHashTable;
@@ -24,7 +27,9 @@ typedef struct IntHashTableStruct* PIntHashTable;
 void InitIntHashTable(PIntHashTable table, int size);
 void DisposeIntHashTable(PIntHashTable table);
 void InsertIntHashTable(PIntHashTable table, int k, void* value);
+void RemoveIntHashTable(PIntHashTable table, int k);
 void* SearchIntHashTable(PIntHashTable table, int k);
 int ExistsIntHashTable(PIntHashTable table, int k);
+
 
 #endif

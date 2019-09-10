@@ -29,5 +29,6 @@ void player_stop(Player*);
 float player_position(Player*);
 void player_setbpm(Player*, float bpm);
 void player_setlpb(Player*, unsigned int lpb);
+void player_initmaster(Player* self);
 
 #endif

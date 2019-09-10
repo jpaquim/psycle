@@ -13,7 +13,7 @@
 #include <uibutton.h>
 #include <uilistbox.h>
 #include <uigroupbox.h>
-#include <player.h>
+#include "workspace.h"
 
 typedef struct {
 	ui_component component;	
@@ -88,6 +88,6 @@ typedef struct {
 	Player* player;
 } SamplerInstrumentView;
 
-void InitSamplerInstrumentView(SamplerInstrumentView*, ui_component* parent, Player* player);
+void InitSamplerInstrumentView(SamplerInstrumentView*, ui_component* parent, Workspace*);
 
 #endif

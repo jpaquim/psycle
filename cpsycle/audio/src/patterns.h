@@ -9,6 +9,8 @@
 
 typedef struct {	
 	IntHashTable slots;
+	int songtracks;
+	unsigned char sharetracknames;
 } Patterns;
 
 void patterns_init(Patterns*);
@@ -17,4 +19,6 @@ void patterns_insert(Patterns*, unsigned int slot, Pattern*);
 int patterns_append(Patterns*, Pattern*);
 Pattern* patterns_at(Patterns*, unsigned int slot);
 void patterns_enumerate(Patterns*, void* context, int (*enumproc)(void*, unsigned int, Pattern*));
+void patterns_clear(Patterns*);
+
 #endif

@@ -43,5 +43,6 @@ SequenceIterator sequence_begin(Sequence* self, float offset);
 SequenceIterator sequence_last(Sequence* self);
 void sequence_seteditposition(Sequence* self, SequenceIterator position);
 SequenceIterator sequence_editposition(Sequence* self);
+void sequence_clear(Sequence*);
 #endif
 

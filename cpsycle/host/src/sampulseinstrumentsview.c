@@ -3,22 +3,27 @@
 
 #include "sampulseinstrumentview.h"
 
-static void OnSize(SampulseInstrumentView* self, ui_component* sender, int width, int height);
-static void OnDraw(SampulseInstrumentView* self, ui_component* sender, ui_graphics* g);
-static void AddString(SampulseInstrumentView* self, const char* text);
-static void AlignInstrumentView(SampulseInstrumentView* self);
-static void BuildInstrumentList(SampulseInstrumentView* self);
+static void OnSize(SampulseInstrumentView*, ui_component* sender, int width, int height);
+static void OnDraw(SampulseInstrumentView*, ui_component* sender, ui_graphics* g);
+static void AddString(SampulseInstrumentView*, const char* text);
+static void AlignInstrumentView(SampulseInstrumentView*);
+static void BuildInstrumentList(SampulseInstrumentView*);
+static void OnSongChanged(SampulseInstrumentView*, Workspace*);
 
-void InitSampulseInstrumentView(SampulseInstrumentView* self, ui_component* parent, Player* player)
+void InitSampulseInstrumentView(SampulseInstrumentView* self,
+								ui_component* parent, Workspace* workspace)
 {
-	self->player = player;
+	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 	InitNoteMapEdit(&self->notemapedit, &self->component);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	ui_listbox_init(&self->instrumentlist, &self->component);
 	AlignInstrumentView(self);
 	BuildInstrumentList(self);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
 void OnSize(SampulseInstrumentView* self, ui_component* sender, int width, int height)
@@ -44,6 +49,11 @@ void BuildInstrumentList(SampulseInstrumentView* self)
 		}
 		AddString(self, buffer);
 	}
+}
+
+void OnSongChanged(SampulseInstrumentView* self, Workspace* workspace)
+{		
+	BuildInstrumentList(self);	
 }
 
 void AddString(SampulseInstrumentView* self, const char* text)

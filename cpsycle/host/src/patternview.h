@@ -8,6 +8,7 @@
 #include <uicomponent.h>
 #include "trackerview.h"
 #include "pianoroll.h"
+#include "workspace.h"
 
 typedef struct PatternView {
 	ui_component component;
@@ -16,6 +17,6 @@ typedef struct PatternView {
 	TabBar tabbar;
 } PatternView;
 
-void InitPatternView(PatternView*, ui_component* parent, Player* player);
+void InitPatternView(PatternView*, ui_component* parent, Workspace* workspace);
 
 #endif

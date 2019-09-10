@@ -18,7 +18,7 @@ typedef struct {
 	Sequence sequence;
 	Samples samples;
 	Instruments instruments;
-	XMInstruments xminstruments;
+	XMInstruments xminstruments;	
 } Song;
 
 void song_init(Song* self);

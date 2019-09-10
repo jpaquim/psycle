@@ -8,17 +8,16 @@
 #include "machine.h"
 #include <signal.h>
 
-struct MachineConnectionStruct {
+typedef struct {
 	int slot;	
 	float volume;	
-	struct MachineConnectionStruct* next;
-};
+} MachineConnectionEntry;
 
-typedef struct MachineConnectionStruct MachineConnection;
+typedef List MachineConnection;
 
 typedef struct {	
-	MachineConnection inputs;
-	MachineConnection outputs;
+	MachineConnection* inputs;
+	MachineConnection* outputs;
 } MachineConnections;
 
 typedef List MachinePath;
@@ -34,22 +33,28 @@ typedef struct {
 	int slot;
 
 	Signal signal_insert;
+	Signal signal_removed;
 	Signal signal_slotchange;		
 } Machines;
 
 void machines_init(Machines*);
 void machines_dispose(Machines*);
 void machines_insert(Machines* self, int slot, Machine* machine);
+void machines_remove(Machines* self, int slot);
 int machines_append(Machines* self, Machine* machine);
 Machine* machines_at(Machines* self, int slot);
 void machines_enumerate(Machines* self, void* context, int (*enumproc)(void*, int, Machine*));
-void machines_connect(Machines* self, int outputslot, int inputslot);
+int machines_connect(Machines* self, int outputslot, int inputslot);
+void machines_disconnect(Machines* self, int outputslot, int inputslot);
+void machines_disconnectall(Machines* self, int slot);
+int machines_connected(Machines* self, int outputslot, int inputslot);
 MachineConnections* machines_connections(Machines* self, int slot);
-MachineList* calc_list(Machines* self, int slot);
 float* machines_nextbuffer(Machines* self);
 void machines_changeslot(Machines* self, int slot);
 int machines_slot(Machines* self);
 Machine* machines_master(Machines* self);
 
+void suspendwork(void);
+void resumework(void);
 
 #endif

@@ -197,6 +197,10 @@ SOURCE=.\src\buffer.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\constants.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\event.h
 # End Source File
 # Begin Source File
@@ -246,6 +250,10 @@ SOURCE=.\src\plugin_interface.h
 # Begin Source File
 
 SOURCE=.\src\plugincatcher.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\psycleversion.h
 # End Source File
 # Begin Source File
 

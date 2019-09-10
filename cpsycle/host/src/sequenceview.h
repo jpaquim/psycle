@@ -7,6 +7,7 @@
 #include <patterns.h>
 #include <sequence.h>
 #include <uibutton.h>
+#include "workspace.h"
 
 typedef struct {
    void (*newentry)(void*);
@@ -43,8 +44,8 @@ typedef struct {
 	Sequence* sequence;
 } SequenceView;
 
-void InitSequenceView(SequenceView*, ui_component* parent, Sequence* sequence, Patterns* patterns);
-void InitSequenceListView(SequenceListView*, ui_component* parent, Sequence* sequence, Patterns* patterns);
+void InitSequenceView(SequenceView*, ui_component* parent, Workspace*);
+void InitSequenceListView(SequenceListView*, ui_component* parent, Sequence*, Patterns*);
 void InitSequenceButtons(SequenceButtons* self, ui_component* parent);
 
 #endif
