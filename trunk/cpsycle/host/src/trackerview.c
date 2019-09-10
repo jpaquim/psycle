@@ -39,6 +39,7 @@ static int NumLines(TrackerView* self);
 static void AdjustScrollranges(self, width, height);
 static float Offset(TrackerGrid* self, int y, int* lines, int* sublines, int* subline);
 static int TestCursor(TrackerGrid* self, int track, double offset, int subline);
+static int TestRange(double position, double offset, double  width);
 
 char* notes_tab_a440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
@@ -110,8 +111,10 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	self->cursorstep = 0.25;
 	self->dx = 0;
 	self->dy = 0;
-		
-	self->textwidth = 10;
+
+	self->textheight = 12;
+	self->textwidth = 9;
+	self->textleftedge = 2;
 	self->colx[0] = 0;
 	self->colx[1] = (self->textwidth*3)+2;
 	self->colx[2] = self->colx[1]+self->textwidth;
@@ -121,9 +124,10 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	self->colx[6] = self->colx[5]+self->textwidth;
 	self->colx[7] = self->colx[6]+self->textwidth;
 	self->colx[8] = self->colx[7]+self->textwidth;
-	self->colx[9] = self->colx[8]+self->textwidth+1;
-	self->trackwidth = self->colx[9];	
-	self->lineheight = 12;	
+	self->colx[9] = self->colx[8]+self->textwidth + 1;
+	self->trackwidth = self->colx[9];		
+	
+	self->lineheight = self->textheight + 1;
 	self->component.scrollstepx = self->trackwidth;
 	self->component.scrollstepy = self->lineheight;
 	ui_component_showhorizontalscrollbar(&self->component);
@@ -132,6 +136,12 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	self->component.doublebuffered = 1;	
 	signal_connect(&self->player->song->sequence.signal_editposchanged,
 		self, OnEditPositionChanged);	
+}
+
+void TrackerViewSongChanged(TrackerView* self, Workspace* workspace)
+{	
+	signal_connect(&self->grid.player->song->sequence.signal_editposchanged,
+		&self->grid, OnEditPositionChanged);	
 }
 
 void TrackerViewApplyProperties(TrackerView* self, Properties* properties)
@@ -166,14 +176,16 @@ void TrackerViewApplyProperties(TrackerView* self, Properties* properties)
 void OnDraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	TrackerGridBlock clip;
-	self->bpl = 1.0f / self->player->lpb;
-	if (self->view->skin.hfont) {
-		ui_setfont(g, self->view->skin.hfont);
-	}	
-	ClipBlock(self, g, &clip);
-	DrawBackground(self, g, &clip);
-	if (self->view->pattern) {		
+	if (self->view->pattern) {
+		self->bpl = 1.0f / self->player->lpb;
+		if (self->view->skin.hfont) {
+			ui_setfont(g, self->view->skin.hfont);
+		}
+		ClipBlock(self, g, &clip);
+		DrawBackground(self, g, &clip);
 		DrawEvents(self, g, &clip);
+	} else {
+		ui_drawsolidrectangle(g, g->clip, self->view->skin.background);	
 	}
 }
 
@@ -183,7 +195,8 @@ float Offset(TrackerGrid* self, int y, int* lines, int* sublines, int* subline)
 	int cpy = 0;		
 	int first = 1;
 	int count = y / self->lineheight;
-	int remaininglines = 0;
+	int remaininglines = 0;	
+
 	PatternNode* curr = self->view->pattern->events;
 	*lines = 0;
 	*sublines = 0;	
@@ -292,18 +305,17 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 		do {
 			fill = 0;
 			cpx = clip->topleft.track * self->trackwidth + self->dx;						
-			for (track =  clip->topleft.track; track < clip->bottomright.track; ++track) {						
+			for (track =  clip->topleft.track; track < clip->bottomright.track; ++track) {
 				int hasevent = 0;
 				int cursor = TestCursor(self, track, offset, subline);
 				int playbar = 0;
-				playbar = (self->player->playing &&
-						   self->player->sequencer.position >= offset &&
-						   self->player->sequencer.position < offset + self->bpl) ? 1 : 0;
-
+				playbar = self->player->playing && TestRange(
+								self->player->sequencer.position, offset, self->bpl)
+						   ? 1 : 0;				
 				while (!fill && self->curr_event &&
 					((PatternEntry*)(self->curr_event->entry))->track <= track &&
 					((PatternEntry*)(self->curr_event->entry))->offset >= offset && 				
-					((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl) {
+					((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl) {					
 					if (((PatternEntry*)(self->curr_event->entry))->track == track) {
 						DrawPatternEvent(self, g, &((PatternEntry*)(self->curr_event->entry))->event, cpx, cpy, playbar, cursor, beat, beat4);
 						hasevent = 1;
@@ -320,9 +332,16 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 					DrawPatternEvent(self, g, &event, cpx, cpy, playbar, cursor, beat, beat4);
 				} else
 				if (self->curr_event && ((PatternEntry*)(self->curr_event->entry))->track <= track) {
-					fill = 1;					
+					fill = 1;
 				}
 				cpx += self->trackwidth;			
+			}
+			// skip remaining tracks
+			while (self->curr_event &&
+				((PatternEntry*)(self->curr_event->entry))->track > 0 &&
+				((PatternEntry*)(self->curr_event->entry))->offset >= offset && 				
+				((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl) {					
+				self->curr_event = self->curr_event->next;
 			}
 			cpy += self->lineheight;
 			subline++;
@@ -331,6 +350,11 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 		offset += self->bpl;
 		subline = 0;
 	}
+}
+
+int TestRange(double position, double offset, double width)
+{
+	return position >= offset && position < offset + width; 
 }
 
 void SetColColor(TrackerSkin* skin, ui_graphics* g, int col, int playbar, int cursor, int beat, int beat4)
@@ -369,9 +393,9 @@ void SetColColor(TrackerSkin* skin, ui_graphics* g, int col, int playbar, int cu
 void DrawPatternEvent(TrackerGrid* self, ui_graphics* g, PatternEvent* event, int x, int y, int playbar, int cursor, int beat, int beat4)
 {					
 	ui_rectangle r;	
-
+	
 	SetColColor(&self->view->skin, g, 0, playbar, cursor && self->cursor.col == 0, beat, beat4);
-	ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->lineheight);
+	ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->textheight);
 	ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r,
 	self->notestab[event->note],
 	strlen(self->notestab[event->note]));			
@@ -430,13 +454,14 @@ void DrawDigit(TrackerGrid* self, ui_graphics* g, int digit, int col, int x, int
 {
 	char buffer[20];	
 	ui_rectangle r;
-	ui_setrectangle(&r, x + self->colx[col], y, self->textwidth, self->lineheight);
+	ui_setrectangle(&r, x + self->colx[col], y, self->textwidth, self->textheight);
 	if (digit != -1) {
 		_snprintf(buffer, 2, "%X", digit);	
 	} else {
 		_snprintf(buffer, 2, "%s", "");	
 	}
-	ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer, strlen(buffer));	
+	ui_textoutrectangle(g, r.left + self->textleftedge, r.top,
+		ETO_OPAQUE | ETO_CLIPPED, r, buffer, strlen(buffer));	
 }
 
 void OnGridSize(TrackerGrid* self, ui_component* sender, int width, int height)
@@ -720,32 +745,34 @@ void OnScroll(TrackerGrid* self, ui_component* sender, int cx, int cy)
 
 void OnMouseDown(TrackerGrid* self, ui_component* sender, int x, int y, int button)
 {
-	if (button == 1) {
-		int lines;
-		int sublines;
-		int subline;		
-		int coloffset;				
-		self->cursor.offset = Offset(self, y - self->dy, &lines, &sublines, &subline);
-		self->cursor.totallines = lines + sublines;
-		self->cursor.subline = subline;
-		self->cursor.track = (x - self->dx) / self->trackwidth;
-		coloffset = (x - self->dx) - self->cursor.track * self->trackwidth;
-		if (coloffset < 3*self->textwidth) {
-			self->cursor.col = 0;
-		} else {
-			self->cursor.col = coloffset / self->textwidth - 2;
+	if (self->view->pattern) {
+		if (button == 1) {
+			int lines;
+			int sublines;
+			int subline;		
+			int coloffset;				
+			self->cursor.offset = Offset(self, y - self->dy, &lines, &sublines, &subline);
+			self->cursor.totallines = lines + sublines;
+			self->cursor.subline = subline;
+			self->cursor.track = (x - self->dx) / self->trackwidth;
+			coloffset = (x - self->dx) - self->cursor.track * self->trackwidth;
+			if (coloffset < 3*self->textwidth) {
+				self->cursor.col = 0;
+			} else {
+				self->cursor.col = coloffset / self->textwidth - 2;
+			}
+			ui_invalidate(&self->component);
+			ui_component_setfocus(&self->component);
+		} else
+		if (button == 2) {
+			ui_size size = ui_component_size(&self->view->component);
+			if (ui_component_visible(&self->view->properties.component)) {			
+				ui_component_hide(&self->view->properties.component);			
+			} else {
+				ui_component_show(&self->view->properties.component);
+			}
+			OnViewSize(self->view, &self->view->component, size.width, size.height);
 		}
-		ui_invalidate(&self->component);
-		ui_component_setfocus(&self->component);
-	} else
-	if (button == 2) {
-		ui_size size = ui_component_size(&self->view->component);
-		if (ui_component_visible(&self->view->properties.component)) {			
-			ui_component_hide(&self->view->properties.component);			
-		} else {
-			ui_component_show(&self->view->properties.component);
-		}
-		OnViewSize(self->view, &self->view->component, size.width, size.height);
 	}
 }
 
@@ -764,18 +791,18 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Player* player)
 {	
 	ui_component_init(&self->component, parent);
 	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_HEADERSKIN));
-	InitDefaultSkin(self);
+	InitDefaultSkin(self);	
 	InitTrackerHeader(&self->header, &self->component);	
+	self->header.trackwidth = self->skin.headercoords.background.destwidth;
 	self->linenumbers.skin = &self->skin;
 	InitTrackerGrid(&self->grid, &self->component, self, player);
 	InitTrackerLineNumbersLabel(&self->linenumberslabel, &self->component);	
 	InitTrackerLineNumbers(&self->linenumbers, &self->component);
 	self->linenumbers.view = self;
 	self->grid.header = &self->header;
-	self->grid.linenumbers = &self->linenumbers;
-	self->header.trackwidth = self->grid.trackwidth;
+	self->grid.linenumbers = &self->linenumbers;	
 	self->header.skin = &self->skin;
-	self->linenumbers.lineheight = 12;
+	self->linenumbers.lineheight = 13;
 	signal_connect(&self->component.signal_size, self, OnViewSize);
 	InitPatternProperties(&self->properties, &self->component, 0);	
 	ui_component_hide(&self->properties.component);	
@@ -784,6 +811,15 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Player* player)
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
 	TrackerViewApplyProperties(self, 0);
+	if (self->grid.trackwidth < self->header.trackwidth) {
+		int i;
+		int temp = (self->header.trackwidth - self->grid.trackwidth)/2;
+		self->grid.trackwidth = self->header.trackwidth;
+		for (i = 0; i < 10; ++i) {
+			self->grid.colx[i] += temp;
+		}				
+	}
+	self->grid.component.scrollstepx = self->grid.trackwidth;
 	SetTimer(self->component.hwnd, 200, 50, 0);
 }
 
@@ -810,13 +846,14 @@ void InitDefaultSkin(TrackerView* self)
 	self->skin.headercoords.mute = mute;
 	self->skin.headercoords.solo = solo;
 	self->skin.headercoords.digit0x = digit0x;
-	self->skin.headercoords.digitx0 = digitx0;	
+	self->skin.headercoords.digitx0 = digitx0;
+	self->skin.hfont = NULL;
 }
 
 void OnViewSize(TrackerView* self, ui_component* sender, int width, int height)
 {
 	int headerheight = 20;
-	int linenumberwidth = 40;
+	int linenumberwidth = 45;
 	int hscrollbarheight = 20;
 	int propertyheight = ui_component_visible(&self->properties.component) ? 60 : 0;
 	ui_component_move(&self->header.component, linenumberwidth, 0);
@@ -871,7 +908,8 @@ void InitTrackerLineNumbers(TrackerLineNumbers* self, ui_component* parent)
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnLineNumbersDraw);
 	self->dy = 0;
-	self->lineheight = 12;
+	self->textheight = 12;
+	self->lineheight = self->textheight + 1;
 	self->component.doublebuffered = 1;
 }
 
@@ -881,7 +919,10 @@ void OnLineNumbersDraw(TrackerLineNumbers* self, ui_component* sender, ui_graphi
 	int cpy = self->dy;
 	int line;		
 	float offset;
+	ui_size size;
 	TrackerGridBlock clip;
+
+	size = ui_component_size(&self->component);	
 	ClipBlock(&self->view->grid, g, &clip);
 	LineNumbersDrawBackground(self, g);
 	if (self->view->pattern) {		
@@ -901,7 +942,7 @@ void OnLineNumbersDraw(TrackerLineNumbers* self, ui_component* sender, ui_graphi
 			SetColColor(self->skin, g, 0, 0, 0, beat, beat4);
 			// %3i
 			_snprintf(buffer, 10, "%.2X %.3f", line, offset);
-			ui_setrectangle(&r, 0, cpy, 40-2, self->lineheight);
+			ui_setrectangle(&r, 0, cpy, size.width - 2, self->textheight);
 			ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 				strlen(buffer));		
 			cpy += self->lineheight;
@@ -909,7 +950,7 @@ void OnLineNumbersDraw(TrackerLineNumbers* self, ui_component* sender, ui_graphi
 			numsublines = NumSublines(self->view->pattern, offset, self->view->grid.bpl);
 			for (subline = 0; subline < numsublines; ++subline) {
 				_snprintf(buffer, 10, "  %.2X", subline);	
-				ui_setrectangle(&r, 0, cpy, 40-2, self->lineheight);
+				ui_setrectangle(&r, 0, cpy, size.width - 2, self->textheight);
 				ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 					strlen(buffer));		
 				cpy += self->lineheight;

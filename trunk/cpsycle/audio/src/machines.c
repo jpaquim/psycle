@@ -1,16 +1,33 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "machines.h"
+#include <assert.h>
 
 #define BUFFER_SIZE 1024
 
 static int OnEnumMachine(Machines* self, int slot, Machine* machine);
 static int OnEnumPathMachines(Machines* self, int slot, Machine* machine);
-static MachineConnection* connection_tail(MachineConnection* first);
+static int machines_freeslot(Machines* self);
+static MachineConnection* findconnection(MachineConnection* connection, int slot);
+static MachineConnectionEntry* allocconnectionentry(int slot, float volume);
+static void appendconnectionentry(MachineConnection** connection,
+		MachineConnectionEntry* entry);
+static MachineList* compute_path(Machines* self, int slot);
 static void free_machinepath(List* path);
 
 HANDLE hGuiEvent;
 HANDLE hWorkDoneEvent;
+
+void suspendwork(void)
+{
+	ResetEvent(hGuiEvent);
+	WaitForSingleObject(hWorkDoneEvent, INFINITE);
+}
+
+void resumework(void)
+{
+	SetEvent(hGuiEvent);
+}
 
 void machines_init(Machines* self)
 {
@@ -22,14 +39,16 @@ void machines_init(Machines* self)
 	self->numbuffers = 20;
 	self->buffers = (float*) malloc(sizeof(float)*BUFFER_SIZE * self->numbuffers);
 	self->currbuffer = 0;
-	self->slot = 0;		
+	self->slot = 0;	
 	signal_init(&self->signal_insert);
+	signal_init(&self->signal_removed);
 	signal_init(&self->signal_slotchange);
 }
 
 void machines_dispose(Machines* self)
 {	
 	signal_dispose(&self->signal_insert);
+	signal_dispose(&self->signal_removed);
 	signal_dispose(&self->signal_slotchange);
 	machines_enumerate(self, self, OnEnumMachine);
 	free_machinepath(self->path);
@@ -51,10 +70,20 @@ void machines_insert(Machines* self, int slot, Machine* machine)
 	InsertIntHashTable(&self->slots, slot, machine);
 	connections = (MachineConnections*) malloc(sizeof(MachineConnections));
 	memset(connections, 0, sizeof(MachineConnections));
-	connections->outputs.slot = -1;
-	connections->inputs.slot = -1;
+	connections->outputs = 0;
+	connections->inputs = 0;
 	InsertIntHashTable(&self->connections, slot, connections);
 	signal_emit(&self->signal_insert, self, 1, slot);	
+}
+
+void machines_remove(Machines* self, int slot)
+{	
+	machines_disconnectall(self, slot);
+	suspendwork();
+	RemoveIntHashTable(&self->slots, slot);
+	self->path = compute_path(self, 0);
+	signal_emit(&self->signal_removed, self, 1, slot);
+	resumework();
 }
 
 int machines_append(Machines* self, Machine* machine)
@@ -62,20 +91,25 @@ int machines_append(Machines* self, Machine* machine)
 	MachineConnections* connections;
 	int slot;
 
-	slot = 0;
-	while (SearchIntHashTable(&self->slots, slot)) {
-		++slot;
-	}
+	slot = machines_freeslot(self);	
 	InsertIntHashTable(&self->slots, slot, machine);
 	{
 		connections = (MachineConnections*) malloc(sizeof(MachineConnections));
 		memset(connections, 0, sizeof(MachineConnections));
-		connections->outputs.slot = -1;		
-		connections->inputs.slot = -1;
+		connections->inputs = 0;
+		connections->outputs = 0;
 	}
 	InsertIntHashTable(&self->connections, slot, connections);
 	signal_emit(&self->signal_insert, self, 1, slot);
 	return slot;
+}
+
+int machines_freeslot(Machines* self)
+{
+	int rv;
+	
+	for (rv = 0; SearchIntHashTable(&self->slots, rv) != 0; ++rv);
+	return rv;
 }
 
 Machine* machines_at(Machines* self, int slot)
@@ -83,12 +117,14 @@ Machine* machines_at(Machines* self, int slot)
 	return SearchIntHashTable(&self->slots, slot);
 }
 
-void machines_enumerate(Machines* self, void* context, int (*enumproc)(void*, int, Machine*))
+void machines_enumerate(Machines* self, void* context,
+						int (*enumproc)(void*, int, Machine*))
 {
-	Machine* machine;
+	Machine* machine;	
 	int slot;
-	for (slot = 0; slot < 256; ++slot) {
-		machine = (Machine*) SearchIntHashTable(&self->slots, slot);
+
+	for (slot = self->slots.keymin; slot <= self->slots.keymax; ++slot) {
+		machine = machines_at(self, slot);
 		if (machine) {
 			if (!enumproc(context, slot, machine)) {
 				break;
@@ -97,46 +133,141 @@ void machines_enumerate(Machines* self, void* context, int (*enumproc)(void*, in
 	}
 }
 
-void machines_connect(Machines* self, int outputslot, int inputslot)
+int machines_connect(Machines* self, int outputslot, int inputslot)
 {
-	MachineConnections* machineconnections;
-	List* list;
-	
-	machineconnections = SearchIntHashTable(&self->connections, outputslot);
-	if (machineconnections) {			
-		MachineConnection* tail = connection_tail(&machineconnections->outputs);
-		tail->next = (MachineConnection*) malloc(sizeof(MachineConnection));
-		tail->next->volume = 1.0;
-		tail->next->slot = inputslot;
-		tail->next->next = 0;		
+	if (!machines_connected(self, outputslot, inputslot)) {		
+		MachineConnections* connections;		
+
+		suspendwork();
+		connections = machines_connections(self, outputslot);
+		if (connections) {		
+			appendconnectionentry(&connections->outputs,
+				allocconnectionentry(inputslot, 1.f));		
+		}
+		connections = machines_connections(self, inputslot);
+		if (connections) {					
+			appendconnectionentry(&connections->inputs,
+				allocconnectionentry(outputslot, 1.f));		
+		}		
+		self->path = compute_path(self, 0);		
+		resumework();
+		return 1;
 	}
-	machineconnections = SearchIntHashTable(&self->connections, inputslot);
-	if (machineconnections) {	
-		MachineConnection* tail = connection_tail(&machineconnections->inputs);
-		tail->next = (MachineConnection*) malloc(sizeof(MachineConnection));
-		tail->next->volume = 1.0;
-		tail->next->slot = outputslot;
-		tail->next->next = 0;		
+	return 0;
+}
+
+MachineConnectionEntry* allocconnectionentry(int slot, float volume)
+{
+	MachineConnectionEntry* rv;
+		
+	rv = malloc(sizeof(MachineConnectionEntry));
+	rv->slot = slot;
+	rv->volume = 1.0;	
+	return rv;
+}
+
+void appendconnectionentry(MachineConnection** connection,
+	MachineConnectionEntry* entry)
+{
+	if (*connection) {		
+		list_append(*connection, entry);		
+	} else {
+		*connection = list_create(entry);			
 	}
-	//path = compute_path(self, 0);
-	list = calc_list(self, 0);	
-	if (list) {		
-		ResetEvent(hGuiEvent);
-		WaitForSingleObject(hWorkDoneEvent, INFINITE);
-		self->path = list;
-		SetEvent(hGuiEvent);
+}
+
+void machines_disconnect(Machines* self, int outputslot, int inputslot)
+{	
+	MachineConnections* connections;
+
+	connections = machines_connections(self, outputslot);
+	if (connections) {				
+		MachineConnection* p;
+
+		p = findconnection(connections->outputs, inputslot);
+		suspendwork();
+		if (p) {
+			free(p->entry);
+			list_remove(&connections->outputs, p);			
+		}		
+		connections = machines_connections(self, inputslot);
+		p = findconnection(connections->inputs, outputslot);
+		if (p) {		
+			free(p->entry);
+			list_remove(&connections->inputs, p);						
+		}
+		self->path = compute_path(self, 0);	
+		resumework();
 	}	
 }
 
-MachineConnection* connection_tail(MachineConnection* first)
+void machines_disconnectall(Machines* self, int slot)
 {
-	MachineConnection* ptr;
+	MachineConnections* connections;
+	connections = machines_connections(self, slot);
+	if (connections) {		
+		MachineConnection* out;
+		MachineConnection* in;
+	
+		suspendwork();
+		out = connections->outputs;
+		while (out) {			
+			MachineConnections* dst;
+			MachineConnection* dstinput;
+			dst = machines_connections(self, ((MachineConnectionEntry*) out->entry)->slot);
+			dstinput = findconnection(dst->inputs, slot);
+			free(dstinput->entry);
+			list_remove(&dst->inputs, dstinput);
+			out = out->next;
+		}
+		list_free(connections->outputs);
+		connections->outputs = 0;
+		
+		in = connections->inputs;
+		while (in) {			
+			MachineConnections* src;
+			MachineConnection* srcoutput;
+			src = machines_connections(self, ((MachineConnectionEntry*) in->entry)->slot);
+			srcoutput = findconnection(src->outputs, slot);
+			free(srcoutput->entry);
+			list_remove(&src->outputs, srcoutput);
+			in = in->next;
+		}
+		list_free(connections->inputs);
+		connections->inputs = 0;
+		resumework();
+	}	
+}
 
-	ptr = first;
-	while (ptr->next != NULL) {
-		ptr = ptr->next;
+int machines_connected(Machines* self, int outputslot, int inputslot)
+{	
+	MachineConnection* p;
+	MachineConnections* connections;	
+
+	connections = machines_connections(self, outputslot);
+	if (connections) {						
+		p = findconnection(connections->outputs, inputslot);
+#if defined(_DEBUG)
+		if (p) {			
+			connections = machines_connections(self, inputslot);
+			assert(connections);
+			p = findconnection(connections->inputs, outputslot);
+			assert(p);
+		}
+#endif
 	}
-	return ptr;
+	return p != 0;
+}
+
+MachineConnection* findconnection(MachineConnection* connection, int slot)
+{	
+	MachineConnection* p;
+	
+	p = connection;
+	while (p && ((MachineConnectionEntry*)(p->entry))->slot != slot) {
+		p = p->next;
+	}
+	return p;
 }
 
 MachineConnections* machines_connections(Machines* self, int slot)
@@ -145,45 +276,45 @@ MachineConnections* machines_connections(Machines* self, int slot)
 }
 
 
-MachineList* calc_list(Machines* self, int slot)
+MachineList* compute_path(Machines* self, int slot)
 {
-	MachineConnection* ptr;
+	MachineConnection* p;
 	MachineConnections* connections;
 
 	MachineList* list;
 	list = list_create((void*)slot);
 	connections = machines_connections(self, slot);
-	ptr = &connections->inputs;
-	if (!ptr) {		
+	p = connections->inputs;
+	if (!p) {		
 		return list;
 	}
-	while (ptr) {		
-		if (ptr->slot != -1) {
-			List* inlist;			
-			inlist = calc_list(self, ptr->slot);
-			if (inlist) {								
-				inlist->tail->next = list;
-				inlist->tail = list->tail;
-				list = inlist;				
-			}
-		}		
-		ptr = ptr->next;
+	while (p) {
+		List* inlist;
+		MachineConnectionEntry* entry;
+
+		entry = (MachineConnectionEntry*) p->entry;		
+		inlist = compute_path(self, entry->slot);
+		if (inlist) {								
+			inlist->tail->next = list;
+			inlist->tail = list->tail;
+			list = inlist;				
+		}
+		p = p->next;
 	}
 	return list;
 }
 
-
 void free_machinepath(List* path)
 {
 	if (path) {
-		List* ptr;
+		List* p;
 		List* next;
 		
-		ptr = path;
-		while (ptr != NULL) {
-			next = ptr->next;
-			free(ptr);
-			ptr = next;
+		p = path;
+		while (p != NULL) {
+			next = p->next;
+			free(p);
+			p = next;
 		}
 	}
 }

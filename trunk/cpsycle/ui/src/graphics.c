@@ -22,7 +22,13 @@ void ui_textoutrectangle(ui_graphics* g, int x, int y, unsigned int options,
 
 void ui_drawrectangle(ui_graphics* self, const ui_rectangle r)
 {
+	HBRUSH hBrush;
+	HBRUSH hOldBrush;
+
+	hBrush = GetStockObject (NULL_BRUSH);
+	hOldBrush = SelectObject (self->hdc, hBrush);
 	Rectangle(self->hdc, r.left, r.top, r.right, r.bottom);
+	SelectObject (self->hdc, hOldBrush);
 }
 
 void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r, unsigned int color)

@@ -2,10 +2,9 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "machineview.h"
 #include "machines.h"
+#include "workspace.h"
 #include <machinefactory.h>
 #include "resources/resource.h"
-
-extern MachineCallback machinecallback;
 
 static void OnTabBarChange(MachineView* self, ui_component* sender, int tabindex);
 static void OnShow(MachineView* self, ui_component* sender);
@@ -37,27 +36,30 @@ static void BlitSkinPart(MachineView* self, ui_graphics* g, int x, int y,
 static void MachineUiSize(MachineView* self, int mode, int* width, int* height);
 static void OnMachinesChangeSlot(MachineView* self, Machines* machines, int slot);
 static void OnMachinesInsert(MachineView* self, Machines* machines, int slot);
+static void OnMachinesRemoved(MachineView* self, Machines* machines, int slot);
+static int OnEnumFindWire(MachineView* self, int slot, Machine* machine);
+static void OnSongChanged(MachineView* self, Workspace* sender);
 
 extern HINSTANCE appInstance;
 
 void MachineUiSet(MachineUi* self, int x, int y, const char* editname)
 {	
 	self->x = x;
-	self->y = y;
+	self->y = y;	
 	if (self->editname) {
 		free(self->editname);
 	}
 	self->editname = strdup(editname);
 }
 
-void InitMachineView(MachineView* self, ui_component* parent, Player* player, Properties* properties)
+void InitMachineView(MachineView* self, ui_component* parent, Workspace* workspace)
 {				
+	self->workspace = workspace;
 	self->cx = 0;
 	self->cy = 0;	
+	self->wirefound = 0;
 	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_MACHINESKIN));	
-	if (self->skin.hfont == NULL) {
-		self->skin.hfont = ui_createfont("Tahoma", 12);
-	}	
+	self->skin.hfont = ui_createfont("Tahoma", 12);		
 	memset(&self->machineuis, 0, sizeof(MachineUi[256]));
 	MachineUiSet(&self->machineuis[0], 200, 200, 0);
 	memset(&self->machine_frames, 0, sizeof(ui_component[256]));
@@ -72,20 +74,21 @@ void InitMachineView(MachineView* self, ui_component* parent, Player* player, Pr
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	ui_component_move(&self->component, 0, 0);
-	self->player = player;			
+	self->player = &workspace->player;
 	self->dragslot = -1;
 	self->dragmode = MACHINEVIEW_DRAG_MACHINE;
 	self->selectedslot = 0;
-	InitNewMachine(&self->newmachine, &self->component, player, properties);
+	InitNewMachine(&self->newmachine, &self->component, self->player, self->workspace->config);
 	ui_component_hide(&self->newmachine.component);
 	self->newmachine.selected = OnPluginSelected;
 	self->component.doublebuffered = TRUE;
 	InitMachineCoords(self);	
 	signal_connect(&self->player->song->machines.signal_slotchange, self, OnMachinesChangeSlot);
 	signal_connect(&self->player->song->machines.signal_insert, self, OnMachinesInsert);
+	signal_connect(&self->player->song->machines.signal_removed, self, OnMachinesRemoved);
 
 	InitTabBar(&self->tabbar, parent);
-	ui_component_move(&self->tabbar.component, 600, 50);
+	ui_component_move(&self->tabbar.component, 600, 75);
 	ui_component_resize(&self->tabbar.component, 160, 20);
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "Wires");
@@ -95,6 +98,7 @@ void InitMachineView(MachineView* self, ui_component* parent, Player* player, Pr
 	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
 	signal_connect(&self->component.signal_show, self, OnShow);
 	signal_connect(&self->component.signal_hide, self, OnHide);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
 void Draw(MachineView* self, ui_graphics* g)
@@ -185,16 +189,17 @@ int OnEnumDrawWires(MachineView* self, int slot, Machine* machine)
 	MachineConnection* ptr;
 	
 	connections	= machines_connections(&self->player->song->machines, slot);	
-	ptr = &connections->outputs;	
+	ptr = connections->outputs;	
 	while (ptr != NULL) {
-		if (ptr->slot != -1) 
+		MachineConnectionEntry* entry = (MachineConnectionEntry*)ptr->entry;
+		if (entry->slot != -1) 
 		{
 			Machine* outmachine;
 			Machine* inmachine;
 
 			outmachine = machines_at(&self->player->song->machines, slot);
 			if (machine) {
-				inmachine  = machines_at(&self->player->song->machines, ptr->slot);
+				inmachine  = machines_at(&self->player->song->machines, entry->slot);
 				if (inmachine) {
 					int outwidth;
 					int outheight;
@@ -205,8 +210,8 @@ int OnEnumDrawWires(MachineView* self, int slot, Machine* machine)
 					ui_drawline(self->g, 
 						self->machineuis[slot].x + outwidth/2,
 						self->machineuis[slot].y + outheight /2,
-						self->machineuis[ptr->slot].x + inwidth/2,
-						self->machineuis[ptr->slot].y + inheight/2);
+						self->machineuis[entry->slot].x + inwidth/2,
+						self->machineuis[entry->slot].y + inheight/2);
 				}
 			}
 		}
@@ -376,15 +381,13 @@ void OnMouseUp(MachineView* self, ui_component* sender, int x, int y, int button
 			int outputslot = self->dragslot;
 			self->dragslot = -1;
 			HitTest(self, x, y);
-			if (self->dragslot != -1) {				
-				Machine* machine;
-				machines_connect(&self->player->song->machines, outputslot, self->dragslot);
-				machine = machines_at(&self->player->song->machines, outputslot);				
+			if (self->dragslot != -1) {								
+				machines_connect(&self->player->song->machines, outputslot, self->dragslot);				
 			}
 		}
 	}
 	self->dragslot = -1;	
-	ui_invalidate(&self->component);	
+	ui_invalidate(&self->component);
 }
 
 void OnMouseMove(MachineView* self, ui_component* sender, int x, int y, int button)
@@ -433,7 +436,7 @@ void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 {
 	Machine* machine;
 	
-	machine = machinefactory_make(machinecallback, info, path);
+	machine = machinefactory_make(self->workspace->machinecallback, info, path);
 	if (machine) {
 		int slot;
 
@@ -446,7 +449,85 @@ void OnPluginSelected(MachineView* self, CMachineInfo* info, const char* path)
 
 void OnKeyDown(MachineView* self, ui_component* sender, int keycode, int keydata)
 {	
-	ui_component_propagateevent(sender);
+	int state;
+
+	state = GetKeyState (VK_LBUTTON);
+	if (state < 0 && keycode == VK_DELETE) {
+		self->wirefound = 0;
+		machines_enumerate(&self->player->song->machines, self, OnEnumFindWire);
+		if (self->wirefound) {
+			machines_disconnect(&self->player->song->machines, self->wiresrc, self->wiredst);			
+			ui_invalidate(&self->component);
+		}
+	} else 
+	if (keycode == VK_DELETE && self->selectedslot != 0) {
+		machines_remove(&self->player->song->machines, self->selectedslot);		
+	} else {
+		ui_component_propagateevent(sender);
+	}
+}
+
+int OnEnumFindWire(MachineView* self, int slot, Machine* machine)
+{		
+	MachineConnections* connections;
+	MachineConnection* ptr;
+	
+	connections	= machines_connections(&self->player->song->machines, slot);	
+	ptr = connections->outputs;	
+	while (ptr != NULL) {
+		MachineConnectionEntry* entry = (MachineConnectionEntry*)ptr->entry;
+		if (entry->slot != -1) 
+		{		
+			Machine* outmachine;
+			Machine* inmachine;
+
+			outmachine = machines_at(&self->player->song->machines, slot);
+			if (machine) {
+				inmachine  = machines_at(&self->player->song->machines, entry->slot);
+				if (inmachine) {
+					int outwidth;
+					int outheight;
+					int inwidth;
+					int inheight;
+					int x1, x2, y1, y2;
+					float m;
+					int b;
+					int y;
+
+					MachineUiSize(self, outmachine->mode(outmachine), &outwidth, &outheight);
+					MachineUiSize(self, inmachine->mode(inmachine), &inwidth, &inheight);
+					
+					x1 = self->machineuis[slot].x + outwidth/2,
+					y1 = self->machineuis[slot].y + outheight /2,
+					x2 = self->machineuis[entry->slot].x + inwidth/2,
+					y2 = self->machineuis[entry->slot].y + inheight/2;
+				
+					self->wiresrc = slot;
+					self->wiredst = entry->slot;
+
+					if (x2 - x1 != 0) {
+						m = (y2 - y1) / (float)(x2 - x1);
+						b = y1 - (int) (m * x1);
+						y = (int)(m * self->mx) + b;
+					} else {											
+						if (abs(self->mx - x1) < 10 &&
+							self->my >= y1 && self->my <= y2) {	
+							self->wirefound = 1;
+							return 0;
+						} else {
+							return 1;
+						}
+					}
+					if (abs(self->my - y) < 10) {						
+						self->wirefound = 1;
+						return 0;					
+					}
+				}
+			}
+		}
+		ptr = ptr->next;
+	}
+	return 1;
 }
 
 void OnMachinesChangeSlot(MachineView* self, Machines* machines, int slot)
@@ -467,6 +548,11 @@ void OnMachinesInsert(MachineView* self, Machines* machines, int slot)
 			? machine->info(machine)->ShortName
 			: "");
 	}
+}
+
+void OnMachinesRemoved(MachineView* self, Machines* machines, int slot)
+{
+	ui_invalidate(&self->component);
 }
 
 void OnTabBarChange(MachineView* self, ui_component* sender, int tabindex)
@@ -493,4 +579,12 @@ void OnShow(MachineView* self, ui_component* sender)
 void OnHide(MachineView* self, ui_component* sender)
 {
 	ui_component_hide(&self->tabbar.component);
+}
+
+void OnSongChanged(MachineView* self, Workspace* workspace)
+{	
+	signal_connect(&workspace->song->machines.signal_slotchange, self, OnMachinesChangeSlot);
+	signal_connect(&workspace->song->machines.signal_insert, self, OnMachinesInsert);
+	signal_connect(&workspace->song->machines.signal_removed, self, OnMachinesRemoved);
+	ui_invalidate(&self->component);
 }

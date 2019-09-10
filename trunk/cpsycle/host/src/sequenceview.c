@@ -14,20 +14,25 @@ static void OnNewEntry(SequenceButtons* self, ui_component* sender);
 static void OnDelEntry(SequenceButtons* self, ui_component* sender);
 static void OnSize(SequenceView* self, ui_component* sender, int width, int height);
 static void OnMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int button);
+static void OnSongChanged(SequenceView*, Workspace*);
 
-void InitSequenceView(SequenceView* self, ui_component* parent, Sequence* sequence, Patterns* patterns)
+void InitSequenceView(SequenceView* self, ui_component* parent,
+					  Workspace* workspace)
 {	
 	ui_component_init(&self->component, parent);		
 	signal_connect(&self->component.signal_size, self, OnSize);
-	InitSequenceListView(&self->listview, &self->component, sequence, patterns);			
+	InitSequenceListView(&self->listview, &self->component, 
+		&workspace->song->sequence, &workspace->song->patterns);			
 	ui_component_move(&self->listview.component, 0, 20);	
 	self->buttons.context = &self->listview;
 	InitSequenceButtons(&self->buttons, &self->component);			
 	self->buttons.controller.newentry = OnControllerNewEntry;
 	self->buttons.controller.delentry = OnControllerDelEntry;
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
-void InitSequenceListView(SequenceListView* self, ui_component* parent, Sequence* sequence, Patterns* patterns)
+void InitSequenceListView(SequenceListView* self, ui_component* parent,
+						  Sequence* sequence, Patterns* patterns)
 {				
 	self->sequence = sequence;
 	self->patterns = patterns;
@@ -155,4 +160,13 @@ void OnMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int
 	}
 	ui_invalidate(&self->component);		
 	sequence_seteditposition(self->sequence, sequence_at(self->sequence, self->selected));
+}
+
+void OnSongChanged(SequenceView* self, Workspace* workspace)
+{
+	self->sequence = &workspace->song->sequence;
+	self->listview.sequence = &workspace->song->sequence;
+	self->listview.patterns = &workspace->song->patterns;
+	self->listview.selected = 0;
+	ui_invalidate(&self->component);
 }

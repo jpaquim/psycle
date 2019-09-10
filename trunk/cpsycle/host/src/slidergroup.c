@@ -25,7 +25,8 @@ void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	signal_connect(&self->component.signal_size, self, OnSize);
-	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);	
+	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
+	signal_init(&self->signal_value);
 	signal_init(&self->signal_describevalue);
 	signal_init(&self->signal_tweakvalue);	
 	SetTimer(self->component.hwnd, timerid, 50, 0);
@@ -33,6 +34,7 @@ void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 
 void OnDestroy(SliderGroup* self)
 {
+	signal_dispose(&self->signal_value);
 	signal_dispose(&self->signal_describevalue);
 	signal_dispose(&self->signal_tweakvalue);
 }

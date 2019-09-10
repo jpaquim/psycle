@@ -7,7 +7,7 @@
 #include <uicomponent.h>
 #include "notemapedit.h"
 #include <uilistbox.h>
-#include <player.h>
+#include "workspace.h"
 
 typedef struct {
 	ui_component component;
@@ -16,6 +16,6 @@ typedef struct {
 	Player* player;
 } SampulseInstrumentView;
 
-void InitSampulseInstrumentView(SampulseInstrumentView*, ui_component* parent, Player* player);
+void InitSampulseInstrumentView(SampulseInstrumentView*, ui_component* parent, Workspace*);
 
 #endif

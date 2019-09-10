@@ -16,6 +16,7 @@ static void OnSampleListChanged(SamplesView* self, ui_component* sender, int slo
 static void SetSample(SamplesView*, int slot);
 static void OnLoadSample(SamplesView*, ui_component* sender);
 static void OnTabBarChange(SamplesView* self, ui_component* sender, int tabindex);
+static void OnSongChanged(SamplesView* self, Workspace* workspace);
 /// Header View
 static void InitSamplesHeaderView(SamplesHeaderView*, ui_component* parent, Instruments* instruments, ui_listbox* samplelist);
 static void SetSampleSamplesHeaderView(SamplesHeaderView*, Sample* sample);
@@ -55,10 +56,10 @@ static void OnEditChangeSustainend(SamplesWaveLoopView*, ui_edit* sender);
 
 extern char* notes_tab_a440[256];
 
-void InitSamplesView(SamplesView* self, ui_component* parent, Player* player)
+void InitSamplesView(SamplesView* self, ui_component* parent, Workspace* workspace)
 {
 	ui_margin margin = {3, 3, 0, 3};
-	self->player = player;
+	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_size, self, OnSize);
@@ -76,7 +77,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent, Player* player)
 	
 	ui_component_init(&self->client, &self->component);
 	ui_component_enablealign(&self->client);	
-	InitSamplesHeaderView(&self->header, &self->client, &player->song->instruments, &self->samplelist);
+	InitSamplesHeaderView(&self->header, &self->client, &workspace->song->instruments, &self->samplelist);
 	ui_component_resize(&self->header.component, 0, 50);
 	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);	
 	ui_component_setmargin(&self->header.component, &margin);
@@ -93,7 +94,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent, Player* player)
 	ui_component_resize(&self->general.component, 0, 120);
 	ui_component_setalign(&self->general.component, UI_ALIGN_TOP);	
 	ui_component_setmargin(&self->general.component, &margin);
-	InitSamplesVibratoView(&self->vibrato, &self->client, player);
+	InitSamplesVibratoView(&self->vibrato, &self->client, &workspace->player);
 	ui_component_resize(&self->vibrato.component, 0, 120);
 	ui_component_setalign(&self->vibrato.component, UI_ALIGN_TOP);
 	ui_component_setmargin(&self->vibrato.component, &margin);
@@ -113,9 +114,10 @@ void InitSamplesView(SamplesView* self, ui_component* parent, Player* player)
 	AlignSamplesView(self);	
 	BuildSampleList(self);
 	signal_connect(&self->samplelist.signal_selchanged, self, OnSampleListChanged);	
-	signal_connect(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 	ui_component_hide(&self->vibrato.component);
 	SetSample(self, 0);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
 void OnSize(SamplesView* self, ui_component* sender, int width, int height)
@@ -228,6 +230,13 @@ void OnTabBarChange(SamplesView* self, ui_component* sender, int tabindex)
 		default:
 		break;
 	}
+}
+
+void OnSongChanged(SamplesView* self, Workspace* workspace)
+{	
+	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
+	BuildSampleList(self);
+	SetSample(self, 0);
 }
 
 void InitSamplesHeaderView(SamplesHeaderView* self, ui_component* parent, Instruments* instruments, ui_listbox* samplelist)
@@ -861,3 +870,4 @@ void OnEditChangeSustainend(SamplesWaveLoopView* self, ui_edit* sender)
 		// DrawScope();
 	}
 }
+

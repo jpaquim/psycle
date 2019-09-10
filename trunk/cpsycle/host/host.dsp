@@ -234,6 +234,10 @@ SOURCE=.\src\vumeter.c
 
 SOURCE=.\src\wavebox.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\workspace.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -381,6 +385,10 @@ SOURCE=.\src\vumeter.h
 # Begin Source File
 
 SOURCE=.\src\wavebox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\workspace.h
 # End Source File
 # End Group
 # Begin Source File

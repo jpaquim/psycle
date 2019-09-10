@@ -18,8 +18,8 @@ void InitVumeter(Vumeter* self, ui_component* parent, Player* player)
 	self->player = player;
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	SetTimer(self->component.hwnd, 300, 50, 0);	
-	self->leftavg;
-	self->rightavg;
+	self->leftavg = 0;
+	self->rightavg = 0;
 	signal_connect(&machines_master(&self->player->song->machines)->signal_worked, self, OnMasterWorked);
 }
 

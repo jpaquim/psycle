@@ -3,7 +3,6 @@
 
 #include "samplerinstrumentview.h"
 
-static void OnDraw(SamplerInstrumentView* self, ui_component* sender, ui_graphics* g);
 static void OnSize(SamplerInstrumentView*, ui_component* sender, int width, int height);
 static void AddString(SamplerInstrumentView* self, const char* text);
 static void AlignInstrumentView(SamplerInstrumentView* self);
@@ -13,6 +12,7 @@ static void OnInstrumentListChanged(SamplerInstrumentView* self, ui_component* s
 static void BuildInstrumentList(SamplerInstrumentView* self);
 static void SetInstrument(SamplerInstrumentView* self, int slot);
 static void OnTabBarChange(SamplerInstrumentView* self, ui_component* sender, int tabindex);
+static void OnSongChanged(SamplerInstrumentView* self, Workspace* workspace);
 static void InitSamplerInstrumentHeaderView(SamplerInstrumentHeaderView*, ui_component* parent, Instruments*);
 static void SetInstrumentInstrumentHeaderView(SamplerInstrumentHeaderView*, Instrument*);
 static void OnPrevInstrument(SamplerInstrumentHeaderView*, ui_component* sender);
@@ -33,18 +33,20 @@ static void InitSamplerInstrumentPitchView(SamplerInstrumentPitchView*, ui_compo
 static void SetInstrumentInstrumentPitchView(SamplerInstrumentPitchView* self, Instrument* instrument);
 
 
-void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent, Player* player)
+void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent,
+							   Workspace* workspace)
 {
-	self->player = player;
+	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);
-	signal_connect(&self->component.signal_draw, self, OnDraw);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);	
 	signal_connect(&self->component.signal_size, self, OnSize);
-	InitSamplerInstrumentHeaderView(&self->header, &self->component, &player->song->instruments);
-	InitSamplerInstrumentGeneralView(&self->general, &self->component, &player->song->instruments);
-	InitSamplerInstrumentVolumeView(&self->volume, &self->component, &player->song->instruments);
-	InitSamplerInstrumentPanView(&self->pan, &self->component, &player->song->instruments);
-	InitSamplerInstrumentFilterView(&self->filter, &self->component, &player->song->instruments);
-	InitSamplerInstrumentPitchView(&self->pitch, &self->component, &player->song->instruments);
+	InitSamplerInstrumentHeaderView(&self->header, &self->component, &workspace->song->instruments);
+	InitSamplerInstrumentGeneralView(&self->general, &self->component, &workspace->song->instruments);
+	InitSamplerInstrumentVolumeView(&self->volume, &self->component, &workspace->song->instruments);
+	InitSamplerInstrumentPanView(&self->pan, &self->component, &workspace->song->instruments);
+	InitSamplerInstrumentFilterView(&self->filter, &self->component, &workspace->song->instruments);
+	InitSamplerInstrumentPitchView(&self->pitch, &self->component, &workspace->song->instruments);
 	ui_listbox_init(&self->instrumentlist, &self->component);
 	InitTabBar(&self->tabbar, &self->component);	
 	tabbar_append(&self->tabbar, "General");
@@ -66,6 +68,7 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	ui_component_hide(&self->pan.component);
 	ui_component_hide(&self->filter.component);
 	ui_component_hide(&self->pitch.component);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
 void AlignInstrumentView(SamplerInstrumentView* self)
@@ -138,14 +141,6 @@ void AddString(SamplerInstrumentView* self, const char* text)
 	ui_listbox_addstring(&self->instrumentlist, text);
 }
 
-void OnDraw(SamplerInstrumentView* self, ui_component* sender, ui_graphics* g)
-{
-	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);	
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0x009a887c);
-}
-
 void OnTabBarChange(SamplerInstrumentView* self, ui_component* sender, int tabindex)
 {
 	switch (tabindex) {
@@ -189,11 +184,26 @@ void OnTabBarChange(SamplerInstrumentView* self, ui_component* sender, int tabin
 	}
 }
 
+void OnSongChanged(SamplerInstrumentView* self, Workspace* workspace)
+{	
+	self->header.instruments = &workspace->song->instruments;
+	self->general.instruments = &workspace->song->instruments;
+	self->volume.instruments = &workspace->song->instruments;
+	self->pan.instruments = &workspace->song->instruments;
+	self->filter.instruments = &workspace->song->instruments;
+	self->pitch.instruments = &workspace->song->instruments;
+	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+	BuildInstrumentList(self);
+	SetInstrument(self, 0);
+}
+
 void InitSamplerInstrumentHeaderView(SamplerInstrumentHeaderView* self, ui_component* parent, Instruments* instruments)
 {
 	self->instrument = 0;
 	self->instruments = instruments;
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 
 	ui_label_init(&self->namelabel, &self->component);
 	ui_label_settext(&self->namelabel, "Instrument name");
@@ -247,7 +257,9 @@ void OnDeleteInstrument(SamplerInstrumentHeaderView* self, ui_component* sender)
 void InitSamplerInstrumentGeneralView(SamplerInstrumentGeneralView* self, ui_component* parent, Instruments* instruments)
 {
 	self->instruments = instruments;	
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);		
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 	
 	ui_label_init(&self->nnaheaderlabel, &self->component);
 	ui_label_settext(&self->nnaheaderlabel, "New Note Action");
@@ -339,6 +351,8 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 
 	self->instruments = instruments;	
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 	ui_component_enablealign(&self->component);
 	ui_groupbox_init(&self->groupbox, &self->component);	
 	ui_groupbox_settext(&self->groupbox, "Amplitude envelope");	
@@ -374,7 +388,8 @@ void SetInstrumentInstrumentVolumeView(SamplerInstrumentVolumeView* self, Instru
 void InitSamplerInstrumentPanView(SamplerInstrumentPanView* self, ui_component* parent, Instruments* instruments)
 {
 	self->instruments = instruments;	
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 }
 
 void SetInstrumentInstrumentPanView(SamplerInstrumentPanView* self, Instrument* instrument)
@@ -396,6 +411,8 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 
 	self->instruments = instruments;	
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 	ui_component_enablealign(&self->component);
 	ui_groupbox_init(&self->groupbox, &self->component);	
 	ui_groupbox_settext(&self->groupbox, "Filter envelope");	
@@ -431,7 +448,9 @@ void SetInstrumentInstrumentFilterView(SamplerInstrumentFilterView* self, Instru
 void InitSamplerInstrumentPitchView(SamplerInstrumentPitchView* self, ui_component* parent, Instruments* instruments)
 {
 	self->instruments = instruments;	
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 }
 
 void SetInstrumentInstrumentPitchView(SamplerInstrumentPitchView* self, Instrument* instrument)

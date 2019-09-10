@@ -53,13 +53,11 @@ void work(Machine* self, List* events, int numsamples, int tracks)
 		int numworksamples;
 		PatternEntry* entry = (PatternEntry*)p->entry;		
 		numworksamples = (unsigned int)entry->delta - pos;		
-		if (numworksamples > 0) {
-			if (self->generateaudio) {
-				self->inputs.pos = pos;
-				self->outputs.pos = pos;
-				self->generateaudio(self, &self->inputs, &self->outputs,
-					numworksamples, tracks);				
-			}			
+		if (numworksamples > 0) {	
+			buffer_setoffset(&self->inputs, pos);
+			buffer_setoffset(&self->outputs, pos);			
+			self->generateaudio(self, &self->inputs, &self->outputs,
+				numworksamples, tracks);			
 			amount -= numworksamples;
 		}
 		self->seqtick(self, entry->track, &entry->event);		
@@ -67,12 +65,12 @@ void work(Machine* self, List* events, int numsamples, int tracks)
 		p = p->next;
 	}
 	if (amount > 0 && self->generateaudio) {
-		self->inputs.pos = pos;
-		self->outputs.pos = pos;
+		buffer_setoffset(&self->inputs, pos);
+		buffer_setoffset(&self->outputs, pos);			
 		self->generateaudio(self, &self->inputs, &self->outputs, amount, tracks);		
 	}
-	self->inputs.pos = 0;
-	self->outputs.pos = 0;
+	buffer_setoffset(&self->inputs, 0);
+	buffer_setoffset(&self->outputs, 0);			
 }
 
 int machine_supports(Machine* self, int option)

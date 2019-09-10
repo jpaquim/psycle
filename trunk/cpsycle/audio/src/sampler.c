@@ -126,7 +126,7 @@ void generateaudio(Sampler* self, Buffer* input, Buffer* output, int numsamples,
 
 void seqtick(Sampler* self, int channel, const PatternEvent* event)
 {
-	Samples* samples = self->machine.machinecallback.samples(0);
+	Samples* samples = self->machine.machinecallback.samples(self->machine.machinecallback.context);
 	Sample* sample = SearchIntHashTable(&samples->container, event->inst);
 	release_voices(self, channel);
 

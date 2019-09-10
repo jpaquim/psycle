@@ -25,8 +25,7 @@ typedef EXPORT void (CALLBACK  *ptest)(void);
 
 void player_init(Player* self, Song* song, const char* driverpath)
 {
-	char path[MAX_PATH];
-	Master* master;
+	char path[MAX_PATH];	
 		
 	self->song = song;	
 	self->pos = 0.0f;
@@ -43,12 +42,19 @@ void player_init(Player* self, Song* song, const char* driverpath)
 	player_loaddriver(self, path);
 	
 	self->t = 125 / (44100 * 60.0f);
-	master = malloc(sizeof(Master));
-	master_init(master);
-	machines_insert(&self->song->machines, 0, (Machine*)master);
+	player_initmaster(self);
 	
 	signal_init(&self->signal_lpbchanged);
 	self->driver->open(self->driver);	
+}
+
+void player_initmaster(Player* self)
+{
+	Master* master;
+
+	master = malloc(sizeof(Master));
+	master_init(master);
+	machines_insert(&self->song->machines, 0, (Machine*)master);
 }
 
 void player_loaddriver(Player* self, const char* path)
@@ -180,10 +186,11 @@ real* Work(Player* self, int* numsamples)
 
 				if (connections) {
 					MachineConnection* connectionptr;
-					connectionptr = &connections->inputs;
+					connectionptr = connections->inputs;
 					while (connectionptr) {
-						if (connectionptr->slot != -1) {
-							Machine* source = machines_at(&self->song->machines, connectionptr->slot);
+						MachineConnectionEntry* entry = (MachineConnectionEntry*)connectionptr->entry;
+						if (entry->slot != -1) {
+							Machine* source = machines_at(&self->song->machines, entry->slot);
 							for (i = 0; i < 2; ++i) {
 								dsp_add(source->outputs.samples[i], machine->outputs.samples[i], amount, 1.0f);
 							}

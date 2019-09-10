@@ -8,7 +8,8 @@ static void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int bu
 
 void InitTabBar(TabBar* self, ui_component* parent)
 {			
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_init(&self->signal_change);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);

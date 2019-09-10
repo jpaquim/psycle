@@ -10,6 +10,7 @@
 #include "player.h"
 #include "sampulseinstrumentview.h"
 #include "samplerinstrumentview.h"
+#include "workspace.h"
 
 typedef struct {
 	ui_component component;
@@ -18,6 +19,6 @@ typedef struct {
 	TabBar tabbar;
 } InstrumentsView;
 
-void InitInstrumentsView(InstrumentsView*, ui_component* parent, Player* player);
+void InitInstrumentsView(InstrumentsView*, ui_component* parent, Workspace*);
 
 #endif

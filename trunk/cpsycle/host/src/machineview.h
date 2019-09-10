@@ -5,6 +5,7 @@
 #define MACHINEVIEW
 
 #include <windows.h>
+#include "workspace.h"
 #include <uicomponent.h>
 #include <uidef.h>
 #include <player.h>
@@ -91,14 +92,18 @@ typedef struct {
 	int dragslot;
 	int dragmode;
 	int selectedslot;
+	int wirefound;
+	int wiresrc;
+	int wiredst;
 	MachineFrame machine_frames[256];
 	ParamView machine_paramviews[256];
 	PluginCatcher plugincatcher;
 	MachineSkin skin;
 	TabBar tabbar;   
+	Workspace* workspace;
 } MachineView;
 
-void InitMachineView(MachineView* machineView, ui_component* parent, Player* player, Properties* properties);
+void InitMachineView(MachineView* machineView, ui_component* parent, Workspace*);
 void MachineViewApplyProperties(MachineView* self, Properties* properties);
 
 #endif

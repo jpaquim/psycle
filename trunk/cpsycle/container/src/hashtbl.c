@@ -10,6 +10,9 @@ void InitIntHashTable(PIntHashTable table, int size) {
   for (i = 0; i < size; ++i) {
     table->keys[i] = 0;
   }
+  table->count = 0;
+  table->keymax = 0;
+  table->keymin = 2147483647;
 }
 
 void DisposeIntHashTable(PIntHashTable table) {
@@ -26,6 +29,7 @@ void DisposeIntHashTable(PIntHashTable table) {
     }
     table->keys[i] = 0;
   }
+  table->count = 0;
 }
 
 static int inth(int k, int size) {  
@@ -51,6 +55,39 @@ void InsertIntHashTable(PIntHashTable table, int k, void* value) {
      }
      ptr->next = newentry;
   }
+  if (table->keymin > newentry->key) {
+	table->keymin = newentry->key;
+  }
+  if (table->keymax < newentry->key) {
+	table->keymax = newentry->key;
+  }
+  ++table->count;
+}
+
+void RemoveIntHashTable(PIntHashTable table, int k)
+{
+	int hn;
+	PIntHashEntry p;
+	PIntHashEntry q;
+
+	hn = inth(k, table->size);
+	if (table->keys[hn] != 0) {	
+		p = table->keys[hn];
+		q = 0;
+		while (p != 0) {
+			if (k == p->key) {
+				if (q) {				
+					q->next = p->next;				
+				} else {
+					table->keys[hn] = p->next;
+				}
+				free(p);
+				break;
+			}
+			q = p;
+			p = p->next;
+		}  
+	}
 }
 
 void* SearchIntHashTable(PIntHashTable table, int k) {
@@ -85,3 +122,4 @@ int ExistsIntHashTable(PIntHashTable table, int k)
 	hn = inth(k, table->size);
 	return table->keys[hn] != 0;
 }
+

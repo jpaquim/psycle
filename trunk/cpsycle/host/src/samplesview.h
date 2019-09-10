@@ -14,6 +14,7 @@
 #include "wavebox.h"
 #include "slidergroup.h"
 #include "tabbar.h"
+#include "workspace.h"
 
 typedef struct {
 	ui_component component;
@@ -88,6 +89,6 @@ typedef struct {
 	Player* player;
 } SamplesView;
 
-void InitSamplesView(SamplesView*, ui_component* parent, Player* player);
+void InitSamplesView(SamplesView*, ui_component* parent, Workspace* workspace);
 
 #endif

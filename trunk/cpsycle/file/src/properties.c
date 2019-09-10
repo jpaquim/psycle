@@ -104,6 +104,26 @@ Properties* properties_append_int(Properties* self, const char* key, int value, 
 	properties_init(ptr->next);
 	ptr->next->item.key = strdup(key);
 	ptr->next->item.value.i = value;	
+	ptr->next->item.typ = PROPERTY_TYP_INTEGER;
+	return ptr->next;
+}
+
+Properties* properties_append_double(Properties* self, const char* key, double value, double min, double max)
+{
+	Properties* ptr;
+
+	if (!self) {
+		return 0;
+	}
+	ptr = self;	
+	while (ptr->next != 0) {
+		ptr = ptr->next;		
+	}
+	ptr->next = (Properties*) malloc(sizeof(Properties));
+	properties_init(ptr->next);
+	ptr->next->item.key = strdup(key);
+	ptr->next->item.value.d = value;	
+	ptr->next->item.typ = PROPERTY_TYP_DOUBLE;
 	return ptr->next;
 }
 
@@ -156,6 +176,19 @@ void properties_readint(Properties* properties, const char* key, int* value, int
 	}
 }
 
+void properties_readdouble(Properties* properties, const char* key, double* value, double defaultvalue)
+{
+	if (!properties) {
+		*value = defaultvalue;
+	} else {
+		Properties* property = properties_read(properties, key);
+		if (property && property->item.typ == PROPERTY_TYP_DOUBLE) {
+			*value = property->item.value.d;
+		} else {
+			*value = defaultvalue;
+		}
+	}
+}
 
 void properties_write_string(Properties* self, const char* key, const char* value)
 {
@@ -179,6 +212,17 @@ void properties_write_int(Properties* self, const char* key, int value)
 		ptr->item.typ = PROPERTY_TYP_INTEGER;		
 	} else {
 		properties_append_int(self, key, value, 0, 0);
+	}
+}
+
+void properties_write_double(Properties* self, const char* key, double value)
+{
+	Properties* ptr = properties_read(self, key);
+	if (ptr) {		
+		ptr->item.value.d = value;
+		ptr->item.typ = PROPERTY_TYP_DOUBLE;		
+	} else {
+		properties_append_double(self, key, value, 0, 0);
 	}
 }
 
