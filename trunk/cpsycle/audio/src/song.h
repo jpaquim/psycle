@@ -10,6 +10,7 @@
 #include "samples.h"
 #include "instruments.h"
 #include "xminstruments.h"
+#include "machinefactory.h"
 
 typedef struct {
 	Properties* properties;
@@ -23,6 +24,7 @@ typedef struct {
 
 void song_init(Song* self);
 void song_dispose(Song* self);
-void song_load(Song* self, const char* path);
+void song_load(Song* self, const char* path, MachineFactory*,
+			   Properties** workspaceproperties);
 
 #endif

@@ -7,7 +7,6 @@
 #include <math.h>
 
 /// Samples Main View
-static void OnDraw(SamplesView* self, ui_component* sender, ui_graphics* g);
 static void OnSize(SamplesView*, ui_component* sender, int width, int height);
 static void AddString(SamplesView* self, const char* text);
 static void BuildSampleList(SamplesView* self);
@@ -15,7 +14,6 @@ static void AlignSamplesView(SamplesView* self);
 static void OnSampleListChanged(SamplesView* self, ui_component* sender, int slot);
 static void SetSample(SamplesView*, int slot);
 static void OnLoadSample(SamplesView*, ui_component* sender);
-static void OnTabBarChange(SamplesView* self, ui_component* sender, int tabindex);
 static void OnSongChanged(SamplesView* self, Workspace* workspace);
 /// Header View
 static void InitSamplesHeaderView(SamplesHeaderView*, ui_component* parent, Instruments* instruments, ui_listbox* samplelist);
@@ -56,12 +54,14 @@ static void OnEditChangeSustainend(SamplesWaveLoopView*, ui_edit* sender);
 
 extern char* notes_tab_a440[256];
 
-void InitSamplesView(SamplesView* self, ui_component* parent, Workspace* workspace)
+void InitSamplesView(SamplesView* self, ui_component* parent,
+	ui_component* tabbarparent, Workspace* workspace)
 {
 	ui_margin margin = {3, 3, 0, 3};
 	self->player = &workspace->player;
-	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, OnDraw);
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	ui_listbox_init(&self->samplelist, &self->component);
 	ui_button_init(&self->loadbutton, &self->component);
@@ -72,9 +72,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent, Workspace* workspa
 	ui_button_init(&self->duplicatebutton, &self->component);
 	ui_button_settext(&self->duplicatebutton, "Duplicate");
 	ui_button_init(&self->deletebutton, &self->component);
-	ui_button_settext(&self->deletebutton, "Delete");
-
-	
+	ui_button_settext(&self->deletebutton, "Delete");	
 	ui_component_init(&self->client, &self->component);
 	ui_component_enablealign(&self->client);	
 	InitSamplesHeaderView(&self->header, &self->client, &workspace->song->instruments, &self->samplelist);
@@ -88,16 +86,17 @@ void InitSamplesView(SamplesView* self, ui_component* parent, Workspace* workspa
 	tabbar_append(&self->tabbar, "General");
 	tabbar_append(&self->tabbar, "Vibrato");	
 	self->tabbar.tabwidth = 80;
-	self->tabbar.selected = 0;
-	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
-	InitSamplesGeneralView(&self->general, &self->client);
-	ui_component_resize(&self->general.component, 0, 120);
-	ui_component_setalign(&self->general.component, UI_ALIGN_TOP);	
-	ui_component_setmargin(&self->general.component, &margin);
-	InitSamplesVibratoView(&self->vibrato, &self->client, &workspace->player);
-	ui_component_resize(&self->vibrato.component, 0, 120);
-	ui_component_setalign(&self->vibrato.component, UI_ALIGN_TOP);
-	ui_component_setmargin(&self->vibrato.component, &margin);
+	self->tabbar.selected = 0;	
+	ui_notebook_init(&self->notebook, &self->client);	
+	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->notebook.component, 0x009a887c);	
+	ui_component_resize(&self->notebook.component, 0, 120);
+	ui_component_setalign(&self->notebook.component, UI_ALIGN_TOP);	
+	ui_component_setmargin(&self->notebook.component, &margin);
+	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
+	InitSamplesGeneralView(&self->general, &self->notebook.component);			
+	InitSamplesVibratoView(&self->vibrato, &self->notebook.component, &workspace->player);
+	ui_notebook_setpage(&self->notebook, 0);
 	InitWaveBox(&self->wavebox, &self->client);
 	ui_component_resize(&self->wavebox.component, 0, 80);
 	ui_component_setalign(&self->wavebox.component, UI_ALIGN_TOP);	
@@ -114,8 +113,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent, Workspace* workspa
 	AlignSamplesView(self);	
 	BuildSampleList(self);
 	signal_connect(&self->samplelist.signal_selchanged, self, OnSampleListChanged);	
-	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
-	ui_component_hide(&self->vibrato.component);
+	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
 	SetSample(self, 0);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
@@ -208,27 +206,6 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 		signal_prevent(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 		instruments_changeslot(&self->player->song->instruments, slot);
 		signal_enable(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
-	}
-	return; 
-}
-
-void OnTabBarChange(SamplesView* self, ui_component* sender, int tabindex)
-{
-	switch (tabindex) {
-		case 0:						
-			ui_component_show(&self->general.component);			
-			ui_component_hide(&self->vibrato.component);
-			ui_component_align(&self->client);
-			ui_invalidate(&self->component);
-		break;
-		case 1:			
-			ui_component_hide(&self->general.component);
-			ui_component_show(&self->vibrato.component);
-			ui_component_align(&self->client);
-			ui_invalidate(&self->component);
-		break;
-		default:
-		break;
 	}
 }
 
@@ -518,6 +495,8 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);	
 	self->sample = 0;
 	self->player = player;	
 
@@ -831,14 +810,6 @@ LoopType ComboBoxToLoopType(int combobox_index)
 	return rv;
 }
 
-void OnDraw(SamplesView* self, ui_component* sender, ui_graphics* g)
-{
-	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);	
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0x009a887c);
-}
-
 void OnEditChangeLoopstart(SamplesWaveLoopView* self, ui_edit* sender)
 {
 	if (self->sample) {
@@ -870,4 +841,3 @@ void OnEditChangeSustainend(SamplesWaveLoopView* self, ui_edit* sender)
 		// DrawScope();
 	}
 }
-

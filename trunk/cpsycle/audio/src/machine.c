@@ -17,8 +17,12 @@ static void setvalue(Machine* self, int const param, int const value) { }
 static void dispose(Machine* self);
 static int mode(Machine* self) { return MACHMODE_FX; }
 
-static int master_mode(Machine* self) { return MACHMODE_MASTER; }
+static int master_mode(Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(Master* self);
+
+static int dummymachine_mode(DummyMachine* self) { return self->mode; }
+static void dummymachine_dispose(DummyMachine* self);
+
 
 void machine_init(Machine* self)
 {	
@@ -98,5 +102,21 @@ void master_dispose(Master* self)
 	machine_dispose(&self->machine);
 }
 
+void dummymachine_init(DummyMachine* self)
+{
+	memset(self, 0, sizeof(DummyMachine));
+	machine_init(&self->machine);	
+	self->machine.mode = dummymachine_mode;
+	self->machine.dispose = dummymachine_dispose;
+	buffer_init(&self->machine.inputs, 2);
+	buffer_init(&self->machine.outputs, 2);
+	self->mode = MACHMODE_FX;
+}
 
+void dummymachine_dispose(DummyMachine* self)
+{	
+	buffer_dispose(&self->machine.inputs);
+	buffer_dispose(&self->machine.outputs);	
+	machine_dispose(&self->machine);
+}
 

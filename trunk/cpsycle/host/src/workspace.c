@@ -21,6 +21,27 @@ void workspace_init(Workspace* self)
 	player_init(&self->player, self->song, "..\\driver\\mme\\Release\\");
 #endif
 	signal_init(&self->signal_songchanged);
+	self->properties = 0;
+	plugincatcher_init(&self->plugincatcher);
+	workspace_scanplugins(self);
+	machinefactory_init(&self->machinefactory, self->machinecallback, self->config);
+}
+
+void workspace_scanplugins(Workspace* self)
+{	
+	Properties* property;
+
+	plugincatcher_scan(&self->plugincatcher, "sampler", MACH_SAMPLER);		
+	property = properties_read(self->config, "vstdir");
+	if (property) {
+		plugincatcher_scan(&self->plugincatcher,
+			properties_valuestring(property), MACH_VST);
+	}
+	property = properties_read(self->config, "plugindir");
+	if (property) {
+		plugincatcher_scan(&self->plugincatcher,
+			properties_valuestring(property), MACH_PLUGIN);
+	}
 }
 
 void workspace_dispose(Workspace* self)
@@ -29,6 +50,7 @@ void workspace_dispose(Workspace* self)
 	song_dispose(self->song);
 	properties_free(self->config);
 	signal_dispose(&self->signal_songchanged);
+	plugincatcher_dispose(&self->plugincatcher);
 }
 
 void workspace_config(Workspace* self)
@@ -47,6 +69,8 @@ void workspace_newsong(Workspace* self)
 	song_init(self->song);	
 	player_initmaster(&self->player);
 	applysongproperties(self);
+	properties_free(self->properties);
+	self->properties = 0;
 	signal_emit(&self->signal_songchanged, self, 0);
 	resumework();
 }
@@ -61,14 +85,14 @@ void workspace_removesong(Workspace* self)
 }
 
 void workspace_loadsong(Workspace* self, const char* path)
-{
-	suspendwork();
+{	
+	suspendwork();	
 	workspace_removesong(self);
 	self->song = (Song*) malloc(sizeof(Song));
 	song_init(self->song);
 	self->player.song = self->song;
 	player_initmaster(&self->player);	
-	song_load(self->song, path);
+	song_load(self->song, path, &self->machinefactory, &self->properties);	 
 	applysongproperties(self);
 	signal_emit(&self->signal_songchanged, self, 0);
 	resumework();
@@ -83,6 +107,11 @@ void applysongproperties(Workspace* self)
 	player_setbpm(&self->player, (float)dTmp);
 	properties_readint(self->song->properties, "lpb", &tmp, 4);
 	player_setlpb(&self->player, tmp);
+}
+
+Properties* workspace_pluginlist(Workspace* self)
+{
+	return self->plugincatcher.plugins;
 }
 
 Samples* machinecallback_samples(Workspace* self)

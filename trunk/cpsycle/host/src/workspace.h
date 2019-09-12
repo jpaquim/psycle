@@ -8,18 +8,25 @@
 #include <player.h>
 #include <properties.h>
 #include <signal.h>
+#include <plugincatcher.h>
+#include <machinefactory.h>
 
 typedef struct {	
 	Song* song;
 	Player player;
 	MachineCallback machinecallback;
 	Properties* config;
+	Properties* properties;
 	Signal signal_songchanged;
+	PluginCatcher plugincatcher;
+	MachineFactory machinefactory;
 } Workspace;
 
 void workspace_init(Workspace*);
 void workspace_dispose(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
+void workspace_scanplugins(Workspace*);
+Properties* workspace_pluginlist(Workspace*);
 
 #endif

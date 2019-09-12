@@ -6,6 +6,7 @@
 #include "hashtbl.h"
 #include <memory.h>
 #include <commctrl.h>   // includes the common control header
+#include <stdio.h>
 
 
 static TCHAR szAppClass[] = TEXT ("PsycleApp") ;
@@ -205,15 +206,17 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;
 		case WM_KEYDOWN:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->signal_keydown.slots) {
-				signal_emit(&component->signal_keydown, component, 2, (int)wParam, lParam);
-				if (!component->propagateevent) {
-					return 0;
-				} else {					
-					SendMessage (GetParent (hwnd), message, wParam, lParam) ;               
+			if (component) {			
+				component->propagateevent = component->defaultpropagation;
+				if (component->signal_keydown.slots) {
+					signal_emit(&component->signal_keydown, component, 2, (int)wParam, lParam);
 				}
-				component->propagateevent = 0;
-			}			
+				if (component->propagateevent) {					
+					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
+				}				
+				component->propagateevent = component->defaultpropagation;
+				return 0 ;								
+			}
 		break;
 		case WM_KEYUP:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
@@ -266,9 +269,16 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;
 		case WM_LBUTTONDBLCLK:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->signal_mousedoubleclick.slots) {
-				signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
-				return 0 ;
+			if (component) {			
+				component->propagateevent = component->defaultpropagation;
+				if (component->signal_mousedoubleclick.slots) {					
+					signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);					
+				}
+				if (component->propagateevent) {					
+					SendMessage (GetParent (hwnd), message, wParam, lParam) ;               
+				}				
+				component->propagateevent = component->defaultpropagation;
+				return 0 ;								
 			}
 		break;
 		case WM_MBUTTONDBLCLK:
@@ -471,6 +481,7 @@ void ui_component_init_signals(ui_component* component)
 	component->alignchildren = 0;
 	memset(&component->margin, 0, sizeof(ui_margin));
 	component->debugflag = 0;
+	component->defaultpropagation = 0;
 }
 
 void ui_component_dispose(ui_component* component)
@@ -514,6 +525,17 @@ ui_size ui_component_size(ui_component* self)
 	RECT rect ;
 	    
     GetClientRect (self->hwnd, &rect) ;
+	rv.width = rect.right;
+	rv.height = rect.bottom;
+	return rv;
+}
+
+ui_size ui_component_frame_size(ui_component* self)
+{   
+	ui_size rv;
+	RECT rect ;
+	    
+    GetWindowRect (self->hwnd, &rect) ;
 	rv.width = rect.right;
 	rv.height = rect.bottom;
 	return rv;
@@ -590,11 +612,15 @@ void ui_component_move(ui_component* self, int left, int top)
 }
 
 void ui_component_resize(ui_component* self, int width, int height)
-{
+{	
+	ui_size size = ui_component_size(self);
 	SetWindowPos (self->hwnd, NULL, 
 	   0,
 	   0,
-	   width, height, SWP_NOZORDER | SWP_NOMOVE) ;
+	   width, height, SWP_NOZORDER | SWP_NOMOVE);
+	if (size.width == width && size.height == height) {
+		SendMessage(self->hwnd, WM_SIZE, SIZE_RESTORED, MAKELONG(width, height));
+	}
 }
 
 void ui_component_setposition(ui_component* component, int x, int y, int width, int height)

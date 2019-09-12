@@ -9,6 +9,7 @@ static int properties_enumerate_rec(Properties* self);
 static void* target;
 static int (*callback)(void* self, struct PropertiesStruct* properties, int level);
 static int level;
+static int OnSearchPropertiesEnum(Properties* self, Properties* property, int level);
 
 Properties* properties_create(void)
 {
@@ -23,143 +24,144 @@ void properties_init(Properties* self)
 	self->children = 0;
 	self->next = 0;	
 	self->dispose = 0;
+	self->item.key = 0;
 	memset(&self->item, 0, sizeof(Properties));		
 }
 
 void properties_free(Properties* self)
 {
-	Properties* ptr;
+	Properties* p;
 	Properties* next;
 
-	ptr = self;
-	while (ptr != 0) {
-		if (ptr->dispose) {
-			ptr->dispose(&ptr->item);
+	p = self;
+	while (p != 0) {
+		if (p->dispose) {
+			p->dispose(&p->item);
 		} else
-		if (ptr->children) {
-			properties_free(ptr->children);
+		if (p->children) {
+			properties_free(p->children);
 		}		
-		next = ptr->next;
-		free(ptr->item.key);
-		if (ptr->item.typ == PROPERTY_TYP_STRING) {
-			free(ptr->item.value.s);
+		next = p->next;
+		free(p->item.key);
+		if (p->item.typ == PROPERTY_TYP_STRING) {
+			free(p->item.value.s);
 		}
-		free(ptr);
-		ptr = next;
+		free(p);
+		p = next;
 	}	
 }
 
 Properties* properties_append_string(Properties* self, const char* key, const char* value)
 {		
-	Properties* ptr;
+	Properties* p;
 
 	if (!self) {
 		return 0;
 	}
-	ptr = self;	
-	while (ptr->next != 0) {
-		ptr = ptr->next;		
+	p = self;	
+	while (p->next != 0) {
+		p = p->next;		
 	}
-	ptr->next = (Properties*) malloc(sizeof(Properties));
-	properties_init(ptr->next);
-	ptr->next->item.key = strdup(key);
-	ptr->next->item.value.s = strdup(value);	
-	ptr->next->item.typ = PROPERTY_TYP_STRING;	
-	return ptr->next;
+	p->next = (Properties*) malloc(sizeof(Properties));
+	properties_init(p->next);
+	p->next->item.key = strdup(key);
+	p->next->item.value.s = strdup(value);	
+	p->next->item.typ = PROPERTY_TYP_STRING;	
+	return p->next;
 }
 
 Properties* properties_append_userdata(Properties* self, const char* key,
 	void* value, void (*dispose)(Property*))
 {			
-	Properties* ptr;
+	Properties* p;
 
 	if (!self) {
 		return 0;
 	}
-	ptr = self;	
-	while (ptr->next != 0) {
-		ptr = ptr->next;		
+	p = self;	
+	while (p->next != 0) {
+		p = p->next;		
 	}
-	ptr->next = (Properties*) malloc(sizeof(Properties));	
-	properties_init(ptr->next);
-	ptr->next->dispose = dispose;
-	ptr->next->item.key = strdup(key);
-	ptr->next->item.value.ud = value;	
-	ptr->next->item.typ = PROPERTY_TYP_USERDATA;	
-	return ptr->next;
+	p->next = (Properties*) malloc(sizeof(Properties));	
+	properties_init(p->next);
+	p->next->dispose = dispose;
+	p->next->item.key = strdup(key);
+	p->next->item.value.ud = value;	
+	p->next->item.typ = PROPERTY_TYP_USERDATA;	
+	return p->next;
 }
 
 Properties* properties_append_int(Properties* self, const char* key, int value, int min, int max)
 {		
-	Properties* ptr;
+	Properties* p;
 
 	if (!self) {
 		return 0;
 	}
-	ptr = self;	
-	while (ptr->next != 0) {
-		ptr = ptr->next;		
+	p = self;	
+	while (p->next != 0) {
+		p = p->next;		
 	}
-	ptr->next = (Properties*) malloc(sizeof(Properties));
-	properties_init(ptr->next);
-	ptr->next->item.key = strdup(key);
-	ptr->next->item.value.i = value;	
-	ptr->next->item.typ = PROPERTY_TYP_INTEGER;
-	return ptr->next;
+	p->next = (Properties*) malloc(sizeof(Properties));
+	properties_init(p->next);
+	p->next->item.key = strdup(key);
+	p->next->item.value.i = value;	
+	p->next->item.typ = PROPERTY_TYP_INTEGER;
+	return p->next;
 }
 
 Properties* properties_append_double(Properties* self, const char* key, double value, double min, double max)
 {
-	Properties* ptr;
+	Properties* p;
 
 	if (!self) {
 		return 0;
 	}
-	ptr = self;	
-	while (ptr->next != 0) {
-		ptr = ptr->next;		
+	p = self;	
+	while (p->next != 0) {
+		p = p->next;		
 	}
-	ptr->next = (Properties*) malloc(sizeof(Properties));
-	properties_init(ptr->next);
-	ptr->next->item.key = strdup(key);
-	ptr->next->item.value.d = value;	
-	ptr->next->item.typ = PROPERTY_TYP_DOUBLE;
-	return ptr->next;
+	p->next = (Properties*) malloc(sizeof(Properties));
+	properties_init(p->next);
+	p->next->item.key = strdup(key);
+	p->next->item.value.d = value;	
+	p->next->item.typ = PROPERTY_TYP_DOUBLE;
+	return p->next;
 }
 
 
 Properties* properties_append_choice(Properties* self, const char* key, int value)
 {
-	Properties* ptr;
+	Properties* p;
 
 	if (!self) {
 		return 0;
 	}
-	ptr = self;	
-	while (ptr->next != 0) {
-		ptr = ptr->next;		
+	p = self;	
+	while (p->next != 0) {
+		p = p->next;		
 	}
-	ptr->next = (Properties*) malloc(sizeof(Properties));
-	properties_init(ptr->next);
-	ptr->next->item.key = strdup(key);
-	ptr->next->item.value.i = value;	
-	ptr->next->item.typ = PROPERTY_TYP_CHOICE;	
-	ptr->next->item.hint = PROPERTY_HINT_LIST;	
-	return ptr->next;
+	p->next = (Properties*) malloc(sizeof(Properties));
+	properties_init(p->next);
+	p->next->item.key = strdup(key);
+	p->next->item.value.i = value;	
+	p->next->item.typ = PROPERTY_TYP_CHOICE;	
+	p->next->item.hint = PROPERTY_HINT_LIST;	
+	return p->next;
 }
 
 Properties* properties_read(Properties* self, const char* key)
 {
-	Properties* ptr;	
+	Properties* p;	
 
-	ptr = self;
-	while (ptr != 0) {				
-		if (ptr->item.key && strcmp(key, ptr->item.key) == 0) {
+	p = self;
+	while (p != 0) {				
+		if (p->item.key && strcmp(key, p->item.key) == 0) {
 			break;
 		}
-		ptr = ptr->next;		
+		p = p->next;		
 	}	
-	return ptr;
+	return p;
 }
 
 void properties_readint(Properties* properties, const char* key, int* value, int defaultvalue)
@@ -190,15 +192,29 @@ void properties_readdouble(Properties* properties, const char* key, double* valu
 	}
 }
 
+void properties_readstring(Properties* properties, const char* key, char** text, char* defaulttext)
+{
+	if (!properties) {
+		*text = defaulttext;
+	} else {
+		Properties* property = properties_read(properties, key);
+		if (property && property->item.typ == PROPERTY_TYP_STRING) {
+			*text = property->item.value.s;
+		} else {
+			*text = defaulttext;
+		}
+	}
+}
+
 void properties_write_string(Properties* self, const char* key, const char* value)
 {
-	Properties* ptr = properties_read(self, key);
-	if (ptr) {
-		if (ptr->item.typ == PROPERTY_TYP_STRING) {
-			free(ptr->item.value.s);
+	Properties* p = properties_read(self, key);
+	if (p) {
+		if (p->item.typ == PROPERTY_TYP_STRING) {
+			free(p->item.value.s);
 		}
-		ptr->item.value.s = strdup(value);
-		ptr->item.typ = PROPERTY_TYP_STRING;
+		p->item.value.s = strdup(value);
+		p->item.typ = PROPERTY_TYP_STRING;
 	} else {
 		properties_append_string(self, key, value);
 	}
@@ -206,10 +222,10 @@ void properties_write_string(Properties* self, const char* key, const char* valu
 
 void properties_write_int(Properties* self, const char* key, int value)
 {
-	Properties* ptr = properties_read(self, key);
-	if (ptr) {		
-		ptr->item.value.i = value;
-		ptr->item.typ = PROPERTY_TYP_INTEGER;		
+	Properties* p = properties_read(self, key);
+	if (p) {		
+		p->item.value.i = value;
+		p->item.typ = PROPERTY_TYP_INTEGER;		
 	} else {
 		properties_append_int(self, key, value, 0, 0);
 	}
@@ -217,10 +233,10 @@ void properties_write_int(Properties* self, const char* key, int value)
 
 void properties_write_double(Properties* self, const char* key, double value)
 {
-	Properties* ptr = properties_read(self, key);
-	if (ptr) {		
-		ptr->item.value.d = value;
-		ptr->item.typ = PROPERTY_TYP_DOUBLE;		
+	Properties* p = properties_read(self, key);
+	if (p) {		
+		p->item.value.d = value;
+		p->item.typ = PROPERTY_TYP_DOUBLE;		
 	} else {
 		properties_append_double(self, key, value, 0, 0);
 	}
@@ -236,21 +252,56 @@ void properties_enumerate(Properties* self, void* t, int (*enumproc)(void* self,
 
 int properties_enumerate_rec(Properties* self)
 {
-	Properties* ptr;
-	ptr = self;
-	while (ptr != 0) {								
-		if (!callback(target, ptr, level)) {
+	Properties* p;
+	p = self;
+	while (p != 0) {								
+		if (!callback(target, p, level)) {
 			return 0;
 		}		
-		if (ptr->children) {
+		if (p->children) {
 			++level;
-			if (!properties_enumerate_rec(ptr->children)) {
+			if (!properties_enumerate_rec(p->children)) {
 				--level;
 				return 0;
 			}
 			--level;
 		}
-		ptr = ptr->next;		
+		p = p->next;		
 	}	
 	return 1;
+}
+
+static const char* searchkey;
+static Properties* keyfound;
+
+Properties* properties_find(Properties* self, const char* key)
+{
+	searchkey = key;
+	keyfound = 0;
+	properties_enumerate(self, self, OnSearchPropertiesEnum);
+	return keyfound;		
+}
+
+int OnSearchPropertiesEnum(Properties* self, Properties* property, int level)
+{
+	if (property->item.key && strcmp(property->item.key, searchkey) == 0) {
+		keyfound = property;
+		return 0;
+	}
+	return 1;
+}
+
+const char* properties_key(Properties* self)
+{	
+	return (self) ? self->item.key : "";
+}
+
+int properties_value(Properties* self)
+{
+	return (self) ? self->item.value.i : 0;
+}
+
+const char* properties_valuestring(Properties* self)
+{
+	return (self) ? self->item.value.s : "";
 }

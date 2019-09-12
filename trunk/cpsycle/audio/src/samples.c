@@ -10,6 +10,15 @@ void samples_init(Samples* self)
 
 void samples_dispose(Samples* self)
 {
+	Sample* sample;
+	int slot;
+	
+	for (slot = self->container.keymin; slot <= self->container.keymax; ++slot) {
+		sample = samples_at(self, slot);
+		if (sample) {
+			sample_dispose(sample);			
+		}
+	}
 	DisposeIntHashTable(&self->container);
 }
 

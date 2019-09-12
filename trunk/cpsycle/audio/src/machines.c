@@ -5,13 +5,14 @@
 
 #define BUFFER_SIZE 1024
 
-static int OnEnumMachine(Machines* self, int slot, Machine* machine);
+static int OnEnumFreeMachine(Machines* self, int slot, Machine* machine);
 static int OnEnumPathMachines(Machines* self, int slot, Machine* machine);
 static int machines_freeslot(Machines* self);
 static MachineConnection* findconnection(MachineConnection* connection, int slot);
 static MachineConnectionEntry* allocconnectionentry(int slot, float volume);
 static void appendconnectionentry(MachineConnection** connection,
 		MachineConnectionEntry* entry);
+static MachineConnections* initconnections(Machines* self, int slot);
 static MachineList* compute_path(Machines* self, int slot);
 static void free_machinepath(List* path);
 
@@ -21,7 +22,7 @@ HANDLE hWorkDoneEvent;
 void suspendwork(void)
 {
 	ResetEvent(hGuiEvent);
-	WaitForSingleObject(hWorkDoneEvent, INFINITE);
+	WaitForSingleObject(hWorkDoneEvent, 200);
 }
 
 void resumework(void)
@@ -43,6 +44,7 @@ void machines_init(Machines* self)
 	signal_init(&self->signal_insert);
 	signal_init(&self->signal_removed);
 	signal_init(&self->signal_slotchange);
+	self->filemode = 0;
 }
 
 void machines_dispose(Machines* self)
@@ -50,14 +52,14 @@ void machines_dispose(Machines* self)
 	signal_dispose(&self->signal_insert);
 	signal_dispose(&self->signal_removed);
 	signal_dispose(&self->signal_slotchange);
-	machines_enumerate(self, self, OnEnumMachine);
+	machines_enumerate(self, self, OnEnumFreeMachine);
 	free_machinepath(self->path);
 	DisposeIntHashTable(&self->slots);
 	DisposeIntHashTable(&self->connections);
 	free(self->buffers);
 }
 
-int OnEnumMachine(Machines* self, int slot, Machine* machine)
+int OnEnumFreeMachine(Machines* self, int slot, Machine* machine)
 {
 	machine->dispose(machine);
 	free(machine);
@@ -65,15 +67,24 @@ int OnEnumMachine(Machines* self, int slot, Machine* machine)
 }
 
 void machines_insert(Machines* self, int slot, Machine* machine)
+{	
+	InsertIntHashTable(&self->slots, slot, machine);	
+	if (!machines_connections(self, slot)) {
+		initconnections(self, slot);
+	}	
+	signal_emit(&self->signal_insert, self, 1, slot);	
+}
+
+MachineConnections* initconnections(Machines* self, int slot)
 {
 	MachineConnections* connections;
-	InsertIntHashTable(&self->slots, slot, machine);
+
 	connections = (MachineConnections*) malloc(sizeof(MachineConnections));
 	memset(connections, 0, sizeof(MachineConnections));
 	connections->outputs = 0;
 	connections->inputs = 0;
 	InsertIntHashTable(&self->connections, slot, connections);
-	signal_emit(&self->signal_insert, self, 1, slot);	
+	return connections;
 }
 
 void machines_remove(Machines* self, int slot)
@@ -81,25 +92,20 @@ void machines_remove(Machines* self, int slot)
 	machines_disconnectall(self, slot);
 	suspendwork();
 	RemoveIntHashTable(&self->slots, slot);
-	self->path = compute_path(self, 0);
+	self->path = compute_path(self, MASTER_INDEX);
 	signal_emit(&self->signal_removed, self, 1, slot);
 	resumework();
 }
 
 int machines_append(Machines* self, Machine* machine)
-{
-	MachineConnections* connections;
+{	
 	int slot;
 
 	slot = machines_freeslot(self);	
 	InsertIntHashTable(&self->slots, slot, machine);
-	{
-		connections = (MachineConnections*) malloc(sizeof(MachineConnections));
-		memset(connections, 0, sizeof(MachineConnections));
-		connections->inputs = 0;
-		connections->outputs = 0;
+	if (!machines_connections(self, slot)) {
+		initconnections(self, slot);
 	}
-	InsertIntHashTable(&self->connections, slot, connections);
 	signal_emit(&self->signal_insert, self, 1, slot);
 	return slot;
 }
@@ -138,19 +144,29 @@ int machines_connect(Machines* self, int outputslot, int inputslot)
 	if (!machines_connected(self, outputslot, inputslot)) {		
 		MachineConnections* connections;		
 
-		suspendwork();
+		if (!self->filemode) {
+			suspendwork();
+		}
 		connections = machines_connections(self, outputslot);
+		if (self->filemode && !connections) {
+			connections = initconnections(self, outputslot);
+		}
 		if (connections) {		
 			appendconnectionentry(&connections->outputs,
 				allocconnectionentry(inputslot, 1.f));		
 		}
 		connections = machines_connections(self, inputslot);
-		if (connections) {					
+		if (self->filemode && !connections) {
+			connections = initconnections(self, inputslot);
+		}
+		if (connections) {
 			appendconnectionentry(&connections->inputs,
 				allocconnectionentry(outputslot, 1.f));		
 		}		
-		self->path = compute_path(self, 0);		
-		resumework();
+		if (!self->filemode) {
+			self->path = compute_path(self, MASTER_INDEX);		
+			resumework();
+		}
 		return 1;
 	}
 	return 0;
@@ -180,7 +196,7 @@ void machines_disconnect(Machines* self, int outputslot, int inputslot)
 {	
 	MachineConnections* connections;
 
-	connections = machines_connections(self, outputslot);
+	connections = machines_connections(self, outputslot);	
 	if (connections) {				
 		MachineConnection* p;
 
@@ -196,7 +212,7 @@ void machines_disconnect(Machines* self, int outputslot, int inputslot)
 			free(p->entry);
 			list_remove(&connections->inputs, p);						
 		}
-		self->path = compute_path(self, 0);	
+		self->path = compute_path(self, MASTER_INDEX);	
 		resumework();
 	}	
 }
@@ -241,7 +257,7 @@ void machines_disconnectall(Machines* self, int slot)
 
 int machines_connected(Machines* self, int outputslot, int inputslot)
 {	
-	MachineConnection* p;
+	MachineConnection* p = 0;
 	MachineConnections* connections;	
 
 	connections = machines_connections(self, outputslot);
@@ -343,5 +359,16 @@ int machines_slot(Machines* self)
 
 Machine* machines_master(Machines* self)
 {
-	return machines_at(self, 0);	
+	return machines_at(self, MASTER_INDEX);	
+}
+
+void machines_startfilemode(Machines* self)
+{
+	self->filemode = 1;
+}
+
+void machines_endfilemode(Machines* self)
+{
+	self->path = compute_path(self, MASTER_INDEX);
+	self->filemode = 0;
 }

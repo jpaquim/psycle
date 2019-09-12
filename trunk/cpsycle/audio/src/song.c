@@ -5,31 +5,35 @@
 #include "pattern.h"
 #include "constants.h"
 #include <datacompression.h>
+#include "machinefactory.h"
 
-static void loadpsy3(Song* self, RiffFile* file, char header[9]);
+static void song_initdefaults(Song* self);
+static void song_initproperties(Song* self);
+
+static void loadpsy3(Song* self, RiffFile* file, char header[9],
+	MachineFactory* machinefactory, Properties* workspaceproperties);
 static void readsngi(Song*, RiffFile* file, int size, int version);
-void readseqd(Song* song, RiffFile* file, int size, int version,
+static void readseqd(Song* song, RiffFile* file, int size, int version,
 			  unsigned char* playorder, int* playlength);
 static void readpatd(Song* song, RiffFile* file, int size, int version);
+static void readinsd(Song* song, RiffFile* file, int size, int version);
+static void readmacd(Song* song, RiffFile* file, int size, int version,
+	MachineFactory* machinefactory, Properties* workspaceproperties);
 static void loadpsy2(Song* self, RiffFile* file);
-static void initproperties(Song* self);
+static void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * instrum_name, int fullopen, int loadIdx);
+static Machine* machineloadfilechunk(RiffFile* file, int index, int version,
+	MachineFactory* machinefactory, Machines* machines,
+	Properties* workspaceproperties);
 
 void song_init(Song* self)
-{
-	Pattern* pattern;
-
-	self->properties = properties_create();	
-	initproperties(self);
+{	
 	machines_init(&self->machines);
 	patterns_init(&self->patterns);
 	sequence_init(&self->sequence, &self->patterns);
 	samples_init(&self->samples);
 	instruments_init(&self->instruments);
 	xminstruments_init(&self->xminstruments);	
-	pattern = (Pattern*) malloc(sizeof(Pattern));
-	patterns_insert(&self->patterns, 0, pattern);
-	pattern_init(pattern);	
-	sequence_insert(&self->sequence, sequence_begin(&self->sequence, 0), 0);
+	song_initdefaults(self);	
 }
 
 void song_dispose(Song* self)
@@ -44,8 +48,20 @@ void song_dispose(Song* self)
 	xminstruments_dispose(&self->xminstruments);	
 }
 
-void initproperties(Song* self)
+void song_initdefaults(Song* self)
 {
+	Pattern* pattern;
+	
+	pattern = (Pattern*) malloc(sizeof(Pattern));
+	patterns_insert(&self->patterns, 0, pattern);
+	pattern_init(pattern);	
+	sequence_insert(&self->sequence, sequence_begin(&self->sequence, 0), 0);
+	song_initproperties(self);
+}
+
+void song_initproperties(Song* self)
+{
+	self->properties = properties_create();
 	properties_append_string(self->properties, "title", "Untitled");	
 	properties_append_string(self->properties, "credits", "Unnamed");
 	properties_append_string(self->properties, "comments", "No Comments");
@@ -54,31 +70,35 @@ void initproperties(Song* self)
 	properties_append_int(self->properties, "tracks", 16, 1, 64);
 }
 
-void song_load(Song* self, const char* path)
+void song_load(Song* self, const char* path, MachineFactory* machinefactory, Properties** workspaceproperties)
 {	
 	RiffFile file;
 
 	if (rifffile_open(&file, (char*) path))
 	{
-		char header[9];
-
+		char header[9];		
+		*workspaceproperties = 0;
 		sequence_clear(&self->sequence);
 		patterns_clear(&self->patterns);
+		machines_startfilemode(&self->machines);
 		rifffile_read(&file, header, 8);
 		header[8]=0;		
 		if (strcmp(header,"PSY3SONG")==0) {			
-			loadpsy3(self, &file, header);
+			*workspaceproperties = properties_create();
+			loadpsy3(self, &file, header, machinefactory, *workspaceproperties);
 		} else
 		if (strcmp(header,"PSY2SONG")==0) {
 			loadpsy2(self, &file);
 		} else {
 
 		}
+		machines_endfilemode(&self->machines);
 		rifffile_close(&file);
 	}
 }
 
-void loadpsy3(Song* self, RiffFile* file, char header[9])
+void loadpsy3(Song* self, RiffFile* file, char header[9], MachineFactory* machinefactory,
+			  Properties* workspaceproperties)
 {
 	unsigned int version = 0;
 	unsigned int size = 0;
@@ -89,7 +109,10 @@ void loadpsy3(Song* self, RiffFile* file, char header[9])
 	int chunkcount = 0;		
 	long filesize = rifffile_filesize(file);
 	unsigned char playorder[MAX_SONG_POSITIONS];
+	Properties* machinesproperties;	
 
+	machinesproperties = properties_append_int(workspaceproperties, "machines", 0, 0, 0);
+	
 	rifffile_read(file, &version,sizeof(version));
 	rifffile_read(file, &size,sizeof(size));
 	rifffile_read(file, &chunkcount,sizeof(chunkcount));
@@ -149,14 +172,17 @@ void loadpsy3(Song* self, RiffFile* file, char header[9])
 			rifffile_read(file, &version,sizeof(version));
 			rifffile_read(file, &size,sizeof(size));
 			chunkcount--;
-			rifffile_skip(file, size);
+			readmacd(self, file, size, version, machinefactory,
+				machinesproperties);			
+			// rifffile_skip(file, size);
 		} else
 		if (strcmp(header,"INSD")==0) {
 			int curpos=0; curpos; // not used
 			rifffile_read(file, &version,sizeof(version));
 			rifffile_read(file, &size,sizeof(size));
 			chunkcount--;
-			rifffile_skip(file, size);
+			readinsd(self, file, size, version);
+			// rifffile_skip(file, size);
 		} else {
 			// we are not at a valid header for some weird reason.  
 			// probably there is some extra data.
@@ -374,7 +400,7 @@ void readpatd(Song* song, RiffFile* file, int size, int version)
 				}
 				pattern->length = 64 * 0.25;								
 				free(pdest);
-				pdest = 0;			
+				pdest = 0;				
 			}
 		}
 		//\ fix for a bug existing in the song saver in the 1.7.x series
@@ -391,6 +417,376 @@ void readpatd(Song* song, RiffFile* file, int size, int version)
 		}
 	}
 	rifffile_seek(file, begins + size);
+}
+
+void readinsd(Song* song, RiffFile* file, int size, int version)
+{	
+///\name Loop stuff
+	///\{
+	unsigned char _loop;
+	int _lines;
+	///\}
+
+	///\verbatim
+	/// NNA values overview:
+	///
+	/// 0 = Note Cut      [Fast Release 'Default']
+	/// 1 = Note Release  [Release Stage]
+	/// 2 = Note Continue [No NNA]
+	///\endverbatim
+	unsigned char _NNA;
+
+
+	int sampler_to_use; // Sampler machine index for lockinst.
+	unsigned char _LOCKINST;	// Force this instrument number to change the selected machine to use a specific sampler when editing (i.e. when using the pc or midi keyboards, not the notes already existing in a pattern)
+
+	///\name Amplitude Envelope overview:
+	///\{
+	/// Attack Time [in Samples at 44.1Khz, independently of the real samplerate]
+	int ENV_AT;	
+	/// Decay Time [in Samples at 44.1Khz, independently of the real samplerate]
+	int ENV_DT;	
+	/// Sustain Level [in %]
+	int ENV_SL;	
+	/// Release Time [in Samples at 44.1Khz, independently of the real samplerate]
+	int ENV_RT;	
+	///\}
+	
+	///\name Filter 
+	///\{
+	/// Attack Time [in Samples at 44.1Khz]
+	int ENV_F_AT;	
+	/// Decay Time [in Samples at 44.1Khz]
+	int ENV_F_DT;	
+	/// Sustain Level [0..128]
+	int ENV_F_SL;	
+	/// Release Time [in Samples at 44.1Khz]
+	int ENV_F_RT;	
+
+	/// Cutoff Frequency [0-127]
+	int ENV_F_CO;	
+	/// Resonance [0-127]
+	int ENV_F_RQ;	
+	/// EnvAmount [-128,128]
+	int ENV_F_EA;	
+	/// Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
+	int ENV_F_TP;	
+	///\}
+	unsigned char _RPAN;
+	unsigned char _RCUT;
+	unsigned char _RRES;
+	char instrum_name[32];
+
+	int val;
+	int pan=128;
+	int numwaves;
+	int i;
+	int index;
+
+	size_t begins = rifffile_getpos(file);
+	if((version&0xffff0000) == VERSION_MAJOR_ZERO)
+	{
+		rifffile_read(file, &index, sizeof index);
+		if(index < MAX_INSTRUMENTS)
+		{	
+			Instrument* instrument;
+
+			instrument = malloc(sizeof(Instrument));
+			instrument_init(instrument);
+			rifffile_read(file, &_loop, sizeof(_loop));
+			rifffile_read(file, &_lines, sizeof(_lines));
+			rifffile_read(file, &_NNA, sizeof(_NNA));
+
+			instrument->nna = _NNA;
+
+			rifffile_read(file, &ENV_AT, sizeof(ENV_AT));
+			rifffile_read(file, &ENV_DT, sizeof(ENV_DT));
+			rifffile_read(file, &ENV_SL, sizeof(ENV_SL));
+			rifffile_read(file, &ENV_RT, sizeof(ENV_RT));
+
+			instrument->volumeenvelope.attack = ENV_AT * 1.f/44100;
+			instrument->volumeenvelope.decay = ENV_DT * 1.f/44100;
+			instrument->volumeenvelope.sustain = ENV_SL / 100.f;
+			instrument->volumeenvelope.release = ENV_RT * 1.f/44100;
+			
+			rifffile_read(file, &ENV_F_AT, sizeof(ENV_F_AT));
+			rifffile_read(file, &ENV_F_DT, sizeof(ENV_F_DT));
+			rifffile_read(file, &ENV_F_SL, sizeof(ENV_F_SL));
+			rifffile_read(file, &ENV_F_RT, sizeof(ENV_F_RT));
+
+			instrument->filterenvelope.attack = ENV_AT * 1.f/44100;
+			instrument->filterenvelope.decay = ENV_F_DT * 1.f/44100;
+			instrument->filterenvelope.sustain = ENV_F_SL / 128.f;
+			instrument->filterenvelope.release = ENV_F_RT * 1.f/44100;
+
+			rifffile_read(file, &ENV_F_CO, sizeof(ENV_F_CO));
+			rifffile_read(file, &ENV_F_RQ, sizeof(ENV_F_RQ));
+			rifffile_read(file, &ENV_F_EA, sizeof(ENV_F_EA));
+
+			instrument->filtercutoff = ENV_F_CO / 127.f;
+			instrument->filterres = ENV_F_RQ / 127.f;
+			instrument->filtermodamount = ENV_F_EA / 255.f + 0.5f;
+			
+			rifffile_read(file, &val, sizeof(val));
+			ENV_F_TP = val;
+
+
+			rifffile_read(file, &pan, sizeof(pan));
+			rifffile_read(file, &_RPAN, sizeof(_RPAN));
+			rifffile_read(file, &_RCUT, sizeof(_RCUT));
+			rifffile_read(file, &_RRES, sizeof(_RRES));
+
+			instrument->_RPAN = _RPAN;
+			instrument->_RCUT = _RCUT;
+			instrument->_RRES = _RRES;			
+			
+			rifffile_readstring(file, instrum_name,sizeof(instrum_name));
+
+			// now we have to read waves
+
+			
+			rifffile_read(file, &numwaves, sizeof(numwaves));
+			for (i = 0; i < numwaves; i++)
+			{
+				loadwavesubchunk(song, file, index, pan, instrum_name, 1, i );
+			}
+
+			if ((version & 0xFF) >= 1) 
+			{ //revision 1 or greater
+				rifffile_read(file, &sampler_to_use, sizeof(sampler_to_use));
+				rifffile_read(file, &_LOCKINST, sizeof(_LOCKINST));
+			}
+
+			//Ensure validity of values read
+			if (sampler_to_use < 0 || sampler_to_use >= MAX_BUSES) { _LOCKINST=FALSE; sampler_to_use = -1; }
+			//Truncate to 220 samples boundaries, and ensure it is not zero.
+			ENV_AT = (ENV_AT/220)*220; if (ENV_AT <=0) ENV_AT=1;
+			ENV_DT = (ENV_DT/220)*220; if (ENV_DT <=0) ENV_DT=1;
+			if (ENV_RT == 16) ENV_RT = 220;
+			else { ENV_RT = (ENV_RT/220)*220; if (ENV_RT <=0) ENV_RT=1; }
+			ENV_F_AT = (ENV_F_AT/220)*220; if (ENV_F_AT <=0) ENV_F_AT=1;
+			ENV_F_DT = (ENV_F_DT/220)*220; if (ENV_F_DT <=0) ENV_F_DT=1;
+			ENV_F_RT = (ENV_F_RT/220)*220; if (ENV_F_RT <=0) ENV_F_RT=1;			
+			instrument_setname(instrument, instrum_name);
+			instruments_insert(&song->instruments, instrument, index);			
+		}
+	}
+	rifffile_seek(file, begins + size);
+}
+
+void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * instrum_name, int fullopen, int loadIdx)
+{
+	char Header[8];
+	UINT version;
+	UINT size;
+
+	rifffile_read(file, &Header,4);
+	Header[4] = 0;
+	rifffile_read(file, &version,sizeof(version));
+	rifffile_read(file, &size,sizeof(size));
+
+	//fileformat supports several waves, but sampler only supports one.
+	if (strcmp(Header,"WAVE")==0 && version <= CURRENT_FILE_VERSION_WAVE || loadIdx == 0)
+	{
+		Sample* wave;
+		//This index represented the index position of this wave for the instrument. 0 to 15.
+		unsigned int legacyindex;
+		unsigned short volume = 0;
+		int tmp = 0;
+		unsigned char doloop = 0;
+		char dummy[32];
+		unsigned int packedsize;
+		byte* pData;
+		short* pDest;
+		
+		wave = malloc(sizeof(Sample));
+		sample_init(wave);
+
+		wave->panfactor = (float) pan / 256.f ; //(value_mapper::map_256_1(pan));
+		wave->samplerate = 44100;
+				
+		rifffile_read(file, &legacyindex,sizeof(legacyindex));
+		rifffile_read(file, &wave->numframes, sizeof(wave->numframes));
+		rifffile_read(file, &volume, sizeof volume);
+		wave->globalvolume = volume*0.01f;
+		rifffile_read(file, &wave->loopstart, sizeof wave->loopstart);
+		rifffile_read(file, &wave->loopend, sizeof wave->loopend);
+				
+		rifffile_read(file, &tmp, sizeof(tmp));
+		wave->tune = tmp;
+		rifffile_read(file, &tmp, sizeof(tmp));
+		//Current sampler uses 100 cents. Older used +-256
+		tmp = (int)((float)tmp/2.56f);
+		wave->finetune = tmp;		
+		rifffile_read(file, &doloop, sizeof(doloop));
+		wave->looptype = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
+		rifffile_read(file, &wave->stereo, sizeof(&wave->stereo));
+		//Old sample name, never used.
+		rifffile_readstring(file, dummy,sizeof(dummy));
+		wave->name = strdup(instrum_name);
+				
+		rifffile_read(file, &packedsize,sizeof(packedsize));
+				
+		if ( fullopen )
+		{
+			unsigned int i;
+			pData = malloc(packedsize+4);// +4 to avoid any attempt at buffer overflow by the code
+			rifffile_read(file, pData, packedsize);
+			sounddesquash(pData, &pDest);		
+			free(pData);
+			wave->channels.samples[0] = malloc(sizeof(float)*wave->numframes);
+			for (i = 0; i < wave->numframes; i++) {
+				short val = (short) pDest[i];
+				wave->channels.samples[0][i] = (float) val;				
+			 }
+			free(pDest);
+			pData = 0;			
+		}
+		else
+		{
+			rifffile_skip(file, packedsize);
+
+			wave->channels.samples[0] = 0;
+		}
+
+		if (wave->stereo)
+		{
+			rifffile_read(file, &packedsize,sizeof(packedsize));
+			if ( fullopen )
+			{
+				unsigned int i;
+				pData = malloc(packedsize+4); // +4 to avoid any attempt at buffer overflow by the code
+				rifffile_read(file, pData,packedsize);
+				sounddesquash(pData, &pDest);
+				free(pData);
+				wave->channels.samples[1] = malloc(sizeof(float)*wave->numframes);
+				for (i = 0; i < wave->numframes; i++) {
+					short val = (short) pDest[i];
+					wave->channels.samples[1][i] = (float) val;					
+				}
+				free(pDest);
+				pData = 0;
+			}
+			else
+			{
+				rifffile_skip(file, packedsize);
+				wave->channels.samples[1] = 0;
+			}
+		}
+		samples_insert(&song->samples, wave, instrIdx);
+	}
+	else
+	{
+		rifffile_skip(file, size);
+	}
+}
+
+
+void readmacd(Song* song, RiffFile* file, int size, int version, MachineFactory* machinefactory,
+			  Properties* machinesproperties)
+{
+	size_t begins = rifffile_getpos(file);
+	if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
+	{
+		int index;
+		rifffile_read(file, &index, sizeof index);
+		if(index < MAX_MACHINES)
+		{			
+			Machine* machine;
+			Properties* machineproperties;
+
+			if (!machinesproperties->children) {
+				machinesproperties->children = properties_create();
+			}
+			machineproperties = properties_append_int(machinesproperties->children, "machine", index, 0, MAX_MACHINES);
+			machine = machineloadfilechunk(file, index, version, machinefactory,
+				&song->machines, machineproperties);
+			if (machine) {
+				machines_insert(&song->machines, index, machine);
+			}
+		}
+	}
+	rifffile_seek(file, begins + size);
+}
+
+Machine* machineloadfilechunk(RiffFile* file, int index, int version,
+	MachineFactory* machinefactory, Machines* machines, Properties* properties)
+{
+	// assume version 0 for now	
+	Machine* machine;
+	int type;
+	char modulename[256];
+	char editname[32];
+	int i;
+
+	properties->children = properties_create();
+	rifffile_read(file, &type,sizeof(type));
+	rifffile_readstring(file, modulename, 256);
+	machine = machinefactory_make(machinefactory, type, modulename);
+	if (!machine) {
+		machine = machinefactory_make(machinefactory, MACH_DUMMY, modulename);
+		type = MACH_DUMMY;
+	}
+	
+	{
+		unsigned char bypass;
+		unsigned char mute;
+		int panning;
+		int x;
+		int y;
+		// char _editName[32];
+
+
+		rifffile_read(file, &bypass, sizeof(bypass));
+		rifffile_read(file, &mute, sizeof(mute));
+		rifffile_read(file, &panning, sizeof(panning));
+		rifffile_read(file, &x, sizeof(x));
+		rifffile_read(file, &y, sizeof(y));
+		rifffile_skip(file, 2*sizeof(int));	// numInputs, numOutputs		
+		properties_append_int(properties->children, "x", x, 0, 0);
+		properties_append_int(properties->children, "y", y, 0, 0);
+	}
+
+	for(i = 0; i < MAX_CONNECTIONS; i++)
+	{
+		int input;
+		int output;
+		float inconvol;
+		float wiremultiplier;
+		unsigned char connection;
+		unsigned char incon;
+
+		// Incoming connections Machine number
+		rifffile_read(file, &input ,sizeof(input));	
+		// Outgoing connections Machine number
+		rifffile_read(file, &output, sizeof(output)); 
+		// Incoming connections Machine vol
+		rifffile_read(file, &inconvol, sizeof(inconvol));
+		// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+		rifffile_read(file, &wiremultiplier, sizeof(wiremultiplier));	
+		// Outgoing connections activated
+		rifffile_read(file, &connection, sizeof(connection));
+		// Incoming connections activated
+		rifffile_read(file, &incon, sizeof(incon));
+		if (output != -1) {					
+			machines_connect(machines, index, output);
+		}
+		//if (input != -1) {				
+		//	machines_connect(machines, input, index);
+		// }
+	}
+
+	rifffile_readstring(file, editname, 32);
+	if (type == MACH_DUMMY) {
+		char txt[40];
+		strcpy(txt, "X!");
+		strcat(txt, editname);
+		properties_append_string(properties->children, "editname", txt);
+	} else {
+		properties_append_string(properties->children, "editname", editname);
+	}
+
+	return machine;	
 }
 
 void loadpsy2(Song* self, RiffFile* file)

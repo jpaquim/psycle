@@ -21,33 +21,41 @@ void plugincatcher_dispose(PluginCatcher* self)
 
 void plugincatcher_scan(PluginCatcher* self, const char* path, int type)
 {
-	if (type == 3) {
-		CMachineInfo* pInfo;
-		pInfo = malloc(sizeof(CMachineInfo));
-		memset(pInfo, 0, sizeof(CMachineInfo));
-		pInfo->Flags = GENERATOR | 32;
-		pInfo->Name = strdup("Sampler");
-		pInfo->ShortName = strdup("Sampler");
-		pInfo->Author = strdup("psycledelics");
-		pInfo->Command = strdup("");
-		properties_append_userdata(self->plugins, "internal", pInfo, OnDestroyMachineInfo);	
+	if (type == MACH_SAMPLER) {
+		Properties* properties;
+		
+		properties = properties_append_int(self->plugins, path, type, 0, 0);		
+		properties->children = properties_create();
+		properties_append_int(properties->children, "mode", GENERATOR, 0, 0);
+		properties_append_string(properties->children, "name", "Sampler");
+		properties_append_string(properties->children, "shortname", "Sampler");
+		properties_append_string(properties->children, "author", "psycedelics");
+		properties_append_string(properties->children, "command", "");		
 	} else {
 		dir_enum(self, path, "*.dll", type, OnEnumDir);
 	}
 }
 
-int OnEnumDir(PluginCatcher* self, const char* path, int flag)
+int OnEnumDir(PluginCatcher* self, const char* path, int type)
 {
 	CMachineInfo* pInfo;
 
-	if (flag == 0) {
+	if (type == MACH_PLUGIN) {
 		pInfo = plugin_psycle_test(path);
 	} else
-	if (flag == 1) {
+	if (type == MACH_VST) {
 		pInfo = plugin_vst_test(path);
 	}
 	if (pInfo) {
-		properties_append_userdata(self->plugins, path, pInfo, OnDestroyMachineInfo);
+		Properties* properties;
+
+		properties = properties_append_int(self->plugins, path, type, 0, 0);		
+		properties->children = properties_create();
+		properties_append_int(properties->children, "mode", pInfo->Flags, 0, 0);
+		properties_append_string(properties->children, "name", pInfo->Name);
+		properties_append_string(properties->children, "shortname", pInfo->ShortName);
+		properties_append_string(properties->children, "author", pInfo->Author);
+		properties_append_string(properties->children, "command", pInfo->Command);		
 	}	
 	return 1;
 }
