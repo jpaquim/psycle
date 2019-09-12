@@ -80,7 +80,8 @@ typedef struct Sample {
 	short finetune;
 	float panfactor;
 	int panenabled;
-	int surround;
+	unsigned char surround;
+	unsigned char stereo;
 	Vibrato vibrato;
 } Sample;
 

@@ -45,7 +45,7 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 
 void SelectMachineBarSlot(MachineBar* self, int slot)
 {
-	ui_combobox_setcursel(&self->machinebox, slot - 1);
+	ui_combobox_setcursel(&self->machinebox, slot);
 }
 
 void OnSize(MachineBar* self, ui_component* sender, int width, int height)
@@ -71,14 +71,14 @@ void OnMachinesInsert(MachineBar* self, Machines* machines, int slot)
 {	
 	ui_combobox_clear(&self->machinebox);
 	machines_enumerate(self->machines, self, OnEnumMachines);
-	ui_combobox_setcursel(&self->machinebox, machines->slot - 1);
+	ui_combobox_setcursel(&self->machinebox, machines->slot);
 }
 
 void OnMachinesRemoved(MachineBar* self, Machines* machines, int slot)
 {
 	ui_combobox_clear(&self->machinebox);
 	machines_enumerate(self->machines, self, OnEnumMachines);
-	ui_combobox_setcursel(&self->machinebox, machines->slot - 1);	
+	ui_combobox_setcursel(&self->machinebox, machines->slot);	
 }
 
 int OnEnumMachines(MachineBar* self, int slot, Machine* machine)
@@ -95,13 +95,13 @@ void OnMachineBoxSelChange(MachineBar* self, ui_component* sender, int sel)
 {	
 	List* slots = self->machinebox.signal_selchanged.slots;
 	self->machinebox.signal_selchanged.slots = 0;
-	machines_changeslot(self->machines, sel + 1);	
+	machines_changeslot(self->machines, sel);	
 	self->machinebox.signal_selchanged.slots = slots;
 }
 
 void OnMachinesSlotChange(MachineBar* self, Machines* machines, int slot)
 {
-	ui_combobox_setcursel(&self->machinebox, slot - 1);	
+	ui_combobox_setcursel(&self->machinebox, slot);	
 }
 
 void BuildInstrumentList(MachineBar* self)

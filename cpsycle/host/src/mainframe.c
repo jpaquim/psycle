@@ -21,8 +21,6 @@ static void OnSize(MainFrame* self, ui_component* sender, int width, int height)
 static void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata);
 static void OnTimer(MainFrame* self, ui_component* sender, int timerid);
 static void OnSequenceSelChange(MainFrame* self, SequenceEntry* entry);
-static void OnTabBarChange(MainFrame* self, ui_component* sender, int tabindex);
-static void SetActiveView(MainFrame* self, ui_component* view);
 static void OnPlay(MainFrame* self, ui_component* sender);
 static void OnStop(MainFrame* self, ui_component* sender);
 static void OnLoadSong(MainFrame* self, ui_component* sender);
@@ -45,6 +43,7 @@ void InitMainFrame(MainFrame* self)
 	
 	workspace_init(&self->workspace);	
 	self->player = &self->workspace.player;
+	self->firstshow = 1;
 	ui_frame_init(&self->component, 0);
 	// ui_component_resize(&self->component, 800, 600);
 	ui_component_settitle(&self->component, "Psycle");
@@ -73,7 +72,6 @@ void InitMainFrame(MainFrame* self)
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Settings");
 	tabbar_select(&self->tabbar, 0);	
-	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
 	InitPlayBar(&self->playbar, &self->component);
 	ui_component_move(&self->playbar.component, 320, 2);
 	ui_component_resize(&self->playbar.component, 160, 25);	
@@ -88,30 +86,25 @@ void InitMainFrame(MainFrame* self)
 	InitLinesPerBeatBar(&self->linesperbeatbar, &self->component, &self->workspace.player);
 	ui_component_move(&self->linesperbeatbar.component, 220, 25);
 	ui_component_resize(&self->linesperbeatbar.component, 250, 20);	
-	InitSettingsView(&self->settingsview, &self->component, self->workspace.config);
-	ui_component_move(&self->settingsview.component, 150, toolbarheight + tabbarheight);
-	ui_component_hide(&self->settingsview.component);
-	InitMachineView(&self->machineview, &self->component, &self->workspace);
-	ui_component_move(&self->machineview.component, 150, toolbarheight + tabbarheight);	
-	ui_component_hide(&self->machineview.component);
-	self->patternview.trackerview.grid.noteinputs = &self->noteinputs;	
-	InitPatternView(&self->patternview, &self->component, &self->workspace);
-	InitSamplesView(&self->samplesview, &self->component, &self->workspace);	
-	InitInstrumentsView(&self->instrumentsview, &self->component, &self->workspace);
+	ui_notebook_init(&self->notebook, &self->component);
+	ui_component_move(&self->notebook.component, 150, toolbarheight + tabbarheight);
+	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
+	/// init notebook views
+	InitMachineView(&self->machineview, &self->notebook.component, &self->component, &self->workspace);
+	InitPatternView(&self->patternview, &self->notebook.component, &self->component, &self->workspace);	
+	self->patternview.trackerview.grid.noteinputs = &self->noteinputs;		
+	InitSamplesView(&self->samplesview, &self->notebook.component, &self->component, &self->workspace);	
+	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
+		&self->component, &self->workspace);
 	self->instrumentsview.sampulseview.notemapedit.noteinputs = &self->noteinputs;	
+	InitSettingsView(&self->settingsview, &self->notebook.component,
+		self->workspace.config);	
 	greet_init(&self->greet, &self->component);
-	ui_component_hide(&self->machineview.component);
-	ui_component_move(&self->patternview.component, 150, toolbarheight + tabbarheight);
-	ui_component_move(&self->samplesview.component, 150, toolbarheight + tabbarheight);
-	ui_component_hide(&self->samplesview.component);
-	ui_component_move(&self->instrumentsview.component, 150, toolbarheight + tabbarheight);
-	ui_component_hide(&self->instrumentsview.component);
-	ui_component_hide(&self->greet.component);
-	self->activeview = &self->patternview.component;
+	ui_component_hide(&self->greet.component);	
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);	
 	ui_component_move(&self->sequenceview.component, 0, toolbarheight);
-	SetActiveView(self, &self->machineview.component);
+	ui_notebook_setpage(&self->notebook, 0);
 	/*InitSongProperties(&songproperties, &self->component);	
 	ui_menu_init(&menu, "", 0);
 	ui_menu_init(&menu_file, "File", OnFileMenu);		
@@ -124,7 +117,7 @@ void InitMainFrame(MainFrame* self)
 	ui_statusbar_settext(&statusbar, 1, "Field2");
 	ui_statusbar_settext(&statusbar, 2, "Field3");	
 
-	SetTimer(self->component.hwnd, 100, 50, 0);
+	SetTimer(self->component.hwnd, 100, 50, 0);	
 }
 
 void InitMenu(MainFrame* self)
@@ -148,11 +141,13 @@ void Destroy(MainFrame* self, ui_component* component)
 void OnSize(MainFrame* self, ui_component* sender, int width, int height)
 {
 	int statusbarheight = 30;
-	self->cx = width;
-	self->cy = height;
 	ui_component_resize(&self->sequenceview.component, 100, height - statusbarheight - toolbarheight);
-	ui_component_resize(self->activeview, width - 150, height - statusbarheight - toolbarheight - tabbarheight);
+	ui_component_resize(&self->notebook.component, width - 150, height - statusbarheight - toolbarheight - tabbarheight);
 	SendMessage(statusbar.component.hwnd, WM_SIZE, 0, 0);
+	if (self->firstshow) {
+		machineview_align(&self->machineview);
+		self->firstshow = 0;
+	}
 }
 
 void OnFileMenu(ui_menu* menu)
@@ -160,38 +155,25 @@ void OnFileMenu(ui_menu* menu)
    PostQuitMessage(0);  
 }
 
-void SetActiveView(MainFrame* self, ui_component* view)
-{
-	int statusbarheight = 30;
-	
-	if (self->activeview) {
-		ui_component_hide(self->activeview);
-	}
-	self->activeview = view;
-	ui_component_show(self->activeview);
-	ui_component_resize(self->activeview, self->cx - 150, self->cy - toolbarheight - statusbarheight - tabbarheight);	
-	ui_component_setfocus(self->activeview);
-}
-
 void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata)
 {	
 	if (keycode == VK_F2) {
-		SetActiveView(self, &self->machineview.component);
+//		SetActiveView(self, &self->machineview.component);
 	} else
 	if (keycode == VK_F5) {
 		player_start(self->player);		
 	} else
 	if (keycode == VK_F3) {
-		SetActiveView(self, &self->patternview.component);		
+//		SetActiveView(self, &self->patternview.component);		
 	} else	 
 	if (keycode == VK_F6) {
-		SetActiveView(self, &self->settingsview.component);		
+//		SetActiveView(self, &self->settingsview.component);		
 	} else
 	if (keycode == VK_F8) {
 		player_stop(self->player);		
 	} else
 	if (keycode == VK_F9) {
-		song_load(self->player->song, "Example - mixerdemo.psy");
+		OnLoadSong(self, &self->component);		
 	} else 
 	if (keycode == VK_F4) {
 		Properties* properties = properties_create();
@@ -207,7 +189,8 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 			Machine* machine;
 			int base;
 			base = 48;
-			machine = machines_at(&self->machineview.player->song->machines, 1);
+			machine = machines_at(&self->workspace.song->machines,
+				self->workspace.song->machines.slot);
 			if (machine) {				
 				PatternEvent event = { cmd + base, 0, 0, 0, 0 };
 				machine->seqtick(machine, 0, &event);
@@ -222,29 +205,6 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 
 	_snprintf(buffer, 20, "%.4f", player_position(self->patternview.trackerview.grid.player)); 
 	ui_statusbar_settext(&statusbar, 0, buffer);	
-}
-
-void OnTabBarChange(MainFrame* self, ui_component* sender, int tabindex)
-{
-	switch (tabindex) {
-		case 0:
-			SetActiveView(self, &self->machineview.component);
-		break;
-		case 1:
-			SetActiveView(self, &self->patternview.component);
-		break;		
-		case 2:
-			SetActiveView(self, &self->samplesview.component);
-		break;
-		case 3:
-			SetActiveView(self, &self->instrumentsview.component);
-		break;
-		case 4:
-			SetActiveView(self, &self->settingsview.component);
-		break;
-		default:;
-		break;
-	};
 }
 
 void OnPlay(MainFrame* self, ui_component* sender)

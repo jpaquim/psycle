@@ -3,63 +3,40 @@
 
 #include "patternview.h"
 
-static void OnPatternViewSize(PatternView* self, ui_component* sender, int width, int height);
-static void OnTabBarChange(PatternView* self, ui_component* sender, int tabindex);
+static void OnSize(PatternView* self, ui_component* sender, int width, int height);
 static void OnShow(PatternView* self, ui_component* sender);
 static void OnHide(PatternView* self, ui_component* sender);
 static void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb);
 static void OnSongChanged(PatternView* self, Workspace* sender);
 
-void InitPatternView(PatternView* self, ui_component* parent, Workspace* workspace)
+void InitPatternView(PatternView* self, ui_component* parent,
+	ui_component* tabbarparent, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
-	InitTrackerView(&self->trackerview, &self->component, &workspace->player);
-	signal_connect(&self->component.signal_size, self, OnPatternViewSize);
+	ui_notebook_init(&self->notebook, &self->component);
+	InitTrackerView(&self->trackerview, &self->notebook.component, &workspace->player);
+	signal_connect(&self->component.signal_size, self, OnSize);
 	TrackerViewSetPattern(&self->trackerview, patterns_at(&workspace->song->patterns, 0));	
-	InitPianoroll(&self->pianoroll, &self->component);	
+	InitPianoroll(&self->pianoroll, &self->notebook.component);	
 	self->pianoroll.pattern = patterns_at(&workspace->song->patterns, 0);
-	ui_component_hide(&self->pianoroll.component);
-
-	InitTabBar(&self->tabbar, parent);
+	ui_notebook_setpage(&self->notebook, 0);
+	InitTabBar(&self->tabbar, tabbarparent);
 	ui_component_move(&self->tabbar.component, 600, 75);
 	ui_component_resize(&self->tabbar.component, 160, 20);
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "Tracker");
 	tabbar_append(&self->tabbar, "Pianoroll");
 	self->tabbar.selected = 0;
-	signal_connect(&self->tabbar.signal_change, self, OnTabBarChange);
+	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	signal_connect(&self->component.signal_show, self, OnShow);
 	signal_connect(&self->component.signal_hide, self, OnHide);
 	signal_connect(&workspace->player.signal_lpbchanged, self, OnLpbChanged);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
-void OnPatternViewSize(PatternView* self, ui_component* sender, int width, int height)
-{
-	ui_size size = ui_component_size(&self->component);
-	ui_component_resize(&self->trackerview.component, size.width, size.height);
-	ui_component_resize(&self->pianoroll.component, size.width, size.height);
-}
-
-void OnTabBarChange(PatternView* self, ui_component* sender, int tabindex)
-{
-	ui_size size = ui_component_size(&self->component);
-	switch (tabindex) {
-		case 0:
-			ui_component_hide(&self->pianoroll.component);
-			ui_component_show(&self->trackerview.component);			
-			ui_component_resize(&self->trackerview.component, size.width, size.height);	
-			ui_component_setfocus(&self->trackerview.component);	
-		break;
-		case 1:			
-			ui_component_hide(&self->trackerview.component);
-			ui_component_show(&self->pianoroll.component);
-			ui_component_resize(&self->pianoroll.component, size.width, size.height);	
-			ui_component_setfocus(&self->pianoroll.component);	
-		break;
-		default:;
-		break;
-	};
+void OnSize(PatternView* self, ui_component* sender, int width, int height)
+{	
+	ui_component_resize(&self->notebook.component, width, height);
 }
 
 void OnShow(PatternView* self, ui_component* sender)

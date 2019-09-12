@@ -5,7 +5,7 @@
 #if !defined(INSTRUMENTSVIEW_H)
 #define INSTRUMENTSVIEW_H
 
-#include <uicomponent.h>
+#include <uinotebook.h>
 #include "tabbar.h"
 #include "player.h"
 #include "sampulseinstrumentview.h"
@@ -14,11 +14,13 @@
 
 typedef struct {
 	ui_component component;
+	ui_notebook notebook;
 	SamplerInstrumentView samplerview;
 	SampulseInstrumentView sampulseview;
 	TabBar tabbar;
 } InstrumentsView;
 
-void InitInstrumentsView(InstrumentsView*, ui_component* parent, Workspace*);
+void InitInstrumentsView(InstrumentsView*, ui_component* parent,
+	ui_component* tabbarparent, Workspace*);
 
 #endif

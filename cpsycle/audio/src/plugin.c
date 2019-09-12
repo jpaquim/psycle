@@ -25,7 +25,6 @@ void plugin_init(Plugin* self, const char* path)
 	int err;
 
 	machine_init(&self->machine);	
-///	CMachineInterface* _pInterface;
 	self->dll = LoadLibrary(path);
 	err = GetLastError();	
 	self->mi = 0;

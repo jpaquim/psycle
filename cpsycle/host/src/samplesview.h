@@ -4,7 +4,7 @@
 #if !defined(SAMPLESVIEW_H)
 #define SAMPLESVIEW_H
 
-#include <player.h>
+#include <uinotebook.h>
 #include <uibutton.h>
 #include <uicombobox.h>
 #include <uiedit.h>
@@ -72,7 +72,8 @@ typedef struct {
 } SamplesWaveLoopView;
 
 typedef struct {
-	ui_component component;	
+	ui_component component;
+	ui_notebook notebook;
 	ui_listbox samplelist;
 	ui_button loadbutton;
 	ui_button savebutton;
@@ -89,6 +90,7 @@ typedef struct {
 	Player* player;
 } SamplesView;
 
-void InitSamplesView(SamplesView*, ui_component* parent, Workspace* workspace);
+void InitSamplesView(SamplesView*, ui_component* parent,
+	ui_component* tabbarparent, Workspace* workspace);
 
 #endif

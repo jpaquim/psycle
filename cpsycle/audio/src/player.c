@@ -54,7 +54,7 @@ void player_initmaster(Player* self)
 
 	master = malloc(sizeof(Master));
 	master_init(master);
-	machines_insert(&self->song->machines, 0, (Machine*)master);
+	machines_insert(&self->song->machines, MASTER_INDEX, (Machine*)master);
 }
 
 void player_loaddriver(Player* self, const char* path)
@@ -90,7 +90,7 @@ void player_dispose(Player* self)
 {		
 	if (self->driver != self->silentdriver) {
 		ResetEvent(hGuiEvent);
-		WaitForSingleObject(hWorkDoneEvent, INFINITE);
+		WaitForSingleObject(hWorkDoneEvent, 200);
 		self->driver->close(self->driver);
 		SetEvent(hGuiEvent);		
 		player_unloaddriver(self);
@@ -198,7 +198,7 @@ real* Work(Player* self, int* numsamples)
 						connectionptr = connectionptr->next;
 					}								
 				}				
-				if (slot != 0) {
+				if (slot != MASTER_INDEX) {
 					List* events = 0;
 					if (self->playing) {												
 						List* node = self->sequencer.events;
@@ -228,7 +228,7 @@ real* Work(Player* self, int* numsamples)
 			}
 							
 		}
-		master = machines_at(&self->song->machines, 0);
+		master = machines_at(&self->song->machines, MASTER_INDEX);
 		if (master && master->outputs.samples[0] && master->outputs.samples[1]) {	
 			signal_emit(&master->signal_worked, master, 1, amount);
 			dsp_interleave(pSamples, master->outputs.samples[0], master->outputs.samples[1], amount);			

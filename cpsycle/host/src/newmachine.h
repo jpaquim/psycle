@@ -4,27 +4,27 @@
 #if !defined(NEWMACHINE)
 #define NEWMACHINE
 
+#include "workspace.h"
 #include <uicomponent.h>
 #include <uidef.h>
-#include <player.h>
 #include <plugincatcher.h>
 #include <hashtbl.h>
+#include <signal.h>
 
 struct NewMachineStruct {
    ui_component component;   
    ui_graphics* g;
    int cx;
-   int cy;    
-   PluginCatcher plugincatcher;
+   int cy;   
    int pluginpos;
    Properties* selectedplugin;
-   void* selectioncontext;
-   void (*selected)(void*, CMachineInfo* plugin, const char* path);
+   Signal signal_selected;
+   Workspace* workspace;
 };
 
 typedef struct NewMachineStruct NewMachine;
 
-void InitNewMachine(NewMachine* NewMachine, ui_component* parent, Player* player, Properties* properties);
+void InitNewMachine(NewMachine* NewMachine, ui_component* parent, Workspace* workspace);
 
 
 #endif

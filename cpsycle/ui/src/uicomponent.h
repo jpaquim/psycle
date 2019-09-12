@@ -55,6 +55,7 @@ typedef struct {
 	int alignchildren;
 	ui_margin margin;
 	int doublebuffered;
+	int defaultpropagation;
 	int propagateevent;
 	int preventdefault;
 	int scrollstepx;
@@ -88,6 +89,7 @@ List* ui_component_children(ui_component*, int recursive);
 void ui_component_capture(ui_component*);
 void ui_component_releasecapture();
 ui_size ui_component_size(ui_component*);
+ui_size ui_component_frame_size(ui_component* self);
 void ui_invalidate(ui_component*);
 void ui_component_setfocus(ui_component*);
 void ui_component_setfont(ui_component*, HFONT font);

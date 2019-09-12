@@ -137,6 +137,10 @@ SOURCE=.\src\uimenu.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uinotebook.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uislider.c
 # End Source File
 # Begin Source File
@@ -198,6 +202,10 @@ SOURCE=.\src\uilistbox.h
 # Begin Source File
 
 SOURCE=.\src\uimenu.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uinotebook.h
 # End Source File
 # Begin Source File
 

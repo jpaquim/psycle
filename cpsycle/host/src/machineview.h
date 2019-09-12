@@ -6,7 +6,7 @@
 
 #include <windows.h>
 #include "workspace.h"
-#include <uicomponent.h>
+#include <uinotebook.h>
 #include <uidef.h>
 #include <player.h>
 #include <plugincatcher.h>
@@ -74,18 +74,17 @@ typedef struct {
 void MachineUiSet(MachineUi* self, int x, int y, const char* editname);
 
 enum {	
-	MACHINEVIEW_DRAG_MACHINE,
-	MACHINEVIEW_DRAG_NEWCONNECTION,
-	MACHINEVIEW_DRAG_CHANGECONNECTION
+	WireView_DRAG_MACHINE,
+	WireView_DRAG_NEWCONNECTION,
+	WireView_DRAG_CHANGECONNECTION
 };
 
 typedef struct {
-	ui_component component;
-	NewMachine newmachine;
+	ui_component component;	
 	ui_graphics* g;
 	int cx;
 	int cy;
-	Player* player;
+	Machines* machines;
 	MachineUi machineuis[256];
 	int mx;
 	int my;
@@ -98,12 +97,26 @@ typedef struct {
 	MachineFrame machine_frames[256];
 	ParamView machine_paramviews[256];
 	PluginCatcher plugincatcher;
-	MachineSkin skin;
-	TabBar tabbar;   
+	MachineSkin skin;	   
+	Workspace* workspace;
+} WireView;
+
+void InitWireView(WireView*, ui_component* parent,
+	ui_component* tabbarparent, Workspace*);
+void wireview_align(WireView*);
+
+typedef struct {
+	ui_component component;
+	TabBar tabbar;
+	ui_notebook notebook;	
+	WireView wireview;
+	NewMachine newmachine;
 	Workspace* workspace;
 } MachineView;
 
-void InitMachineView(MachineView* machineView, ui_component* parent, Workspace*);
-void MachineViewApplyProperties(MachineView* self, Properties* properties);
+void InitMachineView(MachineView*, ui_component* parent,
+	ui_component* tabbarparent, Workspace*);
+void MachineViewApplyProperties(MachineView*, Properties*);
+void machineview_align(MachineView*);
 
 #endif

@@ -19,10 +19,8 @@ static int cpy;
 static int dy;
 static int count;
 
-void InitNewMachine(NewMachine* self, ui_component* parent, Player* player, Properties* properties)
+void InitNewMachine(NewMachine* self, ui_component* parent, Workspace* workspace)
 {	
-	Properties* property;
-	
 	ui_component_init(&self->component, parent);	
 	ui_component_showverticalscrollbar(&self->component);
 	signal_connect(&self->component.signal_destroy, self,OnDestroy);	
@@ -34,33 +32,29 @@ void InitNewMachine(NewMachine* self, ui_component* parent, Player* player, Prop
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	ui_component_move(&self->component, 0, 0);	
 	self->selectedplugin = 0;
-	plugincatcher_init(&self->plugincatcher);
-	plugincatcher_scan(&self->plugincatcher, 0, 3);		
-	property = properties_read(properties, "vstdir");
-	if (property) {
-		plugincatcher_scan(&self->plugincatcher, property->item.value.s, 1);
-	}
-	property = properties_read(properties, "plugindir");
-	if (property) {
-		plugincatcher_scan(&self->plugincatcher, property->item.value.s, 0);
-	}
-	dy = 0;
-	self-> selectioncontext = parent;
+	self->workspace = workspace;	
+	dy = 0;	
+	signal_init(&self->signal_selected);
 }
 
 void OnDestroy(NewMachine* self, ui_component* component)
 {
-	plugincatcher_dispose(&self->plugincatcher);
+	signal_dispose(&self->signal_selected);
 }
 
 void OnDraw(NewMachine* self, ui_component* sender, ui_graphics* g)
 {	   	
+	Properties* pluginlist;
+
 	DrawBackground(self, g);
 	self->g = g;
 	cpy = 0;
 	ui_setbackgroundcolor(g, 0x009a887c);
 	ui_settextcolor(g, 0x00000000);
-	properties_enumerate(self->plugincatcher.plugins, self, OnPropertiesEnum);
+	pluginlist = workspace_pluginlist(self->workspace);
+	if (pluginlist) {
+		properties_enumerate(pluginlist, self, OnPropertiesEnum);
+	}
 }
 
 
@@ -74,8 +68,8 @@ void DrawBackground(NewMachine* self, ui_graphics* g)
 
 int OnPropertiesEnum(NewMachine* self, Properties* property, int level)
 {		
-	if (property->item.key) {				
-		CMachineInfo* pInfo;		
+	if (property->item.key && property->children) {						
+		Properties* p;
 	//	ui_textout(self->g, 20, 40 + cpy + dy, property->item.key, strlen(property->item.key));				
 		if (property == self->selectedplugin) {
 			ui_rectangle r = { 19, 19, 300, 37 };
@@ -83,8 +77,11 @@ int OnPropertiesEnum(NewMachine* self, Properties* property, int level)
 			r.bottom += cpy + dy;
 			ui_drawrectangle(self->g, r);
 		}
-		pInfo = (CMachineInfo*)property->item.value.ud;				
-		ui_textout(self->g, 20, 20 + cpy + dy, pInfo->Name, strlen(pInfo->Name));	
+		p = properties_read(property->children, "name");
+		if (p && p->item.typ == PROPERTY_TYP_STRING) {
+			ui_textout(self->g, 20, 20 + cpy + dy, p->item.value.s,
+				strlen(p->item.value.s));	
+		}
 		// ui_textout(self->g, 200, 20 + cpy + dy, pInfo->Author, strlen(pInfo->Author));	
 		cpy += 20;
 	}
@@ -107,40 +104,45 @@ void OnScroll(NewMachine* self, ui_component* sender, int cx, int cy)
 void OnMouseDown(NewMachine* self, ui_component* sender, int x, int y, int button)
 {
 	HitTest(self, x, y);
+	ui_component_setfocus(&self->component);
 }
 
 void HitTest(NewMachine* self, int x, int y)
 {	
-	self->pluginpos = (y - dy) / 20;
-	count = 0;	
-	properties_enumerate(self->plugincatcher.plugins, self, OnPropertiesCount);
-	InvalidateRect(self->component.hwnd, NULL, TRUE);
+	Properties* pluginlist;
+
+	pluginlist = workspace_pluginlist(self->workspace);
+	if (pluginlist) {
+		self->pluginpos = (y - dy) / 20;
+		count = 0;			
+		properties_enumerate(pluginlist, self,OnPropertiesCount);
+		ui_invalidate(&self->component);
+	}	
 }
 
 int OnPropertiesCount(NewMachine* self, Properties* property, int level)
 {
-	if (self->pluginpos == count) {
+	if (self->pluginpos == count && level == 0) {
 		self->selectedplugin = property;
 		return 0;
 	}
-	++count;
+	if (level == 0) {
+		++count;
+	}
 	return 1;
 }
 
 void OnMouseDoubleClick(NewMachine* self, ui_component* sender, int x, int y, int button)
 {
-	if (self->selectedplugin && self->selected) {
-		self->selected(self->selectioncontext,
-		(CMachineInfo*)self->selectedplugin->item.value.ud,
-		self->selectedplugin->item.key);
-	}
-	ui_component_hide(&self->component);
+	if (self->selectedplugin) {
+		signal_emit(&self->signal_selected, self, 1, self->selectedplugin);		
+	}	
 }
 
 void OnKeyDown(NewMachine* self, ui_component* sender, int keycode, int keydata)
 {
-	if (keycode == VK_ESCAPE) {
-		ui_component_hide(&self->component);
+	if (keycode == VK_ESCAPE) {	
+		self->component.propagateevent = 1;
 	}
 }
 

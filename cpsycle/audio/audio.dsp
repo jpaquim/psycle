@@ -117,6 +117,10 @@ SOURCE=.\src\machines.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\mixer.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\dsp\src\operations.c
 # End Source File
 # Begin Source File
@@ -226,6 +230,10 @@ SOURCE=.\src\machinefactory.h
 # Begin Source File
 
 SOURCE=.\src\machines.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mixer.h
 # End Source File
 # Begin Source File
 

@@ -7,7 +7,7 @@
 #include "tabbar.h"
 #include "slidergroup.h"
 #include "envelopeview.h"
-#include <uicomponent.h>
+#include <uinotebook.h>
 #include <uilabel.h>
 #include <uiedit.h>
 #include <uibutton.h>
@@ -63,7 +63,9 @@ typedef struct {
 	SliderGroup decay;
 	SliderGroup sustain;
 	SliderGroup release;
-	SliderGroup modamount;	
+	SliderGroup cutoff;
+	SliderGroup res;
+	SliderGroup modamount;
 	Player* player;
 	Instrument* instrument;
 	Instruments* instruments;
@@ -77,6 +79,7 @@ typedef struct {
 
 typedef struct {
 	ui_component component;	
+	ui_notebook notebook;
 	TabBar tabbar;
 	ui_listbox instrumentlist;	
 	SamplerInstrumentHeaderView header;

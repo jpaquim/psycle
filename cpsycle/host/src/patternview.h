@@ -5,18 +5,20 @@
 #if !defined(PATTERNVIEW)
 #define PATTERNVIEW
 
-#include <uicomponent.h>
+#include <uinotebook.h>
 #include "trackerview.h"
 #include "pianoroll.h"
 #include "workspace.h"
 
 typedef struct PatternView {
 	ui_component component;
+	ui_notebook notebook;
 	TrackerView trackerview;
 	Pianoroll pianoroll;
 	TabBar tabbar;
 } PatternView;
 
-void InitPatternView(PatternView*, ui_component* parent, Workspace* workspace);
+void InitPatternView(PatternView*, ui_component* parent,
+	ui_component* tabbarparent, Workspace* workspace);
 
 #endif

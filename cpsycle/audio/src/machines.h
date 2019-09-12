@@ -8,6 +8,8 @@
 #include "machine.h"
 #include <signal.h>
 
+#define MASTER_INDEX 128
+
 typedef struct {
 	int slot;	
 	float volume;	
@@ -31,6 +33,7 @@ typedef struct {
 	int numbuffers;
 	int currbuffer;
 	int slot;
+	int filemode;
 
 	Signal signal_insert;
 	Signal signal_removed;
@@ -53,6 +56,8 @@ float* machines_nextbuffer(Machines* self);
 void machines_changeslot(Machines* self, int slot);
 int machines_slot(Machines* self);
 Machine* machines_master(Machines* self);
+void machines_startfilemode(Machines* self);
+void machines_endfilemode(Machines* self);
 
 void suspendwork(void);
 void resumework(void);

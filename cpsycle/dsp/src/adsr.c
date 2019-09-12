@@ -14,7 +14,7 @@ void adsr_envelopesettings_init(ADSREnvelopeSettings* self, float attack,
 
 void adsr_envelopesettings_initdefault(ADSREnvelopeSettings* self)
 {
-	adsr_envelopesettings_init(self, 1.0f, 1.0f, 0.5f, 1.0f);	
+	adsr_envelopesettings_init(self, 0.1f, 1.0f, 0.5f, 1.0f);	
 }
 
 void adsr_init(ADSR* self)

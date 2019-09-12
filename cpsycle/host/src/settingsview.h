@@ -10,15 +10,18 @@
 #include <properties.h>
 
 typedef struct {
-   ui_component component;
-   Properties* properties;
-   ui_graphics* g;
-   int lastlevel;
-   Properties* selected;
-   ui_rectangle selrect;
-   int mx;
-   int my;
-   ui_edit edit;
+	ui_component component;
+	Properties* properties;
+	ui_graphics* g;
+	int lastlevel;
+	Properties* selected;
+	ui_rectangle selrect;
+	int mx;
+	int my;
+	int cpy;
+	int cpx;
+	int fillchoice;
+	ui_edit edit;	
 } SettingsView;
 
 void InitSettingsView(SettingsView* Settingsview, ui_component* parent, Properties* properties);

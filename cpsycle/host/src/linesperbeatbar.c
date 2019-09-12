@@ -21,12 +21,12 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 	ui_button_settext(&self->morebutton, ">");	
 	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);	
 	ui_component_move(&self->lpbdesclabel.component, 0, 0);
-	ui_component_resize(&self->lpbdesclabel.component, 50, 20);	
-	ui_component_move(&self->lessbutton.component, 80, 0);
+	ui_component_resize(&self->lpbdesclabel.component, 100, 20);	
+	ui_component_move(&self->lessbutton.component, 105, 0);
 	ui_component_resize(&self->lessbutton.component, 20, 20);	
-	ui_component_move(&self->lpblabel.component, 105, 0);
+	ui_component_move(&self->lpblabel.component, 130, 0);
 	ui_component_resize(&self->lpblabel.component, 40, 20);
-	ui_component_move(&self->morebutton.component, 150, 0);
+	ui_component_move(&self->morebutton.component, 175, 0);
 	ui_component_resize(&self->morebutton.component, 20, 20);		
 	self->lpb = 0;
 	signal_connect(&self->component.signal_timer, self, OnTimer);
