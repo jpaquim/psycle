@@ -20,12 +20,8 @@ typedef struct {
 	ui_button newentry;
 	ui_button delentry;
 	void* context;
-	HFONT font;
+	ui_font font;
 } SequenceButtons;
-
-typedef struct {
-	HFONT font;
-} SequenceListViewSkin;
 
 typedef struct {
 	ui_component component;
@@ -34,7 +30,7 @@ typedef struct {
 	SequenceController* controller;
 	int selected;
 	int lineheight;
-	SequenceListViewSkin skin;		
+	ui_font font;
 } SequenceListView;
 
 typedef struct {

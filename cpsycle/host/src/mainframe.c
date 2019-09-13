@@ -8,7 +8,6 @@
 #include <uibutton.h>
 #include <uilabel.h>
 #include "settingsview.h"
-#include "songproperties.h"
 #include "cmdsnotes.h"
 #include "skinio.h"
 
@@ -32,7 +31,6 @@ static ui_menu menu_file;
 static ui_edit edit;
 static ui_button button;
 static ui_label label;
-static SongProperties songproperties;
 
 static int toolbarheight = 75;
 static int tabbarheight = 20;
@@ -40,8 +38,10 @@ static int tabbarheight = 20;
 void InitMainFrame(MainFrame* self)
 {	
 	int iStatusWidths[] = {100, 200, -1};	
+	ui_margin tabbardividemargin = { 0, 30, 0, 0};
 	
 	workspace_init(&self->workspace);	
+	workspace_load_configuration(&self->workspace);
 	self->player = &self->workspace.player;
 	self->firstshow = 1;
 	ui_frame_init(&self->component, 0);
@@ -70,7 +70,10 @@ void InitMainFrame(MainFrame* self)
 	tabbar_append(&self->tabbar, "Pattern");	
 	tabbar_append(&self->tabbar, "Samples");
 	tabbar_append(&self->tabbar, "Instruments");
+	tabbar_append(&self->tabbar, "Properties");
 	tabbar_append(&self->tabbar, "Settings");
+	tabbar_append(&self->tabbar, "Help");
+	tabbar_settabmargin(&self->tabbar, 4, &tabbardividemargin);
 	tabbar_select(&self->tabbar, 0);	
 	InitPlayBar(&self->playbar, &self->component);
 	ui_component_move(&self->playbar.component, 320, 2);
@@ -97,16 +100,15 @@ void InitMainFrame(MainFrame* self)
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->component, &self->workspace);
 	self->instrumentsview.sampulseview.notemapedit.noteinputs = &self->noteinputs;	
+	InitSongProperties(&self->songproperties, &self->notebook.component, &self->workspace);	
 	InitSettingsView(&self->settingsview, &self->notebook.component,
 		self->workspace.config);	
-	greet_init(&self->greet, &self->component);
-	ui_component_hide(&self->greet.component);	
+	greet_init(&self->greet, &self->notebook.component);		
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);	
 	ui_component_move(&self->sequenceview.component, 0, toolbarheight);
-	ui_notebook_setpage(&self->notebook, 0);
-	/*InitSongProperties(&songproperties, &self->component);	
-	ui_menu_init(&menu, "", 0);
+	ui_notebook_setpage(&self->notebook, 0);	
+	/*ui_menu_init(&menu, "", 0);
 	ui_menu_init(&menu_file, "File", OnFileMenu);		
 	ui_menu_append(&menu, &menu_file, 0);
 	ui_component_setmenu(&self->component, &menu);
@@ -134,6 +136,7 @@ void OnDraw(MainFrame* self, ui_component* sender, ui_graphics* g)
 
 void Destroy(MainFrame* self, ui_component* component)
 {
+	workspace_save_configuration(&self->workspace);
 	workspace_dispose(&self->workspace);
 	PostQuitMessage (0) ;
 }
@@ -236,5 +239,8 @@ void OnLoadSong(MainFrame* self, ui_component* sender)
 	*path = '\0'; 
 	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
 		workspace_loadsong(&self->workspace, path);
+		ui_notebook_setpage(&self->notebook, 4);
+		self->tabbar.selected = 4;
+		ui_invalidate(&self->tabbar.component);
 	}
 }

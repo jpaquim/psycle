@@ -31,6 +31,22 @@ typedef	enum {
 							  // row becomes x ticks longer)
 } PatternCmd;
 
+typedef	enum {
+	NOTECOMMANDS_C0 = 0,   // In MIDI, it is actually c minus 1
+	NOTECOMMANDS_MIDDLEC = 60,
+	NOTECOMMANDS_MIDDLEA = 69,
+	NOTECOMMANDS_B9 = 119, // In MIDI, it is actualy b8
+	NOTECOMMANDS_RELEASE = 120,
+	NOTECOMMANDS_TWEAK,
+	NOTECOMMANDS_TWEAKEFFECT, //old. for compatibility only.
+	NOTECOMMANDS_MIDICC,
+	NOTECOMMANDS_TWEAKSLIDE,
+	//Place whatever that can be written in the pattern above invalid, and anything else below it
+	NOTECOMMANDS_INVALID,
+	NOTECOMMANDS_MIDI_SYNC = 254,
+	NOTECOMMANDS_EMPTY = 255
+} NoteCommands;
+
 typedef struct {
 	unsigned char note;
 	unsigned char inst;

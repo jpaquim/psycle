@@ -76,6 +76,9 @@ int OnPropertiesEnum(SettingsView* self, Properties* property, int level)
 				}
 				ui_textout(self->g, 200, 20 + self->cpy, property->item.value.s, strlen(property->item.value.s));
 				ui_setbackgroundcolor(self->g, 0x009a887c);
+			//	if (property->item.hint == PROPERTY_HINT_EDITDIR) {
+			//		ui_textout(self->g, 500, 20 + self->cpy, "...", strlen("..."));
+			//	}
 			} else
 			if (property->item.typ == PROPERTY_TYP_INTEGER) {
 				char buf[20];

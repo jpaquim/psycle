@@ -9,7 +9,7 @@ static void workspace_removesong(Workspace* self);
 static void applysongproperties(Workspace* self);
 
 void workspace_init(Workspace* self)
-{
+{	
 	workspace_config(self);
 	self->song = (Song*) malloc(sizeof(Song));
 	song_init(self->song);
@@ -55,10 +55,13 @@ void workspace_dispose(Workspace* self)
 
 void workspace_config(Workspace* self)
 {
+	Properties* p;
 	self->config = properties_create();
-	properties_append_string(self->config, "version", "alpha");
-	properties_append_string(self->config, "plugindir", "C:\\Programme\\Psycle\\PsyclePlugins");
-	properties_append_string(self->config, "vstdir", "C:\\Programme\\Psycle\\VstPlugins");	
+	p = properties_append_string(self->config, "version", "alpha");	
+	p = properties_append_string(self->config, "plugindir", "C:\\Programme\\Psycle\\PsyclePlugins");
+	p->item.hint = PROPERTY_HINT_EDITDIR;
+	p = properties_append_string(self->config, "vstdir", "C:\\Programme\\Psycle\\VstPlugins");	
+	p->item.hint = PROPERTY_HINT_EDITDIR;
 }
 
 void workspace_newsong(Workspace* self)
@@ -112,6 +115,16 @@ void applysongproperties(Workspace* self)
 Properties* workspace_pluginlist(Workspace* self)
 {
 	return self->plugincatcher.plugins;
+}
+
+void workspace_load_configuration(Workspace* self)
+{	
+	properties_load(self->config, "psycle.ini");	
+}
+
+void workspace_save_configuration(Workspace* self)
+{
+	properties_save(self->config, "psycle.ini");	
 }
 
 Samples* machinecallback_samples(Workspace* self)

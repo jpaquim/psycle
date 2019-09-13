@@ -85,8 +85,6 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_component_setmargin(&self->tabbar.component, &margin);
 	tabbar_append(&self->tabbar, "General");
 	tabbar_append(&self->tabbar, "Vibrato");	
-	self->tabbar.tabwidth = 80;
-	self->tabbar.selected = 0;	
 	ui_notebook_init(&self->notebook, &self->client);	
 	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
 	ui_component_setbackgroundcolor(&self->notebook.component, 0x009a887c);	

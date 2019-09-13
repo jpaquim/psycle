@@ -4,13 +4,48 @@
 #if !defined(UIDEF)
 #define UIDEF
 
-typedef struct { int x, y; } ui_point;
-typedef struct { int left, top, right, bottom; } ui_rectangle;
-typedef struct { int width, height; } ui_size;
-typedef struct { int top, right, bottom, left; } ui_margin;
+#include <windows.h>
+
+typedef struct { 
+	int x;
+	int y;
+} ui_point;
+
+typedef struct {
+	int left;
+	int top;
+	int right;
+	int bottom;
+} ui_rectangle;
+
+typedef struct {
+	int width;
+	int height;
+} ui_size;
+
+typedef struct {
+	int top;
+	int right;
+	int bottom;
+	int left;
+} ui_margin;
+
+typedef struct {
+	LOGFONT lf; 
+} ui_fontinfo;
+
+void ui_fontinfo_init(ui_fontinfo*, const char* family, int height);
+
+typedef struct {
+	HFONT hfont;
+	int stock;
+} ui_font;
 
 void ui_setrectangle(ui_rectangle*, int left, int top, int width, int height);
 void ui_setmargin(ui_margin*, int top, int right, int bottom, int left);
 void ui_error(const char* err, const char* shorterr);
+
+void ui_font_init(ui_font*, const ui_fontinfo* info);
+void ui_font_dispose(ui_font*);
 
 #endif

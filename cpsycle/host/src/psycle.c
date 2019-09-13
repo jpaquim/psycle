@@ -3,6 +3,8 @@
 
 #include "mainframe.h"
 #include <ui_app.h>
+#include <dir.h>
+
 
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
@@ -11,12 +13,21 @@ UIMAIN
 {    	
 	MainFrame main;			
 	int err;
-	
-	UIINIT;		
+	char workpath[MAX_PATH];
+	const char* env = 0;	
+
+	env = pathenv();	
+	if (env) {			
+		insertpathenv(workdir(workpath));
+	}
+	UIINIT;	
 	InitMainFrame(&main);	
 	ui_component_show_state(&main.component, iCmdShow);		 	 
 	err = ui_run();	
 	UIDISPOSE;
-//  _CrtDumpMemoryLeaks( );   
+	if (env) {
+		setpathenv(env);
+	}
+	//  _CrtDumpMemoryLeaks( );
 	return err;
 }

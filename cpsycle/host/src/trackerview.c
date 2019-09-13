@@ -87,10 +87,8 @@ char* notes_tab_a220[256] = {
 void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view, Player* player)
 {		
 	self->view = view;
-	self->header = 0;
-	if (self->view->skin.hfont == NULL) {
-		self->view->skin.hfont = ui_createfont("Tahoma", 12);
-	}
+	self->header = 0;	
+	self->view->font = ui_createfont("Tahoma", 12);	
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_size, self, OnGridSize);
 	signal_connect(&self->component.signal_keydown,self, OnGridKeyDown);
@@ -177,10 +175,8 @@ void OnDraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	TrackerGridBlock clip;
 	if (self->view->pattern) {
-		self->bpl = 1.0f / self->player->lpb;
-		if (self->view->skin.hfont) {
-			ui_setfont(g, self->view->skin.hfont);
-		}
+		self->bpl = 1.0f / self->player->lpb;		
+		ui_setfont(g, &self->view->font);		
 		ClipBlock(self, g, &clip);
 		DrawBackground(self, g, &clip);
 		DrawEvents(self, g, &clip);
@@ -846,8 +842,7 @@ void InitDefaultSkin(TrackerView* self)
 	self->skin.headercoords.mute = mute;
 	self->skin.headercoords.solo = solo;
 	self->skin.headercoords.digit0x = digit0x;
-	self->skin.headercoords.digitx0 = digitx0;
-	self->skin.hfont = NULL;
+	self->skin.headercoords.digitx0 = digitx0;	
 }
 
 void OnViewSize(TrackerView* self, ui_component* sender, int width, int height)
@@ -926,7 +921,7 @@ void OnLineNumbersDraw(TrackerLineNumbers* self, ui_component* sender, ui_graphi
 	ClipBlock(&self->view->grid, g, &clip);
 	LineNumbersDrawBackground(self, g);
 	if (self->view->pattern) {		
-		ui_setfont(g, self->skin->hfont);				
+		ui_setfont(g, &self->view->font);				
 		cpy = (clip.topleft.totallines - clip.topleft.subline) * self->lineheight + self->dy;
 		offset = clip.topleft.offset;				
 		line = clip.topleft.line;

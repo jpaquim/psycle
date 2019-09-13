@@ -8,15 +8,25 @@
 #include "list.h"
 
 typedef struct {
+	char* text;
+	ui_size size;
+	ui_margin margin;
+} Tab;
+
+void InitTab(Tab*, const char* text, ui_size* size);
+
+typedef struct {
 	List* tabs;
 	ui_component component;
-	int selected;
-	int tabwidth;
+	int selected;	
+	ui_margin tabmargin;
 	Signal signal_change;
+	ui_font font;
 } TabBar;
 
 void InitTabBar(TabBar*, ui_component* parent);
 void tabbar_append(TabBar*, const char* label);
 void tabbar_select(TabBar*, int tab);
+void tabbar_settabmargin(TabBar*, int tab, const ui_margin* margin);
 
 #endif

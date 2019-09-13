@@ -28,5 +28,7 @@ void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 Properties* workspace_pluginlist(Workspace*);
+void workspace_load_configuration(Workspace*);
+void workspace_save_configuration(Workspace*);
 
 #endif

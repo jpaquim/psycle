@@ -7,7 +7,8 @@
 #include "sampler.h"
 #include "mixer.h"
 
-static char* makefullpath(MachineFactory*, const char* path, const char* dirconfigkey, char* fullpath);
+static char* makefullpath(MachineFactory*, const char* path,
+	const char* dirconfigkey, char* fullpath);
 
 void machinefactory_init(MachineFactory* self, MachineCallback callback,
 	Properties* configuration)
@@ -78,19 +79,21 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 	}
 	if (machine) {
 		machine->machinecallback = self->machinecallback;
-	}
-	
+	}	
 	return machine;
 }
 
-char* makefullpath(MachineFactory* self, const char* path, const char* dirconfigkey, char* fullpath)
+char* makefullpath(MachineFactory* self, const char* path,
+	const char* dirconfigkey, char* fullpath)
 {
 	char* dir;
 
 	fullpath[0] = '\0';
-	if (self->configuration) {
-		properties_readstring(self->configuration, "dir", &dir, "");
-	}
-	_snprintf(fullpath, MAX_PATH, "%s%s%s", dir, "\\", path);
+	if (self->configuration && (strrchr(path, '\\') == 0)) {
+		properties_readstring(self->configuration, dirconfigkey, &dir, "");
+		_snprintf(fullpath, MAX_PATH, "%s%s%s", dir, "\\", path);
+	} else {
+		_snprintf(fullpath, MAX_PATH, "%s", path);
+	}	
 	return fullpath;
 }

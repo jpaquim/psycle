@@ -13,6 +13,7 @@ enum {
 
 enum {
 	PROPERTY_HINT_EDIT,
+	PROPERTY_HINT_EDITDIR,
 	PROPERTY_HINT_LIST
 };
 
@@ -39,10 +40,9 @@ struct PropertiesStruct {
 
 typedef struct PropertiesStruct Properties;
 
-
-void properties_init(Properties* self);
+void properties_init(Properties* );
 Properties* properties_create(void);
-void properties_free(Properties* self);
+void properties_free(Properties* );
 Properties* properties_append_string(Properties*, const char* key, const char* value);
 Properties* properties_append_choice(Properties*, const char* key, int value);
 Properties* properties_append_userdata(Properties*, const char* key,
@@ -56,10 +56,12 @@ void properties_readstring(Properties*, const char* key, char** text, char* defa
 void properties_write_string(Properties*, const char* key, const char* value);
 void properties_write_int(Properties*, const char* key, int value);
 void properties_write_double(Properties*, const char* key, double value);
-void properties_enumerate(Properties*, void* target, int (*enumerate)(void* self, struct PropertiesStruct* properties, int level));
+void properties_enumerate(Properties*, void* target, int (*enumerate)(void* , struct PropertiesStruct* properties, int level));
 Properties* properties_find(Properties*, const char* key);
 const char* properties_key(Properties*);
 int properties_value(Properties*);
 const char* properties_valuestring(Properties*);
+void properties_load(Properties*, const char* path);
+void properties_save(Properties*, const char* path);
 
 #endif

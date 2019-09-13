@@ -1,10 +1,21 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-
 #include "graphics.h"
 
-static HFONT hFontPrev;
+void ui_graphics_init(ui_graphics* g, HDC hdc)
+{
+	g->hdc = hdc;	
+	g->hFontPrev = 0;
+}	
+
+void ui_graphics_dispose(ui_graphics* g)
+{
+	if (g->hFontPrev != 0) {		
+		SelectObject (g->hdc, g->hFontPrev);
+	}
+}
+
 
 void ui_textout(ui_graphics* self, int x, int y, const char* str, int len)
 {	
@@ -18,6 +29,17 @@ void ui_textoutrectangle(ui_graphics* g, int x, int y, unsigned int options,
 		                
     SetRect (&rect, r.left, r.top, r.right, r.bottom) ;     	
 	ExtTextOut(g->hdc, x, y, options, &rect, text, len, NULL);
+}
+
+ui_size ui_textsize(ui_graphics* g, const char* text)
+{
+	ui_size	rv;
+	SIZE size;
+	
+	GetTextExtentPoint(g->hdc, text, strlen(text), &size) ;	
+	rv.width = size.cx; 
+	rv.height = size.cy;
+	return rv;
 }
 
 void ui_drawrectangle(ui_graphics* self, const ui_rectangle r)
@@ -75,33 +97,25 @@ void ui_settextcolor(ui_graphics* g, unsigned int color)
 	SetTextColor(g->hdc, color);
 }
 
-void ui_setfont(ui_graphics* g, HFONT hfont)
+void ui_setfont(ui_graphics* g, ui_font* font)
 {	
-	hFontPrev = SelectObject(g->hdc, hfont);
+	if (font && font->hfont) {
+		g->hFontPrev = SelectObject(g->hdc, font->hfont);
+	}
 }
 
-HFONT ui_createfont(const char* name, int size)
+ui_font ui_createfont(const char* name, int size)
 {
-	return CreateFont(size, 0, 0, 0, 0, 0, 0, 0, 
+	ui_font font;
+	font.hfont = CreateFont(size, 0, 0, 0, 0, 0, 0, 0, 
 		1, 0, 0, 0, VARIABLE_PITCH | FF_DONTCARE, name);          
+	font.stock = 0;
+	return font;
 }
 
 void ui_deletefont(HFONT hfont)
 {	
 	DeleteObject(hfont);
-}
-
-void ui_graphics_init(ui_graphics* g, HDC hdc)
-{
-	g->hdc = hdc;	
-	hFontPrev = 0;
-}	
-
-void ui_graphics_dispose(ui_graphics* g)
-{
-	if (hFontPrev != 0) {		
-		SelectObject (g->hdc, hFontPrev);
-	}
 }
 
 void ui_drawline(ui_graphics* g, int x1, int y1, int x2, int y2)

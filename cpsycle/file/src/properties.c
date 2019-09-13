@@ -1,15 +1,19 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "properties.h"
 #include <malloc.h>
 #include <string.h>
-
+#include "fileio.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 static int properties_enumerate_rec(Properties* self);
 static void* target;
 static int (*callback)(void* self, struct PropertiesStruct* properties, int level);
 static int level;
 static int OnSearchPropertiesEnum(Properties* self, Properties* property, int level);
+static int OnSaveIniEnum(RiffFile* file, Properties* property, int level);
 
 Properties* properties_create(void)
 {
@@ -304,4 +308,92 @@ int properties_value(Properties* self)
 const char* properties_valuestring(Properties* self)
 {
 	return (self) ? self->item.value.s : "";
+}
+
+void properties_load(Properties* self, const char* path)
+{
+	FILE* fp;
+			
+	fp = fopen(path, "rb");
+	if (fp) {
+		int c;
+		int i;
+		int state;
+		char key[_MAX_PATH + 1];
+		char value[_MAX_PATH + 1];
+		
+		i = 0;
+		state = 0;
+				
+		while ((c = fgetc(fp)) != EOF) {			
+			if (state == 0) {
+				if (c == '=') {
+					state = 1;
+					key[i] = '\0';
+					i = 0;
+				} else {
+					if (i < _MAX_PATH) {
+						key[i] = c;					
+					}
+					++i;
+				}
+			} else
+			if (state == 1) {
+				if (c == '\n') {
+					state = 2;
+					value[i] = '\0';
+					i = 0;					
+				} else
+				if (i < _MAX_PATH) {
+					value[i] = c;					
+				}
+				++i;
+			}
+			if (state == 2) {
+				if (properties_read(self, key)) {
+					properties_write_string(self, key, value);
+				}
+				i = 0;
+				state = 0;
+			}
+		}		
+		fclose(fp);
+		if (state == 1) {
+			if (i < _MAX_PATH) {
+				value[i] = '\0';
+			} else {
+				value[_MAX_PATH - 1] = '\0';
+			}
+			if (properties_read(self, key)) {
+				properties_write_string(self, key, value);
+			}			
+		}
+	}	
+}
+
+void properties_save(Properties* self, const char* path)
+{
+	RiffFile file;
+	if (rifffile_create(&file, "psycle.ini", 1)) {
+		properties_enumerate(self, &file, OnSaveIniEnum);
+		rifffile_close(&file);
+	}
+}
+
+int OnSaveIniEnum(RiffFile* file, Properties* property, int level)
+{
+	if (property->item.key) {
+		rifffile_write(file, property->item.key, strlen(property->item.key));
+		rifffile_write(file, "=", strlen("="));
+		switch (property->item.typ) {
+			case PROPERTY_TYP_STRING:
+				rifffile_write(file, property->item.value.s,
+					strlen(property->item.value.s));
+			break;			
+			default:
+			break;
+		}
+		rifffile_write(file, "\n", strlen("\n"));
+	}
+	return 1;
 }

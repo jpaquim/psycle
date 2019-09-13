@@ -6,25 +6,33 @@ static void AddString(Greet* self, const char* text);
 
 void greet_init(Greet* self, ui_component* parent)
 {
-	ui_frame_init(&self->component, parent);	
-	ui_component_settitle(&self->component, "Greetings and info");
-	ui_component_resize(&self->component, 242, 237);
+	ui_margin margin = { 3, 3, 0, 3 };
+
+	ui_component_init(&self->component, parent);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
+	ui_component_enablealign(&self->component);
+	ui_component_settitle(&self->component, "Greetings and info");	
 	ui_label_init(&self->header, &self->component);
-	ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
-	ui_component_move(&self->header.component, 5,4);
-	ui_component_resize(&self->header.component, 232, 17);
+	ui_component_resize(&self->header.component, 0, 40);
+	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
+	ui_component_setmargin(&self->header.component, &margin);
+	ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");		
 	ui_listbox_init(&self->greetz, &self->component);
-	ui_component_move(&self->greetz.component, 11, 33);
-	ui_component_resize(&self->greetz.component, 220,174);
-	ui_button_init(&self->ok, &self->component);
-	ui_button_settext(&self->ok, "OK");
-	ui_component_move(&self->ok.component, 5,215);
-	ui_component_resize(&self->ok.component, 231,15);
+	ui_component_setalign(&self->greetz.component, UI_ALIGN_TOP);
+	margin.top = 25;
+	margin.left = 5;
+	margin.right = 5;
+	ui_component_setmargin(&self->greetz.component, &margin);
+	ui_component_resize(&self->greetz.component, 0, 174);	
 	ui_groupbox_init(&self->groupbox, &self->component);
-	ui_groupbox_settext(&self->groupbox, "Thanks!");
-	ui_component_move(&self->groupbox.component, 5, 23);
-	ui_component_resize(&self->groupbox.component, 232, 190);
-	
+	ui_groupbox_settext(&self->groupbox, "Thanks!");	
+	ui_component_setalign(&self->groupbox.component, UI_ALIGN_FILL);
+	margin.top = 45;
+	margin.left = 3;
+	margin.right = 3;
+	ui_component_setmargin(&self->groupbox.component, &margin);
+		
 /*
 	//Original Arguru's Greetings.
 	m_greetz.AddString("Hamarr Heylen 'Hymax' [Logo design]");
@@ -92,4 +100,3 @@ void AddString(Greet* self, const char* text)
 {
 	ui_listbox_addstring(&self->greetz, text);
 }
-

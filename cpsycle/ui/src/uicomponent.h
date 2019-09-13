@@ -63,6 +63,7 @@ typedef struct {
 	int debugflag;
 	unsigned int backgroundcolor;
 	BackgroundMode backgroundmode;
+	ui_font font;
 } ui_component;
 
 void ui_component_init(ui_component* component, ui_component* parent);
@@ -92,7 +93,7 @@ ui_size ui_component_size(ui_component*);
 ui_size ui_component_frame_size(ui_component* self);
 void ui_invalidate(ui_component*);
 void ui_component_setfocus(ui_component*);
-void ui_component_setfont(ui_component*, HFONT font);
+void ui_component_setfont(ui_component*, ui_font* font);
 void ui_component_propagateevent(ui_component*);
 void ui_component_preventdefault(ui_component*);
 void ui_component_init_signals(ui_component*);
@@ -106,6 +107,7 @@ void ui_component_enableinput(ui_component*, int recursive);
 void ui_component_preventinput(ui_component*, int recursive);
 void ui_component_setbackgroundmode(ui_component*, BackgroundMode);
 void ui_component_setbackgroundcolor(ui_component*, unsigned int color);
+ui_size ui_component_textsize(ui_component*, const char*);
 
 int ui_openfile(ui_component* self, char* title, char* filter, char* defextension, char* filename);
 #endif
