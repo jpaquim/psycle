@@ -14,6 +14,7 @@
 #include "samplesview.h"
 #include "instrumentsview.h"
 #include "settingsview.h"
+#include "songproperties.h"
 #include "properties.h"
 #include "noteinputs.h"
 #include "tabbar.h"
@@ -31,11 +32,12 @@ typedef struct {
 	ui_notebook notebook;
 	MachineBar machinebar;
 	PlayBar playbar;
-	MachineView machineview;
-	PatternView patternview;	
 	SequenceView sequenceview;
+	MachineView machineview;
+	PatternView patternview;		
 	SamplesView samplesview;
 	InstrumentsView instrumentsview;
+	SongProperties songproperties;
 	SettingsView settingsview;
 	Vumeter vumeter;
 	TimeBar timebar;

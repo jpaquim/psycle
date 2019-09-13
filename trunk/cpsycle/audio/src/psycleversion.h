@@ -1,5 +1,5 @@
-// #if !defined(PSYCLEVERSION_H)
-// #define PSYCLEVERSION_H
+#if !defined(PSYCLEVERSION_H)
+#define PSYCLEVERSION_H
 
 ///\file
 ///\brief the version number of the psycle host application.
@@ -63,4 +63,4 @@
 	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif*/
 
-//#endif
+#endif

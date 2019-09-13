@@ -49,8 +49,7 @@ typedef struct {
 	unsigned int cursor;
 	unsigned int cursor2;
 	TrackerHeaderCoords headercoords;
-	ui_bitmap skinbmp;
-	HFONT hfont;
+	ui_bitmap skinbmp;	
 } TrackerSkin;
 
 typedef struct {
@@ -114,7 +113,7 @@ typedef struct {
    int colx[TrackerGrid_NUMCOLS];   
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
-   struct TrackerView* view;
+   struct TrackerView* view;   
 } TrackerGrid;
 
 typedef struct TrackerView {
@@ -125,7 +124,8 @@ typedef struct TrackerView {
 	TrackerGrid grid;
 	PatternProperties properties;
 	Pattern* pattern;
-	TrackerSkin skin;	
+	TrackerSkin skin;
+	ui_font font;
 } TrackerView;
 
 void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView* view, Player* player);

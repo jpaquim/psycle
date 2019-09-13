@@ -133,7 +133,10 @@ void loadpsy3(Song* self, RiffFile* file, char header[9], MachineFactory* machin
 				char name_[129]; char author_[65]; char comments_[65536];
 				rifffile_readstring(file, name_, sizeof name_);
 				rifffile_readstring(file, author_, sizeof author_);
-				rifffile_readstring(file, comments_,sizeof comments_);				
+				rifffile_readstring(file, comments_,sizeof comments_);
+				properties_write_string(self->properties, "title", name_);
+				properties_write_string(self->properties, "credits", author_);
+				properties_write_string(self->properties, "comments", comments_);
 				//bugfix. There were songs with incorrect size.
 				if(version == 0) {
 				//	size= (UINT)(rifffile_getpos(file) - begins);

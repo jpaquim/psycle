@@ -62,8 +62,6 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	tabbar_append(&self->tabbar, "Pan");
 	tabbar_append(&self->tabbar, "Filter");
 	tabbar_append(&self->tabbar, "Pitch");
-	self->tabbar.tabwidth = 80;
-	self->tabbar.selected = 0;
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 
 	AlignInstrumentView(self);

@@ -4,7 +4,6 @@
 #if !defined(MACHINEVIEW)
 #define MACHINEVIEW
 
-#include <windows.h>
 #include "workspace.h"
 #include <uinotebook.h>
 #include <uidef.h>
@@ -61,7 +60,7 @@ typedef struct {
 	unsigned int effect_font_flags;	
 	unsigned int effect_fontcolour;
 	ui_bitmap skinbmp;	
-	HFONT hfont;
+	ui_font font;
 } MachineSkin;
 
 

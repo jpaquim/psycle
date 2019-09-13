@@ -63,18 +63,22 @@ void MachineUiSet(MachineUi* self, int x, int y, const char* editname)
 
 void InitWireView(WireView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
-{				
+{	
+	ui_fontinfo fontinfo;
+
 	self->workspace = workspace;
 	self->cx = 0;
 	self->cy = 0;	
 	self->wirefound = 0;
-	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_MACHINESKIN));	
-	self->skin.hfont = ui_createfont("Tahoma", 12);		
+	self->skin.skinbmp.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_MACHINESKIN));		
 	memset(&self->machineuis, 0, sizeof(MachineUi[256]));
 	MachineUiSet(&self->machineuis[0], 200, 200, 0);
 	memset(&self->machine_frames, 0, sizeof(ui_component[256]));
 	memset(&self->machine_paramviews, 0, sizeof(ParamView[256]));
 	ui_component_init(&self->component, parent);
+	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
+	ui_font_init(&self->skin.font, &fontinfo);
+	ui_component_setfont(&self->component, &self->skin.font);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
@@ -164,10 +168,7 @@ void WireViewApplyProperties(WireView* self, Properties* properties)
 
 
 void OnDraw(WireView* self, ui_component* sender, ui_graphics* g)
-{	   	
-	if (self->skin.hfont) {
-		ui_setfont(g, self->skin.hfont);
-	}
+{	
 	DrawBackground(self, g);
 	DrawWires(self, g);	
 	DrawMachines(self, g);	
@@ -690,9 +691,7 @@ void InitMachineView(MachineView* self, ui_component* parent,
 	ui_component_move(&self->tabbar.component, 600, 75);
 	ui_component_resize(&self->tabbar.component, 160, 20);
 	tabbar_append(&self->tabbar, "Wires");
-	tabbar_append(&self->tabbar, "New Machine");
-	self->tabbar.tabwidth = 70;
-	self->tabbar.selected = 0;
+	tabbar_append(&self->tabbar, "New Machine");	
 	ui_notebook_setpage(&self->notebook, 0);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	signal_connect(&self->newmachine.signal_selected, self, OnNewMachineSelected);

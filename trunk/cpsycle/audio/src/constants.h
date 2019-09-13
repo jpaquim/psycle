@@ -1,4 +1,5 @@
-#pragma once
+#if !defined(CONSTANTS_H)
+#define CONSTANTS_H
 
 #include "psycleversion.h"
 
@@ -22,8 +23,8 @@
 		#define MAX_SEQUENCES			1
 		/// maximum number of different patterns. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
 		#define MAX_PATTERNS			256
-		/// Max number of pattern tracks
-		/*unsigned*/ int const MAX_TRACKS = 64; //  plugin_interface::MAX_TRACKS;
+		/// Max number of pattern tracks		
+		#define MAX_TRACKS				64 //  plugin_interface::MAX_TRACKS;
 		/// harcoded maximal number of lines per pattern
 		#define MAX_LINES				1024
 		/// maximum number of positions in the sequence. PSY3 Fileformat supports up to 2^32. UI is limited to 256 for now.
@@ -80,3 +81,5 @@
 		unsigned const int VERSION_MAJOR_ONE  = 0x00010000;
 
 		#define CURRENT_CACHE_MAP_VERSION	0x0002
+
+#endif

@@ -2,8 +2,13 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "dir.h"
+#include <direct.h>
 #include <windows.h>
 #include <stdio.h>
+
+static const char pathenvvarname[] = { 
+	"PATH"
+};
 
 void dir_enum(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
 {
@@ -46,5 +51,44 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag, v
 	if (FindClose(hFind) == FALSE)
 	{
 		return;
+	}
+}
+
+char* workdir(char* buffer)
+{
+	return _getcwd(buffer, _MAX_PATH);
+}
+
+const char* pathenv(void)
+{		
+	return getenv(pathenvvarname);	
+}
+
+void insertpathenv(const char* path)
+{	
+	const char* envpath;		
+	
+	envpath = pathenv();
+	if (envpath && path) {	
+		char newenvpath[MAX_PATH + 5];
+
+		newenvpath[0] = '\0';
+		strcat(newenvpath, path);
+		strcat(newenvpath, ";");
+		strcat(newenvpath, envpath);
+		setpathenv(newenvpath);
+	}	
+}
+
+void setpathenv(const char* path)
+{
+	if (path) {
+		char newenv[MAX_PATH + 5];
+		newenv[0] = '\0';
+
+		strcat(newenv, pathenvvarname);
+		strcat(newenv, "=");	
+		strcat(newenv, path);
+		putenv(newenv);
 	}
 }

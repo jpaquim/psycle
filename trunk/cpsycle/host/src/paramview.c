@@ -19,7 +19,7 @@ static void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int
 static int HitTest(ParamView* self, int x, int y);
 
 static ui_bitmap knobs;
-static HFONT hfont;
+static ui_font font;
 extern HINSTANCE appInstance;
 
 void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
@@ -27,8 +27,8 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	if (knobs.hBitmap == NULL) {
 		knobs.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_PARAMKNOB));
 	}
-	if (hfont == NULL) {
-		hfont = ui_createfont("Tahoma", 12);
+	if (font.hfont == NULL) {
+		font = ui_createfont("Tahoma", 12);
 	}
 	self->machine = machine;
 	ui_component_init(&self->component, parent);	
@@ -61,10 +61,8 @@ void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
 		int row = 0;
 		int col = 0;
 		int param;
-
-		if (hfont) {
-			ui_setfont(g, hfont);
-		}
+		
+		ui_setfont(g, &font);		
 					
 		for (param = 0; param < self->numparams; ++param) {
 			DrawParam(self, g, param, row, col);

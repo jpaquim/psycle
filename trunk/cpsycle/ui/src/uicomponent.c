@@ -165,6 +165,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				HBITMAP oldBmp;
 				HDC hdc;				
 				RECT rect;
+				HFONT hPrevFont = 0;
 
 				ui_graphics_init(&g, BeginPaint (hwnd, &ps));				
 				if (component->doublebuffered) {
@@ -182,7 +183,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (component->backgroundmode == BACKGROUND_SET) {
 					ui_drawsolidrectangle(&g, g.clip, component->backgroundcolor);
 				}
+				if (component->font.hfont) {
+					hPrevFont = SelectObject(g.hdc, component->font.hfont);
+				}
 				signal_emit(&component->signal_draw, component, 1, (int)&g);
+				if (hPrevFont) {
+					SelectObject(g.hdc, hPrevFont);
+				}
 				if (component->doublebuffered) {
 					g.hdc = hdc;
 					BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom,
@@ -482,6 +489,8 @@ void ui_component_init_signals(ui_component* component)
 	memset(&component->margin, 0, sizeof(ui_margin));
 	component->debugflag = 0;
 	component->defaultpropagation = 0;
+	component->font.stock = 0;
+	component->font.hfont = 0;
 }
 
 void ui_component_dispose(ui_component* component)
@@ -501,6 +510,9 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_show);
 	signal_dispose(&component->signal_hide);
 	signal_dispose(&component->signal_windowproc);
+	if (component->font.hfont) {
+		ui_font_dispose(&component->font);
+	}
 }
 
 void ui_classcomponent_init(ui_component* component, ui_component* parent, const char* classname)
@@ -720,9 +732,14 @@ void ui_component_setfocus(ui_component* self)
 	SetFocus(self->hwnd);
 }
 
-void ui_component_setfont(ui_component* self, HFONT hFont)
+void ui_component_setfont(ui_component* self, ui_font* font)
 {
-     SendMessage (self->hwnd, WM_SETFONT, (WPARAM) hFont, 0) ;
+	if (font && font->hfont) {
+		SendMessage (self->hwnd, WM_SETFONT, (WPARAM) font->hfont, 0);
+	}
+	if (font) {
+		self->font = *font;
+	}
 }
 
 void ui_component_propagateevent(ui_component* self)
@@ -855,4 +872,27 @@ void ui_component_setbackgroundmode(ui_component* self, BackgroundMode mode)
 void ui_component_setbackgroundcolor(ui_component* self, unsigned int color)
 {
 	self->backgroundcolor = color;
+}
+
+ui_size ui_component_textsize(ui_component* self, const char* text)
+{
+	ui_size rv;
+	ui_graphics g;
+	HFONT hPrevFont = 0;
+	HDC hdc;
+	
+	hdc = GetDC (self->hwnd);	
+    SaveDC (hdc) ;          
+	ui_graphics_init(&g, hdc);
+	if (self->font.hfont) {
+		hPrevFont = SelectObject(hdc, self->font.hfont);
+	}
+	rv = ui_textsize(&g, text);
+	if (hPrevFont) {
+		SelectObject(hdc, hPrevFont);
+	}
+	ui_graphics_dispose(&g);
+	RestoreDC (hdc, -1);	
+	ReleaseDC(NULL, hdc);
+	return rv;
 }
