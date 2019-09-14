@@ -3,196 +3,270 @@
 #include "sequence.h"
 #include <stdlib.h>
 
-static PatternNode* SequenceIterator_next(SequenceIterator* self);
-static void SequenceIterator_unget(SequenceIterator* self);
-static void sequence_reposition(Sequence* self);
-static SequenceIterator sequence_makeiterator(Sequence* self, List* entries);
+static PatternNode* SequenceTrackIterator_next(SequenceTrackIterator* self);
+static void SequenceTrackIterator_unget(SequenceTrackIterator* self);
+static void sequence_reposition(Sequence* self, SequenceTrack* track);
+static SequenceTrackIterator sequence_makeiterator(Sequence* self, List* entries);
+static SequencePosition sequence_makeposition(Sequence* self, SequenceTracks* track, List* entries);
+
+void sequencetrack_init(SequenceTrack* self)
+{
+	self->entries = 0;
+}
+
+void sequenceposition_init(SequencePosition* self)
+{
+	self->track = 0;
+	self->trackposition.patternnode = 0;
+	self->trackposition.tracknode = 0;
+}
+
+void sequencetrack_dispose(SequenceTrack* self)
+{
+	List* p;
+	List* next;
+
+	p = self->entries;
+	while (p) {
+		next = p->next;
+		free(p->entry);
+		p = next;
+	}
+	list_free(self->entries);
+	self->entries = 0;
+}
 
 void sequence_init(Sequence* self, Patterns* patterns)
 {
-	self->entries = 0;
+	self->tracks = 0;
 	self->patterns = patterns;
-	self->editpos.patternnode = 0;
-	self->editpos.sequence = 0;
-	signal_init(&self->signal_editposchanged);
+	self->editposition = sequence_makeposition(self, 0, 0);
+	signal_init(&self->signal_editpositionchanged);
 }
 
 void sequence_dispose(Sequence* self)
 {
-	Track* ptr;
+	SequenceTracks* p;
 	List* next;
 
-	ptr = self->entries;
-	while (ptr) {
-		next = ptr->next;
-		free(ptr->entry);
-		ptr = next;
+	p = self->tracks;
+	while (p) {
+		next = p->next;
+		sequencetrack_dispose((SequenceTrack*)p->entry);
+		free(p->entry);
+		p = next;
 	}
-	list_free(self->entries);
-	signal_dispose(&self->signal_editposchanged);
+	list_free(self->tracks);
+	signal_dispose(&self->signal_editpositionchanged);
 }
 
-SequenceEntry* sequence_insert(Sequence* self, SequenceIterator position, int pattern)
+SequenceEntry* sequence_insert(Sequence* self, SequencePosition position, int pattern)
 {		
 	SequenceEntry* entry = (SequenceEntry*) malloc(sizeof(SequenceEntry));
+	SequenceTrack* track = (SequenceTrack*) position.track->entry;	
 	entry->pattern = pattern;
 	entry->offset = 0;
-	if (self->entries) {
-		Track* ptr = position.sequence;
+	if (track->entries) {
+		List* ptr = position.trackposition.tracknode;
 		if (ptr) {			
-			self->editpos = sequence_makeiterator(self, list_insert(&self->entries, position.sequence, entry));
-			sequence_reposition(self);						
+			self->editposition = sequence_makeposition(self, 
+				position.track, list_insert(&track->entries, position.trackposition.tracknode, entry));
+			sequence_reposition(self, track);						
 		}
 	} else {		
-		self->entries = list_create(entry);		
-		self->editpos = sequence_makeiterator(self, self->entries);
+		track->entries = list_create(entry);		
+		self->editposition = sequence_makeposition(self, position.track,
+			track->entries);
 	}
-	signal_emit(&self->signal_editposchanged, self, 0);
+	signal_emit(&self->signal_editpositionchanged, self, 0);
 	return entry;
 }
 
+void sequence_remove(Sequence* self, SequencePosition position)
+{					
+	if (position.track) {
+		SequenceTrack* track;
+		SequenceEntry* entry;
+		List* ptr;
 
-void sequence_remove(Sequence* self, SequenceIterator position)
-{				
-	Track* ptr = position.sequence;					
-	SequenceEntry* entry = (SequenceEntry*)ptr->entry;
-	ptr = list_remove(&self->entries, ptr);	
-	if (self->entries != NULL) {
-		sequence_reposition(self);	
-		if (ptr) {
-			self->editpos = sequence_begin(self, entry->offset);
+		track = (SequenceTrack*)position.track->entry;
+		ptr = position.trackposition.tracknode;	
+		entry = (SequenceEntry*)ptr->entry;
+		ptr = list_remove(&track->entries, ptr);	
+		if (track->entries != NULL) {
+			SequencePosition newposition;
+			
+			newposition.track = position.track;
+			sequence_reposition(self, track);	
+			if (ptr) {						
+				newposition.trackposition = sequence_begin(self, position.track, entry->offset);				
+			} else {
+				newposition.trackposition = sequence_last(self, position.track);				
+			}
+			self->editposition = newposition;
 		} else {
-			self->editpos = sequence_last(self);
+			self->editposition = sequence_makeposition(self, position.track, 0);
 		}
-	} else {
-		self->editpos = sequence_makeiterator(self, 0);
+		signal_emit(&self->signal_editpositionchanged, self, 0);
 	}
-	signal_emit(&self->signal_editposchanged, self, 0);
 }
 
 void sequence_clear(Sequence* self)
 {
-	Track* ptr;
-	List* next;
-
-	ptr = self->entries;
-	while (ptr) {
-		next = ptr->next;
-		free(ptr->entry);
-		ptr = next;
+	SequenceTracks* p;	
+	
+	for (p = self->tracks; p != 0; p = p->next) {		
+		sequencetrack_dispose((SequenceTrack*)p->entry);		
 	}
-	list_free(self->entries);
-	self->entries = 0;
-	self->editpos.patternnode = 0;
-	self->editpos.sequence = 0;
+	list_free(self->tracks);
+	self->tracks = 0;
+	sequenceposition_init(&self->editposition);	
 }
 
-SequenceIterator sequence_last(Sequence* self)
+SequenceTrackIterator sequence_last(Sequence* self, List* tracknode)
 {
-	SequenceIterator ptr;
+	SequenceTrackIterator p;
+	SequenceTrack* track;
 
-	if (self->entries == 0) {
-		return sequence_begin(self, 0);
+	if (tracknode == 0) {
+		return sequence_begin(self, tracknode, 0);
 	}
-	ptr.patternnode = 0;		
-	ptr.sequence = self->entries->tail;
-	if (ptr.sequence) {
+	 
+	track = (SequenceTrack*) tracknode->entry;
+	if (track->entries == 0) {
+		return sequence_begin(self, tracknode, 0);
+	}
+	p.patternnode = 0;		
+	p.tracknode = track->entries->tail;
+	if (p.tracknode) {
 		Pattern* pattern;
-		SequenceEntry* entry = (SequenceEntry*) ptr.sequence->entry;
+		SequenceEntry* entry = (SequenceEntry*) track->entries->tail->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
 		if (pattern) {
-			ptr.patternnode = pattern->events;
+			p.patternnode = pattern->events;
 		} else {
-			ptr.patternnode = 0;
+			p.patternnode = 0;
 		}
 	}
-	return ptr;	
+	return p;
 }
 
-void sequence_reposition(Sequence* self)
+void sequence_reposition(Sequence* self, SequenceTrack* track)
 {
-	float curroffset = 0.0f;
-	Track* ptr = self->entries;	
-	while (ptr) {
+	float curroffset = 0.0f;	
+	List* p;	
+			
+	for (p = track->entries; p != 0; p = p->next) {
 		Pattern* pattern;
-		SequenceEntry* entry = (SequenceEntry*) ptr->entry;
+		SequenceEntry* entry = (SequenceEntry*) p->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
 		if (pattern) {
 			entry->offset = curroffset;
 			curroffset += pattern->length;
 		} else {
 			entry->offset = curroffset;
-		}
-		ptr = ptr->next;
+		}		
 	}
 }
 
-unsigned int sequence_size(Sequence* self)
-{
-	Track* ptr;	
+unsigned int sequence_size(Sequence* self, List* tracknode)
+{	
 	unsigned int c = 0;
 
-	ptr = self->entries;
-	while (ptr) {		
-		ptr = ptr->next;
-		++c;
+	if (tracknode) {
+		List* p;
+
+		SequenceTrack* track = (SequenceTrack*)(tracknode->entry);		
+		p = track->entries;
+		while (p) {		
+			p = p->next;
+			++c;
+		}
 	}
 	return c;
 }
 
-SequenceIterator sequence_at(Sequence* self, unsigned int position)
+SequencePosition sequence_at(Sequence* self, unsigned int trackindex,
+	unsigned int position)
 {
-	SequenceIterator rv;	
-	Track* ptr;	
+	SequencePosition rv;	
+	List* ptr;	
 	unsigned int c = 0;	
-	
-	rv.patternnode = 0;
-	rv.sequence = 0;
-	ptr = self->entries;
-	while (ptr) {
-		if (c == position) {			
-			rv = sequence_makeiterator(self, ptr);
+	SequenceTracks* ptracks;
+	SequenceTrack* track;
+
+	sequenceposition_init(&rv);
+	ptracks = self->tracks;
+	while (ptracks) {
+		if (c == trackindex) {
 			break;
 		}
+		ptracks = ptracks->next;
 		++c;
-		ptr = ptr->next;
+	}
+
+	if (ptracks) {
+		track = (SequenceTrack*)(ptracks->entry);
+	} else {
+		track = 0;
+	}
+	
+	rv.track = ptracks;	
+	if (rv.track) {
+		ptr = track->entries;
+		c = 0;
+		while (ptr) {
+			if (c == position) {			
+				rv = sequence_makeposition(self, ptracks, ptr);
+				break;
+			}
+			++c;
+			ptr = ptr->next;
+		}
 	}
 	return rv;
 }
 
-Track* sequence_at_offset(Sequence* self, float offset)
+List* sequence_at_offset(Sequence* self, SequenceTracks* tracknode, float offset)
 {
-	float curroffset = 0.0f;
-	Track* ptr = self->entries;	
-	while (ptr) {
-		Pattern* pattern;
-		SequenceEntry* entry = (SequenceEntry*) ptr->entry;
-		pattern = patterns_at(self->patterns, entry->pattern);
-		if (pattern) {
-			if (offset >= curroffset && offset < curroffset + pattern->length) {
-				break;
+	float curroffset = 0.0f;	
+	List* p = 0;
+
+	if (tracknode) {		
+		SequenceTrack* track;
+
+		track = (SequenceTrack*)tracknode->entry;
+		p = track->entries;	
+		while (p) {
+			Pattern* pattern;
+			SequenceEntry* entry = (SequenceEntry*) p->entry;
+			pattern = patterns_at(self->patterns, entry->pattern);
+			if (pattern) {
+				if (offset >= curroffset && offset < curroffset + pattern->length) {
+					break;
+				}
+				curroffset += pattern->length;
 			}
-			curroffset += pattern->length;
+			p = p->next;
 		}
-		ptr = ptr->next;
 	}
-	return ptr;
+	return p;
 }
 
-SequenceIterator sequence_begin(Sequence* self, float pos)
+SequenceTrackIterator sequence_begin(Sequence* self, List* track, float pos)
 {		
-	return sequence_makeiterator(self, sequence_at_offset(self, pos));	
+	return sequence_makeiterator(self, sequence_at_offset(self, track, pos));	
 }
 
-void sequenceiterator_inc(SequenceIterator* self) {	
+void sequencetrackiterator_inc(SequenceTrackIterator* self) {	
 	if (self->patternnode) {		
 		self->patternnode = self->patternnode->next;
 		if (self->patternnode == NULL) {
-			if (self->sequence->next) {
+			if (self->tracknode->next) {
 				SequenceEntry* entry;
 				Pattern* pattern;
-				self->sequence = self->sequence->next;			
-				entry = (SequenceEntry*) self->sequence->entry;
+				self->tracknode = self->tracknode->next;			
+				entry = (SequenceEntry*) self->tracknode->entry;
 				pattern = patterns_at(self->patterns, entry->pattern);
 				self->patternnode = pattern->events;
 			}
@@ -200,23 +274,23 @@ void sequenceiterator_inc(SequenceIterator* self) {
 	}
 }
 
-void sequence_seteditposition(Sequence* self, SequenceIterator position)
+void sequence_seteditposition(Sequence* self, SequencePosition position)
 {
-	self->editpos = position;	
-	signal_emit(&self->signal_editposchanged, self, 0);
+	self->editposition = position;	
+	signal_emit(&self->signal_editpositionchanged, self, 0);
 }
 
-SequenceIterator sequence_editposition(Sequence* self)
+SequencePosition sequence_editposition(Sequence* self)
 {
-	return self->editpos;
+	return self->editposition;
 }
 
-SequenceIterator sequence_makeiterator(Sequence* self, List* entries)
+SequenceTrackIterator sequence_makeiterator(Sequence* self, List* entries)
 {
-	SequenceIterator rv;
+	SequenceTrackIterator rv;
 	Pattern* pPattern  = 0;	
 	rv.patterns = self->patterns;
-	rv.sequence = entries;
+	rv.tracknode = entries;
 	if (entries) {
 		SequenceEntry* entry = (SequenceEntry*) entries->entry;
 		pPattern = patterns_at(self->patterns, entry->pattern);
@@ -229,25 +303,56 @@ SequenceIterator sequence_makeiterator(Sequence* self, List* entries)
 	return rv;
 }
 
-PatternNode* sequenceiterator_patternnode(SequenceIterator* self)
+static SequencePosition sequence_makeposition(Sequence* self, SequenceTracks* track, List* entries)
+{
+	SequencePosition rv;
+
+	rv.trackposition = sequence_makeiterator(self, entries);
+	rv.track = track;
+	return rv;
+}
+
+PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator* self)
 {
 	return self->patternnode;
 }
 
-SequenceEntry* sequenceiterator_entry(SequenceIterator* self)
+SequenceEntry* sequencetrackiterator_entry(SequenceTrackIterator* self)
 {
-	return self->sequence ? (SequenceEntry*) self->sequence->entry : 0;
+	return self->tracknode ? (SequenceEntry*) self->tracknode->entry : 0;
 }
 
-PatternEntry* sequenceiterator_patternentry(SequenceIterator* self)
+PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator* self)
 {
 	return self->patternnode ? (PatternEntry*)(self->patternnode)->entry : 0;
 }
 
-float sequenceiterator_offset(SequenceIterator* self)
+float sequencetrackiterator_offset(SequenceTrackIterator* self)
 {	
-	return sequenceiterator_patternentry(self)
-		? sequenceiterator_entry(self)->offset +
-		  sequenceiterator_patternentry(self)->offset
+	return sequencetrackiterator_patternentry(self)
+		? sequencetrackiterator_entry(self)->offset +
+		  sequencetrackiterator_patternentry(self)->offset
 		: 0.f;	
+}
+
+List* sequence_appendtrack(Sequence* self, SequenceTrack* track)
+{
+	List* rv;
+
+	if (self->tracks == 0) {
+		self->tracks = list_create(track);
+		rv = self->tracks;
+	} else {
+		rv = list_append(self->tracks, track);		
+	}
+	return rv;
+}
+
+unsigned int sequence_sizetracks(Sequence* self)
+{
+	unsigned int c = 0;	
+	SequenceTracks* p;
+	
+	for (p = self->tracks; p != 0; p = p->next, ++c);
+	return c;
 }

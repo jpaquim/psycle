@@ -50,12 +50,19 @@ void song_dispose(Song* self)
 
 void song_initdefaults(Song* self)
 {
+	SequenceTrack* sequencetrack;
+	SequencePosition sequenceposition;
 	Pattern* pattern;
 	
 	pattern = (Pattern*) malloc(sizeof(Pattern));
 	patterns_insert(&self->patterns, 0, pattern);
-	pattern_init(pattern);	
-	sequence_insert(&self->sequence, sequence_begin(&self->sequence, 0), 0);
+	pattern_init(pattern);
+	sequencetrack = malloc(sizeof(SequenceTrack));
+	sequencetrack_init(sequencetrack);
+	sequenceposition.track = sequence_appendtrack(&self->sequence, sequencetrack);
+	sequenceposition.trackposition =
+		sequence_begin(&self->sequence, sequenceposition.track, 0);
+	sequence_insert(&self->sequence, sequenceposition, 0);
 	song_initproperties(self);
 }
 
@@ -76,9 +83,10 @@ void song_load(Song* self, const char* path, MachineFactory* machinefactory, Pro
 
 	if (rifffile_open(&file, (char*) path))
 	{
-		char header[9];		
+		char header[9];				
+
 		*workspaceproperties = 0;
-		sequence_clear(&self->sequence);
+		sequence_clear(&self->sequence);		
 		patterns_clear(&self->patterns);
 		machines_startfilemode(&self->machines);
 		rifffile_read(&file, header, 8);
@@ -195,9 +203,17 @@ void loadpsy3(Song* self, RiffFile* file, char header[9], MachineFactory* machin
 	}
 	{
 		int i;
-		for (i = 0; i < playlength; ++i) {
-			sequence_insert(&self->sequence, sequence_last(&self->sequence),
-				playorder[i]);			
+		SequenceTrack* sequencetrack;
+		SequencePosition sequenceposition;
+
+		sequencetrack = malloc(sizeof(SequenceTrack));
+		sequencetrack_init(sequencetrack);				
+		sequenceposition.track =
+			sequence_appendtrack(&self->sequence, sequencetrack);		
+		for (i = 0; i < playlength; ++i) {			
+			sequenceposition.trackposition =
+				sequence_last(&self->sequence, sequenceposition.track);
+			sequence_insert(&self->sequence, sequenceposition, playorder[i]);
 		}
 	}
 }

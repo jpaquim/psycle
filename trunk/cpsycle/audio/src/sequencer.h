@@ -12,7 +12,7 @@ typedef struct {
 	float bpm;
 	float window;
 	unsigned int samplerate;
-	SequenceIterator curr;	
+	List* currtrackiterators;	
 	List* events;
 	List* delayedevents;
 } Sequencer;
@@ -21,6 +21,5 @@ void sequencer_init(Sequencer*);
 void sequencer_dispose(Sequencer*);
 void sequencer_tick(Sequencer*, float offset);
 void sequencer_setposition(Sequencer*, float position);
-SequenceIterator sequencer_curr(Sequencer*);
 
 #endif

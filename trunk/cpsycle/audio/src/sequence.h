@@ -13,36 +13,54 @@ typedef struct {
 } SequenceEntry;
 
 typedef struct {
-	Patterns* patterns;	
-	List* sequence;
-	PatternNode* patternnode;		
-} SequenceIterator;
+	List* entries;
+} SequenceTrack;
 
-void sequenceiterator_inc(SequenceIterator*);
-PatternNode* sequenceiterator_patternnode(SequenceIterator*);
-SequenceEntry* sequenceiterator_entry(SequenceIterator*);
-PatternEntry* sequenceiterator_patternentry(SequenceIterator*);
-float sequenceiterator_offset(SequenceIterator*);
+void sequencetrack_init(SequenceTrack*);
 
-typedef List Track;
+typedef List SequenceTrackNode;
 
 typedef struct {
-	Track* entries;
+	Patterns* patterns;	
+	SequenceTrackNode* tracknode;
+	PatternNode* patternnode;		
+} SequenceTrackIterator;
+
+void sequencetrackiterator_inc(SequenceTrackIterator*);
+PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator*);
+SequenceEntry* sequencetrackiterator_entry(SequenceTrackIterator*);
+PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator*);
+float sequencetrackiterator_offset(SequenceTrackIterator*);
+
+typedef List SequenceTracks;
+
+typedef struct {
+	SequenceTracks* track;
+	SequenceTrackIterator trackposition;
+} SequencePosition;
+
+void sequenceposition_init(SequencePosition*);
+
+typedef struct {
+	SequenceTracks* tracks;
 	Patterns* patterns;
-	SequenceIterator editpos;
-	Signal signal_editposchanged;
+	SequencePosition editposition;
+	Signal signal_editpositionchanged;
 } Sequence;
 
 void sequence_init(Sequence*, Patterns*);
 void sequence_dispose(Sequence*);
-SequenceEntry* sequence_insert(Sequence*, SequenceIterator position, int pattern);
-void sequence_remove(Sequence*, SequenceIterator position);
-unsigned int sequence_size(Sequence*);
-SequenceIterator sequence_at(Sequence*, unsigned int position);
-SequenceIterator sequence_begin(Sequence* self, float offset);
-SequenceIterator sequence_last(Sequence* self);
-void sequence_seteditposition(Sequence* self, SequenceIterator position);
-SequenceIterator sequence_editposition(Sequence* self);
+SequenceEntry* sequence_insert(Sequence*, SequencePosition position, int pattern);
+void sequence_remove(Sequence*, SequencePosition position);
+unsigned int sequence_size(Sequence*, List* track);
+SequencePosition sequence_at(Sequence*, unsigned int trackindex, unsigned int position);
+SequenceTrackIterator sequence_begin(Sequence* self, List* track, float offset);
+SequenceTrackIterator sequence_last(Sequence* self, List* track);
+void sequence_seteditposition(Sequence* self, SequencePosition position);
+SequencePosition sequence_editposition(Sequence* self);
 void sequence_clear(Sequence*);
+List* sequence_appendtrack(Sequence*, SequenceTrack*);
+unsigned int sequence_sizetracks(Sequence*);
+
 #endif
 

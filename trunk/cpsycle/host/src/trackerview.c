@@ -132,13 +132,13 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	ui_component_showverticalscrollbar(&self->component);
 	ui_component_sethorizontalscrollrange(&self->component, 0, 16);
 	self->component.doublebuffered = 1;	
-	signal_connect(&self->player->song->sequence.signal_editposchanged,
+	signal_connect(&self->player->song->sequence.signal_editpositionchanged,
 		self, OnEditPositionChanged);	
 }
 
 void TrackerViewSongChanged(TrackerView* self, Workspace* workspace)
 {	
-	signal_connect(&self->grid.player->song->sequence.signal_editposchanged,
+	signal_connect(&self->grid.player->song->sequence.signal_editpositionchanged,
 		&self->grid, OnEditPositionChanged);	
 }
 
@@ -774,8 +774,8 @@ void OnMouseDown(TrackerGrid* self, ui_component* sender, int x, int y, int butt
 
 void OnEditPositionChanged(TrackerGrid* self, Sequence* sender)
 {	
-	if (sender->editpos.sequence) {
-		SequenceEntry* entry = (SequenceEntry*)sender->editpos.sequence->entry;	
+	if (sender->editposition.trackposition.tracknode) {		
+		SequenceEntry* entry = (SequenceEntry*)sender->editposition.trackposition.tracknode->entry;	
 		TrackerViewSetPattern(self->view, patterns_at(&self->player->song->patterns, entry->pattern));
 	} else {
 		TrackerViewSetPattern(self->view, 0);		
