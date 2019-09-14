@@ -144,7 +144,7 @@ void Destroy(MainFrame* self, ui_component* component)
 void OnSize(MainFrame* self, ui_component* sender, int width, int height)
 {
 	int statusbarheight = 30;
-	ui_component_resize(&self->sequenceview.component, 100, height - statusbarheight - toolbarheight);
+	ui_component_resize(&self->sequenceview.component, 140, height - statusbarheight - toolbarheight);
 	ui_component_resize(&self->notebook.component, width - 150, height - statusbarheight - toolbarheight - tabbarheight);
 	SendMessage(statusbar.component.hwnd, WM_SIZE, 0, 0);
 	if (self->firstshow) {

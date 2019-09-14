@@ -12,6 +12,7 @@
 typedef struct {
    void (*newentry)(void*);
    void (*delentry)(void*);
+   void (*newtrack)(void*);
 } SequenceController;
 
 typedef struct {
@@ -19,6 +20,7 @@ typedef struct {
 	SequenceController controller;
 	ui_button newentry;
 	ui_button delentry;
+	ui_button newtrack;
 	void* context;
 	ui_font font;
 } SequenceButtons;
@@ -29,6 +31,8 @@ typedef struct {
 	Patterns* patterns;
 	SequenceController* controller;
 	int selected;
+	int selectedtrack;
+	int foundselected;
 	int lineheight;
 	ui_font font;
 } SequenceListView;
