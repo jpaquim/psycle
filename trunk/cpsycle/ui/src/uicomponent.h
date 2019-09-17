@@ -51,6 +51,7 @@ typedef struct {
 	Signal signal_show;
 	Signal signal_hide;
 	Signal signal_windowproc;
+	Signal signal_align;
 	UiAlignType align;
 	int alignchildren;
 	ui_margin margin;
@@ -64,6 +65,7 @@ typedef struct {
 	unsigned int backgroundcolor;
 	BackgroundMode backgroundmode;
 	ui_font font;
+	int visible;
 } ui_component;
 
 void ui_component_init(ui_component* component, ui_component* parent);
@@ -85,6 +87,7 @@ void ui_component_resize(ui_component*, int width, int height);
 void ui_component_setposition(ui_component*, int x, int y, int width, int height);
 void ui_component_setmenu(ui_component*, ui_menu* menu);
 void ui_component_settitle(ui_component*, const char* title);
+ui_component* ui_component_parent(ui_component* component);
 void ui_component_enumerate_children(ui_component*, void* context, int (*childenum)(void*, void*));
 List* ui_component_children(ui_component*, int recursive);
 void ui_component_capture(ui_component*);
@@ -96,6 +99,7 @@ void ui_component_setfocus(ui_component*);
 void ui_component_setfont(ui_component*, ui_font* font);
 void ui_component_propagateevent(ui_component*);
 void ui_component_preventdefault(ui_component*);
+void ui_component_init_base(ui_component*);
 void ui_component_init_signals(ui_component*);
 int ui_component_visible(ui_component*);
 void ui_component_align(ui_component*);

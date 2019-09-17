@@ -89,6 +89,10 @@ SOURCE=.\src\adsr.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\filter.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\operations.c
 # End Source File
 # End Group
@@ -98,6 +102,10 @@ SOURCE=.\src\operations.c
 # Begin Source File
 
 SOURCE=.\src\adsr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\filter.h
 # End Source File
 # Begin Source File
 

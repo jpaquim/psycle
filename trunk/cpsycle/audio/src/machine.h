@@ -7,8 +7,7 @@
 #include "plugin_interface.h"
 #include <signal.h>
 #include "event.h"
-#include "buffer.h"
-#include <list.h>
+#include "buffercontext.h"
 
 typedef enum {
 	MACHMODE_GENERATOR = 0,
@@ -49,8 +48,8 @@ typedef struct {
 
 typedef struct {	
 	void (*init)(void*);	
-	void (*work)(void *, List* events, int numsamples, int tracks);
-	void (*generateaudio)(void *, Buffer* input, Buffer* output, int numsamples, int tracks);
+	void (*work)(void*, BufferContext*);
+	void (*generateaudio)(void *, BufferContext*);
 	int (*hostevent)(void*, int const eventNr, int const val1, float const val2);
 	void (*seqtick)(void*, int channel, const PatternEvent*);
 	void (*sequencertick)(void*);
@@ -61,27 +60,21 @@ typedef struct {
 	const CMachineInfo* (*info)(void*);
 	void (*dispose)(void*);
 	int (*mode)(void*);	
-	Buffer inputs;
-	Buffer outputs;	
+	unsigned int (*numinputs)(void*);
+	unsigned int (*numoutputs)(void*);
+		
 	Signal signal_worked;
 	MachineCallback machinecallback;
-	void* callbackcontext;
 } Machine;
-
-typedef struct {
-	Machine machine;	
-} Master;
 
 typedef struct {
 	Machine machine;
 	int mode;
 } DummyMachine;
 
-void machine_init(Machine* self);
-void machine_dispose(Machine* self);
-int machine_supports(Machine* self, int option);
-
-void master_init(Master* self);
+void machine_init(Machine*);
+void machine_dispose(Machine*);
+int machine_supports(Machine*, int option);
 
 void dummymachine_init(DummyMachine* self);
 

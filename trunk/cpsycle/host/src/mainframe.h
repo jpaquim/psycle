@@ -7,6 +7,7 @@
 #include "workspace.h"
 #include <uibutton.h>
 #include <uinotebook.h>
+#include "uistatusbar.h"
 #include "machinebar.h"
 #include "machineview.h"
 #include "patternview.h"
@@ -20,15 +21,20 @@
 #include "tabbar.h"
 #include "playbar.h"
 #include "vumeter.h"
+#include "volslider.h"
+#include "clipbox.h"
 #include "timebar.h"
 #include "linesperbeatbar.h"
+#include "octavebar.h"
+#include "songtrackbar.h"
 #include "greet.h"
 
 typedef struct {
 	ui_component component;
 	ui_button newsongbutton;
 	ui_button loadsongbutton;
-	TabBar tabbar;
+	ui_component splitbar;
+	TabBar tabbar;	
 	ui_notebook notebook;
 	MachineBar machinebar;
 	PlayBar playbar;
@@ -39,15 +45,23 @@ typedef struct {
 	InstrumentsView instrumentsview;
 	SongProperties songproperties;
 	SettingsView settingsview;
+	Greet greet;
 	Vumeter vumeter;
+	VolSlider volslider;
+	ClipBox clipbox;
+	SongTrackBar songtrackbar;
 	TimeBar timebar;
 	LinesPerBeatBar linesperbeatbar;
-	Greet greet;
+	OctaveBar octavebar;	
+	ui_statusbar statusbar;
 	ui_component* activeview;
 	Player* player;
 	NoteInputs noteinputs;	
 	Workspace workspace;
 	int firstshow;
+	int toolbarheight;
+	int tabbarheight;
+	int resize;
 } MainFrame;
 
 void InitMainFrame(MainFrame* self);

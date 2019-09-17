@@ -32,11 +32,11 @@ void ui_slider_init(ui_slider* slider, ui_component* parent)
 	slider->component.events.target = slider;
 	slider->component.events.cmdtarget = slider;
 	InsertIntHashTable(&winidmap, (int)winid, &slider->component);
-	winid++;
-	slider->component.align = 0;
+	winid++;	
 	slider->component.events.command = OnCommand;
 	signal_connect(&slider->component.signal_destroy, slider,  OnDestroy);
 	signal_connect(&slider->component.signal_windowproc, slider,  OnWindowProc);
+	ui_component_init_base(&slider->component);
 }
 
 void OnDestroy(ui_slider* self, ui_component* sender)

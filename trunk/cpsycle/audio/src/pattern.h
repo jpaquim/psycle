@@ -24,6 +24,7 @@ typedef struct {
 
 void pattern_init(Pattern*);
 void pattern_free(Pattern*);
+Pattern* pattern_clone(Pattern*);
 PatternEntry* pattern_write(Pattern*, int track, float offset, PatternEvent);
 PatternNode* pattern_insert(Pattern*, PatternNode* prev, int track, float offset, PatternEvent*);
 void pattern_remove(Pattern*, PatternNode*);

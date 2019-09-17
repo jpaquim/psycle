@@ -37,31 +37,44 @@ static int inth(int k, int size) {
 }
 
 void InsertIntHashTable(PIntHashTable table, int k, void* value) {
-  int hn;
-  PIntHashEntry ptr;
-  PIntHashEntry newentry;
+	int hn;
+	PIntHashEntry p;
+	PIntHashEntry newentry;
 
-  newentry = malloc(sizeof(IntHashEntry));
-  newentry->key = k;
-  newentry->value = value;
-  newentry->next = 0;
-  hn = inth(k, table->size);
-  if (table->keys[hn] == 0) {
-     table->keys[hn] = newentry;
-  } else {
-     ptr = table->keys[hn];
-     while (ptr->next != 0) {
-       ptr = ptr->next;
-     }
-     ptr->next = newentry;
-  }
-  if (table->keymin > newentry->key) {
-	table->keymin = newentry->key;
-  }
-  if (table->keymax < newentry->key) {
-	table->keymax = newentry->key;
-  }
-  ++table->count;
+	hn = inth(k, table->size);
+	p = 0;
+	if (table->keys[hn] != 0) {
+		p = table->keys[hn];
+		while (p != 0) {
+			if (k == p->key) {
+				p->value = value;
+				break;
+			}
+			p = p->next;
+		}
+	}
+	if (!p) {
+		newentry = malloc(sizeof(IntHashEntry));
+		newentry->key = k;
+		newentry->value = value;
+		newentry->next = 0;
+		if (table->keys[hn] == 0) {
+			table->keys[hn] = newentry;
+		} else {
+		p = table->keys[hn];
+		while (p->next != 0) {
+			p = p->next;
+		}
+		p->next = newentry;
+		}
+		if (table->keymin > newentry->key) {
+			table->keymin = newentry->key;
+		}
+		if (table->keymax < newentry->key) {
+			table->keymax = newentry->key;
+		}
+		++table->count;
+	}
 }
 
 void RemoveIntHashTable(PIntHashTable table, int k)
@@ -82,6 +95,7 @@ void RemoveIntHashTable(PIntHashTable table, int k)
 					table->keys[hn] = p->next;
 				}
 				free(p);
+				--table->count;
 				break;
 			}
 			q = p;

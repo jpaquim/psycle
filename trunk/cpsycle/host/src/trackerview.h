@@ -71,6 +71,7 @@ typedef struct {
 	ui_component component;
 	int dx;
 	int trackwidth;
+	int numtracks;
 	TrackerSkin* skin;
 } TrackerHeader;
 
@@ -87,7 +88,7 @@ typedef struct {
 	struct TrackerView* view;
 } TrackerLineNumbers;
 
-#define TrackerGrid_NUMCOLS 10
+#define TRACKERGRID_NUMCOLS 10
 
 typedef struct {
    ui_component component;   
@@ -110,7 +111,7 @@ typedef struct {
    int textheight;
    int textwidth;
    int textleftedge;
-   int colx[TrackerGrid_NUMCOLS];   
+   int colx[TRACKERGRID_NUMCOLS];
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
    struct TrackerView* view;   

@@ -28,10 +28,10 @@ void ui_button_init(ui_button* button, ui_component* parent)
 	button->component.events.target = button;
 	button->component.events.cmdtarget = button;
 	InsertIntHashTable(&winidmap, (int)winid, &button->component);
-	winid++;
-	button->component.align = 0;
+	winid++;	
 	button->component.events.command = OnCommand;
 	signal_connect(&button->component.signal_destroy, button,  OnDestroy);
+	ui_component_init_base(&button->component);
 }
 
 void OnDestroy(ui_button* self, ui_component* sender)

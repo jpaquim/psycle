@@ -9,7 +9,7 @@ typedef float real;
 typedef struct {
 	unsigned int numchannels;	
 	real** samples;
-	unsigned int offset;
+	unsigned int offset;	
 } Buffer;
 
 void buffer_init(Buffer*, unsigned int channels);
@@ -20,4 +20,9 @@ void buffer_move(Buffer*, unsigned int offset);
 void buffer_setoffset(Buffer*, unsigned int offset);
 unsigned int buffer_offset(Buffer*);
 real* buffer_at(Buffer*, unsigned int channel);
+void buffer_clearsamples(Buffer*, unsigned int numsamples);
+void buffer_addsamples(Buffer*, Buffer* source, unsigned int numsamples,
+	float vol);
+void buffer_mulsamples(Buffer*, unsigned int numsamples, float mul);
+
 #endif

@@ -7,7 +7,10 @@ static void OnTimer(LinesPerBeatBar* self, ui_component* sender, int timerid);
 
 void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* player)
 {				
-	ui_component_init(&self->component, parent);		
+	ui_margin margin = { 0, 3, 0, 0 };
+
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
 	self->player = player;	
 	ui_label_init(&self->lpbdesclabel, &self->component);
 	ui_label_settext(&self->lpbdesclabel, "Lines per beat");	
@@ -15,22 +18,26 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 	ui_label_settext(&self->lpblabel, "4");	
 	ui_button_init(&self->lessbutton, &self->component);
 	ui_button_settext(&self->lessbutton, "<");	
-	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);		
+	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);	
 	
 	ui_button_init(&self->morebutton, &self->component);
 	ui_button_settext(&self->morebutton, ">");	
-	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);	
-	ui_component_move(&self->lpbdesclabel.component, 0, 0);
-	ui_component_resize(&self->lpbdesclabel.component, 100, 20);	
-	ui_component_move(&self->lessbutton.component, 105, 0);
-	ui_component_resize(&self->lessbutton.component, 20, 20);	
-	ui_component_move(&self->lpblabel.component, 130, 0);
-	ui_component_resize(&self->lpblabel.component, 40, 20);
-	ui_component_move(&self->morebutton.component, 175, 0);
-	ui_component_resize(&self->morebutton.component, 20, 20);		
+	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);		
+	ui_component_resize(&self->lpbdesclabel.component, 70, 0);		
+	ui_component_resize(&self->lessbutton.component, 20, 0);		
+	ui_component_resize(&self->lpblabel.component, 30, 0);	
+	ui_component_resize(&self->morebutton.component, 20, 0);
 	self->lpb = 0;
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	SetTimer(self->component.hwnd, 500, 50, 0);
+	{
+		List* p;
+		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)
+		{
+			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_LEFT);
+			ui_component_setmargin((ui_component*)p->entry, &margin);
+		}
+	}
 }
 
 void OnLessClicked(LinesPerBeatBar* self, ui_component* sender)

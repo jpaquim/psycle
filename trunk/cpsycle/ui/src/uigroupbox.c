@@ -20,6 +20,7 @@ void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 	InsertIntHashTable(&selfmap, (int)groupbox->component.hwnd, &groupbox->component);	
 	groupbox->component.events.target = groupbox;
 	groupbox->component.events.cmdtarget = groupbox;
+	ui_component_init_base(&groupbox->component);
 }
 
 

@@ -16,19 +16,26 @@ typedef struct {
 	float pos; 
 	int playing;
 	float t;
-	unsigned int lpb;
-
-	Signal signal_lpbchanged;	
+	unsigned int lpb;	
+	unsigned int numsongtracks;
+	Signal signal_numsongtrackschanged;
+	Signal signal_lpbchanged;
 	HMODULE module;
+	float volume;
 } Player;
 
 void player_init(Player*, Song*, const char* driverpath);
 void player_dispose(Player*);
 void player_start(Player*);
 void player_stop(Player*);
+void player_setsong(Player*, Song*);
 float player_position(Player*);
 void player_setbpm(Player*, float bpm);
 void player_setlpb(Player*, unsigned int lpb);
 void player_initmaster(Player* self);
+void player_setnumsongtracks(Player* self, unsigned int numsongtracks);
+unsigned int player_numsongtracks(Player* self);
+void player_setvolume(Player*, float volume);
+float player_volume(Player*);
 
 #endif

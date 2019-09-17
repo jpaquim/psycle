@@ -32,6 +32,7 @@ void ui_statusbar_init(ui_statusbar* statusbar, ui_component* parent)
     }
 	InsertIntHashTable(&selfmap, (int)statusbar->component.hwnd, &statusbar->component);	
 	statusbar->component.events.target = statusbar;
+	ui_component_init_base(&statusbar->component);
 }
 
 void ui_statusbar_setfields(ui_statusbar* self, int parts, int iStatusWidths[])

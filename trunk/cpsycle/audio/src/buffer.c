@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include <operations.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -57,4 +58,39 @@ unsigned int buffer_offset(Buffer* self)
 real* buffer_at(Buffer* self, unsigned int channel)
 {
 	return self->samples[channel] + self->offset;
+}
+
+void buffer_clearsamples(Buffer* self, unsigned int numsamples)
+{
+	unsigned int channel;
+
+	for (channel = 0; channel < self->numchannels; ++channel) {
+		dsp_clear(self->samples[channel], numsamples);
+	}
+}
+
+void buffer_addsamples(Buffer* self, Buffer* source, unsigned int numsamples,
+	float vol)
+{
+	unsigned int channel;
+
+	if (source) {
+		for (channel = 0; channel < source->numchannels && 
+			channel < self->numchannels; ++channel) {
+				dsp_add(
+					source->samples[channel],
+					self->samples[channel],
+					numsamples,
+					vol);
+		}
+	}
+}
+
+void buffer_mulsamples(Buffer* self, unsigned int numsamples, float mul)
+{
+	unsigned int channel;
+	
+	for (channel = 0; channel < self->numchannels; ++channel) {
+		dsp_mul(self->samples[channel], numsamples, mul);
+	}	
 }

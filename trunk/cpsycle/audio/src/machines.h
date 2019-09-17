@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #if !defined(MACHINES_H)
 #define MACHINES_H
 
@@ -9,6 +10,7 @@
 #include <signal.h>
 
 #define MASTER_INDEX 128
+#define MAX_STREAM_SIZE 256
 
 typedef struct {
 	int slot;	
@@ -28,13 +30,15 @@ typedef List MachineList;
 typedef struct {	
 	IntHashTable slots;
 	IntHashTable connections;
+	IntHashTable inputbuffers;
+	IntHashTable outputbuffers;
 	MachinePath* path;
-	float* buffers;
-	int numbuffers;
-	int currbuffer;
+	List* buffers;
+	float* samplebuffers;
+	int numsamplebuffers;
+	int currsamplebuffer;
 	int slot;
 	int filemode;
-
 	Signal signal_insert;
 	Signal signal_removed;
 	Signal signal_slotchange;		
@@ -42,22 +46,27 @@ typedef struct {
 
 void machines_init(Machines*);
 void machines_dispose(Machines*);
-void machines_insert(Machines* self, int slot, Machine* machine);
-void machines_remove(Machines* self, int slot);
-int machines_append(Machines* self, Machine* machine);
-Machine* machines_at(Machines* self, int slot);
-void machines_enumerate(Machines* self, void* context, int (*enumproc)(void*, int, Machine*));
-int machines_connect(Machines* self, int outputslot, int inputslot);
-void machines_disconnect(Machines* self, int outputslot, int inputslot);
-void machines_disconnectall(Machines* self, int slot);
-int machines_connected(Machines* self, int outputslot, int inputslot);
-MachineConnections* machines_connections(Machines* self, int slot);
-float* machines_nextbuffer(Machines* self);
-void machines_changeslot(Machines* self, int slot);
-int machines_slot(Machines* self);
-Machine* machines_master(Machines* self);
-void machines_startfilemode(Machines* self);
-void machines_endfilemode(Machines* self);
+void machines_insert(Machines*, int slot, Machine*);
+void machines_remove(Machines*, int slot);
+int machines_append(Machines*, Machine*);
+Machine* machines_at(Machines*, int slot);
+void machines_enumerate(Machines*, void* context,
+	int (*enumproc)(void*, int, Machine*));
+int machines_connect(Machines*, int outputslot, int inputslot);
+void machines_disconnect(Machines*, int outputslot, int inputslot);
+void machines_disconnectall(Machines*, int slot);
+int machines_connected(Machines*, int outputslot, int inputslot);
+MachineList* machines_path(Machines* self);
+MachineConnections* machines_connections(Machines*, int slot);
+Buffer* machines_inputs(Machines*, unsigned int slot);
+Buffer* machines_outputs(Machines*, unsigned int slot);
+void machines_buffer_end(Machines*);
+void machines_changeslot(Machines*, int slot);
+int machines_slot(Machines*);
+Machine* machines_master(Machines*);
+void machines_startfilemode(Machines*);
+void machines_endfilemode(Machines*);
+unsigned int machines_size(Machines*);
 
 void suspendwork(void);
 void resumework(void);

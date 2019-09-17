@@ -32,6 +32,7 @@ void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 	combobox->component.events.target = combobox;
 	combobox->component.events.cmdtarget = combobox;
 	combobox->component.events.command = OnCommand;
+	ui_component_init_base(&combobox->component);
 }
 
 void OnDestroy(ui_combobox* self, ui_component* sender)
@@ -39,9 +40,9 @@ void OnDestroy(ui_combobox* self, ui_component* sender)
 	signal_dispose(&self->signal_selchanged);
 }
 
-void ui_combobox_addstring(ui_combobox* combobox, const char* text)
+int ui_combobox_addstring(ui_combobox* combobox, const char* text)
 {
-	SendMessage(combobox->component.hwnd, CB_ADDSTRING, 0, (LPARAM)text);
+	return SendMessage(combobox->component.hwnd, CB_ADDSTRING, 0, (LPARAM)text);
 }
 
 void ui_combobox_clear(ui_combobox* combobox)

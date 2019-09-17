@@ -40,16 +40,11 @@ void mixer_init(Mixer* self)
 	self->machine.dispose = mixer_dispose;
 	self->machine.seqtick = mixer_seqtick;
 	self->machine.mode = mixer_mode;
-	buffer_init(&self->machine.inputs, 2);
-	buffer_init(&self->machine.outputs, 2);	
-
 	self->solocolumn_ = -1;	
 }
 
 void mixer_dispose(Mixer* self)
 {		
-	buffer_dispose(&self->machine.inputs);
-	buffer_dispose(&self->machine.outputs);
 	machine_dispose(&self->machine);
 }
 

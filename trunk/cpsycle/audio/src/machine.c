@@ -3,25 +3,42 @@
 #include "machine.h"
 #include "pattern.h"
 
+static CMachineInfo const macinfo = {
+	MI_VERSION,
+	0x0250,
+	EFFECT | 32 | 64,
+	0,
+	0,
+	"Machine"
+		#ifndef NDEBUG
+		" (debug build)"
+		#endif
+		,
+	"Machine",
+	"Psycledelics",
+	"help",
+	3
+};
 
-static void work(Machine* self, List* events, int numsamples, int tracks);
-static void generateaudio(Machine* self, Buffer* input, Buffer* output, int numsamples, int tracks) { }
+static void work(Machine* self, BufferContext*);
+static void generateaudio(Machine* self, BufferContext* bc) { }
 static int hostevent(Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
 static void seqtick(Machine* self, int channel, const PatternEvent* event) { }
 static void sequencertick(Machine* self) { }
-static CMachineInfo* info(Machine* self) { return 0; }
+static const CMachineInfo* info(Machine* self) { return &macinfo; }
 static void parametertweak(Machine* self, int par, int val) { }
 static int describevalue(Machine* self, char* txt, int const param, int const value) { return 0; }
 static int value(Machine* self, int const param) { return 0; }
 static void setvalue(Machine* self, int const param, int const value) { }
 static void dispose(Machine* self);
 static int mode(Machine* self) { return MACHMODE_FX; }
-
-static int master_mode(Master* self) { return MACHMODE_MASTER; }
-static void master_dispose(Master* self);
+static unsigned int numinputs(Machine* self) { return 0; }
+static unsigned int numoutputs(Machine* self) { return 0; }	
 
 static int dummymachine_mode(DummyMachine* self) { return self->mode; }
 static void dummymachine_dispose(DummyMachine* self);
+static unsigned int dummymachine_numinputs(DummyMachine* self) { return 2; }
+static unsigned int dummymachine_numoutputs(DummyMachine* self) { return 2; }
 
 
 void machine_init(Machine* self)
@@ -39,7 +56,8 @@ void machine_init(Machine* self)
 	self->setvalue = setvalue;
 	self->value = value;
 	self->generateaudio = generateaudio;
-
+	self->numinputs = numinputs;
+	self->numoutputs = numoutputs;
 	signal_init(&self->signal_worked);
 }
 
@@ -48,33 +66,39 @@ void machine_dispose(Machine* self)
 	signal_dispose(&self->signal_worked);
 }
 
-void work(Machine* self, List* events, int numsamples, int tracks)
+void work(Machine* self, BufferContext* bc)
 {			
-	List* p = events;
-	unsigned int amount = numsamples;
+	List* p = bc->events;
+	unsigned int amount = bc->numsamples;
 	unsigned int pos = 0;
 	while (p) {					
 		int numworksamples;
 		PatternEntry* entry = (PatternEntry*)p->entry;		
 		numworksamples = (unsigned int)entry->delta - pos;		
-		if (numworksamples > 0) {	
-			buffer_setoffset(&self->inputs, pos);
-			buffer_setoffset(&self->outputs, pos);			
-			self->generateaudio(self, &self->inputs, &self->outputs,
-				numworksamples, tracks);			
+		if (numworksamples > 0) {				
+			int restorenumsamples = bc->numsamples;
+			
+			buffer_setoffset(bc->input, pos);
+			buffer_setoffset(bc->output, pos);			
+			bc->numsamples = numworksamples;
+			self->generateaudio(self, bc);
 			amount -= numworksamples;
+			bc->numsamples = restorenumsamples;
 		}
 		self->seqtick(self, entry->track, &entry->event);		
 		pos = (unsigned int)entry->delta;
 		p = p->next;
 	}
 	if (amount > 0 && self->generateaudio) {
-		buffer_setoffset(&self->inputs, pos);
-		buffer_setoffset(&self->outputs, pos);			
-		self->generateaudio(self, &self->inputs, &self->outputs, amount, tracks);		
+		int restorenumsamples = bc->numsamples;
+		buffer_setoffset(bc->input, pos);
+		buffer_setoffset(bc->output, pos);			
+		bc->numsamples = amount;
+		self->generateaudio(self, bc);
+		bc->numsamples = restorenumsamples;
 	}
-	buffer_setoffset(&self->inputs, 0);
-	buffer_setoffset(&self->outputs, 0);			
+	buffer_setoffset(bc->input, 0);
+	buffer_setoffset(bc->output, 0);			
 }
 
 int machine_supports(Machine* self, int option)
@@ -85,38 +109,20 @@ int machine_supports(Machine* self, int option)
 	return 0;
 }
 
-void master_init(Master* self)
-{
-	memset(self, 0, sizeof(Master));
-	machine_init(&self->machine);	
-	self->machine.mode = master_mode;
-	self->machine.dispose = master_dispose;
-	buffer_init(&self->machine.inputs, 2);
-	buffer_init(&self->machine.outputs, 2);	
-}
-
-void master_dispose(Master* self)
-{	
-	buffer_dispose(&self->machine.inputs);
-	buffer_dispose(&self->machine.outputs);	
-	machine_dispose(&self->machine);
-}
-
 void dummymachine_init(DummyMachine* self)
 {
 	memset(self, 0, sizeof(DummyMachine));
 	machine_init(&self->machine);	
 	self->machine.mode = dummymachine_mode;
 	self->machine.dispose = dummymachine_dispose;
-	buffer_init(&self->machine.inputs, 2);
-	buffer_init(&self->machine.outputs, 2);
+	self->machine.numinputs = dummymachine_numinputs;
+	self->machine.numoutputs = dummymachine_numoutputs;
+
 	self->mode = MACHMODE_FX;
 }
 
 void dummymachine_dispose(DummyMachine* self)
 {	
-	buffer_dispose(&self->machine.inputs);
-	buffer_dispose(&self->machine.outputs);	
 	machine_dispose(&self->machine);
 }
 

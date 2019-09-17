@@ -24,8 +24,8 @@ void ui_menu_init(ui_menu* menu, char* label, void (*execute)(ui_menu*))
 void ui_menu_append(ui_menu* self, ui_menu* child, int popup)
 {
 	if (popup != 0)
-	{
-		AppendMenu(self->hmenu, MF_POPUP, child->hmenu, child->label);		
+	{		
+		AppendMenu(self->hmenu, MF_POPUP, (unsigned int)child->hmenu, child->label);		
 	} else {
 		AppendMenu(self->hmenu, MF_STRING, id, child->label);
 		InsertIntHashTable(&menumap, id, child);

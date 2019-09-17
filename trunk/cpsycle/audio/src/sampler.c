@@ -5,8 +5,7 @@
 #include <operations.h>
 #include <math.h>
 
-static void generateaudio(Sampler* self, Buffer* input, Buffer* output,
-	int numsamples, int tracks);
+static void generateaudio(Sampler*, BufferContext*);
 static void seqtick(Sampler* self, int channel, const PatternEvent* event);
 static const CMachineInfo* info(Sampler* self);
 static void parametertweak(Sampler* self, int par, int val);
@@ -17,6 +16,8 @@ static void dispose(Sampler* self);
 static int mode(Sampler* self) { return MACHMODE_GENERATOR; }
 static int unused_voice(Sampler* self);
 static void release_voices(Sampler* self, int channel);
+static unsigned int numinputs(Sampler*);
+static unsigned int numoutputs(Sampler*);
 
 static void voice_init(Voice* self, Sample* sample, int channel);
 static void voice_dispose(Voice* self);
@@ -93,8 +94,8 @@ void sampler_init(Sampler* self)
 	self->machine.value = value;
 	self->machine.dispose = dispose;
 	self->machine.mode = mode;
-	buffer_init(&self->machine.inputs, 2);
-	buffer_init(&self->machine.outputs, 2);	
+	self->machine.numinputs = numinputs;
+	self->machine.numoutputs = numoutputs;
 	self->numvoices = SAMPLER_MAX_POLYPHONY;
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		voice_init(&self->voices[voice], 0, 0);		
@@ -110,17 +111,15 @@ void dispose(Sampler* self)
 	for (voice=0; voice < self->numvoices; ++voice) {
 		voice_dispose(&self->voices[voice]);
 	}
-	buffer_dispose(&self->machine.inputs);
-	buffer_dispose(&self->machine.outputs);
 	machine_dispose(&self->machine);
 }
 
-void generateaudio(Sampler* self, Buffer* input, Buffer* output, int numsamples, int tracks)
+void generateaudio(Sampler* self, BufferContext* bc)
 {	
 	int voice;
 
 	for (voice = 0; voice < self->numvoices; ++voice) {
-		voice_work(&self->voices[voice], output, numsamples);
+		voice_work(&self->voices[voice], bc->output, bc->numsamples);
 	}
 }
 
@@ -215,6 +214,16 @@ int value(Sampler* self, int const param)
 
 void setvalue(Sampler* self, int const param, int const value)
 {	
+}
+
+unsigned int numinputs(Sampler* self)
+{
+	return 0;
+}
+
+unsigned int numoutputs(Sampler* self)
+{
+	return 2;
 }
 
 void voice_init(Voice* self, Sample* sample, int channel)

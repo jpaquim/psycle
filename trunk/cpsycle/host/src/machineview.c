@@ -533,7 +533,7 @@ void OnKeyDown(WireView* self, ui_component* sender, int keycode, int keydata)
 			ui_invalidate(&self->component);
 		}
 	} else 
-	if (keycode == VK_DELETE && self->selectedslot != 0) {
+	if (keycode == VK_DELETE && self->selectedslot != MASTER_INDEX) {
 		machines_remove(self->machines, self->selectedslot);		
 	} else {
 		ui_component_propagateevent(sender);
@@ -628,15 +628,6 @@ void OnMachinesRemoved(WireView* self, Machines* machines, int slot)
 	ui_invalidate(&self->component);
 }
 
-void OnSongChanged(WireView* self, Workspace* workspace)
-{	
-	self->machines = &workspace->song->machines;
-	machines_enumerate(self->machines, self, OnEnumSetMachineUis);
-	UpdateMachineUis(self, properties_find(workspace->properties, "machines"));	
-	ConnectMachinesSignals(self);	
-	ui_invalidate(&self->component);
-}
-
 void UpdateMachineUis(WireView* self, Properties* machines)
 {
 	if (machines) {
@@ -697,6 +688,15 @@ void InitMachineView(MachineView* self, ui_component* parent,
 	signal_connect(&self->newmachine.signal_selected, self, OnNewMachineSelected);
 	signal_connect(&self->component.signal_mousedoubleclick, self,OnMachineViewMouseDoubleClick);
 	signal_connect(&self->component.signal_keydown, self,OnMachineViewKeyDown);
+}
+
+void OnSongChanged(WireView* self, Workspace* workspace)
+{	
+	self->machines = &workspace->song->machines;
+	machines_enumerate(self->machines, self, OnEnumSetMachineUis);
+	UpdateMachineUis(self, properties_find(workspace->properties, "machines"));	
+	ConnectMachinesSignals(self);	
+	ui_invalidate(&self->component);
 }
 
 void OnMachineViewSize(MachineView* self, ui_component* sender, int width, int height)
