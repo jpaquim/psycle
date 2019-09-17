@@ -56,7 +56,7 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 {	
 	List* tabs;
 	int c = 0;
-	int cpx = 0;	
+	int cpx = 5;	
 	ui_size size;
 
 	size = ui_component_size(&self->component);	

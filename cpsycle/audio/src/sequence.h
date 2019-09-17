@@ -60,6 +60,7 @@ void sequence_seteditposition(Sequence* self, SequencePosition position);
 SequencePosition sequence_editposition(Sequence* self);
 void sequence_clear(Sequence*);
 List* sequence_appendtrack(Sequence*, SequenceTrack*);
+List* sequence_removetrack(Sequence*, SequenceTracks*);
 unsigned int sequence_sizetracks(Sequence*);
 
 #endif

@@ -1,25 +1,30 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "player.h"
 #include "math.h"
+#include "master.h"
 #include "plugin.h"
 #include "vstplugin.h"
 #include "silentdriver.h"
 #include <operations.h>
 
-static float buffer[65535];
+static float bufferdriver[65535];
 
-
-static float* Work(Player* player, int* numsamples);
+static float* Work(Player*, int* numsamples);
+static void player_advance(Player*, unsigned int amount);
+static void player_workpath(Player*, unsigned int amount);
+static List* player_timedevents(Player*, unsigned int slot, unsigned int amount);
+static Buffer* player_mix(Player*, unsigned int slot, unsigned int amount);
+static void player_filldriver(Player*, float* buffer, unsigned int amount);
+static void player_signal_wait_host(Player*);
 static void Interleave(float* dst, float* left, float* right, int num);
-static float Offset(Player* self, int numsamples);
-static void player_loaddriver(Player* self, const char* path);
-static void player_unloaddriver(Player* self);
+static float Offset(Player*, int numsamples);
+static void player_loaddriver(Player*, const char* path);
+static void player_unloaddriver(Player*);
 
 extern HANDLE hGuiEvent;
 extern HANDLE hWorkDoneEvent;
-
-#define STREAM_SIZE 256
 
 typedef EXPORT void (CALLBACK  *ptest)(void);
 
@@ -31,6 +36,8 @@ void player_init(Player* self, Song* song, const char* driverpath)
 	self->pos = 0.0f;
 	self->playing = FALSE;
 	self->lpb = 4;
+	self->numsongtracks = 16;
+	self->volume = 1.0f;
 	
 	sequencer_init(&self->sequencer);
 	self->sequencer.sequence = &song->sequence;
@@ -44,6 +51,7 @@ void player_init(Player* self, Song* song, const char* driverpath)
 	self->t = 125 / (44100 * 60.0f);
 	player_initmaster(self);
 	
+	signal_init(&self->signal_numsongtrackschanged);
 	signal_init(&self->signal_lpbchanged);
 	self->driver->open(self->driver);	
 }
@@ -102,6 +110,11 @@ void player_dispose(Player* self)
 	sequencer_dispose(&self->sequencer);
 }
 
+void player_setsong(Player* self, Song* song)
+{
+	self->song = song;	
+}
+
 void player_start(Player* self)
 {
 	self->pos = 0.0f;
@@ -151,100 +164,169 @@ unsigned int Frames(Player* self, float offset)
 real* Work(Player* self, int* numsamples)
 {		
 	unsigned int amount;
-	unsigned int numSamplex = *numsamples;
-	float* pSamples = buffer;
-	Machine* master;
-		
-	if (numSamplex > STREAM_SIZE) {
-		amount = STREAM_SIZE;
-	} else {
-		amount = numSamplex;
-	}
-	do
-	{							
-		MachinePath* path = self->song->machines.path;
-		if (self->playing) {
-			sequencer_tick(&self->sequencer, Offset(self, amount));			
-		}		
-		if (path) {
-			MachinePath* pathptr;			
-			pathptr = path;			
-			while (pathptr != NULL) {
-				Machine* machine;
-				MachineConnections* connections;				
-				int i;
-				int slot;
-
-				slot = (int)pathptr->entry;
-				machine = machines_at(&self->song->machines, slot);
-				connections = machines_connections(&self->song->machines, slot);				
-
-				for (i = 0; i < 2; ++i) {
-					machine->outputs.samples[i] = machines_nextbuffer(&self->song->machines);				
-					dsp_clear(machine->outputs.samples[i], amount);					
-				}
-
-				if (connections) {
-					MachineConnection* connectionptr;
-					connectionptr = connections->inputs;
-					while (connectionptr) {
-						MachineConnectionEntry* entry = (MachineConnectionEntry*)connectionptr->entry;
-						if (entry->slot != -1) {
-							Machine* source = machines_at(&self->song->machines, entry->slot);
-							for (i = 0; i < 2; ++i) {
-								dsp_add(source->outputs.samples[i], machine->outputs.samples[i], amount, 1.0f);
-							}
-						}
-						connectionptr = connectionptr->next;
-					}								
-				}				
-				if (slot != MASTER_INDEX) {
-					List* events = 0;
-					if (self->playing) {												
-						List* node = self->sequencer.events;
-						while (node) {
-							PatternEntry* entry = (PatternEntry*)node->entry;
-							if (entry->event.mach == slot) {
-								unsigned int deltaframes;
-								if (!events) {
-									events = list_create(entry);
-								} else {
-									list_append(events, entry);
-								}
-								deltaframes = Frames(self, entry->delta);
-								if (deltaframes >= amount) {
-									deltaframes = amount - 1;
-								}
-								entry->delta = (float) deltaframes;
-							}
-							node = node->next;
-						}						
-					}
-					machine->work(machine, events, amount, 16);
-					list_free(events);
-					signal_emit(&machine->signal_worked, machine, 1, amount);
-				}
-				pathptr = pathptr->next;
-			}
-							
-		}
-		master = machines_at(&self->song->machines, MASTER_INDEX);
-		if (master && master->outputs.samples[0] && master->outputs.samples[1]) {	
-			signal_emit(&master->signal_worked, master, 1, amount);
-			dsp_interleave(pSamples, master->outputs.samples[0], master->outputs.samples[1], amount);			
-		}
-		numSamplex -= amount;		
-		pSamples  += 2*amount;
+	unsigned int numsamplex;
+	float* psamples;
 	
-	} 
-	while (numSamplex);
-	SetEvent(hWorkDoneEvent);
-	WaitForSingleObject(hGuiEvent, INFINITE);	
-	
-//	dsp_mul(buffer, *numsamples, 0.5);
-	return buffer;
+	psamples = bufferdriver;
+	numsamplex = *numsamples;	
+	amount = numsamplex > MAX_STREAM_SIZE ? MAX_STREAM_SIZE : numsamplex;
+	do {			
+		player_advance(self, amount);
+		player_workpath(self, amount);
+		player_filldriver(self, psamples, amount);
+		numsamplex -= amount;		
+		psamples  += (2*amount);
+	}  while (numsamplex > 0);
+	player_signal_wait_host(self);		
+	return bufferdriver;
 }
 
+void player_advance(Player* self, unsigned int amount)
+{
+	if (self->playing) {
+		sequencer_tick(&self->sequencer, Offset(self, amount));			
+	}
+}
+
+void player_workpath(Player* self, unsigned int amount)
+{
+	MachinePath* path;
+	path = machines_path(&self->song->machines);
+	if (path) {
+		for ( ; path != 0; path = path->next) {
+			unsigned int slot;						
+			Buffer* output;
+
+			slot = (int)path->entry;				
+			output = player_mix(self, slot, amount);								
+			if (slot != MASTER_INDEX) {				
+				Machine* machine;
+				BufferContext bc;
+
+				machine = machines_at(&self->song->machines, slot);
+				if (machine && output) {
+					List* events;
+
+					events = player_timedevents(self, slot, amount);												
+					buffercontext_init(&bc, events, output, output, amount,
+					self->numsongtracks);
+					machine->work(machine, &bc);						
+					signal_emit(&machine->signal_worked, machine, 1, &bc);
+					list_free(events);
+				}									
+			}			
+		}							
+	}		
+}
+
+
+List* player_timedevents(Player* self, unsigned int slot, unsigned int amount)
+{
+	List* events = 0;
+
+	if (self->playing) {												
+		List* node = self->sequencer.events;
+		while (node) {
+			PatternEntry* entry = (PatternEntry*)node->entry;
+			if (entry->event.mach == slot) {
+				unsigned int deltaframes;
+				if (!events) {
+					events = list_create(entry);
+				} else {
+					list_append(events, entry);
+				}
+				deltaframes = Frames(self, entry->delta);
+				if (deltaframes >= amount) {
+					deltaframes = amount - 1;
+				}
+				entry->delta = (float) deltaframes;
+			}
+			node = node->next;
+		}						
+	}
+	return events;
+}
+
+Buffer* player_mix(Player* self, unsigned int slot, unsigned int amount)
+{
+	MachineConnections* connections;				
+	Buffer* output;
+	
+	connections = machines_connections(&self->song->machines, slot);
+	output = machines_outputs(&self->song->machines, slot);
+	if (output) {
+		buffer_clearsamples(output, amount);
+		if (connections) {
+			MachineConnection* connection;
+			
+			for (connection = connections->inputs; connection != 0;
+					connection = connection->next) {
+				MachineConnectionEntry* source = 
+					(MachineConnectionEntry*)connection->entry;
+				if (source->slot != -1) {							
+					buffer_addsamples(
+						output, 
+						machines_outputs(&self->song->machines,
+							source->slot),
+						amount,
+						1.0f);
+				}						
+			}								
+		}
+	}
+	return output;
+}
+
+void player_filldriver(Player* self, float* buffer, unsigned int amount)
+{
+	Buffer* masteroutput;
+	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
+	if (masteroutput) {		
+		Machine* mastermachine;
+
+		mastermachine = machines_at(&self->song->machines, MASTER_INDEX);
+		if (mastermachine) {
+			BufferContext bc;
+					
+			buffercontext_init(&bc, 0, masteroutput, masteroutput, amount,
+				self->numsongtracks);	
+			buffer_mulsamples(masteroutput, amount, self->volume);
+			signal_emit(&mastermachine->signal_worked, mastermachine, 1, &bc);
+		}
+		dsp_interleave(buffer, masteroutput->samples[0],
+			masteroutput->samples[1], amount);
+	}
+}
+
+void player_signal_wait_host(Player* self)
+{
+	SetEvent(hWorkDoneEvent);
+	WaitForSingleObject(hGuiEvent, INFINITE);	
+}
+
+void player_setnumsongtracks(Player* self, unsigned int numsongtracks)
+{
+	if (numsongtracks >= 1 && numsongtracks <= 64) {
+		self->numsongtracks = numsongtracks;	
+		signal_emit(&self->signal_numsongtrackschanged, self, 1,
+			self->numsongtracks);
+	}
+}
+
+unsigned int player_numsongtracks(Player* self)
+{
+	return self->numsongtracks;
+}
+
+void player_setvolume(Player* self, float volume)
+{
+	self->volume = volume;
+}
+
+float player_volume(Player* self)
+{
+	return self->volume;
+}
 
 
 

@@ -13,7 +13,7 @@ typedef struct {
 } ui_combobox;
 
 void ui_combobox_init(ui_combobox* combobox, ui_component* parent);
-void ui_combobox_addstring(ui_combobox* combobox, const char* text);
+int ui_combobox_addstring(ui_combobox* combobox, const char* text);
 void ui_combobox_clear(ui_combobox* combobox);
 void ui_combobox_setcursel(ui_combobox* combobox, int index);
 

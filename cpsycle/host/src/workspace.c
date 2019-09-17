@@ -7,10 +7,13 @@ static void workspace_config(Workspace* self);
 static Samples* machinecallback_samples(Workspace*);
 static void workspace_removesong(Workspace* self);
 static void applysongproperties(Workspace* self);
+static Properties* workspace_makeproperties(Workspace* self);
 
 void workspace_init(Workspace* self)
 {	
-	workspace_config(self);
+	self->octave = 4;
+	signal_init(&self->signal_octavechanged);
+	workspace_config(self);		
 	self->song = (Song*) malloc(sizeof(Song));
 	song_init(self->song);
 	self->machinecallback.context = self;
@@ -25,6 +28,16 @@ void workspace_init(Workspace* self)
 	plugincatcher_init(&self->plugincatcher);
 	workspace_scanplugins(self);
 	machinefactory_init(&self->machinefactory, self->machinecallback, self->config);
+}
+
+void workspace_dispose(Workspace* self)
+{	
+	player_dispose(&self->player);	
+	song_dispose(self->song);
+	properties_free(self->config);
+	signal_dispose(&self->signal_octavechanged);
+	signal_dispose(&self->signal_songchanged);
+	plugincatcher_dispose(&self->plugincatcher);
 }
 
 void workspace_scanplugins(Workspace* self)
@@ -44,15 +57,6 @@ void workspace_scanplugins(Workspace* self)
 	}
 }
 
-void workspace_dispose(Workspace* self)
-{
-	player_dispose(&self->player);	
-	song_dispose(self->song);
-	properties_free(self->config);
-	signal_dispose(&self->signal_songchanged);
-	plugincatcher_dispose(&self->plugincatcher);
-}
-
 void workspace_config(Workspace* self)
 {
 	Properties* p;
@@ -70,12 +74,31 @@ void workspace_newsong(Workspace* self)
 	workspace_removesong(self);
 	self->song = (Song*) malloc(sizeof(Song));
 	song_init(self->song);	
+	player_setsong(&self->player, self->song);
 	player_initmaster(&self->player);
 	applysongproperties(self);
 	properties_free(self->properties);
-	self->properties = 0;
+	self->properties = workspace_makeproperties(self);
 	signal_emit(&self->signal_songchanged, self, 0);
 	resumework();
+}
+
+Properties* workspace_makeproperties(Workspace* self)
+{
+	Properties* properties;
+	Properties* machinesproperties;	
+	Properties* machineproperties;
+	
+	properties = properties_create();	
+	machinesproperties = properties_append_int(properties, "machines", 0, 0, 0);
+	machinesproperties->children = properties_create();			
+	machineproperties =
+		properties_append_int(machinesproperties->children, "machine",
+			MASTER_INDEX, 0, 0);
+	machineproperties->children = properties_create();
+	properties_append_int(machineproperties->children, "x", 320, 0, 0);
+	properties_append_int(machineproperties->children, "y", 200, 0, 0);
+	return properties;
 }
 
 void workspace_removesong(Workspace* self)
@@ -83,7 +106,8 @@ void workspace_removesong(Workspace* self)
 	if (self->song) {
 		song_dispose(self->song);
 		free(self->song);
-		self->song = 0;		
+		self->song = 0;
+		self->octave = 4;
 	}
 }
 
@@ -93,7 +117,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 	workspace_removesong(self);
 	self->song = (Song*) malloc(sizeof(Song));
 	song_init(self->song);
-	self->player.song = self->song;
+	player_setsong(&self->player, self->song);	
 	player_initmaster(&self->player);	
 	song_load(self->song, path, &self->machinefactory, &self->properties);	 
 	applysongproperties(self);
@@ -125,6 +149,17 @@ void workspace_load_configuration(Workspace* self)
 void workspace_save_configuration(Workspace* self)
 {
 	properties_save(self->config, "psycle.ini");	
+}
+
+void workspace_setoctave(Workspace* self, int octave)
+{
+	self->octave = octave;
+	signal_emit(&self->signal_octavechanged, self, 1, octave);
+}
+
+int workspace_octave(Workspace* self)
+{
+	return self->octave;
 }
 
 Samples* machinecallback_samples(Workspace* self)

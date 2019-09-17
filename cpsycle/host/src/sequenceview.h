@@ -10,42 +10,39 @@
 #include "workspace.h"
 
 typedef struct {
-   void (*newentry)(void*);
-   void (*delentry)(void*);
-   void (*newtrack)(void*);
-} SequenceController;
-
-typedef struct {
-	ui_component component;
-	SequenceController controller;
+	ui_component component;	
+	ui_button incpattern;
+	ui_button decpattern;	
 	ui_button newentry;
+	ui_button insertentry;
 	ui_button delentry;
+	ui_button cloneentry;
 	ui_button newtrack;
-	void* context;
-	ui_font font;
+	ui_button deltrack;
+	void* context;	
 } SequenceButtons;
 
 typedef struct {
 	ui_component component;
 	Sequence* sequence;
-	Patterns* patterns;
-	SequenceController* controller;
+	Patterns* patterns;	
 	int selected;
 	int selectedtrack;
 	int foundselected;
-	int lineheight;
-	ui_font font;
+	int lineheight;	
 } SequenceListView;
 
 typedef struct {
-	ui_component component;
+	ui_component component;	
 	SequenceListView listview;
 	SequenceButtons buttons;
+	Patterns* patterns;
 	Sequence* sequence;
 } SequenceView;
 
 void InitSequenceView(SequenceView*, ui_component* parent, Workspace*);
-void InitSequenceListView(SequenceListView*, ui_component* parent, Sequence*, Patterns*);
-void InitSequenceButtons(SequenceButtons* self, ui_component* parent);
+void InitSequenceListView(SequenceListView*, ui_component* parent, Sequence*,
+	Patterns*);
+void InitSequenceButtons(SequenceButtons*, ui_component* parent);
 
 #endif

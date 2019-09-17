@@ -19,8 +19,8 @@ void ui_label_init(ui_label* label, ui_component* parent)
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)label->component.hwnd, &label->component);	
-	label->component.events.target = label;
-	label->component.align = 0;	
+	label->component.events.target = label;	
+	ui_component_init_base(&label->component);
 }
 
 

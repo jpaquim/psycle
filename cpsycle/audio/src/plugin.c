@@ -6,9 +6,8 @@
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-static void work(Plugin* self, List* events, int numsamples, int tracks);
 static int hostevent(Plugin* self, int const eventNr, int const val1, float const val2);
-static void generateaudio(Plugin* self, Buffer* input, Buffer* output, int numsamples, int tracks);
+static void generateaudio(Plugin* self, BufferContext*);
 static void seqtick(Plugin* self, int channel, const PatternEvent* event);
 static void sequencertick(Plugin* self);
 static CMachineInfo* info(Plugin* self);
@@ -18,6 +17,8 @@ static int value(Plugin*, int const param);
 static void setvalue(Plugin*, int const param, int const value);
 static void dispose(Plugin* self);
 static int mode(Plugin* self);
+static unsigned int numinputs(Plugin*);
+static unsigned int numoutputs(Plugin*);
 		
 void plugin_init(Plugin* self, const char* path)
 {
@@ -39,6 +40,8 @@ void plugin_init(Plugin* self, const char* path)
 	self->machine.dispose = dispose;
 	self->machine.mode = mode;
 	self->machine.generateaudio = generateaudio;
+	self->machine.numinputs = numinputs;
+	self->machine.numoutputs = numoutputs;
 	pInfo = info(self);	
 	if (!pInfo)
 	{
@@ -54,8 +57,6 @@ void plugin_init(Plugin* self, const char* path)
 			for (gbp = 0; gbp< pInfo->numParameters; gbp++) {
 				mi_parametertweak(self->mi, gbp, pInfo->Parameters[gbp]->DefValue);
 			}		
-			buffer_init(&self->machine.inputs, 2);
-			buffer_init(&self->machine.outputs, 2);	
 		}
 	}	
 }
@@ -67,8 +68,6 @@ void dispose(Plugin* self)
 		self->mi = 0;
 		self->dll = 0;
 	}		
-	buffer_dispose(&self->machine.inputs);
-	buffer_dispose(&self->machine.outputs);	
 	machine_dispose(&self->machine);
 }
 
@@ -108,10 +107,10 @@ void seqtick(Plugin* self, int channel, const PatternEvent* event)
 	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd, event->parameter);
 }
 
-void generateaudio(Plugin* self, Buffer* input, Buffer* output, int numsamples, int tracks)
+void generateaudio(Plugin* self, BufferContext* bc)
 {
-	mi_work(self->mi, buffer_at(output, 0), buffer_at(output, 1), numsamples,
-		tracks);
+	mi_work(self->mi, buffer_at(bc->output, 0), buffer_at(bc->output, 1),
+		bc->numsamples, bc->numtracks);
 }
 
 int hostevent(Plugin* self, int const eventNr, int const val1, float const val2)
@@ -167,3 +166,22 @@ int mode(Plugin* self)
 		return MACHMODE_FX;
 	}	
 }
+
+unsigned int numinputs(Plugin* self)
+{
+	if (info(self)) {
+		return (info(self)->Flags & 3 == 3) ? 0 : 2;
+	} else {
+		return 0;
+	}
+}
+
+unsigned int numoutputs(Plugin* self)
+{
+	if (info(self)) {
+		return 2;
+	} else {
+		return 0;
+	}
+}
+

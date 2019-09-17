@@ -1,13 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "sequence.h"
 #include <stdlib.h>
 
-static PatternNode* SequenceTrackIterator_next(SequenceTrackIterator* self);
-static void SequenceTrackIterator_unget(SequenceTrackIterator* self);
-static void sequence_reposition(Sequence* self, SequenceTrack* track);
-static SequenceTrackIterator sequence_makeiterator(Sequence* self, List* entries);
-static SequencePosition sequence_makeposition(Sequence* self, SequenceTracks* track, List* entries);
+static PatternNode* SequenceTrackIterator_next(SequenceTrackIterator*);
+static void SequenceTrackIterator_unget(SequenceTrackIterator*);
+static void sequence_reposition(Sequence* self, SequenceTrack*);
+static SequenceTrackIterator sequence_makeiterator(Sequence*, List* entries);
+static SequencePosition sequence_makeposition(Sequence*, SequenceTracks*, List* entries);
 
 void sequencetrack_init(SequenceTrack* self)
 {
@@ -344,6 +345,41 @@ List* sequence_appendtrack(Sequence* self, SequenceTrack* track)
 		rv = self->tracks;
 	} else {
 		rv = list_append(self->tracks, track);		
+	}
+	return rv;
+}
+
+List* sequence_removetrack(Sequence* self, SequenceTracks* tracknode)
+{
+	List* rv = 0;
+	float offset = 0;
+
+	int editpositionchanged = 0;
+	SequenceTrack* track = 0;
+	if (self->tracks && tracknode) {		
+		if (self->editposition.track == tracknode) {
+			editpositionchanged = 1;		
+			if (self->editposition.trackposition.tracknode) {
+				SequenceEntry* entry;
+				entry = (SequenceEntry*) 
+					self->editposition.trackposition.tracknode->entry;								
+				offset = entry->offset;
+			}
+		}			
+		rv = list_remove(&self->tracks, tracknode);
+		if (rv) {
+			track = (SequenceTrack*) rv;			
+			self->editposition.track = rv;
+			self->editposition.trackposition =
+				sequence_begin(self, rv, offset);
+		} else {			
+			self->editposition.track = self->tracks;
+			self->editposition.trackposition =
+				sequence_begin(self, self->tracks, offset);
+		}
+		if (editpositionchanged) {
+			signal_emit(&self->signal_editpositionchanged, self, 0);
+		}
 	}
 	return rv;
 }

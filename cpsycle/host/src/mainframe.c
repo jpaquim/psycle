@@ -2,7 +2,6 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "mainframe.h"
-#include "uistatusbar.h"
 #include <uimenu.h>
 #include <uiedit.h>
 #include <uibutton.h>
@@ -24,22 +23,19 @@ static void OnPlay(MainFrame* self, ui_component* sender);
 static void OnStop(MainFrame* self, ui_component* sender);
 static void OnLoadSong(MainFrame* self, ui_component* sender);
 static void OnNewSong(MainFrame* self, ui_component* sender);
-
-static ui_statusbar statusbar;
-static ui_menu menu;    
-static ui_menu menu_file;
-static ui_edit edit;
-static ui_button button;
-static ui_label label;
-
-static int toolbarheight = 75;
-static int tabbarheight = 20;
+static void OnAlign(MainFrame* self, ui_component* sender);
+static void OnMouseDown(MainFrame*, ui_component* sender, int x, int y, int button);
+static void OnMouseMove(MainFrame*, ui_component* sender, int x, int y, int button);
+static void OnMouseUp(MainFrame*, ui_component* sender, int x, int y, int button);
 
 void InitMainFrame(MainFrame* self)
 {	
 	int iStatusWidths[] = {100, 200, -1};	
 	ui_margin tabbardividemargin = { 0, 30, 0, 0};
-	
+
+	self->toolbarheight = 75;
+	self->tabbarheight = 20;
+	self->resize = 0;
 	workspace_init(&self->workspace);	
 	workspace_load_configuration(&self->workspace);
 	self->player = &self->workspace.player;
@@ -50,6 +46,7 @@ void InitMainFrame(MainFrame* self)
 	signal_connect(&self->component.signal_destroy, self, Destroy);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&self->component.signal_align, self, OnAlign);
 	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	ui_button_init(&self->newsongbutton, &self->component);
@@ -63,8 +60,11 @@ void InitMainFrame(MainFrame* self)
 	InitMachineBar(&self->machinebar, &self->component, &self->workspace);
 	ui_component_move(&self->machinebar.component, 3, 50);
 	ui_component_resize(&self->machinebar.component, 410, 25);
+	ui_component_init(&self->splitbar, &self->component);
+	ui_component_setbackgroundmode(&self->splitbar, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->splitbar, 0x00CCCCCC);
 	InitTabBar(&self->tabbar, &self->component);
-	ui_component_move(&self->tabbar.component, 150, toolbarheight);
+	ui_component_move(&self->tabbar.component, 150, self->toolbarheight);
 	ui_component_resize(&self->tabbar.component, 430, 20);	
 	tabbar_append(&self->tabbar, "Machines");
 	tabbar_append(&self->tabbar, "Pattern");	
@@ -76,21 +76,28 @@ void InitMainFrame(MainFrame* self)
 	tabbar_settabmargin(&self->tabbar, 4, &tabbardividemargin);
 	tabbar_select(&self->tabbar, 0);	
 	InitPlayBar(&self->playbar, &self->component);
-	ui_component_move(&self->playbar.component, 320, 2);
-	ui_component_resize(&self->playbar.component, 160, 25);	
+	ui_component_setposition(&self->playbar.component, 320, 2, 160, 25);	
 	signal_connect(&self->playbar.signal_play, self, OnPlay);
 	signal_connect(&self->playbar.signal_stop, self, OnStop);
-	InitVumeter(&self->vumeter, &self->component, &self->workspace.player);
-	ui_component_move(&self->vumeter.component, 520, 0);
-	ui_component_resize(&self->vumeter.component, 200, 20);	
+	// Songbar
+	InitSongTrackBar(&self->songtrackbar, &self->component, &self->workspace);
+	ui_component_setposition(&self->songtrackbar.component, 0, 25, 100, 20);
 	InitTimeBar(&self->timebar, &self->component, &self->workspace.player);
-	ui_component_move(&self->timebar.component, 0, 25);
-	ui_component_resize(&self->timebar.component, 250, 20);	
+	ui_component_setposition(&self->timebar.component, 100, 25, 190, 20);	
 	InitLinesPerBeatBar(&self->linesperbeatbar, &self->component, &self->workspace.player);
-	ui_component_move(&self->linesperbeatbar.component, 220, 25);
-	ui_component_resize(&self->linesperbeatbar.component, 250, 20);	
+	ui_component_setposition(&self->linesperbeatbar.component, 290, 25, 180, 20);	
+	InitOctaveBar(&self->octavebar, &self->component, &self->workspace);
+	ui_component_setposition(&self->octavebar.component, 445, 25, 100, 20);
+	// Vugroup
+	InitVumeter(&self->vumeter, &self->component, &self->workspace);
+	ui_component_setposition(&self->vumeter.component, 540, 0, 200, 20);	
+	InitVolSlider(&self->volslider, &self->component, &self->workspace.player);
+	ui_component_setposition(&self->volslider.component, 540, 20, 200, 20);	
+	InitClipBox(&self->clipbox, &self->component, &self->workspace);
+	ui_component_setposition(&self->clipbox.component, 745, 5, 10, 35);	
+	
 	ui_notebook_init(&self->notebook, &self->component);
-	ui_component_move(&self->notebook.component, 150, toolbarheight + tabbarheight);
+	ui_component_move(&self->notebook.component, 150, self->toolbarheight + self->tabbarheight);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	/// init notebook views
 	InitMachineView(&self->machineview, &self->notebook.component, &self->component, &self->workspace);
@@ -106,19 +113,23 @@ void InitMainFrame(MainFrame* self)
 	greet_init(&self->greet, &self->notebook.component);		
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);	
-	ui_component_move(&self->sequenceview.component, 0, toolbarheight);
+	ui_component_move(&self->sequenceview.component, 0, self->toolbarheight);
 	ui_notebook_setpage(&self->notebook, 0);	
 	/*ui_menu_init(&menu, "", 0);
 	ui_menu_init(&menu_file, "File", OnFileMenu);		
 	ui_menu_append(&menu, &menu_file, 0);
 	ui_component_setmenu(&self->component, &menu);
 	*/	
-	ui_statusbar_init(&statusbar, &self->component);
-	ui_statusbar_setfields(&statusbar, 3, iStatusWidths);
-	ui_statusbar_settext(&statusbar, 0, "Field1");
-	ui_statusbar_settext(&statusbar, 1, "Field2");
-	ui_statusbar_settext(&statusbar, 2, "Field3");	
+	ui_statusbar_init(&self->statusbar, &self->component);
+	ui_statusbar_setfields(&self->statusbar, 3, iStatusWidths);
+	ui_statusbar_settext(&self->statusbar, 0, "");
+	ui_statusbar_settext(&self->statusbar, 1, "");
+	ui_statusbar_settext(&self->statusbar, 2, "");
 
+	signal_connect(&self->splitbar.signal_mousedown, self, OnMouseDown);	
+	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
+	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);
+	
 	SetTimer(self->component.hwnd, 100, 50, 0);	
 }
 
@@ -141,16 +152,45 @@ void Destroy(MainFrame* self, ui_component* component)
 	PostQuitMessage (0) ;
 }
 
-void OnSize(MainFrame* self, ui_component* sender, int width, int height)
+void OnAlign(MainFrame* self, ui_component* sender)
 {
-	int statusbarheight = 30;
-	ui_component_resize(&self->sequenceview.component, 140, height - statusbarheight - toolbarheight);
-	ui_component_resize(&self->notebook.component, width - 150, height - statusbarheight - toolbarheight - tabbarheight);
-	SendMessage(statusbar.component.hwnd, WM_SIZE, 0, 0);
+	ui_size size;
+	ui_size statusbarsize;
+	ui_size tabbarsize;
+	ui_size sequenceviewsize;
+
+	size = ui_component_size(&self->component);
+	statusbarsize = ui_component_size(&self->statusbar.component);
+	tabbarsize = ui_component_size(&self->tabbar.component);
+	sequenceviewsize = ui_component_size(&self->sequenceview.component);
+
+	ui_component_setposition(&self->splitbar,
+		sequenceviewsize.width,
+		self->toolbarheight, 4,
+		size.height - statusbarsize.height - self->toolbarheight - tabbarsize.height);
+	ui_component_resize(&self->sequenceview.component,
+		sequenceviewsize.width,
+		size.height - statusbarsize.height - self->toolbarheight);
+	ui_component_setposition(&self->tabbar.component,
+		sequenceviewsize.width + 4,
+		self->toolbarheight,
+		tabbarsize.width,
+		tabbarsize.height);
+	ui_component_setposition(&self->notebook.component,
+		sequenceviewsize.width + 4,
+		self->toolbarheight + self->tabbarheight,
+		size.width - sequenceviewsize.width - 3,
+		size.height - statusbarsize.height - self->toolbarheight - tabbarsize.height);
+	ui_component_resize(&self->statusbar.component, 0, 0);	
 	if (self->firstshow) {
 		machineview_align(&self->machineview);
 		self->firstshow = 0;
 	}
+}
+
+void OnSize(MainFrame* self, ui_component* sender, int width, int height)
+{	
+	ui_component_align(&self->component);
 }
 
 void OnFileMenu(ui_menu* menu)
@@ -207,7 +247,7 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 	char buffer[20];
 
 	_snprintf(buffer, 20, "%.4f", player_position(self->patternview.trackerview.grid.player)); 
-	ui_statusbar_settext(&statusbar, 0, buffer);	
+	ui_statusbar_settext(&self->statusbar, 0, buffer);	
 }
 
 void OnPlay(MainFrame* self, ui_component* sender)
@@ -243,4 +283,43 @@ void OnLoadSong(MainFrame* self, ui_component* sender)
 		self->tabbar.selected = 4;
 		ui_invalidate(&self->tabbar.component);
 	}
+}
+
+void OnMouseDown(MainFrame* self, ui_component* sender, int x, int y, int button)
+{	
+	ui_component_capture(sender);
+	self->resize = 1;	
+}
+
+void OnMouseMove(MainFrame* self, ui_component* sender, int x, int y, int button)
+{
+	if (self->resize == 1) {		
+		RECT rc;
+		POINT pt;
+	
+		GetWindowRect(sender->hwnd, &rc);
+		pt.x = rc.left;
+		pt.y = rc.top;
+		ScreenToClient(GetParent(sender->hwnd), &pt);
+		ui_component_move(sender, pt.x + x, self->toolbarheight);
+		ui_invalidate(sender);
+		UpdateWindow(sender->hwnd);
+	}
+}
+
+void OnMouseUp(MainFrame* self, ui_component* sender, int x, int y, int button)
+{		
+	RECT rc;
+	POINT pt;
+	
+	ui_component_releasecapture();
+	self->resize = 0;
+	GetWindowRect(sender->hwnd, &rc);
+	pt.x = rc.left;
+	pt.y = rc.top;
+	ScreenToClient(GetParent(sender->hwnd), &pt);
+	ui_component_resize(&self->sequenceview.component,
+		pt.x, ui_component_size(&self->sequenceview.component).height);	
+	ui_component_align(&self->component);
+	ui_invalidate(&self->tabbar.component);
 }

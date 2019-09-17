@@ -14,6 +14,7 @@ static TCHAR szComponentClass[] = TEXT ("PsycleComponent") ;
 IntHashTable selfmap;
 IntHashTable winidmap;
 int winid = 20000;
+static ui_font defaultfont;
 extern IntHashTable menumap;
 
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
@@ -31,6 +32,7 @@ void ui_init(HINSTANCE hInstance)
 {
 	WNDCLASS     wndclass ;
 	INITCOMMONCONTROLSEX icex;
+	ui_fontinfo fontinfo;
 	int succ;
 	
 	InitIntHashTable(&selfmap, 100);
@@ -66,21 +68,24 @@ void ui_init(HINSTANCE hInstance)
 
 	RegisterClass (&wndclass) ;
 
-	ui_menu_setup();
-
+	ui_menu_setup();	
 
 	// Ensure that the common control DLL is loaded.     		
 	icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     icex.dwICC = ICC_USEREX_CLASSES;
     succ = InitCommonControlsEx(&icex);        
 
-	appInstance = hInstance;
+	appInstance = hInstance;		
+	
+	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
+	ui_font_init(&defaultfont, &fontinfo);	
 }
 
 void ui_dispose()
 {
 	DisposeIntHashTable(&selfmap);
 	DisposeIntHashTable(&winidmap);
+	DeleteObject(defaultfont.hfont);
 }
 
 
@@ -458,11 +463,8 @@ void ui_component_init(ui_component* component, ui_component* parent)
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)component->hwnd, component);
-	component->events.target = component;			
-	component->scrollstepx = 100;
-	component->scrollstepy = 12;
-	component->backgroundcolor = 0xFFFFFFFF;
-	component->backgroundmode = BACKGROUND_NONE;
+	component->events.target = component;				
+	ui_component_init_base(component);
 }
 
 void ui_component_init_signals(ui_component* component)
@@ -481,16 +483,24 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_destroy);
 	signal_init(&component->signal_show);
 	signal_init(&component->signal_hide);
+	signal_init(&component->signal_align);
 	signal_init(&component->signal_windowproc);
+}
+
+void ui_component_init_base(ui_component* component) {
+	component->scrollstepx = 100;
+	component->scrollstepy = 12;
 	component->propagateevent = 0;
 	component->preventdefault = 0;
 	component->align = UI_ALIGN_NONE;
 	component->alignchildren = 0;
 	memset(&component->margin, 0, sizeof(ui_margin));
 	component->debugflag = 0;
-	component->defaultpropagation = 0;
-	component->font.stock = 0;
-	component->font.hfont = 0;
+	component->defaultpropagation = 0;	
+	component->visible = 1;
+	component->backgroundmode = BACKGROUND_NONE;
+	component->backgroundcolor = 0xFFFFFFFF;
+	ui_component_setfont(component, &defaultfont);	
 }
 
 void ui_component_dispose(ui_component* component)
@@ -509,8 +519,9 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_destroy);
 	signal_dispose(&component->signal_show);
 	signal_dispose(&component->signal_hide);
+	signal_dispose(&component->signal_align);
 	signal_dispose(&component->signal_windowproc);
-	if (component->font.hfont) {
+	if (component->font.hfont && component->font.hfont != defaultfont.hfont) {
 		ui_font_dispose(&component->font);
 	}
 }
@@ -561,12 +572,14 @@ void ui_component_show_state(ui_component* self, int cmd)
 
 void ui_component_show(ui_component* self)
 {
+	self->visible = 1;
 	ShowWindow(self->hwnd, SW_SHOW);
 	UpdateWindow(self->hwnd) ;
 }
 
 void ui_component_hide(ui_component* self)
 {
+	self->visible = 0;
 	ShowWindow(self->hwnd, SW_HIDE);
 	UpdateWindow(self->hwnd) ;
 }
@@ -759,6 +772,7 @@ int ui_component_visible(ui_component* self)
 
 void ui_component_align(ui_component* self)
 {	
+	int cpx = 0;
 	int cpy = 0;
 	List* p;
 	ui_size size;
@@ -769,7 +783,7 @@ void ui_component_align(ui_component* self)
 		if (component->debugflag == 1) {
 			cpy = cpy;
 		}
-		if (IsWindowVisible(component->hwnd)) {
+		if (component->visible) {
 			if (component->align == UI_ALIGN_FILL) {
 				ui_component_setposition(component,
 					component->margin.left,
@@ -785,10 +799,22 @@ void ui_component_align(ui_component* self)
 					componentsize.height);
 				cpy += component->margin.bottom;
 				cpy += componentsize.height;
-			}		
+			} else
+			if (component->align == UI_ALIGN_LEFT) {			
+				ui_size componentsize = ui_component_size(component);		
+				cpx += component->margin.left;
+				ui_component_setposition(component,
+					cpx,
+					component->margin.top,
+					componentsize.width,
+					size.height - component->margin.top - component->margin.bottom);
+				cpx += component->margin.right;
+				cpx += componentsize.width;
+			}				
 		}
 	}
 	list_free(p);
+	signal_emit(&self->signal_align, self, 0);
 }
 
 void ui_component_setmargin(ui_component* self, const ui_margin* margin)
@@ -895,4 +921,10 @@ ui_size ui_component_textsize(ui_component* self, const char* text)
 	RestoreDC (hdc, -1);	
 	ReleaseDC(NULL, hdc);
 	return rv;
+}
+
+ui_component* ui_component_parent(ui_component* self)
+{			
+	return (ui_component*) SearchIntHashTable(&selfmap,
+		(int) GetParent(self->hwnd));
 }

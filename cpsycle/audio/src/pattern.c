@@ -11,6 +11,35 @@ void pattern_init(Pattern* self)
 	self->label = strdup("Untitled");
 }
 
+Pattern* pattern_clone(Pattern* self)
+{	
+	Pattern* rv;
+	PatternNode* p;	
+
+	rv = (Pattern*) malloc(sizeof(Pattern));
+	rv->events = 0;			
+	for (p = self->events; p != 0; p = p->next) {
+		PatternEntry* entry;
+		PatternEntry* rventry;
+
+		entry = (PatternEntry*)p->entry;
+		rventry = (PatternEntry*)malloc(sizeof(PatternEntry));
+		if (entry) {
+			*rventry = *entry;
+		} else {
+			memset(rventry, 0, sizeof(PatternEntry));
+		}
+		if (rv->events) {						
+			list_append(rv->events, rventry);
+		} else {
+			rv->events = list_create(rventry);
+		}
+	}
+	rv->length = self->length;
+	rv->label = strdup(self->label);
+	return rv;
+}
+
 void pattern_free(Pattern* self)
 {
 	PatternNode* p;

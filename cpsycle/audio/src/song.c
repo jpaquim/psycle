@@ -26,14 +26,14 @@ static Machine* machineloadfilechunk(RiffFile* file, int index, int version,
 	Properties* workspaceproperties);
 
 void song_init(Song* self)
-{	
-	machines_init(&self->machines);
+{		
+	machines_init(&self->machines);					
 	patterns_init(&self->patterns);
 	sequence_init(&self->sequence, &self->patterns);
 	samples_init(&self->samples);
 	instruments_init(&self->instruments);
 	xminstruments_init(&self->xminstruments);	
-	song_initdefaults(self);	
+	song_initdefaults(self);
 }
 
 void song_dispose(Song* self)
@@ -93,7 +93,8 @@ void song_load(Song* self, const char* path, MachineFactory* machinefactory, Pro
 		header[8]=0;		
 		if (strcmp(header,"PSY3SONG")==0) {			
 			*workspaceproperties = properties_create();
-			loadpsy3(self, &file, header, machinefactory, *workspaceproperties);
+			loadpsy3(self, &file, header, machinefactory,
+				*workspaceproperties);
 		} else
 		if (strcmp(header,"PSY2SONG")==0) {
 			loadpsy2(self, &file);
@@ -105,8 +106,8 @@ void song_load(Song* self, const char* path, MachineFactory* machinefactory, Pro
 	}
 }
 
-void loadpsy3(Song* self, RiffFile* file, char header[9], MachineFactory* machinefactory,
-			  Properties* workspaceproperties)
+void loadpsy3(Song* self, RiffFile* file, char header[9],
+	MachineFactory* machinefactory, Properties* workspaceproperties)
 {
 	unsigned int version = 0;
 	unsigned int size = 0;
@@ -400,13 +401,12 @@ void readpatd(Song* song, RiffFile* file, int size, int version)
 
 				psource = pdest;
 				pattern_init(pattern);
-				patterns_insert(&song->patterns, index, pattern);									
+				patterns_insert(&song->patterns, index, pattern);
+				//unsigned char* pdata = CreateNewPattern() + (y * MULTIPLY);
 				for(y = 0 ; y < patternlines[index] ; ++y)
-				{
-					unsigned char* pdata = CreateNewPattern() + (y * MULTIPLY);
-					unsigned char* ptrack = pdata;
-					int track;
-					memcpy(pdata, psource, song->patterns.songtracks * EVENT_SIZE);
+				{					
+					unsigned char* ptrack = psource;
+					int track;					
 					for (track = 0; track < song->patterns.songtracks; ++track) {
 						PatternEvent* event = (PatternEvent*)(ptrack);
 						if (event->note != 255) {
@@ -417,7 +417,7 @@ void readpatd(Song* song, RiffFile* file, int size, int version)
 					offset += 0.25;
 					psource += song->patterns.songtracks * EVENT_SIZE;
 				}
-				pattern->length = 64 * 0.25;								
+				pattern->length = patternlines[index] * 0.25f;								
 				free(pdest);
 				pdest = 0;				
 			}

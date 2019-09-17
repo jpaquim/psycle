@@ -16,10 +16,12 @@ typedef struct {
 	Player player;
 	MachineCallback machinecallback;
 	Properties* config;
-	Properties* properties;
-	Signal signal_songchanged;
+	Properties* properties;	
 	PluginCatcher plugincatcher;
 	MachineFactory machinefactory;
+	int octave;
+	Signal signal_octavechanged;
+	Signal signal_songchanged;
 } Workspace;
 
 void workspace_init(Workspace*);
@@ -30,5 +32,7 @@ void workspace_scanplugins(Workspace*);
 Properties* workspace_pluginlist(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
+void workspace_setoctave(Workspace*, int octave);
+int workspace_octave(Workspace*);
 
 #endif

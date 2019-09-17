@@ -89,6 +89,10 @@ SOURCE=.\src\buffer.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\buffercontext.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\event.c
 # End Source File
 # Begin Source File
@@ -114,6 +118,10 @@ SOURCE=.\src\machinefactory.c
 # Begin Source File
 
 SOURCE=.\src\machines.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\master.c
 # End Source File
 # Begin Source File
 
@@ -201,6 +209,10 @@ SOURCE=.\src\buffer.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\buffercontext.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\constants.h
 # End Source File
 # Begin Source File
@@ -230,6 +242,10 @@ SOURCE=.\src\machinefactory.h
 # Begin Source File
 
 SOURCE=.\src\machines.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\master.h
 # End Source File
 # Begin Source File
 

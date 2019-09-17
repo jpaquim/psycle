@@ -328,7 +328,7 @@ void OnDeleteSample(SamplesHeaderView* self, ui_component* sender)
 void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
 {
 	int i;
-	ui_margin margin;
+	ui_margin margin = { 3, 3, 0, 3 };
 	SliderGroup* sliders[] = {
 		&self->defaultvolume,
 		&self->globalvolume,
@@ -345,8 +345,7 @@ void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
 	InitSliderGroup(&self->globalvolume, &self->component, "Global Volume");
 	InitSliderGroup(&self->panposition, &self->component, "Pan Position");
 	InitSliderGroup(&self->samplednote, &self->component, "Sampled Note"); 
-	InitSliderGroup(&self->pitchfinetune, &self->component, "Pitch Finetune");		
-	ui_setmargin(&margin, 3, 3, 0, 3);
+	InitSliderGroup(&self->pitchfinetune, &self->component, "Pitch Finetune");	
 	for (i = 0; i < 5; ++i) {		
 		ui_component_resize(&sliders[i]->component, 0, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);

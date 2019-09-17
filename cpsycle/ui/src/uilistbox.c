@@ -32,6 +32,7 @@ void ui_listbox_init(ui_listbox* listbox, ui_component* parent)
 	listbox->component.events.target = listbox;
 	listbox->component.events.cmdtarget = listbox;
 	listbox->component.events.command = OnCommand;
+	ui_component_init_base(&listbox->component);	
 }
 
 

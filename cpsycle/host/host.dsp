@@ -92,6 +92,14 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\src\clipbox.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\clipbox.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\config.c
 # End Source File
 # Begin Source File
@@ -149,6 +157,10 @@ SOURCE=.\src\noteinputs.c
 # Begin Source File
 
 SOURCE=.\src\notemapedit.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\octavebar.c
 # End Source File
 # Begin Source File
 
@@ -212,6 +224,10 @@ SOURCE=.\src\songproperties.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\songtrackbar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\tabbar.c
 # End Source File
 # Begin Source File
@@ -221,6 +237,10 @@ SOURCE=.\src\timebar.c
 # Begin Source File
 
 SOURCE=.\src\trackerview.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\volslider.c
 # End Source File
 # Begin Source File
 
@@ -308,6 +328,10 @@ SOURCE=.\src\notemapedit.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\octavebar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\paramview.h
 # End Source File
 # Begin Source File
@@ -368,6 +392,10 @@ SOURCE=.\src\songproperties.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\songtrackbar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\tabbar.h
 # End Source File
 # Begin Source File
@@ -377,6 +405,10 @@ SOURCE=.\src\timebar.h
 # Begin Source File
 
 SOURCE=.\src\trackerview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\volslider.h
 # End Source File
 # Begin Source File
 

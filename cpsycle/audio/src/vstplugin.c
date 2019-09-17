@@ -6,7 +6,7 @@
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-static void work(VstPlugin* self, List* events, int numsamples, int tracks);
+static void work(VstPlugin* self, BufferContext*);
 static int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2);
 static void seqtick(VstPlugin* self, int channel, const PatternEvent* event);
 static void sequencertick(VstPlugin* self);
@@ -61,9 +61,6 @@ void vstplugin_init(VstPlugin* self, const char* path)
 			VstInt32 numOutputs;
 			numInputs = self->effect->numInputs;
 			numOutputs = self->effect->numOutputs;
-			buffer_init(&self->machine.inputs, numInputs);
-			buffer_init(&self->machine.outputs, numOutputs);
-
 			self->effect->user = self;
 			self->effect->dispatcher (self->effect, effOpen, 0, 0, 0, 0);
 			self->effect->dispatcher (self->effect, effSetSampleRate, 0, 0, 0, kSampleRate);
@@ -91,9 +88,7 @@ void dispose(VstPlugin* self)
 			free((char*)self->info->Command);
 		}
 		self->info = 0;
-	}
-	buffer_dispose(&self->machine.inputs);
-	buffer_dispose(&self->machine.outputs);			
+	}	
 	machine_dispose(&self->machine);
 }
 
@@ -129,10 +124,10 @@ CMachineInfo* plugin_vst_test(const char* path)
 	return rv;
 }
 
-void work(VstPlugin* self, List* events, int numsamples, int tracks)
+void work(VstPlugin* self, BufferContext* bc)
 {	
-	self->effect->processReplacing(self->effect, self->machine.inputs.samples,
-		self->machine.outputs.samples, numsamples);
+	self->effect->processReplacing(self->effect, bc->input->samples,
+		bc->output->samples, bc->numsamples);
 }
 
 void seqtick(VstPlugin* self, int channel, const PatternEvent* event)
