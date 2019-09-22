@@ -42,8 +42,11 @@ void adsr_tick(ADSR* self)
 			self->value -= self->step;
 			if (self->value < self->settings.sustain) {
 				self->value = self->settings.sustain;
-				self->stage = ENV_RELEASE; //SUSTAIN;
+				self->stage = ENV_SUSTAIN;
 			}
+		break;
+		case ENV_SUSTAIN:
+			self->stage = ENV_SUSTAIN;
 		break;
 		case ENV_RELEASE:
 		case ENV_FASTRELEASE:

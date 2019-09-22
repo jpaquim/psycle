@@ -3,19 +3,21 @@
 #if !defined(PROPERTIES)
 #define PROPERTIES
 
-enum {
+typedef enum {
 	PROPERTY_TYP_INTEGER,
 	PROPERTY_TYP_STRING,
 	PROPERTY_TYP_DOUBLE,
+	PROPERTY_TYP_BOOL,
 	PROPERTY_TYP_CHOICE,
 	PROPERTY_TYP_USERDATA
-};
+} PropertyType;
 
-enum {
+typedef enum {
 	PROPERTY_HINT_EDIT,
-	PROPERTY_HINT_EDITDIR,
-	PROPERTY_HINT_LIST
-};
+	PROPERTY_HINT_EDITDIR,	
+	PROPERTY_HINT_LIST,
+	PROPERTY_HINT_CHECK,
+} PropertyHint;
 
 typedef struct {
 	char* key;	
@@ -48,17 +50,22 @@ Properties* properties_append_choice(Properties*, const char* key, int value);
 Properties* properties_append_userdata(Properties*, const char* key,
 	void* value, void (*dispose)(Property*));
 Properties* properties_append_int(Properties*, const char* key, int value, int min, int max);
+Properties* properties_append_bool(Properties*, const char* key, int value);
 Properties* properties_append_double(Properties*, const char* key, double value, double min, double max);
 Properties* properties_read(Properties*, const char* key);
 void properties_readint(Properties*, const char* key, int* value, int defaultvalue);
+void properties_readbool(Properties*, const char* key, int* value, int defaultvalue);
 void properties_readdouble(Properties*, const char* key, double* value, double defaultvalue);
 void properties_readstring(Properties*, const char* key, char** text, char* defaulttext);
-void properties_write_string(Properties*, const char* key, const char* value);
-void properties_write_int(Properties*, const char* key, int value);
-void properties_write_double(Properties*, const char* key, double value);
+Properties* properties_write_string(Properties*, const char* key, const char* value);
+Properties* properties_write_int(Properties*, const char* key, int value);
+Properties* properties_write_bool(Properties*, const char* key, int value);
+Properties* properties_write_choice(Properties*, const char* key, int value);
+Properties* properties_write_double(Properties*, const char* key, double value);
 void properties_enumerate(Properties*, void* target, int (*enumerate)(void* , struct PropertiesStruct* properties, int level));
 Properties* properties_find(Properties*, const char* key);
 const char* properties_key(Properties*);
+int properties_checktype(Properties*, PropertyType);
 int properties_value(Properties*);
 const char* properties_valuestring(Properties*);
 void properties_load(Properties*, const char* path);

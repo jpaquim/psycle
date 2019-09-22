@@ -11,5 +11,6 @@
 #define UIDISPOSE ui_dispose()
 
 int ui_run(void);
+void ui_quit(void);
 
 #endif

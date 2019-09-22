@@ -135,13 +135,16 @@ void mi_unused3(CMachineInterface* mi)
 	mi->unused3();
 }
 
-CMachineInterface* mi_create(HINSTANCE dll)
+CMachineInterface* mi_create(void* module)
 {
 	CMachineInterface* mi;
 	CREATEMACHINE GetInterface;
+	HINSTANCE hmodule;
+
+	hmodule = (HINSTANCE) module;
 
 	mi = 0;
-	GetInterface =(CREATEMACHINE)GetProcAddress(dll, "CreateMachine");
+	GetInterface =(CREATEMACHINE)GetProcAddress(hmodule, "CreateMachine");
 	if (GetInterface != NULL)
 	{			
 		mi = GetInterface();	

@@ -1,7 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "machine.h"
 #include "pattern.h"
+#include <string.h>
 
 static CMachineInfo const macinfo = {
 	MI_VERSION,
@@ -34,12 +36,13 @@ static void dispose(Machine* self);
 static int mode(Machine* self) { return MACHMODE_FX; }
 static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
+static float pan(Machine* self) { return 0; } 
+static void setpan(Machine* self, float val) { };
 
 static int dummymachine_mode(DummyMachine* self) { return self->mode; }
 static void dummymachine_dispose(DummyMachine* self);
 static unsigned int dummymachine_numinputs(DummyMachine* self) { return 2; }
 static unsigned int dummymachine_numoutputs(DummyMachine* self) { return 2; }
-
 
 void machine_init(Machine* self)
 {	
@@ -58,6 +61,8 @@ void machine_init(Machine* self)
 	self->generateaudio = generateaudio;
 	self->numinputs = numinputs;
 	self->numoutputs = numoutputs;
+	self->pan = pan;
+	self->setpan = setpan;
 	signal_init(&self->signal_worked);
 }
 

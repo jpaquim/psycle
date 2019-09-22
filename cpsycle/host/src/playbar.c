@@ -9,6 +9,7 @@ static void OnMouseDown(PlayBar* self, ui_component* sender, int x, int y, int b
 void InitPlayBar(PlayBar* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_init(&self->signal_play);
 	signal_init(&self->signal_stop);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
@@ -43,13 +44,14 @@ void OnDraw(PlayBar* self, ui_component* sender, ui_graphics* g)
 	int cpx = 0;
 	int c = 0;
 
+	ui_setbackgroundmode(g, TRANSPARENT);
 	ptr = self->tabs;
 	while (ptr) {
 		const char* str = (const char*)ptr->entry;
 		if (self->selected == c) {
-			ui_settextcolor(g, 0xFFFF0000);
+			ui_settextcolor(g, 0x00B1C8B0);
 		} else {
-			ui_settextcolor(g, 0x00000000);
+			ui_settextcolor(g, 0x00D1C5B6);
 		}
 		ui_textout(g, cpx, 0, str, strlen(str));
 		cpx += 50;

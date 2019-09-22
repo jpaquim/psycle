@@ -2,34 +2,36 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "dir.h"
+#define __cplusplus
+#include <diversalis/os.hpp>
+#undef __cplusplus
+#include <stdio.h>
+
+#if defined(DIVERSALIS__OS__MICROSOFT)
+
 #include <direct.h>
 #include <windows.h>
-#include <stdio.h>
 
 static const char pathenvvarname[] = { 
 	"PATH"
 };
 
-void dir_enum(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
+void dir_enum(void* context, const char* root, const char* wildcard, int flag,
+	void (*enumproc)(void*, const char* path, int flag))
 {
 	HANDLE hFind;
 	WIN32_FIND_DATA wfd;
 	char path[MAX_PATH];	
 	BOOL cont;
   
-	_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard);
-  
- 	
- 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE)
-	{		
+	_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard); 	
+ 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		return;
 	}
-  
 	cont = TRUE;
-	while(cont == TRUE)
-	{
-		if ((strncmp(".", wfd.cFileName, 1) !=0) && (strncmp("..", wfd.cFileName, 2) != 0) )
-		{
+	while(cont == TRUE) {
+		if ((strncmp(".", wfd.cFileName, 1) !=0) && 
+				(strncmp("..", wfd.cFileName, 2) != 0) ) {
 			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
 				_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);
@@ -44,12 +46,10 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag, v
 		}
 		cont = FindNextFile(hFind, &wfd);
 	}
-	if (GetLastError() != ERROR_NO_MORE_FILES)
-	{
+	if (GetLastError() != ERROR_NO_MORE_FILES) {
 		return;
 	}
-	if (FindClose(hFind) == FALSE)
-	{
+	if (FindClose(hFind) == FALSE) {
 		return;
 	}
 }
@@ -92,3 +92,36 @@ void setpathenv(const char* path)
 		putenv(newenv);
 	}
 }
+
+#else
+
+#include <stdio.h>
+
+static const char pathenvvarname[] = { 
+	"PATH"
+};
+
+void dir_enum(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
+{	
+}
+
+char* workdir(char* buffer)
+{
+	return 0;
+}
+
+const char* pathenv(void)
+{		
+	return 0;
+}
+
+void insertpathenv(const char* path)
+{		
+}
+
+void setpathenv(const char* path)
+{
+}
+
+
+#endif

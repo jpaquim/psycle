@@ -44,6 +44,9 @@ typedef struct {
 	Signal signal_mouseup;
 	Signal signal_mousemove;
 	Signal signal_mousedoubleclick;
+	Signal signal_mouseenter;
+	Signal signal_mousehover;
+	Signal signal_mouseleave;
 	Signal signal_scroll;
 	Signal signal_create;
 	Signal signal_destroy;
@@ -65,7 +68,8 @@ typedef struct {
 	unsigned int backgroundcolor;
 	BackgroundMode backgroundmode;
 	ui_font font;
-	int visible;
+	HBRUSH background;
+	int visible;	
 } ui_component;
 
 void ui_component_init(ui_component* component, ui_component* parent);

@@ -26,12 +26,12 @@ void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)edit->component.hwnd, &edit->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &edit->component);
-	winid++;
-	edit->component.align = 0;
+	winid++;	
 	edit->component.events.target = edit;
 	edit->component.events.cmdtarget = edit;
 	edit->component.events.command = OnCommand;
 	signal_connect(&edit->component.signal_destroy, edit,  OnDestroy);
+	ui_component_init_base(&edit->component);
 }
 
 void OnDestroy(ui_edit* self, ui_component* sender)

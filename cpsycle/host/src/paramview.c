@@ -19,19 +19,15 @@ static void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int
 static int HitTest(ParamView* self, int x, int y);
 
 static ui_bitmap knobs;
-static ui_font font;
-extern HINSTANCE appInstance;
 
 void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 {		
 	if (knobs.hBitmap == NULL) {
-		knobs.hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(IDB_PARAMKNOB));
-	}
-	if (font.hfont == NULL) {
-		font = ui_createfont("Tahoma", 12);
-	}
+		ui_bitmap_loadresource(&knobs, IDB_PARAMKNOB);		
+	}	
 	self->machine = machine;
 	ui_component_init(&self->component, parent);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
@@ -60,9 +56,7 @@ void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
 	if (self->params) {								
 		int row = 0;
 		int col = 0;
-		int param;
-		
-		ui_setfont(g, &font);		
+		int param;		
 					
 		for (param = 0; param < self->numparams; ++param) {
 			DrawParam(self, g, param, row, col);
@@ -117,19 +111,18 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_setrectangle(&r, left, top, width, height);
 	ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx, height / 2);
 	ui_setrectangle(&r_bottom, left + knob_cx, top + height/2, width - knob_cx, height / 2);
-		
-	ui_drawsolidrectangle(g, r, 0xFFFFFFFF);
+			
 	par = self->params[param];
 	if (self->machine->describevalue(
 		self->machine, str, param, self->machine->value(self->machine, param)) == FALSE) {
 		_snprintf(str, 128, "%d", self->machine->value(self->machine, param));
 	}
-	ui_setbackgroundcolor(g, 0x00788D93); // + nc*2);
-	ui_settextcolor(g, 0x00CCDDEE); // + nc);	
+	ui_setbackgroundcolor(g, 0x00555555); // + nc*2);
+	ui_settextcolor(g, 0x00CDCDCD); // + nc);	
 	ui_textoutrectangle(g, r_top.left, r_top.top,
 		ETO_OPAQUE, r_top, par->Name, strlen(par->Name));	
-	ui_setbackgroundcolor(g, 0x00687D83); // + nc*2);
-	ui_settextcolor(g, 0x0044EEFF); // + nc);
+	ui_setbackgroundcolor(g, 0x00444444); // + nc*2);
+	ui_settextcolor(g, 0x00E7BD18); // + nc);
 	ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
 		ETO_OPAQUE, r_bottom, str, strlen(str));		
 	knob_frame = (int)((self->machine->value(self->machine, param) - par->MinValue)* 63.0/(par->MaxValue - par->MinValue));

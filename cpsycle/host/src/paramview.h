@@ -14,7 +14,7 @@ typedef struct {
    int cx;
    int cy;
    Machine* machine;
-   const CMachineParameter** params;
+   const CMachineParameter* const * params;
    int numparams;
    int numcols;   
    int numrows;

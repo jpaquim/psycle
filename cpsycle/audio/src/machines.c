@@ -2,8 +2,11 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "machines.h"
+#include "exclusivelock.h"
 #include <operations.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 static int OnEnumFreeMachine(Machines*, int slot, Machine*);
 static int OnEnumPathMachines(Machines*, int slot, Machine*);
@@ -20,21 +23,6 @@ static void machines_releasebuffers(Machines*);
 static Buffer* machines_nextbuffer(Machines*, unsigned int channels);
 static void machines_freebuffers(Machines*);
 
-
-HANDLE hGuiEvent;
-HANDLE hWorkDoneEvent;
-
-void suspendwork(void)
-{
-	ResetEvent(hGuiEvent);
-	WaitForSingleObject(hWorkDoneEvent, 500);
-}
-
-void resumework(void)
-{
-	SetEvent(hGuiEvent);
-}
-
 void machines_init(Machines* self)
 {
 	InitIntHashTable(&self->slots, 256);
@@ -42,8 +30,6 @@ void machines_init(Machines* self)
 	InitIntHashTable(&self->inputbuffers, 256);
 	InitIntHashTable(&self->outputbuffers, 256);
 	self->path = 0;
-	hGuiEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
-	hWorkDoneEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
 	self->numsamplebuffers = 100;
 	self->samplebuffers = (float*)malloc(sizeof(float) * MAX_STREAM_SIZE *
 		self->numsamplebuffers);

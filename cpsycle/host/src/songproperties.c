@@ -15,8 +15,7 @@ void InitSongProperties(SongProperties* self, ui_component* parent, Workspace* w
 	properties_append_string(self->song->properties, "credits", "the credits");
 	properties_append_string(self->song->properties, "comments", "the comments");
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	ui_component_enablealign(&self->component);
 	ui_label_init(&self->label_title, &self->component);
 	ui_label_settext(&self->label_title, "Song Title");		

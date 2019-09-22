@@ -11,12 +11,13 @@ static void OnKeyDown(SettingsView* self, ui_component* sender, int keycode, int
 static void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int button);
 static void OnMouseDoubleClick(SettingsView* self, ui_component* sender, int x, int y, int button);
 static void OnEditChange(SettingsView* self, ui_edit* sender);
+static void OnDestroy(SettingsView* self, ui_component* sender);
 
 void InitSettingsView(SettingsView* self, ui_component* parent, Properties* properties)
 {			
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
+	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
@@ -28,14 +29,21 @@ void InitSettingsView(SettingsView* self, ui_component* parent, Properties* prop
 	signal_connect(&self->edit.signal_change, self, OnEditChange);
 	self->cpx = 0;
 	self->cpy = 0;
-	self->fillchoice = 0;	
+	self->fillchoice = 0;
+	signal_init(&self->signal_changed);
+}
+
+void OnDestroy(SettingsView* self, ui_component* sender)
+{
+	signal_dispose(&self->signal_changed);
 }
 
 void OnDraw(SettingsView* self, ui_component* sender, ui_graphics* g)
 {	
-    self->g = g;		    
-	ui_setbackgroundcolor(g, 0x009a887c);
-	ui_settextcolor(g, 0x00000000);	   
+    self->g = g;		    	
+	ui_setcolor(g, 0x00CACACA);
+	ui_settextcolor(g, 0x00CACACA);
+	ui_setbackgroundmode(g, TRANSPARENT);
 	self->cpx = 0;
 	self->cpy = 0;
 	self->lastlevel = 0;
@@ -61,7 +69,7 @@ int OnPropertiesEnum(SettingsView* self, Properties* property, int level)
 	if (property->item.key) {				
 		if (self->fillchoice) {
 			ui_rectangle r;
-			ui_textout(self->g, 220, 20 + self->cpy, property->item.key, strlen(property->item.key));			
+			ui_textout(self->g, 220, 20 + self->cpy, property->item.key, strlen(property->item.key));
 			r.left = 200;
 			r.top = 20 + self->cpy;
 			r.right = 210;
@@ -70,12 +78,28 @@ int OnPropertiesEnum(SettingsView* self, Properties* property, int level)
 		} else
 		{
 			ui_textout(self->g, 20 + self->cpx, 20 + self->cpy, property->item.key, strlen(property->item.key));
+			if (property->item.typ == PROPERTY_TYP_BOOL) {
+				ui_rectangle r;				
+				r.left = 200;
+				r.top = 20 + self->cpy;
+				r.right = 211;
+				r.bottom = 34 + self->cpy;				
+				if (property->item.value.i == 1) {
+					ui_textout(self->g, 203, 21 + self->cpy - 2,
+						"x", strlen("x"));			
+				}
+				ui_drawrectangle(self->g, r);
+			} else
 			if (property->item.typ == PROPERTY_TYP_STRING) {
-				if (self->selected == property) {
-					ui_setbackgroundcolor(self->g, 0x00Aa988c);
+				if (self->selected == property) {					
+					ui_setbackgroundmode(self->g, OPAQUE);
+					ui_setbackgroundcolor(self->g, 0x009B7800);
+					ui_settextcolor(self->g, 0x00FFFFFF);
 				}
 				ui_textout(self->g, 200, 20 + self->cpy, property->item.value.s, strlen(property->item.value.s));
-				ui_setbackgroundcolor(self->g, 0x009a887c);
+				ui_setbackgroundcolor(self->g, 0x003E3E3E);
+				ui_setbackgroundmode(self->g, TRANSPARENT);
+				ui_settextcolor(self->g, 0x00CACACA);
 			//	if (property->item.hint == PROPERTY_HINT_EDITDIR) {
 			//		ui_textout(self->g, 500, 20 + self->cpy, "...", strlen("..."));
 			//	}
@@ -142,6 +166,17 @@ int OnPropertiesHitTestEnum(SettingsView* self, Properties* property, int level)
 		} else
 		{
 	//		ui_textout(self->g, 20 + self->cpx, 20 + self->cpy, property->item.key, strlen(property->item.key));
+			if (property->item.typ == PROPERTY_TYP_BOOL) {
+				ui_rectangle r;				
+				r.left = 200;
+				r.top = 20 + self->cpy;
+				r.right = 211;
+				r.bottom = 34 + self->cpy;				
+				if (Intersects(&r, self->mx, self->my)) {
+					property->item.value.i = property->item.value.i == 0;
+					signal_emit(&self->signal_changed, self, 1, property);
+				}
+			} else
 			if (property->item.typ == PROPERTY_TYP_STRING) {
 				ui_rectangle r;
 				ui_setrectangle(&r, 200, 20 + self->cpy, 300, 20);
@@ -179,6 +214,7 @@ void OnEditChange(SettingsView* self, ui_edit* sender)
 {
 	if (self->selected) {
 		properties_write_string(self->selected, self->selected->item.key, ui_edit_text(&self->edit));
+		signal_emit(&self->signal_changed, self, 1, self->selected);
 	}
 }
 

@@ -7,7 +7,6 @@
 #include "machine.h"
 #include "instrument.h"
 #include "sample.h"
-#include <windows.h>
 #include <adsr.h>
 
 #define MAX_TRACKS 64

@@ -42,6 +42,7 @@ typedef struct {
 } ui_font;
 
 void ui_setrectangle(ui_rectangle*, int left, int top, int width, int height);
+int ui_rectangle_intersect(ui_rectangle*, int x, int y);
 void ui_setmargin(ui_margin*, int top, int right, int bottom, int left);
 void ui_error(const char* err, const char* shorterr);
 

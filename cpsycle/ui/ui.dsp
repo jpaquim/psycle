@@ -121,7 +121,15 @@ SOURCE=.\src\uievents.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiframe.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uigroupbox.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiimage.c
 # End Source File
 # Begin Source File
 
@@ -189,7 +197,15 @@ SOURCE=.\src\uievents.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiframe.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uigroupbox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiimage.h
 # End Source File
 # Begin Source File
 

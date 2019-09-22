@@ -40,11 +40,16 @@ void OnDraw(Vumeter* self, ui_component* sender, ui_graphics* g)
 	right.bottom += 6;
 	ui_drawsolidrectangle(g, left, 0xFF000000);
 	ui_drawsolidrectangle(g, right, 0xFF000000);
-
+	
 	left.right = (int) (self->leftavg * size.width);
 	right.right = (int) (self->rightavg * size.width);
 	ui_drawsolidrectangle(g, left, 0xFF00FF00);
 	ui_drawsolidrectangle(g, right, 0xFF00FF00);
+
+	ui_setrectangle(&left, left.right, left.top, size.width - left.right, 5);
+	ui_setrectangle(&right, right.right, right.top, size.width - right.right, 5);
+	ui_drawsolidrectangle(g, left, 0x003E3E3E);
+	ui_drawsolidrectangle(g, right, 0x003E3E3E);
 }
 
 void OnSize(Vumeter* self, ui_component* sender, int width, int height)

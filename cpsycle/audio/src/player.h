@@ -7,6 +7,7 @@
 #include "song.h"
 #include "sequencer.h"
 #include <signal.h>
+#include "library.h"
 
 typedef struct {	
 	Driver* driver;
@@ -20,7 +21,7 @@ typedef struct {
 	unsigned int numsongtracks;
 	Signal signal_numsongtrackschanged;
 	Signal signal_lpbchanged;
-	HMODULE module;
+	Library drivermodule;
 	float volume;
 } Player;
 

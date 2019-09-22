@@ -3,15 +3,16 @@
 
 #include "wavebox.h"
 
-static void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g);
-static void OnSize(WaveBox* self, ui_component* sender, int width, int height);
-static void OnDestroy(WaveBox* self, ui_component* component);
-static void OnMouseDown(WaveBox* self, ui_component* sender, int x, int y, int button);
+static void OnDraw(WaveBox*, ui_component* sender, ui_graphics*);
+static void OnSize(WaveBox*, ui_component* sender, int width, int height);
+static void OnDestroy(WaveBox*, ui_component* sender);
+static void OnMouseDown(WaveBox*, ui_component* sender, int x, int y, int button);
 
 
 void InitWaveBox(WaveBox* self, ui_component* parent)
 {			
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	signal_connect(&self->component.signal_size, self, OnSize);	
@@ -19,7 +20,7 @@ void InitWaveBox(WaveBox* self, ui_component* parent)
 	self->sample = 0;
 }
 
-void OnDestroy(WaveBox* self, ui_component* component)
+void OnDestroy(WaveBox* self, ui_component* sender)
 {		
 }
 
@@ -28,7 +29,7 @@ void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);	
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0xFFAAAAA);
+	ui_setcolor(g, 0x00B1C8B0);
 	if (self->sample) {
 		int x;
 		int centery = size.height / 2;

@@ -60,8 +60,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_margin margin = {3, 3, 0, 3};
 	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);
 	ui_listbox_init(&self->samplelist, &self->component);
 	ui_button_init(&self->loadbutton, &self->component);
@@ -87,7 +86,6 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "Vibrato");	
 	ui_notebook_init(&self->notebook, &self->client);	
 	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->notebook.component, 0x009a887c);	
 	ui_component_resize(&self->notebook.component, 0, 120);
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_TOP);	
 	ui_component_setmargin(&self->notebook.component, &margin);
@@ -492,8 +490,7 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x009a887c);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	self->sample = 0;
 	self->player = player;	
 

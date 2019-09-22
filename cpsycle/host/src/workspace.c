@@ -2,12 +2,13 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "workspace.h"
+#include <stdlib.h>
 
-static void workspace_config(Workspace* self);
+static void workspace_config(Workspace*);
 static Samples* machinecallback_samples(Workspace*);
-static void workspace_removesong(Workspace* self);
-static void applysongproperties(Workspace* self);
-static Properties* workspace_makeproperties(Workspace* self);
+static void workspace_removesong(Workspace*);
+static void applysongproperties(Workspace*);
+static Properties* workspace_makeproperties(Workspace*);
 
 void workspace_init(Workspace* self)
 {	
@@ -24,6 +25,7 @@ void workspace_init(Workspace* self)
 	player_init(&self->player, self->song, "..\\driver\\mme\\Release\\");
 #endif
 	signal_init(&self->signal_songchanged);
+	signal_init(&self->signal_configchanged);
 	self->properties = 0;
 	plugincatcher_init(&self->plugincatcher);
 	workspace_scanplugins(self);
@@ -37,6 +39,7 @@ void workspace_dispose(Workspace* self)
 	properties_free(self->config);
 	signal_dispose(&self->signal_octavechanged);
 	signal_dispose(&self->signal_songchanged);
+	signal_dispose(&self->signal_configchanged);
 	plugincatcher_dispose(&self->plugincatcher);
 }
 
@@ -62,10 +65,15 @@ void workspace_config(Workspace* self)
 	Properties* p;
 	self->config = properties_create();
 	p = properties_append_string(self->config, "version", "alpha");	
-	p = properties_append_string(self->config, "plugindir", "C:\\Programme\\Psycle\\PsyclePlugins");
+	p = properties_append_string(self->config, "plugindir",
+		"C:\\Programme\\Psycle\\PsyclePlugins");
 	p->item.hint = PROPERTY_HINT_EDITDIR;
-	p = properties_append_string(self->config, "vstdir", "C:\\Programme\\Psycle\\VstPlugins");	
+	p = properties_append_string(self->config, "vstdir",
+		"C:\\Programme\\Psycle\\VstPlugins");	
 	p->item.hint = PROPERTY_HINT_EDITDIR;
+	p = properties_append_bool(self->config, "showaboutatstart", 1);
+	p = properties_append_bool(self->config, "showsonginfoonload", 1);
+	p = properties_append_bool(self->config, "linenumbers", 1);
 }
 
 void workspace_newsong(Workspace* self)

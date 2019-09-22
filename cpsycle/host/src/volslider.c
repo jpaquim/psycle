@@ -16,10 +16,12 @@ static void SetSliderValue(VolSlider* slider, float value);
 static int timerid = 700;
 
 void InitVolSlider(VolSlider* self, ui_component* parent, Player* player)
-{	
+{		
 	self->player = player;	
 	ui_component_init(&self->component, parent);	
 	ui_slider_init(&self->slider, &self->component);	
+	self->slider.component.debugflag = 10;
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_slider_setrange(&self->slider, -32768, 32767);
 	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
 	signal_connect(&self->component.signal_timer, self, OnTimer);

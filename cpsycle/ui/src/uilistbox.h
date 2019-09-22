@@ -14,7 +14,7 @@ typedef struct {
 
 
 void ui_listbox_init(ui_listbox* listbox, ui_component* parent);
-void ui_listbox_addstring(ui_listbox* listbox, const char* text);
+int ui_listbox_addstring(ui_listbox* listbox, const char* text);
 void ui_listbox_setstring(ui_listbox* listbox, const char* text, int index);
 void ui_listbox_clear(ui_listbox* listbox);
 void ui_listbox_setcursel(ui_listbox* listbox, int index);

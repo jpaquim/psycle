@@ -8,7 +8,8 @@ static void OnMouseDown(EnvelopeView* self, ui_component* sender, int x, int y, 
 
 void InitEnvelopeView(EnvelopeView* self, ui_component* parent)
 {			
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	signal_connect(&self->component.signal_size, self, OnSize);	
@@ -21,10 +22,10 @@ void OnDestroy(EnvelopeView* self, ui_component* component)
 
 void OnDraw(EnvelopeView* self, ui_component* sender, ui_graphics* g)
 {	
-	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0xFFAAAAA);	
+//	ui_rectangle r;
+//	ui_size size = ui_component_size(&self->component);
+//	ui_setrectangle(&r, 0, 0, size.width, size.height);
+	
 }
 
 void OnSize(EnvelopeView* self, ui_component* sender, int width, int height)

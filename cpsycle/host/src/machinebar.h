@@ -4,13 +4,17 @@
 #if !defined(MACHINEBAR_H)
 #define MACHINEBAR_H
 
+#include "uibutton.h"
 #include "uicombobox.h"
 #include "workspace.h"
 
 typedef struct {
 	ui_component component;
 	ui_combobox machinebox;
-	ui_combobox instparambox;
+	ui_button prevmachinebutton;
+	ui_button nextmachinebutton;
+	ui_button gear;
+	ui_combobox instparambox;	
 	Player* player;	
 	void (*selchange)(void*, int);
 	void* eventcontext;

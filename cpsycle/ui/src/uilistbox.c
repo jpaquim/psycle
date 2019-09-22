@@ -42,9 +42,9 @@ void OnDestroy(ui_listbox* self, ui_component* sender)
 }
 
 
-void ui_listbox_addstring(ui_listbox* listbox, const char* text)
+int ui_listbox_addstring(ui_listbox* listbox, const char* text)
 {
-	SendMessage(listbox->component.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
+	return SendMessage(listbox->component.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
 }
 
 void ui_listbox_setstring(ui_listbox* self, const char* text, int index)

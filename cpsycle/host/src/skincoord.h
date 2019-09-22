@@ -13,6 +13,7 @@ typedef struct {
 	int desty;
 	int destwidth;
 	int destheight;	
+	int range;
 } SkinCoord;
 
 #endif

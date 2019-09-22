@@ -114,7 +114,19 @@ Properties* properties_append_int(Properties* self, const char* key, int value, 
 	return p->next;
 }
 
-Properties* properties_append_double(Properties* self, const char* key, double value, double min, double max)
+Properties* properties_append_bool(Properties* self, const char* key, int value)
+{
+	Properties* p;
+	
+	p = properties_append_int(self, key, value != 0, 0, 1);
+	p->item.typ = PROPERTY_TYP_BOOL;
+	p->item.hint = PROPERTY_HINT_CHECK;
+
+	return p;
+}
+
+Properties* properties_append_double(Properties* self, const char* key,
+	double value, double min, double max)
 {
 	Properties* p;
 
@@ -168,13 +180,29 @@ Properties* properties_read(Properties* self, const char* key)
 	return p;
 }
 
-void properties_readint(Properties* properties, const char* key, int* value, int defaultvalue)
+void properties_readint(Properties* properties, const char* key, int* value,
+	int defaultvalue)
 {
 	if (!properties) {
 		*value = defaultvalue;
 	} else {
 		Properties* property = properties_read(properties, key);
 		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+			*value = property->item.value.i;
+		} else {
+			*value = defaultvalue;
+		}
+	}
+}
+
+void properties_readbool(Properties* properties, const char* key, int* value,
+	int defaultvalue)
+{
+	if (!properties) {
+		*value = defaultvalue;
+	} else {
+		Properties* property = properties_read(properties, key);
+		if (property && property->item.typ == PROPERTY_TYP_BOOL) {
 			*value = property->item.value.i;
 		} else {
 			*value = defaultvalue;
@@ -210,7 +238,7 @@ void properties_readstring(Properties* properties, const char* key, char** text,
 	}
 }
 
-void properties_write_string(Properties* self, const char* key, const char* value)
+Properties* properties_write_string(Properties* self, const char* key, const char* value)
 {
 	Properties* p = properties_read(self, key);
 	if (p) {
@@ -220,30 +248,56 @@ void properties_write_string(Properties* self, const char* key, const char* valu
 		p->item.value.s = strdup(value);
 		p->item.typ = PROPERTY_TYP_STRING;
 	} else {
-		properties_append_string(self, key, value);
+		p = properties_append_string(self, key, value);
 	}
+	return p;
 }
 
-void properties_write_int(Properties* self, const char* key, int value)
+Properties* properties_write_int(Properties* self, const char* key, int value)
 {
 	Properties* p = properties_read(self, key);
 	if (p) {		
 		p->item.value.i = value;
 		p->item.typ = PROPERTY_TYP_INTEGER;		
 	} else {
-		properties_append_int(self, key, value, 0, 0);
+		p = properties_append_int(self, key, value, 0, 0);
 	}
+	return p;
 }
 
-void properties_write_double(Properties* self, const char* key, double value)
+Properties* properties_write_bool(Properties* self, const char* key, int value)
+{
+	Properties* p;
+	
+	p = properties_write_int(self, key, value != 0);
+	p->item.typ = PROPERTY_TYP_BOOL;
+	p->item.hint = PROPERTY_HINT_CHECK;	
+	return p;
+}
+
+Properties* properties_write_choice(Properties* self, const char* key, int value)
+{
+	Properties* p = properties_read(self, key);
+	if (p) {		
+		p->item.value.i = value;
+		p->item.typ = PROPERTY_TYP_CHOICE;
+	} else {
+		p = properties_append_int(self, key, value, 0, 0);
+		p->item.typ = PROPERTY_TYP_CHOICE;
+	}
+	return p;
+}
+
+Properties* properties_write_double(Properties* self, const char* key, double value)
 {
 	Properties* p = properties_read(self, key);
 	if (p) {		
 		p->item.value.d = value;
 		p->item.typ = PROPERTY_TYP_DOUBLE;		
 	} else {
-		properties_append_double(self, key, value, 0, 0);
+		p = properties_append_double(self, key, value, 0, 0);
 	}
+	return p;
 }
 
 void properties_enumerate(Properties* self, void* t, int (*enumproc)(void* self, struct PropertiesStruct* properties, int level))
@@ -293,6 +347,11 @@ int OnSearchPropertiesEnum(Properties* self, Properties* property, int level)
 		return 0;
 	}
 	return 1;
+}
+
+int properties_checktype(Properties* property, PropertyType typ)
+{
+	return property->item.typ == typ;
 }
 
 const char* properties_key(Properties* self)
@@ -350,8 +409,24 @@ void properties_load(Properties* self, const char* path)
 				++i;
 			}
 			if (state == 2) {
-				if (properties_read(self, key)) {
-					properties_write_string(self, key, value);
+				Properties* p = properties_read(self, key);
+				if (p) {
+					switch (p->item.typ) {
+						case PROPERTY_TYP_INTEGER:
+							properties_write_int(self, key, atoi(value));
+						break;
+						case PROPERTY_TYP_BOOL:
+							properties_write_bool(self, key, atoi(value));
+						break;
+						case PROPERTY_TYP_CHOICE:
+							properties_write_choice(self, key, atoi(value));
+						break;
+						case PROPERTY_TYP_STRING:
+							properties_write_string(self, key, value);
+						break;
+						default:
+						break;
+					}					
 				}
 				i = 0;
 				state = 0;
@@ -383,9 +458,23 @@ void properties_save(Properties* self, const char* path)
 int OnSaveIniEnum(RiffFile* file, Properties* property, int level)
 {
 	if (property->item.key) {
+		char text[40];
+
 		rifffile_write(file, property->item.key, strlen(property->item.key));
 		rifffile_write(file, "=", strlen("="));
 		switch (property->item.typ) {
+			case PROPERTY_TYP_INTEGER:
+				_snprintf(text, 40, "%d", property->item.value.i);
+				rifffile_write(file, text, strlen(text));
+			break;
+			case PROPERTY_TYP_BOOL:
+				_snprintf(text, 40, "%d", property->item.value.i);
+				rifffile_write(file, text, strlen(text));
+			break;
+			case PROPERTY_TYP_CHOICE:
+				_snprintf(text, 40, "%d", property->item.value.i);
+				rifffile_write(file, text, strlen(text));
+			break;
 			case PROPERTY_TYP_STRING:
 				rifffile_write(file, property->item.value.s,
 					strlen(property->item.value.s));

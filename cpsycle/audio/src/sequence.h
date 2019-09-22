@@ -8,7 +8,7 @@
 #include <signal.h>
 
 typedef struct {
-	int pattern;
+	unsigned int pattern;
 	float offset;	
 } SequenceEntry;
 
@@ -40,6 +40,7 @@ typedef struct {
 } SequencePosition;
 
 void sequenceposition_init(SequencePosition*);
+SequenceEntry* sequenceposition_entry(SequencePosition*);
 
 typedef struct {
 	SequenceTracks* tracks;
@@ -62,6 +63,9 @@ void sequence_clear(Sequence*);
 List* sequence_appendtrack(Sequence*, SequenceTrack*);
 List* sequence_removetrack(Sequence*, SequenceTracks*);
 unsigned int sequence_sizetracks(Sequence*);
+int sequence_patternused(Sequence*, unsigned int patternslot);
+void sequence_setpatternslot(Sequence*, SequencePosition, unsigned int slot);
+
 
 #endif
 

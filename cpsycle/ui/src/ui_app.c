@@ -16,3 +16,8 @@ int ui_run(void)
     }
     return msg.wParam ;
 }
+
+void ui_quit(void)
+{
+	PostQuitMessage(0);
+}

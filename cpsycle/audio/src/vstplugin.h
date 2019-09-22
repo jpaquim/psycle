@@ -4,12 +4,11 @@
 #define VSTPLUGIN_H
 
 #include "machine.h"
-#include <windows.h>
-
+#include "library.h"
 
 typedef struct {
 	Machine machine;		
-	HINSTANCE module;
+	Library library;
 	struct AEffect* effect;
 	CMachineInfo* info;	
 } VstPlugin;

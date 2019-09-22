@@ -9,19 +9,21 @@ extern IntHashTable selfmap;
 void onsize(ui_notebook*, ui_component* sender, int width, int height);
 void ontabbarchange(ui_notebook*, ui_component* sender, int tabindex);
 
-void ui_notebook_init(ui_notebook* notebook, ui_component* parent)
+void ui_notebook_init(ui_notebook* self, ui_component* parent)
 {  
-    ui_component_init(&notebook->component, parent);
-	notebook->component.defaultpropagation = 1;
-	signal_connect(&notebook->component.signal_size, notebook, onsize);
+    ui_component_init(&self->component, parent);
+	self->component.defaultpropagation = 1;
+	signal_connect(&self->component.signal_size, self, onsize);
+	self->pageindex = 0;
 }
 
 void ui_notebook_setpage(ui_notebook* self, int pageindex)
-{
+{	
 	List* p;
 	int c = 0;		
 	ui_size size;
 
+	self->pageindex = pageindex;
 	size = ui_component_size(&self->component);
 	for (p = ui_component_children(&self->component, 0); p != NULL;
 			p = p->next, ++c) {		
@@ -42,6 +44,11 @@ void ui_notebook_setpage(ui_notebook* self, int pageindex)
 		}
 	}
 	list_free(p);	
+}
+
+int ui_notebook_page(ui_notebook* self)
+{
+	return self->pageindex;
 }
 
 void ui_notebook_connectcontroller(ui_notebook* self, Signal* controllersignal)

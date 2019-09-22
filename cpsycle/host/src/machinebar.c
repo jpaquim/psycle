@@ -1,6 +1,8 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "machinebar.h"
 
-static void OnSize(MachineBar*, ui_component* sender, int width, int height);
 static void OnDestroy(MachineBar*, ui_component* component);
 static void BuildMachineBox(MachineBar* self);
 static int OnEnumMachines(MachineBar*, int slot, Machine* machine);
@@ -17,37 +19,59 @@ static void OnInstrumentListChanged(MachineBar* self, ui_component* sender, int 
 static void OnSongChanged(MachineBar*, Workspace*);
 static void ConnectSongSignals(MachineBar* self);
 static void ClearMachineBox(MachineBar* self);
+static void OnPrevMachine(MachineBar*, ui_component* sender);
+static void OnNextMachine(MachineBar*, ui_component* sender);
 
 void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace)
 {			
+	ui_margin margin = { 0, 3, 3, 3 };
+
 	self->selchange = 0;
 	self->player = &workspace->player;
 	self->machines = &workspace->song->machines;	
 	self->instruments = &workspace->song->instruments;
 	InitIntHashTable(&self->comboboxslots, 256);
 	InitIntHashTable(&self->slotscombobox, 256);
-	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
-	ui_combobox_init(&self->machinebox, &self->component);	
-	ui_component_move(&self->machinebox.component, 0, 0);
-	ui_component_resize(&self->machinebox.component, 200, 20);	
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
+	ui_combobox_init(&self->machinebox, &self->component);
+	ui_component_resize(&self->machinebox.component, 200, 20);
+	ui_button_init(&self->prevmachinebutton, &self->component);
+	ui_button_settext(&self->prevmachinebutton, "<");	
+	signal_connect(&self->prevmachinebutton.signal_clicked, self, OnPrevMachine);
+	ui_button_init(&self->nextmachinebutton, &self->component);
+	ui_button_settext(&self->nextmachinebutton, ">");	
+	signal_connect(&self->nextmachinebutton.signal_clicked, self, OnNextMachine);
+	ui_component_resize(&self->prevmachinebutton.component, 20, 0);	
+	ui_component_resize(&self->nextmachinebutton.component, 20, 0);
+	ui_button_init(&self->gear, &self->component);
+	ui_button_settext(&self->gear, "Gear Rack");
+	ui_component_resize(&self->gear.component, 60, 20);
 	BuildMachineBox(self);
 	signal_connect(&self->machinebox.signal_selchanged, self, OnMachineBoxSelChange);	
 	self->prevent_selchange_notify = FALSE;	
 	ui_combobox_init(&self->instparambox, &self->component);	
-	ui_component_move(&self->instparambox.component, 203, 0);
 	ui_component_resize(&self->instparambox.component, 200, 20);
 	BuildInstrumentList(self);
 	ui_combobox_setcursel(&self->instparambox, 0);
 	signal_connect(&self->instparambox.signal_selchanged, self, OnInstParamBoxSelChange);
 	ConnectSongSignals(self);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	{
+		List* p;
+		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)
+		{
+			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_LEFT);
+			ui_component_setmargin((ui_component*)p->entry, &margin);
+		}
+	}
 }
 
 void OnDestroy(MachineBar* self, ui_component* component)
 {
 	DisposeIntHashTable(&self->comboboxslots);
+	DisposeIntHashTable(&self->slotscombobox);
 }
 
 void ClearMachineBox(MachineBar* self)
@@ -62,10 +86,6 @@ void ClearMachineBox(MachineBar* self)
 void SelectMachineBarSlot(MachineBar* self, int slot)
 {
 	ui_combobox_setcursel(&self->machinebox, slot);
-}
-
-void OnSize(MachineBar* self, ui_component* sender, int width, int height)
-{	
 }
 
 void OnInstrumentInsert(MachineBar* self, ui_component* sender, int slot)
@@ -183,4 +203,18 @@ void ConnectSongSignals(MachineBar* self)
 	signal_connect(&self->machines->signal_slotchange, self, OnMachinesSlotChange);
 	signal_connect(&self->instruments->signal_insert, self, OnInstrumentInsert);
 	signal_connect(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);	
+}
+
+void OnNextMachine(MachineBar* self, ui_component* sender)
+{
+	if (self->machines && machines_slot(self->machines) > 0) {
+		machines_changeslot(self->machines, machines_slot(self->machines) - 1);
+	}
+}
+
+void OnPrevMachine(MachineBar* self, ui_component* sender)
+{
+	if (self->machines) {
+		machines_changeslot(self->machines, machines_slot(self->machines) + 1);
+	}
 }

@@ -68,14 +68,16 @@ typedef struct {
 	int x;
 	int y;
 	char* editname;
+	int mode;
 } MachineUi;
 
-void MachineUiSet(MachineUi* self, int x, int y, const char* editname);
+void MachineUiSet(MachineUi* self, int x, int y, int mode, const char* editname);
 
 enum {	
-	WireView_DRAG_MACHINE,
-	WireView_DRAG_NEWCONNECTION,
-	WireView_DRAG_CHANGECONNECTION
+	WIREVIEW_DRAG_MACHINE,
+	WIREVIEW_DRAG_NEWCONNECTION,
+	WIREVIEW_DRAG_CHANGECONNECTION,
+	WIREVIEW_DRAG_PAN,
 };
 
 typedef struct {
