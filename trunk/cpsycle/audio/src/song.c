@@ -6,6 +6,16 @@
 #include "constants.h"
 #include <datacompression.h>
 #include "machinefactory.h"
+#include <stdlib.h>
+#include <string.h> 
+
+#if !defined(FALSE)
+#define FALSE 0
+#endif
+
+#if !defined(TRUE)
+#define TRUE 1
+#endif
 
 static void song_initdefaults(Song* self);
 static void song_initproperties(Song* self);
@@ -148,7 +158,7 @@ void loadpsy3(Song* self, RiffFile* file, char header[9],
 				properties_write_string(self->properties, "comments", comments_);
 				//bugfix. There were songs with incorrect size.
 				if(version == 0) {
-				//	size= (UINT)(rifffile_getpos(file) - begins);
+				//	size= (unsigned int)(rifffile_getpos(file) - begins);
 				}
 			}
 		//	}
@@ -596,8 +606,8 @@ void readinsd(Song* song, RiffFile* file, int size, int version)
 void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * instrum_name, int fullopen, int loadIdx)
 {
 	char Header[8];
-	UINT version;
-	UINT size;
+	unsigned int version;
+	unsigned int size;
 
 	rifffile_read(file, &Header,4);
 	Header[4] = 0;

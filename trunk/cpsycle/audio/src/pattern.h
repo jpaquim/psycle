@@ -31,6 +31,7 @@ void pattern_remove(Pattern*, PatternNode*);
 PatternNode* pattern_greaterequal(Pattern*, float offset, PatternNode** prev);
 void pattern_setlabel(Pattern*, const char*);
 void pattern_setlength(Pattern*, float length);
+int pattern_empty(Pattern*);
 
 #endif
 

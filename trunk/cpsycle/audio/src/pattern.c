@@ -154,3 +154,8 @@ void pattern_setlength(Pattern* self, float length)
 {
 	self->length = length;
 }
+
+int pattern_empty(Pattern* self)
+{
+	return self->events == 0;
+}

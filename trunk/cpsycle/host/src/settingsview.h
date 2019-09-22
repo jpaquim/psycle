@@ -21,9 +21,11 @@ typedef struct {
 	int cpy;
 	int cpx;
 	int fillchoice;
-	ui_edit edit;	
+	ui_edit edit;
+	Signal signal_changed;
 } SettingsView;
 
-void InitSettingsView(SettingsView* Settingsview, ui_component* parent, Properties* properties);
+void InitSettingsView(SettingsView* Settingsview, ui_component* parent, 
+	Properties* properties);
 
 #endif

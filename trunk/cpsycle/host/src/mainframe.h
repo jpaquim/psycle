@@ -5,11 +5,14 @@
 #define MAINFRAME_H
 
 #include "workspace.h"
+#include <uilabel.h>
 #include <uibutton.h>
+#include <uiframe.h>
 #include <uinotebook.h>
 #include "uistatusbar.h"
 #include "machinebar.h"
 #include "machineview.h"
+#include "gear.h"
 #include "patternview.h"
 #include "sequenceview.h"
 #include "samplesview.h"
@@ -27,10 +30,13 @@
 #include "linesperbeatbar.h"
 #include "octavebar.h"
 #include "songtrackbar.h"
-#include "greet.h"
+#include "helpview.h"
 
 typedef struct {
 	ui_component component;
+	ui_component top;
+	ui_component tabbars;
+	ui_component client;
 	ui_button newsongbutton;
 	ui_button loadsongbutton;
 	ui_component splitbar;
@@ -45,7 +51,8 @@ typedef struct {
 	InstrumentsView instrumentsview;
 	SongProperties songproperties;
 	SettingsView settingsview;
-	Greet greet;
+	HelpView helpview;	
+	Gear gear;
 	Vumeter vumeter;
 	VolSlider volslider;
 	ClipBox clipbox;
@@ -58,9 +65,9 @@ typedef struct {
 	Player* player;
 	NoteInputs noteinputs;	
 	Workspace workspace;
+	ui_label label;
 	int firstshow;
-	int toolbarheight;
-	int tabbarheight;
+	int toolbarheight;	
 	int resize;
 } MainFrame;
 

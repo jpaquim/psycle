@@ -2,6 +2,8 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "plugin.h"
 #include "pattern.h"
+#include <stdlib.h>
+#include <string.h>
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
@@ -19,15 +21,17 @@ static void dispose(Plugin* self);
 static int mode(Plugin* self);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
+static float pan(Plugin* self) { return self->pan; } 
+static void setpan(Plugin* self, float val);
 		
 void plugin_init(Plugin* self, const char* path)
 {
-	CMachineInfo* pInfo;
-	int err;
+	CMachineInfo* pInfo = 0;	
 
-	machine_init(&self->machine);	
-	self->dll = LoadLibrary(path);
-	err = GetLastError();	
+	machine_init(&self->machine);
+	library_init(&self->library);
+	library_load(&self->library, path);	
+	self->pan = 0.5;
 	self->mi = 0;
 	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
@@ -42,15 +46,17 @@ void plugin_init(Plugin* self, const char* path)
 	self->machine.generateaudio = generateaudio;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
+	self->machine.pan = pan;
+	self->machine.setpan = setpan;
+
 	pInfo = info(self);	
 	if (!pInfo)
 	{
-		FreeLibrary(self->dll);
-		self->dll = NULL;		
+		library_dispose(&self->library);		
 	} else {		
-		self->mi = mi_create(self->dll);
+		self->mi = mi_create(self->library.module);
 		if (!self->mi) {
-			FreeLibrary(self->dll);			
+			library_dispose(&self->library);			
 		} else {
 			int gbp;	
 			mi_init(self->mi);
@@ -62,11 +68,10 @@ void plugin_init(Plugin* self, const char* path)
 }
 
 void dispose(Plugin* self)
-{	
-	if (self->dll) {
-		FreeLibrary(self->dll);
-		self->mi = 0;
-		self->dll = 0;
+{		
+	if (self->library.module != 0) {
+		library_dispose(&self->library);
+		self->mi = 0;		
 	}		
 	machine_dispose(&self->machine);
 }
@@ -76,13 +81,12 @@ CMachineInfo* plugin_psycle_test(const char* path)
 {
 	GETINFO GetInfo;
 	CMachineInfo* rv;
-	HINSTANCE dll;	
-	int err;
+	Library library;	
 
 	rv = 0;
-	dll = LoadLibrary(path);
-	err = GetLastError();					
-	GetInfo =(GETINFO)GetProcAddress(dll, "GetInfo");
+	library_init(&library);
+	library_load(&library, path);					
+	GetInfo =(GETINFO)library_functionpointer(&library, "GetInfo");
 	if (GetInfo != NULL) {	
 		CMachineInfo* pInfo = GetInfo();
 		if (pInfo) {
@@ -98,7 +102,7 @@ CMachineInfo* plugin_psycle_test(const char* path)
 			rv->PlugVersion = pInfo->PlugVersion;
 		}
 	}
-	FreeLibrary(dll);	
+	library_dispose(&library);		
 	return rv;
 }
 
@@ -128,10 +132,11 @@ CMachineInfo* info(Plugin* self)
 {
 	CMachineInfo* pInfo = 0;
 	
-	if (self->dll) {
+	if (self->library.module != 0) {
 		GETINFO GetInfo;
-		GetInfo =(GETINFO)GetProcAddress(self->dll, "GetInfo");
-		if (GetInfo != NULL) {	
+
+		GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+		if (GetInfo != 0) {	
 			pInfo = GetInfo();
 		}
 	}
@@ -183,5 +188,10 @@ unsigned int numoutputs(Plugin* self)
 	} else {
 		return 0;
 	}
+}
+
+void setpan(Plugin* self, float val)
+{ 	
+	self->pan = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
 }
 

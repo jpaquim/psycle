@@ -9,7 +9,10 @@
 
 typedef struct {
    ui_component component;
-   Signal signal_clicked;
+   Signal signal_clicked;    
+   int ownerdrawn;
+   char* text; // ownerdrawn 
+   int hover;
 } ui_button;
 
 void ui_button_init(ui_button* button, ui_component* parent);

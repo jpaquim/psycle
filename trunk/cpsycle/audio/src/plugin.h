@@ -4,11 +4,13 @@
 #define PLUGIN_H
 
 #include "machine.h"
+#include "library.h"
 
 typedef struct {
 	Machine machine;	
 	CMachineInterface* mi;
-	HINSTANCE dll;	
+	Library library;
+	float pan;
 } Plugin;
 
 void plugin_init(Plugin* self, const char* path);

@@ -1,9 +1,9 @@
 #include "linesperbeatbar.h"
 #include <stdio.h>
 
-static void OnLessClicked(LinesPerBeatBar* self, ui_component* sender);
-static void OnMoreClicked(LinesPerBeatBar* self, ui_component* sender);
-static void OnTimer(LinesPerBeatBar* self, ui_component* sender, int timerid);
+static void OnLessClicked(LinesPerBeatBar*, ui_component* sender);
+static void OnMoreClicked(LinesPerBeatBar*, ui_component* sender);
+static void OnTimer(LinesPerBeatBar*, ui_component* sender, int timerid);
 
 void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* player)
 {				
@@ -11,15 +11,15 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	self->player = player;	
-	ui_label_init(&self->lpbdesclabel, &self->component);
+	self->player = player;		
+	ui_label_init(&self->lpbdesclabel, &self->component);	
+	self->lpbdesclabel.component.debugflag = 20;
 	ui_label_settext(&self->lpbdesclabel, "Lines per beat");	
 	ui_label_init(&self->lpblabel, &self->component);
 	ui_label_settext(&self->lpblabel, "4");	
 	ui_button_init(&self->lessbutton, &self->component);
 	ui_button_settext(&self->lessbutton, "<");	
-	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);	
-	
+	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);		
 	ui_button_init(&self->morebutton, &self->component);
 	ui_button_settext(&self->morebutton, ">");	
 	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);		

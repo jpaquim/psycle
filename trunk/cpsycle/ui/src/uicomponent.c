@@ -9,12 +9,13 @@
 #include <stdio.h>
 
 
-static TCHAR szAppClass[] = TEXT ("PsycleApp") ;
+TCHAR szAppClass[] = TEXT ("PsycleApp");
 static TCHAR szComponentClass[] = TEXT ("PsycleComponent") ;
 IntHashTable selfmap;
 IntHashTable winidmap;
 int winid = 20000;
 static ui_font defaultfont;
+static int defaultbackgroundcolor = 0x00232323;
 extern IntHashTable menumap;
 
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
@@ -27,6 +28,7 @@ static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
 static void enableinput(ui_component* self, int enable, int recursive);
 
 HINSTANCE appInstance = 0;
+static int tracking = 0;
 
 void ui_init(HINSTANCE hInstance)
 {
@@ -85,7 +87,7 @@ void ui_dispose()
 {
 	DisposeIntHashTable(&selfmap);
 	DisposeIntHashTable(&winidmap);
-	DeleteObject(defaultfont.hfont);
+	DeleteObject(defaultfont.hfont);	
 }
 
 
@@ -140,6 +142,23 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0 ;
 			}
 		break;
+		case WM_CTLCOLORSTATIC:							
+			component = SearchIntHashTable(&selfmap, lParam);			
+			if (component) {					
+				SetTextColor((HDC) wParam, 0x00D1C5B6);
+				SetBkColor((HDC) wParam, component->backgroundcolor);
+				if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
+					return (long) component->background;
+				} else {
+					return (long) GetStockObject(NULL_BRUSH);
+				}
+			} else {
+				return (long) component->background;	
+			}
+		break;
+		case WM_ERASEBKGND:
+			return 1;
+		break;
 		case WM_COMMAND:
           hMenu = GetMenu (hwnd) ;
 		  menu_id = LOWORD (wParam);
@@ -172,21 +191,26 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				RECT rect;
 				HFONT hPrevFont = 0;
 
-				ui_graphics_init(&g, BeginPaint (hwnd, &ps));				
-				if (component->doublebuffered) {
-					hdc = g.hdc;
-					bufferDC = CreateCompatibleDC(hdc);
-					GetClientRect(hwnd, &rect);
+				hdc = BeginPaint (hwnd, &ps);
+				GetClientRect(hwnd, &rect);
+				if (component->doublebuffered) {					
+					bufferDC = CreateCompatibleDC(hdc);					
 					bufferBmp = CreateCompatibleBitmap(hdc, rect.right,
 						rect.bottom);
-					oldBmp = SelectObject(bufferDC, bufferBmp);
-					g.hdc = bufferDC;
-				}									
+					oldBmp = SelectObject(bufferDC, bufferBmp);					
+					ui_graphics_init(&g, bufferDC);
+				} else {
+					ui_graphics_init(&g, hdc);
+				}
 				ui_setrectangle(&g.clip,
 					ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
 					ps.rcPaint.bottom - ps.rcPaint.top);				
 				if (component->backgroundmode == BACKGROUND_SET) {
-					ui_drawsolidrectangle(&g, g.clip, component->backgroundcolor);
+					ui_rectangle r;
+					ui_setrectangle(&r,
+					rect.left, rect.top, rect.right - rect.left,
+					rect.bottom - rect.top);				
+					ui_drawsolidrectangle(&g, r, component->backgroundcolor);
 				}
 				if (component->font.hfont) {
 					hPrevFont = SelectObject(g.hdc, component->font.hfont);
@@ -197,11 +221,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 				if (component->doublebuffered) {
 					g.hdc = hdc;
-					BitBlt(hdc, 0, 0, ps.rcPaint.right, ps.rcPaint.bottom,
-						bufferDC,0,0,SRCCOPY);				
+					BitBlt(hdc, ps.rcPaint.left,ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom,
+						bufferDC, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);				
 					SelectObject(bufferDC, oldBmp);
 					DeleteObject(bufferBmp);
-					DeleteDC(bufferDC);
+					DeleteDC(bufferDC);					
 				}
 				ui_graphics_dispose(&g);
 				EndPaint (hwnd, &ps) ;
@@ -299,7 +323,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
 				return 0 ;
 			}
-		break;
+		break;		
 		case WM_RBUTTONDBLCLK:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
 			if (component && component->signal_mousedoubleclick.slots) {
@@ -309,11 +333,43 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;
 		case WM_MOUSEMOVE:
 			component = SearchIntHashTable(&selfmap, (int) hwnd);
-			if (component && component->signal_mousemove.slots) {
+			if (component) {
+				if (!tracking) {
+					TRACKMOUSEEVENT tme;
+
+					if (component && component->signal_mouseenter.slots) {	
+						signal_emit(&component->signal_mouseenter, component, 0);
+					}
+					tme.cbSize = sizeof(TRACKMOUSEEVENT);
+					tme.dwFlags = TME_LEAVE | TME_HOVER;
+					tme.dwHoverTime = 200;
+					tme.hwndTrack = hwnd;
+					if (_TrackMouseEvent(&tme)) {
+						tracking = 1;
+					} 
+					return 0;
+				}				
+			}
+			if (component && component->signal_mousemove.slots) {				
 				signal_emit(&component->signal_mousemove, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
 				return 0 ;
 			}
 		break;
+		case WM_MOUSEHOVER:
+			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			if (component && component->signal_mousehover.slots) {				                    
+				signal_emit(&component->signal_mousehover, component, 0);
+				return 0;
+			}
+		break;
+		case WM_MOUSELEAVE:	
+			tracking = 0;
+			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			if (component && component->signal_mouseleave.slots) {				                    
+				signal_emit(&component->signal_mouseleave, component, 0);
+				return 0;
+			}			
+		break; 
 		case WM_VSCROLL:
 			handle_vscroll(hwnd, wParam, lParam);
 			return 0;
@@ -326,7 +382,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			handle_hscroll(hwnd, wParam, lParam);
 			return 0;
-		break;
+		break;		
 		default:			
 		break;
 	}	
@@ -429,28 +485,6 @@ void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 	}
 }
 
-void ui_frame_init(ui_component* frame, ui_component* parent)
-{		
-	HWND hWndParent = 0;
-	int style = 0;
-
-	if (parent) {
-	  hWndParent = parent->hwnd;
-	  // style  |= WS_CHILD;
-	}
-	memset(&frame->events, 0, sizeof(ui_events));	
-	ui_component_init_signals(frame);
-	frame->doublebuffered = 0;
-	frame->hwnd = CreateWindow (szAppClass, TEXT ("Psycle"),
-                          WS_OVERLAPPEDWINDOW,
-                          CW_USEDEFAULT, CW_USEDEFAULT,
-                          CW_USEDEFAULT, CW_USEDEFAULT | style,
-                          hWndParent, NULL, appInstance, NULL);     	
-	InsertIntHashTable(&selfmap, (int)frame->hwnd, frame);	
-	frame->events.target = frame;
-	frame->events.cmdtarget = frame;	
-}
-
 void ui_component_init(ui_component* component, ui_component* parent)
 {		
 	memset(&component->events, 0, sizeof(ui_events));
@@ -478,6 +512,9 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_mouseup);
 	signal_init(&component->signal_mousemove);
 	signal_init(&component->signal_mousedoubleclick);
+	signal_init(&component->signal_mouseenter);
+	signal_init(&component->signal_mousehover);
+	signal_init(&component->signal_mouseleave);
 	signal_init(&component->signal_scroll);
 	signal_init(&component->signal_create);
 	signal_init(&component->signal_destroy);
@@ -487,20 +524,22 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_windowproc);
 }
 
-void ui_component_init_base(ui_component* component) {
-	component->scrollstepx = 100;
-	component->scrollstepy = 12;
-	component->propagateevent = 0;
-	component->preventdefault = 0;
-	component->align = UI_ALIGN_NONE;
-	component->alignchildren = 0;
-	memset(&component->margin, 0, sizeof(ui_margin));
-	component->debugflag = 0;
-	component->defaultpropagation = 0;	
-	component->visible = 1;
-	component->backgroundmode = BACKGROUND_NONE;
-	component->backgroundcolor = 0xFFFFFFFF;
-	ui_component_setfont(component, &defaultfont);	
+void ui_component_init_base(ui_component* self) {
+	self->scrollstepx = 100;
+	self->scrollstepy = 12;
+	self->propagateevent = 0;
+	self->preventdefault = 0;
+	self->align = UI_ALIGN_NONE;
+	self->alignchildren = 0;
+	memset(&self->margin, 0, sizeof(ui_margin));
+	self->debugflag = 0;
+	self->defaultpropagation = 0;	
+	self->visible = 1;
+	self->backgroundmode = BACKGROUND_NONE;
+	self->backgroundcolor = defaultbackgroundcolor;
+	self->background = 0;
+	ui_component_setfont(self, &defaultfont);
+	ui_component_setbackgroundcolor(self, self->backgroundcolor);
 }
 
 void ui_component_dispose(ui_component* component)
@@ -514,6 +553,9 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_mouseup);
 	signal_dispose(&component->signal_mousemove);
 	signal_dispose(&component->signal_mousedoubleclick);
+	signal_dispose(&component->signal_mouseenter);
+	signal_dispose(&component->signal_mousehover);	
+	signal_dispose(&component->signal_mouseleave);
 	signal_dispose(&component->signal_scroll);
 	signal_dispose(&component->signal_create);
 	signal_dispose(&component->signal_destroy);
@@ -523,6 +565,9 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_windowproc);
 	if (component->font.hfont && component->font.hfont != defaultfont.hfont) {
 		ui_font_dispose(&component->font);
+	}
+	if (component->background) {
+		DeleteObject(component->background);
 	}
 }
 
@@ -892,12 +937,16 @@ int ui_openfile(ui_component* self, char* szTitle, char* szFilter,
 
 void ui_component_setbackgroundmode(ui_component* self, BackgroundMode mode)
 {
-	self->backgroundmode = mode;
+	self->backgroundmode = mode;	
 }
 
 void ui_component_setbackgroundcolor(ui_component* self, unsigned int color)
 {
 	self->backgroundcolor = color;
+	if (self->background) {
+		DeleteObject(self->background);
+	}
+	self->background = CreateSolidBrush(color);
 }
 
 ui_size ui_component_textsize(ui_component* self, const char* text)

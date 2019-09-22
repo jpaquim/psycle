@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <windows.h>
 
 #define MI_VERSION				11		//Psycle 1.6.
 #define SEQUENCER				1
@@ -182,7 +181,7 @@ extern "C" {
 
 #if defined __STDC__ || __cplusplus
 extern void mi_setcallback(CMachineInterface* mi);
-extern CMachineInterface* mi_create(HINSTANCE dll);
+extern CMachineInterface* mi_create(void* module);
 extern void mi_init(CMachineInterface* mi);
 extern void mi_sequencertick(CMachineInterface* mi);		
 extern void mi_parametertweak(CMachineInterface* mi, int par, int val);

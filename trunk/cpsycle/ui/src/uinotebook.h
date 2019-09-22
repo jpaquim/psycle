@@ -7,11 +7,13 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;   
+   ui_component component;
+   int pageindex;
 } ui_notebook;
 
 void ui_notebook_init(ui_notebook*, ui_component* parent);
 void ui_notebook_setpage(ui_notebook*, int page);
+int ui_notebook_page(ui_notebook*);
 void ui_notebook_connectcontroller(ui_notebook*, Signal* controllersignal);
 
 #endif

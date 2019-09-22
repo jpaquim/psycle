@@ -2,6 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "master.h"
+#include <string.h>
 
 static int master_mode(Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(Master* self);

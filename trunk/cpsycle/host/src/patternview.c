@@ -14,14 +14,14 @@ void InitPatternView(PatternView* self, ui_component* parent,
 {
 	ui_component_init(&self->component, parent);
 	ui_notebook_init(&self->notebook, &self->component);
-	InitTrackerView(&self->trackerview, &self->notebook.component, &workspace->player);
+	InitTrackerView(&self->trackerview, &self->notebook.component, workspace);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	TrackerViewSetPattern(&self->trackerview, patterns_at(&workspace->song->patterns, 0));	
 	InitPianoroll(&self->pianoroll, &self->notebook.component);	
 	self->pianoroll.pattern = patterns_at(&workspace->song->patterns, 0);
 	ui_notebook_setpage(&self->notebook, 0);
 	InitTabBar(&self->tabbar, tabbarparent);
-	ui_component_move(&self->tabbar.component, 600, 75);
+	ui_component_move(&self->tabbar.component, 450, 0);
 	ui_component_resize(&self->tabbar.component, 160, 20);
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "Tracker");

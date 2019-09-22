@@ -1,6 +1,8 @@
 #if !defined(PSYCLEVERSION_H)
 #define PSYCLEVERSION_H
 
+#include "detail/project.h"
+
 ///\file
 ///\brief the version number of the psycle host application.
 
@@ -20,17 +22,17 @@
 #define PSYCLE__LICENSE "Some parts GPL, others public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 12
-#define PSYCLE__VERSION__PATCH 2
-#define PSYCLE__VERSION__QUALITY "beta"
+#define PSYCLE__VERSION__PATCH 3
+#define PSYCLE__VERSION__QUALITY "test"
 #define PSYCLE__SOURCE_URL "Subversion $URL: file:///svn/p/psycle/code/trunk/psycle/src/psycle/host/Version.hpp $"
 
-/*
+
 /// identifies what source version the build comes from.
 #define PSYCLE__VERSION \
 	PSYCLE__BRANCH " " \
-	UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." \
-	UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR) "." \
-	UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__PATCH) " " \
+	DIVERSALIS__STRINGIZE(PSYCLE__VERSION__MAJOR) "." \
+	DIVERSALIS__STRINGIZE(PSYCLE__VERSION__MINOR) "." \
+	DIVERSALIS__STRINGIZE(PSYCLE__VERSION__PATCH) " " \
 	PSYCLE__VERSION__QUALITY
 
 #define PSYCLE__VERSION__NUMBER \
@@ -53,14 +55,5 @@
 	#define PSYCLE__BUILD__DATE "a sunny day"
 #endif
 
-#if defined _M_X64
-	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_IX86
-	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_IA64
-	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#else
-	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif*/
 
 #endif

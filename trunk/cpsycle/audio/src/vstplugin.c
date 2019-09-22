@@ -1,7 +1,21 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "vstplugin.h"
 #include "aeffectx.h"
+#include <stdlib.h>
+
+#if !defined(FALSE)
+#define FALSE 0
+#endif
+
+#if !defined(TRUE)
+#define TRUE 1
+#endif
+
+#if !defined(BOOL)
+#define BOOL int
+#endif
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
@@ -25,12 +39,10 @@ static void checkEffectProcessing (AEffect* effect);
 static void DispatchMachineInfo(AEffect* effect, CMachineInfo* info);
 typedef AEffect* (*PluginEntryProc) (audioMasterCallback audioMaster);
 static VstIntPtr VSTCALLBACK HostCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
-static PluginEntryProc getMainEntry (HINSTANCE module);
-
+static PluginEntryProc getMainEntry(Library* library);
 
 void vstplugin_init(VstPlugin* self, const char* path)
-{
-	int err;
+{	
 	PluginEntryProc mainProc;	
 
 	machine_init(&self->machine);
@@ -46,9 +58,9 @@ void vstplugin_init(VstPlugin* self, const char* path)
 	self->machine.dispose = dispose;
 	self->machine.mode = mode;
 	self->info = 0;
-	self->module = LoadLibrary(path);
-	err = GetLastError();
-	mainProc = getMainEntry(self->module);
+	library_init(&self->library);
+	library_load(&self->library, path);		
+	mainProc = getMainEntry(&self->library);
 	if (mainProc) {
 
 // dispatcher(int32_t opcode, int32_t index = 0, intptr_t value = 0, void *ptr = nullptr, float opt = 0.0f) const {
@@ -74,13 +86,12 @@ void vstplugin_init(VstPlugin* self, const char* path)
 
 void dispose(VstPlugin* self)
 {	
-	if (self->module) {
+	if (self->library.module) {
 		if (self->effect) {
 			self->effect->dispatcher (self->effect, effClose, 0, 0, 0, 0);
 			self->effect = 0;			
 		}
-		FreeLibrary(self->module);		
-		self->module = 0;
+		library_dispose(&self->library);		
 		if (self->info) {
 			free((char*)self->info->Author);
 			free((char*)self->info->Name);
@@ -92,12 +103,12 @@ void dispose(VstPlugin* self)
 	machine_dispose(&self->machine);
 }
 
-PluginEntryProc getMainEntry (HINSTANCE module)
+PluginEntryProc getMainEntry(Library* library)
 {
 	PluginEntryProc mainProc = 0;	
-	mainProc = (PluginEntryProc)GetProcAddress ((HMODULE)module, "VSTPluginMain");
+	mainProc = (PluginEntryProc)library_functionpointer(library, "VSTPluginMain");
 	if(!mainProc)
-		mainProc = (PluginEntryProc)GetProcAddress ((HMODULE)module, "main");	
+		mainProc = (PluginEntryProc)library_functionpointer(library,"main");	
 	return mainProc;
 }
 
@@ -105,14 +116,13 @@ PluginEntryProc getMainEntry (HINSTANCE module)
 CMachineInfo* plugin_vst_test(const char* path)
 {		
 	CMachineInfo* rv;
-	HINSTANCE dll;	
-	PluginEntryProc mainEntry;
-	int err;
+	Library library;
+	PluginEntryProc mainEntry;	
 
 	rv = 0;
-	dll = LoadLibrary(path);
-	err = GetLastError();	
-	mainEntry = getMainEntry(dll);
+	library_init(&library);
+	library_load(&library, path);		
+	mainEntry = getMainEntry(&library);
 	if (mainEntry) {
 		AEffect* effect = mainEntry (HostCallback);
 		if (effect) {			
@@ -120,7 +130,7 @@ CMachineInfo* plugin_vst_test(const char* path)
 			DispatchMachineInfo(effect, rv);									
 		}
 	}	
-	FreeLibrary(dll);
+	library_dispose(&library);	
 	return rv;
 }
 

@@ -14,7 +14,7 @@ typedef struct {
 	ui_label lpbdesclabel;
 	ui_label lpblabel;	
 	ui_button lessbutton;
-	ui_button morebutton;	
+	ui_button morebutton;
 	Player* player;
 	unsigned int lpb;
 } LinesPerBeatBar;

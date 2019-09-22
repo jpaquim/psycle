@@ -37,6 +37,7 @@ void ui_slider_init(ui_slider* slider, ui_component* parent)
 	signal_connect(&slider->component.signal_destroy, slider,  OnDestroy);
 	signal_connect(&slider->component.signal_windowproc, slider,  OnWindowProc);
 	ui_component_init_base(&slider->component);
+	ui_component_setbackgroundmode(&slider->component, BACKGROUND_SET);
 }
 
 void OnDestroy(ui_slider* self, ui_component* sender)

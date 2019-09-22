@@ -2,12 +2,23 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "player.h"
+#include "exclusivelock.h"
 #include "math.h"
 #include "master.h"
 #include "plugin.h"
 #include "vstplugin.h"
 #include "silentdriver.h"
 #include <operations.h>
+#include <stdlib.h>
+#include <string.h>
+
+#if !defined(FALSE)
+#define FALSE 0
+#endif
+
+#if !defined(TRUE)
+#define TRUE 1
+#endif
 
 static float bufferdriver[65535];
 
@@ -23,14 +34,11 @@ static float Offset(Player*, int numsamples);
 static void player_loaddriver(Player*, const char* path);
 static void player_unloaddriver(Player*);
 
-extern HANDLE hGuiEvent;
-extern HANDLE hWorkDoneEvent;
-
-typedef EXPORT void (CALLBACK  *ptest)(void);
+typedef __declspec (dllexport) void (__stdcall  *ptest)(void);
 
 void player_init(Player* self, Song* song, const char* driverpath)
 {
-	char path[MAX_PATH];	
+	char path[_MAX_PATH];	
 		
 	self->song = song;	
 	self->pos = 0.0f;
@@ -46,6 +54,7 @@ void player_init(Player* self, Song* song, const char* driverpath)
 	
 	strcpy(path, driverpath);
 	strcat(path, "mme.dll");
+	library_init(&self->drivermodule);
 	player_loaddriver(self, path);
 	
 	self->t = 125 / (44100 * 60.0f);
@@ -53,6 +62,7 @@ void player_init(Player* self, Song* song, const char* driverpath)
 	
 	signal_init(&self->signal_numsongtrackschanged);
 	signal_init(&self->signal_lpbchanged);
+	lock_init();
 	self->driver->open(self->driver);	
 }
 
@@ -67,14 +77,15 @@ void player_initmaster(Player* self)
 
 void player_loaddriver(Player* self, const char* path)
 {
-	Driver* driver = 0;	
-	self->module = LoadLibrary(path);
-	if (self->module) {
-		pfndriver_create pdrivercreate;			
-		pdrivercreate = (pfndriver_create) GetProcAddress (self->module, "driver_create");
-		if (pdrivercreate) {
-			driver = pdrivercreate();					
-			driver->init(driver);
+	Driver* driver = 0;
+	library_load(&self->drivermodule, path);	
+	if (self->drivermodule.module) {
+		pfndriver_create fpdrivercreate;
+		fpdrivercreate = (pfndriver_create)
+			library_functionpointer(&self->drivermodule, "driver_create");
+		if (fpdrivercreate) {
+			driver = fpdrivercreate();					
+			driver->init(driver);			
 			driver->connect(driver, self, Work);
 		}
 	}
@@ -86,22 +97,23 @@ void player_loaddriver(Player* self, const char* path)
 
 void player_unloaddriver(Player* self)
 {
-	if (self->driver && self->driver != self->silentdriver && self->module) {
+	if (self->driver && self->driver != self->silentdriver &&
+			self->drivermodule.module) {
 		self->driver->dispose(self->driver);
 		self->driver->free(self->driver);
-		FreeLibrary(self->module);
-		self->module = 0;
+		library_dispose(&self->drivermodule);
+		library_init(&self->drivermodule);		
 	}
 }
 
 void player_dispose(Player* self)
 {		
 	if (self->driver != self->silentdriver) {
-		ResetEvent(hGuiEvent);
-		WaitForSingleObject(hWorkDoneEvent, 200);
+		suspendwork();		
 		self->driver->close(self->driver);
-		SetEvent(hGuiEvent);		
+		resumework();		
 		player_unloaddriver(self);
+		lock_dispose();
 	}	
 	self->silentdriver->dispose(self->silentdriver);
 	self->silentdriver->free(self->silentdriver);
@@ -177,7 +189,7 @@ real* Work(Player* self, int* numsamples)
 		numsamplex -= amount;		
 		psamples  += (2*amount);
 	}  while (numsamplex > 0);
-	player_signal_wait_host(self);		
+	signalwaithost();	
 	return bufferdriver;
 }
 
@@ -296,12 +308,6 @@ void player_filldriver(Player* self, float* buffer, unsigned int amount)
 		dsp_interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
 	}
-}
-
-void player_signal_wait_host(Player* self)
-{
-	SetEvent(hWorkDoneEvent);
-	WaitForSingleObject(hGuiEvent, INFINITE);	
 }
 
 void player_setnumsongtracks(Player* self, unsigned int numsongtracks)

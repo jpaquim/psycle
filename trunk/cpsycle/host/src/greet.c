@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "greet.h"
 
 static void AddString(Greet* self, const char* text);
@@ -10,7 +11,6 @@ void greet_init(Greet* self, ui_component* parent)
 
 	ui_component_init(&self->component, parent);	
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
 	ui_component_enablealign(&self->component);
 	ui_component_settitle(&self->component, "Greetings and info");	
 	ui_label_init(&self->header, &self->component);

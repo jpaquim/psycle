@@ -6,6 +6,8 @@
 #include "vstplugin.h"
 #include "sampler.h"
 #include "mixer.h"
+#include <stdlib.h>
+#include <string.h>
 
 static char* makefullpath(MachineFactory*, const char* path,
 	const char* dirconfigkey, char* fullpath);
@@ -47,7 +49,7 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 		case MACH_VST:
 		{
 			VstPlugin* plugin;
-			char fullpath[MAX_PATH];
+			char fullpath[_MAX_PATH];
 
 			plugin = (VstPlugin*)malloc(sizeof(VstPlugin));
 			vstplugin_init(plugin, makefullpath(self, path, "vstplugindir", fullpath));	
@@ -62,7 +64,7 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 		case MACH_PLUGIN:
 		{
 			Plugin* plugin;
-			char fullpath[MAX_PATH];
+			char fullpath[_MAX_PATH];
 						
 			plugin = (Plugin*)malloc(sizeof(Plugin));			
 			plugin_init(plugin, makefullpath(self, path, "plugindir", fullpath));
@@ -91,9 +93,9 @@ char* makefullpath(MachineFactory* self, const char* path,
 	fullpath[0] = '\0';
 	if (self->configuration && (strrchr(path, '\\') == 0)) {
 		properties_readstring(self->configuration, dirconfigkey, &dir, "");
-		_snprintf(fullpath, MAX_PATH, "%s%s%s", dir, "\\", path);
+		_snprintf(fullpath, _MAX_PATH, "%s%s%s", dir, "\\", path);
 	} else {
-		_snprintf(fullpath, MAX_PATH, "%s", path);
+		_snprintf(fullpath, _MAX_PATH, "%s", path);
 	}	
 	return fullpath;
 }

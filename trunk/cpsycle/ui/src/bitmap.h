@@ -12,9 +12,10 @@ typedef struct {
    HBITMAP hBitmap;
 } ui_bitmap;
 
-void ui_bitmap_init(ui_bitmap*, int width, int height);
+void ui_bitmap_init(ui_bitmap*);
 void ui_bitmap_load(ui_bitmap*, const char* path);
 void ui_bitmap_dispose(ui_bitmap*);
 ui_size ui_bitmap_size(ui_bitmap*);
+void ui_bitmap_loadresource(ui_bitmap*, int resourceid);
 
 #endif

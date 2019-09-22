@@ -12,6 +12,8 @@ static void OnNewEntry(SequenceView*);
 static void OnInsertEntry(SequenceView*);
 static void OnCloneEntry(SequenceView*);
 static void OnDelEntry(SequenceView*);
+static void OnIncPattern(SequenceView*);
+static void OnDecPattern(SequenceView*);
 static void OnNewTrack(SequenceView*);
 static void OnDelTrack(SequenceView*);
 static void OnSize(SequenceView*, ui_component* sender, int width, int height);
@@ -28,8 +30,7 @@ void InitSequenceView(SequenceView* self, ui_component* parent,
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x00EEEEEE);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	InitSequenceListView(&self->listview, &self->component, 
 		&workspace->song->sequence, &workspace->song->patterns);			
@@ -41,6 +42,8 @@ void InitSequenceView(SequenceView* self, ui_component* parent,
 	signal_connect(&self->buttons.insertentry.signal_clicked, self, OnInsertEntry);
 	signal_connect(&self->buttons.cloneentry.signal_clicked, self, OnCloneEntry);
 	signal_connect(&self->buttons.delentry.signal_clicked, self, OnDelEntry);
+	signal_connect(&self->buttons.incpattern.signal_clicked, self, OnIncPattern);
+	signal_connect(&self->buttons.decpattern.signal_clicked, self, OnDecPattern);
 	signal_connect(&self->buttons.newtrack.signal_clicked, self, OnNewTrack);
 	signal_connect(&self->buttons.deltrack.signal_clicked, self, OnDelTrack);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
@@ -51,8 +54,7 @@ void InitSequenceView(SequenceView* self, ui_component* parent,
 void InitSequenceButtons(SequenceButtons* self, ui_component* parent)
 {		
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x00FFFFFF);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 
 	ui_button_init(&self->incpattern, &self->component);	
 	ui_button_settext(&self->incpattern, "+");
@@ -119,7 +121,7 @@ void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g)
 void DrawSequence(SequenceListView* self, ui_graphics* g)
 {
 	SequenceTracks* p;	
-	int cpx = 0;
+	int cpx = 5;
 	int c = 0;	
 	self->foundselected = 0;
 	for (p = self->sequence->tracks; p != 0; p = p->next, cpx += trackwidth, ++c) {
@@ -127,7 +129,7 @@ void DrawSequence(SequenceListView* self, ui_graphics* g)
 	}
 	if (!self->foundselected) {
 		ui_setbackgroundcolor(g, 0x00FF0000);
-		ui_textout(g, self->selectedtrack*trackwidth,
+		ui_textout(g, 5 + self->selectedtrack*trackwidth,
 			self->selected * self->lineheight, "     ", 5);
 	}
 }
@@ -143,9 +145,9 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 		
 	ui_setrectangle(&r, x, 0, trackwidth - 5, size.height);	
 	if (trackindex == self->selectedtrack) {
-		ui_drawsolidrectangle(g, r, 0x00CCCCCC);
+		ui_drawsolidrectangle(g, r, 0x00363636);
 	} else {		
-		ui_drawsolidrectangle(g, r, 0x00DDDDDD);
+		ui_drawsolidrectangle(g, r, 0x003E3E3E);
 	}
 	ui_settextcolor(g, 0);
 	p = track->entries;
@@ -157,10 +159,12 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 		//if (pattern) {
 			_snprintf(buffer,20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
 			if (self->selected == (int)c && self->selectedtrack == trackindex) {
-				ui_setbackgroundcolor(g, 0x00FF0000);
+				ui_setbackgroundcolor(g, 0x009B7800);
+				ui_settextcolor(g, 0x00FFFFFF);
 				self->foundselected = 1;				
 			} else {
-				ui_setbackgroundcolor(g, 0xFFFFFFFF);
+				ui_setbackgroundcolor(g, 0x003E3E3E);
+				ui_settextcolor(g, 0x00CACACA);
 			}
 			ui_textout(g, x, cpy, buffer, strlen(buffer));
 		//}
@@ -179,59 +183,82 @@ void OnSize(SequenceView* self, ui_component* sender, int width, int height)
 }
 
 void OnNewEntry(SequenceView* self)
-{
-	unsigned int slot;
-	Pattern* pattern = (Pattern*) malloc(sizeof(Pattern));
-	pattern_init(pattern);
-	slot = patterns_append(self->patterns, pattern);
-	sequence_insert(self->sequence, sequence_editposition(self->sequence), slot);	
+{	
+	Pattern* pattern;
+	
+	pattern = (Pattern*) malloc(sizeof(Pattern));
+	pattern_init(pattern);	
+	sequence_insert(self->sequence, sequence_editposition(self->sequence), 
+		patterns_append(self->patterns, pattern));	
 }
 
 void OnInsertEntry(SequenceView* self)
-{
-	unsigned int slot = 0;
-	SequencePosition editposition;	
+{	
+	SequencePosition editposition;
+	SequenceEntry* entry;
 	
 	editposition = sequence_editposition(self->sequence);
-	if (editposition.trackposition.tracknode) {				
-		slot = ((SequenceEntry*)(editposition.trackposition.tracknode->entry))->pattern;
-	}		
-	sequence_insert(self->sequence, editposition, slot);	
+	entry = sequenceposition_entry(&editposition);			
+	sequence_insert(self->sequence, editposition, entry ? entry->pattern :0);
 }
 
 void OnCloneEntry(SequenceView* self)
-{
-	unsigned int slot = 0;
-	SequencePosition editposition;	
+{		
+	SequencePosition editposition;
+	SequenceEntry* entry;
 	
 	editposition = sequence_editposition(self->sequence);
-	if (editposition.trackposition.tracknode) {				
+	entry = sequenceposition_entry(&editposition);
+	if (entry) {			
 		Pattern* pattern;
-		slot = ((SequenceEntry*)(editposition.trackposition.tracknode->entry))->pattern;
-		pattern = patterns_at(self->patterns, slot);
-		if (pattern) {
-			pattern = pattern_clone(pattern);
-			slot = patterns_append(self->patterns, pattern);
-		}
-		if (pattern) {
-			sequence_insert(self->sequence, editposition, slot);
-		}
+				
+		pattern = patterns_at(self->patterns, entry->pattern);
+		if (pattern) {			
+			sequence_insert(self->sequence, editposition, 
+				patterns_append(self->patterns, pattern_clone(pattern)));
+		}						
 	}			
 }
 
 void OnDelEntry(SequenceView* self)
+{	
+	SequencePosition editposition;
+	
+	editposition = sequence_editposition(self->sequence);
+	sequence_remove(self->sequence, editposition);
+	if (editposition.track == self->sequence->tracks &&
+			sequence_size(self->sequence, editposition.track) == 0) {
+		SequencePosition position;
+		
+		position.trackposition = sequence_begin(self->sequence, editposition.track, 0);
+		position.track = editposition.track;
+		sequence_insert(self->sequence, position, 0);
+	}	
+}
+
+void OnIncPattern(SequenceView* self)
 {
-	if (self->listview.selected != -1) {
-		SequencePosition p = sequence_editposition(self->sequence);
-		sequence_remove(self->sequence, p);
-		if (p.track == self->sequence->tracks &&
-				sequence_size(self->sequence, p.track) == 0) {
-			SequencePosition position;
-			
-			position.trackposition = sequence_begin(self->sequence, p.track, 0);
-			position.track = p.track;
-			sequence_insert(self->sequence, position, 0);
-		}		
+	SequenceEntry* entry;
+	SequencePosition editposition;
+
+	editposition = sequence_editposition(self->sequence);	
+	entry = sequenceposition_entry(&editposition);
+	if (entry) {
+		sequence_setpatternslot(self->sequence,
+			sequence_editposition(self->sequence), entry->pattern + 1);
+	}
+}
+
+void OnDecPattern(SequenceView* self)
+{
+	SequenceEntry* entry;
+	SequencePosition editposition;
+
+	editposition = sequence_editposition(self->sequence);	
+	entry = sequenceposition_entry(&editposition); 
+	if (entry && entry->pattern > 0) {
+		sequence_setpatternslot(self->sequence,
+			sequence_editposition(self->sequence), entry->pattern - 1);
 	}
 }
 

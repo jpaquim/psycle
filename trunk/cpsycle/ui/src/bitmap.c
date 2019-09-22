@@ -7,9 +7,15 @@ extern HINSTANCE appInstance;
 static BOOL LoadBitmapFromBMPFile(LPTSTR szFileName, HBITMAP *phBitmap,
 	HPALETTE *phPalette );
 
-void ui_bitmap_init(ui_bitmap* self, int width, int height)
+void ui_bitmap_init(ui_bitmap* self)
 {
-	self->hBitmap = 0; // CreateBitmap (cx, cy, cPlanes, cBitsPixel, NULL) ;
+	self->hBitmap = 0;
+}
+
+void ui_bitmap_dispose(ui_bitmap* self)
+{
+	DeleteObject(self->hBitmap);
+	self->hBitmap = 0;
 }
 
 void ui_bitmap_load(ui_bitmap* self, const char* path)
@@ -81,11 +87,6 @@ BOOL LoadBitmapFromBMPFile(LPTSTR szFileName, HBITMAP *phBitmap,
 }   
 
 
-void ui_bitmap_dispose(ui_bitmap* self)
-{
-	DeleteObject(self->hBitmap);
-}
-
 ui_size ui_bitmap_size(ui_bitmap* self)
 {
 	ui_size size;
@@ -95,4 +96,9 @@ ui_size ui_bitmap_size(ui_bitmap* self)
 	size.width = bitmap.bmWidth;
 	size.height = bitmap.bmHeight;
 	return size;
+}
+
+void ui_bitmap_loadresource(ui_bitmap* self, int resourceid)
+{
+	self->hBitmap = LoadBitmap (appInstance, MAKEINTRESOURCE(resourceid));
 }

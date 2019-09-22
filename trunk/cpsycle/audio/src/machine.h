@@ -59,7 +59,9 @@ typedef struct {
 	void (*setvalue)(void*, int const param, int const value);	
 	const CMachineInfo* (*info)(void*);
 	void (*dispose)(void*);
-	int (*mode)(void*);	
+	int (*mode)(void*);
+	float (*pan)(void*);
+	void (*setpan)(void*, float val);
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
 		

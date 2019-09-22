@@ -4,7 +4,6 @@
 #include "sampulseinstrumentview.h"
 
 static void OnSize(SampulseInstrumentView*, ui_component* sender, int width, int height);
-static void OnDraw(SampulseInstrumentView*, ui_component* sender, ui_graphics* g);
 static void AddString(SampulseInstrumentView*, const char* text);
 static void AlignInstrumentView(SampulseInstrumentView*);
 static void BuildInstrumentList(SampulseInstrumentView*);
@@ -15,11 +14,9 @@ void InitSampulseInstrumentView(SampulseInstrumentView* self,
 {
 	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x009a887c);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	InitNoteMapEdit(&self->notemapedit, &self->component);
 	signal_connect(&self->component.signal_size, self, OnSize);
-	signal_connect(&self->component.signal_draw, self, OnDraw);
 	ui_listbox_init(&self->instrumentlist, &self->component);
 	AlignInstrumentView(self);
 	BuildInstrumentList(self);
@@ -61,10 +58,3 @@ void AddString(SampulseInstrumentView* self, const char* text)
 	ui_listbox_addstring(&self->instrumentlist, text);
 }
 
-void OnDraw(SampulseInstrumentView* self, ui_component* sender, ui_graphics* g)
-{
-	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);	
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0x009a887c);
-}

@@ -21,6 +21,8 @@ void ui_label_init(ui_label* label, ui_component* parent)
 	InsertIntHashTable(&selfmap, (int)label->component.hwnd, &label->component);	
 	label->component.events.target = label;	
 	ui_component_init_base(&label->component);
+	ui_component_setbackgroundmode(&label->component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&label->component, 0x000000);
 }
 
 

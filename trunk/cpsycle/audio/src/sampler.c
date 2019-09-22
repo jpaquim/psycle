@@ -6,25 +6,27 @@
 #include <math.h>
 
 static void generateaudio(Sampler*, BufferContext*);
-static void seqtick(Sampler* self, int channel, const PatternEvent* event);
-static const CMachineInfo* info(Sampler* self);
+static void seqtick(Sampler*, int channel, const PatternEvent*);
+static const CMachineInfo* info(Sampler*);
 static void parametertweak(Sampler* self, int par, int val);
 static int describevalue(Sampler*, char* txt, int const param, int const value);
 static int value(Sampler*, int const param);
 static void setvalue(Sampler*, int const param, int const value);
-static void dispose(Sampler* self);
+static void dispose(Sampler*);
 static int mode(Sampler* self) { return MACHMODE_GENERATOR; }
-static int unused_voice(Sampler* self);
-static void release_voices(Sampler* self, int channel);
+static int unused_voice(Sampler*);
+static void release_voices(Sampler*, int channel);
 static unsigned int numinputs(Sampler*);
 static unsigned int numoutputs(Sampler*);
 
-static void voice_init(Voice* self, Sample* sample, int channel);
-static void voice_dispose(Voice* self);
-static void voice_seqtick(Voice* self, const PatternEvent* event);
-static void voice_work(Voice* self, Buffer* buffer, int numsamples);
-static void voice_release(Voice* self);
-static void voice_fastrelease(Voice* self);
+static void voice_init(Voice*, Sample*, int channel);
+static void voice_dispose(Voice*);
+static void voice_seqtick(Voice*, const PatternEvent*);
+static void voice_noteon(Voice*, const PatternEvent*);
+static void voice_noteoff(Voice*, const PatternEvent*);
+static void voice_work(Voice*, Buffer*, int numsamples);
+static void voice_release(Voice*);
+static void voice_fastrelease(Voice*);
 
 static int songtracks = 16;
 
@@ -241,6 +243,16 @@ void voice_dispose(Voice* self)
 
 void voice_seqtick(Voice* self, const PatternEvent* event)
 {
+	if (event->note == NOTECOMMANDS_RELEASE) {
+		voice_noteoff(self, event);
+	} else
+	if (event->note < NOTECOMMANDS_RELEASE) {
+		voice_noteon(self, event);
+	}
+}
+
+void voice_noteon(Voice* self, const PatternEvent* event)
+{
 	int baseC;	
 	
 	baseC = 60;	
@@ -252,6 +264,12 @@ void voice_seqtick(Voice* self, const PatternEvent* event)
 			((float)self->sample->samplerate / 44100));
 	adsr_start(&self->env);
 	adsr_start(&self->filterenv);
+}
+
+void voice_noteoff(Voice* self, const PatternEvent* event)
+{
+	adsr_release(&self->env);
+	adsr_release(&self->filterenv);
 }
 
 void voice_work(Voice* self, Buffer* output, int numsamples)

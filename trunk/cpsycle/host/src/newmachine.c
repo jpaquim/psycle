@@ -5,7 +5,6 @@
 
 static void OnDestroy(NewMachine* self, ui_component* component);
 static void OnDraw(NewMachine* self, ui_component* sender, ui_graphics* g);
-static void DrawBackground(NewMachine* self, ui_graphics* g);
 static void OnSize(NewMachine* self, ui_component* sender, int width, int height);
 static void OnMouseDown(NewMachine* self, ui_component* sender, int x, int y, int button);
 static void HitTest(NewMachine* self, int x, int y);
@@ -21,7 +20,8 @@ static int count;
 
 void InitNewMachine(NewMachine* self, ui_component* parent, Workspace* workspace)
 {	
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_component_showverticalscrollbar(&self->component);
 	signal_connect(&self->component.signal_destroy, self,OnDestroy);	
 	signal_connect(&self->component.signal_size, self, OnSize);
@@ -46,24 +46,12 @@ void OnDraw(NewMachine* self, ui_component* sender, ui_graphics* g)
 {	   	
 	Properties* pluginlist;
 
-	DrawBackground(self, g);
 	self->g = g;
-	cpy = 0;
-	ui_setbackgroundcolor(g, 0x009a887c);
-	ui_settextcolor(g, 0x00000000);
+	cpy = 0;	
 	pluginlist = workspace_pluginlist(self->workspace);
 	if (pluginlist) {
 		properties_enumerate(pluginlist, self, OnPropertiesEnum);
 	}
-}
-
-
-void DrawBackground(NewMachine* self, ui_graphics* g)
-{
-	ui_rectangle r;
-	
-	ui_setrectangle(&r, 0, 0, self->cx, self->cy);
-	ui_drawsolidrectangle(g, r, 0x009a887c);	
 }
 
 int OnPropertiesEnum(NewMachine* self, Properties* property, int level)
@@ -72,13 +60,21 @@ int OnPropertiesEnum(NewMachine* self, Properties* property, int level)
 		Properties* p;
 	//	ui_textout(self->g, 20, 40 + cpy + dy, property->item.key, strlen(property->item.key));				
 		if (property == self->selectedplugin) {
+			ui_setbackgroundcolor(self->g, 0x009B7800);
+			ui_settextcolor(self->g, 0x00FFFFFF);		
+		} else {
+			ui_setbackgroundcolor(self->g, 0x003E3E3E);
+			ui_settextcolor(self->g, 0x00CACACA);		
+		}
+		if (property == self->selectedplugin) {
 			ui_rectangle r = { 19, 19, 300, 37 };
 			r.top += cpy + dy;
 			r.bottom += cpy + dy;
+			ui_setcolor(self->g, 0x00FFFFFF);
 			ui_drawrectangle(self->g, r);
 		}
 		p = properties_read(property->children, "name");
-		if (p && p->item.typ == PROPERTY_TYP_STRING) {
+		if (p && p->item.key && p->item.typ == PROPERTY_TYP_STRING) {
 			ui_textout(self->g, 20, 20 + cpy + dy, p->item.value.s,
 				strlen(p->item.value.s));	
 		}

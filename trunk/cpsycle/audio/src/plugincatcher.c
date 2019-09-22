@@ -1,12 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "plugincatcher.h"
 #include "plugin.h"
 #include "vstplugin.h"
 #include <dir.h>
+#include <stdlib.h>
 
-static int OnEnumDir(PluginCatcher* self, const char* path, int flag);
-static void OnDestroyMachineInfo(Property* property);
+static int OnEnumDir(PluginCatcher*, const char* path, int flag);
+static void OnDestroyMachineInfo(Property*);
 
 void plugincatcher_init(PluginCatcher* self)
 {

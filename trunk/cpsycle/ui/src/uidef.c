@@ -23,6 +23,12 @@ void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int heigh
    self->bottom = top + height;   
 }
 
+int ui_rectangle_intersect(ui_rectangle* self, int x, int y)
+{
+	return (x >= self->left && x < self->right && 
+			y >= self->top && y < self->bottom);
+}
+
 void ui_setmargin(ui_margin* self, int top, int right, int bottom, int left)
 {   
    self->top = top;

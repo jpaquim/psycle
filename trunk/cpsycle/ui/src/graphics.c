@@ -7,13 +7,23 @@ void ui_graphics_init(ui_graphics* g, HDC hdc)
 {
 	g->hdc = hdc;	
 	g->hFontPrev = 0;
+	g->pen = 0;
+	g->hPenPrev = 0;
+	g->brush = 0;
+	g->hBrushPrev = 0;
 }	
 
 void ui_graphics_dispose(ui_graphics* g)
 {
 	if (g->hFontPrev != 0) {		
 		SelectObject (g->hdc, g->hFontPrev);
+	}	
+	if (g->pen) {
+		DeleteObject(g->pen);
 	}
+	if (g->brush) {
+		DeleteObject(g->brush);
+	}	
 }
 
 
@@ -85,6 +95,20 @@ void ui_drawbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y, int width,
 	SelectObject (hdcMem, bitmap->hBitmap) ;	
 	BitBlt(g->hdc, x, y, width, height, hdcMem, xsrc, ysrc, SRCCOPY);
 	DeleteDC (hdcMem);  
+}
+
+void ui_setcolor(ui_graphics* g, unsigned int color)
+{
+	if (g->pen) {
+		DeleteObject(g->pen);
+	}
+	g->pen = CreatePen(PS_SOLID, 1, color);
+	SelectObject(g->hdc, g->pen);
+}
+
+void ui_setbackgroundmode(ui_graphics* g, unsigned int mode)
+{
+	SetBkMode(g->hdc, mode);
 }
 
 void ui_setbackgroundcolor(ui_graphics* g, unsigned int color)

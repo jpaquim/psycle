@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\lua53\src\\" /I "..\ui\src" /I "..\file\src" /I "..\audio\src" /I "..\container\src" /I "..\dsp\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\diversalis\src" /I "..\lua53\src\\" /I "..\ui\src" /I "..\file\src" /I "..\audio\src" /I "..\container\src" /I "..\dsp\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\lua53\src\\" /I "..\ui\src" /I "..\file\src" /I "..\audio\src" /I "..\container\src" /I "..\dsp\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\diversalis\src" /I "..\lua53\src\\" /I "..\ui\src" /I "..\file\src" /I "..\audio\src" /I "..\container\src" /I "..\dsp\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
@@ -92,6 +92,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\src\about.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\clipbox.c
 # End Source File
 # Begin Source File
@@ -112,7 +116,15 @@ SOURCE=.\src\file.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gear.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\greet.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\helpview.c
 # End Source File
 # Begin Source File
 
@@ -121,10 +133,6 @@ SOURCE=.\src\inputmap.c
 # Begin Source File
 
 SOURCE=.\src\instrumentsview.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\library.c
 # End Source File
 # Begin Source File
 
@@ -264,6 +272,10 @@ SOURCE=.\src\workspace.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\src\about.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\cmdsnotes.h
 # End Source File
 # Begin Source File
@@ -280,7 +292,15 @@ SOURCE=.\src\file.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gear.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\greet.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\helpview.h
 # End Source File
 # Begin Source File
 
@@ -289,10 +309,6 @@ SOURCE=.\src\inputmap.h
 # Begin Source File
 
 SOURCE=.\src\instrumentsview.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\library.h
 # End Source File
 # Begin Source File
 
@@ -430,6 +446,14 @@ SOURCE=.\src\resources\machine_skin.bmp
 # Begin Source File
 
 SOURCE=.\src\resources\pattern_header_skin.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\resources\splash_screen.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\resources\TbMainKnob.bmp
 # End Source File
 # End Target
 # End Project

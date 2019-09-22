@@ -22,6 +22,7 @@ typedef struct {
 	int octave;
 	Signal signal_octavechanged;
 	Signal signal_songchanged;
+	Signal signal_configchanged;
 } Workspace;
 
 void workspace_init(Workspace*);

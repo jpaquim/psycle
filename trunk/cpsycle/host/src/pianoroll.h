@@ -4,7 +4,6 @@
 #if !defined(PIANOROLL)
 #define PIANOROLL
 
-#include <windows.h>
 #include <uicomponent.h>
 #include <pattern.h>
 #include <uidef.h>

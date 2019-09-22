@@ -22,6 +22,16 @@ void sequenceposition_init(SequencePosition* self)
 	self->trackposition.tracknode = 0;
 }
 
+SequenceEntry* sequenceposition_entry(SequencePosition* position)
+{
+	SequenceEntry* rv = 0;
+
+	if (position->trackposition.tracknode) {				
+		rv = (SequenceEntry*)position->trackposition.tracknode->entry;
+	}
+	return rv;
+}
+
 void sequencetrack_dispose(SequenceTrack* self)
 {
 	List* p;
@@ -391,4 +401,53 @@ unsigned int sequence_sizetracks(Sequence* self)
 	
 	for (p = self->tracks; p != 0; p = p->next, ++c);
 	return c;
+}
+
+int sequence_patternused(Sequence* self, unsigned int patternslot)
+{
+	int rv = 0;
+	SequenceTracks* t;	
+
+	t = self->tracks;
+	while (t) {
+		SequenceTrack* track;
+		List* p;
+
+		track = (SequenceTrack*)p->entry;
+		p = track->entries;
+		while (p) {
+			SequenceEntry* entry;
+
+			entry = (SequenceEntry*)p->entry;
+			if (entry->pattern == patternslot) {
+				rv = 1;
+				break;
+			}
+			p = p->next;
+		}
+		t = t->next;
+	}
+	return rv;
+}
+
+void sequence_setpatternslot(Sequence* self, SequencePosition position,
+	unsigned int slot)
+{
+	SequenceEntry* entry;
+
+	entry = sequenceposition_entry(&position);
+	if (entry) {
+		Pattern* pattern;		
+		
+		pattern = patterns_at(self->patterns, slot);
+		if (pattern == 0) {
+			pattern = (Pattern*) malloc(sizeof(Pattern));
+			pattern_init(pattern);
+			patterns_insert(self->patterns, slot, pattern);		
+		}
+		entry->pattern = slot;
+		if (sequenceposition_entry(&self->editposition) == entry) {
+			signal_emit(&self->signal_editpositionchanged, self, 0);
+		}
+	}
 }

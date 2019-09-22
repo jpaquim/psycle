@@ -72,11 +72,13 @@ typedef struct {
 	int dx;
 	int trackwidth;
 	int numtracks;
+	int classic;
 	TrackerSkin* skin;
 } TrackerHeader;
 
 typedef struct {
 	ui_component component;
+	struct TrackerView* view;
 } TrackerLineNumbersLabel;
 
 typedef struct {
@@ -127,14 +129,15 @@ typedef struct TrackerView {
 	Pattern* pattern;
 	TrackerSkin skin;
 	ui_font font;
+	int showlinenumbers;	
 } TrackerView;
 
 void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView* view, Player* player);
 void TrackerViewApplyProperties(TrackerView* self, Properties* properties);
 void InitTrackerHeader(TrackerHeader*, ui_component* parent);
-void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self, ui_component* parent);
+void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self, ui_component* parent, TrackerView*);
 void InitTrackerLineNumbers(TrackerLineNumbers* self, ui_component* parent);
-void InitTrackerView(TrackerView*, ui_component* parent, Player*);
+void InitTrackerView(TrackerView*, ui_component* parent, Workspace* workspace);
 void TrackerViewSetPattern(TrackerView*, Pattern*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 

@@ -14,6 +14,10 @@ typedef struct {
   HFONT hfont;
   HFONT hFontPrev;
   ui_rectangle clip;
+  HPEN pen;
+  HPEN hPenPrev;
+  HBRUSH brush;
+  HBRUSH hBrushPrev;
 } ui_graphics;
 
 void ui_graphics_init(ui_graphics* g, HDC hdc);
@@ -30,7 +34,9 @@ void ui_drawfullbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y);
 void ui_drawbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y, int width,
 	int height, int xsrc, int ysrc);
 void ui_setbackgroundcolor(ui_graphics* g, unsigned int color);
+void ui_setbackgroundmode(ui_graphics* g, unsigned int mode);
 void ui_settextcolor(ui_graphics* g, unsigned int color);
+void ui_setcolor(ui_graphics* g, unsigned int color);
 void ui_setfont(ui_graphics* g, ui_font* font);
 ui_font ui_createfont(const char* name, int size);
 void ui_deletefont(HFONT hfont);
