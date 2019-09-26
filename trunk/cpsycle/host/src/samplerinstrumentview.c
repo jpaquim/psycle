@@ -4,12 +4,10 @@
 #include "samplerinstrumentview.h"
 
 static void OnSize(SamplerInstrumentView*, ui_component* sender, int width, int height);
-static void AddString(SamplerInstrumentView* self, const char* text);
 static void AlignInstrumentView(SamplerInstrumentView* self);
 static void OnInstrumentInsert(SamplerInstrumentView* self, ui_component* sender, int slot);
 static void OnInstrumentSlotChanged(SamplerInstrumentView* self, Instrument* sender, int slot);
 static void OnInstrumentListChanged(SamplerInstrumentView* self, ui_component* sender, int slot);
-static void BuildInstrumentList(SamplerInstrumentView* self);
 static void SetInstrument(SamplerInstrumentView* self, int slot);
 static void OnSongChanged(SamplerInstrumentView* self, Workspace* workspace);
 static void InitSamplerInstrumentHeaderView(SamplerInstrumentHeaderView*, ui_component* parent, Instruments*);
@@ -53,7 +51,7 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	InitSamplerInstrumentPanView(&self->pan, &self->notebook.component, &workspace->song->instruments);
 	InitSamplerInstrumentFilterView(&self->filter, &self->notebook.component, &workspace->song->instruments);
 	InitSamplerInstrumentPitchView(&self->pitch, &self->notebook.component, &workspace->song->instruments);
-	ui_listbox_init(&self->instrumentlist, &self->component);
+	InitInstrumentsBox(&self->instrumentsbox, &self->component, &workspace->song->instruments);
 	InitTabBar(&self->tabbar, &self->component);	
 	tabbar_append(&self->tabbar, "General");
 	tabbar_append(&self->tabbar, "Volume");
@@ -63,10 +61,9 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 
 	AlignInstrumentView(self);
-	BuildInstrumentList(self);
 	signal_connect(&self->player->song->instruments.signal_insert, self, OnInstrumentInsert);
 	signal_connect(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
-	signal_connect(&self->instrumentlist.signal_selchanged, self, OnInstrumentListChanged);
+	signal_connect(&self->instrumentsbox.instrumentlist.signal_selchanged, self, OnInstrumentListChanged);
 
 	ui_notebook_setpage(&self->notebook, 0);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
@@ -76,7 +73,8 @@ void AlignInstrumentView(SamplerInstrumentView* self)
 {
 	ui_size size = ui_component_size(&self->component);
 
-	ui_component_setposition(&self->instrumentlist.component,		 5,   5, 210, 400);
+	ui_component_setposition(&self->instrumentsbox.instrumentlist.component,
+																	5,   5, 210, 400);
 	ui_component_setposition(&self->header.component,			   220,   5, 500,  20);
 	ui_component_setposition(&self->tabbar.component,			   220,  30, 500,  20);
 	ui_component_setposition(&self->notebook.component,			   220,  60, size.width - 220, size.height - 60);	
@@ -89,14 +87,11 @@ void OnSize(SamplerInstrumentView* self, ui_component* sender, int width, int he
 
 void OnInstrumentInsert(SamplerInstrumentView* self, ui_component* sender, int slot)
 {
-	BuildInstrumentList(self);
-	ui_listbox_setcursel(&self->instrumentlist, slot);	
 	SetInstrument(self, slot);
 }
 
 void OnInstrumentSlotChanged(SamplerInstrumentView* self, Instrument* sender, int slot)
-{
-	ui_listbox_setcursel(&self->instrumentlist, slot);
+{	
 	SetInstrument(self, slot);
 }
 
@@ -107,35 +102,13 @@ void OnInstrumentListChanged(SamplerInstrumentView* self, ui_component* sender, 
 
 void SetInstrument(SamplerInstrumentView* self, int slot)
 {
-	Instrument* instrument = SearchIntHashTable(&self->player->song->instruments.container, slot);	
+	Instrument* instrument = instruments_at(&self->player->song->instruments, slot);	
 	SetInstrumentInstrumentHeaderView(&self->header, instrument);
 	SetInstrumentInstrumentGeneralView(&self->general, instrument);
 	SetInstrumentInstrumentVolumeView(&self->volume, instrument);
 	SetInstrumentInstrumentPanView(&self->pan, instrument);
 	SetInstrumentInstrumentFilterView(&self->filter, instrument);
 	SetInstrumentInstrumentPitchView(&self->pitch, instrument);
-}
-
-void BuildInstrumentList(SamplerInstrumentView* self)
-{
-	Instrument* instrument;
-	int slot = 0;
-	char buffer[20];
-
-	ui_listbox_clear(&self->instrumentlist);
-	for ( ; slot < 256; ++slot) {		
-		if (instrument = SearchIntHashTable(&self->player->song->instruments.container, slot)) {
-			_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
-		} else {
-			_snprintf(buffer, 20, "%02X:%s", slot, "");
-		}
-		AddString(self, buffer);
-	}
-}
-
-void AddString(SamplerInstrumentView* self, const char* text)
-{
-	ui_listbox_addstring(&self->instrumentlist, text);
 }
 
 void OnSongChanged(SamplerInstrumentView* self, Workspace* workspace)
@@ -147,7 +120,7 @@ void OnSongChanged(SamplerInstrumentView* self, Workspace* workspace)
 	self->filter.instruments = &workspace->song->instruments;
 	self->pitch.instruments = &workspace->song->instruments;
 	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
-	BuildInstrumentList(self);
+	SetInstruments(&self->instrumentsbox, &workspace->song->instruments);
 	SetInstrument(self, 0);
 }
 

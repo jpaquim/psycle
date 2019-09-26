@@ -44,6 +44,7 @@ RSC=rc.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
 # ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\diversalis\src" /I "..\lua53\src\\" /I "..\ui\src" /I "..\file\src" /I "..\audio\src" /I "..\container\src" /I "..\dsp\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /c
+# SUBTRACT CPP /Z<none>
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -132,6 +133,10 @@ SOURCE=.\src\inputmap.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\instrumentsbox.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\instrumentsview.c
 # End Source File
 # Begin Source File
@@ -145,6 +150,10 @@ SOURCE=.\src\machinebar.c
 # Begin Source File
 
 SOURCE=.\src\machineframe.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machinesbox.c
 # End Source File
 # Begin Source File
 
@@ -201,6 +210,10 @@ SOURCE=.\src\resources\resource.rc
 # Begin Source File
 
 SOURCE=.\src\samplerinstrumentview.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\samplesbox.c
 # End Source File
 # Begin Source File
 
@@ -308,6 +321,10 @@ SOURCE=.\src\inputmap.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\instrumentsbox.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\instrumentsview.h
 # End Source File
 # Begin Source File
@@ -321,6 +338,10 @@ SOURCE=.\src\machinebar.h
 # Begin Source File
 
 SOURCE=.\src\machineframe.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machinesbox.h
 # End Source File
 # Begin Source File
 
@@ -373,6 +394,10 @@ SOURCE=.\src\resources\resource.h
 # Begin Source File
 
 SOURCE=.\src\samplerinstrumentview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\samplesbox.h
 # End Source File
 # Begin Source File
 

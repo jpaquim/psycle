@@ -41,7 +41,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\diversalis\src" /I "..\file\src" /I "..\container\src" /I "..\dsp\src" /I "..\lua53\src" /I "..\vst-2.4\vst2.x" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GR /GX /O2 /I "..\..\diversalis\src" /I "..\file\src" /I "..\container\src" /I "..\dsp\src" /I "..\lua53\src" /I "..\vst-2.4\vst2.x" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# SUBTRACT CPP /Z<none>
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -86,126 +87,405 @@ LIB32=link.exe -lib
 # Begin Source File
 
 SOURCE=.\src\buffer.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\buffercontext.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\event.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\exclusivelock.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\instrument.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\instruments.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\library.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\luaplugin.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\machine.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\machinefactory.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\machines.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\master.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\mixer.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\dsp\src\operations.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\pattern.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\patterns.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\player.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\plugin.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\plugin_interface.cpp
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\plugincatcher.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\sample.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\sampler.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\samples.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\sequence.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\sequencer.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\silentdriver.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\song.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\vstplugin.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\waveio.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\xminstrument.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\xminstruments.c
+
+!IF  "$(CFG)" == "audio - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
+
+# ADD CPP /GR
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "Header Files"

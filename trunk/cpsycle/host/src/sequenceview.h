@@ -7,6 +7,8 @@
 #include <patterns.h>
 #include <sequence.h>
 #include <uibutton.h>
+#include <uilabel.h>
+#include <uicheckbox.h>
 #include "workspace.h"
 
 typedef struct {
@@ -33,9 +35,22 @@ typedef struct {
 } SequenceListView;
 
 typedef struct {
+	ui_component component;
+	ui_label desc;
+	ui_label duration;	
+	Sequence* sequence;
+} SequenceViewDuration;
+
+void InitSequenceViewDuration(SequenceViewDuration*, ui_component* parent,
+	Sequence*);
+
+typedef struct {
 	ui_component component;	
 	SequenceListView listview;
 	SequenceButtons buttons;
+	SequenceViewDuration duration;
+	ui_checkbox followsong;
+	ui_checkbox shownames;	
 	Patterns* patterns;
 	Sequence* sequence;
 } SequenceView;

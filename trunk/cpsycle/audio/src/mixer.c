@@ -6,6 +6,8 @@
 static void mixer_dispose(Mixer* self);
 static int mixer_mode(Mixer* self) { return MACHMODE_FX; }
 static void mixer_seqtick(Mixer* self, int channel, const PatternEvent* event);
+static unsigned int numinputs(Mixer*);
+static unsigned int numoutputs(Mixer*);
 
 static char* _psName;
 
@@ -34,9 +36,11 @@ void mixermasterchannel_init(MixerMasterChannel* self)
 	self->gain_ = 1.0f;
 }
 
-void mixer_init(Mixer* self)
+void mixer_init(Mixer* self, MachineCallback callback)
 {
-	machine_init(&self->machine);
+	machine_init(&self->machine, callback);
+	self->machine.numinputs = numinputs;
+	self->machine.numoutputs = numoutputs;
 	self->machine.dispose = mixer_dispose;
 	self->machine.seqtick = mixer_seqtick;
 	self->machine.mode = mixer_mode;
@@ -70,4 +74,15 @@ void mixer_seqtick(Mixer* self, int channel, const PatternEvent* event)
 		//	SetParameter(param,nv);
 		//}
 	}
+}
+
+
+unsigned int numinputs(Mixer* self)
+{
+	return 2;
+}
+
+unsigned int numoutputs(Mixer* self)
+{
+	return 2;
 }

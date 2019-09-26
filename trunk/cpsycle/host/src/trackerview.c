@@ -32,6 +32,7 @@ static void InitDefaultSkin(TrackerView*);
 static void BlitSkinPart(TrackerHeader*, ui_graphics* g, int x, int y, SkinCoord* coord);
 static void LineNumbersDrawBackground(TrackerLineNumbers*, ui_graphics* g);
 static void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel*, ui_component* sender);
+static void ShowLineNumbers(TrackerView* self, int showstate);
 static void OnTimer(TrackerView*, ui_component* sender, int timerid);
 static void OnPropertiesClose(TrackerView*, ui_component* sender);
 static void OnPropertiesApply(TrackerView*, ui_component* sender);
@@ -158,30 +159,30 @@ void TrackerViewSongChanged(TrackerView* self, Workspace* workspace)
 		&self->grid, OnEditPositionChanged);	
 }
 
-void TrackerViewApplyProperties(TrackerView* self, Properties* properties)
+void TrackerViewApplyProperties(TrackerView* self, Properties* p)
 {
-	properties_readint(properties, "pvc_separator", &self->skin.separator, 0x00292929);
-	properties_readint(properties, "pvc_separator2", &self->skin.separator2, 0x00292929);
-	properties_readint(properties, "pvc_background", &self->skin.background, 0x00292929);
-	properties_readint(properties, "pvc_background2", &self->skin.background2, 0x00292929);
-	properties_readint(properties, "pvc_row4beat", &self->skin.row4beat, 0x00595959);
-	properties_readint(properties, "pvc_row4beat2", &self->skin.row4beat2, 0x00595959);
-	properties_readint(properties, "pvc_rowbeat", &self->skin.rowbeat, 0x00363636);
-	properties_readint(properties, "pvc_rowbeat2", &self->skin.rowbeat2, 0x00363636);
-	properties_readint(properties, "pvc_row", &self->skin.row, 0x003E3E3E);
-	properties_readint(properties, "pvc_row2", &self->skin.row2, 0x003E3E3E);
-	properties_readint(properties, "pvc_font", &self->skin.font, 0x00CACACA);
-	properties_readint(properties, "pvc_font2", &self->skin.font2, 0x00CACACA );
-	properties_readint(properties, "pvc_fontplay", &self->skin.fontPlay, 0x00FFFFFF);
-	properties_readint(properties, "pvc_fontcur2", &self->skin.fontCur2, 0x00FFFFFF);
-	properties_readint(properties, "pvc_fontsel", &self->skin.fontSel, 0x00FFFFFF);
-	properties_readint(properties, "pvc_fontsel2", &self->skin.fontSel2, 0x00FFFFFF);
-	properties_readint(properties, "pvc_selection", &self->skin.selection, 0x009B7800);
-	properties_readint(properties, "pvc_selection2", &self->skin.selection2, 0x009B7800);
-	properties_readint(properties, "pvc_playbar", &self->skin.playbar, 0x009F7B00);
-	properties_readint(properties, "pvc_playbar2", &self->skin.playbar2, 0x009F7B00);
-	properties_readint(properties, "pvc_cursor", &self->skin.cursor, 0x009F7B00);
-	properties_readint(properties, "pvc_cursor2", &self->skin.cursor2, 0x009F7B00);
+	self->skin.separator = properties_int(p, "pvc_separator", 0x00292929);
+	self->skin.separator2 = properties_int(p, "pvc_separator2", 0x00292929);
+	self->skin.background = properties_int(p, "pvc_background", 0x00292929);
+	self->skin.background2 = properties_int(p, "pvc_background2", 0x00292929);
+	self->skin.row4beat = properties_int(p, "pvc_row4beat", 0x00595959);
+	self->skin.row4beat2 = properties_int(p, "pvc_row4beat2", 0x00595959);
+	self->skin.rowbeat = properties_int(p, "pvc_rowbeat", 0x00363636);
+	self->skin.rowbeat2 = properties_int(p, "pvc_rowbeat2", 0x00363636);
+	self->skin.row = properties_int(p, "pvc_row", 0x003E3E3E);
+	self->skin.row2 = properties_int(p, "pvc_row2", 0x003E3E3E);
+	self->skin.font = properties_int(p, "pvc_font", 0x00CACACA);
+	self->skin.font2 = properties_int(p, "pvc_font2", 0x00CACACA );
+	self->skin.fontPlay = properties_int(p, "pvc_fontplay", 0x00FFFFFF);
+	self->skin.fontCur2 = properties_int(p, "pvc_fontcur2", 0x00FFFFFF);
+	self->skin.fontSel = properties_int(p, "pvc_fontsel", 0x00FFFFFF);
+	self->skin.fontSel2 = properties_int(p, "pvc_fontsel2", 0x00FFFFFF);
+	self->skin.selection = properties_int(p, "pvc_selection", 0x009B7800);
+	self->skin.selection2 = properties_int(p, "pvc_selection2", 0x009B7800);
+	self->skin.playbar = properties_int(p, "pvc_playbar", 0x009F7B00);
+	self->skin.playbar2 = properties_int(p, "pvc_playbar2", 0x009F7B00);
+	self->skin.cursor = properties_int(p, "pvc_cursor", 0x009F7B00);
+	self->skin.cursor2 = properties_int(p, "pvc_cursor2", 0x009F7B00);
 	ui_invalidate(&self->component);
 }
 
@@ -850,6 +851,7 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->grid.component.scrollstepx = self->grid.trackwidth;
 	SetTimer(self->component.hwnd, 200, 50, 0);
 	signal_connect(&workspace->signal_configchanged, self, OnConfigChanged);
+	ShowLineNumbers(self, workspace_showlinenumbers(workspace));
 }
 
 void TrackerViewSetPattern(TrackerView* self, Pattern* pattern)
@@ -1151,16 +1153,20 @@ int NumLines(TrackerView* self)
 void OnConfigChanged(TrackerView* self, Workspace* workspace, Properties* property)
 {
 	if (strcmp(properties_key(property), "linenumbers") == 0) {
-		properties_readbool(workspace->config, "linenumbers",
-			&self->showlinenumbers, 1);
-		if (self->showlinenumbers != 0) {		
-			ui_component_show(&self->linenumbers.component);
-			ui_component_show(&self->linenumberslabel.component);
-		} else {
-			ui_component_hide(&self->linenumbers.component);
-			ui_component_hide(&self->linenumberslabel.component);
-		}
-		Align(self, &self->component);
-		ui_invalidate(&self->component);
+		ShowLineNumbers(self, properties_value(property));
 	}	
+}
+
+void ShowLineNumbers(TrackerView* self, int showstate)
+{
+	self->showlinenumbers = showstate;
+	if (self->showlinenumbers != 0) {		
+		ui_component_show(&self->linenumbers.component);
+		ui_component_show(&self->linenumberslabel.component);
+	} else {
+		ui_component_hide(&self->linenumbers.component);
+		ui_component_hide(&self->linenumberslabel.component);
+	}
+	Align(self, &self->component);
+	ui_invalidate(&self->component);
 }

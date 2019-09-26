@@ -4,16 +4,13 @@
 #include "gear.h"
 
 static void OnSize(Gear*, ui_component* sender, int width, int height);
-static void OnDestroy(Gear*, ui_component* component);
 static void ConnectSongSignals(Gear*);
-static void BuildListBox(Gear*);
-static void ClearListBox(Gear*);
-static int OnEnumMachines(Gear*, int slot, Machine*);
-static void OnMachinesSlotChange(Gear*, Machines* machines, int slot);
-static void OnMachineBoxSelChange(Gear*, ui_component* sender, int sel);
 static void OnDelete(Gear*, ui_component* sender);
 static void OnSongChanged(Gear*, Workspace*);
-
+static void OnClone(Gear*, ui_component* sender);
+static void OnExchange(Gear* self, ui_component* sender);
+static void OnParameters(Gear*, ui_component* sender);
+static void OnMaster(Gear*, ui_component* sender);
 
 void InitGearButtons(GearButtons* self, ui_component* parent)
 {
@@ -50,12 +47,11 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 
 void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 {		
+	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
-	InitIntHashTable(&self->listboxslots, 256);
-	InitIntHashTable(&self->slotslistbox, 256);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	InitTabBar(&self->tabbar, &self->component);	
 	ui_component_move(&self->tabbar.component, 0, 0);
 	ui_component_resize(&self->tabbar.component, 0, 20);
@@ -64,21 +60,26 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Waves");	
 	tabbar_select(&self->tabbar, 0);		
+	ui_notebook_init(&self->notebook, &self->component);
 	signal_connect(&self->component.signal_size, self, OnSize);	
-	ui_listbox_init(&self->listbox, &self->component);
-	ui_component_setposition(&self->listbox.component, 0, 0, 200, 20);
-	BuildListBox(self);
-	signal_connect(&self->listbox.signal_selchanged, self, OnMachineBoxSelChange);
+	InitMachinesBox(&self->machinesboxgen, &self->notebook.component, 
+		&workspace->song->machines, MACHINEBOX_GENERATOR);
+	InitMachinesBox(&self->machinesboxfx, &self->notebook.component, 
+		&workspace->song->machines, MACHINEBOX_FX);
+	InitInstrumentsBox(&self->instrumentsbox, &self->notebook.component, 
+		&workspace->song->instruments);
+	InitSamplesBox(&self->samplesbox, &self->notebook.component, 
+		&workspace->song->samples, &workspace->song->instruments);
 	ConnectSongSignals(self);
+	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
+	tabbar_select(&self->tabbar, 0);
 	InitGearButtons(&self->buttons, &self->component);
 	signal_connect(&self->buttons.del.signal_clicked, self, OnDelete);
+	signal_connect(&self->buttons.clone.signal_clicked, self, OnClone);
+	signal_connect(&self->buttons.parameters.signal_clicked, self, OnParameters);
+	signal_connect(&self->buttons.showmaster.signal_clicked, self, OnMaster);
+	signal_connect(&self->buttons.exchange.signal_clicked, self, OnExchange);
 	ui_component_resize(&self->buttons.component, 100, 0);
-}
-
-void OnDestroy(Gear* self, ui_component* component)
-{
-	DisposeIntHashTable(&self->listboxslots);
-	DisposeIntHashTable(&self->slotslistbox);
 }
 
 void OnSize(Gear* self, ui_component* sender, int width, int height)
@@ -88,96 +89,87 @@ void OnSize(Gear* self, ui_component* sender, int width, int height)
 	buttonssize = ui_component_size(&self->buttons.component);
 	ui_component_move(&self->tabbar.component, 0, height - 20);
 	ui_component_resize(&self->tabbar.component, width, 20);
-	ui_component_resize(&self->listbox.component, width - buttonssize.width, height - 20);
+	ui_component_resize(&self->notebook.component, width - buttonssize.width, height - 20);
 	ui_component_move(&self->buttons.component, width - buttonssize.width , 0);
 	ui_component_resize(&self->buttons.component, buttonssize.width, height - 20);
 }
 
-void BuildListBox(Gear* self)
-{
-	ClearListBox(self);	
-	if (machines_size(self->machines) == 1) {
-		ui_listbox_addstring(&self->listbox, "No Machines Loaded");
-		ui_listbox_setcursel(&self->listbox, 0);
-	} else {
-		machines_enumerate(self->machines, self, OnEnumMachines);
-	}
-}
-
-void ClearListBox(Gear* self)
-{
-	ui_listbox_clear(&self->listbox);
-	DisposeIntHashTable(&self->listboxslots);
-	InitIntHashTable(&self->listboxslots, 256);
-	DisposeIntHashTable(&self->slotslistbox);
-	InitIntHashTable(&self->slotslistbox, 256);
-}
-
-int OnEnumMachines(Gear* self, int slot, Machine* machine)
-{			
-	if (slot != MASTER_INDEX &&
-			machine->info(machine) && machine->info(machine)->ShortName) {
-		int listboxindex;
-
-		char buffer[128];
-		_snprintf(buffer, 128, "%02X: %s", slot, machine->info(machine)->ShortName); 
-		listboxindex = ui_listbox_addstring(&self->listbox, buffer);
-		InsertIntHashTable(&self->listboxslots, listboxindex, (void*)slot);
-		InsertIntHashTable(&self->slotslistbox, slot, (void*) listboxindex);
-	}
-	return 1;
-}
-
-void OnMachinesInsert(Gear* self, Machines* machines, int slot)
-{	
-	BuildListBox(self);
-	ui_listbox_setcursel(&self->listbox, machines->slot);
-}
-
-void OnMachinesRemoved(Gear* self, Machines* machines, int slot)
-{
-	BuildListBox(self);
-	ui_listbox_setcursel(&self->listbox, machines->slot);	
-}
-
 void ConnectSongSignals(Gear* self)
 {
-	signal_connect(&self->machines->signal_insert, self, OnMachinesInsert);
-	signal_connect(&self->machines->signal_removed, self, OnMachinesRemoved);	
-	signal_connect(&self->machines->signal_slotchange, self, OnMachinesSlotChange);
 	// signal_connect(&self->instruments->signal_insert, self, OnInstrumentInsert);
 	// signal_connect(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);	
 }
 
-void OnMachineBoxSelChange(Gear* self, ui_component* sender, int sel)
-{	
-	int slot;
-	
-	List* slots = self->listbox.signal_selchanged.slots;
-	self->listbox.signal_selchanged.slots = 0;
-	slot = (int)SearchIntHashTable(&self->listboxslots, sel);
-	machines_changeslot(self->machines, slot);	
-	self->listbox.signal_selchanged.slots = slots;
-}
-
-void OnMachinesSlotChange(Gear* self, Machines* machines, int slot)
-{	
-	int listboxindex;
-
-	listboxindex = (int) SearchIntHashTable(&self->slotslistbox, slot);
-	ui_listbox_setcursel(&self->listbox, listboxindex);	
-}
-
 void OnDelete(Gear* self, ui_component* sender)
 {
-	if (self->machines && machines_slot(self->machines) != MASTER_INDEX) {
-		machines_remove(self->machines, machines_slot(self->machines));
+	switch (self->tabbar.selected) {
+		case 0:
+			MachinesBoxRemove(&self->machinesboxgen);
+		break;
+		case 1:
+			MachinesBoxRemove(&self->machinesboxfx);
+		break;
+		default:
+		break;
 	}
 }
 
 void OnSongChanged(Gear* self, Workspace* workspace)
 {	
 	self->machines = &workspace->song->machines;		
+	SetMachines(&self->machinesboxgen, &workspace->song->machines);
+	SetMachines(&self->machinesboxfx, &workspace->song->machines);
+	SetInstruments(&self->instrumentsbox, &workspace->song->instruments);
+	SetSamples(&self->samplesbox, &workspace->song->samples,
+		&workspace->song->instruments);
 	ConnectSongSignals(self);
 	ui_invalidate(&self->component);
+}
+
+void OnClone(Gear* self, ui_component* sender)
+{
+	switch (self->tabbar.selected) {
+		case 0:
+			MachinesBoxClone(&self->machinesboxgen);
+		break;
+		case 1:
+			MachinesBoxClone(&self->machinesboxfx);
+		break;
+		default:
+		break;
+	}
+}
+
+void OnExchange(Gear* self, ui_component* sender)
+{
+	switch (self->tabbar.selected) {
+		case 0:
+			MachinesBoxExchange(&self->machinesboxgen);
+		break;
+		case 1:
+			MachinesBoxExchange(&self->machinesboxfx);
+		break;
+		default:
+		break;
+	}
+}
+
+
+void OnParameters(Gear* self, ui_component* sender)
+{
+	switch (self->tabbar.selected) {
+		case 0:
+			MachinesBoxShowParameters(&self->machinesboxgen);
+		break;
+		case 1:
+			MachinesBoxShowParameters(&self->machinesboxfx);
+		break;
+		default:
+		break;
+	}
+}
+
+void OnMaster(Gear* self, ui_component* sender)
+{
+	machines_showparameters(self->machines, MASTER_INDEX);
 }

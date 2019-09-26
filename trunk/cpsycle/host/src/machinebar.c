@@ -36,6 +36,7 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	ui_component_enablealign(&self->component);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	ui_combobox_init(&self->machinebox, &self->component);
+	self->machinebox.component.justify = UI_JUSTIFY_NONE;
 	ui_component_resize(&self->machinebox.component, 200, 20);
 	ui_button_init(&self->prevmachinebutton, &self->component);
 	ui_button_settext(&self->prevmachinebutton, "<");	
@@ -51,7 +52,8 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	BuildMachineBox(self);
 	signal_connect(&self->machinebox.signal_selchanged, self, OnMachineBoxSelChange);	
 	self->prevent_selchange_notify = FALSE;	
-	ui_combobox_init(&self->instparambox, &self->component);	
+	ui_combobox_init(&self->instparambox, &self->component);
+	self->instparambox.component.justify = UI_JUSTIFY_NONE;
 	ui_component_resize(&self->instparambox.component, 200, 20);
 	BuildInstrumentList(self);
 	ui_combobox_setcursel(&self->instparambox, 0);
@@ -65,7 +67,7 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_LEFT);
 			ui_component_setmargin((ui_component*)p->entry, &margin);
 		}
-	}
+	}			
 }
 
 void OnDestroy(MachineBar* self, ui_component* component)

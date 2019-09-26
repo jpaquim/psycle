@@ -11,7 +11,7 @@ typedef struct {
 	lua_State* L;
 } LuaPlugin;
 
-void luaplugin_init(LuaPlugin* self, const char* path);
+void luaplugin_init(LuaPlugin* self, MachineCallback, const char* path);
 CMachineInfo* plugin_lua_test(const char* path);
 
 #endif

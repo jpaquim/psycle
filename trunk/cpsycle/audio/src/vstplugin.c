@@ -41,11 +41,11 @@ typedef AEffect* (*PluginEntryProc) (audioMasterCallback audioMaster);
 static VstIntPtr VSTCALLBACK HostCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 static PluginEntryProc getMainEntry(Library* library);
 
-void vstplugin_init(VstPlugin* self, const char* path)
+void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 {	
 	PluginEntryProc mainProc;	
 
-	machine_init(&self->machine);
+	machine_init(&self->machine, callback);
 	self->machine.work = work;
 	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
@@ -57,16 +57,12 @@ void vstplugin_init(VstPlugin* self, const char* path)
 	self->machine.value = value;
 	self->machine.dispose = dispose;
 	self->machine.mode = mode;
+	self->machine.setcallback(self, callback);
 	self->info = 0;
 	library_init(&self->library);
 	library_load(&self->library, path);		
 	mainProc = getMainEntry(&self->library);
 	if (mainProc) {
-
-// dispatcher(int32_t opcode, int32_t index = 0, intptr_t value = 0, void *ptr = nullptr, float opt = 0.0f) const {
-// return aEffect->dispatcher(aEffect, opcode, index, value, ptr, opt);
-
-
 		self->effect = mainProc (HostCallback);
 		if (self->effect) {
 			VstInt32 numInputs;

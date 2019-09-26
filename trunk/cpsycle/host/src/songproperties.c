@@ -9,8 +9,9 @@ static void WriteProperties(SongProperties* self, Song* song);
 static void OnSongChanged(SongProperties* self, Workspace* sender);
 
 void InitSongProperties(SongProperties* self, ui_component* parent, Workspace* workspace)
-{			
+{		
 	self->song = workspace->song;
+	self->song->properties = properties_create();
 	properties_append_string(self->song->properties, "title", "a title");
 	properties_append_string(self->song->properties, "credits", "the credits");
 	properties_append_string(self->song->properties, "comments", "the comments");

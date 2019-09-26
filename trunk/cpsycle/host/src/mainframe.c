@@ -30,8 +30,11 @@ static void OnMouseUp(MainFrame*, ui_component* sender, int x, int y, int button
 static void OnGear(MainFrame*, ui_component* sender);
 static void OnGearCreate(MainFrame*, ui_component* sender);
 static void OnAboutOk(MainFrame*, ui_component* sender);
+static void OnUpdateDriver(MainFrame*, ui_component* sender);
 static void SetStartPage(MainFrame*);
-static void OnSettingsViewChanged(MainFrame*, ui_component* sender, Properties*);
+static void OnSettingsViewChanged(MainFrame*, SettingsView* sender, Properties*);
+
+HWND hwndmain;
 
 enum {
 	TABPAGE_MACHINEVIEW		= 0,
@@ -48,15 +51,16 @@ void InitMainFrame(MainFrame* self)
 	int statuswidths[] = { 100, 200, -1 };	
 	ui_margin tabbardividemargin = { 0, 30, 0, 0};
 
+	ui_frame_init(&self->component, 0);		
+	ui_component_init(&self->top, &self->component);	
 	self->toolbarheight = 80;	
 	self->resize = 0;
 	workspace_init(&self->workspace);	
+	self->workspace.mainhandle = self->component.hwnd;
+	workspace_initplayer(&self->workspace);
 	workspace_load_configuration(&self->workspace);
 	self->player = &self->workspace.player;
-	self->firstshow = 1;	
-
-	ui_frame_init(&self->component, 0);	
-	ui_component_init(&self->top, &self->component);
+	self->firstshow = 1;		
 	ui_component_setbackgroundmode(&self->top, BACKGROUND_SET);		
 	InitBars(self, &self->top);	
 	// ui_component_init(&self->client, &self->component);	
@@ -97,7 +101,7 @@ void InitMainFrame(MainFrame* self)
 	self->instrumentsview.sampulseview.notemapedit.noteinputs = &self->noteinputs;	
 	InitSongProperties(&self->songproperties, &self->notebook.component, &self->workspace);	
 	InitSettingsView(&self->settingsview, &self->notebook.component,
-		self->workspace.config);	
+		&self->tabbars, self->workspace.config);	
 	signal_connect(&self->settingsview.signal_changed, self, OnSettingsViewChanged);
 	InitHelpView(&self->helpview, &self->notebook.component, &self->tabbars,
 		&self->workspace);	
@@ -105,16 +109,11 @@ void InitMainFrame(MainFrame* self)
 	InitNoteInputs(&self->noteinputs);	
 	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);
 	ui_component_move(&self->sequenceview.component, 0, self->toolbarheight);	
-	InitGear(&self->gear, &self->component, &self->workspace);
+	InitGear(&self->gear, &self->component, &self->workspace);	
 	ui_component_resize(&self->gear.component, 300, 200);
 	ui_component_hide(&self->gear.component);
 	signal_connect(&self->machinebar.gear.signal_clicked, self, OnGear);	
 	signal_connect(&self->gear.buttons.createreplace.signal_clicked, self, OnGearCreate);	
-	/*ui_menu_init(&menu, "", 0);
-	ui_menu_init(&menu_file, "File", OnFileMenu);		
-	ui_menu_append(&menu, &menu_file, 0);
-	ui_component_setmenu(&self->component, &menu);
-	*/
 		
 	ui_statusbar_init(&self->statusbar, &self->component);
 	ui_statusbar_setfields(&self->statusbar, 3, statuswidths);
@@ -131,10 +130,8 @@ void InitMainFrame(MainFrame* self)
 	if (self->workspace.song->properties) {
 		Properties* title;
 		title = properties_find(self->workspace.song->properties, "title");
-		if (title) {
-			char* titlestr = 0;
-			properties_readstring(title, "title", &titlestr, "Untitled");
-			ui_statusbar_settext(&self->statusbar, 0, titlestr);
+		if (title) {						
+			ui_statusbar_settext(&self->statusbar, 0, title->item.value.s);
 		}
 	}
 }
@@ -155,6 +152,10 @@ void InitBars(MainFrame* self, ui_component* parent)
 	ui_component_setposition(&self->loadsongbutton.component, 105, 0, 100, 20);	
 	signal_connect(&self->loadsongbutton.signal_clicked, self, OnLoadSong);	
 	InitMachineBar(&self->machinebar, parent, &self->workspace);	
+	ui_button_init(&self->updatedriver, parent);
+	ui_button_settext(&self->updatedriver, "Restart Driver");
+	ui_component_setposition(&self->updatedriver.component, 210, 0, 100, 20);	
+	signal_connect(&self->updatedriver.signal_clicked, self, OnUpdateDriver);	
 	ui_component_move(&self->machinebar.component, 3, 50);
 	ui_component_resize(&self->machinebar.component, 530, 25);
 	// Songbar
@@ -176,11 +177,8 @@ void InitBars(MainFrame* self, ui_component* parent)
 }
 
 void SetStartPage(MainFrame* self)
-{
-	int showabout;
-
-	properties_readbool(self->workspace.config, "showaboutatstart", &showabout, 1);
-	if (showabout) {
+{		
+	if (workspace_showaboutatstart(&self->workspace)) {
 		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);
 		ui_component_show(&self->helpview.tabbar.component);
 	} else {
@@ -344,11 +342,9 @@ void OnLoadSong(MainFrame* self, ui_component* sender)
 	char  defaultextension[] = "PSY";
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
-		workspace_loadsong(&self->workspace, path);
-		properties_readbool(self->workspace.config, "showsonginfoonload",
-			&showsonginfo, 1);
-		if (showsonginfo) {
+	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {		
+		workspace_loadsong(&self->workspace, path);				
+		if (workspace_showsonginfoonload(&self->workspace)) {
 			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);
 		} else {
 			ui_invalidate(&self->component);	
@@ -429,12 +425,17 @@ void OnAboutOk(MainFrame* self, ui_component* sender)
 
 void OnGearCreate(MainFrame* self, ui_component* sender)
 {
+	self->machineview.newmachine.calledbygear = 1;
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	tabbar_select(&self->machineview.tabbar, 1);
 }
 
-void OnSettingsViewChanged(MainFrame* self, ui_component* sender, Properties* property)
+void OnSettingsViewChanged(MainFrame* self, SettingsView* sender, Properties* property)
 {
-	signal_emit(&self->workspace.signal_configchanged,
-		&self->workspace, 1, property);
+	workspace_configchanged(&self->workspace, property, sender->choiceproperty);	
+}
+
+void OnUpdateDriver(MainFrame* self, ui_component* sender)
+{
+	workspace_updatedriver(&self->workspace);
 }

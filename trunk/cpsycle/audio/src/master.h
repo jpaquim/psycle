@@ -11,7 +11,7 @@ typedef struct {
 	Machine machine;	
 } Master;
 
-void master_init(Master* self);
+void master_init(Master* self, MachineCallback);
 
 
 #endif

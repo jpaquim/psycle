@@ -13,7 +13,7 @@ typedef struct {
 	float pan;
 } Plugin;
 
-void plugin_init(Plugin* self, const char* path);
+void plugin_init(Plugin* self, MachineCallback, const char* path);
 CMachineInfo* plugin_psycle_test(const char* path);
 
 

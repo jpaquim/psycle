@@ -1,58 +1,79 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 #include "plugin_interface.h"
-#include <windows.h>
 
-//#include "plugin_interface.h"
-// #include <windows.h>
+#include "machine.h"
+#include <string.h>
+extern "C" {
+#include "library.h"
+}
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-
 class PluginFxCallback : public CFxCallback
 {
-public:
-	HWND hWnd;
 
-	virtual void MessBox(char* ptxt,char *caption,unsigned int type)
-	{
-		MessageBox(hWnd,ptxt,caption,type);
+	inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) const 
+	{ 		
 	}
-	virtual int GetTickLength(void)
-	{
-		return 1024; //Global::_pSong->SamplesPerTick;
+	inline virtual int GetTickLength() const { 
+		return 256;
 	}
-	virtual int GetSamplingRate(void)
-	{
-#if defined(_WINAMP_PLUGIN_)
-		return 44100; //Global::pConfig->_samplesPerSec;
-#else		
-		return 44100; //Global::pConfig->_pOutputDriver->_samplesPerSec;
-#endif // _WINAMP_PLUGIN_
+	inline virtual int GetSamplingRate() const { 
+		return callback.samplerate && callback.context
+			? callback.samplerate(callback.context) 
+			: 44100;
 	}
-	virtual int GetBPM(void)
-	{
-		return 125; //Global::pPlayer->bpm;
+	inline virtual int GetBPM() const { 
+		return callback.bpm && callback.context
+			? callback.bpm(callback.context) 
+			: 125;		
 	}
-	virtual int GetTPB(void)
+	inline virtual int GetTPB() const { return 4; }
+	virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/)
 	{
-		return 4; //Global::pPlayer->tpb;
+		return 0;
 	}
+	virtual bool FileBox(bool openMode, char filter[], char inoutName[])
+	{
+		return 0;
+	}
+	/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+	inline virtual float * unused0(int, int) { return NULL;}
+	/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+	inline virtual float * unused1(int, int) { return NULL;}
+
+	public: ///\todo private:
+		MachineCallback callback;
 };
 
 
-static PluginFxCallback _callback;
-
-
-void mi_setcallback(CMachineInterface* mi)
+void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callback)
 {
-	mi->pCB = &_callback;
+	PluginFxCallback* pCB;
+
+	if (mi->pCB == 0) {
+		mi->pCB = new PluginFxCallback;
+	}	
+	pCB = dynamic_cast<PluginFxCallback*>(mi->pCB);
+	if (pCB) {
+		if (callback) {								
+			pCB->callback = *callback;
+		} else {
+			memset(&mi->pCB, 0, sizeof(MachineCallback));
+		}	
+	}
 }
 
 void mi_init(CMachineInterface* mi)
 {
-	mi->Init();
+	mi->Init();	
+}
+
+void mi_dispose(CMachineInterface* mi)
+{
+	delete mi->pCB;
 }
 
 void mi_sequencertick(CMachineInterface* mi)
@@ -139,16 +160,16 @@ CMachineInterface* mi_create(void* module)
 {
 	CMachineInterface* mi;
 	CREATEMACHINE GetInterface;
-	HINSTANCE hmodule;
-
-	hmodule = (HINSTANCE) module;
-
+	Library library;
+	
+	library.module = module;
+	library.err = 0;
+	
 	mi = 0;
-	GetInterface =(CREATEMACHINE)GetProcAddress(hmodule, "CreateMachine");
+	GetInterface = (CREATEMACHINE) library_functionpointer(&library, "CreateMachine");
 	if (GetInterface != NULL)
 	{			
-		mi = GetInterface();	
-		mi->pCB = &_callback; //mi_setcallback(mi);			
+		mi = GetInterface();			
 	}
 	return mi;
 }

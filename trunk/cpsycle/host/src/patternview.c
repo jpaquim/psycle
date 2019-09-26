@@ -3,11 +3,11 @@
 
 #include "patternview.h"
 
-static void OnSize(PatternView* self, ui_component* sender, int width, int height);
-static void OnShow(PatternView* self, ui_component* sender);
-static void OnHide(PatternView* self, ui_component* sender);
-static void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb);
-static void OnSongChanged(PatternView* self, Workspace* sender);
+static void OnSize(PatternView*, ui_component* sender, int width, int height);
+static void OnShow(PatternView*, ui_component* sender);
+static void OnHide(PatternView*, ui_component* sender);
+static void OnLpbChanged(PatternView*, Player* sender, unsigned int lpb);
+static void OnSongChanged(PatternView*, Workspace* sender);
 
 void InitPatternView(PatternView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)

@@ -50,7 +50,7 @@ typedef struct {
 	int defaultspeed;
 } Sampler;
 
-void sampler_init(Sampler*);
+void sampler_init(Sampler*, MachineCallback);
 
 
 #endif

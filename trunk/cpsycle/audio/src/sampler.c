@@ -82,11 +82,11 @@ static CMachineInfo const MacInfo = {
 	3
 };
 
-void sampler_init(Sampler* self)
+void sampler_init(Sampler* self, MachineCallback callback)
 {
 	int voice;
 	
-	machine_init(&self->machine);
+	machine_init(&self->machine, callback);	
 	self->machine.generateaudio = generateaudio;
 	self->machine.seqtick = seqtick;
 	self->machine.info = info;
@@ -97,7 +97,7 @@ void sampler_init(Sampler* self)
 	self->machine.dispose = dispose;
 	self->machine.mode = mode;
 	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
+	self->machine.numoutputs = numoutputs;	
 	self->numvoices = SAMPLER_MAX_POLYPHONY;
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		voice_init(&self->voices[voice], 0, 0);		
@@ -127,7 +127,7 @@ void generateaudio(Sampler* self, BufferContext* bc)
 
 void seqtick(Sampler* self, int channel, const PatternEvent* event)
 {
-	Samples* samples = self->machine.machinecallback.samples(self->machine.machinecallback.context);
+	Samples* samples = self->machine.callback.samples(self->machine.callback.context);
 	Sample* sample = SearchIntHashTable(&samples->container, event->inst);
 	release_voices(self, channel);
 

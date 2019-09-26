@@ -10,6 +10,7 @@
 typedef struct {
 	MachineCallback machinecallback;
 	Properties* configuration;
+	Properties* directories;
 } MachineFactory;
 
 void machinefactory_init(MachineFactory*, MachineCallback, Properties* configuration);

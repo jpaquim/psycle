@@ -19,9 +19,9 @@ static void setvalue(LuaPlugin*, int const param, int const value);
 static void dispose(LuaPlugin* self);
 static int mode(LuaPlugin* self);
 		
-void luaplugin_init(LuaPlugin* self, const char* path)
+void luaplugin_init(LuaPlugin* self, MachineCallback callback, const char* path)
 {
-	machine_init(&self->machine);
+	machine_init(&self->machine, callback);
 	self->L = luaL_newstate();   
 	luaL_openlibs(self->L);	
 }

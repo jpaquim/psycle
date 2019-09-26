@@ -10,7 +10,7 @@
 
 static int OnEnumFreeMachine(Machines*, int slot, Machine*);
 static int OnEnumPathMachines(Machines*, int slot, Machine*);
-static int machines_freeslot(Machines*);
+static int machines_freeslot(Machines*, int start);
 static MachineConnection* findconnection(MachineConnection*, int slot);
 static MachineConnectionEntry* allocconnectionentry(int slot, float volume);
 static void appendconnectionentry(MachineConnection**, MachineConnectionEntry*);
@@ -39,6 +39,7 @@ void machines_init(Machines* self)
 	signal_init(&self->signal_insert);
 	signal_init(&self->signal_removed);
 	signal_init(&self->signal_slotchange);
+	signal_init(&self->signal_showparameters);
 	self->filemode = 0;
 }
 
@@ -47,6 +48,7 @@ void machines_dispose(Machines* self)
 	signal_dispose(&self->signal_insert);
 	signal_dispose(&self->signal_removed);
 	signal_dispose(&self->signal_slotchange);
+	signal_dispose(&self->signal_showparameters);
 	machines_enumerate(self, self, OnEnumFreeMachine);
 	free_machinepath(self->path);
 	DisposeIntHashTable(&self->slots);
@@ -76,11 +78,13 @@ int OnEnumFreeMachine(Machines* self, int slot, Machine* machine)
 
 void machines_insert(Machines* self, int slot, Machine* machine)
 {	
-	InsertIntHashTable(&self->slots, slot, machine);	
-	if (!machines_connections(self, slot)) {
-		initconnections(self, slot);
-	}	
-	signal_emit(&self->signal_insert, self, 1, slot);	
+	if (machine) {
+		InsertIntHashTable(&self->slots, slot, machine);	
+		if (!machines_connections(self, slot)) {
+			initconnections(self, slot);
+		}	
+		signal_emit(&self->signal_insert, self, 1, slot);
+	}
 }
 
 MachineConnections* initconnections(Machines* self, int slot)
@@ -97,19 +101,33 @@ MachineConnections* initconnections(Machines* self, int slot)
 
 void machines_remove(Machines* self, int slot)
 {	
-	machines_disconnectall(self, slot);
 	suspendwork();
+	machines_disconnectall(self, slot);	
 	RemoveIntHashTable(&self->slots, slot);
 	machines_setpath(self, compute_path(self, MASTER_INDEX));
 	signal_emit(&self->signal_removed, self, 1, slot);
 	resumework();
 }
 
+void machines_exchange(Machines* self, int srcslot, int dstslot)
+{
+	Machine* src;
+	Machine* dst;
+
+	src = machines_at(self, srcslot);
+	dst = machines_at(self, dstslot);
+	machines_remove(self, srcslot);
+	machines_remove(self, dstslot);
+	machines_insert(self, srcslot, dst);
+	machines_insert(self, dstslot, src);
+}
+
 int machines_append(Machines* self, Machine* machine)
 {	
 	int slot;
-
-	slot = machines_freeslot(self);	
+	
+	slot = machines_freeslot(self,
+		(machine->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
 	InsertIntHashTable(&self->slots, slot, machine);
 	if (!machines_connections(self, slot)) {
 		initconnections(self, slot);
@@ -118,11 +136,11 @@ int machines_append(Machines* self, Machine* machine)
 	return slot;
 }
 
-int machines_freeslot(Machines* self)
+int machines_freeslot(Machines* self, int start)
 {
 	int rv;
 	
-	for (rv = 0; SearchIntHashTable(&self->slots, rv) != 0; ++rv);
+	for (rv = start; SearchIntHashTable(&self->slots, rv) != 0; ++rv);
 	return rv;
 }
 
@@ -445,11 +463,16 @@ void machines_startfilemode(Machines* self)
 
 void machines_endfilemode(Machines* self)
 {
-	self->path = compute_path(self, MASTER_INDEX);
+	machines_setpath(self, compute_path(self, MASTER_INDEX));
 	self->filemode = 0;
 }
 
 unsigned int machines_size(Machines* self)
 {
 	return self->slots.count;
+}
+
+void machines_showparameters(Machines* self, int slot)
+{
+	signal_emit(&self->signal_showparameters, self, 1, slot);
 }

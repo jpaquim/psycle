@@ -13,7 +13,7 @@ typedef struct {
 	CMachineInfo* info;	
 } VstPlugin;
 
-void vstplugin_init(VstPlugin* self, const char* path);
+void vstplugin_init(VstPlugin*, MachineCallback, const char* path);
 CMachineInfo* plugin_vst_test(const char* path);
 
 #endif

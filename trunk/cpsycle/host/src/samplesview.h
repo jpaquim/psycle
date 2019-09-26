@@ -9,7 +9,7 @@
 #include <uicombobox.h>
 #include <uiedit.h>
 #include <uilabel.h>
-#include <uilistbox.h>
+#include "samplesbox.h"
 #include <uislider.h>
 #include "wavebox.h"
 #include "slidergroup.h"
@@ -74,7 +74,7 @@ typedef struct {
 typedef struct {
 	ui_component component;
 	ui_notebook notebook;
-	ui_listbox samplelist;
+	SamplesBox samplesbox;
 	ui_button loadbutton;
 	ui_button savebutton;
 	ui_button duplicatebutton;

@@ -16,6 +16,7 @@ IntHashTable winidmap;
 int winid = 20000;
 static ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
+static HBRUSH defaultbackgroundbrush;
 extern IntHashTable menumap;
 
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
@@ -81,13 +82,15 @@ void ui_init(HINSTANCE hInstance)
 	
 	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
 	ui_font_init(&defaultfont, &fontinfo);	
+	defaultbackgroundbrush = CreateSolidBrush(0x00232323);
 }
 
 void ui_dispose()
 {
 	DisposeIntHashTable(&selfmap);
 	DisposeIntHashTable(&winidmap);
-	DeleteObject(defaultfont.hfont);	
+	DeleteObject(defaultfont.hfont);
+	DeleteObject(defaultbackgroundbrush);
 }
 
 
@@ -142,7 +145,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0 ;
 			}
 		break;
-		case WM_CTLCOLORSTATIC:							
+		case WM_CTLCOLORLISTBOX:
+		case WM_CTLCOLORSTATIC:			
 			component = SearchIntHashTable(&selfmap, lParam);			
 			if (component) {					
 				SetTextColor((HDC) wParam, 0x00D1C5B6);
@@ -153,7 +157,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					return (long) GetStockObject(NULL_BRUSH);
 				}
 			} else {
-				return (long) component->background;	
+				SetTextColor((HDC) wParam, 0x00D1C5B6);
+				SetBkColor((HDC) wParam, defaultbackgroundcolor);
+				return (long) defaultbackgroundbrush;
 			}
 		break;
 		case WM_ERASEBKGND:
@@ -530,6 +536,7 @@ void ui_component_init_base(ui_component* self) {
 	self->propagateevent = 0;
 	self->preventdefault = 0;
 	self->align = UI_ALIGN_NONE;
+	self->justify = UI_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
 	memset(&self->margin, 0, sizeof(ui_margin));
 	self->debugflag = 0;
@@ -824,10 +831,11 @@ void ui_component_align(ui_component* self)
 
 	size = ui_component_size(self);	
 	for (p = ui_component_children(self, 0); p != 0; p = p->next) {
-		ui_component* component = (ui_component*)p->entry;
-		if (component->debugflag == 1) {
-			cpy = cpy;
-		}
+		ui_size componentsize;
+		ui_component* component;
+			
+		component = (ui_component*)p->entry;		
+		componentsize = ui_component_size(component);
 		if (component->visible) {
 			if (component->align == UI_ALIGN_FILL) {
 				ui_component_setposition(component,
@@ -852,7 +860,9 @@ void ui_component_align(ui_component* self)
 					cpx,
 					component->margin.top,
 					componentsize.width,
-					size.height - component->margin.top - component->margin.bottom);
+					component->justify == UI_JUSTIFY_EXPAND 
+					? size.height - component->margin.top - component->margin.bottom
+					: componentsize.height);
 				cpx += component->margin.right;
 				cpx += componentsize.width;
 			}				

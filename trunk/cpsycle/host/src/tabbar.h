@@ -24,6 +24,7 @@ typedef struct {
 	ui_font font;
 	int hover;
 	int hoverindex;
+	int tabalignment;
 } TabBar;
 
 void InitTabBar(TabBar*, ui_component* parent);

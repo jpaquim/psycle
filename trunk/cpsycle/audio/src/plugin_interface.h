@@ -62,20 +62,33 @@ typedef struct {
 		
 
 #ifdef __cplusplus
-class CFxCallback
-{
-public:
-	virtual void MessBox(char* ptxt,char*caption,unsigned int type){}
-	virtual int CallbackFunc(int cbkID,int par1,int par2,int par3){return 0;}
-	virtual float *GetWaveLData(int inst,int wave){return 0;} // USELESS if you cannot get the length!
-	virtual float *GetWaveRData(int inst,int wave){return 0;} // USELESS if you cannot get the length!
-	virtual int GetTickLength(){return 2048;}
-	virtual int GetSamplingRate(){return 44100;}
-	virtual int GetBPM(){return 125;}
-	virtual int GetTPB(){return 4;}
 
-	// Don't get fooled by the above return values.
-	// You get a pointer to a subclass of this one that returns the correct ones.
+/// callback functions to let plugins communicate with the host.
+/// DO NOT CHANGE the order of the functions. This is an exported class!
+class CFxCallback {
+	public:
+		virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) const = 0;
+		///\todo: doc
+		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/) = 0;
+
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
+		virtual float * unused0(int, int) = 0;
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
+		virtual float * unused1(int, int) = 0;
+
+		virtual int GetTickLength() const = 0;
+		virtual int GetSamplingRate() const = 0;
+		virtual int GetBPM() const = 0;
+		virtual int GetTPB() const = 0;
+		/// do not move this destructor from here. Since this is an interface, the position matters.
+		virtual ~CFxCallback() throw() {}
+		/// Open a load (openMode=true) or save (openMode=false) dialog.
+		/// filter is in MFC format: description|*.ext|description2|*ext2|| 
+		/// if you indicate a directory in inoutName, it will be used. Else, you need to provide
+		/// an empty string ([0]='\0') and the plugin dir will be used instead.
+		/// returns true if the user pressed open/save, else return false.
+		/// filter can be any size you want. inoutname has to be 1024 chars.
+		virtual bool FileBox(bool openMode, char filter[], char inoutName[]) = 0;
 };
 #endif
 
@@ -180,9 +193,10 @@ extern "C" {
 #endif
 
 #if defined __STDC__ || __cplusplus
-extern void mi_setcallback(CMachineInterface* mi);
+extern void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callback);
 extern CMachineInterface* mi_create(void* module);
 extern void mi_init(CMachineInterface* mi);
+extern void mi_dispose(CMachineInterface* mi);
 extern void mi_sequencertick(CMachineInterface* mi);		
 extern void mi_parametertweak(CMachineInterface* mi, int par, int val);
 extern void mi_work(CMachineInterface* mi, float * psamplesleft, float * psamplesright, int numsamples, int tracks);
@@ -205,6 +219,7 @@ extern void mi_setval(CMachineInterface* mi, int param, int val);
 extern void mi_setcallback(); 
 extern CMachineInterface* mi_create();
 extern void mi_init();
+extern void mi_dispose();
 extern void mi_sequencertick();		
 extern void mi_parametertweak();
 extern void mi_work();

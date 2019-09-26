@@ -98,27 +98,29 @@ void sequence_remove(Sequence* self, SequencePosition position)
 	if (position.track) {
 		SequenceTrack* track;
 		SequenceEntry* entry;
-		List* ptr;
+		List* p;
 
 		track = (SequenceTrack*)position.track->entry;
-		ptr = position.trackposition.tracknode;	
-		entry = (SequenceEntry*)ptr->entry;
-		ptr = list_remove(&track->entries, ptr);	
-		if (track->entries != NULL) {
-			SequencePosition newposition;
-			
-			newposition.track = position.track;
-			sequence_reposition(self, track);	
-			if (ptr) {						
-				newposition.trackposition = sequence_begin(self, position.track, entry->offset);				
+		p = position.trackposition.tracknode;
+		if (p) {
+			entry = (SequenceEntry*)p->entry;
+			p = list_remove(&track->entries, p);	
+			if (track->entries != NULL) {
+				SequencePosition newposition;
+				
+				newposition.track = position.track;
+				sequence_reposition(self, track);	
+				if (p) {						
+					newposition.trackposition = sequence_begin(self, position.track, entry->offset);				
+				} else {
+					newposition.trackposition = sequence_last(self, position.track);				
+				}
+				self->editposition = newposition;
 			} else {
-				newposition.trackposition = sequence_last(self, position.track);				
+				self->editposition = sequence_makeposition(self, position.track, 0);
 			}
-			self->editposition = newposition;
-		} else {
-			self->editposition = sequence_makeposition(self, position.track, 0);
+			signal_emit(&self->signal_editpositionchanged, self, 0);
 		}
-		signal_emit(&self->signal_editpositionchanged, self, 0);
 	}
 }
 
@@ -413,7 +415,7 @@ int sequence_patternused(Sequence* self, unsigned int patternslot)
 		SequenceTrack* track;
 		List* p;
 
-		track = (SequenceTrack*)p->entry;
+		track = (SequenceTrack*)t->entry;
 		p = track->entries;
 		while (p) {
 			SequenceEntry* entry;
@@ -450,4 +452,34 @@ void sequence_setpatternslot(Sequence* self, SequencePosition position,
 			signal_emit(&self->signal_editpositionchanged, self, 0);
 		}
 	}
+}
+
+float sequence_duration(Sequence* self)
+{	
+	SequenceTracks* t;
+	float duration = 0.f;
+
+	t = self->tracks;
+	while (t) {
+		SequenceTrack* track;
+		List* p;
+
+		track = (SequenceTrack*)t->entry;
+		p = track->entries;
+		if (p) {			
+			Pattern* pattern;
+			SequenceEntry* entry;
+
+			p = p->tail;
+			entry = (SequenceEntry*) p->entry;
+			pattern = patterns_at(self->patterns, entry->pattern);
+			if (pattern) {
+				if (duration < entry->offset + pattern->length) {
+					duration = entry->offset + pattern->length;
+				}
+			}
+		}		
+		t = t->next;
+	}
+	return duration;
 }

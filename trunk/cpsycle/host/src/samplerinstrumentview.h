@@ -11,7 +11,7 @@
 #include <uilabel.h>
 #include <uiedit.h>
 #include <uibutton.h>
-#include <uilistbox.h>
+#include "instrumentsbox.h"
 #include <uigroupbox.h>
 #include "workspace.h"
 
@@ -81,7 +81,7 @@ typedef struct {
 	ui_component component;	
 	ui_notebook notebook;
 	TabBar tabbar;
-	ui_listbox instrumentlist;	
+	InstrumentsBox instrumentsbox;	
 	SamplerInstrumentHeaderView header;
 	SamplerInstrumentGeneralView general;
 	SamplerInstrumentVolumeView volume;

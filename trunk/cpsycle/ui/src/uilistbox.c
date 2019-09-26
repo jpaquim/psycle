@@ -11,16 +11,29 @@ extern int winid;
 
 static void OnCommand(ui_listbox* self, WPARAM wParam, LPARAM lParam);
 static void OnDestroy(ui_listbox* self, ui_component* sender);
+static void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style);
 
 void ui_listbox_init(ui_listbox* listbox, ui_component* parent)
 {  
-    memset(&listbox->component.events, 0, sizeof(ui_events));
-	ui_component_init_signals(&listbox->component);	
+	ui_listbox_init_style(listbox, parent, 
+		WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY);    
+}
+
+void ui_listbox_init_multiselect(ui_listbox* listbox, ui_component* parent)
+{  
+	ui_listbox_init_style(listbox, parent, 
+		WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_NOTIFY);    
+}
+
+void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style)
+{  
+	memset(&listbox->component.events, 0, sizeof(ui_events));
+	ui_component_init_signals(&listbox->component);		
 	signal_init(&listbox->signal_selchanged);
 	signal_connect(&listbox->component.signal_destroy, listbox, OnDestroy);
 	listbox->component.doublebuffered = 0;
 	listbox->component.hwnd = CreateWindow (TEXT("LISTBOX"), NULL,
-		WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY,
+		style,
 		0, 0, 90, 90,
 		parent->hwnd, (HMENU)winid,
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
@@ -33,6 +46,7 @@ void ui_listbox_init(ui_listbox* listbox, ui_component* parent)
 	listbox->component.events.cmdtarget = listbox;
 	listbox->component.events.command = OnCommand;
 	ui_component_init_base(&listbox->component);	
+	ui_component_setbackgroundmode(&listbox->component, BACKGROUND_SET);
 }
 
 
@@ -40,7 +54,6 @@ void OnDestroy(ui_listbox* self, ui_component* sender)
 {
 	signal_dispose(&self->signal_selchanged);
 }
-
 
 int ui_listbox_addstring(ui_listbox* listbox, const char* text)
 {
@@ -71,6 +84,17 @@ void ui_listbox_setcursel(ui_listbox* listbox, int index)
 int ui_listbox_cursel(ui_listbox* listbox)
 {
 	return SendMessage(listbox->component.hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+}
+
+void ui_listbox_selitems(ui_listbox* listbox, int* items, int maxitems)
+{	
+	SendMessage(listbox->component.hwnd, LB_GETSELITEMS, (WPARAM)maxitems,
+		(LPARAM)items); 
+}
+
+int ui_listbox_numselitems(ui_listbox* listbox)
+{
+	return SendMessage(listbox->component.hwnd, LB_GETSELCOUNT, (WPARAM)0, (LPARAM)0); 
 }
 
 void OnCommand(ui_listbox* self, WPARAM wParam, LPARAM lParam) {

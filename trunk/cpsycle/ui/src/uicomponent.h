@@ -26,6 +26,11 @@ typedef enum {
 } UiAlignType;
 
 typedef enum {
+	UI_JUSTIFY_NONE,	
+	UI_JUSTIFY_EXPAND	
+} UiJustifyType;
+
+typedef enum {
 	BACKGROUND_NONE,
 	BACKGROUND_SET,
 	BACKGROUND_PARENT,
@@ -56,6 +61,7 @@ typedef struct {
 	Signal signal_windowproc;
 	Signal signal_align;
 	UiAlignType align;
+	UiJustifyType justify;
 	int alignchildren;
 	ui_margin margin;
 	int doublebuffered;

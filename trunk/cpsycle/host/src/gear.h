@@ -6,6 +6,10 @@
 
 #include "uibutton.h"
 #include "uilistbox.h"
+#include "instrumentsbox.h"
+#include "samplesbox.h"
+#include "machinesbox.h"
+#include "uinotebook.h"
 #include "tabbar.h"
 #include "workspace.h"
 
@@ -24,11 +28,15 @@ typedef struct {
 typedef struct {
 	ui_component component;
 	TabBar tabbar;
+	ui_notebook notebook;
 	ui_listbox listbox;	
-	GearButtons buttons;
-	IntHashTable listboxslots;
-	IntHashTable slotslistbox;
+	MachinesBox machinesboxgen;
+	MachinesBox machinesboxfx;
+	InstrumentsBox instrumentsbox;
+	SamplesBox samplesbox;	
+	GearButtons buttons;	
 	Machines* machines;
+	Workspace* workspace;
 } Gear;
 
 void InitGear(Gear*, ui_component* parent, Workspace*);
