@@ -16,17 +16,21 @@ typedef struct {
 	Player player;
 	MachineCallback machinecallback;
 	Properties* config;
+	Properties* inputoutput;
 	Properties* properties;	
+	Properties* driverconfigure;
 	PluginCatcher plugincatcher;
 	MachineFactory machinefactory;
 	int octave;
 	Signal signal_octavechanged;
 	Signal signal_songchanged;
 	Signal signal_configchanged;
+	void* mainhandle;
 } Workspace;
 
 void workspace_init(Workspace*);
 void workspace_dispose(Workspace*);
+void workspace_initplayer(Workspace* self);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
@@ -34,6 +38,12 @@ Properties* workspace_pluginlist(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_setoctave(Workspace*, int octave);
+void workspace_updatedriver(Workspace*);
 int workspace_octave(Workspace*);
+int workspace_showsonginfoonload(Workspace*);
+int workspace_showaboutatstart(Workspace*);
+int workspace_showlinenumbers(Workspace*);
+void workspace_configchanged(Workspace* self, Properties* property,
+	Properties* choice);
 
 #endif

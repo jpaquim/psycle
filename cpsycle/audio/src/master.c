@@ -98,10 +98,10 @@ static CMachineInfo const MacInfo = {
 	3
 };
 
-void master_init(Master* self)
+void master_init(Master* self, MachineCallback callback)
 {
 	memset(self, 0, sizeof(Master));
-	machine_init(&self->machine);	
+	machine_init(&self->machine, callback);	
 	self->machine.mode = master_mode;
 	self->machine.dispose = master_dispose;
 	self->machine.info = info;

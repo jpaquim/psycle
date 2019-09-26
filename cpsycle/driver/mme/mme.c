@@ -43,13 +43,14 @@ typedef struct {
 	int (*error)(int, const char*);
 } MmeDriver;
 
-static void driver_free(Driver* driver);
-static int driver_init(Driver* driver);
-static void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback);
-static int driver_open(Driver* driver);
-static int driver_close(Driver* driver);
-static int driver_dispose(Driver* driver);
-
+static void driver_free(Driver*);
+static int driver_init(Driver*);
+static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
+static int driver_open(Driver*);
+static int driver_close(Driver*);
+static int driver_dispose(Driver*);
+static void updateconfiguration(Driver*);
+static unsigned int samplerate(Driver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
 static void PollerThread(void *pWaveOut);
@@ -99,6 +100,8 @@ EXPORT Driver* __cdecl driver_create(void)
 	mme->driver.open = driver_open;
 	mme->driver.close = driver_close;
 	mme->driver.dispose = driver_dispose;
+	mme->driver.updateconfiguration = updateconfiguration;
+	mme->driver.samplerate = samplerate;
 
 	return &mme->driver;
 }
@@ -149,8 +152,7 @@ static void init_properties(Driver* driver)
 	int i;
 	int n;
 
-	driver->properties = properties_create();
-	properties_append_string(driver->properties, "name", "winmme");
+	driver->properties = properties_create_string("name", "winmme");
 	properties_append_string(driver->properties, "version", "1.0");
 	property = properties_append_choice(driver->properties, "device", -1);	
 	property->children = properties_create();
@@ -195,7 +197,17 @@ static void apply_properties(MmeDriver* self)
 	}
 }
 
-void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback)
+void updateconfiguration(Driver* self)
+{
+	apply_properties((MmeDriver*)self);
+}
+
+unsigned int samplerate(Driver* self)
+{
+	return ((MmeDriver*)self)->_samplesPerSec;
+}
+
+void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
 {
 	MmeDriver* self = (MmeDriver*) driver;
 	self->_callbackContext = context;

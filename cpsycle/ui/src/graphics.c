@@ -8,21 +8,15 @@ void ui_graphics_init(ui_graphics* g, HDC hdc)
 	g->hdc = hdc;	
 	g->hFontPrev = 0;
 	g->pen = 0;
-	g->hPenPrev = 0;
+	g->pen = CreatePen(PS_SOLID, 1, 0x666666);
 	g->brush = 0;
 	g->hBrushPrev = 0;
 }	
 
 void ui_graphics_dispose(ui_graphics* g)
 {
-	if (g->hFontPrev != 0) {		
-		SelectObject (g->hdc, g->hFontPrev);
-	}	
-	if (g->pen) {
+	if (g->pen) {	
 		DeleteObject(g->pen);
-	}
-	if (g->brush) {
-		DeleteObject(g->brush);
 	}	
 }
 
@@ -72,7 +66,34 @@ void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r, unsigned int co
      hBrush = CreateSolidBrush(color) ;     
      FillRect (g->hdc, &rect, hBrush);     
      DeleteObject (hBrush) ;
-}     
+}
+
+void ui_drawsolidpolygon(ui_graphics* g, ui_point* pts, unsigned int numpoints, 
+	unsigned int inner, unsigned int outter)
+{
+	HBRUSH hBrush;     
+	HBRUSH hBrushPrev;
+	HPEN hPen;     
+	HPEN hPenPrev;
+	POINT* wpts;
+	unsigned int i;
+
+	wpts = (POINT*)malloc(sizeof(POINT) * numpoints);
+	for (i = 0; i < numpoints; ++i) {
+		wpts[i].x = pts[i].x;
+		wpts[i].y = pts[i].y;
+	}    
+    hBrush = CreateSolidBrush(inner);
+	hBrushPrev = SelectObject(g->hdc, hBrush);
+	hPen = CreatePen(PS_SOLID, 1, outter);
+	hPenPrev = SelectObject(g->hdc, hPen);
+	Polygon(g->hdc, wpts, numpoints);
+	SelectObject(g->hdc, hBrushPrev);
+	SelectObject(g->hdc, hPenPrev);
+    DeleteObject (hBrush);
+	DeleteObject (hPen);
+	free(wpts);
+}
 
 void ui_drawfullbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y)
 {
@@ -99,11 +120,13 @@ void ui_drawbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y, int width,
 
 void ui_setcolor(ui_graphics* g, unsigned int color)
 {
+	HPEN pen;	
+	pen = CreatePen(PS_SOLID, 1, color);
+	SelectObject(g->hdc, pen);
 	if (g->pen) {
 		DeleteObject(g->pen);
 	}
-	g->pen = CreatePen(PS_SOLID, 1, color);
-	SelectObject(g->hdc, g->pen);
+	g->pen = pen;
 }
 
 void ui_setbackgroundmode(ui_graphics* g, unsigned int mode)
@@ -124,7 +147,7 @@ void ui_settextcolor(ui_graphics* g, unsigned int color)
 void ui_setfont(ui_graphics* g, ui_font* font)
 {	
 	if (font && font->hfont) {
-		g->hFontPrev = SelectObject(g->hdc, font->hfont);
+		SelectObject(g->hdc, font->hfont);
 	}
 }
 

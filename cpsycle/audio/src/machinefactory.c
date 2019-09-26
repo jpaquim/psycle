@@ -6,6 +6,7 @@
 #include "vstplugin.h"
 #include "sampler.h"
 #include "mixer.h"
+#include "master.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,6 +18,7 @@ void machinefactory_init(MachineFactory* self, MachineCallback callback,
 {
 	self->machinecallback = callback;
 	self->configuration = configuration;
+	self->directories = properties_find(self->configuration, "directories");
 }
 
 Machine* machinefactory_make(MachineFactory* self, MachineType type,
@@ -25,24 +27,31 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 	Machine* machine = 0;
 
 	switch (type) {
+		case MACH_MASTER:
+		{
+			Master* master = (Master*)malloc(sizeof(Master));
+			master_init(master, self->machinecallback);		
+			machine = &master->machine;
+		}
+		break;
 		case MACH_DUMMY:
 		{
 			DummyMachine* dummy = (DummyMachine*)malloc(sizeof(DummyMachine));
-			dummymachine_init(dummy);	
+			dummymachine_init(dummy, self->machinecallback);	
 			machine = &dummy->machine;
 		}
 		break;
 		case MACH_MIXER:
 		{
 			Mixer* mixer = (Mixer*)malloc(sizeof(Mixer));
-			mixer_init(mixer);		
+			mixer_init(mixer, self->machinecallback);		
 			machine = &mixer->machine;
 		}
 		break;
 		case MACH_SAMPLER:
 		{
 			Sampler* sampler = (Sampler*)malloc(sizeof(Sampler));
-			sampler_init(sampler);		
+			sampler_init(sampler, self->machinecallback);		
 			machine = &sampler->machine;
 		}
 		break;
@@ -52,7 +61,9 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 			char fullpath[_MAX_PATH];
 
 			plugin = (VstPlugin*)malloc(sizeof(VstPlugin));
-			vstplugin_init(plugin, makefullpath(self, path, "vstplugindir", fullpath));	
+			vstplugin_init(plugin, 
+				self->machinecallback,
+				makefullpath(self, path, "vstplugindir", fullpath));	
 			if (plugin->machine.info(&plugin->machine)) {						
 				machine = &plugin->machine;			
 			} else {
@@ -67,7 +78,9 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 			char fullpath[_MAX_PATH];
 						
 			plugin = (Plugin*)malloc(sizeof(Plugin));			
-			plugin_init(plugin, makefullpath(self, path, "plugindir", fullpath));
+			plugin_init(plugin,
+				self->machinecallback,
+				makefullpath(self, path, "plugindir", fullpath));
 			if (plugin->machine.info(&plugin->machine)) {						
 				machine = &plugin->machine;			
 			} else {
@@ -78,9 +91,6 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 		break;
 		default:
 		break;
-	}
-	if (machine) {
-		machine->machinecallback = self->machinecallback;
 	}	
 	return machine;
 }
@@ -92,7 +102,7 @@ char* makefullpath(MachineFactory* self, const char* path,
 
 	fullpath[0] = '\0';
 	if (self->configuration && (strrchr(path, '\\') == 0)) {
-		properties_readstring(self->configuration, dirconfigkey, &dir, "");
+		properties_readstring(self->directories, dirconfigkey, &dir, "");
 		_snprintf(fullpath, _MAX_PATH, "%s%s%s", dir, "\\", path);
 	} else {
 		_snprintf(fullpath, _MAX_PATH, "%s", path);

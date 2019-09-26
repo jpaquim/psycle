@@ -22,6 +22,7 @@ static CMachineInfo const macinfo = {
 	3
 };
 
+static Machine* clone(Machine* self) { return 0; }
 static void work(Machine* self, BufferContext*);
 static void generateaudio(Machine* self, BufferContext* bc) { }
 static int hostevent(Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
@@ -38,15 +39,18 @@ static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
 static float pan(Machine* self) { return 0; } 
 static void setpan(Machine* self, float val) { };
+static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
+static void updatesamplerate(Machine* self, unsigned int samplerate) { }
 
 static int dummymachine_mode(DummyMachine* self) { return self->mode; }
 static void dummymachine_dispose(DummyMachine* self);
 static unsigned int dummymachine_numinputs(DummyMachine* self) { return 2; }
 static unsigned int dummymachine_numoutputs(DummyMachine* self) { return 2; }
 
-void machine_init(Machine* self)
+void machine_init(Machine* self, MachineCallback callback)
 {	
 	memset(self, 0, sizeof(Machine));
+	self->clone = clone;
 	self->dispose = machine_dispose;
 	self->work = work;
 	self->mode = mode;
@@ -63,6 +67,9 @@ void machine_init(Machine* self)
 	self->numoutputs = numoutputs;
 	self->pan = pan;
 	self->setpan = setpan;
+	self->setcallback = setcallback;
+	self->updatesamplerate = updatesamplerate;
+	self->callback = callback;
 	signal_init(&self->signal_worked);
 }
 
@@ -114,10 +121,10 @@ int machine_supports(Machine* self, int option)
 	return 0;
 }
 
-void dummymachine_init(DummyMachine* self)
+void dummymachine_init(DummyMachine* self, MachineCallback callback)
 {
 	memset(self, 0, sizeof(DummyMachine));
-	machine_init(&self->machine);	
+	machine_init(&self->machine, callback);	
 	self->machine.mode = dummymachine_mode;
 	self->machine.dispose = dummymachine_dispose;
 	self->machine.numinputs = dummymachine_numinputs;

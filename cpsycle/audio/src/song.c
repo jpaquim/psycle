@@ -7,7 +7,7 @@
 #include <datacompression.h>
 #include "machinefactory.h"
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -19,24 +19,24 @@
 
 static void song_initdefaults(Song* self);
 static void song_initproperties(Song* self);
+static void song_initmaster(Song* self);
 
-static void loadpsy3(Song* self, RiffFile* file, char header[9],
-	MachineFactory* machinefactory, Properties* workspaceproperties);
-static void readsngi(Song*, RiffFile* file, int size, int version);
-static void readseqd(Song* song, RiffFile* file, int size, int version,
+static void loadpsy3(Song*, RiffFile*, char header[9], Properties* workspace);
+static void readsngi(Song*, RiffFile*, int size, int version);
+static void readseqd(Song*, RiffFile*, int size, int version,
 			  unsigned char* playorder, int* playlength);
-static void readpatd(Song* song, RiffFile* file, int size, int version);
-static void readinsd(Song* song, RiffFile* file, int size, int version);
-static void readmacd(Song* song, RiffFile* file, int size, int version,
-	MachineFactory* machinefactory, Properties* workspaceproperties);
-static void loadpsy2(Song* self, RiffFile* file);
-static void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * instrum_name, int fullopen, int loadIdx);
-static Machine* machineloadfilechunk(RiffFile* file, int index, int version,
-	MachineFactory* machinefactory, Machines* machines,
-	Properties* workspaceproperties);
+static void readpatd(Song*, RiffFile*, int size, int version);
+static void readinsd(Song*, RiffFile*, int size, int version);
+static void readmacd(Song*, RiffFile*, int size, int version, Properties* workspace);
+static void loadpsy2(Song*, RiffFile*);
+static void loadwavesubchunk(Song*, RiffFile*, int instrIdx, int pan, char * instrum_name, int fullopen, int loadIdx);
+static Machine* machineloadfilechunk(Song*, RiffFile*, int index, int version,
+	Machines* machines,
+	Properties* workspace);
 
-void song_init(Song* self)
+void song_init(Song* self, MachineFactory* machinefactory)
 {		
+	self->machinefactory = machinefactory;
 	machines_init(&self->machines);					
 	patterns_init(&self->patterns);
 	sequence_init(&self->sequence, &self->patterns);
@@ -73,8 +73,18 @@ void song_initdefaults(Song* self)
 	sequenceposition.trackposition =
 		sequence_begin(&self->sequence, sequenceposition.track, 0);
 	sequence_insert(&self->sequence, sequenceposition, 0);
+	song_initmaster(self);
 	song_initproperties(self);
 }
+
+void song_initmaster(Song* self)
+{
+	Machine* master;	
+
+	master = machinefactory_make(self->machinefactory, MACH_MASTER, 0);
+	machines_insert(&self->machines, MASTER_INDEX, master);
+}
+
 
 void song_initproperties(Song* self)
 {
@@ -87,7 +97,7 @@ void song_initproperties(Song* self)
 	properties_append_int(self->properties, "tracks", 16, 1, 64);
 }
 
-void song_load(Song* self, const char* path, MachineFactory* machinefactory, Properties** workspaceproperties)
+void song_load(Song* self, const char* path, Properties** workspaceproperties)
 {	
 	RiffFile file;
 
@@ -103,8 +113,7 @@ void song_load(Song* self, const char* path, MachineFactory* machinefactory, Pro
 		header[8]=0;		
 		if (strcmp(header,"PSY3SONG")==0) {			
 			*workspaceproperties = properties_create();
-			loadpsy3(self, &file, header, machinefactory,
-				*workspaceproperties);
+			loadpsy3(self, &file, header, *workspaceproperties);
 		} else
 		if (strcmp(header,"PSY2SONG")==0) {
 			loadpsy2(self, &file);
@@ -117,7 +126,7 @@ void song_load(Song* self, const char* path, MachineFactory* machinefactory, Pro
 }
 
 void loadpsy3(Song* self, RiffFile* file, char header[9],
-	MachineFactory* machinefactory, Properties* workspaceproperties)
+	Properties* workspaceproperties)
 {
 	unsigned int version = 0;
 	unsigned int size = 0;
@@ -130,7 +139,7 @@ void loadpsy3(Song* self, RiffFile* file, char header[9],
 	unsigned char playorder[MAX_SONG_POSITIONS];
 	Properties* machinesproperties;	
 
-	machinesproperties = properties_append_int(workspaceproperties, "machines", 0, 0, 0);
+	machinesproperties = properties_createsection(workspaceproperties, "machines");
 	
 	rifffile_read(file, &version,sizeof(version));
 	rifffile_read(file, &size,sizeof(size));
@@ -194,8 +203,7 @@ void loadpsy3(Song* self, RiffFile* file, char header[9],
 			rifffile_read(file, &version,sizeof(version));
 			rifffile_read(file, &size,sizeof(size));
 			chunkcount--;
-			readmacd(self, file, size, version, machinefactory,
-				machinesproperties);			
+			readmacd(self, file, size, version, machinesproperties);
 			// rifffile_skip(file, size);
 		} else
 		if (strcmp(header,"INSD")==0) {
@@ -710,8 +718,7 @@ void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * 
 	}
 }
 
-
-void readmacd(Song* song, RiffFile* file, int size, int version, MachineFactory* machinefactory,
+void readmacd(Song* self, RiffFile* file, int size, int version,
 			  Properties* machinesproperties)
 {
 	size_t begins = rifffile_getpos(file);
@@ -723,23 +730,21 @@ void readmacd(Song* song, RiffFile* file, int size, int version, MachineFactory*
 		{			
 			Machine* machine;
 			Properties* machineproperties;
-
-			if (!machinesproperties->children) {
-				machinesproperties->children = properties_create();
-			}
-			machineproperties = properties_append_int(machinesproperties->children, "machine", index, 0, MAX_MACHINES);
-			machine = machineloadfilechunk(file, index, version, machinefactory,
-				&song->machines, machineproperties);
+			
+			machineproperties = properties_createsection(machinesproperties, "machine");
+			properties_append_int(machineproperties, "index", index, 0, MAX_MACHINES);
+			machine = machineloadfilechunk(self, file, index, version,
+				&self->machines, machineproperties);
 			if (machine) {
-				machines_insert(&song->machines, index, machine);
+				machines_insert(&self->machines, index, machine);
 			}
 		}
 	}
 	rifffile_seek(file, begins + size);
 }
 
-Machine* machineloadfilechunk(RiffFile* file, int index, int version,
-	MachineFactory* machinefactory, Machines* machines, Properties* properties)
+Machine* machineloadfilechunk(Song* self, RiffFile* file, int index, int version,
+	Machines* machines, Properties* properties)
 {
 	// assume version 0 for now	
 	Machine* machine;
@@ -747,13 +752,12 @@ Machine* machineloadfilechunk(RiffFile* file, int index, int version,
 	char modulename[256];
 	char editname[32];
 	int i;
-
-	properties->children = properties_create();
+	
 	rifffile_read(file, &type,sizeof(type));
 	rifffile_readstring(file, modulename, 256);
-	machine = machinefactory_make(machinefactory, type, modulename);
+	machine = machinefactory_make(self->machinefactory, type, modulename);
 	if (!machine) {
-		machine = machinefactory_make(machinefactory, MACH_DUMMY, modulename);
+		machine = machinefactory_make(self->machinefactory, MACH_DUMMY, modulename);
 		type = MACH_DUMMY;
 	}
 	
@@ -771,9 +775,9 @@ Machine* machineloadfilechunk(RiffFile* file, int index, int version,
 		rifffile_read(file, &panning, sizeof(panning));
 		rifffile_read(file, &x, sizeof(x));
 		rifffile_read(file, &y, sizeof(y));
-		rifffile_skip(file, 2*sizeof(int));	// numInputs, numOutputs		
-		properties_append_int(properties->children, "x", x, 0, 0);
-		properties_append_int(properties->children, "y", y, 0, 0);
+		rifffile_skip(file, 2*sizeof(int));	// numInputs, numOutputs				
+		properties_append_int(properties, "x", x, 0, 0);
+		properties_append_int(properties, "y", y, 0, 0);
 	}
 
 	for(i = 0; i < MAX_CONNECTIONS; i++)
@@ -810,9 +814,9 @@ Machine* machineloadfilechunk(RiffFile* file, int index, int version,
 		char txt[40];
 		strcpy(txt, "X!");
 		strcat(txt, editname);
-		properties_append_string(properties->children, "editname", txt);
+		properties_append_string(properties, "editname", txt);
 	} else {
-		properties_append_string(properties->children, "editname", editname);
+		properties_append_string(properties, "editname", editname);
 	}
 
 	return machine;	

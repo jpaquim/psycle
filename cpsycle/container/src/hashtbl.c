@@ -111,6 +111,10 @@ void* SearchIntHashTable(PIntHashTable table, int k) {
 
   rv = 0;
 
+  if (table->size == 0) {
+	return 0;
+  }
+
   hn = inth(k, table->size);
   if (table->keys[hn] == 0) {
     rv = 0;
@@ -132,7 +136,10 @@ void* SearchIntHashTable(PIntHashTable table, int k) {
 int ExistsIntHashTable(PIntHashTable table, int k)
 {
 	int hn;
-	
+
+	if (table->size == 0) {
+		return 0;
+	}
 	hn = inth(k, table->size);
 	return table->keys[hn] != 0;
 }

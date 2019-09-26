@@ -29,6 +29,8 @@ void ui_textout(ui_graphics*, int, int,  const char*, int);
 void ui_drawrectangle(ui_graphics*, const ui_rectangle);
 ui_size ui_textsize(ui_graphics*, const char*);
 void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r, unsigned int color);
+void ui_drawsolidpolygon(ui_graphics* g, ui_point* , unsigned int numpoints, 
+	unsigned int inner, unsigned int outter);
 void ui_drawline(ui_graphics* g, int x1, int y1, int x2, int y2);			
 void ui_drawfullbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y);
 void ui_drawbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y, int width,

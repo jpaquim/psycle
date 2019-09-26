@@ -36,6 +36,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "directx"=".\driver\directx\directx.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "dsp"=".\dsp\dsp.dsp" - Package Owner=<4>
 
 Package=<5>

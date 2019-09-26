@@ -65,6 +65,7 @@ List* sequence_removetrack(Sequence*, SequenceTracks*);
 unsigned int sequence_sizetracks(Sequence*);
 int sequence_patternused(Sequence*, unsigned int patternslot);
 void sequence_setpatternslot(Sequence*, SequencePosition, unsigned int slot);
+float sequence_duration(Sequence*);
 
 
 #endif

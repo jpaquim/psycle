@@ -41,13 +41,16 @@ typedef enum  {
 
 #define MACHINE_USES_INSTRUMENTS 64
 
-typedef struct {
-	struct Samples* (*samples)(void* callbackcontext);
+typedef struct MachineCallback {
+	struct Samples* (*samples)(void*);
+	unsigned int (*samplerate)(void*);
+	unsigned int (*bpm)(void*);
 	void* context;
 } MachineCallback;
 
-typedef struct {	
-	void (*init)(void*);	
+typedef struct Machine {	
+	void (*init)(void*);
+	struct Machine* (*clone)(void*);
 	void (*work)(void*, BufferContext*);
 	void (*generateaudio)(void *, BufferContext*);
 	int (*hostevent)(void*, int const eventNr, int const val1, float const val2);
@@ -62,11 +65,13 @@ typedef struct {
 	int (*mode)(void*);
 	float (*pan)(void*);
 	void (*setpan)(void*, float val);
+	void (*updatesamplerate)(void*, unsigned int samplerate);
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
+	void (*setcallback)(void*, MachineCallback);
 		
 	Signal signal_worked;
-	MachineCallback machinecallback;
+	MachineCallback callback;
 } Machine;
 
 typedef struct {
@@ -74,10 +79,10 @@ typedef struct {
 	int mode;
 } DummyMachine;
 
-void machine_init(Machine*);
+void machine_init(Machine*, MachineCallback);
 void machine_dispose(Machine*);
 int machine_supports(Machine*, int option);
 
-void dummymachine_init(DummyMachine* self);
+void dummymachine_init(DummyMachine* self, MachineCallback);
 
 #endif

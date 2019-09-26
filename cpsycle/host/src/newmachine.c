@@ -15,7 +15,6 @@ static void OnMouseDoubleClick(NewMachine* self, ui_component* sender, int x, in
 static void OnKeyDown(NewMachine* self, ui_component* sender, int keycode, int keydata);
 
 static int cpy;
-static int dy;
 static int count;
 
 void InitNewMachine(NewMachine* self, ui_component* parent, Workspace* workspace)
@@ -33,7 +32,8 @@ void InitNewMachine(NewMachine* self, ui_component* parent, Workspace* workspace
 	ui_component_move(&self->component, 0, 0);	
 	self->selectedplugin = 0;
 	self->workspace = workspace;	
-	dy = 0;	
+	self->dy = 0;	
+	self->calledbygear = 0;
 	signal_init(&self->signal_selected);
 }
 
@@ -58,28 +58,21 @@ int OnPropertiesEnum(NewMachine* self, Properties* property, int level)
 {		
 	if (property->item.key && property->children) {						
 		Properties* p;
-	//	ui_textout(self->g, 20, 40 + cpy + dy, property->item.key, strlen(property->item.key));				
+	//	ui_textout(self->g, 20, 40 + cpy + self->dy, property->item.key, strlen(property->item.key));				
 		if (property == self->selectedplugin) {
 			ui_setbackgroundcolor(self->g, 0x009B7800);
 			ui_settextcolor(self->g, 0x00FFFFFF);		
 		} else {
 			ui_setbackgroundcolor(self->g, 0x003E3E3E);
 			ui_settextcolor(self->g, 0x00CACACA);		
-		}
-		if (property == self->selectedplugin) {
-			ui_rectangle r = { 19, 19, 300, 37 };
-			r.top += cpy + dy;
-			r.bottom += cpy + dy;
-			ui_setcolor(self->g, 0x00FFFFFF);
-			ui_drawrectangle(self->g, r);
-		}
-		p = properties_read(property->children, "name");
+		}		
+		p = properties_read(property, "name");
 		if (p && p->item.key && p->item.typ == PROPERTY_TYP_STRING) {
-			ui_textout(self->g, 20, 20 + cpy + dy, p->item.value.s,
+			ui_textout(self->g, 22, cpy + self->dy + 2, p->item.value.s,
 				strlen(p->item.value.s));	
+			cpy += 20;
 		}
-		// ui_textout(self->g, 200, 20 + cpy + dy, pInfo->Author, strlen(pInfo->Author));	
-		cpy += 20;
+		// ui_textout(self->g, 200, 20 + cpy + self->dy, pInfo->Author, strlen(pInfo->Author));			
 	}
 	return 1;
 }
@@ -94,7 +87,7 @@ void OnSize(NewMachine* self, ui_component* sender, int width, int height)
 
 void OnScroll(NewMachine* self, ui_component* sender, int cx, int cy)
 {
-	dy += cy;
+	self->dy += cy;
 }
 
 void OnMouseDown(NewMachine* self, ui_component* sender, int x, int y, int button)
@@ -109,7 +102,7 @@ void HitTest(NewMachine* self, int x, int y)
 
 	pluginlist = workspace_pluginlist(self->workspace);
 	if (pluginlist) {
-		self->pluginpos = (y - dy) / 20;
+		self->pluginpos = (y - self->dy) / 20;
 		count = 0;			
 		properties_enumerate(pluginlist, self,OnPropertiesCount);
 		ui_invalidate(&self->component);
@@ -118,11 +111,11 @@ void HitTest(NewMachine* self, int x, int y)
 
 int OnPropertiesCount(NewMachine* self, Properties* property, int level)
 {
-	if (self->pluginpos == count && level == 0) {
+	if (self->pluginpos == count && level == 1) {
 		self->selectedplugin = property;
 		return 0;
 	}
-	if (level == 0) {
+	if (level == 1) {
 		++count;
 	}
 	return 1;
@@ -131,7 +124,8 @@ int OnPropertiesCount(NewMachine* self, Properties* property, int level)
 void OnMouseDoubleClick(NewMachine* self, ui_component* sender, int x, int y, int button)
 {
 	if (self->selectedplugin) {
-		signal_emit(&self->signal_selected, self, 1, self->selectedplugin);		
+		signal_emit(&self->signal_selected, self, 1, self->selectedplugin);
+		self->calledbygear = 0;
 	}	
 }
 

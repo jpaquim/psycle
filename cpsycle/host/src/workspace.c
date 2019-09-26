@@ -3,33 +3,83 @@
 
 #include "workspace.h"
 #include <stdlib.h>
+#include <string.h>
 
 static void workspace_config(Workspace*);
-static Samples* machinecallback_samples(Workspace*);
 static void workspace_removesong(Workspace*);
 static void applysongproperties(Workspace*);
 static Properties* workspace_makeproperties(Workspace*);
+static Samples* machinecallback_samples(Workspace*);
+static unsigned int machinecallback_samplerate(Workspace*);
+static int machinecallback_bpm(Workspace*);
+static void workspace_setdriverlist(Workspace*);
+static void workspace_driverconfig(Workspace*);
+static const char* workspace_driverpath(Workspace*);
+static void workspace_configaudio(Workspace*);
 
 void workspace_init(Workspace* self)
 {	
 	self->octave = 4;
 	signal_init(&self->signal_octavechanged);
+	self->inputoutput = 0;
 	workspace_config(self);		
-	self->song = (Song*) malloc(sizeof(Song));
-	song_init(self->song);
 	self->machinecallback.context = self;
 	self->machinecallback.samples = machinecallback_samples;
-#if defined(DEBUG)
-	player_init(&self->player, self->song, "..\\driver\\mme\\Debug\\");
-#else
-	player_init(&self->player, self->song, "..\\driver\\mme\\Release\\");
-#endif
+	self->machinecallback.samplerate = machinecallback_samplerate;
+	self->machinecallback.bpm = machinecallback_bpm;	
+	machinefactory_init(&self->machinefactory, self->machinecallback,
+		self->config);
+	self->song = (Song*) malloc(sizeof(Song));
+	song_init(self->song, &self->machinefactory);	
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
 	self->properties = 0;
 	plugincatcher_init(&self->plugincatcher);
 	workspace_scanplugins(self);
-	machinefactory_init(&self->machinefactory, self->machinecallback, self->config);
+}
+
+void workspace_initplayer(Workspace* self)
+{
+	player_init(&self->player, self->song, self->mainhandle);
+	workspace_driverconfig(self);
+}
+	
+void workspace_configaudio(Workspace* self)
+{			
+	player_loaddriver(&self->player, workspace_driverpath(self));
+	self->player.driver->open(self->player.driver);	
+	workspace_driverconfig(self);	
+}
+
+const char* workspace_driverpath(Workspace* self)
+{
+	Properties* p;
+	const char* rv = 0;
+
+	p = properties_read(self->inputoutput, "driver");
+	if (p) {
+		int choice;		
+		int count;
+		
+		choice = properties_value(p);
+		p = p->children;
+		count = 0;
+		while (p) {
+			if (count == choice) {
+				rv = properties_valuestring(p);
+				break;
+			}
+			p = p->next;
+			++count;
+		}
+	}
+	return rv;
+}
+
+void workspace_driverconfig(Workspace* self)
+{		
+	self->driverconfigure->item.disposechildren = 0;
+	self->driverconfigure->children = self->player.driver->properties;	
 }
 
 void workspace_dispose(Workspace* self)
@@ -46,34 +96,140 @@ void workspace_dispose(Workspace* self)
 void workspace_scanplugins(Workspace* self)
 {	
 	Properties* property;
+	Properties* directories;
 
-	plugincatcher_scan(&self->plugincatcher, "sampler", MACH_SAMPLER);		
-	property = properties_read(self->config, "vstdir");
-	if (property) {
-		plugincatcher_scan(&self->plugincatcher,
-			properties_valuestring(property), MACH_VST);
-	}
-	property = properties_read(self->config, "plugindir");
-	if (property) {
-		plugincatcher_scan(&self->plugincatcher,
-			properties_valuestring(property), MACH_PLUGIN);
+	directories = properties_find(self->config, "directories");
+	if (directories && directories->children) {		
+		plugincatcher_scan(&self->plugincatcher, "sampler", MACH_SAMPLER);		
+		property = properties_read(directories, "vstdir");
+		if (property) {
+			plugincatcher_scan(&self->plugincatcher,
+				properties_valuestring(property), MACH_VST);
+		}
+		property = properties_read(directories, "plugindir");
+		if (property) {
+			plugincatcher_scan(&self->plugincatcher,
+				properties_valuestring(property), MACH_PLUGIN);
+		}
 	}
 }
 
 void workspace_config(Workspace* self)
 {
 	Properties* p;
-	self->config = properties_create();
-	p = properties_append_string(self->config, "version", "alpha");	
-	p = properties_append_string(self->config, "plugindir",
+
+	Properties* general;
+	Properties* visual;
+	Properties* keyboard;
+	Properties* directories;	
+	Properties* midicontrollers;
+
+	self->config = properties_create();	
+	general = properties_createsection(self->config, "general");
+	properties_settext(general, "General");
+	p = properties_append_string(general, "version", "alpha");	
+	properties_settext(p, "Version");	
+	p->item.hint = PROPERTY_HINT_HIDE;
+	p = properties_append_bool(general, "showaboutatstart", 1);
+	properties_settext(p, "Show About at Startup");
+	p = properties_append_bool(general, "showsonginfoonload", 1);
+	properties_settext(p, "Show song info on Load");	
+
+	visual = properties_createsection(self->config, "visual");	
+	properties_settext(visual, "Visual");	
+	p = properties_append_bool(visual, "linenumbers", 1);
+	properties_settext(p, "Line numbers");
+	keyboard = properties_createsection(self->config, "keyboard");
+	properties_settext(keyboard, "Keyboard and Misc.");
+	directories = properties_createsection(self->config, "directories");
+	properties_settext(directories, "Directories");
+	p = properties_append_string(directories, "plugindir",
 		"C:\\Programme\\Psycle\\PsyclePlugins");
+	properties_settext(p, "Plug-in directory");
 	p->item.hint = PROPERTY_HINT_EDITDIR;
-	p = properties_append_string(self->config, "vstdir",
-		"C:\\Programme\\Psycle\\VstPlugins");	
+	p = properties_append_string(directories, "vstdir",
+		"C:\\Programme\\Psycle\\VstPlugins");
+	properties_settext(p, "VST directories");
 	p->item.hint = PROPERTY_HINT_EDITDIR;
-	p = properties_append_bool(self->config, "showaboutatstart", 1);
-	p = properties_append_bool(self->config, "showsonginfoonload", 1);
-	p = properties_append_bool(self->config, "linenumbers", 1);
+	// InputOutput
+	{		
+		self->inputoutput = properties_createsection(self->config, "inputoutput");
+		workspace_setdriverlist(self);
+		self->driverconfigure = properties_createsection(self->inputoutput, "configure");
+		properties_settext(self->driverconfigure, "Configure");		
+	}
+	// MIDIControllers
+	midicontrollers = properties_createsection(self->config, "midicontrollers");
+	properties_settext(midicontrollers, "MIDI Controllers");
+}
+
+void workspace_setdriverlist(Workspace* self)
+{
+	Properties* drivers;
+
+	properties_settext(self->inputoutput, "Input/Output");
+	// change number to set startup driver, if no psycle.ini found
+	drivers = properties_append_choice(self->inputoutput, "driver", 2); 
+	properties_settext(drivers, "Driver");
+	properties_append_string(drivers, "silent", "silentdriver");		
+#if defined(DEBUG)
+	properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
+	properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
+#else
+	properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
+	properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
+#endif
+}
+
+void workspace_configchanged(Workspace* self, Properties* property, Properties* choice)
+{
+	if (choice && (strcmp(properties_key(choice), "driver") == 0)) {
+		player_reloaddriver(&self->player, properties_valuestring(property));		
+		workspace_driverconfig(self);
+	}
+	signal_emit(&self->signal_configchanged, self, 1, property);
+}
+
+int workspace_showsonginfoonload(Workspace* self)
+{	
+	int rv = 1;
+	if (self->config) {
+		Properties* p;
+
+		p = properties_find(self->config, "general");
+		if (p && p->children) {			
+			properties_readbool(p, "showsonginfoonload", &rv, 1);
+		}
+	}
+	return rv;
+}
+
+int workspace_showaboutatstart(Workspace* self)
+{	
+	int rv = 1;
+	if (self->config) {
+		Properties* p;
+
+		p = properties_find(self->config, "general");
+		if (p && p->children) {			
+			properties_readbool(p, "showaboutatstart", &rv, 1);
+		}
+	}
+	return rv;
+}
+
+int workspace_showlinenumbers(Workspace* self)
+{	
+	int rv = 1;
+	if (self->config) {
+		Properties* p;
+
+		p = properties_find(self->config, "visual");
+		if (p && p->children) {			
+			properties_readbool(p, "linenumbers", &rv, 1);
+		}
+	}
+	return rv;
 }
 
 void workspace_newsong(Workspace* self)
@@ -81,11 +237,11 @@ void workspace_newsong(Workspace* self)
 	suspendwork();
 	workspace_removesong(self);
 	self->song = (Song*) malloc(sizeof(Song));
-	song_init(self->song);	
-	player_setsong(&self->player, self->song);
-	player_initmaster(&self->player);
+	song_init(self->song, &self->machinefactory);	
+	player_setsong(&self->player, self->song);	
 	applysongproperties(self);
 	properties_free(self->properties);
+	self->properties = 0;
 	self->properties = workspace_makeproperties(self);
 	signal_emit(&self->signal_songchanged, self, 0);
 	resumework();
@@ -93,20 +249,17 @@ void workspace_newsong(Workspace* self)
 
 Properties* workspace_makeproperties(Workspace* self)
 {
-	Properties* properties;
-	Properties* machinesproperties;	
-	Properties* machineproperties;
+	Properties* root;
+	Properties* machines;	
+	Properties* machine;
 	
-	properties = properties_create();	
-	machinesproperties = properties_append_int(properties, "machines", 0, 0, 0);
-	machinesproperties->children = properties_create();			
-	machineproperties =
-		properties_append_int(machinesproperties->children, "machine",
-			MASTER_INDEX, 0, 0);
-	machineproperties->children = properties_create();
-	properties_append_int(machineproperties->children, "x", 320, 0, 0);
-	properties_append_int(machineproperties->children, "y", 200, 0, 0);
-	return properties;
+	root = properties_create();
+	machines = properties_createsection(root, "machines");	
+	machine = properties_createsection(machines, "machine");	
+	properties_append_int(machine, "index", MASTER_INDEX, 0, 0);		
+	properties_append_int(machine, "x", 320, 0, 0);
+	properties_append_int(machine, "y", 200, 0, 0);
+	return root;
 }
 
 void workspace_removesong(Workspace* self)
@@ -124,24 +277,22 @@ void workspace_loadsong(Workspace* self, const char* path)
 	suspendwork();	
 	workspace_removesong(self);
 	self->song = (Song*) malloc(sizeof(Song));
-	song_init(self->song);
+	song_init(self->song, &self->machinefactory);
 	player_setsong(&self->player, self->song);	
-	player_initmaster(&self->player);	
-	song_load(self->song, path, &self->machinefactory, &self->properties);	 
+	song_load(self->song, path, &self->properties);	 
 	applysongproperties(self);
 	signal_emit(&self->signal_songchanged, self, 0);
 	resumework();
 }
 
 void applysongproperties(Workspace* self)
-{
-	int tmp;
+{	
 	double dTmp;
 
 	properties_readdouble(self->song->properties, "bpm", &dTmp, 125.0);
-	player_setbpm(&self->player, (float)dTmp);
-	properties_readint(self->song->properties, "lpb", &tmp, 4);
-	player_setlpb(&self->player, tmp);
+	player_setbpm(&self->player, (float)dTmp);	
+	player_setlpb(&self->player, properties_int(self->song->properties, 
+		"lpb", 4));
 }
 
 Properties* workspace_pluginlist(Workspace* self)
@@ -152,6 +303,7 @@ Properties* workspace_pluginlist(Workspace* self)
 void workspace_load_configuration(Workspace* self)
 {	
 	properties_load(self->config, "psycle.ini");	
+	workspace_configaudio(self);
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -170,7 +322,22 @@ int workspace_octave(Workspace* self)
 	return self->octave;
 }
 
+void workspace_updatedriver(Workspace* self)
+{
+	player_restartdriver(&self->player);
+}
+
 Samples* machinecallback_samples(Workspace* self)
 {
 	return &self->song->samples;
+}
+
+unsigned int machinecallback_samplerate(Workspace* self)
+{
+	return self->player.driver->samplerate(self->player.driver);
+}
+
+int machinecallback_bpm(Workspace* self)
+{
+	return (int)player_bpm(&self->player);
 }

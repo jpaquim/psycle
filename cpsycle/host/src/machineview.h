@@ -51,6 +51,7 @@ typedef struct {
 	unsigned int polycolour;
 	unsigned int wirewidth;
 	unsigned int wireaa;
+	unsigned int triangle_size;
 	const char* generator_fontface;
 	int generator_font_point;
 	unsigned int generator_font_flags;	

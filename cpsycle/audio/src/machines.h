@@ -41,13 +41,15 @@ typedef struct {
 	int filemode;
 	Signal signal_insert;
 	Signal signal_removed;
-	Signal signal_slotchange;		
+	Signal signal_slotchange;
+	Signal signal_showparameters;
 } Machines;
 
 void machines_init(Machines*);
 void machines_dispose(Machines*);
 void machines_insert(Machines*, int slot, Machine*);
 void machines_remove(Machines*, int slot);
+void machines_exchange(Machines*, int srcslot, int dstslot);
 int machines_append(Machines*, Machine*);
 Machine* machines_at(Machines*, int slot);
 void machines_enumerate(Machines*, void* context,
@@ -67,6 +69,7 @@ Machine* machines_master(Machines*);
 void machines_startfilemode(Machines*);
 void machines_endfilemode(Machines*);
 unsigned int machines_size(Machines*);
+void machines_showparameters(Machines*, int slot);
 
 void suspendwork(void);
 void resumework(void);

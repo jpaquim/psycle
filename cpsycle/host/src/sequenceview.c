@@ -17,6 +17,8 @@ static void OnDecPattern(SequenceView*);
 static void OnNewTrack(SequenceView*);
 static void OnDelTrack(SequenceView*);
 static void OnSize(SequenceView*, ui_component* sender, int width, int height);
+static void OnDurationSize(SequenceViewDuration*, ui_component* sender, int width, int height);
+static void UpdateSequenceViewDuration(SequenceViewDuration*);
 static void OnListViewMouseDown(SequenceListView*, ui_component* sender, int x, int y, int button);
 static void OnSongChanged(SequenceView*, Workspace*);
 static void OnEditPositionChanged(SequenceView*, Sequence* sender);
@@ -33,11 +35,15 @@ void InitSequenceView(SequenceView* self, ui_component* parent,
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	InitSequenceListView(&self->listview, &self->component, 
-		&workspace->song->sequence, &workspace->song->patterns);			
-	ui_component_move(&self->listview.component, 0, 75);
+		&workspace->song->sequence, &workspace->song->patterns);		
 	self->buttons.context = &self->listview;
 	InitSequenceButtons(&self->buttons, &self->component);
 	ui_component_resize(&self->buttons.component, 200, 70);
+	InitSequenceViewDuration(&self->duration, &self->component, self->sequence);	
+	ui_checkbox_init(&self->followsong, &self->component);
+	ui_checkbox_settext(&self->followsong, "Follow Song");
+	ui_checkbox_init(&self->shownames, &self->component);	
+	ui_checkbox_settext(&self->shownames, "Show pattern names");
 	signal_connect(&self->buttons.newentry.signal_clicked, self, OnNewEntry);
 	signal_connect(&self->buttons.insertentry.signal_clicked, self, OnInsertEntry);
 	signal_connect(&self->buttons.cloneentry.signal_clicked, self, OnCloneEntry);
@@ -176,10 +182,29 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 
 void OnSize(SequenceView* self, ui_component* sender, int width, int height)
 {
-	ui_size size = ui_component_size(&self->buttons.component);
+	ui_size buttonssize = ui_component_size(&self->buttons.component);
+	ui_size durationsize = ui_component_size(&self->duration.component);
 	
-	ui_component_resize(&self->buttons.component, width - 3, size.height);
-	ui_component_resize(&self->listview.component, width - 3, height - size.height - 3);
+	ui_component_resize(&self->buttons.component, width - 3, buttonssize.height);
+	ui_component_setposition(&self->listview.component, 
+		0, buttonssize.height,
+		width - 3,
+		height - buttonssize.height - durationsize.height - 40 - 3);	
+	ui_component_setposition(&self->duration.component, 
+		0,
+		height - durationsize.height - 40,
+		width - 3,
+		durationsize.height);
+	ui_component_setposition(&self->followsong.component, 
+		0,
+		height - 40,
+		width - 3,
+		20);
+	ui_component_setposition(&self->shownames.component, 
+		0,
+		height - 20,
+		width - 3,
+		20);
 }
 
 void OnNewEntry(SequenceView* self)
@@ -190,6 +215,7 @@ void OnNewEntry(SequenceView* self)
 	pattern_init(pattern);	
 	sequence_insert(self->sequence, sequence_editposition(self->sequence), 
 		patterns_append(self->patterns, pattern));	
+	UpdateSequenceViewDuration(&self->duration);
 }
 
 void OnInsertEntry(SequenceView* self)
@@ -200,6 +226,7 @@ void OnInsertEntry(SequenceView* self)
 	editposition = sequence_editposition(self->sequence);
 	entry = sequenceposition_entry(&editposition);			
 	sequence_insert(self->sequence, editposition, entry ? entry->pattern :0);
+	UpdateSequenceViewDuration(&self->duration);
 }
 
 void OnCloneEntry(SequenceView* self)
@@ -218,6 +245,7 @@ void OnCloneEntry(SequenceView* self)
 				patterns_append(self->patterns, pattern_clone(pattern)));
 		}						
 	}			
+	UpdateSequenceViewDuration(&self->duration);
 }
 
 void OnDelEntry(SequenceView* self)
@@ -234,6 +262,7 @@ void OnDelEntry(SequenceView* self)
 		position.track = editposition.track;
 		sequence_insert(self->sequence, position, 0);
 	}	
+	UpdateSequenceViewDuration(&self->duration);
 }
 
 void OnIncPattern(SequenceView* self)
@@ -247,6 +276,7 @@ void OnIncPattern(SequenceView* self)
 		sequence_setpatternslot(self->sequence,
 			sequence_editposition(self->sequence), entry->pattern + 1);
 	}
+	UpdateSequenceViewDuration(&self->duration);
 }
 
 void OnDecPattern(SequenceView* self)
@@ -260,6 +290,7 @@ void OnDecPattern(SequenceView* self)
 		sequence_setpatternslot(self->sequence,
 			sequence_editposition(self->sequence), entry->pattern - 1);
 	}
+	UpdateSequenceViewDuration(&self->duration);
 }
 
 void OnNewTrack(SequenceView* self)
@@ -277,6 +308,7 @@ void OnDelTrack(SequenceView* self)
 		self->listview.selected);	
 	sequence_removetrack(self->sequence, position.track);
 	ui_invalidate(&self->component);	
+	UpdateSequenceViewDuration(&self->duration);
 }
 
 void OnListViewMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int button)
@@ -303,6 +335,7 @@ void OnSongChanged(SequenceView* self, Workspace* workspace)
 	self->listview.sequence = &workspace->song->sequence;
 	self->listview.patterns = &workspace->song->patterns;
 	self->listview.selected = 0;
+	self->duration.sequence = &workspace->song->sequence;
 	ui_invalidate(&self->component);
 }
 
@@ -340,4 +373,34 @@ void OnEditPositionChanged(SequenceView* self, Sequence* sequence)
 		self->listview.selected = c;
 	}
 	ui_invalidate(&self->listview.component);
+}
+
+void InitSequenceViewDuration(SequenceViewDuration* self, ui_component* parent,
+	Sequence* sequence)
+{
+	self->sequence = sequence;
+	ui_component_init(&self->component, parent);
+	ui_component_resize(&self->component, 100, 20);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	signal_connect(&self->component.signal_size, self, OnDurationSize);	
+	ui_label_init(&self->desc, &self->component);
+	ui_label_settext(&self->desc, "Duration");
+	ui_label_init(&self->duration, &self->component);
+	UpdateSequenceViewDuration(self);
+}
+
+void UpdateSequenceViewDuration(SequenceViewDuration* self)
+{
+	char text[40];
+	
+	_snprintf(text, 40, "%.2f", sequence_duration(self->sequence));
+	ui_label_settext(&self->duration, text);
+}
+
+void OnDurationSize(SequenceViewDuration* self, ui_component* sender, int width, int height)
+{
+	ui_size size = ui_component_size(&self->component);
+
+	ui_component_setposition(&self->desc.component, 0, 0, 45, size.height);
+	ui_component_setposition(&self->duration.component, 45, 0, 50, size.height);
 }

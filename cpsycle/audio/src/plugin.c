@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "plugin.h"
 #include "pattern.h"
 #include <stdlib.h>
@@ -8,6 +9,7 @@
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
+static Machine* clone(void*);
 static int hostevent(Plugin* self, int const eventNr, int const val1, float const val2);
 static void generateaudio(Plugin* self, BufferContext*);
 static void seqtick(Plugin* self, int channel, const PatternEvent* event);
@@ -23,16 +25,18 @@ static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
 static float pan(Plugin* self) { return self->pan; } 
 static void setpan(Plugin* self, float val);
+static void setcallback(Plugin* self, MachineCallback callback);
 		
-void plugin_init(Plugin* self, const char* path)
+void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 {
 	CMachineInfo* pInfo = 0;	
 
-	machine_init(&self->machine);
+	machine_init(&self->machine, callback);	
 	library_init(&self->library);
 	library_load(&self->library, path);	
 	self->pan = 0.5;
 	self->mi = 0;
+	self->machine.clone = clone;
 	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
 	self->machine.sequencertick = sequencertick;
@@ -48,32 +52,44 @@ void plugin_init(Plugin* self, const char* path)
 	self->machine.numoutputs = numoutputs;
 	self->machine.pan = pan;
 	self->machine.setpan = setpan;
+	self->machine.setcallback = setcallback;
 
 	pInfo = info(self);	
 	if (!pInfo)
 	{
 		library_dispose(&self->library);		
 	} else {		
-		self->mi = mi_create(self->library.module);
+		self->mi = mi_create(self->library.module);		
 		if (!self->mi) {
 			library_dispose(&self->library);			
 		} else {
 			int gbp;	
+			mi_setcallback(self->mi, &callback);
 			mi_init(self->mi);
 			for (gbp = 0; gbp< pInfo->numParameters; gbp++) {
 				mi_parametertweak(self->mi, gbp, pInfo->Parameters[gbp]->DefValue);
-			}		
+			}					
 		}
 	}	
 }
 
 void dispose(Plugin* self)
 {		
-	if (self->library.module != 0) {
+	if (self->library.module != 0 && self->mi) {
+		mi_dispose(self->mi);
 		library_dispose(&self->library);
 		self->mi = 0;		
 	}		
 	machine_dispose(&self->machine);
+}
+
+Machine* clone(Plugin* self)
+{
+	Plugin* rv;
+
+	rv = malloc(sizeof(Plugin));
+	plugin_init(rv, self->machine.callback, self->library.path);
+	return &rv->machine;
 }
 
 
@@ -195,3 +211,9 @@ void setpan(Plugin* self, float val)
 	self->pan = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
 }
 
+void setcallback(Plugin* self, MachineCallback callback)
+{
+	if (self->mi) {				
+		mi_setcallback(self->mi, &callback);
+	}
+}

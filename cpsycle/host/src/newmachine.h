@@ -16,10 +16,12 @@ struct NewMachineStruct {
    ui_graphics* g;
    int cx;
    int cy;   
+   int dy;
    int pluginpos;
    Properties* selectedplugin;
    Signal signal_selected;
    Workspace* workspace;
+   int calledbygear;
 };
 
 typedef struct NewMachineStruct NewMachine;

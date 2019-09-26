@@ -19,12 +19,13 @@ typedef struct {
 	Sequence sequence;
 	Samples samples;
 	Instruments instruments;
-	XMInstruments xminstruments;	
+	XMInstruments xminstruments;
+	MachineFactory* machinefactory;
 } Song;
 
-void song_init(Song* self);
+void song_init(Song* self, MachineFactory*);
 void song_dispose(Song* self);
-void song_load(Song* self, const char* path, MachineFactory*,
+void song_load(Song* self, const char* path,
 			   Properties** workspaceproperties);
 
 #endif

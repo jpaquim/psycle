@@ -8,8 +8,6 @@
 
 /// Samples Main View
 static void OnSize(SamplesView*, ui_component* sender, int width, int height);
-static void AddString(SamplesView* self, const char* text);
-static void BuildSampleList(SamplesView* self);
 static void AlignSamplesView(SamplesView* self);
 static void OnSampleListChanged(SamplesView* self, ui_component* sender, int slot);
 static void SetSample(SamplesView*, int slot);
@@ -62,7 +60,8 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);
-	ui_listbox_init(&self->samplelist, &self->component);
+	InitSamplesBox(&self->samplesbox, &self->component,
+		&workspace->song->samples, &workspace->song->instruments);
 	ui_button_init(&self->loadbutton, &self->component);
 	ui_button_settext(&self->loadbutton, "Load");
 	signal_connect(&self->loadbutton.signal_clicked, self, OnLoadSample);
@@ -74,7 +73,8 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_button_settext(&self->deletebutton, "Delete");	
 	ui_component_init(&self->client, &self->component);
 	ui_component_enablealign(&self->client);	
-	InitSamplesHeaderView(&self->header, &self->client, &workspace->song->instruments, &self->samplelist);
+	InitSamplesHeaderView(&self->header, &self->client,
+		&workspace->song->instruments, &self->samplesbox.samplelist);
 	ui_component_resize(&self->header.component, 0, 50);
 	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);	
 	ui_component_setmargin(&self->header.component, &margin);
@@ -106,9 +106,8 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_component_resize(&self->waveloop.component, 0, 125);	
 	ui_component_setalign(&self->waveloop.component, UI_ALIGN_TOP);
 	ui_component_setmargin(&self->waveloop.component, &margin);
-	AlignSamplesView(self);	
-	BuildSampleList(self);
-	signal_connect(&self->samplelist.signal_selchanged, self, OnSampleListChanged);	
+	AlignSamplesView(self);		
+	signal_connect(&self->samplesbox.samplelist.signal_selchanged, self, OnSampleListChanged);	
 	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
 	SetSample(self, 0);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
@@ -121,32 +120,12 @@ void OnSize(SamplesView* self, ui_component* sender, int width, int height)
 
 void AlignSamplesView(SamplesView* self)
 {
-	ui_component_setposition(&self->samplelist.component,		  5,   5, 210, 380);	
+	ui_component_setposition(&self->samplesbox.samplelist.component,
+																  5,   5, 210, 380);	
 	ui_component_setposition(&self->loadbutton.component,         5, 385,  40,  20);
 	ui_component_setposition(&self->savebutton.component,        50, 385,  40,  20);
 	ui_component_setposition(&self->duplicatebutton.component,   95, 385,  65,  20);
 	ui_component_setposition(&self->deletebutton.component,     165, 385,  50,  20);	
-}
-
-void BuildSampleList(SamplesView* self)
-{	
-	Sample* sample;
-	int slot = 0;
-	char buffer[20];
-	ui_listbox_clear(&self->samplelist);
-	for ( ; slot < 256; ++slot) {		
-		if (sample = SearchIntHashTable(&self->player->song->samples.container, slot)) {
-			_snprintf(buffer, 20, "%02X:%s", slot, sample_name(sample));
-		} else {
-			_snprintf(buffer, 20, "%02X:%s", slot, "");
-		}
-		AddString(self, buffer);
-	}
-}
-
-void AddString(SamplesView* self, const char* text)
-{
-	ui_listbox_addstring(&self->samplelist, text);
 }
 
 void OnSampleListChanged(SamplesView* self, ui_component* sender, int slot)
@@ -173,7 +152,7 @@ void SetSample(SamplesView* self, int slot)
 	SetSampleSamplesGeneralView(&self->general, sample);
 	SetSampleSamplesVibratoView(&self->vibrato, sample);
 	SetSampleSamplesWaveLoopView(&self->waveloop, sample);
-	ui_listbox_setcursel(&self->samplelist, slot);	
+	ui_listbox_setcursel(&self->samplesbox.samplelist, slot);
 }
 
 void OnLoadSample(SamplesView* self, ui_component* sender)
@@ -191,13 +170,12 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 		sample = (Sample*)malloc(sizeof(Sample));
 		sample_init(sample);
 		sample_load(sample, path);
-		slot = ui_listbox_cursel(&self->samplelist);
+		slot = ui_listbox_cursel(&self->samplesbox.samplelist);
 		samples_insert(&self->player->song->samples, sample, slot);
 		instrument = (Instrument*)malloc(sizeof(Instrument));		
 		instrument_init(instrument);
 		instrument_setname(instrument, sample_name(sample));
-		instruments_insert(&self->player->song->instruments, instrument, slot);	
-		BuildSampleList(self);
+		instruments_insert(&self->player->song->instruments, instrument, slot);
 		SetSample(self, slot);
 		signal_prevent(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 		instruments_changeslot(&self->player->song->instruments, slot);
@@ -208,7 +186,8 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 void OnSongChanged(SamplesView* self, Workspace* workspace)
 {	
 	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
-	BuildSampleList(self);
+	SetSamples(&self->samplesbox, &workspace->song->samples,
+		&workspace->song->instruments);
 	SetSample(self, 0);
 }
 

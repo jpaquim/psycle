@@ -91,7 +91,7 @@ typedef struct {
 	///  1..C -> return panning
 } Mixer;
 
-void mixer_init(Mixer*);
+void mixer_init(Mixer*, MachineCallback);
 
 
 #endif

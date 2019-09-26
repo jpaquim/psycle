@@ -1,0 +1,1 @@
+Install the DirectX SDK and add dxguid.lib here

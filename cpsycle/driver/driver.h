@@ -27,9 +27,11 @@ typedef struct Driver {
 	int (*open)(struct Driver*);
 	void (*free)(struct Driver*);
 	int (*init)(struct Driver*);
+	void (*updateconfiguration)(struct Driver*);
 	int (*dispose)(struct Driver*);
 	int (*close)(struct Driver*);
-	void (*connect)(struct Driver*, void* context, AUDIODRIVERWORKFN callback);
+	void (*connect)(struct Driver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
+	unsigned int (*samplerate)(struct Driver*);
 } Driver;
 
 

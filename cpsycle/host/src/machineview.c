@@ -20,7 +20,8 @@ static void DrawMachineHighlight(WireView*, ui_graphics* g, int slot);
 static void DrawNewConnectionWire(WireView*, ui_graphics* g);
 static void DrawWires(WireView*, ui_graphics* g);
 static void DrawWireArrow(WireView*, ui_graphics* g, int outputslot, int inputslot);
-static void rotate_point(int x, int y, double phi, int* xr, int *yr);
+static ui_point rotate_point(ui_point, double phi);
+static ui_point move_point(ui_point pt, ui_point d);
 static void OnSize(WireView*, ui_component* sender, int width, int height);
 static void OnDestroy(WireView*, ui_component* component);
 static void OnMouseDown(WireView*, ui_component* sender, int x, int y, int button);
@@ -50,6 +51,7 @@ static void UpdateMachineUis(WireView*, Properties* );
 static void ConnectMachinesSignals(WireView*);
 static void OnMachineViewSize(MachineView*, ui_component* sender, int width, int height);
 static void WireViewApplyProperties(WireView*, Properties*);
+static void OnShowParameters(WireView*, Machines* sender, int slot);
 
 void MachineUiSet(MachineUi* self, int x, int y, int mode, const char* editname)
 {	
@@ -105,6 +107,7 @@ void ConnectMachinesSignals(WireView* self)
 	signal_connect(&self->machines->signal_slotchange, self, OnMachinesChangeSlot);
 	signal_connect(&self->machines->signal_insert, self, OnMachinesInsert);
 	signal_connect(&self->machines->signal_removed, self, OnMachinesRemoved);
+	signal_connect(&self->machines->signal_showparameters, self, OnShowParameters);
 }
 
 void Draw(WireView* self, ui_graphics* g)
@@ -144,19 +147,22 @@ void InitMachineCoords(WireView* self)
 	WireViewApplyProperties(self, 0);
 }
 
-void MachineViewApplyProperties(MachineView* self, Properties* properties)
+void MachineViewApplyProperties(MachineView* self, Properties* p)
 {
-	WireViewApplyProperties(&self->wireview, properties);
+	WireViewApplyProperties(&self->wireview, p);
 }
 
-void WireViewApplyProperties(WireView* self, Properties* properties)
+void WireViewApplyProperties(WireView* self, Properties* p)
 {
-	properties_readint(properties, "mv_colour", &self->skin.colour, 0x00232323);
-	properties_readint(properties, "mv_wirecolour", &self->skin.wirecolour, 0x005F5F5F);
-	properties_readint(properties, "mv_wireaacolour2", &self->skin.polycolour, 0x005F5F5F);
-	properties_readint(properties, "mv_polycolour", &self->skin.generator_fontcolour, 0x00B1C8B0);
-	properties_readint(properties, "mv_generator_fontcolour", &self->skin.generator_fontcolour, 0x00B1C8B0);
-	properties_readint(properties, "mv_effect_fontcolour", &self->skin.effect_fontcolour, 0x00D1C5B6);	
+	self->skin.colour = properties_int(p, "mv_colour", 0x00232323);
+	self->skin.wirecolour = properties_int(p, "mv_wirecolour", 0x005F5F5F);
+	self->skin.polycolour = properties_int(p, "mv_wireaacolour2", 0x005F5F5F);
+	self->skin.polycolour = properties_int(p, "mv_polycolour", 0x00B1C8B0);
+	self->skin.generator_fontcolour = 
+		properties_int(p, "mv_generator_fontcolour", 0x00B1C8B0);
+	self->skin.effect_fontcolour = 
+		properties_int(p, "mv_effect_fontcolour", 0x00D1C5B6);
+	self->skin.triangle_size = properties_int(p, "mv_triangle_size", 10);
 	self->skin.wireaacolour 
 		= ((((self->skin.wirecolour&0x00ff0000) + ((self->skin.colour&0x00ff0000)*4))/5)&0x00ff0000) +
 		  ((((self->skin.wirecolour&0x00ff00) + ((self->skin.colour&0x00ff00)*4))/5)&0x00ff00) +
@@ -166,7 +172,6 @@ void WireViewApplyProperties(WireView* self, Properties* properties)
 		  (((((self->skin.wirecolour&0x00ff00)) + ((self->skin.colour&0x00ff00)))/2)&0x00ff00) +
 		  (((((self->skin.wirecolour&0x00ff)) + ((self->skin.colour&0x00ff)))/2)&0x00ff);
 }
-
 
 void OnDraw(WireView* self, ui_component* sender, ui_graphics* g)
 {	
@@ -240,19 +245,22 @@ void DrawWireArrow(WireView* self, ui_graphics* g, int outputslot, int inputslot
 	int y1;
 	int x2;
 	int y2;
-	int centerx;
-	int centery;
+	ui_point center;	
 	double phi;
-
 	ui_point a;
 	ui_point b;
 	ui_point c;
-	ui_point ar;
-	ui_point br;
-	ui_point cr;
+	ui_point tri[4];
+	int polysize;
 
 	Machine* outmachine;
 	Machine* inmachine;
+
+	float deltaColR = ((self->skin.polycolour     & 0xFF) / 510.0f) + .45f;
+	float deltaColG = ((self->skin.polycolour>>8  & 0xFF) / 510.0f) + .45f;
+	float deltaColB = ((self->skin.polycolour>>16 & 0xFF) / 510.0f) + .45f;
+
+	unsigned int polyInnards = RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB);
 
 	outmachine = machines_at(self->machines, outputslot);
 	inmachine = machines_at(self->machines, inputslot);
@@ -269,31 +277,44 @@ void DrawWireArrow(WireView* self, ui_graphics* g, int outputslot, int inputslot
 	x2 = self->machineuis[inputslot].x + inwidth/2;
 	y2 = self->machineuis[inputslot].y + inheight/2;
 	
-	centerx = (x2 - x1) / 2 + x1;
-	centery = (y2 - y1) / 2 + y1;
+	center.x = (x2 - x1) / 2 + x1;
+	center.y = (y2 - y1) / 2 + y1;
 
-	a.x = -5;
-	a.y = 5;
-	b.x = 5;
-	b.y = 5;
+	polysize = self->skin.triangle_size;
+	a.x = -polysize/2;
+	a.y = polysize/2;
+	b.x = polysize/2;
+	b.y = polysize/2;
 	c.x = 0;
-	c.y = -5;
+	c.y = -polysize/2;
 
 	phi = atan2(x2 - x1, y1 - y2);
-
-	rotate_point(a.x, a.y, phi, &ar.x, &ar.y);
-	rotate_point(b.x, b.y, phi, &br.x, &br.y);
-	rotate_point(c.x, c.y, phi, &cr.x, &cr.y);
-
-	ui_drawline(g, centerx + ar.x, centery + ar.y, centerx + br.x, centery + br.y);
-	ui_drawline(g, centerx + br.x, centery + br.y, centerx + cr.x, centery + cr.y);
-	ui_drawline(g, centerx + cr.x, centery + cr.y, centerx + ar.x, centery + ar.y);
+	
+	tri[0] = move_point(rotate_point(a, phi), center);
+	tri[1] = move_point(rotate_point(b, phi), center);
+	tri[2] = move_point(rotate_point(c, phi), center);
+	tri[3] = tri[0];
+	
+	ui_drawsolidpolygon(g, tri, 4, polyInnards,
+		self->skin.wireaacolour);
 }
 
-void rotate_point(int x, int y, double phi, int* xr, int *yr)
+ui_point rotate_point(ui_point pt, double phi)
 {
-	*xr = (int) (cos(phi) * x - sin(phi) * y);
-	*yr = (int) (sin(phi) * x + cos(phi) * y);
+	ui_point rv;
+
+	rv.x = (int) (cos(phi) * pt.x - sin(phi) * pt.y);
+	rv.y = (int) (sin(phi) * pt.x + cos(phi) * pt.y);
+	return rv;
+}
+
+ui_point move_point(ui_point pt, ui_point d)
+{
+	ui_point rv;
+	
+	rv.x = pt.x + d.x;
+	rv.y = pt.y + d.y;
+	return rv;
 }
 
 void DrawNewConnectionWire(WireView* self, ui_graphics* g)
@@ -425,7 +446,9 @@ void OnSize(WireView* self, ui_component* sender, int width, int height)
 
 void machineview_align(MachineView* self)
 {
-	wireview_align(&self->wireview);
+	wireview_align(&self->wireview);	
+	// UpdateMachineUis(&self->wireview, 
+	//	properties_find(self->workspace->properties, "machines"));	
 }
 
 void wireview_align(WireView* self)
@@ -595,7 +618,6 @@ void OnMouseUp(WireView* self, ui_component* sender, int x, int y, int button)
 	ui_invalidate(&self->component);
 }
 
-
 void OnMouseDoubleClick(WireView* self, ui_component* sender, int x, int y, int button)
 {
 	self->mx = x;
@@ -604,20 +626,7 @@ void OnMouseDoubleClick(WireView* self, ui_component* sender, int x, int y, int 
 	if (self->dragslot == -1) {
 		self->component.propagateevent = 1;
 	} else {
-		if (self->machine_frames[self->dragslot].component.hwnd != 0) {
-			ui_component_show(&self->machine_frames[self->dragslot].component);
-		} else {
-			MachineFrame* frame;
-			ParamView* paramview;
-
-			frame = &self->machine_frames[self->dragslot];
-			InitMachineFrame(frame, &self->component);
-			paramview = &self->machine_paramviews[self->dragslot];			
-			InitParamView(paramview, &frame->component, machines_at(self->machines, self->dragslot));
-			MachineFrameSetParamView(frame, paramview);
-			ui_component_show(&frame->component);
-			ui_component_setfocus(&paramview->component);
-		}
+		machines_showparameters(self->machines, self->dragslot);		
 	}
 	self->dragslot = -1;
 }
@@ -636,7 +645,14 @@ void OnKeyDown(WireView* self, ui_component* sender, int keycode, int keydata)
 		}
 	} else 
 	if (keycode == VK_DELETE && self->selectedslot != MASTER_INDEX) {
-		machines_remove(self->machines, self->selectedslot);
+		Machine* machine;
+
+		machine = machines_at(self->machines, self->selectedslot);
+		if (machine) {
+			machines_remove(self->machines, self->selectedslot);
+			machine->dispose(machine);
+			free(machine);
+		}
 	} else {
 		ui_component_propagateevent(sender);
 	}
@@ -723,6 +739,7 @@ void OnMachinesInsert(WireView* self, Machines* machines, int slot)
 			machine->info(machine)
 			? machine->info(machine)->ShortName
 			: "");
+		ui_invalidate(&self->component);
 	}
 }
 
@@ -740,24 +757,19 @@ void UpdateMachineUis(WireView* self, Properties* machines)
 		p = machines->children;
 		while (p) {
 			if (p->item.key && strcmp(p->item.key, "machine") == 0) {				
+				int x;
+				int y;
+				int mode;
 				int index;
-				properties_readint(p, "machine", &index, 0);									
-				if (p->children) {
-					Properties* q;
-					int x;
-					int y;
-					int mode;
-					char* editname;
-
-					machine = machines_at(self->machines, index);					
-					mode = (machine) ? machine->mode(machine) : MACHMODE_FX;					
-					
-					q = p->children;
-					properties_readint(q, "x", &x, 0);
-					properties_readint(q, "y", &y, 0);					
-					properties_readstring(q, "editname", &editname, "");
-					MachineUiSet(&self->machineuis[index], x, y, mode, editname);	
-				}				
+				char* editname;
+																							
+				index = properties_int(p, "index", 0);
+				x = properties_int(p, "x", 0);
+				y = properties_int(p, "y", 0);
+				properties_readstring(p, "editname", &editname, "");
+				machine = machines_at(self->machines, index);					
+				mode = (machine) ? machine->mode(machine) : MACHMODE_FX;
+				MachineUiSet(&self->machineuis[index], x, y, mode, editname);				
 			}
 			p = p->next;
 		}
@@ -803,18 +815,22 @@ void OnMachineViewSize(MachineView* self, ui_component* sender, int width, int h
 
 void OnNewMachineSelected(MachineView* self, ui_component* sender,
 	Properties* plugininfo)
-{
+{	
 	Machine* machine;
-	
+		
 	machine = machinefactory_make(&self->workspace->machinefactory,
-		properties_value(plugininfo), properties_key(plugininfo));
+		properties_int(plugininfo, "type", 0),
+		properties_key(plugininfo));
 	if (machine) {		
-		machines_changeslot(self->wireview.machines,
-			machines_append(self->wireview.machines, machine));
-		self->tabbar.selected = 0;
-		ui_invalidate(&self->tabbar.component);
-		ui_notebook_setpage(&self->notebook, 0);
-	}
+		if (self->newmachine.calledbygear) {
+			machines_insert(self->wireview.machines,
+				machines_slot(self->wireview.machines), machine);
+		} else {
+			machines_changeslot(self->wireview.machines,
+				machines_append(self->wireview.machines, machine));
+		}
+		tabbar_select(&self->tabbar, 0);			
+	}	
 }
 
 void OnShow(MachineView* self, ui_component* sender)
@@ -843,4 +859,26 @@ void OnMachineViewKeyDown(MachineView* self, ui_component* sender, int keycode, 
 			ui_invalidate(&self->tabbar.component);
 		}
 	}
+}
+
+void OnShowParameters(WireView* self, Machines* sender, int slot)
+{
+	if (!machines_at(self->machines, slot)) {
+		return;
+	}
+	if (self->machine_frames[slot].component.hwnd != 0) {
+			ui_component_show(&self->machine_frames[slot].component);
+	} else {
+		MachineFrame* frame;
+		ParamView* paramview;
+
+		frame = &self->machine_frames[slot];
+		InitMachineFrame(frame, &self->component);
+		paramview = &self->machine_paramviews[slot];			
+		InitParamView(paramview, &frame->component, 
+			machines_at(self->machines, slot));
+		MachineFrameSetParamView(frame, paramview);
+		ui_component_show(&frame->component);
+		ui_component_setfocus(&paramview->component);
+	}	
 }

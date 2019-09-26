@@ -39,6 +39,7 @@ typedef struct {
 	ui_component client;
 	ui_button newsongbutton;
 	ui_button loadsongbutton;
+	ui_button updatedriver;
 	ui_component splitbar;
 	TabBar tabbar;	
 	ui_notebook notebook;
