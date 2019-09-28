@@ -33,10 +33,11 @@ void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
 	signal_connect(&self->moremorebutton.signal_clicked, self, OnMoreMoreClicked);		
 	ui_component_resize(&self->bpmdesclabel.component, 50, 0);	
 	ui_component_resize(&self->lesslessbutton.component, 20, 0);		
-	ui_component_resize(&self->lessbutton.component, 20, 0);		
+	ui_component_resize(&self->lessbutton.component, 10, 0);		
 	ui_component_resize(&self->bpmlabel.component, 40, 0);	
-	ui_component_resize(&self->morebutton.component, 20, 0);		
-	ui_component_resize(&self->moremorebutton.component, 20, 0);	
+	ui_component_resize(&self->moremorebutton.component, 20, 0);
+	ui_component_resize(&self->morebutton.component, 10, 0);		
+	
 	{
 		List* p;
 		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)

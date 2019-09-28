@@ -1,18 +1,16 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-
 #if !defined(TRACKERVIEW)
 #define TRACKERVIEW
 
-#include <uicomponent.h>
-#include <pattern.h>
-#include "noteinputs.h"
-#include "player.h"
 #include "skincoord.h"
+#include "noteinputs.h"
 #include "patternproperties.h"
 #include "tabbar.h"
 #include "workspace.h"
+
+#include <pattern.h>
 
 typedef struct {
 	SkinCoord background;	
@@ -49,29 +47,29 @@ typedef struct {
 	unsigned int cursor;
 	unsigned int cursor2;
 	TrackerHeaderCoords headercoords;
-	ui_bitmap skinbmp;	
+	ui_bitmap bitmap;
 } TrackerSkin;
 
 typedef struct {
-	int track;
+	unsigned int track;
 	float offset;
-	int line;
-	int subline;
-	int totallines;
-	int col;	
-} TrackerGridCursor;
+	unsigned int line;
+	unsigned int subline;
+	unsigned int totallines;
+	unsigned int col;	
+} TrackerCursor;
 
 typedef struct
 {
-	TrackerGridCursor topleft;
-	TrackerGridCursor bottomright;
+	TrackerCursor topleft;
+	TrackerCursor bottomright;
 } TrackerGridBlock;
 
 typedef struct {
 	ui_component component;
 	int dx;
 	int trackwidth;
-	int numtracks;
+	unsigned int numtracks;
 	int classic;
 	TrackerSkin* skin;
 } TrackerHeader;
@@ -100,14 +98,14 @@ typedef struct {
    int dy;
    int trackwidth;
    int lineheight;
-   int numtracks;   
+   unsigned int numtracks;   
    int lpb;
    float bpl;
    float cbpl;
    PatternNode* curr_event;
    NoteInputs* noteinputs;
    char** notestab;
-   TrackerGridCursor cursor;
+   TrackerCursor cursor;
    float cursorstep;   
    Player* player;
    int textheight;
@@ -129,15 +127,17 @@ typedef struct TrackerView {
 	Pattern* pattern;
 	TrackerSkin skin;
 	ui_font font;
-	int showlinenumbers;	
+	int showlinenumbers;
+	Workspace* workspace;
+	int opcount;
 } TrackerView;
 
-void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView* view, Player* player);
-void TrackerViewApplyProperties(TrackerView* self, Properties* properties);
+void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView*, Player*);
+void TrackerViewApplyProperties(TrackerView*, Properties*);
 void InitTrackerHeader(TrackerHeader*, ui_component* parent);
-void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self, ui_component* parent, TrackerView*);
+void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, ui_component* parent, TrackerView*);
 void InitTrackerLineNumbers(TrackerLineNumbers* self, ui_component* parent);
-void InitTrackerView(TrackerView*, ui_component* parent, Workspace* workspace);
+void InitTrackerView(TrackerView*, ui_component* parent, Workspace*);
 void TrackerViewSetPattern(TrackerView*, Pattern*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 

@@ -1,13 +1,14 @@
 #include "vumeter.h"
 #include <math.h>
 
-static void OnDraw(Vumeter* self, ui_component* sender, ui_graphics* g);
-static void OnSize(Vumeter* self, ui_component* sender, int width, int height);
-static void OnDestroy(Vumeter* self, ui_component* component);
-static void OnMouseDown(Vumeter* self, ui_component* sender, int x, int y, int button);
-static void OnTimer(Vumeter* self, ui_component* sender, int timerid);
-static void OnMasterWorked(Vumeter* self, Machine* master, BufferContext* bc);
-static void OnSongChanged(Vumeter* self, Workspace* workspace);
+static void OnDraw(Vumeter*, ui_component* sender, ui_graphics*);
+static void OnSize(Vumeter*, ui_component* sender, int width, int height);
+static void OnDestroy(Vumeter*, ui_component* sender);
+static void OnMouseDown(Vumeter*, ui_component* sender, int x, int y, int button);
+static void OnTimer(Vumeter*, ui_component* sender, int timerid);
+static void OnMasterWorked(Vumeter*, Machine*, BufferContext*);
+static void OnSongChanged(Vumeter*, Workspace*);
+static void ConnectMachinesSignals(Vumeter*, Workspace*);
 
 void InitVumeter(Vumeter* self, ui_component* parent, Workspace* workspace)
 {			
@@ -19,10 +20,9 @@ void InitVumeter(Vumeter* self, ui_component* parent, Workspace* workspace)
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	SetTimer(self->component.hwnd, 300, 50, 0);	
 	self->leftavg = 0;
-	self->rightavg = 0;
+	self->rightavg = 0;	
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	signal_connect(&machines_master(&workspace->song->machines)->signal_worked, 
-		self, OnMasterWorked);
+	ConnectMachinesSignals(self, workspace);
 }
 
 void OnDestroy(Vumeter* self, ui_component* component)
@@ -86,6 +86,15 @@ void OnSongChanged(Vumeter* self, Workspace* workspace)
 {
 	self->leftavg = 0;
 	self->rightavg = 0;
-	signal_connect(&machines_master(&workspace->song->machines)->signal_worked, 
-		self, OnMasterWorked);
+	ConnectMachinesSignals(self, workspace);
+}
+
+void ConnectMachinesSignals(Vumeter* self, Workspace* workspace)
+{
+	if (workspace && workspace->song &&
+			machines_master(&workspace->song->machines)) {
+		signal_connect(
+			&machines_master(&workspace->song->machines)->signal_worked, self,
+			OnMasterWorked);
+	}
 }

@@ -53,8 +53,8 @@ enum {
 	CMD_NOTE_A_3,
 	CMD_NOTE_AS3,
 	CMD_NOTE_B_3,
-	CMD_NOTE_Stop = 120,	///< NOTE STOP
-	CMD_NOTE_TweakM = 121,	///< tweak
+	CMD_NOTE_STOP = 120,	///< NOTE STOP
+	CMD_NOTE_TWEAKM = 121,	///< tweak
 	//CMD_NOTE_TweakE = 122,	///< tweak effect. Old! No longer used.
 	CMD_NOTE_MIDICC = 123,	///< Mcm Command (MIDI CC)
 	CMD_NOTE_TweakS = 124,	///< tweak slide command

@@ -2,7 +2,9 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "master.h"
+#include "machines.h"
 #include <string.h>
+#include <math.h>
 
 static int master_mode(Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(Master* self);
@@ -12,6 +14,8 @@ static int value(Master*, int const param);
 static const CMachineInfo* info(Master* self);
 static unsigned int numinputs(Master* self);
 static unsigned int numoutputs(Master* self);
+static int intparamvalue(float value);
+static float floatparamvalue(int value);
 
 static CMachineParameter const paraMaster = { 
 	"Master", "Master Vol",	0, 65535, MPF_STATE, 0
@@ -107,8 +111,9 @@ void master_init(Master* self, MachineCallback callback)
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;
+	self->machine.value = value;
 	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
+	self->machine.numoutputs = numoutputs;	
 }
 
 void master_dispose(Master* self)
@@ -118,16 +123,51 @@ void master_dispose(Master* self)
 
 void parametertweak(Master* self, int param, int value)
 {
+	if (param == 0) {
+		Machines* machines = self->machine.callback.machines(
+			self->machine.callback.context);
+		if (machines) {			
+			machines_setvolume(machines,
+				floatparamvalue(value) * floatparamvalue(value) * 4.f);
+		}		
+	}
 }
 
 int describevalue(Master* self, char* txt, int const param, int const value)
 { 	
+	if (param == 0) {
+		Machines* machines = self->machine.callback.machines(
+			self->machine.callback.context);
+
+		float db = (float)(20 * log10(machines_volume(machines)));
+		_snprintf(txt, 10, "%.2f dB", db);
+		return 1;
+	}
 	return 0;
 }
 
 int value(Master* self, int const param)
-{		
+{	
+	if (param == 0) {
+		Machines* machines = self->machine.callback.machines(
+			self->machine.callback.context);
+
+		if (machines) {
+			return intparamvalue(
+				(float)sqrt(machines_volume(machines)) * 0.5f);
+		}
+	}
 	return 0;
+}
+
+int intparamvalue(float value)
+{	
+	return (int)((value * 65535.f));	
+}
+
+float floatparamvalue(int value)
+{
+	return value / 65535.f;	
 }
 
 const CMachineInfo* info(Master* self)
@@ -144,3 +184,4 @@ unsigned int numoutputs(Master* self)
 {
 	return 2;
 }
+

@@ -22,13 +22,14 @@ static void song_initproperties(Song* self);
 static void song_initmaster(Song* self);
 
 static void loadpsy3(Song*, RiffFile*, char header[9], Properties* workspace);
-static void readsngi(Song*, RiffFile*, int size, int version);
-static void readseqd(Song*, RiffFile*, int size, int version,
-			  unsigned char* playorder, int* playlength);
-static void readpatd(Song*, RiffFile*, int size, int version);
-static void readinsd(Song*, RiffFile*, int size, int version);
-static void readmacd(Song*, RiffFile*, int size, int version, Properties* workspace);
 static void loadpsy2(Song*, RiffFile*);
+static void readsngi(Song*, RiffFile*, unsigned int size, int version);
+static void readseqd(Song*, RiffFile*, unsigned int size, int version,
+			  unsigned char* playorder, int* playlength);
+static void readpatd(Song*, RiffFile*, unsigned int size, int version);
+static void readinsd(Song*, RiffFile*, unsigned int size, int version);
+static void readmacd(Song*, RiffFile*, unsigned int size, int version, Properties* workspace);
+
 static void loadwavesubchunk(Song*, RiffFile*, int instrIdx, int pan, char * instrum_name, int fullopen, int loadIdx);
 static Machine* machineloadfilechunk(Song*, RiffFile*, int index, int version,
 	Machines* machines,
@@ -82,7 +83,7 @@ void song_initmaster(Song* self)
 	Machine* master;	
 
 	master = machinefactory_make(self->machinefactory, MACH_MASTER, 0);
-	machines_insert(&self->machines, MASTER_INDEX, master);
+	machines_insertmaster(&self->machines, (Master*)master);
 }
 
 
@@ -237,7 +238,7 @@ void loadpsy3(Song* self, RiffFile* file, char header[9],
 	}
 }
 
-void readsngi(Song* song, RiffFile* file, int size, int version)
+void readsngi(Song* song, RiffFile* file, unsigned int size, int version)
 {		
 	int i;
 	int temp;
@@ -346,7 +347,7 @@ void readsngi(Song* song, RiffFile* file, int size, int version)
 	rifffile_seek(file, begins + size);
 }
 
-void readseqd(Song* song, RiffFile* file, int size, int version,
+void readseqd(Song* song, RiffFile* file, unsigned int size, int version,
 			  unsigned char* playorder, int* playlength)
 {	
 	int temp;
@@ -381,7 +382,7 @@ unsigned char * CreateNewPattern(void)
 	return malloc(MULTIPLY2);	
 }
 
-void readpatd(Song* song, RiffFile* file, int size, int version)
+void readpatd(Song* song, RiffFile* file, unsigned int size, int version)
 {
 	size_t begins = rifffile_getpos(file);
 	if((version&0xffff0000) == VERSION_MAJOR_ZERO)
@@ -441,7 +442,9 @@ void readpatd(Song* song, RiffFile* file, int size, int version)
 			}
 		}
 		//\ fix for a bug existing in the song saver in the 1.7.x series
-		if((version == 0x0000) &&( rifffile_getpos(file) == begins+size+4)) size += 4;
+		if ((version == 0x0000) && rifffile_getpos(file) == (int)(begins+size+4)) {
+			size += 4;
+		}
 		if(version > 0) {
 			if( !song->patterns.sharetracknames) {
 				int t;
@@ -456,7 +459,7 @@ void readpatd(Song* song, RiffFile* file, int size, int version)
 	rifffile_seek(file, begins + size);
 }
 
-void readinsd(Song* song, RiffFile* file, int size, int version)
+void readinsd(Song* song, RiffFile* file, unsigned int size, int version)
 {	
 ///\name Loop stuff
 	///\{
@@ -541,20 +544,28 @@ void readinsd(Song* song, RiffFile* file, int size, int version)
 			rifffile_read(file, &ENV_SL, sizeof(ENV_SL));
 			rifffile_read(file, &ENV_RT, sizeof(ENV_RT));
 
-			instrument->volumeenvelope.attack = ENV_AT * 1.f/44100;
-			instrument->volumeenvelope.decay = ENV_DT * 1.f/44100;
-			instrument->volumeenvelope.sustain = ENV_SL / 100.f;
-			instrument->volumeenvelope.release = ENV_RT * 1.f/44100;
+			adsr_settings_setattack(
+				&instrument->volumeenvelope, ENV_AT * 1.f/44100);
+			adsr_settings_setdecay(
+				&instrument->volumeenvelope, ENV_DT * 1.f/44100);
+			adsr_settings_setsustain(
+				&instrument->volumeenvelope, ENV_SL / 100.f);
+			adsr_settings_setrelease(
+				&instrument->volumeenvelope, ENV_RT * 1.f/44100);
 			
 			rifffile_read(file, &ENV_F_AT, sizeof(ENV_F_AT));
 			rifffile_read(file, &ENV_F_DT, sizeof(ENV_F_DT));
 			rifffile_read(file, &ENV_F_SL, sizeof(ENV_F_SL));
 			rifffile_read(file, &ENV_F_RT, sizeof(ENV_F_RT));
 
-			instrument->filterenvelope.attack = ENV_AT * 1.f/44100;
-			instrument->filterenvelope.decay = ENV_F_DT * 1.f/44100;
-			instrument->filterenvelope.sustain = ENV_F_SL / 128.f;
-			instrument->filterenvelope.release = ENV_F_RT * 1.f/44100;
+			adsr_settings_setattack(
+				&instrument->filterenvelope, ENV_AT * 1.f/44100);
+			adsr_settings_setdecay(
+				&instrument->filterenvelope, ENV_F_DT * 1.f/44100);
+			adsr_settings_setsustain(
+				&instrument->filterenvelope, ENV_F_SL / 128.f);
+			adsr_settings_setrelease(
+				&instrument->filterenvelope, ENV_F_RT * 1.f/44100);
 
 			rifffile_read(file, &ENV_F_CO, sizeof(ENV_F_CO));
 			rifffile_read(file, &ENV_F_RQ, sizeof(ENV_F_RQ));
@@ -718,7 +729,7 @@ void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * 
 	}
 }
 
-void readmacd(Song* self, RiffFile* file, int size, int version,
+void readmacd(Song* self, RiffFile* file, unsigned int size, int version,
 			  Properties* machinesproperties)
 {
 	size_t begins = rifffile_getpos(file);

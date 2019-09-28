@@ -7,15 +7,15 @@
 #include <uilabel.h>
 #include <uislider.h>
 #include <machines.h>
-#include "player.h"
+#include "workspace.h"
 
 typedef struct {
 	ui_component component;	
 	ui_slider slider;
-	Player* player;
+	Machines* machines;
 	unsigned int slot;	
 } VolSlider;
 
-void InitVolSlider(VolSlider*, ui_component* parent, Player* player);
+void InitVolSlider(VolSlider*, ui_component* parent, Workspace*);
 
 #endif

@@ -92,7 +92,7 @@ void ui_listbox_selitems(ui_listbox* listbox, int* items, int maxitems)
 		(LPARAM)items); 
 }
 
-int ui_listbox_numselitems(ui_listbox* listbox)
+int ui_listbox_selcount(ui_listbox* listbox)
 {
 	return SendMessage(listbox->component.hwnd, LB_GETSELCOUNT, (WPARAM)0, (LPARAM)0); 
 }

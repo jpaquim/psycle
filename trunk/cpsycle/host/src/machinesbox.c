@@ -150,42 +150,44 @@ void OnMachinesRemoved(MachinesBox* self, Machines* machines, int slot)
 
 void MachinesBoxClone(MachinesBox* self)
 {
-	int selection[256];
-	int numsel;
-	int i;
-	Machine* srcmachine = 0;
+	int selcount;
+	
+	selcount = ui_listbox_selcount(&self->machinelist);
+	if (selcount) {
+		int selection[256];	
+		int i;
+		Machine* srcmachine = 0;
 
-	ui_listbox_selitems(&self->machinelist,
-		selection, 256);
-	numsel = ui_listbox_numselitems(&self->machinelist);
-	for (i = 0; i < numsel; ++i) {				
-		if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
-			int slot;
-			Machine* machine;
-			
-			slot = (int) SearchIntHashTable(&self->listboxslots,
-				selection[i]);
-			machine = machines_at(self->machines, slot);
-			if (machine && srcmachine == 0) {
-				srcmachine = machine;
-				break;
-			}
-		}
-	}
-	if (srcmachine) {
-		for (i = 0; i < numsel; ++i) {				
-			if (ExistsIntHashTable(&self->listboxslots,
-					selection[i])) {
+		ui_listbox_selitems(&self->machinelist, selection, selcount);		
+		for (i = 0; i < selcount; ++i) {				
+			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
 				int slot;
 				Machine* machine;
 				
 				slot = (int) SearchIntHashTable(&self->listboxslots,
 					selection[i]);
 				machine = machines_at(self->machines, slot);
-				if (machine != srcmachine) {
-					Machine* clone = srcmachine->clone(srcmachine);
-					if (clone) {
-						machines_insert(self->machines, slot, clone);
+				if (machine && srcmachine == 0) {
+					srcmachine = machine;
+					break;
+				}
+			}
+		}
+		if (srcmachine) {
+			for (i = 0; i < selcount; ++i) {				
+				if (ExistsIntHashTable(&self->listboxslots,
+						selection[i])) {
+					int slot;
+					Machine* machine;
+					
+					slot = (int) SearchIntHashTable(&self->listboxslots,
+						selection[i]);
+					machine = machines_at(self->machines, slot);
+					if (machine != srcmachine) {
+						Machine* clone = srcmachine->clone(srcmachine);
+						if (clone) {
+							machines_insert(self->machines, slot, clone);
+						}
 					}
 				}
 			}
@@ -194,57 +196,58 @@ void MachinesBoxClone(MachinesBox* self)
 }
 
 void MachinesBoxRemove(MachinesBox* self)
-{
-	int selection[256];
-	int numsel;
-	int i;
+{	
+	int selcount;	
+	
+	selcount = ui_listbox_selcount(&self->machinelist);
+	if (selcount > 0) {
+		int* selection;
+		int i;
 
-	ui_listbox_selitems(&self->machinelist,
-	selection, 256);
-	numsel = ui_listbox_numselitems(&self->machinelist);
-	for (i = 0; i < numsel; ++i) {				
-		if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
-			int slot;
-			Machine* machine;
-			
-			slot = (int) SearchIntHashTable(&self->listboxslots, selection[i]);
-			machine = machines_at(self->machines, slot);
-			if (machine) {					
-				machines_remove(self->machines, slot);
-				machine->dispose(machine);
-				free(machine);
+		selection = (int*)malloc(selcount * sizeof(int));
+		ui_listbox_selitems(&self->machinelist, selection, selcount);
+		for (i = 0; i < selcount; ++i) {				
+			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
+				int slot;			
+				
+				slot = (int) SearchIntHashTable(&self->listboxslots,
+					selection[i]);
+				machines_remove(self->machines, slot);			
 			}
 		}
+		free(selection);
 	}
 }
 
 void MachinesBoxExchange(MachinesBox* self)
 {
-	int selection[256];
-	int numsel;
-	int i;
-	int srcslot = -1;
+	int selcount;	
 
-	ui_listbox_selitems(&self->machinelist,
-		selection, 256);
-	numsel = ui_listbox_numselitems(&self->machinelist);
-	for (i = 0; i < numsel; ++i) {				
-		if (ExistsIntHashTable(&self->listboxslots, selection[i])) {			
-			srcslot = (int) SearchIntHashTable(&self->listboxslots,
-				selection[i]);			
-			break;			
+	selcount = ui_listbox_selcount(&self->machinelist);
+	if (selcount > 0) {
+		int selection[256];	
+		int i;
+		int srcslot = -1;
+
+		ui_listbox_selitems(&self->machinelist, selection, selcount);		
+		for (i = 0; i < selcount; ++i) {				
+			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {			
+				srcslot = (int) SearchIntHashTable(&self->listboxslots,
+					selection[i]);			
+				break;			
+			}
 		}
-	}
-	if (srcslot != -1) {
-		for (i = 0; i < numsel; ++i) {				
-			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
-				int slot;				
-				
-				slot = (int) SearchIntHashTable(&self->listboxslots,
-					selection[i]);				
-				if (slot != srcslot) {		
-					machines_exchange(self->machines, srcslot, slot);
-					break;
+		if (srcslot != -1) {
+			for (i = 0; i < selcount; ++i) {				
+				if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
+					int slot;				
+					
+					slot = (int) SearchIntHashTable(&self->listboxslots,
+						selection[i]);				
+					if (slot != srcslot) {		
+						machines_exchange(self->machines, srcslot, slot);
+						break;
+					}
 				}
 			}
 		}
@@ -252,23 +255,25 @@ void MachinesBoxExchange(MachinesBox* self)
 }
 
 void MachinesBoxShowParameters(MachinesBox* self)
-{
-	int selection[256];
-	int numsel;
-	int i;
+{	
+	int selcount;	
+	
+	selcount = ui_listbox_selcount(&self->machinelist);
+	if (selcount > 0) {
+		int selection[256];
+		int i;
 
-	ui_listbox_selitems(&self->machinelist,
-	selection, 256);
-	numsel = ui_listbox_numselitems(&self->machinelist);
-	for (i = 0; i < numsel; ++i) {				
-		if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
-			int slot;
-			Machine* machine;
-			
-			slot = (int) SearchIntHashTable(&self->listboxslots, selection[i]);
-			machine = machines_at(self->machines, slot);
-			if (machine) {					
-				machines_showparameters(self->machines, slot);
+		ui_listbox_selitems(&self->machinelist, selection, selcount);
+		for (i = 0; i < selcount; ++i) {				
+			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
+				int slot;
+				Machine* machine;
+				
+				slot = (int) SearchIntHashTable(&self->listboxslots, selection[i]);
+				machine = machines_at(self->machines, slot);
+				if (machine) {					
+					machines_showparameters(self->machines, slot);
+				}
 			}
 		}
 	}

@@ -9,8 +9,8 @@ void instrument_init(Instrument* self)
 {	
 	self->name = strdup("");
 	self->nna = NNA_STOP;
-	adsr_envelopesettings_initdefault(&self->volumeenvelope);
-	adsr_envelopesettings_initdefault(&self->filterenvelope);
+	adsr_settings_initdefault(&self->volumeenvelope);
+	adsr_settings_initdefault(&self->filterenvelope);
 }
 
 void instrument_dispose(Instrument* self)

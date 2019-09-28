@@ -3,18 +3,72 @@
 
 #include "adsr.h"
 
-void adsr_envelopesettings_init(ADSREnvelopeSettings* self, float attack,
-	float decay, float sustain, float release)
+void envelopepoint_init(EnvelopePoint* self, float time, float value, float mintime,
+	float maxtime, float minvalue, float maxvalue)
 {
+	self->time = time;
+	self->value = value;
+	self->mintime = mintime;
+	self->maxtime = maxtime;
+	self->minvalue = minvalue;
+	self->maxvalue = maxvalue;
+}
+
+void adsr_settings_init(ADSRSettings* self, float attack,
+	float decay, float sustain, float release)
+{	
 	self->attack = attack;
 	self->decay = decay;
 	self->sustain = sustain;
 	self->release = release;
 }
 
-void adsr_envelopesettings_initdefault(ADSREnvelopeSettings* self)
+void adsr_settings_initdefault(ADSRSettings* self)
 {
-	adsr_envelopesettings_init(self, 0.1f, 1.0f, 0.5f, 1.0f);	
+	self->attack = 0.2f;
+	self->decay = 0.3f;
+	self->sustain = 0.5f;
+	self->release = 0.3f;
+}
+
+float adsr_settings_attack(ADSRSettings* self)
+{
+	return self->attack;
+}
+
+void adsr_settings_setattack(ADSRSettings* self, float value)
+{
+	self->attack = value;
+}
+
+float adsr_settings_decay(ADSRSettings* self)
+{
+	return self->decay;
+}
+
+void adsr_settings_setdecay(ADSRSettings* self, float value)
+{
+	self->decay = value;
+}
+
+float adsr_settings_sustain(ADSRSettings* self)
+{
+	return self->sustain;
+}
+
+void adsr_settings_setsustain(ADSRSettings* self, float value)
+{
+	self->sustain = value;
+}
+
+float adsr_settings_release(ADSRSettings* self)
+{
+	return self->release;
+}
+
+void adsr_settings_setrelease(ADSRSettings* self, float value)
+{
+	self->release = value;
 }
 
 void adsr_init(ADSR* self)
@@ -23,7 +77,7 @@ void adsr_init(ADSR* self)
 	self->value = 0.f;
 	self->step = 0.f;
 	self->samplerate = 44100;
-	adsr_envelopesettings_initdefault(&self->settings);		
+	adsr_settings_initdefault(&self->settings);		
 }
 
 void adsr_tick(ADSR* self)
@@ -35,13 +89,16 @@ void adsr_tick(ADSR* self)
 			if (self->value > 1.0f) {
 				self->value = 1.0f;
 				self->stage = ENV_DECAY;
-				self->step = ((1.0f - self->settings.sustain)/self->settings.decay)*(44100.0f/self->samplerate);
+				self->step = 
+					((1.0f - adsr_settings_sustain(&self->settings)) /
+					adsr_settings_decay(&self->settings)) *
+					(44100.0f/self->samplerate);
 			}
 		break;
 		case ENV_DECAY:
 			self->value -= self->step;
-			if (self->value < self->settings.sustain) {
-				self->value = self->settings.sustain;
+			if (self->value < adsr_settings_sustain(&self->settings)) {
+				self->value = adsr_settings_sustain(&self->settings);
 				self->stage = ENV_SUSTAIN;
 			}
 		break;
@@ -64,7 +121,7 @@ void adsr_tick(ADSR* self)
 void adsr_start(ADSR* self)
 {	
 	self->value = 0.f;
-	self->step = 1.0f / self->settings.attack * 1.0f/44100;	
+	self->step = 1.0f / adsr_settings_attack(&self->settings) * 1.0f/44100;	
 	self->stage = ENV_ATTACK;
 }
 

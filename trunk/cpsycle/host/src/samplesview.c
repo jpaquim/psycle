@@ -72,11 +72,10 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_button_init(&self->deletebutton, &self->component);
 	ui_button_settext(&self->deletebutton, "Delete");	
 	ui_component_init(&self->client, &self->component);
-	ui_component_enablealign(&self->client);	
-	InitSamplesHeaderView(&self->header, &self->client,
+	ui_component_enablealign(&self->client);
+	InitSamplesHeaderView(&self->header, &self->component,
 		&workspace->song->instruments, &self->samplesbox.samplelist);
-	ui_component_resize(&self->header.component, 0, 50);
-	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);	
+	ui_component_resize(&self->header.component, 400, 20);	
 	ui_component_setmargin(&self->header.component, &margin);
 	InitTabBar(&self->tabbar, &self->client);	
 	ui_component_resize(&self->tabbar.component, 0, 20);
@@ -114,18 +113,24 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 }
 
 void OnSize(SamplesView* self, ui_component* sender, int width, int height)
-{	
-	ui_component_setposition(&self->client, 220, 0, width - 220,  height);
+{		
+	AlignSamplesView(self);
 }
 
 void AlignSamplesView(SamplesView* self)
 {
+	ui_size size;
+
+	size = ui_component_size(&self->component);
+
+	ui_component_setposition(&self->header.component, 0, 0, size.width,  25);
+	ui_component_setposition(&self->client, 220, 30, size.width - 220,  size.height - 30);
+	ui_component_setposition(&self->loadbutton.component,         5,  30,  40,  20);
+	ui_component_setposition(&self->savebutton.component,        50,  30,  40,  20);
+	ui_component_setposition(&self->duplicatebutton.component,   95,  30,  65,  20);
+	ui_component_setposition(&self->deletebutton.component,     165,  30,  50,  20);
 	ui_component_setposition(&self->samplesbox.samplelist.component,
-																  5,   5, 210, 380);	
-	ui_component_setposition(&self->loadbutton.component,         5, 385,  40,  20);
-	ui_component_setposition(&self->savebutton.component,        50, 385,  40,  20);
-	ui_component_setposition(&self->duplicatebutton.component,   95, 385,  65,  20);
-	ui_component_setposition(&self->deletebutton.component,     165, 385,  50,  20);	
+																  5,  50, 210, size.height - 50);
 }
 
 void OnSampleListChanged(SamplesView* self, ui_component* sender, int slot)
@@ -180,7 +185,8 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 		signal_prevent(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 		instruments_changeslot(&self->player->song->instruments, slot);
 		signal_enable(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
-	}
+		ui_invalidate(&self->component);
+	}	
 }
 
 void OnSongChanged(SamplesView* self, Workspace* workspace)
@@ -193,51 +199,63 @@ void OnSongChanged(SamplesView* self, Workspace* workspace)
 
 void InitSamplesHeaderView(SamplesHeaderView* self, ui_component* parent, Instruments* instruments, ui_listbox* samplelist)
 {
+	ui_margin margin = { 5, 3, 3, 0 };
+
 	self->instruments = instruments;
 	self->samplelist = samplelist;
 	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
 
 	ui_label_init(&self->namelabel, &self->component);
 	ui_label_settext(&self->namelabel, "Sample Name");
-	ui_component_setposition(&self->namelabel.component, 0, 0, 95, 20);
+	ui_component_resize(&self->namelabel.component, 90, 20);	
 
 	ui_edit_init(&self->nameedit, &self->component, 0);		
-	ui_component_setposition(&self->nameedit.component, 100, 0, 105, 20);
+	ui_component_resize(&self->nameedit.component, 80, 20);
 	signal_connect(&self->nameedit.signal_change, self, OnEditSampleName);
 
 	ui_button_init(&self->prevbutton, &self->component);
 	ui_button_settext(&self->prevbutton, "<");
-	ui_component_setposition(&self->prevbutton.component, 220, 0, 20, 20);
+	ui_component_resize(&self->prevbutton.component, 20, 20);
 	signal_connect(&self->prevbutton.signal_clicked, self, OnPrevSample);
 
 	ui_button_init(&self->nextbutton, &self->component);
 	ui_button_settext(&self->nextbutton, ">");
-	ui_component_setposition(&self->nextbutton.component, 245, 0, 20, 20);
+	ui_component_resize(&self->nextbutton.component, 20, 20);
 	signal_connect(&self->nextbutton.signal_clicked, self, OnNextSample);
 
 	ui_button_init(&self->deletebutton, &self->component);
 	ui_button_settext(&self->deletebutton, "Delete");
-	ui_component_setposition(&self->deletebutton.component, 270, 0, 70, 20);
+	ui_component_resize(&self->deletebutton.component, 40, 20);
 	signal_connect(&self->deletebutton.signal_clicked, self, OnDeleteSample);	
 
 	ui_label_init(&self->srlabel, &self->component);
 	ui_label_settext(&self->srlabel, "Sample Rate");
-	ui_component_setposition(&self->srlabel.component, 0, 25, 85, 20);
+	ui_component_resize(&self->srlabel.component, 85, 20);
 
 	ui_edit_init(&self->sredit, &self->component, 0);	
-	ui_component_setposition(&self->sredit.component, 100, 25, 50, 20);
+	ui_component_resize(&self->sredit.component, 50, 20);
 
 	ui_label_init(&self->numsamplesheaderlabel, &self->component);
 	ui_label_settext(&self->numsamplesheaderlabel, "Samples");
-	ui_component_setposition(&self->numsamplesheaderlabel.component, 160, 25, 60, 20);
+	ui_component_resize(&self->numsamplesheaderlabel.component, 60, 20);
 
 	ui_label_init(&self->numsampleslabel, &self->component);
 	ui_label_settext(&self->numsampleslabel, "");
-	ui_component_setposition(&self->numsampleslabel.component, 230, 25, 60, 20);
+	ui_component_resize(&self->numsampleslabel.component, 40, 20);
 
 	ui_label_init(&self->channellabel, &self->component);
 	ui_label_settext(&self->channellabel, "");
-	ui_component_setposition(&self->channellabel.component, 300, 25, 40, 20);
+	ui_component_resize(&self->channellabel.component, 40, 20);
+
+	{
+		List* p;
+		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)
+		{
+			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_LEFT);
+			ui_component_setmargin((ui_component*)p->entry, &margin);
+		}
+	}
 }
 
 void SetSampleSamplesHeaderView(SamplesHeaderView* self, Sample* sample)

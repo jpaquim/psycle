@@ -16,9 +16,9 @@ void InitSongTrackBar(SongTrackBar* self, ui_component* parent, Workspace* works
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	ui_label_init(&self->headerlabel, &self->component);	
 	ui_label_settext(&self->headerlabel, "Tracks");	
-	ui_component_setposition(&self->headerlabel.component, 0, 0, 45, 20);	
+	ui_component_setposition(&self->headerlabel.component, 0, 0, 35, 20);	
 	ui_combobox_init(&self->trackbox, &self->component);	
-	ui_component_setposition(&self->trackbox.component, 50, 0, 40, 20);	
+	ui_component_setposition(&self->trackbox.component, 40, 0, 60, 20);	
 	Buildtrackbox(self);	
 	signal_connect(&self->trackbox.signal_selchanged, self, OnTrackBoxSelChange);	
 	signal_connect(&workspace->player.signal_numsongtrackschanged, self, OnSongTracksNumChanged);

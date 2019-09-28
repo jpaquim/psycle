@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <plugincatcher.h>
 #include <machinefactory.h>
+#include "undoredo.h"
 
 typedef struct {	
 	Song* song;
@@ -26,11 +27,12 @@ typedef struct {
 	Signal signal_songchanged;
 	Signal signal_configchanged;
 	void* mainhandle;
+	UndoRedo undoredo;
 } Workspace;
 
 void workspace_init(Workspace*);
 void workspace_dispose(Workspace*);
-void workspace_initplayer(Workspace* self);
+void workspace_initplayer(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
@@ -43,7 +45,9 @@ int workspace_octave(Workspace*);
 int workspace_showsonginfoonload(Workspace*);
 int workspace_showaboutatstart(Workspace*);
 int workspace_showlinenumbers(Workspace*);
-void workspace_configchanged(Workspace* self, Properties* property,
+void workspace_configchanged(Workspace*, Properties* property,
 	Properties* choice);
+void workspace_undo(Workspace*);
+void workspace_redo(Workspace*);
 
 #endif

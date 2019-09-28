@@ -15,11 +15,11 @@ static int isoffsetinwindow(Sequencer* self, float offset);
 static void insertevents(Sequencer* self);
 static void insertdelayedevents(Sequencer*);
 
-void sequencer_init(Sequencer* self)
+void sequencer_init(Sequencer* self, Sequence* sequence)
 {
 	self->samplerate = 44100;
 	self->bpm = 125;
-	self->sequence = 0;
+	self->sequence = sequence;
 	self->position = 0;	
 	self->window = 0;
 	self->events = 0;
@@ -32,6 +32,13 @@ void sequencer_dispose(Sequencer* self)
 	clearevents(self);
 	cleardelayed(self);
 	cleartrackiterators(self);
+	self->sequence = 0;
+}
+
+void sequencer_reset(Sequencer* self, Sequence* sequence)
+{
+	sequencer_dispose(self);
+	sequencer_init(self, sequence);
 }
 
 void sequencer_setposition(Sequencer* self, float offset)

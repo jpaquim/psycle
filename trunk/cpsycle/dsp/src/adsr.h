@@ -5,15 +5,35 @@
 #define DSP_ADSR_H
 
 
+typedef struct {
+	float value;
+	float time;
+	float minvalue;
+	float maxvalue;
+	float mintime;
+	float maxtime;	
+} EnvelopePoint;
+
+void envelopepoint_init(EnvelopePoint*, float time, float value, float mintime,
+	float maxtime, float minvalue, float maxvalue);
+
 typedef struct {	
 	float attack;
 	float decay;
 	float sustain;
 	float release;
-} ADSREnvelopeSettings;
+} ADSRSettings;
 
-void adsr_envelopesettings_init(ADSREnvelopeSettings*, float, float, float, float);
-void adsr_envelopesettings_initdefault(ADSREnvelopeSettings*);
+void adsr_settings_init(ADSRSettings*, float, float, float, float);
+void adsr_settings_initdefault(ADSRSettings*);
+float adsr_settings_attack(ADSRSettings*);
+void adsr_settings_setattack(ADSRSettings*, float);
+float adsr_settings_decay(ADSRSettings*);
+void adsr_settings_setdecay(ADSRSettings*, float);
+float adsr_settings_sustain(ADSRSettings*);
+void adsr_settings_setsustain(ADSRSettings*, float);
+float adsr_settings_release(ADSRSettings*);
+void adsr_settings_setrelease(ADSRSettings*, float);
 
 typedef enum
 {
@@ -29,7 +49,7 @@ typedef struct {
 	float value;
 	float step;
 	unsigned int samplerate;
-	ADSREnvelopeSettings settings;
+	ADSRSettings settings;
 	EnvelopeStage stage;	
 } ADSR;
 

@@ -31,6 +31,7 @@ void InitTabBar(TabBar* self, ui_component* parent)
 
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	self->component.doublebuffered = 1;
 	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
 	ui_font_init(&self->font, &fontinfo);
 	ui_component_setfont(&self->component, &self->font);

@@ -21,6 +21,6 @@ void ui_listbox_clear(ui_listbox*);
 void ui_listbox_setcursel(ui_listbox*, int index);
 int ui_listbox_cursel(ui_listbox*);
 void ui_listbox_selitems(ui_listbox*, int* items, int maxitems);
-int ui_listbox_numselitems(ui_listbox*);
+int ui_listbox_selcount(ui_listbox*);
 
 #endif

@@ -6,7 +6,7 @@
 
 #include <hashtbl.h>
 #include <list.h>
-#include "machine.h"
+#include "master.h"
 #include <signal.h>
 
 #define MASTER_INDEX 128
@@ -27,8 +27,9 @@ typedef struct {
 typedef List MachinePath;
 typedef List MachineList;
 
-typedef struct {	
+typedef struct Machines {	
 	IntHashTable slots;
+	Master* master;
 	IntHashTable connections;
 	IntHashTable inputbuffers;
 	IntHashTable outputbuffers;
@@ -39,6 +40,7 @@ typedef struct {
 	int currsamplebuffer;
 	int slot;
 	int filemode;
+	float volume;
 	Signal signal_insert;
 	Signal signal_removed;
 	Signal signal_slotchange;
@@ -48,6 +50,8 @@ typedef struct {
 void machines_init(Machines*);
 void machines_dispose(Machines*);
 void machines_insert(Machines*, int slot, Machine*);
+void machines_insertmaster(Machines*, Master*);
+void machines_erase(Machines*, int slot);
 void machines_remove(Machines*, int slot);
 void machines_exchange(Machines*, int srcslot, int dstslot);
 int machines_append(Machines*, Machine*);
@@ -70,6 +74,9 @@ void machines_startfilemode(Machines*);
 void machines_endfilemode(Machines*);
 unsigned int machines_size(Machines*);
 void machines_showparameters(Machines*, int slot);
+void machines_setvolume(Machines*, float volume);
+float machines_volume(Machines*);
+
 
 void suspendwork(void);
 void resumework(void);
