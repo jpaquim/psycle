@@ -7,9 +7,10 @@
 static void OnDestroy(ClipBox*);
 static void OnSize(ClipBox*, ui_component* sender, int width, int height);
 static void OnTimer(ClipBox* self, ui_component* sender, int timerid);
-static void OnSongChanged(ClipBox* self, Workspace* workspace);
 static void OnMouseDown(ClipBox* self, ui_component* sender, int x, int y, int button);
 static void OnMasterWorked(ClipBox* self, Machine* master, BufferContext* bc);
+static void OnSongChanged(ClipBox* self, Workspace* workspace);
+static void ConnectMachinesSignals(ClipBox* self, Workspace* workspace);
 
 static int timerid = 700;
 
@@ -21,8 +22,8 @@ void InitClipBox(ClipBox* self, ui_component* parent, Workspace* workspace)
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&machines_master(&workspace->song->machines)->signal_worked, 
-		self, OnMasterWorked);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	ConnectMachinesSignals(self, workspace);
 }
 
 void OnDestroy(ClipBox* self)
@@ -61,15 +62,24 @@ void OnMasterWorked(ClipBox* self, Machine* master, BufferContext* bc)
 	}
 }
 
-void OnSongChanged(ClipBox* self, Workspace* workspace)
-{
-	signal_connect(&machines_master(&workspace->song->machines)->signal_worked, 
-		self, OnMasterWorked);
-}
-
 void OnMouseDown(ClipBox* self, ui_component* sender, int x, int y, int button)
 {
 	self->clip = 0;
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);
 		ui_invalidate(&self->component);
+}
+
+void OnSongChanged(ClipBox* self, Workspace* workspace)
+{
+	ConnectMachinesSignals(self, workspace);
+}
+
+void ConnectMachinesSignals(ClipBox* self, Workspace* workspace)
+{
+	if (workspace && workspace->song &&
+			machines_master(&workspace->song->machines)) {
+		signal_connect(
+			&machines_master(&workspace->song->machines)->signal_worked, self,
+			OnMasterWorked);
+	}
 }

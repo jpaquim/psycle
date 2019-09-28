@@ -45,6 +45,7 @@ typedef struct MachineCallback {
 	struct Samples* (*samples)(void*);
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);
+	struct Machines* (*machines)(void*);
 	void* context;
 } MachineCallback;
 

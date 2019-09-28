@@ -14,8 +14,7 @@ typedef struct {
 	Driver* driver;
 	Driver* silentdriver;
 	Song* song;
-	Sequencer sequencer;
-	float pos; 
+	Sequencer sequencer;	
 	int playing;
 	float t;
 	unsigned int lpb;	
@@ -23,7 +22,6 @@ typedef struct {
 	Signal signal_numsongtrackschanged;
 	Signal signal_lpbchanged;
 	Library drivermodule;
-	float volume;
 	float seqtickcount;
 } Player;
 
@@ -39,8 +37,6 @@ void player_setlpb(Player*, unsigned int lpb);
 unsigned int player_lpb(Player*);
 void player_setnumsongtracks(Player*, unsigned int numsongtracks);
 unsigned int player_numsongtracks(Player*);
-void player_setvolume(Player*, float volume);
-float player_volume(Player*);
 void player_loaddriver(Player*, const char* path);
 void player_unloaddriver(Player*);
 void player_restartdriver(Player*);

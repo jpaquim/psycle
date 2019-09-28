@@ -11,36 +11,64 @@
 
 #include <windows.h>
 
-static HANDLE hGuiEvent = 0;
-static HANDLE hWorkDoneEvent = 0;
+static HANDLE worklock = 0;
+static HANDLE workdone = 0;
+static HANDLE mutex = 0;
+static int disabled = 0;
+static int suspended = 0;
 
 void lock_init(void)
 {
-	hGuiEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
-	hWorkDoneEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
+	worklock = CreateEvent(NULL, TRUE, TRUE, NULL);
+	workdone = CreateEvent (NULL, FALSE, FALSE, NULL);
+	mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
+	suspended = 0;
 }
 
 void lock_dispose(void)
 {
-	CloseHandle(hGuiEvent);
-	CloseHandle(hWorkDoneEvent);
+	CloseHandle(worklock);
+	CloseHandle(workdone);
+	CloseHandle(mutex);
+	suspended = 0;
+}
+
+void lock_enable(void)
+{
+	disabled = 0;
+}
+
+void lock_disable(void)
+{
+	disabled = 1;
 }
 
 void suspendwork(void)
-{	
-	ResetEvent(hGuiEvent);
-	WaitForSingleObject(hWorkDoneEvent, 500);
+{		
+	if (!disabled && !suspended) {
+		ResetEvent(workdone);
+		WaitForSingleObject(mutex, INFINITE);	
+		ResetEvent(worklock);
+		WaitForSingleObject(workdone, 500);
+		suspended = 1;
+	}
+}
+
+void signalwaithost(void)
+{		
+	if (!disabled) {
+		ResetEvent(mutex);
+		SetEvent(workdone);	
+		WaitForSingleObject(worklock, INFINITE);
+		SetEvent(mutex);
+	}
 }
 
 void resumework(void)
 {
-	SetEvent(hGuiEvent);
-}
-
-void signalwaithost(void)
-{
-	SetEvent(hWorkDoneEvent);
-	WaitForSingleObject(hGuiEvent, INFINITE);	
+	if (!disabled) {
+		SetEvent(worklock);
+	}
 }
 
 #elif defined DIVERSALIS__OS__UNIX

@@ -27,7 +27,7 @@ void patterns_clear(Patterns* self)
 
 int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* pattern)
 {	
-	free(pattern);
+	pattern_dispose(pattern);	
 	return 1;
 }
 
@@ -64,4 +64,20 @@ void patterns_enumerate(Patterns* self, void* context, int (*enumproc)(void*, un
 			}
 		}
 	}
+}
+
+void patterns_erase(Patterns* self, unsigned int slot)
+{
+
+	RemoveIntHashTable(&self->slots, slot);
+}
+
+void patterns_remove(Patterns* self, unsigned int slot)
+{
+	Pattern* pattern;
+	
+	pattern = (Pattern*) SearchIntHashTable(&self->slots, slot);
+	RemoveIntHashTable(&self->slots, slot);
+	pattern_dispose(pattern);
+	free(pattern);	
 }

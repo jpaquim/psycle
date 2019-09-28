@@ -11,7 +11,6 @@
 static void OnShow(MachineView*, ui_component* sender);
 static void OnHide(MachineView*, ui_component* sender);
 static void OnDraw(WireView*, ui_component* sender, ui_graphics* g);
-static void Draw(WireView*, ui_graphics* g);
 static void DrawBackground(WireView*, ui_graphics* g);
 static void DrawTrackBackground(WireView*, ui_graphics* g, int track);
 static void DrawMachines(WireView*, ui_graphics* g);
@@ -110,10 +109,6 @@ void ConnectMachinesSignals(WireView* self)
 	signal_connect(&self->machines->signal_showparameters, self, OnShowParameters);
 }
 
-void Draw(WireView* self, ui_graphics* g)
-{
-}
-
 void OnDestroy(WireView* self, ui_component* component)
 {	
 }
@@ -164,13 +159,19 @@ void WireViewApplyProperties(WireView* self, Properties* p)
 		properties_int(p, "mv_effect_fontcolour", 0x00D1C5B6);
 	self->skin.triangle_size = properties_int(p, "mv_triangle_size", 10);
 	self->skin.wireaacolour 
-		= ((((self->skin.wirecolour&0x00ff0000) + ((self->skin.colour&0x00ff0000)*4))/5)&0x00ff0000) +
-		  ((((self->skin.wirecolour&0x00ff00) + ((self->skin.colour&0x00ff00)*4))/5)&0x00ff00) +
-		  ((((self->skin.wirecolour&0x00ff) + ((self->skin.colour&0x00ff)*4))/5)&0x00ff);
+		= ((((self->skin.wirecolour&0x00ff0000) 
+			+ ((self->skin.colour&0x00ff0000)*4))/5)&0x00ff0000) +
+		  ((((self->skin.wirecolour&0x00ff00)
+			+ ((self->skin.colour&0x00ff00)*4))/5)&0x00ff00) +
+		  ((((self->skin.wirecolour&0x00ff) 
+			+ ((self->skin.colour&0x00ff)*4))/5)&0x00ff);
 	self->skin.wireaacolour2
-		= (((((self->skin.wirecolour&0x00ff0000)) + ((self->skin.colour&0x00ff0000)))/2)&0x00ff0000) +
-		  (((((self->skin.wirecolour&0x00ff00)) + ((self->skin.colour&0x00ff00)))/2)&0x00ff00) +
-		  (((((self->skin.wirecolour&0x00ff)) + ((self->skin.colour&0x00ff)))/2)&0x00ff);
+		= (((((self->skin.wirecolour&0x00ff0000))
+			+ ((self->skin.colour&0x00ff0000)))/2)&0x00ff0000) +
+		  (((((self->skin.wirecolour&0x00ff00))
+			+ ((self->skin.colour&0x00ff00)))/2)&0x00ff00) +
+		  (((((self->skin.wirecolour&0x00ff))
+			+ ((self->skin.colour&0x00ff)))/2)&0x00ff);
 }
 
 void OnDraw(WireView* self, ui_component* sender, ui_graphics* g)
@@ -295,8 +296,7 @@ void DrawWireArrow(WireView* self, ui_graphics* g, int outputslot, int inputslot
 	tri[2] = move_point(rotate_point(c, phi), center);
 	tri[3] = tri[0];
 	
-	ui_drawsolidpolygon(g, tri, 4, polyInnards,
-		self->skin.wireaacolour);
+	ui_drawsolidpolygon(g, tri, 4, polyInnards, self->skin.wireaacolour);
 }
 
 ui_point rotate_point(ui_point pt, double phi)
@@ -393,30 +393,32 @@ void DrawMachineLine(ui_graphics* g, int xdir, int ydir, int x, int y)
 
 void DrawMachineHighlight(WireView* self, ui_graphics* g, int slot)
 {	
-	if (slot != MASTER_INDEX) {
-		int width;
-		int height;
-		int hdistance = 5; // the distance of the highlight from the machine	
+	if (slot != MASTER_INDEX) {			
 		Machine* machine;
 
 		machine = machines_at(self->machines, slot);
 		if (machine) {
+			int width;
+			int height;
+			int distance = 5; // the distance of the highlight from the machine
+
 			MachineUi* ui = &self->machineuis[slot];
 			MachineUiSize(self, machine->mode(machine), &width, &height);
 			ui_setcolor(g, self->skin.wirecolour);
-			DrawMachineLine(g, 1, 0, ui->x - hdistance, ui->y - hdistance);
-			DrawMachineLine(g, 0, 1, ui->x - hdistance, ui->y - hdistance);
-			DrawMachineLine(g, -1, 0, ui->x + width + hdistance, ui->y - hdistance);
-			DrawMachineLine(g, 0, 1, ui->x + width + hdistance, ui->y - hdistance);
-			DrawMachineLine(g, 0, -1, ui->x + width + hdistance, ui->y + height + hdistance);
-			DrawMachineLine(g, -1, 0, ui->x + width + hdistance, ui->y + height + hdistance);
-			DrawMachineLine(g, 1, 0, ui->x - hdistance, ui->y + height + hdistance);
-			DrawMachineLine(g, 0, -1, ui->x - hdistance, ui->y + height + hdistance);
+			DrawMachineLine(g, 1, 0, ui->x - distance, ui->y - distance);
+			DrawMachineLine(g, 0, 1, ui->x - distance, ui->y - distance);
+			DrawMachineLine(g, -1, 0, ui->x + width + distance, ui->y - distance);
+			DrawMachineLine(g, 0, 1, ui->x + width + distance, ui->y - distance);
+			DrawMachineLine(g, 0, -1, ui->x + width + distance, ui->y + height + distance);
+			DrawMachineLine(g, -1, 0, ui->x + width + distance, ui->y + height + distance);
+			DrawMachineLine(g, 1, 0, ui->x - distance, ui->y + height + distance);
+			DrawMachineLine(g, 0, -1, ui->x - distance, ui->y + height + distance);
 		}
 	}
 }
 
-void BlitSkinPart(WireView* self, ui_graphics* g, int x, int y, SkinCoord* coord)
+void BlitSkinPart(WireView* self, ui_graphics* g, int x, int y,
+	SkinCoord* coord)
 {
 	ui_drawbitmap(g, &self->skin.skinbmp, x + coord->destx, y + coord->desty,
 		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
@@ -624,7 +626,7 @@ void OnMouseDoubleClick(WireView* self, ui_component* sender, int x, int y, int 
 	self->my = y;	
 	machines_enumerate(self->machines, self, OnEnumHitTestMachine);
 	if (self->dragslot == -1) {
-		self->component.propagateevent = 1;
+		ui_component_propagateevent(sender);
 	} else {
 		machines_showparameters(self->machines, self->dragslot);		
 	}
@@ -644,15 +646,8 @@ void OnKeyDown(WireView* self, ui_component* sender, int keycode, int keydata)
 			ui_invalidate(&self->component);
 		}
 	} else 
-	if (keycode == VK_DELETE && self->selectedslot != MASTER_INDEX) {
-		Machine* machine;
-
-		machine = machines_at(self->machines, self->selectedslot);
-		if (machine) {
-			machines_remove(self->machines, self->selectedslot);
-			machine->dispose(machine);
-			free(machine);
-		}
+	if (keycode == VK_DELETE && self->selectedslot != MASTER_INDEX) {		
+		machines_remove(self->machines, self->selectedslot);		
 	} else {
 		ui_component_propagateevent(sender);
 	}
@@ -792,7 +787,7 @@ void InitMachineView(MachineView* self, ui_component* parent,
 	ui_component_resize(&self->tabbar.component, 160, 20);
 	ui_component_hide(&self->tabbar.component);
 	tabbar_append(&self->tabbar, "Wires");
-	tabbar_append(&self->tabbar, "New Machine");	
+	tabbar_append(&self->tabbar, "New Machine");		
 	ui_notebook_setpage(&self->notebook, 0);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	signal_connect(&self->newmachine.signal_selected, self, OnNewMachineSelected);
@@ -843,14 +838,16 @@ void OnHide(MachineView* self, ui_component* sender)
 	ui_component_hide(&self->tabbar.component);
 }
 
-void OnMachineViewMouseDoubleClick(MachineView* self, ui_component* sender, int x, int y, int button)
+void OnMachineViewMouseDoubleClick(MachineView* self, ui_component* sender,
+	int x, int y, int button)
 {
 	ui_notebook_setpage(&self->notebook, 1);
 	self->tabbar.selected = 1;
 	ui_invalidate(&self->tabbar.component);
 }
 
-void OnMachineViewKeyDown(MachineView* self, ui_component* sender, int keycode, int keydata)
+void OnMachineViewKeyDown(MachineView* self, ui_component* sender, int keycode,
+	int keydata)
 {
 	if (keycode == VK_ESCAPE) {
 		if (self->tabbar.selected == 1) {
@@ -858,6 +855,8 @@ void OnMachineViewKeyDown(MachineView* self, ui_component* sender, int keycode, 
 			self->tabbar.selected = 0;
 			ui_invalidate(&self->tabbar.component);
 		}
+	} else {
+		ui_component_propagateevent(sender);
 	}
 }
 

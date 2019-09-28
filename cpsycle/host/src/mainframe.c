@@ -23,6 +23,8 @@ static void OnPlay(MainFrame*, ui_component* sender);
 static void OnStop(MainFrame*, ui_component* sender);
 static void OnLoadSong(MainFrame*, ui_component* sender);
 static void OnNewSong(MainFrame*, ui_component* sender);
+static void OnUndo(MainFrame*, ui_component* sender);
+static void OnRedo(MainFrame*, ui_component* sender);
 static void OnAlign(MainFrame*, ui_component* sender);
 static void OnMouseDown(MainFrame*, ui_component* sender, int x, int y, int button);
 static void OnMouseMove(MainFrame*, ui_component* sender, int x, int y, int button);
@@ -33,6 +35,8 @@ static void OnAboutOk(MainFrame*, ui_component* sender);
 static void OnUpdateDriver(MainFrame*, ui_component* sender);
 static void SetStartPage(MainFrame*);
 static void OnSettingsViewChanged(MainFrame*, SettingsView* sender, Properties*);
+static void OnMouseEnterSplitBar(MainFrame*, ui_component* sender);
+static void OnMouseLeaveSplitBar(MainFrame*, ui_component* sender);
 
 HWND hwndmain;
 
@@ -88,7 +92,8 @@ void InitMainFrame(MainFrame* self)
 	// splitbar
 	ui_component_init(&self->splitbar, &self->component);
 	ui_component_setbackgroundmode(&self->splitbar, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->splitbar, 0x00363636);	
+	signal_connect(&self->splitbar.signal_mouseenter, self, OnMouseEnterSplitBar);
+	signal_connect(&self->splitbar.signal_mouseleave, self, OnMouseLeaveSplitBar);
 	/// init notebook views
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
@@ -145,32 +150,40 @@ void InitBars(MainFrame* self, ui_component* parent)
 	
 	ui_button_init(&self->newsongbutton, parent);
 	ui_button_settext(&self->newsongbutton, "New Song");
-	ui_component_setposition(&self->newsongbutton.component, 0, 0, 100, 20);	
+	ui_component_setposition(&self->newsongbutton.component, 0, 0, 70, 20);	
 	signal_connect(&self->newsongbutton.signal_clicked, self, OnNewSong);
 	ui_button_init(&self->loadsongbutton, parent);
 	ui_button_settext(&self->loadsongbutton, "Load Song");
-	ui_component_setposition(&self->loadsongbutton.component, 105, 0, 100, 20);	
+	ui_component_setposition(&self->loadsongbutton.component, 75, 0, 100, 20);	
 	signal_connect(&self->loadsongbutton.signal_clicked, self, OnLoadSong);	
+	ui_button_init(&self->undobutton, parent);
+	ui_button_settext(&self->undobutton, "Undo");
+	ui_component_setposition(&self->undobutton.component, 180, 0, 40, 20);	
+	signal_connect(&self->undobutton.signal_clicked, self, OnUndo);	
+	ui_button_init(&self->redobutton, parent);
+	ui_button_settext(&self->redobutton, "Redo");
+	ui_component_setposition(&self->redobutton.component, 235, 0, 40, 20);
+	signal_connect(&self->redobutton.signal_clicked, self, OnRedo);	
 	InitMachineBar(&self->machinebar, parent, &self->workspace);	
 	ui_button_init(&self->updatedriver, parent);
-	ui_button_settext(&self->updatedriver, "Restart Driver");
-	ui_component_setposition(&self->updatedriver.component, 210, 0, 100, 20);	
-	signal_connect(&self->updatedriver.signal_clicked, self, OnUpdateDriver);	
+	// ui_button_settext(&self->updatedriver, "Restart Driver");
+	// ui_component_setposition(&self->updatedriver.component, 210, 0, 100, 20);	
+	// signal_connect(&self->updatedriver.signal_clicked, self, OnUpdateDriver);	
 	ui_component_move(&self->machinebar.component, 3, 50);
-	ui_component_resize(&self->machinebar.component, 530, 25);
+	ui_component_resize(&self->machinebar.component, 530, 20);
 	// Songbar
 	InitSongTrackBar(&self->songtrackbar, parent, &self->workspace);
 	ui_component_setposition(&self->songtrackbar.component, 0, 25, 100, 20);
 	InitTimeBar(&self->timebar, parent, &self->workspace.player);
-	ui_component_setposition(&self->timebar.component, 100, 25, 190, 20);	
+	ui_component_setposition(&self->timebar.component, 100, 25, 170, 20);	
 	InitLinesPerBeatBar(&self->linesperbeatbar, parent, &self->workspace.player);
-	ui_component_setposition(&self->linesperbeatbar.component, 290, 25, 180, 20);	
+	ui_component_setposition(&self->linesperbeatbar.component, 280, 25, 130, 20);	
 	InitOctaveBar(&self->octavebar, parent, &self->workspace);
-	ui_component_setposition(&self->octavebar.component, 445, 25, 100, 20);
+	ui_component_setposition(&self->octavebar.component, 420, 25, 120, 20);
 	// Vugroup
 	InitVumeter(&self->vumeter, parent, &self->workspace);
 	ui_component_setposition(&self->vumeter.component, 540, 0, 200, 20);	
-	InitVolSlider(&self->volslider, parent, &self->workspace.player);
+	InitVolSlider(&self->volslider, parent, &self->workspace);
 	ui_component_setposition(&self->volslider.component, 540, 20, 200, 20);	
 	InitClipBox(&self->clipbox, parent, &self->workspace);
 	ui_component_setposition(&self->clipbox.component, 745, 5, 10, 35);
@@ -206,6 +219,7 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	ui_size sequenceviewsize;
 	ui_size gearsize;
 
+	int splitbarwidth = 4;
 	size = ui_component_size(&self->component);
 	statusbarsize = ui_component_size(&self->statusbar.component);
 	tabbarsize = ui_component_size(&self->tabbar.component);
@@ -218,19 +232,19 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	}
 	ui_component_setposition(&self->top, 0, 0, size.width, self->toolbarheight);
 	ui_component_setposition(&self->tabbars,
-		sequenceviewsize.width + 4,
+		sequenceviewsize.width + splitbarwidth,
 		self->toolbarheight,
-		size.width - sequenceviewsize.width - 4,
+		size.width - sequenceviewsize.width - splitbarwidth,
 		tabbarsize.height);
 	ui_component_setposition(&self->splitbar,
 		sequenceviewsize.width,
-		self->toolbarheight, 4,
+		self->toolbarheight, splitbarwidth,
 		size.height - statusbarsize.height - self->toolbarheight);
 	ui_component_resize(&self->sequenceview.component,
 		sequenceviewsize.width,
 		size.height - statusbarsize.height - self->toolbarheight);	
 	ui_component_setposition(&self->notebook.component,
-		sequenceviewsize.width + 4,
+		sequenceviewsize.width + splitbarwidth,
 		self->toolbarheight + tabbarsize.height,
 		size.width - sequenceviewsize.width - 3 - gearsize.width,
 		size.height - statusbarsize.height - self->toolbarheight - tabbarsize.height);
@@ -329,6 +343,17 @@ void OnNewSong(MainFrame* self, ui_component* sender)
 	}	
 }
 
+void OnUndo(MainFrame* self, ui_component* sender)
+{
+	workspace_undo(&self->workspace);
+}
+
+void OnRedo(MainFrame* self, ui_component* sender)
+{
+	workspace_redo(&self->workspace);
+}
+
+
 void OnLoadSong(MainFrame* self, ui_component* sender)
 {
 	char path[MAX_PATH]	 = "";
@@ -398,6 +423,18 @@ void OnMouseUp(MainFrame* self, ui_component* sender, int x, int y, int button)
 		pt.x, ui_component_size(&self->sequenceview.component).height);	
 	ui_component_align(&self->component);
 	ui_invalidate(&self->tabbar.component);
+}
+
+void OnMouseEnterSplitBar(MainFrame* self, ui_component* sender)
+{	
+	ui_component_setbackgroundcolor(sender, 0xFF666666);
+	ui_invalidate(sender);
+}
+
+void OnMouseLeaveSplitBar(MainFrame* self, ui_component* sender)
+{			
+	ui_component_setbackgroundcolor(sender, 0x00232323);
+	ui_invalidate(sender);
 }
 
 void OnGear(MainFrame* self, ui_component* sender)

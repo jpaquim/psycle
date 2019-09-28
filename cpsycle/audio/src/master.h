@@ -13,5 +13,4 @@ typedef struct {
 
 void master_init(Master* self, MachineCallback);
 
-
 #endif

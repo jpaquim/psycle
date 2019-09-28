@@ -41,6 +41,8 @@ void machines_init(Machines* self)
 	signal_init(&self->signal_slotchange);
 	signal_init(&self->signal_showparameters);
 	self->filemode = 0;
+	self->master = 0;
+	self->volume = 1.0f;
 }
 
 void machines_dispose(Machines* self)
@@ -82,8 +84,16 @@ void machines_insert(Machines* self, int slot, Machine* machine)
 		InsertIntHashTable(&self->slots, slot, machine);	
 		if (!machines_connections(self, slot)) {
 			initconnections(self, slot);
-		}	
+		}
 		signal_emit(&self->signal_insert, self, 1, slot);
+	}
+}
+
+void machines_insertmaster(Machines* self, Master* master)
+{
+	self->master = master;
+	if (master) {
+		machines_insert(self, MASTER_INDEX, &master->machine);
 	}
 }
 
@@ -99,14 +109,27 @@ MachineConnections* initconnections(Machines* self, int slot)
 	return connections;
 }
 
-void machines_remove(Machines* self, int slot)
+void machines_erase(Machines* self, int slot)
 {	
 	suspendwork();
+	if (slot == MASTER_INDEX) {
+		self->master = 0;
+	}
 	machines_disconnectall(self, slot);	
 	RemoveIntHashTable(&self->slots, slot);
 	machines_setpath(self, compute_path(self, MASTER_INDEX));
 	signal_emit(&self->signal_removed, self, 1, slot);
 	resumework();
+}
+
+void machines_remove(Machines* self, int slot)
+{	
+	Machine* machine;
+
+	machine = machines_at(self, slot);
+	machines_erase(self, slot);
+	machine->dispose(machine);
+	free(machine);
 }
 
 void machines_exchange(Machines* self, int srcslot, int dstslot)
@@ -116,8 +139,8 @@ void machines_exchange(Machines* self, int srcslot, int dstslot)
 
 	src = machines_at(self, srcslot);
 	dst = machines_at(self, dstslot);
-	machines_remove(self, srcslot);
-	machines_remove(self, dstslot);
+	machines_erase(self, srcslot);
+	machines_erase(self, dstslot);
 	machines_insert(self, srcslot, dst);
 	machines_insert(self, dstslot, src);
 }
@@ -453,7 +476,7 @@ int machines_slot(Machines* self)
 
 Machine* machines_master(Machines* self)
 {
-	return machines_at(self, MASTER_INDEX);	
+	return self->master ? &self->master->machine : 0;
 }
 
 void machines_startfilemode(Machines* self)
@@ -475,4 +498,14 @@ unsigned int machines_size(Machines* self)
 void machines_showparameters(Machines* self, int slot)
 {
 	signal_emit(&self->signal_showparameters, self, 1, slot);
+}
+
+void machines_setvolume(Machines* self, float volume)
+{
+	self->volume = volume;
+}
+
+float machines_volume(Machines* self)
+{
+	return self->volume;
 }

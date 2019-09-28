@@ -24,7 +24,7 @@ static void OnNextMachine(MachineBar*, ui_component* sender);
 
 void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace)
 {			
-	ui_margin margin = { 0, 3, 3, 3 };
+	ui_margin margin = { 0, 10, 3, 3 };
 
 	self->selchange = 0;
 	self->player = &workspace->player;
@@ -38,14 +38,14 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	ui_combobox_init(&self->machinebox, &self->component);
 	self->machinebox.component.justify = UI_JUSTIFY_NONE;
 	ui_component_resize(&self->machinebox.component, 200, 20);
-	ui_button_init(&self->prevmachinebutton, &self->component);
-	ui_button_settext(&self->prevmachinebutton, "<");	
-	signal_connect(&self->prevmachinebutton.signal_clicked, self, OnPrevMachine);
-	ui_button_init(&self->nextmachinebutton, &self->component);
-	ui_button_settext(&self->nextmachinebutton, ">");	
-	signal_connect(&self->nextmachinebutton.signal_clicked, self, OnNextMachine);
-	ui_component_resize(&self->prevmachinebutton.component, 20, 0);	
-	ui_component_resize(&self->nextmachinebutton.component, 20, 0);
+	//ui_button_init(&self->prevmachinebutton, &self->component);
+	//ui_button_settext(&self->prevmachinebutton, "<");	
+	//signal_connect(&self->prevmachinebutton.signal_clicked, self, OnPrevMachine);
+	//ui_button_init(&self->nextmachinebutton, &self->component);
+	//ui_button_settext(&self->nextmachinebutton, ">");	
+	//signal_connect(&self->nextmachinebutton.signal_clicked, self, OnNextMachine);
+	//ui_component_resize(&self->prevmachinebutton.component, 20, 0);	
+	//ui_component_resize(&self->nextmachinebutton.component, 20, 0);
 	ui_button_init(&self->gear, &self->component);
 	ui_button_settext(&self->gear, "Gear Rack");
 	ui_component_resize(&self->gear.component, 60, 20);

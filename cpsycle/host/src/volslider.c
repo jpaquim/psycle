@@ -12,21 +12,23 @@ static void DescribeValue(VolSlider*);
 static float Value(VolSlider* self);
 static void OnTimer(VolSlider* self, ui_component* sender, int timerid);
 static void SetSliderValue(VolSlider* slider, float value);
+static void OnSongChanged(VolSlider* self, Workspace* workspace);
 
 static int timerid = 700;
 
-void InitVolSlider(VolSlider* self, ui_component* parent, Player* player)
+void InitVolSlider(VolSlider* self, ui_component* parent, Workspace* workspace)
 {		
-	self->player = player;	
+	self->machines = &workspace->song->machines;
 	ui_component_init(&self->component, parent);	
 	ui_slider_init(&self->slider, &self->component);	
 	self->slider.component.debugflag = 10;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_slider_setrange(&self->slider, -32768, 32767);
 	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
-	signal_connect(&self->component.signal_timer, self, OnTimer);
-	SetTimer(self->component.hwnd, timerid, 50, 0);
+	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	SetTimer(self->component.hwnd, timerid, 50, 0);
 }
 
 void OnDestroy(VolSlider* self)
@@ -45,15 +47,16 @@ float Value(VolSlider* self)
 
 void OnTimer(VolSlider* self, ui_component* sender, int timerid)
 {		
-	if (self->player) {
-		SetSliderValue(self, (float) sqrt(player_volume(self->player)) * 0.5f);
+	if (self->machines) {
+		SetSliderValue(self, (float) 
+			sqrt(machines_volume(self->machines)) * 0.5f);
 	}
 }
 
 void OnSliderChanged(VolSlider* self, ui_component* sender)
 {	
-	if (self->player) {
-		player_setvolume(self->player, Value(self) * Value(self) * 4.f);
+	if (self->machines) {
+		machines_setvolume(self->machines, Value(self) * Value(self) * 4.f);
 	}
 }
 
@@ -65,4 +68,9 @@ void SetSliderValue(VolSlider* self, float value)
 		intvalue = (int)((value * 65535.f) - 32768.f);
 		ui_slider_setvalue(&self->slider, intvalue);
 	}
+}
+
+void OnSongChanged(VolSlider* self, Workspace* workspace)
+{
+	self->machines = &workspace->song->machines;
 }

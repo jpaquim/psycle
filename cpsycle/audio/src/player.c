@@ -38,15 +38,12 @@ static int onenumsequencertick(Player*, int slot, Machine*);
 void player_init(Player* self, Song* song, void* handle)
 {		
 	mainframe = handle;
-	self->song = song;	
-	self->pos = 0.0f;
+	self->song = song;		
 	self->playing = FALSE;
 	self->lpb = 4;
 	self->seqtickcount = 1.f / self->lpb;
-	self->numsongtracks = 16;
-	self->volume = 1.0f;	
-	sequencer_init(&self->sequencer);
-	self->sequencer.sequence = &song->sequence;
+	self->numsongtracks = 16;	
+	sequencer_init(&self->sequencer, &song->sequence);	
 	library_init(&self->drivermodule);
 	self->silentdriver = create_silent_driver();
 	self->silentdriver->init(self->silentdriver);	
@@ -75,13 +72,16 @@ void player_loaddriver(Player* self, const char* path)
 				self->t = 125 / (44100 * 60.0f);
 				self->sequencer.samplerate = 44100;
 			}
+			lock_enable();
 		}
 		if (!driver) {
 			driver = self->silentdriver;
+			lock_disable();
 		}
 		self->driver = driver;	
 	} else {
 		self->driver = self->silentdriver;
+		lock_disable();
 	}
 }
 
@@ -92,28 +92,24 @@ void player_unloaddriver(Player* self)
 		self->driver->dispose(self->driver);
 		self->driver->free(self->driver);
 		library_dispose(&self->drivermodule);
-		library_init(&self->drivermodule);		
+		library_init(&self->drivermodule);
 	}
 }
 
 void player_reloaddriver(Player* self, const char* path)
-{
-	suspendwork();
+{	
 	self->driver->close(self->driver);
-	Sleep(200);
+	Sleep(400);	
 	player_unloaddriver(self);
-	player_loaddriver(self, path);
-	lock_dispose();
-	lock_init();
+	player_loaddriver(self, path);	
 	self->driver->open(self->driver);
 }
 
 void player_restartdriver(Player* self)
 {
-	if (self->driver != self->silentdriver) {
-		suspendwork();		
+	if (self->driver != self->silentdriver) {			
 		self->driver->close(self->driver);
-		resumework();
+		Sleep(400);
 		self->driver->updateconfiguration(self->driver);
 		self->driver->open(self->driver);		
 	}
@@ -121,10 +117,9 @@ void player_restartdriver(Player* self)
 
 void player_dispose(Player* self)
 {		
-	if (self->driver != self->silentdriver) {
-		suspendwork();		
+	if (self->driver != self->silentdriver) {			
 		self->driver->close(self->driver);
-		resumework();		
+		Sleep(400);
 		player_unloaddriver(self);
 		lock_dispose();
 	}	
@@ -137,12 +132,12 @@ void player_dispose(Player* self)
 
 void player_setsong(Player* self, Song* song)
 {
-	self->song = song;	
+	self->song = song;
+	sequencer_reset(&self->sequencer, &song->sequence);
 }
 
 void player_start(Player* self)
-{
-	self->pos = 0.0f;
+{	
 	sequencer_setposition(&self->sequencer, 0.0f);
 	self->playing = TRUE;
 	self->seqtickcount = 1.f / self->lpb;
@@ -259,7 +254,7 @@ void player_workpath(Player* self, unsigned int amount)
 
 					events = player_timedevents(self, slot, amount);												
 					buffercontext_init(&bc, events, output, output, amount,
-					self->numsongtracks);
+						self->numsongtracks);
 					machine->work(machine, &bc);						
 					signal_emit(&machine->signal_worked, machine, 1, &bc);
 					list_free(events);
@@ -332,16 +327,17 @@ void player_filldriver(Player* self, float* buffer, unsigned int amount)
 	Buffer* masteroutput;
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
 	if (masteroutput) {		
-		Machine* mastermachine;
+		Machine* master;
 
-		mastermachine = machines_at(&self->song->machines, MASTER_INDEX);
-		if (mastermachine) {
+		master = machines_master(&self->song->machines);
+		if (master) {
 			BufferContext bc;
 					
 			buffercontext_init(&bc, 0, masteroutput, masteroutput, amount,
 				self->numsongtracks);	
-			buffer_mulsamples(masteroutput, amount, self->volume);
-			signal_emit(&mastermachine->signal_worked, mastermachine, 1, &bc);
+			buffer_mulsamples(masteroutput, amount,
+				machines_volume(&self->song->machines));
+			signal_emit(&master->signal_worked, master, 1, &bc);
 		}
 		dsp_interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
@@ -360,16 +356,6 @@ void player_setnumsongtracks(Player* self, unsigned int numsongtracks)
 unsigned int player_numsongtracks(Player* self)
 {
 	return self->numsongtracks;
-}
-
-void player_setvolume(Player* self, float volume)
-{
-	self->volume = volume;
-}
-
-float player_volume(Player* self)
-{
-	return self->volume;
 }
 
 

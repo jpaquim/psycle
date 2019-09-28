@@ -306,7 +306,8 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 
 void SetInstrumentInstrumentVolumeView(SamplerInstrumentVolumeView* self, Instrument* instrument)
 {	
-	self->instrument = instrument;	
+	self->instrument = instrument;
+	EnvelopeViewSetAdsrEnvelope(&self->envelopeview, instrument ? &instrument->volumeenvelope : 0);
 }
 
 void OnVolumeViewDescribe(SamplerInstrumentVolumeView* self, SliderGroup* slidergroup, char* txt)
@@ -315,28 +316,32 @@ void OnVolumeViewDescribe(SamplerInstrumentVolumeView* self, SliderGroup* slider
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", self->instrument->volumeenvelope.attack * 1000);				
+			_snprintf(txt, 20, "%.4fms", 
+				adsr_settings_attack(&self->instrument->volumeenvelope) * 1000);				
 		}		
 	} else
 	if (slidergroup == &self->decay) {		
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", self->instrument->volumeenvelope.decay * 1000);
+			_snprintf(txt, 20, "%.4fms",
+				adsr_settings_decay(&self->instrument->volumeenvelope) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->sustain) {
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0%%");
 		} else {
-			_snprintf(txt, 20, "%d%%", (int)(self->instrument->volumeenvelope.sustain * 100));
+			_snprintf(txt, 20, "%d%%", (int)
+				(adsr_settings_sustain(&self->instrument->volumeenvelope) * 100));
 		}		
 	} else
 	if (slidergroup == &self->release) {
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", self->instrument->volumeenvelope.release * 1000);
+			_snprintf(txt, 20, "%.4fms",
+				adsr_settings_release(&self->instrument->volumeenvelope) * 1000);
 		}		
 	}
 }
@@ -347,39 +352,44 @@ void OnVolumeViewTweak(SamplerInstrumentVolumeView* self, SliderGroup* slidergro
 		return;
 	}
 	if (slidergroup == &self->attack) {
-		self->instrument->volumeenvelope.attack = value * 1.4f;
+		adsr_settings_setattack(
+			&self->instrument->volumeenvelope, value * 1.4f);
 	} else
 	if (slidergroup == &self->decay) {
-		self->instrument->volumeenvelope.decay = value * 1.4f;
+		adsr_settings_setdecay(
+			&self->instrument->volumeenvelope, value * 1.4f);
 	} else
 	if (slidergroup == &self->sustain) {
-		self->instrument->volumeenvelope.sustain = value;
+		adsr_settings_setsustain(
+			&self->instrument->volumeenvelope, value);
 	} else
 	if (slidergroup == &self->release) {
-		self->instrument->volumeenvelope.release = value * 1.4f;
+		adsr_settings_setrelease(
+			&self->instrument->volumeenvelope, value * 1.4f);
 	}
+	EnvelopeViewUpdate(&self->envelopeview);
 }
 
 void OnVolumeViewValue(SamplerInstrumentVolumeView* self, SliderGroup* slidergroup, float* value)
 {
 	if (slidergroup == &self->attack) {
 		*value = self->instrument
-			? self->instrument->volumeenvelope.attack / 1.4f
+			? adsr_settings_attack(&self->instrument->volumeenvelope) / 1.4f
 			: 0.f;
 	} else 
 	if (slidergroup == &self->decay) {
 		*value = self->instrument
-			? self->instrument->volumeenvelope.decay / 1.4f
+			? adsr_settings_decay(&self->instrument->volumeenvelope) / 1.4f
 			: 0.f;
 	} else 	
 	if (slidergroup == &self->sustain) {
 		*value = self->instrument
-			? self->instrument->volumeenvelope.sustain
+			? adsr_settings_sustain(&self->instrument->volumeenvelope)
 			: 0.5f;
 	} else
 	if (slidergroup == &self->release) {
 		*value = self->instrument
-			? self->instrument->volumeenvelope.release / 1.4f
+			? adsr_settings_release(&self->instrument->volumeenvelope) / 1.4f
 			: 0.5f;
 	}
 }
@@ -445,9 +455,10 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 }
 
 void SetInstrumentInstrumentFilterView(SamplerInstrumentFilterView* self, Instrument* instrument)
-{
-	// char buffer[20];
-	self->instrument = instrument;	
+{	
+	self->instrument = instrument;
+	EnvelopeViewSetAdsrEnvelope(&self->envelopeview,
+		instrument ? &instrument->filterenvelope : 0);
 }
 
 void OnFilterViewDescribe(SamplerInstrumentFilterView* self, SliderGroup* slidergroup, char* txt)
@@ -456,28 +467,36 @@ void OnFilterViewDescribe(SamplerInstrumentFilterView* self, SliderGroup* slider
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", self->instrument->filterenvelope.attack * 1000);				
+			_snprintf(txt, 20, "%.4fms", 
+				adsr_settings_attack(
+					&self->instrument->filterenvelope) * 1000);				
 		}		
 	} else
 	if (slidergroup == &self->decay) {		
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", self->instrument->filterenvelope.decay * 1000);
+			_snprintf(txt, 20, "%.4fms",
+				adsr_settings_decay(
+					&self->instrument->filterenvelope) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->sustain) {
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0%%");
 		} else {
-			_snprintf(txt, 20, "%d%%", (int)(self->instrument->filterenvelope.sustain * 100));
+			_snprintf(txt, 20, "%d%%", (int)(
+				adsr_settings_sustain(
+					&self->instrument->filterenvelope) * 100));
 		}		
 	} else
 	if (slidergroup == &self->release) {
 		if (!self->instrument) {
 			_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", self->instrument->filterenvelope.release * 1000);
+			_snprintf(txt, 20, "%.4fms",
+				adsr_settings_release(
+					&self->instrument->filterenvelope) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->cutoff) {
@@ -500,7 +519,7 @@ void OnFilterViewDescribe(SamplerInstrumentFilterView* self, SliderGroup* slider
 		} else {
 			_snprintf(txt, 20, "%d%%", (int)(self->instrument->filtermodamount) * 100);
 		}		
-	}
+	}	
 }
 
 void OnFilterViewTweak(SamplerInstrumentFilterView* self,
@@ -510,16 +529,20 @@ void OnFilterViewTweak(SamplerInstrumentFilterView* self,
 		return;
 	}
 	if (slidergroup == &self->attack) {
-		self->instrument->filterenvelope.attack = value * 1.4f;
+			adsr_settings_setattack(
+				&self->instrument->filterenvelope, value * 1.4f);
 	} else
 	if (slidergroup == &self->decay) {
-		self->instrument->filterenvelope.decay = value * 1.4f;
+			adsr_settings_setdecay(
+				&self->instrument->filterenvelope, value * 1.4f);
 	} else
 	if (slidergroup == &self->sustain) {
-		self->instrument->filterenvelope.sustain = value;
+			adsr_settings_setsustain(
+				&self->instrument->filterenvelope, value);
 	} else
 	if (slidergroup == &self->release) {
-		self->instrument->filterenvelope.release = value * 1.4f;
+		adsr_settings_setrelease(
+			&self->instrument->filterenvelope, value * 1.4f);
 	} else
 	if (slidergroup == &self->cutoff) {
 		self->instrument->filtercutoff = value;
@@ -530,28 +553,29 @@ void OnFilterViewTweak(SamplerInstrumentFilterView* self,
 	if (slidergroup == &self->modamount) {
 		self->instrument->filtermodamount = value - 0.5f;
 	}
+	EnvelopeViewUpdate(&self->envelopeview);
 }
 
 void OnFilterViewValue(SamplerInstrumentFilterView* self, SliderGroup* slidergroup, float* value)
 {
 	if (slidergroup == &self->attack) {
 		*value = self->instrument
-			? self->instrument->filterenvelope.attack / 1.4f
+			? adsr_settings_attack(&self->instrument->filterenvelope) / 1.4f
 			: 0.f;
 	} else 
 	if (slidergroup == &self->decay) {
 		*value = self->instrument
-			? self->instrument->filterenvelope.decay / 1.4f
+			? adsr_settings_decay(&self->instrument->filterenvelope) / 1.4f
 			: 0.f;
 	} else 	
 	if (slidergroup == &self->sustain) {
 		*value = self->instrument
-			? self->instrument->filterenvelope.sustain
+			? adsr_settings_sustain(&self->instrument->filterenvelope)
 			: 0.5f;
 	} else
 	if (slidergroup == &self->release) {
 		*value = self->instrument
-			? self->instrument->filterenvelope.release / 1.4f
+			? adsr_settings_release(&self->instrument->filterenvelope) / 1.4f
 			: 0.5f;
 	} else
 	if (slidergroup == &self->cutoff) {

@@ -15,9 +15,9 @@ void InitOctaveBar(OctaveBar* self, ui_component* parent, Workspace* workspace)
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	ui_label_init(&self->headerlabel, &self->component);	
 	ui_label_settext(&self->headerlabel, "Octave");	
-	ui_component_setposition(&self->headerlabel.component, 0, 0, 45, 20);	
+	ui_component_setposition(&self->headerlabel.component, 0, 0, 35, 20);	
 	ui_combobox_init(&self->octavebox, &self->component);	
-	ui_component_setposition(&self->octavebox.component, 50, 0, 40, 20);	
+	ui_component_setposition(&self->octavebox.component, 45, 0, 60, 20);	
 	BuildOctaveBox(self);	
 	signal_connect(&self->octavebox.signal_selchanged, self, OnOctaveBoxSelChange);	
 	signal_connect(&workspace->signal_octavechanged, self, OnOctaveChanged);

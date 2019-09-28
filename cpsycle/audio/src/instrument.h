@@ -34,8 +34,8 @@ typedef struct {
 	char* name;
 	/// Action to take on the playing voice when any new note comes in the same channel.
 	NewNoteAction nna;
-	ADSREnvelopeSettings volumeenvelope;
-	ADSREnvelopeSettings filterenvelope;	
+	ADSRSettings volumeenvelope;
+	ADSRSettings filterenvelope;	
 	float filtercutoff;	
 	float filterres;		
 	float filtermodamount;	

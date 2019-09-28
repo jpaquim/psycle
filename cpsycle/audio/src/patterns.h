@@ -20,5 +20,7 @@ int patterns_append(Patterns*, Pattern*);
 Pattern* patterns_at(Patterns*, unsigned int slot);
 void patterns_enumerate(Patterns*, void* context, int (*enumproc)(void*, unsigned int, Pattern*));
 void patterns_clear(Patterns*);
+void patterns_erase(Patterns*, unsigned int slot);
+void patterns_remove(Patterns*, unsigned int slot);
 
 #endif

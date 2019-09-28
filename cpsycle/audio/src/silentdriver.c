@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void driver_free(Driver* driver);
-static int driver_init(Driver* driver);
-static void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle);
-static int driver_open(Driver* driver);
-static int driver_close(Driver* driver);
-static int driver_dispose(Driver* driver);
+static void driver_free(Driver*);
+static int driver_init(Driver*);
+static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
+static int driver_open(Driver*);
+static int driver_close(Driver*);
+static int driver_dispose(Driver*);
+static unsigned int samplerate(Driver*);
 
 static void init_properties(Driver* driver);
 
@@ -36,6 +37,7 @@ int driver_init(Driver* driver)
 	driver->open = driver_open;
 	driver->close = driver_close;
 	driver->dispose = driver_dispose;
+	driver->samplerate = samplerate;
 	init_properties(driver);
 
 	return 0;
@@ -61,6 +63,12 @@ int driver_close(Driver* driver)
 {
 	return 0;
 }
+
+unsigned int samplerate(Driver* self)
+{
+	return 44100;
+}
+
 
 void init_properties(Driver* driver)
 {	

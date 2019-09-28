@@ -9,13 +9,16 @@ static void workspace_config(Workspace*);
 static void workspace_removesong(Workspace*);
 static void applysongproperties(Workspace*);
 static Properties* workspace_makeproperties(Workspace*);
-static Samples* machinecallback_samples(Workspace*);
-static unsigned int machinecallback_samplerate(Workspace*);
-static int machinecallback_bpm(Workspace*);
 static void workspace_setdriverlist(Workspace*);
 static void workspace_driverconfig(Workspace*);
 static const char* workspace_driverpath(Workspace*);
 static void workspace_configaudio(Workspace*);
+static void workspace_setsong(Workspace*, Song*);
+static Samples* machinecallback_samples(Workspace*);
+static unsigned int machinecallback_samplerate(Workspace*);
+static Machines* machinecallback_machines(Workspace*);
+static int machinecallback_bpm(Workspace*);
+
 
 void workspace_init(Workspace* self)
 {	
@@ -27,6 +30,7 @@ void workspace_init(Workspace* self)
 	self->machinecallback.samples = machinecallback_samples;
 	self->machinecallback.samplerate = machinecallback_samplerate;
 	self->machinecallback.bpm = machinecallback_bpm;	
+	self->machinecallback.machines = machinecallback_machines;
 	machinefactory_init(&self->machinefactory, self->machinecallback,
 		self->config);
 	self->song = (Song*) malloc(sizeof(Song));
@@ -36,6 +40,20 @@ void workspace_init(Workspace* self)
 	self->properties = 0;
 	plugincatcher_init(&self->plugincatcher);
 	workspace_scanplugins(self);
+	undoredo_init(&self->undoredo);
+}
+
+void workspace_dispose(Workspace* self)
+{	
+	player_dispose(&self->player);	
+	song_dispose(self->song);
+	properties_free(self->config);
+	properties_free(self->properties);
+	signal_dispose(&self->signal_octavechanged);
+	signal_dispose(&self->signal_songchanged);
+	signal_dispose(&self->signal_configchanged);
+	plugincatcher_dispose(&self->plugincatcher);
+	undoredo_dispose(&self->undoredo);
 }
 
 void workspace_initplayer(Workspace* self)
@@ -80,17 +98,6 @@ void workspace_driverconfig(Workspace* self)
 {		
 	self->driverconfigure->item.disposechildren = 0;
 	self->driverconfigure->children = self->player.driver->properties;	
-}
-
-void workspace_dispose(Workspace* self)
-{	
-	player_dispose(&self->player);	
-	song_dispose(self->song);
-	properties_free(self->config);
-	signal_dispose(&self->signal_octavechanged);
-	signal_dispose(&self->signal_songchanged);
-	signal_dispose(&self->signal_configchanged);
-	plugincatcher_dispose(&self->plugincatcher);
 }
 
 void workspace_scanplugins(Workspace* self)
@@ -233,16 +240,35 @@ int workspace_showlinenumbers(Workspace* self)
 }
 
 void workspace_newsong(Workspace* self)
+{			
+	Song* song;
+	
+	song = (Song*) malloc(sizeof(Song));
+	song_init(song, &self->machinefactory);	
+	workspace_setsong(self, song);
+	properties_free(self->properties);
+	self->properties = workspace_makeproperties(self);
+}
+
+void workspace_loadsong(Workspace* self, const char* path)
 {	
+	Song* song;
+
+	properties_free(self->properties);
+	song = malloc(sizeof(Song));
+	song_init(song, &self->machinefactory);	
+	song_load(song, path, &self->properties);
+	workspace_setsong(self, song);
+}
+
+void workspace_setsong(Workspace* self, Song* song)
+{
 	suspendwork();
 	workspace_removesong(self);
-	self->song = (Song*) malloc(sizeof(Song));
-	song_init(self->song, &self->machinefactory);	
-	player_setsong(&self->player, self->song);	
+	self->song = song;
+	player_stop(&self->player);	
+	player_setsong(&self->player, self->song);
 	applysongproperties(self);
-	properties_free(self->properties);
-	self->properties = 0;
-	self->properties = workspace_makeproperties(self);
 	signal_emit(&self->signal_songchanged, self, 0);
 	resumework();
 }
@@ -270,19 +296,6 @@ void workspace_removesong(Workspace* self)
 		self->song = 0;
 		self->octave = 4;
 	}
-}
-
-void workspace_loadsong(Workspace* self, const char* path)
-{	
-	suspendwork();	
-	workspace_removesong(self);
-	self->song = (Song*) malloc(sizeof(Song));
-	song_init(self->song, &self->machinefactory);
-	player_setsong(&self->player, self->song);	
-	song_load(self->song, path, &self->properties);	 
-	applysongproperties(self);
-	signal_emit(&self->signal_songchanged, self, 0);
-	resumework();
 }
 
 void applysongproperties(Workspace* self)
@@ -327,6 +340,16 @@ void workspace_updatedriver(Workspace* self)
 	player_restartdriver(&self->player);
 }
 
+void workspace_undo(Workspace* self)
+{
+	undoredo_undo(&self->undoredo);
+}
+
+void workspace_redo(Workspace* self)
+{
+	undoredo_redo(&self->undoredo);
+}
+
 Samples* machinecallback_samples(Workspace* self)
 {
 	return &self->song->samples;
@@ -340,4 +363,9 @@ unsigned int machinecallback_samplerate(Workspace* self)
 int machinecallback_bpm(Workspace* self)
 {
 	return (int)player_bpm(&self->player);
+}
+
+Machines* machinecallback_machines(Workspace* self)
+{
+	return self->song ? &self->song->machines : 0;
 }

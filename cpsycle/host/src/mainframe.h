@@ -40,6 +40,8 @@ typedef struct {
 	ui_button newsongbutton;
 	ui_button loadsongbutton;
 	ui_button updatedriver;
+	ui_button undobutton;
+	ui_button redobutton;
 	ui_component splitbar;
 	TabBar tabbar;	
 	ui_notebook notebook;

@@ -38,14 +38,16 @@ static void OnPropertiesClose(TrackerView*, ui_component* sender);
 static void OnPropertiesApply(TrackerView*, ui_component* sender);
 static int NumLines(TrackerView*);
 static void AdjustScrollranges(TrackerGrid*);
-static float Offset(TrackerGrid*, int y, int* lines, int* sublines, int* subline);
-static int TestCursor(TrackerGrid*, int track, double offset, int subline);
+static float Offset(TrackerGrid*, int y, unsigned int* lines, unsigned int* sublines, unsigned int* subline);
+static int TestCursor(TrackerGrid*, unsigned int track, double offset, unsigned int subline);
 static int TestRange(double position, double offset, double  width);
 static void OnSongTracksNumChanged(TrackerGrid*, Player* player,
 	unsigned int numsongtracks);
 static void SetClassicHeaderCoords(TrackerView* self);
 static void SetHeaderCoords(TrackerView* self);
 static void OnConfigChanged(TrackerView*, Workspace*, Properties*);
+static PatternNode* FindNode(Pattern* pattern, unsigned int track,
+	float offset, unsigned int subline, float bpl, PatternNode** prev);
 
 char* notes_tab_a440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
@@ -89,6 +91,84 @@ char* notes_tab_a220[256] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 };
+
+/// Commands
+
+typedef struct {
+	Command command;
+	TrackerCursor cursor;
+	Pattern* pattern;
+	float bpl;
+	PatternNode* node;	
+	PatternEvent event;
+	PatternEvent oldevent;
+	int write;
+} InsertCommand;
+
+static void InsertCommandDispose(InsertCommand*);
+static void InsertCommandExecute(InsertCommand*);
+static void InsertCommandRevert(InsertCommand*);
+
+InsertCommand* InsertCommandAlloc(Pattern* pattern, float bpl, TrackerCursor cursor,
+	PatternEvent event)
+{
+	InsertCommand* rv;
+	
+	rv = malloc(sizeof(InsertCommand));
+	rv->command.dispose = InsertCommandDispose;
+	rv->command.execute = InsertCommandExecute;
+	rv->command.revert = InsertCommandRevert;
+	rv->cursor = cursor;	
+	rv->bpl = bpl;
+	rv->event = event;
+	rv->node = 0;
+	rv->write = 0;
+	rv->pattern = pattern;	
+	return rv;
+}
+
+void InsertCommandDispose(InsertCommand* self) { }
+
+void InsertCommandExecute(InsertCommand* self)
+{	
+	PatternNode* prev;
+	PatternNode* node = 
+		FindNode(self->pattern,
+			self->cursor.track,
+			self->cursor.offset,
+			self->cursor.subline,
+			self->bpl, &prev);
+	if (node) {	
+		PatternEntry* entry;
+
+		entry = (PatternEntry*)(node->entry);
+		self->oldevent = entry->event;
+		entry->event = self->event;
+		self->node = node;
+		self->write = 1;
+	} else {
+		self->node = pattern_insert(self->pattern,
+			prev,
+			self->cursor.track, 
+			self->cursor.offset,
+			&self->event);
+		self->write = 0;
+	}
+}
+
+void InsertCommandRevert(InsertCommand* self)
+{		
+	if (self->write) {
+		PatternEntry* entry;
+
+		entry = (PatternEntry*)(self->node->entry);
+		entry->event = self->oldevent;		
+	} else {
+		pattern_remove(self->pattern, self->node);
+	}
+}
+
+/// TrackerGrid
 
 void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view, Player* player)
 {		
@@ -200,13 +280,14 @@ void OnDraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-float Offset(TrackerGrid* self, int y, int* lines, int* sublines, int* subline)
+float Offset(TrackerGrid* self, int y, unsigned int* lines,
+	unsigned int* sublines, unsigned int* subline)
 {
 	float offset = 0;	
 	int cpy = 0;		
 	int first = 1;
-	int count = y / self->lineheight;
-	int remaininglines = 0;	
+	unsigned int count = y / self->lineheight;
+	unsigned int remaininglines = 0;	
 
 	if (self->view->pattern) {
 		PatternNode* curr = self->view->pattern->events;
@@ -275,7 +356,7 @@ void ClipBlock(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* block)
 void DrawBackground(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 {
 	ui_rectangle r;
-	int track;
+	unsigned int track;
 	for (track = clip->topleft.track; track < clip->bottomright.track; ++track) {
 		DrawTrackBackground(self, g, track);
 	}
@@ -291,7 +372,8 @@ void DrawTrackBackground(TrackerGrid* self, ui_graphics* g, int track)
 	ui_drawsolidrectangle(g, r, self->view->skin.background);	
 }
 
-int TestCursor(TrackerGrid* self, int track, double offset, int subline)
+int TestCursor(TrackerGrid* self, unsigned int track, double offset,
+	unsigned int subline)
 {
 	return self->cursor.track == track && 
 		self->cursor.offset >= offset && self->cursor.offset < offset + self->bpl
@@ -300,7 +382,7 @@ int TestCursor(TrackerGrid* self, int track, double offset, int subline)
 
 void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 {	
-	int track;
+	unsigned int track;
 	int cpx = 0;	
 	int cpy;
 	double offset;
@@ -501,11 +583,11 @@ void AdjustScrollranges(TrackerGrid* self)
 }
 
 
-int NumSublines(Pattern* pattern, float offset, float bpl)
+unsigned int NumSublines(Pattern* pattern, float offset, float bpl)
 {
 	PatternNode* prev;
 	PatternNode* node = pattern_greaterequal(pattern, offset, &prev);		
-	int currsubline = -1;
+	unsigned int currsubline = -1;
 	while (node) {
 		PatternEntry* entry = (PatternEntry*)(node->entry);
 		if (entry->offset >= offset + bpl) {			
@@ -519,10 +601,11 @@ int NumSublines(Pattern* pattern, float offset, float bpl)
 	return currsubline;
 }
 
-PatternNode* FindNode(Pattern* pattern, int track, float offset, int subline, float bpl, PatternNode** prev)
+PatternNode* FindNode(Pattern* pattern, unsigned int track, float offset, 
+	unsigned int subline, float bpl, PatternNode** prev)
 {
 	PatternNode* node = pattern_greaterequal(pattern, offset, prev);	
-	int currsubline = 0;
+	unsigned int currsubline = 0;
 	int first = 1;	
 	while (node) {
 		PatternEntry* entry = (PatternEntry*)(node->entry);
@@ -569,7 +652,7 @@ void AdvanceCursor(TrackerView* self)
 void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata)
 {		
 	int cmd;
-		
+			
 	if (keycode == VK_UP) {
 		if (self->grid.cursor.subline > 0) {
 			--self->grid.cursor.subline;
@@ -636,34 +719,45 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 			if (cmd != -1) {		
 				int base = 48;
 				PatternNode* prev;
-				PatternNode* node = FindNode(self->pattern, self->grid.cursor.track, self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
+				PatternNode* node =
+					FindNode(self->pattern,
+						self->grid.cursor.track,
+						self->grid.cursor.offset,
+						self->grid.cursor.subline,
+						self->grid.bpl,
+						&prev);
 				if (node) {					
 					PatternEntry* entry = (PatternEntry*)(node->entry);
-					if (cmd == CMD_NOTE_Stop) {
-						entry->event.note = 120;
-					} else {
-						entry->event.note = (unsigned char)(base + cmd);					
-					}
-				} else {
-					Machine* machine;
-					float offset;
-					PatternEvent ev = { 0, 255, 255, 0, 0 };
+					PatternEvent event = entry->event;
 
-					if (cmd == CMD_NOTE_Stop) {
-						ev.note = 120;
+					if (cmd == CMD_NOTE_STOP) {
+						event.note = 120;
 					} else {
-						ev.note = (unsigned char)(base + cmd);
+						event.note = (unsigned char)(base + cmd);					
 					}
-					ev.mach = machines_slot(&self->grid.player->song->machines);
-					machine = machines_at(&self->grid.player->song->machines, ev.mach);
+					undoredo_execute(&self->workspace->undoredo,
+						&InsertCommandAlloc(self->pattern, self->grid.bpl,
+							self->grid.cursor, event)->command);
+					ui_invalidate(&self->component);
+				} else {
+					Machine* machine;					
+					PatternEvent event = { 0, 255, 255, 0, 0 };
+
+					if (cmd == CMD_NOTE_STOP) {
+						event.note = 120;
+					} else {
+						event.note = (unsigned char)(base + cmd);
+					}
+					event.mach = machines_slot(&self->grid.player->song->machines);
+					machine = machines_at(&self->grid.player->song->machines, event.mach);
 					if (machine && machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
-						ev.inst = self->grid.player->song->instruments.slot;
-					}
-					offset = self->grid.cursor.offset;					
-					pattern_insert(self->pattern, prev, self->grid.cursor.track, offset, &ev);
+						event.inst = self->grid.player->song->instruments.slot;
+					}					
+					undoredo_execute(&self->workspace->undoredo,
+						&InsertCommandAlloc(self->pattern, self->grid.bpl,
+							self->grid.cursor, event)->command);
 				}
 				AdvanceCursor(self);				
-				ui_invalidate(&self->component);			
 			}		
 		} else {
 			int val = -1;
@@ -674,61 +768,62 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 				val = keycode - 'A' + 10;
 			}
 			if (val != -1 && self->pattern) {
-				PatternNode* prev;
-				PatternEntry* entry = 0;
+				PatternNode* prev;				
+				PatternEvent event;
 				PatternNode* node = FindNode(self->pattern, self->grid.cursor.track, self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
-				if (node) {					
-					entry = (PatternEntry*)(node->entry);					
-				} else {
-					float offset;
-					int base = 48;
-					PatternEvent ev = { 255, 255, 255, 0, 0 };					
-					offset = self->grid.cursor.offset;
-					entry = pattern_write(self->pattern, self->grid.cursor.track, offset, ev);					
-				}				
-				if (entry) {					
-					switch (self->grid.cursor.col) {
-						case 1: 
-							if ((entry->event.inst == 0xFF) && (val != 0x0F)) {
-								entry->event.inst = 0;
-							}
-							EnterDigit(0, val, &entry->event.inst);
-						break;
-						case 2:
-							if ((entry->event.inst == 0xFF) && (val != 0x0F)) {
-								entry->event.inst = 0;
-							}
-							EnterDigit(1, val, &entry->event.inst);
-						break;
-						case 3:
-							if ((entry->event.mach == 0xFF) && (val != 0x0F)) {
-								entry->event.mach = 0;
-							}
-							EnterDigit(0, val, &entry->event.mach);
-						break;
-						case 4:
-							if ((entry->event.mach == 0xFF) && (val != 0x0F)) {
-								entry->event.mach = 0;
-							}
-							EnterDigit(1, val, &entry->event.mach);
-						break;
-						case 5:							
-							EnterDigit(0, val, &entry->event.cmd);
-						break;
-						case 6:
-							EnterDigit(1, val, &entry->event.cmd);
-						break;
-						case 7:
-							EnterDigit(0, val, &entry->event.parameter);
-						break;
-						case 8:
-							EnterDigit(1, val, &entry->event.parameter);
-						break;
-						default:
-						break;
-					}
-					ui_invalidate(&self->component);
+				if (node) {		
+					PatternEntry* entry;
+
+					entry = (PatternEntry*)(node->entry);
+					event = entry->event;
+				} else {					
+					PatternEvent ev = { 255, 255, 255, 0, 0 };
+					event = ev;					
+				}								
+				switch (self->grid.cursor.col) {
+					case 1: 
+						if ((event.inst == 0xFF) && (val != 0x0F)) {
+							event.inst = 0;
+						}
+						EnterDigit(0, val, &event.inst);
+					break;
+					case 2:
+						if ((event.inst == 0xFF) && (val != 0x0F)) {
+							event.inst = 0;
+						}
+						EnterDigit(1, val, &event.inst);
+					break;
+					case 3:
+						if ((event.mach == 0xFF) && (val != 0x0F)) {
+							event.mach = 0;
+						}
+						EnterDigit(0, val, &event.mach);
+					break;
+					case 4:
+						if ((event.mach == 0xFF) && (val != 0x0F)) {
+							event.mach = 0;
+						}
+						EnterDigit(1, val, &event.mach);
+					break;
+					case 5:							
+						EnterDigit(0, val, &event.cmd);
+					break;
+					case 6:
+						EnterDigit(1, val, &event.cmd);
+					break;
+					case 7:
+						EnterDigit(0, val, &event.parameter);
+					break;
+					case 8:
+						EnterDigit(1, val, &event.parameter);
+					break;
+					default:
+					break;
 				}
+				undoredo_execute(&self->workspace->undoredo,
+						&InsertCommandAlloc(self->pattern, self->grid.bpl,
+							self->grid.cursor, event)->command);
+				ui_invalidate(&self->component);				
 			}
 		}		
 	}	
@@ -796,9 +891,13 @@ void OnMouseDown(TrackerGrid* self, ui_component* sender, int x, int y, int butt
 
 void OnEditPositionChanged(TrackerGrid* self, Sequence* sender)
 {	
-	if (sender->editposition.trackposition.tracknode) {		
-		SequenceEntry* entry = (SequenceEntry*)sender->editposition.trackposition.tracknode->entry;	
-		TrackerViewSetPattern(self->view, patterns_at(&self->player->song->patterns, entry->pattern));
+	SequenceEntry* entry;
+	
+	entry = sequenceposition_entry(&sender->editposition);
+	if (entry) {			
+		TrackerViewSetPattern(self->view,
+			patterns_at(&self->player->song->patterns,
+			entry->pattern));
 	} else {
 		TrackerViewSetPattern(self->view, 0);		
 	}
@@ -807,9 +906,11 @@ void OnEditPositionChanged(TrackerGrid* self, Sequence* sender)
 
 void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspace)
 {		
+	self->workspace = workspace;
+	self->opcount = 0;
 	ui_component_init(&self->component, parent);
 	self->pattern = 0;
-	ui_bitmap_loadresource(&self->skin.skinbmp, IDB_HEADERSKIN);
+	ui_bitmap_loadresource(&self->skin.bitmap, IDB_HEADERSKIN);
 	InitDefaultSkin(self);	
 	InitTrackerHeader(&self->header, &self->component);	
 	self->header.numtracks = player_numsongtracks(&workspace->player);
@@ -857,6 +958,9 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 void TrackerViewSetPattern(TrackerView* self, Pattern* pattern)
 {	
 	self->pattern = pattern;
+	if (pattern) {
+		self->opcount = pattern->opcount;
+	}
 	self->grid.dx = 0;
 	self->grid.dy = 0;
 	self->header.dx = 0;
@@ -864,7 +968,7 @@ void TrackerViewSetPattern(TrackerView* self, Pattern* pattern)
 	PatternPropertiesSetPattern(&self->properties, pattern);
 	AdjustScrollranges(&self->grid);
 	ui_invalidate(&self->linenumbers.component);
-	ui_invalidate(&self->header.component);
+	ui_invalidate(&self->header.component);	
 }
 
 void InitDefaultSkin(TrackerView* self)
@@ -949,7 +1053,7 @@ void OnHeaderDraw(TrackerHeader* self, ui_component* sender, ui_graphics* g)
 	ui_size size;
 	ui_rectangle r;
 	int cpx = self->dx;
-	int track;
+	unsigned int track;
 
 	size = ui_component_size(&self->component);
 	ui_setrectangle(&r, 0, 0, size.width, size.height);		
@@ -969,9 +1073,10 @@ void OnHeaderDraw(TrackerHeader* self, ui_component* sender, ui_graphics* g)
 	}		
 }
 
-void BlitSkinPart(TrackerHeader* self, ui_graphics* g, int x, int y, SkinCoord* coord)
+void BlitSkinPart(TrackerHeader* self, ui_graphics* g, int x, int y,
+	SkinCoord* coord)
 {
-	ui_drawbitmap(g, &self->skin->skinbmp, x + coord->destx, y + coord->desty,
+	ui_drawbitmap(g, &self->skin->bitmap, x + coord->destx, y + coord->desty,
 		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
 }
 
@@ -1082,6 +1187,11 @@ void OnTimer(TrackerView* self, ui_component* sender, int timerid)
 {
 	if (self->grid.player->playing) {
 		ui_invalidate(&self->grid.component);
+	}
+	if (self->pattern && self->pattern->opcount != self->opcount)
+	{
+		ui_invalidate(&self->grid.component);
+		self->opcount = self->pattern->opcount;
 	}
 }
 
