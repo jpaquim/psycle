@@ -27,6 +27,7 @@ static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
 static void enableinput(ui_component* self, int enable, int recursive);
+static void onpreferredsize(ui_component* self, ui_component* sender, ui_size* limit, int* width, int* height);
 
 HINSTANCE appInstance = 0;
 static int tracking = 0;
@@ -91,6 +92,29 @@ void ui_dispose()
 	DisposeIntHashTable(&winidmap);
 	DeleteObject(defaultfont.hfont);
 	DeleteObject(defaultbackgroundbrush);
+}
+
+void ui_replacedefaultfont(ui_component* main, ui_font* font)
+{		
+	if (font && main) {
+		List* p;
+
+		if (main->font.hfont == defaultfont.hfont) {
+			ui_component_setfont(main, font);
+		}
+		for (p = ui_component_children(main, 1); p != 0; p = p->next) {
+			ui_component* child;
+
+			child = (ui_component*)p->entry;
+			if (child->font.hfont == defaultfont.hfont) {
+				ui_component_setfont(child, font);
+				ui_component_align(child);
+			}		
+		}		
+		ui_font_dispose(&defaultfont);
+		defaultfont = *font;
+		ui_component_align(main);
+	}
 }
 
 
@@ -395,7 +419,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }
 
-
 void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	SCROLLINFO		si;	
@@ -527,6 +550,7 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_show);
 	signal_init(&component->signal_hide);
 	signal_init(&component->signal_align);
+	signal_init(&component->signal_preferredsize);
 	signal_init(&component->signal_windowproc);
 }
 
@@ -538,6 +562,7 @@ void ui_component_init_base(ui_component* self) {
 	self->align = UI_ALIGN_NONE;
 	self->justify = UI_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
+	self->alignexpandmode = UI_NOEXPAND;
 	memset(&self->margin, 0, sizeof(ui_margin));
 	self->debugflag = 0;
 	self->defaultpropagation = 0;	
@@ -547,6 +572,7 @@ void ui_component_init_base(ui_component* self) {
 	self->background = 0;
 	ui_component_setfont(self, &defaultfont);
 	ui_component_setbackgroundcolor(self, self->backgroundcolor);
+	signal_connect(&self->signal_preferredsize, self, onpreferredsize);
 }
 
 void ui_component_dispose(ui_component* component)
@@ -569,6 +595,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_show);
 	signal_dispose(&component->signal_hide);
 	signal_dispose(&component->signal_align);
+	signal_dispose(&component->signal_preferredsize);
 	signal_dispose(&component->signal_windowproc);
 	if (component->font.hfont && component->font.hfont != defaultfont.hfont) {
 		ui_font_dispose(&component->font);
@@ -826,17 +853,31 @@ void ui_component_align(ui_component* self)
 {	
 	int cpx = 0;
 	int cpy = 0;
+	int cpymax = 0;
 	List* p;
-	ui_size size;
+	List* wrap = 0;
+	ui_size size;	
 
-	size = ui_component_size(self);	
-	for (p = ui_component_children(self, 0); p != 0; p = p->next) {
-		ui_size componentsize;
+	size = ui_component_size(self);
+	if (self->debugflag == 900) {
+		cpx = 0;
+	}
+	for (p = ui_component_children(self, 0); p != 0; p = p->next) {		
 		ui_component* component;
 			
 		component = (ui_component*)p->entry;		
-		componentsize = ui_component_size(component);
 		if (component->visible) {
+			ui_size componentsize;
+			if (component->signal_preferredsize.slots) {
+				int width;
+				int height;					
+				signal_emit(&component->signal_preferredsize, component, 3, &size,
+					&width, &height);
+				componentsize.width = width;
+				componentsize.height = height;
+			} else {
+				componentsize = ui_component_size(component);
+			}
 			if (component->align == UI_ALIGN_FILL) {
 				ui_component_setposition(component,
 					component->margin.left,
@@ -844,38 +885,143 @@ void ui_component_align(ui_component* self)
 					size.width - component->margin.left - component->margin.right,
 					size.height - component->margin.top - component->margin.bottom);
 			} else
-			if (component->align == UI_ALIGN_TOP) {			
-				ui_size componentsize = ui_component_size(component);		
+			if (component->align == UI_ALIGN_TOP) {				
 				cpy += component->margin.top;
-				ui_component_setposition(component, component->margin.left, cpy,
+				ui_component_setposition(component, 
+					component->margin.left, 
+					cpy,
 					size.width - component->margin.left - component->margin.right,
 					componentsize.height);
 				cpy += component->margin.bottom;
 				cpy += componentsize.height;
 			} else
-			if (component->align == UI_ALIGN_LEFT) {			
-				ui_size componentsize = ui_component_size(component);		
+			if (component->align == UI_ALIGN_LEFT) {
+				if ((self->alignexpandmode & UI_HORIZONTALEXPAND) == UI_HORIZONTALEXPAND) {
+				} else {
+					int requiredcomponentwidth;
+
+					requiredcomponentwidth = componentsize.width + component->margin.left +
+						component->margin.right;				
+					if (cpx + requiredcomponentwidth > size.width) {
+						List* w;						
+						cpx = 0;
+						for (w = wrap; w != 0; w = w->next) {
+							ui_component* c;
+							c = (ui_component*)w->entry;
+							ui_component_resize(c, ui_component_size(c).width,
+								cpymax - cpy - component->margin.top -
+									component->margin.bottom);
+						}
+						cpy = cpymax;
+						list_free(wrap);						
+						wrap = 0;
+					}
+					if (wrap) {
+						list_append(wrap, component);
+					} else {
+						wrap = list_create(component);
+					}
+				}
 				cpx += component->margin.left;
 				ui_component_setposition(component,
 					cpx,
-					component->margin.top,
+					cpy + component->margin.top,
 					componentsize.width,
 					component->justify == UI_JUSTIFY_EXPAND 
-					? size.height - component->margin.top - component->margin.bottom
+					? size.height - cpy - component->margin.top - component->margin.bottom
 					: componentsize.height);
 				cpx += component->margin.right;
-				cpx += componentsize.width;
+				cpx += componentsize.width;				
+				if (cpymax < cpy + componentsize.height + component->margin.top + component->margin.bottom) {
+					cpymax = cpy + componentsize.height + component->margin.top + component->margin.bottom;
+				}
 			}				
 		}
 	}
 	list_free(p);
+	list_free(wrap);
 	signal_emit(&self->signal_align, self, 0);
 }
 
+void onpreferredsize(ui_component* self, ui_component* sender,
+	ui_size* limit, int* width, int* height)
+{		
+	int cpx = 0;
+	int cpxmax = 0;
+	int cpy = 0;
+	int cpymax = 0;	
+	List* p;
+	ui_size size;
+
+	size = ui_component_size(self);
+	if (self->alignchildren) {
+		if ((self->alignexpandmode & UI_HORIZONTALEXPAND) == UI_HORIZONTALEXPAND) {
+			size.width = 0;		
+		} else {
+			size.width = limit->width;
+		}	
+		for (p = ui_component_children(self, 0); p != 0; p = p->next) {		
+			ui_component* component;
+				
+			component = (ui_component*)p->entry;		
+			if (component->visible) {
+				ui_size componentsize;
+				if (component->signal_preferredsize.slots) {
+					int w;
+					int h;					
+					signal_emit(&component->signal_preferredsize, component, 3, &size, &w, &h);
+					componentsize.width = w;
+					componentsize.height = h;
+				} else {
+					componentsize = ui_component_size(component);
+				}			
+				if (component->align == UI_ALIGN_TOP) {
+					cpy += component->margin.top;										
+					cpy += componentsize.height;
+					cpy += component->margin.bottom;
+					if (cpymax < cpy) {
+						cpymax = cpy;
+					}
+					if (cpxmax < componentsize.width + component->margin.left + component->margin.right) {
+						cpxmax = componentsize.width + component->margin.left + component->margin.right;
+					}
+				} else
+				if (component->align == UI_ALIGN_LEFT) {					
+					if (size.width != 0) {
+						int requiredcomponentwidth;
+
+						requiredcomponentwidth = componentsize.width + component->margin.left +
+							component->margin.right;				
+						if (cpx + requiredcomponentwidth > size.width) {
+							cpy = cpymax;
+							cpx = 0;							
+						}						
+					}
+					cpx += component->margin.left;				
+					cpx += component->margin.right;
+					cpx += componentsize.width;
+					if (cpxmax < cpx) {
+						cpxmax = cpx;
+					}
+					if (cpymax < cpy + componentsize.height + component->margin.top + component->margin.bottom) {
+						cpymax = cpy + componentsize.height + component->margin.top + component->margin.bottom;
+					}
+				}				
+			}
+		}
+		list_free(p);
+		*width = cpxmax;
+		*height = cpymax;
+	} else {
+		*width = size.width;
+		*height = size.height;
+	}
+}
+
 void ui_component_setmargin(ui_component* self, const ui_margin* margin)
-{
+{	
 	if (margin) {
-		self->margin = *margin;
+		self->margin = *margin;		
 	} else {
 		memset(&self->margin, 0, sizeof(ui_margin));
 	}
@@ -888,7 +1034,12 @@ void ui_component_setalign(ui_component* self, UiAlignType align)
 
 void ui_component_enablealign(ui_component* self)
 {
-	self->alignchildren = 1;
+	self->alignchildren = 1;	
+}
+
+void ui_component_setalignexpand(ui_component* self, UiExpandMode mode)
+{
+	self->alignexpandmode = mode;
 }
 
 void ui_component_preventalign(ui_component* self)
@@ -986,4 +1137,42 @@ ui_component* ui_component_parent(ui_component* self)
 {			
 	return (ui_component*) SearchIntHashTable(&selfmap,
 		(int) GetParent(self->hwnd));
+}
+
+void ui_components_setalign(List* list, UiAlignType align)
+{
+	List* p;
+
+	for (p = list; p != 0; p = p->next) {
+		ui_component_setalign((ui_component*)p->entry, align);		
+	}
+}
+
+void ui_components_setmargin(List* list, const ui_margin* margin)
+{
+	List* p;
+
+	for (p = list; p != 0; p = p->next) {
+		ui_component_setmargin((ui_component*)p->entry, margin);		
+	}
+}
+
+TEXTMETRIC ui_component_textmetric(ui_component* self)
+{			
+	TEXTMETRIC tm;
+	HDC hdc;		
+	HFONT hPrevFont = 0;	
+	
+	hdc = GetDC (self->hwnd);	
+    SaveDC (hdc) ;          	
+	if (self->font.hfont) {
+		hPrevFont = SelectObject(hdc, self->font.hfont);
+	}
+	GetTextMetrics (hdc, &tm);
+	if (hPrevFont) {
+		SelectObject(hdc, hPrevFont);
+	}	
+	RestoreDC (hdc, -1);	
+	ReleaseDC(NULL, hdc);
+	return tm;
 }

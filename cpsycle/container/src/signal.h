@@ -17,6 +17,7 @@ typedef struct {
 
 void signal_init(Signal*);
 void signal_connect(Signal*, void* context, void* fp);
+void signal_disconnectall(Signal*);
 void signal_prevent(Signal*, void* context, void* fp);
 void signal_enable(Signal*, void* context, void* fp);
 void signal_emit(Signal*, void* context, int num, ...);

@@ -13,11 +13,13 @@ static void workspace_setdriverlist(Workspace*);
 static void workspace_driverconfig(Workspace*);
 static const char* workspace_driverpath(Workspace*);
 static void workspace_configaudio(Workspace*);
-static void workspace_setsong(Workspace*, Song*);
+static void workspace_configvisual(Workspace* self);
+static void workspace_setsong(Workspace*, Song*, int flag);
 static Samples* machinecallback_samples(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
 static Machines* machinecallback_machines(Workspace*);
 static int machinecallback_bpm(Workspace*);
+static void workspace_changedefaultfontsize(Workspace*, int size);
 
 
 void workspace_init(Workspace* self)
@@ -58,7 +60,7 @@ void workspace_dispose(Workspace* self)
 
 void workspace_initplayer(Workspace* self)
 {
-	player_init(&self->player, self->song, self->mainhandle);
+	player_init(&self->player, self->song, self->mainhandle->hwnd);
 	workspace_driverconfig(self);
 }
 	
@@ -67,6 +69,20 @@ void workspace_configaudio(Workspace* self)
 	player_loaddriver(&self->player, workspace_driverpath(self));
 	self->player.driver->open(self->player.driver);	
 	workspace_driverconfig(self);	
+}
+
+void workspace_configvisual(Workspace* self)
+{
+	Properties* p;
+	Properties* visual;
+
+	visual = properties_find(self->config, "visual");
+	if (visual) {
+		p = properties_read(visual, "defaultfontsize");
+		if (p) {
+			workspace_changedefaultfontsize(self, properties_value(p));
+		}
+	}
 }
 
 const char* workspace_driverpath(Workspace* self)
@@ -131,6 +147,7 @@ void workspace_config(Workspace* self)
 	Properties* directories;	
 	Properties* midicontrollers;
 
+	// General
 	self->config = properties_create();	
 	general = properties_createsection(self->config, "general");
 	properties_settext(general, "General");
@@ -140,10 +157,13 @@ void workspace_config(Workspace* self)
 	p = properties_append_bool(general, "showaboutatstart", 1);
 	properties_settext(p, "Show About at Startup");
 	p = properties_append_bool(general, "showsonginfoonload", 1);
-	properties_settext(p, "Show song info on Load");	
+	properties_settext(p, "Show song info on Load");
 
+	// Visual
 	visual = properties_createsection(self->config, "visual");	
 	properties_settext(visual, "Visual");	
+	p = properties_append_int(visual, "defaultfontsize", 80, 0, 999);
+	properties_settext(p, "Default font size");
 	p = properties_append_bool(visual, "linenumbers", 1);
 	properties_settext(p, "Line numbers");
 	keyboard = properties_createsection(self->config, "keyboard");
@@ -193,8 +213,10 @@ void workspace_configchanged(Workspace* self, Properties* property, Properties* 
 	if (choice && (strcmp(properties_key(choice), "driver") == 0)) {
 		player_reloaddriver(&self->player, properties_valuestring(property));		
 		workspace_driverconfig(self);
+	} else
+	if (strcmp(properties_key(property), "defaultfontsize") == 0) {
+		workspace_changedefaultfontsize(self, properties_value(property));
 	}
-	signal_emit(&self->signal_configchanged, self, 1, property);
 }
 
 int workspace_showsonginfoonload(Workspace* self)
@@ -241,13 +263,13 @@ int workspace_showlinenumbers(Workspace* self)
 
 void workspace_newsong(Workspace* self)
 {			
-	Song* song;
+	Song* song;	
 	
 	song = (Song*) malloc(sizeof(Song));
 	song_init(song, &self->machinefactory);	
-	workspace_setsong(self, song);
 	properties_free(self->properties);
 	self->properties = workspace_makeproperties(self);
+	workspace_setsong(self, song, WORKSPACE_NEWSONG);		
 }
 
 void workspace_loadsong(Workspace* self, const char* path)
@@ -258,10 +280,10 @@ void workspace_loadsong(Workspace* self, const char* path)
 	song = malloc(sizeof(Song));
 	song_init(song, &self->machinefactory);	
 	song_load(song, path, &self->properties);
-	workspace_setsong(self, song);
+	workspace_setsong(self, song, WORKSPACE_LOADSONG);
 }
 
-void workspace_setsong(Workspace* self, Song* song)
+void workspace_setsong(Workspace* self, Song* song, int flag)
 {
 	suspendwork();
 	workspace_removesong(self);
@@ -269,7 +291,7 @@ void workspace_setsong(Workspace* self, Song* song)
 	player_stop(&self->player);	
 	player_setsong(&self->player, self->song);
 	applysongproperties(self);
-	signal_emit(&self->signal_songchanged, self, 0);
+	signal_emit(&self->signal_songchanged, self, 1, flag);
 	resumework();
 }
 
@@ -317,6 +339,7 @@ void workspace_load_configuration(Workspace* self)
 {	
 	properties_load(self->config, "psycle.ini");	
 	workspace_configaudio(self);
+	workspace_configvisual(self);
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -368,4 +391,15 @@ int machinecallback_bpm(Workspace* self)
 Machines* machinecallback_machines(Workspace* self)
 {
 	return self->song ? &self->song->machines : 0;
+}
+
+void workspace_changedefaultfontsize(Workspace* self, int size)
+{
+	ui_fontinfo fontinfo;
+	ui_font font;
+
+	ui_fontinfo_init(&fontinfo, "Tahoma", size);
+	ui_font_init(&font, &fontinfo);
+	ui_replacedefaultfont(self->mainhandle, &font);
+	ui_invalidate(self->mainhandle);
 }

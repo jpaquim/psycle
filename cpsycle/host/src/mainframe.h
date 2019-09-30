@@ -10,6 +10,8 @@
 #include <uiframe.h>
 #include <uinotebook.h>
 #include "uistatusbar.h"
+#include "filebar.h"
+#include "undoredobar.h"
 #include "machinebar.h"
 #include "machineview.h"
 #include "gear.h"
@@ -26,26 +28,25 @@
 #include "vumeter.h"
 #include "volslider.h"
 #include "clipbox.h"
-#include "timebar.h"
-#include "linesperbeatbar.h"
-#include "octavebar.h"
-#include "songtrackbar.h"
+#include "songbar.h"
 #include "helpview.h"
 
 typedef struct {
 	ui_component component;
-	ui_component top;
+	ui_component top;	
+	ui_component toprow0;
+	ui_component toprow1;
+	ui_component toprow2;
 	ui_component tabbars;
 	ui_component client;
-	ui_button newsongbutton;
-	ui_button loadsongbutton;
-	ui_button updatedriver;
-	ui_button undobutton;
-	ui_button redobutton;
+	// ui_button updatedriver;
 	ui_component splitbar;
 	TabBar tabbar;	
 	ui_notebook notebook;
+	FileBar filebar;
+	UndoRedoBar undoredobar;
 	MachineBar machinebar;
+	SongBar songbar;
 	PlayBar playbar;
 	SequenceView sequenceview;
 	MachineView machineview;
@@ -56,21 +57,16 @@ typedef struct {
 	SettingsView settingsview;
 	HelpView helpview;	
 	Gear gear;
+	ui_component vubar;
 	Vumeter vumeter;
 	VolSlider volslider;
-	ClipBox clipbox;
-	SongTrackBar songtrackbar;
-	TimeBar timebar;
-	LinesPerBeatBar linesperbeatbar;
-	OctaveBar octavebar;	
+	ClipBox clipbox;	
 	ui_statusbar statusbar;
-	ui_component* activeview;
-	Player* player;
+	ui_component* activeview;	
 	NoteInputs noteinputs;	
 	Workspace workspace;
 	ui_label label;
-	int firstshow;
-	int toolbarheight;	
+	int firstshow;	
 	int resize;
 } MainFrame;
 

@@ -2,14 +2,14 @@
 #include <string.h>
 
 static void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g);
-static void OnSize(TabBar* self, ui_component* sender, int width, int height);
 static void OnDestroy(TabBar* self, ui_component* component);
 static void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button);
 static void OnMouseMove(TabBar* self, ui_component* sender, int x, int y, int button);
 static void onmouseenter(TabBar*, ui_component* sender);
 static void onmouseleave(TabBar*, ui_component* sender);
 static int tabhittest(TabBar* self, int x, int y);
-static void AlignTabs(TabBar* self);
+static void onalign(TabBar*, ui_component* sender);
+static void onpreferredsize(TabBar*, ui_component* sender, ui_size* limit, int* width, int* height);
 
 void InitTab(Tab* self, const char* text, ui_size* size)
 {
@@ -26,20 +26,16 @@ void DisposeTab(Tab* self)
 }
 
 void InitTabBar(TabBar* self, ui_component* parent)
-{	
-	ui_fontinfo fontinfo;		
-
+{
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	self->component.doublebuffered = 1;
-	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
-	ui_font_init(&self->font, &fontinfo);
-	ui_component_setfont(&self->component, &self->font);
+	self->component.doublebuffered = 1;	
 	ui_setmargin(&self->tabmargin, 0, 10, 0, 0);
 	signal_init(&self->signal_change);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
+	signal_connect(&self->component.signal_align, self, onalign);
+	signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
 	signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
@@ -120,10 +116,6 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-void OnSize(TabBar* self, ui_component* sender, int width, int height)
-{
-
-}
 
 void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button)
 {
@@ -251,4 +243,55 @@ void tabbar_settabmargin(TabBar* self, int tabindex, const ui_margin* margin)
 		tabs = tabs->next;
 		++c;
 	}		
+}
+
+void onalign(TabBar* self, ui_component* sender)
+{
+	List* p;
+	
+	for (p = self->tabs; p != 0; p = p->next) {
+		Tab* tab;
+
+		tab = (Tab*)p->entry;
+		tab->size = ui_component_textsize(&self->component, tab->text);			
+	}		
+}
+
+void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, int* width, int* height)
+{
+	ui_size size;
+	
+	List* tabs;	
+	int cpx = 0;
+	int cpy = 0;
+	
+	size = ui_component_size(&self->component);	
+
+	if (self->tabalignment == UI_ALIGN_TOP) {
+		cpx = 5;
+	} else 
+	if (self->tabalignment == UI_ALIGN_RIGHT) {
+		cpy = 5;
+		cpx = 10;
+	} else
+	if (self->tabalignment == UI_ALIGN_LEFT) {		
+		cpy = 5;
+	}
+	for (tabs = self->tabs; tabs != 0; tabs = tabs->next) {
+		Tab* tab;
+
+		tab = (Tab*)tabs->entry;
+		if (self->tabalignment == UI_ALIGN_TOP) {
+			cpx += tab->size.width;
+			cpx += self->tabmargin.right + tab->margin.right;
+		} else 
+		if (self->tabalignment == UI_ALIGN_LEFT ||
+			self->tabalignment == UI_ALIGN_RIGHT) {
+			cpy += tab->size.height;
+			cpy += self->tabmargin.bottom + tab->margin.bottom;
+		}
+	}
+
+	*width = cpx;
+	*height = size.height;
 }

@@ -12,10 +12,8 @@ void InitHelpView(HelpView* self, ui_component* parent,
 {
 	ui_component_init(&self->component, parent);		
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->component, 0x009a887c);		
 	ui_notebook_init(&self->notebook, &self->component);
-	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->notebook.component, 0x009a887c);		
+	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);
 	InitAbout(&self->about, &self->notebook.component);
 	greet_init(&self->greet, &self->notebook.component);	

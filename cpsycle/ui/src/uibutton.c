@@ -18,6 +18,7 @@ static void onownerdraw(ui_button*, ui_component* sender, ui_graphics*);
 static void onmousedown(ui_button*, ui_component* sender);
 static void onmouseenter(ui_button*, ui_component* sender);
 static void onmouseleave(ui_button*, ui_component* sender);
+static void onpreferredsize(ui_button*, ui_component* sender, ui_size* limit, int* width, int* height);
 
 void ui_button_init(ui_button* button, ui_component* parent)
 {  
@@ -27,8 +28,13 @@ void ui_button_init(ui_button* button, ui_component* parent)
 	signal_init(&button->signal_clicked);
 	button->component.doublebuffered = 0;
 	ui_button_create_ownerdrawn(button, parent);
-	signal_connect(&button->component.signal_destroy, button,  ondestroy);
+	signal_connect(&button->component.signal_destroy, button,  ondestroy);	
 	ui_component_init_base(&button->component);
+	signal_disconnectall(&button->component.signal_preferredsize);
+	signal_connect(&button->component.signal_preferredsize, button, onpreferredsize);
+	if (button->ownerdrawn) {
+		ui_component_setbackgroundmode(&button->component, BACKGROUND_SET);
+	}
 }
 
 void ui_button_create_system(ui_button* button, ui_component* parent)
@@ -81,8 +87,25 @@ void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
 	} else {
 		ui_settextcolor(g, 0x00CACACA);
 	}
-	ui_textoutrectangle(g, 2, 2, ETO_CLIPPED, r, self->text,
+	ui_textoutrectangle(g, 0, 0, ETO_CLIPPED, r, self->text,
 		strlen(self->text));
+}
+
+void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit, int* width, int* height)
+{		
+	if (self->ownerdrawn) {
+		ui_size size;
+
+		size = ui_component_textsize(&self->component, self->text);
+		*width = size.width + 4;
+		*height = size.height + 4;
+	} else {
+		ui_size size;
+
+		size = ui_component_size(&self->component);
+		*width = size.width;
+		*height = size.height;
+	}
 }
 
 void onmousedown(ui_button* self, ui_component* sender)

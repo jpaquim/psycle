@@ -42,13 +42,14 @@ Properties* properties_createsection(Properties* self, const char* name)
 void properties_init(Properties* self)
 {		
 	self->children = 0;
+	self->parent = 0;
 	self->next = 0;	
 	self->dispose = 0;
 	memset(&self->item, 0, sizeof(Property));
 	self->item.key = 0;
 	self->item.text = 0;
 	self->item.hint = PROPERTY_HINT_EDIT;
-	self->item.disposechildren = 1;
+	self->item.disposechildren = 1;	
 }
 
 void properties_free(Properties* self)
@@ -571,9 +572,10 @@ Properties* tail(Properties* self)
 Properties* append(Properties* self, Properties* p)
 {	
 	if (self->children) {
-		tail(self->children)->next = p;
+		tail(self->children)->next = p;		
 	} else {
 		self->children = p;
 	}
+	p->parent = self;
 	return p;
 }

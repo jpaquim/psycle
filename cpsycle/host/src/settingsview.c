@@ -39,7 +39,7 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	self->selected = 0;
 	ui_edit_init(&self->edit, &self->client, 0);	
 	ui_component_hide(&self->edit.component);
-	signal_connect(&self->edit.signal_change, self, OnEditChange);
+	// signal_connect(&self->edit.signal_change, self, OnEditChange);
 	self->dy = 0;
 	self->cpx = 0;
 	self->cpy = 0;
@@ -223,7 +223,10 @@ void OnKeyDown(SettingsView* self, ui_component* sender, int keycode, int keydat
 
 void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int button)
 {
-	ui_component_hide(&self->edit.component);
+	if (ui_component_visible(&self->edit.component)) {
+		OnEditChange(self, &self->edit);
+		ui_component_hide(&self->edit.component);
+	}	
 	self->selected = 0;
 	self->mx = x;
 	self->my = y;
@@ -404,19 +407,26 @@ void OnMouseDoubleClick(SettingsView* self, ui_component* sender, int x, int y, 
 		ui_component_move(&self->edit.component, self->selrect.left, self->selrect.top);
 		ui_component_resize(&self->edit.component, self->selrect.right - self->selrect.left, 
 			self->selrect.bottom - self->selrect.top);
-		ui_edit_settext(&self->edit, self->selected->item.value.s);
+		if (self->selected->item.typ == PROPERTY_TYP_INTEGER) {
+			char text[40];
+			_snprintf(text, 40, "%d", self->selected->item.value.i);
+			ui_edit_settext(&self->edit, text);
+		} else
+		if (self->selected->item.typ == PROPERTY_TYP_STRING) {
+			ui_edit_settext(&self->edit, self->selected->item.value.s);
+		}
 		ui_component_show(&self->edit.component);
 	}
 }
 
 void OnEditChange(SettingsView* self, ui_edit* sender)
 {
-	if (self->selected) {
+	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PROPERTY_TYP_STRING) {
-			properties_write_string(self->selected, self->selected->item.key, ui_edit_text(&self->edit));
+			properties_write_string(self->selected->parent, self->selected->item.key, ui_edit_text(&self->edit));
 		} else 
 		if (self->selected->item.typ == PROPERTY_TYP_INTEGER) {
-			properties_write_int(self->selected, self->selected->item.key, atoi(ui_edit_text(&self->edit)));
+			properties_write_int(self->selected->parent, self->selected->item.key, atoi(ui_edit_text(&self->edit)));
 		}
 		signal_emit(&self->signal_changed, self, 1, self->selected);
 	}

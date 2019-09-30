@@ -2,15 +2,14 @@
 #include <stdio.h>
 
 static void OnSize(PatternProperties* self, ui_component* sender, int width, int height);
-static void OnDraw(PatternProperties* self, ui_component* sender, ui_graphics* g);
 static void OnApplyClicked(PatternProperties* self, ui_component* sender);
 static void OnCloseClicked(PatternProperties* self, ui_component* sender);
 
 void InitPatternProperties(PatternProperties* self, ui_component* parent, Pattern* pattern)
 {			
 	self->pattern = pattern;
-	ui_component_init(&self->component, parent);		
-	signal_connect(&self->component.signal_draw, self, OnDraw);		
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	ui_label_init(&self->namelabel, &self->component);
 	ui_label_settext(&self->namelabel, "Name");
@@ -49,14 +48,6 @@ void PatternPropertiesSetPattern(PatternProperties* self, Pattern* pattern)
 		_snprintf(buffer, 10, "");
 	}
 	ui_edit_settext(&self->lengthedit, buffer);
-}
-
-void OnDraw(PatternProperties* self, ui_component* sender, ui_graphics* g)
-{
-	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0x009a887c);
 }
 
 void OnSize(PatternProperties* self, ui_component* sender, int width, int height)

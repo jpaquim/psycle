@@ -6,7 +6,6 @@
 
 #include "skincoord.h"
 #include "noteinputs.h"
-#include "patternproperties.h"
 #include "tabbar.h"
 #include "workspace.h"
 
@@ -122,8 +121,7 @@ typedef struct TrackerView {
 	TrackerHeader header;
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
-	TrackerGrid grid;
-	PatternProperties properties;
+	TrackerGrid grid;	
 	Pattern* pattern;
 	TrackerSkin skin;
 	ui_font font;
@@ -138,7 +136,6 @@ void InitTrackerHeader(TrackerHeader*, ui_component* parent);
 void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, ui_component* parent, TrackerView*);
 void InitTrackerLineNumbers(TrackerLineNumbers* self, ui_component* parent);
 void InitTrackerView(TrackerView*, ui_component* parent, Workspace*);
-void TrackerViewSetPattern(TrackerView*, Pattern*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 
 #endif

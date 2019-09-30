@@ -20,8 +20,7 @@ void InitVolSlider(VolSlider* self, ui_component* parent, Workspace* workspace)
 {		
 	self->machines = &workspace->song->machines;
 	ui_component_init(&self->component, parent);	
-	ui_slider_init(&self->slider, &self->component);	
-	self->slider.component.debugflag = 10;
+	ui_slider_init(&self->slider, &self->component);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_slider_setrange(&self->slider, -32768, 32767);
 	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
