@@ -9,8 +9,10 @@ extern IntHashTable selfmap;
 extern IntHashTable winidmap;
 extern int winid;
 
-static void OnCommand(ui_combobox* self, WPARAM wParam, LPARAM lParam);
-static void OnDestroy(ui_combobox* self, ui_component* sender);
+static void onpreferredsize(ui_combobox*, ui_component* sender,
+	ui_size* limit, int* width, int* height);
+static void OnCommand(ui_combobox*, WPARAM wParam, LPARAM lParam);
+static void OnDestroy(ui_combobox*, ui_component* sender);
 static void ui_combobox_create_system(ui_combobox*, ui_component* parent);
 static void ui_combobox_create_ownerdrawn(ui_combobox*, ui_component* parent);
 static void onownerdraw(ui_combobox*, ui_component* sender, ui_graphics*);
@@ -31,6 +33,9 @@ void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 	if (combobox->ownerdrawn) {
 		ui_component_setbackgroundmode(&combobox->component, BACKGROUND_SET);
 	}
+	signal_connect(&combobox->component.signal_preferredsize,
+		combobox, onpreferredsize);
+	combobox->charnumber = 0;
 }
 
 void ui_combobox_create_system(ui_combobox* combobox, ui_component* parent)
@@ -119,6 +124,24 @@ int ui_combobox_cursel(ui_combobox* self)
 	return SendMessage(self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);	
 }
 
+void ui_combobox_setcharnumber(ui_combobox* self, int number)
+{
+	self->charnumber = number;
+}
+
+void onpreferredsize(ui_combobox* self, ui_component* sender, ui_size* limit, int* width, int* height)
+{
+	TEXTMETRIC tm;
+
+	tm = ui_component_textmetric(&self->component);
+	if (self->charnumber == 0) {
+		*width = 90;
+	} else {		
+		*width = tm.tmAveCharWidth * self->charnumber + 40;
+	}
+	*height = tm.tmHeight;
+}
+
 void OnCommand(ui_combobox* self, WPARAM wParam, LPARAM lParam) {
 	switch(HIWORD(wParam))
     {
@@ -146,7 +169,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	int ay;
 	int sel;
 	unsigned int arrowcolor = 0x00777777;
-	unsigned int arrowhighlightcolor = 0xFFFFFFFF;
+	unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
 	size = ui_component_size(&self->component);
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
@@ -168,7 +191,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 			} else {
 				ui_settextcolor(g, 0x00CACACA);
 			}
-			ui_textoutrectangle(g, 2, 2, ETO_CLIPPED, r, txt, strlen(txt));
+			ui_textoutrectangle(g, 0, 0, ETO_CLIPPED, r, txt, strlen(txt));
 			free(txt);
 		}
 	}

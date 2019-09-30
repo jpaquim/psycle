@@ -22,6 +22,20 @@ void signal_init(Signal* self)
 	self->slots = 0;
 }
 
+void signal_dispose(Signal* self)
+{
+	if (self->slots) {
+		List* ptr = self->slots;
+		while (ptr) {				
+			Slot* slot = (Slot*) ptr->entry;
+			free(slot);
+			ptr = ptr->next;
+		}
+		list_free(self->slots);
+	}
+	self->slots = 0;
+}
+
 void signal_connect(Signal* self, void* context, void* fp)
 {
 	if (self->slots) {
@@ -37,6 +51,11 @@ void signal_connect(Signal* self, void* context, void* fp)
 		node->prevented = 0;
 		self->slots = list_create(node);			
 	}
+}
+
+void signal_disconnectall(Signal* self)
+{
+	signal_dispose(self);
 }
 
 void signal_prevent(Signal* self, void* context, void* fp)
@@ -169,18 +188,5 @@ void signal_notify3(Signal* self, void* sender, void* param1, void* param2, void
 			((signalcallback3)slot->fp)(slot->context, sender, param1, param2, param3);
 			ptr = ptr->next;
 		}
-	}
-}
-
-void signal_dispose(Signal* self)
-{
-	if (self->slots) {
-		List* ptr = self->slots;
-		while (ptr) {				
-			Slot* slot = (Slot*) ptr->entry;
-			free(slot);
-			ptr = ptr->next;
-		}
-		list_free(self->slots);
 	}
 }

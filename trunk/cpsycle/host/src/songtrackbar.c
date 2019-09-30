@@ -11,18 +11,27 @@ static void OnSongChanged(SongTrackBar*, Workspace*);
 void InitSongTrackBar(SongTrackBar* self, ui_component* parent, Workspace* workspace)
 {	
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	ui_label_init(&self->headerlabel, &self->component);	
-	ui_label_settext(&self->headerlabel, "Tracks");	
-	ui_component_setposition(&self->headerlabel.component, 0, 0, 35, 20);	
+	ui_label_settext(&self->headerlabel, "Tracks");		
 	ui_combobox_init(&self->trackbox, &self->component);	
-	ui_component_setposition(&self->trackbox.component, 40, 0, 60, 20);	
+	ui_combobox_setcharnumber(&self->trackbox, 3);
 	Buildtrackbox(self);	
 	signal_connect(&self->trackbox.signal_selchanged, self, OnTrackBoxSelChange);	
 	signal_connect(&workspace->player.signal_numsongtrackschanged, self, OnSongTracksNumChanged);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	{
+		List* children;
+		ui_margin margin = { 0, 10, 3, 3 };
+		
+		children = ui_component_children(&self->component, 0);
+		ui_components_setalign(children, UI_ALIGN_LEFT);
+		ui_components_setmargin(children, &margin);
+	}
 }
 
 void OnDestroy(SongTrackBar* self, ui_component* component)

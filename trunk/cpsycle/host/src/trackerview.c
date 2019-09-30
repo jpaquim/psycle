@@ -22,7 +22,6 @@ static void Align(TrackerView*, ui_component* sender);
 static void OnScroll(TrackerGrid*, ui_component* sende, int cx, int cy);
 static void SetDefaultSkin(TrackerGrid*);
 static void OnMouseDown(TrackerGrid*, ui_component* sender, int x, int y, int button);
-static void OnEditPositionChanged(TrackerGrid*, Sequence* sender);
 static void ClipBlock(TrackerGrid*, ui_graphics* g, TrackerGridBlock* block);
 static void DrawDigit(TrackerGrid*, ui_graphics* g, int digit, int col, int x, int y);
 static void EnterDigit(int digit, int newval, unsigned char* val);
@@ -34,8 +33,6 @@ static void LineNumbersDrawBackground(TrackerLineNumbers*, ui_graphics* g);
 static void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel*, ui_component* sender);
 static void ShowLineNumbers(TrackerView* self, int showstate);
 static void OnTimer(TrackerView*, ui_component* sender, int timerid);
-static void OnPropertiesClose(TrackerView*, ui_component* sender);
-static void OnPropertiesApply(TrackerView*, ui_component* sender);
 static int NumLines(TrackerView*);
 static void AdjustScrollranges(TrackerGrid*);
 static float Offset(TrackerGrid*, int y, unsigned int* lines, unsigned int* sublines, unsigned int* subline);
@@ -219,9 +216,7 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	ui_component_showhorizontalscrollbar(&self->component);
 	ui_component_showverticalscrollbar(&self->component);
 	AdjustScrollranges(self);
-	self->component.doublebuffered = 1;	
-	signal_connect(&self->player->song->sequence.signal_editpositionchanged,
-		self, OnEditPositionChanged);	
+	self->component.doublebuffered = 1;		
 }
 
 void OnSongTracksNumChanged(TrackerGrid* self, Player* player,
@@ -231,12 +226,6 @@ void OnSongTracksNumChanged(TrackerGrid* self, Player* player,
 	self->view->header.numtracks = numsongtracks;
 	AdjustScrollranges(self);
 	ui_invalidate(&self->view->component);
-}
-
-void TrackerViewSongChanged(TrackerView* self, Workspace* workspace)
-{	
-	signal_connect(&self->grid.player->song->sequence.signal_editpositionchanged,
-		&self->grid, OnEditPositionChanged);	
 }
 
 void TrackerViewApplyProperties(TrackerView* self, Properties* p)
@@ -717,7 +706,7 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 		if (self->grid.cursor.col == 0) {			
 			cmd = Cmd(&self->grid.noteinputs->map, keycode);
 			if (cmd != -1) {		
-				int base = 48;
+				int base = workspace_octave(self->workspace) * 12;
 				PatternNode* prev;
 				PatternNode* node =
 					FindNode(self->pattern,
@@ -876,32 +865,8 @@ void OnMouseDown(TrackerGrid* self, ui_component* sender, int x, int y, int butt
 			}
 			ui_invalidate(&self->component);
 			ui_component_setfocus(&self->component);
-		} else
-		if (button == 2) {
-			ui_size size = ui_component_size(&self->view->component);
-			if (ui_component_visible(&self->view->properties.component)) {			
-				ui_component_hide(&self->view->properties.component);			
-			} else {
-				ui_component_show(&self->view->properties.component);
-			}
-			OnViewSize(self->view, &self->view->component, size.width, size.height);
 		}
 	}
-}
-
-void OnEditPositionChanged(TrackerGrid* self, Sequence* sender)
-{	
-	SequenceEntry* entry;
-	
-	entry = sequenceposition_entry(&sender->editposition);
-	if (entry) {			
-		TrackerViewSetPattern(self->view,
-			patterns_at(&self->player->song->patterns,
-			entry->pattern));
-	} else {
-		TrackerViewSetPattern(self->view, 0);		
-	}
-	ui_invalidate(&self->component);
 }
 
 void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspace)
@@ -932,10 +897,6 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 		ui_component_hide(&self->linenumberslabel.component);
 	}
 	signal_connect(&self->component.signal_size, self, OnViewSize);
-	InitPatternProperties(&self->properties, &self->component, 0);	
-	ui_component_hide(&self->properties.component);	
-	signal_connect(&self->properties.closebutton.signal_clicked, self, OnPropertiesClose);
-	signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
 	TrackerViewApplyProperties(self, 0);
@@ -953,22 +914,6 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	SetTimer(self->component.hwnd, 200, 50, 0);
 	signal_connect(&workspace->signal_configchanged, self, OnConfigChanged);
 	ShowLineNumbers(self, workspace_showlinenumbers(workspace));
-}
-
-void TrackerViewSetPattern(TrackerView* self, Pattern* pattern)
-{	
-	self->pattern = pattern;
-	if (pattern) {
-		self->opcount = pattern->opcount;
-	}
-	self->grid.dx = 0;
-	self->grid.dy = 0;
-	self->header.dx = 0;
-	self->linenumbers.dy = 0;
-	PatternPropertiesSetPattern(&self->properties, pattern);
-	AdjustScrollranges(&self->grid);
-	ui_invalidate(&self->linenumbers.component);
-	ui_invalidate(&self->header.component);	
 }
 
 void InitDefaultSkin(TrackerView* self)
@@ -1023,7 +968,6 @@ void Align(TrackerView* self, ui_component* sender)
 	int headerheight = 20;
 	int linenumberwidth = self->showlinenumbers ? 45 :0;
 	int hscrollbarheight = 20;
-	int propertyheight = ui_component_visible(&self->properties.component) ? 60 : 0;
 	size = ui_component_size(&self->component);
 	width = size.width;
 	height = size.height;
@@ -1031,11 +975,9 @@ void Align(TrackerView* self, ui_component* sender)
 	ui_component_resize(&self->header.component, width - linenumberwidth, headerheight);
 	ui_component_move(&self->grid.component, linenumberwidth, headerheight);
 	ui_component_resize(&self->linenumberslabel.component, linenumberwidth, headerheight);
-	ui_component_resize(&self->grid.component, width - linenumberwidth, height - headerheight -  propertyheight);
+	ui_component_resize(&self->grid.component, width - linenumberwidth, height - headerheight);
 	ui_component_move(&self->linenumbers.component, 0, headerheight);
-	ui_component_resize(&self->linenumbers.component, linenumberwidth, height - headerheight -  propertyheight);
-	ui_component_move(&self->properties.component, 0, height - propertyheight);
-	ui_component_resize(&self->properties.component, width, propertyheight);
+	ui_component_resize(&self->linenumbers.component, linenumberwidth, height - headerheight);
 }
 
 void InitTrackerHeader(TrackerHeader* self, ui_component* parent)
@@ -1193,27 +1135,6 @@ void OnTimer(TrackerView* self, ui_component* sender, int timerid)
 		ui_invalidate(&self->grid.component);
 		self->opcount = self->pattern->opcount;
 	}
-}
-
-void OnPropertiesClose(TrackerView* self, ui_component* sender)
-{
-	ui_size size = ui_component_size(&self->component);
-	OnViewSize(self, &self->component, size.width, size.height);	
-}
-
-void OnPropertiesApply(TrackerView* self, ui_component* sender)
-{
-	SCROLLINFO		si;	
-	ui_size size = ui_component_size(&self->component);	
-	OnViewSize(self, &self->grid.component, size.width, size.height);	
-	size = ui_component_size(&self->grid.component);
-	AdjustScrollranges(&self->grid);	
-	si.cbSize = sizeof (si) ;
-    si.fMask  = SIF_ALL ;
-    GetScrollInfo (self->grid.component.hwnd, SB_VERT, &si) ;	
-	self->grid.dy = -si.nPos * self->grid.lineheight;	
-	self->linenumbers.dy = self->grid.dy;
-	ui_invalidate(&self->component);
 }
 
 int NumLines(TrackerView* self)

@@ -10,7 +10,13 @@
 #include <signal.h>
 #include <plugincatcher.h>
 #include <machinefactory.h>
+#include <uicomponent.h>
 #include "undoredo.h"
+
+enum {
+	WORKSPACE_NEWSONG,
+	WORKSPACE_LOADSONG
+};
 
 typedef struct {	
 	Song* song;
@@ -24,9 +30,9 @@ typedef struct {
 	MachineFactory machinefactory;
 	int octave;
 	Signal signal_octavechanged;
-	Signal signal_songchanged;
+	Signal signal_songchanged;	
 	Signal signal_configchanged;
-	void* mainhandle;
+	ui_component* mainhandle;
 	UndoRedo undoredo;
 } Workspace;
 

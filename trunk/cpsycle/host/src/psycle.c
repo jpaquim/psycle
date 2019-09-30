@@ -13,7 +13,7 @@ UIMAIN
 {    	
 	MainFrame main;			
 	int err;
-	char workpath[MAX_PATH];
+	char workpath[_MAX_PATH];
 	const char* env = 0;	
 
 	env = pathenv();	

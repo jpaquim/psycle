@@ -12,9 +12,6 @@
 #include <list.h>
 
 
-void ui_init(HINSTANCE hInstance);
-void ui_dispose();
-
 typedef enum {
 	UI_ALIGN_NONE,
 	UI_ALIGN_CLIENT,
@@ -35,6 +32,12 @@ typedef enum {
 	BACKGROUND_SET,
 	BACKGROUND_PARENT,
 } BackgroundMode;
+
+typedef enum {
+	UI_NOEXPAND = 1,	
+	UI_HORIZONTALEXPAND = 2,
+	UI_VERTICALEXPAND = 4	
+} UiExpandMode;
 
 typedef struct {
 	HWND hwnd;
@@ -60,8 +63,10 @@ typedef struct {
 	Signal signal_hide;
 	Signal signal_windowproc;
 	Signal signal_align;
+	Signal signal_preferredsize;
 	UiAlignType align;
 	UiJustifyType justify;
+	int alignexpandmode;
 	int alignchildren;
 	ui_margin margin;
 	int doublebuffered;
@@ -77,6 +82,10 @@ typedef struct {
 	HBRUSH background;
 	int visible;	
 } ui_component;
+
+void ui_init(HINSTANCE hInstance);
+void ui_dispose();
+void ui_replacedefaultfont(ui_component* main, ui_font* font);
 
 void ui_component_init(ui_component* component, ui_component* parent);
 void ui_component_dispose(ui_component* component);
@@ -103,7 +112,7 @@ List* ui_component_children(ui_component*, int recursive);
 void ui_component_capture(ui_component*);
 void ui_component_releasecapture();
 ui_size ui_component_size(ui_component*);
-ui_size ui_component_frame_size(ui_component* self);
+ui_size ui_component_frame_size(ui_component*);
 void ui_invalidate(ui_component*);
 void ui_component_setfocus(ui_component*);
 void ui_component_setfont(ui_component*, ui_font* font);
@@ -116,12 +125,18 @@ void ui_component_align(ui_component*);
 void ui_component_setmargin(ui_component*, const ui_margin*);
 void ui_component_setalign(ui_component*, UiAlignType align);
 void ui_component_enablealign(ui_component*);
+void ui_component_setalignexpand(ui_component*, UiExpandMode);
 void ui_component_preventalign(ui_component*);
 void ui_component_enableinput(ui_component*, int recursive);
 void ui_component_preventinput(ui_component*, int recursive);
 void ui_component_setbackgroundmode(ui_component*, BackgroundMode);
 void ui_component_setbackgroundcolor(ui_component*, unsigned int color);
 ui_size ui_component_textsize(ui_component*, const char*);
+TEXTMETRIC ui_component_textmetric(ui_component*);
+
+void ui_components_setalign(List*, UiAlignType align);
+void ui_components_setmargin(List* list, const ui_margin* margin);
+
 
 int ui_openfile(ui_component* self, char* title, char* filter, char* defextension, char* filename);
 #endif

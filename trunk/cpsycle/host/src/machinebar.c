@@ -23,20 +23,19 @@ static void OnPrevMachine(MachineBar*, ui_component* sender);
 static void OnNextMachine(MachineBar*, ui_component* sender);
 
 void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace)
-{			
-	ui_margin margin = { 0, 10, 3, 3 };
-
-	self->selchange = 0;
+{				
+	self->selchange = 0;	
 	self->player = &workspace->player;
 	self->machines = &workspace->song->machines;	
 	self->instruments = &workspace->song->instruments;
 	InitIntHashTable(&self->comboboxslots, 256);
 	InitIntHashTable(&self->slotscombobox, 256);
-	ui_component_init(&self->component, parent);
+	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	ui_combobox_init(&self->machinebox, &self->component);
-	self->machinebox.component.justify = UI_JUSTIFY_NONE;
+	ui_combobox_setcharnumber(&self->machinebox, 25);
+//	self->machinebox.component.justify = UI_JUSTIFY_NONE;
 	ui_component_resize(&self->machinebox.component, 200, 20);
 	//ui_button_init(&self->prevmachinebutton, &self->component);
 	//ui_button_settext(&self->prevmachinebutton, "<");	
@@ -47,27 +46,27 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	//ui_component_resize(&self->prevmachinebutton.component, 20, 0);	
 	//ui_component_resize(&self->nextmachinebutton.component, 20, 0);
 	ui_button_init(&self->gear, &self->component);
-	ui_button_settext(&self->gear, "Gear Rack");
-	ui_component_resize(&self->gear.component, 60, 20);
+	ui_button_settext(&self->gear, "Gear Rack");	
 	BuildMachineBox(self);
 	signal_connect(&self->machinebox.signal_selchanged, self, OnMachineBoxSelChange);	
 	self->prevent_selchange_notify = FALSE;	
 	ui_combobox_init(&self->instparambox, &self->component);
-	self->instparambox.component.justify = UI_JUSTIFY_NONE;
+	ui_combobox_setcharnumber(&self->instparambox, 20);
+	//self->instparambox.component.justify = UI_JUSTIFY_NONE;
 	ui_component_resize(&self->instparambox.component, 200, 20);
 	BuildInstrumentList(self);
 	ui_combobox_setcursel(&self->instparambox, 0);
 	signal_connect(&self->instparambox.signal_selchanged, self, OnInstParamBoxSelChange);
 	ConnectSongSignals(self);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);		
 	{
-		List* p;
-		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)
-		{
-			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_LEFT);
-			ui_component_setmargin((ui_component*)p->entry, &margin);
-		}
-	}			
+		List* children;
+		ui_margin margin = { 0, 10, 3, 3 };
+		
+		children = ui_component_children(&self->component, 0);
+		ui_components_setalign(children, UI_ALIGN_LEFT);
+		ui_components_setmargin(children, &margin);
+	}
 }
 
 void OnDestroy(MachineBar* self, ui_component* component)

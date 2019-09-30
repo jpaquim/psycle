@@ -69,27 +69,37 @@ void insertpathenv(const char* path)
 	const char* envpath;		
 	
 	envpath = pathenv();
-	if (envpath && path) {	
-		char newenvpath[MAX_PATH + 5];
+	if (envpath && path) {			
+		char* newenvpath;
+		int size;
 
+		size = strlen(path) + strlen(envpath) + 3;
+		newenvpath = (char*)malloc(size);
 		newenvpath[0] = '\0';
-		strcat(newenvpath, path);
+
+		strcpy(newenvpath, path);
 		strcat(newenvpath, ";");
 		strcat(newenvpath, envpath);
 		setpathenv(newenvpath);
+		free(newenvpath);
 	}	
 }
 
 void setpathenv(const char* path)
 {
 	if (path) {
-		char newenv[MAX_PATH + 5];
+		char* newenv;
+		int size;
+
+		size = strlen(path) + strlen(pathenvvarname) + 3;
+		newenv = (char*)malloc(size);
 		newenv[0] = '\0';
 
-		strcat(newenv, pathenvvarname);
+		strcpy(newenv, pathenvvarname);
 		strcat(newenv, "=");	
 		strcat(newenv, path);
 		putenv(newenv);
+		free(newenv);
 	}
 }
 

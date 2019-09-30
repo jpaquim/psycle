@@ -10,6 +10,7 @@ void InitPlayBar(PlayBar* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);	
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_resize(&self->component, 100, 20);
 	signal_init(&self->signal_play);
 	signal_init(&self->signal_stop);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
@@ -53,12 +54,11 @@ void OnDraw(PlayBar* self, ui_component* sender, ui_graphics* g)
 		} else {
 			ui_settextcolor(g, 0x00D1C5B6);
 		}
-		ui_textout(g, cpx, 0, str, strlen(str));
+		ui_textout(g, cpx, 3, str, strlen(str));
 		cpx += 50;
 		ptr = ptr->next;
 		++c;
-	}
-	ui_drawline(g, 0, 19, 600, 19);
+	}	
 }
 
 void OnSize(PlayBar* self, ui_component* sender, int width, int height)

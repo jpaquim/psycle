@@ -41,6 +41,7 @@ struct PropertiesStruct {
 	Property item;	
 	struct PropertiesStruct* next;
 	struct PropertiesStruct* children;
+	struct PropertiesStruct* parent;
 	void (*dispose)(Property*);
 };
 

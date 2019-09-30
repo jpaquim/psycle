@@ -6,6 +6,7 @@
 #define PATTERNVIEW
 
 #include <uinotebook.h>
+#include "patternproperties.h"
 #include "trackerview.h"
 #include "pianoroll.h"
 #include "workspace.h"
@@ -14,11 +15,13 @@ typedef struct PatternView {
 	ui_component component;
 	ui_notebook notebook;
 	TrackerView trackerview;
+	PatternProperties properties;
 	Pianoroll pianoroll;
 	TabBar tabbar;
 } PatternView;
 
 void InitPatternView(PatternView*, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace);
+void PatternViewSetPattern(PatternView*, Pattern*);
 
 #endif

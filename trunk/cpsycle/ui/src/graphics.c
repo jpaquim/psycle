@@ -8,7 +8,7 @@ void ui_graphics_init(ui_graphics* g, HDC hdc)
 	g->hdc = hdc;	
 	g->hFontPrev = 0;
 	g->pen = 0;
-	g->pen = CreatePen(PS_SOLID, 1, 0x666666);
+	g->pen = CreatePen(PS_SOLID, 1, 0x00666666);
 	g->brush = 0;
 	g->hBrushPrev = 0;
 }	

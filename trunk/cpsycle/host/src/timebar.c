@@ -13,12 +13,14 @@ void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
 
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	self->player = player;
 	self->bpm = 0;
 	ui_label_init(&self->bpmdesclabel, &self->component);
 	ui_label_settext(&self->bpmdesclabel, "Tempo");	
 	ui_label_init(&self->bpmlabel, &self->component);
-	ui_label_settext(&self->bpmlabel, "125");	
+	ui_label_settext(&self->bpmlabel, "125");
+	ui_label_setcharnumber(&self->bpmlabel, 8);
 	ui_button_init(&self->lessbutton, &self->component);
 	ui_button_settext(&self->lessbutton, "<");	
 	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);	
@@ -30,14 +32,7 @@ void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
 	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);	
 	ui_button_init(&self->moremorebutton, &self->component);
 	ui_button_settext(&self->moremorebutton, ">>");	
-	signal_connect(&self->moremorebutton.signal_clicked, self, OnMoreMoreClicked);		
-	ui_component_resize(&self->bpmdesclabel.component, 50, 0);	
-	ui_component_resize(&self->lesslessbutton.component, 20, 0);		
-	ui_component_resize(&self->lessbutton.component, 10, 0);		
-	ui_component_resize(&self->bpmlabel.component, 40, 0);	
-	ui_component_resize(&self->moremorebutton.component, 20, 0);
-	ui_component_resize(&self->morebutton.component, 10, 0);		
-	
+	signal_connect(&self->moremorebutton.signal_clicked, self, OnMoreMoreClicked);	
 	{
 		List* p;
 		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)

@@ -13,18 +13,14 @@
 
 static void Create(MainFrame*);
 static void InitMenu(MainFrame*);
-static void InitBars(MainFrame*, ui_component* parent);
+static void InitBars(MainFrame*);
+static void InitVuBar(MainFrame*);
 static void Destroy(MainFrame*, ui_component* component);
-static void OnSize(MainFrame*, ui_component* sender, int width, int height);
 static void OnKeyDown(MainFrame*, ui_component* component, int keycode, int keydata);
 static void OnTimer(MainFrame*, ui_component* sender, int timerid);
 static void OnSequenceSelChange(MainFrame* , SequenceEntry* entry);
 static void OnPlay(MainFrame*, ui_component* sender);
 static void OnStop(MainFrame*, ui_component* sender);
-static void OnLoadSong(MainFrame*, ui_component* sender);
-static void OnNewSong(MainFrame*, ui_component* sender);
-static void OnUndo(MainFrame*, ui_component* sender);
-static void OnRedo(MainFrame*, ui_component* sender);
 static void OnAlign(MainFrame*, ui_component* sender);
 static void OnMouseDown(MainFrame*, ui_component* sender, int x, int y, int button);
 static void OnMouseMove(MainFrame*, ui_component* sender, int x, int y, int button);
@@ -37,6 +33,7 @@ static void SetStartPage(MainFrame*);
 static void OnSettingsViewChanged(MainFrame*, SettingsView* sender, Properties*);
 static void OnMouseEnterSplitBar(MainFrame*, ui_component* sender);
 static void OnMouseLeaveSplitBar(MainFrame*, ui_component* sender);
+static void OnSongChanged(MainFrame*, ui_component* sender, int flag);
 
 HWND hwndmain;
 
@@ -55,27 +52,25 @@ void InitMainFrame(MainFrame* self)
 	int statuswidths[] = { 100, 200, -1 };	
 	ui_margin tabbardividemargin = { 0, 30, 0, 0};
 
-	ui_frame_init(&self->component, 0);		
-	ui_component_init(&self->top, &self->component);	
-	self->toolbarheight = 80;	
+	ui_frame_init(&self->component, 0);			
+	ui_component_enablealign(&self->component);	
 	self->resize = 0;
-	workspace_init(&self->workspace);	
-	self->workspace.mainhandle = self->component.hwnd;
+	workspace_init(&self->workspace);
+	self->workspace.mainhandle = &self->component;
 	workspace_initplayer(&self->workspace);
 	workspace_load_configuration(&self->workspace);
-	self->player = &self->workspace.player;
-	self->firstshow = 1;		
-	ui_component_setbackgroundmode(&self->top, BACKGROUND_SET);		
-	InitBars(self, &self->top);	
+	signal_connect(&self->workspace.signal_songchanged, self, OnSongChanged);	
+	self->firstshow = 1;	
+	InitBars(self);	
 	// ui_component_init(&self->client, &self->component);	
 	// ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);		
 	// ui_component_resize(&self->component, 800, 600);
 	ui_component_settitle(&self->component, "Psycle");
 	signal_connect(&self->component.signal_destroy, self, Destroy);
-	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_align, self, OnAlign);
 	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
+	signal_connect(&self->component.signal_align, self, OnAlign);
 	ui_component_init(&self->tabbars, &self->component);
 	ui_component_setbackgroundmode(&self->tabbars, BACKGROUND_SET);
 	InitTabBar(&self->tabbar, &self->tabbars);	
@@ -112,8 +107,7 @@ void InitMainFrame(MainFrame* self)
 		&self->workspace);	
 	signal_connect(&self->helpview.about.okbutton.signal_clicked, self, OnAboutOk);
 	InitNoteInputs(&self->noteinputs);	
-	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);
-	ui_component_move(&self->sequenceview.component, 0, self->toolbarheight);	
+	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);	
 	InitGear(&self->gear, &self->component, &self->workspace);	
 	ui_component_resize(&self->gear.component, 300, 200);
 	ui_component_hide(&self->gear.component);
@@ -141,52 +135,64 @@ void InitMainFrame(MainFrame* self)
 	}
 }
 
-void InitBars(MainFrame* self, ui_component* parent)
+void InitBars(MainFrame* self)
 {
-	InitPlayBar(&self->playbar, parent);
-	ui_component_setposition(&self->playbar.component, 320, 2, 160, 25);		
+	ui_component_init(&self->top, &self->component);
+	ui_component_setbackgroundmode(&self->top, BACKGROUND_SET);
+	ui_component_resize(&self->top, 500, 400);
+	ui_component_enablealign(&self->top);	
+	// row0
+	ui_component_init(&self->toprow0, &self->top);
+	ui_component_enablealign(&self->toprow0);
+	ui_component_setbackgroundmode(&self->toprow0, BACKGROUND_SET);	
+	ui_component_setalign(&self->toprow0, UI_ALIGN_TOP);	
+	// row1
+	ui_component_init(&self->toprow1, &self->top);
+	ui_component_enablealign(&self->toprow1);
+	ui_component_setbackgroundmode(&self->toprow1, BACKGROUND_SET);	
+	ui_component_setalign(&self->toprow1, UI_ALIGN_TOP);	
+	// row2
+	ui_component_init(&self->toprow2, &self->top);
+	ui_component_enablealign(&self->toprow2);
+	ui_component_setbackgroundmode(&self->toprow2, BACKGROUND_SET);
+	ui_component_setalign(&self->toprow2, UI_ALIGN_TOP);	
+	// add bars to rows
+	// row0
+	InitFileBar(&self->filebar, &self->toprow0, &self->workspace);
+	ui_component_setalign(&self->filebar.component, UI_ALIGN_LEFT);
+	InitUndoRedoBar(&self->undoredobar, &self->toprow0, &self->workspace);
+	ui_component_setalign(&self->undoredobar.component, UI_ALIGN_LEFT);
+	InitPlayBar(&self->playbar, &self->toprow0);
+	ui_component_setalign(&self->playbar.component, UI_ALIGN_LEFT);	
 	signal_connect(&self->playbar.signal_play, self, OnPlay);
 	signal_connect(&self->playbar.signal_stop, self, OnStop);
-	
-	ui_button_init(&self->newsongbutton, parent);
-	ui_button_settext(&self->newsongbutton, "New Song");
-	ui_component_setposition(&self->newsongbutton.component, 0, 0, 70, 20);	
-	signal_connect(&self->newsongbutton.signal_clicked, self, OnNewSong);
-	ui_button_init(&self->loadsongbutton, parent);
-	ui_button_settext(&self->loadsongbutton, "Load Song");
-	ui_component_setposition(&self->loadsongbutton.component, 75, 0, 100, 20);	
-	signal_connect(&self->loadsongbutton.signal_clicked, self, OnLoadSong);	
-	ui_button_init(&self->undobutton, parent);
-	ui_button_settext(&self->undobutton, "Undo");
-	ui_component_setposition(&self->undobutton.component, 180, 0, 40, 20);	
-	signal_connect(&self->undobutton.signal_clicked, self, OnUndo);	
-	ui_button_init(&self->redobutton, parent);
-	ui_button_settext(&self->redobutton, "Redo");
-	ui_component_setposition(&self->redobutton.component, 235, 0, 40, 20);
-	signal_connect(&self->redobutton.signal_clicked, self, OnRedo);	
-	InitMachineBar(&self->machinebar, parent, &self->workspace);	
-	ui_button_init(&self->updatedriver, parent);
+	// row1
+	// Songbar	
+	InitSongBar(&self->songbar, &self->toprow1, &self->workspace);
+	ui_component_setalign(&self->songbar.component, UI_ALIGN_LEFT);	
+	// row2
+	// Machinebar
+	InitMachineBar(&self->machinebar, &self->toprow2, &self->workspace);	
+	ui_component_setalign(&self->machinebar.component, UI_ALIGN_LEFT);		
+	// Vugroup
+	InitVuBar(self);
+	ui_component_resize(&self->vubar, 200, 50);
+	// ui_button_init(&self->updatedriver, &self->top);
 	// ui_button_settext(&self->updatedriver, "Restart Driver");
 	// ui_component_setposition(&self->updatedriver.component, 210, 0, 100, 20);	
 	// signal_connect(&self->updatedriver.signal_clicked, self, OnUpdateDriver);	
-	ui_component_move(&self->machinebar.component, 3, 50);
-	ui_component_resize(&self->machinebar.component, 530, 20);
-	// Songbar
-	InitSongTrackBar(&self->songtrackbar, parent, &self->workspace);
-	ui_component_setposition(&self->songtrackbar.component, 0, 25, 100, 20);
-	InitTimeBar(&self->timebar, parent, &self->workspace.player);
-	ui_component_setposition(&self->timebar.component, 100, 25, 170, 20);	
-	InitLinesPerBeatBar(&self->linesperbeatbar, parent, &self->workspace.player);
-	ui_component_setposition(&self->linesperbeatbar.component, 280, 25, 130, 20);	
-	InitOctaveBar(&self->octavebar, parent, &self->workspace);
-	ui_component_setposition(&self->octavebar.component, 420, 25, 120, 20);
-	// Vugroup
-	InitVumeter(&self->vumeter, parent, &self->workspace);
-	ui_component_setposition(&self->vumeter.component, 540, 0, 200, 20);	
-	InitVolSlider(&self->volslider, parent, &self->workspace);
-	ui_component_setposition(&self->volslider.component, 540, 20, 200, 20);	
-	InitClipBox(&self->clipbox, parent, &self->workspace);
-	ui_component_setposition(&self->clipbox.component, 745, 5, 10, 35);
+}
+
+void InitVuBar(MainFrame* self)
+{
+	ui_component_init(&self->vubar, &self->component);
+	ui_component_setbackgroundmode(&self->vubar, BACKGROUND_SET);
+	InitVumeter(&self->vumeter, &self->vubar, &self->workspace);
+	ui_component_setposition(&self->vumeter.component, 0, 0, 200, 20);	
+	InitVolSlider(&self->volslider, &self->vubar, &self->workspace);
+	ui_component_setposition(&self->volslider.component, 0, 20, 200, 20);	
+	InitClipBox(&self->clipbox, &self->vubar, &self->workspace);
+	ui_component_setposition(&self->clipbox.component, 205, 5, 10, 35);
 }
 
 void SetStartPage(MainFrame* self)
@@ -218,53 +224,68 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	ui_size tabbarsize;
 	ui_size sequenceviewsize;
 	ui_size gearsize;
-
+	ui_size vusize;
+	int tmp;
 	int splitbarwidth = 4;
+	int toolbarheight;	
+	ui_size limit;
+	
 	size = ui_component_size(&self->component);
 	statusbarsize = ui_component_size(&self->statusbar.component);
-	tabbarsize = ui_component_size(&self->tabbar.component);
+	limit.width = size.width;
+	limit.height = size.height;
+	signal_emit(&self->tabbar.component.signal_preferredsize, &self->tabbar,
+		3, &limit, &tabbarsize.width, &tabbarsize.height);					 	
 	sequenceviewsize = ui_component_size(&self->sequenceview.component);
+	vusize = ui_component_size(&self->vubar);
 	
 	if (self->gear.component.visible) {
 		gearsize = ui_component_size(&self->gear.component);		
 	} else {
 		gearsize.width = 0;
-	}
-	ui_component_setposition(&self->top, 0, 0, size.width, self->toolbarheight);
+	}		
+	limit.width = size.width - vusize.width;
+	limit.height = size.height;
+	signal_emit(&self->top.signal_preferredsize, &self->top, 3, &limit, &tmp,
+		&toolbarheight);		
+	ui_component_setposition(&self->top, 0, 0, size.width - vusize.width,
+		toolbarheight);
+	ui_component_setposition(&self->vubar, 
+		size.width - vusize.width,
+		0,
+		vusize.width,
+		toolbarheight);
 	ui_component_setposition(&self->tabbars,
 		sequenceviewsize.width + splitbarwidth,
-		self->toolbarheight,
+		toolbarheight,
 		size.width - sequenceviewsize.width - splitbarwidth,
 		tabbarsize.height);
+	ui_component_resize(&self->tabbar.component, tabbarsize.width, tabbarsize.height);		
 	ui_component_setposition(&self->splitbar,
 		sequenceviewsize.width,
-		self->toolbarheight, splitbarwidth,
-		size.height - statusbarsize.height - self->toolbarheight);
-	ui_component_resize(&self->sequenceview.component,
+		toolbarheight, splitbarwidth,
+		size.height - statusbarsize.height - toolbarheight);
+	ui_component_setposition(&self->sequenceview.component,
+		0,
+		toolbarheight,
 		sequenceviewsize.width,
-		size.height - statusbarsize.height - self->toolbarheight);	
+		size.height - statusbarsize.height - toolbarheight);	
 	ui_component_setposition(&self->notebook.component,
 		sequenceviewsize.width + splitbarwidth,
-		self->toolbarheight + tabbarsize.height,
+		toolbarheight + tabbarsize.height,
 		size.width - sequenceviewsize.width - 3 - gearsize.width,
-		size.height - statusbarsize.height - self->toolbarheight - tabbarsize.height);
+		size.height - statusbarsize.height - toolbarheight - tabbarsize.height);
 	ui_component_resize(&self->statusbar.component, 0, 0);
 	if (ui_component_visible(&self->gear.component)) {
 		ui_component_move(&self->gear.component,
-			size.width - gearsize.width,
-			self->toolbarheight + tabbarsize.height);
+			size.width - gearsize.width, toolbarheight + tabbarsize.height);
 		ui_component_resize(&self->gear.component, gearsize.width,
-			size.height - statusbarsize.height - self->toolbarheight - tabbarsize.height);
+			size.height - statusbarsize.height - toolbarheight - tabbarsize.height);
 	}
 	if (self->firstshow) {
 		machineview_align(&self->machineview);
 		self->firstshow = 0;
 	}
-}
-
-void OnSize(MainFrame* self, ui_component* sender, int width, int height)
-{	
-	ui_component_align(&self->component);
 }
 
 void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata)
@@ -273,7 +294,7 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	} else
 	if (keycode == VK_F5) {
-		player_start(self->player);		
+		player_start(&self->workspace.player);		
 	} else
 	if (keycode == VK_F3) {
 		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
@@ -282,11 +303,8 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		tabbar_select(&self->tabbar, TABPAGE_SETTINGSVIEW);
 	} else
 	if (keycode == VK_F8) {
-		player_stop(self->player);		
-	} else
-	if (keycode == VK_F9) {
-		OnLoadSong(self, &self->component);		
-	} else 
+		player_stop(&self->workspace.player);		
+	} else	
 	if (keycode == VK_F4) {
 		Properties* properties = properties_create();
 		properties_init(properties);
@@ -321,58 +339,14 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 
 void OnPlay(MainFrame* self, ui_component* sender)
 {	
-	player_start(self->player);		
+	player_start(&self->workspace.player);		
 }
 
-void OnStop(MainFrame* self, ui_component* sender)
-{
-	player_stop(self->player);		
-}
-
-void OnNewSong(MainFrame* self, ui_component* sender)
-{
-	workspace_newsong(&self->workspace);
-	if (self->workspace.song->properties) {
-		Properties* title;
-		title = properties_find(self->workspace.song->properties, "title");
-		if (title) {
-			char* titlestr = 0;
-			properties_readstring(title, "title", &titlestr, "Untitled");
-			ui_statusbar_settext(&self->statusbar, 0, titlestr);
-		}
-	}	
-}
-
-void OnUndo(MainFrame* self, ui_component* sender)
-{
-	workspace_undo(&self->workspace);
-}
-
-void OnRedo(MainFrame* self, ui_component* sender)
-{
-	workspace_redo(&self->workspace);
-}
-
-
-void OnLoadSong(MainFrame* self, ui_component* sender)
-{
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH]	 = ""; 					
-	static char filter[] = "All Songs (*.psy *.xm *.it *.s3m *.mod)" "\0*.psy;*.xm;*.it;*.s3m;*.mod\0"
-				"Songs (*.psy)"				        "\0*.psy\0"
-				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
-				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
-				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
-				"Original Mod Format Songs (*.mod)" "\0*.mod\0";
-	char  defaultextension[] = "PSY";
-	int showsonginfo = 0;	
-	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {		
-		workspace_loadsong(&self->workspace, path);				
+void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
+{	
+	if (flag == WORKSPACE_LOADSONG) {
 		if (workspace_showsonginfoonload(&self->workspace)) {
 			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);
-		} else {
-			ui_invalidate(&self->component);	
 		}
 		if (self->workspace.song->properties) {
 			Properties* title;
@@ -383,7 +357,13 @@ void OnLoadSong(MainFrame* self, ui_component* sender)
 				ui_statusbar_settext(&self->statusbar, 0, titlestr);
 			}
 		}
-	}
+	}	 
+	ui_invalidate(&self->component);	
+}
+
+void OnStop(MainFrame* self, ui_component* sender)
+{
+	player_stop(&self->workspace.player);		
 }
 
 void OnMouseDown(MainFrame* self, ui_component* sender, int x, int y, int button)
@@ -397,12 +377,14 @@ void OnMouseMove(MainFrame* self, ui_component* sender, int x, int y, int button
 	if (self->resize == 1) {		
 		RECT rc;
 		POINT pt;
+		ui_size toolbarsize;
 	
+		toolbarsize = ui_component_size(&self->top);
 		GetWindowRect(sender->hwnd, &rc);
 		pt.x = rc.left;
 		pt.y = rc.top;
 		ScreenToClient(GetParent(sender->hwnd), &pt);
-		ui_component_move(sender, pt.x + x, self->toolbarheight);
+		ui_component_move(sender, pt.x + x, toolbarsize.height);
 		ui_invalidate(sender);
 		UpdateWindow(sender->hwnd);
 	}
@@ -427,7 +409,7 @@ void OnMouseUp(MainFrame* self, ui_component* sender, int x, int y, int button)
 
 void OnMouseEnterSplitBar(MainFrame* self, ui_component* sender)
 {	
-	ui_component_setbackgroundcolor(sender, 0xFF666666);
+	ui_component_setbackgroundcolor(sender, 0x00666666);
 	ui_invalidate(sender);
 }
 

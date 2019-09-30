@@ -120,6 +120,10 @@ SOURCE=.\src\file.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\filebar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gear.c
 # End Source File
 # Begin Source File
@@ -244,6 +248,10 @@ SOURCE=.\src\slidergroup.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\songbar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\songproperties.c
 # End Source File
 # Begin Source File
@@ -265,6 +273,10 @@ SOURCE=.\src\trackerview.c
 # Begin Source File
 
 SOURCE=.\src\undoredo.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\undoredobar.c
 # End Source File
 # Begin Source File
 
@@ -313,6 +325,10 @@ SOURCE=.\src\envelopeview.h
 # Begin Source File
 
 SOURCE=.\src\file.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\filebar.h
 # End Source File
 # Begin Source File
 
@@ -440,6 +456,10 @@ SOURCE=.\src\slidergroup.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\songbar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\songproperties.h
 # End Source File
 # Begin Source File
@@ -461,6 +481,10 @@ SOURCE=.\src\trackerview.h
 # Begin Source File
 
 SOURCE=.\src\undoredo.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\undoredobar.h
 # End Source File
 # Begin Source File
 
