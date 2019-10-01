@@ -8,7 +8,7 @@
 
 void xminstrument_init(XMInstrument* self)
 {
-	self->name = strdup("");
+	self->name = _strdup("");
 }
 
 void xminstrument_dispose(XMInstrument* self)
@@ -24,7 +24,7 @@ void xminstrument_load(XMInstrument* self, const char* path)
 void xminstrument_setname(XMInstrument* self, const char* name)
 {
 	free(self->name);
-	self->name = strdup(name);
+	self->name = _strdup(name);
 }
 
 const char* xminstrument_name(XMInstrument* self)

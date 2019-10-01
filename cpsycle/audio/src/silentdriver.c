@@ -70,15 +70,13 @@ unsigned int samplerate(Driver* self)
 }
 
 
-void init_properties(Driver* driver)
-{	
-	Properties* property;	
-
-	driver->properties = properties_create_string("name", "Silent Driver");
-	properties_append_string(driver->properties, "version", "1.0");
-	property = properties_append_choice(driver->properties, "device", -1);	
-	properties_append_int(driver->properties, "bitdepth", 16, 0, 32);
-	properties_append_int(driver->properties, "samplerate", 44100, 0, 0);
-	properties_append_int(driver->properties, "dither", 0, 0, 1);	
-	properties_append_int(driver->properties, "numsamples", 256, 128, 8193);	
+void init_properties(Driver* self)
+{		
+	self->properties = properties_create();
+	properties_append_string(self->properties, "name", "Silent Driver");
+	properties_append_string(self->properties, "version", "1.0");	
+	properties_append_int(self->properties, "bitdepth", 16, 0, 32);
+	properties_append_int(self->properties, "samplerate", 44100, 0, 0);
+	properties_append_int(self->properties, "dither", 0, 0, 1);	
+	properties_append_int(self->properties, "numsamples", 256, 128, 8193);	
 }

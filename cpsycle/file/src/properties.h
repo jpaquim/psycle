@@ -1,13 +1,15 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #if !defined(PROPERTIES)
 #define PROPERTIES
 
 typedef enum {
+	PROPERTY_TYP_ROOT,
 	PROPERTY_TYP_INTEGER,
 	PROPERTY_TYP_STRING,
 	PROPERTY_TYP_DOUBLE,
-	PROPERTY_TYP_BOOL,
+	PROPERTY_TYP_BOOL,	
 	PROPERTY_TYP_CHOICE,
 	PROPERTY_TYP_USERDATA,
 	PROPERTY_TYP_SECTION
@@ -16,7 +18,8 @@ typedef enum {
 typedef enum {
 	PROPERTY_HINT_HIDE,
 	PROPERTY_HINT_EDIT,
-	PROPERTY_HINT_EDITDIR,	
+	PROPERTY_HINT_EDITDIR,
+	PROPERTY_HINT_INPUT,
 	PROPERTY_HINT_LIST,
 	PROPERTY_HINT_CHECK,
 } PropertyHint;
@@ -47,7 +50,7 @@ struct PropertiesStruct {
 
 typedef struct PropertiesStruct Properties;
 
-void properties_init(Properties* );
+void properties_init(Properties*, const char* key, PropertyType);
 Properties* properties_create(void);
 Properties* properties_createsection(Properties*, const char* name);
 void properties_free(Properties* );
@@ -74,8 +77,9 @@ Properties* properties_write_choice(Properties*, const char* key, int value);
 Properties* properties_write_double(Properties*, const char* key, double value);
 void properties_enumerate(Properties*, void* target, int (*enumerate)(void* , struct PropertiesStruct* properties, int level));
 Properties* properties_find(Properties*, const char* key);
+Properties* properties_findsection(Properties*, const char* key);
 const char* properties_key(Properties*);
-int properties_checktype(Properties*, PropertyType);
+int properties_type(Properties*);
 int properties_value(Properties*);
 Property* properties_entry(Properties*);
 const char* properties_valuestring(Properties*);
@@ -83,6 +87,8 @@ void properties_load(Properties*, const char* path);
 void properties_save(Properties*, const char* path);
 void properties_settext(Properties*, const char* text);
 const char* properties_text(Properties* self);
-
+void properties_sethint(Properties*, PropertyHint);
+int properties_ischoiceitem(Properties*);
+PropertyHint properties_hint(Properties*);
 
 #endif

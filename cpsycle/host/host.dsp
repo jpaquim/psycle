@@ -136,6 +136,10 @@ SOURCE=.\src\helpview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\inputdefiner.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\inputmap.c
 # End Source File
 # Begin Source File
@@ -341,6 +345,10 @@ SOURCE=.\src\greet.h
 # Begin Source File
 
 SOURCE=.\src\helpview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\inputdefiner.h
 # End Source File
 # Begin Source File
 

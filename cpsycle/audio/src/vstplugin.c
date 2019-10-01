@@ -181,13 +181,13 @@ void DispatchMachineInfo(AEffect* effect, CMachineInfo* info)
 	effect->dispatcher (effect, effGetVendorString, 0, 0, vendorString, 0);
 	effect->dispatcher (effect, effGetProductString, 0, 0, productString, 0);
 	
-	info->Author = strdup(vendorString);
-	info->Command = strdup(""); // 0; // strdup(pInfo->Command);
+	info->Author = _strdup(vendorString);
+	info->Command = _strdup(""); // 0; // strdup(pInfo->Command);
 	info->Flags = 16; // pInfo->Flags;
-	info->Name = strdup(effectName);
+	info->Name = _strdup(effectName);
 	info->numCols = 6; // pInfo->numCols;
 	info->numParameters = 0; //pInfo->numParameters;
-	info->ShortName = strdup(effectName);
+	info->ShortName = _strdup(effectName);
 	info->APIVersion = 0; //pInfo->Version;
 	info->PlugVersion = 0;
 }

@@ -86,8 +86,8 @@ void playbar_select(PlayBar* self, int tab)
 void playbar_append(PlayBar* self, const char* label)
 {
 	if (self->tabs) {
-		list_append(self->tabs, strdup(label));		
+		list_append(self->tabs, _strdup(label));		
 	} else {
-		self->tabs = list_create(strdup(label));
+		self->tabs = list_create(_strdup(label));
 	}
 }

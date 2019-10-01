@@ -94,19 +94,17 @@ void InitMainFrame(MainFrame* self)
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	InitMachineView(&self->machineview, &self->notebook.component, &self->tabbars, &self->workspace);
 	InitPatternView(&self->patternview, &self->notebook.component, &self->tabbars, &self->workspace);	
-	self->patternview.trackerview.grid.noteinputs = &self->noteinputs;		
 	InitSamplesView(&self->samplesview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
-	self->instrumentsview.sampulseview.notemapedit.noteinputs = &self->noteinputs;	
+	self->instrumentsview.sampulseview.notemapedit.noteinputs = workspace_noteinputs(&self->workspace);
 	InitSongProperties(&self->songproperties, &self->notebook.component, &self->workspace);	
 	InitSettingsView(&self->settingsview, &self->notebook.component,
 		&self->tabbars, self->workspace.config);	
 	signal_connect(&self->settingsview.signal_changed, self, OnSettingsViewChanged);
 	InitHelpView(&self->helpview, &self->notebook.component, &self->tabbars,
 		&self->workspace);	
-	signal_connect(&self->helpview.about.okbutton.signal_clicked, self, OnAboutOk);
-	InitNoteInputs(&self->noteinputs);	
+	signal_connect(&self->helpview.about.okbutton.signal_clicked, self, OnAboutOk);	
 	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);	
 	InitGear(&self->gear, &self->component, &self->workspace);	
 	ui_component_resize(&self->gear.component, 300, 200);
@@ -306,15 +304,16 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		player_stop(&self->workspace.player);		
 	} else	
 	if (keycode == VK_F4) {
-		Properties* properties = properties_create();
-		properties_init(properties);
+		Properties* properties;
+		
+		properties = properties_create();		
 		skin_load(properties, "old Psycle.psv");
 		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
 		MachineViewApplyProperties(&self->machineview, properties);
 		properties_free(properties);
 	} else {
 		int cmd;		
-		cmd = Cmd(&self->noteinputs.map, keycode);
+		cmd = inputs_cmd(workspace_noteinputs(&self->workspace), keycode);
 		if (cmd != -1) {
 			Machine* machine;
 			int base;

@@ -45,6 +45,19 @@ static void SetHeaderCoords(TrackerView* self);
 static void OnConfigChanged(TrackerView*, Workspace*, Properties*);
 static PatternNode* FindNode(Pattern* pattern, unsigned int track,
 	float offset, unsigned int subline, float bpl, PatternNode** prev);
+static void InitTrackerInputs(TrackerView*);
+
+enum {
+	CMD_NAVUP,
+	CMD_NAVDOWN,
+	CMD_NAVLEFT,
+	CMD_NAVRIGHT,
+	CMD_NAVPAGEUP,	///< pgup
+	CMD_NAVPAGEDOWN,///< pgdn
+	CMD_NAVTOP,		///< home
+	CMD_NAVBOTTOM,	///< end
+};
+
 
 char* notes_tab_a440[256] = {
 	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
@@ -641,8 +654,10 @@ void AdvanceCursor(TrackerView* self)
 void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata)
 {		
 	int cmd;
+
+	cmd = inputs_cmd(&self->inputs, encodeinput(keycode, 0, 0));
 			
-	if (keycode == VK_UP) {
+	if (cmd == CMD_NAVUP) {
 		if (self->grid.cursor.subline > 0) {
 			--self->grid.cursor.subline;
 		} else {
@@ -650,11 +665,11 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 		}
 		ui_invalidate(&self->component);
 	} else
-	if (keycode == VK_DOWN) {		
+	if (cmd == CMD_NAVDOWN) {		
 		AdvanceCursor(self);
 		ui_invalidate(&self->component);
 	} else
-	if (keycode == VK_LEFT) {
+	if (cmd == CMD_NAVLEFT) {
 		if (self->grid.cursor.col == 0) {
 			self->grid.cursor.col = TRACKERGRID_NUMCOLS - 2;
 			--self->grid.cursor.track;
@@ -663,7 +678,7 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 		}
 		ui_invalidate(&self->component);
 	} else
-	if (keycode == VK_RIGHT) {
+	if (cmd == CMD_NAVRIGHT) {
 		if (self->grid.cursor.col == TRACKERGRID_NUMCOLS - 2) {
 			self->grid.cursor.col = 0;
 			++self->grid.cursor.track;
@@ -704,7 +719,7 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 		}		
 	} else {
 		if (self->grid.cursor.col == 0) {			
-			cmd = Cmd(&self->grid.noteinputs->map, keycode);
+			cmd = inputs_cmd(self->grid.noteinputs, encodeinput(keycode, 0, 0));
 			if (cmd != -1) {		
 				int base = workspace_octave(self->workspace) * 12;
 				PatternNode* prev;
@@ -874,6 +889,7 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->workspace = workspace;
 	self->opcount = 0;
 	ui_component_init(&self->component, parent);
+	InitTrackerInputs(self);
 	self->pattern = 0;
 	ui_bitmap_loadresource(&self->skin.bitmap, IDB_HEADERSKIN);
 	InitDefaultSkin(self);	
@@ -882,6 +898,7 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->header.trackwidth = self->skin.headercoords.background.destwidth;
 	self->linenumbers.skin = &self->skin;
 	InitTrackerGrid(&self->grid, &self->component, self, &workspace->player);
+	self->grid.noteinputs = workspace_noteinputs(workspace);
 	InitTrackerLineNumbersLabel(&self->linenumberslabel, &self->component, self);	
 	InitTrackerLineNumbers(&self->linenumbers, &self->component);
 	self->linenumbers.view = self;
@@ -1201,3 +1218,17 @@ void ShowLineNumbers(TrackerView* self, int showstate)
 	Align(self, &self->component);
 	ui_invalidate(&self->component);
 }
+
+void InitTrackerInputs(TrackerView* self)
+{
+	inputs_init(&self->inputs);	
+	inputs_define(&self->inputs, encodeinput(VK_UP, 0, 0), CMD_NAVUP);
+	inputs_define(&self->inputs, encodeinput(VK_DOWN, 0, 0),CMD_NAVDOWN);
+	inputs_define(&self->inputs, encodeinput(VK_LEFT, 0, 0),CMD_NAVLEFT);
+	inputs_define(&self->inputs, encodeinput(VK_RIGHT, 0, 0),CMD_NAVRIGHT);
+	inputs_define(&self->inputs, encodeinput(VK_PRIOR, 0, 0),CMD_NAVPAGEUP);
+	inputs_define(&self->inputs, encodeinput(VK_NEXT, 0, 0),CMD_NAVPAGEDOWN);
+	inputs_define(&self->inputs, encodeinput(VK_HOME, 0, 0), CMD_NAVTOP);
+	inputs_define(&self->inputs, encodeinput(VK_END, 0, 0), CMD_NAVBOTTOM);
+}
+

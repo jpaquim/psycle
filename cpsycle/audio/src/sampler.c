@@ -1,6 +1,7 @@
 #include "sampler.h"
 #include "pattern.h"
 #include "plugin_interface.h"
+#include "instruments.h"
 #include "samples.h"
 #include <operations.h>
 #include <math.h>
@@ -8,7 +9,7 @@
 static void generateaudio(Sampler*, BufferContext*);
 static void seqtick(Sampler*, int channel, const PatternEvent*);
 static const CMachineInfo* info(Sampler*);
-static void parametertweak(Sampler* self, int par, int val);
+static void parametertweak(Sampler*, int par, int val);
 static int describevalue(Sampler*, char* txt, int const param, int const value);
 static int value(Sampler*, int const param);
 static void setvalue(Sampler*, int const param, int const value);
@@ -19,7 +20,7 @@ static void release_voices(Sampler*, int channel);
 static unsigned int numinputs(Sampler*);
 static unsigned int numoutputs(Sampler*);
 
-static void voice_init(Voice*, Sample*, int channel);
+static void voice_init(Voice*, Instrument*, Sample*, int channel, unsigned int samplerate);
 static void voice_dispose(Voice*);
 static void voice_seqtick(Voice*, const PatternEvent*);
 static void voice_noteon(Voice*, const PatternEvent*);
@@ -100,7 +101,7 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.numoutputs = numoutputs;	
 	self->numvoices = SAMPLER_MAX_POLYPHONY;
 	for (voice = 0; voice < self->numvoices; ++voice) {
-		voice_init(&self->voices[voice], 0, 0);		
+		voice_init(&self->voices[voice], 0, 0, 0, 44100);
 	}
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;
@@ -128,15 +129,18 @@ void generateaudio(Sampler* self, BufferContext* bc)
 void seqtick(Sampler* self, int channel, const PatternEvent* event)
 {
 	Samples* samples = self->machine.callback.samples(self->machine.callback.context);
-	Sample* sample = SearchIntHashTable(&samples->container, event->inst);
+	Instruments* instruments = self->machine.callback.instruments(self->machine.callback.context);
+	Sample* sample = samples_at(samples, event->inst);
+	Instrument* instrument = instruments_at(instruments, event->inst);
 	release_voices(self, channel);
 
-	if (sample) {
+	if (sample && instrument) {
 		int voice;
 
 		voice = unused_voice(self);
 		if (voice != -1) {
-			voice_init(&self->voices[voice], sample, channel);
+			voice_init(&self->voices[voice], instrument, sample, channel,
+				self->machine.callback.samplerate(self->machine.callback.context));
 			voice_seqtick(&self->voices[voice], event);			
 		}
 	}
@@ -228,13 +232,28 @@ unsigned int numoutputs(Sampler* self)
 	return 2;
 }
 
-void voice_init(Voice* self, Sample* sample, int channel)
+void voice_init(Voice* self, Instrument* instrument, Sample* sample,
+	int channel, unsigned int samplerate) 
 {
-	self->position = sample_begin(self->sample);
+	self->instrument = instrument;
 	self->sample = sample;
 	self->channel = channel;
-	adsr_init(&self->env);
-	adsr_init(&self->filterenv);
+	if (sample) {
+		self->position = sample_begin(self->sample);
+	}	
+	if (instrument) {
+		adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
+		adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
+	} else {
+		adsr_initdefault(&self->env, samplerate);
+		adsr_initdefault(&self->filterenv, samplerate);
+	}
+}
+
+void voice_reset(Voice* self)
+{				
+	adsr_reset(&self->env);
+	adsr_reset(&self->filterenv);
 }
 
 void voice_dispose(Voice* self)
@@ -285,7 +304,7 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 			adsr_tick(&self->env);
 			adsr_tick(&self->filterenv);
 			if (!sampleiterator_inc(&self->position)) {			
-				voice_init(self, self->sample, self->channel);
+				voice_reset(self);					
 				break;				
 			}		
 		}									

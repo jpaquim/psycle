@@ -13,7 +13,7 @@ static void onpreferredsize(TabBar*, ui_component* sender, ui_size* limit, int* 
 
 void InitTab(Tab* self, const char* text, ui_size* size)
 {
-	self->text = strdup(text);
+	self->text = _strdup(text);
 	if (size) {
 		self->size = *size;
 	}	
@@ -294,4 +294,17 @@ void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, int* wi
 
 	*width = cpx;
 	*height = size.height;
+}
+
+Tab* tabbar_tab(TabBar* self, int tabindex)
+{
+	Tab* rv = 0;
+	List* p;
+	int c = 0;
+	
+	for (p = self->tabs; p != 0 && c < tabindex; p = p->next, ++c);
+	if (p) {		
+		rv = (Tab*)p->entry;		
+	}
+	return rv;
 }

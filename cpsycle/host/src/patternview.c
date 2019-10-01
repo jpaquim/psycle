@@ -11,11 +11,13 @@ static void OnSongChanged(PatternView*, Workspace* sender);
 static void OnEditPositionChanged(PatternView*, Sequence* sender);
 static void OnPropertiesClose(PatternView*, ui_component* sender);
 static void OnPropertiesApply(PatternView*, ui_component* sender);
+static void OnKeyDown(PatternView*, ui_component* sender, int keycode, int keydata);
 
 void InitPatternView(PatternView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	ui_notebook_init(&self->notebook, &self->component);
 	InitTrackerView(&self->trackerview, &self->notebook.component, workspace);
 	signal_connect(&self->component.signal_size, self, OnSize);
@@ -126,4 +128,9 @@ void OnPropertiesApply(PatternView* self, ui_component* sender)
 	self->grid.dy = -si.nPos * self->grid.lineheight;	
 	self->linenumbers.dy = self->grid.dy;
 	ui_invalidate(&self->component);*/
+}
+
+void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata)
+{
+	ui_component_propagateevent(sender);
 }

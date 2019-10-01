@@ -62,7 +62,7 @@ void sample_init(Sample* self)
 	self->panfactor = 0.5f;
 	self->panenabled = 0;
 	self->surround = 0;
-	self->name = strdup("");
+	self->name = _strdup("");
 	vibrato_init(&self->vibrato);
 }
 
@@ -89,7 +89,7 @@ void sample_load(Sample* self, const char* path)
 void sample_setname(Sample* self, const char* name)
 {
 	free(self->name);
-	self->name = strdup(name);
+	self->name = _strdup(name);
 }
 
 const char* sample_name(Sample* self)

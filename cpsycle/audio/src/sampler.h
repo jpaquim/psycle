@@ -35,6 +35,7 @@ typedef enum
 InterpolationType;
 
 typedef struct {
+	Instrument* instrument;
 	Sample* sample;
 	ADSR env;
 	ADSR filterenv;

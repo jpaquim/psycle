@@ -17,37 +17,18 @@ static int OnSearchPropertiesEnum(Properties* self, Properties* property, int le
 static int OnSaveIniEnum(RiffFile* file, Properties* property, int level);
 static Properties* append(Properties* self, Properties* p);
 static Properties* tail(Properties*);
+void properties_sections(Properties*, char* text);
 
-Properties* properties_create(void)
-{
-	Properties* rv;
-	rv = (Properties*) malloc(sizeof(Properties));	
-	properties_init(rv);	
-	return rv;
-}
-
-Properties* properties_createsection(Properties* self, const char* name)
-{
-	Properties* rv;
-	
-	assert(self);
-	rv = (Properties*) malloc(sizeof(Properties));
-	properties_init(rv);
-	rv->item.key = strdup(name);
-	rv->item.typ = PROPERTY_TYP_SECTION;
-	
-	return append(self, rv);
-}
-
-void properties_init(Properties* self)
+void properties_init(Properties* self, const char* key, PropertyType typ)
 {		
 	self->children = 0;
 	self->parent = 0;
 	self->next = 0;	
 	self->dispose = 0;
 	memset(&self->item, 0, sizeof(Property));
-	self->item.key = 0;
+	self->item.key = _strdup(key);
 	self->item.text = 0;
+	self->item.typ = typ;
 	self->item.hint = PROPERTY_HINT_EDIT;
 	self->item.disposechildren = 1;	
 }
@@ -75,6 +56,25 @@ void properties_free(Properties* self)
 	}
 }
 
+Properties* properties_create(void)
+{
+	Properties* rv;
+	rv = (Properties*) malloc(sizeof(Properties));	
+	properties_init(rv, "", PROPERTY_TYP_ROOT);
+	return rv;
+}
+
+Properties* properties_createsection(Properties* self, const char* name)
+{
+	Properties* rv;
+	
+	assert(self);
+	rv = (Properties*) malloc(sizeof(Properties));
+	properties_init(rv, name, PROPERTY_TYP_SECTION);
+	
+	return append(self, rv);
+}
+
 Property* properties_entry(Properties* self)
 {
 	return &self->item;
@@ -85,10 +85,8 @@ Properties* properties_create_string(const char* key, const char* value)
 	Properties* p;
 
 	p = (Properties*) malloc(sizeof(Properties));
-	properties_init(p);	
-	p->item.key = strdup(key);
-	p->item.value.s = strdup(value);	
-	p->item.typ = PROPERTY_TYP_STRING;	
+	properties_init(p, key, PROPERTY_TYP_STRING);	
+	p->item.value.s = _strdup(value);	
 	return p;
 }
 
@@ -107,11 +105,9 @@ Properties* properties_append_userdata(Properties* self, const char* key,
 	}
 	p = tail(self);
 	p->next = (Properties*) malloc(sizeof(Properties));	
-	properties_init(p->next);
-	p->next->dispose = dispose;
-	p->next->item.key = strdup(key);
+	properties_init(p->next, key, PROPERTY_TYP_USERDATA);
+	p->next->dispose = dispose;	
 	p->next->item.value.ud = value;	
-	p->next->item.typ = PROPERTY_TYP_USERDATA;	
 	return p->next;
 }
 
@@ -120,11 +116,8 @@ Properties* properties_create_int(const char* key, int value, int min, int max)
 	Properties* p;
 
 	p = (Properties*) malloc(sizeof(Properties));
-	properties_init(p);
-	p->item.key = strdup(key);
-	p->item.value.i = value;	
-	p->item.typ = PROPERTY_TYP_INTEGER;
-
+	properties_init(p, key, PROPERTY_TYP_INTEGER);	
+	p->item.value.i = value;
 	return p;
 }
 
@@ -160,10 +153,8 @@ Properties* properties_append_double(Properties* self, const char* key,
 	Properties* p;
 		
 	p = (Properties*) malloc(sizeof(Properties));
-	properties_init(p);
-	p->item.key = strdup(key);
-	p->item.value.d = value;	
-	p->item.typ = PROPERTY_TYP_DOUBLE;
+	properties_init(p, key, PROPERTY_TYP_DOUBLE);	
+	p->item.value.d = value;		
 	return append(self, p);	
 }
 
@@ -172,10 +163,8 @@ Properties* properties_create_choice(const char* key, int value)
 	Properties* p;
 
 	p = (Properties*) malloc(sizeof(Properties));
-	properties_init(p);
-	p->item.key = strdup(key);
-	p->item.value.i = value;	
-	p->item.typ = PROPERTY_TYP_CHOICE;	
+	properties_init(p, key, PROPERTY_TYP_CHOICE);	
+	p->item.value.i = value;		
 	p->item.hint = PROPERTY_HINT_LIST;
 	return p;
 }
@@ -265,7 +254,7 @@ Properties* properties_write_string(Properties* self, const char* key, const cha
 		if (p->item.typ == PROPERTY_TYP_STRING) {
 			free(p->item.value.s);
 		}
-		p->item.value.s = strdup(value);
+		p->item.value.s = _strdup(value);
 		p->item.typ = PROPERTY_TYP_STRING;
 	} else {
 		p = properties_append_string(self, key, value);
@@ -369,9 +358,29 @@ int OnSearchPropertiesEnum(Properties* self, Properties* property, int level)
 	return 1;
 }
 
-int properties_checktype(Properties* property, PropertyType typ)
+Properties* properties_findsection(Properties* self, const char* key)
+{	
+	Properties* p;
+	char text[_MAX_PATH];
+	char seps[]   = " .";
+	char *token;
+
+	p = self;	
+	strcpy(text, key);
+	token = strtok(text, seps );
+	while(token != 0) {
+		p = properties_find(self, token);
+		if (!p) {
+			break;
+		}		
+		token = strtok(0, seps );
+	}	
+	return p;
+}
+
+int properties_type(Properties* property)
 {
-	return property->item.typ == typ;
+	return property->item.typ;
 }
 
 const char* properties_key(Properties* self)
@@ -408,6 +417,9 @@ void properties_load(Properties* self, const char* path)
 				
 		while ((c = fgetc(fp)) != EOF) {			
 			if (state == 0) {
+				if (c == '\r') {
+					state = 0;
+				} else
 				if (c == '\n') {
 					state = 0;
 				} else
@@ -475,7 +487,7 @@ void properties_load(Properties* self, const char* path)
 			if (state == 4) {
 				Properties* p;
 				curr = self;
-				p = properties_read(curr, key);
+				p = properties_findsection(self, key);
 				if (p && p->children) {
 					curr = p;
 				}
@@ -512,10 +524,14 @@ int OnSaveIniEnum(RiffFile* file, Properties* property, int level)
 		char text[40];
 
 		if (property->item.typ == PROPERTY_TYP_SECTION)
-		{
+		{			
+			char sections[_MAX_PATH];
+
+			properties_sections(property, sections);
 			rifffile_write(file, "[", 1);
-			rifffile_write(file, property->item.key,
-				strlen(property->item.key));
+			if (sections[0] != '\0') {
+				rifffile_write(file, sections, strlen(sections));
+			}
 			rifffile_write(file, "]", 1);
 		} else {			
 			rifffile_write(file, property->item.key, strlen(property->item.key));
@@ -546,14 +562,43 @@ int OnSaveIniEnum(RiffFile* file, Properties* property, int level)
 	return 1;
 }
 
+void properties_sections(Properties* self, char* text)
+{	
+	Properties* p;
+
+	text[0] = '\0';
+	p = self;
+	while (p) {
+		if (p->item.typ == PROPERTY_TYP_SECTION &&
+			 (strlen(text) + 1 + strlen(properties_key(p))) < _MAX_PATH) {
+			char buffer[_MAX_PATH];
+			
+			strcpy(buffer, text);
+			if (p->parent && p->parent->item.typ == PROPERTY_TYP_SECTION) {
+				strcpy(text, ".");
+			} else {
+				text[0] = '\0';
+			}
+			strcat(text, properties_key(p));			
+			strcat(text, buffer);			
+		}
+		p = p->parent;
+	}	
+}
+
 void properties_settext(Properties* self, const char* text)
 {
-	self->item.text = strdup(text);
+	self->item.text = _strdup(text);
 }
 
 const char* properties_text(Properties* self)
 {
-	return self->item.text ? self->item.text : self->item.key;
+	return self->item.text ? self->item.text : self->item.key ? self->item.key : "";
+}
+
+int properties_ischoiceitem(Properties* self)
+{
+	return self->parent && self->parent->item.typ == PROPERTY_TYP_CHOICE;	
 }
 
 Properties* tail(Properties* self)
@@ -578,4 +623,14 @@ Properties* append(Properties* self, Properties* p)
 	}
 	p->parent = self;
 	return p;
+}
+
+void properties_sethint(Properties* self, PropertyHint hint)
+{
+	self->item.hint = hint;
+}
+
+PropertyHint properties_hint(Properties* self)
+{	
+	return self->item.hint;
 }

@@ -9,7 +9,7 @@ void pattern_init(Pattern* self)
 {
 	self->events = 0;
 	self->length = 16;
-	self->label = strdup("Untitled");	
+	self->label = _strdup("Untitled");	
 	self->opcount = 0;
 }
 
@@ -38,7 +38,7 @@ Pattern* pattern_clone(Pattern* self)
 		}
 	}
 	rv->length = self->length;
-	rv->label = strdup(self->label);
+	rv->label = _strdup(self->label);
 	return rv;
 }
 
@@ -108,7 +108,7 @@ void pattern_setlabel(Pattern* self, const char* text)
 {
 	if (self->label) {
 		free(self->label);
-		self->label = strdup(text);
+		self->label = _strdup(text);
 	}
 	++self->opcount;
 }

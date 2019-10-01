@@ -15,6 +15,21 @@ List* list_create(void* entry)
 	return list;
 }
 
+void list_free(List* list)
+{
+	if (list) {
+		List* ptr;
+		List* next;
+
+		ptr = list;
+		while (ptr != NULL) {
+			next = ptr->next;
+			free(ptr);
+			ptr = next;
+		}
+	}
+}
+
 List* list_append(List* self, void* entry)
 {		
 	self->tail->next = list_create(entry);
@@ -70,18 +85,12 @@ List* list_remove(List** self, List* ptr)
 	return rv;
 }
 
-void list_free(List* list)
-{
-	if (list) {
-		List* ptr;
-		List* next;
+unsigned int list_size(List* self)
+{	
+	unsigned int rv = 0;
+	List* p;
 
-		ptr = list;
-		while (ptr != NULL) {
-			next = ptr->next;
-			free(ptr);
-			ptr = next;
-		}
-	}
+	for (p = self; p != 0; p = p->next, ++rv);
+	return rv;
 }
 

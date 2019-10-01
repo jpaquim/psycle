@@ -8,8 +8,8 @@
 #include <uicomponent.h>
 #include <uiedit.h>
 #include <properties.h>
+#include "inputdefiner.h"
 #include "tabbar.h"
-#include <hashtbl.h>
 
 typedef struct {
 	ui_component component;
@@ -18,21 +18,23 @@ typedef struct {
 	ui_graphics* g;
 	int lastlevel;
 	Properties* selected;
+	Properties* search;
 	ui_rectangle selrect;
 	int dy;
 	int mx;
 	int my;
 	int cpy;
-	int cpx;
-	int fillchoice;
+	int cpx;	
 	int currchoice;
 	int choicecount;
+	int lineheight;
+	int columnwidth;
+	int identwidth;
 	Properties* choiceproperty;
 	ui_edit edit;
+	InputDefiner inputdefiner;
 	Signal signal_changed;
-	TabBar tabbar;
-	IntHashTable sectionpositions;
-	int sectioncount;
+	TabBar tabbar;	
 } SettingsView;
 
 void InitSettingsView(SettingsView* Settingsview, ui_component* parent, ui_component* tabbarparent, 
