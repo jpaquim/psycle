@@ -166,7 +166,8 @@ static void init_properties(Driver* self)
 {	
 	Properties* property;	
 
-	self->properties = properties_create_string("name", "directsound");
+	self->properties = properties_create();
+	properties_append_string(self->properties, "name", "directsound");
 	properties_append_string(self->properties, "version", "1.0");
 	property = properties_append_choice(self->properties, "device", -1);	
 	properties_append_int(self->properties, "bitdepth", 16, 0, 32);

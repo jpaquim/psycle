@@ -3,8 +3,11 @@
 
 #include "adsr.h"
 
-void envelopepoint_init(EnvelopePoint* self, float time, float value, float mintime,
-	float maxtime, float minvalue, float maxvalue)
+static const float defaultfastrelease = 0.003f;
+static void computestep(ADSR* self, float dvalue, float numseconds);
+
+void envelopepoint_init(EnvelopePoint* self, float time, float value,
+	float mintime, float maxtime, float minvalue, float maxvalue)
 {
 	self->time = time;
 	self->value = value;
@@ -21,14 +24,16 @@ void adsr_settings_init(ADSRSettings* self, float attack,
 	self->decay = decay;
 	self->sustain = sustain;
 	self->release = release;
+	self->fastrelease = defaultfastrelease;
 }
 
 void adsr_settings_initdefault(ADSRSettings* self)
 {
-	self->attack = 0.2f;
-	self->decay = 0.3f;
-	self->sustain = 0.5f;
-	self->release = 0.3f;
+	self->attack = 0.005f;
+	self->decay = 0.005f;
+	self->sustain = 1.0f;
+	self->release = 0.005f;
+	self->fastrelease = defaultfastrelease;
 }
 
 float adsr_settings_attack(ADSRSettings* self)
@@ -71,13 +76,49 @@ void adsr_settings_setrelease(ADSRSettings* self, float value)
 	self->release = value;
 }
 
-void adsr_init(ADSR* self)
+
+float adsr_settings_fastrelease(ADSRSettings* self)
+{
+	return self->fastrelease;
+}
+
+void adsr_settings_setfastrelease(ADSRSettings* self, float value)
+{
+	self->fastrelease = value;
+}
+
+void adsr_initdefault(ADSR* self, unsigned int samplerate)
 {	
 	self->stage = ENV_OFF;
 	self->value = 0.f;
 	self->step = 0.f;
-	self->samplerate = 44100;
-	adsr_settings_initdefault(&self->settings);		
+	self->samplerate = samplerate;
+	adsr_settings_initdefault(&self->settings);
+}
+
+void adsr_init(ADSR* self, const ADSRSettings* settings, unsigned int samplerate)
+{
+	self->stage = ENV_OFF;
+	self->value = 0.f;
+	self->step = 0.f;
+	self->samplerate = samplerate;
+	if (settings) {
+		self->settings = *settings;
+	} else {
+		adsr_settings_initdefault(&self->settings);
+	}
+}
+
+void adsr_reset(ADSR* self)
+{
+	self->stage = ENV_OFF;
+	self->value = 0.f;
+	self->step = 0.f;	
+}
+
+void adsr_setsamplerate(ADSR* self, unsigned int samplerate)
+{
+	self->samplerate = samplerate;	
 }
 
 void adsr_tick(ADSR* self)
@@ -89,10 +130,8 @@ void adsr_tick(ADSR* self)
 			if (self->value > 1.0f) {
 				self->value = 1.0f;
 				self->stage = ENV_DECAY;
-				self->step = 
-					((1.0f - adsr_settings_sustain(&self->settings)) /
-					adsr_settings_decay(&self->settings)) *
-					(44100.0f/self->samplerate);
+				computestep(self, 1.0f - adsr_settings_sustain(&self->settings),
+					adsr_settings_decay(&self->settings));
 			}
 		break;
 		case ENV_DECAY:
@@ -107,7 +146,7 @@ void adsr_tick(ADSR* self)
 		break;
 		case ENV_RELEASE:
 		case ENV_FASTRELEASE:
-			self->value -= self->step;
+			self->value -= self->step;			
 			if (self->value <= 0) {
 				self->value = 0;
 				self->stage = ENV_OFF;
@@ -120,14 +159,29 @@ void adsr_tick(ADSR* self)
 
 void adsr_start(ADSR* self)
 {	
-	self->value = 0.f;
-	self->step = 1.0f / adsr_settings_attack(&self->settings) * 1.0f/44100;	
 	self->stage = ENV_ATTACK;
+	self->value = 0.f;	
+	computestep(self, 1.0f, adsr_settings_attack(&self->settings));	
 }
 
 void adsr_release(ADSR* self)
 {
 	if (self->stage != ENV_OFF) {
 		self->stage = ENV_RELEASE;
+		computestep(self, self->value, adsr_settings_release(&self->settings));
 	}
+}
+
+void adsr_fastrelease(ADSR* self)
+{
+	if (self->stage != ENV_OFF) {
+		self->stage = ENV_RELEASE;
+		computestep(self, self->value, 
+			adsr_settings_fastrelease(&self->settings));
+	}
+}
+
+void computestep(ADSR* self, float dvalue, float numseconds)
+{
+	self->step = dvalue / (numseconds * self->samplerate);
 }

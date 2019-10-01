@@ -671,7 +671,7 @@ void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * 
 		rifffile_read(file, &wave->stereo, sizeof(&wave->stereo));
 		//Old sample name, never used.
 		rifffile_readstring(file, dummy,sizeof(dummy));
-		wave->name = strdup(instrum_name);
+		wave->name = _strdup(instrum_name);
 				
 		rifffile_read(file, &packedsize,sizeof(packedsize));
 				

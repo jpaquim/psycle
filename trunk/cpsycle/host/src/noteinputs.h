@@ -6,10 +6,8 @@
 
 #include "inputmap.h"
 
-typedef struct {
-	InputMap map;
-} NoteInputs;
+typedef Inputs NoteInputs;
 
-void InitNoteInputs(NoteInputs* self);
+void InitNoteInputs(NoteInputs*);
 
 #endif

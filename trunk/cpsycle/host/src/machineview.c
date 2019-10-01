@@ -60,7 +60,7 @@ void MachineUiSet(MachineUi* self, int x, int y, int mode, const char* editname)
 	if (self->editname) {
 		free(self->editname);
 	}
-	self->editname = strdup(editname);
+	self->editname = _strdup(editname);
 }
 
 void InitWireView(WireView* self, ui_component* parent,

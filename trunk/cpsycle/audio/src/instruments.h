@@ -8,10 +8,9 @@
 #include <hashtbl.h>
 #include <signal.h>
 
-typedef struct {
+typedef struct Instruments {
 	IntHashTable container;
 	int slot;
-
 	Signal signal_insert;
 	Signal signal_slotchange;
 } Instruments;
@@ -22,6 +21,5 @@ void instruments_insert(Instruments*, Instrument*, int slot);
 void instruments_changeslot(Instruments* self, int slot);
 int instruments_slot(Instruments* self);
 Instrument* instruments_at(Instruments* self, int slot);
-
 
 #endif

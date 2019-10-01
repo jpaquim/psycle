@@ -146,29 +146,30 @@ int driver_dispose(Driver* driver)
 	return 0;
 }
 
-static void init_properties(Driver* driver)
-{	
-	Properties* property;
+static void init_properties(Driver* self)
+{		
+	Properties* devices;
 	int i;
 	int n;
 
-	driver->properties = properties_create_string("name", "winmme");
-	properties_append_string(driver->properties, "version", "1.0");
-	property = properties_append_choice(driver->properties, "device", -1);	
-	property->children = properties_create();
-	properties_append_int(property->children, "WAVE_MAPPER", -1, 0, 0);	
+	self->properties = properties_create();
+		
+	properties_append_string(self->properties, "name", "winmme");
+	properties_append_string(self->properties, "version", "1.0");
+	devices = properties_append_choice(self->properties, "device", -1);		 
+	properties_append_int(devices, "WAVE_MAPPER", -1, 0, 0);	
 	n = waveOutGetNumDevs();	
 	for (i = 0; i < n; i++)
 	{
 		WAVEOUTCAPS caps;
 		waveOutGetDevCaps(i, &caps, sizeof(WAVEOUTCAPS));
-		properties_append_int(property->children, caps.szPname, i, 0, 0);
+		properties_append_int(devices, caps.szPname, i, 0, 0);
 	}
-	properties_append_int(driver->properties, "bitdepth", 16, 0, 32);
-	properties_append_int(driver->properties, "samplerate", 44100, 0, 0);
-	properties_append_int(driver->properties, "dither", 0, 0, 1);
-	properties_append_int(driver->properties, "numbuf", 8, 6, 8);
-	properties_append_int(driver->properties, "numsamples", 4096, 128, 8193);	
+	properties_append_int(self->properties, "bitdepth", 16, 0, 32);
+	properties_append_int(self->properties, "samplerate", 44100, 0, 0);
+	properties_append_int(self->properties, "dither", 0, 0, 1);
+	properties_append_int(self->properties, "numbuf", 8, 6, 8);
+	properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
 static void apply_properties(MmeDriver* self)

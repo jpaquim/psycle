@@ -7,10 +7,11 @@
 
 void instrument_init(Instrument* self)
 {	
-	self->name = strdup("");
+	self->name = _strdup("");
 	self->nna = NNA_STOP;
 	adsr_settings_initdefault(&self->volumeenvelope);
-	adsr_settings_initdefault(&self->filterenvelope);
+	adsr_settings_init(&self->filterenvelope, 0.005f, 0.370f, 0.5f, 0.370f);
+	self->filtermodamount = 1.0f;
 }
 
 void instrument_dispose(Instrument* self)
@@ -25,7 +26,7 @@ void instrument_load(Instrument* self, const char* path)
 void instrument_setname(Instrument* self, const char* name)
 {
 	free(self->name);
-	self->name = strdup(name);
+	self->name = _strdup(name);
 }
 
 const char* instrument_name(Instrument* self)

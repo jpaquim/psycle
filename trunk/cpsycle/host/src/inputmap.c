@@ -1,25 +1,42 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "inputmap.h"
 
-void InitInputMap(InputMap* self)
+void inputs_init(Inputs* self)
 {
 	InitIntHashTable(&self->map, 256);
 }
 
-void DisposeInputMap(InputMap* self)
+void inputs_dispose(Inputs* self)
 {
 	DisposeIntHashTable(&self->map);
 }
 
-int Cmd(InputMap* self, int input)
+int inputs_cmd(Inputs* self, int input)
 {
 	return ExistsIntHashTable(&self->map, input) 
 		? (int) SearchIntHashTable(&self->map, input)
 		: -1;	
 }
 
-void DefineInput(InputMap* self, int input, int cmd)
+void inputs_define(Inputs* self, int input, int cmd)
 {
 	InsertIntHashTable(&self->map, input, (void*)cmd);
+}
+
+unsigned int encodeinput(unsigned int keycode, int shift, int ctrl)
+{
+	unsigned int rv;
+
+	rv = keycode | (shift << 8) | (ctrl << 9);
+
+	return rv;
+}
+
+void decodeinput(unsigned int input, unsigned int* keycode, int* shift, int* ctrl)
+{
+	*keycode = input & 0xFF;
+	*shift = ((input >> 8) & 0x01) == 0x01;
+	*ctrl = ((input >> 9) & 0x01) == 0x01;	
 }

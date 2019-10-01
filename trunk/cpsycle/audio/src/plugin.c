@@ -107,13 +107,13 @@ CMachineInfo* plugin_psycle_test(const char* path)
 		CMachineInfo* pInfo = GetInfo();
 		if (pInfo) {
 			rv = (CMachineInfo*) malloc(sizeof(CMachineInfo));
-			rv->Author = strdup(pInfo->Author);
-			rv->Command = strdup(pInfo->Command);
+			rv->Author = _strdup(pInfo->Author);
+			rv->Command = _strdup(pInfo->Command);
 			rv->Flags = pInfo->Flags;
-			rv->Name = strdup(pInfo->Name);
+			rv->Name = _strdup(pInfo->Name);
 			rv->numCols = pInfo->numCols;
 			rv->numParameters = pInfo->numParameters;
-			rv->ShortName = strdup(pInfo->ShortName);
+			rv->ShortName = _strdup(pInfo->ShortName);
 			rv->APIVersion = pInfo->APIVersion;
 			rv->PlugVersion = pInfo->PlugVersion;
 		}

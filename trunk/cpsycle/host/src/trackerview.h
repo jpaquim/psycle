@@ -5,7 +5,6 @@
 #define TRACKERVIEW
 
 #include "skincoord.h"
-#include "noteinputs.h"
 #include "tabbar.h"
 #include "workspace.h"
 
@@ -102,7 +101,7 @@ typedef struct {
    float bpl;
    float cbpl;
    PatternNode* curr_event;
-   NoteInputs* noteinputs;
+   Inputs* noteinputs;
    char** notestab;
    TrackerCursor cursor;
    float cursorstep;   
@@ -116,6 +115,8 @@ typedef struct {
    struct TrackerView* view;   
 } TrackerGrid;
 
+typedef Inputs TrackerInputs;
+
 typedef struct TrackerView {
 	ui_component component;
 	TrackerHeader header;
@@ -128,6 +129,7 @@ typedef struct TrackerView {
 	int showlinenumbers;
 	Workspace* workspace;
 	int opcount;
+	TrackerInputs inputs;
 } TrackerView;
 
 void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView*, Player*);

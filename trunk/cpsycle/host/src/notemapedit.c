@@ -159,7 +159,7 @@ void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata
 	} else {
 		int cmd;
 
-		cmd = Cmd(&self->noteinputs->map, keycode);
+		cmd = inputs_cmd(self->noteinputs, keycode);
 		if (cmd != -1) {		
 			int base = 48;
 			self->map[self->cursor.note].note = (unsigned char)(base + cmd);

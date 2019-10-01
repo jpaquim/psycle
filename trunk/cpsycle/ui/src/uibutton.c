@@ -58,7 +58,7 @@ void ui_button_create_system(ui_button* button, ui_component* parent)
 void ui_button_create_ownerdrawn(ui_button* self, ui_component* parent)
 {
 	self->ownerdrawn = 1;
-	self->text = strdup("");
+	self->text = _strdup("");
 	ui_component_init(&self->component, parent);
 	signal_connect(&self->component.signal_draw, self, onownerdraw);	
 	signal_connect(&self->component.signal_mousedown, self, onmousedown);
@@ -129,7 +129,7 @@ void ui_button_settext(ui_button* self, const char* text)
 {
 	if (self->ownerdrawn) {
 		free(self->text);
-		self->text = strdup(text);
+		self->text = _strdup(text);
 	} else {
 		SetWindowText(self->component.hwnd, text);
 	}

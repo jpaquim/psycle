@@ -41,11 +41,12 @@ typedef enum  {
 
 #define MACHINE_USES_INSTRUMENTS 64
 
-typedef struct MachineCallback {
-	struct Samples* (*samples)(void*);
+typedef struct MachineCallback {	
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);
+	struct Samples* (*samples)(void*);
 	struct Machines* (*machines)(void*);
+	struct Instruments* (*instruments)(void*);
 	void* context;
 } MachineCallback;
 

@@ -707,6 +707,32 @@ void ui_component_setverticalscrollrange(ui_component* self, int min, int max)
 	SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);
 }
 
+void ui_component_setverticalscrollposition(ui_component* self, int position)
+{
+	SCROLLINFO si;
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_RANGE;	
+	GetScrollInfo(self->hwnd, SB_VERT, &si);
+	if (position < si.nMax) {			
+		si.nPos = (int) position;
+	} else {
+		si.nPos = si.nMax;
+	}
+	si.fMask = SIF_POS;	
+	SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);
+}
+
+void ui_component_verticalscrollrange(ui_component* self, int* scrollmin,
+	int* scrollmax)
+{
+	SCROLLINFO si;
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_RANGE;	
+	GetScrollInfo(self->hwnd, SB_VERT, &si);
+	*scrollmin = si.nMin;
+	*scrollmax = si.nMax;
+}
+
 void ui_component_move(ui_component* self, int left, int top)
 {
 	SetWindowPos (self->hwnd, NULL, 

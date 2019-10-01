@@ -15,14 +15,14 @@ void library_init(Library* self)
 {
 	self->module = 0;
 	self->err = 0;
-	self->path = strdup("");
+	self->path = _strdup("");
 }
 
 void library_load(Library* self, const char* path)
 {	
 	self->module = LoadLibrary(path);	
 	free(self->path);
-	self->path = strdup(path);	
+	self->path = _strdup(path);	
 	if (self->module == NULL) {
 		self->err = GetLastError();			
 	}	

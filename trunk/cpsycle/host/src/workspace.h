@@ -12,6 +12,7 @@
 #include <machinefactory.h>
 #include <uicomponent.h>
 #include "undoredo.h"
+#include "inputmap.h"
 
 enum {
 	WORKSPACE_NEWSONG,
@@ -20,12 +21,12 @@ enum {
 
 typedef struct {	
 	Song* song;
-	Player player;
-	MachineCallback machinecallback;
+	Player player;	
 	Properties* config;
 	Properties* inputoutput;
+	Properties* keyboard;
 	Properties* properties;	
-	Properties* driverconfigure;
+	Properties* driverconfigure;	
 	PluginCatcher plugincatcher;
 	MachineFactory machinefactory;
 	int octave;
@@ -34,6 +35,7 @@ typedef struct {
 	Signal signal_configchanged;
 	ui_component* mainhandle;
 	UndoRedo undoredo;
+	Inputs noteinputs;
 } Workspace;
 
 void workspace_init(Workspace*);
@@ -55,5 +57,6 @@ void workspace_configchanged(Workspace*, Properties* property,
 	Properties* choice);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
+Inputs* workspace_noteinputs(Workspace*);
 
 #endif

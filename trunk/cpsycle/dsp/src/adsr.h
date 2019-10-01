@@ -22,6 +22,7 @@ typedef struct {
 	float decay;
 	float sustain;
 	float release;
+	float fastrelease;
 } ADSRSettings;
 
 void adsr_settings_init(ADSRSettings*, float, float, float, float);
@@ -34,6 +35,8 @@ float adsr_settings_sustain(ADSRSettings*);
 void adsr_settings_setsustain(ADSRSettings*, float);
 float adsr_settings_release(ADSRSettings*);
 void adsr_settings_setrelease(ADSRSettings*, float);
+float adsr_settings_fastrelease(ADSRSettings*);
+void adsr_settings_setfastrelease(ADSRSettings*, float);
 
 typedef enum
 {
@@ -47,13 +50,16 @@ typedef enum
 
 typedef struct {
 	float value;
-	float step;
+	float step;	
 	unsigned int samplerate;
 	ADSRSettings settings;
-	EnvelopeStage stage;	
+	EnvelopeStage stage;
 } ADSR;
 
-void adsr_init(ADSR*);
+void adsr_initdefault(ADSR*, unsigned int samplerate);
+void adsr_init(ADSR*, const ADSRSettings*, unsigned int samplerate);
+void adsr_reset(ADSR*);
+void adsr_setsamplerate(ADSR*, unsigned int samplerate);
 void adsr_tick(ADSR*);
 void adsr_start(ADSR*);
 void adsr_release(ADSR*);

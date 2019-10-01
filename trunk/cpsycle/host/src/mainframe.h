@@ -22,7 +22,6 @@
 #include "settingsview.h"
 #include "songproperties.h"
 #include "properties.h"
-#include "noteinputs.h"
 #include "tabbar.h"
 #include "playbar.h"
 #include "vumeter.h"
@@ -63,7 +62,6 @@ typedef struct {
 	ClipBox clipbox;	
 	ui_statusbar statusbar;
 	ui_component* activeview;	
-	NoteInputs noteinputs;	
 	Workspace workspace;
 	ui_label label;
 	int firstshow;	

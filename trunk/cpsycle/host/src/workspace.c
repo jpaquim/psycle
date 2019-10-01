@@ -2,10 +2,21 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "workspace.h"
+#include "cmdsnotes.h"
 #include <stdlib.h>
 #include <string.h>
 
-static void workspace_config(Workspace*);
+static void workspace_makeconfig(Workspace*);
+static void workspace_makegeneral(Workspace*);
+static void workspace_makenotes(Workspace*);
+static void workspace_makevisual(Workspace*);
+static void workspace_makekeyboard(Workspace*);
+static void workspace_makedirectories(Workspace*);
+static void workspace_makenotes(Workspace*);
+static void workspace_makeinputoutput(Workspace*);
+static void workspace_makemidicontrollers(Workspace*);
+static void workspace_makenoteinputs(Workspace*, Properties* notes);
+static int cmdnote(const char* key);
 static void workspace_removesong(Workspace*);
 static void applysongproperties(Workspace*);
 static Properties* workspace_makeproperties(Workspace*);
@@ -13,36 +24,34 @@ static void workspace_setdriverlist(Workspace*);
 static void workspace_driverconfig(Workspace*);
 static const char* workspace_driverpath(Workspace*);
 static void workspace_configaudio(Workspace*);
-static void workspace_configvisual(Workspace* self);
+static void workspace_configvisual(Workspace*);
+static void workspace_configkeyboard(Workspace*);
 static void workspace_setsong(Workspace*, Song*, int flag);
-static Samples* machinecallback_samples(Workspace*);
-static unsigned int machinecallback_samplerate(Workspace*);
-static Machines* machinecallback_machines(Workspace*);
-static int machinecallback_bpm(Workspace*);
 static void workspace_changedefaultfontsize(Workspace*, int size);
 
+static MachineCallback machinecallback(Workspace*);
+static unsigned int machinecallback_samplerate(Workspace*);
+static int machinecallback_bpm(Workspace*);
+static Samples* machinecallback_samples(Workspace*);
+static Machines* machinecallback_machines(Workspace*);
+static Instruments* machinecallback_instruments(Workspace*);
 
 void workspace_init(Workspace* self)
 {	
 	self->octave = 4;
 	signal_init(&self->signal_octavechanged);
 	self->inputoutput = 0;
-	workspace_config(self);		
-	self->machinecallback.context = self;
-	self->machinecallback.samples = machinecallback_samples;
-	self->machinecallback.samplerate = machinecallback_samplerate;
-	self->machinecallback.bpm = machinecallback_bpm;	
-	self->machinecallback.machines = machinecallback_machines;
-	machinefactory_init(&self->machinefactory, self->machinecallback,
+	workspace_makeconfig(self);
+	machinefactory_init(&self->machinefactory, machinecallback(self),
 		self->config);
 	self->song = (Song*) malloc(sizeof(Song));
 	song_init(self->song, &self->machinefactory);	
-	signal_init(&self->signal_songchanged);
-	signal_init(&self->signal_configchanged);
-	self->properties = 0;
+	self->properties = workspace_makeproperties(self);
 	plugincatcher_init(&self->plugincatcher);
 	workspace_scanplugins(self);
 	undoredo_init(&self->undoredo);
+	signal_init(&self->signal_songchanged);
+	signal_init(&self->signal_configchanged);
 }
 
 void workspace_dispose(Workspace* self)
@@ -82,6 +91,17 @@ void workspace_configvisual(Workspace* self)
 		if (p) {
 			workspace_changedefaultfontsize(self, properties_value(p));
 		}
+	}
+}
+
+void workspace_configkeyboard(Workspace* self)
+{	
+	Properties* notes;
+
+	notes = properties_findsection(self->config, "keyboard.notes");
+	if (notes) {
+		inputs_dispose(&self->noteinputs);
+		workspace_makenoteinputs(self, notes);		
 	}
 }
 
@@ -137,17 +157,21 @@ void workspace_scanplugins(Workspace* self)
 	}
 }
 
-void workspace_config(Workspace* self)
+void workspace_makeconfig(Workspace* self)
+{	
+	workspace_makegeneral(self);
+	workspace_makevisual(self);	
+	workspace_makekeyboard(self);
+	workspace_makedirectories(self);
+	workspace_makeinputoutput(self);
+	workspace_makemidicontrollers(self);
+}
+
+void workspace_makegeneral(Workspace* self)
 {
+	Properties* general;
 	Properties* p;
 
-	Properties* general;
-	Properties* visual;
-	Properties* keyboard;
-	Properties* directories;	
-	Properties* midicontrollers;
-
-	// General
 	self->config = properties_create();	
 	general = properties_createsection(self->config, "general");
 	properties_settext(general, "General");
@@ -158,7 +182,12 @@ void workspace_config(Workspace* self)
 	properties_settext(p, "Show About at Startup");
 	p = properties_append_bool(general, "showsonginfoonload", 1);
 	properties_settext(p, "Show song info on Load");
+}
 
+void workspace_makevisual(Workspace* self)
+{
+	Properties* visual;
+	Properties* p;
 	// Visual
 	visual = properties_createsection(self->config, "visual");	
 	properties_settext(visual, "Visual");	
@@ -166,8 +195,63 @@ void workspace_config(Workspace* self)
 	properties_settext(p, "Default font size");
 	p = properties_append_bool(visual, "linenumbers", 1);
 	properties_settext(p, "Line numbers");
-	keyboard = properties_createsection(self->config, "keyboard");
-	properties_settext(keyboard, "Keyboard and Misc.");
+}
+
+void workspace_makekeyboard(Workspace* self)
+{	
+	self->keyboard = properties_createsection(self->config, "keyboard");
+	properties_settext(self->keyboard, "Keyboard and Misc.");
+	workspace_makenotes(self);
+}
+
+void workspace_makenotes(Workspace* self)
+{
+	Properties* notes;
+	Properties* p;
+
+	notes = properties_createsection(self->keyboard, "notes");
+	properties_settext(notes, "Notes");
+	properties_append_int(notes, "CMD_NOTE_C_0", encodeinput('Z', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_CS0", encodeinput('S', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_D_0", encodeinput('X', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_DS0", encodeinput('D', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_E_0", encodeinput('C', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_F_0", encodeinput('V', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_FS0", encodeinput('G', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_G_0", encodeinput('B', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_GS0", encodeinput('H', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_A_0", encodeinput('N', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_AS0", encodeinput('J', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_B_0", encodeinput('M', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_C_1", encodeinput('Q', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_CS1", encodeinput('2', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_D_1", encodeinput('W', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_DS1", encodeinput('3', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_E_1", encodeinput('E', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_F_1", encodeinput('R', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_FS1", encodeinput('5', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_G_1", encodeinput('T', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_GS1", encodeinput('6', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_A_1", encodeinput('Y', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_AS1", encodeinput('7', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_B_1", encodeinput('U', 0, 0), 0, 0);		
+	properties_append_int(notes, "CMD_NOTE_C_2", encodeinput('I', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_CS2", encodeinput('9', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_D_2", encodeinput('O', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_DS2", encodeinput('0', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_E_2", encodeinput('P', 0, 0), 0, 0);
+	properties_append_int(notes, "CMD_NOTE_STOP", encodeinput('1', 0, 0), 0, 0);
+	for (p = notes->children; p != 0; p = p->next) {
+		properties_sethint(p, PROPERTY_HINT_INPUT);
+	}
+	workspace_makenoteinputs(self, notes);
+}
+
+void workspace_makedirectories(Workspace* self)
+{
+	Properties* directories;
+	Properties* p;
+
 	directories = properties_createsection(self->config, "directories");
 	properties_settext(directories, "Directories");
 	p = properties_append_string(directories, "plugindir",
@@ -178,16 +262,94 @@ void workspace_config(Workspace* self)
 		"C:\\Programme\\Psycle\\VstPlugins");
 	properties_settext(p, "VST directories");
 	p->item.hint = PROPERTY_HINT_EDITDIR;
-	// InputOutput
-	{		
-		self->inputoutput = properties_createsection(self->config, "inputoutput");
-		workspace_setdriverlist(self);
-		self->driverconfigure = properties_createsection(self->inputoutput, "configure");
-		properties_settext(self->driverconfigure, "Configure");		
-	}
-	// MIDIControllers
+}
+
+void workspace_makeinputoutput(Workspace* self)
+{		
+	self->inputoutput = properties_createsection(self->config, "inputoutput");
+	workspace_setdriverlist(self);
+	self->driverconfigure = properties_createsection(self->inputoutput, "configure");
+	properties_settext(self->driverconfigure, "Configure");		
+}
+
+void workspace_makemidicontrollers(Workspace* self)
+{
+	Properties* midicontrollers;
+		
 	midicontrollers = properties_createsection(self->config, "midicontrollers");
 	properties_settext(midicontrollers, "MIDI Controllers");
+}
+
+void workspace_makenoteinputs(Workspace* self, Properties* notes)
+{
+	Properties* p;
+
+	inputs_init(&self->noteinputs);
+	for (p = notes->children; p != 0; p = p->next) {
+		int cmd;
+		
+		cmd = cmdnote(properties_key(p));
+		if (cmd != -1) {
+			inputs_define(&self->noteinputs, properties_value(p), cmd);
+		}
+	}
+}
+
+int cmdnote(const char* key)
+{	
+	if (strcmp("CMD_NOTE_C_0", key) == 0) { return CMD_NOTE_C_0; } else
+	if (strcmp("CMD_NOTE_CS0", key) == 0) { return CMD_NOTE_CS0; } else
+	if (strcmp("CMD_NOTE_D_0", key) == 0) { return CMD_NOTE_D_0; } else
+	if (strcmp("CMD_NOTE_DS0", key) == 0) { return CMD_NOTE_DS0; } else
+	if (strcmp("CMD_NOTE_E_0", key) == 0) { return CMD_NOTE_E_0; } else
+	if (strcmp("CMD_NOTE_F_0", key) == 0) { return CMD_NOTE_F_0; } else
+	if (strcmp("CMD_NOTE_FS0", key) == 0) { return CMD_NOTE_FS0; } else
+	if (strcmp("CMD_NOTE_G_0", key) == 0) { return CMD_NOTE_G_0; } else
+	if (strcmp("CMD_NOTE_GS0", key) == 0) { return CMD_NOTE_GS0; } else
+	if (strcmp("CMD_NOTE_A_0", key) == 0) { return CMD_NOTE_A_0; } else
+	if (strcmp("CMD_NOTE_AS0", key) == 0) { return CMD_NOTE_AS0; } else
+	if (strcmp("CMD_NOTE_B_0", key) == 0) { return CMD_NOTE_B_0; } else
+	if (strcmp("CMD_NOTE_C_1", key) == 0) { return CMD_NOTE_C_1; } else
+	if (strcmp("CMD_NOTE_CS1", key) == 0) { return CMD_NOTE_CS1; } else
+	if (strcmp("CMD_NOTE_D_1", key) == 0) { return CMD_NOTE_D_1; } else
+	if (strcmp("CMD_NOTE_DS1", key) == 0) { return CMD_NOTE_DS1; } else
+	if (strcmp("CMD_NOTE_E_1", key) == 0) { return CMD_NOTE_E_1; } else
+	if (strcmp("CMD_NOTE_F_1", key) == 0) { return CMD_NOTE_F_1; } else
+	if (strcmp("CMD_NOTE_FS1", key) == 0) { return CMD_NOTE_FS1; } else
+	if (strcmp("CMD_NOTE_G_1", key) == 0) { return CMD_NOTE_G_1; } else
+	if (strcmp("CMD_NOTE_GS1", key) == 0) { return CMD_NOTE_GS1; } else
+	if (strcmp("CMD_NOTE_A_1", key) == 0) { return CMD_NOTE_A_1; } else
+	if (strcmp("CMD_NOTE_AS1", key) == 0) { return CMD_NOTE_AS1; } else
+	if (strcmp("CMD_NOTE_B_1", key) == 0) { return CMD_NOTE_B_1; } else
+	if (strcmp("CMD_NOTE_C_2", key) == 0) { return CMD_NOTE_C_2; } else
+	if (strcmp("CMD_NOTE_CS2", key) == 0) { return CMD_NOTE_CS2; } else
+	if (strcmp("CMD_NOTE_D_2", key) == 0) { return CMD_NOTE_D_2; } else
+	if (strcmp("CMD_NOTE_DS2", key) == 0) { return CMD_NOTE_DS2; } else
+	if (strcmp("CMD_NOTE_E_2", key) == 0) { return CMD_NOTE_E_2; } else
+	if (strcmp("CMD_NOTE_F_2", key) == 0) { return CMD_NOTE_F_2; } else
+	if (strcmp("CMD_NOTE_FS2", key) == 0) { return CMD_NOTE_FS2; } else
+	if (strcmp("CMD_NOTE_G_2", key) == 0) { return CMD_NOTE_G_2; } else
+	if (strcmp("CMD_NOTE_GS2", key) == 0) { return CMD_NOTE_GS2; } else
+	if (strcmp("CMD_NOTE_A_2", key) == 0) { return CMD_NOTE_A_2; } else
+	if (strcmp("CMD_NOTE_AS2", key) == 0) { return CMD_NOTE_AS2; } else
+	if (strcmp("CMD_NOTE_B_2", key) == 0) { return CMD_NOTE_B_2; } else
+	if (strcmp("CMD_NOTE_C_3", key) == 0) { return CMD_NOTE_C_3; } else
+	if (strcmp("CMD_NOTE_CS3", key) == 0) { return CMD_NOTE_CS3; } else
+	if (strcmp("CMD_NOTE_D_3", key) == 0) { return CMD_NOTE_D_3; } else
+	if (strcmp("CMD_NOTE_DS3", key) == 0) { return CMD_NOTE_DS3; } else
+	if (strcmp("CMD_NOTE_E_3", key) == 0) { return CMD_NOTE_E_3; } else
+	if (strcmp("CMD_NOTE_F_3", key) == 0) { return CMD_NOTE_F_3; } else
+	if (strcmp("CMD_NOTE_FS3", key) == 0) { return CMD_NOTE_FS3; } else
+	if (strcmp("CMD_NOTE_G_3", key) == 0) { return CMD_NOTE_G_3; } else
+	if (strcmp("CMD_NOTE_GS3", key) == 0) { return CMD_NOTE_GS3; } else
+	if (strcmp("CMD_NOTE_A_3", key) == 0) { return CMD_NOTE_A_3; } else
+	if (strcmp("CMD_NOTE_AS3", key) == 0) { return CMD_NOTE_AS3; } else
+	if (strcmp("CMD_NOTE_B_3", key) == 0) { return CMD_NOTE_B_3; } else
+	if (strcmp("CMD_NOTE_STOP", key) == 0) { return CMD_NOTE_STOP; } else
+	if (strcmp("CMD_NOTE_TWEAKM", key) == 0) { return  CMD_NOTE_TWEAKM; } else	
+	if (strcmp("CMD_NOTE_MIDICC", key) == 0) { return CMD_NOTE_MIDICC; } else
+	if (strcmp("CMD_NOTE_TweakS", key) == 0) { return  CMD_NOTE_TweakS; }
+	return -1;
 }
 
 void workspace_setdriverlist(Workspace* self)
@@ -216,7 +378,11 @@ void workspace_configchanged(Workspace* self, Properties* property, Properties* 
 	} else
 	if (strcmp(properties_key(property), "defaultfontsize") == 0) {
 		workspace_changedefaultfontsize(self, properties_value(property));
+	} else
+	if ((properties_hint(property) == PROPERTY_HINT_INPUT)) {		
+		workspace_configkeyboard(self);		
 	}
+	signal_emit(&self->signal_configchanged, self, 1, property);
 }
 
 int workspace_showsonginfoonload(Workspace* self)
@@ -288,7 +454,7 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	suspendwork();
 	workspace_removesong(self);
 	self->song = song;
-	player_stop(&self->player);	
+	player_stop(&self->player);
 	player_setsong(&self->player, self->song);
 	applysongproperties(self);
 	signal_emit(&self->signal_songchanged, self, 1, flag);
@@ -340,6 +506,7 @@ void workspace_load_configuration(Workspace* self)
 	properties_load(self->config, "psycle.ini");	
 	workspace_configaudio(self);
 	workspace_configvisual(self);
+	workspace_configkeyboard(self);
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -373,6 +540,35 @@ void workspace_redo(Workspace* self)
 	undoredo_redo(&self->undoredo);
 }
 
+void workspace_changedefaultfontsize(Workspace* self, int size)
+{
+	ui_fontinfo fontinfo;
+	ui_font font;
+
+	ui_fontinfo_init(&fontinfo, "Tahoma", size);
+	ui_font_init(&font, &fontinfo);
+	ui_replacedefaultfont(self->mainhandle, &font);
+	ui_invalidate(self->mainhandle);
+}
+
+Inputs* workspace_noteinputs(Workspace* self)
+{
+	return &self->noteinputs;
+}
+
+MachineCallback machinecallback(Workspace* self)
+{
+	MachineCallback rv;
+
+	rv.context = self;
+	rv.samples = machinecallback_samples;
+	rv.samplerate = machinecallback_samplerate;
+	rv.bpm = machinecallback_bpm;	
+	rv.machines = machinecallback_machines;
+	rv.instruments = machinecallback_instruments;
+	return rv;
+}
+
 Samples* machinecallback_samples(Workspace* self)
 {
 	return &self->song->samples;
@@ -393,13 +589,7 @@ Machines* machinecallback_machines(Workspace* self)
 	return self->song ? &self->song->machines : 0;
 }
 
-void workspace_changedefaultfontsize(Workspace* self, int size)
+Instruments* machinecallback_instruments(Workspace* self)
 {
-	ui_fontinfo fontinfo;
-	ui_font font;
-
-	ui_fontinfo_init(&fontinfo, "Tahoma", size);
-	ui_font_init(&font, &fontinfo);
-	ui_replacedefaultfont(self->mainhandle, &font);
-	ui_invalidate(self->mainhandle);
+	return self->song ? &self->song->instruments : 0;
 }

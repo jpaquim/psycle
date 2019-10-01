@@ -17,5 +17,6 @@ void list_free(List* list);
 List* list_append(List*, void* node);
 List* list_insert(List**, List* ptr, void* node);
 List* list_remove(List**, List* ptr);
+unsigned int list_size(List*);
 
 #endif
