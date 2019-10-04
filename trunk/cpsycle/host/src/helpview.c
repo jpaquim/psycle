@@ -23,7 +23,7 @@ void InitHelpView(HelpView* self, ui_component* parent,
 	ui_component_setposition(&self->tabbar.component, 450, 0, 160, 20);	
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "About");
-	tabbar_append(&self->tabbar, "Greetings");	
+	tabbar_append(&self->tabbar, "Greetings");
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	ui_notebook_setpage(&self->notebook, 0);
 	signal_connect(&self->component.signal_show, self, OnShow);

@@ -14,6 +14,7 @@
 #include "wavebox.h"
 #include "slidergroup.h"
 #include "tabbar.h"
+#include "notestab.h"
 #include "workspace.h"
 
 typedef struct {
@@ -35,12 +36,13 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
-	Sample* sample;	
+	Sample* sample;
+	NotesTabMode notestabmode;
 	SliderGroup defaultvolume;
 	SliderGroup globalvolume;
 	SliderGroup panposition;
 	SliderGroup samplednote; 
-	SliderGroup pitchfinetune;	
+	SliderGroup pitchfinetune;
 } SamplesGeneralView;
 
 typedef struct {
@@ -87,7 +89,7 @@ typedef struct {
 	SamplesWaveLoopView waveloop;
 	ui_button waveeditorbutton;
 	WaveBox wavebox;
-	Player* player;
+	Player* player;	
 } SamplesView;
 
 void InitSamplesView(SamplesView*, ui_component* parent,

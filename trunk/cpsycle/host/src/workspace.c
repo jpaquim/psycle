@@ -10,12 +10,16 @@ static void workspace_makeconfig(Workspace*);
 static void workspace_makegeneral(Workspace*);
 static void workspace_makenotes(Workspace*);
 static void workspace_makevisual(Workspace*);
+static void workspace_makepatternview(Workspace*, Properties*);
 static void workspace_makekeyboard(Workspace*);
 static void workspace_makedirectories(Workspace*);
 static void workspace_makenotes(Workspace*);
 static void workspace_makeinputoutput(Workspace*);
 static void workspace_makemidicontrollers(Workspace*);
 static void workspace_makenoteinputs(Workspace*, Properties* notes);
+static void workspace_makelang(Workspace*);
+static void workspace_makelangen(Workspace*);
+static void workspace_makelanges(Workspace*);
 static int cmdnote(const char* key);
 static void workspace_removesong(Workspace*);
 static void applysongproperties(Workspace*);
@@ -40,6 +44,7 @@ void workspace_init(Workspace* self)
 {	
 	self->octave = 4;
 	signal_init(&self->signal_octavechanged);
+	self->cursorstep = 1;	
 	self->inputoutput = 0;
 	workspace_makeconfig(self);
 	machinefactory_init(&self->machinefactory, machinecallback(self),
@@ -52,6 +57,7 @@ void workspace_init(Workspace* self)
 	undoredo_init(&self->undoredo);
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
+	signal_init(&self->signal_editpositionchanged);
 }
 
 void workspace_dispose(Workspace* self)
@@ -60,9 +66,11 @@ void workspace_dispose(Workspace* self)
 	song_dispose(self->song);
 	properties_free(self->config);
 	properties_free(self->properties);
+	properties_free(self->lang);
 	signal_dispose(&self->signal_octavechanged);
 	signal_dispose(&self->signal_songchanged);
 	signal_dispose(&self->signal_configchanged);
+	signal_dispose(&self->signal_editpositionchanged);
 	plugincatcher_dispose(&self->plugincatcher);
 	undoredo_dispose(&self->undoredo);
 }
@@ -159,12 +167,13 @@ void workspace_scanplugins(Workspace* self)
 
 void workspace_makeconfig(Workspace* self)
 {	
+	workspace_makelang(self);
 	workspace_makegeneral(self);
 	workspace_makevisual(self);	
 	workspace_makekeyboard(self);
 	workspace_makedirectories(self);
 	workspace_makeinputoutput(self);
-	workspace_makemidicontrollers(self);
+	workspace_makemidicontrollers(self);	
 }
 
 void workspace_makegeneral(Workspace* self)
@@ -190,11 +199,35 @@ void workspace_makevisual(Workspace* self)
 	Properties* p;
 	// Visual
 	visual = properties_createsection(self->config, "visual");	
-	properties_settext(visual, "Visual");	
+	properties_settext(visual, "Visual");
 	p = properties_append_int(visual, "defaultfontsize", 80, 0, 999);
 	properties_settext(p, "Default font size");
-	p = properties_append_bool(visual, "linenumbers", 1);
+	workspace_makepatternview(self, visual);
+}
+
+void workspace_makepatternview(Workspace* self, Properties* visual)
+{
+	Properties* patternview;
+	Properties* p;
+	
+	patternview = properties_createsection(visual, "patternview");
+	properties_settext(patternview, "Pattern View");
+	p = properties_append_bool(patternview, "drawemptydata", 0);
+	properties_settext(p, "Draw empty data");
+	p = properties_append_int(patternview, "fontsize", 80, 0, 999);
+	properties_settext(p, "Font Size");
+	p = properties_append_bool(patternview, "linenumbers", 1);
 	properties_settext(p, "Line numbers");
+	p = properties_append_bool(patternview, "linenumberscursor", 1);
+	properties_settext(p, "Line numbers cursor");
+	p = properties_append_bool(patternview, "linenumbersinhex", 1);
+	properties_settext(p, "Line numbers in HEX");
+	p = properties_append_bool(patternview, "centercursoronscreen", 0);
+	properties_settext(p, "Center cursor on screen");
+	p = properties_append_int(patternview, "beatsperbar", 4, 1, 16);
+	properties_settext(p, "Bar highlighting: (beats/bar)");
+	p = properties_append_bool(patternview, "notetab", 1);
+	properties_settext(p, "A4 is 440Hz (Otherwise it is 220Hz)");	
 }
 
 void workspace_makekeyboard(Workspace* self)
@@ -352,6 +385,40 @@ int cmdnote(const char* key)
 	return -1;
 }
 
+void workspace_makelang(Workspace* self)
+{
+	self->lang = properties_create();
+	workspace_makelangen(self);
+//	workspace_makelanges(self);
+}
+
+void workspace_makelangen(Workspace* self)
+{
+	properties_append_string(self->lang, "loadsong", "Load Song");
+	properties_append_string(self->lang, "newsong", "New Song");
+	properties_append_string(self->lang, "undo", "Undo");
+	properties_append_string(self->lang, "redo", "Redo");
+	properties_append_string(self->lang, "play", "Play");
+	properties_append_string(self->lang, "stop", "Stop");
+}
+
+void workspace_makelanges(Workspace* self)
+{
+	properties_write_string(self->lang, "loadsong", "Carga Song");
+	properties_write_string(self->lang, "newsong", "Nuevo Song");
+	properties_write_string(self->lang, "undo", "Deshacer");
+	properties_write_string(self->lang, "redo", "Rehacer");
+	properties_write_string(self->lang, "play", "Toca");
+	properties_write_string(self->lang, "stop", "Para");
+}
+
+const char* workspace_translate(Workspace* self, const char* key) {
+	char* rv;
+
+	properties_readstring(self->lang, key, &rv, key);
+	return rv;
+}
+
 void workspace_setdriverlist(Workspace* self)
 {
 	Properties* drivers;
@@ -386,31 +453,13 @@ void workspace_configchanged(Workspace* self, Properties* property, Properties* 
 }
 
 int workspace_showsonginfoonload(Workspace* self)
-{	
-	int rv = 1;
-	if (self->config) {
-		Properties* p;
-
-		p = properties_find(self->config, "general");
-		if (p && p->children) {			
-			properties_readbool(p, "showsonginfoonload", &rv, 1);
-		}
-	}
-	return rv;
+{				
+	return properties_bool(self->config, "general.showsonginfoonload", 1);
 }
 
 int workspace_showaboutatstart(Workspace* self)
 {	
-	int rv = 1;
-	if (self->config) {
-		Properties* p;
-
-		p = properties_find(self->config, "general");
-		if (p && p->children) {			
-			properties_readbool(p, "showaboutatstart", &rv, 1);
-		}
-	}
-	return rv;
+	return properties_bool(self->config, "general.showaboutatstart", 1);	
 }
 
 int workspace_showlinenumbers(Workspace* self)
@@ -421,7 +470,7 @@ int workspace_showlinenumbers(Workspace* self)
 
 		p = properties_find(self->config, "visual");
 		if (p && p->children) {			
-			properties_readbool(p, "linenumbers", &rv, 1);
+			rv = properties_bool(p, "linenumbers", 1);
 		}
 	}
 	return rv;
@@ -507,6 +556,7 @@ void workspace_load_configuration(Workspace* self)
 	workspace_configaudio(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
+	signal_emit(&self->signal_configchanged, self, 1,self->config);
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -554,6 +604,33 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 Inputs* workspace_noteinputs(Workspace* self)
 {
 	return &self->noteinputs;
+}
+
+void workspace_seteditposition(Workspace* self, EditPosition editposition)
+{
+	int line;
+	double offset;
+
+	offset = editposition.offset;
+	line = (int) (offset * player_lpb(&self->player));
+	self->editposition = editposition;
+	self->editposition.line = line;
+	signal_emit(&self->signal_editpositionchanged, self, 0);
+}
+
+EditPosition workspace_editposition(Workspace* self)
+{
+	return self->editposition;
+}
+
+void workspace_setcursorstep(Workspace* self, int step)
+{
+	self->cursorstep = step;
+}
+
+int workspace_cursorstep(Workspace* self)
+{
+	return self->cursorstep;
 }
 
 MachineCallback machinecallback(Workspace* self)

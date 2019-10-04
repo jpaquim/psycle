@@ -14,18 +14,18 @@ void InitFileBar(FileBar* self, ui_component* parent, Workspace* workspace)
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	ui_button_init(&self->newsongbutton, &self->component);
-	ui_button_settext(&self->newsongbutton, "New Song");	
+	ui_button_settext(&self->newsongbutton, workspace_translate(workspace, "newsong"));
 	signal_connect(&self->newsongbutton.signal_clicked, self, OnNewSong);
 	ui_button_init(&self->loadsongbutton, &self->component);
-	ui_button_settext(&self->loadsongbutton, "Load Song");	
+	ui_button_settext(&self->loadsongbutton, workspace_translate(workspace, "loadsong"));
 	signal_connect(&self->loadsongbutton.signal_clicked, self, OnLoadSong);	
-	{
-		List* children;
-		ui_margin margin = { 3, 10, 0, 3 };
-		
-		children = ui_component_children(&self->component, 0);
-		ui_components_setalign(children, UI_ALIGN_LEFT);
-		ui_components_setmargin(children, &margin);
+	{		
+		ui_margin margin = { 0, 3, 3, 0 };
+				
+		ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);		
 	}
 }
 

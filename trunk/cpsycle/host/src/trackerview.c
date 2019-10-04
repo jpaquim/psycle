@@ -22,29 +22,38 @@ static void Align(TrackerView*, ui_component* sender);
 static void OnScroll(TrackerGrid*, ui_component* sende, int cx, int cy);
 static void SetDefaultSkin(TrackerGrid*);
 static void OnMouseDown(TrackerGrid*, ui_component* sender, int x, int y, int button);
-static void ClipBlock(TrackerGrid*, ui_graphics* g, TrackerGridBlock* block);
-static void DrawDigit(TrackerGrid*, ui_graphics* g, int digit, int col, int x, int y);
+static void ClipBlock(TrackerGrid*, ui_graphics*, TrackerGridBlock* block);
+static void DrawDigit(TrackerGrid*, ui_graphics*, int digit, int col, int x, int y);
+static void HandlePatternEventInput(TrackerView*, unsigned int keycode);
+static void InputNote(TrackerView*, note_t note);
+static void InputDigit(TrackerView*, int value);
+static void EnterDigitColumn(PatternEvent*, int column, int value);
 static void EnterDigit(int digit, int newval, unsigned char* val);
+static int chartoint(char c);
+unsigned char NoteCmdToNote(TrackerView*, int cmd);
 static void OnLineNumbersDraw(TrackerLineNumbers*, ui_component* sender, ui_graphics* g);
 static void OnLineNumbersLabelDraw(TrackerLineNumbersLabel*, ui_component* sender, ui_graphics* g);
 static void InitDefaultSkin(TrackerView*);
-static void BlitSkinPart(TrackerHeader*, ui_graphics* g, int x, int y, SkinCoord* coord);
-static void LineNumbersDrawBackground(TrackerLineNumbers*, ui_graphics* g);
+static void BlitSkinPart(TrackerHeader*, ui_graphics*, int x, int y, SkinCoord*);
+static void LineNumbersDrawBackground(TrackerLineNumbers*, ui_graphics*);
 static void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel*, ui_component* sender);
-static void ShowLineNumbers(TrackerView* self, int showstate);
+static void ShowLineNumbers(TrackerView*, int showstate);
+static void ShowEmptyData(TrackerView*, int showstate);
 static void OnTimer(TrackerView*, ui_component* sender, int timerid);
 static int NumLines(TrackerView*);
 static void AdjustScrollranges(TrackerGrid*);
-static float Offset(TrackerGrid*, int y, unsigned int* lines, unsigned int* sublines, unsigned int* subline);
+static double Offset(TrackerGrid*, int y, unsigned int* lines, unsigned int* sublines, unsigned int* subline);
 static int TestCursor(TrackerGrid*, unsigned int track, double offset, unsigned int subline);
 static int TestRange(double position, double offset, double  width);
-static void OnSongTracksNumChanged(TrackerGrid*, Player* player,
+static void OnSongTracksNumChanged(TrackerGrid*, Player*,
 	unsigned int numsongtracks);
-static void SetClassicHeaderCoords(TrackerView* self);
-static void SetHeaderCoords(TrackerView* self);
+static void SetClassicHeaderCoords(TrackerView*);
+static void SetHeaderCoords(TrackerView*);
 static void OnConfigChanged(TrackerView*, Workspace*, Properties*);
-static PatternNode* FindNode(Pattern* pattern, unsigned int track,
-	float offset, unsigned int subline, float bpl, PatternNode** prev);
+static void ReadConfig(TrackerView* self);
+static PatternNode* FindNode(Pattern*, unsigned int track, beat_t offset,
+	unsigned int subline, float bpl, PatternNode** prev);
+
 static void InitTrackerInputs(TrackerView*);
 
 enum {
@@ -58,48 +67,13 @@ enum {
 	CMD_NAVBOTTOM,	///< end
 };
 
-
-char* notes_tab_a440[256] = {
-	"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
-	"C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","B-0", //1
-	"C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","B-1", //2
-	"C-2","C#2","D-2","D#2","E-2","F-2","F#2","G-2","G#2","A-2","A#2","B-2", //3
-	"C-3","C#3","D-3","D#3","E-3","F-3","F#3","G-3","G#3","A-3","A#3","B-3", //4
-	"C-4","C#4","D-4","D#4","E-4","F-4","F#4","G-4","G#4","A-4","A#4","B-4", //5
-	"C-5","C#5","D-5","D#5","E-5","F-5","F#5","G-5","G#5","A-5","A#5","B-5", //6
-	"C-6","C#6","D-6","D#6","E-6","F-6","F#6","G-6","G#6","A-6","A#6","B-6", //7
-	"C-7","C#7","D-7","D#7","E-7","F-7","F#7","G-7","G#7","A-7","A#7","B-7", //8
-	"C-8","C#8","D-8","D#8","E-8","F-8","F#8","G-8","G#8","A-8","A#8","B-8", //9
-	"off","twk","twf","mcm","tws","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-};
-char* notes_tab_a220[256] = {
-	"C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","B-0", //0
-	"C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","B-1", //1
-	"C-2","C#2","D-2","D#2","E-2","F-2","F#2","G-2","G#2","A-2","A#2","B-2", //2
-	"C-3","C#3","D-3","D#3","E-3","F-3","F#3","G-3","G#3","A-3","A#3","B-3", //3
-	"C-4","C#4","D-4","D#4","E-4","F-4","F#4","G-4","G#4","A-4","A#4","B-4", //4
-	"C-5","C#5","D-5","D#5","E-5","F-5","F#5","G-5","G#5","A-5","A#5","B-5", //5
-	"C-6","C#6","D-6","D#6","E-6","F-6","F#6","G-6","G#6","A-6","A#6","B-6", //6
-	"C-7","C#7","D-7","D#7","E-7","F-7","F#7","G-7","G#7","A-7","A#7","B-7", //7
-	"C-8","C#8","D-8","D#8","E-8","F-8","F#8","G-8","G#8","A-8","A#8","B-8", //8
-	"C-9","C#9","D-9","D#9","E-9","F-9","F#9","G-9","G#9","A-9","A#9","B-9", //9
-	"off","twk","twf","mcm","tws","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
-	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+enum {
+	TRACKER_COLUMN_NOTE	 = 0,
+	TRACKER_COLUMN_INST	 = 1,
+	TRACKER_COLUMN_MACH	 = 3,
+	TRACKER_COLUMN_CMD	 = 5,
+	TRACKER_COLUMN_PARAM = 7,
+	TRACKER_COLUMN_END	 = 9
 };
 
 /// Commands
@@ -108,19 +82,19 @@ typedef struct {
 	Command command;
 	TrackerCursor cursor;
 	Pattern* pattern;
-	float bpl;
+	double bpl;
 	PatternNode* node;	
 	PatternEvent event;
 	PatternEvent oldevent;
-	int write;
+	int insert;
 } InsertCommand;
 
 static void InsertCommandDispose(InsertCommand*);
 static void InsertCommandExecute(InsertCommand*);
 static void InsertCommandRevert(InsertCommand*);
 
-InsertCommand* InsertCommandAlloc(Pattern* pattern, float bpl, TrackerCursor cursor,
-	PatternEvent event)
+InsertCommand* InsertCommandAlloc(Pattern* pattern, double bpl,
+	TrackerCursor cursor, PatternEvent event)
 {
 	InsertCommand* rv;
 	
@@ -132,7 +106,7 @@ InsertCommand* InsertCommandAlloc(Pattern* pattern, float bpl, TrackerCursor cur
 	rv->bpl = bpl;
 	rv->event = event;
 	rv->node = 0;
-	rv->write = 0;
+	rv->insert = 0;
 	rv->pattern = pattern;	
 	return rv;
 }
@@ -140,41 +114,34 @@ InsertCommand* InsertCommandAlloc(Pattern* pattern, float bpl, TrackerCursor cur
 void InsertCommandDispose(InsertCommand* self) { }
 
 void InsertCommandExecute(InsertCommand* self)
-{	
+{		
 	PatternNode* prev;
-	PatternNode* node = 
+	self->node = 
 		FindNode(self->pattern,
 			self->cursor.track,
-			self->cursor.offset,
+			(beat_t)self->cursor.offset,
 			self->cursor.subline,
-			self->bpl, &prev);
-	if (node) {	
-		PatternEntry* entry;
-
-		entry = (PatternEntry*)(node->entry);
-		self->oldevent = entry->event;
-		entry->event = self->event;
-		self->node = node;
-		self->write = 1;
+			(beat_t)self->bpl, &prev);	
+	if (self->node) {
+		self->oldevent = pattern_event(self->pattern, self->node);
+		pattern_setevent(self->pattern, self->node, &self->event);
+		self->insert = 0;
 	} else {
 		self->node = pattern_insert(self->pattern,
 			prev,
 			self->cursor.track, 
-			self->cursor.offset,
+			(beat_t)self->cursor.offset,
 			&self->event);
-		self->write = 0;
+		self->insert = 1;
 	}
 }
 
 void InsertCommandRevert(InsertCommand* self)
 {		
-	if (self->write) {
-		PatternEntry* entry;
-
-		entry = (PatternEntry*)(self->node->entry);
-		entry->event = self->oldevent;		
-	} else {
+	if (self->insert) {
 		pattern_remove(self->pattern, self->node);
+	} else {
+		pattern_setevent(self->pattern, self->node, &self->oldevent);		
 	}
 }
 
@@ -198,12 +165,13 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	self->player = player;	
 	self->numtracks = player_numsongtracks(player);
 	self->lpb = self->player->lpb;
-	self->bpl = 1.0f / self->lpb;
-	self->notestab = notes_tab_a220;	
+	self->bpl = 1.0 / self->lpb;
+	self->notestabmode = NOTESTAB_DEFAULT;	
 	self->cursor.track = 0;
 	self->cursor.offset = 0;
 	self->cursor.subline = 0;
 	self->cursor.col = 0;
+	workspace_seteditposition(self->view->workspace, self->cursor);
 	self->cursorstep = 0.25;
 	self->dx = 0;
 	self->dy = 0;
@@ -214,9 +182,9 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	self->colx[0] = 0;
 	self->colx[1] = (self->textwidth*3)+2;
 	self->colx[2] = self->colx[1]+self->textwidth;
-	self->colx[3] = self->colx[2]+self->textwidth+1;
+	self->colx[3] = self->colx[2]+self->textwidth + 1;
 	self->colx[4] = self->colx[3]+self->textwidth;
-	self->colx[5] = self->colx[4]+self->textwidth+1;
+	self->colx[5] = self->colx[4]+self->textwidth + 1;
 	self->colx[6] = self->colx[5]+self->textwidth;
 	self->colx[7] = self->colx[6]+self->textwidth;
 	self->colx[8] = self->colx[7]+self->textwidth;
@@ -272,7 +240,7 @@ void OnDraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	TrackerGridBlock clip;
 	if (self->view->pattern) {
-		self->bpl = 1.0f / self->player->lpb;		
+		self->bpl = 1.0 / self->player->lpb;		
 		ui_setfont(g, &self->view->font);		
 		ClipBlock(self, g, &clip);
 		DrawBackground(self, g, &clip);
@@ -282,10 +250,10 @@ void OnDraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-float Offset(TrackerGrid* self, int y, unsigned int* lines,
+double Offset(TrackerGrid* self, int y, unsigned int* lines,
 	unsigned int* sublines, unsigned int* subline)
 {
-	float offset = 0;	
+	double offset = 0;	
 	int cpy = 0;		
 	int first = 1;
 	unsigned int count = y / self->lineheight;
@@ -388,12 +356,13 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 	int cpx = 0;	
 	int cpy;
 	double offset;
+	double threshold = 0.0001;	
 	int subline;	
-	PatternNode* prev;
+	int line = 0;	
 	
 	cpy = (clip->topleft.totallines - clip->topleft.subline) * self->lineheight + self->dy;	
 	offset = clip->topleft.offset;	
-	self->curr_event = pattern_greaterequal(self->view->pattern, (float)offset, &prev);
+	self->curr_event = pattern_greaterequal(self->view->pattern, (beat_t)offset);
 	subline = 0;	
 	while (offset <= clip->bottomright.offset && offset < self->view->pattern->length) {	
 		int beat;
@@ -401,7 +370,7 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 		int fill;
 		
 		beat = fabs(fmod(offset, 1.0f)) < 0.01f ;
-		beat4 = fabs(fmod(offset, 4.0f)) < 0.01f;		
+		beat4 = fabs(fmod(offset, 4.0f)) < 0.01f;
 		do {
 			fill = 0;
 			cpx = clip->topleft.track * self->trackwidth + self->dx;						
@@ -414,8 +383,11 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 						   ? 1 : 0;				
 				while (!fill && self->curr_event &&
 					((PatternEntry*)(self->curr_event->entry))->track <= track &&
-					((PatternEntry*)(self->curr_event->entry))->offset >= offset && 				
-					((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl) {					
+					((PatternEntry*)(self->curr_event->entry))->offset + 2* threshold >= offset &&
+					((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl - threshold) {
+					PatternEntry* entry;
+										
+					entry = (PatternEntry*)(self->curr_event->entry);					
 					if (((PatternEntry*)(self->curr_event->entry))->track == track) {
 						DrawPatternEvent(self, g, &((PatternEntry*)(self->curr_event->entry))->event, cpx, cpy, playbar, cursor, beat, beat4);
 						hasevent = 1;
@@ -439,14 +411,15 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 			// skip remaining tracks
 			while (self->curr_event &&
 				((PatternEntry*)(self->curr_event->entry))->track > 0 &&
-				((PatternEntry*)(self->curr_event->entry))->offset >= offset && 				
-				((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl) {					
+				((PatternEntry*)(self->curr_event->entry))->offset + 2* threshold >= offset && 
+				((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl - threshold) {
 				self->curr_event = self->curr_event->next;
 			}
 			cpy += self->lineheight;
+			++line;
 			subline++;
 		} while (self->curr_event &&
-			((PatternEntry*)(self->curr_event->entry))->offset < offset + self->bpl);
+			((PatternEntry*)(self->curr_event->entry))->offset + 2*threshold < offset + self->bpl);
 		offset += self->bpl;
 		subline = 0;
 	}
@@ -492,15 +465,20 @@ void SetColColor(TrackerSkin* skin, ui_graphics* g, int col, int playbar, int cu
 
 void DrawPatternEvent(TrackerGrid* self, ui_graphics* g, PatternEvent* event, int x, int y, int playbar, int cursor, int beat, int beat4)
 {					
-	ui_rectangle r;	
-	
+	ui_rectangle r;
+	static const char* emptynotestr = "- - -";
+	const char* notestr;
+		
 	SetColColor(&self->view->skin, g, 0, playbar, cursor && self->cursor.col == 0, beat, beat4);
-	ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->textheight);
-	ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r,
-	self->notestab[event->note],
-	strlen(self->notestab[event->note]));			
-	
-	{	// inst
+	{	// draw note
+		ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->textheight);
+		notestr = (event->note != 255 || !self->view->showemptydata) 
+			  ? notetostr(event->note, self->notestabmode)
+			  : emptynotestr;		
+		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, notestr,
+		strlen(notestr));	
+	}
+	{	// draw inst
 		int hi = (event->inst & 0xF0) >> 4;
 		int lo = event->inst & 0x0F;
 		if (event->inst == 0xFF) {
@@ -512,7 +490,7 @@ void DrawPatternEvent(TrackerGrid* self, ui_graphics* g, PatternEvent* event, in
 		SetColColor(&self->view->skin, g, 2, playbar, cursor && (self->cursor.col == 2), beat, beat4);
 		DrawDigit(self, g, lo, 2, x, y);
 	}
-	{	// mach
+	{	// draw mach
 		int hi = (event->mach & 0xF0) >> 4;
 		int lo = event->mach & 0x0F;
 		if (event->mach == 0xFF) {
@@ -524,7 +502,7 @@ void DrawPatternEvent(TrackerGrid* self, ui_graphics* g, PatternEvent* event, in
 		SetColColor(&self->view->skin, g, 4, playbar, cursor && (self->cursor.col == 4), beat, beat4);
 		DrawDigit(self, g, lo, 4, x, y);
 	}
-	{	// cmd
+	{	// draw cmd
 		int hi = (event->cmd & 0xF0) >> 4;
 		int lo = event->cmd & 0x0F;				
 		if (event->cmd == 0x00 && event->parameter == 0x00) {
@@ -536,7 +514,7 @@ void DrawPatternEvent(TrackerGrid* self, ui_graphics* g, PatternEvent* event, in
 		SetColColor(&self->view->skin, g, 6, playbar, cursor && (self->cursor.col == 6), beat, beat4);
 		DrawDigit(self, g, lo, 6, x, y);
 	}
-	{	// parameter
+	{	// draw parameter
 		int hi = (event->parameter & 0xF0) >> 4;
 		int lo = event->parameter & 0x0F;		
 		if (event->cmd == 0x00 && event->parameter == 0x00) {
@@ -558,7 +536,11 @@ void DrawDigit(TrackerGrid* self, ui_graphics* g, int digit, int col, int x, int
 	if (digit != -1) {
 		_snprintf(buffer, 2, "%X", digit);	
 	} else {
-		_snprintf(buffer, 2, "%s", "");	
+		if (self->view->showemptydata) {
+			_snprintf(buffer, 2, "%s", ".");
+		} else {
+			_snprintf(buffer, 2, "%s", "");	
+		}
 	}
 	ui_textoutrectangle(g, r.left + self->textleftedge, r.top,
 		ETO_OPAQUE | ETO_CLIPPED, r, buffer, strlen(buffer));	
@@ -585,30 +567,37 @@ void AdjustScrollranges(TrackerGrid* self)
 }
 
 
-unsigned int NumSublines(Pattern* pattern, float offset, float bpl)
+unsigned int NumSublines(Pattern* pattern, double offset, double bpl)
 {
-	PatternNode* prev;
-	PatternNode* node = pattern_greaterequal(pattern, offset, &prev);		
-	unsigned int currsubline = -1;
+	PatternNode* node = pattern_greaterequal(pattern, (beat_t)offset);	
+	unsigned int currsubline = 0;
+	int first = 1;
+
 	while (node) {
 		PatternEntry* entry = (PatternEntry*)(node->entry);
 		if (entry->offset >= offset + bpl) {			
 			break;
 		}				
-		if (entry->track == 0) {
-			++currsubline;					
+		if (entry->track == 0 && !first) {
+			++currsubline;			
 		}
 		node = node->next;
+		first = 0;
 	}
 	return currsubline;
 }
 
 PatternNode* FindNode(Pattern* pattern, unsigned int track, float offset, 
-	unsigned int subline, float bpl, PatternNode** prev)
+	unsigned int subline, beat_t bpl, PatternNode** prev)
 {
-	PatternNode* node = pattern_greaterequal(pattern, offset, prev);	
 	unsigned int currsubline = 0;
-	int first = 1;	
+	int first = 1;
+	PatternNode* node = pattern_greaterequal(pattern, offset);	
+	if (node) {
+		*prev = node->prev;
+	} else {
+		*prev = pattern_last(pattern);
+	}	
 	while (node) {
 		PatternEntry* entry = (PatternEntry*)(node->entry);
 		if (entry->offset >= offset + bpl) {			
@@ -643,12 +632,14 @@ void OnGridKeyDown(TrackerGrid* self, ui_component* sender, int keycode, int key
 
 void AdvanceCursor(TrackerView* self)
 {
-	if (self->grid.cursor.subline < NumSublines(self->pattern, self->grid.cursor.offset, self->grid.bpl)) {
+	if (self->grid.cursor.subline < 
+		NumSublines(self->pattern, self->grid.cursor.offset, self->grid.bpl)) {
 		++self->grid.cursor.subline;
 	} else {
-		self->grid.cursor.offset += self->grid.bpl;
+		self->grid.cursor.offset += self->cursorstep * self->grid.bpl;
 		self->grid.cursor.subline = 0;
 	}
+	workspace_seteditposition(self->workspace, self->grid.cursor);
 }
 
 void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata)
@@ -656,17 +647,19 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 	int cmd;
 
 	cmd = inputs_cmd(&self->inputs, encodeinput(keycode, 0, 0));
-			
+		
 	if (cmd == CMD_NAVUP) {
 		if (self->grid.cursor.subline > 0) {
 			--self->grid.cursor.subline;
 		} else {
 			self->grid.cursor.offset -= self->grid.bpl;
 		}
+		workspace_seteditposition(self->workspace, self->grid.cursor);
 		ui_invalidate(&self->component);
 	} else
 	if (cmd == CMD_NAVDOWN) {		
 		AdvanceCursor(self);
+		workspace_seteditposition(self->workspace, self->grid.cursor);
 		ui_invalidate(&self->component);
 	} else
 	if (cmd == CMD_NAVLEFT) {
@@ -676,6 +669,7 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 		} else {
 			--self->grid.cursor.col;
 		}
+		workspace_seteditposition(self->workspace, self->grid.cursor);
 		ui_invalidate(&self->component);
 	} else
 	if (cmd == CMD_NAVRIGHT) {
@@ -685,6 +679,7 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 		} else {
 			++self->grid.cursor.col;
 		}
+		workspace_seteditposition(self->workspace, self->grid.cursor);
 		ui_invalidate(&self->component);
 	} else
 	if (keycode == VK_TAB && GetKeyState (VK_SHIFT) < 0) {
@@ -693,145 +688,167 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 	} else
 	if (keycode == VK_TAB) {
 		self->grid.cursor.track += 1;
+		workspace_seteditposition(self->workspace, self->grid.cursor);
 		ui_invalidate(&self->component);		
 	} else
 	if (keycode == VK_DELETE) {
 		PatternNode* prev;
 		PatternNode* node = FindNode(self->pattern, self->grid.cursor.track,
-			self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
+			(beat_t)self->grid.cursor.offset, self->grid.cursor.subline, (beat_t)self->grid.bpl, &prev);
 		if (node) {
 			pattern_remove(self->pattern, node);
 			ui_invalidate(&self->component);
 		}
+
 	} else
-	if (keycode == VK_RETURN) {
+	if (keycode == VK_RETURN) {		
 		PatternNode* prev;
 		PatternNode* node = FindNode(self->pattern, 0,
-			self->grid.cursor.offset, self->grid.cursor.subline + 1, self->grid.bpl, &prev);		
+			(beat_t)self->grid.cursor.offset, self->grid.cursor.subline + 1, (beat_t)self->grid.bpl, &prev);		
 		if (prev && ((PatternEntry*)prev->entry)->offset >= self->grid.cursor.offset) {
 			PatternEvent ev = { 255, 255, 255, 0, 0 };
-			float offset;
+			double offset;
 			++self->grid.cursor.subline;
 			offset = self->grid.cursor.offset + self->grid.cursor.subline*self->grid.bpl/4;
-			pattern_insert(self->pattern, prev, 0, offset, &ev);			
+			pattern_insert(self->pattern, prev, 0, (beat_t)offset, &ev);			
 			AdjustScrollranges(&self->grid);
+			workspace_seteditposition(self->workspace, self->grid.cursor);
 			ui_invalidate(&self->component);			
-		}		
+		}	
 	} else {
-		if (self->grid.cursor.col == 0) {			
-			cmd = inputs_cmd(self->grid.noteinputs, encodeinput(keycode, 0, 0));
-			if (cmd != -1) {		
-				int base = workspace_octave(self->workspace) * 12;
-				PatternNode* prev;
-				PatternNode* node =
-					FindNode(self->pattern,
-						self->grid.cursor.track,
-						self->grid.cursor.offset,
-						self->grid.cursor.subline,
-						self->grid.bpl,
-						&prev);
-				if (node) {					
-					PatternEntry* entry = (PatternEntry*)(node->entry);
-					PatternEvent event = entry->event;
-
-					if (cmd == CMD_NOTE_STOP) {
-						event.note = 120;
-					} else {
-						event.note = (unsigned char)(base + cmd);					
-					}
-					undoredo_execute(&self->workspace->undoredo,
-						&InsertCommandAlloc(self->pattern, self->grid.bpl,
-							self->grid.cursor, event)->command);
-					ui_invalidate(&self->component);
-				} else {
-					Machine* machine;					
-					PatternEvent event = { 0, 255, 255, 0, 0 };
-
-					if (cmd == CMD_NOTE_STOP) {
-						event.note = 120;
-					} else {
-						event.note = (unsigned char)(base + cmd);
-					}
-					event.mach = machines_slot(&self->grid.player->song->machines);
-					machine = machines_at(&self->grid.player->song->machines, event.mach);
-					if (machine && machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
-						event.inst = self->grid.player->song->instruments.slot;
-					}					
-					undoredo_execute(&self->workspace->undoredo,
-						&InsertCommandAlloc(self->pattern, self->grid.bpl,
-							self->grid.cursor, event)->command);
-				}
-				AdvanceCursor(self);				
-			}		
-		} else {
-			int val = -1;
-			if (keycode >= '0' && keycode <='9') {
-				val = keycode - '0';
-			} else
-			if (keycode >= 'A' && keycode <='Z') {
-				val = keycode - 'A' + 10;
-			}
-			if (val != -1 && self->pattern) {
-				PatternNode* prev;				
-				PatternEvent event;
-				PatternNode* node = FindNode(self->pattern, self->grid.cursor.track, self->grid.cursor.offset, self->grid.cursor.subline, self->grid.bpl, &prev);
-				if (node) {		
-					PatternEntry* entry;
-
-					entry = (PatternEntry*)(node->entry);
-					event = entry->event;
-				} else {					
-					PatternEvent ev = { 255, 255, 255, 0, 0 };
-					event = ev;					
-				}								
-				switch (self->grid.cursor.col) {
-					case 1: 
-						if ((event.inst == 0xFF) && (val != 0x0F)) {
-							event.inst = 0;
-						}
-						EnterDigit(0, val, &event.inst);
-					break;
-					case 2:
-						if ((event.inst == 0xFF) && (val != 0x0F)) {
-							event.inst = 0;
-						}
-						EnterDigit(1, val, &event.inst);
-					break;
-					case 3:
-						if ((event.mach == 0xFF) && (val != 0x0F)) {
-							event.mach = 0;
-						}
-						EnterDigit(0, val, &event.mach);
-					break;
-					case 4:
-						if ((event.mach == 0xFF) && (val != 0x0F)) {
-							event.mach = 0;
-						}
-						EnterDigit(1, val, &event.mach);
-					break;
-					case 5:							
-						EnterDigit(0, val, &event.cmd);
-					break;
-					case 6:
-						EnterDigit(1, val, &event.cmd);
-					break;
-					case 7:
-						EnterDigit(0, val, &event.parameter);
-					break;
-					case 8:
-						EnterDigit(1, val, &event.parameter);
-					break;
-					default:
-					break;
-				}
-				undoredo_execute(&self->workspace->undoredo,
-						&InsertCommandAlloc(self->pattern, self->grid.bpl,
-							self->grid.cursor, event)->command);
-				ui_invalidate(&self->component);				
-			}
-		}		
+		HandlePatternEventInput(self, keycode);
 	}	
 	ui_component_propagateevent(sender);
+}
+
+void HandlePatternEventInput(TrackerView* self, unsigned int keycode)
+{
+	if (self->grid.cursor.col == TRACKER_COLUMN_NOTE) {
+		int cmd;
+
+		cmd = inputs_cmd(self->grid.noteinputs, encodeinput(keycode, 0, 0));
+		if (cmd != -1) {
+			InputNote(self, NoteCmdToNote(self, cmd));
+		}
+	} else {								
+		InputDigit(self, chartoint((char)keycode));			
+	}		
+}
+
+unsigned char NoteCmdToNote(TrackerView* self, int cmd)
+{
+	int rv = 255;	
+		
+	if (cmd == CMD_NOTE_STOP) {
+		rv = 120;
+	} else {
+		unsigned char base;
+
+		base = (unsigned char)workspace_octave(self->workspace) * 12;
+		rv = base + cmd;
+	}
+	return rv;
+}
+
+void InputNote(TrackerView* self, note_t note)
+{
+	Machine* machine;
+	PatternEvent event;
+				
+	patternevent_init(&event,
+		note,
+		255,
+		(unsigned char)machines_slot(&self->workspace->song->machines),
+		0,
+		0);
+	machine = machines_at(&self->workspace->song->machines, event.mach);
+	if (machine && 
+			machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
+		event.inst = self->workspace->song->instruments.slot;
+	}			
+	undoredo_execute(&self->workspace->undoredo,
+		&InsertCommandAlloc(self->pattern, self->grid.bpl,
+			self->grid.cursor, event)->command);				
+	AdvanceCursor(self);
+}
+
+void InputDigit(TrackerView* self, int value)
+{
+	if (self->pattern && value != -1) {
+		PatternNode* prev;	
+		PatternEvent event;
+				
+		PatternNode* node = FindNode(self->pattern,
+			self->grid.cursor.track,
+			(beat_t)self->grid.cursor.offset,
+			self->grid.cursor.subline,
+			(beat_t)self->grid.bpl,
+			&prev);						
+		event = pattern_event(self->pattern, node);						
+		EnterDigitColumn(&event, self->grid.cursor.col, value);				
+		undoredo_execute(&self->workspace->undoredo,
+				&InsertCommandAlloc(self->pattern, self->grid.bpl,
+					self->grid.cursor, event)->command);
+	}
+}
+
+int chartoint(char c) {
+	int rv = -1;
+
+	if (c >= '0' && c <='9') {
+		rv = c - '0';
+	} else
+	if (c >= 'A' && c <='Z') {
+		rv = c - 'A' + 10;
+	} else
+	if (c >= 'a' && c <='z') {
+		rv = c - 'a' + 10;
+	}
+	return rv;
+}
+
+void EnterDigitColumn(PatternEvent* event, int column, int value)
+{
+	switch (column) {
+		case 1: 
+			if ((event->inst == 0xFF) && (value != 0x0F)) {
+				event->inst = 0;
+			}
+			EnterDigit(0, value, &event->inst);
+		break;
+		case 2:
+			if ((event->inst == 0xFF) && (value != 0x0F)) {
+				event->inst = 0;
+			}
+			EnterDigit(1, value, &event->inst);
+		break;
+		case 3:
+			if ((event->mach == 0xFF) && (value != 0x0F)) {
+				event->mach = 0;
+			}
+			EnterDigit(0, value, &event->mach);
+		break;
+		case 4:
+			if ((event->mach == 0xFF) && (value != 0x0F)) {
+				event->mach = 0;
+			}
+			EnterDigit(1, value, &event->mach);
+		break;
+		case 5:							
+			EnterDigit(0, value, &event->cmd);
+		break;
+		case 6:
+			EnterDigit(1, value, &event->cmd);
+		break;
+		case 7:
+			EnterDigit(0, value, &event->parameter);
+		break;
+		case 8:
+			EnterDigit(1, value, &event->parameter);
+		break;
+		default:
+		break;
+	}
 }
 
 void EnterDigit(int digit, int newval, unsigned char* val)
@@ -878,6 +895,7 @@ void OnMouseDown(TrackerGrid* self, ui_component* sender, int x, int y, int butt
 			} else {
 				self->cursor.col = coloffset / self->textwidth - 2;
 			}
+			workspace_seteditposition(self->view->workspace, self->cursor);
 			ui_invalidate(&self->component);
 			ui_component_setfocus(&self->component);
 		}
@@ -888,6 +906,7 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 {		
 	self->workspace = workspace;
 	self->opcount = 0;
+	self->cursorstep = 1;
 	ui_component_init(&self->component, parent);
 	InitTrackerInputs(self);
 	self->pattern = 0;
@@ -905,14 +924,9 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->grid.header = &self->header;
 	self->grid.linenumbers = &self->linenumbers;	
 	self->header.skin = &self->skin;
-	self->linenumbers.lineheight = 13;	
-
-	properties_readbool(workspace->config, "linenumbers",
-		&self->showlinenumbers, 1);
-	if (self->showlinenumbers == 0) {		
-		ui_component_hide(&self->linenumbers.component);
-		ui_component_hide(&self->linenumberslabel.component);
-	}
+	self->linenumbers.lineheight = 13;
+	self->showlinenumbers = 1;
+	self->showemptydata = 0;
 	signal_connect(&self->component.signal_size, self, OnViewSize);
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
@@ -1057,7 +1071,7 @@ void OnLineNumbersDraw(TrackerLineNumbers* self, ui_component* sender, ui_graphi
 		char buffer[20];		
 		int cpy = self->dy;
 		int line;		
-		float offset;	
+		double offset;	
 		TrackerGridBlock clip;
 
 		size = ui_component_size(&self->component);
@@ -1147,8 +1161,7 @@ void OnTimer(TrackerView* self, ui_component* sender, int timerid)
 	if (self->grid.player->playing) {
 		ui_invalidate(&self->grid.component);
 	}
-	if (self->pattern && self->pattern->opcount != self->opcount)
-	{
+	if (self->pattern && self->pattern->opcount != self->opcount) {
 		ui_invalidate(&self->grid.component);
 		self->opcount = self->pattern->opcount;
 	}
@@ -1159,7 +1172,7 @@ int NumLines(TrackerView* self)
 	int lines = 0;
 	int sublines = 0;	
 	int remaininglines = 0;
-	float offset = 0;
+	double offset = 0;
 
 	if (!self->pattern) {
 		return 0;
@@ -1200,9 +1213,26 @@ int NumLines(TrackerView* self)
 
 void OnConfigChanged(TrackerView* self, Workspace* workspace, Properties* property)
 {
+	if (property == workspace->config) {
+		ReadConfig(self);
+	} else
 	if (strcmp(properties_key(property), "linenumbers") == 0) {
 		ShowLineNumbers(self, properties_value(property));
-	}	
+	} else
+	if (strcmp(properties_key(property), "drawemptydata") == 0) {
+		ShowEmptyData(self, properties_value(property));
+	}
+}
+
+void ReadConfig(TrackerView* self)
+{
+	Properties* pv;
+	
+	pv = properties_findsection(self->workspace->config, "visual.patternview");
+	if (pv) {		
+		ShowLineNumbers(self, properties_bool(pv, "linenumbers", 1));
+		ShowEmptyData(self, properties_bool(pv, "drawemptydata", 1));
+	}
 }
 
 void ShowLineNumbers(TrackerView* self, int showstate)
@@ -1219,6 +1249,12 @@ void ShowLineNumbers(TrackerView* self, int showstate)
 	ui_invalidate(&self->component);
 }
 
+void ShowEmptyData(TrackerView* self, int showstate)
+{
+	self->showemptydata = showstate;	
+	ui_invalidate(&self->component);
+}
+
 void InitTrackerInputs(TrackerView* self)
 {
 	inputs_init(&self->inputs);	
@@ -1231,4 +1267,3 @@ void InitTrackerInputs(TrackerView* self)
 	inputs_define(&self->inputs, encodeinput(VK_HOME, 0, 0), CMD_NAVTOP);
 	inputs_define(&self->inputs, encodeinput(VK_END, 0, 0), CMD_NAVBOTTOM);
 }
-

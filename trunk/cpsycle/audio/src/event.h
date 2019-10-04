@@ -1,7 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #if !defined(PATTERNEVENT_H)
 #define PATTERNEVENT_H
+
+typedef float beat_t;
 
 typedef	enum {
 	EXTENDED	=		0xFE, // (see below)
@@ -56,12 +59,12 @@ typedef struct {
 } PatternEvent;
 
 
-void pattern_setevent(PatternEvent* self,
+void patternevent_init(PatternEvent*,
 	unsigned char note,
 	unsigned char inst,
 	unsigned char mach,
 	unsigned char cmd,
 	unsigned char parameter);
-
+void patternevent_clear(PatternEvent*);
 
 #endif

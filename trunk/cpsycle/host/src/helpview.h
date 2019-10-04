@@ -15,7 +15,7 @@ typedef struct {
 	ui_notebook notebook;
 	TabBar tabbar;
 	About about;
-	Greet greet;
+	Greet greet;	
 } HelpView;
 
 void InitHelpView(HelpView*, ui_component* parent,

@@ -8,8 +8,9 @@ extern IntHashTable selfmap;
 extern IntHashTable winidmap;
 extern int winid;
 
-static void OnCommand(ui_edit* self, WPARAM wParam, LPARAM lParam);
-static void OnDestroy(ui_edit* self, ui_component* sender);
+static void oncommand(ui_edit*, ui_component* sender, WPARAM wParam, LPARAM lParam);
+static void ondestroy(ui_edit*, ui_component* sender);
+static void onpreferredsize(ui_edit*, ui_component* sender, ui_size* limit, int* width, int* height);
 
 void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 {  
@@ -27,26 +28,33 @@ void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 	InsertIntHashTable(&selfmap, (int)edit->component.hwnd, &edit->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &edit->component);
 	winid++;	
-	edit->component.events.target = edit;
-	edit->component.events.cmdtarget = edit;
-	edit->component.events.command = OnCommand;
-	signal_connect(&edit->component.signal_destroy, edit,  OnDestroy);
+	signal_connect(&edit->component.signal_command, edit, oncommand);
+	signal_connect(&edit->component.signal_destroy, edit, ondestroy);
 	ui_component_init_base(&edit->component);
+	signal_disconnectall(&edit->component.signal_preferredsize);
+	signal_connect(&edit->component.signal_preferredsize, edit, onpreferredsize);
+	edit->charnumber = 0;
+	edit->linenumber = 1;
 }
 
-void OnDestroy(ui_edit* self, ui_component* sender)
+void ondestroy(ui_edit* self, ui_component* sender)
 {
 	signal_dispose(&self->signal_change);
-}
-
-void ui_edit_connect(ui_edit* edit, void* target)
-{
-	edit->component.events.target = target;
 }
 
 void ui_edit_settext(ui_edit* edit, const char* text)
 {
 	SetWindowText(edit->component.hwnd, text);
+}
+
+void ui_edit_setcharnumber(ui_edit* self, int number)
+{
+	self->charnumber = number;
+}
+
+void ui_edit_setlinenumber(ui_edit* self, int number)
+{
+	self->linenumber = number;
 }
 
 const char* ui_edit_text(ui_edit* edit)
@@ -56,7 +64,7 @@ const char* ui_edit_text(ui_edit* edit)
 	return buf;
 }
 
-void OnCommand(ui_edit* self, WPARAM wParam, LPARAM lParam) {
+void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam, LPARAM lParam) {
 	switch(HIWORD(wParam))
     {
         case EN_CHANGE:
@@ -69,4 +77,23 @@ void OnCommand(ui_edit* self, WPARAM wParam, LPARAM lParam) {
 		default:
 		break;
     }
+}
+
+void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit, int* width, int* height)
+{			
+	ui_size size;
+	char text[256];
+	TEXTMETRIC tm;
+	
+	tm = ui_component_textmetric(&self->component);
+	GetWindowText(self->component.hwnd, text, 256);
+	size = ui_component_textsize(&self->component, text);	
+	
+	if (self->charnumber == 0) {
+		*width = size.width + 2;		
+		*height = (int)(tm.tmHeight * self->linenumber * 1.5);
+	} else {				
+		*width = tm.tmAveCharWidth * self->charnumber + 2;
+		*height = (int)(tm.tmHeight * self->linenumber * 1.5);
+	}	
 }

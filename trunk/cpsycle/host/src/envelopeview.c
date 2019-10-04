@@ -48,11 +48,10 @@ void adsrpointmapper_updatesettings(ADSRPointMapper* self)
 }
 
 void InitEnvelopeView(EnvelopeView* self, ui_component* parent)
-{			
-	ui_setmargin(&self->spacing, 5, 5, 5, 5);
-
+{				
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_margin_init(&self->spacing, 5, 5, 5, 5);
 	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);

@@ -13,14 +13,15 @@
 
 static void Create(MainFrame*);
 static void InitMenu(MainFrame*);
+static void InitStatusBar(MainFrame*);
 static void InitBars(MainFrame*);
 static void InitVuBar(MainFrame*);
+static void SetStatusBarText(MainFrame*, const char* text);
+static const char* StatusBarIdleText(MainFrame* self);
 static void Destroy(MainFrame*, ui_component* component);
 static void OnKeyDown(MainFrame*, ui_component* component, int keycode, int keydata);
 static void OnTimer(MainFrame*, ui_component* sender, int timerid);
 static void OnSequenceSelChange(MainFrame* , SequenceEntry* entry);
-static void OnPlay(MainFrame*, ui_component* sender);
-static void OnStop(MainFrame*, ui_component* sender);
 static void OnAlign(MainFrame*, ui_component* sender);
 static void OnMouseDown(MainFrame*, ui_component* sender, int x, int y, int button);
 static void OnMouseMove(MainFrame*, ui_component* sender, int x, int y, int button);
@@ -48,8 +49,7 @@ enum {
 };
 
 void InitMainFrame(MainFrame* self)
-{	
-	int statuswidths[] = { 100, 200, -1 };	
+{			
 	ui_margin tabbardividemargin = { 0, 30, 0, 0};
 
 	ui_frame_init(&self->component, 0);			
@@ -71,7 +71,7 @@ void InitMainFrame(MainFrame* self)
 	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	signal_connect(&self->component.signal_align, self, OnAlign);
-	ui_component_init(&self->tabbars, &self->component);
+	ui_component_init(&self->tabbars, &self->component);	
 	ui_component_setbackgroundmode(&self->tabbars, BACKGROUND_SET);
 	InitTabBar(&self->tabbar, &self->tabbars);	
 	ui_component_resize(&self->tabbar.component,
@@ -106,18 +106,12 @@ void InitMainFrame(MainFrame* self)
 		&self->workspace);	
 	signal_connect(&self->helpview.about.okbutton.signal_clicked, self, OnAboutOk);	
 	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);	
-	InitGear(&self->gear, &self->component, &self->workspace);	
-	ui_component_resize(&self->gear.component, 300, 200);
+	InitGear(&self->gear, &self->component, &self->workspace);
 	ui_component_hide(&self->gear.component);
 	signal_connect(&self->machinebar.gear.signal_clicked, self, OnGear);	
 	signal_connect(&self->gear.buttons.createreplace.signal_clicked, self, OnGearCreate);	
 		
-	ui_statusbar_init(&self->statusbar, &self->component);
-	ui_statusbar_setfields(&self->statusbar, 3, statuswidths);
-	ui_statusbar_settext(&self->statusbar, 0, "");
-	ui_statusbar_settext(&self->statusbar, 1, "");
-	ui_statusbar_settext(&self->statusbar, 2, "");
-
+	InitStatusBar(self);
 	signal_connect(&self->splitbar.signal_mousedown, self, OnMouseDown);	
 	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
 	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);
@@ -128,9 +122,48 @@ void InitMainFrame(MainFrame* self)
 		Properties* title;
 		title = properties_find(self->workspace.song->properties, "title");
 		if (title) {						
-			ui_statusbar_settext(&self->statusbar, 0, title->item.value.s);
+			SetStatusBarText(self, properties_valuestring(title));
 		}
 	}
+	SetStatusBarText(self, StatusBarIdleText(self));
+	signal_emit(&self->workspace.signal_configchanged, &self->workspace, 1,
+		self->workspace.config);
+}
+
+void SetStatusBarText(MainFrame* self, const char* text)
+{	
+	ui_label_settext(&self->statusbarlabel, text ? text : "");
+}
+
+const char* StatusBarIdleText(MainFrame* self)
+{
+	const char* rv;
+
+	if (self->workspace.song->properties) {
+		Properties* title;
+		title = properties_find(self->workspace.song->properties, "title");
+		if (title) {						
+			rv = properties_valuestring(title);
+		}
+	}
+	return rv;
+}
+
+void InitStatusBar(MainFrame* self)
+{	
+	ui_component_init(&self->statusbar, &self->component);
+	ui_component_setbackgroundmode(&self->statusbar, BACKGROUND_SET);
+	ui_component_enablealign(&self->statusbar);
+	{ // statusbar label
+		ui_margin margin = { 2, 0, 2, 0 };
+		ui_label_init(&self->statusbarlabel, &self->statusbar);
+		ui_label_settext(&self->statusbarlabel, "Ready");
+		ui_label_setcharnumber(&self->statusbarlabel, 31);
+		ui_component_setmargin(&self->statusbarlabel.component, &margin);
+		ui_component_setalign(&self->statusbarlabel.component, UI_ALIGN_LEFT);
+	}
+	InitPatternViewBar(&self->patternbar, &self->statusbar, &self->workspace);	
+	ui_component_setalign(&self->patternbar.component, UI_ALIGN_LEFT);	
 }
 
 void InitBars(MainFrame* self)
@@ -156,14 +189,18 @@ void InitBars(MainFrame* self)
 	ui_component_setalign(&self->toprow2, UI_ALIGN_TOP);	
 	// add bars to rows
 	// row0
-	InitFileBar(&self->filebar, &self->toprow0, &self->workspace);
-	ui_component_setalign(&self->filebar.component, UI_ALIGN_LEFT);
-	InitUndoRedoBar(&self->undoredobar, &self->toprow0, &self->workspace);
-	ui_component_setalign(&self->undoredobar.component, UI_ALIGN_LEFT);
-	InitPlayBar(&self->playbar, &self->toprow0);
-	ui_component_setalign(&self->playbar.component, UI_ALIGN_LEFT);	
-	signal_connect(&self->playbar.signal_play, self, OnPlay);
-	signal_connect(&self->playbar.signal_stop, self, OnStop);
+	InitFileBar(&self->filebar, &self->toprow0, &self->workspace);	
+	InitUndoRedoBar(&self->undoredobar, &self->toprow0, &self->workspace);	
+	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
+	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);		
+	{
+		ui_margin margin = { 0, 30, 0, 0 };
+
+		ui_components_setalign(ui_component_children(&self->toprow0, 0),
+			UI_ALIGN_LEFT, &margin);
+		margin.right = 0;
+		ui_component_setmargin(&self->playposbar.component, &margin);
+	}
 	// row1
 	// Songbar	
 	InitSongBar(&self->songbar, &self->toprow1, &self->workspace);
@@ -184,13 +221,13 @@ void InitBars(MainFrame* self)
 void InitVuBar(MainFrame* self)
 {
 	ui_component_init(&self->vubar, &self->component);
-	ui_component_setbackgroundmode(&self->vubar, BACKGROUND_SET);
+	ui_component_setbackgroundmode(&self->vubar, BACKGROUND_SET);	
 	InitVumeter(&self->vumeter, &self->vubar, &self->workspace);
-	ui_component_setposition(&self->vumeter.component, 0, 0, 200, 20);	
+	ui_component_setposition(&self->vumeter.component, 0, 00, 200, 20);	
 	InitVolSlider(&self->volslider, &self->vubar, &self->workspace);
 	ui_component_setposition(&self->volslider.component, 0, 20, 200, 20);	
 	InitClipBox(&self->clipbox, &self->vubar, &self->workspace);
-	ui_component_setposition(&self->clipbox.component, 205, 5, 10, 35);
+	ui_component_setposition(&self->clipbox.component, 205, 25, 10, 35);	
 }
 
 void SetStartPage(MainFrame* self)
@@ -223,20 +260,15 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	ui_size sequenceviewsize;
 	ui_size gearsize;
 	ui_size vusize;
-	int tmp;
-	int splitbarwidth = 4;
-	int toolbarheight;	
+	ui_size topsize;	
 	ui_size limit;
+	int splitbarwidth = 4;	
 	
 	size = ui_component_size(&self->component);
-	statusbarsize = ui_component_size(&self->statusbar.component);
-	limit.width = size.width;
-	limit.height = size.height;
-	signal_emit(&self->tabbar.component.signal_preferredsize, &self->tabbar,
-		3, &limit, &tabbarsize.width, &tabbarsize.height);					 	
+	statusbarsize = ui_component_preferredsize(&self->statusbar, &size);
+	tabbarsize = ui_component_preferredsize(&self->tabbar.component, &size);	
 	sequenceviewsize = ui_component_size(&self->sequenceview.component);
-	vusize = ui_component_size(&self->vubar);
-	
+	vusize = ui_component_size(&self->vubar);	
 	if (self->gear.component.visible) {
 		gearsize = ui_component_size(&self->gear.component);		
 	} else {
@@ -244,46 +276,50 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	}		
 	limit.width = size.width - vusize.width;
 	limit.height = size.height;
-	signal_emit(&self->top.signal_preferredsize, &self->top, 3, &limit, &tmp,
-		&toolbarheight);		
+	topsize = ui_component_preferredsize(&self->top, &limit);	
 	ui_component_setposition(&self->top, 0, 0, size.width - vusize.width,
-		toolbarheight);
+		topsize.height);
 	ui_component_setposition(&self->vubar, 
 		size.width - vusize.width,
 		0,
 		vusize.width,
-		toolbarheight);
+		topsize.height);
 	ui_component_setposition(&self->tabbars,
 		sequenceviewsize.width + splitbarwidth,
-		toolbarheight,
+		topsize.height,
 		size.width - sequenceviewsize.width - splitbarwidth,
 		tabbarsize.height);
 	ui_component_resize(&self->tabbar.component, tabbarsize.width, tabbarsize.height);		
 	ui_component_setposition(&self->splitbar,
 		sequenceviewsize.width,
-		toolbarheight, splitbarwidth,
-		size.height - statusbarsize.height - toolbarheight);
+		topsize.height, splitbarwidth,
+		size.height - statusbarsize.height - topsize.height);
 	ui_component_setposition(&self->sequenceview.component,
 		0,
-		toolbarheight,
+		topsize.height,
 		sequenceviewsize.width,
-		size.height - statusbarsize.height - toolbarheight);	
+		size.height - statusbarsize.height - topsize.height);	
 	ui_component_setposition(&self->notebook.component,
 		sequenceviewsize.width + splitbarwidth,
-		toolbarheight + tabbarsize.height,
+		topsize.height + tabbarsize.height,
 		size.width - sequenceviewsize.width - 3 - gearsize.width,
-		size.height - statusbarsize.height - toolbarheight - tabbarsize.height);
-	ui_component_resize(&self->statusbar.component, 0, 0);
+		size.height - statusbarsize.height - topsize.height - tabbarsize.height);
+	ui_component_setposition(&self->statusbar,
+		0,
+		size.height - statusbarsize.height,		
+		size.width,
+		statusbarsize.height);
 	if (ui_component_visible(&self->gear.component)) {
-		ui_component_move(&self->gear.component,
-			size.width - gearsize.width, toolbarheight + tabbarsize.height);
-		ui_component_resize(&self->gear.component, gearsize.width,
-			size.height - statusbarsize.height - toolbarheight - tabbarsize.height);
+		ui_component_setposition(&self->gear.component,
+			size.width - gearsize.width,
+			topsize.height + tabbarsize.height,
+			gearsize.width,
+			size.height - statusbarsize.height - topsize.height - tabbarsize.height);
 	}
 	if (self->firstshow) {
 		machineview_align(&self->machineview);
 		self->firstshow = 0;
-	}
+	}	
 }
 
 void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata)
@@ -330,15 +366,36 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 
 void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 {
-	char buffer[20];
+	/*char buffer[20];	
 
-	_snprintf(buffer, 20, "%.4f", player_position(self->patternview.trackerview.grid.player)); 
+	ui_statusbar_settext(&self->statusbar, 0, "A Song");
+	_snprintf(buffer, 20, "%.4f", 
+		player_position(self->patternview.trackerview.grid.player)); 
 	ui_statusbar_settext(&self->statusbar, 1, buffer);	
-}
+	{
+		SequencePosition p;
+		SequenceEntry* entry;
 
-void OnPlay(MainFrame* self, ui_component* sender)
-{	
-	player_start(&self->workspace.player);		
+		p = sequence_editposition(&self->workspace.song->sequence);
+		entry = sequenceposition_entry(&p);
+		if (entry) {
+			_snprintf(buffer, 20, "Pat %.2d", entry->pattern); 
+			ui_statusbar_settext(&self->statusbar, 2, buffer);
+		}
+	}
+	{
+		_snprintf(buffer, 20, "Oct %d", workspace_octave(&self->workspace)); 
+		ui_statusbar_settext(&self->statusbar, 3, buffer);
+	}
+	{
+		int line;
+		double offset;
+
+		offset = workspace_editposition(&self->workspace).offset;
+		line = (int) (offset * player_lpb(&self->workspace.player));
+		_snprintf(buffer, 20, "Line %d  %.2f bts", line, offset); 
+		ui_statusbar_settext(&self->statusbar, 4, buffer);
+	}*/
 }
 
 void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
@@ -353,16 +410,11 @@ void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
 			if (title) {
 				char* titlestr = 0;
 				properties_readstring(title, "title", &titlestr, "Untitled");
-				ui_statusbar_settext(&self->statusbar, 0, titlestr);
+				SetStatusBarText(self, titlestr);				
 			}
 		}
 	}	 
 	ui_invalidate(&self->component);	
-}
-
-void OnStop(MainFrame* self, ui_component* sender)
-{
-	player_stop(&self->workspace.player);		
 }
 
 void OnMouseDown(MainFrame* self, ui_component* sender, int x, int y, int button)
@@ -402,8 +454,7 @@ void OnMouseUp(MainFrame* self, ui_component* sender, int x, int y, int button)
 	ScreenToClient(GetParent(sender->hwnd), &pt);
 	ui_component_resize(&self->sequenceview.component,
 		pt.x, ui_component_size(&self->sequenceview.component).height);	
-	ui_component_align(&self->component);
-	ui_invalidate(&self->tabbar.component);
+	ui_component_align(&self->component);	
 }
 
 void OnMouseEnterSplitBar(MainFrame* self, ui_component* sender)
@@ -422,16 +473,18 @@ void OnGear(MainFrame* self, ui_component* sender)
 {
 	if (ui_component_visible(&self->gear.component)) {
 		ui_component_hide(&self->gear.component);
-		ui_component_align(&self->component);		
+		ui_component_align(&self->component);
 	} else {						
-		ui_size size;
+		ui_component_show(&self->gear.component);
+		ui_component_align(&self->component);
+		/*ui_size size;
 		ui_size gearsize;
 
 		size = ui_component_size(&self->component);
 		gearsize = ui_component_size(&self->gear.component);
 		ui_component_move(&self->gear.component, size.width - gearsize.width, gearsize.height);
 		ui_component_show(&self->gear.component);
-		ui_component_align(&self->component);
+		ui_component_align(&self->component);*/
 	}	
 	
 }
@@ -457,3 +510,4 @@ void OnUpdateDriver(MainFrame* self, ui_component* sender)
 {
 	workspace_updatedriver(&self->workspace);
 }
+

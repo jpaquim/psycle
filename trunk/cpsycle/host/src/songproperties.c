@@ -3,10 +3,11 @@
 
 #include "songproperties.h"
 
-static int Align(SongProperties* self, ui_component* child);
-static void ReadProperties(SongProperties* self, Song* song);
-static void WriteProperties(SongProperties* self, Song* song);
+static void ReadProperties(SongProperties*, Song*);
+static void WriteProperties(SongProperties*, Song*);
 static void OnSongChanged(SongProperties* self, Workspace* sender);
+static void OnSize(SongProperties*, ui_component* sender, int width, int height);
+static void songproperties_initalign(SongProperties*);
 
 void InitSongProperties(SongProperties* self, ui_component* parent, Workspace* workspace)
 {		
@@ -16,22 +17,32 @@ void InitSongProperties(SongProperties* self, ui_component* parent, Workspace* w
 	properties_append_string(self->song->properties, "credits", "the credits");
 	properties_append_string(self->song->properties, "comments", "the comments");
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
-	ui_component_enablealign(&self->component);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);		
 	ui_label_init(&self->label_title, &self->component);
 	ui_label_settext(&self->label_title, "Song Title");		
-	ui_edit_init(&self->edit_title, &self->component, 0);	
+	ui_edit_init(&self->edit_title, &self->component, ES_READONLY);	
 	ui_label_init(&self->label_credits, &self->component);
 	ui_label_settext(&self->label_credits, "Credits");	
-	ui_edit_init(&self->edit_credits, &self->component, 0);
+	ui_edit_init(&self->edit_credits, &self->component, ES_READONLY);
 	ui_label_init(&self->label_comments, &self->component);
 	ui_label_settext(&self->label_comments, "Comments");	
 	ui_edit_init(&self->edit_comments, &self->component,
-		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL);
-	ui_component_enumerate_children(&self->component, self, Align);
+		WS_VSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL);
 	ui_component_resize(&self->edit_comments.component, 0, 200);
 	ReadProperties(self, self->song);	
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	songproperties_initalign(self);
+}
+
+void songproperties_initalign(SongProperties* self)
+{
+	ui_margin margin = { 0, 0, 0, 0 };
+
+	ui_component_enablealign(&self->component);
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_components_setalign(ui_component_children(&self->component, 0),
+		UI_ALIGN_TOP, &margin);
+	ui_component_setalign(&self->edit_comments.component, UI_ALIGN_CLIENT);
 }
 
 void ReadProperties(SongProperties* self, Song* song)
@@ -44,16 +55,6 @@ void ReadProperties(SongProperties* self, Song* song)
 void WriteProperties(SongProperties* self, Song* song)
 {
 	properties_write_string(song->properties, "title", ui_edit_text(&self->edit_title));
-}
-
-int Align(SongProperties* self, ui_component* child)
-{	
-	ui_margin margin = { 3, 3, 0, 3 };
-
-	ui_component_setalign(child, UI_ALIGN_TOP);
-	ui_component_resize(child, 0, 20);
-	ui_component_setmargin(child, &margin);
-	return 1;
 }
 
 void OnSongChanged(SongProperties* self, Workspace* workspace)

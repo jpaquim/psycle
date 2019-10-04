@@ -4,10 +4,27 @@
 #include "mainframe.h"
 #include <ui_app.h>
 #include <dir.h>
+#include <stdio.h>
 
 
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
+
+void precision(void)
+{
+	int line;
+	double bpl;
+	double offset;
+	double ctrl;
+
+	bpl = 1.0 / 9;
+	offset = 0;
+	for (line = 0; line < 10; ++line) {
+		ctrl = line * bpl;
+		offset += bpl;		
+	}
+
+}
 
 UIMAIN
 {    	
@@ -20,7 +37,8 @@ UIMAIN
 	if (env) {			
 		insertpathenv(workdir(workpath));
 	}
-	UIINIT;	
+	UIINIT;		
+	precision();
 	InitMainFrame(&main);	
 	ui_component_show_state(&main.component, iCmdShow);		 	 
 	err = ui_run();	

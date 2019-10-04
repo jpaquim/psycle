@@ -1,93 +1,42 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "playbar.h"
-#include <string.h>
 
-static void OnDraw(PlayBar* self, ui_component* sender, ui_graphics* g);
-static void OnSize(PlayBar* self, ui_component* sender, int width, int height);
-static void OnDestroy(PlayBar* self, ui_component* component);
-static void OnMouseDown(PlayBar* self, ui_component* sender, int x, int y, int button);
+void playbar_initalign(PlayBar*);
+static void onplayclicked(PlayBar*, ui_component* sender);
+static void onstopclicked(PlayBar*, ui_component* sender);
 
-void InitPlayBar(PlayBar* self, ui_component* parent)
+void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
 {			
+	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);	
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_resize(&self->component, 100, 20);
-	signal_init(&self->signal_play);
-	signal_init(&self->signal_stop);
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	self->tabs = 0;
-	self->selected = -1;
-	playbar_append(self, "Play");
-	playbar_append(self, "Stop");
+	ui_button_init(&self->play, &self->component);
+	ui_button_settext(&self->play, workspace_translate(workspace, "play"));
+	signal_connect(&self->play.signal_clicked, self, onplayclicked);
+	ui_button_init(&self->stop, &self->component);
+	ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
+	signal_connect(&self->stop.signal_clicked, self, onstopclicked);
+	playbar_initalign(self);
 }
 
-void OnDestroy(PlayBar* self, ui_component* component)
-{	
-	List* ptr;
-	List* next;
-	
-	ptr = self->tabs;
-	while (ptr) {
-		next = ptr->next;
-		free(ptr->entry);
-		ptr = next;
-	}
-	list_free(self->tabs);
-	signal_dispose(&self->signal_play);
-	signal_dispose(&self->signal_stop);
-}
-
-void OnDraw(PlayBar* self, ui_component* sender, ui_graphics* g)
-{	
-	List* ptr;
-	int cpx = 0;
-	int c = 0;
-
-	ui_setbackgroundmode(g, TRANSPARENT);
-	ptr = self->tabs;
-	while (ptr) {
-		const char* str = (const char*)ptr->entry;
-		if (self->selected == c) {
-			ui_settextcolor(g, 0x00B1C8B0);
-		} else {
-			ui_settextcolor(g, 0x00D1C5B6);
-		}
-		ui_textout(g, cpx, 3, str, strlen(str));
-		cpx += 50;
-		ptr = ptr->next;
-		++c;
-	}	
-}
-
-void OnSize(PlayBar* self, ui_component* sender, int width, int height)
+void playbar_initalign(PlayBar* self)
 {
+	ui_margin margin = { 0, 3, 3, 0 };
+
+	ui_component_enablealign(&self->component);
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_components_setalign(ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT, &margin);
 }
 
-void OnMouseDown(PlayBar* self, ui_component* sender, int x, int y, int button)
+void onplayclicked(PlayBar* self, ui_component* sender)
 {
-	self->selected = x / 50;	
-	if (self->selected == 0) {
-		signal_emit(&self->signal_play, self, 0);
-	} else
-	if (self->selected == 1) {
-		signal_emit(&self->signal_stop, self, 0);
-		self->selected = -1;
-	}
-	ui_invalidate(&self->component);
+	player_start(self->player);
 }
 
-void playbar_select(PlayBar* self, int tab)
+void onstopclicked(PlayBar* self, ui_component* sender)
 {
-	self->selected = tab;
-}
-
-void playbar_append(PlayBar* self, const char* label)
-{
-	if (self->tabs) {
-		list_append(self->tabs, _strdup(label));		
-	} else {
-		self->tabs = list_create(_strdup(label));
-	}
+	player_stop(self->player);
 }

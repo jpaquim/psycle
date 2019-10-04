@@ -166,7 +166,7 @@ SequenceTrackIterator sequence_last(Sequence* self, List* tracknode)
 
 void sequence_reposition(Sequence* self, SequenceTrack* track)
 {
-	float curroffset = 0.0f;	
+	beat_t curroffset = 0.0f;	
 	List* p;	
 			
 	for (p = track->entries; p != 0; p = p->next) {
@@ -240,9 +240,9 @@ SequencePosition sequence_at(Sequence* self, unsigned int trackindex,
 	return rv;
 }
 
-List* sequence_at_offset(Sequence* self, SequenceTracks* tracknode, float offset)
+List* sequence_at_offset(Sequence* self, SequenceTracks* tracknode, beat_t offset)
 {
-	float curroffset = 0.0f;	
+	beat_t curroffset = 0.0f;	
 	List* p = 0;
 
 	if (tracknode) {		
@@ -266,7 +266,7 @@ List* sequence_at_offset(Sequence* self, SequenceTracks* tracknode, float offset
 	return p;
 }
 
-SequenceTrackIterator sequence_begin(Sequence* self, List* track, float pos)
+SequenceTrackIterator sequence_begin(Sequence* self, List* track, beat_t pos)
 {		
 	return sequence_makeiterator(self, sequence_at_offset(self, track, pos));	
 }
@@ -340,7 +340,7 @@ PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator* self)
 	return self->patternnode ? (PatternEntry*)(self->patternnode)->entry : 0;
 }
 
-float sequencetrackiterator_offset(SequenceTrackIterator* self)
+beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
 {	
 	return sequencetrackiterator_patternentry(self)
 		? sequencetrackiterator_entry(self)->offset +
@@ -364,7 +364,7 @@ List* sequence_appendtrack(Sequence* self, SequenceTrack* track)
 List* sequence_removetrack(Sequence* self, SequenceTracks* tracknode)
 {
 	List* rv = 0;
-	float offset = 0;
+	beat_t offset = 0;
 
 	int editpositionchanged = 0;
 	SequenceTrack* track = 0;
@@ -454,10 +454,10 @@ void sequence_setpatternslot(Sequence* self, SequencePosition position,
 	}
 }
 
-float sequence_duration(Sequence* self)
+beat_t sequence_duration(Sequence* self)
 {	
 	SequenceTracks* t;
-	float duration = 0.f;
+	beat_t duration = 0.f;
 
 	t = self->tracks;
 	while (t) {

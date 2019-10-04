@@ -24,11 +24,13 @@
 #include "properties.h"
 #include "tabbar.h"
 #include "playbar.h"
+#include "playposbar.h"
 #include "vumeter.h"
 #include "volslider.h"
 #include "clipbox.h"
 #include "songbar.h"
 #include "helpview.h"
+#include "stepbox.h"
 
 typedef struct {
 	ui_component component;
@@ -47,6 +49,7 @@ typedef struct {
 	MachineBar machinebar;
 	SongBar songbar;
 	PlayBar playbar;
+	PlayPosBar playposbar;
 	SequenceView sequenceview;
 	MachineView machineview;
 	PatternView patternview;		
@@ -60,12 +63,15 @@ typedef struct {
 	Vumeter vumeter;
 	VolSlider volslider;
 	ClipBox clipbox;	
-	ui_statusbar statusbar;
+	ui_component statusbar;
 	ui_component* activeview;	
 	Workspace workspace;
 	ui_label label;
 	int firstshow;	
 	int resize;
+	StepBox stepbox;
+	ui_label statusbarlabel;
+	PatternViewBar patternbar;
 } MainFrame;
 
 void InitMainFrame(MainFrame* self);

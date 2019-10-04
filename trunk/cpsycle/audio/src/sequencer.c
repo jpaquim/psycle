@@ -7,11 +7,11 @@
 
 static void clearevents(Sequencer*);
 static void cleardelayed(Sequencer*);
-static void maketrackiterators(Sequencer*, float offset);
+static void maketrackiterators(Sequencer*, beat_t offset);
 static void cleartrackiterators(Sequencer*);
-static void advanceposition(Sequencer* self, float width);
-static void addcurrevent(Sequencer*, SequenceTrackIterator*, float offset);
-static int isoffsetinwindow(Sequencer* self, float offset);
+static void advanceposition(Sequencer* self, beat_t width);
+static void addcurrevent(Sequencer*, SequenceTrackIterator*, beat_t offset);
+static int isoffsetinwindow(Sequencer* self, beat_t offset);
 static void insertevents(Sequencer* self);
 static void insertdelayedevents(Sequencer*);
 
@@ -41,7 +41,7 @@ void sequencer_reset(Sequencer* self, Sequence* sequence)
 	sequencer_init(self, sequence);
 }
 
-void sequencer_setposition(Sequencer* self, float offset)
+void sequencer_setposition(Sequencer* self, beat_t offset)
 {
 	clearevents(self);
 	cleardelayed(self);
@@ -62,7 +62,7 @@ void cleartrackiterators(Sequencer* self)
 	self->currtrackiterators = 0;
 }
 
-void maketrackiterators(Sequencer* self, float offset)
+void maketrackiterators(Sequencer* self, beat_t offset)
 {
 	SequenceTracks* p;
 
@@ -92,7 +92,7 @@ void cleardelayed(Sequencer* self)
 	self->delayedevents = 0;	
 }
 
-void sequencer_tick(Sequencer* self, float width)
+void sequencer_tick(Sequencer* self, beat_t width)
 {			
 	advanceposition(self, width);
 	clearevents(self);
@@ -100,7 +100,7 @@ void sequencer_tick(Sequencer* self, float width)
 	insertdelayedevents(self);
 }
 
-void advanceposition(Sequencer* self, float width)
+void advanceposition(Sequencer* self, beat_t width)
 {
 	self->position += self->window;
 	self->window = width;
@@ -115,7 +115,8 @@ void insertevents(Sequencer* self)
 
 		iterator = (SequenceTrackIterator*)p->entry;
 		while (sequencetrackiterator_patternentry(iterator)) {
-			float offset;			
+			beat_t offset;
+			
 			offset = sequencetrackiterator_offset(iterator); 
 			if (isoffsetinwindow(self, offset)) {
 				addcurrevent(self, iterator, offset);
@@ -127,18 +128,18 @@ void insertevents(Sequencer* self)
 	}
 }
 
-int isoffsetinwindow(Sequencer* self, float offset)
+int isoffsetinwindow(Sequencer* self, beat_t offset)
 {
   return offset >= self->position && offset < self->position + self->window;
 }
 
 void addcurrevent(Sequencer* self, SequenceTrackIterator* trackiterator,
-	float offset)
+	beat_t offset)
 {		
 	PatternEntry* entry = sequencetrackiterator_patternentry(trackiterator);
 	if (entry->event.cmd == NOTE_DELAY) {
 		int lpb = 4;
-		entry->delta = offset + entry->event.parameter / (lpb*256.f);
+		entry->delta = offset + entry->event.parameter / (lpb * 256.f);
 		if (!self->delayedevents) {
 			self->delayedevents = list_create(entry);
 		} else {

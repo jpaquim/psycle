@@ -10,9 +10,9 @@ extern IntHashTable selfmap;
 extern IntHashTable winidmap;
 extern int winid;
 
-static void OnCommand(ui_slider* self, WPARAM wParam, LPARAM lParam);
-static void OnDestroy(ui_slider* self, ui_component* sender);
-static void OnWindowProc(ui_slider* self, ui_component* sender, int message,
+static void oncommand(ui_slider*, ui_component* sender, WPARAM wParam, LPARAM lParam);
+static void ondestroy(ui_slider*, ui_component* sender);
+static void onwindowproc(ui_slider*, ui_component* sender, int message,
 	WPARAM wParam, LPARAM lParam);
 
 void ui_slider_init(ui_slider* slider, ui_component* parent)
@@ -32,15 +32,15 @@ void ui_slider_init(ui_slider* slider, ui_component* parent)
 	slider->component.events.target = slider;
 	slider->component.events.cmdtarget = slider;
 	InsertIntHashTable(&winidmap, (int)winid, &slider->component);
-	winid++;	
-	slider->component.events.command = OnCommand;
-	signal_connect(&slider->component.signal_destroy, slider,  OnDestroy);
-	signal_connect(&slider->component.signal_windowproc, slider,  OnWindowProc);
+	winid++;		
 	ui_component_init_base(&slider->component);
+	signal_connect(&slider->component.signal_destroy, slider,  ondestroy);
+	signal_connect(&slider->component.signal_windowproc, slider,  onwindowproc);
+	signal_connect(&slider->component.signal_command, slider, oncommand);
 	ui_component_setbackgroundmode(&slider->component, BACKGROUND_SET);
 }
 
-void OnDestroy(ui_slider* self, ui_component* sender)
+void ondestroy(ui_slider* self, ui_component* sender)
 {
 	signal_dispose(&self->signal_clicked);
 	signal_dispose(&self->signal_changed);
@@ -66,7 +66,7 @@ int ui_slider_value(ui_slider* self)
 	return SendMessage(self->component.hwnd, TBM_GETPOS, (WPARAM)0, (LPARAM)0);
 }
 
-void OnWindowProc(ui_slider* self, ui_component* sender, int message, WPARAM wParam, LPARAM lParam)
+void onwindowproc(ui_slider* self, ui_component* sender, int message, WPARAM wParam, LPARAM lParam)
 {	
 	switch (message) {
 		case WM_VSCROLL:
@@ -106,7 +106,7 @@ void OnWindowProc(ui_slider* self, ui_component* sender, int message, WPARAM wPa
 	}
 }
 
-void OnCommand(ui_slider* self, WPARAM wParam, LPARAM lParam)
+void oncommand(ui_slider* self, ui_component* sender, WPARAM wParam, LPARAM lParam)
 {
 	
 }

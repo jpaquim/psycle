@@ -15,12 +15,10 @@ static void OnMouseDown(NoteMapEdit* self, ui_component* sender, int x, int y, i
 static void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata);
 static void DefaultMapping(NoteMapEdit* self);
 
-
-extern char* notes_tab_a440[256];
-
 void InitNoteMapEdit(NoteMapEdit* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
@@ -28,6 +26,7 @@ void InitNoteMapEdit(NoteMapEdit* self, ui_component* parent)
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
 
+	self->notestabmode = NOTESTAB_DEFAULT;
 	self->cursor.col = 0;
 	self->cursor.note = 0;
 	self->dy = 0;
@@ -50,16 +49,15 @@ void OnDestroy(NoteMapEdit* self, ui_component* component)
 
 void OnDraw(NoteMapEdit* self, ui_component* sender, ui_graphics* g)
 {	
-	int note;
+	note_t note;
 	int cpy;
 	int lineheight = 20;
 
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawsolidrectangle(g, r, 0x009a887c);	
+	ui_setrectangle(&r, 0, 0, size.width, size.height);	
 	cpy = self->dy;
-	ui_setbackgroundcolor(g, 0xFFAAAAA);
+	ui_setbackgroundcolor(g, 0x00595959);
 	for (note = 0; note < 120; ++note) {
 		PatternEvent event = self->map[note];		
 		int cursor = self->cursor.note == note;
@@ -70,16 +68,16 @@ void OnDraw(NoteMapEdit* self, ui_component* sender, ui_graphics* g)
 			lo = -1;
 		}
 		SetColColor(g, 0, cursor);
-		ui_settextcolor(g, 0x00000000);
+		ui_settextcolor(g, 0x00CACACA);
 		ui_setrectangle(&r, 0, cpy, size.width, size.height);		
 		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r,
-			notes_tab_a440[note],
-			strlen(notes_tab_a440[note]));
+			notetostr(note, self->notestabmode),
+			strlen(notetostr(note, self->notestabmode)));
 		ui_setrectangle(&r, 40, cpy, size.width, size.height);
 		SetColColor(g, self->cursor.col == 0, cursor);
 		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r,
-			notes_tab_a440[self->map[note].note],
-			strlen(notes_tab_a440[self->map[note].note]));		
+			notetostr(note, self->notestabmode),
+			strlen(notetostr(note, self->notestabmode)));		
 		SetColColor(g, self->cursor.col == 1, cursor);
 		DrawDigit(self, g, hi, 0, 80, cpy);
 		SetColColor(g, self->cursor.col == 2, cursor);
@@ -91,15 +89,15 @@ void OnDraw(NoteMapEdit* self, ui_component* sender, ui_graphics* g)
 void SetColColor(ui_graphics* g, int col, int cursor)
 {
 	if (cursor != 0) {		
-		ui_setbackgroundcolor(g, 0x00c9beb8);
+		ui_setbackgroundcolor(g, 0x003E3E3E);
 		if (col != 0) {		
-		  ui_settextcolor(g, 0x00ffffff);					
+		  ui_settextcolor(g, 0x009F7B00);					
 		} else {
-		  ui_settextcolor(g, 0x00000000);		
+		  ui_settextcolor(g, 0x00FFFFFF);		
 		}
 	} else {
-		ui_setbackgroundcolor(g, 0x009a887c);
-		ui_settextcolor(g, 0x00000000);		
+		ui_setbackgroundcolor(g, 0x003E3E3E);
+		ui_settextcolor(g, 0x00CACACA);		
 	}	
 }
 

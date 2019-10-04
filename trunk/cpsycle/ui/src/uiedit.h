@@ -7,14 +7,16 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;   
-   Signal signal_change;
+	ui_component component;
+	int charnumber;
+	int linenumber;
+	Signal signal_change;      
 } ui_edit;
 
-
-void ui_edit_init(ui_edit* edit, ui_component* parent, int styles);
-void ui_edit_connect(ui_edit* edit, void* target);
-void ui_edit_settext(ui_edit* edit, const char* text);
-const char* ui_edit_text(ui_edit* edit);
+void ui_edit_init(ui_edit*, ui_component* parent, int styles);
+void ui_edit_settext(ui_edit*, const char* text);
+const char* ui_edit_text(ui_edit*);
+void ui_edit_setcharnumber(ui_edit*, int number);
+void ui_edit_setlinenumber(ui_edit*, int number);
 
 #endif

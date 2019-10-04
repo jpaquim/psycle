@@ -9,9 +9,9 @@
 
 typedef struct {
 	Sequence* sequence;
-	float position;
-	float bpm;
-	float window;
+	beat_t position;
+	beat_t bpm;
+	beat_t window;
 	unsigned int samplerate;
 	List* currtrackiterators;	
 	List* events;
@@ -21,7 +21,7 @@ typedef struct {
 void sequencer_init(Sequencer*, Sequence*);
 void sequencer_dispose(Sequencer*);
 void sequencer_reset(Sequencer*, Sequence*);
-void sequencer_tick(Sequencer*, float offset);
-void sequencer_setposition(Sequencer*, float position);
+void sequencer_tick(Sequencer*, beat_t offset);
+void sequencer_setposition(Sequencer*, beat_t position);
 
 #endif

@@ -98,7 +98,7 @@ void PreparePropertiesEnum(SettingsView* self)
 	
 	tm = ui_component_textmetric(&self->client);
 	self->lineheight = (int) (tm.tmHeight * 1.5);
-	self->columnwidth = tm.tmAveCharWidth * 40;
+	self->columnwidth = tm.tmAveCharWidth * 50;
 	self->identwidth = tm.tmAveCharWidth * 4;
 	self->cpx = 0;
 	self->cpy = 0;
@@ -422,12 +422,12 @@ void OnScroll(SettingsView* self, ui_component* sender, int cx, int cy)
 void OnSize(SettingsView* self, ui_component* sender, int width, int height)
 {
 	ui_size size;
-	ui_size tabbarsize;
+	ui_size tabbarsize;	
 	
-	size = ui_component_size(&self->component);	
-	tabbarsize = ui_component_size(&self->tabbar.component);	
-	ui_component_setposition(&self->client, 0, 0, 
-		size.width - tabbarsize.width, size.height);
+	size = ui_component_size(&self->component);		
+	tabbarsize = ui_component_preferredsize(&self->tabbar.component, &size);	
+	ui_component_resize(&self->client, size.width - tabbarsize.width,
+		size.height);
 	ui_component_setposition(&self->tabbar.component,
 		size.width - tabbarsize.width, 0, tabbarsize.width, size.height);
 	AdjustScrollRange(self);

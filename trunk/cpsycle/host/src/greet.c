@@ -3,36 +3,27 @@
 
 #include "greet.h"
 
-static void AddString(Greet* self, const char* text);
+static void OnSize(Greet*, ui_component* sender, int width, int height);
+static void AddString(Greet*, const char* text);
+static void Build(Greet* self);
+static void BuildOriginal(Greet* self);
+static void OnOriginal(Greet*, ui_component* sender);
 
 void greet_init(Greet* self, ui_component* parent)
-{
-	ui_margin margin = { 3, 3, 0, 3 };
-
+{	
 	ui_component_init(&self->component, parent);	
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_enablealign(&self->component);
+	signal_connect(&self->component.signal_size, self, OnSize);
+	self->current = 1;
 	ui_component_settitle(&self->component, "Greetings and info");	
-	ui_label_init(&self->header, &self->component);
-	ui_component_resize(&self->header.component, 0, 40);
-	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
-	ui_component_setmargin(&self->header.component, &margin);
+	ui_label_init(&self->header, &self->component);		
 	ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");		
-	ui_listbox_init(&self->greetz, &self->component);
-	ui_component_setalign(&self->greetz.component, UI_ALIGN_TOP);
-	margin.top = 25;
-	margin.left = 5;
-	margin.right = 5;
-	ui_component_setmargin(&self->greetz.component, &margin);
-	ui_component_resize(&self->greetz.component, 0, 174);	
+	ui_listbox_init(&self->greetz, &self->component);	
 	ui_groupbox_init(&self->groupbox, &self->component);
-	ui_groupbox_settext(&self->groupbox, "Thanks!");	
-	ui_component_setalign(&self->groupbox.component, UI_ALIGN_FILL);
-	margin.top = 45;
-	margin.left = 3;
-	margin.right = 3;
-	ui_component_setmargin(&self->groupbox.component, &margin);
-		
+	ui_groupbox_settext(&self->groupbox, "Thanks!");
+	ui_button_init(&self->original, &self->component);
+	ui_button_settext(&self->original, "Show Original Arguru's Greetings");
+	signal_connect(&self->original.signal_clicked, self, OnOriginal);	
 /*
 	//Original Arguru's Greetings.
 	m_greetz.AddString("Hamarr Heylen 'Hymax' [Logo design]");
@@ -59,6 +50,11 @@ void greet_init(Greet* self, ui_component* parent)
 	m_greetz.AddString("All #track at Irc-Hispano");
 
 */
+	Build(self);
+}
+
+void Build(Greet* self)
+{
 	AddString(self, "All the people in the Forums");
 	AddString(self, "All at #psycle [EFnet]");
 
@@ -95,8 +91,56 @@ void greet_init(Greet* self, ui_component* parent)
 //	AddString(self, "Vir|us");
 }
 
+void BuildOriginal(Greet* self)
+{
+	//Original Arguru's Greetings.
+	AddString(self, "Hamarr Heylen 'Hymax' [Logo design]");
+	AddString(self, "Raul Reales 'DJLaser'");
+	AddString(self, "Fco. Portillo 'Titan3_4'");
+	AddString(self, "Juliole");
+	AddString(self, "Sergio 'Zuprimo'");
+	AddString(self, "Oskari Tammelin [buzz creator]");
+	AddString(self, "Amir Geva 'Photon'");
+	AddString(self, "WhiteNoize");
+	AddString(self, "Zephod");
+	AddString(self, "Felix Petrescu 'WakaX'");
+	AddString(self, "Spiril at #goa [EFNET]");
+	AddString(self, "Joselex 'Americano'");
+	AddString(self, "Lach-ST2");
+	AddString(self, "DrDestral");
+	AddString(self, "Ic3man");
+	AddString(self, "Osirix");
+	AddString(self, "Mulder3");
+	AddString(self, "HexDump");
+	AddString(self, "Robotico");
+	AddString(self, "Krzysztof Foltman [FSM]");
+
+	AddString(self, "All #track at Irc-Hispano");
+}
+
 
 void AddString(Greet* self, const char* text)
 {
 	ui_listbox_addstring(&self->greetz, text);
+}
+
+void OnOriginal(Greet* self, ui_component* sender)
+{
+	ui_listbox_clear(&self->greetz);
+	self->current = self->current == 0;
+	if (self->current) {
+		Build(self);
+		ui_button_settext(&self->original, "Show Original Arguru's Greetings");
+	} else {
+		BuildOriginal(self);
+		ui_button_settext(&self->original, "Show Current Greetings");
+	}	
+}
+
+void OnSize(Greet* self, ui_component* sender, int width, int height)
+{
+	ui_component_setposition(&self->header.component, 0, 10, width, 40);
+	ui_component_setposition(&self->groupbox.component, 0, 45, width - 10, height - 75);
+	ui_component_setposition(&self->greetz.component, 10, 65, width - 30, height - 100);
+	ui_component_setposition(&self->original.component, 0, height - 25, width, 20);
 }

@@ -11,7 +11,7 @@ extern int winid;
 
 static void onpreferredsize(ui_combobox*, ui_component* sender,
 	ui_size* limit, int* width, int* height);
-static void OnCommand(ui_combobox*, WPARAM wParam, LPARAM lParam);
+static void oncommand(ui_combobox*, ui_component* sender, WPARAM wParam, LPARAM lParam);
 static void OnDestroy(ui_combobox*, ui_component* sender);
 static void ui_combobox_create_system(ui_combobox*, ui_component* parent);
 static void ui_combobox_create_ownerdrawn(ui_combobox*, ui_component* parent);
@@ -52,9 +52,7 @@ void ui_combobox_create_system(ui_combobox* combobox, ui_component* parent)
 	InsertIntHashTable(&winidmap, (int)winid, &combobox->component);
 	combobox->component.winid = (HMENU)winid;
 	winid++;	
-	combobox->component.events.target = combobox;
-	combobox->component.events.cmdtarget = combobox;
-	combobox->component.events.command = OnCommand;	
+	signal_connect(&combobox->component.signal_command, combobox, oncommand);	
 	combobox->currcombo = &combobox->component;
 }
 
@@ -79,9 +77,7 @@ void ui_combobox_create_ownerdrawn(ui_combobox* self, ui_component* parent)
 	InsertIntHashTable(&winidmap, (int)winid, &self->combo);
 	self->combo.winid = (HMENU)winid;
 	winid++;	
-	self->combo.events.target = self;
-	self->combo.events.cmdtarget = self;
-	self->combo.events.command = OnCommand;	
+	signal_connect(&self->combo.signal_command, self, oncommand);
 	ui_component_hide(&self->combo);
 	self->ownerdrawn = 1;	
 	self->currcombo = &self->combo;	
@@ -142,14 +138,17 @@ void onpreferredsize(ui_combobox* self, ui_component* sender, ui_size* limit, in
 	*height = tm.tmHeight;
 }
 
-void OnCommand(ui_combobox* self, WPARAM wParam, LPARAM lParam) {
+void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam, LPARAM lParam) {
 	switch(HIWORD(wParam))
     {
         case CBN_SELCHANGE :
         {
             if (self->signal_selchanged.slots) {
 				int sel = SendMessage(self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-				signal_emit(&self->signal_selchanged, self, 1, sel);
+				signal_emit(&self->signal_selchanged, self, 1, sel);			
+			}
+			if (self->ownerdrawn) {
+				ui_invalidate(&self->component);
 			}
         }
 		break;

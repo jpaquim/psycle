@@ -174,12 +174,38 @@ Properties* properties_append_choice(Properties* self, const char* key, int valu
 	return append(self, properties_create_choice(key, value));	
 }
 
+char* pathend(const char* path, char* section, char* key)
+{
+	char* p;
+	
+	p = strrchr(path, '.');
+	return p;
+}
+
 Properties* properties_read(Properties* self, const char* key)
 {
 	Properties* p;	
-
-	p = self->children;
-	while (p != 0) {				
+	char* c;
+	
+	c = strrchr(key, '.');
+	if (!c) {			
+		p = self->children;		
+	} else {
+		char* path;
+		int count;
+		
+		count = c - key;
+		path = malloc(count + 1);
+		strncpy(path, key, count);
+		path[count] = '\0';		
+		key = c + 1;		
+		p = properties_findsection(self, path);
+		if (p) {
+			p = p->children;
+		}
+		free(path);
+	}
+	while (p != 0) {		
 		if (p->item.key && strcmp(key, p->item.key) == 0) {
 			break;
 		}
@@ -204,19 +230,22 @@ int properties_int(Properties* properties, const char* key,
 	return rv;
 }
 
-void properties_readbool(Properties* properties, const char* key, int* value,
-	int defaultvalue)
+int properties_bool(Properties* properties, const char* key, int defaultvalue)
 {
+	int rv;
+
 	if (!properties) {
-		*value = defaultvalue;
+		rv = defaultvalue;
 	} else {
 		Properties* property = properties_read(properties, key);
-		if (property && property->item.typ == PROPERTY_TYP_BOOL) {
-			*value = property->item.value.i;
+		if (property && (property->item.typ == PROPERTY_TYP_BOOL ||
+				property->item.typ == PROPERTY_TYP_INTEGER)) {
+			rv = property->item.value.i != 0;
 		} else {
-			*value = defaultvalue;
+			rv = defaultvalue;
 		}
 	}
+	return rv;
 }
 
 void properties_readdouble(Properties* properties, const char* key, double* value, double defaultvalue)
@@ -233,7 +262,7 @@ void properties_readdouble(Properties* properties, const char* key, double* valu
 	}
 }
 
-void properties_readstring(Properties* properties, const char* key, char** text, char* defaulttext)
+void properties_readstring(Properties* properties, const char* key, const char** text, const char* defaulttext)
 {
 	if (!properties) {
 		*text = defaulttext;

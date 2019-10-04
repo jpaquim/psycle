@@ -93,6 +93,10 @@ SOURCE=.\src\filter.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\notestab.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\operations.c
 # End Source File
 # End Group
@@ -106,6 +110,10 @@ SOURCE=.\src\adsr.h
 # Begin Source File
 
 SOURCE=.\src\filter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\notestab.h
 # End Source File
 # Begin Source File
 
