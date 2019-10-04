@@ -16,6 +16,7 @@ IntHashTable winidmap;
 int winid = 20000;
 static ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
+static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
 extern IntHashTable menumap;
 
@@ -128,8 +129,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	ui_menu*	 menu;
 	int			 menu_id;		
 
-
-	component = SearchIntHashTable(&selfmap, (int) hwnd);
+	component = SearchIntHashTable(&selfmap, (int) hwnd);	
 	if (component && component->signal_windowproc.slots) {				
 		signal_emit(&component->signal_windowproc, component, 3, (LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
 		if (component->preventdefault) {					
@@ -168,12 +168,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				signal_emit(&component->signal_timer, component, 1, (int) wParam);				
 				return 0 ;
 			}
-		break;
+		break;		
 		case WM_CTLCOLORLISTBOX:
 		case WM_CTLCOLORSTATIC:			
 			component = SearchIntHashTable(&selfmap, lParam);			
 			if (component) {					
-				SetTextColor((HDC) wParam, 0x00D1C5B6);
+				SetTextColor((HDC) wParam, component->color);
 				SetBkColor((HDC) wParam, component->backgroundcolor);
 				if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
 					return (long) component->background;
@@ -181,7 +181,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					return (long) GetStockObject(NULL_BRUSH);
 				}
 			} else {
-				SetTextColor((HDC) wParam, 0x00D1C5B6);
+				SetTextColor((HDC) wParam, defaultcolor);
 				SetBkColor((HDC) wParam, defaultbackgroundcolor);
 				return (long) defaultbackgroundbrush;
 			}
@@ -197,8 +197,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			menu->execute(menu);
 		  }
 		  component = SearchIntHashTable(&winidmap, LOWORD(wParam));
-			if (component && component->events.command) {				                    
-				component->events.command(component->events.cmdtarget, wParam, lParam);
+		  if (component && component->signal_command.slots) {
+				signal_emit(&component->signal_command, component, 2, wParam, lParam);				
 				return 0;
 			}
 		  return 0 ;  
@@ -552,6 +552,7 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_align);
 	signal_init(&component->signal_preferredsize);
 	signal_init(&component->signal_windowproc);
+	signal_init(&component->signal_command);
 }
 
 void ui_component_init_base(ui_component* self) {
@@ -567,9 +568,11 @@ void ui_component_init_base(ui_component* self) {
 	self->debugflag = 0;
 	self->defaultpropagation = 0;	
 	self->visible = 1;
+	self->doublebuffered = 0;
 	self->backgroundmode = BACKGROUND_NONE;
 	self->backgroundcolor = defaultbackgroundcolor;
 	self->background = 0;
+	self->color = defaultcolor;
 	ui_component_setfont(self, &defaultfont);
 	ui_component_setbackgroundcolor(self, self->backgroundcolor);
 	signal_connect(&self->signal_preferredsize, self, onpreferredsize);
@@ -597,6 +600,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_align);
 	signal_dispose(&component->signal_preferredsize);
 	signal_dispose(&component->signal_windowproc);
+	signal_dispose(&component->signal_command);
 	if (component->font.hfont && component->font.hfont != defaultfont.hfont) {
 		ui_font_dispose(&component->font);
 	}
@@ -616,7 +620,7 @@ void ui_classcomponent_init(ui_component* component, ui_component* parent, const
 		parent->hwnd, NULL,
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)component->hwnd, component);	
+	InsertIntHashTable(&selfmap, (int)component->hwnd, component);		
 	component->events.target = component;
 	component->align = 0;
 }
@@ -743,20 +747,15 @@ void ui_component_move(ui_component* self, int left, int top)
 
 void ui_component_resize(ui_component* self, int width, int height)
 {	
-	ui_size size = ui_component_size(self);
 	SetWindowPos (self->hwnd, NULL, 
 	   0,
 	   0,
-	   width, height, SWP_NOZORDER | SWP_NOMOVE);
-	if (size.width == width && size.height == height) {
-		SendMessage(self->hwnd, WM_SIZE, SIZE_RESTORED, MAKELONG(width, height));
-	}
+	   width, height, SWP_NOZORDER | SWP_NOMOVE);	
 }
 
-void ui_component_setposition(ui_component* component, int x, int y, int width, int height)
-{
-	ui_component_move(component, x, y);
-	ui_component_resize(component, width, height);
+void ui_component_setposition(ui_component* self, int x, int y, int width, int height)
+{	
+	SetWindowPos(self->hwnd, 0, x, y, width, height, SWP_NOZORDER);	
 }
 
 void ui_component_setmenu(ui_component* self, ui_menu* menu)
@@ -882,28 +881,20 @@ void ui_component_align(ui_component* self)
 	int cpymax = 0;
 	List* p;
 	List* wrap = 0;
-	ui_size size;	
+	ui_size size;
+	ui_component* client = 0;
 
-	size = ui_component_size(self);
-	if (self->debugflag == 900) {
-		cpx = 0;
-	}
+	size = ui_component_size(self);	
 	for (p = ui_component_children(self, 0); p != 0; p = p->next) {		
 		ui_component* component;
 			
 		component = (ui_component*)p->entry;		
 		if (component->visible) {
-			ui_size componentsize;
-			if (component->signal_preferredsize.slots) {
-				int width;
-				int height;					
-				signal_emit(&component->signal_preferredsize, component, 3, &size,
-					&width, &height);
-				componentsize.width = width;
-				componentsize.height = height;
-			} else {
-				componentsize = ui_component_size(component);
-			}
+			ui_size componentsize;			
+			componentsize = ui_component_preferredsize(component, &size);
+			if (component->align == UI_ALIGN_CLIENT) {
+				client = component;
+			} 
 			if (component->align == UI_ALIGN_FILL) {
 				ui_component_setposition(component,
 					component->margin.left,
@@ -964,6 +955,13 @@ void ui_component_align(ui_component* self)
 			}				
 		}
 	}
+	if (client) {
+		ui_component_setposition(client,
+					client->margin.left,
+					cpy + client->margin.top,
+					size.width - client->margin.left - client->margin.right,
+					size.height - cpy - client->margin.top - client->margin.bottom);
+	}
 	list_free(p);
 	list_free(wrap);
 	signal_emit(&self->signal_align, self, 0);
@@ -971,16 +969,17 @@ void ui_component_align(ui_component* self)
 
 void onpreferredsize(ui_component* self, ui_component* sender,
 	ui_size* limit, int* width, int* height)
-{		
-	int cpx = 0;
-	int cpxmax = 0;
-	int cpy = 0;
-	int cpymax = 0;	
-	List* p;
+{			
+	int cpxmax = 0;	
+	int cpymax = 0;		
 	ui_size size;
 
 	size = ui_component_size(self);
 	if (self->alignchildren) {
+		List* p;
+		int cpx = 0;
+		int cpy = 0;
+
 		if ((self->alignexpandmode & UI_HORIZONTALEXPAND) == UI_HORIZONTALEXPAND) {
 			size.width = 0;		
 		} else {
@@ -991,16 +990,9 @@ void onpreferredsize(ui_component* self, ui_component* sender,
 				
 			component = (ui_component*)p->entry;		
 			if (component->visible) {
-				ui_size componentsize;
-				if (component->signal_preferredsize.slots) {
-					int w;
-					int h;					
-					signal_emit(&component->signal_preferredsize, component, 3, &size, &w, &h);
-					componentsize.width = w;
-					componentsize.height = h;
-				} else {
-					componentsize = ui_component_size(component);
-				}			
+				ui_size componentsize;			
+				
+				componentsize = ui_component_preferredsize(component, &size);				
 				if (component->align == UI_ALIGN_TOP) {
 					cpy += component->margin.top;										
 					cpy += componentsize.height;
@@ -1136,6 +1128,11 @@ void ui_component_setbackgroundcolor(ui_component* self, unsigned int color)
 	self->background = CreateSolidBrush(color);
 }
 
+void ui_component_setcolor(ui_component* self, unsigned int color)
+{
+	self->color = color;
+}
+
 ui_size ui_component_textsize(ui_component* self, const char* text)
 {
 	ui_size rv;
@@ -1165,12 +1162,15 @@ ui_component* ui_component_parent(ui_component* self)
 		(int) GetParent(self->hwnd));
 }
 
-void ui_components_setalign(List* list, UiAlignType align)
+void ui_components_setalign(List* list, UiAlignType align, const ui_margin* margin)
 {
 	List* p;
 
 	for (p = list; p != 0; p = p->next) {
-		ui_component_setalign((ui_component*)p->entry, align);		
+		ui_component_setalign((ui_component*)p->entry, align);
+		if (margin) {
+			ui_component_setmargin((ui_component*)p->entry, margin);
+		}
 	}
 }
 
@@ -1181,6 +1181,15 @@ void ui_components_setmargin(List* list, const ui_margin* margin)
 	for (p = list; p != 0; p = p->next) {
 		ui_component_setmargin((ui_component*)p->entry, margin);		
 	}
+}
+
+ui_size ui_component_preferredsize(ui_component* self, ui_size* limit)
+{
+	ui_size rv;
+	
+	signal_emit(&self->signal_preferredsize, self, 3, limit, &rv.width,
+		&rv.height);
+	return rv;	
 }
 
 TEXTMETRIC ui_component_textmetric(ui_component* self)

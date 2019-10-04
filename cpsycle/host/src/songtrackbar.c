@@ -1,10 +1,11 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "songtrackbar.h"
 
-static void OnSize(SongTrackBar*, ui_component* sender, int width, int height);
-static void OnDestroy(SongTrackBar*, ui_component* component);
 static void Buildtrackbox(SongTrackBar* self);
 static void OnTrackBoxSelChange(SongTrackBar*, ui_component* sender, int sel);
-static void OnSongTracksNumChanged(SongTrackBar* self, Workspace* workspace,
+static void OnSongTracksNumChanged(SongTrackBar*, Workspace*,
 	unsigned int numsongtracks);
 static void OnSongChanged(SongTrackBar*, Workspace*);
 
@@ -13,9 +14,7 @@ void InitSongTrackBar(SongTrackBar* self, ui_component* parent, Workspace* works
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);	
 	ui_label_init(&self->headerlabel, &self->component);	
 	ui_label_settext(&self->headerlabel, "Tracks");		
 	ui_combobox_init(&self->trackbox, &self->component);	
@@ -24,22 +23,14 @@ void InitSongTrackBar(SongTrackBar* self, ui_component* parent, Workspace* works
 	signal_connect(&self->trackbox.signal_selchanged, self, OnTrackBoxSelChange);	
 	signal_connect(&workspace->player.signal_numsongtrackschanged, self, OnSongTracksNumChanged);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	{
-		List* children;
-		ui_margin margin = { 0, 10, 3, 3 };
+	{		
+		ui_margin margin = { 0, 3, 3, 0 };
 		
-		children = ui_component_children(&self->component, 0);
-		ui_components_setalign(children, UI_ALIGN_LEFT);
-		ui_components_setmargin(children, &margin);
+		ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);
 	}
-}
-
-void OnDestroy(SongTrackBar* self, ui_component* component)
-{
-}
-
-void OnSize(SongTrackBar* self, ui_component* sender, int width, int height)
-{	
 }
 
 void Buildtrackbox(SongTrackBar* self)

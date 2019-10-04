@@ -22,7 +22,9 @@ static void UpdateSequenceViewDuration(SequenceViewDuration*);
 static void OnListViewMouseDown(SequenceListView*, ui_component* sender, int x, int y, int button);
 static void OnSongChanged(SequenceView*, Workspace*);
 static void OnEditPositionChanged(SequenceView*, Sequence* sender);
-static void AlignSequenceButtons(SequenceButtons*);
+static void buttons_onalign(SequenceButtons* self, ui_component* sender);
+static void buttons_onpreferredsize(SequenceButtons*, ui_component* sender, ui_size* limit, int* width, int* height);
+static List* rowend(List* p);
 
 static int trackwidth = 75;
 
@@ -59,8 +61,9 @@ void InitSequenceView(SequenceView* self, ui_component* parent,
 
 void InitSequenceButtons(SequenceButtons* self, ui_component* parent)
 {		
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_init(&self->component, parent);	
+	ui_component_enablealign(&self->component);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 
 	ui_button_init(&self->incpattern, &self->component);	
 	ui_button_settext(&self->incpattern, "+");
@@ -78,32 +81,87 @@ void InitSequenceButtons(SequenceButtons* self, ui_component* parent)
 	ui_button_settext(&self->newtrack, "New Trk");
 	ui_button_init(&self->deltrack, &self->component);	
 	ui_button_settext(&self->deltrack, "Del Trk");
-	AlignSequenceButtons(self);
+	signal_connect(&self->component.signal_align, self, buttons_onalign);
+	signal_disconnectall(&self->component.signal_preferredsize);
+	signal_connect(&self->component.signal_preferredsize, self,
+		buttons_onpreferredsize);	
 }
 
-void AlignSequenceButtons(SequenceButtons* self)
+void buttons_onalign(SequenceButtons* self, ui_component* sender)
 {
-	int colx[4];
-	List* p;
+	int numcols = 3;
+	int numrows = 0;
+	int colwidth = 0;
+	int rowheight = 0;
+	int cpx = 0;
 	int cpy = 0;
-	int col = 0;
-
-	colx[0] = 5;
-	colx[1] = 55;
-	colx[2] = 105;
-	colx[3] = 145;
-
-	for (p = ui_component_children(&self->component, 0); p != 0; p = p->next) {
+	int c = 0;
+	int margin = 5;
+	ui_size size;
+	List* p;
+	
+	size = ui_component_size(&self->component);
+	size = ui_component_preferredsize(&self->component, &size);
+	colwidth = size.width / numcols;
+	p = ui_component_children(&self->component, 0);	
+	numrows = (list_size(p) / numcols) + 1;
+	rowheight = size.height / numrows - margin;	
+	for (p = ui_component_children(&self->component, 0); p != 0; 
+			p = p->next, ++c, cpx += colwidth + margin) {
 		ui_component* component;
 
-		component = (ui_component*)p->entry;		
-		ui_component_setposition(component, colx[col], cpy, colx[col + 1] - colx[col] - 5, 20);
-		++col;
-		if (col == 3) {
-			col = 0;
-			cpy += 22;
+		component = (ui_component*)p->entry;
+		if (c >= numcols) {
+			cpx = 0;
+			cpy += rowheight + margin;
+			c = 0;
+		}		
+		ui_component_setposition(component, 
+			cpx,
+			cpy,
+			colwidth,
+			rowheight);		
+	}	
+}
+
+void buttons_onpreferredsize(SequenceButtons* self, ui_component* sender, ui_size* limit, int* width, int* height)
+{	
+	int numcols = 3;
+	int margin = 5;
+	int c = 0;
+	int cpx = 0;
+	int cpy = 0;
+	int cpxmax = 0;
+	int cpymax = 0;
+	int colmax[3];
+	ui_size size;
+	List* p;	
+	
+	size = ui_component_size(&self->component);
+	memset(colmax, 0, sizeof(colmax));
+	for (p = ui_component_children(&self->component, 0); p != 0; p = p->next,
+			++c) {
+		ui_component* component;
+		ui_size componentsize;
+		if (c >= numcols) {
+			cpx = 0;
+			cpy = cpymax;
+			c = 0;
 		}
+		component = (ui_component*)p->entry;
+		componentsize = ui_component_preferredsize(component, &size);
+		if (colmax[c] < componentsize.width + margin) {
+			colmax[c] = componentsize.width + margin;
+		}
+		cpx += componentsize.width + margin;		
+		if (cpymax < cpy + componentsize.height + margin) {
+			cpymax = cpy + componentsize.height + margin;
+		}		
 	}
+	cpxmax = 0;
+	for (c = 0; c < numcols; ++c, cpxmax += colmax[c]);
+	*width = cpxmax;
+	*height = cpymax;
 }
 
 void InitSequenceListView(SequenceListView* self, ui_component* parent,
@@ -181,11 +239,13 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 }
 
 void OnSize(SequenceView* self, ui_component* sender, int width, int height)
-{
-	ui_size buttonssize = ui_component_size(&self->buttons.component);
+{	
+	ui_size size = ui_component_size(&self->component);
+	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, &size);
 	ui_size durationsize = ui_component_size(&self->duration.component);
 	
-	ui_component_resize(&self->buttons.component, width - 3, buttonssize.height);
+	ui_component_setposition(&self->buttons.component,
+		0, 0, width - 3, buttonssize.height);
 	ui_component_setposition(&self->listview.component, 
 		0, buttonssize.height,
 		width - 3,

@@ -32,7 +32,7 @@ static Buffer* player_mix(Player*, unsigned int slot, unsigned int amount);
 static void player_filldriver(Player*, float* buffer, unsigned int amount);
 static void player_signal_wait_host(Player*);
 static void Interleave(float* dst, float* left, float* right, int num);
-static float Offset(Player*, int numsamples);
+static beat_t Offset(Player*, int numsamples);
 static int onenumsequencertick(Player*, int slot, Machine*);
 
 void player_init(Player* self, Song* song, void* handle)
@@ -148,12 +148,12 @@ void player_stop(Player* self)
 	self->playing = FALSE;
 }
 
-float player_position(Player* self)
+beat_t player_position(Player* self)
 {
 	return self->sequencer.position;
 }
 
-void player_setbpm(Player* self, float bpm)
+void player_setbpm(Player* self, beat_t bpm)
 {
 	if (bpm < 32) {
 		self->sequencer.bpm = 32;
@@ -166,7 +166,7 @@ void player_setbpm(Player* self, float bpm)
 	self->t = self->sequencer.bpm / (44100 * 60.0f);
 }
 
-float player_bpm(Player* self)
+beat_t player_bpm(Player* self)
 {
 	return self->sequencer.bpm;
 }
@@ -182,12 +182,12 @@ unsigned int player_lpb(Player* self)
 	return self->lpb;
 }
 
-float Offset(Player* self, int numsamples)
+beat_t Offset(Player* self, int numsamples)
 {
 	return numsamples * self->t;
 }
 
-unsigned int Frames(Player* self, float offset)
+unsigned int Frames(Player* self, beat_t offset)
 {
 	return (unsigned int)(offset / self->t);
 }
@@ -214,7 +214,7 @@ real* Work(Player* self, int* numsamples)
 
 void player_advance(Player* self, unsigned int amount)
 {
-	float offset;
+	beat_t offset;
 
 	offset = Offset(self, amount);
 	if (self->playing) {		
@@ -275,6 +275,7 @@ List* player_timedevents(Player* self, unsigned int slot, unsigned int amount)
 			PatternEntry* entry = (PatternEntry*)node->entry;
 			if (entry->event.mach == slot) {
 				unsigned int deltaframes;
+
 				if (!events) {
 					events = list_create(entry);
 				} else {
@@ -284,7 +285,7 @@ List* player_timedevents(Player* self, unsigned int slot, unsigned int amount)
 				if (deltaframes >= amount) {
 					deltaframes = amount - 1;
 				}
-				entry->delta = (float) deltaframes;
+				entry->delta = (beat_t) deltaframes;
 			}
 			node = node->next;
 		}						

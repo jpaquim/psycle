@@ -191,7 +191,7 @@ int mode(Plugin* self)
 unsigned int numinputs(Plugin* self)
 {
 	if (info(self)) {
-		return (info(self)->Flags & 3 == 3) ? 0 : 2;
+		return ((info(self)->Flags & 3) == 3) ? 0 : 2;
 	} else {
 		return 0;
 	}

@@ -66,7 +66,7 @@ void pattern_remove(Pattern* self, PatternNode* node)
 }
 
 PatternNode* pattern_insert(Pattern* self, PatternNode* prev, int track,
-	float offset, const PatternEvent* event)
+	beat_t offset, const PatternEvent* event)
 {
 	PatternNode* rv;
 	PatternEntry* entry;
@@ -87,21 +87,53 @@ PatternNode* pattern_insert(Pattern* self, PatternNode* prev, int track,
 	return rv;
 }
 
-PatternNode* pattern_greaterequal(Pattern* self, float offset,
-	PatternNode** prev)
+void pattern_setevent(Pattern* self, PatternNode* node, const PatternEvent* event)
 {
-	PatternNode* p;	
-	*prev = 0;
+	if (node) {
+		PatternEntry* entry;
+			
+		entry = (PatternEntry*) node->entry;
+		if (event) {			
+			entry->event = *event;
+		} else {
+			PatternEvent empty;
+
+			patternevent_clear(&empty);
+			entry->event = empty;
+		}
+		++self->opcount;
+	}
+}
+
+PatternEvent pattern_event(Pattern* self, PatternNode* node)
+{
+	if (node) {
+		return ((PatternEntry*)node->entry)->event;
+	} else {
+		PatternEvent empty;
+
+		patternevent_clear(&empty);
+		return empty;
+	}	
+}
+
+PatternNode* pattern_greaterequal(Pattern* self, beat_t offset)
+{
+	PatternNode* p;		
 	p = self->events;
 	while (p != 0) {
 		PatternEntry* entry = (PatternEntry*)p->entry;
 		if (entry->offset >= offset) {			
 			break;
-		}	
-		*prev = p;
+		}		
 		p = p->next;
 	}	
 	return p;
+}
+
+PatternNode* pattern_last(Pattern* self)
+{	
+	return self->events ? self->events->tail : 0;
 }
 
 void pattern_setlabel(Pattern* self, const char* text)
@@ -113,7 +145,7 @@ void pattern_setlabel(Pattern* self, const char* text)
 	++self->opcount;
 }
 
-void pattern_setlength(Pattern* self, float length)
+void pattern_setlength(Pattern* self, beat_t length)
 {
 	self->length = length;
 	++self->opcount;
@@ -122,4 +154,9 @@ void pattern_setlength(Pattern* self, float length)
 int pattern_empty(Pattern* self)
 {
 	return self->events == 0;
+}
+
+unsigned int pattern_opcount(Pattern* self)
+{
+	return self->opcount;
 }

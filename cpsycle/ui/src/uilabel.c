@@ -49,7 +49,7 @@ void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, int* 
 	GetWindowText(self->component.hwnd, text, 256);
 	size = ui_component_textsize(&self->component, text);
 	if (self->charnumber == 0) {
-		*width = size.width;
+		*width = size.width + 2;
 	} else {
 		TEXTMETRIC tm;
 		tm = ui_component_textmetric(&self->component);

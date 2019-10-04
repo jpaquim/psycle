@@ -50,13 +50,11 @@ static void OnEditChangeLoopend(SamplesWaveLoopView*, ui_edit* sender);
 static void OnEditChangeSustainstart(SamplesWaveLoopView*, ui_edit* sender);
 static void OnEditChangeSustainend(SamplesWaveLoopView*, ui_edit* sender);
 
-extern char* notes_tab_a440[256];
-
 void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
 {
 	ui_margin margin = {3, 3, 0, 3};
-	self->player = &workspace->player;
+	self->player = &workspace->player;	
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);
@@ -333,6 +331,7 @@ void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
 	};	
 		
 	self->sample = 0;
+	self->notestabmode = NOTESTAB_DEFAULT;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
 	
@@ -433,8 +432,8 @@ void OnGeneralViewDescribe(SamplesGeneralView* self, SliderGroup* slidergroup, c
 	} else
 	if (slidergroup == &self->samplednote) {		
 		_snprintf(txt, 10, "%s", self->sample
-			? notes_tab_a440[self->sample->tune + 60]
-			: "C4");		
+			? notetostr((note_t)(self->sample->tune + 60), self->notestabmode)
+			: notetostr(60, self->notestabmode));		
 	} else
 	if (slidergroup == &self->pitchfinetune) {
 		_snprintf(txt, 10, "%d ct.", self->sample
@@ -509,7 +508,7 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 	InitSliderGroup(&self->speed, &self->component, "Speed");
 	InitSliderGroup(&self->depth, &self->component, "Depth");
 
-	ui_setmargin(&margin, 3, 3, 0, 3);
+	ui_margin_init(&margin, 3, 3, 0, 3);
 	for (i = 0; i < 3; ++i) {		
 		ui_component_resize(&sliders[i]->component, 0, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);

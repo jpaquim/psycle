@@ -6,7 +6,8 @@
 
 #include "uicomponent.h"
 #include <event.h>
-#include "noteinputs.h"
+#include "notestab.h"
+#include "inputmap.h"
 
 typedef struct {
 	int note;
@@ -17,8 +18,9 @@ typedef struct {
 	ui_component component;	
 	NoteMapEditCursor cursor;
 	PatternEvent map[120];
-	NoteInputs* noteinputs;
-	int dy;
+	Inputs* noteinputs;
+	NotesTabMode notestabmode;
+	int dy;	
 } NoteMapEdit;
 
 void InitNoteMapEdit(NoteMapEdit*, ui_component* parent);

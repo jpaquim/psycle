@@ -64,6 +64,7 @@ typedef struct {
 	Signal signal_windowproc;
 	Signal signal_align;
 	Signal signal_preferredsize;
+	Signal signal_command;
 	UiAlignType align;
 	UiJustifyType justify;
 	int alignexpandmode;
@@ -77,6 +78,7 @@ typedef struct {
 	int scrollstepy;
 	int debugflag;
 	unsigned int backgroundcolor;
+	unsigned int color;
 	BackgroundMode backgroundmode;
 	ui_font font;
 	HBRUSH background;
@@ -134,12 +136,15 @@ void ui_component_enableinput(ui_component*, int recursive);
 void ui_component_preventinput(ui_component*, int recursive);
 void ui_component_setbackgroundmode(ui_component*, BackgroundMode);
 void ui_component_setbackgroundcolor(ui_component*, unsigned int color);
+void ui_component_setcolor(ui_component*, unsigned int color);
 ui_size ui_component_textsize(ui_component*, const char*);
 TEXTMETRIC ui_component_textmetric(ui_component*);
+ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
 
-void ui_components_setalign(List*, UiAlignType align);
+void ui_components_setalign(List*, UiAlignType align, const ui_margin* margin);
 void ui_components_setmargin(List* list, const ui_margin* margin);
 
+int ui_openfile(ui_component* self, char* title, char* filter,
+	char* defextension, char* filename);
 
-int ui_openfile(ui_component* self, char* title, char* filter, char* defextension, char* filename);
 #endif

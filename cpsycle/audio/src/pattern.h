@@ -11,9 +11,9 @@
 typedef struct {
 	PatternEvent event;
 	 /// position in beat unit
-	float offset;
-	 /// sound driver callback event position in beat unit
-	float delta;
+	beat_t offset;
+	 /// sound driver callback event position
+	beat_t delta;
 	/// the tracker channel
 	unsigned int track; 
 } PatternEntry;
@@ -23,9 +23,9 @@ typedef List PatternNode;
 
 typedef struct {
 	PatternNode* events;
-	float length;
+	beat_t length;
 	char* label;
-	int opcount;
+	unsigned int opcount;
 } Pattern;
 
 /// initializes a pattern
@@ -38,19 +38,28 @@ Pattern* pattern_clone(Pattern*);
 /// inserts an event by copy
 ///\return the pattern node containing the inserted event
 PatternNode* pattern_insert(Pattern*, PatternNode* prev, int track,
-	float offset, const PatternEvent*);
+	beat_t offset, const PatternEvent*);
 /// removes a pattern node
 void pattern_remove(Pattern*, PatternNode*);
 /// finds the pattern node greater or equal than the offset
-///\return the pattern node greater or equal than the offset and its predeccessor
-PatternNode* pattern_greaterequal(Pattern*, float offset, PatternNode** prev);
+///\return the pattern node greater or equal than the offset
+PatternNode* pattern_greaterequal(Pattern*, beat_t offset);
+/// finds the last pattern
+///\return finds the last pattern node
+PatternNode* pattern_last(Pattern*);
 /// sets the pattern description
 void pattern_setlabel(Pattern*, const char*);
-/// sets the pattern length in beat unit
-void pattern_setlength(Pattern*, float length);	
+/// sets the pattern length
+void pattern_setlength(Pattern*, beat_t length);	
 /// tells if the pattern contains events
 ///\return tells if the pattern contains events
 int pattern_empty(Pattern*);
+/// sets the event or an empty event if event is 0
+void pattern_setevent(Pattern*, PatternNode*, const PatternEvent*);
+/// gets the event or an empty event if node is 0
+///\return gets the event or an empty event if node is 0
+PatternEvent pattern_event(Pattern*, PatternNode*);
+/// gets the op count to determine changes
+unsigned int pattern_opcount(Pattern*);
 
 #endif
-

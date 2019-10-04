@@ -13,6 +13,7 @@
 #include <uicomponent.h>
 #include "undoredo.h"
 #include "inputmap.h"
+#include <sequence.h>
 
 enum {
 	WORKSPACE_NEWSONG,
@@ -20,12 +21,22 @@ enum {
 };
 
 typedef struct {	
+	unsigned int track;
+	double offset;
+	unsigned int line;
+	unsigned int subline;
+	unsigned int totallines;
+	unsigned int col;
+} EditPosition;
+
+typedef struct {	
 	Song* song;
 	Player player;	
 	Properties* config;
 	Properties* inputoutput;
 	Properties* keyboard;
-	Properties* properties;	
+	Properties* properties;
+	Properties* lang;	
 	Properties* driverconfigure;	
 	PluginCatcher plugincatcher;
 	MachineFactory machinefactory;
@@ -33,9 +44,12 @@ typedef struct {
 	Signal signal_octavechanged;
 	Signal signal_songchanged;	
 	Signal signal_configchanged;
+	Signal signal_editpositionchanged;
 	ui_component* mainhandle;
 	UndoRedo undoredo;
 	Inputs noteinputs;
+	EditPosition editposition;
+	int cursorstep;
 } Workspace;
 
 void workspace_init(Workspace*);
@@ -58,5 +72,10 @@ void workspace_configchanged(Workspace*, Properties* property,
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 Inputs* workspace_noteinputs(Workspace*);
+void workspace_seteditposition(Workspace*, EditPosition);
+EditPosition workspace_editposition(Workspace*);
+void workspace_setcursorstep(Workspace*, int step);
+int workspace_cursorstep(Workspace*);
+const char* workspace_translate(Workspace*, const char* key);
 
 #endif

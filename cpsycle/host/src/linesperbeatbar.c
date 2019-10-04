@@ -8,6 +8,7 @@ static void OnTimer(LinesPerBeatBar*, ui_component* sender, int timerid);
 void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* player)
 {					
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	self->player = player;		
@@ -16,21 +17,21 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 	ui_label_init(&self->lpblabel, &self->component);
 	ui_label_setcharnumber(&self->lpblabel, 3);	
 	ui_button_init(&self->lessbutton, &self->component);
-	ui_button_settext(&self->lessbutton, "<");		
+	ui_button_seticon(&self->lessbutton, UI_ICON_LESS);
 	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);		
 	ui_button_init(&self->morebutton, &self->component);
-	ui_button_settext(&self->morebutton, ">");		
+	ui_button_seticon(&self->morebutton, UI_ICON_MORE);
 	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);	
 	self->lpb = 0;
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	SetTimer(self->component.hwnd, 500, 50, 0);
-	{
-		List* children;
-		ui_margin margin = { 0, 3, 0, 0 };
+	{		
+		ui_margin margin = { 0, 3, 3, 0 };
 				
-		children = ui_component_children(&self->component, 0);
-		ui_components_setalign(children, UI_ALIGN_LEFT);
-		ui_components_setmargin(children, &margin);
+		ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);		
 	}
 }
 

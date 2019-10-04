@@ -29,7 +29,7 @@ int ui_rectangle_intersect(ui_rectangle* self, int x, int y)
 			y >= self->top && y < self->bottom);
 }
 
-void ui_setmargin(ui_margin* self, int top, int right, int bottom, int left)
+void ui_margin_init(ui_margin* self, int top, int right, int bottom, int left)
 {   
    self->top = top;
    self->right = right;

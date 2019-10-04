@@ -8,7 +8,9 @@
 #include "resources/resource.h"
 
 static void OnSize(About*, ui_component* sender, int width, int height);
+static void InitButtons(About* self);
 static void OnContributors(About*, ui_component* sender);
+static void OnVersion(About*, ui_component* sender);
 static void OnShowatstartup(About*, ui_component* sender);
 static void Align(About*, ui_component* sender);
 	
@@ -20,7 +22,8 @@ void InitContrib(Contrib* self, ui_component* parent)
 	ui_component_enablealign(&self->component);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	ui_edit_init(&self->contrib, &self->component, 
-		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL);
+		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY);
+	ui_edit_setlinenumber(&self->contrib, 10);
 	ui_edit_settext(&self->contrib,						
 		"Josep Mª Antolín. [JAZ]/JosepMa\tDeveloper since release 1.5" "\r\n"
 		"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
@@ -58,9 +61,9 @@ void InitContrib(Contrib* self, ui_component* parent)
 		"Argu\t\t( http://www.aodix.com/ )" "\r\n"
 		"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 	);	
-	ui_edit_init(&self->psycledelics, &self->component, 0);
+	ui_edit_init(&self->psycledelics, &self->component, ES_READONLY);
 	ui_edit_settext(&self->psycledelics, "http://psycle.pastnotecut.org");	
-	ui_edit_init(&self->sourceforge, &self->component, 0);
+	ui_edit_init(&self->sourceforge, &self->component, ES_READONLY);
 	ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
 	ui_label_init(&self->steincopyright, &self->component);
 	ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
@@ -79,38 +82,63 @@ void InitContrib(Contrib* self, ui_component* parent)
 	}
 }
 
+void InitVersion(Version* self, ui_component* parent)
+{
+	ui_component_init(&self->component, parent);		
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_label_init(&self->versioninfo, &self->component);
+	ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
+	ui_component_resize(&self->versioninfo.component, 500, 300);
+	ui_component_setbackgroundmode(&self->versioninfo.component, BACKGROUND_SET);
+	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
+}
+
 void InitAbout(About* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);	
+	InitButtons(self);
 	ui_notebook_init(&self->notebook, &self->component);
 	ui_image_init(&self->image, &self->notebook.component);	
 	ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
-	InitContrib(&self->contrib, &self->notebook.component);		
-	ui_label_init(&self->versioninfo, &self->component);
-	ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
-	ui_component_setbackgroundmode(&self->versioninfo.component, BACKGROUND_SET);
-	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
+	InitContrib(&self->contrib, &self->notebook.component);
+	InitVersion(&self->version, &self->notebook.component);		
+	ui_notebook_setpage(&self->notebook, 0);
+}
+
+void InitButtons(About* self)
+{
 	ui_button_init(&self->contribbutton, &self->component);
 	ui_button_settext(&self->contribbutton, "Contributors / Credits");
 	signal_connect(&self->contribbutton.signal_clicked, self, OnContributors);
+	ui_button_init(&self->versionbutton, &self->component);
+	ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
+	signal_connect(&self->versionbutton.signal_clicked, self, OnVersion);
 	ui_button_init(&self->okbutton, &self->component);
 	ui_button_settext(&self->okbutton, "OK");
-	ui_notebook_setpage(&self->notebook, 0);
 }
 
 void Align(About* self, ui_component* sender)
 {
 	ui_size size;
 	int centerx;
+	int centery;
 
 	size = ui_component_size(&self->component);
 	centerx = (size.width - 500) / 2;	
-	ui_component_setposition(&self->notebook.component, centerx, 5, 500, 260);	
-	ui_component_setposition(&self->versioninfo.component, centerx, 262, 500, 95);
-	ui_component_setposition(&self->contribbutton.component, centerx, 365, 140, 20);
-	ui_component_setposition(&self->okbutton.component, centerx + 145, 365, 500 - 145, 20);
+	centery = (size.height - 385) / 2;
+	ui_component_setposition(&self->notebook.component, centerx, centery + 5, 520, 360);	
+	if (centery + 365 > size.height - 25) {
+		centery = size.height - 365 - 25;
+	}
+	ui_component_setposition(&self->contribbutton.component, centerx, centery + 365, 120, 20);
+	ui_component_setposition(&self->versionbutton.component, centerx + 145, centery + 365, 300, 20);
+	ui_component_setposition(&self->okbutton.component,
+		centerx + 445,
+		centery + 365,
+		60,
+		20);
 }
 
 void OnSize(About* self, ui_component* sender, int width, int height)
@@ -121,6 +149,14 @@ void OnSize(About* self, ui_component* sender, int width, int height)
 void OnContributors(About* self, ui_component* sender) 
 {	
 	ui_notebook_setpage(&self->notebook, 
-		ui_notebook_page(&self->notebook) == 0 ? 1 : 0);
+		ui_notebook_page(&self->notebook) != 1 ? 1 : 0);
+	ui_invalidate(&self->component);
+}
+
+void OnVersion(About* self, ui_component* sender) 
+{	
+	ui_notebook_setpage(&self->notebook, 
+		ui_notebook_page(&self->notebook) != 2 ? 2 : 0);
+	ui_invalidate(&self->component);
 }
 

@@ -4,19 +4,16 @@
 #if !defined(PLAYBAR_H)
 #define PLAYBAR_H
 
-#include "uicomponent.h"
-#include "list.h"
+#include "uibutton.h"
+#include "workspace.h"
 
 typedef struct {
-	List* tabs;
 	ui_component component;
-	int selected;
-	Signal signal_play;
-	Signal signal_stop;
+	ui_button play;
+	ui_button stop;	
+	Player* player;
 } PlayBar;
 
-void InitPlayBar(PlayBar*, ui_component* parent);
-void playbar_append(PlayBar*, const char* label);
-void playbar_select(PlayBar*, int tab);
+void playbar_init(PlayBar*, ui_component* parent, Workspace*);
 
 #endif

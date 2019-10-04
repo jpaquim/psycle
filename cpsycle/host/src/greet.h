@@ -14,7 +14,8 @@ typedef struct {
 	ui_groupbox groupbox;
 	ui_label header;
 	ui_listbox greetz;
-	ui_button ok;
+	ui_button original;
+	int current;
 } Greet;
 
 

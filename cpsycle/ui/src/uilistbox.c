@@ -9,8 +9,8 @@ extern IntHashTable selfmap;
 extern IntHashTable winidmap;
 extern int winid;
 
-static void OnCommand(ui_listbox* self, WPARAM wParam, LPARAM lParam);
-static void OnDestroy(ui_listbox* self, ui_component* sender);
+static void oncommand(ui_listbox*, ui_component* sender, WPARAM wParam, LPARAM lParam);
+static void ondestroy(ui_listbox*, ui_component* sender);
 static void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style);
 
 void ui_listbox_init(ui_listbox* listbox, ui_component* parent)
@@ -30,7 +30,7 @@ void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style)
 	memset(&listbox->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&listbox->component);		
 	signal_init(&listbox->signal_selchanged);
-	signal_connect(&listbox->component.signal_destroy, listbox, OnDestroy);
+	signal_connect(&listbox->component.signal_destroy, listbox, ondestroy);
 	listbox->component.doublebuffered = 0;
 	listbox->component.hwnd = CreateWindow (TEXT("LISTBOX"), NULL,
 		style,
@@ -41,16 +41,13 @@ void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style)
 	InsertIntHashTable(&selfmap, (int)listbox->component.hwnd, &listbox->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &listbox->component);
 	listbox->component.winid = (HMENU)winid;
-	winid++;	
-	listbox->component.events.target = listbox;
-	listbox->component.events.cmdtarget = listbox;
-	listbox->component.events.command = OnCommand;
-	ui_component_init_base(&listbox->component);	
+	winid++;		
+	ui_component_init_base(&listbox->component);
+	signal_connect(&listbox->component.signal_command, listbox, oncommand);
 	ui_component_setbackgroundmode(&listbox->component, BACKGROUND_SET);
 }
 
-
-void OnDestroy(ui_listbox* self, ui_component* sender)
+void ondestroy(ui_listbox* self, ui_component* sender)
 {
 	signal_dispose(&self->signal_selchanged);
 }
@@ -97,7 +94,7 @@ int ui_listbox_selcount(ui_listbox* listbox)
 	return SendMessage(listbox->component.hwnd, LB_GETSELCOUNT, (WPARAM)0, (LPARAM)0); 
 }
 
-void OnCommand(ui_listbox* self, WPARAM wParam, LPARAM lParam) {
+void oncommand(ui_listbox* self, ui_component* sender, WPARAM wParam, LPARAM lParam) {
 	switch(HIWORD(wParam))
     {
         case LBN_SELCHANGE :

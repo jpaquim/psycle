@@ -24,14 +24,22 @@ typedef struct {
 
 void InitContrib(Contrib*, ui_component* parent);
 
+typedef struct {
+	ui_component component;
+	ui_label versioninfo;
+} Version;
+
+void InitVersion(Version*, ui_component* parent);
+
 typedef struct {	
 	ui_component component;
 	ui_notebook notebook;
 	ui_image image;
 	Contrib contrib;
+	Version version;
 	ui_button contribbutton;
-	ui_button okbutton;	
-	ui_label versioninfo;	
+	ui_button versionbutton;
+	ui_button okbutton;		
 } About;
 
 void InitAbout(About*, ui_component* parent);		

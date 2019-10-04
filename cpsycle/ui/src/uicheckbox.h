@@ -9,15 +9,12 @@
 
 typedef struct {
    ui_component component;
-   Signal signal_clicked;    
-   int ownerdrawn;
-   char* text; // ownerdrawn 
-   int hover;
+   Signal signal_clicked;   
 } ui_checkbox;
 
-void ui_checkbox_init(ui_checkbox* checkbox, ui_component* parent);
-void ui_checkbox_settext(ui_checkbox* checkbox, const char* text);
-void ui_checkbox_check(ui_checkbox* checkbox);
-void ui_checkbox_disablecheck(ui_checkbox* checkbox);
+void ui_checkbox_init(ui_checkbox*, ui_component* parent);
+void ui_checkbox_settext(ui_checkbox*, const char* text);
+void ui_checkbox_check(ui_checkbox*);
+void ui_checkbox_disablecheck(ui_checkbox*);
 
 #endif

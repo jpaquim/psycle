@@ -21,13 +21,13 @@ void InitOctaveBar(OctaveBar* self, ui_component* parent, Workspace* workspace)
 	signal_connect(&self->octavebox.signal_selchanged, self, OnOctaveBoxSelChange);	
 	signal_connect(&workspace->signal_octavechanged, self, OnOctaveChanged);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	{
-		List* children;
-		ui_margin margin = { 0, 10, 3, 3 };
-		
-		children = ui_component_children(&self->component, 0);
-		ui_components_setalign(children, UI_ALIGN_LEFT);
-		ui_components_setmargin(children, &margin);
+	{		
+		ui_margin margin = { 0, 3, 3, 0 };
+				
+		ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);		
 	}
 }
 

@@ -285,7 +285,7 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 
 	InitEnvelopeView(&self->envelopeview, &self->component);
 	ui_component_setalign(&self->envelopeview.component, UI_ALIGN_TOP);
-	ui_setmargin(&margin, 20, 5, 5, 5);
+	ui_margin_init(&margin, 20, 5, 5, 5);
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 200);	
 
@@ -294,7 +294,7 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 	InitSliderGroup(&self->sustain, &self->component, "Sustain Level");
 	InitSliderGroup(&self->release, &self->component, "Release");
 	
-	ui_setmargin(&margin, 0, 5, 5, 5);
+	ui_margin_init(&margin, 0, 5, 5, 5);
 	for (i = 0; i < 4; ++i) {		
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
@@ -432,7 +432,7 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 
 	InitEnvelopeView(&self->envelopeview, &self->component);
 	ui_component_setalign(&self->envelopeview.component, UI_ALIGN_TOP);
-	ui_setmargin(&margin, 20, 5, 5, 5);
+	ui_margin_init(&margin, 20, 5, 5, 5);
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 100);	
 
@@ -444,7 +444,7 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 	InitSliderGroup(&self->res, &self->component, "Res/bandw.");
 	InitSliderGroup(&self->modamount, &self->component, "Mod. Amount");
 	
-	ui_setmargin(&margin, 0, 5, 5, 5);
+	ui_margin_init(&margin, 0, 5, 5, 5);
 	for (i = 0; i < 7; ++i) {		
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);

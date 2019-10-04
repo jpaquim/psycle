@@ -14,7 +14,7 @@ static void OnMaster(Gear*, ui_component* sender);
 
 void InitGearButtons(GearButtons* self, ui_component* parent)
 {
-	ui_component_init(&self->component, parent);
+	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	ui_button_init(&self->createreplace, &self->component);
@@ -32,7 +32,7 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 	ui_button_init(&self->showmaster, &self->component);
 	ui_button_settext(&self->showmaster, "Show master");
 	{
-		ui_margin margin = { 3, 3, 3, 3 };
+		ui_margin margin = { 0, 3, 3, 0 };
 		List* p;
 		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next) {
 			ui_component* component;
@@ -51,6 +51,7 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 	self->machines = &workspace->song->machines;
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	ui_component_init(&self->component, parent);
+	ui_component_resize(&self->component, 300, 0);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	InitTabBar(&self->tabbar, &self->component);	
 	ui_component_move(&self->tabbar.component, 0, 0);
@@ -89,9 +90,10 @@ void OnSize(Gear* self, ui_component* sender, int width, int height)
 	buttonssize = ui_component_size(&self->buttons.component);
 	ui_component_move(&self->tabbar.component, 0, height - 20);
 	ui_component_resize(&self->tabbar.component, width, 20);
-	ui_component_resize(&self->notebook.component, width - buttonssize.width, height - 20);
-	ui_component_move(&self->buttons.component, width - buttonssize.width , 0);
-	ui_component_resize(&self->buttons.component, buttonssize.width, height - 20);
+	ui_component_setposition(&self->notebook.component, 0, 0,
+		width - buttonssize.width, height - 20);
+	ui_component_setposition(&self->buttons.component, width - buttonssize.width , 0,
+		buttonssize.width, height - 20);
 }
 
 void ConnectSongSignals(Gear* self)

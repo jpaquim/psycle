@@ -4,6 +4,7 @@
 #if !defined(TRACKERVIEW)
 #define TRACKERVIEW
 
+#include "notestab.h"
 #include "skincoord.h"
 #include "tabbar.h"
 #include "workspace.h"
@@ -48,19 +49,11 @@ typedef struct {
 	ui_bitmap bitmap;
 } TrackerSkin;
 
-typedef struct {
-	unsigned int track;
-	float offset;
-	unsigned int line;
-	unsigned int subline;
-	unsigned int totallines;
-	unsigned int col;	
-} TrackerCursor;
+typedef EditPosition TrackerCursor;
 
-typedef struct
-{
-	TrackerCursor topleft;
-	TrackerCursor bottomright;
+typedef struct {
+	EditPosition topleft;
+	EditPosition bottomright;
 } TrackerGridBlock;
 
 typedef struct {
@@ -98,13 +91,13 @@ typedef struct {
    int lineheight;
    unsigned int numtracks;   
    int lpb;
-   float bpl;
-   float cbpl;
+   double bpl;
+   double cbpl;
    PatternNode* curr_event;
    Inputs* noteinputs;
-   char** notestab;
+   NotesTabMode notestabmode;
    TrackerCursor cursor;
-   float cursorstep;   
+   beat_t cursorstep;   
    Player* player;
    int textheight;
    int textwidth;
@@ -127,9 +120,11 @@ typedef struct TrackerView {
 	TrackerSkin skin;
 	ui_font font;
 	int showlinenumbers;
+	int showemptydata;
 	Workspace* workspace;
-	int opcount;
+	unsigned int opcount;
 	TrackerInputs inputs;
+	unsigned int cursorstep;
 } TrackerView;
 
 void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView*, Player*);

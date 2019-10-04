@@ -180,10 +180,6 @@ SOURCE=.\src\newmachine.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\noteinputs.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\notemapedit.c
 # End Source File
 # Begin Source File
@@ -209,6 +205,10 @@ SOURCE=.\src\pionoroll.c
 # Begin Source File
 
 SOURCE=.\src\playbar.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\playposbar.c
 # End Source File
 # Begin Source File
 
@@ -261,6 +261,10 @@ SOURCE=.\src\songproperties.c
 # Begin Source File
 
 SOURCE=.\src\songtrackbar.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\stepbox.c
 # End Source File
 # Begin Source File
 
@@ -392,10 +396,6 @@ SOURCE=.\src\newmachine.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\noteinputs.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\notemapedit.h
 # End Source File
 # Begin Source File
@@ -421,6 +421,10 @@ SOURCE=.\src\pianoroll.h
 # Begin Source File
 
 SOURCE=.\src\playbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\playposbar.h
 # End Source File
 # Begin Source File
 
@@ -473,6 +477,10 @@ SOURCE=.\src\songproperties.h
 # Begin Source File
 
 SOURCE=.\src\songtrackbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\stepbox.h
 # End Source File
 # Begin Source File
 

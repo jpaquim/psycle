@@ -58,14 +58,13 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	ui_combobox_setcursel(&self->instparambox, 0);
 	signal_connect(&self->instparambox.signal_selchanged, self, OnInstParamBoxSelChange);
 	ConnectSongSignals(self);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);		
-	{
-		List* children;
-		ui_margin margin = { 0, 10, 3, 3 };
-		
-		children = ui_component_children(&self->component, 0);
-		ui_components_setalign(children, UI_ALIGN_LEFT);
-		ui_components_setmargin(children, &margin);
+	{		
+		ui_margin margin = { 0, 3, 3, 0 };
+				
+		ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);		
 	}
 }
 

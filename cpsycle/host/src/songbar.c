@@ -12,12 +12,12 @@ void InitSongBar(SongBar* self, ui_component* parent, Workspace* workspace)
 	InitLinesPerBeatBar(&self->linesperbeatbar, &self->component, &workspace->player);
 	ui_component_resize(&self->linesperbeatbar.component, 130, 0);	
 	InitOctaveBar(&self->octavebar, &self->component, workspace);	
-	{
-		List* children;
+	{		
 		ui_margin margin = { 0, 10, 3, 3 };
 		
-		children = ui_component_children(&self->component, 0);
-		ui_components_setalign(children, UI_ALIGN_LEFT);
-		ui_components_setmargin(children, &margin);
+		ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);
 	}
 }

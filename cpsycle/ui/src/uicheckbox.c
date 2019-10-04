@@ -9,26 +9,26 @@ extern IntHashTable selfmap;
 extern IntHashTable winidmap;
 extern int winid;
 
-static void OnCommand(ui_checkbox* self, WPARAM wParam, LPARAM lParam);
-static void ondestroy(ui_checkbox* self, ui_component* sender);
+static void oncommand(ui_checkbox*, ui_component*, WPARAM wParam, LPARAM lParam);
+static void ondestroy(ui_checkbox*, ui_component*);
+static void onpreferredsize(ui_checkbox*, ui_component* sender, ui_size* limit,
+	int* width, int* height);
 static void ui_checkbox_create_system(ui_checkbox*, ui_component* parent);
 
 void ui_checkbox_init(ui_checkbox* checkbox, ui_component* parent)
 {  
-	memset(&checkbox->component.events, 0, sizeof(ui_events));	
-	checkbox->hover = 0;
+	memset(&checkbox->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&checkbox->component);
-	signal_init(&checkbox->signal_clicked);
-	checkbox->component.doublebuffered = 0;
+	signal_init(&checkbox->signal_clicked);	
 	ui_checkbox_create_system(checkbox, parent);
 	signal_connect(&checkbox->component.signal_destroy, checkbox,  ondestroy);
 	ui_component_init_base(&checkbox->component);
+	signal_connect(&checkbox->component.signal_preferredsize,
+		checkbox, onpreferredsize);
 }
 
 void ui_checkbox_create_system(ui_checkbox* checkbox, ui_component* parent)
-{    	
-	checkbox->ownerdrawn = 0;
-	checkbox->text = 0;
+{	
 	checkbox->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
 		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
 		0, 0, 90, 90,
@@ -36,11 +36,9 @@ void ui_checkbox_create_system(ui_checkbox* checkbox, ui_component* parent)
 		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)checkbox->component.hwnd, &checkbox->component);	
-	checkbox->component.events.target = checkbox;
-	checkbox->component.events.cmdtarget = checkbox;
 	InsertIntHashTable(&winidmap, (int)winid, &checkbox->component);
-	winid++;	
-	checkbox->component.events.command = OnCommand;
+	winid++;		
+	signal_connect(&checkbox->component.signal_command, checkbox, oncommand);
 }
 
 void ondestroy(ui_checkbox* self, ui_component* sender)
@@ -63,7 +61,7 @@ void ui_checkbox_disablecheck(ui_checkbox* self)
 	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
 }
 
-static void OnCommand(ui_checkbox* self, WPARAM wParam, LPARAM lParam)
+static void oncommand(ui_checkbox* self, ui_component* sender, WPARAM wParam, LPARAM lParam)
 {
 	switch(HIWORD(wParam))
     {
@@ -77,5 +75,17 @@ static void OnCommand(ui_checkbox* self, WPARAM wParam, LPARAM lParam)
 		default:
 		break;
     }
+}
+
+void onpreferredsize(ui_checkbox* self, ui_component* sender, ui_size* limit,
+	int* width, int* height)
+{			
+	ui_size size;	
+	char text[256];
+
+	GetWindowText(self->component.hwnd, text, 256);
+	size = ui_component_textsize(&self->component, text);	
+	*width = size.width + 20;
+	*height = size.height + 4;	
 }
 

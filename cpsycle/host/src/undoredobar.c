@@ -14,18 +14,18 @@ void InitUndoRedoBar(UndoRedoBar* self, ui_component* parent, Workspace* workspa
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	ui_button_init(&self->undobutton, &self->component);
-	ui_button_settext(&self->undobutton, "Undo");	
+	ui_button_settext(&self->undobutton, workspace_translate(workspace, "undo"));
 	signal_connect(&self->undobutton.signal_clicked, self, OnUndo);	
 	ui_button_init(&self->redobutton, &self->component);
-	ui_button_settext(&self->redobutton, "Redo");	
+	ui_button_settext(&self->redobutton, workspace_translate(workspace, "redo"));
 	signal_connect(&self->redobutton.signal_clicked, self, OnRedo);
-	{
-		List* children;
-		ui_margin margin = { 3, 10, 0, 3 };
+	{		
+		ui_margin margin = { 0, 3, 3, 0 };
 		
-		children = ui_component_children(&self->component, 0);
-		ui_components_setalign(children, UI_ALIGN_LEFT);
-		ui_components_setmargin(children, &margin);
+		ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);
 	}
 }
 

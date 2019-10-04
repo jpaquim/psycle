@@ -4,15 +4,17 @@
 #include "uistatusbar.h"
 #include "hashtbl.h"
 #include <commctrl.h>
+#include <stdio.h>
 
 extern IntHashTable selfmap;
 
-void ui_statusbar_init(ui_statusbar* statusbar, ui_component* parent)
+
+void ui_statusbar_init(ui_statusbar* self, ui_component* parent)
 {  
-    memset(&statusbar->component.events, 0, sizeof(ui_events));
-	ui_component_init_signals(&statusbar->component);	
-	statusbar->component.doublebuffered = 0;
-	statusbar->component.hwnd = CreateWindowEx(
+    memset(&self->component.events, 0, sizeof(ui_events));
+	ui_component_init_signals(&self->component);	
+	self->component.doublebuffered = 0;
+	self->component.hwnd = CreateWindowEx(
         0,
         STATUSCLASSNAME,
         NULL,
@@ -22,17 +24,16 @@ void ui_statusbar_init(ui_statusbar* statusbar, ui_component* parent)
         0,
         0,
         parent->hwnd,
-        (HMENU)50000,
+        0,
         (HINSTANCE)GetWindowLong(parent->hwnd, GWL_HINSTANCE),
         NULL);
 
-    if (! statusbar->component.hwnd)
+    if (! self->component.hwnd)
     {
         MessageBox(NULL, "Failed To Create The Status Bar", "Error", MB_OK | MB_ICONERROR);
     }
-	InsertIntHashTable(&selfmap, (int)statusbar->component.hwnd, &statusbar->component);	
-	statusbar->component.events.target = statusbar;
-	ui_component_init_base(&statusbar->component);
+	InsertIntHashTable(&selfmap, (int)self->component.hwnd, &self->component);		
+	ui_component_init_base(&self->component);			
 }
 
 void ui_statusbar_setfields(ui_statusbar* self, int parts, int iStatusWidths[])
@@ -44,3 +45,4 @@ void ui_statusbar_settext(ui_statusbar* self, int field, const char* text)
 {
 	SendMessage(self->component.hwnd, SB_SETTEXT, field,(LPARAM)text);
 }
+

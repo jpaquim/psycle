@@ -17,7 +17,7 @@ void InitTab(Tab* self, const char* text, ui_size* size)
 	if (size) {
 		self->size = *size;
 	}	
-	ui_setmargin(&self->margin, 0, 0, 0, 0);
+	ui_margin_init(&self->margin, 0, 0, 0, 0);
 }
 
 void DisposeTab(Tab* self)
@@ -30,7 +30,7 @@ void InitTabBar(TabBar* self, ui_component* parent)
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	self->component.doublebuffered = 1;	
-	ui_setmargin(&self->tabmargin, 0, 10, 0, 0);
+	ui_margin_init(&self->tabmargin, 0, 10, 0, 0);
 	signal_init(&self->signal_change);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
@@ -220,6 +220,7 @@ void tabbar_append(TabBar* self, const char* label)
 		self->tabs = list_create(tab);
 	}	
 	tab->size = ui_component_textsize(&self->component, tab->text);
+	tab->size.height = 20;
 }
 
 void tabbar_settabmargin(TabBar* self, int tabindex, const ui_margin* margin)
@@ -253,7 +254,7 @@ void onalign(TabBar* self, ui_component* sender)
 		Tab* tab;
 
 		tab = (Tab*)p->entry;
-		tab->size = ui_component_textsize(&self->component, tab->text);			
+		tab->size = ui_component_textsize(&self->component, tab->text);
 	}		
 }
 
@@ -264,6 +265,8 @@ void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, int* wi
 	List* tabs;	
 	int cpx = 0;
 	int cpy = 0;
+	int cpxmax = 0;
+	int cpymax = 0;
 	
 	size = ui_component_size(&self->component);	
 
@@ -279,21 +282,37 @@ void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, int* wi
 	}
 	for (tabs = self->tabs; tabs != 0; tabs = tabs->next) {
 		Tab* tab;
+		ui_size tabsize;
 
 		tab = (Tab*)tabs->entry;
-		if (self->tabalignment == UI_ALIGN_TOP) {
-			cpx += tab->size.width;
+		tabsize = ui_component_textsize(&self->component, tab->text);
+		tabsize.height = (int) (tabsize.height * 1.5);
+		tabsize.width = (int) tabsize.width;
+		if (self->tabalignment == UI_ALIGN_TOP) {			
+			cpx += tabsize.width;
 			cpx += self->tabmargin.right + tab->margin.right;
+			if (cpymax < cpy + tabsize.height + tab->margin.top + tab->margin.bottom) {
+				cpymax = cpy + tabsize.height + tab->margin.top + tab->margin.bottom;
+			}
+			if (cpxmax < cpx + tabsize.width + tab->margin.left + tab->margin.right) {
+				cpxmax = cpx + tabsize.width + tab->margin.left + tab->margin.right;
+			}
 		} else 
 		if (self->tabalignment == UI_ALIGN_LEFT ||
 			self->tabalignment == UI_ALIGN_RIGHT) {
-			cpy += tab->size.height;
-			cpy += self->tabmargin.bottom + tab->margin.bottom;
+									
+			cpy += tabsize.height;
+			if (cpxmax < cpx + tabsize.width + tab->margin.left + tab->margin.right) {
+				cpxmax = cpx + tabsize.width + tab->margin.left + tab->margin.right;
+			}
+			if (cpymax < cpy + tabsize.height + tab->margin.top + tab->margin.bottom) {
+				cpymax = cpy + tabsize.height + tab->margin.top + tab->margin.bottom;
+			}
 		}
 	}
 
-	*width = cpx;
-	*height = size.height;
+	*width = cpxmax;
+	*height = cpymax;
 }
 
 Tab* tabbar_tab(TabBar* self, int tabindex)
