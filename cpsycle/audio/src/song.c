@@ -5,6 +5,7 @@
 #include "pattern.h"
 #include "constants.h"
 #include <datacompression.h>
+#include <dir.h>
 #include "machinefactory.h"
 #include <stdlib.h>
 #include <string.h>
@@ -17,9 +18,9 @@
 #define TRUE 1
 #endif
 
-static void song_initdefaults(Song* self);
-static void song_initproperties(Song* self);
-static void song_initmaster(Song* self);
+static void song_initdefaults(Song*);
+static void song_initproperties(Song*);
+static void song_initmaster(Song*);
 
 static void loadpsy3(Song*, RiffFile*, char header[9], Properties* workspace);
 static void loadpsy2(Song*, RiffFile*);
@@ -29,6 +30,7 @@ static void readseqd(Song*, RiffFile*, unsigned int size, int version,
 static void readpatd(Song*, RiffFile*, unsigned int size, int version);
 static void readinsd(Song*, RiffFile*, unsigned int size, int version);
 static void readmacd(Song*, RiffFile*, unsigned int size, int version, Properties* workspace);
+static void makeplugincatchername(const char* psy3dllname, char* catchername);
 
 static void loadwavesubchunk(Song*, RiffFile*, int instrIdx, int pan, char * instrum_name, int fullopen, int loadIdx);
 static Machine* machineloadfilechunk(Song*, RiffFile*, int index, int version,
@@ -477,7 +479,7 @@ void readinsd(Song* song, RiffFile* file, unsigned int size, int version)
 	unsigned char _NNA;
 
 
-	int sampler_to_use; // Sampler machine index for lockinst.
+	int sampler_to_use = -1; // Sampler machine index for lockinst.
 	unsigned char _LOCKINST;	// Force this instrument number to change the selected machine to use a specific sampler when editing (i.e. when using the pc or midi keyboards, not the notes already existing in a pattern)
 
 	///\name Amplitude Envelope overview:
@@ -761,14 +763,17 @@ Machine* machineloadfilechunk(Song* self, RiffFile* file, int index, int version
 	Machine* machine;
 	int type;
 	char modulename[256];
+	char plugincatchername[256];
 	char editname[32];
 	int i;
 	
 	rifffile_read(file, &type,sizeof(type));
 	rifffile_readstring(file, modulename, 256);
-	machine = machinefactory_make(self->machinefactory, type, modulename);
+	makeplugincatchername(modulename, plugincatchername);
+	machine = machinefactory_make(self->machinefactory, type, plugincatchername);
 	if (!machine) {
-		machine = machinefactory_make(self->machinefactory, MACH_DUMMY, modulename);
+		machine = machinefactory_make(self->machinefactory, MACH_DUMMY, 
+			plugincatchername);
 		type = MACH_DUMMY;
 	}
 	
@@ -831,6 +836,23 @@ Machine* machineloadfilechunk(Song* self, RiffFile* file, int index, int version
 	}
 
 	return machine;	
+}
+
+static char* replace_char(char* str, char c, char r)
+{
+	char* p;
+	
+	for (p = strchr(str, c); p != 0; p = strchr(p + 1, c)) *p = r;
+	return p;
+}
+
+void makeplugincatchername(const char* psy3dllname, char* catchername)
+{
+	char ext[_MAX_PATH];
+
+	extract_path(psy3dllname, catchername, ext);
+	_strlwr(catchername);
+	replace_char(catchername, ' ', '-');
 }
 
 void loadpsy2(Song* self, RiffFile* file)

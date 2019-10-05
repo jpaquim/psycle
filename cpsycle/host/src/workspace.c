@@ -47,13 +47,13 @@ void workspace_init(Workspace* self)
 	self->cursorstep = 1;	
 	self->inputoutput = 0;
 	workspace_makeconfig(self);
-	machinefactory_init(&self->machinefactory, machinecallback(self),
-		self->config);
+	plugincatcher_init(&self->plugincatcher, self->directories);
+	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
+	machinefactory_init(&self->machinefactory, machinecallback(self), 
+		&self->plugincatcher);
 	self->song = (Song*) malloc(sizeof(Song));
 	song_init(self->song, &self->machinefactory);	
-	self->properties = workspace_makeproperties(self);
-	plugincatcher_init(&self->plugincatcher);
-	workspace_scanplugins(self);
+	self->properties = workspace_makeproperties(self);		
 	undoredo_init(&self->undoredo);
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
@@ -145,24 +145,9 @@ void workspace_driverconfig(Workspace* self)
 }
 
 void workspace_scanplugins(Workspace* self)
-{	
-	Properties* property;
-	Properties* directories;
-
-	directories = properties_find(self->config, "directories");
-	if (directories && directories->children) {		
-		plugincatcher_scan(&self->plugincatcher, "sampler", MACH_SAMPLER);		
-		property = properties_read(directories, "vstdir");
-		if (property) {
-			plugincatcher_scan(&self->plugincatcher,
-				properties_valuestring(property), MACH_VST);
-		}
-		property = properties_read(directories, "plugindir");
-		if (property) {
-			plugincatcher_scan(&self->plugincatcher,
-				properties_valuestring(property), MACH_PLUGIN);
-		}
-	}
+{		
+	plugincatcher_scan(&self->plugincatcher);
+	plugincatcher_save(&self->plugincatcher);
 }
 
 void workspace_makeconfig(Workspace* self)
@@ -282,16 +267,15 @@ void workspace_makenotes(Workspace* self)
 
 void workspace_makedirectories(Workspace* self)
 {
-	Properties* directories;
 	Properties* p;
 
-	directories = properties_createsection(self->config, "directories");
-	properties_settext(directories, "Directories");
-	p = properties_append_string(directories, "plugindir",
+	self->directories = properties_createsection(self->config, "directories");
+	properties_settext(self->directories, "Directories");
+	p = properties_append_string(self->directories, "plugin",
 		"C:\\Programme\\Psycle\\PsyclePlugins");
 	properties_settext(p, "Plug-in directory");
 	p->item.hint = PROPERTY_HINT_EDITDIR;
-	p = properties_append_string(directories, "vstdir",
+	p = properties_append_string(self->directories, "vst",
 		"C:\\Programme\\Psycle\\VstPlugins");
 	properties_settext(p, "VST directories");
 	p->item.hint = PROPERTY_HINT_EDITDIR;
@@ -552,7 +536,7 @@ Properties* workspace_pluginlist(Workspace* self)
 
 void workspace_load_configuration(Workspace* self)
 {	
-	properties_load(self->config, "psycle.ini");	
+	properties_load(self->config, "psycle.ini", 0);	
 	workspace_configaudio(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
@@ -631,6 +615,11 @@ void workspace_setcursorstep(Workspace* self, int step)
 int workspace_cursorstep(Workspace* self)
 {
 	return self->cursorstep;
+}
+
+int workspace_hasplugincache(Workspace* self)
+{
+	return self->hasplugincache;
 }
 
 MachineCallback machinecallback(Workspace* self)

@@ -790,7 +790,7 @@ void InitMachineView(MachineView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "New Machine");		
 	ui_notebook_setpage(&self->notebook, 0);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	signal_connect(&self->newmachine.signal_selected, self, OnNewMachineSelected);
+	signal_connect(&self->newmachine.pluginsview.signal_selected, self, OnNewMachineSelected);
 	signal_connect(&self->component.signal_mousedoubleclick, self,OnMachineViewMouseDoubleClick);
 	signal_connect(&self->component.signal_keydown, self,OnMachineViewKeyDown);
 }
@@ -812,12 +812,13 @@ void OnNewMachineSelected(MachineView* self, ui_component* sender,
 	Properties* plugininfo)
 {	
 	Machine* machine;
+	char* path;
 		
-	machine = machinefactory_make(&self->workspace->machinefactory,
-		properties_int(plugininfo, "type", 0),
-		properties_key(plugininfo));
+	properties_readstring(plugininfo, "path", &path, "");
+	machine = machinefactory_makefrompath(&self->workspace->machinefactory,
+		properties_int(plugininfo, "type", -1), path);
 	if (machine) {		
-		if (self->newmachine.calledbygear) {
+		if (self->newmachine.pluginsview.calledbygear) {
 			machines_insert(self->wireview.machines,
 				machines_slot(self->wireview.machines), machine);
 		} else {

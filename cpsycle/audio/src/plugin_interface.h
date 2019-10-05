@@ -193,6 +193,7 @@ extern "C" {
 #endif
 
 #if defined __STDC__ || __cplusplus
+extern void mi_resetcallback(CMachineInterface* mi);
 extern void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callback);
 extern CMachineInterface* mi_create(void* module);
 extern void mi_init(CMachineInterface* mi);
@@ -216,6 +217,7 @@ extern void mi_unused3(CMachineInterface* mi);
 extern int mi_val(CMachineInterface* mi, int param);
 extern void mi_setval(CMachineInterface* mi, int param, int val);
 #else
+extern void mi_resetcallback();
 extern void mi_setcallback(); 
 extern CMachineInterface* mi_create();
 extern void mi_init();

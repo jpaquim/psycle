@@ -24,28 +24,42 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 	char path[MAX_PATH];	
 	BOOL cont;
   
-	_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard); 	
+	// First, enumerate all files using the wildcard in the current directory
+	_snprintf(path, MAX_PATH, "%s\\*", root, wildcard);
  	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		return;
 	}
 	cont = TRUE;
-	while(cont == TRUE) {
-		if ((strncmp(".", wfd.cFileName, 1) !=0) && 
+	do {
+		if ((strncmp(".", wfd.cFileName, 1) != 0) && 
 				(strncmp("..", wfd.cFileName, 2) != 0) ) {
-			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			{
-				_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);
-				dir_enum(context, path, wildcard, flag, enumproc);
-			}
-			else
-			{
-				//do your work here -- mildly klugy comparison
+			if (!(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {						
 				_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
-				enumproc(context, path, flag);
+				enumproc(context, path, flag);				
 			}
-		}
-		cont = FindNextFile(hFind, &wfd);
+		}		
+	} while (FindNextFile(hFind, &wfd));
+	if (GetLastError() != ERROR_NO_MORE_FILES) {
+		return;
 	}
+	if (FindClose(hFind) == FALSE) {
+		return;
+	}
+	// Secondly, find and emumerate all subdirectories with their subdirectories
+	_snprintf(path, MAX_PATH, "%s\\*", root);
+	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
+		return;
+	}	
+	do {
+		if ((strncmp(".", wfd.cFileName, 1) != 0) && 
+				(strncmp("..", wfd.cFileName, 2) != 0) ) {
+			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+				// enumerate subdirectory with its subdirectories
+				_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
+				dir_enum(context, path, wildcard, flag, enumproc);
+			}			
+		}		
+	} while (FindNextFile(hFind, &wfd));
 	if (GetLastError() != ERROR_NO_MORE_FILES) {
 		return;
 	}
@@ -133,5 +147,23 @@ void setpathenv(const char* path)
 {
 }
 
-
 #endif
+
+void extract_path(const char* path, char* name, char* ext)
+{
+	char* p;
+		
+	p = strrchr(path, '\\');
+	if (p) {
+		name = strcpy(name, p + 1);
+	} else {
+		name = strcpy(name, path);
+	}
+	p = strrchr(name, '.');
+	if (p) {
+		ext = strncpy(ext, p + 1, strlen(name) - (p - name));
+		name[p - name] = '\0';
+	} else {
+		ext = '\0';
+	}
+}

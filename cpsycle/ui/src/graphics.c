@@ -40,7 +40,7 @@ ui_size ui_textsize(ui_graphics* g, const char* text)
 	ui_size	rv;
 	SIZE size;
 	
-	GetTextExtentPoint(g->hdc, text, strlen(text), &size) ;	
+	GetTextExtentPoint(g->hdc, text, (int)strlen(text), &size) ;	
 	rv.width = size.cx; 
 	rv.height = size.cy;
 	return rv;

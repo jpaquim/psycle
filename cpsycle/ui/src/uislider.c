@@ -8,7 +8,7 @@
 
 extern IntHashTable selfmap;
 extern IntHashTable winidmap;
-extern int winid;
+extern winid_t winid;
 
 static void oncommand(ui_slider*, ui_component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(ui_slider*, ui_component* sender);
@@ -16,7 +16,14 @@ static void onwindowproc(ui_slider*, ui_component* sender, int message,
 	WPARAM wParam, LPARAM lParam);
 
 void ui_slider_init(ui_slider* slider, ui_component* parent)
-{  
+{
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
     memset(&slider->component.events, 0, sizeof(ui_events));	
 	ui_component_init_signals(&slider->component);
 	signal_init(&slider->signal_clicked);
@@ -26,7 +33,7 @@ void ui_slider_init(ui_slider* slider, ui_component* parent)
 		WS_CHILD | WS_VISIBLE,
 		0, 0, 90, 90,
 		parent->hwnd, (HMENU)winid,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)slider->component.hwnd, &slider->component);	
 	slider->component.events.target = slider;

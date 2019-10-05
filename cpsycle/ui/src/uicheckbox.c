@@ -7,7 +7,7 @@
 
 extern IntHashTable selfmap;
 extern IntHashTable winidmap;
-extern int winid;
+extern winid_t winid;
 
 static void oncommand(ui_checkbox*, ui_component*, WPARAM wParam, LPARAM lParam);
 static void ondestroy(ui_checkbox*, ui_component*);
@@ -28,12 +28,19 @@ void ui_checkbox_init(ui_checkbox* checkbox, ui_component* parent)
 }
 
 void ui_checkbox_create_system(ui_checkbox* checkbox, ui_component* parent)
-{	
+{
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	checkbox->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
 		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
 		0, 0, 90, 90,
 		parent->hwnd, (HMENU)winid,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)checkbox->component.hwnd, &checkbox->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &checkbox->component);

@@ -7,7 +7,14 @@
 extern IntHashTable selfmap;
 
 void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
-{  
+{
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
     memset(&groupbox->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&groupbox->component);	
 	groupbox->component.doublebuffered = 0;
@@ -15,7 +22,7 @@ void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 		WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
 		0, 0, 90, 90,
 		parent->hwnd, NULL,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)groupbox->component.hwnd, &groupbox->component);	
 	groupbox->component.events.target = groupbox;

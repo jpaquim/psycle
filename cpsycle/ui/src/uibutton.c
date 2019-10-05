@@ -8,7 +8,8 @@
 
 extern IntHashTable selfmap;
 extern IntHashTable winidmap;
-extern int winid;
+
+extern winid_t winid;
 
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
@@ -45,14 +46,21 @@ void ui_button_init(ui_button* button, ui_component* parent)
 }
 
 void ui_button_create_system(ui_button* self, ui_component* parent)
-{    	
+{    		
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	self->ownerdrawn = 0;
 	self->text = 0;
 	self->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
 		WS_CHILD | WS_VISIBLE,
 		0, 0, 90, 90,
 		parent->hwnd, (HMENU)winid,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)self->component.hwnd, &self->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &self->component);

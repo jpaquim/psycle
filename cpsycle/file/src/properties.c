@@ -7,6 +7,7 @@
 #include "fileio.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <assert.h>
 
 static int properties_enumerate_rec(Properties* self);
@@ -17,6 +18,8 @@ static int OnSearchPropertiesEnum(Properties* self, Properties* property, int le
 static int OnSaveIniEnum(RiffFile* file, Properties* property, int level);
 static Properties* append(Properties* self, Properties* p);
 static Properties* tail(Properties*);
+static Properties* properties_findsectionex(Properties*, const char* key,
+	Properties** prev);
 void properties_sections(Properties*, char* text);
 
 void properties_init(Properties* self, const char* key, PropertyType typ)
@@ -60,7 +63,7 @@ Properties* properties_create(void)
 {
 	Properties* rv;
 	rv = (Properties*) malloc(sizeof(Properties));	
-	properties_init(rv, "", PROPERTY_TYP_ROOT);
+	properties_init(rv, "root", PROPERTY_TYP_ROOT);
 	return rv;
 }
 
@@ -388,21 +391,31 @@ int OnSearchPropertiesEnum(Properties* self, Properties* property, int level)
 }
 
 Properties* properties_findsection(Properties* self, const char* key)
+{
+	Properties* prev = 0;
+
+	return properties_findsectionex(self, key, &prev);
+}
+
+Properties* properties_findsectionex(Properties* self, const char* key,
+	Properties** prev)
 {	
-	Properties* p;
+	Properties* p;	
 	char text[_MAX_PATH];
 	char seps[]   = " .";
 	char *token;
 
-	p = self;	
+	p = self;
+	*prev = p;
 	strcpy(text, key);
 	token = strtok(text, seps );
 	while(token != 0) {
-		p = properties_find(self, token);
+		p = properties_find(self, token);	
 		if (!p) {
 			break;
 		}		
-		token = strtok(0, seps );
+		*prev = p;
+		token = strtok(0, seps );		
 	}	
 	return p;
 }
@@ -427,7 +440,7 @@ const char* properties_valuestring(Properties* self)
 	return (self) ? self->item.value.s : "";
 }
 
-void properties_load(Properties* self, const char* path)
+int properties_load(Properties* self, const char* path, int allowappend)
 {
 	FILE* fp;
 	Properties* curr;
@@ -494,6 +507,8 @@ void properties_load(Properties* self, const char* path)
 				Properties* p = properties_read(curr, key);
 				if (p) {
 					switch (p->item.typ) {
+						case PROPERTY_TYP_ROOT:
+						break;
 						case PROPERTY_TYP_INTEGER:
 							properties_write_int(curr, key, atoi(value));
 						break;
@@ -509,16 +524,32 @@ void properties_load(Properties* self, const char* path)
 						default:
 						break;
 					}					
+				} else
+				if (allowappend) {
+					int intval;
+					char *stopstring;
+
+					intval = strtol(value, &stopstring, 10);
+					if (errno == ERANGE || strcmp(stopstring, "") != 0) {
+						properties_append_string(curr, key, value);	
+					} else {
+						properties_append_int(curr, key, intval, 0, 0);											
+					}
 				}
 				i = 0;
 				state = 0;
 			} else
 			if (state == 4) {
-				Properties* p;
-				curr = self;
-				p = properties_findsection(self, key);
+				Properties* p;				
+				Properties* prev = 0;
+				p = properties_findsectionex(self, key, &prev);
 				if (p && p->children) {
 					curr = p;
+				} else
+				if (allowappend) {										
+					curr = properties_createsection(prev, key);
+				} else {
+					curr = self;
 				}
 				i = 0;
 				state = 0;
@@ -534,14 +565,15 @@ void properties_load(Properties* self, const char* path)
 			if (properties_read(curr, key)) {
 				properties_write_string(curr, key, value);
 			}			
-		}
-	}	
+		}		
+	}
+	return fp != 0;
 }
 
 void properties_save(Properties* self, const char* path)
 {
 	RiffFile file;
-	if (rifffile_create(&file, "psycle.ini", 1)) {
+	if (rifffile_create(&file, path, 1)) {
 		properties_enumerate(self, &file, OnSaveIniEnum);
 		rifffile_close(&file);
 	}
@@ -551,9 +583,11 @@ int OnSaveIniEnum(RiffFile* file, Properties* property, int level)
 {
 	if (property->item.key) {
 		char text[40];
-
-		if (property->item.typ == PROPERTY_TYP_SECTION)
-		{			
+		
+		if (property->item.typ == PROPERTY_TYP_ROOT) {
+			rifffile_write(file, "[root]", 6);
+		} else
+		if (property->item.typ == PROPERTY_TYP_SECTION) {
 			char sections[_MAX_PATH];
 
 			properties_sections(property, sections);

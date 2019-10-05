@@ -35,6 +35,7 @@ typedef struct {
 	Properties* config;
 	Properties* inputoutput;
 	Properties* keyboard;
+	Properties* directories;
 	Properties* properties;
 	Properties* lang;	
 	Properties* driverconfigure;	
@@ -44,12 +45,13 @@ typedef struct {
 	Signal signal_octavechanged;
 	Signal signal_songchanged;	
 	Signal signal_configchanged;
-	Signal signal_editpositionchanged;
+	Signal signal_editpositionchanged;	
 	ui_component* mainhandle;
 	UndoRedo undoredo;
 	Inputs noteinputs;
 	EditPosition editposition;
 	int cursorstep;
+	int hasplugincache;
 } Workspace;
 
 void workspace_init(Workspace*);
@@ -77,5 +79,6 @@ EditPosition workspace_editposition(Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 const char* workspace_translate(Workspace*, const char* key);
+int workspace_hasplugincache(Workspace*);
 
 #endif
