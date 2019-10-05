@@ -5,13 +5,21 @@
 #define NEWMACHINE
 
 #include "workspace.h"
-#include <uicomponent.h>
+#include <uibutton.h>
 #include <uidef.h>
 #include <plugincatcher.h>
 #include <hashtbl.h>
 #include <signal.h>
 
-struct NewMachineStruct {
+typedef struct {
+	ui_component component;
+	ui_button rescan;
+	Workspace* workspace;
+} NewMachineBar;
+
+void InitNewMachineBar(NewMachineBar*, ui_component* parent, Workspace*);
+
+typedef struct {
    ui_component component;   
    ui_graphics* g;
    int cx;
@@ -22,11 +30,17 @@ struct NewMachineStruct {
    Signal signal_selected;
    Workspace* workspace;
    int calledbygear;
-};
+} PluginsView;
 
-typedef struct NewMachineStruct NewMachine;
+void InitPluginsView(PluginsView*, ui_component* parent, Workspace*);
 
-void InitNewMachine(NewMachine* NewMachine, ui_component* parent, Workspace* workspace);
+typedef struct {
+   ui_component component;   
+   PluginsView pluginsview;
+   NewMachineBar bar;
+} NewMachine;
+
+void InitNewMachine(NewMachine*, ui_component* parent, Workspace*);
 
 
 #endif

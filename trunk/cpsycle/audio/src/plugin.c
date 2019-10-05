@@ -64,6 +64,7 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 			library_dispose(&self->library);			
 		} else {
 			int gbp;	
+			mi_resetcallback(self->mi);
 			mi_setcallback(self->mi, &callback);
 			mi_init(self->mi);
 			for (gbp = 0; gbp< pInfo->numParameters; gbp++) {
@@ -191,7 +192,7 @@ int mode(Plugin* self)
 unsigned int numinputs(Plugin* self)
 {
 	if (info(self)) {
-		return ((info(self)->Flags & 3) == 3) ? 0 : 2;
+		return (info(self)->Flags & 3 == 3) ? 0 : 2;
 	} else {
 		return 0;
 	}

@@ -83,7 +83,7 @@ int properties_type(Properties*);
 int properties_value(Properties*);
 Property* properties_entry(Properties*);
 const char* properties_valuestring(Properties*);
-void properties_load(Properties*, const char* path);
+int properties_load(Properties*, const char* path, int allowappend);
 void properties_save(Properties*, const char* path);
 void properties_settext(Properties*, const char* text);
 const char* properties_text(Properties* self);

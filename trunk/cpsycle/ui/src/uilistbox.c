@@ -7,7 +7,7 @@
 
 extern IntHashTable selfmap;
 extern IntHashTable winidmap;
-extern int winid;
+extern winid_t winid;
 
 static void oncommand(ui_listbox*, ui_component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(ui_listbox*, ui_component* sender);
@@ -27,6 +27,13 @@ void ui_listbox_init_multiselect(ui_listbox* listbox, ui_component* parent)
 
 void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style)
 {  
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	memset(&listbox->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&listbox->component);		
 	signal_init(&listbox->signal_selchanged);
@@ -36,7 +43,7 @@ void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style)
 		style,
 		0, 0, 90, 90,
 		parent->hwnd, (HMENU)winid,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)listbox->component.hwnd, &listbox->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &listbox->component);

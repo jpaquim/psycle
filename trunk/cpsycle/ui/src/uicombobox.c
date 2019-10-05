@@ -7,7 +7,7 @@
 
 extern IntHashTable selfmap;
 extern IntHashTable winidmap;
-extern int winid;
+extern winid_t winid;
 
 static void onpreferredsize(ui_combobox*, ui_component* sender,
 	ui_size* limit, int* width, int* height);
@@ -40,13 +40,20 @@ void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 
 void ui_combobox_create_system(ui_combobox* combobox, ui_component* parent)
 {
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	combobox->ownerdrawn = 0;	
 	combobox->component.doublebuffered = 0;
 	combobox->component.hwnd = CreateWindow (TEXT("COMBOBOX"), NULL,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
 		0, 0, 90, 200,
 		parent->hwnd, (HMENU)winid,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)combobox->component.hwnd, &combobox->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &combobox->component);
@@ -58,6 +65,13 @@ void ui_combobox_create_system(ui_combobox* combobox, ui_component* parent)
 
 void ui_combobox_create_ownerdrawn(ui_combobox* self, ui_component* parent)
 {		
+HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, onownerdraw);	
 	signal_connect(&self->component.signal_mousedown, self, onmousedown);
@@ -71,7 +85,7 @@ void ui_combobox_create_ownerdrawn(ui_combobox* self, ui_component* parent)
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
 		0, 0, 90, 200,
 		self->component.hwnd, (HMENU)winid,
-		(HINSTANCE) GetWindowLong (self->component.hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)self->combo.hwnd, &self->combo);	
 	InsertIntHashTable(&winidmap, (int)winid, &self->combo);

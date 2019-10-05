@@ -11,9 +11,13 @@
 
 TCHAR szAppClass[] = TEXT ("PsycleApp");
 static TCHAR szComponentClass[] = TEXT ("PsycleComponent") ;
+
+winid_t winid = 20000;
+
 IntHashTable selfmap;
 IntHashTable winidmap;
-int winid = 20000;
+
+
 static ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
 static int defaultcolor = 0x00D1C5B6;
@@ -515,7 +519,14 @@ void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 }
 
 void ui_component_init(ui_component* component, ui_component* parent)
-{		
+{
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	memset(&component->events, 0, sizeof(ui_events));
 	ui_component_init_signals(component);	
 	component->doublebuffered = 0;
@@ -523,7 +534,7 @@ void ui_component_init(ui_component* component, ui_component* parent)
 		WS_CHILDWINDOW | WS_VISIBLE,
 		0, 0, 90, 90,
 		parent->hwnd, NULL,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)component->hwnd, component);
 	component->events.target = component;				
@@ -611,6 +622,13 @@ void ui_component_dispose(ui_component* component)
 
 void ui_classcomponent_init(ui_component* component, ui_component* parent, const char* classname)
 {
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	memset(&component->events, 0, sizeof(ui_events));	
 	ui_component_init_signals(component);
 	component->doublebuffered = 0;
@@ -618,7 +636,7 @@ void ui_classcomponent_init(ui_component* component, ui_component* parent, const
 		WS_CHILDWINDOW | WS_VISIBLE,
 		0, 0, 100, 100,
 		parent->hwnd, NULL,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)component->hwnd, component);		
 	component->events.target = component;
@@ -669,14 +687,25 @@ void ui_component_hide(ui_component* self)
 
 void ui_component_showhorizontalscrollbar(ui_component* self)
 {
+#if defined(_WIN64)
+	SetWindowLongPtr(self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr(self->hwnd, GWL_STYLE) | WS_HSCROLL);
+#else
 	SetWindowLong(self->hwnd, GWL_STYLE, 
 		GetWindowLong(self->hwnd, GWL_STYLE) | WS_HSCROLL);
+#endif
 }
+
 
 void ui_component_hidehorizontalscrollbar(ui_component* self)
 {
+#if defined(_WIN64)
+	SetWindowLongPtr(self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr(self->hwnd, GWL_STYLE) & ~WS_HSCROLL);
+#else
 	SetWindowLong(self->hwnd, GWL_STYLE, 
 		GetWindowLong(self->hwnd, GWL_STYLE) & ~WS_HSCROLL);
+#endif
 }
 
 void ui_component_sethorizontalscrollrange(ui_component* self, int min, int max)
@@ -691,14 +720,24 @@ void ui_component_sethorizontalscrollrange(ui_component* self, int min, int max)
 
 void ui_component_showverticalscrollbar(ui_component* self)
 {
+#if defined(_WIN64)
+	SetWindowLongPtr(self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr(self->hwnd, GWL_STYLE) | WS_VSCROLL);
+#else
 	SetWindowLong(self->hwnd, GWL_STYLE, 
 		GetWindowLong(self->hwnd, GWL_STYLE) | WS_VSCROLL);
+#endif
 }
 
 void ui_component_hideverticalscrollbar(ui_component* self)
 {
+#if defined(_WIN64)
+	SetWindowLongPtr(self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr(self->hwnd, GWL_STYLE) & ~WS_VSCROLL);
+#else
 	SetWindowLong(self->hwnd, GWL_STYLE, 
 		GetWindowLong(self->hwnd, GWL_STYLE) & ~WS_VSCROLL);
+#endif
 }
 
 void ui_component_setverticalscrollrange(ui_component* self, int min, int max)

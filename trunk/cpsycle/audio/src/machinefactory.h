@@ -5,15 +5,17 @@
 #define MACHINEFACTORY_H
 
 #include "machine.h"
-#include <properties.h>
+#include "plugincatcher.h"
 
 typedef struct {
-	MachineCallback machinecallback;
-	Properties* configuration;
-	Properties* directories;
+	MachineCallback machinecallback;	
+	PluginCatcher* catcher;
 } MachineFactory;
 
-void machinefactory_init(MachineFactory*, MachineCallback, Properties* configuration);
-Machine* machinefactory_make(MachineFactory*, MachineType, const char* path);
+void machinefactory_init(MachineFactory*, MachineCallback, PluginCatcher*);
+Machine* machinefactory_make(MachineFactory*, MachineType,
+	const char* plugincatchername);
+Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
+	const char* path);
 
 #endif

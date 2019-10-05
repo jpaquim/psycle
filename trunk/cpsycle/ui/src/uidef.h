@@ -50,4 +50,10 @@ void ui_error(const char* err, const char* shorterr);
 void ui_font_init(ui_font*, const ui_fontinfo* info);
 void ui_font_dispose(ui_font*);
 
+#ifdef _WIN64
+typedef long long winid_t;
+#else
+typedef int winid_t;
+#endif
+
 #endif

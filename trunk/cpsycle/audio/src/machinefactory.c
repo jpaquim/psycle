@@ -10,18 +10,31 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char* makefullpath(MachineFactory*, const char* path,
-	const char* dirconfigkey, char* fullpath);
+static char* modulepath(MachineFactory*, int machtype, const char* path, char* fullpath);
+static int pathhasextension(const char* path);
+static int onpropertiesenum(MachineFactory*, Properties*, int level);
+
+static const char* searchname;
+static int searchtype;
+static Properties* searchresult;
 
 void machinefactory_init(MachineFactory* self, MachineCallback callback,
-	Properties* configuration)
+	PluginCatcher* catcher)
 {
-	self->machinecallback = callback;
-	self->configuration = configuration;
-	self->directories = properties_find(self->configuration, "directories");
+	self->machinecallback = callback;	
+	self->catcher = catcher;
 }
 
 Machine* machinefactory_make(MachineFactory* self, MachineType type,
+	const char* plugincatchername)
+{
+	char fullpath[_MAX_PATH];
+
+	return machinefactory_makefrompath(self, type,
+		modulepath(self, MACH_PLUGIN, plugincatchername, fullpath));
+}
+
+Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 	const char* path)
 {
 	Machine* machine = 0;
@@ -57,13 +70,10 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 		break;
 		case MACH_VST:
 		{
-			VstPlugin* plugin;
-			char fullpath[_MAX_PATH];
+			VstPlugin* plugin;			
 
 			plugin = (VstPlugin*)malloc(sizeof(VstPlugin));
-			vstplugin_init(plugin, 
-				self->machinecallback,
-				makefullpath(self, path, "vstplugindir", fullpath));	
+			vstplugin_init(plugin, self->machinecallback, path);	
 			if (plugin->machine.info(&plugin->machine)) {						
 				machine = &plugin->machine;			
 			} else {
@@ -74,13 +84,10 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 		break;		
 		case MACH_PLUGIN:
 		{
-			Plugin* plugin;
-			char fullpath[_MAX_PATH];
-						
+			Plugin* plugin;			
+									;
 			plugin = (Plugin*)malloc(sizeof(Plugin));			
-			plugin_init(plugin,
-				self->machinecallback,
-				makefullpath(self, path, "plugindir", fullpath));
+			plugin_init(plugin, self->machinecallback, path);
 			if (plugin->machine.info(&plugin->machine)) {						
 				machine = &plugin->machine;			
 			} else {
@@ -95,17 +102,43 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 	return machine;
 }
 
-char* makefullpath(MachineFactory* self, const char* path,
-	const char* dirconfigkey, char* fullpath)
-{
-	char* dir;
-
-	fullpath[0] = '\0';
-	if (self->configuration && (strrchr(path, '\\') == 0)) {
-		properties_readstring(self->directories, dirconfigkey, &dir, "");
-		_snprintf(fullpath, _MAX_PATH, "%s%s%s", dir, "\\", path);
+char* modulepath(MachineFactory* self, int machtype, const char* path,
+	char* fullpath)
+{	
+	if (!path) {
+		*fullpath = '\0';
+	} else
+	if (pathhasextension(path)) {
+		strcpy(fullpath, path);
 	} else {
-		_snprintf(fullpath, _MAX_PATH, "%s", path);
-	}	
+		searchname = path;
+		searchtype = machtype;
+		searchresult = 0;
+		properties_enumerate(self->catcher->plugins, self, onpropertiesenum);
+		if (searchresult) {
+			properties_readstring(searchresult, "path", &fullpath, "");
+		} else {
+			strcpy(fullpath, path);
+		}
+	}
 	return fullpath;
+}
+
+int onpropertiesenum(MachineFactory* self, Properties* property, int level)
+{
+	if (properties_type(property) == PROPERTY_TYP_SECTION) {
+		const char* key = properties_key(property);
+		key = key;
+		if ((strcmp(properties_key(property), searchname) == 0) &&
+				properties_int(property, "type", 0) == searchtype) {
+			searchresult = property;
+			return 0;			
+		}
+	}
+	return 1;
+}
+
+int pathhasextension(const char* path)
+{
+	return strrchr(path, '.') != 0;
 }

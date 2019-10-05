@@ -59,6 +59,9 @@ void InitMainFrame(MainFrame* self)
 	self->workspace.mainhandle = &self->component;
 	workspace_initplayer(&self->workspace);
 	workspace_load_configuration(&self->workspace);
+	if (!workspace_hasplugincache(&self->workspace)) {
+		workspace_scanplugins(&self->workspace);
+	}
 	signal_connect(&self->workspace.signal_songchanged, self, OnSongChanged);	
 	self->firstshow = 1;	
 	InitBars(self);	
@@ -496,7 +499,7 @@ void OnAboutOk(MainFrame* self, ui_component* sender)
 
 void OnGearCreate(MainFrame* self, ui_component* sender)
 {
-	self->machineview.newmachine.calledbygear = 1;
+	self->machineview.newmachine.pluginsview.calledbygear = 1;
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	tabbar_select(&self->machineview.tabbar, 1);
 }

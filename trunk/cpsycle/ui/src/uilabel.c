@@ -12,14 +12,20 @@ static TEXTMETRIC textmetric(ui_component*);
 
 void ui_label_init(ui_label* label, ui_component* parent)
 {  
+	HINSTANCE hInstance;
     memset(&label->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&label->component);	
 	label->component.doublebuffered = 0;
+#if defined(_WIN64)		
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
 	label->component.hwnd = CreateWindow (TEXT("STATIC"), NULL,
 		WS_CHILD | WS_VISIBLE | SS_CENTER,
 		0, 0, 90, 90,
 		parent->hwnd, NULL,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)label->component.hwnd, &label->component);	
 	label->component.events.target = label;	
@@ -29,7 +35,6 @@ void ui_label_init(ui_label* label, ui_component* parent)
 	signal_connect(&label->component.signal_preferredsize, label, onpreferredsize);
 	label->charnumber = 0;
 }
-
 
 void ui_label_settext(ui_label* label, const char* text)
 {

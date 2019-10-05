@@ -6,7 +6,7 @@
 
 extern IntHashTable selfmap;
 extern IntHashTable winidmap;
-extern int winid;
+extern winid_t winid;
 
 static void oncommand(ui_edit*, ui_component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(ui_edit*, ui_component* sender);
@@ -14,6 +14,13 @@ static void onpreferredsize(ui_edit*, ui_component* sender, ui_size* limit, int*
 
 void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 {  
+	HINSTANCE hInstance;
+
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif	
     memset(&edit->component.events, 0, sizeof(ui_events));	
 	ui_component_init_signals(&edit->component);	
 	signal_init(&edit->signal_change);
@@ -23,7 +30,7 @@ void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 		0, 0, 90, 90,
 		parent->hwnd, 
 		(HMENU)winid,
-		(HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE),
+		hInstance,
 		NULL);		
 	InsertIntHashTable(&selfmap, (int)edit->component.hwnd, &edit->component);	
 	InsertIntHashTable(&winidmap, (int)winid, &edit->component);

@@ -48,6 +48,10 @@ class PluginFxCallback : public CFxCallback
 		MachineCallback callback;
 };
 
+void mi_resetcallback(CMachineInterface* mi)
+{
+	mi->pCB = 0;
+}
 
 void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callback)
 {

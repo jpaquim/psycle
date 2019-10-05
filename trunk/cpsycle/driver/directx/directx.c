@@ -79,6 +79,9 @@ static void Quantize(float *pin, int *piout, int c);
 
 int f2i(float flt) 
 { 
+#if defined(_WIN64)
+	return (int)flt;
+#else
   int i; 
   static const double half = 0.5f; 
   _asm 
@@ -88,6 +91,7 @@ int f2i(float flt)
 	 fistp i 
   } 
   return i;
+#endif
 }
 
 int on_error(int err, const char* msg)

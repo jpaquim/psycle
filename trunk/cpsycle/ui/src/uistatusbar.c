@@ -10,7 +10,14 @@ extern IntHashTable selfmap;
 
 
 void ui_statusbar_init(ui_statusbar* self, ui_component* parent)
-{  
+{
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif	
     memset(&self->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&self->component);	
 	self->component.doublebuffered = 0;
@@ -25,7 +32,7 @@ void ui_statusbar_init(ui_statusbar* self, ui_component* parent)
         0,
         parent->hwnd,
         0,
-        (HINSTANCE)GetWindowLong(parent->hwnd, GWL_HINSTANCE),
+        hInstance,
         NULL);
 
     if (! self->component.hwnd)
