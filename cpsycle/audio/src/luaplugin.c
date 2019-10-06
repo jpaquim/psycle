@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "LuaPlugin.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -7,17 +8,17 @@
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-static void work(LuaPlugin* self, BufferContext*);
-static int hostevent(LuaPlugin* self, int const eventNr, int const val1, float const val2);
-static void seqtick(LuaPlugin* self, int channel, const PatternEvent* event);
-static void sequencertick(LuaPlugin* self);
-static CMachineInfo* info(LuaPlugin* self);
-static void parametertweak(LuaPlugin* self, int par, int val);
+static void work(LuaPlugin*, BufferContext*);
+static int hostevent(LuaPlugin*, int const eventNr, int const val1, float const val2);
+static void seqtick(LuaPlugin*, int channel, const PatternEvent*);
+static void sequencerlinetick(LuaPlugin*);
+static CMachineInfo* info(LuaPlugin*);
+static void parametertweak(LuaPlugin*, int par, int val);
 static int describevalue(LuaPlugin*, char* txt, int const param, int const value);
 static int value(LuaPlugin*, int const param);
 static void setvalue(LuaPlugin*, int const param, int const value);
-static void dispose(LuaPlugin* self);
-static int mode(LuaPlugin* self);
+static void dispose(LuaPlugin*);
+static int mode(LuaPlugin*);
 		
 void luaplugin_init(LuaPlugin* self, MachineCallback callback, const char* path)
 {
@@ -53,7 +54,7 @@ int hostevent(LuaPlugin* self, int const eventNr, int const val1, float const va
 	
 }
 
-void sequencertick(LuaPlugin* self)
+void sequencerlinetick(LuaPlugin* self)
 {
 	
 }

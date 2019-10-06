@@ -18,6 +18,8 @@ typedef struct {
 	unsigned int track; 
 } PatternEntry;
 
+PatternEntry* patternentry_clone(PatternEntry*);
+
 /// a list of event entries ordered by position in beat unit
 typedef List PatternNode;
 

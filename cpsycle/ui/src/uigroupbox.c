@@ -4,7 +4,7 @@
 #include "uigroupbox.h"
 #include "hashtbl.h"
 
-extern IntHashTable selfmap;
+extern Table selfmap;
 
 void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 {
@@ -24,7 +24,7 @@ void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 		parent->hwnd, NULL,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)groupbox->component.hwnd, &groupbox->component);	
+	table_insert(&selfmap, (int)groupbox->component.hwnd, &groupbox->component);	
 	groupbox->component.events.target = groupbox;
 	groupbox->component.events.cmdtarget = groupbox;
 	ui_component_init_base(&groupbox->component);

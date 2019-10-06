@@ -8,6 +8,7 @@
 #include "instrument.h"
 #include "sample.h"
 #include <adsr.h>
+#include <hashtbl.h>
 
 #define MAX_TRACKS 64
 
@@ -49,6 +50,7 @@ typedef struct {
 	int numvoices;
 	int resamplingmethod;
 	int defaultspeed;
+	Table lastinst;
 } Sampler;
 
 void sampler_init(Sampler*, MachineCallback);

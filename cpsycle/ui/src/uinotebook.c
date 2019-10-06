@@ -2,9 +2,6 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "uinotebook.h"
-#include "hashtbl.h"
-
-extern IntHashTable selfmap;
 
 void onsize(ui_notebook*, ui_component* sender, int width, int height);
 void ontabbarchange(ui_notebook*, ui_component* sender, int tabindex);

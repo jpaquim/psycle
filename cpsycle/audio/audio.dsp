@@ -42,7 +42,6 @@ RSC=rc.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /MT /W3 /GR /GX /O2 /I "..\..\diversalis\src" /I "..\file\src" /I "..\container\src" /I "..\dsp\src" /I "..\lua53\src" /I "..\vst-2.4\vst2.x" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# SUBTRACT CPP /Z<none>
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -109,6 +108,10 @@ SOURCE=.\src\buffercontext.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\duplicator.c
 # End Source File
 # Begin Source File
 
@@ -502,6 +505,10 @@ SOURCE=.\src\buffercontext.h
 # Begin Source File
 
 SOURCE=.\src\constants.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\duplicator.h
 # End Source File
 # Begin Source File
 

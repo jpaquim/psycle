@@ -1,50 +1,50 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "hashtbl.h"
 #include <stdlib.h>
 
+static int h(int k, int size) {  return k % size; }
 
-void InitIntHashTable(PIntHashTable table, int size) {
+void table_init(Table* self)
+{
   int i;
-  table->size = size;
-  for (i = 0; i < size; ++i) {
-    table->keys[i] = 0;
+
+  self->size = TABLEKEYS;
+  for (i = 0; i < self->size; ++i) {
+    self->keys[i] = 0;
   }
-  table->count = 0;
-  table->keymax = 0;
-  table->keymin = 2147483647;
+  self->count = 0;
+  self->keymax = 0;
+  self->keymin = 2147483647;
 }
 
-void DisposeIntHashTable(PIntHashTable table) {
+void table_dispose(Table* self)
+{
   int i;
-  PIntHashEntry ptr;
-  PIntHashEntry next;
+  HashEntry* p;
+  HashEntry* q;
 
-  for (i = 0; i < table->size; ++i) {
-    ptr = table->keys[i];
-    while (ptr != 0) {
-      next = ptr->next;
-      free(ptr);
-      ptr = next;
+  for (i = 0; i < self->size; ++i) {    
+    for (p = self->keys[i]; p != 0; p = q) {      
+	  q = p->next;
+      free(p);      
     }
-    table->keys[i] = 0;
+    self->keys[i] = 0;
   }
-  table->count = 0;
+  self->count = 0;
 }
 
-static int inth(int k, int size) {  
-  return k % size;
-}
-
-void InsertIntHashTable(PIntHashTable table, int k, void* value) {
+void table_insert(Table* self, int k, void* value)
+{
 	int hn;
-	PIntHashEntry p;
-	PIntHashEntry newentry;
+	HashEntry* p;
+	HashEntry* newentry;
 
-	hn = inth(k, table->size);
+	hn = h(k, self->size);
 	p = 0;
-	if (table->keys[hn] != 0) {
-		p = table->keys[hn];
+	if (self->keys[hn] != 0) {
+		p = self->keys[hn];
 		while (p != 0) {
 			if (k == p->key) {
 				p->value = value;
@@ -54,48 +54,48 @@ void InsertIntHashTable(PIntHashTable table, int k, void* value) {
 		}
 	}
 	if (!p) {
-		newentry = malloc(sizeof(IntHashEntry));
+		newentry = malloc(sizeof(HashEntry));
 		newentry->key = k;
 		newentry->value = value;
 		newentry->next = 0;
-		if (table->keys[hn] == 0) {
-			table->keys[hn] = newentry;
+		if (self->keys[hn] == 0) {
+			self->keys[hn] = newentry;
 		} else {
-		p = table->keys[hn];
+		p = self->keys[hn];
 		while (p->next != 0) {
 			p = p->next;
 		}
 		p->next = newentry;
 		}
-		if (table->keymin > newentry->key) {
-			table->keymin = newentry->key;
+		if (self->keymin > newentry->key) {
+			self->keymin = newentry->key;
 		}
-		if (table->keymax < newentry->key) {
-			table->keymax = newentry->key;
+		if (self->keymax < newentry->key) {
+			self->keymax = newentry->key;
 		}
-		++table->count;
+		++self->count;
 	}
 }
 
-void RemoveIntHashTable(PIntHashTable table, int k)
+void table_remove(Table* self, int k)
 {
 	int hn;
-	PIntHashEntry p;
-	PIntHashEntry q;
+	HashEntry* p;
+	HashEntry* q;
 
-	hn = inth(k, table->size);
-	if (table->keys[hn] != 0) {	
-		p = table->keys[hn];
+	hn = h(k, self->size);
+	if (self->keys[hn] != 0) {	
+		p = self->keys[hn];
 		q = 0;
 		while (p != 0) {
 			if (k == p->key) {
 				if (q) {				
 					q->next = p->next;				
 				} else {
-					table->keys[hn] = p->next;
+					self->keys[hn] = p->next;
 				}
 				free(p);
-				--table->count;
+				--self->count;
 				break;
 			}
 			q = p;
@@ -104,43 +104,32 @@ void RemoveIntHashTable(PIntHashTable table, int k)
 	}
 }
 
-void* SearchIntHashTable(PIntHashTable table, int k) {
-  int hn;
-  PIntHashEntry ptr;
-  void* rv;
+void* table_at(Table* self, int k)
+{
+	void* rv = 0;
+	  	
+	if (self->count > 0) {
+		int hn;
 
-  rv = 0;
+		hn = h(k, self->size);
+		if (self->keys[hn] != 0) {		
+			HashEntry* p;
 
-  if (table->size == 0) {
-	return 0;
-  }
-
-  hn = inth(k, table->size);
-  if (table->keys[hn] == 0) {
-    rv = 0;
-  } else
-  {
-    ptr = table->keys[hn];
-    while (ptr != 0) {
-      if (k == ptr->key) {
-	rv = ptr->value;
+			p = self->keys[hn];
+			while (p != 0) {
+				if (k == p->key) {
+					rv = p->value;
+					break;
+				}
+				p = p->next;
+			}		
+		}
+	}
 	return rv;
-      }
-      ptr = ptr->next;
-    }
-    return 0;
-  }
-  return 0;
 }
 
-int ExistsIntHashTable(PIntHashTable table, int k)
-{
-	int hn;
-
-	if (table->size == 0) {
-		return 0;
-	}
-	hn = inth(k, table->size);
-	return table->keys[hn] != 0;
+int table_exists(Table* self, int k)
+{	
+	return (self->count > 0) && (self->keys[h(k, self->size)] != 0);
 }
 

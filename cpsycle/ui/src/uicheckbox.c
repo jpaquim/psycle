@@ -5,8 +5,8 @@
 #include "hashtbl.h"
 #include <string.h>
 
-extern IntHashTable selfmap;
-extern IntHashTable winidmap;
+extern Table selfmap;
+extern Table winidmap;
 extern winid_t winid;
 
 static void oncommand(ui_checkbox*, ui_component*, WPARAM wParam, LPARAM lParam);
@@ -42,8 +42,8 @@ void ui_checkbox_create_system(ui_checkbox* checkbox, ui_component* parent)
 		parent->hwnd, (HMENU)winid,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)checkbox->component.hwnd, &checkbox->component);	
-	InsertIntHashTable(&winidmap, (int)winid, &checkbox->component);
+	table_insert(&selfmap, (int)checkbox->component.hwnd, &checkbox->component);	
+	table_insert(&winidmap, (int)winid, &checkbox->component);
 	winid++;		
 	signal_connect(&checkbox->component.signal_command, checkbox, oncommand);
 }

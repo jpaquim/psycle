@@ -22,8 +22,8 @@ void InitMachinesBox(MachinesBox* self, ui_component* parent,
 {	
 	self->mode = mode;
 	self->showslots = 1;
-	InitIntHashTable(&self->listboxslots, 256);
-	InitIntHashTable(&self->slotslistbox, 256);
+	table_init(&self->listboxslots);
+	table_init(&self->slotslistbox);
 	ui_listbox_init_multiselect(&self->machinelist, parent);	
 	SetMachines(self, machines);	
 	signal_connect(&self->machinelist.signal_selchanged, self,
@@ -33,8 +33,8 @@ void InitMachinesBox(MachinesBox* self, ui_component* parent,
 
 void OnDestroy(MachinesBox* self, ui_component* component)
 {
-	DisposeIntHashTable(&self->listboxslots);
-	DisposeIntHashTable(&self->slotslistbox);
+	table_dispose(&self->listboxslots);
+	table_dispose(&self->slotslistbox);
 }
 
 void BuildMachinesList(MachinesBox* self)
@@ -66,8 +66,8 @@ void InsertSlot(MachinesBox* self, int slot, Machine* machine)
 			strcat(buffer, machine->info(machine)->ShortName); 
 		}
 		listboxindex = ui_listbox_addstring(&self->machinelist, buffer);
-		InsertIntHashTable(&self->listboxslots, listboxindex, (void*)slot);
-		InsertIntHashTable(&self->slotslistbox, slot, (void*) listboxindex);
+		table_insert(&self->listboxslots, listboxindex, (void*)slot);
+		table_insert(&self->slotslistbox, slot, (void*) listboxindex);
 }
 
 int OnEnumMachines(MachinesBox* self, int slot, Machine* machine)
@@ -99,10 +99,10 @@ int CheckMachineMode(MachinesBox* self, Machine* machine)
 void ClearMachineBox(MachinesBox* self)
 {
 	ui_listbox_clear(&self->machinelist);
-	DisposeIntHashTable(&self->listboxslots);
-	InitIntHashTable(&self->listboxslots, 256);
-	DisposeIntHashTable(&self->slotslistbox);
-	InitIntHashTable(&self->slotslistbox, 256);
+	table_dispose(&self->listboxslots);
+	table_init(&self->listboxslots);
+	table_dispose(&self->slotslistbox);
+	table_init(&self->slotslistbox);
 }
 
 void AddString(MachinesBox* self, const char* text)
@@ -116,7 +116,7 @@ void OnMachinesListChanged(MachinesBox* self, ui_component* sender, int sel)
 
 	List* slots = self->machinelist.signal_selchanged.slots;
 	self->machinelist.signal_selchanged.slots = 0;
-	slot = (int)SearchIntHashTable(&self->listboxslots, sel);
+	slot = (int)table_at(&self->listboxslots, sel);
 	machines_changeslot(self->machines, slot);	
 	self->machinelist.signal_selchanged.slots = slots;
 
@@ -128,21 +128,21 @@ void OnMachinesInsert(MachinesBox* self, Machines* machines, int slot)
 		int boxindex;
 
 		BuildMachinesList(self);
-		boxindex = (int)SearchIntHashTable(&self->slotslistbox, slot);
+		boxindex = (int)table_at(&self->slotslistbox, slot);
 		ui_listbox_setcursel(&self->machinelist, boxindex);
 	}
 }
 
 void OnMachineSlotChanged(MachinesBox* self, Machines* sender, int slot)
 {
-	if (ExistsIntHashTable(&self->slotslistbox, slot)) {
+	if (table_exists(&self->slotslistbox, slot)) {
 		ui_listbox_setcursel(&self->machinelist, slot);	
 	}
 }
 
 void OnMachinesRemoved(MachinesBox* self, Machines* machines, int slot)
 {	
-	if (ExistsIntHashTable(&self->slotslistbox, slot)) {
+	if (table_exists(&self->slotslistbox, slot)) {
 		BuildMachinesList(self);
 		ui_listbox_setcursel(&self->machinelist, machines->slot);
 	}
@@ -160,11 +160,11 @@ void MachinesBoxClone(MachinesBox* self)
 
 		ui_listbox_selitems(&self->machinelist, selection, selcount);		
 		for (i = 0; i < selcount; ++i) {				
-			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
+			if (table_exists(&self->listboxslots, selection[i])) {
 				int slot;
 				Machine* machine;
 				
-				slot = (int) SearchIntHashTable(&self->listboxslots,
+				slot = (int) table_at(&self->listboxslots,
 					selection[i]);
 				machine = machines_at(self->machines, slot);
 				if (machine && srcmachine == 0) {
@@ -175,12 +175,12 @@ void MachinesBoxClone(MachinesBox* self)
 		}
 		if (srcmachine) {
 			for (i = 0; i < selcount; ++i) {				
-				if (ExistsIntHashTable(&self->listboxslots,
+				if (table_exists(&self->listboxslots,
 						selection[i])) {
 					int slot;
 					Machine* machine;
 					
-					slot = (int) SearchIntHashTable(&self->listboxslots,
+					slot = (int) table_at(&self->listboxslots,
 						selection[i]);
 					machine = machines_at(self->machines, slot);
 					if (machine != srcmachine) {
@@ -207,10 +207,10 @@ void MachinesBoxRemove(MachinesBox* self)
 		selection = (int*)malloc(selcount * sizeof(int));
 		ui_listbox_selitems(&self->machinelist, selection, selcount);
 		for (i = 0; i < selcount; ++i) {				
-			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
+			if (table_exists(&self->listboxslots, selection[i])) {
 				int slot;			
 				
-				slot = (int) SearchIntHashTable(&self->listboxslots,
+				slot = (int) table_at(&self->listboxslots,
 					selection[i]);
 				machines_remove(self->machines, slot);			
 			}
@@ -231,18 +231,18 @@ void MachinesBoxExchange(MachinesBox* self)
 
 		ui_listbox_selitems(&self->machinelist, selection, selcount);		
 		for (i = 0; i < selcount; ++i) {				
-			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {			
-				srcslot = (int) SearchIntHashTable(&self->listboxslots,
+			if (table_exists(&self->listboxslots, selection[i])) {			
+				srcslot = (int) table_at(&self->listboxslots,
 					selection[i]);			
 				break;			
 			}
 		}
 		if (srcslot != -1) {
 			for (i = 0; i < selcount; ++i) {				
-				if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
+				if (table_exists(&self->listboxslots, selection[i])) {
 					int slot;				
 					
-					slot = (int) SearchIntHashTable(&self->listboxslots,
+					slot = (int) table_at(&self->listboxslots,
 						selection[i]);				
 					if (slot != srcslot) {		
 						machines_exchange(self->machines, srcslot, slot);
@@ -265,11 +265,11 @@ void MachinesBoxShowParameters(MachinesBox* self)
 
 		ui_listbox_selitems(&self->machinelist, selection, selcount);
 		for (i = 0; i < selcount; ++i) {				
-			if (ExistsIntHashTable(&self->listboxslots, selection[i])) {
+			if (table_exists(&self->listboxslots, selection[i])) {
 				int slot;
 				Machine* machine;
 				
-				slot = (int) SearchIntHashTable(&self->listboxslots, selection[i]);
+				slot = (int) table_at(&self->listboxslots, selection[i]);
 				machine = machines_at(self->machines, slot);
 				if (machine) {					
 					machines_showparameters(self->machines, slot);

@@ -5,8 +5,8 @@
 #include "uicombobox.h"
 #include "hashtbl.h"
 
-extern IntHashTable selfmap;
-extern IntHashTable winidmap;
+extern Table selfmap;
+extern Table winidmap;
 extern winid_t winid;
 
 static void onpreferredsize(ui_combobox*, ui_component* sender,
@@ -55,8 +55,8 @@ void ui_combobox_create_system(ui_combobox* combobox, ui_component* parent)
 		parent->hwnd, (HMENU)winid,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)combobox->component.hwnd, &combobox->component);	
-	InsertIntHashTable(&winidmap, (int)winid, &combobox->component);
+	table_insert(&selfmap, (int)combobox->component.hwnd, &combobox->component);	
+	table_insert(&winidmap, (int)winid, &combobox->component);
 	combobox->component.winid = (HMENU)winid;
 	winid++;	
 	signal_connect(&combobox->component.signal_command, combobox, oncommand);	
@@ -87,8 +87,8 @@ HINSTANCE hInstance;
 		self->component.hwnd, (HMENU)winid,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)self->combo.hwnd, &self->combo);	
-	InsertIntHashTable(&winidmap, (int)winid, &self->combo);
+	table_insert(&selfmap, (int)self->combo.hwnd, &self->combo);	
+	table_insert(&winidmap, (int)winid, &self->combo);
 	self->combo.winid = (HMENU)winid;
 	winid++;	
 	signal_connect(&self->combo.signal_command, self, oncommand);

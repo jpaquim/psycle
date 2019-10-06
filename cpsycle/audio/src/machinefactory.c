@@ -7,6 +7,7 @@
 #include "sampler.h"
 #include "mixer.h"
 #include "master.h"
+#include "duplicator.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -52,6 +53,13 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 			DummyMachine* dummy = (DummyMachine*)malloc(sizeof(DummyMachine));
 			dummymachine_init(dummy, self->machinecallback);	
 			machine = &dummy->machine;
+		}
+		break;
+		case MACH_DUPLICATOR:
+		{
+			Duplicator* duplicator = (Duplicator*)malloc(sizeof(Duplicator));
+			duplicator_init(duplicator, self->machinecallback);	
+			machine = &duplicator->machine;
 		}
 		break;
 		case MACH_MIXER:

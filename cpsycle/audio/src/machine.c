@@ -28,6 +28,8 @@ static void generateaudio(Machine* self, BufferContext* bc) { }
 static int hostevent(Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
 static void seqtick(Machine* self, int channel, const PatternEvent* event) { }
 static void sequencertick(Machine* self) { }
+static List* sequencerinsert(Machine* self, List* events) { return 0; }
+static void sequencerlinetick(Machine* self) { }
 static const CMachineInfo* info(Machine* self) { return &macinfo; }
 static void parametertweak(Machine* self, int par, int val) { }
 static int describevalue(Machine* self, char* txt, int const param, int const value) { return 0; }
@@ -47,8 +49,14 @@ static void dummymachine_dispose(DummyMachine* self);
 static unsigned int dummymachine_numinputs(DummyMachine* self) { return 2; }
 static unsigned int dummymachine_numoutputs(DummyMachine* self) { return 2; }
 
+static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
+static unsigned int bpm(Machine* self) { return self->callback.bpm(self->callback.context); }
+static struct Samples* samples(Machine* self) { return self->callback.samples(self->callback.context); }
+static struct Machines* machines(Machine* self) { return self->callback.machines(self->callback.context); }
+static struct Instruments* instruments(Machine* self) { return self->callback.instruments(self->callback.context); }
+
 void machine_init(Machine* self, MachineCallback callback)
-{	
+{		
 	memset(self, 0, sizeof(Machine));
 	self->clone = clone;
 	self->dispose = machine_dispose;
@@ -57,6 +65,8 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->hostevent = hostevent;
 	self->seqtick = seqtick;
 	self->sequencertick = sequencertick;
+	self->sequencerlinetick = sequencerlinetick;
+	self->sequencerinsert = sequencerinsert;
 	self->info = info;
 	self->parametertweak = parametertweak;
 	self->describevalue = describevalue;
@@ -69,6 +79,11 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->setpan = setpan;
 	self->setcallback = setcallback;
 	self->updatesamplerate = updatesamplerate;
+	self->bpm = bpm;
+	self->samplerate = samplerate;
+	self->instruments = instruments;
+	self->samples = samples;
+	self->machines = machines;
 	self->callback = callback;
 	signal_init(&self->signal_worked);
 }
@@ -80,11 +95,13 @@ void machine_dispose(Machine* self)
 
 void work(Machine* self, BufferContext* bc)
 {			
-	List* p = bc->events;
+	List* p;
 	unsigned int amount = bc->numsamples;
 	unsigned int pos = 0;
-	while (p) {					
+
+	for (p = bc->events; p != 0; p = p->next) {					
 		int numworksamples;
+
 		PatternEntry* entry = (PatternEntry*)p->entry;		
 		numworksamples = (unsigned int)entry->delta - pos;		
 		if (numworksamples > 0) {				
@@ -98,8 +115,7 @@ void work(Machine* self, BufferContext* bc)
 			bc->numsamples = restorenumsamples;
 		}
 		self->seqtick(self, entry->track, &entry->event);		
-		pos = (unsigned int)entry->delta;
-		p = p->next;
+		pos = (unsigned int)entry->delta;	
 	}
 	if (amount > 0 && self->generateaudio) {
 		int restorenumsamples = bc->numsamples;

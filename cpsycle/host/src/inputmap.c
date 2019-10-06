@@ -5,24 +5,24 @@
 
 void inputs_init(Inputs* self)
 {
-	InitIntHashTable(&self->map, 256);
+	table_init(&self->map);
 }
 
 void inputs_dispose(Inputs* self)
 {
-	DisposeIntHashTable(&self->map);
+	table_dispose(&self->map);
 }
 
 int inputs_cmd(Inputs* self, int input)
 {
-	return ExistsIntHashTable(&self->map, input) 
-		? (int) SearchIntHashTable(&self->map, input)
+	return table_exists(&self->map, input) 
+		? (int) table_at(&self->map, input)
 		: -1;	
 }
 
 void inputs_define(Inputs* self, int input, int cmd)
 {
-	InsertIntHashTable(&self->map, input, (void*)cmd);
+	table_insert(&self->map, input, (void*)cmd);
 }
 
 unsigned int encodeinput(unsigned int keycode, int shift, int ctrl)

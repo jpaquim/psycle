@@ -5,7 +5,7 @@
 
 void instruments_init(Instruments* self)
 {
-	InitIntHashTable(&self->container, 256);
+	table_init(&self->container);
 	self->slot = 0;		
 	signal_init(&self->signal_insert);
 	signal_init(&self->signal_slotchange);
@@ -15,12 +15,12 @@ void instruments_dispose(Instruments* self)
 {
 	signal_dispose(&self->signal_insert);
 	signal_dispose(&self->signal_slotchange);
-	DisposeIntHashTable(&self->container);
+	table_dispose(&self->container);
 }
 
 void instruments_insert(Instruments* self, Instrument* instrument, int slot)
 {
-	InsertIntHashTable(&self->container, slot, instrument);
+	table_insert(&self->container, slot, instrument);
 	signal_emit(&self->signal_insert, self, 1, slot);
 }
 
@@ -37,8 +37,5 @@ int instruments_slot(Instruments* self)
 
 Instrument* instruments_at(Instruments* self, int slot)
 {
-	return SearchIntHashTable(&self->container, slot);
+	return table_at(&self->container, slot);
 }
-
-
-

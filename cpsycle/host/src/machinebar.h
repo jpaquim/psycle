@@ -21,8 +21,8 @@ typedef struct {
 	Machines* machines;
 	Instruments* instruments;
 	int prevent_selchange_notify;
-	IntHashTable comboboxslots;
-	IntHashTable slotscombobox;
+	Table comboboxslots;
+	Table slotscombobox;
 } MachineBar;
 
 void InitMachineBar(MachineBar*, ui_component* parent, Workspace* );

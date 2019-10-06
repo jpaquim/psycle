@@ -6,7 +6,7 @@
 
 extern TCHAR szAppClass[];
 extern HINSTANCE appInstance;
-extern IntHashTable selfmap;
+extern Table selfmap;
 
 void ui_frame_init(ui_frame* frame, ui_component* parent)
 {		
@@ -25,7 +25,7 @@ void ui_frame_init(ui_frame* frame, ui_component* parent)
                           CW_USEDEFAULT, CW_USEDEFAULT,
                           CW_USEDEFAULT, CW_USEDEFAULT | style,
                           hWndParent, NULL, appInstance, NULL);     	
-	InsertIntHashTable(&selfmap, (int)frame->hwnd, frame);	
+	table_insert(&selfmap, (int)frame->hwnd, frame);	
 	frame->events.target = frame;
 	frame->events.cmdtarget = frame;
 	ui_component_init_base(frame);

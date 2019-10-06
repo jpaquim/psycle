@@ -5,7 +5,7 @@
 
 void samples_init(Samples* self)
 {
-	InitIntHashTable(&self->container, 256);
+	table_init(&self->container);
 }
 
 void samples_dispose(Samples* self)
@@ -19,15 +19,15 @@ void samples_dispose(Samples* self)
 			sample_dispose(sample);			
 		}
 	}
-	DisposeIntHashTable(&self->container);
+	table_dispose(&self->container);
 }
 
 void samples_insert(Samples* self, Sample* sample, int slot)
 {
-	InsertIntHashTable(&self->container, slot, sample);
+	table_insert(&self->container, slot, sample);
 }
 
 Sample* samples_at(Samples* self, int slot)
 {
-	return SearchIntHashTable(&self->container, slot);
+	return table_at(&self->container, slot);
 }

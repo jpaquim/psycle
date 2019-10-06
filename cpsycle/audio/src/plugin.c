@@ -10,16 +10,16 @@ typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
 static Machine* clone(void*);
-static int hostevent(Plugin* self, int const eventNr, int const val1, float const val2);
-static void generateaudio(Plugin* self, BufferContext*);
-static void seqtick(Plugin* self, int channel, const PatternEvent* event);
-static void sequencertick(Plugin* self);
-static CMachineInfo* info(Plugin* self);
-static void parametertweak(Plugin* self, int par, int val);
+static int hostevent(Plugin*, int const eventNr, int const val1, float const val2);
+static void generateaudio(Plugin*, BufferContext*);
+static void seqtick(Plugin*, int channel, const PatternEvent* event);
+static void sequencerlinetick(Plugin*);
+static CMachineInfo* info(Plugin*);
+static void parametertweak(Plugin*, int par, int val);
 static int describevalue(Plugin*, char* txt, int const param, int const value);
 static int value(Plugin*, int const param);
 static void setvalue(Plugin*, int const param, int const value);
-static void dispose(Plugin* self);
+static void dispose(Plugin*);
 static int mode(Plugin* self);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
@@ -39,7 +39,7 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.clone = clone;
 	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
-	self->machine.sequencertick = sequencertick;
+	self->machine.sequencerlinetick = sequencerlinetick;
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;
@@ -139,7 +139,7 @@ int hostevent(Plugin* self, int const eventNr, int const val1, float const val2)
 	return mi_hostevent(self->mi, eventNr, val1, val2);
 }
 
-void sequencertick(Plugin* self)
+void sequencerlinetick(Plugin* self)
 {
 	mi_sequencertick(self->mi);
 }

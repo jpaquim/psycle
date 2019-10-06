@@ -6,8 +6,8 @@
 #include "hashtbl.h"
 #include <string.h>
 
-extern IntHashTable selfmap;
-extern IntHashTable winidmap;
+extern Table selfmap;
+extern Table winidmap;
 
 extern winid_t winid;
 
@@ -62,8 +62,8 @@ void ui_button_create_system(ui_button* self, ui_component* parent)
 		parent->hwnd, (HMENU)winid,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)self->component.hwnd, &self->component);	
-	InsertIntHashTable(&winidmap, (int)winid, &self->component);
+	table_insert(&selfmap, (int)self->component.hwnd, &self->component);	
+	table_insert(&winidmap, (int)winid, &self->component);
 	winid++;
 	signal_connect(&self->component.signal_command, self, oncommand);
 }

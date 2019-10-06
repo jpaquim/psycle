@@ -34,6 +34,7 @@ static void player_signal_wait_host(Player*);
 static void Interleave(float* dst, float* left, float* right, int num);
 static beat_t Offset(Player*, int numsamples);
 static int onenumsequencertick(Player*, int slot, Machine*);
+static void sequencerinsert(Player*);
 
 void player_init(Player* self, Song* song, void* handle)
 {		
@@ -221,15 +222,52 @@ void player_advance(Player* self, unsigned int amount)
 		sequencer_tick(&self->sequencer, offset);
 	}
 	self->seqtickcount -= offset;
+	machines_enumerate(&self->song->machines, self, onenumsequencertick);
 	if (self->seqtickcount <= 0) {		
-		machines_enumerate(&self->song->machines, self, onenumsequencertick);		
 		self->seqtickcount = 0;
+	}
+	if (self->playing) {
+		sequencerinsert(self);
+	}	
+}
+
+void sequencerinsert(Player* self) {
+	List* p;
+
+	for (p = sequencer_tickevents(&self->sequencer); p != 0; p = p->next) {			
+		PatternEntry* entry;			
+		
+		entry = (PatternEntry*) p->entry;
+		if (entry->event.mach != NOTECOMMANDS_EMPTY) {
+			Machine* machine;				
+				
+			machine = machines_at(&self->song->machines, entry->event.mach);
+			if (machine) {
+				List* events;
+
+				events = sequencer_machinetickevents(&self->sequencer,
+					entry->event.mach);
+				if (events) {					
+					List* insert;
+					
+					insert = machine->sequencerinsert(machine, events);
+					if (insert) {
+						sequencer_append(&self->sequencer, insert);					
+						list_free(insert);
+					}
+					list_free(events);
+				}					
+			}									
+		}
 	}
 }
 
-int onenumsequencertick(Player* machines, int slot, Machine* machine)
-{
-	machine->sequencertick(machine);	
+int onenumsequencertick(Player* self, int slot, Machine* machine)
+{		
+	machine->sequencertick(machine);
+	if (self->seqtickcount <= 0) {
+		machine->sequencerlinetick(machine);
+	}		
 	return 1;
 }
 
@@ -264,33 +302,27 @@ void player_workpath(Player* self, unsigned int amount)
 	}		
 }
 
-
 List* player_timedevents(Player* self, unsigned int slot, unsigned int amount)
 {
-	List* events = 0;
+	List* rv = 0;
 
-	if (self->playing) {												
-		List* node = self->sequencer.events;
-		while (node) {
-			PatternEntry* entry = (PatternEntry*)node->entry;
-			if (entry->event.mach == slot) {
-				unsigned int deltaframes;
+	if (self->playing) {
+		List* p;
 
-				if (!events) {
-					events = list_create(entry);
-				} else {
-					list_append(events, entry);
-				}
-				deltaframes = Frames(self, entry->delta);
-				if (deltaframes >= amount) {
-					deltaframes = amount - 1;
-				}
-				entry->delta = (beat_t) deltaframes;
+		rv = sequencer_machinetickevents(&self->sequencer, slot);
+		for (p = rv ; p != 0; p = p->next) {		
+			PatternEntry* entry;
+			unsigned int deltaframes;
+
+			entry = (PatternEntry*) p->entry;
+			deltaframes = Frames(self, entry->delta);
+			if (deltaframes >= amount) {
+				deltaframes = amount - 1;
 			}
-			node = node->next;
+			entry->delta = (beat_t) deltaframes;						
 		}						
 	}
-	return events;
+	return rv;
 }
 
 Buffer* player_mix(Player* self, unsigned int slot, unsigned int amount)
@@ -358,7 +390,3 @@ unsigned int player_numsongtracks(Player* self)
 {
 	return self->numsongtracks;
 }
-
-
-
-

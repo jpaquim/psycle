@@ -690,7 +690,8 @@ void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * 
 				wave->channels.samples[0][i] = (float) val;				
 			 }
 			free(pDest);
-			pData = 0;			
+			pData = 0;
+			wave->channels.numchannels = 1;
 		}
 		else
 		{
@@ -716,6 +717,7 @@ void loadwavesubchunk(Song* song, RiffFile* file, int instrIdx, int pan, char * 
 				}
 				free(pDest);
 				pData = 0;
+				wave->channels.numchannels = 2;
 			}
 			else
 			{
