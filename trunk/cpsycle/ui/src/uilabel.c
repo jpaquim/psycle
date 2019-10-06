@@ -1,11 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-
 #include "uilabel.h"
 #include "hashtbl.h"
 
-extern IntHashTable selfmap;
+extern Table selfmap;
 
 static void onpreferredsize(ui_label*, ui_component* sender, ui_size* limit, int* width, int* height);
 static TEXTMETRIC textmetric(ui_component*);
@@ -27,7 +26,7 @@ void ui_label_init(ui_label* label, ui_component* parent)
 		parent->hwnd, NULL,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)label->component.hwnd, &label->component);	
+	table_insert(&selfmap, (int)label->component.hwnd, &label->component);	
 	label->component.events.target = label;	
 	ui_component_init_base(&label->component);
 	ui_component_setbackgroundmode(&label->component, BACKGROUND_SET);

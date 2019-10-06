@@ -6,8 +6,7 @@
 #include <commctrl.h>
 #include <stdio.h>
 
-extern IntHashTable selfmap;
-
+extern Table selfmap;
 
 void ui_statusbar_init(ui_statusbar* self, ui_component* parent)
 {
@@ -39,7 +38,7 @@ void ui_statusbar_init(ui_statusbar* self, ui_component* parent)
     {
         MessageBox(NULL, "Failed To Create The Status Bar", "Error", MB_OK | MB_ICONERROR);
     }
-	InsertIntHashTable(&selfmap, (int)self->component.hwnd, &self->component);		
+	table_insert(&selfmap, (int)self->component.hwnd, &self->component);		
 	ui_component_init_base(&self->component);			
 }
 

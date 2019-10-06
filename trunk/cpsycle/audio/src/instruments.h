@@ -9,7 +9,7 @@
 #include <signal.h>
 
 typedef struct Instruments {
-	IntHashTable container;
+	Table container;
 	int slot;
 	Signal signal_insert;
 	Signal signal_slotchange;

@@ -28,8 +28,8 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	self->player = &workspace->player;
 	self->machines = &workspace->song->machines;	
 	self->instruments = &workspace->song->instruments;
-	InitIntHashTable(&self->comboboxslots, 256);
-	InitIntHashTable(&self->slotscombobox, 256);
+	table_init(&self->comboboxslots);
+	table_init(&self->slotscombobox);
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
@@ -70,17 +70,17 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 
 void OnDestroy(MachineBar* self, ui_component* component)
 {
-	DisposeIntHashTable(&self->comboboxslots);
-	DisposeIntHashTable(&self->slotscombobox);
+	table_dispose(&self->comboboxslots);
+	table_dispose(&self->slotscombobox);
 }
 
 void ClearMachineBox(MachineBar* self)
 {
 	ui_combobox_clear(&self->machinebox);
-	DisposeIntHashTable(&self->comboboxslots);
-	InitIntHashTable(&self->comboboxslots, 256);
-	DisposeIntHashTable(&self->slotscombobox);
-	InitIntHashTable(&self->slotscombobox, 256);
+	table_dispose(&self->comboboxslots);
+	table_init(&self->comboboxslots);
+	table_dispose(&self->slotscombobox);
+	table_init(&self->slotscombobox);
 }
 
 void SelectMachineBarSlot(MachineBar* self, int slot)
@@ -131,8 +131,8 @@ int OnEnumMachines(MachineBar* self, int slot, Machine* machine)
 		char buffer[128];
 		_snprintf(buffer, 128, "%02X: %s", slot, machine->info(machine)->ShortName); 
 		comboboxindex = ui_combobox_addstring(&self->machinebox, buffer);
-		InsertIntHashTable(&self->comboboxslots, comboboxindex, (void*)slot);
-		InsertIntHashTable(&self->slotscombobox, slot, (void*) comboboxindex);
+		table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
+		table_insert(&self->slotscombobox, slot, (void*) comboboxindex);
 	}
 	return 1;
 }
@@ -143,7 +143,7 @@ void OnMachineBoxSelChange(MachineBar* self, ui_component* sender, int sel)
 	
 	List* slots = self->machinebox.signal_selchanged.slots;
 	self->machinebox.signal_selchanged.slots = 0;
-	slot = (int)SearchIntHashTable(&self->comboboxslots, sel);
+	slot = (int)table_at(&self->comboboxslots, sel);
 	machines_changeslot(self->machines, slot);	
 	self->machinebox.signal_selchanged.slots = slots;
 }
@@ -152,7 +152,7 @@ void OnMachinesSlotChange(MachineBar* self, Machines* machines, int slot)
 {	
 	int comboboxindex;
 
-	comboboxindex = (int) SearchIntHashTable(&self->slotscombobox, slot);
+	comboboxindex = (int) table_at(&self->slotscombobox, slot);
 	ui_combobox_setcursel(&self->machinebox, comboboxindex);	
 }
 
@@ -164,7 +164,7 @@ void BuildInstrumentList(MachineBar* self)
 
 	ui_combobox_clear(&self->instparambox);
 	for ( ; slot < 256; ++slot) {		
-		if (instrument = SearchIntHashTable(&self->player->song->instruments.container, slot)) {
+		if (instrument = table_at(&self->player->song->instruments.container, slot)) {
 			_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
 		} else {
 			_snprintf(buffer, 20, "%02X:%s", slot, "");

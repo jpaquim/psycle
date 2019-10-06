@@ -69,7 +69,7 @@ void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
 	} else {
 		pattern = 0;
 	}	
-	ui_settextcolor(g, 0x00CACACA);
+	ui_settextcolor(g, 0x00D1C5B6);
 	ui_setbackgroundmode(g, TRANSPARENT);
 	_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d         Edit ON",
 		pattern,

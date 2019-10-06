@@ -17,8 +17,8 @@ typedef enum {
 typedef struct {
 	ui_listbox machinelist;	
 	Machines* machines;
-	IntHashTable listboxslots;
-	IntHashTable slotslistbox;
+	Table listboxslots;
+	Table slotslistbox;
 	MachineBoxMode mode;
 	int showslots;
 } MachinesBox;

@@ -7,7 +7,7 @@ static int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* Pattern
 
 void patterns_init(Patterns* self)
 {
-	InitIntHashTable(&self->slots, 256);
+	table_init(&self->slots);
 	self->songtracks = 16;
 	self->sharetracknames = 0;
 }
@@ -15,14 +15,14 @@ void patterns_init(Patterns* self)
 void patterns_dispose(Patterns* self)
 {	
 	patterns_enumerate(self, self, OnEnumFreePattern);
-	DisposeIntHashTable(&self->slots);
+	table_dispose(&self->slots);
 }
 
 void patterns_clear(Patterns* self)
 {
 	patterns_enumerate(self, self, OnEnumFreePattern);
-	DisposeIntHashTable(&self->slots);
-	InitIntHashTable(&self->slots, 256);	
+	table_dispose(&self->slots);
+	table_init(&self->slots);	
 }
 
 int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* pattern)
@@ -33,23 +33,23 @@ int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* pattern)
 
 void patterns_insert(Patterns* self, unsigned int slot, Pattern* pattern)
 {
-	InsertIntHashTable(&self->slots, slot, pattern);
+	table_insert(&self->slots, slot, pattern);
 }
 
 int patterns_append(Patterns* self, Pattern* pattern)
 {
 	int slot = 0;
 	
-	while (SearchIntHashTable(&self->slots, slot)) {
+	while (table_at(&self->slots, slot)) {
 		++slot;
 	}
-	InsertIntHashTable(&self->slots, slot, pattern);	
+	table_insert(&self->slots, slot, pattern);	
 	return slot;
 }
 
 Pattern* patterns_at(Patterns* self, unsigned int slot)
 {
-	return SearchIntHashTable(&self->slots, slot);
+	return table_at(&self->slots, slot);
 }
 
 void patterns_enumerate(Patterns* self, void* context, int (*enumproc)(void*, unsigned int, Pattern*))
@@ -57,7 +57,7 @@ void patterns_enumerate(Patterns* self, void* context, int (*enumproc)(void*, un
 	Pattern* pattern;
 	int slot;
 	for (slot = 0; slot < 256; ++slot) {
-		pattern = (Pattern*) SearchIntHashTable(&self->slots, slot);
+		pattern = (Pattern*) table_at(&self->slots, slot);
 		if (pattern) {
 			if (!enumproc(context, slot, pattern)) {
 				break;
@@ -69,15 +69,15 @@ void patterns_enumerate(Patterns* self, void* context, int (*enumproc)(void*, un
 void patterns_erase(Patterns* self, unsigned int slot)
 {
 
-	RemoveIntHashTable(&self->slots, slot);
+	table_remove(&self->slots, slot);
 }
 
 void patterns_remove(Patterns* self, unsigned int slot)
 {
 	Pattern* pattern;
 	
-	pattern = (Pattern*) SearchIntHashTable(&self->slots, slot);
-	RemoveIntHashTable(&self->slots, slot);
+	pattern = (Pattern*) table_at(&self->slots, slot);
+	table_remove(&self->slots, slot);
 	pattern_dispose(pattern);
 	free(pattern);	
 }

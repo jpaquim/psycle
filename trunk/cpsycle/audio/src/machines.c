@@ -25,10 +25,10 @@ static void machines_freebuffers(Machines*);
 
 void machines_init(Machines* self)
 {
-	InitIntHashTable(&self->slots, 256);
-	InitIntHashTable(&self->connections, 256);
-	InitIntHashTable(&self->inputbuffers, 256);
-	InitIntHashTable(&self->outputbuffers, 256);
+	table_init(&self->slots);
+	table_init(&self->connections);
+	table_init(&self->inputbuffers);
+	table_init(&self->outputbuffers);
 	self->path = 0;
 	self->numsamplebuffers = 100;
 	self->samplebuffers = (float*)malloc(sizeof(float) * MAX_STREAM_SIZE *
@@ -53,8 +53,8 @@ void machines_dispose(Machines* self)
 	signal_dispose(&self->signal_showparameters);
 	machines_enumerate(self, self, OnEnumFreeMachine);
 	free_machinepath(self->path);
-	DisposeIntHashTable(&self->slots);
-	DisposeIntHashTable(&self->connections);
+	table_dispose(&self->slots);
+	table_dispose(&self->connections);
 	machines_releasebuffers(self);
 	machines_freebuffers(self);
 	free(self->samplebuffers);	
@@ -81,7 +81,7 @@ int OnEnumFreeMachine(Machines* self, int slot, Machine* machine)
 void machines_insert(Machines* self, int slot, Machine* machine)
 {	
 	if (machine) {
-		InsertIntHashTable(&self->slots, slot, machine);	
+		table_insert(&self->slots, slot, machine);	
 		if (!machines_connections(self, slot)) {
 			initconnections(self, slot);
 		}
@@ -105,7 +105,7 @@ MachineConnections* initconnections(Machines* self, int slot)
 	memset(connections, 0, sizeof(MachineConnections));
 	connections->outputs = 0;
 	connections->inputs = 0;
-	InsertIntHashTable(&self->connections, slot, connections);
+	table_insert(&self->connections, slot, connections);
 	return connections;
 }
 
@@ -116,7 +116,7 @@ void machines_erase(Machines* self, int slot)
 		self->master = 0;
 	}
 	machines_disconnectall(self, slot);	
-	RemoveIntHashTable(&self->slots, slot);
+	table_remove(&self->slots, slot);
 	machines_setpath(self, compute_path(self, MASTER_INDEX));
 	signal_emit(&self->signal_removed, self, 1, slot);
 	resumework();
@@ -151,7 +151,7 @@ int machines_append(Machines* self, Machine* machine)
 	
 	slot = machines_freeslot(self,
 		(machine->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
-	InsertIntHashTable(&self->slots, slot, machine);
+	table_insert(&self->slots, slot, machine);
 	if (!machines_connections(self, slot)) {
 		initconnections(self, slot);
 	}
@@ -163,13 +163,13 @@ int machines_freeslot(Machines* self, int start)
 {
 	int rv;
 	
-	for (rv = start; SearchIntHashTable(&self->slots, rv) != 0; ++rv);
+	for (rv = start; table_at(&self->slots, rv) != 0; ++rv);
 	return rv;
 }
 
 Machine* machines_at(Machines* self, int slot)
 {
-	return SearchIntHashTable(&self->slots, slot);
+	return table_at(&self->slots, slot);
 }
 
 void machines_enumerate(Machines* self, void* context,
@@ -340,7 +340,7 @@ MachineConnection* findconnection(MachineConnection* connection, int slot)
 
 MachineConnections* machines_connections(Machines* self, int slot)
 {
-	return SearchIntHashTable(&self->connections, slot);	
+	return table_at(&self->connections, slot);	
 }
 
 void machines_setpath(Machines* self, MachineList* path)
@@ -417,7 +417,7 @@ void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amo
 			} else {
 				self->buffers = list_create(buffer);
 			}
-			InsertIntHashTable(&self->outputbuffers, slot, buffer);				
+			table_insert(&self->outputbuffers, slot, buffer);				
 		}
 	}			
 }
@@ -445,22 +445,22 @@ Buffer* machines_nextbuffer(Machines* self, unsigned int channels)
 
 void machines_releasebuffers(Machines* self)
 {
-	DisposeIntHashTable(&self->inputbuffers);
-	DisposeIntHashTable(&self->outputbuffers);
-	InitIntHashTable(&self->inputbuffers, 256);
-	InitIntHashTable(&self->outputbuffers, 256);
+	table_dispose(&self->inputbuffers);
+	table_dispose(&self->outputbuffers);
+	table_init(&self->inputbuffers);
+	table_init(&self->outputbuffers);
 	machines_freebuffers(self);
 	self->currsamplebuffer = 0;
 }
 
 Buffer* machines_inputs(Machines* self, unsigned int slot)
 {
-	return SearchIntHashTable(&self->inputbuffers, slot);
+	return table_at(&self->inputbuffers, slot);
 }
 
 Buffer* machines_outputs(Machines* self, unsigned int slot)
 {
-	return SearchIntHashTable(&self->outputbuffers, slot);
+	return table_at(&self->outputbuffers, slot);
 }
 
 void machines_changeslot(Machines* self, int slot)

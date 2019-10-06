@@ -19,7 +19,7 @@ void ui_name_init(void* self, ui_name* name, ui_component* parent)
 		parent->hwnd, NULL,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)name->component.hwnd, &name->component.events);	
+	table_insert(&selfmap, (int)name->component.hwnd, &name->component.events);	
 	name->component.events.self = self;
 }
 

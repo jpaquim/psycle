@@ -28,13 +28,12 @@ typedef List MachinePath;
 typedef List MachineList;
 
 typedef struct Machines {	
-	IntHashTable slots;
-	Master* master;
-	IntHashTable connections;
-	IntHashTable inputbuffers;
-	IntHashTable outputbuffers;
+	Table slots;	
+	Table connections;
+	Table inputbuffers;
+	Table outputbuffers;
 	MachinePath* path;
-	List* buffers;
+	List* buffers;	
 	float* samplebuffers;
 	int numsamplebuffers;
 	int currsamplebuffer;
@@ -45,6 +44,7 @@ typedef struct Machines {
 	Signal signal_removed;
 	Signal signal_slotchange;
 	Signal signal_showparameters;
+	Master* master;
 } Machines;
 
 void machines_init(Machines*);

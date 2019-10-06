@@ -97,3 +97,13 @@ void buffer_mulsamples(Buffer* self, unsigned int numsamples, float mul)
 		dsp_mul(self->samples[channel], numsamples, mul);
 	}	
 }
+
+unsigned int buffer_numchannels(Buffer* self)
+{
+	return self->numchannels;
+}
+
+int buffer_mono(Buffer* self)
+{
+	return self->numchannels == 1;
+}

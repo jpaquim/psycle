@@ -25,6 +25,7 @@ static void OnEditPositionChanged(SequenceView*, Sequence* sender);
 static void buttons_onalign(SequenceButtons* self, ui_component* sender);
 static void buttons_onpreferredsize(SequenceButtons*, ui_component* sender, ui_size* limit, int* width, int* height);
 static List* rowend(List* p);
+static int listviewmargin = 5;
 
 static int trackwidth = 75;
 
@@ -169,7 +170,8 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent,
 {				
 	self->sequence = sequence;
 	self->patterns = patterns;
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_mousedown, self, OnListViewMouseDown);	
 	self->selected = 0;
@@ -185,16 +187,16 @@ void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g)
 void DrawSequence(SequenceListView* self, ui_graphics* g)
 {
 	SequenceTracks* p;	
-	int cpx = 5;
-	int c = 0;	
+	int cpx = 0;
+	int c = 0;		
 	self->foundselected = 0;
 	for (p = self->sequence->tracks; p != 0; p = p->next, cpx += trackwidth, ++c) {
-		DrawTrack(self, g, (SequenceTrack*)p->entry, c, cpx);
+		DrawTrack(self, g, (SequenceTrack*)p->entry, c, cpx + listviewmargin);
 	}
 	if (!self->foundselected) {
 		ui_setbackgroundcolor(g, 0x00FF0000);
-		ui_textout(g, 5 + self->selectedtrack*trackwidth,
-			self->selected * self->lineheight, "     ", 5);
+		ui_textout(g, self->selectedtrack*trackwidth,
+			self->selected * self->lineheight + listviewmargin, "     ", 5);
 	}
 }
 
@@ -209,10 +211,12 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 		
 	ui_setrectangle(&r, x, 0, trackwidth - 5, size.height);	
 	if (trackindex == self->selectedtrack) {
-		ui_drawsolidrectangle(g, r, 0x00363636);
-	} else {		
-		ui_drawsolidrectangle(g, r, 0x003E3E3E);
+		ui_setcolor(g, 0x00777777);		
+	} else {
+		ui_setcolor(g, 0x00363636);
 	}
+	ui_drawline(g, r.left, r.top, r.right, r.top);
+	ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
 	ui_settextcolor(g, 0);
 	p = track->entries;
 	while (p != 0) {
@@ -227,10 +231,10 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 				ui_settextcolor(g, 0x00FFFFFF);
 				self->foundselected = 1;				
 			} else {
-				ui_setbackgroundcolor(g, 0x003E3E3E);
+				ui_setbackgroundcolor(g, 0x00232323);
 				ui_settextcolor(g, 0x00CACACA);
 			}
-			ui_textout(g, x, cpy, buffer, strlen(buffer));
+			ui_textout(g, x + 5, cpy + listviewmargin, buffer, strlen(buffer));
 		//}
 		p = p->next;
 		cpy += self->lineheight;
@@ -376,9 +380,8 @@ void OnListViewMouseDown(SequenceListView* self, ui_component* sender, int x, in
 	unsigned int selected;
 	unsigned int selectedtrack;	
 
-	selected = y / self->lineheight;
+	selected = (y - listviewmargin) / self->lineheight;
 	selectedtrack = x / trackwidth;
-
 	if (selectedtrack < sequence_sizetracks(self->sequence)) {
 		SequencePosition position;
 

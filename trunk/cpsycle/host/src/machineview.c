@@ -486,7 +486,14 @@ void OnMouseDown(WireView* self, ui_component* sender, int x, int y, int button)
 			
 		} else
 		if (button == 2) {
-			self->dragmode = WIREVIEW_DRAG_NEWCONNECTION;		
+			Machine* machine;
+
+			machine = machines_at(self->machines, self->dragslot);
+			if (machine && machine->numoutputs(machine) > 0) {
+				self->dragmode = WIREVIEW_DRAG_NEWCONNECTION;
+			} else {
+				self->dragslot = -1;	
+			}			
 		}
 	}
 }

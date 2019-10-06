@@ -8,7 +8,7 @@
 #include <hashtbl.h>
 
 typedef struct {
-	IntHashTable container;
+	Table container;
 } XMInstruments;
 
 void xminstruments_init(XMInstruments*);

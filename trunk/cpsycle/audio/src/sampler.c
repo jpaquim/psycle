@@ -1,3 +1,6 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "sampler.h"
 #include "pattern.h"
 #include "plugin_interface.h"
@@ -19,6 +22,8 @@ static int unused_voice(Sampler*);
 static void release_voices(Sampler*, int channel);
 static unsigned int numinputs(Sampler*);
 static unsigned int numoutputs(Sampler*);
+
+static int currslot(Sampler*, unsigned int channel, const PatternEvent*);
 
 static void voice_init(Voice*, Instrument*, Sample*, int channel, unsigned int samplerate);
 static void voice_dispose(Voice*);
@@ -105,6 +110,7 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	}
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;
+	table_init(&self->lastinst);
 }
 
 void dispose(Sampler* self)
@@ -115,6 +121,7 @@ void dispose(Sampler* self)
 		voice_dispose(&self->voices[voice]);
 	}
 	machine_dispose(&self->machine);
+	table_dispose(&self->lastinst);
 }
 
 void generateaudio(Sampler* self, BufferContext* bc)
@@ -124,24 +131,33 @@ void generateaudio(Sampler* self, BufferContext* bc)
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		voice_work(&self->voices[voice], bc->output, bc->numsamples);
 	}
+//	if (sample-buffer_numchannels(bc->output)
 }
 
 void seqtick(Sampler* self, int channel, const PatternEvent* event)
-{
-	Samples* samples = self->machine.callback.samples(self->machine.callback.context);
-	Instruments* instruments = self->machine.callback.instruments(self->machine.callback.context);
-	Sample* sample = samples_at(samples, event->inst);
-	Instrument* instrument = instruments_at(instruments, event->inst);
-	release_voices(self, channel);
+{	
+	Sample* sample;
+	int slot;
+		
+	slot = currslot(self, channel, event);
+	if (slot == NOTECOMMANDS_EMPTY) {
+		return;
+	}	
+	sample = samples_at(self->machine.samples(self), slot);
+	if (sample) {
+		Instrument* instrument;
 
-	if (sample && instrument) {
-		int voice;
-
-		voice = unused_voice(self);
-		if (voice != -1) {
-			voice_init(&self->voices[voice], instrument, sample, channel,
-				self->machine.callback.samplerate(self->machine.callback.context));
-			voice_seqtick(&self->voices[voice], event);			
+		release_voices(self, channel);
+		instrument = instruments_at(self->machine.instruments(self), slot);		
+		if (instrument) {
+			int voice;
+			
+			voice = unused_voice(self);
+			if (voice != -1) {
+				voice_init(&self->voices[voice], instrument, sample, channel,
+					self->machine.callback.samplerate(self->machine.callback.context));
+				voice_seqtick(&self->voices[voice], event);			
+			}
 		}
 	}
 }
@@ -156,6 +172,22 @@ int unused_voice(Sampler* self)
 		}
 	}
 	return -1;
+}
+
+int currslot(Sampler* self, unsigned int channel, const PatternEvent* event)
+{
+	int rv;
+
+	if (event->inst != NOTECOMMANDS_EMPTY) {
+		table_insert(&self->lastinst, channel, (void*)event->inst);
+		rv = event->inst;
+	} else
+	if (table_exists(&self->lastinst, channel)) {
+		rv = (int) table_at(&self->lastinst, channel);
+	} else { 
+		rv = NOTECOMMANDS_EMPTY;
+	}
+	return rv;
 }
 
 void release_voices(Sampler* self, int channel)
@@ -293,21 +325,41 @@ void voice_noteoff(Voice* self, const PatternEvent* event)
 
 void voice_work(Voice* self, Buffer* output, int numsamples)
 {	
-	if (self->sample && self->env.stage != ENV_OFF) {
-		float* left = buffer_at(output, 0);
-		float* right = buffer_at(output, 1);
+	if (self->sample && self->env.stage != ENV_OFF) {		
+		int i;
 
-		float* src = self->sample->channels.samples[0];
-		int i;		
 		for (i = 0; i < numsamples; ++i) {
-			left[i] += src[sampleiterator_frameposition(&self->position)] * self->env.value;
+			unsigned int c;
+
+			for (c = 0; c < buffer_numchannels(&self->sample->channels); ++c) {				
+				float* src;
+				float* dst;
+				unsigned int frame;
+
+				src = buffer_at(&self->sample->channels, c);
+				if (c >= buffer_numchannels(output)) {
+					break;
+				}
+				dst = buffer_at(output, c);
+				frame = sampleiterator_frameposition(&self->position);
+				dst[i] += src[frame] *
+					self->env.value;				
+			}				
 			adsr_tick(&self->env);
 			adsr_tick(&self->filterenv);
 			if (!sampleiterator_inc(&self->position)) {			
 				voice_reset(self);					
 				break;				
-			}		
-		}									
+			}
+		}
+		if (buffer_mono(&self->sample->channels) &&
+			buffer_numchannels(output) > 1) {
+			dsp_add(
+				buffer_at(output, 0),
+				buffer_at(output, 1),
+				numsamples,
+				1.0f);
+		}
 	}
 }
 

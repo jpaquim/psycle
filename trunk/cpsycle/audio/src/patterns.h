@@ -8,7 +8,7 @@
 #include "pattern.h"
 
 typedef struct {	
-	IntHashTable slots;
+	Table slots;
 	int songtracks;
 	unsigned char sharetracknames;
 } Patterns;

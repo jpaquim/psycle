@@ -5,6 +5,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+PatternEntry* patternentry_clone(PatternEntry* entry)
+{
+	PatternEntry* rv;
+	if (entry) {			
+		rv = (PatternEntry*)malloc(sizeof(PatternEntry));
+		*rv = *entry;			
+	} else {
+		rv = 0;
+	}
+	return rv;
+}
+
 void pattern_init(Pattern* self)
 {
 	self->events = 0;

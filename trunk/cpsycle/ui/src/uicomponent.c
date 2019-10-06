@@ -14,15 +14,15 @@ static TCHAR szComponentClass[] = TEXT ("PsycleComponent") ;
 
 winid_t winid = 20000;
 
-IntHashTable selfmap;
-IntHashTable winidmap;
+Table selfmap;
+Table winidmap;
 
 
 static ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
 static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
-extern IntHashTable menumap;
+extern Table menumap;
 
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
                            WPARAM wParam, LPARAM lParam);
@@ -44,8 +44,8 @@ void ui_init(HINSTANCE hInstance)
 	ui_fontinfo fontinfo;
 	int succ;
 	
-	InitIntHashTable(&selfmap, 100);
-	InitIntHashTable(&winidmap, 100);	
+	table_init(&selfmap);
+	table_init(&winidmap);
 
 	wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
     wndclass.lpfnWndProc   = ui_winproc ;
@@ -93,8 +93,8 @@ void ui_init(HINSTANCE hInstance)
 
 void ui_dispose()
 {
-	DisposeIntHashTable(&selfmap);
-	DisposeIntHashTable(&winidmap);
+	table_dispose(&selfmap);
+	table_dispose(&winidmap);
 	DeleteObject(defaultfont.hfont);
 	DeleteObject(defaultbackgroundbrush);
 }
@@ -133,7 +133,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	ui_menu*	 menu;
 	int			 menu_id;		
 
-	component = SearchIntHashTable(&selfmap, (int) hwnd);	
+	component = table_at(&selfmap, (int) hwnd);	
 	if (component && component->signal_windowproc.slots) {				
 		signal_emit(&component->signal_windowproc, component, 3, (LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
 		if (component->preventdefault) {					
@@ -146,7 +146,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	switch (message)
     {		
 		case WM_SHOWWINDOW:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component) {				                    
 				if (wParam == TRUE) {
 					signal_emit(&component->signal_show, component, 0);
@@ -157,7 +157,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 		break;		
 		case WM_SIZE:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component) {				                    
 				if (component->alignchildren == 1) {
 					ui_component_align(component);
@@ -167,7 +167,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}			
 		break;
 		case WM_TIMER:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_timer.slots) {
 				signal_emit(&component->signal_timer, component, 1, (int) wParam);				
 				return 0 ;
@@ -175,7 +175,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;		
 		case WM_CTLCOLORLISTBOX:
 		case WM_CTLCOLORSTATIC:			
-			component = SearchIntHashTable(&selfmap, lParam);			
+			component = table_at(&selfmap, lParam);			
 			if (component) {					
 				SetTextColor((HDC) wParam, component->color);
 				SetBkColor((HDC) wParam, component->backgroundcolor);
@@ -196,11 +196,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		case WM_COMMAND:
           hMenu = GetMenu (hwnd) ;
 		  menu_id = LOWORD (wParam);
-          menu = SearchIntHashTable(&menumap, menu_id);		  
+          menu = table_at(&menumap, menu_id);		  
           if (menu && menu->execute) {	
 			menu->execute(menu);
 		  }
-		  component = SearchIntHashTable(&winidmap, LOWORD(wParam));
+		  component = table_at(&winidmap, LOWORD(wParam));
 		  if (component && component->signal_command.slots) {
 				signal_emit(&component->signal_command, component, 2, wParam, lParam);				
 				return 0;
@@ -208,14 +208,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		  return 0 ;  
 		break;          
 		case WM_CREATE:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_create.slots) {	
 				signal_emit(&component->signal_create, component, 0);
 			}
 			return 0 ;
 		break;
 		case WM_PAINT :
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && (component->signal_draw.slots ||
 					component->backgroundmode != BACKGROUND_NONE)) {		
 				HDC bufferDC;
@@ -267,7 +267,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 		break;
 		case WM_DESTROY:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_destroy.slots) {
 				signal_emit(&component->signal_destroy, component, 0);
 				ui_component_dispose(component);
@@ -275,7 +275,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			return 0;
 		break;
 		case WM_KEYDOWN:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component) {			
 				component->propagateevent = component->defaultpropagation;
 				if (component->signal_keydown.slots) {
@@ -289,56 +289,56 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 		break;
 		case WM_KEYUP:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_keyup.slots) {
 				signal_emit(&component->signal_keyup, component, 2, (int)wParam, lParam);			
 			}
 			return 0;
 		break;
 		case WM_LBUTTONUP:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mouseup.slots) {
 				signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
 				return 0 ;
 			}
 		break;
 		case WM_RBUTTONUP:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mouseup.slots) {			
 				signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);				
 				return 0 ;
 			}			
 		break;
 		case WM_MBUTTONUP:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mouseup.slots) {			
 				signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);				
 				return 0 ;
 			}
 		break;
 		case WM_LBUTTONDOWN:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mousedown.slots) {
 				signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
 				return 0 ;
 			}			
 		break;
 		case WM_RBUTTONDOWN:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mousedown.slots) {		
 				signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
 				return 0 ;
 			}
 		break;
 		case WM_MBUTTONDOWN:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mousedown.slots) {		
 				signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);				
 				return 0 ;
 			}
 		break;
 		case WM_LBUTTONDBLCLK:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component) {			
 				component->propagateevent = component->defaultpropagation;
 				if (component->signal_mousedoubleclick.slots) {					
@@ -352,21 +352,21 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 		break;
 		case WM_MBUTTONDBLCLK:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mousedoubleclick.slots) {
 				signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
 				return 0 ;
 			}
 		break;		
 		case WM_RBUTTONDBLCLK:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mousedoubleclick.slots) {
 				signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);
 				return 0 ;
 			}
 		break;
 		case WM_MOUSEMOVE:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component) {
 				if (!tracking) {
 					TRACKMOUSEEVENT tme;
@@ -390,7 +390,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 		break;
 		case WM_MOUSEHOVER:
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mousehover.slots) {				                    
 				signal_emit(&component->signal_mousehover, component, 0);
 				return 0;
@@ -398,7 +398,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;
 		case WM_MOUSELEAVE:	
 			tracking = 0;
-			component = SearchIntHashTable(&selfmap, (int) hwnd);
+			component = table_at(&selfmap, (int) hwnd);
 			if (component && component->signal_mouseleave.slots) {				                    
 				signal_emit(&component->signal_mouseleave, component, 0);
 				return 0;
@@ -409,7 +409,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			return 0;
 		break;
 		case WM_HSCROLL:
-			component = SearchIntHashTable(&selfmap, (int) lParam);
+			component = table_at(&selfmap, (int) lParam);
 			if (component && component->signal_windowproc.slots) {				                    
 				signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
 				return DefWindowProc (hwnd, message, wParam, lParam);
@@ -444,7 +444,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	// If the position has changed, scroll the window and update it
 	if (si.nPos != iPos)
 	{                    
-		component = SearchIntHashTable(&selfmap, (int) hwnd);
+		component = table_at(&selfmap, (int) hwnd);
 		if (component && component->signal_scroll.slots) {
 			signal_emit(&component->signal_scroll, component, 2, 
 				0, component->scrollstepy * (iPos - si.nPos));			
@@ -478,7 +478,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	if (si.nPos != iPos)
 	{                    
-		component = SearchIntHashTable(&selfmap, (int) hwnd);
+		component = table_at(&selfmap, (int) hwnd);
 		if (component && component->signal_scroll.slots) {
 			signal_emit(&component->signal_scroll, component, 2, 
 				component->scrollstepx * (iPos - si.nPos), 0);			
@@ -536,7 +536,7 @@ void ui_component_init(ui_component* component, ui_component* parent)
 		parent->hwnd, NULL,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)component->hwnd, component);
+	table_insert(&selfmap, (int)component->hwnd, component);
 	component->events.target = component;				
 	ui_component_init_base(component);
 }
@@ -638,7 +638,7 @@ void ui_classcomponent_init(ui_component* component, ui_component* parent, const
 		parent->hwnd, NULL,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)component->hwnd, component);		
+	table_insert(&selfmap, (int)component->hwnd, component);		
 	component->events.target = component;
 	component->align = 0;
 }
@@ -817,7 +817,7 @@ void ui_component_enumerate_children(ui_component* self, void* context, int (*ch
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam)
 {
 	ui_component* self = (ui_component*) lParam;
-	ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
+	ui_component* child = table_at(&selfmap, (int)hwnd);
 	if (child &&  self->events.childenum) {
 		return self->events.childenum(self->events.target, child);		  
 	}     
@@ -832,7 +832,7 @@ List* ui_component_children(ui_component* self, int recursive)
 	} else {
 		HWND hwnd = GetWindow(self->hwnd, GW_CHILD);
 		if (hwnd) {
-			ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
+			ui_component* child = table_at(&selfmap, (int)hwnd);
 			if (child) {				
 				children = list_create(child);				
 			}
@@ -840,7 +840,7 @@ List* ui_component_children(ui_component* self, int recursive)
 		while (hwnd) {
 			hwnd = GetNextWindow(hwnd, GW_HWNDNEXT);
 			if (hwnd) {
-				ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
+				ui_component* child = table_at(&selfmap, (int)hwnd);
 				if (child) {
 					if (children == 0) {
 						children = list_create(child);
@@ -857,7 +857,7 @@ List* ui_component_children(ui_component* self, int recursive)
 BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam)
 {
 	List** pChildren = (List**) lParam;
-	ui_component* child = SearchIntHashTable(&selfmap, (int)hwnd);
+	ui_component* child = table_at(&selfmap, (int)hwnd);
 	if (child) {
 		if (*pChildren == 0) {
 			*pChildren = list_create(child);
@@ -1197,7 +1197,7 @@ ui_size ui_component_textsize(ui_component* self, const char* text)
 
 ui_component* ui_component_parent(ui_component* self)
 {			
-	return (ui_component*) SearchIntHashTable(&selfmap,
+	return (ui_component*) table_at(&selfmap,
 		(int) GetParent(self->hwnd));
 }
 

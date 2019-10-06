@@ -23,5 +23,7 @@ void sequencer_dispose(Sequencer*);
 void sequencer_reset(Sequencer*, Sequence*);
 void sequencer_tick(Sequencer*, beat_t offset);
 void sequencer_setposition(Sequencer*, beat_t position);
-
+List* sequencer_tickevents(Sequencer*);
+List* sequencer_machinetickevents(Sequencer*, unsigned int slot);
+void sequencer_append(Sequencer*, List* events);
 #endif

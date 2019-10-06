@@ -23,7 +23,7 @@ typedef CMachineInterface * (*CREATEMACHINE)(void);
 static void work(VstPlugin* self, BufferContext*);
 static int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2);
 static void seqtick(VstPlugin* self, int channel, const PatternEvent* event);
-static void sequencertick(VstPlugin* self);
+static void sequencerlinetick(VstPlugin* self);
 static const CMachineInfo* info(VstPlugin* self);
 static void parametertweak(VstPlugin* self, int par, int val);
 static int describevalue(VstPlugin*, char* txt, int const param, int const value);
@@ -49,7 +49,7 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.work = work;
 	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
-	self->machine.sequencertick = sequencertick;
+	self->machine.sequencerlinetick = sequencerlinetick;
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;
@@ -166,7 +166,7 @@ int hostevent(VstPlugin* self, int const eventNr, int const val1, float const va
 	return 0;
 }
 
-void sequencertick(VstPlugin* self)
+void sequencerlinetick(VstPlugin* self)
 {
 	
 }

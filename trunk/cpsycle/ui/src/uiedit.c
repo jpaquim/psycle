@@ -4,8 +4,8 @@
 #include "uiedit.h"
 #include "hashtbl.h"
 
-extern IntHashTable selfmap;
-extern IntHashTable winidmap;
+extern Table selfmap;
+extern Table winidmap;
 extern winid_t winid;
 
 static void oncommand(ui_edit*, ui_component* sender, WPARAM wParam, LPARAM lParam);
@@ -32,8 +32,8 @@ void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
 		(HMENU)winid,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)edit->component.hwnd, &edit->component);	
-	InsertIntHashTable(&winidmap, (int)winid, &edit->component);
+	table_insert(&selfmap, (int)edit->component.hwnd, &edit->component);	
+	table_insert(&winidmap, (int)winid, &edit->component);
 	winid++;	
 	signal_connect(&edit->component.signal_command, edit, oncommand);
 	signal_connect(&edit->component.signal_destroy, edit, ondestroy);

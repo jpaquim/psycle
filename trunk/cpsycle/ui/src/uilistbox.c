@@ -5,8 +5,8 @@
 #include "uilistbox.h"
 #include "hashtbl.h"
 
-extern IntHashTable selfmap;
-extern IntHashTable winidmap;
+extern Table selfmap;
+extern Table winidmap;
 extern winid_t winid;
 
 static void oncommand(ui_listbox*, ui_component* sender, WPARAM wParam, LPARAM lParam);
@@ -45,8 +45,8 @@ void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent, int style)
 		parent->hwnd, (HMENU)winid,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)listbox->component.hwnd, &listbox->component);	
-	InsertIntHashTable(&winidmap, (int)winid, &listbox->component);
+	table_insert(&selfmap, (int)listbox->component.hwnd, &listbox->component);	
+	table_insert(&winidmap, (int)winid, &listbox->component);
 	listbox->component.winid = (HMENU)winid;
 	winid++;		
 	ui_component_init_base(&listbox->component);

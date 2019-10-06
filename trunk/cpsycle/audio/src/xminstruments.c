@@ -5,16 +5,16 @@
 
 void xminstruments_init(XMInstruments* self)
 {
-	InitIntHashTable(&self->container, 256);
+	table_init(&self->container);
 }
 
 void xminstruments_dispose(XMInstruments* self)
 {
-	DisposeIntHashTable(&self->container);
+	table_dispose(&self->container);
 }
 
 void xminstruments_insert(XMInstruments* self, XMInstrument* instrument, int slot)
 {
-	InsertIntHashTable(&self->container, slot, instrument);
+	table_insert(&self->container, slot, instrument);
 }
 

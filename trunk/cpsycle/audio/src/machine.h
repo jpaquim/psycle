@@ -46,7 +46,7 @@ typedef struct MachineCallback {
 	unsigned int (*bpm)(void*);
 	struct Samples* (*samples)(void*);
 	struct Machines* (*machines)(void*);
-	struct Instruments* (*instruments)(void*);
+	struct Instruments* (*instruments)(void*);	
 	void* context;
 } MachineCallback;
 
@@ -57,7 +57,10 @@ typedef struct Machine {
 	void (*generateaudio)(void *, BufferContext*);
 	int (*hostevent)(void*, int const eventNr, int const val1, float const val2);
 	void (*seqtick)(void*, int channel, const PatternEvent*);
-	void (*sequencertick)(void*);
+	void (*sequencertick)(void*); // real sequencer tick
+	void (*sequencerlinetick)(void*); // old tick (line based)
+	// update sequencer events
+	List* (*sequencerinsert)(void*, List* events);
 	void (*parametertweak)(void*, int par, int val);
 	int (*describevalue)(void*, char* txt, int const param, int const value);
 	int (*value)(void*, int const param);
@@ -71,6 +74,12 @@ typedef struct Machine {
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
 	void (*setcallback)(void*, MachineCallback);
+	// machine callbacks
+	unsigned int (*samplerate)(void*);
+	unsigned int (*bpm)(void*);
+	struct Samples* (*samples)(void*);
+	struct Machines* (*machines)(void*);
+	struct Instruments* (*instruments)(void*);
 		
 	Signal signal_worked;
 	MachineCallback callback;

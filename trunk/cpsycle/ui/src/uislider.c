@@ -6,8 +6,8 @@
 #include <commctrl.h>
 #include <stdio.h>
 
-extern IntHashTable selfmap;
-extern IntHashTable winidmap;
+extern Table selfmap;
+extern Table winidmap;
 extern winid_t winid;
 
 static void oncommand(ui_slider*, ui_component* sender, WPARAM wParam, LPARAM lParam);
@@ -35,10 +35,10 @@ void ui_slider_init(ui_slider* slider, ui_component* parent)
 		parent->hwnd, (HMENU)winid,
 		hInstance,
 		NULL);		
-	InsertIntHashTable(&selfmap, (int)slider->component.hwnd, &slider->component);	
+	table_insert(&selfmap, (int)slider->component.hwnd, &slider->component);	
 	slider->component.events.target = slider;
 	slider->component.events.cmdtarget = slider;
-	InsertIntHashTable(&winidmap, (int)winid, &slider->component);
+	table_insert(&winidmap, (int)winid, &slider->component);
 	winid++;		
 	ui_component_init_base(&slider->component);
 	signal_connect(&slider->component.signal_destroy, slider,  ondestroy);

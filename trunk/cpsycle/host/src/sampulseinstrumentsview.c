@@ -39,7 +39,7 @@ void BuildInstrumentList(SampulseInstrumentView* self)
 	int slot = 0;
 	char buffer[20];
 	for ( ; slot < 256; ++slot) {		
-		if (instrument = SearchIntHashTable(&self->player->song->xminstruments.container, slot)) {
+		if (instrument = table_at(&self->player->song->xminstruments.container, slot)) {
 			_snprintf(buffer, 20, "%02X:%s", slot, xminstrument_name(instrument));
 		} else {
 			_snprintf(buffer, 20, "%02X:%s", slot, "");

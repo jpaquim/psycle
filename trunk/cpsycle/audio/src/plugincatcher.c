@@ -12,6 +12,7 @@
 
 static void plugincatcher_makeinternals(PluginCatcher*);
 static void plugincatcher_makesampler(PluginCatcher*);
+static void plugincatcher_makeduplicator(PluginCatcher*);
 static int isplugin(int type);
 static int onenumdir(PluginCatcher*, const char* path, int flag);
 
@@ -43,6 +44,7 @@ void plugincatcher_clear(PluginCatcher* self)
 void plugincatcher_makeinternals(PluginCatcher* self)
 {
 	plugincatcher_makesampler(self);
+	plugincatcher_makeduplicator(self);
 }
 
 void plugincatcher_makesampler(PluginCatcher* self)
@@ -54,6 +56,20 @@ void plugincatcher_makesampler(PluginCatcher* self)
 	properties_append_int(p, "mode", GENERATOR, 0, 0);
 	properties_append_string(p, "name", "Sampler");
 	properties_append_string(p, "shortname", "Sampler");
+	properties_append_string(p, "author", "psycedelics");
+	properties_append_string(p, "command", "");
+	properties_append_string(p, "modulepath", "");
+}
+
+void plugincatcher_makeduplicator(PluginCatcher* self)
+{
+	Properties* p;
+
+	p = properties_createsection(self->plugins, "duplicator");
+	properties_append_int(p, "type", MACH_DUPLICATOR, 0, 0);
+	properties_append_int(p, "mode", GENERATOR, 0, 0);
+	properties_append_string(p, "name", "Duplicator");
+	properties_append_string(p, "shortname", "Dupeit!");
 	properties_append_string(p, "author", "psycedelics");
 	properties_append_string(p, "command", "");
 	properties_append_string(p, "modulepath", "");
