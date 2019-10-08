@@ -55,5 +55,6 @@ typedef struct {
 
 void sampler_init(Sampler*, MachineCallback);
 
+const CMachineInfo* sampler_info(void);
 
 #endif

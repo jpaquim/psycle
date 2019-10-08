@@ -24,6 +24,6 @@ typedef struct {
 } ui_image;
 
 void ui_image_init(ui_image*, ui_component* parent);
-void ui_image_setbitmapalignment(ui_image*, Alignment alignment);	
+void ui_image_setbitmapalignment(ui_image*, Alignment);	
 
 #endif

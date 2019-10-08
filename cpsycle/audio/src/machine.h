@@ -4,42 +4,11 @@
 #if !defined(MACHINE_H)
 #define MACHINE_H
 
+#include "machinedefs.h"
 #include "plugin_interface.h"
 #include <signal.h>
 #include "event.h"
 #include "buffercontext.h"
-
-typedef enum {
-	MACHMODE_GENERATOR = 0,
-	MACHMODE_FX = 1,
-	MACHMODE_MASTER = 2,
-} MachineMode;
-
-typedef enum  {
-	MACH_UNDEFINED = -1,
-	MACH_MASTER = 0,
-	MACH_SINE = 1, ///< now a plugin
-	MACH_DIST = 2, ///< now a plugin
-	MACH_SAMPLER = 3,
-	MACH_DELAY = 4, ///< now a plugin
-	MACH_2PFILTER = 5, ///< now a plugin
-	MACH_GAIN = 6, ///< now a plugin
-	MACH_FLANGER = 7, ///< now a plugin
-	MACH_PLUGIN = 8,
-	MACH_VST = 9,
-	MACH_VSTFX = 10,
-	MACH_SCOPE = 11, ///< Test machine. removed
-	MACH_XMSAMPLER = 12,
-	MACH_DUPLICATOR = 13,
-	MACH_MIXER = 14,
-	MACH_RECORDER = 15,
-	MACH_DUPLICATOR2 = 16,
-	MACH_LUA = 17,
-	MACH_LADSPA = 18,
-	MACH_DUMMY = 255
-} MachineType;
-
-#define MACHINE_USES_INSTRUMENTS 64
 
 typedef struct MachineCallback {	
 	unsigned int (*samplerate)(void*);
@@ -85,15 +54,8 @@ typedef struct Machine {
 	MachineCallback callback;
 } Machine;
 
-typedef struct {
-	Machine machine;
-	int mode;
-} DummyMachine;
-
 void machine_init(Machine*, MachineCallback);
 void machine_dispose(Machine*);
 int machine_supports(Machine*, int option);
-
-void dummymachine_init(DummyMachine* self, MachineCallback);
 
 #endif

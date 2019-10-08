@@ -30,7 +30,6 @@ static int describevalue(VstPlugin*, char* txt, int const param, int const value
 static int value(VstPlugin*, int const param);
 static void setvalue(VstPlugin*, int const param, int const value);
 static void dispose(VstPlugin* self);
-static int mode(VstPlugin* self);
 static const VstInt32 kBlockSize = 512;
 static const float kSampleRate = 48000.f;
 static const VstInt32 kNumProcessCycles = 5;
@@ -56,7 +55,6 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.setvalue = setvalue;
 	self->machine.value = value;
 	self->machine.dispose = dispose;
-	self->machine.mode = mode;
 	self->machine.setcallback(self, callback);
 	self->info = 0;
 	library_init(&self->library);
@@ -111,22 +109,25 @@ PluginEntryProc getMainEntry(Library* library)
 
 CMachineInfo* plugin_vst_test(const char* path)
 {		
-	CMachineInfo* rv;
-	Library library;
-	PluginEntryProc mainEntry;	
+	CMachineInfo* rv = 0;
 
-	rv = 0;
-	library_init(&library);
-	library_load(&library, path);		
-	mainEntry = getMainEntry(&library);
-	if (mainEntry) {
-		AEffect* effect = mainEntry (HostCallback);
-		if (effect) {			
-			rv = (CMachineInfo*) malloc(sizeof(CMachineInfo));
-			DispatchMachineInfo(effect, rv);									
-		}
-	}	
-	library_dispose(&library);	
+	if (path && strcmp(path, "") != 0) {
+		Library library;
+		PluginEntryProc mainEntry;	
+
+		rv = 0;
+		library_init(&library);
+		library_load(&library, path);		
+		mainEntry = getMainEntry(&library);
+		if (mainEntry) {
+			AEffect* effect = mainEntry (HostCallback);
+			if (effect) {			
+				rv = (CMachineInfo*) malloc(sizeof(CMachineInfo));
+				DispatchMachineInfo(effect, rv);									
+			}
+		}	
+		library_dispose(&library);	
+	}
 	return rv;
 }
 
@@ -219,15 +220,6 @@ int value(VstPlugin* self, int const param)
 void setvalue(VstPlugin* self, int const param, int const value)
 {
 
-}
-
-int mode(VstPlugin* self)
-{
-	if (self->machine.info(self) && (self->machine.info(self)->Flags == 3 )) {
-		return MACHMODE_GENERATOR;
-	} else {
-		return MACHMODE_FX;
-	}	
 }
 
 VstIntPtr VSTCALLBACK HostCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)

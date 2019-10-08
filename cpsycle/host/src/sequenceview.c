@@ -160,7 +160,9 @@ void buttons_onpreferredsize(SequenceButtons* self, ui_component* sender, ui_siz
 		}		
 	}
 	cpxmax = 0;
-	for (c = 0; c < numcols; ++c, cpxmax += colmax[c]);
+	for (c = 0; c < numcols; ++c) {
+		cpxmax += colmax[c];
+	}
 	*width = cpxmax;
 	*height = cpymax;
 }

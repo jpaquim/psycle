@@ -2,50 +2,24 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "uicheckbox.h"
-#include "hashtbl.h"
 #include <string.h>
 
-extern Table selfmap;
-extern Table winidmap;
-extern winid_t winid;
-
-static void oncommand(ui_checkbox*, ui_component*, WPARAM wParam, LPARAM lParam);
+static void oncommand(ui_checkbox*, ui_component*, WPARAM wParam,
+	LPARAM lParam);
 static void ondestroy(ui_checkbox*, ui_component*);
 static void onpreferredsize(ui_checkbox*, ui_component* sender, ui_size* limit,
 	int* width, int* height);
-static void ui_checkbox_create_system(ui_checkbox*, ui_component* parent);
 
-void ui_checkbox_init(ui_checkbox* checkbox, ui_component* parent)
-{  
-	memset(&checkbox->component.events, 0, sizeof(ui_events));
-	ui_component_init_signals(&checkbox->component);
-	signal_init(&checkbox->signal_clicked);	
-	ui_checkbox_create_system(checkbox, parent);
-	signal_connect(&checkbox->component.signal_destroy, checkbox,  ondestroy);
-	ui_component_init_base(&checkbox->component);
-	signal_connect(&checkbox->component.signal_preferredsize,
-		checkbox, onpreferredsize);
-}
-
-void ui_checkbox_create_system(ui_checkbox* checkbox, ui_component* parent)
-{
-	HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-	checkbox->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
+void ui_checkbox_init(ui_checkbox* self, ui_component* parent)
+{  	
+	signal_init(&self->signal_clicked);	
+	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
+		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
-		0, 0, 90, 90,
-		parent->hwnd, (HMENU)winid,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)checkbox->component.hwnd, &checkbox->component);	
-	table_insert(&winidmap, (int)winid, &checkbox->component);
-	winid++;		
-	signal_connect(&checkbox->component.signal_command, checkbox, oncommand);
+		1);
+	signal_connect(&self->component.signal_destroy, self,  ondestroy);	
+	signal_connect(&self->component.signal_preferredsize, self,
+		onpreferredsize);
 }
 
 void ondestroy(ui_checkbox* self, ui_component* sender)
@@ -68,7 +42,8 @@ void ui_checkbox_disablecheck(ui_checkbox* self)
 	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
 }
 
-static void oncommand(ui_checkbox* self, ui_component* sender, WPARAM wParam, LPARAM lParam)
+void oncommand(ui_checkbox* self, ui_component* sender, WPARAM wParam,
+	LPARAM lParam)
 {
 	switch(HIWORD(wParam))
     {
@@ -95,4 +70,3 @@ void onpreferredsize(ui_checkbox* self, ui_component* sender, ui_size* limit,
 	*width = size.width + 20;
 	*height = size.height + 4;	
 }
-

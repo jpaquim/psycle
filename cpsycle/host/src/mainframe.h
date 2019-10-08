@@ -74,6 +74,7 @@ typedef struct {
 	PatternViewBar patternbar;
 } MainFrame;
 
-void InitMainFrame(MainFrame* self);
+void mainframe_init(MainFrame*);
+int mainframe_showmaximizedatstart(MainFrame*);
 
 #endif

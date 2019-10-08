@@ -13,6 +13,7 @@ static void OnContributors(About*, ui_component* sender);
 static void OnVersion(About*, ui_component* sender);
 static void OnShowatstartup(About*, ui_component* sender);
 static void Align(About*, ui_component* sender);
+static void OnMouseDoubleClick(About*, ui_component* sender, int x, int y, int button);
 	
 void InitContrib(Contrib* self, ui_component* parent)
 {
@@ -101,10 +102,13 @@ void InitAbout(About* self, ui_component* parent)
 	InitButtons(self);
 	ui_notebook_init(&self->notebook, &self->component);
 	ui_image_init(&self->image, &self->notebook.component);	
+	self->image.component.preventdefault = 0;
 	ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
 	InitContrib(&self->contrib, &self->notebook.component);
 	InitVersion(&self->version, &self->notebook.component);		
 	ui_notebook_setpage(&self->notebook, 0);
+	signal_connect(&self->component.signal_mousedoubleclick, self,
+		OnMouseDoubleClick);
 }
 
 void InitButtons(About* self)
@@ -116,7 +120,7 @@ void InitButtons(About* self)
 	ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
 	signal_connect(&self->versionbutton.signal_clicked, self, OnVersion);
 	ui_button_init(&self->okbutton, &self->component);
-	ui_button_settext(&self->okbutton, "OK");
+	ui_button_settext(&self->okbutton, "OK");	
 }
 
 void Align(About* self, ui_component* sender)
@@ -158,5 +162,10 @@ void OnVersion(About* self, ui_component* sender)
 	ui_notebook_setpage(&self->notebook, 
 		ui_notebook_page(&self->notebook) != 2 ? 2 : 0);
 	ui_invalidate(&self->component);
+}
+
+void OnMouseDoubleClick(About* self, ui_component* sender, int x, int y, int button)
+{
+	signal_emit(&self->okbutton.signal_clicked, self, 0);
 }
 

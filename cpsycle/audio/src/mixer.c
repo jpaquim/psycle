@@ -3,6 +3,28 @@
 #define TRUE 1
 #define FALSE 0
 
+const CMachineInfo* mixer_info(void)
+{
+	static CMachineInfo const macinfo = {
+		MI_VERSION,
+		0x0250,
+		GENERATOR | 32 | 64,
+		0,
+		0,
+		"Mixer"
+			#ifndef NDEBUG
+			" (debug build)"
+			#endif
+			,
+		"Mixer",
+		"Psycledelics",
+		"help",
+		0
+	};
+	return &macinfo;
+}
+
+static const CMachineInfo* info(Mixer* self) { return mixer_info(); }
 static void mixer_dispose(Mixer* self);
 static int mixer_mode(Mixer* self) { return MACHMODE_FX; }
 static void mixer_seqtick(Mixer* self, int channel, const PatternEvent* event);

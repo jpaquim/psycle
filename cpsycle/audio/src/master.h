@@ -6,11 +6,11 @@
 
 #include "machine.h"
 
-
 typedef struct {
 	Machine machine;	
 } Master;
 
 void master_init(Master* self, MachineCallback);
+const CMachineInfo* master_info(void);
 
 #endif

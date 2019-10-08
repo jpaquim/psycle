@@ -8,34 +8,31 @@
 #include <commctrl.h>   // includes the common control header
 #include <stdio.h>
 
+HINSTANCE appInstance = 0;
 
-TCHAR szAppClass[] = TEXT ("PsycleApp");
-static TCHAR szComponentClass[] = TEXT ("PsycleComponent") ;
-
-winid_t winid = 20000;
-
+TCHAR szAppClass[] = TEXT("PsycleApp");
+static TCHAR szComponentClass[] = TEXT("PsycleComponent");
+static winid_t winid = 20000;
 Table selfmap;
-Table winidmap;
-
-
+static Table winidmap;
 static ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
 static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
+static int tracking = 0;
+
 extern Table menumap;
 
-LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
-                           WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, WPARAM wParam,
+	LPARAM lParam);
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam);
 BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
 static void enableinput(ui_component* self, int enable, int recursive);
-static void onpreferredsize(ui_component* self, ui_component* sender, ui_size* limit, int* width, int* height);
-
-HINSTANCE appInstance = 0;
-static int tracking = 0;
+static void onpreferredsize(ui_component*, ui_component* sender, 
+	ui_size* limit, int* width, int* height);
 
 void ui_init(HINSTANCE hInstance)
 {
@@ -122,6 +119,148 @@ void ui_replacedefaultfont(ui_component* main, ui_font* font)
 	}
 }
 
+int ui_win32_component_init(ui_component* self, ui_component* parent,
+		LPCTSTR classname, 
+		int x, int y, int width, int height,
+		DWORD dwStyle,
+		int usecommand)
+{
+	int err = 0;
+	HINSTANCE hInstance;
+
+	ui_component_init_signals(self);
+	if (parent) {
+#if defined(_WIN64)		
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
+	} else {
+		hInstance = appInstance;
+	}
+	self->hwnd = CreateWindow(
+		classname,
+		NULL,		
+		dwStyle,
+		x, y, width, height,
+		parent ? parent->hwnd : NULL,
+		usecommand ? (HMENU)winid : NULL,
+		hInstance,
+		NULL);	
+	if (!self->hwnd) {
+        MessageBox(NULL, "Failed To Create Component", "Error",
+			MB_OK | MB_ICONERROR);
+		err = 1;
+	} else {
+		table_insert(&selfmap, (int)self->hwnd, self);
+	}
+	if (err == 0 && usecommand) {
+		table_insert(&winidmap, (int)winid, self);
+		winid++;		
+	}
+	ui_component_init_base(self);
+	return err;
+}
+
+void ui_component_init(ui_component* component, ui_component* parent)
+{
+	HINSTANCE hInstance;
+    
+#if defined(_WIN64)
+		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
+#else
+		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
+#endif
+	ui_component_init_signals(component);	
+	component->doublebuffered = 0;
+	component->hwnd = CreateWindow (szComponentClass, NULL,
+		WS_CHILDWINDOW | WS_VISIBLE,
+		0, 0, 90, 90,
+		parent->hwnd, NULL,
+		hInstance,
+		NULL);		
+	table_insert(&selfmap, (int)component->hwnd, component);
+	ui_component_init_base(component);
+}
+
+void ui_component_init_signals(ui_component* component)
+{
+	signal_init(&component->signal_size);
+	signal_init(&component->signal_draw);
+	signal_init(&component->signal_timer);
+	signal_init(&component->signal_keydown);
+	signal_init(&component->signal_keyup);
+	signal_init(&component->signal_mousedown);
+	signal_init(&component->signal_mouseup);
+	signal_init(&component->signal_mousemove);
+	signal_init(&component->signal_mousedoubleclick);
+	signal_init(&component->signal_mouseenter);
+	signal_init(&component->signal_mousehover);
+	signal_init(&component->signal_mouseleave);
+	signal_init(&component->signal_scroll);
+	signal_init(&component->signal_create);
+	signal_init(&component->signal_destroy);
+	signal_init(&component->signal_show);
+	signal_init(&component->signal_hide);
+	signal_init(&component->signal_align);
+	signal_init(&component->signal_preferredsize);
+	signal_init(&component->signal_windowproc);
+	signal_init(&component->signal_command);
+}
+
+void ui_component_init_base(ui_component* self) {
+	self->scrollstepx = 100;
+	self->scrollstepy = 12;
+	self->propagateevent = 0;
+	self->preventdefault = 0;
+	self->align = UI_ALIGN_NONE;
+	self->justify = UI_JUSTIFY_EXPAND;
+	self->alignchildren = 0;
+	self->alignexpandmode = UI_NOEXPAND;
+	memset(&self->margin, 0, sizeof(ui_margin));
+	self->debugflag = 0;
+	self->defaultpropagation = 0;	
+	self->visible = 1;
+	self->doublebuffered = 0;
+	self->backgroundmode = BACKGROUND_NONE;
+	self->backgroundcolor = defaultbackgroundcolor;
+	self->background = 0;
+	self->color = defaultcolor;
+	ui_component_setfont(self, &defaultfont);
+	ui_component_setbackgroundcolor(self, self->backgroundcolor);
+	signal_connect(&self->signal_preferredsize, self, onpreferredsize);
+}
+
+void ui_component_dispose(ui_component* component)
+{	
+	signal_dispose(&component->signal_size);
+	signal_dispose(&component->signal_draw);
+	signal_dispose(&component->signal_timer);
+	signal_dispose(&component->signal_keydown);
+	signal_dispose(&component->signal_keyup);
+	signal_dispose(&component->signal_mousedown);
+	signal_dispose(&component->signal_mouseup);
+	signal_dispose(&component->signal_mousemove);
+	signal_dispose(&component->signal_mousedoubleclick);
+	signal_dispose(&component->signal_mouseenter);
+	signal_dispose(&component->signal_mousehover);	
+	signal_dispose(&component->signal_mouseleave);
+	signal_dispose(&component->signal_scroll);
+	signal_dispose(&component->signal_create);
+	signal_dispose(&component->signal_destroy);
+	signal_dispose(&component->signal_show);
+	signal_dispose(&component->signal_hide);
+	signal_dispose(&component->signal_align);
+	signal_dispose(&component->signal_preferredsize);
+	signal_dispose(&component->signal_windowproc);
+	signal_dispose(&component->signal_command);
+	if (component->font.hfont && component->font.hfont != defaultfont.hfont) {
+		ui_font_dispose(&component->font);
+	}
+	if (component->background) {
+		DeleteObject(component->background);
+	}
+}
 
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
                                WPARAM wParam, LPARAM lParam)
@@ -518,131 +657,6 @@ void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 	}
 }
 
-void ui_component_init(ui_component* component, ui_component* parent)
-{
-	HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-	memset(&component->events, 0, sizeof(ui_events));
-	ui_component_init_signals(component);	
-	component->doublebuffered = 0;
-	component->hwnd = CreateWindow (szComponentClass, NULL,
-		WS_CHILDWINDOW | WS_VISIBLE,
-		0, 0, 90, 90,
-		parent->hwnd, NULL,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)component->hwnd, component);
-	component->events.target = component;				
-	ui_component_init_base(component);
-}
-
-void ui_component_init_signals(ui_component* component)
-{
-	signal_init(&component->signal_size);
-	signal_init(&component->signal_draw);
-	signal_init(&component->signal_timer);
-	signal_init(&component->signal_keydown);
-	signal_init(&component->signal_keyup);
-	signal_init(&component->signal_mousedown);
-	signal_init(&component->signal_mouseup);
-	signal_init(&component->signal_mousemove);
-	signal_init(&component->signal_mousedoubleclick);
-	signal_init(&component->signal_mouseenter);
-	signal_init(&component->signal_mousehover);
-	signal_init(&component->signal_mouseleave);
-	signal_init(&component->signal_scroll);
-	signal_init(&component->signal_create);
-	signal_init(&component->signal_destroy);
-	signal_init(&component->signal_show);
-	signal_init(&component->signal_hide);
-	signal_init(&component->signal_align);
-	signal_init(&component->signal_preferredsize);
-	signal_init(&component->signal_windowproc);
-	signal_init(&component->signal_command);
-}
-
-void ui_component_init_base(ui_component* self) {
-	self->scrollstepx = 100;
-	self->scrollstepy = 12;
-	self->propagateevent = 0;
-	self->preventdefault = 0;
-	self->align = UI_ALIGN_NONE;
-	self->justify = UI_JUSTIFY_EXPAND;
-	self->alignchildren = 0;
-	self->alignexpandmode = UI_NOEXPAND;
-	memset(&self->margin, 0, sizeof(ui_margin));
-	self->debugflag = 0;
-	self->defaultpropagation = 0;	
-	self->visible = 1;
-	self->doublebuffered = 0;
-	self->backgroundmode = BACKGROUND_NONE;
-	self->backgroundcolor = defaultbackgroundcolor;
-	self->background = 0;
-	self->color = defaultcolor;
-	ui_component_setfont(self, &defaultfont);
-	ui_component_setbackgroundcolor(self, self->backgroundcolor);
-	signal_connect(&self->signal_preferredsize, self, onpreferredsize);
-}
-
-void ui_component_dispose(ui_component* component)
-{	
-	signal_dispose(&component->signal_size);
-	signal_dispose(&component->signal_draw);
-	signal_dispose(&component->signal_timer);
-	signal_dispose(&component->signal_keydown);
-	signal_dispose(&component->signal_keyup);
-	signal_dispose(&component->signal_mousedown);
-	signal_dispose(&component->signal_mouseup);
-	signal_dispose(&component->signal_mousemove);
-	signal_dispose(&component->signal_mousedoubleclick);
-	signal_dispose(&component->signal_mouseenter);
-	signal_dispose(&component->signal_mousehover);	
-	signal_dispose(&component->signal_mouseleave);
-	signal_dispose(&component->signal_scroll);
-	signal_dispose(&component->signal_create);
-	signal_dispose(&component->signal_destroy);
-	signal_dispose(&component->signal_show);
-	signal_dispose(&component->signal_hide);
-	signal_dispose(&component->signal_align);
-	signal_dispose(&component->signal_preferredsize);
-	signal_dispose(&component->signal_windowproc);
-	signal_dispose(&component->signal_command);
-	if (component->font.hfont && component->font.hfont != defaultfont.hfont) {
-		ui_font_dispose(&component->font);
-	}
-	if (component->background) {
-		DeleteObject(component->background);
-	}
-}
-
-void ui_classcomponent_init(ui_component* component, ui_component* parent, const char* classname)
-{
-	HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-	memset(&component->events, 0, sizeof(ui_events));	
-	ui_component_init_signals(component);
-	component->doublebuffered = 0;
-	component->hwnd = CreateWindow (classname, NULL,
-		WS_CHILDWINDOW | WS_VISIBLE,
-		0, 0, 100, 100,
-		parent->hwnd, NULL,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)component->hwnd, component);		
-	component->events.target = component;
-	component->align = 0;
-}
-
 ui_size ui_component_size(ui_component* self)
 {   
 	ui_size rv;
@@ -807,19 +821,22 @@ void ui_component_settitle(ui_component* self, const char* title)
 	SetWindowText(self->hwnd, title);
 }
 
-void ui_component_enumerate_children(ui_component* self, void* context, int (*childenum)(void*, void*))
-{
-	self->events.childenum = childenum;
-	self->events.target = context;
-	EnumChildWindows (self->hwnd, ChildEnumProc, (LPARAM) self);    
+void ui_component_enumerate_children(ui_component* self, void* context, 
+	int (*childenum)(void*, void*))
+{	
+	EnumCallback callback;
+	
+	callback.context = context;
+	callback.childenum = childenum;
+	EnumChildWindows (self->hwnd, ChildEnumProc, (LPARAM) &callback);
 }
 
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam)
 {
-	ui_component* self = (ui_component*) lParam;
+	EnumCallback* callback = (EnumCallback*) lParam;
 	ui_component* child = table_at(&selfmap, (int)hwnd);
-	if (child &&  self->events.childenum) {
-		return self->events.childenum(self->events.target, child);		  
+	if (child &&  callback->childenum) {
+		return callback->childenum(callback->context, child);		  
 	}     
     return FALSE ;
 }

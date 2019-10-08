@@ -11,6 +11,7 @@ static void workspace_makegeneral(Workspace*);
 static void workspace_makenotes(Workspace*);
 static void workspace_makevisual(Workspace*);
 static void workspace_makepatternview(Workspace*, Properties*);
+static void workspace_makemachineview(Workspace* self, Properties*);
 static void workspace_makekeyboard(Workspace*);
 static void workspace_makedirectories(Workspace*);
 static void workspace_makenotes(Workspace*);
@@ -131,7 +132,7 @@ const char* workspace_driverpath(Workspace* self)
 				rv = properties_valuestring(p);
 				break;
 			}
-			p = p->next;
+			p = properties_next(p);
 			++count;
 		}
 	}
@@ -176,6 +177,8 @@ void workspace_makegeneral(Workspace* self)
 	properties_settext(p, "Show About at Startup");
 	p = properties_append_bool(general, "showsonginfoonload", 1);
 	properties_settext(p, "Show song info on Load");
+	p = properties_append_bool(general, "showmaximizedatstart", 1);
+	properties_settext(p, "Show Maximized at Startup");
 }
 
 void workspace_makevisual(Workspace* self)
@@ -188,37 +191,58 @@ void workspace_makevisual(Workspace* self)
 	p = properties_append_int(visual, "defaultfontsize", 80, 0, 999);
 	properties_settext(p, "Default font size");
 	workspace_makepatternview(self, visual);
+	workspace_makemachineview(self, visual);
 }
 
 void workspace_makepatternview(Workspace* self, Properties* visual)
 {
-	Properties* patternview;
-	Properties* p;
+	Properties* pvc;	
 	
-	patternview = properties_createsection(visual, "patternview");
-	properties_settext(patternview, "Pattern View");
-	p = properties_append_bool(patternview, "drawemptydata", 0);
-	properties_settext(p, "Draw empty data");
-	p = properties_append_int(patternview, "fontsize", 80, 0, 999);
-	properties_settext(p, "Font Size");
-	p = properties_append_bool(patternview, "linenumbers", 1);
-	properties_settext(p, "Line numbers");
-	p = properties_append_bool(patternview, "linenumberscursor", 1);
-	properties_settext(p, "Line numbers cursor");
-	p = properties_append_bool(patternview, "linenumbersinhex", 1);
-	properties_settext(p, "Line numbers in HEX");
-	p = properties_append_bool(patternview, "centercursoronscreen", 0);
-	properties_settext(p, "Center cursor on screen");
-	p = properties_append_int(patternview, "beatsperbar", 4, 1, 16);
-	properties_settext(p, "Bar highlighting: (beats/bar)");
-	p = properties_append_bool(patternview, "notetab", 1);
-	properties_settext(p, "A4 is 440Hz (Otherwise it is 220Hz)");	
+	pvc = properties_createsection(visual, "patternview");
+	properties_settext(pvc, "Pattern View");
+	properties_settext(
+		properties_append_bool(pvc, "drawemptydata", 0),
+		"Draw empty data");
+	properties_settext(
+		properties_append_int(pvc, "fontsize", 80, 0, 999),
+		"Font Size");
+	properties_settext(
+		properties_append_bool(pvc, "linenumbers", 1),
+		"Line numbers");
+	properties_settext(
+		properties_append_bool(pvc, "linenumberscursor", 1),
+		"Line numbers cursor");
+	properties_settext(
+		properties_append_bool(pvc, "linenumbersinhex", 1),
+		"Line numbers in HEX");
+	properties_settext(
+		properties_append_bool(pvc, "centercursoronscreen", 0),
+		"Center cursor on screen");
+	properties_settext(
+		properties_append_int(pvc, "beatsperbar", 4, 1, 16),
+		"Bar highlighting: (beats/bar)");
+	properties_settext(
+		properties_append_bool(pvc, "notetab", 1),
+		"A4 is 440Hz (Otherwise it is 220Hz)");	
+}
+
+void workspace_makemachineview(Workspace* self, Properties* visual)
+{
+	Properties* mvc;
+	
+	mvc = properties_settext(
+		properties_createsection(visual, "machineview"),
+		"Machine View");
+	properties_settext(
+		properties_append_bool(mvc, "drawvumeters", 1),
+		"Draw VU Meters");
 }
 
 void workspace_makekeyboard(Workspace* self)
 {	
-	self->keyboard = properties_createsection(self->config, "keyboard");
-	properties_settext(self->keyboard, "Keyboard and Misc.");
+	self->keyboard = properties_settext(
+		properties_createsection(self->config, "keyboard"),
+		"Keyboard and Misc.");
 	workspace_makenotes(self);
 }
 
@@ -229,72 +253,79 @@ void workspace_makenotes(Workspace* self)
 
 	notes = properties_createsection(self->keyboard, "notes");
 	properties_settext(notes, "Notes");
-	properties_append_int(notes, "CMD_NOTE_C_0", encodeinput('Z', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_CS0", encodeinput('S', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_D_0", encodeinput('X', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_DS0", encodeinput('D', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_E_0", encodeinput('C', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_F_0", encodeinput('V', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_FS0", encodeinput('G', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_G_0", encodeinput('B', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_GS0", encodeinput('H', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_A_0", encodeinput('N', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_AS0", encodeinput('J', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_B_0", encodeinput('M', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_C_1", encodeinput('Q', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_CS1", encodeinput('2', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_D_1", encodeinput('W', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_DS1", encodeinput('3', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_E_1", encodeinput('E', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_F_1", encodeinput('R', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_FS1", encodeinput('5', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_G_1", encodeinput('T', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_GS1", encodeinput('6', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_A_1", encodeinput('Y', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_AS1", encodeinput('7', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_B_1", encodeinput('U', 0, 0), 0, 0);		
-	properties_append_int(notes, "CMD_NOTE_C_2", encodeinput('I', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_CS2", encodeinput('9', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_D_2", encodeinput('O', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_DS2", encodeinput('0', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_E_2", encodeinput('P', 0, 0), 0, 0);
-	properties_append_int(notes, "CMD_NOTE_STOP", encodeinput('1', 0, 0), 0, 0);
-	for (p = notes->children; p != 0; p = p->next) {
+	properties_append_int(notes, "cmd_note_c_0", encodeinput('Z', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_cs0", encodeinput('S', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_d_0", encodeinput('X', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_ds0", encodeinput('D', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_e_0", encodeinput('C', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_f_0", encodeinput('V', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_fs0", encodeinput('G', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_g_0", encodeinput('B', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_gs0", encodeinput('H', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_a_0", encodeinput('N', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_as0", encodeinput('J', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_b_0", encodeinput('M', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_c_1", encodeinput('Q', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_cs1", encodeinput('2', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_d_1", encodeinput('W', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_ds1", encodeinput('3', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_e_1", encodeinput('E', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_f_1", encodeinput('R', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_fs1", encodeinput('5', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_g_1", encodeinput('T', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_gs1", encodeinput('6', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_a_1", encodeinput('Y', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_as1", encodeinput('7', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_b_1", encodeinput('U', 0, 0), 0, 0);		
+	properties_append_int(notes, "cmd_note_c_2", encodeinput('I', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_cs2", encodeinput('9', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_d_2", encodeinput('O', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_ds2", encodeinput('0', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_e_2", encodeinput('P', 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_stop", encodeinput('1', 0, 0), 0, 0);
+	for (p = notes->children; p != 0; p = properties_next(p)) {
 		properties_sethint(p, PROPERTY_HINT_INPUT);
 	}
 	workspace_makenoteinputs(self, notes);
 }
 
 void workspace_makedirectories(Workspace* self)
-{
-	Properties* p;
-
-	self->directories = properties_createsection(self->config, "directories");
-	properties_settext(self->directories, "Directories");
-	p = properties_append_string(self->directories, "plugin",
-		"C:\\Programme\\Psycle\\PsyclePlugins");
-	properties_settext(p, "Plug-in directory");
-	p->item.hint = PROPERTY_HINT_EDITDIR;
-	p = properties_append_string(self->directories, "vst",
-		"C:\\Programme\\Psycle\\VstPlugins");
-	properties_settext(p, "VST directories");
-	p->item.hint = PROPERTY_HINT_EDITDIR;
+{	
+	self->directories = properties_settext(
+		properties_createsection(self->config, "directories"),
+		"Directories");
+	properties_sethint(properties_settext(
+		properties_append_string(
+			self->directories,
+			"plugin",
+			"C:\\Programme\\Psycle\\PsyclePlugins"),
+		"Plug-in directory"),
+		PROPERTY_HINT_EDITDIR);
+	properties_sethint(properties_settext(
+		properties_append_string(
+			self->directories,
+			"vst",
+			"C:\\Programme\\Psycle\\VstPlugins"),
+		"VST directories"),
+		PROPERTY_HINT_EDITDIR);
 }
 
 void workspace_makeinputoutput(Workspace* self)
 {		
 	self->inputoutput = properties_createsection(self->config, "inputoutput");
 	workspace_setdriverlist(self);
-	self->driverconfigure = properties_createsection(self->inputoutput, "configure");
-	properties_settext(self->driverconfigure, "Configure");		
+	self->driverconfigure = properties_settext(
+		properties_createsection(self->inputoutput, "configure"),
+		"Configure");		
 }
 
 void workspace_makemidicontrollers(Workspace* self)
 {
 	Properties* midicontrollers;
 		
-	midicontrollers = properties_createsection(self->config, "midicontrollers");
-	properties_settext(midicontrollers, "MIDI Controllers");
+	midicontrollers = properties_settext(
+		properties_createsection(self->config, "midicontrollers"),
+		"MIDI Controllers");
 }
 
 void workspace_makenoteinputs(Workspace* self, Properties* notes)
@@ -302,7 +333,7 @@ void workspace_makenoteinputs(Workspace* self, Properties* notes)
 	Properties* p;
 
 	inputs_init(&self->noteinputs);
-	for (p = notes->children; p != 0; p = p->next) {
+	for (p = notes->children; p != 0; p = properties_next(p)) {
 		int cmd;
 		
 		cmd = cmdnote(properties_key(p));
@@ -314,58 +345,58 @@ void workspace_makenoteinputs(Workspace* self, Properties* notes)
 
 int cmdnote(const char* key)
 {	
-	if (strcmp("CMD_NOTE_C_0", key) == 0) { return CMD_NOTE_C_0; } else
-	if (strcmp("CMD_NOTE_CS0", key) == 0) { return CMD_NOTE_CS0; } else
-	if (strcmp("CMD_NOTE_D_0", key) == 0) { return CMD_NOTE_D_0; } else
-	if (strcmp("CMD_NOTE_DS0", key) == 0) { return CMD_NOTE_DS0; } else
-	if (strcmp("CMD_NOTE_E_0", key) == 0) { return CMD_NOTE_E_0; } else
-	if (strcmp("CMD_NOTE_F_0", key) == 0) { return CMD_NOTE_F_0; } else
-	if (strcmp("CMD_NOTE_FS0", key) == 0) { return CMD_NOTE_FS0; } else
-	if (strcmp("CMD_NOTE_G_0", key) == 0) { return CMD_NOTE_G_0; } else
-	if (strcmp("CMD_NOTE_GS0", key) == 0) { return CMD_NOTE_GS0; } else
-	if (strcmp("CMD_NOTE_A_0", key) == 0) { return CMD_NOTE_A_0; } else
-	if (strcmp("CMD_NOTE_AS0", key) == 0) { return CMD_NOTE_AS0; } else
-	if (strcmp("CMD_NOTE_B_0", key) == 0) { return CMD_NOTE_B_0; } else
-	if (strcmp("CMD_NOTE_C_1", key) == 0) { return CMD_NOTE_C_1; } else
-	if (strcmp("CMD_NOTE_CS1", key) == 0) { return CMD_NOTE_CS1; } else
-	if (strcmp("CMD_NOTE_D_1", key) == 0) { return CMD_NOTE_D_1; } else
-	if (strcmp("CMD_NOTE_DS1", key) == 0) { return CMD_NOTE_DS1; } else
-	if (strcmp("CMD_NOTE_E_1", key) == 0) { return CMD_NOTE_E_1; } else
-	if (strcmp("CMD_NOTE_F_1", key) == 0) { return CMD_NOTE_F_1; } else
-	if (strcmp("CMD_NOTE_FS1", key) == 0) { return CMD_NOTE_FS1; } else
-	if (strcmp("CMD_NOTE_G_1", key) == 0) { return CMD_NOTE_G_1; } else
-	if (strcmp("CMD_NOTE_GS1", key) == 0) { return CMD_NOTE_GS1; } else
-	if (strcmp("CMD_NOTE_A_1", key) == 0) { return CMD_NOTE_A_1; } else
-	if (strcmp("CMD_NOTE_AS1", key) == 0) { return CMD_NOTE_AS1; } else
-	if (strcmp("CMD_NOTE_B_1", key) == 0) { return CMD_NOTE_B_1; } else
-	if (strcmp("CMD_NOTE_C_2", key) == 0) { return CMD_NOTE_C_2; } else
-	if (strcmp("CMD_NOTE_CS2", key) == 0) { return CMD_NOTE_CS2; } else
-	if (strcmp("CMD_NOTE_D_2", key) == 0) { return CMD_NOTE_D_2; } else
-	if (strcmp("CMD_NOTE_DS2", key) == 0) { return CMD_NOTE_DS2; } else
-	if (strcmp("CMD_NOTE_E_2", key) == 0) { return CMD_NOTE_E_2; } else
-	if (strcmp("CMD_NOTE_F_2", key) == 0) { return CMD_NOTE_F_2; } else
-	if (strcmp("CMD_NOTE_FS2", key) == 0) { return CMD_NOTE_FS2; } else
-	if (strcmp("CMD_NOTE_G_2", key) == 0) { return CMD_NOTE_G_2; } else
-	if (strcmp("CMD_NOTE_GS2", key) == 0) { return CMD_NOTE_GS2; } else
-	if (strcmp("CMD_NOTE_A_2", key) == 0) { return CMD_NOTE_A_2; } else
-	if (strcmp("CMD_NOTE_AS2", key) == 0) { return CMD_NOTE_AS2; } else
-	if (strcmp("CMD_NOTE_B_2", key) == 0) { return CMD_NOTE_B_2; } else
-	if (strcmp("CMD_NOTE_C_3", key) == 0) { return CMD_NOTE_C_3; } else
-	if (strcmp("CMD_NOTE_CS3", key) == 0) { return CMD_NOTE_CS3; } else
-	if (strcmp("CMD_NOTE_D_3", key) == 0) { return CMD_NOTE_D_3; } else
-	if (strcmp("CMD_NOTE_DS3", key) == 0) { return CMD_NOTE_DS3; } else
-	if (strcmp("CMD_NOTE_E_3", key) == 0) { return CMD_NOTE_E_3; } else
-	if (strcmp("CMD_NOTE_F_3", key) == 0) { return CMD_NOTE_F_3; } else
-	if (strcmp("CMD_NOTE_FS3", key) == 0) { return CMD_NOTE_FS3; } else
-	if (strcmp("CMD_NOTE_G_3", key) == 0) { return CMD_NOTE_G_3; } else
-	if (strcmp("CMD_NOTE_GS3", key) == 0) { return CMD_NOTE_GS3; } else
-	if (strcmp("CMD_NOTE_A_3", key) == 0) { return CMD_NOTE_A_3; } else
-	if (strcmp("CMD_NOTE_AS3", key) == 0) { return CMD_NOTE_AS3; } else
-	if (strcmp("CMD_NOTE_B_3", key) == 0) { return CMD_NOTE_B_3; } else
-	if (strcmp("CMD_NOTE_STOP", key) == 0) { return CMD_NOTE_STOP; } else
-	if (strcmp("CMD_NOTE_TWEAKM", key) == 0) { return  CMD_NOTE_TWEAKM; } else	
-	if (strcmp("CMD_NOTE_MIDICC", key) == 0) { return CMD_NOTE_MIDICC; } else
-	if (strcmp("CMD_NOTE_TweakS", key) == 0) { return  CMD_NOTE_TweakS; }
+	if (strcmp("cmd_note_c_0", key) == 0) { return CMD_NOTE_C_0; } else
+	if (strcmp("cmd_note_cs0", key) == 0) { return CMD_NOTE_CS0; } else
+	if (strcmp("cmd_note_d_0", key) == 0) { return CMD_NOTE_D_0; } else
+	if (strcmp("cmd_note_ds0", key) == 0) { return CMD_NOTE_DS0; } else
+	if (strcmp("cmd_note_e_0", key) == 0) { return CMD_NOTE_E_0; } else
+	if (strcmp("cmd_note_f_0", key) == 0) { return CMD_NOTE_F_0; } else
+	if (strcmp("cmd_note_fs0", key) == 0) { return CMD_NOTE_FS0; } else
+	if (strcmp("cmd_note_g_0", key) == 0) { return CMD_NOTE_G_0; } else
+	if (strcmp("cmd_note_gs0", key) == 0) { return CMD_NOTE_GS0; } else
+	if (strcmp("cmd_note_a_0", key) == 0) { return CMD_NOTE_A_0; } else
+	if (strcmp("cmd_note_as0", key) == 0) { return CMD_NOTE_AS0; } else
+	if (strcmp("cmd_note_b_0", key) == 0) { return CMD_NOTE_B_0; } else
+	if (strcmp("cmd_note_c_1", key) == 0) { return CMD_NOTE_C_1; } else
+	if (strcmp("cmd_note_cs1", key) == 0) { return CMD_NOTE_CS1; } else
+	if (strcmp("cmd_note_d_1", key) == 0) { return CMD_NOTE_D_1; } else
+	if (strcmp("cmd_note_ds1", key) == 0) { return CMD_NOTE_DS1; } else
+	if (strcmp("cmd_note_e_1", key) == 0) { return CMD_NOTE_E_1; } else
+	if (strcmp("cmd_note_f_1", key) == 0) { return CMD_NOTE_F_1; } else
+	if (strcmp("cmd_note_fs1", key) == 0) { return CMD_NOTE_FS1; } else
+	if (strcmp("cmd_note_g_1", key) == 0) { return CMD_NOTE_G_1; } else
+	if (strcmp("cmd_note_gs1", key) == 0) { return CMD_NOTE_GS1; } else
+	if (strcmp("cmd_note_a_1", key) == 0) { return CMD_NOTE_A_1; } else
+	if (strcmp("cmd_note_as1", key) == 0) { return CMD_NOTE_AS1; } else
+	if (strcmp("cmd_note_b_1", key) == 0) { return CMD_NOTE_B_1; } else
+	if (strcmp("cmd_note_c_2", key) == 0) { return CMD_NOTE_C_2; } else
+	if (strcmp("cmd_note_cs2", key) == 0) { return CMD_NOTE_CS2; } else
+	if (strcmp("cmd_note_d_2", key) == 0) { return CMD_NOTE_D_2; } else
+	if (strcmp("cmd_note_ds2", key) == 0) { return CMD_NOTE_DS2; } else
+	if (strcmp("cmd_note_e_2", key) == 0) { return CMD_NOTE_E_2; } else
+	if (strcmp("cmd_note_f_2", key) == 0) { return CMD_NOTE_F_2; } else
+	if (strcmp("cmd_note_fs2", key) == 0) { return CMD_NOTE_FS2; } else
+	if (strcmp("cmd_note_g_2", key) == 0) { return CMD_NOTE_G_2; } else
+	if (strcmp("cmd_note_gs2", key) == 0) { return CMD_NOTE_GS2; } else
+	if (strcmp("cmd_note_a_2", key) == 0) { return CMD_NOTE_A_2; } else
+	if (strcmp("cmd_note_as2", key) == 0) { return CMD_NOTE_AS2; } else
+	if (strcmp("cmd_note_b_2", key) == 0) { return CMD_NOTE_B_2; } else
+	if (strcmp("cmd_note_c_3", key) == 0) { return CMD_NOTE_C_3; } else
+	if (strcmp("cmd_note_cs3", key) == 0) { return CMD_NOTE_CS3; } else
+	if (strcmp("cmd_note_d_3", key) == 0) { return CMD_NOTE_D_3; } else
+	if (strcmp("cmd_note_ds3", key) == 0) { return CMD_NOTE_DS3; } else
+	if (strcmp("cmd_note_e_3", key) == 0) { return CMD_NOTE_E_3; } else
+	if (strcmp("cmd_note_f_3", key) == 0) { return CMD_NOTE_F_3; } else
+	if (strcmp("cmd_note_fs3", key) == 0) { return CMD_NOTE_FS3; } else
+	if (strcmp("cmd_note_g_3", key) == 0) { return CMD_NOTE_G_3; } else
+	if (strcmp("cmd_note_gs3", key) == 0) { return CMD_NOTE_GS3; } else
+	if (strcmp("cmd_note_a_3", key) == 0) { return CMD_NOTE_A_3; } else
+	if (strcmp("cmd_note_as3", key) == 0) { return CMD_NOTE_AS3; } else
+	if (strcmp("cmd_note_b_3", key) == 0) { return CMD_NOTE_B_3; } else
+	if (strcmp("cmd_note_stop", key) == 0) { return CMD_NOTE_STOP; } else
+	if (strcmp("cmd_note_tweakm", key) == 0) { return  CMD_NOTE_TWEAKM; } else	
+	if (strcmp("cmd_note_midicc", key) == 0) { return CMD_NOTE_MIDICC; } else
+	if (strcmp("cmd_note_tweaks", key) == 0) { return  CMD_NOTE_TweakS; }
 	return -1;
 }
 
@@ -446,18 +477,14 @@ int workspace_showaboutatstart(Workspace* self)
 	return properties_bool(self->config, "general.showaboutatstart", 1);	
 }
 
+int workspace_showmaximizedatstart(Workspace* self)
+{
+	return properties_bool(self->config, "general.showmaximizedatstart", 1);	
+}
+
 int workspace_showlinenumbers(Workspace* self)
 {	
-	int rv = 1;
-	if (self->config) {
-		Properties* p;
-
-		p = properties_find(self->config, "visual");
-		if (p && p->children) {			
-			rv = properties_bool(p, "linenumbers", 1);
-		}
-	}
-	return rv;
+	return properties_bool(self->config, "visual.linenumbers", 1);	
 }
 
 void workspace_newsong(Workspace* self)

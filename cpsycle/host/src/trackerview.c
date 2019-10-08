@@ -8,6 +8,8 @@
 #include <math.h>
 #include "resources/resource.h"
 
+#define TIMERID_TRACKERVIEW 600
+
 static void OnDraw(TrackerGrid*, ui_component* sender, ui_graphics* g);
 static void OnHeaderDraw(TrackerHeader*, ui_component* sender, ui_graphics* g);
 static void DrawBackground(TrackerGrid*, ui_graphics* g, TrackerGridBlock* clip);
@@ -942,7 +944,7 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 		self->header.trackwidth = self->grid.trackwidth;
 	}
 	self->grid.component.scrollstepx = self->grid.trackwidth;
-	SetTimer(self->component.hwnd, 200, 50, 0);
+	SetTimer(self->component.hwnd, TIMERID_TRACKERVIEW, 200, 0);
 	signal_connect(&workspace->signal_configchanged, self, OnConfigChanged);
 	ShowLineNumbers(self, workspace_showlinenumbers(workspace));
 }
@@ -1158,12 +1160,14 @@ void OnLineNumbersLabelDraw(TrackerLineNumbersLabel* self, ui_component* sender,
 
 void OnTimer(TrackerView* self, ui_component* sender, int timerid)
 {
-	if (self->grid.player->playing) {
-		ui_invalidate(&self->grid.component);
-	}
-	if (self->pattern && self->pattern->opcount != self->opcount) {
-		ui_invalidate(&self->grid.component);
-		self->opcount = self->pattern->opcount;
+	if (timerid == TIMERID_TRACKERVIEW) {
+		if (self->grid.player->playing) {
+			ui_invalidate(&self->grid.component);
+		}
+		if (self->pattern && self->pattern->opcount != self->opcount) {
+			ui_invalidate(&self->grid.component);
+			self->opcount = self->pattern->opcount;
+		}
 	}
 }
 

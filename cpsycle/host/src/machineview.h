@@ -70,6 +70,7 @@ typedef struct {
 	int y;
 	char* editname;
 	int mode;
+	float volumedisplay;
 } MachineUi;
 
 void MachineUiSet(MachineUi* self, int x, int y, int mode, const char* editname);
@@ -96,6 +97,7 @@ typedef struct {
 	int wirefound;
 	int wiresrc;
 	int wiredst;
+	int drawvumeters;
 	MachineFrame machine_frames[256];
 	ParamView machine_paramviews[256];
 	PluginCatcher plugincatcher;

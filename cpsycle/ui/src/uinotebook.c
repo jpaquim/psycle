@@ -9,6 +9,7 @@ void ontabbarchange(ui_notebook*, ui_component* sender, int tabindex);
 void ui_notebook_init(ui_notebook* self, ui_component* parent)
 {  
     ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	self->component.defaultpropagation = 1;
 	signal_connect(&self->component.signal_size, self, onsize);
 	self->pageindex = 0;

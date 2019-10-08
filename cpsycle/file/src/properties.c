@@ -649,9 +649,10 @@ void properties_sections(Properties* self, char* text)
 	}	
 }
 
-void properties_settext(Properties* self, const char* text)
+Properties* properties_settext(Properties* self, const char* text)
 {
 	self->item.text = _strdup(text);
+	return self;
 }
 
 const char* properties_text(Properties* self)
@@ -688,12 +689,17 @@ Properties* append(Properties* self, Properties* p)
 	return p;
 }
 
-void properties_sethint(Properties* self, PropertyHint hint)
+Properties* properties_sethint(Properties* self, PropertyHint hint)
 {
 	self->item.hint = hint;
+	return self;
 }
 
 PropertyHint properties_hint(Properties* self)
 {	
 	return self->item.hint;
+}
+
+Properties* properties_next(Properties* self) {
+	return self->next;
 }

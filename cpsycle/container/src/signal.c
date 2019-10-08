@@ -38,18 +38,28 @@ void signal_dispose(Signal* self)
 
 void signal_connect(Signal* self, void* context, void* fp)
 {
-	if (self->slots) {
+	List* p;
+	int connected = 0;
+
+	p = self->slots;
+	while (p != 0) {
+		Slot* slot = (Slot*) p->entry;
+		if (slot->context == context && slot->fp == fp) {
+			connected = 1;
+			break;
+		}
+		p = p->next;
+	}
+	if (!connected) {
 		Slot* node = (Slot*)malloc(sizeof(Slot));
 		node->context = context;
 		node->fp = fp;
 		node->prevented = 0;
-		list_append(self->slots, node);
-	} else {
-		Slot* node = (Slot*)malloc(sizeof(Slot));
-		node->context = context;
-		node->fp = fp;
-		node->prevented = 0;
-		self->slots = list_create(node);			
+		if (self->slots) {			
+			list_append(self->slots, node);
+		} else {	
+			self->slots = list_create(node);			
+		}
 	}
 }
 

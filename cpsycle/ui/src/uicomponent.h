@@ -1,16 +1,15 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-
-#if !defined(UICOMPONENT)
-#define UICOMPONENT
+#if !defined(UICOMPONENT_H)
+#define UICOMPONENT_H
 
 #include <windows.h>
 #include "uidef.h"
-#include "uievents.h"
+#include "graphics.h"
+#include <signal.h>
 #include "uimenu.h"
 #include <list.h>
-
 
 typedef enum {
 	UI_ALIGN_NONE,
@@ -39,10 +38,14 @@ typedef enum {
 	UI_VERTICALEXPAND = 4	
 } UiExpandMode;
 
+typedef struct {		               
+   int (*childenum)(void*, void*);   
+   void* context;
+} EnumCallback;
+
 typedef struct {
 	HWND hwnd;
-	HMENU winid;
-	ui_events events;
+	HMENU winid;	
 	Signal signal_size;
 	Signal signal_draw;
 	Signal signal_timer;
@@ -65,6 +68,7 @@ typedef struct {
 	Signal signal_align;
 	Signal signal_preferredsize;
 	Signal signal_command;
+	EnumCallback childenum;
 	UiAlignType align;
 	UiJustifyType justify;
 	int alignexpandmode;
@@ -89,11 +93,12 @@ void ui_init(HINSTANCE hInstance);
 void ui_dispose();
 void ui_replacedefaultfont(ui_component* main, ui_font* font);
 
-void ui_component_init(ui_component* component, ui_component* parent);
-void ui_component_dispose(ui_component* component);
-void ui_frame_init(ui_component* frame, ui_component* parent);
-void ui_classcomponent_init(ui_component* component, ui_component* parent, const char* classname);
-
+void ui_component_init(ui_component*, ui_component* parent);
+void ui_component_dispose(ui_component*);
+void ui_frame_init(ui_component*, ui_component* parent);
+int ui_win32_component_init(ui_component*, ui_component* parent,
+	LPCTSTR classname, int x, int y, int width, int height,
+	DWORD dwStyle, int usecommand);
 void ui_component_show(ui_component*);
 void ui_component_hide(ui_component*);
 void ui_component_show_state(ui_component*, int cmd);

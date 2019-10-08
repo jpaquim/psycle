@@ -10,22 +10,6 @@
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
 
-void precision(void)
-{
-	int line;
-	double bpl;
-	double offset;
-	double ctrl;
-
-	bpl = 1.0 / 9;
-	offset = 0;
-	for (line = 0; line < 10; ++line) {
-		ctrl = line * bpl;
-		offset += bpl;		
-	}
-
-}
-
 UIMAIN
 {    	
 	MainFrame main;			
@@ -37,10 +21,13 @@ UIMAIN
 	if (env) {			
 		insertpathenv(workdir(workpath));
 	}
-	UIINIT;		
-	precision();
-	InitMainFrame(&main);	
-	ui_component_show_state(&main.component, iCmdShow);		 	 
+	UIINIT;
+	mainframe_init(&main);	
+	if (mainframe_showmaximizedatstart(&main)) {
+		ui_component_show_state(&main.component, SW_MAXIMIZE);
+	} else {
+		ui_component_show_state(&main.component, iCmdShow);
+	}
 	err = ui_run();	
 	UIDISPOSE;
 	if (env) {

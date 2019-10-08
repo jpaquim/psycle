@@ -2,22 +2,18 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "machinefactory.h"
-#include "plugin.h"
-#include "vstplugin.h"
-#include "sampler.h"
-#include "mixer.h"
-#include "master.h"
+
+#include "dummy.h"
 #include "duplicator.h"
+#include "duplicator2.h"
+#include "master.h"
+#include "mixer.h"
+#include "plugin.h"
+#include "sampler.h"
+#include "vstplugin.h"
+
 #include <stdlib.h>
 #include <string.h>
-
-static char* modulepath(MachineFactory*, int machtype, const char* path, char* fullpath);
-static int pathhasextension(const char* path);
-static int onpropertiesenum(MachineFactory*, Properties*, int level);
-
-static const char* searchname;
-static int searchtype;
-static Properties* searchresult;
 
 void machinefactory_init(MachineFactory* self, MachineCallback callback,
 	PluginCatcher* catcher)
@@ -31,8 +27,12 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 {
 	char fullpath[_MAX_PATH];
 
+	if (!self->catcher) {
+		return 0;
+	}
 	return machinefactory_makefrompath(self, type,
-		modulepath(self, MACH_PLUGIN, plugincatchername, fullpath));
+		plugincatcher_modulepath(self->catcher, MACH_PLUGIN,
+		plugincatchername, fullpath));
 }
 
 Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
@@ -60,6 +60,13 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 			Duplicator* duplicator = (Duplicator*)malloc(sizeof(Duplicator));
 			duplicator_init(duplicator, self->machinecallback);	
 			machine = &duplicator->machine;
+		}
+		break;
+		case MACH_DUPLICATOR2:
+		{
+			Duplicator2* duplicator2 = (Duplicator2*)malloc(sizeof(Duplicator2));
+			duplicator2_init(duplicator2, self->machinecallback);	
+			machine = &duplicator2->machine;
 		}
 		break;
 		case MACH_MIXER:
@@ -108,45 +115,4 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 		break;
 	}	
 	return machine;
-}
-
-char* modulepath(MachineFactory* self, int machtype, const char* path,
-	char* fullpath)
-{	
-	if (!path) {
-		*fullpath = '\0';
-	} else
-	if (pathhasextension(path)) {
-		strcpy(fullpath, path);
-	} else {
-		searchname = path;
-		searchtype = machtype;
-		searchresult = 0;
-		properties_enumerate(self->catcher->plugins, self, onpropertiesenum);
-		if (searchresult) {
-			properties_readstring(searchresult, "path", &fullpath, "");
-		} else {
-			strcpy(fullpath, path);
-		}
-	}
-	return fullpath;
-}
-
-int onpropertiesenum(MachineFactory* self, Properties* property, int level)
-{
-	if (properties_type(property) == PROPERTY_TYP_SECTION) {
-		const char* key = properties_key(property);
-		key = key;
-		if ((strcmp(properties_key(property), searchname) == 0) &&
-				properties_int(property, "type", 0) == searchtype) {
-			searchresult = property;
-			return 0;			
-		}
-	}
-	return 1;
-}
-
-int pathhasextension(const char* path)
-{
-	return strrchr(path, '.') != 0;
 }

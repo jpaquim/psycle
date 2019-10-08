@@ -23,6 +23,7 @@ typedef struct {
 	Signal signal_lpbchanged;
 	Library drivermodule;
 	beat_t seqtickcount;
+	Table rmsvol;
 } Player;
 
 void player_init(Player*, Song*, void* handle);

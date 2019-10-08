@@ -2,37 +2,20 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "uilabel.h"
-#include "hashtbl.h"
-
-extern Table selfmap;
 
 static void onpreferredsize(ui_label*, ui_component* sender, ui_size* limit, int* width, int* height);
 static TEXTMETRIC textmetric(ui_component*);
 
-void ui_label_init(ui_label* label, ui_component* parent)
-{  
-	HINSTANCE hInstance;
-    memset(&label->component.events, 0, sizeof(ui_events));
-	ui_component_init_signals(&label->component);	
-	label->component.doublebuffered = 0;
-#if defined(_WIN64)		
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-	label->component.hwnd = CreateWindow (TEXT("STATIC"), NULL,
+void ui_label_init(ui_label* self, ui_component* parent)
+{  		
+	ui_win32_component_init(&self->component, parent, TEXT("STATIC"), 
+		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | SS_CENTER,
-		0, 0, 90, 90,
-		parent->hwnd, NULL,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)label->component.hwnd, &label->component);	
-	label->component.events.target = label;	
-	ui_component_init_base(&label->component);
-	ui_component_setbackgroundmode(&label->component, BACKGROUND_SET);
-	signal_disconnectall(&label->component.signal_preferredsize);
-	signal_connect(&label->component.signal_preferredsize, label, onpreferredsize);
-	label->charnumber = 0;
+		0);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	signal_disconnectall(&self->component.signal_preferredsize);
+	signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
+	self->charnumber = 0;	
 }
 
 void ui_label_settext(ui_label* label, const char* text)

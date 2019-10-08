@@ -1,29 +1,25 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-
 #include "uicombobox.h"
-#include "hashtbl.h"
 
-extern Table selfmap;
-extern Table winidmap;
-extern winid_t winid;
-
-static void onpreferredsize(ui_combobox*, ui_component* sender,
-	ui_size* limit, int* width, int* height);
-static void oncommand(ui_combobox*, ui_component* sender, WPARAM wParam, LPARAM lParam);
+static void onpreferredsize(ui_combobox*, ui_component* sender, ui_size* limit,
+	int* width, int* height);
+static void oncommand(ui_combobox*, ui_component* sender, WPARAM wParam,
+	LPARAM lParam);
 static void OnDestroy(ui_combobox*, ui_component* sender);
 static void ui_combobox_create_system(ui_combobox*, ui_component* parent);
 static void ui_combobox_create_ownerdrawn(ui_combobox*, ui_component* parent);
 static void onownerdraw(ui_combobox*, ui_component* sender, ui_graphics*);
-static void onmousedown(ui_combobox*, ui_component* sender, int x, int y, int button);
-static void onmousemove(ui_combobox*, ui_component* sender, int x, int y, int button);
+static void onmousedown(ui_combobox*, ui_component* sender, int x, int y,
+	int button);
+static void onmousemove(ui_combobox*, ui_component* sender, int x, int y,
+	int button);
 static void onmouseenter(ui_combobox*, ui_component* sender);
 static void onmouseleave(ui_combobox*, ui_component* sender);
 
 void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 {  
-    memset(&combobox->component.events, 0, sizeof(ui_events));
 	combobox->hover = 0;
 	ui_component_init_signals(&combobox->component);
 	signal_init(&combobox->signal_selchanged);
@@ -38,61 +34,31 @@ void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 	combobox->charnumber = 0;
 }
 
-void ui_combobox_create_system(ui_combobox* combobox, ui_component* parent)
-{
-	HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-	combobox->ownerdrawn = 0;	
-	combobox->component.doublebuffered = 0;
-	combobox->component.hwnd = CreateWindow (TEXT("COMBOBOX"), NULL,
+void ui_combobox_create_system(ui_combobox* self, ui_component* parent)
+{	
+	ui_win32_component_init(&self->component, parent, TEXT("COMBOBOX"), 
+		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
-		0, 0, 90, 200,
-		parent->hwnd, (HMENU)winid,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)combobox->component.hwnd, &combobox->component);	
-	table_insert(&winidmap, (int)winid, &combobox->component);
-	combobox->component.winid = (HMENU)winid;
-	winid++;	
-	signal_connect(&combobox->component.signal_command, combobox, oncommand);	
-	combobox->currcombo = &combobox->component;
+		1);
+	ui_component_resize(&self->component, 90, 200);
+	signal_connect(&self->component.signal_command, self, oncommand);	
+	self->currcombo = &self->component;
 }
 
 void ui_combobox_create_ownerdrawn(ui_combobox* self, ui_component* parent)
 {		
-HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, onownerdraw);	
 	signal_connect(&self->component.signal_mousedown, self, onmousedown);
 	signal_connect(&self->component.signal_mousemove, self, onmousemove);
 	signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
-	
-	self->combo.doublebuffered = 0;
-	ui_component_init_signals(&self->combo);
-	self->combo.hwnd = CreateWindow (TEXT("COMBOBOX"), NULL,
+	signal_connect(&self->component.signal_mouseleave, self, onmouseleave);		
+	ui_win32_component_init(&self->combo, &self->component, TEXT("COMBOBOX"), 
+		0, 0, 100, 200,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
-		0, 0, 90, 200,
-		self->component.hwnd, (HMENU)winid,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)self->combo.hwnd, &self->combo);	
-	table_insert(&winidmap, (int)winid, &self->combo);
-	self->combo.winid = (HMENU)winid;
-	winid++;	
-	signal_connect(&self->combo.signal_command, self, oncommand);
-	ui_component_hide(&self->combo);
+		1);
+	ui_component_hide(&self->combo);	
+	signal_connect(&self->combo.signal_command, self, oncommand);	
 	self->ownerdrawn = 1;	
 	self->currcombo = &self->combo;	
 }
@@ -131,7 +97,8 @@ void ui_combobox_setcursel(ui_combobox* self, int index)
 
 int ui_combobox_cursel(ui_combobox* self)
 {
-	return SendMessage(self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);	
+	return SendMessage(self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0,
+		(LPARAM)0);	
 }
 
 void ui_combobox_setcharnumber(ui_combobox* self, int number)
@@ -139,7 +106,8 @@ void ui_combobox_setcharnumber(ui_combobox* self, int number)
 	self->charnumber = number;
 }
 
-void onpreferredsize(ui_combobox* self, ui_component* sender, ui_size* limit, int* width, int* height)
+void onpreferredsize(ui_combobox* self, ui_component* sender, ui_size* limit,
+	int* width, int* height)
 {
 	TEXTMETRIC tm;
 
@@ -152,13 +120,15 @@ void onpreferredsize(ui_combobox* self, ui_component* sender, ui_size* limit, in
 	*height = tm.tmHeight;
 }
 
-void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam, LPARAM lParam) {
+void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam,
+	LPARAM lParam) {
 	switch(HIWORD(wParam))
     {
         case CBN_SELCHANGE :
         {
             if (self->signal_selchanged.slots) {
-				int sel = SendMessage(self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+				int sel = SendMessage(self->currcombo->hwnd, CB_GETCURSEL,
+					(WPARAM)0, (LPARAM)0);
 				signal_emit(&self->signal_selchanged, self, 1, sel);			
 			}
 			if (self->ownerdrawn) {
@@ -196,7 +166,8 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 			char* txt;
 
 			txt = (char*)malloc(len + 1);			
-			SendMessage(self->combo.hwnd, CB_GETLBTEXT, (WPARAM)sel, (LPARAM)txt);
+			SendMessage(self->combo.hwnd, CB_GETLBTEXT, (WPARAM)sel,
+				(LPARAM)txt);
 
 			ui_setbackgroundmode(g, TRANSPARENT);
 			if (self->hover) {
@@ -220,7 +191,8 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	arrow_down[3] = arrow_down[0];
 
 	if (self->hover == 1) {
-		ui_drawsolidpolygon(g, arrow_down, 4, arrowhighlightcolor, arrowhighlightcolor);
+		ui_drawsolidpolygon(g, arrow_down, 4, arrowhighlightcolor,
+			arrowhighlightcolor);
 	} else {
 		ui_drawsolidpolygon(g, arrow_down, 4, arrowcolor, arrowcolor);
 	}
@@ -237,7 +209,8 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	arrow_right[3] = arrow_right[0];
 
 	if (self->hover == 3) {
-		ui_drawsolidpolygon(g, arrow_right, 4, arrowhighlightcolor, arrowhighlightcolor);
+		ui_drawsolidpolygon(g, arrow_right, 4, arrowhighlightcolor,
+			arrowhighlightcolor);
 	} else {
 		ui_drawsolidpolygon(g, arrow_right, 4, arrowcolor, arrowcolor);
 	}
@@ -254,13 +227,15 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	arrow_left[3] = arrow_left[0];
 
 	if (self->hover == 2) {
-		ui_drawsolidpolygon(g, arrow_left, 4, arrowhighlightcolor, arrowhighlightcolor);
+		ui_drawsolidpolygon(g, arrow_left, 4, arrowhighlightcolor,
+			arrowhighlightcolor);
 	} else {		
 		ui_drawsolidpolygon(g, arrow_left, 4, arrowcolor, arrowcolor);
 	}
 }
 
-void onmousedown(ui_combobox* self, ui_component* sender, int x, int y, int button)
+void onmousedown(ui_combobox* self, ui_component* sender, int x, int y,
+	int button)
 {
 	ui_size size = ui_component_size(sender);	
 
@@ -296,7 +271,8 @@ void onmouseenter(ui_combobox* self, ui_component* sender)
 	ui_invalidate(&self->component);
 }
 
-void onmousemove(ui_combobox* self, ui_component* sender, int x, int y, int button)
+void onmousemove(ui_combobox* self, ui_component* sender, int x, int y,
+	int button)
 {
 	if (self->hover) {
 		int hover = self->hover;
@@ -311,7 +287,8 @@ void onmousemove(ui_combobox* self, ui_component* sender, int x, int y, int butt
 		if (x >= size.width - 25 && x < size.width - 10) {
 			int count;
 			int index;
-			count = SendMessage(self->currcombo->hwnd, CB_GETCOUNT, 0, (LPARAM)0);
+			count = SendMessage(self->currcombo->hwnd, CB_GETCOUNT, 0,
+				(LPARAM)0);
 			index = ui_combobox_cursel(self);
 			if (index < count - 1) {
 				self->hover = 3;
