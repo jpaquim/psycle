@@ -20,7 +20,6 @@ static int describevalue(Plugin*, char* txt, int const param, int const value);
 static int value(Plugin*, int const param);
 static void setvalue(Plugin*, int const param, int const value);
 static void dispose(Plugin*);
-static int mode(Plugin* self);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
 static float pan(Plugin* self) { return self->pan; } 
@@ -46,7 +45,6 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.setvalue = setvalue;
 	self->machine.value = value;
 	self->machine.dispose = dispose;
-	self->machine.mode = mode;
 	self->machine.generateaudio = generateaudio;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
@@ -95,31 +93,33 @@ Machine* clone(Plugin* self)
 
 
 CMachineInfo* plugin_psycle_test(const char* path)
-{
-	GETINFO GetInfo;
-	CMachineInfo* rv;
-	Library library;	
+{	
+	CMachineInfo* rv = 0;	
+	
+	if (path && strcmp(path, "") != 0) {
+		GETINFO GetInfo;
+		Library library;
 
-	rv = 0;
-	library_init(&library);
-	library_load(&library, path);					
-	GetInfo =(GETINFO)library_functionpointer(&library, "GetInfo");
-	if (GetInfo != NULL) {	
-		CMachineInfo* pInfo = GetInfo();
-		if (pInfo) {
-			rv = (CMachineInfo*) malloc(sizeof(CMachineInfo));
-			rv->Author = _strdup(pInfo->Author);
-			rv->Command = _strdup(pInfo->Command);
-			rv->Flags = pInfo->Flags;
-			rv->Name = _strdup(pInfo->Name);
-			rv->numCols = pInfo->numCols;
-			rv->numParameters = pInfo->numParameters;
-			rv->ShortName = _strdup(pInfo->ShortName);
-			rv->APIVersion = pInfo->APIVersion;
-			rv->PlugVersion = pInfo->PlugVersion;
+		library_init(&library);
+		library_load(&library, path);					
+		GetInfo =(GETINFO)library_functionpointer(&library, "GetInfo");
+		if (GetInfo != NULL) {	
+			CMachineInfo* pInfo = GetInfo();
+			if (pInfo) {
+				rv = (CMachineInfo*) malloc(sizeof(CMachineInfo));
+				rv->Author = _strdup(pInfo->Author);
+				rv->Command = _strdup(pInfo->Command);
+				rv->Flags = pInfo->Flags;
+				rv->Name = _strdup(pInfo->Name);
+				rv->numCols = pInfo->numCols;
+				rv->numParameters = pInfo->numParameters;
+				rv->ShortName = _strdup(pInfo->ShortName);
+				rv->APIVersion = pInfo->APIVersion;
+				rv->PlugVersion = pInfo->PlugVersion;
+			}
 		}
+		library_dispose(&library);
 	}
-	library_dispose(&library);		
 	return rv;
 }
 
@@ -178,15 +178,6 @@ int value(Plugin* self, int const param)
 void setvalue(Plugin* self, int const param, int const value)
 {
 	mi_setval(self->mi, param, value);
-}
-
-int mode(Plugin* self)
-{
-	if (self->machine.info(self) && (self->machine.info(self)->Flags == 3 )) {
-		return MACHMODE_GENERATOR;
-	} else {
-		return MACHMODE_FX;
-	}	
 }
 
 unsigned int numinputs(Plugin* self)

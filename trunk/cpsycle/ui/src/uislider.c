@@ -2,49 +2,24 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "uislider.h"
-#include "hashtbl.h"
 #include <commctrl.h>
 #include <stdio.h>
 
-extern Table selfmap;
-extern Table winidmap;
-extern winid_t winid;
-
-static void oncommand(ui_slider*, ui_component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(ui_slider*, ui_component* sender);
 static void onwindowproc(ui_slider*, ui_component* sender, int message,
 	WPARAM wParam, LPARAM lParam);
 
-void ui_slider_init(ui_slider* slider, ui_component* parent)
-{
-	HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-    memset(&slider->component.events, 0, sizeof(ui_events));	
-	ui_component_init_signals(&slider->component);
-	signal_init(&slider->signal_clicked);
-	signal_init(&slider->signal_changed);
-	slider->component.doublebuffered = 0;
-	slider->component.hwnd = CreateWindow (TRACKBAR_CLASS, NULL,
+void ui_slider_init(ui_slider* self, ui_component* parent)
+{	
+	ui_win32_component_init(&self->component, parent, TRACKBAR_CLASS, 
+		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE,
-		0, 0, 90, 90,
-		parent->hwnd, (HMENU)winid,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)slider->component.hwnd, &slider->component);	
-	slider->component.events.target = slider;
-	slider->component.events.cmdtarget = slider;
-	table_insert(&winidmap, (int)winid, &slider->component);
-	winid++;		
-	ui_component_init_base(&slider->component);
-	signal_connect(&slider->component.signal_destroy, slider,  ondestroy);
-	signal_connect(&slider->component.signal_windowproc, slider,  onwindowproc);
-	signal_connect(&slider->component.signal_command, slider, oncommand);
-	ui_component_setbackgroundmode(&slider->component, BACKGROUND_SET);
+		0);
+	signal_init(&self->signal_clicked);
+	signal_init(&self->signal_changed);	
+	signal_connect(&self->component.signal_destroy, self, ondestroy);
+	signal_connect(&self->component.signal_windowproc, self, onwindowproc);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 }
 
 void ondestroy(ui_slider* self, ui_component* sender)
@@ -60,7 +35,8 @@ void ui_slider_settext(ui_slider* slider, const char* text)
 
 void ui_slider_setrange(ui_slider* self, int minrange, int maxrange)
 {	
-	SendMessage(self->component.hwnd, TBM_SETRANGE, TRUE, MAKELONG(minrange, maxrange));	
+	SendMessage(self->component.hwnd, TBM_SETRANGE, TRUE,
+		MAKELONG(minrange, maxrange));
 }
 
 void ui_slider_setvalue(ui_slider* self, int value)
@@ -73,7 +49,8 @@ int ui_slider_value(ui_slider* self)
 	return SendMessage(self->component.hwnd, TBM_GETPOS, (WPARAM)0, (LPARAM)0);
 }
 
-void onwindowproc(ui_slider* self, ui_component* sender, int message, WPARAM wParam, LPARAM lParam)
+void onwindowproc(ui_slider* self, ui_component* sender, int message,
+	WPARAM wParam, LPARAM lParam)
 {	
 	switch (message) {
 		case WM_VSCROLL:
@@ -112,9 +89,3 @@ void onwindowproc(ui_slider* self, ui_component* sender, int message, WPARAM wPa
 			break;
 	}
 }
-
-void oncommand(ui_slider* self, ui_component* sender, WPARAM wParam, LPARAM lParam)
-{
-	
-}
-

@@ -5,13 +5,12 @@
 #include "exclusivelock.h"
 #include "math.h"
 #include "master.h"
-#include "plugin.h"
-#include "vstplugin.h"
 #include "silentdriver.h"
 #include <operations.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
+#include <rms.h>
+#include <windows.h> // Sleep
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -51,7 +50,33 @@ void player_init(Player* self, Song* song, void* handle)
 	self->driver = self->silentdriver;		
 	signal_init(&self->signal_numsongtrackschanged);
 	signal_init(&self->signal_lpbchanged);
-	lock_init();	
+	lock_init();
+	table_init(&self->rmsvol);
+}
+
+void player_dispose(Player* self)
+{		
+	if (self->driver != self->silentdriver) {			
+		self->driver->close(self->driver);
+		Sleep(400);
+		player_unloaddriver(self);
+		lock_dispose();
+	}	
+	self->silentdriver->dispose(self->silentdriver);
+	self->silentdriver->free(self->silentdriver);
+	self->silentdriver = 0;
+	signal_dispose(&self->signal_lpbchanged);
+	sequencer_dispose(&self->sequencer);
+	{
+		int r;
+
+		for (r = self->rmsvol.keymin; r < self->rmsvol.keymax; ++r) {
+			if (table_exists(&self->rmsvol, r)) {
+				free(table_at(&self->rmsvol, r));
+			}
+		}
+		table_dispose(&self->rmsvol);
+	}
 }
 
 void player_loaddriver(Player* self, const char* path)
@@ -69,9 +94,11 @@ void player_loaddriver(Player* self, const char* path)
 				driver->connect(driver, self, Work, mainframe);									
 				self->t = 125 / (driver->samplerate(driver) * 60.0f);
 				self->sequencer.samplerate = driver->samplerate(driver);
+				rmsvol_setsamplerate(self->sequencer.samplerate);
 			} else {
 				self->t = 125 / (44100 * 60.0f);
 				self->sequencer.samplerate = 44100;
+				rmsvol_setsamplerate(44100);
 			}
 			lock_enable();
 		}
@@ -114,21 +141,6 @@ void player_restartdriver(Player* self)
 		self->driver->updateconfiguration(self->driver);
 		self->driver->open(self->driver);		
 	}
-}
-
-void player_dispose(Player* self)
-{		
-	if (self->driver != self->silentdriver) {			
-		self->driver->close(self->driver);
-		Sleep(400);
-		player_unloaddriver(self);
-		lock_dispose();
-	}	
-	self->silentdriver->dispose(self->silentdriver);
-	self->silentdriver->free(self->silentdriver);
-	self->silentdriver = 0;
-	signal_dispose(&self->signal_lpbchanged);
-	sequencer_dispose(&self->sequencer);
 }
 
 void player_setsong(Player* self, Song* song)
@@ -289,12 +301,24 @@ void player_workpath(Player* self, unsigned int amount)
 				machine = machines_at(&self->song->machines, slot);
 				if (machine && output) {
 					List* events;
+					RMSVol* rms;
 
-					events = player_timedevents(self, slot, amount);												
+					events = player_timedevents(self, slot, amount);
+					if (!table_exists(&self->rmsvol, slot)) {
+						rms = (RMSVol*)malloc(sizeof(RMSVol));
+						rmsvol_init(rms);
+						table_insert(&self->rmsvol, slot, rms);
+					} else {
+						rms = table_at(&self->rmsvol, slot);
+					}					
 					buffercontext_init(&bc, events, output, output, amount,
-						self->numsongtracks);
-					machine->work(machine, &bc);						
-					signal_emit(&machine->signal_worked, machine, 1, &bc);
+						self->numsongtracks, rms);
+					machine->work(machine, &bc);		
+					if (buffer_numchannels(bc.output) >= 2) {
+						rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],
+							bc.numsamples);
+					}
+					signal_emit(&machine->signal_worked, machine, 2, slot, &bc);
 					list_free(events);
 				}									
 			}			
@@ -364,13 +388,22 @@ void player_filldriver(Player* self, float* buffer, unsigned int amount)
 
 		master = machines_master(&self->song->machines);
 		if (master) {
-			BufferContext bc;
-					
+			BufferContext bc;					
+			RMSVol* rms;			
+			if (!table_exists(&self->rmsvol, MASTER_INDEX)) {
+				rms = (RMSVol*)malloc(sizeof(RMSVol));
+				rmsvol_init(rms);
+				table_insert(&self->rmsvol, MASTER_INDEX, rms);
+			} else {
+				rms = table_at(&self->rmsvol, MASTER_INDEX);
+			}					
 			buffercontext_init(&bc, 0, masteroutput, masteroutput, amount,
-				self->numsongtracks);	
+				self->numsongtracks, rms);
 			buffer_mulsamples(masteroutput, amount,
-				machines_volume(&self->song->machines));
-			signal_emit(&master->signal_worked, master, 1, &bc);
+				machines_volume(&self->song->machines));			
+			rmsvol_tick(rms, masteroutput->samples[0], masteroutput->samples[1],
+				amount);			
+			signal_emit(&master->signal_worked, master, 2, MASTER_INDEX, &bc);			
 		}
 		dsp_interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);

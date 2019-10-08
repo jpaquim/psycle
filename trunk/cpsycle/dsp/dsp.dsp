@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\diversalis\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -99,6 +99,10 @@ SOURCE=.\src\notestab.c
 
 SOURCE=.\src\operations.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\rms.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -118,6 +122,10 @@ SOURCE=.\src\notestab.h
 # Begin Source File
 
 SOURCE=.\src\operations.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\rms.h
 # End Source File
 # End Group
 # End Target

@@ -111,7 +111,19 @@ SOURCE=.\src\buffercontext.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\dummy.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\duplicator.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\duplicator2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\duplicatormap.c
 # End Source File
 # Begin Source File
 
@@ -508,7 +520,19 @@ SOURCE=.\src\constants.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\dummy.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\duplicator.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\duplicator2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\duplicatormap.h
 # End Source File
 # Begin Source File
 
@@ -537,6 +561,10 @@ SOURCE=.\src\luaplugin.h
 # Begin Source File
 
 SOURCE=.\src\machine.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machinedefs.h
 # End Source File
 # Begin Source File
 

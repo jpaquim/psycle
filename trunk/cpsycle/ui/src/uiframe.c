@@ -5,28 +5,13 @@
 #include "hashtbl.h"
 
 extern TCHAR szAppClass[];
-extern HINSTANCE appInstance;
-extern Table selfmap;
 
-void ui_frame_init(ui_frame* frame, ui_component* parent)
-{		
-	HWND hWndParent = 0;
-	int style = 0;
-
-	if (parent) {
-	  hWndParent = parent->hwnd;
-	  // style  |= WS_CHILD;
-	}
-	memset(&frame->events, 0, sizeof(ui_events));	
-	ui_component_init_signals(frame);
-	frame->doublebuffered = 0;
-	frame->hwnd = CreateWindow (szAppClass, TEXT ("Psycle"),
-                          WS_OVERLAPPEDWINDOW,
-                          CW_USEDEFAULT, CW_USEDEFAULT,
-                          CW_USEDEFAULT, CW_USEDEFAULT | style,
-                          hWndParent, NULL, appInstance, NULL);     	
-	table_insert(&selfmap, (int)frame->hwnd, frame);	
-	frame->events.target = frame;
-	frame->events.cmdtarget = frame;
-	ui_component_init_base(frame);
+void ui_frame_init(ui_frame* self, ui_component* parent)
+{			
+	ui_win32_component_init(self, parent, szAppClass, 
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		WS_OVERLAPPEDWINDOW,
+		0);
+	ui_component_setbackgroundmode(self, BACKGROUND_NONE);
 }

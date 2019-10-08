@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PROPERTIES)
-#define PROPERTIES
+#if !defined(PROPERTIES_H)
+#define PROPERTIES_H
 
 typedef enum {
 	PROPERTY_TYP_ROOT,
@@ -85,10 +85,11 @@ Property* properties_entry(Properties*);
 const char* properties_valuestring(Properties*);
 int properties_load(Properties*, const char* path, int allowappend);
 void properties_save(Properties*, const char* path);
-void properties_settext(Properties*, const char* text);
+Properties* properties_settext(Properties*, const char* text);
 const char* properties_text(Properties* self);
-void properties_sethint(Properties*, PropertyHint);
+Properties* properties_sethint(Properties*, PropertyHint);
 int properties_ischoiceitem(Properties*);
 PropertyHint properties_hint(Properties*);
+Properties* properties_next(Properties*);
 
 #endif

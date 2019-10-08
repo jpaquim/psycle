@@ -17,7 +17,6 @@ static int describevalue(Sampler*, char* txt, int const param, int const value);
 static int value(Sampler*, int const param);
 static void setvalue(Sampler*, int const param, int const value);
 static void dispose(Sampler*);
-static int mode(Sampler* self) { return MACHMODE_GENERATOR; }
 static int unused_voice(Sampler*);
 static void release_voices(Sampler*, int channel);
 static unsigned int numinputs(Sampler*);
@@ -88,6 +87,11 @@ static CMachineInfo const MacInfo = {
 	3
 };
 
+const CMachineInfo* sampler_info(void)
+{
+	return &MacInfo;
+}
+
 void sampler_init(Sampler* self, MachineCallback callback)
 {
 	int voice;
@@ -101,7 +105,6 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.setvalue = setvalue;
 	self->machine.value = value;
 	self->machine.dispose = dispose;
-	self->machine.mode = mode;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;	
 	self->numvoices = SAMPLER_MAX_POLYPHONY;

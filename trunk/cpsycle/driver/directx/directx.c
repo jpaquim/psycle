@@ -146,7 +146,7 @@ int driver_init(Driver* driver)
 	self->_pBuffer = NULL;
 	self->driver._pCallback = NULL;
 	self->device_guid_ = DSDEVID_DefaultPlayback;
-	self->_numBuffers = 4;
+	self->_numBuffers = 6;
 	self->_bufferSize = 4096;	
 	self->_samplesPerSec= 44100;	
 	self->pollSleep_ = 20;

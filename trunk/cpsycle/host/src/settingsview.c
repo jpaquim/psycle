@@ -68,7 +68,7 @@ void AppendTabbarSections(SettingsView* self)
 {	
 	Properties* p;	
 	
-	for (p = self->properties->children; p != 0; p = p->next) {
+	for (p = self->properties->children; p != 0; p = properties_next(p)) {
 		if (properties_type(p) == PROPERTY_TYP_SECTION) {
 			tabbar_append(&self->tabbar, properties_text(p));			
 		}		
@@ -449,7 +449,7 @@ void ontabbarchange(SettingsView* self, ui_component* sender, int tabindex)
 						break;
 					}				
 				}		
-				p = p->next;
+				p = properties_next(p);
 			}
 		}
 		self->search = p;

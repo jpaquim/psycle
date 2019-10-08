@@ -15,7 +15,6 @@ void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 #else
 		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
 #endif
-    memset(&groupbox->component.events, 0, sizeof(ui_events));
 	ui_component_init_signals(&groupbox->component);	
 	groupbox->component.doublebuffered = 0;
 	groupbox->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
@@ -25,11 +24,8 @@ void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 		hInstance,
 		NULL);		
 	table_insert(&selfmap, (int)groupbox->component.hwnd, &groupbox->component);	
-	groupbox->component.events.target = groupbox;
-	groupbox->component.events.cmdtarget = groupbox;
 	ui_component_init_base(&groupbox->component);
 }
-
 
 void ui_groupbox_settext(ui_groupbox* groupbox, const char* text)
 {

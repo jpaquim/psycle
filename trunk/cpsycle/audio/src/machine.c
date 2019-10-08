@@ -35,19 +35,14 @@ static void parametertweak(Machine* self, int par, int val) { }
 static int describevalue(Machine* self, char* txt, int const param, int const value) { return 0; }
 static int value(Machine* self, int const param) { return 0; }
 static void setvalue(Machine* self, int const param, int const value) { }
-static void dispose(Machine* self);
-static int mode(Machine* self) { return MACHMODE_FX; }
+static void dispose(Machine*);
+static int mode(Machine*);
 static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
 static float pan(Machine* self) { return 0; } 
 static void setpan(Machine* self, float val) { };
 static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
-
-static int dummymachine_mode(DummyMachine* self) { return self->mode; }
-static void dummymachine_dispose(DummyMachine* self);
-static unsigned int dummymachine_numinputs(DummyMachine* self) { return 2; }
-static unsigned int dummymachine_numoutputs(DummyMachine* self) { return 2; }
 
 static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(Machine* self) { return self->callback.bpm(self->callback.context); }
@@ -129,6 +124,16 @@ void work(Machine* self, BufferContext* bc)
 	buffer_setoffset(bc->output, 0);			
 }
 
+static int mode(Machine* self)
+{ 
+	const CMachineInfo* info;
+
+	info = self->info(self);
+	return (!info) ? MACHMODE_GENERATOR : (info->Flags & 3) == 3
+			? MACHMODE_GENERATOR 
+		    : MACHMODE_FX;
+}
+
 int machine_supports(Machine* self, int option)
 {
 	if (self->info(self)) {
@@ -136,21 +141,3 @@ int machine_supports(Machine* self, int option)
 	}
 	return 0;
 }
-
-void dummymachine_init(DummyMachine* self, MachineCallback callback)
-{
-	memset(self, 0, sizeof(DummyMachine));
-	machine_init(&self->machine, callback);	
-	self->machine.mode = dummymachine_mode;
-	self->machine.dispose = dummymachine_dispose;
-	self->machine.numinputs = dummymachine_numinputs;
-	self->machine.numoutputs = dummymachine_numoutputs;
-
-	self->mode = MACHMODE_FX;
-}
-
-void dummymachine_dispose(DummyMachine* self)
-{	
-	machine_dispose(&self->machine);
-}
-

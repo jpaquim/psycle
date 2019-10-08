@@ -432,6 +432,10 @@ SOURCE=.\src\resources\resource.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\audio\src\sampler.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\samplerinstrumentview.h
 # End Source File
 # Begin Source File

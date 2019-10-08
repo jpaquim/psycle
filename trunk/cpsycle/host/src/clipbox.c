@@ -8,7 +8,7 @@ static void OnDestroy(ClipBox*);
 static void OnSize(ClipBox*, ui_component* sender, int width, int height);
 static void OnTimer(ClipBox* self, ui_component* sender, int timerid);
 static void OnMouseDown(ClipBox* self, ui_component* sender, int x, int y, int button);
-static void OnMasterWorked(ClipBox* self, Machine* master, BufferContext* bc);
+static void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc);
 static void OnSongChanged(ClipBox* self, Workspace* workspace);
 static void ConnectMachinesSignals(ClipBox* self, Workspace* workspace);
 
@@ -39,7 +39,7 @@ void OnTimer(ClipBox* self, ui_component* sender, int timerid)
 	}
 }
 
-void OnMasterWorked(ClipBox* self, Machine* master, BufferContext* bc)
+void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc)
 {
 	real* left = bc->output->samples[0];
 	real* right = bc->output->samples[1];

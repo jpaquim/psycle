@@ -1,13 +1,17 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(UIFRAME_H)
-#define UIFRAME_H
+#if !defined(DUMMY_H)
+#define DUMMY_H
 
-#include "uicomponent.h"
+#include "machine.h"
 
-typedef ui_component ui_frame;
+typedef struct {
+	Machine machine;
+	int mode;
+} DummyMachine;
 
-void ui_frame_init(ui_frame*, ui_component* parent);
+void dummymachine_init(DummyMachine* self, MachineCallback);
+const CMachineInfo* dummymachine_info(void);
 
 #endif

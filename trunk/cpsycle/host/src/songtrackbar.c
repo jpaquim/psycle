@@ -14,7 +14,7 @@ void InitSongTrackBar(SongTrackBar* self, ui_component* parent, Workspace* works
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);	
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	ui_label_init(&self->headerlabel, &self->component);	
 	ui_label_settext(&self->headerlabel, "Tracks");		
 	ui_combobox_init(&self->trackbox, &self->component);	

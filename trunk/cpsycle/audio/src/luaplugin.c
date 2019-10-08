@@ -86,9 +86,5 @@ void setvalue(LuaPlugin* self, int const param, int const value)
 
 int mode(LuaPlugin* self)
 {
-	if (self->machine.info(self) && (self->machine.info(self)->Flags == 3 )) {
-		return MACHMODE_GENERATOR;
-	} else {
-		return MACHMODE_FX;
-	}	
+	return MACHMODE_FX;		
 }

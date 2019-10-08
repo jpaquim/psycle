@@ -1,12 +1,14 @@
 #include "vumeter.h"
 #include <math.h>
+#include <rms.h>
+
+#define TIMERID_MASTERVU 400
 
 static void OnDraw(Vumeter*, ui_component* sender, ui_graphics*);
 static void OnSize(Vumeter*, ui_component* sender, int width, int height);
 static void OnDestroy(Vumeter*, ui_component* sender);
-static void OnMouseDown(Vumeter*, ui_component* sender, int x, int y, int button);
 static void OnTimer(Vumeter*, ui_component* sender, int timerid);
-static void OnMasterWorked(Vumeter*, Machine*, BufferContext*);
+static void OnMasterWorked(Vumeter*, Machine*, unsigned int slot, BufferContext*);
 static void OnSongChanged(Vumeter*, Workspace*);
 static void ConnectMachinesSignals(Vumeter*, Workspace*);
 
@@ -16,13 +18,12 @@ void InitVumeter(Vumeter* self, ui_component* parent, Workspace* workspace)
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	signal_connect(&self->component.signal_size, self, OnSize);	
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);	
 	signal_connect(&self->component.signal_timer, self, OnTimer);
-	SetTimer(self->component.hwnd, 300, 50, 0);	
 	self->leftavg = 0;
 	self->rightavg = 0;	
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	ConnectMachinesSignals(self, workspace);
+	SetTimer(self->component.hwnd, TIMERID_MASTERVU, 50, 0);			
 }
 
 void OnDestroy(Vumeter* self, ui_component* component)
@@ -38,13 +39,13 @@ void OnDraw(Vumeter* self, ui_component* sender, ui_graphics* g)
 	right = left;
 	right.top += 6;
 	right.bottom += 6;
-	ui_drawsolidrectangle(g, left, 0xFF000000);
-	ui_drawsolidrectangle(g, right, 0xFF000000);
+	ui_drawsolidrectangle(g, left, 0x00000000);
+	ui_drawsolidrectangle(g, right, 0x00000000);
 	
 	left.right = (int) (self->leftavg * size.width);
 	right.right = (int) (self->rightavg * size.width);
-	ui_drawsolidrectangle(g, left, 0xFF00FF00);
-	ui_drawsolidrectangle(g, right, 0xFF00FF00);
+	ui_drawsolidrectangle(g, left, 0x0000FF00);
+	ui_drawsolidrectangle(g, right, 0x0000FF00);
 
 	ui_setrectangle(&left, left.right, left.top, size.width - left.right, 5);
 	ui_setrectangle(&right, right.right, right.top, size.width - right.right, 5);
@@ -56,30 +57,20 @@ void OnSize(Vumeter* self, ui_component* sender, int width, int height)
 {
 }
 
-void OnMouseDown(Vumeter* self, ui_component* sender, int x, int y, int button)
-{
-}
-
 void OnTimer(Vumeter* self, ui_component* sender, int timerid)
 {	
-	ui_invalidate(&self->component);	
+	if (timerid == TIMERID_MASTERVU) {
+		ui_invalidate(&self->component);
+	}
 }
 
-void OnMasterWorked(Vumeter* self, Machine* master, BufferContext* bc)
-{
-	real* left = bc->output->samples[0];
-	real* right = bc->output->samples[1];
-	real leftavg = 0;
-	real rightavg = 0;
-	char buffer[20];
-	unsigned int sample = 0;
-	for ( ; sample < bc->numsamples; ++sample) {
-		leftavg += (real) fabs(left[sample]);
-		rightavg += (real) fabs(right[sample]);
+void OnMasterWorked(Vumeter* self, Machine* master, unsigned int slot,
+	BufferContext* bc)
+{	
+	if (bc->rmsvol) {
+		self->leftavg = bc->rmsvol->data.previousLeft / 32768;
+		self->rightavg = bc->rmsvol->data.previousRight / 32768;
 	}
-	self->leftavg = leftavg / bc->numsamples / 32768;
-	self->rightavg = rightavg / bc->numsamples / 32768;
-	_snprintf(buffer, 10, "%.4f, ", self->leftavg);	
 }
 
 void OnSongChanged(Vumeter* self, Workspace* workspace)

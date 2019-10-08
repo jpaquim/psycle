@@ -121,10 +121,6 @@ SOURCE=.\src\uiedit.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\uievents.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\uiframe.c
 # End Source File
 # Begin Source File
@@ -198,10 +194,6 @@ SOURCE=.\src\uidef.h
 # Begin Source File
 
 SOURCE=.\src\uiedit.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\uievents.h
 # End Source File
 # Begin Source File
 

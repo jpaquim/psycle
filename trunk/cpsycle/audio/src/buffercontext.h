@@ -13,13 +13,16 @@ typedef struct {
 	List* events;
 	unsigned int numsamples;
 	unsigned int numtracks;
+	struct RMSVol* rmsvol;
 } BufferContext;
 
 void buffercontext_init(BufferContext*, List* events, Buffer* input,
-	Buffer* output, unsigned int numsamples, unsigned int numtracks);
+	Buffer* output, unsigned int numsamples, unsigned int numtracks,
+	struct RMSVol* rmsvol);
 void buffercontext_dispose(BufferContext*);
 unsigned int buffercontext_numsamples(BufferContext*);
 unsigned int buffercontext_numtracks(BufferContext*);
+float buffercontext_rmsvolume(BufferContext*);
 
 
 #endif

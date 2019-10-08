@@ -3,7 +3,6 @@
 
 #include "duplicator.h"
 #include "pattern.h"
-#include <windows.h>
 
 static void work(Duplicator* self, BufferContext* bc) { }
 static void sequencertick(Duplicator*);
@@ -14,11 +13,10 @@ static int describevalue(Duplicator*, char* txt, int const param, int const valu
 static int value(Duplicator*, int const param);
 static void setvalue(Duplicator* self, int const param, int const value) { }
 static void dispose(Duplicator*);
-static int mode(Duplicator* self) { return MACHMODE_GENERATOR; }
 static unsigned int numinputs(Duplicator* self) { return 0; }
 static unsigned int numoutputs(Duplicator* self) { return 0; }
 
-static int adjustnote(int note);
+static int transpose(int note, int offset);
 
 static CMachineParameter const paraOutput0 = { "Output Machine 0", "Output Machine 0", -1,	0x7E, MPF_STATE, 0 };
 static CMachineParameter const paraOutput1 = { "Output Machine 1", "Output Machine 1", -1,	0x7E, MPF_STATE, 0 };
@@ -73,21 +71,25 @@ static CMachineInfo const MacInfo = {
 	2
 };
 
+const CMachineInfo* duplicator_info(void)
+{
+	return &MacInfo;
+}
+
 void duplicator_init(Duplicator* self, MachineCallback callback)
 {	
 	int i;
 
-	machine_init(&self->machine, callback);	
+	machine_init(&self->machine, callback);		
 	self->machine.work = work;	
-	self->machine.sequencertick = sequencertick;
-	self->machine.sequencerinsert = sequencerinsert;
 	self->machine.info = info;
+	self->machine.sequencertick = sequencertick;
+	self->machine.sequencerinsert = sequencerinsert;	
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;
 	self->machine.setvalue = setvalue;
 	self->machine.value = value;
 	self->machine.dispose = dispose;
-	self->machine.mode = mode;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
 	for (i = 0; i < NUMMACHINES; ++i) {
@@ -95,11 +97,13 @@ void duplicator_init(Duplicator* self, MachineCallback callback)
 		self->noteoffset[i] = 0;
 	}
 	self->isticking = 0;
+	duplicatormap_init(&self->map);
 }
 
 void dispose(Duplicator* self)
-{
-	machine_dispose(&self->machine);	
+{	
+	machine_dispose(&self->machine);
+	duplicatormap_dispose(&self->map);
 }
 
 void sequencertick(Duplicator* self)
@@ -119,20 +123,32 @@ List* sequencerinsert(Duplicator* self, List* events)
 
 			for (i = 0; i < NUMMACHINES; i++) {						
 				if (self->macoutput[i] != -1) {
+					int note;
+					PatternEntry* duplicatorentry;
 					PatternEntry* entry;
 
-					entry = patternentry_clone((PatternEntry*) p->entry);
-					if (entry) {
+					duplicatorentry = (PatternEntry*)p->entry;
+					duplicatormap_allocate(&self->map, duplicatorentry->track, i,
+						self->macoutput[i]);
+					note = duplicatorentry->event.note;
+					if (note < NOTECOMMANDS_RELEASE) {						
+						note = transpose(note, self->noteoffset[i]);
+					}
+					entry = patternentry_clone(duplicatorentry);
+					if (entry) {						
 						entry->event.mach = self->macoutput[i];
-						if (entry->event.note < NOTECOMMANDS_RELEASE) {
-							entry->event.note = adjustnote(entry->event.note +
-								self->noteoffset[i]);
-						}
+						entry->event.note = note;						
+						entry->track = duplicatormap_at(&self->map,
+							duplicatorentry->track, i);						 
 						if (!insert) {
 							insert = list_create(entry);
 						} else {
 							list_append(insert, entry);
 						}
+					}
+					if (entry->event.note >= NOTECOMMANDS_RELEASE) {
+						duplicatormap_remove(&self->map, duplicatorentry->track, i,
+							self->macoutput[i]);						
 					}
 				}
 			}
@@ -141,9 +157,9 @@ List* sequencerinsert(Duplicator* self, List* events)
 	return insert;
 }
 
-int adjustnote(int note)
+int transpose(int note, int offset)
 {
-	int rv = note;
+	int rv = note + offset;
 
 	if (note >= NOTECOMMANDS_RELEASE) {
 		rv = 119;

@@ -2,15 +2,18 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "buffercontext.h"
+#include <rms.h>
 
 void buffercontext_init(BufferContext* self, List* events, Buffer* input, 
-	Buffer* output, unsigned int numsamples, unsigned int numtracks)
+	Buffer* output, unsigned int numsamples, unsigned int numtracks,
+	RMSVol* rmsvol)
 {	
 	self->events = events;
 	self->input = input;
 	self->output = output;
 	self->numsamples = numsamples;
-	self->numtracks = numtracks;	
+	self->numtracks = numtracks;
+	self->rmsvol = rmsvol;
 }
 
 void buffercontext_dispose(BufferContext* self)
@@ -25,4 +28,9 @@ unsigned int buffercontext_numsamples(BufferContext* self)
 unsigned int buffercontext_numtracks(BufferContext* self)
 {
 	return self->numtracks;
+}
+
+float buffercontext_rmsvolume(BufferContext* self)
+{
+	return self->rmsvol ? rmsvol_value(self->rmsvol) : 0.f;
 }

@@ -2,46 +2,25 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "uiedit.h"
-#include "hashtbl.h"
-
-extern Table selfmap;
-extern Table winidmap;
-extern winid_t winid;
 
 static void oncommand(ui_edit*, ui_component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(ui_edit*, ui_component* sender);
-static void onpreferredsize(ui_edit*, ui_component* sender, ui_size* limit, int* width, int* height);
+static void onpreferredsize(ui_edit*, ui_component* sender, ui_size* limit,
+	int* width, int* height);
 
-void ui_edit_init(ui_edit* edit, ui_component* parent, int styles)
-{  
-	HINSTANCE hInstance;
-
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif	
-    memset(&edit->component.events, 0, sizeof(ui_events));	
-	ui_component_init_signals(&edit->component);	
-	signal_init(&edit->signal_change);
-	edit->component.doublebuffered = 0;
-	edit->component.hwnd = CreateWindow (TEXT("EDIT"), NULL,
-		WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | styles,
-		0, 0, 90, 90,
-		parent->hwnd, 
-		(HMENU)winid,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)edit->component.hwnd, &edit->component);	
-	table_insert(&winidmap, (int)winid, &edit->component);
-	winid++;	
-	signal_connect(&edit->component.signal_command, edit, oncommand);
-	signal_connect(&edit->component.signal_destroy, edit, ondestroy);
-	ui_component_init_base(&edit->component);
-	signal_disconnectall(&edit->component.signal_preferredsize);
-	signal_connect(&edit->component.signal_preferredsize, edit, onpreferredsize);
-	edit->charnumber = 0;
-	edit->linenumber = 1;
+void ui_edit_init(ui_edit* self, ui_component* parent, int styles)
+{  		
+	ui_win32_component_init(&self->component, parent, TEXT("EDIT"), 
+		0, 0, 100, 20,
+		WS_CHILD | WS_VISIBLE | ES_LEFT | styles,
+		1);
+	signal_connect(&self->component.signal_command, self, oncommand);
+	signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	signal_disconnectall(&self->component.signal_preferredsize);
+	signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
+	signal_init(&self->signal_change);
+	self->charnumber = 0;
+	self->linenumber = 1;
 }
 
 void ondestroy(ui_edit* self, ui_component* sender)
@@ -71,7 +50,8 @@ const char* ui_edit_text(ui_edit* edit)
 	return buf;
 }
 
-void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam, LPARAM lParam) {
+void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam,
+	LPARAM lParam) {
 	switch(HIWORD(wParam))
     {
         case EN_CHANGE:
@@ -86,7 +66,8 @@ void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam, LPARAM lParam
     }
 }
 
-void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit, int* width, int* height)
+void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit,
+	int* width, int* height)
 {			
 	ui_size size;
 	char text[256];

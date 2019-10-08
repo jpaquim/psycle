@@ -1,77 +1,57 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-
 #include "uibutton.h"
-#include "hashtbl.h"
 #include <string.h>
-
-extern Table selfmap;
-extern Table winidmap;
-
-extern winid_t winid;
 
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
-static void oncommand(ui_button*, ui_component* sender, WPARAM wParam, LPARAM lParam);
-static void ondestroy(ui_button*, ui_component* sender);
 static void ui_button_create_system(ui_button*, ui_component* parent);
 static void ui_button_create_ownerdrawn(ui_button*, ui_component* parent);
+static void ondestroy(ui_button*, ui_component* sender);
 static void onownerdraw(ui_button*, ui_component* sender, ui_graphics*);
-static void ui_button_drawicon(ui_button*, ui_graphics*);
+static void drawicon(ui_button*, ui_graphics*);
 static void drawarrow(ui_button*, ui_point* arrow, ui_graphics*);
+static void makearrow(ui_point*, ButtonIcon icon, int x, int y);
 static void onmousedown(ui_button*, ui_component* sender);
 static void onmouseenter(ui_button*, ui_component* sender);
 static void onmouseleave(ui_button*, ui_component* sender);
-static void onpreferredsize(ui_button*, ui_component* sender, ui_size* limit, int* width, int* height);
-static void makearrow(ui_point*, ButtonIcon icon, int x, int y);
+static void oncommand(ui_button*, ui_component* sender, WPARAM wParam,
+	LPARAM lParam);
+static void onpreferredsize(ui_button*, ui_component* sender, ui_size* limit,
+	int* width, int* height);
 
-void ui_button_init(ui_button* button, ui_component* parent)
-{  
-	memset(&button->component.events, 0, sizeof(ui_events));	
-	button->hover = 0;
-	button->icon = UI_ICON_NONE;
-	ui_component_init_signals(&button->component);
-	signal_init(&button->signal_clicked);
-	button->component.doublebuffered = 0;
-	ui_button_create_ownerdrawn(button, parent);
-	signal_connect(&button->component.signal_destroy, button,  ondestroy);	
-	ui_component_init_base(&button->component);
-	signal_disconnectall(&button->component.signal_preferredsize);
-	signal_connect(&button->component.signal_preferredsize, button, onpreferredsize);
-	if (button->ownerdrawn) {
-		ui_component_setbackgroundmode(&button->component, BACKGROUND_SET);
-	}	
+void ui_button_init(ui_button* self, ui_component* parent)
+{	
+	self->hover = 0;
+	self->icon = UI_ICON_NONE;
+	if (self->ownerdrawn) {
+		ui_button_create_ownerdrawn(self, parent);
+		ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	} else {
+		ui_button_create_system(self, parent);
+	}
+	signal_init(&self->signal_clicked);	
+	signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	signal_disconnectall(&self->component.signal_preferredsize);
+	signal_connect(&self->component.signal_preferredsize, self,
+		onpreferredsize);
 }
 
 void ui_button_create_system(ui_button* self, ui_component* parent)
-{    		
-	HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-	self->ownerdrawn = 0;
+{    	
 	self->text = 0;
-	self->component.hwnd = CreateWindow (TEXT("BUTTON"), NULL,
+	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
+		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE,
-		0, 0, 90, 90,
-		parent->hwnd, (HMENU)winid,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)self->component.hwnd, &self->component);	
-	table_insert(&winidmap, (int)winid, &self->component);
-	winid++;
-	signal_connect(&self->component.signal_command, self, oncommand);
+		1);
+	signal_connect(&self->component.signal_command, self, oncommand);	
 }
 
 void ui_button_create_ownerdrawn(ui_button* self, ui_component* parent)
 {
-	self->ownerdrawn = 1;
-	self->text = _strdup("");
+	self->text = _strdup("");	
 	ui_component_init(&self->component, parent);
 	signal_connect(&self->component.signal_draw, self, onownerdraw);	
 	signal_connect(&self->component.signal_mousedown, self, onmousedown);
@@ -110,29 +90,44 @@ void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
 		self->text,
 		strlen(self->text));
 	if (self->icon != UI_ICON_NONE) {
-		ui_button_drawicon(self, g);
+		drawicon(self, g);
 	}
 }
 
-void ui_button_drawicon(ui_button* self, ui_graphics* g)
+void drawicon(ui_button* self, ui_graphics* g)
 {
 	ui_size size;
 	ui_point arrow[4];			
 	
 	size = ui_component_size(&self->component);
 	if (self->icon == UI_ICON_LESSLESS) {
-		makearrow(arrow, UI_ICON_LESS, (size.width) / 2 - 4, (size.height - 8) / 2);	
+		makearrow(arrow,
+			UI_ICON_LESS,
+			(size.width) / 2 - 4,
+			(size.height - 8) / 2);
 		drawarrow(self, arrow, g);
-		makearrow(arrow, UI_ICON_LESS, (size.width) / 2 + 4, (size.height - 8) / 2);	
+		makearrow(arrow,
+			UI_ICON_LESS,
+			(size.width) / 2 + 4,
+			(size.height - 8) / 2);	
 		drawarrow(self, arrow, g);
 	} else
 	if (self->icon == UI_ICON_MOREMORE) {
-		makearrow(arrow, UI_ICON_MORE, (size.width) / 2 - 4, (size.height - 8) / 2);	
+		makearrow(arrow,
+			UI_ICON_MORE,
+			(size.width) / 2 - 4,
+			(size.height - 8) / 2);	
 		drawarrow(self, arrow, g);
-		makearrow(arrow, UI_ICON_MORE, (size.width) / 2 + 4, (size.height - 8) / 2);	
+		makearrow(arrow,
+			UI_ICON_MORE,
+			(size.width) / 2 + 4,
+			(size.height - 8) / 2);	
 		drawarrow(self, arrow, g);
 	} else {
-		makearrow(arrow, self->icon, (size.width - 4) / 2, (size.height - 8) / 2);
+		makearrow(arrow,
+			self->icon, 
+			(size.width - 4) / 2,
+			(size.height - 8) / 2);
 		drawarrow(self, arrow, g);
 	}
 }
@@ -140,7 +135,8 @@ void ui_button_drawicon(ui_button* self, ui_graphics* g)
 void drawarrow(ui_button* self, ui_point* arrow, ui_graphics* g)
 {
 	if (self->hover == 1) {
-		ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor, arrowhighlightcolor);
+		ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor,
+			arrowhighlightcolor);
 	} else {		
 		ui_drawsolidpolygon(g, arrow, 4, arrowcolor, arrowcolor);
 	}		
@@ -172,7 +168,8 @@ void makearrow(ui_point* arrow, ButtonIcon icon, int x, int y)
 	}
 }
 
-void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit, int* width, int* height)
+void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit,
+	int* width, int* height)
 {		
 	if (self->ownerdrawn) {
 		ui_size size;
@@ -240,7 +237,8 @@ void ui_button_disablehighlight(ui_button* self)
 	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
 }
 
-void oncommand(ui_button* self, ui_component* sender, WPARAM wParam, LPARAM lParam)
+void oncommand(ui_button* self, ui_component* sender, WPARAM wParam,
+	LPARAM lParam)
 {
 	switch(HIWORD(wParam))
     {

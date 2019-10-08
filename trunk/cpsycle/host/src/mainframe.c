@@ -48,7 +48,7 @@ enum {
 	TABPAGE_HELPVIEW		= 6
 };
 
-void InitMainFrame(MainFrame* self)
+void mainframe_init(MainFrame* self)
 {			
 	ui_margin tabbardividemargin = { 0, 30, 0, 0};
 
@@ -119,7 +119,7 @@ void InitMainFrame(MainFrame* self)
 	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
 	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);
 	
-	SetTimer(self->component.hwnd, 100, 50, 0);	
+	SetTimer(self->component.hwnd, 100, 50, 0);
 	SetStartPage(self);
 	if (self->workspace.song->properties) {
 		Properties* title;
@@ -165,7 +165,7 @@ void InitStatusBar(MainFrame* self)
 		ui_component_setmargin(&self->statusbarlabel.component, &margin);
 		ui_component_setalign(&self->statusbarlabel.component, UI_ALIGN_LEFT);
 	}
-	InitPatternViewBar(&self->patternbar, &self->statusbar, &self->workspace);	
+	InitPatternViewBar(&self->patternbar, &self->statusbar, &self->workspace);		
 	ui_component_setalign(&self->patternbar.component, UI_ALIGN_LEFT);	
 }
 
@@ -514,3 +514,7 @@ void OnUpdateDriver(MainFrame* self, ui_component* sender)
 	workspace_updatedriver(&self->workspace);
 }
 
+int mainframe_showmaximizedatstart(MainFrame* self)
+{
+	return workspace_showmaximizedatstart(&self->workspace);
+}

@@ -3,20 +3,20 @@
 
 #include "samplesview.h"
 #include <instruments.h>
-#include <instrument.h>
 #include <math.h>
 
 /// Samples Main View
 static void OnSize(SamplesView*, ui_component* sender, int width, int height);
-static void AlignSamplesView(SamplesView* self);
-static void OnSampleListChanged(SamplesView* self, ui_component* sender, int slot);
+static void AlignSamplesView(SamplesView*);
+static void OnSampleListChanged(SamplesView*, ui_component* sender, int slot);
 static void SetSample(SamplesView*, int slot);
 static void OnLoadSample(SamplesView*, ui_component* sender);
-static void OnSongChanged(SamplesView* self, Workspace* workspace);
+static void OnSongChanged(SamplesView*, Workspace*);
 /// Header View
-static void InitSamplesHeaderView(SamplesHeaderView*, ui_component* parent, Instruments* instruments, ui_listbox* samplelist);
-static void SetSampleSamplesHeaderView(SamplesHeaderView*, Sample* sample);
-static void OnInstrumentSlotChanged(SamplesView* self, Instrument* sender, int slot);
+static void InitSamplesHeaderView(SamplesHeaderView*, ui_component* parent,
+	Instruments*, ui_listbox* samplelist);
+static void SetSampleSamplesHeaderView(SamplesHeaderView*, Sample*);
+static void OnInstrumentSlotChanged(SamplesView*, Instrument* sender, int slot);
 static void OnPrevSample(SamplesHeaderView*, ui_component* sender);
 static void OnNextSample(SamplesHeaderView*, ui_component* sender);
 static void OnDeleteSample(SamplesHeaderView*, ui_component* sender);
@@ -197,62 +197,42 @@ void OnSongChanged(SamplesView* self, Workspace* workspace)
 
 void InitSamplesHeaderView(SamplesHeaderView* self, ui_component* parent, Instruments* instruments, ui_listbox* samplelist)
 {
-	ui_margin margin = { 5, 3, 3, 0 };
-
 	self->instruments = instruments;
 	self->samplelist = samplelist;
 	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	ui_component_enablealign(&self->component);	
 
 	ui_label_init(&self->namelabel, &self->component);
 	ui_label_settext(&self->namelabel, "Sample Name");
-	ui_component_resize(&self->namelabel.component, 90, 20);	
-
 	ui_edit_init(&self->nameedit, &self->component, 0);		
-	ui_component_resize(&self->nameedit.component, 80, 20);
+	ui_edit_setcharnumber(&self->nameedit, 20);	
 	signal_connect(&self->nameedit.signal_change, self, OnEditSampleName);
-
 	ui_button_init(&self->prevbutton, &self->component);
-	ui_button_settext(&self->prevbutton, "<");
-	ui_component_resize(&self->prevbutton.component, 20, 20);
+	ui_button_seticon(&self->prevbutton, UI_ICON_LESS);	
 	signal_connect(&self->prevbutton.signal_clicked, self, OnPrevSample);
-
 	ui_button_init(&self->nextbutton, &self->component);
-	ui_button_settext(&self->nextbutton, ">");
-	ui_component_resize(&self->nextbutton.component, 20, 20);
+	ui_button_seticon(&self->nextbutton, UI_ICON_MORE);	
 	signal_connect(&self->nextbutton.signal_clicked, self, OnNextSample);
-
 	ui_button_init(&self->deletebutton, &self->component);
-	ui_button_settext(&self->deletebutton, "Delete");
-	ui_component_resize(&self->deletebutton.component, 40, 20);
+	ui_button_settext(&self->deletebutton, "Delete");	
 	signal_connect(&self->deletebutton.signal_clicked, self, OnDeleteSample);	
-
 	ui_label_init(&self->srlabel, &self->component);
-	ui_label_settext(&self->srlabel, "Sample Rate");
-	ui_component_resize(&self->srlabel.component, 85, 20);
-
+	ui_label_settext(&self->srlabel, "Sample Rate");	
 	ui_edit_init(&self->sredit, &self->component, 0);	
-	ui_component_resize(&self->sredit.component, 50, 20);
-
+	ui_edit_setcharnumber(&self->sredit, 8);
 	ui_label_init(&self->numsamplesheaderlabel, &self->component);
-	ui_label_settext(&self->numsamplesheaderlabel, "Samples");
-	ui_component_resize(&self->numsamplesheaderlabel.component, 60, 20);
-
+	ui_label_settext(&self->numsamplesheaderlabel, "Samples");	
 	ui_label_init(&self->numsampleslabel, &self->component);
-	ui_label_settext(&self->numsampleslabel, "");
-	ui_component_resize(&self->numsampleslabel.component, 40, 20);
-
+	ui_label_setcharnumber(&self->numsampleslabel, 10);
 	ui_label_init(&self->channellabel, &self->component);
 	ui_label_settext(&self->channellabel, "");
-	ui_component_resize(&self->channellabel.component, 40, 20);
-
+	ui_label_setcharnumber(&self->channellabel, 6);
 	{
-		List* p;
-		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)
-		{
-			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_LEFT);
-			ui_component_setmargin((ui_component*)p->entry, &margin);
-		}
+		ui_margin margin = { 5, 3, 3, 0 };		
+						
+		ui_components_setalign(ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin);		
 	}
 }
 

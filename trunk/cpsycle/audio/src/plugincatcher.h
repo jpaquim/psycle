@@ -4,6 +4,9 @@
 #if !defined(PLUGINCATCHER_H)
 #define PLUGINCATCHER_H
 
+#include "plugin_interface.h"
+#include "machinedefs.h"
+
 #include <properties.h>
 #include <signal.h>
 
@@ -20,5 +23,10 @@ void plugincatcher_clear(PluginCatcher*);
 void plugincatcher_scan(PluginCatcher*);
 int plugincatcher_load(PluginCatcher*);
 void plugincatcher_save(PluginCatcher*);
+const CMachineInfo* plugincatcher_machineinfo(PluginCatcher*, MachineType,
+	const char* name);
+char* plugincatcher_modulepath(PluginCatcher*, MachineType, const char* path,
+	char* fullpath);
+
 
 #endif

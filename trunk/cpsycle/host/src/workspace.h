@@ -68,6 +68,7 @@ void workspace_updatedriver(Workspace*);
 int workspace_octave(Workspace*);
 int workspace_showsonginfoonload(Workspace*);
 int workspace_showaboutatstart(Workspace*);
+int workspace_showmaximizedatstart(Workspace*);
 int workspace_showlinenumbers(Workspace*);
 void workspace_configchanged(Workspace*, Properties* property,
 	Properties* choice);
