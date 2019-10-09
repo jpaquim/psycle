@@ -36,9 +36,7 @@ typedef struct Machine {
 	void (*setvalue)(void*, int const param, int const value);	
 	const CMachineInfo* (*info)(void*);
 	void (*dispose)(void*);
-	int (*mode)(void*);
-	float (*pan)(void*);
-	void (*setpan)(void*, float val);
+	int (*mode)(void*);	
 	void (*updatesamplerate)(void*, unsigned int samplerate);
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
@@ -52,10 +50,21 @@ typedef struct Machine {
 		
 	Signal signal_worked;
 	MachineCallback callback;
+	int bypass;
+	int mute;
+	float panning;
 } Machine;
 
 void machine_init(Machine*, MachineCallback);
 void machine_dispose(Machine*);
 int machine_supports(Machine*, int option);
+float machine_panning(Machine* self);
+void machine_setpanning(Machine*, float panning);
+void machine_bypass(Machine*);
+void machine_unbypass(Machine*);
+int machine_bypassed(Machine*);
+void machine_mute(Machine*);
+void machine_unmute(Machine*);
+int machine_muted(Machine*);
 
 #endif

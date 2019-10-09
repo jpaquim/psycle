@@ -26,7 +26,8 @@ static void SetDefaultSkin(TrackerGrid*);
 static void OnMouseDown(TrackerGrid*, ui_component* sender, int x, int y, int button);
 static void ClipBlock(TrackerGrid*, ui_graphics*, TrackerGridBlock* block);
 static void DrawDigit(TrackerGrid*, ui_graphics*, int digit, int col, int x, int y);
-static void HandlePatternEventInput(TrackerView*, unsigned int keycode);
+static void HandlePatternEventInput(TrackerView*, unsigned int keycode,
+	int shift, int ctrl);
 static void InputNote(TrackerView*, note_t note);
 static void InputDigit(TrackerView*, int value);
 static void EnterDigitColumn(PatternEvent*, int column, int value);
@@ -166,8 +167,8 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 
 	self->player = player;	
 	self->numtracks = player_numsongtracks(player);
-	self->lpb = self->player->lpb;
-	self->bpl = 1.0 / self->lpb;
+	self->lpb = player_lpb(self->player);
+	self->bpl = 1.0 / player_lpb(self->player);
 	self->notestabmode = NOTESTAB_DEFAULT;	
 	self->cursor.track = 0;
 	self->cursor.offset = 0;
@@ -242,7 +243,7 @@ void OnDraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	TrackerGridBlock clip;
 	if (self->view->pattern) {
-		self->bpl = 1.0 / self->player->lpb;		
+		self->bpl = 1.0 / player_lpb(self->player);
 		ui_setfont(g, &self->view->font);		
 		ClipBlock(self, g, &clip);
 		DrawBackground(self, g, &clip);
@@ -718,17 +719,19 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 			ui_invalidate(&self->component);			
 		}	
 	} else {
-		HandlePatternEventInput(self, keycode);
+		HandlePatternEventInput(self, 
+			keycode, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 	}	
 	ui_component_propagateevent(sender);
 }
 
-void HandlePatternEventInput(TrackerView* self, unsigned int keycode)
+void HandlePatternEventInput(TrackerView* self, unsigned int keycode,
+	int shift, int ctrl)
 {
 	if (self->grid.cursor.col == TRACKER_COLUMN_NOTE) {
 		int cmd;
 
-		cmd = inputs_cmd(self->grid.noteinputs, encodeinput(keycode, 0, 0));
+		cmd = inputs_cmd(self->grid.noteinputs, encodeinput(keycode, shift, ctrl));
 		if (cmd != -1) {
 			InputNote(self, NoteCmdToNote(self, cmd));
 		}
@@ -741,8 +744,14 @@ unsigned char NoteCmdToNote(TrackerView* self, int cmd)
 {
 	int rv = 255;	
 		
+	if (cmd == CMD_NOTE_TWEAKM) {
+		rv = NOTECOMMANDS_TWEAK;
+	} else
+	if (cmd == CMD_NOTE_TWEAKS) {
+		rv = NOTECOMMANDS_TWEAKSLIDE;
+	} else
 	if (cmd == CMD_NOTE_STOP) {
-		rv = 120;
+		rv = NOTECOMMANDS_RELEASE;
 	} else {
 		unsigned char base;
 
@@ -1210,12 +1219,13 @@ int NumLines(TrackerView* self)
 	}			
 	offset = self->pattern->length - offset;
 	if (offset > 0) {
-		remaininglines = (int)(offset * self->grid.player->lpb);
+		remaininglines = (int)(offset * player_lpb(self->grid.player));
 	}
 	return lines + sublines + remaininglines;
 }
 
-void OnConfigChanged(TrackerView* self, Workspace* workspace, Properties* property)
+void OnConfigChanged(TrackerView* self, Workspace* workspace, Properties*
+	property)
 {
 	if (property == workspace->config) {
 		ReadConfig(self);

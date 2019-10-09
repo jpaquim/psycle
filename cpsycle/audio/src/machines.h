@@ -29,10 +29,11 @@ typedef List MachineList;
 
 typedef struct Machines {	
 	Table slots;	
-	Table connections;
+	Table connections;	
 	Table inputbuffers;
 	Table outputbuffers;
 	MachinePath* path;
+	Table nopath;
 	List* buffers;	
 	float* samplebuffers;
 	int numsamplebuffers;
@@ -76,7 +77,6 @@ unsigned int machines_size(Machines*);
 void machines_showparameters(Machines*, int slot);
 void machines_setvolume(Machines*, float volume);
 float machines_volume(Machines*);
-
 
 void suspendwork(void);
 void resumework(void);

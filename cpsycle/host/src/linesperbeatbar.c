@@ -24,7 +24,7 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);	
 	self->lpb = 0;
 	signal_connect(&self->component.signal_timer, self, OnTimer);
-	SetTimer(self->component.hwnd, 500, 50, 0);
+	SetTimer(self->component.hwnd, 500, 200, 0);
 	{		
 		ui_margin margin = { 0, 3, 3, 0 };
 				
@@ -37,21 +37,22 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 
 void OnLessClicked(LinesPerBeatBar* self, ui_component* sender)
 {		
-	player_setlpb(self->player, self->player->lpb - 1);
+	player_setlpb(self->player, player_lpb(self->player) - 1);
 }
 
 void OnMoreClicked(LinesPerBeatBar* self, ui_component* sender)
 {		
-	player_setlpb(self->player, self->player->lpb + 1);
+	player_setlpb(self->player, player_lpb(self->player) + 1);
 }
 
 void OnTimer(LinesPerBeatBar* self, ui_component* sender, int timerid)
 {		
-	if (self->lpb != self->player->lpb) {
+	if (self->lpb != player_lpb(self->player)) {
 		char text[20];
 
-		_snprintf(text, 10, "%2d", self->player->lpb);
+		self->lpb = player_lpb(self->player);
+		_snprintf(text, 10, "%2d", self->lpb);
 		ui_label_settext(&self->lpblabel, text);
-		self->lpb = self->player->lpb;
+		
 	}
 }

@@ -25,6 +25,7 @@ void buffer_addsamples(Buffer*, Buffer* source, unsigned int numsamples,
 	float vol);
 void buffer_mulsamples(Buffer*, unsigned int numsamples, float mul);
 unsigned int buffer_numchannels(Buffer*);
+void buffer_pan(Buffer* self, float pan, unsigned int amount);
 int buffer_mono(Buffer*);
 
 #endif

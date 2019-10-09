@@ -24,6 +24,7 @@ static void onpreferredsize(ui_button*, ui_component* sender, ui_size* limit,
 
 void ui_button_init(ui_button* self, ui_component* parent)
 {	
+	self->ownerdrawn = 1;
 	self->hover = 0;
 	self->icon = UI_ICON_NONE;
 	if (self->ownerdrawn) {

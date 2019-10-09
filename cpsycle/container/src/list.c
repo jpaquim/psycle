@@ -38,6 +38,18 @@ List* list_append(List* self, void* entry)
 	return self->tail;
 }
 
+List* list_appendlist(List** self, List* list)
+{
+	if (!*self) {
+		*self = list;
+	} else 
+	if (list) {
+		(*self)->tail->next = list;
+		(*self)->tail = list->tail;
+	}
+	return *self ? (*self)->tail : 0;
+}
+
 List* list_insert(List** self, List* ptr, void* entry)
 {
 	List* next;

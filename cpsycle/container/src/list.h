@@ -14,8 +14,9 @@ typedef struct ListStruct List;
 
 List* list_create(void* node);
 void list_free(List* list);
-List* list_append(List*, void* node);
-List* list_insert(List**, List* ptr, void* node);
+List* list_append(List*, void* entry);
+List* list_appendlist(List**, List*);
+List* list_insert(List**, List* ptr, void* entry);
 List* list_remove(List**, List* ptr);
 unsigned int list_size(List*);
 

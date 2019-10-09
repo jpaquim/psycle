@@ -39,8 +39,6 @@ static void dispose(Machine*);
 static int mode(Machine*);
 static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
-static float pan(Machine* self) { return 0; } 
-static void setpan(Machine* self, float val) { };
 static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
 
@@ -69,9 +67,7 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->value = value;
 	self->generateaudio = generateaudio;
 	self->numinputs = numinputs;
-	self->numoutputs = numoutputs;
-	self->pan = pan;
-	self->setpan = setpan;
+	self->numoutputs = numoutputs;	
 	self->setcallback = setcallback;
 	self->updatesamplerate = updatesamplerate;
 	self->bpm = bpm;
@@ -80,6 +76,9 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->samples = samples;
 	self->machines = machines;
 	self->callback = callback;
+	self->bypass = 0;
+	self->mute = 0;
+	self->panning = 0.5f;	
 	signal_init(&self->signal_worked);
 }
 
@@ -109,7 +108,12 @@ void work(Machine* self, BufferContext* bc)
 			amount -= numworksamples;
 			bc->numsamples = restorenumsamples;
 		}
-		self->seqtick(self, entry->track, &entry->event);		
+		if (entry->event.note == NOTECOMMANDS_TWEAK) {
+			self->parametertweak(self, entry->event.inst,
+				entry->event.parameter);
+		} else {
+			self->seqtick(self, entry->track, &entry->event);
+		}
 		pos = (unsigned int)entry->delta;	
 	}
 	if (amount > 0 && self->generateaudio) {
@@ -141,3 +145,44 @@ int machine_supports(Machine* self, int option)
 	}
 	return 0;
 }
+
+int machine_bypassed(Machine* self)
+{
+	return self->bypass;
+}
+
+void machine_bypass(Machine* self)
+{
+	self->bypass = 1;
+}
+
+void machine_unbypass(Machine* self)
+{
+	self->bypass = 0;
+}
+
+int machine_muted(Machine* self)
+{
+	return self->mute;
+}
+
+void machine_mute(Machine* self)
+{
+	self->mute = 1;
+}
+
+void machine_unmute(Machine* self)
+{
+	self->mute = 0;
+}
+
+float machine_panning(Machine* self)
+{
+	return self->panning;
+}
+
+void machine_setpanning(Machine* self, float val)
+{
+	self->panning = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
+}
+

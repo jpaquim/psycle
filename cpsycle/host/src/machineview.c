@@ -35,6 +35,7 @@ static void OnKeyDown(WireView*, ui_component* sender, int keycode, int keydata)
 static void OnMachineViewKeyDown(MachineView*, ui_component* sender, int keycode, int keydata);
 static void HitTest(WireView*, int x, int y);
 static int HitTestPan(WireView*, int x, int y, int slot, int* dx);
+static int HitTestCoord(WireView*, int x, int y, int mode, int slot, SkinCoord*);
 static float PanValue(WireView*, int x, int y, int slot);
 static int OnEnumDrawMachine(WireView*, int slot, Machine*);
 static int OnEnumDrawWires(WireView*, int slot, Machine*);
@@ -67,7 +68,10 @@ void MachineUiSet(MachineUi* self, int x, int y, int mode, const char* editname)
 {	
 	self->x = x;
 	self->y = y;
-	self->mode = mode;
+	if (mode == MACHMODE_MASTER) {
+		self->mode = MACHMODE_MASTER;
+	} else
+	self->mode = (mode & 3) ? MACHMODE_GENERATOR : MACHMODE_FX;
 	if (self->editname) {
 		free(self->editname);
 	}
@@ -108,6 +112,8 @@ void InitWireView(WireView* self, ui_component* parent,
 	self->dragslot = -1;
 	self->dragmode = WIREVIEW_DRAG_MACHINE;
 	self->selectedslot = 0;
+	self->selectedwire.src = -1;
+	self->selectedwire.dst = -1;
 	self->component.doublebuffered = TRUE;
 	InitMachineCoords(self);			
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);	
@@ -138,17 +144,17 @@ void InitMachineCoords(WireView* self)
 		{ 0, 156, 0, 7, 4, 20, 129, 4, 129 },		// vu0
 		{ 108, 156, 1, 7, 6, 33, 82, 7, 82 },		// vupeak
 		{ 0, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
-		{ 23, 139, 17, 17, 137, 4, 17, 17, 0 },		// mute
-		{ 6, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
+		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
+		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
 		{ 0, 0, 0, 0, 20, 3, 117, 15, 0 },			// name
 	};		
 	EffectCoords effect = {
-		{ 0, 0, 138, 52, 0, 0, 138, 52, 0 },	// background
+		{ 0, 0, 138, 52, 0, 0, 138, 52, 0 },		// background
 		{ 0, 163, 0, 7, 4, 20, 129, 4, 129 },		// vu0
-		{ 96, 144, 6, 5, 0, 0, 0, 0, 0 },		// vupeak
-		{ 57, 139, 6, 13, 6, 33, 6, 13, 82 },	// pan
-		{ 7, 149, 7, 7, 117, 31, 7, 7, 0 },	// mute
-		{ 14, 149, 7, 7, 98, 31, 7, 7, 0 },		// bypass
+		{ 96, 144, 6, 5, 0, 0, 0, 0, 0 },			// vupeak
+		{ 57, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
+		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
+		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// bypass
 		{ 0, 0, 0, 0, 20, 3, 117, 15, 0 },			// name 
 	};			
 	self->skin.master = master;
@@ -190,6 +196,7 @@ void WireViewApplyProperties(WireView* self, Properties* p)
 {
 	self->skin.colour = properties_int(p, "mv_colour", 0x00232323);
 	self->skin.wirecolour = properties_int(p, "mv_wirecolour", 0x005F5F5F);
+	self->skin.selwirecolour = properties_int(p, "mv_wirecolour", 0x007F7F7F);
 	self->skin.polycolour = properties_int(p, "mv_wireaacolour2", 0x005F5F5F);
 	self->skin.polycolour = properties_int(p, "mv_polycolour", 0x00B1C8B0);
 	self->skin.generator_fontcolour = 
@@ -265,7 +272,12 @@ int OnEnumDrawWires(WireView* self, int slot, Machine* machine)
 					int inheight;
 					MachineUiSize(self, outmachine->mode(outmachine), &outwidth, &outheight);
 					MachineUiSize(self, inmachine->mode(inmachine), &inwidth, &inheight);
-					ui_setcolor(self->g, self->skin.wirecolour);
+					if (self->selectedwire.src == slot &&
+						self->selectedwire.dst == entry->slot) {
+						ui_setcolor(self->g, self->skin.selwirecolour);
+					} else {
+						ui_setcolor(self->g, self->skin.wirecolour);
+					}
 					ui_drawline(self->g, 
 						self->machineuis[slot].x + outwidth/2,
 						self->machineuis[slot].y + outheight /2,
@@ -407,18 +419,27 @@ void DrawMachine(WireView* self, ui_graphics* g, int slot, Machine* machine, int
 			ui_settextcolor(g, self->skin.generator_fontcolour);
 			ui_textout(g, x + self->skin.generator.name.destx + 2, y + self->skin.generator.name.desty  + 2, editname, strlen(editname));
 			BlitSkinPart(self, g,
-				x + SliderCoord(&self->skin.generator.pan, machine->pan(machine)),
+				x + SliderCoord(&self->skin.generator.pan, machine_panning(machine)),
 				y,
 				&self->skin.generator.pan);
+			if (machine_muted(machine)) {
+				BlitSkinPart(self, g, x, y, &self->skin.generator.mute);
+			}
 		} else
 		if (machine->mode(machine) == MACHMODE_FX) {
 			BlitSkinPart(self, g, x, y, &self->skin.effect.background);
 			ui_settextcolor(g, self->skin.effect_fontcolour);
 			ui_textout(g, x + self->skin.effect.name.destx + 2, y + self->skin.effect.name.desty  + 2, editname, strlen(editname));		
 			BlitSkinPart(self, g,
-				x + SliderCoord(&self->skin.effect.pan, machine->pan(machine)),
+				x + SliderCoord(&self->skin.effect.pan, machine_panning(machine)),
 				y,
 				&self->skin.effect.pan);
+			if (machine_bypassed(machine)) {
+				BlitSkinPart(self, g, x, y, &self->skin.effect.bypass);
+			}
+			if (machine_muted(machine)) {
+				BlitSkinPart(self, g, x, y, &self->skin.effect.mute);
+			}
 		} else
 		if (machine->mode(machine) == MACHMODE_MASTER) {
 			BlitSkinPart(self, g, x, y, &self->skin.master.background);
@@ -542,13 +563,53 @@ void OnMouseDown(WireView* self, ui_component* sender, int x, int y, int button)
 	ui_component_setfocus(&self->component);
 	self->mx = x;
 	self->my = y;
+	self->selectedwire.src = -1;
+	self->selectedwire.dst = -1;
 	HitTest(self, x, y);
-	if (self->dragslot != -1) {		
+	if (self->dragslot == -1) {
+		if (button == 1) {
+			self->wirefound = 0;
+			machines_enumerate(self->machines, self, OnEnumFindWire);
+			if (self->wirefound) {
+				self->selectedwire.src = self->wiresrc;
+				self->selectedwire.dst = self->wiredst;
+			}
+			ui_invalidate(&self->component);
+		}
+	} else {		
 		if (button == 1) {
 			if (self->dragslot != MASTER_INDEX) {
 				self->selectedslot = self->dragslot;				
 				machines_changeslot(self->machines, self->selectedslot);
 			}
+			if (HitTestCoord(self, x, y, MACHMODE_GENERATOR, self->dragslot,
+				&self->skin.generator.solo)) {
+				
+			} else
+			if (HitTestCoord(self, x, y, MACHMODE_FX, self->dragslot,
+					&self->skin.effect.bypass)) {
+				Machine* machine = machines_at(self->machines, self->dragslot);
+				if (machine) {
+					if (machine_bypassed(machine)) {
+						machine_unbypass(machine);
+					} else {
+						machine_bypass(machine);
+					}
+				}
+			} else
+			if (HitTestCoord(self, x, y, MACHMODE_GENERATOR, self->dragslot,
+					&self->skin.generator.mute) ||
+				HitTestCoord(self, x, y, MACHMODE_FX, self->dragslot,
+					&self->skin.effect.mute)) {
+				Machine* machine = machines_at(self->machines, self->dragslot);
+				if (machine) {
+					if (machine_muted(machine)) {
+						machine_unmute(machine);
+					} else {
+						machine_mute(machine);
+					}
+				}
+			} else
 			if (HitTestPan(self, x, y, self->dragslot, &self->mx)) {
 				self->dragmode = WIREVIEW_DRAG_PAN;				
 			} else  {
@@ -588,7 +649,7 @@ int HitTestPan(WireView* self, int x, int y, int slot, int* dx)
 	if (machine) {
 		switch (self->machineuis[slot].mode) {
 			case MACHMODE_GENERATOR:
-				offset = (int) (machine->pan(machine) * self->skin.generator.pan.range);					
+				offset = (int) (machine_panning(machine) * self->skin.generator.pan.range);					
 				ui_setrectangle(&r,
 					self->skin.generator.pan.destx + offset,
 						self->skin.generator.pan.desty,
@@ -596,7 +657,7 @@ int HitTestPan(WireView* self, int x, int y, int slot, int* dx)
 						self->skin.generator.pan.destheight);			
 			break;
 			case MACHMODE_FX:
-				offset = (int) (machine->pan(machine) * self->skin.generator.pan.range);
+				offset = (int) (machine_panning(machine) * self->skin.generator.pan.range);
 				ui_setrectangle(&r,
 					self->skin.effect.pan.destx + offset,
 						self->skin.effect.pan.desty,
@@ -608,6 +669,24 @@ int HitTestPan(WireView* self, int x, int y, int slot, int* dx)
 		}	
 	}
 	*dx = xm - r.left;
+	return ui_rectangle_intersect(&r, xm, ym);	
+}
+
+int HitTestCoord(WireView* self, int x, int y, int mode, int slot, SkinCoord* coord)
+{
+	ui_rectangle r = { 0, 0, 0, 0 };	
+	int xm = x - self->machineuis[slot].x;	
+	int ym = y - self->machineuis[slot].y;
+
+	if (self->machineuis[slot].mode == mode) {
+		return 0;
+	}
+
+	ui_setrectangle(&r,
+		coord->destx,
+		coord->desty,
+		coord->destwidth,
+		coord->destheight);			
 	return ui_rectangle_intersect(&r, xm, ym);	
 }
 
@@ -667,7 +746,7 @@ void OnMouseMove(WireView* self, ui_component* sender, int x, int y, int button)
 
 			machine = machines_at(self->machines, self->dragslot);
 			if (machine) {
-				machine->setpan(machine,
+				machine_setpanning(machine,
 					PanValue(self, x, y,
 						self->dragslot));
 			}
@@ -715,16 +794,9 @@ void OnMouseDoubleClick(WireView* self, ui_component* sender, int x, int y, int 
 
 void OnKeyDown(WireView* self, ui_component* sender, int keycode, int keydata)
 {	
-	int state;
-
-	state = GetKeyState (VK_LBUTTON);
-	if (state < 0 && keycode == VK_DELETE) {
-		self->wirefound = 0;
-		machines_enumerate(self->machines, self, OnEnumFindWire);
-		if (self->wirefound) {
-			machines_disconnect(self->machines, self->wiresrc, self->wiredst);			
-			ui_invalidate(&self->component);
-		}
+	if (keycode == VK_DELETE && self->selectedwire.src != -1) {						
+		machines_disconnect(self->machines, self->wiresrc, self->wiredst);			
+		ui_invalidate(&self->component);		
 	} else 
 	if (keycode == VK_DELETE && self->selectedslot != MASTER_INDEX) {		
 		machines_remove(self->machines, self->selectedslot);		

@@ -22,8 +22,6 @@ static void setvalue(Plugin*, int const param, int const value);
 static void dispose(Plugin*);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
-static float pan(Plugin* self) { return self->pan; } 
-static void setpan(Plugin* self, float val);
 static void setcallback(Plugin* self, MachineCallback callback);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
@@ -47,9 +45,7 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.dispose = dispose;
 	self->machine.generateaudio = generateaudio;
 	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.pan = pan;
-	self->machine.setpan = setpan;
+	self->machine.numoutputs = numoutputs;	
 	self->machine.setcallback = setcallback;
 
 	pInfo = info(self);	
@@ -196,11 +192,6 @@ unsigned int numoutputs(Plugin* self)
 	} else {
 		return 0;
 	}
-}
-
-void setpan(Plugin* self, float val)
-{ 	
-	self->pan = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
 }
 
 void setcallback(Plugin* self, MachineCallback callback)

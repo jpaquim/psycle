@@ -15,9 +15,7 @@ typedef struct {
 	Driver* silentdriver;
 	Song* song;
 	Sequencer sequencer;	
-	int playing;
-	beat_t t;
-	unsigned int lpb;	
+	int playing;			
 	unsigned int numsongtracks;
 	Signal signal_numsongtrackschanged;
 	Signal signal_lpbchanged;

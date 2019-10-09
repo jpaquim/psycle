@@ -103,7 +103,7 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;
 	self->machine.setvalue = setvalue;
-	self->machine.value = value;
+	self->machine.value = value;	
 	self->machine.dispose = dispose;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;	
@@ -113,6 +113,7 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	}
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;
+	self->pan = 0.5f;
 	table_init(&self->lastinst);
 }
 

@@ -9,7 +9,6 @@
 #include <string.h>
 
 static int OnEnumFreeMachine(Machines*, int slot, Machine*);
-static int OnEnumPathMachines(Machines*, int slot, Machine*);
 static int machines_freeslot(Machines*, int start);
 static MachineConnection* findconnection(MachineConnection*, int slot);
 static MachineConnectionEntry* allocconnectionentry(int slot, float volume);
@@ -17,7 +16,7 @@ static void appendconnectionentry(MachineConnection**, MachineConnectionEntry*);
 static MachineConnections* initconnections(Machines*, int slot);
 static void machines_setpath(Machines*, MachineList* path);
 static MachineList* compute_path(Machines*, int slot);
-static void free_machinepath(List* path);
+static MachineList* compute_slotpath(Machines*, int slot);
 static void machines_preparebuffers(Machines*, MachineList* path, unsigned int amount);
 static void machines_releasebuffers(Machines*);
 static Buffer* machines_nextbuffer(Machines*, unsigned int channels);
@@ -29,6 +28,7 @@ void machines_init(Machines* self)
 	table_init(&self->connections);
 	table_init(&self->inputbuffers);
 	table_init(&self->outputbuffers);
+	table_init(&self->nopath);
 	self->path = 0;
 	self->numsamplebuffers = 100;
 	self->samplebuffers = (float*)malloc(sizeof(float) * MAX_STREAM_SIZE *
@@ -51,24 +51,17 @@ void machines_dispose(Machines* self)
 	signal_dispose(&self->signal_removed);
 	signal_dispose(&self->signal_slotchange);
 	signal_dispose(&self->signal_showparameters);
-	machines_enumerate(self, self, OnEnumFreeMachine);
-	free_machinepath(self->path);
+	machines_enumerate(self, self, OnEnumFreeMachine);	
+	table_dispose(&self->inputbuffers);
+	table_dispose(&self->outputbuffers);
+	machines_freebuffers(self);
+	list_free(self->path);
+	self->path = 0;
 	table_dispose(&self->slots);
 	table_dispose(&self->connections);
-	machines_releasebuffers(self);
-	machines_freebuffers(self);
+	table_dispose(&self->nopath);	
+	
 	free(self->samplebuffers);	
-}
-
-void machines_freebuffers(Machines* self)
-{
-	List* p;
-
-	for (p = self->buffers; p != 0; p = p->next) {				
-		free(p->entry);		
-	}
-	list_free(p);
-	self->buffers = 0;
 }
 
 int OnEnumFreeMachine(Machines* self, int slot, Machine* machine)
@@ -148,7 +141,7 @@ void machines_exchange(Machines* self, int srcslot, int dstslot)
 int machines_append(Machines* self, Machine* machine)
 {	
 	int slot;
-	
+		
 	slot = machines_freeslot(self,
 		(machine->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
 	table_insert(&self->slots, slot, machine);
@@ -156,6 +149,11 @@ int machines_append(Machines* self, Machine* machine)
 		initconnections(self, slot);
 	}
 	signal_emit(&self->signal_insert, self, 1, slot);
+	if (!self->filemode) {
+		suspendwork();
+		machines_setpath(self, compute_path(self, MASTER_INDEX));
+		resumework();
+	}
 	return slot;
 }
 
@@ -214,7 +212,7 @@ int machines_connect(Machines* self, int outputslot, int inputslot)
 				allocconnectionentry(outputslot, 1.f));		
 		}		
 		if (!self->filemode) {
-			machines_setpath(self, compute_path(self, MASTER_INDEX));			
+			machines_setpath(self, compute_path(self, MASTER_INDEX));
 			resumework();
 		}
 		return 1;
@@ -346,6 +344,9 @@ MachineConnections* machines_connections(Machines* self, int slot)
 void machines_setpath(Machines* self, MachineList* path)
 {	
 	machines_preparebuffers(self, path, MAX_STREAM_SIZE);
+	if (self->path) {
+		list_free(self->path);
+	}
 	self->path = path;
 }
 
@@ -354,13 +355,59 @@ MachineList* machines_path(Machines* self)
 	return self->path;
 }
 
+void reset_nopath(Machines* self)
+{		
+	int slot;
+
+	table_dispose(&self->nopath);
+	table_init(&self->nopath);
+	for (slot = self->slots.keymin; slot <= self->slots.keymax; ++slot) {
+		if (table_exists(&self->slots, slot)) {
+			table_insert(&self->nopath, slot, 0);
+		}
+	}
+}
+
+void remove_nopath(Machines* self, int slot)
+{
+	table_remove(&self->nopath, slot);
+}
+
+MachineList* nopath(Machines* self)
+{
+	List* rv = 0;
+	int slot;
+	
+	for (slot = self->nopath.keymin; slot <= self->nopath.keymax; ++slot) {
+		if (table_exists(&self->nopath, slot)) {
+			if (!rv) {
+				rv = list_create((void*)slot);
+			} else {
+				list_append(rv, (void*)slot);
+			}
+		}
+	}
+	return rv;
+}
+
 MachineList* compute_path(Machines* self, int slot)
+{
+	MachineList* rv;	
+
+	reset_nopath(self);
+	remove_nopath(self, slot);
+	rv = compute_slotpath(self, slot);			
+	list_appendlist(&rv, nopath(self));
+	return rv;
+}
+
+MachineList* compute_slotpath(Machines* self, int slot)
 {
 	MachineConnection* p;
 	MachineConnections* connections;
-
 	MachineList* list;
-	list = list_create((void*)slot);
+
+	list = list_create((void*)slot);	
 	connections = machines_connections(self, slot);
 	p = connections->inputs;
 	if (!p) {		
@@ -370,8 +417,9 @@ MachineList* compute_path(Machines* self, int slot)
 		List* inlist;
 		MachineConnectionEntry* entry;
 
-		entry = (MachineConnectionEntry*) p->entry;		
-		inlist = compute_path(self, entry->slot);
+		entry = (MachineConnectionEntry*) p->entry;
+		remove_nopath(self, entry->slot);
+		inlist = compute_slotpath(self, entry->slot);		
 		if (inlist) {								
 			inlist->tail->next = list;
 			inlist->tail = list->tail;
@@ -380,21 +428,6 @@ MachineList* compute_path(Machines* self, int slot)
 		p = p->next;
 	}
 	return list;
-}
-
-void free_machinepath(List* path)
-{
-	if (path) {
-		List* p;
-		List* next;
-		
-		p = path;
-		while (p != NULL) {
-			next = p->next;
-			free(p);
-			p = next;
-		}
-	}
 }
 
 void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amount)
@@ -422,6 +455,15 @@ void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amo
 	}			
 }
 
+void machines_releasebuffers(Machines* self)
+{
+	table_dispose(&self->inputbuffers);
+	table_dispose(&self->outputbuffers);
+	table_init(&self->inputbuffers);
+	table_init(&self->outputbuffers);
+	machines_freebuffers(self);
+	self->currsamplebuffer = 0;	
+}
 
 Buffer* machines_nextbuffer(Machines* self, unsigned int channels)
 {
@@ -443,15 +485,20 @@ Buffer* machines_nextbuffer(Machines* self, unsigned int channels)
 	return rv;
 }
 
-void machines_releasebuffers(Machines* self)
+void machines_freebuffers(Machines* self)
 {
-	table_dispose(&self->inputbuffers);
-	table_dispose(&self->outputbuffers);
-	table_init(&self->inputbuffers);
-	table_init(&self->outputbuffers);
-	machines_freebuffers(self);
-	self->currsamplebuffer = 0;
+	List* p;
+
+	for (p = self->buffers; p != 0; p = p->next) {
+		Buffer* buffer;
+
+		buffer = (Buffer*) p->entry;
+		free(buffer);	
+	}
+	list_free(p);
+	self->buffers = 0;
 }
+
 
 Buffer* machines_inputs(Machines* self, unsigned int slot)
 {
