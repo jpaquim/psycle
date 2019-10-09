@@ -22,7 +22,6 @@ static void workspace_makelang(Workspace*);
 static void workspace_makelangen(Workspace*);
 static void workspace_makelanges(Workspace*);
 static int cmdnote(const char* key);
-static void workspace_removesong(Workspace*);
 static void applysongproperties(Workspace*);
 static Properties* workspace_makeproperties(Workspace*);
 static void workspace_setdriverlist(Workspace*);
@@ -283,6 +282,9 @@ void workspace_makenotes(Workspace* self)
 	properties_append_int(notes, "cmd_note_ds2", encodeinput('0', 0, 0), 0, 0);
 	properties_append_int(notes, "cmd_note_e_2", encodeinput('P', 0, 0), 0, 0);
 	properties_append_int(notes, "cmd_note_stop", encodeinput('1', 0, 0), 0, 0);
+	// special
+	properties_append_int(notes, "cmd_note_tweakm", encodeinput(192, 0, 0), 0, 0);
+	properties_append_int(notes, "cmd_note_tweaks", encodeinput(192, 0, 1), 0, 0);
 	for (p = notes->children; p != 0; p = properties_next(p)) {
 		properties_sethint(p, PROPERTY_HINT_INPUT);
 	}
@@ -396,7 +398,7 @@ int cmdnote(const char* key)
 	if (strcmp("cmd_note_stop", key) == 0) { return CMD_NOTE_STOP; } else
 	if (strcmp("cmd_note_tweakm", key) == 0) { return  CMD_NOTE_TWEAKM; } else	
 	if (strcmp("cmd_note_midicc", key) == 0) { return CMD_NOTE_MIDICC; } else
-	if (strcmp("cmd_note_tweaks", key) == 0) { return  CMD_NOTE_TweakS; }
+	if (strcmp("cmd_note_tweaks", key) == 0) { return  CMD_NOTE_TWEAKS; }	
 	return -1;
 }
 
@@ -511,13 +513,17 @@ void workspace_loadsong(Workspace* self, const char* path)
 
 void workspace_setsong(Workspace* self, Song* song, int flag)
 {
-	suspendwork();
-	workspace_removesong(self);
-	self->song = song;
+	Song* oldsong;
+
+	oldsong = self->song;
+	suspendwork();	
 	player_stop(&self->player);
+	self->song = song;
 	player_setsong(&self->player, self->song);
 	applysongproperties(self);
 	signal_emit(&self->signal_songchanged, self, 1, flag);
+	song_dispose(oldsong);
+	free(oldsong);			
 	resumework();
 }
 
@@ -534,16 +540,6 @@ Properties* workspace_makeproperties(Workspace* self)
 	properties_append_int(machine, "x", 320, 0, 0);
 	properties_append_int(machine, "y", 200, 0, 0);
 	return root;
-}
-
-void workspace_removesong(Workspace* self)
-{
-	if (self->song) {
-		song_dispose(self->song);
-		free(self->song);
-		self->song = 0;
-		self->octave = 4;
-	}
 }
 
 void applysongproperties(Workspace* self)

@@ -46,6 +46,7 @@ typedef struct {
 	EffectCoords effect;
 	unsigned int colour;
 	unsigned int wirecolour;
+	unsigned int selwirecolour;
 	unsigned int wireaacolour;
 	unsigned int wireaacolour2;
 	unsigned int polycolour;
@@ -73,6 +74,11 @@ typedef struct {
 	float volumedisplay;
 } MachineUi;
 
+typedef struct {
+	int src;
+	int dst;
+} WireConnection;
+
 void MachineUiSet(MachineUi* self, int x, int y, int mode, const char* editname);
 
 enum {	
@@ -97,6 +103,7 @@ typedef struct {
 	int wirefound;
 	int wiresrc;
 	int wiredst;
+	WireConnection selectedwire;
 	int drawvumeters;
 	MachineFrame machine_frames[256];
 	ParamView machine_paramviews[256];

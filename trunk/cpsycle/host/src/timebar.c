@@ -43,30 +43,31 @@ void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
 
 void OnLessLessClicked(TimeBar* self, ui_component* sender)
 {		
-	player_setbpm(self->player, self->player->sequencer.bpm - 10);
+	player_setbpm(self->player, player_bpm(self->player) - 10);
 }
 
 void OnLessClicked(TimeBar* self, ui_component* sender)
 {		
-	player_setbpm(self->player, self->player->sequencer.bpm - 1);
+	player_setbpm(self->player, player_bpm(self->player) - 1);
 }
 
 void OnMoreClicked(TimeBar* self, ui_component* sender)
 {		
-	player_setbpm(self->player, self->player->sequencer.bpm + 1);
+	player_setbpm(self->player, player_bpm(self->player) + 1);
 }
 
 void OnMoreMoreClicked(TimeBar* self, ui_component* sender)
 {	
-	player_setbpm(self->player, self->player->sequencer.bpm + 10);
+	player_setbpm(self->player, player_bpm(self->player) + 10);
 }
 
 void OnTimer(TimeBar* self, ui_component* sender, int timerid)
 {	
 	char buffer[20];
-	if (self->bpm != self->player->sequencer.bpm) {
-		_snprintf(buffer, 10, "%.2f", self->player->sequencer.bpm);
-		ui_label_settext(&self->bpmlabel, buffer);
+	if (self->bpm != player_bpm(self->player)) {
 		self->bpm = self->player->sequencer.bpm;
+		_snprintf(buffer, 10, "%.2f", self->bpm);
+		ui_label_settext(&self->bpmlabel, buffer);
+		
 	}
 }

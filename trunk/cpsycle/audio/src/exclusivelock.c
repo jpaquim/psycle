@@ -49,9 +49,9 @@ void suspendwork(void)
 		ResetEvent(workdone);
 		WaitForSingleObject(mutex, INFINITE);	
 		ResetEvent(worklock);
-		WaitForSingleObject(workdone, 500);
-		suspended = 1;
+		WaitForSingleObject(workdone, 500);		
 	}
+	++suspended;
 }
 
 void signalwaithost(void)
@@ -59,16 +59,17 @@ void signalwaithost(void)
 	if (!disabled) {
 		ResetEvent(mutex);
 		SetEvent(workdone);	
-		WaitForSingleObject(worklock, INFINITE);
-		SetEvent(mutex);
+		WaitForSingleObject(worklock, INFINITE);		
+		SetEvent(mutex);		
 	}
 }
 
 void resumework(void)
 {
-	if (!disabled) {
+	--suspended;
+	if (!disabled && !suspended) {
 		SetEvent(worklock);
-	}
+	}	
 }
 
 #elif defined DIVERSALIS__OS__UNIX

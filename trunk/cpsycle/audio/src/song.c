@@ -785,9 +785,7 @@ Machine* machineloadfilechunk(Song* self, RiffFile* file, int index, int version
 		int panning;
 		int x;
 		int y;
-		// char _editName[32];
-
-
+		
 		rifffile_read(file, &bypass, sizeof(bypass));
 		rifffile_read(file, &mute, sizeof(mute));
 		rifffile_read(file, &panning, sizeof(panning));
@@ -796,6 +794,13 @@ Machine* machineloadfilechunk(Song* self, RiffFile* file, int index, int version
 		rifffile_skip(file, 2*sizeof(int));	// numInputs, numOutputs				
 		properties_append_int(properties, "x", x, 0, 0);
 		properties_append_int(properties, "y", y, 0, 0);
+		if (bypass) {
+			machine_bypass(machine);
+		}
+		if (mute) {
+			machine_mute(machine);
+		}
+		machine_setpanning(machine, panning / 128.f);
 	}
 
 	for(i = 0; i < MAX_CONNECTIONS; i++)

@@ -98,6 +98,24 @@ void buffer_mulsamples(Buffer* self, unsigned int numsamples, float mul)
 	}	
 }
 
+void buffer_pan(Buffer* self, float pan, unsigned int amount)
+{
+	unsigned int channel;
+	float vol[2];
+
+	vol[1] = pan * 2.f;
+	vol[0] = 2.0f - vol[1];
+	if (vol[0] > 1.0f) {
+		vol[0] = 1.0f;
+	}
+	if (vol[1] > 1.0f) {
+		vol[1] = 1.0f;
+	}
+	for (channel = 0; channel < 2 && channel < self->numchannels; ++channel) {
+		dsp_mul(self->samples[channel], amount, vol[channel]);
+	}
+}
+
 unsigned int buffer_numchannels(Buffer* self)
 {
 	return self->numchannels;

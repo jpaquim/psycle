@@ -50,6 +50,7 @@ typedef struct {
 	int numvoices;
 	int resamplingmethod;
 	int defaultspeed;
+	float pan;
 	Table lastinst;
 } Sampler;
 

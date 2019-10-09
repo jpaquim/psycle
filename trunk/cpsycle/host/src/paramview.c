@@ -5,6 +5,8 @@
 #include <bitmap.h>
 #include "resources/resource.h"
 
+#define TIMERID_PARAMVIEW 410
+
 static void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(ParamView* self, ui_graphics* g);
 static void OnSize(ParamView* self, ui_component* sender, int width, int height);
@@ -17,6 +19,7 @@ static void OnMouseDown(ParamView* self, ui_component* sender, int x, int y, int
 static void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int button);
 static void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button);
 static int HitTest(ParamView* self, int x, int y);
+static void OnTimer(ParamView*, ui_component* sender, int timerid);
 
 static ui_bitmap knobs;
 
@@ -32,7 +35,8 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	signal_connect(&self->component.signal_size, self, OnSize);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
-	signal_connect(&self->component.signal_mousemove,self,OnMouseMove);
+	signal_connect(&self->component.signal_mousemove,self, OnMouseMove);
+	signal_connect(&self->component.signal_timer,self, OnTimer);
 	ui_component_move(&self->component, 0, 0);
 	ui_component_resize(&self->component, 800, 400);
 
@@ -49,6 +53,7 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	}
 	self->tweak = -1;
 	self->component.doublebuffered = TRUE;
+	SetTimer(self->component.hwnd, TIMERID_PARAMVIEW, 100, 0);
 }
 
 void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
@@ -215,3 +220,7 @@ void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button
 	}
 }
 
+void OnTimer(ParamView* self, ui_component* sender, int timerid)
+{
+	ui_invalidate(&self->component);
+}

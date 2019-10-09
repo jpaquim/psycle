@@ -31,7 +31,6 @@ static Buffer* player_mix(Player*, unsigned int slot, unsigned int amount);
 static void player_filldriver(Player*, float* buffer, unsigned int amount);
 static void player_signal_wait_host(Player*);
 static void Interleave(float* dst, float* left, float* right, int num);
-static beat_t Offset(Player*, int numsamples);
 static int onenumsequencertick(Player*, int slot, Machine*);
 static void sequencerinsert(Player*);
 
@@ -39,11 +38,10 @@ void player_init(Player* self, Song* song, void* handle)
 {		
 	mainframe = handle;
 	self->song = song;		
-	self->playing = FALSE;
-	self->lpb = 4;
-	self->seqtickcount = 1.f / self->lpb;
+	self->playing = FALSE;	
+	self->seqtickcount = 1.f / 4;
 	self->numsongtracks = 16;	
-	sequencer_init(&self->sequencer, &song->sequence);	
+	sequencer_init(&self->sequencer, &song->sequence, &song->machines);	
 	library_init(&self->drivermodule);
 	self->silentdriver = create_silent_driver();
 	self->silentdriver->init(self->silentdriver);	
@@ -91,13 +89,12 @@ void player_loaddriver(Player* self, const char* path)
 			if (fpdrivercreate) {
 				driver = fpdrivercreate();		
 				driver->init(driver);
-				driver->connect(driver, self, Work, mainframe);									
-				self->t = 125 / (driver->samplerate(driver) * 60.0f);
-				self->sequencer.samplerate = driver->samplerate(driver);
+				driver->connect(driver, self, Work, mainframe);				
+				sequencer_setsamplerate(&self->sequencer,
+					driver->samplerate(driver));
 				rmsvol_setsamplerate(self->sequencer.samplerate);
 			} else {
-				self->t = 125 / (44100 * 60.0f);
-				self->sequencer.samplerate = 44100;
+				sequencer_setsamplerate(&self->sequencer, 44100);				
 				rmsvol_setsamplerate(44100);
 			}
 			lock_enable();
@@ -146,14 +143,16 @@ void player_restartdriver(Player* self)
 void player_setsong(Player* self, Song* song)
 {
 	self->song = song;
-	sequencer_reset(&self->sequencer, &song->sequence);
+	sequencer_reset(&self->sequencer, &song->sequence, &song->machines);
+	sequencer_setsamplerate(&self->sequencer,
+		self->driver->samplerate(self->driver));
 }
 
 void player_start(Player* self)
 {	
 	sequencer_setposition(&self->sequencer, 0.0f);
 	self->playing = TRUE;
-	self->seqtickcount = 1.f / self->lpb;
+	self->seqtickcount = 1.f / sequencer_lpb(&self->sequencer);
 }
 
 void player_stop(Player* self)
@@ -168,41 +167,23 @@ beat_t player_position(Player* self)
 
 void player_setbpm(Player* self, beat_t bpm)
 {
-	if (bpm < 32) {
-		self->sequencer.bpm = 32;
-	} else
-	if (bpm > 999) {
-		self->sequencer.bpm = 999;
-	} else {
-		self->sequencer.bpm = bpm;
-	}
-	self->t = self->sequencer.bpm / (44100 * 60.0f);
+	sequencer_setbpm(&self->sequencer, bpm);	
 }
 
 beat_t player_bpm(Player* self)
 {
-	return self->sequencer.bpm;
+	return sequencer_bpm(&self->sequencer);
 }
 
 void player_setlpb(Player* self, unsigned int lpb)
 {
-	self->lpb = lpb;
+	sequencer_setlpb(&self->sequencer, lpb);
 	signal_emit(&self->signal_lpbchanged, self, 1, lpb);
 }
 
 unsigned int player_lpb(Player* self)
 {
-	return self->lpb;
-}
-
-beat_t Offset(Player* self, int numsamples)
-{
-	return numsamples * self->t;
-}
-
-unsigned int Frames(Player* self, beat_t offset)
-{
-	return (unsigned int)(offset / self->t);
+	return sequencer_lpb(&self->sequencer);
 }
 
 real* Work(Player* self, int* numsamples)
@@ -229,7 +210,7 @@ void player_advance(Player* self, unsigned int amount)
 {
 	beat_t offset;
 
-	offset = Offset(self, amount);
+	offset = sequencer_offset(&self->sequencer, amount);
 	if (self->playing) {		
 		sequencer_tick(&self->sequencer, offset);
 	}
@@ -283,6 +264,8 @@ int onenumsequencertick(Player* self, int slot, Machine* machine)
 	return 1;
 }
 
+static void panbuffer(Buffer* buffer, float pan, unsigned int amount);
+
 void player_workpath(Player* self, unsigned int amount)
 {
 	MachinePath* path;
@@ -313,7 +296,8 @@ void player_workpath(Player* self, unsigned int amount)
 					}					
 					buffercontext_init(&bc, events, output, output, amount,
 						self->numsongtracks, rms);
-					machine->work(machine, &bc);		
+					machine->work(machine, &bc);
+					buffer_pan(output, machine_panning(machine), amount);
 					if (buffer_numchannels(bc.output) >= 2) {
 						rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],
 							bc.numsamples);
@@ -339,7 +323,7 @@ List* player_timedevents(Player* self, unsigned int slot, unsigned int amount)
 			unsigned int deltaframes;
 
 			entry = (PatternEntry*) p->entry;
-			deltaframes = Frames(self, entry->delta);
+			deltaframes = sequencer_frames(&self->sequencer, entry->delta);
 			if (deltaframes >= amount) {
 				deltaframes = amount - 1;
 			}
@@ -349,6 +333,8 @@ List* player_timedevents(Player* self, unsigned int slot, unsigned int amount)
 	return rv;
 }
 
+static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
+
 Buffer* player_mix(Player* self, unsigned int slot, unsigned int amount)
 {
 	MachineConnections* connections;				
@@ -356,6 +342,7 @@ Buffer* player_mix(Player* self, unsigned int slot, unsigned int amount)
 	
 	connections = machines_connections(&self->song->machines, slot);
 	output = machines_outputs(&self->song->machines, slot);
+
 	if (output) {
 		buffer_clearsamples(output, amount);
 		if (connections) {
@@ -365,8 +352,8 @@ Buffer* player_mix(Player* self, unsigned int slot, unsigned int amount)
 					connection = connection->next) {
 				MachineConnectionEntry* source = 
 					(MachineConnectionEntry*)connection->entry;
-				if (source->slot != -1) {							
-					buffer_addsamples(
+				if (source->slot != -1) {
+					addsamples(
 						output, 
 						machines_outputs(&self->song->machines,
 							source->slot),
@@ -377,6 +364,23 @@ Buffer* player_mix(Player* self, unsigned int slot, unsigned int amount)
 		}
 	}
 	return output;
+}
+
+
+void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
+{
+	unsigned int channel;
+
+	if (source) {
+		for (channel = 0; channel < source->numchannels && 
+			channel < dst->numchannels; ++channel) {
+				dsp_add(
+					source->samples[channel],
+					dst->samples[channel],
+					numsamples,
+					vol);
+		}
+	}
 }
 
 void player_filldriver(Player* self, float* buffer, unsigned int amount)
