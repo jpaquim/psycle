@@ -15,10 +15,21 @@ typedef struct HashEntry {
 typedef struct {
 	HashEntry* keys[TABLEKEYS];
 	int size;
-	int count;
-	int keymax;
-	int keymin;
+	int count;	
 } Table;
+
+typedef struct {
+	int pos;
+	int count;
+	HashEntry* curr;
+	Table* table;
+} TableIterator;
+
+void tableiterator_init(TableIterator*, Table*);
+void tableiterator_inc(TableIterator*);
+int tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs);
+int tableiterator_key(TableIterator*);
+void* tableiterator_value(TableIterator*);
 
 void table_init(Table*);
 void table_dispose(Table*);
@@ -26,6 +37,9 @@ void table_insert(Table*, int k, void* value);
 void table_remove(Table*, int k);
 void* table_at(Table*, int k);
 int table_exists(Table*, int k);
+TableIterator table_begin(Table*);
+const TableIterator* table_end(void);
 
+int freetableentry(void*, void*, HashEntry*);
 
 #endif

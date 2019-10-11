@@ -8,11 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int OnEnumFreeMachine(Machines*, int slot, Machine*);
+static void freemachines(Machines* self);
 static int machines_freeslot(Machines*, int start);
 static MachineConnection* findconnection(MachineConnection*, int slot);
 static MachineConnectionEntry* allocconnectionentry(int slot, float volume);
-static void appendconnectionentry(MachineConnection**, MachineConnectionEntry*);
 static MachineConnections* initconnections(Machines*, int slot);
 static void machines_setpath(Machines*, MachineList* path);
 static MachineList* compute_path(Machines*, int slot);
@@ -51,7 +50,7 @@ void machines_dispose(Machines* self)
 	signal_dispose(&self->signal_removed);
 	signal_dispose(&self->signal_slotchange);
 	signal_dispose(&self->signal_showparameters);
-	machines_enumerate(self, self, OnEnumFreeMachine);	
+	freemachines(self);
 	table_dispose(&self->inputbuffers);
 	table_dispose(&self->outputbuffers);
 	machines_freebuffers(self);
@@ -64,11 +63,18 @@ void machines_dispose(Machines* self)
 	free(self->samplebuffers);	
 }
 
-int OnEnumFreeMachine(Machines* self, int slot, Machine* machine)
+void freemachines(Machines* self)
 {
-	machine->dispose(machine);
-	free(machine);
-	return 1;
+	TableIterator it;
+	
+	for (it = machines_begin(self); !tableiterator_equal(&it, table_end());
+			tableiterator_inc(&it)) {			
+		Machine* machine;
+
+		machine = (Machine*)tableiterator_value(&it);
+		machine->dispose(machine);
+		free(machine);
+	}
 }
 
 void machines_insert(Machines* self, int slot, Machine* machine)
@@ -104,7 +110,8 @@ MachineConnections* initconnections(Machines* self, int slot)
 
 void machines_erase(Machines* self, int slot)
 {	
-	suspendwork();
+	// suspendwork();
+	lock_enter();
 	if (slot == MASTER_INDEX) {
 		self->master = 0;
 	}
@@ -112,7 +119,8 @@ void machines_erase(Machines* self, int slot)
 	table_remove(&self->slots, slot);
 	machines_setpath(self, compute_path(self, MASTER_INDEX));
 	signal_emit(&self->signal_removed, self, 1, slot);
-	resumework();
+	lock_leave();
+	// resumework();
 }
 
 void machines_remove(Machines* self, int slot)
@@ -150,9 +158,11 @@ int machines_append(Machines* self, Machine* machine)
 	}
 	signal_emit(&self->signal_insert, self, 1, slot);
 	if (!self->filemode) {
-		suspendwork();
+		//suspendwork();
+		lock_enter();
 		machines_setpath(self, compute_path(self, MASTER_INDEX));
-		resumework();
+		lock_leave();
+//		resumework();
 	}
 	return slot;
 }
@@ -170,22 +180,6 @@ Machine* machines_at(Machines* self, int slot)
 	return table_at(&self->slots, slot);
 }
 
-void machines_enumerate(Machines* self, void* context,
-						int (*enumproc)(void*, int, Machine*))
-{
-	Machine* machine;	
-	int slot;
-
-	for (slot = self->slots.keymin; slot <= self->slots.keymax; ++slot) {
-		machine = machines_at(self, slot);
-		if (machine) {
-			if (!enumproc(context, slot, machine)) {
-				break;
-			}
-		}
-	}
-}
-
 int machines_connect(Machines* self, int outputslot, int inputslot)
 {
 	if (outputslot != inputslot && 
@@ -193,14 +187,15 @@ int machines_connect(Machines* self, int outputslot, int inputslot)
 		MachineConnections* connections;		
 
 		if (!self->filemode) {
-			suspendwork();
+			lock_enter();
+			//suspendwork();
 		}
 		connections = machines_connections(self, outputslot);
 		if (self->filemode && !connections) {
 			connections = initconnections(self, outputslot);
 		}
-		if (connections) {		
-			appendconnectionentry(&connections->outputs,
+		if (connections) {
+			list_append(&connections->outputs,
 				allocconnectionentry(inputslot, 1.f));		
 		}
 		connections = machines_connections(self, inputslot);
@@ -208,12 +203,13 @@ int machines_connect(Machines* self, int outputslot, int inputslot)
 			connections = initconnections(self, inputslot);
 		}
 		if (connections) {
-			appendconnectionentry(&connections->inputs,
+			list_append(&connections->inputs,
 				allocconnectionentry(outputslot, 1.f));		
 		}		
 		if (!self->filemode) {
 			machines_setpath(self, compute_path(self, MASTER_INDEX));
-			resumework();
+			//resumework();
+			lock_leave();
 		}
 		return 1;
 	}
@@ -230,16 +226,6 @@ MachineConnectionEntry* allocconnectionentry(int slot, float volume)
 	return rv;
 }
 
-void appendconnectionentry(MachineConnection** connection,
-	MachineConnectionEntry* entry)
-{
-	if (*connection) {		
-		list_append(*connection, entry);		
-	} else {
-		*connection = list_create(entry);			
-	}
-}
-
 void machines_disconnect(Machines* self, int outputslot, int inputslot)
 {	
 	MachineConnections* connections;
@@ -249,7 +235,8 @@ void machines_disconnect(Machines* self, int outputslot, int inputslot)
 		MachineConnection* p;
 
 		p = findconnection(connections->outputs, inputslot);
-		suspendwork();
+		//suspendwork();
+		lock_enter();
 		if (p) {
 			free(p->entry);
 			list_remove(&connections->outputs, p);			
@@ -261,7 +248,8 @@ void machines_disconnect(Machines* self, int outputslot, int inputslot)
 			list_remove(&connections->inputs, p);						
 		}
 		machines_setpath(self, compute_path(self, MASTER_INDEX));
-		resumework();
+		//resumework();
+		lock_leave();
 	}	
 }
 
@@ -273,7 +261,8 @@ void machines_disconnectall(Machines* self, int slot)
 		MachineConnection* out;
 		MachineConnection* in;
 	
-		suspendwork();
+		// suspendwork();
+		lock_enter();
 		out = connections->outputs;
 		while (out) {			
 			MachineConnections* dst;
@@ -301,7 +290,8 @@ void machines_disconnectall(Machines* self, int slot)
 		}
 		list_free(connections->inputs);
 		connections->inputs = 0;
-		resumework();
+		//resumework();
+		lock_leave();
 	}	
 }
 
@@ -357,14 +347,14 @@ MachineList* machines_path(Machines* self)
 
 void reset_nopath(Machines* self)
 {		
-	int slot;
+	TableIterator it;
 
 	table_dispose(&self->nopath);
 	table_init(&self->nopath);
-	for (slot = self->slots.keymin; slot <= self->slots.keymax; ++slot) {
-		if (table_exists(&self->slots, slot)) {
-			table_insert(&self->nopath, slot, 0);
-		}
+		
+	for (it = table_begin(&self->slots); it.curr != 0;
+			tableiterator_inc(&it)) {
+		table_insert(&self->nopath, it.curr->key, 0);		
 	}
 }
 
@@ -375,17 +365,12 @@ void remove_nopath(Machines* self, int slot)
 
 MachineList* nopath(Machines* self)
 {
-	List* rv = 0;
-	int slot;
-	
-	for (slot = self->nopath.keymin; slot <= self->nopath.keymax; ++slot) {
-		if (table_exists(&self->nopath, slot)) {
-			if (!rv) {
-				rv = list_create((void*)slot);
-			} else {
-				list_append(rv, (void*)slot);
-			}
-		}
+	List* rv = 0;	
+
+	TableIterator it;
+	for (it = table_begin(&self->nopath); it.curr != 0;
+			tableiterator_inc(&it)) {			
+		list_append(&rv, (void*)it.curr->key);
 	}
 	return rv;
 }
@@ -397,7 +382,7 @@ MachineList* compute_path(Machines* self, int slot)
 	reset_nopath(self);
 	remove_nopath(self, slot);
 	rv = compute_slotpath(self, slot);			
-	list_appendlist(&rv, nopath(self));
+	list_cat(&rv, nopath(self));
 	return rv;
 }
 
@@ -432,25 +417,17 @@ MachineList* compute_slotpath(Machines* self, int slot)
 
 void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amount)
 {
-	MachinePath* p;	
+	MachinePath* slot;	
 
 	machines_releasebuffers(self);
-	for (p = path; p != 0; p = p->next) {		
+	for (slot = path; slot != 0; slot = slot->next) {		
 		Machine* machine;
-		unsigned int slot;		
-
-		slot = (unsigned int) p->entry;
-		machine = machines_at(self, slot);
-		if (machine) {
-			Buffer* buffer;
-			
-			buffer = machines_nextbuffer(self, machine->numoutputs(machine));
-			if (self->buffers) {
-				list_append(self->buffers, buffer);
-			} else {
-				self->buffers = list_create(buffer);
-			}
-			table_insert(&self->outputbuffers, slot, buffer);				
+		
+		machine = machines_at(self, (unsigned int) slot->entry);
+		if (machine) {						
+			table_insert(&self->outputbuffers, (unsigned int) slot->entry, 
+				list_append(&self->buffers, machines_nextbuffer(
+					self,machine->numoutputs(machine)))->entry);
 		}
 	}			
 }
@@ -555,4 +532,9 @@ void machines_setvolume(Machines* self, float volume)
 float machines_volume(Machines* self)
 {
 	return self->volume;
+}
+
+TableIterator machines_begin(Machines* self)
+{
+	return table_begin(&self->slots);
 }

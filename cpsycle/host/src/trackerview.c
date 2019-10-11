@@ -381,8 +381,8 @@ void DrawEvents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
 				int hasevent = 0;
 				int cursor = TestCursor(self, track, offset, subline);
 				int playbar = 0;
-				playbar = self->player->playing && TestRange(
-								self->player->sequencer.position, offset, self->bpl)
+				playbar = player_playing(self->player) && TestRange(
+							player_position(self->player), offset, self->bpl)
 						   ? 1 : 0;				
 				while (!fill && self->curr_event &&
 					((PatternEntry*)(self->curr_event->entry))->track <= track &&
@@ -1170,7 +1170,7 @@ void OnLineNumbersLabelDraw(TrackerLineNumbersLabel* self, ui_component* sender,
 void OnTimer(TrackerView* self, ui_component* sender, int timerid)
 {
 	if (timerid == TIMERID_TRACKERVIEW) {
-		if (self->grid.player->playing) {
+		if (player_playing(self->grid.player)) {
 			ui_invalidate(&self->grid.component);
 		}
 		if (self->pattern && self->pattern->opcount != self->opcount) {

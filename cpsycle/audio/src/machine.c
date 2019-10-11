@@ -108,6 +108,9 @@ void work(Machine* self, BufferContext* bc)
 			amount -= numworksamples;
 			bc->numsamples = restorenumsamples;
 		}
+		if (entry->event.cmd == SET_PANNING) {
+			machine_setpanning(self, entry->event.parameter / 255.f);
+		} else
 		if (entry->event.note == NOTECOMMANDS_TWEAK) {
 			self->parametertweak(self, entry->event.inst,
 				entry->event.parameter);

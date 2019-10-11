@@ -11,23 +11,27 @@ static void freeentries(List* events);
 static void maketrackiterators(Sequencer*, beat_t offset);
 static void cleartrackiterators(Sequencer*);
 static void advanceposition(Sequencer* self, beat_t width);
-static void addcurrevent(Sequencer*, SequenceTrackIterator*, beat_t offset);
-static void addtweakslideevent(Sequencer* self, PatternEntry* entry);
-static void addevent(Sequencer* self, PatternEntry* entry);
-static int isoffsetinwindow(Sequencer* self, beat_t offset);
-static void insertevents(Sequencer* self);
+static void addsequenceevent(Sequencer*, SequenceTrackIterator*, beat_t offset);
+static void maketweakslideevents(Sequencer*, PatternEntry*);
+static int isoffsetinwindow(Sequencer*, beat_t offset);
+static void insertevents(Sequencer*);
+static void sequencerinsert(Sequencer*);
 static void insertdelayedevents(Sequencer*);
 static void compute_beatsprosample(Sequencer*);
+static void notifysequencertick(Sequencer*, beat_t width);
 
 void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 {
 	self->sequence = sequence;
 	self->machines = machines;
 	self->samplerate = 44100;
-	self->bpm = 125;
+	self->bpm = 125.f;
 	self->lpb = 4;
+	self->lpbspeed = 1.f;
+	self->playing = 0;	
 	self->position = 0;	
 	self->window = 0;
+	self->seqlinetickcount = 1.f / self->lpb;
 	self->events = 0;
 	self->delayedevents = 0;
 	self->currtrackiterators = 0;
@@ -57,6 +61,23 @@ void sequencer_setposition(Sequencer* self, beat_t offset)
 	self->window = 0.0f;
 	cleartrackiterators(self);
 	maketrackiterators(self, offset);
+}
+
+beat_t sequencer_position(Sequencer* self)
+{	
+	return self->position;
+}
+
+void sequencer_start(Sequencer* self)
+{	
+	self->lpbspeed = 1.f;
+	compute_beatsprosample(self);
+	self->playing = 1;
+}
+
+void sequencer_stop(Sequencer* self)
+{
+	self->playing = 0;
 }
 
 void sequencer_setsamplerate(Sequencer* self, unsigned int samplerate)
@@ -89,8 +110,11 @@ beat_t sequencer_bpm(Sequencer* self)
 }
 
 void sequencer_setlpb(Sequencer* self, unsigned int lpb)
-{
+{	
 	self->lpb = lpb;
+	self->lpbspeed = 1.f;
+	self->seqlinetickcount = 1.f / lpb;
+	compute_beatsprosample(self);
 }
 
 unsigned int sequencer_lpb(Sequencer* self)
@@ -110,12 +134,8 @@ List* sequencer_machinetickevents(Sequencer* self, unsigned int slot)
 		
 	for (p = self->events; p != 0; p = p->next) {
 		PatternEntry* entry = (PatternEntry*) p->entry;		
-		if (entry->event.mach == slot) {
-			if (!rv) {
-				rv = list_create(entry);
-			} else {
-				list_append(rv, entry);
-			}			
+		if (entry->event.mach == slot) {			
+			list_append(&rv, entry);						
 		}		
 	}
 	return rv;
@@ -141,12 +161,8 @@ void maketrackiterators(Sequencer* self, beat_t offset)
 
 		iterator =
 			(SequenceTrackIterator*)malloc(sizeof(SequenceTrackIterator));
-		*iterator = sequence_begin(self->sequence, p, 0.0f);		
-		if (self->currtrackiterators == 0) {
-			self->currtrackiterators = list_create(iterator);
-		} else {
-			list_append(self->currtrackiterators, iterator);	
-		}
+		*iterator = sequence_begin(self->sequence, p, 0.0f);				
+		list_append(&self->currtrackiterators, iterator);		
 	}
 }
 
@@ -173,18 +189,82 @@ void freeentries(List* events)
 	}
 }
 
+void sequencer_frametick(Sequencer* self, unsigned int numframes)
+{	
+	sequencer_tick(self, sequencer_offset(self, numframes));
+}
+
 void sequencer_tick(Sequencer* self, beat_t width)
-{			
-	advanceposition(self, width);
-	clearevents(self);
-	insertevents(self);
-	insertdelayedevents(self);
+{
+	if (self->playing) {
+		advanceposition(self, width);
+		clearevents(self);
+		insertevents(self);
+		insertdelayedevents(self);
+	}
+	notifysequencertick(self, width);
+	if (self->playing) {
+		sequencerinsert(self);
+	}	
+}
+
+void notifysequencertick(Sequencer* self, beat_t width)
+{
+	TableIterator it;
+	int linetick;
+	
+	linetick = self->seqlinetickcount <= 0;
+	for (it = machines_begin(self->machines); !tableiterator_equal(&it, table_end());		
+			tableiterator_inc(&it)) {			
+		Machine* machine;
+
+		machine = (Machine*)tableiterator_value(&it);
+		machine->sequencertick(machine);
+		if (linetick) {
+			machine->sequencerlinetick(machine);
+		}		
+	}
+	if (linetick) {
+		self->seqlinetickcount = 1.f / (self->lpb * self->lpbspeed);
+	} else {
+		self->seqlinetickcount -= width;
+	}
+}
+
+void sequencerinsert(Sequencer* self) {
+	List* p;
+
+	for (p = sequencer_tickevents(self); p != 0; p = p->next) {			
+		PatternEntry* entry;			
+		
+		entry = (PatternEntry*) p->entry;
+		if (entry->event.mach != NOTECOMMANDS_EMPTY) {
+			Machine* machine;				
+				
+			machine = machines_at(self->machines, entry->event.mach);
+			if (machine) {
+				List* events;
+
+				events = sequencer_machinetickevents(self, entry->event.mach);
+				if (events) {					
+					List* insert;
+					
+					insert = machine->sequencerinsert(machine, events);
+					if (insert) {
+						sequencer_append(self, insert);					
+						list_free(insert);
+					}
+					list_free(events);
+				}					
+			}									
+		}
+	}
 }
 
 void advanceposition(Sequencer* self, beat_t width)
-{
+{	
 	self->position += self->window;
-	self->window = width;
+	self->window = width;	
 }
 
 void insertevents(Sequencer* self)
@@ -200,7 +280,7 @@ void insertevents(Sequencer* self)
 			
 			offset = sequencetrackiterator_offset(iterator); 
 			if (isoffsetinwindow(self, offset)) {
-				addcurrevent(self, iterator, offset);
+				addsequenceevent(self, iterator, offset);
 				sequencetrackiterator_inc(iterator);
 			} else {			
 				break;
@@ -213,8 +293,15 @@ void sequencer_append(Sequencer* self, List* events)
 {
 	List* p;
 
-	for (p = events; p != 0; p = p->next) {		
-		addevent(self, (PatternEntry*) p->entry);
+	for (p = events; p != 0; p = p->next) {
+		PatternEntry* entry;
+
+		entry = (PatternEntry*) p->entry;
+		if (entry->event.cmd == NOTE_DELAY) {
+			list_append(&self->delayedevents, entry);
+		} else {
+			list_append(&self->events, entry);
+		}
 	}
 }
 
@@ -223,29 +310,38 @@ int isoffsetinwindow(Sequencer* self, beat_t offset)
   return offset >= self->position && offset < self->position + self->window;
 }
 
-void addcurrevent(Sequencer* self, SequenceTrackIterator* trackiterator,
+void addsequenceevent(Sequencer* self, SequenceTrackIterator* trackiterator,
 	beat_t offset)
-{			
-	PatternEntry* entry;
-	int add = 1;
-	
-	entry =	patternentry_clone(sequencetrackiterator_patternentry(trackiterator));	
-	if (entry->event.cmd == NOTE_DELAY) {		
-		entry->delta = offset + entry->event.parameter / (self->lpb * 256.f);	
+{	
+	PatternEntry* patternentry;
+
+	patternentry = sequencetrackiterator_patternentry(trackiterator);
+	if (patternentry->event.cmd == SET_TEMPO) {
+		self->bpm = patternentry->event.parameter;
+		compute_beatsprosample(self);		
+	} else 
+	if (patternentry->event.cmd == EXTENDED) {
+		if (patternentry->event.parameter < SET_LINESPERBEAT1) {
+			self->lpbspeed = patternentry->event.parameter / (beat_t)self->lpb;
+			compute_beatsprosample(self);
+		}
+	}
+	if (patternentry->event.note == NOTECOMMANDS_TWEAKSLIDE) {
+		maketweakslideevents(self, patternentry);
 	} else {
-		entry->delta = offset - self->position;	
-	}
-	if (entry->event.note == NOTECOMMANDS_TWEAKSLIDE) {
-			addtweakslideevent(self, entry);		
-			add = 0;
-			free(entry);
-	}
-	if (add) {
-		addevent(self, entry);
-	}
+		PatternEntry* entry;
+		entry =	patternentry_clone(patternentry);									
+		if (entry->event.cmd == NOTE_DELAY) {		
+			entry->delta = offset + entry->event.parameter / (self->lpb * self->lpbspeed * 256.f);
+			list_append(&self->delayedevents, entry);
+		} else {
+			entry->delta = offset - self->position;
+			list_append(&self->events, entry);
+		}
+	}	
 }
 
-void addtweakslideevent(Sequencer* self, PatternEntry* entry)
+void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 {
 	Machine* machine;		
 		
@@ -255,7 +351,7 @@ void addtweakslideevent(Sequencer* self, PatternEntry* entry)
 		int param = entry->event.inst;
 		int min = machine->info(machine)->Parameters[param]->MinValue;
 		int max = machine->info(machine)->Parameters[param]->MaxValue;		
-		int slides = sequencer_frames(self, 1.f/self->lpb) / 64;		
+		int slides = sequencer_frames(self, 1.f/(self->lpb * self->lpbspeed)) / 64;		
 		int dest = ((entry->event.cmd << 8) + entry->event.parameter) + min;
 		int start = machine->value(machine, param);
 		int slide;
@@ -272,7 +368,8 @@ void addtweakslideevent(Sequencer* self, PatternEntry* entry)
 			PatternEntry* slideentry;
 			slideentry = patternentry_clone(entry);
 			slideentry->event.note = NOTECOMMANDS_TWEAK;
-			addevent(self, slideentry);
+			slideentry->bpm = self->bpm;
+			list_append(&self->events, slideentry);
 		} else {
 			delta = (dest - start) / (float)slides;			
 			curr = (float)start + min;
@@ -291,29 +388,13 @@ void addtweakslideevent(Sequencer* self, PatternEntry* entry)
 				parameter = nv & 0xFF;
 				curr += delta;
 				slideentry = patternentry_clone(entry);
+				slideentry->bpm = self->bpm;
 				slideentry->event.note = NOTECOMMANDS_TWEAK;
 				slideentry->event.cmd = cmd;
 				slideentry->event.parameter = parameter;				
-				slideentry->delta += slide * 64 * self->beatsprosample;
-				addevent(self, slideentry);				
+				slideentry->delta += slide * 64 * self->beatsprosample;				
+				list_append(&self->delayedevents, slideentry);				
 			}
-		}
-	}
-}
-
-void addevent(Sequencer* self, PatternEntry* entry)
-{
-	if (entry->event.cmd == NOTE_DELAY) {		
-		if (!self->delayedevents) {
-			self->delayedevents = list_create(entry);
-		} else {
-			list_append(self->delayedevents, entry);
-		}
-	} else {		
-		if (!self->events) {
-			self->events = list_create(entry);
-		} else {
-			list_append(self->events, entry);
 		}
 	}
 }
@@ -339,12 +420,8 @@ void insertdelayedevents(Sequencer* self)
 			delayed->delta = delayed->offset + delayed->delta - self->position;	
 			if (q) {
 				q = list_insert(&self->events, q, delayed);								
-			} else {
-				if (!self->events) {
-					self->events = list_create(delayed);
-				} else {
-					list_append(self->events, delayed);
-				}				
+			} else {				
+				list_append(&self->events, delayed);								
 			}			
 			if (!p) {
 				break;
@@ -355,7 +432,7 @@ void insertdelayedevents(Sequencer* self)
 
 void compute_beatsprosample(Sequencer* self)
 {
-	self->beatsprosample = self->bpm / (self->samplerate * 60.0f);
+	self->beatsprosample = (self->bpm * self->lpbspeed) / (self->samplerate * 60.0f);
 }
 
 beat_t sequencer_offset(Sequencer* self, int numsamples)
@@ -366,4 +443,35 @@ beat_t sequencer_offset(Sequencer* self, int numsamples)
 unsigned int sequencer_frames(Sequencer* self, beat_t offset)
 {
 	return (unsigned int)(offset / self->beatsprosample);
+}
+
+int sequencer_playing(Sequencer* self)
+{
+	return self->playing;
+}
+
+List* sequencer_timedevents(Sequencer* self, unsigned int slot,
+	unsigned int amount)
+{
+	List* rv = 0;
+
+	if (sequencer_playing(self)) {
+		List* p;
+
+		rv = sequencer_machinetickevents(self, slot);
+		for (p = rv ; p != 0; p = p->next) {		
+			PatternEntry* entry;
+			beat_t beatsprosample;
+			unsigned int deltaframes;			
+
+			entry = (PatternEntry*) p->entry;
+			beatsprosample = (entry->bpm * self->lpbspeed) / (self->samplerate * 60.0f);			
+			deltaframes = (unsigned int) (entry->delta / self->beatsprosample);
+			if (deltaframes >= amount) {
+				deltaframes = amount - 1;
+			}
+			entry->delta = (beat_t) deltaframes;						
+		}						
+	}
+	return rv;
 }

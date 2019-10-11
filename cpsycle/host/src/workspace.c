@@ -3,6 +3,7 @@
 
 #include "workspace.h"
 #include "cmdsnotes.h"
+#include <exclusivelock.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -84,7 +85,6 @@ void workspace_initplayer(Workspace* self)
 void workspace_configaudio(Workspace* self)
 {			
 	player_loaddriver(&self->player, workspace_driverpath(self));
-	self->player.driver->open(self->player.driver);	
 	workspace_driverconfig(self);	
 }
 
@@ -465,6 +465,13 @@ void workspace_configchanged(Workspace* self, Properties* property, Properties* 
 	} else
 	if ((properties_hint(property) == PROPERTY_HINT_INPUT)) {		
 		workspace_configkeyboard(self);		
+	} else
+	if (strcmp(properties_key(property), "drawvumeters") == 0) {
+		if (properties_value(property)) {
+			player_setvumetermode(&self->player, VUMETER_RMS);
+		} else {
+			player_setvumetermode(&self->player, VUMETER_NONE);
+		}
 	}
 	signal_emit(&self->signal_configchanged, self, 1, property);
 }
@@ -516,7 +523,8 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	Song* oldsong;
 
 	oldsong = self->song;
-	suspendwork();	
+	//suspendwork();	
+	lock_enter();
 	player_stop(&self->player);
 	self->song = song;
 	player_setsong(&self->player, self->song);
@@ -524,7 +532,8 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	signal_emit(&self->signal_songchanged, self, 1, flag);
 	song_dispose(oldsong);
 	free(oldsong);			
-	resumework();
+	// resumework();
+	lock_leave();
 }
 
 Properties* workspace_makeproperties(Workspace* self)

@@ -17,33 +17,20 @@
 #include "tabbar.h"
 
 typedef struct {
-	SkinCoord background;	
-} MasterCoords;
-
-typedef struct {
 	SkinCoord background;
 	SkinCoord vu0;
 	SkinCoord vupeak;
 	SkinCoord pan;
 	SkinCoord mute;
 	SkinCoord solo;
+	SkinCoord bypass;	
 	SkinCoord name;
-} GeneratorCoords;
+} MachineCoords;
 
 typedef struct {
-	SkinCoord background;	
-	SkinCoord vu0;
-	SkinCoord vupeak;
-	SkinCoord pan;
-	SkinCoord mute;
-	SkinCoord bypass;
-	SkinCoord name;
-} EffectCoords;
-
-typedef struct {
-	MasterCoords master;
-	GeneratorCoords generator;
-	EffectCoords effect;
+	MachineCoords master;
+	MachineCoords generator;
+	MachineCoords effect;
 	unsigned int colour;
 	unsigned int wirecolour;
 	unsigned int selwirecolour;
@@ -65,21 +52,19 @@ typedef struct {
 	ui_font font;
 } MachineSkin;
 
-
 typedef struct {
 	int x;
 	int y;
 	char* editname;
 	int mode;
 	float volumedisplay;
+	MachineCoords* coords;
 } MachineUi;
 
 typedef struct {
 	int src;
 	int dst;
 } WireConnection;
-
-void MachineUiSet(MachineUi* self, int x, int y, int mode, const char* editname);
 
 enum {	
 	WIREVIEW_DRAG_MACHINE,
@@ -90,19 +75,14 @@ enum {
 
 typedef struct {
 	ui_component component;	
-	ui_graphics* g;
-	int cx;
-	int cy;
 	Machines* machines;
 	MachineUi machineuis[256];
 	int mx;
 	int my;
 	int dragslot;
 	int dragmode;
-	int selectedslot;
-	int wirefound;
-	int wiresrc;
-	int wiredst;
+	int selectedslot;	
+	WireConnection dragwire;	
 	WireConnection selectedwire;
 	int drawvumeters;
 	MachineFrame machine_frames[256];

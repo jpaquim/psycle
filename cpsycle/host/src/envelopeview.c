@@ -66,9 +66,9 @@ void InitEnvelopeView(EnvelopeView* self, ui_component* parent)
 	adsr_settings_init(&self->dummysettings, 0.2f, 0.4f, 0.8f, 0.3f);
 	adsrpointmapper_init(&self->pointmapper);
 	self->points = list_create(&self->pointmapper.start);
-	list_append(self->points, &self->pointmapper.attack);
-	list_append(self->points, &self->pointmapper.decay);
-	list_append(self->points, &self->pointmapper.release);
+	list_append(&self->points, &self->pointmapper.attack);
+	list_append(&self->points, &self->pointmapper.decay);
+	list_append(&self->points, &self->pointmapper.release);
 	self->sustainstage = 2;
 	self->dragrelative = 1;
 }

@@ -29,7 +29,8 @@ typedef struct {
 
 void InitTabBar(TabBar*, ui_component* parent);
 void tabbar_append(TabBar*, const char* label);
-void tabbar_select(TabBar*, int tab);
+void tabbar_select(TabBar*, int tabindex);
+int tabbar_selected(TabBar*);
 void tabbar_settabmargin(TabBar*, int tab, const ui_margin* margin);
 Tab* tabbar_tab(TabBar*, int tabindex);
 

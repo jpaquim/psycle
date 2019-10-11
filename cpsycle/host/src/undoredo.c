@@ -4,9 +4,10 @@
 #include "undoredo.h"
 #include <stdlib.h> 
 
-static void clear_redo(UndoRedo* self);
-static void clear_undo(UndoRedo* self);
+static void clear_redo(UndoRedo*);
+static void clear_undo(UndoRedo*);
 static void clear_list(List* list);
+static Command* swap(List** first, List** second);
 
 void undoredo_init(UndoRedo* self)
 {
@@ -21,48 +22,42 @@ void undoredo_dispose(UndoRedo* self)
 }
 
 void undoredo_undo(UndoRedo* self)
-{
-	if (self->undo) {
-		List* last;
-		Command* command;
+{	
+	Command* command;
 
-		last = self->undo->tail;
-		command = (Command*)last->entry;
+	command = swap(&self->undo, &self->redo);
+	if (command) {
 		command->revert(command);
-		if (self->redo == 0) {
-			self->redo = list_create(command);
-		} else {
-			list_append(self->redo, command);		
-		}
-		list_remove(&self->undo, last);
 	}
 }
 
 void undoredo_redo(UndoRedo* self)
-{
-	if (self->redo) {
-		List* last;
-		Command* command;
-
-		last = self->redo->tail;
-		command = (Command*)last->entry;
+{	
+	Command* command;
+	
+	command = swap(&self->redo, &self->undo);
+	if (command) {
 		command->execute(command);
-		if (self->undo == 0) {
-			self->undo = list_create(command);
-		} else {
-			list_append(self->undo, command);		
-		}
-		list_remove(&self->redo, last);
+	}	
+}
+
+Command* swap(List** first, List** second)
+{
+	Command* rv;
+
+	if (*first) {		
+		rv = (Command*)list_last(*first)->entry;
+		list_append(second, rv);
+		list_remove(first, list_last(*first));		
+	} else {
+		rv = 0;
 	}
+	return rv;
 }
 
 void undoredo_execute(UndoRedo* self, Command* command)
-{
-	if (self->undo == 0) {
-		self->undo = list_create(command);
-	} else {
-		list_append(self->undo, command);		
-	}
+{	
+	list_append(&self->undo, command);	
 	command->execute(command);
 	clear_redo(self);
 }

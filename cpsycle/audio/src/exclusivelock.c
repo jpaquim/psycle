@@ -1,3 +1,4 @@
+
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
@@ -11,26 +12,21 @@
 
 #include <windows.h>
 
-static HANDLE worklock = 0;
-static HANDLE workdone = 0;
-static HANDLE mutex = 0;
 static int disabled = 0;
-static int suspended = 0;
+
+static CRITICAL_SECTION worklock;
 
 void lock_init(void)
 {
-	worklock = CreateEvent(NULL, TRUE, TRUE, NULL);
-	workdone = CreateEvent (NULL, FALSE, FALSE, NULL);
-	mutex = CreateEvent(NULL, FALSE, FALSE, NULL);
-	suspended = 0;
+	InitializeCriticalSection(&worklock);	
+	disabled = 0;	
 }
 
 void lock_dispose(void)
-{
-	CloseHandle(worklock);
-	CloseHandle(workdone);
-	CloseHandle(mutex);
-	suspended = 0;
+{	
+	DeleteCriticalSection(&worklock);
+	disabled = 0;
+	
 }
 
 void lock_enable(void)
@@ -43,52 +39,70 @@ void lock_disable(void)
 	disabled = 1;
 }
 
-void suspendwork(void)
-{		
-	if (!disabled && !suspended) {
-		ResetEvent(workdone);
-		WaitForSingleObject(mutex, INFINITE);	
-		ResetEvent(worklock);
-		WaitForSingleObject(workdone, 500);		
-	}
-	++suspended;
-}
-
-void signalwaithost(void)
-{		
-	if (!disabled) {
-		ResetEvent(mutex);
-		SetEvent(workdone);	
-		WaitForSingleObject(worklock, INFINITE);		
-		SetEvent(mutex);		
-	}
-}
-
-void resumework(void)
+void lock_enter(void)
 {
-	--suspended;
-	if (!disabled && !suspended) {
-		SetEvent(worklock);
-	}	
+	if (!disabled) {
+		EnterCriticalSection(&worklock);
+	}
 }
 
-#elif defined DIVERSALIS__OS__UNIX
+void lock_leave(void)
+{
+	if (!disabled) {
+		LeaveCriticalSection(&worklock);
+	}
+}
 
+#elif defined DIVERSALIS__OS__POSIX
+
+#include <pthread.h>
+
+static pthread_mutex_t worklock;
+
+static int disabled = 0;
 
 void lock_init(void)
 {	
+	disabled = 0;
+	pthread_mutexattr_t recursiveattr;
+	pthread_mutexattr_init(&recursiveattr);
+	pthread_mutexattr_settype(&recursiveattr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&worklock, &recursiveattr);
+	pthread_mutexattr_destroy(&recursiveattr);		
 }
 
 void lock_dispose(void)
-{
+{	
+	pthread_mutex_destroy(&worklock);
+	disabled = 0;	
 }
 
-void suspendwork(void)
+void lock_enable(void)
 {
+	disabled = 0;
 }
 
-void signalwaithost(void)
+void lock_disable(void)
 {
+	disabled = 1;
 }
+
+void lock_enter(void)
+{
+	if (!disabled) {
+		pthread_mutex_lock(&worklock);
+	}
+}
+
+void lock_leave(void)
+{
+	if (!disabled) {
+		 pthread_mutex_unlock(&worklock);
+	}
+}
+
+#elif
+	#error "
 
 #endif
+

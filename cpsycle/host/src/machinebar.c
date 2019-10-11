@@ -5,8 +5,8 @@
 
 static void OnDestroy(MachineBar*, ui_component* component);
 static void BuildMachineBox(MachineBar* self);
-static int OnEnumMachines(MachineBar*, int slot, Machine* machine);
 static void OnMachinesInsert(MachineBar*, Machines* machines, int slot);
+static int insertmachine(MachineBar*, int slot, Machine*);
 static void OnMachinesRemoved(MachineBar*, Machines* machines, int slot);
 static void OnMachinesSlotChange(MachineBar*, Machines* machines, int slot);
 static void OnMachineBoxSelChange(MachineBar*, ui_component* sender, int sel);
@@ -118,11 +118,19 @@ void BuildMachineBox(MachineBar* self)
 		ui_combobox_addstring(&self->machinebox, "No Machines Loaded");
 		ui_combobox_setcursel(&self->machinebox, 0);
 	} else {
-		machines_enumerate(self->machines, self, OnEnumMachines);
+		TableIterator it;
+	
+		for (it = machines_begin(self->machines); !tableiterator_equal(&it, table_end());
+			tableiterator_inc(&it)) {			
+			Machine* machine;
+
+			machine = (Machine*)tableiterator_value(&it);
+			insertmachine(self, tableiterator_key(&it), machine);
+		}
 	}
 }
 
-int OnEnumMachines(MachineBar* self, int slot, Machine* machine)
+int insertmachine(MachineBar* self, int slot, Machine* machine)
 {			
 	if (slot != MASTER_INDEX &&
 			machine->info(machine) && machine->info(machine)->ShortName) {

@@ -349,16 +349,8 @@ beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
 }
 
 List* sequence_appendtrack(Sequence* self, SequenceTrack* track)
-{
-	List* rv;
-
-	if (self->tracks == 0) {
-		self->tracks = list_create(track);
-		rv = self->tracks;
-	} else {
-		rv = list_append(self->tracks, track);		
-	}
-	return rv;
+{	
+	return list_append(&self->tracks, track);	
 }
 
 List* sequence_removetrack(Sequence* self, SequenceTracks* tracknode)

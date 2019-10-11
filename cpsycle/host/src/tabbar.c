@@ -208,17 +208,18 @@ void tabbar_select(TabBar* self, int tab)
 	signal_emit(&self->signal_change, self, 1, self->selected);
 }
 
+int tabbar_selected(TabBar* self)
+{
+	return self->selected;
+}
+
 void tabbar_append(TabBar* self, const char* label)
 {
 	Tab* tab;
 
 	tab = (Tab*)malloc(sizeof(Tab));
 	InitTab(tab, label, 0);
-	if (self->tabs) {
-		list_append(self->tabs, tab);		
-	} else {
-		self->tabs = list_create(tab);
-	}	
+	list_append(&self->tabs, tab);	
 	tab->size = ui_component_textsize(&self->component, tab->text);
 	tab->size.height = 20;
 }

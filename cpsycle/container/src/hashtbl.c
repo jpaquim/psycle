@@ -3,8 +3,10 @@
 
 #include "hashtbl.h"
 #include <stdlib.h>
+#include <assert.h>
 
 static int h(int k, int size) {  return k % size; }
+static TableIterator tableend;
 
 void table_init(Table* self)
 {
@@ -14,9 +16,7 @@ void table_init(Table* self)
   for (i = 0; i < self->size; ++i) {
     self->keys[i] = 0;
   }
-  self->count = 0;
-  self->keymax = 0;
-  self->keymin = 2147483647;
+  self->count = 0; 
 }
 
 void table_dispose(Table* self)
@@ -61,18 +61,12 @@ void table_insert(Table* self, int k, void* value)
 		if (self->keys[hn] == 0) {
 			self->keys[hn] = newentry;
 		} else {
-		p = self->keys[hn];
-		while (p->next != 0) {
-			p = p->next;
-		}
-		p->next = newentry;
-		}
-		if (self->keymin > newentry->key) {
-			self->keymin = newentry->key;
-		}
-		if (self->keymax < newentry->key) {
-			self->keymax = newentry->key;
-		}
+			p = self->keys[hn];
+			while (p->next != 0) {
+				p = p->next;
+			}
+			p->next = newentry;
+		}				
 		++self->count;
 	}
 }
@@ -100,7 +94,7 @@ void table_remove(Table* self, int k)
 			}
 			q = p;
 			p = p->next;
-		}  
+		}		
 	}
 }
 
@@ -133,3 +127,70 @@ int table_exists(Table* self, int k)
 	return (self->count > 0) && (self->keys[h(k, self->size)] != 0);
 }
 
+int freetableentry(void* context, void* param, HashEntry* entry)
+{
+	free(entry->value);
+	return 1;
+}
+
+TableIterator table_begin(Table* self)
+{
+	TableIterator rv;
+
+	tableiterator_init(&rv, self);
+	return rv;
+}
+
+const TableIterator* table_end(void)
+{
+	return &tableend;
+}
+
+void tableiterator_init(TableIterator* self, Table* table)
+{
+	assert(table);
+	self->table = table;
+	if (table->count == 0) {
+		self->curr = 0;
+		return;
+	}
+	self->pos = 0;
+	self->count = 0;	
+	while (!table->keys[self->pos] && self->pos < TABLEKEYS) {		
+		++self->pos;		
+	}	
+	self->curr = self->pos < TABLEKEYS ? table->keys[self->pos] : 0;
+}
+
+int tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs)
+{
+	return lhs->curr == rhs->curr;
+}
+
+void tableiterator_inc(TableIterator* self)
+{
+	if (self->count == self->table->count) {
+		self->curr = 0;
+		return;
+	}
+	if (self->curr) {
+		self->curr = self->curr->next;		
+	}	
+	while (!self->curr && self->pos + 1 < TABLEKEYS) {
+		++self->pos;
+		self->curr = self->table->keys[self->pos];		
+	}
+	++self->count;
+}
+
+int tableiterator_key(TableIterator* self)
+{
+	assert(self->curr);
+	return self->curr->key;
+}
+
+void* tableiterator_value(TableIterator* self)
+{
+	assert(self->curr);
+	return self->curr->value;
+}

@@ -10,17 +10,20 @@
 #include <errno.h>
 #include <assert.h>
 
-static int properties_enumerate_rec(Properties* self);
-static void* target;
-static int (*callback)(void* self, struct PropertiesStruct* properties, int level);
-static int level;
-static int OnSearchPropertiesEnum(Properties* self, Properties* property, int level);
-static int OnSaveIniEnum(RiffFile* file, Properties* property, int level);
+#define _strdup strdup
+
+static int properties_enumerate_rec(Properties*);
+static int OnSearchPropertiesEnum(Properties*, Properties*, int level);
+static int OnSaveIniEnum(RiffFile* file, Properties*, int level);
 static Properties* append(Properties* self, Properties* p);
 static Properties* tail(Properties*);
 static Properties* properties_findsectionex(Properties*, const char* key,
 	Properties** prev);
 void properties_sections(Properties*, char* text);
+
+static void* target;
+static PropertiesCallback callback;
+static int level;
 
 void properties_init(Properties* self, const char* key, PropertyType typ)
 {		
@@ -29,7 +32,7 @@ void properties_init(Properties* self, const char* key, PropertyType typ)
 	self->next = 0;	
 	self->dispose = 0;
 	memset(&self->item, 0, sizeof(Property));
-	self->item.key = _strdup(key);
+	self->item.key = strdup(key);
 	self->item.text = 0;
 	self->item.typ = typ;
 	self->item.hint = PROPERTY_HINT_EDIT;
@@ -341,7 +344,7 @@ Properties* properties_write_double(Properties* self, const char* key, double va
 	return p;
 }
 
-void properties_enumerate(Properties* self, void* t, int (*enumproc)(void* self, struct PropertiesStruct* properties, int level))
+void properties_enumerate(Properties* self, void* t, int (*enumproc)(void* self, Properties* properties, int level))
 {
 	target = t;
 	level = 0;
@@ -574,7 +577,7 @@ void properties_save(Properties* self, const char* path)
 {
 	RiffFile file;
 	if (rifffile_create(&file, path, 1)) {
-		properties_enumerate(self, &file, OnSaveIniEnum);
+		properties_enumerate(self, &file, (PropertiesCallback)OnSaveIniEnum);
 		rifffile_close(&file);
 	}
 }

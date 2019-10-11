@@ -40,15 +40,15 @@ typedef struct {
 	int disposechildren;
 } Property;
 
-struct PropertiesStruct {
+typedef struct Properties {
 	Property item;	
-	struct PropertiesStruct* next;
-	struct PropertiesStruct* children;
-	struct PropertiesStruct* parent;
+	struct Properties* next;
+	struct Properties* children;
+	struct Properties* parent;
 	void (*dispose)(Property*);
-};
+} Properties;
 
-typedef struct PropertiesStruct Properties;
+typedef int (*PropertiesCallback)(void* , Properties*, int level);
 
 void properties_init(Properties*, const char* key, PropertyType);
 Properties* properties_create(void);
@@ -75,7 +75,7 @@ Properties* properties_write_int(Properties*, const char* key, int value);
 Properties* properties_write_bool(Properties*, const char* key, int value);
 Properties* properties_write_choice(Properties*, const char* key, int value);
 Properties* properties_write_double(Properties*, const char* key, double value);
-void properties_enumerate(Properties*, void* target, int (*enumerate)(void* , struct PropertiesStruct* properties, int level));
+void properties_enumerate(Properties*, void* target, PropertiesCallback);
 Properties* properties_find(Properties*, const char* key);
 Properties* properties_findsection(Properties*, const char* key);
 const char* properties_key(Properties*);

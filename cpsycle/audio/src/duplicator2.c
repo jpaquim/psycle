@@ -176,12 +176,8 @@ List* sequencerinsert(Duplicator2* self, List* events)
 						entry->event.mach = self->macoutput[i];
 						entry->event.note = note;
 						entry->track = duplicatormap_at(&self->map, 
-							duplicatorentry->track, i);						
-						if (!insert) {
-							insert = list_create(entry);
-						} else {
-							list_append(insert, entry);
-						}						
+							duplicatorentry->track, i);												
+						list_append(&insert, entry);												
 					}
 					if (duplicatorentry->event.note >= NOTECOMMANDS_RELEASE) {
 						duplicatormap_remove(&self->map, duplicatorentry->track,
