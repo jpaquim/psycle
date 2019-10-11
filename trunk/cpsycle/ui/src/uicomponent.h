@@ -124,6 +124,7 @@ void ui_component_releasecapture();
 ui_size ui_component_size(ui_component*);
 ui_size ui_component_frame_size(ui_component*);
 void ui_invalidate(ui_component*);
+void ui_invalidaterect(ui_component*, const ui_rectangle* rect);
 void ui_component_setfocus(ui_component*);
 void ui_component_setfont(ui_component*, ui_font* font);
 void ui_component_propagateevent(ui_component*);

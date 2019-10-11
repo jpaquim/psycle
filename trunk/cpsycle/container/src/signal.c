@@ -54,12 +54,8 @@ void signal_connect(Signal* self, void* context, void* fp)
 		Slot* node = (Slot*)malloc(sizeof(Slot));
 		node->context = context;
 		node->fp = fp;
-		node->prevented = 0;
-		if (self->slots) {			
-			list_append(self->slots, node);
-		} else {	
-			self->slots = list_create(node);			
-		}
+		node->prevented = 0;		
+		list_append(&self->slots, node);		
 	}
 }
 

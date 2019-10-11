@@ -2,6 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "samples.h"
+#include <stdlib.h> 
 
 void samples_init(Samples* self)
 {
@@ -9,15 +10,16 @@ void samples_init(Samples* self)
 }
 
 void samples_dispose(Samples* self)
-{
-	Sample* sample;
-	int slot;
-	
-	for (slot = self->container.keymin; slot <= self->container.keymax; ++slot) {
-		sample = samples_at(self, slot);
-		if (sample) {
-			sample_dispose(sample);			
-		}
+{	
+	TableIterator it;
+
+	for (it = table_begin(&self->container);
+			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+		Sample* sample;
+		
+		sample = (Sample*)tableiterator_value(&it);
+		sample_dispose(sample);
+		free(sample);
 	}
 	table_dispose(&self->container);
 }

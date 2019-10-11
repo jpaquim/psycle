@@ -8,7 +8,7 @@ static void OnDestroy(MachinesBox*, ui_component*);
 static void ClearMachineBox(MachinesBox*);
 static void BuildMachinesList(MachinesBox*);
 static void InsertSlot(MachinesBox* self, int slot, Machine* machine);
-static int OnEnumMachines(MachinesBox*, int slot, Machine*);
+static void insertmachine(MachinesBox* self, int slot, Machine* machine);
 static int CheckMachineMode(MachinesBox*, Machine*);
 static void AddString(MachinesBox*, const char* text);
 static void OnMachineSlotChanged(MachinesBox*, Machines* sender, int slot);
@@ -52,7 +52,15 @@ void BuildMachinesList(MachinesBox* self)
 			InsertSlot(self, slot, machines_at(self->machines, slot));
 		}
 	} else {
-		machines_enumerate(self->machines, self, OnEnumMachines);
+		TableIterator it;
+	
+		for (it = machines_begin(self->machines); !tableiterator_equal(&it, table_end());
+			tableiterator_inc(&it)) {			
+			Machine* machine;
+
+			machine = (Machine*)tableiterator_value(&it);
+			insertmachine(self, tableiterator_key(&it), machine);
+		}
 	}
 }
 
@@ -70,13 +78,12 @@ void InsertSlot(MachinesBox* self, int slot, Machine* machine)
 		table_insert(&self->slotslistbox, slot, (void*) listboxindex);
 }
 
-int OnEnumMachines(MachinesBox* self, int slot, Machine* machine)
+void insertmachine(MachinesBox* self, int slot, Machine* machine)
 {	
 	if (CheckMachineMode(self, machine) && machine->info(machine) && 
 			machine->info(machine)->ShortName) {
 		InsertSlot(self, slot, machine);
-	}
-	return 1;
+	}	
 }
 
 int CheckMachineMode(MachinesBox* self, Machine* machine)

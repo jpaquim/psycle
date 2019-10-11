@@ -2,6 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "instruments.h"
+#include <stdlib.h>
 
 void instruments_init(Instruments* self)
 {
@@ -12,10 +13,20 @@ void instruments_init(Instruments* self)
 }
 
 void instruments_dispose(Instruments* self)
-{
+{	
+	TableIterator it;
+
+	for (it = table_begin(&self->container);
+			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+		Instrument* instrument;
+		
+		instrument = (Instrument*)tableiterator_value(&it);
+		instrument_dispose(instrument);
+		free(instrument);
+	}
+	table_dispose(&self->container);
 	signal_dispose(&self->signal_insert);
 	signal_dispose(&self->signal_slotchange);
-	table_dispose(&self->container);
 }
 
 void instruments_insert(Instruments* self, Instrument* instrument, int slot)

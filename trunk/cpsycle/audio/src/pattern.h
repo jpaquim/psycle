@@ -12,8 +12,10 @@ typedef struct {
 	PatternEvent event;
 	 /// position in beat unit
 	beat_t offset;
-	 /// sound driver callback event position
+	/// sound driver callback event position
 	beat_t delta;
+	/// current sequencer bpm
+	beat_t bpm;
 	/// the tracker channel
 	unsigned int track; 
 } PatternEntry;

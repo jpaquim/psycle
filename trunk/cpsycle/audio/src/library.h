@@ -12,6 +12,7 @@ typedef struct {
 
 void library_init(Library*);
 void library_load(Library*, const char* path);
+void library_unload(Library*);
 void* library_functionpointer(Library*, const char* name);
 void library_dispose(Library*);
 

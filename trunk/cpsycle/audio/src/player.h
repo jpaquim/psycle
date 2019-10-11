@@ -10,24 +10,30 @@
 #include <signal.h>
 #include "library.h"
 
+typedef enum {
+	VUMETER_NONE,
+	VUMETER_PEAK,
+	VUMETER_RMS,	
+} VUMeterMode;
+
 typedef struct {	
-	Driver* driver;
-	Driver* silentdriver;
+	Driver* driver;	
 	Song* song;
 	Sequencer sequencer;	
-	int playing;			
 	unsigned int numsongtracks;
 	Signal signal_numsongtrackschanged;
 	Signal signal_lpbchanged;
-	Library drivermodule;
-	beat_t seqtickcount;
-	Table rmsvol;
+	Library drivermodule;	
+	Table rms;	
+	VUMeterMode vumode;
+	int resetvumeters;
 } Player;
 
 void player_init(Player*, Song*, void* handle);
 void player_dispose(Player*);
 void player_start(Player*);
 void player_stop(Player*);
+int player_playing(Player*);
 void player_setsong(Player*, Song*);
 beat_t player_position(Player*);
 void player_setbpm(Player*, beat_t bpm);
@@ -37,8 +43,9 @@ unsigned int player_lpb(Player*);
 void player_setnumsongtracks(Player*, unsigned int numsongtracks);
 unsigned int player_numsongtracks(Player*);
 void player_loaddriver(Player*, const char* path);
-void player_unloaddriver(Player*);
 void player_restartdriver(Player*);
 void player_reloaddriver(Player*, const char* path);
+void player_setvumetermode(Player*, VUMeterMode);
+VUMeterMode player_vumetermode(Player*);
 
 #endif

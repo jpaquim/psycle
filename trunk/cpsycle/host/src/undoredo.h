@@ -4,6 +4,10 @@
 #if !defined(UNDOREDO_H)
 #define UNDOREDO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <list.h>
 #include "command.h"
 
@@ -17,5 +21,9 @@ void undoredo_dispose(UndoRedo*);
 void undoredo_undo(UndoRedo*);
 void undoredo_redo(UndoRedo*);
 void undoredo_execute(UndoRedo*, Command*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

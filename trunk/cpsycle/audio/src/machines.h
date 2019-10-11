@@ -40,7 +40,7 @@ typedef struct Machines {
 	int currsamplebuffer;
 	int slot;
 	int filemode;
-	float volume;
+	float volume;	
 	Signal signal_insert;
 	Signal signal_removed;
 	Signal signal_slotchange;
@@ -57,8 +57,6 @@ void machines_remove(Machines*, int slot);
 void machines_exchange(Machines*, int srcslot, int dstslot);
 int machines_append(Machines*, Machine*);
 Machine* machines_at(Machines*, int slot);
-void machines_enumerate(Machines*, void* context,
-	int (*enumproc)(void*, int, Machine*));
 int machines_connect(Machines*, int outputslot, int inputslot);
 void machines_disconnect(Machines*, int outputslot, int inputslot);
 void machines_disconnectall(Machines*, int slot);
@@ -77,8 +75,6 @@ unsigned int machines_size(Machines*);
 void machines_showparameters(Machines*, int slot);
 void machines_setvolume(Machines*, float volume);
 float machines_volume(Machines*);
-
-void suspendwork(void);
-void resumework(void);
+TableIterator machines_begin(Machines*);
 
 #endif

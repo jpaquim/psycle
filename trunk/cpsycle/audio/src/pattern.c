@@ -42,12 +42,8 @@ Pattern* pattern_clone(Pattern* self)
 			*rventry = *entry;
 		} else {
 			memset(rventry, 0, sizeof(PatternEntry));
-		}
-		if (rv->events) {						
-			list_append(rv->events, rventry);
-		} else {
-			rv->events = list_create(rventry);
-		}
+		}		
+		list_append(&rv->events, rventry);		
 	}
 	rv->length = self->length;
 	rv->label = _strdup(self->label);
@@ -87,7 +83,8 @@ PatternNode* pattern_insert(Pattern* self, PatternNode* prev, int track,
 		entry = (PatternEntry*)malloc(sizeof(PatternEntry));
 		entry->event = *event;
 		entry->offset = offset;
-		entry->delta = 0;
+		entry->delta = 0.f;
+		entry->bpm = 0.f;
 		entry->track = track;
 		if (!self->events) {
 			rv = self->events = list_create(entry);

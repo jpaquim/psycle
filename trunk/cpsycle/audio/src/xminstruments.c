@@ -2,6 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "xminstruments.h"
+#include <stdlib.h>
 
 void xminstruments_init(XMInstruments* self)
 {
@@ -10,6 +11,16 @@ void xminstruments_init(XMInstruments* self)
 
 void xminstruments_dispose(XMInstruments* self)
 {
+	TableIterator it;
+
+	for (it = table_begin(&self->container);
+			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+		XMInstrument* xminstrument;
+		
+		xminstrument = (XMInstrument*)tableiterator_value(&it);
+		xminstrument_dispose(xminstrument);
+		free(xminstrument);
+	}
 	table_dispose(&self->container);
 }
 

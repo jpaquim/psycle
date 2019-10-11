@@ -8,9 +8,7 @@ void lock_init(void);
 void lock_dispose(void);
 void lock_enable(void);
 void lock_disable(void);
-void suspendwork(void);
-void resumework(void);
-void signalwaithost(void);
-void signalhost(void);
+void lock_enter(void);
+void lock_leave(void);
 
 #endif

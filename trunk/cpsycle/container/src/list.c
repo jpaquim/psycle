@@ -30,15 +30,19 @@ void list_free(List* list)
 	}
 }
 
-List* list_append(List* self, void* entry)
+List* list_append(List** self, void* entry)
 {		
-	self->tail->next = list_create(entry);
-	self->tail->next->prev = self->tail;
-	self->tail = self->tail->next;	
-	return self->tail;
+	if (*self == 0) {
+		*self = list_create(entry);
+	} else {
+		(*self)->tail->next = list_create(entry);
+		(*self)->tail->next->prev = (*self)->tail;
+		(*self)->tail = (*self)->tail->next;	
+	}
+	return (*self)->tail;
 }
 
-List* list_appendlist(List** self, List* list)
+List* list_cat(List** self, List* list)
 {
 	if (!*self) {
 		*self = list;
@@ -64,7 +68,7 @@ List* list_insert(List** self, List* ptr, void* entry)
 	}	
 	next = ptr->next;	
 	if (next == NULL) {
-		return list_append(*self, entry);
+		return list_append(self, entry);
 	}
 	ptr->next = list_create(entry);	
 	ptr->next->prev = ptr;	
@@ -104,5 +108,10 @@ unsigned int list_size(List* self)
 
 	for (p = self; p != 0; p = p->next, ++rv);
 	return rv;
+}
+
+List* list_last(List* self)
+{
+	return self ? self->tail : 0;
 }
 

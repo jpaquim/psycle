@@ -28,6 +28,12 @@ void library_load(Library* self, const char* path)
 	}	
 }
 
+void library_unload(Library* self)
+{
+	library_dispose(self);
+	library_init(self);
+}
+
 void* library_functionpointer(Library* self, const char* name)
 {
 	return GetProcAddress(self->module, name);

@@ -33,7 +33,7 @@ typedef struct {
 } RiffFile; 
 
 BOOL rifffile_open(RiffFile*, const char* psFileName);
-BOOL rifffile_create(RiffFile*, char* psFileName, BOOL overwrite);
+BOOL rifffile_create(RiffFile*, const char* psFileName, BOOL overwrite);
 BOOL rifffile_close(RiffFile*);
 BOOL rifffile_read(RiffFile*, void* pData, unsigned long numBytes);
 BOOL rifffile_write(RiffFile*, void* pData, unsigned long numBytes);

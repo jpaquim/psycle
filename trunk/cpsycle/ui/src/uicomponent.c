@@ -858,12 +858,8 @@ List* ui_component_children(ui_component* self, int recursive)
 			hwnd = GetNextWindow(hwnd, GW_HWNDNEXT);
 			if (hwnd) {
 				ui_component* child = table_at(&selfmap, (int)hwnd);
-				if (child) {
-					if (children == 0) {
-						children = list_create(child);
-					} else {
-						list_append(children, child);
-					}		
+				if (child) {					
+					list_append(&children, child);							
 				}
 			}
 		}
@@ -875,12 +871,8 @@ BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam)
 {
 	List** pChildren = (List**) lParam;
 	ui_component* child = table_at(&selfmap, (int)hwnd);
-	if (child) {
-		if (*pChildren == 0) {
-			*pChildren = list_create(child);
-		} else {
-			list_append(*pChildren, child);
-		}		
+	if (child) {		
+		list_append(pChildren, child);				
 	}     
     return TRUE;
 }
@@ -897,7 +889,18 @@ void ui_component_releasecapture()
 
 void ui_invalidate(ui_component* self)
 {
-	InvalidateRect(self->hwnd, NULL, TRUE);
+	InvalidateRect(self->hwnd, NULL, FALSE);
+}
+
+void ui_invalidaterect(ui_component* self, const ui_rectangle* r)
+{
+	RECT rc;
+
+	rc.left = r->left;
+	rc.top = r->top;
+	rc.right = r->right;
+	rc.bottom = r->bottom;
+	InvalidateRect(self->hwnd, &rc, FALSE);
 }
 
 void ui_component_setfocus(ui_component* self)
@@ -988,12 +991,8 @@ void ui_component_align(ui_component* self)
 						cpy = cpymax;
 						list_free(wrap);						
 						wrap = 0;
-					}
-					if (wrap) {
-						list_append(wrap, component);
-					} else {
-						wrap = list_create(component);
-					}
+					}					
+					list_append(&wrap, component);					
 				}
 				cpx += component->margin.left;
 				ui_component_setposition(component,

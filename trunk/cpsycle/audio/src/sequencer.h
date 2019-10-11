@@ -14,8 +14,11 @@ typedef struct {
 	beat_t bpm;
 	unsigned int samplerate;
 	beat_t beatsprosample;	
-	unsigned int lpb;
+	unsigned int lpb; // global
+	beat_t lpbspeed;
+	int playing;
 	beat_t position;
+	beat_t seqlinetickcount;
 	beat_t window;	
 	List* currtrackiterators;	
 	List* events;
@@ -25,10 +28,15 @@ typedef struct {
 void sequencer_init(Sequencer*, Sequence*, Machines*);
 void sequencer_dispose(Sequencer*);
 void sequencer_reset(Sequencer*, Sequence*, Machines*);
+void sequencer_frametick(Sequencer*, unsigned int numsamples);
 void sequencer_tick(Sequencer*, beat_t offset);
 void sequencer_setposition(Sequencer*, beat_t position);
+beat_t sequencer_position(Sequencer*);
+void sequencer_start(Sequencer*);
+void sequencer_stop(Sequencer*);
 List* sequencer_tickevents(Sequencer*);
 List* sequencer_machinetickevents(Sequencer*, unsigned int slot);
+List* sequencer_timedevents(Sequencer*, unsigned int slot, unsigned int amount);
 void sequencer_append(Sequencer*, List* events);
 void sequencer_setsamplerate(Sequencer*, unsigned int samplerate);
 unsigned int sequencer_samplerate(Sequencer*);
@@ -38,5 +46,6 @@ void sequencer_setlpb(Sequencer*, unsigned int lpb);
 unsigned int sequencer_lpb(Sequencer*);
 unsigned int sequencer_frames(Sequencer*, beat_t offset);
 beat_t sequencer_offset(Sequencer*, int numsamples);
+int sequencer_playing(Sequencer*);
 
 #endif

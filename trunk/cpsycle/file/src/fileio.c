@@ -31,7 +31,6 @@ unsigned long FourCC(char *psName)
 	return retbuf;
 }
 
-
 BOOL rifffile_open(RiffFile* self,
 				   const char* psFileName)
 {
@@ -41,7 +40,7 @@ BOOL rifffile_open(RiffFile* self,
 }
 
 BOOL rifffile_create(RiffFile* self,
-					 char* psFileName,
+					 const char* psFileName,
 					 BOOL overwrite)
 {
 	strcpy(self->szName,psFileName);
