@@ -4,7 +4,6 @@
 #if !defined(DSP_ADSR_H)
 #define DSP_ADSR_H
 
-
 typedef struct {
 	float value;
 	float time;

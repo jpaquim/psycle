@@ -8,6 +8,7 @@ static void OnDraw(SequenceListView*, ui_component* sender, ui_graphics* g);
 static void DrawSequence(SequenceListView*, ui_graphics* g);
 void DrawTrack(SequenceListView*, ui_graphics* g, SequenceTrack* track,
 	int trackindex, int x);
+static void ComputeTextSizes(SequenceListView*);
 static void OnNewEntry(SequenceView*);
 static void OnInsertEntry(SequenceView*);
 static void OnCloneEntry(SequenceView*);
@@ -20,14 +21,14 @@ static void OnSize(SequenceView*, ui_component* sender, int width, int height);
 static void OnDurationSize(SequenceViewDuration*, ui_component* sender, int width, int height);
 static void UpdateSequenceViewDuration(SequenceViewDuration*);
 static void OnListViewMouseDown(SequenceListView*, ui_component* sender, int x, int y, int button);
+static void OnScroll(SequenceListView*, ui_component* sender, int cx, int cy);
 static void OnSongChanged(SequenceView*, Workspace*);
 static void OnEditPositionChanged(SequenceView*, Sequence* sender);
 static void buttons_onalign(SequenceButtons* self, ui_component* sender);
 static void buttons_onpreferredsize(SequenceButtons*, ui_component* sender, ui_size* limit, int* width, int* height);
 static List* rowend(List* p);
-static int listviewmargin = 5;
 
-static int trackwidth = 75;
+static int listviewmargin = 5;
 
 void InitSequenceView(SequenceView* self, ui_component* parent,
 	Workspace* workspace)
@@ -174,11 +175,15 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent,
 	self->patterns = patterns;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_showverticalscrollbar(&self->component);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_mousedown, self, OnListViewMouseDown);	
+	signal_connect(&self->component.signal_mousedown, self, OnListViewMouseDown);
+	signal_connect(&self->component.signal_scroll, self, OnScroll);	
 	self->selected = 0;
 	self->selectedtrack = 0;	
 	self->lineheight = 12;
+	self->trackwidth = 100;
+	self->dy = 0;
 }
 
 void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g)
@@ -192,14 +197,27 @@ void DrawSequence(SequenceListView* self, ui_graphics* g)
 	int cpx = 0;
 	int c = 0;		
 	self->foundselected = 0;
-	for (p = self->sequence->tracks; p != 0; p = p->next, cpx += trackwidth, ++c) {
+	ComputeTextSizes(self);
+	for (p = self->sequence->tracks; p != 0; p = p->next, 
+			cpx += self->trackwidth, ++c) {
 		DrawTrack(self, g, (SequenceTrack*)p->entry, c, cpx + listviewmargin);
 	}
 	if (!self->foundselected) {
 		ui_setbackgroundcolor(g, 0x00FF0000);
-		ui_textout(g, self->selectedtrack*trackwidth,
+		ui_textout(g, self->selectedtrack*self->trackwidth,
 			self->selected * self->lineheight + listviewmargin, "     ", 5);
 	}
+}
+
+void ComputeTextSizes(SequenceListView* self)
+{
+	TEXTMETRIC tm;
+	
+	tm = ui_component_textmetric(&self->component);
+	self->avgcharwidth = tm.tmAveCharWidth;
+	self->lineheight = (int) (tm.tmHeight * 1.5);
+	self->trackwidth = tm.tmAveCharWidth * 15;
+	self->identwidth = tm.tmAveCharWidth * 4;	
 }
 
 void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int trackindex, int x)
@@ -211,14 +229,14 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);
 		
-	ui_setrectangle(&r, x, 0, trackwidth - 5, size.height);	
-	if (trackindex == self->selectedtrack) {
-		ui_setcolor(g, 0x00777777);		
+	ui_setrectangle(&r, x, 0, self->trackwidth - 5, size.height);	
+	if (trackindex == self->selectedtrack) {		
+		ui_drawsolidrectangle(g, r, 0x00303030);
 	} else {
-		ui_setcolor(g, 0x00363636);
+		ui_drawsolidrectangle(g, r, 0x00272727);		
 	}
-	ui_drawline(g, r.left, r.top, r.right, r.top);
-	ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
+	
+	// ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
 	ui_settextcolor(g, 0);
 	p = track->entries;
 	while (p != 0) {
@@ -236,7 +254,7 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 				ui_setbackgroundcolor(g, 0x00232323);
 				ui_settextcolor(g, 0x00CACACA);
 			}
-			ui_textout(g, x + 5, cpy + listviewmargin, buffer, strlen(buffer));
+			ui_textout(g, x + 5, cpy + self->dy + listviewmargin, buffer, strlen(buffer));
 		//}
 		p = p->next;
 		cpy += self->lineheight;
@@ -382,14 +400,20 @@ void OnListViewMouseDown(SequenceListView* self, ui_component* sender, int x, in
 	unsigned int selected;
 	unsigned int selectedtrack;	
 
-	selected = (y - listviewmargin) / self->lineheight;
-	selectedtrack = x / trackwidth;
+	ComputeTextSizes(self);
+	selected = (y - listviewmargin - self->dy) / self->lineheight;
+	selectedtrack = x / self->trackwidth;
 	if (selectedtrack < sequence_sizetracks(self->sequence)) {
 		SequencePosition position;
 
 		position = sequence_at(self->sequence, selectedtrack, selected);
 		sequence_seteditposition(self->sequence, position);
 	}
+}
+
+void OnScroll(SequenceListView* self, ui_component* sender, int cx, int cy)
+{
+	self->dy += cy;
 }
 
 void OnSongChanged(SequenceView* self, Workspace* workspace)

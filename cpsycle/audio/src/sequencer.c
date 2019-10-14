@@ -330,12 +330,13 @@ void addsequenceevent(Sequencer* self, SequenceTrackIterator* trackiterator,
 		maketweakslideevents(self, patternentry);
 	} else {
 		PatternEntry* entry;
-		entry =	patternentry_clone(patternentry);									
+		entry =	patternentry_clone(patternentry);
+		entry->bpm = self->bpm;
 		if (entry->event.cmd == NOTE_DELAY) {		
-			entry->delta = offset + entry->event.parameter / (self->lpb * self->lpbspeed * 256.f);
+			entry->delta = offset + entry->event.parameter / (self->lpb * self->lpbspeed * 256.f);			
 			list_append(&self->delayedevents, entry);
 		} else {
-			entry->delta = offset - self->position;
+			entry->delta = offset - self->position;			
 			list_append(&self->events, entry);
 		}
 	}	

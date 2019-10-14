@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "song.h"
 #include <fileio.h>
 #include "pattern.h"
@@ -579,7 +580,7 @@ void readinsd(Song* song, RiffFile* file, unsigned int size, int version)
 			
 			rifffile_read(file, &val, sizeof(val));
 			ENV_F_TP = val;
-
+			instrument->filtertype = (FilterType) val;
 
 			rifffile_read(file, &pan, sizeof(pan));
 			rifffile_read(file, &_RPAN, sizeof(_RPAN));
@@ -824,7 +825,7 @@ Machine* machineloadfilechunk(Song* self, RiffFile* file, int index, int version
 		rifffile_read(file, &connection, sizeof(connection));
 		// Incoming connections activated
 		rifffile_read(file, &incon, sizeof(incon));
-		if (output != -1) {					
+		if (connection && output != -1) {					
 			machines_connect(machines, index, output);
 		}
 		//if (input != -1) {				
@@ -841,6 +842,8 @@ Machine* machineloadfilechunk(Song* self, RiffFile* file, int index, int version
 	} else {
 		properties_append_string(properties, "editname", editname);
 	}
+
+	machine->loadspecific(machine, file);
 
 	return machine;	
 }

@@ -6,17 +6,12 @@
 
 #include <stdio.h>
 
-#if !defined(BOOL)
-#define BOOL int
-#endif
-
 typedef struct TYPEULONGINV {
   unsigned char hihi;
   unsigned char hilo;
   unsigned char lohi;
   unsigned char lolo;
 } ULONGINV;
-
 
 typedef struct
 {
@@ -27,22 +22,22 @@ RiffChunkHeader;
 
 
 typedef struct {	
-	BOOL _modified;
+	int _modified;
 	char szName[1024];
 	FILE* _file;
 } RiffFile; 
 
-BOOL rifffile_open(RiffFile*, const char* psFileName);
-BOOL rifffile_create(RiffFile*, const char* psFileName, BOOL overwrite);
-BOOL rifffile_close(RiffFile*);
-BOOL rifffile_read(RiffFile*, void* pData, unsigned long numBytes);
-BOOL rifffile_write(RiffFile*, void* pData, unsigned long numBytes);
-BOOL rifffile_expect(RiffFile*, void* pData, unsigned long numBytes);
+int rifffile_open(RiffFile*, const char* psFileName);
+int rifffile_create(RiffFile*, const char* psFileName, int overwrite);
+int rifffile_close(RiffFile*);
+int rifffile_read(RiffFile*, void* pData, unsigned long numBytes);
+int rifffile_write(RiffFile*, void* pData, unsigned long numBytes);
+int rifffile_expect(RiffFile*, void* pData, unsigned long numBytes);
 long rifffile_seek(RiffFile*,long offset);
 long rifffile_skip(RiffFile*, long numBytes);
-BOOL rifffile_eof(RiffFile*);
+int rifffile_eof(RiffFile*);
 long rifffile_filesize(RiffFile*);
-BOOL rifffile_readstring(RiffFile*, char* pData, unsigned long maxBytes);
+int rifffile_readstring(RiffFile*, char* pData, unsigned long maxBytes);
 long rifffile_getpos(RiffFile*);	
 FILE* rifffile_getfile(RiffFile*);
 
@@ -50,4 +45,3 @@ static unsigned long FourCC(char *psName);
 	
 
 #endif
-

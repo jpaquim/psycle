@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 
 static void freemachines(Machines* self);
 static int machines_freeslot(Machines*, int start);
@@ -15,7 +16,7 @@ static MachineConnectionEntry* allocconnectionentry(int slot, float volume);
 static MachineConnections* initconnections(Machines*, int slot);
 static void machines_setpath(Machines*, MachineList* path);
 static MachineList* compute_path(Machines*, int slot);
-static MachineList* compute_slotpath(Machines*, int slot);
+static void compute_slotpath(Machines*, int slot, List**);
 static void machines_preparebuffers(Machines*, MachineList* path, unsigned int amount);
 static void machines_releasebuffers(Machines*);
 static Buffer* machines_nextbuffer(Machines*, unsigned int channels);
@@ -377,42 +378,42 @@ MachineList* nopath(Machines* self)
 
 MachineList* compute_path(Machines* self, int slot)
 {
-	MachineList* rv;	
+	MachineList* rv = 0;	
 
-	reset_nopath(self);
-	remove_nopath(self, slot);
-	rv = compute_slotpath(self, slot);			
+	reset_nopath(self);	
+	compute_slotpath(self, slot, &rv);
+	//	Debug Path Output
+	//	if (rv) {
+	//		List* p;
+
+	//		for (p = rv; p != 0; p = p->next) {
+	//			char text[20];
+
+	//			_snprintf(text, 20, "%d, ", (int)(p->entry));
+	//			OutputDebugString(text);
+	//		}
+	//		OutputDebugString("\n");
+	//	}
 	list_cat(&rv, nopath(self));
 	return rv;
 }
 
-MachineList* compute_slotpath(Machines* self, int slot)
+void compute_slotpath(Machines* self, int slot, List** path)
 {
 	MachineConnection* p;
 	MachineConnections* connections;
-	MachineList* list;
 
-	list = list_create((void*)slot);	
-	connections = machines_connections(self, slot);
-	p = connections->inputs;
-	if (!p) {		
-		return list;
-	}
-	while (p) {
-		List* inlist;
+	connections = machines_connections(self, slot);	
+	for (p = connections->inputs; p != 0; p = p->next) {
 		MachineConnectionEntry* entry;
 
-		entry = (MachineConnectionEntry*) p->entry;
-		remove_nopath(self, entry->slot);
-		inlist = compute_slotpath(self, entry->slot);		
-		if (inlist) {								
-			inlist->tail->next = list;
-			inlist->tail = list->tail;
-			list = inlist;				
-		}
-		p = p->next;
+		entry = (MachineConnectionEntry*) p->entry;		
+		compute_slotpath(self, entry->slot, path);		
+	}	
+	if (table_exists(&self->nopath, slot)) {
+		remove_nopath(self, slot);
+		list_append(path, (void*)slot);
 	}
-	return list;
 }
 
 void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amount)

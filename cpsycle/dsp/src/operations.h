@@ -9,5 +9,6 @@ void dsp_mul(float *dst, int numSamples, float mul);
 void dsp_movmul(float *src, float *dst, int num, float mul);		
 void dsp_clear(float *dst, int num);
 void dsp_interleave(float* dst, float* left, float* right, int num);
+void dsp_erase_all_nans_infinities_and_denormals(float* dst, unsigned int num);
 
 #endif

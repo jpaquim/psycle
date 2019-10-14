@@ -31,7 +31,7 @@ void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Worksp
 	signal_connect(&self->component.signal_preferredsize, self, onstatuspreferredsize);
 	signal_connect(&workspace->signal_songchanged, self, OnStatusSongChanged);
 	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-		self, OnStatusSequencePositionChanged);	
+		self, OnStatusSequencePositionChanged);
 }
 
 void OnStatusSequencePositionChanged(PatternViewStatus* self, Sequence* sender)
@@ -139,7 +139,8 @@ void InitPatternView(PatternView* self,
 	signal_connect(&workspace->player.signal_lpbchanged, self, OnLpbChanged);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-		self, OnEditPositionChanged);	
+		self, OnEditPositionChanged);
+	self->lpb = player_lpb(&workspace->player);
 }
 
 void PatternViewSetPattern(PatternView* self, Pattern* pattern)
@@ -175,6 +176,19 @@ void OnHide(PatternView* self, ui_component* sender)
 
 void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
 {
+	// Sequence* sequence;	
+	// SequenceTrackIterator iterator;
+	// SequenceEntry* seqentry; 
+	// Pattern* pattern;
+	//    		
+	// sequence = &self->workspace->song->sequence;	
+	// iterator = sequence_begin(sequence, sequence->tracks, 0.0f);
+	// seqentry = sequencetrackiterator_entry(&iterator);
+	// pattern = patterns_at(sequence->patterns, seqentry->pattern);
+	// pattern_scale(pattern, self->lpb / (beat_t)lpb);
+	// self->lpb = lpb;
+	//
+
 	ui_invalidate(&self->trackerview.component);
 	ui_invalidate(&self->pianoroll.component);
 }

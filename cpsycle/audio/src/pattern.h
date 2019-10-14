@@ -66,4 +66,6 @@ PatternEvent pattern_event(Pattern*, PatternNode*);
 /// gets the op count to determine changes
 unsigned int pattern_opcount(Pattern*);
 
+void pattern_scale(Pattern*, float factor);
+
 #endif

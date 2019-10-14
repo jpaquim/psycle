@@ -37,6 +37,7 @@ typedef struct PatternView {
 	Pianoroll pianoroll;	
 	TabBar tabbar;
 	Workspace* workspace;
+	unsigned int lpb;
 } PatternView;
 
 void InitPatternView(PatternView*, ui_component* parent,

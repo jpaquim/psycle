@@ -93,6 +93,18 @@ SOURCE=.\src\filter.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\filtercoeff.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\lowpass12e.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\multifilter.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\notestab.c
 # End Source File
 # Begin Source File
@@ -114,6 +126,18 @@ SOURCE=.\src\adsr.h
 # Begin Source File
 
 SOURCE=.\src\filter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\filtercoeff.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\lowpass12e.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\multifilter.h
 # End Source File
 # Begin Source File
 

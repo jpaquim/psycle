@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <rms.h>
-#include <windows.h> // Sleep
+#include <multifilter.h>
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -20,12 +20,10 @@
 #define TRUE 1
 #endif
 
-#define DRIVERCLOSESLEEP 400
-
 static float bufferdriver[65535];
 static void* mainframe;
 
-static void player_initdriver(Player* self);
+static void player_initdriver(Player*);
 static void player_initrms(Player*);
 static void player_initsignals(Player*);
 static void player_disposerms(Player*);
@@ -36,6 +34,7 @@ static Buffer* player_mix(Player*, unsigned int slot, unsigned int amount);
 static void player_filldriver(Player*, float* buffer, unsigned int amount);
 static RMSVol* player_rmsvol(Player*, unsigned int slot);
 static void player_resetvumeters(Player*);
+static void erase_all_nans_infinities_and_denormals(float * sample);
 
 void player_init(Player* self, Song* song, void* handle)
 {			
@@ -98,6 +97,7 @@ void player_loaddriver(Player* self, const char* path)
 		library_load(&self->drivermodule, path);	
 		if (self->drivermodule.module) {
 			pfndriver_create fpdrivercreate;
+
 			fpdrivercreate = (pfndriver_create)
 				library_functionpointer(&self->drivermodule, "driver_create");
 			if (fpdrivercreate) {
@@ -115,6 +115,7 @@ void player_loaddriver(Player* self, const char* path)
 	}	
 	sequencer_setsamplerate(&self->sequencer, driver->samplerate(driver));
 	rmsvol_setsamplerate(driver->samplerate(driver));
+	multifilter_inittables(driver->samplerate(driver));
 	self->driver = driver;
 	self->driver->open(self->driver);
 }
@@ -122,8 +123,7 @@ void player_loaddriver(Player* self, const char* path)
 void player_unloaddriver(Player* self)
 {
 	if (self->driver) {
-		self->driver->close(self->driver);
-		Sleep(DRIVERCLOSESLEEP);
+		self->driver->close(self->driver);		
 		self->driver->dispose(self->driver);
 		self->driver->free(self->driver);		
 		library_unload(&self->drivermodule);		
@@ -139,8 +139,7 @@ void player_reloaddriver(Player* self, const char* path)
 
 void player_restartdriver(Player* self)
 {	
-	self->driver->close(self->driver);
-	Sleep(DRIVERCLOSESLEEP);
+	self->driver->close(self->driver);	
 	self->driver->updateconfiguration(self->driver);
 	self->driver->open(self->driver);	
 }
@@ -313,6 +312,8 @@ void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
 					dst->samples[channel],
 					numsamples,
 					vol);
+				dsp_erase_all_nans_infinities_and_denormals(
+					dst->samples[channel], numsamples);					
 		}
 	}
 }
@@ -383,3 +384,4 @@ VUMeterMode player_vumetermode(Player* self)
 {
 	return self->vumode;
 }
+
