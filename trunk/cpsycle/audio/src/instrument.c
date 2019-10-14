@@ -9,6 +9,7 @@ void instrument_init(Instrument* self)
 {	
 	self->name = _strdup("");
 	self->nna = NNA_STOP;
+	self->filtertype = F_NONE;
 	adsr_settings_initdefault(&self->volumeenvelope);
 	adsr_settings_init(&self->filterenvelope, 0.005f, 0.370f, 0.5f, 0.370f);
 	self->filtermodamount = 1.0f;

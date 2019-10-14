@@ -31,7 +31,11 @@ typedef struct {
 	int selected;
 	int selectedtrack;
 	int foundselected;
-	int lineheight;	
+	int lineheight;
+	int trackwidth;
+	int identwidth;   
+	int avgcharwidth;
+	int dy;
 } SequenceListView;
 
 typedef struct {
@@ -52,7 +56,7 @@ typedef struct {
 	ui_checkbox followsong;
 	ui_checkbox shownames;	
 	Patterns* patterns;
-	Sequence* sequence;
+	Sequence* sequence;	
 } SequenceView;
 
 void InitSequenceView(SequenceView*, ui_component* parent, Workspace*);

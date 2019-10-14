@@ -22,6 +22,7 @@ static void setvalue(Plugin*, int const param, int const value);
 static void dispose(Plugin*);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
+static void loadspecific(Plugin* self, RiffFile* file);
 static void setcallback(Plugin* self, MachineCallback callback);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
@@ -45,7 +46,8 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.dispose = dispose;
 	self->machine.generateaudio = generateaudio;
 	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;	
+	self->machine.numoutputs = numoutputs;
+	self->machine.loadspecific = loadspecific;
 	self->machine.setcallback = setcallback;
 
 	pInfo = info(self);	
@@ -200,3 +202,35 @@ void setcallback(Plugin* self, MachineCallback callback)
 		mi_setcallback(self->mi, &callback);
 	}
 }
+
+void loadspecific(Plugin* self, RiffFile* file)
+{
+	unsigned int size;
+
+	rifffile_read(file, &size, sizeof(size)); // size of whole structure
+	if(size) {
+		unsigned int count;
+		unsigned int i;
+
+		rifffile_read(file, &count, sizeof(count));  // size of vars
+		for (i = 0; i < count; i++) {
+			int temp;
+			
+			rifffile_read(file, &temp, sizeof(temp));			
+			self->machine.parametertweak(self, i, temp);
+		}
+		size -= sizeof(count) + sizeof(int)*count;
+		if(size) {
+			unsigned int size2 = 0;
+			unsigned char* pData;
+			
+			size2 = mi_getdatasize(self->mi);
+			// This way we guarantee that the plugin will have enough bytes,
+			// even if it does not fit what it reads.
+			pData = (unsigned char*)malloc(max(size,size2));
+			rifffile_read(file, pData, size); // Read internal data.			
+			mi_putdata(self->mi, pData); // Internal load
+			free(pData);
+		}						
+	}	
+}			

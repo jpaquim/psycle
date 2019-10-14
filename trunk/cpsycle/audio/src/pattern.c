@@ -169,3 +169,14 @@ unsigned int pattern_opcount(Pattern* self)
 {
 	return self->opcount;
 }
+
+void pattern_scale(Pattern* self, float factor)
+{
+	PatternNode* p;	
+	
+	for (p = self->events; p != 0; p = p->next) {		
+		PatternEntry* entry = (PatternEntry*)p->entry;
+
+		entry->offset *= factor;
+	}
+}

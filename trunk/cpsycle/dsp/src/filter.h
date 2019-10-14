@@ -4,18 +4,40 @@
 #if !defined(DSP_FILTER_H)
 #define DSP_FILTER_H
 
+#include "filtercoeff.h"
+
 typedef struct {
 	void (*init)(void*);
 	void (*dispose)(void*);
-	float(*work)(void*, float sample);
-	void(*setcutoff)(void*, float cutoff);
-	float(*cutoff)(void*);
-	void(*setressonance)(void*, float ressonance);
-	float(*ressonance)(void*);
-	void(*setsamplerate)(void*, float samplerate);
-	float(*samplerate)(void*);
+	float (*work)(void*, float sample);
+	void (*setcutoff)(void*, float cutoff);	
+	float (*cutoff)(void*);
+	void (*setressonance)(void*, float ressonance);
+	float (*ressonance)(void*);
+	void (*setsamplerate)(void*, float samplerate);
+	float (*samplerate)(void*);
+	void (*update)(void*, int full);
+	void (*reset)(void*);
 } Filter;
 
 void filter_init(Filter*);
+
+typedef struct {
+	Filter filter;	
+	float samplerate;
+	float cutoff;
+	float q;
+} CustomFilter;
+
+void customfilter_init(CustomFilter*);
+
+typedef struct {
+	float x1, x2, y1, y2;
+} FIRWork;
+
+void firwork_init(FIRWork*);
+float firwork_work(FIRWork*, FilterCoeff* coeffs, float sample);
+void firwork_reset(FIRWork*);
+
 
 #endif

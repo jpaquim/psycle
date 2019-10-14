@@ -8,6 +8,7 @@
 #define DIRECTSOUND_VERSION 0x8000
 #include <dsound.h>
 #include <MMReg.h>
+#include <process.h>
 
 static HWND hwndmain;
 
@@ -55,7 +56,7 @@ typedef struct {
 	LPCGUID _pDsGuid;
 	LPDIRECTSOUND _pDs;
 	LPDIRECTSOUNDBUFFER _pBuffer;
-
+	HANDLE hEvent;
 	int (*error)(int, const char*);
 } DXDriver;
 
@@ -154,6 +155,8 @@ int driver_init(Driver* driver)
 	self->_bitDepth = 16;
 
 	init_properties(&self->driver);
+	self->hEvent = CreateEvent
+		(NULL, FALSE, FALSE, NULL);
 //	apply_properties(self);
 	return 0;
 }
@@ -163,6 +166,7 @@ int driver_dispose(Driver* driver)
 	DXDriver* self = (DXDriver*) driver;
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
+	CloseHandle(self->hEvent);
 	return 0;
 }
 
@@ -328,7 +332,7 @@ int driver_open(Driver* driver)
 	}
 	self->_currentOffset = 0;
 	self->_buffersToDo = self->_numBuffers;
-	//_event.ResetEvent();
+	ResetEvent(self->hEvent);
 	self->_timerActive = TRUE;
 	_beginthread(PollerThread, 0, self);
 
@@ -369,7 +373,7 @@ void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits,
 }
 
 void PollerThread(void * self)
-{
+{	
 	DXDriver* pThis = (DXDriver*)self;
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 
@@ -378,7 +382,7 @@ void PollerThread(void * self)
 		DoBlocks(pThis);
 		Sleep(pThis->pollSleep_);
 	}
-	//_event.SetEvent();
+	SetEvent(pThis->hEvent);
 	_endthread();
 }
 
@@ -542,9 +546,10 @@ int driver_close(Driver* driver)
 	}
 	self->_running = FALSE;
 	self->_timerActive = FALSE;
-	// CSingleLock event(&_event, TRUE);
+	
+	WaitForSingleObject(self->hEvent, INFINITE);
 	// Once we get here, the PollerThread should have stopped
-	//
+	// or we hang in deadlock
 	if (self->_playing)
 	{
 		IDirectSoundBuffer_Stop(self->_pBuffer);

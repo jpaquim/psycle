@@ -5,6 +5,7 @@
 #define INSTRUMENT_H
 
 #include <adsr.h>
+#include <multifilter.h>
 
 typedef enum {
 	NNA_STOP = 0x0,		///  [Note Cut]	(This one actually does a very fast fadeout)
@@ -12,23 +13,6 @@ typedef enum {
 	NNA_NOTEOFF = 0x2,	///  [Note off]
 	NNA_FADEOUT = 0x3	///  [Note fade]
 } NewNoteAction;
-
-typedef enum {
-	F_LOWPASS12 = 0,
-	F_HIGHPASS12 = 1,
-	F_BANDPASS12 = 2,
-	F_BANDREJECT12 = 3,
-	F_NONE = 4,//This one is kept here because it is used in load/save. Also used in Sampulse instrument filter as "use channel default"
-	F_ITLOWPASS = 5,
-	F_MPTLOWPASSE = 6,
-	F_MPTHIGHPASSE = 7,
-	F_LOWPASS12E = 8,
-	F_HIGHPASS12E = 9,
-	F_BANDPASS12E = 10,
-	F_BANDREJECT12E = 11,
-
-	F_NUMFILTERS
-} FilterType;
 
 typedef struct {	
 	char* name;

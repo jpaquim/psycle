@@ -274,6 +274,7 @@ void voice_init(Voice* self, Instrument* instrument, Sample* sample,
 	self->instrument = instrument;
 	self->sample = sample;
 	self->channel = channel;
+	self->vol = 1.f;
 	if (sample) {
 		self->position = sample_begin(self->sample);
 	}	
@@ -283,6 +284,20 @@ void voice_init(Voice* self, Instrument* instrument, Sample* sample,
 	} else {
 		adsr_initdefault(&self->env, samplerate);
 		adsr_initdefault(&self->filterenv, samplerate);
+	}	
+	multifilter_init(&self->filter_l);
+	multifilter_init(&self->filter_r);
+	if (instrument) {
+		((Filter*)&self->filter_l)->setcutoff(&self->filter_l, 
+			self->instrument->filtercutoff);
+		((Filter*)&self->filter_r)->setcutoff(&self->filter_r,
+			self->instrument->filtercutoff);	
+		((Filter*)&self->filter_l)->setressonance(&self->filter_l, 
+			self->instrument->filterres);
+		((Filter*)&self->filter_r)->setressonance(&self->filter_r,
+			self->instrument->filterres);
+		multifilter_settype(&self->filter_l, instrument->filtertype);
+		multifilter_settype(&self->filter_r, instrument->filtertype);
 	}
 }
 
@@ -290,6 +305,8 @@ void voice_reset(Voice* self)
 {				
 	adsr_reset(&self->env);
 	adsr_reset(&self->filterenv);
+	((Filter*)(&self->filter_r))->reset(&self->filter_l);
+	((Filter*)(&self->filter_r))->reset(&self->filter_r);
 }
 
 void voice_dispose(Voice* self)
@@ -298,6 +315,9 @@ void voice_dispose(Voice* self)
 
 void voice_seqtick(Voice* self, const PatternEvent* event)
 {
+	if (event->cmd == SAMPLER_CMD_VOLUME) {
+		 self->vol = (float) event->parameter / 255;
+	} else
 	if (event->note == NOTECOMMANDS_RELEASE) {
 		voice_noteoff(self, event);
 	} else
@@ -331,13 +351,16 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 {	
 	if (self->sample && self->env.stage != ENV_OFF) {		
 		int i;
+		float vol;		
 
+		vol = self->vol * self->sample->defaultvolume;		
 		for (i = 0; i < numsamples; ++i) {
-			unsigned int c;
-
-			for (c = 0; c < buffer_numchannels(&self->sample->channels); ++c) {				
+			unsigned int c;			
+							
+			for (c = 0; c < buffer_numchannels(&self->sample->channels); ++c) {
 				float* src;
 				float* dst;
+				float val;				
 				unsigned int frame;
 
 				src = buffer_at(&self->sample->channels, c);
@@ -346,11 +369,30 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 				}
 				dst = buffer_at(output, c);
 				frame = sampleiterator_frameposition(&self->position);
-				dst[i] += src[frame] *
-					self->env.value;				
+				val = src[frame];
+				if (c == 0) {
+					if (multifilter_type(&self->filter_l) != F_NONE) {
+						((Filter*)&self->filter_l)->setcutoff(&self->filter_l,
+							self->filterenv.value);
+						val = ((Filter*)&self->filter_l)->work(&self->filter_l,
+							val);
+					}
+				} else
+				if (c == 1) {
+					if (multifilter_type(&self->filter_r) != F_NONE) {
+						((Filter*)&self->filter_r)->setcutoff(&self->filter_r,
+							self->filterenv.value);
+						val = ((Filter*)&self->filter_r)->work(&self->filter_r,
+							val);
+					}
+				}								
+				dst[i] += val * vol * self->env.value;
 			}				
-			adsr_tick(&self->env);
-			adsr_tick(&self->filterenv);
+			adsr_tick(&self->env);			
+			if (multifilter_type(&self->filter_l) != F_NONE) {
+				adsr_tick(&self->filterenv);
+			}
+			
 			if (!sampleiterator_inc(&self->position)) {			
 				voice_reset(self);					
 				break;				
@@ -362,7 +404,7 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 				buffer_at(output, 0),
 				buffer_at(output, 1),
 				numsamples,
-				1.0f);
+				1.f);
 		}
 	}
 }

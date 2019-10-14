@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "../driver.h"
 #include <windows.h>
 #include <mmsystem.h>
@@ -38,9 +39,10 @@ typedef struct {
 	int m_readPosWraps;
 	/// helper variable to detect the previous wraps.
 	int m_lastPlayPos;		
-	CBlock _blocks[MAX_WAVEOUT_BLOCKS];		
+	CBlock _blocks[MAX_WAVEOUT_BLOCKS];
 	void* _callbackContext;	
 	int (*error)(int, const char*);
+	HANDLE hEvent;
 } MmeDriver;
 
 static void driver_free(Driver*);
@@ -106,7 +108,8 @@ EXPORT Driver* __cdecl driver_create(void)
 	mme->driver.dispose = driver_dispose;
 	mme->driver.updateconfiguration = updateconfiguration;
 	mme->driver.samplerate = samplerate;
-
+	mme->hEvent = CreateEvent
+		(NULL, FALSE, FALSE, NULL);
 	return &mme->driver;
 }
 
@@ -147,6 +150,7 @@ int driver_dispose(Driver* driver)
 	MmeDriver* self = (MmeDriver*) driver;
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
+	CloseHandle(self->hEvent);
 	return 0;
 }
 
@@ -270,7 +274,7 @@ int driver_open(Driver* driver)
 	}
 
 	self->_stopPolling = FALSE;
-	//_event.ResetEvent();
+	ResetEvent(self->hEvent);
 	_beginthread(PollerThread, 0, self);
 	self->_running = TRUE;	
 	return TRUE;
@@ -318,7 +322,7 @@ void PollerThread(void * self)
 		DoBlocks(pThis);
 		Sleep(pThis->pollSleep_);
 	}
-	//_event.SetEvent();
+	SetEvent(pThis->hEvent);
 	_endthread();
 }
 
@@ -396,13 +400,15 @@ int driver_close(Driver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;
 	unsigned int _numBlocks;
-	CBlock *pBlock;
-	// SingleLock lock(&_lock, TRUE);
-	if(!self->_running) return TRUE;
-	self->_stopPolling = TRUE;
-	// CSingleLock event(&_event, TRUE);
+	CBlock *pBlock;	
+	if(!self->_running) {
+		return TRUE;
+	}
+	self->_stopPolling = TRUE;	
 	_numBlocks = self->_numBlocks;
+	WaitForSingleObject(self->hEvent, INFINITE);
 	// Once we get here, the PollerThread should have stopped
+	// or we hang in deadlock	
 	if(waveOutReset(self->_handle) != MMSYSERR_NOERROR)
 	{
 		self->error(1, "waveOutReset() failed");

@@ -9,6 +9,7 @@
 #include <signal.h>
 #include "event.h"
 #include "buffercontext.h"
+#include "fileio.h"
 
 typedef struct MachineCallback {	
 	unsigned int (*samplerate)(void*);
@@ -41,18 +42,19 @@ typedef struct Machine {
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
 	void (*setcallback)(void*, MachineCallback);
+	void (*loadspecific)(void*, RiffFile*);
 	// machine callbacks
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);
 	struct Samples* (*samples)(void*);
 	struct Machines* (*machines)(void*);
 	struct Instruments* (*instruments)(void*);
-		
-	Signal signal_worked;
+			
 	MachineCallback callback;
 	int bypass;
 	int mute;
 	float panning;
+	Signal signal_worked;
 } Machine;
 
 void machine_init(Machine*, MachineCallback);

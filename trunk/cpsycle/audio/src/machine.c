@@ -41,6 +41,7 @@ static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
 static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
+static void loadspecific(Machine* self, RiffFile* file) { }
 
 static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(Machine* self) { return self->callback.bpm(self->callback.context); }
@@ -70,6 +71,7 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->numoutputs = numoutputs;	
 	self->setcallback = setcallback;
 	self->updatesamplerate = updatesamplerate;
+	self->loadspecific = loadspecific;
 	self->bpm = bpm;
 	self->samplerate = samplerate;
 	self->instruments = instruments;

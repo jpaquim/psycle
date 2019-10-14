@@ -1,19 +1,17 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(DSP_NOTESTAB_H)
-#define DSP_NOTESTAB_H
+#if !defined(DSP_LOWPASS12E_H)
+#define DSP_LOWPASS12E_H
 
-typedef unsigned char note_t;
+#include "filter.h"
 
-typedef enum {
-	NOTESTAB_A440,
-	NOTESTAB_A220	
-} NotesTabMode;
+typedef struct {
+	CustomFilter customfilter;	
+	FilterCoeff coeff;
+	FIRWork firwork;
+} LowPass12E;
 
-#define NOTESTAB_DEFAULT NOTESTAB_A220
-
-const char* notetostr(note_t note, NotesTabMode mode);
-const char* const * notetab(NotesTabMode mode);
+void lowpass12e_init(LowPass12E*);
 
 #endif
