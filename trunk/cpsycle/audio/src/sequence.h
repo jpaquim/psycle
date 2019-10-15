@@ -64,6 +64,7 @@ void sequence_clear(Sequence*);
 List* sequence_appendtrack(Sequence*, SequenceTrack*);
 List* sequence_removetrack(Sequence*, SequenceTracks*);
 unsigned int sequence_sizetracks(Sequence*);
+unsigned int sequence_maxtracksize(Sequence*);
 int sequence_patternused(Sequence*, unsigned int patternslot);
 void sequence_setpatternslot(Sequence*, SequencePosition, unsigned int slot);
 beat_t sequence_duration(Sequence*);

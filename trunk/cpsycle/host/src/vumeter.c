@@ -1,3 +1,5 @@
+#include "../../detail/prefix.h"
+
 #include "vumeter.h"
 #include <math.h>
 #include <rms.h>

@@ -22,10 +22,9 @@ typedef struct {
 
 void ui_graphics_init(ui_graphics* g, HDC hdc);
 void ui_graphics_dispose(ui_graphics* g);
-void ui_textout(ui_graphics*, int x, int y,  const char*, int);
+void ui_textout(ui_graphics*, int x, int y,  const char*, size_t len);
 void ui_textoutrectangle(ui_graphics* g, int x, int y, unsigned int options,
-	ui_rectangle r, const char* text, int len);
-void ui_textout(ui_graphics*, int, int,  const char*, int);
+	ui_rectangle r, const char* text, size_t len);
 void ui_drawrectangle(ui_graphics*, const ui_rectangle);
 ui_size ui_textsize(ui_graphics*, const char*);
 void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r, unsigned int color);

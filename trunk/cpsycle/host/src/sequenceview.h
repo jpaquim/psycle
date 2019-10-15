@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(SEQUENCERVIEW)
-#define SEQUENCERVIEW
+#if !defined(SEQUENCERVIEW_H)
+#define SEQUENCERVIEW_H
 
 #include <patterns.h>
 #include <sequence.h>
@@ -35,7 +35,8 @@ typedef struct {
 	int trackwidth;
 	int identwidth;   
 	int avgcharwidth;
-	int dy;
+	int dx;
+	int dy;	
 } SequenceListView;
 
 typedef struct {

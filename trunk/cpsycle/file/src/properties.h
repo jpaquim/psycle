@@ -78,6 +78,7 @@ Properties* properties_write_double(Properties*, const char* key, double value);
 void properties_enumerate(Properties*, void* target, PropertiesCallback);
 Properties* properties_find(Properties*, const char* key);
 Properties* properties_findsection(Properties*, const char* key);
+int properties_insection(Properties*, Properties* section);
 const char* properties_key(Properties*);
 int properties_type(Properties*);
 int properties_value(Properties*);

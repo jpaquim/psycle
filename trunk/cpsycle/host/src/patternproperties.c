@@ -1,3 +1,5 @@
+#include "../../detail/prefix.h"
+
 #include "patternproperties.h"
 #include <stdio.h>
 

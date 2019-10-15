@@ -22,7 +22,8 @@ typedef struct {
 	beat_t window;	
 	List* currtrackiterators;	
 	List* events;
-	List* delayedevents;	
+	List* delayedevents;
+	List* inputevents;
 } Sequencer;
 
 void sequencer_init(Sequencer*, Sequence*, Machines*);
@@ -47,5 +48,7 @@ unsigned int sequencer_lpb(Sequencer*);
 unsigned int sequencer_frames(Sequencer*, beat_t offset);
 beat_t sequencer_offset(Sequencer*, int numsamples);
 int sequencer_playing(Sequencer*);
+void sequencer_addinputevent(Sequencer*, const PatternEvent*,
+	unsigned int track);
 
 #endif

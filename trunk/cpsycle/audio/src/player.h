@@ -5,6 +5,7 @@
 #define PLAYER_H
 
 #include "../../driver/driver.h"
+#include "../../driver/eventdriver.h"
 #include "song.h"
 #include "sequencer.h"
 #include <signal.h>
@@ -17,13 +18,15 @@ typedef enum {
 } VUMeterMode;
 
 typedef struct {	
-	Driver* driver;	
+	Driver* driver;
+	EventDriver* eventdriver;
 	Song* song;
 	Sequencer sequencer;	
 	unsigned int numsongtracks;
 	Signal signal_numsongtrackschanged;
 	Signal signal_lpbchanged;
-	Library drivermodule;	
+	Library drivermodule;
+	Library eventdrivermodule;
 	Table rms;	
 	VUMeterMode vumode;
 	int resetvumeters;
@@ -43,7 +46,9 @@ unsigned int player_lpb(Player*);
 void player_setnumsongtracks(Player*, unsigned int numsongtracks);
 unsigned int player_numsongtracks(Player*);
 void player_loaddriver(Player*, const char* path);
+void player_loadeventdriver(Player * self, const char * path);
 void player_restartdriver(Player*);
+void player_restarteventdriver(Player*);
 void player_reloaddriver(Player*, const char* path);
 void player_setvumetermode(Player*, VUMeterMode);
 VUMeterMode player_vumetermode(Player*);

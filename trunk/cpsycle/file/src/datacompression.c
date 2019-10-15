@@ -15,6 +15,9 @@
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content 
 /// simple bit encoder
+
+#include "../../detail/prefix.h"
+
 #include "datacompression.h"
 #include <assert.h>
 #include <stdlib.h>
