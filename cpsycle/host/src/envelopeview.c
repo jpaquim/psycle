@@ -1,3 +1,5 @@
+#include "../../detail/prefix.h"
+
 #include "envelopeview.h"
 
 static void OnDraw(EnvelopeView*, ui_component* sender, ui_graphics* g);

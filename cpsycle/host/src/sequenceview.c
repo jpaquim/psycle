@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "sequenceview.h"
 #include <stdio.h>
 
@@ -9,6 +11,7 @@ static void DrawSequence(SequenceListView*, ui_graphics* g);
 void DrawTrack(SequenceListView*, ui_graphics* g, SequenceTrack* track,
 	int trackindex, int x);
 static void ComputeTextSizes(SequenceListView*);
+static void AdjustScrollBars(SequenceListView*);
 static void OnNewEntry(SequenceView*);
 static void OnInsertEntry(SequenceView*);
 static void OnCloneEntry(SequenceView*);
@@ -175,7 +178,7 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent,
 	self->patterns = patterns;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_showverticalscrollbar(&self->component);
+	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_mousedown, self, OnListViewMouseDown);
 	signal_connect(&self->component.signal_scroll, self, OnScroll);	
@@ -183,6 +186,7 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent,
 	self->selectedtrack = 0;	
 	self->lineheight = 12;
 	self->trackwidth = 100;
+	self->dx = 0;
 	self->dy = 0;
 }
 
@@ -200,7 +204,7 @@ void DrawSequence(SequenceListView* self, ui_graphics* g)
 	ComputeTextSizes(self);
 	for (p = self->sequence->tracks; p != 0; p = p->next, 
 			cpx += self->trackwidth, ++c) {
-		DrawTrack(self, g, (SequenceTrack*)p->entry, c, cpx + listviewmargin);
+		DrawTrack(self, g, (SequenceTrack*)p->entry, c, cpx + self->dx + listviewmargin);
 	}
 	if (!self->foundselected) {
 		ui_setbackgroundcolor(g, 0x00FF0000);
@@ -216,7 +220,7 @@ void ComputeTextSizes(SequenceListView* self)
 	tm = ui_component_textmetric(&self->component);
 	self->avgcharwidth = tm.tmAveCharWidth;
 	self->lineheight = (int) (tm.tmHeight * 1.5);
-	self->trackwidth = tm.tmAveCharWidth * 15;
+	self->trackwidth = tm.tmAveCharWidth * 16;
 	self->identwidth = tm.tmAveCharWidth * 4;	
 }
 
@@ -267,13 +271,14 @@ void OnSize(SequenceView* self, ui_component* sender, int width, int height)
 	ui_size size = ui_component_size(&self->component);
 	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, &size);
 	ui_size durationsize = ui_component_size(&self->duration.component);
-	
+		
 	ui_component_setposition(&self->buttons.component,
 		0, 0, width - 3, buttonssize.height);
 	ui_component_setposition(&self->listview.component, 
 		0, buttonssize.height,
 		width - 3,
-		height - buttonssize.height - durationsize.height - 40 - 3);	
+		height - buttonssize.height - durationsize.height - 40 - 3);
+	AdjustScrollBars(&self->listview);
 	ui_component_setposition(&self->duration.component, 
 		0,
 		height - durationsize.height - 40,
@@ -300,6 +305,7 @@ void OnNewEntry(SequenceView* self)
 	sequence_insert(self->sequence, sequence_editposition(self->sequence), 
 		patterns_append(self->patterns, pattern));	
 	UpdateSequenceViewDuration(&self->duration);
+	AdjustScrollBars(&self->listview);
 }
 
 void OnInsertEntry(SequenceView* self)
@@ -311,6 +317,7 @@ void OnInsertEntry(SequenceView* self)
 	entry = sequenceposition_entry(&editposition);			
 	sequence_insert(self->sequence, editposition, entry ? entry->pattern :0);
 	UpdateSequenceViewDuration(&self->duration);
+	AdjustScrollBars(&self->listview);
 }
 
 void OnCloneEntry(SequenceView* self)
@@ -347,6 +354,7 @@ void OnDelEntry(SequenceView* self)
 		sequence_insert(self->sequence, position, 0);
 	}	
 	UpdateSequenceViewDuration(&self->duration);
+	AdjustScrollBars(&self->listview);
 }
 
 void OnIncPattern(SequenceView* self)
@@ -382,6 +390,7 @@ void OnNewTrack(SequenceView* self)
 	SequenceTrack* track = (SequenceTrack*)malloc(sizeof(SequenceTrack));
 	sequencetrack_init(track);
 	sequence_appendtrack(self->sequence, track);
+	AdjustScrollBars(&self->listview);
 	ui_invalidate(&self->component);	
 }
 
@@ -393,6 +402,7 @@ void OnDelTrack(SequenceView* self)
 	sequence_removetrack(self->sequence, position.track);
 	ui_invalidate(&self->component);	
 	UpdateSequenceViewDuration(&self->duration);
+	AdjustScrollBars(&self->listview);
 }
 
 void OnListViewMouseDown(SequenceListView* self, ui_component* sender, int x, int y, int button)
@@ -402,7 +412,7 @@ void OnListViewMouseDown(SequenceListView* self, ui_component* sender, int x, in
 
 	ComputeTextSizes(self);
 	selected = (y - listviewmargin - self->dy) / self->lineheight;
-	selectedtrack = x / self->trackwidth;
+	selectedtrack = (x - self->dx) / self->trackwidth;
 	if (selectedtrack < sequence_sizetracks(self->sequence)) {
 		SequencePosition position;
 
@@ -413,7 +423,40 @@ void OnListViewMouseDown(SequenceListView* self, ui_component* sender, int x, in
 
 void OnScroll(SequenceListView* self, ui_component* sender, int cx, int cy)
 {
-	self->dy += cy;
+	self->dx += cx;
+	self->dy += cy;	
+}
+
+void AdjustScrollBars(SequenceListView* self)
+{
+	ui_size size;
+
+	size = ui_component_size(&self->component);
+	ComputeTextSizes(self);
+	{ // vertical lines
+		int num;
+		int visi;
+		
+		num = sequence_maxtracksize(self->sequence);		
+		visi = size.height / self->lineheight;
+		self->component.scrollstepy = self->lineheight;
+		if (visi - num >= 0) {
+			self->dy = 0;		
+		}	
+		ui_component_setverticalscrollrange(&self->component, 0, num - visi);	
+	}	
+	{ // horizontal tracks
+		int num;
+		int visi;
+		
+		num = sequence_sizetracks(self->sequence);
+		visi = size.width / self->trackwidth;
+		self->component.scrollstepx = self->trackwidth;
+		if (visi - num >= 0) {
+			self->dx = 0;		
+		}	
+		ui_component_sethorizontalscrollrange(&self->component, 0, num - visi);	
+	}
 }
 
 void OnSongChanged(SequenceView* self, Workspace* workspace)

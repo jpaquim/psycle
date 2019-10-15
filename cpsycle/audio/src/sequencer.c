@@ -1,12 +1,15 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "sequencer.h"
 #include "pattern.h"
 #include <stdlib.h> 
 
 static void clearevents(Sequencer*);
 static void cleardelayed(Sequencer*);
+static void clearinputevents(Sequencer*);
 static void freeentries(List* events);
 static void maketrackiterators(Sequencer*, beat_t offset);
 static void cleartrackiterators(Sequencer*);
@@ -15,8 +18,9 @@ static void addsequenceevent(Sequencer*, SequenceTrackIterator*, beat_t offset);
 static void maketweakslideevents(Sequencer*, PatternEntry*);
 static int isoffsetinwindow(Sequencer*, beat_t offset);
 static void insertevents(Sequencer*);
-static void sequencerinsert(Sequencer*);
+static void insertinputevents(Sequencer*);
 static void insertdelayedevents(Sequencer*);
+static void sequencerinsert(Sequencer*);
 static void compute_beatsprosample(Sequencer*);
 static void notifysequencertick(Sequencer*, beat_t width);
 
@@ -34,6 +38,7 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->seqlinetickcount = 1.f / self->lpb;
 	self->events = 0;
 	self->delayedevents = 0;
+	self->inputevents = 0;
 	self->currtrackiterators = 0;
 	compute_beatsprosample(self);
 }
@@ -42,6 +47,7 @@ void sequencer_dispose(Sequencer* self)
 {
 	clearevents(self);
 	cleardelayed(self);
+	clearinputevents(self);
 	cleartrackiterators(self);
 	self->sequence = 0;
 	self->machines = 0;
@@ -180,6 +186,13 @@ void cleardelayed(Sequencer* self)
 	self->delayedevents = 0;	
 }
 
+void clearinputevents(Sequencer* self)
+{
+	freeentries(self->inputevents);
+	list_free(self->inputevents);
+	self->inputevents = 0;	
+}
+
 void freeentries(List* events)
 {
 	List* p;
@@ -197,10 +210,13 @@ void sequencer_frametick(Sequencer* self, unsigned int numframes)
 void sequencer_tick(Sequencer* self, beat_t width)
 {
 	if (self->playing) {
-		advanceposition(self, width);
-		clearevents(self);
+		advanceposition(self, width);		
+	}
+	clearevents(self);
+	insertinputevents(self);
+	if (self->playing) {
 		insertevents(self);
-		insertdelayedevents(self);
+		insertdelayedevents(self);		
 	}
 	notifysequencertick(self, width);
 	if (self->playing) {
@@ -406,6 +422,7 @@ void insertdelayedevents(Sequencer* self)
 	
 	for (p = self->delayedevents; p != 0; p = p->next) {
 		PatternEntry* delayed = (PatternEntry*)p->entry;
+
 		if (isoffsetinwindow(self, delayed->offset + delayed->delta)) {						
 			List* q;
 			int inserted = 0;
@@ -428,6 +445,26 @@ void insertdelayedevents(Sequencer* self)
 				break;
 			}
 		}		
+	}
+}
+
+void insertinputevents(Sequencer* self)
+{
+	List* p;
+	List* q;
+	
+	for (p = self->inputevents; p != 0; p = q) {
+		PatternEntry* entry = (PatternEntry*)p->entry;
+		
+		q = p->next;
+		entry->delta = 0;
+		list_append(&self->events, entry);
+		if (q) {
+			q->tail = self->inputevents->tail;
+			q->prev = 0;
+		}
+		self->inputevents = q;
+		free(p);		
 	}
 }
 
@@ -455,24 +492,37 @@ List* sequencer_timedevents(Sequencer* self, unsigned int slot,
 	unsigned int amount)
 {
 	List* rv = 0;
+	List* p;
 
-	if (sequencer_playing(self)) {
-		List* p;
+	rv = sequencer_machinetickevents(self, slot);
+	for (p = rv ; p != 0; p = p->next) {		
+		PatternEntry* entry;
+		beat_t beatsprosample;
+		unsigned int deltaframes;			
 
-		rv = sequencer_machinetickevents(self, slot);
-		for (p = rv ; p != 0; p = p->next) {		
-			PatternEntry* entry;
-			beat_t beatsprosample;
-			unsigned int deltaframes;			
-
-			entry = (PatternEntry*) p->entry;
-			beatsprosample = (entry->bpm * self->lpbspeed) / (self->samplerate * 60.0f);			
-			deltaframes = (unsigned int) (entry->delta / self->beatsprosample);
-			if (deltaframes >= amount) {
-				deltaframes = amount - 1;
-			}
-			entry->delta = (beat_t) deltaframes;						
-		}						
+		entry = (PatternEntry*) p->entry;
+		beatsprosample = (entry->bpm * self->lpbspeed) / (self->samplerate * 60.0f);			
+		deltaframes = (unsigned int) (entry->delta / self->beatsprosample);
+		if (deltaframes >= amount) {
+			deltaframes = amount - 1;
+		}
+		entry->delta = (beat_t) deltaframes;						
 	}
 	return rv;
+}
+
+void sequencer_addinputevent(Sequencer* self, const PatternEvent* event,
+	unsigned int track)
+{
+	if (event) {
+		PatternEntry* entry;
+	
+		entry = (PatternEntry*) malloc(sizeof(PatternEntry));
+			entry->event = *event;
+			entry->track = track;
+			entry->bpm = self->bpm;
+			entry->delta = 0;
+			entry->offset = 0;
+		list_append(&self->inputevents, entry);
+	}
 }

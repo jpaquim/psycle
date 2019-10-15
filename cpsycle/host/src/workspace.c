@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "workspace.h"
 #include "cmdsnotes.h"
 #include <exclusivelock.h>
@@ -17,7 +19,7 @@ static void workspace_makekeyboard(Workspace*);
 static void workspace_makedirectories(Workspace*);
 static void workspace_makenotes(Workspace*);
 static void workspace_makeinputoutput(Workspace*);
-static void workspace_makemidicontrollers(Workspace*);
+static void workspace_makemidi(Workspace*);
 static void workspace_makenoteinputs(Workspace*, Properties* notes);
 static void workspace_makelang(Workspace*);
 static void workspace_makelangen(Workspace*);
@@ -26,9 +28,12 @@ static int cmdnote(const char* key);
 static void applysongproperties(Workspace*);
 static Properties* workspace_makeproperties(Workspace*);
 static void workspace_setdriverlist(Workspace*);
+static void workspace_setmididriverlist(Workspace*);
 static void workspace_driverconfig(Workspace*);
+static void workspace_mididriverconfig(Workspace*);
 static const char* workspace_driverpath(Workspace*);
 static void workspace_configaudio(Workspace*);
+static void workspace_configmidi(Workspace*);
 static void workspace_configvisual(Workspace*);
 static void workspace_configkeyboard(Workspace*);
 static void workspace_setsong(Workspace*, Song*, int flag);
@@ -47,6 +52,7 @@ void workspace_init(Workspace* self)
 	signal_init(&self->signal_octavechanged);
 	self->cursorstep = 1;	
 	self->inputoutput = 0;
+	self->midi = 0;
 	workspace_makeconfig(self);
 	plugincatcher_init(&self->plugincatcher, self->directories);
 	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
@@ -80,12 +86,18 @@ void workspace_initplayer(Workspace* self)
 {
 	player_init(&self->player, self->song, self->mainhandle->hwnd);
 	workspace_driverconfig(self);
+	workspace_mididriverconfig(self);
 }
 	
 void workspace_configaudio(Workspace* self)
 {			
 	player_loaddriver(&self->player, workspace_driverpath(self));
 	workspace_driverconfig(self);	
+}
+
+void workspace_configmidi(Workspace* self)
+{	
+	workspace_mididriverconfig(self);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -144,6 +156,15 @@ void workspace_driverconfig(Workspace* self)
 	self->driverconfigure->children = self->player.driver->properties;	
 }
 
+void workspace_mididriverconfig(Workspace* self)
+{		
+	if (self->player.eventdriver) 
+	{
+		self->midiconfigure->item.disposechildren = 0;
+		self->midiconfigure->children = self->player.eventdriver->properties;	
+	}
+}
+
 void workspace_scanplugins(Workspace* self)
 {		
 	plugincatcher_scan(&self->plugincatcher);
@@ -158,7 +179,7 @@ void workspace_makeconfig(Workspace* self)
 	workspace_makekeyboard(self);
 	workspace_makedirectories(self);
 	workspace_makeinputoutput(self);
-	workspace_makemidicontrollers(self);	
+	workspace_makemidi(self);	
 }
 
 void workspace_makegeneral(Workspace* self)
@@ -321,13 +342,15 @@ void workspace_makeinputoutput(Workspace* self)
 		"Configure");		
 }
 
-void workspace_makemidicontrollers(Workspace* self)
-{
-	Properties* midicontrollers;
-		
-	midicontrollers = properties_settext(
+void workspace_makemidi(Workspace* self)
+{			
+	self->midi = properties_settext(
 		properties_createsection(self->config, "midicontrollers"),
 		"MIDI Controllers");
+	workspace_setmididriverlist(self);
+	self->midiconfigure = properties_settext(
+		properties_createsection(self->midi, "configure"),
+		"Configure");
 }
 
 void workspace_makenoteinputs(Workspace* self, Properties* notes)
@@ -454,11 +477,36 @@ void workspace_setdriverlist(Workspace* self)
 #endif
 }
 
+void workspace_setmididriverlist(Workspace* self)
+{
+	Properties* drivers;
+
+	properties_settext(self->midi, "Midi Input");
+	// change number to set startup driver, if no psycle.ini found
+	drivers = properties_append_choice(self->midi, "mididriver", 0); 
+	properties_settext(drivers, "Driver");
+	properties_append_string(drivers, "none", "none");		
+#if defined(DEBUG)
+	properties_append_string(drivers, "mme", "..\\driver\\mmemidi\\Debug\\mme.dll");	
+#else
+	properties_append_string(drivers, "mme", "..\\driver\\mmemidi\\Release\\mme.dll");	
+#endif
+}
+
 void workspace_configchanged(Workspace* self, Properties* property, Properties* choice)
 {
+	if (choice && (strcmp(properties_key(choice), "device") == 0)) {
+		if (properties_insection(property, self->midi)) {
+			player_restarteventdriver(&self->player);
+		}
+	} else
 	if (choice && (strcmp(properties_key(choice), "driver") == 0)) {
 		player_reloaddriver(&self->player, properties_valuestring(property));		
 		workspace_driverconfig(self);
+	} else
+	if (choice && (strcmp(properties_key(choice), "mididriver") == 0)) {
+		// player_reloaddriver(&self->player, properties_valuestring(property));		
+		workspace_mididriverconfig(self);
 	} else
 	if (strcmp(properties_key(property), "defaultfontsize") == 0) {
 		workspace_changedefaultfontsize(self, properties_value(property));
@@ -570,6 +618,7 @@ void workspace_load_configuration(Workspace* self)
 {	
 	properties_load(self->config, "psycle.ini", 0);	
 	workspace_configaudio(self);
+	workspace_configmidi(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
 	signal_emit(&self->signal_configchanged, self, 1,self->config);

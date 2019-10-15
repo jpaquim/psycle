@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "player.h"
 #include "exclusivelock.h"
 #include "math.h"
@@ -11,6 +13,7 @@
 #include <string.h>
 #include <rms.h>
 #include <multifilter.h>
+#include <windows.h>
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -24,11 +27,14 @@ static float bufferdriver[65535];
 static void* mainframe;
 
 static void player_initdriver(Player*);
+static void player_initeventdriver(Player*);
 static void player_initrms(Player*);
 static void player_initsignals(Player*);
 static void player_disposerms(Player*);
 static void player_unloaddriver(Player*);
+static void player_unloadeventdriver(Player * self);
 static float* Work(Player*, int* numsamples);
+static void WorkMidi(Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(Player*, unsigned int amount);
 static Buffer* player_mix(Player*, unsigned int slot, unsigned int amount);
 static void player_filldriver(Player*, float* buffer, unsigned int amount);
@@ -43,6 +49,7 @@ void player_init(Player* self, Song* song, void* handle)
 	sequencer_init(&self->sequencer, &song->sequence, &song->machines);
 	mainframe = handle;
 	player_initdriver(self);
+	player_initeventdriver(self);
 	player_initsignals(self);
 	player_initrms(self);	
 }
@@ -53,6 +60,13 @@ void player_initdriver(Player* self)
 	lock_init();
 	library_init(&self->drivermodule);
 	player_loaddriver(self, 0);		
+}
+
+void player_initeventdriver(Player* self)
+{
+	self->eventdriver = 0;
+	library_init(&self->eventdrivermodule);
+	player_loadeventdriver(self, "..\\driver\\mmemidi\\Debug\\mmemidi.dll");
 }
 
 void player_initsignals(Player* self)
@@ -71,6 +85,7 @@ void player_initrms(Player* self)
 void player_dispose(Player* self)
 {			
 	player_unloaddriver(self);
+	player_unloadeventdriver(self);
 	lock_dispose();	
 	signal_dispose(&self->signal_lpbchanged);
 	sequencer_dispose(&self->sequencer);		
@@ -120,6 +135,38 @@ void player_loaddriver(Player* self, const char* path)
 	self->driver->open(self->driver);
 }
 
+void player_loadeventdriver(Player* self, const char* path)
+{
+	EventDriver* eventdriver = 0;
+
+	player_unloadeventdriver(self);
+	if (path) {
+		library_load(&self->eventdrivermodule, path);
+		if (self->eventdrivermodule.module) {
+			pfneventdriver_create fpeventdrivercreate;
+
+			fpeventdrivercreate = (pfneventdriver_create)
+				library_functionpointer(&self->eventdrivermodule,
+					"eventdriver_create");
+			if (fpeventdrivercreate) {
+				eventdriver = fpeventdrivercreate();
+				eventdriver->init(eventdriver);
+				eventdriver->connect(eventdriver, self, WorkMidi, mainframe);
+			}
+			// lock_enable();
+		}
+	}
+	if (!eventdriver) {
+		// eventdriver = create_silent_driver();
+		// eventdriver->init(driver);
+		// lock_disable();
+	}
+	self->eventdriver = eventdriver;
+	if (self->eventdriver) {
+		self->eventdriver->open(self->eventdriver);
+	}
+}
+
 void player_unloaddriver(Player* self)
 {
 	if (self->driver) {
@@ -129,6 +176,17 @@ void player_unloaddriver(Player* self)
 		library_unload(&self->drivermodule);		
 	}
 	self->driver = 0;
+}
+
+void player_unloadeventdriver(Player* self)
+{
+	if (self->eventdriver) {
+		self->eventdriver->close(self->eventdriver);
+		self->eventdriver->dispose(self->eventdriver);
+		self->eventdriver->free(self->eventdriver);
+		library_unload(&self->eventdrivermodule);
+	}
+	self->eventdriver = 0;
 }
 
 void player_reloaddriver(Player* self, const char* path)
@@ -142,6 +200,13 @@ void player_restartdriver(Player* self)
 	self->driver->close(self->driver);	
 	self->driver->updateconfiguration(self->driver);
 	self->driver->open(self->driver);	
+}
+
+void player_restarteventdriver(Player* self)
+{	
+	self->eventdriver->close(self->eventdriver);	
+	self->eventdriver->updateconfiguration(self->eventdriver);
+	self->eventdriver->open(self->eventdriver);	
 }
 
 void player_setsong(Player* self, Song* song)
@@ -385,3 +450,35 @@ VUMeterMode player_vumetermode(Player* self)
 	return self->vumode;
 }
 
+void WorkMidi(Player* self, int cmd, unsigned char* data, unsigned int size)
+{
+//	char text[20];
+
+	// _snprintf(text, 20, "%02X %02X %02X %02X; ", data[0], data[1], data[2], data[3]);	
+	// MessageBox(0, text, "Midi In", MB_OK);
+	if (cmd == 1) {  // MIDI DATA
+		int lsb;
+		int msb;
+
+		lsb = data[0] & 0x0F;
+		msb = (data[0] & 0xF0) >> 4;
+
+		switch (msb) {
+			case 0x9:
+			{
+				// Note On/Off
+				PatternEvent event;
+
+				event.note = data[2] > 0 ? data[1] : NOTECOMMANDS_RELEASE;
+				event.inst = 255;
+				event.mach = lsb;
+				event.cmd = 0;
+				event.parameter = 0;
+
+				sequencer_addinputevent(&self->sequencer, &event, 0);				
+			}
+			default:
+			break;			
+		}
+	}
+}

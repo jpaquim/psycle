@@ -34,11 +34,13 @@ typedef struct {
 	Player player;	
 	Properties* config;
 	Properties* inputoutput;
+	Properties* midi;
 	Properties* keyboard;
 	Properties* directories;
 	Properties* properties;
 	Properties* lang;	
-	Properties* driverconfigure;	
+	Properties* driverconfigure;
+	Properties* midiconfigure;
 	PluginCatcher plugincatcher;
 	MachineFactory machinefactory;
 	int octave;

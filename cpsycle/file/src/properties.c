@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "properties.h"
 #include <malloc.h>
 #include <string.h>
@@ -10,16 +12,17 @@
 #include <errno.h>
 #include <assert.h>
 
-#define _strdup strdup
-
 static int properties_enumerate_rec(Properties*);
 static int OnSearchPropertiesEnum(Properties*, Properties*, int level);
+static int OnPropertySearchPropertiesEnum(Properties* self, 
+	Properties* property, int level);
 static int OnSaveIniEnum(RiffFile* file, Properties*, int level);
 static Properties* append(Properties* self, Properties* p);
 static Properties* tail(Properties*);
 static Properties* properties_findsectionex(Properties*, const char* key,
 	Properties** prev);
 void properties_sections(Properties*, char* text);
+
 
 static void* target;
 static PropertiesCallback callback;
@@ -375,6 +378,7 @@ int properties_enumerate_rec(Properties* self)
 
 static const char* searchkey;
 static Properties* keyfound;
+static Properties* searchproperty;
 
 Properties* properties_find(Properties* self, const char* key)
 {
@@ -393,11 +397,34 @@ int OnSearchPropertiesEnum(Properties* self, Properties* property, int level)
 	return 1;
 }
 
+int OnPropertySearchPropertiesEnum(Properties* self, Properties* property, int level)
+{
+	if (property == searchproperty) {
+		keyfound = property;
+		return 0;
+	}
+	return 1;
+}
+
 Properties* properties_findsection(Properties* self, const char* key)
 {
 	Properties* prev = 0;
 
 	return properties_findsectionex(self, key, &prev);
+}
+
+int properties_insection(Properties* self, Properties* section)
+{
+	int rv = 0;
+		
+	if (section) {				
+		keyfound = 0;
+		searchproperty = self;
+			
+		properties_enumerate(section, section, OnPropertySearchPropertiesEnum);
+		rv = keyfound != 0;		
+	}
+	return rv;
 }
 
 Properties* properties_findsectionex(Properties* self, const char* key,

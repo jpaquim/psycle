@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "sequence.h"
 #include <stdlib.h>
 
@@ -184,19 +186,16 @@ void sequence_reposition(Sequence* self, SequenceTrack* track)
 
 unsigned int sequence_size(Sequence* self, List* tracknode)
 {	
-	unsigned int c = 0;
+	unsigned int rv = 0;
 
 	if (tracknode) {
+		SequenceTrack* track;
 		List* p;
 
-		SequenceTrack* track = (SequenceTrack*)(tracknode->entry);		
-		p = track->entries;
-		while (p) {		
-			p = p->next;
-			++c;
-		}
+		track = (SequenceTrack*)(tracknode->entry);
+		for (p = track->entries; p != 0; p = p->next, ++rv);
 	}
-	return c;
+	return rv;
 }
 
 SequencePosition sequence_at(Sequence* self, unsigned int trackindex,
@@ -474,4 +473,20 @@ beat_t sequence_duration(Sequence* self)
 		t = t->next;
 	}
 	return duration;
+}
+
+unsigned int sequence_maxtracksize(Sequence* self)
+{
+	unsigned int rv = 0;	
+	SequenceTracks* t;
+		 
+	for (t = self->tracks; t != 0; t = t->next) {
+		unsigned int c;
+
+		c = sequence_size(self, t);
+		if (c > rv) {
+			rv = c;
+		}		
+	}
+	return rv;
 }
