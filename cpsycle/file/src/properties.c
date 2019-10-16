@@ -130,6 +130,17 @@ Properties* properties_create_int(const char* key, int value, int min, int max)
 	return p;
 }
 
+Properties* properties_append_action(Properties* self, const char* key)
+{			
+	Properties* p;
+	
+	p = properties_create_int(key, 0, 0, 0);
+	p->item.typ = PROPERTY_TYP_ACTION;
+	p->item.hint = PROPERTY_HINT_CHECK;
+	append(self, p);
+	return p;
+}
+
 Properties* properties_append_int(Properties* self, const char* key, int value, int min, int max)
 {			
 	return append(self, properties_create_int(key, value, min, max));	
@@ -626,10 +637,11 @@ int OnSaveIniEnum(RiffFile* file, Properties* property, int level)
 				rifffile_write(file, sections, strlen(sections));
 			}
 			rifffile_write(file, "]", 1);
-		} else {			
+		} else 
+		if (property->item.typ != PROPERTY_TYP_ACTION) {			
 			rifffile_write(file, property->item.key, strlen(property->item.key));
 			rifffile_write(file, "=", strlen("="));
-			switch (property->item.typ) {
+			switch (property->item.typ) {				
 				case PROPERTY_TYP_INTEGER:
 					_snprintf(text, 40, "%d", property->item.value.i);
 					rifffile_write(file, text, strlen(text));
@@ -732,4 +744,30 @@ PropertyHint properties_hint(Properties* self)
 
 Properties* properties_next(Properties* self) {
 	return self->next;
+}
+
+Properties* properties_remove(Properties* self, Properties* property)
+{
+	Properties* p;
+	Properties* q;
+
+	p = self->children;	
+	q = 0;
+	while (p != 0) {		
+		if (p == property) {			
+			if (q) {
+				q->next = p->next;
+			}
+			properties_free(p);
+		}		
+		q = p;
+		p = p->next;
+	}
+	return q;
+}
+
+void properties_clear(Properties* self)
+{			
+	properties_free(self->children);	
+	self->children = 0;
 }

@@ -8,6 +8,7 @@
 #include "skincoord.h"
 #include "tabbar.h"
 #include "workspace.h"
+#include <inputmap.h>
 
 #include <pattern.h>
 
@@ -94,7 +95,6 @@ typedef struct {
    double bpl;
    double cbpl;
    PatternNode* curr_event;
-   Inputs* noteinputs;
    NotesTabMode notestabmode;
    TrackerCursor cursor;
    beat_t cursorstep;   

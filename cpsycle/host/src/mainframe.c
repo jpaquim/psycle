@@ -57,9 +57,7 @@ void mainframe_init(MainFrame* self)
 	ui_frame_init(&self->component, 0);			
 	ui_component_enablealign(&self->component);	
 	self->resize = 0;
-	workspace_init(&self->workspace);
-	self->workspace.mainhandle = &self->component;
-	workspace_initplayer(&self->workspace);
+	workspace_init(&self->workspace, &self->component);	
 	workspace_load_configuration(&self->workspace);
 	if (!workspace_hasplugincache(&self->workspace)) {
 		workspace_scanplugins(&self->workspace);
@@ -102,7 +100,6 @@ void mainframe_init(MainFrame* self)
 	InitSamplesView(&self->samplesview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
-	self->instrumentsview.sampulseview.notemapedit.noteinputs = workspace_noteinputs(&self->workspace);
 	InitSongProperties(&self->songproperties, &self->notebook.component, &self->workspace);	
 	InitSettingsView(&self->settingsview, &self->notebook.component,
 		&self->tabbars, self->workspace.config);	
@@ -352,21 +349,22 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
 		MachineViewApplyProperties(&self->machineview, properties);
 		properties_free(properties);
-	} else {
-		int cmd;		
-		cmd = inputs_cmd(workspace_noteinputs(&self->workspace), keycode);
-		if (cmd != -1) {
-			Machine* machine;
-			int base;
-			base = 48;
-			machine = machines_at(&self->workspace.song->machines,
-				self->workspace.song->machines.slot);
-			if (machine) {				
-				PatternEvent event = { cmd + base, 0, 0, 0, 0 };
-				machine->seqtick(machine, 0, &event);
-			}
-		}
-	}		
+	} else {				
+		EventDriver* kbd;
+			
+		kbd = workspace_kbddriver(&self->workspace);
+		kbd->write(kbd, (unsigned char*)&keycode, 4);
+
+		/*Machine* machine;
+		int base;
+		base = 48;
+		machine = machines_at(&self->workspace.song->machines,
+			self->workspace.song->machines.slot);
+		if (machine) {				
+			PatternEvent event = { cmd + base, 0, 0, 0, 0 };
+			machine->seqtick(machine, 0, &event);
+		}*/				
+	}
 }
 
 void OnTimer(MainFrame* self, ui_component* sender, int timerid)

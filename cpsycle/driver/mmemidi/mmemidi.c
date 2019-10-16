@@ -9,14 +9,6 @@
 
 #define DEVICE_NONE 0
 
-typedef struct {			
-	HANDLE Handle;
-	unsigned char *pData;
-	WAVEHDR *pHeader;
-	HANDLE HeaderHandle;
-	int Prepared;
-} CBlock;
-
 typedef struct {
 	EventDriver driver;	
 	HMIDIIN hMidiIn;
@@ -38,7 +30,6 @@ static void init_properties(EventDriver* self);
 static void apply_properties(MmeMidiDriver* self);
 
 static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
-
 
 int onerror(int err, const char* msg)
 {

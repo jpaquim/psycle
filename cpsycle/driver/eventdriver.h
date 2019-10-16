@@ -33,6 +33,7 @@ typedef struct EventDriver {
 	int (*close)(struct EventDriver*);
 	void (*connect)(struct EventDriver*, void* context, EVENTDRIVERWORKFN callback, void* handle);
 	unsigned int (*samplerate)(struct EventDriver*);
+	void (*write)(struct EventDriver*, unsigned char* data, int size);
 	int (*error)(int, const char*);
 } EventDriver;
 

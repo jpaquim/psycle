@@ -25,6 +25,7 @@ static void DrawKey(SettingsView*, Properties*, int column);
 static void DrawValue(SettingsView*, Properties*, int column);
 static void DrawString(SettingsView*, Properties*, int column);
 static void DrawInteger(SettingsView*, Properties*, int column);
+static void DrawButton(SettingsView*, Properties*, int column);
 static void DrawCheckBox(SettingsView*, Properties*, int column);
 static void AdvanceLine(SettingsView*);
 static void AddRemoveIdent(SettingsView*, int level);
@@ -119,7 +120,7 @@ int OnPropertiesDrawEnum(SettingsView* self, Properties* property, int level)
 	if (properties_type(property) == PROPERTY_TYP_CHOICE) {
 		self->currchoice = properties_value(property);
 		self->choicecount = 0;					
-	}	
+	}		
 	DrawLineBackground(self, property);						
 	DrawKey(self, property, 0);	
 	DrawValue(self, property, 1);
@@ -166,12 +167,16 @@ void DrawLineBackground(SettingsView* self, Properties* property)
 }
 
 void DrawKey(SettingsView* self, Properties* property, int column)
-{
-	ui_textout(self->g,
+{	
+	if (properties_type(property) == PROPERTY_TYP_ACTION) {
+		DrawButton(self, property, column + 1);
+	} else {
+		ui_textout(self->g,
 		self->cpx + column * self->columnwidth,
 		self->cpy + self->dy,
 		properties_text(property),
 		strlen(properties_text(property)));
+	}
 }
 
 void DrawValue(SettingsView* self, Properties* property, int column)
@@ -224,6 +229,24 @@ void AdvanceLine(SettingsView* self)
 	self->cpy += self->lineheight;
 }
 
+void DrawButton(SettingsView* self, Properties* property, int column)
+{
+	ui_size size;
+	ui_rectangle r;	
+	ui_textout(self->g, self->columnwidth * column + 3, self->cpy + self->dy,
+		properties_text(property),
+		strlen(properties_text(property)));
+	ui_setbackgroundcolor(self->g, 0x003E3E3E);
+	ui_setbackgroundmode(self->g, TRANSPARENT);
+	ui_settextcolor(self->g, 0x00CACACA);	
+	size = ui_component_textsize(&self->client, properties_text(property));
+	r.left = self->columnwidth * column ;
+	r.top = self->cpy + self->dy ;
+	r.right = r.left + size.width + 6;
+	r.bottom = r.top + size.height + 2;
+	ui_drawrectangle(self->g, r);
+}
+
 void DrawCheckBox(SettingsView* self, Properties* property, int column)
 {
 	ui_rectangle r;
@@ -274,6 +297,9 @@ void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int but
 		} else
 		if (properties_type(self->selected) == PROPERTY_TYP_BOOL) {
 			self->selected->item.value.i = self->selected->item.value.i == 0;
+			signal_emit(&self->signal_changed, self, 1, self->selected);
+		} else
+		if (properties_type(self->selected) == PROPERTY_TYP_ACTION) {			
 			signal_emit(&self->signal_changed, self, 1, self->selected);
 		}
 	}
@@ -350,7 +376,8 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 		rv = Intersects(&r, self->mx, self->my);
 	} else
 	if (properties_type(property) == PROPERTY_TYP_INTEGER ||
-			properties_type(property) == PROPERTY_TYP_STRING) {
+		properties_type(property) == PROPERTY_TYP_STRING ||
+		properties_type(property) == PROPERTY_TYP_ACTION) {
 		ui_rectangle r;
 		ui_setrectangle(&r, self->columnwidth * column, 
 			self->cpy + self->dy, 300, self->lineheight);
