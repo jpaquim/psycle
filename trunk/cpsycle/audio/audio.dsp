@@ -153,6 +153,10 @@ SOURCE=.\src\exclusivelock.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\inputmap.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\instrument.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -176,6 +180,10 @@ SOURCE=.\src\instruments.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\kbddriver.c
 # End Source File
 # Begin Source File
 
@@ -544,11 +552,19 @@ SOURCE=.\src\exclusivelock.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\inputmap.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\instrument.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\instruments.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\kbddriver.h
 # End Source File
 # Begin Source File
 

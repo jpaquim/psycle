@@ -12,7 +12,8 @@ typedef enum {
 	PROPERTY_TYP_BOOL,	
 	PROPERTY_TYP_CHOICE,
 	PROPERTY_TYP_USERDATA,
-	PROPERTY_TYP_SECTION
+	PROPERTY_TYP_SECTION,
+	PROPERTY_TYP_ACTION
 } PropertyType;
 
 typedef enum {
@@ -21,7 +22,7 @@ typedef enum {
 	PROPERTY_HINT_EDITDIR,
 	PROPERTY_HINT_INPUT,
 	PROPERTY_HINT_LIST,
-	PROPERTY_HINT_CHECK,
+	PROPERTY_HINT_CHECK	
 } PropertyHint;
 
 typedef struct {
@@ -65,6 +66,7 @@ Properties* properties_append_userdata(Properties*, const char* key,
 Properties* properties_append_int(Properties*, const char* key, int value, int min, int max);
 Properties* properties_append_bool(Properties*, const char* key, int value);
 Properties* properties_append_double(Properties*, const char* key, double value, double min, double max);
+Properties* properties_append_action(Properties*, const char* key);
 Properties* properties_read(Properties*, const char* key);
 int properties_int(Properties*, const char* key, int defaultvalue);
 int properties_bool(Properties*, const char* key, int defaultvalue);
@@ -92,5 +94,7 @@ Properties* properties_sethint(Properties*, PropertyHint);
 int properties_ischoiceitem(Properties*);
 PropertyHint properties_hint(Properties*);
 Properties* properties_next(Properties*);
+Properties* properties_remove(Properties*, Properties*);
+void properties_clear(Properties*);
 
 #endif

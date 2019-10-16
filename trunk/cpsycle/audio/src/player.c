@@ -8,6 +8,7 @@
 #include "math.h"
 #include "master.h"
 #include "silentdriver.h"
+#include "kbddriver.h"
 #include <operations.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,19 +29,20 @@ static void* mainframe;
 
 static void player_initdriver(Player*);
 static void player_initeventdriver(Player*);
+static void player_initkbddriver(Player*);
 static void player_initrms(Player*);
 static void player_initsignals(Player*);
 static void player_disposerms(Player*);
 static void player_unloaddriver(Player*);
-static void player_unloadeventdriver(Player * self);
+static void player_unloadeventdrivers(Player*);
 static float* Work(Player*, int* numsamples);
-static void WorkMidi(Player*, int cmd, unsigned char* data, unsigned int size);
+static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(Player*, unsigned int amount);
 static Buffer* player_mix(Player*, unsigned int slot, unsigned int amount);
 static void player_filldriver(Player*, float* buffer, unsigned int amount);
 static RMSVol* player_rmsvol(Player*, unsigned int slot);
 static void player_resetvumeters(Player*);
-static void erase_all_nans_infinities_and_denormals(float * sample);
+static EventDriverEntry* player_eventdriverentry(Player*, int id);
 
 void player_init(Player* self, Song* song, void* handle)
 {			
@@ -56,7 +58,7 @@ void player_init(Player* self, Song* song, void* handle)
 
 void player_initdriver(Player* self)
 {	
-	self->driver = 0;
+	self->driver = 0;	
 	lock_init();
 	library_init(&self->drivermodule);
 	player_loaddriver(self, 0);		
@@ -64,15 +66,16 @@ void player_initdriver(Player* self)
 
 void player_initeventdriver(Player* self)
 {
-	self->eventdriver = 0;
-	library_init(&self->eventdrivermodule);
-	player_loadeventdriver(self, "..\\driver\\mmemidi\\Debug\\mmemidi.dll");
+	self->eventdrivers = 0;	
+	self->kbddriver = 0;
+	player_initkbddriver(self);	
 }
 
 void player_initsignals(Player* self)
 {
 	signal_init(&self->signal_numsongtrackschanged);
 	signal_init(&self->signal_lpbchanged);
+	signal_init(&self->signal_inputevent);
 }
 
 void player_initrms(Player* self)
@@ -85,9 +88,11 @@ void player_initrms(Player* self)
 void player_dispose(Player* self)
 {			
 	player_unloaddriver(self);
-	player_unloadeventdriver(self);
+	player_unloadeventdrivers(self);
 	lock_dispose();	
+	signal_dispose(&self->signal_numsongtrackschanged);
 	signal_dispose(&self->signal_lpbchanged);
+	signal_dispose(&self->signal_inputevent);
 	sequencer_dispose(&self->sequencer);		
 	player_disposerms(self);
 }
@@ -137,34 +142,55 @@ void player_loaddriver(Player* self, const char* path)
 
 void player_loadeventdriver(Player* self, const char* path)
 {
-	EventDriver* eventdriver = 0;
-
-	player_unloadeventdriver(self);
+	EventDriver* eventdriver = 0;	
+	
 	if (path) {
-		library_load(&self->eventdrivermodule, path);
-		if (self->eventdrivermodule.module) {
-			pfneventdriver_create fpeventdrivercreate;
-
-			fpeventdrivercreate = (pfneventdriver_create)
-				library_functionpointer(&self->eventdrivermodule,
-					"eventdriver_create");
-			if (fpeventdrivercreate) {
-				eventdriver = fpeventdrivercreate();
-				eventdriver->init(eventdriver);
-				eventdriver->connect(eventdriver, self, WorkMidi, mainframe);
+		if (strcmp(path, "kbd") == 0) {
+			if (!self->kbddriver) {
+				player_initkbddriver(self);
 			}
-			// lock_enable();
+		} else {
+			Library* library;
+
+			library = malloc(sizeof(Library));
+			library_init(library);
+			library_load(library, path);
+			if (library->module) {
+				pfneventdriver_create fpeventdrivercreate;
+
+				fpeventdrivercreate = (pfneventdriver_create)
+					library_functionpointer(library, "eventdriver_create");
+				if (fpeventdrivercreate) {
+					EventDriverEntry* eventdriverentry;
+
+					eventdriver = fpeventdrivercreate();
+					eventdriver->init(eventdriver);
+					eventdriver->connect(eventdriver, self, workeventinput, mainframe);
+					eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry*));
+					eventdriverentry->eventdriver = eventdriver;
+					eventdriverentry->library = library;
+					list_append(&self->eventdrivers, eventdriverentry);				
+					eventdriver->open(eventdriver);
+				}
+			}
 		}
 	}
-	if (!eventdriver) {
-		// eventdriver = create_silent_driver();
-		// eventdriver->init(driver);
-		// lock_disable();
-	}
-	self->eventdriver = eventdriver;
-	if (self->eventdriver) {
-		self->eventdriver->open(self->eventdriver);
-	}
+}
+
+void player_initkbddriver(Player* self)
+{
+	EventDriver* eventdriver;
+	EventDriverEntry* eventdriverentry;
+
+	eventdriver = create_kbd_driver();
+	eventdriver->init(eventdriver);
+	self->kbddriver = eventdriver;
+	eventdriver->connect(eventdriver, self, workeventinput, mainframe);
+
+	eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry*));
+	eventdriverentry->eventdriver = eventdriver;
+	eventdriverentry->library = 0;
+	list_append(&self->eventdrivers, eventdriverentry);	
 }
 
 void player_unloaddriver(Player* self)
@@ -176,17 +202,6 @@ void player_unloaddriver(Player* self)
 		library_unload(&self->drivermodule);		
 	}
 	self->driver = 0;
-}
-
-void player_unloadeventdriver(Player* self)
-{
-	if (self->eventdriver) {
-		self->eventdriver->close(self->eventdriver);
-		self->eventdriver->dispose(self->eventdriver);
-		self->eventdriver->free(self->eventdriver);
-		library_unload(&self->eventdrivermodule);
-	}
-	self->eventdriver = 0;
 }
 
 void player_reloaddriver(Player* self, const char* path)
@@ -202,12 +217,67 @@ void player_restartdriver(Player* self)
 	self->driver->open(self->driver);	
 }
 
-void player_restarteventdriver(Player* self)
+void player_restarteventdriver(Player* self, int id)
 {	
-	self->eventdriver->close(self->eventdriver);	
-	self->eventdriver->updateconfiguration(self->eventdriver);
-	self->eventdriver->open(self->eventdriver);	
+	EventDriver* eventdriver;
+
+	eventdriver = player_eventdriver(self, id);
+	if (eventdriver) {
+		eventdriver->close(eventdriver);	
+		eventdriver->updateconfiguration(eventdriver);
+		eventdriver->open(eventdriver);	
+	}
 }
+
+void player_removeeventdriver(Player * self, int id)
+{
+	EventDriver* eventdriver;
+
+	eventdriver = player_eventdriver(self, id);	
+	if (eventdriver) {
+		EventDriverEntry* eventdriverentry;
+		List* p;
+
+		eventdriver->close(eventdriver);
+		eventdriver->dispose(eventdriver);
+		eventdriver->free(eventdriver);
+		if (eventdriver == self->kbddriver) {
+			self->kbddriver = 0;
+		}
+		eventdriverentry = player_eventdriverentry(self, id);
+		if (eventdriverentry && eventdriverentry->library) {
+			library_unload(eventdriverentry->library);
+		}
+		for (p = self->eventdrivers; p != 0; p = p->next) {
+			if (((EventDriverEntry*)p->entry)->eventdriver == eventdriver) {
+				list_remove(&self->eventdrivers, p);
+				break;
+			}
+		}		
+	}
+}
+
+void player_unloadeventdrivers(Player* self)
+{
+	List* p;	
+
+	for (p = self->eventdrivers; p != 0; p = p->next) {
+		EventDriverEntry* eventdriverentry;
+		EventDriver* eventdriver;
+		
+		eventdriverentry = (EventDriverEntry*)p->entry;
+		eventdriver = eventdriverentry->eventdriver;
+		eventdriver->close(eventdriver);
+		eventdriver->dispose(eventdriver);
+		eventdriver->free(eventdriver);
+		if (eventdriverentry && eventdriverentry->library) {
+			library_unload(eventdriverentry->library);
+		}
+	}
+	list_free(self->eventdrivers);
+	self->eventdrivers = 0;
+}
+
 
 void player_setsong(Player* self, Song* song)
 {
@@ -450,7 +520,7 @@ VUMeterMode player_vumetermode(Player* self)
 	return self->vumode;
 }
 
-void WorkMidi(Player* self, int cmd, unsigned char* data, unsigned int size)
+void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int size)
 {
 //	char text[20];
 
@@ -475,10 +545,57 @@ void WorkMidi(Player* self, int cmd, unsigned char* data, unsigned int size)
 				event.cmd = 0;
 				event.parameter = 0;
 
-				sequencer_addinputevent(&self->sequencer, &event, 0);				
+				sequencer_addinputevent(&self->sequencer, &event, 0);
+				signal_emit(&self->signal_inputevent, self, 1, &event);
 			}
 			default:
 			break;			
 		}
-	}
+	} else
+	if (cmd == 2) { 
+		PatternEvent event;
+
+		event.note = data[0];
+		event.inst = 255;
+		event.mach = 0;
+		event.cmd = 0;
+		event.parameter = 0;
+
+		sequencer_addinputevent(&self->sequencer, &event, 0);
+		signal_emit(&self->signal_inputevent, self, 1, &event);
+	}	
+}
+
+EventDriver* player_kbddriver(Player* self)
+{
+	return self->kbddriver;
+}
+
+EventDriver* player_eventdriver(Player* self, int id) 
+{
+	List* p;
+	int c = 0;
+
+	for (p = self->eventdrivers; p != 0 && id != c; p = p->next, ++c);
+	
+	return p ? ((EventDriverEntry*) (p->entry))->eventdriver : 0;
+}
+
+unsigned int player_numeventdrivers(Player* self)
+{
+	int rv = 0;
+	List* p;
+	
+	for (p = self->eventdrivers; p != 0; p = p->next, ++rv);
+	return rv;
+}
+
+EventDriverEntry* player_eventdriverentry(Player* self, int id)
+{
+	List* p;
+	int c = 0;
+
+	for (p = self->eventdrivers; p != 0 && id != c; p = p->next, ++c);
+	
+	return p ? ((EventDriverEntry*) (p->entry)) : 0;
 }

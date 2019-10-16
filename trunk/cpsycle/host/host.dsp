@@ -140,10 +140,6 @@ SOURCE=.\src\inputdefiner.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\inputmap.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\instrumentsbox.c
 # End Source File
 # Begin Source File
@@ -353,10 +349,6 @@ SOURCE=.\src\helpview.h
 # Begin Source File
 
 SOURCE=.\src\inputdefiner.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\inputmap.h
 # End Source File
 # Begin Source File
 

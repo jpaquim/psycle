@@ -28,8 +28,6 @@ static void SetDefaultSkin(TrackerGrid*);
 static void OnMouseDown(TrackerGrid*, ui_component* sender, int x, int y, int button);
 static void ClipBlock(TrackerGrid*, ui_graphics*, TrackerGridBlock* block);
 static void DrawDigit(TrackerGrid*, ui_graphics*, int digit, int col, int x, int y);
-static void HandlePatternEventInput(TrackerView*, unsigned int keycode,
-	int shift, int ctrl);
 static void InputNote(TrackerView*, note_t note);
 static void InputDigit(TrackerView*, int value);
 static void EnterDigitColumn(PatternEvent*, int column, int value);
@@ -58,6 +56,7 @@ static void OnConfigChanged(TrackerView*, Workspace*, Properties*);
 static void ReadConfig(TrackerView* self);
 static PatternNode* FindNode(Pattern*, unsigned int track, beat_t offset,
 	unsigned int subline, float bpl, PatternNode** prev);
+static void OnInputEvent(TrackerView* self, Player* sender, PatternEvent* event);
 
 static void InitTrackerInputs(TrackerView*);
 
@@ -721,25 +720,20 @@ void OnKeyDown(TrackerView* self, ui_component* sender, int keycode, int keydata
 			ui_invalidate(&self->component);			
 		}	
 	} else {
-		HandlePatternEventInput(self, 
-			keycode, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+		if (self->grid.cursor.col != TRACKER_COLUMN_NOTE) {
+			InputDigit(self, chartoint((char)keycode));
+		}
+		// HandlePatternEventInput(self, 
+		// 	keycode, GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 	}	
 	ui_component_propagateevent(sender);
 }
 
-void HandlePatternEventInput(TrackerView* self, unsigned int keycode,
-	int shift, int ctrl)
+void OnInputEvent(TrackerView* self, Player* sender, PatternEvent* event)
 {
-	if (self->grid.cursor.col == TRACKER_COLUMN_NOTE) {
-		int cmd;
-
-		cmd = inputs_cmd(self->grid.noteinputs, encodeinput(keycode, shift, ctrl));
-		if (cmd != -1) {
-			InputNote(self, NoteCmdToNote(self, cmd));
-		}
-	} else {								
-		InputDigit(self, chartoint((char)keycode));			
-	}		
+	if (self->grid.cursor.col == TRACKER_COLUMN_NOTE) {			
+		InputNote(self, event->note);		
+	}
 }
 
 unsigned char NoteCmdToNote(TrackerView* self, int cmd)
@@ -930,7 +924,6 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->header.trackwidth = self->skin.headercoords.background.destwidth;
 	self->linenumbers.skin = &self->skin;
 	InitTrackerGrid(&self->grid, &self->component, self, &workspace->player);
-	self->grid.noteinputs = workspace_noteinputs(workspace);
 	InitTrackerLineNumbersLabel(&self->linenumberslabel, &self->component, self);	
 	InitTrackerLineNumbers(&self->linenumbers, &self->component);
 	self->linenumbers.view = self;
@@ -957,6 +950,7 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->grid.component.scrollstepx = self->grid.trackwidth;
 	SetTimer(self->component.hwnd, TIMERID_TRACKERVIEW, 200, 0);
 	signal_connect(&workspace->signal_configchanged, self, OnConfigChanged);
+	signal_connect(&workspace->player.signal_inputevent, self, OnInputEvent);
 	ShowLineNumbers(self, workspace_showlinenumbers(workspace));
 }
 

@@ -12,7 +12,6 @@
 #include <machinefactory.h>
 #include <uicomponent.h>
 #include "undoredo.h"
-#include "inputmap.h"
 #include <sequence.h>
 
 enum {
@@ -49,16 +48,14 @@ typedef struct {
 	Signal signal_configchanged;
 	Signal signal_editpositionchanged;	
 	ui_component* mainhandle;
-	UndoRedo undoredo;
-	Inputs noteinputs;
+	UndoRedo undoredo;	
 	EditPosition editposition;
 	int cursorstep;
 	int hasplugincache;
 } Workspace;
 
-void workspace_init(Workspace*);
+void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
-void workspace_initplayer(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
@@ -76,12 +73,12 @@ void workspace_configchanged(Workspace*, Properties* property,
 	Properties* choice);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
-Inputs* workspace_noteinputs(Workspace*);
 void workspace_seteditposition(Workspace*, EditPosition);
 EditPosition workspace_editposition(Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 const char* workspace_translate(Workspace*, const char* key);
 int workspace_hasplugincache(Workspace*);
+EventDriver* workspace_kbddriver(Workspace*);
 
 #endif

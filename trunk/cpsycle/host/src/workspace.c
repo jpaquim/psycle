@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void workspace_initplayer(Workspace*);
 static void workspace_makeconfig(Workspace*);
 static void workspace_makegeneral(Workspace*);
 static void workspace_makenotes(Workspace*);
@@ -20,20 +21,18 @@ static void workspace_makedirectories(Workspace*);
 static void workspace_makenotes(Workspace*);
 static void workspace_makeinputoutput(Workspace*);
 static void workspace_makemidi(Workspace*);
-static void workspace_makenoteinputs(Workspace*, Properties* notes);
 static void workspace_makelang(Workspace*);
 static void workspace_makelangen(Workspace*);
 static void workspace_makelanges(Workspace*);
-static int cmdnote(const char* key);
 static void applysongproperties(Workspace*);
 static Properties* workspace_makeproperties(Workspace*);
 static void workspace_setdriverlist(Workspace*);
-static void workspace_setmididriverlist(Workspace*);
 static void workspace_driverconfig(Workspace*);
-static void workspace_mididriverconfig(Workspace*);
+static void workspace_mididriverconfig(Workspace*, int deviceid);
+static void workspace_updatemididriverlist(Workspace*);
 static const char* workspace_driverpath(Workspace*);
+static const char* workspace_eventdriverpath(Workspace*);
 static void workspace_configaudio(Workspace*);
-static void workspace_configmidi(Workspace*);
 static void workspace_configvisual(Workspace*);
 static void workspace_configkeyboard(Workspace*);
 static void workspace_setsong(Workspace*, Song*, int flag);
@@ -46,25 +45,27 @@ static Samples* machinecallback_samples(Workspace*);
 static Machines* machinecallback_machines(Workspace*);
 static Instruments* machinecallback_instruments(Workspace*);
 
-void workspace_init(Workspace* self)
+void workspace_init(Workspace* self, void* handle)
 {	
 	self->octave = 4;
 	signal_init(&self->signal_octavechanged);
 	self->cursorstep = 1;	
 	self->inputoutput = 0;
 	self->midi = 0;
+	self->mainhandle = handle;
 	workspace_makeconfig(self);
 	plugincatcher_init(&self->plugincatcher, self->directories);
 	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
 	machinefactory_init(&self->machinefactory, machinecallback(self), 
 		&self->plugincatcher);
 	self->song = (Song*) malloc(sizeof(Song));
-	song_init(self->song, &self->machinefactory);	
+	song_init(self->song, &self->machinefactory);
 	self->properties = workspace_makeproperties(self);		
 	undoredo_init(&self->undoredo);
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
 	signal_init(&self->signal_editpositionchanged);
+	workspace_initplayer(self);
 }
 
 void workspace_dispose(Workspace* self)
@@ -86,18 +87,14 @@ void workspace_initplayer(Workspace* self)
 {
 	player_init(&self->player, self->song, self->mainhandle->hwnd);
 	workspace_driverconfig(self);
-	workspace_mididriverconfig(self);
+	workspace_updatemididriverlist(self);
+	workspace_mididriverconfig(self, 0);
 }
 	
 void workspace_configaudio(Workspace* self)
 {			
 	player_loaddriver(&self->player, workspace_driverpath(self));
 	workspace_driverconfig(self);	
-}
-
-void workspace_configmidi(Workspace* self)
-{	
-	workspace_mididriverconfig(self);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -115,14 +112,7 @@ void workspace_configvisual(Workspace* self)
 }
 
 void workspace_configkeyboard(Workspace* self)
-{	
-	Properties* notes;
-
-	notes = properties_findsection(self->config, "keyboard.notes");
-	if (notes) {
-		inputs_dispose(&self->noteinputs);
-		workspace_makenoteinputs(self, notes);		
-	}
+{			
 }
 
 const char* workspace_driverpath(Workspace* self)
@@ -150,18 +140,47 @@ const char* workspace_driverpath(Workspace* self)
 	return rv;
 }
 
+const char* workspace_eventdriverpath(Workspace* self)
+{
+	Properties* p;
+	const char* rv = 0;
+
+	p = properties_read(self->midi, "driver");
+	if (p) {
+		int choice;		
+		int count;
+		
+		choice = properties_value(p);
+		p = p->children;
+		count = 0;
+		while (p) {
+			if (count == choice) {
+				rv = properties_valuestring(p);
+				break;
+			}
+			p = properties_next(p);
+			++count;
+		}
+	}
+	return rv;
+}
+
 void workspace_driverconfig(Workspace* self)
 {		
 	self->driverconfigure->item.disposechildren = 0;
 	self->driverconfigure->children = self->player.driver->properties;	
 }
 
-void workspace_mididriverconfig(Workspace* self)
-{		
-	if (self->player.eventdriver) 
-	{
+void workspace_mididriverconfig(Workspace* self, int driverid)
+{	
+	EventDriver* eventdriver;
+	
+	eventdriver = player_eventdriver(&self->player, driverid);
+	if (eventdriver) {	
 		self->midiconfigure->item.disposechildren = 0;
-		self->midiconfigure->children = self->player.eventdriver->properties;	
+		self->midiconfigure->children = eventdriver->properties;	
+	} else {
+		self->midiconfigure->children = 0;	
 	}
 }
 
@@ -263,53 +282,6 @@ void workspace_makekeyboard(Workspace* self)
 	self->keyboard = properties_settext(
 		properties_createsection(self->config, "keyboard"),
 		"Keyboard and Misc.");
-	workspace_makenotes(self);
-}
-
-void workspace_makenotes(Workspace* self)
-{
-	Properties* notes;
-	Properties* p;
-
-	notes = properties_createsection(self->keyboard, "notes");
-	properties_settext(notes, "Notes");
-	properties_append_int(notes, "cmd_note_c_0", encodeinput('Z', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_cs0", encodeinput('S', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_d_0", encodeinput('X', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_ds0", encodeinput('D', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_e_0", encodeinput('C', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_f_0", encodeinput('V', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_fs0", encodeinput('G', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_g_0", encodeinput('B', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_gs0", encodeinput('H', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_a_0", encodeinput('N', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_as0", encodeinput('J', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_b_0", encodeinput('M', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_c_1", encodeinput('Q', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_cs1", encodeinput('2', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_d_1", encodeinput('W', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_ds1", encodeinput('3', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_e_1", encodeinput('E', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_f_1", encodeinput('R', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_fs1", encodeinput('5', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_g_1", encodeinput('T', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_gs1", encodeinput('6', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_a_1", encodeinput('Y', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_as1", encodeinput('7', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_b_1", encodeinput('U', 0, 0), 0, 0);		
-	properties_append_int(notes, "cmd_note_c_2", encodeinput('I', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_cs2", encodeinput('9', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_d_2", encodeinput('O', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_ds2", encodeinput('0', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_e_2", encodeinput('P', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_stop", encodeinput('1', 0, 0), 0, 0);
-	// special
-	properties_append_int(notes, "cmd_note_tweakm", encodeinput(192, 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_tweaks", encodeinput(192, 0, 1), 0, 0);
-	for (p = notes->children; p != 0; p = properties_next(p)) {
-		properties_sethint(p, PROPERTY_HINT_INPUT);
-	}
-	workspace_makenoteinputs(self, notes);
 }
 
 void workspace_makedirectories(Workspace* self)
@@ -343,86 +315,82 @@ void workspace_makeinputoutput(Workspace* self)
 }
 
 void workspace_makemidi(Workspace* self)
-{			
+{		
+	Properties* installed;
 	self->midi = properties_settext(
 		properties_createsection(self->config, "midicontrollers"),
-		"MIDI Controllers");
-	workspace_setmididriverlist(self);
+		"MIDI Controllers");		
+		
+
+	properties_settext(self->midi, "Event Input");
+	// change number to set startup driver, if no psycle.ini found
+	installed = properties_append_choice(self->midi, "installeddriver", 0);
+	properties_settext(installed, "Input Drivers");
+	properties_append_string(installed, "kbd", "kbd");	
+#if defined(DEBUG)
+	properties_append_string(installed, "mmemidi", "..\\driver\\mmemidi\\Debug\\mmemidi.dll");	
+#else
+	properties_append_string(installed, "mmemidi", "..\\driver\\mmemidi\\Release\\mmemidi.dll");
+#endif
+	properties_settext(
+		properties_append_action(self->midi, "addeventdriver"),
+		"Add to active drivers");
+	properties_settext(
+		properties_append_choice(self->midi, "mididriver", 0),
+		"Active Drivers");		
+	properties_settext(
+		properties_append_action(self->midi, "removeeventdriver"),
+			"Remove active driver");
 	self->midiconfigure = properties_settext(
 		properties_createsection(self->midi, "configure"),
 		"Configure");
 }
 
-void workspace_makenoteinputs(Workspace* self, Properties* notes)
+void workspace_setdriverlist(Workspace* self)
 {
-	Properties* p;
+	Properties* drivers;
 
-	inputs_init(&self->noteinputs);
-	for (p = notes->children; p != 0; p = properties_next(p)) {
-		int cmd;
-		
-		cmd = cmdnote(properties_key(p));
-		if (cmd != -1) {
-			inputs_define(&self->noteinputs, properties_value(p), cmd);
-		}
-	}
+	properties_settext(self->inputoutput, "Input/Output");
+	// change number to set startup driver, if no psycle.ini found
+	drivers = properties_append_choice(self->inputoutput, "driver", 2); 
+	properties_settext(drivers, "Driver");
+	properties_append_string(drivers, "silent", "silentdriver");
+#if defined(DEBUG)
+	properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
+	properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
+#else
+	properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
+	properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
+#endif
 }
 
-int cmdnote(const char* key)
-{	
-	if (strcmp("cmd_note_c_0", key) == 0) { return CMD_NOTE_C_0; } else
-	if (strcmp("cmd_note_cs0", key) == 0) { return CMD_NOTE_CS0; } else
-	if (strcmp("cmd_note_d_0", key) == 0) { return CMD_NOTE_D_0; } else
-	if (strcmp("cmd_note_ds0", key) == 0) { return CMD_NOTE_DS0; } else
-	if (strcmp("cmd_note_e_0", key) == 0) { return CMD_NOTE_E_0; } else
-	if (strcmp("cmd_note_f_0", key) == 0) { return CMD_NOTE_F_0; } else
-	if (strcmp("cmd_note_fs0", key) == 0) { return CMD_NOTE_FS0; } else
-	if (strcmp("cmd_note_g_0", key) == 0) { return CMD_NOTE_G_0; } else
-	if (strcmp("cmd_note_gs0", key) == 0) { return CMD_NOTE_GS0; } else
-	if (strcmp("cmd_note_a_0", key) == 0) { return CMD_NOTE_A_0; } else
-	if (strcmp("cmd_note_as0", key) == 0) { return CMD_NOTE_AS0; } else
-	if (strcmp("cmd_note_b_0", key) == 0) { return CMD_NOTE_B_0; } else
-	if (strcmp("cmd_note_c_1", key) == 0) { return CMD_NOTE_C_1; } else
-	if (strcmp("cmd_note_cs1", key) == 0) { return CMD_NOTE_CS1; } else
-	if (strcmp("cmd_note_d_1", key) == 0) { return CMD_NOTE_D_1; } else
-	if (strcmp("cmd_note_ds1", key) == 0) { return CMD_NOTE_DS1; } else
-	if (strcmp("cmd_note_e_1", key) == 0) { return CMD_NOTE_E_1; } else
-	if (strcmp("cmd_note_f_1", key) == 0) { return CMD_NOTE_F_1; } else
-	if (strcmp("cmd_note_fs1", key) == 0) { return CMD_NOTE_FS1; } else
-	if (strcmp("cmd_note_g_1", key) == 0) { return CMD_NOTE_G_1; } else
-	if (strcmp("cmd_note_gs1", key) == 0) { return CMD_NOTE_GS1; } else
-	if (strcmp("cmd_note_a_1", key) == 0) { return CMD_NOTE_A_1; } else
-	if (strcmp("cmd_note_as1", key) == 0) { return CMD_NOTE_AS1; } else
-	if (strcmp("cmd_note_b_1", key) == 0) { return CMD_NOTE_B_1; } else
-	if (strcmp("cmd_note_c_2", key) == 0) { return CMD_NOTE_C_2; } else
-	if (strcmp("cmd_note_cs2", key) == 0) { return CMD_NOTE_CS2; } else
-	if (strcmp("cmd_note_d_2", key) == 0) { return CMD_NOTE_D_2; } else
-	if (strcmp("cmd_note_ds2", key) == 0) { return CMD_NOTE_DS2; } else
-	if (strcmp("cmd_note_e_2", key) == 0) { return CMD_NOTE_E_2; } else
-	if (strcmp("cmd_note_f_2", key) == 0) { return CMD_NOTE_F_2; } else
-	if (strcmp("cmd_note_fs2", key) == 0) { return CMD_NOTE_FS2; } else
-	if (strcmp("cmd_note_g_2", key) == 0) { return CMD_NOTE_G_2; } else
-	if (strcmp("cmd_note_gs2", key) == 0) { return CMD_NOTE_GS2; } else
-	if (strcmp("cmd_note_a_2", key) == 0) { return CMD_NOTE_A_2; } else
-	if (strcmp("cmd_note_as2", key) == 0) { return CMD_NOTE_AS2; } else
-	if (strcmp("cmd_note_b_2", key) == 0) { return CMD_NOTE_B_2; } else
-	if (strcmp("cmd_note_c_3", key) == 0) { return CMD_NOTE_C_3; } else
-	if (strcmp("cmd_note_cs3", key) == 0) { return CMD_NOTE_CS3; } else
-	if (strcmp("cmd_note_d_3", key) == 0) { return CMD_NOTE_D_3; } else
-	if (strcmp("cmd_note_ds3", key) == 0) { return CMD_NOTE_DS3; } else
-	if (strcmp("cmd_note_e_3", key) == 0) { return CMD_NOTE_E_3; } else
-	if (strcmp("cmd_note_f_3", key) == 0) { return CMD_NOTE_F_3; } else
-	if (strcmp("cmd_note_fs3", key) == 0) { return CMD_NOTE_FS3; } else
-	if (strcmp("cmd_note_g_3", key) == 0) { return CMD_NOTE_G_3; } else
-	if (strcmp("cmd_note_gs3", key) == 0) { return CMD_NOTE_GS3; } else
-	if (strcmp("cmd_note_a_3", key) == 0) { return CMD_NOTE_A_3; } else
-	if (strcmp("cmd_note_as3", key) == 0) { return CMD_NOTE_AS3; } else
-	if (strcmp("cmd_note_b_3", key) == 0) { return CMD_NOTE_B_3; } else
-	if (strcmp("cmd_note_stop", key) == 0) { return CMD_NOTE_STOP; } else
-	if (strcmp("cmd_note_tweakm", key) == 0) { return  CMD_NOTE_TWEAKM; } else	
-	if (strcmp("cmd_note_midicc", key) == 0) { return CMD_NOTE_MIDICC; } else
-	if (strcmp("cmd_note_tweaks", key) == 0) { return  CMD_NOTE_TWEAKS; }	
-	return -1;
+void workspace_updatemididriverlist(Workspace* self)
+{
+	int numdrivers;
+	int i;
+	Properties* drivers;	
+	
+	drivers = properties_read(self->midi, "mididriver");
+	if (drivers) {
+		properties_clear(drivers);
+	}
+	numdrivers = player_numeventdrivers(&self->player);
+	for (i = 0; i < numdrivers; ++i) {
+		char idstr[40];
+
+		EventDriver* eventdriver;
+
+		eventdriver = player_eventdriver(&self->player, i);
+		if (eventdriver) {
+			char* text;
+			
+			_snprintf(idstr, 40, "dev%d", i);
+			properties_readstring(eventdriver->properties, "name", &text, idstr);
+			properties_settext(
+				properties_append_string(drivers, idstr, text),
+				text);
+		}
+	}
 }
 
 void workspace_makelang(Workspace* self)
@@ -459,54 +427,65 @@ const char* workspace_translate(Workspace* self, const char* key) {
 	return rv;
 }
 
-void workspace_setdriverlist(Workspace* self)
+void workspace_configchanged(Workspace* self, Properties* property, 
+	Properties* choice)
 {
-	Properties* drivers;
+	if (properties_type(property) == PROPERTY_TYP_ACTION) {
+		if (strcmp(properties_key(property), "addeventdriver") == 0) {
+			Properties* p;
 
-	properties_settext(self->inputoutput, "Input/Output");
-	// change number to set startup driver, if no psycle.ini found
-	drivers = properties_append_choice(self->inputoutput, "driver", 2); 
-	properties_settext(drivers, "Driver");
-	properties_append_string(drivers, "silent", "silentdriver");		
-#if defined(DEBUG)
-	properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
-	properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
-#else
-	properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
-	properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
-#endif
-}
+			p = properties_read(self->midi, "installeddriver");
+			if (p) {
+				int id;
+				int c = 0;
+				
+				id = properties_value(p);				
+				for (p = p->children; p != 0  && c != id; p = p->next, ++c);
+				if (p) {
+					player_loadeventdriver(&self->player,					
+						properties_valuestring(p));
+					workspace_updatemididriverlist(self);
+					p = properties_read(self->midi, "mididriver");
+					if (p) {
+						p->item.value.i = player_numeventdrivers(&self->player) - 1;
+						workspace_mididriverconfig(self, properties_value(p));
+					}
+				}
+			}
+		} else
+		if (strcmp(properties_key(property), "removeeventdriver") == 0) {
+			Properties* p;
 
-void workspace_setmididriverlist(Workspace* self)
-{
-	Properties* drivers;
+			p = properties_read(self->midi, "mididriver");
+			if (p) {
+				int id;				
+				
+				id = properties_value(p);
+				player_removeeventdriver(&self->player, id);
+				workspace_updatemididriverlist(self);
+				--(p->item.value.i);
+				if (p->item.value.i < 0) {
+					p->item.value.i = 0;
+				}
+				workspace_mididriverconfig(self, properties_value(p));	
+			}
+		}
+	} else
+	if (choice && properties_insection(property, self->midi)) {
+		if (strcmp(properties_key(choice), "mididriver") == 0) {
+			workspace_mididriverconfig(self, properties_value(choice));	
+		} else {		
+			Properties* p;
 
-	properties_settext(self->midi, "Midi Input");
-	// change number to set startup driver, if no psycle.ini found
-	drivers = properties_append_choice(self->midi, "mididriver", 0); 
-	properties_settext(drivers, "Driver");
-	properties_append_string(drivers, "none", "none");		
-#if defined(DEBUG)
-	properties_append_string(drivers, "mme", "..\\driver\\mmemidi\\Debug\\mme.dll");	
-#else
-	properties_append_string(drivers, "mme", "..\\driver\\mmemidi\\Release\\mme.dll");	
-#endif
-}
-
-void workspace_configchanged(Workspace* self, Properties* property, Properties* choice)
-{
-	if (choice && (strcmp(properties_key(choice), "device") == 0)) {
-		if (properties_insection(property, self->midi)) {
-			player_restarteventdriver(&self->player);
+			p = properties_find(self->midi, "mididriver");
+			if (p) {
+				player_restarteventdriver(&self->player, properties_value(p));
+			}
 		}
 	} else
 	if (choice && (strcmp(properties_key(choice), "driver") == 0)) {
 		player_reloaddriver(&self->player, properties_valuestring(property));		
 		workspace_driverconfig(self);
-	} else
-	if (choice && (strcmp(properties_key(choice), "mididriver") == 0)) {
-		// player_reloaddriver(&self->player, properties_valuestring(property));		
-		workspace_mididriverconfig(self);
 	} else
 	if (strcmp(properties_key(property), "defaultfontsize") == 0) {
 		workspace_changedefaultfontsize(self, properties_value(property));
@@ -570,8 +549,7 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 {
 	Song* oldsong;
 
-	oldsong = self->song;
-	//suspendwork();	
+	oldsong = self->song;	
 	lock_enter();
 	player_stop(&self->player);
 	self->song = song;
@@ -580,7 +558,6 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	signal_emit(&self->signal_songchanged, self, 1, flag);
 	song_dispose(oldsong);
 	free(oldsong);			
-	// resumework();
 	lock_leave();
 }
 
@@ -618,7 +595,7 @@ void workspace_load_configuration(Workspace* self)
 {	
 	properties_load(self->config, "psycle.ini", 0);	
 	workspace_configaudio(self);
-	workspace_configmidi(self);
+	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
 	signal_emit(&self->signal_configchanged, self, 1,self->config);
@@ -664,11 +641,6 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 	ui_font_init(&font, &fontinfo);
 	ui_replacedefaultfont(self->mainhandle, &font);
 	ui_invalidate(self->mainhandle);
-}
-
-Inputs* workspace_noteinputs(Workspace* self)
-{
-	return &self->noteinputs;
 }
 
 void workspace_seteditposition(Workspace* self, EditPosition editposition)
@@ -739,4 +711,9 @@ Machines* machinecallback_machines(Workspace* self)
 Instruments* machinecallback_instruments(Workspace* self)
 {
 	return self->song ? &self->song->instruments : 0;
+}
+
+EventDriver* workspace_kbddriver(Workspace* self)
+{
+	return player_kbddriver(&self->player);
 }
