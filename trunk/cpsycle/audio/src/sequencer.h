@@ -23,7 +23,7 @@ typedef struct {
 	List* currtrackiterators;	
 	List* events;
 	List* delayedevents;
-	List* inputevents;
+	List* inputevents;	
 } Sequencer;
 
 void sequencer_init(Sequencer*, Sequence*, Machines*);

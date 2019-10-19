@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "clipbox.h"
-#include <math.h>
+#include <rms.h>
 
 static void OnDestroy(ClipBox*);
 static void OnSize(ClipBox*, ui_component* sender, int width, int height);
@@ -14,18 +14,20 @@ static void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, Bu
 static void OnSongChanged(ClipBox* self, Workspace* workspace);
 static void ConnectMachinesSignals(ClipBox* self, Workspace* workspace);
 
-static int timerid = 700;
+#define TIMER_ID_CLIPBOX 700
 
 void InitClipBox(ClipBox* self, ui_component* parent, Workspace* workspace)
 {
-	self->clip = 0;
+	self->clip = 0;	
 	ui_component_init(&self->component, parent);	
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	signal_connect(&self->component.signal_timer, self, OnTimer);
+	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);	
 	ConnectMachinesSignals(self, workspace);
+	// SetTimer(self->component.hwnd, TIMER_ID_CLIPBOX, 200, 0);
 }
 
 void OnDestroy(ClipBox* self)
@@ -42,25 +44,16 @@ void OnTimer(ClipBox* self, ui_component* sender, int timerid)
 }
 
 void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc)
-{
-	real* left = bc->output->samples[0];
-	real* right = bc->output->samples[1];
-	real leftavg = 0;
-	real rightavg = 0;
-	
-	unsigned int sample = 0;
-	for ( ; sample < bc->numsamples; ++sample) {
-		leftavg += (real) fabs(left[sample]);
-		rightavg += (real) fabs(right[sample]);
-	}
-	leftavg = leftavg / bc->numsamples / 32768;
-	rightavg = rightavg / bc->numsamples / 32768;	
-
-	if (leftavg >= 32767 || leftavg < -32768) {				
-		self->clip = 1;
-	}
-	if (rightavg >= 32767 || rightavg < -32768) {				
-		self->clip = 1;
+{	
+	if (bc->rmsvol) {		
+		if (bc->rmsvol->data.previousLeft >= 32767.f ||
+			bc->rmsvol->data.previousLeft < -32768.f) {				
+			self->clip = 1;
+		}
+		if (bc->rmsvol->data.previousRight >= 32767.f ||
+			bc->rmsvol->data.previousRight < -32768.f) {				
+			self->clip = 1;
+		}
 	}
 }
 
@@ -73,7 +66,7 @@ void OnMouseDown(ClipBox* self, ui_component* sender, int x, int y, int button)
 
 void OnSongChanged(ClipBox* self, Workspace* workspace)
 {
-	ConnectMachinesSignals(self, workspace);
+	ConnectMachinesSignals(self, workspace);	
 }
 
 void ConnectMachinesSignals(ClipBox* self, Workspace* workspace)

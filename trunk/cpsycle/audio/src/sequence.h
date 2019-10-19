@@ -18,6 +18,8 @@ typedef struct {
 } SequenceTrack;
 
 void sequencetrack_init(SequenceTrack*);
+SequenceTrack* sequencetrack_alloc(void);
+SequenceTrack* sequencetrack_allocinit(void);
 
 typedef List SequenceTrackNode;
 

@@ -39,14 +39,31 @@ void buffer_dispose(Buffer* self)
 	free(self->samples);
 }
 
+Buffer* buffer_alloc(void)
+{
+	return (Buffer*) malloc(sizeof(Buffer));
+}
+
+Buffer* buffer_allocinit(unsigned int channels)
+{
+	Buffer* rv;
+
+	rv = buffer_alloc();
+	if (rv) {
+		buffer_init(rv, channels);
+	}
+	return rv;
+}
+
+
 void buffer_resize(Buffer* self, unsigned int channels)
 {
 	free(self->samples);
 	self->samples = 0;
 	if (channels > 0) {
-		self->samples = (real**) malloc(sizeof(real*)*channels);
+		self->samples = (amp_t**) malloc(sizeof(amp_t*)*channels);
 		self->numchannels = channels;
-		memset(self->samples, 0, sizeof(real*)*channels);
+		memset(self->samples, 0, sizeof(amp_t*)*channels);
 	}	
 }
 
@@ -60,7 +77,7 @@ unsigned int buffer_offset(Buffer* self)
 	return self->offset;
 }
 
-real* buffer_at(Buffer* self, unsigned int channel)
+amp_t* buffer_at(Buffer* self, unsigned int channel)
 {
 	return self->samples[channel] + self->offset;
 }
@@ -75,7 +92,7 @@ void buffer_clearsamples(Buffer* self, unsigned int numsamples)
 }
 
 void buffer_addsamples(Buffer* self, Buffer* source, unsigned int numsamples,
-	float vol)
+	amp_t vol)
 {
 	unsigned int channel;
 
@@ -91,7 +108,7 @@ void buffer_addsamples(Buffer* self, Buffer* source, unsigned int numsamples,
 	}
 }
 
-void buffer_mulsamples(Buffer* self, unsigned int numsamples, float mul)
+void buffer_mulsamples(Buffer* self, unsigned int numsamples, amp_t mul)
 {
 	unsigned int channel;
 	
@@ -100,10 +117,10 @@ void buffer_mulsamples(Buffer* self, unsigned int numsamples, float mul)
 	}	
 }
 
-void buffer_pan(Buffer* self, float pan, unsigned int amount)
+void buffer_pan(Buffer* self, amp_t pan, unsigned int amount)
 {
 	unsigned int channel;
-	float vol[2];
+	amp_t vol[2];
 
 	vol[1] = pan * 2.f;
 	vol[0] = 2.0f - vol[1];

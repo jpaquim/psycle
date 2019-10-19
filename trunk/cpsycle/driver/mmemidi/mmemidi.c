@@ -24,7 +24,6 @@ static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
 static void updateconfiguration(EventDriver*);
-static unsigned int samplerate(EventDriver*);
 
 static void init_properties(EventDriver* self);
 static void apply_properties(MmeMidiDriver* self);
@@ -54,16 +53,15 @@ EXPORT EventDriver* __cdecl eventdriver_create(void)
 	mme->deviceid = DEVICE_NONE;
 	mme->driver.open = driver_open;
 	mme->driver.free = driver_free;
-	mme->driver.init = driver_init;
 	mme->driver.connect = driver_connect;
 	mme->driver.open = driver_open;
 	mme->driver.close = driver_close;
 	mme->driver.dispose = driver_dispose;
 	mme->driver.updateconfiguration = updateconfiguration;
-	mme->driver.samplerate = samplerate;
 	mme->driver.error = onerror;
 	mme->hEvent = CreateEvent
 		(NULL, FALSE, FALSE, NULL);
+	driver_init(&mme->driver);
 	return &mme->driver;
 }
 
@@ -129,11 +127,6 @@ void apply_properties(MmeMidiDriver* self)
 void updateconfiguration(EventDriver* self)
 {
 	apply_properties((MmeMidiDriver*)self);
-}
-
-unsigned int samplerate(EventDriver* self)
-{
-	return 44100;
 }
 
 void driver_connect(EventDriver* driver, void* context, EVENTDRIVERWORKFN callback, void* handle)

@@ -17,6 +17,22 @@ void sequencetrack_init(SequenceTrack* self)
 	self->entries = 0;
 }
 
+SequenceTrack* sequencetrack_alloc(void)
+{
+	return malloc(sizeof(SequenceTrack));
+}
+
+SequenceTrack* sequencetrack_allocinit(void)
+{
+	SequenceTrack* rv;
+
+	rv = sequencetrack_alloc();
+	if (rv) {
+		sequencetrack_init(rv);
+	}
+	return rv;
+}
+
 void sequenceposition_init(SequencePosition* self)
 {
 	self->track = 0;
@@ -433,9 +449,8 @@ void sequence_setpatternslot(Sequence* self, SequencePosition position,
 		Pattern* pattern;		
 		
 		pattern = patterns_at(self->patterns, slot);
-		if (pattern == 0) {
-			pattern = (Pattern*) malloc(sizeof(Pattern));
-			pattern_init(pattern);
+		if (pattern == 0) {			
+			pattern = pattern_allocinit();			
 			patterns_insert(self->patterns, slot, pattern);		
 		}
 		entry->pattern = slot;

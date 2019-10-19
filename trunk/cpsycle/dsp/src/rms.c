@@ -5,6 +5,7 @@
 
 #include "rms.h"
 #include <math.h>
+#include <stdlib.h>
 #define DIVERSALIS__COMPILER__RESOURCE	// get rid of not c++ error
 #define DIVERSALIS__CPU__ENDIAN			// avoid boost include
 #define DIVERSALIS__CPU__ENDIAN__LITTLE
@@ -14,6 +15,8 @@
 #endif
 
 static int numRMSSamples = 1;
+
+// RMSData
 
 void rmsdata_init(RMSData* self)
 {
@@ -25,10 +28,10 @@ void rmsdata_init(RMSData* self)
 }
 
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
-void rmsdata_accumulate(RMSData* self, const float* __restrict pSamplesL,
-	const float* __restrict pSamplesR, int count)
+void rmsdata_accumulate(RMSData* self, const amp_t* __restrict pSamplesL,
+	const amp_t* __restrict pSamplesR, int count)
 {
-	float result;
+	float result; // does this work with double?
 
 	__m128 acleftvec = _mm_set_ps1(0.0f);
 	__m128 acrightvec = _mm_set_ps1(0.0f);
@@ -60,11 +63,11 @@ void rmsdata_accumulate(RMSData* self, const float* __restrict pSamplesL,
 }
 #else
 
-void rmsdata_accumulate(RMSData* self, const float* __restrict pSamplesL,
-	const float* __restrict pSamplesR, int count)
+void rmsdata_accumulate(RMSData* self, const amp_t* __restrict pSamplesL,
+	const amp_t* __restrict pSamplesR, int count)
 {
-	double acleft = self->AccumLeft;
-	double acright = self->AccumRight;
+	big_amp_t acleft = self->AccumLeft;
+	big_amp_t acright = self->AccumRight;
 	--pSamplesL; --pSamplesR;
 	while (count--) {
 		++pSamplesL; acleft  += *pSamplesL * *pSamplesL;
@@ -76,15 +79,33 @@ void rmsdata_accumulate(RMSData* self, const float* __restrict pSamplesL,
 
 #endif
 
+// RMSVol
+
 void rmsvol_init(RMSVol* self)
 {
 	rmsdata_init(&self->data);
 	self->volume = 0.f;
 }
 
+RMSVol* rmsvol_alloc(void)
+{
+	return (RMSVol*) malloc(sizeof(RMSVol));
+}
+
+RMSVol* rmsvol_allocinit(void)
+{
+	RMSVol* rv;
+
+	rv = rmsvol_alloc();
+	if (rv) {
+		rmsvol_init(rv);
+	}
+	return rv;
+}
+
 /// Note: Values are accumulated since the standard calculation requires 50ms of data.
-void rmsvol_tick(RMSVol* self, const float * __restrict pSamplesL,
-	const float * __restrict pSamplesR, int numSamples)
+void rmsvol_tick(RMSVol* self, const amp_t * __restrict pSamplesL,
+	const amp_t * __restrict pSamplesR, int numSamples)
 {
 	const float * pL = pSamplesL;
 	const float * pR = pSamplesR;
@@ -116,7 +137,7 @@ void rmsvol_tick(RMSVol* self, const float * __restrict pSamplesL,
 			: self->data.previousRight;
 }
 
-float rmsvol_value(RMSVol* self)
+amp_t rmsvol_value(RMSVol* self)
 {
 	return self->volume;
 }

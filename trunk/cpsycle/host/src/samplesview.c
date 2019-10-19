@@ -172,8 +172,7 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 		Sample* sample;
 		Instrument* instrument;
 
-		sample = (Sample*)malloc(sizeof(Sample));
-		sample_init(sample);
+		sample = sample_allocinit();
 		sample_load(sample, path);
 		slot = ui_listbox_cursel(&self->samplesbox.samplelist);
 		samples_insert(&self->player->song->samples, sample, slot);

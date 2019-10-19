@@ -9,7 +9,7 @@
 
 static void init(Filter* self) { }
 static void dispose(Filter* self) { }
-static float work(Filter* self, float sample) { return sample; }
+static amp_t work(Filter* self, amp_t sample) { return sample; }
 static void setcutoff(Filter* self, float cutoff) { }
 static float cutoff(Filter* self) { return 0.f; }
 static void setressonance(Filter* self, float ressonance) { }
@@ -107,11 +107,11 @@ void firwork_reset(FIRWork* self)
 	firwork_init(self);
 }
 
-float firwork_work(FIRWork* self, FilterCoeff* coeffs, float sample)
+amp_t firwork_work(FIRWork* self, FilterCoeff* coeffs, amp_t sample)
 {
-	float y;
+	amp_t y;
 
-	y = (float) 
+	y = (amp_t) 
 		 (sample * coeffs->coeff[0] +  
 		self->x1 * coeffs->coeff[1] + 
 		self->x2 * coeffs->coeff[2] + 

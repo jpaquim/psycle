@@ -76,10 +76,10 @@ void OnMasterWorked(Vumeter* self, Machine* master, unsigned int slot,
 }
 
 void OnSongChanged(Vumeter* self, Workspace* workspace)
-{
+{	
 	self->leftavg = 0;
 	self->rightavg = 0;
-	ConnectMachinesSignals(self, workspace);
+	ConnectMachinesSignals(self, workspace);	
 }
 
 void ConnectMachinesSignals(Vumeter* self, Workspace* workspace)

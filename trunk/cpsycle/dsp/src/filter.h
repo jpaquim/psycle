@@ -9,7 +9,7 @@
 typedef struct {
 	void (*init)(void*);
 	void (*dispose)(void*);
-	float (*work)(void*, float sample);
+	amp_t (*work)(void*, amp_t sample);
 	void (*setcutoff)(void*, float cutoff);	
 	float (*cutoff)(void*);
 	void (*setressonance)(void*, float ressonance);
@@ -32,11 +32,11 @@ typedef struct {
 void customfilter_init(CustomFilter*);
 
 typedef struct {
-	float x1, x2, y1, y2;
+	amp_t x1, x2, y1, y2;
 } FIRWork;
 
 void firwork_init(FIRWork*);
-float firwork_work(FIRWork*, FilterCoeff* coeffs, float sample);
+amp_t firwork_work(FIRWork*, FilterCoeff* coeffs, amp_t sample);
 void firwork_reset(FIRWork*);
 
 

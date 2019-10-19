@@ -93,7 +93,7 @@ void reset(MultiFilter* self)
 	}
 }
 
-float work(MultiFilter* self, float sample)
+amp_t work(MultiFilter* self, amp_t sample)
 {
 	return self->selectedfilter 
 		? self->selectedfilter->work(self->selectedfilter, sample)

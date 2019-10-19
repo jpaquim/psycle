@@ -22,7 +22,7 @@ void InitSampulseInstrumentView(SampulseInstrumentView* self,
 	ui_listbox_init(&self->instrumentlist, &self->component);
 	AlignInstrumentView(self);
 	BuildInstrumentList(self);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+//	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
 void OnSize(SampulseInstrumentView* self, ui_component* sender, int width, int height)

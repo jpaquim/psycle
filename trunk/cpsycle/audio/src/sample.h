@@ -86,6 +86,8 @@ typedef struct Sample {
 } Sample;
 
 void sample_init(Sample*);
+Sample* sample_alloc(void);
+Sample* sample_allocinit(void);
 void sample_dispose(Sample*);
 void sample_load(Sample*, const char* path);
 void sample_setname(Sample*, const char* name);

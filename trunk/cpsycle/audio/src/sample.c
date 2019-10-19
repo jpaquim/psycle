@@ -80,6 +80,22 @@ void sample_dispose(Sample* self)
 	free(self->name);
 }
 
+Sample* sample_alloc(void)
+{
+	return (Sample*) malloc(sizeof(Sample));
+}
+
+Sample* sample_allocinit(void)
+{
+	Sample* rv;
+
+	rv = sample_alloc();
+	if (rv) {
+		sample_init(rv);
+	}
+	return rv;
+}
+
 void sample_load(Sample* self, const char* path)
 {
 	char* delim;

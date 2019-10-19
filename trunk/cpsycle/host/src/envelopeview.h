@@ -34,5 +34,4 @@ void InitEnvelopeView(EnvelopeView*, ui_component* parent);
 void EnvelopeViewSetAdsrEnvelope(EnvelopeView*, ADSRSettings*);
 void EnvelopeViewUpdate(EnvelopeView*);
 
-
 #endif

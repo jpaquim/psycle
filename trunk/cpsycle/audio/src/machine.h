@@ -10,6 +10,7 @@
 #include "event.h"
 #include "buffercontext.h"
 #include "fileio.h"
+#include "connections.h"
 
 typedef struct MachineCallback {	
 	unsigned int (*samplerate)(void*);
@@ -23,6 +24,7 @@ typedef struct MachineCallback {
 typedef struct Machine {	
 	void (*init)(void*);
 	struct Machine* (*clone)(void*);
+	Buffer* (*mix)(void*, int slot, unsigned int amount, MachineSockets*, struct Machines*);
 	void (*work)(void*, BufferContext*);
 	void (*generateaudio)(void *, BufferContext*);
 	int (*hostevent)(void*, int const eventNr, int const val1, float const val2);
@@ -42,7 +44,7 @@ typedef struct Machine {
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
 	void (*setcallback)(void*, MachineCallback);
-	void (*loadspecific)(void*, RiffFile*);
+	void (*loadspecific)(void*, PsyFile*);
 	// machine callbacks
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);

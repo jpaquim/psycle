@@ -14,7 +14,6 @@
 #include <string.h>
 #include <rms.h>
 #include <multifilter.h>
-#include <windows.h>
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -24,7 +23,7 @@
 #define TRUE 1
 #endif
 
-static float bufferdriver[65535];
+static amp_t bufferdriver[65535];
 static void* mainframe;
 
 static void player_initdriver(Player*);
@@ -35,11 +34,10 @@ static void player_initsignals(Player*);
 static void player_disposerms(Player*);
 static void player_unloaddriver(Player*);
 static void player_unloadeventdrivers(Player*);
-static float* Work(Player*, int* numsamples);
+static amp_t* work(Player*, int* numsamples);
 static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(Player*, unsigned int amount);
-static Buffer* player_mix(Player*, unsigned int slot, unsigned int amount);
-static void player_filldriver(Player*, float* buffer, unsigned int amount);
+static void player_filldriver(Player*, amp_t* buffer, unsigned int amount);
 static RMSVol* player_rmsvol(Player*, unsigned int slot);
 static void player_resetvumeters(Player*);
 static EventDriverEntry* player_eventdriverentry(Player*, int id);
@@ -50,7 +48,7 @@ void player_init(Player* self, Song* song, void* handle)
 	self->numsongtracks = 16;	
 	sequencer_init(&self->sequencer, &song->sequence, &song->machines);
 	mainframe = handle;
-	player_initdriver(self);
+	player_initdriver(self);	
 	player_initeventdriver(self);
 	player_initsignals(self);
 	player_initrms(self);	
@@ -121,16 +119,14 @@ void player_loaddriver(Player* self, const char* path)
 			fpdrivercreate = (pfndriver_create)
 				library_functionpointer(&self->drivermodule, "driver_create");
 			if (fpdrivercreate) {
-				driver = fpdrivercreate();		
-				driver->init(driver);
-				driver->connect(driver, self, Work, mainframe);								
+				driver = fpdrivercreate();				
+				driver->connect(driver, self, work, mainframe);
 			}
 			lock_enable();
 		}		
 	}
 	if (!driver) {
-		driver = create_silent_driver();
-		driver->init(driver);
+		driver = create_silent_driver();		
 		lock_disable();
 	}	
 	sequencer_setsamplerate(&self->sequencer, driver->samplerate(driver));
@@ -152,8 +148,7 @@ void player_loadeventdriver(Player* self, const char* path)
 		} else {
 			Library* library;
 
-			library = malloc(sizeof(Library));
-			library_init(library);
+			library = library_allocinit();			
 			library_load(library, path);
 			if (library->module) {
 				pfneventdriver_create fpeventdrivercreate;
@@ -163,8 +158,7 @@ void player_loadeventdriver(Player* self, const char* path)
 				if (fpeventdrivercreate) {
 					EventDriverEntry* eventdriverentry;
 
-					eventdriver = fpeventdrivercreate();
-					eventdriver->init(eventdriver);
+					eventdriver = fpeventdrivercreate();					
 					eventdriver->connect(eventdriver, self, workeventinput, mainframe);
 					eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry*));
 					eventdriverentry->eventdriver = eventdriver;
@@ -182,15 +176,14 @@ void player_initkbddriver(Player* self)
 	EventDriver* eventdriver;
 	EventDriverEntry* eventdriverentry;
 
-	eventdriver = create_kbd_driver();
-	eventdriver->init(eventdriver);
+	eventdriver = create_kbd_driver();	
 	self->kbddriver = eventdriver;
 	eventdriver->connect(eventdriver, self, workeventinput, mainframe);
 
-	eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry*));
+	eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry));
 	eventdriverentry->eventdriver = eventdriver;
 	eventdriverentry->library = 0;
-	list_append(&self->eventdrivers, eventdriverentry);	
+	list_append(&self->eventdrivers, eventdriverentry);
 }
 
 void player_unloaddriver(Player* self)
@@ -329,11 +322,11 @@ unsigned int player_lpb(Player* self)
 	return sequencer_lpb(&self->sequencer);
 }
 
-real* Work(Player* self, int* numsamples)
+amp_t* work(Player* self, int* numsamples)
 {		
 	unsigned int amount;
 	unsigned int numsamplex;
-	float* psamples;
+	amp_t* psamples;
 	
 	psamples = bufferdriver;
 	numsamplex = *numsamples;	
@@ -350,25 +343,25 @@ real* Work(Player* self, int* numsamples)
 	return bufferdriver;
 }
 
-static void panbuffer(Buffer* buffer, float pan, unsigned int amount);
-
 void player_workpath(Player* self, unsigned int amount)
 {
 	MachinePath* path;
 	path = machines_path(&self->song->machines);
 	if (path) {
 		for ( ; path != 0; path = path->next) {
-			unsigned int slot;						
-			Buffer* output;
+			unsigned int slot;									
+			Machine* machine;
 
-			slot = (int)path->entry;				
-			output = player_mix(self, slot, amount);								
-			if (slot != MASTER_INDEX) {				
-				Machine* machine;
-				BufferContext bc;
+			slot = (int)path->entry;
+			machine = machines_at(&self->song->machines, slot);
+			if (machine) {			
+				Buffer* output;
 
-				machine = machines_at(&self->song->machines, slot);
-				if (machine && output) {
+				output = machine->mix(machine, slot, amount,
+					connections_at(&self->song->machines.connections, slot),
+					&self->song->machines);
+				if (output && slot != MASTER_INDEX) {				
+					BufferContext bc;										
 					List* events;
 					RMSVol* rms;
 
@@ -384,8 +377,8 @@ void player_workpath(Player* self, unsigned int amount)
 							bc.numsamples);
 					}
 					signal_emit(&machine->signal_worked, machine, 2, slot, &bc);
-					list_free(events);
-				}									
+					list_free(events);										
+				}
 			}			
 		}							
 	}
@@ -401,59 +394,7 @@ void player_resetvumeters(Player* self)
 	self->resetvumeters = 0;	
 }
 
-static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
-
-Buffer* player_mix(Player* self, unsigned int slot, unsigned int amount)
-{
-	MachineConnections* connections;				
-	Buffer* output;
-	
-	connections = machines_connections(&self->song->machines, slot);
-	output = machines_outputs(&self->song->machines, slot);
-
-	if (output) {
-		buffer_clearsamples(output, amount);
-		if (connections) {
-			MachineConnection* connection;
-			
-			for (connection = connections->inputs; connection != 0;
-					connection = connection->next) {
-				MachineConnectionEntry* source = 
-					(MachineConnectionEntry*)connection->entry;
-				if (source->slot != -1) {
-					addsamples(
-						output, 
-						machines_outputs(&self->song->machines,
-							source->slot),
-						amount,
-						1.0f);
-				}						
-			}								
-		}
-	}
-	return output;
-}
-
-
-void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
-{
-	unsigned int channel;
-
-	if (source) {
-		for (channel = 0; channel < source->numchannels && 
-			channel < dst->numchannels; ++channel) {
-				dsp_add(
-					source->samples[channel],
-					dst->samples[channel],
-					numsamples,
-					vol);
-				dsp_erase_all_nans_infinities_and_denormals(
-					dst->samples[channel], numsamples);					
-		}
-	}
-}
-
-void player_filldriver(Player* self, float* buffer, unsigned int amount)
+void player_filldriver(Player* self, amp_t* buffer, unsigned int amount)
 {
 	Buffer* masteroutput;
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
@@ -486,11 +427,10 @@ RMSVol* player_rmsvol(Player* self, unsigned int slot)
 	RMSVol* rv;
 
 	if (!table_exists(&self->rms, slot)) {
-		rv = (RMSVol*)malloc(sizeof(RMSVol));
-		rmsvol_init(rv);
+		rv = rmsvol_allocinit();		
 		table_insert(&self->rms, slot, rv);
 	} else {
-		rv = table_at(&self->rms, slot);
+		rv = (RMSVol*) table_at(&self->rms, slot);
 	}
 	return rv;
 }
@@ -521,11 +461,7 @@ VUMeterMode player_vumetermode(Player* self)
 }
 
 void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int size)
-{
-//	char text[20];
-
-	// _snprintf(text, 20, "%02X %02X %02X %02X; ", data[0], data[1], data[2], data[3]);	
-	// MessageBox(0, text, "Midi In", MB_OK);
+{	
 	if (cmd == 1) {  // MIDI DATA
 		int lsb;
 		int msb;

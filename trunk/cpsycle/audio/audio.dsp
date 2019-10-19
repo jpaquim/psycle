@@ -111,6 +111,10 @@ SOURCE=.\src\buffercontext.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\connections.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\dummy.c
 # End Source File
 # Begin Source File
@@ -369,6 +373,14 @@ SOURCE=.\src\plugincatcher.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\psy2.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\psy3.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sample.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -524,6 +536,10 @@ SOURCE=.\src\buffercontext.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\connections.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\constants.h
 # End Source File
 # Begin Source File
@@ -625,6 +641,14 @@ SOURCE=.\src\plugincatcher.h
 # Begin Source File
 
 SOURCE=.\src\detail\project.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\psy2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\psy3.h
 # End Source File
 # Begin Source File
 

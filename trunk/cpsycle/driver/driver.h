@@ -11,6 +11,7 @@
 #define DRIVER_H
 
 #include <properties.h>
+#include "../dsp/src/dsptypes.h"
 
 typedef struct {
 	int Version;							// VERSION
@@ -19,14 +20,14 @@ typedef struct {
 	char const *ShortName;					// "MME"	
 } AudioDriverInfo;
 
-typedef float* (*AUDIODRIVERWORKFN)(void* context, int* numSamples);
+typedef amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples);
 
 typedef struct Driver {
-	AUDIODRIVERWORKFN _pCallback;
+	AUDIODRIVERWORKFN _pCallback;	
+	void* _callbackContext;
 	Properties* properties;
 	int (*open)(struct Driver*);
-	void (*free)(struct Driver*);
-	int (*init)(struct Driver*);
+	void (*free)(struct Driver*);	
 	void (*updateconfiguration)(struct Driver*);
 	int (*dispose)(struct Driver*);
 	int (*close)(struct Driver*);

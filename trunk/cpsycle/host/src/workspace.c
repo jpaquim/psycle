@@ -58,8 +58,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
 	machinefactory_init(&self->machinefactory, machinecallback(self), 
 		&self->plugincatcher);
-	self->song = (Song*) malloc(sizeof(Song));
-	song_init(self->song, &self->machinefactory);
+	self->song = song_allocinit(&self->machinefactory);
 	self->properties = workspace_makeproperties(self);		
 	undoredo_init(&self->undoredo);
 	signal_init(&self->signal_songchanged);
@@ -372,23 +371,22 @@ void workspace_updatemididriverlist(Workspace* self)
 	
 	drivers = properties_read(self->midi, "mididriver");
 	if (drivers) {
-		properties_clear(drivers);
-	}
-	numdrivers = player_numeventdrivers(&self->player);
-	for (i = 0; i < numdrivers; ++i) {
-		char idstr[40];
+		properties_clear(drivers);	
+		numdrivers = player_numeventdrivers(&self->player);
+		for (i = 0; i < numdrivers; ++i) {
+			char idstr[40];
+			EventDriver* eventdriver;
 
-		EventDriver* eventdriver;
-
-		eventdriver = player_eventdriver(&self->player, i);
-		if (eventdriver) {
-			char* text;
-			
-			_snprintf(idstr, 40, "dev%d", i);
-			properties_readstring(eventdriver->properties, "name", &text, idstr);
-			properties_settext(
-				properties_append_string(drivers, idstr, text),
-				text);
+			eventdriver = player_eventdriver(&self->player, i);
+			if (eventdriver) {
+				char* text;
+				
+				_snprintf(idstr, 40, "dev%d", i);
+				properties_readstring(eventdriver->properties, "name", &text, idstr);
+				properties_settext(
+					properties_append_string(drivers, idstr, text),
+					text);
+			}
 		}
 	}
 }
@@ -527,8 +525,7 @@ void workspace_newsong(Workspace* self)
 {			
 	Song* song;	
 	
-	song = (Song*) malloc(sizeof(Song));
-	song_init(song, &self->machinefactory);	
+	song = song_allocinit(&self->machinefactory);
 	properties_free(self->properties);
 	self->properties = workspace_makeproperties(self);
 	workspace_setsong(self, song, WORKSPACE_NEWSONG);		
@@ -539,8 +536,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 	Song* song;
 
 	properties_free(self->properties);
-	song = malloc(sizeof(Song));
-	song_init(song, &self->machinefactory);	
+	song = song_allocinit(&self->machinefactory);
 	song_load(song, path, &self->properties);
 	workspace_setsong(self, song, WORKSPACE_LOADSONG);
 }

@@ -57,8 +57,12 @@ typedef struct {
 	int y;
 	char* editname;
 	int mode;
-	float volumedisplay;
+	amp_t volumedisplay;	
 	MachineCoords* coords;
+	MachineSkin* skin;
+	Machine* machine;
+	MachineFrame* frame;
+	ParamView* paramview;
 } MachineUi;
 
 typedef struct {
@@ -76,7 +80,7 @@ enum {
 typedef struct {
 	ui_component component;	
 	Machines* machines;
-	MachineUi machineuis[256];
+	Table machineuis;	
 	int mx;
 	int my;
 	int dragslot;
@@ -84,15 +88,13 @@ typedef struct {
 	int selectedslot;	
 	WireConnection dragwire;	
 	WireConnection selectedwire;
-	int drawvumeters;
-	MachineFrame machine_frames[256];
-	ParamView machine_paramviews[256];
+	int drawvumeters;	
 	PluginCatcher plugincatcher;
 	MachineSkin skin;	   
 	Workspace* workspace;
 } WireView;
 
-void InitWireView(WireView*, ui_component* parent,
+void wireview_init(WireView*, ui_component* parent,
 	ui_component* tabbarparent, Workspace*);
 void wireview_align(WireView*);
 
@@ -105,9 +107,9 @@ typedef struct {
 	Workspace* workspace;
 } MachineView;
 
-void InitMachineView(MachineView*, ui_component* parent,
+void machineview_init(MachineView*, ui_component* parent,
 	ui_component* tabbarparent, Workspace*);
-void MachineViewApplyProperties(MachineView*, Properties*);
+void machineview_applyproperties(MachineView*, Properties*);
 void machineview_align(MachineView*);
 
 #endif

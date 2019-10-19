@@ -95,7 +95,7 @@ void mainframe_init(MainFrame* self)
 	/// init notebook views
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	InitMachineView(&self->machineview, &self->notebook.component, &self->tabbars, &self->workspace);
+	machineview_init(&self->machineview, &self->notebook.component, &self->tabbars, &self->workspace);
 	InitPatternView(&self->patternview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitSamplesView(&self->samplesview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
@@ -347,7 +347,7 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		properties = properties_create();		
 		skin_load(properties, "old Psycle.psv");
 		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
-		MachineViewApplyProperties(&self->machineview, properties);
+		machineview_applyproperties(&self->machineview, properties);
 		properties_free(properties);
 	} else {				
 		EventDriver* kbd;
@@ -402,7 +402,7 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 }
 
 void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
-{	
+{		
 	if (flag == WORKSPACE_LOADSONG) {
 		if (workspace_showsonginfoonload(&self->workspace)) {
 			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);

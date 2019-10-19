@@ -62,7 +62,7 @@ static void OnApplyClicked(PatternProperties* self, ui_component* sender)
 {
 	if (self->pattern) {
 		pattern_setlabel(self->pattern, ui_edit_text(&self->nameedit));
-		pattern_setlength(self->pattern, (float)atof(ui_edit_text(&self->lengthedit)));
+		pattern_setlength(self->pattern, (beat_t)atof(ui_edit_text(&self->lengthedit)));
 	}
 }
 

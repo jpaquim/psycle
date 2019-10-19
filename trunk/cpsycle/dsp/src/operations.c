@@ -6,23 +6,23 @@
 #include "operations.h"
 #include <string.h>
 
-static void erase_all_nans_infinities_and_denormals(float* sample);
+static void erase_all_nans_infinities_and_denormals(amp_t* sample);
 
-void dsp_add(float *src, float *dst, int num, float vol)
+void dsp_add(amp_t *src, amp_t *dst, int num, amp_t vol)
 {
 	for ( ; num != 0; ++dst, ++src, --num) {
 		*dst += (*src * vol);
 	}	
 }
 	
-void dsp_mul(float *dst, int num, float mul)
+void dsp_mul(amp_t *dst, int num, amp_t mul)
 {	
 	for ( ; num != 0; ++dst, --num) {
 		*dst *= mul;		
 	}	
 }
 	
-void dsp_movmul(float *src, float *dst, int num, float mul)
+void dsp_movmul(amp_t *src, amp_t *dst, int num, amp_t mul)
 {
 	--src;
 	--dst;
@@ -33,12 +33,12 @@ void dsp_movmul(float *src, float *dst, int num, float mul)
 	while (--num);
 }
 	
-void dsp_clear(float *dst, int num)
+void dsp_clear(amp_t *dst, int num)
 {
-	memset(dst, 0, num * sizeof(float));
+	memset(dst, 0, num * sizeof(amp_t));
 }
 
-void dsp_interleave(float* dst, float* left, float* right, int num)
+void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, int num)
 {
 	int i;		
 	--dst;
@@ -56,7 +56,7 @@ void dsp_interleave(float* dst, float* left, float* right, int num)
 	while (--i);
 }
 
-void dsp_erase_all_nans_infinities_and_denormals(float* dst,
+void dsp_erase_all_nans_infinities_and_denormals(amp_t* dst,
 		unsigned int num) {
 	unsigned int i;
 
