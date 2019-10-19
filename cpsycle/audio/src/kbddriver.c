@@ -79,7 +79,6 @@ static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
 static void updateconfiguration(EventDriver*);
-static unsigned int samplerate(EventDriver*);
 static void driver_write(EventDriver* driver, unsigned char* data, int size);
 
 static void init_properties(EventDriver*);
@@ -99,16 +98,15 @@ EventDriver* create_kbd_driver(void)
 	KbdDriver* kbd = (KbdDriver*) malloc(sizeof(KbdDriver));
 	memset(kbd, 0, sizeof(KbdDriver));	
 	kbd->driver.open = driver_open;
-	kbd->driver.free = driver_free;
-	kbd->driver.init = driver_init;
+	kbd->driver.free = driver_free;	
 	kbd->driver.connect = driver_connect;
 	kbd->driver.open = driver_open;
 	kbd->driver.close = driver_close;
 	kbd->driver.dispose = driver_dispose;
-	kbd->driver.updateconfiguration = updateconfiguration;
-	kbd->driver.samplerate = samplerate;
+	kbd->driver.updateconfiguration = updateconfiguration;	
 	kbd->driver.error = onerror;	
 	kbd->driver.write = driver_write;
+	driver_init(&kbd->driver);
 	return &kbd->driver;			
 }
 
@@ -149,11 +147,6 @@ int driver_open(EventDriver* driver)
 int driver_close(EventDriver* driver)
 {
 	return 0;
-}
-
-unsigned int samplerate(EventDriver* self)
-{
-	return 44100;
 }
 
 void driver_write(EventDriver* driver, unsigned char* data, int size)

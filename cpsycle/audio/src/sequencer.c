@@ -285,19 +285,19 @@ void advanceposition(Sequencer* self, beat_t width)
 
 void insertevents(Sequencer* self)
 {
-	List* p;
+	List* p;	
 
 	for (p = self->currtrackiterators; p != 0; p = p->next) {
-		SequenceTrackIterator* iterator;
+		SequenceTrackIterator* it;
 
-		iterator = (SequenceTrackIterator*)p->entry;
-		while (sequencetrackiterator_patternentry(iterator)) {
+		it = (SequenceTrackIterator*)p->entry;
+		while (sequencetrackiterator_patternentry(it)) {
 			beat_t offset;
 			
-			offset = sequencetrackiterator_offset(iterator); 
+			offset = sequencetrackiterator_offset(it);
 			if (isoffsetinwindow(self, offset)) {
-				addsequenceevent(self, iterator, offset);
-				sequencetrackiterator_inc(iterator);
+				addsequenceevent(self, it, offset);			
+				sequencetrackiterator_inc(it);				
 			} else {			
 				break;
 			}				

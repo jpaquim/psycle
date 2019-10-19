@@ -4,8 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "machine.h"
+#include "machines.h"
 #include "pattern.h"
 #include <string.h>
+#include <operations.h>
 
 static CMachineInfo const macinfo = {
 	MI_VERSION,
@@ -25,7 +27,8 @@ static CMachineInfo const macinfo = {
 };
 
 static Machine* clone(Machine* self) { return 0; }
-static void work(Machine* self, BufferContext*);
+static Buffer* mix(Machine*, int slot, unsigned int amount, MachineSockets*, Machines*);
+static void work(Machine*, BufferContext*);
 static void generateaudio(Machine* self, BufferContext* bc) { }
 static int hostevent(Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
 static void seqtick(Machine* self, int channel, const PatternEvent* event) { }
@@ -43,19 +46,22 @@ static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
 static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
-static void loadspecific(Machine* self, RiffFile* file) { }
-
+static void loadspecific(Machine* self, PsyFile* file) { }
+static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
+/// machinecallback
 static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(Machine* self) { return self->callback.bpm(self->callback.context); }
 static struct Samples* samples(Machine* self) { return self->callback.samples(self->callback.context); }
 static struct Machines* machines(Machine* self) { return self->callback.machines(self->callback.context); }
 static struct Instruments* instruments(Machine* self) { return self->callback.instruments(self->callback.context); }
 
+
 void machine_init(Machine* self, MachineCallback callback)
 {		
 	memset(self, 0, sizeof(Machine));
 	self->clone = clone;
 	self->dispose = machine_dispose;
+	self->mix = mix;
 	self->work = work;
 	self->mode = mode;
 	self->hostevent = hostevent;
@@ -193,3 +199,47 @@ void machine_setpanning(Machine* self, float val)
 	self->panning = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
 }
 
+Buffer* mix(Machine* self, int slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
+{			
+	Buffer* output;
+
+	output = machines_outputs(machines, slot);
+	if (output) {
+		buffer_clearsamples(output, amount);
+		if (connected_machine_sockets) {
+			WireSocket* WireSocket;
+			
+			for (WireSocket = connected_machine_sockets->inputs;
+				WireSocket != 0; WireSocket = WireSocket->next) {
+				WireSocketEntry* source = 
+					(WireSocketEntry*)WireSocket->entry;
+				if (source->slot != -1) {
+					addsamples(
+						output, 
+						machines_outputs(machines, source->slot),
+						amount,
+						1.0f);
+				}						
+			}								
+		}
+	}
+	return output;
+}
+
+void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
+{
+	unsigned int channel;
+
+	if (source) {
+		for (channel = 0; channel < source->numchannels && 
+			channel < dst->numchannels; ++channel) {
+				dsp_add(
+					source->samples[channel],
+					dst->samples[channel],
+					numsamples,
+					vol);
+				dsp_erase_all_nans_infinities_and_denormals(
+					dst->samples[channel], numsamples);					
+		}
+	}
+}

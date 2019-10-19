@@ -42,8 +42,7 @@ typedef struct {
 	int _playing;
 	//Controls if we want the thread to be running or not
 	int _threadRun;
-	int _timerActive;		
-	void* _callbackContext;	
+	int _timerActive;	
 	GUID device_guid_;
 	int _deviceIndex;	
 	int _numBuffers;
@@ -120,14 +119,13 @@ EXPORT Driver* __cdecl driver_create(void)
 	memset(dx, 0, sizeof(DXDriver));
 	dx->driver.open = driver_open;
 	dx->driver.free = driver_free;
-	dx->driver.init = driver_init;
 	dx->driver.connect = driver_connect;
 	dx->driver.open = driver_open;
 	dx->driver.close = driver_close;
 	dx->driver.dispose = driver_dispose;
 	dx->driver.updateconfiguration = updateconfiguration;
 	dx->driver.samplerate = samplerate;
-
+	driver_init(&dx->driver);
 	return &dx->driver;
 }
 
@@ -221,10 +219,9 @@ unsigned int samplerate(Driver* self)
 }
 
 void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
-{
-	DXDriver* self = (DXDriver*) driver;
-	self->_callbackContext = context;
-	self->driver._pCallback = callback;
+{	
+	driver->_callbackContext = context;
+	driver->_pCallback = callback;
 	hwndmain = (HWND) handle;
 }
 
@@ -480,7 +477,7 @@ void DoBlocks(DXDriver* self)
 			{
 				int n = blockSize;
 				float *pFloatBlock = self->driver._pCallback(
-					self->_callbackContext, 
+					self->driver._callbackContext, 
 					&n);
 				if (self->_dither)
 				{
@@ -499,7 +496,8 @@ void DoBlocks(DXDriver* self)
 			while(blockSize > 0)
 			{
 				int n = blockSize;
-				float *pFloatBlock = self->driver._pCallback(self->_callbackContext, &n);
+				float *pFloatBlock = self->driver._pCallback(
+					self->driver._callbackContext, &n);
 				if (self->_dither)
 				{
 					//QuantizeWithDither(pFloatBlock, pBlock, n);

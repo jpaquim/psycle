@@ -24,7 +24,7 @@ static void setvalue(Plugin*, int const param, int const value);
 static void dispose(Plugin*);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
-static void loadspecific(Plugin* self, RiffFile* file);
+static void loadspecific(Plugin* self, PsyFile* file);
 static void setcallback(Plugin* self, MachineCallback callback);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
@@ -205,20 +205,20 @@ void setcallback(Plugin* self, MachineCallback callback)
 	}
 }
 
-void loadspecific(Plugin* self, RiffFile* file)
+void loadspecific(Plugin* self, PsyFile* file)
 {
 	unsigned int size;
 
-	rifffile_read(file, &size, sizeof(size)); // size of whole structure
+	psyfile_read(file, &size, sizeof(size)); // size of whole structure
 	if(size) {
 		unsigned int count;
 		unsigned int i;
 
-		rifffile_read(file, &count, sizeof(count));  // size of vars
+		psyfile_read(file, &count, sizeof(count));  // size of vars
 		for (i = 0; i < count; i++) {
 			int temp;
 			
-			rifffile_read(file, &temp, sizeof(temp));			
+			psyfile_read(file, &temp, sizeof(temp));			
 			self->machine.parametertweak(self, i, temp);
 		}
 		size -= sizeof(count) + sizeof(int)*count;
@@ -230,7 +230,7 @@ void loadspecific(Plugin* self, RiffFile* file)
 			// This way we guarantee that the plugin will have enough bytes,
 			// even if it does not fit what it reads.
 			pData = (unsigned char*)malloc(max(size,size2));
-			rifffile_read(file, pData, size); // Read internal data.			
+			psyfile_read(file, pData, size); // Read internal data.			
 			mi_putdata(self->mi, pData); // Internal load
 			free(pData);
 		}						

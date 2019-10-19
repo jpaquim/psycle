@@ -6,6 +6,8 @@
 #include "sequenceview.h"
 #include <stdio.h>
 
+#define TIMERID_SEQUENCEVIEW 2000
+
 static void OnDraw(SequenceListView*, ui_component* sender, ui_graphics* g);
 static void DrawSequence(SequenceListView*, ui_graphics* g);
 void DrawTrack(SequenceListView*, ui_graphics* g, SequenceTrack* track,
@@ -30,19 +32,22 @@ static void OnEditPositionChanged(SequenceView*, Sequence* sender);
 static void buttons_onalign(SequenceButtons* self, ui_component* sender);
 static void buttons_onpreferredsize(SequenceButtons*, ui_component* sender, ui_size* limit, int* width, int* height);
 static List* rowend(List* p);
+static void OnTimer(SequenceListView*, ui_component* sender, int timerid);
 
 static int listviewmargin = 5;
 
 void InitSequenceView(SequenceView* self, ui_component* parent,
 	Workspace* workspace)
 {	
+	self->workspace = workspace;
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	InitSequenceListView(&self->listview, &self->component, 
-		&workspace->song->sequence, &workspace->song->patterns);		
+		&workspace->song->sequence, &workspace->song->patterns);
+	self->listview.player = &workspace->player;
 	self->buttons.context = &self->listview;
 	InitSequenceButtons(&self->buttons, &self->component);
 	ui_component_resize(&self->buttons.component, 200, 70);
@@ -182,12 +187,16 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent,
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_mousedown, self, OnListViewMouseDown);
 	signal_connect(&self->component.signal_scroll, self, OnScroll);	
+	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	self->selected = 0;
 	self->selectedtrack = 0;	
 	self->lineheight = 12;
 	self->trackwidth = 100;
 	self->dx = 0;
 	self->dy = 0;
+	self->lastplayposition = -1.f;
+	self->lastentry = 0;
+	SetTimer(self->component.hwnd, TIMERID_SEQUENCEVIEW, 200, 0);
 }
 
 void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g)
@@ -243,26 +252,37 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 	// ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
 	ui_settextcolor(g, 0);
 	p = track->entries;
-	while (p != 0) {
+	for (; p != 0; p = p->next, ++c, cpy += self->lineheight) {
 		SequenceEntry* entry;
+		int playing = 0;
 		// Pattern* pattern;
-		entry = (SequenceEntry*)p->entry;
-		//pattern = patterns_at(&self->sequence->patterns, entry->pattern);
-		//if (pattern) {
-			_snprintf(buffer,20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
-			if (self->selected == (int)c && self->selectedtrack == trackindex) {
-				ui_setbackgroundcolor(g, 0x009B7800);
-				ui_settextcolor(g, 0x00FFFFFF);
-				self->foundselected = 1;				
-			} else {
-				ui_setbackgroundcolor(g, 0x00232323);
-				ui_settextcolor(g, 0x00CACACA);
+		entry = (SequenceEntry*)p->entry;		
+
+		if (player_playing(self->player)) {
+			Pattern* pattern;
+
+			pattern = patterns_at(self->patterns, entry->pattern);			
+			if (pattern && 
+					player_position(self->player) >= entry->offset &&
+					player_position(self->player) < entry->offset +
+						pattern->length) {
+				playing = 1;
 			}
-			ui_textout(g, x + 5, cpy + self->dy + listviewmargin, buffer, strlen(buffer));
-		//}
-		p = p->next;
-		cpy += self->lineheight;
-		++c;
+		}		
+		_snprintf(buffer,20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
+		if (self->selected == (int)c && self->selectedtrack == trackindex) {
+			ui_setbackgroundcolor(g, 0x009B7800);
+			ui_settextcolor(g, 0x00FFFFFF);
+			self->foundselected = 1;				
+		} else 
+		if (playing) {
+			ui_setbackgroundcolor(g, 0x00232323);
+			ui_settextcolor(g, 0x00D1C5B6);
+		} else {
+			ui_setbackgroundcolor(g, 0x00232323);
+			ui_settextcolor(g, 0x00CACACA);
+		}
+		ui_textout(g, x + 5, cpy + self->dy + listviewmargin, buffer, strlen(buffer));
 	}	
 }
 
@@ -297,13 +317,9 @@ void OnSize(SequenceView* self, ui_component* sender, int width, int height)
 }
 
 void OnNewEntry(SequenceView* self)
-{	
-	Pattern* pattern;
-	
-	pattern = (Pattern*) malloc(sizeof(Pattern));
-	pattern_init(pattern);	
+{		
 	sequence_insert(self->sequence, sequence_editposition(self->sequence), 
-		patterns_append(self->patterns, pattern));	
+		patterns_append(self->patterns, pattern_allocinit()));	
 	UpdateSequenceViewDuration(&self->duration);
 	AdjustScrollBars(&self->listview);
 }
@@ -386,10 +402,8 @@ void OnDecPattern(SequenceView* self)
 }
 
 void OnNewTrack(SequenceView* self)
-{
-	SequenceTrack* track = (SequenceTrack*)malloc(sizeof(SequenceTrack));
-	sequencetrack_init(track);
-	sequence_appendtrack(self->sequence, track);
+{	
+	sequence_appendtrack(self->sequence, sequencetrack_allocinit());
 	AdjustScrollBars(&self->listview);
 	ui_invalidate(&self->component);	
 }
@@ -488,10 +502,7 @@ void OnEditPositionChanged(SequenceView* self, Sequence* sequence)
 		++c;
 		p = p->next;		
 	}
-
 	self->listview.selectedtrack = c;
-
-
 	if (p) {
 		q = ((SequenceTrack*)p->entry)->entries;
 		c = 0;
@@ -535,4 +546,22 @@ void OnDurationSize(SequenceViewDuration* self, ui_component* sender, int width,
 
 	ui_component_setposition(&self->desc.component, 0, 0, 45, size.height);
 	ui_component_setposition(&self->duration.component, 45, 0, 50, size.height);
+}
+
+void OnTimer(SequenceListView* self, ui_component* sender, int timerid)
+{			
+	SequenceTrackIterator it;
+	
+	if (player_playing(self->player)) {
+		it = sequence_begin(self->sequence, self->sequence->tracks, 
+			player_position(self->player));
+		if (it.tracknode && self->lastentry != it.tracknode->entry) {
+			ui_invalidate(&self->component);
+			self->lastentry = (SequenceEntry*) it.tracknode->entry;
+		}
+	} else
+	if (self->lastentry) {
+		ui_invalidate(&self->component);
+		self->lastentry = 0;
+	}
 }

@@ -3,6 +3,7 @@
 
 #include "../../detail/prefix.h"
 
+#include <windows.h>
 #include "properties.h"
 #include <malloc.h>
 #include <string.h>
@@ -16,7 +17,7 @@ static int properties_enumerate_rec(Properties*);
 static int OnSearchPropertiesEnum(Properties*, Properties*, int level);
 static int OnPropertySearchPropertiesEnum(Properties* self, 
 	Properties* property, int level);
-static int OnSaveIniEnum(RiffFile* file, Properties*, int level);
+static int OnSaveIniEnum(PsyFile* file, Properties*, int level);
 static Properties* append(Properties* self, Properties* p);
 static Properties* tail(Properties*);
 static Properties* properties_findsectionex(Properties*, const char* key,
@@ -55,7 +56,7 @@ void properties_free(Properties* self)
 		if (p->children && p->item.disposechildren) {
 			properties_free(p->children);
 		}		
-		next = p->next;
+		next = p->next;		
 		free(p->item.key);
 		if (p->item.typ == PROPERTY_TYP_STRING) {
 			free(p->item.value.s);
@@ -613,56 +614,56 @@ int properties_load(Properties* self, const char* path, int allowappend)
 
 void properties_save(Properties* self, const char* path)
 {
-	RiffFile file;
-	if (rifffile_create(&file, path, 1)) {
+	PsyFile file;
+	if (psyfile_create(&file, path, 1)) {
 		properties_enumerate(self, &file, (PropertiesCallback)OnSaveIniEnum);
-		rifffile_close(&file);
+		psyfile_close(&file);
 	}
 }
 
-int OnSaveIniEnum(RiffFile* file, Properties* property, int level)
+int OnSaveIniEnum(PsyFile* file, Properties* property, int level)
 {
 	if (property->item.key) {
 		char text[40];
 		
 		if (property->item.typ == PROPERTY_TYP_ROOT) {
-			rifffile_write(file, "[root]", 6);
+			psyfile_write(file, "[root]", 6);
 		} else
 		if (property->item.typ == PROPERTY_TYP_SECTION) {
 			char sections[_MAX_PATH];
 
 			properties_sections(property, sections);
-			rifffile_write(file, "[", 1);
+			psyfile_write(file, "[", 1);
 			if (sections[0] != '\0') {
-				rifffile_write(file, sections, strlen(sections));
+				psyfile_write(file, sections, strlen(sections));
 			}
-			rifffile_write(file, "]", 1);
+			psyfile_write(file, "]", 1);
 		} else 
 		if (property->item.typ != PROPERTY_TYP_ACTION) {			
-			rifffile_write(file, property->item.key, strlen(property->item.key));
-			rifffile_write(file, "=", strlen("="));
+			psyfile_write(file, property->item.key, strlen(property->item.key));
+			psyfile_write(file, "=", strlen("="));
 			switch (property->item.typ) {				
 				case PROPERTY_TYP_INTEGER:
 					_snprintf(text, 40, "%d", property->item.value.i);
-					rifffile_write(file, text, strlen(text));
+					psyfile_write(file, text, strlen(text));
 				break;
 				case PROPERTY_TYP_BOOL:
 					_snprintf(text, 40, "%d", property->item.value.i);
-					rifffile_write(file, text, strlen(text));
+					psyfile_write(file, text, strlen(text));
 				break;
 				case PROPERTY_TYP_CHOICE:
 					_snprintf(text, 40, "%d", property->item.value.i);
-					rifffile_write(file, text, strlen(text));
+					psyfile_write(file, text, strlen(text));
 				break;
 				case PROPERTY_TYP_STRING:
-					rifffile_write(file, property->item.value.s,
+					psyfile_write(file, property->item.value.s,
 						strlen(property->item.value.s));
 				break;						
 				default:
 				break;
 			}
 		}
-		rifffile_write(file, "\n", strlen("\n"));
+		psyfile_write(file, "\n", strlen("\n"));
 	}
 	return 1;
 }

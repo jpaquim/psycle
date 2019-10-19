@@ -4,11 +4,13 @@
 #if !defined(DSP_OPERATIONS_H)
 #define DSP_OPERATIONS_H
 
-void dsp_add(float *src, float *dst, int num, float vol);
-void dsp_mul(float *dst, int numSamples, float mul);
-void dsp_movmul(float *src, float *dst, int num, float mul);		
-void dsp_clear(float *dst, int num);
-void dsp_interleave(float* dst, float* left, float* right, int num);
-void dsp_erase_all_nans_infinities_and_denormals(float* dst, unsigned int num);
+#include "dsptypes.h"
+
+void dsp_add(amp_t *src, amp_t *dst, int num, amp_t vol);
+void dsp_mul(amp_t *dst, int numSamples, amp_t mul);
+void dsp_movmul(amp_t *src, amp_t *dst, int num, amp_t mul);
+void dsp_clear(amp_t *dst, int num);
+void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, int num);
+void dsp_erase_all_nans_infinities_and_denormals(amp_t* dst, unsigned int num);
 
 #endif

@@ -393,8 +393,7 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 			adsr_tick(&self->env);			
 			if (multifilter_type(&self->filter_l) != F_NONE) {
 				adsr_tick(&self->filterenv);
-			}
-			
+			}			
 			if (!sampleiterator_inc(&self->position)) {			
 				voice_reset(self);					
 				break;				

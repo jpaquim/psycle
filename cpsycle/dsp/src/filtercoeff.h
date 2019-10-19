@@ -4,14 +4,16 @@
 #if !defined(DSP_FILTERCOEFF_H)
 #define DSP_FILTERCOEFF_H
 
+#include "dsptypes.h"
+
 extern const double TPI;
 
 typedef struct {	
-	double coeff[5];
+	big_amp_t coeff[5];
 } FilterCoeff;
 
 typedef struct {
-	float container[128][128][5];
+	amp_t container[128][128][5];
 } FilterMap;
 
 

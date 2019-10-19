@@ -4,7 +4,7 @@
 #if !defined(PATTERNEVENT_H)
 #define PATTERNEVENT_H
 
-typedef float beat_t;
+#include <dsptypes.h>
 
 typedef	enum {
 	EXTENDED	=		0xFE, // (see below)

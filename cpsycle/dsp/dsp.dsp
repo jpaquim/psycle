@@ -125,6 +125,10 @@ SOURCE=.\src\adsr.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\dsptypes.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\filter.h
 # End Source File
 # Begin Source File

@@ -3,6 +3,8 @@
 
 #include "../../detail/prefix.h"
 
+#include <windows.h>
+
 #include "signal.h"
 #include <stdlib.h>
 #include <stdarg.h>          
@@ -110,7 +112,7 @@ void signal_emit_int(Signal* self, void* context, int param)
 		List* p = self->slots;
 		for (p = self->slots; p != 0; p = p->next) {
 			Slot* slot = (Slot*) p->entry;
-			if (!slot->prevented) {
+			if (!slot->prevented) {				
 				((signalcallback_int)slot->fp)(slot->context, context, param);
 			}
 		}

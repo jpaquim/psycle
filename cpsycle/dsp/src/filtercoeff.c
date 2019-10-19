@@ -31,7 +31,7 @@ void filtermap_setcoeffs(FilterMap* self, int cutoff, int q,  FilterCoeff* coeff
 	int pole;
 
 	for (pole = 0; pole < 5; ++ pole) {
-		self->container[cutoff][q][pole] = (float) coeffs->coeff[pole];
+		self->container[cutoff][q][pole] = (amp_t) coeffs->coeff[pole];
 	}			
 }
 

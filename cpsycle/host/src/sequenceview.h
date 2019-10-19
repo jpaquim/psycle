@@ -36,7 +36,10 @@ typedef struct {
 	int identwidth;   
 	int avgcharwidth;
 	int dx;
-	int dy;	
+	int dy;
+	beat_t lastplayposition;
+	Player* player;
+	SequenceEntry* lastentry;
 } SequenceListView;
 
 typedef struct {
@@ -57,7 +60,8 @@ typedef struct {
 	ui_checkbox followsong;
 	ui_checkbox shownames;	
 	Patterns* patterns;
-	Sequence* sequence;	
+	Sequence* sequence;
+	Workspace* workspace;
 } SequenceView;
 
 void InitSequenceView(SequenceView*, ui_component* parent, Workspace*);

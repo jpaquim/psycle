@@ -5,11 +5,13 @@
 
 #include "adsr.h"
 
-static const float defaultfastrelease = 0.003f;
-static void computestep(ADSR* self, float dvalue, float numseconds);
+static const seconds_t defaultfastrelease = 0.003f;
+static void computestep(ADSR* self, amp_t dvalue, seconds_t numseconds);
 
-void envelopepoint_init(EnvelopePoint* self, float time, float value,
-	float mintime, float maxtime, float minvalue, float maxvalue)
+void envelopepoint_init(EnvelopePoint* self, 
+	seconds_t time, amp_t value,
+	seconds_t mintime, seconds_t maxtime,
+	amp_t minvalue, amp_t maxvalue)
 {
 	self->time = time;
 	self->value = value;
@@ -19,8 +21,8 @@ void envelopepoint_init(EnvelopePoint* self, float time, float value,
 	self->maxvalue = maxvalue;
 }
 
-void adsr_settings_init(ADSRSettings* self, float attack,
-	float decay, float sustain, float release)
+void adsr_settings_init(ADSRSettings* self, seconds_t attack,
+	seconds_t decay, percent_t sustain, seconds_t release)
 {	
 	self->attack = attack;
 	self->decay = decay;
@@ -38,53 +40,53 @@ void adsr_settings_initdefault(ADSRSettings* self)
 	self->fastrelease = defaultfastrelease;
 }
 
-float adsr_settings_attack(ADSRSettings* self)
+seconds_t adsr_settings_attack(ADSRSettings* self)
 {
 	return self->attack;
 }
 
-void adsr_settings_setattack(ADSRSettings* self, float value)
+void adsr_settings_setattack(ADSRSettings* self, seconds_t value)
 {
 	self->attack = value;
 }
 
-float adsr_settings_decay(ADSRSettings* self)
+seconds_t adsr_settings_decay(ADSRSettings* self)
 {
 	return self->decay;
 }
 
-void adsr_settings_setdecay(ADSRSettings* self, float value)
+void adsr_settings_setdecay(ADSRSettings* self, seconds_t value)
 {
 	self->decay = value;
 }
 
-float adsr_settings_sustain(ADSRSettings* self)
+percent_t adsr_settings_sustain(ADSRSettings* self)
 {
 	return self->sustain;
 }
 
-void adsr_settings_setsustain(ADSRSettings* self, float value)
+void adsr_settings_setsustain(ADSRSettings* self, percent_t value)
 {
 	self->sustain = value;
 }
 
-float adsr_settings_release(ADSRSettings* self)
+seconds_t adsr_settings_release(ADSRSettings* self)
 {
 	return self->release;
 }
 
-void adsr_settings_setrelease(ADSRSettings* self, float value)
+void adsr_settings_setrelease(ADSRSettings* self, seconds_t value)
 {
 	self->release = value;
 }
 
 
-float adsr_settings_fastrelease(ADSRSettings* self)
+seconds_t adsr_settings_fastrelease(ADSRSettings* self)
 {
 	return self->fastrelease;
 }
 
-void adsr_settings_setfastrelease(ADSRSettings* self, float value)
+void adsr_settings_setfastrelease(ADSRSettings* self, seconds_t value)
 {
 	self->fastrelease = value;
 }
@@ -183,7 +185,7 @@ void adsr_fastrelease(ADSR* self)
 	}
 }
 
-void computestep(ADSR* self, float dvalue, float numseconds)
+void computestep(ADSR* self, amp_t dvalue, seconds_t numseconds)
 {
 	self->step = dvalue / (numseconds * self->samplerate);
 }

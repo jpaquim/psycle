@@ -25,6 +25,8 @@ typedef struct {
 
 void song_init(Song* self, MachineFactory*);
 void song_dispose(Song* self);
+Song* song_alloc(void);
+Song* song_allocinit(MachineFactory*);
 void song_load(Song* self, const char* path,
 			   Properties** workspaceproperties);
 

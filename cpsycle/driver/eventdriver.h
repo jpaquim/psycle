@@ -26,13 +26,11 @@ typedef struct EventDriver {
 	void* _callbackContext;
 	Properties* properties;
 	int (*open)(struct EventDriver*);
-	void (*free)(struct EventDriver*);
-	int (*init)(struct EventDriver*);
+	void (*free)(struct EventDriver*);	
 	void (*updateconfiguration)(struct EventDriver*);
 	int (*dispose)(struct EventDriver*);
 	int (*close)(struct EventDriver*);
-	void (*connect)(struct EventDriver*, void* context, EVENTDRIVERWORKFN callback, void* handle);
-	unsigned int (*samplerate)(struct EventDriver*);
+	void (*connect)(struct EventDriver*, void* context, EVENTDRIVERWORKFN callback, void* handle);	
 	void (*write)(struct EventDriver*, unsigned char* data, int size);
 	int (*error)(int, const char*);
 } EventDriver;

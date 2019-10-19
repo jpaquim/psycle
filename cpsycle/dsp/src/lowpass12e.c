@@ -11,7 +11,7 @@ static lowpass12e_coeffmap_initialized;
 
 static void lowpass12e_computecoeffs(LowPass12E* self, int freq, int r, FilterCoeff* coeff);
 static void lowpass12e_update(LowPass12E*, int full);
-static float lowpass12e_work(LowPass12E*, float sample);
+static amp_t lowpass12e_work(LowPass12E*, amp_t sample);
 static void lowpass12e_reset(LowPass12E*);
 
 void lowpass12e_init(LowPass12E* self)
@@ -71,7 +71,7 @@ void lowpass12e_computecoeffs(LowPass12E* self, int freq, int r, FilterCoeff* co
 	filtercoeff_setparameter(coeff, a0, a1, a2, b0, b1, b2);
 }
 
-float lowpass12e_work(LowPass12E* self, float sample)
+amp_t lowpass12e_work(LowPass12E* self, amp_t sample)
 {
 	return firwork_work(&self->firwork, &self->coeff, sample);
 }

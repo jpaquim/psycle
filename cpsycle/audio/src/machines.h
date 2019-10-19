@@ -4,34 +4,21 @@
 #if !defined(MACHINES_H)
 #define MACHINES_H
 
-#include <hashtbl.h>
-#include <list.h>
+#include "connections.h"
 #include "master.h"
 #include <signal.h>
 
 #define MASTER_INDEX 128
 #define MAX_STREAM_SIZE 256
 
-typedef struct {
-	int slot;	
-	float volume;	
-} MachineConnectionEntry;
-
-typedef List MachineConnection;
-
-typedef struct {	
-	MachineConnection* inputs;
-	MachineConnection* outputs;
-} MachineConnections;
-
 typedef List MachinePath;
 typedef List MachineList;
 
 typedef struct Machines {	
 	Table slots;	
-	Table connections;	
 	Table inputbuffers;
 	Table outputbuffers;
+	Connections connections;
 	MachinePath* path;
 	Table nopath;
 	List* buffers;	
@@ -45,13 +32,12 @@ typedef struct Machines {
 	Signal signal_removed;
 	Signal signal_slotchange;
 	Signal signal_showparameters;
-	Master* master;
+	Machine* master;
 } Machines;
 
 void machines_init(Machines*);
 void machines_dispose(Machines*);
 void machines_insert(Machines*, int slot, Machine*);
-void machines_insertmaster(Machines*, Master*);
 void machines_erase(Machines*, int slot);
 void machines_remove(Machines*, int slot);
 void machines_exchange(Machines*, int srcslot, int dstslot);
@@ -62,12 +48,12 @@ void machines_disconnect(Machines*, int outputslot, int inputslot);
 void machines_disconnectall(Machines*, int slot);
 int machines_connected(Machines*, int outputslot, int inputslot);
 MachineList* machines_path(Machines* self);
-MachineConnections* machines_connections(Machines*, int slot);
 Buffer* machines_inputs(Machines*, unsigned int slot);
 Buffer* machines_outputs(Machines*, unsigned int slot);
 void machines_buffer_end(Machines*);
 void machines_changeslot(Machines*, int slot);
 int machines_slot(Machines*);
+void machines_insertmaster(Machines*, Machine*);
 Machine* machines_master(Machines*);
 void machines_startfilemode(Machines*);
 void machines_endfilemode(Machines*);

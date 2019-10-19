@@ -4,38 +4,42 @@
 #if !defined(DSP_ADSR_H)
 #define DSP_ADSR_H
 
+#include "dsptypes.h"
+
 typedef struct {
-	float value;
-	float time;
-	float minvalue;
-	float maxvalue;
-	float mintime;
-	float maxtime;	
+	amp_t value;
+	beat_t time;
+	amp_t minvalue;
+	amp_t maxvalue;
+	beat_t mintime;
+	beat_t maxtime;	
 } EnvelopePoint;
 
-void envelopepoint_init(EnvelopePoint*, float time, float value, float mintime,
-	float maxtime, float minvalue, float maxvalue);
+void envelopepoint_init(EnvelopePoint*, 
+		seconds_t time, amp_t value,
+		seconds_t mintime, seconds_t maxtime,
+		amp_t minvalue, amp_t maxvalue);
 
 typedef struct {	
-	float attack;
-	float decay;
-	float sustain;
-	float release;
-	float fastrelease;
+	seconds_t attack;
+	seconds_t decay;
+	percent_t sustain;
+	seconds_t release;
+	seconds_t fastrelease;
 } ADSRSettings;
 
-void adsr_settings_init(ADSRSettings*, float, float, float, float);
+void adsr_settings_init(ADSRSettings*, seconds_t, seconds_t, seconds_t, seconds_t);
 void adsr_settings_initdefault(ADSRSettings*);
 float adsr_settings_attack(ADSRSettings*);
-void adsr_settings_setattack(ADSRSettings*, float);
+void adsr_settings_setattack(ADSRSettings*, seconds_t);
 float adsr_settings_decay(ADSRSettings*);
-void adsr_settings_setdecay(ADSRSettings*, float);
+void adsr_settings_setdecay(ADSRSettings*, seconds_t);
 float adsr_settings_sustain(ADSRSettings*);
-void adsr_settings_setsustain(ADSRSettings*, float);
+void adsr_settings_setsustain(ADSRSettings*, percent_t);
 float adsr_settings_release(ADSRSettings*);
-void adsr_settings_setrelease(ADSRSettings*, float);
+void adsr_settings_setrelease(ADSRSettings*, seconds_t);
 float adsr_settings_fastrelease(ADSRSettings*);
-void adsr_settings_setfastrelease(ADSRSettings*, float);
+void adsr_settings_setfastrelease(ADSRSettings*, seconds_t);
 
 typedef enum
 {
@@ -48,8 +52,8 @@ typedef enum
 } EnvelopeStage;
 
 typedef struct {
-	float value;
-	float step;	
+	amp_t value;
+	amp_t step;	
 	unsigned int samplerate;
 	ADSRSettings settings;
 	EnvelopeStage stage;

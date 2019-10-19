@@ -27,12 +27,41 @@ void pattern_init(Pattern* self)
 	self->opcount = 0;
 }
 
+void pattern_dispose(Pattern* self)
+{
+	PatternNode* p;	
+	
+	for (p = self->events; p != 0; p = p->next) {		
+		free (p->entry);		
+	}
+	list_free(self->events);
+	self->events = 0;
+	free(self->label);
+	self->label = 0;
+}
+
+Pattern* pattern_alloc(void)
+{
+	return (Pattern*) malloc(sizeof(Pattern));
+}
+
+Pattern* pattern_allocinit(void)
+{
+	Pattern* rv;
+
+	rv = pattern_alloc();
+	if (rv) {
+		pattern_init(rv);
+	}
+	return rv;
+}
+
 Pattern* pattern_clone(Pattern* self)
 {	
 	Pattern* rv;
 	PatternNode* p;	
 
-	rv = (Pattern*) malloc(sizeof(Pattern));
+	rv = pattern_alloc();
 	rv->events = 0;			
 	for (p = self->events; p != 0; p = p->next) {
 		PatternEntry* entry;
@@ -48,21 +77,8 @@ Pattern* pattern_clone(Pattern* self)
 		list_append(&rv->events, rventry);		
 	}
 	rv->length = self->length;
-	rv->label = _strdup(self->label);
+	rv->label = strdup(self->label);
 	return rv;
-}
-
-void pattern_dispose(Pattern* self)
-{
-	PatternNode* p;	
-	
-	for (p = self->events; p != 0; p = p->next) {		
-		free (p->entry);		
-	}
-	list_free(self->events);
-	self->events = 0;
-	free(self->label);
-	self->label = 0;
 }
 
 void pattern_remove(Pattern* self, PatternNode* node)

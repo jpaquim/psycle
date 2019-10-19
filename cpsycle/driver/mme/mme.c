@@ -39,8 +39,7 @@ typedef struct {
 	int m_readPosWraps;
 	/// helper variable to detect the previous wraps.
 	int m_lastPlayPos;		
-	CBlock _blocks[MAX_WAVEOUT_BLOCKS];
-	void* _callbackContext;	
+	CBlock _blocks[MAX_WAVEOUT_BLOCKS];	
 	int (*error)(int, const char*);
 	HANDLE hEvent;
 } MmeDriver;
@@ -101,7 +100,6 @@ EXPORT Driver* __cdecl driver_create(void)
 	memset(mme, 0, sizeof(MmeDriver));
 	mme->driver.open = driver_open;
 	mme->driver.free = driver_free;
-	mme->driver.init = driver_init;
 	mme->driver.connect = driver_connect;
 	mme->driver.open = driver_open;
 	mme->driver.close = driver_close;
@@ -110,6 +108,7 @@ EXPORT Driver* __cdecl driver_create(void)
 	mme->driver.samplerate = samplerate;
 	mme->hEvent = CreateEvent
 		(NULL, FALSE, FALSE, NULL);
+	driver_init(&mme->driver);
 	return &mme->driver;
 }
 
@@ -218,9 +217,8 @@ unsigned int samplerate(Driver* self)
 
 void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
 {
-	MmeDriver* self = (MmeDriver*) driver;
-	self->_callbackContext = context;
-	self->driver._pCallback = callback;
+	driver->_callbackContext = context;
+	driver->_pCallback = callback;
 }
 
 int driver_open(Driver* driver)
@@ -348,7 +346,7 @@ void DoBlocks(MmeDriver* self)
 		do
 		{
 			int n = bs;
-			float *pBuf = self->driver._pCallback(self->_callbackContext, &n);
+			float *pBuf = self->driver._pCallback(self->driver._callbackContext, &n);
 			if (self->_stopPolling == TRUE) {
 				break;
 			}

@@ -32,7 +32,7 @@ unsigned long FourCC(char *psName)
 	return retbuf;
 }
 
-BOOL rifffile_open(RiffFile* self,
+BOOL psyfile_open(PsyFile* self,
 				   const char* psFileName)
 {
 	strcpy(self->szName,psFileName);
@@ -40,7 +40,7 @@ BOOL rifffile_open(RiffFile* self,
 	return (self->_file != NULL);
 }
 
-BOOL rifffile_create(RiffFile* self,
+BOOL psyfile_create(PsyFile* self,
 					 const char* psFileName,
 					 BOOL overwrite)
 {
@@ -59,7 +59,7 @@ BOOL rifffile_create(RiffFile* self,
 	return (self->_file != NULL);
 }
 
-BOOL rifffile_close(RiffFile* self)
+BOOL psyfile_close(PsyFile* self)
 {
 	if ( self->_file != NULL )
 	{
@@ -75,7 +75,7 @@ BOOL rifffile_close(RiffFile* self)
 	
 }
 
-BOOL rifffile_read(RiffFile* self,
+BOOL psyfile_read(PsyFile* self,
 				   void* pData,
 				   unsigned long numBytes)
 {
@@ -84,7 +84,7 @@ BOOL rifffile_read(RiffFile* self,
 	
 }
 
-BOOL rifffile_write(RiffFile* self,
+BOOL psyfile_write(PsyFile* self,
 					void* pData,
 					unsigned long numBytes)
 {
@@ -96,7 +96,7 @@ BOOL rifffile_write(RiffFile* self,
 	
 }
 
-BOOL rifffile_expect(RiffFile* self,
+BOOL psyfile_expect(PsyFile* self,
 					 void* pData,
 					 unsigned long numBytes)
 {
@@ -119,7 +119,7 @@ BOOL rifffile_expect(RiffFile* self,
 	
 }
 
-long rifffile_seek(RiffFile* self,
+long psyfile_seek(PsyFile* self,
 				   long offset)
 {
 	if (fseek(self->_file, offset, SEEK_SET) != 0)
@@ -130,26 +130,26 @@ long rifffile_seek(RiffFile* self,
 	
 }
 
-long rifffile_skip(RiffFile* self,
+long psyfile_skip(PsyFile* self,
 				   long numBytes)
 {
 	if (fseek(self->_file, numBytes, SEEK_CUR) != 0) return -1;
 	return ftell(self->_file);
 }
 
-BOOL rifffile_eof(RiffFile* self)
+BOOL psyfile_eof(PsyFile* self)
 {
 	return feof(self->_file);
 	
 }
 
-long rifffile_getpos(RiffFile* self)
+long psyfile_getpos(PsyFile* self)
 {
 	return ftell(self->_file);
 }
 
 
-long rifffile_filesize(RiffFile* self)
+long psyfile_filesize(PsyFile* self)
 {	
 	int init = ftell(self->_file);
 	int end;
@@ -160,7 +160,7 @@ long rifffile_filesize(RiffFile* self)
 	
 }
 
-BOOL rifffile_readstring(RiffFile* self, char* pData, unsigned long maxBytes)
+BOOL psyfile_readstring(PsyFile* self, char* pData, unsigned long maxBytes)
 {
 	if (maxBytes > 0)
 	{		
@@ -169,7 +169,7 @@ BOOL rifffile_readstring(RiffFile* self, char* pData, unsigned long maxBytes)
 		memset(pData,0,maxBytes);
 		for (index = 0; index < maxBytes; index++)
 		{
-			if (rifffile_read(self, &c, sizeof(c)))
+			if (psyfile_read(self, &c, sizeof(c)))
 			{
 				pData[index] = c;
 				if (c == 0)
@@ -184,7 +184,7 @@ BOOL rifffile_readstring(RiffFile* self, char* pData, unsigned long maxBytes)
 		}
 		do
 		{
-			if (!rifffile_read(self, &c, sizeof(c)))
+			if (!psyfile_read(self, &c, sizeof(c)))
 			{
 				return FALSE;
 			}
@@ -195,7 +195,7 @@ BOOL rifffile_readstring(RiffFile* self, char* pData, unsigned long maxBytes)
 	
 }
 
-FILE* rifffile_getfile(RiffFile* self)
+FILE* psyfile_getfile(PsyFile* self)
 {
 	return self->_file;
 }

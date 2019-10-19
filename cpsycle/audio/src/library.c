@@ -4,10 +4,27 @@
 #include "../../detail/prefix.h"
 
 #include "library.h"
+#include <stdlib.h>
 
 #define __cplusplus
 #include <diversalis/os.hpp>
 #undef __cplusplus
+
+Library* library_alloc(void)
+{
+	return (Library*) malloc(sizeof(Library));
+}
+
+Library* library_allocinit(void)
+{
+	Library* rv;
+
+	rv = library_alloc();
+	if (rv) {
+		library_init(rv);
+	}
+	return rv;
+}
 
 #if defined(DIVERSALIS__OS__MICROSOFT)
 

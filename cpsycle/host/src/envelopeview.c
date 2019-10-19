@@ -16,8 +16,9 @@ static void ShiftSuccessors(EnvelopeView* self, double timeshift);
 static void CheckAdjustPointRange(List* p);
 static int pxvalue(EnvelopeView*, double value);
 static int pxtime(EnvelopeView*, double t);
-static float displaymaxtime(EnvelopeView*);
-EnvelopePoint* allocpoint(float time, float value, float mintime, float maxtime, float minvalue, float maxvalue);
+static seconds_t displaymaxtime(EnvelopeView*);
+EnvelopePoint* allocpoint(seconds_t time, amp_t value, seconds_t mintime,
+	seconds_t maxtime, amp_t minvalue, amp_t maxvalue);
 static void InitPoints(EnvelopeView*);
 
 void adsrpointmapper_init(ADSRPointMapper* self)
@@ -275,7 +276,7 @@ float displaymaxtime(EnvelopeView* self)
 	return 5.f;
 }
 
-EnvelopePoint* allocpoint(float time, float value, float mintime, float maxtime, float minvalue, float maxvalue)
+EnvelopePoint* allocpoint(seconds_t time, amp_t value, seconds_t mintime, seconds_t maxtime, amp_t minvalue, amp_t maxvalue)
 {
 	EnvelopePoint* rv;
 

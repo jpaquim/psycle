@@ -10,7 +10,7 @@
 /// an event with additional position and track information
 typedef struct {
 	PatternEvent event;
-	 /// position in beat unit
+	/// position in beat unit
 	beat_t offset;
 	/// sound driver callback event position
 	beat_t delta;
@@ -36,6 +36,12 @@ typedef struct {
 void pattern_init(Pattern*);
 /// frees all memory used
 void pattern_dispose(Pattern*);
+/// allocates a pattern
+///\return allocates a pattern
+Pattern* pattern_alloc(void);
+/// allocates and initializes a pattern
+///\return allocates and initializes a pattern
+Pattern* pattern_allocinit(void);
 /// allocates a new pattern with a copy of all events
 ///\return allocates a new pattern with a copy of all events
 Pattern* pattern_clone(Pattern*);
@@ -65,7 +71,7 @@ void pattern_setevent(Pattern*, PatternNode*, const PatternEvent*);
 PatternEvent pattern_event(Pattern*, PatternNode*);
 /// gets the op count to determine changes
 unsigned int pattern_opcount(Pattern*);
-
+/// multiplies all entry offsets with the given factor
 void pattern_scale(Pattern*, float factor);
 
 #endif
