@@ -21,7 +21,6 @@ typedef void (*signalcallback_float)(void*, void*, float);
 typedef void (*signalcallback2)(void*, void*, void*, void*);
 typedef void (*signalcallback3)(void*, void*, void*, void*, void*);
 
-
 void signal_init(Signal* self)
 {
 	self->slots = 0;
@@ -38,7 +37,7 @@ void signal_dispose(Signal* self)
 		}
 		list_free(self->slots);
 	}
-	self->slots = 0;
+	self->slots = 0;	
 }
 
 void signal_connect(Signal* self, void* context, void* fp)

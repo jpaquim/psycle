@@ -107,7 +107,11 @@ void init_properties(EventDriver* self)
 		
 		MIDIINCAPS caps;
 		midiInGetDevCaps(i, &caps, sizeof(MIDIINCAPS));
+#if defined _MSC_VER > 1200
+		_snprintf_s(text, strlen(caps.szPname), 256, "%d:%s", i, caps.szPname);
+#else
 		_snprintf(text, 256, "%d:%s", i, caps.szPname);
+#endif
 		properties_append_int(devices, text, i, 0, 0);
 	}
 }

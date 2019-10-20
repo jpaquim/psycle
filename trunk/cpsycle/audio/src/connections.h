@@ -40,6 +40,9 @@ int connections_connect(Connections*, int outputslot, int inputslot);
 void connections_disconnect(Connections*, int outputslot, int inputslot);
 int connections_connected(Connections*, int outputslot, int inputslot);
 void connections_disconnectall(Connections*, int slot);
+void connections_setwirevolume(Connections*, int outputslot, int inputslot,
+	amp_t factor);
+amp_t connections_wirevolume(Connections*, int outputslot, int inputslot);
 
 
 #endif

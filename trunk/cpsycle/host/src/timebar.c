@@ -36,8 +36,9 @@ void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
 	{
 		ui_margin margin = { 0, 3, 3, 0 };
 
-		ui_components_setalign(ui_component_children(&self->component, 0),
-			UI_ALIGN_LEFT, &margin);
+		list_free(ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT, &margin));
 	}	
 	SetTimer(self->component.hwnd, 500, 50, 0);
 	signal_connect(&self->component.signal_timer, self, OnTimer);

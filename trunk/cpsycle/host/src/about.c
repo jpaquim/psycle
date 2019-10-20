@@ -77,11 +77,13 @@ void InitContrib(Contrib* self, ui_component* parent)
 	ui_component_resize(&self->steincopyright.component, 0, 20);
 	{
 		List* p;
-		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next)
+		List* q;
+		for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next)
 		{
 			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_TOP);			
 			ui_component_setmargin((ui_component*)p->entry, &margin);
 		}
+		list_free(q);
 	}
 }
 

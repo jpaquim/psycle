@@ -20,12 +20,13 @@ void ui_notebook_init(ui_notebook* self, ui_component* parent)
 void ui_notebook_setpage(ui_notebook* self, int pageindex)
 {	
 	List* p;
+	List* q;
 	int c = 0;		
 	ui_size size;
 
 	self->pageindex = pageindex;
 	size = ui_component_size(&self->component);
-	for (p = ui_component_children(&self->component, 0); p != NULL;
+	for (p = q = ui_component_children(&self->component, 0); p != NULL;
 			p = p->next, ++c) {		
 		ui_component* component;
 
@@ -43,7 +44,7 @@ void ui_notebook_setpage(ui_notebook* self, int pageindex)
 			ui_component_hide(component);
 		}
 	}
-	list_free(p);	
+	list_free(q);	
 }
 
 int ui_notebook_page(ui_notebook* self)
@@ -59,11 +60,12 @@ void ui_notebook_connectcontroller(ui_notebook* self, Signal* controllersignal)
 void onsize(ui_notebook* self, ui_component* sender, int width, int height)
 {
 	List* p;
+	List* q;
 
-	for (p = ui_component_children(&self->component, 0); p != 0; p = p->next) {			
+	for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next) {
 		ui_component_resize((ui_component*)p->entry, width, height);
 	}
-	list_free(p);
+	list_free(q);
 }
 
 void ontabbarchange(ui_notebook* self, ui_component* sender, int tabindex)

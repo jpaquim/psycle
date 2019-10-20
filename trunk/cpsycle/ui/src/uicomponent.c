@@ -25,8 +25,10 @@ static int tracking = 0;
 
 extern Table menumap;
 
-LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, WPARAM wParam,
-	LPARAM lParam);
+static LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
+	WPARAM wParam, LPARAM lParam);
+static LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
+	WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam);
 BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
@@ -102,11 +104,12 @@ void ui_replacedefaultfont(ui_component* main, ui_font* font)
 {		
 	if (font && main) {
 		List* p;
+		List* q;
 
 		if (main->font.hfont == defaultfont.hfont) {
 			ui_component_setfont(main, font);
 		}
-		for (p = ui_component_children(main, 1); p != 0; p = p->next) {
+		for (p = q = ui_component_children(main, 1); p != 0; p = p->next) {
 			ui_component* child;
 
 			child = (ui_component*)p->entry;
@@ -115,6 +118,7 @@ void ui_replacedefaultfont(ui_component* main, ui_font* font)
 				ui_component_align(child);
 			}		
 		}		
+		list_free(q);
 		ui_font_dispose(&defaultfont);
 		defaultfont = *font;
 		ui_component_align(main);
@@ -160,33 +164,33 @@ int ui_win32_component_init(ui_component* self, ui_component* parent,
 		table_insert(&winidmap, (int)winid, self);
 		winid++;		
 	}
-	ui_component_init_base(self);
+	ui_component_init_base(self);		
+#if defined(_WIN64)		
+		self->wndproc = (winproc)GetWindowLongPtr(self->hwnd, GWLP_WNDPROC);
+#else		
+		self->wndproc = (winproc)GetWindowLong(self->hwnd, GWL_WNDPROC);
+#endif
+	if (classname != szComponentClass && classname != szAppClass) {
+#if defined(_WIN64)		
+		SetWindowLongPtr(self->hwnd, GWLP_WNDPROC, (LONG_PTR) ui_com_winproc);
+#else	
+		SetWindowLong(self->hwnd, GWL_WNDPROC, (LONG)ui_com_winproc);
+#endif
+	}
 	return err;
 }
 
 void ui_component_init(ui_component* component, ui_component* parent)
-{
-	HINSTANCE hInstance;
-    
-#if defined(_WIN64)
-		hInstance = (HINSTANCE) GetWindowLongPtr (parent->hwnd, GWLP_HINSTANCE);
-#else
-		hInstance = (HINSTANCE) GetWindowLong (parent->hwnd, GWL_HINSTANCE);
-#endif
-	ui_component_init_signals(component);	
-	component->doublebuffered = 0;
-	component->hwnd = CreateWindow (szComponentClass, NULL,
-		WS_CHILDWINDOW | WS_VISIBLE,
-		0, 0, 90, 90,
-		parent->hwnd, NULL,
-		hInstance,
-		NULL);		
-	table_insert(&selfmap, (int)component->hwnd, component);
-	ui_component_init_base(component);
+{		
+	ui_win32_component_init(component, parent, szComponentClass,
+		0, 0, 90, 90, WS_CHILDWINDOW | WS_VISIBLE, 0);
 }
 
 void ui_component_init_signals(ui_component* component)
 {
+	if (component->debugflag == 10000) {
+		component = component;
+	}
 	signal_init(&component->signal_size);
 	signal_init(&component->signal_draw);
 	signal_init(&component->signal_timer);
@@ -245,7 +249,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_mousemove);
 	signal_dispose(&component->signal_mousedoubleclick);
 	signal_dispose(&component->signal_mouseenter);
-	signal_dispose(&component->signal_mousehover);	
+	signal_dispose(&component->signal_mousehover);
 	signal_dispose(&component->signal_mouseleave);
 	signal_dispose(&component->signal_scroll);
 	signal_dispose(&component->signal_create);
@@ -262,6 +266,29 @@ void ui_component_dispose(ui_component* component)
 	if (component->background) {
 		DeleteObject(component->background);
 	}
+}
+
+LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
+	WPARAM wParam, LPARAM lParam)
+{
+	ui_component*   component;	
+
+	component = table_at(&selfmap, (int)hwnd);
+	if (component) {		
+		switch (message)
+		{
+			case WM_DESTROY:
+				if (component->signal_destroy.slots) {
+					signal_emit(&component->signal_destroy, component, 0);
+				}
+				ui_component_dispose(component);
+			break;
+			default:
+			break;
+		}
+		return CallWindowProc(component->wndproc, hwnd, message, wParam, lParam);
+	}
+	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
 LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
@@ -409,8 +436,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		break;
 		case WM_DESTROY:
 			component = table_at(&selfmap, (int) hwnd);
-			if (component && component->signal_destroy.slots) {
-				signal_emit(&component->signal_destroy, component, 0);
+			if (component) {
+				if (component->debugflag == 20000) {
+					component = component;
+				}
+				if (component->signal_destroy.slots) {
+					signal_emit(&component->signal_destroy, component, 0);
+				}
 				ui_component_dispose(component);
 			}			
 			return 0;
@@ -941,12 +973,13 @@ void ui_component_align(ui_component* self)
 	int cpy = 0;
 	int cpymax = 0;
 	List* p;
+	List* q;
 	List* wrap = 0;
 	ui_size size;
 	ui_component* client = 0;
-
-	size = ui_component_size(self);	
-	for (p = ui_component_children(self, 0); p != 0; p = p->next) {		
+		
+	size = ui_component_size(self);		
+	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
 		ui_component* component;
 			
 		component = (ui_component*)p->entry;		
@@ -1019,7 +1052,7 @@ void ui_component_align(ui_component* self)
 					size.width - client->margin.left - client->margin.right,
 					size.height - cpy - client->margin.top - client->margin.bottom);
 	}
-	list_free(p);
+	list_free(q);
 	list_free(wrap);
 	signal_emit(&self->signal_align, self, 0);
 }
@@ -1034,6 +1067,7 @@ void onpreferredsize(ui_component* self, ui_component* sender,
 	size = ui_component_size(self);
 	if (self->alignchildren) {
 		List* p;
+		List* q;
 		int cpx = 0;
 		int cpy = 0;
 
@@ -1042,7 +1076,7 @@ void onpreferredsize(ui_component* self, ui_component* sender,
 		} else {
 			size.width = limit->width;
 		}	
-		for (p = ui_component_children(self, 0); p != 0; p = p->next) {		
+		for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
 			ui_component* component;
 				
 			component = (ui_component*)p->entry;		
@@ -1084,7 +1118,7 @@ void onpreferredsize(ui_component* self, ui_component* sender,
 				}				
 			}
 		}
-		list_free(p);
+		list_free(q);
 		*width = cpxmax;
 		*height = cpymax;
 	} else {
@@ -1137,11 +1171,12 @@ void enableinput(ui_component* self, int enable, int recursive)
 	EnableWindow(self->hwnd, enable);
 	if (recursive) {
 		List* p;
+		List* q;
 		
-		for (p = ui_component_children(self, recursive); p != 0; p = p->next) {
+		for (p = q = ui_component_children(self, recursive); p != 0; p = p->next) {
 			EnableWindow(((ui_component*)(p->entry))->hwnd, enable);
 		}
-		list_free(p);
+		list_free(q);
 	}
 }
 
@@ -1219,7 +1254,7 @@ ui_component* ui_component_parent(ui_component* self)
 		(int) GetParent(self->hwnd));
 }
 
-void ui_components_setalign(List* list, UiAlignType align, const ui_margin* margin)
+List* ui_components_setalign(List* list, UiAlignType align, const ui_margin* margin)
 {
 	List* p;
 
@@ -1229,15 +1264,17 @@ void ui_components_setalign(List* list, UiAlignType align, const ui_margin* marg
 			ui_component_setmargin((ui_component*)p->entry, margin);
 		}
 	}
+	return list;
 }
 
-void ui_components_setmargin(List* list, const ui_margin* margin)
+List* ui_components_setmargin(List* list, const ui_margin* margin)
 {
 	List* p;
 
 	for (p = list; p != 0; p = p->next) {
 		ui_component_setmargin((ui_component*)p->entry, margin);		
 	}
+	return list;
 }
 
 ui_size ui_component_preferredsize(ui_component* self, ui_size* limit)

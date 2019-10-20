@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #if !defined(SONG_H)
 #define SONG_H
 
@@ -12,6 +13,10 @@
 #include "xminstruments.h"
 #include "machinefactory.h"
 
+/// Song hold everything comprising a "tracker module",
+/// this include patterns, pattern sequence, machines and their initial 
+/// parameters and coordinates, wavetables, ...
+
 typedef struct {
 	Properties* properties;
 	Machines machines;
@@ -23,11 +28,18 @@ typedef struct {
 	MachineFactory* machinefactory;
 } Song;
 
-void song_init(Song* self, MachineFactory*);
-void song_dispose(Song* self);
+/// initializes a song
+void song_init(Song*, MachineFactory*);
+/// frees all memory used
+void song_dispose(Song*);
+/// allocates a song
+///\return allocates a song
 Song* song_alloc(void);
+/// allocates and initializes a song
+///\return allocates and initializes a song
 Song* song_allocinit(MachineFactory*);
-void song_load(Song* self, const char* path,
-			   Properties** workspaceproperties);
+/// loads a song
+///\return ui properties (coordinates, ...)
+void song_load(Song*, const char* path, Properties** workspaceproperties);
 
 #endif

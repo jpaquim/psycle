@@ -12,6 +12,7 @@
 
 #define TIMERID_TRACKERVIEW 600
 
+static void OnDestroy(TrackerView*, ui_component* sender);
 static void OnDraw(TrackerGrid*, ui_component* sender, ui_graphics* g);
 static void OnHeaderDraw(TrackerHeader*, ui_component* sender, ui_graphics* g);
 static void DrawBackground(TrackerGrid*, ui_graphics* g, TrackerGridBlock* clip);
@@ -933,6 +934,7 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->linenumbers.lineheight = 13;
 	self->showlinenumbers = 1;
 	self->showemptydata = 0;
+	signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	signal_connect(&self->component.signal_size, self, OnViewSize);
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
@@ -952,6 +954,11 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	signal_connect(&workspace->signal_configchanged, self, OnConfigChanged);
 	signal_connect(&workspace->player.signal_inputevent, self, OnInputEvent);
 	ShowLineNumbers(self, workspace_showlinenumbers(workspace));
+}
+
+void OnDestroy(TrackerView* self, ui_component* sender)
+{
+	inputs_dispose(&self->inputs);
 }
 
 void InitDefaultSkin(TrackerView* self)

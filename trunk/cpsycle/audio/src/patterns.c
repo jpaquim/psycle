@@ -30,7 +30,8 @@ void patterns_clear(Patterns* self)
 
 int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* pattern)
 {	
-	pattern_dispose(pattern);	
+	pattern_dispose(pattern);
+	free(pattern);
 	return 1;
 }
 

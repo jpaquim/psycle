@@ -134,6 +134,23 @@ void parametertweak(Master* self, int param, int value)
 		if (machines) {			
 			machines_setvolume(machines,
 				floatparamvalue(value) * floatparamvalue(value) * 4.f);
+		}
+	} else {
+		MachineSockets* sockets;
+		WireSocket* p;
+		int c = 1;
+		Machines* machines = self->machine.machines(self);
+		
+		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		if (sockets) {
+			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
+			if (p) {
+				WireSocketEntry* input_entry;
+
+				input_entry = (WireSocketEntry*) p->entry;
+				input_entry->volume =
+					floatparamvalue(value) * floatparamvalue(value) * 4.f;					
+			}
 		}		
 	}
 }
@@ -144,9 +161,28 @@ int describevalue(Master* self, char* txt, int const param, int const value)
 		Machines* machines = self->machine.callback.machines(
 			self->machine.callback.context);
 
-		float db = (float)(20 * log10(machines_volume(machines)));
+		amp_t db = (amp_t)(20 * log10(machines_volume(machines)));
 		_snprintf(txt, 10, "%.2f dB", db);
 		return 1;
+	} else {
+		MachineSockets* sockets;
+		WireSocket* p;
+		int c = 1;
+		Machines* machines = self->machine.machines(self);
+		
+		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		if (sockets) {
+			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
+			if (p) {				
+				WireSocketEntry* input_entry;
+				amp_t db;
+
+				input_entry = (WireSocketEntry*) p->entry;
+				db = (amp_t)(20 * log10(input_entry->volume));
+				_snprintf(txt, 10, "%.2f dB", db);
+				return 1;
+			}			
+		}
 	}
 	return 0;
 }
@@ -160,6 +196,24 @@ int value(Master* self, int const param)
 		if (machines) {
 			return intparamvalue(
 				(float)sqrt(machines_volume(machines)) * 0.5f);
+		}
+	} else {
+		MachineSockets* sockets;
+		WireSocket* input_socket;
+		int c = 1;
+		Machines* machines = self->machine.machines(self);
+		
+		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		if (sockets) {
+			for (input_socket = sockets->inputs; input_socket != 0 && c != param;
+					input_socket = input_socket->next, ++c);
+			if (input_socket) {
+				WireSocketEntry* input_entry;
+
+				input_entry = (WireSocketEntry*) input_socket->entry;
+				return intparamvalue(
+					(float)sqrt(input_entry->volume) * 0.5f);
+			}
 		}
 	}
 	return 0;

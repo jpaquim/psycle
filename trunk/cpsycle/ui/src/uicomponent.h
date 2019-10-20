@@ -43,6 +43,9 @@ typedef struct {
    void* context;
 } EnumCallback;
 
+typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
+	LPARAM lParam);
+
 typedef struct {
 	HWND hwnd;
 	HMENU winid;	
@@ -86,7 +89,8 @@ typedef struct {
 	BackgroundMode backgroundmode;
 	ui_font font;
 	HBRUSH background;
-	int visible;	
+	int visible;
+	winproc wndproc;
 } ui_component;
 
 void ui_init(HINSTANCE hInstance);
@@ -147,8 +151,8 @@ ui_size ui_component_textsize(ui_component*, const char*);
 TEXTMETRIC ui_component_textmetric(ui_component*);
 ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
 
-void ui_components_setalign(List*, UiAlignType align, const ui_margin* margin);
-void ui_components_setmargin(List* list, const ui_margin* margin);
+List* ui_components_setalign(List*, UiAlignType align, const ui_margin* margin);
+List* ui_components_setmargin(List* list, const ui_margin* margin);
 
 int ui_openfile(ui_component* self, char* title, char* filter,
 	char* defextension, char* filename);

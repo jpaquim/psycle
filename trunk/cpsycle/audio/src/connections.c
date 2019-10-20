@@ -8,6 +8,8 @@
 #include "connections.h"
 #include <assert.h>
 
+static WireSocketEntry* connection_input(Connections* self, int outputslot, int inputslot);
+
 void machinesockets_init(MachineSockets* self)
 {
 	self->outputs = 0;
@@ -60,6 +62,23 @@ WireSocket* connection_at(WireSocket* socket, int slot)
 		p = p->next;
 	}
 	return p;
+}
+
+WireSocketEntry* connection_input(Connections* self, int outputslot, int inputslot)
+{
+	WireSocketEntry* rv = 0;
+	MachineSockets* sockets;
+
+	sockets = connections_at(self, outputslot);	
+	if (sockets) {
+		WireSocket* input_socket;
+
+		input_socket = connection_at(sockets->outputs, inputslot);
+		if (input_socket) {			
+			rv = (WireSocketEntry*) input_socket->entry;
+		}
+	}
+	return rv;
 }
 
 void connections_init(Connections* self)
@@ -202,4 +221,23 @@ int connections_connected(Connections* self, int outputslot, int inputslot)
 #endif
 	}
 	return p != 0;
+}
+
+void connections_setwirevolume(Connections* self, int outputslot,
+	int inputslot, amp_t factor)
+{	
+	WireSocketEntry* input_entry;
+
+	input_entry = connection_input(self, outputslot, inputslot);		
+	if (input_entry) {
+		input_entry->volume = factor;		
+	}
+}
+
+amp_t connections_wirevolume(Connections* self, int outputslot, int inputslot)
+{	
+	WireSocketEntry* input_entry;
+
+	input_entry = connection_input(self, outputslot, inputslot);		
+	return input_entry ? input_entry->volume : 1.f;	
 }

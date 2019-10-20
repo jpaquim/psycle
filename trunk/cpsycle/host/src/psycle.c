@@ -8,14 +8,10 @@
 #include <dir.h>
 #include <stdio.h>
 
-
-// #define _CRTDBG_MAP_ALLOC
-// #include <crtdbg.h>
-
 UIMAIN
 {    	
 	MainFrame main;			
-	int err;
+	int err = 0;	
 	char workpath[_MAX_PATH];
 	const char* env = 0;	
 
@@ -34,7 +30,7 @@ UIMAIN
 	UIDISPOSE;
 	if (env) {
 		setpathenv(env);
-	}
-	//  _CrtDumpMemoryLeaks( );
+	}	
+	// _CrtDumpMemoryLeaks( );
 	return err;
 }

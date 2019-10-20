@@ -86,6 +86,7 @@ void player_initrms(Player* self)
 void player_dispose(Player* self)
 {			
 	player_unloaddriver(self);
+	library_dispose(&self->drivermodule);
 	player_unloadeventdrivers(self);
 	lock_dispose();	
 	signal_dispose(&self->signal_numsongtrackschanged);
@@ -160,12 +161,15 @@ void player_loadeventdriver(Player* self, const char* path)
 
 					eventdriver = fpeventdrivercreate();					
 					eventdriver->connect(eventdriver, self, workeventinput, mainframe);
-					eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry*));
+					eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry));
 					eventdriverentry->eventdriver = eventdriver;
 					eventdriverentry->library = library;
 					list_append(&self->eventdrivers, eventdriverentry);				
 					eventdriver->open(eventdriver);
 				}
+			} else {
+				library_dispose(library);
+				free(library);
 			}
 		}
 	}
@@ -191,7 +195,7 @@ void player_unloaddriver(Player* self)
 	if (self->driver) {
 		self->driver->close(self->driver);		
 		self->driver->dispose(self->driver);
-		self->driver->free(self->driver);		
+		self->driver->free(self->driver);
 		library_unload(&self->drivermodule);		
 	}
 	self->driver = 0;
@@ -240,13 +244,17 @@ void player_removeeventdriver(Player * self, int id)
 		eventdriverentry = player_eventdriverentry(self, id);
 		if (eventdriverentry && eventdriverentry->library) {
 			library_unload(eventdriverentry->library);
-		}
+			library_dispose(eventdriverentry->library);
+			free(eventdriverentry->library);
+			eventdriverentry->library = 0;
+		}		
 		for (p = self->eventdrivers; p != 0; p = p->next) {
 			if (((EventDriverEntry*)p->entry)->eventdriver == eventdriver) {
 				list_remove(&self->eventdrivers, p);
 				break;
 			}
-		}		
+		}
+		free(eventdriverentry);
 	}
 }
 
@@ -265,7 +273,10 @@ void player_unloadeventdrivers(Player* self)
 		eventdriver->free(eventdriver);
 		if (eventdriverentry && eventdriverentry->library) {
 			library_unload(eventdriverentry->library);
+			library_dispose(eventdriverentry->library);
+			free(eventdriverentry->library);
 		}
+		free(eventdriverentry);
 	}
 	list_free(self->eventdrivers);
 	self->eventdrivers = 0;

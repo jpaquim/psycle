@@ -109,15 +109,15 @@ void buttons_onalign(SequenceButtons* self, ui_component* sender)
 	int margin = 5;
 	ui_size size;
 	List* p;
+	List* q;
 	
 	size = ui_component_size(&self->component);
 	size = ui_component_preferredsize(&self->component, &size);
 	colwidth = size.width / numcols;
-	p = ui_component_children(&self->component, 0);	
+	p = q = ui_component_children(&self->component, 0);	
 	numrows = (list_size(p) / numcols) + 1;
 	rowheight = size.height / numrows - margin;	
-	for (p = ui_component_children(&self->component, 0); p != 0; 
-			p = p->next, ++c, cpx += colwidth + margin) {
+	for ( ; p != 0; p = p->next, ++c, cpx += colwidth + margin) {
 		ui_component* component;
 
 		component = (ui_component*)p->entry;
@@ -131,7 +131,8 @@ void buttons_onalign(SequenceButtons* self, ui_component* sender)
 			cpy,
 			colwidth,
 			rowheight);		
-	}	
+	}
+	list_free(q);
 }
 
 void buttons_onpreferredsize(SequenceButtons* self, ui_component* sender, ui_size* limit, int* width, int* height)
@@ -145,11 +146,12 @@ void buttons_onpreferredsize(SequenceButtons* self, ui_component* sender, ui_siz
 	int cpymax = 0;
 	int colmax[3];
 	ui_size size;
-	List* p;	
+	List* p;
+	List* q;
 	
 	size = ui_component_size(&self->component);
 	memset(colmax, 0, sizeof(colmax));
-	for (p = ui_component_children(&self->component, 0); p != 0; p = p->next,
+	for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next,
 			++c) {
 		ui_component* component;
 		ui_size componentsize;
@@ -168,6 +170,7 @@ void buttons_onpreferredsize(SequenceButtons* self, ui_component* sender, ui_siz
 			cpymax = cpy + componentsize.height + margin;
 		}		
 	}
+	list_free(q);
 	cpxmax = 0;
 	for (c = 0; c < numcols; ++c) {
 		cpxmax += colmax[c];

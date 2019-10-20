@@ -63,9 +63,10 @@ void library_dispose(Library* self)
 	if (self->module) {
 		FreeLibrary(self->module);
 		self->err = GetLastError();
-		self->module = 0;
-		free(self->path);
+		self->module = 0;		
 	}
+	free(self->path);
+	self->path = 0;
 }
 
 #elif defined(DIVERSALIS_OS_APPLE)

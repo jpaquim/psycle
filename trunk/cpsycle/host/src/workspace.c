@@ -47,8 +47,7 @@ static Instruments* machinecallback_instruments(Workspace*);
 
 void workspace_init(Workspace* self, void* handle)
 {	
-	self->octave = 4;
-	signal_init(&self->signal_octavechanged);
+	self->octave = 4;	
 	self->cursorstep = 1;	
 	self->inputoutput = 0;
 	self->midi = 0;
@@ -61,6 +60,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->song = song_allocinit(&self->machinefactory);
 	self->properties = workspace_makeproperties(self);		
 	undoredo_init(&self->undoredo);
+	signal_init(&self->signal_octavechanged);
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
 	signal_init(&self->signal_editpositionchanged);
@@ -69,8 +69,12 @@ void workspace_init(Workspace* self, void* handle)
 
 void workspace_dispose(Workspace* self)
 {	
-	player_dispose(&self->player);	
-	song_dispose(self->song);
+	player_dispose(&self->player);
+	if (self->song) {
+		song_dispose(self->song);
+		free(self->song);
+		self->song = 0;
+	}
 	properties_free(self->config);
 	properties_free(self->properties);
 	properties_free(self->lang);
