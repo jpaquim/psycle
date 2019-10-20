@@ -23,11 +23,11 @@ void playposbar_init(PlayPosBar* self, ui_component* parent, Player* player)
 	SetTimer(self->component.hwnd, 500, 50, 0);
 	{		
 		ui_margin margin = { 3, 3, 3, 0 };
-				
-		ui_components_setalign(
+			
+		list_free(ui_components_setalign(		
 			ui_component_children(&self->component, 0),
 			UI_ALIGN_LEFT,
-			&margin);		
+			&margin));		
 	}
 }
 

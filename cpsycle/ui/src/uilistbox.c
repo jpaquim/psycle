@@ -30,8 +30,9 @@ void ui_listbox_init_style(ui_listbox* self, ui_component* parent, int style)
 		style,
 		1);	
 	signal_connect(&self->component.signal_command, self, oncommand);
+	signal_connect(&self->component.signal_destroy, self, ondestroy);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);		
-	signal_init(&self->signal_selchanged);
+	signal_init(&self->signal_selchanged);	
 }
 
 void ondestroy(ui_listbox* self, ui_component* sender)

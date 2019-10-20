@@ -218,9 +218,9 @@ Buffer* mix(Machine* self, int slot, unsigned int amount, MachineSockets* connec
 						output, 
 						machines_outputs(machines, source->slot),
 						amount,
-						1.0f);
+						source->volume);
 				}						
-			}								
+			}							
 		}
 	}
 	return output;

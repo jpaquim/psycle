@@ -29,8 +29,9 @@ void playbar_initalign(PlayBar* self)
 
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	ui_components_setalign(ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT, &margin);
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT, &margin));
 }
 
 void onplayclicked(PlayBar* self, ui_component* sender)

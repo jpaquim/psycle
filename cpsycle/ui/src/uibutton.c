@@ -39,7 +39,7 @@ void ui_button_init(ui_button* self, ui_component* parent)
 	signal_connect(&self->component.signal_destroy, self, ondestroy);	
 	signal_disconnectall(&self->component.signal_preferredsize);
 	signal_connect(&self->component.signal_preferredsize, self,
-		onpreferredsize);
+		onpreferredsize);	
 }
 
 void ui_button_create_system(ui_button* self, ui_component* parent)
@@ -67,7 +67,7 @@ void ondestroy(ui_button* self, ui_component* sender)
 	if (self->ownerdrawn == 1) {
 		free(self->text);
 	}
-	signal_dispose(&self->signal_clicked);
+	signal_dispose(&self->signal_clicked);	
 }
 
 void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)

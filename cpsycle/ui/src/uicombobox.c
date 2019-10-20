@@ -9,7 +9,7 @@ static void onpreferredsize(ui_combobox*, ui_component* sender, ui_size* limit,
 	int* width, int* height);
 static void oncommand(ui_combobox*, ui_component* sender, WPARAM wParam,
 	LPARAM lParam);
-static void OnDestroy(ui_combobox*, ui_component* sender);
+static void ondestroy(ui_combobox*, ui_component* sender);
 static void ui_combobox_create_system(ui_combobox*, ui_component* parent);
 static void ui_combobox_create_ownerdrawn(ui_combobox*, ui_component* parent);
 static void onownerdraw(ui_combobox*, ui_component* sender, ui_graphics*);
@@ -23,14 +23,12 @@ static void onmouseleave(ui_combobox*, ui_component* sender);
 void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 {  
 	combobox->hover = 0;
-	ui_component_init_signals(&combobox->component);
 	signal_init(&combobox->signal_selchanged);
-	signal_connect(&combobox->component.signal_destroy, combobox, OnDestroy);
-	ui_combobox_create_ownerdrawn(combobox, parent);
-	ui_component_init_base(&combobox->component);
+	ui_combobox_create_ownerdrawn(combobox, parent);	
 	if (combobox->ownerdrawn) {
 		ui_component_setbackgroundmode(&combobox->component, BACKGROUND_SET);
-	}
+	}	
+	signal_connect(&combobox->component.signal_destroy, combobox, ondestroy);
 	signal_connect(&combobox->component.signal_preferredsize,
 		combobox, onpreferredsize);
 	combobox->charnumber = 0;
@@ -65,9 +63,10 @@ void ui_combobox_create_ownerdrawn(ui_combobox* self, ui_component* parent)
 	self->currcombo = &self->combo;	
 }
 
-void OnDestroy(ui_combobox* self, ui_component* sender)
+void ondestroy(ui_combobox* self, ui_component* sender)
 {
-	signal_dispose(&self->signal_selchanged);	
+	signal_dispose(&self->signal_selchanged);
+	ui_component_dispose(&self->combo);
 }
 
 int ui_combobox_addstring(ui_combobox* self, const char* text)

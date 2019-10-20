@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "mixer.h"
+#include "machines.h"
+#include <operations.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -35,6 +37,8 @@ static int mixer_mode(Mixer* self) { return MACHMODE_FX; }
 static void mixer_seqtick(Mixer* self, int channel, const PatternEvent* event);
 static unsigned int numinputs(Mixer*);
 static unsigned int numoutputs(Mixer*);
+static Buffer* mix(Mixer*, int slot, unsigned int amount, MachineSockets*, Machines*);
+static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
 
 static char* _psName;
 
@@ -71,6 +75,7 @@ void mixer_init(Mixer* self, MachineCallback callback)
 	self->machine.dispose = mixer_dispose;
 	self->machine.seqtick = mixer_seqtick;
 	self->machine.mode = mixer_mode;
+	self->machine.mix = mix;
 	self->solocolumn_ = -1;	
 }
 
@@ -103,7 +108,6 @@ void mixer_seqtick(Mixer* self, int channel, const PatternEvent* event)
 	}
 }
 
-
 unsigned int numinputs(Mixer* self)
 {
 	return 2;
@@ -112,4 +116,49 @@ unsigned int numinputs(Mixer* self)
 unsigned int numoutputs(Mixer* self)
 {
 	return 2;
+}
+
+Buffer* mix(Mixer* self, int slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
+{			
+	Buffer* output;
+
+	output = machines_outputs(machines, slot);
+	if (output) {
+		buffer_clearsamples(output, amount);
+		if (connected_machine_sockets) {
+			WireSocket* WireSocket;
+			
+			for (WireSocket = connected_machine_sockets->inputs;
+				WireSocket != 0; WireSocket = WireSocket->next) {
+				WireSocketEntry* source = 
+					(WireSocketEntry*)WireSocket->entry;
+				if (source->slot != -1) {
+					addsamples(
+						output, 
+						machines_outputs(machines, source->slot),
+						amount,
+						source->volume);
+				}						
+			}							
+		}
+	}
+	return output;
+}
+
+void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
+{
+	unsigned int channel;
+
+	if (source) {
+		for (channel = 0; channel < source->numchannels && 
+			channel < dst->numchannels; ++channel) {
+				dsp_add(
+					source->samples[channel],
+					dst->samples[channel],
+					numsamples,
+					vol);
+				dsp_erase_all_nans_infinities_and_denormals(
+					dst->samples[channel], numsamples);					
+		}
+	}
 }

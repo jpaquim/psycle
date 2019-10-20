@@ -36,7 +36,8 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 	{
 		ui_margin margin = { 0, 3, 3, 0 };
 		List* p;
-		for (p = ui_component_children(&self->component, 0); p != 0; p = p->next) {
+		List* q;
+		for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next) {
 			ui_component* component;
 			
 			component = (ui_component*)p->entry;
@@ -44,6 +45,7 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 			ui_component_setmargin(component, &margin);
 			ui_component_resize(component, 0, 20);
 		}
+		list_free(q);
 	}
 }
 

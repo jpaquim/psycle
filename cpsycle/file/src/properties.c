@@ -58,6 +58,7 @@ void properties_free(Properties* self)
 		}		
 		next = p->next;		
 		free(p->item.key);
+		free(p->item.text);
 		if (p->item.typ == PROPERTY_TYP_STRING) {
 			free(p->item.value.s);
 		}
@@ -694,6 +695,7 @@ void properties_sections(Properties* self, char* text)
 
 Properties* properties_settext(Properties* self, const char* text)
 {
+	free(self->item.text);
 	self->item.text = _strdup(text);
 	return self;
 }

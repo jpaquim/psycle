@@ -231,9 +231,10 @@ void InitSamplesHeaderView(SamplesHeaderView* self, ui_component* parent, Instru
 	{
 		ui_margin margin = { 5, 3, 3, 0 };		
 						
-		ui_components_setalign(ui_component_children(&self->component, 0),
+		list_free(ui_components_setalign(
+			ui_component_children(&self->component, 0),
 			UI_ALIGN_LEFT,
-			&margin);		
+			&margin));
 	}
 }
 

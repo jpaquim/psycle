@@ -117,6 +117,7 @@ void mainframe_init(MainFrame* self)
 	signal_connect(&self->splitbar.signal_mousedown, self, OnMouseDown);	
 	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
 	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);
+	self->splitbar.debugflag = 10000;
 	
 	SetTimer(self->component.hwnd, 100, 50, 0);
 	SetStartPage(self);
@@ -198,8 +199,9 @@ void InitBars(MainFrame* self)
 	{
 		ui_margin margin = { 0, 30, 0, 0 };
 
-		ui_components_setalign(ui_component_children(&self->toprow0, 0),
-			UI_ALIGN_LEFT, &margin);
+		list_free(ui_components_setalign(
+			ui_component_children(&self->toprow0, 0),
+			UI_ALIGN_LEFT, &margin));
 		margin.right = 0;
 		ui_component_setmargin(&self->playposbar.component, &margin);
 	}

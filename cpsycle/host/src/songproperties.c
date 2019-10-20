@@ -13,11 +13,7 @@ static void songproperties_initalign(SongProperties*);
 
 void InitSongProperties(SongProperties* self, ui_component* parent, Workspace* workspace)
 {		
-	self->song = workspace->song;
-	self->song->properties = properties_create();
-	properties_append_string(self->song->properties, "title", "a title");
-	properties_append_string(self->song->properties, "credits", "the credits");
-	properties_append_string(self->song->properties, "comments", "the comments");
+	self->song = workspace->song;	
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);		
 	ui_label_init(&self->label_title, &self->component);
@@ -42,8 +38,9 @@ void songproperties_initalign(SongProperties* self)
 
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	ui_components_setalign(ui_component_children(&self->component, 0),
-		UI_ALIGN_TOP, &margin);
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_TOP, &margin));
 	ui_component_setalign(&self->edit_comments.component, UI_ALIGN_CLIENT);
 }
 
