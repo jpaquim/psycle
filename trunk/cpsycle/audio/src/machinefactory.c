@@ -13,6 +13,7 @@
 #include "plugin.h"
 #include "sampler.h"
 #include "vstplugin.h"
+#include "machineproxy.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +23,18 @@ void machinefactory_init(MachineFactory* self, MachineCallback callback,
 {
 	self->machinecallback = callback;	
 	self->catcher = catcher;
+	self->options = MACHINEFACTORY_CREATEASPROXY;
+}
+
+void machinefactory_setoptions(MachineFactory* self, 
+	MachineFactoryOptions options)
+{
+	self->options = options;
+}
+
+MachineFactoryOptions machinefactory_options(MachineFactory* self)
+{
+	return self->options;
 }
 
 Machine* machinefactory_make(MachineFactory* self, MachineType type,
@@ -41,6 +54,7 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 	const char* path)
 {
 	Machine* machine = 0;
+	MachineProxy* proxy = 0;
 
 	switch (type) {
 		case MACH_MASTER:
@@ -115,6 +129,13 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 		break;
 		default:
 		break;
-	}	
+	}
+	if ((machine && 
+		((self->options & MACHINEFACTORY_CREATEASPROXY) 
+			== MACHINEFACTORY_CREATEASPROXY))) {
+		proxy = malloc(sizeof(MachineProxy));
+		machineproxy_init(proxy, machine);
+		machine = &proxy->machine;
+	}
 	return machine;
 }

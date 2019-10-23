@@ -103,7 +103,7 @@ void song_load(Song* self, const char* path, Properties** workspaceproperties)
 		machines_startfilemode(&self->machines);
 		psyfile_read(&file, header, 8);
 		header[8] = '\0';
-		*workspaceproperties = properties_create();
+		*workspaceproperties = properties_create();		
 		if (strcmp(header,"PSY3SONG")==0) {						
 			psy3_load(self, &file, header, *workspaceproperties);
 		} else

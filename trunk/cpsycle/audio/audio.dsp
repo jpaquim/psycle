@@ -144,6 +144,10 @@ SOURCE=.\src\event.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\eventdrivers.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\exclusivelock.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -240,6 +244,10 @@ SOURCE=.\src\machinefactory.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machineproxy.c
 # End Source File
 # Begin Source File
 
@@ -564,6 +572,10 @@ SOURCE=.\src\event.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\eventdrivers.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\exclusivelock.h
 # End Source File
 # Begin Source File
@@ -601,6 +613,10 @@ SOURCE=.\src\machinedefs.h
 # Begin Source File
 
 SOURCE=.\src\machinefactory.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machineproxy.h
 # End Source File
 # Begin Source File
 

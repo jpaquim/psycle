@@ -129,8 +129,7 @@ void master_dispose(Master* self)
 void parametertweak(Master* self, int param, int value)
 {
 	if (param == 0) {
-		Machines* machines = self->machine.callback.machines(
-			self->machine.callback.context);
+		Machines* machines = self->machine.machines(self);
 		if (machines) {			
 			machines_setvolume(machines,
 				floatparamvalue(value) * floatparamvalue(value) * 4.f);

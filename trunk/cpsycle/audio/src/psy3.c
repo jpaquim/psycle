@@ -702,6 +702,10 @@ Machine* machineloadfilechunk(Song* self, PsyFile* file, int index, int version,
 		machine_setpanning(machine, panning / 128.f);
 	}
 
+	if (index == 64) {
+		index = index;
+	}
+	
 	for(i = 0; i < MAX_CONNECTIONS; i++)
 	{
 		int input;
@@ -724,11 +728,11 @@ Machine* machineloadfilechunk(Song* self, PsyFile* file, int index, int version,
 		// Incoming connections activated
 		psyfile_read(file, &incon, sizeof(incon));
 		if (connection && output != -1) {					
-			machines_connect(machines, index, output);
+			machines_connect(machines, index, output, 0);
 		}
-		//if (input != -1) {				
-		//	machines_connect(machines, input, index);
-		// }
+		if (incon && input != -1) {
+			machines_connect(machines, input, index, 0);
+		}
 	}
 
 	psyfile_readstring(file, editname, 32);
@@ -740,9 +744,7 @@ Machine* machineloadfilechunk(Song* self, PsyFile* file, int index, int version,
 	} else {
 		properties_append_string(properties, "editname", editname);
 	}
-
-	machine->loadspecific(machine, file);
-
+	machine->loadspecific(machine, file, index, machines);
 	return machine;	
 }
 

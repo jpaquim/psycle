@@ -18,13 +18,15 @@ static void seqtick(Plugin*, int channel, const PatternEvent* event);
 static void sequencerlinetick(Plugin*);
 static CMachineInfo* info(Plugin*);
 static void parametertweak(Plugin*, int par, int val);
+static int parameterlabel(Plugin*, char* txt, int param);
+static int parametername(Plugin*, char* txt, int param);
 static int describevalue(Plugin*, char* txt, int const param, int const value);
 static int value(Plugin*, int const param);
 static void setvalue(Plugin*, int const param, int const value);
 static void dispose(Plugin*);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
-static void loadspecific(Plugin* self, PsyFile* file);
+static void loadspecific(Plugin* self, PsyFile* file, unsigned int slot, struct Machines*);
 static void setcallback(Plugin* self, MachineCallback callback);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
@@ -42,6 +44,8 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.sequencerlinetick = sequencerlinetick;
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
+	self->machine.parameterlabel = parameterlabel;
+	self->machine.parametername = parametername;
 	self->machine.describevalue = describevalue;
 	self->machine.setvalue = setvalue;
 	self->machine.value = value;
@@ -160,6 +164,20 @@ CMachineInfo* info(Plugin* self)
 	return pInfo;
 }
 
+int parameterlabel(Plugin* self, char* txt, int param)
+{
+	txt[0] = '\0';
+	_snprintf(txt, 128, "%s", info(self)->Parameters[param]->Name);
+	return *txt != '\0';
+}
+
+int parametername(Plugin* self, char* txt, int param)
+{
+	txt[0] = '\0';
+	_snprintf(txt, 128, "%s", info(self)->Parameters[param]->Name);
+	return *txt != '\0';
+}
+
 void parametertweak(Plugin* self, int par, int val)
 {
 	mi_parametertweak(self->mi, par, val);
@@ -205,7 +223,7 @@ void setcallback(Plugin* self, MachineCallback callback)
 	}
 }
 
-void loadspecific(Plugin* self, PsyFile* file)
+void loadspecific(Plugin* self, PsyFile* file, unsigned int slot, struct Machines* machines)
 {
 	unsigned int size;
 

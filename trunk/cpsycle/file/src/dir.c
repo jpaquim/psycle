@@ -27,25 +27,26 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 	BOOL cont;
   
 	// First, enumerate all files using the wildcard in the current directory
-	_snprintf(path, MAX_PATH, "%s\\*", root, wildcard);
+	_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard);
  	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
-		return;
-	}
-	cont = TRUE;
-	do {
-		if ((strncmp(".", wfd.cFileName, 1) != 0) && 
-				(strncmp("..", wfd.cFileName, 2) != 0) ) {
-			if (!(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {						
-				_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
-				enumproc(context, path, flag);				
-			}
-		}		
-	} while (FindNextFile(hFind, &wfd));
-	if (GetLastError() != ERROR_NO_MORE_FILES) {
-		return;
-	}
-	if (FindClose(hFind) == FALSE) {
-		return;
+		
+	} else {
+		cont = TRUE;
+		do {
+			if ((strncmp(".", wfd.cFileName, 1) != 0) && 
+					(strncmp("..", wfd.cFileName, 2) != 0) ) {
+				if (!(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {						
+					_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
+					enumproc(context, path, flag);				
+				}
+			}		
+		} while (FindNextFile(hFind, &wfd));
+		if (GetLastError() != ERROR_NO_MORE_FILES) {
+			return;
+		}
+		if (FindClose(hFind) == FALSE) {
+			return;
+		}
 	}
 	// Secondly, find and emumerate all subdirectories with their subdirectories
 	_snprintf(path, MAX_PATH, "%s\\*", root);

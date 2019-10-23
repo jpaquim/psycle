@@ -27,6 +27,8 @@ typedef unsigned long dword;
 // CMachineParameter flags
 #define MPF_NULL				0
 #define MPF_STATE				2
+#define MPF_SLIDER				4
+#define MPF_LEVEL				8
 
 typedef struct {
 	char const *Name;		// Short name: "Cutoff"

@@ -8,6 +8,13 @@
 #include <pattern.h>
 #include <uidef.h>
 
+typedef struct {
+	ui_component component;	
+	int dy;
+	int textheight;
+	int keyheight;
+	struct TrackerView* view;
+} PianoKeyboard;
 
 typedef struct {
    ui_component component;      
@@ -23,6 +30,7 @@ typedef struct {
 
 typedef struct Pianoroll {
    ui_component component;
+   PianoKeyboard keyboard;
    Pianogrid grid;
    int cx;
    int cy;  

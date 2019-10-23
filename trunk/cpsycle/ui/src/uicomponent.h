@@ -99,6 +99,7 @@ void ui_replacedefaultfont(ui_component* main, ui_font* font);
 
 void ui_component_init(ui_component*, ui_component* parent);
 void ui_component_dispose(ui_component*);
+void ui_component_destroy(ui_component*);
 void ui_frame_init(ui_component*, ui_component* parent);
 int ui_win32_component_init(ui_component*, ui_component* parent,
 	LPCTSTR classname, int x, int y, int width, int height,

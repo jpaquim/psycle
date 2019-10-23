@@ -30,6 +30,7 @@ IDB_ABOUT               BITMAP  DISCARDABLE     "splash_screen.bmp"
 IDB_MACHINESKIN         BITMAP  DISCARDABLE     "machine_skin.bmp"
 IDB_HEADERSKIN          BITMAP  DISCARDABLE     "pattern_header_skin.bmp"
 IDB_PARAMKNOB           BITMAP  DISCARDABLE     "TbMainKnob.bmp"
+IDB_MIXERSKIN           BITMAP  DISCARDABLE     "mixer_skin.bmp"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

@@ -111,9 +111,11 @@ void machineui_updatecoords(MachineUi* self)
 void machineui_dispose(MachineUi* self)
 {
 	if (self->paramview) {
+		ui_component_destroy(&self->paramview->component);
 		free(self->paramview);
 	}
 	if (self->frame) {
+		ui_component_destroy(&self->frame->component);
 		free(self->frame);
 	}	
 	free(self->editname);
@@ -778,7 +780,7 @@ void wireview_onmouseup(WireView* self, ui_component* sender, int x, int y, int 
 			self->dragslot = -1;
 			wireview_hittest(self, x, y);
 			if (self->dragslot != -1) {								
-				machines_connect(self->machines, outputslot, self->dragslot);				
+				machines_connect(self->machines, outputslot, self->dragslot, 0);				
 			}
 		}
 	}
@@ -806,8 +808,10 @@ void wireview_onkeydown(WireView* self, ui_component* sender, int keycode, int k
 			self->selectedwire.dst);
 		ui_invalidate(&self->component);
 	} else 
-	if (keycode == VK_DELETE && self->selectedslot != MASTER_INDEX) {		
-		machines_remove(self->machines, self->selectedslot);		
+	if (keycode == VK_DELETE && self->selectedslot != - 1 && 
+			self->selectedslot != MASTER_INDEX) {		
+		machines_remove(self->machines, self->selectedslot);
+		self->selectedslot = -1;
 	} else {
 		ui_component_propagateevent(sender);
 	}
@@ -907,6 +911,7 @@ void wireview_onmachinesinsert(WireView* self, Machines* machines, int slot)
 
 void wireview_onmachinesremoved(WireView* self, Machines* machines, int slot)
 {
+	machineuis_remove(self, slot);
 	ui_invalidate(&self->component);
 }
 
@@ -1024,6 +1029,7 @@ void machineuis_remove(WireView* self, int slot)
 
 	machineui = (MachineUi*) table_at(&self->machineuis, slot);
 	if (machineui) {
+		machineui_dispose(machineui);
 		free(machineui);
 		table_remove(&self->machineuis, slot);
 	}

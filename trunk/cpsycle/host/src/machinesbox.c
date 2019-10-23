@@ -72,8 +72,10 @@ void InsertSlot(MachinesBox* self, int slot, Machine* machine)
 
 		char buffer[128];
 		_snprintf(buffer, 128, "%02X:", slot);
-		if (machine) {
+		if (machine && machine->info(machine)) {
 			strcat(buffer, machine->info(machine)->ShortName); 
+		} else {
+			strcat(buffer, "crashed"); 
 		}
 		listboxindex = ui_listbox_addstring(&self->machinelist, buffer);
 		table_insert(&self->listboxslots, listboxindex, (void*)slot);

@@ -8,6 +8,8 @@
 #include "connections.h"
 #include <assert.h>
 
+static WireSocketEntry* wiresocketentry_allocinit(int slot, float volume, int send);
+static void wiresocketentry_dispose(WireSocketEntry*);
 static WireSocketEntry* connection_input(Connections* self, int outputslot, int inputslot);
 
 void machinesockets_init(MachineSockets* self)
@@ -21,11 +23,19 @@ void machinesockets_dispose(MachineSockets* self)
 	WireSocket* p;
 
 	for (p = self->inputs; p != 0; p = p->next) {
-		free(p->entry);
+		WireSocketEntry* entry;
+
+		entry = (WireSocketEntry*)p->entry;
+		wiresocketentry_dispose(entry);
+		free(entry);
 	}
 	list_free(p);
 	for (p = self->outputs; p != 0; p = p->next) {
-		free(p->entry);
+		WireSocketEntry* entry;
+
+		entry = (WireSocketEntry*)p->entry;
+		wiresocketentry_dispose(entry);
+		free(entry);
 	}
 	list_free(p);
 }
@@ -41,16 +51,37 @@ MachineSockets* machinesockets_allocinit(void)
 	return rv;
 }
 
-WireSocketEntry* wiresocketentry_allocinit(int slot, float volume)
+WireSocketEntry* wiresocketentry_allocinit(int slot, float volume, int send)
 {
 	WireSocketEntry* rv;
 		
 	rv = (WireSocketEntry*) malloc(sizeof(WireSocketEntry));
 	if (rv) {
+		PinConnection* pins;
+
 		rv->slot = slot;
-		rv->volume = 1.0;	
+		rv->volume = 1.0;
+		rv->send = send;
+		pins = (PinConnection*)malloc(sizeof(PinConnection));
+		pins->src = 0;
+		pins->dst = 0;
+		rv->mapping = list_create(pins);
+		pins = (PinConnection*)malloc(sizeof(PinConnection));
+		pins->src = 0;
+		pins->dst = 0;
+		list_append(&rv->mapping, pins);
 	}
 	return rv;
+}
+
+void wiresocketentry_dispose(WireSocketEntry* self)
+{	
+	List* p;
+
+	for (p = self->mapping; p != 0; p = p->next) {
+		free(p->entry);
+	}
+	list_free(self->mapping);
 }
 
 WireSocket* connection_at(WireSocket* socket, int slot)
@@ -84,6 +115,10 @@ WireSocketEntry* connection_input(Connections* self, int outputslot, int inputsl
 void connections_init(Connections* self)
 {
 	table_init(&self->container);
+	table_init(&self->sends);
+	signal_init(&self->signal_connected);
+	signal_init(&self->signal_disconnected);
+	self->filemode = 0;
 }
 
 void connections_dispose(Connections* self)
@@ -99,6 +134,9 @@ void connections_dispose(Connections* self)
 		free(sockets);
 	}
 	table_dispose(&self->container);
+	table_dispose(&self->sends);
+	signal_dispose(&self->signal_connected);
+	signal_dispose(&self->signal_disconnected);
 }
 
 MachineSockets* connections_at(Connections* self, int slot)
@@ -115,7 +153,7 @@ MachineSockets* connections_initslot(Connections* self, int slot)
 	return sockets;
 }
 
-int connections_connect(Connections* self, int outputslot, int inputslot)
+int connections_connect(Connections* self, int outputslot, int inputslot, int send)
 {
 	if (outputslot != inputslot && 
 			!connections_connected(self, outputslot, inputslot)) {
@@ -127,7 +165,7 @@ int connections_connect(Connections* self, int outputslot, int inputslot)
 		}
 		if (connections) {
 			list_append(&connections->outputs,
-				wiresocketentry_allocinit(inputslot, 1.f));		
+				wiresocketentry_allocinit(inputslot, 1.f, send));
 		}
 		connections = connections_at(self, inputslot);
 		if (!connections) {
@@ -135,8 +173,11 @@ int connections_connect(Connections* self, int outputslot, int inputslot)
 		}
 		if (connections) {
 			list_append(&connections->inputs,
-				wiresocketentry_allocinit(outputslot, 1.f));		
-		}		
+				wiresocketentry_allocinit(outputslot, 1.f, send));
+		}
+		if (!self->filemode) {
+			signal_emit(&self->signal_connected, self, 2, outputslot, inputslot);
+		}
 		return 1;
 	}
 	return 0;
@@ -159,7 +200,10 @@ void connections_disconnect(Connections* self, int outputslot, int inputslot)
 		p = connection_at(connections->inputs, outputslot);
 		if (p) {		
 			free(p->entry);
-			list_remove(&connections->inputs, p);						
+			list_remove(&connections->inputs, p);			
+		}
+		if (!self->filemode) {
+			signal_emit(&self->signal_disconnected, self, 2, outputslot, inputslot);
 		}
 	}	
 }
@@ -174,14 +218,19 @@ void connections_disconnectall(Connections* self, int slot)
 				
 		out = connections->outputs;
 		while (out) {			
+			int dstslot;
 			MachineSockets* dst;
 			WireSocket* dstinput;
 			dst = connections_at(self,
 				((WireSocketEntry*) out->entry)->slot);
+			dstslot = ((WireSocketEntry*) out->entry)->slot;
 			dstinput = connection_at(dst->inputs, slot);
 			free(dstinput->entry);
 			list_remove(&dst->inputs, dstinput);
 			out = out->next;
+			if (!self->filemode) {
+				signal_emit(&self->signal_disconnected, self, 2, slot, dstslot);
+			}
 		}
 		list_free(connections->outputs);
 		connections->outputs = 0;
@@ -190,13 +239,18 @@ void connections_disconnectall(Connections* self, int slot)
 		while (in) {			
 			MachineSockets* src;
 			WireSocket* srcoutput;
+			int srcslot;
 
 			src = connections_at(self,
 				((WireSocketEntry*) in->entry)->slot);
+			srcslot = ((WireSocketEntry*) in->entry)->slot;
 			srcoutput = connection_at(src->outputs, slot);
 			free(srcoutput->entry);
 			list_remove(&src->outputs, srcoutput);
 			in = in->next;
+			if (!self->filemode) {
+				signal_emit(&self->signal_disconnected, self, 2, srcslot, slot);
+			}
 		}
 		list_free(connections->inputs);
 		connections->inputs = 0;		

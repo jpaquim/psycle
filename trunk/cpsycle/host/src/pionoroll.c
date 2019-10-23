@@ -5,8 +5,6 @@
 
 #include "pianoroll.h"
 
-static void OnDraw(Pianoroll* self, ui_component* sender, ui_graphics* g);
-static void DrawBackground(Pianoroll* self, ui_graphics* g);
 static void OnGridDraw(Pianogrid* self, ui_component* sender, ui_graphics* g);
 static void DrawGridBackground(Pianogrid* self, ui_graphics* g);
 static void DrawGrid(Pianogrid* self, ui_graphics* g);
@@ -24,6 +22,8 @@ static void OnMouseDoubleClick(Pianoroll* self, ui_component* sender, int x, int
 static void OnKeyDown(Pianoroll* self, ui_component* sender, int keycode, int keydata);
 static void OnScroll(Pianogrid* self, ui_component* sende, int cx, int cy);
 
+static void OnPianoKeyboardDraw(PianoKeyboard*, ui_component* sender, ui_graphics* g);
+static void InitPianoKeyboard(PianoKeyboard*, ui_component* parent);
 
 void InitPianoroll(Pianoroll* self, ui_component* parent)
 {				
@@ -36,9 +36,9 @@ void InitPianoroll(Pianoroll* self, ui_component* parent)
 	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
 	signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
 	signal_connect(&self->component.signal_mousedoubleclick, self,OnMouseDoubleClick);
-	signal_connect(&self->component.signal_keydown, self, OnKeyDown);	
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	InitPianogrid(&self->grid, &self->component, self);
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
+	InitPianoKeyboard(&self->keyboard, &self->component);
+	InitPianogrid(&self->grid, &self->component, self);	
 	self->pattern = 0;
 	ui_component_move(&self->component, 0, 0);	
 }
@@ -47,24 +47,15 @@ void OnDestroy(Pianoroll* self, ui_component* component)
 {	
 }
 
-void OnDraw(Pianoroll* self, ui_component* sender, ui_graphics* g)
-{	   	
-	DrawBackground(self, g);
-}
-
-void DrawBackground(Pianoroll* self, ui_graphics* g)
-{
-//	ui_rectangle r;
-	
-//	ui_setrectangle(&r, 0, 0, self->cx, self->cy);
-//	ui_drawsolidrectangle(g, r, 0xFFFF0000);	
-}
-
 void OnSize(Pianoroll* self, ui_component* sender, int width, int height)
 {
+	int keyboardwidth;
+
 	self->cx = width;
 	self->cy = height;
-	ui_component_resize(&self->grid.component, width, height);
+	keyboardwidth = 40;
+	ui_component_setposition(&self->keyboard.component, 0, 0, keyboardwidth, height);
+	ui_component_setposition(&self->grid.component, keyboardwidth       , 0, width - keyboardwidth, height);
 }
 
 void OnMouseDown(Pianoroll* self, ui_component* sender, int x, int y, int button)
@@ -93,6 +84,7 @@ void InitPianogrid(Pianogrid* self, ui_component* parent, Pianoroll* roll)
 {
 	self->view = roll;
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_destroy, self, OnGridDestroy);	
 	signal_connect(&self->component.signal_size, self, OnGridSize);
 	signal_connect(&self->component.signal_keydown, self, OnGridKeyDown);	
@@ -125,20 +117,11 @@ void OnGridSize(Pianogrid* self, ui_component* sender, int width, int height)
 }
 
 void OnGridDraw(Pianogrid* self, ui_component* sender, ui_graphics* g)
-{	   	
-	DrawGridBackground(self, g);
+{	   		
 	if (self->view->pattern) {
 		DrawGrid(self, g);
 		DrawEvents(self, g);
 	}
-}
-
-void DrawGridBackground(Pianogrid* self, ui_graphics* g)
-{
-	ui_rectangle r;
-	
-	ui_setrectangle(&r, 0, 0, self->cx, self->cy);
-	ui_drawsolidrectangle(g, r, 0x009a887c);	
 }
 
 void DrawGrid(Pianogrid* self, ui_graphics* g)
@@ -146,15 +129,16 @@ void DrawGrid(Pianogrid* self, ui_graphics* g)
 	int keymin = 0;
 	int keymax = 88;
 	int key;
-	for (key = keymin; key < keymax; ++key) {
-		ui_rectangle r;
-		ui_setrectangle(&r, 0, key * self->keyheight, self->cx, self->keyheight-1);
-		ui_drawsolidrectangle(g, r, 0x00c1b5aa);
-	}
+	
 
 	if (self->view->pattern) {
 		float offset = 0;
 		int cpx = 0;
+
+		ui_setcolor(g, 0x00333333);
+		for (key = keymin; key < keymax; ++key) {	
+			ui_drawline(g, 0, key * self->keyheight, self->cx, key * self->keyheight);
+		}
 		while (offset < self->view->pattern->length) {
 			ui_drawline(g, cpx, 0, cpx, self->cy);
 			offset += self->bpl;
@@ -206,7 +190,7 @@ void DrawEvent(Pianogrid* self, ui_graphics* g, PatternEvent* event, int track, 
 	int left = (int)(offset * self->beatwidth) + self->dx;
 	int width = (int)(length * self->beatwidth);
 	ui_setrectangle(&r, left, (88 - event->note) * self->keyheight + 1 + self->dy, width, self->keyheight-2);
-	ui_drawsolidrectangle(g, r, 0x00d5ccc6);	
+	ui_drawsolidrectangle(g, r, 0x00B1C8B0);	
 }
 
 void OnGridKeyDown(Pianogrid* self, ui_component* sender, int keycode, int keydata)
@@ -219,4 +203,69 @@ void OnScroll(Pianogrid* self, ui_component* sender, int cx, int cy)
 	self->dx += cx;
 	self->dy += cy;	
 }
+
+// PianoKeyboard
+
+void InitPianoKeyboard(PianoKeyboard* self, ui_component* parent)
+{		
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	signal_connect(&self->component.signal_draw, self, OnPianoKeyboardDraw);
+	self->dy = 0;
+	self->textheight = 12;
+	self->keyheight = 12;
+	self->component.doublebuffered = 1;
+}
+
+int isblack(int key)
+{
+	int offset = key % 12;
+
+	return (offset == 1 || offset == 3 || offset == 6 || offset == 8 
+		|| offset == 10);
+	// 0 1 2 3 4 5 6 7 8 9 10 11
+	// c   d   e f   g   a    h 
+}
+
+void OnPianoKeyboardDraw(PianoKeyboard* self, ui_component* sender, ui_graphics* g)
+{		
+	int keymin = 0;
+	int keymax = 88;
+	int key;	
+	int keyboardheight;
+	ui_size size;
+		
+	keyboardheight = (keymax - keymin) * self->keyheight;
+	size = ui_component_size(&self->component);
+	ui_setcolor(g, 0x00333333);
+	for (key = keymin; key < keymax; ++key) {	
+		int cpy;
+
+		cpy = keyboardheight - key * self->keyheight;
+
+		ui_drawline(g, 0, cpy, size.width, cpy);
+		if (isblack(key)) {
+			ui_rectangle r;			
+			ui_setrectangle(&r, (int)(size.width * 0.75), cpy, 
+				(int)(size.width * 0.25), self->keyheight);
+			ui_drawsolidrectangle(g, r, 0x00CACACA);
+			ui_drawline(g, 0, cpy + self->keyheight/2, size.width, 
+					cpy + self->keyheight/2);
+			ui_setrectangle(&r, 0, cpy, (int)(size.width * 0.75), self->keyheight);
+			ui_drawsolidrectangle(g, r, 0x00444444);						
+		} else {
+			ui_rectangle r;			
+			ui_setrectangle(&r, 0, cpy, size.width, self->keyheight);
+			ui_drawsolidrectangle(g, r, 0x00CACACA);
+			if (key % 12 == 0 || ((key % 12) == 5)) {
+				ui_drawline(g, 0, cpy + self->keyheight, size.width, 
+					cpy + self->keyheight);
+			}
+			//} else {
+			//	ui_drawline(g, 0, cpy, size.width, cpy);			
+			//}
+		}
+	}
+}
+
 
