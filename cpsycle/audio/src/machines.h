@@ -43,7 +43,7 @@ void machines_remove(Machines*, int slot);
 void machines_exchange(Machines*, int srcslot, int dstslot);
 int machines_append(Machines*, Machine*);
 Machine* machines_at(Machines*, int slot);
-int machines_connect(Machines*, int outputslot, int inputslot);
+int machines_connect(Machines*, int outputslot, int inputslot, int send);
 void machines_disconnect(Machines*, int outputslot, int inputslot);
 void machines_disconnectall(Machines*, int slot);
 int machines_connected(Machines*, int outputslot, int inputslot);

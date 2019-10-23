@@ -37,7 +37,9 @@ static List* sequencerinsert(Machine* self, List* events) { return 0; }
 static void sequencerlinetick(Machine* self) { }
 static const CMachineInfo* info(Machine* self) { return &macinfo; }
 static void parametertweak(Machine* self, int par, int val) { }
-static int describevalue(Machine* self, char* txt, int const param, int const value) { return 0; }
+static int parameterlabel(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
+static int parametername(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
+static int describevalue(Machine* self, char* txt, int param, int value) { return 0; }
 static int value(Machine* self, int const param) { return 0; }
 static void setvalue(Machine* self, int const param, int const value) { }
 static void dispose(Machine*);
@@ -46,8 +48,21 @@ static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
 static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
-static void loadspecific(Machine* self, PsyFile* file) { }
+static void loadspecific(Machine* self, PsyFile* file, unsigned int slot, Machines* machines) { }
 static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
+static unsigned int numparameters(Machine* self) { 
+	return self->info(self) ? self->info(self)->numParameters : 0;
+}
+static unsigned int numcols(Machine* self) { 
+	return self->info(self) ? self->info(self)->numCols : 0;
+}
+static const CMachineParameter* parameter(Machine* self, unsigned int par)
+{
+	return self->info(self)->Parameters[par];
+}
+static int paramviewoptions(Machine* self) { return 0; }
+static unsigned int slot(Machine* self) { return -1; }
+static void setslot(Machine* self, int slot) { }
 /// machinecallback
 static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(Machine* self) { return self->callback.bpm(self->callback.context); }
@@ -77,18 +92,27 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->generateaudio = generateaudio;
 	self->numinputs = numinputs;
 	self->numoutputs = numoutputs;	
+	self->numparameters = numparameters;
+	self->numcols = numcols;
+	self->parameter = parameter;
+	self->paramviewoptions = paramviewoptions;
+	self->parameterlabel = parameterlabel;
+	self->parametername = parametername;
 	self->setcallback = setcallback;
 	self->updatesamplerate = updatesamplerate;
 	self->loadspecific = loadspecific;
 	self->bpm = bpm;
 	self->samplerate = samplerate;
-	self->instruments = instruments;
+	self->instruments = instruments;	
 	self->samples = samples;
 	self->machines = machines;
 	self->callback = callback;
+	self->slot = slot;
+	self->setslot = setslot;
 	self->bypass = 0;
 	self->mute = 0;
-	self->panning = 0.5f;	
+	self->panning = 0.5f;
+	self->ismixersend = 0;	
 	signal_init(&self->signal_worked);
 }
 
@@ -213,7 +237,7 @@ Buffer* mix(Machine* self, int slot, unsigned int amount, MachineSockets* connec
 				WireSocket != 0; WireSocket = WireSocket->next) {
 				WireSocketEntry* source = 
 					(WireSocketEntry*)WireSocket->entry;
-				if (source->slot != -1) {
+				if (source->slot != -1 && !source->send) {
 					addsamples(
 						output, 
 						machines_outputs(machines, source->slot),

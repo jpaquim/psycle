@@ -213,7 +213,7 @@ const CMachineInfo* info(Sampler* self)
 }
 
 void parametertweak(Sampler* self, int param, int value)
-{
+{	
 	switch (param) {
 		case 0: self->numvoices = value; break;
 		case 1: self->resamplingmethod = value; break;

@@ -19,6 +19,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define __cplusplus
+#include <diversalis/os.hpp>
+#undef __cplusplus
+
 
 #if defined DIVERSALIS__OS__MICROSOFT
 #define MODULEEXT ".dll"
@@ -129,11 +133,11 @@ void plugincatcher_scan(PluginCatcher* self)
 	if (self->dirconfig) {
 		p = properties_findsection(self->dirconfig, "plugin");
 		if (p) {		
-			dir_enum(self, properties_valuestring(p), "*."MODULEEXT, MACH_PLUGIN, onenumdir);		
+			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_PLUGIN, onenumdir);		
 		}
 		p = properties_findsection(self->dirconfig, "vst");
 		if (p) {		
-			dir_enum(self, properties_valuestring(p), "*."MODULEEXT, MACH_VST, onenumdir);		
+			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_VST, onenumdir);		
 		}
 	}
 	signal_emit(&self->signal_changed, self, 0);
@@ -157,6 +161,7 @@ char* replace_char(char* str, char c, char r)
 int onenumdir(PluginCatcher* self, const char* path, int type)
 {
 	const CMachineInfo* info;
+	CMachineInfo macinfo;
 	char name[_MAX_PATH];
 	char ext[_MAX_PATH];
 
@@ -167,12 +172,14 @@ int onenumdir(PluginCatcher* self, const char* path, int type)
 
 	if (type == MACH_PLUGIN) {
 		info = plugin_psycle_test(path);
+		if (info) {
+			plugincatcher_makeplugininfo(self, name, path, type, info);
+		}	
 	} else
 	if (type == MACH_VST) {
-		info = plugin_vst_test(path);
-	}
-	if (info) {
-		plugincatcher_makeplugininfo(self, name, path, type, info);
+		if (plugin_vst_test(path, &macinfo)) {
+			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+		}
 	}	
 	return 1;
 }
@@ -238,9 +245,13 @@ const CMachineInfo* plugincatcher_machineinfo(PluginCatcher* self,
 		case MACH_VST:
 		{
 			char path[_MAX_PATH];
-			rv = plugin_vst_test(plugincatcher_modulepath(self, MACH_PLUGIN,
-				name, path));
-
+			CMachineInfo* info;
+			
+			info = (CMachineInfo*) malloc(sizeof(CMachineInfo));
+			if (plugin_vst_test(plugincatcher_modulepath(self, MACH_PLUGIN,
+				name, path), info)) {
+				rv = info;
+			}
 		}
 		break;		
 		default:

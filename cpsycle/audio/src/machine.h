@@ -21,6 +21,10 @@ typedef struct MachineCallback {
 	void* context;
 } MachineCallback;
 
+typedef enum {
+	MACHINE_PARAMVIEW_COMPACT = 1
+} MachineViewOptions;
+
 typedef struct Machine {	
 	void (*init)(void*);
 	struct Machine* (*clone)(void*);
@@ -34,20 +38,28 @@ typedef struct Machine {
 	// update sequencer events
 	List* (*sequencerinsert)(void*, List* events);
 	void (*parametertweak)(void*, int par, int val);
-	int (*describevalue)(void*, char* txt, int const param, int const value);
-	int (*value)(void*, int const param);
-	void (*setvalue)(void*, int const param, int const value);	
+	int (*parameterlabel)(void*, char* txt, int param);
+	int (*parametername)(void*, char* txt, int param);
+	int (*describevalue)(void*, char* txt, int param, int value);
+	int (*value)(void*, int param);
+	void (*setvalue)(void*, int param, int value);	
 	const CMachineInfo* (*info)(void*);
 	void (*dispose)(void*);
 	int (*mode)(void*);	
 	void (*updatesamplerate)(void*, unsigned int samplerate);
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
+	unsigned int (*numparameters)(void*);
+	unsigned int (*numcols)(void*);	
+	unsigned int (*slot)(void*);
+	void (*setslot)(void*, int);
+	const CMachineParameter* (*parameter)(void*, unsigned int par);
+	int (*paramviewoptions)(void*);
 	void (*setcallback)(void*, MachineCallback);
-	void (*loadspecific)(void*, PsyFile*);
+	void (*loadspecific)(void*, PsyFile*, unsigned int slot, struct Machines*);	
 	// machine callbacks
 	unsigned int (*samplerate)(void*);
-	unsigned int (*bpm)(void*);
+	unsigned int (*bpm)(void*);	
 	struct Samples* (*samples)(void*);
 	struct Machines* (*machines)(void*);
 	struct Instruments* (*instruments)(void*);
@@ -56,7 +68,8 @@ typedef struct Machine {
 	int bypass;
 	int mute;
 	float panning;
-	Signal signal_worked;
+	int ismixersend;		
+	Signal signal_worked;	
 } Machine;
 
 void machine_init(Machine*, MachineCallback);
@@ -70,5 +83,6 @@ int machine_bypassed(Machine*);
 void machine_mute(Machine*);
 void machine_unmute(Machine*);
 int machine_muted(Machine*);
+
 
 #endif

@@ -268,6 +268,11 @@ void ui_component_dispose(ui_component* component)
 	}
 }
 
+void ui_component_destroy(ui_component* self)
+{
+	DestroyWindow(self->hwnd);
+}
+
 LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam)
 {

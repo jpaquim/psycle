@@ -26,6 +26,17 @@ Library* library_allocinit(void)
 	return rv;
 }
 
+void library_disposefree(Library* self)
+{
+	library_dispose(self);
+	free(self);
+}
+
+int library_empty(Library* self)
+{
+	return self->module == 0;
+}
+
 #if defined(DIVERSALIS__OS__MICROSOFT)
 
 #include <windows.h>

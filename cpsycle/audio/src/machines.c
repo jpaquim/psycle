@@ -91,8 +91,14 @@ void machines_free(Machines* self)
 void machines_insert(Machines* self, int slot, Machine* machine)
 {	
 	if (machine) {
-		table_insert(&self->slots, slot, machine);		
+		table_insert(&self->slots, slot, machine);
+		machine->setslot(machine, slot);
 		signal_emit(&self->signal_insert, self, 1, slot);
+		if (!self->filemode) {		
+			lock_enter();
+			machines_setpath(self, compute_path(self, MASTER_INDEX));
+			lock_leave();
+		}
 	}
 }
 
@@ -122,9 +128,11 @@ void machines_remove(Machines* self, int slot)
 	Machine* machine;
 
 	machine = machines_at(self, slot);
-	machines_erase(self, slot);
-	machine->dispose(machine);
-	free(machine);
+	if (machine) {
+		machines_erase(self, slot);		
+		machine->dispose(machine);
+		free(machine);		
+	}
 }
 
 void machines_exchange(Machines* self, int srcslot, int dstslot)
@@ -134,10 +142,12 @@ void machines_exchange(Machines* self, int srcslot, int dstslot)
 
 	src = machines_at(self, srcslot);
 	dst = machines_at(self, dstslot);
-	machines_erase(self, srcslot);
-	machines_erase(self, dstslot);
-	machines_insert(self, srcslot, dst);
-	machines_insert(self, dstslot, src);
+	if (src && dst) {
+		machines_erase(self, srcslot);
+		machines_erase(self, dstslot);
+		machines_insert(self, srcslot, dst);
+		machines_insert(self, dstslot, src);
+	}
 }
 
 int machines_append(Machines* self, Machine* machine)
@@ -147,6 +157,7 @@ int machines_append(Machines* self, Machine* machine)
 	slot = machines_freeslot(self,
 		(machine->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
 	table_insert(&self->slots, slot, machine);
+	machine->setslot(machine, slot);
 	signal_emit(&self->signal_insert, self, 1, slot);
 	if (!self->filemode) {		
 		lock_enter();
@@ -169,13 +180,13 @@ Machine* machines_at(Machines* self, int slot)
 	return table_at(&self->slots, slot);
 }
 
-int machines_connect(Machines* self, int outputslot, int inputslot)
+int machines_connect(Machines* self, int outputslot, int inputslot, int send)
 {
 	int rv;
 	if (!self->filemode) {
 		lock_enter();			
 	}
-	rv = connections_connect(&self->connections, outputslot, inputslot);
+	rv = connections_connect(&self->connections, outputslot, inputslot, send);
 	if (!self->filemode) {
 		machines_setpath(self, compute_path(self, MASTER_INDEX));			
 		lock_leave();
@@ -380,12 +391,14 @@ Machine* machines_master(Machines* self)
 void machines_startfilemode(Machines* self)
 {
 	self->filemode = 1;
+	self->connections.filemode = 1;
 }
 
 void machines_endfilemode(Machines* self)
 {
 	machines_setpath(self, compute_path(self, MASTER_INDEX));
 	self->filemode = 0;	
+	self->connections.filemode = 0;
 }
 
 unsigned int machines_size(Machines* self)

@@ -13,8 +13,7 @@ typedef struct {
    ui_component component;   
    int cx;
    int cy;
-   Machine* machine;
-   const CMachineParameter* const * params;
+   Machine* machine;   
    int numparams;
    int numcols;   
    int numrows;

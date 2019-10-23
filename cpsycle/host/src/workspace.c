@@ -47,6 +47,7 @@ static Instruments* machinecallback_instruments(Workspace*);
 
 void workspace_init(Workspace* self, void* handle)
 {	
+	lock_init();
 	self->octave = 4;	
 	self->cursorstep = 1;	
 	self->inputoutput = 0;
@@ -84,6 +85,7 @@ void workspace_dispose(Workspace* self)
 	signal_dispose(&self->signal_editpositionchanged);
 	plugincatcher_dispose(&self->plugincatcher);
 	undoredo_dispose(&self->undoredo);
+	lock_dispose();
 }
 
 void workspace_initplayer(Workspace* self)

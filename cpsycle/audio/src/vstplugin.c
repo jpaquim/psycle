@@ -6,6 +6,8 @@
 #include "vstplugin.h"
 #include "aeffectx.h"
 #include <stdlib.h>
+#include <excpt.h>
+#include <operations.h>
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -28,19 +30,37 @@ static void seqtick(VstPlugin* self, int channel, const PatternEvent* event);
 static void sequencerlinetick(VstPlugin* self);
 static const CMachineInfo* info(VstPlugin* self);
 static void parametertweak(VstPlugin* self, int par, int val);
-static int describevalue(VstPlugin*, char* txt, int const param, int const value);
-static int value(VstPlugin*, int const param);
-static void setvalue(VstPlugin*, int const param, int const value);
+static int parameterlabel(VstPlugin*, char* txt, int param);
+static int parametername(VstPlugin*, char* txt, int param);
+static int describevalue(VstPlugin*, char* txt, int param, int value);
+static int value(VstPlugin*, int param);
+static void setvalue(VstPlugin*, int param, int value);
+static unsigned int numparameters(VstPlugin*);
+static unsigned int numcols(VstPlugin*);
+static const CMachineParameter* parameter(VstPlugin*, unsigned int par);
+
 static void dispose(VstPlugin* self);
+static unsigned int numinputs(VstPlugin*);
+static unsigned int numoutputs(VstPlugin*);
 static const VstInt32 kBlockSize = 512;
 static const float kSampleRate = 48000.f;
 static const VstInt32 kNumProcessCycles = 5;
 static void checkEffectProperties (AEffect* effect);
 static void checkEffectProcessing (AEffect* effect);
-static void DispatchMachineInfo(AEffect* effect, CMachineInfo* info);
+static int DispatchMachineInfo(AEffect* effect, CMachineInfo* info);
 typedef AEffect* (*PluginEntryProc) (audioMasterCallback audioMaster);
 static VstIntPtr VSTCALLBACK HostCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 static PluginEntryProc getMainEntry(Library* library);
+
+static CMachineParameter const paraVst = 
+{ 
+	"VST",	
+	"VST",									// description
+	0,										// MinValue	
+	65535,									// MaxValue
+	MPF_STATE,								// Flags
+	0
+};
 
 void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 {	
@@ -53,10 +73,17 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.sequencerlinetick = sequencerlinetick;
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
+	self->machine.parameterlabel = parameterlabel;
+	self->machine.parametername = parametername;
 	self->machine.describevalue = describevalue;
 	self->machine.setvalue = setvalue;
 	self->machine.value = value;
+	self->machine.numparameters = numparameters;
+	self->machine.numcols = numcols;
+	self->machine.parameter = parameter;
 	self->machine.dispose = dispose;
+	self->machine.numinputs = numinputs;
+	self->machine.numoutputs = numoutputs;
 	self->machine.setcallback(self, callback);
 	self->info = 0;
 	library_init(&self->library);
@@ -108,35 +135,37 @@ PluginEntryProc getMainEntry(Library* library)
 	return mainProc;
 }
 
-
-CMachineInfo* plugin_vst_test(const char* path)
-{		
-	CMachineInfo* rv = 0;
+int plugin_vst_test(const char* path, CMachineInfo* rv)
+{
+	int vst = 0;
 
 	if (path && strcmp(path, "") != 0) {
 		Library library;
 		PluginEntryProc mainEntry;	
-
-		rv = 0;
-		library_init(&library);
+		
+		library_init(&library);		
 		library_load(&library, path);		
 		mainEntry = getMainEntry(&library);
 		if (mainEntry) {
 			AEffect* effect = mainEntry (HostCallback);
-			if (effect) {			
-				rv = (CMachineInfo*) malloc(sizeof(CMachineInfo));
-				DispatchMachineInfo(effect, rv);									
+			if (effect) {				
+				int err;
+
+				err = DispatchMachineInfo(effect, rv);
+				if (err == 0) {
+					vst = 1;
+				}
 			}
 		}	
 		library_dispose(&library);	
 	}
-	return rv;
+	return vst;
 }
 
 void work(VstPlugin* self, BufferContext* bc)
 {	
 	self->effect->processReplacing(self->effect, bc->input->samples,
-		bc->output->samples, bc->numsamples);
+		bc->output->samples, bc->numsamples);	
 }
 
 void seqtick(VstPlugin* self, int channel, const PatternEvent* event)
@@ -174,52 +203,83 @@ void sequencerlinetick(VstPlugin* self)
 	
 }
 
-void DispatchMachineInfo(AEffect* effect, CMachineInfo* info)
+static int FilterException(int code, struct _EXCEPTION_POINTERS *ep) 
+{
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+int DispatchMachineInfo(AEffect* effect, CMachineInfo* info)
 {
 	char effectName[256] = {0};
 	char vendorString[256] = {0};
 	char productString[256] = {0};
+	int err = 0;
 
-	effect->dispatcher (effect, effGetEffectName, 0, 0, effectName, 0);
-	effect->dispatcher (effect, effGetVendorString, 0, 0, vendorString, 0);
-	effect->dispatcher (effect, effGetProductString, 0, 0, productString, 0);
-	
-	info->Author = _strdup(vendorString);
-	info->Command = _strdup(""); // 0; // strdup(pInfo->Command);
-	info->Flags = 16; // pInfo->Flags;
-	info->Name = _strdup(effectName);
-	info->numCols = 6; // pInfo->numCols;
-	info->numParameters = 0; //pInfo->numParameters;
-	info->ShortName = _strdup(effectName);
-	info->APIVersion = 0; //pInfo->Version;
-	info->PlugVersion = 0;
+	__try {
+		effect->dispatcher (effect, effGetEffectName, 0, 0, effectName, 0);
+		effect->dispatcher (effect, effGetVendorString, 0, 0, vendorString, 0);
+		effect->dispatcher (effect, effGetProductString, 0, 0, productString, 0);
+		
+		info->Author = _strdup(vendorString);
+		info->Command = _strdup(""); // 0; // strdup(pInfo->Command);
+		info->Flags = 16; // pInfo->Flags;
+		info->Name = _strdup(effectName);
+		info->numCols = 6; // pInfo->numCols;
+		info->numParameters = 0; //pInfo->numParameters;
+		info->ShortName = _strdup(effectName);
+		info->APIVersion = 0; //pInfo->Version;
+		info->PlugVersion = 0;
+	}
+	__except(FilterException(GetExceptionCode(), GetExceptionInformation())) {		
+		err = GetExceptionCode();
+	}
+	return err;
 }
 
 const CMachineInfo* info(VstPlugin* self)
 {	
 	if (self->info == 0 && self->effect) {
-		self->info = (CMachineInfo*) malloc(sizeof(CMachineInfo));	
-		DispatchMachineInfo(self->effect, self->info);
+		self->info = (CMachineInfo*) malloc(sizeof(CMachineInfo));		
+		if (DispatchMachineInfo(self->effect, self->info)) {
+			free(self->info);
+			self->info = 0;
+		}
 	}
 	return self->info;
 }
 
 void parametertweak(VstPlugin* self, int par, int val)
 {
-
+	self->effect->setParameter(self->effect, par, val / 65535.f);
 }
 
-int describevalue(VstPlugin* self, char* txt, int const param, int const value)
-{ 
-	return 0;
-}
-
-int value(VstPlugin* self, int const param)
+int parameterlabel(VstPlugin* self, char* txt, int param)
 {
-	return 0;
+	txt[0] = '\0';
+	self->effect->dispatcher(self->effect, effGetParamLabel, param, 0, txt, 0);
+	return *txt != '\0';
 }
 
-void setvalue(VstPlugin* self, int const param, int const value)
+int parametername(VstPlugin* self, char* txt, int param)
+{
+	txt[0] = '\0';
+	self->effect->dispatcher(self->effect, effGetParamName, param, 0, txt, 0);
+	return *txt != '\0';
+}
+
+int describevalue(VstPlugin* self, char* txt, int param, int value)
+{ 		
+	txt[0] = '\0';
+	self->effect->dispatcher(self->effect, effGetParamDisplay, param, 0, txt, 0);
+	return *txt != '\0';
+}
+
+int value(VstPlugin* self, int param)
+{
+	return (int)(self->effect->getParameter(self->effect, param) * 65535.f);
+}
+
+void setvalue(VstPlugin* self, int param, int value)
 {
 
 }
@@ -399,6 +459,79 @@ void checkEffectProcessing (AEffect* effect)
 	}
 }
 
+unsigned int numinputs(VstPlugin* self)
+{
+	return self->effect->numInputs;
+}
 
+unsigned int numoutputs(VstPlugin* self)
+{
+	return self->effect->numOutputs;
+}
 
+unsigned int numparameters(VstPlugin* self)
+{
+	return self->effect->numParams;	
+}
 
+unsigned int numcols(VstPlugin* self)
+{
+	return 6;
+}
+
+const CMachineParameter* parameter(VstPlugin* self, unsigned int par)
+{
+	return &paraVst;
+}
+
+/*
+bool Plugin::LoadSpecificChunk(RiffFile * pFile, int version)
+{
+	try {
+		UINT size;
+		unsigned char _program;
+		pFile->Read(&size, sizeof size );
+		if(size)
+		{
+			UINT count;
+			pFile->Read(&_program, sizeof _program);
+			pFile->Read(&count, sizeof count);
+			size -= sizeof _program + sizeof count + sizeof(float) * count;
+			if(!size)
+			{
+				BeginSetProgram();
+				SetProgram(_program);
+				for(UINT i(0) ; i < count ; ++i)
+				{
+					float temp;
+					pFile->Read(&temp, sizeof temp);
+					SetParameter(i, temp);
+				}
+				EndSetProgram();
+			}
+			else
+			{
+				BeginSetProgram();
+				SetProgram(_program);
+				EndSetProgram();
+				pFile->Skip(sizeof(float) *count);
+				if(ProgramIsChunk())
+				{
+					char * data(new char[size]);
+					pFile->Read(data, size); // Number of parameters
+					SetChunk(data,size);
+					zapArray(data);
+				}
+				else
+				{
+					// there is a data chunk, but this machine does not want one.
+					pFile->Skip(size);
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	catch(...){return false;}
+}
+*/

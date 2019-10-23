@@ -6,14 +6,22 @@
 
 #include <hashtbl.h>
 #include <list.h>
+#include <signal.h>
 #include <dsptypes.h>
 
 #define MASTER_INDEX 128
 #define MAX_STREAM_SIZE 256
 
 typedef struct {
-	int slot;	
-	amp_t volume;	
+	int src;
+	int dst;
+} PinConnection;
+
+typedef struct {
+	int slot;
+	int send;
+	amp_t volume;
+	List* mapping;
 } WireSocketEntry;
 
 typedef List WireSocket;
@@ -29,14 +37,18 @@ void machinesockets_dispose(MachineSockets*);
 WireSocket* connection_at(WireSocket*, int slot);
 
 typedef struct {
-	Table container;	
+	Table container;
+	Table sends;
+	Signal signal_connected;
+	Signal signal_disconnected;
+	int filemode;
 } Connections;
 
 void connections_init(Connections*);
 void connections_dispose(Connections*);
 MachineSockets* connections_initslot(Connections*, int slot);
 MachineSockets* connections_at(Connections*, int slot);
-int connections_connect(Connections*, int outputslot, int inputslot);
+int connections_connect(Connections*, int outputslot, int inputslot, int send);
 void connections_disconnect(Connections*, int outputslot, int inputslot);
 int connections_connected(Connections*, int outputslot, int inputslot);
 void connections_disconnectall(Connections*, int slot);
