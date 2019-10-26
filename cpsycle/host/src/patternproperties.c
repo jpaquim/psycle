@@ -3,7 +3,7 @@
 #include "patternproperties.h"
 #include <stdio.h>
 
-static void OnSize(PatternProperties* self, ui_component* sender, int width, int height);
+static void OnSize(PatternProperties* self, ui_component* sender, ui_size*);
 static void OnApplyClicked(PatternProperties* self, ui_component* sender);
 static void OnCloseClicked(PatternProperties* self, ui_component* sender);
 
@@ -52,9 +52,9 @@ void PatternPropertiesSetPattern(PatternProperties* self, Pattern* pattern)
 	ui_edit_settext(&self->lengthedit, buffer);
 }
 
-void OnSize(PatternProperties* self, ui_component* sender, int width, int height)
+void OnSize(PatternProperties* self, ui_component* sender, ui_size* size)
 {
-	ui_component_move(&self->closebutton.component, width - 25, 5);
+	ui_component_move(&self->closebutton.component, size->width - 25, 5);
 	ui_component_resize(&self->closebutton.component, 20, 20);
 }
 

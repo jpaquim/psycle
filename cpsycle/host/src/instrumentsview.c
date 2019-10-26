@@ -5,7 +5,7 @@
 
 #include "instrumentsview.h"
 
-static void OnSize(InstrumentsView* self, ui_component* sender, int width, int height);
+static void OnSize(InstrumentsView* self, ui_component* sender, ui_size*);
 static void OnShow(InstrumentsView* self, ui_component* sender);
 static void OnHide(InstrumentsView* self, ui_component* sender);
 
@@ -41,7 +41,7 @@ void OnHide(InstrumentsView* self, ui_component* sender)
 	ui_component_hide(&self->tabbar.component);
 }
 
-void OnSize(InstrumentsView* self, ui_component* sender, int width, int height)
+void OnSize(InstrumentsView* self, ui_component* sender, ui_size* size)
 {
-	ui_component_resize(&self->notebook.component, width, height);
+	ui_component_resize(&self->notebook.component, size->width, size->height);
 }

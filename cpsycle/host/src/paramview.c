@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "paramview.h"
-#include <bitmap.h>
+#include "skingraphics.h"
 #include "resources/resource.h"
 #include "skincoord.h"
 
@@ -12,7 +12,6 @@
 
 static void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(ParamView* self, ui_graphics* g);
-static void OnSize(ParamView* self, ui_component* sender, int width, int height);
 static void DrawParam(ParamView* self, ui_graphics* g, int param, int row, int col);
 static void DrawSlider(ParamView* self, ui_graphics* g, int param, int row, int col);
 static void DrawLevel(ParamView* self, ui_graphics* g, int param, int row, int col);
@@ -26,7 +25,6 @@ static void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int b
 static void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button);
 static int HitTest(ParamView* self, int x, int y);
 static void OnTimer(ParamView*, ui_component* sender, int timerid);
-static void blitskinpart(ui_graphics*, ui_bitmap*, int x, int y, SkinCoord*);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
 
@@ -44,13 +42,11 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	self->machine = machine;
 	ui_component_init(&self->component, parent);	
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&self->component.signal_draw, self, OnDraw);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
 	signal_connect(&self->component.signal_mousemove,self, OnMouseMove);
-	signal_connect(&self->component.signal_timer,self, OnTimer);
-	ui_component_move(&self->component, 0, 0);
+	signal_connect(&self->component.signal_timer,self, OnTimer);	
 	ui_component_resize(&self->component, 800, 400);
 	if (self->machine) {
 		self->numparams = self->machine->numparameters(self->machine);
@@ -179,15 +175,11 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 	int half;
 	ui_rectangle r;
 	const CMachineParameter* par;
-	const char *parName;
-	const char *parValue;
 	char str[128];
 	
 	par = self->machine->parameter(self->machine, param);
 	if (par) {
-		str[0] = '\0';
-		parName = par->Name;	
-		parValue = str;
+		str[0] = '\0';		
 
 		cellposition(self, row, col, &left, &top);
 		cellsize(self, &width, &height);		
@@ -196,13 +188,22 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 
 		ui_setbackgroundcolor(g, 0x00232323);
 		ui_settextcolor(g, 0x00FFFFFF);
+		if (!self->machine->parametername(self->machine, str, param)) {
+			if (!self->machine->parameterlabel(self->machine, str, param)) {
+				_snprintf(str, 128, "%s", par->Name);
+			}
+		}
 		ui_textoutrectangle(g, 
 			left, top, ETO_OPAQUE | ETO_CLIPPED,
-			r, parName, strlen(parName));
+			r, str, strlen(str));
 		ui_setrectangle(&r, left, top + half, width, top + half);
+		if (self->machine->describevalue(
+			self->machine, str, param, self->machine->value(self->machine, param)) == FALSE) {
+			_snprintf(str, 128, "%d", self->machine->value(self->machine, param));
+		}
 		ui_textoutrectangle(g, 
-			left, top, ETO_OPAQUE | ETO_CLIPPED,
-			r, parValue, strlen(parValue));	
+			left, top + half, ETO_OPAQUE | ETO_CLIPPED,
+			r, str, strlen(str));	
 	}
 }
 
@@ -215,15 +216,12 @@ void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
 	int half;
 	int quarter;
 	ui_rectangle r;
-	const CMachineParameter* par;
-	const char *parName;
+	const CMachineParameter* par;	
 	const char *parValue;
 	char str[128];
 	
 	par = self->machine->parameter(self->machine, param);
-	if (par) {
-		str[0] = '\0';
-		parName = par->Name;	
+	if (par) {		
 		parValue = str;
 
 		cellposition(self, row, col, &left, &top);
@@ -243,9 +241,15 @@ void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
 
 		ui_setbackgroundcolor(g, 0x00232323);
 		ui_settextcolor(g, 0x00FFFFFF);
+		if (!self->machine->parametername(self->machine, str, param)) {
+			if (!self->machine->parameterlabel(self->machine, str, param)) {
+				_snprintf(str, 128, "%s", par->Name);
+			}
+		}
+
 		ui_textoutrectangle(g, 
 			left, top, ETO_OPAQUE | ETO_CLIPPED,
-			r, parName, strlen(parName));
+			r, str, strlen(str));
 	}
 }
 
@@ -265,11 +269,11 @@ void DrawSlider(ParamView* self, ui_graphics* g, int param, int row, int col)
 
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, &width, &height);	
-	blitskinpart(g, &mixer, left, top, &slider);
+	skin_blitpart(g, &mixer, left, top, &slider);
 	xoffset = (slider.destwidth - knob.destwidth) / 2;
 	value =	(self->machine->value(self->machine, param) / 65535.f);	
 	yoffset = (int)((1 - value) * slider.destheight);
-	blitskinpart(g, &mixer, left + xoffset, top + yoffset, &knob);	
+	skin_blitpart(g, &mixer, left + xoffset, top + yoffset, &knob);	
 }
 
 void DrawLevel(ParamView* self, ui_graphics* g, int param, int row, int col)
@@ -287,14 +291,14 @@ void DrawLevel(ParamView* self, ui_graphics* g, int param, int row, int col)
 
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, &width, &height);		
-	blitskinpart(g, &mixer, left + slider.destwidth, 
+	skin_blitpart(g, &mixer, left + slider.destwidth, 
 		slider.destheight - vuoff.destheight, &vuoff);			
 	value =	(self->machine->value(self->machine, param) / 65535.f);	
 	vuonheight = (int)(vuon.srcheight * value);
 	vuon.srcy += (vuon.srcheight - vuonheight);
 	vuon.srcheight = vuonheight;
 	vuon.destheight = vuon.srcheight;
-	blitskinpart(g, &mixer, left + slider.destwidth, 
+	skin_blitpart(g, &mixer, left + slider.destwidth, 
 		slider.destheight - vuon.destheight, &vuon);
 }
 
@@ -333,12 +337,6 @@ void ParamViewSize(ParamView* self, int* width, int* height)
 	cellsize(self, &cellwidth, &cellheight);
 	*width = self->numcols * cellwidth;
 	*height = self->numrows * cellheight;
-}
-
-void OnSize(ParamView* self, ui_component* sender, int width, int height)
-{
-	self->cx = width;
-	self->cy = height;
 }
 
 void OnMouseDown(ParamView* self, ui_component* sender, int x, int y, int button)
@@ -399,12 +397,6 @@ void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button
 void OnTimer(ParamView* self, ui_component* sender, int timerid)
 {
 	ui_invalidate(&self->component);
-}
-
-void blitskinpart(ui_graphics* g, ui_bitmap* bitmap, int x, int y, SkinCoord* coord)
-{
-	ui_drawbitmap(g, bitmap, x + coord->destx, y + coord->desty,
-		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
 }
 
 int intparamvalue(float value)

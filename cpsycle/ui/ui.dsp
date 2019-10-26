@@ -149,6 +149,10 @@ SOURCE=.\src\uinotebook.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiprogressbar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uislider.c
 # End Source File
 # Begin Source File
@@ -222,6 +226,10 @@ SOURCE=.\src\uimenu.h
 # Begin Source File
 
 SOURCE=.\src\uinotebook.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiprogressbar.h
 # End Source File
 # Begin Source File
 

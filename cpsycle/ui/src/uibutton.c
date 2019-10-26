@@ -28,6 +28,7 @@ void ui_button_init(ui_button* self, ui_component* parent)
 {	
 	self->ownerdrawn = 1;
 	self->hover = 0;
+	self->highlight = 0;
 	self->icon = UI_ICON_NONE;
 	if (self->ownerdrawn) {
 		ui_button_create_ownerdrawn(self, parent);
@@ -74,15 +75,19 @@ void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
 {
 	ui_size size;
 	ui_size textsize;
-	ui_rectangle r;
-	
+	ui_rectangle r;	
+		
 	size = ui_component_size(&self->component);
 	textsize = ui_component_textsize(&self->component, self->text);
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ui_setbackgroundmode(g, TRANSPARENT);
 	if (self->hover) {
 		ui_settextcolor(g, 0x00FFFFFF);
-	} else {
+	} else 
+	if (self->highlight) {
+		ui_settextcolor(g, 0x00FFFFFF);
+	} else
+	{
 		ui_settextcolor(g, 0x00CACACA);
 	}
 	ui_textoutrectangle(g, 
@@ -232,11 +237,13 @@ void ui_button_seticon(ui_button* self, ButtonIcon icon)
 
 void ui_button_highlight(ui_button* self)
 {
+	self->highlight = 1;
 	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
 }
 
 void ui_button_disablehighlight(ui_button* self)
 {
+	self->highlight = 0;
 	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
 }
 

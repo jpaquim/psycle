@@ -12,6 +12,7 @@
 #include "cmdsnotes.h"
 #include "skinio.h"
 #include "ui_app.h"
+#include "inputmap.h"
 
 static void Create(MainFrame*);
 static void InitMenu(MainFrame*);
@@ -37,6 +38,8 @@ static void OnSettingsViewChanged(MainFrame*, SettingsView* sender, Properties*)
 static void OnMouseEnterSplitBar(MainFrame*, ui_component* sender);
 static void OnMouseLeaveSplitBar(MainFrame*, ui_component* sender);
 static void OnSongChanged(MainFrame*, ui_component* sender, int flag);
+static void onsongloadprogress(MainFrame*, Workspace*, int progress);
+static void onpluginscanprogress(MainFrame*, Workspace*, int progress);
 
 HWND hwndmain;
 
@@ -166,7 +169,13 @@ void InitStatusBar(MainFrame* self)
 		ui_component_setalign(&self->statusbarlabel.component, UI_ALIGN_LEFT);
 	}
 	InitPatternViewBar(&self->patternbar, &self->statusbar, &self->workspace);		
-	ui_component_setalign(&self->patternbar.component, UI_ALIGN_LEFT);	
+	ui_component_setalign(&self->patternbar.component, UI_ALIGN_LEFT);
+	ui_progressbar_init(&self->progressbar, &self->statusbar);
+	ui_component_setalign(&self->progressbar.component, UI_ALIGN_RIGHT);	
+	signal_connect(&self->workspace.signal_loadprogress, self, 
+		onsongloadprogress);
+	signal_connect(&self->workspace.signal_scanprogress, self, 
+		onpluginscanprogress);
 }
 
 void InitBars(MainFrame* self)
@@ -215,11 +224,7 @@ void InitBars(MainFrame* self)
 	ui_component_setalign(&self->machinebar.component, UI_ALIGN_LEFT);		
 	// Vugroup
 	InitVuBar(self);
-	ui_component_resize(&self->vubar, 200, 50);
-	// ui_button_init(&self->updatedriver, &self->top);
-	// ui_button_settext(&self->updatedriver, "Restart Driver");
-	// ui_component_setposition(&self->updatedriver.component, 210, 0, 100, 20);	
-	// signal_connect(&self->updatedriver.signal_clicked, self, OnUpdateDriver);	
+	ui_component_resize(&self->vubar, 200, 50);	
 }
 
 void InitVuBar(MainFrame* self)
@@ -229,7 +234,7 @@ void InitVuBar(MainFrame* self)
 	InitVumeter(&self->vumeter, &self->vubar, &self->workspace);
 	ui_component_setposition(&self->vumeter.component, 0, 00, 200, 20);	
 	InitVolSlider(&self->volslider, &self->vubar, &self->workspace);
-	ui_component_setposition(&self->volslider.component, 0, 20, 200, 20);	
+	ui_component_setposition(&self->volslider.slider.component, 0, 20, 200, 20);	
 	InitClipBox(&self->clipbox, &self->vubar, &self->workspace);
 	ui_component_setposition(&self->clipbox.component, 205, 25, 10, 35);	
 }
@@ -351,11 +356,14 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
 		machineview_applyproperties(&self->machineview, properties);
 		properties_free(properties);
-	} else {				
+	} else {			
 		EventDriver* kbd;
-			
+		int input;
+		
+		input = encodeinput(keycode, GetKeyState(VK_SHIFT) < 0,
+			GetKeyState(VK_CONTROL) < 0);		
 		kbd = workspace_kbddriver(&self->workspace);
-		kbd->write(kbd, (unsigned char*)&keycode, 4);
+		kbd->write(kbd, (unsigned char*)&input, 4);
 
 		/*Machine* machine;
 		int base;
@@ -401,6 +409,20 @@ void OnTimer(MainFrame* self, ui_component* sender, int timerid)
 		_snprintf(buffer, 20, "Line %d  %.2f bts", line, offset); 
 		ui_statusbar_settext(&self->statusbar, 4, buffer);
 	}*/
+}
+
+void onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
+{
+	ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
+}
+
+void onpluginscanprogress(MainFrame* self, Workspace* workspace, int progress)
+{	
+	if (progress == 0) {
+		ui_progressbar_setprogress(&self->progressbar, 0);
+	} else {
+		ui_progressbar_tick(&self->progressbar);
+	}
 }
 
 void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
@@ -481,17 +503,8 @@ void OnGear(MainFrame* self, ui_component* sender)
 		ui_component_align(&self->component);
 	} else {						
 		ui_component_show(&self->gear.component);
-		ui_component_align(&self->component);
-		/*ui_size size;
-		ui_size gearsize;
-
-		size = ui_component_size(&self->component);
-		gearsize = ui_component_size(&self->gear.component);
-		ui_component_move(&self->gear.component, size.width - gearsize.width, gearsize.height);
-		ui_component_show(&self->gear.component);
-		ui_component_align(&self->component);*/
+		ui_component_align(&self->component);		
 	}	
-	
 }
 
 void OnAboutOk(MainFrame* self, ui_component* sender)

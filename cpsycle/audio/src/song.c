@@ -14,6 +14,8 @@ static void song_initproperties(Song*);
 static void song_initmachines(Song*);
 static void song_initpatterns(Song*);
 static void song_initsequence(Song*);
+static void song_initsignals(Song*);
+static void song_disposesignals(Song*);
 
 void song_init(Song* self, MachineFactory* machinefactory)
 {		
@@ -25,6 +27,7 @@ void song_init(Song* self, MachineFactory* machinefactory)
 	samples_init(&self->samples);
 	instruments_init(&self->instruments);
 	xminstruments_init(&self->xminstruments);
+	song_initsignals(self);
 }
 
 void song_initproperties(Song* self)
@@ -62,6 +65,12 @@ void song_initsequence(Song* self)
 	sequence_insert(&self->sequence, sequenceposition, 0);
 }
 
+void song_initsignals(Song* self)
+{
+	signal_init(&self->signal_loadprogress);
+	signal_init(&self->signal_saveprogress);
+}
+
 void song_dispose(Song* self)
 {
 	properties_free(self->properties);
@@ -72,6 +81,13 @@ void song_dispose(Song* self)
 	samples_dispose(&self->samples);
 	instruments_dispose(&self->instruments);
 	xminstruments_dispose(&self->xminstruments);	
+	song_disposesignals(self);
+}
+
+void song_disposesignals(Song* self)
+{
+	signal_dispose(&self->signal_loadprogress);
+	signal_dispose(&self->signal_saveprogress);
 }
 
 Song* song_alloc(void)
@@ -103,9 +119,10 @@ void song_load(Song* self, const char* path, Properties** workspaceproperties)
 		machines_startfilemode(&self->machines);
 		psyfile_read(&file, header, 8);
 		header[8] = '\0';
-		*workspaceproperties = properties_create();		
+		*workspaceproperties = properties_create();
+		signal_emit(&self->signal_loadprogress, self, 1, 1);
 		if (strcmp(header,"PSY3SONG")==0) {						
-			psy3_load(self, &file, header, *workspaceproperties);
+			psy3_load(self, &file, header, *workspaceproperties);			
 		} else
 		if (strcmp(header,"PSY2SONG")==0) {
 			psy2_load(self, &file, header, *workspaceproperties);
@@ -114,5 +131,6 @@ void song_load(Song* self, const char* path, Properties** workspaceproperties)
 		}
 		machines_endfilemode(&self->machines);
 		psyfile_close(&file);
+		signal_emit(&self->signal_loadprogress, self, 1, 0);
 	}
 }

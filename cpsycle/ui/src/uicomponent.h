@@ -116,6 +116,7 @@ void ui_component_setverticalscrollrange(ui_component*, int min, int max);
 void ui_component_verticalscrollrange(ui_component* self, int* scrollmin,
 	int* scrollmax);
 void ui_component_setverticalscrollposition(ui_component*, int position);
+void ui_component_sethorizontalscrollposition(ui_component*, int position);
 void ui_component_move(ui_component*, int left, int top);
 void ui_component_resize(ui_component*, int width, int height);
 void ui_component_setposition(ui_component*, int x, int y, int width, int height);
@@ -131,6 +132,7 @@ ui_size ui_component_frame_size(ui_component*);
 void ui_invalidate(ui_component*);
 void ui_invalidaterect(ui_component*, const ui_rectangle* rect);
 void ui_component_setfocus(ui_component*);
+int ui_component_hasfocus(ui_component*);
 void ui_component_setfont(ui_component*, ui_font* font);
 void ui_component_propagateevent(ui_component*);
 void ui_component_preventdefault(ui_component*);

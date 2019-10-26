@@ -26,6 +26,8 @@ typedef struct {
 	Instruments instruments;
 	XMInstruments xminstruments;
 	MachineFactory* machinefactory;
+	Signal signal_loadprogress;
+	Signal signal_saveprogress;
 } Song;
 
 /// initializes a song

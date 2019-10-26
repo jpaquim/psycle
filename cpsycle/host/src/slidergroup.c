@@ -7,17 +7,18 @@
 #include <stdio.h>
 
 static void OnDestroy(SliderGroup*);
-static void OnSize(SliderGroup*, ui_component* sender, int width, int height);
+static void OnSize(SliderGroup*, ui_component* sender, ui_size*);
 static void OnSliderChanged(SliderGroup*, ui_component* sender);
 static void DescribeValue(SliderGroup*);
-static float Value(SliderGroup* self);
-static void OnTimer(SliderGroup* self, ui_component* sender, int timerid);
+static float Value(SliderGroup*);
+static void OnTimer(SliderGroup*, ui_component* sender, int timerid);
 
 static int timerid = 600;
 
 void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 {
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_label_init(&self->desclabel, &self->component);
 	ui_slider_init(&self->slider, &self->component);	
 	ui_slider_setrange(&self->slider, -32768, 32767);
@@ -41,16 +42,16 @@ void OnDestroy(SliderGroup* self)
 	signal_dispose(&self->signal_tweakvalue);
 }
 
-void OnSize(SliderGroup* self, ui_component* sender, int width, int height)
+void OnSize(SliderGroup* self, ui_component* sender, ui_size* size)
 {	
 	int descwidth = 100;
 	int lblwidth = 70;
-	int sliderwidth = width - descwidth - lblwidth - 15;
-	ui_component_resize(&self->desclabel.component, descwidth, height);
-	ui_component_resize(&self->slider.component, sliderwidth, height);
-	ui_component_resize(&self->label.component, lblwidth, height);
+	int sliderwidth = size->width - descwidth - lblwidth - 15;
+	ui_component_resize(&self->desclabel.component, descwidth, size->height);
+	ui_component_resize(&self->slider.component, sliderwidth, size->height);
+	ui_component_resize(&self->label.component, lblwidth, size->height);
 	ui_component_move(&self->slider.component, descwidth + 5, 0);
-	ui_component_move(&self->label.component, width - lblwidth - 5, 0);
+	ui_component_move(&self->label.component, size->width - lblwidth - 5, 0);
 }
 
 void OnSliderChanged(SliderGroup* self, ui_component* sender)

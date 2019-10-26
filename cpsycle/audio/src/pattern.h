@@ -54,6 +54,10 @@ void pattern_remove(Pattern*, PatternNode*);
 /// finds the pattern node greater or equal than the offset
 ///\return the pattern node greater or equal than the offset
 PatternNode* pattern_greaterequal(Pattern*, beat_t offset);
+/// finds a pattern node
+///\return the pattern node
+PatternNode* pattern_findnode(Pattern* pattern, unsigned int track,
+	float offset, unsigned int subline, beat_t bpl, PatternNode** prev);
 /// finds the last pattern
 ///\return finds the last pattern node
 PatternNode* pattern_last(Pattern*);

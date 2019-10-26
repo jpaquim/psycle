@@ -12,6 +12,6 @@ typedef struct {
 } MachineFrame;
 
 void InitMachineFrame(MachineFrame*, ui_component* parent);
-void MachineFrameSetParamView(MachineFrame* self, ParamView* view);
+void MachineFrameSetParamView(MachineFrame* self, ui_component* view);
 
 #endif

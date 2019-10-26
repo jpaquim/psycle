@@ -15,6 +15,7 @@ typedef struct {
 	char* inipath;
 	Properties* dirconfig;
 	Signal signal_changed;
+	Signal signal_scanprogress;
 } PluginCatcher;
 
 void plugincatcher_init(PluginCatcher*, Properties* dirconfig);

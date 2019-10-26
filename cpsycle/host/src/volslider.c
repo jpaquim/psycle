@@ -8,37 +8,28 @@
 #include <math.h>
 
 static void OnDestroy(VolSlider*);
-static void OnSize(VolSlider*, ui_component* sender, int width, int height);
 static void OnSliderChanged(VolSlider*, ui_component* sender);
 static void DescribeValue(VolSlider*);
-static float Value(VolSlider* self);
-static void OnTimer(VolSlider* self, ui_component* sender, int timerid);
-static void SetSliderValue(VolSlider* slider, float value);
-static void OnSongChanged(VolSlider* self, Workspace* workspace);
+static float Value(VolSlider*);
+static void OnTimer(VolSlider*, ui_component* sender, int timerid);
+static void SetSliderValue(VolSlider*, float value);
+static void OnSongChanged(VolSlider*, Workspace*);
 
 static int timerid = 700;
 
 void InitVolSlider(VolSlider* self, ui_component* parent, Workspace* workspace)
 {		
-	self->machines = &workspace->song->machines;
-	ui_component_init(&self->component, parent);	
-	ui_slider_init(&self->slider, &self->component);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	self->machines = &workspace->song->machines;	
+	ui_slider_init(&self->slider, parent);	
 	ui_slider_setrange(&self->slider, -32768, 32767);
 	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
-	signal_connect(&self->component.signal_timer, self, OnTimer);	
-	signal_connect(&self->component.signal_size, self, OnSize);
+	signal_connect(&self->slider.component.signal_timer, self, OnTimer);	
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	SetTimer(self->component.hwnd, timerid, 50, 0);
+	SetTimer(self->slider.component.hwnd, timerid, 50, 0);
 }
 
 void OnDestroy(VolSlider* self)
 {	
-}
-
-void OnSize(VolSlider* self, ui_component* sender, int width, int height)
-{			
-	ui_component_resize(&self->slider.component, width, height);	
 }
 
 float Value(VolSlider* self)

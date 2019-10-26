@@ -8,26 +8,11 @@
 #include <stdlib.h>
 #include <excpt.h>
 #include <operations.h>
+#include "pattern.h"
 
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-
-#if !defined(TRUE)
-#define TRUE 1
-#endif
-
-#if !defined(BOOL)
-#define BOOL int
-#endif
-
-typedef CMachineInfo * (*GETINFO)(void);
-typedef CMachineInterface * (*CREATEMACHINE)(void);
-
+static int mode(VstPlugin*);
 static void work(VstPlugin* self, BufferContext*);
 static int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2);
-static void seqtick(VstPlugin* self, int channel, const PatternEvent* event);
-static void sequencerlinetick(VstPlugin* self);
 static const CMachineInfo* info(VstPlugin* self);
 static void parametertweak(VstPlugin* self, int par, int val);
 static int parameterlabel(VstPlugin*, char* txt, int param);
@@ -47,10 +32,16 @@ static const float kSampleRate = 48000.f;
 static const VstInt32 kNumProcessCycles = 5;
 static void checkEffectProperties (AEffect* effect);
 static void checkEffectProcessing (AEffect* effect);
-static int DispatchMachineInfo(AEffect* effect, CMachineInfo* info);
-typedef AEffect* (*PluginEntryProc) (audioMasterCallback audioMaster);
-static VstIntPtr VSTCALLBACK HostCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
-static PluginEntryProc getMainEntry(Library* library);
+static int machineinfo(AEffect* effect, CMachineInfo* info);
+typedef AEffect* (*PluginEntryProc)(audioMasterCallback audioMaster);
+static VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
+static PluginEntryProc getmainentry(Library* library);
+static int haseditor(VstPlugin*);
+static void seteditorhandle(VstPlugin*, void* handle);
+static void editorsize(VstPlugin*, int* width, int* height);
+static void editoridle(VstPlugin*);
+static void processevents(VstPlugin*, BufferContext*);
+struct VstMidiEvent* allocinitmidievent(VstPlugin*, const PatternEntry*);
 
 static CMachineParameter const paraVst = 
 { 
@@ -64,13 +55,12 @@ static CMachineParameter const paraVst =
 
 void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 {	
-	PluginEntryProc mainProc;	
+	PluginEntryProc mainproc;	
 
 	machine_init(&self->machine, callback);
+	self->machine.mode = mode;
 	self->machine.work = work;
-	self->machine.hostevent = hostevent;
-	self->machine.seqtick = seqtick;
-	self->machine.sequencerlinetick = sequencerlinetick;
+	self->machine.hostevent = hostevent;	
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
 	self->machine.parameterlabel = parameterlabel;
@@ -85,17 +75,31 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
 	self->machine.setcallback(self, callback);
+	self->machine.haseditor = haseditor;
+	self->machine.seteditorhandle = seteditorhandle;
+	self->machine.editorsize = editorsize;
+	self->machine.editoridle = editoridle;
 	self->info = 0;
+	self->editorhandle = 0;
+	self->events = 0;	
 	library_init(&self->library);
 	library_load(&self->library, path);		
-	mainProc = getMainEntry(&self->library);
-	if (mainProc) {
-		self->effect = mainProc (HostCallback);
-		if (self->effect) {
+	mainproc = getmainentry(&self->library);
+	if (mainproc) {
+		self->effect = mainproc(hostcallback);
+		if (self->effect) {			
 			VstInt32 numInputs;
 			VstInt32 numOutputs;
+			unsigned int size;
+
+			self->effect->user = self;
+			self->eventcap = 1024;
+			size = sizeof(struct VstEvents) + 
+				sizeof(VstEvent*) * self->eventcap;
+			self->events = (struct VstEvents*) malloc(size);
+			table_init(&self->noteons);			
 			numInputs = self->effect->numInputs;
-			numOutputs = self->effect->numOutputs;
+			numOutputs = self->effect->numOutputs;			
 			self->effect->user = self;
 			self->effect->dispatcher (self->effect, effOpen, 0, 0, 0, 0);
 			self->effect->dispatcher (self->effect, effSetSampleRate, 0, 0, 0, kSampleRate);
@@ -122,75 +126,116 @@ void dispose(VstPlugin* self)
 			free((char*)self->info->Command);
 		}
 		self->info = 0;
+		free(self->events);
+		table_dispose(&self->noteons);
 	}	
 	machine_dispose(&self->machine);
 }
 
-PluginEntryProc getMainEntry(Library* library)
+PluginEntryProc getmainentry(Library* library)
 {
-	PluginEntryProc mainProc = 0;	
-	mainProc = (PluginEntryProc)library_functionpointer(library, "VSTPluginMain");
-	if(!mainProc)
-		mainProc = (PluginEntryProc)library_functionpointer(library,"main");	
-	return mainProc;
+	PluginEntryProc rv = 0;
+
+	rv = (PluginEntryProc)library_functionpointer(library, "VSTPluginMain");
+	if(!rv) {
+		rv = (PluginEntryProc)library_functionpointer(library,"main");
+	}
+	return rv;
 }
 
 int plugin_vst_test(const char* path, CMachineInfo* rv)
 {
 	int vst = 0;
-
+	
 	if (path && strcmp(path, "") != 0) {
 		Library library;
-		PluginEntryProc mainEntry;	
+		PluginEntryProc mainentry;	
 		
 		library_init(&library);		
-		library_load(&library, path);		
-		mainEntry = getMainEntry(&library);
-		if (mainEntry) {
-			AEffect* effect = mainEntry (HostCallback);
-			if (effect) {				
-				int err;
-
-				err = DispatchMachineInfo(effect, rv);
-				if (err == 0) {
-					vst = 1;
-				}
-			}
-		}	
+		library_load(&library, path);
+		if (!library_empty(&library)) {
+			mainentry = getmainentry(&library);
+			if (mainentry) {
+				AEffect* effect;
+				
+				effect = mainentry(hostcallback);
+				vst = effect && machineinfo(effect, rv) == 0;
+			}	
+		}
 		library_dispose(&library);	
 	}
 	return vst;
 }
 
 void work(VstPlugin* self, BufferContext* bc)
-{	
-	self->effect->processReplacing(self->effect, bc->input->samples,
-		bc->output->samples, bc->numsamples);	
+{
+	unsigned int c;	
+	for (c = 0; c < bc->output->numchannels; ++c) {
+		dsp_mul(bc->output->samples[c], bc->numsamples, 1/32768.f);
+	}
+	processevents(self, bc);
+	self->effect->processReplacing(self->effect, bc->output->samples,
+		bc->output->samples, bc->numsamples);
+	for (c = 0; c < bc->output->numchannels; ++c) {
+		dsp_mul(bc->output->samples[c], bc->numsamples, 32768.f);
+	}
 }
 
-void seqtick(VstPlugin* self, int channel, const PatternEvent* event)
+void processevents(VstPlugin* self, BufferContext* bc)
 {
-	struct VstMidiEvent e;
-	struct VstEvents ve;
-	int n;
+	List* p;
+	int count = 0;
+	int i;
+	
+	for (p = bc->events; p != 0 && count < self->eventcap;
+			p = p->next) {
+		PatternEntry* entry = (PatternEntry*)p->entry;		
+		if (entry->event.cmd == SET_PANNING) {
+			// todo split work
+			machine_setpanning(&self->machine, 
+					entry->event.parameter / 255.f);
+		} else
+		if (entry->event.note == NOTECOMMANDS_TWEAK) {
+			// todo translate to midi events 
+//			self->parametertweak(self, entry->event.inst,
+//				entry->event.parameter);
+		} else {
+			
+			self->events->events[count] = (VstEvent*)
+				allocinitmidievent(self, entry);
+			++count;			
+		}			
+	}	
+	self->events->numEvents = count;
+	self->events->reserved = 0;
+	self->effect->dispatcher(self->effect, effProcessEvents, 0, 0, self->events, 0);
+	for (i = 0; i < count; ++i) {		
+		free(self->events->events[i]);
+	}
+}
 
-	n = 1;	
-	ve.numEvents = 1;
-	ve.reserved = 0;	
+struct VstMidiEvent* allocinitmidievent(VstPlugin* self, const PatternEntry* entry)
+{
+	struct VstMidiEvent* rv;
+	char note;
+	int noteon;
 
-	memset(&e, 0, sizeof(struct VstMidiEvent));
-	e.type          = kVstMidiType;
-	e.byteSize      = sizeof(e);
-	e.flags         = kVstMidiEventIsRealtime;
-	e.midiData[0]   = (char)(channel + (1 ? 0x90 : 0x80));
-	e.midiData[1]   = (char)(event->note);
-	e.midiData[2]   = (char)(127);
-
-	ve.events[0] = (VstEvent*)&e;
-//	if(auto l = vstMidi.lock()) {
-//		vstMidi.events.push_back(e);
-//	}
-	self->effect->dispatcher(self->effect, effProcessEvents, 0, 0, &ve, 0);	
+	rv = malloc(sizeof(struct VstMidiEvent));
+	memset(rv, 0, sizeof(struct VstMidiEvent));
+	noteon = entry->event.note < NOTECOMMANDS_RELEASE;
+	if (noteon) {
+		table_insert(&self->noteons, entry->track, (void*)entry->event.note);
+		note = (char) entry->event.note;
+	} else {
+		note = (char) table_at(&self->noteons, entry->track);
+	}
+	rv->type          = kVstMidiType;
+	rv->byteSize      = sizeof(struct VstMidiEvent);
+	rv->flags         = kVstMidiEventIsRealtime;
+	rv->midiData[0]   = (char) (entry->track + noteon ? 0x90 : 0x80);
+	rv->midiData[1]   = (char)note;
+	rv->midiData[2]   = (char)(127);
+	return rv;
 }
 
 int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2)
@@ -198,17 +243,12 @@ int hostevent(VstPlugin* self, int const eventNr, int const val1, float const va
 	return 0;
 }
 
-void sequencerlinetick(VstPlugin* self)
-{
-	
-}
-
 static int FilterException(int code, struct _EXCEPTION_POINTERS *ep) 
 {
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
-int DispatchMachineInfo(AEffect* effect, CMachineInfo* info)
+int machineinfo(AEffect* effect, CMachineInfo* info)
 {
 	char effectName[256] = {0};
 	char vendorString[256] = {0};
@@ -222,7 +262,9 @@ int DispatchMachineInfo(AEffect* effect, CMachineInfo* info)
 		
 		info->Author = _strdup(vendorString);
 		info->Command = _strdup(""); // 0; // strdup(pInfo->Command);
-		info->Flags = 16; // pInfo->Flags;
+		info->Flags = (effect->flags & effFlagsIsSynth) == effFlagsIsSynth
+						  ? 3
+						  : 0;
 		info->Name = _strdup(effectName);
 		info->numCols = 6; // pInfo->numCols;
 		info->numParameters = 0; //pInfo->numParameters;
@@ -240,7 +282,7 @@ const CMachineInfo* info(VstPlugin* self)
 {	
 	if (self->info == 0 && self->effect) {
 		self->info = (CMachineInfo*) malloc(sizeof(CMachineInfo));		
-		if (DispatchMachineInfo(self->effect, self->info)) {
+		if (machineinfo(self->effect, self->info) != 0) {
 			free(self->info);
 			self->info = 0;
 		}
@@ -284,179 +326,34 @@ void setvalue(VstPlugin* self, int param, int value)
 
 }
 
-VstIntPtr VSTCALLBACK HostCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
+VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 {
 	VstIntPtr result = 0;
-
-	// Filter idle calls...
-	BOOL filtered = FALSE;
-	if(opcode == audioMasterIdle)
-	{
-		static BOOL wasIdle = FALSE;
-		if(wasIdle)
-			filtered = TRUE;
-		else
-		{
-			printf ("(Future idle calls will not be displayed!)\n");
-			wasIdle = TRUE;
-		}
+	VstPlugin* self;
+	
+	if (effect) {
+		self = (VstPlugin*) effect->user;
+	} else
+	if (opcode == audioMasterVersion) {
+		return kVstVersion;
+	} else {
+		return 0;
 	}
-
-	if(!filtered)
-		printf ("PLUG> HostCallback (opcode %d)\n index = %d, value = %p, ptr = %p, opt = %f\n", opcode, index,
-		(void*) (value), ptr, opt);
-
+	
 	switch(opcode)
 	{
-	case audioMasterVersion :
-		result = kVstVersion;
+		case audioMasterVersion :
+			result = kVstVersion;
 		break;		
-
+		case audioMasterIdle:            
+        break;
+		case audioMasterGetSampleRate:
+			result = self->machine.samplerate(&self->machine);
+		default:
+		break;
 	}
 
 	return result;
-}
-
-void checkEffectProperties (AEffect* effect)
-{	
-	char effectName[256] = {0};
-	char vendorString[256] = {0};
-	char productString[256] = {0};
-	VstInt32 progIndex;
-	VstInt32 paramIndex;
-
-	printf ("HOST> Gathering properties...\n");
-
-	effect->dispatcher (effect, effGetEffectName, 0, 0, effectName, 0);
-	effect->dispatcher (effect, effGetVendorString, 0, 0, vendorString, 0);
-	effect->dispatcher (effect, effGetProductString, 0, 0, productString, 0);
-
-	printf ("Name = %s\nVendor = %s\nProduct = %s\n\n", effectName, vendorString, productString);
-
-	printf ("numPrograms = %d\nnumParams = %d\nnumInputs = %d\nnumOutputs = %d\n\n", 
-			effect->numPrograms, effect->numParams, effect->numInputs, effect->numOutputs);
-
-	// Iterate programs...
-	for(progIndex = 0; progIndex < effect->numPrograms; progIndex++)
-	{
-		char progName[256] = {0};
-		if(!effect->dispatcher (effect, effGetProgramNameIndexed, progIndex, 0, progName, 0))
-		{
-			effect->dispatcher (effect, effSetProgram, 0, progIndex, 0, 0); // Note: old program not restored here!
-			effect->dispatcher (effect, effGetProgramName, 0, 0, progName, 0);
-		}
-		printf ("Program %03d: %s\n", progIndex, progName);
-	}
-
-	printf ("\n");
-
-	// Iterate parameters...
-	for(paramIndex = 0; paramIndex < effect->numParams; paramIndex++)
-	{
-		char paramName[256] = {0};
-		char paramLabel[256] = {0};
-		char paramDisplay[256] = {0};
-		float value;
-
-		effect->dispatcher (effect, effGetParamName, paramIndex, 0, paramName, 0);
-		effect->dispatcher (effect, effGetParamLabel, paramIndex, 0, paramLabel, 0);
-		effect->dispatcher (effect, effGetParamDisplay, paramIndex, 0, paramDisplay, 0);
-		value = effect->getParameter (effect, paramIndex);
-
-		printf ("Param %03d: %s [%s %s] (normalized = %f)\n", paramIndex, paramName, paramDisplay, paramLabel, value);
-	}
-
-	printf ("\n");
-
-	// Can-do nonsense...
-	{
-		VstInt32 canDoIndex;
-		static const char* canDos[] =
-		{
-			"receiveVstEvents",
-			"receiveVstMidiEvent",
-			"midiProgramNames"
-		};
-
-		for(canDoIndex = 0; canDoIndex < sizeof(canDos)/sizeof(canDos[0]); canDoIndex++)
-		{
-			VstInt32 result;
-			printf ("Can do %s... ", canDos[canDoIndex]);
-			result = (VstInt32)effect->dispatcher (effect, effCanDo, 0, 0, (void*)canDos[canDoIndex], 0);
-			switch(result)
-			{
-				case 0  : printf ("don't know"); break;
-				case 1  : printf ("yes"); break;
-				case -1 : printf ("definitely not!"); break;
-				default : printf ("?????");
-			}
-			printf ("\n");
-		}
-	}
-
-	printf ("\n");
-}
-
-//-------------------------------------------------------------------------------------------------------
-void checkEffectProcessing (AEffect* effect)
-{
-	float** inputs = 0;
-	float** outputs = 0;
-	VstInt32 numInputs = effect->numInputs;
-	VstInt32 numOutputs = effect->numOutputs;
-	
-	if(numInputs > 0)
-	{
-		VstInt32 i;
-		inputs = (float**)malloc(sizeof(float*)*numInputs);
-		for(i = 0; i < numInputs; i++)
-		{
-			inputs[i] = (float*)malloc(sizeof(float)*kBlockSize);
-			memset (inputs[i], 0, kBlockSize * sizeof(float));
-		}
-	}
-
-	if(numOutputs > 0)
-	{
-		VstInt32 i;
-		outputs = (float**)malloc(sizeof(float*)*numOutputs);
-		for(i = 0; i < numOutputs; i++)
-		{
-			outputs[i] = (float*)malloc(sizeof(float)*kBlockSize);
-			memset (outputs[i], 0, kBlockSize * sizeof(float));
-		}
-	}
-
-	printf ("HOST> Resume effect...\n");
-	effect->dispatcher (effect, effMainsChanged, 0, 1, 0, 0);
-
-	{
-		VstInt32 processCount;
-		for(processCount = 0; processCount < kNumProcessCycles; processCount++)
-		{
-			printf ("HOST> Process Replacing...\n");
-			effect->processReplacing (effect, inputs, outputs, kBlockSize);
-		}
-	}
-
-	printf ("HOST> Suspend effect...\n");
-	effect->dispatcher (effect, effMainsChanged, 0, 0, 0, 0);
-
-	if(numInputs > 0)
-	{
-		VstInt32 i;
-		for(i = 0; i < numInputs; i++)
-			free(inputs[i]);
-		free(inputs);
-	}
-
-	if(numOutputs > 0)
-	{
-		VstInt32 i;
-		for(i = 0; i < numOutputs; i++)
-			free(outputs[i]);
-		free(outputs);
-	}
 }
 
 unsigned int numinputs(VstPlugin* self)
@@ -535,3 +432,42 @@ bool Plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 	catch(...){return false;}
 }
 */
+
+int haseditor(VstPlugin* self)
+{
+	return (self->effect->flags & effFlagsHasEditor) == effFlagsHasEditor;
+}
+
+void seteditorhandle(VstPlugin* self, void* handle)
+{		
+	self->editorhandle = handle;
+	self->effect->dispatcher(self->effect, effEditOpen, 0, 0, handle, 0);	
+}
+
+void editorsize(VstPlugin* self, int* width, int* height)
+{
+	struct ERect* r = 0;
+
+	self->effect->dispatcher(self->effect, effEditGetRect, 0, 0,  &r, 0);
+	if (r != 0) {
+		*width = r->right - r->left;
+		*height = r->bottom - r->top;
+	} else {
+		*width = 0;
+		*height = 0;
+	}
+}
+
+void editoridle(VstPlugin* self)
+{
+	if(self->editorhandle) {
+		self->effect->dispatcher(self->effect, effEditIdle, 0, 0, 0, 0);
+	}
+}
+
+int mode(VstPlugin* self)
+{ 
+	return (self->effect->flags & effFlagsIsSynth) == effFlagsIsSynth
+		? MACHMODE_GENERATOR
+		: MACHMODE_FX;
+}

@@ -37,6 +37,8 @@ static void workspace_configvisual(Workspace*);
 static void workspace_configkeyboard(Workspace*);
 static void workspace_setsong(Workspace*, Song*, int flag);
 static void workspace_changedefaultfontsize(Workspace*, int size);
+static void workspace_onloadprogress(Workspace*, Song*, int progress);
+static void workspace_onscanprogress(Workspace*, PluginCatcher*, int progress);
 
 static MachineCallback machinecallback(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
@@ -55,6 +57,8 @@ void workspace_init(Workspace* self, void* handle)
 	self->mainhandle = handle;
 	workspace_makeconfig(self);
 	plugincatcher_init(&self->plugincatcher, self->directories);
+	signal_connect(&self->plugincatcher.signal_scanprogress, self,
+		workspace_onscanprogress);
 	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
 	machinefactory_init(&self->machinefactory, machinecallback(self), 
 		&self->plugincatcher);
@@ -65,6 +69,8 @@ void workspace_init(Workspace* self, void* handle)
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
 	signal_init(&self->signal_editpositionchanged);
+	signal_init(&self->signal_loadprogress);
+	signal_init(&self->signal_scanprogress);
 	workspace_initplayer(self);
 }
 
@@ -83,6 +89,8 @@ void workspace_dispose(Workspace* self)
 	signal_dispose(&self->signal_songchanged);
 	signal_dispose(&self->signal_configchanged);
 	signal_dispose(&self->signal_editpositionchanged);
+	signal_dispose(&self->signal_loadprogress);
+	signal_dispose(&self->signal_scanprogress);
 	plugincatcher_dispose(&self->plugincatcher);
 	undoredo_dispose(&self->undoredo);
 	lock_dispose();
@@ -191,8 +199,13 @@ void workspace_mididriverconfig(Workspace* self, int driverid)
 
 void workspace_scanplugins(Workspace* self)
 {		
-	plugincatcher_scan(&self->plugincatcher);
+	plugincatcher_scan(&self->plugincatcher);	
 	plugincatcher_save(&self->plugincatcher);
+}
+
+void workspace_onscanprogress(Workspace* self, PluginCatcher* sender, int progress)
+{
+	signal_emit(&self->signal_scanprogress, self, 1, progress);
 }
 
 void workspace_makeconfig(Workspace* self)
@@ -304,7 +317,7 @@ void workspace_makedirectories(Workspace* self)
 	properties_sethint(properties_settext(
 		properties_append_string(
 			self->directories,
-			"vst",
+			"vst",			
 			"C:\\Programme\\Psycle\\VstPlugins"),
 		"VST directories"),
 		PROPERTY_HINT_EDITDIR);
@@ -543,8 +556,14 @@ void workspace_loadsong(Workspace* self, const char* path)
 
 	properties_free(self->properties);
 	song = song_allocinit(&self->machinefactory);
+	signal_connect(&song->signal_loadprogress, self, workspace_onloadprogress);
 	song_load(song, path, &self->properties);
 	workspace_setsong(self, song, WORKSPACE_LOADSONG);
+}
+
+void workspace_onloadprogress(Workspace* self, Song* sender, int progress)
+{
+	signal_emit(&self->signal_loadprogress, self, 1, progress);
 }
 
 void workspace_setsong(Workspace* self, Song* song, int flag)

@@ -6,7 +6,6 @@
 #include "wavebox.h"
 
 static void OnDraw(WaveBox*, ui_component* sender, ui_graphics*);
-static void OnSize(WaveBox*, ui_component* sender, int width, int height);
 static void OnDestroy(WaveBox*, ui_component* sender);
 static void OnMouseDown(WaveBox*, ui_component* sender, int x, int y, int button);
 
@@ -16,8 +15,7 @@ void InitWaveBox(WaveBox* self, ui_component* parent)
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
+	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	self->sample = 0;
 }
@@ -44,10 +42,6 @@ void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 			ui_drawline(g, x, centery, x, (int) (centery + framevalue / 1000));
 		}
 	}
-}
-
-void OnSize(WaveBox* self, ui_component* sender, int width, int height)
-{	
 }
 
 void OnMouseDown(WaveBox* self, ui_component* sender, int x, int y, int button)

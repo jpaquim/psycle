@@ -5,7 +5,7 @@
 
 #include "uinotebook.h"
 
-void onsize(ui_notebook*, ui_component* sender, int width, int height);
+void onsize(ui_notebook*, ui_component* sender, ui_size* size);
 void ontabbarchange(ui_notebook*, ui_component* sender, int tabindex);
 
 void ui_notebook_init(ui_notebook* self, ui_component* parent)
@@ -57,13 +57,13 @@ void ui_notebook_connectcontroller(ui_notebook* self, Signal* controllersignal)
 	signal_connect(controllersignal, self, ontabbarchange);
 }
 
-void onsize(ui_notebook* self, ui_component* sender, int width, int height)
+void onsize(ui_notebook* self, ui_component* sender, ui_size* size)
 {
 	List* p;
 	List* q;
 
 	for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next) {
-		ui_component_resize((ui_component*)p->entry, width, height);
+		ui_component_resize((ui_component*)p->entry, size->width, size->height);
 	}
 	list_free(q);
 }

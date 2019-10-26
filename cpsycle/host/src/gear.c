@@ -5,7 +5,7 @@
 
 #include "gear.h"
 
-static void OnSize(Gear*, ui_component* sender, int width, int height);
+static void OnSize(Gear*, ui_component* sender, ui_size*);
 static void ConnectSongSignals(Gear*);
 static void OnDelete(Gear*, ui_component* sender);
 static void OnSongChanged(Gear*, Workspace*);
@@ -87,17 +87,18 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 	ui_component_resize(&self->buttons.component, 100, 0);
 }
 
-void OnSize(Gear* self, ui_component* sender, int width, int height)
+void OnSize(Gear* self, ui_component* sender, ui_size* size)
 {
 	ui_size buttonssize;
 
 	buttonssize = ui_component_size(&self->buttons.component);
-	ui_component_move(&self->tabbar.component, 0, height - 20);
-	ui_component_resize(&self->tabbar.component, width, 20);
+	ui_component_move(&self->tabbar.component, 0, size->height - 20);
+	ui_component_resize(&self->tabbar.component, size->width, 20);
 	ui_component_setposition(&self->notebook.component, 0, 0,
-		width - buttonssize.width, height - 20);
-	ui_component_setposition(&self->buttons.component, width - buttonssize.width , 0,
-		buttonssize.width, height - 20);
+		size->width - buttonssize.width, size->height - 20);
+	ui_component_setposition(&self->buttons.component,
+		size->width - buttonssize.width , 0,
+		buttonssize.width, size->height - 20);
 }
 
 void ConnectSongSignals(Gear* self)

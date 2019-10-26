@@ -6,21 +6,9 @@
 #include "mixer.h"
 #include "machines.h"
 #include <operations.h>
-#include <windows.h>
 #include <math.h>
-
-#define TRUE 1
-#define FALSE 0
-
-static CMachineParameter const paraDummy = 
-{ 
-	"",	
-	"",										// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	1,										// Flags
-	0
-};
+#include <stdlib.h>
+#include <string.h>
 
 static CMachineParameter const paraInputHeader = 
 { 
@@ -28,17 +16,7 @@ static CMachineParameter const paraInputHeader =
 	"Input",								// description
 	0,										// MinValue	
 	65535,									// MaxValue
-	1,										// Flags
-	0
-};
-
-static CMachineParameter const paraSendHeader = 
-{ 
-	"Send",	
-	"Send",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	1,										// Flags
+	3,										// Flags
 	0
 };
 
@@ -52,6 +30,16 @@ static CMachineParameter const paraMixKnob =
 	0
 };
 
+static CMachineParameter const paraMixHeader = 
+{ 
+	"Mix",	
+	"Mix",									// description
+	0,										// MinValue	
+	65535,									// MaxValue
+	1,										// Flags
+	0
+};
+
 static CMachineParameter const paraGainKnob = 
 { 
 	"Gain",	
@@ -62,6 +50,16 @@ static CMachineParameter const paraGainKnob =
 	0
 };
 
+static CMachineParameter const paraGainHeader = 
+{ 
+	"Gain",	
+	"Gain",									// description
+	0,										// MinValue	
+	65535,									// MaxValue
+	1,										// Flags
+	0
+};
+
 static CMachineParameter const paraPanKnob = 
 { 
 	"Pan",	
@@ -69,6 +67,16 @@ static CMachineParameter const paraPanKnob =
 	0,										// MinValue	
 	65535,									// MaxValue
 	MPF_STATE,								// Flags
+	0
+};
+
+static CMachineParameter const paraPanHeader = 
+{ 
+	"Pan",	
+	"Pan",									// description
+	0,										// MinValue	
+	65535,									// MaxValue
+	1,										// Flags
 	0
 };
 
@@ -98,7 +106,7 @@ static CMachineParameter const paraReturnHeader =
 	"Return",								// description
 	0,										// MinValue	
 	65535,									// MaxValue
-	1,										// Flags
+	3,										// Flags
 	0
 };
 
@@ -118,6 +126,67 @@ static CMachineParameter const paraSendVol =
 	"Send",									// description
 	0,										// MinValue	
 	65535,									// MaxValue
+	MPF_STATE,								// Flags
+	0
+};
+
+
+static CMachineParameter const paraRouteKnob = 
+{ 
+	"Route",	
+	"Route",								// description
+	0,										// MinValue	
+	1,										// MaxValue
+	MPF_STATE,								// Flags
+	0
+};
+
+static CMachineParameter const paraMasterSendKnob = 
+{ 
+	"Master",	
+	"Master",								// description
+	0,										// MinValue	
+	1,										// MaxValue
+	MPF_STATE,								// Flags
+	0
+};
+
+static CMachineParameter const paraSoloKnob = 
+{ 
+	"Solo",	
+	"Solo",									// description
+	0,										// MinValue	
+	1,										// MaxValue
+	MPF_STATE,								// Flags
+	0
+};
+
+static CMachineParameter const paraMuteKnob = 
+{ 
+	"Mute",	
+	"Mute",									// description
+	0,										// MinValue	
+	1,										// MaxValue
+	MPF_STATE,								// Flags
+	0
+};
+
+static CMachineParameter const paraDryKnob = 
+{ 
+	"Dry",	
+	"Dry",									// description
+	0,										// MinValue	
+	1,										// MaxValue
+	MPF_STATE,								// Flags
+	0
+};
+
+static CMachineParameter const paraWetKnob = 
+{ 
+	"Wet",	
+	"Wet",									// description
+	0,										// MinValue	
+	1,										// MaxValue
 	MPF_STATE,								// Flags
 	0
 };
@@ -154,8 +223,7 @@ static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, flo
 static void loadspecific(Mixer*, PsyFile* file, unsigned int slot, Machines*);
 static void onconnected(Mixer*, Connections*, int outputslot, int inputslot);
 static void ondisconnected(Mixer*, Connections*, int outputslot, int inputslot);
-static void work_send(Mixer*, int slot, Machine*, Buffer* output, 
-		unsigned int amount, unsigned int songtracks);
+static int parametername(Mixer*, char* txt, int param);
 static void parametertweak(Mixer*, int param, int value);
 static int value(Mixer*, int const param);
 static int describevalue(Mixer*, char* txt, int const param, int const value);
@@ -169,11 +237,21 @@ static void insertinputchannels(Mixer*, int num, Machines* machines);
 static int paramviewoptions(Machine* self) { return MACHINE_PARAMVIEW_COMPACT; }
 static unsigned int slot(Mixer* self) { return self->slot; }
 static void setslot(Mixer* self, int slot) { self->slot = slot; }
-
-static char* _psName;
+static int mastercolumn(Mixer*);
+static int inputcolumn(Mixer*);
+static int returncolumn(Mixer*);
+static void preparemix(Mixer*, Machines*, unsigned int amount);
+static void mixinputs(Mixer*, Machines*, unsigned int amount);
+static void workreturns(Mixer*, Machines*, unsigned int amount);
+static void mixreturns(Mixer*, Machines*, unsigned int amount);
+static void tickrms(Mixer*, unsigned int amount);
+static void levelmaster(Mixer*, unsigned int amount);
 
 static MixerChannel* mixerchannel_allocinit(unsigned int inputslot);
 static void mixerchannel_dispose(MixerChannel*);
+
+static ReturnChannel* returnchannel_allocinit(unsigned int fxslot);
+static void returnchannel_dispose(ReturnChannel*);
 
 void mixerchannel_init(MixerChannel* self, unsigned int inputslot)
 {		
@@ -185,7 +263,7 @@ void mixerchannel_init(MixerChannel* self, unsigned int inputslot)
 	table_init(&self->sendvols);
 	self->volume = 1.0f;
 	self->gain = 1.f;
-	self->wetonly = 0;	
+	self->wetonly = 0;
 }
 
 MixerChannel* mixerchannel_allocinit(unsigned int inputslot)
@@ -201,7 +279,33 @@ MixerChannel* mixerchannel_allocinit(unsigned int inputslot)
 
 void mixerchannel_dispose(MixerChannel* self)
 {	
-	table_dispose(&self->sendvols);
+	table_dispose(&self->sendvols);	
+}
+
+void returnchannel_init(ReturnChannel* self, unsigned int fxslot)
+{		
+	self->fxslot = fxslot;
+	self->mute = 0;
+	self->panning = 0.5f;	
+	self->volume = 1.0f;	
+	self->mastersend = 1;
+	table_init(&self->sendsto);
+}
+
+ReturnChannel* returnchannel_allocinit(unsigned int fxslot)
+{
+	ReturnChannel* rv;
+
+	rv = (ReturnChannel*) malloc(sizeof(ReturnChannel));
+	if (rv) {
+		returnchannel_init(rv, fxslot);
+	}	
+	return rv;
+}
+
+void returnchannel_dispose(ReturnChannel* self)
+{		
+	table_dispose(&self->sendsto);
 }
 
 void mixer_init(Mixer* self, MachineCallback callback)
@@ -216,6 +320,7 @@ void mixer_init(Mixer* self, MachineCallback callback)
 	self->machine.seqtick = mixer_seqtick;
 	self->machine.mode = mixer_mode;
 	self->machine.mix = mix;
+	self->machine.parametername = parametername;
 	self->machine.parametertweak = parametertweak;
 	self->machine.value = value;
 	self->machine.describevalue = describevalue;
@@ -253,7 +358,19 @@ void mixer_dispose(Mixer* self)
 		table_dispose(&self->inputs);
 	}
 	table_dispose(&self->sends);
-	table_dispose(&self->returns);
+	{ // dispose returns
+		TableIterator it;
+
+		for (it = table_begin(&self->returns);
+			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+			ReturnChannel* channel;
+
+			channel = (ReturnChannel*)tableiterator_value(&it);
+			returnchannel_dispose(channel);
+			free(channel);		
+		}	
+		table_dispose(&self->returns);
+	}	
 	machine_dispose(&self->machine);	
 }
 
@@ -292,69 +409,128 @@ unsigned int numoutputs(Mixer* self)
 }
 
 Buffer* mix(Mixer* self, int slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
-{			
-	Buffer* master;
-	TableIterator input_iter;
-	int input = 0;
-
-	master = machines_outputs(machines, slot);
-	if (!master) {
-		return 0;
-	}
-	buffer_clearsamples(master, amount);		
-	for (input_iter = table_begin(&self->inputs);
-			!tableiterator_equal(&input_iter, table_end());
-			tableiterator_inc(&input_iter), ++input) {
-		TableIterator send_iter;
-		MixerChannel* inputchannel;
-		Buffer* source;
-		WireSocketEntry* input_entry;
-		int sendindex = 0;
-		float wirevol = 1.f;
-
-		inputchannel = (MixerChannel*) tableiterator_value(&input_iter);
-		source = machines_outputs(machines, inputchannel->inputslot);
-		input_entry = wiresocketentry(self, input);				
-		if (input_entry) {
-			wirevol = input_entry->volume;	
-		}
-		for (send_iter = table_begin(&self->sends);
-				!tableiterator_equal(&send_iter, table_end());
-				tableiterator_inc(&send_iter), ++sendindex) {
-			Buffer* dst;
-			int dstslot;
-			int sendvol;
-
-			dstslot = (int)tableiterator_value(&send_iter);
-			dst = machines_outputs(machines, dstslot);
-			buffer_clearsamples(dst, amount);
-			sendvol = (int) table_at(&inputchannel->sendvols, sendindex);
-			addsamples(dst, source, amount, sendvol / 65535.f * wirevol);
-			work_send(self, dstslot, machines_at(machines, dstslot),
-				dst, amount, 16);
-			addsamples(master, dst, amount, 1.0f);
-		}
-		addsamples(master, source, amount, inputchannel->volume * 
-			inputchannel->drymix * wirevol);
-	}
-	rmsvol_tick(&self->masterrmsvol, master->samples[0], master->samples[1],
-							amount);
-	dsp_mul(master->samples[0], amount, self->master.volume);
-	dsp_mul(master->samples[1], amount, self->master.volume);
-	return master;
+{							
+	preparemix(self, machines, amount);
+	mixinputs(self, machines, amount);
+	workreturns(self, machines, amount);	
+	mixreturns(self, machines, amount);
+	tickrms(self, amount);
+	levelmaster(self, amount);	
+	return self->master.buffer;
 }
 
-void work_send(Mixer* self, int slot, Machine* machine, Buffer* output, 
-		unsigned int amount, unsigned int songtracks) {
-	BufferContext bc;										
-	List* events;	
+void preparemix(Mixer* self, Machines* machines, unsigned int amount)
+{			
+	TableIterator iter;
 
-	events = 0;
-	buffercontext_init(&bc, events, output, output, amount,
-		songtracks, 0);
-	machine->work(machine, &bc);
-	buffer_pan(output, machine_panning(machine), amount);	
-	signal_emit(&machine->signal_worked, machine, 2, slot, &bc);	
+	self->master.buffer = machines_outputs(machines, self->slot);
+	buffer_clearsamples(self->master.buffer, amount);	
+	for (iter = table_begin(&self->returns);
+		!tableiterator_equal(&iter, table_end());
+			tableiterator_inc(&iter)) {	
+		ReturnChannel* channel;
+
+		channel = (ReturnChannel*) tableiterator_value(&iter);
+		channel->buffer = machines_outputs(machines, channel->fxslot);
+		channel->fx = machines_at(machines, channel->fxslot);
+		buffer_clearsamples(channel->buffer, amount);
+	}
+}
+
+void mixinputs(Mixer* self, Machines* machines, unsigned int amount)
+{		
+	TableIterator iter;	
+	
+	for (iter = table_begin(&self->inputs);
+			!tableiterator_equal(&iter, table_end());
+			tableiterator_inc(&iter)) {		
+		MixerChannel* channel;		
+		
+		channel = (MixerChannel*) tableiterator_value(&iter);
+		if (channel) {						
+			WireSocketEntry* input_entry;
+			float wirevol = 1.f;
+			TableIterator fx_iter;
+
+			channel->buffer = machines_outputs(machines, channel->inputslot);
+			input_entry = wiresocketentry(self, tableiterator_key(&iter));
+			if (input_entry) {
+				wirevol = input_entry->volume;	
+			}
+			addsamples(self->master.buffer, channel->buffer, amount,
+				channel->volume * channel->drymix * wirevol);
+			for (fx_iter = table_begin(&self->returns);
+					!tableiterator_equal(&fx_iter, table_end());
+					tableiterator_inc(&fx_iter)) {
+				ReturnChannel* fxchannel;
+				int sendvol;			
+
+				fxchannel = (ReturnChannel*)tableiterator_value(&fx_iter);
+				if (fxchannel) {
+					sendvol = (int) table_at(&channel->sendvols,
+						tableiterator_key(&fx_iter));
+					addsamples(fxchannel->buffer, channel->buffer, amount,
+						(sendvol / 65535.f) * wirevol);
+				}
+			}
+		}
+	}
+}
+
+void mixreturns(Mixer* self, Machines* machines, unsigned int amount)
+{		
+	TableIterator iter;
+	
+	for (iter = table_begin(&self->returns);
+		!tableiterator_equal(&iter, table_end());
+			tableiterator_inc(&iter)) {	
+		ReturnChannel* channel;		
+
+		channel = tableiterator_value(&iter);
+		if (channel && channel->mastersend) {			
+			addsamples(self->master.buffer, channel->buffer, amount,
+				channel->volume);
+		}
+	}
+}
+
+void workreturns(Mixer* self, Machines* machines, unsigned int amount)
+{	
+	TableIterator iter;
+	
+	for (iter = table_begin(&self->returns);
+		!tableiterator_equal(&iter, table_end());
+			tableiterator_inc(&iter)) {	
+		ReturnChannel* channel;		
+
+		channel = tableiterator_value(&iter);
+		if (channel) {
+			BufferContext bc;
+			List* events = 0;			
+			TableIterator sendsto_iter;			
+			
+			buffercontext_init(&bc, events, channel->buffer, channel->buffer,
+				amount, 16, 0);
+			channel->fx->work(channel->fx, &bc);
+		//	buffer_pan(fxbuffer, machine_panning(fx), amount);
+		//	buffer_pan(fxbuffer, channel->panning, amount);
+			signal_emit(&channel->fx->signal_worked, channel->fx, 2, 
+				channel->fxslot, &bc);
+			if (channel->sendsto.count >=0 ) {
+				for (sendsto_iter = table_begin(&channel->sendsto);
+					!tableiterator_equal(&sendsto_iter, table_end());
+						tableiterator_inc(&sendsto_iter)) {
+					ReturnChannel* sendto;
+
+					sendto = (ReturnChannel*)tableiterator_value(&sendsto_iter);
+					if (sendto) {										
+						addsamples(sendto->buffer, channel->buffer, amount, 
+							channel->volume);
+					}
+				}
+			}
+		}
+	}
 }
 
 void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
@@ -369,10 +545,24 @@ void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
 					dst->samples[channel],
 					numsamples,
 					vol);
-				dsp_erase_all_nans_infinities_and_denormals(
-					dst->samples[channel], numsamples);					
+			//	dsp_erase_all_nans_infinities_and_denormals(
+			//		dst->samples[channel], numsamples);					
 		}
 	}
+}
+
+void tickrms(Mixer* self, unsigned int amount)
+{
+	rmsvol_tick(&self->masterrmsvol, 
+		self->master.buffer->samples[0],
+		self->master.buffer->samples[1],
+		amount);
+}
+
+void levelmaster(Mixer* self, unsigned int amount)
+{
+	dsp_mul(self->master.buffer->samples[0], amount, self->master.volume);
+	dsp_mul(self->master.buffer->samples[1], amount, self->master.volume);
 }
 
 void onconnected(Mixer* self, Connections* connections, int outputslot, int inputslot)
@@ -390,7 +580,8 @@ void onconnected(Mixer* self, Connections* connections, int outputslot, int inpu
 				table_insert(&self->inputs, self->inputs.count, (void*)channel);
 			} else {
 				table_insert(&self->sends, self->sends.count, (void*)outputslot);
-				table_insert(&self->returns, self->returns.count, (void*)outputslot);
+				table_insert(&self->returns, self->returns.count, 
+					returnchannel_allocinit(outputslot));
 				machine->ismixersend = 1;
 			}
 		}
@@ -421,20 +612,51 @@ void ondisconnected(Mixer* self, Connections* connections, int outputslot, int i
 				}
 			}			
 		} else {
-			TableIterator it;
-			int c = 0;
+			TableIterator it;			
 
-			for (it = table_begin(&self->sends);
-				!tableiterator_equal(&it, table_end()); tableiterator_inc(&it), ++c) {				
-				int sendslot;
+			for (it = table_begin(&self->returns);
+					!tableiterator_equal(&it, table_end());
+					tableiterator_inc(&it)) {				
+				TableIterator sendsto_iter;	
+				ReturnChannel* channel;				
 
-				sendslot = (int)tableiterator_value(&it);
-				if (sendslot == outputslot) {
-					table_remove(&self->sends, c);
-					table_remove(&self->returns, c);
-					break;
+				channel = table_at(&self->returns, tableiterator_key(&it));
+
+				sendsto_iter = table_begin(&channel->sendsto);
+				while (!tableiterator_equal(&sendsto_iter, table_end())) {
+					ReturnChannel* sendto;
+					int key;
+
+					key = tableiterator_key(&sendsto_iter);
+					sendto = (ReturnChannel*)tableiterator_value(&sendsto_iter);
+					tableiterator_inc(&sendsto_iter);
+					if (sendto) {										
+						if (sendto->fxslot == outputslot) {
+							table_remove(&channel->sendsto, key);								
+						}
+					}					
 				}
 			}
+
+			for (it = table_begin(&self->sends);
+				!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+				int sendslot;
+				int c;
+
+				c = tableiterator_key(&it);
+				sendslot = (int)tableiterator_value(&it);
+				if (sendslot == outputslot) {
+					ReturnChannel* returnchannel;
+					table_remove(&self->sends, c);					
+					returnchannel = table_at(&self->returns, c);
+					table_remove(&self->returns, c);
+					if (returnchannel) {
+						returnchannel_dispose(returnchannel);
+						free(returnchannel);
+					}					
+					break;
+				}
+			}			
 		}
 	}
 }
@@ -454,7 +676,10 @@ void parametertweak(Mixer* self, int param, int value)
 	row = param % rows;
 	col = param / rows;
 
-	if (col == 0) {	// MASTER COLUMN
+	if (col < mastercolumn(self)) {
+
+	} else
+	if (col == mastercolumn(self)) {	// MASTER COLUMN
 		if (row == self->sends.count + 1) {
 			self->master.drymix = value / 65535.f;
 		} else
@@ -470,10 +695,12 @@ void parametertweak(Mixer* self, int param, int value)
 					floatparamvalue(value) * 4.f;			
 		}
 	} else 
-	if (col < self->inputs.count + 1) {
+	// Input Columns
+	if (col < returncolumn(self)) {
 		MixerChannel* channel;
 			
-		channel = (MixerChannel*) table_at(&self->inputs, col - 1);
+		channel = (MixerChannel*) table_at(&self->inputs,
+			col - inputcolumn(self));
 		if (channel) {
 			if (row == self->sends.count + 1) {
 				channel->drymix = value / 65535.f;
@@ -492,8 +719,53 @@ void parametertweak(Mixer* self, int param, int value)
 			} else				
 			if (row == self->sends.count + 3) {
 				channel->panning = floatparamvalue(value); 
-			} else
+			} else				 
 			if (row == self->sends.count + 4) {
+
+			} else
+			if (row == self->sends.count + 5) {
+				channel->mute = value;
+			} else
+			if (row == self->sends.count + 6) {
+				channel->dryonly = value;
+			} else
+			if (row == self->sends.count + 7) {
+				channel->wetonly = value;
+			}
+			if (row == self->sends.count + 8) {
+				channel->volume = floatparamvalue(value) * 
+					floatparamvalue(value) * 4.f;
+			}
+		}
+	} else
+	// Return Columns
+	if (col < returncolumn(self) + self->returns.count) {
+		ReturnChannel* channel;
+	
+		channel = (ReturnChannel*) table_at(&self->returns,
+			col - returncolumn(self));
+		if (channel) {
+			if (row > 0 && row < self->sends.count + 1) {
+				if (value) {
+					table_insert(&channel->sendsto, row - 1,
+						(ReturnChannel*) table_at(&self->returns, 
+							col - returncolumn(self) + 1));
+				} else {
+					table_remove(&channel->sendsto, row - 1);
+				}
+			} else
+			if (row == self->sends.count + 1) {
+				channel->mastersend = value; 
+			} else
+			if (row == self->sends.count + 3) {
+				channel->panning = floatparamvalue(value); 
+			} else
+			if (row == self->sends.count + 4) {				
+			} else
+			if (row == self->sends.count + 5) {
+				channel->mute = value;
+			} else
+			if (row == self->sends.count + 8) {
 				channel->volume = floatparamvalue(value) * 
 					floatparamvalue(value) * 4.f;
 			}
@@ -511,7 +783,10 @@ int value(Mixer* self, int const param)
 	row = param % rows;
 	col = param / rows;
 
-	if (col == 0) {	// MASTER COLUMN
+	if (col < mastercolumn(self)) {
+
+	} else
+	if (col == mastercolumn(self)) {	// MASTER COLUMN
 		if (row == self->sends.count + 1) {			
 			return (int)(self->master.drymix * 65535);
 		} else
@@ -521,19 +796,21 @@ int value(Mixer* self, int const param)
 		} else	
 		if (row == self->sends.count + 3) {			
 			return intparamvalue(self->master.panning);			
-		} else	
-		if (row == self->sends.count + 4) {
+		} else
+		if (row == self->sends.count + 8) {
 			return intparamvalue(
 				(float)sqrt(self->master.volume) * 0.5f);
 		} else
-		if (row == self->sends.count + 5) {
+		if (row == self->sends.count + 9) {
 			return (int)(rmsvol_value(&self->masterrmsvol) / 32768.f  * 65535);
 		}
 	} else 
-	if (col < self->inputs.count + 1) {
+	// Input Column
+	if (col < returncolumn(self)) {
 		MixerChannel* channel;
 	
-		channel = (MixerChannel*) table_at(&self->inputs, col - 1);
+		channel = (MixerChannel*) table_at(&self->inputs, 
+			col - inputcolumn(self));
 		if (channel) {
 			if (row == self->sends.count + 1) {
 				return (int)(channel->drymix * 65535);
@@ -549,24 +826,53 @@ int value(Mixer* self, int const param)
 					return intparamvalue(
 						(float)sqrt(input_entry->volume) * 0.5f);					
 				}
-			} else				
+			} else
 			if (row == self->sends.count + 3) {
 				return intparamvalue(channel->panning);
 			} else
 			if (row == self->sends.count + 4) {
+				
+			} else
+			if (row == self->sends.count + 5) {
+				return channel->mute;
+			} else
+			if (row == self->sends.count + 6) {
+				return channel->dryonly;
+			} else
+			if (row == self->sends.count + 7) {
+				return channel->wetonly;
+			} else
+			if (row == self->sends.count + 8) {
 				return intparamvalue(
 					(float)sqrt(channel->volume) * 0.5f);
 			}
 		}
-	}
-	/*
-	if (param == 0) {
-		return (int)(self->mastervol * 65535);
 	} else
-	if (param == 1) {				
-		return (int)(rmsvol_value(&self->masterrmsvol) / 32768.f  * 65535);
-		return 0;
-	} */
+	// Return Column
+	if (col < returncolumn(self) + self->returns.count) {
+		ReturnChannel* channel;
+	
+		channel = (ReturnChannel*) table_at(&self->returns,
+			col - returncolumn(self));
+		if (channel) {
+			if (row > 0 && row < self->sends.count + 1) {
+				return table_exists(&channel->sendsto, row - 1);				
+			} else
+			if (row == self->sends.count + 1) {
+				return channel->mastersend;
+			} else
+			if (row == self->sends.count + 3) {
+				return intparamvalue(channel->panning);
+			} else
+			if (row == self->sends.count + 5) {
+				return channel->mute;
+			} else	
+			if (row == self->sends.count + 8) {
+				return intparamvalue(
+					(float)sqrt(channel->volume) * 0.5f);
+			}
+		}		
+	}
 	return 0;
 }
 
@@ -576,11 +882,32 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 	int row;
 	int rows;
 
+	*txt = '\0';
 	rows = numparameters(self) / numcols(self);
 	row = param % rows;
 	col = param / rows;
-
-	if (col == 0) {	// MASTER COLUMN
+	if (col < mastercolumn(self)) {
+		if (row > 0 && row < self->sends.count + 1) {
+			int index;
+			int channel;
+			
+			index = row - 1;
+			channel = (int) table_at(&self->sends, index);
+			//if (channel) {
+			{
+				Machine* machine;		
+				
+				machine = machines_at(self->machine.machines(&self->machine),
+					channel);		
+				if (machine && machine->info(machine)) {
+					strcpy(txt, machine->info(machine)->ShortName);
+					return 1;
+				}				
+			}
+			//}
+		}
+	} else
+	if (col == mastercolumn(self)) {	// MASTER COLUMN		
 		if (row == self->sends.count + 1) {				
 			_snprintf(txt, 20, "%d%%", (int) (self->master.drymix * 100));
 			return 1;
@@ -606,7 +933,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			}
 			return 1;
 		} else
-		if (row == self->sends.count + 4) {
+		if (row == self->sends.count + 8) {
 			float db;
 
 			db = (amp_t)(20 * log10(self->master.volume));
@@ -614,11 +941,22 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			return 1;
 		}
 	} else
-	if (col < self->inputs.count + 1) {
+	if (col < returncolumn(self)) {
 		MixerChannel* channel;
 	
-		channel = (MixerChannel*) table_at(&self->inputs, col - 1);
+		channel = (MixerChannel*) table_at(&self->inputs,
+			col - inputcolumn(self));
 		if (channel) {
+			if (row == 0) {
+				Machine* machine;		
+				
+				machine = machines_at(self->machine.machines(&self->machine),
+					channel->inputslot);		
+				if (machine && machine->info(machine)) {
+					strcpy(txt, machine->info(machine)->ShortName);					
+				}
+				return 1;								
+			} else
 			if (row > 0 && row < self->sends.count + 1) {
 				float sendvol;
 				sendvol = (int) table_at(&channel->sendvols, row - 1) / 65535.f;
@@ -659,33 +997,119 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 				}
 				return 1;
 			} else
-			if (row == self->sends.count + 4) {
+			if (row == self->sends.count + 8) {
 				float db;
 
 				db = (amp_t)(20 * log10(channel->volume));
 				_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
 			}
-		}			
+		}		
+	} else
+	if (col < returncolumn(self) + self->returns.count) {
+		ReturnChannel* channel;
+		int index;
+
+		index = col - returncolumn(self);
+		channel = (ReturnChannel*) table_at(&self->returns, index);		
+		if (channel) {
+			if (row == 0) {
+				Machine* fx;		
+				
+				fx = machines_at(self->machine.machines(&self->machine),
+					channel->fxslot);		
+				if (fx && fx->info(fx)) {
+					strcpy(txt, fx->info(fx)->ShortName);					
+				}
+				return 1;
+			}
+			if (row == self->sends.count + 1) {
+				if (channel->mastersend == 0) {
+					strcpy(txt,"off");
+				} else {
+					strcpy(txt,"on");
+				}
+			} else
+			if (row == self->sends.count + 3) {
+				if (channel->panning == 0.f) {
+					strcpy(txt,"left");
+				} else
+				if (channel->panning == 1.f) {
+					strcpy(txt,"right");
+				} else
+				if (channel->panning == 0.5f) {
+					strcpy(txt,"center");
+				} else {
+					sprintf(txt,"%.0f%%", channel->panning * 100);
+				}
+				return 1;
+			} else
+			if (row == self->sends.count + 8) {
+				float db;
+
+				db = (amp_t)(20 * log10(channel->volume));
+				_snprintf(txt, 10, "%.2f dB", db);
+				return 1;
+			}
+		}
 	}
 	return 0;
 }
 
 unsigned int numparameters(Mixer* self)
-{
-	int cols;
-
-	cols = numcols(self);	
-	return cols * (6  + self->sends.count + self->sends.count);
+{	
+	return numcols(self) * (10  + self->sends.count + self->sends.count);
 }
 
 unsigned int numcols(Mixer* self)
 {
-	return self->inputs.count + self->returns.count + 1;
+	return returncolumn(self) + self->returns.count + 1;
+}
+
+int parametername(Mixer* self, char* txt, int param)
+{		
+	int col;
+	int row;
+	int rows;
+
+	txt[0] = '\0';
+	rows = numparameters(self) / numcols(self);
+	row = param % rows;
+	col = param / rows;
+	if (col < mastercolumn(self)) {
+		if (row > 0 && row < self->sends.count + 1) {
+			_snprintf(txt, 128, "Send %d", row);
+			return 1;
+		}
+	} else
+	if (col == mastercolumn(self)) {
+	} else	
+	if (col < returncolumn(self)) {
+		int index;
+		MixerChannel* channel;
+
+		index = col - inputcolumn(self);
+		channel = (MixerChannel*) table_at(&self->inputs, index);
+		if (row == 0) {			
+			_snprintf(txt, 128, "Input %d", index + 1);			
+		}
+	} else
+	if (col < returncolumn(self) + self->returns.count) {
+		int index;
+		ReturnChannel* channel;		
+		
+		index = col - returncolumn(self);
+		channel = (ReturnChannel*) table_at(&self->returns, index);
+		if (row == 0) {			
+			_snprintf(txt, 128, "Return %d", index + 1);
+		}
+	}
+	return *txt != '\0';
 }
 
 const CMachineParameter* parameter(Mixer* self, unsigned int param)
 {			
+	static CMachineParameter paraempty = { "", "", 0, 65535,	1, 0 };
 	int col;
 	int row;
 	int rows;
@@ -693,12 +1117,26 @@ const CMachineParameter* parameter(Mixer* self, unsigned int param)
 	rows = numparameters(self) / numcols(self);
 	row = param % rows;
 	col = param / rows;
-	if (col == 0) {
+	if (col < mastercolumn(self)) {
+		if (row > 0 && row < self->sends.count + 1) {
+			static CMachineParameter par = { "Send", "Send", 0, 65535, 3, 0 };
+			return &par;
+		} else
+		if (row == self->sends.count + 1) {
+			return &paraMixHeader;
+		} else
+		if (row == self->sends.count + 2) {
+			return &paraGainHeader;
+		} else
+		if (row == self->sends.count + 3) {
+			return &paraPanHeader;
+		}
+	} else
+	if (col == mastercolumn(self)) {
 		if (row == 0) {
 			return &paraMasterHeader;
 		} else
-		if (row > 0 && row < self->sends.count + 1) {
-			return &paraSendHeader;
+		if (row > 0 && row < self->sends.count + 1) {			
 		} else
 		if (row == self->sends.count + 1) {
 			return &paraMixKnob;
@@ -709,14 +1147,15 @@ const CMachineParameter* parameter(Mixer* self, unsigned int param)
 		if (row == self->sends.count + 3) {
 			return &paraPanKnob;
 		} else	
-		if (row == self->sends.count + 4) {
+		if (row == self->sends.count + 8) {
 			return &paraLevelKnob;
 		} else
-		if (row == self->sends.count + 5) {
+		if (row == self->sends.count + 9) {
 			return &paraVuInfo;
 		}
 	} else
-	if (col < self->inputs.count + 1) {
+	// Input Column
+	if (col < returncolumn(self)) {
 		if (row == 0) {
 			return &paraInputHeader;
 		} else
@@ -733,28 +1172,58 @@ const CMachineParameter* parameter(Mixer* self, unsigned int param)
 			return &paraPanKnob;
 		} else
 		if (row == self->sends.count + 4) {
-			return &paraLevelKnob;
+			return &paraSoloKnob;
 		} else
 		if (row == self->sends.count + 5) {
+			return &paraMuteKnob;
+		} else
+		if (row == self->sends.count + 6) {
+			return &paraDryKnob;
+		} else
+		if (row == self->sends.count + 7) {
+			return &paraWetKnob;
+		} else
+		if (row == self->sends.count + 8) {
+			return &paraLevelKnob;
+		} else
+		if (row == self->sends.count + 9) {
 			return &paraVuInfo;
 		}
-	} else {
+	} else
+	// Return Column
+	if (col < returncolumn(self) + self->returns.count) {
+		int returnindex;
+
+		returnindex = col - returncolumn(self);
 		if (row == 0) {
 			return &paraReturnHeader;
-		} else 		
+		} else
+		if (row > returnindex + 1 && row < self->sends.count + 1) {
+			return &paraRouteKnob;
+		} else
+		if (row == self->sends.count + 1) {
+			return &paraMasterSendKnob;
+		} else
 		if (row == self->sends.count + 3) {
 			return &paraPanKnob;		
 		} else
 		if (row == self->sends.count + 4) {
-			return &paraLevelKnob;
+			return &paraSoloKnob;
 		} else
 		if (row == self->sends.count + 5) {
+			return &paraMuteKnob;
+		} else		
+		if (row == self->sends.count + 8) {
+			return &paraLevelKnob;
+		} else
+		if (row == self->sends.count + 9) {
 			return &paraVuInfo;
 		} else {
-			return &paraDummy;
+			
+			return &paraempty;
 		}
 	}
-	return &paraDummy;
+	return &paraempty;
 }
 
 int intparamvalue(float value)
@@ -765,6 +1234,21 @@ int intparamvalue(float value)
 float floatparamvalue(int value)
 {
 	return value / 65535.f;	
+}
+
+int mastercolumn(Mixer* self)
+{
+	return 1;
+}
+
+int inputcolumn(Mixer* self)
+{
+	return mastercolumn(self) + 1;
+}
+
+int returncolumn(Mixer* self)
+{
+	return inputcolumn(self) + self->inputs.count;
 }
 
 WireSocketEntry* wiresocketentry(Mixer* self, int input)
@@ -824,9 +1308,19 @@ void loadspecific(Mixer* self, PsyFile* file, unsigned int slot, Machines* machi
 	}
 	//legacyReturn_.resize(numrets);
 	//legacySend_.resize(numrets);
+
+	for (i = 0; i < numrets; ++i) {
+		ReturnChannel* channel;
+
+		channel = returnchannel_allocinit(-1);
+		table_insert(&self->returns, i, channel);		
+	}
+
 	for (i = 0; i < numrets; ++i) {
 		int j;
+		ReturnChannel* channel;
 
+		channel = (ReturnChannel*) table_at(&self->returns, i);
 		{			
 			// LegacyWire& leg = legacyReturn_[i];
 			int inputmachine;
@@ -839,8 +1333,8 @@ void loadspecific(Mixer* self, PsyFile* file, unsigned int slot, Machines* machi
 				inputconvol /= 32768.f;
 			}
 			table_insert(&self->sends, i, (void*)inputmachine);
-			table_insert(&self->returns, i, (void*)inputmachine);
-			table_insert(&machines->connections.sends, inputmachine, (void*)1);			
+			channel->fxslot = inputmachine;
+			table_insert(&machines->connections.sends, inputmachine, (void*)1);
 		}
 		{
 			// LegacyWire& leg2 = legacySend_[i];
@@ -854,12 +1348,16 @@ void loadspecific(Mixer* self, PsyFile* file, unsigned int slot, Machines* machi
 			if (inputconvol > 0.f && inputconvol < 0.0002f) { //bugfix on 1.10.1 alpha
 				inputconvol *= 32768.f;
 			}			
-		}				
+		}		
+				
 		for (j = 0; j < numrets; ++j)
 		{
 			unsigned char send = 0;
 			psyfile_read(file, &send, sizeof(unsigned char));
-			// Return(i).SendsTo(j,send);
+			if (send) {				
+				table_insert(&channel->sendsto, j,
+					table_at(&self->returns, j));
+			}			
 		}
 		{
 			// Return(i)
@@ -872,6 +1370,10 @@ void loadspecific(Mixer* self, PsyFile* file, unsigned int slot, Machines* machi
 			psyfile_read(file, &volume, sizeof(float));
 			psyfile_read(file, &panning, sizeof(float));
 			psyfile_read(file, &mute, sizeof(unsigned char));
+			channel->mastersend = mastersend;
+			channel->volume = volume;
+			channel->panning = panning;
+			channel->mute = mute;
 		}
 	}
 

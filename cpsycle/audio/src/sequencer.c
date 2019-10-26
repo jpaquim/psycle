@@ -526,3 +526,34 @@ void sequencer_addinputevent(Sequencer* self, const PatternEvent* event,
 		list_append(&self->inputevents, entry);
 	}
 }
+
+void sequencer_recordinputevent(Sequencer* self, const PatternEvent* event,
+	unsigned int track, beat_t playposition)
+{
+	SequenceTrackIterator it;
+
+	it = sequence_begin(self->sequence, self->sequence->tracks, playposition);
+	if (it.tracknode) {
+		SequenceEntry* entry;
+		Pattern* pattern;		
+		
+		entry = (SequenceEntry*) it.tracknode->entry;
+		pattern = patterns_at(self->sequence->patterns, entry->pattern);
+		if (pattern) {			
+			beat_t quantizedpatternoffset;
+			PatternNode* prev;
+			PatternNode* node;
+
+			quantizedpatternoffset = ((int)((playposition - entry->offset) *
+				self->lpb)) / (beat_t)self->lpb;			
+			node = pattern_findnode(pattern, 0, quantizedpatternoffset, 0, 
+				1.f / self->lpb, &prev);
+			if (node) {					
+				pattern_setevent(pattern, node, event);
+			} else {
+				pattern_insert(pattern, prev, 0, quantizedpatternoffset,
+					event);
+			}
+		}
+	}
+}

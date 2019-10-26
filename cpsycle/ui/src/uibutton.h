@@ -21,6 +21,7 @@ typedef struct {
    int ownerdrawn;
    char* text; // ownerdrawn 
    int hover;
+   int highlight;
    ButtonIcon icon;
 } ui_button;
 

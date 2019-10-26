@@ -11,7 +11,6 @@
 static void OnDraw(NoteMapEdit* self, ui_component* sender, ui_graphics* g);
 static void SetColColor(ui_graphics* g, int col, int cursor);
 static void DrawDigit(NoteMapEdit* self, ui_graphics* g, int digit, int col, int x, int y);
-static void OnSize(NoteMapEdit* self, ui_component* sender, int width, int height);
 static void OnDestroy(NoteMapEdit* self, ui_component* component);
 static void OnMouseDown(NoteMapEdit* self, ui_component* sender, int x, int y, int button);
 static void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata);
@@ -24,7 +23,6 @@ void InitNoteMapEdit(NoteMapEdit* self, ui_component* parent)
 	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
 
@@ -116,10 +114,6 @@ void DrawDigit(NoteMapEdit* self, ui_graphics* g, int digit, int col, int x, int
 		_snprintf(buffer, 2, "%s", "");	
 	}
 	ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer, strlen(buffer));	
-}
-
-void OnSize(NoteMapEdit* self, ui_component* sender, int width, int height)
-{
 }
 
 void OnMouseDown(NoteMapEdit* self, ui_component* sender, int x, int y, int button)

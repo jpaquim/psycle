@@ -57,6 +57,10 @@ typedef struct Machine {
 	int (*paramviewoptions)(void*);
 	void (*setcallback)(void*, MachineCallback);
 	void (*loadspecific)(void*, PsyFile*, unsigned int slot, struct Machines*);	
+	int (*haseditor)(void*);
+	void (*seteditorhandle)(void*, void* handle);
+	void (*editorsize)(void*, int* width, int* height);
+	void (*editoridle)(void*);
 	// machine callbacks
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);	

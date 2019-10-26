@@ -7,8 +7,7 @@
 
 static void ReadProperties(SongProperties*, Song*);
 static void WriteProperties(SongProperties*, Song*);
-static void OnSongChanged(SongProperties* self, Workspace* sender);
-static void OnSize(SongProperties*, ui_component* sender, int width, int height);
+static void OnSongChanged(SongProperties*, Workspace*);
 static void songproperties_initalign(SongProperties*);
 
 void InitSongProperties(SongProperties* self, ui_component* parent, Workspace* workspace)

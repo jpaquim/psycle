@@ -18,7 +18,7 @@ static void OnMouseDoubleClick(SettingsView*, ui_component* sender, int x, int y
 static void OnEditChange(SettingsView*, ui_edit* sender);
 static void OnInputDefinerChange(SettingsView* self, InputDefiner* sender);
 static void OnDestroy(SettingsView*, ui_component* sender);
-static void OnSize(SettingsView*, ui_component* sender, int width, int height);
+static void OnSize(SettingsView*, ui_component* sender, ui_size*);
 static void OnScroll(SettingsView*, ui_component* sender, int cx, int cy);
 static void DrawLineBackground(SettingsView*,Properties*);
 static void DrawKey(SettingsView*, Properties*, int column);
@@ -448,17 +448,15 @@ void OnScroll(SettingsView* self, ui_component* sender, int cx, int cy)
 	self->dy += cy;
 }
 
-void OnSize(SettingsView* self, ui_component* sender, int width, int height)
-{
-	ui_size size;
+void OnSize(SettingsView* self, ui_component* sender, ui_size* size)
+{	
 	ui_size tabbarsize;	
-	
-	size = ui_component_size(&self->component);		
-	tabbarsize = ui_component_preferredsize(&self->tabbar.component, &size);	
-	ui_component_resize(&self->client, size.width - tabbarsize.width,
-		size.height);
+		
+	tabbarsize = ui_component_preferredsize(&self->tabbar.component, size);
+	ui_component_resize(&self->client, size->width - tabbarsize.width,
+		size->height);
 	ui_component_setposition(&self->tabbar.component,
-		size.width - tabbarsize.width, 0, tabbarsize.width, size.height);
+		size->width - tabbarsize.width, 0, tabbarsize.width, size->height);
 	AdjustScrollRange(self);
 }
 

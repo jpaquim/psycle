@@ -7,7 +7,6 @@
 #define TIMERID_MASTERVU 400
 
 static void OnDraw(Vumeter*, ui_component* sender, ui_graphics*);
-static void OnSize(Vumeter*, ui_component* sender, int width, int height);
 static void OnDestroy(Vumeter*, ui_component* sender);
 static void OnTimer(Vumeter*, ui_component* sender, int timerid);
 static void OnMasterWorked(Vumeter*, Machine*, unsigned int slot, BufferContext*);
@@ -18,8 +17,7 @@ void InitVumeter(Vumeter* self, ui_component* parent, Workspace* workspace)
 {			
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
+	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	signal_connect(&self->component.signal_timer, self, OnTimer);
 	self->leftavg = 0;
 	self->rightavg = 0;	
@@ -53,10 +51,6 @@ void OnDraw(Vumeter* self, ui_component* sender, ui_graphics* g)
 	ui_setrectangle(&right, right.right, right.top, size.width - right.right, 5);
 	ui_drawsolidrectangle(g, left, 0x003E3E3E);
 	ui_drawsolidrectangle(g, right, 0x003E3E3E);
-}
-
-void OnSize(Vumeter* self, ui_component* sender, int width, int height)
-{
 }
 
 void OnTimer(Vumeter* self, ui_component* sender, int timerid)

@@ -50,5 +50,7 @@ beat_t sequencer_offset(Sequencer*, int numsamples);
 int sequencer_playing(Sequencer*);
 void sequencer_addinputevent(Sequencer*, const PatternEvent*,
 	unsigned int track);
+void sequencer_recordinputevent(Sequencer*, const PatternEvent*,
+	unsigned int track, beat_t playposition);
 
 #endif

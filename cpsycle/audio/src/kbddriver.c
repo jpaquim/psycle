@@ -157,10 +157,31 @@ void driver_write(EventDriver* driver, unsigned char* data, int size)
 	self = (KbdDriver*)(driver);
 	
 	cmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
+	if (cmd == CMD_NOTE_STOP) {
+		int note;
+		
+		note = NOTECOMMANDS_RELEASE;
+		driver->_pCallback(driver->_callbackContext, 2,
+				(unsigned char*)&note, 4);
+	} else
+	if (cmd == CMD_NOTE_TWEAKM) {
+		int note;
+		
+		note = NOTECOMMANDS_TWEAK;
+		driver->_pCallback(driver->_callbackContext, 2,
+				(unsigned char*)&note, 4);
+	} else
+	if (cmd == CMD_NOTE_TWEAKS) {
+		int note;
+		
+		note = NOTECOMMANDS_TWEAKSLIDE;
+		driver->_pCallback(driver->_callbackContext, 2,
+				(unsigned char*)&note, 4);
+	} else
 	if (cmd != -1) {
 		int base;
 		int note;
-	
+			
 		base = 48;
 		note = cmd + base;
 		driver->_pCallback(driver->_callbackContext, 2,

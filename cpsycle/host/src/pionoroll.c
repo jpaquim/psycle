@@ -5,22 +5,22 @@
 
 #include "pianoroll.h"
 
-static void OnGridDraw(Pianogrid* self, ui_component* sender, ui_graphics* g);
-static void DrawGridBackground(Pianogrid* self, ui_graphics* g);
-static void DrawGrid(Pianogrid* self, ui_graphics* g);
-static void DrawEvents(Pianogrid* self, ui_graphics* g);
-static void DrawEvent(Pianogrid* self, ui_graphics* g, PatternEvent* event, int track, float offset, float length);
-static void OnSize(Pianoroll* self, ui_component* sender, int width, int height);
-static void OnGridSize(Pianogrid* self, ui_component* sender, int width, int height);
-static void OnDestroy(Pianoroll* self, ui_component* component);
-static void OnGridDestroy(Pianogrid* self, ui_component* component);
-static void OnGridKeyDown(Pianogrid* self, ui_component* sender, int keycode, int keydata);
-static void OnMouseDown(Pianoroll* self, ui_component* sender, int x, int y, int button);
-static void OnMouseUp(Pianoroll* self, ui_component* sender, int x, int y, int button);
-static void OnMouseMove(Pianoroll* self, ui_component* sender,int x, int y, int button);
-static void OnMouseDoubleClick(Pianoroll* self, ui_component* sender, int x, int y, int button);
-static void OnKeyDown(Pianoroll* self, ui_component* sender, int keycode, int keydata);
-static void OnScroll(Pianogrid* self, ui_component* sende, int cx, int cy);
+static void OnGridDraw(Pianogrid*, ui_component* sender, ui_graphics*);
+static void DrawGridBackground(Pianogrid*, ui_graphics*);
+static void DrawGrid(Pianogrid*, ui_graphics*);
+static void DrawEvents(Pianogrid*, ui_graphics*);
+static void DrawEvent(Pianogrid*, ui_graphics*, PatternEvent* event, int track, float offset, float length);
+static void OnSize(Pianoroll*, ui_component* sender, ui_size*);
+static void OnGridSize(Pianogrid*, ui_component* sender, ui_size*);
+static void OnDestroy(Pianoroll*, ui_component* component);
+static void OnGridDestroy(Pianogrid*, ui_component* component);
+static void OnGridKeyDown(Pianogrid*, ui_component* sender, int keycode, int keydata);
+static void OnMouseDown(Pianoroll*, ui_component* sender, int x, int y, int button);
+static void OnMouseUp(Pianoroll*, ui_component* sender, int x, int y, int button);
+static void OnMouseMove(Pianoroll*, ui_component* sender,int x, int y, int button);
+static void OnMouseDoubleClick(Pianoroll*, ui_component* sender, int x, int y, int button);
+static void OnKeyDown(Pianoroll*, ui_component* sender, int keycode, int keydata);
+static void OnScroll(Pianogrid*, ui_component* sender, int cx, int cy);
 
 static void OnPianoKeyboardDraw(PianoKeyboard*, ui_component* sender, ui_graphics* g);
 static void InitPianoKeyboard(PianoKeyboard*, ui_component* parent);
@@ -47,15 +47,15 @@ void OnDestroy(Pianoroll* self, ui_component* component)
 {	
 }
 
-void OnSize(Pianoroll* self, ui_component* sender, int width, int height)
+void OnSize(Pianoroll* self, ui_component* sender, ui_size* size)
 {
 	int keyboardwidth;
 
-	self->cx = width;
-	self->cy = height;
+	self->cx = size->width;
+	self->cy = size->height;
 	keyboardwidth = 40;
-	ui_component_setposition(&self->keyboard.component, 0, 0, keyboardwidth, height);
-	ui_component_setposition(&self->grid.component, keyboardwidth       , 0, width - keyboardwidth, height);
+	ui_component_setposition(&self->keyboard.component, 0, 0, keyboardwidth, size->height);
+	ui_component_setposition(&self->grid.component, keyboardwidth, 0, size->width - keyboardwidth, size->height);
 }
 
 void OnMouseDown(Pianoroll* self, ui_component* sender, int x, int y, int button)
@@ -110,10 +110,10 @@ void OnGridDestroy(Pianogrid* self, ui_component* component)
 {	
 }
 
-void OnGridSize(Pianogrid* self, ui_component* sender, int width, int height)
+void OnGridSize(Pianogrid* self, ui_component* sender, ui_size* size)
 {
-	self->cx = width;
-	self->cy = height;
+	self->cx = size->width;
+	self->cy = size->height;
 }
 
 void OnGridDraw(Pianogrid* self, ui_component* sender, ui_graphics* g)

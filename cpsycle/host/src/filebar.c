@@ -58,7 +58,9 @@ void OnLoadSong(FileBar* self, ui_component* sender)
 	char  defaultextension[] = "PSY";
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {		
+	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
+		ui_invalidate(self->workspace->mainhandle);
+		UpdateWindow(self->workspace->mainhandle->hwnd);
 		workspace_loadsong(self->workspace, path);						
 	}
 }

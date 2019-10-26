@@ -240,6 +240,10 @@ SOURCE=.\src\settingsview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\skingraphics.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\skinio.c
 # End Source File
 # Begin Source File
@@ -288,7 +292,7 @@ SOURCE=.\src\volslider.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\audio\src\vstplugin.c
+SOURCE=.\src\vst2view.c
 # End Source File
 # Begin Source File
 
@@ -456,6 +460,10 @@ SOURCE=.\src\skincoord.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\skingraphics.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\skinio.h
 # End Source File
 # Begin Source File
@@ -501,6 +509,10 @@ SOURCE=.\src\undoredobar.h
 # Begin Source File
 
 SOURCE=.\src\volslider.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vst2view.h
 # End Source File
 # Begin Source File
 
