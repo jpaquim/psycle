@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "machineview.h"
+#include "skingraphics.h"
 #include "resources/resource.h"
 #include <math.h>
 
@@ -25,7 +26,6 @@ static void machineui_draw(MachineUi*, WireView*, ui_graphics*, int slot);
 static void machineui_drawvu(MachineUi*, WireView*, ui_graphics*);
 static void machineui_drawhighlight(MachineUi*, WireView*, ui_graphics*);
 static void machineui_showparameters(MachineUi*, ui_component* parent);
-static void blitskinpart(ui_graphics*, ui_bitmap*, int x, int y, SkinCoord*);
 static int slidercoord(SkinCoord*, float value);
 
 static void wireview_initmasterui(WireView*);
@@ -91,6 +91,7 @@ void machineui_init(MachineUi* self, int x, int y, Machine* machine,
 	self->machine = machine;
 	self->frame = 0;
 	self->paramview = 0;
+	self->vst2view = 0;
 }
 
 void machineui_updatecoords(MachineUi* self)
@@ -167,7 +168,7 @@ void machineui_draw(MachineUi* self, WireView* wireview, ui_graphics* g,
 			_snprintf(editname, 130, "%02d:%s", slot, self->editname);		
 		}
 		ui_setbackgroundmode(g, TRANSPARENT);		
-		blitskinpart(g, &wireview->skin.skinbmp, x, y, &self->coords->background);
+		skin_blitpart(g, &wireview->skin.skinbmp, x, y, &self->coords->background);
 		if (self->mode == MACHMODE_FX) {			
 			ui_settextcolor(g, wireview->skin.effect_fontcolour);
 		} else {		
@@ -176,13 +177,13 @@ void machineui_draw(MachineUi* self, WireView* wireview, ui_graphics* g,
 		if (self->mode != MACHMODE_MASTER) {			
 			ui_textout(g, x + coords->name.destx + 2, y + coords->name.desty + 2,
 				editname, strlen(editname));
-			blitskinpart(g, &wireview->skin.skinbmp, x + slidercoord(&coords->pan, 
+			skin_blitpart(g, &wireview->skin.skinbmp, x + slidercoord(&coords->pan, 
 				machine_panning(self->machine)), y, &coords->pan);
 			if (machine_muted(self->machine)) {
-				blitskinpart(g, &wireview->skin.skinbmp, x, y, &coords->mute);
+				skin_blitpart(g, &wireview->skin.skinbmp, x, y, &coords->mute);
 			}
 			if (machine_bypassed(self->machine)) {
-				blitskinpart(g, &wireview->skin.skinbmp, x, y, &coords->bypass);
+				skin_blitpart(g, &wireview->skin.skinbmp, x, y, &coords->bypass);
 			}
 		}		
 		if (wireview->drawvumeters) {
@@ -211,22 +212,32 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 		if (self->frame == 0) {			
 			self->frame = (MachineFrame*) malloc(sizeof(MachineFrame));
 			self->frame->component.hwnd = 0;
-		}					
+		}
+		if (self->machine->haseditor(self->machine)) {
+			int width;
+			int height;
+
+			InitMachineFrame(self->frame, parent);
+			self->vst2view = (Vst2View*) malloc(sizeof(Vst2View));
+			InitVst2View(self->vst2view, &self->frame->component, self->machine);
+			MachineFrameSetParamView(self->frame, &self->vst2view->component);
+			self->machine->editorsize(self->machine, &width, &height);
+			ui_component_resize(&self->frame->component, width, height + 28);			
+		} else
 		if (self->frame->component.hwnd == 0) {
+			int width;
+			int height;
+
 			InitMachineFrame(self->frame, parent);
 			self->paramview = (ParamView*) malloc(sizeof(ParamView));
 			InitParamView(self->paramview, &self->frame->component, self->machine);
-			MachineFrameSetParamView(self->frame, self->paramview);		
+			MachineFrameSetParamView(self->frame, &self->paramview->component);		
+			ParamViewSize(self->paramview, &width, &height);
+			ui_component_resize(&self->frame->component, width, height + 28);
 		}
 		ui_component_show(&self->frame->component);
-		ui_component_setfocus(&self->paramview->component);
+		//ui_component_setfocus(&self->paramview->component);
 	}
-}
-
-void blitskinpart(ui_graphics* g, ui_bitmap* bitmap, int x, int y, SkinCoord* coord)
-{
-	ui_drawbitmap(g, bitmap, x + coord->destx, y + coord->desty,
-		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
 }
 
 void wireview_init(WireView* self, ui_component* parent,

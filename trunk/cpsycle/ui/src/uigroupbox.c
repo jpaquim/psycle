@@ -4,9 +4,6 @@
 #include "../../detail/prefix.h"
 
 #include "uigroupbox.h"
-#include "hashtbl.h"
-
-extern Table selfmap;
 
 void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 {

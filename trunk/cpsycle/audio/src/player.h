@@ -30,6 +30,7 @@ typedef struct {
 	Table rms;	
 	VUMeterMode vumode;
 	int resetvumeters;
+	int recordingnotes;
 } Player;
 
 // init dispose
@@ -54,6 +55,10 @@ unsigned int player_lpb(Player*);
 void player_loaddriver(Player*, const char* path);
 void player_reloaddriver(Player*, const char* path);
 void player_restartdriver(Player*);
+// event recording
+void player_startrecordingnotes(Player*);
+void player_stoprecordingnotes(Player*);
+int player_recordingnotes(Player*);
 // event driver
 void player_loadeventdriver(Player*, const char * path);
 void player_addeventdriver(Player*, int id);

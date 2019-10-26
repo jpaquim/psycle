@@ -53,11 +53,16 @@ static Properties* searchresult;
 
 void plugincatcher_init(PluginCatcher* self, Properties* dirconfig)
 {
+	char inipath[_MAX_PATH];
 	self->plugins = properties_create();
 	plugincatcher_makeinternals(self);
-	self->inipath = strdup("psycle-plugin-scanner-cache.ini");
+	
+	workdir(inipath);		
+	strcat(inipath, "\\psycle-plugin-scanner-cache.ini");
+	self->inipath = strdup(inipath);
 	self->dirconfig = dirconfig;
 	signal_init(&self->signal_changed);
+	signal_init(&self->signal_scanprogress);
 }
 
 void plugincatcher_dispose(PluginCatcher* self)
@@ -67,6 +72,7 @@ void plugincatcher_dispose(PluginCatcher* self)
 	free(self->inipath);	
 	self->dirconfig = 0;
 	signal_dispose(&self->signal_changed);
+	signal_dispose(&self->signal_scanprogress);
 }
 
 void plugincatcher_clear(PluginCatcher* self)
@@ -133,14 +139,17 @@ void plugincatcher_scan(PluginCatcher* self)
 	if (self->dirconfig) {
 		p = properties_findsection(self->dirconfig, "plugin");
 		if (p) {		
-			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_PLUGIN, onenumdir);		
+			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_PLUGIN,
+				onenumdir);
 		}
 		p = properties_findsection(self->dirconfig, "vst");
 		if (p) {		
-			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_VST, onenumdir);		
+			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_VST,
+				onenumdir);
 		}
 	}
 	signal_emit(&self->signal_changed, self, 0);
+	signal_emit(&self->signal_scanprogress, self, 1, 0);
 }
 
 int isplugin(int type)
@@ -169,18 +178,20 @@ int onenumdir(PluginCatcher* self, const char* path, int type)
 	strlwr(name);
 	strlwr(ext);
 	replace_char(name, ' ', '-');
-
 	if (type == MACH_PLUGIN) {
 		info = plugin_psycle_test(path);
 		if (info) {
 			plugincatcher_makeplugininfo(self, name, path, type, info);
+			signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}	
 	} else
 	if (type == MACH_VST) {
+
 		if (plugin_vst_test(path, &macinfo)) {
 			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+			signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}
-	}	
+	}		
 	return 1;
 }
 

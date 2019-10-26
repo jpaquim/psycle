@@ -22,8 +22,8 @@ static void OnIncPattern(SequenceView*);
 static void OnDecPattern(SequenceView*);
 static void OnNewTrack(SequenceView*);
 static void OnDelTrack(SequenceView*);
-static void OnSize(SequenceView*, ui_component* sender, int width, int height);
-static void OnDurationSize(SequenceViewDuration*, ui_component* sender, int width, int height);
+static void OnSize(SequenceView*, ui_component* sender, ui_size*);
+static void OnDurationSize(SequenceViewDuration*, ui_component* sender, ui_size*);
 static void UpdateSequenceViewDuration(SequenceViewDuration*);
 static void OnListViewMouseDown(SequenceListView*, ui_component* sender, int x, int y, int button);
 static void OnScroll(SequenceListView*, ui_component* sender, int cx, int cy);
@@ -289,33 +289,32 @@ void DrawTrack(SequenceListView* self, ui_graphics* g, SequenceTrack* track, int
 	}	
 }
 
-void OnSize(SequenceView* self, ui_component* sender, int width, int height)
-{	
-	ui_size size = ui_component_size(&self->component);
-	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, &size);
+void OnSize(SequenceView* self, ui_component* sender, ui_size* size)
+{		
+	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, size);
 	ui_size durationsize = ui_component_size(&self->duration.component);
 		
 	ui_component_setposition(&self->buttons.component,
-		0, 0, width - 3, buttonssize.height);
+		0, 0, size->width - 3, buttonssize.height);
 	ui_component_setposition(&self->listview.component, 
 		0, buttonssize.height,
-		width - 3,
-		height - buttonssize.height - durationsize.height - 40 - 3);
+		size->width - 3,
+		size->height - buttonssize.height - durationsize.height - 40 - 3);
 	AdjustScrollBars(&self->listview);
 	ui_component_setposition(&self->duration.component, 
 		0,
-		height - durationsize.height - 40,
-		width - 3,
+		size->height - durationsize.height - 40,
+		size->width - 3,
 		durationsize.height);
 	ui_component_setposition(&self->followsong.component, 
 		0,
-		height - 40,
-		width - 3,
+		size->height - 40,
+		size->width - 3,
 		20);
 	ui_component_setposition(&self->shownames.component, 
 		0,
-		height - 20,
-		width - 3,
+		size->height - 20,
+		size->width - 3,
 		20);
 }
 
@@ -543,12 +542,10 @@ void UpdateSequenceViewDuration(SequenceViewDuration* self)
 	ui_label_settext(&self->duration, text);
 }
 
-void OnDurationSize(SequenceViewDuration* self, ui_component* sender, int width, int height)
-{
-	ui_size size = ui_component_size(&self->component);
-
-	ui_component_setposition(&self->desc.component, 0, 0, 45, size.height);
-	ui_component_setposition(&self->duration.component, 45, 0, 50, size.height);
+void OnDurationSize(SequenceViewDuration* self, ui_component* sender, ui_size* size)
+{	
+	ui_component_setposition(&self->desc.component, 0, 0, 45, size->height);
+	ui_component_setposition(&self->duration.component, 45, 0, 50, size->height);
 }
 
 void OnTimer(SequenceListView* self, ui_component* sender, int timerid)

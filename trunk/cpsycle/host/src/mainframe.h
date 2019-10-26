@@ -9,6 +9,7 @@
 #include <uibutton.h>
 #include <uiframe.h>
 #include <uinotebook.h>
+#include <uiprogressbar.h>
 #include "uistatusbar.h"
 #include "filebar.h"
 #include "undoredobar.h"
@@ -39,9 +40,10 @@ typedef struct {
 	ui_component toprow1;
 	ui_component toprow2;
 	ui_component tabbars;
-	ui_component client;
+	ui_component client;	
 	// ui_button updatedriver;
 	ui_component splitbar;
+	ui_progressbar progressbar;
 	TabBar tabbar;	
 	ui_notebook notebook;
 	FileBar filebar;

@@ -4,13 +4,11 @@
 #if !defined(VOLSLIDER_H)
 #define VOLSLIDER_H
 
-#include <uilabel.h>
 #include <uislider.h>
 #include <machines.h>
 #include "workspace.h"
 
-typedef struct {
-	ui_component component;	
+typedef struct {	
 	ui_slider slider;
 	Machines* machines;
 	unsigned int slot;	

@@ -40,15 +40,18 @@ static struct Instruments* machineproxy_instruments(MachineProxy*);
 static void machineproxy_setcallback(MachineProxy*, MachineCallback);
 static int machineproxy_parameterlabel(MachineProxy*, char* txt, int param);
 static int machineproxy_parametername(MachineProxy*, char* txt, int param);
+static int machineproxy_haseditor(MachineProxy*);
+static void machineproxy_seteditorhandle(MachineProxy*, void* handle);
+static void machineproxy_editorsize(MachineProxy*, int* width, int* height);
+static void machineproxy_editoridle(MachineProxy*);
 
-
-static int FilterException(MachineProxy* proxy, int code, struct _EXCEPTION_POINTERS *ep) 
+static int FilterException(MachineProxy* proxy, const char* msg, int code, struct _EXCEPTION_POINTERS *ep) 
 {	
 	char txt[512];
 	proxy->crashed = 1;	
-	
+		
 	if (proxy->client->info(proxy->client)) {
-		_snprintf(txt, 512, "%s crashed", proxy->client->info(proxy->client)->ShortName);
+		_snprintf(txt, 512, "%s crashed \n\r %s", proxy->client->info(proxy->client)->ShortName, msg);
 	} else {
 		_snprintf(txt, 512, "Machine crashed");
 	}
@@ -87,6 +90,10 @@ void machineproxy_init(MachineProxy* self, Machine* client)
 	self->machine.setcallback = machineproxy_setcallback;
 	self->machine.setslot = machineproxy_setslot;
 	self->machine.slot = machineproxy_slot;
+	self->machine.haseditor = machineproxy_haseditor;
+	self->machine.seteditorhandle = machineproxy_seteditorhandle;
+	self->machine.editorsize = machineproxy_editorsize;
+	self->machine.editoridle = machineproxy_editoridle;
 }
 
 Buffer* machineproxy_mix(MachineProxy* self, int slot, unsigned int amount, MachineSockets* sockets, Machines* machines)
@@ -96,7 +103,7 @@ Buffer* machineproxy_mix(MachineProxy* self, int slot, unsigned int amount, Mach
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->mix(self->client, slot, amount, sockets, machines);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "mix", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -107,7 +114,7 @@ void machineproxy_work(MachineProxy* self, BufferContext* bc)
 	if (self->crashed == 0) {
 		__try {
 			self->client->work(self->client, bc);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "work", GetExceptionCode(), GetExceptionInformation())) {
 		}
 	}
 }
@@ -117,7 +124,7 @@ void machineproxy_generateaudio(MachineProxy* self, BufferContext* bc)
 	if (self->crashed == 0) {
 		__try {
 			self->client->generateaudio(self->client, bc);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "generateaudio", GetExceptionCode(), GetExceptionInformation())) {
 		}		
 	}
 }
@@ -128,7 +135,7 @@ void machineproxy_dispose(MachineProxy* self)
 		__try {
 			self->client->dispose(self->client);
 			free(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "dispose", GetExceptionCode(), GetExceptionInformation())) {
 		}
 	}
 }
@@ -140,7 +147,7 @@ int machineproxy_mode(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->mode(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "mode", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -153,7 +160,7 @@ int machineproxy_numinputs(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->numinputs(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "numinputs", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -166,7 +173,7 @@ unsigned int machineproxy_numoutputs(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->numoutputs(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "numoutputs",  GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -177,7 +184,7 @@ void machineproxy_parametertweak(MachineProxy* self, int par, int val)
 	if (self->crashed == 0) {
 		__try {
 			self->client->parametertweak(self->client, par, val);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {		
+		} __except(FilterException(self, "parametertweak", GetExceptionCode(), GetExceptionInformation())) {		
 		}	
 	}
 }
@@ -190,7 +197,7 @@ int machineproxy_describevalue(MachineProxy* self, char* txt, int const param, i
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->describevalue(self->client, txt, param, value);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "describevalue", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -203,7 +210,7 @@ int machineproxy_value(MachineProxy* self, int const param)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->value(self->client, param);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "value", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -216,20 +223,20 @@ const CMachineInfo* machineproxy_info(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->info(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "info", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
 }
 
 unsigned int machineproxy_numparameters(MachineProxy* self)
-{ 
+{
 	unsigned int rv = 0;
 
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->numparameters(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "numparameters", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -242,7 +249,7 @@ unsigned int machineproxy_numcols(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->numcols(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "numcols", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -255,7 +262,7 @@ const CMachineParameter* machineproxy_parameter(MachineProxy* self, unsigned int
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->parameter(self->client, par);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "parameter", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -268,7 +275,7 @@ int machineproxy_paramviewoptions(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->paramviewoptions(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "paramviewoptions", GetExceptionCode(), GetExceptionInformation())) {
 			rv = 0;
 		}
 	}
@@ -280,7 +287,7 @@ void machineproxy_loadspecific(MachineProxy* self, PsyFile* file, unsigned int s
 	if (self->crashed == 0) {
 		__try {
 			self->client->loadspecific(self->client, file, slot, machines);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self,"loadspecific",  GetExceptionCode(), GetExceptionInformation())) {
 		}	
 	}
 }
@@ -292,7 +299,7 @@ unsigned int machineproxy_samplerate(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->samplerate(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "samplerate", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -305,7 +312,7 @@ unsigned int machineproxy_bpm(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->bpm(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "bpm", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -318,7 +325,7 @@ struct Samples* machineproxy_samples(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try {
 			rv = self->client->samples(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "samples", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -331,7 +338,7 @@ struct Machines* machineproxy_machines(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try { 
 			rv = self->client->machines(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "machines", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -344,7 +351,7 @@ struct Instruments* machineproxy_instruments(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try { 
 			rv = self->client->instruments(self->client); 
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "instruments", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -355,7 +362,7 @@ void machineproxy_setcallback(MachineProxy* self, MachineCallback callback)
 	if (self->crashed == 0) {
 		__try { 
 			self->client->setcallback(self->client, callback);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "setcallback", GetExceptionCode(), GetExceptionInformation())) {
 		}
 	}
 }
@@ -367,7 +374,7 @@ unsigned int machineproxy_slot(MachineProxy* self)
 	if (self->crashed == 0) {
 		__try { 
 			rv = self->client->slot(self->client);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {			
+		} __except(FilterException(self, "slot", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -378,7 +385,7 @@ void machineproxy_setslot(MachineProxy* self, int slot)
 	if (self->crashed == 0) {
 		__try { 
 			self->client->setslot(self->client, slot);
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "setslot", GetExceptionCode(), GetExceptionInformation())) {
 		}
 	}
 }
@@ -391,7 +398,7 @@ int machineproxy_parameterlabel(MachineProxy* self, char* txt, int param)
 	if (self->crashed == 0) {
 		__try { 
 			rv = self->client->parameterlabel(self->client, txt, param);			
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "parameterlabel", GetExceptionCode(), GetExceptionInformation())) {
 			txt = '\0';
 		}
 	}
@@ -406,9 +413,55 @@ int machineproxy_parametername(MachineProxy* self, char* txt, int param)
 	if (self->crashed == 0) {
 		__try { 
 			rv = self->client->parametername(self->client, txt, param);			
-		} __except(FilterException(self, GetExceptionCode(), GetExceptionInformation())) {
+		} __except(FilterException(self, "parametername", GetExceptionCode(), GetExceptionInformation())) {
 			txt = '\0';			
 		}
 	}
 	return rv;
+}
+
+int machineproxy_haseditor(MachineProxy* self)
+{ 
+	int rv = 0;
+	
+	if (self->crashed == 0) {
+		__try { 
+			rv = self->client->haseditor(self->client);
+		} __except(FilterException(self, "haseditor", GetExceptionCode(), GetExceptionInformation())) {			
+		}
+	}
+	return rv;
+}
+
+void machineproxy_seteditorhandle(MachineProxy* self, void* handle)
+{
+	if (self->crashed == 0) {
+		__try { 
+			self->client->seteditorhandle(self->client, handle);
+		} __except(FilterException(self, "seteditorhandle", GetExceptionCode(), GetExceptionInformation())) {			
+		}
+	}	
+}
+
+void machineproxy_editorsize(MachineProxy* self, int* width, int* height)
+{
+	if (self->crashed == 0) {
+		__try { 
+			self->client->editorsize(self->client, width, height);
+		} __except(FilterException(self, "editorsize", GetExceptionCode(), GetExceptionInformation())) {
+			*width = 0;
+			*height = 0;
+		}
+	}	
+}
+
+static void machineproxy_editoridle(MachineProxy* self)
+{
+	if (self->crashed == 0) {
+		__try { 
+			self->client->editoridle(self->client);
+		} __except(FilterException(self, "editoridle", GetExceptionCode(), GetExceptionInformation())) {
+
+		}
+	}
 }

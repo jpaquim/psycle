@@ -47,11 +47,13 @@ typedef struct {
 	Signal signal_songchanged;	
 	Signal signal_configchanged;
 	Signal signal_editpositionchanged;	
+	Signal signal_loadprogress;
+	Signal signal_scanprogress;
 	ui_component* mainhandle;
 	UndoRedo undoredo;	
 	EditPosition editposition;
 	int cursorstep;
-	int hasplugincache;
+	int hasplugincache;	
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);

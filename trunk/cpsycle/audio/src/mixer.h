@@ -16,8 +16,20 @@ typedef struct {
 	int mute;
 	int dryonly;
 	int wetonly;
-	int inputslot;
+	int inputslot;	
+	Buffer* buffer;
 } MixerChannel;
+
+typedef struct {
+	Table sendsto;
+	int mastersend;
+	amp_t volume;
+	amp_t panning;
+	int mute;
+	int fxslot;
+	Buffer* buffer;
+	Machine* fx;
+} ReturnChannel;
 
 typedef struct {
 	Machine machine;

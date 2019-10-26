@@ -7,9 +7,9 @@
 #include <plugin_interface.h>
 
 static void OnDestroy(PluginsView*, ui_component* component);
-static void OnDraw(PluginsView*, ui_component* sender, ui_graphics* g);
-static void OnSize(NewMachine*, ui_component* sender, int width, int height);
-static void OnPluginsSize(PluginsView*, ui_component* sender, int width, int height);
+static void OnDraw(PluginsView*, ui_component* sender, ui_graphics*);
+static void OnSize(NewMachine*, ui_component* sender, ui_size*);
+static void OnPluginsSize(PluginsView*, ui_component* sender, ui_size* size);
 static void OnMouseDown(PluginsView*, ui_component* sender, int x, int y, int button);
 static void HitTest(PluginsView*, int x, int y);
 static void ComputeTextSizes(PluginsView* self);
@@ -20,8 +20,8 @@ static void OnMouseDoubleClick(PluginsView*, ui_component* sender, int x, int y,
 static void OnKeyDown(NewMachine*, ui_component* sender, int keycode, int keydata);
 static void OnPluginsKeyDown(PluginsView*, ui_component* sender, int keycode, int keydata);
 static void onrescan(NewMachineBar*, ui_component* sender);
-static void onplugincachechanged(PluginsView* self, PluginCatcher* sender);
-static void InitNewMachineDetail(NewMachineDetail* self, ui_component* parent);
+static void onplugincachechanged(PluginsView*, PluginCatcher* sender);
+static void InitNewMachineDetail(NewMachineDetail*, ui_component* parent);
 static void onpluginselectionchanged(NewMachine*, ui_component* parent, Properties*);
 
 void InitNewMachineBar(NewMachineBar* self, ui_component* parent, Workspace* workspace)
@@ -124,13 +124,13 @@ int OnDrawPropertiesEnum(PluginsView* self, Properties* property, int level)
 			mode = properties_int(property, "mode", -1);
 			self->cpx += self->columnwidth;
 			if (mode != -1) {
-				const char* modestr;
-				
-				modestr = ((mode & 3) == 3) ? "gn" : "fx";
-				if ((mode &3)) {
+				const char* modestr;								 
+				if (mode & 3) {
+					modestr = "gn";
 					ui_settextcolor(self->g, 0x00B1C8B0);
 				} else {
-					ui_settextcolor(self->g, 0x00D1C5B6);
+					modestr = "fx";
+					ui_settextcolor(self->g, 0x00D1C5B6);					
 				}
 				ui_textout(self->g,
 					self->cpx - 10 * self->avgcharwidth,
@@ -169,10 +169,10 @@ int OnDrawPropertiesEnum(PluginsView* self, Properties* property, int level)
 }
 
 
-void OnPluginsSize(PluginsView* self, ui_component* sender, int width, int height)
+void OnPluginsSize(PluginsView* self, ui_component* sender, ui_size* size)
 {
-	self->cx = width;
-	self->cy = height;
+	self->cx = size->width;
+	self->cy = size->height;
 
 	ui_component_setverticalscrollrange(&self->component, 0, 100);
 }
@@ -269,7 +269,7 @@ void OnKeyDown(NewMachine* self, ui_component* sender, int keycode, int keydata)
 	}
 }
 
-void OnSize(NewMachine* self, ui_component* sender, int width, int height)
+void OnSize(NewMachine* self, ui_component* sender, ui_size* size)
 {	
 	ui_size barsize;
 	ui_size detailsize;
@@ -277,16 +277,16 @@ void OnSize(NewMachine* self, ui_component* sender, int width, int height)
 	barsize.height = 20;
 	detailsize.height = 100;
 	ui_component_resize(&self->pluginsview.component,
-		width,
-		height - barsize.height - detailsize.height);
+		size->width,
+		size->height - barsize.height - detailsize.height);
 	ui_component_setposition(&self->detail.component,
 		0,
-		height - barsize.height - detailsize.height,		 
-		width, 
+		size->height - barsize.height - detailsize.height,		 
+		size->width, 
 		detailsize.height);
 	ui_component_setposition(&self->bar.component,
 		0,
-		height - barsize.height,		 
-		width, 
+		size->height - barsize.height,		 
+		size->width, 
 		barsize.height);
 }

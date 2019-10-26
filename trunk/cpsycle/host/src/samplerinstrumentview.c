@@ -5,7 +5,7 @@
 
 #include "samplerinstrumentview.h"
 
-static void OnSize(SamplerInstrumentView*, ui_component* sender, int width, int height);
+static void OnSize(SamplerInstrumentView*, ui_component* sender, ui_size* size);
 static void AlignInstrumentView(SamplerInstrumentView* self);
 static void OnInstrumentInsert(SamplerInstrumentView* self, ui_component* sender, int slot);
 static void OnInstrumentSlotChanged(SamplerInstrumentView* self, Instrument* sender, int slot);
@@ -82,7 +82,7 @@ void AlignInstrumentView(SamplerInstrumentView* self)
 	ui_component_setposition(&self->notebook.component,			   220,  60, size.width - 220, size.height - 60);	
 }
 
-void OnSize(SamplerInstrumentView* self, ui_component* sender, int width, int height)
+void OnSize(SamplerInstrumentView* self, ui_component* sender, ui_size* size)
 {
 	AlignInstrumentView(self);
 }
@@ -184,7 +184,8 @@ void OnDeleteInstrument(SamplerInstrumentHeaderView* self, ui_component* sender)
 
 void InitSamplerInstrumentGeneralView(SamplerInstrumentGeneralView* self, ui_component* parent, Instruments* instruments)
 {
-	self->instruments = instruments;	
+	self->instruments = instruments;
+	self->instrument = 0;
 	ui_component_init(&self->component, parent);		
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	

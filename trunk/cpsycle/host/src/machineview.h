@@ -12,6 +12,7 @@
 #include "newmachine.h"
 #include "machineframe.h"
 #include "paramview.h"
+#include "vst2view.h"
 #include "machinebar.h"
 #include "skincoord.h"
 #include "tabbar.h"
@@ -63,6 +64,7 @@ typedef struct {
 	Machine* machine;
 	MachineFrame* frame;
 	ParamView* paramview;
+	Vst2View* vst2view;
 } MachineUi;
 
 typedef struct {

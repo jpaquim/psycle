@@ -5,7 +5,7 @@
 
 #include "greet.h"
 
-static void OnSize(Greet*, ui_component* sender, int width, int height);
+static void OnSize(Greet*, ui_component* sender, ui_size*);
 static void AddString(Greet*, const char* text);
 static void Build(Greet* self);
 static void BuildOriginal(Greet* self);
@@ -139,10 +139,10 @@ void OnOriginal(Greet* self, ui_component* sender)
 	}	
 }
 
-void OnSize(Greet* self, ui_component* sender, int width, int height)
+void OnSize(Greet* self, ui_component* sender, ui_size* size)
 {
-	ui_component_setposition(&self->header.component, 0, 10, width, 40);
-	ui_component_setposition(&self->groupbox.component, 0, 45, width - 10, height - 75);
-	ui_component_setposition(&self->greetz.component, 10, 65, width - 30, height - 100);
-	ui_component_setposition(&self->original.component, 0, height - 25, width, 20);
+	ui_component_setposition(&self->header.component, 0, 10, size->width, 40);
+	ui_component_setposition(&self->groupbox.component, 0, 45, size->width - 10, size->height - 75);
+	ui_component_setposition(&self->greetz.component, 10, 65, size->width - 30, size->height - 100);
+	ui_component_setposition(&self->original.component, 0, size->height - 25, size->width, 20);
 }

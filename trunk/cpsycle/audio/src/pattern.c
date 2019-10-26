@@ -158,6 +158,46 @@ PatternNode* pattern_greaterequal(Pattern* self, beat_t offset)
 	return p;
 }
 
+PatternNode* pattern_findnode(Pattern* pattern, unsigned int track, float offset, 
+	unsigned int subline, beat_t bpl, PatternNode** prev)
+{
+	unsigned int currsubline = 0;
+	int first = 1;
+	PatternNode* node = pattern_greaterequal(pattern, offset);	
+	if (node) {
+		*prev = node->prev;
+	} else {
+		*prev = pattern_last(pattern);
+	}	
+	while (node) {
+		PatternEntry* entry = (PatternEntry*)(node->entry);
+		if (entry->offset >= offset + bpl) {			
+			node = 0;
+			break;
+		}
+		if (entry->track == 0 && !first) {
+			++currsubline;				
+		}
+		if (subline < currsubline) {			
+			node = 0;
+			break;
+		}
+		if (entry->track > track && subline == currsubline) {			
+			node = 0;
+			break;
+		}		
+		if (entry->track == track && subline == currsubline) {
+			break;
+		}				
+		*prev = node;		
+		node = node->next;
+		first = 0;
+	}
+	return node;
+}
+
+
+
 PatternNode* pattern_last(Pattern* self)
 {	
 	return self->events ? self->events->tail : 0;

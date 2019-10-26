@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "resources/resource.h"
 
-static void OnSize(About*, ui_component* sender, int width, int height);
+static void OnSize(About*, ui_component* sender, ui_size*);
 static void InitButtons(About* self);
 static void OnContributors(About*, ui_component* sender);
 static void OnVersion(About*, ui_component* sender);
@@ -149,7 +149,7 @@ void Align(About* self, ui_component* sender)
 		20);
 }
 
-void OnSize(About* self, ui_component* sender, int width, int height)
+void OnSize(About* self, ui_component* sender, ui_size* size)
 {	
 	Align(self, &self->component);
 }

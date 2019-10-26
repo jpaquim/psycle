@@ -6,7 +6,7 @@
 #include "machineframe.h"
 
 static void OnDestroy(MachineFrame* self, ui_component* frame);
-static void OnSize(MachineFrame* self, ui_component* sender, int width, int height);
+static void OnSize(MachineFrame* self, ui_component* sender, ui_size* size);
 
 void InitMachineFrame(MachineFrame* self, ui_component* parent)
 {		
@@ -20,14 +20,9 @@ void InitMachineFrame(MachineFrame* self, ui_component* parent)
 	//ui_component_resize(&self->component, 400, 400);		
 }
 
-void MachineFrameSetParamView(MachineFrame* self, ParamView* view)
+void MachineFrameSetParamView(MachineFrame* self, ui_component* view)
 {
-	int width;
-	int height;
-
 	self->view = (ui_component*) view;
-	ParamViewSize(view, &width, &height);
-	ui_component_resize(&self->component, width, height + 28);
 }
 
 
@@ -36,9 +31,9 @@ void OnDestroy(MachineFrame* self, ui_component* frame)
 	self->component.hwnd = 0;		
 }
 
-void OnSize(MachineFrame* self, ui_component* sender, int width, int height)
+void OnSize(MachineFrame* self, ui_component* sender, ui_size* size)
 {
 	if (self->view) {
-		ui_component_resize(self->view, width, height);
+		ui_component_resize(self->view, size->width, size->height);
 	}
 }

@@ -6,6 +6,7 @@
 #include "playbar.h"
 
 void playbar_initalign(PlayBar*);
+static void onrecordnotesclicked(PlayBar*, ui_component* sender);
 static void onplayclicked(PlayBar*, ui_component* sender);
 static void onstopclicked(PlayBar*, ui_component* sender);
 
@@ -14,6 +15,9 @@ void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
 	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);	
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_button_init(&self->recordnotes, &self->component);
+	ui_button_settext(&self->recordnotes, "Record Notes");	
+	signal_connect(&self->recordnotes.signal_clicked, self, onrecordnotesclicked);
 	ui_button_init(&self->play, &self->component);
 	ui_button_settext(&self->play, workspace_translate(workspace, "play"));
 	signal_connect(&self->play.signal_clicked, self, onplayclicked);
@@ -42,4 +46,15 @@ void onplayclicked(PlayBar* self, ui_component* sender)
 void onstopclicked(PlayBar* self, ui_component* sender)
 {
 	player_stop(self->player);
+}
+
+void onrecordnotesclicked(PlayBar* self, ui_component* sender)
+{	
+	if (player_recordingnotes(self->player)) {
+		player_stoprecordingnotes(self->player);
+		ui_button_disablehighlight(&self->recordnotes);
+	} else {
+		player_startrecordingnotes(self->player);
+		ui_button_highlight(&self->recordnotes);
+	}
 }

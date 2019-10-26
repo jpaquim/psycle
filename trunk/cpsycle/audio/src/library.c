@@ -5,6 +5,7 @@
 
 #include "library.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #define __cplusplus
 #include <diversalis/os.hpp>
@@ -40,6 +41,16 @@ int library_empty(Library* self)
 #if defined(DIVERSALIS__OS__MICROSOFT)
 
 #include <windows.h>
+#include <excpt.h>
+
+static int FilterException(const char* path, int code, struct _EXCEPTION_POINTERS *ep) 
+{	
+	char txt[512];	
+		
+	_snprintf(txt, 512, "Error Load Module %s", path);	
+	MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
+	return EXCEPTION_EXECUTE_HANDLER;
+}
 
 void library_init(Library* self)
 {
@@ -50,12 +61,17 @@ void library_init(Library* self)
 
 void library_load(Library* self, const char* path)
 {	
-	self->module = LoadLibrary(path);	
-	free(self->path);
-	self->path = _strdup(path);	
-	if (self->module == NULL) {
-		self->err = GetLastError();			
-	}	
+	__try {						
+		free(self->path);
+		self->path = _strdup(path);
+		self->module = LoadLibrary(path);			
+		if (self->module == NULL) {
+			self->err = GetLastError();					
+		}
+	} __except(FilterException(path, GetExceptionCode(), GetExceptionInformation())) {
+		self->module = 0;
+		self->err = 1;
+	}
 }
 
 void library_unload(Library* self)

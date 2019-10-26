@@ -8,7 +8,7 @@
 #include <math.h>
 
 /// Samples Main View
-static void OnSize(SamplesView*, ui_component* sender, int width, int height);
+static void OnSize(SamplesView*, ui_component* sender, ui_size*);
 static void AlignSamplesView(SamplesView*);
 static void OnSampleListChanged(SamplesView*, ui_component* sender, int slot);
 static void SetSample(SamplesView*, int slot);
@@ -112,7 +112,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
-void OnSize(SamplesView* self, ui_component* sender, int width, int height)
+void OnSize(SamplesView* self, ui_component* sender, ui_size* size)
 {		
 	AlignSamplesView(self);
 }

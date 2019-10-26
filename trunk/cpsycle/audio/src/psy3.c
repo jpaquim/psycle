@@ -43,6 +43,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 	int solo = 0;
 	int playlength;
 	int chunkcount = 0;		
+	int progress = 0;
 	long filesize = psyfile_filesize(file);
 	unsigned char playorder[MAX_SONG_POSITIONS];
 	Properties* machinesproperties;	
@@ -79,6 +80,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 				}
 			}
 		//	}
+			progress += 1;
 			chunkcount--;
 		//	psyfile_skip(file, begins + size);
 		} else 
@@ -88,6 +90,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 			psyfile_read(file, &size,sizeof(size));
 			chunkcount--;
 			readsngi(self, file, size, version);
+			progress += 1;
 		//	psyfile_skip(file, size);
 		} else 
 		if (strcmp(header,"SEQD")==0) {
@@ -96,6 +99,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 			psyfile_read(file, &size,sizeof(size));
 			chunkcount--;			
 			readseqd(self, file, size, version, playorder, &playlength);
+			progress += 1;
 		//	psyfile_skip(file, size);
 		} else 
 		if (strcmp(header,"PATD")==0) {
@@ -104,6 +108,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 			psyfile_read(file, &size,sizeof(size));
 			chunkcount--;
 			readpatd(self, file, size, version);
+			progress += 1;
 			// psyfile_skip(file, size);
 		} else
 		if (strcmp(header,"MACD")==0) {
@@ -112,6 +117,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 			psyfile_read(file, &size,sizeof(size));
 			chunkcount--;
 			readmacd(self, file, size, version, machinesproperties);
+			progress += 1;
 			// psyfile_skip(file, size);
 		} else
 		if (strcmp(header,"INSD")==0) {
@@ -120,6 +126,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 			psyfile_read(file, &size,sizeof(size));
 			chunkcount--;
 			readinsd(self, file, size, version);
+			progress += 1;			
 			// psyfile_skip(file, size);
 		} else {
 			// we are not at a valid header for some weird reason.  
@@ -127,6 +134,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 			// shift back 3 bytes and try again
 			psyfile_skip(file, -3);
 		}
+		signal_emit(&self->signal_loadprogress, self, 1, progress);
 	}
 	{
 		int i;		
@@ -139,7 +147,7 @@ void psy3_load(Song* self, PsyFile* file, char header[9],
 				sequence_last(&self->sequence, sequenceposition.track);
 			sequence_insert(&self->sequence, sequenceposition, playorder[i]);
 		}
-	}
+	}	
 }
 
 void readsngi(Song* song, PsyFile* file, unsigned int size, int version)

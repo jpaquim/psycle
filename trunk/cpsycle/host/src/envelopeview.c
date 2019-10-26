@@ -6,7 +6,7 @@ static void OnDraw(EnvelopeView*, ui_component* sender, ui_graphics* g);
 static void DrawGrid(EnvelopeView*, ui_graphics* g);
 static void DrawPoints(EnvelopeView*, ui_graphics* g);
 static void DrawLines(EnvelopeView*, ui_graphics* g);
-static void OnSize(EnvelopeView*, ui_component* sender, int width, int height);
+static void OnSize(EnvelopeView*, ui_component* sender, ui_size* size);
 static void OnDestroy(EnvelopeView*, ui_component* component);
 static void OnMouseDown(EnvelopeView*, ui_component* sender, int x, int y, int button);
 static void OnMouseMove(EnvelopeView*, ui_component* sender, int x, int y, int button);
@@ -171,10 +171,10 @@ void DrawLines(EnvelopeView* self, ui_graphics* g)
 	}
 }
 
-void OnSize(EnvelopeView* self, ui_component* sender, int width, int height)
+void OnSize(EnvelopeView* self, ui_component* sender, ui_size* size)
 {
-	self->cx = width - self->spacing.left - self->spacing.right;
-	self->cy = height - self->spacing.top - self->spacing.bottom;
+	self->cx = size->width - self->spacing.left - self->spacing.right;
+	self->cy = size->height - self->spacing.top - self->spacing.bottom;
 }
 
 void OnMouseDown(EnvelopeView* self, ui_component* sender, int x, int y, int button)

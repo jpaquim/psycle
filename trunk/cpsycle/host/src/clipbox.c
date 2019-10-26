@@ -7,7 +7,6 @@
 #include <rms.h>
 
 static void OnDestroy(ClipBox*);
-static void OnSize(ClipBox*, ui_component* sender, int width, int height);
 static void OnTimer(ClipBox* self, ui_component* sender, int timerid);
 static void OnMouseDown(ClipBox* self, ui_component* sender, int x, int y, int button);
 static void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc);

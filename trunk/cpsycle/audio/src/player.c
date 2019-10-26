@@ -45,7 +45,8 @@ static void player_resetvumeters(Player*);
 void player_init(Player* self, Song* song, void* handle)
 {			
 	self->song = song;	
-	self->numsongtracks = 16;	
+	self->numsongtracks = 16;
+	self->recordingnotes = 0;
 	sequencer_init(&self->sequencer, &song->sequence, &song->machines);
 	mainframe = handle;
 	player_initdriver(self);	
@@ -219,44 +220,47 @@ RMSVol* player_rmsvol(Player* self, unsigned int slot)
 
 void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int size)
 {	
-	if (cmd == 1) {  // MIDI DATA
-		int lsb;
-		int msb;
+	int validevent = 0;
+	PatternEvent event;
+	
+	switch (cmd) {
+		case 1:// MIDI DATA
+		{
+			int lsb;
+			int msb;
 
-		lsb = data[0] & 0x0F;
-		msb = (data[0] & 0xF0) >> 4;
-
-		switch (msb) {
-			case 0x9:
-			{
-				// Note On/Off
-				PatternEvent event;
-
-				event.note = data[2] > 0 ? data[1] : NOTECOMMANDS_RELEASE;
-				event.inst = 255;
-				event.mach = lsb;
-				event.cmd = 0;
-				event.parameter = 0;
-
-				sequencer_addinputevent(&self->sequencer, &event, 0);
-				signal_emit(&self->signal_inputevent, self, 1, &event);
+			lsb = data[0] & 0x0F;
+			msb = (data[0] & 0xF0) >> 4;
+			switch (msb) {
+				case 0x9:
+					// Note On/Off
+					event.note = data[2] > 0 ? data[1] : NOTECOMMANDS_RELEASE;
+					event.inst = 255;
+					event.mach = lsb;
+					event.cmd = 0;
+					event.parameter = 0;
+					validevent = 1;
+				default:
+				break;
 			}
-			default:
-			break;			
 		}
-	} else
-	if (cmd == 2) { 
-		PatternEvent event;
-
-		event.note = data[0];
-		event.inst = 255;
-		event.mach = 0;
-		event.cmd = 0;
-		event.parameter = 0;
-
+		break;
+		case 2:	
+			patternevent_init(&event, data[0], 255, 0, 0, 0);
+			validevent = 1;
+		break;
+		default:		
+		break;
+	}
+	if (validevent) {
 		sequencer_addinputevent(&self->sequencer, &event, 0);
-		signal_emit(&self->signal_inputevent, self, 1, &event);
-	}	
+		if (self->recordingnotes && sequencer_playing(&self->sequencer)) {
+			sequencer_recordinputevent(&self->sequencer, &event, 0, 
+				player_position(self));			
+		} else {			
+			signal_emit(&self->signal_inputevent, self, 1, &event);
+		}
+	}
 }
 
 // general setter and getter
@@ -393,6 +397,23 @@ void player_restartdriver(Player* self)
 	self->driver->close(self->driver);	
 	self->driver->updateconfiguration(self->driver);
 	self->driver->open(self->driver);	
+}
+
+// Event Recording
+
+void player_startrecordingnotes(Player* self)
+{
+	self->recordingnotes = 1;
+}
+
+void player_stoprecordingnotes(Player* self)
+{
+	self->recordingnotes = 0;
+}
+
+int player_recordingnotes(Player* self)
+{
+	return self->recordingnotes;
 }
 
 // EventDriver load, unload, restart, ..., methods

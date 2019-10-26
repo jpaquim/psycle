@@ -5,7 +5,7 @@
 
 #include "sampulseinstrumentview.h"
 
-static void OnSize(SampulseInstrumentView*, ui_component* sender, int width, int height);
+static void OnSize(SampulseInstrumentView*, ui_component* sender, ui_size*);
 static void AddString(SampulseInstrumentView*, const char* text);
 static void AlignInstrumentView(SampulseInstrumentView*);
 static void BuildInstrumentList(SampulseInstrumentView*);
@@ -25,7 +25,7 @@ void InitSampulseInstrumentView(SampulseInstrumentView* self,
 //	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
-void OnSize(SampulseInstrumentView* self, ui_component* sender, int width, int height)
+void OnSize(SampulseInstrumentView* self, ui_component* sender, ui_size* size)
 {			
 }
 

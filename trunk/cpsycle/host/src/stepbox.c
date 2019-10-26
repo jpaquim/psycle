@@ -17,7 +17,8 @@ void stepbox_init(StepBox* self, ui_component* parent, Workspace* workspace)
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);	
 	ui_label_init(&self->header, &self->component);	
 	ui_label_settext(&self->header, "Step");
-	ui_combobox_init(&self->combobox, &self->component);	
+	ui_combobox_init(&self->combobox, &self->component);
+	signal_connect(&self->combobox.signal_selchanged, self, onselectionchanged);
 	ui_combobox_setcharnumber(&self->combobox, 3);
 	build(self);
 	ui_combobox_setcursel(&self->combobox, workspace_cursorstep(workspace) - 1);	

@@ -5,7 +5,7 @@
 
 #include "patternview.h"
 
-static void OnSize(PatternView*, ui_component* sender, int width, int height);
+static void OnSize(PatternView*, ui_component* sender, ui_size*);
 static void OnShow(PatternView*, ui_component* sender);
 static void OnHide(PatternView*, ui_component* sender);
 static void OnLpbChanged(PatternView*, Player* sender, unsigned int lpb);
@@ -161,9 +161,9 @@ void PatternViewSetPattern(PatternView* self, Pattern* pattern)
 	ui_invalidate(&self->trackerview.header.component);	
 }
 
-void OnSize(PatternView* self, ui_component* sender, int width, int height)
+void OnSize(PatternView* self, ui_component* sender, ui_size* size)
 {					
-	ui_component_resize(&self->notebook.component, width, height);
+	ui_component_resize(&self->notebook.component, size->width, size->height);
 }
 
 void OnShow(PatternView* self, ui_component* sender)
@@ -200,6 +200,7 @@ void OnSongChanged(PatternView* self, Workspace* workspace)
 	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
 		self, OnEditPositionChanged);
 	PatternViewSetPattern(self, patterns_at(&workspace->song->patterns, 0));	
+	self->trackerview.sequenceentryoffset = 0.f;
 	self->pianoroll.pattern = self->trackerview.pattern;	
 	ui_invalidate(&self->component);
 }
@@ -213,8 +214,10 @@ void OnEditPositionChanged(PatternView* self, Sequence* sender)
 		PatternViewSetPattern(self,
 			patterns_at(&self->trackerview.workspace->song->patterns,
 			entry->pattern));
+		self->trackerview.sequenceentryoffset = entry->offset;
 	} else {
-		PatternViewSetPattern(self, 0);		
+		PatternViewSetPattern(self, 0);
+		self->trackerview.sequenceentryoffset = 0.f;
 	}
 	ui_invalidate(&self->component);
 }

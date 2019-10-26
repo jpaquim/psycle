@@ -80,6 +80,9 @@ typedef struct {
 	struct TrackerView* view;
 } TrackerLineNumbers;
 
+void trackerlinenumbers_init(TrackerLineNumbers*, ui_component* parent,
+	struct TrackerView*);
+
 #define TRACKERGRID_NUMCOLS 10
 
 typedef struct {
@@ -93,8 +96,7 @@ typedef struct {
    unsigned int numtracks;   
    int lpb;
    double bpl;
-   double cbpl;
-   PatternNode* curr_event;
+   double cbpl;   
    NotesTabMode notestabmode;
    TrackerCursor cursor;
    beat_t cursorstep;   
@@ -125,13 +127,15 @@ typedef struct TrackerView {
 	unsigned int opcount;
 	TrackerInputs inputs;
 	unsigned int cursorstep;
+	int syncpattern;
+	beat_t lastplayposition;
+	beat_t sequenceentryoffset;
 } TrackerView;
 
 void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView*, Player*);
 void TrackerViewApplyProperties(TrackerView*, Properties*);
 void InitTrackerHeader(TrackerHeader*, ui_component* parent);
 void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, ui_component* parent, TrackerView*);
-void InitTrackerLineNumbers(TrackerLineNumbers* self, ui_component* parent);
 void InitTrackerView(TrackerView*, ui_component* parent, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 

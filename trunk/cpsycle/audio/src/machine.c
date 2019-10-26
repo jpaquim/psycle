@@ -63,6 +63,15 @@ static const CMachineParameter* parameter(Machine* self, unsigned int par)
 static int paramviewoptions(Machine* self) { return 0; }
 static unsigned int slot(Machine* self) { return -1; }
 static void setslot(Machine* self, int slot) { }
+static int haseditor(Machine* self) { return 0; }
+static void seteditorhandle(Machine* self, void* handle) { }
+static void editorsize(Machine* self, int* width, int* height)
+{ 
+	*width = 0;
+	*height = 0;
+}
+void editoridle(Machine* self) { }
+
 /// machinecallback
 static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(Machine* self) { return self->callback.bpm(self->callback.context); }
@@ -113,6 +122,10 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->mute = 0;
 	self->panning = 0.5f;
 	self->ismixersend = 0;	
+	self->haseditor = haseditor;
+	self->seteditorhandle = seteditorhandle;
+	self->editorsize = editorsize;
+	self->editoridle = editoridle;
 	signal_init(&self->signal_worked);
 }
 
