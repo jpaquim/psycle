@@ -200,14 +200,14 @@ int plugincatcher_load(PluginCatcher* self)
 	int rv;
 
 	plugincatcher_clear(self);	
-	rv = properties_load(self->plugins, self->inipath, 1);
+	rv = propertiesio_load(self->plugins, self->inipath, 1);
 	signal_emit(&self->signal_changed, self, 0);
 	return rv;
 }
 
 void plugincatcher_save(PluginCatcher* self)
 {	
-	properties_save(self->plugins, self->inipath);
+	propertiesio_save(self->plugins, self->inipath);
 }
 
 const CMachineInfo* plugincatcher_machineinfo(PluginCatcher* self,

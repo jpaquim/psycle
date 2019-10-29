@@ -17,7 +17,7 @@ static void machineuis_remove(WireView*, int slot);
 static void machineuis_removeall(WireView*);
 
 static void machineui_init(MachineUi*, int x, int y, Machine* machine,
-	MachineSkin*, const char* editname);
+	unsigned int slot, MachineSkin*, const char* editname);
 static void machineui_updatecoords(MachineUi*);
 static void machineui_dispose(MachineUi*);
 static ui_size machineui_size(MachineUi*);
@@ -73,7 +73,7 @@ static void machineview_onmousedoubleclick(MachineView*, ui_component* sender, i
 static void machineview_onkeydown(MachineView*, ui_component* sender, int keycode, int keydata);
 
 void machineui_init(MachineUi* self, int x, int y, Machine* machine,
-	MachineSkin* skin, const char* editname)
+	unsigned int slot, MachineSkin* skin, const char* editname)
 {	
 	assert(machine);
 	self->x = x;
@@ -89,6 +89,7 @@ void machineui_init(MachineUi* self, int x, int y, Machine* machine,
 	self->editname = _strdup(editname);
 	self->volumedisplay = 0.f;	
 	self->machine = machine;
+	self->slot = slot;
 	self->frame = 0;
 	self->paramview = 0;
 	self->vst2view = 0;
@@ -178,7 +179,7 @@ void machineui_draw(MachineUi* self, WireView* wireview, ui_graphics* g,
 			ui_textout(g, x + coords->name.destx + 2, y + coords->name.desty + 2,
 				editname, strlen(editname));
 			skin_blitpart(g, &wireview->skin.skinbmp, x + slidercoord(&coords->pan, 
-				machine_panning(self->machine)), y, &coords->pan);
+				self->machine->panning(self->machine)), y, &coords->pan);
 			if (machine_muted(self->machine)) {
 				skin_blitpart(g, &wireview->skin.skinbmp, x, y, &coords->mute);
 			}
@@ -227,8 +228,18 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 		if (self->frame->component.hwnd == 0) {
 			int width;
 			int height;
+			char txt[128];
 
 			InitMachineFrame(self->frame, parent);
+
+			if (self->machine && self->machine->info(self->machine)) {				
+				_snprintf(txt, 128, "%.2X : %s", self->slot,
+					self->machine->info(self->machine)->ShortName);				
+			} else {
+				ui_component_settitle(&self->frame->component, txt);
+				_snprintf(txt, 128, "%.2X :", self->slot);
+			}
+			ui_component_settitle(&self->frame->component, txt);
 			self->paramview = (ParamView*) malloc(sizeof(ParamView));
 			InitParamView(self->paramview, &self->frame->component, self->machine);
 			MachineFrameSetParamView(self->frame, &self->paramview->component);		
@@ -251,8 +262,7 @@ void wireview_init(WireView* self, ui_component* parent,
 	ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);	
 	table_init(&self->machineuis);	
 	wireview_initmasterui(self);
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
 	ui_font_init(&self->skin.font, &fontinfo);
 	ui_component_setfont(&self->component, &self->skin.font);
@@ -693,7 +703,7 @@ int wireview_hittestpan(WireView* self, int x, int y, int slot, int* dx)
 		machine = machines_at(self->machines, slot);
 		coords = machineui->coords;
 		if (coords) {
-			offset = (int) (machine_panning(machine) * coords->pan.range);	
+			offset = (int) (machine->panning(machine) * coords->pan.range);	
 			ui_setrectangle(&r, coords->pan.destx + offset, coords->pan.desty,
 					coords->pan.destwidth, coords->pan.destheight);
 			*dx = xm - r.left;
@@ -762,7 +772,7 @@ void wireview_onmousemove(WireView* self, ui_component* sender, int x, int y, in
 
 			machine = machines_at(self->machines, self->dragslot);
 			if (machine) {
-				machine_setpanning(machine, wireview_panvalue(self, x, y,
+				machine->setpanning(machine, wireview_panvalue(self, x, y,
 					self->dragslot));
 			}
 		} else
@@ -1024,7 +1034,7 @@ void machineuis_insert(WireView* self, int slot,
 			machineuis_remove(self, slot);
 		}	
 		machineui = (MachineUi*) malloc(sizeof(MachineUi));
-		machineui_init(machineui, x, y, machine, &self->skin, editname);
+		machineui_init(machineui, x, y, machine, slot, &self->skin, editname);
 		table_insert(&self->machineuis, slot, machineui);
 	}
 }
@@ -1067,15 +1077,18 @@ void machineview_init(MachineView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);		
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	ui_component_enablealign(&self->component);
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
 	signal_connect(&self->component.signal_show, self, machineview_onshow);
 	signal_connect(&self->component.signal_hide, self, machineview_onhide);
-	wireview_init(&self->wireview, &self->notebook.component, tabbarparent, workspace);
-	InitNewMachine(&self->newmachine, &self->notebook.component, self->workspace);	
-	InitTabBar(&self->tabbar, tabbarparent);
+	wireview_init(&self->wireview, &self->notebook.component, tabbarparent,
+		workspace);
+	newmachine_init(&self->newmachine, &self->notebook.component,
+		self->workspace);	
+	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setposition(&self->tabbar.component, 450, 0, 160, 20);	
 	ui_component_hide(&self->tabbar.component);
 	tabbar_append(&self->tabbar, "Wires");

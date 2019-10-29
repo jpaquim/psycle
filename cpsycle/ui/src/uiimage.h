@@ -5,7 +5,7 @@
 #define UIIMAGE_H
 
 #include "uicomponent.h"
-#include "bitmap.h"
+#include "uibitmap.h"
 
 typedef enum {
 	ALIGNMENT_NONE				= 0,	

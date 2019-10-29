@@ -15,8 +15,7 @@ void ui_progressbar_init(ui_progressbar* self, ui_component* parent)
 {	
 	self->text = _strdup("");
 	self->progress = 0.f;
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, ondraw);
 	signal_connect(&self->component.signal_destroy, self, ondestroy);
 	signal_connect(&self->component.signal_preferredsize, self,

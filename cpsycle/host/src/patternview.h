@@ -38,10 +38,11 @@ typedef struct PatternView {
 	TabBar tabbar;
 	Workspace* workspace;
 	unsigned int lpb;
+	ui_button split;
 } PatternView;
 
-void InitPatternView(PatternView*, ui_component* parent,
+void patternview_init(PatternView*, ui_component* parent,
 		ui_component* tabbarparent,	Workspace*);
-void PatternViewSetPattern(PatternView*, Pattern*);
+void patternview_setpattern(PatternView*, Pattern*);
 
 #endif

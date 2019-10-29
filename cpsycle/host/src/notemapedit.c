@@ -19,7 +19,6 @@ static void DefaultMapping(NoteMapEdit* self);
 void InitNoteMapEdit(NoteMapEdit* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);

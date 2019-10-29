@@ -22,8 +22,11 @@ static int machineproxy_mode(MachineProxy*);
 static int machineproxy_numinputs(MachineProxy*);
 static unsigned int machineproxy_numoutputs(MachineProxy*);
 static void machineproxy_parametertweak(MachineProxy*, int par, int val);
+static void machineproxy_patterntweak(MachineProxy* self, int par, int val);
 static int machineproxy_describevalue(MachineProxy*, char* txt, int const param, int const value);
 static int machineproxy_value(MachineProxy*, int const param);
+static void machineproxy_setpanning(MachineProxy*, amp_t);
+static amp_t machineproxy_panning(MachineProxy*);
 static const CMachineInfo* machineproxy_info(MachineProxy*);
 static unsigned int machineproxy_numparameters(MachineProxy*);
 static unsigned int machineproxy_numcols(MachineProxy*);
@@ -72,8 +75,11 @@ void machineproxy_init(MachineProxy* self, Machine* client)
 	self->machine.numinputs = machineproxy_numinputs;
 	self->machine.numoutputs = machineproxy_numoutputs;
 	self->machine.parametertweak = machineproxy_parametertweak;
+	self->machine.patterntweak = machineproxy_patterntweak;
 	self->machine.describevalue = machineproxy_describevalue;
 	self->machine.value = machineproxy_value;
+	self->machine.setpanning = machineproxy_setpanning;
+	self->machine.panning = machineproxy_panning;
 	self->machine.info = machineproxy_info;
 	self->machine.numparameters = machineproxy_numparameters;
 	self->machine.numcols = machineproxy_numcols;
@@ -189,6 +195,16 @@ void machineproxy_parametertweak(MachineProxy* self, int par, int val)
 	}
 }
 
+void machineproxy_patterntweak(MachineProxy* self, int par, int val)
+{
+	if (self->crashed == 0) {
+		__try {
+			self->client->patterntweak(self->client, par, val);
+		} __except(FilterException(self, "parametertweak", GetExceptionCode(), GetExceptionInformation())) {		
+		}	
+	}
+}
+
 int machineproxy_describevalue(MachineProxy* self, char* txt, int const param, int const value)
 {
 	int rv = 0;
@@ -211,6 +227,29 @@ int machineproxy_value(MachineProxy* self, int const param)
 		__try {
 			rv = self->client->value(self->client, param);
 		} __except(FilterException(self, "value", GetExceptionCode(), GetExceptionInformation())) {			
+		}
+	}
+	return rv;
+}
+
+void machineproxy_setpanning(MachineProxy* self, amp_t panning)
+{	
+	if (self->crashed == 0) {
+		__try {
+			self->client->setpanning(self->client, panning);
+		} __except(FilterException(self, "setpanning", GetExceptionCode(), GetExceptionInformation())) {			
+		}
+	}	
+}
+
+amp_t machineproxy_panning(MachineProxy* self)
+{
+	amp_t rv = 0;
+
+	if (self->crashed == 0) {
+		__try {
+			rv = self->client->panning(self->client);
+		} __except(FilterException(self, "panning", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;

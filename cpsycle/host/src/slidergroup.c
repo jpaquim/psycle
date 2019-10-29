@@ -17,8 +17,7 @@ static int timerid = 600;
 
 void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 {
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->desclabel, &self->component);
 	ui_slider_init(&self->slider, &self->component);	
 	ui_slider_setrange(&self->slider, -32768, 32767);

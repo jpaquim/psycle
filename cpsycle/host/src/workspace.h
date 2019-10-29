@@ -6,7 +6,7 @@
 
 #include <song.h>
 #include <player.h>
-#include <properties.h>
+#include <propertiesio.h>
 #include <signal.h>
 #include <plugincatcher.h>
 #include <machinefactory.h>
@@ -53,13 +53,15 @@ typedef struct {
 	UndoRedo undoredo;	
 	EditPosition editposition;
 	int cursorstep;
-	int hasplugincache;	
+	int hasplugincache;
+	char* filename;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
+void workspace_savesong(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 Properties* workspace_pluginlist(Workspace*);
 void workspace_load_configuration(Workspace*);

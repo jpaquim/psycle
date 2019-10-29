@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "machineframe.h"
+#include "resources/resource.h"
 
 static void OnDestroy(MachineFrame* self, ui_component* frame);
 static void OnSize(MachineFrame* self, ui_component* sender, ui_size* size);
@@ -11,7 +12,8 @@ static void OnSize(MachineFrame* self, ui_component* sender, ui_size* size);
 void InitMachineFrame(MachineFrame* self, ui_component* parent)
 {		
 	self->view = 0;
-	ui_frame_init(&self->component, parent);	
+	ui_frame_init(&self->component, parent);
+	ui_component_seticonressource(&self->component, IDI_MACPARAM);
 	ui_component_move(&self->component, 200, 150);
 	ui_component_resize(&self->component, 400, 400);	
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);

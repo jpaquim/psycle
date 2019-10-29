@@ -9,9 +9,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dsptypes.h>
 
 static CMachineParameter const paraInputHeader = 
-{ 
+{
 	"Input",	
 	"Input",								// description
 	0,										// MinValue	
@@ -225,6 +226,7 @@ static void onconnected(Mixer*, Connections*, int outputslot, int inputslot);
 static void ondisconnected(Mixer*, Connections*, int outputslot, int inputslot);
 static int parametername(Mixer*, char* txt, int param);
 static void parametertweak(Mixer*, int param, int value);
+static void patterntweak(Mixer* self, int par, int val);
 static int value(Mixer*, int const param);
 static int describevalue(Mixer*, char* txt, int const param, int const value);
 static unsigned int numparameters(Mixer*);
@@ -322,6 +324,7 @@ void mixer_init(Mixer* self, MachineCallback callback)
 	self->machine.mix = mix;
 	self->machine.parametername = parametername;
 	self->machine.parametertweak = parametertweak;
+	self->machine.patterntweak = patterntweak;
 	self->machine.value = value;
 	self->machine.describevalue = describevalue;
 	self->machine.numparameters = numparameters;
@@ -512,7 +515,7 @@ void workreturns(Mixer* self, Machines* machines, unsigned int amount)
 			buffercontext_init(&bc, events, channel->buffer, channel->buffer,
 				amount, 16, 0);
 			channel->fx->work(channel->fx, &bc);
-		//	buffer_pan(fxbuffer, machine_panning(fx), amount);
+		//	buffer_pan(fxbuffer, fx->panning(fx), amount);
 		//	buffer_pan(fxbuffer, channel->panning, amount);
 			signal_emit(&channel->fx->signal_worked, channel->fx, 2, 
 				channel->fxslot, &bc);
@@ -666,6 +669,89 @@ const CMachineInfo* info(Mixer* self)
 	return mixer_info();
 }
 
+static amp_t dB2Amp(amp_t db)
+{	
+	return (amp_t) pow(10.0f, db / 20.0f);
+}
+
+void patterntweak(Mixer* self, int numparam, int value)
+{
+	int channelindex = numparam/16;
+	int param = numparam%16;
+	if (channelindex == 0) {		
+		if (param == 0) {
+			if (value >= 0x1000) {
+				self->master.volume = 1.0f;
+			} else
+			if (value == 0) {
+				self->master.volume = 0.0f;
+			} else {
+				amp_t dbs = (value/42.67f)-96.0f;
+				self->master.volume = dB2Amp(dbs);
+			}			
+		} else 
+		if (param == 13) {
+			self->master.drymix = (value >= 0x100) 
+				? 1.0f
+				: ((value&0xFF)/ 256.f);
+		} else
+		if (param == 14) { 
+			self->master.gain = (value >= 1024) 
+				? 4.0f
+				: ((value&0x3FF)/256.0f);
+		} else {			
+			self->machine.setpanning(&self->machine, (value >> 1) / 256.f);
+		}
+	} else
+	// Inputs
+	if (channelindex <= self->inputs.count) {
+		MixerChannel* channel;
+
+		channel = table_at(&self->inputs, channelindex - 1);
+		if (channel) {
+			if (param == 0) { 
+				channel->drymix = (value == 256) 
+					? 1.0f
+					: ((value&0xFF)/256.0f);
+			} else
+			if (param <= 12) {				 
+				if (param - 1 < self->sends.count) {														
+					table_insert(&channel->sendvols, param - 1, 
+						(void*) intparamvalue( 
+							(value == 256) ? 1.0f : 
+							((value&0xFF)/256.0f)));					
+				}
+			} else			
+			if (param == 13) {
+				channel->mute = value == 3;
+				channel->wetonly = value == 2;
+				channel->dryonly = value == 1;
+			} else 
+			if (param == 14) {
+				WireSocketEntry* input_entry;
+
+				input_entry = wiresocketentry(self, channelindex - 1);
+				if (input_entry) {		
+					float val=(value>=1024)?4.0f:((value&0x3FF)/256.0f);
+					input_entry->volume = val;
+				}
+			} else {
+				if (value >= 0x1000) {
+					channel->volume = 1.0f;
+				} else
+				if (value == 0) {
+					channel->volume = 0.0f;
+				} else {
+					amp_t dbs = (value/42.67f)-96.0f;
+					channel->volume = dB2Amp(dbs);
+				}
+			}
+		}
+	}
+}
+
+
+
 void parametertweak(Mixer* self, int param, int value)
 {	
 	int col;
@@ -690,7 +776,7 @@ void parametertweak(Mixer* self, int param, int value)
 		if (row == self->sends.count + 3) {
 			self->master.panning = floatparamvalue(value); 
 		} else	
-		if (row == self->sends.count + 4) {
+		if (row == self->sends.count + 8) {
 			self->master.volume = floatparamvalue(value) * 
 					floatparamvalue(value) * 4.f;			
 		}
@@ -711,7 +797,7 @@ void parametertweak(Mixer* self, int param, int value)
 			if (row == self->sends.count + 2) {
 				WireSocketEntry* input_entry;
 
-				input_entry = wiresocketentry(self, col - 1);
+				input_entry = wiresocketentry(self, col - inputcolumn(self));
 				if (input_entry) {						
 					input_entry->volume = floatparamvalue(value) * 
 						floatparamvalue(value) * 4.f;

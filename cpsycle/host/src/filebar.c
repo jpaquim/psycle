@@ -5,33 +5,48 @@
 
 #include "filebar.h"
 
-static void OnLoadSong(FileBar*, ui_component* sender);
-static void OnNewSong(FileBar*, ui_component* sender);
+static void filebar_initalign(FileBar*);
+static void filebar_onnewsong(FileBar*, ui_component* sender);
+static void filebar_onloadsong(FileBar*, ui_component* sender);
+static void filebar_onsavesong(FileBar*, ui_component* sender);
 
-void InitFileBar(FileBar* self, ui_component* parent, Workspace* workspace)
+void filebar_init(FileBar* self, ui_component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);		
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_label_init(&self->header, &self->component);
+	ui_label_settext(&self->header,	"Song  ");
 	ui_button_init(&self->newsongbutton, &self->component);
-	ui_button_settext(&self->newsongbutton, workspace_translate(workspace, "newsong"));
-	signal_connect(&self->newsongbutton.signal_clicked, self, OnNewSong);
+	ui_button_settext(&self->newsongbutton,
+		workspace_translate(workspace, "new"));
+	signal_connect(&self->newsongbutton.signal_clicked, self,
+		filebar_onnewsong);
 	ui_button_init(&self->loadsongbutton, &self->component);
-	ui_button_settext(&self->loadsongbutton, workspace_translate(workspace, "loadsong"));
-	signal_connect(&self->loadsongbutton.signal_clicked, self, OnLoadSong);	
-	{		
-		ui_margin margin = { 0, 3, 3, 0 };
-
-		list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
-			UI_ALIGN_LEFT,
-			&margin));		
-	}
+	ui_button_settext(&self->loadsongbutton,
+		workspace_translate(workspace, "load"));
+	signal_connect(&self->loadsongbutton.signal_clicked, self,
+		filebar_onloadsong);
+	ui_button_init(&self->savesongbutton, &self->component);
+	ui_button_settext(&self->savesongbutton, 
+		workspace_translate(workspace, "save"));	
+	signal_connect(&self->savesongbutton.signal_clicked, self,
+		filebar_onloadsong);
+	filebar_initalign(self);
 }
 
-void OnNewSong(FileBar* self, ui_component* sender)
+void filebar_initalign(FileBar* self)
+{	
+	ui_margin margin = { 0, 5, 0, 0 };
+
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT,
+		&margin));
+}
+
+void filebar_onnewsong(FileBar* self, ui_component* sender)
 {
 	workspace_newsong(self->workspace);
 	if (self->workspace->song->properties) {
@@ -45,7 +60,27 @@ void OnNewSong(FileBar* self, ui_component* sender)
 	}	
 }
 
-void OnLoadSong(FileBar* self, ui_component* sender)
+void filebar_onloadsong(FileBar* self, ui_component* sender)
+{
+	char path[MAX_PATH]	 = "";
+	char title[MAX_PATH]	 = ""; 					
+	static char filter[] = "All Songs (*.psy *.xm *.it *.s3m *.mod)" "\0*.psy;*.xm;*.it;*.s3m;*.mod\0"
+				"Songs (*.psy)"				        "\0*.psy\0"
+				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
+				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
+				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
+				"Original Mod Format Songs (*.mod)" "\0*.mod\0";
+	char  defaultextension[] = "PSY";
+	int showsonginfo = 0;	
+	*path = '\0'; 
+	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
+		ui_invalidate(self->workspace->mainhandle);
+		UpdateWindow(self->workspace->mainhandle->hwnd);
+		workspace_loadsong(self->workspace, path);						
+	}
+}
+
+void filebar_onsavesong(FileBar* self, ui_component* sender)
 {
 	char path[MAX_PATH]	 = "";
 	char title[MAX_PATH]	 = ""; 					

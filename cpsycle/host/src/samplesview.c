@@ -57,8 +57,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 {
 	ui_margin margin = {3, 3, 0, 3};
 	self->player = &workspace->player;	
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_size, self, OnSize);
 	InitSamplesBox(&self->samplesbox, &self->component,
 		&workspace->song->samples, &workspace->song->instruments);
@@ -77,7 +76,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 		&workspace->song->instruments, &self->samplesbox.samplelist);
 	ui_component_resize(&self->header.component, 400, 20);	
 	ui_component_setmargin(&self->header.component, &margin);
-	InitTabBar(&self->tabbar, &self->client);	
+	tabbar_init(&self->tabbar, &self->client);	
 	ui_component_resize(&self->tabbar.component, 0, 20);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_TOP);
 	ui_component_setmargin(&self->tabbar.component, &margin);
@@ -468,7 +467,6 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	self->sample = 0;
 	self->player = player;	
 

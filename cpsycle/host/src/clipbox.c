@@ -19,7 +19,6 @@ void InitClipBox(ClipBox* self, ui_component* parent, Workspace* workspace)
 {
 	self->clip = 0;	
 	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);

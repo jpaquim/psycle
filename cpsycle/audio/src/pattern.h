@@ -4,7 +4,7 @@
 #if !defined(PATTERN_H)
 #define PATTERN_H
 
-#include "event.h"
+#include "patternevent.h"
 #include <list.h>
 
 /// an event with additional position and track information

@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "mainframe.h"
-#include <ui_app.h>
+#include <uiapp.h>
 #include <dir.h>
 #include <stdio.h>
 

@@ -10,8 +10,7 @@ static void OnCloseClicked(PatternProperties* self, ui_component* sender);
 void InitPatternProperties(PatternProperties* self, ui_component* parent, Pattern* pattern)
 {			
 	self->pattern = pattern;
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	ui_label_init(&self->namelabel, &self->component);
 	ui_label_settext(&self->namelabel, "Name");

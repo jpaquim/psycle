@@ -41,7 +41,6 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	}
 	self->machine = machine;
 	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_draw, self, OnDraw);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);

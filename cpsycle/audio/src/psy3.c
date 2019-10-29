@@ -707,7 +707,7 @@ Machine* machineloadfilechunk(Song* self, PsyFile* file, int index, int version,
 		if (mute) {
 			machine_mute(machine);
 		}
-		machine_setpanning(machine, panning / 128.f);
+		machine->setpanning(machine, panning / 128.f);
 	}
 
 	if (index == 64) {
@@ -773,3 +773,9 @@ void makeplugincatchername(const char* psy3dllname, char* catchername)
 	replace_char(catchername, ' ', '-');
 }
 
+
+void psy3_save(Song* song, PsyFile* file, Properties* workspaceproperties)
+{
+
+
+}

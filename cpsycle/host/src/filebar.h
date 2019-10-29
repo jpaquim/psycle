@@ -7,14 +7,17 @@
 #include "workspace.h"
 
 #include <uibutton.h>
+#include <uilabel.h>
 
 typedef struct {
 	ui_component component;
+	ui_label header;
 	ui_button newsongbutton;
 	ui_button loadsongbutton;
+	ui_button savesongbutton;
 	Workspace* workspace;	
 } FileBar;
 
-void InitFileBar(FileBar*, ui_component* parent, Workspace*);
+void filebar_init(FileBar*, ui_component* parent, Workspace*);
 
 #endif

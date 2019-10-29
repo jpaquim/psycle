@@ -7,7 +7,7 @@
 #include "plugin_interface.h"
 #include "machinedefs.h"
 
-#include <properties.h>
+#include <propertiesio.h>
 #include <signal.h>
 
 typedef struct {

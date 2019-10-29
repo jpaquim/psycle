@@ -32,7 +32,6 @@ void ui_button_init(ui_button* self, ui_component* parent)
 	self->icon = UI_ICON_NONE;
 	if (self->ownerdrawn) {
 		ui_button_create_ownerdrawn(self, parent);
-		ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	} else {
 		ui_button_create_system(self, parent);
 	}

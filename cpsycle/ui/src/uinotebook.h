@@ -8,12 +8,17 @@
 
 typedef struct {
    ui_component component;
+   ui_component splitbar;
    int pageindex;
+   int split;
+   int splitx;
 } ui_notebook;
 
 void ui_notebook_init(ui_notebook*, ui_component* parent);
 void ui_notebook_setpage(ui_notebook*, int page);
 int ui_notebook_page(ui_notebook*);
+void ui_notebook_split(ui_notebook*);
+void ui_notebook_full(ui_notebook*);
 void ui_notebook_connectcontroller(ui_notebook*, Signal* controllersignal);
 
 #endif

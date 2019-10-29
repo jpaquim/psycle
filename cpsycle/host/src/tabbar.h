@@ -27,7 +27,7 @@ typedef struct {
 	int tabalignment;
 } TabBar;
 
-void InitTabBar(TabBar*, ui_component* parent);
+void tabbar_init(TabBar*, ui_component* parent);
 void tabbar_append(TabBar*, const char* label);
 void tabbar_select(TabBar*, int tabindex);
 int tabbar_selected(TabBar*);

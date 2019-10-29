@@ -12,8 +12,7 @@ static void OnMouseDown(WaveBox*, ui_component* sender, int x, int y, int button
 
 void InitWaveBox(WaveBox* self, ui_component* parent)
 {			
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);

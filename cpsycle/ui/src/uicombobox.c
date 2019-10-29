@@ -25,9 +25,6 @@ void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 	combobox->hover = 0;
 	signal_init(&combobox->signal_selchanged);
 	ui_combobox_create_ownerdrawn(combobox, parent);	
-	if (combobox->ownerdrawn) {
-		ui_component_setbackgroundmode(&combobox->component, BACKGROUND_SET);
-	}	
 	signal_connect(&combobox->component.signal_destroy, combobox, ondestroy);
 	signal_connect(&combobox->component.signal_preferredsize,
 		combobox, onpreferredsize);

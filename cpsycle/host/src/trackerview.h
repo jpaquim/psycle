@@ -66,10 +66,14 @@ typedef struct {
 	TrackerSkin* skin;
 } TrackerHeader;
 
+void trackerheader_init(TrackerHeader*, ui_component* parent);
+
 typedef struct {
 	ui_component component;
 	struct TrackerView* view;
 } TrackerLineNumbersLabel;
+
+void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, ui_component* parent, struct TrackerView*);
 
 typedef struct {
 	ui_component component;
@@ -110,7 +114,15 @@ typedef struct {
    struct TrackerView* view;   
 } TrackerGrid;
 
+void InitTrackerGrid(TrackerGrid*, ui_component* parent, struct TrackerView*, Player*);
+
 typedef Inputs TrackerInputs;
+
+typedef struct {
+	int line;
+	int sublines;
+	int accsublines;
+} SublineCache;
 
 typedef struct TrackerView {
 	ui_component component;
@@ -130,13 +142,13 @@ typedef struct TrackerView {
 	int syncpattern;
 	beat_t lastplayposition;
 	beat_t sequenceentryoffset;
+	List* sublines;
+	Table screenlines;
 } TrackerView;
 
-void InitTrackerGrid(TrackerGrid*, ui_component* parent, TrackerView*, Player*);
-void TrackerViewApplyProperties(TrackerView*, Properties*);
-void InitTrackerHeader(TrackerHeader*, ui_component* parent);
-void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, ui_component* parent, TrackerView*);
-void InitTrackerView(TrackerView*, ui_component* parent, Workspace*);
+void trackerview_init(TrackerView*, ui_component* parent, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
+void trackerview_setpattern(TrackerView*, Pattern*);
+void TrackerViewApplyProperties(TrackerView*, Properties*);
 
 #endif

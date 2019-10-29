@@ -151,7 +151,7 @@ void player_workpath(Player* self, unsigned int amount)
 					buffercontext_init(&bc, events, output, output, amount,
 						self->numsongtracks, rms);
 					machine->work(machine, &bc);
-					buffer_pan(output, machine_panning(machine), amount);
+					buffer_pan(output, machine->panning(machine), amount);
 					if (self->vumode == VUMETER_RMS && buffer_numchannels(
 							bc.output) >= 2) {
 						rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],

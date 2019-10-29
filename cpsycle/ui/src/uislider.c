@@ -20,8 +20,7 @@ void ui_slider_init(ui_slider* self, ui_component* parent)
 	signal_init(&self->signal_clicked);
 	signal_init(&self->signal_changed);	
 	signal_connect(&self->component.signal_destroy, self, ondestroy);
-	signal_connect(&self->component.signal_windowproc, self, onwindowproc);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	signal_connect(&self->component.signal_windowproc, self, onwindowproc);	
 }
 
 void ondestroy(ui_slider* self, ui_component* sender)

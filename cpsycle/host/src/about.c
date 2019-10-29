@@ -22,8 +22,7 @@ void InitContrib(Contrib* self, ui_component* parent)
 	ui_margin margin = { 0, 3, 0, 0 };
 
 	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_enablealign(&self->component);	
 	ui_edit_init(&self->contrib, &self->component, 
 		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY);
 	ui_edit_setlinenumber(&self->contrib, 10);
@@ -89,19 +88,16 @@ void InitContrib(Contrib* self, ui_component* parent)
 
 void InitVersion(Version* self, ui_component* parent)
 {
-	ui_component_init(&self->component, parent);		
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->versioninfo, &self->component);
 	ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
-	ui_component_resize(&self->versioninfo.component, 500, 300);
-	ui_component_setbackgroundmode(&self->versioninfo.component, BACKGROUND_SET);
+	ui_component_resize(&self->versioninfo.component, 500, 300);	
 	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
 
 void InitAbout(About* self, ui_component* parent)
 {			
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	InitButtons(self);
 	ui_notebook_init(&self->notebook, &self->component);

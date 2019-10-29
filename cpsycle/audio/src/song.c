@@ -106,6 +106,14 @@ Song* song_allocinit(MachineFactory* machinefactory)
 	return rv;
 }
 
+void song_free(Song* self)
+{
+	if (self) {
+		song_dispose(self);
+		free(self);
+	}
+}
+
 void song_load(Song* self, const char* path, Properties** workspaceproperties)
 {	
 	PsyFile file;
@@ -132,5 +140,14 @@ void song_load(Song* self, const char* path, Properties** workspaceproperties)
 		machines_endfilemode(&self->machines);
 		psyfile_close(&file);
 		signal_emit(&self->signal_loadprogress, self, 1, 0);
+	}
+}
+
+void song_save(Song* self, const char* path, Properties* workspaceproperties)
+{
+	PsyFile file;
+
+	if (psyfile_create(&file, path, 1)) {
+		psy3_save(self, &file, workspaceproperties);
 	}
 }

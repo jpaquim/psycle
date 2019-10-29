@@ -2,7 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "event.h"
+#include "patternevent.h"
 
 #include "kbddriver.h"
 #include <stdlib.h>

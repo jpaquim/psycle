@@ -6,62 +6,95 @@
 #include "newmachine.h"
 #include <plugin_interface.h>
 
-static void OnDestroy(PluginsView*, ui_component* component);
-static void OnDraw(PluginsView*, ui_component* sender, ui_graphics*);
-static void OnSize(NewMachine*, ui_component* sender, ui_size*);
-static void OnPluginsSize(PluginsView*, ui_component* sender, ui_size* size);
-static void OnMouseDown(PluginsView*, ui_component* sender, int x, int y, int button);
-static void HitTest(PluginsView*, int x, int y);
-static void ComputeTextSizes(PluginsView* self);
-static int OnDrawPropertiesEnum(PluginsView*, Properties* curr_properties, int level);
-static void OnScroll(PluginsView*, ui_component* sender, int cx, int cy);
-static int OnPropertiesCount(PluginsView*, Properties* property, int level);
-static void OnMouseDoubleClick(PluginsView*, ui_component* sender, int x, int y, int button);
-static void OnKeyDown(NewMachine*, ui_component* sender, int keycode, int keydata);
-static void OnPluginsKeyDown(PluginsView*, ui_component* sender, int keycode, int keydata);
-static void onrescan(NewMachineBar*, ui_component* sender);
-static void onplugincachechanged(PluginsView*, PluginCatcher* sender);
-static void InitNewMachineDetail(NewMachineDetail*, ui_component* parent);
-static void onpluginselectionchanged(NewMachine*, ui_component* parent, Properties*);
+static void newmachine_onpluginselected(NewMachine*, ui_component* parent,
+	Properties*);
+static void newmachine_onplugincachechanged(NewMachine*, PluginCatcher*);
+static void newmachine_onkeydown(NewMachine*, ui_component* sender, 
+	int keycode, int keydata);
 
-void InitNewMachineBar(NewMachineBar* self, ui_component* parent, Workspace* workspace)
+static void pluginsview_ondestroy(PluginsView*, ui_component* component);
+static void pluginsview_ondraw(PluginsView*, ui_component* sender,
+	ui_graphics*);
+static void pluginsview_drawitem(PluginsView*, ui_graphics* g, Properties*,
+	int x, int y);
+static void pluginsview_onsize(PluginsView*, ui_component* sender,
+	ui_size* size);
+static void pluginsview_onmousedown(PluginsView*, ui_component* sender,
+	int x, int y, int button);
+static void pluginsview_hittest(PluginsView*, int x, int y);
+static void pluginsview_computetextsizes(PluginsView* self);
+static void pluginsview_onscroll(PluginsView*, ui_component* sender,
+	int cx, int cy);
+static void pluginsview_onmousedoubleclick(PluginsView*, ui_component* sender,
+	int x, int y, int button);
+static void pluginsview_onkeydown(PluginsView*, ui_component* sender,
+	int keycode, int keydata);
+static void pluginsview_onplugincachechanged(PluginsView*,
+	PluginCatcher* sender);
+static void pluginsview_adjustscroll(PluginsView*);
+
+static void pluginname(Properties*, char* txt);
+static int plugintype(Properties*, char* txt);
+static int pluginmode(Properties*, char* txt);
+
+static void newmachinebar_onrescan(NewMachineBar*, ui_component* sender);
+
+static void newmachinedetail_reset(NewMachineDetail*);
+
+void newmachinebar_init(NewMachineBar* self, ui_component* parent,
+	Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	ui_button_init(&self->rescan, &self->component);
 	ui_button_settext(&self->rescan, "Rescan");
-	signal_connect(&self->rescan.signal_clicked, self, onrescan);
-	ui_component_setposition(&self->rescan.component, 0, 0, 100, 20);	
+	signal_connect(&self->rescan.signal_clicked, self,
+		newmachinebar_onrescan);
+	ui_component_setposition(&self->rescan.component, 0, 0, 80, 20);
 }
 
-void onrescan(NewMachineBar* self, ui_component* sender)
+void newmachinebar_onrescan(NewMachineBar* self, ui_component* sender)
 {
 	workspace_scanplugins(self->workspace);
 }
 
-void InitNewMachineDetail(NewMachineDetail* self, ui_component* parent)
+void newmachinedetail_init(NewMachineDetail* self, ui_component* parent,
+	Workspace* workspace)
 {
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
+	newmachinebar_init(&self->bar, &self->component, workspace);
+	ui_component_setposition(&self->bar.component, 0, 10, 80, 100);
 	ui_label_init(&self->desclabel, &self->component);
-	ui_label_settext(&self->desclabel, "");	
-	ui_component_setposition(&self->desclabel.component, 0, 0, 600, 50);
+	ui_label_settext(&self->desclabel, 
+		"Select a plugin to view its description.");	
+	ui_component_setposition(&self->desclabel.component, 0, 110, 80, 100);	
 }
 
-void InitPluginsView(PluginsView* self, ui_component* parent, Workspace* workspace)
+void newmachinedetail_reset(NewMachineDetail* self)
+{
+	ui_label_settext(&self->desclabel, 
+		"Select a plugin to view its description.");	
+}
+
+void pluginsview_init(PluginsView* self, ui_component* parent,
+	Workspace* workspace)
 {	
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	ui_component_showverticalscrollbar(&self->component);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_destroy, self,OnDestroy);	
-	signal_connect(&self->component.signal_size, self, OnPluginsSize);
-	signal_connect(&self->component.signal_scroll, self, OnScroll);	
-	signal_connect(&self->component.signal_keydown, self, OnPluginsKeyDown);
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	signal_connect(&self->component.signal_mousedoubleclick, self, OnMouseDoubleClick);
-	signal_connect(&self->component.signal_draw, self, OnDraw);	
+	signal_connect(&self->component.signal_destroy, self,
+		pluginsview_ondestroy);	
+	signal_connect(&self->component.signal_size, self,
+		pluginsview_onsize);
+	signal_connect(&self->component.signal_scroll, self,
+		pluginsview_onscroll);	
+	signal_connect(&self->component.signal_keydown, self,
+		pluginsview_onkeydown);
+	signal_connect(&self->component.signal_mousedown, self,
+		pluginsview_onmousedown);
+	signal_connect(&self->component.signal_mousedoubleclick, self,
+		pluginsview_onmousedoubleclick);
+	signal_connect(&self->component.signal_draw, self, pluginsview_ondraw);
 	self->selectedplugin = 0;
 	self->workspace = workspace;	
 	self->dy = 0;	
@@ -69,154 +102,184 @@ void InitPluginsView(PluginsView* self, ui_component* parent, Workspace* workspa
 	signal_init(&self->signal_selected);
 	signal_init(&self->signal_changed);
 	signal_connect(&workspace->plugincatcher.signal_changed, self,
-		onplugincachechanged);
+		pluginsview_onplugincachechanged);
 }
 
-void OnDestroy(PluginsView* self, ui_component* component)
+void pluginsview_ondestroy(PluginsView* self, ui_component* component)
 {
 	signal_dispose(&self->signal_selected);
 	signal_dispose(&self->signal_changed);
 }
 
-void OnDraw(PluginsView* self, ui_component* sender, ui_graphics* g)
-{	   		
-	self->g = g;
-	self->cpx = 0;
-	self->cpy = 0;
-	ComputeTextSizes(self);
-	if (workspace_pluginlist(self->workspace)) {
-		properties_enumerate(workspace_pluginlist(self->workspace),
-			self, OnDrawPropertiesEnum);
+void pluginsview_ondraw(PluginsView* self, ui_component* sender,
+	ui_graphics* g)
+{	
+	Properties* p;
+	int cpx = 0;
+	int cpy = 0;
+	
+	pluginsview_computetextsizes(self);
+	p = workspace_pluginlist(self->workspace);
+	if (p) {
+		p = p->children;
 	}
+	for ( ; p != 0; p = p->next) {
+		pluginsview_drawitem(self, g, p, cpx, cpy);
+		cpx += self->columnwidth;
+		if (cpx >= self->numcols * self->columnwidth) {
+			cpx = 0;
+			cpy += self->lineheight;
+		}
+	}	
 }
 
-void ComputeTextSizes(PluginsView* self)
+void pluginsview_drawitem(PluginsView* self, ui_graphics* g,
+	Properties* property, int x, int y)
+{
+	char txt[128];
+
+	if (property == self->selectedplugin) {
+		ui_setbackgroundcolor(g, 0x009B7800);
+		ui_settextcolor(g, 0x00FFFFFF);		
+	} else {
+		ui_setbackgroundcolor(g, 0x00232323);
+		ui_settextcolor(g, 0x00CACACA);		
+	}		
+	pluginname(property, txt);			
+	ui_textout(g, x, y + self->dy + 2, txt, strlen(txt));
+	plugintype(property, txt);
+	ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
+		y + self->dy + 2, txt, strlen(txt));	
+	if (pluginmode(property, txt) & 3) {
+		ui_settextcolor(g, 0x00B1C8B0);
+	} else {		
+		ui_settextcolor(g, 0x00D1C5B6);	
+	}
+	ui_textout(g, x + self->columnwidth - 10 * self->avgcharwidth,
+		y + self->dy + 2, txt, strlen(txt));	
+}
+
+void pluginsview_computetextsizes(PluginsView* self)
 {
 	TEXTMETRIC tm;
+	ui_size size;
 	
+	size = ui_component_size(&self->component);
 	tm = ui_component_textmetric(&self->component);
 	self->avgcharwidth = tm.tmAveCharWidth;
 	self->lineheight = (int) (tm.tmHeight * 1.5);
-	self->columnwidth = tm.tmAveCharWidth * 50;
+	self->columnwidth = tm.tmAveCharWidth * 45;
 	self->identwidth = tm.tmAveCharWidth * 4;
-	self->numcols = self->cx / self->columnwidth;
+	self->numcols = max(1, size.width / self->columnwidth);
 }
 
-int OnDrawPropertiesEnum(PluginsView* self, Properties* property, int level)
-{		
-	if (property->item.key && property->children) {						
-		Properties* p;	
-		if (property == self->selectedplugin) {
-			ui_setbackgroundcolor(self->g, 0x009B7800);
-			ui_settextcolor(self->g, 0x00FFFFFF);		
-		} else {
-			ui_setbackgroundcolor(self->g, 0x00232323);
-			ui_settextcolor(self->g, 0x00CACACA);		
-		}		
-		p = properties_read(property, "name");
-		if (p && p->item.key && p->item.typ == PROPERTY_TYP_STRING) {
-			int mode;
-			int typ;
-
-			ui_textout(self->g, self->cpx, self->cpy + self->dy + 2,
-				properties_valuestring(p),
-				strlen(properties_valuestring(p)));
-			mode = properties_int(property, "mode", -1);
-			self->cpx += self->columnwidth;
-			if (mode != -1) {
-				const char* modestr;								 
-				if (mode & 3) {
-					modestr = "gn";
-					ui_settextcolor(self->g, 0x00B1C8B0);
-				} else {
-					modestr = "fx";
-					ui_settextcolor(self->g, 0x00D1C5B6);					
-				}
-				ui_textout(self->g,
-					self->cpx - 10 * self->avgcharwidth,
-					self->cpy + self->dy + 2,
-					modestr,
-					strlen(modestr));				
-			}		
-			typ = properties_int(property, "type", -1);
-			if (typ != -1) {
-				const char* typestr;
-				
-				switch (typ) {
-					case MACH_PLUGIN:
-						typestr = "psy";
-					break;
-					case MACH_VST:
-						typestr = "vst";
-					break;
-					default:
-						typestr = "int";
-					break;
-				}				
-				ui_textout(self->g,
-					self->cpx - 7 * self->avgcharwidth,
-					self->cpy + self->dy + 2,
-					typestr,
-					strlen(typestr));				
-			}
-			if (self->cpx >= self->numcols * self->columnwidth) {
-				self->cpx = 0;
-				self->cpy += self->lineheight;
-			}
-		}		
-	}
-	return 1;
-}
-
-
-void OnPluginsSize(PluginsView* self, ui_component* sender, ui_size* size)
+void pluginname(Properties* property, char* txt)
 {
-	self->cx = size->width;
-	self->cy = size->height;
-
-	ui_component_setverticalscrollrange(&self->component, 0, 100);
+	Properties* p;
+	
+	p = properties_read(property, "name");	
+	_snprintf(txt, 128, "%s", 
+		p && properties_valuestring(p) != '\0'
+		? properties_valuestring(p)
+		: properties_key(property));	
 }
 
-void OnScroll(PluginsView* self, ui_component* sender, int cx, int cy)
+int plugintype(Properties* property, char* txt)
+{	
+	int rv;
+	
+	rv = properties_int(property, "type", -1);
+	switch (rv) {
+		case MACH_PLUGIN:
+			strcpy(txt, "psy");
+		break;
+		case MACH_VST:
+			strcpy(txt, "vst");
+		break;
+		default:
+			strcpy(txt, "int");
+		break;
+	}
+	return rv;
+}
+
+int pluginmode(Properties* property, char* txt)
+{			
+	int rv;
+
+	rv = properties_int(property, "mode", -1);
+	strcpy(txt, rv & 3 ? "gn" : "fx");
+	return rv;
+}
+
+void pluginsview_onsize(PluginsView* self, ui_component* sender, ui_size* size)
+{
+	pluginsview_adjustscroll(self);
+}
+
+void pluginsview_adjustscroll(PluginsView* self)
+{
+	Properties* p;
+
+	p = workspace_pluginlist(self->workspace);
+	if (p) {
+		ui_size size;
+		int visilines;
+		int currlines;
+
+		pluginsview_computetextsizes(self);
+		size = ui_component_size(&self->component);		
+		visilines = size.height / self->lineheight;
+		currlines = properties_size(p) / self->numcols;
+		self->component.scrollstepy = self->lineheight;
+		ui_component_setverticalscrollrange(&self->component,
+			0, currlines - visilines);
+	}
+}
+
+void pluginsview_onscroll(PluginsView* self, ui_component* sender, 
+	int cx, int cy)
 {
 	self->dy += cy;
 }
 
-void OnMouseDown(PluginsView* self, ui_component* sender, int x, int y, int button)
+void pluginsview_onmousedown(PluginsView* self, ui_component* sender,
+	int x, int y, int button)
 {
-	HitTest(self, x, y);	
+	pluginsview_hittest(self, x, y);
+	ui_invalidate(&self->component);
 	signal_emit(&self->signal_changed, self, 1, self->selectedplugin);
 	ui_component_setfocus(&self->component);
 }
 
-void HitTest(PluginsView* self, int x, int y)
+void pluginsview_hittest(PluginsView* self, int x, int y)
 {	
-	Properties* plugins;
+	Properties* p;
+	int cpx = 0;
+	int cpy = 0;
+	
+	pluginsview_computetextsizes(self);
+	p = workspace_pluginlist(self->workspace);
+	if (p) {			
+		for (p = p->children ; p != 0; p = p->next) {
+			ui_rectangle r;
 
-	plugins = workspace_pluginlist(self->workspace);
-	if (plugins) {
-		ComputeTextSizes(self);
-		self->pluginpos = (x / self->columnwidth) + 
-			self->numcols * ((y - self->dy) / self->lineheight);
-		self->count = 0;
-		properties_enumerate(plugins, self,OnPropertiesCount);
-		ui_invalidate(&self->component);
-	}	
+			ui_setrectangle(&r, cpx, cpy, self->columnwidth, self->lineheight);
+			if (ui_rectangle_intersect(&r, x, y - self->dy)) {
+				self->selectedplugin = p;
+				break;
+			}		
+			cpx += self->columnwidth;
+			if (cpx >= self->numcols * self->columnwidth) {
+				cpx = 0;
+				cpy += self->lineheight;
+			}
+		}
+	}
 }
 
-int OnPropertiesCount(PluginsView* self, Properties* property, int level)
-{
-	if (self->pluginpos == self->count && level == 1) {
-		self->selectedplugin = property;
-		return 0;
-	}
-	if (level == 1) {
-		++self->count;
-	}
-	return 1;
-}
-
-void OnMouseDoubleClick(PluginsView* self, ui_component* sender, int x, int y, int button)
+void pluginsview_onmousedoubleclick(PluginsView* self, ui_component* sender,
+	int x, int y, int button)
 {
 	if (self->selectedplugin) {
 		signal_emit(&self->signal_selected, self, 1, self->selectedplugin);
@@ -224,32 +287,40 @@ void OnMouseDoubleClick(PluginsView* self, ui_component* sender, int x, int y, i
 	}	
 }
 
-void OnPluginsKeyDown(PluginsView* self, ui_component* sender, int keycode, int keydata)
+void pluginsview_onkeydown(PluginsView* self, ui_component* sender, 
+	int keycode, int keydata)
 {
 	if (keycode == VK_ESCAPE) {	
 		self->component.propagateevent = 1;
 	}
 }
 
-void onplugincachechanged(PluginsView* self, PluginCatcher* sender)
+void pluginsview_onplugincachechanged(PluginsView* self, PluginCatcher* sender)
 {
 	self->dy = 0;
+	self->selectedplugin = 0;
+	pluginsview_adjustscroll(self);	
 	ui_invalidate(&self->component);
 }
 
-void InitNewMachine(NewMachine* self, ui_component* parent, Workspace* workspace)
+void newmachine_init(NewMachine* self, ui_component* parent,
+	Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	InitPluginsView(&self->pluginsview, &self->component, workspace);
-	InitNewMachineBar(&self->bar, &self->component, workspace);
-	InitNewMachineDetail(&self->detail, &self->component);
-	signal_connect(&self->component.signal_size, self, OnSize);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	ui_component_enablealign(&self->component);	
+	newmachinedetail_init(&self->detail, &self->component, workspace);
+	ui_component_setalign(&self->detail.component, UI_ALIGN_LEFT);	
+	pluginsview_init(&self->pluginsview, &self->component, workspace);
+	ui_component_setalign(&self->pluginsview.component, UI_ALIGN_CLIENT);	
 	signal_connect(&self->pluginsview.signal_changed, self,
-		onpluginselectionchanged);
+		newmachine_onpluginselected);
+	signal_connect(&workspace->plugincatcher.signal_changed, self,
+		newmachine_onplugincachechanged);
 }
 
-void onpluginselectionchanged(NewMachine* self, ui_component* parent, Properties* selected)
+void newmachine_onpluginselected(NewMachine* self, ui_component* parent,
+	Properties* selected)
 {
 	char* text;
 	char detail[1024];
@@ -259,34 +330,18 @@ void onpluginselectionchanged(NewMachine* self, ui_component* parent, Properties
 	properties_readstring(selected, "desc", &text, "");
 	strcat(detail, "  ");
 	strcat(detail, text);
-	ui_label_settext(&self->detail.desclabel, detail); 
+	ui_label_settext(&self->detail.desclabel, detail);
 }
 
-void OnKeyDown(NewMachine* self, ui_component* sender, int keycode, int keydata)
+void newmachine_onplugincachechanged(NewMachine* self, PluginCatcher* sender)
+{
+	newmachinedetail_reset(&self->detail);
+}
+
+void newmachine_onkeydown(NewMachine* self, ui_component* sender,
+	int keycode, int keydata)
 {
 	if (keycode == VK_ESCAPE) {	
 		self->component.propagateevent = 1;
 	}
-}
-
-void OnSize(NewMachine* self, ui_component* sender, ui_size* size)
-{	
-	ui_size barsize;
-	ui_size detailsize;
-	
-	barsize.height = 20;
-	detailsize.height = 100;
-	ui_component_resize(&self->pluginsview.component,
-		size->width,
-		size->height - barsize.height - detailsize.height);
-	ui_component_setposition(&self->detail.component,
-		0,
-		size->height - barsize.height - detailsize.height,		 
-		size->width, 
-		detailsize.height);
-	ui_component_setposition(&self->bar.component,
-		0,
-		size->height - barsize.height,		 
-		size->width, 
-		barsize.height);
 }

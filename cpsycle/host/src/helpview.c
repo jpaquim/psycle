@@ -11,15 +11,13 @@ static void OnHide(HelpView*, ui_component* sender);
 void InitHelpView(HelpView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
 {
-	ui_component_init(&self->component, parent);		
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
-	ui_notebook_init(&self->notebook, &self->component);
-	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);	
+	ui_notebook_init(&self->notebook, &self->component);	
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);	
 	InitAbout(&self->about, &self->notebook.component);
 	greet_init(&self->greet, &self->notebook.component);
-	InitTabBar(&self->tabbar, tabbarparent);
+	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setposition(&self->tabbar.component, 450, 0, 160, 20);	
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "About");

@@ -53,7 +53,7 @@ typedef struct {
 	ui_font font;
 } MachineSkin;
 
-typedef struct {
+typedef struct {	
 	int x;
 	int y;
 	char* editname;
@@ -62,6 +62,7 @@ typedef struct {
 	MachineCoords* coords;
 	MachineSkin* skin;
 	Machine* machine;
+	unsigned int slot;
 	MachineFrame* frame;
 	ParamView* paramview;
 	Vst2View* vst2view;

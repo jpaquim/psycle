@@ -11,8 +11,7 @@ static void onselectionchanged(StepBox*, ui_component* sender, int index);
 void stepbox_init(StepBox* self, ui_component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);	
 	ui_label_init(&self->header, &self->component);	
