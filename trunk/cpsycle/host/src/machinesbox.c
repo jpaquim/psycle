@@ -56,7 +56,8 @@ void BuildMachinesList(MachinesBox* self)
 	} else {
 		TableIterator it;
 	
-		for (it = machines_begin(self->machines); !tableiterator_equal(&it, table_end());
+		for (it = machines_begin(self->machines); 
+				!tableiterator_equal(&it, table_end());
 			tableiterator_inc(&it)) {			
 			Machine* machine;
 
@@ -75,7 +76,7 @@ void InsertSlot(MachinesBox* self, int slot, Machine* machine)
 		if (machine && machine->info(machine)) {
 			strcat(buffer, machine->info(machine)->ShortName); 
 		} else {
-			strcat(buffer, "crashed"); 
+			strcat(buffer, ""); 
 		}
 		listboxindex = ui_listbox_addstring(&self->machinelist, buffer);
 		table_insert(&self->listboxslots, listboxindex, (void*)slot);

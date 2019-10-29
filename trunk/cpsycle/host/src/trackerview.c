@@ -31,7 +31,7 @@ static void trackergrid_onscroll(TrackerGrid*, ui_component* sender,
 static int trackergrid_testcursor(TrackerGrid*, unsigned int track,
 	big_beat_t offset, unsigned int subline);
 static int trackergrid_testplaybar(TrackerGrid* self, big_beat_t offset);
-static void trackergrid_clipblock(TrackerGrid*, ui_graphics*,
+static void trackergrid_clipblock(TrackerGrid*, const ui_rectangle*,
 	TrackerGridBlock*);
 static void trackergrid_drawdigit(TrackerGrid*, ui_graphics*, int digit,
 	int col, int x, int y);
@@ -74,6 +74,7 @@ static void trackerview_initinputs(TrackerView*);
 static void trackerview_invalidatecursor(TrackerView*, const TrackerCursor*);
 static void trackerview_invalidateline(TrackerView*, beat_t offset);
 static void trackerview_initdefaultskin(TrackerView*);
+static int trackerview_offsettoscreenline(TrackerView*, big_beat_t);
 
 static void trackerheader_ondraw(TrackerHeader*, ui_component* sender, ui_graphics* g);
 
@@ -277,7 +278,7 @@ void trackergrid_ondraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 	if (self->view->pattern) {
 		self->bpl = 1.0 / player_lpb(self->player);
 		ui_setfont(g, &self->view->font);		
-		trackergrid_clipblock(self, g, &clip);
+		trackergrid_clipblock(self, &g->clip, &clip);
 		trackergrid_drawbackground(self, g, &clip);
 		trackergrid_drawevents(self, g, &clip);
 	} else {
@@ -323,7 +324,7 @@ big_beat_t trackergrid_offset(TrackerGrid* self, int y, unsigned int* lines,
 					break;
 				}
 			} while (curr);
-			if (!curr || (*lines + *sublines >= count)) {
+			if ((*lines + *sublines >= count)) {
 				break;
 			}
 			++(*lines);
@@ -336,23 +337,26 @@ big_beat_t trackergrid_offset(TrackerGrid* self, int y, unsigned int* lines,
 	return offset + remaininglines * self->bpl;
 }
 
-void trackergrid_clipblock(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* block)
+void trackergrid_clipblock(TrackerGrid* self, const ui_rectangle* clip,
+	TrackerGridBlock* block)
 {	
 	int lines;
 	int sublines;
 	int subline;
-	block->topleft.track = (g->clip.left - self->dx) / self->trackwidth;
+	block->topleft.track = (clip->left - self->dx) / self->trackwidth;
 	block->topleft.col = 0;
-	block->topleft.offset =  trackergrid_offset(self, g->clip.top - self->dy, &lines, &sublines, &subline);
+	block->topleft.offset =  trackergrid_offset(self, clip->top - self->dy,
+		&lines, &sublines, &subline);
 	block->topleft.line = lines;
 	block->topleft.subline = subline;
 	block->topleft.totallines = lines + sublines;
-	block->bottomright.track = (g->clip.right - self->dx + self->trackwidth) / self->trackwidth;
+	block->bottomright.track = (clip->right - self->dx + self->trackwidth) / self->trackwidth;
 	if (block->bottomright.track > self->numtracks) {
 		block->bottomright.track = self->numtracks;
 	}
 	block->bottomright.col = 0;
-	block->bottomright.offset = trackergrid_offset(self, g->clip.bottom - self->dy, &lines, &sublines, &subline);
+	block->bottomright.offset = trackergrid_offset(self, clip->bottom - self->dy,
+		&lines, &sublines, &subline);
 	block->bottomright.line = lines;
 	block->bottomright.totallines = lines + sublines;
 	block->bottomright.subline = subline;
@@ -851,7 +855,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender, int keycode,
 			(beat_t)self->grid.cursor.offset, self->grid.cursor.subline, (beat_t)self->grid.bpl, &prev);
 		if (node) {
 			pattern_remove(self->pattern, node);
-			ui_invalidate(&self->component);
+			ui_invalidate(&self->linenumbers.component);
 		}
 
 	} else
@@ -867,7 +871,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender, int keycode,
 			pattern_insert(self->pattern, prev, 0, (beat_t)offset, &ev);			
 			trackergrid_adjustscroll(&self->grid);
 			workspace_seteditposition(self->workspace, self->grid.cursor);
-			ui_invalidate(&self->component);			
+			ui_invalidate(&self->linenumbers.component);
 		}	
 	} else {
 		if (self->grid.cursor.col != TRACKER_COLUMN_NOTE) {			
@@ -1016,13 +1020,14 @@ void enterdigit(int digit, int newval, unsigned char* val)
 
 void trackerview_invalidatecursor(TrackerView* self, const TrackerCursor* cursor)
 {
-	int line;	
-	ui_rectangle r;	
-	
-	line = (int) (cursor->offset / self->grid.bpl);	
+	int line;		
+	ui_rectangle r;		
+
+	line = trackerview_offsettoscreenline(self, cursor->offset)
+		+ cursor->subline;	
 	ui_setrectangle(&r,
 		cursor->track * self->grid.trackwidth + self->grid.dx,
-		self->grid.lineheight * line + self->grid.dy,
+		self->grid.lineheight * line + self->grid.dy,		
 		self->grid.trackwidth,
 		self->grid.lineheight);
 	ui_invalidaterect(&self->grid.component, &r);
@@ -1088,7 +1093,7 @@ void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, int x, int
 	}
 }
 
-void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspace)
+void trackerview_init(TrackerView* self, ui_component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
 	self->opcount = 0;
@@ -1097,11 +1102,12 @@ void InitTrackerView(TrackerView* self, ui_component* parent, Workspace* workspa
 	self->lastplayposition = -1.f;
 	self->sequenceentryoffset = 0.f;
 	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	trackerview_initinputs(self);
 	self->pattern = 0;
 	ui_bitmap_loadresource(&self->skin.bitmap, IDB_HEADERSKIN);
 	trackerview_initdefaultskin(self);	
-	InitTrackerHeader(&self->header, &self->component);	
+	trackerheader_init(&self->header, &self->component);	
 	self->header.numtracks = player_numsongtracks(&workspace->player);
 	self->header.trackwidth = self->skin.headercoords.background.destwidth;
 	self->linenumbers.skin = &self->skin;
@@ -1193,24 +1199,27 @@ void trackerview_align(TrackerView* self, ui_component* sender)
 	ui_size size;
 	int width;
 	int height;
-	int headerheight = 20;
+	int headerheight = 30;
 	int linenumberwidth = self->showlinenumbers ? 45 :0;
 
 	size = ui_component_size(&self->component);
 	width = size.width;
 	height = size.height;
-	ui_component_move(&self->header.component, linenumberwidth, 0);
-	ui_component_resize(&self->header.component, width - linenumberwidth, headerheight);
-	ui_component_move(&self->grid.component, linenumberwidth, headerheight);
-	ui_component_resize(&self->linenumberslabel.component, linenumberwidth, headerheight);
-	ui_component_resize(&self->grid.component, width - linenumberwidth, height - headerheight);
-	ui_component_move(&self->linenumbers.component, 0, headerheight);
-	ui_component_resize(&self->linenumbers.component, linenumberwidth, height - headerheight);
+	ui_component_setposition(&self->header.component, linenumberwidth, 0,
+		width - linenumberwidth, headerheight);
+	ui_component_setposition(&self->grid.component, linenumberwidth, headerheight,
+		width - linenumberwidth, height - headerheight);	
+	ui_component_setposition(&self->linenumbers.component, 0, headerheight,
+		linenumberwidth, height - headerheight);
+	ui_component_resize(&self->linenumberslabel.component,
+		linenumberwidth, headerheight);	
 }
 
-void InitTrackerHeader(TrackerHeader* self, ui_component* parent)
+void trackerheader_init(TrackerHeader* self, ui_component* parent)
 {		
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	self->component.doublebuffered = 1;
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	signal_connect(&self->component.signal_draw, self, trackerheader_ondraw);
 	self->dx = 0;
 	self->numtracks = 16;
@@ -1272,7 +1281,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
 		TrackerGridBlock clip;
 
 		size = ui_component_size(&self->component);
-		trackergrid_clipblock(&self->view->grid, g, &clip);		
+		trackergrid_clipblock(&self->view->grid, &g->clip, &clip);
 		ui_setfont(g, &self->view->font);				
 		cpy = (clip.topleft.totallines - clip.topleft.subline) * self->lineheight + self->dy;
 		offset = clip.topleft.offset;				
@@ -1409,6 +1418,57 @@ int trackerview_numlines(TrackerView* self)
 	return lines + sublines + remaininglines;
 }
 
+int trackerview_offsettoscreenline(TrackerView* self, big_beat_t offs)
+{
+	int lines = 0;
+	int sublines = 0;	
+	int remaininglines = 0;
+	double offset = 0;
+	
+	if (!self->pattern) {
+		return 0;
+	} else {		
+		int first = 1;		
+		PatternNode* curr = self->pattern->events;
+		int subline = 0;
+
+		while (curr && offset < self->pattern->length) {		
+			PatternEntry* entry;		
+			first = 1;
+			do {
+				entry = (PatternEntry*)curr->entry;			
+				if ((entry->offset >= offset) && (entry->offset < offset + self->grid.bpl))
+				{						
+					if (entry->track == 0 && !first) {
+						++(sublines);
+						++subline;
+					}
+					if (entry->offset >= offs) {
+						break;
+					}
+					first = 0;
+					curr = curr->next;
+				} else {
+					subline = 0;
+					break;
+				}	
+			} while (curr);			
+			if (offset >= offs) {
+				subline = 0;
+				break;
+			}
+			++(lines);
+			subline = 0;			
+			offset += self->grid.bpl;			
+		}
+	}			
+	offset = offs - offset;
+	if (offset > 0) {		
+		remaininglines = (int)(offset * player_lpb(self->grid.player));		
+	}
+	return lines + sublines + remaininglines;
+}
+
 void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	Properties* property)
 {
@@ -1467,4 +1527,19 @@ void trackerview_initinputs(TrackerView* self)
 	inputs_define(&self->inputs, encodeinput(VK_END, 0, 0), CMD_NAVBOTTOM);	
 	inputs_define(&self->inputs, encodeinput(VK_TAB, 1, 0), CMD_COLUMNPREV);
 	inputs_define(&self->inputs, encodeinput(VK_TAB, 0, 0), CMD_COLUMNNEXT);
+}
+
+void trackerview_setpattern(TrackerView* self, Pattern* pattern)
+{
+	self->pattern = pattern;
+	if (pattern) {
+		self->opcount = pattern->opcount;
+	}
+	self->grid.dx = 0;
+	self->grid.dy = 0;
+	self->header.dx = 0;
+	self->linenumbers.dy = 0;
+	trackergrid_adjustscroll(&self->grid);
+	ui_invalidate(&self->linenumbers.component);
+	ui_invalidate(&self->header.component);	
 }

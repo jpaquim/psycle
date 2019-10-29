@@ -5,6 +5,7 @@
 
 #include "patternview.h"
 
+void patternview_onsplit(PatternView*, ui_component* sender);
 static void OnSize(PatternView*, ui_component* sender, ui_size*);
 static void OnShow(PatternView*, ui_component* sender);
 static void OnHide(PatternView*, ui_component* sender);
@@ -24,8 +25,7 @@ void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Worksp
 {		
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
-	self->component.doublebuffered = 1;
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	self->component.doublebuffered = 1;	
 	ui_component_resize(&self->component, 300, 20);
 	signal_connect(&self->component.signal_draw, self, OnStatusDraw);
 	signal_connect(&workspace->signal_editpositionchanged, self, OnPatternEditPositionChanged);
@@ -93,7 +93,6 @@ void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_siz
 void InitPatternViewBar(PatternViewBar* self, ui_component* parent, Workspace* workspace)
 {		
 	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);		
 	ui_component_enablealign(&self->component);	
 	stepbox_init(&self->step, &self->component, workspace);
 	InitPatternViewStatus(&self->status, &self->component, workspace);
@@ -107,35 +106,38 @@ void InitPatternViewBar(PatternViewBar* self, ui_component* parent, Workspace* w
 	}
 }
 
-void InitPatternView(PatternView* self, 
+void patternview_init(PatternView* self, 
 		ui_component* parent,
 		ui_component* tabbarparent,		
 		Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
-	ui_notebook_init(&self->notebook, &self->component);
-	InitTrackerView(&self->trackerview, &self->notebook.component, workspace);
-	signal_connect(&self->component.signal_size, self, OnSize);
-	PatternViewSetPattern(self, patterns_at(&workspace->song->patterns, 0));	
-	InitPianoroll(&self->pianoroll, &self->notebook.component);	
-	self->pianoroll.pattern = patterns_at(&workspace->song->patterns, 0);
-	ui_notebook_setpage(&self->notebook, 0);
-	InitPatternProperties(&self->properties, &self->notebook.component, 0);	
-	ui_component_hide(&self->properties.component);	
-	signal_connect(&self->properties.closebutton.signal_clicked, self, OnPropertiesClose);
-	signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);
+	ui_notebook_init(&self->notebook, &self->component);	
+	trackerview_init(&self->trackerview, &self->notebook.component, workspace);
+	signal_connect(&self->component.signal_size, self, OnSize);	
+	pianoroll_init(&self->pianoroll, &self->notebook.component, workspace);
+	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
+	// InitPatternProperties(&self->properties, &self->notebook.component, 0);
+	// signal_connect(&self->properties.closebutton.signal_clicked, self, OnPropertiesClose);
+	// signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);	
 	// Tabbar
-	InitTabBar(&self->tabbar, tabbarparent);
+	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_move(&self->tabbar.component, 450, 0);
-	ui_component_resize(&self->tabbar.component, 160, 20);
+	ui_component_resize(&self->tabbar.component, 100, 20);
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "Tracker");
 	tabbar_append(&self->tabbar, "Pianoroll");
-	tabbar_append(&self->tabbar, "Properties");
-	self->tabbar.selected = 0;		
+	// tabbar_append(&self->tabbar, "Properties");	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
+	tabbar_select(&self->tabbar, 0);
+	ui_button_init(&self->split, tabbarparent);
+	ui_button_settext(&self->split, "Split");
+	ui_component_setposition(&self->split.component, 450 + 100, 0, 50, 12);
+	ui_component_hide(&self->split.component);
+	signal_connect(&self->split.signal_clicked, self, patternview_onsplit);
 	signal_connect(&self->component.signal_show, self, OnShow);
 	signal_connect(&self->component.signal_hide, self, OnHide);
 	signal_connect(&workspace->player.signal_lpbchanged, self, OnLpbChanged);
@@ -145,20 +147,11 @@ void InitPatternView(PatternView* self,
 	self->lpb = player_lpb(&workspace->player);
 }
 
-void PatternViewSetPattern(PatternView* self, Pattern* pattern)
+void patternview_setpattern(PatternView* self, Pattern* pattern)
 {	
-	self->trackerview.pattern = pattern;
-	if (pattern) {
-		self->trackerview.opcount = pattern->opcount;
-	}
-	self->trackerview.grid.dx = 0;
-	self->trackerview.grid.dy = 0;
-	self->trackerview.header.dx = 0;
-	self->trackerview.linenumbers.dy = 0;
-	PatternPropertiesSetPattern(&self->properties, pattern);
-//	AdjustScrollranges(&self->trackerview.grid);
-	ui_invalidate(&self->trackerview.linenumbers.component);
-	ui_invalidate(&self->trackerview.header.component);	
+	trackerview_setpattern(&self->trackerview, pattern);
+	pianoroll_setpattern(&self->pianoroll, pattern);
+	// PatternPropertiesSetPattern(&self->properties, pattern);
 }
 
 void OnSize(PatternView* self, ui_component* sender, ui_size* size)
@@ -168,12 +161,27 @@ void OnSize(PatternView* self, ui_component* sender, ui_size* size)
 
 void OnShow(PatternView* self, ui_component* sender)
 {			
-	ui_component_show(&self->tabbar.component);		
+	ui_component_show(&self->tabbar.component);
+	ui_component_show(&self->split.component);
 }
 
 void OnHide(PatternView* self, ui_component* sender)
 {	
-	ui_component_hide(&self->tabbar.component);				
+	ui_component_hide(&self->tabbar.component);
+	ui_component_hide(&self->split.component);			
+}
+
+void patternview_onsplit(PatternView* self, ui_component* sender)
+{
+	if (self->notebook.splitbar.hwnd) {
+		ui_notebook_full(&self->notebook);
+		ui_button_settext(&self->split, "Split");
+		ui_invalidate(&self->split.component);
+	} else {
+		ui_notebook_split(&self->notebook);
+		ui_button_settext(&self->split, "Full");
+		ui_invalidate(&self->split.component);
+	}
 }
 
 void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
@@ -199,7 +207,7 @@ void OnSongChanged(PatternView* self, Workspace* workspace)
 {
 	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
 		self, OnEditPositionChanged);
-	PatternViewSetPattern(self, patterns_at(&workspace->song->patterns, 0));	
+	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
 	self->trackerview.sequenceentryoffset = 0.f;
 	self->pianoroll.pattern = self->trackerview.pattern;	
 	ui_invalidate(&self->component);
@@ -211,36 +219,23 @@ void OnEditPositionChanged(PatternView* self, Sequence* sender)
 	
 	entry = sequenceposition_entry(&sender->editposition);
 	if (entry) {			
-		PatternViewSetPattern(self,
+		patternview_setpattern(self,
 			patterns_at(&self->trackerview.workspace->song->patterns,
 			entry->pattern));
 		self->trackerview.sequenceentryoffset = entry->offset;
 	} else {
-		PatternViewSetPattern(self, 0);
+		patternview_setpattern(self, 0);		
 		self->trackerview.sequenceentryoffset = 0.f;
 	}
 	ui_invalidate(&self->component);
 }
 
 void OnPropertiesClose(PatternView* self, ui_component* sender)
-{
-	// ui_size size = ui_component_size(&self->trackerview.component);
-	// OnViewSize(self->t, &self->component, size.width, size.height);	
+{	
 }
 
 void OnPropertiesApply(PatternView* self, ui_component* sender)
 {
-	/*SCROLLINFO		si;	
-	ui_size size = ui_component_size(&self->component);	
-	OnViewSize(self, &self->grid.component, size.width, size.height);	
-	size = ui_component_size(&self->grid.component);
-	AdjustScrollranges(&self->grid);	
-	si.cbSize = sizeof (si) ;
-    si.fMask  = SIF_ALL ;
-    GetScrollInfo (self->grid.component.hwnd, SB_VERT, &si) ;	
-	self->grid.dy = -si.nPos * self->grid.lineheight;	
-	self->linenumbers.dy = self->grid.dy;
-	ui_invalidate(&self->component);*/
 }
 
 void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata)

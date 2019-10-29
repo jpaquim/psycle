@@ -5,8 +5,8 @@
 #define SKINGRAPHICS_H
 
 #include "skincoord.h"
-#include <graphics.h>
+#include <uigraphics.h>
 
-void skin_blitpart(ui_graphics*, ui_bitmap*, int x, int y, SkinCoord* coord);
+void skin_blitpart(ui_graphics*, ui_bitmap*, int x, int y, SkinCoord*);
 
 #endif

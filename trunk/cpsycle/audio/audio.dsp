@@ -131,19 +131,6 @@ SOURCE=.\src\duplicatormap.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\event.c
-
-!IF  "$(CFG)" == "audio - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
-
-# ADD CPP /GR
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\eventdrivers.c
 # End Source File
 # Begin Source File
@@ -313,6 +300,10 @@ SOURCE=.\src\pattern.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\patternevent.c
 # End Source File
 # Begin Source File
 
@@ -568,10 +559,6 @@ SOURCE=.\src\duplicatormap.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\event.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\eventdrivers.h
 # End Source File
 # Begin Source File
@@ -633,6 +620,10 @@ SOURCE=.\src\mixer.h
 # Begin Source File
 
 SOURCE=.\src\pattern.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\patternevent.h
 # End Source File
 # Begin Source File
 

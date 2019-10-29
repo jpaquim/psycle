@@ -14,6 +14,6 @@ typedef struct {
 	Workspace* workspace;
 } UndoRedoBar;
 
-void InitUndoRedoBar(UndoRedoBar*, ui_component* parent, Workspace*);
+void undoredobar_init(UndoRedoBar*, ui_component* parent, Workspace*);
 
 #endif

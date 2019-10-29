@@ -192,7 +192,7 @@ void processevents(VstPlugin* self, BufferContext* bc)
 		PatternEntry* entry = (PatternEntry*)p->entry;		
 		if (entry->event.cmd == SET_PANNING) {
 			// todo split work
-			machine_setpanning(&self->machine, 
+			self->machine.setpanning(&self->machine, 
 					entry->event.parameter / 255.f);
 		} else
 		if (entry->event.note == NOTECOMMANDS_TWEAK) {

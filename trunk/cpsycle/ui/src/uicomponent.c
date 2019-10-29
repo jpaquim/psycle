@@ -228,7 +228,7 @@ void ui_component_init_base(ui_component* self) {
 	self->defaultpropagation = 0;	
 	self->visible = 1;
 	self->doublebuffered = 0;
-	self->backgroundmode = BACKGROUND_NONE;
+	self->backgroundmode = BACKGROUND_SET;
 	self->backgroundcolor = defaultbackgroundcolor;
 	self->background = 0;
 	self->color = defaultcolor;
@@ -335,7 +335,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_SIZE:			
 				{
 					ui_size size;
-
 					if (component->alignchildren == 1) {
 						ui_component_align(component);
 					}
@@ -685,6 +684,23 @@ ui_size ui_component_size(ui_component* self)
 	return rv;
 }
 
+ui_rectangle ui_component_position(ui_component* self)
+{   
+	ui_rectangle rv;
+	RECT rc;
+	RECT prc;	
+	HWND pHwnd;
+	    	
+    GetWindowRect(self->hwnd, &rc);
+	pHwnd = GetParent(self->hwnd);
+	GetWindowRect(pHwnd, &prc);	
+	rv.left = rc.left - prc.left;
+	rv.top = rc.top - prc.top;
+	rv.right =  rv.left + (rc.right - rc.left);
+	rv.bottom = rv.top + (rc.bottom - rc.top);
+	return rv;
+}
+
 ui_size ui_component_frame_size(ui_component* self)
 {   
 	ui_size rv;
@@ -775,8 +791,8 @@ void ui_component_setverticalscrollrange(ui_component* self, int min, int max)
 {
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
-	si.nMin = min;
-	si.nMax = max;
+	si.nMin = max(0, min);
+	si.nMax = max(si.nMin, max);
 	si.fMask = SIF_RANGE;	
 	SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);
 }
@@ -1061,9 +1077,9 @@ void ui_component_align(ui_component* self)
 	}
 	if (client) {
 		ui_component_setposition(client,
-					client->margin.left,
+					cpx + client->margin.left,
 					cpy + client->margin.top,
-					size.width - client->margin.left - client->margin.right,
+					size.width - cpx - client->margin.left - client->margin.right,
 					size.height - cpy - client->margin.top - client->margin.bottom);
 	}
 	list_free(q);
@@ -1318,4 +1334,16 @@ TEXTMETRIC ui_component_textmetric(ui_component* self)
 	RestoreDC (hdc, -1);	
 	ReleaseDC(NULL, hdc);
 	return tm;
+}
+
+
+void ui_component_seticonressource(ui_component* self, int ressourceid)
+{
+#if defined(_WIN64)	
+	SetClassLongPtr(self->hwnd, GCLP_HICON, 
+		 LoadIcon(appInstance, MAKEINTRESOURCE(ressourceid)));
+#else	
+	SetClassLong(self->hwnd, GCL_HICON, 
+		 LoadIcon(appInstance, MAKEINTRESOURCE(ressourceid)));
+#endif
 }

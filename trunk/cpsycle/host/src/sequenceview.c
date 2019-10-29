@@ -43,7 +43,7 @@ void InitSequenceView(SequenceView* self, ui_component* parent,
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	InitSequenceListView(&self->listview, &self->component, 
 		&workspace->song->sequence, &workspace->song->patterns);
@@ -73,8 +73,6 @@ void InitSequenceButtons(SequenceButtons* self, ui_component* parent)
 {		
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-
 	ui_button_init(&self->incpattern, &self->component);	
 	ui_button_settext(&self->incpattern, "+");
 	ui_button_init(&self->insertentry, &self->component);	
@@ -184,8 +182,7 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent,
 {				
 	self->sequence = sequence;
 	self->patterns = patterns;
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_mousedown, self, OnListViewMouseDown);
@@ -295,26 +292,26 @@ void OnSize(SequenceView* self, ui_component* sender, ui_size* size)
 	ui_size durationsize = ui_component_size(&self->duration.component);
 		
 	ui_component_setposition(&self->buttons.component,
-		0, 0, size->width - 3, buttonssize.height);
+		0, 0, size->width, buttonssize.height);
 	ui_component_setposition(&self->listview.component, 
 		0, buttonssize.height,
-		size->width - 3,
-		size->height - buttonssize.height - durationsize.height - 40 - 3);
+		size->width,
+		size->height - buttonssize.height - durationsize.height - 40);
 	AdjustScrollBars(&self->listview);
 	ui_component_setposition(&self->duration.component, 
 		0,
 		size->height - durationsize.height - 40,
-		size->width - 3,
+		size->width,
 		durationsize.height);
 	ui_component_setposition(&self->followsong.component, 
 		0,
 		size->height - 40,
-		size->width - 3,
+		size->width,
 		20);
 	ui_component_setposition(&self->shownames.component, 
 		0,
 		size->height - 20,
-		size->width - 3,
+		size->width,
 		20);
 }
 
@@ -525,8 +522,7 @@ void InitSequenceViewDuration(SequenceViewDuration* self, ui_component* parent,
 {
 	self->sequence = sequence;
 	ui_component_init(&self->component, parent);
-	ui_component_resize(&self->component, 100, 20);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_resize(&self->component, 100, 20);	
 	signal_connect(&self->component.signal_size, self, OnDurationSize);	
 	ui_label_init(&self->desc, &self->component);
 	ui_label_settext(&self->desc, "Duration");

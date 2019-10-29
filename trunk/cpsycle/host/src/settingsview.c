@@ -43,8 +43,7 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	ui_component_init(&self->component, parent);
 	ui_component_init(&self->client, &self->component);
 	self->client.doublebuffered = 1;
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
-	ui_component_setbackgroundmode(&self->client, BACKGROUND_SET);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	ui_component_showverticalscrollbar(&self->client);
 	signal_connect(&self->client.signal_destroy, self, OnDestroy);
 	signal_connect(&self->client.signal_draw, self, OnDraw);
@@ -61,7 +60,7 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	inputdefiner_init(&self->inputdefiner, &self->client);	
 	ui_component_hide(&self->inputdefiner.component);		
 	signal_init(&self->signal_changed);
-	InitTabBar(&self->tabbar, &self->component);
+	tabbar_init(&self->tabbar, &self->component);
 	self->tabbar.tabalignment = UI_ALIGN_RIGHT;	
 	ui_component_resize(&self->tabbar.component, 130, 0);	
 	AppendTabbarSections(self);	

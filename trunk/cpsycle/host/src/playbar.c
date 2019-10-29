@@ -14,7 +14,6 @@ void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
 {			
 	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_button_init(&self->recordnotes, &self->component);
 	ui_button_settext(&self->recordnotes, "Record Notes");	
 	signal_connect(&self->recordnotes.signal_clicked, self, onrecordnotesclicked);
@@ -29,7 +28,7 @@ void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
 
 void playbar_initalign(PlayBar* self)
 {
-	ui_margin margin = { 0, 3, 3, 0 };
+	ui_margin margin = { 0, 5, 0, 0 };
 
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);

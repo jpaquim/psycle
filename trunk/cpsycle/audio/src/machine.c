@@ -37,11 +37,17 @@ static List* sequencerinsert(Machine* self, List* events) { return 0; }
 static void sequencerlinetick(Machine* self) { }
 static const CMachineInfo* info(Machine* self) { return &macinfo; }
 static void parametertweak(Machine* self, int par, int val) { }
+static void patterntweak(Machine* self, int par, int val)
+{
+	self->parametertweak(self, par, val);
+}
 static int parameterlabel(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
 static int parametername(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
 static int describevalue(Machine* self, char* txt, int param, int value) { return 0; }
 static int value(Machine* self, int const param) { return 0; }
 static void setvalue(Machine* self, int const param, int const value) { }
+static void setpanning(Machine*, amp_t);
+static amp_t panning(Machine*);
 static void dispose(Machine*);
 static int mode(Machine*);
 static unsigned int numinputs(Machine* self) { return 0; }
@@ -95,9 +101,12 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->sequencerinsert = sequencerinsert;
 	self->info = info;
 	self->parametertweak = parametertweak;
+	self->patterntweak = patterntweak;
 	self->describevalue = describevalue;
 	self->setvalue = setvalue;
 	self->value = value;
+	self->setpanning = setpanning;
+	self->panning = panning;
 	self->generateaudio = generateaudio;
 	self->numinputs = numinputs;
 	self->numoutputs = numoutputs;	
@@ -120,7 +129,7 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->setslot = setslot;
 	self->bypass = 0;
 	self->mute = 0;
-	self->panning = 0.5f;
+	self->pan = 0.5f;
 	self->ismixersend = 0;	
 	self->haseditor = haseditor;
 	self->seteditorhandle = seteditorhandle;
@@ -156,11 +165,14 @@ void work(Machine* self, BufferContext* bc)
 			bc->numsamples = restorenumsamples;
 		}
 		if (entry->event.cmd == SET_PANNING) {
-			machine_setpanning(self, entry->event.parameter / 255.f);
+			self->setpanning(self, 
+				entry->event.parameter / 255.f);
 		} else
 		if (entry->event.note == NOTECOMMANDS_TWEAK) {
-			self->parametertweak(self, entry->event.inst,
-				entry->event.parameter);
+			int value;
+			
+			value = (entry->event.cmd << 8) + entry->event.parameter;
+			self->patterntweak(self, entry->event.inst, value);
 		} else {
 			self->seqtick(self, entry->track, &entry->event);
 		}
@@ -226,14 +238,14 @@ void machine_unmute(Machine* self)
 	self->mute = 0;
 }
 
-float machine_panning(Machine* self)
+void setpanning(Machine* self, amp_t val)
 {
-	return self->panning;
+	self->pan = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
 }
 
-void machine_setpanning(Machine* self, float val)
+amp_t panning(Machine* self)
 {
-	self->panning = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
+	return self->pan;
 }
 
 Buffer* mix(Machine* self, int slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)

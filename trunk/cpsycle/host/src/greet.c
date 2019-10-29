@@ -14,7 +14,6 @@ static void OnOriginal(Greet*, ui_component* sender);
 void greet_init(Greet* self, ui_component* parent)
 {	
 	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	self->current = 1;
 	ui_component_settitle(&self->component, "Greetings and info");	

@@ -529,7 +529,15 @@ SOURCE=.\src\workspace.h
 # End Group
 # Begin Source File
 
+SOURCE=.\src\resources\icon1.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\resources\machine_skin.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\resources\macparam.ico
 # End Source File
 # Begin Source File
 
@@ -538,6 +546,10 @@ SOURCE=.\src\resources\mixer_skin.bmp
 # Begin Source File
 
 SOURCE=.\src\resources\pattern_header_skin.bmp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\resources\Project3.ico
 # End Source File
 # Begin Source File
 

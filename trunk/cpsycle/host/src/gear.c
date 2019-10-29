@@ -17,8 +17,7 @@ static void OnMaster(Gear*, ui_component* sender);
 void InitGearButtons(GearButtons* self, ui_component* parent)
 {
 	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	ui_component_enablealign(&self->component);	
 	ui_button_init(&self->createreplace, &self->component);
 	ui_button_settext(&self->createreplace, "Create/Replace");
 	ui_button_init(&self-> del, &self->component);
@@ -55,9 +54,8 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 	self->machines = &workspace->song->machines;
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	ui_component_init(&self->component, parent);
-	ui_component_resize(&self->component, 300, 0);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
-	InitTabBar(&self->tabbar, &self->component);	
+	ui_component_resize(&self->component, 300, 0);	
+	tabbar_init(&self->tabbar, &self->component);	
 	ui_component_move(&self->tabbar.component, 0, 0);
 	ui_component_resize(&self->tabbar.component, 0, 20);
 	tabbar_append(&self->tabbar, "Generators");

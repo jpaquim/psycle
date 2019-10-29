@@ -40,8 +40,12 @@ Song* song_alloc(void);
 /// allocates and initializes a song
 ///\return allocates and initializes a song
 Song* song_allocinit(MachineFactory*);
+/// disposes and deallocates the song
+void song_free(Song*);
 /// loads a song
 ///\return ui properties (coordinates, ...)
 void song_load(Song*, const char* path, Properties** workspaceproperties);
+/// saves a song
+void song_save(Song*, const char* path, Properties* workspaceproperties);
 
 #endif

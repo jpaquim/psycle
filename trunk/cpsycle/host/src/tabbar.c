@@ -27,10 +27,9 @@ void DisposeTab(Tab* self)
 	free(self->text);
 }
 
-void InitTabBar(TabBar* self, ui_component* parent)
+void tabbar_init(TabBar* self, ui_component* parent)
 {
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;	
 	ui_margin_init(&self->tabmargin, 0, 10, 0, 0);
 	signal_init(&self->signal_change);
@@ -68,6 +67,10 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 	int c = 0;
 	int cpx = 0;
 	int cpy = 0;
+	int cpxsel = 0;
+	int selwidth = 0;	
+	int cpxhover = 0;
+	int hoverwidth = 0;
 	ui_size size;
 
 	size = ui_component_size(&self->component);
@@ -87,11 +90,18 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 		Tab* tab;
 
 		tab = (Tab*)tabs->entry;
-		if (self->hover && self->hoverindex == c) {
-			ui_settextcolor(g, 0x00FFFFFF);
-		} else
 		if (self->selected == c) {
 			ui_settextcolor(g, 0x00B1C8B0);
+			cpxsel = cpx;
+			selwidth = tab->size.width;
+		}
+		if (self->hover && self->hoverindex == c && self->hoverindex != self->selected) {
+			ui_settextcolor(g, 0x00FFFFFF);
+			cpxhover = cpx;
+			hoverwidth = tab->size.width;
+		} else
+		if (self->selected == c) {
+			ui_settextcolor(g, 0x00B1C8B0);		
 		} else {
 			ui_settextcolor(g, 0x00D1C5B6);
 		}
@@ -107,8 +117,15 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 		}
 	}
 	ui_setcolor(g, 0x005F5F5F);		
-	if (self->tabalignment == UI_ALIGN_TOP) {
-		ui_drawline(g, 0, size.height - 2, cpx, size.height - 2);
+	if (self->tabalignment == UI_ALIGN_TOP) {		
+		ui_setcolor(g, 0x00B1C8B0);		
+		ui_drawline(g, cpxsel, size.height - 3, cpxsel + selwidth,
+			size.height - 3);		 
+		if (self->hover && self->hoverindex != self->selected) {		
+			ui_setcolor(g, 0x00FFFFFF);
+			ui_drawline(g, cpxhover, size.height - 3, cpxhover + hoverwidth,
+				size.height - 3);
+		}
 	} else
 	if (self->tabalignment == UI_ALIGN_LEFT) {
 		ui_drawline(g, size.width - 2, 0, size.width - 2, cpy);
@@ -118,7 +135,6 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-
 void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button)
 {
 	int tabindex;
@@ -126,6 +142,7 @@ void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button)
 	tabindex = tabhittest(self, x, y);
 	if (tabindex != -1 && tabindex != self->selected)  {
 		self->selected = tabhittest(self, x, y);
+		ui_invalidate(&self->component);
 		signal_emit(&self->signal_change, self, 1, self->selected);
 	}		
 }

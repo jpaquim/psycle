@@ -11,10 +11,11 @@
 #include "settingsview.h"
 #include "cmdsnotes.h"
 #include "skinio.h"
-#include "ui_app.h"
 #include "inputmap.h"
+#include <uiapp.h>
+#include <dir.h>
+#include "resources/resource.h"
 
-static void Create(MainFrame*);
 static void InitMenu(MainFrame*);
 static void InitStatusBar(MainFrame*);
 static void InitBars(MainFrame*);
@@ -40,6 +41,7 @@ static void OnMouseLeaveSplitBar(MainFrame*, ui_component* sender);
 static void OnSongChanged(MainFrame*, ui_component* sender, int flag);
 static void onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void onpluginscanprogress(MainFrame*, Workspace*, int progress);
+static void UpdateTitle(MainFrame*);
 
 HWND hwndmain;
 
@@ -57,29 +59,26 @@ void mainframe_init(MainFrame* self)
 {			
 	ui_margin tabbardividemargin = { 0, 30, 0, 0};
 
-	ui_frame_init(&self->component, 0);			
-	ui_component_enablealign(&self->component);	
+	ui_frame_init(&self->component, 0);				
+	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);	
+	ui_component_enablealign(&self->component);
 	self->resize = 0;
 	workspace_init(&self->workspace, &self->component);	
 	workspace_load_configuration(&self->workspace);
 	if (!workspace_hasplugincache(&self->workspace)) {
 		workspace_scanplugins(&self->workspace);
-	}
-	signal_connect(&self->workspace.signal_songchanged, self, OnSongChanged);	
+	}	
+	signal_connect(&self->workspace.signal_songchanged, self, OnSongChanged);
+	UpdateTitle(self);
 	self->firstshow = 1;	
 	InitBars(self);	
-	// ui_component_init(&self->client, &self->component);	
-	// ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);		
-	// ui_component_resize(&self->component, 800, 600);
-	ui_component_settitle(&self->component, "Psycle");
 	signal_connect(&self->component.signal_destroy, self, Destroy);
 	signal_connect(&self->component.signal_align, self, OnAlign);
 	signal_connect(&self->component.signal_timer, self, OnTimer);	
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	signal_connect(&self->component.signal_align, self, OnAlign);
-	ui_component_init(&self->tabbars, &self->component);	
-	ui_component_setbackgroundmode(&self->tabbars, BACKGROUND_SET);
-	InitTabBar(&self->tabbar, &self->tabbars);	
+	ui_component_init(&self->tabbars, &self->component);		
+	tabbar_init(&self->tabbar, &self->tabbars);	
 	ui_component_resize(&self->tabbar.component,
 		430, ui_component_size(&self->tabbar.component).height);	
 	tabbar_append(&self->tabbar, "Machines");
@@ -91,15 +90,14 @@ void mainframe_init(MainFrame* self)
 	tabbar_append(&self->tabbar, "Help");	
 	tabbar_settabmargin(&self->tabbar, 4, &tabbardividemargin);	
 	// splitbar
-	ui_component_init(&self->splitbar, &self->component);
-	ui_component_setbackgroundmode(&self->splitbar, BACKGROUND_SET);
+	ui_component_init(&self->splitbar, &self->component);	
 	signal_connect(&self->splitbar.signal_mouseenter, self, OnMouseEnterSplitBar);
 	signal_connect(&self->splitbar.signal_mouseleave, self, OnMouseLeaveSplitBar);
 	/// init notebook views
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	machineview_init(&self->machineview, &self->notebook.component, &self->tabbars, &self->workspace);
-	InitPatternView(&self->patternview, &self->notebook.component, &self->tabbars, &self->workspace);	
+	patternview_init(&self->patternview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitSamplesView(&self->samplesview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
@@ -133,7 +131,7 @@ void mainframe_init(MainFrame* self)
 	}
 	SetStatusBarText(self, StatusBarIdleText(self));
 	signal_emit(&self->workspace.signal_configchanged, &self->workspace, 1,
-		self->workspace.config);
+		self->workspace.config);	
 }
 
 void SetStatusBarText(MainFrame* self, const char* text)
@@ -157,8 +155,7 @@ const char* StatusBarIdleText(MainFrame* self)
 
 void InitStatusBar(MainFrame* self)
 {	
-	ui_component_init(&self->statusbar, &self->component);
-	ui_component_setbackgroundmode(&self->statusbar, BACKGROUND_SET);
+	ui_component_init(&self->statusbar, &self->component);	
 	ui_component_enablealign(&self->statusbar);
 	{ // statusbar label
 		ui_margin margin = { 2, 0, 2, 0 };
@@ -180,29 +177,25 @@ void InitStatusBar(MainFrame* self)
 
 void InitBars(MainFrame* self)
 {
-	ui_component_init(&self->top, &self->component);
-	ui_component_setbackgroundmode(&self->top, BACKGROUND_SET);
+	ui_component_init(&self->top, &self->component);	
 	ui_component_resize(&self->top, 500, 400);
 	ui_component_enablealign(&self->top);	
 	// row0
 	ui_component_init(&self->toprow0, &self->top);
-	ui_component_enablealign(&self->toprow0);
-	ui_component_setbackgroundmode(&self->toprow0, BACKGROUND_SET);	
+	ui_component_enablealign(&self->toprow0);	
 	ui_component_setalign(&self->toprow0, UI_ALIGN_TOP);	
 	// row1
 	ui_component_init(&self->toprow1, &self->top);
-	ui_component_enablealign(&self->toprow1);
-	ui_component_setbackgroundmode(&self->toprow1, BACKGROUND_SET);	
+	ui_component_enablealign(&self->toprow1);	
 	ui_component_setalign(&self->toprow1, UI_ALIGN_TOP);	
 	// row2
 	ui_component_init(&self->toprow2, &self->top);
-	ui_component_enablealign(&self->toprow2);
-	ui_component_setbackgroundmode(&self->toprow2, BACKGROUND_SET);
+	ui_component_enablealign(&self->toprow2);	
 	ui_component_setalign(&self->toprow2, UI_ALIGN_TOP);	
 	// add bars to rows
 	// row0
-	InitFileBar(&self->filebar, &self->toprow0, &self->workspace);	
-	InitUndoRedoBar(&self->undoredobar, &self->toprow0, &self->workspace);	
+	filebar_init(&self->filebar, &self->toprow0, &self->workspace);	
+	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);	
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
 	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);		
 	{
@@ -229,8 +222,7 @@ void InitBars(MainFrame* self)
 
 void InitVuBar(MainFrame* self)
 {
-	ui_component_init(&self->vubar, &self->component);
-	ui_component_setbackgroundmode(&self->vubar, BACKGROUND_SET);	
+	ui_component_init(&self->vubar, &self->component);	
 	InitVumeter(&self->vumeter, &self->vubar, &self->workspace);
 	ui_component_setposition(&self->vumeter.component, 0, 00, 200, 20);	
 	InitVolSlider(&self->volslider, &self->vubar, &self->workspace);
@@ -432,16 +424,30 @@ void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
 			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);
 		}
 		if (self->workspace.song->properties) {
-			Properties* title;
+			Properties* title;			
+
 			title = properties_find(self->workspace.song->properties, "title");
 			if (title) {
 				char* titlestr = 0;
 				properties_readstring(title, "title", &titlestr, "Untitled");
 				SetStatusBarText(self, titlestr);				
-			}
+			}						
 		}
-	}	 
+	}
+	UpdateTitle(self);
 	ui_invalidate(&self->component);	
+}
+
+void UpdateTitle(MainFrame* self)
+{	
+	char txt[512];
+	char name[512];
+	char ext[512];
+
+	extract_path(self->workspace.filename, name, ext);
+	_snprintf(txt, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
+		name, ext);			
+	ui_component_settitle(&self->component, txt);
 }
 
 void OnMouseDown(MainFrame* self, ui_component* sender, int x, int y, int button)

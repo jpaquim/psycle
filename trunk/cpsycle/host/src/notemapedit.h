@@ -5,7 +5,7 @@
 #define NOTEMAPEDIT_H
 
 #include "uicomponent.h"
-#include <event.h>
+#include <patternevent.h>
 #include "notestab.h"
 #include "inputmap.h"
 

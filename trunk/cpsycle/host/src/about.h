@@ -4,7 +4,6 @@
 #if !defined(ABOUT_H)
 #define ABOUT_H
 
-#include <bitmap.h>
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uiedit.h>

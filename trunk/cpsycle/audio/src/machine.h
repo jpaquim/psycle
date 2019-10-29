@@ -7,10 +7,11 @@
 #include "machinedefs.h"
 #include "plugin_interface.h"
 #include <signal.h>
-#include "event.h"
+#include "patternevent.h"
 #include "buffercontext.h"
 #include "fileio.h"
 #include "connections.h"
+#include <dsptypes.h>
 
 typedef struct MachineCallback {	
 	unsigned int (*samplerate)(void*);
@@ -38,15 +39,19 @@ typedef struct Machine {
 	// update sequencer events
 	List* (*sequencerinsert)(void*, List* events);
 	void (*parametertweak)(void*, int par, int val);
+	void (*patterntweak)(void*, int par, int val);
 	int (*parameterlabel)(void*, char* txt, int param);
 	int (*parametername)(void*, char* txt, int param);
 	int (*describevalue)(void*, char* txt, int param, int value);
 	int (*value)(void*, int param);
+	void (*setpanning)(void*, amp_t);
+	amp_t (*panning)(void*);
 	void (*setvalue)(void*, int param, int value);	
 	const CMachineInfo* (*info)(void*);
 	void (*dispose)(void*);
 	int (*mode)(void*);	
 	void (*updatesamplerate)(void*, unsigned int samplerate);
+
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
 	unsigned int (*numparameters)(void*);
@@ -71,7 +76,7 @@ typedef struct Machine {
 	MachineCallback callback;
 	int bypass;
 	int mute;
-	float panning;
+	amp_t pan;
 	int ismixersend;		
 	Signal signal_worked;	
 } Machine;
@@ -79,8 +84,6 @@ typedef struct Machine {
 void machine_init(Machine*, MachineCallback);
 void machine_dispose(Machine*);
 int machine_supports(Machine*, int option);
-float machine_panning(Machine* self);
-void machine_setpanning(Machine*, float panning);
 void machine_bypass(Machine*);
 void machine_unbypass(Machine*);
 int machine_bypassed(Machine*);

@@ -4,12 +4,14 @@
 #include "../../detail/prefix.h"
 
 #include "workspace.h"
-#include "cmdsnotes.h"
 #include <exclusivelock.h>
 #include <stdlib.h>
 #include <string.h>
 
 static void workspace_initplayer(Workspace*);
+static void workspace_initplugincatcherandmachinefactory(Workspace*);
+static void workspace_initsignals(Workspace*);
+static void workspace_disposesignals(Workspace*);
 static void workspace_makeconfig(Workspace*);
 static void workspace_makegeneral(Workspace*);
 static void workspace_makenotes(Workspace*);
@@ -55,45 +57,63 @@ void workspace_init(Workspace* self, void* handle)
 	self->inputoutput = 0;
 	self->midi = 0;
 	self->mainhandle = handle;
+	self->filename = strdup("Untitled.psy");
 	workspace_makeconfig(self);
+	workspace_initplugincatcherandmachinefactory(self);
+	self->song = song_allocinit(&self->machinefactory);
+	self->properties = workspace_makeproperties(self);		
+	undoredo_init(&self->undoredo);
+	workspace_initsignals(self);
+	workspace_initplayer(self);
+}
+
+void workspace_initplugincatcherandmachinefactory(Workspace* self)
+{
 	plugincatcher_init(&self->plugincatcher, self->directories);
 	signal_connect(&self->plugincatcher.signal_scanprogress, self,
 		workspace_onscanprogress);
 	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
 	machinefactory_init(&self->machinefactory, machinecallback(self), 
 		&self->plugincatcher);
-	self->song = song_allocinit(&self->machinefactory);
-	self->properties = workspace_makeproperties(self);		
-	undoredo_init(&self->undoredo);
+}
+
+void workspace_initsignals(Workspace* self)
+{
 	signal_init(&self->signal_octavechanged);
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
 	signal_init(&self->signal_editpositionchanged);
 	signal_init(&self->signal_loadprogress);
 	signal_init(&self->signal_scanprogress);
-	workspace_initplayer(self);
 }
 
 void workspace_dispose(Workspace* self)
 {	
-	player_dispose(&self->player);
-	if (self->song) {
-		song_dispose(self->song);
-		free(self->song);
-		self->song = 0;
-	}
+	player_dispose(&self->player);	
+	song_free(self->song);	
+	self->song = 0;	
 	properties_free(self->config);
+	self->config = 0;
 	properties_free(self->properties);
+	self->properties = 0;
 	properties_free(self->lang);
+	self->lang = 0;
+	free(self->filename);
+	self->filename = 0;
+	plugincatcher_dispose(&self->plugincatcher);
+	undoredo_dispose(&self->undoredo);
+	workspace_disposesignals(self);
+	lock_dispose();
+}
+
+void workspace_disposesignals(Workspace* self)
+{
 	signal_dispose(&self->signal_octavechanged);
 	signal_dispose(&self->signal_songchanged);
 	signal_dispose(&self->signal_configchanged);
 	signal_dispose(&self->signal_editpositionchanged);
 	signal_dispose(&self->signal_loadprogress);
 	signal_dispose(&self->signal_scanprogress);
-	plugincatcher_dispose(&self->plugincatcher);
-	undoredo_dispose(&self->undoredo);
-	lock_dispose();
 }
 
 void workspace_initplayer(Workspace* self)
@@ -111,16 +131,13 @@ void workspace_configaudio(Workspace* self)
 }
 
 void workspace_configvisual(Workspace* self)
-{
-	Properties* p;
+{	
 	Properties* visual;
 
 	visual = properties_find(self->config, "visual");
-	if (visual) {
-		p = properties_read(visual, "defaultfontsize");
-		if (p) {
-			workspace_changedefaultfontsize(self, properties_value(p));
-		}
+	if (visual) {				
+		workspace_changedefaultfontsize(self, 
+			properties_int(visual, "defaultfontsize", 80));		
 	}
 }
 
@@ -419,8 +436,9 @@ void workspace_makelang(Workspace* self)
 
 void workspace_makelangen(Workspace* self)
 {
-	properties_append_string(self->lang, "loadsong", "Load Song");
-	properties_append_string(self->lang, "newsong", "New Song");
+	properties_append_string(self->lang, "load", "Load");
+	properties_append_string(self->lang, "save", "Save");
+	properties_append_string(self->lang, "new", "New");
 	properties_append_string(self->lang, "undo", "Undo");
 	properties_append_string(self->lang, "redo", "Redo");
 	properties_append_string(self->lang, "play", "Play");
@@ -429,8 +447,9 @@ void workspace_makelangen(Workspace* self)
 
 void workspace_makelanges(Workspace* self)
 {
-	properties_write_string(self->lang, "loadsong", "Carga Song");
-	properties_write_string(self->lang, "newsong", "Nuevo Song");
+	properties_write_string(self->lang, "load", "Cargar");
+	properties_write_string(self->lang, "save", "Guardar");
+	properties_write_string(self->lang, "new", "Nuevo");
 	properties_write_string(self->lang, "undo", "Deshacer");
 	properties_write_string(self->lang, "redo", "Rehacer");
 	properties_write_string(self->lang, "play", "Toca");
@@ -547,6 +566,8 @@ void workspace_newsong(Workspace* self)
 	song = song_allocinit(&self->machinefactory);
 	properties_free(self->properties);
 	self->properties = workspace_makeproperties(self);
+	free(self->filename);
+	self->filename = strdup("Untitled.psy");
 	workspace_setsong(self, song, WORKSPACE_NEWSONG);		
 }
 
@@ -558,6 +579,8 @@ void workspace_loadsong(Workspace* self, const char* path)
 	song = song_allocinit(&self->machinefactory);
 	signal_connect(&song->signal_loadprogress, self, workspace_onloadprogress);
 	song_load(song, path, &self->properties);
+	free(self->filename);
+	self->filename = strdup(path);
 	workspace_setsong(self, song, WORKSPACE_LOADSONG);
 }
 
@@ -570,16 +593,20 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 {
 	Song* oldsong;
 
-	oldsong = self->song;	
-	lock_enter();
+	oldsong = self->song;
 	player_stop(&self->player);
+	lock_enter();	
 	self->song = song;
 	player_setsong(&self->player, self->song);
 	applysongproperties(self);
-	signal_emit(&self->signal_songchanged, self, 1, flag);
-	song_dispose(oldsong);
-	free(oldsong);			
+	signal_emit(&self->signal_songchanged, self, 1, flag);	
 	lock_leave();
+	song_free(oldsong);	
+}
+
+void workspace_savesong(Workspace* self, const char* path)
+{
+	song_save(self->song, path, self->properties);
 }
 
 Properties* workspace_makeproperties(Workspace* self)
@@ -614,7 +641,7 @@ Properties* workspace_pluginlist(Workspace* self)
 
 void workspace_load_configuration(Workspace* self)
 {	
-	properties_load(self->config, "psycle.ini", 0);	
+	propertiesio_load(self->config, "psycle.ini", 0);	
 	workspace_configaudio(self);
 	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
@@ -624,7 +651,7 @@ void workspace_load_configuration(Workspace* self)
 
 void workspace_save_configuration(Workspace* self)
 {
-	properties_save(self->config, "psycle.ini");	
+	propertiesio_save(self->config, "psycle.ini");	
 }
 
 void workspace_setoctave(Workspace* self, int octave)
@@ -665,14 +692,10 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 }
 
 void workspace_seteditposition(Workspace* self, EditPosition editposition)
-{
-	int line;
-	double offset;
-
-	offset = editposition.offset;
-	line = (int) (offset * player_lpb(&self->player));
+{	
 	self->editposition = editposition;
-	self->editposition.line = line;
+	self->editposition.line = 
+		(int) (editposition.offset * player_lpb(&self->player));
 	signal_emit(&self->signal_editpositionchanged, self, 0);
 }
 
@@ -721,7 +744,7 @@ unsigned int machinecallback_samplerate(Workspace* self)
 
 int machinecallback_bpm(Workspace* self)
 {
-	return (int)player_bpm(&self->player);
+	return (int) player_bpm(&self->player);
 }
 
 Machines* machinecallback_machines(Workspace* self)

@@ -7,5 +7,6 @@
 #include "song.h"
 
 void psy3_load(Song*, PsyFile*, char header[9], Properties* workspaceproperties);
+void psy3_save(Song*, PsyFile*, Properties* workspaceproperties);
 
 #endif

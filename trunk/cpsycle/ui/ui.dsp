@@ -85,15 +85,11 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\src\bitmap.c
+SOURCE=.\src\uiapp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\graphics.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\ui_app.c
+SOURCE=.\src\uibitmap.c
 # End Source File
 # Begin Source File
 
@@ -121,7 +117,15 @@ SOURCE=.\src\uiedit.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uievents.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiframe.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uigraphics.c
 # End Source File
 # Begin Source File
 
@@ -165,15 +169,11 @@ SOURCE=.\src\uistatusbar.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\src\bitmap.h
+SOURCE=.\src\uiapp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\graphics.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\ui_app.h
+SOURCE=.\src\uibitmap.h
 # End Source File
 # Begin Source File
 
@@ -201,7 +201,15 @@ SOURCE=.\src\uiedit.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uievents.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiframe.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uigraphics.h
 # End Source File
 # Begin Source File
 

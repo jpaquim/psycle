@@ -13,8 +13,7 @@ static void songproperties_initalign(SongProperties*);
 void InitSongProperties(SongProperties* self, ui_component* parent, Workspace* workspace)
 {		
 	self->song = workspace->song;	
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);		
+	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->label_title, &self->component);
 	ui_label_settext(&self->label_title, "Song Title");		
 	ui_edit_init(&self->edit_title, &self->component, ES_READONLY);	

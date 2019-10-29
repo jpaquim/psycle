@@ -15,8 +15,7 @@ void inputdefiner_init(InputDefiner* self, ui_component* parent)
 {
 	self->input = 0;
 	self->regularkey = 0;
-	ui_component_init(&self->component, parent);		
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, ondraw);
 	signal_connect(&self->component.signal_keydown, self, onkeydown);
 	signal_connect(&self->component.signal_keyup, self, onkeyup);

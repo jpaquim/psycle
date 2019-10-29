@@ -6,7 +6,7 @@
 
 #include <windows.h>
 #include "uidef.h"
-#include "graphics.h"
+#include "uigraphics.h"
 #include <signal.h>
 #include "uimenu.h"
 #include <list.h>
@@ -128,6 +128,7 @@ List* ui_component_children(ui_component*, int recursive);
 void ui_component_capture(ui_component*);
 void ui_component_releasecapture();
 ui_size ui_component_size(ui_component*);
+ui_rectangle ui_component_position(ui_component*);
 ui_size ui_component_frame_size(ui_component*);
 void ui_invalidate(ui_component*);
 void ui_invalidaterect(ui_component*, const ui_rectangle* rect);
@@ -153,6 +154,7 @@ void ui_component_setcolor(ui_component*, unsigned int color);
 ui_size ui_component_textsize(ui_component*, const char*);
 TEXTMETRIC ui_component_textmetric(ui_component*);
 ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
+void ui_component_seticonressource(ui_component*, int ressourceid);
 
 List* ui_components_setalign(List*, UiAlignType align, const ui_margin* margin);
 List* ui_components_setmargin(List* list, const ui_margin* margin);
