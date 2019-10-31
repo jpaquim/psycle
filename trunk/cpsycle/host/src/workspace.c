@@ -101,6 +101,7 @@ void workspace_dispose(Workspace* self)
 	free(self->filename);
 	self->filename = 0;
 	plugincatcher_dispose(&self->plugincatcher);
+	machinefactory_dispose(&self->machinefactory);
 	undoredo_dispose(&self->undoredo);
 	workspace_disposesignals(self);
 	lock_dispose();
@@ -118,7 +119,7 @@ void workspace_disposesignals(Workspace* self)
 
 void workspace_initplayer(Workspace* self)
 {
-	player_init(&self->player, self->song, self->mainhandle->hwnd);
+	player_init(&self->player, self->song, (void*)self->mainhandle->hwnd);
 	workspace_driverconfig(self);
 	workspace_updatemididriverlist(self);
 	workspace_mididriverconfig(self, 0);

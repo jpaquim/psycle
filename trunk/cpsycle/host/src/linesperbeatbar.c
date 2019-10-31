@@ -11,7 +11,8 @@ static void OnMoreClicked(LinesPerBeatBar*, ui_component* sender);
 static void OnTimer(LinesPerBeatBar*, ui_component* sender, int timerid);
 
 void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* player)
-{					
+{	
+	self->lpb = 0;			
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
@@ -25,10 +26,9 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);		
 	ui_button_init(&self->morebutton, &self->component);
 	ui_button_seticon(&self->morebutton, UI_ICON_MORE);
-	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);	
-	self->lpb = 0;
+	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);
 	signal_connect(&self->component.signal_timer, self, OnTimer);
-	SetTimer(self->component.hwnd, 500, 200, 0);
+	ui_component_starttimer(&self->component, 500, 200);
 	{		
 		ui_margin margin = { 0, 3, 3, 0 };
 				

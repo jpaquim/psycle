@@ -11,6 +11,8 @@
 static void pianoheader_ondraw(PianoHeader*, ui_component* sender, ui_graphics*);
 void pianoheader_drawruler(PianoHeader*, ui_graphics*);
 
+
+static void pianoroll_onlpbchanged(Pianoroll*, Player* sender, unsigned int lpb);
 static void pianoroll_ontimer(Pianoroll*, ui_component* sender, 
 	int timerid);
 static void pianogrid_ondraw(Pianogrid*, ui_component* sender, ui_graphics*);
@@ -59,9 +61,10 @@ void pianoroll_init(Pianoroll* self, ui_component* parent, Workspace* workspace)
 	pianoheader_init(&self->header, &self->component, self);
 	ui_component_init(&self->keyboardheader, &self->component);
 	pianokeyboard_init(&self->keyboard, &self->component);
-	pianogrid_init(&self->grid, &self->component, self);	
-	SetTimer(self->component.hwnd, TIMERID_PIANOROLL, 100, 0);
+	pianogrid_init(&self->grid, &self->component, self);		
+	signal_connect(&workspace->player.signal_lpbchanged, self, pianoroll_onlpbchanged);
 	pianoroll_updatemetrics(self);
+	ui_component_starttimer(&self->component, TIMERID_PIANOROLL, 100);
 }
 
 void pianoroll_ondestroy(Pianoroll* self, ui_component* component)
@@ -84,8 +87,8 @@ void pianoroll_ontimer(Pianoroll* self, ui_component* sender, int timerid)
 		if (self->pattern && self->pattern->opcount != self->opcount &&
 				self->syncpattern) {
 			ui_invalidate(&self->grid.component);
-		}
-		self->opcount = self->pattern->opcount;
+		}		
+		self->opcount = self->pattern ? self->pattern->opcount : 0;
 	}
 }
 
@@ -250,13 +253,13 @@ void pianogrid_onscroll(Pianogrid* self, ui_component* sender, int cx, int cy)
 		self->view->header.metrics = self->metrics;
 		self->view->keyboard.metrics = self->metrics;
 		ui_invalidate(&self->view->header.component);
-		UpdateWindow(self->view->header.component.hwnd);
+		UpdateWindow((HWND)self->view->header.component.hwnd);
 	}
 	if (self->cy != 0) {
 		self->dy += cy;
 		self->view->keyboard.dy = self->dy;
 		ui_invalidate(&self->view->keyboard.component);
-		UpdateWindow(self->view->keyboard.component.hwnd);
+		UpdateWindow((HWND)self->view->keyboard.component.hwnd);
 	}	
 }
 
@@ -324,15 +327,17 @@ void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, int x, int y, 
 	beat_t offset;	
 	
 	offset = (x  / (beat_t) self->metrics.beatwidth) + self->beatscrollpos;
-	offset = (float)((int)(offset * self->metrics.lpb) / self->metrics.lpb);
+	offset = (int)(offset * (beat_t)self->metrics.lpb) / (beat_t)self->metrics.lpb;
 	if (button == 1) {
 		PatternEvent event;
 		PatternNode* node = 0;
 		PatternNode* prev = 0;
 
 		patternevent_clear(&event);
-		event.note = self->metrics.keymax - 1 - (y - self->dy) / self->metrics.keyheight;
-		node = pattern_findnode(self->view->pattern, 0, offset, 0, 0.25, &prev);
+		event.note = self->metrics.keymax - 1 - (y - self->dy) /
+			self->metrics.keyheight;
+		node = pattern_findnode(self->view->pattern, 0, offset, 0,
+			1 / (beat_t) self->metrics.lpb, &prev);
 		if (node) {				
 			pattern_setevent(self->view->pattern, node, &event);		
 		} else {
@@ -448,4 +453,12 @@ void pianogrid_adjustscroll(Pianogrid* self)
 		self->view->pattern->length : 0) - metrics.visibeats + 0.5));
 	ui_component_setverticalscrollrange(&self->component, 0,
 		metrics.keymax - metrics.keymin - metrics.visikeys);
+}
+
+void pianoroll_onlpbchanged(Pianoroll* self, Player* sender, unsigned int lpb)
+{
+	pianoroll_updatemetrics(self);
+	pianogrid_adjustscroll(&self->grid);
+	ui_invalidate(&self->grid.component);
+	ui_invalidate(&self->header.component);	
 }

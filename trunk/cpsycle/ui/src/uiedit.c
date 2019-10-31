@@ -32,7 +32,7 @@ void ondestroy(ui_edit* self, ui_component* sender)
 
 void ui_edit_settext(ui_edit* edit, const char* text)
 {
-	SetWindowText(edit->component.hwnd, text);
+	SetWindowText((HWND)edit->component.hwnd, text);
 }
 
 void ui_edit_setcharnumber(ui_edit* self, int number)
@@ -48,7 +48,7 @@ void ui_edit_setlinenumber(ui_edit* self, int number)
 const char* ui_edit_text(ui_edit* edit)
 {
 	static char buf[256];
-	GetWindowText(edit->component.hwnd, buf, 255);
+	GetWindowText((HWND)edit->component.hwnd, buf, 255);
 	return buf;
 }
 
@@ -70,16 +70,15 @@ void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam,
 
 void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit,
 	int* width, int* height)
-{			
-	ui_size size;
+{				
 	char text[256];
 	TEXTMETRIC tm;
 	
-	tm = ui_component_textmetric(&self->component);
-	GetWindowText(self->component.hwnd, text, 256);
-	size = ui_component_textsize(&self->component, text);	
-	
+	tm = ui_component_textmetric(&self->component);	
 	if (self->charnumber == 0) {
+		ui_size size;
+		GetWindowText((HWND)self->component.hwnd, text, 256);
+		size = ui_component_textsize(&self->component, text);	
 		*width = size.width + 2;		
 		*height = (int)(tm.tmHeight * self->linenumber * 1.5);
 	} else {				

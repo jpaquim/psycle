@@ -23,7 +23,7 @@ void InitVumeter(Vumeter* self, ui_component* parent, Workspace* workspace)
 	self->rightavg = 0;	
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	ConnectMachinesSignals(self, workspace);
-	SetTimer(self->component.hwnd, TIMERID_MASTERVU, 50, 0);			
+	ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
 }
 
 void OnDestroy(Vumeter* self, ui_component* component)

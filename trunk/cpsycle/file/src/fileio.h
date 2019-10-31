@@ -40,6 +40,10 @@ long psyfile_filesize(PsyFile*);
 int psyfile_readstring(PsyFile*, char* pData, unsigned long maxBytes);
 long psyfile_getpos(PsyFile*);	
 FILE* psyfile_getfile(PsyFile*);
+size_t psyfile_writeheader(PsyFile*, char* pData, unsigned int version,
+	unsigned int size);
+int psyfile_writestring(PsyFile*, char* str);
+size_t psyfile_updatesize(PsyFile*, size_t startpos);
 
 static unsigned long FourCC(char *psName);
 	

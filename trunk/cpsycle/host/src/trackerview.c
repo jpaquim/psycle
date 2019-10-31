@@ -792,9 +792,9 @@ int trackerview_scrolleft(TrackerView* self)
 		self->grid.dx = -tracks * self->grid.trackwidth;
 		self->header.dx = self->grid.dx;
 		ui_invalidate(&self->grid.component);
-		UpdateWindow(self->grid.component.hwnd);
+		UpdateWindow((HWND)self->grid.component.hwnd);
 		ui_invalidate(&self->header.component);
-		UpdateWindow(self->header.component.hwnd);
+		UpdateWindow((HWND)self->header.component.hwnd);
 		ui_component_sethorizontalscrollposition(
 			&self->grid.component, 0);		
 		invalidate = 0;
@@ -815,9 +815,9 @@ int trackerview_scrollright(TrackerView* self)
 		self->grid.dx = -(tracks - visitracks) * self->grid.trackwidth;
 		self->header.dx = self->grid.dx;
 		ui_invalidate(&self->header.component);
-		UpdateWindow(self->header.component.hwnd);				
+		UpdateWindow((HWND)self->header.component.hwnd);				
 		ui_invalidate(&self->grid.component);	
-		UpdateWindow(self->grid.component.hwnd);
+		UpdateWindow((HWND)self->grid.component.hwnd);
 		ui_component_sethorizontalscrollposition(&self->grid.component, 
 			tracks - visitracks);
 		invalidate = 0;
@@ -1064,7 +1064,7 @@ void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int cx, int c
 	if (self->linenumbers && cy != 0) {
 		self->linenumbers->dy += cy;
 		ui_invalidate(&self->linenumbers->component);
-		UpdateWindow(self->linenumbers->component.hwnd);
+		UpdateWindow((HWND)self->linenumbers->component.hwnd);
 	}
 }
 
@@ -1137,7 +1137,7 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 		self->header.trackwidth = self->grid.trackwidth;
 	}
 	self->grid.component.scrollstepx = self->grid.trackwidth;
-	SetTimer(self->component.hwnd, TIMERID_TRACKERVIEW, 100, 0);
+	ui_component_starttimer(&self->component, TIMERID_TRACKERVIEW, 100);
 	signal_connect(&workspace->signal_configchanged, self,
 		trackerview_onconfigchanged);
 	signal_connect(&workspace->player.signal_inputevent, self,
@@ -1370,7 +1370,7 @@ void trackerview_ontimer(TrackerView* self, ui_component* sender, int timerid)
 				self->syncpattern) {
 			ui_invalidate(&self->grid.component);			
 		}
-		self->opcount = self->pattern->opcount;
+		self->opcount = self->pattern ? self->pattern->opcount : 0;		
 	}
 }
 

@@ -20,6 +20,6 @@ typedef struct {
 	beat_t bpm;
 } TimeBar;
 
-void InitTimeBar(TimeBar*, ui_component* parent, Player*);
+void timerbar_init(TimeBar*, ui_component* parent, Player*);
 
 #endif

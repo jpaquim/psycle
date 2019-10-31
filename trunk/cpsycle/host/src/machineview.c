@@ -278,7 +278,7 @@ void wireview_init(WireView* self, ui_component* parent,
 	signal_connect(&workspace->signal_songchanged, self, wireview_onsongchanged);	
 	wireview_connectmachinessignals(self);
 	signal_connect(&workspace->signal_configchanged, self, wireview_onconfigchanged);	
-	SetTimer(self->component.hwnd, TIMERID_UPDATEVUMETERS, 50, 0);
+	ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
 }
 
 void wireview_connectuisignals(WireView* self)
@@ -367,9 +367,9 @@ void wireview_readconfig(WireView* self)
 	mv = properties_findsection(self->workspace->config, "visual.machineview");
 	if (mv) {		
 		self->drawvumeters = properties_bool(mv, "drawvumeters", 1);
-		KillTimer(self->component.hwnd, TIMERID_UPDATEVUMETERS);
+		ui_component_stoptimer(&self->component, TIMERID_UPDATEVUMETERS);
 		if (self->drawvumeters) {
-			SetTimer(self->component.hwnd, TIMERID_UPDATEVUMETERS, 50, 0);			
+			ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
 		}
 	}
 }
@@ -565,7 +565,6 @@ void wireview_drawmachines(WireView* self, ui_graphics* g)
 		}
 	}
 }
-
 
 int slidercoord(SkinCoord* coord, float value)
 {	
@@ -1140,7 +1139,8 @@ void wireview_onnewmachineselected(MachineView* self, ui_component* sender,
 	char* path;
 		
 	properties_readstring(plugininfo, "path", &path, "");
-	machine = machinefactory_makefrompath(&self->workspace->machinefactory,
+	machine = machinefactory_makemachinefrompath(
+		&self->workspace->machinefactory, 
 		properties_int(plugininfo, "type", -1), path);
 	if (machine) {		
 		if (self->newmachine.pluginsview.calledbygear) {

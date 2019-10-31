@@ -13,17 +13,17 @@
 static int mode(VstPlugin*);
 static void work(VstPlugin* self, BufferContext*);
 static int hostevent(VstPlugin* self, int const eventNr, int const val1, float const val2);
-static const CMachineInfo* info(VstPlugin* self);
+static const MachineInfo* info(VstPlugin* self);
 static void parametertweak(VstPlugin* self, int par, int val);
 static int parameterlabel(VstPlugin*, char* txt, int param);
 static int parametername(VstPlugin*, char* txt, int param);
 static int describevalue(VstPlugin*, char* txt, int param, int value);
 static int value(VstPlugin*, int param);
 static void setvalue(VstPlugin*, int param, int value);
+static int parametertype(VstPlugin*, int param);
+static void parameterrange(VstPlugin*, int param, int* minval, int* maxval);
 static unsigned int numparameters(VstPlugin*);
 static unsigned int numcols(VstPlugin*);
-static const CMachineParameter* parameter(VstPlugin*, unsigned int par);
-
 static void dispose(VstPlugin* self);
 static unsigned int numinputs(VstPlugin*);
 static unsigned int numoutputs(VstPlugin*);
@@ -32,7 +32,7 @@ static const float kSampleRate = 48000.f;
 static const VstInt32 kNumProcessCycles = 5;
 static void checkEffectProperties (AEffect* effect);
 static void checkEffectProcessing (AEffect* effect);
-static int machineinfo(AEffect* effect, CMachineInfo* info);
+static int machineinfo(AEffect* effect, MachineInfo* info, const char* path, int shellidx);
 typedef AEffect* (*PluginEntryProc)(audioMasterCallback audioMaster);
 static VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 static PluginEntryProc getmainentry(Library* library);
@@ -43,16 +43,6 @@ static void editoridle(VstPlugin*);
 static void processevents(VstPlugin*, BufferContext*);
 struct VstMidiEvent* allocinitmidievent(VstPlugin*, const PatternEntry*);
 
-static CMachineParameter const paraVst = 
-{ 
-	"VST",	
-	"VST",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
 void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 {	
 	PluginEntryProc mainproc;	
@@ -62,6 +52,8 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.work = work;
 	self->machine.hostevent = hostevent;	
 	self->machine.info = info;
+	self->machine.parametertype = parametertype;
+	self->machine.parameterrange = parameterrange;
 	self->machine.parametertweak = parametertweak;
 	self->machine.parameterlabel = parameterlabel;
 	self->machine.parametername = parametername;
@@ -69,8 +61,7 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.setvalue = setvalue;
 	self->machine.value = value;
 	self->machine.numparameters = numparameters;
-	self->machine.numcols = numcols;
-	self->machine.parameter = parameter;
+	self->machine.numcols = numcols;	
 	self->machine.dispose = dispose;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
@@ -106,7 +97,9 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 			self->effect->dispatcher (self->effect, effSetProcessPrecision, 0, kVstProcessPrecision32, 0, 0);
 			self->effect->dispatcher (self->effect, effSetBlockSize, 0, kBlockSize, 0, 0);
 			self->effect->dispatcher (self->effect, effMainsChanged, 0, 1, 0, 0);
-			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);			
+			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
+			self->plugininfo = machineinfo_allocinit();
+			machineinfo(self->effect, self->plugininfo, self->library.path, 0);
 		}
 	}		
 } 
@@ -129,6 +122,11 @@ void dispose(VstPlugin* self)
 		free(self->events);
 		table_dispose(&self->noteons);
 	}	
+	if (self->plugininfo) {
+		machineinfo_dispose(self->plugininfo);
+		free(self->plugininfo);
+		self->plugininfo = 0;
+	}
 	machine_dispose(&self->machine);
 }
 
@@ -143,7 +141,7 @@ PluginEntryProc getmainentry(Library* library)
 	return rv;
 }
 
-int plugin_vst_test(const char* path, CMachineInfo* rv)
+int plugin_vst_test(const char* path, MachineInfo* rv)
 {
 	int vst = 0;
 	
@@ -159,7 +157,7 @@ int plugin_vst_test(const char* path, CMachineInfo* rv)
 				AEffect* effect;
 				
 				effect = mainentry(hostcallback);
-				vst = effect && machineinfo(effect, rv) == 0;
+				vst = effect && machineinfo(effect, rv, path, 0) == 0;
 			}	
 		}
 		library_dispose(&library);	
@@ -248,7 +246,8 @@ static int FilterException(int code, struct _EXCEPTION_POINTERS *ep)
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
-int machineinfo(AEffect* effect, CMachineInfo* info)
+int machineinfo(AEffect* effect, MachineInfo* info, const char* path,
+	int shellidx)
 {
 	char effectName[256] = {0};
 	char vendorString[256] = {0};
@@ -260,17 +259,17 @@ int machineinfo(AEffect* effect, CMachineInfo* info)
 		effect->dispatcher (effect, effGetVendorString, 0, 0, vendorString, 0);
 		effect->dispatcher (effect, effGetProductString, 0, 0, productString, 0);
 		
-		info->Author = _strdup(vendorString);
-		info->Command = _strdup(""); // 0; // strdup(pInfo->Command);
-		info->Flags = (effect->flags & effFlagsIsSynth) == effFlagsIsSynth
-						  ? 3
-						  : 0;
-		info->Name = _strdup(effectName);
-		info->numCols = 6; // pInfo->numCols;
-		info->numParameters = 0; //pInfo->numParameters;
-		info->ShortName = _strdup(effectName);
-		info->APIVersion = 0; //pInfo->Version;
-		info->PlugVersion = 0;
+		machineinfo_set(info,
+			vendorString,
+			"",
+			(effect->flags & effFlagsIsSynth) == effFlagsIsSynth,
+			effectName,
+			effectName,
+			0,
+			0,
+			MACH_VST,
+			path,
+			shellidx);		
 	}
 	__except(FilterException(GetExceptionCode(), GetExceptionInformation())) {		
 		err = GetExceptionCode();
@@ -278,16 +277,9 @@ int machineinfo(AEffect* effect, CMachineInfo* info)
 	return err;
 }
 
-const CMachineInfo* info(VstPlugin* self)
+const MachineInfo* info(VstPlugin* self)
 {	
-	if (self->info == 0 && self->effect) {
-		self->info = (CMachineInfo*) malloc(sizeof(CMachineInfo));		
-		if (machineinfo(self->effect, self->info) != 0) {
-			free(self->info);
-			self->info = 0;
-		}
-	}
-	return self->info;
+	return self->plugininfo;
 }
 
 void parametertweak(VstPlugin* self, int par, int val)
@@ -376,9 +368,15 @@ unsigned int numcols(VstPlugin* self)
 	return 6;
 }
 
-const CMachineParameter* parameter(VstPlugin* self, unsigned int par)
+int parametertype(VstPlugin* self, int param)
 {
-	return &paraVst;
+	return MPF_STATE;
+}
+
+void parameterrange(VstPlugin* self, int param, int* minval, int* maxval)
+{
+	*minval = 0;
+	*maxval = 65535;
 }
 
 /*

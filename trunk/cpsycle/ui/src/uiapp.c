@@ -15,7 +15,7 @@ int ui_run(void)
           TranslateMessage (&msg) ;
           DispatchMessage (&msg) ;
     }
-    return msg.wParam ;
+    return (int) msg.wParam ;
 }
 
 void ui_quit(void)

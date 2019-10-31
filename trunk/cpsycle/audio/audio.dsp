@@ -234,6 +234,10 @@ SOURCE=.\src\machinefactory.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\machineinfo.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\machineproxy.c
 # End Source File
 # Begin Source File
@@ -600,6 +604,10 @@ SOURCE=.\src\machinedefs.h
 # Begin Source File
 
 SOURCE=.\src\machinefactory.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machineinfo.h
 # End Source File
 # Begin Source File
 

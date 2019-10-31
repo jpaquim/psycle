@@ -3,13 +3,15 @@
 #include "timebar.h"
 #include <stdio.h>
 
-static void OnLessLessClicked(TimeBar* self, ui_component* sender);
-static void OnLessClicked(TimeBar* self, ui_component* sender);
-static void OnMoreClicked(TimeBar* self, ui_component* sender);
-static void OnMoreMoreClicked(TimeBar* self, ui_component* sender);
-static void OnTimer(TimeBar* self, ui_component* sender, int timerid);
+#define TIMERID_TIMERBAR 500
 
-void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
+static void timerbar_onlesslessclicked(TimeBar* self, ui_component* sender);
+static void timerbar_onlessclicked(TimeBar* self, ui_component* sender);
+static void timerbar_onmoreclicked(TimeBar* self, ui_component* sender);
+static void timerbar_onmoremoreclicked(TimeBar* self, ui_component* sender);
+static void timerbar_ontimer(TimeBar* self, ui_component* sender, int timerid);
+
+void timerbar_init(TimeBar* self, ui_component* parent, Player* player)
 {				
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
@@ -23,16 +25,20 @@ void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
 	ui_label_setcharnumber(&self->bpmlabel, 8);	
 	ui_button_init(&self->lessless, &self->component);
 	ui_button_seticon(&self->lessless, UI_ICON_LESSLESS);		
-	signal_connect(&self->lessless.signal_clicked, self, OnLessLessClicked);	
+	signal_connect(&self->lessless.signal_clicked, self,
+		timerbar_onlesslessclicked);	
 	ui_button_init(&self->less, &self->component);
 	ui_button_seticon(&self->less, UI_ICON_LESS);	
-	signal_connect(&self->less.signal_clicked, self, OnLessClicked);		
+	signal_connect(&self->less.signal_clicked, self,
+		timerbar_onlessclicked);		
 	ui_button_init(&self->more, &self->component);
 	ui_button_seticon(&self->more, UI_ICON_MORE);	
-	signal_connect(&self->more.signal_clicked, self, OnMoreClicked);	
+	signal_connect(&self->more.signal_clicked, self,
+		timerbar_onmoreclicked);	
 	ui_button_init(&self->moremore, &self->component);
 	ui_button_seticon(&self->moremore, UI_ICON_MOREMORE);	
-	signal_connect(&self->moremore.signal_clicked, self, OnMoreMoreClicked);
+	signal_connect(&self->moremore.signal_clicked, self,
+		timerbar_onmoremoreclicked);
 	{
 		ui_margin margin = { 0, 3, 3, 0 };
 
@@ -40,37 +46,37 @@ void InitTimeBar(TimeBar* self, ui_component* parent, Player* player)
 			ui_component_children(&self->component, 0),
 			UI_ALIGN_LEFT, &margin));
 	}	
-	SetTimer(self->component.hwnd, 500, 50, 0);
-	signal_connect(&self->component.signal_timer, self, OnTimer);
+	ui_component_starttimer(&self->component, TIMERID_TIMERBAR, 50);
+	signal_connect(&self->component.signal_timer, self, timerbar_ontimer);
 }
 
-void OnLessLessClicked(TimeBar* self, ui_component* sender)
+void timerbar_onlesslessclicked(TimeBar* self, ui_component* sender)
 {		
 	player_setbpm(self->player, player_bpm(self->player) - 10);
 }
 
-void OnLessClicked(TimeBar* self, ui_component* sender)
+void timerbar_onlessclicked(TimeBar* self, ui_component* sender)
 {		
 	player_setbpm(self->player, player_bpm(self->player) - 1);
 }
 
-void OnMoreClicked(TimeBar* self, ui_component* sender)
+void timerbar_onmoreclicked(TimeBar* self, ui_component* sender)
 {		
 	player_setbpm(self->player, player_bpm(self->player) + 1);
 }
 
-void OnMoreMoreClicked(TimeBar* self, ui_component* sender)
+void timerbar_onmoremoreclicked(TimeBar* self, ui_component* sender)
 {	
 	player_setbpm(self->player, player_bpm(self->player) + 10);
 }
 
-void OnTimer(TimeBar* self, ui_component* sender, int timerid)
-{	
-	char buffer[20];
+void timerbar_ontimer(TimeBar* self, ui_component* sender, int timerid)
+{		
 	if (self->bpm != player_bpm(self->player)) {
+		char txt[20];
+
 		self->bpm = self->player->sequencer.bpm;
-		_snprintf(buffer, 10, "%.2f", self->bpm);
-		ui_label_settext(&self->bpmlabel, buffer);
-		
+		_snprintf(txt, 10, "%.2f", self->bpm);
+		ui_label_settext(&self->bpmlabel, txt);
 	}
 }

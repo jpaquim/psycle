@@ -225,7 +225,7 @@ void ui_button_settext(ui_button* self, const char* text)
 		self->text = _strdup(text);
 		ui_invalidate(&self->component);
 	} else {
-		SetWindowText(self->component.hwnd, text);
+		SetWindowText((HWND)self->component.hwnd, text);
 	}
 }
 
@@ -237,13 +237,13 @@ void ui_button_seticon(ui_button* self, ButtonIcon icon)
 void ui_button_highlight(ui_button* self)
 {
 	self->highlight = 1;
-	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
 }
 
 void ui_button_disablehighlight(ui_button* self)
 {
 	self->highlight = 0;
-	SendMessage(self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
 }
 
 void oncommand(ui_button* self, ui_component* sender, WPARAM wParam,

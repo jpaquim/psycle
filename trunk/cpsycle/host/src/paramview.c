@@ -62,7 +62,7 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	}
 	self->tweak = -1;
 	self->component.doublebuffered = TRUE;
-	SetTimer(self->component.hwnd, TIMERID_PARAMVIEW, 100, 0);
+	ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
 }
 
 void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
@@ -96,25 +96,24 @@ void DrawBackground(ParamView* self, ui_graphics* g)
 
 void DrawParam(ParamView* self, ui_graphics* g, int par, int row, int col)
 {	
-	const CMachineParameter* param;
-
-	param = self->machine->parameter(self->machine, par);
-	if (param) {
-		if (param->Flags == 1) {
+	switch (self->machine->parametertype(self->machine, par)) {
+		case 1:
 			DrawHeader(self, g, par, row, col);
-		} else
-		if (param->Flags == 3) {
+		break;
+		case 3:
 			DrawInfoLabel(self, g, par, row, col);
-		} else
-		if (param->Flags & MPF_STATE) {
+		break;
+		case MPF_STATE:
 			DrawKnob(self, g, par, row, col);
-		} else
-		if (param->Flags & MPF_SLIDER) {
+		break;
+		case MPF_SLIDER:
 			DrawSlider(self, g, par, row, col);
-		}
-		if (param->Flags & MPF_LEVEL) {
+		break;
+		case MPF_LEVEL:
 			DrawLevel(self, g, par, row, col);
-		}
+		break;
+		default:
+		break;
 	}
 }
 
@@ -132,9 +131,9 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 	int knob_cx;
 	int knob_cy;
 	int knob_frame;
-
-	const CMachineParameter* par;
-	par = self->machine->parameter(self->machine, param);
+	int minval;
+	int maxval;
+	
 	knob_cx = 28;
 	knob_cy = 28;
 	cellposition(self, row, col, &left, &top);
@@ -146,7 +145,7 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 				
 	if (!self->machine->parametername(self->machine, label, param)) {
 		if (!self->machine->parameterlabel(self->machine, label, param)) {
-			_snprintf(label, 128, "%s", par->Name);
+			_snprintf(label, 128, "%s", "");
 		}
 	}
 	if (self->machine->describevalue(
@@ -160,8 +159,10 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_setbackgroundcolor(g, 0x00444444); // + nc*2);
 	ui_settextcolor(g, 0x00E7BD18); // + nc);
 	ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
-		ETO_OPAQUE, r_bottom, str, strlen(str));		
-	knob_frame = (int)((self->machine->value(self->machine, param) - par->MinValue)* 63.0/(par->MaxValue - par->MinValue));
+		ETO_OPAQUE, r_bottom, str, strlen(str));
+	self->machine->parameterrange(self->machine, param, &minval, &maxval);
+	knob_frame = (int)((self->machine->value(self->machine, param) - minval) *
+		63.0 / (max(1, maxval - minval)));
 	ui_drawbitmap(g, &knobs, r.left, r.top, knob_cx, knob_cy, knob_frame*knob_cx, 0);	
 }
 
@@ -172,38 +173,34 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 	int width;
 	int height;
 	int half;
-	ui_rectangle r;
-	const CMachineParameter* par;
+	ui_rectangle r;	
 	char str[128];
-	
-	par = self->machine->parameter(self->machine, param);
-	if (par) {
-		str[0] = '\0';		
+			
+	str[0] = '\0';		
 
-		cellposition(self, row, col, &left, &top);
-		cellsize(self, &width, &height);		
-		half = height/2;
-		ui_setrectangle(&r, left, top, width, top + half);
+	cellposition(self, row, col, &left, &top);
+	cellsize(self, &width, &height);		
+	half = height/2;
+	ui_setrectangle(&r, left, top, width, top + half);
 
-		ui_setbackgroundcolor(g, 0x00232323);
-		ui_settextcolor(g, 0x00FFFFFF);
-		if (!self->machine->parametername(self->machine, str, param)) {
-			if (!self->machine->parameterlabel(self->machine, str, param)) {
-				_snprintf(str, 128, "%s", par->Name);
-			}
+	ui_setbackgroundcolor(g, 0x00232323);
+	ui_settextcolor(g, 0x00FFFFFF);
+	if (!self->machine->parametername(self->machine, str, param)) {
+		if (!self->machine->parameterlabel(self->machine, str, param)) {
+			_snprintf(str, 128, "%s", "");
 		}
-		ui_textoutrectangle(g, 
-			left, top, ETO_OPAQUE | ETO_CLIPPED,
-			r, str, strlen(str));
-		ui_setrectangle(&r, left, top + half, width, top + half);
-		if (self->machine->describevalue(
-			self->machine, str, param, self->machine->value(self->machine, param)) == FALSE) {
-			_snprintf(str, 128, "%d", self->machine->value(self->machine, param));
-		}
-		ui_textoutrectangle(g, 
-			left, top + half, ETO_OPAQUE | ETO_CLIPPED,
-			r, str, strlen(str));	
 	}
+	ui_textoutrectangle(g, 
+		left, top, ETO_OPAQUE | ETO_CLIPPED,
+		r, str, strlen(str));
+	ui_setrectangle(&r, left, top + half, width, top + half);
+	if (self->machine->describevalue(
+		self->machine, str, param, self->machine->value(self->machine, param)) == FALSE) {
+		_snprintf(str, 128, "%d", self->machine->value(self->machine, param));
+	}
+	ui_textoutrectangle(g, 
+		left, top + half, ETO_OPAQUE | ETO_CLIPPED,
+		r, str, strlen(str));	
 }
 
 void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
@@ -214,42 +211,38 @@ void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
 	int height;
 	int half;
 	int quarter;
-	ui_rectangle r;
-	const CMachineParameter* par;	
+	ui_rectangle r;	
 	const char *parValue;
 	char str[128];
-	
-	par = self->machine->parameter(self->machine, param);
-	if (par) {		
-		parValue = str;
+			
+	parValue = str;
 
-		cellposition(self, row, col, &left, &top);
-		cellsize(self, &width, &height);		
-		half = height/2;
-		quarter = half/2;
-	
-		// dc.FillSolidRect(x, y, width, quarter,uiSetting->topColor);
-		// dc.FillSolidRect(x, y+half+quarter, width, quarter,uiSetting->bottomColor);
+	cellposition(self, row, col, &left, &top);
+	cellsize(self, &width, &height);		
+	half = height/2;
+	quarter = half/2;
 
-		// CFont *oldfont = dc.SelectObject(&uiSetting->font_bold);
-		// dc.SetBkColor(uiSetting->titleColor);
-		// dc.SetTextColor(uiSetting->fonttitleColor);
-		// dc.ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y + quarter, x+width, y+half+quarter), CString(parName), 0);
-		// dc.SelectObject(oldfont);
-		ui_setrectangle(&r, left, top, width, top + half);
+	// dc.FillSolidRect(x, y, width, quarter,uiSetting->topColor);
+	// dc.FillSolidRect(x, y+half+quarter, width, quarter,uiSetting->bottomColor);
 
-		ui_setbackgroundcolor(g, 0x00232323);
-		ui_settextcolor(g, 0x00FFFFFF);
-		if (!self->machine->parametername(self->machine, str, param)) {
-			if (!self->machine->parameterlabel(self->machine, str, param)) {
-				_snprintf(str, 128, "%s", par->Name);
-			}
+	// CFont *oldfont = dc.SelectObject(&uiSetting->font_bold);
+	// dc.SetBkColor(uiSetting->titleColor);
+	// dc.SetTextColor(uiSetting->fonttitleColor);
+	// dc.ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y + quarter, x+width, y+half+quarter), CString(parName), 0);
+	// dc.SelectObject(oldfont);
+	ui_setrectangle(&r, left, top, width, top + half);
+
+	ui_setbackgroundcolor(g, 0x00232323);
+	ui_settextcolor(g, 0x00FFFFFF);
+	if (!self->machine->parametername(self->machine, str, param)) {
+		if (!self->machine->parameterlabel(self->machine, str, param)) {
+			_snprintf(str, 128, "%s", "");
 		}
-
-		ui_textoutrectangle(g, 
-			left, top, ETO_OPAQUE | ETO_CLIPPED,
-			r, str, strlen(str));
 	}
+
+	ui_textoutrectangle(g, 
+		left, top, ETO_OPAQUE | ETO_CLIPPED,
+		r, str, strlen(str));	
 }
 
 void DrawSlider(ParamView* self, ui_graphics* g, int param, int row, int col)
@@ -373,20 +366,23 @@ void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int button)
 
 void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button)
 {
-	if (self->tweak != -1) {
-		const CMachineParameter* param;
+	if (self->tweak != -1) {		
 		int dy;
-		int val;		
+		int val;
+		int minval;
+		int maxval;
 				
-		self->my = y;
-		param = self->machine->parameter(self->machine, self->tweak);
+		self->my = y;		
+		self->machine->parameterrange(self->machine, self->tweak, &minval,
+			&maxval);
 		dy = self->tweakbase - y;
-		val = (int)(self->tweakval + (param->MaxValue - param->MinValue) / 100.0 * dy);
-		if (val > param->MaxValue) {
-			val = param->MaxValue;
+		val = (int)(self->tweakval +
+			(maxval - minval) / 100.0 * dy);
+		if (val > maxval) {
+			val = maxval;
 		}
-		if (val < param->MinValue) {
-			val = param->MinValue;
+		if (val < minval) {
+			val = minval;
 		}
 		self->machine->parametertweak(self->machine, self->tweak, val);
 		ui_invalidate(&self->component);		

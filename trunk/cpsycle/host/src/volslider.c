@@ -25,7 +25,7 @@ void InitVolSlider(VolSlider* self, ui_component* parent, Workspace* workspace)
 	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
 	signal_connect(&self->slider.component.signal_timer, self, OnTimer);	
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	SetTimer(self->slider.component.hwnd, timerid, 50, 0);
+	ui_component_starttimer(&self->slider.component, timerid, 50);
 }
 
 void OnDestroy(VolSlider* self)

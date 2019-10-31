@@ -7,14 +7,11 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-typedef CMachineInfo * (*GETINFO)(void);
-typedef CMachineInterface * (*CREATEMACHINE)(void);
-
 static void work(LuaPlugin*, BufferContext*);
 static int hostevent(LuaPlugin*, int const eventNr, int const val1, float const val2);
 static void seqtick(LuaPlugin*, int channel, const PatternEvent*);
 static void sequencerlinetick(LuaPlugin*);
-static CMachineInfo* info(LuaPlugin*);
+static MachineInfo* info(LuaPlugin*);
 static void parametertweak(LuaPlugin*, int par, int val);
 static int describevalue(LuaPlugin*, char* txt, int const param, int const value);
 static int value(LuaPlugin*, int const param);
@@ -36,7 +33,7 @@ void dispose(LuaPlugin* self)
 	machine_dispose(&self->machine);
 }
 
-CMachineInfo* luaplugin_psycle_test(const char* path)
+MachineInfo* luaplugin_psycle_test(const char* path)
 {
 	return 0;
 }
@@ -61,7 +58,7 @@ void sequencerlinetick(LuaPlugin* self)
 	
 }
 
-CMachineInfo* info(LuaPlugin* self)
+MachineInfo* info(LuaPlugin* self)
 {
 
 }

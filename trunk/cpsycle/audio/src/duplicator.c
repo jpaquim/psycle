@@ -9,7 +9,7 @@
 static void work(Duplicator* self, BufferContext* bc) { }
 static void sequencertick(Duplicator*);
 static List* sequencerinsert(Duplicator*, List* events);
-static const CMachineInfo* info(Duplicator*);
+static const MachineInfo* info(Duplicator*);
 static void parametertweak(Duplicator*, int par, int val);
 static int describevalue(Duplicator*, char* txt, int const param, int const value);
 static int value(Duplicator*, int const param);
@@ -56,12 +56,10 @@ static CMachineParameter const *pParameters[] = {
 	&paraOffset7,
 };
 
-static CMachineInfo const MacInfo = {
+static MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	GENERATOR | 32 | 64,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
 	"Note Duplicator"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -69,11 +67,11 @@ static CMachineInfo const MacInfo = {
 		,
 	"Note Duplicator",
 	"Psycledelics",
-	"help",
-	2
+	"help",	
+	MACH_DUPLICATOR
 };
 
-const CMachineInfo* duplicator_info(void)
+const MachineInfo* duplicator_info(void)
 {
 	return &MacInfo;
 }
@@ -168,7 +166,7 @@ int transpose(int note, int offset)
 	return rv;
 }
 
-const CMachineInfo* info(Duplicator* self)
+const MachineInfo* info(Duplicator* self)
 {	
 	return &MacInfo;
 }

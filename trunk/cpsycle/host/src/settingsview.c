@@ -55,7 +55,7 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	self->selected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
-	ui_edit_init(&self->edit, &self->client, 0);	
+	ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);	
 	ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->client);	
 	ui_component_hide(&self->inputdefiner.component);		

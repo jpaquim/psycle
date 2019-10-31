@@ -53,12 +53,12 @@ void ui_progressbar_setprogress(ui_progressbar* self, float progress)
 {
 	self->progress = progress;
 	ui_invalidate(&self->component);
-	UpdateWindow(self->component.hwnd);
+	UpdateWindow((HWND)self->component.hwnd);
 }
 
 void ui_progressbar_tick(ui_progressbar* self)
 {
 	self->progress += 0.01f;
 	ui_invalidate(&self->component);
-	UpdateWindow(self->component.hwnd);
+	UpdateWindow((HWND)self->component.hwnd);
 }

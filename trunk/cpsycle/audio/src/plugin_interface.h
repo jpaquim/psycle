@@ -39,7 +39,7 @@ typedef struct {
 	int DefValue;			// default value for params that have MPF_STATE flag set
 } CMachineParameter;
 
-typedef struct {
+typedef struct CMachineInfo {
 	/// API version. Use MI_VERSION
 	short APIVersion;
 	/// plug version. Your machine version. Shown in Hexadecimal.

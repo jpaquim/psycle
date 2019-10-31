@@ -196,7 +196,7 @@ void InitSequenceListView(SequenceListView* self, ui_component* parent,
 	self->dy = 0;
 	self->lastplayposition = -1.f;
 	self->lastentry = 0;
-	SetTimer(self->component.hwnd, TIMERID_SEQUENCEVIEW, 200, 0);
+	ui_component_starttimer(&self->component, TIMERID_SEQUENCEVIEW, 200);
 }
 
 void OnDraw(SequenceListView* self, ui_component* sender, ui_graphics* g)

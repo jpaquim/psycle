@@ -68,18 +68,18 @@ void ondestroy(ui_combobox* self, ui_component* sender)
 
 int ui_combobox_addstring(ui_combobox* self, const char* text)
 {
-	int index;
+	LRESULT index;
 
-	index = SendMessage(self->currcombo->hwnd, CB_ADDSTRING, 0, (LPARAM)text);
+	index = SendMessage((HWND)self->currcombo->hwnd, CB_ADDSTRING, (WPARAM)0, (LPARAM)text);
 	if (self->ownerdrawn) {
 		ui_invalidate(&self->component);
 	}
-	return index;
+	return (int)index;
 }
 
 void ui_combobox_clear(ui_combobox* self)
 {
-	SendMessage(self->currcombo->hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
+	SendMessage((HWND)self->currcombo->hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
 	if (self->ownerdrawn) {
 		ui_invalidate(&self->component);
 	}
@@ -87,7 +87,7 @@ void ui_combobox_clear(ui_combobox* self)
 
 void ui_combobox_setcursel(ui_combobox* self, int index)
 {
-	SendMessage(self->currcombo->hwnd, CB_SETCURSEL, (WPARAM)index, (LPARAM)0);
+	SendMessage((HWND)self->currcombo->hwnd, CB_SETCURSEL, (WPARAM)index, (LPARAM)0);
 	if (self->ownerdrawn) {
 		ui_invalidate(&self->component);
 	}
@@ -95,7 +95,7 @@ void ui_combobox_setcursel(ui_combobox* self, int index)
 
 int ui_combobox_cursel(ui_combobox* self)
 {
-	return SendMessage(self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0,
+	return SendMessage((HWND)self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0,
 		(LPARAM)0);	
 }
 
@@ -125,8 +125,8 @@ void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam,
         case CBN_SELCHANGE :
         {
             if (self->signal_selchanged.slots) {
-				int sel = SendMessage(self->currcombo->hwnd, CB_GETCURSEL,
-					(WPARAM)0, (LPARAM)0);
+				int sel = SendMessage((HWND)self->currcombo->hwnd,
+					CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 				signal_emit(&self->signal_selchanged, self, 1, sel);			
 			}
 			if (self->ownerdrawn) {
@@ -149,22 +149,26 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	int ax;
 	int ay;
 	int sel;
+	TEXTMETRIC tm;
+	int vcenter;
 	unsigned int arrowcolor = 0x00777777;
 	unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
 	size = ui_component_size(&self->component);
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
 
-	sel = SendMessage(self->combo.hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	tm = ui_component_textmetric(&self->component);
+	vcenter = (size.height - tm.tmHeight) / 2;
+	sel = SendMessage((HWND)self->combo.hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 	if (sel != CB_ERR) {
 		int len;
 		
-		len = SendMessage(self->combo.hwnd, CB_GETLBTEXTLEN, (WPARAM)sel, 0);
+		len = SendMessage((HWND)self->combo.hwnd, CB_GETLBTEXTLEN, (WPARAM)sel, 0);
 		if (len > 0) {
 			char* txt;
 
 			txt = (char*)malloc(len + 1);			
-			SendMessage(self->combo.hwnd, CB_GETLBTEXT, (WPARAM)sel,
+			SendMessage((HWND)self->combo.hwnd, CB_GETLBTEXT, (WPARAM)sel,
 				(LPARAM)txt);
 
 			ui_setbackgroundmode(g, TRANSPARENT);
@@ -173,12 +177,12 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 			} else {
 				ui_settextcolor(g, 0x00CACACA);
 			}
-			ui_textoutrectangle(g, 0, 0, ETO_CLIPPED, r, txt, strlen(txt));
+			ui_textoutrectangle(g, 0, vcenter, ETO_CLIPPED, r, txt, strlen(txt));
 			free(txt);
 		}
 	}
 	ax = size.width - 10;
-	ay = 4;
+	ay = 4 + vcenter;
 	
 	arrow_down[0].x = 0 + ax;
 	arrow_down[0].y = 0 + ay;
@@ -196,7 +200,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	}
 
 	ax = size.width - 25;
-	ay = 2;
+	ay = 2 + vcenter;
 
 	arrow_right[0].x = 0 + ax;
 	arrow_right[0].y = 0 + ay;
@@ -214,7 +218,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	}
 
 	ax = size.width - 40;
-	ay = 2;
+	ay = 2 + vcenter;
 
 	arrow_left[0].x = 4 + ax;
 	arrow_left[0].y = 0 + ay;
@@ -248,18 +252,19 @@ void onmousedown(ui_combobox* self, ui_component* sender, int x, int y,
 		int count;
 		int index;
 
-		count = SendMessage(self->currcombo->hwnd, CB_GETCOUNT, 0, (LPARAM)0);
+		count = SendMessage((HWND)self->currcombo->hwnd, CB_GETCOUNT, 0, (LPARAM)0);
 		index = ui_combobox_cursel(self);
 		if (index < count - 1) {
 			ui_combobox_setcursel(self, index + 1);
 			signal_emit(&self->signal_selchanged, self, 1, index + 1);
 		}
 	} else {
-		SetWindowPos (self->combo.hwnd, NULL, 
+		SetWindowPos((HWND)self->combo.hwnd, NULL, 
 		   0,
 		   0,
 		   size.width, size.height, SWP_NOZORDER | SWP_NOMOVE);
-		SendMessage(self->combo.hwnd, CB_SHOWDROPDOWN, (WPARAM)TRUE, (LPARAM)0);
+		SendMessage((HWND)self->combo.hwnd, CB_SHOWDROPDOWN,
+			(WPARAM)TRUE, (LPARAM)0);
 	}
 }
 
@@ -285,7 +290,7 @@ void onmousemove(ui_combobox* self, ui_component* sender, int x, int y,
 		if (x >= size.width - 25 && x < size.width - 10) {
 			int count;
 			int index;
-			count = SendMessage(self->currcombo->hwnd, CB_GETCOUNT, 0,
+			count = SendMessage((HWND)self->currcombo->hwnd, CB_GETCOUNT, 0,
 				(LPARAM)0);
 			index = ui_combobox_cursel(self);
 			if (index < count - 1) {

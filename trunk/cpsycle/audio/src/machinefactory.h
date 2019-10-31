@@ -6,6 +6,7 @@
 
 #include "machine.h"
 #include "plugincatcher.h"
+#include <hashtbl.h>
 
 typedef enum {
 	MACHINEFACTORY_CREATEASPROXY = 1
@@ -14,13 +15,14 @@ typedef enum {
 typedef struct {
 	MachineCallback machinecallback;	
 	PluginCatcher* catcher;
-	MachineFactoryOptions options;
+	MachineFactoryOptions options;	
 } MachineFactory;
 
 void machinefactory_init(MachineFactory*, MachineCallback, PluginCatcher*);
-Machine* machinefactory_make(MachineFactory*, MachineType,
+void machinefactory_dispose(MachineFactory*);
+Machine* machinefactory_makemachine(MachineFactory*, MachineType,
 	const char* plugincatchername);
-Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
+Machine* machinefactory_makemachinefrompath(MachineFactory*, MachineType,
 	const char* path);
 void machinefactory_setoptions(MachineFactory*, MachineFactoryOptions options);
 MachineFactoryOptions machinefactory_options(MachineFactory*);

@@ -364,22 +364,25 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 		
 	machine = machines_at(self->machines, entry->event.mach);
 	if (machine && machine->info(machine) &&
-			entry->event.inst < machine->info(machine)->numParameters) {
+			entry->event.inst < machine->numparameters(machine) > 0) {
 		int param = entry->event.inst;
-		int min = machine->info(machine)->Parameters[param]->MinValue;
-		int max = machine->info(machine)->Parameters[param]->MaxValue;		
+		int minval;
+		int maxval;		
 		int slides = sequencer_frames(self, 1.f/(self->lpb * self->lpbspeed)) / 64;		
-		int dest = ((entry->event.cmd << 8) + entry->event.parameter) + min;
+		int dest = ((entry->event.cmd << 8) + entry->event.parameter);
 		int start = machine->value(machine, param);
 		int slide;
 		float delta;
 		float curr;
 
+		machine->parameterrange(machine, entry->event.parameter, &minval,
+			&maxval);		
+		dest += minval;
 		if (slides == 0) {
 			return;
 		}
-		if (dest > max) { 
-			dest = max;
+		if (dest > maxval) { 
+			dest = maxval;
 		}
 		if (dest == start) {
 			PatternEntry* slideentry;
@@ -389,7 +392,7 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 			list_append(&self->events, slideentry);
 		} else {
 			delta = (dest - start) / (float)slides;			
-			curr = (float)start + min;
+			curr = (float)start + minval;
 			for (slide = 0; slide < slides; ++slide) {
 				PatternEntry* slideentry;
 				int cmd;
@@ -399,8 +402,8 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 				if (slide == slides -1) {
 					curr = (float)dest;
 				}				
-				nv = (int) curr + min;
-				if (nv > max) nv = max;
+				nv = (int) curr + minval;
+				if (nv > maxval) nv = maxval;
 				cmd = nv >> 8;
 				parameter = nv & 0xFF;
 				curr += delta;

@@ -27,10 +27,11 @@ static int machineproxy_describevalue(MachineProxy*, char* txt, int const param,
 static int machineproxy_value(MachineProxy*, int const param);
 static void machineproxy_setpanning(MachineProxy*, amp_t);
 static amp_t machineproxy_panning(MachineProxy*);
-static const CMachineInfo* machineproxy_info(MachineProxy*);
+static const MachineInfo* machineproxy_info(MachineProxy*);
+static int machineproxy_parametertype(MachineProxy*, int param);
+static void machineproxy_parameterrange(MachineProxy*, int numparam, int* minval, int* maxval);
 static unsigned int machineproxy_numparameters(MachineProxy*);
 static unsigned int machineproxy_numcols(MachineProxy*);
-static const CMachineParameter* machineproxy_parameter(MachineProxy*, unsigned int par);
 static int machineproxy_paramviewoptions(MachineProxy*);
 static void machineproxy_loadspecific(MachineProxy*, PsyFile* file, unsigned int slot, Machines* machines);
 static unsigned int machineproxy_samplerate(MachineProxy*);
@@ -81,9 +82,10 @@ void machineproxy_init(MachineProxy* self, Machine* client)
 	self->machine.setpanning = machineproxy_setpanning;
 	self->machine.panning = machineproxy_panning;
 	self->machine.info = machineproxy_info;
+	self->machine.parameterrange = machineproxy_parameterrange;
+	self->machine.parametertype = machineproxy_parametertype;
 	self->machine.numparameters = machineproxy_numparameters;
-	self->machine.numcols = machineproxy_numcols;
-	self->machine.parameter = machineproxy_parameter;
+	self->machine.numcols = machineproxy_numcols;	
 	self->machine.paramviewoptions = machineproxy_paramviewoptions;
 	self->machine.parameterlabel = machineproxy_parameterlabel;
 	self->machine.parametername = machineproxy_parametername;
@@ -255,9 +257,9 @@ amp_t machineproxy_panning(MachineProxy* self)
 	return rv;
 }
 
-const CMachineInfo* machineproxy_info(MachineProxy* self)
+const MachineInfo* machineproxy_info(MachineProxy* self)
 { 
-	const CMachineInfo* rv = 0;
+	const MachineInfo* rv = 0;
 
 	if (self->crashed == 0) {
 		__try {
@@ -289,19 +291,6 @@ unsigned int machineproxy_numcols(MachineProxy* self)
 		__try {
 			rv = self->client->numcols(self->client);
 		} __except(FilterException(self, "numcols", GetExceptionCode(), GetExceptionInformation())) {			
-		}
-	}
-	return rv;
-}
-
-const CMachineParameter* machineproxy_parameter(MachineProxy* self, unsigned int par)
-{
-	const CMachineParameter* rv = 0;
-
-	if (self->crashed == 0) {
-		__try {
-			rv = self->client->parameter(self->client, par);
-		} __except(FilterException(self, "parameter", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -425,6 +414,29 @@ void machineproxy_setslot(MachineProxy* self, int slot)
 		__try { 
 			self->client->setslot(self->client, slot);
 		} __except(FilterException(self, "setslot", GetExceptionCode(), GetExceptionInformation())) {
+		}
+	}
+}
+
+int machineproxy_parametertype(MachineProxy* self, int param)
+{
+	int rv = MPF_STATE;
+	
+	if (self->crashed == 0) {
+		__try { 
+			rv = self->client->parametertype(self->client, param);			
+		} __except(FilterException(self, "parametertype", GetExceptionCode(), GetExceptionInformation())) {			
+		}
+	}
+	return rv;
+}
+
+void machineproxy_parameterrange(MachineProxy* self, int numparam, int* minval, int* maxval)
+{
+	if (self->crashed == 0) {
+		__try { 
+			self->client->parameterrange(self->client, numparam, minval, maxval);
+		} __except(FilterException(self, "parameterrange", GetExceptionCode(), GetExceptionInformation())) {
 		}
 	}
 }

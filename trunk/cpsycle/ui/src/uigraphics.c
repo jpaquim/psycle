@@ -22,7 +22,6 @@ void ui_graphics_dispose(ui_graphics* g)
 	}	
 }
 
-
 void ui_textout(ui_graphics* self, int x, int y, const char* str, size_t len)
 {	
 	TextOut(self->hdc, x, y, str, len);

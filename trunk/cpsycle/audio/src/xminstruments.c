@@ -31,3 +31,7 @@ void xminstruments_insert(XMInstruments* self, XMInstrument* instrument, int slo
 	table_insert(&self->container, slot, instrument);
 }
 
+size_t xminstruments_size(XMInstruments* self)
+{
+	return table_size(&self->container);
+}

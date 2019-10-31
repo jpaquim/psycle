@@ -88,10 +88,19 @@ void machines_free(Machines* self)
 	}
 }
 
+void machines_clear(Machines* self)
+{
+	machines_dispose(self);
+	machines_init(self);
+}
+
 void machines_insert(Machines* self, int slot, Machine* machine)
 {	
 	if (machine) {
 		table_insert(&self->slots, slot, machine);
+		if (slot == MASTER_INDEX) {
+			self->master = machine;
+		}
 		machine->setslot(machine, slot);
 		signal_emit(&self->signal_insert, self, 1, slot);
 		if (!self->filemode) {		
@@ -401,9 +410,9 @@ void machines_endfilemode(Machines* self)
 	self->connections.filemode = 0;
 }
 
-unsigned int machines_size(Machines* self)
+size_t machines_size(Machines* self)
 {
-	return self->slots.count;
+	return table_size(&self->slots);
 }
 
 void machines_showparameters(Machines* self, int slot)

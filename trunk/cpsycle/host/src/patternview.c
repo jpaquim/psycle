@@ -199,8 +199,7 @@ void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
 	// self->lpb = lpb;
 	//
 
-	ui_invalidate(&self->trackerview.component);
-	ui_invalidate(&self->pianoroll.component);
+	ui_invalidate(&self->trackerview.component);		
 }
 
 void OnSongChanged(PatternView* self, Workspace* workspace)

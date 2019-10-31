@@ -22,5 +22,6 @@ void patterns_enumerate(Patterns*, void* context, int (*enumproc)(void*, unsigne
 void patterns_clear(Patterns*);
 void patterns_erase(Patterns*, unsigned int slot);
 void patterns_remove(Patterns*, unsigned int slot);
+size_t patterns_size(Patterns*);
 
 #endif

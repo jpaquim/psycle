@@ -31,23 +31,23 @@ void ondestroy(ui_slider* self, ui_component* sender)
 
 void ui_slider_settext(ui_slider* slider, const char* text)
 {
-	SetWindowText(slider->component.hwnd, text);
+	SetWindowText((HWND)slider->component.hwnd, text);
 }
 
 void ui_slider_setrange(ui_slider* self, int minrange, int maxrange)
 {	
-	SendMessage(self->component.hwnd, TBM_SETRANGE, TRUE,
+	SendMessage((HWND)self->component.hwnd, TBM_SETRANGE, TRUE,
 		MAKELONG(minrange, maxrange));
 }
 
 void ui_slider_setvalue(ui_slider* self, int value)
 {
-	SendMessage(self->component.hwnd, TBM_SETPOS, TRUE, value);
+	SendMessage((HWND)self->component.hwnd, TBM_SETPOS, TRUE, value);
 }
 
 int ui_slider_value(ui_slider* self)
 {
-	return SendMessage(self->component.hwnd, TBM_GETPOS, (WPARAM)0, (LPARAM)0);
+	return SendMessage((HWND)self->component.hwnd, TBM_GETPOS, (WPARAM)0, (LPARAM)0);
 }
 
 void onwindowproc(ui_slider* self, ui_component* sender, int message,

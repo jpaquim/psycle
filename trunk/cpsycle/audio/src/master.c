@@ -9,90 +9,27 @@
 #include <math.h>
 
 static int master_mode(Master* self) { return MACHMODE_MASTER; }
-static void master_dispose(Master* self);
-static void parametertweak(Master* self, int par, int val);
-static int describevalue(Master*, char* txt, int const param, int const value);
-static int value(Master*, int const param);
-static const CMachineInfo* info(Master* self);
-static unsigned int numinputs(Master* self);
-static unsigned int numoutputs(Master* self);
+static void master_dispose(Master*);
+
+static int parametertype(Master*, int param);
+static unsigned int numparameters(Master*);
+static unsigned int numcols(Master*);
+static void parametertweak(Master*, int par, int val);	
+static void parameterrange(Master*, int numparam, int* minval, int* maxval);
+static int parameterlabel(Master*, char* txt, int param);
+static int parametername(Master*, char* txt, int param);
+static int describevalue(Master*, char* txt, int param, int value);
+static int value(Master*, int param);
+static const MachineInfo* info(Master*);
+static unsigned int numinputs(Master*);
+static unsigned int numoutputs(Master*);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
 
-static CMachineParameter const paraMaster = { 
-	"Master", "Master Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM1 = { 
-	"m1 Vol", "m1 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM2 = { 
-	"m2 Vol", "m2 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM3 = { 
-	"m3 Vol", "m3 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM4 = { 
-	"m4 Vol", "m4 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM5 = { 
-	"m5 Vol", "m5 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM6 = { 
-	"m6 Vol", "m6 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM7 = { 
-	"m7 Vol", "m7 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM8 = { 
-	"m8 Vol", "m8 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM9 = { 
-	"m9 Vol", "m9 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM10 = { 
-	"m10 Vol", "m10 Vol",	0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM11 = { 
-	"m11 Vol", "m11 Vol", 0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const paraM12 = { 
-	"m12 Vol", "m12 Vol", 0, 65535, MPF_STATE, 0
-};
-
-static CMachineParameter const *pParameters[] = {
-	&paraMaster,
-	&paraM1,
-	&paraM2,
-	&paraM3,
-	&paraM4,
-	&paraM5,
-	&paraM6,
-	&paraM7,
-	&paraM8,
-	&paraM9,
-	&paraM10,
-	&paraM11,
-	&paraM12
-};
-
-static CMachineInfo const MacInfo = {
+static MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
 	"Master"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -101,10 +38,12 @@ static CMachineInfo const MacInfo = {
 	"Master",
 	"Psycledelics",
 	"help",
-	3
+	MACH_MASTER,
+	0,
+	0
 };
 
-const CMachineInfo* master_info(void) { return &MacInfo; }
+const MachineInfo* master_info(void) { return &MacInfo; }
 
 void master_init(Master* self, MachineCallback callback)
 {
@@ -119,6 +58,16 @@ void master_init(Master* self, MachineCallback callback)
 	self->machine.value = value;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;	
+	// Parameter
+	self->machine.parametertype = parametertype;
+	self->machine.numcols = numcols;
+	self->machine.numparameters = numparameters;
+	self->machine.parameterrange = parameterrange;
+	self->machine.parametertweak = parametertweak;	
+	self->machine.parameterlabel = parameterlabel;
+	self->machine.parametername = parametername;
+	self->machine.describevalue = describevalue;
+	self->machine.value = value;	
 }
 
 void master_dispose(Master* self)
@@ -154,7 +103,7 @@ void parametertweak(Master* self, int param, int value)
 	}
 }
 
-int describevalue(Master* self, char* txt, int const param, int const value)
+int describevalue(Master* self, char* txt, int param, int value)
 { 	
 	if (param == 0) {
 		Machines* machines = self->machine.callback.machines(
@@ -186,7 +135,7 @@ int describevalue(Master* self, char* txt, int const param, int const value)
 	return 0;
 }
 
-int value(Master* self, int const param)
+int value(Master* self, int param)
 {	
 	if (param == 0) {
 		Machines* machines = self->machine.callback.machines(
@@ -228,7 +177,7 @@ float floatparamvalue(int value)
 	return value / 65535.f;	
 }
 
-const CMachineInfo* info(Master* self)
+const MachineInfo* info(Master* self)
 {	
 	return &MacInfo;
 }
@@ -243,3 +192,35 @@ unsigned int numoutputs(Master* self)
 	return 2;
 }
 
+int parametertype(Master* self, int par)
+{
+	return MPF_STATE;
+}
+
+void parameterrange(Master* self, int numparam, int* minval, int* maxval)
+{
+	*minval = 0;
+	*maxval = 65535;
+}
+
+unsigned int numparameters(Master* self)
+{
+	return 13;
+}
+
+unsigned int numcols(Master* self)
+{
+	return 4;
+}
+
+int parameterlabel(Master* self, char* txt, int param)
+{
+	_snprintf(txt, 128, "%s", "Vol");
+	return 1;
+}
+
+int parametername(Master* self, char* txt, int param)
+{
+	_snprintf(txt, 128, "%s", "Vol");
+	return 1;
+}

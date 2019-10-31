@@ -20,6 +20,6 @@ typedef struct {
 } Duplicator2;
 
 void duplicator2_init(Duplicator2*, MachineCallback);
-const CMachineInfo* duplicator2_info(void);
+const MachineInfo* duplicator2_info(void);
 
 #endif

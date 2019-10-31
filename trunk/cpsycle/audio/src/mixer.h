@@ -43,7 +43,7 @@ typedef struct {
 } Mixer;
 
 void mixer_init(Mixer*, MachineCallback);
-const CMachineInfo* mixer_info(void);
+const MachineInfo* mixer_info(void);
 
 
 #endif

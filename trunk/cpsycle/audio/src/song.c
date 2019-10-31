@@ -45,7 +45,7 @@ void song_initmachines(Song* self)
 {
 	machines_init(&self->machines);
 	machines_insertmaster(&self->machines,
-		machinefactory_make(self->machinefactory, MACH_MASTER, 0));
+		machinefactory_makemachine(self->machinefactory, MACH_MASTER, 0));
 }
 
 void song_initpatterns(Song* self)
@@ -124,6 +124,7 @@ void song_load(Song* self, const char* path, Properties** workspaceproperties)
 		*workspaceproperties = 0;
 		sequence_clear(&self->sequence);		
 		patterns_clear(&self->patterns);
+		machines_clear(&self->machines);
 		machines_startfilemode(&self->machines);
 		psyfile_read(&file, header, 8);
 		header[8] = '\0';
@@ -137,6 +138,24 @@ void song_load(Song* self, const char* path, Properties** workspaceproperties)
 		} else {
 
 		}
+		if (!machines_at(&self->machines, MASTER_INDEX)) {
+			Properties* machines;	
+			Properties* machine;
+
+			machines_insertmaster(&self->machines,
+					machinefactory_makemachine(self->machinefactory,
+					MACH_MASTER, 0));
+			machines = properties_findsection(*workspaceproperties,
+				"machines");
+			if (!machines) {
+				machines = properties_createsection(
+					*workspaceproperties, "machines");
+			}
+			machine = properties_createsection(machines, "machine");
+			properties_append_int(machine, "index", MASTER_INDEX, 0, 0);		
+			properties_append_int(machine, "x", 320, 0, 0);
+			properties_append_int(machine, "y", 200, 0, 0);			
+		}		
 		machines_endfilemode(&self->machines);
 		psyfile_close(&file);
 		signal_emit(&self->signal_loadprogress, self, 1, 0);
@@ -149,5 +168,6 @@ void song_save(Song* self, const char* path, Properties* workspaceproperties)
 
 	if (psyfile_create(&file, path, 1)) {
 		psy3_save(self, &file, workspaceproperties);
+		psyfile_close(&file);
 	}
 }

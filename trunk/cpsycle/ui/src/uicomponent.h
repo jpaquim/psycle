@@ -47,8 +47,8 @@ typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
 	LPARAM lParam);
 
 typedef struct {
-	HWND hwnd;
-	HMENU winid;	
+	size_t hwnd;
+	size_t winid;	
 	Signal signal_size;
 	Signal signal_draw;
 	Signal signal_timer;
@@ -151,6 +151,8 @@ void ui_component_preventinput(ui_component*, int recursive);
 void ui_component_setbackgroundmode(ui_component*, BackgroundMode);
 void ui_component_setbackgroundcolor(ui_component*, unsigned int color);
 void ui_component_setcolor(ui_component*, unsigned int color);
+void ui_component_starttimer(ui_component*, unsigned int id, unsigned int interval);
+void ui_component_stoptimer(ui_component*, unsigned int id);
 ui_size ui_component_textsize(ui_component*, const char*);
 TEXTMETRIC ui_component_textmetric(ui_component*);
 ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
@@ -161,5 +163,9 @@ List* ui_components_setmargin(List* list, const ui_margin* margin);
 
 int ui_openfile(ui_component* self, char* title, char* filter,
 	char* defextension, char* filename);
+int ui_savefile(ui_component* self, char* title, char* filter,
+	char* defextension, char* filename);
+
+ui_component* ui_maincomponent(void);
 
 #endif

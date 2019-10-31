@@ -136,7 +136,7 @@ void onmousemove(ui_notebook* self, ui_component* sender, int x, int y, int butt
 		ui_component_move(sender, position.left + x, size.height);		
 		align_split(self, position.left + x);
 		ui_invalidate(&self->component);
-		UpdateWindow(self->component.hwnd);
+		UpdateWindow((HWND)self->component.hwnd);
 	}
 }
 

@@ -41,7 +41,7 @@ void ondestroy(ui_listbox* self, ui_component* sender)
 
 int ui_listbox_addstring(ui_listbox* listbox, const char* text)
 {
-	return SendMessage(listbox->component.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
+	return SendMessage((HWND)listbox->component.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
 }
 
 void ui_listbox_setstring(ui_listbox* self, const char* text, int index)
@@ -49,36 +49,36 @@ void ui_listbox_setstring(ui_listbox* self, const char* text, int index)
 	int sel;
 
 	sel = ui_listbox_cursel(self);
-	SendMessage(self->component.hwnd, LB_DELETESTRING, (WPARAM)index, (LPARAM)text);
-	SendMessage(self->component.hwnd, LB_INSERTSTRING, (WPARAM)index, (LPARAM)text);
+	SendMessage((HWND)self->component.hwnd, LB_DELETESTRING, (WPARAM)index, (LPARAM)text);
+	SendMessage((HWND)self->component.hwnd, LB_INSERTSTRING, (WPARAM)index, (LPARAM)text);
 	ui_listbox_setcursel(self, sel);
 }
 
 void ui_listbox_clear(ui_listbox* listbox)
 {
-	SendMessage(listbox->component.hwnd, LB_RESETCONTENT, 0, (LPARAM)0);
+	SendMessage((HWND)listbox->component.hwnd, LB_RESETCONTENT, 0, (LPARAM)0);
 }
 
 void ui_listbox_setcursel(ui_listbox* listbox, int index)
 {
-	SendMessage(listbox->component.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);
+	SendMessage((HWND)listbox->component.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);
 	
 }
 
 int ui_listbox_cursel(ui_listbox* listbox)
 {
-	return SendMessage(listbox->component.hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	return SendMessage((HWND)listbox->component.hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 }
 
 void ui_listbox_selitems(ui_listbox* listbox, int* items, int maxitems)
 {	
-	SendMessage(listbox->component.hwnd, LB_GETSELITEMS, (WPARAM)maxitems,
+	SendMessage((HWND)listbox->component.hwnd, LB_GETSELITEMS, (WPARAM)maxitems,
 		(LPARAM)items); 
 }
 
 int ui_listbox_selcount(ui_listbox* listbox)
 {
-	return SendMessage(listbox->component.hwnd, LB_GETSELCOUNT, 
+	return SendMessage((HWND)listbox->component.hwnd, LB_GETSELCOUNT, 
 		(WPARAM)0, (LPARAM)0); 
 }
 
@@ -89,7 +89,7 @@ void oncommand(ui_listbox* self, ui_component* sender, WPARAM wParam,
         case LBN_SELCHANGE :
         {
             if (self->signal_selchanged.slots) {
-				int sel = SendMessage(self->component.hwnd, LB_GETCURSEL, 
+				int sel = SendMessage((HWND)self->component.hwnd, LB_GETCURSEL,
 					(WPARAM)0, (LPARAM)0);
 				signal_emit(&self->signal_selchanged, self, 1, sel);
 			}

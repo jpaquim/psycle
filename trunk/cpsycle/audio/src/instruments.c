@@ -52,3 +52,8 @@ Instrument* instruments_at(Instruments* self, int slot)
 {
 	return table_at(&self->container, slot);
 }
+
+size_t instruments_size(Instruments* self)
+{
+	return table_size(&self->container);
+}

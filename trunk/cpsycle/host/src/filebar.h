@@ -12,9 +12,9 @@
 typedef struct {
 	ui_component component;
 	ui_label header;
-	ui_button newsongbutton;
-	ui_button loadsongbutton;
-	ui_button savesongbutton;
+	ui_button newbutton;
+	ui_button loadbutton;
+	ui_button savebutton;
 	Workspace* workspace;	
 } FileBar;
 
