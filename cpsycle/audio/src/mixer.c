@@ -11,195 +11,12 @@
 #include <string.h>
 #include <dsptypes.h>
 
-static CMachineParameter const paraInputHeader = 
+const MachineInfo* mixer_info(void)
 {
-	"Input",	
-	"Input",								// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	3,										// Flags
-	0
-};
-
-static CMachineParameter const paraMixKnob = 
-{ 
-	"Mix",	
-	"Mix",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraMixHeader = 
-{ 
-	"Mix",	
-	"Mix",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	1,										// Flags
-	0
-};
-
-static CMachineParameter const paraGainKnob = 
-{ 
-	"Gain",	
-	"Gain",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraGainHeader = 
-{ 
-	"Gain",	
-	"Gain",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	1,										// Flags
-	0
-};
-
-static CMachineParameter const paraPanKnob = 
-{ 
-	"Pan",	
-	"Pan",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraPanHeader = 
-{ 
-	"Pan",	
-	"Pan",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	1,										// Flags
-	0
-};
-
-static CMachineParameter const paraLevelKnob = 
-{ 
-	"Level",	
-	"Level",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraVuInfo = 
-{ 
-	"VU",	
-	"VU",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	1,										// Flags
-	0
-};
-
-static CMachineParameter const paraReturnHeader = 
-{ 
-	"Return",
-	"Return",								// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	3,										// Flags
-	0
-};
-
-static CMachineParameter const paraMasterHeader = 
-{ 
-	"Master Out",
-	"Master Out",							// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	1,										// Flags
-	0
-};
-
-static CMachineParameter const paraSendVol = 
-{ 
-	"Send",	
-	"Send",									// description
-	0,										// MinValue	
-	65535,									// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-
-static CMachineParameter const paraRouteKnob = 
-{ 
-	"Route",	
-	"Route",								// description
-	0,										// MinValue	
-	1,										// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraMasterSendKnob = 
-{ 
-	"Master",	
-	"Master",								// description
-	0,										// MinValue	
-	1,										// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraSoloKnob = 
-{ 
-	"Solo",	
-	"Solo",									// description
-	0,										// MinValue	
-	1,										// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraMuteKnob = 
-{ 
-	"Mute",	
-	"Mute",									// description
-	0,										// MinValue	
-	1,										// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraDryKnob = 
-{ 
-	"Dry",	
-	"Dry",									// description
-	0,										// MinValue	
-	1,										// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-static CMachineParameter const paraWetKnob = 
-{ 
-	"Wet",	
-	"Wet",									// description
-	0,										// MinValue	
-	1,										// MaxValue
-	MPF_STATE,								// Flags
-	0
-};
-
-const CMachineInfo* mixer_info(void)
-{
-	static CMachineInfo const macinfo = {
+	static MachineInfo const macinfo = {
 		MI_VERSION,
 		0x0250,
 		GENERATOR | 32 | 64,
-		0,
-		0,
 		"Mixer"
 			#ifndef NDEBUG
 			" (debug build)"
@@ -208,12 +25,12 @@ const CMachineInfo* mixer_info(void)
 		"Mixer",
 		"Psycledelics",
 		"help",
-		1
+		MACH_MIXER
 	};
 	return &macinfo;
 }
 
-static const CMachineInfo* info(Mixer*);
+static const MachineInfo* info(Mixer*);
 static void mixer_dispose(Mixer*);
 static int mixer_mode(Mixer* self) { return MACHMODE_FX; }
 static void mixer_seqtick(Mixer*, int channel, const PatternEvent*);
@@ -224,6 +41,9 @@ static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, flo
 static void loadspecific(Mixer*, PsyFile* file, unsigned int slot, Machines*);
 static void onconnected(Mixer*, Connections*, int outputslot, int inputslot);
 static void ondisconnected(Mixer*, Connections*, int outputslot, int inputslot);
+static int parametertype(Mixer*, int par);
+static void parameterrange(Mixer*, int param, int* minval, int* maxval);
+static int parameterlabel(Mixer*, char* txt, int param);
 static int parametername(Mixer*, char* txt, int param);
 static void parametertweak(Mixer*, int param, int value);
 static void patterntweak(Mixer* self, int par, int val);
@@ -231,7 +51,6 @@ static int value(Mixer*, int const param);
 static int describevalue(Mixer*, char* txt, int const param, int const value);
 static unsigned int numparameters(Mixer*);
 static unsigned int numcols(Mixer*);
-static const CMachineParameter* parameter(Mixer*, unsigned int par);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
 static WireSocketEntry* wiresocketentry(Mixer*, int input);
@@ -239,9 +58,9 @@ static void insertinputchannels(Mixer*, int num, Machines* machines);
 static int paramviewoptions(Machine* self) { return MACHINE_PARAMVIEW_COMPACT; }
 static unsigned int slot(Mixer* self) { return self->slot; }
 static void setslot(Mixer* self, int slot) { self->slot = slot; }
-static int mastercolumn(Mixer*);
-static int inputcolumn(Mixer*);
-static int returncolumn(Mixer*);
+static size_t mastercolumn(Mixer*);
+static size_t inputcolumn(Mixer*);
+static size_t returncolumn(Mixer*);
 static void preparemix(Mixer*, Machines*, unsigned int amount);
 static void mixinputs(Mixer*, Machines*, unsigned int amount);
 static void workreturns(Mixer*, Machines*, unsigned int amount);
@@ -322,14 +141,16 @@ void mixer_init(Mixer* self, MachineCallback callback)
 	self->machine.seqtick = mixer_seqtick;
 	self->machine.mode = mixer_mode;
 	self->machine.mix = mix;
+	self->machine.parametertype = parametertype;
+	self->machine.parameterrange = parameterrange;
 	self->machine.parametername = parametername;
+	self->machine.parameterlabel = parameterlabel;
 	self->machine.parametertweak = parametertweak;
 	self->machine.patterntweak = patterntweak;
 	self->machine.value = value;
 	self->machine.describevalue = describevalue;
 	self->machine.numparameters = numparameters;
-	self->machine.numcols = numcols;
-	self->machine.parameter = parameter;
+	self->machine.numcols = numcols;	
 	self->machine.paramviewoptions = paramviewoptions;
 	self->machine.loadspecific = loadspecific;
 	self->machine.setslot = setslot;
@@ -664,7 +485,7 @@ void ondisconnected(Mixer* self, Connections* connections, int outputslot, int i
 	}
 }
 
-const CMachineInfo* info(Mixer* self)
+const MachineInfo* info(Mixer* self)
 {	
 	return mixer_info();
 }
@@ -676,8 +497,9 @@ static amp_t dB2Amp(amp_t db)
 
 void patterntweak(Mixer* self, int numparam, int value)
 {
-	int channelindex = numparam/16;
-	int param = numparam%16;
+	size_t channelindex = numparam / 16;
+	size_t param = numparam % 16;
+
 	if (channelindex == 0) {		
 		if (param == 0) {
 			if (value >= 0x1000) {
@@ -754,9 +576,9 @@ void patterntweak(Mixer* self, int numparam, int value)
 
 void parametertweak(Mixer* self, int param, int value)
 {	
-	int col;
-	int row;
-	int rows;
+	size_t col;
+	size_t row;
+	size_t rows;
 
 	rows = numparameters(self) / numcols(self);
 	row = param % rows;
@@ -861,9 +683,9 @@ void parametertweak(Mixer* self, int param, int value)
 
 int value(Mixer* self, int const param)
 {	
-	int col;
-	int row;
-	int rows;
+	size_t col;
+	size_t row;
+	size_t rows;
 
 	rows = numparameters(self) / numcols(self);
 	row = param % rows;
@@ -964,9 +786,9 @@ int value(Mixer* self, int const param)
 
 int describevalue(Mixer* self, char* txt, int const param, int const value)
 { 	
-	int col;
-	int row;
-	int rows;
+	size_t col;
+	size_t row;
+	size_t rows;
 
 	*txt = '\0';
 	rows = numparameters(self) / numcols(self);
@@ -1144,7 +966,8 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 
 unsigned int numparameters(Mixer* self)
 {	
-	return numcols(self) * (10  + self->sends.count + self->sends.count);
+	return numcols(self) * (10  + table_size(&self->sends) + 
+		table_size(&self->sends));
 }
 
 unsigned int numcols(Mixer* self)
@@ -1154,14 +977,14 @@ unsigned int numcols(Mixer* self)
 
 int parametername(Mixer* self, char* txt, int param)
 {		
-	int col;
-	int row;
-	int rows;
+	size_t col;
+	size_t row;
+	size_t rows;
 
 	txt[0] = '\0';
 	rows = numparameters(self) / numcols(self);
 	row = param % rows;
-	col = param / rows;
+	col = param / rows;	
 	if (col < mastercolumn(self)) {
 		if (row > 0 && row < self->sends.count + 1) {
 			_snprintf(txt, 128, "Send %d", row);
@@ -1169,6 +992,10 @@ int parametername(Mixer* self, char* txt, int param)
 		}
 	} else
 	if (col == mastercolumn(self)) {
+		if (row == 0) {
+			_snprintf(txt, 128, "%s", "MasterOut");
+			return 1;
+		}
 	} else	
 	if (col < returncolumn(self)) {
 		int index;
@@ -1193,148 +1020,72 @@ int parametername(Mixer* self, char* txt, int param)
 	return *txt != '\0';
 }
 
-const CMachineParameter* parameter(Mixer* self, unsigned int param)
-{			
-	static CMachineParameter paraempty = { "", "", 0, 65535,	1, 0 };
-	int col;
-	int row;
-	int rows;
-
+int parametertype(Mixer* self, int param)
+{
+	size_t col;
+	size_t row;
+	size_t rows;
+	
 	rows = numparameters(self) / numcols(self);
 	row = param % rows;
 	col = param / rows;
+
+
 	if (col < mastercolumn(self)) {
+		if (row == 0) {
+			return 1;
+		} else
 		if (row > 0 && row < self->sends.count + 1) {
-			static CMachineParameter par = { "Send", "Send", 0, 65535, 3, 0 };
-			return &par;
-		} else
-		if (row == self->sends.count + 1) {
-			return &paraMixHeader;
-		} else
-		if (row == self->sends.count + 2) {
-			return &paraGainHeader;
-		} else
-		if (row == self->sends.count + 3) {
-			return &paraPanHeader;
+			return 1;
 		}
 	} else
 	if (col == mastercolumn(self)) {
-		if (row == 0) {
-			return &paraMasterHeader;
-		} else
-		if (row > 0 && row < self->sends.count + 1) {			
-		} else
-		if (row == self->sends.count + 1) {
-			return &paraMixKnob;
-		} else
-		if (row == self->sends.count + 2) {
-			return &paraGainKnob;
-		} else	
-		if (row == self->sends.count + 3) {
-			return &paraPanKnob;
-		} else	
-		if (row == self->sends.count + 8) {
-			return &paraLevelKnob;
-		} else
-		if (row == self->sends.count + 9) {
-			return &paraVuInfo;
+		if (row == 0) {			
+			return 1;
 		}
-	} else
-	// Input Column
+	} else	
 	if (col < returncolumn(self)) {
-		if (row == 0) {
-			return &paraInputHeader;
-		} else
-		if (row > 0 && row < self->sends.count + 1) {
-			return &paraSendVol;
-		} else
-		if (row == self->sends.count + 1) {
-			return &paraMixKnob;
-		} else
-		if (row == self->sends.count + 2) {
-			return &paraGainKnob;
-		} else	
-		if (row == self->sends.count + 3) {
-			return &paraPanKnob;
-		} else
-		if (row == self->sends.count + 4) {
-			return &paraSoloKnob;
-		} else
-		if (row == self->sends.count + 5) {
-			return &paraMuteKnob;
-		} else
-		if (row == self->sends.count + 6) {
-			return &paraDryKnob;
-		} else
-		if (row == self->sends.count + 7) {
-			return &paraWetKnob;
-		} else
-		if (row == self->sends.count + 8) {
-			return &paraLevelKnob;
-		} else
-		if (row == self->sends.count + 9) {
-			return &paraVuInfo;
+		int index;
+		MixerChannel* channel;
+
+		index = col - inputcolumn(self);
+		channel = (MixerChannel*) table_at(&self->inputs, index);
+		if (row == 0) {			
+			return 1;
 		}
 	} else
-	// Return Column
 	if (col < returncolumn(self) + self->returns.count) {
-		int returnindex;
-
-		returnindex = col - returncolumn(self);
-		if (row == 0) {
-			return &paraReturnHeader;
-		} else
-		if (row > returnindex + 1 && row < self->sends.count + 1) {
-			return &paraRouteKnob;
-		} else
-		if (row == self->sends.count + 1) {
-			return &paraMasterSendKnob;
-		} else
-		if (row == self->sends.count + 3) {
-			return &paraPanKnob;		
-		} else
-		if (row == self->sends.count + 4) {
-			return &paraSoloKnob;
-		} else
-		if (row == self->sends.count + 5) {
-			return &paraMuteKnob;
-		} else		
-		if (row == self->sends.count + 8) {
-			return &paraLevelKnob;
-		} else
-		if (row == self->sends.count + 9) {
-			return &paraVuInfo;
-		} else {
-			
-			return &paraempty;
+		int index;
+		ReturnChannel* channel;		
+		
+		index = col - returncolumn(self);
+		channel = (ReturnChannel*) table_at(&self->returns, index);
+		if (row == 0) {			
+			return 1;
 		}
-	}
-	return &paraempty;
+	}	
+	return MPF_STATE;
 }
 
-int intparamvalue(float value)
-{	
-	return (int)((value * 65535.f));	
-}
-
-float floatparamvalue(int value)
+void parameterrange(Mixer* self, int param, int* minval, int* maxval)
 {
-	return value / 65535.f;	
+	*minval = 0;
+	*maxval = 65535;
 }
 
-int mastercolumn(Mixer* self)
+int parameterlabel(Mixer* self, char* txt, int param)
 {
-	return 1;
+	return parametername(self, txt, param);	
 }
 
-int inputcolumn(Mixer* self)
+size_t inputcolumn(Mixer* self)
 {
 	return mastercolumn(self) + 1;
 }
 
-int returncolumn(Mixer* self)
+size_t returncolumn(Mixer* self)
 {
-	return inputcolumn(self) + self->inputs.count;
+	return inputcolumn(self) + table_size(&self->inputs);
 }
 
 WireSocketEntry* wiresocketentry(Mixer* self, int input)
@@ -1360,8 +1111,8 @@ void loadspecific(Mixer* self, PsyFile* file, unsigned int slot, Machines* machi
 {
 	unsigned int filesize;
 	int numins = 0;
-	int numrets = 0;
-	int i;
+	unsigned int numrets = 0;
+	unsigned int i;
 	
 	psyfile_read(file, &filesize, sizeof(filesize));
 	psyfile_read(file, &self->solocolumn, sizeof(self->solocolumn));
@@ -1375,9 +1126,9 @@ void loadspecific(Mixer* self, PsyFile* file, unsigned int slot, Machines* machi
 	if ( numins >0 ) insertinputchannels(self, numins, machines);
 //	if ( numrets >0 ) InsertReturn(numrets - 1);
 //	if ( numrets >0 ) InsertSend(numrets-1, NULL);
-	for (i = 0; i < self->inputs.count; ++i) {
+	for (i = 0; i < (unsigned int) table_size(&self->inputs); ++i) {
 		MixerChannel* channel;
-		int j;
+		unsigned int j;
 
 		channel = (MixerChannel*) table_at(&self->inputs, i);
 		for (j = 0; j<numrets; ++j) {
@@ -1403,7 +1154,7 @@ void loadspecific(Mixer* self, PsyFile* file, unsigned int slot, Machines* machi
 	}
 
 	for (i = 0; i < numrets; ++i) {
-		int j;
+		unsigned int j;
 		ReturnChannel* channel;
 
 		channel = (ReturnChannel*) table_at(&self->returns, i);
@@ -1485,4 +1236,19 @@ void insertinputchannels(Mixer* self, int num, Machines* machines)
 			table_insert(&self->inputs, c, mixerchannel_allocinit(c));
 		}
 	}	
+}
+
+int intparamvalue(float value)
+{	
+	return (int)((value * 65535.f));	
+}
+
+float floatparamvalue(int value)
+{
+	return value / 65535.f;	
+}
+
+size_t mastercolumn(Mixer* self)
+{
+	return 1;
 }

@@ -21,7 +21,7 @@ void ui_label_init(ui_label* self, ui_component* parent)
 
 void ui_label_settext(ui_label* label, const char* text)
 {
-	SetWindowText(label->component.hwnd, text);
+	SetWindowText((HWND)label->component.hwnd, text);
 }
 
 void ui_label_setcharnumber(ui_label* self, int number)
@@ -31,18 +31,27 @@ void ui_label_setcharnumber(ui_label* self, int number)
 
 void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, int* width, int* height)
 {	
-	TEXTMETRIC tm;
-	ui_size size;
+	TEXTMETRIC tm;	
 	char text[256];
 	
-	tm = ui_component_textmetric(&self->component);
-	GetWindowText(self->component.hwnd, text, 256);
-	size = ui_component_textsize(&self->component, text);
+	tm = ui_component_textmetric(&self->component);	
 	if (self->charnumber == 0) {
+		ui_size size;
+		GetWindowText((HWND)self->component.hwnd, text, 256);
+		size = ui_component_textsize(&self->component, text);
 		*width = size.width + 2;
 	} else {		
 		*width = tm.tmAveCharWidth * self->charnumber;
 	}
 	*height = tm.tmHeight;
+}
+
+void ui_label_setstyle(ui_label* self, int style)
+{
+	#if defined(_WIN64)
+	SetWindowLongPtr((HWND)self->component.hwnd, GWL_STYLE, style);		
+#else
+	SetWindowLong((HWND)self->component.hwnd, GWL_STYLE, style);
+#endif
 }
 

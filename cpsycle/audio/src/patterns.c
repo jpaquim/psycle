@@ -85,3 +85,8 @@ void patterns_remove(Patterns* self, unsigned int slot)
 	pattern_dispose(pattern);
 	free(pattern);	
 }
+
+size_t patterns_size(Patterns* self)
+{
+	return self->slots.count;
+}

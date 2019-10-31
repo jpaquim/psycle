@@ -11,6 +11,7 @@
 
 static void signal_notify(Signal* self, void* sender);
 static void signal_notify_int(Signal* self, void* sender, int param);
+static void signal_notify1(Signal* self, void* sender, void* param1);
 static void signal_notify2(Signal* self, void* sender, void* param1, void* param2);
 static void signal_notify3(Signal* self, void* sender, void* param1, void* param2, void* param3);
 static Slot* signal_findslot(Signal* self, void* context, void* fp);
@@ -18,6 +19,7 @@ static Slot* signal_findslot(Signal* self, void* context, void* fp);
 typedef void (*signalcallback0)(void*, void*);
 typedef void (*signalcallback_int)(void*, void*, int);
 typedef void (*signalcallback_float)(void*, void*, float);
+typedef void (*signalcallback1)(void*, void*, void*);
 typedef void (*signalcallback2)(void*, void*, void*, void*);
 typedef void (*signalcallback3)(void*, void*, void*, void*, void*);
 
@@ -137,7 +139,7 @@ void signal_emit(Signal* self, void* context, int num, ...)
 		signal_notify(self, context);
 	} else 
 	if (num == 1) {
-		signal_notify_int(self, context, va_arg(ap, int));
+		signal_notify1(self, context, va_arg(ap, void*));
 	} else 
 	if (num == 2) {
 		void* arg1 = va_arg(ap, void*);
@@ -172,6 +174,18 @@ void signal_notify_int(Signal* self, void* sender, int param)
 		while (ptr) {				
 			Slot* slot = (Slot*) ptr->entry;
 			((signalcallback_int)slot->fp)(slot->context, sender, param);
+			ptr = ptr->next;
+		}
+	}
+}
+
+void signal_notify1(Signal* self, void* sender, void* param)
+{
+	if (self->slots) {
+		List* ptr = self->slots;
+		while (ptr) {
+			Slot* slot = (Slot*)ptr->entry;
+			((signalcallback1)slot->fp)(slot->context, sender, param);
 			ptr = ptr->next;
 		}
 	}

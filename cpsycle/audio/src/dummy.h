@@ -12,6 +12,6 @@ typedef struct {
 } DummyMachine;
 
 void dummymachine_init(DummyMachine* self, MachineCallback);
-const CMachineInfo* dummymachine_info(void);
+const MachineInfo* dummymachine_info(void);
 
 #endif

@@ -13,7 +13,13 @@
 
 static void generateaudio(Sampler*, BufferContext*);
 static void seqtick(Sampler*, int channel, const PatternEvent*);
-static const CMachineInfo* info(Sampler*);
+static const MachineInfo* info(Sampler*);
+static unsigned int numcols(Sampler*);
+static unsigned int numparameters(Sampler*);
+static int parametertype(Sampler* self, int par);
+static void parameterrange(Sampler*, int numparam, int* minval, int* maxval);
+static int parameterlabel(Sampler*, char* txt, int param);
+static int parametername(Sampler*, char* txt, int param);
 static void parametertweak(Sampler*, int par, int val);
 static int describevalue(Sampler*, char* txt, int const param, int const value);
 static int value(Sampler*, int const param);
@@ -72,12 +78,10 @@ static CMachineParameter const *pParameters[] = {
 	&paraSpeed
 };
 
-static CMachineInfo const MacInfo = {
+static MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	GENERATOR | 32 | 64,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
 	"Sampler"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -85,11 +89,13 @@ static CMachineInfo const MacInfo = {
 		,
 	"Sampler",
 	"Psycledelics",
-	"help",
-	3
+	"help",	
+	MACH_SAMPLER,
+	0,
+	0
 };
 
-const CMachineInfo* sampler_info(void)
+const MachineInfo* sampler_info(void)
 {
 	return &MacInfo;
 }
@@ -102,6 +108,8 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.generateaudio = generateaudio;
 	self->machine.seqtick = seqtick;
 	self->machine.info = info;
+	self->machine.numcols = numcols;
+	self->machine.numparameters = numparameters;
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;
 	self->machine.setvalue = setvalue;
@@ -109,7 +117,11 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.dispose = dispose;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;	
-	self->numvoices = SAMPLER_MAX_POLYPHONY;
+	self->machine.parameterrange = parameterrange;
+	self->machine.parametertype = parametertype;
+	self->machine.parametername = parametername;
+	self->machine.parameterlabel = parameterlabel;
+	self->numvoices = SAMPLER_MAX_POLYPHONY;	
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		voice_init(&self->voices[voice], 0, 0, 0, 44100);
 	}
@@ -207,7 +219,7 @@ void release_voices(Sampler* self, int channel)
 	}
 }
 
-const CMachineInfo* info(Sampler* self)
+const MachineInfo* info(Sampler* self)
 {	
 	return &MacInfo;
 }
@@ -420,4 +432,83 @@ void voice_fastrelease(Voice* self)
 {
 	adsr_release(&self->env);	
 	adsr_release(&self->filterenv);
+}
+
+unsigned int numparameters(Sampler* self)
+{
+	return 3;
+}
+
+unsigned int numcols(Sampler* self)
+{
+	return 3;
+}
+
+int parametertype(Sampler* self, int par)
+{
+	return MPF_STATE;
+}
+
+void parameterrange(Sampler* self, int param, int* minval, int* maxval)
+{
+	switch (param) {
+		case 0:
+			*minval = 1;
+			*maxval = 16;
+		break;
+		case 1:
+			*minval = 0;
+			*maxval = 3;
+		break;
+		case 2:
+			*minval = 0;
+			*maxval = 1;
+		break;
+		default:
+			*minval = 0;
+			*maxval = 0;
+		break;
+	}		
+}
+
+int parameterlabel(Sampler* self, char* txt, int param)
+{
+	int rv = 1;
+	switch (param) {
+		case 0:
+			_snprintf(txt, 128, "%s", "Polyphony Voices");
+		break;
+		case 1:
+			_snprintf(txt, 128, "%s", "Resampling method");
+		break;
+		case 2:
+			_snprintf(txt, 128, "%s", "Default speed");
+		break;
+		default:
+			txt[0] = '\0';
+			rv = 0;
+		break;
+	}
+	return rv;
+}
+
+int parametername(Sampler* self, char* txt, int param)
+{
+	int rv = 1;
+	switch (param) {
+		case 0:
+			_snprintf(txt, 128, "%s", "Polyphony");
+		break;
+		case 1:
+			_snprintf(txt, 128, "%s", "Resampling");
+		break;
+		case 2:
+			_snprintf(txt, 128, "%s", "Default speed");
+		break;
+		default:
+			txt[0] = '\0';
+			rv = 0;
+		break;
+	}
+	return rv;
 }

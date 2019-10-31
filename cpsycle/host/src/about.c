@@ -90,6 +90,7 @@ void InitVersion(Version* self, ui_component* parent)
 {
 	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->versioninfo, &self->component);
+	ui_label_setstyle(&self->versioninfo, WS_CHILD | WS_VISIBLE | SS_CENTER);
 	ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 	ui_component_resize(&self->versioninfo.component, 500, 300);	
 	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);

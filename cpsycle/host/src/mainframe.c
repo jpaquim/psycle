@@ -24,7 +24,6 @@ static void SetStatusBarText(MainFrame*, const char* text);
 static const char* StatusBarIdleText(MainFrame* self);
 static void Destroy(MainFrame*, ui_component* component);
 static void OnKeyDown(MainFrame*, ui_component* component, int keycode, int keydata);
-static void OnTimer(MainFrame*, ui_component* sender, int timerid);
 static void OnSequenceSelChange(MainFrame* , SequenceEntry* entry);
 static void OnAlign(MainFrame*, ui_component* sender);
 static void OnMouseDown(MainFrame*, ui_component* sender, int x, int y, int button);
@@ -73,8 +72,7 @@ void mainframe_init(MainFrame* self)
 	self->firstshow = 1;	
 	InitBars(self);	
 	signal_connect(&self->component.signal_destroy, self, Destroy);
-	signal_connect(&self->component.signal_align, self, OnAlign);
-	signal_connect(&self->component.signal_timer, self, OnTimer);	
+	signal_connect(&self->component.signal_align, self, OnAlign);	
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	signal_connect(&self->component.signal_align, self, OnAlign);
 	ui_component_init(&self->tabbars, &self->component);		
@@ -118,9 +116,7 @@ void mainframe_init(MainFrame* self)
 	signal_connect(&self->splitbar.signal_mousedown, self, OnMouseDown);	
 	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
 	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);
-	self->splitbar.debugflag = 10000;
-	
-	SetTimer(self->component.hwnd, 100, 50, 0);
+	self->splitbar.debugflag = 10000;	
 	SetStartPage(self);
 	if (self->workspace.song->properties) {
 		Properties* title;
@@ -369,40 +365,6 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 	}
 }
 
-void OnTimer(MainFrame* self, ui_component* sender, int timerid)
-{
-	/*char buffer[20];	
-
-	ui_statusbar_settext(&self->statusbar, 0, "A Song");
-	_snprintf(buffer, 20, "%.4f", 
-		player_position(self->patternview.trackerview.grid.player)); 
-	ui_statusbar_settext(&self->statusbar, 1, buffer);	
-	{
-		SequencePosition p;
-		SequenceEntry* entry;
-
-		p = sequence_editposition(&self->workspace.song->sequence);
-		entry = sequenceposition_entry(&p);
-		if (entry) {
-			_snprintf(buffer, 20, "Pat %.2d", entry->pattern); 
-			ui_statusbar_settext(&self->statusbar, 2, buffer);
-		}
-	}
-	{
-		_snprintf(buffer, 20, "Oct %d", workspace_octave(&self->workspace)); 
-		ui_statusbar_settext(&self->statusbar, 3, buffer);
-	}
-	{
-		int line;
-		double offset;
-
-		offset = workspace_editposition(&self->workspace).offset;
-		line = (int) (offset * player_lpb(&self->workspace.player));
-		_snprintf(buffer, 20, "Line %d  %.2f bts", line, offset); 
-		ui_statusbar_settext(&self->statusbar, 4, buffer);
-	}*/
-}
-
 void onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
 {
 	ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
@@ -459,34 +421,26 @@ void OnMouseDown(MainFrame* self, ui_component* sender, int x, int y, int button
 void OnMouseMove(MainFrame* self, ui_component* sender, int x, int y, int button)
 {
 	if (self->resize == 1) {		
-		RECT rc;
-		POINT pt;
 		ui_size toolbarsize;
+		ui_rectangle position;
 	
 		toolbarsize = ui_component_size(&self->top);
-		GetWindowRect(sender->hwnd, &rc);
-		pt.x = rc.left;
-		pt.y = rc.top;
-		ScreenToClient(GetParent(sender->hwnd), &pt);
-		ui_component_move(sender, pt.x + x, toolbarsize.height);
+		position = ui_component_position(sender);
+		ui_component_move(sender, position.left + x, toolbarsize.height);
 		ui_invalidate(sender);
-		UpdateWindow(sender->hwnd);
+		UpdateWindow((HWND)sender->hwnd);
 	}
 }
 
 void OnMouseUp(MainFrame* self, ui_component* sender, int x, int y, int button)
-{		
-	RECT rc;
-	POINT pt;
+{			
+	ui_rectangle position;
 	
 	ui_component_releasecapture();
 	self->resize = 0;
-	GetWindowRect(sender->hwnd, &rc);
-	pt.x = rc.left;
-	pt.y = rc.top;
-	ScreenToClient(GetParent(sender->hwnd), &pt);
+	position = ui_component_position(sender);
 	ui_component_resize(&self->sequenceview.component,
-		pt.x, ui_component_size(&self->sequenceview.component).height);	
+		position.left, ui_component_size(&self->sequenceview.component).height);	
 	ui_component_align(&self->component);	
 }
 

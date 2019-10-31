@@ -200,3 +200,36 @@ FILE* psyfile_getfile(PsyFile* self)
 	return self->_file;
 }
 
+size_t psyfile_writeheader(PsyFile* file, char* pData, unsigned int version,
+	unsigned int size/*=0*/)
+{
+	size_t pos;
+
+	psyfile_write(file, pData, 4);
+	psyfile_write(file, &version, sizeof(version));
+	pos = psyfile_getpos(file);
+	psyfile_write(file, &size, sizeof(size));
+	return pos;
+}
+
+int psyfile_writestring(PsyFile* file, char* str)
+{
+	int rv = 0;
+
+	rv = psyfile_write(file, str, strlen(str) + 1);
+	return rv;
+}
+
+size_t psyfile_updatesize(PsyFile* file, size_t startpos)
+{
+	size_t pos2;
+	unsigned int size;
+	
+	pos2 = psyfile_getpos(file); 
+	size = (size_t)(pos2 - startpos - 4);
+	psyfile_seek(file, startpos);
+	psyfile_write(file, &size, sizeof(size));
+	psyfile_seek(file, pos2);
+	return size;
+}
+

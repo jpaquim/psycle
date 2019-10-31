@@ -206,7 +206,7 @@ void InitSamplerInstrumentGeneralView(SamplerInstrumentGeneralView* self, ui_com
 	ui_component_setposition(&self->nnanonebutton.component, 185, 30, 70, 20);
 	signal_connect(&self->nnanonebutton.signal_clicked, self, OnNNANone);
 
-	SendMessage(self->nnacutbutton.component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+	SendMessage((HWND)self->nnacutbutton.component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
 
 }
 

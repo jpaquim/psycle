@@ -37,12 +37,14 @@ typedef struct Machines {
 
 void machines_init(Machines*);
 void machines_dispose(Machines*);
+void machines_clear(Machines*);
 void machines_insert(Machines*, int slot, Machine*);
 void machines_erase(Machines*, int slot);
 void machines_remove(Machines*, int slot);
 void machines_exchange(Machines*, int srcslot, int dstslot);
 int machines_append(Machines*, Machine*);
 Machine* machines_at(Machines*, int slot);
+size_t machines_size(Machines*);
 int machines_connect(Machines*, int outputslot, int inputslot, int send);
 void machines_disconnect(Machines*, int outputslot, int inputslot);
 void machines_disconnectall(Machines*, int slot);
@@ -57,7 +59,6 @@ void machines_insertmaster(Machines*, Machine*);
 Machine* machines_master(Machines*);
 void machines_startfilemode(Machines*);
 void machines_endfilemode(Machines*);
-unsigned int machines_size(Machines*);
 void machines_showparameters(Machines*, int slot);
 void machines_setvolume(Machines*, float volume);
 float machines_volume(Machines*);

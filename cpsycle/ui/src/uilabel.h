@@ -14,5 +14,6 @@ typedef struct {
 void ui_label_init(ui_label*, ui_component* parent);
 void ui_label_settext(ui_label*, const char* text);
 void ui_label_setcharnumber(ui_label*, int number);
+void ui_label_setstyle(ui_label*, int style);
 
 #endif

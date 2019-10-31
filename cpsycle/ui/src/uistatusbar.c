@@ -16,12 +16,12 @@ void ui_statusbar_init(ui_statusbar* self, ui_component* parent)
 
 void ui_statusbar_setfields(ui_statusbar* self, int parts, int iStatusWidths[])
 {	
-	SendMessage(self->component.hwnd, SB_SETPARTS, parts, 
+	SendMessage((HWND)self->component.hwnd, SB_SETPARTS, parts, 
 		(LPARAM)iStatusWidths);           
 }
 
 void ui_statusbar_settext(ui_statusbar* self, int field, const char* text)
 {
-	SendMessage(self->component.hwnd, SB_SETTEXT, field,(LPARAM)text);
+	SendMessage((HWND)self->component.hwnd, SB_SETTEXT, field,(LPARAM)text);
 }
 

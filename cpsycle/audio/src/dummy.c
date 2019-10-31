@@ -5,14 +5,12 @@
 
 #include "dummy.h"
 
-const CMachineInfo* dummymachine_info(void)
+const MachineInfo* dummymachine_info(void)
 {
-	static CMachineInfo const macinfo = {
+	static MachineInfo const macinfo = {
 		MI_VERSION,
 		0x0250,
 		EFFECT | 32 | 64,
-		0,
-		0,
 		"Dummy plug"
 			#ifndef NDEBUG
 			" (debug build)"
@@ -20,13 +18,13 @@ const CMachineInfo* dummymachine_info(void)
 			,
 		"Dummy Plug",
 		"Psycledelics",
-		"help",
-		3
+		"help",		
+		MACH_DUMMY
 	};
 	return &macinfo;
 }
 
-static const CMachineInfo* info(DummyMachine* self) {
+static const MachineInfo* info(DummyMachine* self) {
 	return dummymachine_info();
 }
 static int mode(DummyMachine* self) { return self->mode; }

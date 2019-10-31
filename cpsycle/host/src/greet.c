@@ -17,8 +17,9 @@ void greet_init(Greet* self, ui_component* parent)
 	signal_connect(&self->component.signal_size, self, OnSize);
 	self->current = 1;
 	ui_component_settitle(&self->component, "Greetings and info");	
-	ui_label_init(&self->header, &self->component);		
-	ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");		
+	ui_label_init(&self->header, &self->component);
+	ui_label_setstyle(&self->header, WS_CHILD | WS_VISIBLE | SS_CENTER);
+	ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
 	ui_listbox_init(&self->greetz, &self->component);	
 	ui_groupbox_init(&self->groupbox, &self->component);
 	ui_groupbox_settext(&self->groupbox, "Thanks!");

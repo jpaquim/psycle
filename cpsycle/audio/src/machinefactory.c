@@ -23,7 +23,11 @@ void machinefactory_init(MachineFactory* self, MachineCallback callback,
 {
 	self->machinecallback = callback;	
 	self->catcher = catcher;
-	self->options = MACHINEFACTORY_CREATEASPROXY;
+	self->options = MACHINEFACTORY_CREATEASPROXY;	
+}
+
+void machinefactory_dispose(MachineFactory* self)
+{	
 }
 
 void machinefactory_setoptions(MachineFactory* self, 
@@ -37,7 +41,7 @@ MachineFactoryOptions machinefactory_options(MachineFactory* self)
 	return self->options;
 }
 
-Machine* machinefactory_make(MachineFactory* self, MachineType type,
+Machine* machinefactory_makemachine(MachineFactory* self, MachineType type,
 	const char* plugincatchername)
 {
 	char fullpath[_MAX_PATH];
@@ -45,15 +49,15 @@ Machine* machinefactory_make(MachineFactory* self, MachineType type,
 	if (!self->catcher) {
 		return 0;
 	}
-	return machinefactory_makefrompath(self, type,
+	return machinefactory_makemachinefrompath(self, type,
 		plugincatcher_modulepath(self->catcher, MACH_PLUGIN,
-		plugincatchername, fullpath));
+		plugincatchername, fullpath));	
 }
 
-Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
-	const char* path)
+Machine* machinefactory_makemachinefrompath(MachineFactory* self,
+	MachineType type, const char* path)
 {
-	Machine* machine = 0;
+	Machine* rv = 0;
 	MachineProxy* proxy = 0;
 
 	switch (type) {
@@ -61,42 +65,42 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 		{
 			Master* master = (Master*)malloc(sizeof(Master));
 			master_init(master, self->machinecallback);		
-			machine = &master->machine;
+			rv = &master->machine;
 		}
 		break;
 		case MACH_DUMMY:
 		{
 			DummyMachine* dummy = (DummyMachine*)malloc(sizeof(DummyMachine));
 			dummymachine_init(dummy, self->machinecallback);	
-			machine = &dummy->machine;
+			rv = &dummy->machine;
 		}
 		break;
 		case MACH_DUPLICATOR:
 		{
 			Duplicator* duplicator = (Duplicator*)malloc(sizeof(Duplicator));
 			duplicator_init(duplicator, self->machinecallback);	
-			machine = &duplicator->machine;
+			rv = &duplicator->machine;
 		}
 		break;
 		case MACH_DUPLICATOR2:
 		{
 			Duplicator2* duplicator2 = (Duplicator2*)malloc(sizeof(Duplicator2));
 			duplicator2_init(duplicator2, self->machinecallback);	
-			machine = &duplicator2->machine;
+			rv = &duplicator2->machine;
 		}
 		break;
 		case MACH_MIXER:
 		{
 			Mixer* mixer = (Mixer*)malloc(sizeof(Mixer));
 			mixer_init(mixer, self->machinecallback);		
-			machine = &mixer->machine;
+			rv = &mixer->machine;
 		}
 		break;
 		case MACH_SAMPLER:
 		{
 			Sampler* sampler = (Sampler*)malloc(sizeof(Sampler));
 			sampler_init(sampler, self->machinecallback);		
-			machine = &sampler->machine;
+			rv = &sampler->machine;
 		}
 		break;
 		case MACH_VST:
@@ -106,7 +110,7 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 			plugin = (VstPlugin*)malloc(sizeof(VstPlugin));
 			vstplugin_init(plugin, self->machinecallback, path);	
 			if (plugin->machine.info(&plugin->machine)) {						
-				machine = &plugin->machine;			
+				rv = &plugin->machine;			
 			} else {
 				plugin->machine.dispose(plugin);
 				free(plugin);
@@ -120,7 +124,7 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 			plugin = (Plugin*)malloc(sizeof(Plugin));			
 			plugin_init(plugin, self->machinecallback, path);
 			if (plugin->machine.info(&plugin->machine)) {						
-				machine = &plugin->machine;			
+				rv = &plugin->machine;			
 			} else {
 				plugin->machine.dispose(plugin);
 				free(plugin);
@@ -130,12 +134,11 @@ Machine* machinefactory_makefrompath(MachineFactory* self, MachineType type,
 		default:
 		break;
 	}
-	if ((machine && 
-		((self->options & MACHINEFACTORY_CREATEASPROXY) 
+	if ((rv && ((self->options & MACHINEFACTORY_CREATEASPROXY)
 			== MACHINEFACTORY_CREATEASPROXY))) {
 		proxy = malloc(sizeof(MachineProxy));
-		machineproxy_init(proxy, machine);
-		machine = &proxy->machine;
-	}
-	return machine;
+		machineproxy_init(proxy, rv);
+		rv = &proxy->machine;
+	}	
+	return rv;
 }

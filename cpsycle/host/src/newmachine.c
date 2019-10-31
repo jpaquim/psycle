@@ -65,6 +65,7 @@ void newmachinedetail_init(NewMachineDetail* self, ui_component* parent,
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	ui_component_setposition(&self->bar.component, 0, 10, 80, 100);
 	ui_label_init(&self->desclabel, &self->component);
+	ui_label_setstyle(&self->desclabel, WS_CHILD | WS_VISIBLE | SS_CENTER);
 	ui_label_settext(&self->desclabel, 
 		"Select a plugin to view its description.");	
 	ui_component_setposition(&self->desclabel.component, 0, 110, 80, 100);	

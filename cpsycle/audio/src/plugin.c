@@ -16,7 +16,13 @@ static int hostevent(Plugin*, int const eventNr, int const val1, float const val
 static void generateaudio(Plugin*, BufferContext*);
 static void seqtick(Plugin*, int channel, const PatternEvent* event);
 static void sequencerlinetick(Plugin*);
-static CMachineInfo* info(Plugin*);
+static MachineInfo* info(Plugin*);
+static int parametertype(Plugin* self, int par);
+static unsigned int numcols(Plugin*);
+static unsigned int numparameters(Plugin*);
+static void parameterrange(Plugin*, int numparam, int* minval, int* maxval);
+static int parameterlabel(Plugin*, char* txt, int param);
+static int parametername(Plugin*, char* txt, int param);
 static void parametertweak(Plugin*, int par, int val);
 static int parameterlabel(Plugin*, char* txt, int param);
 static int parametername(Plugin*, char* txt, int param);
@@ -31,18 +37,25 @@ static void setcallback(Plugin* self, MachineCallback callback);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 {
-	CMachineInfo* pInfo = 0;	
-
+	GETINFO GetInfo;
+	
 	machine_init(&self->machine, callback);	
 	library_init(&self->library);
-	library_load(&self->library, path);	
+	library_load(&self->library, path);		
 	self->pan = 0.5;
 	self->mi = 0;
+	self->plugininfo = 0;
 	self->machine.clone = clone;
 	self->machine.hostevent = hostevent;
 	self->machine.seqtick = seqtick;
 	self->machine.sequencerlinetick = sequencerlinetick;
 	self->machine.info = info;
+	self->machine.numcols = numcols;
+	self->machine.numparameters = numparameters;
+	self->machine.parameterrange = parameterrange;
+	self->machine.parametertype = parametertype;
+	self->machine.parametername = parametername;
+	self->machine.parameterlabel = parameterlabel;
 	self->machine.parametertweak = parametertweak;
 	self->machine.parameterlabel = parameterlabel;
 	self->machine.parametername = parametername;
@@ -56,22 +69,29 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.loadspecific = loadspecific;
 	self->machine.setcallback = setcallback;
 
-	pInfo = info(self);	
-	if (!pInfo)
-	{
+			
+	GetInfo = (GETINFO)library_functionpointer(&self->library, "GetInfo");
+	if (!GetInfo) {
 		library_dispose(&self->library);		
 	} else {		
 		self->mi = mi_create(self->library.module);		
 		if (!self->mi) {
 			library_dispose(&self->library);			
-		} else {
-			int gbp;	
-			mi_resetcallback(self->mi);
-			mi_setcallback(self->mi, &callback);
-			mi_init(self->mi);
-			for (gbp = 0; gbp< pInfo->numParameters; gbp++) {
-				mi_parametertweak(self->mi, gbp, pInfo->Parameters[gbp]->DefValue);
-			}					
+		} else {						
+			CMachineInfo* pInfo = GetInfo();
+			if (pInfo) {
+				int gbp;	
+				mi_resetcallback(self->mi);
+				mi_setcallback(self->mi, &callback);
+				mi_init(self->mi);
+				for (gbp = 0; gbp< pInfo->numParameters; gbp++) {
+					mi_parametertweak(self->mi, gbp, 
+						pInfo->Parameters[gbp]->DefValue);
+				}
+				self->plugininfo = machineinfo_allocinit();
+				machineinfo_setnativeinfo(self->plugininfo, pInfo, MACH_PLUGIN,
+					self->library.path, 0);
+			}
 		}
 	}	
 }
@@ -82,7 +102,12 @@ void dispose(Plugin* self)
 		mi_dispose(self->mi);
 		library_dispose(&self->library);
 		self->mi = 0;		
-	}		
+	}			
+	if (self->plugininfo) {
+		machineinfo_dispose(self->plugininfo);
+		free(self->plugininfo);
+		self->plugininfo = 0;
+	}
 	machine_dispose(&self->machine);
 }
 
@@ -95,11 +120,10 @@ Machine* clone(Plugin* self)
 	return &rv->machine;
 }
 
-
-CMachineInfo* plugin_psycle_test(const char* path)
+int plugin_psycle_test(const char* path, MachineInfo* info)
 {	
-	CMachineInfo* rv = 0;	
-	
+	int rv = 0;
+
 	if (path && strcmp(path, "") != 0) {
 		GETINFO GetInfo;
 		Library library;
@@ -108,28 +132,22 @@ CMachineInfo* plugin_psycle_test(const char* path)
 		library_load(&library, path);					
 		GetInfo =(GETINFO)library_functionpointer(&library, "GetInfo");
 		if (GetInfo != NULL) {	
-			CMachineInfo* pInfo = GetInfo();
-			if (pInfo) {
-				rv = (CMachineInfo*) malloc(sizeof(CMachineInfo));
-				rv->Author = _strdup(pInfo->Author);
-				rv->Command = _strdup(pInfo->Command);
-				rv->Flags = pInfo->Flags;
-				rv->Name = _strdup(pInfo->Name);
-				rv->numCols = pInfo->numCols;
-				rv->numParameters = pInfo->numParameters;
-				rv->ShortName = _strdup(pInfo->ShortName);
-				rv->APIVersion = pInfo->APIVersion;
-				rv->PlugVersion = pInfo->PlugVersion;
+			CMachineInfo* nativeinfo = GetInfo();
+			if (nativeinfo) {				
+				machineinfo_setnativeinfo(info, nativeinfo, MACH_PLUGIN,
+					library.path, 0);
+				rv = 1;
 			}
 		}
 		library_dispose(&library);
 	}
-	return rv;
+	return rv;	
 }
 
 void seqtick(Plugin* self, int channel, const PatternEvent* event)
 {
-	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd, event->parameter);
+	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd,
+		event->parameter);
 }
 
 void generateaudio(Plugin* self, BufferContext* bc)
@@ -148,34 +166,9 @@ void sequencerlinetick(Plugin* self)
 	mi_sequencertick(self->mi);
 }
 
-
-CMachineInfo* info(Plugin* self)
-{
-	CMachineInfo* pInfo = 0;
-	
-	if (self->library.module != 0) {
-		GETINFO GetInfo;
-
-		GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
-		if (GetInfo != 0) {	
-			pInfo = GetInfo();
-		}
-	}
-	return pInfo;
-}
-
-int parameterlabel(Plugin* self, char* txt, int param)
-{
-	txt[0] = '\0';
-	_snprintf(txt, 128, "%s", info(self)->Parameters[param]->Name);
-	return *txt != '\0';
-}
-
-int parametername(Plugin* self, char* txt, int param)
-{
-	txt[0] = '\0';
-	_snprintf(txt, 128, "%s", info(self)->Parameters[param]->Name);
-	return *txt != '\0';
+MachineInfo* info(Plugin* self)
+{		
+	return self->plugininfo;
 }
 
 void parametertweak(Plugin* self, int par, int val)
@@ -254,3 +247,104 @@ void loadspecific(Plugin* self, PsyFile* file, unsigned int slot, struct Machine
 		}						
 	}	
 }			
+
+int parametertype(Plugin* self, int param)
+{
+	int rv = MPF_STATE;
+	GETINFO GetInfo;
+
+	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {	
+		CMachineInfo* pInfo = GetInfo();
+		if (pInfo) {	
+			if (param < pInfo->numParameters) {
+				rv = pInfo->Parameters[param]->Flags;
+			}
+		}
+	}
+	return rv;
+}
+
+void parameterrange(Plugin* self, int param, int* minval, int* maxval)
+{	
+	GETINFO GetInfo;
+
+	*minval = 0;
+	*maxval = 0;
+	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {	
+		CMachineInfo* pInfo = GetInfo();
+		if (pInfo) {	
+			if (param < pInfo->numParameters) {
+				*minval = pInfo->Parameters[param]->MinValue;
+				*maxval = pInfo->Parameters[param]->MaxValue;				
+			}
+		}
+	}	
+}
+
+int parameterlabel(Plugin* self, char* txt, int param)
+{
+	int rv = 0;
+	GETINFO GetInfo;
+
+	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {	
+		CMachineInfo* pInfo = GetInfo();
+		if (pInfo) {	
+			if (param < pInfo->numParameters) {
+				_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Description);
+				rv = 1;
+			}
+		}
+	}
+	return rv;
+}
+
+int parametername(Plugin* self, char* txt, int param)
+{
+	int rv = 0;
+	GETINFO GetInfo;
+
+	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {	
+		CMachineInfo* pInfo = GetInfo();
+		if (pInfo) {	
+			if (param < pInfo->numParameters) {
+				_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Name);
+				rv = 1;
+			}
+		}
+	}
+	return rv;
+}
+
+unsigned int numcols(Plugin* self)
+{
+	int rv = 0;
+	GETINFO GetInfo;
+
+	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {	
+		CMachineInfo* pInfo = GetInfo();
+		if (pInfo) {	
+			rv = pInfo->numCols;				
+		}
+	}
+	return rv;
+}
+
+unsigned int numparameters(Plugin* self)
+{
+	int rv = 0;
+	GETINFO GetInfo;
+
+	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {	
+		CMachineInfo* pInfo = GetInfo();
+		if (pInfo) {	
+			rv = pInfo->numParameters;
+		}
+	}
+	return rv;
+}

@@ -18,6 +18,6 @@ typedef struct {
 } Duplicator;
 
 void duplicator_init(Duplicator*, MachineCallback);
-const CMachineInfo* duplicator_info(void);
+const MachineInfo* duplicator_info(void);
 
 #endif

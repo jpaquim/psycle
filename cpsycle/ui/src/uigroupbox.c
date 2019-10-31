@@ -15,5 +15,5 @@ void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
 
 void ui_groupbox_settext(ui_groupbox* groupbox, const char* text)
 {
-	SetWindowText(groupbox->component.hwnd, text);
+	SetWindowText((HWND)groupbox->component.hwnd, text);
 }

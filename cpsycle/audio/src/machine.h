@@ -5,7 +5,7 @@
 #define MACHINE_H
 
 #include "machinedefs.h"
-#include "plugin_interface.h"
+#include "machineinfo.h"
 #include <signal.h>
 #include "patternevent.h"
 #include "buffercontext.h"
@@ -38,28 +38,30 @@ typedef struct Machine {
 	void (*sequencerlinetick)(void*); // old tick (line based)
 	// update sequencer events
 	List* (*sequencerinsert)(void*, List* events);
-	void (*parametertweak)(void*, int par, int val);
+	void (*setpanning)(void*, amp_t);
+	amp_t (*panning)(void*);
+	void (*setvalue)(void*, int param, int value);	
+	const MachineInfo* (*info)(void*);
+	void (*dispose)(void*);
+	int (*mode)(void*);	
+	void (*updatesamplerate)(void*, unsigned int samplerate);
+	unsigned int (*numinputs)(void*);
+	unsigned int (*numoutputs)(void*);
+	unsigned int (*slot)(void*);
+	void (*setslot)(void*, int);
+	// Parameters	
+	int (*parametertype)(void*, int param);
+	unsigned int (*numparameters)(void*);
+	unsigned int (*numcols)(void*);
+	void (*parameterrange)(void*, int numparam, int* minval, int* maxval);
+	void (*parametertweak)(void*, int par, int val);	
 	void (*patterntweak)(void*, int par, int val);
 	int (*parameterlabel)(void*, char* txt, int param);
 	int (*parametername)(void*, char* txt, int param);
 	int (*describevalue)(void*, char* txt, int param, int value);
-	int (*value)(void*, int param);
-	void (*setpanning)(void*, amp_t);
-	amp_t (*panning)(void*);
-	void (*setvalue)(void*, int param, int value);	
-	const CMachineInfo* (*info)(void*);
-	void (*dispose)(void*);
-	int (*mode)(void*);	
-	void (*updatesamplerate)(void*, unsigned int samplerate);
-
-	unsigned int (*numinputs)(void*);
-	unsigned int (*numoutputs)(void*);
-	unsigned int (*numparameters)(void*);
-	unsigned int (*numcols)(void*);	
-	unsigned int (*slot)(void*);
-	void (*setslot)(void*, int);
-	const CMachineParameter* (*parameter)(void*, unsigned int par);
+	int (*value)(void*, int param);	
 	int (*paramviewoptions)(void*);
+
 	void (*setcallback)(void*, MachineCallback);
 	void (*loadspecific)(void*, PsyFile*, unsigned int slot, struct Machines*);	
 	int (*haseditor)(void*);
@@ -78,7 +80,8 @@ typedef struct Machine {
 	int mute;
 	amp_t pan;
 	int ismixersend;		
-	Signal signal_worked;	
+	Signal signal_worked;
+	size_t buildid;
 } Machine;
 
 void machine_init(Machine*, MachineCallback);

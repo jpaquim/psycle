@@ -11,14 +11,15 @@ typedef struct {
 	Machine machine;		
 	Library library;
 	struct AEffect* effect;
-	CMachineInfo* info;
+	MachineInfo* info;
 	void* editorhandle;
 	struct VstEvents* events;
 	int eventcap;
 	Table noteons;
+	MachineInfo* plugininfo;
 } VstPlugin;
 
 void vstplugin_init(VstPlugin*, MachineCallback, const char* path);
-int plugin_vst_test(const char* path, CMachineInfo* rv);
+int plugin_vst_test(const char* path, MachineInfo* rv);
 
 #endif

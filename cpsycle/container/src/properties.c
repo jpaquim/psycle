@@ -278,7 +278,7 @@ void properties_readdouble(Properties* properties, const char* key, double* valu
 	}
 }
 
-void properties_readstring(Properties* properties, const char* key, const char** text, const char* defaulttext)
+char* properties_readstring(Properties* properties, const char* key, const char** text, const char* defaulttext)
 {
 	if (!properties) {
 		*text = defaulttext;
@@ -290,6 +290,7 @@ void properties_readstring(Properties* properties, const char* key, const char**
 			*text = defaulttext;
 		}
 	}
+	return *text;
 }
 
 Properties* properties_write_string(Properties* self, const char* key, const char* value)

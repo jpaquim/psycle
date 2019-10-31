@@ -18,21 +18,21 @@ void filebar_init(FileBar* self, ui_component* parent, Workspace* workspace)
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	ui_label_init(&self->header, &self->component);
 	ui_label_settext(&self->header,	"Song  ");
-	ui_button_init(&self->newsongbutton, &self->component);
-	ui_button_settext(&self->newsongbutton,
+	ui_button_init(&self->newbutton, &self->component);
+	ui_button_settext(&self->newbutton,
 		workspace_translate(workspace, "new"));
-	signal_connect(&self->newsongbutton.signal_clicked, self,
+	signal_connect(&self->newbutton.signal_clicked, self,
 		filebar_onnewsong);
-	ui_button_init(&self->loadsongbutton, &self->component);
-	ui_button_settext(&self->loadsongbutton,
+	ui_button_init(&self->loadbutton, &self->component);
+	ui_button_settext(&self->loadbutton,
 		workspace_translate(workspace, "load"));
-	signal_connect(&self->loadsongbutton.signal_clicked, self,
+	signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
-	ui_button_init(&self->savesongbutton, &self->component);
-	ui_button_settext(&self->savesongbutton, 
-		workspace_translate(workspace, "save"));	
-	signal_connect(&self->savesongbutton.signal_clicked, self,
-		filebar_onloadsong);
+	ui_button_init(&self->savebutton, &self->component);
+	ui_button_settext(&self->savebutton, 
+		workspace_translate(workspace, "save"));
+	signal_connect(&self->savebutton.signal_clicked, self,
+		filebar_onsavesong);
 	filebar_initalign(self);
 }
 
@@ -73,9 +73,7 @@ void filebar_onloadsong(FileBar* self, ui_component* sender)
 	char  defaultextension[] = "PSY";
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
-		ui_invalidate(self->workspace->mainhandle);
-		UpdateWindow(self->workspace->mainhandle->hwnd);
+	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {		
 		workspace_loadsong(self->workspace, path);						
 	}
 }
@@ -84,18 +82,11 @@ void filebar_onsavesong(FileBar* self, ui_component* sender)
 {
 	char path[MAX_PATH]	 = "";
 	char title[MAX_PATH]	 = ""; 					
-	static char filter[] = "All Songs (*.psy *.xm *.it *.s3m *.mod)" "\0*.psy;*.xm;*.it;*.s3m;*.mod\0"
-				"Songs (*.psy)"				        "\0*.psy\0"
-				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
-				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
-				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
-				"Original Mod Format Songs (*.mod)" "\0*.mod\0";
+	static char filter[] = "Songs (*.psy)\0*.psy\0";
 	char  defaultextension[] = "PSY";
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
-		ui_invalidate(self->workspace->mainhandle);
-		UpdateWindow(self->workspace->mainhandle->hwnd);
-		workspace_loadsong(self->workspace, path);						
+	if (ui_savefile(&self->component, title, filter, defaultextension, path)) {		
+		workspace_savesong(self->workspace, path);						
 	}
 }

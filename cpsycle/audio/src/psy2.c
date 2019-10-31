@@ -501,11 +501,11 @@ void psy2_load(Song* song, PsyFile* file, char header[9],
 					psyfile_read(file, sDllName, sizeof(sDllName)); // Plugin dll name
 					makeplugincatchername(sDllName, plugincatchername);
 				}
-
-				machine = machinefactory_make(song->machinefactory, type, plugincatchername);
+				machine = machinefactory_makemachine(song->machinefactory, type,
+					plugincatchername);
 				if (!machine) {
-					machine = machinefactory_make(song->machinefactory, MACH_DUMMY, 
-						plugincatchername);
+					machine = machinefactory_makemachine(song->machinefactory, 
+						MACH_DUMMY, plugincatchername);
 					type = MACH_DUMMY;
 				}				
 				if (type == MACH_DUMMY) {

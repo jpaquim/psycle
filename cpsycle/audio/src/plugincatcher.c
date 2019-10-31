@@ -37,7 +37,7 @@ static void plugincatcher_makeplugininfo(PluginCatcher*,
 	const char* name,
 	const char* path,
 	unsigned int type,
-	const CMachineInfo* info);
+	const MachineInfo* info);
 static void plugincatcher_makesampler(PluginCatcher*);
 static void plugincatcher_makeduplicator(PluginCatcher*);
 static int isplugin(int type);
@@ -62,7 +62,7 @@ void plugincatcher_init(PluginCatcher* self, Properties* dirconfig)
 	self->inipath = strdup(inipath);
 	self->dirconfig = dirconfig;
 	signal_init(&self->signal_changed);
-	signal_init(&self->signal_scanprogress);
+	signal_init(&self->signal_scanprogress);	
 }
 
 void plugincatcher_dispose(PluginCatcher* self)
@@ -70,7 +70,7 @@ void plugincatcher_dispose(PluginCatcher* self)
 	properties_free(self->plugins);
 	self->plugins = 0;
 	free(self->inipath);	
-	self->dirconfig = 0;
+	self->dirconfig = 0;	
 	signal_dispose(&self->signal_changed);
 	signal_dispose(&self->signal_scanprogress);
 }
@@ -83,30 +83,26 @@ void plugincatcher_clear(PluginCatcher* self)
 }
 
 void plugincatcher_makeinternals(PluginCatcher* self)
-{
-	int typ;
-
-	for (typ = MACH_MASTER + 1; typ <= MACH_DUMMY; ++typ) {
-		const CMachineInfo* info;
-		
-		info = plugincatcher_machineinfo(self, typ, "");
-		if (info) {
-			char* name;
-
-			name = strdup(info->ShortName);
-			strlwr(name);			
-			replace_char(name, ' ', '-');
-			plugincatcher_makeplugininfo(self, name, "", typ, info);
-			free(name);
-		}
-	}
+{		
+	plugincatcher_makeplugininfo(self, "sampler", "", MACH_SAMPLER,
+		sampler_info());
+	plugincatcher_makeplugininfo(self, "dummy", "", MACH_DUMMY,
+		dummymachine_info());
+	plugincatcher_makeplugininfo(self, "master", "", MACH_MASTER,
+		master_info());
+	plugincatcher_makeplugininfo(self, "mixer", "", MACH_MIXER,
+		mixer_info());
+	plugincatcher_makeplugininfo(self, "duplicator", "", MACH_DUPLICATOR,
+		duplicator_info());
+	plugincatcher_makeplugininfo(self, "duplicator2", "", MACH_DUPLICATOR2,
+		duplicator2_info());
 }
 
 void plugincatcher_makeplugininfo(PluginCatcher* self,
 		const char* name,
 		const char* path,
 		unsigned int type,
-		const CMachineInfo* info) {
+		const MachineInfo* info) {
 
 	if (info) {
 		Properties* p;
@@ -168,31 +164,36 @@ char* replace_char(char* str, char c, char r)
 }
 
 int onenumdir(PluginCatcher* self, const char* path, int type)
-{
-	const CMachineInfo* info;
-	CMachineInfo macinfo;
-	char name[_MAX_PATH];
+{	
+	MachineInfo macinfo;
+	char name[_MAX_PATH];	
+
+	machineinfo_init(&macinfo);
+	plugincatcher_catchername(self, path, name);
+	if (type == MACH_PLUGIN) {		
+		if (plugin_psycle_test(path, &macinfo)) {
+			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+			signal_emit(&self->signal_scanprogress, self, 1, 1);
+		}	
+	} else
+	if (type == MACH_VST) {
+		if (plugin_vst_test(path, &macinfo)) {
+			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+			signal_emit(&self->signal_scanprogress, self, 1, 1);
+		}
+	}
+	machineinfo_dispose(&macinfo);
+	return 1;
+}
+
+void plugincatcher_catchername(PluginCatcher* self, const char* path, char* name)
+{	
 	char ext[_MAX_PATH];
 
 	extract_path(path, name, ext);
 	strlwr(name);
 	strlwr(ext);
 	replace_char(name, ' ', '-');
-	if (type == MACH_PLUGIN) {
-		info = plugin_psycle_test(path);
-		if (info) {
-			plugincatcher_makeplugininfo(self, name, path, type, info);
-			signal_emit(&self->signal_scanprogress, self, 1, 1);
-		}	
-	} else
-	if (type == MACH_VST) {
-
-		if (plugin_vst_test(path, &macinfo)) {
-			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
-			signal_emit(&self->signal_scanprogress, self, 1, 1);
-		}
-	}		
-	return 1;
 }
 
 int plugincatcher_load(PluginCatcher* self)
@@ -208,68 +209,6 @@ int plugincatcher_load(PluginCatcher* self)
 void plugincatcher_save(PluginCatcher* self)
 {	
 	propertiesio_save(self->plugins, self->inipath);
-}
-
-const CMachineInfo* plugincatcher_machineinfo(PluginCatcher* self,
-	MachineType type, const char* name)
-{
-	const CMachineInfo* rv = 0;
-
-	switch (type) {		
-		case MACH_DUMMY:
-		{
-			rv = dummymachine_info();
-		}
-		break;
-		case MACH_DUPLICATOR:
-		{
-			rv = duplicator_info();
-		}
-		break;
-		case MACH_DUPLICATOR2:
-		{
-			rv = duplicator2_info();
-		}
-		break;
-		case MACH_MASTER:
-		{
-			rv = master_info();
-		}
-		break;
-		case MACH_MIXER:
-		{
-			rv = mixer_info();			
-		}
-		break;		
-		case MACH_PLUGIN:
-		{
-			char path[_MAX_PATH];
-			rv = plugin_psycle_test(plugincatcher_modulepath(self, MACH_PLUGIN,
-				name, path));
-		}
-		break;
-		case MACH_SAMPLER:
-		{
-			rv = sampler_info();
-		}
-		break;
-		case MACH_VST:
-		{
-			char path[_MAX_PATH];
-			CMachineInfo* info;
-			
-			info = (CMachineInfo*) malloc(sizeof(CMachineInfo));
-			if (plugin_vst_test(plugincatcher_modulepath(self, MACH_PLUGIN,
-				name, path), info)) {
-				rv = info;
-			}
-		}
-		break;		
-		default:
-			rv = 0;
-		break;
-	}
-	return rv;
 }
 
 char* plugincatcher_modulepath(PluginCatcher* self, MachineType machtype,

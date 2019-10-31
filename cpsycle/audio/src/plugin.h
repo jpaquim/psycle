@@ -11,10 +11,10 @@ typedef struct {
 	CMachineInterface* mi;
 	Library library;
 	float pan;
+	MachineInfo* plugininfo;
 } Plugin;
 
 void plugin_init(Plugin* self, MachineCallback, const char* path);
-CMachineInfo* plugin_psycle_test(const char* path);
-
+int plugin_psycle_test(const char* path, MachineInfo*);
 
 #endif

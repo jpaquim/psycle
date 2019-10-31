@@ -9,12 +9,10 @@
 #include <string.h>
 #include <operations.h>
 
-static CMachineInfo const macinfo = {
+static MachineInfo const macinfo = {	
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
-	0,
-	0,
 	"Machine"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -23,7 +21,7 @@ static CMachineInfo const macinfo = {
 	"Machine",
 	"Psycledelics",
 	"help",
-	3
+	MACH_UNDEFINED
 };
 
 static Machine* clone(Machine* self) { return 0; }
@@ -35,7 +33,13 @@ static void seqtick(Machine* self, int channel, const PatternEvent* event) { }
 static void sequencertick(Machine* self) { }
 static List* sequencerinsert(Machine* self, List* events) { return 0; }
 static void sequencerlinetick(Machine* self) { }
-static const CMachineInfo* info(Machine* self) { return &macinfo; }
+static const MachineInfo* info(Machine* self) { return &macinfo; }
+static int parametertype(Machine* self, int param) { return MPF_STATE; }
+static void parameterrange(Machine* self, int numparam, int* minval, int* maxval)
+{
+	*minval = 0;
+	*maxval = 0;
+}
 static void parametertweak(Machine* self, int par, int val) { }
 static void patterntweak(Machine* self, int par, int val)
 {
@@ -56,16 +60,8 @@ static void setcallback(Machine* self, MachineCallback callback) { self->callbac
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
 static void loadspecific(Machine* self, PsyFile* file, unsigned int slot, Machines* machines) { }
 static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
-static unsigned int numparameters(Machine* self) { 
-	return self->info(self) ? self->info(self)->numParameters : 0;
-}
-static unsigned int numcols(Machine* self) { 
-	return self->info(self) ? self->info(self)->numCols : 0;
-}
-static const CMachineParameter* parameter(Machine* self, unsigned int par)
-{
-	return self->info(self)->Parameters[par];
-}
+static unsigned int numparameters(Machine* self) { return 0; }
+static unsigned int numcols(Machine* self) { return 0; }
 static int paramviewoptions(Machine* self) { return 0; }
 static unsigned int slot(Machine* self) { return -1; }
 static void setslot(Machine* self, int slot) { }
@@ -110,9 +106,10 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->generateaudio = generateaudio;
 	self->numinputs = numinputs;
 	self->numoutputs = numoutputs;	
+	self->parameterrange = parameterrange;
+	self->parametertype = parametertype;
 	self->numparameters = numparameters;
 	self->numcols = numcols;
-	self->parameter = parameter;
 	self->paramviewoptions = paramviewoptions;
 	self->parameterlabel = parameterlabel;
 	self->parametername = parametername;
@@ -192,7 +189,7 @@ void work(Machine* self, BufferContext* bc)
 
 static int mode(Machine* self)
 { 
-	const CMachineInfo* info;
+	const MachineInfo* info;
 
 	info = self->info(self);
 	return (!info) ? MACHMODE_GENERATOR : (info->Flags & 3) == 3

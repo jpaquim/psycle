@@ -4,18 +4,19 @@
 #if !defined(PLUGINCATCHER_H)
 #define PLUGINCATCHER_H
 
-#include "plugin_interface.h"
 #include "machinedefs.h"
+#include "machineinfo.h"
 
 #include <propertiesio.h>
 #include <signal.h>
+#include <hashtbl.h>
 
 typedef struct {
 	Properties* plugins;
 	char* inipath;
 	Properties* dirconfig;
 	Signal signal_changed;
-	Signal signal_scanprogress;
+	Signal signal_scanprogress;	
 } PluginCatcher;
 
 void plugincatcher_init(PluginCatcher*, Properties* dirconfig);
@@ -24,10 +25,10 @@ void plugincatcher_clear(PluginCatcher*);
 void plugincatcher_scan(PluginCatcher*);
 int plugincatcher_load(PluginCatcher*);
 void plugincatcher_save(PluginCatcher*);
-const CMachineInfo* plugincatcher_machineinfo(PluginCatcher*, MachineType,
-	const char* name);
+/*const MachineInfo* plugincatcher_machineinfo(PluginCatcher*, MachineType,
+	const char* name);*/
 char* plugincatcher_modulepath(PluginCatcher*, MachineType, const char* path,
 	char* fullpath);
-
+void plugincatcher_catchername(PluginCatcher*, const char* path, char* name);
 
 #endif
