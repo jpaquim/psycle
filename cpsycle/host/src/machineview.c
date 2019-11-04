@@ -256,6 +256,7 @@ void wireview_init(WireView* self, ui_component* parent,
 {	
 	ui_fontinfo fontinfo;
 
+	self->statusbar = 0;
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
 	self->drawvumeters = 1;		
@@ -781,14 +782,20 @@ void wireview_onmousemove(WireView* self, ui_component* sender, int x, int y, in
 			machineui = machineuis_at(self, self->dragslot);
 			if (machineui) {
 				machineui->x = x - self->mx;
-				machineui->y = y - self->my;			
+				machineui->y = y - self->my;				
+			}
+			if (self->statusbar) {
+				char txt[128];
+				_snprintf(txt, 128, "%s (%d, %d)", machineui->editname, x - self->mx, y - self->my);
+				ui_label_settext(&self->statusbar->label, txt);
+				ui_invalidate(&self->statusbar->label.component);
 			}
 		} else
 		if (self->dragmode == WIREVIEW_DRAG_NEWCONNECTION) {
 			self->mx = x;
 			self->my = y;			
 		}
-		ui_invalidate(&self->component);		
+		ui_invalidate(&self->component);				
 	}
 }
 
@@ -800,7 +807,7 @@ void wireview_onmouseup(WireView* self, ui_component* sender, int x, int y, int 
 			self->dragslot = -1;
 			wireview_hittest(self, x, y);
 			if (self->dragslot != -1) {								
-				machines_connect(self->machines, outputslot, self->dragslot, 0);				
+				machines_connect(self->machines, outputslot, self->dragslot);				
 			}
 		}
 	}
@@ -1072,6 +1079,22 @@ void machineuis_removeall(WireView* self)
 	table_init(&self->machineuis);
 }
 
+void machineviewbar_init(MachineViewBar* self, ui_component* parent, Workspace* workspace)
+{
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	ui_label_init(&self->label, &self->component);	
+	ui_label_setcharnumber(&self->label, 40);
+	{
+		ui_margin margin = { 2, 10, 2, 0 };
+
+		list_free(ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_LEFT,
+			&margin));
+	}
+}
+
 void machineview_init(MachineView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
 {
@@ -1088,7 +1111,7 @@ void machineview_init(MachineView* self, ui_component* parent,
 	newmachine_init(&self->newmachine, &self->notebook.component,
 		self->workspace);	
 	tabbar_init(&self->tabbar, tabbarparent);
-	ui_component_setposition(&self->tabbar.component, 450, 0, 160, 20);	
+	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
 	ui_component_hide(&self->tabbar.component);
 	tabbar_append(&self->tabbar, "Wires");
 	tabbar_append(&self->tabbar, "New Machine");		
@@ -1101,6 +1124,8 @@ void machineview_init(MachineView* self, ui_component* parent,
 
 void machineview_onshow(MachineView* self, ui_component* sender)
 {	
+	self->tabbar.component.visible = 1;
+	ui_component_align(ui_component_parent(&self->tabbar.component));
 	ui_component_show(&self->tabbar.component);
 }
 

@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stddef.h>
+
+
 
 static int properties_enumerate_rec(Properties*);
 static int OnSearchPropertiesEnum(Properties*, Properties*, int level);
@@ -40,24 +43,26 @@ void properties_init(Properties* self, const char* key, PropertyType typ)
 void properties_free(Properties* self)
 {
 	Properties* p;
-	Properties* next;
+	Properties* q;
 
-	p = self;
-	while (p != 0) {
-		if (p->dispose) {
-			p->dispose(&p->item);
-		} else
-		if (p->children && p->item.disposechildren) {
-			properties_free(p->children);
-		}		
-		next = p->next;		
-		free(p->item.key);
-		free(p->item.text);
-		if (p->item.typ == PROPERTY_TYP_STRING) {
-			free(p->item.value.s);
+	if (self) {
+		p = self;
+		for (p = self; p != 0; p = q) {
+			q = p->next;
+			if (p->dispose) {
+				p->dispose(&p->item);
+			}
+			else
+				if (p->children && p->item.disposechildren) {
+					properties_free(p->children);
+				}			
+			free(p->item.key);
+			free(p->item.text);
+			if (p->item.typ == PROPERTY_TYP_STRING) {
+				free(p->item.value.s);
+			}
+			free(p);			
 		}
-		free(p);
-		p = next;
 	}
 }
 
@@ -208,18 +213,20 @@ Properties* properties_read(Properties* self, const char* key)
 		p = self->children;		
 	} else {
 		char* path;
-		int count;
+		ptrdiff_t count;
 		
 		count = c - key;
 		path = malloc(count + 1);
-		strncpy(path, key, count);
-		path[count] = '\0';		
-		key = c + 1;		
-		p = properties_findsection(self, path);
-		if (p) {
-			p = p->children;
+		if (path) {			
+			strncpy(path, key, count);
+			path[count] = '\0';
+			key = c + 1;
+			p = properties_findsection(self, path);
+			if (p) {
+				p = p->children;
+			}
+			free(path);
 		}
-		free(path);
 	}
 	while (p != 0) {		
 		if (p->item.key && strcmp(key, p->item.key) == 0) {
@@ -230,8 +237,7 @@ Properties* properties_read(Properties* self, const char* key)
 	return p;
 }
 
-int properties_int(Properties* properties, const char* key,
-	int defaultvalue)
+int properties_int(Properties* properties, const char* key, int defaultvalue)
 {
 	int rv = defaultvalue;
 
@@ -278,7 +284,7 @@ void properties_readdouble(Properties* properties, const char* key, double* valu
 	}
 }
 
-char* properties_readstring(Properties* properties, const char* key, const char** text, const char* defaulttext)
+const char* properties_readstring(Properties* properties, const char* key, const char** text, const char* defaulttext)
 {
 	if (!properties) {
 		*text = defaulttext;

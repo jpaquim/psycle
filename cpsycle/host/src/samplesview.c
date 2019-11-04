@@ -167,7 +167,7 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 	char  defaultextension[] = "WAV"; 
 	*path = '\0'; 
 	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
-		int slot;
+		intptr_t slot;
 		Sample* sample;
 		Instrument* instrument;
 
@@ -273,7 +273,7 @@ void OnEditSampleName(SamplesHeaderView* self, ui_edit* sender)
 	if (self->sample) {
 		char txt[40];		
 		sample_setname(self->sample, ui_edit_text(sender));
-		_snprintf(txt, 20, "%02X:%s", ui_listbox_cursel(self->samplelist),
+		_snprintf(txt, 20, "%02X:%s", (int)ui_listbox_cursel(self->samplelist),
 			sample_name(self->sample));
 		ui_listbox_setstring(self->samplelist, txt,
 			ui_listbox_cursel(self->samplelist));

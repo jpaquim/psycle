@@ -95,11 +95,19 @@ typedef struct {
 	PluginCatcher plugincatcher;
 	MachineSkin skin;	   
 	Workspace* workspace;
+	struct MachineViewBar* statusbar;
 } WireView;
 
 void wireview_init(WireView*, ui_component* parent,
 	ui_component* tabbarparent, Workspace*);
 void wireview_align(WireView*);
+
+typedef struct MachineViewBar {
+	ui_component component;
+	ui_label label;
+} MachineViewBar;
+
+void machineviewbar_init(MachineViewBar*, ui_component* parent, Workspace*);
 
 typedef struct {
 	ui_component component;

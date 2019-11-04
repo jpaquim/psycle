@@ -6,6 +6,7 @@
 #include "machine.h"
 #include "machines.h"
 #include "pattern.h"
+#include "songio.h"
 #include <string.h>
 #include <operations.h>
 
@@ -25,7 +26,7 @@ static MachineInfo const macinfo = {
 };
 
 static Machine* clone(Machine* self) { return 0; }
-static Buffer* mix(Machine*, int slot, unsigned int amount, MachineSockets*, Machines*);
+static Buffer* mix(Machine*, size_t slot, unsigned int amount, MachineSockets*, Machines*);
 static void work(Machine*, BufferContext*);
 static void generateaudio(Machine* self, BufferContext* bc) { }
 static int hostevent(Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
@@ -48,8 +49,7 @@ static void patterntweak(Machine* self, int par, int val)
 static int parameterlabel(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
 static int parametername(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
 static int describevalue(Machine* self, char* txt, int param, int value) { return 0; }
-static int value(Machine* self, int const param) { return 0; }
-static void setvalue(Machine* self, int const param, int const value) { }
+static int parametervalue(Machine* self, int const param) { return 0; }
 static void setpanning(Machine*, amp_t);
 static amp_t panning(Machine*);
 static void dispose(Machine*);
@@ -58,10 +58,11 @@ static unsigned int numinputs(Machine* self) { return 0; }
 static unsigned int numoutputs(Machine* self) { return 0; }	
 static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
-static void loadspecific(Machine* self, PsyFile* file, unsigned int slot, Machines* machines) { }
-static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
+static void loadspecific(Machine*, struct SongFile*, unsigned int slot);
+static void savespecific(Machine*, struct SongFile*, unsigned int slot);
+static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, amp_t vol);
 static unsigned int numparameters(Machine* self) { return 0; }
-static unsigned int numcols(Machine* self) { return 0; }
+static unsigned int numparametercols(Machine* self) { return 0; }
 static int paramviewoptions(Machine* self) { return 0; }
 static unsigned int slot(Machine* self) { return -1; }
 static void setslot(Machine* self, int slot) { }
@@ -99,8 +100,7 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->parametertweak = parametertweak;
 	self->patterntweak = patterntweak;
 	self->describevalue = describevalue;
-	self->setvalue = setvalue;
-	self->value = value;
+	self->parametervalue = parametervalue;
 	self->setpanning = setpanning;
 	self->panning = panning;
 	self->generateaudio = generateaudio;
@@ -109,13 +109,14 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->parameterrange = parameterrange;
 	self->parametertype = parametertype;
 	self->numparameters = numparameters;
-	self->numcols = numcols;
+	self->numparametercols = numparametercols;
 	self->paramviewoptions = paramviewoptions;
 	self->parameterlabel = parameterlabel;
 	self->parametername = parametername;
 	self->setcallback = setcallback;
 	self->updatesamplerate = updatesamplerate;
 	self->loadspecific = loadspecific;
+	self->savespecific = savespecific;
 	self->bpm = bpm;
 	self->samplerate = samplerate;
 	self->instruments = instruments;	
@@ -245,7 +246,7 @@ amp_t panning(Machine* self)
 	return self->pan;
 }
 
-Buffer* mix(Machine* self, int slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
+Buffer* mix(Machine* self, size_t slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
 {			
 	Buffer* output;
 
@@ -253,26 +254,19 @@ Buffer* mix(Machine* self, int slot, unsigned int amount, MachineSockets* connec
 	if (output) {
 		buffer_clearsamples(output, amount);
 		if (connected_machine_sockets) {
-			WireSocket* WireSocket;
+			WireSocket* input_socket;
 			
-			for (WireSocket = connected_machine_sockets->inputs;
-				WireSocket != 0; WireSocket = WireSocket->next) {
-				WireSocketEntry* source = 
-					(WireSocketEntry*)WireSocket->entry;
-				if (source->slot != -1 && !source->send) {
-					addsamples(
-						output, 
-						machines_outputs(machines, source->slot),
-						amount,
-						source->volume);
-				}						
+			for (input_socket = connected_machine_sockets->inputs; input_socket != 0; input_socket = input_socket->next) {
+				WireSocketEntry* source = (WireSocketEntry*) input_socket->entry;
+				addsamples(output, machines_outputs(machines, source->slot), amount,
+					source->volume);				
 			}							
 		}
 	}
 	return output;
 }
 
-void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
+void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, amp_t vol)
 {
 	unsigned int channel;
 
@@ -287,5 +281,36 @@ void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
 				dsp_erase_all_nans_infinities_and_denormals(
 					dst->samples[channel], numsamples);					
 		}
+	}
+}
+
+void loadspecific(Machine* self, struct SongFile* songfile, unsigned int slot)
+{
+	unsigned int size;
+	unsigned int count;
+	unsigned int i;
+
+	psyfile_read(songfile->file, &size, sizeof(size)); // size of this part params to load	
+	psyfile_read(songfile->file, &count, sizeof(count)); // num params to load
+	for (i = 0; i < count; i++) {
+		int temp;
+		psyfile_read(songfile->file, &temp, sizeof(temp));
+		self->parametertweak(self, i, temp);
+	}
+	psyfile_skip(songfile->file, size - sizeof(count) - (count * sizeof(int)));
+}
+
+void savespecific(Machine* self, struct SongFile* songfile, unsigned int slot)
+{
+	unsigned int i;
+	unsigned count = self->numparameters(self);
+	unsigned  size = sizeof(count)+(count*sizeof(int));
+	psyfile_write(songfile->file, &size, sizeof(size));
+	psyfile_write(songfile->file, &count, sizeof(count));
+	for(i = 0; i < count; ++i) {
+		int temp;
+		
+		temp = self->parametervalue(self, i);
+		psyfile_write(songfile->file, &temp, sizeof(temp));
 	}
 }

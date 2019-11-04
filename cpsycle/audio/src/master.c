@@ -7,24 +7,27 @@
 #include "machines.h"
 #include <string.h>
 #include <math.h>
+#include "songio.h"
 
 static int master_mode(Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(Master*);
 
 static int parametertype(Master*, int param);
 static unsigned int numparameters(Master*);
-static unsigned int numcols(Master*);
+static unsigned int numparametercols(Master*);
 static void parametertweak(Master*, int par, int val);	
 static void parameterrange(Master*, int numparam, int* minval, int* maxval);
 static int parameterlabel(Master*, char* txt, int param);
 static int parametername(Master*, char* txt, int param);
 static int describevalue(Master*, char* txt, int param, int value);
-static int value(Master*, int param);
+static int parametervalue(Master*, int param);
 static const MachineInfo* info(Master*);
 static unsigned int numinputs(Master*);
 static unsigned int numoutputs(Master*);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
+static void master_loadspecific(Master*, struct SongFile*, unsigned int slot);
+static void master_savespecific(Master*, struct SongFile*, unsigned int slot);
 
 static MachineInfo const MacInfo = {
 	MI_VERSION,
@@ -55,19 +58,21 @@ void master_init(Master* self, MachineCallback callback)
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;
-	self->machine.value = value;
+	self->machine.parametervalue = parametervalue;
 	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;	
+	self->machine.numoutputs = numoutputs;
+	self->machine.loadspecific = master_loadspecific;
+	self->machine.savespecific = master_savespecific;
 	// Parameter
 	self->machine.parametertype = parametertype;
-	self->machine.numcols = numcols;
+	self->machine.numparametercols = numparametercols;
 	self->machine.numparameters = numparameters;
 	self->machine.parameterrange = parameterrange;
 	self->machine.parametertweak = parametertweak;	
 	self->machine.parameterlabel = parameterlabel;
 	self->machine.parametername = parametername;
 	self->machine.describevalue = describevalue;
-	self->machine.value = value;	
+	self->machine.parametervalue = parametervalue;
 }
 
 void master_dispose(Master* self)
@@ -135,7 +140,7 @@ int describevalue(Master* self, char* txt, int param, int value)
 	return 0;
 }
 
-int value(Master* self, int param)
+int parametervalue(Master* self, int param)
 {	
 	if (param == 0) {
 		Machines* machines = self->machine.callback.machines(
@@ -208,7 +213,7 @@ unsigned int numparameters(Master* self)
 	return 13;
 }
 
-unsigned int numcols(Master* self)
+unsigned int numparametercols(Master* self)
 {
 	return 4;
 }
@@ -223,4 +228,29 @@ int parametername(Master* self, char* txt, int param)
 {
 	_snprintf(txt, 128, "%s", "Vol");
 	return 1;
+}
+
+void master_loadspecific(Master* self, struct SongFile* songfile, unsigned int slot)
+{	
+	unsigned int size;
+	int outdry = 256;
+	unsigned char decreaseOnClip = 0;
+
+	psyfile_read(songfile->file, &size, sizeof size ); // size of this part params to load
+	psyfile_read(songfile->file, &outdry, sizeof outdry);
+	psyfile_read(songfile->file, &decreaseOnClip, sizeof decreaseOnClip);
+
+	machines_setvolume(&songfile->song->machines, outdry / (amp_t)256);
+}
+
+void master_savespecific(Master* self, struct SongFile* songfile, unsigned int slot)
+{
+	unsigned int size;
+	int outdry = 256;
+	unsigned char decreaseOnClip = 0;
+				
+	size = sizeof outdry + sizeof decreaseOnClip;
+	psyfile_write(songfile->file, &size, sizeof size); // size of this part params to save
+	psyfile_write(songfile->file, &outdry, sizeof outdry);
+	psyfile_write(songfile->file, &decreaseOnClip, sizeof decreaseOnClip); 
 }

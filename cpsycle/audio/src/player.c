@@ -37,7 +37,7 @@ static amp_t* work(Player*, int* numsamples);
 static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(Player*, unsigned int amount);
 static void player_filldriver(Player*, amp_t* buffer, unsigned int amount);
-static RMSVol* player_rmsvol(Player*, unsigned int slot);
+static RMSVol* player_rmsvol(Player*, size_t slot);
 static void player_resetvumeters(Player*);
 
 // player init and dispose
@@ -130,10 +130,10 @@ void player_workpath(Player* self, unsigned int amount)
 	path = machines_path(&self->song->machines);
 	if (path) {
 		for ( ; path != 0; path = path->next) {
-			unsigned int slot;									
+			size_t slot;									
 			Machine* machine;
 
-			slot = (int)path->entry;
+			slot = (size_t)path->entry;
 			machine = machines_at(&self->song->machines, slot);
 			if (machine && !table_exists(&self->song->machines.connections.sends, slot)) {
 				Buffer* output;
@@ -203,7 +203,7 @@ void player_filldriver(Player* self, amp_t* buffer, unsigned int amount)
 	}
 }
 
-RMSVol* player_rmsvol(Player* self, unsigned int slot)
+RMSVol* player_rmsvol(Player* self, size_t slot)
 {
 	RMSVol* rv;
 
@@ -381,6 +381,7 @@ void player_unloaddriver(Player* self)
 		self->driver->close(self->driver);		
 		self->driver->dispose(self->driver);
 		self->driver->free(self->driver);
+//		free(self->driver);
 		library_unload(&self->drivermodule);		
 	}
 	self->driver = 0;

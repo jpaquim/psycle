@@ -88,7 +88,7 @@ void insertpathenv(const char* path)
 	envpath = pathenv();
 	if (envpath && path) {			
 		char* newenvpath;
-		int size;
+		size_t size;
 
 		size = strlen(path) + strlen(envpath) + 3;
 		newenvpath = (char*)malloc(size);
@@ -106,17 +106,19 @@ void setpathenv(const char* path)
 {
 	if (path) {
 		char* newenv;
-		int size;
+		size_t size;
 
 		size = strlen(path) + strlen(pathenvvarname) + 3;
 		newenv = (char*)malloc(size);
-		newenv[0] = '\0';
+		if (newenv) {
+			newenv[0] = '\0';
 
-		strcpy(newenv, pathenvvarname);
-		strcat(newenv, "=");	
-		strcat(newenv, path);
-		putenv(newenv);
-		free(newenv);
+			strcpy(newenv, pathenvvarname);
+			strcat(newenv, "=");
+			strcat(newenv, path);
+			putenv(newenv);
+			free(newenv);
+		}
 	}
 }
 

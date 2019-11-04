@@ -22,7 +22,7 @@ static void onmouseleave(ui_button*, ui_component* sender);
 static void oncommand(ui_button*, ui_component* sender, WPARAM wParam,
 	LPARAM lParam);
 static void onpreferredsize(ui_button*, ui_component* sender, ui_size* limit,
-	int* width, int* height);
+	ui_size* size);
 
 void ui_button_init(ui_button* self, ui_component* parent)
 {	
@@ -176,28 +176,26 @@ void makearrow(ui_point* arrow, ButtonIcon icon, int x, int y)
 }
 
 void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit,
-	int* width, int* height)
+	ui_size* rv)
 {		
-	if (self->ownerdrawn) {
-		ui_size size;
+	if (rv) {
+		if (self->ownerdrawn) {
+			ui_size size;
 
-		if (self->icon) {
-			if (self->icon == UI_ICON_LESS || self->icon == UI_ICON_MORE) {
-				size = ui_component_textsize(&self->component, "<");
+			if (self->icon) {
+				if (self->icon == UI_ICON_LESS || self->icon == UI_ICON_MORE) {
+					size = ui_component_textsize(&self->component, "<");
+				} else {
+					size = ui_component_textsize(&self->component, "<<");
+				}
 			} else {
-				size = ui_component_textsize(&self->component, "<<");
+				size = ui_component_textsize(&self->component, self->text);			
 			}
+			rv->width = size.width + 4;
+			rv->height = size.height + 4;
 		} else {
-			size = ui_component_textsize(&self->component, self->text);			
+			*rv = ui_component_size(&self->component);		
 		}
-		*width = size.width + 4;
-		*height = size.height + 4;
-	} else {
-		ui_size size;
-
-		size = ui_component_size(&self->component);
-		*width = size.width;
-		*height = size.height;
 	}
 }
 

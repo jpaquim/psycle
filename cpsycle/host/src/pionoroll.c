@@ -21,12 +21,15 @@ static void pianogrid_drawevents(Pianogrid*, ui_graphics*);
 static void pianogrid_drawevent(Pianogrid*, ui_graphics*, PatternEvent*, int track, float offset, float length);
 static void pianogrid_onsize(Pianogrid*, ui_component* sender, ui_size*);
 static void pianogrid_adjustscroll(Pianogrid*);
-static void pianoroll_updatemetrics(Pianoroll*);
-static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
 static void pianogrid_onscroll(Pianogrid*, ui_component* sender, int cx, int cy);
 static void pianogrid_onkeydown(Pianogrid*, ui_component* sender, int keycode, int keydata);
 static void pianogrid_onmousedown(Pianogrid*, ui_component* sender, int x, int y, int button);
 
+static void pianoroll_updatemetrics(Pianoroll*);
+static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
+static int pianorolld_testplaybar(Pianoroll*, big_beat_t offset);
+static int testrange(big_beat_t position, big_beat_t offset, big_beat_t width);
+static void pianoroll_invalidateline(Pianoroll*, beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, ui_component* component);
 static void pianoroll_onsize(Pianoroll*, ui_component* sender, ui_size*);
 static void pianoroll_onmousedown(Pianoroll*, ui_component* sender, int x, int y, int button);
@@ -45,6 +48,7 @@ void pianoroll_init(Pianoroll* self, ui_component* parent, Workspace* workspace)
 	self->opcount = 0;
 	self->syncpattern = 1;
 	self->pattern = 0;
+	self->sequenceentryoffset = 0.f;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	signal_connect(&self->component.signal_destroy, self, pianoroll_ondestroy);
@@ -74,21 +78,51 @@ void pianoroll_ondestroy(Pianoroll* self, ui_component* component)
 void pianoroll_ontimer(Pianoroll* self, ui_component* sender, int timerid)
 {
 	if (timerid == TIMERID_PIANOROLL) {		
-		/*if (player_playing(self->grid.player)) {
-			trackerview_invalidateline(self, self->lastplayposition);
+		if (player_playing(&self->workspace->player)) {
+			pianoroll_invalidateline(self, self->lastplayposition);
 			self->lastplayposition = player_position(&self->workspace->player);			
-			trackerview_invalidateline(self, self->lastplayposition);
+			pianoroll_invalidateline(self, self->lastplayposition);
 		} else {
 			if (self->lastplayposition != -1) {				
-				trackerview_invalidateline(self, self->lastplayposition);
+				pianoroll_invalidateline(self, self->lastplayposition);
 				self->lastplayposition = -1;
 			}
-		}*/
+		}
 		if (self->pattern && self->pattern->opcount != self->opcount &&
 				self->syncpattern) {
 			ui_invalidate(&self->grid.component);
 		}		
 		self->opcount = self->pattern ? self->pattern->opcount : 0;
+	}
+}
+
+int pianoroll_testplaybar(Pianoroll* self, big_beat_t offset)
+{
+	return player_playing(&self->workspace->player) &&
+		testrange(self->lastplayposition -
+			self->sequenceentryoffset,
+			offset, 1 / (big_beat_t)self->grid.metrics.lpb);
+}
+
+int testrange(big_beat_t position, big_beat_t offset, big_beat_t width)
+{
+	return position >= offset && position < offset + width;
+}
+
+void pianoroll_invalidateline(Pianoroll* self, beat_t offset)
+{
+	int line;
+	ui_rectangle r;
+
+	if (offset >= self->sequenceentryoffset &&
+		offset < self->sequenceentryoffset + self->pattern->length) {
+		line = (int)((offset - self->sequenceentryoffset) * self->grid.metrics.lpb);
+		ui_setrectangle(&r,
+			(int)(self->grid.metrics.stepwidth * line + self->grid.beatscrollpos * self->grid.metrics.beatwidth),
+			0,			
+			(int)self->grid.metrics.stepwidth,
+			self->grid.metrics.visikeys * self->grid.metrics.keyheight);
+		ui_invalidaterect(&self->grid.component, &r);
 	}
 }
 
@@ -189,6 +223,27 @@ void pianogrid_drawgrid(Pianogrid* self, ui_graphics* g)
 			}		
 		}		
 	}
+
+	if (player_playing(&self->view->workspace->player)) {
+		big_beat_t offset;
+		
+		offset = self->view->lastplayposition;
+		if (offset >= self->view->sequenceentryoffset &&
+			offset < self->view->sequenceentryoffset + self->view->pattern->length) {
+			int line;
+			ui_rectangle r;
+
+			line = (int)((offset - self->view->sequenceentryoffset) * self->metrics.lpb);
+			
+			ui_setrectangle(&r,
+				(int) (self->metrics.stepwidth * line + self->beatscrollpos * self->metrics.beatwidth),
+				0,
+				(int)self->metrics.stepwidth,
+				self->metrics.visikeys * self->metrics.keyheight);
+			ui_drawsolidrectangle(g, r, 0x009F7B00);
+		}
+
+	}
 }
 
 void pianogrid_drawevents(Pianogrid* self, ui_graphics* g)
@@ -230,11 +285,11 @@ void pianogrid_drawevents(Pianogrid* self, ui_graphics* g)
 
 void pianogrid_drawevent(Pianogrid* self, ui_graphics* g, PatternEvent* event, int track, float offset, float length)
 {
-	ui_rectangle r;
+	ui_rectangle r;	
 	int left = (int)((offset + self->beatscrollpos) * self->metrics.beatwidth);
 	int width = (int)(length * self->metrics.beatwidth);
 	ui_setrectangle(&r, left, (self->metrics.keymax - event->note - 1) * self->metrics.keyheight
-		+ 1 + self->dy, width, self->metrics.keyheight - 2);
+		+ 1 + self->dy, width, self->metrics.keyheight - 2);		
 	ui_drawsolidrectangle(g, r, 0x00B1C8B0);	
 }
 

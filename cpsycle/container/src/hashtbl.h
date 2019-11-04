@@ -39,7 +39,7 @@ void table_insert(Table*, size_t k, void* value);
 void table_remove(Table*, size_t k);
 void* table_at(Table*, size_t k);
 size_t table_size(Table*);
-size_t table_exists(Table*, size_t k);
+int table_exists(Table*, size_t k);
 TableIterator table_begin(Table*);
 const TableIterator* table_end(void);
 

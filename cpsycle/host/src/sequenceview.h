@@ -24,6 +24,8 @@ typedef struct {
 	void* context;	
 } SequenceButtons;
 
+void sequencebuttons_init(SequenceButtons*, ui_component* parent);
+
 typedef struct {
 	ui_component component;
 	Sequence* sequence;
@@ -49,7 +51,7 @@ typedef struct {
 	Sequence* sequence;
 } SequenceViewDuration;
 
-void InitSequenceViewDuration(SequenceViewDuration*, ui_component* parent,
+void sequenceduration_init(SequenceViewDuration*, ui_component* parent,
 	Sequence*);
 
 typedef struct {
@@ -64,9 +66,9 @@ typedef struct {
 	Workspace* workspace;
 } SequenceView;
 
-void InitSequenceView(SequenceView*, ui_component* parent, Workspace*);
-void InitSequenceListView(SequenceListView*, ui_component* parent, Sequence*,
+void sequenceview_init(SequenceView*, ui_component* parent, Workspace*);
+void sequencelistview_init(SequenceListView*, ui_component* parent, Sequence*,
 	Patterns*);
-void InitSequenceButtons(SequenceButtons*, ui_component* parent);
+
 
 #endif

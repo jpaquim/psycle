@@ -7,19 +7,9 @@
 #include <string.h> 
 #include <stdio.h>
 
-typedef int BOOL;
-
-#if !defined(TRUE)
-#define TRUE 1
-#endif
-
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-
-unsigned long FourCC(char *psName)
+uint32_t FourCC(char *psName)
 {
-	long retbuf = 0x20202020;   // four spaces (padding)
+	int32_t retbuf = 0x20202020;   // four spaces (padding)
 	char *ps = ((char *)&retbuf);
 	int i;
 	
@@ -32,17 +22,14 @@ unsigned long FourCC(char *psName)
 	return retbuf;
 }
 
-BOOL psyfile_open(PsyFile* self,
-				   const char* psFileName)
+int psyfile_open(PsyFile* self, const char* psFileName)
 {
 	strcpy(self->szName,psFileName);
 	self->_file = fopen(psFileName, "rb");
 	return (self->_file != NULL);
 }
 
-BOOL psyfile_create(PsyFile* self,
-					 const char* psFileName,
-					 BOOL overwrite)
+int psyfile_create(PsyFile* self, const char* psFileName, int overwrite)
 {
 	strcpy(self->szName,psFileName);
 	self->_file = fopen(psFileName, "rb");
@@ -51,7 +38,7 @@ BOOL psyfile_create(PsyFile* self,
 		fclose(self->_file);
 		if (!overwrite)
 		{
-			return FALSE;
+			return 0;
 		}
 	}
 	
@@ -59,36 +46,32 @@ BOOL psyfile_create(PsyFile* self,
 	return (self->_file != NULL);
 }
 
-BOOL psyfile_close(PsyFile* self)
+int psyfile_close(PsyFile* self)
 {
-	if ( self->_file != NULL )
-	{
-		BOOL b;
+	if ( self->_file != NULL ) {
+		int b;
 		fflush(self->_file);
 		b = !ferror(self->_file);
 		fclose(self->_file);
 		self->_file = NULL;
 		return b;
 	}
-	return TRUE;
-	
-	
+	return 1;	
 }
 
-BOOL psyfile_read(PsyFile* self,
+int psyfile_read(PsyFile* self,
 				   void* pData,
-				   unsigned long numBytes)
+				   uint32_t numBytes)
 {
-	unsigned long bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
-	return (bytesRead == numBytes);
-	
+	uint32_t bytesRead = fread(pData, sizeof(char), numBytes, self->_file);
+	return (bytesRead == numBytes);	
 }
 
-BOOL psyfile_write(PsyFile* self,
+int psyfile_write(PsyFile* self,
 					void* pData,
-					unsigned long numBytes)
+					uint32_t numBytes)
 {
-	unsigned long bytesWritten;
+	uint32_t bytesWritten;
 	fflush(self->_file);
 	bytesWritten = fwrite(pData, sizeof(char), numBytes, self->_file);
 	return (bytesWritten == numBytes);
@@ -96,9 +79,9 @@ BOOL psyfile_write(PsyFile* self,
 	
 }
 
-BOOL psyfile_expect(PsyFile* self,
+int psyfile_expect(PsyFile* self,
 					 void* pData,
-					 unsigned long numBytes)
+					 uint32_t numBytes)
 {
 	unsigned char c;
 	
@@ -106,23 +89,23 @@ BOOL psyfile_expect(PsyFile* self,
 	{
 		if (fread(&c, sizeof(c), 1, self->_file) != 1)
 		{
-			return FALSE;
+			return 0;
 		}
 		if (c != *((char*)pData))
 		{
-			return FALSE;
+			return 0;
 		}
 		pData = (char*)pData + 1;
 	}
-	return TRUE;
+	return 1;
 	
 	
 }
 
-long psyfile_seek(PsyFile* self,
-				   long offset)
+uint32_t psyfile_seek(PsyFile* self,
+				   uint32_t offset)
 {
-	if (fseek(self->_file, offset, SEEK_SET) != 0)
+	if (fseek(self->_file, (long)offset, SEEK_SET) != 0)
 	{
 		return -1;
 	}
@@ -130,26 +113,26 @@ long psyfile_seek(PsyFile* self,
 	
 }
 
-long psyfile_skip(PsyFile* self,
-				   long numBytes)
+uint32_t psyfile_skip(PsyFile* self,
+				   uint32_t numBytes)
 {
-	if (fseek(self->_file, numBytes, SEEK_CUR) != 0) return -1;
+	if (fseek(self->_file, (long)numBytes, SEEK_CUR) != 0) return -1;
 	return ftell(self->_file);
 }
 
-BOOL psyfile_eof(PsyFile* self)
+int psyfile_eof(PsyFile* self)
 {
 	return feof(self->_file);
 	
 }
 
-long psyfile_getpos(PsyFile* self)
+uint32_t psyfile_getpos(PsyFile* self)
 {
 	return ftell(self->_file);
 }
 
 
-long psyfile_filesize(PsyFile* self)
+uint32_t psyfile_filesize(PsyFile* self)
 {	
 	int init = ftell(self->_file);
 	int end;
@@ -160,13 +143,14 @@ long psyfile_filesize(PsyFile* self)
 	
 }
 
-BOOL psyfile_readstring(PsyFile* self, char* pData, unsigned long maxBytes)
+int psyfile_readstring(PsyFile* self, char* pData, uint32_t maxBytes)
 {
 	if (maxBytes > 0)
 	{		
 		char c;
-		unsigned long index;
-		memset(pData,0,maxBytes);
+		uint32_t index;
+
+		memset(pData, 0, maxBytes);
 		for (index = 0; index < maxBytes; index++)
 		{
 			if (psyfile_read(self, &c, sizeof(c)))
@@ -174,24 +158,24 @@ BOOL psyfile_readstring(PsyFile* self, char* pData, unsigned long maxBytes)
 				pData[index] = c;
 				if (c == 0)
 				{
-					return TRUE;
+					return 1;
 				}
 			}
 			else 
 			{
-				return FALSE;
+				return 0;
 			}
 		}
 		do
 		{
 			if (!psyfile_read(self, &c, sizeof(c)))
 			{
-				return FALSE;
+				return 0;
 			}
 		} while (c != 0);
-		return TRUE;
+		return 1;
 	}
-	return FALSE;
+	return 0;
 	
 }
 
@@ -200,10 +184,10 @@ FILE* psyfile_getfile(PsyFile* self)
 	return self->_file;
 }
 
-size_t psyfile_writeheader(PsyFile* file, char* pData, unsigned int version,
-	unsigned int size/*=0*/)
+uint32_t psyfile_writeheader(PsyFile* file, char* pData, uint32_t version,
+	uint32_t size/*=0*/)
 {
-	size_t pos;
+	uint32_t pos;
 
 	psyfile_write(file, pData, 4);
 	psyfile_write(file, &version, sizeof(version));
@@ -216,17 +200,17 @@ int psyfile_writestring(PsyFile* file, char* str)
 {
 	int rv = 0;
 
-	rv = psyfile_write(file, str, strlen(str) + 1);
+	rv = psyfile_write(file, str, (uint32_t)strlen(str) + 1);
 	return rv;
 }
 
-size_t psyfile_updatesize(PsyFile* file, size_t startpos)
+uint32_t psyfile_updatesize(PsyFile* file, uint32_t startpos)
 {
-	size_t pos2;
-	unsigned int size;
+	uint32_t pos2;
+	uint32_t size;
 	
 	pos2 = psyfile_getpos(file); 
-	size = (size_t)(pos2 - startpos - 4);
+	size = (pos2 - startpos - 4);
 	psyfile_seek(file, startpos);
 	psyfile_write(file, &size, sizeof(size));
 	psyfile_seek(file, pos2);

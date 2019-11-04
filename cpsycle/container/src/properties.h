@@ -71,7 +71,7 @@ Properties* properties_read(Properties*, const char* key);
 int properties_int(Properties*, const char* key, int defaultvalue);
 int properties_bool(Properties*, const char* key, int defaultvalue);
 void properties_readdouble(Properties*, const char* key, double* value, double defaultvalue);
-char* properties_readstring(Properties*, const char* key, const char** text, const char* defaulttext);
+const char* properties_readstring(Properties*, const char* key, const char** text, const char* defaulttext);
 Properties* properties_write_string(Properties*, const char* key, const char* value);
 Properties* properties_write_int(Properties*, const char* key, int value);
 Properties* properties_write_bool(Properties*, const char* key, int value);

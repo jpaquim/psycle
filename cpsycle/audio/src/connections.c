@@ -8,9 +8,9 @@
 #include "connections.h"
 #include <assert.h>
 
-static WireSocketEntry* wiresocketentry_allocinit(int slot, float volume, int send);
+static WireSocketEntry* wiresocketentry_allocinit(size_t slot, amp_t volume);
 static void wiresocketentry_dispose(WireSocketEntry*);
-static WireSocketEntry* connection_input(Connections* self, int outputslot, int inputslot);
+static WireSocketEntry* connection_input(Connections* self, size_t outputslot, size_t inputslot);
 
 void machinesockets_init(MachineSockets* self)
 {
@@ -29,7 +29,8 @@ void machinesockets_dispose(MachineSockets* self)
 		wiresocketentry_dispose(entry);
 		free(entry);
 	}
-	list_free(p);
+	list_free(self->inputs);
+	self->inputs = 0;
 	for (p = self->outputs; p != 0; p = p->next) {
 		WireSocketEntry* entry;
 
@@ -37,7 +38,8 @@ void machinesockets_dispose(MachineSockets* self)
 		wiresocketentry_dispose(entry);
 		free(entry);
 	}
-	list_free(p);
+	list_free(self->outputs);
+	self->outputs = 0;
 }
 
 MachineSockets* machinesockets_allocinit(void)
@@ -51,7 +53,7 @@ MachineSockets* machinesockets_allocinit(void)
 	return rv;
 }
 
-WireSocketEntry* wiresocketentry_allocinit(int slot, float volume, int send)
+WireSocketEntry* wiresocketentry_allocinit(size_t slot, amp_t volume)
 {
 	WireSocketEntry* rv;
 		
@@ -60,16 +62,19 @@ WireSocketEntry* wiresocketentry_allocinit(int slot, float volume, int send)
 		PinConnection* pins;
 
 		rv->slot = slot;
-		rv->volume = 1.0;
-		rv->send = send;
+		rv->volume = 1.0;		
 		pins = (PinConnection*)malloc(sizeof(PinConnection));
-		pins->src = 0;
-		pins->dst = 0;
-		rv->mapping = list_create(pins);
+		if (pins) {
+			pins->src = 0;
+			pins->dst = 0;
+			rv->mapping = list_create(pins);
+		}
 		pins = (PinConnection*)malloc(sizeof(PinConnection));
-		pins->src = 0;
-		pins->dst = 0;
-		list_append(&rv->mapping, pins);
+		if (pins) {
+			pins->src = 0;
+			pins->dst = 0;
+			list_append(&rv->mapping, pins);
+		}
 	}
 	return rv;
 }
@@ -82,9 +87,10 @@ void wiresocketentry_dispose(WireSocketEntry* self)
 		free(p->entry);
 	}
 	list_free(self->mapping);
+	self->mapping = 0;
 }
 
-WireSocket* connection_at(WireSocket* socket, int slot)
+WireSocket* connection_at(WireSocket* socket, size_t slot)
 {	
 	WireSocket* p;
 	
@@ -95,7 +101,7 @@ WireSocket* connection_at(WireSocket* socket, int slot)
 	return p;
 }
 
-WireSocketEntry* connection_input(Connections* self, int outputslot, int inputslot)
+WireSocketEntry* connection_input(Connections* self, size_t outputslot, size_t inputslot)
 {
 	WireSocketEntry* rv = 0;
 	MachineSockets* sockets;
@@ -139,12 +145,12 @@ void connections_dispose(Connections* self)
 	signal_dispose(&self->signal_disconnected);
 }
 
-MachineSockets* connections_at(Connections* self, int slot)
+MachineSockets* connections_at(Connections* self, size_t slot)
 {
 	return table_at(&self->container, slot);	
 }
 
-MachineSockets* connections_initslot(Connections* self, int slot)
+MachineSockets* connections_initslot(Connections* self, size_t slot)
 {
 	MachineSockets* sockets;
 
@@ -153,7 +159,7 @@ MachineSockets* connections_initslot(Connections* self, int slot)
 	return sockets;
 }
 
-int connections_connect(Connections* self, int outputslot, int inputslot, int send)
+int connections_connect(Connections* self, size_t outputslot, size_t inputslot)
 {
 	if (outputslot != inputslot && 
 			!connections_connected(self, outputslot, inputslot)) {
@@ -165,7 +171,7 @@ int connections_connect(Connections* self, int outputslot, int inputslot, int se
 		}
 		if (connections) {
 			list_append(&connections->outputs,
-				wiresocketentry_allocinit(inputslot, 1.f, send));
+				wiresocketentry_allocinit(inputslot, 1.f));
 		}
 		connections = connections_at(self, inputslot);
 		if (!connections) {
@@ -173,7 +179,7 @@ int connections_connect(Connections* self, int outputslot, int inputslot, int se
 		}
 		if (connections) {
 			list_append(&connections->inputs,
-				wiresocketentry_allocinit(outputslot, 1.f, send));
+				wiresocketentry_allocinit(outputslot, 1.f));
 		}
 		if (!self->filemode) {
 			signal_emit(&self->signal_connected, self, 2, outputslot, inputslot);
@@ -183,7 +189,7 @@ int connections_connect(Connections* self, int outputslot, int inputslot, int se
 	return 0;
 }
 
-void connections_disconnect(Connections* self, int outputslot, int inputslot)
+void connections_disconnect(Connections* self, size_t outputslot, size_t inputslot)
 {	
 	MachineSockets* connections;
 
@@ -208,7 +214,7 @@ void connections_disconnect(Connections* self, int outputslot, int inputslot)
 	}	
 }
 
-void connections_disconnectall(Connections* self, int slot)
+void connections_disconnectall(Connections* self, size_t slot)
 {
 	MachineSockets* connections;
 	connections = connections_at(self, slot);
@@ -218,7 +224,7 @@ void connections_disconnectall(Connections* self, int slot)
 				
 		out = connections->outputs;
 		while (out) {			
-			int dstslot;
+			size_t dstslot;
 			MachineSockets* dst;
 			WireSocket* dstinput;
 			dst = connections_at(self,
@@ -239,7 +245,7 @@ void connections_disconnectall(Connections* self, int slot)
 		while (in) {			
 			MachineSockets* src;
 			WireSocket* srcoutput;
-			int srcslot;
+			size_t srcslot;
 
 			src = connections_at(self,
 				((WireSocketEntry*) in->entry)->slot);
@@ -257,7 +263,7 @@ void connections_disconnectall(Connections* self, int slot)
 	}	
 }
 
-int connections_connected(Connections* self, int outputslot, int inputslot)
+int connections_connected(Connections* self, size_t outputslot, size_t inputslot)
 {	
 	WireSocket* p = 0;
 	MachineSockets* sockets;	
@@ -277,8 +283,8 @@ int connections_connected(Connections* self, int outputslot, int inputslot)
 	return p != 0;
 }
 
-void connections_setwirevolume(Connections* self, int outputslot,
-	int inputslot, amp_t factor)
+void connections_setwirevolume(Connections* self, size_t outputslot,
+	size_t inputslot, amp_t factor)
 {	
 	WireSocketEntry* input_entry;
 
@@ -288,7 +294,7 @@ void connections_setwirevolume(Connections* self, int outputslot,
 	}
 }
 
-amp_t connections_wirevolume(Connections* self, int outputslot, int inputslot)
+amp_t connections_wirevolume(Connections* self, size_t outputslot, size_t inputslot)
 {	
 	WireSocketEntry* input_entry;
 

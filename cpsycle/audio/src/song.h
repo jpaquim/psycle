@@ -17,7 +17,7 @@
 /// this include patterns, pattern sequence, machines and their initial 
 /// parameters and coordinates, wavetables, ...
 
-typedef struct {
+typedef struct Song {
 	Properties* properties;
 	Machines machines;
 	Patterns patterns;
@@ -30,9 +30,9 @@ typedef struct {
 	Signal signal_saveprogress;
 } Song;
 
-/// initializes a song
+/// initializes a song with a master and one sequence track/entry/pattern
 void song_init(Song*, MachineFactory*);
-/// frees all memory used
+/// frees all internal memory used by the songstruct
 void song_dispose(Song*);
 /// allocates a song
 ///\return allocates a song
@@ -42,10 +42,8 @@ Song* song_alloc(void);
 Song* song_allocinit(MachineFactory*);
 /// disposes and deallocates the song
 void song_free(Song*);
-/// loads a song
-///\return ui properties (coordinates, ...)
-void song_load(Song*, const char* path, Properties** workspaceproperties);
-/// saves a song
-void song_save(Song*, const char* path, Properties* workspaceproperties);
+/// Clears the song completly (no master, no pattern, no sequence track/entry)
+void song_clear(Song*);
+
 
 #endif

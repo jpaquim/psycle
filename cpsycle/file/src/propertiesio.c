@@ -5,8 +5,7 @@
 
 #include "propertiesio.h"
 #include <malloc.h>
-#include <string.h>
-#include "fileio.h"
+#include <string.h> 
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -14,8 +13,8 @@
 
 #define MAXSTRINGSIZE 4096
 
-static int reallocstr(char** str, int size, int* cap);
-static int OnSaveIniEnum(PsyFile* file, Properties*, int level);
+static int reallocstr(char** str, size_t size, size_t* cap);
+static int OnSaveIniEnum(FILE* file, Properties*, int level);
 
 int propertiesio_load(Properties* self, const char* path, int allowappend)
 {
@@ -29,9 +28,9 @@ int propertiesio_load(Properties* self, const char* path, int allowappend)
 		int i;
 		int state;
 		char* key = 0;
-		int keycap = 0;
+		size_t keycap = 0;
 		char* value = 0;
-		int valcap = 0;
+		size_t valcap = 0;
 		
 		i = 0;
 		state = 0;
@@ -156,67 +155,72 @@ int propertiesio_load(Properties* self, const char* path, int allowappend)
 
 void propertiesio_save(Properties* self, const char* path)
 {
-	PsyFile file;
-	if (psyfile_create(&file, path, 1)) {
-		properties_enumerate(self, &file, (PropertiesCallback)OnSaveIniEnum);
-		psyfile_close(&file);
+	FILE* fp;
+	fp = fopen(path, "wb");
+	if (fp) {
+		properties_enumerate(self, fp, (PropertiesCallback)OnSaveIniEnum);
+		fclose(fp);
 	}
 }
 
-int OnSaveIniEnum(PsyFile* file, Properties* property, int level)
+int OnSaveIniEnum(FILE* fp, Properties* property, int level)
 {
 	if (property->item.key) {
 		char text[40];
 		char sections[MAXSTRINGSIZE];
 		
 		if (property->item.typ == PROPERTY_TYP_ROOT) {
-			psyfile_write(file, "[root]", 6);
+			fwrite("[root]", sizeof(char), 6, fp);			
 		} else
 		if (property->item.typ == PROPERTY_TYP_SECTION) {
 			properties_sections(property, sections);
-			psyfile_write(file, "[", 1);
+			fwrite("[", sizeof(char), 1, fp);
 			if (sections[0] != '\0') {
-				psyfile_write(file, sections, strlen(sections));
-			}
-			psyfile_write(file, "]", 1);
+				fwrite(sections, sizeof(char), strlen(sections), fp);
+			}			
+			fwrite("]", sizeof(char), 1, fp);
 		} else 
-		if (property->item.typ != PROPERTY_TYP_ACTION) {			
-			psyfile_write(file, property->item.key, strlen(property->item.key));
-			psyfile_write(file, "=", strlen("="));
+		if (property->item.typ != PROPERTY_TYP_ACTION) {
+			fwrite(properties_key(property), sizeof(char),
+				strlen(properties_key(property)), fp);
+			fwrite("=", sizeof(char), 1, fp);
 			switch (property->item.typ) {				
 				case PROPERTY_TYP_INTEGER:
-					_snprintf(text, 40, "%d", property->item.value.i);
-					psyfile_write(file, text, strlen(text));
+					_snprintf(text, 40, "%d", properties_value(property));
+					text[39] = '\0';
+					fwrite(text, sizeof(char), strlen(text), fp);					
 				break;
 				case PROPERTY_TYP_BOOL:
 					_snprintf(text, 40, "%d", property->item.value.i);
-					psyfile_write(file, text, strlen(text));
+					text[39] = '\0';
+					fwrite(text, sizeof(char), strlen(text), fp);
 				break;
 				case PROPERTY_TYP_CHOICE:
 					_snprintf(text, 40, "%d", property->item.value.i);
-					psyfile_write(file, text, strlen(text));
+					text[39] = '\0';
+					fwrite(text, sizeof(char), strlen(text), fp);
 				break;
 				case PROPERTY_TYP_STRING:
-					psyfile_write(file, property->item.value.s,
-						strlen(property->item.value.s));
+					fwrite(properties_valuestring(property), sizeof(char),
+						strlen(properties_valuestring(property)), fp);					
 				break;						
 				default:
 				break;
 			}
-		}
-		psyfile_write(file, "\n", strlen("\n"));
+		}		
+		fwrite("\n", sizeof(char),  1, fp);
 	}
 	return 1;
 }
 
-int reallocstr(char** str, int size, int* cap)
+int reallocstr(char** str, size_t size, size_t* cap)
 {
 	int err = 0;
 
-	if (*cap < size) {
+	if (cap && *cap < size) {
 		*cap = min(size + 256, MAXSTRINGSIZE);		
 		*str = realloc(*str, *cap);
-		if (*cap == MAXSTRINGSIZE) {			
+		if (*cap == MAXSTRINGSIZE || *str == 0) {			
 			err = 1;			
 		}
 	}

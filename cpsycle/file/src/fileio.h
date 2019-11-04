@@ -5,6 +5,7 @@
 #define FILEIO_H
 
 #include <stdio.h>
+#include "../../detail/stdint.h"
 
 typedef struct TYPEULONGINV {
   unsigned char hihi;
@@ -21,7 +22,7 @@ typedef struct
 RiffChunkHeader;
 
 
-typedef struct {	
+typedef struct PsyFile {	
 	int _modified;
 	char szName[1024];
 	FILE* _file;
@@ -30,22 +31,22 @@ typedef struct {
 int psyfile_open(PsyFile*, const char* path);
 int psyfile_create(PsyFile*, const char* path, int overwrite);
 int psyfile_close(PsyFile*);
-int psyfile_read(PsyFile*, void* data, unsigned long numBytes);
-int psyfile_write(PsyFile*, void* data, unsigned long numBytes);
-int psyfile_expect(PsyFile*, void* data, unsigned long numBytes);
-long psyfile_seek(PsyFile*,long offset);
-long psyfile_skip(PsyFile*, long numBytes);
+int psyfile_read(PsyFile*, void* data, uint32_t numBytes);
+int psyfile_write(PsyFile*, void* data, uint32_t numBytes);
+int psyfile_expect(PsyFile*, void* data, uint32_t numBytes);
+uint32_t psyfile_seek(PsyFile*, uint32_t offset);
+uint32_t psyfile_skip(PsyFile*, uint32_t numBytes);
 int psyfile_eof(PsyFile*);
-long psyfile_filesize(PsyFile*);
-int psyfile_readstring(PsyFile*, char* pData, unsigned long maxBytes);
-long psyfile_getpos(PsyFile*);	
+uint32_t psyfile_filesize(PsyFile*);
+int psyfile_readstring(PsyFile*, char* pData, uint32_t maxBytes);
+uint32_t psyfile_getpos(PsyFile*);
 FILE* psyfile_getfile(PsyFile*);
-size_t psyfile_writeheader(PsyFile*, char* pData, unsigned int version,
-	unsigned int size);
+uint32_t psyfile_writeheader(PsyFile*, char* pData, uint32_t version,
+	uint32_t size);
 int psyfile_writestring(PsyFile*, char* str);
-size_t psyfile_updatesize(PsyFile*, size_t startpos);
+uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
 
-static unsigned long FourCC(char *psName);
+static uint32_t FourCC(char *psName);
 	
 
 #endif

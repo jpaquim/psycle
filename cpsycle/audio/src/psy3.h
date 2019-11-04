@@ -4,9 +4,7 @@
 #if !defined(PSY3_H)
 #define PSY3_H
 
-#include "song.h"
-
-void psy3_load(Song*, PsyFile*, char header[9], Properties* workspaceproperties);
-void psy3_save(Song*, PsyFile*, Properties* workspaceproperties);
+void psy3_load(struct SongFile*);
+void psy3_save(struct SongFile*);
 
 #endif

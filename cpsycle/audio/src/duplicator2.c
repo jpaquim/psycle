@@ -12,9 +12,8 @@ static void sequencertick(Duplicator2*);
 static List* sequencerinsert(Duplicator2*, List* events);
 static const MachineInfo* info(Duplicator2*);
 static void parametertweak(Duplicator2*, int par, int val);
-static int describevalue(Duplicator2*, char* txt, int const param, int const value);
-static int value(Duplicator2*, int const param);
-static void setvalue(Duplicator2* self, int const param, int const value) { }
+static int describevalue(Duplicator2*, char* txt, int param, int value);
+static int parametervalue(Duplicator2*, int param);
 static void dispose(Duplicator2*);
 static unsigned int numinputs(Duplicator2* self) { return 0; }
 static unsigned int numoutputs(Duplicator2* self) { return 0; }
@@ -119,9 +118,8 @@ void duplicator2_init(Duplicator2* self, MachineCallback callback)
 	self->machine.sequencerinsert = sequencerinsert;
 	self->machine.info = info;
 	self->machine.parametertweak = parametertweak;
-	self->machine.describevalue = describevalue;
-	self->machine.setvalue = setvalue;
-	self->machine.value = value;
+	self->machine.describevalue = describevalue;	
+	self->machine.parametervalue = parametervalue;
 	self->machine.dispose = dispose;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
@@ -221,12 +219,12 @@ void parametertweak(Duplicator2* self, int param, int value)
 	}			
 }
 
-int describevalue(Duplicator2* self, char* txt, int const param, int const value)
+int describevalue(Duplicator2* self, char* txt, int param, int value)
 { 
 	return 0;
 }
 
-int value(Duplicator2* self, int const param)
+int parametervalue(Duplicator2* self, int param)
 {	
 	if (param >= 0 && param < NUMMACHINES) {
 		return self->macoutput[param];

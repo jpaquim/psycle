@@ -37,7 +37,7 @@ static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
 static void enableinput(ui_component* self, int enable, int recursive);
 static void onpreferredsize(ui_component*, ui_component* sender, 
-	ui_size* limit, int* width, int* height);
+	ui_size* limit, ui_size* rv);
 
 void ui_init(HINSTANCE hInstance)
 {
@@ -194,9 +194,6 @@ void ui_component_init(ui_component* component, ui_component* parent)
 
 void ui_component_init_signals(ui_component* component)
 {
-	if (component->debugflag == 10000) {
-		component = component;
-	}
 	signal_init(&component->signal_size);
 	signal_init(&component->signal_draw);
 	signal_init(&component->signal_timer);
@@ -363,14 +360,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					SetTextColor((HDC) wParam, component->color);
 					SetBkColor((HDC) wParam, component->backgroundcolor);
 					if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
-						return (long) component->background;
+						return (intptr_t) component->background;
 					} else {
-						return (long) GetStockObject(NULL_BRUSH);
+						return (intptr_t) GetStockObject(NULL_BRUSH);
 					}
 				} else {				
 					SetTextColor((HDC) wParam, defaultcolor);
 					SetBkColor((HDC) wParam, defaultbackgroundcolor);
-					return (long) defaultbackgroundbrush;
+					return (intptr_t) defaultbackgroundbrush;
 				}
 			break;
 			case WM_ERASEBKGND:
@@ -1003,7 +1000,7 @@ void ui_component_align(ui_component* self)
 	ui_size size;
 	ui_component* client = 0;
 		
-	size = ui_component_size(self);		
+	size = ui_component_size(self);
 	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
 		ui_component* component;
 			
@@ -1094,72 +1091,73 @@ void ui_component_align(ui_component* self)
 }
 
 void onpreferredsize(ui_component* self, ui_component* sender,
-	ui_size* limit, int* width, int* height)
+	ui_size* limit, ui_size* rv)
 {			
-	int cpxmax = 0;	
-	int cpymax = 0;		
-	ui_size size;
+	if (rv) {
+		int cpxmax = 0;	
+		int cpymax = 0;		
+		ui_size size;
 
-	size = ui_component_size(self);
-	if (self->alignchildren) {
-		List* p;
-		List* q;
-		int cpx = 0;
-		int cpy = 0;
+		size = ui_component_size(self);
+		if (self->alignchildren) {
+			List* p;
+			List* q;
+			int cpx = 0;
+			int cpy = 0;
 
-		if ((self->alignexpandmode & UI_HORIZONTALEXPAND) == UI_HORIZONTALEXPAND) {
-			size.width = 0;		
-		} else {
-			size.width = limit->width;
-		}	
-		for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
-			ui_component* component;
-				
-			component = (ui_component*)p->entry;		
-			if (component->visible) {
-				ui_size componentsize;			
-				
-				componentsize = ui_component_preferredsize(component, &size);				
-				if (component->align == UI_ALIGN_TOP) {
-					cpy += component->margin.top;										
-					cpy += componentsize.height;
-					cpy += component->margin.bottom;
-					if (cpymax < cpy) {
-						cpymax = cpy;
-					}
-					if (cpxmax < componentsize.width + component->margin.left + component->margin.right) {
-						cpxmax = componentsize.width + component->margin.left + component->margin.right;
-					}
-				} else
-				if (component->align == UI_ALIGN_LEFT) {					
-					if (size.width != 0) {
-						int requiredcomponentwidth;
+			if ((self->alignexpandmode & UI_HORIZONTALEXPAND) == UI_HORIZONTALEXPAND) {
+				size.width = 0;		
+			} else {
+				size.width = limit->width;
+			}	
+			for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
+				ui_component* component;
+					
+				component = (ui_component*)p->entry;		
+				if (component->visible) {
+					ui_size componentsize;			
+					
+					componentsize = ui_component_preferredsize(component, &size);				
+					if (component->align == UI_ALIGN_TOP) {
+						cpy += component->margin.top;										
+						cpy += componentsize.height;
+						cpy += component->margin.bottom;
+						if (cpymax < cpy) {
+							cpymax = cpy;
+						}
+						if (cpxmax < componentsize.width + component->margin.left + component->margin.right) {
+							cpxmax = componentsize.width + component->margin.left + component->margin.right;
+						}
+					} else
+					if (component->align == UI_ALIGN_LEFT) {					
+						if (size.width != 0) {
+							int requiredcomponentwidth;
 
-						requiredcomponentwidth = componentsize.width + component->margin.left +
-							component->margin.right;				
-						if (cpx + requiredcomponentwidth > size.width) {
-							cpy = cpymax;
-							cpx = 0;							
-						}						
-					}
-					cpx += component->margin.left;				
-					cpx += component->margin.right;
-					cpx += componentsize.width;
-					if (cpxmax < cpx) {
-						cpxmax = cpx;
-					}
-					if (cpymax < cpy + componentsize.height + component->margin.top + component->margin.bottom) {
-						cpymax = cpy + componentsize.height + component->margin.top + component->margin.bottom;
-					}
-				}				
+							requiredcomponentwidth = componentsize.width + component->margin.left +
+								component->margin.right;				
+							if (cpx + requiredcomponentwidth > size.width) {
+								cpy = cpymax;
+								cpx = 0;							
+							}						
+						}
+						cpx += component->margin.left;				
+						cpx += component->margin.right;
+						cpx += componentsize.width;
+						if (cpxmax < cpx) {
+							cpxmax = cpx;
+						}
+						if (cpymax < cpy + componentsize.height + component->margin.top + component->margin.bottom) {
+							cpymax = cpy + componentsize.height + component->margin.top + component->margin.bottom;
+						}
+					}				
+				}
 			}
+			list_free(q);
+			rv->width = cpxmax;
+			rv->height = cpymax;
+		} else {
+			*rv = size;
 		}
-		list_free(q);
-		*width = cpxmax;
-		*height = cpymax;
-	} else {
-		*width = size.width;
-		*height = size.height;
 	}
 }
 
@@ -1349,10 +1347,8 @@ List* ui_components_setmargin(List* list, const ui_margin* margin)
 
 ui_size ui_component_preferredsize(ui_component* self, ui_size* limit)
 {
-	ui_size rv;
-	
-	signal_emit(&self->signal_preferredsize, self, 3, limit, &rv.width,
-		&rv.height);
+	ui_size rv;	
+	signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
 	return rv;	
 }
 
@@ -1381,10 +1377,10 @@ void ui_component_seticonressource(ui_component* self, int ressourceid)
 {
 #if defined(_WIN64)	
 	SetClassLongPtr((HWND)self->hwnd, GCLP_HICON, 
-		 LoadIcon(appInstance, MAKEINTRESOURCE(ressourceid)));
+		(intptr_t)LoadIcon(appInstance, MAKEINTRESOURCE(ressourceid)));
 #else	
 	SetClassLong((HWND)self->hwnd, GCL_HICON, 
-		 (long)LoadIcon(appInstance, MAKEINTRESOURCE(ressourceid)));
+		(intptr_t)LoadIcon(appInstance, MAKEINTRESOURCE(ressourceid)));
 #endif
 }
 

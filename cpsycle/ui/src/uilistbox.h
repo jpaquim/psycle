@@ -13,12 +13,12 @@ typedef struct {
 
 void ui_listbox_init(ui_listbox*, ui_component* parent);
 void ui_listbox_init_multiselect(ui_listbox*, ui_component* parent);
-int ui_listbox_addstring(ui_listbox*, const char* text);
-void ui_listbox_setstring(ui_listbox*, const char* text, int index);
+intptr_t ui_listbox_addstring(ui_listbox*, const char* text);
+void ui_listbox_setstring(ui_listbox*, const char* text, intptr_t index);
 void ui_listbox_clear(ui_listbox*);
-void ui_listbox_setcursel(ui_listbox*, int index);
-int ui_listbox_cursel(ui_listbox*);
+void ui_listbox_setcursel(ui_listbox*, intptr_t index);
+intptr_t ui_listbox_cursel(ui_listbox*);
 void ui_listbox_selitems(ui_listbox*, int* items, int maxitems);
-int ui_listbox_selcount(ui_listbox*);
+intptr_t ui_listbox_selcount(ui_listbox*);
 
 #endif

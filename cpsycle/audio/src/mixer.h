@@ -16,7 +16,7 @@ typedef struct {
 	int mute;
 	int dryonly;
 	int wetonly;
-	int inputslot;	
+	size_t inputslot;
 	Buffer* buffer;
 } MixerChannel;
 
@@ -26,7 +26,7 @@ typedef struct {
 	amp_t volume;
 	amp_t panning;
 	int mute;
-	int fxslot;
+	size_t fxslot;
 	Buffer* buffer;
 	Machine* fx;
 } ReturnChannel;

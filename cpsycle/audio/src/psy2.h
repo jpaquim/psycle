@@ -4,8 +4,6 @@
 #if !defined(PSY2_H)
 #define PSY2_H
 
-#include "song.h"
-
-void psy2_load(Song*, PsyFile*, char header[9], Properties* workspace);
+void psy2_load(struct SongFile*);
 
 #endif

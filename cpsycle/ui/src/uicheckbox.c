@@ -10,7 +10,7 @@ static void oncommand(ui_checkbox*, ui_component*, WPARAM wParam,
 	LPARAM lParam);
 static void ondestroy(ui_checkbox*, ui_component*);
 static void onpreferredsize(ui_checkbox*, ui_component* sender, ui_size* limit,
-	int* width, int* height);
+	ui_size* rv);
 
 void ui_checkbox_init(ui_checkbox* self, ui_component* parent)
 {  	
@@ -62,13 +62,15 @@ void oncommand(ui_checkbox* self, ui_component* sender, WPARAM wParam,
 }
 
 void onpreferredsize(ui_checkbox* self, ui_component* sender, ui_size* limit,
-	int* width, int* height)
-{			
-	ui_size size;	
-	char text[256];
+	ui_size* rv)
+{	
+	if (rv) {
+		ui_size size;	
+		char text[256];
 
-	GetWindowText((HWND)self->component.hwnd, text, 256);
-	size = ui_component_textsize(&self->component, text);	
-	*width = size.width + 20;
-	*height = size.height + 4;	
+		GetWindowText((HWND)self->component.hwnd, text, 256);
+		size = ui_component_textsize(&self->component, text);	
+		rv->width = size.width + 20;
+		rv->height = size.height + 4;
+	}
 }

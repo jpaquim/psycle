@@ -7,6 +7,7 @@
 #include <exclusivelock.h>
 #include <stdlib.h>
 #include <string.h>
+#include <songio.h>
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -363,7 +364,7 @@ void workspace_makemidi(Workspace* self)
 	installed = properties_append_choice(self->midi, "installeddriver", 0);
 	properties_settext(installed, "Input Drivers");
 	properties_append_string(installed, "kbd", "kbd");	
-#if defined(DEBUG)
+#if defined(_DEBUG)
 	properties_append_string(installed, "mmemidi", "..\\driver\\mmemidi\\Debug\\mmemidi.dll");	
 #else
 	properties_append_string(installed, "mmemidi", "..\\driver\\mmemidi\\Release\\mmemidi.dll");
@@ -391,7 +392,7 @@ void workspace_setdriverlist(Workspace* self)
 	drivers = properties_append_choice(self->inputoutput, "driver", 2); 
 	properties_settext(drivers, "Driver");
 	properties_append_string(drivers, "silent", "silentdriver");
-#if defined(DEBUG)
+#if defined(_DEBUG)
 	properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
 	properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
 #else
@@ -575,14 +576,19 @@ void workspace_newsong(Workspace* self)
 void workspace_loadsong(Workspace* self, const char* path)
 {	
 	Song* song;
+	SongFile songfile;
 
 	properties_free(self->properties);
 	song = song_allocinit(&self->machinefactory);
 	signal_connect(&song->signal_loadprogress, self, workspace_onloadprogress);
-	song_load(song, path, &self->properties);
+	songfile.song = song;
+	songfile.file = 0;	
+	songfile_load(&songfile, path);	
+	self->properties = songfile.workspaceproperties;
 	free(self->filename);
 	self->filename = strdup(path);
 	workspace_setsong(self, song, WORKSPACE_LOADSONG);
+	
 }
 
 void workspace_onloadprogress(Workspace* self, Song* sender, int progress)
@@ -607,7 +613,11 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 
 void workspace_savesong(Workspace* self, const char* path)
 {
-	song_save(self->song, path, self->properties);
+	SongFile songfile;
+	songfile.file = 0;
+	songfile.song = self->song;	
+	songfile.workspaceproperties = self->properties;
+	songfile_save(&songfile, path);
 }
 
 Properties* workspace_makeproperties(Workspace* self)

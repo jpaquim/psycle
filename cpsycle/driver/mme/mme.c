@@ -27,10 +27,10 @@ typedef struct {
 	int _dither;
 	int _bitDepth;
 	unsigned int _samplesPerSec;
-	unsigned int _numBlocks;
+	size_t _numBlocks;
 	int _blockSizeBytes;
 	int _blockSize;
-	int _currentBlock;
+	size_t _currentBlock;
 	int _running;
 	int _stopPolling;	
 	unsigned int pollSleep_;
@@ -97,19 +97,23 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 EXPORT Driver* __cdecl driver_create(void)
 {
 	MmeDriver* mme = (MmeDriver*) malloc(sizeof(MmeDriver));
-	memset(mme, 0, sizeof(MmeDriver));
-	mme->driver.open = driver_open;
-	mme->driver.free = driver_free;
-	mme->driver.connect = driver_connect;
-	mme->driver.open = driver_open;
-	mme->driver.close = driver_close;
-	mme->driver.dispose = driver_dispose;
-	mme->driver.updateconfiguration = updateconfiguration;
-	mme->driver.samplerate = samplerate;
-	mme->hEvent = CreateEvent
+	if (mme) {
+		memset(mme, 0, sizeof(MmeDriver));
+		mme->driver.open = driver_open;
+		mme->driver.free = driver_free;
+		mme->driver.connect = driver_connect;
+		mme->driver.open = driver_open;
+		mme->driver.close = driver_close;
+		mme->driver.dispose = driver_dispose;
+		mme->driver.updateconfiguration = updateconfiguration;
+		mme->driver.samplerate = samplerate;
+		mme->hEvent = CreateEvent
 		(NULL, FALSE, FALSE, NULL);
-	driver_init(&mme->driver);
-	return &mme->driver;
+		driver_init(&mme->driver);
+		return &mme->driver;
+	} else {
+		return 0;
+	}
 }
 
 void driver_free(Driver* driver)
@@ -251,7 +255,11 @@ int driver_open(Driver* driver)
 		pBlock++)
 	{
 		pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, self->_blockSize);
-		pBlock->pData = (byte *)GlobalLock(pBlock->Handle);
+		if (pBlock->Handle) {
+			pBlock->pData = (byte*)GlobalLock(pBlock->Handle);
+		} else {
+			pBlock->pData = 0;
+		}
 	}
 
 	// allocate block headers
@@ -260,14 +268,17 @@ int driver_open(Driver* driver)
 		WAVEHDR *ph;
 
 		pBlock->HeaderHandle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, sizeof(WAVEHDR));
-		pBlock->pHeader = (WAVEHDR *)GlobalLock(pBlock->HeaderHandle);
+		if (pBlock->HeaderHandle) {
+			pBlock->pHeader = (WAVEHDR*)GlobalLock(pBlock->HeaderHandle);
 
-		ph = pBlock->pHeader;
-		ph->lpData = (char *)pBlock->pData;
-		ph->dwBufferLength = self->_blockSize;
-		ph->dwFlags = WHDR_DONE;
-		ph->dwLoops = 0;
-
+			ph = pBlock->pHeader;
+			if (ph) {
+				ph->lpData = (char*)pBlock->pData;
+				ph->dwBufferLength = self->_blockSize;
+				ph->dwFlags = WHDR_DONE;
+				ph->dwLoops = 0;
+			}
+		}
 		pBlock->Prepared = FALSE;
 	}
 
@@ -397,7 +408,7 @@ void DoBlocks(MmeDriver* self)
 int driver_close(Driver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;
-	unsigned int _numBlocks;
+	size_t _numBlocks;
 	CBlock *pBlock;	
 	if(!self->_running) {
 		return TRUE;

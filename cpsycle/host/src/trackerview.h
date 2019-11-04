@@ -87,7 +87,7 @@ typedef struct {
 void trackerlinenumbers_init(TrackerLineNumbers*, ui_component* parent,
 	struct TrackerView*);
 
-#define TRACKERGRID_NUMCOLS 10
+#define TRACKERGRID_numparametercols 10
 
 typedef struct {
    ui_component component;   
@@ -108,7 +108,7 @@ typedef struct {
    int textheight;
    int textwidth;
    int textleftedge;
-   int colx[TRACKERGRID_NUMCOLS];
+   int colx[TRACKERGRID_numparametercols];
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
    struct TrackerView* view;   

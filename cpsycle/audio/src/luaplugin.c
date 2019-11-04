@@ -13,9 +13,8 @@ static void seqtick(LuaPlugin*, int channel, const PatternEvent*);
 static void sequencerlinetick(LuaPlugin*);
 static MachineInfo* info(LuaPlugin*);
 static void parametertweak(LuaPlugin*, int par, int val);
-static int describevalue(LuaPlugin*, char* txt, int const param, int const value);
-static int value(LuaPlugin*, int const param);
-static void setvalue(LuaPlugin*, int const param, int const value);
+static int describevalue(LuaPlugin*, char* txt, int param, int value);
+static int parametervalue(LuaPlugin*, int param);
 static void dispose(LuaPlugin*);
 static int mode(LuaPlugin*);
 		
@@ -68,17 +67,12 @@ void parametertweak(LuaPlugin* self, int par, int val)
 
 }
 
-int describevalue(LuaPlugin* self, char* txt, int const param, int const value)
+int describevalue(LuaPlugin* self, char* txt, int param, int value)
 { 
 	return 0;
 }
 
-int value(LuaPlugin* self, int const param)
-{
-
-}
-
-void setvalue(LuaPlugin* self, int const param, int const value)
+int parametervalue(LuaPlugin* self, int param)
 {
 
 }

@@ -147,7 +147,8 @@ void sequence_clear(Sequence* self)
 	SequenceTracks* p;	
 	
 	for (p = self->tracks; p != 0; p = p->next) {		
-		sequencetrack_dispose((SequenceTrack*)p->entry);		
+		sequencetrack_dispose((SequenceTrack*)p->entry);
+		free(p->entry);
 	}
 	list_free(self->tracks);
 	self->tracks = 0;

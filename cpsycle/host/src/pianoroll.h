@@ -70,6 +70,8 @@ typedef struct Pianoroll {
    Pattern* pattern;
    unsigned int opcount;
    int syncpattern;
+   beat_t sequenceentryoffset;
+   beat_t lastplayposition;
    Workspace* workspace;
 } Pianoroll;
 

@@ -5,6 +5,7 @@
 
 #include "plugin.h"
 #include "pattern.h"
+#include "songio.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,7 +19,7 @@ static void seqtick(Plugin*, int channel, const PatternEvent* event);
 static void sequencerlinetick(Plugin*);
 static MachineInfo* info(Plugin*);
 static int parametertype(Plugin* self, int par);
-static unsigned int numcols(Plugin*);
+static unsigned int numparametercols(Plugin*);
 static unsigned int numparameters(Plugin*);
 static void parameterrange(Plugin*, int numparam, int* minval, int* maxval);
 static int parameterlabel(Plugin*, char* txt, int param);
@@ -26,14 +27,13 @@ static int parametername(Plugin*, char* txt, int param);
 static void parametertweak(Plugin*, int par, int val);
 static int parameterlabel(Plugin*, char* txt, int param);
 static int parametername(Plugin*, char* txt, int param);
-static int describevalue(Plugin*, char* txt, int const param, int const value);
-static int value(Plugin*, int const param);
-static void setvalue(Plugin*, int const param, int const value);
+static int describevalue(Plugin*, char* txt, int param, int value);
+static int parametervalue(Plugin*, int param);
 static void dispose(Plugin*);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
-static void loadspecific(Plugin* self, PsyFile* file, unsigned int slot, struct Machines*);
-static void setcallback(Plugin* self, MachineCallback callback);
+static void loadspecific(Plugin*, struct SongFile*, unsigned int slot);
+static void setcallback(Plugin*, MachineCallback);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 {
@@ -50,7 +50,7 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.seqtick = seqtick;
 	self->machine.sequencerlinetick = sequencerlinetick;
 	self->machine.info = info;
-	self->machine.numcols = numcols;
+	self->machine.numparametercols = numparametercols;
 	self->machine.numparameters = numparameters;
 	self->machine.parameterrange = parameterrange;
 	self->machine.parametertype = parametertype;
@@ -59,9 +59,8 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.parametertweak = parametertweak;
 	self->machine.parameterlabel = parameterlabel;
 	self->machine.parametername = parametername;
-	self->machine.describevalue = describevalue;
-	self->machine.setvalue = setvalue;
-	self->machine.value = value;
+	self->machine.describevalue = describevalue;	
+	self->machine.parametervalue = parametervalue;
 	self->machine.dispose = dispose;
 	self->machine.generateaudio = generateaudio;
 	self->machine.numinputs = numinputs;
@@ -176,25 +175,20 @@ void parametertweak(Plugin* self, int par, int val)
 	mi_parametertweak(self->mi, par, val);
 }
 
-int describevalue(Plugin* self, char* txt, int const param, int const value)
+int describevalue(Plugin* self, char* txt, int param, int value)
 { 
 	return mi_describevalue(self->mi, txt, param, value);
 }
 
-int value(Plugin* self, int const param)
+int parametervalue(Plugin* self, int param)
 {
 	return mi_val(self->mi, param);
-}
-
-void setvalue(Plugin* self, int const param, int const value)
-{
-	mi_setval(self->mi, param, value);
 }
 
 unsigned int numinputs(Plugin* self)
 {
 	if (info(self)) {
-		return (info(self)->Flags & 3 == 3) ? 0 : 2;
+		return ((info(self)->Flags & 3) == 3) ? 0 : 2;
 	} else {
 		return 0;
 	}
@@ -216,20 +210,20 @@ void setcallback(Plugin* self, MachineCallback callback)
 	}
 }
 
-void loadspecific(Plugin* self, PsyFile* file, unsigned int slot, struct Machines* machines)
+void loadspecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 {
 	unsigned int size;
 
-	psyfile_read(file, &size, sizeof(size)); // size of whole structure
+	psyfile_read(songfile->file, &size, sizeof(size)); // size of whole structure
 	if(size) {
 		unsigned int count;
 		unsigned int i;
 
-		psyfile_read(file, &count, sizeof(count));  // size of vars
+		psyfile_read(songfile->file, &count, sizeof(count));  // size of vars
 		for (i = 0; i < count; i++) {
 			int temp;
 			
-			psyfile_read(file, &temp, sizeof(temp));			
+			psyfile_read(songfile->file, &temp, sizeof(temp));
 			self->machine.parametertweak(self, i, temp);
 		}
 		size -= sizeof(count) + sizeof(int)*count;
@@ -241,7 +235,7 @@ void loadspecific(Plugin* self, PsyFile* file, unsigned int slot, struct Machine
 			// This way we guarantee that the plugin will have enough bytes,
 			// even if it does not fit what it reads.
 			pData = (unsigned char*)malloc(max(size,size2));
-			psyfile_read(file, pData, size); // Read internal data.			
+			psyfile_read(songfile->file, pData, size); // Read internal data.			
 			mi_putdata(self->mi, pData); // Internal load
 			free(pData);
 		}						
@@ -319,7 +313,7 @@ int parametername(Plugin* self, char* txt, int param)
 	return rv;
 }
 
-unsigned int numcols(Plugin* self)
+unsigned int numparametercols(Plugin* self)
 {
 	int rv = 0;
 	GETINFO GetInfo;
@@ -328,7 +322,7 @@ unsigned int numcols(Plugin* self)
 	if (GetInfo != NULL) {	
 		CMachineInfo* pInfo = GetInfo();
 		if (pInfo) {	
-			rv = pInfo->numCols;				
+			rv = pInfo->numparametercols;				
 		}
 	}
 	return rv;

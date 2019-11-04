@@ -14,10 +14,10 @@
 static void machines_initsignals(Machines*);
 static void machines_disposesignals(Machines*);
 static void machines_free(Machines*);
-static int machines_freeslot(Machines*, int start);
+static size_t machines_freeslot(Machines*, size_t start);
 static void machines_setpath(Machines*, MachineList* path);
-static MachineList* compute_path(Machines*, int slot);
-static void compute_slotpath(Machines*, int slot, List**);
+static MachineList* compute_path(Machines*, size_t slot);
+static void compute_slotpath(Machines*, size_t slot, List**);
 static void machines_preparebuffers(Machines*, MachineList* path, unsigned int amount);
 static void machines_releasebuffers(Machines*);
 static Buffer* machines_nextbuffer(Machines*, unsigned int channels);
@@ -94,7 +94,7 @@ void machines_clear(Machines* self)
 	machines_init(self);
 }
 
-void machines_insert(Machines* self, int slot, Machine* machine)
+void machines_insert(Machines* self, size_t slot, Machine* machine)
 {	
 	if (machine) {
 		table_insert(&self->slots, slot, machine);
@@ -119,7 +119,7 @@ void machines_insertmaster(Machines* self, Machine* master)
 	}
 }
 
-void machines_erase(Machines* self, int slot)
+void machines_erase(Machines* self, size_t slot)
 {	
 	lock_enter();
 	if (slot == MASTER_INDEX) {
@@ -132,7 +132,7 @@ void machines_erase(Machines* self, int slot)
 	lock_leave();	
 }
 
-void machines_remove(Machines* self, int slot)
+void machines_remove(Machines* self, size_t slot)
 {	
 	Machine* machine;
 
@@ -144,7 +144,7 @@ void machines_remove(Machines* self, int slot)
 	}
 }
 
-void machines_exchange(Machines* self, int srcslot, int dstslot)
+void machines_exchange(Machines* self, size_t srcslot, size_t dstslot)
 {
 	Machine* src;
 	Machine* dst;
@@ -159,9 +159,9 @@ void machines_exchange(Machines* self, int srcslot, int dstslot)
 	}
 }
 
-int machines_append(Machines* self, Machine* machine)
+size_t machines_append(Machines* self, Machine* machine)
 {	
-	int slot;
+	size_t slot;
 		
 	slot = machines_freeslot(self,
 		(machine->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
@@ -176,26 +176,26 @@ int machines_append(Machines* self, Machine* machine)
 	return slot;
 }
 
-int machines_freeslot(Machines* self, int start)
+size_t machines_freeslot(Machines* self, size_t start)
 {
-	int rv;
+	size_t rv;
 	
 	for (rv = start; table_at(&self->slots, rv) != 0; ++rv);
 	return rv;
 }
 
-Machine* machines_at(Machines* self, int slot)
+Machine* machines_at(Machines* self, size_t slot)
 {
 	return table_at(&self->slots, slot);
 }
 
-int machines_connect(Machines* self, int outputslot, int inputslot, int send)
+int machines_connect(Machines* self, size_t outputslot, size_t inputslot)
 {
 	int rv;
 	if (!self->filemode) {
 		lock_enter();			
 	}
-	rv = connections_connect(&self->connections, outputslot, inputslot, send);
+	rv = connections_connect(&self->connections, outputslot, inputslot);
 	if (!self->filemode) {
 		machines_setpath(self, compute_path(self, MASTER_INDEX));			
 		lock_leave();
@@ -203,7 +203,7 @@ int machines_connect(Machines* self, int outputslot, int inputslot, int send)
 	return rv;
 }
 
-void machines_disconnect(Machines* self, int outputslot, int inputslot)
+void machines_disconnect(Machines* self, size_t outputslot, size_t inputslot)
 {
 	lock_enter();	
 	connections_disconnect(&self->connections, outputslot, inputslot);
@@ -211,14 +211,14 @@ void machines_disconnect(Machines* self, int outputslot, int inputslot)
 	lock_leave();
 }
 
-void machines_disconnectall(Machines* self, int slot)
+void machines_disconnectall(Machines* self, size_t slot)
 {
 	lock_enter();
 	connections_disconnectall(&self->connections, slot);
 	lock_leave();
 }
 
-int machines_connected(Machines* self, int outputslot, int inputslot)
+int machines_connected(Machines* self, size_t outputslot, size_t inputslot)
 {	
 	return connections_connected(&self->connections, outputslot, inputslot);
 }
@@ -250,7 +250,7 @@ void reset_nopath(Machines* self)
 	}
 }
 
-void remove_nopath(Machines* self, int slot)
+void remove_nopath(Machines* self, size_t slot)
 {
 	table_remove(&self->nopath, slot);
 }
@@ -267,7 +267,7 @@ MachineList* nopath(Machines* self)
 	return rv;
 }
 
-MachineList* compute_path(Machines* self, int slot)
+MachineList* compute_path(Machines* self, size_t slot)
 {
 	MachineList* rv = 0;	
 
@@ -289,7 +289,7 @@ MachineList* compute_path(Machines* self, int slot)
 	return rv;
 }
 
-void compute_slotpath(Machines* self, int slot, List** path)
+void compute_slotpath(Machines* self, size_t slot, List** path)
 {	
 	MachineSockets* connected_sockets;
 
@@ -318,11 +318,11 @@ void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amo
 	for (slot = path; slot != 0; slot = slot->next) {		
 		Machine* machine;
 		
-		machine = machines_at(self, (unsigned int) slot->entry);
+		machine = machines_at(self, (size_t) slot->entry);
 		if (machine) {						
-			table_insert(&self->outputbuffers, (unsigned int) slot->entry, 
+			table_insert(&self->outputbuffers, (size_t) slot->entry, 
 				list_append(&self->buffers, machines_nextbuffer(
-					self,machine->numoutputs(machine)))->entry);
+					self, machine->numoutputs(machine)))->entry);
 		}
 	}			
 }
@@ -359,24 +359,26 @@ Buffer* machines_nextbuffer(Machines* self, unsigned int channels)
 void machines_freebuffers(Machines* self)
 {
 	List* p;
+	List* q;
 
-	for (p = self->buffers; p != 0; p = p->next) {
+	for (p = q = self->buffers; p != 0; p = p->next) {
 		Buffer* buffer;
 
 		buffer = (Buffer*) p->entry;
+		buffer_dispose(buffer);
 		free(buffer);	
 	}
-	list_free(p);
+	list_free(q);
 	self->buffers = 0;
 }
 
 
-Buffer* machines_inputs(Machines* self, unsigned int slot)
+Buffer* machines_inputs(Machines* self, size_t slot)
 {
 	return table_at(&self->inputbuffers, slot);
 }
 
-Buffer* machines_outputs(Machines* self, unsigned int slot)
+Buffer* machines_outputs(Machines* self, size_t slot)
 {
 	return table_at(&self->outputbuffers, slot);
 }
@@ -415,17 +417,17 @@ size_t machines_size(Machines* self)
 	return table_size(&self->slots);
 }
 
-void machines_showparameters(Machines* self, int slot)
+void machines_showparameters(Machines* self, size_t slot)
 {
 	signal_emit(&self->signal_showparameters, self, 1, slot);
 }
 
-void machines_setvolume(Machines* self, float volume)
+void machines_setvolume(Machines* self, amp_t volume)
 {
 	self->volume = volume;
 }
 
-float machines_volume(Machines* self)
+amp_t machines_volume(Machines* self)
 {
 	return self->volume;
 }
