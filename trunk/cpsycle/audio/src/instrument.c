@@ -22,6 +22,22 @@ void instrument_dispose(Instrument* self)
 	free(self->name);
 }
 
+Instrument* instrument_alloc(void)
+{
+	return (Instrument*)malloc(sizeof(Instrument));
+}
+
+Instrument* instrument_allocinit(void)
+{
+	Instrument* rv;
+
+	rv = instrument_alloc();
+	if (rv) {
+		instrument_init(rv);
+	}
+	return rv;
+}
+
 void instrument_load(Instrument* self, const char* path)
 {	
 }

@@ -8,7 +8,7 @@
 static void oncommand(ui_edit*, ui_component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(ui_edit*, ui_component* sender);
 static void onpreferredsize(ui_edit*, ui_component* sender, ui_size* limit,
-	int* width, int* height);
+	ui_size* rv);
 
 void ui_edit_init(ui_edit* self, ui_component* parent, int styles)
 {  		
@@ -69,20 +69,32 @@ void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam,
 }
 
 void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit,
-	int* width, int* height)
-{				
-	char text[256];
-	TEXTMETRIC tm;
-	
-	tm = ui_component_textmetric(&self->component);	
-	if (self->charnumber == 0) {
-		ui_size size;
-		GetWindowText((HWND)self->component.hwnd, text, 256);
-		size = ui_component_textsize(&self->component, text);	
-		*width = size.width + 2;		
-		*height = (int)(tm.tmHeight * self->linenumber * 1.5);
-	} else {				
-		*width = tm.tmAveCharWidth * self->charnumber + 2;
-		*height = (int)(tm.tmHeight * self->linenumber * 1.5);
-	}	
+	ui_size* rv)
+{			
+	if (rv) {
+		char text[256];
+		TEXTMETRIC tm;
+		
+		tm = ui_component_textmetric(&self->component);	
+		if (self->charnumber == 0) {
+			ui_size size;
+			GetWindowText((HWND)self->component.hwnd, text, 256);
+			size = ui_component_textsize(&self->component, text);	
+			rv->width = size.width + 2;		
+			rv->height = (int)(tm.tmHeight * self->linenumber * 1.5);
+		} else {				
+			rv->width = tm.tmAveCharWidth * self->charnumber + 2;
+			rv->height = (int)(tm.tmHeight * self->linenumber * 1.5);
+		}
+	}
+}
+
+void ui_edit_enableedit(ui_edit* self)
+{
+	SendMessage((HWND)self->component.hwnd, EM_SETREADONLY, (WPARAM)0, (LPARAM)0);
+}
+
+void ui_edit_preventedit(ui_edit* self)
+{
+	SendMessage((HWND)self->component.hwnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
 }

@@ -9,7 +9,7 @@
 static void ondestroy(ui_progressbar*, ui_component* sender);
 static void ondraw(ui_progressbar*, ui_component* sender, ui_graphics*);
 static void onpreferredsize(ui_progressbar*, ui_component* sender, ui_size* limit,
-	int* width, int* height);
+	ui_size* rv);
 
 void ui_progressbar_init(ui_progressbar* self, ui_component* parent)
 {	
@@ -43,10 +43,12 @@ void ondraw(ui_progressbar* self, ui_component* sender, ui_graphics* g)
 }
 
 void onpreferredsize(ui_progressbar* self, ui_component* sender, ui_size* limit,
-	int* width, int* height)
+	ui_size* rv)
 {		
-	*width = 200;
-	*height = 20;	
+	if (rv) {
+		rv->width = 200;
+		rv->height = 20;
+	}
 }
 
 void ui_progressbar_setprogress(ui_progressbar* self, float progress)

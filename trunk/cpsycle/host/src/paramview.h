@@ -15,7 +15,7 @@ typedef struct {
    int cy;
    Machine* machine;   
    int numparams;
-   int numcols;   
+   int numparametercols;   
    int numrows;
    int tweak;
    int tweakbase;

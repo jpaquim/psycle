@@ -18,13 +18,13 @@ void inputs_dispose(Inputs* self)
 int inputs_cmd(Inputs* self, int input)
 {
 	return table_exists(&self->map, input) 
-		? (int) table_at(&self->map, input)
+		? (int)(size_t) table_at(&self->map, input)
 		: -1;	
 }
 
 void inputs_define(Inputs* self, int input, int cmd)
 {
-	table_insert(&self->map, input, (void*)cmd);
+	table_insert(&self->map, input, (void*)(size_t)cmd);
 }
 
 unsigned int encodeinput(unsigned int keycode, int shift, int ctrl)

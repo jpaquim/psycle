@@ -154,6 +154,7 @@ int driver_init(Driver* driver)
 	self->pollSleep_ = 20;
 	self->_dither = 0;
 	self->_bitDepth = 16;
+	self->_exclusive = 0;
 
 	init_properties(&self->driver);
 	self->hEvent = CreateEvent
@@ -340,8 +341,6 @@ int driver_open(Driver* driver)
 	return TRUE;
 }
 
-
-
 void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits)
 {
 	// Set up wave format structure. 
@@ -375,7 +374,7 @@ void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits,
 void PollerThread(void * self)
 {	
 	DXDriver* pThis = (DXDriver*)self;
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 
 	while (pThis->_timerActive)
 	{

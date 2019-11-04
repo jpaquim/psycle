@@ -4,6 +4,9 @@
 #if !defined(UIDEF_H)
 #define UIDEF_H
 
+#include "../../detail/prefix.h"
+#include <stddef.h>
+
 #include <windows.h>
 
 typedef struct { 

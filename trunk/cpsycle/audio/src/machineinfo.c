@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "machineinfo.h"
 #include <string.h>
 #include <stdlib.h> 
@@ -95,15 +97,17 @@ MachineInfo* machineinfo_clone(const MachineInfo* self)
 	MachineInfo* rv;
 
 	rv = (MachineInfo*) malloc(sizeof(MachineInfo));
-	rv->Author = strdup(self->Author ? self->Author : "");
-	rv->Command = strdup(self->Command ? self->Command : "");
-	rv->Flags = self->Flags;
-	rv->Name = strdup(self->Name ? self->Name : "");	
-	rv->ShortName = strdup(self->ShortName ? self->ShortName : "");
-	rv->APIVersion = self->APIVersion;
-	rv->PlugVersion = self->PlugVersion;
-	rv->type = self->type;	
-	rv->modulepath = strdup(self->modulepath ? self->modulepath : "");
-	rv->shellidx = self->shellidx;
+	if (rv) {
+		rv->Author = strdup(self->Author ? self->Author : "");
+		rv->Command = strdup(self->Command ? self->Command : "");
+		rv->Flags = self->Flags;
+		rv->Name = strdup(self->Name ? self->Name : "");
+		rv->ShortName = strdup(self->ShortName ? self->ShortName : "");
+		rv->APIVersion = self->APIVersion;
+		rv->PlugVersion = self->PlugVersion;
+		rv->type = self->type;
+		rv->modulepath = strdup(self->modulepath ? self->modulepath : "");
+		rv->shellidx = self->shellidx;
+	}
 	return rv;
 }

@@ -6,7 +6,7 @@
 #include "uicombobox.h"
 
 static void onpreferredsize(ui_combobox*, ui_component* sender, ui_size* limit,
-	int* width, int* height);
+	ui_size* rv);
 static void oncommand(ui_combobox*, ui_component* sender, WPARAM wParam,
 	LPARAM lParam);
 static void ondestroy(ui_combobox*, ui_component* sender);
@@ -85,7 +85,7 @@ void ui_combobox_clear(ui_combobox* self)
 	}
 }
 
-void ui_combobox_setcursel(ui_combobox* self, int index)
+void ui_combobox_setcursel(ui_combobox* self, intptr_t index)
 {
 	SendMessage((HWND)self->currcombo->hwnd, CB_SETCURSEL, (WPARAM)index, (LPARAM)0);
 	if (self->ownerdrawn) {
@@ -93,7 +93,7 @@ void ui_combobox_setcursel(ui_combobox* self, int index)
 	}
 }
 
-int ui_combobox_cursel(ui_combobox* self)
+intptr_t ui_combobox_cursel(ui_combobox* self)
 {
 	return SendMessage((HWND)self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0,
 		(LPARAM)0);	
@@ -105,17 +105,19 @@ void ui_combobox_setcharnumber(ui_combobox* self, int number)
 }
 
 void onpreferredsize(ui_combobox* self, ui_component* sender, ui_size* limit,
-	int* width, int* height)
+	ui_size* rv)
 {
-	TEXTMETRIC tm;
+	if (rv) {
+		TEXTMETRIC tm;
 
-	tm = ui_component_textmetric(&self->component);
-	if (self->charnumber == 0) {
-		*width = 90;
-	} else {		
-		*width = tm.tmAveCharWidth * self->charnumber + 40;
+		tm = ui_component_textmetric(&self->component);
+		if (self->charnumber == 0) {
+			rv->width = 90;
+		} else {		
+			rv->width = tm.tmAveCharWidth * self->charnumber + 40;
+		}
+		rv->height = tm.tmHeight;
 	}
-	*height = tm.tmHeight;
 }
 
 void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam,
@@ -125,7 +127,7 @@ void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam,
         case CBN_SELCHANGE :
         {
             if (self->signal_selchanged.slots) {
-				int sel = SendMessage((HWND)self->currcombo->hwnd,
+				intptr_t sel = SendMessage((HWND)self->currcombo->hwnd,
 					CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 				signal_emit(&self->signal_selchanged, self, 1, sel);			
 			}
@@ -148,9 +150,10 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	ui_point arrow_right[4];
 	int ax;
 	int ay;
-	int sel;
+	intptr_t sel;
 	TEXTMETRIC tm;
 	int vcenter;
+	int varrowcenter;
 	unsigned int arrowcolor = 0x00777777;
 	unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
@@ -159,9 +162,10 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 
 	tm = ui_component_textmetric(&self->component);
 	vcenter = (size.height - tm.tmHeight) / 2;
+	varrowcenter = (size.height - 10) / 2;
 	sel = SendMessage((HWND)self->combo.hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 	if (sel != CB_ERR) {
-		int len;
+		intptr_t len;
 		
 		len = SendMessage((HWND)self->combo.hwnd, CB_GETLBTEXTLEN, (WPARAM)sel, 0);
 		if (len > 0) {
@@ -182,7 +186,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 		}
 	}
 	ax = size.width - 10;
-	ay = 4 + vcenter;
+	ay = 4 + varrowcenter;
 	
 	arrow_down[0].x = 0 + ax;
 	arrow_down[0].y = 0 + ay;
@@ -200,7 +204,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	}
 
 	ax = size.width - 25;
-	ay = 2 + vcenter;
+	ay = 2 + varrowcenter;
 
 	arrow_right[0].x = 0 + ax;
 	arrow_right[0].y = 0 + ay;
@@ -218,7 +222,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	}
 
 	ax = size.width - 40;
-	ay = 2 + vcenter;
+	ay = 2 + varrowcenter;
 
 	arrow_left[0].x = 4 + ax;
 	arrow_left[0].y = 0 + ay;
@@ -242,15 +246,15 @@ void onmousedown(ui_combobox* self, ui_component* sender, int x, int y,
 	ui_size size = ui_component_size(sender);	
 
 	if (x >= size.width - 40 && x < size.width - 25) {
-		int index = ui_combobox_cursel(self);
+		intptr_t index = ui_combobox_cursel(self);
 		if (index > 0) {
 			ui_combobox_setcursel(self,  index - 1);
 			signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
 	} else
 	if (x >= size.width - 25 && x < size.width - 10) {
-		int count;
-		int index;
+		intptr_t count;
+		intptr_t index;
 
 		count = SendMessage((HWND)self->currcombo->hwnd, CB_GETCOUNT, 0, (LPARAM)0);
 		index = ui_combobox_cursel(self);
@@ -282,14 +286,14 @@ void onmousemove(ui_combobox* self, ui_component* sender, int x, int y,
 		ui_size size = ui_component_size(sender);	
 
 		if (x >= size.width - 40 && x < size.width - 25) {
-			int index = ui_combobox_cursel(self);
+			intptr_t index = ui_combobox_cursel(self);
 			if (index > 0) {
 				self->hover = 2;
 			}
 		} else
 		if (x >= size.width - 25 && x < size.width - 10) {
-			int count;
-			int index;
+			intptr_t count;
+			intptr_t index;
 			count = SendMessage((HWND)self->currcombo->hwnd, CB_GETCOUNT, 0,
 				(LPARAM)0);
 			index = ui_combobox_cursel(self);

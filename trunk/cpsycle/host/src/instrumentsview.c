@@ -19,7 +19,7 @@ void InitInstrumentsView(InstrumentsView* self, ui_component* parent,
 	InitSampulseInstrumentView(&self->sampulseview, &self->notebook.component, workspace);
 	InitSamplerInstrumentView(&self->samplerview, &self->notebook.component, workspace);	
 	tabbar_init(&self->tabbar, tabbarparent);
-	ui_component_setposition(&self->tabbar.component, 450, 0, 160, 20);	
+	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);	
 	ui_component_hide(&self->tabbar.component);
 	tabbar_append(&self->tabbar, "Sampulse");
 	tabbar_append(&self->tabbar, "Sampler PS1");		
@@ -32,6 +32,8 @@ void InitInstrumentsView(InstrumentsView* self, ui_component* parent,
 
 void OnShow(InstrumentsView* self, ui_component* sender)
 {	
+	self->tabbar.component.visible = 1;	
+	ui_component_align(ui_component_parent(&self->tabbar.component));
 	ui_component_show(&self->tabbar.component);
 }
 

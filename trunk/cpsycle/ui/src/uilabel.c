@@ -5,7 +5,7 @@
 
 #include "uilabel.h"
 
-static void onpreferredsize(ui_label*, ui_component* sender, ui_size* limit, int* width, int* height);
+static void onpreferredsize(ui_label*, ui_component* sender, ui_size* limit, ui_size* rv);
 static TEXTMETRIC textmetric(ui_component*);
 
 void ui_label_init(ui_label* self, ui_component* parent)
@@ -21,7 +21,7 @@ void ui_label_init(ui_label* self, ui_component* parent)
 
 void ui_label_settext(ui_label* label, const char* text)
 {
-	SetWindowText((HWND)label->component.hwnd, text);
+	SetWindowText((HWND)label->component.hwnd, text);	
 }
 
 void ui_label_setcharnumber(ui_label* self, int number)
@@ -29,21 +29,23 @@ void ui_label_setcharnumber(ui_label* self, int number)
 	self->charnumber = number;
 }
 
-void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, int* width, int* height)
+void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, ui_size* rv)
 {	
-	TEXTMETRIC tm;	
-	char text[256];
-	
-	tm = ui_component_textmetric(&self->component);	
-	if (self->charnumber == 0) {
-		ui_size size;
-		GetWindowText((HWND)self->component.hwnd, text, 256);
-		size = ui_component_textsize(&self->component, text);
-		*width = size.width + 2;
-	} else {		
-		*width = tm.tmAveCharWidth * self->charnumber;
+	if (rv) {
+		TEXTMETRIC tm;	
+		char text[256];
+		
+		tm = ui_component_textmetric(&self->component);	
+		if (self->charnumber == 0) {
+			ui_size size;
+			GetWindowText((HWND)self->component.hwnd, text, 256);
+			size = ui_component_textsize(&self->component, text);
+			rv->width = size.width + 2;
+		} else {		
+			rv->width = tm.tmAveCharWidth * self->charnumber;
+		}
+		rv->height = tm.tmHeight;
 	}
-	*height = tm.tmHeight;
 }
 
 void ui_label_setstyle(ui_label* self, int style)

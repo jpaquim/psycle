@@ -26,7 +26,7 @@ void ui_menu_append(ui_menu* self, ui_menu* child, int popup)
 {
 	if (popup != 0)
 	{		
-		AppendMenu(self->hmenu, MF_POPUP, (unsigned int)child->hmenu, child->label);		
+		AppendMenu(self->hmenu, MF_POPUP, (UINT_PTR)child->hmenu, child->label);		
 	} else {
 		AppendMenu(self->hmenu, MF_STRING, id, child->label);
 		table_insert(&menumap, id, child);

@@ -35,7 +35,7 @@ typedef struct {
    int lineheight;
    int columnwidth;
    int identwidth;
-   int numcols;
+   int numparametercols;
    int avgcharwidth;
    int pluginpos;
    Properties* selectedplugin;

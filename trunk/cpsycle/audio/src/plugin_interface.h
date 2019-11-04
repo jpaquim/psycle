@@ -59,7 +59,7 @@ typedef struct CMachineInfo {
 	/// "Text to show as custom command (see Command method)"
 	char  * Command;
 	/// number of columns to display in the parameters' window
-	int numCols;
+	int numparametercols;
 } CMachineInfo;
 		
 

@@ -127,7 +127,7 @@ void pluginsview_ondraw(PluginsView* self, ui_component* sender,
 	for ( ; p != 0; p = p->next) {
 		pluginsview_drawitem(self, g, p, cpx, cpy);
 		cpx += self->columnwidth;
-		if (cpx >= self->numcols * self->columnwidth) {
+		if (cpx >= self->numparametercols * self->columnwidth) {
 			cpx = 0;
 			cpy += self->lineheight;
 		}
@@ -171,7 +171,7 @@ void pluginsview_computetextsizes(PluginsView* self)
 	self->lineheight = (int) (tm.tmHeight * 1.5);
 	self->columnwidth = tm.tmAveCharWidth * 45;
 	self->identwidth = tm.tmAveCharWidth * 4;
-	self->numcols = max(1, size.width / self->columnwidth);
+	self->numparametercols = max(1, size.width / self->columnwidth);
 }
 
 void pluginname(Properties* property, char* txt)
@@ -231,7 +231,7 @@ void pluginsview_adjustscroll(PluginsView* self)
 		pluginsview_computetextsizes(self);
 		size = ui_component_size(&self->component);		
 		visilines = size.height / self->lineheight;
-		currlines = properties_size(p) / self->numcols;
+		currlines = properties_size(p) / self->numparametercols;
 		self->component.scrollstepy = self->lineheight;
 		ui_component_setverticalscrollrange(&self->component,
 			0, currlines - visilines);
@@ -271,7 +271,7 @@ void pluginsview_hittest(PluginsView* self, int x, int y)
 				break;
 			}		
 			cpx += self->columnwidth;
-			if (cpx >= self->numcols * self->columnwidth) {
+			if (cpx >= self->numparametercols * self->columnwidth) {
 				cpx = 0;
 				cpy += self->lineheight;
 			}

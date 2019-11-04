@@ -10,6 +10,7 @@
 #include <signal.h>
 #include "uimenu.h"
 #include <list.h>
+#include "../../detail/stdint.h"
 
 typedef enum {
 	UI_ALIGN_NONE,

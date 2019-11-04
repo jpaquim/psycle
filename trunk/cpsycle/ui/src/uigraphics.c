@@ -24,7 +24,7 @@ void ui_graphics_dispose(ui_graphics* g)
 
 void ui_textout(ui_graphics* self, int x, int y, const char* str, size_t len)
 {	
-	TextOut(self->hdc, x, y, str, len);
+	TextOut(self->hdc, x, y, str, (int)len);
 }
 
 void ui_textoutrectangle(ui_graphics* g, int x, int y, unsigned int options,
@@ -33,7 +33,7 @@ void ui_textoutrectangle(ui_graphics* g, int x, int y, unsigned int options,
 	RECT rect;
 		                
     SetRect (&rect, r.left, r.top, r.right, r.bottom) ;     	
-	ExtTextOut(g->hdc, x, y, options, &rect, text, len, NULL);
+	ExtTextOut(g->hdc, x, y, options, &rect, text, (int)len, NULL);
 }
 
 ui_size ui_textsize(ui_graphics* g, const char* text)

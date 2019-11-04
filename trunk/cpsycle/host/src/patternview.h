@@ -27,7 +27,7 @@ typedef struct {
 	PatternViewStatus status;	
 } PatternViewBar;
 
-void InitPatternViewBar(PatternViewBar*, ui_component* parent, Workspace*);
+void patternviewbar_init(PatternViewBar*, ui_component* parent, Workspace*);
 
 typedef struct PatternView {
 	ui_component component;	

@@ -18,12 +18,11 @@ static void parametertweak(VstPlugin* self, int par, int val);
 static int parameterlabel(VstPlugin*, char* txt, int param);
 static int parametername(VstPlugin*, char* txt, int param);
 static int describevalue(VstPlugin*, char* txt, int param, int value);
-static int value(VstPlugin*, int param);
-static void setvalue(VstPlugin*, int param, int value);
+static int parametervalue(VstPlugin*, int param);
 static int parametertype(VstPlugin*, int param);
 static void parameterrange(VstPlugin*, int param, int* minval, int* maxval);
 static unsigned int numparameters(VstPlugin*);
-static unsigned int numcols(VstPlugin*);
+static unsigned int numparametercols(VstPlugin*);
 static void dispose(VstPlugin* self);
 static unsigned int numinputs(VstPlugin*);
 static unsigned int numoutputs(VstPlugin*);
@@ -57,11 +56,10 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.parametertweak = parametertweak;
 	self->machine.parameterlabel = parameterlabel;
 	self->machine.parametername = parametername;
-	self->machine.describevalue = describevalue;
-	self->machine.setvalue = setvalue;
-	self->machine.value = value;
+	self->machine.describevalue = describevalue;	
+	self->machine.parametervalue = parametervalue;
 	self->machine.numparameters = numparameters;
-	self->machine.numcols = numcols;	
+	self->machine.numparametercols = numparametercols;	
 	self->machine.dispose = dispose;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
@@ -308,7 +306,7 @@ int describevalue(VstPlugin* self, char* txt, int param, int value)
 	return *txt != '\0';
 }
 
-int value(VstPlugin* self, int param)
+int parametervalue(VstPlugin* self, int param)
 {
 	return (int)(self->effect->getParameter(self->effect, param) * 65535.f);
 }
@@ -363,7 +361,7 @@ unsigned int numparameters(VstPlugin* self)
 	return self->effect->numParams;	
 }
 
-unsigned int numcols(VstPlugin* self)
+unsigned int numparametercols(VstPlugin* self)
 {
 	return 6;
 }

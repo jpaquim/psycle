@@ -19,8 +19,8 @@ typedef struct {
 void ui_combobox_init(ui_combobox*, ui_component* parent);
 int ui_combobox_addstring(ui_combobox*, const char* text);
 void ui_combobox_clear(ui_combobox*);
-void ui_combobox_setcursel(ui_combobox*, int index);
-int ui_combobox_cursel(ui_combobox*);
+void ui_combobox_setcursel(ui_combobox*, intptr_t index);
+intptr_t ui_combobox_cursel(ui_combobox*);
 void ui_combobox_setcharnumber(ui_combobox*, int num);
 
 #endif

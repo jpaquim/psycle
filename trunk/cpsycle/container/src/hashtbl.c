@@ -124,7 +124,7 @@ void* table_at(Table* self, size_t k)
 	return rv;
 }
 
-size_t table_exists(Table* self, size_t k)
+int table_exists(Table* self, size_t k)
 {	
 	return (self->count > 0) && (self->keys[h(k, self->arraysize)] != 0);
 }

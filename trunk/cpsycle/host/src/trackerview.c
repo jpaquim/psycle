@@ -659,7 +659,7 @@ void trackerview_prevcol(TrackerView* self)
 	oldcursor = self->grid.cursor;
 
 	if (self->grid.cursor.col == 0) {
-		self->grid.cursor.col = TRACKERGRID_NUMCOLS - 2;
+		self->grid.cursor.col = TRACKERGRID_numparametercols - 2;
 		if (self->grid.cursor.track > 0) {
 			--self->grid.cursor.track;
 			trackerview_scrolleft(self);
@@ -684,7 +684,7 @@ void trackerview_nextcol(TrackerView* self)
 	TrackerCursor oldcursor;
 	oldcursor = self->grid.cursor;	
 
-	if (self->grid.cursor.col == TRACKERGRID_NUMCOLS - 2) {
+	if (self->grid.cursor.col == TRACKERGRID_numparametercols - 2) {
 		self->grid.cursor.col = 0;
 		if (self->grid.cursor.track < player_numsongtracks(
 			&self->workspace->player) - 1) {

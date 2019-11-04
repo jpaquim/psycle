@@ -19,7 +19,8 @@ typedef struct {
 	ui_edit edit_comments;	
 } SongProperties;
 
-void InitSongProperties(SongProperties* songproperties, ui_component* parent,
-	Workspace*);
+void songproperties_init(SongProperties*, ui_component* parent, Workspace*);
+void songproperties_enableedit(SongProperties*);
+void songproperties_disableedit(SongProperties*);
 
 #endif

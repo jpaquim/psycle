@@ -9,7 +9,6 @@
 #include <signal.h>
 #include "patternevent.h"
 #include "buffercontext.h"
-#include "fileio.h"
 #include "connections.h"
 #include <dsptypes.h>
 
@@ -29,7 +28,7 @@ typedef enum {
 typedef struct Machine {	
 	void (*init)(void*);
 	struct Machine* (*clone)(void*);
-	Buffer* (*mix)(void*, int slot, unsigned int amount, MachineSockets*, struct Machines*);
+	Buffer* (*mix)(void*, size_t slot, unsigned int amount, MachineSockets*, struct Machines*);
 	void (*work)(void*, BufferContext*);
 	void (*generateaudio)(void *, BufferContext*);
 	int (*hostevent)(void*, int const eventNr, int const val1, float const val2);
@@ -52,18 +51,19 @@ typedef struct Machine {
 	// Parameters	
 	int (*parametertype)(void*, int param);
 	unsigned int (*numparameters)(void*);
-	unsigned int (*numcols)(void*);
+	unsigned int (*numparametercols)(void*);
 	void (*parameterrange)(void*, int numparam, int* minval, int* maxval);
 	void (*parametertweak)(void*, int par, int val);	
 	void (*patterntweak)(void*, int par, int val);
 	int (*parameterlabel)(void*, char* txt, int param);
 	int (*parametername)(void*, char* txt, int param);
 	int (*describevalue)(void*, char* txt, int param, int value);
-	int (*value)(void*, int param);	
+	int (*parametervalue)(void*, int param);	
 	int (*paramviewoptions)(void*);
 
 	void (*setcallback)(void*, MachineCallback);
-	void (*loadspecific)(void*, PsyFile*, unsigned int slot, struct Machines*);	
+	void (*loadspecific)(void*, struct SongFile*, unsigned int slot);
+	void (*savespecific)(void*, struct SongFile*, unsigned int slot);
 	int (*haseditor)(void*);
 	void (*seteditorhandle)(void*, void* handle);
 	void (*editorsize)(void*, int* width, int* height);

@@ -66,14 +66,15 @@ typedef struct {
 	VolSlider volslider;
 	ClipBox clipbox;	
 	ui_component statusbar;
+	ui_notebook viewbars;
 	ui_component* activeview;	
 	Workspace workspace;
 	ui_label label;
 	int firstshow;	
 	int resize;
-	StepBox stepbox;
 	ui_label statusbarlabel;
 	PatternViewBar patternbar;
+	MachineViewBar machineviewbar;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

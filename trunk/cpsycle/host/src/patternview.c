@@ -5,7 +5,7 @@
 
 #include "patternview.h"
 
-void patternview_onsplit(PatternView*, ui_component* sender);
+static void patternview_onsplit(PatternView*, ui_component* sender);
 static void OnSize(PatternView*, ui_component* sender, ui_size*);
 static void OnShow(PatternView*, ui_component* sender);
 static void OnHide(PatternView*, ui_component* sender);
@@ -16,7 +16,7 @@ static void OnPropertiesClose(PatternView*, ui_component* sender);
 static void OnPropertiesApply(PatternView*, ui_component* sender);
 static void OnKeyDown(PatternView*, ui_component* sender, int keycode, int keydata);
 static void OnStatusDraw(PatternViewStatus*, ui_component* sender, ui_graphics* g);
-static void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, int* width, int* height);
+static void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, ui_size* rv);
 static void OnPatternEditPositionChanged(PatternViewStatus*, Workspace* sender);
 static void OnStatusSequencePositionChanged(PatternViewStatus*, Sequence* sender);
 static void OnStatusSongChanged(PatternViewStatus*, Workspace* sender);
@@ -81,21 +81,23 @@ void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
 	ui_textout(g, 0, 0, text, strlen(text));
 }
 
-void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, int* width, int* height)
+void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, ui_size* rv)
 {				
-	TEXTMETRIC tm;
+	if (rv) {
+		TEXTMETRIC tm;
 	
-	tm = ui_component_textmetric(&self->component);
-	*width = tm.tmAveCharWidth * 50;
-	*height = (int)(tm.tmHeight * 1.5);
+		tm = ui_component_textmetric(&self->component);
+		rv->width = tm.tmAveCharWidth * 80;
+		rv->height = (int)(tm.tmHeight * 1.5);
+	}
 }
 
-void InitPatternViewBar(PatternViewBar* self, ui_component* parent, Workspace* workspace)
+void patternviewbar_init(PatternViewBar* self, ui_component* parent, Workspace* workspace)
 {		
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);	
 	stepbox_init(&self->step, &self->component, workspace);
-	InitPatternViewStatus(&self->status, &self->component, workspace);
+	InitPatternViewStatus(&self->status, &self->component, workspace);	
 	{		
 		ui_margin margin = { 2, 10, 2, 0 };
 				
@@ -125,8 +127,7 @@ void patternview_init(PatternView* self,
 	// signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);	
 	// Tabbar
 	tabbar_init(&self->tabbar, tabbarparent);
-	ui_component_move(&self->tabbar.component, 450, 0);
-	ui_component_resize(&self->tabbar.component, 100, 20);
+	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);	
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "Tracker");
 	tabbar_append(&self->tabbar, "Pianoroll");
@@ -135,7 +136,7 @@ void patternview_init(PatternView* self,
 	tabbar_select(&self->tabbar, 0);
 	ui_button_init(&self->split, tabbarparent);
 	ui_button_settext(&self->split, "Split");
-	ui_component_setposition(&self->split.component, 450 + 100, 0, 50, 12);
+	ui_component_setalign(&self->split.component, UI_ALIGN_LEFT);	
 	ui_component_hide(&self->split.component);
 	signal_connect(&self->split.signal_clicked, self, patternview_onsplit);
 	signal_connect(&self->component.signal_show, self, OnShow);
@@ -161,6 +162,9 @@ void OnSize(PatternView* self, ui_component* sender, ui_size* size)
 
 void OnShow(PatternView* self, ui_component* sender)
 {			
+	self->tabbar.component.visible = 1;
+	self->split.component.visible = 1;
+	ui_component_align(ui_component_parent(&self->tabbar.component));
 	ui_component_show(&self->tabbar.component);
 	ui_component_show(&self->split.component);
 }
@@ -208,6 +212,7 @@ void OnSongChanged(PatternView* self, Workspace* workspace)
 		self, OnEditPositionChanged);
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
 	self->trackerview.sequenceentryoffset = 0.f;
+	self->pianoroll.sequenceentryoffset = 0.f;
 	self->pianoroll.pattern = self->trackerview.pattern;	
 	ui_invalidate(&self->component);
 }
@@ -222,9 +227,11 @@ void OnEditPositionChanged(PatternView* self, Sequence* sender)
 			patterns_at(&self->trackerview.workspace->song->patterns,
 			entry->pattern));
 		self->trackerview.sequenceentryoffset = entry->offset;
+		self->pianoroll.sequenceentryoffset = entry->offset;
 	} else {
 		patternview_setpattern(self, 0);		
 		self->trackerview.sequenceentryoffset = 0.f;
+		self->pianoroll.sequenceentryoffset = 0.f;
 	}
 	ui_invalidate(&self->component);
 }

@@ -31,6 +31,8 @@ typedef struct {
 
 void instrument_init(Instrument*);
 void instrument_dispose(Instrument*);
+Instrument* instrument_alloc(void);
+Instrument* instrument_allocinit(void);
 void instrument_load(Instrument*, const char* path);
 void instrument_setname(Instrument*, const char* name);
 const char* instrument_name(Instrument*);

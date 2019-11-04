@@ -73,12 +73,11 @@ void mainframe_init(MainFrame* self)
 	InitBars(self);	
 	signal_connect(&self->component.signal_destroy, self, Destroy);
 	signal_connect(&self->component.signal_align, self, OnAlign);	
-	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
-	signal_connect(&self->component.signal_align, self, OnAlign);
-	ui_component_init(&self->tabbars, &self->component);		
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);	
+	ui_component_init(&self->tabbars, &self->component);
+	ui_component_enablealign(&self->tabbars);
 	tabbar_init(&self->tabbar, &self->tabbars);	
-	ui_component_resize(&self->tabbar.component,
-		430, ui_component_size(&self->tabbar.component).height);	
+	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
 	tabbar_append(&self->tabbar, "Machines");
 	tabbar_append(&self->tabbar, "Pattern");	
 	tabbar_append(&self->tabbar, "Samples");
@@ -99,14 +98,14 @@ void mainframe_init(MainFrame* self)
 	InitSamplesView(&self->samplesview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
-	InitSongProperties(&self->songproperties, &self->notebook.component, &self->workspace);	
+	songproperties_init(&self->songproperties, &self->notebook.component, &self->workspace);	
 	InitSettingsView(&self->settingsview, &self->notebook.component,
 		&self->tabbars, self->workspace.config);	
 	signal_connect(&self->settingsview.signal_changed, self, OnSettingsViewChanged);
 	InitHelpView(&self->helpview, &self->notebook.component, &self->tabbars,
 		&self->workspace);	
 	signal_connect(&self->helpview.about.okbutton.signal_clicked, self, OnAboutOk);	
-	InitSequenceView(&self->sequenceview, &self->component, &self->workspace);	
+	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);	
 	InitGear(&self->gear, &self->component, &self->workspace);
 	ui_component_hide(&self->gear.component);
 	signal_connect(&self->machinebar.gear.signal_clicked, self, OnGear);	
@@ -115,8 +114,7 @@ void mainframe_init(MainFrame* self)
 	InitStatusBar(self);
 	signal_connect(&self->splitbar.signal_mousedown, self, OnMouseDown);	
 	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
-	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);
-	self->splitbar.debugflag = 10000;	
+	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);	
 	SetStartPage(self);
 	if (self->workspace.song->properties) {
 		Properties* title;
@@ -127,7 +125,7 @@ void mainframe_init(MainFrame* self)
 	}
 	SetStatusBarText(self, StatusBarIdleText(self));
 	signal_emit(&self->workspace.signal_configchanged, &self->workspace, 1,
-		self->workspace.config);	
+		self->workspace.config);			
 }
 
 void SetStatusBarText(MainFrame* self, const char* text)
@@ -161,8 +159,16 @@ void InitStatusBar(MainFrame* self)
 		ui_component_setmargin(&self->statusbarlabel.component, &margin);
 		ui_component_setalign(&self->statusbarlabel.component, UI_ALIGN_LEFT);
 	}
-	InitPatternViewBar(&self->patternbar, &self->statusbar, &self->workspace);		
+	ui_notebook_init(&self->viewbars, &self->statusbar);
+	ui_component_setalign(&self->viewbars.component, UI_ALIGN_LEFT);
+	ui_component_enablealign(&self->viewbars.component);		
+	machineviewbar_init(&self->machineviewbar, &self->viewbars.component, &self->workspace);
+	ui_component_setalign(&self->machineviewbar.component, UI_ALIGN_LEFT);
+	self->machineview.wireview.statusbar = &self->machineviewbar;
+	patternviewbar_init(&self->patternbar, &self->viewbars.component, &self->workspace);
 	ui_component_setalign(&self->patternbar.component, UI_ALIGN_LEFT);
+	ui_notebook_setpage(&self->viewbars, 0);
+	ui_notebook_connectcontroller(&self->viewbars, &self->tabbar.signal_change);
 	ui_progressbar_init(&self->progressbar, &self->statusbar);
 	ui_component_setalign(&self->progressbar.component, UI_ALIGN_RIGHT);	
 	signal_connect(&self->workspace.signal_loadprogress, self, 
@@ -285,8 +291,7 @@ void OnAlign(MainFrame* self, ui_component* sender)
 		sequenceviewsize.width + splitbarwidth,
 		topsize.height,
 		size.width - sequenceviewsize.width - splitbarwidth,
-		tabbarsize.height);
-	ui_component_resize(&self->tabbar.component, tabbarsize.width, tabbarsize.height);		
+		tabbarsize.height);	
 	ui_component_setposition(&self->splitbar,
 		sequenceviewsize.width,
 		topsize.height, splitbarwidth,

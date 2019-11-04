@@ -35,6 +35,9 @@ void ui_notebook_setpage(ui_notebook* self, int pageindex)
 	
 	self->pageindex = pageindex;
 	size = ui_component_size(&self->component);
+	if (self->component.align == UI_ALIGN_LEFT) {
+		size = ui_component_preferredsize(&self->component, &size);
+	}	
 	for (p = q = ui_component_children(&self->component, 0); p != NULL;
 			p = p->next, ++c) {		
 		ui_component* component;
@@ -53,6 +56,9 @@ void ui_notebook_setpage(ui_notebook* self, int pageindex)
 		}
 	}
 	list_free(q);		
+	if (self->component.align == UI_ALIGN_LEFT) {
+		ui_component_align(ui_component_parent(&self->component));
+	}
 }
 
 int ui_notebook_page(ui_notebook* self)

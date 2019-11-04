@@ -475,6 +475,10 @@ SOURCE=.\src\song.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\songio.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\vstplugin.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -696,6 +700,10 @@ SOURCE=.\src\silentdriver.h
 # Begin Source File
 
 SOURCE=.\src\song.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\songio.h
 # End Source File
 # Begin Source File
 

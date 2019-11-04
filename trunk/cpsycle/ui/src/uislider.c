@@ -45,7 +45,7 @@ void ui_slider_setvalue(ui_slider* self, int value)
 	SendMessage((HWND)self->component.hwnd, TBM_SETPOS, TRUE, value);
 }
 
-int ui_slider_value(ui_slider* self)
+intptr_t ui_slider_value(ui_slider* self)
 {
 	return SendMessage((HWND)self->component.hwnd, TBM_GETPOS, (WPARAM)0, (LPARAM)0);
 }

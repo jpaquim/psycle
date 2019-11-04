@@ -133,7 +133,7 @@ List* sequencer_tickevents(Sequencer* self)
 	return self->events;
 }
 
-List* sequencer_machinetickevents(Sequencer* self, unsigned int slot)
+List* sequencer_machinetickevents(Sequencer* self, size_t slot)
 {
 	List* rv = 0;
 	List* p;
@@ -370,7 +370,7 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 		int maxval;		
 		int slides = sequencer_frames(self, 1.f/(self->lpb * self->lpbspeed)) / 64;		
 		int dest = ((entry->event.cmd << 8) + entry->event.parameter);
-		int start = machine->value(machine, param);
+		int start = machine->parametervalue(machine, param);
 		int slide;
 		float delta;
 		float curr;
@@ -491,8 +491,7 @@ int sequencer_playing(Sequencer* self)
 	return self->playing;
 }
 
-List* sequencer_timedevents(Sequencer* self, unsigned int slot,
-	unsigned int amount)
+List* sequencer_timedevents(Sequencer* self, size_t slot, unsigned int amount)
 {
 	List* rv = 0;
 	List* p;

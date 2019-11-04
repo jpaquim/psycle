@@ -13,6 +13,8 @@
 #ifndef DATACOMPRESSION_H
 #define DATACOMPRESSION_H
 
+#include <stddef.h>
+
 /// compresses.
 /// returns the destination size. remember to delete the destination when done!
 unsigned int beerz77comp2(unsigned char const * source, unsigned char ** destination, unsigned int source_size);
@@ -20,7 +22,7 @@ unsigned int beerz77comp2(unsigned char const * source, unsigned char ** destina
 /// decompresses.
 /// \todo the destination size is NOT returned
 /// remember to delete your destination when done!
-int beerz77decomp2(unsigned char const * source, unsigned char ** destination);
+int beerz77decomp2(unsigned char const * source, unsigned char ** destination, size_t* destsize);
 
 /// squashes sound.
 /// returns the destination size. remember to delete the destination when done!

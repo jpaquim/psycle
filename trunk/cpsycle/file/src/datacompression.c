@@ -50,7 +50,7 @@ unsigned int beerz77comp2(unsigned char const * pSource, unsigned char ** pDesti
 
 	while(pCurrentPos < pSource + size) {
 		unsigned char const * pBestMatch;
-		int BestMatchLength;
+		ptrdiff_t BestMatchLength;
 		// update our sliding window
 		pSlidingWindow = pCurrentPos - 0xff - MIN_REDUNDANT_BYTES_2; // maximum search offset
 		// check for overflow!
@@ -84,7 +84,7 @@ unsigned int beerz77comp2(unsigned char const * pSource, unsigned char ** pDesti
 						// there is no match
 						break;
 					}
-				}
+				}				
 				// check for best match
 				if(pMatchPosStart - pTestPos > BestMatchLength) {
 					BestMatchLength = pMatchPosStart - pTestPos;
@@ -136,8 +136,9 @@ unsigned int beerz77comp2(unsigned char const * pSource, unsigned char ** pDesti
 	return pDestPos - *pDestination;
 }
 
-int beerz77decomp2(unsigned char const * pSourcePos, unsigned char ** pDestination) {
+int beerz77decomp2(unsigned char const * pSourcePos, unsigned char ** pDestination, size_t* destsize) {
 	assert(pSourcePos);
+	*destsize = 0;
 	if(*pSourcePos++ == 0x04) {
 		unsigned char* pWindowPos;
 		unsigned char* pDestPos;
@@ -176,6 +177,7 @@ int beerz77decomp2(unsigned char const * pSourcePos, unsigned char ** pDestinati
 				FileSize -= Length;
 			}
 		}
+		*destsize = pDestPos - *pDestination;
 		return TRUE;
 	}
 	return FALSE;

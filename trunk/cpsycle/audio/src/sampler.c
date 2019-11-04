@@ -8,27 +8,28 @@
 #include "plugin_interface.h"
 #include "instruments.h"
 #include "samples.h"
+#include "songio.h"
 #include <operations.h>
 #include <math.h>
 
 static void generateaudio(Sampler*, BufferContext*);
 static void seqtick(Sampler*, int channel, const PatternEvent*);
 static const MachineInfo* info(Sampler*);
-static unsigned int numcols(Sampler*);
+static unsigned int numparametercols(Sampler*);
 static unsigned int numparameters(Sampler*);
 static int parametertype(Sampler* self, int par);
 static void parameterrange(Sampler*, int numparam, int* minval, int* maxval);
 static int parameterlabel(Sampler*, char* txt, int param);
 static int parametername(Sampler*, char* txt, int param);
 static void parametertweak(Sampler*, int par, int val);
-static int describevalue(Sampler*, char* txt, int const param, int const value);
-static int value(Sampler*, int const param);
-static void setvalue(Sampler*, int const param, int const value);
+static int describevalue(Sampler*, char* txt, int param, int value);
+static int parametervalue(Sampler*, int param);
 static void dispose(Sampler*);
 static int unused_voice(Sampler*);
 static void release_voices(Sampler*, int channel);
 static unsigned int numinputs(Sampler*);
 static unsigned int numoutputs(Sampler*);
+static void loadspecific(Sampler*, struct SongFile*, unsigned int slot);
 
 static int currslot(Sampler*, unsigned int channel, const PatternEvent*);
 
@@ -42,41 +43,6 @@ static void voice_release(Voice*);
 static void voice_fastrelease(Voice*);
 
 static int songtracks = 16;
-
-static CMachineParameter const paraPolyphony = 
-{ 
-	"Polyphony",
-	"Polyphony Voices",								// description
-	1,												// MinValue	
-	16,												// MaxValue
-	MPF_STATE,										// Flags
-	0
-};
-
-static CMachineParameter const paraInterpolation = {
-	"Resampling",
-	"Resampling method",
-	0,
-	3,
-	MPF_STATE,
-	0
-};
-
-static CMachineParameter const paraSpeed = 
-{ 
-	"Default Speed",
-	"Default Speed",								// description
-	0,												// MinValue	
-	1,												// MaxValue
-	MPF_STATE,										// Flags
-	0
-};
-
-static CMachineParameter const *pParameters[] = {
-	&paraPolyphony,
-	&paraInterpolation,	
-	&paraSpeed
-};
 
 static MachineInfo const MacInfo = {
 	MI_VERSION,
@@ -108,15 +74,15 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.generateaudio = generateaudio;
 	self->machine.seqtick = seqtick;
 	self->machine.info = info;
-	self->machine.numcols = numcols;
-	self->machine.numparameters = numparameters;
-	self->machine.parametertweak = parametertweak;
-	self->machine.describevalue = describevalue;
-	self->machine.setvalue = setvalue;
-	self->machine.value = value;	
 	self->machine.dispose = dispose;
 	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;	
+	self->machine.numoutputs = numoutputs;
+	self->machine.loadspecific = loadspecific;
+	self->machine.numparametercols = numparametercols;
+	self->machine.numparameters = numparameters;
+	self->machine.parametertweak = parametertweak;
+	self->machine.describevalue = describevalue;	
+	self->machine.parametervalue = parametervalue;		
 	self->machine.parameterrange = parameterrange;
 	self->machine.parametertype = parametertype;
 	self->machine.parametername = parametername;
@@ -161,7 +127,7 @@ void seqtick(Sampler* self, int channel, const PatternEvent* event)
 	if (slot == NOTECOMMANDS_EMPTY) {
 		return;
 	}	
-	sample = samples_at(self->machine.samples(self), slot);
+	sample = samples_at(self->machine.samples(self), slot);	
 	if (sample) {
 		Instrument* instrument;
 
@@ -201,7 +167,7 @@ int currslot(Sampler* self, unsigned int channel, const PatternEvent* event)
 		rv = event->inst;
 	} else
 	if (table_exists(&self->lastinst, channel)) {
-		rv = (int) table_at(&self->lastinst, channel);
+		rv = (int)(ptrdiff_t) table_at(&self->lastinst, channel);
 	} else { 
 		rv = NOTECOMMANDS_EMPTY;
 	}
@@ -235,7 +201,7 @@ void parametertweak(Sampler* self, int param, int value)
 	}
 }
 
-int describevalue(Sampler* self, char* txt, int const param, int const value)
+int describevalue(Sampler* self, char* txt, int param, int value)
 { 
 	if (param == 1) {
 		switch(value)
@@ -256,7 +222,7 @@ int describevalue(Sampler* self, char* txt, int const param, int const value)
 	return 0;
 }
 
-int value(Sampler* self, int const param)
+int parametervalue(Sampler* self, int param)
 {	
 	switch (param) {
 		case 0: return self->numvoices; break;
@@ -268,9 +234,85 @@ int value(Sampler* self, int const param)
 	return 0;
 }
 
-void setvalue(Sampler* self, int const param, int const value)
-{	
+unsigned int numparameters(Sampler* self)
+{
+	return 3;
 }
+
+unsigned int numparametercols(Sampler* self)
+{
+	return 3;
+}
+
+int parametertype(Sampler* self, int par)
+{
+	return MPF_STATE;
+}
+
+void parameterrange(Sampler* self, int param, int* minval, int* maxval)
+{
+	switch (param) {
+	case 0:
+		*minval = 1;
+		*maxval = 16;
+		break;
+	case 1:
+		*minval = 0;
+		*maxval = 3;
+		break;
+	case 2:
+		*minval = 0;
+		*maxval = 1;
+		break;
+	default:
+		*minval = 0;
+		*maxval = 0;
+		break;
+	}
+}
+
+int parameterlabel(Sampler* self, char* txt, int param)
+{
+	int rv = 1;
+	switch (param) {
+	case 0:
+		_snprintf(txt, 128, "%s", "Polyphony Voices");
+		break;
+	case 1:
+		_snprintf(txt, 128, "%s", "Resampling method");
+		break;
+	case 2:
+		_snprintf(txt, 128, "%s", "Default speed");
+		break;
+	default:
+		txt[0] = '\0';
+		rv = 0;
+		break;
+	}
+	return rv;
+}
+
+int parametername(Sampler* self, char* txt, int param)
+{
+	int rv = 1;
+	switch (param) {
+	case 0:
+		_snprintf(txt, 128, "%s", "Polyphony");
+		break;
+	case 1:
+		_snprintf(txt, 128, "%s", "Resampling");
+		break;
+	case 2:
+		_snprintf(txt, 128, "%s", "Default speed");
+		break;
+	default:
+		txt[0] = '\0';
+		rv = 0;
+		break;
+	}
+	return rv;
+}
+
 
 unsigned int numinputs(Sampler* self)
 {
@@ -315,6 +357,47 @@ void voice_init(Voice* self, Instrument* instrument, Sample* sample,
 	}
 }
 
+static void loadspecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
+{
+	//Old version had default C4 as false
+	// DefaultC4(false);
+	// LinearSlide(false);
+	unsigned int size = 0;
+	psyfile_read(songfile->file, &size, sizeof(size));
+	if (size)
+	{
+		/// Version 0
+		int temp;
+		psyfile_read(songfile->file, &temp, sizeof(temp)); // numSubtracks
+		self->numvoices = temp;
+		psyfile_read(songfile->file, &temp, sizeof(temp)); // quality		
+		/* switch (temp)
+		{
+		case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+		case 3:	_resampler.quality(helpers::dsp::resampler::quality::sinc); break;
+		case 0:	_resampler.quality(helpers::dsp::resampler::quality::zero_order); break;
+		case 1:
+		default: _resampler.quality(helpers::dsp::resampler::quality::linear);
+		} */
+
+		if (size > 3 * sizeof(unsigned int))
+		{
+			unsigned int internalversion;
+			psyfile_read(songfile->file, &internalversion, sizeof(internalversion));
+			if (internalversion >= 1) {
+				unsigned char defaultC4;
+				psyfile_read(songfile->file, &defaultC4, sizeof(defaultC4)); // correct A4 frequency.
+				// DefaultC4(defaultC4);
+			}
+			if (internalversion >= 2) {
+				unsigned char slidemode;
+				psyfile_read(songfile->file, &slidemode, sizeof(slidemode)); // correct slide.
+				// LinearSlide(slidemode);
+			}
+		}
+	}	
+}
+
 void voice_reset(Voice* self)
 {				
 	adsr_reset(&self->env);
@@ -330,7 +413,7 @@ void voice_dispose(Voice* self)
 void voice_seqtick(Voice* self, const PatternEvent* event)
 {
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
-		 self->vol = (float) event->parameter / 255;
+		 self->vol = event->parameter / (amp_t)255;
 	} else
 	if (event->note == NOTECOMMANDS_RELEASE) {
 		voice_noteoff(self, event);
@@ -344,13 +427,13 @@ void voice_noteon(Voice* self, const PatternEvent* event)
 {
 	int baseC;	
 	
-	baseC = 60;	
+	baseC = 60;
 	self->position = sample_begin(self->sample);
 	double_setvalue(&self->position.speed,
 		pow(2.0f,
 			(event->note + self->sample->tune - baseC + 
-				((float)self->sample->finetune * 0.01f)) / 12.0f) *
-			((float)self->sample->samplerate / 44100));
+				((amp_t)self->sample->finetune * 0.01f)) / 12.0f) *
+			((beat_t)self->sample->samplerate / 44100));
 	adsr_start(&self->env);
 	adsr_start(&self->filterenv);
 }
@@ -365,16 +448,19 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 {	
 	if (self->sample && self->env.stage != ENV_OFF) {		
 		int i;
-		float vol;		
-
-		vol = self->vol * self->sample->defaultvolume;		
+		amp_t vol;		
+				
+		vol = self->vol * self->sample->globalvolume * self->sample->defaultvolume;
+		if (vol > 0.5) {
+			vol = 0.5;
+		}
 		for (i = 0; i < numsamples; ++i) {
 			unsigned int c;			
 							
 			for (c = 0; c < buffer_numchannels(&self->sample->channels); ++c) {
-				float* src;
-				float* dst;
-				float val;				
+				amp_t* src;
+				amp_t* dst;
+				amp_t val;				
 				unsigned int frame;
 
 				src = buffer_at(&self->sample->channels, c);
@@ -434,81 +520,3 @@ void voice_fastrelease(Voice* self)
 	adsr_release(&self->filterenv);
 }
 
-unsigned int numparameters(Sampler* self)
-{
-	return 3;
-}
-
-unsigned int numcols(Sampler* self)
-{
-	return 3;
-}
-
-int parametertype(Sampler* self, int par)
-{
-	return MPF_STATE;
-}
-
-void parameterrange(Sampler* self, int param, int* minval, int* maxval)
-{
-	switch (param) {
-		case 0:
-			*minval = 1;
-			*maxval = 16;
-		break;
-		case 1:
-			*minval = 0;
-			*maxval = 3;
-		break;
-		case 2:
-			*minval = 0;
-			*maxval = 1;
-		break;
-		default:
-			*minval = 0;
-			*maxval = 0;
-		break;
-	}		
-}
-
-int parameterlabel(Sampler* self, char* txt, int param)
-{
-	int rv = 1;
-	switch (param) {
-		case 0:
-			_snprintf(txt, 128, "%s", "Polyphony Voices");
-		break;
-		case 1:
-			_snprintf(txt, 128, "%s", "Resampling method");
-		break;
-		case 2:
-			_snprintf(txt, 128, "%s", "Default speed");
-		break;
-		default:
-			txt[0] = '\0';
-			rv = 0;
-		break;
-	}
-	return rv;
-}
-
-int parametername(Sampler* self, char* txt, int param)
-{
-	int rv = 1;
-	switch (param) {
-		case 0:
-			_snprintf(txt, 128, "%s", "Polyphony");
-		break;
-		case 1:
-			_snprintf(txt, 128, "%s", "Resampling");
-		break;
-		case 2:
-			_snprintf(txt, 128, "%s", "Default speed");
-		break;
-		default:
-			txt[0] = '\0';
-			rv = 0;
-		break;
-	}
-	return rv;
-}

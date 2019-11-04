@@ -8,7 +8,7 @@
 static void OnDestroy(MachineBar*, ui_component* component);
 static void BuildMachineBox(MachineBar* self);
 static void OnMachinesInsert(MachineBar*, Machines* machines, int slot);
-static int insertmachine(MachineBar*, int slot, Machine*);
+static int insertmachine(MachineBar*, size_t slot, Machine*);
 static void OnMachinesRemoved(MachineBar*, Machines* machines, int slot);
 static void OnMachinesSlotChange(MachineBar*, Machines* machines, int slot);
 static void OnMachineBoxSelChange(MachineBar*, ui_component* sender, int sel);
@@ -127,19 +127,19 @@ void BuildMachineBox(MachineBar* self)
 			Machine* machine;
 
 			machine = (Machine*)tableiterator_value(&it);
-			insertmachine(self, tableiterator_key(&it), machine);
+			insertmachine(self, tableiterator_key(&it),  machine);
 		}
 	}
 }
 
-int insertmachine(MachineBar* self, int slot, Machine* machine)
+int insertmachine(MachineBar* self, size_t slot, Machine* machine)
 {			
 	if (slot != MASTER_INDEX &&
 			machine->info(machine) && machine->info(machine)->ShortName) {
-		int comboboxindex;
+		intptr_t comboboxindex;
 
 		char buffer[128];
-		_snprintf(buffer, 128, "%02X: %s", slot, machine->info(machine)->ShortName); 
+		_snprintf(buffer, 128, "%02zX: %s", slot, machine->info(machine)->ShortName); 
 		comboboxindex = ui_combobox_addstring(&self->machinebox, buffer);
 		table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
 		table_insert(&self->slotscombobox, slot, (void*) comboboxindex);
@@ -149,20 +149,20 @@ int insertmachine(MachineBar* self, int slot, Machine* machine)
 
 void OnMachineBoxSelChange(MachineBar* self, ui_component* sender, int sel)
 {	
-	int slot;
+	size_t slot;
 	
 	List* slots = self->machinebox.signal_selchanged.slots;
 	self->machinebox.signal_selchanged.slots = 0;
-	slot = (int)table_at(&self->comboboxslots, sel);
+	slot = (size_t)table_at(&self->comboboxslots, sel);
 	machines_changeslot(self->machines, slot);	
 	self->machinebox.signal_selchanged.slots = slots;
 }
 
 void OnMachinesSlotChange(MachineBar* self, Machines* machines, int slot)
 {	
-	int comboboxindex;
+	intptr_t comboboxindex;
 
-	comboboxindex = (int) table_at(&self->slotscombobox, slot);
+	comboboxindex = (intptr_t) table_at(&self->slotscombobox, slot);
 	ui_combobox_setcursel(&self->machinebox, comboboxindex);	
 }
 

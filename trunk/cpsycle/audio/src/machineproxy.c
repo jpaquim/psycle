@@ -14,7 +14,7 @@
 
 // proxy
 
-static Buffer* machineproxy_mix(MachineProxy*, int slot, unsigned int amount, MachineSockets*, Machines*);
+static Buffer* machineproxy_mix(MachineProxy*, size_t slot, unsigned int amount, MachineSockets*, Machines*);
 static void machineproxy_work(MachineProxy*, BufferContext*);
 static void machineproxy_generateaudio(MachineProxy*, BufferContext* bc);
 static void machineproxy_dispose(MachineProxy*);
@@ -24,16 +24,17 @@ static unsigned int machineproxy_numoutputs(MachineProxy*);
 static void machineproxy_parametertweak(MachineProxy*, int par, int val);
 static void machineproxy_patterntweak(MachineProxy* self, int par, int val);
 static int machineproxy_describevalue(MachineProxy*, char* txt, int const param, int const value);
-static int machineproxy_value(MachineProxy*, int const param);
+static int machineproxy_parametervalue(MachineProxy*, int const param);
 static void machineproxy_setpanning(MachineProxy*, amp_t);
 static amp_t machineproxy_panning(MachineProxy*);
 static const MachineInfo* machineproxy_info(MachineProxy*);
 static int machineproxy_parametertype(MachineProxy*, int param);
 static void machineproxy_parameterrange(MachineProxy*, int numparam, int* minval, int* maxval);
 static unsigned int machineproxy_numparameters(MachineProxy*);
-static unsigned int machineproxy_numcols(MachineProxy*);
+static unsigned int machineproxy_numparametercols(MachineProxy*);
 static int machineproxy_paramviewoptions(MachineProxy*);
-static void machineproxy_loadspecific(MachineProxy*, PsyFile* file, unsigned int slot, Machines* machines);
+static void machineproxy_loadspecific(MachineProxy*, struct SongFile*, unsigned int slot);
+static void machineproxy_savespecific(MachineProxy*, struct SongFile*, unsigned int slot);
 static unsigned int machineproxy_samplerate(MachineProxy*);
 static unsigned int machineproxy_bpm(MachineProxy*);
 static unsigned int machineproxy_slot(MachineProxy*);
@@ -78,18 +79,19 @@ void machineproxy_init(MachineProxy* self, Machine* client)
 	self->machine.parametertweak = machineproxy_parametertweak;
 	self->machine.patterntweak = machineproxy_patterntweak;
 	self->machine.describevalue = machineproxy_describevalue;
-	self->machine.value = machineproxy_value;
+	self->machine.parametervalue = machineproxy_parametervalue;
 	self->machine.setpanning = machineproxy_setpanning;
 	self->machine.panning = machineproxy_panning;
 	self->machine.info = machineproxy_info;
 	self->machine.parameterrange = machineproxy_parameterrange;
 	self->machine.parametertype = machineproxy_parametertype;
 	self->machine.numparameters = machineproxy_numparameters;
-	self->machine.numcols = machineproxy_numcols;	
+	self->machine.numparametercols = machineproxy_numparametercols;	
 	self->machine.paramviewoptions = machineproxy_paramviewoptions;
 	self->machine.parameterlabel = machineproxy_parameterlabel;
 	self->machine.parametername = machineproxy_parametername;
 	self->machine.loadspecific = machineproxy_loadspecific;
+	self->machine.savespecific = machineproxy_savespecific;
 	self->machine.samplerate = machineproxy_samplerate;
 	self->machine.bpm = machineproxy_bpm;
 	self->machine.machines = machineproxy_machines;
@@ -104,7 +106,7 @@ void machineproxy_init(MachineProxy* self, Machine* client)
 	self->machine.editoridle = machineproxy_editoridle;
 }
 
-Buffer* machineproxy_mix(MachineProxy* self, int slot, unsigned int amount, MachineSockets* sockets, Machines* machines)
+Buffer* machineproxy_mix(MachineProxy* self, size_t slot, unsigned int amount, MachineSockets* sockets, Machines* machines)
 {
 	Buffer* rv = 0;
 
@@ -221,14 +223,14 @@ int machineproxy_describevalue(MachineProxy* self, char* txt, int const param, i
 	return rv;
 }
 
-int machineproxy_value(MachineProxy* self, int const param)
+int machineproxy_parametervalue(MachineProxy* self, int const param)
 {
 	int rv = 0;
 
 	if (self->crashed == 0) {
 		__try {
-			rv = self->client->value(self->client, param);
-		} __except(FilterException(self, "value", GetExceptionCode(), GetExceptionInformation())) {			
+			rv = self->client->parametervalue(self->client, param);
+		} __except(FilterException(self, "parametervalue", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -283,14 +285,14 @@ unsigned int machineproxy_numparameters(MachineProxy* self)
 	return rv;
 }
 
-unsigned int machineproxy_numcols(MachineProxy* self)
+unsigned int machineproxy_numparametercols(MachineProxy* self)
 { 
 	unsigned int rv = 0;
 
 	if (self->crashed == 0) {
 		__try {
-			rv = self->client->numcols(self->client);
-		} __except(FilterException(self, "numcols", GetExceptionCode(), GetExceptionInformation())) {			
+			rv = self->client->numparametercols(self->client);
+		} __except(FilterException(self, "numparametercols", GetExceptionCode(), GetExceptionInformation())) {			
 		}
 	}
 	return rv;
@@ -310,11 +312,21 @@ int machineproxy_paramviewoptions(MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_loadspecific(MachineProxy* self, PsyFile* file, unsigned int slot, Machines* machines)
+void machineproxy_loadspecific(MachineProxy* self, struct SongFile* songfile, unsigned int slot)
 {
 	if (self->crashed == 0) {
 		__try {
-			self->client->loadspecific(self->client, file, slot, machines);
+			self->client->loadspecific(self->client, songfile, slot);
+		} __except(FilterException(self,"loadspecific",  GetExceptionCode(), GetExceptionInformation())) {
+		}	
+	}
+}
+
+void machineproxy_savespecific(MachineProxy* self, struct SongFile* songfile, unsigned int slot)
+{
+	if (self->crashed == 0) {
+		__try {
+			self->client->savespecific(self->client, songfile, slot);
 		} __except(FilterException(self,"loadspecific",  GetExceptionCode(), GetExceptionInformation())) {
 		}	
 	}

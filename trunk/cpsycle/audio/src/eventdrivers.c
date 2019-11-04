@@ -48,6 +48,7 @@ void eventdrivers_dispose(EventDrivers* self)
 		eventdriver->close(eventdriver);
 		eventdriver->dispose(eventdriver);
 		eventdriver->free(eventdriver);
+		//free(eventdriver);
 		if (eventdriverentry && eventdriverentry->library) {
 			library_unload(eventdriverentry->library);
 			library_disposefree(eventdriverentry->library);			
@@ -122,6 +123,7 @@ void eventdrivers_remove(EventDrivers* self, int id)
 		eventdriver->close(eventdriver);
 		eventdriver->dispose(eventdriver);
 		eventdriver->free(eventdriver);
+		// free(eventdriver);
 		if (eventdriver == self->kbddriver) {
 			self->kbddriver = 0;
 		}
