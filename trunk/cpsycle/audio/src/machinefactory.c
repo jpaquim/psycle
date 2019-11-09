@@ -23,7 +23,8 @@ void machinefactory_init(MachineFactory* self, MachineCallback callback,
 {
 	self->machinecallback = callback;	
 	self->catcher = catcher;
-	self->options = 0;// MACHINEFACTORY_CREATEASPROXY;
+	// self->options = MACHINEFACTORY_CREATEASPROXY;
+	self->options = 0;
 }
 
 void machinefactory_dispose(MachineFactory* self)
@@ -50,7 +51,7 @@ Machine* machinefactory_makemachine(MachineFactory* self, MachineType type,
 		return 0;
 	}
 	return machinefactory_makemachinefrompath(self, type,
-		plugincatcher_modulepath(self->catcher, MACH_PLUGIN,
+		plugincatcher_modulepath(self->catcher, type,
 		plugincatchername, fullpath));	
 }
 

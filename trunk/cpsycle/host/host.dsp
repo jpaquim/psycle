@@ -96,11 +96,11 @@ SOURCE=.\src\about.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\clipbox.c
+SOURCE=.\src\channelmappingview.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\clipbox.h
+SOURCE=.\src\clipbox.c
 # End Source File
 # Begin Source File
 
@@ -212,6 +212,10 @@ SOURCE=.\src\psycle.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\renderview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\resources\resource.rc
 # End Source File
 # Begin Source File
@@ -296,11 +300,19 @@ SOURCE=.\src\vst2view.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\vubar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\vumeter.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\wavebox.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\wireview.c
 # End Source File
 # Begin Source File
 
@@ -313,6 +325,14 @@ SOURCE=.\src\workspace.c
 # Begin Source File
 
 SOURCE=.\src\about.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\channelmappingview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\clipbox.h
 # End Source File
 # Begin Source File
 
@@ -424,6 +444,10 @@ SOURCE=.\src\playposbar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\renderview.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\resources\resource.h
 # End Source File
 # Begin Source File
@@ -516,11 +540,19 @@ SOURCE=.\src\vst2view.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\vubar.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\vumeter.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\wavebox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\wireview.h
 # End Source File
 # Begin Source File
 

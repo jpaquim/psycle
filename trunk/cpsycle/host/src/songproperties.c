@@ -57,15 +57,13 @@ void songproperties_initalign(SongProperties* self)
 }
 
 void songproperties_read(SongProperties* self)
-{
-	char* text;
-
+{	
 	ui_edit_settext(&self->edit_title, 
-		properties_readstring(self->song->properties, "title", &text, ""));
+		properties_readstring(self->song->properties, "title", ""));
 	ui_edit_settext(&self->edit_credits, 
-		properties_readstring(self->song->properties, "credits", &text, ""));
+		properties_readstring(self->song->properties, "credits", ""));
 	ui_edit_settext(&self->edit_comments,
-		properties_readstring(self->song->properties, "comments", &text, ""));
+		properties_readstring(self->song->properties, "comments", ""));
 }
 
 void songproperties_write(SongProperties* self)

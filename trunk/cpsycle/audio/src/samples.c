@@ -26,12 +26,12 @@ void samples_dispose(Samples* self)
 	table_dispose(&self->container);
 }
 
-void samples_insert(Samples* self, Sample* sample, int slot)
+void samples_insert(Samples* self, Sample* sample, uintptr_t slot)
 {
 	table_insert(&self->container, slot, sample);
 }
 
-Sample* samples_at(Samples* self, int slot)
+Sample* samples_at(Samples* self, uintptr_t slot)
 {
 	return table_at(&self->container, slot);
 }

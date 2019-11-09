@@ -5,6 +5,9 @@
 
 #include "duplicator.h"
 #include "pattern.h"
+#include <string.h>
+#include <stdlib.h>
+#include "songio.h"
 
 static void work(Duplicator* self, BufferContext* bc) { }
 static void sequencertick(Duplicator*);
@@ -13,47 +16,20 @@ static const MachineInfo* info(Duplicator*);
 static void parametertweak(Duplicator*, int par, int val);
 static int describevalue(Duplicator*, char* txt, int param, int value);
 static int parametervalue(Duplicator*, int param);
+static void parameterrange(Duplicator*, int param, int* minval, int* maxval);
+static int parameterlabel(Duplicator*, char* txt, int param);
+static int parametername(Duplicator*, char* txt, int param);
+static unsigned int numparameters(Duplicator*);
+static unsigned int numparametercols(Duplicator*);
 static void dispose(Duplicator*);
 static unsigned int numinputs(Duplicator* self) { return 0; }
 static unsigned int numoutputs(Duplicator* self) { return 0; }
+static const char* editname(Duplicator*);
+static void seteditname(Duplicator*, const char* name);
+static void loadspecific(Duplicator*, struct SongFile*, unsigned int slot);
+static void savespecific(Duplicator*, struct SongFile*, unsigned int slot);
 
 static int transpose(int note, int offset);
-
-static CMachineParameter const paraOutput0 = { "Output Machine 0", "Output Machine 0", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOutput1 = { "Output Machine 1", "Output Machine 1", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOutput2 = { "Output Machine 2", "Output Machine 2", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOutput3 = { "Output Machine 3", "Output Machine 3", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOutput4 = { "Output Machine 4", "Output Machine 4", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOutput5 = { "Output Machine 5", "Output Machine 5", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOutput6 = { "Output Machine 6", "Output Machine 6", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOutput7 = { "Output Machine 7", "Output Machine 7", -1,	0x7E, MPF_STATE, 0 };
-static CMachineParameter const paraOffset0 = { "Note Offset 0", "Note Offset 0", -48, 48, MPF_STATE, 0 };
-static CMachineParameter const paraOffset1 = { "Note Offset 1", "Note Offset 1", -48, 48, MPF_STATE, 0 };
-static CMachineParameter const paraOffset2 = { "Note Offset 2", "Note Offset 2", -48, 48, MPF_STATE, 0 };
-static CMachineParameter const paraOffset3 = { "Note Offset 3", "Note Offset 3", -48, 48, MPF_STATE, 0 };
-static CMachineParameter const paraOffset4 = { "Note Offset 4", "Note Offset 4", -48, 48, MPF_STATE, 0 };
-static CMachineParameter const paraOffset5 = { "Note Offset 5", "Note Offset 5", -48, 48, MPF_STATE, 0 };
-static CMachineParameter const paraOffset6 = { "Note Offset 6", "Note Offset 6", -48, 48, MPF_STATE, 0 };
-static CMachineParameter const paraOffset7 = { "Note Offset 7", "Note Offset 7", -48, 48, MPF_STATE, 0 };
-
-static CMachineParameter const *pParameters[] = {
-	&paraOutput0,
-	&paraOutput1,	
-	&paraOutput2,
-	&paraOutput3,
-	&paraOutput4,
-	&paraOutput5,
-	&paraOutput6,
-	&paraOutput7,
-	&paraOffset0,
-	&paraOffset1,	
-	&paraOffset2,
-	&paraOffset3,
-	&paraOffset4,
-	&paraOffset5,
-	&paraOffset6,
-	&paraOffset7,
-};
 
 static MachineInfo const MacInfo = {
 	MI_VERSION,
@@ -87,14 +63,25 @@ void duplicator_init(Duplicator* self, MachineCallback callback)
 	self->machine.parametertweak = parametertweak;
 	self->machine.describevalue = describevalue;	
 	self->machine.parametervalue = parametervalue;
+	self->machine.describevalue = describevalue;
+	self->machine.parameterrange = parameterrange;
+	self->machine.numparameters = numparameters;
+	self->machine.numparametercols = numparametercols;
+	self->machine.parameterlabel = parameterlabel;
+	self->machine.parametername = parametername;
 	self->machine.dispose = dispose;
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
+	self->machine.seteditname = seteditname;
+	self->machine.editname = editname;
+	self->machine.loadspecific = loadspecific;
+	self->machine.savespecific = savespecific;
 	for (i = 0; i < NUMMACHINES; ++i) {
 		self->macoutput[i] = -1;
 		self->noteoffset[i] = 0;
 	}
 	self->isticking = 0;
+	self->editname = strdup("Note Duplicator");
 	duplicatormap_init(&self->map);
 }
 
@@ -102,6 +89,7 @@ void dispose(Duplicator* self)
 {	
 	machine_dispose(&self->machine);
 	duplicatormap_dispose(&self->map);
+	free(self->editname);
 }
 
 void sequencertick(Duplicator* self)
@@ -194,4 +182,72 @@ int parametervalue(Duplicator* self, int param)
 		return self->noteoffset[param - NUMMACHINES];
 	}
 	return 0;
+}
+
+void parameterrange(Duplicator* self, int param, int* minval, int* maxval)
+{
+	if (param < 8) {
+		*minval = -1;
+		*maxval = 0x7E;
+	} else {
+		*minval = -48;
+		*maxval = 48;
+	}
+}
+
+int parameterlabel(Duplicator* self, char* txt, int param)
+{
+	return parametername(self, txt, param);
+}
+
+int parametername(Duplicator* self, char* txt, int param)
+{
+	txt[0] = '\0';
+	if (param < 8) {
+		_snprintf(txt, 128, "%s %d", "Output Machine ", param);
+	} else {
+		_snprintf(txt, 128, "%s %d", "Note Offset ", param);
+	}
+	return 1;
+}
+
+unsigned int numparameters(Duplicator* self)
+{
+	return 16;
+}
+
+unsigned int numparametercols(Duplicator* self)
+{
+	return 2;	
+}
+
+const char* editname(Duplicator* self)
+{
+	return self->editname;
+}
+
+void seteditname(Duplicator* self, const char* name)
+{
+	free(self->editname);
+	self->editname = strdup(name);
+}
+
+void loadspecific(Duplicator* self, struct SongFile* songfile, unsigned int slot)
+{
+	uint32_t size;
+	psyfile_read(songfile->file, &size, sizeof size); // size of this part params to load
+	//TODO: endianess
+	psyfile_read(songfile->file, &self->macoutput[0], NUMMACHINES * sizeof(short));
+	psyfile_read(songfile->file, &self->noteoffset[0], NUMMACHINES * sizeof(short));	
+}
+
+void savespecific(Duplicator* self, struct SongFile* songfile, unsigned int slot)
+{
+	uint32_t size;
+	
+	size = sizeof self->macoutput + sizeof self->noteoffset;
+	psyfile_write(songfile->file, &size, sizeof size); // size of this part params to save
+	//TODO: endianess
+	psyfile_write(songfile->file, &self->macoutput[0], NUMMACHINES * sizeof(short));
+	psyfile_write(songfile->file, &self->noteoffset[0], NUMMACHINES * sizeof(short));
 }

@@ -219,13 +219,13 @@ char* plugincatcher_modulepath(PluginCatcher* self, MachineType machtype,
 	} else
 	if (pathhasextension(path)) {
 		strcpy(fullpath, path);
-	} else {
+	} else {		
 		searchname = path;
 		searchtype = machtype;
 		searchresult = 0;
 		properties_enumerate(self->plugins, self, onpropertiesenum);
-		if (searchresult) {
-			properties_readstring(searchresult, "path", &fullpath, "");
+		if (searchresult) {						
+			strcpy(fullpath, properties_readstring(searchresult, "path", ""));
 		} else {
 			strcpy(fullpath, path);
 		}

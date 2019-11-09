@@ -43,7 +43,7 @@ uint32_t psyfile_getpos(PsyFile*);
 FILE* psyfile_getfile(PsyFile*);
 uint32_t psyfile_writeheader(PsyFile*, char* pData, uint32_t version,
 	uint32_t size);
-int psyfile_writestring(PsyFile*, char* str);
+int psyfile_writestring(PsyFile*, const char* str);
 uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
 
 static uint32_t FourCC(char *psName);

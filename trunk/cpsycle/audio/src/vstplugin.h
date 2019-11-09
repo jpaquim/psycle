@@ -17,6 +17,7 @@ typedef struct {
 	int eventcap;
 	Table noteons;
 	MachineInfo* plugininfo;
+	char* editname;
 } VstPlugin;
 
 void vstplugin_init(VstPlugin*, MachineCallback, const char* path);

@@ -89,6 +89,10 @@ SOURCE=.\src\adsr.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\alignedalloc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\filter.c
 # End Source File
 # Begin Source File
@@ -122,6 +126,10 @@ SOURCE=.\src\rms.c
 # Begin Source File
 
 SOURCE=.\src\adsr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\alignedalloc.h
 # End Source File
 # Begin Source File
 

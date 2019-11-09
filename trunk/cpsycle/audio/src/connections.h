@@ -13,12 +13,12 @@
 #define MAX_STREAM_SIZE 256
 
 typedef struct {
-	size_t src;
-	size_t dst;
+	uintptr_t src;
+	uintptr_t dst;
 } PinConnection;
 
 typedef struct {
-	size_t slot;	
+	uintptr_t slot;	
 	amp_t volume;
 	List* mapping;
 } WireSocketEntry;
@@ -33,7 +33,7 @@ typedef struct {
 void machinesockets_init(MachineSockets*);
 void machinesockets_dispose(MachineSockets*);
 
-WireSocket* connection_at(WireSocket*, size_t slot);
+WireSocket* connection_at(WireSocket*, uintptr_t slot);
 
 typedef struct {
 	Table container;
@@ -45,15 +45,16 @@ typedef struct {
 
 void connections_init(Connections*);
 void connections_dispose(Connections*);
-MachineSockets* connections_initslot(Connections*, size_t slot);
-MachineSockets* connections_at(Connections*, size_t slot);
-int connections_connect(Connections*, size_t outputslot, size_t inputslot);
-void connections_disconnect(Connections*, size_t outputslot, size_t inputslot);
-int connections_connected(Connections*, size_t outputslot, size_t inputslot);
-void connections_disconnectall(Connections*, size_t slot);
-void connections_setwirevolume(Connections*, size_t outputslot, size_t inputslot,
+MachineSockets* connections_initslot(Connections*, uintptr_t slot);
+MachineSockets* connections_at(Connections*, uintptr_t slot);
+int connections_connect(Connections*, uintptr_t outputslot, uintptr_t inputslot);
+void connections_disconnect(Connections*, uintptr_t outputslot, uintptr_t inputslot);
+int connections_connected(Connections*, uintptr_t outputslot, uintptr_t inputslot);
+void connections_disconnectall(Connections*, uintptr_t slot);
+void connections_setwirevolume(Connections*, uintptr_t outputslot, uintptr_t inputslot,
 	amp_t factor);
-amp_t connections_wirevolume(Connections*, size_t outputslot, size_t inputslot);
+amp_t connections_wirevolume(Connections*, uintptr_t outputslot, uintptr_t inputslot);
+WireSocketEntry* connection_input(Connections* self, uintptr_t outputslot, uintptr_t inputslot);
 
 
 #endif

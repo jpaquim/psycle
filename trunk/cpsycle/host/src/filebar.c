@@ -9,6 +9,7 @@ static void filebar_initalign(FileBar*);
 static void filebar_onnewsong(FileBar*, ui_component* sender);
 static void filebar_onloadsong(FileBar*, ui_component* sender);
 static void filebar_onsavesong(FileBar*, ui_component* sender);
+static void filebar_onrendersong(FileBar*, ui_component* sender);
 
 void filebar_init(FileBar* self, ui_component* parent, Workspace* workspace)
 {
@@ -33,6 +34,11 @@ void filebar_init(FileBar* self, ui_component* parent, Workspace* workspace)
 		workspace_translate(workspace, "save"));
 	signal_connect(&self->savebutton.signal_clicked, self,
 		filebar_onsavesong);
+	ui_button_init(&self->renderbutton, &self->component);
+	ui_button_settext(&self->renderbutton, 
+		workspace_translate(workspace, "Render"));
+	signal_connect(&self->renderbutton.signal_clicked, self,
+		filebar_onrendersong);
 	filebar_initalign(self);
 }
 
@@ -53,8 +59,7 @@ void filebar_onnewsong(FileBar* self, ui_component* sender)
 		Properties* title;
 		title = properties_find(self->workspace->song->properties, "title");
 		if (title) {
-			char* titlestr = 0;
-			properties_readstring(title, "title", &titlestr, "Untitled");			
+			const char* titlestr = properties_readstring(title, "title", "Untitled");			
 			// ui_statusbar_settext(&self->statusbar, 0, titlestr);
 		}
 	}	
@@ -89,4 +94,9 @@ void filebar_onsavesong(FileBar* self, ui_component* sender)
 	if (ui_savefile(&self->component, title, filter, defaultextension, path)) {		
 		workspace_savesong(self->workspace, path);						
 	}
+}
+
+void filebar_onrendersong(FileBar* self, ui_component* sender)
+{
+
 }

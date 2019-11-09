@@ -17,12 +17,12 @@ typedef struct {
 	int dryonly;
 	int wetonly;
 	size_t inputslot;
-	Buffer* buffer;
+	Buffer* buffer;	
 } MixerChannel;
 
 typedef struct {
 	Table sendsto;
-	int mastersend;
+	unsigned char mastersend;
 	amp_t volume;
 	amp_t panning;
 	int mute;
@@ -39,7 +39,8 @@ typedef struct {
 	int solocolumn;
 	RMSVol masterrmsvol;
 	MixerChannel master;
-	unsigned int slot;
+	uintptr_t slot;
+	char* editname;
 } Mixer;
 
 void mixer_init(Mixer*, MachineCallback);

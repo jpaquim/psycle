@@ -16,6 +16,7 @@ static void cleartrackiterators(Sequencer*);
 static void advanceposition(Sequencer* self, beat_t width);
 static void addsequenceevent(Sequencer*, SequenceTrackIterator*, beat_t offset);
 static void maketweakslideevents(Sequencer*, PatternEntry*);
+static void makeretriggerevents(Sequencer*, PatternEntry*);
 static int isoffsetinwindow(Sequencer*, beat_t offset);
 static void insertevents(Sequencer*);
 static void insertinputevents(Sequencer*);
@@ -348,11 +349,19 @@ void addsequenceevent(Sequencer* self, SequenceTrackIterator* trackiterator,
 		PatternEntry* entry;
 		entry =	patternentry_clone(patternentry);
 		entry->bpm = self->bpm;
-		if (entry->event.cmd == NOTE_DELAY) {		
-			entry->delta = offset + entry->event.parameter / (self->lpb * self->lpbspeed * 256.f);			
+		if (entry->event.cmd == NOTE_DELAY) {
+			entry->delta = offset + entry->event.parameter / 
+				(self->lpb * self->lpbspeed * 256.f);
 			list_append(&self->delayedevents, entry);
+		} else
+		if (entry->event.cmd == RETRIGGER) {
+			entry->delta = offset - self->position;
+			list_append(&self->events, entry);			
+			makeretriggerevents(self, patternentry);
+		} else
+		if (entry->event.cmd == RETR_CONT) {
 		} else {
-			entry->delta = offset - self->position;			
+			entry->delta = offset - self->position;
 			list_append(&self->events, entry);
 		}
 	}	
@@ -413,10 +422,29 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 				slideentry->event.cmd = cmd;
 				slideentry->event.parameter = parameter;				
 				slideentry->delta += slide * 64 * self->beatsprosample;				
-				list_append(&self->delayedevents, slideentry);				
+				list_append(&self->delayedevents, slideentry);
 			}
 		}
 	}
+}
+
+void makeretriggerevents(Sequencer* self, PatternEntry* entry)
+{
+	beat_t retriggerstep;
+	beat_t retriggeroffset;		
+
+	retriggerstep = entry->event.parameter / (self->lpb * self->lpbspeed * 256.f);
+	retriggeroffset = retriggerstep;
+	while (retriggeroffset < 1 / (self->lpb * self->lpbspeed)) {
+		PatternEntry* retriggerentry;
+
+		retriggerentry = patternentry_clone(entry);
+		retriggerentry->event.cmd = 0;
+		retriggerentry->event.parameter = 0;
+		retriggerentry->delta = entry->delta + retriggeroffset;
+		list_append(&self->delayedevents, retriggerentry);
+		retriggeroffset += retriggerstep;
+	}	
 }
 
 void insertdelayedevents(Sequencer* self)

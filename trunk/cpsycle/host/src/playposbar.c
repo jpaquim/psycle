@@ -17,12 +17,12 @@ void playposbar_init(PlayPosBar* self, ui_component* parent, Player* player)
 	ui_label_init(&self->header, &self->component);		
 	ui_label_settext(&self->header, "Player position");	
 	ui_label_init(&self->position, &self->component);
-	ui_label_setcharnumber(&self->position, 10);			
+	ui_label_setcharnumber(&self->position, 10);
 	self->lastposition = -1.0f;
 	signal_connect(&self->component.signal_timer, self, ontimer);
 	ui_component_starttimer(&self->component, 500, 50);
 	{		
-		ui_margin margin = { 3, 3, 3, 0 };
+		ui_margin margin = { 0, 0, 0, 0 };
 			
 		list_free(ui_components_setalign(		
 			ui_component_children(&self->component, 0),

@@ -9,11 +9,12 @@
 #include "workspace.h"
 
 typedef struct {	
-	ui_slider slider;
+	ui_component component;
 	Machines* machines;
-	unsigned int slot;	
+	float value;
+	int dragx;
 } VolSlider;
 
-void InitVolSlider(VolSlider*, ui_component* parent, Workspace*);
+void volslider_init(VolSlider*, ui_component* parent, Workspace*);
 
 #endif

@@ -8,16 +8,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-void buffer_init(Buffer* self, unsigned int channels)
+void buffer_init(Buffer* self, uintptr_t channels)
 {
 	self->samples = 0;	
 	self->offset = 0;
 	buffer_resize(self, channels);
 }
 
-void buffer_init_shared(Buffer* self, Buffer* src, unsigned int offset)
+void buffer_init_shared(Buffer* self, Buffer* src, uintptr_t offset)
 {
-	unsigned int channel;
+	uintptr_t channel;
 
 	buffer_init(self, src->numchannels);
 	for (channel = 0; channel < src->numchannels; ++channel) {
@@ -25,9 +25,9 @@ void buffer_init_shared(Buffer* self, Buffer* src, unsigned int offset)
 	}
 }
 
-void buffer_move(Buffer* self, unsigned int offset)
+void buffer_move(Buffer* self, uintptr_t offset)
 {	
-	unsigned int channel;
+	uintptr_t channel;
 
 	for (channel = 0; channel < self->numchannels; ++channel) {
 		self->samples[channel] = self->samples[channel] + offset;
@@ -44,7 +44,7 @@ Buffer* buffer_alloc(void)
 	return (Buffer*) malloc(sizeof(Buffer));
 }
 
-Buffer* buffer_allocinit(unsigned int channels)
+Buffer* buffer_allocinit(uintptr_t channels)
 {
 	Buffer* rv;
 
@@ -56,45 +56,45 @@ Buffer* buffer_allocinit(unsigned int channels)
 }
 
 
-void buffer_resize(Buffer* self, unsigned int channels)
+void buffer_resize(Buffer* self, uintptr_t channels)
 {
 	free(self->samples);
-	self->samples = 0;
+	self->samples = 0;	
 	if (channels > 0) {
-		self->samples = (amp_t**) malloc(sizeof(amp_t*)*channels);
-		self->numchannels = channels;
+		self->samples = (amp_t**) malloc(sizeof(amp_t*)*channels);		
 		memset(self->samples, 0, sizeof(amp_t*)*channels);
-	}	
+	}
+	self->numchannels = channels;
 }
 
-void buffer_setoffset(Buffer* self, unsigned int offset)
+void buffer_setoffset(Buffer* self, uintptr_t offset)
 {
 	self->offset = offset;
 }
 
-unsigned int buffer_offset(Buffer* self)
+uintptr_t buffer_offset(Buffer* self)
 {
 	return self->offset;
 }
 
-amp_t* buffer_at(Buffer* self, unsigned int channel)
+amp_t* buffer_at(Buffer* self, uintptr_t channel)
 {
 	return self->samples[channel] + self->offset;
 }
 
-void buffer_clearsamples(Buffer* self, unsigned int numsamples)
+void buffer_clearsamples(Buffer* self, uintptr_t numsamples)
 {
-	unsigned int channel;
+	uintptr_t channel;
 
 	for (channel = 0; channel < self->numchannels; ++channel) {
 		dsp_clear(self->samples[channel], numsamples);
 	}
 }
 
-void buffer_addsamples(Buffer* self, Buffer* source, unsigned int numsamples,
+void buffer_addsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
 	amp_t vol)
 {
-	unsigned int channel;
+	uintptr_t channel;
 
 	if (source) {
 		for (channel = 0; channel < source->numchannels && 
@@ -108,18 +108,18 @@ void buffer_addsamples(Buffer* self, Buffer* source, unsigned int numsamples,
 	}
 }
 
-void buffer_mulsamples(Buffer* self, unsigned int numsamples, amp_t mul)
+void buffer_mulsamples(Buffer* self, uintptr_t numsamples, amp_t mul)
 {
-	unsigned int channel;
+	uintptr_t channel;
 	
 	for (channel = 0; channel < self->numchannels; ++channel) {
 		dsp_mul(self->samples[channel], numsamples, mul);
 	}	
 }
 
-void buffer_pan(Buffer* self, amp_t pan, unsigned int amount)
+void buffer_pan(Buffer* self, amp_t pan, uintptr_t amount)
 {
-	unsigned int channel;
+	uintptr_t channel;
 	amp_t vol[2];
 
 	vol[1] = pan * 2.f;
@@ -135,7 +135,7 @@ void buffer_pan(Buffer* self, amp_t pan, unsigned int amount)
 	}
 }
 
-unsigned int buffer_numchannels(Buffer* self)
+uintptr_t buffer_numchannels(Buffer* self)
 {
 	return self->numchannels;
 }

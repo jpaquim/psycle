@@ -64,8 +64,8 @@ static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, amp
 static unsigned int numparameters(Machine* self) { return 0; }
 static unsigned int numparametercols(Machine* self) { return 0; }
 static int paramviewoptions(Machine* self) { return 0; }
-static unsigned int slot(Machine* self) { return -1; }
-static void setslot(Machine* self, int slot) { }
+static uintptr_t slot(Machine* self) { return NOMACHINE_INDEX; }
+static void setslot(Machine* self, uintptr_t slot) { }
 static int haseditor(Machine* self) { return 0; }
 static void seteditorhandle(Machine* self, void* handle) { }
 static void editorsize(Machine* self, int* width, int* height)
@@ -73,7 +73,9 @@ static void editorsize(Machine* self, int* width, int* height)
 	*width = 0;
 	*height = 0;
 }
-void editoridle(Machine* self) { }
+static void editoridle(Machine* self) { }
+static const char* editname(Machine* self) { return ""; }
+static void seteditname(Machine* self, const char* name) { }
 
 /// machinecallback
 static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
@@ -133,6 +135,8 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->seteditorhandle = seteditorhandle;
 	self->editorsize = editorsize;
 	self->editoridle = editoridle;
+	self->editname = editname;
+	self->seteditname = seteditname;
 	signal_init(&self->signal_worked);
 }
 

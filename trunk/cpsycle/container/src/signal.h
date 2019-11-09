@@ -4,6 +4,7 @@
 #define SIGNAL_H
 
 #include "list.h"
+#include "../../detail/stdint.h"
 
 typedef struct {
 	void* fp;
@@ -21,7 +22,7 @@ void signal_disconnectall(Signal*);
 void signal_prevent(Signal*, void* context, void* fp);
 void signal_enable(Signal*, void* context, void* fp);
 void signal_emit(Signal*, void* context, int num, ...);
-void signal_emit_int(Signal*, void* context, int param);
+void signal_emit_int(Signal*, void* context, intptr_t param);
 void signal_emit_float(Signal*, void* context, float param);
 void signal_dispose(Signal*);
 

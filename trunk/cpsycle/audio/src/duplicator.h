@@ -11,10 +11,11 @@
 
 typedef struct {
 	Machine machine;
-	int macoutput[NUMMACHINES];
-	int noteoffset[NUMMACHINES];
+	short macoutput[NUMMACHINES];
+	short noteoffset[NUMMACHINES];
 	int isticking;
 	DuplicatorMap map;
+	char* editname;
 } Duplicator;
 
 void duplicator_init(Duplicator*, MachineCallback);

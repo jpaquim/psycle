@@ -56,6 +56,7 @@ typedef struct {
 	int defaultspeed;
 	float pan;	
 	Table lastinst;
+	char* editname;
 } Sampler;
 
 void sampler_init(Sampler*, MachineCallback);

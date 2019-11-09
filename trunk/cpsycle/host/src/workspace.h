@@ -49,12 +49,14 @@ typedef struct {
 	Signal signal_editpositionchanged;	
 	Signal signal_loadprogress;
 	Signal signal_scanprogress;
+	Signal signal_beforesavesong;
 	ui_component* mainhandle;
 	UndoRedo undoredo;	
 	EditPosition editposition;
 	int cursorstep;
 	int hasplugincache;
 	char* filename;
+	int followsong;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -84,5 +86,8 @@ int workspace_cursorstep(Workspace*);
 const char* workspace_translate(Workspace*, const char* key);
 int workspace_hasplugincache(Workspace*);
 EventDriver* workspace_kbddriver(Workspace*);
+int workspace_followingsong(Workspace*);
+void workspace_followsong(Workspace*);
+void workspace_stopfollowsong(Workspace*);
 
 #endif

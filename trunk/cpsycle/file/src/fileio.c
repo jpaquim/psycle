@@ -196,7 +196,7 @@ uint32_t psyfile_writeheader(PsyFile* file, char* pData, uint32_t version,
 	return pos;
 }
 
-int psyfile_writestring(PsyFile* file, char* str)
+int psyfile_writestring(PsyFile* file, const char* str)
 {
 	int rv = 0;
 

@@ -19,8 +19,7 @@ void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 {
 	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->desclabel, &self->component);
-	ui_slider_init(&self->slider, &self->component);	
-	ui_slider_setrange(&self->slider, -32768, 32767);
+	ui_slider_init(&self->slider, &self->component);		
 	ui_label_init(&self->label, &self->component);		
 	ui_label_settext(&self->desclabel, desc);
 	ui_label_settext(&self->label, "-");	
@@ -61,7 +60,7 @@ void OnSliderChanged(SliderGroup* self, ui_component* sender)
 
 float Value(SliderGroup* self)
 {	
-	return (ui_slider_value(&self->slider) + 32768) / 65535.f;
+	return (float)ui_slider_value(&self->slider);
 }
 
 void DescribeValue(SliderGroup* self)
@@ -78,15 +77,13 @@ void DescribeValue(SliderGroup* self)
 void OnTimer(SliderGroup* self, ui_component* sender, int timerid)
 {
 	float value = 0;
-	float* pValue;
-	int intvalue;
+	float* pValue;	
 
 	pValue = &value;
 	signal_emit(&self->signal_value, self, 1, pValue);
 
-	if (Value(self) != value) {
-		intvalue = (int)((value * 65535.f) - 32768.f);
-		ui_slider_setvalue(&self->slider, intvalue);
+	if (Value(self) != value) {		
+		ui_slider_setvalue(&self->slider, value);
 		DescribeValue(self);
 	}
 }

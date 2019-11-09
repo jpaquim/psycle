@@ -10,12 +10,17 @@ typedef struct {
    ui_component component;
    Signal signal_clicked;
    Signal signal_changed;
+   double value;
+   int tweakbase;
+   UiOrientation orientation;
 } ui_slider;
 
 void ui_slider_init(ui_slider*, ui_component* parent);
 void ui_slider_settext(ui_slider*, const char* text);
-void ui_slider_setrange(ui_slider*, int minrange, int maxrange);
-void ui_slider_setvalue(ui_slider*, int value);
-intptr_t ui_slider_value(ui_slider*);
+void ui_slider_setvalue(ui_slider*, double value);
+double ui_slider_value(ui_slider*);
+void ui_slider_showvertical(ui_slider*);
+void ui_slider_showhorizontal(ui_slider*);
+UiOrientation ui_slider_orientation(ui_slider*);
 
 #endif

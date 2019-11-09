@@ -20,9 +20,10 @@ typedef struct {
 
 static void makeplugincatchername(const char* psy3dllname,
 	char* catchername);
-static void psy2machineload(SongFile*);
-static void psy2pluginload(SongFile*);
-static void psy2samplerload(SongFile*);
+static void psy2machineload(SongFile*, int32_t slot);
+static void psy2pluginload(SongFile*, int32_t slot);
+static void psy2samplerload(SongFile*, int32_t slot);
+static void psy2readmachineconnections(SongFile*, int32_t slot);
 static char* replace_char(char* str, char c, char r)
 {
 	char* p;
@@ -30,13 +31,16 @@ static char* replace_char(char* str, char c, char r)
 	for (p = strchr(str, c); p != 0; p = strchr(p + 1, c)) *p = r;
 	return p;
 }
-void makeplugincatchername(const char* psy3dllname, char* catchername)
+void makeplugincatchername(const char* modulename, char* catchername)
 {
 	char ext[_MAX_PATH];
 
-	extract_path(psy3dllname, catchername, ext);
+	extract_path(modulename, catchername, ext);
 	_strlwr(catchername);
 	replace_char(catchername, ' ', '-');
+	if (strstr(catchername, "blitz")) {
+		strcpy(catchername, "blitzn");
+	}
 }
 
 void psy2_load(SongFile* songfile)
@@ -471,11 +475,22 @@ void psy2_load(SongFile* songfile)
 			if (_machineActive[i])
 			{
 				Machine* machine;
+				int32_t slot;
 				Properties* machineproperties;
+				char plugincatchername[256];
+
+				if (i == 0) {
+					slot = MASTER_INDEX;
+				} else
+				if (i == MASTER_INDEX) {
+					slot = 0;
+				} else {
+					slot = i;
+				}
 				// progress.m_Progress.SetPos(8192+i*(4096/128));
 				// ::Sleep(1);
 				machineproperties = properties_createsection(machinesproperties, "machine");
-				properties_append_int(machineproperties, "index", i, 0, MAX_MACHINES);
+				properties_append_int(machineproperties, "index", slot, 0, MAX_MACHINES);
 				
 				psyfile_read(songfile->file, &x, sizeof(x));
 				psyfile_read(songfile->file, &y, sizeof(y));
@@ -489,7 +504,7 @@ void psy2_load(SongFile* songfile)
 				if (type == MACH_PLUGIN) {					
 					psyfile_read(songfile->file, sDllName, sizeof(sDllName)); // Plugin dll name
 					makeplugincatchername(sDllName, plugincatchername);
-				}
+				}				
 				machine = machinefactory_makemachine(
 					songfile->song->machinefactory,
 					type,
@@ -509,16 +524,16 @@ void psy2_load(SongFile* songfile)
 				} else {
 					properties_append_string(machineproperties, "editname", sDllName);
 				}
-
+				
 				if (type == MACH_SAMPLER) {
-					psy2samplerload(songfile);
+					psy2samplerload(songfile, slot);
 				} else
 				if (type == MACH_PLUGIN) {
-					psy2pluginload(songfile);
+					psy2pluginload(songfile, slot);
 				} else {
-					psy2machineload(songfile);
+					psy2machineload(songfile, slot);
 				}
-				machines_insert(&songfile->song->machines, i, machine);
+				machines_insert(&songfile->song->machines, slot, machine);
 			}
 		}
 	}
@@ -794,7 +809,7 @@ void psy2_load(SongFile* songfile)
 //	return true;	
 }
 
-void psy2machineload(SongFile* songfile)
+void psy2machineload(SongFile* songfile, int32_t slot)
 {
 	char junk[256];
 	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
@@ -810,20 +825,12 @@ void psy2machineload(SongFile* songfile)
 	int32_t _panning;
 	int32_t _outDry;
 	int32_t _outWet;
+	int32_t c;
 
 	memset(&junk, 0, sizeof(junk));
 
 	psyfile_read(songfile->file, &_editName, sizeof(_editName));
-
-	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
-	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));
-	psyfile_read(songfile->file, &_inputConVol[0], sizeof(_inputConVol));
-	psyfile_read(songfile->file, &_connection[0], sizeof(_connection));
-	psyfile_read(songfile->file, &_inputCon[0], sizeof(_inputCon));
-	psyfile_read(songfile->file, &_connectionPoint[0], sizeof(_connectionPoint));
-	psyfile_read(songfile->file, &_numInputs, sizeof(_numInputs));
-	psyfile_read(songfile->file, &_numOutputs, sizeof(_numOutputs));
-
+	psy2readmachineconnections(songfile, slot);
 	psyfile_read(songfile->file, &_panning, sizeof(_panning));
 	// Machine::SetPan(_panning);
 	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
@@ -857,9 +864,10 @@ void psy2machineload(SongFile* songfile)
 	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode	
 }
 
-void psy2pluginload(SongFile* songfile)
+void psy2pluginload(SongFile* songfile, int32_t slot)
 {
 	char junk[256];
+	int32_t c;
 	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
 	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
 	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
@@ -882,15 +890,7 @@ void psy2pluginload(SongFile* songfile)
 	{
 		psyfile_read(songfile->file, &junk[0], sizeof(int32_t));			
 	}
-	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
-	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));
-	psyfile_read(songfile->file, &_inputConVol[0], sizeof(_inputConVol));
-	psyfile_read(songfile->file, &_connection[0], sizeof(_connection));
-	psyfile_read(songfile->file, &_inputCon[0], sizeof(_inputCon));
-	psyfile_read(songfile->file, &_connectionPoint[0], sizeof(_connectionPoint));
-	psyfile_read(songfile->file, &_numInputs, sizeof(_numInputs));
-	psyfile_read(songfile->file, &_numOutputs, sizeof(_numOutputs));
-
+	psy2readmachineconnections(songfile, slot);
 	psyfile_read(songfile->file, &_panning, sizeof(_panning));
 //	Machine::SetPan(_panning);
 	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
@@ -924,9 +924,10 @@ void psy2pluginload(SongFile* songfile)
 	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode
 }
 
-void psy2samplerload(SongFile* songfile)
+void psy2samplerload(SongFile* songfile, int32_t slot)
 {	
 	char junk[256];
+	int32_t c;
 	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
 	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
 	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
@@ -948,16 +949,7 @@ void psy2samplerload(SongFile* songfile)
 	memset(&junk, 0, sizeof(junk));
 
 	psyfile_read(songfile->file, &_editName, sizeof(_editName));
-
-	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
-	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));
-	psyfile_read(songfile->file, &_inputConVol[0], sizeof(_inputConVol));
-	psyfile_read(songfile->file, &_connection[0], sizeof(_connection));
-	psyfile_read(songfile->file, &_inputCon[0], sizeof(_inputCon));
-	psyfile_read(songfile->file, &_connectionPoint[0], sizeof(_connectionPoint));
-	psyfile_read(songfile->file, &_numInputs, sizeof(_numInputs));
-	psyfile_read(songfile->file, &_numOutputs, sizeof(_numOutputs));
-
+	psy2readmachineconnections(songfile, slot);
 	psyfile_read(songfile->file, &_panning, sizeof(_panning));
 // 	Machine::SetPan(_panning);
 	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
@@ -1009,4 +1001,62 @@ void psy2samplerload(SongFile* songfile)
 	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfoamp
 	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfophase
 	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode	
+}
+
+void psy2readmachineconnections(SongFile* songfile, int32_t slot)
+{
+	int32_t  c;
+	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
+	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
+	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
+//	float _wireMultiplier[MAX_CONNECTIONS];	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+	unsigned char _connection[MAX_CONNECTIONS];      // Outgoing connections activated
+	unsigned char _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
+	int32_t _numInputs;							// number of Incoming connections
+	int32_t _numOutputs;						// number of Outgoing connections
+	char _editName[16];
+	POINT _connectionPoint[MAX_CONNECTIONS];
+	int32_t _panning;
+	int32_t _outDry;
+	int32_t _outWet;
+	int32_t i;
+//	int32_t numParameters;
+	int32_t _numVoices;
+
+	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
+	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));
+	psyfile_read(songfile->file, &_inputConVol[0], sizeof(_inputConVol));
+	psyfile_read(songfile->file, &_connection[0], sizeof(_connection));
+	psyfile_read(songfile->file, &_inputCon[0], sizeof(_inputCon));
+	psyfile_read(songfile->file, &_connectionPoint[0], sizeof(_connectionPoint));
+	psyfile_read(songfile->file, &_numInputs, sizeof(_numInputs));
+	psyfile_read(songfile->file, &_numOutputs, sizeof(_numOutputs));
+
+
+	/*for (c = 0; c < MAX_CONNECTIONS; ++c) { // all for each of its input connections.		
+		if (_connection[c]) {
+			int32_t invertslot;
+
+			if (_inputMachines[c] == 0) {
+				invertslot = MASTER_INDEX;
+			} else
+			if (_inputMachines[c] == MASTER_INDEX) {
+				invertslot = 0;
+			} else {
+				invertslot = _inputMachines[c];
+			}
+			connections_connect(&songfile->song->machines.connections,
+				invertslot, slot);
+			if (_outputMachines[c] == 0) {
+				invertslot = MASTER_INDEX;
+			} else
+			if (_outputMachines[c] == MASTER_INDEX) {
+				invertslot = 0;
+			} else {
+				invertslot = _outputMachines[c];
+			}
+			connections_connect(&songfile->song->machines.connections,
+				slot, invertslot);
+		}		
+	}*/
 }
