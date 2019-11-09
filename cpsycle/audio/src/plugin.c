@@ -33,7 +33,10 @@ static void dispose(Plugin*);
 static unsigned int numinputs(Plugin*);
 static unsigned int numoutputs(Plugin*);
 static void loadspecific(Plugin*, struct SongFile*, unsigned int slot);
+static void savespecific(Plugin*, struct SongFile*, unsigned int slot);
 static void setcallback(Plugin*, MachineCallback);
+static const char* editname(Plugin*);
+static void seteditname(Plugin*, const char* name);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 {
@@ -66,8 +69,11 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
 	self->machine.loadspecific = loadspecific;
+	self->machine.savespecific = savespecific;
+	self->machine.editname = editname;
+	self->machine.seteditname = seteditname;
 	self->machine.setcallback = setcallback;
-
+	self->editname = 0;
 			
 	GetInfo = (GETINFO)library_functionpointer(&self->library, "GetInfo");
 	if (!GetInfo) {
@@ -90,9 +96,13 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 				self->plugininfo = machineinfo_allocinit();
 				machineinfo_setnativeinfo(self->plugininfo, pInfo, MACH_PLUGIN,
 					self->library.path, 0);
+				self->editname = strdup(pInfo->ShortName);
 			}
 		}
-	}	
+	}
+	if (!self->editname) {
+		self->editname = strdup("Plugin");
+	}
 }
 
 void dispose(Plugin* self)
@@ -107,6 +117,7 @@ void dispose(Plugin* self)
 		free(self->plugininfo);
 		self->plugininfo = 0;
 	}
+	free(self->editname);
 	machine_dispose(&self->machine);
 }
 
@@ -115,8 +126,10 @@ Machine* clone(Plugin* self)
 	Plugin* rv;
 
 	rv = malloc(sizeof(Plugin));
-	plugin_init(rv, self->machine.callback, self->library.path);
-	return &rv->machine;
+	if (rv) {
+		plugin_init(rv, self->machine.callback, self->library.path);
+	}
+	return rv ? &rv->machine : 0;
 }
 
 int plugin_psycle_test(const char* path, MachineInfo* info)
@@ -242,6 +255,34 @@ void loadspecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 	}	
 }			
 
+void savespecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
+{
+	uint32_t count = self->machine.numparameters(&self->machine);
+	uint32_t size2 = 0;
+	uint32_t size;
+	uint32_t i;
+
+	size2 = mi_getdatasize(self->mi);
+	size = size2 + sizeof(count) + sizeof(int) * count;
+	psyfile_write(songfile->file, &size, sizeof(size));
+	psyfile_write(songfile->file, &count, sizeof(count));
+	for (i = 0; i < count; ++i) {
+		int temp;
+		
+		temp = self->machine.parametervalue(&self->machine, i);
+		psyfile_write(songfile->file, &temp, sizeof temp);
+	}
+	if (size2) {
+		unsigned char* pData;
+
+		pData = malloc(size2);
+		mi_getdata(self->mi, pData);
+		psyfile_write(songfile->file, pData, size2); //data chunk
+		free(pData);
+		pData = 0;
+	}
+}
+
 int parametertype(Plugin* self, int param)
 {
 	int rv = MPF_STATE;
@@ -341,4 +382,15 @@ unsigned int numparameters(Plugin* self)
 		}
 	}
 	return rv;
+}
+
+const char* editname(Plugin* self)
+{
+	return self->editname;
+}
+
+void seteditname(Plugin* self, const char* name)
+{
+	free(self->editname);
+	self->editname = strdup(name);
 }

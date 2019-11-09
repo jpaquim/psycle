@@ -12,6 +12,7 @@ typedef struct {
 	Library library;
 	float pan;
 	MachineInfo* plugininfo;
+	char* editname;
 } Plugin;
 
 void plugin_init(Plugin* self, MachineCallback, const char* path);

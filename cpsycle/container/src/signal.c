@@ -10,14 +10,14 @@
 #include <stdarg.h>          
 
 static void signal_notify(Signal* self, void* sender);
-static void signal_notify_int(Signal* self, void* sender, int param);
 static void signal_notify1(Signal* self, void* sender, void* param1);
 static void signal_notify2(Signal* self, void* sender, void* param1, void* param2);
 static void signal_notify3(Signal* self, void* sender, void* param1, void* param2, void* param3);
+static void signal_notify_int(Signal* self, void* sender, intptr_t param);
 static Slot* signal_findslot(Signal* self, void* context, void* fp);
 
 typedef void (*signalcallback0)(void*, void*);
-typedef void (*signalcallback_int)(void*, void*, int);
+typedef void (*signalcallback_int)(void*, void*, intptr_t);
 typedef void (*signalcallback_float)(void*, void*, float);
 typedef void (*signalcallback1)(void*, void*, void*);
 typedef void (*signalcallback2)(void*, void*, void*, void*);
@@ -107,7 +107,7 @@ Slot* signal_findslot(Signal* self, void* context, void* fp)
 	return rv;
 }
 
-void signal_emit_int(Signal* self, void* context, int param)
+void signal_emit_int(Signal* self, void* context, intptr_t param)
 {
 	if (self->slots) {
 		List* p = self->slots;
@@ -167,7 +167,7 @@ void signal_notify(Signal* self, void* sender)
 	}
 }
 
-void signal_notify_int(Signal* self, void* sender, int param)
+void signal_notify_int(Signal* self, void* sender, intptr_t param)
 {
 	if (self->slots) {
 		List* ptr = self->slots;

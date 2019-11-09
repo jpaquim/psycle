@@ -323,12 +323,12 @@ void newmachine_init(NewMachine* self, ui_component* parent,
 void newmachine_onpluginselected(NewMachine* self, ui_component* parent,
 	Properties* selected)
 {
-	char* text;
+	const char* text;
 	char detail[1024];
 
-	properties_readstring(selected, "name", &text, "");
+	text = properties_readstring(selected, "name", "");
 	strcpy(detail, text);
-	properties_readstring(selected, "desc", &text, "");
+	text = properties_readstring(selected, "desc", "");
 	strcat(detail, "  ");
 	strcat(detail, text);
 	ui_label_settext(&self->detail.desclabel, detail);

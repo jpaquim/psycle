@@ -5,29 +5,30 @@
 #define BUFFER_H
 
 #include <dsptypes.h>
+#include "../../detail/stdint.h"
 
 typedef struct {
-	unsigned int numchannels;	
+	uintptr_t numchannels;	
 	amp_t** samples;
-	unsigned int offset;	
+	uintptr_t offset;
 } Buffer;
 
-void buffer_init(Buffer*, unsigned int channels);
-void buffer_init_shared(Buffer*, Buffer* src, unsigned int offset);
+void buffer_init(Buffer*, uintptr_t channels);
+void buffer_init_shared(Buffer*, Buffer* src, uintptr_t offset);
 void buffer_dispose(Buffer*);
 Buffer* buffer_alloc(void);
-Buffer* buffer_allocinit(unsigned int channels);
-void buffer_resize(Buffer*, unsigned int channels);
-void buffer_move(Buffer*, unsigned int offset);
-void buffer_setoffset(Buffer*, unsigned int offset);
-unsigned int buffer_offset(Buffer*);
-amp_t* buffer_at(Buffer*, unsigned int channel);
-void buffer_clearsamples(Buffer*, unsigned int numsamples);
-void buffer_addsamples(Buffer*, Buffer* source, unsigned int numsamples,
+Buffer* buffer_allocinit(uintptr_t channels);
+void buffer_resize(Buffer*, uintptr_t channels);
+void buffer_move(Buffer*, uintptr_t offset);
+void buffer_setoffset(Buffer*, uintptr_t offset);
+uintptr_t buffer_offset(Buffer*);
+amp_t* buffer_at(Buffer*, uintptr_t channel);
+void buffer_clearsamples(Buffer*, uintptr_t numsamples);
+void buffer_addsamples(Buffer*, Buffer* source, uintptr_t numsamples,
 	float vol);
-void buffer_mulsamples(Buffer*, unsigned int numsamples, amp_t mul);
-unsigned int buffer_numchannels(Buffer*);
-void buffer_pan(Buffer* self, amp_t pan, unsigned int amount);
+void buffer_mulsamples(Buffer*, uintptr_t numsamples, amp_t mul);
+uintptr_t buffer_numchannels(Buffer*);
+void buffer_pan(Buffer* self, amp_t pan, uintptr_t amount);
 int buffer_mono(Buffer*);
 
 #endif

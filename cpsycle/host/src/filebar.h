@@ -15,6 +15,7 @@ typedef struct {
 	ui_button newbutton;
 	ui_button loadbutton;
 	ui_button savebutton;
+	ui_button renderbutton;
 	Workspace* workspace;	
 } FileBar;
 

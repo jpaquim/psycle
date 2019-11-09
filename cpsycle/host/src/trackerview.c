@@ -86,6 +86,7 @@ static void trackerlinenumbers_ondraw(TrackerLineNumbers*,
 
 static int testrange(big_beat_t position, big_beat_t offset, big_beat_t width);
 static int testrange_e(big_beat_t position, big_beat_t offset, big_beat_t width);
+static int colgroupstart(int col);
 
 enum {
 	CMD_NAVUP,
@@ -835,7 +836,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender, int keycode,
 		trackerview_prevline(self);
 	} else
 	if (cmd == CMD_NAVDOWN) {		
-		trackerview_advanceline(self);		
+		trackerview_advanceline(self);
 	} else
 	if (cmd == CMD_NAVLEFT) {
 		trackerview_prevcol(self);
@@ -944,8 +945,30 @@ void trackerview_inputdigit(TrackerView* self, int value)
 		undoredo_execute(&self->workspace->undoredo,
 				&InsertCommandAlloc(self->pattern, self->grid.bpl,
 					self->grid.cursor, event)->command);
+		if (colgroupstart(self->grid.cursor.col + 1) != 
+				colgroupstart(self->grid.cursor.col)) {
+			self->grid.cursor.col = colgroupstart(self->grid.cursor.col);
+			trackerview_advanceline(self);			
+		} else {
+			trackerview_nextcol(self);
+		}
 		trackerview_invalidatecursor(self, &self->grid.cursor);
 		trackerview_enablesync(self);
+	}
+}
+
+int colgroupstart(int col)
+{
+	if (col == 1 || col == 2) {
+		return 1;
+	} else
+	if (col == 3 || col == 4) {
+		return 3;
+	} else
+		if (col == 5 || col == 6 || col == 7 || col == 8) {
+		return 5;
+	} else {
+		return 0;
 	}
 }
 

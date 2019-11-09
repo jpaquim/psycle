@@ -27,7 +27,6 @@ void MachineFrameSetParamView(MachineFrame* self, ui_component* view)
 	self->view = (ui_component*) view;
 }
 
-
 void OnDestroy(MachineFrame* self, ui_component* frame)
 {
 	self->component.hwnd = 0;		

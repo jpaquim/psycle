@@ -55,40 +55,40 @@ typedef struct {
 
 typedef struct {	
 	int x;
-	int y;
-	char* editname;
+	int y;	
 	int mode;
 	amp_t volumedisplay;	
 	MachineCoords* coords;
 	MachineSkin* skin;
 	Machine* machine;
-	unsigned int slot;
+	uintptr_t slot;
 	MachineFrame* frame;
 	ParamView* paramview;
 	Vst2View* vst2view;
 } MachineUi;
 
 typedef struct {
-	int src;
-	int dst;
+	uintptr_t src;
+	uintptr_t dst;
 } WireConnection;
 
 enum {	
-	WIREVIEW_DRAG_MACHINE,
-	WIREVIEW_DRAG_NEWCONNECTION,
-	WIREVIEW_DRAG_CHANGECONNECTION,
-	WIREVIEW_DRAG_PAN,
+	MACHINEWIREVIEW_DRAG_MACHINE,
+	MACHINEWIREVIEW_DRAG_NEWCONNECTION,
+	MACHINEWIREVIEW_DRAG_CHANGECONNECTION,
+	MACHINEWIREVIEW_DRAG_PAN,
 };
 
 typedef struct {
 	ui_component component;	
 	Machines* machines;
-	Table machineuis;	
+	Table machineuis;
+	List* wireframes;
 	int mx;
 	int my;
-	int dragslot;
+	uintptr_t dragslot;
 	int dragmode;
-	int selectedslot;	
+	uintptr_t selectedslot;	
 	WireConnection dragwire;	
 	WireConnection selectedwire;
 	int drawvumeters;	
@@ -96,11 +96,11 @@ typedef struct {
 	MachineSkin skin;	   
 	Workspace* workspace;
 	struct MachineViewBar* statusbar;
-} WireView;
+} MachineWireView;
 
-void wireview_init(WireView*, ui_component* parent,
+void machinewireview_init(MachineWireView*, ui_component* parent,
 	ui_component* tabbarparent, Workspace*);
-void wireview_align(WireView*);
+void machinewireview_align(MachineWireView*);
 
 typedef struct MachineViewBar {
 	ui_component component;
@@ -113,7 +113,7 @@ typedef struct {
 	ui_component component;
 	TabBar tabbar;
 	ui_notebook notebook;	
-	WireView wireview;
+	MachineWireView wireview;
 	NewMachine newmachine;
 	Workspace* workspace;
 } MachineView;

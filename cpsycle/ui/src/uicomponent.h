@@ -39,6 +39,11 @@ typedef enum {
 	UI_VERTICALEXPAND = 4	
 } UiExpandMode;
 
+typedef enum {
+	UI_HORIZONTAL,
+	UI_VERTICAL
+} UiOrientation;
+
 typedef struct {		               
    int (*childenum)(void*, void*);   
    void* context;
@@ -48,8 +53,8 @@ typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
 	LPARAM lParam);
 
 typedef struct {
-	size_t hwnd;
-	size_t winid;	
+	uintptr_t hwnd;
+	uintptr_t winid;	
 	Signal signal_size;
 	Signal signal_draw;
 	Signal signal_timer;

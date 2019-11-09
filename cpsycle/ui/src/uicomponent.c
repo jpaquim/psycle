@@ -15,7 +15,7 @@ HWND appMainComponentHandle = 0;
 
 TCHAR szAppClass[] = TEXT("PsycleApp");
 static TCHAR szComponentClass[] = TEXT("PsycleComponent");
-static size_t winid = 20000;
+static uintptr_t winid = 20000;
 static Table selfmap;
 static Table winidmap;
 static ui_font defaultfont;
@@ -147,7 +147,7 @@ int ui_win32_component_init(ui_component* self, ui_component* parent,
 	} else {
 		hInstance = appInstance;
 	}
-	self->hwnd = (size_t) CreateWindow(
+	self->hwnd = (uintptr_t) CreateWindow(
 		classname,
 		NULL,		
 		dwStyle,
@@ -161,7 +161,7 @@ int ui_win32_component_init(ui_component* self, ui_component* parent,
 			MB_OK | MB_ICONERROR);
 		err = 1;
 	} else {
-		table_insert(&selfmap, (size_t) self->hwnd, self);
+		table_insert(&selfmap, (uintptr_t) self->hwnd, self);
 	}
 	if (err == 0 && usecommand) {
 		table_insert(&winidmap, winid, self);
@@ -281,7 +281,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 {
 	ui_component*   component;	
 
-	component = table_at(&selfmap, (size_t) hwnd);
+	component = table_at(&selfmap, (uintptr_t) hwnd);
 	if (component) {		
 		switch (message)
 		{
@@ -314,7 +314,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	ui_menu*	 menu;
 	int			 menu_id;		
 
-	component = table_at(&selfmap, (size_t) hwnd);	
+	component = table_at(&selfmap, (uintptr_t) hwnd);	
 	if (component && component->signal_windowproc.slots) {				
 		signal_emit(&component->signal_windowproc, component, 3, (LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
 		if (component->preventdefault) {					
@@ -355,7 +355,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;		
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLORSTATIC:	
-				component = table_at(&selfmap, (size_t) lParam);
+				component = table_at(&selfmap, (uintptr_t) lParam);
 				if (component) {					
 					SetTextColor((HDC) wParam, component->color);
 					SetBkColor((HDC) wParam, component->backgroundcolor);
@@ -376,11 +376,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_COMMAND:
 			  hMenu = GetMenu (hwnd) ;
 			  menu_id = LOWORD (wParam);
-			  menu = table_at(&menumap, (size_t) menu_id);
+			  menu = table_at(&menumap, (uintptr_t) menu_id);
 			  if (menu && menu->execute) {	
 				menu->execute(menu);
 			  }
-			  component = table_at(&winidmap, (size_t) LOWORD(wParam));
+			  component = table_at(&winidmap, (uintptr_t) LOWORD(wParam));
 			  if (component && component->signal_command.slots) {
 					signal_emit(&component->signal_command, component, 2, wParam, lParam);				
 					return 0;
@@ -566,7 +566,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 			break;
 			case WM_HSCROLL:	
-				component = table_at(&selfmap, (size_t) (int) lParam);
+				component = table_at(&selfmap, (uintptr_t) (int) lParam);
 				if (component && component->signal_windowproc.slots) {				                    
 					signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
 					return DefWindowProc (hwnd, message, wParam, lParam);
@@ -602,7 +602,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	// If the position has changed, scroll the window and update it
 	if (si.nPos != iPos)
 	{                    
-		component = table_at(&selfmap, (size_t) hwnd);
+		component = table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
 			signal_emit(&component->signal_scroll, component, 2, 
 				0, component->scrollstepy * (iPos - si.nPos));			
@@ -636,7 +636,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	if (si.nPos != iPos)
 	{                    
-		component = table_at(&selfmap, (size_t) hwnd);
+		component = table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
 			signal_emit(&component->signal_scroll, component, 2, 
 				component->scrollstepx * (iPos - si.nPos), 0);			
@@ -885,7 +885,7 @@ void ui_component_enumerate_children(ui_component* self, void* context,
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam)
 {
 	EnumCallback* callback = (EnumCallback*) lParam;
-	ui_component* child = table_at(&selfmap, (size_t) hwnd);
+	ui_component* child = table_at(&selfmap, (uintptr_t) hwnd);
 	if (child &&  callback->childenum) {
 		return callback->childenum(callback->context, child);		  
 	}     
@@ -898,7 +898,7 @@ List* ui_component_children(ui_component* self, int recursive)
 	if (recursive == 1) {
 		EnumChildWindows ((HWND)self->hwnd, AllChildEnumProc, (LPARAM) &children);
 	} else {
-		size_t hwnd = (size_t)GetWindow((HWND)self->hwnd, GW_CHILD);
+		uintptr_t hwnd = (uintptr_t)GetWindow((HWND)self->hwnd, GW_CHILD);
 		if (hwnd) {
 			ui_component* child = table_at(&selfmap, hwnd);
 			if (child) {				
@@ -906,7 +906,7 @@ List* ui_component_children(ui_component* self, int recursive)
 			}
 		}
 		while (hwnd) {
-			hwnd = (size_t) GetNextWindow((HWND)hwnd, GW_HWNDNEXT);
+			hwnd = (uintptr_t) GetNextWindow((HWND)hwnd, GW_HWNDNEXT);
 			if (hwnd) {
 				ui_component* child = table_at(&selfmap, hwnd);
 				if (child) {					
@@ -921,7 +921,7 @@ List* ui_component_children(ui_component* self, int recursive)
 BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam)
 {
 	List** pChildren = (List**) lParam;
-	ui_component* child = table_at(&selfmap, (size_t) hwnd);
+	ui_component* child = table_at(&selfmap, (uintptr_t) hwnd);
 	if (child) {		
 		list_append(pChildren, child);				
 	}     
@@ -992,6 +992,7 @@ int ui_component_visible(ui_component* self)
 void ui_component_align(ui_component* self)
 {	
 	int cpx = 0;
+	int cpx_r;
 	int cpy = 0;
 	int cpymax = 0;
 	List* p;
@@ -1001,6 +1002,7 @@ void ui_component_align(ui_component* self)
 	ui_component* client = 0;
 		
 	size = ui_component_size(self);
+	cpx_r = size.width;
 	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
 		ui_component* component;
 			
@@ -1023,7 +1025,7 @@ void ui_component_align(ui_component* self)
 				ui_component_setposition(component, 
 					component->margin.left, 
 					cpy,
-					size.width - component->margin.left - component->margin.right,
+					cpx_r - component->margin.left - component->margin.right,
 					componentsize.height);
 				cpy += component->margin.bottom;
 				cpy += componentsize.height;
@@ -1032,9 +1034,10 @@ void ui_component_align(ui_component* self)
 				int requiredcomponentwidth;
 
 				requiredcomponentwidth = componentsize.width + component->margin.left +
-					component->margin.right;				
+					component->margin.right;
+				cpx_r -= requiredcomponentwidth;
 				ui_component_setposition(component,
-					size.width - requiredcomponentwidth,
+					cpx_r + component->margin.left,
 					cpy + component->margin.top,
 					componentsize.width,										
 					size.height - component->margin.top - component->margin.bottom);
@@ -1082,7 +1085,7 @@ void ui_component_align(ui_component* self)
 		ui_component_setposition(client,
 					cpx + client->margin.left,
 					cpy + client->margin.top,
-					size.width - cpx - client->margin.left - client->margin.right,
+					size.width - cpx - client->margin.left - client->margin.right - (size.width - cpx_r),
 					size.height - cpy - client->margin.top - client->margin.bottom);
 	}
 	list_free(q);
@@ -1319,7 +1322,7 @@ ui_size ui_component_textsize(ui_component* self, const char* text)
 ui_component* ui_component_parent(ui_component* self)
 {			
 	return (ui_component*) table_at(&selfmap, 
-		(size_t) GetParent((HWND)self->hwnd));
+		(uintptr_t) GetParent((HWND)self->hwnd));
 }
 
 List* ui_components_setalign(List* list, UiAlignType align, const ui_margin* margin)
@@ -1386,7 +1389,7 @@ void ui_component_seticonressource(ui_component* self, int ressourceid)
 
 ui_component* ui_maincomponent(void)
 {
-	return table_at(&selfmap, (size_t) appMainComponentHandle);
+	return table_at(&selfmap, (uintptr_t) appMainComponentHandle);
 }
 
 void ui_component_starttimer(ui_component* self, unsigned int id,

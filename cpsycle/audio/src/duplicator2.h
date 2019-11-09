@@ -7,16 +7,15 @@
 #include "machine.h"
 #include "duplicatormap.h"
 
-#define NUMMACHINES 8
-
 typedef struct {
 	Machine machine;
-	int macoutput[NUMMACHINES];
-	int noteoffset[NUMMACHINES];
-	int isticking;
-	char lowkey[256];
-	char highkey[256];
+	short macoutput[16];
+	short noteoffset[16];	
+	short lowkey[16];
+	short highkey[16];
 	DuplicatorMap map;
+	char* editname;
+	int isticking;
 } Duplicator2;
 
 void duplicator2_init(Duplicator2*, MachineCallback);

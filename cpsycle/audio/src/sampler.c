@@ -11,6 +11,8 @@
 #include "songio.h"
 #include <operations.h>
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
 
 static void generateaudio(Sampler*, BufferContext*);
 static void seqtick(Sampler*, int channel, const PatternEvent*);
@@ -30,6 +32,9 @@ static void release_voices(Sampler*, int channel);
 static unsigned int numinputs(Sampler*);
 static unsigned int numoutputs(Sampler*);
 static void loadspecific(Sampler*, struct SongFile*, unsigned int slot);
+static void savespecific(Sampler*, struct SongFile*, unsigned int slot);
+static const char* editname(Sampler* self);
+static void seteditname(Sampler* self, const char* name);
 
 static int currslot(Sampler*, unsigned int channel, const PatternEvent*);
 
@@ -43,6 +48,7 @@ static void voice_release(Voice*);
 static void voice_fastrelease(Voice*);
 
 static int songtracks = 16;
+static const uint32_t SAMPLERVERSION = 0x00000002;
 
 static MachineInfo const MacInfo = {
 	MI_VERSION,
@@ -78,6 +84,7 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.numinputs = numinputs;
 	self->machine.numoutputs = numoutputs;
 	self->machine.loadspecific = loadspecific;
+	self->machine.savespecific = savespecific;
 	self->machine.numparametercols = numparametercols;
 	self->machine.numparameters = numparameters;
 	self->machine.parametertweak = parametertweak;
@@ -87,6 +94,8 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->machine.parametertype = parametertype;
 	self->machine.parametername = parametername;
 	self->machine.parameterlabel = parameterlabel;
+	self->machine.editname = editname;
+	self->machine.seteditname = seteditname;
 	self->numvoices = SAMPLER_MAX_POLYPHONY;	
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		voice_init(&self->voices[voice], 0, 0, 0, 44100);
@@ -94,6 +103,7 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;
 	self->pan = 0.5f;
+	self->editname = strdup("Sampler");
 	table_init(&self->lastinst);
 }
 
@@ -105,6 +115,8 @@ void dispose(Sampler* self)
 		voice_dispose(&self->voices[voice]);
 	}
 	machine_dispose(&self->machine);
+	free(self->editname);
+	self->editname = 0;
 	table_dispose(&self->lastinst);
 }
 
@@ -396,6 +408,45 @@ static void loadspecific(Sampler* self, struct SongFile* songfile, unsigned int 
 			}
 		}
 	}	
+}
+
+void savespecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
+{
+	uint32_t temp;
+	uint32_t size = 3 * sizeof(temp) + 2 * sizeof(unsigned char);
+	unsigned char defaultC4;
+	unsigned char slidemode;
+
+	psyfile_write(songfile->file, &size, sizeof(size));
+	temp = self->numvoices;
+	psyfile_write(songfile->file, &temp, sizeof(temp)); // numSubtracks
+	/* switch (_resampler.quality())
+	{
+	case helpers::dsp::resampler::quality::zero_order: temp = 0; break;
+	case helpers::dsp::resampler::quality::spline: temp = 2; break;
+	case helpers::dsp::resampler::quality::sinc: temp = 3; break;
+	case helpers::dsp::resampler::quality::linear: //fallthrough
+	default: temp = 1;
+	} */
+	temp = 1;
+	psyfile_write(songfile->file, &temp, sizeof(temp)); // quality
+	temp = SAMPLERVERSION;
+	psyfile_write(songfile->file, &temp, sizeof(temp));
+	defaultC4 = 1; // isDefaultC4();
+	psyfile_write(songfile->file, &defaultC4, sizeof(defaultC4)); // correct A4
+	slidemode = 1;
+	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
+}
+
+const char* editname(Sampler* self)
+{
+	return self->editname;
+}
+
+void seteditname(Sampler* self, const char* name)
+{
+	free(self->editname);
+	self->editname = strdup(name);
 }
 
 void voice_reset(Voice* self)

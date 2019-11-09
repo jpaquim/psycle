@@ -7,7 +7,9 @@
 #include "connections.h"
 #include "master.h"
 #include <signal.h>
+#include "../../detail/stdint.h"
 
+#define NOMACHINE_INDEX UINTPTR_MAX
 #define MASTER_INDEX 128
 #define MAX_STREAM_SIZE 256
 
@@ -25,7 +27,7 @@ typedef struct Machines {
 	float* samplebuffers;
 	int numsamplebuffers;
 	int currsamplebuffer;
-	int slot;
+	uintptr_t slot;
 	int filemode;
 	float volume;	
 	Signal signal_insert;
@@ -38,28 +40,28 @@ typedef struct Machines {
 void machines_init(Machines*);
 void machines_dispose(Machines*);
 void machines_clear(Machines*);
-void machines_insert(Machines*, size_t slot, Machine*);
-void machines_erase(Machines*, size_t slot);
-void machines_remove(Machines*, size_t slot);
-void machines_exchange(Machines*, size_t srcslot, size_t dstslot);
-size_t machines_append(Machines*, Machine*);
-Machine* machines_at(Machines*, size_t slot);
-size_t machines_size(Machines*);
-int machines_connect(Machines*, size_t outputslot, size_t inputslot);
-void machines_disconnect(Machines*, size_t outputslot, size_t inputslot);
-void machines_disconnectall(Machines*, size_t slot);
-int machines_connected(Machines*, size_t outputslot, size_t inputslot);
+void machines_insert(Machines*, uintptr_t slot, Machine*);
+void machines_erase(Machines*, uintptr_t slot);
+void machines_remove(Machines*, uintptr_t slot);
+void machines_exchange(Machines*, uintptr_t srcslot, uintptr_t dstslot);
+uintptr_t machines_append(Machines*, Machine*);
+Machine* machines_at(Machines*, uintptr_t slot);
+uintptr_t machines_size(Machines*);
+int machines_connect(Machines*, uintptr_t outputslot, uintptr_t inputslot);
+void machines_disconnect(Machines*, uintptr_t outputslot, uintptr_t inputslot);
+void machines_disconnectall(Machines*, uintptr_t slot);
+int machines_connected(Machines*, uintptr_t outputslot, uintptr_t inputslot);
 MachineList* machines_path(Machines* self);
-Buffer* machines_inputs(Machines*, size_t slot);
-Buffer* machines_outputs(Machines*, size_t slot);
+Buffer* machines_inputs(Machines*, uintptr_t slot);
+Buffer* machines_outputs(Machines*, uintptr_t slot);
 void machines_buffer_end(Machines*);
-void machines_changeslot(Machines*, int slot);
-int machines_slot(Machines*);
+void machines_changeslot(Machines*, uintptr_t slot);
+uintptr_t machines_slot(Machines*);
 void machines_insertmaster(Machines*, Machine*);
 Machine* machines_master(Machines*);
 void machines_startfilemode(Machines*);
 void machines_endfilemode(Machines*);
-void machines_showparameters(Machines*, size_t slot);
+void machines_showparameters(Machines*, uintptr_t slot);
 void machines_setvolume(Machines*, amp_t volume);
 amp_t machines_volume(Machines*);
 TableIterator machines_begin(Machines*);

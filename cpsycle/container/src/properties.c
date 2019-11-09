@@ -284,19 +284,20 @@ void properties_readdouble(Properties* properties, const char* key, double* valu
 	}
 }
 
-const char* properties_readstring(Properties* properties, const char* key, const char** text, const char* defaulttext)
+const char* properties_readstring(Properties* properties, const char* key, const char* defaulttext)
 {
+	const char* rv = 0;
 	if (!properties) {
-		*text = defaulttext;
+		rv = defaulttext;
 	} else {
 		Properties* property = properties_read(properties, key);
 		if (property && property->item.typ == PROPERTY_TYP_STRING) {
-			*text = property->item.value.s;
+			rv = property->item.value.s;
 		} else {
-			*text = defaulttext;
+			rv = defaulttext;
 		}
 	}
-	return *text;
+	return rv;
 }
 
 Properties* properties_write_string(Properties* self, const char* key, const char* value)

@@ -31,24 +31,24 @@ void instruments_dispose(Instruments* self)
 	signal_dispose(&self->signal_slotchange);
 }
 
-void instruments_insert(Instruments* self, Instrument* instrument, int slot)
+void instruments_insert(Instruments* self, Instrument* instrument, uintptr_t slot)
 {
 	table_insert(&self->container, slot, instrument);
 	signal_emit(&self->signal_insert, self, 1, slot);
 }
 
-void instruments_changeslot(Instruments* self, int slot)
+void instruments_changeslot(Instruments* self, uintptr_t slot)
 {
 	self->slot = slot;	
 	signal_emit(&self->signal_slotchange, self, 1, slot);
 }
 
-int instruments_slot(Instruments* self)
+uintptr_t instruments_slot(Instruments* self)
 {
 	return self->slot;
 }
 
-Instrument* instruments_at(Instruments* self, int slot)
+Instrument* instruments_at(Instruments* self, uintptr_t slot)
 {
 	return table_at(&self->container, slot);
 }

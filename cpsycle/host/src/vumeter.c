@@ -1,36 +1,36 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "../../detail/prefix.h"
 
 #include "vumeter.h"
+
 #include <math.h>
 #include <rms.h>
 
 #define TIMERID_MASTERVU 400
 
-static void OnDraw(Vumeter*, ui_component* sender, ui_graphics*);
-static void OnDestroy(Vumeter*, ui_component* sender);
-static void OnTimer(Vumeter*, ui_component* sender, int timerid);
-static void OnMasterWorked(Vumeter*, Machine*, unsigned int slot, BufferContext*);
-static void OnSongChanged(Vumeter*, Workspace*);
-static void ConnectMachinesSignals(Vumeter*, Workspace*);
+static void vumeter_ondraw(Vumeter*, ui_component* sender, ui_graphics*);
+static void vumeter_ontimer(Vumeter*, ui_component* sender, int timerid);
+static void vumeter_onmasterworked(Vumeter*, Machine*, unsigned int slot, BufferContext*);
+static void vumeter_onsongchanged(Vumeter*, Workspace*);
+static void vumeter_connectmachinessignals(Vumeter*, Workspace*);
 
-void InitVumeter(Vumeter* self, ui_component* parent, Workspace* workspace)
-{			
-	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
-	signal_connect(&self->component.signal_timer, self, OnTimer);
+void vumeter_init(Vumeter* self, ui_component* parent, Workspace* workspace)
+{					
+	ui_component_init(&self->component, parent);
 	self->leftavg = 0;
-	self->rightavg = 0;	
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	ConnectMachinesSignals(self, workspace);
+	self->rightavg = 0;
+	self->component.doublebuffered = 1;
+	signal_connect(&self->component.signal_draw, self, vumeter_ondraw);	
+	signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
+	signal_connect(&workspace->signal_songchanged, self,
+		vumeter_onsongchanged);
+	vumeter_connectmachinessignals(self, workspace);
 	ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
 }
 
-void OnDestroy(Vumeter* self, ui_component* component)
-{		
-}
-
-void OnDraw(Vumeter* self, ui_component* sender, ui_graphics* g)
+void vumeter_ondraw(Vumeter* self, ui_component* sender, ui_graphics* g)
 {	
 	ui_rectangle left;
 	ui_rectangle right;
@@ -53,14 +53,14 @@ void OnDraw(Vumeter* self, ui_component* sender, ui_graphics* g)
 	ui_drawsolidrectangle(g, right, 0x003E3E3E);
 }
 
-void OnTimer(Vumeter* self, ui_component* sender, int timerid)
+void vumeter_ontimer(Vumeter* self, ui_component* sender, int timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		ui_invalidate(&self->component);
 	}
 }
 
-void OnMasterWorked(Vumeter* self, Machine* master, unsigned int slot,
+void vumeter_onmasterworked(Vumeter* self, Machine* master, unsigned int slot,
 	BufferContext* bc)
 {	
 	if (bc->rmsvol) {
@@ -69,19 +69,19 @@ void OnMasterWorked(Vumeter* self, Machine* master, unsigned int slot,
 	}
 }
 
-void OnSongChanged(Vumeter* self, Workspace* workspace)
+void vumeter_onsongchanged(Vumeter* self, Workspace* workspace)
 {	
 	self->leftavg = 0;
 	self->rightavg = 0;
-	ConnectMachinesSignals(self, workspace);	
+	vumeter_connectmachinessignals(self, workspace);	
 }
 
-void ConnectMachinesSignals(Vumeter* self, Workspace* workspace)
+void vumeter_connectmachinessignals(Vumeter* self, Workspace* workspace)
 {
 	if (workspace && workspace->song &&
 			machines_master(&workspace->song->machines)) {
 		signal_connect(
 			&machines_master(&workspace->song->machines)->signal_worked, self,
-			OnMasterWorked);
+			vumeter_onmasterworked);
 	}
 }

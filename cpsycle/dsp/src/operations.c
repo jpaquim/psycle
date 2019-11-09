@@ -8,21 +8,21 @@
 
 static void erase_all_nans_infinities_and_denormals(amp_t* sample);
 
-void dsp_add(amp_t *src, amp_t *dst, int num, amp_t vol)
+void dsp_add(amp_t *src, amp_t *dst, uintptr_t num, amp_t vol)
 {
 	for ( ; num != 0; ++dst, ++src, --num) {
 		*dst += (*src * vol);
 	}	
 }
 	
-void dsp_mul(amp_t *dst, int num, amp_t mul)
+void dsp_mul(amp_t *dst, uintptr_t num, amp_t mul)
 {	
 	for ( ; num != 0; ++dst, --num) {
 		*dst *= mul;		
 	}	
 }
 	
-void dsp_movmul(amp_t *src, amp_t *dst, int num, amp_t mul)
+void dsp_movmul(amp_t *src, amp_t *dst, uintptr_t num, amp_t mul)
 {
 	--src;
 	--dst;
@@ -33,14 +33,14 @@ void dsp_movmul(amp_t *src, amp_t *dst, int num, amp_t mul)
 	while (--num);
 }
 	
-void dsp_clear(amp_t *dst, int num)
+void dsp_clear(amp_t *dst, uintptr_t num)
 {
 	memset(dst, 0, num * sizeof(amp_t));
 }
 
-void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, int num)
+void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, uintptr_t num)
 {
-	int i;		
+	uintptr_t i;
 	--dst;
 	--left;
 	--right;	
@@ -57,8 +57,8 @@ void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, int num)
 }
 
 void dsp_erase_all_nans_infinities_and_denormals(amp_t* dst,
-		unsigned int num) {
-	unsigned int i;
+		uintptr_t num) {
+	uintptr_t i;
 
 	for(i = 0; i < num; ++i) {
 		erase_all_nans_infinities_and_denormals(&dst[i]);

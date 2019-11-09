@@ -12,6 +12,6 @@ typedef struct {
 	int clip;
 } ClipBox;
 
-void InitClipBox(ClipBox*, ui_component* parent, Workspace* workspace);
+void clipbox_init(ClipBox*, ui_component* parent, Workspace* workspace);
 
 #endif

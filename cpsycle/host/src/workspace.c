@@ -54,7 +54,8 @@ void workspace_init(Workspace* self, void* handle)
 {	
 	lock_init();
 	self->octave = 4;	
-	self->cursorstep = 1;	
+	self->cursorstep = 1;
+	self->followsong = 0;
 	self->inputoutput = 0;
 	self->midi = 0;
 	self->mainhandle = handle;
@@ -62,7 +63,7 @@ void workspace_init(Workspace* self, void* handle)
 	workspace_makeconfig(self);
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);
-	self->properties = workspace_makeproperties(self);		
+	self->properties = workspace_makeproperties(self);	
 	undoredo_init(&self->undoredo);
 	workspace_initsignals(self);
 	workspace_initplayer(self);
@@ -86,6 +87,7 @@ void workspace_initsignals(Workspace* self)
 	signal_init(&self->signal_editpositionchanged);
 	signal_init(&self->signal_loadprogress);
 	signal_init(&self->signal_scanprogress);
+	signal_init(&self->signal_beforesavesong);
 }
 
 void workspace_dispose(Workspace* self)
@@ -116,6 +118,7 @@ void workspace_disposesignals(Workspace* self)
 	signal_dispose(&self->signal_editpositionchanged);
 	signal_dispose(&self->signal_loadprogress);
 	signal_dispose(&self->signal_scanprogress);
+	signal_dispose(&self->signal_beforesavesong);
 }
 
 void workspace_initplayer(Workspace* self)
@@ -329,6 +332,13 @@ void workspace_makedirectories(Workspace* self)
 	properties_sethint(properties_settext(
 		properties_append_string(
 			self->directories,
+			"song",
+			"C:\\Programme\\Psycle\\Songs"),
+		"Song directory"),
+		PROPERTY_HINT_EDITDIR);
+	properties_sethint(properties_settext(
+		properties_append_string(
+			self->directories,
 			"plugin",
 			"C:\\Programme\\Psycle\\PsyclePlugins"),
 		"Plug-in directory"),
@@ -417,13 +427,11 @@ void workspace_updatemididriverlist(Workspace* self)
 
 			eventdriver = player_eventdriver(&self->player, i);
 			if (eventdriver) {
-				char* text;
+				const char* text;
 				
 				_snprintf(idstr, 40, "dev%d", i);
-				properties_readstring(eventdriver->properties, "name", &text, idstr);
-				properties_settext(
-					properties_append_string(drivers, idstr, text),
-					text);
+				text = properties_readstring(eventdriver->properties, "name", idstr);
+				properties_settext(properties_append_string(drivers, idstr, text), text);
 			}
 		}
 	}
@@ -459,10 +467,7 @@ void workspace_makelanges(Workspace* self)
 }
 
 const char* workspace_translate(Workspace* self, const char* key) {
-	char* rv;
-
-	properties_readstring(self->lang, key, &rv, key);
-	return rv;
+	return properties_readstring(self->lang, key, key);	
 }
 
 void workspace_configchanged(Workspace* self, Properties* property, 
@@ -615,7 +620,8 @@ void workspace_savesong(Workspace* self, const char* path)
 {
 	SongFile songfile;
 	songfile.file = 0;
-	songfile.song = self->song;	
+	songfile.song = self->song;
+	signal_emit(&self->signal_beforesavesong, self, 0);
 	songfile.workspaceproperties = self->properties;
 	songfile_save(&songfile, path);
 }
@@ -771,4 +777,19 @@ Instruments* machinecallback_instruments(Workspace* self)
 EventDriver* workspace_kbddriver(Workspace* self)
 {
 	return player_kbddriver(&self->player);
+}
+
+int workspace_followingsong(Workspace* self)
+{
+	return self->followsong;
+}
+
+void workspace_followsong(Workspace* self)
+{
+	self->followsong = 1;
+}
+
+void workspace_stopfollowsong(Workspace* self)
+{
+	self->followsong = 0;
 }

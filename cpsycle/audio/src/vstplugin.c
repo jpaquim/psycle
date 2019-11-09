@@ -39,6 +39,9 @@ static int haseditor(VstPlugin*);
 static void seteditorhandle(VstPlugin*, void* handle);
 static void editorsize(VstPlugin*, int* width, int* height);
 static void editoridle(VstPlugin*);
+static const char* editname(VstPlugin*);
+static void seteditname(VstPlugin*, const char* name);
+
 static void processevents(VstPlugin*, BufferContext*);
 struct VstMidiEvent* allocinitmidievent(VstPlugin*, const PatternEntry*);
 
@@ -68,9 +71,13 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->machine.seteditorhandle = seteditorhandle;
 	self->machine.editorsize = editorsize;
 	self->machine.editoridle = editoridle;
+	self->machine.editname = editname;
+	self->machine.seteditname = seteditname;
 	self->info = 0;
 	self->editorhandle = 0;
-	self->events = 0;	
+	self->events = 0;
+	self->plugininfo = 0;
+	self->editname = 0;
 	library_init(&self->library);
 	library_load(&self->library, path);		
 	mainproc = getmainentry(&self->library);
@@ -98,6 +105,7 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
 			self->plugininfo = machineinfo_allocinit();
 			machineinfo(self->effect, self->plugininfo, self->library.path, 0);
+			self->editname = strdup(self->plugininfo->ShortName);
 		}
 	}		
 } 
@@ -125,6 +133,7 @@ void dispose(VstPlugin* self)
 		free(self->plugininfo);
 		self->plugininfo = 0;
 	}
+	free(self->editname);
 	machine_dispose(&self->machine);
 }
 
@@ -467,3 +476,15 @@ int mode(VstPlugin* self)
 		? MACHMODE_GENERATOR
 		: MACHMODE_FX;
 }
+
+const char* editname(VstPlugin* self)
+{
+	return self->editname;
+}
+
+void seteditname(VstPlugin* self, const char* name)
+{
+	free(self->editname);
+	self->editname = strdup(name);
+}
+

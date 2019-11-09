@@ -7,20 +7,23 @@
 #include "instrument.h"
 #include <hashtbl.h>
 #include <signal.h>
+#include "../../detail/stdint.h"
+
+#define NOINSTRUMENT_INDEX UINTPTR_MAX
 
 typedef struct Instruments {
 	Table container;
-	int slot;
+	uintptr_t slot;
 	Signal signal_insert;
 	Signal signal_slotchange;
 } Instruments;
 
 void instruments_init(Instruments*);
 void instruments_dispose(Instruments*);
-void instruments_insert(Instruments*, Instrument*, int slot);
-void instruments_changeslot(Instruments*, int slot);
-int instruments_slot(Instruments*);
-Instrument* instruments_at(Instruments*, int slot);
-size_t instruments_size(Instruments*);
+void instruments_insert(Instruments*, Instrument*, uintptr_t slot);
+void instruments_changeslot(Instruments*, uintptr_t slot);
+uintptr_t instruments_slot(Instruments*);
+Instrument* instruments_at(Instruments*, uintptr_t slot);
+uintptr_t instruments_size(Instruments*);
 
 #endif

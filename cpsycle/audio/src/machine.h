@@ -46,8 +46,8 @@ typedef struct Machine {
 	void (*updatesamplerate)(void*, unsigned int samplerate);
 	unsigned int (*numinputs)(void*);
 	unsigned int (*numoutputs)(void*);
-	unsigned int (*slot)(void*);
-	void (*setslot)(void*, int);
+	uintptr_t (*slot)(void*);
+	void (*setslot)(void*, uintptr_t);
 	// Parameters	
 	int (*parametertype)(void*, int param);
 	unsigned int (*numparameters)(void*);
@@ -68,6 +68,8 @@ typedef struct Machine {
 	void (*seteditorhandle)(void*, void* handle);
 	void (*editorsize)(void*, int* width, int* height);
 	void (*editoridle)(void*);
+	const char* (*editname)(void*);
+	void (*seteditname)(void*, const char* name);
 	// machine callbacks
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);	

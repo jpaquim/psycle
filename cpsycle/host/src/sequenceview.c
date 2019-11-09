@@ -496,6 +496,7 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace)
 	self->listview.patterns = &workspace->song->patterns;
 	self->listview.selected = 0;
 	self->duration.sequence = &workspace->song->sequence;
+	sequencelistview_adjustscrollbars(&self->listview);
 	ui_invalidate(&self->component);
 }
 

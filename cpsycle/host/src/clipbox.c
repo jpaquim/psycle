@@ -6,33 +6,28 @@
 #include "clipbox.h"
 #include <rms.h>
 
-static void OnDestroy(ClipBox*);
-static void OnTimer(ClipBox* self, ui_component* sender, int timerid);
-static void OnMouseDown(ClipBox* self, ui_component* sender, int x, int y, int button);
-static void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc);
-static void OnSongChanged(ClipBox* self, Workspace* workspace);
-static void ConnectMachinesSignals(ClipBox* self, Workspace* workspace);
+static void clipbox_ondraw(ClipBox*, ui_component* sender, ui_graphics*);
+static void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid);
+static void clipbox_onmousedown(ClipBox* self, ui_component* sender, int x, int y, int button);
+static void clipbox_onmasterworked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc);
+static void clipbox_onsongchanged(ClipBox* self, Workspace* workspace);
+static void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace);
 
 #define TIMER_ID_CLIPBOX 700
 
-void InitClipBox(ClipBox* self, ui_component* parent, Workspace* workspace)
+void clipbox_init(ClipBox* self, ui_component* parent, Workspace* workspace)
 {
 	self->clip = 0;	
 	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundcolor(&self->component, 0x00000000);
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_timer, self, OnTimer);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);	
-	ConnectMachinesSignals(self, workspace);
-	// SetTimer(self->component.hwnd, TIMER_ID_CLIPBOX, 200, 0);
+	signal_connect(&self->component.signal_draw, self, clipbox_ondraw);
+	signal_connect(&self->component.signal_mousedown, self, clipbox_onmousedown);
+	signal_connect(&self->component.signal_timer, self, clipbox_ontimer);
+	signal_connect(&workspace->signal_songchanged, self, clipbox_onsongchanged);	
+	clipbox_connectmachinessignals(self, workspace);
+	// ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 200);
 }
 
-void OnDestroy(ClipBox* self)
-{	
-}
-
-void OnTimer(ClipBox* self, ui_component* sender, int timerid)
+void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid)
 {	
 	if (self->clip) {
 		ui_component_setbackgroundcolor(&self->component, 0x00FF0000);
@@ -41,7 +36,7 @@ void OnTimer(ClipBox* self, ui_component* sender, int timerid)
 	}
 }
 
-void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc)
+void clipbox_onmasterworked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc)
 {	
 	if (bc->rmsvol) {		
 		if (bc->rmsvol->data.previousLeft >= 32767.f ||
@@ -55,24 +50,35 @@ void OnMasterWorked(ClipBox* self, Machine* master, unsigned int slot, BufferCon
 	}
 }
 
-void OnMouseDown(ClipBox* self, ui_component* sender, int x, int y, int button)
+void clipbox_onmousedown(ClipBox* self, ui_component* sender, int x, int y, int button)
 {
 	self->clip = 0;
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);
 		ui_invalidate(&self->component);
 }
 
-void OnSongChanged(ClipBox* self, Workspace* workspace)
+void clipbox_onsongchanged(ClipBox* self, Workspace* workspace)
 {
-	ConnectMachinesSignals(self, workspace);	
+	clipbox_connectmachinessignals(self, workspace);	
 }
 
-void ConnectMachinesSignals(ClipBox* self, Workspace* workspace)
+void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
 {
 	if (workspace && workspace->song &&
 			machines_master(&workspace->song->machines)) {
-		signal_connect(
-			&machines_master(&workspace->song->machines)->signal_worked, self,
-			OnMasterWorked);
+		signal_connect(&machines_master(
+			&workspace->song->machines)->signal_worked, self,
+			clipbox_onmasterworked);
 	}
+}
+
+void clipbox_ondraw(ClipBox* self, ui_component* sender, ui_graphics* g)
+{
+	ui_rectangle r;
+	ui_size size;
+
+	size = ui_component_size(&self->component);
+	ui_setrectangle(&r, 0, 0, size.width, size.height);
+	ui_setcolor(g, 0x00333333);
+	ui_drawrectangle(g, r);
 }

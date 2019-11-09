@@ -7,13 +7,15 @@
 #include "sample.h"
 #include <hashtbl.h>
 
+#define NOSAMPLES_INDEX UINTPTR_MAX
+
 typedef struct Samples {
 	Table container;
 } Samples;
 
 void samples_init(Samples*);
 void samples_dispose(Samples*);
-void samples_insert(Samples*, Sample* sample, int slot);
-Sample* samples_at(Samples*, int slot);
+void samples_insert(Samples*, Sample* sample, uintptr_t slot);
+Sample* samples_at(Samples*, uintptr_t slot);
 
 #endif

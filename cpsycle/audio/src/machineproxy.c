@@ -37,8 +37,8 @@ static void machineproxy_loadspecific(MachineProxy*, struct SongFile*, unsigned 
 static void machineproxy_savespecific(MachineProxy*, struct SongFile*, unsigned int slot);
 static unsigned int machineproxy_samplerate(MachineProxy*);
 static unsigned int machineproxy_bpm(MachineProxy*);
-static unsigned int machineproxy_slot(MachineProxy*);
-static void machineproxy_setslot(MachineProxy*, int slot);
+static uintptr_t machineproxy_slot(MachineProxy*);
+static void machineproxy_setslot(MachineProxy*, uintptr_t slot);
 static struct Samples* machineproxy_samples(MachineProxy*);
 static struct Machines* machineproxy_machines(MachineProxy*);
 static struct Instruments* machineproxy_instruments(MachineProxy*);
@@ -49,6 +49,8 @@ static int machineproxy_haseditor(MachineProxy*);
 static void machineproxy_seteditorhandle(MachineProxy*, void* handle);
 static void machineproxy_editorsize(MachineProxy*, int* width, int* height);
 static void machineproxy_editoridle(MachineProxy*);
+static const char* machineproxy_editname(MachineProxy* self);
+static void machineproxy_seteditname(MachineProxy* self, const char* name);
 
 static int FilterException(MachineProxy* proxy, const char* msg, int code, struct _EXCEPTION_POINTERS *ep) 
 {	
@@ -104,6 +106,8 @@ void machineproxy_init(MachineProxy* self, Machine* client)
 	self->machine.seteditorhandle = machineproxy_seteditorhandle;
 	self->machine.editorsize = machineproxy_editorsize;
 	self->machine.editoridle = machineproxy_editoridle;
+	self->machine.seteditname = machineproxy_seteditname;
+	self->machine.editname = machineproxy_editname;
 }
 
 Buffer* machineproxy_mix(MachineProxy* self, size_t slot, unsigned int amount, MachineSockets* sockets, Machines* machines)
@@ -407,9 +411,9 @@ void machineproxy_setcallback(MachineProxy* self, MachineCallback callback)
 	}
 }
 
-unsigned int machineproxy_slot(MachineProxy* self)
+uintptr_t machineproxy_slot(MachineProxy* self)
 {
-	unsigned int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 		__try { 
@@ -420,7 +424,7 @@ unsigned int machineproxy_slot(MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_setslot(MachineProxy* self, int slot)
+void machineproxy_setslot(MachineProxy* self, uintptr_t slot)
 {
 	if (self->crashed == 0) {
 		__try { 
@@ -524,6 +528,32 @@ static void machineproxy_editoridle(MachineProxy* self)
 		__try { 
 			self->client->editoridle(self->client);
 		} __except(FilterException(self, "editoridle", GetExceptionCode(), GetExceptionInformation())) {
+
+		}
+	}
+}
+
+const char* machineproxy_editname(MachineProxy* self)
+{
+	const char* rv = 0;
+
+	if (self->crashed == 0) {
+		__try {
+			rv = self->client->editname(self->client);
+		}
+		__except (FilterException(self, "editname", GetExceptionCode(), GetExceptionInformation())) {
+		}
+	}
+	return rv;
+}
+
+void machineproxy_seteditname(MachineProxy* self, const char* name)
+{
+	if (self->crashed == 0) {
+		__try {
+			self->client->seteditname(self->client, name);
+		}
+		__except (FilterException(self, "seteditname", GetExceptionCode(), GetExceptionInformation())) {
 
 		}
 	}

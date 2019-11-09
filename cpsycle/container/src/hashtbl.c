@@ -7,12 +7,12 @@
 #include <stdlib.h>
 #include <assert.h>
 
-static size_t h(size_t k, size_t size) {  return k % size; }
+static uintptr_t h(uintptr_t k, uintptr_t size) {  return k % size; }
 static TableIterator tableend;
 
 void table_init(Table* self)
 {
-  size_t i;
+  uintptr_t i;
 
   self->arraysize = TABLEKEYS;
   for (i = 0; i < self->arraysize; ++i) {
@@ -23,7 +23,7 @@ void table_init(Table* self)
 
 void table_dispose(Table* self)
 {
-  size_t i;
+  uintptr_t i;
   HashEntry* p;
   HashEntry* q;
 
@@ -37,9 +37,9 @@ void table_dispose(Table* self)
   self->count = 0;
 }
 
-void table_insert(Table* self, size_t k, void* value)
+void table_insert(Table* self, uintptr_t k, void* value)
 {
-	size_t hn;
+	uintptr_t hn;
 	HashEntry* p;
 	HashEntry* newentry;
 
@@ -73,9 +73,9 @@ void table_insert(Table* self, size_t k, void* value)
 	}
 }
 
-void table_remove(Table* self, size_t k)
+void table_remove(Table* self, uintptr_t k)
 {
-	size_t hn;
+	uintptr_t hn;
 	HashEntry* p;
 	HashEntry* q;
 
@@ -100,12 +100,12 @@ void table_remove(Table* self, size_t k)
 	}
 }
 
-void* table_at(Table* self, size_t k)
+void* table_at(Table* self, uintptr_t k)
 {
 	void* rv = 0;
 	  	
 	if (self->count > 0) {
-		size_t hn;
+		uintptr_t hn;
 
 		hn = h(k, self->arraysize);
 		if (self->keys[hn] != 0) {		
@@ -124,17 +124,17 @@ void* table_at(Table* self, size_t k)
 	return rv;
 }
 
-int table_exists(Table* self, size_t k)
+int table_exists(Table* self, uintptr_t k)
 {	
 	return (self->count > 0) && (self->keys[h(k, self->arraysize)] != 0);
 }
 
-size_t table_size(Table* self)
+uintptr_t table_size(Table* self)
 {
 	return self->count;
 }
 
-size_t freetableentry(void* context, void* param, HashEntry* entry)
+uintptr_t freetableentry(void* context, void* param, HashEntry* entry)
 {
 	free(entry->value);
 	return 1;
@@ -169,7 +169,7 @@ void tableiterator_init(TableIterator* self, Table* table)
 	self->curr = self->pos < TABLEKEYS ? table->keys[self->pos] : 0;
 }
 
-size_t tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs)
+uintptr_t tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs)
 {
 	return lhs->curr == rhs->curr;
 }
@@ -190,7 +190,7 @@ void tableiterator_inc(TableIterator* self)
 	++self->count;
 }
 
-size_t tableiterator_key(TableIterator* self)
+uintptr_t tableiterator_key(TableIterator* self)
 {
 	assert(self->curr);
 	return self->curr->key;

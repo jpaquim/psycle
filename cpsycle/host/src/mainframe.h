@@ -22,13 +22,12 @@
 #include "instrumentsview.h"
 #include "settingsview.h"
 #include "songproperties.h"
+#include "renderview.h"
 #include "properties.h"
 #include "tabbar.h"
 #include "playbar.h"
 #include "playposbar.h"
-#include "vumeter.h"
-#include "volslider.h"
-#include "clipbox.h"
+#include "vubar.h"
 #include "songbar.h"
 #include "helpview.h"
 #include "stepbox.h"
@@ -58,13 +57,11 @@ typedef struct {
 	SamplesView samplesview;
 	InstrumentsView instrumentsview;
 	SongProperties songproperties;
+	RenderView renderview;
 	SettingsView settingsview;
 	HelpView helpview;	
 	Gear gear;
-	ui_component vubar;
-	Vumeter vumeter;
-	VolSlider volslider;
-	ClipBox clipbox;	
+	VuBar vubar;	
 	ui_component statusbar;
 	ui_notebook viewbars;
 	ui_component* activeview;	

@@ -4,7 +4,7 @@
 #if !defined(HASHTABL_H)
 #define HASHTABL_H
 
-#include <stddef.h>
+#include "../../detail/stdint.h"
 
 #define TABLEKEYS 256
 
@@ -16,33 +16,33 @@ typedef struct HashEntry {
 
 typedef struct {
 	HashEntry* keys[TABLEKEYS];
-	size_t arraysize;
-	size_t count;	
+	uintptr_t arraysize;
+	uintptr_t count;
 } Table;
 
 typedef struct {
-	size_t pos;
-	size_t count;
+	uintptr_t pos;
+	uintptr_t count;
 	HashEntry* curr;
 	Table* table;
 } TableIterator;
 
 void tableiterator_init(TableIterator*, Table*);
 void tableiterator_inc(TableIterator*);
-size_t tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs);
-size_t tableiterator_key(TableIterator*);
+uintptr_t tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs);
+uintptr_t tableiterator_key(TableIterator*);
 void* tableiterator_value(TableIterator*);
 
 void table_init(Table*);
 void table_dispose(Table*);
-void table_insert(Table*, size_t k, void* value);
-void table_remove(Table*, size_t k);
-void* table_at(Table*, size_t k);
-size_t table_size(Table*);
-int table_exists(Table*, size_t k);
+void table_insert(Table*, uintptr_t k, void* value);
+void table_remove(Table*, uintptr_t k);
+void* table_at(Table*, uintptr_t k);
+uintptr_t table_size(Table*);
+int table_exists(Table*, uintptr_t k);
 TableIterator table_begin(Table*);
 const TableIterator* table_end(void);
 
-size_t freetableentry(void*, void*, HashEntry*);
+uintptr_t freetableentry(void*, void*, HashEntry*);
 
 #endif

@@ -42,6 +42,7 @@ static void psy3_writemacd(SongFile*);
 static void psy3_writemachine(SongFile*, Machine*, int32_t slot);
 static void psy3_savedllnameandindex(PsyFile*, const char* name,
 	int32_t shellindex);
+static Properties* machine_properties(SongFile*, int32_t slot);
 
 void psy3_load(SongFile* self)
 {
@@ -754,6 +755,8 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, uint32_t version, P
 		}
 		if (incon && input != -1) {
 			machines_connect(&self->song->machines, input, index);
+			connections_setwirevolume(&self->song->machines.connections,
+				input, index, inconvol);
 		}
 	}
 
@@ -761,11 +764,9 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, uint32_t version, P
 	if (type == MACH_DUMMY) {
 		char txt[40];
 		strcpy(txt, "X!");
-		strcat(txt, editname);
-		properties_append_string(properties, "editname", txt);
-	} else {
-		properties_append_string(properties, "editname", editname);
+		strcat(txt, editname);		
 	}
+	machine->seteditname(machine, editname);
 	machine->loadspecific(machine, self, index);
 	return machine;	
 }
@@ -778,13 +779,16 @@ static char* replace_char(char* str, char c, char r)
 	return p;
 }
 
-void makeplugincatchername(const char* psy3dllname, char* catchername)
+void makeplugincatchername(const char* modulename, char* catchername)
 {
 	char ext[_MAX_PATH];
 
-	extract_path(psy3dllname, catchername, ext);
+	extract_path(modulename, catchername, ext);
 	_strlwr(catchername);
 	replace_char(catchername, ' ', '-');
+	if (strstr(catchername, "blitz")) {
+		strcpy(catchername, "blitzn");
+	}
 }
 
 void psy3_save(SongFile* self)
@@ -832,17 +836,15 @@ void psy3_writefileheader(SongFile* self)
 
 void psy3_writesonginfo(SongFile* self)
 {		
-	uint32_t sizepos;
-	char* str;
+	uint32_t sizepos;	
 	
 	sizepos = psyfile_writeheader(self->file, "INFO", CURRENT_FILE_VERSION_INFO, 0);
 	psyfile_writestring(self->file,
-		properties_readstring(self->song->properties, "title", &str, "a Title"));
+		properties_readstring(self->song->properties, "title", "a Title"));
 	psyfile_writestring(self->file,
-		properties_readstring(self->song->properties, "credits", &str, "unknown"));
+		properties_readstring(self->song->properties, "credits", "unknown"));
 	psyfile_writestring(self->file,
-		properties_readstring(self->song->properties, "comments", &str,
-			"no comments"));
+		properties_readstring(self->song->properties, "comments", "no comments"));
 	psyfile_updatesize(self->file, sizepos);
 }
 
@@ -1080,9 +1082,11 @@ void psy3_writemachine(SongFile* self, Machine* machine, int32_t slot)
 		int32_t temp;
 		unsigned char bTemp;
 		MachineSockets* sockets;
-		char* tmpName;
+		const char* tmpName;
+		Properties* p;
 
 		unused = -1;
+		p = machine_properties(self, slot);
 		temp = info->type;
 		psyfile_write(self->file, &temp, sizeof(temp));
 		psy3_savedllnameandindex(self->file, info->modulepath, info->shellidx);
@@ -1092,9 +1096,9 @@ void psy3_writemachine(SongFile* self, Machine* machine, int32_t slot)
 		psyfile_write(self->file, &bTemp, sizeof(bTemp));
 		temp = (int32_t)(machine->panning(machine) * 256);
 		psyfile_write(self->file, &temp, sizeof(temp));
-		temp = 100; // x
+		temp = p ? properties_int(p, "x", 100) : 100;
 		psyfile_write(self->file, &temp, sizeof(temp));
-		temp = 100; // y
+		temp = p ? properties_int(p, "y", 100) : 100;
 		psyfile_write(self->file, &temp, sizeof(temp));
 		// Connections
 		sockets = connections_at(&self->song->machines.connections, slot);
@@ -1151,7 +1155,7 @@ void psy3_writemachine(SongFile* self, Machine* machine, int32_t slot)
 				psyfile_write(self->file, &bTemp, sizeof(bTemp)); // Incoming connections activated
 			}
 		}
-		tmpName = "";
+		tmpName = machine->editname(machine) ? machine->editname(machine) : "";
 		psyfile_writestring(self->file, tmpName);
 		{
 			machine->savespecific(machine, self, slot);
@@ -1198,4 +1202,32 @@ void psy3_savedllnameandindex(PsyFile* file, const char* name,
 		strcat(str2,idxtext);
 	}
 	pFile->Write(&str2,strlen(str2)+1);*/
+}
+
+Properties* machine_properties(SongFile* self, int32_t slot)
+{
+	Properties* rv = 0;
+
+	if (self->workspaceproperties) {
+		Properties* p;
+
+		p = properties_findsection(self->workspaceproperties, "machines");
+		if (p) {
+			p = p->children;
+
+			while (p != 0) {
+				Properties* q;
+				
+				q = properties_read(p, "index");
+				if (q) {
+					if (properties_value(q) == slot) {
+						rv = p;
+						break;
+					}
+				}
+				p = p->next;
+			}
+		}
+	}
+	return rv;
 }

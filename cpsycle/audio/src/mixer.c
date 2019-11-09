@@ -40,6 +40,7 @@ static unsigned int numoutputs(Mixer*);
 static Buffer* mix(Mixer*, size_t slot, unsigned int amount, MachineSockets*, Machines*);
 static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
 static void loadspecific(Mixer*, struct SongFile*, unsigned int slot);
+static void savespecific(Mixer*, struct SongFile*, unsigned int slot);
 static void onconnected(Mixer*, Connections*, size_t outputslot, size_t inputslot);
 static void ondisconnected(Mixer*, Connections*, size_t outputslot, size_t inputslot);
 static int parametertype(Mixer*, int par);
@@ -52,13 +53,16 @@ static int parametervalue(Mixer*, int const param);
 static int describevalue(Mixer*, char* txt, int const param, int const value);
 static unsigned int numparameters(Mixer*);
 static unsigned int numparametercols(Mixer*);
+static const char* editname(Mixer*);
+static void seteditname(Mixer*, const char* name);
+
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
 static WireSocketEntry* wiresocketentry(Mixer*, size_t input);
 static void insertinputchannels(Mixer*, size_t num, Machines* machines);
 static int paramviewoptions(Machine* self) { return MACHINE_PARAMVIEW_COMPACT; }
-static unsigned int slot(Mixer* self) { return self->slot; }
-static void setslot(Mixer* self, int slot) { self->slot = slot; }
+static uintptr_t slot(Mixer* self) { return self->slot; }
+static void setslot(Mixer* self, uintptr_t slot) { self->slot = slot; }
 static size_t mastercolumn(Mixer*);
 static size_t inputcolumn(Mixer*);
 static size_t returncolumn(Mixer*);
@@ -155,8 +159,11 @@ void mixer_init(Mixer* self, MachineCallback callback)
 	self->machine.numparametercols = numparametercols;	
 	self->machine.paramviewoptions = paramviewoptions;
 	self->machine.loadspecific = loadspecific;
+	self->machine.savespecific = savespecific;
 	self->machine.setslot = setslot;
 	self->machine.slot = slot;
+	self->machine.seteditname = seteditname;
+	self->machine.editname = editname;
 	table_init(&self->inputs);
 	table_init(&self->sends);
 	table_init(&self->returns);
@@ -166,6 +173,7 @@ void mixer_init(Mixer* self, MachineCallback callback)
 	rmsvol_init(&self->masterrmsvol);
 	mixerchannel_init(&self->master, 0);	
 	self->slot = 65535;
+	self->editname = strdup("Mixer");
 }
 
 void mixer_dispose(Mixer* self)
@@ -197,7 +205,8 @@ void mixer_dispose(Mixer* self)
 		}	
 		table_dispose(&self->returns);
 	}	
-	machine_dispose(&self->machine);	
+	machine_dispose(&self->machine);
+	free(self->editname);
 }
 
 void mixer_seqtick(Mixer* self, int channel, const PatternEvent* event)
@@ -700,7 +709,7 @@ int parametervalue(Mixer* self, int const param)
 		if (row == self->sends.count + 1) {			
 			return (int)(self->master.drymix * 65535);
 		} else
-		if (row == self->sends.count + 2) {
+		if (row == self->sends.count + 2) {			
 			return intparamvalue(
 				(float)sqrt(self->master.gain) * 0.5f);
 		} else	
@@ -731,7 +740,7 @@ int parametervalue(Mixer* self, int const param)
 			if (row == self->sends.count + 2) {
 				WireSocketEntry* input_entry;
 
-				input_entry = wiresocketentry(self, col - 1);
+				input_entry = wiresocketentry(self, col - inputcolumn(self));
 				if (input_entry) {						
 					return intparamvalue(
 						(float)sqrt(input_entry->volume) * 0.5f);					
@@ -884,7 +893,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			if (row == self->sends.count + 2) {
 				WireSocketEntry* input_entry;
 
-				input_entry = wiresocketentry(self, col - 1);
+				input_entry = wiresocketentry(self, col - inputcolumn(self));
 				if (input_entry) {
 					float db;
 
@@ -1133,7 +1142,7 @@ void loadspecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
 		unsigned int j;
 
 		channel = (MixerChannel*) table_at(&self->inputs, i);
-		for (j = 0; j<numrets; ++j) {
+		for (j = 0; j < numrets; ++j) {
 			float send = 0.0f;
 			psyfile_read(songfile->file, &send,sizeof(float));
 			table_insert(&channel->sendvols, j, (void*)(ptrdiff_t)(send * 65535));
@@ -1171,7 +1180,7 @@ void loadspecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
 			if (inputconvol > 8.0f) { //bugfix on 1.10.1 alpha
 				inputconvol /= 32768.f;
 			}
-			table_insert(&self->sends, i, (void*)(ptrdiff_t)inputmachine);
+			table_insert(&self->sends, i, (void*)(intptr_t)inputmachine);
 			channel->fxslot = inputmachine;
 			table_insert(&songfile->song->machines.connections.sends, inputmachine, (void*)1);
 		}
@@ -1221,6 +1230,102 @@ void loadspecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
 	// return true;
 }
 
+void savespecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
+{
+	float volume_;
+	float drywetmix_;
+	float gain_;
+	int32_t numins;
+	int32_t numrets;
+	uint32_t size;
+	int32_t i;
+	int32_t j;
+	
+	size = (sizeof(self->solocolumn) + sizeof(volume_) + sizeof(drywetmix_) + sizeof(gain_) +		
+		2 * sizeof(uint32_t));
+	size += (3 * sizeof(float) + 3 * sizeof(unsigned char) + self->sends.count * sizeof(float)) * self->inputs.count;
+	size += (2 * sizeof(float) + 2 * sizeof(unsigned char) + self->sends.count * sizeof(unsigned char) + 2 * sizeof(float) + sizeof(uint32_t)) * self->returns.count;
+	size += (2 * sizeof(float) + sizeof(uint32_t)) * self->sends.count;
+	psyfile_write(songfile->file, &size, sizeof(size));
+
+	psyfile_write(songfile->file, &self->solocolumn, sizeof(self->solocolumn));
+	psyfile_write(songfile->file, &self->master.volume, sizeof(float));
+	psyfile_write(songfile->file, &self->master.gain, sizeof(float));
+	psyfile_write(songfile->file, &self->master.drymix, sizeof(float));
+
+	numins = self->inputs.count;
+	numrets = self->returns.count;
+	psyfile_write(songfile->file, &numins, sizeof(int32_t));
+	psyfile_write(songfile->file, &numrets, sizeof(int32_t));
+	for (i = 0; i < self->inputs.count; i++)
+	{
+		MixerChannel* channel;
+
+		channel = (MixerChannel*) table_at(&self->inputs, i);
+		for (j = 0; j < self->sends.count; j++)
+		{
+			float sendvol;
+
+			sendvol = (int)(intptr_t)table_at(&channel->sendvols, j) / 65535.f;
+			psyfile_write(songfile->file,  &sendvol, sizeof(float));
+		}
+		psyfile_write(songfile->file, &channel->volume, sizeof(float));
+		psyfile_write(songfile->file, &channel->panning, sizeof(float));
+		psyfile_write(songfile->file, &channel->drymix, sizeof(float));
+		psyfile_write(songfile->file, &channel->mute, sizeof(unsigned char));
+		psyfile_write(songfile->file, &channel->dryonly, sizeof(unsigned char));
+		psyfile_write(songfile->file, &channel->wetonly, sizeof(unsigned char));
+	}
+	for (i = 0; i < self->returns.count; i++)
+	{
+		float volume, volMultiplier;
+		uint32_t wMacIdx;
+
+		ReturnChannel* channel;
+
+		channel = table_at(&self->returns, i);		
+		//Returning machines and values
+		//const Wire& wireRet = Return(i).GetWire();
+		//wMacIdx = (wireRet.Enabled()) ? wireRet.GetSrcMachine()._macIndex : -1;
+		//volume = wireRet.GetVolume();
+		volMultiplier = 1.0f; // wireRet.GetVolMultiplier();
+		psyfile_write(songfile->file, &channel->fxslot, sizeof(int32_t));	// Incoming connections Machine number
+		psyfile_write(songfile->file, &channel->volume, sizeof(float));	// Incoming connections Machine vol
+		psyfile_write(songfile->file, &volMultiplier, sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+
+		//Sending machines and values
+		if (table_exists(&channel->sendsto, i)) {
+			ReturnChannel* sendto;
+
+			sendto = table_at(&channel->sendsto, i);
+			wMacIdx = sendto->fxslot;
+			volume = sendto->volume;
+			volMultiplier = 1.0f;
+		}
+		else {
+			wMacIdx = -1;
+			volume = 1.0f;
+			volMultiplier = 1.0f;
+		}
+		psyfile_write(songfile->file, &wMacIdx, sizeof(int));	// send connections Machine number
+		psyfile_write(songfile->file, &volume, sizeof(float));	// send connections Machine vol
+		psyfile_write(songfile->file, &volMultiplier, sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+
+		//Rewiring of returns to sends and mix values
+		for (j = 0; j < self->sends.count; j++)
+		{
+			unsigned char send;
+
+			send = table_exists(&channel->sendsto, j);
+			psyfile_write(songfile->file, &send, sizeof(unsigned char));
+		}
+		psyfile_write(songfile->file, &channel->mastersend, sizeof(unsigned char));
+		psyfile_write(songfile->file, &channel->volume, sizeof(float));
+		psyfile_write(songfile->file, &channel->panning, sizeof(float));
+		psyfile_write(songfile->file, &channel->mute, sizeof(unsigned char));
+	}
+}
+
 void insertinputchannels(Mixer* self, size_t num, Machines* machines)
 {
 	WireSocketEntry* rv = 0;
@@ -1253,4 +1358,15 @@ float floatparamvalue(int value)
 size_t mastercolumn(Mixer* self)
 {
 	return 1;
+}
+
+const char* editname(Mixer* self)
+{
+	return self->editname;
+}
+
+void seteditname(Mixer* self, const char* name)
+{
+	free(self->editname);
+	self->editname = strdup(name);
 }
