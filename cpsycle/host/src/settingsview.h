@@ -20,6 +20,7 @@ typedef struct {
 	Properties* selected;
 	Properties* search;
 	ui_rectangle selrect;
+	int dirbutton;
 	int dy;
 	int mx;
 	int my;

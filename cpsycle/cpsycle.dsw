@@ -144,6 +144,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "player"=".\player\player.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name audio
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "ui"=".\ui\ui.dsp" - Package Owner=<4>
 
 Package=<5>

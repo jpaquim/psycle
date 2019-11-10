@@ -9,6 +9,8 @@
 #include <memory.h>
 #include <commctrl.h>   // includes the common control header
 #include <stdio.h>
+#include <shlobj.h>
+
 
 HINSTANCE appInstance = 0;
 HWND appMainComponentHandle = 0;
@@ -609,7 +611,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		}
 		ScrollWindow (hwnd, 0, component->scrollstepy * (iPos - si.nPos), 
                                    NULL, NULL) ;
-		UpdateWindow (hwnd) ;
+		UpdateWindow (hwnd);
 	}
 }
 
@@ -952,6 +954,11 @@ void ui_invalidaterect(ui_component* self, const ui_rectangle* r)
 	rc.right = r->right;
 	rc.bottom = r->bottom;
 	InvalidateRect((HWND)self->hwnd, &rc, FALSE);
+}
+
+void ui_component_update(ui_component* self)
+{
+	UpdateWindow((HWND)self->hwnd);
 }
 
 void ui_component_setfocus(ui_component* self)
@@ -1401,4 +1408,56 @@ void ui_component_starttimer(ui_component* self, unsigned int id,
 void ui_component_stoptimer(ui_component* self, unsigned int id)
 {
 	KillTimer((HWND)self->hwnd, id);
+}
+
+int ui_browsefolder(ui_component* self, const char* title, char* path)
+{
+
+	///\todo: alternate browser window for Vista/7: http://msdn.microsoft.com/en-us/library/bb775966%28v=VS.85%29.aspx
+	// SHCreateItemFromParsingName(
+	int val= 0;
+	
+	LPMALLOC pMalloc;
+	// Gets the Shell's default allocator
+	//
+	path[0] = '\0';
+	if (SHGetMalloc(&pMalloc) == NOERROR)
+	{
+		char pszBuffer[MAX_PATH];		
+		BROWSEINFO bi;
+		LPITEMIDLIST pidl;
+
+		pszBuffer[0]='\0';
+		// Get help on BROWSEINFO struct - it's got all the bit settings.
+		//
+		bi.hwndOwner = (HWND) self->hwnd;
+		bi.pidlRoot = NULL;
+		bi.pszDisplayName = pszBuffer;
+		bi.lpszTitle = title;
+#if defined _MSC_VER > 1200
+		bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+#else
+		bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
+#endif
+		bi.lpfn = NULL;
+		bi.lParam = 0;
+		// This next call issues the dialog box.
+		//
+		if ((pidl = SHBrowseForFolder(&bi)) != NULL) {
+			if (SHGetPathFromIDList(pidl, pszBuffer)) {
+				// At this point pszBuffer contains the selected path
+				//
+				val = 1;
+				_snprintf(path, MAX_PATH, "%s", pszBuffer);
+				path[MAX_PATH - 1] = '\0';				
+			}
+			// Free the PIDL allocated by SHBrowseForFolder.
+			//
+			pMalloc->lpVtbl->Free(pMalloc, pidl);
+		}
+		// Release the shell's allocator.
+		//
+		pMalloc->lpVtbl->Release(pMalloc);
+	}
+	return val;
 }
