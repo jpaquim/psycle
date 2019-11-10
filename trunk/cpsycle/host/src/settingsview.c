@@ -55,6 +55,7 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	self->selected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
+	self->dirbutton = 0;
 	ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);	
 	ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->client);	
@@ -186,6 +187,9 @@ void DrawValue(SettingsView* self, Properties* property, int column)
 	} else
 	if (properties_type(property) == PROPERTY_TYP_STRING) {
 		DrawString(self, property, column);
+		if (properties_hint(property) == PROPERTY_HINT_EDITDIR) {
+			DrawButton(self, property, column + 1);
+		}
 	} else
 	if (properties_type(property) == PROPERTY_TYP_INTEGER) {
 		DrawInteger(self, property, column);
@@ -232,13 +236,22 @@ void DrawButton(SettingsView* self, Properties* property, int column)
 {
 	ui_size size;
 	ui_rectangle r;	
-	ui_textout(self->g, self->columnwidth * column + 3, self->cpy + self->dy,
-		properties_text(property),
-		strlen(properties_text(property)));
+	if (properties_hint(property) == PROPERTY_HINT_EDITDIR) {
+		ui_textout(self->g, self->columnwidth * column + 3, self->cpy + self->dy,
+			"...", 3);
+	} else {
+		ui_textout(self->g, self->columnwidth * column + 3, self->cpy + self->dy,
+			properties_text(property),
+			strlen(properties_text(property)));
+	}
 	ui_setbackgroundcolor(self->g, 0x003E3E3E);
 	ui_setbackgroundmode(self->g, TRANSPARENT);
 	ui_settextcolor(self->g, 0x00CACACA);	
-	size = ui_component_textsize(&self->client, properties_text(property));
+	if (properties_hint(property) == PROPERTY_HINT_EDITDIR) {
+		size = ui_component_textsize(&self->client, "...");
+	} else {
+		size = ui_component_textsize(&self->client, properties_text(property));
+	}
 	r.left = self->columnwidth * column ;
 	r.top = self->cpy + self->dy ;
 	r.right = r.left + size.width + 6;
@@ -286,9 +299,21 @@ void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int but
 	self->mx = x;
 	self->my = y;
 	self->choiceproperty = 0;
-	PreparePropertiesEnum(self);
+	self->dirbutton = 0;
+	PreparePropertiesEnum(self);	
 	properties_enumerate(self->properties->children, self, OnPropertiesHitTestEnum);
 	if (self->selected) {
+		if (self->dirbutton) {
+			char path[MAX_PATH]	 = "";
+			char title[MAX_PATH];
+			
+			_snprintf(title, MAX_PATH, "%s", properties_text(self->selected));
+			title[MAX_PATH - 1] = '\0';
+			if (ui_browsefolder(&self->component, title, path)) {
+				properties_write_string(self->selected->parent,
+					self->selected->item.key, path);
+			}
+		} else
 		if (properties_ischoiceitem(self->selected)) {
 			self->choiceproperty = self->selected->parent;
 			self->choiceproperty->item.value.i = self->choicecount;
@@ -361,6 +386,7 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 {
 	int rv = 0;	
 
+	self->dirbutton = 0;
 	if (properties_type(property) == PROPERTY_TYP_BOOL) {					
 		ui_rectangle r;
 		int checked = 0;
@@ -372,16 +398,25 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 		r.right = r.left + size.width + 5;
 		r.bottom = r.top + size.height + 2;
 	
-		rv = Intersects(&r, self->mx, self->my);
+		rv = Intersects(&r, self->mx, self->my);		
 	} else
 	if (properties_type(property) == PROPERTY_TYP_INTEGER ||
 		properties_type(property) == PROPERTY_TYP_STRING ||
 		properties_type(property) == PROPERTY_TYP_ACTION) {
-		ui_rectangle r;
+		ui_rectangle r;		
 		ui_setrectangle(&r, self->columnwidth * column, 
-			self->cpy + self->dy, 300, self->lineheight);
+			self->cpy + self->dy, self->columnwidth, self->lineheight);
 		self->selrect = r;
 		rv = Intersects(&r, self->mx, self->my);
+		if (!rv && properties_hint(property) == PROPERTY_HINT_EDITDIR) {
+			ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
+				self->cpy + self->dy, self->columnwidth, self->lineheight);
+			self->selrect = r;
+			rv = Intersects(&r, self->mx, self->my);
+			if (rv) {
+				self->dirbutton = 1;
+			}
+		}
 	}
 	return rv;
 }

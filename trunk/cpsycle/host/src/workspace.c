@@ -42,7 +42,7 @@ static void workspace_setsong(Workspace*, Song*, int flag);
 static void workspace_changedefaultfontsize(Workspace*, int size);
 static void workspace_onloadprogress(Workspace*, Song*, int progress);
 static void workspace_onscanprogress(Workspace*, PluginCatcher*, int progress);
-
+/// Machinecallback
 static MachineCallback machinecallback(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
 static int machinecallback_bpm(Workspace*);
@@ -592,8 +592,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 	self->properties = songfile.workspaceproperties;
 	free(self->filename);
 	self->filename = strdup(path);
-	workspace_setsong(self, song, WORKSPACE_LOADSONG);
-	
+	workspace_setsong(self, song, WORKSPACE_LOADSONG);	
 }
 
 void workspace_onloadprogress(Workspace* self, Song* sender, int progress)

@@ -425,7 +425,7 @@ void OnMouseMove(MainFrame* self, ui_component* sender, int x, int y, int button
 		position = ui_component_position(sender);
 		ui_component_move(sender, position.left + x, toolbarsize.height);
 		ui_invalidate(sender);
-		UpdateWindow((HWND)sender->hwnd);
+		ui_component_update(sender);
 	}
 }
 

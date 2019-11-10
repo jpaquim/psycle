@@ -308,13 +308,13 @@ void pianogrid_onscroll(Pianogrid* self, ui_component* sender, int cx, int cy)
 		self->view->header.metrics = self->metrics;
 		self->view->keyboard.metrics = self->metrics;
 		ui_invalidate(&self->view->header.component);
-		UpdateWindow((HWND)self->view->header.component.hwnd);
+		ui_component_update(&self->view->header.component);		
 	}
 	if (self->cy != 0) {
 		self->dy += cy;
 		self->view->keyboard.dy = self->dy;
 		ui_invalidate(&self->view->keyboard.component);
-		UpdateWindow((HWND)self->view->keyboard.component.hwnd);
+		ui_component_update(&self->view->keyboard.component);
 	}	
 }
 

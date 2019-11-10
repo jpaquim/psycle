@@ -138,6 +138,7 @@ ui_rectangle ui_component_position(ui_component*);
 ui_size ui_component_frame_size(ui_component*);
 void ui_invalidate(ui_component*);
 void ui_invalidaterect(ui_component*, const ui_rectangle* rect);
+void ui_component_update(ui_component*);
 void ui_component_setfocus(ui_component*);
 int ui_component_hasfocus(ui_component*);
 void ui_component_setfont(ui_component*, ui_font* font);
@@ -171,6 +172,7 @@ int ui_openfile(ui_component* self, char* title, char* filter,
 	char* defextension, char* filename);
 int ui_savefile(ui_component* self, char* title, char* filter,
 	char* defextension, char* filename);
+int ui_browsefolder(ui_component* self, const char* title, char* path);
 
 ui_component* ui_maincomponent(void);
 
