@@ -22,7 +22,7 @@ void filtercoeff_setparameter(FilterCoeff*, float a0, float a1, float a2,
 	float b0, float b1, float b2);
 
 typedef void (*FilterMapCallback)(void*, int freq, int r, FilterCoeff* coeff);
-void filtermap_compute(void*, void* context, FilterMapCallback);
+void filtermap_compute(FilterMap*, void* context, FilterMapCallback);
 
 float cutoffinternalext(int v);
 float resonanceinternal(float v);

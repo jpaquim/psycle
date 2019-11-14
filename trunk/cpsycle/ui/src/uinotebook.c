@@ -141,7 +141,7 @@ void onmousemove(ui_notebook* self, ui_component* sender, int x, int y, int butt
 		position = ui_component_position(sender);
 		ui_component_move(sender, position.left + x, size.height);		
 		align_split(self, position.left + x);
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 		ui_component_update(&self->component);		
 	}
 }
@@ -164,13 +164,13 @@ void onmouseup(ui_notebook* self, ui_component* sender, int x, int y, int button
 void onmouseentersplitbar(ui_notebook* self, ui_component* sender)
 {	
 	ui_component_setbackgroundcolor(sender, 0x00666666);
-	ui_invalidate(sender);
+	ui_component_invalidate(sender);
 }
 
 void onmouseleavesplitbar(ui_notebook* self, ui_component* sender)
 {			
 	ui_component_setbackgroundcolor(sender, 0x00232323);
-	ui_invalidate(sender);
+	ui_component_invalidate(sender);
 }
 
 void align_split(ui_notebook* self, int x) {

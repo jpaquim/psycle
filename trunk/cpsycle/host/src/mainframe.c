@@ -14,6 +14,7 @@
 #include "inputmap.h"
 #include <uiapp.h>
 #include <dir.h>
+#include <portable.h>
 #include "resources/resource.h"
 
 static void InitMenu(MainFrame*);
@@ -394,7 +395,7 @@ void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
 		}
 	}
 	UpdateTitle(self);
-	ui_invalidate(&self->component);	
+	ui_component_invalidate(&self->component);	
 }
 
 void UpdateTitle(MainFrame* self)
@@ -404,7 +405,7 @@ void UpdateTitle(MainFrame* self)
 	char ext[512];
 
 	extract_path(self->workspace.filename, name, ext);
-	_snprintf(txt, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
+	psy_snprintf(txt, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
 		name, ext);			
 	ui_component_settitle(&self->component, txt);
 }
@@ -424,7 +425,7 @@ void OnMouseMove(MainFrame* self, ui_component* sender, int x, int y, int button
 		toolbarsize = ui_component_size(&self->top);
 		position = ui_component_position(sender);
 		ui_component_move(sender, position.left + x, toolbarsize.height);
-		ui_invalidate(sender);
+		ui_component_invalidate(sender);
 		ui_component_update(sender);
 	}
 }
@@ -444,13 +445,13 @@ void OnMouseUp(MainFrame* self, ui_component* sender, int x, int y, int button)
 void OnMouseEnterSplitBar(MainFrame* self, ui_component* sender)
 {	
 	ui_component_setbackgroundcolor(sender, 0x00666666);
-	ui_invalidate(sender);
+	ui_component_invalidate(sender);
 }
 
 void OnMouseLeaveSplitBar(MainFrame* self, ui_component* sender)
 {			
 	ui_component_setbackgroundcolor(sender, 0x00232323);
-	ui_invalidate(sender);
+	ui_component_invalidate(sender);
 }
 
 void OnGear(MainFrame* self, ui_component* sender)

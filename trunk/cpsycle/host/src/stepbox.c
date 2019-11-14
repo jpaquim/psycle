@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "stepbox.h"
+#include <portable.h>
 
 static void build(StepBox*);
 static void onselectionchanged(StepBox*, ui_component* sender, int index);
@@ -37,7 +38,7 @@ void build(StepBox* self)
 
 	for (step = 1; step <= 16; ++step) {
 		char text[20];
-		_snprintf(text, 20, "%d", step);
+		psy_snprintf(text, 20, "%d", step);
 		ui_combobox_addstring(&self->combobox, text);
 	}	
 }

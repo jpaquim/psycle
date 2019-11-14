@@ -8,6 +8,7 @@
 #include "songio.h"
 #include <string.h>
 #include <stdlib.h>
+#include <portable.h>
 
 static void work(Duplicator2* self, BufferContext* bc) { }
 static void sequencertick(Duplicator2*);
@@ -24,8 +25,6 @@ static unsigned int numparametercols(Duplicator2*);
 static void dispose(Duplicator2*);
 static unsigned int numinputs(Duplicator2* self) { return 0; }
 static unsigned int numoutputs(Duplicator2* self) { return 0; }
-static const char* editname(Duplicator2*);
-static void seteditname(Duplicator2*, const char* name);
 static void loadspecific(Duplicator2*, struct SongFile*, unsigned int slot);
 static void savespecific(Duplicator2*, struct SongFile*, unsigned int slot);
 
@@ -53,28 +52,27 @@ const MachineInfo* duplicator2_info(void)
 
 void duplicator2_init(Duplicator2* self, MachineCallback callback)
 {	
-	int i;
+	Machine* base = (Machine*)self;
+	int i;	
 
-	machine_init(&self->machine, callback);	
-	self->machine.work = work;	
-	self->machine.sequencertick = sequencertick;
-	self->machine.sequencerinsert = sequencerinsert;
-	self->machine.info = info;
-	self->machine.parametertweak = parametertweak;
-	self->machine.describevalue = describevalue;	
-	self->machine.parametervalue = parametervalue;
-	self->machine.dispose = dispose;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.parameterrange = parameterrange;
-	self->machine.numparameters = numparameters;
-	self->machine.numparametercols = numparametercols;
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.parametername = parametername;
-	self->machine.seteditname = seteditname;
-	self->machine.editname = editname;
-	self->machine.loadspecific = loadspecific;
-	self->machine.savespecific = savespecific;
+	custommachine_init(&self->custommachine, callback);
+	base->work = work;	
+	base->sequencertick = sequencertick;
+	base->sequencerinsert = sequencerinsert;
+	base->info = info;
+	base->parametertweak = parametertweak;
+	base->describevalue = describevalue;	
+	base->parametervalue = parametervalue;
+	base->dispose = dispose;
+	base->numinputs = numinputs;
+	base->numoutputs = numoutputs;
+	base->parameterrange = parameterrange;
+	base->numparameters = numparameters;
+	base->numparametercols = numparametercols;
+	base->parameterlabel = parameterlabel;
+	base->parametername = parametername;	
+	base->loadspecific = loadspecific;
+	base->savespecific = savespecific;
 	for (i = 0; i < 16; ++i) {
 		self->macoutput[i] = -1;
 		self->noteoffset[i] = 0;
@@ -83,14 +81,13 @@ void duplicator2_init(Duplicator2* self, MachineCallback callback)
 	}
 	self->isticking = 0;
 	duplicatormap_init(&self->map);	
-	self->editname = strdup("Note Duplicator 2");	
+	base->seteditname(base, "Note Duplicator 2");	
 }
 
 void dispose(Duplicator2* self)
-{
-	machine_dispose(&self->machine);
+{	
 	duplicatormap_dispose(&self->map);
-	free(self->editname);
+	custommachine_dispose(&self->custommachine);
 }
 
 void sequencertick(Duplicator2* self)
@@ -217,17 +214,17 @@ int parametername(Duplicator2* self, char* txt, int param)
 {
 	txt[0] = '\0';
 	if (param < 16) {
-		_snprintf(txt, 128, "%s %d", "Output Machine ", param);
+		psy_snprintf(txt, 128, "%s %d", "Output Machine ", param);
 	} else 
 	if (param < 2 * 16) {
-		_snprintf(txt, 128, "%s %d", "Note Offset ", param);
+		psy_snprintf(txt, 128, "%s %d", "Note Offset ", param);
 	} else
 	if (param < 3 * 16) {
-		_snprintf(txt, 128, "%s %d", "Low Note ", param);
+		psy_snprintf(txt, 128, "%s %d", "Low Note ", param);
 		
 	} else
 	if (param < 4 * 16) {
-		_snprintf(txt, 128, "%s %d", "High Note ", param);
+		psy_snprintf(txt, 128, "%s %d", "High Note ", param);
 	}
 	return 1;
 }
@@ -240,18 +237,6 @@ unsigned int numparameters(Duplicator2* self)
 unsigned int numparametercols(Duplicator2* self)
 {
 	return 4;	
-}
-
-
-const char* editname(Duplicator2* self)
-{
-	return self->editname;
-}
-
-void seteditname(Duplicator2* self, const char* name)
-{
-	free(self->editname);
-	self->editname = strdup(name);
 }
 
 void loadspecific(Duplicator2* self, struct SongFile* songfile, unsigned int slot)

@@ -10,7 +10,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <windows.h>
 
 static void machines_initsignals(Machines*);
 static void machines_disposesignals(Machines*);
@@ -33,9 +32,9 @@ void machines_init(Machines* self)
 	table_init(&self->nopath);
 	self->path = 0;
 	self->numsamplebuffers = 100;
-#if defined DIVERSALIS__CPU__X86__SSE
-	self->samplebuffers = (float*)aligned_memory_alloc(16, sizeof(float) * MAX_STREAM_SIZE *
-		self->numsamplebuffers);
+#if defined SSE
+	self->samplebuffers = (float*)aligned_memory_alloc(16, MAX_STREAM_SIZE *
+		self->numsamplebuffers, sizeof(float));
 #else
 	self->samplebuffers = (float*)malloc(sizeof(float) * MAX_STREAM_SIZE *
 		self->numsamplebuffers);
@@ -69,7 +68,7 @@ void machines_dispose(Machines* self)
 	table_dispose(&self->slots);
 	connections_dispose(&self->connections);
 	table_dispose(&self->nopath);
-#if defined DIVERSALIS__CPU__X86__SSE	
+#if defined SSE	
 	aligned_memory_dealloc(self->samplebuffers);
 #else
 	free(self->samplebuffers);
@@ -290,7 +289,7 @@ MachineList* compute_path(Machines* self, uintptr_t slot)
 	//		for (p = rv; p != 0; p = p->next) {
 	//			char text[20];
 
-	//			_snprintf(text, 20, "%d, ", (int)(p->entry));
+	//			psy_snprintf(text, 20, "%d, ", (int)(p->entry));
 	//			OutputDebugString(text);
 	//		}
 	//		OutputDebugString("\n");
@@ -446,3 +445,4 @@ TableIterator machines_begin(Machines* self)
 {
 	return table_begin(&self->slots);
 }
+

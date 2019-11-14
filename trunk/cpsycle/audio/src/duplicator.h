@@ -4,18 +4,17 @@
 #if !defined(DUPLICATOR_H)
 #define DUPLICATOR_H
 
-#include "machine.h"
+#include "custommachine.h"
 #include "duplicatormap.h"
 
 #define NUMMACHINES 8
 
 typedef struct {
-	Machine machine;
+	CustomMachine custommachine;
 	short macoutput[NUMMACHINES];
 	short noteoffset[NUMMACHINES];
 	int isticking;
-	DuplicatorMap map;
-	char* editname;
+	DuplicatorMap map;	
 } Duplicator;
 
 void duplicator_init(Duplicator*, MachineCallback);

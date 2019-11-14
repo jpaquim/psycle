@@ -3,8 +3,6 @@
 
 #include "../../detail/prefix.h"
 
-#include <windows.h>
-
 #include "signal.h"
 #include <stdlib.h>
 #include <stdarg.h>          
@@ -62,6 +60,21 @@ void signal_connect(Signal* self, void* context, void* fp)
 		node->fp = fp;
 		node->prevented = 0;		
 		list_append(&self->slots, node);		
+	}
+}
+
+void signal_disconnect(Signal* self, void* context, void* fp)
+{
+	List* p;	
+
+	p = self->slots;
+	while (p != 0) {
+		Slot* slot = (Slot*) p->entry;
+		if (slot->context == context && slot->fp == fp) {
+			list_remove(&self->slots, p);
+			break;
+		}
+		p = p->next;
 	}
 }
 

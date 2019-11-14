@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <songio.h>
+#include <portable.h>
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -429,7 +430,7 @@ void workspace_updatemididriverlist(Workspace* self)
 			if (eventdriver) {
 				const char* text;
 				
-				_snprintf(idstr, 40, "dev%d", i);
+				psy_snprintf(idstr, 40, "dev%d", i);
 				text = properties_readstring(eventdriver->properties, "name", idstr);
 				properties_settext(properties_append_string(drivers, idstr, text), text);
 			}
@@ -704,7 +705,7 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 	ui_fontinfo_init(&fontinfo, "Tahoma", size);
 	ui_font_init(&font, &fontinfo);
 	ui_replacedefaultfont(self->mainhandle, &font);
-	ui_invalidate(self->mainhandle);
+	ui_component_invalidate(self->mainhandle);
 }
 
 void workspace_seteditposition(Workspace* self, EditPosition editposition)

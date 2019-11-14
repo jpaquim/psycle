@@ -5,6 +5,7 @@
 
 #include "playposbar.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void ontimer(PlayPosBar*, ui_component* sender, int timerid);
 
@@ -36,7 +37,7 @@ void ontimer(PlayPosBar* self, ui_component* sender, int timerid)
 	if (self->lastposition != player_position(self->player)) {
 		char text[20];
 
-		_snprintf(text, 10, "%.4f", player_position(self->player));
+		psy_snprintf(text, 10, "%.4f", player_position(self->player));
 		ui_label_settext(&self->position, text);
 		self->lastposition = player_position(self->player);
 	}

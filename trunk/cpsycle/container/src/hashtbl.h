@@ -9,7 +9,7 @@
 #define TABLEKEYS 256
 
 typedef struct HashEntry {
-	size_t key;
+	uintptr_t key;
 	void* value;
 	struct HashEntry* next;
 } HashEntry;

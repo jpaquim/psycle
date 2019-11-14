@@ -13,6 +13,7 @@
 #include "machinefactory.h"
 #include <stdlib.h>
 #include <string.h>
+#include <portable.h>
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -717,10 +718,10 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, uint32_t version, P
 		properties_append_int(properties, "x", x, 0, 0);
 		properties_append_int(properties, "y", y, 0, 0);
 		if (bypass) {
-			machine_bypass(machine);
+			machine->bypass(machine);
 		}
 		if (mute) {
-			machine_mute(machine);
+			machine->mute(machine);
 		}
 		machine->setpanning(machine, panning / 128.f);
 	}
@@ -1090,9 +1091,9 @@ void psy3_writemachine(SongFile* self, Machine* machine, int32_t slot)
 		temp = info->type;
 		psyfile_write(self->file, &temp, sizeof(temp));
 		psy3_savedllnameandindex(self->file, info->modulepath, info->shellidx);
-		bTemp = machine->bypass;
+		bTemp = (unsigned char) machine->bypassed(machine);
 		psyfile_write(self->file, &bTemp, sizeof(bTemp));
-		bTemp = machine->mute;
+		bTemp = (unsigned char) machine->muted(machine);
 		psyfile_write(self->file, &bTemp, sizeof(bTemp));
 		temp = (int32_t)(machine->panning(machine) * 256);
 		psyfile_write(self->file, &temp, sizeof(temp));
@@ -1178,7 +1179,7 @@ void psy3_savedllnameandindex(PsyFile* file, const char* name,
 
 	str[0] = '\0';
 	if (name) {
-		_snprintf(str, 256, "%s", name);			
+		psy_snprintf(str, 256, "%s", name);			
 	}
 	psyfile_writestring(file, str);
 

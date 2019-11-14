@@ -6,6 +6,7 @@
 #include "settingsview.h"
 #include <stdio.h>
 #include "inputmap.h"
+#include <portable.h>
 
 static void OnDraw(SettingsView*, ui_component* sender, ui_graphics*);
 static int OnPropertiesDrawEnum(SettingsView*, Properties*, int level);
@@ -222,7 +223,7 @@ void DrawInteger(SettingsView* self, Properties* property, int column)
 		inputdefiner_setinput(&self->inputdefiner, properties_value(property));
 		inputdefiner_text(&self->inputdefiner, text);
 	} else {
-		_snprintf(text, 20, "%d", properties_value(property));
+		psy_snprintf(text, 20, "%d", properties_value(property));
 	}
 	ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy, text, strlen(text));
 }
@@ -307,7 +308,7 @@ void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int but
 			char path[MAX_PATH]	 = "";
 			char title[MAX_PATH];
 			
-			_snprintf(title, MAX_PATH, "%s", properties_text(self->selected));
+			psy_snprintf(title, MAX_PATH, "%s", properties_text(self->selected));
 			title[MAX_PATH - 1] = '\0';
 			if (ui_browsefolder(&self->component, title, path)) {
 				properties_write_string(self->selected->parent,
@@ -327,7 +328,7 @@ void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int but
 			signal_emit(&self->signal_changed, self, 1, self->selected);
 		}
 	}
-	ui_invalidate(&self->client);
+	ui_component_invalidate(&self->client);
 }
 
 int Intersects(ui_rectangle* r, int x, int y)
@@ -433,7 +434,7 @@ void OnMouseDoubleClick(SettingsView* self, ui_component* sender, int x, int y, 
 				edit = &self->inputdefiner.component;				
 			} else {
 				char text[40];
-				_snprintf(text, 40, "%d", properties_value(self->selected));
+				psy_snprintf(text, 40, "%d", properties_value(self->selected));
 				ui_edit_settext(&self->edit, text);
 				edit = &self->edit.component;				
 			}
@@ -529,7 +530,7 @@ void ontabbarchange(SettingsView* self, ui_component* sender, int tabindex)
 			self->dy = -scrollposition * self->lineheight;			
 			ui_component_setverticalscrollposition(&self->client, scrollposition);
 		}	
-		ui_invalidate(&self->client);
+		ui_component_invalidate(&self->client);
 	}
 }
 

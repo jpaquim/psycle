@@ -15,13 +15,14 @@ typedef enum {
 } ButtonIcon;
 
 typedef struct {
-   ui_component component;
-   Signal signal_clicked;    
-   int ownerdrawn;
-   char* text; // ownerdrawn 
-   int hover;
-   int highlight;
-   ButtonIcon icon;
+	ui_component component;
+	Signal signal_clicked;    
+	int ownerdrawn;
+	char* text; // ownerdrawn 
+	int hover;
+	int highlight;
+	ButtonIcon icon;
+	int charnumber;
 } ui_button;
 
 void ui_button_init(ui_button*, ui_component* parent);
@@ -29,5 +30,6 @@ void ui_button_settext(ui_button*, const char* text);
 void ui_button_seticon(ui_button*, ButtonIcon);
 void ui_button_highlight(ui_button*);
 void ui_button_disablehighlight(ui_button*);
+void ui_button_setcharnumber(ui_button*, int number);
 
 #endif

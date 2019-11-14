@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "samplerinstrumentview.h"
+#include <portable.h>
 
 static void OnSize(SamplerInstrumentView*, ui_component* sender, ui_size* size);
 static void AlignInstrumentView(SamplerInstrumentView* self);
@@ -23,17 +24,17 @@ static void OnNNACut(SamplerInstrumentGeneralView* self);
 static void OnNNARelease(SamplerInstrumentGeneralView* self);
 static void OnNNANone(SamplerInstrumentGeneralView* self);
 static void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView*, ui_component* parent, Instruments*);
-static void OnVolumeViewDescribe(SamplerInstrumentVolumeView*, SliderGroup*, char* txt);
-static void OnVolumeViewTweak(SamplerInstrumentVolumeView*, SliderGroup*, float value);
-static void OnVolumeViewValue(SamplerInstrumentVolumeView*, SliderGroup*, float* value);
+static void OnVolumeViewDescribe(SamplerInstrumentVolumeView*, ui_slider*, char* txt);
+static void OnVolumeViewTweak(SamplerInstrumentVolumeView*, ui_slider*, float value);
+static void OnVolumeViewValue(SamplerInstrumentVolumeView*, ui_slider*, float* value);
 static void SetInstrumentInstrumentVolumeView(SamplerInstrumentVolumeView* self, Instrument* instrument);
 static void InitSamplerInstrumentPanView(SamplerInstrumentPanView*, ui_component* parent, Instruments*);
 static void SetInstrumentInstrumentPanView(SamplerInstrumentPanView* self, Instrument* instrument);
 static void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView*, ui_component* parent, Instruments*);
 static void SetInstrumentInstrumentFilterView(SamplerInstrumentFilterView* self, Instrument* instrument);
-static void OnFilterViewDescribe(SamplerInstrumentFilterView*, SliderGroup*, char* txt);
-static void OnFilterViewTweak(SamplerInstrumentFilterView*, SliderGroup*, float value);
-static void OnFilterViewValue(SamplerInstrumentFilterView*, SliderGroup*, float* value);
+static void OnFilterViewDescribe(SamplerInstrumentFilterView*, ui_slider*, char* txt);
+static void OnFilterViewTweak(SamplerInstrumentFilterView*, ui_slider*, float value);
+static void OnFilterViewValue(SamplerInstrumentFilterView*, ui_slider*, float* value);
 static void InitSamplerInstrumentPitchView(SamplerInstrumentPitchView*, ui_component* parent, Instruments*);
 static void SetInstrumentInstrumentPitchView(SamplerInstrumentPitchView* self, Instrument* instrument);
 
@@ -43,9 +44,9 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 {
 	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_notebook_init(&self->notebook, &self->component);
-	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
+	//ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
 	signal_connect(&self->component.signal_size, self, OnSize);
 	InitSamplerInstrumentHeaderView(&self->header, &self->component, &workspace->song->instruments);
 	InitSamplerInstrumentGeneralView(&self->general, &self->notebook.component, &workspace->song->instruments);
@@ -268,7 +269,7 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 {
 	ui_margin margin;
 	int i;
-	SliderGroup* sliders[] = {
+	ui_slider* sliders[] = {
 		&self->attack,
 		&self->decay,
 		&self->sustain,
@@ -289,17 +290,21 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 200);	
 
-	InitSliderGroup(&self->attack, &self->component, "Attack");
-	InitSliderGroup(&self->decay, &self->component, "Decay");
-	InitSliderGroup(&self->sustain, &self->component, "Sustain Level");
-	InitSliderGroup(&self->release, &self->component, "Release");
+	ui_slider_init(&self->attack, &self->component);
+	ui_slider_settext(&self->attack, "Attack");
+	ui_slider_init(&self->decay, &self->component);
+	ui_slider_settext(&self->decay, "Decay");
+	ui_slider_init(&self->sustain, &self->component);
+	ui_slider_settext(&self->sustain, "Sustain Level");
+	ui_slider_init(&self->release, &self->component);
+	ui_slider_settext(&self->release, "Release");
 	
 	ui_margin_init(&margin, 0, 5, 5, 5);
 	for (i = 0; i < 4; ++i) {		
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
 		ui_component_setmargin(&sliders[i]->component, &margin);
-		SliderGroupConnect(sliders[i], self, OnVolumeViewDescribe,
+		ui_slider_connect(sliders[i], self, OnVolumeViewDescribe,
 			OnVolumeViewTweak, OnVolumeViewValue);		
 	}	
 }
@@ -310,43 +315,43 @@ void SetInstrumentInstrumentVolumeView(SamplerInstrumentVolumeView* self, Instru
 	EnvelopeViewSetAdsrEnvelope(&self->envelopeview, instrument ? &instrument->volumeenvelope : 0);
 }
 
-void OnVolumeViewDescribe(SamplerInstrumentVolumeView* self, SliderGroup* slidergroup, char* txt)
+void OnVolumeViewDescribe(SamplerInstrumentVolumeView* self, ui_slider* slidergroup, char* txt)
 {
 	if (slidergroup == &self->attack) {		
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0ms");
+			psy_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", 
+			psy_snprintf(txt, 20, "%.4fms", 
 				adsr_settings_attack(&self->instrument->volumeenvelope) * 1000);				
 		}		
 	} else
 	if (slidergroup == &self->decay) {		
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0ms");
+			psy_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms",
+			psy_snprintf(txt, 20, "%.4fms",
 				adsr_settings_decay(&self->instrument->volumeenvelope) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->sustain) {
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0%%");
+			psy_snprintf(txt, 10, "0%%");
 		} else {
-			_snprintf(txt, 20, "%d%%", (int)
+			psy_snprintf(txt, 20, "%d%%", (int)
 				(adsr_settings_sustain(&self->instrument->volumeenvelope) * 100));
 		}		
 	} else
 	if (slidergroup == &self->release) {
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0ms");
+			psy_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms",
+			psy_snprintf(txt, 20, "%.4fms",
 				adsr_settings_release(&self->instrument->volumeenvelope) * 1000);
 		}		
 	}
 }
 
-void OnVolumeViewTweak(SamplerInstrumentVolumeView* self, SliderGroup* slidergroup, float value)
+void OnVolumeViewTweak(SamplerInstrumentVolumeView* self, ui_slider* slidergroup, float value)
 {
 	if (!self->instrument) {
 		return;
@@ -370,7 +375,7 @@ void OnVolumeViewTweak(SamplerInstrumentVolumeView* self, SliderGroup* slidergro
 	EnvelopeViewUpdate(&self->envelopeview);
 }
 
-void OnVolumeViewValue(SamplerInstrumentVolumeView* self, SliderGroup* slidergroup, float* value)
+void OnVolumeViewValue(SamplerInstrumentVolumeView* self, ui_slider* slidergroup, float* value)
 {
 	if (slidergroup == &self->attack) {
 		*value = self->instrument
@@ -410,7 +415,7 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 {
 	ui_margin margin;
 	int i;
-	SliderGroup* sliders[] = {
+	ui_slider* sliders[] = {
 		&self->attack,
 		&self->decay,
 		&self->sustain,
@@ -434,20 +439,27 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 100);	
 
-	InitSliderGroup(&self->attack, &self->component, "Attack");
-	InitSliderGroup(&self->decay, &self->component, "Decay");
-	InitSliderGroup(&self->sustain, &self->component, "Sustain Level");
-	InitSliderGroup(&self->release, &self->component, "Release");
-	InitSliderGroup(&self->cutoff, &self->component, "Cut-off");
-	InitSliderGroup(&self->res, &self->component, "Res/bandw.");
-	InitSliderGroup(&self->modamount, &self->component, "Mod. Amount");
+	ui_slider_init(&self->attack, &self->component);
+	ui_slider_settext(&self->attack, "Attack");
+	ui_slider_init(&self->decay, &self->component);
+	ui_slider_settext(&self->decay, "Decay");
+	ui_slider_init(&self->sustain, &self->component);
+	ui_slider_settext(&self->sustain, "Sustain Level");
+	ui_slider_init(&self->release, &self->component);
+	ui_slider_settext(&self->release, "Release");
+	ui_slider_init(&self->cutoff, &self->component);
+	ui_slider_settext(&self->cutoff, "Cut-off");
+	ui_slider_init(&self->res, &self->component);
+	ui_slider_settext(&self->res, "Res/bandw.");
+	ui_slider_init(&self->modamount, &self->component);
+	ui_slider_settext(&self->modamount, "Mod. Amount");
 	
 	ui_margin_init(&margin, 0, 5, 5, 5);
 	for (i = 0; i < 7; ++i) {		
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
 		ui_component_setmargin(&sliders[i]->component, &margin);
-		SliderGroupConnect(sliders[i], self, OnFilterViewDescribe,
+		ui_slider_connect(sliders[i], self, OnFilterViewDescribe,
 			OnFilterViewTweak, OnFilterViewValue);		
 	}	
 }
@@ -459,69 +471,69 @@ void SetInstrumentInstrumentFilterView(SamplerInstrumentFilterView* self, Instru
 		instrument ? &instrument->filterenvelope : 0);
 }
 
-void OnFilterViewDescribe(SamplerInstrumentFilterView* self, SliderGroup* slidergroup, char* txt)
+void OnFilterViewDescribe(SamplerInstrumentFilterView* self, ui_slider* slidergroup, char* txt)
 {
 	if (slidergroup == &self->attack) {		
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0ms");
+			psy_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms", 
+			psy_snprintf(txt, 20, "%.4fms", 
 				adsr_settings_attack(
 					&self->instrument->filterenvelope) * 1000);				
 		}		
 	} else
 	if (slidergroup == &self->decay) {		
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0ms");
+			psy_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms",
+			psy_snprintf(txt, 20, "%.4fms",
 				adsr_settings_decay(
 					&self->instrument->filterenvelope) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->sustain) {
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0%%");
+			psy_snprintf(txt, 10, "0%%");
 		} else {
-			_snprintf(txt, 20, "%d%%", (int)(
+			psy_snprintf(txt, 20, "%d%%", (int)(
 				adsr_settings_sustain(
 					&self->instrument->filterenvelope) * 100));
 		}		
 	} else
 	if (slidergroup == &self->release) {
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0ms");
+			psy_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%.4fms",
+			psy_snprintf(txt, 20, "%.4fms",
 				adsr_settings_release(
 					&self->instrument->filterenvelope) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->cutoff) {
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0");
+			psy_snprintf(txt, 10, "0");
 		} else {
-			_snprintf(txt, 20, "%d", (int)(self->instrument->filtercutoff * 11665 + 2333));
+			psy_snprintf(txt, 20, "%d", (int)(self->instrument->filtercutoff * 11665 + 2333));
 		}		
 	} else
 	if (slidergroup == &self->res) {
 		if (!self->instrument) {
-			_snprintf(txt, 10, "50%%");
+			psy_snprintf(txt, 10, "50%%");
 		} else {
-			_snprintf(txt, 20, "%d%%", (int)(self->instrument->filterres * 100));
+			psy_snprintf(txt, 20, "%d%%", (int)(self->instrument->filterres * 100));
 		}		
 	} else
 	if (slidergroup == &self->modamount) {
 		if (!self->instrument) {
-			_snprintf(txt, 10, "0ms");
+			psy_snprintf(txt, 10, "0ms");
 		} else {
-			_snprintf(txt, 20, "%d%%", (int)(self->instrument->filtermodamount) * 100);
+			psy_snprintf(txt, 20, "%d%%", (int)(self->instrument->filtermodamount) * 100);
 		}		
 	}	
 }
 
 void OnFilterViewTweak(SamplerInstrumentFilterView* self,
-	SliderGroup* slidergroup, float value)
+	ui_slider* slidergroup, float value)
 {
 	if (!self->instrument) {
 		return;
@@ -554,7 +566,7 @@ void OnFilterViewTweak(SamplerInstrumentFilterView* self,
 	EnvelopeViewUpdate(&self->envelopeview);
 }
 
-void OnFilterViewValue(SamplerInstrumentFilterView* self, SliderGroup* slidergroup, float* value)
+void OnFilterViewValue(SamplerInstrumentFilterView* self, ui_slider* slidergroup, float* value)
 {
 	if (slidergroup == &self->attack) {
 		*value = self->instrument

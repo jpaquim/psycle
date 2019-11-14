@@ -6,6 +6,7 @@
 #include "library.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <portable.h>
 
 #define __cplusplus
 #include <diversalis/os.hpp>
@@ -47,7 +48,7 @@ static int FilterException(const char* path, int code, struct _EXCEPTION_POINTER
 {	
 	char txt[512];	
 		
-	_snprintf(txt, 512, "Error Load Module %s", path);	
+	psy_snprintf(txt, 512, "Error Load Module %s", path);	
 	MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
 	return EXCEPTION_EXECUTE_HANDLER;
 }

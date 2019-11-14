@@ -252,10 +252,6 @@ SOURCE=.\src\skinio.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\slidergroup.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\songbar.c
 # End Source File
 # Begin Source File
@@ -305,6 +301,10 @@ SOURCE=.\src\vubar.c
 # Begin Source File
 
 SOURCE=.\src\vumeter.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vuscope.c
 # End Source File
 # Begin Source File
 
@@ -492,10 +492,6 @@ SOURCE=.\src\skinio.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\slidergroup.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\songbar.h
 # End Source File
 # Begin Source File
@@ -545,6 +541,10 @@ SOURCE=.\src\vubar.h
 # Begin Source File
 
 SOURCE=.\src\vumeter.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vuscope.h
 # End Source File
 # Begin Source File
 

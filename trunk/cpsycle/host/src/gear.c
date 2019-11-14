@@ -128,7 +128,7 @@ void OnSongChanged(Gear* self, Workspace* workspace)
 	SetSamples(&self->samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
 	ConnectSongSignals(self);
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void OnClone(Gear* self, ui_component* sender)

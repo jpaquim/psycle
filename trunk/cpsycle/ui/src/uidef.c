@@ -24,6 +24,14 @@ void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int heigh
    self->bottom = top + height;   
 }
 
+int ui_rectangle_intersect_rectangle(const ui_rectangle* self, const ui_rectangle* other)
+{
+	return !(other->left > self->right ||
+		other->right < self->left ||
+		other->top > self->bottom ||
+		other->bottom < self->top);
+}
+
 int ui_rectangle_intersect(ui_rectangle* self, int x, int y)
 {
 	return (x >= self->left && x < self->right && 

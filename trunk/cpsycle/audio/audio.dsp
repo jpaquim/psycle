@@ -115,6 +115,10 @@ SOURCE=.\src\connections.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\custommachine.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\dummy.c
 # End Source File
 # Begin Source File
@@ -548,6 +552,10 @@ SOURCE=.\src\connections.h
 # Begin Source File
 
 SOURCE=.\src\constants.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\custommachine.h
 # End Source File
 # Begin Source File
 

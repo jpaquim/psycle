@@ -5,15 +5,16 @@
 
 #include "channelmappingview.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void pinedit_ondraw(PinEdit*, ui_component* sender, ui_graphics*);
 static void pinedit_drawpinsockets(PinEdit*, ui_graphics*);
 static void pinedit_drawpinconnections(PinEdit*, ui_graphics*);
 
-void pinedit_init(PinEdit* self, ui_component* parent, uintptr_t src, uintptr_t dst, Workspace* workspace)
+void pinedit_init(PinEdit* self, ui_component* parent, Wire wire,
+	Workspace* workspace)
 {					
-	self->src = src;
-	self->dst = dst;
+	self->wire = wire;
 	self->lineheight = 12;
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
@@ -33,12 +34,12 @@ void pinedit_drawpinsockets(PinEdit* self, ui_graphics* g)
 	uintptr_t numsrcpins;
 	uintptr_t numdstpins;
 	
-	machine = machines_at(&self->workspace->song->machines, self->src);
+	machine = machines_at(&self->workspace->song->machines, self->wire.src);
 	if (machine) {
-		machine = machines_at(&self->workspace->song->machines, self->dst);
+		machine = machines_at(&self->workspace->song->machines, self->wire.dst);
 		numsrcpins = machine->numoutputs(machine);
 		if (machine) {
-			int p;
+			uintptr_t p;
 			ui_rectangle r;
 			ui_size pin = { 8, 8 };
 			ui_size size;
@@ -54,7 +55,7 @@ void pinedit_drawpinsockets(PinEdit* self, ui_graphics* g)
 			ui_settextcolor(g, 0x00CACACA);
 			for (p = 0; p < numsrcpins; ++p) {
 				cpy = p * self->lineheight;
-				_snprintf(text, 40, "%.02d", p);
+				psy_snprintf(text, 40, "%.02d", p);
 				text[39] = '\0';
 				ui_textout(g, centerx, cpy, text, strlen(text));
 				ui_setrectangle(&r, centerx + 20, cpy + (self->lineheight - pin.height) / 2, pin.width, pin.height);
@@ -79,7 +80,7 @@ void pinedit_drawpinconnections(PinEdit* self, ui_graphics* g)
 	size = ui_component_size(&self->component);
 	centerx = (size.width - 100) / 2;
 	connections = &self->workspace->song->machines.connections;
-	input = connection_input(connections, self->src, self->dst);
+	input = connection_input(connections, self->wire.src, self->wire.dst);
 	for (pinpair = input->mapping; pinpair != 0; pinpair = pinpair->next) {
 		PinConnection* pinconnection;		
 
@@ -91,7 +92,7 @@ void pinedit_drawpinconnections(PinEdit* self, ui_graphics* g)
 }
 
 void channelmappingview_init(ChannelMappingView* self, ui_component* parent,
-	uintptr_t src, uintptr_t dst, Workspace* workspace)
+	Wire wire, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
@@ -104,6 +105,6 @@ void channelmappingview_init(ChannelMappingView* self, ui_component* parent,
 	ui_button_init(&self->unselectall, &self->buttongroup);
 	ui_component_setalign(&self->unselectall.component, UI_ALIGN_TOP);
 	ui_button_settext(&self->unselectall, "Unselect all");
-	pinedit_init(&self->pinedit, &self->component, src, dst, workspace);
+	pinedit_init(&self->pinedit, &self->component, wire, workspace);
 	ui_component_setalign(&self->pinedit.component, UI_ALIGN_CLIENT);
 }

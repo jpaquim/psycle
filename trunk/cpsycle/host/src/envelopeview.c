@@ -194,7 +194,7 @@ void OnMouseMove(EnvelopeView* self, ui_component* sender, int x, int y, int but
 		CheckAdjustPointRange(self->dragpoint);
 		ShiftSuccessors(self, pt->time - oldtime);
 		adsrpointmapper_updatesettings(&self->pointmapper);
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 }
 
@@ -293,6 +293,6 @@ void EnvelopeViewUpdate(EnvelopeView* self)
 {
 	if (self->points && !self->dragpoint) {
 		adsrpointmapper_updatepoints(&self->pointmapper);
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 }

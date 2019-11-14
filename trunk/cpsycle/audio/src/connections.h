@@ -36,6 +36,11 @@ void machinesockets_dispose(MachineSockets*);
 WireSocket* connection_at(WireSocket*, uintptr_t slot);
 
 typedef struct {
+	uintptr_t src;
+	uintptr_t dst;
+} Wire;
+
+typedef struct {
 	Table container;
 	Table sends;
 	Signal signal_connected;

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dsptypes.h>
+#include <portable.h>
 
 const MachineInfo* mixer_info(void)
 {
@@ -37,12 +38,12 @@ static int mixer_mode(Mixer* self) { return MACHMODE_FX; }
 static void mixer_seqtick(Mixer*, int channel, const PatternEvent*);
 static unsigned int numinputs(Mixer*);
 static unsigned int numoutputs(Mixer*);
-static Buffer* mix(Mixer*, size_t slot, unsigned int amount, MachineSockets*, Machines*);
+static Buffer* mix(Mixer*, uintptr_t slot, unsigned int amount, MachineSockets*, Machines*);
 static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol);
 static void loadspecific(Mixer*, struct SongFile*, unsigned int slot);
 static void savespecific(Mixer*, struct SongFile*, unsigned int slot);
-static void onconnected(Mixer*, Connections*, size_t outputslot, size_t inputslot);
-static void ondisconnected(Mixer*, Connections*, size_t outputslot, size_t inputslot);
+static void onconnected(Mixer*, Connections*, uintptr_t outputslot, uintptr_t inputslot);
+static void ondisconnected(Mixer*, Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static int parametertype(Mixer*, int par);
 static void parameterrange(Mixer*, int param, int* minval, int* maxval);
 static int parameterlabel(Mixer*, char* txt, int param);
@@ -53,19 +54,17 @@ static int parametervalue(Mixer*, int const param);
 static int describevalue(Mixer*, char* txt, int const param, int const value);
 static unsigned int numparameters(Mixer*);
 static unsigned int numparametercols(Mixer*);
-static const char* editname(Mixer*);
-static void seteditname(Mixer*, const char* name);
 
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
-static WireSocketEntry* wiresocketentry(Mixer*, size_t input);
-static void insertinputchannels(Mixer*, size_t num, Machines* machines);
+static WireSocketEntry* wiresocketentry(Mixer*, uintptr_t input);
+static void insertinputchannels(Mixer*, uintptr_t num, Machines* machines);
 static int paramviewoptions(Machine* self) { return MACHINE_PARAMVIEW_COMPACT; }
 static uintptr_t slot(Mixer* self) { return self->slot; }
 static void setslot(Mixer* self, uintptr_t slot) { self->slot = slot; }
-static size_t mastercolumn(Mixer*);
-static size_t inputcolumn(Mixer*);
-static size_t returncolumn(Mixer*);
+static uintptr_t mastercolumn(Mixer*);
+static uintptr_t inputcolumn(Mixer*);
+static uintptr_t returncolumn(Mixer*);
 static void preparemix(Mixer*, Machines*, unsigned int amount);
 static void mixinputs(Mixer*, Machines*, unsigned int amount);
 static void workreturns(Mixer*, Machines*, unsigned int amount);
@@ -73,14 +72,14 @@ static void mixreturns(Mixer*, Machines*, unsigned int amount);
 static void tickrms(Mixer*, unsigned int amount);
 static void levelmaster(Mixer*, unsigned int amount);
 
-static MixerChannel* mixerchannel_allocinit(size_t inputslot);
+static MixerChannel* mixerchannel_allocinit(uintptr_t inputslot);
 static void mixerchannel_dispose(MixerChannel*);
 
-static void returnchannel_init(ReturnChannel*, size_t fxslot);
-static ReturnChannel* returnchannel_allocinit(size_t fxslot);
+static void returnchannel_init(ReturnChannel*, uintptr_t fxslot);
+static ReturnChannel* returnchannel_allocinit(uintptr_t fxslot);
 static void returnchannel_dispose(ReturnChannel*);
 
-void mixerchannel_init(MixerChannel* self, size_t inputslot)
+void mixerchannel_init(MixerChannel* self, uintptr_t inputslot)
 {		
 	self->inputslot = inputslot;
 	self->drymix = 1.0f;
@@ -93,7 +92,7 @@ void mixerchannel_init(MixerChannel* self, size_t inputslot)
 	self->wetonly = 0;
 }
 
-MixerChannel* mixerchannel_allocinit(size_t inputslot)
+MixerChannel* mixerchannel_allocinit(uintptr_t inputslot)
 {
 	MixerChannel* rv;
 
@@ -109,7 +108,7 @@ void mixerchannel_dispose(MixerChannel* self)
 	table_dispose(&self->sendvols);	
 }
 
-void returnchannel_init(ReturnChannel* self, size_t fxslot)
+void returnchannel_init(ReturnChannel* self, uintptr_t fxslot)
 {		
 	self->fxslot = fxslot;
 	self->mute = 0;
@@ -119,7 +118,7 @@ void returnchannel_init(ReturnChannel* self, size_t fxslot)
 	table_init(&self->sendsto);
 }
 
-ReturnChannel* returnchannel_allocinit(size_t fxslot)
+ReturnChannel* returnchannel_allocinit(uintptr_t fxslot)
 {
 	ReturnChannel* rv;
 
@@ -137,43 +136,42 @@ void returnchannel_dispose(ReturnChannel* self)
 
 void mixer_init(Mixer* self, MachineCallback callback)
 {
+	Machine* base = (Machine*)self;
 	Machines* machines;
 
-	machine_init(&self->machine, callback);
-	self->machine.info = info;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.dispose = mixer_dispose;
-	self->machine.seqtick = mixer_seqtick;
-	self->machine.mode = mixer_mode;
-	self->machine.mix = mix;
-	self->machine.parametertype = parametertype;
-	self->machine.parameterrange = parameterrange;
-	self->machine.parametername = parametername;
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.parametertweak = parametertweak;
-	self->machine.patterntweak = patterntweak;
-	self->machine.parametervalue = parametervalue;
-	self->machine.describevalue = describevalue;
-	self->machine.numparameters = numparameters;
-	self->machine.numparametercols = numparametercols;	
-	self->machine.paramviewoptions = paramviewoptions;
-	self->machine.loadspecific = loadspecific;
-	self->machine.savespecific = savespecific;
-	self->machine.setslot = setslot;
-	self->machine.slot = slot;
-	self->machine.seteditname = seteditname;
-	self->machine.editname = editname;
+	custommachine_init(&self->custommachine, callback);
+	base->info = info;
+	base->numinputs = numinputs;
+	base->numoutputs = numoutputs;
+	base->dispose = mixer_dispose;
+	base->seqtick = mixer_seqtick;
+	base->mode = mixer_mode;
+	base->mix = mix;
+	base->parametertype = parametertype;
+	base->parameterrange = parameterrange;
+	base->parametername = parametername;
+	base->parameterlabel = parameterlabel;
+	base->parametertweak = parametertweak;
+	base->patterntweak = patterntweak;
+	base->parametervalue = parametervalue;
+	base->describevalue = describevalue;
+	base->numparameters = numparameters;
+	base->numparametercols = numparametercols;	
+	base->paramviewoptions = paramviewoptions;
+	base->loadspecific = loadspecific;
+	base->savespecific = savespecific;
+	base->setslot = setslot;
+	base->slot = slot;	
 	table_init(&self->inputs);
 	table_init(&self->sends);
 	table_init(&self->returns);
-	machines = self->machine.machines(self);
+	machines = base->machines(base);
 	signal_connect(&machines->connections.signal_connected, self, onconnected);
 	signal_connect(&machines->connections.signal_disconnected, self, ondisconnected);
 	rmsvol_init(&self->masterrmsvol);
 	mixerchannel_init(&self->master, 0);	
 	self->slot = 65535;
-	self->editname = strdup("Mixer");
+	base->seteditname(base, "Mixer");
 }
 
 void mixer_dispose(Mixer* self)
@@ -205,8 +203,7 @@ void mixer_dispose(Mixer* self)
 		}	
 		table_dispose(&self->returns);
 	}	
-	machine_dispose(&self->machine);
-	free(self->editname);
+	custommachine_dispose(&self->custommachine);	
 }
 
 void mixer_seqtick(Mixer* self, int channel, const PatternEvent* event)
@@ -243,7 +240,7 @@ unsigned int numoutputs(Mixer* self)
 	return 2;
 }
 
-Buffer* mix(Mixer* self, size_t slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
+Buffer* mix(Mixer* self, uintptr_t slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
 {							
 	preparemix(self, machines, amount);
 	mixinputs(self, machines, amount);
@@ -302,7 +299,7 @@ void mixinputs(Mixer* self, Machines* machines, unsigned int amount)
 
 				fxchannel = (ReturnChannel*)tableiterator_value(&fx_iter);
 				if (fxchannel) {
-					sendvol = (int)(size_t) table_at(&channel->sendvols,
+					sendvol = (int)(uintptr_t) table_at(&channel->sendvols,
 						tableiterator_key(&fx_iter));
 					addsamples(fxchannel->buffer, channel->buffer, amount,
 						(sendvol / 65535.f) * wirevol);
@@ -400,12 +397,13 @@ void levelmaster(Mixer* self, unsigned int amount)
 	dsp_mul(self->master.buffer->samples[1], amount, self->master.volume);
 }
 
-void onconnected(Mixer* self, Connections* connections, size_t outputslot, size_t inputslot)
+void onconnected(Mixer* self, Connections* connections, uintptr_t outputslot, uintptr_t inputslot)
 {				
+	Machine* base = (Machine*)self;
 	if (inputslot == (int)self->slot) {		
 		if (outputslot != (int)self->slot) {
 			Machine* machine;
-			Machines* machines = self->machine.machines(self);
+			Machines* machines = base->machines(base);
 
 			machine = machines_at(machines, outputslot);
 			if (machine->mode(machine) == MACHMODE_GENERATOR) {
@@ -416,18 +414,18 @@ void onconnected(Mixer* self, Connections* connections, size_t outputslot, size_
 			} else {
 				table_insert(&self->sends, self->sends.count, (void*)outputslot);
 				table_insert(&self->returns, self->returns.count, 
-					returnchannel_allocinit(outputslot));
-				machine->ismixersend = 1;
+					returnchannel_allocinit(outputslot));				
 			}
 		}
 	}
 }
 
-void ondisconnected(Mixer* self, Connections* connections, size_t outputslot, size_t inputslot)
+void ondisconnected(Mixer* self, Connections* connections, uintptr_t outputslot, uintptr_t inputslot)
 {
+	Machine* base = (Machine*)self;
 	if (inputslot == (int)self->slot) {
 		Machine* machine;
-		Machines* machines = self->machine.machines(self);
+		Machines* machines = base->machines(base);
 
 		machine = machines_at(machines, outputslot);
 		if (machine->mode(machine) == MACHMODE_GENERATOR) {
@@ -460,7 +458,7 @@ void ondisconnected(Mixer* self, Connections* connections, size_t outputslot, si
 				sendsto_iter = table_begin(&channel->sendsto);
 				while (!tableiterator_equal(&sendsto_iter, table_end())) {
 					ReturnChannel* sendto;
-					size_t key;
+					uintptr_t key;
 
 					key = tableiterator_key(&sendsto_iter);
 					sendto = (ReturnChannel*)tableiterator_value(&sendsto_iter);
@@ -475,11 +473,11 @@ void ondisconnected(Mixer* self, Connections* connections, size_t outputslot, si
 
 			for (it = table_begin(&self->sends);
 				!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
-				size_t sendslot;
-				size_t c;
+				uintptr_t sendslot;
+				uintptr_t c;
 
 				c = tableiterator_key(&it);
-				sendslot = (size_t)tableiterator_value(&it);
+				sendslot = (uintptr_t)tableiterator_value(&it);
 				if (sendslot == outputslot) {
 					ReturnChannel* returnchannel;
 					table_remove(&self->sends, c);					
@@ -508,8 +506,9 @@ static amp_t dB2Amp(amp_t db)
 
 void patterntweak(Mixer* self, int numparam, int value)
 {
-	size_t channelindex = numparam / 16;
-	size_t param = numparam % 16;
+	Machine* base = (Machine*)self;
+	uintptr_t channelindex = numparam / 16;
+	uintptr_t param = numparam % 16;
 
 	if (channelindex == 0) {		
 		if (param == 0) {
@@ -533,7 +532,7 @@ void patterntweak(Mixer* self, int numparam, int value)
 				? 4.0f
 				: ((value&0x3FF)/256.0f);
 		} else {			
-			self->machine.setpanning(&self->machine, (value >> 1) / 256.f);
+			base->setpanning(base, (value >> 1) / 256.f);
 		}
 	} else
 	// Inputs
@@ -587,9 +586,9 @@ void patterntweak(Mixer* self, int numparam, int value)
 
 void parametertweak(Mixer* self, int param, int value)
 {	
-	size_t col;
-	size_t row;
-	size_t rows;
+	uintptr_t col;
+	uintptr_t row;
+	uintptr_t rows;
 
 	rows = numparameters(self) / numparametercols(self);
 	row = param % rows;
@@ -694,9 +693,9 @@ void parametertweak(Mixer* self, int param, int value)
 
 int parametervalue(Mixer* self, int const param)
 {	
-	size_t col;
-	size_t row;
-	size_t rows;
+	uintptr_t col;
+	uintptr_t row;
+	uintptr_t rows;
 
 	rows = numparameters(self) / numparametercols(self);
 	row = param % rows;
@@ -797,9 +796,10 @@ int parametervalue(Mixer* self, int const param)
 
 int describevalue(Mixer* self, char* txt, int const param, int const value)
 { 	
-	size_t col;
-	size_t row;
-	size_t rows;
+	Machine* base = (Machine*)self;
+	uintptr_t col;
+	uintptr_t row;
+	uintptr_t rows;
 
 	*txt = '\0';
 	rows = numparameters(self) / numparametercols(self);
@@ -807,17 +807,16 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 	col = param / rows;
 	if (col < mastercolumn(self)) {
 		if (row > 0 && row < self->sends.count + 1) {
-			size_t index;
-			size_t channel;
+			uintptr_t index;
+			uintptr_t channel;
 			
 			index = row - 1;
-			channel = (size_t) table_at(&self->sends, index);
+			channel = (uintptr_t) table_at(&self->sends, index);
 			//if (channel) {
 			{
 				Machine* machine;		
 				
-				machine = machines_at(self->machine.machines(&self->machine),
-					channel);		
+				machine = machines_at(base->machines(base), channel);		
 				if (machine && machine->info(machine)) {
 					strcpy(txt, machine->info(machine)->ShortName);
 					return 1;
@@ -828,14 +827,14 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 	} else
 	if (col == mastercolumn(self)) {	// MASTER COLUMN		
 		if (row == self->sends.count + 1) {				
-			_snprintf(txt, 20, "%d%%", (int) (self->master.drymix * 100));
+			psy_snprintf(txt, 20, "%d%%", (int) (self->master.drymix * 100));
 			return 1;
 		} else
 		if (row == self->sends.count + 2) {
 			float db;
 
 			db = (amp_t)(20 * log10(self->master.gain));
-			_snprintf(txt, 10, "%.2f dB", db);
+			psy_snprintf(txt, 10, "%.2f dB", db);
 			return 1;			
 		} else
 		if (row == self->sends.count + 3) {
@@ -856,7 +855,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			float db;
 
 			db = (amp_t)(20 * log10(self->master.volume));
-			_snprintf(txt, 10, "%.2f dB", db);
+			psy_snprintf(txt, 10, "%.2f dB", db);
 			return 1;
 		}
 	} else
@@ -869,8 +868,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			if (row == 0) {
 				Machine* machine;		
 				
-				machine = machines_at(self->machine.machines(&self->machine),
-					channel->inputslot);		
+				machine = machines_at(base->machines(base), channel->inputslot);		
 				if (machine && machine->info(machine)) {
 					strcpy(txt, machine->info(machine)->ShortName);					
 				}
@@ -887,7 +885,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 				return 1;
 			} else
 			if (row == self->sends.count + 1) {				
-				_snprintf(txt, 20, "%d%%", (int) (channel->drymix * 100));
+				psy_snprintf(txt, 20, "%d%%", (int) (channel->drymix * 100));
 				return 1;
 			} else
 			if (row == self->sends.count + 2) {
@@ -898,7 +896,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 					float db;
 
 					db = (amp_t)(20 * log10(input_entry->volume));
-					_snprintf(txt, 10, "%.2f dB", db);
+					psy_snprintf(txt, 10, "%.2f dB", db);
 					return 1;
 				}
 			} else
@@ -912,7 +910,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 				if (channel->panning == 0.5f) {
 					strcpy(txt,"center");
 				} else {
-					sprintf(txt,"%.0f%%", channel->panning * 100);
+					psy_snprintf(txt, 128, "%.0f%%", channel->panning * 100);
 				}
 				return 1;
 			} else
@@ -920,14 +918,14 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 				float db;
 
 				db = (amp_t)(20 * log10(channel->volume));
-				_snprintf(txt, 10, "%.2f dB", db);
+				psy_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
 			}
 		}		
 	} else
 	if (col < returncolumn(self) + self->returns.count) {
 		ReturnChannel* channel;
-		size_t index;
+		uintptr_t index;
 
 		index = col - returncolumn(self);
 		channel = (ReturnChannel*) table_at(&self->returns, index);		
@@ -935,8 +933,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			if (row == 0) {
 				Machine* fx;		
 				
-				fx = machines_at(self->machine.machines(&self->machine),
-					channel->fxslot);		
+				fx = machines_at(base->machines(base), channel->fxslot);
 				if (fx && fx->info(fx)) {
 					strcpy(txt, fx->info(fx)->ShortName);					
 				}
@@ -967,7 +964,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 				float db;
 
 				db = (amp_t)(20 * log10(channel->volume));
-				_snprintf(txt, 10, "%.2f dB", db);
+				psy_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
 			}
 		}
@@ -988,9 +985,9 @@ unsigned int numparametercols(Mixer* self)
 
 int parametername(Mixer* self, char* txt, int param)
 {		
-	size_t col;
-	size_t row;
-	size_t rows;
+	uintptr_t col;
+	uintptr_t row;
+	uintptr_t rows;
 
 	txt[0] = '\0';
 	rows = numparameters(self) / numparametercols(self);
@@ -998,34 +995,34 @@ int parametername(Mixer* self, char* txt, int param)
 	col = param / rows;	
 	if (col < mastercolumn(self)) {
 		if (row > 0 && row < self->sends.count + 1) {
-			_snprintf(txt, 128, "Send %u", (unsigned int)row);
+			psy_snprintf(txt, 128, "Send %u", (unsigned int)row);
 			return 1;
 		}
 	} else
 	if (col == mastercolumn(self)) {
 		if (row == 0) {
-			_snprintf(txt, 128, "%s", "MasterOut");
+			psy_snprintf(txt, 128, "%s", "MasterOut");
 			return 1;
 		}
 	} else	
 	if (col < returncolumn(self)) {
-		size_t index;
+		uintptr_t index;
 		MixerChannel* channel;
 
 		index = col - inputcolumn(self);
 		channel = (MixerChannel*) table_at(&self->inputs, index);
 		if (row == 0) {			
-			_snprintf(txt, 128, "Input %u", (unsigned int)index + 1);			
+			psy_snprintf(txt, 128, "Input %u", (unsigned int)index + 1);			
 		}
 	} else
 	if (col < returncolumn(self) + self->returns.count) {
-		size_t index;
+		uintptr_t index;
 		ReturnChannel* channel;		
 		
 		index = col - returncolumn(self);
 		channel = (ReturnChannel*) table_at(&self->returns, index);
 		if (row == 0) {			
-			_snprintf(txt, 128, "Return %u", (unsigned int) index + 1);
+			psy_snprintf(txt, 128, "Return %u", (unsigned int) index + 1);
 		}
 	}
 	return *txt != '\0';
@@ -1033,9 +1030,9 @@ int parametername(Mixer* self, char* txt, int param)
 
 int parametertype(Mixer* self, int param)
 {
-	size_t col;
-	size_t row;
-	size_t rows;
+	uintptr_t col;
+	uintptr_t row;
+	uintptr_t rows;
 	
 	rows = numparameters(self) / numparametercols(self);
 	row = param % rows;
@@ -1056,7 +1053,7 @@ int parametertype(Mixer* self, int param)
 		}
 	} else	
 	if (col < returncolumn(self)) {
-		size_t index;
+		uintptr_t index;
 		MixerChannel* channel;
 
 		index = col - inputcolumn(self);
@@ -1066,7 +1063,7 @@ int parametertype(Mixer* self, int param)
 		}
 	} else
 	if (col < returncolumn(self) + self->returns.count) {
-		size_t index;
+		uintptr_t index;
 		ReturnChannel* channel;		
 		
 		index = col - returncolumn(self);
@@ -1089,22 +1086,23 @@ int parameterlabel(Mixer* self, char* txt, int param)
 	return parametername(self, txt, param);	
 }
 
-size_t inputcolumn(Mixer* self)
+uintptr_t inputcolumn(Mixer* self)
 {
 	return mastercolumn(self) + 1;
 }
 
-size_t returncolumn(Mixer* self)
+uintptr_t returncolumn(Mixer* self)
 {
 	return inputcolumn(self) + table_size(&self->inputs);
 }
 
-WireSocketEntry* wiresocketentry(Mixer* self, size_t input)
-{
+WireSocketEntry* wiresocketentry(Mixer* self, uintptr_t input)
+{	
 	WireSocketEntry* rv = 0;
 	MachineSockets* sockets;
 	WireSocket* p;
-	Machines* machines = self->machine.machines(self);
+	Machine* base = (Machine*)self;
+	Machines* machines = base->machines(base);
 
 	sockets = connections_at(&machines->connections, self->slot);
 	if (sockets) {
@@ -1326,7 +1324,7 @@ void savespecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
 	}
 }
 
-void insertinputchannels(Mixer* self, size_t num, Machines* machines)
+void insertinputchannels(Mixer* self, uintptr_t num, Machines* machines)
 {
 	WireSocketEntry* rv = 0;
 	MachineSockets* sockets;
@@ -1355,18 +1353,7 @@ float floatparamvalue(int value)
 	return value / 65535.f;	
 }
 
-size_t mastercolumn(Mixer* self)
+uintptr_t mastercolumn(Mixer* self)
 {
 	return 1;
-}
-
-const char* editname(Mixer* self)
-{
-	return self->editname;
-}
-
-void seteditname(Mixer* self, const char* name)
-{
-	free(self->editname);
-	self->editname = strdup(name);
 }

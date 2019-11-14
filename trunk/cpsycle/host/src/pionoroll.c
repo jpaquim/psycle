@@ -5,6 +5,7 @@
 
 #include "pianoroll.h"
 #include <stdio.h>
+#include <portable.h>
 
 #define TIMERID_PIANOROLL 640
 
@@ -90,7 +91,7 @@ void pianoroll_ontimer(Pianoroll* self, ui_component* sender, int timerid)
 		}
 		if (self->pattern && self->pattern->opcount != self->opcount &&
 				self->syncpattern) {
-			ui_invalidate(&self->grid.component);
+			ui_component_invalidate(&self->grid.component);
 		}		
 		self->opcount = self->pattern ? self->pattern->opcount : 0;
 	}
@@ -122,7 +123,7 @@ void pianoroll_invalidateline(Pianoroll* self, beat_t offset)
 			0,			
 			(int)self->grid.metrics.stepwidth,
 			self->grid.metrics.visikeys * self->grid.metrics.keyheight);
-		ui_invalidaterect(&self->grid.component, &r);
+		ui_component_invalidaterect(&self->grid.component, &r);
 	}
 }
 
@@ -307,13 +308,13 @@ void pianogrid_onscroll(Pianogrid* self, ui_component* sender, int cx, int cy)
 		self->view->header.scrollpos = self->beatscrollpos;
 		self->view->header.metrics = self->metrics;
 		self->view->keyboard.metrics = self->metrics;
-		ui_invalidate(&self->view->header.component);
+		ui_component_invalidate(&self->view->header.component);
 		ui_component_update(&self->view->header.component);		
 	}
 	if (self->cy != 0) {
 		self->dy += cy;
 		self->view->keyboard.dy = self->dy;
-		ui_invalidate(&self->view->keyboard.component);
+		ui_component_invalidate(&self->view->keyboard.component);
 		ui_component_update(&self->view->keyboard.component);
 	}	
 }
@@ -416,8 +417,8 @@ void pianoroll_setpattern(Pianoroll* self, Pattern* pattern)
 	self->keyboard.dy = 0;
 	pianoroll_updatemetrics(self);
 	pianogrid_adjustscroll(&self->grid);
-	ui_invalidate(&self->grid.component);
-	ui_invalidate(&self->keyboard.component);
+	ui_component_invalidate(&self->grid.component);
+	ui_component_invalidate(&self->keyboard.component);
 }
 
 // Header
@@ -461,7 +462,7 @@ void pianoheader_drawruler(PianoHeader* self, ui_graphics* g)
 			cpx += self->metrics.beatwidth, ++c) {		
 		char txt[40];
 		ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - 6);
-		_snprintf(txt, 40, "%d", (int)(c - self->scrollpos));
+		psy_snprintf(txt, 40, "%d", (int)(c - self->scrollpos));
 		ui_textout(g, (int) cpx + 3, baseline - 14, txt, strlen(txt));		
 	}
 }
@@ -514,6 +515,6 @@ void pianoroll_onlpbchanged(Pianoroll* self, Player* sender, unsigned int lpb)
 {
 	pianoroll_updatemetrics(self);
 	pianogrid_adjustscroll(&self->grid);
-	ui_invalidate(&self->grid.component);
-	ui_invalidate(&self->header.component);	
+	ui_component_invalidate(&self->grid.component);
+	ui_component_invalidate(&self->header.component);	
 }

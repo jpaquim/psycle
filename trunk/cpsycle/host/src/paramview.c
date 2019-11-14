@@ -7,6 +7,7 @@
 #include "skingraphics.h"
 #include "resources/resource.h"
 #include "skincoord.h"
+#include <portable.h>
 
 #define TIMERID_PARAMVIEW 410
 
@@ -145,12 +146,12 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 				
 	if (!self->machine->parametername(self->machine, label, param)) {
 		if (!self->machine->parameterlabel(self->machine, label, param)) {
-			_snprintf(label, 128, "%s", "");
+			psy_snprintf(label, 128, "%s", "");
 		}
 	}
 	if (self->machine->describevalue(
 		self->machine, str, param, self->machine->parametervalue(self->machine, param)) == FALSE) {
-		_snprintf(str, 128, "%d", self->machine->parametervalue(self->machine, param));
+		psy_snprintf(str, 128, "%d", self->machine->parametervalue(self->machine, param));
 	}
 	ui_setbackgroundcolor(g, 0x00555555); // + nc*2);
 	ui_settextcolor(g, 0x00CDCDCD); // + nc);	
@@ -187,7 +188,7 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_settextcolor(g, 0x00FFFFFF);
 	if (!self->machine->parametername(self->machine, str, param)) {
 		if (!self->machine->parameterlabel(self->machine, str, param)) {
-			_snprintf(str, 128, "%s", "");
+			psy_snprintf(str, 128, "%s", "");
 		}
 	}
 	ui_textoutrectangle(g, 
@@ -196,7 +197,7 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_setrectangle(&r, left, top + half, width, top + half);
 	if (self->machine->describevalue(
 		self->machine, str, param, self->machine->parametervalue(self->machine, param)) == FALSE) {
-		_snprintf(str, 128, "%d", self->machine->parametervalue(self->machine, param));
+		psy_snprintf(str, 128, "%d", self->machine->parametervalue(self->machine, param));
 	}
 	ui_textoutrectangle(g, 
 		left, top + half, ETO_OPAQUE | ETO_CLIPPED,
@@ -236,7 +237,7 @@ void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_settextcolor(g, 0x00FFFFFF);
 	if (!self->machine->parametername(self->machine, str, param)) {
 		if (!self->machine->parameterlabel(self->machine, str, param)) {
-			_snprintf(str, 128, "%s", "");
+			psy_snprintf(str, 128, "%s", "");
 		}
 	}
 
@@ -385,13 +386,13 @@ void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button
 			val = minval;
 		}
 		self->machine->parametertweak(self->machine, self->tweak, val);
-		ui_invalidate(&self->component);		
+		ui_component_invalidate(&self->component);		
 	}
 }
 
 void OnTimer(ParamView* self, ui_component* sender, int timerid)
 {
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 int intparamvalue(float value)

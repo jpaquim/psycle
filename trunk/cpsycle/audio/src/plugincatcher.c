@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <portable.h>
 
 #define __cplusplus
 #include <diversalis/os.hpp>
@@ -117,7 +118,7 @@ void plugincatcher_makeplugininfo(PluginCatcher* self,
 		properties_append_string(p, "path", path);				
 		if (type == MACH_PLUGIN) {
 			char text[256];
-			_snprintf(text, 256, "Psycle %s by %s ", 
+			psy_snprintf(text, 256, "Psycle %s by %s ", 
 				(info->Flags & 3) == 3 ? "instrument" : "effect", 
 				info->Author);
 			properties_append_string(p, "desc", text);

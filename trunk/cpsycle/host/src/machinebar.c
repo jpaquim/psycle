@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "machinebar.h"
+#include <portable.h>
 
 static void OnDestroy(MachineBar*, ui_component* component);
 static void BuildMachineBox(MachineBar* self);
@@ -139,7 +140,7 @@ int insertmachine(MachineBar* self, size_t slot, Machine* machine)
 		intptr_t comboboxindex;
 
 		char buffer[128];
-		_snprintf(buffer, 128, "%02X: %s", slot, machine->info(machine)->ShortName); 
+		psy_snprintf(buffer, 128, "%02X: %s", slot, machine->info(machine)->ShortName); 
 		comboboxindex = ui_combobox_addstring(&self->machinebox, buffer);
 		table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
 		table_insert(&self->slotscombobox, slot, (void*) comboboxindex);
@@ -175,9 +176,9 @@ void BuildInstrumentList(MachineBar* self)
 	ui_combobox_clear(&self->instparambox);
 	for ( ; slot < 256; ++slot) {		
 		if (instrument = table_at(&self->player->song->instruments.container, slot)) {
-			_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
+			psy_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
 		} else {
-			_snprintf(buffer, 20, "%02X:%s", slot, "");
+			psy_snprintf(buffer, 20, "%02X:%s", slot, "");
 		}
 		AddString(self, buffer);
 	}

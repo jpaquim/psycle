@@ -72,7 +72,7 @@ int ui_combobox_addstring(ui_combobox* self, const char* text)
 
 	index = SendMessage((HWND)self->currcombo->hwnd, CB_ADDSTRING, (WPARAM)0, (LPARAM)text);
 	if (self->ownerdrawn) {
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 	return (int)index;
 }
@@ -81,7 +81,7 @@ void ui_combobox_clear(ui_combobox* self)
 {
 	SendMessage((HWND)self->currcombo->hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
 	if (self->ownerdrawn) {
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 }
 
@@ -89,7 +89,7 @@ void ui_combobox_setcursel(ui_combobox* self, intptr_t index)
 {
 	SendMessage((HWND)self->currcombo->hwnd, CB_SETCURSEL, (WPARAM)index, (LPARAM)0);
 	if (self->ownerdrawn) {
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 }
 
@@ -132,7 +132,7 @@ void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam,
 				signal_emit(&self->signal_selchanged, self, 1, sel);			
 			}
 			if (self->ownerdrawn) {
-				ui_invalidate(&self->component);
+				ui_component_invalidate(&self->component);
 			}
         }
 		break;
@@ -275,7 +275,7 @@ void onmousedown(ui_combobox* self, ui_component* sender, int x, int y,
 void onmouseenter(ui_combobox* self, ui_component* sender)
 {
 	self->hover = 1;
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void onmousemove(ui_combobox* self, ui_component* sender, int x, int y,
@@ -304,7 +304,7 @@ void onmousemove(ui_combobox* self, ui_component* sender, int x, int y,
 			self->hover = 1;
 		}
 		if (hover != self->hover) {
-			ui_invalidate(&self->component);
+			ui_component_invalidate(&self->component);
 		}
 	}
 }
@@ -312,6 +312,6 @@ void onmousemove(ui_combobox* self, ui_component* sender, int x, int y,
 void onmouseleave(ui_combobox* self, ui_component* sender)
 {		
 	self->hover = 0;
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 

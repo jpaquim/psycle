@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "patternview.h"
+#include <portable.h>
 
 static void patternview_onsplit(PatternView*, ui_component* sender);
 static void OnSize(PatternView*, ui_component* sender, ui_size*);
@@ -38,7 +39,7 @@ void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Worksp
 
 void OnStatusSequencePositionChanged(PatternViewStatus* self, Sequence* sender)
 {
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void OnStatusSongChanged(PatternViewStatus* self, Workspace* workspace)
@@ -51,7 +52,7 @@ void OnStatusSongChanged(PatternViewStatus* self, Workspace* workspace)
 
 void OnPatternEditPositionChanged(PatternViewStatus* self, Workspace* sender)
 {
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
@@ -73,7 +74,7 @@ void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
 	}	
 	ui_settextcolor(g, 0x00D1C5B6);
 	ui_setbackgroundmode(g, TRANSPARENT);
-	_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d         Edit ON",
+	psy_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d         Edit ON",
 		pattern,
 		editposition.line,
 		editposition.track,
@@ -180,11 +181,11 @@ void patternview_onsplit(PatternView* self, ui_component* sender)
 	if (self->notebook.splitbar.hwnd) {
 		ui_notebook_full(&self->notebook);
 		ui_button_settext(&self->split, "Split");
-		ui_invalidate(&self->split.component);
+		ui_component_invalidate(&self->split.component);
 	} else {
 		ui_notebook_split(&self->notebook);
 		ui_button_settext(&self->split, "Full");
-		ui_invalidate(&self->split.component);
+		ui_component_invalidate(&self->split.component);
 	}
 }
 
@@ -203,7 +204,7 @@ void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
 	// self->lpb = lpb;
 	//
 
-	ui_invalidate(&self->trackerview.component);		
+	ui_component_invalidate(&self->trackerview.component);		
 }
 
 void OnSongChanged(PatternView* self, Workspace* workspace)
@@ -214,7 +215,7 @@ void OnSongChanged(PatternView* self, Workspace* workspace)
 	self->trackerview.sequenceentryoffset = 0.f;
 	self->pianoroll.sequenceentryoffset = 0.f;
 	self->pianoroll.pattern = self->trackerview.pattern;	
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void OnEditPositionChanged(PatternView* self, Sequence* sender)
@@ -233,7 +234,7 @@ void OnEditPositionChanged(PatternView* self, Sequence* sender)
 		self->trackerview.sequenceentryoffset = 0.f;
 		self->pianoroll.sequenceentryoffset = 0.f;
 	}
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void OnPropertiesClose(PatternView* self, ui_component* sender)

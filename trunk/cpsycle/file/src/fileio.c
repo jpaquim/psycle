@@ -68,7 +68,7 @@ int psyfile_read(PsyFile* self,
 }
 
 int psyfile_write(PsyFile* self,
-					void* pData,
+					const void* pData,
 					uint32_t numBytes)
 {
 	uint32_t bytesWritten;

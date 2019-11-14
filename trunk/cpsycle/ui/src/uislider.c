@@ -6,12 +6,21 @@
 #include "uislider.h"
 #include <commctrl.h>
 #include <stdio.h>
+#include <portable.h>
 
+static void ui_slider_initsignals(ui_slider*);
+static void ui_slider_disposesignals(ui_slider*);
 static void ui_slider_ondraw(ui_slider*, ui_component* sender, ui_graphics*);
+static void ui_slider_drawverticalruler(ui_slider*, ui_graphics* g);
 static void ui_slider_onmousedown(ui_slider*, ui_component* sender, int x, int y, int button);
 static void ui_slider_onmouseup(ui_slider*, ui_component* sender, int x, int y, int button);
 static void ui_slider_onmousemove(ui_slider*, ui_component* sender, int x, int y, int button);
 static void ui_slider_ondestroy(ui_slider*, ui_component* sender);
+static void ui_slider_ontimer(ui_slider*, ui_component* sender, int timerid);
+static void ui_slider_updatevalue(ui_slider*);
+static void ui_slider_describevalue(self);
+
+static int UI_TIMERID_SLIDER = 600;
 
 void ui_slider_init(ui_slider* self, ui_component* parent)
 {	
@@ -20,23 +29,54 @@ void ui_slider_init(ui_slider* self, ui_component* parent)
 	self->tweakbase = -1;
 	self->orientation = UI_HORIZONTAL;
 	self->value = 0.0f;
-	signal_init(&self->signal_clicked);
-	signal_init(&self->signal_changed);	
+	self->labelsize = 100;
+	self->valuelabelsize = 40;	
+	self->valuedescription[0] = '\0';
+	self->label[0] = '\0';
+	self->margin = 5;
+	self->rulerstep = 0.1;
+	self->charnumber = 0;
+	ui_slider_initsignals(self);
 	signal_connect(&self->component.signal_draw, self, ui_slider_ondraw);
 	signal_connect(&self->component.signal_destroy, self, ui_slider_ondestroy);
 	signal_connect(&self->component.signal_mousedown, self, ui_slider_onmousedown);
 	signal_connect(&self->component.signal_mousemove, self, ui_slider_onmousemove);
 	signal_connect(&self->component.signal_mouseup, self, ui_slider_onmouseup);
+	signal_connect(&self->component.signal_timer, self, ui_slider_ontimer);
+	ui_component_starttimer(&self->component, UI_TIMERID_SLIDER, 50);	
+}
+
+void ui_slider_initsignals(ui_slider* self)
+{
+	signal_init(&self->signal_clicked);
+	signal_init(&self->signal_changed);
+	signal_init(&self->signal_describevalue);
+	signal_init(&self->signal_tweakvalue);
+	signal_init(&self->signal_value);	
 }
 
 void ui_slider_ondestroy(ui_slider* self, ui_component* sender)
 {
-	signal_dispose(&self->signal_clicked);
-	signal_dispose(&self->signal_changed);
+	ui_slider_disposesignals(self);
 }
 
-void ui_slider_settext(ui_slider* slider, const char* text)
-{	
+void ui_slider_disposesignals(ui_slider* self)
+{
+	signal_dispose(&self->signal_clicked);
+	signal_dispose(&self->signal_changed);
+	signal_dispose(&self->signal_describevalue);
+	signal_dispose(&self->signal_tweakvalue);
+	signal_dispose(&self->signal_value);
+}
+
+void ui_slider_settext(ui_slider* self, const char* text)
+{
+	strcpy(self->label, text);
+}
+
+void ui_slider_setcharnumber(ui_slider* self, int charnumber)
+{
+	self->charnumber = charnumber;
 }
 
 void ui_slider_setvalue(ui_slider* self, double value)
@@ -52,24 +92,76 @@ double ui_slider_value(ui_slider* self)
 void ui_slider_ondraw(ui_slider* self, ui_component* sender, ui_graphics* g)
 {
 	ui_rectangle r;
+	
+	ui_setcolor(g, 0x00333333);	
+	if (self->orientation == UI_HORIZONTAL) {
+		int sliderwidth = 6;
+		ui_size size;	
+
+		size = ui_component_size(&self->component);
+		ui_setrectangle(&r, 0, 0,
+			self->labelsize, size.height);
+		ui_settextcolor(g, 0x00CACACA);
+		ui_setbackgroundmode(g, TRANSPARENT);
+		ui_textoutrectangle(g, 0, 0, 0, r,
+			self->label, strlen(self->label));
+		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
+
+		ui_setrectangle(&r, self->labelsize + self->margin, 0, size.width, size.height);
+		ui_drawrectangle(g, r);
+		ui_setrectangle(&r,
+			self->labelsize + self->margin + (int)((size.width - sliderwidth) * self->value),
+			2, sliderwidth, size.height - 4);
+		ui_drawsolidrectangle(g, r, 0x00CACACA);
+		{
+			size = ui_component_size(&self->component);
+			ui_setrectangle(&r, size.width - self->valuelabelsize, 0,
+				self->valuelabelsize, size.height);
+			ui_settextcolor(g, 0x00CACACA);
+			ui_setbackgroundmode(g, TRANSPARENT);
+			ui_textoutrectangle(g, size.width - self->valuelabelsize, 0, 0, r,
+				self->valuedescription, strlen(self->valuedescription));
+		}
+	} else {
+		int sliderheight = 8;
+		ui_size size;
+		ui_size slidersize;
+		int centerx = 0;
+		size = ui_component_size(&self->component);
+
+		if (self->charnumber != 0) {
+			TEXTMETRIC tm;			
+		
+			tm = ui_component_textmetric(&self->component);
+			slidersize.width = tm.tmAveCharWidth * self->charnumber;
+			slidersize.height = size.height;
+			centerx = (size.width - slidersize.width) / 2;
+		} else {
+			slidersize = size;
+		}
+		
+		ui_slider_drawverticalruler(self, g);
+		ui_setrectangle(&r, centerx, 0, slidersize.width, size.height);
+		ui_drawrectangle(g, r);
+		ui_setrectangle(&r, 2 + centerx, (int)((size.height - sliderheight) * (1 - self->value)),
+			slidersize.width - 4, sliderheight);
+		ui_drawsolidrectangle(g, r, 0x00CACACA);
+	}	
+}
+
+void ui_slider_drawverticalruler(ui_slider* self, ui_graphics* g)
+{
+	double step = 0;
+	int markwidth = 5;
 	ui_size size;
 
 	size = ui_component_size(&self->component);
-	ui_setcolor(g, 0x00333333);
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_drawrectangle(g, r);
-	if (self->orientation == UI_HORIZONTAL) {
-		int sliderwidth = 6;
+	for (step = 0; step <= 1.0; step += self->rulerstep) {
+		int cpy;
 
-		ui_setrectangle(&r, (int)((size.width - sliderwidth) * self->value),
-			2, sliderwidth, size.height - 4);
-		ui_drawsolidrectangle(g, r, 0x00CACACA);
-	} else {
-		int sliderheight = 8;
-
-		ui_setrectangle(&r, 2, (int)((size.height - sliderheight) * (1 - self->value)),
-			size.width - 4, sliderheight);
-		ui_drawsolidrectangle(g, r, 0x00CACACA);
+		cpy = (int)(step * size.height);
+		ui_drawline(g, 0, cpy, markwidth, cpy);
+		ui_drawline(g, size.width - markwidth, cpy, size.width, cpy);
 	}
 }
 
@@ -78,8 +170,9 @@ void ui_slider_onmousedown(ui_slider* self, ui_component* sender, int x, int y,
 {
 	ui_size size;
 	size = ui_component_size(&self->component);
+	size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
 	if (self->orientation == UI_HORIZONTAL) {
-		self->tweakbase = x - (int)(self->value * (size.width - 6));
+		self->tweakbase = (x - self->labelsize - self->margin) - (int)(self->value * (size.width - 6));
 	} else
 	if (self->orientation == UI_VERTICAL) {
 		self->tweakbase = y - (int)(self->value * (size.height - 6));
@@ -94,16 +187,19 @@ void ui_slider_onmousemove(ui_slider* self, ui_component* sender, int x, int y,
 		ui_size size;
 
 		size = ui_component_size(&self->component);
+		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
 		if (self->orientation == UI_HORIZONTAL) {
 			self->value = max(0.f,
-				min(1.f, (x - self->tweakbase) / (float)(size.width - 6)));
+				min(1.f, (x - self->tweakbase - self->labelsize - self->margin) 
+					/ (float)(size.width - 6)));
 		}
 		else {
 			self->value = max(0.f,
 				min(1.f, 1 - (y - self->tweakbase) / (float)(size.height - 6)));
 		}
-		signal_emit(&self->signal_changed, self, 0);		
-		ui_invalidate(&self->component);
+		signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
+		signal_emit(&self->signal_changed, self, 0);
+		ui_component_invalidate(&self->component);
 	}
 }
 
@@ -127,4 +223,41 @@ void ui_slider_showhorizontal(ui_slider* self)
 UiOrientation ui_slider_orientation(ui_slider* self)
 {
 	return self->orientation;
+}
+
+void ui_slider_ontimer(ui_slider* self, ui_component* sender, int timerid)
+{	
+	ui_slider_updatevalue(self);
+	ui_slider_describevalue(self);
+}
+
+void ui_slider_updatevalue(ui_slider* self)
+{
+	float value = 0;
+	float* pvalue;
+
+	pvalue = &value;
+	signal_emit(&self->signal_value, self, 1, pvalue);
+	if (self->value != value) {
+		self->value = value;
+		ui_component_invalidate(&self->component);
+	}
+}
+
+void ui_slider_describevalue(ui_slider* self)
+{	
+	self->valuedescription[0] = '\0';
+	signal_emit(&self->signal_describevalue, self, 1, self->valuedescription);
+	if (self->valuedescription[0] == '\0') {
+		psy_snprintf(self->valuedescription, 128, "%f", self->value);
+	}
+	ui_component_invalidate(&self->component);
+}
+
+void ui_slider_connect(ui_slider* self, void* context, ui_slider_fpdescribe describe,
+	ui_slider_fptweak tweak, ui_slider_fpvalue value)
+{
+	signal_connect(&self->signal_describevalue, context, describe);
+	signal_connect(&self->signal_tweakvalue, context, tweak);
+	signal_connect(&self->signal_value, context, value);
 }

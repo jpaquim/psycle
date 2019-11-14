@@ -6,6 +6,7 @@
 #include "volslider.h"
 #include <stdio.h>
 #include <math.h>
+#include <portable.h>
 
 static int TIMERID_VOLSLIDER = 700;
 
@@ -68,7 +69,7 @@ void volslider_onmousemove(VolSlider* self, ui_component* sender,int x, int y,
 		self->value = max(0.f, 
 			min(1.f, (x - self->dragx) / (float)(size.width - 6)));
 		volslider_onsliderchanged(self, sender);
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 }
 
@@ -94,12 +95,12 @@ void volslider_onsongchanged(VolSlider* self, Workspace* workspace)
 void volslider_ontimer(VolSlider* self, ui_component* sender, int timerid)
 {		
 	if (self->machines) {
-		float oldvalue;
+		amp_t oldvalue;
 
 		oldvalue = self->value;
-		self->value = (float)(sqrt(machines_volume(self->machines)) * 0.5f);
+		self->value = (amp_t)(sqrt(machines_volume(self->machines)) * 0.5f);
 		if (oldvalue != self->value) {
-			ui_invalidate(&self->component);
+			ui_component_invalidate(&self->component);
 		}
 	}
 }

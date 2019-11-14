@@ -6,6 +6,7 @@
 #include "samplesview.h"
 #include <instruments.h>
 #include <math.h>
+#include <portable.h>
 
 /// Samples Main View
 static void OnSize(SamplesView*, ui_component* sender, ui_size*);
@@ -26,16 +27,16 @@ static void OnEditSampleName(SamplesHeaderView*, ui_edit* sender);
 /// General Settings View
 static void InitSamplesGeneralView(SamplesGeneralView*, ui_component* parent);
 static void SetSampleSamplesGeneralView(SamplesGeneralView*, Sample* sample);
-static void OnGeneralViewDescribe(SamplesGeneralView*, SliderGroup*, char* txt);
+static void OnGeneralViewDescribe(SamplesGeneralView*, ui_slider*, char* txt);
 static void GeneralViewFillPanDescription(SamplesGeneralView*, char* txt);
-static void OnGeneralViewTweak(SamplesGeneralView*, SliderGroup*, float value);
-static void OnGeneralViewValue(SamplesGeneralView*, SliderGroup*, float* value);
+static void OnGeneralViewTweak(SamplesGeneralView*, ui_slider*, float value);
+static void OnGeneralViewValue(SamplesGeneralView*, ui_slider*, float* value);
 static void InitSamplesVibratoView(SamplesVibratoView*, ui_component* parent, Player* player);
 static void SetSampleSamplesVibratoView(SamplesVibratoView*, Sample* sample);
 /// Vibrato Settings View
-static void OnVibratoViewDescribe(SamplesVibratoView*, SliderGroup*, char* txt);
-static void OnVibratoViewTweak(SamplesVibratoView*, SliderGroup*, float value);
-static void OnVibratoViewValue(SamplesVibratoView*, SliderGroup*, float* value);
+static void OnVibratoViewDescribe(SamplesVibratoView*, ui_slider*, char* txt);
+static void OnVibratoViewTweak(SamplesVibratoView*, ui_slider*, float value);
+static void OnVibratoViewValue(SamplesVibratoView*, ui_slider*, float* value);
 static void InitSamplesWaveLoopView(SamplesWaveLoopView*, ui_component* parent);
 static void OnWaveFormChange(SamplesVibratoView*, ui_combobox* sender, int sel);
 static WaveForms ComboBoxToWaveForm(int combobox_index);
@@ -138,7 +139,7 @@ void OnSampleListChanged(SamplesView* self, ui_component* sender, int slot)
 	signal_prevent(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 	instruments_changeslot(&self->player->song->instruments, slot);
 	signal_enable(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
-	ui_invalidate(&self->wavebox.component);	
+	ui_component_invalidate(&self->wavebox.component);	
 }
 
 void OnInstrumentSlotChanged(SamplesView* self, Instrument* sender, int slot)
@@ -183,7 +184,7 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 		signal_prevent(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 		instruments_changeslot(&self->player->song->instruments, slot);
 		signal_enable(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}	
 }
 
@@ -242,22 +243,22 @@ void SetSampleSamplesHeaderView(SamplesHeaderView* self, Sample* sample)
 	char buffer[20];
 	self->sample = sample;
 	ui_edit_settext(&self->nameedit, self->sample ? sample->name : "");	
-	_snprintf(buffer, 20, "%d", self->sample ? self->sample->samplerate : 0);
+	psy_snprintf(buffer, 20, "%d", self->sample ? self->sample->samplerate : 0);
 	ui_edit_settext(&self->sredit, buffer);
-	_snprintf(buffer, 20, "%d", self->sample ? self->sample->numframes : 0);
+	psy_snprintf(buffer, 20, "%d", self->sample ? self->sample->numframes : 0);
 	ui_label_settext(&self->numsampleslabel, buffer);	
 	if (self->sample) {
 		if (self->sample->channels.numchannels == 1) {
-			_snprintf(buffer, 20, "Mono");
+			psy_snprintf(buffer, 20, "Mono");
 		} else
 		if (self->sample->channels.numchannels == 2) {
-			_snprintf(buffer, 20, "Stereo");
+			psy_snprintf(buffer, 20, "Stereo");
 		} else
 		if (self->sample->channels.numchannels > 3) {
-			_snprintf(buffer, 20, "%d Chs", self->sample->channels.numchannels);
+			psy_snprintf(buffer, 20, "%d Chs", self->sample->channels.numchannels);
 		}		
 	} else {
-		_snprintf(buffer, 20, "");
+		psy_snprintf(buffer, 20, "");
 	}
 	ui_label_settext(&self->channellabel, buffer);
 
@@ -273,7 +274,7 @@ void OnEditSampleName(SamplesHeaderView* self, ui_edit* sender)
 	if (self->sample) {
 		char txt[40];		
 		sample_setname(self->sample, ui_edit_text(sender));
-		_snprintf(txt, 20, "%02X:%s", (int)ui_listbox_cursel(self->samplelist),
+		psy_snprintf(txt, 20, "%02X:%s", (int)ui_listbox_cursel(self->samplelist),
 			sample_name(self->sample));
 		ui_listbox_setstring(self->samplelist, txt,
 			ui_listbox_cursel(self->samplelist));
@@ -303,7 +304,7 @@ void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
 {
 	int i;
 	ui_margin margin = { 3, 3, 0, 3 };
-	SliderGroup* sliders[] = {
+	ui_slider* sliders[] = {
 		&self->defaultvolume,
 		&self->globalvolume,
 		&self->panposition,
@@ -316,16 +317,21 @@ void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
 	
-	InitSliderGroup(&self->defaultvolume, &self->component, "Default Volume");
-	InitSliderGroup(&self->globalvolume, &self->component, "Global Volume");
-	InitSliderGroup(&self->panposition, &self->component, "Pan Position");
-	InitSliderGroup(&self->samplednote, &self->component, "Sampled Note"); 
-	InitSliderGroup(&self->pitchfinetune, &self->component, "Pitch Finetune");	
+	ui_slider_init(&self->defaultvolume, &self->component);
+	ui_slider_settext(&self->defaultvolume, "Default Volume");
+	ui_slider_init(&self->globalvolume, &self->component);
+	ui_slider_settext(&self->globalvolume, "Global Volume");
+	ui_slider_init(&self->panposition, &self->component);
+	ui_slider_settext(&self->panposition, "Pan Position");
+	ui_slider_init(&self->samplednote, &self->component);
+	ui_slider_settext(&self->samplednote, "Sampled Note"); 
+	ui_slider_init(&self->pitchfinetune, &self->component);
+	ui_slider_settext(&self->pitchfinetune, "Pitch Finetune");	
 	for (i = 0; i < 5; ++i) {		
 		ui_component_resize(&sliders[i]->component, 0, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
 		ui_component_setmargin(&sliders[i]->component, &margin);
-		SliderGroupConnect(sliders[i], self, OnGeneralViewDescribe,
+		ui_slider_connect(sliders[i], self, OnGeneralViewDescribe,
 			OnGeneralViewTweak, OnGeneralViewValue);		
 	}
 }
@@ -344,80 +350,80 @@ int map_1_128(float value) {
 	return (int)(value * 128.f);
 }
 
-void OnGeneralViewTweak(SamplesGeneralView* self, SliderGroup* slidergroup, float value)
+void OnGeneralViewTweak(SamplesGeneralView* self, ui_slider* slider, float value)
 {
 	if (!self->sample) {
 		return;
 	}
-	if (slidergroup == &self->defaultvolume) {
+	if (slider == &self->defaultvolume) {
 		self->sample->defaultvolume = value;
 	} else
-	if (slidergroup == &self->globalvolume) {		
+	if (slider == &self->globalvolume) {		
 		self->sample->globalvolume = (value * value) * 4.f;
 	} else
-	if (slidergroup == &self->panposition) {
+	if (slider == &self->panposition) {
 		self->sample->panfactor = value;
 	} else
-	if (slidergroup == &self->samplednote) {
+	if (slider == &self->samplednote) {
 		self->sample->tune = (int)(value * 119.f) - 60;
 	} else
-	if (slidergroup == &self->pitchfinetune) {
+	if (slider == &self->pitchfinetune) {
 		self->sample->finetune = (int)(value * 200.f) - 100;
 	}
 }
 
-void OnGeneralViewValue(SamplesGeneralView* self, SliderGroup* slidergroup,
+void OnGeneralViewValue(SamplesGeneralView* self, ui_slider* slider,
 	float* value)
 {	
-	if (slidergroup == &self->defaultvolume) {
+	if (slider == &self->defaultvolume) {
 		*value = self->sample ? self->sample->defaultvolume : 1.0f;
 	} else 
-	if (slidergroup == &self->globalvolume) {
+	if (slider == &self->globalvolume) {
 		if (self->sample) {			
 			*value = (float)sqrt(self->sample->globalvolume) * 0.5f;
 		} else {
 			*value = 0.5f;
 		}
 	} else 	
-	if (slidergroup == &self->panposition) {
+	if (slider == &self->panposition) {
 		*value = self->sample ? self->sample->panfactor : 0.5f;
 	} else
-	if (slidergroup == &self->samplednote) {
+	if (slider == &self->samplednote) {
 		*value = self->sample ? (self->sample->tune + 60) / 119.f : 0.5f;
 	} else
-	if (slidergroup == &self->pitchfinetune) {
+	if (slider == &self->pitchfinetune) {
 		*value = self->sample ? self->sample->finetune / 200.f + 0.5f : 0.f;
 	}
 }
 
-void OnGeneralViewDescribe(SamplesGeneralView* self, SliderGroup* slidergroup, char* txt)
+void OnGeneralViewDescribe(SamplesGeneralView* self, ui_slider* slider, char* txt)
 {		
-	if (slidergroup == &self->defaultvolume) {		
-		_snprintf(txt, 10, "C%02X", self->sample 
+	if (slider == &self->defaultvolume) {		
+		psy_snprintf(txt, 10, "C%02X", self->sample 
 			? map_1_128(self->sample->defaultvolume)
 			: 0x80);
 	} else
-	if (slidergroup == &self->globalvolume) {		
+	if (slider == &self->globalvolume) {		
 		if (!self->sample) {
-			_snprintf(txt, 10, "-inf. dB");
+			psy_snprintf(txt, 10, "-inf. dB");
 		} else
 		if (self->sample->globalvolume == 0) {
-			_snprintf(txt, 10, "-inf. dB");
+			psy_snprintf(txt, 10, "-inf. dB");
 		} else {
 			float db = (float)(20 * log10(self->sample->globalvolume));
-			_snprintf(txt, 10, "%.2f dB", db);
+			psy_snprintf(txt, 10, "%.2f dB", db);
 		}
 	} else
-	if (slidergroup == &self->panposition) {		
+	if (slider == &self->panposition) {		
 		GeneralViewFillPanDescription(self, txt);		
 	} else
-	if (slidergroup == &self->samplednote) {		
-		_snprintf(txt, 10, "%s", self->sample
+	if (slider == &self->samplednote) {		
+		psy_snprintf(txt, 10, "%s", self->sample
 			? notetostr((note_t)(self->sample->tune + 60), self->notestabmode)
 			: notetostr(60, self->notestabmode));		
 	} else
-	if (slidergroup == &self->pitchfinetune) {
-		_snprintf(txt, 10, "%d ct.", self->sample
+	if (slider == &self->pitchfinetune) {
+		psy_snprintf(txt, 10, "%d ct.", self->sample
 			? self->sample->finetune
 			: 0);
 	}
@@ -426,31 +432,31 @@ void OnGeneralViewDescribe(SamplesGeneralView* self, SliderGroup* slidergroup, c
 void GeneralViewFillPanDescription(SamplesGeneralView* self, char* txt) {	
 
 	if (!self->sample) {
-		_snprintf(txt, 10, "|64|");
+		psy_snprintf(txt, 10, "|64|");
 	} else
 	if (self->sample->surround) {
-		_snprintf(txt, 10, "SurrounD");
+		psy_snprintf(txt, 10, "SurrounD");
 	} else {		
 		int pos = (int)(self->sample->panfactor * 128.f);
 		if (pos == 0) {
-			sprintf(txt,"||%02d  ", pos);
+			psy_snprintf(txt, 128,"||%02d  ", pos);
 		} else
 		if (pos < 32) {
-			sprintf(txt,"<<%02d  ", pos);
+			psy_snprintf(txt, 128, "<<%02d  ", pos);
 		} else
 		if (pos < 64) {
-			sprintf(txt," <%02d< ", pos);
+			psy_snprintf(txt, 128, " <%02d< ", pos);
 		} else 
-		if ( pos == 64) {
-			sprintf(txt," |%02d| ", pos); 
+		if (pos == 64) {
+			psy_snprintf(txt, 128, " |%02d| ", pos); 
 		} else
-		if ( pos <= 96) {
-			sprintf(txt," >%02d> ", pos);
+		if (pos <= 96) {
+			psy_snprintf(txt, 128, " >%02d> ", pos);
 		} else
 		if (pos < 128) {
-			sprintf(txt,"  %02d>>", pos);
+			psy_snprintf(txt, 128, "  %02d>>", pos);
 		} else {
-			sprintf(txt,"  %02d||", pos);
+			psy_snprintf(txt, 128, "  %02d||", pos);
 		}
 	}	
 }
@@ -459,7 +465,7 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 {
 	ui_margin margin;
 	int i;
-	SliderGroup* sliders[] = {
+	ui_slider* sliders[] = {
 		&self->attack,
 		&self->speed,
 		&self->depth,		
@@ -484,16 +490,18 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 	ui_combobox_setcursel(&self->waveformbox, 0);
 	signal_connect(&self->waveformbox.signal_selchanged, self, OnWaveFormChange);
 
-	InitSliderGroup(&self->attack, &self->component, "Attack");	
-	InitSliderGroup(&self->speed, &self->component, "Speed");
-	InitSliderGroup(&self->depth, &self->component, "Depth");
-
+	ui_slider_init(&self->attack, &self->component);
+	ui_slider_settext(&self->attack, "Attack");	
+	ui_slider_init(&self->speed, &self->component);
+	ui_slider_settext(&self->speed,"Speed");
+	ui_slider_init(&self->depth, &self->component);
+	ui_slider_settext(&self->depth, "Depth");
 	ui_margin_init(&margin, 3, 3, 0, 3);
 	for (i = 0; i < 3; ++i) {		
 		ui_component_resize(&sliders[i]->component, 0, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
 		ui_component_setmargin(&sliders[i]->component, &margin);
-		SliderGroupConnect(sliders[i], self, OnVibratoViewDescribe,
+		ui_slider_connect(sliders[i], self, OnVibratoViewDescribe,
 			OnVibratoViewTweak, OnVibratoViewValue);		
 	}	
 	sliders[0]->component.margin.top = 32;		
@@ -513,7 +521,7 @@ void SetSampleSamplesVibratoView(SamplesVibratoView* self, Sample* sample)
 	}
 }
 
-void OnVibratoViewTweak(SamplesVibratoView* self, SliderGroup* slidergroup, float value)
+void OnVibratoViewTweak(SamplesVibratoView* self, ui_slider* slidergroup, float value)
 {
 	if (!self->sample) {
 		return;
@@ -529,7 +537,7 @@ void OnVibratoViewTweak(SamplesVibratoView* self, SliderGroup* slidergroup, floa
 	}
 }
 
-void OnVibratoViewValue(SamplesVibratoView* self, SliderGroup* slidergroup,
+void OnVibratoViewValue(SamplesVibratoView* self, ui_slider* slidergroup,
 	float* value)
 {	
 	if (slidergroup == &self->attack) {
@@ -543,38 +551,38 @@ void OnVibratoViewValue(SamplesVibratoView* self, SliderGroup* slidergroup,
 	}
 }
 
-void OnVibratoViewDescribe(SamplesVibratoView* self, SliderGroup* slidergroup, char* txt)
+void OnVibratoViewDescribe(SamplesVibratoView* self, ui_slider* slidergroup, char* txt)
 {		
 	if (slidergroup == &self->attack) {		
 		if (!self->sample) {
-			_snprintf(txt, 10, "No Delay");
+			psy_snprintf(txt, 10, "No Delay");
 		} else 
 		if (self->sample->vibrato.attack == 0) {
-			_snprintf(txt, 10, "No Delay");
+			psy_snprintf(txt, 10, "No Delay");
 		} else {
-			_snprintf(txt, 10, "%.0fms", (4096000.0f*256)
+			psy_snprintf(txt, 10, "%.0fms", (4096000.0f*256)
 				/(self->sample->vibrato.attack*44100.f));
 		}		
 	} else
 	if (slidergroup == &self->speed) {		
 		if (!self->sample) {
-			_snprintf(txt, 10, "off");
+			psy_snprintf(txt, 10, "off");
 		} else
 		if (self->sample->vibrato.speed == 0) {
-			_snprintf(txt, 10, "off");			
+			psy_snprintf(txt, 10, "off");			
 		} else {		
-			_snprintf(txt, 10, "%.0fms", (256000.0f*256) 
+			psy_snprintf(txt, 10, "%.0fms", (256000.0f*256) 
 				/ (self->sample->vibrato.speed*44100.f));
 		}
 	} else
 	if (slidergroup == &self->depth) {		
 		if (!self->sample) {
-			_snprintf(txt, 10, "off");
+			psy_snprintf(txt, 10, "off");
 		} else
 		if (self->sample->vibrato.depth == 0) {
-			_snprintf(txt, 10, "off");			
+			psy_snprintf(txt, 10, "off");			
 		} else {
-			_snprintf(txt, 10, "%d", self->sample->vibrato.depth);
+			psy_snprintf(txt, 10, "%d", self->sample->vibrato.depth);
 		}
 	}
 }

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <excpt.h>
+#include <portable.h>
 
 // proxy
 
@@ -27,6 +28,12 @@ static int machineproxy_describevalue(MachineProxy*, char* txt, int const param,
 static int machineproxy_parametervalue(MachineProxy*, int const param);
 static void machineproxy_setpanning(MachineProxy*, amp_t);
 static amp_t machineproxy_panning(MachineProxy*);
+static void machineproxy_mute(MachineProxy*);
+static void machineproxy_unmute(MachineProxy*);
+static int machineproxy_muted(MachineProxy*);
+static void machineproxy_bypass(MachineProxy*);
+static void machineproxy_unbypass(MachineProxy*);
+static int machineproxy_bypassed(MachineProxy*);
 static const MachineInfo* machineproxy_info(MachineProxy*);
 static int machineproxy_parametertype(MachineProxy*, int param);
 static void machineproxy_parameterrange(MachineProxy*, int numparam, int* minval, int* maxval);
@@ -58,9 +65,9 @@ static int FilterException(MachineProxy* proxy, const char* msg, int code, struc
 	proxy->crashed = 1;	
 		
 	if (proxy->client->info(proxy->client)) {
-		_snprintf(txt, 512, "%s crashed \n\r %s", proxy->client->info(proxy->client)->ShortName, msg);
+		psy_snprintf(txt, 512, "%s crashed \n\r %s", proxy->client->info(proxy->client)->ShortName, msg);
 	} else {
-		_snprintf(txt, 512, "Machine crashed");
+		psy_snprintf(txt, 512, "Machine crashed");
 	}
 	MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
 	return EXCEPTION_EXECUTE_HANDLER;
@@ -84,6 +91,12 @@ void machineproxy_init(MachineProxy* self, Machine* client)
 	self->machine.parametervalue = machineproxy_parametervalue;
 	self->machine.setpanning = machineproxy_setpanning;
 	self->machine.panning = machineproxy_panning;
+	self->machine.mute = machineproxy_mute;
+	self->machine.unmute = machineproxy_unmute;
+	self->machine.muted = machineproxy_muted;
+	self->machine.bypass = machineproxy_bypass;
+	self->machine.unbypass = machineproxy_unbypass;
+	self->machine.bypassed = machineproxy_bypassed;
 	self->machine.info = machineproxy_info;
 	self->machine.parameterrange = machineproxy_parameterrange;
 	self->machine.parametertype = machineproxy_parametertype;
@@ -258,6 +271,78 @@ amp_t machineproxy_panning(MachineProxy* self)
 		__try {
 			rv = self->client->panning(self->client);
 		} __except(FilterException(self, "panning", GetExceptionCode(), GetExceptionInformation())) {			
+		}
+	}
+	return rv;
+}
+
+void machineproxy_mute(MachineProxy* self)
+{
+	if (self->crashed == 0) {
+		__try {
+			self->client->mute(self->client);
+		}
+		__except (FilterException(self, "mute", GetExceptionCode(), GetExceptionInformation())) {
+		}
+	}
+}
+
+void machineproxy_unmute(MachineProxy* self)
+{
+	if (self->crashed == 0) {
+		__try {
+			self->client->unmute(self->client);
+		}
+		__except (FilterException(self, "unmute", GetExceptionCode(), GetExceptionInformation())) {
+		}
+	}
+}
+
+int machineproxy_muted(MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+		__try {
+			rv = self->client->muted(self->client);
+		}
+		__except (FilterException(self, "muted", GetExceptionCode(), GetExceptionInformation())) {
+		}
+	}
+	return rv;
+}
+
+void machineproxy_bypass(MachineProxy* self)
+{
+	if (self->crashed == 0) {
+		__try {
+			self->client->bypass(self->client);
+		}
+		__except (FilterException(self, "bypass", GetExceptionCode(), GetExceptionInformation())) {
+		}
+	}
+}
+
+void machineproxy_unbypass(MachineProxy* self)
+{
+	if (self->crashed == 0) {
+		__try {
+			self->client->unbypass(self->client);
+		}
+		__except (FilterException(self, "unbypass", GetExceptionCode(), GetExceptionInformation())) {
+		}
+	}
+}
+
+int machineproxy_bypassed(MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+		__try {
+			rv = self->client->bypassed(self->client);
+		}
+		__except (FilterException(self, "panning", GetExceptionCode(), GetExceptionInformation())) {
 		}
 	}
 	return rv;

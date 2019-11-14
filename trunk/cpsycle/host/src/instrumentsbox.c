@@ -5,6 +5,7 @@
 
 #include "instrumentsbox.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void BuildInstrumentList(InstrumentsBox* self);
 static void AddString(InstrumentsBox* self, const char* text);
@@ -31,9 +32,9 @@ void BuildInstrumentList(InstrumentsBox* self)
 	ui_listbox_clear(&self->instrumentlist);
 	for ( ; slot < 256; ++slot) {		
 		if (instrument = instruments_at(self->instruments, slot)) {
-			_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
+			psy_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
 		} else {
-			_snprintf(buffer, 20, "%02X:%s", slot, "");
+			psy_snprintf(buffer, 20, "%02X:%s", slot, "");
 		}
 		AddString(self, buffer);
 	}

@@ -50,8 +50,14 @@ static int parameterlabel(Machine* self, char* txt, int param) { txt[0] = '\0'; 
 static int parametername(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
 static int describevalue(Machine* self, char* txt, int param, int value) { return 0; }
 static int parametervalue(Machine* self, int const param) { return 0; }
-static void setpanning(Machine*, amp_t);
-static amp_t panning(Machine*);
+static void setpanning(Machine* self, amp_t panning) { }
+static amp_t panning(Machine* self) { return (amp_t) 0.5f; }
+static void mute(Machine* self) { }
+static void unmute(Machine* self) { }
+static int muted(Machine* self) { return 0; }
+static void bypass(Machine* self) { }
+static void unbypass(Machine* self) { }
+static int bypassed(Machine* self) { return 0; }
 static void dispose(Machine*);
 static int mode(Machine*);
 static unsigned int numinputs(Machine* self) { return 0; }
@@ -84,7 +90,6 @@ static struct Samples* samples(Machine* self) { return self->callback.samples(se
 static struct Machines* machines(Machine* self) { return self->callback.machines(self->callback.context); }
 static struct Instruments* instruments(Machine* self) { return self->callback.instruments(self->callback.context); }
 
-
 void machine_init(Machine* self, MachineCallback callback)
 {		
 	memset(self, 0, sizeof(Machine));
@@ -105,6 +110,12 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->parametervalue = parametervalue;
 	self->setpanning = setpanning;
 	self->panning = panning;
+	self->mute = mute;
+	self->unmute = unmute;
+	self->muted = muted;
+	self->bypass = bypass;
+	self->unbypass = unbypass;
+	self->bypassed = bypassed;
 	self->generateaudio = generateaudio;
 	self->numinputs = numinputs;
 	self->numoutputs = numoutputs;	
@@ -128,9 +139,7 @@ void machine_init(Machine* self, MachineCallback callback)
 	self->slot = slot;
 	self->setslot = setslot;
 	self->bypass = 0;
-	self->mute = 0;
-	self->pan = 0.5f;
-	self->ismixersend = 0;	
+	self->mute = 0;	
 	self->haseditor = haseditor;
 	self->seteditorhandle = seteditorhandle;
 	self->editorsize = editorsize;
@@ -208,46 +217,6 @@ int machine_supports(Machine* self, int option)
 		return (self->info(self)->Flags & option) == option;
 	}
 	return 0;
-}
-
-int machine_bypassed(Machine* self)
-{
-	return self->bypass;
-}
-
-void machine_bypass(Machine* self)
-{
-	self->bypass = 1;
-}
-
-void machine_unbypass(Machine* self)
-{
-	self->bypass = 0;
-}
-
-int machine_muted(Machine* self)
-{
-	return self->mute;
-}
-
-void machine_mute(Machine* self)
-{
-	self->mute = 1;
-}
-
-void machine_unmute(Machine* self)
-{
-	self->mute = 0;
-}
-
-void setpanning(Machine* self, amp_t val)
-{
-	self->pan = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
-}
-
-amp_t panning(Machine* self)
-{
-	return self->pan;
 }
 
 Buffer* mix(Machine* self, size_t slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)

@@ -65,81 +65,120 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		case MACH_MASTER:
 		{
 			Master* master = (Master*)malloc(sizeof(Master));
-			master_init(master, self->machinecallback);		
-			rv = &master->machine;
+			if (master) {
+				master_init(master, self->machinecallback);
+				rv = (Machine*) master;
+			} else {
+				rv = 0;
+			}
 		}
 		break;
 		case MACH_DUMMY:
 		{
 			DummyMachine* dummy = (DummyMachine*)malloc(sizeof(DummyMachine));
-			dummymachine_init(dummy, self->machinecallback);	
-			rv = &dummy->machine;
+			if (dummy) {
+				dummymachine_init(dummy, self->machinecallback);
+				rv = (Machine*) dummy;
+			} else {
+				rv = 0;
+			}
 		}
 		break;
 		case MACH_DUPLICATOR:
 		{
 			Duplicator* duplicator = (Duplicator*)malloc(sizeof(Duplicator));
-			duplicator_init(duplicator, self->machinecallback);	
-			rv = &duplicator->machine;
+			if (duplicator) {
+				duplicator_init(duplicator, self->machinecallback);
+				rv = (Machine*) duplicator;
+			} else {
+				rv = 0;
+			}
 		}
 		break;
 		case MACH_DUPLICATOR2:
 		{
 			Duplicator2* duplicator2 = (Duplicator2*)malloc(sizeof(Duplicator2));
-			duplicator2_init(duplicator2, self->machinecallback);	
-			rv = &duplicator2->machine;
+			if (duplicator2) {
+				duplicator2_init(duplicator2, self->machinecallback);
+				rv = (Machine*) duplicator2;
+			} else {
+				rv = 0;
+			}
 		}
 		break;
 		case MACH_MIXER:
 		{
 			Mixer* mixer = (Mixer*)malloc(sizeof(Mixer));
-			mixer_init(mixer, self->machinecallback);		
-			rv = &mixer->machine;
+			if (mixer) {
+				mixer_init(mixer, self->machinecallback);
+				rv = (Machine*) mixer;
+			} else {
+				rv = 0;
+			}
 		}
 		break;
 		case MACH_SAMPLER:
 		{
 			Sampler* sampler = (Sampler*)malloc(sizeof(Sampler));
-			sampler_init(sampler, self->machinecallback);		
-			rv = &sampler->machine;
+			if (sampler) {
+				sampler_init(sampler, self->machinecallback);
+				rv = (Machine*) sampler;
+			} else {
+				rv = 0;
+			}
 		}
 		break;
 		case MACH_VST:
 		{
-			VstPlugin* plugin;			
+			Machine* plugin;			
 
-			plugin = (VstPlugin*)malloc(sizeof(VstPlugin));
-			vstplugin_init(plugin, self->machinecallback, path);	
-			if (plugin->machine.info(&plugin->machine)) {						
-				rv = &plugin->machine;			
+			plugin = (Machine*)malloc(sizeof(VstPlugin));
+			if (plugin) {
+				vstplugin_init((VstPlugin*)plugin, self->machinecallback, path);
+				if (plugin->info(plugin)) {
+					rv = plugin;
+				} else {
+					plugin->dispose(plugin);
+					free(plugin);
+				}
 			} else {
-				plugin->machine.dispose(plugin);
-				free(plugin);
+				rv = 0;
 			}
 		}
 		break;		
 		case MACH_PLUGIN:
 		{
-			Plugin* plugin;			
-									;
-			plugin = (Plugin*)malloc(sizeof(Plugin));			
-			plugin_init(plugin, self->machinecallback, path);
-			if (plugin->machine.info(&plugin->machine)) {						
-				rv = &plugin->machine;			
+			Machine* plugin;			
+									
+			plugin = (Machine*)malloc(sizeof(Plugin));
+			if (plugin) {
+				plugin_init((Plugin*)plugin, self->machinecallback, path);
+				if (plugin->info(plugin)) {
+					rv = plugin;
+				} else {
+					plugin->dispose(plugin);
+					free(plugin);
+				}
 			} else {
-				plugin->machine.dispose(plugin);
-				free(plugin);
+				rv = 0;
 			}
 		}
 		break;
 		default:
+			rv = 0;
 		break;
 	}
 	if ((rv && ((self->options & MACHINEFACTORY_CREATEASPROXY)
 			== MACHINEFACTORY_CREATEASPROXY))) {
 		proxy = malloc(sizeof(MachineProxy));
-		machineproxy_init(proxy, rv);
-		rv = &proxy->machine;
+		if (proxy) {
+			machineproxy_init(proxy, rv);
+			rv = &proxy->machine;
+		} else {
+			rv->dispose(rv);
+			free(rv);
+			rv = 0;
+		}		
 	}	
 	return rv;
 }

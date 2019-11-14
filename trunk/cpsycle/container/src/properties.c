@@ -11,8 +11,6 @@
 #include <assert.h>
 #include <stddef.h>
 
-
-
 static int properties_enumerate_rec(Properties*);
 static int OnSearchPropertiesEnum(Properties*, Properties*, int level);
 static int OnPropertySearchPropertiesEnum(Properties* self, 
@@ -96,7 +94,7 @@ Properties* properties_create_string(const char* key, const char* value)
 
 	p = (Properties*) malloc(sizeof(Properties));
 	properties_init(p, key, PROPERTY_TYP_STRING);	
-	p->item.value.s = _strdup(value);	
+	p->item.value.s = strdup(value);	
 	return p;
 }
 
@@ -307,7 +305,7 @@ Properties* properties_write_string(Properties* self, const char* key, const cha
 		if (p->item.typ == PROPERTY_TYP_STRING) {
 			free(p->item.value.s);
 		}
-		p->item.value.s = _strdup(value);
+		p->item.value.s = strdup(value);
 		p->item.typ = PROPERTY_TYP_STRING;
 	} else {
 		p = properties_append_string(self, key, value);
@@ -399,7 +397,8 @@ Properties* properties_find(Properties* self, const char* key)
 {
 	searchkey = key;
 	keyfound = 0;
-	properties_enumerate(self, self, OnSearchPropertiesEnum);
+	properties_enumerate(self, self, 
+	    (PropertiesCallback)OnSearchPropertiesEnum);
 	return keyfound;		
 }
 
@@ -436,7 +435,8 @@ int properties_insection(Properties* self, Properties* section)
 		keyfound = 0;
 		searchproperty = self;
 			
-		properties_enumerate(section, section, OnPropertySearchPropertiesEnum);
+		properties_enumerate(section, section,
+		    (PropertiesCallback)OnPropertySearchPropertiesEnum);
 		rv = keyfound != 0;		
 	}
 	return rv;
@@ -512,7 +512,7 @@ void properties_sections(Properties* self, char* text)
 Properties* properties_settext(Properties* self, const char* text)
 {
 	free(self->item.text);
-	self->item.text = _strdup(text);
+	self->item.text = strdup(text);
 	return self;
 }
 

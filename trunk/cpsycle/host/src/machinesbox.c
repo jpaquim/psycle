@@ -5,6 +5,7 @@
 
 #include "machinesbox.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void OnDestroy(MachinesBox*, ui_component*);
 static void ClearMachineBox(MachinesBox*);
@@ -72,7 +73,7 @@ void InsertSlot(MachinesBox* self, int slot, Machine* machine)
 		int listboxindex;
 
 		char buffer[128];
-		_snprintf(buffer, 128, "%02X:", slot);
+		psy_snprintf(buffer, 128, "%02X:", slot);
 		if (machine && machine->info(machine)) {
 			strcat(buffer, machine->info(machine)->ShortName); 
 		} else {

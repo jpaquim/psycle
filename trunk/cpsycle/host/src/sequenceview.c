@@ -5,6 +5,7 @@
 
 #include "sequenceview.h"
 #include <stdio.h>
+#include <portable.h>
 
 #define TIMERID_SEQUENCEVIEW 2000
 
@@ -283,7 +284,7 @@ void sequencelistview_drawtrack(SequenceListView* self, ui_graphics* g, Sequence
 				playing = 1;
 			}
 		}		
-		_snprintf(buffer,20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
+		psy_snprintf(buffer,20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
 		if (self->selected == (int)c && self->selectedtrack == trackindex) {
 			ui_setbackgroundcolor(g, 0x009B7800);
 			ui_settextcolor(g, 0x00FFFFFF);
@@ -418,7 +419,7 @@ void sequenceview_onnewtrack(SequenceView* self)
 {	
 	sequence_appendtrack(self->sequence, sequencetrack_allocinit());
 	sequencelistview_adjustscrollbars(&self->listview);
-	ui_invalidate(&self->component);	
+	ui_component_invalidate(&self->component);	
 }
 
 void sequenceview_ondeltrack(SequenceView* self)
@@ -427,7 +428,7 @@ void sequenceview_ondeltrack(SequenceView* self)
 	position = sequence_at(self->sequence, self->listview.selectedtrack,
 		self->listview.selected);	
 	sequence_removetrack(self->sequence, position.track);
-	ui_invalidate(&self->component);	
+	ui_component_invalidate(&self->component);	
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscrollbars(&self->listview);
 }
@@ -497,7 +498,7 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace)
 	self->listview.selected = 0;
 	self->duration.sequence = &workspace->song->sequence;
 	sequencelistview_adjustscrollbars(&self->listview);
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void sequenceview_oneditpositionchanged(SequenceView* self, Sequence* sequence)
@@ -530,7 +531,7 @@ void sequenceview_oneditpositionchanged(SequenceView* self, Sequence* sequence)
 		}
 		self->listview.selected = c;
 	}
-	ui_invalidate(&self->listview.component);
+	ui_component_invalidate(&self->listview.component);
 }
 
 void sequenceduration_init(SequenceViewDuration* self, ui_component* parent,
@@ -555,7 +556,7 @@ void sequenceduration_update(SequenceViewDuration* self)
 {
 	char text[40];
 	
-	_snprintf(text, 40, "%.2f", sequence_duration(self->sequence));
+	psy_snprintf(text, 40, "%.2f", sequence_duration(self->sequence));
 	ui_label_settext(&self->duration, text);
 }
 
@@ -567,12 +568,12 @@ void sequencelistview_ontimer(SequenceListView* self, ui_component* sender, int 
 		it = sequence_begin(self->sequence, self->sequence->tracks, 
 			player_position(self->player));
 		if (it.tracknode && self->lastentry != it.tracknode->entry) {
-			ui_invalidate(&self->component);
+			ui_component_invalidate(&self->component);
 			self->lastentry = (SequenceEntry*) it.tracknode->entry;
 		}
 	} else
 	if (self->lastentry) {
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 		self->lastentry = 0;
 	}
 }

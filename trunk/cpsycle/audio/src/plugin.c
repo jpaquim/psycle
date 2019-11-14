@@ -8,6 +8,7 @@
 #include "songio.h"
 #include <stdlib.h>
 #include <string.h>
+#include <portable.h>
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
@@ -35,45 +36,40 @@ static unsigned int numoutputs(Plugin*);
 static void loadspecific(Plugin*, struct SongFile*, unsigned int slot);
 static void savespecific(Plugin*, struct SongFile*, unsigned int slot);
 static void setcallback(Plugin*, MachineCallback);
-static const char* editname(Plugin*);
-static void seteditname(Plugin*, const char* name);
 		
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 {
 	GETINFO GetInfo;
+	Machine* base = &self->custommachine.machine;
 	
-	machine_init(&self->machine, callback);	
+	custommachine_init(&self->custommachine, callback);	
 	library_init(&self->library);
-	library_load(&self->library, path);		
-	self->pan = 0.5;
+	library_load(&self->library, path);			
 	self->mi = 0;
 	self->plugininfo = 0;
-	self->machine.clone = clone;
-	self->machine.hostevent = hostevent;
-	self->machine.seqtick = seqtick;
-	self->machine.sequencerlinetick = sequencerlinetick;
-	self->machine.info = info;
-	self->machine.numparametercols = numparametercols;
-	self->machine.numparameters = numparameters;
-	self->machine.parameterrange = parameterrange;
-	self->machine.parametertype = parametertype;
-	self->machine.parametername = parametername;
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.parametertweak = parametertweak;
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.parametername = parametername;
-	self->machine.describevalue = describevalue;	
-	self->machine.parametervalue = parametervalue;
-	self->machine.dispose = dispose;
-	self->machine.generateaudio = generateaudio;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.loadspecific = loadspecific;
-	self->machine.savespecific = savespecific;
-	self->machine.editname = editname;
-	self->machine.seteditname = seteditname;
-	self->machine.setcallback = setcallback;
-	self->editname = 0;
+	base->clone = clone;
+	base->hostevent = hostevent;
+	base->seqtick = seqtick;
+	base->sequencerlinetick = sequencerlinetick;
+	base->info = info;
+	base->numparametercols = numparametercols;
+	base->numparameters = numparameters;
+	base->parameterrange = parameterrange;
+	base->parametertype = parametertype;
+	base->parametername = parametername;
+	base->parameterlabel = parameterlabel;
+	base->parametertweak = parametertweak;
+	base->parameterlabel = parameterlabel;
+	base->parametername = parametername;
+	base->describevalue = describevalue;
+	base->parametervalue = parametervalue;
+	base->dispose = dispose;
+	base->generateaudio = generateaudio;
+	base->numinputs = numinputs;
+	base->numoutputs = numoutputs;
+	base->loadspecific = loadspecific;
+	base->savespecific = savespecific;	
+	base->setcallback = setcallback;	
 			
 	GetInfo = (GETINFO)library_functionpointer(&self->library, "GetInfo");
 	if (!GetInfo) {
@@ -95,13 +91,13 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 				}
 				self->plugininfo = machineinfo_allocinit();
 				machineinfo_setnativeinfo(self->plugininfo, pInfo, MACH_PLUGIN,
-					self->library.path, 0);
-				self->editname = strdup(pInfo->ShortName);
+					self->library.path, 0);				
+				base->seteditname(base, pInfo->ShortName);
 			}
 		}
 	}
-	if (!self->editname) {
-		self->editname = strdup("Plugin");
+	if (!base->editname(base)) {
+		base->seteditname(base, "Plugin");
 	}
 }
 
@@ -116,9 +112,8 @@ void dispose(Plugin* self)
 		machineinfo_dispose(self->plugininfo);
 		free(self->plugininfo);
 		self->plugininfo = 0;
-	}
-	free(self->editname);
-	machine_dispose(&self->machine);
+	}	
+	custommachine_dispose(&self->custommachine);
 }
 
 Machine* clone(Plugin* self)
@@ -127,9 +122,9 @@ Machine* clone(Plugin* self)
 
 	rv = malloc(sizeof(Plugin));
 	if (rv) {
-		plugin_init(rv, self->machine.callback, self->library.path);
+		plugin_init(rv, self->custommachine.machine.callback, self->library.path);
 	}
-	return rv ? &rv->machine : 0;
+	return rv ? &rv->custommachine.machine : 0;
 }
 
 int plugin_psycle_test(const char* path, MachineInfo* info)
@@ -237,7 +232,7 @@ void loadspecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 			int temp;
 			
 			psyfile_read(songfile->file, &temp, sizeof(temp));
-			self->machine.parametertweak(self, i, temp);
+			self->custommachine.machine.parametertweak(self, i, temp);
 		}
 		size -= sizeof(count) + sizeof(int)*count;
 		if(size) {
@@ -257,7 +252,7 @@ void loadspecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 
 void savespecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 {
-	uint32_t count = self->machine.numparameters(&self->machine);
+	uint32_t count = self->custommachine.machine.numparameters(&self->custommachine.machine);
 	uint32_t size2 = 0;
 	uint32_t size;
 	uint32_t i;
@@ -269,7 +264,7 @@ void savespecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 	for (i = 0; i < count; ++i) {
 		int temp;
 		
-		temp = self->machine.parametervalue(&self->machine, i);
+		temp = self->custommachine.machine.parametervalue(&self->custommachine.machine, i);
 		psyfile_write(songfile->file, &temp, sizeof temp);
 	}
 	if (size2) {
@@ -328,7 +323,7 @@ int parameterlabel(Plugin* self, char* txt, int param)
 		CMachineInfo* pInfo = GetInfo();
 		if (pInfo) {	
 			if (param < pInfo->numParameters) {
-				_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Description);
+				psy_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Description);
 				rv = 1;
 			}
 		}
@@ -346,7 +341,7 @@ int parametername(Plugin* self, char* txt, int param)
 		CMachineInfo* pInfo = GetInfo();
 		if (pInfo) {	
 			if (param < pInfo->numParameters) {
-				_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Name);
+				psy_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Name);
 				rv = 1;
 			}
 		}
@@ -384,13 +379,3 @@ unsigned int numparameters(Plugin* self)
 	return rv;
 }
 
-const char* editname(Plugin* self)
-{
-	return self->editname;
-}
-
-void seteditname(Plugin* self, const char* name)
-{
-	free(self->editname);
-	self->editname = strdup(name);
-}

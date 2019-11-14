@@ -39,6 +39,12 @@ typedef struct Machine {
 	List* (*sequencerinsert)(void*, List* events);
 	void (*setpanning)(void*, amp_t);
 	amp_t (*panning)(void*);
+	void (*mute)(void*);	
+	void (*unmute)(void*);
+	int (*muted)(void*);
+	void (*bypass)(void*);
+	void (*unbypass)(void*);
+	int (*bypassed)(void*);
 	void (*setvalue)(void*, int param, int value);	
 	const MachineInfo* (*info)(void*);
 	void (*dispose)(void*);
@@ -75,26 +81,13 @@ typedef struct Machine {
 	unsigned int (*bpm)(void*);	
 	struct Samples* (*samples)(void*);
 	struct Machines* (*machines)(void*);
-	struct Instruments* (*instruments)(void*);
-			
-	MachineCallback callback;
-	int bypass;
-	int mute;
-	amp_t pan;
-	int ismixersend;		
-	Signal signal_worked;
-	size_t buildid;
+	struct Instruments* (*instruments)(void*);			
+	MachineCallback callback;	
+	Signal signal_worked;	
 } Machine;
 
 void machine_init(Machine*, MachineCallback);
 void machine_dispose(Machine*);
 int machine_supports(Machine*, int option);
-void machine_bypass(Machine*);
-void machine_unbypass(Machine*);
-int machine_bypassed(Machine*);
-void machine_mute(Machine*);
-void machine_unmute(Machine*);
-int machine_muted(Machine*);
-
 
 #endif

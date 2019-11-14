@@ -32,7 +32,7 @@ int psyfile_open(PsyFile*, const char* path);
 int psyfile_create(PsyFile*, const char* path, int overwrite);
 int psyfile_close(PsyFile*);
 int psyfile_read(PsyFile*, void* data, uint32_t numBytes);
-int psyfile_write(PsyFile*, void* data, uint32_t numBytes);
+int psyfile_write(PsyFile*, const void* data, uint32_t numBytes);
 int psyfile_expect(PsyFile*, void* data, uint32_t numBytes);
 uint32_t psyfile_seek(PsyFile*, uint32_t offset);
 uint32_t psyfile_skip(PsyFile*, uint32_t numBytes);

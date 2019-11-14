@@ -4,11 +4,11 @@
 #if !defined(VSTPLUGIN_H)
 #define VSTPLUGIN_H
 
-#include "machine.h"
+#include "custommachine.h"
 #include "library.h"
 
 typedef struct {
-	Machine machine;		
+	CustomMachine custommachine;		
 	Library library;
 	struct AEffect* effect;
 	MachineInfo* info;
@@ -16,8 +16,7 @@ typedef struct {
 	struct VstEvents* events;
 	int eventcap;
 	Table noteons;
-	MachineInfo* plugininfo;
-	char* editname;
+	MachineInfo* plugininfo;	
 } VstPlugin;
 
 void vstplugin_init(VstPlugin*, MachineCallback, const char* path);

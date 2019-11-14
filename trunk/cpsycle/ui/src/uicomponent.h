@@ -4,7 +4,6 @@
 #if !defined(UICOMPONENT_H)
 #define UICOMPONENT_H
 
-#include <windows.h>
 #include "uidef.h"
 #include "uigraphics.h"
 #include <signal.h>
@@ -77,6 +76,7 @@ typedef struct {
 	Signal signal_align;
 	Signal signal_preferredsize;
 	Signal signal_command;
+	Signal signal_focuslost;
 	EnumCallback childenum;
 	UiAlignType align;
 	UiJustifyType justify;
@@ -136,8 +136,8 @@ void ui_component_releasecapture();
 ui_size ui_component_size(ui_component*);
 ui_rectangle ui_component_position(ui_component*);
 ui_size ui_component_frame_size(ui_component*);
-void ui_invalidate(ui_component*);
-void ui_invalidaterect(ui_component*, const ui_rectangle* rect);
+void ui_component_invalidate(ui_component*);
+void ui_component_invalidaterect(ui_component*, const ui_rectangle* rect);
 void ui_component_update(ui_component*);
 void ui_component_setfocus(ui_component*);
 int ui_component_hasfocus(ui_component*);

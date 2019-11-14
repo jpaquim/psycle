@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "songio.h"
+#include <portable.h>
 
 static void work(Duplicator* self, BufferContext* bc) { }
 static void sequencertick(Duplicator*);
@@ -24,8 +25,6 @@ static unsigned int numparametercols(Duplicator*);
 static void dispose(Duplicator*);
 static unsigned int numinputs(Duplicator* self) { return 0; }
 static unsigned int numoutputs(Duplicator* self) { return 0; }
-static const char* editname(Duplicator*);
-static void seteditname(Duplicator*, const char* name);
 static void loadspecific(Duplicator*, struct SongFile*, unsigned int slot);
 static void savespecific(Duplicator*, struct SongFile*, unsigned int slot);
 
@@ -53,43 +52,41 @@ const MachineInfo* duplicator_info(void)
 
 void duplicator_init(Duplicator* self, MachineCallback callback)
 {	
+	Machine* base = &self->custommachine.machine;
 	int i;
 
-	machine_init(&self->machine, callback);		
-	self->machine.work = work;	
-	self->machine.info = info;
-	self->machine.sequencertick = sequencertick;
-	self->machine.sequencerinsert = sequencerinsert;	
-	self->machine.parametertweak = parametertweak;
-	self->machine.describevalue = describevalue;	
-	self->machine.parametervalue = parametervalue;
-	self->machine.describevalue = describevalue;
-	self->machine.parameterrange = parameterrange;
-	self->machine.numparameters = numparameters;
-	self->machine.numparametercols = numparametercols;
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.parametername = parametername;
-	self->machine.dispose = dispose;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.seteditname = seteditname;
-	self->machine.editname = editname;
-	self->machine.loadspecific = loadspecific;
-	self->machine.savespecific = savespecific;
+	custommachine_init(&self->custommachine, callback);
+	base->work = work;	
+	base->info = info;
+	base->sequencertick = sequencertick;
+	base->sequencerinsert = sequencerinsert;	
+	base->parametertweak = parametertweak;
+	base->describevalue = describevalue;	
+	base->parametervalue = parametervalue;
+	base->describevalue = describevalue;
+	base->parameterrange = parameterrange;
+	base->numparameters = numparameters;
+	base->numparametercols = numparametercols;
+	base->parameterlabel = parameterlabel;
+	base->parametername = parametername;
+	base->dispose = dispose;
+	base->numinputs = numinputs;
+	base->numoutputs = numoutputs;	
+	base->loadspecific = loadspecific;
+	base->savespecific = savespecific;
 	for (i = 0; i < NUMMACHINES; ++i) {
 		self->macoutput[i] = -1;
 		self->noteoffset[i] = 0;
 	}
 	self->isticking = 0;
-	self->editname = strdup("Note Duplicator");
+	base->seteditname(base, "Note Duplicator");
 	duplicatormap_init(&self->map);
 }
 
 void dispose(Duplicator* self)
-{	
-	machine_dispose(&self->machine);
+{		
 	duplicatormap_dispose(&self->map);
-	free(self->editname);
+	custommachine_dispose(&self->custommachine);
 }
 
 void sequencertick(Duplicator* self)
@@ -204,9 +201,9 @@ int parametername(Duplicator* self, char* txt, int param)
 {
 	txt[0] = '\0';
 	if (param < 8) {
-		_snprintf(txt, 128, "%s %d", "Output Machine ", param);
+		psy_snprintf(txt, 128, "%s %d", "Output Machine ", param);
 	} else {
-		_snprintf(txt, 128, "%s %d", "Note Offset ", param);
+		psy_snprintf(txt, 128, "%s %d", "Note Offset ", param);
 	}
 	return 1;
 }
@@ -219,17 +216,6 @@ unsigned int numparameters(Duplicator* self)
 unsigned int numparametercols(Duplicator* self)
 {
 	return 2;	
-}
-
-const char* editname(Duplicator* self)
-{
-	return self->editname;
-}
-
-void seteditname(Duplicator* self, const char* name)
-{
-	free(self->editname);
-	self->editname = strdup(name);
 }
 
 void loadspecific(Duplicator* self, struct SongFile* songfile, unsigned int slot)

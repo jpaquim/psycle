@@ -31,7 +31,7 @@ void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid)
 {	
 	if (self->clip) {
 		ui_component_setbackgroundcolor(&self->component, 0x00FF0000);
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 		self->clip = 0;
 	}
 }
@@ -54,7 +54,7 @@ void clipbox_onmousedown(ClipBox* self, ui_component* sender, int x, int y, int 
 {
 	self->clip = 0;
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);
-		ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void clipbox_onsongchanged(ClipBox* self, Workspace* workspace)
