@@ -4,7 +4,7 @@
 #if !defined(MIXER_H)
 #define MIXER_H
 
-#include "machine.h"
+#include "custommachine.h"
 #include <rms.h>
 
 typedef struct {
@@ -32,15 +32,14 @@ typedef struct {
 } ReturnChannel;
 
 typedef struct {
-	Machine machine;
+	CustomMachine custommachine;
 	Table inputs;
 	Table sends;
 	Table returns;
 	int solocolumn;
 	RMSVol masterrmsvol;
 	MixerChannel master;
-	uintptr_t slot;
-	char* editname;
+	uintptr_t slot;	
 } Mixer;
 
 void mixer_init(Mixer*, MachineCallback);

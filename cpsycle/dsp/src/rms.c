@@ -6,11 +6,7 @@
 #include "rms.h"
 #include <math.h>
 #include <stdlib.h>
-#define DIVERSALIS__COMPILER__RESOURCE	// get rid of not c++ error
-#define DIVERSALIS__CPU__ENDIAN			// avoid boost include
-#define DIVERSALIS__CPU__ENDIAN__LITTLE
-#include <diversalis/cpu.hpp>
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
+#if defined SSE
 	#include <xmmintrin.h>
 #endif
 
@@ -27,7 +23,7 @@ void rmsdata_init(RMSData* self)
 	self->previousRight = 0;
 }
 
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if defined SSE
 void rmsdata_accumulate(RMSData* self, const amp_t* __restrict pSamplesL,
 	const amp_t* __restrict pSamplesR, int count)
 {
@@ -116,7 +112,7 @@ void rmsvol_tick(RMSVol* self, const amp_t * __restrict pSamplesL,
 		// count can be negative when changing the samplerate.
 		if (count >= 0) {
 			rmsdata_accumulate(&self->data, pSamplesL, pSamplesR, count);				
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if defined SSE
 			//small workaround for 16byte boundary (it makes it slightly incorrect, but hopefully just a bit).
 			ns -= count&0x3;
 			count = count&~0x3;

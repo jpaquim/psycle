@@ -812,20 +812,11 @@ void psy2_load(SongFile* songfile)
 void psy2machineload(SongFile* songfile, int32_t slot)
 {
 	char junk[256];
-	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
-	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
-	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
-//	float _wireMultiplier[MAX_CONNECTIONS];	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-	unsigned char _connection[MAX_CONNECTIONS];      // Outgoing connections activated
-	unsigned char _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
-	int32_t _numInputs;							// number of Incoming connections
-	int32_t _numOutputs;						// number of Outgoing connections
+
 	char _editName[16];
-	POINT _connectionPoint[MAX_CONNECTIONS];
 	int32_t _panning;
 	int32_t _outDry;
 	int32_t _outWet;
-	int32_t c;
 
 	memset(&junk, 0, sizeof(junk));
 
@@ -867,17 +858,7 @@ void psy2machineload(SongFile* songfile, int32_t slot)
 void psy2pluginload(SongFile* songfile, int32_t slot)
 {
 	char junk[256];
-	int32_t c;
-	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
-	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
-	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
-//	float _wireMultiplier[MAX_CONNECTIONS];	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-	unsigned char _connection[MAX_CONNECTIONS];      // Outgoing connections activated
-	unsigned char _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
-	int32_t _numInputs;							// number of Incoming connections
-	int32_t _numOutputs;						// number of Outgoing connections
 	char _editName[16];
-	POINT _connectionPoint[MAX_CONNECTIONS];
 	int32_t _panning;
 	int32_t _outDry;
 	int32_t _outWet;
@@ -926,18 +907,8 @@ void psy2pluginload(SongFile* songfile, int32_t slot)
 
 void psy2samplerload(SongFile* songfile, int32_t slot)
 {	
-	char junk[256];
-	int32_t c;
-	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
-	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
-	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
-//	float _wireMultiplier[MAX_CONNECTIONS];	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-	unsigned char _connection[MAX_CONNECTIONS];      // Outgoing connections activated
-	unsigned char _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
-	int32_t _numInputs;							// number of Incoming connections
-	int32_t _numOutputs;						// number of Outgoing connections
+	char junk[256];	
 	char _editName[16];
-	POINT _connectionPoint[MAX_CONNECTIONS];
 	int32_t _panning;
 	int32_t _outDry;
 	int32_t _outWet;
@@ -1004,8 +975,7 @@ void psy2samplerload(SongFile* songfile, int32_t slot)
 }
 
 void psy2readmachineconnections(SongFile* songfile, int32_t slot)
-{
-	int32_t  c;
+{	
 	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections Machine number
 	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections Machine number
 	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections Machine vol
@@ -1014,14 +984,7 @@ void psy2readmachineconnections(SongFile* songfile, int32_t slot)
 	unsigned char _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
 	int32_t _numInputs;							// number of Incoming connections
 	int32_t _numOutputs;						// number of Outgoing connections
-	char _editName[16];
-	POINT _connectionPoint[MAX_CONNECTIONS];
-	int32_t _panning;
-	int32_t _outDry;
-	int32_t _outWet;
-	int32_t i;
-//	int32_t numParameters;
-	int32_t _numVoices;
+	POINT _connectionPoint[MAX_CONNECTIONS];			
 
 	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
 	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));

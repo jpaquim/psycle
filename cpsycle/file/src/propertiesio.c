@@ -3,6 +3,7 @@
 
 #include "../../detail/prefix.h"
 
+#include <portable.h>
 #include "propertiesio.h"
 #include <malloc.h>
 #include <string.h> 
@@ -186,17 +187,17 @@ int OnSaveIniEnum(FILE* fp, Properties* property, int level)
 			fwrite("=", sizeof(char), 1, fp);
 			switch (property->item.typ) {				
 				case PROPERTY_TYP_INTEGER:
-					_snprintf(text, 40, "%d", properties_value(property));
+					psy_snprintf(text, 40, "%d", properties_value(property));
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);					
 				break;
 				case PROPERTY_TYP_BOOL:
-					_snprintf(text, 40, "%d", property->item.value.i);
+					psy_snprintf(text, 40, "%d", property->item.value.i);
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;
 				case PROPERTY_TYP_CHOICE:
-					_snprintf(text, 40, "%d", property->item.value.i);
+					psy_snprintf(text, 40, "%d", property->item.value.i);
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;

@@ -4,7 +4,7 @@
 #if !defined(SAMPLER_H)
 #define SAMPLER_H
 
-#include "machine.h"
+#include "custommachine.h"
 #include "instrument.h"
 #include "sample.h"
 #include <adsr.h>
@@ -49,14 +49,12 @@ typedef struct {
 } Voice;
 
 typedef struct {
-	Machine machine;		
+	CustomMachine custommachine;		
 	Voice voices[SAMPLER_MAX_POLYPHONY];
 	int numvoices;
 	int resamplingmethod;
-	int defaultspeed;
-	float pan;	
-	Table lastinst;
-	char* editname;
+	int defaultspeed;	
+	Table lastinst;	
 } Sampler;
 
 void sampler_init(Sampler*, MachineCallback);

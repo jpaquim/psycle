@@ -5,12 +5,12 @@
 #define SAMPLERINSTRUMENTVIEW_H
 
 #include "tabbar.h"
-#include "slidergroup.h"
 #include "envelopeview.h"
 #include <uinotebook.h>
 #include <uilabel.h>
 #include <uiedit.h>
 #include <uibutton.h>
+#include <uislider.h>
 #include "instrumentsbox.h"
 #include <uigroupbox.h>
 #include "workspace.h"
@@ -40,10 +40,10 @@ typedef struct {
 	ui_component component;	
 	ui_groupbox groupbox;
 	EnvelopeView envelopeview;
-	SliderGroup attack;
-	SliderGroup decay;
-	SliderGroup sustain;
-	SliderGroup release;
+	ui_slider attack;
+	ui_slider decay;
+	ui_slider sustain;
+	ui_slider release;
 	Player* player;
 	Instrument* instrument;
 	Instruments* instruments;
@@ -59,13 +59,13 @@ typedef struct {
 	ui_component component;	
 	ui_groupbox groupbox;
 	EnvelopeView envelopeview;
-	SliderGroup attack;
-	SliderGroup decay;
-	SliderGroup sustain;
-	SliderGroup release;
-	SliderGroup cutoff;
-	SliderGroup res;
-	SliderGroup modamount;
+	ui_slider attack;
+	ui_slider decay;
+	ui_slider sustain;
+	ui_slider release;
+	ui_slider cutoff;
+	ui_slider res;
+	ui_slider modamount;
 	Player* player;
 	Instrument* instrument;
 	Instruments* instruments;

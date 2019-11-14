@@ -5,6 +5,7 @@
 
 #include "samplesbox.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void BuildSampleList(SamplesBox* self);
 static void AddString(SamplesBox* self, const char* text);
@@ -30,9 +31,9 @@ void BuildSampleList(SamplesBox* self)
 	ui_listbox_clear(&self->samplelist);
 	for ( ; slot < 256; ++slot) {		
 		if (sample = samples_at(self->samples, slot)) {
-			_snprintf(buffer, 20, "%02X:%s", slot, sample_name(sample));
+			psy_snprintf(buffer, 20, "%02X:%s", slot, sample_name(sample));
 		} else {
-			_snprintf(buffer, 20, "%02X:%s", slot, "");
+			psy_snprintf(buffer, 20, "%02X:%s", slot, "");
 		}
 		AddString(self, buffer);
 	}

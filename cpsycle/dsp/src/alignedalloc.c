@@ -3,58 +3,32 @@
 
 #include "../../detail/prefix.h"
 
-#define __cplusplus
-#include <diversalis/os.hpp>
-#undef __cplusplus
-
 #include "alignedalloc.h"
 #include <malloc.h>
 #include <stdio.h>
 #include <assert.h>
 
-void* aligned_memory_alloc(size_t alignment, size_t size) {		
-#if defined DIVERSALIS__OS__POSIX
+void* aligned_memory_alloc(size_t alignment, size_t count, size_t size) {
+#if POSIX
 	void* address;
-	int const err(posix_memalign(&address, alignment, size));
-	if (err) throw exception(err, UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-	x = static_cast<X*>(address);
-	// note: free with std::free
-#elif 0///\todo defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
-	x = static_cast<X*>(__mingw_aligned_malloc(size, alignment));
-	// note: free with _mingw_aligned_free
-#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
-	#if defined DIVERSALIS__CPU__X86__SSE
-		return _aligned_malloc(size, alignment);
-	#else
-		assert(0);
-		return 0;
-	#endif
-	// note: free with _aligned_free
+	int err;
+	
+	err = posix_memalign(&address, alignment, size * count);
+	if (err) {
+	    address = 0;
+	}
+	return address;
+#elif defined _WIN32 && defined SSE		
+		return _aligned_malloc(size * count, alignment);
 #else
-	// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
-	// memalign on Solaris but not BSD (#include both <cstdlib> and <cmalloc>)
-	// note that memalign is declared obsolete and does not specify how to free the allocated memory.
-
-	size; // unused
-	x = new X[count];
-	// note: free with delete[]
-#error "TODO alloc some extra mem and store orig pointer or alignment to the x[-1]"
+	return 0;
 #endif	
 }
 
 void aligned_memory_dealloc(void* address) {
-#if defined DIVERSALIS__OS__POSIX
-	std::free(address);
-#elif 0///\todo: defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
-	_aligned_free(address);
-#elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
-	#if defined DIVERSALIS__CPU__X86__SSE
-		_aligned_free(address);
-	#else
-		assert(0);
-	#endif
+#if defined _WIN32 && defined SSE	
+	_aligned_free(address);	
 #else
-	delete[] address;
-#error "TODO alloc some extra mem and store orig pointer or alignment to the x[-1]"
+	free(address);
 #endif
 }

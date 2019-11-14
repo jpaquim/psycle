@@ -1,5 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #if !defined(SIGNAL_H)
 #define SIGNAL_H
 
@@ -18,6 +19,7 @@ typedef struct {
 
 void signal_init(Signal*);
 void signal_connect(Signal*, void* context, void* fp);
+void signal_disconnect(Signal*, void* context, void* fp);
 void signal_disconnectall(Signal*);
 void signal_prevent(Signal*, void* context, void* fp);
 void signal_enable(Signal*, void* context, void* fp);

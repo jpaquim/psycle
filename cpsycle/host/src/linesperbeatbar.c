@@ -5,6 +5,7 @@
 
 #include "linesperbeatbar.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void OnLessClicked(LinesPerBeatBar*, ui_component* sender);
 static void OnMoreClicked(LinesPerBeatBar*, ui_component* sender);
@@ -55,8 +56,7 @@ void OnTimer(LinesPerBeatBar* self, ui_component* sender, int timerid)
 		char text[20];
 
 		self->lpb = player_lpb(self->player);
-		_snprintf(text, 10, "%2d", self->lpb);
-		ui_label_settext(&self->lpblabel, text);
-		
+		psy_snprintf(text, 10, "%2d", self->lpb);
+		ui_label_settext(&self->lpblabel, text);		
 	}
 }

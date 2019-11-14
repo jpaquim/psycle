@@ -5,6 +5,7 @@
 
 #include "newmachine.h"
 #include <plugin_interface.h>
+#include <portable.h>
 
 static void newmachine_onpluginselected(NewMachine*, ui_component* parent,
 	Properties*);
@@ -179,7 +180,7 @@ void pluginname(Properties* property, char* txt)
 	Properties* p;
 	
 	p = properties_read(property, "name");	
-	_snprintf(txt, 128, "%s", 
+	psy_snprintf(txt, 128, "%s", 
 		p && properties_valuestring(p) != '\0'
 		? properties_valuestring(p)
 		: properties_key(property));	
@@ -248,7 +249,7 @@ void pluginsview_onmousedown(PluginsView* self, ui_component* sender,
 	int x, int y, int button)
 {
 	pluginsview_hittest(self, x, y);
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 	signal_emit(&self->signal_changed, self, 1, self->selectedplugin);
 	ui_component_setfocus(&self->component);
 }
@@ -301,7 +302,7 @@ void pluginsview_onplugincachechanged(PluginsView* self, PluginCatcher* sender)
 	self->dy = 0;
 	self->selectedplugin = 0;
 	pluginsview_adjustscroll(self);	
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void newmachine_init(NewMachine* self, ui_component* parent,

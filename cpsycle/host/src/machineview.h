@@ -6,6 +6,7 @@
 
 #include "workspace.h"
 #include <uinotebook.h>
+#include <uiedit.h>
 #include <uidef.h>
 #include <player.h>
 #include <plugincatcher.h>
@@ -65,12 +66,8 @@ typedef struct {
 	MachineFrame* frame;
 	ParamView* paramview;
 	Vst2View* vst2view;
+	char* restorename;
 } MachineUi;
-
-typedef struct {
-	uintptr_t src;
-	uintptr_t dst;
-} WireConnection;
 
 enum {	
 	MACHINEWIREVIEW_DRAG_MACHINE,
@@ -89,13 +86,14 @@ typedef struct {
 	uintptr_t dragslot;
 	int dragmode;
 	uintptr_t selectedslot;	
-	WireConnection dragwire;	
-	WireConnection selectedwire;
+	Wire dragwire;	
+	Wire selectedwire;
 	int drawvumeters;	
 	PluginCatcher plugincatcher;
 	MachineSkin skin;	   
 	Workspace* workspace;
 	struct MachineViewBar* statusbar;
+	ui_edit editname;	
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, ui_component* parent,

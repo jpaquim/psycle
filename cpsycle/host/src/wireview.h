@@ -8,20 +8,27 @@
 #include <uinotebook.h>
 #include <uislider.h>
 #include "tabbar.h"
+#include "vuscope.h"
 #include "workspace.h"
 
 typedef struct {
 	ui_component component;
 	TabBar tabbar;
 	ui_notebook notebook;
+	ui_component slidergroup;
 	ui_slider volslider;
+	ui_button dbvol;
+	ui_button percvol;
+	VuScope vuscope;
 	ChannelMappingView channelmappingview;
-	uintptr_t src;
-	uintptr_t dst;
+	ui_component bottomgroup;
+	ui_button deletewire;
+	Wire wire;
 	Workspace* workspace;
 } WireView;
 
-void wireview_init(WireView*, ui_component* parent, uintptr_t src, uintptr_t dst, Workspace*);
+void wireview_init(WireView*, ui_component* parent, Wire, Workspace*);
+int wireview_wireexists(WireView*);
 
 typedef struct {
 	ui_component component;

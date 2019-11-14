@@ -8,6 +8,7 @@
 #include <string.h>
 #include <math.h>
 #include "songio.h"
+#include <portable.h>
 
 static int master_mode(Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(Master*);
@@ -115,7 +116,7 @@ int describevalue(Master* self, char* txt, int param, int value)
 			self->machine.callback.context);
 
 		amp_t db = (amp_t)(20 * log10(machines_volume(machines)));
-		_snprintf(txt, 10, "%.2f dB", db);
+		psy_snprintf(txt, 10, "%.2f dB", db);
 		return 1;
 	} else {
 		MachineSockets* sockets;
@@ -132,7 +133,7 @@ int describevalue(Master* self, char* txt, int param, int value)
 
 				input_entry = (WireSocketEntry*) p->entry;
 				db = (amp_t)(20 * log10(input_entry->volume));
-				_snprintf(txt, 10, "%.2f dB", db);
+				psy_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
 			}			
 		}
@@ -220,13 +221,13 @@ unsigned int numparametercols(Master* self)
 
 int parameterlabel(Master* self, char* txt, int param)
 {
-	_snprintf(txt, 128, "%s", "Vol");
+	psy_snprintf(txt, 128, "%s", "Vol");
 	return 1;
 }
 
 int parametername(Master* self, char* txt, int param)
 {
-	_snprintf(txt, 128, "%s", "Vol");
+	psy_snprintf(txt, 128, "%s", "Vol");
 	return 1;
 }
 

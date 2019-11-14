@@ -4,10 +4,10 @@
 #if !defined(DUMMY_H)
 #define DUMMY_H
 
-#include "machine.h"
+#include "custommachine.h"
 
 typedef struct {
-	Machine machine;
+	CustomMachine machine;
 	int mode;
 } DummyMachine;
 

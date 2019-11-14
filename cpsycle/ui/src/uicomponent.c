@@ -10,7 +10,7 @@
 #include <commctrl.h>   // includes the common control header
 #include <stdio.h>
 #include <shlobj.h>
-
+#include <portable.h>
 
 HINSTANCE appInstance = 0;
 HWND appMainComponentHandle = 0;
@@ -78,11 +78,8 @@ void ui_init(HINSTANCE hInstance)
 	wndclass.lpszMenuName  = NULL;
 	wndclass.lpszClassName = szComponentClass;
      
-
 	RegisterClass (&wndclass) ;
-
-	ui_menu_setup();	
-
+	ui_menu_setup();
 	// Ensure that the common control DLL is loaded.     		
 	icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     icex.dwICC = ICC_USEREX_CLASSES;
@@ -213,6 +210,7 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_destroy);
 	signal_init(&component->signal_show);
 	signal_init(&component->signal_hide);
+	signal_init(&component->signal_focuslost);
 	signal_init(&component->signal_align);
 	signal_init(&component->signal_preferredsize);
 	signal_init(&component->signal_windowproc);
@@ -261,6 +259,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_destroy);
 	signal_dispose(&component->signal_show);
 	signal_dispose(&component->signal_hide);
+	signal_dispose(&component->signal_focuslost);
 	signal_dispose(&component->signal_align);
 	signal_dispose(&component->signal_preferredsize);
 	signal_dispose(&component->signal_windowproc);
@@ -297,6 +296,16 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				if (component && component->signal_timer.slots) {
 					signal_emit(&component->signal_timer, component, 1, (int) wParam);					
 				}
+			case WM_KEYDOWN:				
+				if (component->signal_keydown.slots) {
+					signal_emit(&component->signal_keydown, component, 2, (int)wParam, lParam);
+				}				
+			break;
+			case WM_KILLFOCUS:
+				if (component->signal_focuslost.slots) {
+					signal_emit(&component->signal_focuslost, component, 0);					
+				}
+			break;
 		break;		
 			default:
 			break;
@@ -575,7 +584,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 				handle_hscroll(hwnd, wParam, lParam);
 				return 0;
-			break;		
+			break;
+			case WM_KILLFOCUS:							
+				if (component->signal_focuslost.slots) {
+					signal_emit(&component->signal_focuslost, component, 0);
+					return 0;
+				}
+			break;
 			default:			
 			break;
 		}	
@@ -940,12 +955,12 @@ void ui_component_releasecapture()
 	ReleaseCapture();
 }
 
-void ui_invalidate(ui_component* self)
+void ui_component_invalidate(ui_component* self)
 {
 	InvalidateRect((HWND)self->hwnd, NULL, FALSE);
 }
 
-void ui_invalidaterect(ui_component* self, const ui_rectangle* r)
+void ui_component_invalidaterect(ui_component* self, const ui_rectangle* r)
 {
 	RECT rc;
 
@@ -1001,6 +1016,7 @@ void ui_component_align(ui_component* self)
 	int cpx = 0;
 	int cpx_r;
 	int cpy = 0;
+	int cpy_b = 0;
 	int cpymax = 0;
 	List* p;
 	List* q;
@@ -1010,6 +1026,7 @@ void ui_component_align(ui_component* self)
 		
 	size = ui_component_size(self);
 	cpx_r = size.width;
+	cpy_b = size.height;
 	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
 		ui_component* component;
 			
@@ -1027,7 +1044,7 @@ void ui_component_align(ui_component* self)
 					size.width - component->margin.left - component->margin.right,
 					size.height - component->margin.top - component->margin.bottom);
 			} else
-			if (component->align == UI_ALIGN_TOP) {				
+			if (component->align == UI_ALIGN_TOP) {
 				cpy += component->margin.top;
 				ui_component_setposition(component, 
 					component->margin.left, 
@@ -1036,6 +1053,17 @@ void ui_component_align(ui_component* self)
 					componentsize.height);
 				cpy += component->margin.bottom;
 				cpy += componentsize.height;
+			} else
+			if (component->align == UI_ALIGN_BOTTOM) {
+				cpy_b -= component->margin.bottom;
+				ui_component_setposition(component, 
+					component->margin.left, 
+					cpy_b -= componentsize.height,
+					cpx_r - component->margin.left - component->margin.right,
+					componentsize.height);
+				cpy_b -= component->margin.top;
+				cpy_b -= componentsize.height;
+
 			} else
 			if (component->align == UI_ALIGN_RIGHT) {
 				int requiredcomponentwidth;
@@ -1093,7 +1121,7 @@ void ui_component_align(ui_component* self)
 					cpx + client->margin.left,
 					cpy + client->margin.top,
 					size.width - cpx - client->margin.left - client->margin.right - (size.width - cpx_r),
-					size.height - cpy - client->margin.top - client->margin.bottom);
+					size.height - cpy - (size.height - cpy_b) - client->margin.top - client->margin.bottom);
 	}
 	list_free(q);
 	list_free(wrap);
@@ -1129,6 +1157,17 @@ void onpreferredsize(ui_component* self, ui_component* sender,
 					
 					componentsize = ui_component_preferredsize(component, &size);				
 					if (component->align == UI_ALIGN_TOP) {
+						cpy += component->margin.top;										
+						cpy += componentsize.height;
+						cpy += component->margin.bottom;
+						if (cpymax < cpy) {
+							cpymax = cpy;
+						}
+						if (cpxmax < componentsize.width + component->margin.left + component->margin.right) {
+							cpxmax = componentsize.width + component->margin.left + component->margin.right;
+						}
+					} else
+					if (component->align == UI_ALIGN_BOTTOM) {
 						cpy += component->margin.top;										
 						cpy += componentsize.height;
 						cpy += component->margin.bottom;
@@ -1448,7 +1487,7 @@ int ui_browsefolder(ui_component* self, const char* title, char* path)
 				// At this point pszBuffer contains the selected path
 				//
 				val = 1;
-				_snprintf(path, MAX_PATH, "%s", pszBuffer);
+				psy_snprintf(path, MAX_PATH, "%s", pszBuffer);
 				path[MAX_PATH - 1] = '\0';				
 			}
 			// Free the PIDL allocated by SHBrowseForFolder.

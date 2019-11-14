@@ -10,12 +10,11 @@
 typedef struct {	
 	ui_component component;	
 	Workspace* workspace;
-	uintptr_t src;
-	uintptr_t dst;
+	Wire wire;
 	int lineheight;
 } PinEdit;
 
-void pinedit_init(PinEdit*, ui_component* parent, uintptr_t src, uintptr_t dst, Workspace*);
+void pinedit_init(PinEdit*, ui_component* parent, Wire, Workspace*);
 
 typedef struct {
 	ui_component component;
@@ -26,6 +25,6 @@ typedef struct {
 } ChannelMappingView;
 
 
-void channelmappingview_init(ChannelMappingView*, ui_component* parent, uintptr_t src, uintptr_t dst, Workspace*);
+void channelmappingview_init(ChannelMappingView*, ui_component* parent, Wire, Workspace*);
 
 #endif

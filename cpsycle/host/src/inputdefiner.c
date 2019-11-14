@@ -6,6 +6,7 @@
 #include "inputdefiner.h"
 #include "inputmap.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void ondraw(InputDefiner*, ui_component* sender, ui_graphics*);
 static void onkeydown(InputDefiner*, ui_component* sender, int keycode, int keydata);
@@ -34,7 +35,7 @@ void inputdefiner_text(InputDefiner* self, char* text)
 	int ctrl;
 
 	decodeinput(self->input, &keycode, &shift, &ctrl);
-	_snprintf(keystr, 5, "%c", keycode);
+	psy_snprintf(keystr, 5, "%c", keycode);
 	text[0] = '\0';	
 	if (shift) {
 		strcat(text, "Shift + ");		
@@ -76,7 +77,7 @@ void onkeydown(InputDefiner* self, ui_component* sender, int keycode, int keydat
 		self->regularkey = keycode;	
 		self->input = encodeinput(self->regularkey, shift, ctrl);
 	}
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void onkeyup(InputDefiner* self, ui_component* sender, int keycode, int keydata)
@@ -99,6 +100,6 @@ void onkeyup(InputDefiner* self, ui_component* sender, int keycode, int keydata)
 	if (inputkeycode <= 0x30) {
 		self->input = encodeinput(0, shift, ctrl);
 	}
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 

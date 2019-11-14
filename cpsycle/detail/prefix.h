@@ -4,6 +4,20 @@
 #if !defined(PREFIX_H)
 #define PREFIX_H
 
+#if defined _M_X64
+#define SSE
+#else
+#if defined _M_IX86 // according to the only doc, it doesn't seem to go above 600 (i686)
+#if _M_IX86_FP // expands to a value indicating which -arch compiler option was used:
+	// 0 if -arch was not used.
+	// 1 if -arch:SSE was used.
+	// 2 if -arch:SSE2 was used.
+	///\todo detect SSE3 (prescott, nocona)
+#define SSE _M_IX86_FP
+#endif
+#endif
+#endif
+
 /*
 ** Windows stuff
 */

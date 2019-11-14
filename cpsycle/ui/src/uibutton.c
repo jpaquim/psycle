@@ -30,6 +30,7 @@ void ui_button_init(ui_button* self, ui_component* parent)
 	self->hover = 0;
 	self->highlight = 0;
 	self->icon = UI_ICON_NONE;
+	self->charnumber = 0;
 	if (self->ownerdrawn) {
 		ui_button_create_ownerdrawn(self, parent);
 	} else {
@@ -175,24 +176,35 @@ void makearrow(ui_point* arrow, ButtonIcon icon, int x, int y)
 	}
 }
 
+void ui_button_setcharnumber(ui_button* self, int number)
+{
+	self->charnumber = number;
+}
+
 void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit,
 	ui_size* rv)
 {		
 	if (rv) {
 		if (self->ownerdrawn) {
+			TEXTMETRIC tm;	
 			ui_size size;
 
-			if (self->icon) {
-				if (self->icon == UI_ICON_LESS || self->icon == UI_ICON_MORE) {
-					size = ui_component_textsize(&self->component, "<");
+			tm = ui_component_textmetric(&self->component);
+			if (self->charnumber == 0) {
+				if (self->icon) {
+					if (self->icon == UI_ICON_LESS || self->icon == UI_ICON_MORE) {
+						size = ui_component_textsize(&self->component, "<");
+					} else {
+						size = ui_component_textsize(&self->component, "<<");
+					}
 				} else {
-					size = ui_component_textsize(&self->component, "<<");
+					size = ui_component_textsize(&self->component, self->text);			
 				}
+				rv->width = size.width + 4;				
 			} else {
-				size = ui_component_textsize(&self->component, self->text);			
+				rv->width = tm.tmAveCharWidth * self->charnumber;
 			}
-			rv->width = size.width + 4;
-			rv->height = size.height + 4;
+			rv->height = tm.tmHeight;
 		} else {
 			*rv = ui_component_size(&self->component);		
 		}
@@ -207,13 +219,13 @@ void onmousedown(ui_button* self, ui_component* sender)
 void onmouseenter(ui_button* self, ui_component* sender)
 {
 	self->hover = 1;
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void onmouseleave(ui_button* self, ui_component* sender)
 {		
 	self->hover = 0;
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void ui_button_settext(ui_button* self, const char* text)
@@ -221,7 +233,7 @@ void ui_button_settext(ui_button* self, const char* text)
 	if (self->ownerdrawn) {
 		free(self->text);
 		self->text = _strdup(text);
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	} else {
 		SetWindowText((HWND)self->component.hwnd, text);
 	}

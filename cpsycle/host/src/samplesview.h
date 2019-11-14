@@ -12,7 +12,6 @@
 #include "samplesbox.h"
 #include <uislider.h>
 #include "wavebox.h"
-#include "slidergroup.h"
 #include "tabbar.h"
 #include "notestab.h"
 #include "workspace.h"
@@ -38,11 +37,11 @@ typedef struct {
 	ui_component component;
 	Sample* sample;
 	NotesTabMode notestabmode;
-	SliderGroup defaultvolume;
-	SliderGroup globalvolume;
-	SliderGroup panposition;
-	SliderGroup samplednote; 
-	SliderGroup pitchfinetune;
+	ui_slider defaultvolume;
+	ui_slider globalvolume;
+	ui_slider panposition;
+	ui_slider samplednote; 
+	ui_slider pitchfinetune;
 } SamplesGeneralView;
 
 typedef struct {
@@ -50,9 +49,9 @@ typedef struct {
 	Sample* sample;	
 	ui_label waveformheaderlabel;
 	ui_combobox waveformbox;
-	SliderGroup attack;
-	SliderGroup speed;
-	SliderGroup depth;
+	ui_slider attack;
+	ui_slider speed;
+	ui_slider depth;
 	Player* player;
 } SamplesVibratoView;
 

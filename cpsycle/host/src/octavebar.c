@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "octavebar.h"
+#include <portable.h>
 
 static void OnDestroy(OctaveBar*, ui_component* component);
 static void BuildOctaveBox(OctaveBar* self);
@@ -46,7 +47,7 @@ void BuildOctaveBox(OctaveBar* self)
 	char text[20];
 
 	for (octave = 0; octave < 9; ++octave) {
-		_snprintf(text, 20, "%d", octave);		
+		psy_snprintf(text, 20, "%d", octave);		
 		ui_combobox_addstring(&self->octavebox, text);
 	}
 	ui_combobox_setcursel(&self->octavebox, self->workspace->octave);

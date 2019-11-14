@@ -4,17 +4,16 @@
 #if !defined(DUPLICATOR2_H)
 #define DUPLICATOR2_H
 
-#include "machine.h"
+#include "custommachine.h"
 #include "duplicatormap.h"
 
 typedef struct {
-	Machine machine;
+	CustomMachine custommachine;
 	short macoutput[16];
 	short noteoffset[16];	
 	short lowkey[16];
 	short highkey[16];
-	DuplicatorMap map;
-	char* editname;
+	DuplicatorMap map;	
 	int isticking;
 } Duplicator2;
 

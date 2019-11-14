@@ -56,7 +56,7 @@ void vumeter_ondraw(Vumeter* self, ui_component* sender, ui_graphics* g)
 void vumeter_ontimer(Vumeter* self, ui_component* sender, int timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 }
 

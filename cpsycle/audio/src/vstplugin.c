@@ -39,45 +39,41 @@ static int haseditor(VstPlugin*);
 static void seteditorhandle(VstPlugin*, void* handle);
 static void editorsize(VstPlugin*, int* width, int* height);
 static void editoridle(VstPlugin*);
-static const char* editname(VstPlugin*);
-static void seteditname(VstPlugin*, const char* name);
 
 static void processevents(VstPlugin*, BufferContext*);
 struct VstMidiEvent* allocinitmidievent(VstPlugin*, const PatternEntry*);
 
 void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 {	
-	PluginEntryProc mainproc;	
-
-	machine_init(&self->machine, callback);
-	self->machine.mode = mode;
-	self->machine.work = work;
-	self->machine.hostevent = hostevent;	
-	self->machine.info = info;
-	self->machine.parametertype = parametertype;
-	self->machine.parameterrange = parameterrange;
-	self->machine.parametertweak = parametertweak;
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.parametername = parametername;
-	self->machine.describevalue = describevalue;	
-	self->machine.parametervalue = parametervalue;
-	self->machine.numparameters = numparameters;
-	self->machine.numparametercols = numparametercols;	
-	self->machine.dispose = dispose;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.setcallback(self, callback);
-	self->machine.haseditor = haseditor;
-	self->machine.seteditorhandle = seteditorhandle;
-	self->machine.editorsize = editorsize;
-	self->machine.editoridle = editoridle;
-	self->machine.editname = editname;
-	self->machine.seteditname = seteditname;
+	Machine* base = &self->custommachine.machine;
+	PluginEntryProc mainproc;
+	
+	custommachine_init(&self->custommachine, callback);	
+	base->mode = mode;
+	base->work = work;
+	base->hostevent = hostevent;	
+	base->info = info;
+	base->parametertype = parametertype;
+	base->parameterrange = parameterrange;
+	base->parametertweak = parametertweak;
+	base->parameterlabel = parameterlabel;
+	base->parametername = parametername;
+	base->describevalue = describevalue;	
+	base->parametervalue = parametervalue;
+	base->numparameters = numparameters;
+	base->numparametercols = numparametercols;	
+	base->dispose = dispose;
+	base->numinputs = numinputs;
+	base->numoutputs = numoutputs;
+	base->setcallback(self, callback);
+	base->haseditor = haseditor;
+	base->seteditorhandle = seteditorhandle;
+	base->editorsize = editorsize;
+	base->editoridle = editoridle;
 	self->info = 0;
 	self->editorhandle = 0;
 	self->events = 0;
-	self->plugininfo = 0;
-	self->editname = 0;
+	self->plugininfo = 0;	
 	library_init(&self->library);
 	library_load(&self->library, path);		
 	mainproc = getmainentry(&self->library);
@@ -105,13 +101,16 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
 			self->plugininfo = machineinfo_allocinit();
 			machineinfo(self->effect, self->plugininfo, self->library.path, 0);
-			self->editname = strdup(self->plugininfo->ShortName);
+			base->seteditname(base, self->plugininfo->ShortName);
 		}
-	}		
+	}
+	if (!base->editname(base)) {
+		base->seteditname(base, "VstPlugin");
+	}
 } 
 
 void dispose(VstPlugin* self)
-{	
+{		
 	if (self->library.module) {
 		if (self->effect) {
 			self->effect->dispatcher (self->effect, effClose, 0, 0, 0, 0);
@@ -132,9 +131,8 @@ void dispose(VstPlugin* self)
 		machineinfo_dispose(self->plugininfo);
 		free(self->plugininfo);
 		self->plugininfo = 0;
-	}
-	free(self->editname);
-	machine_dispose(&self->machine);
+	}	
+	custommachine_dispose(&self->custommachine);
 }
 
 PluginEntryProc getmainentry(Library* library)
@@ -188,6 +186,7 @@ void work(VstPlugin* self, BufferContext* bc)
 
 void processevents(VstPlugin* self, BufferContext* bc)
 {
+	Machine* base = &self->custommachine.machine;
 	List* p;
 	int count = 0;
 	int i;
@@ -197,8 +196,7 @@ void processevents(VstPlugin* self, BufferContext* bc)
 		PatternEntry* entry = (PatternEntry*)p->entry;		
 		if (entry->event.cmd == SET_PANNING) {
 			// todo split work
-			self->machine.setpanning(&self->machine, 
-					entry->event.parameter / 255.f);
+			base->setpanning(base, entry->event.parameter / 255.f);
 		} else
 		if (entry->event.note == NOTECOMMANDS_TWEAK) {
 			// todo translate to midi events 
@@ -329,6 +327,7 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 {
 	VstIntPtr result = 0;
 	VstPlugin* self;
+	Machine* base;
 	
 	if (effect) {
 		self = (VstPlugin*) effect->user;
@@ -338,6 +337,7 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 	} else {
 		return 0;
 	}
+	base = &self->custommachine.machine;
 	
 	switch(opcode)
 	{
@@ -347,7 +347,7 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 		case audioMasterIdle:            
         break;
 		case audioMasterGetSampleRate:
-			result = self->machine.samplerate(&self->machine);
+			result = base->samplerate(base);
 		default:
 		break;
 	}
@@ -476,15 +476,3 @@ int mode(VstPlugin* self)
 		? MACHMODE_GENERATOR
 		: MACHMODE_FX;
 }
-
-const char* editname(VstPlugin* self)
-{
-	return self->editname;
-}
-
-void seteditname(VstPlugin* self, const char* name)
-{
-	free(self->editname);
-	self->editname = strdup(name);
-}
-

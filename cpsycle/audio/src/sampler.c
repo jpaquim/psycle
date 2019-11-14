@@ -13,6 +13,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <portable.h>
 
 static void generateaudio(Sampler*, BufferContext*);
 static void seqtick(Sampler*, int channel, const PatternEvent*);
@@ -33,8 +34,6 @@ static unsigned int numinputs(Sampler*);
 static unsigned int numoutputs(Sampler*);
 static void loadspecific(Sampler*, struct SongFile*, unsigned int slot);
 static void savespecific(Sampler*, struct SongFile*, unsigned int slot);
-static const char* editname(Sampler* self);
-static void seteditname(Sampler* self, const char* name);
 
 static int currslot(Sampler*, unsigned int channel, const PatternEvent*);
 
@@ -74,36 +73,34 @@ const MachineInfo* sampler_info(void)
 
 void sampler_init(Sampler* self, MachineCallback callback)
 {
+	Machine* base = &self->custommachine.machine;
 	int voice;
 	
-	machine_init(&self->machine, callback);	
-	self->machine.generateaudio = generateaudio;
-	self->machine.seqtick = seqtick;
-	self->machine.info = info;
-	self->machine.dispose = dispose;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.loadspecific = loadspecific;
-	self->machine.savespecific = savespecific;
-	self->machine.numparametercols = numparametercols;
-	self->machine.numparameters = numparameters;
-	self->machine.parametertweak = parametertweak;
-	self->machine.describevalue = describevalue;	
-	self->machine.parametervalue = parametervalue;		
-	self->machine.parameterrange = parameterrange;
-	self->machine.parametertype = parametertype;
-	self->machine.parametername = parametername;
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.editname = editname;
-	self->machine.seteditname = seteditname;
+	custommachine_init(&self->custommachine, callback);	
+	base->generateaudio = generateaudio;
+	base->seqtick = seqtick;
+	base->info = info;
+	base->dispose = dispose;
+	base->numinputs = numinputs;
+	base->numoutputs = numoutputs;
+	base->loadspecific = loadspecific;
+	base->savespecific = savespecific;
+	base->numparametercols = numparametercols;
+	base->numparameters = numparameters;
+	base->parametertweak = parametertweak;
+	base->describevalue = describevalue;	
+	base->parametervalue = parametervalue;		
+	base->parameterrange = parameterrange;
+	base->parametertype = parametertype;
+	base->parametername = parametername;
+	base->parameterlabel = parameterlabel;	
 	self->numvoices = SAMPLER_MAX_POLYPHONY;	
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		voice_init(&self->voices[voice], 0, 0, 0, 44100);
 	}
 	self->resamplingmethod = 2;
-	self->defaultspeed = 1;
-	self->pan = 0.5f;
-	self->editname = strdup("Sampler");
+	self->defaultspeed = 1;	
+	base->seteditname(base, "Sampler");
 	table_init(&self->lastinst);
 }
 
@@ -113,11 +110,9 @@ void dispose(Sampler* self)
 
 	for (voice=0; voice < self->numvoices; ++voice) {
 		voice_dispose(&self->voices[voice]);
-	}
-	machine_dispose(&self->machine);
-	free(self->editname);
-	self->editname = 0;
+	}	
 	table_dispose(&self->lastinst);
+	custommachine_dispose(&self->custommachine);
 }
 
 void generateaudio(Sampler* self, BufferContext* bc)
@@ -132,6 +127,7 @@ void generateaudio(Sampler* self, BufferContext* bc)
 
 void seqtick(Sampler* self, int channel, const PatternEvent* event)
 {	
+	Machine* base = (Machine*)self;
 	Sample* sample;
 	int slot;
 		
@@ -139,19 +135,19 @@ void seqtick(Sampler* self, int channel, const PatternEvent* event)
 	if (slot == NOTECOMMANDS_EMPTY) {
 		return;
 	}	
-	sample = samples_at(self->machine.samples(self), slot);	
+	sample = samples_at(base->samples(self), slot);	
 	if (sample) {
 		Instrument* instrument;
 
 		release_voices(self, channel);
-		instrument = instruments_at(self->machine.instruments(self), slot);		
+		instrument = instruments_at(base->instruments(self), slot);		
 		if (instrument) {
 			int voice;
 			
 			voice = unused_voice(self);
 			if (voice != -1) {
 				voice_init(&self->voices[voice], instrument, sample, channel,
-					self->machine.callback.samplerate(self->machine.callback.context));
+					base->samplerate(base));
 				voice_seqtick(&self->voices[voice], event);			
 			}
 		}
@@ -179,7 +175,7 @@ int currslot(Sampler* self, unsigned int channel, const PatternEvent* event)
 		rv = event->inst;
 	} else
 	if (table_exists(&self->lastinst, channel)) {
-		rv = (int)(ptrdiff_t) table_at(&self->lastinst, channel);
+		rv = (int)(uintptr_t) table_at(&self->lastinst, channel);
 	} else { 
 		rv = NOTECOMMANDS_EMPTY;
 	}
@@ -288,13 +284,13 @@ int parameterlabel(Sampler* self, char* txt, int param)
 	int rv = 1;
 	switch (param) {
 	case 0:
-		_snprintf(txt, 128, "%s", "Polyphony Voices");
+		psy_snprintf(txt, 128, "%s", "Polyphony Voices");
 		break;
 	case 1:
-		_snprintf(txt, 128, "%s", "Resampling method");
+		psy_snprintf(txt, 128, "%s", "Resampling method");
 		break;
 	case 2:
-		_snprintf(txt, 128, "%s", "Default speed");
+		psy_snprintf(txt, 128, "%s", "Default speed");
 		break;
 	default:
 		txt[0] = '\0';
@@ -309,13 +305,13 @@ int parametername(Sampler* self, char* txt, int param)
 	int rv = 1;
 	switch (param) {
 	case 0:
-		_snprintf(txt, 128, "%s", "Polyphony");
+		psy_snprintf(txt, 128, "%s", "Polyphony");
 		break;
 	case 1:
-		_snprintf(txt, 128, "%s", "Resampling");
+		psy_snprintf(txt, 128, "%s", "Resampling");
 		break;
 	case 2:
-		_snprintf(txt, 128, "%s", "Default speed");
+		psy_snprintf(txt, 128, "%s", "Default speed");
 		break;
 	default:
 		txt[0] = '\0';
@@ -436,17 +432,6 @@ void savespecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
 	psyfile_write(songfile->file, &defaultC4, sizeof(defaultC4)); // correct A4
 	slidemode = 1;
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
-}
-
-const char* editname(Sampler* self)
-{
-	return self->editname;
-}
-
-void seteditname(Sampler* self, const char* name)
-{
-	free(self->editname);
-	self->editname = strdup(name);
 }
 
 void voice_reset(Voice* self)

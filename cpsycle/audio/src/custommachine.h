@@ -1,19 +1,20 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
-#if !defined(PLUGIN_H)
-#define PLUGIN_H
 
-#include "custommachine.h"
-#include "library.h"
+#if !defined(CUSTOMMACHINE_H)
+#define CUSTOMMACHINE_H
+
+#include "machine.h"
 
 typedef struct {
-	CustomMachine custommachine;	
-	CMachineInterface* mi;
-	Library library;	
-	MachineInfo* plugininfo;	
-} Plugin;
+	Machine machine;
+	amp_t pan;
+	int ismuted;
+	int isbypassed;
+	char* editname;
+} CustomMachine;
 
-void plugin_init(Plugin* self, MachineCallback, const char* path);
-int plugin_psycle_test(const char* path, MachineInfo*);
+void custommachine_init(CustomMachine*, MachineCallback);
+void custommachine_dispose(CustomMachine*);
 
 #endif

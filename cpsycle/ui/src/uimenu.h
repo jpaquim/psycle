@@ -4,7 +4,7 @@
 #if !defined(MENU_H)
 #define MENU_H
 
-#include <windows.h>
+#include "uidef.h"
 
 struct ui_menu_struct {
   HMENU hmenu;

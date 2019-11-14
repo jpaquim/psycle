@@ -155,14 +155,14 @@ void OnContributors(About* self, ui_component* sender)
 {	
 	ui_notebook_setpage(&self->notebook, 
 		ui_notebook_page(&self->notebook) != 1 ? 1 : 0);
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void OnVersion(About* self, ui_component* sender) 
 {	
 	ui_notebook_setpage(&self->notebook, 
 		ui_notebook_page(&self->notebook) != 2 ? 2 : 0);
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void OnMouseDoubleClick(About* self, ui_component* sender, int x, int y, int button)

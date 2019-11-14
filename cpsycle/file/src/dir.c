@@ -4,12 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "dir.h"
-#define __cplusplus
-#include <diversalis/os.hpp>
-#undef __cplusplus
 #include <stdio.h>
+#include <string.h>
+#include <portable.h>
 
-#if defined(DIVERSALIS__OS__MICROSOFT)
+#if defined(_WIN32)
 
 #include <direct.h>
 #include <windows.h>
@@ -27,7 +26,7 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 	BOOL cont;
   
 	// First, enumerate all files using the wildcard in the current directory
-	_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard);
+	psy_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard);
  	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		
 	} else {
@@ -36,7 +35,7 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 			if ((strncmp(".", wfd.cFileName, 1) != 0) && 
 					(strncmp("..", wfd.cFileName, 2) != 0) ) {
 				if (!(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {						
-					_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
+					psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
 					enumproc(context, path, flag);				
 				}
 			}		
@@ -49,7 +48,7 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 		}
 	}
 	// Secondly, find and emumerate all subdirectories with their subdirectories
-	_snprintf(path, MAX_PATH, "%s\\*", root);
+	psy_snprintf(path, MAX_PATH, "%s\\*", root);
 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
 		return;
 	}	
@@ -58,7 +57,7 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 				(strncmp("..", wfd.cFileName, 2) != 0) ) {
 			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 				// enumerate subdirectory with its subdirectories
-				_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
+				psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
 				dir_enum(context, path, wildcard, flag, enumproc);
 			}			
 		}		

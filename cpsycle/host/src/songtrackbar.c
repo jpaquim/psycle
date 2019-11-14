@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "songtrackbar.h"
+#include <portable.h>
 
 static void Buildtrackbox(SongTrackBar* self);
 static void OnTrackBoxSelChange(SongTrackBar*, ui_component* sender, int sel);
@@ -41,7 +42,7 @@ void Buildtrackbox(SongTrackBar* self)
 	char text[20];
 
 	for (track = 0; track < 65; ++track) {
-		_snprintf(text, 20, "%d", track);		
+		psy_snprintf(text, 20, "%d", track);		
 		ui_combobox_addstring(&self->trackbox, text);
 	}	
 	ui_combobox_setcursel(&self->trackbox,

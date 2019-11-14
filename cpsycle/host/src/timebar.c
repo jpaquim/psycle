@@ -2,6 +2,7 @@
 
 #include "timebar.h"
 #include <stdio.h>
+#include <portable.h>
 
 #define TIMERID_TIMERBAR 500
 
@@ -76,7 +77,7 @@ void timerbar_ontimer(TimeBar* self, ui_component* sender, int timerid)
 		char txt[20];
 
 		self->bpm = self->player->sequencer.bpm;
-		_snprintf(txt, 10, "%.2f", self->bpm);
+		psy_snprintf(txt, 10, "%.2f", self->bpm);
 		ui_label_settext(&self->bpmlabel, txt);
 	}
 }

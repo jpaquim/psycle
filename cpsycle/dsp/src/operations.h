@@ -13,5 +13,6 @@ void dsp_movmul(amp_t *src, amp_t *dst, uintptr_t num, amp_t mul);
 void dsp_clear(amp_t *dst, uintptr_t num);
 void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, uintptr_t num);
 void dsp_erase_all_nans_infinities_and_denormals(amp_t* dst, uintptr_t num);
+float dsp_maxvol(const float* src, uintptr_t num);
 
 #endif

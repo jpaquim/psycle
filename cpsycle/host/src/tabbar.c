@@ -142,7 +142,7 @@ void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button)
 	tabindex = tabhittest(self, x, y);
 	if (tabindex != -1 && tabindex != self->selected)  {
 		self->selected = tabhittest(self, x, y);
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 		signal_emit(&self->signal_change, self, 1, self->selected);
 	}		
 }
@@ -203,7 +203,7 @@ void OnMouseMove(TabBar* self, ui_component* sender, int x, int y, int button)
 	tabindex = tabhittest(self, x, y);	
 	if (tabindex != self->hoverindex) {
 		self->hoverindex = tabindex;
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	}
 	
 }
@@ -211,19 +211,19 @@ void OnMouseMove(TabBar* self, ui_component* sender, int x, int y, int button)
 void onmouseenter(TabBar* self, ui_component* sender)
 {
 	self->hover = 1;
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void onmouseleave(TabBar* self, ui_component* sender)
 {		
 	self->hover = 0;
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 }
 
 void tabbar_select(TabBar* self, int tab)
 {
 	self->selected = tab;
-	ui_invalidate(&self->component);
+	ui_component_invalidate(&self->component);
 	signal_emit(&self->signal_change, self, 1, self->selected);
 }
 

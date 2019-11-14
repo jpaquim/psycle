@@ -27,7 +27,9 @@
  *          to be 64-bit aware.
  */
  
- 
+#if !defined(_WIN32)
+#include <stdint.h>
+#else 
 #ifndef _STDINT_H
 #define _STDINT_H
 #define __need_wint_t
@@ -232,4 +234,5 @@ typedef unsigned __STDINT_LONGLONG   uintmax_t;
  
 #endif  /* !defined ( __cplusplus) || defined __STDC_CONSTANT_MACROS */
  
+#endif
 #endif

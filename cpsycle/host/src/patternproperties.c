@@ -2,6 +2,7 @@
 
 #include "patternproperties.h"
 #include <stdio.h>
+#include <portable.h>
 
 static void OnSize(PatternProperties* self, ui_component* sender, ui_size*);
 static void OnApplyClicked(PatternProperties* self, ui_component* sender);
@@ -43,10 +44,10 @@ void PatternPropertiesSetPattern(PatternProperties* self, Pattern* pattern)
 	self->pattern = pattern;
 	if (self->pattern) {
 		ui_edit_settext(&self->nameedit, pattern->label);
-		_snprintf(buffer, 10, "%.4f", self->pattern->length);
+		psy_snprintf(buffer, 10, "%.4f", self->pattern->length);
 	} else {
 		ui_edit_settext(&self->nameedit, "");
-		_snprintf(buffer, 10, "");
+		psy_snprintf(buffer, 10, "");
 	}
 	ui_edit_settext(&self->lengthedit, buffer);
 }

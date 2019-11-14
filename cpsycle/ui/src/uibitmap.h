@@ -4,7 +4,6 @@
 #if !defined(UIBITMAP_H)
 #define UIBITMAP_H
 
-#include <windows.h>
 #include "uidef.h"
 
 typedef struct {

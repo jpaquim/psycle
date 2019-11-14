@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "sampulseinstrumentview.h"
+#include <portable.h>
 
 static void OnSize(SampulseInstrumentView*, ui_component* sender, ui_size*);
 static void AddString(SampulseInstrumentView*, const char* text);
@@ -42,9 +43,9 @@ void BuildInstrumentList(SampulseInstrumentView* self)
 	char buffer[20];
 	for ( ; slot < 256; ++slot) {		
 		if (instrument = table_at(&self->player->song->xminstruments.container, slot)) {
-			_snprintf(buffer, 20, "%02X:%s", slot, xminstrument_name(instrument));
+			psy_snprintf(buffer, 20, "%02X:%s", slot, xminstrument_name(instrument));
 		} else {
-			_snprintf(buffer, 20, "%02X:%s", slot, "");
+			psy_snprintf(buffer, 20, "%02X:%s", slot, "");
 		}
 		AddString(self, buffer);
 	}

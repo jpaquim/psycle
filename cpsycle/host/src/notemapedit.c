@@ -7,6 +7,7 @@
 #include "cmdsnotes.h"
 #include <string.h>
 #include <stdio.h>
+#include <portable.h>
 
 static void OnDraw(NoteMapEdit* self, ui_component* sender, ui_graphics* g);
 static void SetColColor(ui_graphics* g, int col, int cursor);
@@ -108,9 +109,9 @@ void DrawDigit(NoteMapEdit* self, ui_graphics* g, int digit, int col, int x, int
 	int lineheight = 20;
 	ui_setrectangle(&r, x + col * textwidth, y, textwidth, lineheight);
 	if (digit != -1) {
-		_snprintf(buffer, 2, "%X", digit);	
+		psy_snprintf(buffer, 2, "%X", digit);	
 	} else {
-		_snprintf(buffer, 2, "%s", "");	
+		psy_snprintf(buffer, 2, "%s", "");	
 	}
 	ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer, strlen(buffer));	
 }
@@ -130,7 +131,7 @@ void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata
 			if (self->cursor.note < scrolllines) {
 				self->dy += 20; 
 			}
-			ui_invalidate(&self->component);
+			ui_component_invalidate(&self->component);
 		}		
 	} else
 	if (keycode == VK_DOWN) {		
@@ -139,16 +140,16 @@ void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata
 			if (self->cursor.note > visiblelines + scrolllines) {
 				self->dy -= 20; 
 			}
-			ui_invalidate(&self->component);
+			ui_component_invalidate(&self->component);
 		}
 	} else
 	if (keycode == VK_LEFT) {
 		--self->cursor.col;
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	} else
 	if (keycode == VK_RIGHT) {
 		++self->cursor.col;
-		ui_invalidate(&self->component);
+		ui_component_invalidate(&self->component);
 	} else {
 		int cmd;
 
@@ -156,7 +157,7 @@ void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata
 		if (cmd != -1) {		
 			int base = 48;
 			self->map[self->cursor.note].note = (unsigned char)(base + cmd);
-			ui_invalidate(&self->component);
+			ui_component_invalidate(&self->component);
 		}
 	}
 }

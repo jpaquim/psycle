@@ -33,10 +33,11 @@ static unsigned int numoutputs(DummyMachine* self) { return 2; }
 
 void dummymachine_init(DummyMachine* self, MachineCallback callback)
 {	
-	machine_init(&self->machine, callback);	
-	self->machine.mode = mode;
-	self->machine.info = info;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
+	Machine* base = (Machine*)self;
+	machine_init(base, callback);	
+	base->mode = mode;
+	base->info = info;
+	base->numinputs = numinputs;
+	base->numoutputs = numoutputs;
 	self->mode = MACHMODE_FX;
 }
