@@ -8,16 +8,17 @@
 void ui_graphics_init(ui_graphics* g, HDC hdc)
 {
 	g->hdc = hdc;	
-	g->hFontPrev = 0;
-	g->pen = 0;
-	g->pen = CreatePen(PS_SOLID, 1, 0x00666666);
+	g->hFontPrev = 0;	
+	g->pen = CreatePen(PS_SOLID, 1, 0x00666666);	
 	g->brush = 0;
 	g->hBrushPrev = 0;
+	g->penprev = SelectObject(g->hdc, g->pen);
 }	
 
 void ui_graphics_dispose(ui_graphics* g)
 {
-	if (g->pen) {	
+	SelectObject(g->hdc, g->penprev);
+	if (g->pen) {		
 		DeleteObject(g->pen);
 	}	
 }

@@ -21,9 +21,9 @@ static void DrawInfoLabel(ParamView*, ui_graphics* g, int param, int row, int co
 static void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col);
 static void cellsize(ParamView* self, int* width, int* height);
 static void cellposition(ParamView* self, int row, int col, int* x, int* y);
-static void OnMouseDown(ParamView* self, ui_component* sender, int x, int y, int button);
-static void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int button);
-static void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button);
+static void OnMouseDown(ParamView* self, ui_component* sender, MouseEvent*);
+static void OnMouseUp(ParamView* self, ui_component* sender, MouseEvent*);
+static void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent*);
 static int HitTest(ParamView* self, int x, int y);
 static void OnTimer(ParamView*, ui_component* sender, int timerid);
 static int intparamvalue(float value);
@@ -332,11 +332,11 @@ void ParamViewSize(ParamView* self, int* width, int* height)
 	*height = self->numrows * cellheight;
 }
 
-void OnMouseDown(ParamView* self, ui_component* sender, int x, int y, int button)
+void OnMouseDown(ParamView* self, ui_component* sender, MouseEvent* ev)
 {
-	self->tweak = HitTest(self, x, y);
+	self->tweak = HitTest(self, ev->x, ev->y);
 	if (self->tweak != -1) {
-		self->tweakbase = y;
+		self->tweakbase = ev->y;
 		self->tweakval = self->machine->parametervalue(self->machine, self->tweak);
 		ui_component_capture(&self->component);
 	}
@@ -357,7 +357,7 @@ int HitTest(ParamView* self, int x, int y)
 	return (rv >= 0 && rv < self->numparams) ? rv : -1;
 }
 
-void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int button)
+void OnMouseUp(ParamView* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->tweak != -1) {
 		ui_component_releasecapture();
@@ -365,7 +365,7 @@ void OnMouseUp(ParamView* self, ui_component* sender, int x, int y, int button)
 	self->tweak = -1;
 }
 
-void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button)
+void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->tweak != -1) {		
 		int dy;
@@ -373,10 +373,10 @@ void OnMouseMove(ParamView* self, ui_component* sender, int x, int y, int button
 		int minval;
 		int maxval;
 				
-		self->my = y;		
+		self->my = ev->y;
 		self->machine->parameterrange(self->machine, self->tweak, &minval,
 			&maxval);
-		dy = self->tweakbase - y;
+		dy = self->tweakbase - ev->y;
 		val = (int)(self->tweakval +
 			(maxval - minval) / 100.0 * dy);
 		if (val > maxval) {

@@ -23,9 +23,9 @@ static void trackergrid_drawevents(TrackerGrid*, ui_graphics*,
 static void trackergrid_drawevent(TrackerGrid*, ui_graphics* g, PatternEvent*,
 	int x, int y, int playbar, int cursor, int beat, int beat4);
 static void trackergrid_onkeydown(TrackerGrid*, ui_component* sender,
-	int keycode, int keydata);
+	KeyEvent*);
 static void trackergrid_onmousedown(TrackerGrid*, ui_component* sender,
-	int x, int y, int button);
+	MouseEvent*);
 static void trackergrid_onsize(TrackerGrid*, ui_component* sender, ui_size* size);
 static void trackergrid_onscroll(TrackerGrid*, ui_component* sender,
 	int cx, int cy);
@@ -44,7 +44,7 @@ static void trackergrid_numtrackschanged(TrackerGrid*, Player*,
 static void trackerview_onsize(TrackerView*, ui_component* sender, ui_size*);
 static void trackerview_ondestroy(TrackerView*, ui_component* sender);
 static void trackerview_onkeydown(TrackerView*, ui_component* sender,
-	int keycode, int keydata);
+	KeyEvent*);
 static void trackerview_ontimer(TrackerView*, ui_component* sender, 
 	int timerid);
 static void trackerview_align(TrackerView*, ui_component* sender);
@@ -56,7 +56,9 @@ static int chartoint(char c);
 static void trackerview_prevcol(TrackerView*);
 static void trackerview_nextcol(TrackerView*);
 static void trackerview_prevline(TrackerView*);
+static void trackerview_prevlines(TrackerView*, uintptr_t lines);
 static void trackerview_advanceline(TrackerView*);
+static void trackerview_advancelines(TrackerView*, uintptr_t lines);
 static void trackerview_prevtrack(TrackerView*);
 static void trackerview_nexttrack(TrackerView*);
 static void trackerview_enablesync(TrackerView*);
@@ -207,7 +209,7 @@ void InitTrackerGrid(TrackerGrid* self, ui_component* parent, TrackerView* view,
 	self->cursor.offset = 0;
 	self->cursor.subline = 0;
 	self->cursor.col = 0;
-	workspace_seteditposition(self->view->workspace, self->cursor);
+	workspace_setpatterneditposition(self->view->workspace, self->cursor);
 	self->cursorstep = 0.25;
 	self->dx = 0;
 	self->dy = 0;
@@ -649,7 +651,8 @@ unsigned int NumSublines(Pattern* pattern, double offset, double bpl)
 	return currsubline;
 }
 
-void trackergrid_onkeydown(TrackerGrid* self, ui_component* sender, int keycode, int keydata)
+void trackergrid_onkeydown(TrackerGrid* self, ui_component* sender,
+	KeyEvent* keyevent)
 {
 	sender->propagateevent = 1;	
 }
@@ -673,7 +676,7 @@ void trackerview_prevcol(TrackerView* self)
 	} else {
 		--self->grid.cursor.col;
 	}
-	workspace_seteditposition(self->workspace, self->grid.cursor);	
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);	
 	if (invalidate) {
 		trackerview_invalidatecursor(self, &oldcursor);
 		trackerview_invalidatecursor(self, &self->grid.cursor);
@@ -699,7 +702,7 @@ void trackerview_nextcol(TrackerView* self)
 	} else {
 		++self->grid.cursor.col;
 	}
-	workspace_seteditposition(self->workspace, self->grid.cursor);
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
 	if (invalidate) {
 		trackerview_invalidatecursor(self, &oldcursor);
 		trackerview_invalidatecursor(self, &self->grid.cursor);
@@ -720,7 +723,22 @@ void trackerview_prevline(TrackerView* self)
 			self->grid.cursor.offset = self->pattern->length - self->grid.bpl;
 		}
 	}
-	workspace_seteditposition(self->workspace, self->grid.cursor);		
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);		
+	trackerview_invalidatecursor(self, &oldcursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);
+}
+
+void trackerview_prevlines(TrackerView* self, uintptr_t lines)
+{
+	TrackerCursor oldcursor;
+
+	oldcursor = self->grid.cursor;
+	self->grid.cursor.subline = 0;
+	self->grid.cursor.offset -= lines * self->grid.bpl;		
+	if (self->grid.cursor.offset < 0) {
+		self->grid.cursor.offset = self->pattern->length - self->grid.bpl;	
+	}
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);		
 	trackerview_invalidatecursor(self, &oldcursor);
 	trackerview_invalidatecursor(self, &self->grid.cursor);
 }
@@ -741,7 +759,22 @@ void trackerview_advanceline(TrackerView* self)
 			self->grid.cursor.offset = 0;
 		}
 	}
-	workspace_seteditposition(self->workspace, self->grid.cursor);
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
+	trackerview_invalidatecursor(self, &oldcursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);
+}
+
+void trackerview_advancelines(TrackerView* self, uintptr_t lines)
+{
+	TrackerCursor oldcursor;
+
+	oldcursor = self->grid.cursor;		
+	self->grid.cursor.offset += lines * self->grid.bpl;
+	self->grid.cursor.subline = 0;
+	if (self->grid.cursor.offset >= self->pattern->length) {
+		self->grid.cursor.offset = 0;
+	}	
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
 	trackerview_invalidatecursor(self, &oldcursor);
 	trackerview_invalidatecursor(self, &self->grid.cursor);
 }
@@ -765,7 +798,7 @@ void trackerview_prevtrack(TrackerView* self)
 		trackerview_invalidatecursor(self, &oldcursor);
 		trackerview_invalidatecursor(self, &self->grid.cursor);
 	}
-	workspace_seteditposition(self->workspace, self->grid.cursor);	
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);	
 }
 
 void trackerview_nexttrack(TrackerView* self)
@@ -783,7 +816,7 @@ void trackerview_nexttrack(TrackerView* self)
 		self->grid.cursor.track = 0;
 		invalidate = trackerview_scrollleft(self);
 	}
-	workspace_seteditposition(self->workspace, self->grid.cursor);		
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);		
 	if (invalidate) {
 		trackerview_invalidatecursor(self, &oldcursor);
 		trackerview_invalidatecursor(self, &self->grid.cursor);
@@ -832,17 +865,26 @@ int trackerview_scrollright(TrackerView* self)
 	return invalidate;
 }
 
-void trackerview_onkeydown(TrackerView* self, ui_component* sender, int keycode, int keydata)
+void trackerview_onkeydown(TrackerView* self, ui_component* sender,
+	KeyEvent* keyevent)
 {		
 	int cmd;
 
-	cmd = inputs_cmd(&self->inputs, encodeinput(keycode, 
+	cmd = inputs_cmd(&self->inputs, encodeinput(keyevent->keycode, 
 		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0));		
 	if (cmd == CMD_NAVUP) {
 		trackerview_prevline(self);
 	} else
+	if (cmd == CMD_NAVPAGEUP) {		
+		trackerview_prevlines(self, 
+			player_lpb(&self->workspace->player));
+	}
 	if (cmd == CMD_NAVDOWN) {		
 		trackerview_advanceline(self);
+	} else
+	if (cmd == CMD_NAVPAGEDOWN) {
+		trackerview_advancelines(self, 
+			player_lpb(&self->workspace->player));
 	} else
 	if (cmd == CMD_NAVLEFT) {
 		trackerview_prevcol(self);
@@ -855,8 +897,8 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender, int keycode,
 	} else
 	if (cmd == CMD_COLUMNNEXT) {
 		trackerview_nexttrack(self);
-	} else
-	if (keycode == VK_DELETE) {
+	} else		
+	if (keyevent->keycode == VK_DELETE) {
 		PatternNode* prev;
 		PatternNode* node = pattern_findnode(self->pattern, self->grid.cursor.track,
 			(beat_t)self->grid.cursor.offset, self->grid.cursor.subline, (beat_t)self->grid.bpl, &prev);
@@ -866,7 +908,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender, int keycode,
 		}
 
 	} else
-	if (keycode == VK_RETURN) {		
+	if (keyevent->keycode == VK_RETURN) {
 		PatternNode* prev;
 		PatternNode* node = pattern_findnode(self->pattern, 0,
 			(beat_t)self->grid.cursor.offset, self->grid.cursor.subline + 1, (beat_t)self->grid.bpl, &prev);		
@@ -877,12 +919,12 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender, int keycode,
 			offset = self->grid.cursor.offset + self->grid.cursor.subline*self->grid.bpl/4;
 			pattern_insert(self->pattern, prev, 0, (beat_t)offset, &ev);			
 			trackergrid_adjustscroll(&self->grid);
-			workspace_seteditposition(self->workspace, self->grid.cursor);
+			workspace_setpatterneditposition(self->workspace, self->grid.cursor);
 			ui_component_invalidate(&self->linenumbers.component);
 		}	
 	} else {
 		if (self->grid.cursor.col != TRACKER_COLUMN_NOTE) {			
-			trackerview_inputdigit(self, chartoint((char)keycode));
+			trackerview_inputdigit(self, chartoint((char)keyevent->keycode));
 		}		
 	}	
 	ui_component_propagateevent(sender);
@@ -1097,25 +1139,26 @@ void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int cx, int c
 	}
 }
 
-void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, int x, int y, int button)
+void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->view->pattern) {
-		if (button == 1) {
+		if (ev->button == 1) {
 			int lines;
 			int sublines;
 			int subline;		
 			int coloffset;				
-			self->cursor.offset = trackergrid_offset(self, y - self->dy, &lines, &sublines, &subline);
+			self->cursor.offset = trackergrid_offset(self, ev->y - self->dy, &lines, &sublines, &subline);
 			self->cursor.totallines = lines + sublines;
 			self->cursor.subline = subline;
-			self->cursor.track = (x - self->dx) / self->trackwidth;
-			coloffset = (x - self->dx) - self->cursor.track * self->trackwidth;
+			self->cursor.track = (ev->x - self->dx) / self->trackwidth;
+			coloffset = (ev->x - self->dx) - self->cursor.track * self->trackwidth;
 			if (coloffset < 3*self->textwidth) {
 				self->cursor.col = 0;
 			} else {
 				self->cursor.col = coloffset / self->textwidth - 2;
 			}
-			workspace_seteditposition(self->view->workspace, self->cursor);
+			self->cursor.pattern = workspace_patterneditposition(self->view->workspace).pattern;
+			workspace_setpatterneditposition(self->view->workspace, self->cursor);
 			ui_component_invalidate(&self->component);
 			ui_component_setfocus(&self->component);
 		}

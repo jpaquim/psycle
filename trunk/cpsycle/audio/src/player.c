@@ -270,7 +270,7 @@ void player_setsong(Player* self, Song* song)
 	self->song = song;
 	sequencer_reset(&self->sequencer, &song->sequence, &song->machines);
 	sequencer_setsamplerate(&self->sequencer,
-		self->driver->samplerate(self->driver));
+		self->driver->samplerate(self->driver));	
 }
 
 void player_setnumsongtracks(Player* self, unsigned int numsongtracks)
@@ -301,8 +301,7 @@ VUMeterMode player_vumetermode(Player* self)
 // sequencer setter and getter
 
 void player_start(Player* self)
-{	
-	sequencer_setposition(&self->sequencer, 0.0f);
+{		
 	sequencer_start(&self->sequencer);	
 }
 
@@ -314,6 +313,11 @@ void player_stop(Player* self)
 int player_playing(Player* self)
 {
 	return sequencer_playing(&self->sequencer);
+}
+
+void player_setposition(Player* self, beat_t offset)
+{
+	sequencer_setposition(&self->sequencer, offset);	
 }
 
 beat_t player_position(Player* self)

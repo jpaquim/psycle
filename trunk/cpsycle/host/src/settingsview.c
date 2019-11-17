@@ -13,9 +13,9 @@ static int OnPropertiesDrawEnum(SettingsView*, Properties*, int level);
 static int OnPropertiesHitTestEnum(SettingsView*, Properties*, int level);
 static int OnEnumPropertyPosition(SettingsView*, Properties*, int level);
 static void PreparePropertiesEnum(SettingsView* self);
-static void OnKeyDown(SettingsView*, ui_component* sender, int keycode, int keydata);
-static void OnMouseDown(SettingsView*, ui_component* sender, int x, int y, int button);
-static void OnMouseDoubleClick(SettingsView*, ui_component* sender, int x, int y, int button);
+static void OnKeyDown(SettingsView*, ui_component* sender, KeyEvent*);
+static void OnMouseDown(SettingsView*, ui_component* sender, MouseEvent*);
+static void OnMouseDoubleClick(SettingsView*, ui_component* sender, MouseEvent*);
 static void OnEditChange(SettingsView*, ui_edit* sender);
 static void OnInputDefinerChange(SettingsView* self, InputDefiner* sender);
 static void OnDestroy(SettingsView*, ui_component* sender);
@@ -282,11 +282,11 @@ void DrawCheckBox(SettingsView* self, Properties* property, int column)
 	ui_drawrectangle(self->g, r);
 }
 
-void OnKeyDown(SettingsView* self, ui_component* sender, int keycode, int keydata)
+void OnKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
 {	
 }
 
-void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int button)
+void OnMouseDown(SettingsView* self, ui_component* sender, MouseEvent* ev)
 {
 	if (ui_component_visible(&self->edit.component)) {
 		OnEditChange(self, &self->edit);
@@ -297,8 +297,8 @@ void OnMouseDown(SettingsView* self, ui_component* sender, int x, int y, int but
 		ui_component_hide(&self->inputdefiner.component);
 	}	
 	self->selected = 0;
-	self->mx = x;
-	self->my = y;
+	self->mx = ev->x;
+	self->my = ev->y;
 	self->choiceproperty = 0;
 	self->dirbutton = 0;
 	PreparePropertiesEnum(self);	
@@ -422,7 +422,7 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 	return rv;
 }
 
-void OnMouseDoubleClick(SettingsView* self, ui_component* sender, int x, int y, int button)
+void OnMouseDoubleClick(SettingsView* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->selected) {
 		ui_component* edit = 0;

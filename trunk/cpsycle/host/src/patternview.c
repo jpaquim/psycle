@@ -12,10 +12,11 @@ static void OnShow(PatternView*, ui_component* sender);
 static void OnHide(PatternView*, ui_component* sender);
 static void OnLpbChanged(PatternView*, Player* sender, unsigned int lpb);
 static void OnSongChanged(PatternView*, Workspace* sender);
-static void OnEditPositionChanged(PatternView*, Sequence* sender);
+static void OnEditPositionChanged(PatternView*, Workspace* sender);
+static void OnSequenceSelectionChanged(PatternView*, Workspace* sender);
 static void OnPropertiesClose(PatternView*, ui_component* sender);
 static void OnPropertiesApply(PatternView*, ui_component* sender);
-static void OnKeyDown(PatternView*, ui_component* sender, int keycode, int keydata);
+static void OnKeyDown(PatternView*, ui_component* sender, KeyEvent*);
 static void OnStatusDraw(PatternViewStatus*, ui_component* sender, ui_graphics* g);
 static void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, ui_size* rv);
 static void OnPatternEditPositionChanged(PatternViewStatus*, Workspace* sender);
@@ -33,8 +34,8 @@ void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Worksp
 	signal_disconnectall(&self->component.signal_preferredsize);
 	signal_connect(&self->component.signal_preferredsize, self, onstatuspreferredsize);
 	signal_connect(&workspace->signal_songchanged, self, OnStatusSongChanged);
-	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-		self, OnStatusSequencePositionChanged);
+//	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
+//		self, OnStatusSequencePositionChanged);
 }
 
 void OnStatusSequencePositionChanged(PatternViewStatus* self, Sequence* sender)
@@ -45,8 +46,8 @@ void OnStatusSequencePositionChanged(PatternViewStatus* self, Sequence* sender)
 void OnStatusSongChanged(PatternViewStatus* self, Workspace* workspace)
 {
 	if (workspace->song) {
-		signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-			self, OnStatusSequencePositionChanged);
+//		signal_connect(&workspace->song->sequence.signal_editpositionchanged,
+//			self, OnStatusSequencePositionChanged);
 	}
 }
 
@@ -58,20 +59,20 @@ void OnPatternEditPositionChanged(PatternViewStatus* self, Workspace* sender)
 void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
 {
 	char text[256];
-	EditPosition editposition;
-	SequencePosition sequenceposition;
-	SequenceEntry* sequenceentry;
+	PatternEditPosition editposition;
+//	SequencePosition sequenceposition;
+//	SequenceEntry* sequenceentry;
 	int pattern;
 
-	editposition = workspace_editposition(self->workspace);
-	sequenceposition = 
-		sequence_editposition(&self->workspace->song->sequence);
-	sequenceentry = sequenceposition_entry(&sequenceposition);	
-	if (sequenceentry) {
-		pattern = sequenceentry->pattern;
-	} else {
-		pattern = 0;
-	}	
+	editposition = workspace_patterneditposition(self->workspace);
+//	sequenceposition = 
+//		sequence_editposition(&self->workspace->song->sequence);
+//	sequenceentry = sequenceposition_entry(&sequenceposition);	
+//	if (sequenceentry) {
+//		pattern = sequenceentry->pattern;
+//	} else {
+	pattern = editposition.pattern;
+//	}	
 	ui_settextcolor(g, 0x00D1C5B6);
 	ui_setbackgroundmode(g, TRANSPARENT);
 	psy_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d         Edit ON",
@@ -144,8 +145,10 @@ void patternview_init(PatternView* self,
 	signal_connect(&self->component.signal_hide, self, OnHide);
 	signal_connect(&workspace->player.signal_lpbchanged, self, OnLpbChanged);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-		self, OnEditPositionChanged);
+	//signal_connect(&workspace->signal_editpositionchanged,
+	//	self, OnEditPositionChanged);
+	signal_connect(&workspace->signal_sequenceselectionchanged,
+		self, OnSequenceSelectionChanged);
 	self->lpb = player_lpb(&workspace->player);
 }
 
@@ -209,8 +212,6 @@ void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
 
 void OnSongChanged(PatternView* self, Workspace* workspace)
 {
-	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-		self, OnEditPositionChanged);
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
 	self->trackerview.sequenceentryoffset = 0.f;
 	self->pianoroll.sequenceentryoffset = 0.f;
@@ -218,15 +219,37 @@ void OnSongChanged(PatternView* self, Workspace* workspace)
 	ui_component_invalidate(&self->component);
 }
 
-void OnEditPositionChanged(PatternView* self, Sequence* sender)
+void OnEditPositionChanged(PatternView* self, Workspace* sender)
 {	
+	/*Pattern* pattern;
+
+	if (sender->song) {
+		pattern = patterns_at(&sender->song->patterns, 
+			sender->patterneditposition.pattern);
+		patternview_setpattern(self, pattern);
+		self->trackerview.sequenceentryoffset = 0; // entry->offset;
+		self->pianoroll.sequenceentryoffset = 0; // entry->offset;
+	} else {
+		patternview_setpattern(self, 0);		
+		self->trackerview.sequenceentryoffset = 0.f;
+		self->pianoroll.sequenceentryoffset = 0.f;
+	}
+	ui_component_invalidate(&self->component);*/
+}
+
+void OnSequenceSelectionChanged(PatternView* self, Workspace* workspace)
+{	
+	SequenceSelection selection;
 	SequenceEntry* entry;
-	
-	entry = sequenceposition_entry(&sender->editposition);
-	if (entry) {			
-		patternview_setpattern(self,
-			patterns_at(&self->trackerview.workspace->song->patterns,
-			entry->pattern));
+
+	selection = workspace_sequenceselection(workspace);
+	entry = sequenceposition_entry(&selection.editposition);
+	if (entry) {
+		Pattern* pattern;
+
+		pattern = patterns_at(&workspace->song->patterns, 
+			entry->pattern);
+		patternview_setpattern(self, pattern);
 		self->trackerview.sequenceentryoffset = entry->offset;
 		self->pianoroll.sequenceentryoffset = entry->offset;
 	} else {
@@ -234,7 +257,7 @@ void OnEditPositionChanged(PatternView* self, Sequence* sender)
 		self->trackerview.sequenceentryoffset = 0.f;
 		self->pianoroll.sequenceentryoffset = 0.f;
 	}
-	ui_component_invalidate(&self->component);
+	ui_component_invalidate(&self->component);		
 }
 
 void OnPropertiesClose(PatternView* self, ui_component* sender)
@@ -245,7 +268,7 @@ void OnPropertiesApply(PatternView* self, ui_component* sender)
 {
 }
 
-void OnKeyDown(PatternView* self, ui_component* sender, int keycode, int keydata)
+void OnKeyDown(PatternView* self, ui_component* sender, KeyEvent* keyevent)
 {
 	ui_component_propagateevent(sender);
 }

@@ -8,10 +8,10 @@
 
 typedef union _Double { 
     struct {
-        unsigned long LowPart;
-        unsigned long HighPart; 
+        uint32_t LowPart;
+        uint32_t HighPart; 
     };	
-    unsigned __int64 QuadPart;
+    uint64_t QuadPart;
 } Double;
 
 void double_setvalue(Double*, double value);

@@ -24,12 +24,12 @@ static void InitVuBar(MainFrame*);
 static void SetStatusBarText(MainFrame*, const char* text);
 static const char* StatusBarIdleText(MainFrame* self);
 static void Destroy(MainFrame*, ui_component* component);
-static void OnKeyDown(MainFrame*, ui_component* component, int keycode, int keydata);
+static void OnKeyDown(MainFrame*, ui_component* component, KeyEvent*);
 static void OnSequenceSelChange(MainFrame* , SequenceEntry* entry);
 static void OnAlign(MainFrame*, ui_component* sender);
-static void OnMouseDown(MainFrame*, ui_component* sender, int x, int y, int button);
-static void OnMouseMove(MainFrame*, ui_component* sender, int x, int y, int button);
-static void OnMouseUp(MainFrame*, ui_component* sender, int x, int y, int button);
+static void OnMouseDown(MainFrame*, ui_component* sender, MouseEvent*);
+static void OnMouseMove(MainFrame*, ui_component* sender, MouseEvent*);
+static void OnMouseUp(MainFrame*, ui_component* sender, MouseEvent*);
 static void OnGear(MainFrame*, ui_component* sender);
 static void OnGearCreate(MainFrame*, ui_component* sender);
 static void OnAboutOk(MainFrame*, ui_component* sender);
@@ -204,7 +204,7 @@ void InitBars(MainFrame* self)
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);	
 	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);	
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
-	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);		
+	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);
 	{
 		ui_margin margin = { 0, 20, 0, 0 };
 
@@ -318,24 +318,24 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	}	
 }
 
-void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydata)
+void OnKeyDown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
 {	
-	if (keycode == VK_F2) {
+	if (keyevent->keycode == VK_F2) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	} else
-	if (keycode == VK_F5) {
+	if (keyevent->keycode == VK_F5) {
 		player_start(&self->workspace.player);		
 	} else
-	if (keycode == VK_F3) {
+	if (keyevent->keycode == VK_F3) {
 		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
 	} else	 
-	if (keycode == VK_F6) {
+	if (keyevent->keycode == VK_F6) {
 		tabbar_select(&self->tabbar, TABPAGE_SETTINGSVIEW);
 	} else
-	if (keycode == VK_F8) {
+	if (keyevent->keycode == VK_F8) {
 		player_stop(&self->workspace.player);		
 	} else	
-	if (keycode == VK_F4) {
+	if (keyevent->keycode == VK_F4) {
 		Properties* properties;
 		
 		properties = properties_create();		
@@ -347,7 +347,7 @@ void OnKeyDown(MainFrame* self, ui_component* component, int keycode, int keydat
 		EventDriver* kbd;
 		int input;
 		
-		input = encodeinput(keycode, GetKeyState(VK_SHIFT) < 0,
+		input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
 			GetKeyState(VK_CONTROL) < 0);		
 		kbd = workspace_kbddriver(&self->workspace);
 		kbd->write(kbd, (unsigned char*)&input, 4);
@@ -410,13 +410,13 @@ void UpdateTitle(MainFrame* self)
 	ui_component_settitle(&self->component, txt);
 }
 
-void OnMouseDown(MainFrame* self, ui_component* sender, int x, int y, int button)
+void OnMouseDown(MainFrame* self, ui_component* sender, MouseEvent* ev)
 {	
 	ui_component_capture(sender);
 	self->resize = 1;	
 }
 
-void OnMouseMove(MainFrame* self, ui_component* sender, int x, int y, int button)
+void OnMouseMove(MainFrame* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->resize == 1) {		
 		ui_size toolbarsize;
@@ -424,13 +424,13 @@ void OnMouseMove(MainFrame* self, ui_component* sender, int x, int y, int button
 	
 		toolbarsize = ui_component_size(&self->top);
 		position = ui_component_position(sender);
-		ui_component_move(sender, position.left + x, toolbarsize.height);
+		ui_component_move(sender, position.left + ev->x, toolbarsize.height);
 		ui_component_invalidate(sender);
 		ui_component_update(sender);
 	}
 }
 
-void OnMouseUp(MainFrame* self, ui_component* sender, int x, int y, int button)
+void OnMouseUp(MainFrame* self, ui_component* sender, MouseEvent* ev)
 {			
 	ui_rectangle position;
 	

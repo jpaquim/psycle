@@ -7,7 +7,7 @@
 
 static void OnDraw(WaveBox*, ui_component* sender, ui_graphics*);
 static void OnDestroy(WaveBox*, ui_component* sender);
-static void OnMouseDown(WaveBox*, ui_component* sender, int x, int y, int button);
+static void OnMouseDown(WaveBox*, ui_component* sender, MouseEvent*);
 
 
 void InitWaveBox(WaveBox* self, ui_component* parent)
@@ -43,7 +43,7 @@ void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-void OnMouseDown(WaveBox* self, ui_component* sender, int x, int y, int button)
+void OnMouseDown(WaveBox* self, ui_component* sender, MouseEvent* mouseevent)
 {
 }
 

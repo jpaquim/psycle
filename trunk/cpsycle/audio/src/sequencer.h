@@ -8,6 +8,11 @@
 #include "machines.h"
 #include <list.h>
 
+typedef enum {
+	SEQUENCERPLAYMODE_PLAYALL,
+	SEQUENCERPLAYMODE_PLAYSEL
+} SequencerPlayMode;
+
 typedef struct {
 	Sequence* sequence;
 	Machines* machines;	
@@ -23,7 +28,9 @@ typedef struct {
 	List* currtrackiterators;	
 	List* events;
 	List* delayedevents;
-	List* inputevents;	
+	List* inputevents;
+	SequencerPlayMode mode;
+	int looping;
 } Sequencer;
 
 void sequencer_init(Sequencer*, Sequence*, Machines*);
@@ -52,5 +59,10 @@ void sequencer_addinputevent(Sequencer*, const PatternEvent*,
 	unsigned int track);
 void sequencer_recordinputevent(Sequencer*, const PatternEvent*,
 	unsigned int track, beat_t playposition);
+void sequencer_setplaymode(Sequencer*, SequencerPlayMode);
+void sequencer_loop(Sequencer*);
+void sequencer_stoploop(Sequencer*);
+int sequencer_looping(Sequencer*);
+SequencerPlayMode sequencer_playmode(Sequencer*);
 
 #endif

@@ -10,7 +10,7 @@
 
 void double_setvalue(Double* self, double value)
 {
-	self->QuadPart = (unsigned __int64)(value * 4294967296.0f);
+	self->QuadPart = (uint64_t)(value * 4294967296.0f);
 }
 
 void sampleiterator_init(SampleIterator* self, Sample* sample)

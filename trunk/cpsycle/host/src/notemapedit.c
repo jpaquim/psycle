@@ -13,8 +13,8 @@ static void OnDraw(NoteMapEdit* self, ui_component* sender, ui_graphics* g);
 static void SetColColor(ui_graphics* g, int col, int cursor);
 static void DrawDigit(NoteMapEdit* self, ui_graphics* g, int digit, int col, int x, int y);
 static void OnDestroy(NoteMapEdit* self, ui_component* component);
-static void OnMouseDown(NoteMapEdit* self, ui_component* sender, int x, int y, int button);
-static void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata);
+static void OnMouseDown(NoteMapEdit* self, ui_component* sender, MouseEvent*);
+static void OnKeyDown(NoteMapEdit* self, ui_component* sender, KeyEvent*);
 static void DefaultMapping(NoteMapEdit* self);
 
 void InitNoteMapEdit(NoteMapEdit* self, ui_component* parent)
@@ -116,16 +116,16 @@ void DrawDigit(NoteMapEdit* self, ui_graphics* g, int digit, int col, int x, int
 	ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer, strlen(buffer));	
 }
 
-void OnMouseDown(NoteMapEdit* self, ui_component* sender, int x, int y, int button)
+void OnMouseDown(NoteMapEdit* self, ui_component* sender, MouseEvent* mousevent)
 {
 }
 
-void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata)
+void OnKeyDown(NoteMapEdit* self, ui_component* sender, KeyEvent* keyevent)
 {
 	ui_size size = ui_component_size(&self->component);
 	int scrolllines = -self->dy / 20;
 	int visiblelines = size.height / 20;
-	if (keycode == VK_UP) {		
+	if (keyevent->keycode == VK_UP) {		
 		if (self->cursor.note > 0) {
 			--self->cursor.note;
 			if (self->cursor.note < scrolllines) {
@@ -134,7 +134,7 @@ void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata
 			ui_component_invalidate(&self->component);
 		}		
 	} else
-	if (keycode == VK_DOWN) {		
+	if (keyevent->keycode == VK_DOWN) {		
 		if (self->cursor.note < 120) {
 			++self->cursor.note;
 			if (self->cursor.note > visiblelines + scrolllines) {
@@ -143,17 +143,17 @@ void OnKeyDown(NoteMapEdit* self, ui_component* sender, int keycode, int keydata
 			ui_component_invalidate(&self->component);
 		}
 	} else
-	if (keycode == VK_LEFT) {
+	if (keyevent->keycode == VK_LEFT) {
 		--self->cursor.col;
 		ui_component_invalidate(&self->component);
 	} else
-	if (keycode == VK_RIGHT) {
+	if (keyevent->keycode == VK_RIGHT) {
 		++self->cursor.col;
 		ui_component_invalidate(&self->component);
 	} else {
 		int cmd;
 
-		cmd = inputs_cmd(self->noteinputs, keycode);
+		cmd = inputs_cmd(self->noteinputs, keyevent->keycode);
 		if (cmd != -1) {		
 			int base = 48;
 			self->map[self->cursor.note].note = (unsigned char)(base + cmd);

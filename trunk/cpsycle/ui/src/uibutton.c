@@ -40,7 +40,7 @@ void ui_button_init(ui_button* self, ui_component* parent)
 	signal_connect(&self->component.signal_destroy, self, ondestroy);	
 	signal_disconnectall(&self->component.signal_preferredsize);
 	signal_connect(&self->component.signal_preferredsize, self,
-		onpreferredsize);	
+		onpreferredsize);
 }
 
 void ui_button_create_system(ui_button* self, ui_component* parent)
@@ -246,14 +246,24 @@ void ui_button_seticon(ui_button* self, ButtonIcon icon)
 
 void ui_button_highlight(ui_button* self)
 {
-	self->highlight = 1;
-	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+	if (!self->highlight) {
+		self->highlight = 1;
+		SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+		if (self->ownerdrawn) {
+			ui_component_invalidate(&self->component);
+		}
+	}
 }
 
 void ui_button_disablehighlight(ui_button* self)
 {
-	self->highlight = 0;
-	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
+	if (self->highlight) {
+		self->highlight = 0;
+		SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
+		if (self->ownerdrawn) {
+			ui_component_invalidate(&self->component);
+		}
+	}
 }
 
 void oncommand(ui_button* self, ui_component* sender, WPARAM wParam,

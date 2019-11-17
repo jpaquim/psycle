@@ -7,6 +7,21 @@
 #include "uigraphics.h"
 #include <signal.h>
 
+typedef struct {
+	int keycode;
+	int keydata;
+} KeyEvent;
+
+void keyevent_init(KeyEvent*, int keycode, int keydata);
+
+typedef struct {	
+	int x;
+	int y;
+	int button;
+} MouseEvent;
+
+void mouseevent_init(MouseEvent*, int x, int y, int button);
+
 typedef struct {		               
    int (*childenum)(void*, void*);
    void* target;
@@ -14,4 +29,3 @@ typedef struct {
 } ui_events;
 
 #endif
-

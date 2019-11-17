@@ -21,14 +21,23 @@ typedef struct {
 	ui_button cloneentry;
 	ui_button newtrack;
 	ui_button deltrack;
+	ui_button dummy;
+	ui_button singlesel;
+	ui_button multisel;
 	void* context;	
 } SequenceButtons;
 
 void sequencebuttons_init(SequenceButtons*, ui_component* parent);
 
+typedef enum {
+	SELECTIONMODE_SINGLE,
+	SELECTIONMODE_MULTI
+} SelectionMode;
+
 typedef struct {
 	ui_component component;
 	Sequence* sequence;
+	SequenceSelection* selection;	
 	Patterns* patterns;	
 	int selected;
 	int selectedtrack;
@@ -39,10 +48,15 @@ typedef struct {
 	int avgcharwidth;
 	int dx;
 	int dy;
+	SelectionMode selectionmode;
 	beat_t lastplayposition;
 	Player* player;
-	SequenceEntry* lastentry;
+	SequenceEntry* lastentry;	
+	Workspace* workspace;
 } SequenceListView;
+
+void sequencelistview_init(SequenceListView*, ui_component* parent, Sequence*,
+	Patterns*, Workspace*);
 
 typedef struct {
 	ui_component component;
@@ -63,12 +77,11 @@ typedef struct {
 	ui_checkbox shownames;	
 	Patterns* patterns;
 	Sequence* sequence;
-	Workspace* workspace;
+	SequenceSelection* selection;
+	Workspace* workspace;	
 } SequenceView;
 
 void sequenceview_init(SequenceView*, ui_component* parent, Workspace*);
-void sequencelistview_init(SequenceListView*, ui_component* parent, Sequence*,
-	Patterns*);
 
 
 #endif

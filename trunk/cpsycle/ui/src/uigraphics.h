@@ -13,8 +13,8 @@ typedef struct {
   HFONT hfont;
   HFONT hFontPrev;
   ui_rectangle clip;
-  HPEN pen;
-  HPEN hPenPrev;
+  HPEN pen;  
+  HPEN penprev;
   HBRUSH brush;
   HBRUSH hBrushPrev;
 } ui_graphics;

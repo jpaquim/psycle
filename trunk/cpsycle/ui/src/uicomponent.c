@@ -298,7 +298,10 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				}
 			case WM_KEYDOWN:				
 				if (component->signal_keydown.slots) {
-					signal_emit(&component->signal_keydown, component, 2, (int)wParam, lParam);
+					KeyEvent keyevent;
+
+					keyevent_init(&keyevent, (int)wParam, lParam);
+					signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}				
 			break;
 			case WM_KILLFOCUS:
@@ -465,7 +468,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_KEYDOWN:							
 				component->propagateevent = component->defaultpropagation;
 				if (component->signal_keydown.slots) {
-					signal_emit(&component->signal_keydown, component, 2, (int)wParam, lParam);
+					KeyEvent keyevent;
+
+					keyevent_init(&keyevent, (int)wParam, lParam);
+					signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}
 				if (component->propagateevent) {					
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
@@ -475,50 +481,88 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_KEYUP:			
 				if (component->signal_keyup.slots) {
-					signal_emit(&component->signal_keyup, component, 2, (int)wParam, lParam);			
+					KeyEvent keyevent;
+
+					keyevent_init(&keyevent, (int)wParam, lParam);
+					signal_emit(&component->signal_keyup, component, 1, &keyevent);
 				}
 				return 0;
 			break;
 			case WM_LBUTTONUP:			
 				if (component->signal_mouseup.slots) {
-					signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_LBUTTON);
+					signal_emit(&component->signal_mouseup, component, 1,
+						&mouseevent);
 					return 0 ;
 				}
 			break;
 			case WM_RBUTTONUP:			
-				if (component->signal_mouseup.slots) {			
-					signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);				
+				if (component->signal_mouseup.slots) {
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_RBUTTON);
+					signal_emit(&component->signal_mouseup, component, 1,
+						&mouseevent);
 					return 0 ;
 				}			
 			break;
 			case WM_MBUTTONUP:			
 				if (component->signal_mouseup.slots) {			
-					signal_emit(&component->signal_mouseup, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);				
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_MBUTTON);
+					signal_emit(&component->signal_mouseup, component, 1,
+						&mouseevent);
 					return 0 ;
 				}
 			break;
 			case WM_LBUTTONDOWN:			
 				if (component->signal_mousedown.slots) {
-					signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);				
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_LBUTTON);
+					signal_emit(&component->signal_mousedown, component, 1,
+						&mouseevent);
 					return 0 ;
 				}			
 			break;
 			case WM_RBUTTONDOWN:			
 				if (component->signal_mousedown.slots) {		
-					signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_RBUTTON);
+					signal_emit(&component->signal_mousedown, component, 1,
+						&mouseevent);
 					return 0 ;
 				}
 			break;
 			case WM_MBUTTONDOWN:			
 				if (component->signal_mousedown.slots) {		
-					signal_emit(&component->signal_mousedown, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);				
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_MBUTTON);
+					signal_emit(&component->signal_mousedown, component, 1,
+						&mouseevent);
 					return 0 ;
 				}
 			break;
 			case WM_LBUTTONDBLCLK:							
 				component->propagateevent = component->defaultpropagation;
-				if (component->signal_mousedoubleclick.slots) {					
-					signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);					
+				if (component->signal_mousedoubleclick.slots) {
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_LBUTTON);					
+					signal_emit(&component->signal_mousedoubleclick, component, 1,
+						&mouseevent);
 				}
 				if (component->propagateevent) {					
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;               
@@ -528,14 +572,24 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_MBUTTONDBLCLK:			
 				if (component->signal_mousedoubleclick.slots) {
-					signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 2);
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_MBUTTON);
+					signal_emit(&component->signal_mousedoubleclick, component, 1,
+						&mouseevent);
 					return 0 ;
 				}
 			break;		
 			case WM_RBUTTONDBLCLK:			
 				if (component->signal_mousedoubleclick.slots) {
-					signal_emit(&component->signal_mousedoubleclick, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 3);
-					return 0 ;
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), MK_RBUTTON);
+					signal_emit(&component->signal_mousedoubleclick, component, 1,
+						&mouseevent);
+					return 0;
 				}
 			break;
 			case WM_MOUSEMOVE:							
@@ -554,8 +608,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					} 
 					return 0;
 				}								
-				if (component->signal_mousemove.slots) {				
-					signal_emit(&component->signal_mousemove, component, 3, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam), 1);
+				if (component->signal_mousemove.slots) {
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), wParam);					
+					signal_emit(&component->signal_mousemove, component, 1,
+						&mouseevent);
 					return 0 ;
 				}
 			break;
@@ -576,7 +635,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				handle_vscroll(hwnd, wParam, lParam);
 				return 0;
 			break;
-			case WM_HSCROLL:	
+			case WM_HSCROLL:
 				component = table_at(&selfmap, (uintptr_t) (int) lParam);
 				if (component && component->signal_windowproc.slots) {				                    
 					signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
@@ -585,7 +644,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				handle_hscroll(hwnd, wParam, lParam);
 				return 0;
 			break;
-			case WM_KILLFOCUS:							
+			case WM_KILLFOCUS:
 				if (component->signal_focuslost.slots) {
 					signal_emit(&component->signal_focuslost, component, 0);
 					return 0;

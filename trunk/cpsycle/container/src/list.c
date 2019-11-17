@@ -118,3 +118,29 @@ List* list_last(List* self)
 	return self ? self->tail : 0;
 }
 
+int list_check(List* self, List* node)
+{
+	List* p = self;
+			
+	while (p != 0) {
+		if (p == node) {
+			break;
+		}
+		p = p->next;		
+	}
+	return p != 0;
+}
+
+List* list_findentry(List* self, void* entry)
+{
+	List* p = self;
+			
+	while (p != 0) {
+		if (p->entry == entry) {
+			break;
+		}
+		p = p->next;		
+	}
+	return p;
+}
+

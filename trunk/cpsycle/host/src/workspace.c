@@ -43,6 +43,7 @@ static void workspace_setsong(Workspace*, Song*, int flag);
 static void workspace_changedefaultfontsize(Workspace*, int size);
 static void workspace_onloadprogress(Workspace*, Song*, int progress);
 static void workspace_onscanprogress(Workspace*, PluginCatcher*, int progress);
+static void workspace_onsequenceeditpositionchanged(Workspace*, SequenceSelection*);
 /// Machinecallback
 static MachineCallback machinecallback(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
@@ -64,10 +65,20 @@ void workspace_init(Workspace* self, void* handle)
 	workspace_makeconfig(self);
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);
-	self->properties = workspace_makeproperties(self);	
+	self->properties = workspace_makeproperties(self);
+	sequenceselection_init(&self->sequenceselection, &self->song->sequence);
+	sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
+	signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
+		workspace_onsequenceeditpositionchanged);
 	undoredo_init(&self->undoredo);
 	workspace_initsignals(self);
-	workspace_initplayer(self);
+	workspace_initplayer(self);	
+	self->patterneditposition.pattern = 0;
+	self->patterneditposition.col = 
+	self->patterneditposition.line = 0;
+	self->patterneditposition.offset = 0;
+	self->patterneditposition.totallines = 0;
+	self->patterneditposition.track = 0;	
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -86,6 +97,7 @@ void workspace_initsignals(Workspace* self)
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
 	signal_init(&self->signal_editpositionchanged);
+	signal_init(&self->signal_sequenceselectionchanged);
 	signal_init(&self->signal_loadprogress);
 	signal_init(&self->signal_scanprogress);
 	signal_init(&self->signal_beforesavesong);
@@ -117,6 +129,7 @@ void workspace_disposesignals(Workspace* self)
 	signal_dispose(&self->signal_songchanged);
 	signal_dispose(&self->signal_configchanged);
 	signal_dispose(&self->signal_editpositionchanged);
+	signal_dispose(&self->signal_sequenceselectionchanged);
 	signal_dispose(&self->signal_loadprogress);
 	signal_dispose(&self->signal_scanprogress);
 	signal_dispose(&self->signal_beforesavesong);
@@ -453,6 +466,7 @@ void workspace_makelangen(Workspace* self)
 	properties_append_string(self->lang, "undo", "Undo");
 	properties_append_string(self->lang, "redo", "Redo");
 	properties_append_string(self->lang, "play", "Play");
+	properties_append_string(self->lang, "sel", "Sel");
 	properties_append_string(self->lang, "stop", "Stop");
 }
 
@@ -611,7 +625,9 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	self->song = song;
 	player_setsong(&self->player, self->song);
 	applysongproperties(self);
-	signal_emit(&self->signal_songchanged, self, 1, flag);	
+	sequenceselection_setsequence(&self->sequenceselection
+		,&self->song->sequence);	
+	signal_emit(&self->signal_songchanged, self, 1, flag);
 	lock_leave();
 	song_free(oldsong);	
 }
@@ -708,17 +724,30 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 	ui_component_invalidate(self->mainhandle);
 }
 
-void workspace_seteditposition(Workspace* self, EditPosition editposition)
+void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editposition)
 {	
-	self->editposition = editposition;
-	self->editposition.line = 
+	self->patterneditposition = editposition;
+	self->patterneditposition.line = 
 		(int) (editposition.offset * player_lpb(&self->player));
 	signal_emit(&self->signal_editpositionchanged, self, 0);
 }
 
-EditPosition workspace_editposition(Workspace* self)
+PatternEditPosition workspace_patterneditposition(Workspace* self)
 {
-	return self->editposition;
+	return self->patterneditposition;
+}
+
+void workspace_setsequenceselection(Workspace* self,
+		SequenceSelection selection)
+{	
+	self->sequenceselection = selection;	
+	sequence_setplayselection(&self->song->sequence, &selection);
+	signal_emit(&self->signal_sequenceselectionchanged, self, 0);
+}
+
+SequenceSelection workspace_sequenceselection(Workspace* self)
+{
+	return self->sequenceselection;
 }
 
 void workspace_setcursorstep(Workspace* self, int step)
@@ -792,4 +821,22 @@ void workspace_followsong(Workspace* self)
 void workspace_stopfollowsong(Workspace* self)
 {
 	self->followsong = 0;
+}
+
+void workspace_onsequenceeditpositionchanged(Workspace* self,
+	SequenceSelection* selection)
+{
+	PatternEditPosition position;
+	SequenceEntry* entry;
+
+	if (selection->editposition.trackposition.tracknode) {
+		entry = (SequenceEntry*) selection->editposition.trackposition.tracknode->entry;
+		position.pattern = entry->pattern;
+		position.col = 
+		position.line = 0;
+		position.offset = 0;
+		position.totallines = 0;
+		position.track = 0;
+		workspace_setpatterneditposition(self, position);
+	}
 }

@@ -10,8 +10,7 @@
 static void newmachine_onpluginselected(NewMachine*, ui_component* parent,
 	Properties*);
 static void newmachine_onplugincachechanged(NewMachine*, PluginCatcher*);
-static void newmachine_onkeydown(NewMachine*, ui_component* sender, 
-	int keycode, int keydata);
+static void newmachine_onkeydown(NewMachine*, ui_component* sender, KeyEvent*);
 
 static void pluginsview_ondestroy(PluginsView*, ui_component* component);
 static void pluginsview_ondraw(PluginsView*, ui_component* sender,
@@ -21,7 +20,7 @@ static void pluginsview_drawitem(PluginsView*, ui_graphics* g, Properties*,
 static void pluginsview_onsize(PluginsView*, ui_component* sender,
 	ui_size* size);
 static void pluginsview_onmousedown(PluginsView*, ui_component* sender,
-	int x, int y, int button);
+	MouseEvent*);
 static void pluginsview_hittest(PluginsView*, int x, int y);
 static void pluginsview_computetextsizes(PluginsView* self);
 static void pluginsview_onscroll(PluginsView*, ui_component* sender,
@@ -29,7 +28,7 @@ static void pluginsview_onscroll(PluginsView*, ui_component* sender,
 static void pluginsview_onmousedoubleclick(PluginsView*, ui_component* sender,
 	int x, int y, int button);
 static void pluginsview_onkeydown(PluginsView*, ui_component* sender,
-	int keycode, int keydata);
+	KeyEvent*);
 static void pluginsview_onplugincachechanged(PluginsView*,
 	PluginCatcher* sender);
 static void pluginsview_adjustscroll(PluginsView*);
@@ -246,9 +245,9 @@ void pluginsview_onscroll(PluginsView* self, ui_component* sender,
 }
 
 void pluginsview_onmousedown(PluginsView* self, ui_component* sender,
-	int x, int y, int button)
+	MouseEvent* ev)
 {
-	pluginsview_hittest(self, x, y);
+	pluginsview_hittest(self, ev->x, ev->y);
 	ui_component_invalidate(&self->component);
 	signal_emit(&self->signal_changed, self, 1, self->selectedplugin);
 	ui_component_setfocus(&self->component);
@@ -289,10 +288,10 @@ void pluginsview_onmousedoubleclick(PluginsView* self, ui_component* sender,
 	}	
 }
 
-void pluginsview_onkeydown(PluginsView* self, ui_component* sender, 
-	int keycode, int keydata)
+void pluginsview_onkeydown(PluginsView* self, ui_component* sender,
+	KeyEvent* keyevent)
 {
-	if (keycode == VK_ESCAPE) {	
+	if (keyevent->keycode == VK_ESCAPE) {	
 		self->component.propagateevent = 1;
 	}
 }
@@ -341,9 +340,9 @@ void newmachine_onplugincachechanged(NewMachine* self, PluginCatcher* sender)
 }
 
 void newmachine_onkeydown(NewMachine* self, ui_component* sender,
-	int keycode, int keydata)
+	KeyEvent* keyevent)
 {
-	if (keycode == VK_ESCAPE) {	
+	if (keyevent->keycode == VK_ESCAPE) {	
 		self->component.propagateevent = 1;
 	}
 }

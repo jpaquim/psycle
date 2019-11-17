@@ -5,6 +5,7 @@
 #define UICOMPONENT_H
 
 #include "uidef.h"
+#include "uievents.h"
 #include "uigraphics.h"
 #include <signal.h>
 #include "uimenu.h"

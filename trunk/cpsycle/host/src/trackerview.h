@@ -50,11 +50,11 @@ typedef struct {
 	ui_bitmap bitmap;
 } TrackerSkin;
 
-typedef EditPosition TrackerCursor;
+typedef PatternEditPosition TrackerCursor;
 
 typedef struct {
-	EditPosition topleft;
-	EditPosition bottomright;
+	PatternEditPosition topleft;
+	PatternEditPosition bottomright;
 } TrackerGridBlock;
 
 typedef struct {
