@@ -9,8 +9,8 @@
 #include <portable.h>
 
 static void ondraw(InputDefiner*, ui_component* sender, ui_graphics*);
-static void onkeydown(InputDefiner*, ui_component* sender, int keycode, int keydata);
-static void onkeyup(InputDefiner*, ui_component* sender, int keycode, int keydata);
+static void onkeydown(InputDefiner*, ui_component* sender, KeyEvent*);
+static void onkeyup(InputDefiner*, ui_component* sender, KeyEvent*);
 
 void inputdefiner_init(InputDefiner* self, ui_component* parent)
 {
@@ -58,7 +58,7 @@ void ondraw(InputDefiner* self, ui_component* sender, ui_graphics* g)
 	ui_textout(g, 0, 0, text, strlen(text));
 }
 
-void onkeydown(InputDefiner* self, ui_component* sender, int keycode, int keydata)
+void onkeydown(InputDefiner* self, ui_component* sender, KeyEvent* keyevent)
 {
 	int shift;
 	int ctrl;	
@@ -66,21 +66,21 @@ void onkeydown(InputDefiner* self, ui_component* sender, int keycode, int keydat
 	shift = GetKeyState (VK_SHIFT) < 0;
 	ctrl = GetKeyState (VK_CONTROL) < 0;	
 
-	if ((keycode == VK_SHIFT || keycode == VK_CONTROL)) {
+	if ((keyevent->keycode == VK_SHIFT || keyevent->keycode == VK_CONTROL)) {
 		if (self->regularkey == 0) {
 			self->input = encodeinput(0, shift, ctrl);
 		} else {
 			self->input = encodeinput(self->regularkey, shift, ctrl);
 		}
 	}
-	if (keycode >= 0x30) {
-		self->regularkey = keycode;	
+	if (keyevent->keycode >= 0x30) {
+		self->regularkey = keyevent->keycode;	
 		self->input = encodeinput(self->regularkey, shift, ctrl);
 	}
 	ui_component_invalidate(&self->component);
 }
 
-void onkeyup(InputDefiner* self, ui_component* sender, int keycode, int keydata)
+void onkeyup(InputDefiner* self, ui_component* sender, KeyEvent* keyevent)
 {
 	int shift;
 	int ctrl;
@@ -94,7 +94,7 @@ void onkeyup(InputDefiner* self, ui_component* sender, int keycode, int keydata)
 	if (self->regularkey) {		
 		self->input = encodeinput(inputkeycode, shift, ctrl);
 	}
-	if (keycode >= 0x30) {
+	if (keyevent->keycode >= 0x30) {
 		self->regularkey = 0;
 	}
 	if (inputkeycode <= 0x30) {
@@ -102,4 +102,3 @@ void onkeyup(InputDefiner* self, ui_component* sender, int keycode, int keydata)
 	}
 	ui_component_invalidate(&self->component);
 }
-

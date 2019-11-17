@@ -4,3 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "uievents.h"
+
+void keyevent_init(KeyEvent* self, int keycode, int keydata)
+{
+	self->keycode = keycode;
+	self->keydata = keydata;
+}
+
+void mouseevent_init(MouseEvent* self, int x, int y, int button)
+{
+	self->x = x;
+	self->y = y;
+	self->button = button;
+}

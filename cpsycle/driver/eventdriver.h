@@ -4,7 +4,12 @@
 #ifdef __cplusplus
   #define EXPORT extern "C" __declspec (dllexport)
 #else
+#ifdef _WIN32
 #define EXPORT __declspec (dllexport)
+#else
+#define EXPORT
+#define __cdecl __attribute__((__cdecl__))
+#endif
 #endif
 
 #if !defined(EVENTDRIVER_H)

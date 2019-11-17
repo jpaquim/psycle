@@ -5,13 +5,13 @@
 
 #include <string.h>
 #include "../driver.h"
-#include <windows.h>
-//#include <mmsystem.h>
-#include <process.h>
 #define DIRECTSOUND_VERSION 0x8000
+#include <windows.h>
+#include <mmsystem.h>
+//#include <mmreg.h>
 #include <dsound.h>
-#include <MMReg.h>
 #include <process.h>
+#include <MMReg.h>
 
 static HWND hwndmain;
 

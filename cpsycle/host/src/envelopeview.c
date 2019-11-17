@@ -8,9 +8,9 @@ static void DrawPoints(EnvelopeView*, ui_graphics* g);
 static void DrawLines(EnvelopeView*, ui_graphics* g);
 static void OnSize(EnvelopeView*, ui_component* sender, ui_size* size);
 static void OnDestroy(EnvelopeView*, ui_component* component);
-static void OnMouseDown(EnvelopeView*, ui_component* sender, int x, int y, int button);
-static void OnMouseMove(EnvelopeView*, ui_component* sender, int x, int y, int button);
-static void OnMouseUp(EnvelopeView*, ui_component* sender, int x, int y, int button);
+static void OnMouseDown(EnvelopeView*, ui_component* sender, MouseEvent*);
+static void OnMouseMove(EnvelopeView*, ui_component* sender, MouseEvent*);
+static void OnMouseUp(EnvelopeView*, ui_component* sender, MouseEvent*);
 static List* HitTestPoint(EnvelopeView* self, int x, int y);
 static void ShiftSuccessors(EnvelopeView* self, double timeshift);
 static void CheckAdjustPointRange(List* p);
@@ -176,12 +176,12 @@ void OnSize(EnvelopeView* self, ui_component* sender, ui_size* size)
 	self->cy = size->height - self->spacing.top - self->spacing.bottom;
 }
 
-void OnMouseDown(EnvelopeView* self, ui_component* sender, int x, int y, int button)
+void OnMouseDown(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 {
-	self->dragpoint = HitTestPoint(self, x, y);
+	self->dragpoint = HitTestPoint(self, ev->x, ev->y);
 }
 
-void OnMouseMove(EnvelopeView* self, ui_component* sender, int x, int y, int button)
+void OnMouseMove(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 {		
 	if (self->dragpoint) {		
 		EnvelopePoint* pt;
@@ -189,8 +189,8 @@ void OnMouseMove(EnvelopeView* self, ui_component* sender, int x, int y, int but
 
 		pt = (EnvelopePoint*)self->dragpoint->entry;
 		oldtime = pt->time;
-		pt->value = 1.f - (y - self->spacing.top)/(float)self->cy;
-		pt->time = (x - self->spacing.left) * displaymaxtime(self)/(float)self->cx;				
+		pt->value = 1.f - (ev->y - self->spacing.top)/(float)self->cy;
+		pt->time = (ev->x - self->spacing.left) * displaymaxtime(self)/(float)self->cx;				
 		CheckAdjustPointRange(self->dragpoint);
 		ShiftSuccessors(self, pt->time - oldtime);
 		adsrpointmapper_updatesettings(&self->pointmapper);
@@ -239,7 +239,7 @@ void CheckAdjustPointRange(List* p)
 	}	
 }
 
-void OnMouseUp(EnvelopeView* self, ui_component* sender, int x, int y, int button)
+void OnMouseUp(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 {	
 	self->dragpoint = 0;
 }

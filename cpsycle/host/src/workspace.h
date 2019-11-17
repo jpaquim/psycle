@@ -26,7 +26,8 @@ typedef struct {
 	unsigned int subline;
 	unsigned int totallines;
 	unsigned int col;
-} EditPosition;
+	uintptr_t pattern;
+} PatternEditPosition;
 
 typedef struct {	
 	Song* song;
@@ -46,13 +47,15 @@ typedef struct {
 	Signal signal_octavechanged;
 	Signal signal_songchanged;	
 	Signal signal_configchanged;
-	Signal signal_editpositionchanged;	
+	Signal signal_editpositionchanged;
+	Signal signal_sequenceselectionchanged;
 	Signal signal_loadprogress;
 	Signal signal_scanprogress;
 	Signal signal_beforesavesong;
 	ui_component* mainhandle;
 	UndoRedo undoredo;	
-	EditPosition editposition;
+	PatternEditPosition patterneditposition;
+	SequenceSelection sequenceselection;
 	int cursorstep;
 	int hasplugincache;
 	char* filename;
@@ -79,8 +82,10 @@ void workspace_configchanged(Workspace*, Properties* property,
 	Properties* choice);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
-void workspace_seteditposition(Workspace*, EditPosition);
-EditPosition workspace_editposition(Workspace*);
+void workspace_setpatterneditposition(Workspace*, PatternEditPosition);
+PatternEditPosition workspace_patterneditposition(Workspace*);
+void workspace_setsequenceselection(Workspace*, SequenceSelection);
+SequenceSelection workspace_sequenceselection(Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 const char* workspace_translate(Workspace*, const char* key);

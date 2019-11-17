@@ -9,10 +9,13 @@
 
 typedef struct {
 	ui_component component;
+	ui_button loop;
 	ui_button recordnotes;
 	ui_button play;
+	ui_button playsel;
 	ui_button stop;	
 	Player* player;
+	Workspace* workspace;
 } PlayBar;
 
 void playbar_init(PlayBar*, ui_component* parent, Workspace*);

@@ -46,6 +46,7 @@ VUMeterMode player_vumetermode(Player*);
 void player_start(Player*);
 void player_stop(Player*);
 int player_playing(Player*);
+void player_setposition(Player*, beat_t offset);
 beat_t player_position(Player*);
 void player_setbpm(Player*, beat_t bpm);
 beat_t player_bpm(Player*);

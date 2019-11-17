@@ -19,6 +19,7 @@ void songfile_load(SongFile* self, const char* path)
 	self->file = &file;
 	if (psyfile_open(self->file, path)) {
 		char header[9];
+//		SequencePosition position;
 		
 		self->workspaceproperties = properties_create();
 		song_clear(self->song);		
@@ -38,7 +39,12 @@ void songfile_load(SongFile* self, const char* path)
 			songfile_createmaster(self);
 		}		
 		machines_endfilemode(&self->song->machines);
-		psyfile_close(self->file);		
+		psyfile_close(self->file);
+//		position.track = self->song->sequence.tracks;
+//		position.trackposition = 
+//			sequence_begin(&self->song->sequence,
+//				self->song->sequence.tracks, (beat_t) 0.f);
+//		sequence_seteditposition(&self->song->sequence, position);
 	}
 	signal_emit(&self->song->signal_loadprogress, self->song, 1, 0);
 }

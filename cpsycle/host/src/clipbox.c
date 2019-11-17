@@ -8,7 +8,7 @@
 
 static void clipbox_ondraw(ClipBox*, ui_component* sender, ui_graphics*);
 static void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid);
-static void clipbox_onmousedown(ClipBox* self, ui_component* sender, int x, int y, int button);
+static void clipbox_onmousedown(ClipBox* self, ui_component* sender, MouseEvent*);
 static void clipbox_onmasterworked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc);
 static void clipbox_onsongchanged(ClipBox* self, Workspace* workspace);
 static void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace);
@@ -50,7 +50,7 @@ void clipbox_onmasterworked(ClipBox* self, Machine* master, unsigned int slot, B
 	}
 }
 
-void clipbox_onmousedown(ClipBox* self, ui_component* sender, int x, int y, int button)
+void clipbox_onmousedown(ClipBox* self, ui_component* sender, MouseEvent* ev)
 {
 	self->clip = 0;
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);

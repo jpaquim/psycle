@@ -11,9 +11,9 @@
 static int TIMERID_VOLSLIDER = 700;
 
 static void volslider_ondraw(VolSlider*, ui_component* sender, ui_graphics*);
-static void volslider_onmousedown(VolSlider*, ui_component* sender, int x, int y, int button);
-static void volslider_onmouseup(VolSlider*, ui_component* sender, int x, int y, int button);
-static void volslider_onmousemove(VolSlider*, ui_component* sender,int x, int y, int button);
+static void volslider_onmousedown(VolSlider*, ui_component* sender, MouseEvent*);
+static void volslider_onmouseup(VolSlider*, ui_component* sender, MouseEvent*);
+static void volslider_onmousemove(VolSlider*, ui_component* sender, MouseEvent*);
 static void volslider_ontimer(VolSlider*, ui_component* sender, int timerid);
 static void volslider_onsliderchanged(VolSlider*, ui_component* sender);
 static void volslider_onsongchanged(VolSlider*, Workspace*);
@@ -50,31 +50,30 @@ void volslider_ondraw(VolSlider* self, ui_component* sender, ui_graphics* g)
 	
 }
 
-void volslider_onmousedown(VolSlider* self, ui_component* sender, int x, int y,
-	int button)
+void volslider_onmousedown(VolSlider* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	ui_size size;
 	size = ui_component_size(&self->component);
-	self->dragx = x - (int)(self->value * (size.width - 6));
+	self->dragx = ev->x - (int)(self->value * (size.width - 6));
 	ui_component_capture(&self->component);
 }
 
-void volslider_onmousemove(VolSlider* self, ui_component* sender,int x, int y,
-	int button)
+void volslider_onmousemove(VolSlider* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	if (self->dragx != -1) {
 		ui_size size;
 
 		size = ui_component_size(&self->component);
 		self->value = max(0.f, 
-			min(1.f, (x - self->dragx) / (float)(size.width - 6)));
+			min(1.f, (ev->x - self->dragx) / (float)(size.width - 6)));
 		volslider_onsliderchanged(self, sender);
 		ui_component_invalidate(&self->component);
 	}
 }
 
-void volslider_onmouseup(VolSlider* self, ui_component* sender, int x, int y,
-	int button)
+void volslider_onmouseup(VolSlider* self, ui_component* sender, MouseEvent* ev)
 {
 	self->dragx = -1;
 	ui_component_releasecapture(&self->component);

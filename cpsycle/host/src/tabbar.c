@@ -5,8 +5,8 @@
 
 static void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g);
 static void OnDestroy(TabBar* self, ui_component* component);
-static void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button);
-static void OnMouseMove(TabBar* self, ui_component* sender, int x, int y, int button);
+static void OnMouseDown(TabBar* self, ui_component* sender, MouseEvent*);
+static void OnMouseMove(TabBar* self, ui_component* sender, MouseEvent*);
 static void onmouseenter(TabBar*, ui_component* sender);
 static void onmouseleave(TabBar*, ui_component* sender);
 static int tabhittest(TabBar* self, int x, int y);
@@ -135,13 +135,13 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-void OnMouseDown(TabBar* self, ui_component* sender, int x, int y, int button)
+void OnMouseDown(TabBar* self, ui_component* sender, MouseEvent* mouseevent)
 {
 	int tabindex;
 	
-	tabindex = tabhittest(self, x, y);
+	tabindex = tabhittest(self, mouseevent->x, mouseevent->y);
 	if (tabindex != -1 && tabindex != self->selected)  {
-		self->selected = tabhittest(self, x, y);
+		self->selected = tabhittest(self, mouseevent->x, mouseevent->y);
 		ui_component_invalidate(&self->component);
 		signal_emit(&self->signal_change, self, 1, self->selected);
 	}		
@@ -196,11 +196,11 @@ int tabhittest(TabBar* self, int x, int y)
 	return rv;
 }
 
-void OnMouseMove(TabBar* self, ui_component* sender, int x, int y, int button)
+void OnMouseMove(TabBar* self, ui_component* sender, MouseEvent* ev)
 {	
 	int tabindex;
 
-	tabindex = tabhittest(self, x, y);	
+	tabindex = tabhittest(self, ev->x, ev->y);	
 	if (tabindex != self->hoverindex) {
 		self->hoverindex = tabindex;
 		ui_component_invalidate(&self->component);

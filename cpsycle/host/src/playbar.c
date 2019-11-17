@@ -4,26 +4,42 @@
 #include "../../detail/prefix.h"
 
 #include "playbar.h"
+#include <exclusivelock.h>
+
+#define TIMERID_PLAYBAR 400
 
 void playbar_initalign(PlayBar*);
+static void onloopclicked(PlayBar*, ui_component* sender);
 static void onrecordnotesclicked(PlayBar*, ui_component* sender);
 static void onplayclicked(PlayBar*, ui_component* sender);
+static void onplayselclicked(PlayBar*, ui_component* sender);
+static void startplay(PlayBar*);
 static void onstopclicked(PlayBar*, ui_component* sender);
+static void ontimer(PlayBar*, ui_component* sender, int timerid);
 
 void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
 {			
+	self->workspace = workspace;
 	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);	
+	ui_button_init(&self->loop, &self->component);
+	ui_button_settext(&self->loop, "Loop");	
+	signal_connect(&self->loop.signal_clicked, self, onloopclicked);
 	ui_button_init(&self->recordnotes, &self->component);
 	ui_button_settext(&self->recordnotes, "Record Notes");	
 	signal_connect(&self->recordnotes.signal_clicked, self, onrecordnotesclicked);
 	ui_button_init(&self->play, &self->component);
 	ui_button_settext(&self->play, workspace_translate(workspace, "play"));
 	signal_connect(&self->play.signal_clicked, self, onplayclicked);
+	ui_button_init(&self->playsel, &self->component);
+	ui_button_settext(&self->playsel, workspace_translate(workspace, "sel"));
+	signal_connect(&self->playsel.signal_clicked, self, onplayselclicked);
 	ui_button_init(&self->stop, &self->component);
 	ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
 	signal_connect(&self->stop.signal_clicked, self, onstopclicked);
+	signal_connect(&self->component.signal_timer, self, ontimer);
 	playbar_initalign(self);
+	ui_component_starttimer(&self->component, TIMERID_PLAYBAR, 100);
 }
 
 void playbar_initalign(PlayBar* self)
@@ -38,13 +54,59 @@ void playbar_initalign(PlayBar* self)
 }
 
 void onplayclicked(PlayBar* self, ui_component* sender)
+{	
+	startplay(self);
+}
+
+void onplayselclicked(PlayBar* self, ui_component* sender)
 {
-	player_start(self->player);
+	if (sequencer_playmode(&self->player->sequencer) == SEQUENCERPLAYMODE_PLAYALL) {
+		sequencer_setplaymode(&self->player->sequencer, SEQUENCERPLAYMODE_PLAYSEL);
+		ui_button_highlight(&self->playsel);
+	} else {
+		sequencer_setplaymode(&self->player->sequencer, SEQUENCERPLAYMODE_PLAYALL);
+		ui_button_disablehighlight(&self->playsel);
+	}
+	if (!player_playing(self->player)) {
+		startplay(self);
+	}
+}
+
+void startplay(PlayBar* self)
+{
+	Sequence* sequence;
+	SequencePosition editposition;
+	SequenceEntry* entry;
+	
+	ui_button_highlight(&self->play);
+	sequence = self->player->sequencer.sequence;
+	editposition = self->workspace->sequenceselection.editposition;
+	entry = sequenceposition_entry(&editposition);
+	if (entry) {
+		lock_enter();
+		player_stop(self->player);
+		player_setposition(self->player, entry->offset);
+		player_start(self->player);
+		lock_leave();
+	}
 }
 
 void onstopclicked(PlayBar* self, ui_component* sender)
 {
-	player_stop(self->player);
+	ui_button_disablehighlight(&self->play);
+	ui_button_disablehighlight(&self->playsel);
+	player_stop(self->player);	
+}
+
+void onloopclicked(PlayBar* self, ui_component* sender)
+{
+	if (sequencer_looping(&self->player->sequencer)) {
+		sequencer_stoploop(&self->player->sequencer);
+		ui_button_disablehighlight(&self->loop);
+	} else {
+		sequencer_loop(&self->player->sequencer);
+		ui_button_highlight(&self->loop);
+	}
 }
 
 void onrecordnotesclicked(PlayBar* self, ui_component* sender)
@@ -55,5 +117,24 @@ void onrecordnotesclicked(PlayBar* self, ui_component* sender)
 	} else {
 		player_startrecordingnotes(self->player);
 		ui_button_highlight(&self->recordnotes);
+	}
+}
+
+void ontimer(PlayBar* self, ui_component* sender, int timerid)
+{
+	if (player_playing(self->player)) {
+		ui_button_highlight(&self->play);
+		if (sequencer_playmode(&self->player->sequencer)
+			== SEQUENCERPLAYMODE_PLAYSEL) {
+			ui_button_highlight(&self->playsel);
+		}
+	} else {
+		ui_button_disablehighlight(&self->play);
+		ui_button_disablehighlight(&self->playsel);
+	}
+	if (sequencer_looping(&self->player->sequencer)) {
+		ui_button_highlight(&self->loop);
+	} else {
+		ui_button_disablehighlight(&self->loop);
 	}
 }

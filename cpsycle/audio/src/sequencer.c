@@ -12,6 +12,7 @@ static void cleardelayed(Sequencer*);
 static void clearinputevents(Sequencer*);
 static void freeentries(List* events);
 static void maketrackiterators(Sequencer*, beat_t offset);
+static beat_t skiptrackiterators(Sequencer*, beat_t offset);
 static void cleartrackiterators(Sequencer*);
 static void advanceposition(Sequencer* self, beat_t width);
 static void addsequenceevent(Sequencer*, SequenceTrackIterator*, beat_t offset);
@@ -33,7 +34,8 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->bpm = 125.f;
 	self->lpb = 4;
 	self->lpbspeed = 1.f;
-	self->playing = 0;	
+	self->playing = 0;
+	self->looping = 1;
 	self->position = 0;	
 	self->window = 0;
 	self->seqlinetickcount = 1.f / self->lpb;
@@ -41,7 +43,9 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->delayedevents = 0;
 	self->inputevents = 0;
 	self->currtrackiterators = 0;
+	self->mode = SEQUENCERPLAYMODE_PLAYALL;
 	compute_beatsprosample(self);
+	maketrackiterators(self, (beat_t)0.f);
 }
 
 void sequencer_dispose(Sequencer* self)
@@ -63,10 +67,10 @@ void sequencer_reset(Sequencer* self, Sequence* sequence, Machines* machines)
 void sequencer_setposition(Sequencer* self, beat_t offset)
 {
 	clearevents(self);
-	cleardelayed(self);
-	self->position = 0.0f;
-	self->window = 0.0f;
+	cleardelayed(self);		
 	cleartrackiterators(self);
+	self->position = offset;
+	self->window = 0.0f;
 	maketrackiterators(self, offset);
 }
 
@@ -168,9 +172,31 @@ void maketrackiterators(Sequencer* self, beat_t offset)
 
 		iterator =
 			(SequenceTrackIterator*)malloc(sizeof(SequenceTrackIterator));
-		*iterator = sequence_begin(self->sequence, p, 0.0f);				
+		*iterator = sequence_begin(self->sequence, p, offset);
 		list_append(&self->currtrackiterators, iterator);		
 	}
+}
+
+beat_t skiptrackiterators(Sequencer* self, beat_t offset)
+{
+	List* p;		
+		
+	int first = 1;
+	beat_t newplayposition = offset;
+	for (p = self->currtrackiterators; p != 0; p = p->next) {
+		SequenceTrackIterator* it;
+		int skip = 0;
+
+		it = (SequenceTrackIterator*)p->entry;		
+		while (it->tracknode && !sequencetrackiterator_entry(it)->selplay) {			
+			sequencetrackiterator_incentry(it);			
+			skip = 1;
+		}
+		if (first && it->tracknode && skip) {
+			newplayposition = sequencetrackiterator_offset(it);
+		}		
+	}
+	return newplayposition;
 }
 
 void clearevents(Sequencer* self)
@@ -216,6 +242,10 @@ void sequencer_tick(Sequencer* self, beat_t width)
 	clearevents(self);
 	insertinputevents(self);
 	if (self->playing) {
+		if (self->mode == SEQUENCERPLAYMODE_PLAYSEL) {
+			self->position =
+				skiptrackiterators(self, self->position);
+		}
 		insertevents(self);
 		insertdelayedevents(self);		
 	}
@@ -286,23 +316,44 @@ void advanceposition(Sequencer* self, beat_t width)
 
 void insertevents(Sequencer* self)
 {
-	List* p;	
+	List* p;
+	int continueplaying = 0;
 
 	for (p = self->currtrackiterators; p != 0; p = p->next) {
 		SequenceTrackIterator* it;
 
 		it = (SequenceTrackIterator*)p->entry;
-		while (sequencetrackiterator_patternentry(it)) {
-			beat_t offset;
-			
-			offset = sequencetrackiterator_offset(it);
-			if (isoffsetinwindow(self, offset)) {
-				addsequenceevent(self, it, offset);			
-				sequencetrackiterator_inc(it);				
-			} else {			
-				break;
-			}				
-		}
+		if (!continueplaying && it->tracknode) {
+			SequenceEntry* entry;
+			Pattern* pattern;
+
+			entry = sequencetrackiterator_entry(it);
+			pattern = patterns_at(it->patterns, entry->pattern);
+			if (pattern	&& self->position <= entry->offset + pattern->length) {
+				continueplaying = 1;
+			}
+			while (sequencetrackiterator_patternentry(it)) {
+				beat_t offset;
+				
+				offset = sequencetrackiterator_offset(it);
+				if (isoffsetinwindow(self, offset)) {
+					addsequenceevent(self, it, offset);			
+					sequencetrackiterator_inc(it);
+				} else {			
+					break;
+				}				
+			}
+		}				
+	}	
+	if (self->looping && !continueplaying) {
+		self->position = (beat_t) 0.f;
+		clearevents(self);
+		cleardelayed(self);
+		cleartrackiterators(self);
+		maketrackiterators(self, 0.f);
+		self->window = (beat_t) 0.f;
+	} else {
+		self->playing = continueplaying;
 	}
 }
 
@@ -586,4 +637,29 @@ void sequencer_recordinputevent(Sequencer* self, const PatternEvent* event,
 			}
 		}
 	}
+}
+
+void sequencer_setplaymode(Sequencer* self, SequencerPlayMode mode)
+{
+	self->mode = mode;
+}
+
+SequencerPlayMode sequencer_playmode(Sequencer* self)
+{
+	return self->mode;
+}
+
+void sequencer_loop(Sequencer* self)
+{
+	self->looping = 1;
+}
+
+void sequencer_stoploop(Sequencer* self)
+{
+	self->looping = 0;
+}
+
+int sequencer_looping(Sequencer* self)
+{
+	return self->looping;
 }

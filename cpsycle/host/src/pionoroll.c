@@ -23,8 +23,8 @@ static void pianogrid_drawevent(Pianogrid*, ui_graphics*, PatternEvent*, int tra
 static void pianogrid_onsize(Pianogrid*, ui_component* sender, ui_size*);
 static void pianogrid_adjustscroll(Pianogrid*);
 static void pianogrid_onscroll(Pianogrid*, ui_component* sender, int cx, int cy);
-static void pianogrid_onkeydown(Pianogrid*, ui_component* sender, int keycode, int keydata);
-static void pianogrid_onmousedown(Pianogrid*, ui_component* sender, int x, int y, int button);
+static void pianogrid_onkeydown(Pianogrid*, ui_component* sender, KeyEvent*);
+static void pianogrid_onmousedown(Pianogrid*, ui_component* sender, MouseEvent*);
 
 static void pianoroll_updatemetrics(Pianoroll*);
 static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
@@ -33,11 +33,11 @@ static int testrange(big_beat_t position, big_beat_t offset, big_beat_t width);
 static void pianoroll_invalidateline(Pianoroll*, beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, ui_component* component);
 static void pianoroll_onsize(Pianoroll*, ui_component* sender, ui_size*);
-static void pianoroll_onmousedown(Pianoroll*, ui_component* sender, int x, int y, int button);
-static void pianoroll_onmouseup(Pianoroll*, ui_component* sender, int x, int y, int button);
-static void pianoroll_onmousemove(Pianoroll*, ui_component* sender,int x, int y, int button);
-static void pianoroll_onmousedoubleclick(Pianoroll*, ui_component* sender, int x, int y, int button);
-static void pianoroll_onkeydown(Pianoroll*, ui_component* sender, int keycode, int keydata);
+static void pianoroll_onmousedown(Pianoroll*, ui_component* sender, MouseEvent*);
+static void pianoroll_onmouseup(Pianoroll*, ui_component* sender, MouseEvent*);
+static void pianoroll_onmousemove(Pianoroll*, ui_component* sender, MouseEvent*);
+static void pianoroll_onmousedoubleclick(Pianoroll*, ui_component* sender, MouseEvent*);
+static void pianoroll_onkeydown(Pianoroll*, ui_component* sender, KeyEvent*);
 
 static void pianokeyboard_ondraw(PianoKeyboard*, ui_component* sender, ui_graphics* g);
 
@@ -143,24 +143,24 @@ void pianoroll_onsize(Pianoroll* self, ui_component* sender, ui_size* size)
 	pianoroll_updatemetrics(self);
 }
 
-void pianoroll_onmousedown(Pianoroll* self, ui_component* sender, int x, int y, int button)
+void pianoroll_onmousedown(Pianoroll* self, ui_component* sender, MouseEvent* ev)
 {
 	ui_component_setfocus(&self->component);	
 }
 
-void pianoroll_onmouseup(Pianoroll* self, ui_component* sender, int x, int y, int button)
+void pianoroll_onmouseup(Pianoroll* self, ui_component* sender, MouseEvent* ev)
 {		
 }
 
-void pianoroll_onmousemove(Pianoroll* self, ui_component* sender, int x, int y, int button)
+void pianoroll_onmousemove(Pianoroll* self, ui_component* sender, MouseEvent* ev)
 {	
 }
 
-void pianoroll_onmousedoubleclick(Pianoroll* self, ui_component* sender, int x, int y, int button)
+void pianoroll_onmousedoubleclick(Pianoroll* self, ui_component* sender, MouseEvent* ev)
 {	
 }
 
-void pianoroll_onkeydown(Pianoroll* self, ui_component* sender, int keycode, int keydata)
+void pianoroll_onkeydown(Pianoroll* self, ui_component* sender, KeyEvent* keyevent)
 {	
 	ui_component_propagateevent(sender);
 }
@@ -294,7 +294,7 @@ void pianogrid_drawevent(Pianogrid* self, ui_graphics* g, PatternEvent* event, i
 	ui_drawsolidrectangle(g, r, 0x00B1C8B0);	
 }
 
-void pianogrid_onkeydown(Pianogrid* self, ui_component* sender, int keycode, int keydata)
+void pianogrid_onkeydown(Pianogrid* self, ui_component* sender, KeyEvent* keyevent)
 {	
 	ui_component_propagateevent(sender);
 }
@@ -378,19 +378,19 @@ void pianokeyboard_ondraw(PianoKeyboard* self, ui_component* sender, ui_graphics
 	}
 }
 
-void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, int x, int y, int button)
+void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, MouseEvent* ev)
 {
 	beat_t offset;	
 	
-	offset = (x  / (beat_t) self->metrics.beatwidth) + self->beatscrollpos;
+	offset = (ev->x  / (beat_t) self->metrics.beatwidth) + self->beatscrollpos;
 	offset = (int)(offset * (beat_t)self->metrics.lpb) / (beat_t)self->metrics.lpb;
-	if (button == 1) {
+	if (ev->button == 1) {
 		PatternEvent event;
 		PatternNode* node = 0;
 		PatternNode* prev = 0;
 
 		patternevent_clear(&event);
-		event.note = self->metrics.keymax - 1 - (y - self->dy) /
+		event.note = self->metrics.keymax - 1 - (ev->y - self->dy) /
 			self->metrics.keyheight;
 		node = pattern_findnode(self->view->pattern, 0, offset, 0,
 			1 / (beat_t) self->metrics.lpb, &prev);
@@ -400,7 +400,7 @@ void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, int x, int y, 
 			pattern_insert(self->view->pattern, prev, 0, offset, &event);
 		}
 	} else 
-	if (button == 2) {
+	if (ev->button == 2) {
 		PatternNode* prev;
 		PatternNode* node = pattern_findnode(self->view->pattern, 0,
 			offset, 0, 1 / (beat_t) self->metrics.lpb, &prev);

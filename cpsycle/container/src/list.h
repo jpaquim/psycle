@@ -37,6 +37,10 @@ List* list_remove(List**, List* node);
 List* list_last(List*);
 /// counts the nodes of the list
 unsigned int list_size(List*);
+/// checks if the list has the node
+int list_check(List* self, List* node);
+/// returns the node for the entry
+List* list_findentry(List* self, void* entry);
 
 #ifdef __cplusplus
 }
