@@ -9,6 +9,7 @@
 #include <string.h>
 #include <songio.h>
 #include <portable.h>
+#include <operations.h>
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -55,6 +56,11 @@ static Instruments* machinecallback_instruments(Workspace*);
 void workspace_init(Workspace* self, void* handle)
 {	
 	lock_init();
+#ifdef SSE
+	dsp_sse2_init(&dsp);
+#else
+	dsp_noopt_init(&dsp);
+#endif
 	self->octave = 4;	
 	self->cursorstep = 1;
 	self->followsong = 0;
@@ -309,6 +315,9 @@ void workspace_makepatternview(Workspace* self, Properties* visual)
 		properties_append_bool(pvc, "linenumbersinhex", 1),
 		"Line numbers in HEX");
 	properties_settext(
+		properties_append_bool(pvc, "wraparound", 1),
+		"Wrap Around");
+	properties_settext(
 		properties_append_bool(pvc, "centercursoronscreen", 0),
 		"Center cursor on screen");
 	properties_settext(
@@ -326,6 +335,9 @@ void workspace_makemachineview(Workspace* self, Properties* visual)
 	mvc = properties_settext(
 		properties_createsection(visual, "machineview"),
 		"Machine View");
+	properties_settext(
+		properties_append_bool(mvc, "drawmachineindexes", 1),
+		"Draw Machine Indexes");
 	properties_settext(
 		properties_append_bool(mvc, "drawvumeters", 1),
 		"Draw VU Meters");
@@ -578,7 +590,27 @@ int workspace_showmaximizedatstart(Workspace* self)
 
 int workspace_showlinenumbers(Workspace* self)
 {	
-	return properties_bool(self->config, "visual.linenumbers", 1);	
+	return properties_bool(self->config, "visual.patternview.linenumbers", 1);	
+}
+
+int workspace_showlinenumbercursor(Workspace* self)
+{	
+	return properties_bool(self->config, "visual.patternview.linenumberscursor", 1);
+}
+
+int workspace_showlinenumbersinhex(Workspace* self)
+{
+	return properties_bool(self->config, "visual.patternview.linenumbersinhex", 1);
+}
+
+int workspace_wraparound(Workspace* self)
+{
+	return properties_bool(self->config, "visual.patternview.wraparound", 1);
+}
+
+int workspace_showmachineindexes(Workspace* self)
+{
+	return properties_bool(self->config, "visual.machineview.drawmachineindexes", 1);
 }
 
 void workspace_newsong(Workspace* self)
@@ -659,12 +691,10 @@ Properties* workspace_makeproperties(Workspace* self)
 
 void applysongproperties(Workspace* self)
 {	
-	double dTmp;
-
-	properties_readdouble(self->song->properties, "bpm", &dTmp, 125.0);
-	player_setbpm(&self->player, (float)dTmp);	
-	player_setlpb(&self->player, properties_int(self->song->properties, 
-		"lpb", 4));
+	if (self->song) {	
+		player_setbpm(&self->player, self->song->properties.bpm);	
+		player_setlpb(&self->player, self->song->properties.lpb);
+	}
 }
 
 Properties* workspace_pluginlist(Workspace* self)

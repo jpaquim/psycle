@@ -217,3 +217,18 @@ uint32_t psyfile_updatesize(PsyFile* file, uint32_t startpos)
 	return size;
 }
 
+int psyfile_readchunkbegin(PsyFile* self)
+{
+	--self->chunkcount;
+	psyfile_read(self, &self->currchunk.version, sizeof(uint32_t));
+	psyfile_read(self, &self->currchunk.size, sizeof(uint32_t));
+	self->currchunk.begins = psyfile_getpos(self);
+	return 1;
+}
+
+void psyfile_seekchunkend(PsyFile* self)
+{
+	psyfile_seek(self, self->currchunk.begins + self->currchunk.size);	
+}
+
+

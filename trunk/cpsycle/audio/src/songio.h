@@ -13,6 +13,7 @@ typedef struct SongFile {
 	struct Song* song;
 	struct PsyFile* file;
 	Properties* workspaceproperties;
+	int err;
 } SongFile;
 
 /// loads a song

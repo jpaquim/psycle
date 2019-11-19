@@ -265,7 +265,9 @@ void preparemix(Mixer* self, Machines* machines, unsigned int amount)
 		channel = (ReturnChannel*) tableiterator_value(&iter);
 		channel->buffer = machines_outputs(machines, channel->fxslot);
 		channel->fx = machines_at(machines, channel->fxslot);
-		buffer_clearsamples(channel->buffer, amount);
+		if (channel->buffer) {
+			buffer_clearsamples(channel->buffer, amount);
+		}
 	}
 }
 
@@ -298,7 +300,7 @@ void mixinputs(Mixer* self, Machines* machines, unsigned int amount)
 				int sendvol;			
 
 				fxchannel = (ReturnChannel*)tableiterator_value(&fx_iter);
-				if (fxchannel) {
+				if (fxchannel && fxchannel->buffer) {
 					sendvol = (int)(uintptr_t) table_at(&channel->sendvols,
 						tableiterator_key(&fx_iter));
 					addsamples(fxchannel->buffer, channel->buffer, amount,
@@ -336,7 +338,7 @@ void workreturns(Mixer* self, Machines* machines, unsigned int amount)
 		ReturnChannel* channel;		
 
 		channel = tableiterator_value(&iter);
-		if (channel) {
+		if (channel && channel->fx && channel->buffer) {
 			BufferContext bc;
 			List* events = 0;			
 			TableIterator sendsto_iter;			
@@ -372,7 +374,7 @@ void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, float vol)
 	if (source) {
 		for (channel = 0; channel < source->numchannels && 
 			channel < dst->numchannels; ++channel) {
-				dsp_add(
+				dsp.add(
 					source->samples[channel],
 					dst->samples[channel],
 					numsamples,
@@ -393,8 +395,8 @@ void tickrms(Mixer* self, unsigned int amount)
 
 void levelmaster(Mixer* self, unsigned int amount)
 {
-	dsp_mul(self->master.buffer->samples[0], amount, self->master.volume);
-	dsp_mul(self->master.buffer->samples[1], amount, self->master.volume);
+	dsp.mul(self->master.buffer->samples[0], amount, self->master.volume);
+	dsp.mul(self->master.buffer->samples[1], amount, self->master.volume);
 }
 
 void onconnected(Mixer* self, Connections* connections, uintptr_t outputslot, uintptr_t inputslot)
@@ -581,7 +583,6 @@ void patterntweak(Mixer* self, int numparam, int value)
 		}
 	}
 }
-
 
 
 void parametertweak(Mixer* self, int param, int value)

@@ -5,16 +5,16 @@
 
 #include "songproperties.h"
 
-static void songproperties_initalign(SongProperties*);
-static void songproperties_read(SongProperties*);
-static void songproperties_write(SongProperties*);
-static void songproperties_onsongchanged(SongProperties*, Workspace*, int flag);
-static void songproperties_onhide(SongProperties*, ui_component* sender);
-static void songproperties_ontitlechanged(SongProperties*, ui_component* sender);
-static void songproperties_oncreditschanged(SongProperties*, ui_component* sender);
-static void songproperties_oncommentschanged(SongProperties*, ui_component* sender);
+static void songpropertiesview_initalign(SongPropertiesView*);
+static void songpropertiesview_read(SongPropertiesView*);
+static void songpropertiesview_write(SongPropertiesView*);
+static void songpropertiesview_onsongchanged(SongPropertiesView*, Workspace*, int flag);
+static void songpropertiesview_onhide(SongPropertiesView*, ui_component* sender);
+static void songpropertiesview_ontitlechanged(SongPropertiesView*, ui_component* sender);
+static void songpropertiesview_oncreditschanged(SongPropertiesView*, ui_component* sender);
+static void songpropertiesview_oncommentschanged(SongPropertiesView*, ui_component* sender);
 
-void songproperties_init(SongProperties* self, ui_component* parent,
+void songpropertiesview_init(SongPropertiesView* self, ui_component* parent,
 	Workspace* workspace)
 {		
 	self->song = workspace->song;	
@@ -23,28 +23,28 @@ void songproperties_init(SongProperties* self, ui_component* parent,
 	ui_label_settext(&self->label_title, "Song Title");
 	ui_edit_init(&self->edit_title, &self->component, 0);
 	signal_connect(&self->edit_title.signal_change, self,
-		songproperties_ontitlechanged);
+		songpropertiesview_ontitlechanged);
 	ui_label_init(&self->label_credits, &self->component);
 	ui_label_settext(&self->label_credits, "Credits");	
 	ui_edit_init(&self->edit_credits, &self->component, 0);
 	signal_connect(&self->edit_credits.signal_change, self,
-		songproperties_oncreditschanged);
+		songpropertiesview_oncreditschanged);
 	ui_label_init(&self->label_comments, &self->component);
 	ui_label_settext(&self->label_comments, "Comments");	
 	ui_edit_init(&self->edit_comments, &self->component,
 		WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL);
 	ui_component_resize(&self->edit_comments.component, 0, 200);
 	signal_connect(&self->edit_comments.signal_change, self,
-		songproperties_oncommentschanged);
-	songproperties_read(self);	
+		songpropertiesview_oncommentschanged);
+	songpropertiesview_read(self);	
 	signal_connect(&workspace->signal_songchanged, self,
-		songproperties_onsongchanged);
+		songpropertiesview_onsongchanged);
 	signal_connect(&self->component.signal_hide, self,
-		songproperties_onhide);	
-	songproperties_initalign(self);
+		songpropertiesview_onhide);	
+	songpropertiesview_initalign(self);
 }
 
-void songproperties_initalign(SongProperties* self)
+void songpropertiesview_initalign(SongPropertiesView* self)
 {
 	ui_margin margin = { 0, 0, 0, 0 };
 
@@ -56,73 +56,77 @@ void songproperties_initalign(SongProperties* self)
 	ui_component_setalign(&self->edit_comments.component, UI_ALIGN_CLIENT);
 }
 
-void songproperties_read(SongProperties* self)
+void songpropertiesview_read(SongPropertiesView* self)
 {	
 	ui_edit_settext(&self->edit_title, 
-		properties_readstring(self->song->properties, "title", ""));
+		self->song->properties.title);
 	ui_edit_settext(&self->edit_credits, 
-		properties_readstring(self->song->properties, "credits", ""));
+		self->song->properties.credits);
 	ui_edit_settext(&self->edit_comments,
-		properties_readstring(self->song->properties, "comments", ""));
+		self->song->properties.comments);
 }
 
-void songproperties_write(SongProperties* self)
+void songpropertiesview_write(SongPropertiesView* self)
 {
-	properties_write_string(self->song->properties, "title",
-		ui_edit_text(&self->edit_title));
-	properties_write_string(self->song->properties, "credits",
-		ui_edit_text(&self->edit_credits));
-	properties_write_string(self->song->properties, "comments",
-		ui_edit_text(&self->edit_comments));
+	free(self->song->properties.title);
+	self->song->properties.title = 
+		strdup(ui_edit_text(&self->edit_title));
+	free(self->song->properties.credits);
+	self->song->properties.credits = 
+		strdup(ui_edit_text(&self->edit_credits));
+	free(self->song->properties.comments);
+	self->song->properties.comments = 
+		strdup(ui_edit_text(&self->edit_comments));
 }
 
-void songproperties_onsongchanged(SongProperties* self, Workspace* workspace,
-	int flag)
+void songpropertiesview_onsongchanged(SongPropertiesView* self,
+	Workspace* workspace, int flag)
 {
 	if (flag == WORKSPACE_LOADSONG) {
-		songproperties_disableedit(self);
+		songpropertiesview_disableedit(self);
 	} else {
-		songproperties_enableedit(self);
+		songpropertiesview_enableedit(self);
 	}
 	self->song = workspace->song;
-	songproperties_read(self);
+	songpropertiesview_read(self);
 }
 
-void songproperties_enableedit(SongProperties* self)
+void songpropertiesview_enableedit(SongPropertiesView* self)
 {
 	ui_edit_enableedit(&self->edit_title);
 	ui_edit_enableedit(&self->edit_credits);	
 	ui_edit_enableedit(&self->edit_comments);	
 }
 
-void songproperties_disableedit(SongProperties* self)
+void songpropertiesview_disableedit(SongPropertiesView* self)
 {
 	ui_edit_preventedit(&self->edit_title);
 	ui_edit_preventedit(&self->edit_credits);	
 	ui_edit_preventedit(&self->edit_comments);	
 }
 
-void songproperties_onhide(SongProperties* self, ui_component* sender)
+void songpropertiesview_onhide(SongPropertiesView* self, ui_component* sender)
 {
-	songproperties_enableedit(self);
+	songpropertiesview_enableedit(self);
 }
 
-void songproperties_ontitlechanged(SongProperties* self, ui_component* sender)
+void songpropertiesview_ontitlechanged(SongPropertiesView* self, ui_component* sender)
 {
-	properties_write_string(self->song->properties, "title",
-		ui_edit_text(&self->edit_title));		
+	free(self->song->properties.title);
+	self->song->properties.title = strdup(ui_edit_text(&self->edit_title));
 }
 
-void songproperties_oncreditschanged(SongProperties* self,
+void songpropertiesview_oncreditschanged(SongPropertiesView* self,
 	ui_component* sender)
 {
-	properties_write_string(self->song->properties, "credits",
-		ui_edit_text(&self->edit_credits));
+	free(self->song->properties.credits);
+	self->song->properties.credits = strdup(ui_edit_text(&self->edit_credits));
 }
 
-void songproperties_oncommentschanged(SongProperties* self,
+void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 	ui_component* sender)
 {
-	properties_write_string(self->song->properties, "comments",
+	free(self->song->properties.comments);
+	self->song->properties.comments = strdup(
 		ui_edit_text(&self->edit_comments));
 }

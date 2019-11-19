@@ -28,7 +28,7 @@ static void trackergrid_onmousedown(TrackerGrid*, ui_component* sender,
 	MouseEvent*);
 static void trackergrid_onsize(TrackerGrid*, ui_component* sender, ui_size* size);
 static void trackergrid_onscroll(TrackerGrid*, ui_component* sender,
-	int cx, int cy);
+	int stepx, int stepy);
 static int trackergrid_testcursor(TrackerGrid*, unsigned int track,
 	big_beat_t offset, unsigned int subline);
 static int trackergrid_testplaybar(TrackerGrid* self, big_beat_t offset);
@@ -65,7 +65,11 @@ static void trackerview_enablesync(TrackerView*);
 static void trackerview_preventsync(TrackerView*);
 static int trackerview_scrollleft(TrackerView*);
 static int trackerview_scrollright(TrackerView*);
+static int trackerview_scrollup(TrackerView*);
+static int trackerview_scrolldown(TrackerView*);
 static void trackerview_showlinenumbers(TrackerView*, int showstate);
+static void trackerview_showlinenumbercursor(TrackerView*, int showstate);
+static void trackerview_showlinenumbersinhex(TrackerView*, int showstate);
 static void trackerview_showemptydata(TrackerView*, int showstate);
 static int trackerview_numlines(TrackerView*);
 static void trackerview_setclassicheadercoords(TrackerView*);
@@ -86,7 +90,10 @@ static void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel*, ui_component* 
 
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*,
 	ui_component* sender, ui_graphics*);
-
+static void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
+	const TrackerCursor*);
+static void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
+	beat_t offset);
 static int testrange(big_beat_t position, big_beat_t offset, big_beat_t width);
 static int testrange_e(big_beat_t position, big_beat_t offset, big_beat_t width);
 static int colgroupstart(int col);
@@ -663,12 +670,15 @@ void trackerview_prevcol(TrackerView* self)
 	TrackerCursor oldcursor;
 	oldcursor = self->grid.cursor;
 
-	if (self->grid.cursor.col == 0) {
-		self->grid.cursor.col = TRACKERGRID_numparametercols - 2;
+	if (self->grid.cursor.col == 0) {		
+		if (self->wraparound && self->grid.cursor.track > 0) {
+			self->grid.cursor.col = TRACKERGRID_numparametercols - 2;
+		}
 		if (self->grid.cursor.track > 0) {
 			--self->grid.cursor.track;
 			trackerview_scrollleft(self);
-		} else {			
+		} else 
+		if (self->wraparound) {			
 			self->grid.cursor.track = player_numsongtracks(
 				&self->workspace->player) - 1;
 			invalidate = trackerview_scrollright(self);
@@ -690,12 +700,16 @@ void trackerview_nextcol(TrackerView* self)
 	oldcursor = self->grid.cursor;	
 
 	if (self->grid.cursor.col == TRACKERGRID_numparametercols - 2) {
-		self->grid.cursor.col = 0;
+		if (self->wraparound && self->grid.cursor.track < player_numsongtracks(
+			&self->workspace->player) - 1) {
+			self->grid.cursor.col = 0;
+		}
 		if (self->grid.cursor.track < player_numsongtracks(
 			&self->workspace->player) - 1) {
 			++self->grid.cursor.track;
 			invalidate = trackerview_scrollright(self);
-		} else {			
+		} else 
+		if (self->wraparound) {
 			self->grid.cursor.track = 0;
 			invalidate = trackerview_scrollleft(self);
 		}
@@ -726,6 +740,7 @@ void trackerview_prevline(TrackerView* self)
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);		
 	trackerview_invalidatecursor(self, &oldcursor);
 	trackerview_invalidatecursor(self, &self->grid.cursor);
+	trackerview_scrollup(self);
 }
 
 void trackerview_prevlines(TrackerView* self, uintptr_t lines)
@@ -740,7 +755,7 @@ void trackerview_prevlines(TrackerView* self, uintptr_t lines)
 	}
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);		
 	trackerview_invalidatecursor(self, &oldcursor);
-	trackerview_invalidatecursor(self, &self->grid.cursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);	
 }
 
 void trackerview_advanceline(TrackerView* self)
@@ -761,7 +776,8 @@ void trackerview_advanceline(TrackerView* self)
 	}
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
 	trackerview_invalidatecursor(self, &oldcursor);
-	trackerview_invalidatecursor(self, &self->grid.cursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);	
+	trackerview_scrolldown(self);
 }
 
 void trackerview_advancelines(TrackerView* self, uintptr_t lines)
@@ -779,6 +795,56 @@ void trackerview_advancelines(TrackerView* self, uintptr_t lines)
 	trackerview_invalidatecursor(self, &self->grid.cursor);
 }
 
+int trackerview_scrollup(TrackerView* self)
+{
+	int line;
+	int rv = 1;
+	ui_rectangle r;		
+	
+	line = trackerview_offsettoscreenline(self, self->grid.cursor.offset)
+		+ self->grid.cursor.subline;
+	ui_setrectangle(&r,
+		self->grid.cursor.track * self->grid.trackwidth + self->grid.dx,
+		self->grid.lineheight * line + self->grid.dy,		
+		self->grid.trackwidth,
+		self->grid.lineheight);
+	if (r.top < 0) {		
+		signal_emit(&self->grid.component.signal_scroll, &self->grid.component,
+			2, 0, 1);
+		ui_component_scrollstep(&self->grid.component, 0, 1);
+		ui_component_setverticalscrollposition(
+			&self->grid.component, 
+			ui_component_verticalscrollposition(&self->grid.component) - 1);
+		rv = 0;
+	}	
+	return rv;
+}
+
+int trackerview_scrolldown(TrackerView* self)
+{
+	int line;
+	int rv = 1;
+	ui_rectangle r;		
+	
+	line = trackerview_offsettoscreenline(self, self->grid.cursor.offset)
+		+ self->grid.cursor.subline;	
+	ui_setrectangle(&r,
+		self->grid.cursor.track * self->grid.trackwidth + self->grid.dx,
+		self->grid.lineheight * line + self->grid.dy,		
+		self->grid.trackwidth,
+		self->grid.lineheight);
+	if (r.bottom >= ui_component_size(&self->grid.component).height) {		
+		signal_emit(&self->grid.component.signal_scroll, &self->grid.component,
+			2, 0, -1);
+		ui_component_scrollstep(&self->grid.component, 0, -1);
+		ui_component_setverticalscrollposition(
+			&self->grid.component, 
+			ui_component_verticalscrollposition(&self->grid.component) + 1);
+		rv = 0;
+	}	
+	return rv;
+}
+
 void trackerview_prevtrack(TrackerView* self)
 {
 	TrackerCursor oldcursor;
@@ -789,7 +855,8 @@ void trackerview_prevtrack(TrackerView* self)
 	if (self->grid.cursor.track > 0) {
 		--self->grid.cursor.track;
 		trackerview_scrollleft(self);
-	} else {
+	} else 
+	if (self->wraparound) {
 		self->grid.cursor.track = 
 			player_numsongtracks(&self->workspace->player) - 1;
 		invalidate = trackerview_scrollright(self);
@@ -810,9 +877,10 @@ void trackerview_nexttrack(TrackerView* self)
 	self->grid.cursor.col = 0;
 	if (self->grid.cursor.track < 
 		player_numsongtracks(&self->workspace->player) - 1) {
-			++self->grid.cursor.track;
+		++self->grid.cursor.track;
 		invalidate = trackerview_scrollright(self);
-	} else {
+	} else
+	if (self->wraparound) {
 		self->grid.cursor.track = 0;
 		invalidate = trackerview_scrollleft(self);
 	}
@@ -1102,6 +1170,7 @@ void trackerview_invalidatecursor(TrackerView* self, const TrackerCursor* cursor
 		self->grid.trackwidth,
 		self->grid.lineheight);
 	ui_component_invalidaterect(&self->grid.component, &r);
+	trackerlinenumbers_invalidatecursor(&self->linenumbers, cursor);
 }
 
 void trackerview_invalidateline(TrackerView* self, beat_t offset)
@@ -1123,17 +1192,18 @@ void trackerview_invalidateline(TrackerView* self, beat_t offset)
 }
 
 
-void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int cx, int cy)
-{	
-	self->dx += cx;
-	self->dy += cy;	
+void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int stepx,
+	int stepy)
+{		
+	self->dx += (stepx * sender->scrollstepx);
+	self->dy += (stepy * sender->scrollstepy);
 
-	if (self->header && cx != 0) {
-		self->header->dx += cx;
+	if (self->header && stepx != 0) {
+		self->header->dx = self->dx;
 		ui_component_invalidate(&self->header->component);
 	}
-	if (self->linenumbers && cy != 0) {
-		self->linenumbers->dy += cy;
+	if (self->linenumbers && stepy != 0) {
+		self->linenumbers->dy = self->dy;
 		ui_component_invalidate(&self->linenumbers->component);		
 		ui_component_update(&self->linenumbers->component);
 	}
@@ -1146,7 +1216,10 @@ void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, MouseEvent
 			int lines;
 			int sublines;
 			int subline;		
-			int coloffset;				
+			int coloffset;
+			TrackerCursor oldcursor;
+
+			oldcursor = self->cursor;
 			self->cursor.offset = trackergrid_offset(self, ev->y - self->dy, &lines, &sublines, &subline);
 			self->cursor.totallines = lines + sublines;
 			self->cursor.subline = subline;
@@ -1159,7 +1232,8 @@ void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, MouseEvent
 			}
 			self->cursor.pattern = workspace_patterneditposition(self->view->workspace).pattern;
 			workspace_setpatterneditposition(self->view->workspace, self->cursor);
-			ui_component_invalidate(&self->component);
+			trackerview_invalidatecursor(self->view, &oldcursor);
+			trackerview_invalidatecursor(self->view, &self->cursor);
 			ui_component_setfocus(&self->component);
 		}
 	}
@@ -1173,6 +1247,7 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	self->syncpattern = 1;
 	self->lastplayposition = -1.f;
 	self->sequenceentryoffset = 0.f;
+	self->wraparound = 1;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	trackerview_initinputs(self);
@@ -1191,6 +1266,8 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	self->header.skin = &self->skin;
 	self->linenumbers.lineheight = 13;
 	self->showlinenumbers = 1;
+	self->showlinenumbercursor = 1;
+	self->showlinenumbersinhex = 1;
 	self->showemptydata = 0;
 	signal_connect(&self->component.signal_destroy, self, trackerview_ondestroy);
 	signal_connect(&self->component.signal_size, self, trackerview_onsize);
@@ -1215,6 +1292,8 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	signal_connect(&workspace->player.signal_inputevent, self,
 		trackerview_oninput);
 	trackerview_showlinenumbers(self, workspace_showlinenumbers(workspace));
+	trackerview_showlinenumbercursor(self, workspace_showlinenumbercursor(workspace));
+	trackerview_showlinenumbersinhex(self, workspace_showlinenumbersinhex(workspace));
 }
 
 void trackerview_ondestroy(TrackerView* self, ui_component* sender)
@@ -1362,22 +1441,39 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
 			ui_rectangle r;			
 			int beat;
 			int beat4;
-			int subline;
+			int subline = 0;
 			int numsublines;
 			int ystart;
+			int cursor;			
+			int playbar = trackergrid_testplaybar(&self->view->grid, offset);
+
+			cursor = trackergrid_testcursor(&self->view->grid, 
+				self->view->grid.cursor.track, offset, subline);
 			beat = fmod(offset, 1.0f) == 0.0f;
 			beat4 = fmod(offset, 4.0f) == 0.0f;
-			SetColColor(self->skin, g, 0, 0, 0, beat, beat4);
+			SetColColor(self->skin, g, 0, playbar, self->view->showlinenumbercursor ?
+				cursor : 0, beat, beat4);
 			// %3i
-			psy_snprintf(buffer, 10, "%.2X %.3f", line, offset);
-			ui_setrectangle(&r, 0, cpy, size.width - 2, self->textheight);
+			if (self->view->showlinenumbersinhex) {
+				psy_snprintf(buffer, 10, "%.2X %.3f", line, offset);
+			} else {
+				psy_snprintf(buffer, 10, "%.2d %.3f", line, offset);
+			}
+			ui_setrectangle(&r, 0, cpy, size.width - 2, self->textheight);			
 			ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 				strlen(buffer));		
 			cpy += self->lineheight;
 			ystart = cpy;
 			numsublines = NumSublines(self->view->pattern, offset, self->view->grid.bpl);
 			for (subline = 0; subline < numsublines; ++subline) {
-				psy_snprintf(buffer, 10, "  %.2X", subline);	
+				if (self->view->showlinenumbersinhex) {
+					psy_snprintf(buffer, 10, "  %.2X", subline);
+				} else {
+					psy_snprintf(buffer, 10, "  %.2d", subline);
+				}
+				cursor = trackergrid_testcursor(&self->view->grid, 
+					self->view->grid.cursor.track, offset, subline);
+				SetColColor(self->skin, g, 0, playbar, cursor, beat, beat4);
 				ui_setrectangle(&r, 0, cpy, size.width - 2, self->textheight);
 				ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 					strlen(buffer));		
@@ -1390,6 +1486,40 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
 			offset += self->view->grid.bpl;
 			++line;
 		}		
+	}
+}
+
+void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
+	const TrackerCursor* cursor)
+{
+	int line;		
+	ui_rectangle r;		
+
+	line = trackerview_offsettoscreenline(self->view, cursor->offset)
+		+ cursor->subline;	
+	ui_setrectangle(&r,
+		0,
+		self->view->grid.lineheight * line + self->view->grid.dy,
+		ui_component_size(&self->component).width,
+		self->view->grid.lineheight);
+	ui_component_invalidaterect(&self->component, &r);	
+}
+
+void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, beat_t offset)
+{
+	int line;	
+	ui_rectangle r;	
+	
+	if (offset >= self->view->sequenceentryoffset &&
+			offset < self->view->sequenceentryoffset + self->view->pattern->length) {
+		line = (int) ((offset - self->view->sequenceentryoffset) 
+			/ self->view->grid.bpl);	
+		ui_setrectangle(&r,
+			self->view->grid.dx,
+			self->view->grid.lineheight * line + self->view->grid.dy,
+			ui_component_size(&self->component).width - self->view->grid.dx,
+			self->view->grid.lineheight);
+		ui_component_invalidaterect(&self->component, &r);
 	}
 }
 
@@ -1430,17 +1560,24 @@ void trackerview_ontimer(TrackerView* self, ui_component* sender, int timerid)
 	if (timerid == TIMERID_TRACKERVIEW) {		
 		if (player_playing(self->grid.player)) {
 			trackerview_invalidateline(self, self->lastplayposition);
+			trackerlinenumbers_invalidateline(&self->linenumbers,
+				self->lastplayposition);
 			self->lastplayposition = player_position(&self->workspace->player);			
 			trackerview_invalidateline(self, self->lastplayposition);
+			trackerlinenumbers_invalidateline(&self->linenumbers,
+				self->lastplayposition);
 		} else {
 			if (self->lastplayposition != -1) {				
 				trackerview_invalidateline(self, self->lastplayposition);
+				trackerlinenumbers_invalidateline(&self->linenumbers,
+					self->lastplayposition);
 				self->lastplayposition = -1;
 			}
 		}
 		if (self->pattern && self->pattern->opcount != self->opcount &&
 				self->syncpattern) {
-			ui_component_invalidate(&self->grid.component);			
+			ui_component_invalidate(&self->grid.component);
+			ui_component_invalidate(&self->linenumbers.component);
 		}
 		self->opcount = self->pattern ? self->pattern->opcount : 0;		
 	}
@@ -1547,8 +1684,18 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	if (property == workspace->config) {
 		trackerview_readconfig(self);
 	} else
+	if (strcmp(properties_key(property), "wraparound") == 0) {
+		self->wraparound = properties_value(property);
+		ui_component_invalidate(&self->component);
+	} else
 	if (strcmp(properties_key(property), "linenumbers") == 0) {
 		trackerview_showlinenumbers(self, properties_value(property));
+	} else
+	if (strcmp(properties_key(property), "linenumberscursor") == 0) {
+		trackerview_showlinenumbercursor(self, properties_value(property));
+	} else
+	if (strcmp(properties_key(property), "linenumbersinhex") == 0) {
+		trackerview_showlinenumbersinhex(self, properties_value(property));
 	} else
 	if (strcmp(properties_key(property), "drawemptydata") == 0) {
 		trackerview_showemptydata(self, properties_value(property));
@@ -1562,6 +1709,9 @@ void trackerview_readconfig(TrackerView* self)
 	pv = properties_findsection(self->workspace->config, "visual.patternview");
 	if (pv) {		
 		trackerview_showlinenumbers(self, properties_bool(pv, "linenumbers", 1));
+		trackerview_showlinenumbercursor(self, properties_bool(pv, "linenumberscursor", 1));
+		trackerview_showlinenumbersinhex(self, properties_bool(pv, "linenumbersinhex", 1));
+		self->wraparound = properties_bool(pv, "wraparound", 1);
 		trackerview_showemptydata(self, properties_bool(pv, "drawemptydata", 1));
 	}
 }
@@ -1577,6 +1727,18 @@ void trackerview_showlinenumbers(TrackerView* self, int showstate)
 		ui_component_hide(&self->linenumberslabel.component);
 	}
 	trackerview_align(self, &self->component);
+	ui_component_invalidate(&self->component);
+}
+
+void trackerview_showlinenumbercursor(TrackerView* self, int showstate)
+{
+	self->showlinenumbercursor = showstate;	
+	ui_component_invalidate(&self->component);
+}
+
+void trackerview_showlinenumbersinhex(TrackerView* self, int showstate)
+{
+	self->showlinenumbersinhex = showstate;	
 	ui_component_invalidate(&self->component);
 }
 

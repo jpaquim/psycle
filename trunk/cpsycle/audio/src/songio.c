@@ -16,6 +16,7 @@ void songfile_load(SongFile* self, const char* path)
 {		
 	PsyFile file;
 
+	self->err = 0;
 	self->file = &file;
 	if (psyfile_open(self->file, path)) {
 		char header[9];
@@ -33,18 +34,15 @@ void songfile_load(SongFile* self, const char* path)
 		if (strcmp(header,"PSY2SONG") == 0) {
 			psy2_load(self);
 		} else {
-			
+			self->err = 2;
 		}
 		if (!machines_at(&self->song->machines, MASTER_INDEX)) {
 			songfile_createmaster(self);
 		}		
 		machines_endfilemode(&self->song->machines);
 		psyfile_close(self->file);
-//		position.track = self->song->sequence.tracks;
-//		position.trackposition = 
-//			sequence_begin(&self->song->sequence,
-//				self->song->sequence.tracks, (beat_t) 0.f);
-//		sequence_seteditposition(&self->song->sequence, position);
+	} else {
+		self->err = 1;
 	}
 	signal_emit(&self->song->signal_loadprogress, self->song, 1, 0);
 }

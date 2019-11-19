@@ -4,7 +4,6 @@
 #if !defined(SONG_H)
 #define SONG_H
 
-#include <properties.h>
 #include "machines.h"
 #include "patterns.h"
 #include "sequence.h"
@@ -17,8 +16,20 @@
 /// this include patterns, pattern sequence, machines and their initial 
 /// parameters and coordinates, wavetables, ...
 
+typedef struct {
+	char* title;
+	char* credits;
+	char* comments;
+	beat_t bpm;
+	uintptr_t lpb;
+	uintptr_t tracks;
+	int octave;
+	int tpb;
+	int extraticksperbeat;
+} SongProperties;
+
 typedef struct Song {
-	Properties* properties;
+	SongProperties properties;
 	Machines machines;
 	Patterns patterns;
 	Sequence sequence;
@@ -44,6 +55,5 @@ Song* song_allocinit(MachineFactory*);
 void song_free(Song*);
 /// Clears the song completly (no master, no pattern, no sequence track/entry)
 void song_clear(Song*);
-
 
 #endif

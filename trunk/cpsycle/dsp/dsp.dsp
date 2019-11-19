@@ -113,6 +113,14 @@ SOURCE=.\src\notestab.c
 # End Source File
 # Begin Source File
 
+SOURCE=".\src\operations-noopt.c"
+# End Source File
+# Begin Source File
+
+SOURCE=".\src\operations-sse2.c"
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\operations.c
 # End Source File
 # Begin Source File

@@ -22,7 +22,7 @@ static void pianogrid_drawevents(Pianogrid*, ui_graphics*);
 static void pianogrid_drawevent(Pianogrid*, ui_graphics*, PatternEvent*, int track, float offset, float length);
 static void pianogrid_onsize(Pianogrid*, ui_component* sender, ui_size*);
 static void pianogrid_adjustscroll(Pianogrid*);
-static void pianogrid_onscroll(Pianogrid*, ui_component* sender, int cx, int cy);
+static void pianogrid_onscroll(Pianogrid*, ui_component* sender, int stepx, int stepy);
 static void pianogrid_onkeydown(Pianogrid*, ui_component* sender, KeyEvent*);
 static void pianogrid_onmousedown(Pianogrid*, ui_component* sender, MouseEvent*);
 
@@ -43,9 +43,7 @@ static void pianokeyboard_ondraw(PianoKeyboard*, ui_component* sender, ui_graphi
 
 void pianoroll_init(Pianoroll* self, ui_component* parent, Workspace* workspace)
 {				
-	self->workspace = workspace;
-	self->cx = 0;
-	self->cy = 0;
+	self->workspace = workspace;	
 	self->opcount = 0;
 	self->syncpattern = 1;
 	self->pattern = 0;
@@ -131,9 +129,7 @@ void pianoroll_onsize(Pianoroll* self, ui_component* sender, ui_size* size)
 {	
 	int keyboardwidth;
 	int headerheight;
-
-	self->cx = size->width;
-	self->cy = size->height;
+		
 	keyboardwidth = 40;
 	headerheight = 25;	
 	ui_component_setposition(&self->keyboardheader, 0, 0, keyboardwidth, headerheight);
@@ -185,9 +181,7 @@ void pianogrid_init(Pianogrid* self, ui_component* parent, Pianoroll* roll)
 }
 
 void pianogrid_onsize(Pianogrid* self, ui_component* sender, ui_size* size)
-{
-	self->cx = size->width;
-	self->cy = size->height;
+{		
 	pianogrid_adjustscroll(self);	
 }
 
@@ -217,10 +211,12 @@ void pianogrid_drawgrid(Pianogrid* self, ui_graphics* g)
 		{												
 			int c;
 			beat_t cpx;
-				
+			int cpy;
+			
+			cpy = self->metrics.visikeys * self->metrics.keyheight;				
 			for (c = 0, cpx = 0; c <= self->metrics.visisteps;
 					cpx += self->metrics.stepwidth, ++c) {
-				ui_drawline(g, (int) cpx, 0, (int) cpx, self->cy);
+				ui_drawline(g, (int) cpx, 0, (int) cpx, cpy);
 			}		
 		}		
 	}
@@ -299,10 +295,10 @@ void pianogrid_onkeydown(Pianogrid* self, ui_component* sender, KeyEvent* keyeve
 	ui_component_propagateevent(sender);
 }
 
-void pianogrid_onscroll(Pianogrid* self, ui_component* sender, int cx, int cy)
+void pianogrid_onscroll(Pianogrid* self, ui_component* sender, int stepx, int stepy)
 {	
-	if (self->cx != 0) {		
-		self->beatscrollpos += (cx / self->metrics.beatwidth);
+	if (stepx != 0) {		
+		self->beatscrollpos += stepx;
 		self->view->header.scrollpos = self->beatscrollpos;
 		pianoroll_computemetrics(self->view, &self->metrics);
 		self->view->header.scrollpos = self->beatscrollpos;
@@ -311,8 +307,8 @@ void pianogrid_onscroll(Pianogrid* self, ui_component* sender, int cx, int cy)
 		ui_component_invalidate(&self->view->header.component);
 		ui_component_update(&self->view->header.component);		
 	}
-	if (self->cy != 0) {
-		self->dy += cy;
+	if (stepy != 0) {
+		self->dy += (stepy * sender->scrollstepy);
 		self->view->keyboard.dy = self->dy;
 		ui_component_invalidate(&self->view->keyboard.component);
 		ui_component_update(&self->view->keyboard.component);

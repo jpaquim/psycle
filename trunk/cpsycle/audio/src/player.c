@@ -177,7 +177,7 @@ void player_resetvumeters(Player* self)
 
 void player_filldriver(Player* self, amp_t* buffer, unsigned int amount)
 {
-	Buffer* masteroutput;
+	Buffer* masteroutput;	
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
 	if (masteroutput) {		
 		Machine* master;
@@ -197,8 +197,8 @@ void player_filldriver(Player* self, amp_t* buffer, unsigned int amount)
 					amount);		
 			}
 			signal_emit(&master->signal_worked, master, 2, MASTER_INDEX, &bc);			
-		}
-		dsp_interleave(buffer, masteroutput->samples[0],
+		}	
+		dsp.interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
 	}
 }
@@ -452,3 +452,4 @@ unsigned int player_numeventdrivers(Player* self)
 {
 	return eventdrivers_size(&self->eventdrivers);
 }
+

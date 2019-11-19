@@ -56,7 +56,7 @@ typedef struct {
 	PatternView patternview;		
 	SamplesView samplesview;
 	InstrumentsView instrumentsview;
-	SongProperties songproperties;
+	SongPropertiesView songpropertiesview;
 	RenderView renderview;
 	SettingsView settingsview;
 	HelpView helpview;	

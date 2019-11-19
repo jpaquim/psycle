@@ -16,7 +16,7 @@ static void sequencelistview_drawtrack(SequenceListView*, ui_graphics*, Sequence
 static void sequencelistview_computetextsizes(SequenceListView*);
 static void sequencelistview_adjustscrollbars(SequenceListView*);
 static void sequencelistview_onmousedown(SequenceListView*, ui_component* sender, MouseEvent*);
-static void sequencelistview_onscroll(SequenceListView*, ui_component* sender, int cx, int cy);
+static void sequencelistview_onscroll(SequenceListView*, ui_component* sender, int stepx, int stepy);
 static void sequencelistview_ontimer(SequenceListView*, ui_component* sender, int timerid);
 
 static void sequencelistview_seteditpositionasselection(SequenceListView*);
@@ -576,10 +576,10 @@ void sequencelistview_seteditpositionasselection(SequenceListView* self)
 	}
 }
 
-void sequencelistview_onscroll(SequenceListView* self, ui_component* sender, int cx, int cy)
+void sequencelistview_onscroll(SequenceListView* self, ui_component* sender, int stepx, int stepy)
 {
-	self->dx += cx;
-	self->dy += cy;	
+	self->dx += (stepx * self->component.scrollstepx);
+	self->dy += (stepy * self->component.scrollstepy);	
 }
 
 void sequencelistview_adjustscrollbars(SequenceListView* self)

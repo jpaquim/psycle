@@ -681,12 +681,19 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		component = table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
 			signal_emit(&component->signal_scroll, component, 2, 
-				0, component->scrollstepy * (iPos - si.nPos));			
+				0, (iPos - si.nPos));			
 		}
-		ScrollWindow (hwnd, 0, component->scrollstepy * (iPos - si.nPos), 
-                                   NULL, NULL) ;
-		UpdateWindow (hwnd);
+		ui_component_scrollstep(component, 0, (iPos - si.nPos));
 	}
+}
+
+void ui_component_scrollstep(ui_component* self, intptr_t stepx, intptr_t stepy)
+{
+	ScrollWindow ((HWND)self->hwnd,
+		self->scrollstepx * stepx,
+		self->scrollstepy * stepy, 
+		NULL, NULL) ;
+	UpdateWindow ((HWND)self->hwnd);
 }
 
 void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -715,11 +722,9 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		component = table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
 			signal_emit(&component->signal_scroll, component, 2, 
-				component->scrollstepx * (iPos - si.nPos), 0);			
+				(iPos - si.nPos), 0);			
 		}
-		ScrollWindow (hwnd, component->scrollstepx * (iPos - si.nPos), 0, 
-                                   NULL, NULL) ;
-		UpdateWindow (hwnd) ;
+		ui_component_scrollstep(component, (iPos - si.nPos), 0);
 	}
 }
 
@@ -876,6 +881,15 @@ void ui_component_setverticalscrollrange(ui_component* self, int min, int max)
 	SetScrollInfo((HWND)self->hwnd, SB_VERT, &si, TRUE);
 }
 
+int ui_component_verticalscrollposition(ui_component* self)
+{
+	SCROLLINFO si;
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_POS;	
+	GetScrollInfo((HWND)self->hwnd, SB_VERT, &si);	
+	return si.nPos;
+}
+
 void ui_component_setverticalscrollposition(ui_component* self, int position)
 {
 	SCROLLINFO si;
@@ -889,6 +903,15 @@ void ui_component_setverticalscrollposition(ui_component* self, int position)
 	}
 	si.fMask = SIF_POS;	
 	SetScrollInfo((HWND)self->hwnd, SB_VERT, &si, TRUE);
+}
+
+int ui_component_horizontalscrollposition(ui_component* self)
+{
+	SCROLLINFO si;
+	si.cbSize = sizeof(si);
+	si.fMask = SIF_POS;	
+	GetScrollInfo((HWND)self->hwnd, SB_HORZ, &si);	
+	return si.nPos;
 }
 
 void ui_component_sethorizontalscrollposition(ui_component* self, int position)

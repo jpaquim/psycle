@@ -535,7 +535,7 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 		}
 		if (buffer_mono(&self->sample->channels) &&
 			buffer_numchannels(output) > 1) {
-			dsp_add(
+			dsp.add(
 				buffer_at(output, 0),
 				buffer_at(output, 1),
 				numsamples,

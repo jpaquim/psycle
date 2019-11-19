@@ -16,6 +16,12 @@
 typedef List MachinePath;
 typedef List MachineList;
 
+typedef enum {
+	WHITE,
+	GRAY,	
+	BLACK
+} Colors;
+
 typedef struct Machines {	
 	Table slots;	
 	Table inputbuffers;
@@ -23,6 +29,7 @@ typedef struct Machines {
 	Connections connections;
 	MachinePath* path;
 	Table nopath;
+	Table colors;
 	List* buffers;	
 	float* samplebuffers;
 	int numsamplebuffers;

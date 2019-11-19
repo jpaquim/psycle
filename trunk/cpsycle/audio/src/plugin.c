@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <portable.h>
+#include <math.h>
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
@@ -158,7 +159,7 @@ void seqtick(Plugin* self, int channel, const PatternEvent* event)
 }
 
 void generateaudio(Plugin* self, BufferContext* bc)
-{
+{	
 	mi_work(self->mi, buffer_at(bc->output, 0), buffer_at(bc->output, 1),
 		bc->numsamples, bc->numtracks);
 }

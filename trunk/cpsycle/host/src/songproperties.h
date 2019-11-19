@@ -17,10 +17,10 @@ typedef struct {
 	ui_edit edit_title;
 	ui_edit edit_credits;
 	ui_edit edit_comments;	
-} SongProperties;
+} SongPropertiesView;
 
-void songproperties_init(SongProperties*, ui_component* parent, Workspace*);
-void songproperties_enableedit(SongProperties*);
-void songproperties_disableedit(SongProperties*);
+void songpropertiesview_init(SongPropertiesView*, ui_component* parent, Workspace*);
+void songpropertiesview_enableedit(SongPropertiesView*);
+void songpropertiesview_disableedit(SongPropertiesView*);
 
 #endif

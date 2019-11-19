@@ -134,7 +134,7 @@ int driver_init(Driver* driver)
 
 	self->_samplesPerSec=44100;
 	self->_deviceId=0;
-	self->_numBlocks = 4;
+	self->_numBlocks = 6;
 	self->_blockSize = 4096;
 	self->_blockSizeBytes = 4096;
 	self->pollSleep_ = 20;

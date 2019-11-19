@@ -52,6 +52,7 @@ typedef struct {
 	unsigned int effect_fontcolour;
 	ui_bitmap skinbmp;	
 	ui_font font;
+	int drawmachineindexes;
 } MachineSkin;
 
 typedef struct {	
@@ -91,7 +92,7 @@ typedef struct {
 	int drawvumeters;	
 	PluginCatcher plugincatcher;
 	MachineSkin skin;	   
-	Workspace* workspace;
+	Workspace* workspace;	
 	struct MachineViewBar* statusbar;
 	ui_edit editname;	
 } MachineWireView;

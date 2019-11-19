@@ -7,7 +7,6 @@
 #include <portable.h>
 #include <math.h>
 #include <rms.h>
-#include <alignedalloc.h>
 #include <exclusivelock.h>
 #include <operations.h>
 
@@ -49,15 +48,10 @@ void vuscope_init(VuScope* self, ui_component* parent, Wire wire,
 	self->peakLifeL = self->peakLifeR = 0;
 	self->workspace = workspace;
 	self->component.doublebuffered = 1;
-#if defined SSE
-	self->pSamplesL = aligned_memory_alloc(16, SCOPE_BUF_SIZE, sizeof(float));
-	self->pSamplesR = aligned_memory_alloc(16, SCOPE_BUF_SIZE, sizeof(float));	
-#else
-	self->pSamplesL = malloc(SCOPE_BUF_SIZE * sizeof(float));
-	self->pSamplesR = malloc(SCOPE_BUF_SIZE * sizeof(float));	
-#endif
-	dsp_clear(self->pSamplesL, SCOPE_BUF_SIZE);
-	dsp_clear(self->pSamplesR, SCOPE_BUF_SIZE);
+	self->pSamplesL = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
+	self->pSamplesR = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
+	dsp.clear(self->pSamplesL, SCOPE_BUF_SIZE);
+	dsp.clear(self->pSamplesR, SCOPE_BUF_SIZE);
 	signal_connect(&self->component.signal_destroy, self, vuscope_ondestroy);
 	signal_connect(&self->component.signal_draw, self, vuscope_ondraw);	
 	signal_connect(&self->component.signal_timer, self, vuscope_ontimer);	
@@ -70,13 +64,8 @@ void vuscope_init(VuScope* self, ui_component* parent, Wire wire,
 void vuscope_ondestroy(VuScope* self)
 {
 	vuscope_disconnectmachinessignals(self, self->workspace);
-#ifdef SSE
-	aligned_memory_dealloc(self->pSamplesL);
-	aligned_memory_dealloc(self->pSamplesR);
-#else
-	free(self->pSamplesL);	
-	free(self->pSamplesR);	
-#endif
+	dsp.memory_dealloc(self->pSamplesL);
+	dsp.memory_dealloc(self->pSamplesR);
 	self->pSamplesL = 0;
 	self->pSamplesR = 0;
 }
@@ -194,8 +183,8 @@ void vuscope_drawbars(VuScope* self, ui_graphics* g)
 	}
 	else {*/
 		if (index == 0) { index = SCOPE_BUF_SIZE; }
-		maxL = dsp_maxvol(self->pSamplesL + index - scopesamples, scopesamples);
-		maxR = dsp_maxvol(self->pSamplesR + index - scopesamples, scopesamples);
+		maxL = dsp.maxvol(self->pSamplesL + index - scopesamples, scopesamples);
+		maxR = dsp.maxvol(self->pSamplesR + index - scopesamples, scopesamples);
 #if PSYCLE__CONFIGURATION__RMS_VUS
 		if (srcMachine.Bypass())
 #endif

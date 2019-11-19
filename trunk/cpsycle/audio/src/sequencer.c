@@ -59,7 +59,7 @@ void sequencer_dispose(Sequencer* self)
 }
 
 void sequencer_reset(Sequencer* self, Sequence* sequence, Machines* machines)
-{
+{	
 	sequencer_dispose(self);
 	sequencer_init(self, sequence, machines);
 }

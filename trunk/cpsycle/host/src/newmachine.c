@@ -24,7 +24,7 @@ static void pluginsview_onmousedown(PluginsView*, ui_component* sender,
 static void pluginsview_hittest(PluginsView*, int x, int y);
 static void pluginsview_computetextsizes(PluginsView* self);
 static void pluginsview_onscroll(PluginsView*, ui_component* sender,
-	int cx, int cy);
+	int stepx, int stepy);
 static void pluginsview_onmousedoubleclick(PluginsView*, ui_component* sender,
 	int x, int y, int button);
 static void pluginsview_onkeydown(PluginsView*, ui_component* sender,
@@ -239,9 +239,9 @@ void pluginsview_adjustscroll(PluginsView* self)
 }
 
 void pluginsview_onscroll(PluginsView* self, ui_component* sender, 
-	int cx, int cy)
+	int stepx, int stepy)
 {
-	self->dy += cy;
+	self->dy += sender->scrollstepy * stepy;
 }
 
 void pluginsview_onmousedown(PluginsView* self, ui_component* sender,

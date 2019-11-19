@@ -174,13 +174,13 @@ void work(VstPlugin* self, BufferContext* bc)
 {
 	unsigned int c;	
 	for (c = 0; c < bc->output->numchannels; ++c) {
-		dsp_mul(bc->output->samples[c], bc->numsamples, 1/32768.f);
+		dsp.mul(bc->output->samples[c], bc->numsamples, 1/32768.f);
 	}
 	processevents(self, bc);
 	self->effect->processReplacing(self->effect, bc->output->samples,
 		bc->output->samples, bc->numsamples);
 	for (c = 0; c < bc->output->numchannels; ++c) {
-		dsp_mul(bc->output->samples[c], bc->numsamples, 32768.f);
+		dsp.mul(bc->output->samples[c], bc->numsamples, 32768.f);
 	}
 }
 
