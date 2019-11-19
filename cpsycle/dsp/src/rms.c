@@ -4,11 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "rms.h"
+#include "operations.h"
 #include <math.h>
 #include <stdlib.h>
-#if defined SSE
-	#include <xmmintrin.h>
-#endif
 
 static int numRMSSamples = 1;
 
@@ -23,57 +21,11 @@ void rmsdata_init(RMSData* self)
 	self->previousRight = 0;
 }
 
-#if defined SSE
 void rmsdata_accumulate(RMSData* self, const amp_t* __restrict pSamplesL,
 	const amp_t* __restrict pSamplesR, int count)
-{
-	float result; // does this work with double?
-
-	__m128 acleftvec = _mm_set_ps1(0.0f);
-	__m128 acrightvec = _mm_set_ps1(0.0f);
-	const __m128 *psrcl = (const __m128*)pSamplesL;
-	const __m128 *psrcr = (const __m128*)pSamplesR;
-	while (count > 3){
-		acleftvec = _mm_add_ps(acleftvec,_mm_mul_ps(*psrcl,*psrcl));
-		acrightvec = _mm_add_ps(acrightvec,_mm_mul_ps(*psrcr,*psrcr));
-		psrcl++;
-		psrcr++;
-		count-=4;
-	}	
-	acleftvec = _mm_add_ps(acleftvec,_mm_movehl_ps(acleftvec, acleftvec)); // add (0= 0+2 and 1=1+3 thanks to the move)
-	acleftvec = _mm_add_ss(acleftvec,_mm_shuffle_ps(acleftvec,acleftvec,0x11)); // add (0 = 0+1 thanks to the shuffle)
-	_mm_store_ss(&result, acleftvec); //get the position 0
-	self->AccumLeft += result;
-	acrightvec = _mm_add_ps(acrightvec,_mm_movehl_ps(acrightvec, acrightvec)); // add (0= 0+2 and 1=1+3 thanks to the move)
-	acrightvec = _mm_add_ss(acrightvec,_mm_shuffle_ps(acrightvec,acrightvec,0x11)); // add (0 = 0+1 thanks to the shuffle)
-	_mm_store_ss(&result, acrightvec); //get the position 0
-	self->AccumRight += result;
-	if (count > 0 ) {
-		const float* pL = (const float*)psrcl;
-		const float* pR= (const float*)psrcr;
-		while (count--) {
-			self->AccumLeft += (*pL * *pL); pL++;
-			self->AccumRight += (*pR * *pR); pR++;
-		}
-	}	
+{	
+	dsp.accumulate(&self->AccumLeft, &self->AccumRight, pSamplesL, pSamplesR, count);
 }
-#else
-
-void rmsdata_accumulate(RMSData* self, const amp_t* __restrict pSamplesL,
-	const amp_t* __restrict pSamplesR, int count)
-{
-	big_amp_t acleft = self->AccumLeft;
-	big_amp_t acright = self->AccumRight;
-	--pSamplesL; --pSamplesR;
-	while (count--) {
-		++pSamplesL; acleft  += *pSamplesL * *pSamplesL;
-		++pSamplesR; acright += *pSamplesR * *pSamplesR;
-	}
-	self->AccumLeft = acleft;
-	self->AccumRight = acright;
-}
-
-#endif
 
 // RMSVol
 

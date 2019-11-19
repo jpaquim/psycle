@@ -87,7 +87,7 @@ void buffer_clearsamples(Buffer* self, uintptr_t numsamples)
 	uintptr_t channel;
 
 	for (channel = 0; channel < self->numchannels; ++channel) {
-		dsp_clear(self->samples[channel], numsamples);
+		dsp.clear(self->samples[channel], numsamples);
 	}
 }
 
@@ -99,7 +99,7 @@ void buffer_addsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
 	if (source) {
 		for (channel = 0; channel < source->numchannels && 
 			channel < self->numchannels; ++channel) {
-				dsp_add(
+				dsp.add(
 					source->samples[channel],
 					self->samples[channel],
 					numsamples,
@@ -113,7 +113,7 @@ void buffer_mulsamples(Buffer* self, uintptr_t numsamples, amp_t mul)
 	uintptr_t channel;
 	
 	for (channel = 0; channel < self->numchannels; ++channel) {
-		dsp_mul(self->samples[channel], numsamples, mul);
+		dsp.mul(self->samples[channel], numsamples, mul);
 	}	
 }
 
@@ -131,7 +131,7 @@ void buffer_pan(Buffer* self, amp_t pan, uintptr_t amount)
 		vol[1] = 1.0f;
 	}
 	for (channel = 0; channel < 2 && channel < self->numchannels; ++channel) {
-		dsp_mul(self->samples[channel], amount, vol[channel]);
+		dsp.mul(self->samples[channel], amount, vol[channel]);
 	}
 }
 

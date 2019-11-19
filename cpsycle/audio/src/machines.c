@@ -32,13 +32,8 @@ void machines_init(Machines* self)
 	table_init(&self->nopath);
 	self->path = 0;
 	self->numsamplebuffers = 100;
-#if defined SSE
-	self->samplebuffers = (float*)aligned_memory_alloc(16, MAX_STREAM_SIZE *
+	self->samplebuffers = dsp.memory_alloc(MAX_STREAM_SIZE *
 		self->numsamplebuffers, sizeof(float));
-#else
-	self->samplebuffers = (float*)malloc(sizeof(float) * MAX_STREAM_SIZE *
-		self->numsamplebuffers);
-#endif
 	self->currsamplebuffer = 0;
 	self->slot = 0;	
 	self->buffers = 0;
@@ -68,11 +63,7 @@ void machines_dispose(Machines* self)
 	table_dispose(&self->slots);
 	connections_dispose(&self->connections);
 	table_dispose(&self->nopath);
-#if defined SSE	
-	aligned_memory_dealloc(self->samplebuffers);
-#else
-	free(self->samplebuffers);
-#endif
+	dsp.memory_dealloc(self->samplebuffers);
 }
 
 void machines_disposesignals(Machines* self)
@@ -281,7 +272,9 @@ MachineList* compute_path(Machines* self, uintptr_t slot)
 	MachineList* rv = 0;	
 
 	reset_nopath(self);	
+	table_init(&self->colors);
 	compute_slotpath(self, slot, &rv);
+	table_dispose(&self->colors);
 	//	Debug Path Output
 	//	if (rv) {
 	//		List* p;
@@ -300,7 +293,7 @@ MachineList* compute_path(Machines* self, uintptr_t slot)
 
 void compute_slotpath(Machines* self, uintptr_t slot, List** path)
 {	
-	MachineSockets* connected_sockets;
+	MachineSockets* connected_sockets;	
 
 	connected_sockets = connections_at(&self->connections, slot);	
 	if (connected_sockets) {
@@ -309,8 +302,15 @@ void compute_slotpath(Machines* self, uintptr_t slot, List** path)
 		for (p = connected_sockets->inputs; p != 0; p = p->next) {
 			WireSocketEntry* entry;
 
-			entry = (WireSocketEntry*) p->entry;		
-			compute_slotpath(self, entry->slot, path);		
+			entry = (WireSocketEntry*) p->entry;
+			if (!table_exists(&self->colors, entry->slot)) {
+				table_insert(&self->colors, entry->slot, (void*)1);
+				compute_slotpath(self, entry->slot, path);
+			} else {
+				// cycle detected				
+				p = p;
+			}			
+			table_remove(&self->colors, entry->slot);			
 		}	
 	}
 	if (table_exists(&self->nopath, slot)) {
@@ -321,7 +321,7 @@ void compute_slotpath(Machines* self, uintptr_t slot, List** path)
 
 void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amount)
 {
-	MachinePath* slot;	
+	/*MachinePath* slot;	
 
 	machines_releasebuffers(self);
 	for (slot = path; slot != 0; slot = slot->next) {		
@@ -333,7 +333,21 @@ void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amo
 				list_append(&self->buffers, machines_nextbuffer(
 					self, machine->numoutputs(machine)))->entry);
 		}
-	}			
+	}*/
+
+	TableIterator it;
+	
+	for (it = machines_begin(self); !tableiterator_equal(&it, table_end());
+			tableiterator_inc(&it)) {			
+		Machine* machine;
+
+		machine = (Machine*)tableiterator_value(&it);
+		if (machine) {
+			table_insert(&self->outputbuffers, tableiterator_key(&it),
+				list_append(&self->buffers, machines_nextbuffer(
+					self, machine->numoutputs(machine)))->entry);
+		}
+	}	
 }
 
 void machines_releasebuffers(Machines* self)

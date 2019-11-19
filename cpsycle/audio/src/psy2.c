@@ -85,21 +85,27 @@ void psy2_load(SongFile* songfile)
 	psyfile_read(songfile->file, name_, 32);
 	psyfile_read(songfile->file, author_, 32);
 	psyfile_read(songfile->file, comments_,128);
-	properties_write_string(songfile->song->properties, "title", name_);
-	properties_write_string(songfile->song->properties, "credits", author_);
-	properties_write_string(songfile->song->properties, "comments", comments_);
+	free(songfile->song->properties.title);
+	songfile->song->properties.title = strdup(name_);
+	free(songfile->song->properties.credits);
+	songfile->song->properties.credits = strdup(author_);
+	free(songfile->song->properties.comments);
+	songfile->song->properties.comments = strdup(comments_);
 
 	psyfile_read(songfile->file, &m_beatspermin, sizeof m_beatspermin);
 	psyfile_read(songfile->file, &sampR, sizeof sampR);
+	songfile->song->properties.bpm = (beat_t) m_beatspermin;	
 	if( sampR <= 0)
 	{
 		// Shouldn't happen but has happened.
-		m_linesperbeat= 4;
+		m_linesperbeat = 4;
 	}
 	// The old format assumes we output at 44100 samples/sec, so...
 	else m_linesperbeat = (int32_t) (44100 * 60 / (sampR * m_beatspermin));
 	m_ticksperbeat= 24;
 	m_extraticksperline= 0;
+
+	songfile->song->properties.lpb = m_linesperbeat;
 
 	//if (fullopen)
 	{

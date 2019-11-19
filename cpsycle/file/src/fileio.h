@@ -14,19 +14,23 @@ typedef struct TYPEULONGINV {
   unsigned char lolo;
 } ULONGINV;
 
-typedef struct
-{
-	unsigned long _id;
-	unsigned long _size; // This one should be ULONGINV (it is, at least, in the files I([JAZ]) have tested)
-}
-RiffChunkHeader;
+typedef struct {
+	uint32_t version;
+	uint32_t size;
+	uint32_t begins;
+} RiffChunk;
 
 
 typedef struct PsyFile {	
 	int _modified;
 	char szName[1024];
-	FILE* _file;
+	FILE* _file;	
+	RiffChunk currchunk;
+	uint32_t fileversion;
+	uint32_t filesize;
+	uint32_t chunkcount;
 } PsyFile; 
+
 
 int psyfile_open(PsyFile*, const char* path);
 int psyfile_create(PsyFile*, const char* path, int overwrite);
@@ -45,6 +49,8 @@ uint32_t psyfile_writeheader(PsyFile*, char* pData, uint32_t version,
 	uint32_t size);
 int psyfile_writestring(PsyFile*, const char* str);
 uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
+int psyfile_readchunkbegin(PsyFile*);
+void psyfile_seekchunkend(PsyFile*);
 
 static uint32_t FourCC(char *psName);
 	

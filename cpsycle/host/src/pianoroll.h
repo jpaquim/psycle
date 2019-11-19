@@ -45,9 +45,7 @@ typedef struct {
 void pianokeyboard_init(PianoKeyboard*, ui_component* parent);
 
 typedef struct {
-   ui_component component;      
-   int cx;
-   int cy;   
+   ui_component component;   
    int keyheight;   
    beat_t bpl;
    int lpb;

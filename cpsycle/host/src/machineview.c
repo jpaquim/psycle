@@ -224,7 +224,13 @@ void machineui_draw(MachineUi* self, MachineWireView* wireview, ui_graphics* g,
 		editname[0] = '\0';
 		coords = self->coords;		
 		if (self->machine->editname(self->machine)) {
-			psy_snprintf(editname, 130, "%02d:%s", slot, self->machine->editname(self->machine));
+			if (self->skin->drawmachineindexes) {
+				psy_snprintf(editname, 130, "%02d:%s", slot, 
+					self->machine->editname(self->machine));
+			} else {
+				psy_snprintf(editname, 130, "%s", 
+					self->machine->editname(self->machine));
+			}
 		}
 		ui_setbackgroundmode(g, TRANSPARENT);		
 		skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top, &self->coords->background);
@@ -426,13 +432,8 @@ void machinewireview_initmachinecoords(MachineWireView* self)
 }
 
 void machinewireview_onconfigchanged(MachineWireView* self, Workspace* workspace, Properties* property)
-{
-	if (property == workspace->config) {
-		machinewireview_readconfig(self);
-	} else
-	if (strcmp(properties_key(property), "drawvumeters") == 0) {
-		self->drawvumeters = properties_value(property);
-	}
+{	
+	machinewireview_readconfig(self);
 }
 
 void machinewireview_readconfig(MachineWireView* self)
@@ -446,11 +447,13 @@ void machinewireview_readconfig(MachineWireView* self)
 		if (self->drawvumeters) {
 			ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
 		}
+		self->skin.drawmachineindexes = properties_bool(mv, "drawmachineindexes", 1);
 	}
 }
 
 void machinewireview_applyproperties(MachineWireView* self, Properties* p)
 {
+	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);
 	self->skin.colour = properties_int(p, "mv_colour", 0x00232323);
 	self->skin.wirecolour = properties_int(p, "mv_wirecolour", 0x005F5F5F);
 	self->skin.selwirecolour = properties_int(p, "mv_wirecolour", 0x007F7F7F);

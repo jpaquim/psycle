@@ -20,7 +20,7 @@ static void OnEditChange(SettingsView*, ui_edit* sender);
 static void OnInputDefinerChange(SettingsView* self, InputDefiner* sender);
 static void OnDestroy(SettingsView*, ui_component* sender);
 static void OnSize(SettingsView*, ui_component* sender, ui_size*);
-static void OnScroll(SettingsView*, ui_component* sender, int cx, int cy);
+static void OnScroll(SettingsView*, ui_component* sender, int stepx, int stepy);
 static void DrawLineBackground(SettingsView*,Properties*);
 static void DrawKey(SettingsView*, Properties*, int column);
 static void DrawValue(SettingsView*, Properties*, int column);
@@ -478,9 +478,9 @@ void OnEditChange(SettingsView* self, ui_edit* sender)
 	}
 }
 
-void OnScroll(SettingsView* self, ui_component* sender, int cx, int cy)
+void OnScroll(SettingsView* self, ui_component* sender, int stepx, int stepy)
 {
-	self->dy += cy;
+	self->dy += (stepy * sender->scrollstepy);
 }
 
 void OnSize(SettingsView* self, ui_component* sender, ui_size* size)

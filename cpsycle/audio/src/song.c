@@ -32,13 +32,15 @@ void song_init(Song* self, MachineFactory* machinefactory)
 
 void song_initproperties(Song* self)
 {
-	self->properties = properties_create();
-	properties_append_string(self->properties, "title", "Untitled");	
-	properties_append_string(self->properties, "credits", "Unnamed");
-	properties_append_string(self->properties, "comments", "No Comments");
-	properties_append_double(self->properties, "bpm", 125.0, 0, 999);
-	properties_append_int(self->properties, "lpb", 4, 1, 999);
-	properties_append_int(self->properties, "tracks", 16, 1, 64);
+	self->properties.title = strdup("Untitled");
+	self->properties.credits = strdup("Unnamed");
+	self->properties.comments = strdup("No Comments");
+	self->properties.bpm = (beat_t) 125.0;
+	self->properties.lpb = 4;
+	self->properties.tracks = 16;
+	self->properties.octave = 4;
+	self->properties.tpb = 24;
+	self->properties.extraticksperbeat = 0;
 }
 
 void song_initmachines(Song* self)
@@ -73,8 +75,12 @@ void song_initsignals(Song* self)
 
 void song_dispose(Song* self)
 {
-	properties_free(self->properties);
-	self->properties = 0;	
+	free(self->properties.title);
+	self->properties.title = 0;
+	free(self->properties.credits);
+	self->properties.credits = 0;
+	free(self->properties.comments);
+	self->properties.comments = 0;
 	machines_dispose(&self->machines);
 	patterns_dispose(&self->patterns);
 	sequence_dispose(&self->sequence);		

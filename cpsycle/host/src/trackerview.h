@@ -134,6 +134,9 @@ typedef struct TrackerView {
 	TrackerSkin skin;
 	ui_font font;
 	int showlinenumbers;
+	int showlinenumbercursor;
+	int showlinenumbersinhex;
+	int wraparound;
 	int showemptydata;
 	Workspace* workspace;
 	unsigned int opcount;

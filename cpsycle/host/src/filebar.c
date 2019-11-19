@@ -55,14 +55,7 @@ void filebar_initalign(FileBar* self)
 void filebar_onnewsong(FileBar* self, ui_component* sender)
 {
 	workspace_newsong(self->workspace);
-	if (self->workspace->song->properties) {
-		Properties* title;
-		title = properties_find(self->workspace->song->properties, "title");
-		if (title) {
-			const char* titlestr = properties_readstring(title, "title", "Untitled");			
-			// ui_statusbar_settext(&self->statusbar, 0, titlestr);
-		}
-	}	
+	// todo update statustbar with song title 
 }
 
 void filebar_onloadsong(FileBar* self, ui_component* sender)

@@ -246,12 +246,12 @@ void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, amp_t vol)
 	if (source) {
 		for (channel = 0; channel < source->numchannels && 
 			channel < dst->numchannels; ++channel) {
-				dsp_add(
+				dsp.add(
 					source->samples[channel],
 					dst->samples[channel],
 					numsamples,
 					vol);
-				dsp_erase_all_nans_infinities_and_denormals(
+				dsp.erase_all_nans_infinities_and_denormals(
 					dst->samples[channel], numsamples);					
 		}
 	}

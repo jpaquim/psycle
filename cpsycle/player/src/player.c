@@ -4,11 +4,17 @@
 #include "../../detail/prefix.h"
 
 #include <stdio.h>
+#include <operations.h>
 #include <player.h>
 #include <songio.h>
 #include <exclusivelock.h>
-
-#define PSYCLE__PLAYER__EOF "C"
+#ifdef _WIN32
+#include <windows.h>
+#include <conio.h>
+#else
+#include "coniotermios.h"
+#endif
+#include <dir.h>
 
 typedef struct {
 	Player player;
@@ -23,6 +29,7 @@ typedef struct {
 } CmdPlayer;
 
 static void cmdplayer_init(CmdPlayer*);
+static void cmdplayer_initenv(CmdPlayer*);
 static void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer*);
 static void cmdplayer_dispose(CmdPlayer*);
 static void cmdplayer_scanplugins(CmdPlayer*);
@@ -31,9 +38,9 @@ static void cmdplayer_makeinputoutput(CmdPlayer*);
 static const char* cmdplayer_driverpath(CmdPlayer*);
 static void cmdplayer_setdriverlist(CmdPlayer*);
 static void cmdplayer_loadsong(CmdPlayer*, const char* path);
-static void cmdplayer_setsong(CmdPlayer*, Song*, int flag);
 static void cmdplayer_applysongproperties(CmdPlayer*);
 static MachineCallback machinecallback(CmdPlayer*);
+static void cmdplayer_idle(void);
 /// Machinecallback
 static MachineCallback machinecallback(CmdPlayer*);
 static unsigned int machinecallback_samplerate(CmdPlayer*);
@@ -116,30 +123,66 @@ int main(int argc, char *argv[])
 	} else {
 		cmdplayer_init(&cmdplayer);		
 		cmdplayer_loadsong(&cmdplayer, argv[1]);		
-		printf("psycle: player: press enter or ctrl+" PSYCLE__PLAYER__EOF " (EOF) to stop.\n");
-		player_start(&cmdplayer.player);
-		while ((c = getchar()) != EOF) {
-			if (c == '\n') {
+		printf("psycle: player: press q to stop.\n");
+		sequencer_stoploop(&cmdplayer.player.sequencer);
+		player_setposition(&cmdplayer.player, (beat_t) 0.f);
+		player_start(&cmdplayer.player);		
+#if !defined _WIN32
+		set_conio_terminal_mode();
+#endif
+	c = '\0';
+	while (player_playing(&cmdplayer.player)) {
+		if (kbhit()) {
+			c = getch();
+			if (c == 'q') {
 				break;
 			}
-		}
-		cmdplayer_dispose(&cmdplayer);
+		}		
+		cmdplayer_idle();
+	}
+	cmdplayer_dispose(&cmdplayer);
 	}
 	return 0;
 }
 
+void cmdplayer_idle(void)
+{
+#ifdef _WIN32
+	Sleep(200);
+#else
+	usleep(2000);
+#endif
+}
+
 void cmdplayer_init(CmdPlayer* self)
 {
+	cmdplayer_initenv(self);
 	lock_init();
+	dsp_noopt_init(&dsp);
 	self->config = properties_create();
 	cmdplayer_makedirectories(self);
 	cmdplayer_makeinputoutput(self);
 	cmdplayer_setdriverlist(self);
 	cmdplayer_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);	
-	player_init(&self->player, self->song, (void*)0);
-	player_loaddriver(&self->player, cmdplayer_driverpath(self));
+	player_init(&self->player, self->song, (void*)0);	
+	player_loaddriver(&self->player, cmdplayer_driverpath(self));	
+	printf("Audio driver %s \n", 
+		properties_readstring(self->player.driver->properties, "name",
+		"no description"));
 }
+
+void cmdplayer_initenv(CmdPlayer* self)
+{
+	char workpath[_MAX_PATH];
+	const char* env = 0;	
+	
+	env = pathenv();	
+	if (env) {			
+		insertpathenv(workdir(workpath));
+	}
+}
+
 
 void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 {
@@ -253,35 +296,24 @@ const char* cmdplayer_driverpath(CmdPlayer* self)
 }
 
 void cmdplayer_loadsong(CmdPlayer* self, const char* path)
-{	
-	Song* song;
+{		
+	Song* oldsong;
 	SongFile songfile;
 
-//	properties_free(self->properties);
-	song = song_allocinit(&self->machinefactory);
-	// signal_connect(&song->signal_loadprogress, self, workspace_onloadprogress);
-	songfile.song = song;
+	player_stop(&self->player);
+	oldsong = self->song;
+	lock_enter();	
+	self->song = song_allocinit(&self->machinefactory);	
+	songfile.song = self->song;
 	songfile.file = 0;	
 	songfile_load(&songfile, path);	
-	// self->properties = songfile.workspaceproperties;
-	// free(self->filename);
-	// self->filename = strdup(path);
-	cmdplayer_setsong(self, song, 0); //WORKSPACE_LOADSONG);
-}
-
-void cmdplayer_setsong(CmdPlayer* self, Song* song, int flag)
-{
-	Song* oldsong;
-
-	oldsong = self->song;
-	player_stop(&self->player);
-	lock_enter();	
-	self->song = song;
+	if (songfile.err) {
+		fprintf(stderr, "Couldn't load song\n");
+	}	
 	player_setsong(&self->player, self->song);
 	cmdplayer_applysongproperties(self);
-//	signal_emit(&self->signal_songchanged, self, 1, flag);	
 	lock_leave();
-	song_free(oldsong);	
+	song_free(oldsong);
 }
 
 void cmdplayer_applysongproperties(CmdPlayer* self)

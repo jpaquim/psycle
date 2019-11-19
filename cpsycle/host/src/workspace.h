@@ -78,6 +78,9 @@ int workspace_showsonginfoonload(Workspace*);
 int workspace_showaboutatstart(Workspace*);
 int workspace_showmaximizedatstart(Workspace*);
 int workspace_showlinenumbers(Workspace*);
+int workspace_showlinenumbercursor(Workspace*);
+int workspace_showlinenumbersinhex(Workspace*);
+int workspace_showmachineindexes(Workspace*);
 void workspace_configchanged(Workspace*, Properties* property,
 	Properties* choice);
 void workspace_undo(Workspace*);

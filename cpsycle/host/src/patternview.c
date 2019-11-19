@@ -20,8 +20,7 @@ static void OnKeyDown(PatternView*, ui_component* sender, KeyEvent*);
 static void OnStatusDraw(PatternViewStatus*, ui_component* sender, ui_graphics* g);
 static void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, ui_size* rv);
 static void OnPatternEditPositionChanged(PatternViewStatus*, Workspace* sender);
-static void OnStatusSequencePositionChanged(PatternViewStatus*, Sequence* sender);
-static void OnStatusSongChanged(PatternViewStatus*, Workspace* sender);
+static void OnStatusSequenceSelectionChanged(PatternViewStatus*, Workspace* sender);
 
 void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Workspace* workspace)
 {		
@@ -32,23 +31,15 @@ void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Worksp
 	signal_connect(&self->component.signal_draw, self, OnStatusDraw);
 	signal_connect(&workspace->signal_editpositionchanged, self, OnPatternEditPositionChanged);
 	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self, onstatuspreferredsize);
-	signal_connect(&workspace->signal_songchanged, self, OnStatusSongChanged);
-//	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-//		self, OnStatusSequencePositionChanged);
+	signal_connect(&self->component.signal_preferredsize, self, onstatuspreferredsize);	
+	signal_connect(&workspace->signal_sequenceselectionchanged,
+		self, OnStatusSequenceSelectionChanged);
 }
 
-void OnStatusSequencePositionChanged(PatternViewStatus* self, Sequence* sender)
+void OnStatusSequenceSelectionChanged(PatternViewStatus* self,
+	Workspace* sender)
 {
 	ui_component_invalidate(&self->component);
-}
-
-void OnStatusSongChanged(PatternViewStatus* self, Workspace* workspace)
-{
-	if (workspace->song) {
-//		signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-//			self, OnStatusSequencePositionChanged);
-	}
 }
 
 void OnPatternEditPositionChanged(PatternViewStatus* self, Workspace* sender)
@@ -60,19 +51,18 @@ void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
 {
 	char text[256];
 	PatternEditPosition editposition;
-//	SequencePosition sequenceposition;
-//	SequenceEntry* sequenceentry;
+	SequencePosition sequenceposition;
+	SequenceEntry* sequenceentry;
 	int pattern;
 
 	editposition = workspace_patterneditposition(self->workspace);
-//	sequenceposition = 
-//		sequence_editposition(&self->workspace->song->sequence);
-//	sequenceentry = sequenceposition_entry(&sequenceposition);	
-//	if (sequenceentry) {
-//		pattern = sequenceentry->pattern;
-//	} else {
-	pattern = editposition.pattern;
-//	}	
+	sequenceposition = workspace_sequenceselection(self->workspace).editposition;		
+	sequenceentry = sequenceposition_entry(&sequenceposition);	
+	if (sequenceentry) {
+		pattern = sequenceentry->pattern;
+	} else {
+		pattern = -1;
+	}	
 	ui_settextcolor(g, 0x00D1C5B6);
 	ui_setbackgroundmode(g, TRANSPARENT);
 	psy_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d         Edit ON",

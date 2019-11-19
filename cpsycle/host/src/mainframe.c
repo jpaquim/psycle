@@ -101,7 +101,8 @@ void mainframe_init(MainFrame* self)
 	InitSamplesView(&self->samplesview, &self->notebook.component, &self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
-	songproperties_init(&self->songproperties, &self->notebook.component, &self->workspace);	
+	songpropertiesview_init(&self->songpropertiesview, &self->notebook.component,
+		&self->workspace);	
 	InitSettingsView(&self->settingsview, &self->notebook.component,
 		&self->tabbars, self->workspace.config);	
 	signal_connect(&self->settingsview.signal_changed, self, OnSettingsViewChanged);
@@ -120,15 +121,10 @@ void mainframe_init(MainFrame* self)
 	signal_connect(&self->splitbar.signal_mousedown, self, OnMouseDown);	
 	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
 	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);	
-	SetStartPage(self);
-	if (self->workspace.song->properties) {
-		Properties* title;
-		title = properties_find(self->workspace.song->properties, "title");
-		if (title) {						
-			SetStatusBarText(self, properties_valuestring(title));
-		}
-	}
-	SetStatusBarText(self, StatusBarIdleText(self));
+	SetStartPage(self);	
+	if (self->workspace.song) {
+		SetStatusBarText(self, self->workspace.song->properties.title);	
+	}	
 	signal_emit(&self->workspace.signal_configchanged, &self->workspace, 1,
 		self->workspace.config);			
 }
@@ -139,17 +135,10 @@ void SetStatusBarText(MainFrame* self, const char* text)
 }
 
 const char* StatusBarIdleText(MainFrame* self)
-{
-	const char* rv;
-
-	if (self->workspace.song->properties) {
-		Properties* title;
-		title = properties_find(self->workspace.song->properties, "title");
-		if (title) {						
-			rv = properties_valuestring(title);
-		}
-	}
-	return rv;
+{	
+	return self->workspace.song
+		? self->workspace.song->properties.title
+		: 0;	
 }
 
 void InitStatusBar(MainFrame* self)
@@ -384,14 +373,8 @@ void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
 		if (workspace_showsonginfoonload(&self->workspace)) {
 			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);
 		}
-		if (self->workspace.song->properties) {
-			Properties* title;			
-
-			title = properties_find(self->workspace.song->properties, "title");
-			if (title) {
-				const char* titlestr = properties_readstring(title, "title", "Untitled");
-				SetStatusBarText(self, titlestr);				
-			}						
+		if (self->workspace.song) {			
+			SetStatusBarText(self, self->workspace.song->properties.title);									
 		}
 	}
 	UpdateTitle(self);
