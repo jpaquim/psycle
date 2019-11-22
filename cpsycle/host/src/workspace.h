@@ -20,16 +20,6 @@ enum {
 };
 
 typedef struct {	
-	unsigned int track;
-	double offset;
-	unsigned int line;
-	unsigned int subline;
-	unsigned int totallines;
-	unsigned int col;
-	uintptr_t pattern;
-} PatternEditPosition;
-
-typedef struct {	
 	Song* song;
 	Player player;	
 	Properties* config;
@@ -60,6 +50,7 @@ typedef struct {
 	int hasplugincache;
 	char* filename;
 	int followsong;
+	Pattern patternpaste;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);

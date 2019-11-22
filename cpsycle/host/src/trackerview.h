@@ -8,6 +8,7 @@
 #include "skincoord.h"
 #include "tabbar.h"
 #include "workspace.h"
+#include <uibutton.h>
 #include <inputmap.h>
 
 #include <pattern.h>
@@ -57,6 +58,8 @@ typedef struct {
 	PatternEditPosition bottomright;
 } TrackerGridBlock;
 
+typedef TrackerGridBlock PatternSelection;
+
 typedef struct {
 	ui_component component;
 	int dx;
@@ -90,6 +93,23 @@ void trackerlinenumbers_init(TrackerLineNumbers*, ui_component* parent,
 #define TRACKERGRID_numparametercols 10
 
 typedef struct {
+	ui_component component;
+	ui_button cut;
+	ui_button copy;
+	ui_button paste;
+	ui_button mixpaste;
+	ui_button del;
+	ui_button changegenerator;
+	ui_button changeinstrument;
+	ui_button blocktransposeup;
+	ui_button blocktransposedown;
+	ui_button blocktransposeup12;	
+	ui_button blocktransposedown12;
+} PatternBlockMenu;
+
+void patternblockmenu_init(PatternBlockMenu*, ui_component*);
+
+typedef struct {
    ui_component component;   
    int cx;
    int cy;
@@ -111,10 +131,13 @@ typedef struct {
    int colx[TRACKERGRID_numparametercols];
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
-   struct TrackerView* view;   
+   struct TrackerView* view;
+   PatternSelection selection;
+   int hasselection;
 } TrackerGrid;
 
-void InitTrackerGrid(TrackerGrid*, ui_component* parent, struct TrackerView*, Player*);
+void InitTrackerGrid(TrackerGrid*, ui_component* parent, struct TrackerView*,
+	Player*);
 
 typedef Inputs TrackerInputs;
 
@@ -129,7 +152,8 @@ typedef struct TrackerView {
 	TrackerHeader header;
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
-	TrackerGrid grid;	
+	TrackerGrid grid;
+	PatternBlockMenu blockmenu;
 	Pattern* pattern;
 	TrackerSkin skin;
 	ui_font font;
@@ -146,7 +170,7 @@ typedef struct TrackerView {
 	beat_t lastplayposition;
 	beat_t sequenceentryoffset;
 	List* sublines;
-	Table screenlines;
+	Table screenlines;	
 } TrackerView;
 
 void trackerview_init(TrackerView*, ui_component* parent, Workspace*);

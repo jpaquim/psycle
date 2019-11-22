@@ -126,7 +126,26 @@ void* table_at(Table* self, uintptr_t k)
 
 int table_exists(Table* self, uintptr_t k)
 {	
-	return (self->count > 0) && (self->keys[h(k, self->arraysize)] != 0);
+	int rv = 0;
+	  	
+	if (self->count > 0) {
+		uintptr_t hn;
+
+		hn = h(k, self->arraysize);
+		if (self->keys[hn] != 0) {		
+			HashEntry* p;
+
+			p = self->keys[hn];
+			while (p != 0) {
+				if (k == p->key) {
+					rv = 1;
+					break;
+				}
+				p = p->next;
+			}		
+		}
+	}
+	return rv;
 }
 
 uintptr_t table_size(Table* self)

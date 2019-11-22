@@ -317,6 +317,7 @@ void OnKeyDown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
 	} else
 	if (keyevent->keycode == VK_F3) {
 		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
+		ui_component_setfocus(&self->patternview.trackerview.grid.component);
 	} else	 
 	if (keyevent->keycode == VK_F6) {
 		tabbar_select(&self->tabbar, TABPAGE_SETTINGSVIEW);
@@ -333,13 +334,16 @@ void OnKeyDown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
 		machineview_applyproperties(&self->machineview, properties);
 		properties_free(properties);
 	} else {			
-		EventDriver* kbd;
-		int input;
-		
-		input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
-			GetKeyState(VK_CONTROL) < 0);		
-		kbd = workspace_kbddriver(&self->workspace);
-		kbd->write(kbd, (unsigned char*)&input, 4);
+		if (keyevent->keycode != VK_CONTROL &&
+			keyevent->keycode != VK_SHIFT) {
+			EventDriver* kbd;
+			int input;
+			
+			input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
+				GetKeyState(VK_CONTROL) < 0);		
+			kbd = workspace_kbddriver(&self->workspace);
+			kbd->write(kbd, (unsigned char*)&input, 4);
+		}
 
 		/*Machine* machine;
 		int base;

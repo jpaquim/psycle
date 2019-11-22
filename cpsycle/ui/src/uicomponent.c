@@ -592,7 +592,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					return 0;
 				}
 			break;
-			case WM_MOUSEMOVE:							
+			case WM_MOUSEMOVE:
 				if (!tracking) {
 					TRACKMOUSEEVENT tme;
 
@@ -612,7 +612,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), wParam);					
+						(SHORT)HIWORD (lParam), wParam);
 					signal_emit(&component->signal_mousemove, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -772,16 +772,22 @@ ui_rectangle ui_component_position(ui_component* self)
 {   
 	ui_rectangle rv;
 	RECT rc;
-	RECT prc;	
-	HWND pHwnd;
+	POINT pt;	
+	int width;
+	int height;	
 	    	
     GetWindowRect((HWND)self->hwnd, &rc);
-	pHwnd = GetParent((HWND)self->hwnd);
-	GetWindowRect(pHwnd, &prc);	
-	rv.left = rc.left - prc.left;
-	rv.top = rc.top - prc.top;
-	rv.right =  rv.left + (rc.right - rc.left);
-	rv.bottom = rv.top + (rc.bottom - rc.top);
+	width = rc.right - rc.left;
+	height = rc.bottom - rc.top;
+	pt.x = rc.left;
+	pt.y = rc.top;
+	ScreenToClient(GetParent((HWND)self->hwnd), &pt);
+
+	
+	rv.left = pt.x;
+	rv.top = pt.y;
+	rv.right =  pt.x + width;
+	rv.bottom = pt.y + height;
 	return rv;
 }
 
