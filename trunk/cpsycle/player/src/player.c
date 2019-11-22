@@ -317,13 +317,9 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 }
 
 void cmdplayer_applysongproperties(CmdPlayer* self)
-{	
-	double dTmp;
-
-	properties_readdouble(self->song->properties, "bpm", &dTmp, 125.0);
-	player_setbpm(&self->player, (float)dTmp);	
-	player_setlpb(&self->player, properties_int(self->song->properties, 
-		"lpb", 4));
+{			
+	player_setbpm(&self->player, self->song->properties.bpm);	
+	player_setlpb(&self->player, self->song->properties.lpb);
 }
 
 // callbacks

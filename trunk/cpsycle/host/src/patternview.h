@@ -30,15 +30,15 @@ typedef struct {
 void patternviewbar_init(PatternViewBar*, ui_component* parent, Workspace*);
 
 typedef struct PatternView {
-	ui_component component;	
+	ui_component component;
 	ui_notebook notebook;
+	ui_notebook editnotebook;
 	TrackerView trackerview;
 	PatternProperties properties;
 	Pianoroll pianoroll;	
 	TabBar tabbar;
 	Workspace* workspace;
-	unsigned int lpb;
-	ui_button split;
+	unsigned int lpb;	
 } PatternView;
 
 void patternview_init(PatternView*, ui_component* parent,

@@ -8,9 +8,9 @@
 static void onsize(ui_notebook*, ui_component* sender, ui_size* size);
 static void align_split(ui_notebook* self, int x);
 static void ontabbarchange(ui_notebook*, ui_component* sender, int tabindex);
-static void onmousedown(ui_notebook*, ui_component* sender, int x, int y, int button);
-static void onmousemove(ui_notebook*, ui_component* sender, int x, int y, int button);
-static void onmouseup(ui_notebook*, ui_component* sender, int x, int y, int button);
+static void onmousedown(ui_notebook*, ui_component* sender, MouseEvent* ev);
+static void onmousemove(ui_notebook*, ui_component* sender, MouseEvent* ev);
+static void onmouseup(ui_notebook*, ui_component* sender, MouseEvent* ev);
 static void onmouseentersplitbar(ui_notebook*, ui_component* sender);
 static void onmouseleavesplitbar(ui_notebook*, ui_component* sender);
 
@@ -100,7 +100,7 @@ void ui_notebook_split(ui_notebook* self)
 {
 	if (self->splitbar.hwnd == 0) {
 		self->split = 1;
-		self->splitx = 200;
+		self->splitx = 400;
 		ui_component_init(&self->splitbar, &self->component);
 		signal_connect(&self->splitbar.signal_mouseenter, self, onmouseentersplitbar);
 		signal_connect(&self->splitbar.signal_mouseleave, self, onmouseleavesplitbar);
@@ -123,7 +123,7 @@ void ui_notebook_full(ui_notebook* self)
 }
 
 
-void onmousedown(ui_notebook* self, ui_component* sender, int x, int y, int button)
+void onmousedown(ui_notebook* self, ui_component* sender, MouseEvent* ev)
 {	
 	if (self->split) {
 		ui_component_capture(sender);
@@ -131,7 +131,7 @@ void onmousedown(ui_notebook* self, ui_component* sender, int x, int y, int butt
 	}
 }
 
-void onmousemove(ui_notebook* self, ui_component* sender, int x, int y, int button)
+void onmousemove(ui_notebook* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->split && self->splitx == -1) {				
 		ui_size size;
@@ -139,14 +139,14 @@ void onmousemove(ui_notebook* self, ui_component* sender, int x, int y, int butt
 	
 		size = ui_component_size(&self->component);
 		position = ui_component_position(sender);
-		ui_component_move(sender, position.left + x, size.height);		
-		align_split(self, position.left + x);
+		ui_component_setposition(sender, position.left + ev->x, 0, 4, size.height);		
+		align_split(self, position.left + ev->x);
 		ui_component_invalidate(&self->component);
 		ui_component_update(&self->component);		
 	}
 }
 
-void onmouseup(ui_notebook* self, ui_component* sender, int x, int y, int button)
+void onmouseup(ui_notebook* self, ui_component* sender, MouseEvent* ev)
 {	
 	if (self->split) {
 		ui_size size;
@@ -154,8 +154,8 @@ void onmouseup(ui_notebook* self, ui_component* sender, int x, int y, int button
 	
 		size = ui_component_size(&self->component);
 		position = ui_component_position(sender);
-		ui_component_move(sender, position.left + x, size.height);
-		self->splitx = position.left + x;
+		ui_component_move(sender, position.left + ev->x, size.height);
+		self->splitx = position.left + ev->x;
 		align_split(self, self->splitx);
 		ui_component_releasecapture();
 	}

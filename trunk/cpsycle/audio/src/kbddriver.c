@@ -152,10 +152,9 @@ int driver_close(EventDriver* driver)
 void driver_write(EventDriver* driver, unsigned char* data, int size)
 {	
 	KbdDriver* self;
-	int cmd;
+	int cmd;	
 
-	self = (KbdDriver*)(driver);
-	
+	self = (KbdDriver*)(driver);	
 	cmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
 	if (cmd == CMD_NOTE_STOP) {
 		int note;

@@ -25,6 +25,7 @@ void pattern_init(Pattern* self)
 	self->length = 16;
 	self->label = _strdup("Untitled");	
 	self->opcount = 0;
+	self->maxsongtracks = 0;
 }
 
 void pattern_dispose(Pattern* self)
@@ -237,4 +238,115 @@ void pattern_scale(Pattern* self, float factor)
 
 		entry->offset *= factor;
 	}
+}
+
+void pattern_blockremove(Pattern* self, PatternEditPosition begin, 
+	PatternEditPosition end)
+{	
+	PatternNode* p;
+	PatternNode* q;
+
+	p = pattern_greaterequal(self, (beat_t) begin.offset);	
+	while (p != 0) {			
+		PatternEntry* entry;
+		q = p->next;
+
+		entry = (PatternEntry*) p->entry;
+		if (entry->offset < end.offset) {
+			if (entry->track >= begin.track && entry->track < end.track) {
+				pattern_remove(self, p);
+			}
+		} else {
+			break;
+		}
+		p = q;
+	}
+}
+
+void pattern_blocktranspose(Pattern* self, PatternEditPosition begin, 
+	PatternEditPosition end, int offset)
+{	
+	PatternNode* p;
+	PatternNode* q;
+
+	p = pattern_greaterequal(self, (beat_t) begin.offset);
+	while (p != 0) {			
+		PatternEntry* entry;
+		q = p->next;
+
+		entry = (PatternEntry*) p->entry;
+		if (entry->offset < end.offset) {
+			if (entry->track >= begin.track && entry->track < end.track) {
+				if (entry->event.note < NOTECOMMANDS_RELEASE) {
+					if (entry->event.note + offset < 0) {
+						entry->event.note = 0;
+					} else {
+						entry->event.note += offset;
+					}					
+					if (entry->event.note >= NOTECOMMANDS_RELEASE) {
+						entry->event.note = NOTECOMMANDS_RELEASE - 1;
+					}
+				}
+			}
+		} else {
+			break;
+		}	
+		p = q;
+	}
+}
+
+void pattern_changemachine(Pattern* self, PatternEditPosition begin, 
+	PatternEditPosition end, int machine)
+{
+		PatternNode* p;
+	PatternNode* q;
+
+	p = pattern_greaterequal(self, (beat_t) begin.offset);
+	while (p != 0) {			
+		PatternEntry* entry;
+		q = p->next;
+
+		entry = (PatternEntry*) p->entry;
+		if (entry->offset < end.offset) {
+			if (entry->track >= begin.track && entry->track < end.track) {
+				entry->event.mach = machine;
+			}
+		} else {
+			break;
+		}	
+		p = q;
+	}
+}
+
+void pattern_changeinstrument(Pattern* self, PatternEditPosition begin, 
+	PatternEditPosition end, int instrument)
+{
+		PatternNode* p;
+	PatternNode* q;
+
+	p = pattern_greaterequal(self, (beat_t) begin.offset);
+	while (p != 0) {			
+		PatternEntry* entry;
+		q = p->next;
+
+		entry = (PatternEntry*) p->entry;
+		if (entry->offset < end.offset) {
+			if (entry->track >= begin.track && entry->track < end.track) {
+				entry->event.inst = instrument;
+			}
+		} else {
+			break;
+		}	
+		p = q;
+	}
+}
+
+void pattern_setmaxsongtracks(Pattern* self, uintptr_t num)
+{
+	self->maxsongtracks = num;
+}
+
+uintptr_t pattern_maxsongtracks(Pattern* self)
+{
+	return self->maxsongtracks;
 }

@@ -84,7 +84,8 @@ void workspace_init(Workspace* self, void* handle)
 	self->patterneditposition.line = 0;
 	self->patterneditposition.offset = 0;
 	self->patterneditposition.totallines = 0;
-	self->patterneditposition.track = 0;	
+	self->patterneditposition.track = 0;
+	pattern_init(&self->patternpaste);
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -126,6 +127,7 @@ void workspace_dispose(Workspace* self)
 	machinefactory_dispose(&self->machinefactory);
 	undoredo_dispose(&self->undoredo);
 	workspace_disposesignals(self);
+	pattern_dispose(&self->patternpaste);
 	lock_dispose();
 }
 

@@ -6,7 +6,7 @@
 #include "patternview.h"
 #include <portable.h>
 
-static void patternview_onsplit(PatternView*, ui_component* sender);
+static void ontabbarchange(PatternView*, ui_component* sender, int tabindex);
 static void OnSize(PatternView*, ui_component* sender, ui_size*);
 static void OnShow(PatternView*, ui_component* sender);
 static void OnHide(PatternView*, ui_component* sender);
@@ -109,28 +109,29 @@ void patternview_init(PatternView* self,
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
-	ui_notebook_init(&self->notebook, &self->component);	
-	trackerview_init(&self->trackerview, &self->notebook.component, workspace);
+	ui_notebook_init(&self->notebook, &self->component);
+	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_NONE);
+	ui_notebook_init(&self->editnotebook, &self->notebook.component);
+	ui_component_setbackgroundmode(&self->editnotebook.component, BACKGROUND_NONE);
+	ui_notebook_setpage(&self->editnotebook, 0);
+	trackerview_init(&self->trackerview, &self->editnotebook.component, workspace);
 	signal_connect(&self->component.signal_size, self, OnSize);	
-	pianoroll_init(&self->pianoroll, &self->notebook.component, workspace);
-	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
-	// InitPatternProperties(&self->properties, &self->notebook.component, 0);
-	// signal_connect(&self->properties.closebutton.signal_clicked, self, OnPropertiesClose);
-	// signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);	
+	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);
+	InitPatternProperties(&self->properties, &self->notebook.component, 0);
+	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));		
+	signal_connect(&self->properties.closebutton.signal_clicked, self, OnPropertiesClose);
+	signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);	
 	// Tabbar
 	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);	
 	ui_component_hide(&self->tabbar.component);	
 	tabbar_append(&self->tabbar, "Tracker");
-	tabbar_append(&self->tabbar, "Pianoroll");
-	// tabbar_append(&self->tabbar, "Properties");	
-	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	tabbar_select(&self->tabbar, 0);
-	ui_button_init(&self->split, tabbarparent);
-	ui_button_settext(&self->split, "Split");
-	ui_component_setalign(&self->split.component, UI_ALIGN_LEFT);	
-	ui_component_hide(&self->split.component);
-	signal_connect(&self->split.signal_clicked, self, patternview_onsplit);
+	tabbar_append(&self->tabbar, "Pianoroll");	
+	tabbar_append(&self->tabbar, "Split");
+	tabbar_append(&self->tabbar, "Properties");	
+	signal_connect(&self->tabbar.signal_change, self, ontabbarchange);
+	// ui_notebook_connectcontroller(&self->editnotebook, &self->tabbar.signal_change);
+	tabbar_select(&self->tabbar, 0);	
 	signal_connect(&self->component.signal_show, self, OnShow);
 	signal_connect(&self->component.signal_hide, self, OnHide);
 	signal_connect(&workspace->player.signal_lpbchanged, self, OnLpbChanged);
@@ -142,11 +143,30 @@ void patternview_init(PatternView* self,
 	self->lpb = player_lpb(&workspace->player);
 }
 
+void ontabbarchange(PatternView* self, ui_component* sender, int tabindex)
+{
+	if (tabindex < 2) {
+		if (self->editnotebook.splitbar.hwnd) {
+			ui_notebook_full(&self->editnotebook);						
+		}
+		ui_notebook_setpage(&self->notebook, 0);
+		ui_notebook_setpage(&self->editnotebook, tabindex);
+	} else 
+	if (tabindex == 2) {
+		ui_notebook_setpage(&self->notebook, 0);
+		if (self->editnotebook.splitbar.hwnd == 0) {		 
+			ui_notebook_split(&self->editnotebook);			
+		}
+	} else {
+		ui_notebook_setpage(&self->notebook, 1);
+	}
+}
+
 void patternview_setpattern(PatternView* self, Pattern* pattern)
 {	
 	trackerview_setpattern(&self->trackerview, pattern);
 	pianoroll_setpattern(&self->pianoroll, pattern);
-	// PatternPropertiesSetPattern(&self->properties, pattern);
+	PatternPropertiesSetPattern(&self->properties, pattern);
 }
 
 void OnSize(PatternView* self, ui_component* sender, ui_size* size)
@@ -156,30 +176,14 @@ void OnSize(PatternView* self, ui_component* sender, ui_size* size)
 
 void OnShow(PatternView* self, ui_component* sender)
 {			
-	self->tabbar.component.visible = 1;
-	self->split.component.visible = 1;
+	self->tabbar.component.visible = 1;	
 	ui_component_align(ui_component_parent(&self->tabbar.component));
-	ui_component_show(&self->tabbar.component);
-	ui_component_show(&self->split.component);
+	ui_component_show(&self->tabbar.component);	
 }
 
 void OnHide(PatternView* self, ui_component* sender)
 {	
-	ui_component_hide(&self->tabbar.component);
-	ui_component_hide(&self->split.component);			
-}
-
-void patternview_onsplit(PatternView* self, ui_component* sender)
-{
-	if (self->notebook.splitbar.hwnd) {
-		ui_notebook_full(&self->notebook);
-		ui_button_settext(&self->split, "Split");
-		ui_component_invalidate(&self->split.component);
-	} else {
-		ui_notebook_split(&self->notebook);
-		ui_button_settext(&self->split, "Full");
-		ui_component_invalidate(&self->split.component);
-	}
+	ui_component_hide(&self->tabbar.component);				
 }
 
 void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
@@ -256,6 +260,7 @@ void OnPropertiesClose(PatternView* self, ui_component* sender)
 
 void OnPropertiesApply(PatternView* self, ui_component* sender)
 {
+	patternview_setpattern(self, self->properties.pattern);
 }
 
 void OnKeyDown(PatternView* self, ui_component* sender, KeyEvent* keyevent)
