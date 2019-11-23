@@ -13,7 +13,7 @@ static void pianoheader_ondraw(PianoHeader*, ui_component* sender, ui_graphics*)
 void pianoheader_drawruler(PianoHeader*, ui_graphics*);
 
 
-static void pianoroll_onlpbchanged(Pianoroll*, Player* sender, unsigned int lpb);
+static void pianoroll_onlpbchanged(Pianoroll*, Player* sender, uintptr_t lpb);
 static void pianoroll_ontimer(Pianoroll*, ui_component* sender, 
 	int timerid);
 static void pianogrid_ondraw(Pianogrid*, ui_component* sender, ui_graphics*);
@@ -65,7 +65,8 @@ void pianoroll_init(Pianoroll* self, ui_component* parent, Workspace* workspace)
 	ui_component_init(&self->keyboardheader, &self->component);
 	pianokeyboard_init(&self->keyboard, &self->component);
 	pianogrid_init(&self->grid, &self->component, self);		
-	signal_connect(&workspace->player.signal_lpbchanged, self, pianoroll_onlpbchanged);
+	signal_connect(&workspace->player.signal_lpbchanged, self,
+		pianoroll_onlpbchanged);
 	pianoroll_updatemetrics(self);
 	ui_component_starttimer(&self->component, TIMERID_PIANOROLL, 100);
 }
@@ -76,7 +77,7 @@ void pianoroll_ondestroy(Pianoroll* self, ui_component* component)
 
 void pianoroll_ontimer(Pianoroll* self, ui_component* sender, int timerid)
 {
-	if (timerid == TIMERID_PIANOROLL) {		
+	if (timerid == TIMERID_PIANOROLL && self->pattern) {		
 		if (player_playing(&self->workspace->player)) {
 			pianoroll_invalidateline(self, self->lastplayposition);
 			self->lastplayposition = player_position(&self->workspace->player);			
@@ -507,7 +508,7 @@ void pianogrid_adjustscroll(Pianogrid* self)
 		metrics.keymax - metrics.keymin - metrics.visikeys);
 }
 
-void pianoroll_onlpbchanged(Pianoroll* self, Player* sender, unsigned int lpb)
+void pianoroll_onlpbchanged(Pianoroll* self, Player* sender, uintptr_t lpb)
 {
 	pianoroll_updatemetrics(self);
 	pianogrid_adjustscroll(&self->grid);

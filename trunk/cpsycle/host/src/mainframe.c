@@ -17,32 +17,43 @@
 #include <portable.h>
 #include "resources/resource.h"
 
-static void InitMenu(MainFrame*);
-static void InitStatusBar(MainFrame*);
-static void InitBars(MainFrame*);
-static void InitVuBar(MainFrame*);
-static void SetStatusBarText(MainFrame*, const char* text);
-static const char* StatusBarIdleText(MainFrame* self);
-static void Destroy(MainFrame*, ui_component* component);
-static void OnKeyDown(MainFrame*, ui_component* component, KeyEvent*);
-static void OnSequenceSelChange(MainFrame* , SequenceEntry* entry);
-static void OnAlign(MainFrame*, ui_component* sender);
-static void OnMouseDown(MainFrame*, ui_component* sender, MouseEvent*);
-static void OnMouseMove(MainFrame*, ui_component* sender, MouseEvent*);
-static void OnMouseUp(MainFrame*, ui_component* sender, MouseEvent*);
-static void OnGear(MainFrame*, ui_component* sender);
-static void OnGearCreate(MainFrame*, ui_component* sender);
-static void OnAboutOk(MainFrame*, ui_component* sender);
-static void OnUpdateDriver(MainFrame*, ui_component* sender);
-static void SetStartPage(MainFrame*);
-static void OnSettingsViewChanged(MainFrame*, SettingsView* sender, Properties*);
-static void OnMouseEnterSplitBar(MainFrame*, ui_component* sender);
-static void OnMouseLeaveSplitBar(MainFrame*, ui_component* sender);
-static void OnSongChanged(MainFrame*, ui_component* sender, int flag);
-static void onsongloadprogress(MainFrame*, Workspace*, int progress);
-static void onpluginscanprogress(MainFrame*, Workspace*, int progress);
-static void onrender(MainFrame*, ui_component* sender);
-static void UpdateTitle(MainFrame*);
+#define TIMERID_MAINFRAME 20
+
+static void mainframe_initmenu(MainFrame*);
+static void mainframe_initstatusbar(MainFrame*);
+static void mainframe_initbars(MainFrame*);
+static void mainframe_initvubar(MainFrame*);
+static void mainframe_setstatusbartext(MainFrame*, const char* text);
+static const char* mainframe_statusbaridletext(MainFrame* self);
+static void mainframe_destroy(MainFrame*, ui_component* component);
+static void mainframe_onkeydown(MainFrame*, ui_component* component,
+	KeyEvent*);
+static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry* entry);
+static void mainframe_onalign(MainFrame*, ui_component* sender);
+static void mainframe_onmousedown(MainFrame*, ui_component* sender,
+	MouseEvent*);
+static void mainframe_onmousemove(MainFrame*, ui_component* sender,
+	MouseEvent*);
+static void mainframe_onmouseup(MainFrame*, ui_component* sender,
+	MouseEvent*);
+static void mainframe_ongear(MainFrame*, ui_component* sender);
+static void mainframe_ongearcreate(MainFrame*, ui_component* sender);
+static void mainframe_onaboutok(MainFrame*, ui_component* sender);
+static void mainframe_onupdatedriver(MainFrame*, ui_component* sender);
+static void mainframe_setstartpage(MainFrame*);
+static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
+	Properties*);
+static void mainframe_onmouseentersplitbar(MainFrame*, ui_component* sender);
+static void mainframe_onmouseleavesplitbar(MainFrame*, ui_component* sender);
+static void mainframe_onsongchanged(MainFrame*, ui_component* sender,
+	int flag);
+static void mainframe_onsongloadprogress(MainFrame*, Workspace*,
+	int progress);
+static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
+	int progress);
+static void mainframe_onrender(MainFrame*, ui_component* sender);
+static void mainframe_updatetitle(MainFrame*);
+static void mainframe_ontimer(MainFrame*, ui_component* sender, int timerid);
 
 HWND hwndmain;
 
@@ -62,7 +73,7 @@ void mainframe_init(MainFrame* self)
 	ui_margin tabbardividemargin = { 0, 30, 0, 0};
 
 	ui_frame_init(&self->component, 0);				
-	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);	
+	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	ui_component_enablealign(&self->component);
 	self->resize = 0;
 	workspace_init(&self->workspace, &self->component);	
@@ -70,13 +81,15 @@ void mainframe_init(MainFrame* self)
 	if (!workspace_hasplugincache(&self->workspace)) {
 		workspace_scanplugins(&self->workspace);
 	}	
-	signal_connect(&self->workspace.signal_songchanged, self, OnSongChanged);
-	UpdateTitle(self);
+	signal_connect(&self->workspace.signal_songchanged, self,
+		mainframe_onsongchanged);
+	mainframe_updatetitle(self);
 	self->firstshow = 1;	
-	InitBars(self);	
-	signal_connect(&self->component.signal_destroy, self, Destroy);
-	signal_connect(&self->component.signal_align, self, OnAlign);	
-	signal_connect(&self->component.signal_keydown, self, OnKeyDown);	
+	mainframe_initbars(self);
+	signal_connect(&self->component.signal_destroy, self, mainframe_destroy);
+	signal_connect(&self->component.signal_align, self, mainframe_onalign);	
+	signal_connect(&self->component.signal_keydown, self, mainframe_onkeydown);
+	signal_connect(&self->component.signal_timer, self, mainframe_ontimer);
 	ui_component_init(&self->tabbars, &self->component);
 	ui_component_enablealign(&self->tabbars);
 	tabbar_init(&self->tabbar, &self->tabbars);	
@@ -91,57 +104,73 @@ void mainframe_init(MainFrame* self)
 	tabbar_settabmargin(&self->tabbar, 4, &tabbardividemargin);	
 	// splitbar
 	ui_component_init(&self->splitbar, &self->component);	
-	signal_connect(&self->splitbar.signal_mouseenter, self, OnMouseEnterSplitBar);
-	signal_connect(&self->splitbar.signal_mouseleave, self, OnMouseLeaveSplitBar);
+	signal_connect(&self->splitbar.signal_mouseenter, self,
+		mainframe_onmouseentersplitbar);
+	signal_connect(&self->splitbar.signal_mouseleave, self,
+		mainframe_onmouseleavesplitbar);
 	/// init notebook views
 	ui_notebook_init(&self->notebook, &self->component);	
-	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	machineview_init(&self->machineview, &self->notebook.component, &self->tabbars, &self->workspace);
-	patternview_init(&self->patternview, &self->notebook.component, &self->tabbars, &self->workspace);	
-	InitSamplesView(&self->samplesview, &self->notebook.component, &self->tabbars, &self->workspace);	
+	ui_notebook_connectcontroller(&self->notebook,
+		&self->tabbar.signal_change);
+	machineview_init(&self->machineview, &self->notebook.component, 
+		&self->tabbars, &self->workspace);
+	patternview_init(&self->patternview, &self->notebook.component,
+		&self->tabbars, &self->workspace);	
+	InitSamplesView(&self->samplesview, &self->notebook.component,
+		&self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
-	songpropertiesview_init(&self->songpropertiesview, &self->notebook.component,
-		&self->workspace);	
+	songpropertiesview_init(&self->songpropertiesview,
+		&self->notebook.component, &self->workspace);	
 	InitSettingsView(&self->settingsview, &self->notebook.component,
 		&self->tabbars, self->workspace.config);	
-	signal_connect(&self->settingsview.signal_changed, self, OnSettingsViewChanged);
+	signal_connect(&self->settingsview.signal_changed, self,
+		mainframe_onsettingsviewchanged);
 	InitHelpView(&self->helpview, &self->notebook.component, &self->tabbars,
 		&self->workspace);	
-	signal_connect(&self->helpview.about.okbutton.signal_clicked, self, OnAboutOk);	
-	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);	
+	signal_connect(&self->helpview.about.okbutton.signal_clicked, self,
+		mainframe_onaboutok);
+	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);
 	renderview_init(&self->renderview, &self->notebook.component,
 		&self->tabbars, &self->workspace);	
-	signal_connect(&self->filebar.renderbutton.signal_clicked, self, onrender);
+	signal_connect(&self->filebar.renderbutton.signal_clicked, self,
+		mainframe_onrender);
 	InitGear(&self->gear, &self->component, &self->workspace);
 	ui_component_hide(&self->gear.component);
-	signal_connect(&self->machinebar.gear.signal_clicked, self, OnGear);	
-	signal_connect(&self->gear.buttons.createreplace.signal_clicked, self, OnGearCreate);			
-	InitStatusBar(self);
-	signal_connect(&self->splitbar.signal_mousedown, self, OnMouseDown);	
-	signal_connect(&self->splitbar.signal_mousemove, self, OnMouseMove);	
-	signal_connect(&self->splitbar.signal_mouseup, self, OnMouseUp);	
-	SetStartPage(self);	
+	signal_connect(&self->machinebar.gear.signal_clicked, self,
+		mainframe_ongear);
+	signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
+		mainframe_ongearcreate);
+	mainframe_initstatusbar(self);
+	signal_connect(&self->splitbar.signal_mousedown, self,
+		mainframe_onmousedown);
+	signal_connect(&self->splitbar.signal_mousemove, self,
+		mainframe_onmousemove);
+	signal_connect(&self->splitbar.signal_mouseup, self,
+		mainframe_onmouseup);
+	mainframe_setstartpage(self);
 	if (self->workspace.song) {
-		SetStatusBarText(self, self->workspace.song->properties.title);	
+		mainframe_setstatusbartext(self,
+			self->workspace.song->properties.title);
 	}	
 	signal_emit(&self->workspace.signal_configchanged, &self->workspace, 1,
-		self->workspace.config);			
+		self->workspace.config);
+	ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
 }
 
-void SetStatusBarText(MainFrame* self, const char* text)
+void mainframe_setstatusbartext(MainFrame* self, const char* text)
 {	
 	ui_label_settext(&self->statusbarlabel, text ? text : "");
 }
 
-const char* StatusBarIdleText(MainFrame* self)
+const char* mainframe_statusbaridletext(MainFrame* self)
 {	
 	return self->workspace.song
 		? self->workspace.song->properties.title
 		: 0;	
 }
 
-void InitStatusBar(MainFrame* self)
+void mainframe_initstatusbar(MainFrame* self)
 {	
 	ui_component_init(&self->statusbar, &self->component);	
 	ui_component_enablealign(&self->statusbar);
@@ -166,12 +195,12 @@ void InitStatusBar(MainFrame* self)
 	ui_progressbar_init(&self->progressbar, &self->statusbar);
 	ui_component_setalign(&self->progressbar.component, UI_ALIGN_RIGHT);	
 	signal_connect(&self->workspace.signal_loadprogress, self, 
-		onsongloadprogress);
+		mainframe_onsongloadprogress);
 	signal_connect(&self->workspace.signal_scanprogress, self, 
-		onpluginscanprogress);
+		mainframe_onpluginscanprogress);
 }
 
-void InitBars(MainFrame* self)
+void mainframe_initbars(MainFrame* self)
 {
 	ui_component_init(&self->top, &self->component);	
 	ui_component_resize(&self->top, 500, 400);
@@ -216,7 +245,7 @@ void InitBars(MainFrame* self)
 	ui_component_resize(&self->vubar.component, 200, 50);	
 }
 
-void SetStartPage(MainFrame* self)
+void mainframe_setstartpage(MainFrame* self)
 {		
 	if (workspace_showaboutatstart(&self->workspace)) {
 		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);
@@ -227,18 +256,18 @@ void SetStartPage(MainFrame* self)
 	}
 }
 
-void InitMenu(MainFrame* self)
+void mainframe_initmenu(MainFrame* self)
 {
 }
 
-void Destroy(MainFrame* self, ui_component* component)
+void mainframe_destroy(MainFrame* self, ui_component* component)
 {
 	workspace_save_configuration(&self->workspace);
 	workspace_dispose(&self->workspace);
 	ui_quit();
 }
 
-void OnAlign(MainFrame* self, ui_component* sender)
+void mainframe_onalign(MainFrame* self, ui_component* sender)
 {
 	ui_size size;
 	ui_size statusbarsize;
@@ -252,7 +281,7 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	
 	size = ui_component_size(&self->component);
 	statusbarsize = ui_component_preferredsize(&self->statusbar, &size);
-	tabbarsize = ui_component_preferredsize(&self->tabbar.component, &size);	
+	tabbarsize = ui_component_preferredsize(&self->tabbar.component, &size);
 	sequenceviewsize = ui_component_size(&self->sequenceview.component);
 	vusize = ui_component_size(&self->vubar.component);	
 	if (self->gear.component.visible) {
@@ -307,7 +336,7 @@ void OnAlign(MainFrame* self, ui_component* sender)
 	}	
 }
 
-void OnKeyDown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
+void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
 {	
 	if (keyevent->keycode == VK_F2) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
@@ -333,7 +362,41 @@ void OnKeyDown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
 		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
 		machineview_applyproperties(&self->machineview, properties);
 		properties_free(properties);
-	} else {			
+	} else 
+	if (keyevent->shift && keyevent->keycode == VK_RIGHT) {
+		if (self->workspace.song) {
+			SequenceSelection selection;
+			SequencePosition position;
+
+			selection = workspace_sequenceselection(&self->workspace);
+			if (selection.editposition.trackposition.tracknode &&
+					selection.editposition.trackposition.tracknode->next) {
+				sequencetrackiterator_incentry(&selection.editposition.trackposition);
+				position = sequence_makeposition(&self->workspace.song->sequence,
+					selection.editposition.track,
+					selection.editposition.trackposition.tracknode);
+				selection.editposition = position;
+				workspace_setsequenceselection(&self->workspace, selection);
+			}
+		}
+	} else
+	if (keyevent->shift && keyevent->keycode == VK_LEFT) {
+		if (self->workspace.song) {
+			SequenceSelection selection;
+			SequencePosition position;
+
+			selection = workspace_sequenceselection(&self->workspace);
+			if (selection.editposition.trackposition.tracknode &&
+					selection.editposition.trackposition.tracknode->prev) {
+				sequencetrackiterator_decentry(&selection.editposition.trackposition);			
+				position = sequence_makeposition(&self->workspace.song->sequence,
+					selection.editposition.track,
+					selection.editposition.trackposition.tracknode);
+				selection.editposition = position;
+				workspace_setsequenceselection(&self->workspace, selection);
+			}
+		}
+	} else {
 		if (keyevent->keycode != VK_CONTROL &&
 			keyevent->keycode != VK_SHIFT) {
 			EventDriver* kbd;
@@ -357,12 +420,12 @@ void OnKeyDown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
 	}
 }
 
-void onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
+void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
 {
 	ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
 }
 
-void onpluginscanprogress(MainFrame* self, Workspace* workspace, int progress)
+void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace, int progress)
 {	
 	if (progress == 0) {
 		ui_progressbar_setprogress(&self->progressbar, 0);
@@ -371,21 +434,22 @@ void onpluginscanprogress(MainFrame* self, Workspace* workspace, int progress)
 	}
 }
 
-void OnSongChanged(MainFrame* self, ui_component* sender, int flag)
+void mainframe_onsongchanged(MainFrame* self, ui_component* sender, int flag)
 {		
 	if (flag == WORKSPACE_LOADSONG) {
 		if (workspace_showsonginfoonload(&self->workspace)) {
 			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);
 		}
 		if (self->workspace.song) {			
-			SetStatusBarText(self, self->workspace.song->properties.title);									
+			mainframe_setstatusbartext(self,
+				self->workspace.song->properties.title);
 		}
 	}
-	UpdateTitle(self);
+	mainframe_updatetitle(self);
 	ui_component_invalidate(&self->component);	
 }
 
-void UpdateTitle(MainFrame* self)
+void mainframe_updatetitle(MainFrame* self)
 {	
 	char txt[512];
 	char name[512];
@@ -397,13 +461,13 @@ void UpdateTitle(MainFrame* self)
 	ui_component_settitle(&self->component, txt);
 }
 
-void OnMouseDown(MainFrame* self, ui_component* sender, MouseEvent* ev)
+void mainframe_onmousedown(MainFrame* self, ui_component* sender, MouseEvent* ev)
 {	
 	ui_component_capture(sender);
 	self->resize = 1;	
 }
 
-void OnMouseMove(MainFrame* self, ui_component* sender, MouseEvent* ev)
+void mainframe_onmousemove(MainFrame* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->resize == 1) {		
 		ui_size toolbarsize;
@@ -417,7 +481,7 @@ void OnMouseMove(MainFrame* self, ui_component* sender, MouseEvent* ev)
 	}
 }
 
-void OnMouseUp(MainFrame* self, ui_component* sender, MouseEvent* ev)
+void mainframe_onmouseup(MainFrame* self, ui_component* sender, MouseEvent* ev)
 {			
 	ui_rectangle position;
 	
@@ -429,19 +493,19 @@ void OnMouseUp(MainFrame* self, ui_component* sender, MouseEvent* ev)
 	ui_component_align(&self->component);	
 }
 
-void OnMouseEnterSplitBar(MainFrame* self, ui_component* sender)
+void mainframe_onmouseentersplitbar(MainFrame* self, ui_component* sender)
 {	
 	ui_component_setbackgroundcolor(sender, 0x00666666);
 	ui_component_invalidate(sender);
 }
 
-void OnMouseLeaveSplitBar(MainFrame* self, ui_component* sender)
+void mainframe_onmouseleavesplitbar(MainFrame* self, ui_component* sender)
 {			
 	ui_component_setbackgroundcolor(sender, 0x00232323);
 	ui_component_invalidate(sender);
 }
 
-void OnGear(MainFrame* self, ui_component* sender)
+void mainframe_ongear(MainFrame* self, ui_component* sender)
 {
 	if (ui_component_visible(&self->gear.component)) {
 		ui_component_hide(&self->gear.component);
@@ -452,24 +516,25 @@ void OnGear(MainFrame* self, ui_component* sender)
 	}	
 }
 
-void OnAboutOk(MainFrame* self, ui_component* sender)
+void mainframe_onaboutok(MainFrame* self, ui_component* sender)
 {
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 }
 
-void OnGearCreate(MainFrame* self, ui_component* sender)
+void mainframe_ongearcreate(MainFrame* self, ui_component* sender)
 {
 	self->machineview.newmachine.pluginsview.calledbygear = 1;
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	tabbar_select(&self->machineview.tabbar, 1);
 }
 
-void OnSettingsViewChanged(MainFrame* self, SettingsView* sender, Properties* property)
+void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
+	Properties* property)
 {
 	workspace_configchanged(&self->workspace, property, sender->choiceproperty);	
 }
 
-void OnUpdateDriver(MainFrame* self, ui_component* sender)
+void mainframe_onupdatedriver(MainFrame* self, ui_component* sender)
 {
 	workspace_updatedriver(&self->workspace);
 }
@@ -479,7 +544,12 @@ int mainframe_showmaximizedatstart(MainFrame* self)
 	return workspace_showmaximizedatstart(&self->workspace);
 }
 
-void onrender(MainFrame* self, ui_component* sender)
+void mainframe_onrender(MainFrame* self, ui_component* sender)
 {
 	ui_notebook_setpage(&self->notebook, TABPAGE_RENDERVIEW);
+}
+
+void mainframe_ontimer(MainFrame* self, ui_component* sender, int timerid)
+{
+	workspace_idle(&self->workspace);
 }

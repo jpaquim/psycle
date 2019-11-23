@@ -6,10 +6,11 @@
 #include "sequenceview.h"
 #include <stdio.h>
 #include <portable.h>
+#include <exclusivelock.h>
 
 #define TIMERID_SEQUENCEVIEW 2000
 
-static void sequencelistview_ondraw(SequenceListView*, ui_component* sender, ui_graphics* g);
+static void sequencelistview_ondraw(SequenceListView*, ui_component* sender, ui_graphics*);
 static void sequencelistview_drawsequence(SequenceListView*, ui_graphics*);
 static void sequencelistview_drawtrack(SequenceListView*, ui_graphics*, SequenceTrack* track,
 	int trackindex, int x);
@@ -30,6 +31,7 @@ static void sequenceview_onnewtrack(SequenceView*);
 static void sequenceview_ondeltrack(SequenceView*);
 static void sequenceview_onsingleselection(SequenceView*, ui_button* sender);
 static void sequenceview_onmultiselection(SequenceView*, ui_button* sender);
+static void sequenceview_onfollowsong(SequenceView*, ui_button* sender);
 static void sequenceview_onsize(SequenceView*, ui_component* sender, ui_size*);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*);
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
@@ -37,8 +39,12 @@ static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
 static void sequenceduration_update(SequenceViewDuration*);
 
 static void sequencebuttons_onalign(SequenceButtons* self, ui_component* sender);
-static void sequencebuttons_onpreferredsize(SequenceButtons*, ui_component* sender, ui_size* limit, ui_size* rv);
+static void sequencebuttons_onpreferredsize(SequenceButtons*,
+	ui_component* sender, ui_size* limit, ui_size* rv);
 static List* rowend(List* p);
+
+static void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader*,
+	ui_component* sender, ui_graphics*);
 
 static int listviewmargin = 5;
 
@@ -51,13 +57,14 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	self->selection = &workspace->sequenceselection;	
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
-	signal_connect(&self->component.signal_size, self, sequenceview_onsize);	
-	sequencelistview_init(&self->listview, &self->component, self->sequence,
+	signal_connect(&self->component.signal_size, self, sequenceview_onsize);
+	sequencelistview_init(&self->listview, &self->component, self, self->sequence,
 		self->patterns, workspace);
 	self->listview.player = &workspace->player;
 	self->buttons.context = &self->listview;
 	sequencebuttons_init(&self->buttons, &self->component);
 	ui_component_resize(&self->buttons.component, 200, 70);
+	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
 	sequenceduration_init(&self->duration, &self->component, self->sequence);
 	ui_checkbox_init(&self->followsong, &self->component);
 	ui_checkbox_settext(&self->followsong, "Follow Song");
@@ -83,6 +90,8 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 		sequenceview_onsingleselection);
 	signal_connect(&self->buttons.multisel.signal_clicked, self,
 		sequenceview_onmultiselection);
+	signal_connect(&self->followsong.signal_clicked, self,
+		sequenceview_onfollowsong);
 	signal_connect(&workspace->signal_songchanged, self,
 		sequenceview_onsongchanged);
 	signal_connect(&workspace->signal_sequenceselectionchanged, self,
@@ -202,15 +211,53 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, ui_component* sender
 	}
 }
 
+
+void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
+	ui_component* parent, SequenceView* view)
+{
+	self->view = view;
+	ui_component_init(&self->component, parent);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	signal_connect(&self->component.signal_draw, self,
+		sequenceviewtrackheader_ondraw); 
+}
+
+void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
+	ui_component* sender, ui_graphics* g)
+{
+	SequenceTracks* p;	
+	int cpx = 0;
+	int centery;
+	int lineheight = 1;
+	int c = 0;
+	ui_rectangle r;	
+
+	centery = (ui_component_size(&self->component).height - lineheight) / 2;
+	sequencelistview_computetextsizes(&self->view->listview);
+	for (p = self->view->sequence->tracks; p != 0; p = p->next, 
+			cpx += self->view->listview.trackwidth, ++c) {
+		ui_setrectangle(&r, cpx, centery, 
+			self->view->listview.trackwidth - 5,
+			lineheight);
+		if (self->view->listview.selectedtrack == c) {
+			ui_drawsolidrectangle(g, r, 0x00B1C8B0);
+		} else {
+			ui_drawsolidrectangle(g, r, 0x00444444);
+		}
+	}	
+}
+
 void sequencelistview_init(SequenceListView* self, ui_component* parent,
-	Sequence* sequence, Patterns* patterns, Workspace* workspace)
+	SequenceView* view, Sequence* sequence, Patterns* patterns,
+	Workspace* workspace)
 {	
+	self->view = view;
 	self->selectionmode = SELECTIONMODE_SINGLE;			
 	self->sequence = sequence;
 	self->patterns = patterns;
 	self->workspace = workspace;
 	self->selection = &workspace->sequenceselection;
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, sequencelistview_ondraw);
 	signal_connect(&self->component.signal_mousedown, self, 
@@ -248,9 +295,15 @@ void sequencelistview_drawsequence(SequenceListView* self, ui_graphics* g)
 			self->dx + listviewmargin);
 	}
 	if (!self->foundselected) {
-		ui_setbackgroundcolor(g, 0x00FF0000);
-		ui_textout(g, self->selectedtrack*self->trackwidth,
-			self->selected * self->lineheight + listviewmargin, "     ", 5);
+		int cpy;
+		ui_rectangle r;
+
+		cpx = self->selectedtrack * self->trackwidth + self->dx +
+			listviewmargin + 5;
+		cpy = self->selected * self->lineheight + listviewmargin;
+		ui_setrectangle(&r, cpx, cpy, self->trackwidth - 5 - 2 * listviewmargin,
+			self->textheight);
+		ui_drawsolidrectangle(g, r, 0x009B7800);		
 	}
 }
 
@@ -261,6 +314,7 @@ void sequencelistview_computetextsizes(SequenceListView* self)
 	tm = ui_component_textmetric(&self->component);
 	self->avgcharwidth = tm.tmAveCharWidth;
 	self->lineheight = (int) (tm.tmHeight * 1.5);
+	self->textheight = tm.tmHeight;
 	self->trackwidth = tm.tmAveCharWidth * 16;
 	self->identwidth = tm.tmAveCharWidth * 4;	
 }
@@ -275,11 +329,11 @@ void sequencelistview_drawtrack(SequenceListView* self, ui_graphics* g, Sequence
 	ui_size size = ui_component_size(&self->component);
 		
 	ui_setrectangle(&r, x, 0, self->trackwidth - 5, size.height);	
-	if (trackindex == self->selectedtrack) {		
-		ui_drawsolidrectangle(g, r, 0x00303030);
-	} else {
-		ui_drawsolidrectangle(g, r, 0x00272727);		
-	}
+//	if (trackindex == self->selectedtrack) {		
+//		ui_drawsolidrectangle(g, r, 0x00303030);
+//	} else {
+//		ui_drawsolidrectangle(g, r, 0x00272727);		
+//	}
 	
 	// ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
 	ui_settextcolor(g, 0);
@@ -323,14 +377,20 @@ void sequencelistview_drawtrack(SequenceListView* self, ui_graphics* g, Sequence
 void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size)
 {		
 	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, size);
-	ui_size durationsize = ui_component_preferredsize(&self->duration.component, size);
+	ui_size trackheader;
+	ui_size durationsize = ui_component_preferredsize(&self->duration.component, size);	
+
+	trackheader.height = (int)(self->listview.textheight * 1.5);
+	trackheader.width = size->width;
 		
 	ui_component_setposition(&self->buttons.component,
 		0, 0, size->width, buttonssize.height);
+	ui_component_setposition(&self->trackheader.component,
+		0, buttonssize.height, size->width, trackheader.height);
 	ui_component_setposition(&self->listview.component, 
-		0, buttonssize.height,
+		0, buttonssize.height + trackheader.height,
 		size->width,
-		size->height - buttonssize.height - durationsize.height - 40);
+		size->height - buttonssize.height - durationsize.height - trackheader.height - 40);
 	sequencelistview_adjustscrollbars(&self->listview);
 	ui_component_setposition(&self->duration.component, 
 		0,
@@ -489,7 +549,9 @@ void sequenceview_ondecpattern(SequenceView* self)
 
 void sequenceview_onnewtrack(SequenceView* self)
 {	
+	lock_enter();
 	sequence_appendtrack(self->sequence, sequencetrack_allocinit());
+	lock_leave();
 	sequencelistview_adjustscrollbars(&self->listview);
 	ui_component_invalidate(&self->component);	
 }
@@ -499,7 +561,9 @@ void sequenceview_ondeltrack(SequenceView* self)
 	SequencePosition position;
 	position = sequence_at(self->sequence, self->listview.selectedtrack,
 		self->listview.selected);	
+	lock_enter();
 	sequence_removetrack(self->sequence, position.track);
+	lock_leave();
 	ui_component_invalidate(&self->component);	
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscrollbars(&self->listview);
@@ -517,6 +581,15 @@ void sequenceview_onmultiselection(SequenceView* self, ui_button* sender)
 	ui_button_highlight(&self->buttons.multisel);
 	ui_button_disablehighlight(&self->buttons.singlesel);
 	self->listview.selectionmode = SELECTIONMODE_MULTI;
+}
+
+void sequenceview_onfollowsong(SequenceView* self, ui_button* sender)
+{
+	if (workspace_followingsong(self->workspace)) {
+		workspace_stopfollowsong(self->workspace);
+	} else {
+		workspace_followsong(self->workspace);
+	}
 }
 
 void sequencelistview_onmousedown(SequenceListView* self, ui_component* sender,
@@ -580,6 +653,7 @@ void sequencelistview_onscroll(SequenceListView* self, ui_component* sender, int
 {
 	self->dx += (stepx * self->component.scrollstepx);
 	self->dy += (stepy * self->component.scrollstepy);	
+	ui_component_invalidate(&self->view->trackheader.component);
 }
 
 void sequencelistview_adjustscrollbars(SequenceListView* self)
@@ -658,6 +732,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 		self->listview.selected = c;
 	}
 	ui_component_invalidate(&self->listview.component);
+	ui_component_invalidate(&self->trackheader.component);
 }
 
 void sequenceduration_init(SequenceViewDuration* self, ui_component* parent,

@@ -10,9 +10,11 @@
 typedef struct {
 	int keycode;
 	int keydata;
+	int shift;
+	int ctrl;
 } KeyEvent;
 
-void keyevent_init(KeyEvent*, int keycode, int keydata);
+void keyevent_init(KeyEvent*, int keycode, int keydata, int shift, int ctrl);
 
 typedef struct {	
 	int x;

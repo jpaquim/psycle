@@ -36,6 +36,7 @@ typedef struct {
 
 void sequencetrackiterator_inc(SequenceTrackIterator*);
 void sequencetrackiterator_incentry(SequenceTrackIterator*);
+void sequencetrackiterator_decentry(SequenceTrackIterator*);
 PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator*);
 SequenceEntry* sequencetrackiterator_entry(SequenceTrackIterator*);
 PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator*);

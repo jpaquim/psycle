@@ -136,7 +136,7 @@ typedef struct {
    int hasselection;
 } TrackerGrid;
 
-void InitTrackerGrid(TrackerGrid*, ui_component* parent, struct TrackerView*,
+void trackergrid_init(TrackerGrid*, ui_component* parent, struct TrackerView*,
 	Player*);
 
 typedef Inputs TrackerInputs;

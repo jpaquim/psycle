@@ -299,8 +299,9 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 			case WM_KEYDOWN:				
 				if (component->signal_keydown.slots) {
 					KeyEvent keyevent;
-
-					keyevent_init(&keyevent, (int)wParam, lParam);
+					
+					keyevent_init(&keyevent, (int)wParam, lParam, 
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 					signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}				
 			break;
@@ -469,8 +470,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				component->propagateevent = component->defaultpropagation;
 				if (component->signal_keydown.slots) {
 					KeyEvent keyevent;
-
-					keyevent_init(&keyevent, (int)wParam, lParam);
+					
+					keyevent_init(&keyevent, (int)wParam, lParam, 
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 					signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}
 				if (component->propagateevent) {					
@@ -483,7 +485,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (component->signal_keyup.slots) {
 					KeyEvent keyevent;
 
-					keyevent_init(&keyevent, (int)wParam, lParam);
+					keyevent_init(&keyevent, (int)wParam, lParam, 
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 					signal_emit(&component->signal_keyup, component, 1, &keyevent);
 				}
 				return 0;

@@ -10,7 +10,7 @@ static void ontabbarchange(PatternView*, ui_component* sender, int tabindex);
 static void OnSize(PatternView*, ui_component* sender, ui_size*);
 static void OnShow(PatternView*, ui_component* sender);
 static void OnHide(PatternView*, ui_component* sender);
-static void OnLpbChanged(PatternView*, Player* sender, unsigned int lpb);
+static void OnLpbChanged(PatternView*, Player* sender, uintptr_t lpb);
 static void OnSongChanged(PatternView*, Workspace* sender);
 static void OnEditPositionChanged(PatternView*, Workspace* sender);
 static void OnSequenceSelectionChanged(PatternView*, Workspace* sender);
@@ -29,7 +29,8 @@ void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Worksp
 	self->component.doublebuffered = 1;	
 	ui_component_resize(&self->component, 300, 20);
 	signal_connect(&self->component.signal_draw, self, OnStatusDraw);
-	signal_connect(&workspace->signal_editpositionchanged, self, OnPatternEditPositionChanged);
+	signal_connect(&workspace->signal_patterneditpositionchanged, self,
+		OnPatternEditPositionChanged);
 	signal_disconnectall(&self->component.signal_preferredsize);
 	signal_connect(&self->component.signal_preferredsize, self, onstatuspreferredsize);	
 	signal_connect(&workspace->signal_sequenceselectionchanged,
@@ -186,7 +187,7 @@ void OnHide(PatternView* self, ui_component* sender)
 	ui_component_hide(&self->tabbar.component);				
 }
 
-void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
+void OnLpbChanged(PatternView* self, Player* sender, uintptr_t lpb)
 {
 	// Sequence* sequence;	
 	// SequenceTrackIterator iterator;
@@ -206,11 +207,22 @@ void OnLpbChanged(PatternView* self, Player* sender, unsigned int lpb)
 
 void OnSongChanged(PatternView* self, Workspace* workspace)
 {
-	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
+	SequenceSelection selection;	
+	
+	selection = workspace_sequenceselection(workspace);	
+	if (selection.editposition.trackposition.tracknode) {
+		SequenceEntry* entry;
+
+		entry = (SequenceEntry*) selection.editposition.trackposition.tracknode->entry;
+		patternview_setpattern(self, patterns_at(&workspace->song->patterns,
+			entry->pattern));	
+	} else {
+		patternview_setpattern(self, 0);
+	}
 	self->trackerview.sequenceentryoffset = 0.f;
 	self->pianoroll.sequenceentryoffset = 0.f;
 	self->pianoroll.pattern = self->trackerview.pattern;	
-	ui_component_invalidate(&self->component);
+	ui_component_invalidate(&self->component);	
 }
 
 void OnEditPositionChanged(PatternView* self, Workspace* sender)

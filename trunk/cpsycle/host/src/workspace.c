@@ -68,6 +68,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->midi = 0;
 	self->mainhandle = handle;
 	self->filename = strdup("Untitled.psy");
+	self->lastentry = 0;
 	workspace_makeconfig(self);
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);
@@ -103,7 +104,7 @@ void workspace_initsignals(Workspace* self)
 	signal_init(&self->signal_octavechanged);
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
-	signal_init(&self->signal_editpositionchanged);
+	signal_init(&self->signal_patterneditpositionchanged);
 	signal_init(&self->signal_sequenceselectionchanged);
 	signal_init(&self->signal_loadprogress);
 	signal_init(&self->signal_scanprogress);
@@ -136,7 +137,7 @@ void workspace_disposesignals(Workspace* self)
 	signal_dispose(&self->signal_octavechanged);
 	signal_dispose(&self->signal_songchanged);
 	signal_dispose(&self->signal_configchanged);
-	signal_dispose(&self->signal_editpositionchanged);
+	signal_dispose(&self->signal_patterneditpositionchanged);
 	signal_dispose(&self->signal_sequenceselectionchanged);
 	signal_dispose(&self->signal_loadprogress);
 	signal_dispose(&self->signal_scanprogress);
@@ -658,10 +659,11 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	lock_enter();	
 	self->song = song;
 	player_setsong(&self->player, self->song);
-	applysongproperties(self);
+	applysongproperties(self);		
 	sequenceselection_setsequence(&self->sequenceselection
 		,&self->song->sequence);	
-	signal_emit(&self->signal_songchanged, self, 1, flag);
+	signal_emit(&self->signal_songchanged, self, 1, flag);	
+	self->lastentry = 0;
 	lock_leave();
 	song_free(oldsong);	
 }
@@ -761,7 +763,7 @@ void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editp
 	self->patterneditposition = editposition;
 	self->patterneditposition.line = 
 		(int) (editposition.offset * player_lpb(&self->player));
-	signal_emit(&self->signal_editpositionchanged, self, 0);
+	signal_emit(&self->signal_patterneditpositionchanged, self, 0);
 }
 
 PatternEditPosition workspace_patterneditposition(Workspace* self)
@@ -870,5 +872,52 @@ void workspace_onsequenceeditpositionchanged(Workspace* self,
 		position.totallines = 0;
 		position.track = 0;
 		workspace_setpatterneditposition(self, position);
+	}
+}
+
+void workspace_idle(Workspace* self)
+{
+	if (self->followsong) {
+		SequenceTrackIterator it;
+		
+		if (player_playing(&self->player)) {
+			it = sequence_begin(&self->song->sequence, 
+				self->song->sequence.tracks,
+				player_position(&self->player));
+			if (it.tracknode && self->lastentry != it.tracknode->entry) {				
+				self->sequenceselection.editposition
+					= sequence_makeposition(&self->song->sequence,
+					self->song->sequence.tracks,
+					it.tracknode);
+				workspace_setsequenceselection(self, 
+					self->sequenceselection);
+				self->lastentry = (SequenceEntry*) it.tracknode->entry;				
+			}
+			if (self->lastentry) {				
+				self->patterneditposition.line = (int) (
+					(player_position(&self->player) -
+					self->lastentry->offset) * player_lpb(&self->player));				
+				self->patterneditposition.offset = 
+					player_position(&self->player) - self->lastentry->offset;
+				self->patterneditposition.offset = 
+					self->patterneditposition.line / 
+					(beat_t) player_lpb(&self->player);
+				workspace_setpatterneditposition(self, 
+					self->patterneditposition);				
+			}
+		} else
+		if (self->lastentry) {				
+			self->patterneditposition.line = (int) (
+				(player_position(&self->player) -
+				self->lastentry->offset) * player_lpb(&self->player));				
+			self->patterneditposition.offset = 
+				player_position(&self->player) - self->lastentry->offset;
+			self->patterneditposition.offset = 
+				self->patterneditposition.line / 
+				(beat_t) player_lpb(&self->player);
+			workspace_setpatterneditposition(self, 
+				self->patterneditposition);
+		}
+		self->lastentry = 0;
 	}
 }

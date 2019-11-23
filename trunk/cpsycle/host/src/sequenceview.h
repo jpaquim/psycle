@@ -43,6 +43,7 @@ typedef struct {
 	int selectedtrack;
 	int foundselected;
 	int lineheight;
+	int textheight;
 	int trackwidth;
 	int identwidth;   
 	int avgcharwidth;
@@ -53,10 +54,11 @@ typedef struct {
 	Player* player;
 	SequenceEntry* lastentry;	
 	Workspace* workspace;
+	struct SequenceView* view;
 } SequenceListView;
 
-void sequencelistview_init(SequenceListView*, ui_component* parent, Sequence*,
-	Patterns*, Workspace*);
+void sequencelistview_init(SequenceListView*, ui_component* parent,
+	struct SequenceView*, Sequence*, Patterns*, Workspace*);
 
 typedef struct {
 	ui_component component;
@@ -70,8 +72,17 @@ void sequenceduration_init(SequenceViewDuration*, ui_component* parent,
 
 typedef struct {
 	ui_component component;	
+	struct SequenceView* view;
+} SequenceViewTrackHeader;
+
+void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
+	ui_component* parent, struct SequenceView*);
+
+typedef struct SequenceView {
+	ui_component component;	
 	SequenceListView listview;
 	SequenceButtons buttons;
+	SequenceViewTrackHeader trackheader;
 	SequenceViewDuration duration;
 	ui_checkbox followsong;
 	ui_checkbox shownames;	
