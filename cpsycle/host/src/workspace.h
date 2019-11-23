@@ -37,7 +37,7 @@ typedef struct {
 	Signal signal_octavechanged;
 	Signal signal_songchanged;	
 	Signal signal_configchanged;
-	Signal signal_editpositionchanged;
+	Signal signal_patterneditpositionchanged;
 	Signal signal_sequenceselectionchanged;
 	Signal signal_loadprogress;
 	Signal signal_scanprogress;
@@ -50,7 +50,8 @@ typedef struct {
 	int hasplugincache;
 	char* filename;
 	int followsong;
-	Pattern patternpaste;
+	SequenceEntry* lastentry;
+	Pattern patternpaste;	
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -88,5 +89,6 @@ EventDriver* workspace_kbddriver(Workspace*);
 int workspace_followingsong(Workspace*);
 void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
+void workspace_idle(Workspace*);
 
 #endif

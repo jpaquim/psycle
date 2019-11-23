@@ -19,7 +19,8 @@ void ui_checkbox_init(ui_checkbox* self, ui_component* parent)
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
 		1);
-	signal_connect(&self->component.signal_destroy, self,  ondestroy);	
+	signal_connect(&self->component.signal_command, self, oncommand);
+	signal_connect(&self->component.signal_destroy, self, ondestroy);
 	signal_connect(&self->component.signal_preferredsize, self,
 		onpreferredsize);
 }

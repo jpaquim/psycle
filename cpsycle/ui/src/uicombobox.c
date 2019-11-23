@@ -13,10 +13,8 @@ static void ondestroy(ui_combobox*, ui_component* sender);
 static void ui_combobox_create_system(ui_combobox*, ui_component* parent);
 static void ui_combobox_create_ownerdrawn(ui_combobox*, ui_component* parent);
 static void onownerdraw(ui_combobox*, ui_component* sender, ui_graphics*);
-static void onmousedown(ui_combobox*, ui_component* sender, int x, int y,
-	int button);
-static void onmousemove(ui_combobox*, ui_component* sender, int x, int y,
-	int button);
+static void onmousedown(ui_combobox*, ui_component* sender, MouseEvent* ev);
+static void onmousemove(ui_combobox*, ui_component* sender, MouseEvent* ev);
 static void onmouseenter(ui_combobox*, ui_component* sender);
 static void onmouseleave(ui_combobox*, ui_component* sender);
 
@@ -240,19 +238,18 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-void onmousedown(ui_combobox* self, ui_component* sender, int x, int y,
-	int button)
+void onmousedown(ui_combobox* self, ui_component* sender, MouseEvent* ev)
 {
 	ui_size size = ui_component_size(sender);	
 
-	if (x >= size.width - 40 && x < size.width - 25) {
+	if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
 		intptr_t index = ui_combobox_cursel(self);
 		if (index > 0) {
 			ui_combobox_setcursel(self,  index - 1);
 			signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
 	} else
-	if (x >= size.width - 25 && x < size.width - 10) {
+	if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
 		intptr_t count;
 		intptr_t index;
 
@@ -278,20 +275,19 @@ void onmouseenter(ui_combobox* self, ui_component* sender)
 	ui_component_invalidate(&self->component);
 }
 
-void onmousemove(ui_combobox* self, ui_component* sender, int x, int y,
-	int button)
+void onmousemove(ui_combobox* self, ui_component* sender, MouseEvent* ev)
 {
 	if (self->hover) {
 		int hover = self->hover;
 		ui_size size = ui_component_size(sender);	
 
-		if (x >= size.width - 40 && x < size.width - 25) {
+		if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
 			intptr_t index = ui_combobox_cursel(self);
 			if (index > 0) {
 				self->hover = 2;
 			}
 		} else
-		if (x >= size.width - 25 && x < size.width - 10) {
+		if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
 			intptr_t count;
 			intptr_t index;
 			count = SendMessage((HWND)self->currcombo->hwnd, CB_GETCOUNT, 0,

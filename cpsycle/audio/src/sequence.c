@@ -387,6 +387,23 @@ void sequencetrackiterator_incentry(SequenceTrackIterator* self)
 	}
 }
 
+void sequencetrackiterator_decentry(SequenceTrackIterator* self)
+{	
+	if (self->tracknode) {		
+		self->tracknode = self->tracknode->prev;
+		if (self->tracknode) {
+			SequenceEntry* entry;
+			Pattern* pattern;
+
+			entry = (SequenceEntry*) self->tracknode->entry;
+			pattern = patterns_at(self->patterns, entry->pattern);
+			self->patternnode = pattern->events;
+		} else {
+			self->patternnode = 0;
+		}
+	}
+}
+
 SequenceTrackIterator sequence_makeiterator(Sequence* self, List* entries)
 {
 	SequenceTrackIterator rv;

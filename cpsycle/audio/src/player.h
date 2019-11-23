@@ -50,8 +50,8 @@ void player_setposition(Player*, beat_t offset);
 beat_t player_position(Player*);
 void player_setbpm(Player*, beat_t bpm);
 beat_t player_bpm(Player*);
-void player_setlpb(Player*, unsigned int lpb);
-unsigned int player_lpb(Player*);
+void player_setlpb(Player*, uintptr_t lpb);
+uintptr_t player_lpb(Player*);
 // audio driver
 void player_loaddriver(Player*, const char* path);
 void player_reloaddriver(Player*, const char* path);

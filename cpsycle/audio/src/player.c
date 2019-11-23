@@ -335,13 +335,13 @@ beat_t player_bpm(Player* self)
 	return sequencer_bpm(&self->sequencer);
 }
 
-void player_setlpb(Player* self, unsigned int lpb)
+void player_setlpb(Player* self, uintptr_t lpb)
 {
 	sequencer_setlpb(&self->sequencer, lpb);
 	signal_emit(&self->signal_lpbchanged, self, 1, lpb);
 }
 
-unsigned int player_lpb(Player* self)
+uintptr_t player_lpb(Player* self)
 {
 	return sequencer_lpb(&self->sequencer);
 }

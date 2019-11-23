@@ -5,10 +5,13 @@
 
 #include "uievents.h"
 
-void keyevent_init(KeyEvent* self, int keycode, int keydata)
+void keyevent_init(KeyEvent* self, int keycode, int keydata, int shift,
+	int ctrl)
 {
 	self->keycode = keycode;
 	self->keydata = keydata;
+	self->shift = shift;
+	self->ctrl = ctrl;
 }
 
 void mouseevent_init(MouseEvent* self, int x, int y, int button)

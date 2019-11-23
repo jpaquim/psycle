@@ -33,7 +33,7 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->samplerate = 44100;
 	self->bpm = 125.f;
 	self->lpb = 4;
-	self->lpbspeed = 1.f;
+	self->lpbspeed = (beat_t) 1.f;
 	self->playing = 0;
 	self->looping = 1;
 	self->position = 0;	
@@ -81,7 +81,7 @@ beat_t sequencer_position(Sequencer* self)
 
 void sequencer_start(Sequencer* self)
 {	
-	self->lpbspeed = 1.f;
+	self->lpbspeed = (beat_t) 1.f;
 	compute_beatsprosample(self);
 	self->playing = 1;
 }
@@ -120,15 +120,15 @@ beat_t sequencer_bpm(Sequencer* self)
 	return self->bpm;
 }
 
-void sequencer_setlpb(Sequencer* self, unsigned int lpb)
+void sequencer_setlpb(Sequencer* self, uintptr_t lpb)
 {	
 	self->lpb = lpb;
-	self->lpbspeed = 1.f;
+	self->lpbspeed = (beat_t) 1.f;
 	self->seqlinetickcount = 1.f / lpb;
 	compute_beatsprosample(self);
 }
 
-unsigned int sequencer_lpb(Sequencer* self)
+uintptr_t sequencer_lpb(Sequencer* self)
 {
 	return self->lpb;
 }
