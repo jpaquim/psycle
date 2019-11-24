@@ -21,18 +21,16 @@ typedef struct {
 	ui_button cloneentry;
 	ui_button newtrack;
 	ui_button deltrack;
-	ui_button dummy;
+	ui_button clear;
+	ui_button cut;
+	ui_button copy;
+	ui_button paste;
 	ui_button singlesel;
-	ui_button multisel;
+	ui_button multisel;	
 	void* context;	
 } SequenceButtons;
 
 void sequencebuttons_init(SequenceButtons*, ui_component* parent);
-
-typedef enum {
-	SELECTIONMODE_SINGLE,
-	SELECTIONMODE_MULTI
-} SelectionMode;
 
 typedef struct {
 	ui_component component;
@@ -48,8 +46,7 @@ typedef struct {
 	int identwidth;   
 	int avgcharwidth;
 	int dx;
-	int dy;
-	SelectionMode selectionmode;
+	int dy;	
 	beat_t lastplayposition;
 	Player* player;
 	SequenceEntry* lastentry;	

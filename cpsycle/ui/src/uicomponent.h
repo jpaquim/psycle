@@ -63,6 +63,7 @@ typedef struct {
 	Signal signal_mousedown;
 	Signal signal_mouseup;
 	Signal signal_mousemove;
+	Signal signal_mousewheel;
 	Signal signal_mousedoubleclick;
 	Signal signal_mouseenter;
 	Signal signal_mousehover;
@@ -98,6 +99,8 @@ typedef struct {
 	HBRUSH background;
 	int visible;
 	winproc wndproc;
+	int accumwheeldelta;
+	int wheelscroll;
 } ui_component;
 
 void ui_init(HINSTANCE hInstance);

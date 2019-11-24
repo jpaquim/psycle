@@ -14,9 +14,10 @@ void keyevent_init(KeyEvent* self, int keycode, int keydata, int shift,
 	self->ctrl = ctrl;
 }
 
-void mouseevent_init(MouseEvent* self, int x, int y, int button)
+void mouseevent_init(MouseEvent* self, int x, int y, int button, int delta)
 {
 	self->x = x;
 	self->y = y;
 	self->button = button;
+	self->delta = 0;
 }

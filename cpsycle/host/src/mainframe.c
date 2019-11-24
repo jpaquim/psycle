@@ -364,36 +364,30 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 		properties_free(properties);
 	} else 
 	if (keyevent->shift && keyevent->keycode == VK_RIGHT) {
-		if (self->workspace.song) {
-			SequenceSelection selection;
-			SequencePosition position;
-
-			selection = workspace_sequenceselection(&self->workspace);
-			if (selection.editposition.trackposition.tracknode &&
-					selection.editposition.trackposition.tracknode->next) {
-				sequencetrackiterator_incentry(&selection.editposition.trackposition);
-				position = sequence_makeposition(&self->workspace.song->sequence,
-					selection.editposition.track,
-					selection.editposition.trackposition.tracknode);
-				selection.editposition = position;
-				workspace_setsequenceselection(&self->workspace, selection);
+		if (self->workspace.song) {						
+			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
+					self->workspace.sequenceselection.editposition.trackposition.tracknode->next) {
+				sequenceselection_seteditposition(
+					&self->workspace.sequenceselection,
+					sequence_makeposition(&self->workspace.song->sequence,
+						self->workspace.sequenceselection.editposition.track,
+						self->workspace.sequenceselection.editposition.trackposition.tracknode->next));
+				workspace_setsequenceselection(&self->workspace, 
+					self->workspace.sequenceselection);
 			}
 		}
 	} else
 	if (keyevent->shift && keyevent->keycode == VK_LEFT) {
-		if (self->workspace.song) {
-			SequenceSelection selection;
-			SequencePosition position;
-
-			selection = workspace_sequenceselection(&self->workspace);
-			if (selection.editposition.trackposition.tracknode &&
-					selection.editposition.trackposition.tracknode->prev) {
-				sequencetrackiterator_decentry(&selection.editposition.trackposition);			
-				position = sequence_makeposition(&self->workspace.song->sequence,
-					selection.editposition.track,
-					selection.editposition.trackposition.tracknode);
-				selection.editposition = position;
-				workspace_setsequenceselection(&self->workspace, selection);
+		if (self->workspace.song) {		
+			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
+					self->workspace.sequenceselection.editposition.trackposition.tracknode->prev) {
+				sequenceselection_seteditposition(
+					&self->workspace.sequenceselection,
+					sequence_makeposition(&self->workspace.song->sequence,
+						self->workspace.sequenceselection.editposition.track,
+						self->workspace.sequenceselection.editposition.trackposition.tracknode->prev));
+				workspace_setsequenceselection(&self->workspace, 
+					self->workspace.sequenceselection);
 			}
 		}
 	} else {

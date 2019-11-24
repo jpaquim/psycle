@@ -53,7 +53,7 @@ beat_t sequencer_bpm(Sequencer*);
 void sequencer_setlpb(Sequencer*, uintptr_t lpb);
 uintptr_t sequencer_lpb(Sequencer*);
 unsigned int sequencer_frames(Sequencer*, beat_t offset);
-beat_t sequencer_offset(Sequencer*, int numsamples);
+beat_t sequencer_frametooffset(Sequencer*, int numsamples);
 int sequencer_playing(Sequencer*);
 void sequencer_addinputevent(Sequencer*, const PatternEvent*,
 	unsigned int track);

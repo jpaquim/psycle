@@ -6,6 +6,7 @@
 #include "operations.h"
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 static void* dsp_memory_alloc(size_t count, size_t size);
 static void dsp_memory_dealloc(void* address);

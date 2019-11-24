@@ -142,7 +142,7 @@ void pianoroll_onsize(Pianoroll* self, ui_component* sender, ui_size* size)
 
 void pianoroll_onmousedown(Pianoroll* self, ui_component* sender, MouseEvent* ev)
 {
-	ui_component_setfocus(&self->component);	
+	ui_component_setfocus(&self->grid.component);	
 }
 
 void pianoroll_onmouseup(Pianoroll* self, ui_component* sender, MouseEvent* ev)
@@ -166,9 +166,10 @@ void pianogrid_init(Pianogrid* self, ui_component* parent, Pianoroll* roll)
 {
 	self->view = roll;	
 	self->beatscrollpos = 0;
-	self->dy = 0;
+	self->dy = 0;	
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;	
+	self->component.doublebuffered = 1;
+	self->component.wheelscroll = 4;
 	signal_connect(&self->component.signal_draw, self, pianogrid_ondraw);
 	signal_connect(&self->component.signal_size, self, pianogrid_onsize);
 	signal_connect(&self->component.signal_scroll, self, pianogrid_onscroll);
@@ -376,9 +377,10 @@ void pianokeyboard_ondraw(PianoKeyboard* self, ui_component* sender, ui_graphics
 }
 
 void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, MouseEvent* ev)
-{
+{	
 	beat_t offset;	
-	
+
+	ui_component_setfocus(&self->component);
 	offset = (ev->x  / (beat_t) self->metrics.beatwidth) + self->beatscrollpos;
 	offset = (int)(offset * (beat_t)self->metrics.lpb) / (beat_t)self->metrics.lpb;
 	if (ev->button == 1) {

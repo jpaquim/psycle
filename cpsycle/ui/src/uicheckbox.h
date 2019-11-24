@@ -15,5 +15,6 @@ void ui_checkbox_init(ui_checkbox*, ui_component* parent);
 void ui_checkbox_settext(ui_checkbox*, const char* text);
 void ui_checkbox_check(ui_checkbox*);
 void ui_checkbox_disablecheck(ui_checkbox*);
+int ui_checkbox_checked(ui_checkbox*);
 
 #endif

@@ -16,6 +16,7 @@ void sequenceselection_init(SequenceSelection* self, Sequence* sequence)
 {
 	self->sequence = sequence;
 	self->entries = 0;
+	self->selectionmode = SELECTIONMODE_SINGLE;
 	self->editposition = sequence_makeposition(self->sequence,
 		self->sequence->tracks, 
 		self->sequence->tracks
@@ -43,8 +44,37 @@ void sequenceselection_dispose(SequenceSelection* self)
 void sequenceselection_seteditposition(SequenceSelection* self,
 	SequencePosition position)
 {
+	List* p;
+	int append = 1;
+
+	if (self->selectionmode == SELECTIONMODE_SINGLE) {
+		list_free(self->entries);
+		self->entries = 0;
+	} else
+	if ((p = list_findentry(self->entries, 
+			position.trackposition.tracknode->entry)) != 0) {
+		list_remove(&self->entries, p);
+		append = 0;
+	}
 	self->editposition = position;
-	signal_emit(&self->signal_editpositionchanged, self, 0);
+	if (append) {
+		if (self->editposition.trackposition.tracknode) {
+			list_append(&self->entries,
+			self->editposition.trackposition.tracknode->entry);
+		}
+	} else {		
+		SequenceTrack* track;
+		List* p = list_last(self->entries);
+			
+		if (p) {
+			track = (SequenceTrack*)position.track->entry;
+			p = list_findentry(track->entries, p->entry);			
+			self->editposition = sequence_makeposition(self->sequence,
+				position.track,
+				p);
+		}
+	}
+// 	signal_emit(&self->signal_editpositionchanged, self, 0);
 }
 
 SequencePosition sequenceselection_editposition(SequenceSelection* self)
@@ -106,6 +136,7 @@ SequenceEntry* sequenceentry_allocinit(uintptr_t pattern, beat_t offset)
 	rv = sequenceentry_alloc();
 	if (rv) {
 		sequenceentry_init(rv, pattern, offset);
+		rv->node = 0;
 	}
 	return rv;
 }
@@ -176,12 +207,13 @@ SequenceTrackNode* sequence_insert(Sequence* self, SequencePosition position,
 	if (track->entries) {		
 		if (position.trackposition.tracknode) {			
 			rv = list_insert(&track->entries, position.trackposition.tracknode,
-				entry);
+				entry);			
 			sequence_reposition(self, track);						
 		} 
 	} else {		
 		rv = track->entries = list_create(entry);		
 	}	
+	entry->node = rv;
 	return rv;
 }
 
