@@ -30,6 +30,8 @@ static void trackergrid_onmousemove(TrackerGrid*, ui_component* sender,
 	MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, ui_component* sender,
 	MouseEvent*);
+static void trackergrid_onmousedoubleclick(TrackerGrid*, ui_component* sender,
+	MouseEvent*);
 static TrackerCursor trackergrid_makecursor(TrackerGrid* self, int x, int y);
 static void trackergrid_onsize(TrackerGrid*, ui_component* sender, ui_size* size);
 static void trackergrid_onscroll(TrackerGrid*, ui_component* sender,
@@ -66,6 +68,10 @@ static void trackerview_prevline(TrackerView*);
 static void trackerview_prevlines(TrackerView*, uintptr_t lines, int wrap);
 static void trackerview_advanceline(TrackerView*);
 static void trackerview_advancelines(TrackerView*, uintptr_t lines, int wrap);
+static void trackerview_home(TrackerView*);
+static void trackerview_end(TrackerView*);
+static void trackerview_selectall(TrackerView*);
+static void trackerview_selectcol(TrackerView*);
 static void trackerview_prevtrack(TrackerView*);
 static void trackerview_nexttrack(TrackerView*);
 static void trackerview_enablesync(TrackerView*);
@@ -152,7 +158,16 @@ enum {
 	CMD_TRANSPOSEBLOCKINC,
 	CMD_TRANSPOSEBLOCKDEC,
 	CMD_TRANSPOSEBLOCKINC12,
-	CMD_TRANSPOSEBLOCKDEC12
+	CMD_TRANSPOSEBLOCKDEC12,
+
+	CMD_SELECTALL,
+	CMD_SELECTCOL,
+	CMD_SELECTBAR,
+
+	CMD_UNDO,
+	CMD_REDO,
+
+	CMD_FOLLOWSONG
 };
 
 enum {
@@ -237,7 +252,7 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent, TrackerView* view
 {		
 	self->view = view;
 	self->header = 0;	
-	self->hasselection = 0;	
+	self->hasselection = 0;
 	signal_connect(&player->signal_numsongtrackschanged, self,
 		trackergrid_numtrackschanged);
 	self->view->font = ui_createfont("Tahoma", 12);	
@@ -251,6 +266,8 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent, TrackerView* view
 		trackergrid_onmousemove);
 	signal_connect(&self->component.signal_mouseup, self,
 		trackergrid_onmouseup);
+	signal_connect(&self->component.signal_mousedoubleclick, self,
+		trackergrid_onmousedoubleclick);
 	signal_connect(&self->component.signal_draw, self,
 		trackergrid_ondraw);
 	signal_connect(&self->component.signal_scroll, self,
@@ -290,7 +307,8 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent, TrackerView* view
 	ui_component_showhorizontalscrollbar(&self->component);
 	ui_component_showverticalscrollbar(&self->component);
 	trackergrid_adjustscroll(self);
-	self->component.doublebuffered = 1;		
+	self->component.doublebuffered = 1;
+	self->component.wheelscroll = 4;
 }
 
 void trackergrid_numtrackschanged(TrackerGrid* self, Player* player,
@@ -334,7 +352,8 @@ void TrackerViewApplyProperties(TrackerView* self, Properties* p)
 void trackergrid_ondraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	TrackerGridBlock clip;
-	if (self->view->pattern) {		
+	if (self->view->pattern) {
+		ui_setfont(g, &self->view->font);
 		trackergrid_clipblock(self, &g->clip, &clip);
 		trackergrid_drawbackground(self, g, &clip);
 		trackergrid_drawevents(self, g, &clip);
@@ -562,27 +581,18 @@ int testrange_e(big_beat_t position, big_beat_t offset, big_beat_t width)
 
 void SetColColor(TrackerSkin* skin, ui_graphics* g, int col, int playbar, int cursor, int selection, int beat, int beat4)
 {
-	if (selection != 0) {
-		ui_setbackgroundcolor(g, skin->selection);
-		ui_settextcolor(g, skin->fontSel);
-	} else
-	if (cursor != 0) {
-		if (beat4) {
-			ui_setbackgroundcolor(g, skin->cursor);
-			ui_settextcolor(g, skin->fontCur);			
-		} else
-		if (beat) {
-			ui_setbackgroundcolor(g, skin->cursor);
-			ui_settextcolor(g, skin->fontCur);			
-		} else {
-			ui_setbackgroundcolor(g, skin->cursor);
-			ui_settextcolor(g, skin->fontCur);
-		}
-	} else 
+	if (cursor != 0) {		
+		ui_setbackgroundcolor(g, skin->cursor);
+		ui_settextcolor(g, skin->fontCur);		
+	} else 	
 	if (playbar) {
 		ui_setbackgroundcolor(g, skin->playbar);
 		ui_settextcolor(g, skin->fontPlay);		
-	} else	{
+	} else	
+	if (selection != 0) {		
+		ui_setbackgroundcolor(g, skin->cursor);
+		ui_settextcolor(g, skin->fontCur);		
+	} else {
 		if (beat4) {
 			ui_setbackgroundcolor(g, skin->row4beat);			
 			ui_settextcolor(g, skin->font);
@@ -606,13 +616,13 @@ void trackergrid_drawevent(TrackerGrid* self, ui_graphics* g, PatternEvent* even
 		
 	SetColColor(&self->view->skin, g, 0, playbar, cursor && self->cursor.col == 0, 
 		selection, beat, beat4);
-	{	// draw note
+	{	// draw note		
 		ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->textheight);
 		notestr = (event->note != 255 || !self->view->showemptydata) 
 			  ? notetostr(event->note, self->notestabmode)
 			  : emptynotestr;		
-		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, notestr,
-		strlen(notestr));	
+		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE | ETO_CLIPPED, r, notestr,
+		 strlen(notestr));	
 	}
 	{	// draw inst
 		int hi = (event->inst & 0xF0) >> 4;
@@ -879,6 +889,72 @@ void trackerview_advancelines(TrackerView* self, uintptr_t lines, int wrap)
 	trackerview_invalidatecursor(self, &self->grid.cursor);
 }
 
+void trackerview_home(TrackerView* self)
+{
+	TrackerCursor oldcursor;
+
+	oldcursor = self->grid.cursor;		
+	self->grid.cursor.offset = 0;
+	self->grid.cursor.subline = 0;	
+	trackerview_scrollup(self);	
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
+	trackerview_invalidatecursor(self, &oldcursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);
+}
+
+void trackerview_end(TrackerView* self)
+{
+	TrackerCursor oldcursor;
+
+	oldcursor = self->grid.cursor;		
+	self->grid.cursor.offset = self->pattern->length - self->grid.bpl;
+	self->grid.cursor.subline = 0;	
+	trackerview_scrolldown(self);	
+	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
+	trackerview_invalidatecursor(self, &oldcursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);
+}
+
+void trackerview_selectall(TrackerView* self)
+{
+	if (self->workspace->song && self->pattern) {
+		self->grid.selection.topleft.offset = 0;
+		self->grid.selection.topleft.track = 0;
+		self->grid.selection.bottomright.offset = self->pattern->length;
+		self->grid.selection.bottomright.track = 
+			self->workspace->song->patterns.songtracks;
+		self->grid.hasselection = 1;
+		ui_component_invalidate(&self->component);
+	}			
+}
+
+void trackerview_selectcol(TrackerView* self)
+{
+	if (self->workspace->song && self->pattern) {
+		self->grid.selection.topleft.offset = 0;
+		self->grid.selection.topleft.track = self->grid.cursor.track;
+		self->grid.selection.bottomright.offset = self->pattern->length;
+		self->grid.selection.bottomright.track = self->grid.cursor.track + 1;
+		self->grid.hasselection = 1;
+		ui_component_invalidate(&self->component);
+	}		
+}
+
+void trackerview_selectbar(TrackerView* self)
+{
+	if (self->workspace->song && self->pattern) {
+		self->grid.selection.topleft.offset = self->grid.cursor.offset;
+		self->grid.selection.topleft.track = self->grid.cursor.track;
+		self->grid.selection.bottomright.offset = self->grid.cursor.offset + 4.0;
+		if (self->grid.cursor.offset > self->pattern->length) {
+			self->grid.cursor.offset = self->pattern->length;
+		}
+		self->grid.selection.bottomright.track = self->grid.cursor.track + 1;
+		self->grid.hasselection = 1;
+		ui_component_invalidate(&self->component);
+	}		
+}
+
 int trackerview_scrollup(TrackerView* self)
 {
 	int line;
@@ -1044,6 +1120,12 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 	if (cmd == CMD_NAVRIGHT) {
 		trackerview_nextcol(self);
 	} else
+	if (cmd == CMD_NAVTOP) {
+		trackerview_home(self);
+	} else
+	if (cmd == CMD_NAVBOTTOM) {
+		trackerview_end(self);
+	} else
 	if (cmd == CMD_COLUMNPREV) {
 		trackerview_prevtrack(self);
 	} else
@@ -1150,6 +1232,24 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 			ui_component_invalidate(&self->linenumbers.component);
 		}
 		trackerview_advanceline(self);	
+	} else
+	if (cmd == CMD_SELECTALL) {	
+		trackerview_selectall(self);
+	} else
+	if (cmd == CMD_SELECTCOL) {
+		trackerview_selectcol(self);
+	} else
+	if (cmd == CMD_SELECTBAR) {
+		trackerview_selectbar(self);
+	} else
+	if (cmd == CMD_UNDO) {
+		workspace_undo(self->workspace);
+	} else
+	if (cmd == CMD_REDO) {
+		workspace_redo(self->workspace);
+	} else
+	if (cmd == CMD_FOLLOWSONG) {
+		self->workspace->followsong = !self->workspace->followsong;
 	} else
 	if (keyevent->keycode == VK_RETURN) {
 		PatternNode* prev;
@@ -1426,6 +1526,12 @@ void trackergrid_onmousemove(TrackerGrid* self, ui_component* sender, MouseEvent
 	}
 }
 
+void trackergrid_onmousedoubleclick(TrackerGrid* self, ui_component* sender,
+	MouseEvent* ev)
+{
+	trackerview_selectcol(self->view);
+}
+
 TrackerCursor trackergrid_makecursor(TrackerGrid* self, int x, int y)
 {
 	TrackerCursor rv;
@@ -1517,8 +1623,7 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	signal_connect(&self->blockmenu.blocktransposeup12.signal_clicked, self,
 		trackerview_onblocktransposeup12);
 	signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked, self,
-		trackerview_onblocktransposedown12);
-	
+		trackerview_onblocktransposedown12);	
 	ui_component_hide(&self->blockmenu.component);
 	TrackerViewApplyProperties(self, 0);
 	if (self->grid.trackwidth < self->header.trackwidth) {
@@ -1691,7 +1796,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
 
 		size = ui_component_size(&self->component);
 		trackergrid_clipblock(&self->view->grid, &g->clip, &clip);
-		ui_setfont(g, &self->view->font);				
+		ui_setfont(g, &self->view->font);
 		cpy = (clip.topleft.totallines - clip.topleft.subline) * self->lineheight + self->dy;
 		offset = clip.topleft.offset;				
 		line = clip.topleft.line;
@@ -2042,7 +2147,15 @@ void trackerview_initinputs(TrackerView* self)
 	inputs_define(&self->inputs, encodeinput(VK_F12, 0, 1), CMD_TRANSPOSEBLOCKINC);
 	inputs_define(&self->inputs, encodeinput(VK_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC);
 	inputs_define(&self->inputs, encodeinput(VK_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12);
-	inputs_define(&self->inputs, encodeinput(VK_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12);	
+	inputs_define(&self->inputs, encodeinput(VK_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12);
+	
+	inputs_define(&self->inputs, encodeinput('A', 0, 1), CMD_SELECTALL);
+	inputs_define(&self->inputs, encodeinput('R', 0, 1), CMD_SELECTCOL);
+	inputs_define(&self->inputs, encodeinput('K', 0, 1), CMD_SELECTBAR);	
+		
+	inputs_define(&self->inputs, encodeinput('Z', 0, 1), CMD_UNDO);
+	inputs_define(&self->inputs, encodeinput('Z', 1, 1), CMD_REDO);
+	inputs_define(&self->inputs, encodeinput('F', 0, 1), CMD_FOLLOWSONG);
 }
 
 void trackerview_setpattern(TrackerView* self, Pattern* pattern)

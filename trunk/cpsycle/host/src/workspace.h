@@ -51,11 +51,13 @@ typedef struct {
 	char* filename;
 	int followsong;
 	SequenceEntry* lastentry;
-	Pattern patternpaste;	
+	Pattern patternpaste;
+	List* sequencepaste;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
+void workspace_disposesequencepaste(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_savesong(Workspace*, const char* path);

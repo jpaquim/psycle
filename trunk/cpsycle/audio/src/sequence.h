@@ -12,6 +12,7 @@ typedef struct {
 	uintptr_t pattern;
 	beat_t offset;
 	int selplay;
+	List* node;
 } SequenceEntry;
 
 void sequenceentry_init(SequenceEntry*, uintptr_t pattern, beat_t offset);
@@ -77,11 +78,17 @@ SequencePosition sequence_makeposition(Sequence*, SequenceTracks*, List* entries
 void sequence_setplayselection(Sequence*, struct SequenceSelection*);
 void sequence_clearplayselection(Sequence*);
 
+typedef enum {
+	SELECTIONMODE_SINGLE,
+	SELECTIONMODE_MULTI
+} SelectionMode;
+
 typedef struct SequenceSelection {
-	Sequence* sequence;
+	Sequence* sequence;	
 	SequencePosition editposition;
 	Signal signal_editpositionchanged;
 	List* entries;
+	SelectionMode selectionmode;
 } SequenceSelection;
 
 void sequenceselection_init(SequenceSelection*, Sequence*);

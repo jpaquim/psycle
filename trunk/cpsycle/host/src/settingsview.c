@@ -44,8 +44,9 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	ui_component_init(&self->component, parent);
 	ui_component_init(&self->client, &self->component);
 	self->client.doublebuffered = 1;
+	self->client.wheelscroll = 4;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
-	ui_component_showverticalscrollbar(&self->client);
+	ui_component_showverticalscrollbar(&self->client);	
 	signal_connect(&self->client.signal_destroy, self, OnDestroy);
 	signal_connect(&self->client.signal_draw, self, OnDraw);
 	signal_connect(&self->client.signal_scroll, self, OnScroll);
@@ -288,6 +289,7 @@ void OnKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
 
 void OnMouseDown(SettingsView* self, ui_component* sender, MouseEvent* ev)
 {
+	ui_component_setfocus(&self->client);
 	if (ui_component_visible(&self->edit.component)) {
 		OnEditChange(self, &self->edit);
 		ui_component_hide(&self->edit.component);

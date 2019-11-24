@@ -14,6 +14,7 @@
 
 HINSTANCE appInstance = 0;
 HWND appMainComponentHandle = 0;
+int iDeltaPerLine = 120;
 
 TCHAR szAppClass[] = TEXT("PsycleApp");
 static TCHAR szComponentClass[] = TEXT("PsycleComponent");
@@ -201,6 +202,7 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_mousedown);
 	signal_init(&component->signal_mouseup);
 	signal_init(&component->signal_mousemove);
+	signal_init(&component->signal_mousewheel);
 	signal_init(&component->signal_mousedoubleclick);
 	signal_init(&component->signal_mouseenter);
 	signal_init(&component->signal_mousehover);
@@ -231,6 +233,8 @@ void ui_component_init_base(ui_component* self) {
 	self->defaultpropagation = 0;	
 	self->visible = 1;
 	self->doublebuffered = 0;
+	self->wheelscroll = 0;
+	self->accumwheeldelta = 0;
 	self->backgroundmode = BACKGROUND_SET;
 	self->backgroundcolor = defaultbackgroundcolor;
 	self->background = 0;
@@ -250,6 +254,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_mousedown);
 	signal_dispose(&component->signal_mouseup);
 	signal_dispose(&component->signal_mousemove);
+	signal_dispose(&component->signal_mousewheel);
 	signal_dispose(&component->signal_mousedoubleclick);
 	signal_dispose(&component->signal_mouseenter);
 	signal_dispose(&component->signal_mousehover);
@@ -496,7 +501,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_LBUTTON);
+						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
 					signal_emit(&component->signal_mouseup, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -507,7 +512,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_RBUTTON);
+						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
 					signal_emit(&component->signal_mouseup, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -518,7 +523,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_MBUTTON);
+						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
 					signal_emit(&component->signal_mouseup, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -529,7 +534,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_LBUTTON);
+						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
 					signal_emit(&component->signal_mousedown, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -540,7 +545,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_RBUTTON);
+						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
 					signal_emit(&component->signal_mousedown, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -551,7 +556,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_MBUTTON);
+						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
 					signal_emit(&component->signal_mousedown, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -563,7 +568,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_LBUTTON);					
+						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);					
 					signal_emit(&component->signal_mousedoubleclick, component, 1,
 						&mouseevent);
 				}
@@ -578,7 +583,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_MBUTTON);
+						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
 					signal_emit(&component->signal_mousedoubleclick, component, 1,
 						&mouseevent);
 					return 0 ;
@@ -589,7 +594,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_RBUTTON);
+						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
 					signal_emit(&component->signal_mousedoubleclick, component, 1,
 						&mouseevent);
 					return 0;
@@ -615,14 +620,79 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MouseEvent mouseevent;
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), wParam);
+						(SHORT)HIWORD (lParam), wParam, 0);
 					signal_emit(&component->signal_mousemove, component, 1,
 						&mouseevent);
 					return 0 ;
 				}
 			break;
+			case WM_SETTINGCHANGE:
+			{
+				static int ulScrollLines;
+
+				SystemParametersInfo (SPI_GETWHEELSCROLLLINES, 0, &ulScrollLines, 0) ;
+      
+			   // ulScrollLines usually equals 3 or 0 (for no scrolling)
+			   // WHEEL_DELTA equals 120, so iDeltaPerLine will be 40
+				if (ulScrollLines)
+					iDeltaPerLine = WHEEL_DELTA / ulScrollLines ;
+				else
+					iDeltaPerLine = 0 ;
+			}
+			return 0 ;
+			break;          
+			case WM_MOUSEWHEEL:
+				if (component->signal_mousewheel.slots) {
+					MouseEvent mouseevent;
+
+					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
+						(SHORT)HIWORD (lParam), LOWORD(wParam), HIWORD(wParam));
+					signal_emit(&component->signal_mousewheel, component, 1,
+						&mouseevent);
+				} else
+				if (component->wheelscroll > 0) {
+					if (iDeltaPerLine != 0) {
+						component->accumwheeldelta += (short) HIWORD (wParam); // 120 or -120
+						while (component->accumwheeldelta >= iDeltaPerLine)
+						{           
+							int iPos;
+							int scrollmin;
+							int scrollmax;
+
+							ui_component_verticalscrollrange(component, &scrollmin,
+								&scrollmax);							
+							iPos = ui_component_verticalscrollposition(component) - 
+								component->wheelscroll;
+							if (iPos < scrollmin) {
+								iPos = scrollmin;
+							}
+							SendMessage((HWND) component->hwnd, 
+								WM_VSCROLL,
+								MAKELONG(SB_THUMBTRACK, iPos), 0);
+							component->accumwheeldelta -= iDeltaPerLine ;							
+						}				
+						while (component->accumwheeldelta <= -iDeltaPerLine)
+						{
+							int iPos;
+							int scrollmin;
+							int scrollmax;
+
+							ui_component_verticalscrollrange(component, &scrollmin,
+								&scrollmax);
+							iPos = ui_component_verticalscrollposition(component) + 
+								component->wheelscroll;
+							if (iPos > scrollmax) {
+								iPos = scrollmax;
+							}
+							SendMessage((HWND) component->hwnd, WM_VSCROLL,
+								MAKELONG(SB_THUMBTRACK, iPos), 0);							
+							component->accumwheeldelta += iDeltaPerLine;							
+						}
+					}
+				}
+			break;
 			case WM_MOUSEHOVER:			
-				if (component->signal_mousehover.slots) {				                    
+				if (component->signal_mousehover.slots) {	                    
 					signal_emit(&component->signal_mousehover, component, 0);
 					return 0;
 				}
@@ -633,7 +703,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					signal_emit(&component->signal_mouseleave, component, 0);
 					return 0;
 				}			
-			break; 
+			break;
 			case WM_VSCROLL:
 				handle_vscroll(hwnd, wParam, lParam);
 				return 0;
@@ -733,6 +803,11 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 {
+	short lo, hi;
+
+
+	lo = LOWORD(wParam);
+	hi = HIWORD(wParam);
 	switch (LOWORD (wParam)) {
 		case SB_TOP:
 		   si->nPos = si->nMin ;
@@ -753,7 +828,7 @@ void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 		   si->nPos += si->nPage ;
 		break ;
 		case SB_THUMBTRACK:
-		   si->nPos = si->nTrackPos ;
+		   si->nPos = HIWORD(wParam);
 		break ;
 		default:
 		break ;         

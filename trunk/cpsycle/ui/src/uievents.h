@@ -20,9 +20,10 @@ typedef struct {
 	int x;
 	int y;
 	int button;
+	int delta;
 } MouseEvent;
 
-void mouseevent_init(MouseEvent*, int x, int y, int button);
+void mouseevent_init(MouseEvent*, int x, int y, int button, int delta);
 
 typedef struct {		               
    int (*childenum)(void*, void*);

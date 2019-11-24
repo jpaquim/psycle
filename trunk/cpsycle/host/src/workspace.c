@@ -87,6 +87,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->patterneditposition.totallines = 0;
 	self->patterneditposition.track = 0;
 	pattern_init(&self->patternpaste);
+	self->sequencepaste = 0;
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -129,6 +130,7 @@ void workspace_dispose(Workspace* self)
 	undoredo_dispose(&self->undoredo);
 	workspace_disposesignals(self);
 	pattern_dispose(&self->patternpaste);
+	workspace_disposesequencepaste(self);
 	lock_dispose();
 }
 
@@ -143,6 +145,21 @@ void workspace_disposesignals(Workspace* self)
 	signal_dispose(&self->signal_scanprogress);
 	signal_dispose(&self->signal_beforesavesong);
 }
+
+void workspace_disposesequencepaste(Workspace* self)
+{
+	List* p;
+
+	for (p = self->sequencepaste; p != 0; p = p->next) {
+		SequenceEntry* entry;		
+
+		entry = (SequenceEntry*) p->entry;
+		free(entry);
+	}
+	list_free(self->sequencepaste);
+	self->sequencepaste = 0;
+}
+
 
 void workspace_initplayer(Workspace* self)
 {
@@ -664,6 +681,7 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 		,&self->song->sequence);	
 	signal_emit(&self->signal_songchanged, self, 1, flag);	
 	self->lastentry = 0;
+	workspace_disposesequencepaste(self);
 	lock_leave();
 	song_free(oldsong);	
 }
@@ -884,14 +902,12 @@ void workspace_idle(Workspace* self)
 			it = sequence_begin(&self->song->sequence, 
 				self->song->sequence.tracks,
 				player_position(&self->player));
-			if (it.tracknode && self->lastentry != it.tracknode->entry) {				
-				self->sequenceselection.editposition
-					= sequence_makeposition(&self->song->sequence,
-					self->song->sequence.tracks,
-					it.tracknode);
-				workspace_setsequenceselection(self, 
-					self->sequenceselection);
-				self->lastentry = (SequenceEntry*) it.tracknode->entry;				
+			if (it.tracknode && self->lastentry != it.tracknode->entry) {
+				sequenceselection_seteditposition(&self->sequenceselection, 
+						sequence_makeposition(&self->song->sequence,
+							self->song->sequence.tracks, it.tracknode));
+				workspace_setsequenceselection(self, self->sequenceselection);
+				self->lastentry = (SequenceEntry*) it.tracknode->entry;		
 			}
 			if (self->lastentry) {				
 				self->patterneditposition.line = (int) (
@@ -917,7 +933,7 @@ void workspace_idle(Workspace* self)
 				(beat_t) player_lpb(&self->player);
 			workspace_setpatterneditposition(self, 
 				self->patterneditposition);
-		}
-		self->lastentry = 0;
+			self->lastentry = 0;
+		}		
 	}
 }

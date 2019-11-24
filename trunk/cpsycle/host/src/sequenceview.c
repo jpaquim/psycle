@@ -10,17 +10,19 @@
 
 #define TIMERID_SEQUENCEVIEW 2000
 
-static void sequencelistview_ondraw(SequenceListView*, ui_component* sender, ui_graphics*);
+static void sequencelistview_ondraw(SequenceListView*, ui_component* sender,
+	ui_graphics*);
 static void sequencelistview_drawsequence(SequenceListView*, ui_graphics*);
-static void sequencelistview_drawtrack(SequenceListView*, ui_graphics*, SequenceTrack* track,
-	int trackindex, int x);
+static void sequencelistview_drawtrack(SequenceListView*, ui_graphics*,
+	SequenceTrack* track, int trackindex, int x);
 static void sequencelistview_computetextsizes(SequenceListView*);
 static void sequencelistview_adjustscrollbars(SequenceListView*);
-static void sequencelistview_onmousedown(SequenceListView*, ui_component* sender, MouseEvent*);
-static void sequencelistview_onscroll(SequenceListView*, ui_component* sender, int stepx, int stepy);
-static void sequencelistview_ontimer(SequenceListView*, ui_component* sender, int timerid);
-
-static void sequencelistview_seteditpositionasselection(SequenceListView*);
+static void sequencelistview_onmousedown(SequenceListView*, 
+	ui_component* sender, MouseEvent*);
+static void sequencelistview_onscroll(SequenceListView*, ui_component* sender,
+	int stepx, int stepy);
+static void sequencelistview_ontimer(SequenceListView*, ui_component* sender,
+	int timerid);
 static void sequenceview_onnewentry(SequenceView*);
 static void sequenceview_oninsertentry(SequenceView*);
 static void sequenceview_oncloneentry(SequenceView*);
@@ -29,6 +31,10 @@ static void sequenceview_onincpattern(SequenceView*);
 static void sequenceview_ondecpattern(SequenceView*);
 static void sequenceview_onnewtrack(SequenceView*);
 static void sequenceview_ondeltrack(SequenceView*);
+static void sequenceview_onclear(SequenceView*);
+static void sequenceview_oncut(SequenceView*);
+static void sequenceview_oncopy(SequenceView*);
+static void sequenceview_onpaste(SequenceView*);
 static void sequenceview_onsingleselection(SequenceView*, ui_button* sender);
 static void sequenceview_onmultiselection(SequenceView*, ui_button* sender);
 static void sequenceview_onfollowsong(SequenceView*, ui_button* sender);
@@ -38,7 +44,8 @@ static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
 
 static void sequenceduration_update(SequenceViewDuration*);
 
-static void sequencebuttons_onalign(SequenceButtons* self, ui_component* sender);
+static void sequencebuttons_onalign(SequenceButtons* self,
+	ui_component* sender);
 static void sequencebuttons_onpreferredsize(SequenceButtons*,
 	ui_component* sender, ui_size* limit, ui_size* rv);
 static List* rowend(List* p);
@@ -86,6 +93,14 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 		sequenceview_onnewtrack);
 	signal_connect(&self->buttons.deltrack.signal_clicked, self,
 		sequenceview_ondeltrack);
+	signal_connect(&self->buttons.clear.signal_clicked, self,
+		sequenceview_onclear);
+	signal_connect(&self->buttons.cut.signal_clicked, self,
+		sequenceview_oncut);
+	signal_connect(&self->buttons.copy.signal_clicked, self,
+		sequenceview_oncopy);
+	signal_connect(&self->buttons.paste.signal_clicked, self,
+		sequenceview_onpaste);
 	signal_connect(&self->buttons.singlesel.signal_clicked, self,
 		sequenceview_onsingleselection);
 	signal_connect(&self->buttons.multisel.signal_clicked, self,
@@ -119,8 +134,14 @@ void sequencebuttons_init(SequenceButtons* self, ui_component* parent)
 	ui_button_settext(&self->newtrack, "New Trk");
 	ui_button_init(&self->deltrack, &self->component);	
 	ui_button_settext(&self->deltrack, "Del Trk");
-	ui_button_init(&self->dummy, &self->component);
-	ui_button_settext(&self->dummy, "");
+	ui_button_init(&self->clear, &self->component);
+	ui_button_settext(&self->clear, "Clear");
+	ui_button_init(&self->cut, &self->component);
+	ui_button_settext(&self->cut, "");
+	ui_button_init(&self->copy, &self->component);
+	ui_button_settext(&self->copy, "Copy");
+	ui_button_init(&self->paste, &self->component);
+	ui_button_settext(&self->paste, "Paste");
 	ui_button_init(&self->singlesel, &self->component);
 	ui_button_settext(&self->singlesel, "SingleSel");
 	ui_button_init(&self->multisel, &self->component);	
@@ -252,14 +273,14 @@ void sequencelistview_init(SequenceListView* self, ui_component* parent,
 	Workspace* workspace)
 {	
 	self->view = view;
-	self->selectionmode = SELECTIONMODE_SINGLE;			
 	self->sequence = sequence;
 	self->patterns = patterns;
 	self->workspace = workspace;
 	self->selection = &workspace->sequenceselection;
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, sequencelistview_ondraw);
+	signal_connect(&self->component.signal_draw, self,
+		sequencelistview_ondraw);
 	signal_connect(&self->component.signal_mousedown, self, 
 		sequencelistview_onmousedown);
 	signal_connect(&self->component.signal_scroll, self,
@@ -277,7 +298,8 @@ void sequencelistview_init(SequenceListView* self, ui_component* parent,
 	ui_component_starttimer(&self->component, TIMERID_SEQUENCEVIEW, 200);
 }
 
-void sequencelistview_ondraw(SequenceListView* self, ui_component* sender, ui_graphics* g)
+void sequencelistview_ondraw(SequenceListView* self, ui_component* sender,
+	ui_graphics* g)
 {	
 	sequencelistview_drawsequence(self, g);
 }
@@ -414,13 +436,13 @@ void sequenceview_onnewentry(SequenceView* self)
 	List* tracknode;
 	
 	tracknode = sequence_insert(self->sequence, self->selection->editposition, 
-		patterns_append(self->patterns, pattern_allocinit()));
-	self->workspace->sequenceselection.editposition
-		= sequence_makeposition(self->sequence,
+		patterns_append(self->patterns, pattern_allocinit()));	
+	sequenceselection_seteditposition(self->selection,
+		sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
-			tracknode);
-	sequencelistview_seteditpositionasselection(&self->listview);
-	workspace_setsequenceselection(self->workspace, self->workspace->sequenceselection);	
+			tracknode));
+	workspace_setsequenceselection(self->workspace,
+		self->workspace->sequenceselection);	
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscrollbars(&self->listview);
 	ui_component_invalidate(&self->component);
@@ -436,11 +458,10 @@ void sequenceview_oninsertentry(SequenceView* self)
 	entry = sequenceposition_entry(&editposition);			
 	tracknode = sequence_insert(self->sequence, editposition,
 		entry ? entry->pattern :0);
-	self->workspace->sequenceselection.editposition
-		= sequence_makeposition(self->sequence,
+	sequenceselection_seteditposition(self->selection,
+		sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
-			tracknode);
-	sequencelistview_seteditpositionasselection(&self->listview);
+			tracknode));
 	workspace_setsequenceselection(self->workspace, self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscrollbars(&self->listview);
@@ -461,11 +482,10 @@ void sequenceview_oncloneentry(SequenceView* self)
 		if (pattern) {			
 			tracknode = sequence_insert(self->sequence, editposition, 
 				patterns_append(self->patterns, pattern_clone(pattern)));
-			self->workspace->sequenceselection.editposition
-				= sequence_makeposition(self->sequence,
-					self->selection->editposition.track,
-					tracknode);
-			sequencelistview_seteditpositionasselection(&self->listview);
+			sequenceselection_seteditposition(self->selection,
+				sequence_makeposition(self->sequence,
+				self->selection->editposition.track,
+				tracknode));			
 			workspace_setsequenceselection(self->workspace,
 				self->workspace->sequenceselection);
 		}						
@@ -499,10 +519,9 @@ void sequenceview_ondelentry(SequenceView* self)
 				self->selection->editposition.track,
 				tracknode);		
 	}		
-	self->workspace->sequenceselection.editposition = editposition;
-	sequencelistview_seteditpositionasselection(&self->listview);
-		workspace_setsequenceselection(self->workspace, 
-			self->workspace->sequenceselection);
+	sequenceselection_seteditposition(self->selection, editposition);
+	workspace_setsequenceselection(self->workspace, 
+		self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscrollbars(&self->listview);
 }
@@ -518,10 +537,10 @@ void sequenceview_onincpattern(SequenceView* self)
 		sequence_setpatternslot(self->sequence, editposition,
 			entry->pattern + 1);
 	}
-	self->workspace->sequenceselection.editposition
-		= sequence_makeposition(self->sequence,
+	sequenceselection_seteditposition(self->selection,
+		sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
-			editposition.trackposition.tracknode);
+			editposition.trackposition.tracknode));
 	workspace_setsequenceselection(self->workspace,
 		self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
@@ -538,10 +557,10 @@ void sequenceview_ondecpattern(SequenceView* self)
 		sequence_setpatternslot(self->sequence, editposition,
 			entry->pattern - 1);
 	}
-	self->workspace->sequenceselection.editposition
-		= sequence_makeposition(self->sequence,
+	sequenceselection_seteditposition(self->selection,
+		sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
-			editposition.trackposition.tracknode);
+			editposition.trackposition.tracknode));
 	workspace_setsequenceselection(self->workspace,
 		self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
@@ -569,18 +588,77 @@ void sequenceview_ondeltrack(SequenceView* self)
 	sequencelistview_adjustscrollbars(&self->listview);
 }
 
+void sequenceview_onclear(SequenceView* self)
+{
+	SequencePosition sequenceposition;
+
+	if (self->workspace->song) {
+		lock_enter();	
+		workspace_disposesequencepaste(self->workspace);
+		sequence_clear(self->sequence);
+		patterns_clear(&self->workspace->song->patterns);		
+		patterns_insert(&self->workspace->song->patterns, 0, pattern_allocinit());
+		sequenceposition.track = 
+			sequence_appendtrack(self->sequence, sequencetrack_allocinit());
+		sequenceposition.trackposition =
+			sequence_begin(self->sequence, sequenceposition.track, 0);
+		sequence_insert(self->sequence, sequenceposition, 0);
+		sequenceselection_setsequence(self->selection, self->sequence);
+		workspace_setsequenceselection(self->workspace, *self->selection);		
+		ui_component_invalidate(&self->component);
+		lock_leave();
+	}
+}
+
+void sequenceview_oncut(SequenceView* self)
+{		
+}
+
+void sequenceview_oncopy(SequenceView* self)
+{	
+	List* p;
+	
+	workspace_disposesequencepaste(self->workspace);	
+	for (p = self->selection->entries; p != 0; p = p->next) {
+		SequenceEntry* entry;		
+
+		entry = (SequenceEntry*) p->entry;		
+		list_append(&self->workspace->sequencepaste,
+			sequenceentry_allocinit(entry->pattern, entry->offset));
+	}
+}
+
+void sequenceview_onpaste(SequenceView* self)
+{	
+	SequencePosition position;
+	List* p;
+	
+	position = self->selection->editposition;	
+	for (p = self->workspace->sequencepaste; p != 0; p = p->next) {
+		SequenceEntry* entry;
+		SequenceTrackNode* node;
+		
+		entry = (SequenceEntry*) p->entry;
+		node = sequence_insert(self->sequence, position, entry->pattern);
+		position = sequence_makeposition(self->sequence,
+				self->selection->editposition.track,
+				node);
+	}
+	ui_component_invalidate(&self->component);
+}
+
 void sequenceview_onsingleselection(SequenceView* self, ui_button* sender)
 {
 	ui_button_highlight(&self->buttons.singlesel);
 	ui_button_disablehighlight(&self->buttons.multisel);
-	self->listview.selectionmode = SELECTIONMODE_SINGLE;
+	self->listview.selection->selectionmode = SELECTIONMODE_SINGLE;
 }
 
 void sequenceview_onmultiselection(SequenceView* self, ui_button* sender)
 {
 	ui_button_highlight(&self->buttons.multisel);
 	ui_button_disablehighlight(&self->buttons.singlesel);
-	self->listview.selectionmode = SELECTIONMODE_MULTI;
+	self->listview.selection->selectionmode = SELECTIONMODE_MULTI;
 }
 
 void sequenceview_onfollowsong(SequenceView* self, ui_button* sender)
@@ -601,51 +679,10 @@ void sequencelistview_onmousedown(SequenceListView* self, ui_component* sender,
 	sequencelistview_computetextsizes(self);
 	selected = (ev->y - listviewmargin - self->dy) / self->lineheight;
 	selectedtrack = (ev->x - self->dx) / self->trackwidth;
-	if (selectedtrack < sequence_sizetracks(self->sequence)) {
-		SequencePosition position;
-		int append = 1;
-		List* p;
-		
-		position = sequence_at(self->sequence, selectedtrack, selected);
-		self->selection->editposition = position;
-		if (self->selectionmode == SELECTIONMODE_SINGLE) {
-			list_free(self->selection->entries);
-			self->selection->entries = 0;
-		} else
-		if ((p = list_findentry(self->selection->entries, 
-				position.trackposition.tracknode->entry)) != 0) {			
-			list_remove(&self->selection->entries, p);
-			append = 0;
-		}
-		if (append) {
-			if (self->selection->editposition.trackposition.tracknode) {				
-				list_append(&self->selection->entries, 
-					self->selection->editposition.trackposition.tracknode->entry);								
-			}
-		} else {		
-			SequenceTrack* track;
-			List* p = list_last(self->selection->entries);
-			
-			if (p) {
-				track = (SequenceTrack*)position.track->entry;
-				p = list_findentry(track->entries, p->entry);
-				position = sequence_makeposition(self->sequence,
-					self->selection->editposition.track,
-					p);			
-				self->selection->editposition = position;
-			}
-		}
-		workspace_setsequenceselection(self->workspace, *self->selection);		
-	}
-}
-
-void sequencelistview_seteditpositionasselection(SequenceListView* self)
-{
-	list_free(self->selection->entries);
-	self->selection->entries = 0;
-	if (self->selection->editposition.trackposition.tracknode) {				
-		list_append(&self->selection->entries, 
-			self->selection->editposition.trackposition.tracknode->entry);		
+	if (selectedtrack < sequence_sizetracks(self->sequence)) {		
+		sequenceselection_seteditposition(self->selection,
+			sequence_at(self->sequence, selectedtrack, selected));		
+		workspace_setsequenceselection(self->workspace, *self->selection);
 	}
 }
 
@@ -776,5 +813,5 @@ void sequencelistview_ontimer(SequenceListView* self, ui_component* sender, int 
 	if (self->lastentry) {
 		ui_component_invalidate(&self->component);
 		self->lastentry = 0;
-	}
+	}	
 }

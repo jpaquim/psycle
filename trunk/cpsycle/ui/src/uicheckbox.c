@@ -40,6 +40,14 @@ void ui_checkbox_check(ui_checkbox* self)
 	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
 }
 
+int ui_checkbox_checked(ui_checkbox* self)
+{
+	int rv;
+	
+	rv = SendMessage((HWND)self->component.hwnd, BM_GETSTATE, (WPARAM)0, (LPARAM)0);
+	return rv;
+}
+
 void ui_checkbox_disablecheck(ui_checkbox* self)
 {
 	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);

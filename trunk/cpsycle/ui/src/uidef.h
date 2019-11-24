@@ -7,6 +7,9 @@
 #include "../../detail/prefix.h"
 #include <stddef.h>
 
+// target win98 or nt 4 or later systems
+#define _WIN32_WINNT 0x400
+
 #include <windows.h>
 #if defined min
 #undef min

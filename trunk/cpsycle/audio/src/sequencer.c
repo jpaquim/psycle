@@ -231,7 +231,7 @@ void freeentries(List* events)
 
 void sequencer_frametick(Sequencer* self, unsigned int numframes)
 {	
-	sequencer_tick(self, sequencer_offset(self, numframes));
+	sequencer_tick(self, sequencer_frametooffset(self, numframes));
 }
 
 void sequencer_tick(Sequencer* self, beat_t width)
@@ -329,8 +329,17 @@ void insertevents(Sequencer* self)
 
 			entry = sequencetrackiterator_entry(it);
 			pattern = patterns_at(it->patterns, entry->pattern);
-			if (pattern	&& self->position <= entry->offset + pattern->length) {
-				continueplaying = 1;
+			if (pattern) {
+				if (self->position <= entry->offset + pattern->length) {
+					continueplaying = 1;
+				} else 
+				if (it->tracknode->next) {
+					sequencetrackiterator_incentry(it);
+					entry = sequencetrackiterator_entry(it);
+					if (self->position <= entry->offset + pattern->length) {
+						continueplaying = 1;
+					}
+				}
 			}
 			while (sequencetrackiterator_patternentry(it)) {
 				beat_t offset;
@@ -555,7 +564,7 @@ void compute_beatsprosample(Sequencer* self)
 	self->beatsprosample = (self->bpm * self->lpbspeed) / (self->samplerate * 60.0f);
 }
 
-beat_t sequencer_offset(Sequencer* self, int numsamples)
+beat_t sequencer_frametooffset(Sequencer* self, int numsamples)
 {
 	return numsamples * self->beatsprosample;
 }
