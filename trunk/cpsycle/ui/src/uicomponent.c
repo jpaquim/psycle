@@ -235,6 +235,8 @@ void ui_component_init_base(ui_component* self) {
 	self->doublebuffered = 0;
 	self->wheelscroll = 0;
 	self->accumwheeldelta = 0;
+	self->handlevscroll = 1;
+	self->handlehscroll = 1;
 	self->backgroundmode = BACKGROUND_SET;
 	self->backgroundcolor = defaultbackgroundcolor;
 	self->background = 0;
@@ -756,7 +758,9 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 			signal_emit(&component->signal_scroll, component, 2, 
 				0, (iPos - si.nPos));			
 		}
-		ui_component_scrollstep(component, 0, (iPos - si.nPos));
+		if (component->handlevscroll) {
+			ui_component_scrollstep(component, 0, (iPos - si.nPos));
+		}
 	}
 }
 
@@ -797,17 +801,14 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 			signal_emit(&component->signal_scroll, component, 2, 
 				(iPos - si.nPos), 0);			
 		}
-		ui_component_scrollstep(component, (iPos - si.nPos), 0);
+		if (component->handlehscroll) {
+			ui_component_scrollstep(component, (iPos - si.nPos), 0);
+		}
 	}
 }
 
 void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 {
-	short lo, hi;
-
-
-	lo = LOWORD(wParam);
-	hi = HIWORD(wParam);
 	switch (LOWORD (wParam)) {
 		case SB_TOP:
 		   si->nPos = si->nMin ;
