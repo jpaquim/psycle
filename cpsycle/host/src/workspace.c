@@ -338,7 +338,7 @@ void workspace_makepatternview(Workspace* self, Properties* visual)
 		properties_append_bool(pvc, "wraparound", 1),
 		"Wrap Around");
 	properties_settext(
-		properties_append_bool(pvc, "centercursoronscreen", 0),
+		properties_append_bool(pvc, "centercursoronscreen", 1),
 		"Center cursor on screen");
 	properties_settext(
 		properties_append_int(pvc, "beatsperbar", 4, 1, 16),

@@ -47,6 +47,8 @@ typedef struct {
 	unsigned int playbar2;
 	unsigned int cursor;
 	unsigned int cursor2;
+	unsigned int midline;
+	unsigned int midline2;
 	TrackerHeaderCoords headercoords;
 	ui_bitmap bitmap;
 } TrackerSkin;
@@ -134,6 +136,7 @@ typedef struct {
    struct TrackerView* view;
    PatternSelection selection;
    int hasselection;
+   int midline;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, ui_component* parent, struct TrackerView*,

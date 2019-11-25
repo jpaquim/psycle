@@ -101,6 +101,8 @@ typedef struct {
 	winproc wndproc;
 	int accumwheeldelta;
 	int wheelscroll;
+	int handlevscroll;
+	int handlehscroll;
 } ui_component;
 
 void ui_init(HINSTANCE hInstance);

@@ -35,3 +35,8 @@ Sample* samples_at(Samples* self, uintptr_t slot)
 {
 	return table_at(&self->container, slot);
 }
+
+uintptr_t samples_size(Samples* self)
+{
+	return table_size(&self->container);
+}
