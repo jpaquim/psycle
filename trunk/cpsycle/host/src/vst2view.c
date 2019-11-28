@@ -13,12 +13,12 @@ void InitVst2View(Vst2View* self, ui_component* parent, Machine* plugin)
 {		
 	self->plugin = plugin;
 	ui_component_init(&self->component, parent);
-	plugin->seteditorhandle(plugin, (void*)self->component.hwnd);
+	plugin->vtable->seteditorhandle(plugin, (void*)self->component.hwnd);
 	signal_connect(&self->component.signal_timer, self, ontimer);
 	ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 
 void ontimer(Vst2View* self, ui_component* sender, int id)
 {	
-	self->plugin->editoridle(self->plugin);
+	self->plugin->vtable->editoridle(self->plugin);
 }

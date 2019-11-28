@@ -18,19 +18,31 @@ static void bypass(CustomMachine* self) { self->isbypassed = 1; }
 static void unbypass(CustomMachine* self) { self->isbypassed = 0; }
 static int bypassed(CustomMachine* self) { return self->isbypassed; }
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(CustomMachine* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->machine.vtable;
+		vtable.setpanning = setpanning;
+		vtable.panning = panning;
+		vtable.mute = mute;
+		vtable.unmute = unmute;
+		vtable.muted = muted;
+		vtable.bypass = bypass;
+		vtable.unbypass = unbypass;
+		vtable.bypassed = bypassed;
+		vtable.editname = custommachine_editname;
+		vtable.seteditname = custommachine_seteditname;
+	}
+}
+
 void custommachine_init(CustomMachine* self, MachineCallback callback)
 {
 	machine_init(&self->machine, callback);
-	self->machine.setpanning = setpanning;
-	self->machine.panning = panning;
-	self->machine.mute = mute;
-	self->machine.unmute = unmute;
-	self->machine.muted = muted;
-	self->machine.bypass = bypass;
-	self->machine.unbypass = unbypass;
-	self->machine.bypassed = bypassed;
-	self->machine.editname = custommachine_editname;
-	self->machine.seteditname = custommachine_seteditname;
+	vtable_init(self);
+	self->machine.vtable = &vtable;
 	self->editname = 0;
 	self->ismuted = 0;
 	self->isbypassed = 0;

@@ -44,7 +44,7 @@ static void parameterrange(Machine* self, int numparam, int* minval, int* maxval
 static void parametertweak(Machine* self, int par, int val) { }
 static void patterntweak(Machine* self, int par, int val)
 {
-	self->parametertweak(self, par, val);
+	self->vtable->parametertweak(self, par, val);
 }
 static int parameterlabel(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
 static int parametername(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
@@ -90,62 +90,74 @@ static struct Samples* samples(Machine* self) { return self->callback.samples(se
 static struct Machines* machines(Machine* self) { return self->callback.machines(self->callback.context); }
 static struct Instruments* instruments(Machine* self) { return self->callback.instruments(self->callback.context); }
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.clone = clone;
+		vtable.dispose = machine_dispose;
+		vtable.mix = mix;
+		vtable.work = work;
+		vtable.mode = mode;
+		vtable.hostevent = hostevent;
+		vtable.seqtick = seqtick;
+		vtable.sequencertick = sequencertick;
+		vtable.sequencerlinetick = sequencerlinetick;
+		vtable.sequencerinsert = sequencerinsert;
+		vtable.info = info;
+		vtable.parametertweak = parametertweak;
+		vtable.patterntweak = patterntweak;
+		vtable.describevalue = describevalue;
+		vtable.parametervalue = parametervalue;
+		vtable.setpanning = setpanning;
+		vtable.panning = panning;
+		vtable.mute = mute;
+		vtable.unmute = unmute;
+		vtable.muted = muted;
+		vtable.bypass = bypass;
+		vtable.unbypass = unbypass;
+		vtable.bypassed = bypassed;
+		vtable.generateaudio = generateaudio;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;	
+		vtable.parameterrange = parameterrange;
+		vtable.parametertype = parametertype;
+		vtable.numparameters = numparameters;
+		vtable.numparametercols = numparametercols;
+		vtable.paramviewoptions = paramviewoptions;
+		vtable.parameterlabel = parameterlabel;
+		vtable.parametername = parametername;
+		vtable.setcallback = setcallback;
+		vtable.updatesamplerate = updatesamplerate;
+		vtable.loadspecific = loadspecific;
+		vtable.savespecific = savespecific;
+		vtable.bpm = bpm;
+		vtable.samplerate = samplerate;
+		vtable.instruments = instruments;	
+		vtable.samples = samples;
+		vtable.machines = machines;		
+		vtable.slot = slot;
+		vtable.setslot = setslot;
+		vtable.bypass = 0;
+		vtable.mute = 0;	
+		vtable.haseditor = haseditor;
+		vtable.seteditorhandle = seteditorhandle;
+		vtable.editorsize = editorsize;
+		vtable.editoridle = editoridle;
+		vtable.editname = editname;
+		vtable.seteditname = seteditname;
+		vtable_initialized = 1;
+	}
+}
+
 void machine_init(Machine* self, MachineCallback callback)
 {		
 	memset(self, 0, sizeof(Machine));
-	self->clone = clone;
-	self->dispose = machine_dispose;
-	self->mix = mix;
-	self->work = work;
-	self->mode = mode;
-	self->hostevent = hostevent;
-	self->seqtick = seqtick;
-	self->sequencertick = sequencertick;
-	self->sequencerlinetick = sequencerlinetick;
-	self->sequencerinsert = sequencerinsert;
-	self->info = info;
-	self->parametertweak = parametertweak;
-	self->patterntweak = patterntweak;
-	self->describevalue = describevalue;
-	self->parametervalue = parametervalue;
-	self->setpanning = setpanning;
-	self->panning = panning;
-	self->mute = mute;
-	self->unmute = unmute;
-	self->muted = muted;
-	self->bypass = bypass;
-	self->unbypass = unbypass;
-	self->bypassed = bypassed;
-	self->generateaudio = generateaudio;
-	self->numinputs = numinputs;
-	self->numoutputs = numoutputs;	
-	self->parameterrange = parameterrange;
-	self->parametertype = parametertype;
-	self->numparameters = numparameters;
-	self->numparametercols = numparametercols;
-	self->paramviewoptions = paramviewoptions;
-	self->parameterlabel = parameterlabel;
-	self->parametername = parametername;
-	self->setcallback = setcallback;
-	self->updatesamplerate = updatesamplerate;
-	self->loadspecific = loadspecific;
-	self->savespecific = savespecific;
-	self->bpm = bpm;
-	self->samplerate = samplerate;
-	self->instruments = instruments;	
-	self->samples = samples;
-	self->machines = machines;
+	vtable_init();
+	self->vtable = &vtable;
 	self->callback = callback;
-	self->slot = slot;
-	self->setslot = setslot;
-	self->bypass = 0;
-	self->mute = 0;	
-	self->haseditor = haseditor;
-	self->seteditorhandle = seteditorhandle;
-	self->editorsize = editorsize;
-	self->editoridle = editoridle;
-	self->editname = editname;
-	self->seteditname = seteditname;
 	signal_init(&self->signal_worked);
 }
 
@@ -171,30 +183,30 @@ void work(Machine* self, BufferContext* bc)
 			buffer_setoffset(bc->input, pos);
 			buffer_setoffset(bc->output, pos);			
 			bc->numsamples = numworksamples;
-			self->generateaudio(self, bc);
+			self->vtable->generateaudio(self, bc);
 			amount -= numworksamples;
 			bc->numsamples = restorenumsamples;
 		}
 		if (entry->event.cmd == SET_PANNING) {
-			self->setpanning(self, 
+			self->vtable->setpanning(self, 
 				entry->event.parameter / 255.f);
 		} else
 		if (entry->event.note == NOTECOMMANDS_TWEAK) {
 			int value;
 			
 			value = (entry->event.cmd << 8) + entry->event.parameter;
-			self->patterntweak(self, entry->event.inst, value);
+			self->vtable->patterntweak(self, entry->event.inst, value);
 		} else {
-			self->seqtick(self, entry->track, &entry->event);
+			self->vtable->seqtick(self, entry->track, &entry->event);
 		}
 		pos = (unsigned int)entry->delta;	
 	}
-	if (amount > 0 && self->generateaudio) {
+	if (amount > 0 && self->vtable->generateaudio) {
 		int restorenumsamples = bc->numsamples;
 		buffer_setoffset(bc->input, pos);
 		buffer_setoffset(bc->output, pos);			
 		bc->numsamples = amount;
-		self->generateaudio(self, bc);
+		self->vtable->generateaudio(self, bc);
 		bc->numsamples = restorenumsamples;
 	}
 	buffer_setoffset(bc->input, 0);
@@ -205,7 +217,7 @@ static int mode(Machine* self)
 { 
 	const MachineInfo* info;
 
-	info = self->info(self);
+	info = self->vtable->info(self);
 	return (!info) ? MACHMODE_GENERATOR : (info->Flags & 3) == 3
 			? MACHMODE_GENERATOR 
 		    : MACHMODE_FX;
@@ -213,8 +225,8 @@ static int mode(Machine* self)
 
 int machine_supports(Machine* self, int option)
 {
-	if (self->info(self)) {
-		return (self->info(self)->Flags & option) == option;
+	if (self->vtable->info(self)) {
+		return (self->vtable->info(self)->Flags & option) == option;
 	}
 	return 0;
 }
@@ -268,7 +280,7 @@ void loadspecific(Machine* self, struct SongFile* songfile, unsigned int slot)
 	for (i = 0; i < count; i++) {
 		int temp;
 		psyfile_read(songfile->file, &temp, sizeof(temp));
-		self->parametertweak(self, i, temp);
+		self->vtable->parametertweak(self, i, temp);
 	}
 	psyfile_skip(songfile->file, size - sizeof(count) - (count * sizeof(int)));
 }
@@ -276,14 +288,14 @@ void loadspecific(Machine* self, struct SongFile* songfile, unsigned int slot)
 void savespecific(Machine* self, struct SongFile* songfile, unsigned int slot)
 {
 	unsigned int i;
-	unsigned count = self->numparameters(self);
+	unsigned count = self->vtable->numparameters(self);
 	unsigned  size = sizeof(count)+(count*sizeof(int));
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &count, sizeof(count));
 	for(i = 0; i < count; ++i) {
 		int temp;
 		
-		temp = self->parametervalue(self, i);
+		temp = self->vtable->parametervalue(self, i);
 		psyfile_write(songfile->file, &temp, sizeof(temp));
 	}
 }

@@ -49,8 +49,9 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 	signal_connect(&self->component.signal_timer,self, OnTimer);	
 	ui_component_resize(&self->component, 800, 400);
 	if (self->machine) {
-		self->numparams = self->machine->numparameters(self->machine);
-		self->numparametercols = self->machine->numparametercols(self->machine);
+		self->numparams = self->machine->vtable->numparameters(self->machine);
+		self->numparametercols =
+			self->machine->vtable->numparametercols(self->machine);
 		if (self->numparametercols > 0) {
 			self->numrows = self->numparams / self->numparametercols;
 		} else {
@@ -73,8 +74,8 @@ void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
 		int col = 0;
 		int param;		
 
-		self->numparams = self->machine->numparameters(self->machine);
-		self->numparametercols = self->machine->numparametercols(self->machine);
+		self->numparams = self->machine->vtable->numparameters(self->machine);
+		self->numparametercols = self->machine->vtable->numparametercols(self->machine);
 
 		if (self->numparams > 0 && self->numparametercols > 0) {
 			self->numrows = self->numparams / self->numparametercols;						
@@ -97,7 +98,7 @@ void DrawBackground(ParamView* self, ui_graphics* g)
 
 void DrawParam(ParamView* self, ui_graphics* g, int par, int row, int col)
 {	
-	switch (self->machine->parametertype(self->machine, par)) {
+	switch (self->machine->vtable->parametertype(self->machine, par)) {
 		case 1:
 			DrawHeader(self, g, par, row, col);
 		break;
@@ -144,14 +145,14 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx, height / 2);
 	ui_setrectangle(&r_bottom, left + knob_cx, top + height/2, width - knob_cx, height / 2);
 				
-	if (!self->machine->parametername(self->machine, label, param)) {
-		if (!self->machine->parameterlabel(self->machine, label, param)) {
+	if (!self->machine->vtable->parametername(self->machine, label, param)) {
+		if (!self->machine->vtable->parameterlabel(self->machine, label, param)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
-	if (self->machine->describevalue(
-		self->machine, str, param, self->machine->parametervalue(self->machine, param)) == FALSE) {
-		psy_snprintf(str, 128, "%d", self->machine->parametervalue(self->machine, param));
+	if (self->machine->vtable->describevalue(
+		self->machine, str, param, self->machine->vtable->parametervalue(self->machine, param)) == FALSE) {
+		psy_snprintf(str, 128, "%d", self->machine->vtable->parametervalue(self->machine, param));
 	}
 	ui_setbackgroundcolor(g, 0x00555555); // + nc*2);
 	ui_settextcolor(g, 0x00CDCDCD); // + nc);	
@@ -161,8 +162,8 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_settextcolor(g, 0x00E7BD18); // + nc);
 	ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
 		ETO_OPAQUE, r_bottom, str, strlen(str));
-	self->machine->parameterrange(self->machine, param, &minval, &maxval);
-	knob_frame = (int)((self->machine->parametervalue(self->machine, param) - minval) *
+	self->machine->vtable->parameterrange(self->machine, param, &minval, &maxval);
+	knob_frame = (int)((self->machine->vtable->parametervalue(self->machine, param) - minval) *
 		63.0 / (max(1, maxval - minval)));
 	ui_drawbitmap(g, &knobs, r.left, r.top, knob_cx, knob_cy, knob_frame*knob_cx, 0);	
 }
@@ -186,8 +187,8 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 
 	ui_setbackgroundcolor(g, 0x00232323);
 	ui_settextcolor(g, 0x00FFFFFF);
-	if (!self->machine->parametername(self->machine, str, param)) {
-		if (!self->machine->parameterlabel(self->machine, str, param)) {
+	if (!self->machine->vtable->parametername(self->machine, str, param)) {
+		if (!self->machine->vtable->parameterlabel(self->machine, str, param)) {
 			psy_snprintf(str, 128, "%s", "");
 		}
 	}
@@ -195,9 +196,9 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 		left, top, ETO_OPAQUE | ETO_CLIPPED,
 		r, str, strlen(str));
 	ui_setrectangle(&r, left, top + half, width, top + half);
-	if (self->machine->describevalue(
-		self->machine, str, param, self->machine->parametervalue(self->machine, param)) == FALSE) {
-		psy_snprintf(str, 128, "%d", self->machine->parametervalue(self->machine, param));
+	if (self->machine->vtable->describevalue(
+		self->machine, str, param, self->machine->vtable->parametervalue(self->machine, param)) == FALSE) {
+		psy_snprintf(str, 128, "%d", self->machine->vtable->parametervalue(self->machine, param));
 	}
 	ui_textoutrectangle(g, 
 		left, top + half, ETO_OPAQUE | ETO_CLIPPED,
@@ -235,8 +236,8 @@ void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
 
 	ui_setbackgroundcolor(g, 0x00232323);
 	ui_settextcolor(g, 0x00FFFFFF);
-	if (!self->machine->parametername(self->machine, str, param)) {
-		if (!self->machine->parameterlabel(self->machine, str, param)) {
+	if (!self->machine->vtable->parametername(self->machine, str, param)) {
+		if (!self->machine->vtable->parameterlabel(self->machine, str, param)) {
 			psy_snprintf(str, 128, "%s", "");
 		}
 	}
@@ -264,7 +265,7 @@ void DrawSlider(ParamView* self, ui_graphics* g, int param, int row, int col)
 	cellsize(self, &width, &height);	
 	skin_blitpart(g, &mixer, left, top, &slider);
 	xoffset = (slider.destwidth - knob.destwidth) / 2;
-	value =	(self->machine->parametervalue(self->machine, param) / 65535.f);	
+	value =	(self->machine->vtable->parametervalue(self->machine, param) / 65535.f);	
 	yoffset = (int)((1 - value) * slider.destheight);
 	skin_blitpart(g, &mixer, left + xoffset, top + yoffset, &knob);	
 }
@@ -286,7 +287,7 @@ void DrawLevel(ParamView* self, ui_graphics* g, int param, int row, int col)
 	cellsize(self, &width, &height);		
 	skin_blitpart(g, &mixer, left + slider.destwidth, 
 		slider.destheight - vuoff.destheight, &vuoff);			
-	value =	(self->machine->parametervalue(self->machine, param) / 65535.f);	
+	value =	(self->machine->vtable->parametervalue(self->machine, param) / 65535.f);	
 	vuonheight = (int)(vuon.srcheight * value);
 	vuon.srcy += (vuon.srcheight - vuonheight);
 	vuon.srcheight = vuonheight;
@@ -297,7 +298,7 @@ void DrawLevel(ParamView* self, ui_graphics* g, int param, int row, int col)
 
 void cellsize(ParamView* self, int* width, int* height)
 {
-	*width = (self->machine->paramviewoptions(self->machine) & 
+	*width = (self->machine->vtable->paramviewoptions(self->machine) & 
 		MACHINE_PARAMVIEW_COMPACT) == MACHINE_PARAMVIEW_COMPACT 
 			? 67
 			: 134;
@@ -319,8 +320,8 @@ void ParamViewSize(ParamView* self, int* width, int* height)
 	int cellheight;
 
 	if (self->machine) {
-		self->numparams = self->machine->numparameters(self->machine);
-		self->numparametercols = self->machine->numparametercols(self->machine);
+		self->numparams = self->machine->vtable->numparameters(self->machine);
+		self->numparametercols = self->machine->vtable->numparametercols(self->machine);
 		if (self->numparametercols > 0) {
 			self->numrows = self->numparams / self->numparametercols;
 		} else {
@@ -337,7 +338,8 @@ void OnMouseDown(ParamView* self, ui_component* sender, MouseEvent* ev)
 	self->tweak = HitTest(self, ev->x, ev->y);
 	if (self->tweak != -1) {
 		self->tweakbase = ev->y;
-		self->tweakval = self->machine->parametervalue(self->machine, self->tweak);
+		self->tweakval =
+			self->machine->vtable->parametervalue(self->machine, self->tweak);
 		ui_component_capture(&self->component);
 	}
 }
@@ -374,8 +376,8 @@ void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent* ev)
 		int maxval;
 				
 		self->my = ev->y;
-		self->machine->parameterrange(self->machine, self->tweak, &minval,
-			&maxval);
+		self->machine->vtable->parameterrange(self->machine, self->tweak,
+			&minval, &maxval);
 		dy = self->tweakbase - ev->y;
 		val = (int)(self->tweakval +
 			(maxval - minval) / 100.0 * dy);
@@ -385,7 +387,7 @@ void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent* ev)
 		if (val < minval) {
 			val = minval;
 		}
-		self->machine->parametertweak(self->machine, self->tweak, val);
+		self->machine->vtable->parametertweak(self->machine, self->tweak, val);
 		ui_component_invalidate(&self->component);		
 	}
 }

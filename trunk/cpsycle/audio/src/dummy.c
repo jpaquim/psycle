@@ -31,13 +31,24 @@ static int mode(DummyMachine* self) { return self->mode; }
 static unsigned int numinputs(DummyMachine* self) { return 2; }
 static unsigned int numoutputs(DummyMachine* self) { return 2; }
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(DummyMachine* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->machine.machine.vtable;
+		vtable.mode = mode;
+		vtable.info = info;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;
+	}
+}
+
 void dummymachine_init(DummyMachine* self, MachineCallback callback)
 {	
 	Machine* base = (Machine*)self;
-	machine_init(base, callback);	
-	base->mode = mode;
-	base->info = info;
-	base->numinputs = numinputs;
-	base->numoutputs = numoutputs;
+	machine_init(base, callback);
+	vtable_init(self);
 	self->mode = MACHMODE_FX;
 }

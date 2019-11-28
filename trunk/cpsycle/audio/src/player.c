@@ -138,7 +138,7 @@ void player_workpath(Player* self, unsigned int amount)
 			if (machine && !table_exists(&self->song->machines.connections.sends, slot)) {
 				Buffer* output;
 
-				output = machine->mix(machine, slot, amount,
+				output = machine->vtable->mix(machine, slot, amount,
 					connections_at(&self->song->machines.connections, slot),
 					&self->song->machines);
 				if (output && slot != MASTER_INDEX) {				
@@ -150,8 +150,8 @@ void player_workpath(Player* self, unsigned int amount)
 					rms = player_rmsvol(self, slot);					
 					buffercontext_init(&bc, events, output, output, amount,
 						self->numsongtracks, rms);
-					machine->work(machine, &bc);
-					buffer_pan(output, machine->panning(machine), amount);
+					machine->vtable->work(machine, &bc);
+					buffer_pan(output, machine->vtable->panning(machine), amount);
 					if (self->vumode == VUMETER_RMS && buffer_numchannels(
 							bc.output) >= 2) {
 						rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],

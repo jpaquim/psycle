@@ -71,36 +71,49 @@ const MachineInfo* sampler_info(void)
 	return &MacInfo;
 }
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(Sampler* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->custommachine.machine.vtable;		
+		vtable.generateaudio = generateaudio;
+		vtable.seqtick = seqtick;
+		vtable.info = info;
+		vtable.dispose = dispose;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;
+		vtable.loadspecific = loadspecific;
+		vtable.savespecific = savespecific;
+		vtable.numparametercols = numparametercols;
+		vtable.numparameters = numparameters;
+		vtable.parametertweak = parametertweak;
+		vtable.describevalue = describevalue;	
+		vtable.parametervalue = parametervalue;		
+		vtable.parameterrange = parameterrange;
+		vtable.parametertype = parametertype;
+		vtable.parametername = parametername;
+		vtable.parameterlabel = parameterlabel;			
+		vtable_initialized = 1;
+	}
+}
+
 void sampler_init(Sampler* self, MachineCallback callback)
 {
 	Machine* base = &self->custommachine.machine;
 	int voice;
 	
 	custommachine_init(&self->custommachine, callback);	
-	base->generateaudio = generateaudio;
-	base->seqtick = seqtick;
-	base->info = info;
-	base->dispose = dispose;
-	base->numinputs = numinputs;
-	base->numoutputs = numoutputs;
-	base->loadspecific = loadspecific;
-	base->savespecific = savespecific;
-	base->numparametercols = numparametercols;
-	base->numparameters = numparameters;
-	base->parametertweak = parametertweak;
-	base->describevalue = describevalue;	
-	base->parametervalue = parametervalue;		
-	base->parameterrange = parameterrange;
-	base->parametertype = parametertype;
-	base->parametername = parametername;
-	base->parameterlabel = parameterlabel;	
+	vtable_init(self);
+	self->custommachine.machine.vtable = &vtable;
 	self->numvoices = SAMPLER_MAX_POLYPHONY;	
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		voice_init(&self->voices[voice], 0, 0, 0, 44100);
 	}
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;	
-	base->seteditname(base, "Sampler");
+	base->vtable->seteditname(base, "Sampler");
 	table_init(&self->lastinst);
 }
 
@@ -135,19 +148,19 @@ void seqtick(Sampler* self, int channel, const PatternEvent* event)
 	if (slot == NOTECOMMANDS_EMPTY) {
 		return;
 	}	
-	sample = samples_at(base->samples(self), slot);	
+	sample = samples_at(base->vtable->samples(self), slot);	
 	if (sample) {
 		Instrument* instrument;
 
 		release_voices(self, channel);
-		instrument = instruments_at(base->instruments(self), slot);		
+		instrument = instruments_at(base->vtable->instruments(self), slot);		
 		if (instrument) {
 			int voice;
 			
 			voice = unused_voice(self);
 			if (voice != -1) {
 				voice_init(&self->voices[voice], instrument, sample, channel,
-					base->samplerate(base));
+					base->vtable->samplerate(base));
 				voice_seqtick(&self->voices[voice], event);			
 			}
 		}
@@ -352,13 +365,13 @@ void voice_init(Voice* self, Instrument* instrument, Sample* sample,
 	multifilter_init(&self->filter_l);
 	multifilter_init(&self->filter_r);
 	if (instrument) {
-		((Filter*)&self->filter_l)->setcutoff(&self->filter_l, 
+		((Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l, 
 			self->instrument->filtercutoff);
-		((Filter*)&self->filter_r)->setcutoff(&self->filter_r,
+		((Filter*)&self->filter_r)->vtable->setcutoff(&self->filter_r,
 			self->instrument->filtercutoff);	
-		((Filter*)&self->filter_l)->setressonance(&self->filter_l, 
+		((Filter*)&self->filter_l)->vtable->setressonance(&self->filter_l, 
 			self->instrument->filterres);
-		((Filter*)&self->filter_r)->setressonance(&self->filter_r,
+		((Filter*)&self->filter_r)->vtable->setressonance(&self->filter_r,
 			self->instrument->filterres);
 		multifilter_settype(&self->filter_l, instrument->filtertype);
 		multifilter_settype(&self->filter_r, instrument->filtertype);
@@ -438,8 +451,8 @@ void voice_reset(Voice* self)
 {				
 	adsr_reset(&self->env);
 	adsr_reset(&self->filterenv);
-	((Filter*)(&self->filter_r))->reset(&self->filter_l);
-	((Filter*)(&self->filter_r))->reset(&self->filter_r);
+	((Filter*)(&self->filter_r))->vtable->reset(&self->filter_l);
+	((Filter*)(&self->filter_r))->vtable->reset(&self->filter_r);
 }
 
 void voice_dispose(Voice* self)
@@ -508,17 +521,17 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 				val = src[frame];
 				if (c == 0) {
 					if (multifilter_type(&self->filter_l) != F_NONE) {
-						((Filter*)&self->filter_l)->setcutoff(&self->filter_l,
+						((Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l,
 							self->filterenv.value);
-						val = ((Filter*)&self->filter_l)->work(&self->filter_l,
+						val = ((Filter*)&self->filter_l)->vtable->work(&self->filter_l,
 							val);
 					}
 				} else
 				if (c == 1) {
 					if (multifilter_type(&self->filter_r) != F_NONE) {
-						((Filter*)&self->filter_r)->setcutoff(&self->filter_r,
+						((Filter*)&self->filter_r)->vtable->setcutoff(&self->filter_r,
 							self->filterenv.value);
-						val = ((Filter*)&self->filter_r)->work(&self->filter_r,
+						val = ((Filter*)&self->filter_r)->vtable->work(&self->filter_r,
 							val);
 					}
 				}								

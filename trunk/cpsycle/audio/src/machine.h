@@ -25,7 +25,9 @@ typedef enum {
 	MACHINE_PARAMVIEW_COMPACT = 1
 } MachineViewOptions;
 
-typedef struct Machine {	
+struct Machine;
+
+typedef struct MachineVtable {
 	void (*init)(void*);
 	struct Machine* (*clone)(void*);
 	Buffer* (*mix)(void*, size_t slot, unsigned int amount, MachineSockets*, struct Machines*);
@@ -82,6 +84,10 @@ typedef struct Machine {
 	struct Samples* (*samples)(void*);
 	struct Machines* (*machines)(void*);
 	struct Instruments* (*instruments)(void*);			
+} MachineVtable;
+
+typedef struct Machine {
+	MachineVtable* vtable;
 	MachineCallback callback;	
 	Signal signal_worked;	
 } Machine;

@@ -43,33 +43,46 @@ static void editoridle(VstPlugin*);
 static void processevents(VstPlugin*, BufferContext*);
 struct VstMidiEvent* allocinitmidievent(VstPlugin*, const PatternEntry*);
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(VstPlugin* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->custommachine.machine.vtable;
+		vtable.mode = mode;
+		vtable.work = work;
+		vtable.hostevent = hostevent;	
+		vtable.info = info;
+		vtable.parametertype = parametertype;
+		vtable.parameterrange = parameterrange;
+		vtable.parametertweak = parametertweak;
+		vtable.parameterlabel = parameterlabel;
+		vtable.parametername = parametername;
+		vtable.describevalue = describevalue;	
+		vtable.parametervalue = parametervalue;
+		vtable.numparameters = numparameters;
+		vtable.numparametercols = numparametercols;	
+		vtable.dispose = dispose;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;		
+		vtable.haseditor = haseditor;
+		vtable.seteditorhandle = seteditorhandle;
+		vtable.editorsize = editorsize;
+		vtable.editoridle = editoridle;
+		vtable_initialized = 1;
+	}
+}
+
 void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 {	
 	Machine* base = &self->custommachine.machine;
 	PluginEntryProc mainproc;
 	
 	custommachine_init(&self->custommachine, callback);	
-	base->mode = mode;
-	base->work = work;
-	base->hostevent = hostevent;	
-	base->info = info;
-	base->parametertype = parametertype;
-	base->parameterrange = parameterrange;
-	base->parametertweak = parametertweak;
-	base->parameterlabel = parameterlabel;
-	base->parametername = parametername;
-	base->describevalue = describevalue;	
-	base->parametervalue = parametervalue;
-	base->numparameters = numparameters;
-	base->numparametercols = numparametercols;	
-	base->dispose = dispose;
-	base->numinputs = numinputs;
-	base->numoutputs = numoutputs;
-	base->setcallback(self, callback);
-	base->haseditor = haseditor;
-	base->seteditorhandle = seteditorhandle;
-	base->editorsize = editorsize;
-	base->editoridle = editoridle;
+	vtable_init(self);
+	base->vtable->setcallback(self, callback);
+	self->custommachine.machine.vtable = &vtable;
 	self->info = 0;
 	self->editorhandle = 0;
 	self->events = 0;
@@ -101,11 +114,11 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
 			self->plugininfo = machineinfo_allocinit();
 			machineinfo(self->effect, self->plugininfo, self->library.path, 0);
-			base->seteditname(base, self->plugininfo->ShortName);
+			base->vtable->seteditname(base, self->plugininfo->ShortName);
 		}
 	}
-	if (!base->editname(base)) {
-		base->seteditname(base, "VstPlugin");
+	if (!base->vtable->editname(base)) {
+		base->vtable->seteditname(base, "VstPlugin");
 	}
 } 
 
@@ -196,7 +209,7 @@ void processevents(VstPlugin* self, BufferContext* bc)
 		PatternEntry* entry = (PatternEntry*)p->entry;		
 		if (entry->event.cmd == SET_PANNING) {
 			// todo split work
-			base->setpanning(base, entry->event.parameter / 255.f);
+			base->vtable->setpanning(base, entry->event.parameter / 255.f);
 		} else
 		if (entry->event.note == NOTECOMMANDS_TWEAK) {
 			// todo translate to midi events 
@@ -347,7 +360,7 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 		case audioMasterIdle:            
         break;
 		case audioMasterGetSampleRate:
-			result = base->samplerate(base);
+			result = base->vtable->samplerate(base);
 		default:
 		break;
 	}

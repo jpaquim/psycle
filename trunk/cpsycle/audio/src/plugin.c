@@ -37,7 +37,41 @@ static unsigned int numoutputs(Plugin*);
 static void loadspecific(Plugin*, struct SongFile*, unsigned int slot);
 static void savespecific(Plugin*, struct SongFile*, unsigned int slot);
 static void setcallback(Plugin*, MachineCallback);
-		
+
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(Plugin* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->custommachine.machine.vtable;
+		vtable.clone = clone;
+		vtable.hostevent = hostevent;
+		vtable.seqtick = seqtick;
+		vtable.sequencerlinetick = sequencerlinetick;
+		vtable.info = info;
+		vtable.numparametercols = numparametercols;
+		vtable.numparameters = numparameters;
+		vtable.parameterrange = parameterrange;
+		vtable.parametertype = parametertype;
+		vtable.parametername = parametername;
+		vtable.parameterlabel = parameterlabel;
+		vtable.parametertweak = parametertweak;
+		vtable.parameterlabel = parameterlabel;
+		vtable.parametername = parametername;
+		vtable.describevalue = describevalue;
+		vtable.parametervalue = parametervalue;
+		vtable.dispose = dispose;
+		vtable.generateaudio = generateaudio;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;
+		vtable.loadspecific = loadspecific;
+		vtable.savespecific = savespecific;	
+		vtable.setcallback = setcallback;	
+		vtable_initialized = 1;
+	}
+}
+
 void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 {
 	GETINFO GetInfo;
@@ -48,30 +82,8 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 	library_load(&self->library, path);			
 	self->mi = 0;
 	self->plugininfo = 0;
-	base->clone = clone;
-	base->hostevent = hostevent;
-	base->seqtick = seqtick;
-	base->sequencerlinetick = sequencerlinetick;
-	base->info = info;
-	base->numparametercols = numparametercols;
-	base->numparameters = numparameters;
-	base->parameterrange = parameterrange;
-	base->parametertype = parametertype;
-	base->parametername = parametername;
-	base->parameterlabel = parameterlabel;
-	base->parametertweak = parametertweak;
-	base->parameterlabel = parameterlabel;
-	base->parametername = parametername;
-	base->describevalue = describevalue;
-	base->parametervalue = parametervalue;
-	base->dispose = dispose;
-	base->generateaudio = generateaudio;
-	base->numinputs = numinputs;
-	base->numoutputs = numoutputs;
-	base->loadspecific = loadspecific;
-	base->savespecific = savespecific;	
-	base->setcallback = setcallback;	
-			
+	vtable_init(self);
+	self->custommachine.machine.vtable = &vtable;
 	GetInfo = (GETINFO)library_functionpointer(&self->library, "GetInfo");
 	if (!GetInfo) {
 		library_dispose(&self->library);		
@@ -93,12 +105,12 @@ void plugin_init(Plugin* self, MachineCallback callback, const char* path)
 				self->plugininfo = machineinfo_allocinit();
 				machineinfo_setnativeinfo(self->plugininfo, pInfo, MACH_PLUGIN,
 					self->library.path, 0);				
-				base->seteditname(base, pInfo->ShortName);
+				base->vtable->seteditname(base, pInfo->ShortName);
 			}
 		}
 	}
-	if (!base->editname(base)) {
-		base->seteditname(base, "Plugin");
+	if (!base->vtable->editname(base)) {
+		base->vtable->seteditname(base, "Plugin");
 	}
 }
 
@@ -233,7 +245,7 @@ void loadspecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 			int temp;
 			
 			psyfile_read(songfile->file, &temp, sizeof(temp));
-			self->custommachine.machine.parametertweak(self, i, temp);
+			self->custommachine.machine.vtable->parametertweak(self, i, temp);
 		}
 		size -= sizeof(count) + sizeof(int)*count;
 		if(size) {
@@ -253,7 +265,8 @@ void loadspecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 
 void savespecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 {
-	uint32_t count = self->custommachine.machine.numparameters(&self->custommachine.machine);
+	uint32_t count = self->custommachine.machine.vtable->numparameters(
+		&self->custommachine.machine);
 	uint32_t size2 = 0;
 	uint32_t size;
 	uint32_t i;
@@ -265,7 +278,8 @@ void savespecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 	for (i = 0; i < count; ++i) {
 		int temp;
 		
-		temp = self->custommachine.machine.parametervalue(&self->custommachine.machine, i);
+		temp = self->custommachine.machine.vtable->parametervalue(
+			&self->custommachine.machine, i);
 		psyfile_write(songfile->file, &temp, sizeof temp);
 	}
 	if (size2) {

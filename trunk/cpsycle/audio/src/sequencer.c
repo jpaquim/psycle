@@ -266,9 +266,9 @@ void notifysequencertick(Sequencer* self, beat_t width)
 		Machine* machine;
 
 		machine = (Machine*)tableiterator_value(&it);
-		machine->sequencertick(machine);
+		machine->vtable->sequencertick(machine);
 		if (linetick) {
-			machine->sequencerlinetick(machine);
+			machine->vtable->sequencerlinetick(machine);
 		}		
 	}
 	if (linetick) {
@@ -296,7 +296,7 @@ void sequencerinsert(Sequencer* self) {
 				if (events) {					
 					List* insert;
 					
-					insert = machine->sequencerinsert(machine, events);
+					insert = machine->vtable->sequencerinsert(machine, events);
 					if (insert) {
 						sequencer_append(self, insert);					
 						list_free(insert);
@@ -432,19 +432,19 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 	Machine* machine;		
 		
 	machine = machines_at(self->machines, entry->event.mach);
-	if (machine && machine->info(machine) &&
-			entry->event.inst < machine->numparameters(machine) > 0) {
+	if (machine &&
+			entry->event.inst < machine->vtable->numparameters(machine) > 0) {
 		int param = entry->event.inst;
 		int minval;
 		int maxval;		
 		int slides = sequencer_frames(self, 1.f/(self->lpb * self->lpbspeed)) / 64;		
 		int dest = ((entry->event.cmd << 8) + entry->event.parameter);
-		int start = machine->parametervalue(machine, param);
+		int start = machine->vtable->parametervalue(machine, param);
 		int slide;
 		float delta;
 		float curr;
 
-		machine->parameterrange(machine, entry->event.parameter, &minval,
+		machine->vtable->parameterrange(machine, entry->event.parameter, &minval,
 			&maxval);		
 		dest += minval;
 		if (slides == 0) {

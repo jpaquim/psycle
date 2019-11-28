@@ -14,12 +14,26 @@ static void lowpass12e_update(LowPass12E*, int full);
 static amp_t lowpass12e_work(LowPass12E*, amp_t sample);
 static void lowpass12e_reset(LowPass12E*);
 
+static filter_vtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(CustomFilter* customfilter)
+{
+	if (!vtable_initialized) {
+		vtable = *customfilter->filter.vtable;
+		vtable.update = lowpass12e_update;
+		vtable.work = lowpass12e_work;
+	    vtable.reset = lowpass12e_reset;
+		vtable_initialized = 1;
+	}	
+}
+
 void lowpass12e_init(LowPass12E* self)
 {
 	customfilter_init(&self->customfilter);	
-	self->customfilter.filter.update = lowpass12e_update;
-	self->customfilter.filter.work = lowpass12e_work;
-	self->customfilter.filter.reset = lowpass12e_reset;
+	vtable_init(&self->customfilter);
+	self->customfilter.filter.vtable = &vtable;
+
 	if (!lowpass12e_coeffmap_initialized) {
 		lowpass12e_update(self, 1);
 		lowpass12e_coeffmap_initialized = 1;
@@ -36,8 +50,8 @@ void lowpass12e_update(LowPass12E* self, int full)
 			lowpass12e_computecoeffs);
 	}
 	filtercoeff_update(&self->coeff, &lowpass12e_coeffmap,
-		(int)(((Filter*)self)->cutoff(self) * 127),
-		(int) ((Filter*)self)->ressonance(self) * 127);
+		(int)(((Filter*)self)->vtable->cutoff(self) * 127),
+		(int) ((Filter*)self)->vtable->ressonance(self) * 127);
 }
 
 void lowpass12e_computecoeffs(LowPass12E* self, int freq, int r, FilterCoeff* coeff)
@@ -51,11 +65,11 @@ void lowpass12e_computecoeffs(LowPass12E* self, int freq, int r, FilterCoeff* co
 	float a0, a1, a2, b0, b1, b2;		
 
 	frequency = cutoffinternalext(freq);
-	samplerate_d = (double)(((Filter*)self)->samplerate(self));
+	samplerate_d = (double)(((Filter*)self)->vtable->samplerate(self));
 	if (frequency * 2.0 > samplerate_d) { 
 		frequency = samplerate_d * 0.5;
 	}
-	omega = (TPI*frequency) / ((Filter*)self)->samplerate(self);	
+	omega = (TPI*frequency) / ((Filter*)self)->vtable->samplerate(self);	
 	sn = (float)sin(omega);
 	cs = (float)cos(omega);
 	alpha = (float)(sn * 0.5f / 
