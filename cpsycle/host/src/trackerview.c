@@ -115,13 +115,18 @@ static void trackerview_onblocktransposeup(TrackerView*);
 static void trackerview_onblocktransposedown(TrackerView*);
 static void trackerview_onblocktransposeup12(TrackerView*);
 static void trackerview_onblocktransposedown12(TrackerView*);
-static void trackerview_onlpbchanged(TrackerView*, Player* sender, uintptr_t lpb);
-static void trackerview_onpatterneditpositionchanged(TrackerView*, Workspace* sender);
+static void trackerview_onlpbchanged(TrackerView*, Player* sender,
+	uintptr_t lpb);
+static void trackerview_onpatterneditpositionchanged(TrackerView*,
+	Workspace* sender);
 
-static void trackerheader_ondraw(TrackerHeader*, ui_component* sender, ui_graphics* g);
+static void trackerheader_ondraw(TrackerHeader*, ui_component* sender,
+	ui_graphics* g);
 
-static void OnLineNumbersLabelDraw(TrackerLineNumbersLabel*, ui_component* sender, ui_graphics*);
-static void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel*, ui_component* sender);
+static void OnLineNumbersLabelDraw(TrackerLineNumbersLabel*,
+	ui_component* sender, ui_graphics*);
+static void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel*,
+	ui_component* sender);
 
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*,
 	ui_component* sender, ui_graphics*);
@@ -748,9 +753,7 @@ void trackergrid_adjustscroll(TrackerGrid* self)
 	}
 	ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
 	if (self->midline) {
-		trackerview_centeroncursor(self->view);
-		ui_component_setverticalscrollposition(&self->component,
-			visilines / 2);
+		trackerview_centeroncursor(self->view);		
 	}
 }
 
@@ -767,7 +770,7 @@ void trackerview_centeroncursor(TrackerView* self)
 	self->grid.dy = (visilines / 2 + line) * self->grid.lineheight;
 	self->linenumbers.dy = self->grid.dy;
 	ui_component_setverticalscrollposition(&self->grid.component,
-		visilines / 2);
+		line);
 }
 
 unsigned int NumSublines(Pattern* pattern, double offset, double bpl)

@@ -5,6 +5,7 @@
 #define DSP_OPERATIONS_H
 
 #include "dsptypes.h"
+#include "stddef.h"
 #include "../../detail/stdint.h"
 
 typedef struct {

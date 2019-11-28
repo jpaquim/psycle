@@ -134,44 +134,57 @@ void returnchannel_dispose(ReturnChannel* self)
 	table_dispose(&self->sendsto);
 }
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(Mixer* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->custommachine.machine.vtable;
+		vtable.info = info;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;
+		vtable.dispose = mixer_dispose;
+		vtable.seqtick = mixer_seqtick;
+		vtable.mode = mixer_mode;
+		vtable.mix = mix;
+		vtable.parametertype = parametertype;
+		vtable.parameterrange = parameterrange;
+		vtable.parametername = parametername;
+		vtable.parameterlabel = parameterlabel;
+		vtable.parametertweak = parametertweak;
+		vtable.patterntweak = patterntweak;
+		vtable.parametervalue = parametervalue;
+		vtable.describevalue = describevalue;
+		vtable.numparameters = numparameters;
+		vtable.numparametercols = numparametercols;	
+		vtable.paramviewoptions = paramviewoptions;
+		vtable.loadspecific = loadspecific;
+		vtable.savespecific = savespecific;
+		vtable.setslot = setslot;
+		vtable.slot = slot;
+		vtable_initialized = 1;
+	}
+}
+
 void mixer_init(Mixer* self, MachineCallback callback)
 {
 	Machine* base = (Machine*)self;
 	Machines* machines;
 
 	custommachine_init(&self->custommachine, callback);
-	base->info = info;
-	base->numinputs = numinputs;
-	base->numoutputs = numoutputs;
-	base->dispose = mixer_dispose;
-	base->seqtick = mixer_seqtick;
-	base->mode = mixer_mode;
-	base->mix = mix;
-	base->parametertype = parametertype;
-	base->parameterrange = parameterrange;
-	base->parametername = parametername;
-	base->parameterlabel = parameterlabel;
-	base->parametertweak = parametertweak;
-	base->patterntweak = patterntweak;
-	base->parametervalue = parametervalue;
-	base->describevalue = describevalue;
-	base->numparameters = numparameters;
-	base->numparametercols = numparametercols;	
-	base->paramviewoptions = paramviewoptions;
-	base->loadspecific = loadspecific;
-	base->savespecific = savespecific;
-	base->setslot = setslot;
-	base->slot = slot;	
+	vtable_init(self);
+	self->custommachine.machine.vtable = &vtable;
 	table_init(&self->inputs);
 	table_init(&self->sends);
 	table_init(&self->returns);
-	machines = base->machines(base);
+	machines = base->vtable->machines(base);
 	signal_connect(&machines->connections.signal_connected, self, onconnected);
 	signal_connect(&machines->connections.signal_disconnected, self, ondisconnected);
 	rmsvol_init(&self->masterrmsvol);
 	mixerchannel_init(&self->master, 0);	
 	self->slot = 65535;
-	base->seteditname(base, "Mixer");
+	base->vtable->seteditname(base, "Mixer");
 }
 
 void mixer_dispose(Mixer* self)
@@ -345,7 +358,7 @@ void workreturns(Mixer* self, Machines* machines, unsigned int amount)
 			
 			buffercontext_init(&bc, events, channel->buffer, channel->buffer,
 				amount, 16, 0);
-			channel->fx->work(channel->fx, &bc);
+			channel->fx->vtable->work(channel->fx, &bc);
 		//	buffer_pan(fxbuffer, fx->panning(fx), amount);
 		//	buffer_pan(fxbuffer, channel->panning, amount);
 			signal_emit(&channel->fx->signal_worked, channel->fx, 2, 
@@ -405,10 +418,10 @@ void onconnected(Mixer* self, Connections* connections, uintptr_t outputslot, ui
 	if (inputslot == (int)self->slot) {		
 		if (outputslot != (int)self->slot) {
 			Machine* machine;
-			Machines* machines = base->machines(base);
+			Machines* machines = base->vtable->machines(base);
 
 			machine = machines_at(machines, outputslot);
-			if (machine->mode(machine) == MACHMODE_GENERATOR) {
+			if (machine->vtable->mode(machine) == MACHMODE_GENERATOR) {
 				MixerChannel* channel;
 
 				channel = mixerchannel_allocinit(outputslot);
@@ -427,10 +440,10 @@ void ondisconnected(Mixer* self, Connections* connections, uintptr_t outputslot,
 	Machine* base = (Machine*)self;
 	if (inputslot == (int)self->slot) {
 		Machine* machine;
-		Machines* machines = base->machines(base);
+		Machines* machines = base->vtable->machines(base);
 
 		machine = machines_at(machines, outputslot);
-		if (machine->mode(machine) == MACHMODE_GENERATOR) {
+		if (machine->vtable->mode(machine) == MACHMODE_GENERATOR) {
 			TableIterator it;
 			int c = 0;
 
@@ -534,7 +547,7 @@ void patterntweak(Mixer* self, int numparam, int value)
 				? 4.0f
 				: ((value&0x3FF)/256.0f);
 		} else {			
-			base->setpanning(base, (value >> 1) / 256.f);
+			base->vtable->setpanning(base, (value >> 1) / 256.f);
 		}
 	} else
 	// Inputs
@@ -817,9 +830,9 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			{
 				Machine* machine;		
 				
-				machine = machines_at(base->machines(base), channel);		
-				if (machine && machine->info(machine)) {
-					strcpy(txt, machine->info(machine)->ShortName);
+				machine = machines_at(base->vtable->machines(base), channel);
+				if (machine && machine->vtable->info(machine)) {
+					strcpy(txt, machine->vtable->info(machine)->ShortName);
 					return 1;
 				}				
 			}
@@ -869,9 +882,10 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			if (row == 0) {
 				Machine* machine;		
 				
-				machine = machines_at(base->machines(base), channel->inputslot);		
-				if (machine && machine->info(machine)) {
-					strcpy(txt, machine->info(machine)->ShortName);					
+				machine = machines_at(base->vtable->machines(base),
+					channel->inputslot);
+				if (machine && machine->vtable->info(machine)) {
+					strcpy(txt, machine->vtable->info(machine)->ShortName);					
 				}
 				return 1;								
 			} else
@@ -934,9 +948,10 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			if (row == 0) {
 				Machine* fx;		
 				
-				fx = machines_at(base->machines(base), channel->fxslot);
-				if (fx && fx->info(fx)) {
-					strcpy(txt, fx->info(fx)->ShortName);					
+				fx = machines_at(base->vtable->machines(base),
+					channel->fxslot);
+				if (fx && fx->vtable->info(fx)) {
+					strcpy(txt, fx->vtable->info(fx)->ShortName);					
 				}
 				return 1;
 			}
@@ -1103,7 +1118,7 @@ WireSocketEntry* wiresocketentry(Mixer* self, uintptr_t input)
 	MachineSockets* sockets;
 	WireSocket* p;
 	Machine* base = (Machine*)self;
-	Machines* machines = base->machines(base);
+	Machines* machines = base->vtable->machines(base);
 
 	sockets = connections_at(&machines->connections, self->slot);
 	if (sockets) {

@@ -50,29 +50,42 @@ const MachineInfo* duplicator2_info(void)
 	return &MacInfo;
 }
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(Duplicator2* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->custommachine.machine.vtable;
+		vtable.work = work;	
+		vtable.sequencertick = sequencertick;
+		vtable.sequencerinsert = sequencerinsert;
+		vtable.info = info;
+		vtable.parametertweak = parametertweak;
+		vtable.describevalue = describevalue;	
+		vtable.parametervalue = parametervalue;
+		vtable.dispose = dispose;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;
+		vtable.parameterrange = parameterrange;
+		vtable.numparameters = numparameters;
+		vtable.numparametercols = numparametercols;
+		vtable.parameterlabel = parameterlabel;
+		vtable.parametername = parametername;	
+		vtable.loadspecific = loadspecific;
+		vtable.savespecific = savespecific;
+		vtable_initialized = 1;
+	}
+}
+
 void duplicator2_init(Duplicator2* self, MachineCallback callback)
 {	
 	Machine* base = (Machine*)self;
 	int i;	
 
 	custommachine_init(&self->custommachine, callback);
-	base->work = work;	
-	base->sequencertick = sequencertick;
-	base->sequencerinsert = sequencerinsert;
-	base->info = info;
-	base->parametertweak = parametertweak;
-	base->describevalue = describevalue;	
-	base->parametervalue = parametervalue;
-	base->dispose = dispose;
-	base->numinputs = numinputs;
-	base->numoutputs = numoutputs;
-	base->parameterrange = parameterrange;
-	base->numparameters = numparameters;
-	base->numparametercols = numparametercols;
-	base->parameterlabel = parameterlabel;
-	base->parametername = parametername;	
-	base->loadspecific = loadspecific;
-	base->savespecific = savespecific;
+	vtable_init(self);
+	self->custommachine.machine.vtable = &vtable;
 	for (i = 0; i < 16; ++i) {
 		self->macoutput[i] = -1;
 		self->noteoffset[i] = 0;
@@ -81,7 +94,7 @@ void duplicator2_init(Duplicator2* self, MachineCallback callback)
 	}
 	self->isticking = 0;
 	duplicatormap_init(&self->map);	
-	base->seteditname(base, "Note Duplicator 2");	
+	base->vtable->seteditname(base, "Note Duplicator 2");	
 }
 
 void dispose(Duplicator2* self)

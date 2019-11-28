@@ -83,7 +83,7 @@ void machines_free(Machines* self)
 		Machine* machine;
 
 		machine = (Machine*)tableiterator_value(&it);
-		machine->dispose(machine);
+		machine->vtable->dispose(machine);
 		free(machine);
 	}
 }
@@ -101,7 +101,7 @@ void machines_insert(Machines* self, uintptr_t slot, Machine* machine)
 		if (slot == MASTER_INDEX) {
 			self->master = machine;
 		}
-		machine->setslot(machine, slot);
+		machine->vtable->setslot(machine, slot);
 		signal_emit(&self->signal_insert, self, 1, slot);
 		if (!self->filemode) {		
 			lock_enter();
@@ -139,7 +139,7 @@ void machines_remove(Machines* self, uintptr_t slot)
 	machine = machines_at(self, slot);
 	if (machine) {
 		machines_erase(self, slot);		
-		machine->dispose(machine);
+		machine->vtable->dispose(machine);
 		free(machine);		
 	}
 }
@@ -164,9 +164,9 @@ uintptr_t machines_append(Machines* self, Machine* machine)
 	uintptr_t slot;
 		
 	slot = machines_freeslot(self,
-		(machine->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
+		(machine->vtable->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
 	table_insert(&self->slots, slot, machine);
-	machine->setslot(machine, slot);
+	machine->vtable->setslot(machine, slot);
 	signal_emit(&self->signal_insert, self, 1, slot);
 	if (!self->filemode) {		
 		lock_enter();
@@ -345,7 +345,7 @@ void machines_preparebuffers(Machines* self, MachineList* path, unsigned int amo
 		if (machine) {
 			table_insert(&self->outputbuffers, tableiterator_key(&it),
 				list_append(&self->buffers, machines_nextbuffer(
-					self, machine->numoutputs(machine)))->entry);
+					self, machine->vtable->numoutputs(machine)))->entry);
 		}
 	}	
 }

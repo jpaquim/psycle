@@ -19,18 +19,30 @@ static float samplerate(Filter* self) { return 44100.f; }
 static void update(Filter* self, int full) { }
 static void reset(Filter* self) { }
 
+static filter_vtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.init = init;
+		vtable.dispose = dispose;
+		vtable.work = work;
+		vtable.setsamplerate = setsamplerate;
+		vtable.samplerate = samplerate;
+		vtable.setcutoff = setcutoff;
+		vtable.cutoff = cutoff;
+		vtable.setressonance = setressonance;
+		vtable.ressonance = ressonance;
+		vtable.reset = reset;
+		vtable_initialized = 1;
+	}	
+}
+
 void filter_init(Filter* self)		
 {
-	self->init = init;
-	self->dispose = dispose;
-	self->work = work;
-	self->setsamplerate = setsamplerate;
-	self->samplerate = samplerate;
-	self->setcutoff = setcutoff;
-	self->cutoff = cutoff;
-	self->setressonance = setressonance;
-	self->ressonance = ressonance;
-	self->reset = reset;
+	vtable_init();
+	self->vtable = &vtable;
 }
 
 // CustomFilter
@@ -42,17 +54,29 @@ static float customfilter_ressonance(CustomFilter*);
 static void customfilter_setsamplerate(CustomFilter*, float samplerate);
 static float customfilter_samplerate(CustomFilter*);
 
+static filter_vtable customfilter_vtable;
+static int customfilter_vtable_initialized = 0;
+
+void customfilter_vtable_init(Filter* filter)
+{
+	if (!customfilter_vtable_initialized) {
+		customfilter_vtable = *filter->vtable;
+		customfilter_vtable.setsamplerate = customfilter_setsamplerate;
+		customfilter_vtable.samplerate = customfilter_samplerate;
+		customfilter_vtable.setcutoff = customfilter_setcutoff;
+		customfilter_vtable.cutoff = customfilter_cutoff;
+		customfilter_vtable.setressonance = customfilter_setressonance;
+		customfilter_vtable.ressonance = customfilter_ressonance;
+	}
+}
+
 void customfilter_init(CustomFilter* self)
 {
 	filter_init(&self->filter);
-	self->filter.setsamplerate = customfilter_setsamplerate;
-	self->filter.samplerate = customfilter_samplerate;
-	self->filter.setcutoff = customfilter_setcutoff;
-	self->filter.cutoff = customfilter_cutoff;
-	self->filter.setressonance = customfilter_setressonance;
-	self->filter.ressonance = customfilter_ressonance;
-
-	self->samplerate = 44100.f;
+	customfilter_vtable_init(&self->filter);
+	self->filter.vtable = &customfilter_vtable;
+	
+	self->samplerate = (beat_t) 44100.f;
 	self->cutoff = 1.0f;
 	self->q = 0.f;
 }
@@ -60,7 +84,7 @@ void customfilter_init(CustomFilter* self)
 void customfilter_setsamplerate(CustomFilter* self, float samplerate)
 {
 	self->samplerate = samplerate;
-	self->filter.update(self, 1);
+	self->filter.vtable->update(self, 1);
 }
 
 float customfilter_samplerate(CustomFilter* self)
@@ -72,7 +96,7 @@ void customfilter_setcutoff(CustomFilter* self, float cutoff)
 {
 	if (self->cutoff != cutoff) {
 		self->cutoff = cutoff;
-		self->filter.update(self, 0);
+		self->filter.vtable->update(self, 0);
 	}
 }
 
@@ -85,7 +109,7 @@ void customfilter_setressonance(CustomFilter* self, float q)
 {
 	if (self->q != q) {
 		self->q = q;
-		self->filter.update(self, 0);
+		self->filter.vtable->update(self, 0);
 	}
 }
 

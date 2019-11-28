@@ -134,10 +134,10 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 			plugin = (Machine*)malloc(sizeof(VstPlugin));
 			if (plugin) {
 				vstplugin_init((VstPlugin*)plugin, self->machinecallback, path);
-				if (plugin->info(plugin)) {
+				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {
-					plugin->dispose(plugin);
+					plugin->vtable->dispose(plugin);
 					free(plugin);
 				}
 			} else {
@@ -152,10 +152,10 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 			plugin = (Machine*)malloc(sizeof(Plugin));
 			if (plugin) {
 				plugin_init((Plugin*)plugin, self->machinecallback, path);
-				if (plugin->info(plugin)) {
+				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {
-					plugin->dispose(plugin);
+					plugin->vtable->dispose(plugin);
 					free(plugin);
 				}
 			} else {
@@ -174,7 +174,7 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 			machineproxy_init(proxy, rv);
 			rv = &proxy->machine;
 		} else {
-			rv->dispose(rv);
+			rv->vtable->dispose(rv);
 			free(rv);
 			rv = 0;
 		}		

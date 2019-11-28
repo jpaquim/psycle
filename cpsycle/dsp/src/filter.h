@@ -6,18 +6,24 @@
 
 #include "filtercoeff.h"
 
-typedef struct {
-	void (*init)(void*);
-	void (*dispose)(void*);
-	amp_t (*work)(void*, amp_t sample);
-	void (*setcutoff)(void*, float cutoff);	
-	float (*cutoff)(void*);
-	void (*setressonance)(void*, float ressonance);
-	float (*ressonance)(void*);
-	void (*setsamplerate)(void*, float samplerate);
-	float (*samplerate)(void*);
-	void (*update)(void*, int full);
-	void (*reset)(void*);
+struct Filter;
+
+typedef struct filter_vtable {
+	void (*init)(struct Filter*);
+	void (*dispose)(struct Filter*);
+	amp_t (*work)(struct Filter*, amp_t sample);
+	void (*setcutoff)(struct Filter*, float cutoff);	
+	float (*cutoff)(struct Filter*);
+	void (*setressonance)(struct Filter*, float ressonance);
+	float (*ressonance)(struct Filter*);
+	void (*setsamplerate)(struct Filter*, float samplerate);
+	float (*samplerate)(struct Filter*);
+	void (*update)(struct Filter*, int full);
+	void (*reset)(struct Filter*);
+} filter_vtable;
+
+typedef struct Filter {
+	struct filter_vtable* vtable;
 } Filter;
 
 void filter_init(Filter*);

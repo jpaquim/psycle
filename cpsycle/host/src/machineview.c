@@ -87,7 +87,7 @@ void machineui_init(MachineUi* self, int x, int y, Machine* machine,
 	self->x = x;
 	self->y = y;
 	self->skin = skin;	
-	self->mode = machine->mode(machine);
+	self->mode = machine->vtable->mode(machine);
 	if (self->mode == MACHMODE_MASTER) {
 		self->mode = MACHMODE_MASTER;		
 	} else {
@@ -165,14 +165,16 @@ void machineui_editname(MachineUi* self, ui_edit* edit)
 		ui_rectangle r;
 		
 		free(self->restorename);
-		self->restorename = self->machine->editname(self->machine) ? strdup(self->machine->editname(self->machine)) : 0;
+		self->restorename = 
+			self->machine->vtable->editname(self->machine) 
+				? strdup(self->machine->vtable->editname(self->machine)) : 0;
 		signal_disconnectall(&edit->component.signal_focuslost);
 		signal_disconnectall(&edit->component.signal_keydown);
 		signal_disconnectall(&edit->signal_change);
 		signal_connect(&edit->signal_change, self, machineui_oneditchange);
 		signal_connect(&edit->component.signal_keydown, self, machineui_onkeydown);
 		signal_connect(&edit->component.signal_focuslost, self, machineui_oneditfocuslost);
-		ui_edit_settext(edit, self->machine->editname(self->machine));
+		ui_edit_settext(edit, self->machine->vtable->editname(self->machine));
 		r = machineui_position(self);
 		r.left += self->coords->name.destx;
 		r.top += self->coords->name.desty;
@@ -191,7 +193,8 @@ void machineui_onkeydown(MachineUi* self, ui_component* sender, KeyEvent* keyeve
 	} else
 	if (keyevent->keycode == VK_ESCAPE) {
 		if (self->machine) {
-			self->machine->seteditname(self->machine, self->restorename);
+			self->machine->vtable->seteditname(self->machine,
+				self->restorename);
 			free(self->restorename);
 			self->restorename = 0;
 		}
@@ -202,7 +205,7 @@ void machineui_onkeydown(MachineUi* self, ui_component* sender, KeyEvent* keyeve
 void machineui_oneditchange(MachineUi* self, ui_edit* sender)
 {
 	if (self->machine) {
-		self->machine->seteditname(self->machine, ui_edit_text(sender));
+		self->machine->vtable->seteditname(self->machine, ui_edit_text(sender));
 	}
 }
 
@@ -223,13 +226,13 @@ void machineui_draw(MachineUi* self, MachineWireView* wireview, ui_graphics* g,
 
 		editname[0] = '\0';
 		coords = self->coords;		
-		if (self->machine->editname(self->machine)) {
+		if (self->machine->vtable->editname(self->machine)) {
 			if (self->skin->drawmachineindexes) {
 				psy_snprintf(editname, 130, "%02d:%s", slot, 
-					self->machine->editname(self->machine));
+					self->machine->vtable->editname(self->machine));
 			} else {
 				psy_snprintf(editname, 130, "%s", 
-					self->machine->editname(self->machine));
+					self->machine->vtable->editname(self->machine));
 			}
 		}
 		ui_setbackgroundmode(g, TRANSPARENT);		
@@ -243,11 +246,12 @@ void machineui_draw(MachineUi* self, MachineWireView* wireview, ui_graphics* g,
 			ui_textout(g, r.left + coords->name.destx + 2, r.top + coords->name.desty + 2,
 				editname, strlen(editname));
 			skin_blitpart(g, &wireview->skin.skinbmp, r.left + slidercoord(&coords->pan, 
-				self->machine->panning(self->machine)), r.top, &coords->pan);
-			if (self->machine->muted(self->machine)) {
+				self->machine->vtable->panning(self->machine)), r.top,
+					&coords->pan);
+			if (self->machine->vtable->muted(self->machine)) {
 				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top, &coords->mute);
 			}
-			if (self->machine->bypassed(self->machine)) {
+			if (self->machine->vtable->bypassed(self->machine)) {
 				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top, &coords->bypass);
 			}
 		}		
@@ -278,7 +282,7 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 			self->frame = (MachineFrame*) malloc(sizeof(MachineFrame));
 			self->frame->component.hwnd = 0;
 		}
-		if (self->machine->haseditor(self->machine)) {
+		if (self->machine->vtable->haseditor(self->machine)) {
 			int width;
 			int height;
 
@@ -286,7 +290,7 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 			self->vst2view = (Vst2View*) malloc(sizeof(Vst2View));
 			InitVst2View(self->vst2view, &self->frame->component, self->machine);
 			MachineFrameSetParamView(self->frame, &self->vst2view->component);
-			self->machine->editorsize(self->machine, &width, &height);
+			self->machine->vtable->editorsize(self->machine, &width, &height);
 			ui_component_resize(&self->frame->component, width, height + 28);			
 		} else
 		if (self->frame->component.hwnd == 0) {
@@ -296,9 +300,9 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 
 			InitMachineFrame(self->frame, parent);
 
-			if (self->machine && self->machine->info(self->machine)) {				
+			if (self->machine && self->machine->vtable->info(self->machine)) {
 				psy_snprintf(txt, 128, "%.2X : %s", self->slot,
-					self->machine->info(self->machine)->ShortName);				
+					self->machine->vtable->info(self->machine)->ShortName);
 			} else {
 				ui_component_settitle(&self->frame->component, txt);
 				psy_snprintf(txt, 128, "%.2X :", self->slot);
@@ -744,10 +748,10 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 					&self->skin.effect.bypass)) {
 				Machine* machine = machines_at(self->machines, self->dragslot);
 				if (machine) {
-					if (machine->bypassed(machine)) {
-						machine->unbypass(machine);
+					if (machine->vtable->bypassed(machine)) {
+						machine->vtable->unbypass(machine);
 					} else {
-						machine->bypass(machine);
+						machine->vtable->bypass(machine);
 					}
 				}
 			} else
@@ -757,10 +761,10 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 					&self->skin.effect.mute)) {
 				Machine* machine = machines_at(self->machines, self->dragslot);
 				if (machine) {
-					if (machine->muted(machine)) {
-						machine->unmute(machine);
+					if (machine->vtable->muted(machine)) {
+						machine->vtable->unmute(machine);
 					} else {
-						machine->mute(machine);
+						machine->vtable->mute(machine);
 					}
 				}
 			} else
@@ -782,7 +786,7 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 			Machine* machine;
 
 			machine = machines_at(self->machines, self->dragslot);
-			if (machine && machine->numoutputs(machine) > 0) {
+			if (machine && machine->vtable->numoutputs(machine) > 0) {
 				self->dragmode = MACHINEWIREVIEW_DRAG_NEWCONNECTION;				
 			} else {
 				self->dragslot = NOMACHINE_INDEX;
@@ -807,7 +811,8 @@ int machinewireview_hittestpan(MachineWireView* self, int x, int y, uintptr_t sl
 		machine = machines_at(self->machines, slot);
 		coords = machineui->coords;
 		if (coords) {
-			offset = (int) (machine->panning(machine) * coords->pan.range);	
+			offset = (int) (machine->vtable->panning(machine) *
+				coords->pan.range);
 			ui_setrectangle(&r, coords->pan.destx + offset, coords->pan.desty,
 					coords->pan.destwidth, coords->pan.destheight);
 			*dx = xm - r.left;
@@ -899,8 +904,8 @@ void machinewireview_onmousemove(MachineWireView* self, ui_component* sender, Mo
 
 			machine = machines_at(self->machines, self->dragslot);
 			if (machine) {
-				machine->setpanning(machine,machinewireview_panvalue(self, ev->x, ev->y,
-					self->dragslot));
+				machine->vtable->setpanning(machine,machinewireview_panvalue(
+					self, ev->x, ev->y, self->dragslot));
 			}
 		} else
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_MACHINE) {
@@ -912,9 +917,11 @@ void machinewireview_onmousemove(MachineWireView* self, ui_component* sender, Mo
 
 				machineui->x = ev->x - self->mx;
 				machineui->y = ev->y - self->my;									
-				psy_snprintf(txt, 128, "%s (%d, %d)", machineui->machine->editname(machineui->machine) ?
-					machineui->machine->editname(machineui->machine) : "",
-						ev->x - self->mx, ev->y - self->my);
+				psy_snprintf(txt, 128, "%s (%d, %d)",
+					machineui->machine->vtable->editname(machineui->machine)
+					? machineui->machine->vtable->editname(machineui->machine)
+					: "",
+					ev->x - self->mx, ev->y - self->my);
 				ui_label_settext(&self->statusbar->label, txt);
 				ui_component_invalidate(&self->statusbar->label.component);				
 			}

@@ -892,12 +892,12 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, Properties* propert
 		properties_append_int(properties, "x", x, 0, 0);
 		properties_append_int(properties, "y", y, 0, 0);
 		if (bypass) {
-			machine->bypass(machine);
+			machine->vtable->bypass(machine);
 		}
 		if (mute) {
-			machine->mute(machine);
+			machine->vtable->mute(machine);
 		}
-		machine->setpanning(machine, panning / 128.f);
+		machine->vtable->setpanning(machine, panning / 128.f);
 	}	
 	
 	for(i = 0; i < MAX_CONNECTIONS; i++)
@@ -937,8 +937,8 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, Properties* propert
 		strcpy(txt, "X!");
 		strcat(txt, editname);		
 	}
-	machine->seteditname(machine, editname);
-	machine->loadspecific(machine, self, index);
+	machine->vtable->seteditname(machine, editname);
+	machine->vtable->loadspecific(machine, self, index);
 	return machine;	
 }
 
@@ -1247,7 +1247,7 @@ void psy3_writemachine(SongFile* self, Machine* machine, int32_t slot)
 {
 	const MachineInfo* info;
 
-	info = machine->info(machine);
+	info = machine->vtable->info(machine);
 	if (info) {
 		int32_t i;
 		int32_t unused;
@@ -1262,11 +1262,11 @@ void psy3_writemachine(SongFile* self, Machine* machine, int32_t slot)
 		temp = info->type;
 		psyfile_write(self->file, &temp, sizeof(temp));
 		psy3_savedllnameandindex(self->file, info->modulepath, info->shellidx);
-		bTemp = (unsigned char) machine->bypassed(machine);
+		bTemp = (unsigned char) machine->vtable->bypassed(machine);
 		psyfile_write(self->file, &bTemp, sizeof(bTemp));
-		bTemp = (unsigned char) machine->muted(machine);
+		bTemp = (unsigned char) machine->vtable->muted(machine);
 		psyfile_write(self->file, &bTemp, sizeof(bTemp));
-		temp = (int32_t)(machine->panning(machine) * 256);
+		temp = (int32_t)(machine->vtable->panning(machine) * 256);
 		psyfile_write(self->file, &temp, sizeof(temp));
 		temp = p ? properties_int(p, "x", 100) : 100;
 		psyfile_write(self->file, &temp, sizeof(temp));
@@ -1327,10 +1327,11 @@ void psy3_writemachine(SongFile* self, Machine* machine, int32_t slot)
 				psyfile_write(self->file, &bTemp, sizeof(bTemp)); // Incoming connections activated
 			}
 		}
-		tmpName = machine->editname(machine) ? machine->editname(machine) : "";
+		tmpName = machine->vtable->editname(machine) 
+			? machine->vtable->editname(machine) : "";
 		psyfile_writestring(self->file, tmpName);
 		{
-			machine->savespecific(machine, self, slot);
+			machine->vtable->savespecific(machine, self, slot);
 		}
 	}
 

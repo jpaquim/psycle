@@ -74,8 +74,8 @@ void InsertSlot(MachinesBox* self, int slot, Machine* machine)
 
 		char buffer[128];
 		psy_snprintf(buffer, 128, "%02X:", slot);
-		if (machine && machine->info(machine)) {
-			strcat(buffer, machine->info(machine)->ShortName); 
+		if (machine && machine->vtable->info(machine)) {
+			strcat(buffer, machine->vtable->info(machine)->ShortName); 
 		} else {
 			strcat(buffer, ""); 
 		}
@@ -86,8 +86,8 @@ void InsertSlot(MachinesBox* self, int slot, Machine* machine)
 
 void insertmachine(MachinesBox* self, int slot, Machine* machine)
 {	
-	if (CheckMachineMode(self, machine) && machine->info(machine) && 
-			machine->info(machine)->ShortName) {
+	if (CheckMachineMode(self, machine) && machine->vtable->info(machine) && 
+			machine->vtable->info(machine)->ShortName) {
 		InsertSlot(self, slot, machine);
 	}	
 }
@@ -97,13 +97,15 @@ int CheckMachineMode(MachinesBox* self, Machine* machine)
 	if (!machine) {
 		return 0;
 	}
-	if (self->mode == MACHINEBOX_FX && machine->mode(machine) == MACHMODE_GENERATOR) {
+	if (self->mode == MACHINEBOX_FX && 
+			machine->vtable->mode(machine) == MACHMODE_GENERATOR) {
 		return 0;
 	}
-	if (self->mode == MACHINEBOX_GENERATOR && machine->mode(machine) == MACHMODE_FX) {
+	if (self->mode == MACHINEBOX_GENERATOR &&
+			machine->vtable->mode(machine) == MACHMODE_FX) {
 		return 0;
 	}
-	if (machine->mode(machine) == MACHMODE_MASTER) {
+	if (machine->vtable->mode(machine) == MACHMODE_MASTER) {
 		return 0;
 	}
 	return 1;
@@ -197,7 +199,8 @@ void MachinesBoxClone(MachinesBox* self)
 						selection[i]);
 					machine = machines_at(self->machines, slot);
 					if (machine != srcmachine) {
-						Machine* clone = srcmachine->clone(srcmachine);
+						Machine* clone = 
+							srcmachine->vtable->clone(srcmachine);
 						if (clone) {
 							machines_insert(self->machines, slot, clone);
 						}

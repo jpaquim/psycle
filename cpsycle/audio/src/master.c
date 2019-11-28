@@ -49,31 +49,44 @@ static MachineInfo const MacInfo = {
 
 const MachineInfo* master_info(void) { return &MacInfo; }
 
+static MachineVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(Master* self)
+{
+	if (!vtable_initialized) {
+		vtable = *self->machine.vtable;
+		vtable.mode = master_mode;
+		vtable.info = info;
+		vtable.dispose = master_dispose;
+		vtable.info = info;
+		vtable.parametertweak = parametertweak;
+		vtable.describevalue = describevalue;
+		vtable.parametervalue = parametervalue;
+		vtable.numinputs = numinputs;
+		vtable.numoutputs = numoutputs;
+		vtable.loadspecific = master_loadspecific;
+		vtable.savespecific = master_savespecific;
+		// Parameter
+		vtable.parametertype = parametertype;
+		vtable.numparametercols = numparametercols;
+		vtable.numparameters = numparameters;
+		vtable.parameterrange = parameterrange;
+		vtable.parametertweak = parametertweak;	
+		vtable.parameterlabel = parameterlabel;
+		vtable.parametername = parametername;
+		vtable.describevalue = describevalue;
+		vtable.parametervalue = parametervalue;
+		vtable_initialized = 1;
+	}
+}
+
 void master_init(Master* self, MachineCallback callback)
 {
 	memset(self, 0, sizeof(Master));
 	machine_init(&self->machine, callback);	
-	self->machine.mode = master_mode;
-	self->machine.info = info;
-	self->machine.dispose = master_dispose;
-	self->machine.info = info;
-	self->machine.parametertweak = parametertweak;
-	self->machine.describevalue = describevalue;
-	self->machine.parametervalue = parametervalue;
-	self->machine.numinputs = numinputs;
-	self->machine.numoutputs = numoutputs;
-	self->machine.loadspecific = master_loadspecific;
-	self->machine.savespecific = master_savespecific;
-	// Parameter
-	self->machine.parametertype = parametertype;
-	self->machine.numparametercols = numparametercols;
-	self->machine.numparameters = numparameters;
-	self->machine.parameterrange = parameterrange;
-	self->machine.parametertweak = parametertweak;	
-	self->machine.parameterlabel = parameterlabel;
-	self->machine.parametername = parametername;
-	self->machine.describevalue = describevalue;
-	self->machine.parametervalue = parametervalue;
+	vtable_init(self);
+	self->machine.vtable = &vtable;
 }
 
 void master_dispose(Master* self)
@@ -84,7 +97,7 @@ void master_dispose(Master* self)
 void parametertweak(Master* self, int param, int value)
 {
 	if (param == 0) {
-		Machines* machines = self->machine.machines(self);
+		Machines* machines = self->machine.vtable->machines(self);
 		if (machines) {			
 			machines_setvolume(machines,
 				floatparamvalue(value) * floatparamvalue(value) * 4.f);
@@ -93,7 +106,7 @@ void parametertweak(Master* self, int param, int value)
 		MachineSockets* sockets;
 		WireSocket* p;
 		int c = 1;
-		Machines* machines = self->machine.machines(self);
+		Machines* machines = self->machine.vtable->machines(self);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
@@ -122,7 +135,7 @@ int describevalue(Master* self, char* txt, int param, int value)
 		MachineSockets* sockets;
 		WireSocket* p;
 		int c = 1;
-		Machines* machines = self->machine.machines(self);
+		Machines* machines = self->machine.vtable->machines(self);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
@@ -155,7 +168,7 @@ int parametervalue(Master* self, int param)
 		MachineSockets* sockets;
 		WireSocket* input_socket;
 		int c = 1;
-		Machines* machines = self->machine.machines(self);
+		Machines* machines = self->machine.vtable->machines(self);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {

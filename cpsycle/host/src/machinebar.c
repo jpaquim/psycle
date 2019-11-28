@@ -136,11 +136,12 @@ void BuildMachineBox(MachineBar* self)
 int insertmachine(MachineBar* self, size_t slot, Machine* machine)
 {			
 	if (slot != MASTER_INDEX &&
-			machine->info(machine) && machine->info(machine)->ShortName) {
+			machine->vtable->info(machine) && machine->vtable->info(machine)->ShortName) {
 		intptr_t comboboxindex;
 
 		char buffer[128];
-		psy_snprintf(buffer, 128, "%02X: %s", slot, machine->info(machine)->ShortName); 
+		psy_snprintf(buffer, 128, "%02X: %s", slot, 
+			machine->vtable->info(machine)->ShortName); 
 		comboboxindex = ui_combobox_addstring(&self->machinebox, buffer);
 		table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
 		table_insert(&self->slotscombobox, slot, (void*) comboboxindex);

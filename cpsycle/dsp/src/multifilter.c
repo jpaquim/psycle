@@ -22,21 +22,35 @@ static void setsamplerate(MultiFilter*, float samplerate);
 static float samplerate(MultiFilter*);
 static void update(MultiFilter*, int full);
 
+static filter_vtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(Filter* filter)
+{
+	if (!vtable_initialized) {
+		vtable = *filter->vtable;
+		vtable.reset = reset;
+		vtable.work = work;
+		vtable.update = update;
+		vtable.setcutoff = setcutoff;
+		vtable.cutoff = cutoff;
+		vtable.setressonance = setressonance;
+		vtable.ressonance = ressonance;
+		vtable.setsamplerate = setsamplerate;
+		vtable.samplerate = samplerate;
+		vtable.work = work;
+		vtable_initialized = 1;
+	}	
+}
+
 void multifilter_init(MultiFilter* self)
 {
+	filter_init(&self->filter);
+	vtable_init(&self->filter);
+	self->filter.vtable = &vtable;
 	self->samplerate = 44100.f;
 	self->cutoff = 1.f;
-	self->q = 0.f;
-	self->filter.reset = reset;
-	self->filter.work = work;
-	self->filter.update = update;
-	self->filter.setcutoff = setcutoff;
-	self->filter.cutoff = cutoff;
-	self->filter.setressonance = setressonance;
-	self->filter.ressonance = ressonance;
-	self->filter.setsamplerate = setsamplerate;
-	self->filter.samplerate = samplerate;
-	self->filter.work = work;
+	self->q = 0.f;	
 	lowpass12e_init(&self->lowpass12E);
 	self->selected = F_NONE;
 	multifilter_settype(self, self->selected);
@@ -50,8 +64,8 @@ void multifilter_settype(MultiFilter* self, FilterType type)
 	switch (self->selected) {
 		case F_LOWPASS12E:
 			filter = (Filter*)(&self->lowpass12E);
-			filter->setcutoff(filter, self->cutoff);
-			filter->setressonance(filter, self->q);
+			filter->vtable->setcutoff(filter, self->cutoff);
+			filter->vtable->setressonance(filter, self->q);
 		break;
 		default:
 			filter = 0;			
@@ -81,7 +95,7 @@ void multifilter_inittables(unsigned int samplerate)
 		LowPass12E lp12e;
 	
 		lowpass12e_init(&lp12e); // forces static stable to initialize
-		lp12e.customfilter.filter.setsamplerate(&lp12e, (float)samplerate);
+		lp12e.customfilter.filter.vtable->setsamplerate(&lp12e, (float)samplerate);
 	}
 	
 }
@@ -89,21 +103,21 @@ void multifilter_inittables(unsigned int samplerate)
 void reset(MultiFilter* self)
 { 
 	if (self->selectedfilter) {
-		self->selectedfilter->reset(self->selectedfilter);
+		self->selectedfilter->vtable->reset(self->selectedfilter);
 	}
 }
 
 amp_t work(MultiFilter* self, amp_t sample)
 {
 	return self->selectedfilter 
-		? self->selectedfilter->work(self->selectedfilter, sample)
+		? self->selectedfilter->vtable->work(self->selectedfilter, sample)
 		: sample;
 }
 
 static void setcutoff(MultiFilter* self, float cutoff)
 { 
 	if (self->selectedfilter) {
-		self->selectedfilter->setcutoff(self->selectedfilter, cutoff);
+		self->selectedfilter->vtable->setcutoff(self->selectedfilter, cutoff);
 	}
 	self->cutoff = cutoff;
 }
@@ -111,14 +125,14 @@ static void setcutoff(MultiFilter* self, float cutoff)
 static float cutoff(MultiFilter* self)
 {
 	return self->selectedfilter 
-		? self->selectedfilter->cutoff(self->selectedfilter)
+		? self->selectedfilter->vtable->cutoff(self->selectedfilter)
 		: self->cutoff;
 }
 
 void setressonance(MultiFilter* self, float ressonance)
 { 
 	if (self->selectedfilter) {
-		self->selectedfilter->setressonance(self->selectedfilter, ressonance);
+		self->selectedfilter->vtable->setressonance(self->selectedfilter, ressonance);
 	}
 	self->q = ressonance;
 }
@@ -126,14 +140,14 @@ void setressonance(MultiFilter* self, float ressonance)
 float ressonance(MultiFilter* self)
 {
 	return self->selectedfilter 
-		? self->selectedfilter->ressonance(self->selectedfilter)
+		? self->selectedfilter->vtable->ressonance(self->selectedfilter)
 		: self->q;
 }
 
 void setsamplerate(MultiFilter* self, float samplerate)
 { 
 	if (self->selectedfilter) {
-		self->selectedfilter->setsamplerate(self->selectedfilter, samplerate);
+		self->selectedfilter->vtable->setsamplerate(self->selectedfilter, samplerate);
 	}
 	self->samplerate = samplerate;
 }
@@ -141,13 +155,13 @@ void setsamplerate(MultiFilter* self, float samplerate)
 float samplerate(MultiFilter* self)
 {
 	return self->selectedfilter 
-		? self->selectedfilter->samplerate(self->selectedfilter)
+		? self->selectedfilter->vtable->samplerate(self->selectedfilter)
 		: self->samplerate;
 }
 
 void update(MultiFilter* self, int full)
 { 
 	if (self->selectedfilter) {
-		self->selectedfilter->update(self->selectedfilter, full);
+		self->selectedfilter->vtable->update(self->selectedfilter, full);
 	}
 }

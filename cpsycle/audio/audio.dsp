@@ -388,6 +388,10 @@ SOURCE=.\src\psy3.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\psyclescript.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sample.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -676,6 +680,10 @@ SOURCE=.\src\psy2.h
 # Begin Source File
 
 SOURCE=.\src\psy3.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\psyclescript.h
 # End Source File
 # Begin Source File
 

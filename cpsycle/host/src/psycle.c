@@ -7,25 +7,30 @@
 #include <uiapp.h>
 #include <dir.h>
 #include <stdio.h>
+#include <luaplugin.h>
 
 UIMAIN
 {    	
-	MainFrame main;			
+	MainFrame mainframe;
 	int err = 0;	
 	char workpath[_MAX_PATH];
 	const char* env = 0;	
+	LuaPlugin plugin;
 	
 	env = pathenv();	
 	if (env) {			
 		insertpathenv(workdir(workpath));
 	}
 	UIINIT;
-	mainframe_init(&main);	
-	if (mainframe_showmaximizedatstart(&main)) {
-		ui_component_show_state(&main.component, SW_MAXIMIZE);
+	mainframe_init(&mainframe);	
+	if (mainframe_showmaximizedatstart(&mainframe)) {
+		ui_component_show_state(&mainframe.component, SW_MAXIMIZE);
 	} else {
-		ui_component_show_state(&main.component, iCmdShow);
+		ui_component_show_state(&mainframe.component, iCmdShow);
 	}
+	luaplugin_init(&plugin, 
+		mainframe.workspace.machinefactory.machinecallback, "testmachine.lua");
+	plugin.machine.vtable->dispose(&plugin);
 	err = ui_run();	
 	UIDISPOSE;
 	if (env) {
