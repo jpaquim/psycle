@@ -47,8 +47,7 @@ void machines_initsignals(Machines* self)
 {
 	signal_init(&self->signal_insert);
 	signal_init(&self->signal_removed);
-	signal_init(&self->signal_slotchange);
-	signal_init(&self->signal_showparameters);
+	signal_init(&self->signal_slotchange);	
 }
 
 void machines_dispose(Machines* self)
@@ -70,8 +69,7 @@ void machines_disposesignals(Machines* self)
 {
 	signal_dispose(&self->signal_insert);
 	signal_dispose(&self->signal_removed);
-	signal_dispose(&self->signal_slotchange);
-	signal_dispose(&self->signal_showparameters);
+	signal_dispose(&self->signal_slotchange);	
 }
 
 void machines_free(Machines* self)
@@ -438,11 +436,6 @@ void machines_endfilemode(Machines* self)
 uintptr_t machines_size(Machines* self)
 {
 	return table_size(&self->slots);
-}
-
-void machines_showparameters(Machines* self, uintptr_t slot)
-{
-	signal_emit(&self->signal_showparameters, self, 1, slot);
 }
 
 void machines_setvolume(Machines* self, amp_t volume)

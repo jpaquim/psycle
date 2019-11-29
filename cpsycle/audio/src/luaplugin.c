@@ -3,10 +3,9 @@
 
 #include "../../detail/prefix.h"
 
-#include "LuaPlugin.h"
+#include "luaplugin.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include <windows.h>
 
 static void work(LuaPlugin*, BufferContext*);
 static int hostevent(LuaPlugin*, int const eventNr, int const val1, float const val2);
@@ -26,13 +25,14 @@ static void vtable_init(LuaPlugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;		
-		vtable.hostevent = hostevent;
-		vtable.seqtick = seqtick;
-		vtable.sequencerlinetick = sequencerlinetick;
-		vtable.info = info;		
-		vtable.parametertweak = parametertweak;		
-		vtable.describevalue = describevalue;
-		vtable.parametervalue = parametervalue;
+		vtable.hostevent = (fp_machine_hostevent) hostevent;
+		vtable.seqtick = (fp_machine_seqtick) seqtick;
+		vtable.sequencerlinetick = (fp_machine_sequencerlinetick)
+			sequencerlinetick;
+		vtable.info = (fp_machine_info) info;		
+		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;		
+		vtable.describevalue = (fp_machine_describevalue) describevalue;
+		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
 		vtable.dispose = dispose;
 		vtable_initialized = 1;
 	}

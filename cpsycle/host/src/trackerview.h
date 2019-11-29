@@ -69,9 +69,11 @@ typedef struct {
 	unsigned int numtracks;
 	int classic;
 	TrackerSkin* skin;
+	struct TrackerView* view;
 } TrackerHeader;
 
-void trackerheader_init(TrackerHeader*, ui_component* parent);
+void trackerheader_init(TrackerHeader*, ui_component* parent,
+	struct TrackerView* view);
 
 typedef struct {
 	ui_component component;

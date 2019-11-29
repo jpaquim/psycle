@@ -2,13 +2,18 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 #include "patternevent.h"
 
 #include "kbddriver.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
-#include <windows.h>
 #include "inputmap.h"
+
+#if defined DIVERSALIS__OS__MICROSOFT    
+#include <windows.h>
+#endif
 
 enum {
 	CMD_NOTE_C_0,
@@ -89,8 +94,12 @@ static int cmdnote(const char* key);
 
 int onerror(int err, const char* msg)
 {
+#if defined DIVERSALIS__OS__MICROSOFT    
 	MessageBox(0, msg, "Kbd driver", MB_OK | MB_ICONERROR);
+#else
+    fprintf(stderr, "Kbd driver %s", msg);
 	return 0;
+#endif    
 }
 
 EventDriver* create_kbd_driver(void)

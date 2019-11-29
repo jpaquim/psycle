@@ -2,14 +2,10 @@
 ///\brief public project-wide definitions. file included first by every header.
 #pragma once
 // #include "config.hpp"
-#define __cplusplus
-#include "diversalis/compiler.hpp"
-#ifndef DIVERSALIS__COMPILER__RESOURCE
-	#include "diversalis/os.hpp"	
-#endif
-#include "diversalis/detail/message.hpp"
-#include "diversalis/detail/stringize.hpp"
-#undef __cplusplus
+#include "../../detail/compiler.h"
+#include "../../detail/os.h"
+#include "../../detail/stringize.h"
+
 
 /**************************************************************************************************/
 /// string describing the configuration of the build

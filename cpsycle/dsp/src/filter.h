@@ -8,18 +8,31 @@
 
 struct Filter;
 
+
+typedef void (*fp_filter_init)(struct Filter*);
+typedef void (*fp_filter_dispose)(struct Filter*);
+typedef amp_t (*fp_filter_work)(struct Filter*, amp_t sample);
+typedef void (*fp_filter_setcutoff)(struct Filter*, float cutoff);	
+typedef float (*fp_filter_cutoff)(struct Filter*);
+typedef void (*fp_filter_setressonance)(struct Filter*, float ressonance);
+typedef float (*fp_filter_ressonance)(struct Filter*);
+typedef void (*fp_filter_setsamplerate)(struct Filter*, float samplerate);
+typedef float (*fp_filter_samplerate)(struct Filter*);
+typedef void (*fp_filter_update)(struct Filter*, int full);
+typedef void (*fp_filter_reset)(struct Filter*);
+
 typedef struct filter_vtable {
-	void (*init)(struct Filter*);
-	void (*dispose)(struct Filter*);
-	amp_t (*work)(struct Filter*, amp_t sample);
-	void (*setcutoff)(struct Filter*, float cutoff);	
-	float (*cutoff)(struct Filter*);
-	void (*setressonance)(struct Filter*, float ressonance);
-	float (*ressonance)(struct Filter*);
-	void (*setsamplerate)(struct Filter*, float samplerate);
-	float (*samplerate)(struct Filter*);
-	void (*update)(struct Filter*, int full);
-	void (*reset)(struct Filter*);
+	fp_filter_init init;
+	fp_filter_dispose dispose;
+	fp_filter_work work;
+	fp_filter_setcutoff setcutoff;
+	fp_filter_cutoff cutoff;
+	fp_filter_setressonance setressonance;
+	fp_filter_ressonance ressonance;
+	fp_filter_setsamplerate setsamplerate;
+	fp_filter_samplerate samplerate;
+	fp_filter_update update;
+	fp_filter_reset reset;
 } filter_vtable;
 
 typedef struct Filter {

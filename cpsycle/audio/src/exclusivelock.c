@@ -2,12 +2,10 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "exclusivelock.h"
 
-#define __cplusplus
-#include <diversalis/os.hpp>
-#undef __cplusplus
 
 #if defined DIVERSALIS__OS__MICROSOFT
 

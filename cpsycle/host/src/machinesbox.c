@@ -21,8 +21,9 @@ static void OnMachinesListChanged(MachinesBox*, ui_component* sender,
 	int slot);
 
 void InitMachinesBox(MachinesBox* self, ui_component* parent,
-	Machines* machines, MachineBoxMode mode)
+	Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
+	self->workspace = workspace;
 	self->mode = mode;
 	self->showslots = 1;
 	table_init(&self->listboxslots);
@@ -288,7 +289,7 @@ void MachinesBoxShowParameters(MachinesBox* self)
 				slot = (int) table_at(&self->listboxslots, selection[i]);
 				machine = machines_at(self->machines, slot);
 				if (machine) {					
-					machines_showparameters(self->machines, slot);
+					workspace_showparameters(self->workspace, slot);
 				}
 			}
 		}

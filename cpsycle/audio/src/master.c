@@ -56,27 +56,27 @@ static void vtable_init(Master* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;
-		vtable.mode = master_mode;
-		vtable.info = info;
-		vtable.dispose = master_dispose;
-		vtable.info = info;
-		vtable.parametertweak = parametertweak;
-		vtable.describevalue = describevalue;
-		vtable.parametervalue = parametervalue;
-		vtable.numinputs = numinputs;
-		vtable.numoutputs = numoutputs;
-		vtable.loadspecific = master_loadspecific;
-		vtable.savespecific = master_savespecific;
+		vtable.mode = (fp_machine_mode) master_mode;
+		vtable.info = (fp_machine_info) info;
+		vtable.dispose = (fp_machine_dispose) master_dispose;
+		vtable.info = (fp_machine_info) info;
+		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
+		vtable.describevalue = (fp_machine_describevalue) describevalue;
+		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
+		vtable.numinputs = (fp_machine_numinputs) numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable.loadspecific = (fp_machine_loadspecific) master_loadspecific;
+		vtable.savespecific = (fp_machine_savespecific) master_savespecific;
 		// Parameter
-		vtable.parametertype = parametertype;
-		vtable.numparametercols = numparametercols;
-		vtable.numparameters = numparameters;
-		vtable.parameterrange = parameterrange;
-		vtable.parametertweak = parametertweak;	
-		vtable.parameterlabel = parameterlabel;
-		vtable.parametername = parametername;
-		vtable.describevalue = describevalue;
-		vtable.parametervalue = parametervalue;
+		vtable.parametertype = (fp_machine_parametertype) parametertype;
+		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;
+		vtable.numparameters = (fp_machine_numparameters) numparameters;
+		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
+		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;	
+		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
+		vtable.parametername = (fp_machine_parametername) parametername;
+		vtable.describevalue = (fp_machine_describevalue) describevalue;
+		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
 		vtable_initialized = 1;
 	}
 }

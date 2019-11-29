@@ -66,9 +66,9 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 	ui_notebook_init(&self->notebook, &self->component);
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	InitMachinesBox(&self->machinesboxgen, &self->notebook.component, 
-		&workspace->song->machines, MACHINEBOX_GENERATOR);
+		&workspace->song->machines, MACHINEBOX_GENERATOR, self->workspace);
 	InitMachinesBox(&self->machinesboxfx, &self->notebook.component, 
-		&workspace->song->machines, MACHINEBOX_FX);
+		&workspace->song->machines, MACHINEBOX_FX, self->workspace);
 	InitInstrumentsBox(&self->instrumentsbox, &self->notebook.component, 
 		&workspace->song->instruments);
 	InitSamplesBox(&self->samplesbox, &self->notebook.component, 
@@ -176,5 +176,5 @@ void OnParameters(Gear* self, ui_component* sender)
 
 void OnMaster(Gear* self, ui_component* sender)
 {
-	machines_showparameters(self->machines, MASTER_INDEX);
+	workspace_showparameters(self->workspace, MASTER_INDEX);
 }

@@ -51,6 +51,8 @@ static void mainframe_onsongloadprogress(MainFrame*, Workspace*,
 	int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
+static void mainframe_onviewselected(MainFrame*, Workspace*,
+	int view);
 static void mainframe_onrender(MainFrame*, ui_component* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, ui_component* sender, int timerid);
@@ -135,6 +137,8 @@ void mainframe_init(MainFrame* self)
 		&self->tabbars, &self->workspace);	
 	signal_connect(&self->filebar.renderbutton.signal_clicked, self,
 		mainframe_onrender);
+	signal_connect(&self->workspace.signal_viewselected, self,
+		mainframe_onviewselected);
 	InitGear(&self->gear, &self->component, &self->workspace);
 	ui_component_hide(&self->gear.component);
 	signal_connect(&self->machinebar.gear.signal_clicked, self,
@@ -154,7 +158,7 @@ void mainframe_init(MainFrame* self)
 			self->workspace.song->properties.title);
 	}	
 	signal_emit(&self->workspace.signal_configchanged, &self->workspace, 1,
-		self->workspace.config);
+		self->workspace.config);	
 	ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
 }
 
@@ -363,6 +367,15 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 		machineview_applyproperties(&self->machineview, properties);
 		properties_free(properties);
 	} else 
+	if (keyevent->keycode == VK_F9) {
+		self->machineview.newmachine.pluginsview.calledby = self->tabbar.selected;
+		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
+		tabbar_select(&self->machineview.tabbar, 1);
+	} else
+	if (keyevent->shift && keyevent->keycode == VK_RETURN) {
+		workspace_showparameters(&self->workspace,
+			machines_slot(&self->workspace.song->machines));
+	} else
 	if (keyevent->shift && keyevent->keycode == VK_RIGHT) {
 		if (self->workspace.song) {						
 			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
@@ -517,7 +530,7 @@ void mainframe_onaboutok(MainFrame* self, ui_component* sender)
 
 void mainframe_ongearcreate(MainFrame* self, ui_component* sender)
 {
-	self->machineview.newmachine.pluginsview.calledbygear = 1;
+	self->machineview.newmachine.pluginsview.calledby = 10;
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	tabbar_select(&self->machineview.tabbar, 1);
 }
@@ -546,4 +559,11 @@ void mainframe_onrender(MainFrame* self, ui_component* sender)
 void mainframe_ontimer(MainFrame* self, ui_component* sender, int timerid)
 {
 	workspace_idle(&self->workspace);
+}
+
+void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view)
+{
+	if (view != 10) {
+		tabbar_select(&self->tabbar, view);
+	}
 }

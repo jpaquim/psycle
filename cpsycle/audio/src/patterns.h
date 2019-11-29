@@ -11,17 +11,25 @@ typedef struct {
 	Table slots;
 	int songtracks;
 	unsigned char sharetracknames;
+	Table mutedtracks;
+	int soloactive;
+	uintptr_t soloedtrack;
 } Patterns;
 
 void patterns_init(Patterns*);
 void patterns_dispose(Patterns*);
-void patterns_insert(Patterns*, unsigned int slot, Pattern*);
+void patterns_insert(Patterns*,uintptr_t slot, Pattern*);
 int patterns_append(Patterns*, Pattern*);
-Pattern* patterns_at(Patterns*, unsigned int slot);
-void patterns_enumerate(Patterns*, void* context, int (*enumproc)(void*, unsigned int, Pattern*));
+Pattern* patterns_at(Patterns*, uintptr_t slot);
 void patterns_clear(Patterns*);
-void patterns_erase(Patterns*, unsigned int slot);
-void patterns_remove(Patterns*, unsigned int slot);
-size_t patterns_size(Patterns*);
+void patterns_erase(Patterns*, uintptr_t slot);
+void patterns_remove(Patterns*, uintptr_t slot);
+uintptr_t patterns_size(Patterns*);
+void patterns_activatesolotrack(Patterns*, uintptr_t track);
+void patterns_deactivatesolotrack(Patterns*);
+void patterns_mutetrack(Patterns*, uintptr_t track);
+void patterns_unmutetrack(Patterns* self, uintptr_t track);
+int patterns_istrackmuted(Patterns*, uintptr_t track);
+int patterns_istracksoloed(Patterns*, uintptr_t track);
 
 #endif

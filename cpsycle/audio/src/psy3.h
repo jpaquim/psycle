@@ -4,6 +4,8 @@
 #if !defined(PSY3_H)
 #define PSY3_H
 
+#include "songio.h"
+
 void psy3_load(struct SongFile*);
 void psy3_save(struct SongFile*);
 

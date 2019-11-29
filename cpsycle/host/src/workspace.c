@@ -110,6 +110,8 @@ void workspace_initsignals(Workspace* self)
 	signal_init(&self->signal_loadprogress);
 	signal_init(&self->signal_scanprogress);
 	signal_init(&self->signal_beforesavesong);
+	signal_init(&self->signal_showparameters);
+	signal_init(&self->signal_viewselected);
 }
 
 void workspace_dispose(Workspace* self)
@@ -144,6 +146,8 @@ void workspace_disposesignals(Workspace* self)
 	signal_dispose(&self->signal_loadprogress);
 	signal_dispose(&self->signal_scanprogress);
 	signal_dispose(&self->signal_beforesavesong);
+	signal_dispose(&self->signal_showparameters);
+	signal_dispose(&self->signal_viewselected);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -936,4 +940,14 @@ void workspace_idle(Workspace* self)
 			self->lastentry = 0;
 		}		
 	}
+}
+
+void workspace_showparameters(Workspace* self, uintptr_t machineslot)
+{
+	signal_emit(&self->signal_showparameters, self, 1, machineslot);
+}
+
+void workspace_selectview(Workspace* self, int view)
+{
+	signal_emit(&self->signal_viewselected, self, 1, view);
 }

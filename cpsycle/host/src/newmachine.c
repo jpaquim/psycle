@@ -44,7 +44,7 @@ static void newmachinedetail_reset(NewMachineDetail*);
 void newmachinebar_init(NewMachineBar* self, ui_component* parent,
 	Workspace* workspace)
 {
-	self->workspace = workspace;
+	self->workspace = workspace;	
 	ui_component_init(&self->component, parent);	
 	ui_button_init(&self->rescan, &self->component);
 	ui_button_settext(&self->rescan, "Rescan");
@@ -99,7 +99,7 @@ void pluginsview_init(PluginsView* self, ui_component* parent,
 	self->selectedplugin = 0;
 	self->workspace = workspace;	
 	self->dy = 0;	
-	self->calledbygear = 0;
+	self->calledby = 0;
 	signal_init(&self->signal_selected);
 	signal_init(&self->signal_changed);
 	signal_connect(&workspace->plugincatcher.signal_changed, self,
@@ -284,7 +284,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, ui_component* sender,
 {
 	if (self->selectedplugin) {
 		signal_emit(&self->signal_selected, self, 1, self->selectedplugin);
-		self->calledbygear = 0;
+		workspace_selectview(self->workspace, self->calledby);
 	}	
 }
 

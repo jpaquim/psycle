@@ -57,24 +57,24 @@ static void vtable_init(Duplicator* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
-		vtable.work = work;	
-		vtable.info = info;
-		vtable.sequencertick = sequencertick;
-		vtable.sequencerinsert = sequencerinsert;	
-		vtable.parametertweak = parametertweak;
-		vtable.describevalue = describevalue;	
-		vtable.parametervalue = parametervalue;
-		vtable.describevalue = describevalue;
-		vtable.parameterrange = parameterrange;
-		vtable.numparameters = numparameters;
-		vtable.numparametercols = numparametercols;
-		vtable.parameterlabel = parameterlabel;
-		vtable.parametername = parametername;
-		vtable.dispose = dispose;
-		vtable.numinputs = numinputs;
-		vtable.numoutputs = numoutputs;	
-		vtable.loadspecific = loadspecific;
-		vtable.savespecific = savespecific;
+		vtable.work = (fp_machine_work) work;	
+		vtable.info = (fp_machine_info) info;
+		vtable.sequencertick = (fp_machine_sequencertick) sequencertick;
+		vtable.sequencerinsert = (fp_machine_sequencerinsert) sequencerinsert;	
+		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
+		vtable.describevalue = (fp_machine_describevalue) describevalue;	
+		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
+		vtable.describevalue = (fp_machine_describevalue) describevalue;
+		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
+		vtable.numparameters = (fp_machine_numparameters) numparameters;
+		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;
+		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
+		vtable.parametername = (fp_machine_parametername) parametername;
+		vtable.dispose = (fp_machine_dispose) dispose;
+		vtable.numinputs = (fp_machine_numinputs) numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;	
+		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
+		vtable.savespecific = (fp_machine_savespecific) savespecific;
 		vtable_initialized = 1;
 	}
 }

@@ -42,7 +42,7 @@ typedef struct {
    Signal signal_selected;
    Signal signal_changed;
    Workspace* workspace;
-   int calledbygear;
+   int calledby;
 } PluginsView;
 
 void pluginsview_init(PluginsView*, ui_component* parent, Workspace*);

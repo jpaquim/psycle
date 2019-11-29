@@ -1,11 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY2_H)
-#define PSY2_H
+#if !defined(PSYCLESCRIPT_H)
+#define PSYCLESCRIPT_H
 
-#include "songio.h"
+#include <lua.h>
 
-void psy2_load(struct SongFile*);
+typedef struct {
+	int id;
+	lua_State* L;
+} PsycleScript;
 
 #endif

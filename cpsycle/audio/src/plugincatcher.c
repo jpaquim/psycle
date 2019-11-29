@@ -2,6 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "plugincatcher.h"
 
@@ -20,17 +21,15 @@
 #include <string.h>
 #include <portable.h>
 
-#define __cplusplus
-#include <diversalis/os.hpp>
-#undef __cplusplus
-
 
 #if defined DIVERSALIS__OS__MICROSOFT
 #define MODULEEXT ".dll"
 #elif defined DIVERSALIS__OS__APPLE
 #define	".dylib"
+#define _MAX_PATH 4096
 #else
 #define MODULEEXT ".so"
+#define _MAX_PATH 4096
 #endif
 
 static void plugincatcher_makeinternals(PluginCatcher*);

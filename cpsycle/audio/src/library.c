@@ -2,15 +2,13 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "library.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <portable.h>
 
-#define __cplusplus
-#include <diversalis/os.hpp>
-#undef __cplusplus
 
 Library* library_alloc(void)
 {
