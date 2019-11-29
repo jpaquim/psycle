@@ -40,6 +40,7 @@ void table_remove(Table*, uintptr_t k);
 void* table_at(Table*, uintptr_t k);
 uintptr_t table_size(Table*);
 int table_exists(Table*, uintptr_t k);
+void table_clear(Table*);
 TableIterator table_begin(Table*);
 const TableIterator* table_end(void);
 

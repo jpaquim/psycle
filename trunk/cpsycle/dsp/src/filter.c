@@ -61,12 +61,19 @@ void customfilter_vtable_init(Filter* filter)
 {
 	if (!customfilter_vtable_initialized) {
 		customfilter_vtable = *filter->vtable;
-		customfilter_vtable.setsamplerate = customfilter_setsamplerate;
-		customfilter_vtable.samplerate = customfilter_samplerate;
-		customfilter_vtable.setcutoff = customfilter_setcutoff;
-		customfilter_vtable.cutoff = customfilter_cutoff;
-		customfilter_vtable.setressonance = customfilter_setressonance;
-		customfilter_vtable.ressonance = customfilter_ressonance;
+		customfilter_vtable.setsamplerate = (fp_filter_setsamplerate) 
+			customfilter_setsamplerate;
+		customfilter_vtable.samplerate = (fp_filter_samplerate) 
+			customfilter_samplerate;
+		customfilter_vtable.setcutoff = (fp_filter_setcutoff)
+			customfilter_setcutoff;
+		customfilter_vtable.cutoff = (fp_filter_cutoff)
+			customfilter_cutoff;
+		customfilter_vtable.setressonance = (fp_filter_setressonance)
+			customfilter_setressonance;
+		customfilter_vtable.ressonance = (fp_filter_ressonance)
+			customfilter_ressonance;
+		customfilter_vtable_initialized = 1;
 	}
 }
 

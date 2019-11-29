@@ -42,6 +42,8 @@ typedef struct {
 	Signal signal_loadprogress;
 	Signal signal_scanprogress;
 	Signal signal_beforesavesong;
+	Signal signal_showparameters;
+	Signal signal_viewselected;
 	ui_component* mainhandle;
 	UndoRedo undoredo;	
 	PatternEditPosition patterneditposition;
@@ -92,5 +94,7 @@ int workspace_followingsong(Workspace*);
 void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
+void workspace_showparameters(Workspace*, uintptr_t machineslot);
+void workspace_selectview(Workspace*, int view);
 
 #endif

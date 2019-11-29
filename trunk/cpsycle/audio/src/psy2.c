@@ -13,6 +13,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+#if !defined DIVERSALIS__OS__MICROSOFT
+#define _MAX_PATH 4096
+#endif
+
 typedef struct {
 	int32_t x;
 	int32_t y;
@@ -43,7 +48,7 @@ void makeplugincatchername(const char* modulename, char* catchername)
 	}
 }
 
-void psy2_load(SongFile* songfile)
+void psy2_load(struct SongFile* songfile)
 {	
 	int32_t i;	
 	int32_t num,sampR;
@@ -363,7 +368,7 @@ void psy2_load(SongFile* songfile)
 						wave->panfactor = (float) pans[i] / 256.f ; //(value_mapper::map_256_1(pan));
 						//Old wavename, not really used anyway.
 						psyfile_read(songfile->file, dummy, 32);
-						wave->name = _strdup(names[i]);						
+						wave->name = strdup(names[i]);						
 						psyfile_read(songfile->file, &volume, sizeof volume);
 						wave->globalvolume = volume*0.01f;
 						psyfile_read(songfile->file, &tmpFineTune, sizeof(short));

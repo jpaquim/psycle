@@ -25,16 +25,17 @@ static void vtable_init(CustomMachine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;
-		vtable.setpanning = setpanning;
-		vtable.panning = panning;
-		vtable.mute = mute;
-		vtable.unmute = unmute;
-		vtable.muted = muted;
-		vtable.bypass = bypass;
-		vtable.unbypass = unbypass;
-		vtable.bypassed = bypassed;
-		vtable.editname = custommachine_editname;
-		vtable.seteditname = custommachine_seteditname;
+		vtable.setpanning = (fp_machine_setpanning) setpanning;
+		vtable.panning = (fp_machine_panning) panning;
+		vtable.mute = (fp_machine_mute) mute;
+		vtable.unmute = (fp_machine_unmute) unmute;
+		vtable.muted = (fp_machine_muted) muted;
+		vtable.bypass = (fp_machine_bypass) bypass;
+		vtable.unbypass = (fp_machine_unbypass) unbypass;
+		vtable.bypassed = (fp_machine_bypassed) bypassed;
+		vtable.editname = (fp_machine_editname) custommachine_editname;
+		vtable.seteditname = (fp_machine_seteditname) custommachine_seteditname;
+		vtable_initialized = 1;
 	}
 }
 

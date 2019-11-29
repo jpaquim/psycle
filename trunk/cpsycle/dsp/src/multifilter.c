@@ -29,16 +29,16 @@ static void vtable_init(Filter* filter)
 {
 	if (!vtable_initialized) {
 		vtable = *filter->vtable;
-		vtable.reset = reset;
-		vtable.work = work;
-		vtable.update = update;
-		vtable.setcutoff = setcutoff;
-		vtable.cutoff = cutoff;
-		vtable.setressonance = setressonance;
-		vtable.ressonance = ressonance;
-		vtable.setsamplerate = setsamplerate;
-		vtable.samplerate = samplerate;
-		vtable.work = work;
+		vtable.reset = (fp_filter_reset) reset;
+		vtable.work = (fp_filter_work) work;
+		vtable.update = (fp_filter_update) update;
+		vtable.setcutoff = (fp_filter_setcutoff) setcutoff;
+		vtable.cutoff = (fp_filter_cutoff) cutoff;
+		vtable.setressonance = (fp_filter_setressonance) setressonance;
+		vtable.ressonance = (fp_filter_ressonance) ressonance;
+		vtable.setsamplerate = (fp_filter_setsamplerate) setsamplerate;
+		vtable.samplerate = (fp_filter_samplerate) samplerate;
+		vtable.work = (fp_filter_work) work;
 		vtable_initialized = 1;
 	}	
 }
@@ -95,7 +95,8 @@ void multifilter_inittables(unsigned int samplerate)
 		LowPass12E lp12e;
 	
 		lowpass12e_init(&lp12e); // forces static stable to initialize
-		lp12e.customfilter.filter.vtable->setsamplerate(&lp12e, (float)samplerate);
+		lp12e.customfilter.filter.vtable->setsamplerate(
+			&lp12e.customfilter.filter, (float)samplerate);
 	}
 	
 }
@@ -132,7 +133,8 @@ static float cutoff(MultiFilter* self)
 void setressonance(MultiFilter* self, float ressonance)
 { 
 	if (self->selectedfilter) {
-		self->selectedfilter->vtable->setressonance(self->selectedfilter, ressonance);
+		self->selectedfilter->vtable->setressonance(self->selectedfilter,
+			ressonance);
 	}
 	self->q = ressonance;
 }
@@ -147,7 +149,8 @@ float ressonance(MultiFilter* self)
 void setsamplerate(MultiFilter* self, float samplerate)
 { 
 	if (self->selectedfilter) {
-		self->selectedfilter->vtable->setsamplerate(self->selectedfilter, samplerate);
+		self->selectedfilter->vtable->setsamplerate(self->selectedfilter,
+			samplerate);
 	}
 	self->samplerate = samplerate;
 }

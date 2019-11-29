@@ -14,7 +14,7 @@
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
-static Machine* clone(void*);
+static Machine* clone(Plugin*);
 static int hostevent(Plugin*, int const eventNr, int const val1, float const val2);
 static void generateaudio(Plugin*, BufferContext*);
 static void seqtick(Plugin*, int channel, const PatternEvent* event);
@@ -45,29 +45,29 @@ static void vtable_init(Plugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
-		vtable.clone = clone;
-		vtable.hostevent = hostevent;
-		vtable.seqtick = seqtick;
-		vtable.sequencerlinetick = sequencerlinetick;
-		vtable.info = info;
-		vtable.numparametercols = numparametercols;
-		vtable.numparameters = numparameters;
-		vtable.parameterrange = parameterrange;
-		vtable.parametertype = parametertype;
-		vtable.parametername = parametername;
-		vtable.parameterlabel = parameterlabel;
-		vtable.parametertweak = parametertweak;
-		vtable.parameterlabel = parameterlabel;
-		vtable.parametername = parametername;
-		vtable.describevalue = describevalue;
-		vtable.parametervalue = parametervalue;
-		vtable.dispose = dispose;
-		vtable.generateaudio = generateaudio;
-		vtable.numinputs = numinputs;
-		vtable.numoutputs = numoutputs;
-		vtable.loadspecific = loadspecific;
-		vtable.savespecific = savespecific;	
-		vtable.setcallback = setcallback;	
+		vtable.clone = (fp_machine_clone) clone;
+		vtable.hostevent = (fp_machine_hostevent) hostevent;
+		vtable.seqtick = (fp_machine_seqtick) seqtick;
+		vtable.sequencerlinetick = (fp_machine_sequencerlinetick) sequencerlinetick;
+		vtable.info = (fp_machine_info) info;
+		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;
+		vtable.numparameters = (fp_machine_numparameters) numparameters;
+		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
+		vtable.parametertype = (fp_machine_parametertype) parametertype;
+		vtable.parametername = (fp_machine_parametername) parametername;
+		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
+		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
+		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
+		vtable.parametername = (fp_machine_parametername) parametername;
+		vtable.describevalue = (fp_machine_describevalue) describevalue;
+		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
+		vtable.dispose = (fp_machine_dispose) dispose;
+		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
+		vtable.numinputs = (fp_machine_numinputs) numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
+		vtable.savespecific = (fp_machine_savespecific) savespecific;	
+		vtable.setcallback = (fp_machine_setcallback) setcallback;	
 		vtable_initialized = 1;
 	}
 }
@@ -245,7 +245,8 @@ void loadspecific(Plugin* self, struct SongFile* songfile, unsigned int slot)
 			int temp;
 			
 			psyfile_read(songfile->file, &temp, sizeof(temp));
-			self->custommachine.machine.vtable->parametertweak(self, i, temp);
+			self->custommachine.machine.vtable->parametertweak(
+				&self->custommachine.machine, i, temp);
 		}
 		size -= sizeof(count) + sizeof(int)*count;
 		if(size) {

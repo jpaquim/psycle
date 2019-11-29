@@ -6,36 +6,46 @@
 #include "patterns.h"
 #include <stdlib.h>
 
-static int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* Pattern);
+static void patterns_disposeslots(Patterns*);
 
 void patterns_init(Patterns* self)
 {
 	table_init(&self->slots);
+	table_init(&self->mutedtracks);
 	self->songtracks = 16;
+	self->soloactive = 0;	
+	self->soloedtrack = 0;
 	self->sharetracknames = 0;
 }
 
 void patterns_dispose(Patterns* self)
 {	
-	patterns_enumerate(self, self, OnEnumFreePattern);
+	patterns_disposeslots(self);
+	table_dispose(&self->mutedtracks);
+}
+
+void patterns_disposeslots(Patterns* self)
+{	
+	TableIterator it;
+
+	for (it = table_begin(&self->slots);
+			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+		Pattern* pattern;
+		
+		pattern = (Pattern*)tableiterator_value(&it);
+		pattern_dispose(pattern);
+		free(pattern);
+	}
 	table_dispose(&self->slots);
 }
 
 void patterns_clear(Patterns* self)
 {
-	patterns_enumerate(self, self, OnEnumFreePattern);
-	table_dispose(&self->slots);
+	patterns_disposeslots(self);	
 	table_init(&self->slots);	
 }
 
-int OnEnumFreePattern(Patterns* self, unsigned int slot, Pattern* pattern)
-{	
-	pattern_dispose(pattern);
-	free(pattern);
-	return 1;
-}
-
-void patterns_insert(Patterns* self, unsigned int slot, Pattern* pattern)
+void patterns_insert(Patterns* self, uintptr_t slot, Pattern* pattern)
 {
 	table_insert(&self->slots, slot, pattern);
 }
@@ -51,32 +61,18 @@ int patterns_append(Patterns* self, Pattern* pattern)
 	return slot;
 }
 
-Pattern* patterns_at(Patterns* self, unsigned int slot)
+Pattern* patterns_at(Patterns* self, uintptr_t slot)
 {
 	return table_at(&self->slots, slot);
 }
 
-void patterns_enumerate(Patterns* self, void* context, int (*enumproc)(void*, unsigned int, Pattern*))
-{
-	Pattern* pattern;
-	int slot;
-	for (slot = 0; slot < 256; ++slot) {
-		pattern = (Pattern*) table_at(&self->slots, slot);
-		if (pattern) {
-			if (!enumproc(context, slot, pattern)) {
-				break;
-			}
-		}
-	}
-}
-
-void patterns_erase(Patterns* self, unsigned int slot)
+void patterns_erase(Patterns* self, uintptr_t slot)
 {
 
 	table_remove(&self->slots, slot);
 }
 
-void patterns_remove(Patterns* self, unsigned int slot)
+void patterns_remove(Patterns* self, uintptr_t slot)
 {
 	Pattern* pattern;
 	
@@ -86,7 +82,49 @@ void patterns_remove(Patterns* self, unsigned int slot)
 	free(pattern);	
 }
 
-size_t patterns_size(Patterns* self)
+uintptr_t patterns_size(Patterns* self)
 {
 	return self->slots.count;
+}
+
+void patterns_activatesolotrack(Patterns* self, uintptr_t track)
+{
+	self->soloactive = 1;
+	self->soloedtrack = track;
+}
+
+void patterns_deactivatesolotrack(Patterns* self)
+{
+	self->soloactive = 0;
+	table_clear(&self->mutedtracks);
+}
+
+void patterns_mutetrack(Patterns* self, uintptr_t track)
+{
+	if (!self->soloactive) {
+		table_insert(&self->mutedtracks, track, (void*)(uintptr_t) 1);
+	} else {
+		table_remove(&self->mutedtracks, track);
+	}
+}
+
+void patterns_unmutetrack(Patterns* self, uintptr_t track)
+{
+	if (!self->soloactive) {
+		table_remove(&self->mutedtracks, track);
+	} else {
+		table_insert(&self->mutedtracks, track, (void*)(uintptr_t) 1);
+	}
+}
+
+int patterns_istrackmuted(Patterns* self, uintptr_t track)
+{
+	return self->soloactive
+		? !table_exists(&self->mutedtracks, track)
+		: table_exists(&self->mutedtracks, track);
+}
+
+int patterns_istracksoloed(Patterns* self, uintptr_t track)
+{
+	return self->soloactive && self->soloedtrack == track;		
 }

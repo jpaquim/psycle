@@ -7,6 +7,7 @@
 
 #include <uilistbox.h>
 #include "machines.h"
+#include "workspace.h"
 
 typedef enum {
 	MACHINEBOX_ALL,
@@ -21,9 +22,11 @@ typedef struct {
 	Table slotslistbox;
 	MachineBoxMode mode;
 	int showslots;
+	Workspace* workspace;
 } MachinesBox;
 
-void InitMachinesBox(MachinesBox*, ui_component* parent, Machines*, MachineBoxMode);
+void InitMachinesBox(MachinesBox*, ui_component* parent, Machines*, MachineBoxMode,
+	Workspace*);
 void MachinesBoxClone(MachinesBox*);
 void MachinesBoxRemove(MachinesBox*);
 void MachinesBoxExchange(MachinesBox*);

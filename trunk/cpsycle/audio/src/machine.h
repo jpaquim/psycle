@@ -27,63 +27,119 @@ typedef enum {
 
 struct Machine;
 
-typedef struct MachineVtable {
-	void (*init)(void*);
-	struct Machine* (*clone)(void*);
-	Buffer* (*mix)(void*, size_t slot, unsigned int amount, MachineSockets*, struct Machines*);
-	void (*work)(void*, BufferContext*);
-	void (*generateaudio)(void *, BufferContext*);
-	int (*hostevent)(void*, int const eventNr, int const val1, float const val2);
-	void (*seqtick)(void*, int channel, const PatternEvent*);
-	void (*sequencertick)(void*); // real sequencer tick
-	void (*sequencerlinetick)(void*); // old tick (line based)
-	// update sequencer events
-	List* (*sequencerinsert)(void*, List* events);
-	void (*setpanning)(void*, amp_t);
-	amp_t (*panning)(void*);
-	void (*mute)(void*);	
-	void (*unmute)(void*);
-	int (*muted)(void*);
-	void (*bypass)(void*);
-	void (*unbypass)(void*);
-	int (*bypassed)(void*);
-	void (*setvalue)(void*, int param, int value);	
-	const MachineInfo* (*info)(void*);
-	void (*dispose)(void*);
-	int (*mode)(void*);	
-	void (*updatesamplerate)(void*, unsigned int samplerate);
-	unsigned int (*numinputs)(void*);
-	unsigned int (*numoutputs)(void*);
-	uintptr_t (*slot)(void*);
-	void (*setslot)(void*, uintptr_t);
+typedef	void (*fp_machine_init)(struct Machine*);
+typedef	struct Machine* (*fp_machine_clone)(struct Machine*);
+typedef	Buffer* (*fp_machine_mix)(struct Machine*, size_t slot, unsigned int amount, MachineSockets*, struct Machines*);
+typedef	void (*fp_machine_work)(struct Machine*, BufferContext*);
+typedef	void (*fp_machine_generateaudio)(struct Machine*, BufferContext*);
+typedef	int (*fp_machine_hostevent)(struct Machine*, int const eventNr, int const val1, float const val2);
+typedef	void (*fp_machine_seqtick)(struct Machine*, int channel, const PatternEvent*);
+typedef	void (*fp_machine_sequencertick)(struct Machine*);
+typedef	void (*fp_machine_sequencerlinetick)(struct Machine*);
+typedef	List* (*fp_machine_sequencerinsert)(struct Machine*, List* events);
+typedef	void (*fp_machine_setpanning)(struct Machine*, amp_t);
+typedef	amp_t (*fp_machine_panning)(struct Machine*);
+typedef	void (*fp_machine_mute)(struct Machine*);	
+typedef	void (*fp_machine_unmute)(struct Machine*);
+typedef	int (*fp_machine_muted)(struct Machine*);
+typedef	void (*fp_machine_bypass)(struct Machine*);
+typedef	void (*fp_machine_unbypass)(struct Machine*);
+typedef	int (*fp_machine_bypassed)(struct Machine*);
+typedef	void (*fp_machine_setvalue)(struct Machine*, int param, int value);	
+typedef	const MachineInfo* (*fp_machine_info)(struct Machine*);
+typedef	void (*fp_machine_dispose)(struct Machine*);
+typedef	int (*fp_machine_mode)(struct Machine*);	
+typedef	void (*fp_machine_updatesamplerate)(struct Machine*, unsigned int samplerate);
+typedef	unsigned int (*fp_machine_numinputs)(struct Machine*);
+typedef	unsigned int (*fp_machine_numoutputs)(struct Machine*);
+typedef	uintptr_t (*fp_machine_slot)(struct Machine*);
+typedef	void (*fp_machine_setslot)(struct Machine*, uintptr_t);
 	// Parameters	
-	int (*parametertype)(void*, int param);
-	unsigned int (*numparameters)(void*);
-	unsigned int (*numparametercols)(void*);
-	void (*parameterrange)(void*, int numparam, int* minval, int* maxval);
-	void (*parametertweak)(void*, int par, int val);	
-	void (*patterntweak)(void*, int par, int val);
-	int (*parameterlabel)(void*, char* txt, int param);
-	int (*parametername)(void*, char* txt, int param);
-	int (*describevalue)(void*, char* txt, int param, int value);
-	int (*parametervalue)(void*, int param);	
-	int (*paramviewoptions)(void*);
+typedef	int (*fp_machine_parametertype)(struct Machine*, int param);
+typedef	unsigned int (*fp_machine_numparameters)(struct Machine*);
+typedef	unsigned int (*fp_machine_numparametercols)(struct Machine*);
+typedef	void (*fp_machine_parameterrange)(struct Machine*, int numparam, int* minval, int* maxval);
+typedef	void (*fp_machine_parametertweak)(struct Machine*, int par, int val);	
+typedef	void (*fp_machine_patterntweak)(struct Machine*, int par, int val);
+typedef	int (*fp_machine_parameterlabel)(struct Machine*, char* txt, int param);
+typedef	int (*fp_machine_parametername)(struct Machine*, char* txt, int param);
+typedef	int (*fp_machine_describevalue)(struct Machine*, char* txt, int param, int value);
+typedef	int (*fp_machine_parametervalue)(struct Machine*, int param);	
+typedef	int (*fp_machine_paramviewoptions)(struct Machine*);
 
-	void (*setcallback)(void*, MachineCallback);
-	void (*loadspecific)(void*, struct SongFile*, unsigned int slot);
-	void (*savespecific)(void*, struct SongFile*, unsigned int slot);
-	int (*haseditor)(void*);
-	void (*seteditorhandle)(void*, void* handle);
-	void (*editorsize)(void*, int* width, int* height);
-	void (*editoridle)(void*);
-	const char* (*editname)(void*);
-	void (*seteditname)(void*, const char* name);
+typedef	void (*fp_machine_setcallback)(struct Machine*, MachineCallback);
+typedef	void (*fp_machine_loadspecific)(struct Machine*, struct SongFile*, unsigned int slot);
+typedef	void (*fp_machine_savespecific)(struct Machine*, struct SongFile*, unsigned int slot);
+typedef	int (*fp_machine_haseditor)(struct Machine*);
+typedef	void (*fp_machine_seteditorhandle)(struct Machine*, void* handle);
+typedef	void (*fp_machine_editorsize)(struct Machine*, int* width, int* height);
+typedef	void (*fp_machine_editoridle)(struct Machine*);
+typedef	const char* (*fp_machine_editname)(struct Machine*);
+typedef	void (*fp_machine_seteditname)(struct Machine*, const char* name);
+// machine callbacks
+typedef	unsigned int (*fp_machine_samplerate)(struct Machine*);
+typedef unsigned int (*fp_machine_bpm)(struct Machine*);	
+typedef	struct Samples* (*fp_machine_samples)(struct Machine*);
+typedef	struct Machines* (*fp_machine_machines)(struct Machine*);
+typedef	struct Instruments* (*fp_machine_instruments)(struct Machine*);
+
+typedef struct MachineVtable {
+	fp_machine_init init;
+	fp_machine_clone clone;
+	fp_machine_mix mix;
+	fp_machine_work work;
+	fp_machine_generateaudio generateaudio;
+	fp_machine_hostevent hostevent;
+	fp_machine_seqtick seqtick;
+	fp_machine_sequencertick sequencertick;
+	fp_machine_sequencerlinetick sequencerlinetick;
+	// update sequencer events
+	fp_machine_sequencerinsert sequencerinsert;
+	fp_machine_setpanning setpanning;
+	fp_machine_panning panning;
+	fp_machine_mute mute;
+	fp_machine_unmute unmute;
+	fp_machine_muted muted;
+	fp_machine_bypass bypass;
+	fp_machine_unbypass unbypass;
+	fp_machine_bypassed bypassed;
+	fp_machine_setvalue setvalue;
+	fp_machine_info info;
+	fp_machine_dispose dispose;
+	fp_machine_mode mode;	
+	fp_machine_updatesamplerate updatesamplerate;
+	fp_machine_numinputs numinputs;
+	fp_machine_numoutputs numoutputs;
+	fp_machine_slot slot;
+	fp_machine_setslot setslot;
+	// Parameters	
+	fp_machine_parametertype parametertype;
+	fp_machine_numparameters numparameters;
+	fp_machine_numparametercols numparametercols;
+	fp_machine_parameterrange parameterrange;
+	fp_machine_parametertweak parametertweak;
+	fp_machine_patterntweak patterntweak;
+	fp_machine_parameterlabel parameterlabel;
+	fp_machine_parametername parametername;
+	fp_machine_describevalue describevalue;
+	fp_machine_parametervalue parametervalue;
+	fp_machine_paramviewoptions paramviewoptions;
+
+	fp_machine_setcallback setcallback;
+	fp_machine_loadspecific loadspecific;
+	fp_machine_savespecific savespecific;
+	fp_machine_haseditor haseditor;
+	fp_machine_seteditorhandle seteditorhandle;
+	fp_machine_editorsize editorsize;
+	fp_machine_editoridle editoridle;
+	fp_machine_editname editname;
+	fp_machine_seteditname seteditname;
 	// machine callbacks
-	unsigned int (*samplerate)(void*);
-	unsigned int (*bpm)(void*);	
-	struct Samples* (*samples)(void*);
-	struct Machines* (*machines)(void*);
-	struct Instruments* (*instruments)(void*);			
+	fp_machine_samplerate samplerate;
+	fp_machine_bpm bpm;
+	fp_machine_samples samples;
+	fp_machine_machines machines;
+	fp_machine_instruments instruments;
 } MachineVtable;
 
 typedef struct Machine {

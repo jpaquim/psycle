@@ -2,6 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "machinefactory.h"
 
@@ -17,6 +18,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#if !defined DIVERSALIS__OS__MICROSOFT
+#define _MAX_PATH 4096
+#endif    
+
+
 
 void machinefactory_init(MachineFactory* self, MachineCallback callback,
 	PluginCatcher* catcher)

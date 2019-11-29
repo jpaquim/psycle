@@ -89,6 +89,7 @@ static void trackerview_showemptydata(TrackerView*, int showstate);
 static int trackerview_numlines(TrackerView*);
 static void trackerview_setclassicheadercoords(TrackerView*);
 static void trackerview_setheadercoords(TrackerView*);
+static void trackerview_setheadertextcoords(TrackerView*);
 static void trackerview_onconfigchanged(TrackerView*, Workspace*, Properties*);
 static void trackerview_readconfig(TrackerView*);
 static void trackerview_oninput(TrackerView*, Player*, PatternEvent*);
@@ -122,6 +123,8 @@ static void trackerview_onpatterneditpositionchanged(TrackerView*,
 
 static void trackerheader_ondraw(TrackerHeader*, ui_component* sender,
 	ui_graphics* g);
+static void trackerheader_onmousedown(TrackerHeader*, ui_component* sender,
+	MouseEvent*);
 
 static void OnLineNumbersLabelDraw(TrackerLineNumbersLabel*,
 	ui_component* sender, ui_graphics*);
@@ -1658,7 +1661,7 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	self->pattern = 0;
 	ui_bitmap_loadresource(&self->skin.bitmap, IDB_HEADERSKIN);
 	trackerview_initdefaultskin(self);	
-	trackerheader_init(&self->header, &self->component);	
+	trackerheader_init(&self->header, &self->component, self);
 	self->header.numtracks = player_numsongtracks(&workspace->player);
 	self->header.trackwidth = self->skin.headercoords.background.destwidth;
 	self->linenumbers.skin = &self->skin;
@@ -1737,11 +1740,11 @@ void trackerview_initdefaultskin(TrackerView* self)
 	trackerview_setclassicheadercoords(self);
 }
 
-void trackerview_setclassicheadercoords(TrackerView* self)
+void trackerview_setheadercoords(TrackerView* self)
 {
 	static SkinCoord background = { 2, 0, 102, 23, 0, 0, 102, 23, 0 };	
 	static SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
-	static SkinCoord mute = { 81, 18, 11, 11, 75, 3, 11, 11, 0 };
+	static SkinCoord mute = { 79, 40, 17, 17, 75, 66, 3, 17, 17 };
 	static SkinCoord solo = { 92, 18, 11, 11, 97, 3, 11, 11, 0 };
 	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
 	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };	
@@ -1754,7 +1757,24 @@ void trackerview_setclassicheadercoords(TrackerView* self)
 	self->skin.headercoords.digitx0 = digitx0;	
 }
 
-void trackerview_setheadercoords(TrackerView* self)
+void trackerview_setclassicheadercoords(TrackerView* self)
+{
+	static SkinCoord background = { 2, 0, 102, 23, 0, 0, 102, 23, 0 };	
+	static SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
+	static SkinCoord mute = { 79, 40, 17, 17, 66, 3, 17, 17, 0 };
+	static SkinCoord solo = { 62, 40, 17, 17, 47, 3, 17, 17, 0 };
+	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
+	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };	
+
+	self->skin.headercoords.background = background;	
+	self->skin.headercoords.record = record;
+	self->skin.headercoords.mute = mute;
+	self->skin.headercoords.solo = solo;
+	self->skin.headercoords.digit0x = digit0x;
+	self->skin.headercoords.digitx0 = digitx0;	
+}
+
+void trackerview_setheadertextcoords(TrackerView* self)
 {
 	SkinCoord background = { 2, 57, 103, 23, 0, 0, 103, 23, 0 };
 	SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
@@ -1805,12 +1825,16 @@ void trackerview_onalign(TrackerView* self, ui_component* sender)
 		linenumberwidth, headerheight);	
 }
 
-void trackerheader_init(TrackerHeader* self, ui_component* parent)
+void trackerheader_init(TrackerHeader* self, ui_component* parent,
+	TrackerView* view)
 {		
+	self->view = view;
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	signal_connect(&self->component.signal_draw, self, trackerheader_ondraw);
+	signal_connect(&self->component.signal_mousedown, self,
+		trackerheader_onmousedown);
 	self->dx = 0;
 	self->numtracks = 16;
 	self->trackwidth = 102;
@@ -1822,7 +1846,7 @@ void trackerheader_ondraw(TrackerHeader* self, ui_component* sender, ui_graphics
 	ui_size size;
 	ui_rectangle r;
 	int cpx = self->dx;
-	unsigned int track;
+	uintptr_t track;
 
 	size = ui_component_size(&self->component);
 	ui_setrectangle(&r, 0, 0, size.width, size.height);		
@@ -1835,12 +1859,68 @@ void trackerheader_ondraw(TrackerHeader* self, ui_component* sender, ui_graphics
 		SkinCoord digit0x = self->skin->headercoords.digit0x;		
 		digitx0.srcx += trackx0 * digitx0.srcwidth;
 		digit0x.srcx += track0x * digit0x.srcwidth;
-		skin_blitpart(g, &self->skin->bitmap, cpx, 0, 
+		skin_blitpart(g, &self->skin->bitmap, cpx, 0,
 			&self->skin->headercoords.background);
 		skin_blitpart(g, &self->skin->bitmap, cpx, 0, &digitx0);
 		skin_blitpart(g, &self->skin->bitmap, cpx, 0, &digit0x);
+		if (self->view->workspace->song) {
+			if (patterns_istrackmuted(&self->view->workspace->song->patterns,
+					track)) {
+				skin_blitpart(g, &self->skin->bitmap, cpx, 0,
+					&self->skin->headercoords.mute);
+			}
+			if (patterns_istracksoloed(&self->view->workspace->song->patterns,
+					track)) {
+				skin_blitpart(g, &self->skin->bitmap, cpx, 0,
+					&self->skin->headercoords.solo);
+			}
+		}
 		cpx += self->trackwidth;
 	}		
+}
+
+void trackerheader_onmousedown(TrackerHeader* self, ui_component* sender,
+	MouseEvent* ev)
+{
+	if (self->view->workspace->song) {
+		ui_rectangle r;
+		uintptr_t track;
+
+		track = (ev->x - self->dx) / self->trackwidth;
+		ui_setrectangle(&r,
+			self->skin->headercoords.mute.destx + track * self->trackwidth,
+			self->skin->headercoords.mute.desty,
+			self->skin->headercoords.mute.destwidth,
+			self->skin->headercoords.mute.destheight);
+		if (ui_rectangle_intersect(&r, ev->x - self->dx, ev->y)) {
+			if (patterns_istrackmuted(&self->view->workspace->song->patterns,
+					track)) {
+				patterns_unmutetrack(&self->view->workspace->song->patterns,
+					track);
+			} else {
+				patterns_mutetrack(&self->view->workspace->song->patterns,
+					track);
+			}
+			ui_component_invalidate(&self->component);
+		}
+		ui_setrectangle(&r,
+			self->skin->headercoords.solo.destx + track * self->trackwidth,
+			self->skin->headercoords.solo.desty,
+			self->skin->headercoords.solo.destwidth,
+			self->skin->headercoords.solo.destheight);
+
+		if (ui_rectangle_intersect(&r, ev->x - self->dx, ev->y)) {
+			if (patterns_istracksoloed(&self->view->workspace->song->patterns,
+					track)) {
+				patterns_deactivatesolotrack(
+					&self->view->workspace->song->patterns);
+			} else {
+				patterns_activatesolotrack(
+					&self->view->workspace->song->patterns, track);
+			}
+			ui_component_invalidate(&self->component);
+		}
+	}
 }
 
 void trackerlinenumbers_init(TrackerLineNumbers* self, ui_component* parent,
@@ -1852,7 +1932,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, ui_component* parent,
 	ui_component_setbackgroundcolor(&self->component, 
 		self->view->skin.background);
 	signal_connect(&self->component.signal_draw, self,
-		trackerlinenumbers_ondraw);
+		trackerlinenumbers_ondraw);	
 	self->dy = 0;
 	self->textheight = 12;
 	self->lineheight = self->textheight + 1;

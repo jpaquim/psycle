@@ -39,8 +39,7 @@ typedef struct Machines {
 	float volume;	
 	Signal signal_insert;
 	Signal signal_removed;
-	Signal signal_slotchange;
-	Signal signal_showparameters;
+	Signal signal_slotchange;	
 	Machine* master;
 } Machines;
 
@@ -68,7 +67,6 @@ void machines_insertmaster(Machines*, Machine*);
 Machine* machines_master(Machines*);
 void machines_startfilemode(Machines*);
 void machines_endfilemode(Machines*);
-void machines_showparameters(Machines*, uintptr_t slot);
 void machines_setvolume(Machines*, amp_t volume);
 amp_t machines_volume(Machines*);
 TableIterator machines_begin(Machines*);

@@ -64,7 +64,7 @@ static void machinewireview_onmachinesremoved(MachineWireView*, Machines*, uintp
 static void machinewireview_onsongchanged(MachineWireView*, Workspace*);
 static void machinewireview_updatemachineuis(MachineWireView*, Properties* );
 static void machinewireview_applyproperties(MachineWireView*, Properties*);
-static void machinewireview_onshowparameters(MachineWireView*, Machines*, uintptr_t slot);
+static void machinewireview_onshowparameters(MachineWireView*, Workspace*, uintptr_t slot);
 static void machinewireview_onmachineworked(MachineWireView*, Machine*, uintptr_t slot,
 	BufferContext*);
 static void machinewireview_ontimer(MachineWireView*, ui_component* sender, int timerid);
@@ -349,6 +349,7 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 	machinewireview_connectmachinessignals(self);
 	signal_connect(&workspace->signal_configchanged, self, machinewireview_onconfigchanged);
 	signal_connect(&workspace->signal_beforesavesong, self, machinewireview_beforesavesong);
+	signal_connect(&workspace->signal_showparameters, self,machinewireview_onshowparameters);
 	ui_edit_init(&self->editname, &self->component, 0);
 	ui_component_hide(&self->editname.component);
 	ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
@@ -375,8 +376,7 @@ void machinewireview_connectmachinessignals(MachineWireView* self)
 {
 	signal_connect(&self->machines->signal_slotchange, self,machinewireview_onmachineschangeslot);
 	signal_connect(&self->machines->signal_insert, self,machinewireview_onmachinesinsert);
-	signal_connect(&self->machines->signal_removed, self,machinewireview_onmachinesremoved);
-	signal_connect(&self->machines->signal_showparameters, self,machinewireview_onshowparameters);
+	signal_connect(&self->machines->signal_removed, self,machinewireview_onmachinesremoved);	
 }
 
 void machinewireview_ondestroy(MachineWireView* self, ui_component* component)
@@ -703,7 +703,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self, ui_component* sen
 	machinewireview_hittest(self, ev->x, ev->y);
 	if (self->dragslot == NOMACHINE_INDEX) {
 		self->selectedwire = machinewireview_hittestwire(self, ev->x, ev->y);
-		if (self->selectedwire.dst != NOMACHINE_INDEX) {
+		if (self->selectedwire.dst != NOMACHINE_INDEX) {			
 			machinewireview_showwireview(self, self->selectedwire);
 			ui_component_invalidate(&self->component);
 		} else {
@@ -715,7 +715,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self, ui_component* sen
 			machineui_editname(machineuis_at(self, self->dragslot), &self->editname);
 		}
 	} else {
-		machines_showparameters(self->machines, self->dragslot);
+		workspace_showparameters(self->workspace, self->dragslot);
 	}
 	self->dragslot = NOMACHINE_INDEX;
 }
@@ -1130,7 +1130,8 @@ void machinewireview_onsongchanged(MachineWireView* self, Workspace* workspace)
 	ui_component_invalidate(&self->component);	
 }
 
-void machinewireview_onshowparameters(MachineWireView* self, Machines* sender, uintptr_t slot)
+void machinewireview_onshowparameters(MachineWireView* self, Workspace* sender,
+	uintptr_t slot)
 {	
 	if (machineuis_at(self, slot)) {
 		machineui_showparameters(machineuis_at(self, slot), &self->component);
@@ -1349,7 +1350,8 @@ void machineview_onhide(MachineView* self, ui_component* sender)
 void machineview_onmousedoubleclick(MachineView* self, ui_component* sender,
 	int x, int y, int button)
 {	
-	tabbar_select(&self->tabbar, 1);		
+	self->newmachine.pluginsview.calledby = 0;
+	tabbar_select(&self->tabbar, 1);
 }
 
 void machineview_onkeydown(MachineView* self, ui_component* sender, KeyEvent* keyevent)
@@ -1379,13 +1381,13 @@ void machinewireview_onnewmachineselected(MachineView* self, ui_component* sende
 		&self->workspace->machinefactory, 
 		properties_int(plugininfo, "type", NOMACHINE_INDEX), path);
 	if (machine) {		
-		if (self->newmachine.pluginsview.calledbygear) {
+		if (self->newmachine.pluginsview.calledby == 10) {
 			machines_insert(self->wireview.machines,
 				machines_slot(self->wireview.machines), machine);
 		} else {
 			machines_changeslot(self->wireview.machines,
 				machines_append(self->wireview.machines, machine));
 		}
-		tabbar_select(&self->tabbar, 0);			
+		tabbar_select(&self->tabbar, 0);
 	}	
 }

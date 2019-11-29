@@ -53,7 +53,20 @@ typedef struct {
 void sequenceposition_init(SequencePosition*);
 SequenceEntry* sequenceposition_entry(SequencePosition*);
 
-typedef struct {
+typedef enum {
+	SELECTIONMODE_SINGLE,
+	SELECTIONMODE_MULTI
+} SelectionMode;
+
+typedef struct SequenceSelection {
+	struct Sequence* sequence;	
+	SequencePosition editposition;
+	Signal signal_editpositionchanged;
+	List* entries;
+	SelectionMode selectionmode;
+} SequenceSelection;
+
+typedef struct Sequence {
 	SequenceTracks* tracks;
 	Patterns* patterns;	
 } Sequence;
@@ -77,19 +90,6 @@ beat_t sequence_duration(Sequence*);
 SequencePosition sequence_makeposition(Sequence*, SequenceTracks*, List* entries);
 void sequence_setplayselection(Sequence*, struct SequenceSelection*);
 void sequence_clearplayselection(Sequence*);
-
-typedef enum {
-	SELECTIONMODE_SINGLE,
-	SELECTIONMODE_MULTI
-} SelectionMode;
-
-typedef struct SequenceSelection {
-	Sequence* sequence;	
-	SequencePosition editposition;
-	Signal signal_editpositionchanged;
-	List* entries;
-	SelectionMode selectionmode;
-} SequenceSelection;
 
 void sequenceselection_init(SequenceSelection*, Sequence*);
 void sequenceselection_seteditposition(SequenceSelection*, SequencePosition);

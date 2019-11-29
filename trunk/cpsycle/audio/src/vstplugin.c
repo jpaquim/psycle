@@ -2,11 +2,17 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "vstplugin.h"
+#if defined(__GNUC__)
+#define _inline inline
+#endif
 #include "aeffectx.h"
 #include <stdlib.h>
+#if defined DIVERSALIS__OS__MICROSOFT
 #include <excpt.h>
+#endif
 #include <operations.h>
 #include "pattern.h"
 
@@ -50,26 +56,26 @@ static void vtable_init(VstPlugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
-		vtable.mode = mode;
-		vtable.work = work;
-		vtable.hostevent = hostevent;	
-		vtable.info = info;
-		vtable.parametertype = parametertype;
-		vtable.parameterrange = parameterrange;
-		vtable.parametertweak = parametertweak;
-		vtable.parameterlabel = parameterlabel;
-		vtable.parametername = parametername;
-		vtable.describevalue = describevalue;	
-		vtable.parametervalue = parametervalue;
-		vtable.numparameters = numparameters;
-		vtable.numparametercols = numparametercols;	
-		vtable.dispose = dispose;
-		vtable.numinputs = numinputs;
-		vtable.numoutputs = numoutputs;		
-		vtable.haseditor = haseditor;
-		vtable.seteditorhandle = seteditorhandle;
-		vtable.editorsize = editorsize;
-		vtable.editoridle = editoridle;
+		vtable.mode = (fp_machine_mode) mode;
+		vtable.work = (fp_machine_work) work;
+		vtable.hostevent = (fp_machine_hostevent) hostevent;	
+		vtable.info = (fp_machine_info) info;
+		vtable.parametertype = (fp_machine_parametertype) parametertype;
+		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
+		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
+		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
+		vtable.parametername = (fp_machine_parametername) parametername;
+		vtable.describevalue = (fp_machine_describevalue) describevalue;	
+		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
+		vtable.numparameters = (fp_machine_numparameters) numparameters;
+		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;	
+		vtable.dispose = (fp_machine_dispose) dispose;
+		vtable.numinputs = (fp_machine_numinputs) numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;		
+		vtable.haseditor = (fp_machine_haseditor) haseditor;
+		vtable.seteditorhandle = (fp_machine_seteditorhandle) seteditorhandle;
+		vtable.editorsize = (fp_machine_editorsize) editorsize;
+		vtable.editoridle = (fp_machine_editoridle) editoridle;
 		vtable_initialized = 1;
 	}
 }
@@ -259,10 +265,12 @@ int hostevent(VstPlugin* self, int const eventNr, int const val1, float const va
 	return 0;
 }
 
+#if defined DIVERSALIS__OS__MICROSOFT
 static int FilterException(int code, struct _EXCEPTION_POINTERS *ep) 
 {
 	return EXCEPTION_EXECUTE_HANDLER;
 }
+#endif
 
 int machineinfo(AEffect* effect, MachineInfo* info, const char* path,
 	int shellidx)
@@ -272,7 +280,10 @@ int machineinfo(AEffect* effect, MachineInfo* info, const char* path,
 	char productString[256] = {0};
 	int err = 0;
 
-	__try {
+#if defined DIVERSALIS__OS__MICROSOFT    
+	__try
+#endif   
+    {
 		effect->dispatcher (effect, effGetEffectName, 0, 0, effectName, 0);
 		effect->dispatcher (effect, effGetVendorString, 0, 0, vendorString, 0);
 		effect->dispatcher (effect, effGetProductString, 0, 0, productString, 0);
@@ -289,9 +300,11 @@ int machineinfo(AEffect* effect, MachineInfo* info, const char* path,
 			path,
 			shellidx);		
 	}
+#if defined DIVERSALIS__OS__MICROSOFT        	
 	__except(FilterException(GetExceptionCode(), GetExceptionInformation())) {		
 		err = GetExceptionCode();
 	}
+#endif	
 	return err;
 }
 

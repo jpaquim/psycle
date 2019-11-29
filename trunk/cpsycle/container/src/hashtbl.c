@@ -37,6 +37,12 @@ void table_dispose(Table* self)
   self->count = 0;
 }
 
+void table_clear(Table* self)
+{
+	table_dispose(self);
+	table_init(self);
+}
+
 void table_insert(Table* self, uintptr_t k, void* value)
 {
 	uintptr_t hn;

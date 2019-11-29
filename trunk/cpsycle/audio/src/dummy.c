@@ -38,10 +38,11 @@ static void vtable_init(DummyMachine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.machine.vtable;
-		vtable.mode = mode;
-		vtable.info = info;
-		vtable.numinputs = numinputs;
-		vtable.numoutputs = numoutputs;
+		vtable.mode = (fp_machine_mode) mode;
+		vtable.info = (fp_machine_info) info;
+		vtable.numinputs = (fp_machine_numinputs) numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable_initialized = 1;
 	}
 }
 

@@ -14,6 +14,6 @@ typedef struct {
 void xminstruments_init(XMInstruments*);
 void xminstruments_dispose(XMInstruments*);
 void xminstruments_insert(XMInstruments*, XMInstrument*, int slot);
-size_t xminstruments_size(XMInstruments*);
+uintptr_t xminstruments_size(XMInstruments*);
 
 #endif

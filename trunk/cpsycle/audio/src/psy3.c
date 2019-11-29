@@ -15,6 +15,10 @@
 #include <string.h>
 #include <portable.h>
 
+#if !defined DIVERSALIS__OS__MICROSOFT
+#define _MAX_PATH 4096
+#endif
+
 #if !defined(FALSE)
 #define FALSE 0
 #endif
@@ -53,7 +57,7 @@ static void psy3_saveinstrumentfilechunk(SongFile*, Instrument* instrument);
 static void psy3_savesample(SongFile*, Sample*);
 static short* psy3_floatbuffertoshort(float* buffer, uintptr_t numframes);
 
-void psy3_load(SongFile* self)
+void psy3_load(struct SongFile* self)
 {
 	char header[9];	
 	uint32_t index = 0;
@@ -962,7 +966,7 @@ void makeplugincatchername(const char* modulename, char* catchername)
 	}
 }
 
-void psy3_save(SongFile* self)
+void psy3_save(struct SongFile* self)
 {
 	uint32_t chunkcount;
 
