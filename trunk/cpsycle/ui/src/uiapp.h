@@ -4,12 +4,22 @@
 #if !defined(UIAPP_H)
 #define UIAPP_H
 
-#define WIN32_LEAN_AND_MEAN
-#define UIMAIN int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,\
- PSTR szCmdLine, int iCmdShow)
-#define UIINIT ui_init(hInstance)
-#define UIDISPOSE ui_dispose()
+#include "../../detail/stdint.h"
+#include "../../detail/os.h"
+#include "hashtbl.h"
 
+#if defined (DIVERSALIS__OS__MICROSOFT)
+
+#define WIN32_LEAN_AND_MEAN
+#define UIMAIN int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
+#define UIINIT ui_init((uintptr_t) hInstance)
+void ui_init(uintptr_t hInstance);
+#else
+#define UIMAIN int main(int argc, char **argv)
+#define UIINIT ui_init()
+void ui_init(void);
+#endif
+void ui_dispose();
 int ui_run(void);
 void ui_quit(void);
 

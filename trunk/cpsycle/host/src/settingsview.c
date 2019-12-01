@@ -52,7 +52,8 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	signal_connect(&self->client.signal_scroll, self, OnScroll);
 	signal_connect(&self->client.signal_keydown, self, OnKeyDown);
 	signal_connect(&self->client.signal_mousedown, self, OnMouseDown);
-	signal_connect(&self->client.signal_mousedoubleclick, self, OnMouseDoubleClick);
+	signal_connect(&self->client.signal_mousedoubleclick, self,
+		OnMouseDoubleClick);
 	signal_connect(&self->component.signal_size, self, OnSize);	
 	self->selected = 0;
 	self->choiceproperty = 0;
@@ -73,7 +74,8 @@ void AppendTabbarSections(SettingsView* self)
 {	
 	Properties* p;	
 	
-	for (p = self->properties->children; p != 0; p = properties_next(p)) {
+	for (p = self->properties->children; p != 0;
+			p = properties_next(p)) {
 		if (properties_type(p) == PROPERTY_TYP_SECTION) {
 			tabbar_append(&self->tabbar, properties_text(p));			
 		}		
@@ -99,7 +101,7 @@ void OnDraw(SettingsView* self, ui_component* sender, ui_graphics* g)
 
 void PreparePropertiesEnum(SettingsView* self)
 {
-	TEXTMETRIC tm;
+	ui_textmetric tm;
 	
 	tm = ui_component_textmetric(&self->client);
 	self->lineheight = (int) (tm.tmHeight * 1.5);
@@ -164,7 +166,7 @@ void DrawLineBackground(SettingsView* self, Properties* property)
 		size = ui_component_size(&self->client);
 		ui_setrectangle(&r, 10, self->cpy + self->dy, size.width - 20,
 			self->lineheight);
-		ui_drawsolidrectangle(self->g, r, 0x00333333);
+		ui_drawsolidrectangle(self->g, r, 0x00292929);
 	}
 }
 
@@ -265,22 +267,42 @@ void DrawCheckBox(SettingsView* self, Properties* property, int column)
 {
 	ui_rectangle r;
 	int checked = 0;
-	ui_size size;	
-	
-	size = ui_component_textsize(&self->client, "x");
+	ui_textmetric tm;
+	ui_size size;
+	ui_size cornersize;
+	ui_size knobsize;
+		
+	tm = ui_component_textmetric(&self->component);
+	size.width = tm.tmAveCharWidth * 4;
+	size.height = tm.tmHeight;
+	knobsize.width = (int) (tm.tmAveCharWidth * 2);
+	knobsize.height = (int) (tm.tmHeight * 0.7 + 0.5);
+	cornersize.width = (int) (tm.tmAveCharWidth * 0.6);
+	cornersize.height = (int) (tm.tmHeight * 0.6);
 	r.left = self->columnwidth * column;
-	r.top = self->cpy + self->dy;
-	r.right = r.left + size.width + 5;
-	r.bottom = r.top + size.height + 2;
+	r.top = self->cpy + self->dy + (self->lineheight - size.height) / 2;
+	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
+	r.bottom = r.top + size.height;
+	ui_setcolor(self->g, 0x00555555);
+	ui_drawroundrectangle(self->g, r, cornersize);
 	if (properties_ischoiceitem(property)) {
 		checked = self->currchoice == self->choicecount;
 	} else {
 		checked = properties_value(property) != 0;
 	}
-	if (checked) {
-		ui_textout(self->g, r.left + 3, r.top - 1, "x", strlen("x"));			
-	}
-	ui_drawrectangle(self->g, r);
+	if (!checked) {
+		r.left = self->columnwidth * column + (int)(tm.tmAveCharWidth * 0.4);
+		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
+		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
+		r.bottom = r.top + knobsize.height;
+		ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00555555);
+	} else {
+		r.left = self->columnwidth * column + tm.tmAveCharWidth * 2;
+		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
+		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
+		r.bottom = r.top + knobsize.height;
+		ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00CACACA);
+	}	
 }
 
 void OnKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
@@ -393,12 +415,14 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 	if (properties_type(property) == PROPERTY_TYP_BOOL) {					
 		ui_rectangle r;
 		int checked = 0;
-		ui_size size;	
+		ui_size size;
+		ui_textmetric tm;
 		
+		tm = ui_component_textmetric(&self->component);
 		size = ui_component_textsize(&self->client, "x");
 		r.left = self->columnwidth * column;
 		r.top = self->cpy + self->dy;
-		r.right = r.left + size.width + 5;
+		r.right = r.left + tm.tmAveCharWidth * 4;;
 		r.bottom = r.top + size.height + 2;
 	
 		rv = Intersects(&r, self->mx, self->my);		

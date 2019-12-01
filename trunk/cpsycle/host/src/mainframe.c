@@ -56,6 +56,7 @@ static void mainframe_onviewselected(MainFrame*, Workspace*,
 static void mainframe_onrender(MainFrame*, ui_component* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, ui_component* sender, int timerid);
+static void mainframe_maximizeorminimizeview(MainFrame*);
 
 HWND hwndmain;
 
@@ -281,7 +282,7 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	ui_size vusize;
 	ui_size topsize;	
 	ui_size limit;
-	int splitbarwidth = 4;	
+	int splitbarwidth = 4;
 	
 	size = ui_component_size(&self->component);
 	statusbarsize = ui_component_preferredsize(&self->statusbar, &size);
@@ -295,7 +296,8 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	}		
 	limit.width = size.width - vusize.width;
 	limit.height = size.height;
-	topsize = ui_component_preferredsize(&self->top, &limit);	
+	topsize = ui_component_preferredsize(&self->top, &limit);
+	topsize.height += ui_component_textmetric(&self->component).tmHeight;
 	ui_component_setposition(&self->top, 0, 0, size.width - vusize.width,
 		topsize.height);
 	ui_component_setposition(&self->vubar.component, 
@@ -376,6 +378,9 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 		workspace_showparameters(&self->workspace,
 			machines_slot(&self->workspace.song->machines));
 	} else
+	if (keyevent->ctrl && keyevent->keycode == VK_TAB) {
+		mainframe_maximizeorminimizeview(self);
+	} else
 	if (keyevent->shift && keyevent->keycode == VK_RIGHT) {
 		if (self->workspace.song) {						
 			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
@@ -427,6 +432,35 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 	}
 }
 
+void mainframe_maximizeorminimizeview(MainFrame* self)
+{
+	if (self->workspace.maximizeview.maximized) {
+		self->workspace.maximizeview.maximized = 0;
+		if (self->workspace.maximizeview.row0) {
+			ui_component_show(&self->toprow0);
+		}
+		if (self->workspace.maximizeview.row1) {
+			ui_component_show(&self->toprow1);
+		}
+		if (self->workspace.maximizeview.row2) {
+			ui_component_show(&self->toprow2);
+		}
+		ui_component_resize(&self->sequenceview.component, 
+			self->workspace.maximizeview.sequenceviewrestorewidth, 0);
+	} else {
+		self->workspace.maximizeview.maximized = 1;
+		self->workspace.maximizeview.row0 = self->toprow0.visible;
+		self->workspace.maximizeview.row1 = self->toprow1.visible;
+		self->workspace.maximizeview.row2 = self->toprow2.visible;
+		self->workspace.maximizeview.sequenceviewrestorewidth =
+			ui_component_size(&self->sequenceview.component).width;
+		ui_component_hide(&self->toprow0);
+		ui_component_hide(&self->toprow1);
+		ui_component_resize(&self->sequenceview.component, 0, 0);			
+	}
+	ui_component_align(&self->component);
+}
+
 void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
 {
 	ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
@@ -471,7 +505,8 @@ void mainframe_updatetitle(MainFrame* self)
 void mainframe_onmousedown(MainFrame* self, ui_component* sender, MouseEvent* ev)
 {	
 	ui_component_capture(sender);
-	self->resize = 1;	
+	self->resize = 1;
+	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
 }
 
 void mainframe_onmousemove(MainFrame* self, ui_component* sender, MouseEvent* ev)
@@ -484,8 +519,9 @@ void mainframe_onmousemove(MainFrame* self, ui_component* sender, MouseEvent* ev
 		position = ui_component_position(sender);
 		ui_component_move(sender, position.left + ev->x, toolbarsize.height);
 		ui_component_invalidate(sender);
-		ui_component_update(sender);
+		ui_component_update(sender);		
 	}
+	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
 }
 
 void mainframe_onmouseup(MainFrame* self, ui_component* sender, MouseEvent* ev)
@@ -497,13 +533,15 @@ void mainframe_onmouseup(MainFrame* self, ui_component* sender, MouseEvent* ev)
 	position = ui_component_position(sender);
 	ui_component_resize(&self->sequenceview.component,
 		position.left, ui_component_size(&self->sequenceview.component).height);	
-	ui_component_align(&self->component);	
+	ui_component_align(&self->component);
+	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
 }
 
 void mainframe_onmouseentersplitbar(MainFrame* self, ui_component* sender)
 {	
 	ui_component_setbackgroundcolor(sender, 0x00666666);
 	ui_component_invalidate(sender);
+	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
 }
 
 void mainframe_onmouseleavesplitbar(MainFrame* self, ui_component* sender)

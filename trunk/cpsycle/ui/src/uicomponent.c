@@ -19,14 +19,14 @@ int iDeltaPerLine = 120;
 TCHAR szAppClass[] = TEXT("PsycleApp");
 static TCHAR szComponentClass[] = TEXT("PsycleComponent");
 static uintptr_t winid = 20000;
-static Table selfmap;
-static Table winidmap;
 static ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
 static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
 static int tracking = 0;
 
+static Table selfmap;
+static Table winidmap;
 extern Table menumap;
 
 static LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
@@ -42,7 +42,7 @@ static void enableinput(ui_component* self, int enable, int recursive);
 static void onpreferredsize(ui_component*, ui_component* sender, 
 	ui_size* limit, ui_size* rv);
 
-void ui_init(HINSTANCE hInstance)
+void ui_init(uintptr_t hInstance)
 {
 	WNDCLASS     wndclass ;
 	INITCOMMONCONTROLSEX icex;
@@ -54,9 +54,9 @@ void ui_init(HINSTANCE hInstance)
 
 	wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
     wndclass.lpfnWndProc   = ui_winproc ;
-    wndclass.cbClsExtra    = 0 ;
-    wndclass.cbWndExtra    = 0 ;
-    wndclass.hInstance     = hInstance ;
+    wndclass.cbClsExtra    = 0;
+    wndclass.cbWndExtra    = 0;
+    wndclass.hInstance     = (HINSTANCE) hInstance ;
     wndclass.hIcon         = LoadIcon (NULL, IDI_APPLICATION) ;
     wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
     wndclass.hbrBackground = (HBRUSH) GetStockObject (NULL_BRUSH) ;
@@ -72,7 +72,7 @@ void ui_init(HINSTANCE hInstance)
 	wndclass.lpfnWndProc   = ui_winproc;
 	wndclass.cbClsExtra    = 0;
 	wndclass.cbWndExtra    = sizeof (long); 
-	wndclass.hInstance     = hInstance;
+	wndclass.hInstance     = (HINSTANCE) hInstance;
 	wndclass.hIcon         = NULL;
 	wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW);
 	wndclass.hbrBackground = (HBRUSH) GetStockObject (NULL_BRUSH);
@@ -86,7 +86,7 @@ void ui_init(HINSTANCE hInstance)
     icex.dwICC = ICC_USEREX_CLASSES;
     succ = InitCommonControlsEx(&icex);        
 
-	appInstance = hInstance;		
+	appInstance = (HINSTANCE) hInstance;
 	
 	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
 	ui_font_init(&defaultfont, &fontinfo);	
@@ -100,6 +100,7 @@ void ui_dispose()
 	DeleteObject(defaultfont.hfont);
 	DeleteObject(defaultbackgroundbrush);
 }
+
 
 void ui_replacedefaultfont(ui_component* main, ui_font* font)
 {		
@@ -241,6 +242,7 @@ void ui_component_init_base(ui_component* self) {
 	self->backgroundcolor = defaultbackgroundcolor;
 	self->background = 0;
 	self->color = defaultcolor;
+	self->cursor = UI_CURSOR_DEFAULT;
 	ui_component_setfont(self, &defaultfont);
 	ui_component_setbackgroundcolor(self, self->backgroundcolor);
 	signal_connect(&self->signal_preferredsize, self, onpreferredsize);
@@ -1568,7 +1570,7 @@ ui_size ui_component_preferredsize(ui_component* self, ui_size* limit)
 	return rv;	
 }
 
-TEXTMETRIC ui_component_textmetric(ui_component* self)
+ui_textmetric ui_component_textmetric(ui_component* self)
 {			
 	TEXTMETRIC tm;
 	HDC hdc;		

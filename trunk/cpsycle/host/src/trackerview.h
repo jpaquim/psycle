@@ -138,7 +138,7 @@ typedef struct {
    struct TrackerView* view;
    PatternSelection selection;
    int hasselection;
-   int midline;
+   int midline;   
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, ui_component* parent, struct TrackerView*,

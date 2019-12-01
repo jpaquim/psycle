@@ -162,7 +162,7 @@ void pluginsview_drawitem(PluginsView* self, ui_graphics* g,
 
 void pluginsview_computetextsizes(PluginsView* self)
 {
-	TEXTMETRIC tm;
+	ui_textmetric tm;
 	ui_size size;
 	
 	size = ui_component_size(&self->component);

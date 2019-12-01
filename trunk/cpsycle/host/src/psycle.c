@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 UIMAIN
-{    	
+{
 	MainFrame mainframe;
 	int err = 0;	
 	char workpath[_MAX_PATH];
@@ -18,8 +18,8 @@ UIMAIN
 	env = pathenv();	
 	if (env) {			
 		insertpathenv(workdir(workpath));
-	}
-	UIINIT;
+	}	
+	UIINIT;	
 	mainframe_init(&mainframe);	
 	if (mainframe_showmaximizedatstart(&mainframe)) {
 		ui_component_show_state(&mainframe.component, SW_MAXIMIZE);
@@ -27,7 +27,7 @@ UIMAIN
 		ui_component_show_state(&mainframe.component, iCmdShow);
 	}
 	err = ui_run();	
-	UIDISPOSE;
+	ui_dispose();
 	if (env) {
 		setpathenv(env);
 	}	

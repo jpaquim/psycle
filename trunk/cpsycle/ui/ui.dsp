@@ -163,6 +163,10 @@ SOURCE=.\src\uislider.c
 
 SOURCE=.\src\uistatusbar.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\uiswitch.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -246,6 +250,10 @@ SOURCE=.\src\uislider.h
 # Begin Source File
 
 SOURCE=.\src\uistatusbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiswitch.h
 # End Source File
 # End Group
 # End Target

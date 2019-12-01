@@ -25,8 +25,13 @@ void ui_textout(ui_graphics*, int x, int y,  const char*, size_t len);
 void ui_textoutrectangle(ui_graphics* g, int x, int y, unsigned int options,
 	ui_rectangle r, const char* text, size_t len);
 void ui_drawrectangle(ui_graphics*, const ui_rectangle);
+void ui_drawroundrectangle(ui_graphics*, const ui_rectangle,
+	ui_size cornersize);
 ui_size ui_textsize(ui_graphics*, const char*);
-void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r, unsigned int color);
+void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r,
+	unsigned int color);
+void ui_drawsolidroundrectangle(ui_graphics* self, const ui_rectangle r,
+	ui_size cornersize, unsigned int color);
 void ui_drawsolidpolygon(ui_graphics* g, ui_point* , unsigned int numpoints, 
 	unsigned int inner, unsigned int outter);
 void ui_drawline(ui_graphics* g, int x1, int y1, int x2, int y2);			

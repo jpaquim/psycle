@@ -59,15 +59,47 @@ void ui_drawrectangle(ui_graphics* self, const ui_rectangle r)
 	SelectObject (self->hdc, hOldBrush);
 }
 
+void ui_drawroundrectangle(ui_graphics* self, const ui_rectangle r, ui_size cornersize)
+{
+	HBRUSH hBrush;
+	HBRUSH hOldBrush;
+
+	hBrush = GetStockObject (NULL_BRUSH);
+	hOldBrush = SelectObject (self->hdc, hBrush);
+	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom, cornersize.width,
+		cornersize.height);
+	SelectObject (self->hdc, hOldBrush);
+}
+
 void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r, unsigned int color)
 {
      HBRUSH hBrush;     
      RECT   rect;	 
 	                
      SetRect (&rect, r.left, r.top, r.right, r.bottom) ;     
-     hBrush = CreateSolidBrush(color) ;     
+     hBrush = CreateSolidBrush(color);
      FillRect (g->hdc, &rect, hBrush);     
      DeleteObject (hBrush) ;
+}
+
+void ui_drawsolidroundrectangle(ui_graphics* self, const ui_rectangle r,
+	ui_size cornersize, unsigned int color)
+{
+	HBRUSH hBrush;
+	HBRUSH hOldBrush;
+	HPEN hPen;
+	HPEN hOldPen;
+
+	hBrush = CreateSolidBrush(color);
+	hOldBrush = SelectObject (self->hdc, hBrush);
+	hPen = CreatePen(PS_SOLID, 1, color);
+	hOldPen = SelectObject(self->hdc, hPen);
+	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom, cornersize.width,
+		cornersize.height);
+	SelectObject (self->hdc, hOldBrush);
+	SelectObject (self->hdc, hOldPen);
+	DeleteObject (hBrush) ;
+	DeleteObject (hPen) ;
 }
 
 void ui_drawsolidpolygon(ui_graphics* g, ui_point* pts, unsigned int numpoints, 

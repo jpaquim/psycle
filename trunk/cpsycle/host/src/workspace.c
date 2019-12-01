@@ -69,6 +69,10 @@ void workspace_init(Workspace* self, void* handle)
 	self->mainhandle = handle;
 	self->filename = strdup("Untitled.psy");
 	self->lastentry = 0;
+	self->maximizeview.maximized = 0;
+	self->maximizeview.row0 = 1;
+	self->maximizeview.row1 = 1;
+	self->maximizeview.row2 = 1;
 	workspace_makeconfig(self);
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);

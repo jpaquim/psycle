@@ -1,24 +1,16 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#include "../../detail/prefix.h"
+#if !defined(UISWITCH_H)
+#define UISWITCH_H
 
-#include "uiapp.h"
-#include <windows.h>
+#include "uicomponent.h"
 
-int ui_run(void) 
-{
-	MSG msg; 
+typedef struct {
+	ui_component component;
+	Signal signal_clicked;    
+} ui_switch;
 
-	while (GetMessage (&msg, NULL, 0, 0))
-    {
-          TranslateMessage (&msg) ;
-          DispatchMessage (&msg) ;
-    }
-    return (int) msg.wParam ;
-}
+void ui_switch_init(ui_switch*, ui_component* parent);
 
-void ui_quit(void)
-{
-	PostQuitMessage(0);
-}
+#endif
