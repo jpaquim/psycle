@@ -73,7 +73,7 @@ void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit,
 {			
 	if (rv) {
 		char text[256];
-		TEXTMETRIC tm;
+		ui_textmetric tm;
 		
 		tm = ui_component_textmetric(&self->component);	
 		if (self->charnumber == 0) {

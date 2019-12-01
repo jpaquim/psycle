@@ -83,6 +83,7 @@ typedef struct SequenceView {
 	SequenceViewDuration duration;
 	ui_checkbox followsong;
 	ui_checkbox shownames;	
+	ui_checkbox recordtweaks;
 	Patterns* patterns;
 	Sequence* sequence;
 	SequenceSelection* selection;

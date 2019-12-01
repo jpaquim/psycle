@@ -103,10 +103,10 @@ typedef struct {
 	int wheelscroll;
 	int handlevscroll;
 	int handlehscroll;
+	int cursor;
 } ui_component;
 
-void ui_init(HINSTANCE hInstance);
-void ui_dispose();
+
 void ui_replacedefaultfont(ui_component* main, ui_font* font);
 
 void ui_component_init(ui_component*, ui_component* parent);
@@ -170,7 +170,7 @@ void ui_component_setcolor(ui_component*, unsigned int color);
 void ui_component_starttimer(ui_component*, unsigned int id, unsigned int interval);
 void ui_component_stoptimer(ui_component*, unsigned int id);
 ui_size ui_component_textsize(ui_component*, const char*);
-TEXTMETRIC ui_component_textmetric(ui_component*);
+ui_textmetric ui_component_textmetric(ui_component*);
 ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
 void ui_component_seticonressource(ui_component*, int ressourceid);
 

@@ -2,6 +2,7 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "psy2.h"
 #include "songio.h"

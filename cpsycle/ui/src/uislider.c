@@ -130,7 +130,7 @@ void ui_slider_ondraw(ui_slider* self, ui_component* sender, ui_graphics* g)
 		size = ui_component_size(&self->component);
 
 		if (self->charnumber != 0) {
-			TEXTMETRIC tm;			
+			ui_textmetric tm;			
 		
 			tm = ui_component_textmetric(&self->component);
 			slidersize.width = tm.tmAveCharWidth * self->charnumber;

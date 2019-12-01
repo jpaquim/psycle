@@ -77,7 +77,7 @@ void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
 void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, ui_size* rv)
 {				
 	if (rv) {
-		TEXTMETRIC tm;
+		ui_textmetric tm;
 	
 		tm = ui_component_textmetric(&self->component);
 		rv->width = tm.tmAveCharWidth * 80;

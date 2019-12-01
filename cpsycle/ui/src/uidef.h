@@ -52,6 +52,13 @@ typedef struct {
 	int stock;
 } ui_font;
 
+typedef enum {
+	UI_CURSOR_DEFAULT,
+	UI_CURSOR_COLRESIZE
+} ui_cursor;
+
+typedef TEXTMETRIC ui_textmetric;
+
 void ui_setrectangle(ui_rectangle*, int left, int top, int width, int height);
 int ui_rectangle_intersect(ui_rectangle*, int x, int y);
 int ui_rectangle_intersect_rectangle(const ui_rectangle*, const ui_rectangle* other);
@@ -59,11 +66,5 @@ void ui_error(const char* err, const char* shorterr);
 
 void ui_font_init(ui_font*, const ui_fontinfo* info);
 void ui_font_dispose(ui_font*);
-
-#ifdef _WIN64
-typedef long long winid_t;
-#else
-typedef int winid_t;
-#endif
 
 #endif

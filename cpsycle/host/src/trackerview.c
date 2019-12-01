@@ -265,7 +265,7 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent,
 	self->view = view;
 	self->header = 0;	
 	self->hasselection = 0;
-	self->midline = 1;
+	self->midline = 1;	
 	signal_connect(&player->signal_numsongtrackschanged, self,
 		trackergrid_numtrackschanged);
 	self->view->font = ui_createfont("Tahoma", 12);	
@@ -756,7 +756,8 @@ void trackergrid_adjustscroll(TrackerGrid* self)
 	}
 	ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
 	if (self->midline) {
-		trackerview_centeroncursor(self->view);		
+		
+		trackerview_centeroncursor(self->view);
 	}
 }
 
@@ -766,11 +767,11 @@ void trackerview_centeroncursor(TrackerView* self)
 	int visilines;
 	ui_size size;
 
-	size = ui_component_size(&self->grid.component);	
+	size = ui_component_size(&self->grid.component);
 	visilines = size.height / self->grid.lineheight;
 	line = trackerview_offsettoscreenline(self, 
 		self->grid.cursor.offset) + self->grid.cursor.subline;
-	self->grid.dy = (visilines / 2 + line) * self->grid.lineheight;
+	self->grid.dy = (visilines / 2 - line) * self->grid.lineheight;
 	self->linenumbers.dy = self->grid.dy;
 	ui_component_setverticalscrollposition(&self->grid.component,
 		line);
@@ -1552,8 +1553,8 @@ void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int stepx,
 		ui_size size;
 		int halfvisilines;	
 		int restoremidline;		
-		ui_rectangle r;
-	
+		ui_rectangle r;		
+			
 		size = ui_component_size(&self->component);		
 		halfvisilines = size.height / self->lineheight / 2;
 		ui_setrectangle(&r, 0, halfvisilines * self->lineheight, size.width,
@@ -2576,13 +2577,15 @@ void trackerview_onblocktransposedown12(TrackerView* self)
 void trackerview_showblockmenu(TrackerView* self)
 {
 	ui_component_show(&self->blockmenu.component);
-	ui_component_align(&self->component);		
+	ui_component_align(&self->component);
+	ui_component_invalidate(&self->linenumbers.component);
 }
 
 void trackerview_hideblockmenu(TrackerView* self)
 {
 	ui_component_hide(&self->blockmenu.component);
 	ui_component_align(&self->component);
+	ui_component_invalidate(&self->linenumbers.component);
 }
 
 void trackerview_toggleblockmenu(TrackerView* self)

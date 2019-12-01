@@ -38,6 +38,7 @@ static void sequenceview_onpaste(SequenceView*);
 static void sequenceview_onsingleselection(SequenceView*, ui_button* sender);
 static void sequenceview_onmultiselection(SequenceView*, ui_button* sender);
 static void sequenceview_onfollowsong(SequenceView*, ui_button* sender);
+static void sequenceview_onrecordtweaks(SequenceView*, ui_button* sender);
 static void sequenceview_onsize(SequenceView*, ui_component* sender, ui_size*);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*);
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
@@ -77,6 +78,8 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	ui_checkbox_settext(&self->followsong, "Follow Song");
 	ui_checkbox_init(&self->shownames, &self->component);	
 	ui_checkbox_settext(&self->shownames, "Show pattern names");
+	ui_checkbox_init(&self->recordtweaks, &self->component);
+	ui_checkbox_settext(&self->recordtweaks, "Record tweaks");
 	signal_connect(&self->buttons.newentry.signal_clicked, self,
 		sequenceview_onnewentry);
 	signal_connect(&self->buttons.insertentry.signal_clicked, self,
@@ -107,6 +110,8 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 		sequenceview_onmultiselection);
 	signal_connect(&self->followsong.signal_clicked, self,
 		sequenceview_onfollowsong);
+	signal_connect(&self->recordtweaks.signal_clicked, self,
+		sequenceview_onrecordtweaks);
 	signal_connect(&workspace->signal_songchanged, self,
 		sequenceview_onsongchanged);
 	signal_connect(&workspace->signal_sequenceselectionchanged, self,
@@ -331,7 +336,7 @@ void sequencelistview_drawsequence(SequenceListView* self, ui_graphics* g)
 
 void sequencelistview_computetextsizes(SequenceListView* self)
 {
-	TEXTMETRIC tm;
+	ui_textmetric tm;
 	
 	tm = ui_component_textmetric(&self->component);
 	self->avgcharwidth = tm.tmAveCharWidth;
@@ -412,19 +417,24 @@ void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size
 	ui_component_setposition(&self->listview.component, 
 		0, buttonssize.height + trackheader.height,
 		size->width,
-		size->height - buttonssize.height - durationsize.height - trackheader.height - 40);
+		size->height - buttonssize.height - durationsize.height - trackheader.height - 60);
 	sequencelistview_adjustscrollbars(&self->listview);
 	ui_component_setposition(&self->duration.component, 
 		0,
-		size->height - durationsize.height - 40,
+		size->height - durationsize.height - 60,
 		size->width,
 		durationsize.height);
 	ui_component_setposition(&self->followsong.component, 
 		0,
-		size->height - 40,
+		size->height - 60,
 		size->width,
 		20);
 	ui_component_setposition(&self->shownames.component, 
+		0,
+		size->height - 40,
+		size->width,
+		20);
+	ui_component_setposition(&self->recordtweaks.component, 
 		0,
 		size->height - 20,
 		size->width,
@@ -668,6 +678,10 @@ void sequenceview_onfollowsong(SequenceView* self, ui_button* sender)
 	} else {
 		workspace_followsong(self->workspace);
 	}
+}
+
+void sequenceview_onrecordtweaks(SequenceView* self, ui_button* sender)
+{	
 }
 
 void sequencelistview_onmousedown(SequenceListView* self, ui_component* sender,

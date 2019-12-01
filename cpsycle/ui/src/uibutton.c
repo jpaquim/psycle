@@ -186,7 +186,7 @@ void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit,
 {		
 	if (rv) {
 		if (self->ownerdrawn) {
-			TEXTMETRIC tm;	
+			ui_textmetric tm;	
 			ui_size size;
 
 			tm = ui_component_textmetric(&self->component);

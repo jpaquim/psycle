@@ -6,7 +6,7 @@
 #include "uilabel.h"
 
 static void onpreferredsize(ui_label*, ui_component* sender, ui_size* limit, ui_size* rv);
-static TEXTMETRIC textmetric(ui_component*);
+static ui_textmetric textmetric(ui_component*);
 
 void ui_label_init(ui_label* self, ui_component* parent)
 {  		
@@ -32,7 +32,7 @@ void ui_label_setcharnumber(ui_label* self, int number)
 void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, ui_size* rv)
 {	
 	if (rv) {
-		TEXTMETRIC tm;	
+		ui_textmetric tm;	
 		char text[256];
 		
 		tm = ui_component_textmetric(&self->component);	

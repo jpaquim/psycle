@@ -106,7 +106,7 @@ void onpreferredsize(ui_combobox* self, ui_component* sender, ui_size* limit,
 	ui_size* rv)
 {
 	if (rv) {
-		TEXTMETRIC tm;
+		ui_textmetric tm;
 
 		tm = ui_component_textmetric(&self->component);
 		if (self->charnumber == 0) {
@@ -149,7 +149,7 @@ void onownerdraw(ui_combobox* self, ui_component* sender, ui_graphics* g)
 	int ax;
 	int ay;
 	intptr_t sel;
-	TEXTMETRIC tm;
+	ui_textmetric tm;
 	int vcenter;
 	int varrowcenter;
 	unsigned int arrowcolor = 0x00777777;

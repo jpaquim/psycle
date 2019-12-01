@@ -19,6 +19,14 @@ enum {
 	WORKSPACE_LOADSONG
 };
 
+typedef struct {
+	int row0;
+	int row1;
+	int row2;
+	int sequenceviewrestorewidth;
+	int maximized;
+} MaximizedView;
+
 typedef struct {	
 	Song* song;
 	Player player;	
@@ -55,6 +63,7 @@ typedef struct {
 	SequenceEntry* lastentry;
 	Pattern patternpaste;
 	List* sequencepaste;
+	MaximizedView maximizeview;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
