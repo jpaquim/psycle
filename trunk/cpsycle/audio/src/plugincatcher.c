@@ -188,9 +188,10 @@ int onenumdir(PluginCatcher* self, const char* path, int type)
 
 void plugincatcher_catchername(PluginCatcher* self, const char* path, char* name)
 {	
-	char ext[_MAX_PATH];
+	char prefix[_MAX_PATH];
+	char ext[_MAX_PATH];	
 
-	extract_path(path, name, ext);
+	extract_path(path, prefix, name, ext);
 	strlwr(name);
 	strlwr(ext);
 	replace_char(name, ' ', '-');

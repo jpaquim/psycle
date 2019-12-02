@@ -13,6 +13,7 @@ typedef struct {
 	beat_t offset;
 	int selplay;
 	List* node;
+	int id;
 } SequenceEntry;
 
 void sequenceentry_init(SequenceEntry*, uintptr_t pattern, beat_t offset);
@@ -88,6 +89,7 @@ int sequence_patternused(Sequence*, unsigned int patternslot);
 void sequence_setpatternslot(Sequence*, SequencePosition, unsigned int slot);
 beat_t sequence_duration(Sequence*);
 SequencePosition sequence_makeposition(Sequence*, SequenceTracks*, List* entries);
+SequencePosition sequence_positionfromid(Sequence*, int id);
 void sequence_setplayselection(Sequence*, struct SequenceSelection*);
 void sequence_clearplayselection(Sequence*);
 

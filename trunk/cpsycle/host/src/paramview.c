@@ -32,7 +32,8 @@ static float floatparamvalue(int value);
 static ui_bitmap knobs;
 static ui_bitmap mixer;
 
-void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
+void InitParamView(ParamView* self, ui_component* parent, Machine* machine,
+	Workspace* workspace)
 {		
 	if (knobs.hBitmap == NULL) {
 		ui_bitmap_loadresource(&knobs, IDB_PARAMKNOB);		
@@ -41,6 +42,7 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine)
 		ui_bitmap_loadresource(&mixer, IDB_MIXERSKIN);
 	}
 	self->machine = machine;
+	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
@@ -373,7 +375,7 @@ void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent* ev)
 		int dy;
 		int val;
 		int minval;
-		int maxval;
+		int maxval;		
 				
 		self->my = ev->y;
 		self->machine->vtable->parameterrange(self->machine, self->tweak,
@@ -387,7 +389,9 @@ void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent* ev)
 		if (val < minval) {
 			val = minval;
 		}
-		self->machine->vtable->parametertweak(self->machine, self->tweak, val);
+		self->machine->vtable->parametertweak(self->machine, self->tweak, val);		
+		workspace_parametertweak(self->workspace,
+			self->machine->vtable->slot(self->machine), self->tweak, val - minval);
 		ui_component_invalidate(&self->component);		
 	}
 }

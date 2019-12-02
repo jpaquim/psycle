@@ -7,13 +7,15 @@
 #include <uiapp.h>
 #include <dir.h>
 #include <stdio.h>
+#include <presetio.h>
+#include <presets.h>
 
 UIMAIN
 {
 	MainFrame mainframe;
 	int err = 0;	
 	char workpath[_MAX_PATH];
-	const char* env = 0;
+	const char* env = 0;	
 	
 	env = pathenv();	
 	if (env) {			

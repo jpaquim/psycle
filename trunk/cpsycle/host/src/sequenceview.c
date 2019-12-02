@@ -384,8 +384,9 @@ void sequencelistview_drawtrack(SequenceListView* self, ui_graphics* g, Sequence
 		}		
 		psy_snprintf(buffer,20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
 		if ( self->selectedtrack == trackindex &&
-			(self->selection->editposition.trackposition.tracknode == p ||
-				 (list_findentry(self->selection->entries, entry)))) {
+			(self->selection->editposition.trackposition.tracknode == p
+				 || (list_findentry(self->selection->entries, entry))				 
+				 )) {
 			ui_setbackgroundcolor(g, 0x009B7800);
 			ui_settextcolor(g, 0x00FFFFFF);
 			self->foundselected = 1;				
@@ -681,7 +682,12 @@ void sequenceview_onfollowsong(SequenceView* self, ui_button* sender)
 }
 
 void sequenceview_onrecordtweaks(SequenceView* self, ui_button* sender)
-{	
+{
+	if (workspace_recordingtweaks(self->workspace)) {
+		workspace_stoprecordtweaks(self->workspace);
+	} else {
+		workspace_recordtweaks(self->workspace);
+	}
 }
 
 void sequencelistview_onmousedown(SequenceListView* self, ui_component* sender,
@@ -770,18 +776,18 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 		p = p->next;		
 	}
 	self->listview.selectedtrack = c;
+	c = 0;
 	if (p) {
-		q = ((SequenceTrack*)p->entry)->entries;
-		c = 0;
+		q = ((SequenceTrack*)p->entry)->entries;		
 		while (q) {
-			if (q == position.trackposition.tracknode) {
+			if (q == position.trackposition.tracknode) {				
 				break;
 			}
 			++c;
 			q = q->next;
-		}
-		self->listview.selected = c;
+		}		
 	}
+	self->listview.selected = c;
 	ui_component_invalidate(&self->listview.component);
 	ui_component_invalidate(&self->trackheader.component);
 }

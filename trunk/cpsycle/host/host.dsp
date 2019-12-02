@@ -172,6 +172,10 @@ SOURCE=.\src\mainframe.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\navigation.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\newmachine.c
 # End Source File
 # Begin Source File
@@ -405,6 +409,10 @@ SOURCE=.\src\machineview.h
 # Begin Source File
 
 SOURCE=.\src\mainframe.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\navigation.h
 # End Source File
 # Begin Source File
 

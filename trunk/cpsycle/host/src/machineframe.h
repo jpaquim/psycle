@@ -6,12 +6,30 @@
 
 #include "paramview.h"
 
+#include <presets.h>
+#include <uibutton.h>
+#include <uicombobox.h>
+#include <presets.h>
+#include <machine.h>
+
 typedef struct {
 	ui_component component;
+	ui_button mute;
+	ui_combobox presetsbox;
+	Presets* presets;
+} ParameterBar;
+
+typedef struct {
+	ui_component component;
+	ParameterBar parameterbar;
 	ui_component* view;
+	Presets* presets;
+	Machine* machine;
 } MachineFrame;
 
-void InitMachineFrame(MachineFrame*, ui_component* parent);
-void MachineFrameSetParamView(MachineFrame* self, ui_component* view);
+void parameterbar_init(ParameterBar*, ui_component* parent);
+
+void machineframe_init(MachineFrame*, ui_component* parent);
+void machineframe_setview(MachineFrame* self, ui_component* view, Machine*);
 
 #endif

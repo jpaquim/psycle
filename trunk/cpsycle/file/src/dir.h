@@ -9,6 +9,6 @@ char* workdir(char* buffer);
 const char* pathenv(void);
 void setpathenv(const char* path);
 void insertpathenv(const char* path);
-void extract_path(const char* path, char* name, char* ext);
+void extract_path(const char* path, char* prefix, char* name, char* ext);
 
 #endif

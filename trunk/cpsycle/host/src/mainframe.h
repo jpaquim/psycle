@@ -13,6 +13,7 @@
 #include "uistatusbar.h"
 #include "filebar.h"
 #include "undoredobar.h"
+#include "navigation.h"
 #include "machinebar.h"
 #include "machineview.h"
 #include "gear.h"
@@ -43,6 +44,7 @@ typedef struct {
 	// ui_button updatedriver;
 	ui_component splitbar;
 	ui_progressbar progressbar;
+	Navigation navigation;
 	TabBar tabbar;	
 	ui_notebook notebook;
 	FileBar filebar;

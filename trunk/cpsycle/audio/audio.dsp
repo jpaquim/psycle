@@ -380,6 +380,18 @@ SOURCE=.\src\plugincatcher.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\preset.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\presetio.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\presets.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\psy2.c
 # End Source File
 # Begin Source File
@@ -668,6 +680,18 @@ SOURCE=.\src\plugin_interface.h
 # Begin Source File
 
 SOURCE=.\src\plugincatcher.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\preset.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\presetio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\presets.h
 # End Source File
 # Begin Source File
 

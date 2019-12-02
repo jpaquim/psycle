@@ -39,9 +39,10 @@ static char* replace_char(char* str, char c, char r)
 }
 void makeplugincatchername(const char* modulename, char* catchername)
 {
+	char prefix[_MAX_PATH];
 	char ext[_MAX_PATH];
 
-	extract_path(modulename, catchername, ext);
+	extract_path(modulename, prefix, catchername, ext);
 	_strlwr(catchername);
 	replace_char(catchername, ' ', '-');
 	if (strstr(catchername, "blitz")) {

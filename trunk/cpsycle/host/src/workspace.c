@@ -45,6 +45,7 @@ static void workspace_changedefaultfontsize(Workspace*, int size);
 static void workspace_onloadprogress(Workspace*, Song*, int progress);
 static void workspace_onscanprogress(Workspace*, PluginCatcher*, int progress);
 static void workspace_onsequenceeditpositionchanged(Workspace*, SequenceSelection*);
+static void workspace_updatenavigation(Workspace*);
 /// Machinecallback
 static MachineCallback machinecallback(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
@@ -52,6 +53,40 @@ static int machinecallback_bpm(Workspace*);
 static Samples* machinecallback_samples(Workspace*);
 static Machines* machinecallback_machines(Workspace*);
 static Instruments* machinecallback_instruments(Workspace*);
+
+
+void history_init(History* self)
+{
+	self->container = 0;
+	self->prevented = 0;
+}
+
+void history_dispose(History* self)
+{
+	List* p;
+
+	for (p = self->container; p != 0; p = p->next) {
+		free(p->entry);
+	}
+	list_free(self->container);
+	self->container = 0;
+	self->prevented = 0;
+}
+
+void history_clear(History* self)
+{
+	history_dispose(self);
+}
+
+void history_add(History* self, int viewid, int sequenceentryid)
+{
+	HistoryEntry* entry;
+
+	entry = (HistoryEntry*) malloc(sizeof(HistoryEntry));	
+	entry->viewid = viewid;
+	entry->sequenceentryid = sequenceentryid;
+	list_append(&self->container, entry);
+}
 
 void workspace_init(Workspace* self, void* handle)
 {	
@@ -64,6 +99,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->octave = 4;	
 	self->cursorstep = 1;
 	self->followsong = 0;
+	self->recordtweaks = 0;
 	self->inputoutput = 0;
 	self->midi = 0;
 	self->mainhandle = handle;
@@ -73,6 +109,9 @@ void workspace_init(Workspace* self, void* handle)
 	self->maximizeview.row0 = 1;
 	self->maximizeview.row1 = 1;
 	self->maximizeview.row2 = 1;
+	self->currnavigation = 0;
+	self->currview = 0;
+	history_init(&self->history);
 	workspace_makeconfig(self);
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);
@@ -81,9 +120,10 @@ void workspace_init(Workspace* self, void* handle)
 	sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
 	signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
 		workspace_onsequenceeditpositionchanged);
-	undoredo_init(&self->undoredo);
+	undoredo_init(&self->undoredo);	
+	self->navigating = 0;
 	workspace_initsignals(self);
-	workspace_initplayer(self);	
+	workspace_initplayer(self);
 	self->patterneditposition.pattern = 0;
 	self->patterneditposition.col = 
 	self->patterneditposition.line = 0;
@@ -91,7 +131,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->patterneditposition.totallines = 0;
 	self->patterneditposition.track = 0;
 	pattern_init(&self->patternpaste);
-	self->sequencepaste = 0;
+	self->sequencepaste = 0;	
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -116,6 +156,7 @@ void workspace_initsignals(Workspace* self)
 	signal_init(&self->signal_beforesavesong);
 	signal_init(&self->signal_showparameters);
 	signal_init(&self->signal_viewselected);
+	signal_init(&self->signal_parametertweak);
 }
 
 void workspace_dispose(Workspace* self)
@@ -134,6 +175,7 @@ void workspace_dispose(Workspace* self)
 	plugincatcher_dispose(&self->plugincatcher);
 	machinefactory_dispose(&self->machinefactory);
 	undoredo_dispose(&self->undoredo);
+	history_dispose(&self->history);
 	workspace_disposesignals(self);
 	pattern_dispose(&self->patternpaste);
 	workspace_disposesequencepaste(self);
@@ -152,6 +194,7 @@ void workspace_disposesignals(Workspace* self)
 	signal_dispose(&self->signal_beforesavesong);
 	signal_dispose(&self->signal_showparameters);
 	signal_dispose(&self->signal_viewselected);
+	signal_dispose(&self->signal_parametertweak);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -376,6 +419,15 @@ void workspace_makekeyboard(Workspace* self)
 	self->keyboard = properties_settext(
 		properties_createsection(self->config, "keyboard"),
 		"Keyboard and Misc.");
+
+	properties_settext(
+		properties_append_bool(self->keyboard, 
+		"recordtweaksastws", 0),
+		"Record Mouse Tweaks as tws (Smooth tweaks)");	
+	properties_settext(
+		properties_append_bool(self->keyboard, 
+		"advancelineonrecordtweak", 0),
+		"Advance Line On Record");
 }
 
 void workspace_makedirectories(Workspace* self)
@@ -657,7 +709,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 {	
 	Song* song;
 	SongFile songfile;
-
+	
 	properties_free(self->properties);
 	song = song_allocinit(&self->machinefactory);
 	signal_connect(&song->signal_loadprogress, self, workspace_onloadprogress);
@@ -679,14 +731,16 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 {
 	Song* oldsong;
 
+	history_clear(&self->history);
 	oldsong = self->song;
 	player_stop(&self->player);
 	lock_enter();	
-	self->song = song;
+	self->song = song;	
 	player_setsong(&self->player, self->song);
-	applysongproperties(self);		
+	applysongproperties(self);
 	sequenceselection_setsequence(&self->sequenceselection
-		,&self->song->sequence);	
+		,&self->song->sequence);
+	workspace_addhistory(self);
 	signal_emit(&self->signal_songchanged, self, 1, flag);	
 	self->lastentry = 0;
 	workspace_disposesequencepaste(self);
@@ -803,6 +857,23 @@ void workspace_setsequenceselection(Workspace* self,
 	self->sequenceselection = selection;	
 	sequence_setplayselection(&self->song->sequence, &selection);
 	signal_emit(&self->signal_sequenceselectionchanged, self, 0);
+	workspace_addhistory(self);
+}
+
+void workspace_addhistory(Workspace* self)
+{
+	if (!self->navigating && !self->history.prevented) {
+		int sequencentryid = -1;
+
+		if (self->sequenceselection.editposition.trackposition.tracknode) {
+				SequenceEntry* entry;			
+				entry = (SequenceEntry*)
+					self->sequenceselection.editposition.trackposition.tracknode->entry;
+				sequencentryid = entry->id;
+		}
+		history_add(&self->history, self->currview, sequencentryid);
+		self->currnavigation = self->history.container->tail;
+	}
 }
 
 SequenceSelection workspace_sequenceselection(Workspace* self)
@@ -897,7 +968,7 @@ void workspace_onsequenceeditpositionchanged(Workspace* self,
 		position.offset = 0;
 		position.totallines = 0;
 		position.track = 0;
-		workspace_setpatterneditposition(self, position);
+		workspace_setpatterneditposition(self, position);		
 	}
 }
 
@@ -914,7 +985,9 @@ void workspace_idle(Workspace* self)
 				sequenceselection_seteditposition(&self->sequenceselection, 
 						sequence_makeposition(&self->song->sequence,
 							self->song->sequence.tracks, it.tracknode));
+				self->history.prevented = 1;
 				workspace_setsequenceselection(self, self->sequenceselection);
+				self->history.prevented = 0;
 				self->lastentry = (SequenceEntry*) it.tracknode->entry;		
 			}
 			if (self->lastentry) {				
@@ -953,5 +1026,82 @@ void workspace_showparameters(Workspace* self, uintptr_t machineslot)
 
 void workspace_selectview(Workspace* self, int view)
 {
+	self->currview = view;
 	signal_emit(&self->signal_viewselected, self, 1, view);
 }
+
+void workspace_parametertweak(Workspace* self, int slot, int tweak, int value)
+{
+	signal_emit(&self->signal_parametertweak, self, 3, slot, tweak, value);
+}
+
+void workspace_recordtweaks(Workspace* self)
+{
+	self->recordtweaks = 1;
+}
+
+void workspace_stoprecordtweaks(Workspace* self)
+{
+	self->recordtweaks = 0;
+}
+
+int workspace_recordingtweaks(Workspace* self)
+{
+	return self->recordtweaks;
+}
+
+int workspace_recordtweaksastws(Workspace* self)
+{
+	return properties_bool(self->keyboard, 
+		"recordtweaksastws", 0);
+}
+
+int workspace_advancelineonrecordtweak(Workspace* self)
+{
+	return properties_bool(self->keyboard, 
+		"advancelineonrecordtweak", 0);
+}
+
+void workspace_onviewchanged(Workspace* self, int view)
+{
+	self->currview = view;
+	workspace_addhistory(self);
+}
+
+void workspace_back(Workspace* self)
+{
+	if (self->currnavigation->prev) {		
+		self->currnavigation = self->currnavigation->prev;
+		workspace_updatenavigation(self);
+	}
+}
+
+void workspace_forward(Workspace* self)
+{
+	if (self->currnavigation->next) {						
+		self->currnavigation = self->currnavigation->next;	
+		workspace_updatenavigation(self);
+	}
+}
+
+void workspace_updatenavigation(Workspace* self)
+{
+	HistoryEntry* entry;
+
+	entry = (HistoryEntry*) (self->currnavigation->entry);
+	self->navigating = 1;
+	if (self->currview != entry->viewid) {
+		workspace_selectview(self, entry->viewid);
+	}
+	if (entry->sequenceentryid != -1 &&
+			self->sequenceselection.editposition.trackposition.tracknode) {
+		SequencePosition position;
+
+		position = sequence_positionfromid(&self->song->sequence,
+			entry->sequenceentryid);
+		sequenceselection_seteditposition(&self->sequenceselection, position);
+		workspace_setsequenceselection(self, self->sequenceselection);
+	}
+	self->navigating = 0;
+}
+

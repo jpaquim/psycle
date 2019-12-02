@@ -6,6 +6,8 @@
 #include "sequence.h"
 #include <stdlib.h>
 
+static sequenceentryid = 1;
+
 static void sequenceselection_addeditposition(SequenceSelection*);
 static PatternNode* SequenceTrackIterator_next(SequenceTrackIterator*);
 static void SequenceTrackIterator_unget(SequenceTrackIterator*);
@@ -122,6 +124,7 @@ void sequenceentry_init(SequenceEntry* self, uintptr_t pattern, beat_t offset)
 	self->pattern = pattern;
 	self->offset = offset;
 	self->selplay = 0;
+	self->id = sequenceentryid++;
 }
 
 SequenceEntry* sequenceentry_alloc(void)
@@ -460,6 +463,38 @@ SequencePosition sequence_makeposition(Sequence* self, SequenceTracks* track, Li
 
 	rv.trackposition = sequence_makeiterator(self, entries);
 	rv.track = track;
+	return rv;
+}
+
+SequencePosition sequence_positionfromid(Sequence* self, int id)
+{
+	SequencePosition rv;	
+	SequenceTracks* t;	
+
+	rv.track = 0;
+	rv.trackposition.patternnode = 0;
+	rv.trackposition.tracknode = 0;
+	rv.trackposition.patterns = 0;
+	t = self->tracks;
+	while (t) {
+		SequenceTrack* track;
+		List* p;
+
+		track = (SequenceTrack*)t->entry;
+		p = track->entries;
+		while (p) {
+			SequenceEntry* entry;
+
+			entry = (SequenceEntry*)p->entry;
+			if (entry->id == id) {
+				rv.track = t;
+				rv.trackposition = sequence_makeiterator(self, p);
+				break;
+			}
+			p = p->next;
+		}
+		t = t->next;
+	}
 	return rv;
 }
 
