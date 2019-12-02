@@ -120,6 +120,8 @@ static void trackerview_onlpbchanged(TrackerView*, Player* sender,
 	uintptr_t lpb);
 static void trackerview_onpatterneditpositionchanged(TrackerView*,
 	Workspace* sender);
+static void trackerview_onparametertweak(TrackerView*,
+	Workspace* sender, int slot, int tweak, int value);
 
 static void trackerheader_ondraw(TrackerHeader*, ui_component* sender,
 	ui_graphics* g);
@@ -1728,6 +1730,8 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 		trackerview_oninput);
 	signal_connect(&workspace->signal_patterneditpositionchanged, self,
 		trackerview_onpatterneditpositionchanged);	
+	signal_connect(&workspace->signal_parametertweak, self,
+		trackerview_onparametertweak);
 	trackerview_readconfig(self);	
 }
 
@@ -2657,5 +2661,36 @@ void trackerview_onpatterneditpositionchanged(TrackerView* self, Workspace* send
 				trackerview_scrollup(self);
 			}
 		}
+	}
+}
+
+void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
+	int slot, int tweak, int value)
+{
+	if (workspace_recordingtweaks(sender)) {		
+		PatternEvent event;				
+		
+		patternevent_init(&event,
+			(unsigned char) (
+				workspace_recordtweaksastws(sender)
+				? NOTECOMMANDS_TWEAKSLIDE
+				: NOTECOMMANDS_TWEAK),
+			255,
+			(unsigned char) machines_slot(&self->workspace->song->machines),
+			(unsigned char) ((value & 0xFF00) >> 8),
+			(unsigned char) (value & 0xFF));
+		event.inst = (unsigned char) tweak;
+		trackerview_preventsync(self);
+		undoredo_execute(&self->workspace->undoredo,
+			&InsertCommandAlloc(self->pattern, self->grid.bpl,
+				self->grid.cursor, event)->command);		
+		if (workspace_advancelineonrecordtweak(sender) &&
+				!(workspace_followingsong(sender) && 
+				  player_playing(&sender->player))) {			
+			trackerview_advanceline(self);
+		} else {
+			trackerview_invalidatecursor(self, &self->grid.cursor);
+		}
+		trackerview_enablesync(self);
 	}
 }

@@ -5,6 +5,7 @@
 #if !defined(PARAMVIEW)
 #define PARAMVIEW
 
+#include "workspace.h"
 #include <uicomponent.h>
 #include <machine.h>
 #include <plugin_interface.h>
@@ -20,10 +21,12 @@ typedef struct {
    int tweak;
    int tweakbase;
    int tweakval;
-   int my;   
+   int my;
+   Workspace* workspace;
 } ParamView;
 
-void InitParamView(ParamView*, ui_component* parent, Machine* machine);
+void InitParamView(ParamView*, ui_component* parent, Machine* machine,
+	Workspace*);
 void ParamViewSize(ParamView*, int* width, int* height);
 
 

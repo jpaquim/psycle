@@ -20,6 +20,19 @@ enum {
 };
 
 typedef struct {
+	int viewid;
+	int sequenceentryid;
+} HistoryEntry;
+
+typedef struct {
+	List* container;
+	int prevented;
+} History;
+
+void history_init(History*);
+void history_dispose(History*);
+
+typedef struct {
 	int row0;
 	int row1;
 	int row2;
@@ -52,18 +65,24 @@ typedef struct {
 	Signal signal_beforesavesong;
 	Signal signal_showparameters;
 	Signal signal_viewselected;
+	Signal signal_parametertweak;
 	ui_component* mainhandle;
-	UndoRedo undoredo;	
+	UndoRedo undoredo;
+	History history;
 	PatternEditPosition patterneditposition;
 	SequenceSelection sequenceselection;
 	int cursorstep;
 	int hasplugincache;
 	char* filename;
 	int followsong;
+	int recordtweaks;
 	SequenceEntry* lastentry;
 	Pattern patternpaste;
 	List* sequencepaste;
 	MaximizedView maximizeview;
+	int currview;
+	List* currnavigation;
+	int navigating;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -105,5 +124,15 @@ void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
 void workspace_selectview(Workspace*, int view);
+void workspace_parametertweak(Workspace*, int slot, int tweak, int value);
+void workspace_recordtweaks(Workspace*);
+void workspace_stoprecordtweaks(Workspace*);
+int workspace_recordingtweaks(Workspace*);
+int workspace_recordtweaksastws(Workspace*);
+int workspace_advancelineonrecordtweak(Workspace*);
+void workspace_onviewchanged(Workspace*, int view);
+void workspace_back(Workspace*);
+void workspace_forward(Workspace*);
+void workspace_addhistory(Workspace*);
 
 #endif

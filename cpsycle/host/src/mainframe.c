@@ -43,6 +43,7 @@ static void mainframe_onupdatedriver(MainFrame*, ui_component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
 	Properties*);
+static void mainframe_ontabbarchanged(MainFrame*, ui_component* sender, uintptr_t tabindex);
 static void mainframe_onmouseentersplitbar(MainFrame*, ui_component* sender);
 static void mainframe_onmouseleavesplitbar(MainFrame*, ui_component* sender);
 static void mainframe_onsongchanged(MainFrame*, ui_component* sender,
@@ -95,7 +96,9 @@ void mainframe_init(MainFrame* self)
 	signal_connect(&self->component.signal_timer, self, mainframe_ontimer);
 	ui_component_init(&self->tabbars, &self->component);
 	ui_component_enablealign(&self->tabbars);
-	tabbar_init(&self->tabbar, &self->tabbars);	
+	navigation_init(&self->navigation, &self->tabbars, &self->workspace);	
+	ui_component_setalign(&self->navigation.component, UI_ALIGN_LEFT);
+	tabbar_init(&self->tabbar, &self->tabbars);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
 	tabbar_append(&self->tabbar, "Machines");
 	tabbar_append(&self->tabbar, "Pattern");	
@@ -114,7 +117,7 @@ void mainframe_init(MainFrame* self)
 	/// init notebook views
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_notebook_connectcontroller(&self->notebook,
-		&self->tabbar.signal_change);
+		&self->tabbar.signal_change);	
 	machineview_init(&self->machineview, &self->notebook.component, 
 		&self->tabbars, &self->workspace);
 	patternview_init(&self->patternview, &self->notebook.component,
@@ -159,7 +162,10 @@ void mainframe_init(MainFrame* self)
 			self->workspace.song->properties.title);
 	}	
 	signal_emit(&self->workspace.signal_configchanged, &self->workspace, 1,
-		self->workspace.config);	
+		self->workspace.config);
+	signal_connect(&self->tabbar.signal_change, self,
+		mainframe_ontabbarchanged);
+	workspace_addhistory(&self->workspace);
 	ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
 }
 
@@ -493,10 +499,11 @@ void mainframe_onsongchanged(MainFrame* self, ui_component* sender, int flag)
 void mainframe_updatetitle(MainFrame* self)
 {	
 	char txt[512];
-	char name[512];
-	char ext[512];
+	char prefix[4096];
+	char name[4096];
+	char ext[4096];
 
-	extract_path(self->workspace.filename, name, ext);
+	extract_path(self->workspace.filename, prefix, name, ext);
 	psy_snprintf(txt, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
 		name, ext);			
 	ui_component_settitle(&self->component, txt);
@@ -604,4 +611,9 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view)
 	if (view != 10) {
 		tabbar_select(&self->tabbar, view);
 	}
+}
+
+void mainframe_ontabbarchanged(MainFrame* self, ui_component* sender, uintptr_t tabindex)
+{
+	workspace_onviewchanged(&self->workspace, tabindex);
 }

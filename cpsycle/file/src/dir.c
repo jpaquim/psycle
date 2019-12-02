@@ -153,14 +153,18 @@ void setpathenv(const char* path)
 
 #endif
 
-void extract_path(const char* path, char* name, char* ext)
+void extract_path(const char* path, char* prefix, char* name, char* ext)
 {
 	char* p;
-		
+
+	prefix[0] = '\0';
 	p = strrchr(path, '\\');
 	if (p) {
+		prefix = strncpy(prefix, path, p - path);
+		prefix[p - path] = '\0';
 		name = strcpy(name, p + 1);
 	} else {
+		prefix[0] = '\0';
 		name = strcpy(name, path);
 	}
 	p = strrchr(name, '.');

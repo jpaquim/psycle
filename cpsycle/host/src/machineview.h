@@ -68,6 +68,7 @@ typedef struct {
 	ParamView* paramview;
 	Vst2View* vst2view;
 	char* restorename;
+	Workspace* workspace;
 } MachineUi;
 
 enum {	

@@ -17,7 +17,7 @@ static MachineUi* machineuis_at(MachineWireView*, uintptr_t slot);
 static void machineuis_remove(MachineWireView*, uintptr_t slot);
 static void machineuis_removeall(MachineWireView*);
 
-static void machineui_init(MachineUi*, int x, int y, Machine* machine, uintptr_t slot, MachineSkin*);
+static void machineui_init(MachineUi*, int x, int y, Machine* machine, uintptr_t slot, MachineSkin*, Workspace*);
 static void machineui_updatecoords(MachineUi*);
 static void machineui_dispose(MachineUi*);
 static ui_size machineui_size(MachineUi*);
@@ -81,9 +81,10 @@ static void machineview_onmousedoubleclick(MachineView*, ui_component* sender, i
 static void machineview_onkeydown(MachineView*, ui_component* sender, KeyEvent*);
 
 void machineui_init(MachineUi* self, int x, int y, Machine* machine,
-	uintptr_t slot, MachineSkin* skin)
+	uintptr_t slot, MachineSkin* skin, Workspace* workspace)
 {	
 	assert(machine);
+	self->workspace = workspace;
 	self->x = x;
 	self->y = y;
 	self->skin = skin;	
@@ -286,10 +287,11 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 			int width;
 			int height;
 
-			InitMachineFrame(self->frame, parent);
+			machineframe_init(self->frame, parent);
 			self->vst2view = (Vst2View*) malloc(sizeof(Vst2View));
 			InitVst2View(self->vst2view, &self->frame->component, self->machine);
-			MachineFrameSetParamView(self->frame, &self->vst2view->component);
+			machineframe_setview(self->frame, &self->vst2view->component,
+				self->machine);
 			self->machine->vtable->editorsize(self->machine, &width, &height);
 			ui_component_resize(&self->frame->component, width, height + 28);			
 		} else
@@ -298,7 +300,7 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 			int height;
 			char txt[128];
 
-			InitMachineFrame(self->frame, parent);
+			machineframe_init(self->frame, parent);
 
 			if (self->machine && self->machine->vtable->info(self->machine)) {
 				psy_snprintf(txt, 128, "%.2X : %s", self->slot,
@@ -309,8 +311,10 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 			}
 			ui_component_settitle(&self->frame->component, txt);
 			self->paramview = (ParamView*) malloc(sizeof(ParamView));
-			InitParamView(self->paramview, &self->frame->component, self->machine);
-			MachineFrameSetParamView(self->frame, &self->paramview->component);		
+			InitParamView(self->paramview, &self->frame->component, self->machine,
+				self->workspace);
+			machineframe_setview(self->frame, &self->paramview->component,
+				self->machine);		
 			ParamViewSize(self->paramview, &width, &height);
 			ui_component_resize(&self->frame->component, width, height + 28);
 		}
@@ -1253,7 +1257,7 @@ void machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y, Mach
 			machineuis_remove(self, slot);
 		}	
 		machineui = (MachineUi*) malloc(sizeof(MachineUi));
-		machineui_init(machineui, x, y, machine, slot, &self->skin);
+		machineui_init(machineui, x, y, machine, slot, &self->skin, self->workspace);
 		table_insert(&self->machineuis, slot, machineui);
 	}
 }
