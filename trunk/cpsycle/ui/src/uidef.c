@@ -15,7 +15,6 @@
 static LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
 	int iDeciPtWidth, int iAttributes, BOOL fLogRes);
 
-
 void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int height)
 {
    self->left = left;
@@ -38,12 +37,64 @@ int ui_rectangle_intersect(ui_rectangle* self, int x, int y)
 			y >= self->top && y < self->bottom);
 }
 
-void ui_margin_init(ui_margin* self, int top, int right, int bottom, int left)
+void ui_margin_init(ui_margin* self, ui_value top, ui_value right,
+	ui_value bottom, ui_value left)
 {   
    self->top = top;
    self->right = right;
-   self->bottom = bottom;   
+   self->bottom = bottom;
    self->left = left;
+}
+
+ui_value ui_value_makepx(intptr_t px)
+{
+	ui_value rv;
+
+	rv.quantity.integer = px;
+	rv.unit = UI_UNIT_PX;
+	return rv;
+}
+
+ui_value ui_value_makeew(double em)
+{
+	ui_value rv;
+
+	rv.quantity.real = em;
+	rv.unit = UI_UNIT_EW;
+	return rv;
+}
+
+ui_value ui_value_makeeh(double em)
+{
+	ui_value rv;
+
+	rv.quantity.real = em;
+	rv.unit = UI_UNIT_EH;
+	return rv;
+}
+
+intptr_t ui_value_px(ui_value* self, const ui_textmetric* tm)
+{
+	intptr_t rv = self->quantity.integer;
+
+	switch (self->unit) {
+		case UI_UNIT_PX:
+			rv = self->quantity.integer;
+		break;
+		case UI_UNIT_EW:
+			if (tm) {
+				rv = (intptr_t)(self->quantity.real * tm->tmAveCharWidth);
+			}
+		break;
+		case UI_UNIT_EH:
+			if (tm) {
+				rv = (intptr_t)(self->quantity.real * tm->tmHeight);
+			}
+		break;
+		default:			
+		break;
+	}
+	return rv;
 }
 
 void ui_error(const char* err, const char* shorterr)

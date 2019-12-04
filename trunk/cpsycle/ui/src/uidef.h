@@ -5,6 +5,7 @@
 #define UIDEF_H
 
 #include "../../detail/prefix.h"
+#include "../../detail/stdint.h"
 #include <stddef.h>
 
 // target win98 or nt 4 or later systems
@@ -14,6 +15,28 @@
 #if defined min
 #undef min
 #endif
+
+typedef TEXTMETRIC ui_textmetric;
+
+typedef enum {
+	UI_UNIT_EH,
+	UI_UNIT_EW,
+	UI_UNIT_PX,
+	UI_UNIT_PE
+} UiUnit;
+
+typedef struct {
+	union {
+		intptr_t integer;
+		double real;
+	} quantity;
+	UiUnit unit;
+} ui_value;
+
+ui_value ui_value_makepx(intptr_t px);
+ui_value ui_value_makeew(double em);
+ui_value ui_value_makeeh(double em);
+intptr_t ui_value_px(ui_value*, const ui_textmetric*);
 
 typedef struct { 
 	int x;
@@ -33,13 +56,15 @@ typedef struct {
 } ui_size;
 
 typedef struct {
-	int top;
-	int right;
-	int bottom;
-	int left;
+	ui_value top;
+	ui_value right;
+	ui_value bottom;
+	ui_value left;
 } ui_margin;
 
-void ui_margin_init(ui_margin*, int top, int right, int bottom, int left);
+void ui_margin_init(ui_margin*, ui_value top, ui_value right, ui_value bottom,
+	ui_value left);
+
 
 typedef struct {
 	LOGFONT lf; 
@@ -57,7 +82,15 @@ typedef enum {
 	UI_CURSOR_COLRESIZE
 } ui_cursor;
 
-typedef TEXTMETRIC ui_textmetric;
+typedef enum {
+	UI_ALIGNMENT_NONE				= 0,	
+	UI_ALIGNMENT_LEFT				= 2,
+	UI_ALIGNMENT_RIGHT				= 4,
+	UI_ALIGNMENT_CENTER_HORIZONTAL	= UI_ALIGNMENT_LEFT | UI_ALIGNMENT_RIGHT,
+	UI_ALIGNMENT_TOP				= 8,
+	UI_ALIGNMENT_BOTTOM				= 16,
+	UI_ALIGNMENT_CENTER_VERTICAL	= UI_ALIGNMENT_TOP | UI_ALIGNMENT_BOTTOM
+} UiAlignment;
 
 void ui_setrectangle(ui_rectangle*, int left, int top, int width, int height);
 int ui_rectangle_intersect(ui_rectangle*, int x, int y);

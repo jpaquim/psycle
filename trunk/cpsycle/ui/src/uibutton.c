@@ -31,6 +31,8 @@ void ui_button_init(ui_button* self, ui_component* parent)
 	self->highlight = 0;
 	self->icon = UI_ICON_NONE;
 	self->charnumber = 0;
+	self->textalignment = UI_ALIGNMENT_CENTER_VERTICAL |
+		UI_ALIGNMENT_CENTER_HORIZONTAL;
 	if (self->ownerdrawn) {
 		ui_button_create_ownerdrawn(self, parent);
 	} else {
@@ -75,7 +77,9 @@ void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
 {
 	ui_size size;
 	ui_size textsize;
-	ui_rectangle r;	
+	ui_rectangle r;
+	int centerx = 0;
+	int centery = 0;
 		
 	size = ui_component_size(&self->component);
 	textsize = ui_component_textsize(&self->component, self->text);
@@ -90,9 +94,17 @@ void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
 	{
 		ui_settextcolor(g, 0x00CACACA);
 	}
+	if ((self->textalignment & UI_ALIGNMENT_CENTER_HORIZONTAL) ==
+		UI_ALIGNMENT_CENTER_HORIZONTAL) {
+		centerx = (size.width - textsize.width) / 2;		
+	}
+	if ((self->textalignment & UI_ALIGNMENT_CENTER_VERTICAL) ==
+		UI_ALIGNMENT_CENTER_VERTICAL) {
+		centery = (size.height - textsize.height) / 2;
+	}	
 	ui_textoutrectangle(g, 
-		(size.width - textsize.width) / 2,
-		(size.height - textsize.height) / 2,
+		centerx,
+		centery,
 		ETO_CLIPPED,
 		r,
 		self->text,
@@ -105,37 +117,47 @@ void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
 void drawicon(ui_button* self, ui_graphics* g)
 {
 	ui_size size;
-	ui_point arrow[4];			
+	ui_point arrow[4];
+	int centerx = 4;
+	int centery = 0;
 	
 	size = ui_component_size(&self->component);
+	if ((self->textalignment & UI_ALIGNMENT_CENTER_HORIZONTAL) ==
+		UI_ALIGNMENT_CENTER_HORIZONTAL) {
+		centerx = (size.width - 4) / 2;		
+	}
+	if ((self->textalignment & UI_ALIGNMENT_CENTER_VERTICAL) ==
+		UI_ALIGNMENT_CENTER_VERTICAL) {
+		centery = (size.height - 8) / 2;
+	}
 	if (self->icon == UI_ICON_LESSLESS) {
 		makearrow(arrow,
 			UI_ICON_LESS,
-			(size.width) / 2 - 4,
-			(size.height - 8) / 2);
+			centerx - 4,
+			centery);
 		drawarrow(self, arrow, g);
 		makearrow(arrow,
 			UI_ICON_LESS,
-			(size.width) / 2 + 4,
-			(size.height - 8) / 2);	
+			centerx + 4,
+			centery);	
 		drawarrow(self, arrow, g);
 	} else
 	if (self->icon == UI_ICON_MOREMORE) {
 		makearrow(arrow,
 			UI_ICON_MORE,
-			(size.width) / 2 - 4,
-			(size.height - 8) / 2);	
+			centerx - 6,
+			centery);
 		drawarrow(self, arrow, g);
 		makearrow(arrow,
 			UI_ICON_MORE,
-			(size.width) / 2 + 4,
-			(size.height - 8) / 2);	
+			centerx + 2,
+			centery);	
 		drawarrow(self, arrow, g);
 	} else {
 		makearrow(arrow,
 			self->icon, 
-			(size.width - 4) / 2,
-			(size.height - 8) / 2);
+			centerx - 2,
+			centery);
 		drawarrow(self, arrow, g);
 	}
 }
@@ -266,6 +288,11 @@ void ui_button_disablehighlight(ui_button* self)
 	}
 }
 
+void ui_button_settextalignment(ui_button* self, UiAlignment alignment)
+{
+	self->textalignment = alignment;
+}
+
 void oncommand(ui_button* self, ui_component* sender, WPARAM wParam,
 	LPARAM lParam)
 {
@@ -282,4 +309,3 @@ void oncommand(ui_button* self, ui_component* sender, WPARAM wParam,
 		break;
     }
 }
-

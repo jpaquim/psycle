@@ -91,7 +91,7 @@ void InitSamplesView(SamplesView* self, ui_component* parent,
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	InitSamplesGeneralView(&self->general, &self->notebook.component);			
 	InitSamplesVibratoView(&self->vibrato, &self->notebook.component, &workspace->player);
-	ui_notebook_setpage(&self->notebook, 0);
+	ui_notebook_setpageindex(&self->notebook, 0);
 	InitWaveBox(&self->wavebox, &self->client);
 	ui_component_resize(&self->wavebox.component, 0, 80);
 	ui_component_setalign(&self->wavebox.component, UI_ALIGN_TOP);	
@@ -496,7 +496,11 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 	ui_slider_settext(&self->speed,"Speed");
 	ui_slider_init(&self->depth, &self->component);
 	ui_slider_settext(&self->depth, "Depth");
-	ui_margin_init(&margin, 3, 3, 0, 3);
+	ui_margin_init(&margin,
+		ui_value_makepx(3),
+		ui_value_makepx(3),
+		ui_value_makepx(0),
+		ui_value_makepx(3));
 	for (i = 0; i < 3; ++i) {		
 		ui_component_resize(&sliders[i]->component, 0, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
@@ -504,7 +508,7 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 		ui_slider_connect(sliders[i], self, OnVibratoViewDescribe,
 			OnVibratoViewTweak, OnVibratoViewValue);		
 	}	
-	sliders[0]->component.margin.top = 32;		
+	sliders[0]->component.margin.top.quantity.integer = 32;		
 }
 
 void SetSampleSamplesVibratoView(SamplesVibratoView* self, Sample* sample)

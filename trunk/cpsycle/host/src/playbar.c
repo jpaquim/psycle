@@ -44,8 +44,10 @@ void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
 
 void playbar_initalign(PlayBar* self)
 {
-	ui_margin margin = { 0, 5, 0, 0 };
+	ui_margin margin;
 
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
+		ui_value_makepx(0), ui_value_makepx(0));
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	list_free(ui_components_setalign(

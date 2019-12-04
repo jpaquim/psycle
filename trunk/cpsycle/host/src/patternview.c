@@ -6,56 +6,70 @@
 #include "patternview.h"
 #include <portable.h>
 
-static void ontabbarchange(PatternView*, ui_component* sender, int tabindex);
-static void OnSize(PatternView*, ui_component* sender, ui_size*);
-static void OnShow(PatternView*, ui_component* sender);
-static void OnHide(PatternView*, ui_component* sender);
-static void OnLpbChanged(PatternView*, Player* sender, uintptr_t lpb);
-static void OnSongChanged(PatternView*, Workspace* sender);
-static void OnEditPositionChanged(PatternView*, Workspace* sender);
-static void OnSequenceSelectionChanged(PatternView*, Workspace* sender);
-static void OnPropertiesClose(PatternView*, ui_component* sender);
-static void OnPropertiesApply(PatternView*, ui_component* sender);
-static void OnKeyDown(PatternView*, ui_component* sender, KeyEvent*);
-static void OnStatusDraw(PatternViewStatus*, ui_component* sender, ui_graphics* g);
-static void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, ui_size* rv);
-static void OnPatternEditPositionChanged(PatternViewStatus*, Workspace* sender);
-static void OnStatusSequenceSelectionChanged(PatternViewStatus*, Workspace* sender);
+static void patternview_ontabbarchange(PatternView*, ui_component* sender, int tabindex);
+static void patternview_onsize(PatternView*, ui_component* sender, ui_size*);
+static void patternview_onshow(PatternView*, ui_component* sender);
+static void patternview_onhide(PatternView*, ui_component* sender);
+static void patternview_onlpbchanged(PatternView*, Player* sender, uintptr_t lpb);
+static void patternview_onsongchanged(PatternView*, Workspace* sender);
+static void patternview_oneditpositionchanged(PatternView*, Workspace* sender);
+static void patternview_onsequenceselectionchanged(PatternView*, Workspace* sender);
+static void patternview_onpropertiesclose(PatternView*, ui_component* sender);
+static void patternview_onpropertiesapply(PatternView*, ui_component* sender);
+static void patternview_onkeydown(PatternView*, ui_component* sender, KeyEvent*);
+static void patternview_onkeyup(PatternView*, ui_component* sender, KeyEvent*);
+static void patternview_onfocus(PatternView*, ui_component* sender);
+static void patternviewstatus_ondraw(PatternViewStatus*, ui_component* sender, ui_graphics* g);
+static void patternviewstatus_onpreferredsize(PatternViewStatus* self,
+	ui_component* sender, ui_size* limit, ui_size* rv);
+static void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus*,
+	Workspace* sender);
+static void patternviewstatus_onsequenceselectionchanged(PatternViewStatus*,
+	Workspace* sender);
+void patternviewbar_initalign(PatternViewBar*);
 
-void InitPatternViewStatus(PatternViewStatus* self, ui_component* parent, Workspace* workspace)
+void patternviewstatus_init(PatternViewStatus* self, ui_component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;	
 	ui_component_resize(&self->component, 300, 20);
-	signal_connect(&self->component.signal_draw, self, OnStatusDraw);
+	signal_connect(&self->component.signal_draw, self,
+		patternviewstatus_ondraw);
 	signal_connect(&workspace->signal_patterneditpositionchanged, self,
-		OnPatternEditPositionChanged);
+		patternviewstatus_onpatterneditpositionchanged);
 	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self, onstatuspreferredsize);	
+	signal_connect(&self->component.signal_preferredsize, self,
+		patternviewstatus_onpreferredsize);	
 	signal_connect(&workspace->signal_sequenceselectionchanged,
-		self, OnStatusSequenceSelectionChanged);
+		self, patternviewstatus_onsequenceselectionchanged);
 }
 
-void OnStatusSequenceSelectionChanged(PatternViewStatus* self,
+void patternviewstatus_onsequenceselectionchanged(PatternViewStatus* self,
 	Workspace* sender)
 {
 	ui_component_invalidate(&self->component);
 }
 
-void OnPatternEditPositionChanged(PatternViewStatus* self, Workspace* sender)
+void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus* self,
+	Workspace* sender)
 {
 	ui_component_invalidate(&self->component);
 }
 
-void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
+void patternviewstatus_ondraw(PatternViewStatus* self, ui_component* sender,
+	ui_graphics* g)
 {
 	char text[256];
 	PatternEditPosition editposition;
 	SequencePosition sequenceposition;
 	SequenceEntry* sequenceentry;
 	int pattern;
+	ui_size size;
+	ui_textmetric tm;
 
+	size = ui_component_size(&self->component);
+	tm = ui_component_textmetric(&self->component);
 	editposition = workspace_patterneditposition(self->workspace);
 	sequenceposition = workspace_sequenceselection(self->workspace).editposition;		
 	sequenceentry = sequenceposition_entry(&sequenceposition);	
@@ -71,36 +85,44 @@ void OnStatusDraw(PatternViewStatus* self, ui_component* sender, ui_graphics* g)
 		editposition.line,
 		editposition.track,
 		editposition.col);
-	ui_textout(g, 0, 0, text, strlen(text));
+	ui_textout(g, 0, (size.height - tm.tmHeight) / 2, text, strlen(text));
 }
 
-void onstatuspreferredsize(PatternViewStatus* self, ui_component* sender, ui_size* limit, ui_size* rv)
+void patternviewstatus_onpreferredsize(PatternViewStatus* self,
+	ui_component* sender, ui_size* limit, ui_size* rv)
 {				
 	if (rv) {
 		ui_textmetric tm;
 	
 		tm = ui_component_textmetric(&self->component);
-		rv->width = tm.tmAveCharWidth * 80;
+		rv->width = tm.tmAveCharWidth * 70;
 		rv->height = (int)(tm.tmHeight * 1.5);
 	}
 }
 
-void patternviewbar_init(PatternViewBar* self, ui_component* parent, Workspace* workspace)
+void patternviewbar_init(PatternViewBar* self, ui_component* parent,
+	Workspace* workspace)
 {		
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);	
 	stepbox_init(&self->step, &self->component, workspace);
-	InitPatternViewStatus(&self->status, &self->component, workspace);	
-	{		
-		ui_margin margin = { 2, 10, 2, 0 };
-				
-		list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
-			UI_ALIGN_LEFT,
-			&margin));		
-	}
+	ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
+	ui_checkbox_settext(&self->movecursorwhenpaste, "Move Cursor When Paste");
+	patternviewstatus_init(&self->status, &self->component, workspace);
+	patternviewbar_initalign(self);
 }
 
+void patternviewbar_initalign(PatternViewBar* self)
+{		
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+		ui_value_makepx(0), ui_value_makepx(0));			
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT,
+		&margin));		
+}
 void patternview_init(PatternView* self, 
 		ui_component* parent,
 		ui_component* tabbarparent,		
@@ -109,19 +131,23 @@ void patternview_init(PatternView* self,
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
-	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
+	signal_connect(&self->component.signal_keydown, self,
+		patternview_onkeydown);
+	signal_connect(&self->component.signal_keyup, self,
+		patternview_onkeyup);
+	signal_connect(&self->component.signal_focus, self, patternview_onfocus);
 	ui_notebook_init(&self->notebook, &self->component);
 	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_NONE);
 	ui_notebook_init(&self->editnotebook, &self->notebook.component);
 	ui_component_setbackgroundmode(&self->editnotebook.component, BACKGROUND_NONE);
-	ui_notebook_setpage(&self->editnotebook, 0);
+	ui_notebook_setpageindex(&self->editnotebook, 0);
 	trackerview_init(&self->trackerview, &self->editnotebook.component, workspace);
-	signal_connect(&self->component.signal_size, self, OnSize);	
+	signal_connect(&self->component.signal_size, self, patternview_onsize);	
 	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);
 	InitPatternProperties(&self->properties, &self->notebook.component, 0);
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));		
-	signal_connect(&self->properties.closebutton.signal_clicked, self, OnPropertiesClose);
-	signal_connect(&self->properties.applybutton.signal_clicked, self, OnPropertiesApply);	
+	signal_connect(&self->properties.closebutton.signal_clicked, self, patternview_onpropertiesclose);
+	signal_connect(&self->properties.applybutton.signal_clicked, self, patternview_onpropertiesapply);	
 	// Tabbar
 	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);	
@@ -130,36 +156,40 @@ void patternview_init(PatternView* self,
 	tabbar_append(&self->tabbar, "Pianoroll");	
 	tabbar_append(&self->tabbar, "Split");
 	tabbar_append(&self->tabbar, "Properties");	
-	signal_connect(&self->tabbar.signal_change, self, ontabbarchange);
+	signal_connect(&self->tabbar.signal_change, self,
+		patternview_ontabbarchange);
 	// ui_notebook_connectcontroller(&self->editnotebook, &self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);	
-	signal_connect(&self->component.signal_show, self, OnShow);
-	signal_connect(&self->component.signal_hide, self, OnHide);
-	signal_connect(&workspace->player.signal_lpbchanged, self, OnLpbChanged);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	signal_connect(&self->component.signal_show, self, patternview_onshow);
+	signal_connect(&self->component.signal_hide, self, patternview_onhide);
+	signal_connect(&workspace->player.signal_lpbchanged, self,
+		patternview_onlpbchanged);
+	signal_connect(&workspace->signal_songchanged, self,
+		patternview_onsongchanged);
 	//signal_connect(&workspace->signal_editpositionchanged,
 	//	self, OnEditPositionChanged);
 	signal_connect(&workspace->signal_sequenceselectionchanged,
-		self, OnSequenceSelectionChanged);
+		self, patternview_onsequenceselectionchanged);
 	self->lpb = player_lpb(&workspace->player);
 }
 
-void ontabbarchange(PatternView* self, ui_component* sender, int tabindex)
+void patternview_ontabbarchange(PatternView* self, ui_component* sender,
+	int tabindex)
 {
 	if (tabindex < 2) {
 		if (self->editnotebook.splitbar.hwnd) {
 			ui_notebook_full(&self->editnotebook);						
 		}
-		ui_notebook_setpage(&self->notebook, 0);
-		ui_notebook_setpage(&self->editnotebook, tabindex);
+		ui_notebook_setpageindex(&self->notebook, 0);
+		ui_notebook_setpageindex(&self->editnotebook, tabindex);
 	} else 
 	if (tabindex == 2) {
-		ui_notebook_setpage(&self->notebook, 0);
+		ui_notebook_setpageindex(&self->notebook, 0);
 		if (self->editnotebook.splitbar.hwnd == 0) {		 
 			ui_notebook_split(&self->editnotebook);			
 		}
 	} else {
-		ui_notebook_setpage(&self->notebook, 1);
+		ui_notebook_setpageindex(&self->notebook, 1);
 	}
 }
 
@@ -170,24 +200,24 @@ void patternview_setpattern(PatternView* self, Pattern* pattern)
 	PatternPropertiesSetPattern(&self->properties, pattern);
 }
 
-void OnSize(PatternView* self, ui_component* sender, ui_size* size)
+void patternview_onsize(PatternView* self, ui_component* sender, ui_size* size)
 {					
 	ui_component_resize(&self->notebook.component, size->width, size->height);
 }
 
-void OnShow(PatternView* self, ui_component* sender)
+void patternview_onshow(PatternView* self, ui_component* sender)
 {			
 	self->tabbar.component.visible = 1;	
 	ui_component_align(ui_component_parent(&self->tabbar.component));
 	ui_component_show(&self->tabbar.component);	
 }
 
-void OnHide(PatternView* self, ui_component* sender)
+void patternview_onhide(PatternView* self, ui_component* sender)
 {	
 	ui_component_hide(&self->tabbar.component);				
 }
 
-void OnLpbChanged(PatternView* self, Player* sender, uintptr_t lpb)
+void patternview_onlpbchanged(PatternView* self, Player* sender, uintptr_t lpb)
 {
 	// Sequence* sequence;	
 	// SequenceTrackIterator iterator;
@@ -205,7 +235,7 @@ void OnLpbChanged(PatternView* self, Player* sender, uintptr_t lpb)
 	ui_component_invalidate(&self->trackerview.component);		
 }
 
-void OnSongChanged(PatternView* self, Workspace* workspace)
+void patternview_onsongchanged(PatternView* self, Workspace* workspace)
 {
 	SequenceSelection selection;	
 	
@@ -225,7 +255,7 @@ void OnSongChanged(PatternView* self, Workspace* workspace)
 	ui_component_invalidate(&self->component);	
 }
 
-void OnEditPositionChanged(PatternView* self, Workspace* sender)
+void patternview_oneditpositionchanged(PatternView* self, Workspace* sender)
 {	
 	/*Pattern* pattern;
 
@@ -243,7 +273,8 @@ void OnEditPositionChanged(PatternView* self, Workspace* sender)
 	ui_component_invalidate(&self->component);*/
 }
 
-void OnSequenceSelectionChanged(PatternView* self, Workspace* workspace)
+void patternview_onsequenceselectionchanged(PatternView* self,
+	Workspace* workspace)
 {	
 	SequenceSelection selection;
 	SequenceEntry* entry;
@@ -266,16 +297,28 @@ void OnSequenceSelectionChanged(PatternView* self, Workspace* workspace)
 	ui_component_invalidate(&self->component);		
 }
 
-void OnPropertiesClose(PatternView* self, ui_component* sender)
+void patternview_onpropertiesclose(PatternView* self, ui_component* sender)
 {	
 }
 
-void OnPropertiesApply(PatternView* self, ui_component* sender)
+void patternview_onpropertiesapply(PatternView* self, ui_component* sender)
 {
 	patternview_setpattern(self, self->properties.pattern);
 }
 
-void OnKeyDown(PatternView* self, ui_component* sender, KeyEvent* keyevent)
+void patternview_onkeydown(PatternView* self, ui_component* sender,
+	KeyEvent* keyevent)
 {
 	ui_component_propagateevent(sender);
+}
+
+void patternview_onkeyup(PatternView* self, ui_component* sender,
+	KeyEvent* keyevent)
+{
+	ui_component_propagateevent(sender);
+}
+
+void patternview_onfocus(PatternView* self, ui_component* sender)
+{
+	ui_component_setfocus(&self->trackerview.grid.component);
 }

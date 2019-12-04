@@ -1,7 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "../eventdriver.h"
+
 #include <windows.h>
 #include <mmsystem.h>
 #include <process.h>
@@ -19,16 +22,20 @@ typedef struct {
 
 static void driver_free(EventDriver*);
 static int driver_init(EventDriver*);
-static void driver_connect(EventDriver*, void* context, EVENTDRIVERWORKFN callback, void* handle);
+static void driver_connect(EventDriver*, void* context, EVENTDRIVERWORKFN,
+	void* handle);
 static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
 static void updateconfiguration(EventDriver*);
+static void driver_cmd(EventDriver*, int type, unsigned char* data, int size,
+	EventDriverCmd* cmd, int maxsize);
 
 static void init_properties(EventDriver* self);
 static void apply_properties(MmeMidiDriver* self);
 
-static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
+static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg,
+	DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
 
 int onerror(int err, const char* msg)
 {
@@ -59,6 +66,7 @@ EXPORT EventDriver* __cdecl eventdriver_create(void)
 	mme->driver.dispose = driver_dispose;
 	mme->driver.updateconfiguration = updateconfiguration;
 	mme->driver.error = onerror;
+	mme->driver.cmd = driver_cmd;
 	mme->hEvent = CreateEvent
 		(NULL, FALSE, FALSE, NULL);
 	driver_init(&mme->driver);
@@ -187,4 +195,11 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 		default:
 		break;
 	}
+}
+
+void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
+	EventDriverCmd* cmd, int maxsize)
+{			
+	cmd->type = EVENTDRIVER_CMD_NONE;	
+	cmd->size = 0;	
 }

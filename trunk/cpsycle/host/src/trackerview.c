@@ -25,6 +25,8 @@ static void trackergrid_drawevent(TrackerGrid*, ui_graphics* g, PatternEvent*,
 	int mid);
 static void trackergrid_onkeydown(TrackerGrid*, ui_component* sender,
 	KeyEvent*);
+static void trackergrid_onkeyup(TrackerGrid*, ui_component* sender,
+	KeyEvent*);
 static void trackergrid_onmousedown(TrackerGrid*, ui_component* sender,
 	MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, ui_component* sender,
@@ -54,6 +56,8 @@ static void trackergrid_numtrackschanged(TrackerGrid*, Player*,
 // static void trackerview_onsize(TrackerView*, ui_component* sender, ui_size*);
 static void trackerview_ondestroy(TrackerView*, ui_component* sender);
 static void trackerview_onkeydown(TrackerView*, ui_component* sender,
+	KeyEvent*);
+static void trackerview_onkeyup(TrackerView*, ui_component* sender,
 	KeyEvent*);
 static void trackerview_ontimer(TrackerView*, ui_component* sender, 
 	int timerid);
@@ -197,11 +201,11 @@ typedef struct {
 	Command command;
 	TrackerCursor cursor;
 	Pattern* pattern;
-	double bpl;
-	PatternNode* node;	
+	double bpl;	
 	PatternEvent event;
 	PatternEvent oldevent;
 	int insert;
+	Workspace* workspace;
 } InsertCommand;
 
 static void InsertCommandDispose(InsertCommand*);
@@ -209,7 +213,7 @@ static void InsertCommandExecute(InsertCommand*);
 static void InsertCommandRevert(InsertCommand*);
 
 InsertCommand* InsertCommandAlloc(Pattern* pattern, double bpl,
-	TrackerCursor cursor, PatternEvent event)
+	TrackerCursor cursor, PatternEvent event, Workspace* workspace)
 {
 	InsertCommand* rv;
 	
@@ -219,45 +223,124 @@ InsertCommand* InsertCommandAlloc(Pattern* pattern, double bpl,
 	rv->command.revert = InsertCommandRevert;
 	rv->cursor = cursor;	
 	rv->bpl = bpl;
-	rv->event = event;
-	rv->node = 0;
+	rv->event = event;	
 	rv->insert = 0;
-	rv->pattern = pattern;	
+	rv->pattern = pattern;
+	rv->workspace = workspace;
 	return rv;
 }
 
 void InsertCommandDispose(InsertCommand* self) { }
 
 void InsertCommandExecute(InsertCommand* self)
-{		
+{	
+	PatternNode* node;
 	PatternNode* prev;
-	self->node = 
-		pattern_findnode(self->pattern,
-			self->cursor.track,
-			(beat_t)self->cursor.offset,
-			self->cursor.subline,
-			(beat_t)self->bpl, &prev);	
-	if (self->node) {
-		self->oldevent = pattern_event(self->pattern, self->node);
-		pattern_setevent(self->pattern, self->node, &self->event);
+
+	node = pattern_findnode(self->pattern,
+		self->cursor.track,
+		(beat_t)self->cursor.offset,
+		self->cursor.subline,
+		(beat_t)self->bpl, &prev);	
+	if (node) {
+		self->oldevent = pattern_event(self->pattern, node);
+		pattern_setevent(self->pattern, node, &self->event);
 		self->insert = 0;
 	} else {
-		self->node = pattern_insert(self->pattern,
+		node = pattern_insert(self->pattern,
 			prev,
 			self->cursor.track, 
 			(beat_t)self->cursor.offset,
 			&self->event);
 		self->insert = 1;
 	}
+	workspace_setpatterneditposition(self->workspace, self->cursor);
 }
 
 void InsertCommandRevert(InsertCommand* self)
-{		
+{
 	if (self->insert) {
-		pattern_remove(self->pattern, self->node);
+		PatternNode* node;
+		PatternNode* prev;
+
+		node = pattern_findnode(self->pattern,
+			self->cursor.track,
+			(beat_t)self->cursor.offset,
+			self->cursor.subline,
+			(beat_t)self->bpl, &prev);
+		if (node) {
+			pattern_remove(self->pattern, node);
+		}
 	} else {
-		pattern_setevent(self->pattern, self->node, &self->oldevent);		
+		PatternNode* node;
+		PatternNode* prev;
+
+		node = pattern_findnode(self->pattern,
+			self->cursor.track,
+			(beat_t)self->cursor.offset,
+			self->cursor.subline,
+			(beat_t)self->bpl, &prev);
+		if (node) {
+			pattern_setevent(self->pattern, node, &self->oldevent);
+		}
 	}
+	workspace_setpatterneditposition(self->workspace, self->cursor);
+}
+
+// BlockTranspose
+
+typedef struct {
+	Command command;
+	Pattern* pattern;
+	Pattern oldpattern;
+	TrackerCursor cursor;	
+	TrackerGridBlock block;	
+	int transposeoffset;
+	Workspace* workspace;
+} BlockTransposeCommand;
+
+static void BlockTransposeCommandDispose(BlockTransposeCommand*);
+static void BlockTransposeCommandExecute(BlockTransposeCommand*);
+static void BlockTransposeCommandRevert(BlockTransposeCommand*);
+
+BlockTransposeCommand* BlockTransposeCommandAlloc(Pattern* pattern,
+	TrackerGridBlock block, TrackerCursor cursor, int transposeoffset,
+	Workspace* workspace)
+{
+	BlockTransposeCommand* rv;
+	
+	rv = malloc(sizeof(BlockTransposeCommand));
+	rv->command.dispose = BlockTransposeCommandDispose;
+	rv->command.execute = BlockTransposeCommandExecute;
+	rv->command.revert = BlockTransposeCommandRevert;	
+	rv->pattern = pattern;
+	pattern_init(&rv->oldpattern);
+	rv->block = block;
+	rv->cursor = cursor;
+	rv->transposeoffset = transposeoffset;
+	rv->workspace = workspace;	
+	return rv;
+}
+
+void BlockTransposeCommandDispose(BlockTransposeCommand* self)
+{
+	pattern_dispose(&self->oldpattern);
+}
+
+void BlockTransposeCommandExecute(BlockTransposeCommand* self)
+{			
+	workspace_setpatterneditposition(self->workspace, self->cursor);
+	pattern_copy(&self->oldpattern, self->pattern);	
+	pattern_blocktranspose(self->pattern, 
+		self->block.topleft,
+		self->block.bottomright, self->transposeoffset);	
+}
+
+void BlockTransposeCommandRevert(BlockTransposeCommand* self)
+{		
+	assert(self->pattern);
+	workspace_setpatterneditposition(self->workspace, self->cursor);
+	pattern_copy(self->pattern, &self->oldpattern);	
 }
 
 /// TrackerGrid
@@ -275,6 +358,8 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent,
 	signal_connect(&self->component.signal_size, self, trackergrid_onsize);
 	signal_connect(&self->component.signal_keydown,self, 
 		trackergrid_onkeydown);
+	signal_connect(&self->component.signal_keyup, self, 
+		trackergrid_onkeyup);
 	signal_connect(&self->component.signal_mousedown, self,
 		trackergrid_onmousedown);
 	signal_connect(&self->component.signal_mousemove, self,
@@ -406,7 +491,7 @@ big_beat_t trackergrid_offset(TrackerGrid* self, int y, unsigned int* lines,
 					}
 					if (entry->track == 0 && !first) {
 						++(*sublines);
-						++*subline;
+						++(*subline);
 					}							
 					first = 0;
 					curr = curr->next;
@@ -800,6 +885,12 @@ unsigned int NumSublines(Pattern* pattern, double offset, double bpl)
 }
 
 void trackergrid_onkeydown(TrackerGrid* self, ui_component* sender,
+	KeyEvent* keyevent)
+{
+	sender->propagateevent = 1;	
+}
+
+void trackergrid_onkeyup(TrackerGrid* self, ui_component* sender,
 	KeyEvent* keyevent)
 {
 	sender->propagateevent = 1;	
@@ -1335,18 +1426,45 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 			ui_component_invalidate(&self->linenumbers.component);
 		}	
 	} else {
-		if (self->grid.cursor.col != TRACKER_COLUMN_NOTE) {			
+		if (self->grid.cursor.col != TRACKER_COLUMN_NOTE) {
 			trackerview_inputdigit(self, chartoint((char)keyevent->keycode));
-		}		
-	}	
+			return;
+		}
+		{	
+			EventDriver* kbd;
+			int input;
+			EventDriverCmd cmd;
+			char data[32];
+
+			cmd.type = -1;
+			cmd.data = data;
+			kbd = workspace_kbddriver(self->workspace);
+			input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
+				GetKeyState(VK_CONTROL) < 0);				
+			kbd->cmd(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4, &cmd, 32);
+			if (cmd.type == EVENTDRIVER_CMD_PATTERN &&
+					cmd.data[0] == NOTECOMMANDS_RELEASE) {
+				trackerview_inputnote(self, NOTECOMMANDS_RELEASE);
+				return;
+			}
+		}
+	}		
+	ui_component_propagateevent(sender);
+}
+
+void trackerview_onkeyup(TrackerView* self, ui_component* sender,
+	KeyEvent* keyevent)
+{
 	ui_component_propagateevent(sender);
 }
 
 void trackerview_oninput(TrackerView* self, Player* sender, PatternEvent* event)
 {
 	if (ui_component_hasfocus(&self->grid.component) &&
-			self->grid.cursor.col == TRACKER_COLUMN_NOTE) {		
-		trackerview_inputnote(self, event->note);		
+			self->grid.cursor.col == TRACKER_COLUMN_NOTE) {
+		if (event->note != NOTECOMMANDS_RELEASE) {
+			trackerview_inputnote(self, event->note);
+		}		
 	}
 }
 
@@ -1381,7 +1499,7 @@ void trackerview_inputnote(TrackerView* self, note_t note)
 	trackerview_preventsync(self);
 	undoredo_execute(&self->workspace->undoredo,
 		&InsertCommandAlloc(self->pattern, self->grid.bpl,
-			self->grid.cursor, event)->command);	
+			self->grid.cursor, event, self->workspace)->command);
 	trackerview_advanceline(self);
 	trackerview_enablesync(self);
 }
@@ -1404,7 +1522,7 @@ void trackerview_inputdigit(TrackerView* self, int value)
 		trackerview_preventsync(self);
 		undoredo_execute(&self->workspace->undoredo,
 				&InsertCommandAlloc(self->pattern, self->grid.bpl,
-					self->grid.cursor, event)->command);
+					self->grid.cursor, event, self->workspace)->command);
 		if (colgroupstart(self->grid.cursor.col + 1) != 
 				colgroupstart(self->grid.cursor.col)) {
 			self->grid.cursor.col = colgroupstart(self->grid.cursor.col);
@@ -1685,6 +1803,8 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	signal_connect(&self->component.signal_timer, self, trackerview_ontimer);
 	signal_connect(&self->component.signal_keydown, self,
 		trackerview_onkeydown);
+	signal_connect(&self->component.signal_keyup, self,
+		trackerview_onkeyup);
 	patternblockmenu_init(&self->blockmenu, &self->component);
 	signal_connect(&self->blockmenu.changegenerator.signal_clicked, self,
 		trackerview_onchangegenerator);
@@ -2540,41 +2660,41 @@ void trackerview_blockunmark(TrackerView* self)
 
 void trackerview_onblocktransposeup(TrackerView* self)
 {
-	if (self->grid.hasselection) {
-		pattern_blocktranspose(self->pattern, 
-			self->grid.selection.topleft,
-			self->grid.selection.bottomright, 1);
-		ui_component_invalidate(&self->component);
-	}	
+	if (self->grid.hasselection) {		
+		undoredo_execute(&self->workspace->undoredo,
+			&BlockTransposeCommandAlloc(self->pattern,
+				self->grid.selection,
+				self->grid.cursor, +1, self->workspace)->command);
+	}
 }
 
 void trackerview_onblocktransposedown(TrackerView* self)
 {
-	if (self->grid.hasselection) {
-		pattern_blocktranspose(self->pattern, 
-			self->grid.selection.topleft,
-			self->grid.selection.bottomright, -1);
-		ui_component_invalidate(&self->component);
+	if (self->grid.hasselection) {		
+		undoredo_execute(&self->workspace->undoredo,
+			&BlockTransposeCommandAlloc(self->pattern,
+				self->grid.selection,
+				self->grid.cursor, -1, self->workspace)->command);
 	}
 }
 
 void trackerview_onblocktransposeup12(TrackerView* self)
 {
-	if (self->grid.hasselection) {
-		pattern_blocktranspose(self->pattern, 
-			self->grid.selection.topleft,
-			self->grid.selection.bottomright, 12);
-		ui_component_invalidate(&self->component);
+	if (self->grid.hasselection) {		
+		undoredo_execute(&self->workspace->undoredo,
+			&BlockTransposeCommandAlloc(self->pattern,
+				self->grid.selection,
+				self->grid.cursor, 12, self->workspace)->command);
 	}
 }
 
 void trackerview_onblocktransposedown12(TrackerView* self)
 {
-	if (self->grid.hasselection) {
-		pattern_blocktranspose(self->pattern, 
-			self->grid.selection.topleft,
-			self->grid.selection.bottomright, -12);
-		ui_component_invalidate(&self->component);
+	if (self->grid.hasselection) {		
+		undoredo_execute(&self->workspace->undoredo,
+			&BlockTransposeCommandAlloc(self->pattern,
+				self->grid.selection,
+				self->grid.cursor, -12, self->workspace)->command);
 	}
 }
 
@@ -2634,31 +2754,37 @@ void patternblockmenu_init(PatternBlockMenu* self, ui_component* parent)
 }
 
 void trackerview_onpatterneditpositionchanged(TrackerView* self, Workspace* sender)
-{
+{	
 	TrackerCursor oldcursor;
 
-	oldcursor = self->grid.cursor;
+	oldcursor = self->grid.cursor;	
 	self->grid.cursor = workspace_patterneditposition(sender);
-	trackerview_invalidatecursor(self, &oldcursor);
-	if (player_playing(&sender->player) && workspace_followingsong(sender)) {
-		int scrolldown;
+	if (!patterneditposition_equal(&self->grid.cursor, &oldcursor)) {
+		trackerview_invalidatecursor(self, &oldcursor);
+		if (player_playing(&sender->player) && workspace_followingsong(sender)) {
+			int scrolldown;
 
-		scrolldown = self->lastplayposition < 
-			player_position(&self->workspace->player);
-		trackerview_invalidateline(self, self->lastplayposition);
-		trackerlinenumbers_invalidateline(&self->linenumbers,
-				self->lastplayposition);
-		self->lastplayposition = player_position(&self->workspace->player);
-		trackerview_invalidateline(self, self->lastplayposition);
-		trackerlinenumbers_invalidateline(&self->linenumbers,
-				self->lastplayposition);
-		if (self->lastplayposition >= self->sequenceentryoffset &&
-				self->lastplayposition < self->sequenceentryoffset +
-				self->pattern->length) {
-			if (scrolldown) {
-				trackerview_scrolldown(self);
-			} else {
-				trackerview_scrollup(self);
+			scrolldown = self->lastplayposition < 
+				player_position(&self->workspace->player);
+			trackerview_invalidateline(self, self->lastplayposition);
+			trackerlinenumbers_invalidateline(&self->linenumbers,
+					self->lastplayposition);
+			self->lastplayposition = player_position(&self->workspace->player);
+			trackerview_invalidateline(self, self->lastplayposition);
+			trackerlinenumbers_invalidateline(&self->linenumbers,
+					self->lastplayposition);			
+			if (self->lastplayposition >= self->sequenceentryoffset &&
+					self->lastplayposition < self->sequenceentryoffset +
+					self->pattern->length) {
+				if (scrolldown) {
+					trackerview_scrolldown(self);
+				} else {
+					trackerview_scrollup(self);
+				}
+			}
+		} else {
+			if (self->grid.midline) {
+				trackerview_centeroncursor(self);
 			}
 		}
 	}
@@ -2683,7 +2809,7 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 		trackerview_preventsync(self);
 		undoredo_execute(&self->workspace->undoredo,
 			&InsertCommandAlloc(self->pattern, self->grid.bpl,
-				self->grid.cursor, event)->command);		
+				self->grid.cursor, event, self->workspace)->command);
 		if (workspace_advancelineonrecordtweak(sender) &&
 				!(workspace_followingsong(sender) && 
 				  player_playing(&sender->player))) {			

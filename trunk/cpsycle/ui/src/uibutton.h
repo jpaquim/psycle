@@ -23,6 +23,7 @@ typedef struct {
 	int highlight;
 	ButtonIcon icon;
 	int charnumber;
+	UiAlignment textalignment;
 } ui_button;
 
 void ui_button_init(ui_button*, ui_component* parent);
@@ -31,5 +32,6 @@ void ui_button_seticon(ui_button*, ButtonIcon);
 void ui_button_highlight(ui_button*);
 void ui_button_disablehighlight(ui_button*);
 void ui_button_setcharnumber(ui_button*, int number);
+void ui_button_settextalignment(ui_button*, UiAlignment);
 
 #endif

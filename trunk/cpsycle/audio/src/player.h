@@ -21,7 +21,7 @@ typedef struct {
 	Driver* driver;		
 	Song* song;
 	Sequencer sequencer;	
-	unsigned int numsongtracks;
+	uintptr_t numsongtracks;
 	Signal signal_numsongtrackschanged;
 	Signal signal_lpbchanged;
 	Signal signal_inputevent;
@@ -31,6 +31,9 @@ typedef struct {
 	VUMeterMode vumode;
 	int resetvumeters;
 	int recordingnotes;
+	int multichannelaudition;
+	Table notestotracks;
+	Table trackstonotes;
 } Player;
 
 // init dispose
@@ -38,8 +41,8 @@ void player_init(Player*, Song*, void* systemhandle);
 void player_dispose(Player*);
 // general
 void player_setsong(Player*, Song*);
-void player_setnumsongtracks(Player*, unsigned int numsongtracks);
-unsigned int player_numsongtracks(Player*);
+void player_setnumsongtracks(Player*, uintptr_t numsongtracks);
+uintptr_t player_numsongtracks(Player*);
 void player_setvumetermode(Player*, VUMeterMode);
 VUMeterMode player_vumetermode(Player*);
 // sequencer

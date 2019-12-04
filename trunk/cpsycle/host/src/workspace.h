@@ -42,6 +42,7 @@ typedef struct {
 
 typedef struct {	
 	Song* song;
+	Song* songcbk;
 	Player player;	
 	Properties* config;
 	Properties* inputoutput;

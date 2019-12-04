@@ -14,18 +14,31 @@ typedef enum {
 } SequencerPlayMode;
 
 typedef struct {
+	beat_t retriggeroffset;
+	beat_t retriggerstep;
+	int jump;
+	beat_t jumpat;
+	beat_t jumpto;	
+} SequenceTrackState;
+
+typedef struct {
+	SequenceTrackState state;
+	SequenceTrackIterator* iterator;
+} SequencerTrack;
+
+typedef struct {
 	Sequence* sequence;
 	Machines* machines;	
 	beat_t bpm;
 	unsigned int samplerate;
 	beat_t beatsprosample;	
 	unsigned int lpb; // global
-	beat_t lpbspeed;
+	beat_t lpbspeed; // pattern
 	int playing;
 	beat_t position;
 	beat_t seqlinetickcount;
 	beat_t window;	
-	List* currtrackiterators;	
+	List* currtracks;	
 	List* events;
 	List* delayedevents;
 	List* inputevents;
@@ -55,8 +68,7 @@ uintptr_t sequencer_lpb(Sequencer*);
 unsigned int sequencer_frames(Sequencer*, beat_t offset);
 beat_t sequencer_frametooffset(Sequencer*, int numsamples);
 int sequencer_playing(Sequencer*);
-void sequencer_addinputevent(Sequencer*, const PatternEvent*,
-	unsigned int track);
+void sequencer_addinputevent(Sequencer*, const PatternEvent*, uintptr_t track);
 void sequencer_recordinputevent(Sequencer*, const PatternEvent*,
 	unsigned int track, beat_t playposition);
 void sequencer_setplaymode(Sequencer*, SequencerPlayMode);

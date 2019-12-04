@@ -267,7 +267,7 @@ SequenceTrackIterator sequence_last(Sequence* self, List* tracknode)
 	track = (SequenceTrack*) tracknode->entry;
 	if (track->entries == 0) {
 		return sequence_begin(self, tracknode, 0);
-	}
+	}	
 	p.patternnode = 0;		
 	p.tracknode = track->entries->tail;
 	if (p.tracknode) {
@@ -443,6 +443,7 @@ SequenceTrackIterator sequence_makeiterator(Sequence* self, List* entries)
 {
 	SequenceTrackIterator rv;
 	Pattern* pPattern  = 0;	
+	
 	rv.patterns = self->patterns;
 	rv.tracknode = entries;
 	if (entries) {

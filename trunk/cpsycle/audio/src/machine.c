@@ -183,13 +183,25 @@ void work(Machine* self, BufferContext* bc)
 			buffer_setoffset(bc->input, pos);
 			buffer_setoffset(bc->output, pos);			
 			bc->numsamples = numworksamples;
-			self->vtable->generateaudio(self, bc);
+			if (!self->vtable->bypassed(self)) {
+				self->vtable->generateaudio(self, bc);
+			}
 			amount -= numworksamples;
 			bc->numsamples = restorenumsamples;
 		}
 		if (entry->event.cmd == SET_PANNING) {
 			self->vtable->setpanning(self, 
 				entry->event.parameter / 255.f);
+		} else
+		if (entry->event.note == NOTECOMMANDS_MIDICC) {
+			Machine* dst;
+			int value;
+
+			dst = machines_at(self->vtable->machines(self), entry->event.mach);
+			if (dst) {
+				value = (entry->event.cmd << 8) + entry->event.parameter;
+				dst->vtable->patterntweak(dst, entry->event.inst, value);
+			}
 		} else
 		if (entry->event.note == NOTECOMMANDS_TWEAK) {
 			int value;
@@ -206,7 +218,9 @@ void work(Machine* self, BufferContext* bc)
 		buffer_setoffset(bc->input, pos);
 		buffer_setoffset(bc->output, pos);			
 		bc->numsamples = amount;
-		self->vtable->generateaudio(self, bc);
+		if (!self->vtable->bypassed(self)) {
+			self->vtable->generateaudio(self, bc);
+		}
 		bc->numsamples = restorenumsamples;
 	}
 	buffer_setoffset(bc->input, 0);

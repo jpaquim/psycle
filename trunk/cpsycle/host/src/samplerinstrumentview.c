@@ -68,7 +68,7 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	signal_connect(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 	signal_connect(&self->instrumentsbox.instrumentlist.signal_selchanged, self, OnInstrumentListChanged);
 
-	ui_notebook_setpage(&self->notebook, 0);
+	ui_notebook_setpageindex(&self->notebook, 0);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
@@ -286,7 +286,11 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 
 	InitEnvelopeView(&self->envelopeview, &self->component);
 	ui_component_setalign(&self->envelopeview.component, UI_ALIGN_TOP);
-	ui_margin_init(&margin, 20, 5, 5, 5);
+	ui_margin_init(&margin,
+		ui_value_makepx(20),
+		ui_value_makepx(5),
+		ui_value_makepx(5),
+		ui_value_makepx(5));
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 200);	
 
@@ -299,7 +303,11 @@ void InitSamplerInstrumentVolumeView(SamplerInstrumentVolumeView* self, ui_compo
 	ui_slider_init(&self->release, &self->component);
 	ui_slider_settext(&self->release, "Release");
 	
-	ui_margin_init(&margin, 0, 5, 5, 5);
+	ui_margin_init(&margin,
+		ui_value_makepx(0),
+		ui_value_makepx(5),
+		ui_value_makepx(5),
+		ui_value_makepx(5));
 	for (i = 0; i < 4; ++i) {		
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
@@ -435,7 +443,11 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 
 	InitEnvelopeView(&self->envelopeview, &self->component);
 	ui_component_setalign(&self->envelopeview.component, UI_ALIGN_TOP);
-	ui_margin_init(&margin, 20, 5, 5, 5);
+	ui_margin_init(&margin,
+		ui_value_makepx(20),
+		ui_value_makepx(5),
+		ui_value_makepx(5),
+		ui_value_makepx(5));
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 100);	
 
@@ -454,7 +466,11 @@ void InitSamplerInstrumentFilterView(SamplerInstrumentFilterView* self, ui_compo
 	ui_slider_init(&self->modamount, &self->component);
 	ui_slider_settext(&self->modamount, "Mod. Amount");
 	
-	ui_margin_init(&margin, 0, 5, 5, 5);
+	ui_margin_init(&margin,
+		ui_value_makepx(0),
+		ui_value_makepx(5),
+		ui_value_makepx(5),
+		ui_value_makepx(5));
 	for (i = 0; i < 7; ++i) {		
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);

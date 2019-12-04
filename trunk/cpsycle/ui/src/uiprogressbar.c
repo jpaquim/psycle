@@ -46,7 +46,7 @@ void onpreferredsize(ui_progressbar* self, ui_component* sender, ui_size* limit,
 	ui_size* rv)
 {		
 	if (rv) {
-		rv->width = 200;
+		rv->width = 100;
 		rv->height = 20;
 	}
 }

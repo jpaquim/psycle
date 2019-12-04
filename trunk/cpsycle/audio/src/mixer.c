@@ -141,7 +141,7 @@ static void vtable_init(Mixer* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
-		vtable.info = info;
+		vtable.info = (fp_machine_info) info;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
 		vtable.dispose = (fp_machine_dispose) mixer_dispose;

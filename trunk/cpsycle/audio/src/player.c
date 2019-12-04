@@ -35,8 +35,8 @@ static void player_unloaddriver(Player*);
 static void player_unloadeventdrivers(Player*);
 static amp_t* work(Player*, int* numsamples);
 static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
-static void player_workpath(Player*, unsigned int amount);
-static void player_filldriver(Player*, amp_t* buffer, unsigned int amount);
+static void player_workpath(Player*, uintptr_t amount);
+static void player_filldriver(Player*, amp_t* buffer, uintptr_t amount);
 static RMSVol* player_rmsvol(Player*, size_t slot);
 static void player_resetvumeters(Player*);
 
@@ -47,12 +47,15 @@ void player_init(Player* self, Song* song, void* handle)
 	self->song = song;	
 	self->numsongtracks = 16;
 	self->recordingnotes = 0;
+	self->multichannelaudition = 0;
 	sequencer_init(&self->sequencer, &song->sequence, &song->machines);
 	mainframe = handle;
 	player_initdriver(self);	
 	eventdrivers_init(&self->eventdrivers, self, workeventinput, handle);
 	player_initsignals(self);
-	player_initrms(self);	
+	player_initrms(self);
+	table_init(&self->notestotracks);
+	table_init(&self->trackstonotes);
 }
 
 void player_initdriver(Player* self)
@@ -86,6 +89,8 @@ void player_dispose(Player* self)
 	signal_dispose(&self->signal_inputevent);
 	sequencer_dispose(&self->sequencer);		
 	player_disposerms(self);
+	table_dispose(&self->notestotracks);
+	table_dispose(&self->trackstonotes);
 }
 
 void player_disposerms(Player* self)
@@ -105,8 +110,8 @@ void player_disposerms(Player* self)
 
 amp_t* work(Player* self, int* numsamples)
 {		
-	unsigned int amount;
-	unsigned int numsamplex;
+	uintptr_t amount;
+	uintptr_t numsamplex;
 	amp_t* psamples;
 	
 	psamples = bufferdriver;
@@ -124,7 +129,7 @@ amp_t* work(Player* self, int* numsamples)
 	return bufferdriver;
 }
 
-void player_workpath(Player* self, unsigned int amount)
+void player_workpath(Player* self, uintptr_t amount)
 {
 	MachinePath* path;
 	path = machines_path(&self->song->machines);
@@ -175,7 +180,7 @@ void player_resetvumeters(Player* self)
 	self->resetvumeters = 0;	
 }
 
-void player_filldriver(Player* self, amp_t* buffer, unsigned int amount)
+void player_filldriver(Player* self, amp_t* buffer, uintptr_t amount)
 {
 	Buffer* masteroutput;	
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
@@ -221,10 +226,12 @@ RMSVol* player_rmsvol(Player* self, size_t slot)
 void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int size)
 {	
 	int validevent = 0;
+	uintptr_t note = 0;
 	PatternEvent event;
 	
 	switch (cmd) {
-		case 1:// MIDI DATA
+		// MIDI DATA
+		case 1:
 		{
 			int lsb;
 			int msb;
@@ -240,26 +247,52 @@ void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int siz
 					event.cmd = 0;
 					event.parameter = 0;
 					validevent = 1;
+					note = data[1];
 				default:
 				break;
 			}
 		}
 		break;
-		case 2:	
+		// Pattern Data
+		case 2:
 			patternevent_init(&event, data[0], 255, 0, 0, 0);
+			note = data[1];
 			validevent = 1;
 		break;
 		default:		
 		break;
 	}
 	if (validevent) {
-		sequencer_addinputevent(&self->sequencer, &event, 0);
+		uintptr_t track = 0;
+
+		if (self->multichannelaudition) {
+			if (event.note < NOTECOMMANDS_RELEASE) {
+				if (table_exists(&self->notestotracks, event.note)) {
+					track = (uintptr_t) table_at(&self->notestotracks, event.note);
+				} else {							
+					while (table_exists(&self->trackstonotes, track)) {
+						++track;
+					}
+					table_insert(&self->notestotracks, event.note, (void*)track);
+					table_insert(&self->trackstonotes, track,
+						(void*)(uintptr_t)event.note);
+				}
+			} else
+			if (event.note == NOTECOMMANDS_RELEASE) {				
+				if (table_exists(&self->notestotracks, note)) {
+					track = (uintptr_t) table_at(&self->notestotracks, note);
+					table_remove(&self->notestotracks, note);
+					table_remove(&self->trackstonotes, track);
+				}
+			}
+		}
+		sequencer_addinputevent(&self->sequencer, &event, track);
 		if (self->recordingnotes && sequencer_playing(&self->sequencer)) {
 			sequencer_recordinputevent(&self->sequencer, &event, 0, 
 				player_position(self));			
 		} else {			
 			signal_emit(&self->signal_inputevent, self, 1, &event);
-		}
+		}		
 	}
 }
 
@@ -273,7 +306,7 @@ void player_setsong(Player* self, Song* song)
 		self->driver->samplerate(self->driver));	
 }
 
-void player_setnumsongtracks(Player* self, unsigned int numsongtracks)
+void player_setnumsongtracks(Player* self, uintptr_t numsongtracks)
 {
 	if (numsongtracks >= 1 && numsongtracks <= 64) {
 		self->numsongtracks = numsongtracks;	
@@ -282,7 +315,7 @@ void player_setnumsongtracks(Player* self, unsigned int numsongtracks)
 	}
 }
 
-unsigned int player_numsongtracks(Player* self)
+uintptr_t player_numsongtracks(Player* self)
 {
 	return self->numsongtracks;
 }
@@ -378,7 +411,6 @@ void player_loaddriver(Player* self, const char* path)
 	self->driver->open(self->driver);
 }
 
-
 void player_unloaddriver(Player* self)
 {
 	if (self->driver) {
@@ -452,4 +484,3 @@ unsigned int player_numeventdrivers(Player* self)
 {
 	return eventdrivers_size(&self->eventdrivers);
 }
-

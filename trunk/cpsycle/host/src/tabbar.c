@@ -19,7 +19,11 @@ void InitTab(Tab* self, const char* text, ui_size* size)
 	if (size) {
 		self->size = *size;
 	}	
-	ui_margin_init(&self->margin, 0, 0, 0, 0);
+	ui_margin_init(&self->margin,
+		ui_value_makepx(0),
+		ui_value_makeew(0),
+		ui_value_makepx(0),
+		ui_value_makepx(0));
 }
 
 void DisposeTab(Tab* self)
@@ -31,7 +35,6 @@ void tabbar_init(TabBar* self, ui_component* parent)
 {
 	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;	
-	ui_margin_init(&self->tabmargin, 0, 10, 0, 0);
 	signal_init(&self->signal_change);
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
@@ -72,12 +75,13 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 	int cpxhover = 0;
 	int hoverwidth = 0;
 	ui_size size;
-
+	ui_textmetric tm;
+	
 	size = ui_component_size(&self->component);
-	ui_setbackgroundmode(g, TRANSPARENT);		
-
+	tm = ui_component_textmetric(&self->component);
+	ui_setbackgroundmode(g, TRANSPARENT);	
 	if (self->tabalignment == UI_ALIGN_TOP) {
-		cpx = 5;
+		cpx = 0;
 	} else 
 	if (self->tabalignment == UI_ALIGN_RIGHT) {
 		cpy = 5;
@@ -92,39 +96,41 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 		tab = (Tab*)tabs->entry;
 		if (self->selected == c) {
 			ui_settextcolor(g, 0x00B1C8B0);
-			cpxsel = cpx;
+			cpxsel = cpx + ui_value_px(&tab->margin.left, &tm);
 			selwidth = tab->size.width;
 		}
 		if (self->hover && self->hoverindex == c && self->hoverindex != self->selected) {
 			ui_settextcolor(g, 0x00FFFFFF);
-			cpxhover = cpx;
+			cpxhover = cpx + ui_value_px(&tab->margin.left, &tm);
 			hoverwidth = tab->size.width;
 		} else
 		if (self->selected == c) {
 			ui_settextcolor(g, 0x00B1C8B0);		
 		} else {
 			ui_settextcolor(g, 0x00D1C5B6);
-		}
-		ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
+		}		
 		if (self->tabalignment == UI_ALIGN_TOP) {
-			cpx += tab->size.width;
-			cpx += self->tabmargin.right + tab->margin.right;
-		} else 
+			cpx += ui_value_px(&tab->margin.left, &tm);
+			ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
+			cpx += tab->size.width + ui_value_px(&tab->margin.right, &tm);
+		} else
 		if (self->tabalignment == UI_ALIGN_LEFT ||
 			self->tabalignment == UI_ALIGN_RIGHT) {
-			cpy += tab->size.height;
-			cpy += self->tabmargin.bottom + tab->margin.bottom;
+			cpy += ui_value_px(&tab->margin.top, &tm);
+			ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
+			cpy += tab->size.height + ui_value_px(&tab->margin.bottom, &tm);
 		}
 	}
 	ui_setcolor(g, 0x005F5F5F);		
-	if (self->tabalignment == UI_ALIGN_TOP) {		
+	if (self->tabalignment == UI_ALIGN_TOP) {
+		int y;
+
 		ui_setcolor(g, 0x00B1C8B0);		
-		ui_drawline(g, cpxsel, size.height - 3, cpxsel + selwidth,
-			size.height - 3);		 
+		y = tm.tmHeight + 2;
+		ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);		 
 		if (self->hover && self->hoverindex != self->selected) {		
 			ui_setcolor(g, 0x00FFFFFF);
-			ui_drawline(g, cpxhover, size.height - 3, cpxhover + hoverwidth,
-				size.height - 3);
+			ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
 		}
 	} else
 	if (self->tabalignment == UI_ALIGN_LEFT) {
@@ -149,14 +155,16 @@ void OnMouseDown(TabBar* self, ui_component* sender, MouseEvent* mouseevent)
 
 int tabhittest(TabBar* self, int x, int y) 
 {
-	List* tabs;
+	List* tabs;	
 	int rv = -1;
 	int c = 0;
 	int cpx = 0;
 	int cpy = 0;
+	ui_textmetric tm;
 
+	tm = ui_component_textmetric(&self->component);
 	if (self->tabalignment == UI_ALIGN_TOP) {
-		cpx = 5;
+		cpx = 0;
 	} else 
 	if (self->tabalignment == UI_ALIGN_RIGHT) {
 		cpy = 5;
@@ -172,23 +180,30 @@ int tabhittest(TabBar* self, int x, int y)
 
 		tab = (Tab*)tabs->entry;
 		if (self->tabalignment == UI_ALIGN_TOP && x >= cpx &&
-			x < cpx + tab->size.width + tab->margin.right +
-				self->tabmargin.right) {
+			x < cpx + tab->size.width +
+				ui_value_px(&tab->margin.left, &tm) +
+				ui_value_px(&tab->margin.right, &tm)) {
 			rv = c;
 			break;
 		} else
-		if ((self->tabalignment == UI_ALIGN_LEFT || self->tabalignment == UI_ALIGN_RIGHT) &&
-			y >= cpy && y < cpy + tab->size.height + tab->margin.bottom +
-				self->tabmargin.bottom) {
+		if ((self->tabalignment == UI_ALIGN_LEFT ||
+				self->tabalignment == UI_ALIGN_RIGHT) &&
+			y >= cpy && y < cpy + tab->size.height +
+				ui_value_px(&tab->margin.top, &tm) +
+				ui_value_px(&tab->margin.bottom, &tm)) {
 			rv = c;
 			break;
 		}
 		if (self->tabalignment == UI_ALIGN_TOP) {
-			cpx += tab->size.width + tab->margin.right + self->tabmargin.right;
+			cpx += tab->size.width +
+				ui_value_px(&tab->margin.left, &tm) +
+				ui_value_px(&tab->margin.right, &tm);
 		} else
 		if (self->tabalignment == UI_ALIGN_LEFT ||
 			self->tabalignment == UI_ALIGN_RIGHT) {
-			cpy += tab->size.height + tab->margin.bottom + self->tabmargin.bottom;
+			cpy += tab->size.height +
+				ui_value_px(&tab->margin.top, &tm) +
+				ui_value_px(&tab->margin.bottom, &tm);
 		}
 		tabs = tabs->next;
 		++c;
@@ -232,15 +247,20 @@ int tabbar_selected(TabBar* self)
 	return self->selected;
 }
 
-void tabbar_append(TabBar* self, const char* label)
+Tab* tabbar_append(TabBar* self, const char* label)
 {
 	Tab* tab;
 
 	tab = (Tab*)malloc(sizeof(Tab));
 	InitTab(tab, label, 0);
+	if (self->tabs != 0) {
+		tab->margin.left = ui_value_makeew(1.5);
+	} 
 	list_append(&self->tabs, tab);	
 	tab->size = ui_component_textsize(&self->component, tab->text);
 	tab->size.height = 20;
+
+	return tab;
 }
 
 void tabbar_settabmargin(TabBar* self, int tabindex, const ui_margin* margin)
@@ -282,17 +302,17 @@ void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, ui_size
 {
 	if (rv) {
 		ui_size size;
-		
+		ui_textmetric tm;
 		List* tabs;	
 		int cpx = 0;
 		int cpy = 0;
 		int cpxmax = 0;
 		int cpymax = 0;
 		
-		size = ui_component_size(&self->component);	
-
+		size = ui_component_size(&self->component);
+		tm = ui_component_textmetric(&self->component);
 		if (self->tabalignment == UI_ALIGN_TOP) {
-			cpx = 5;
+			cpx = 0;
 		} else 
 		if (self->tabalignment == UI_ALIGN_RIGHT) {
 			cpy = 5;
@@ -309,25 +329,38 @@ void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, ui_size
 			tabsize = ui_component_textsize(&self->component, tab->text);
 			tabsize.height = (int) (tabsize.height * 1.5);
 			tabsize.width = (int) tabsize.width;
-			if (self->tabalignment == UI_ALIGN_TOP) {			
-				cpx += tabsize.width;
-				cpx += self->tabmargin.right + tab->margin.right;
-				if (cpymax < cpy + tabsize.height + tab->margin.top + tab->margin.bottom) {
-					cpymax = cpy + tabsize.height + tab->margin.top + tab->margin.bottom;
+			if (self->tabalignment == UI_ALIGN_TOP) {								
+				cpx += tabsize.width;				
+				cpx += ui_value_px(&tab->margin.left, &tm) +
+						ui_value_px(&tab->margin.right, &tm);
+				if (cpymax < cpy + tabsize.height +
+						ui_value_px(&tab->margin.top, &tm) +
+						ui_value_px(&tab->margin.bottom, &tm)) {
+					cpymax = cpy + tabsize.height +
+						ui_value_px(&tab->margin.top, &tm) +
+						ui_value_px(&tab->margin.bottom, &tm);
 				}
-				if (cpxmax < cpx + tabsize.width + tab->margin.left + tab->margin.right) {
-					cpxmax = cpx + tabsize.width + tab->margin.left + tab->margin.right;
+				if (cpxmax < cpx) {
+					cpxmax = cpx;
 				}
 			} else 
 			if (self->tabalignment == UI_ALIGN_LEFT ||
 				self->tabalignment == UI_ALIGN_RIGHT) {
 										
 				cpy += tabsize.height;
-				if (cpxmax < cpx + tabsize.width + tab->margin.left + tab->margin.right) {
-					cpxmax = cpx + tabsize.width + tab->margin.left + tab->margin.right;
+				if (cpxmax < cpx + tabsize.width +
+						ui_value_px(&tab->margin.left, &tm) +
+						ui_value_px(&tab->margin.right, &tm)) {
+					cpxmax = cpx + tabsize.width +
+						ui_value_px(&tab->margin.left, &tm) +
+						ui_value_px(&tab->margin.right, &tm);
 				}
-				if (cpymax < cpy + tabsize.height + tab->margin.top + tab->margin.bottom) {
-					cpymax = cpy + tabsize.height + tab->margin.top + tab->margin.bottom;
+				if (cpymax < cpy + tabsize.height +
+						ui_value_px(&tab->margin.top, &tm) +
+						ui_value_px(&tab->margin.bottom, &tm)) {
+					cpymax = cpy + tabsize.height +
+						ui_value_px(&tab->margin.top, &tm) +
+						ui_value_px(&tab->margin.bottom, &tm);
 				}
 			}
 		}

@@ -26,7 +26,7 @@ void ui_notebook_init(ui_notebook* self, ui_component* parent)
 	self->splitbar.hwnd = 0;	
 }
 
-void ui_notebook_setpage(ui_notebook* self, int pageindex)
+void ui_notebook_setpageindex(ui_notebook* self, int pageindex)
 {	
 	List* p;
 	List* q;
@@ -61,7 +61,7 @@ void ui_notebook_setpage(ui_notebook* self, int pageindex)
 	}
 }
 
-int ui_notebook_page(ui_notebook* self)
+int ui_notebook_pageindex(ui_notebook* self)
 {
 	return self->pageindex;
 }
@@ -93,7 +93,7 @@ void onsize(ui_notebook* self, ui_component* sender, ui_size* size)
 
 void ontabbarchange(ui_notebook* self, ui_component* sender, int tabindex)
 {
-	ui_notebook_setpage(self, tabindex);
+	ui_notebook_setpageindex(self, tabindex);
 }
 
 void ui_notebook_split(ui_notebook* self)
@@ -107,7 +107,7 @@ void ui_notebook_split(ui_notebook* self)
 		signal_connect(&self->splitbar.signal_mousedown, self, onmousedown);		
 		signal_connect(&self->splitbar.signal_mousemove, self, onmousemove);
 		signal_connect(&self->splitbar.signal_mouseup, self, onmouseup);
-		ui_notebook_setpage(self, 0);
+		ui_notebook_setpageindex(self, 0);
 		align_split(self, self->splitx);
 	}
 }
@@ -117,7 +117,7 @@ void ui_notebook_full(ui_notebook* self)
 	if (self->splitbar.hwnd != 0) {
 		self->split = 0;
 		ui_component_destroy(&self->splitbar);
-		ui_notebook_setpage(self, self->pageindex);
+		ui_notebook_setpageindex(self, self->pageindex);
 		self->splitbar.hwnd = 0;
 	}
 }
@@ -199,4 +199,24 @@ void align_split(ui_notebook* self, int x) {
 		}		
 	}	
 	list_free(q);
+}
+
+ui_component* ui_notebook_activepage(ui_notebook* self)
+{
+	ui_component* rv = 0;
+	List* p;
+	List* q;
+
+	for (p = q = ui_component_children(&self->component, 0);
+			p != 0; p = p->next) {		
+		ui_component* component;
+
+		component = (ui_component*)p->entry;
+		if (ui_component_visible(component)) {
+			rv = component;
+			break;
+		}
+	}
+	list_free(q);
+	return rv;			
 }

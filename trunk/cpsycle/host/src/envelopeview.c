@@ -53,7 +53,11 @@ void adsrpointmapper_updatesettings(ADSRPointMapper* self)
 void InitEnvelopeView(EnvelopeView* self, ui_component* parent)
 {				
 	ui_component_init(&self->component, parent);	
-	ui_margin_init(&self->spacing, 5, 5, 5, 5);
+	ui_margin_init(&self->spacing, 
+		ui_value_makepx(5),
+		ui_value_makepx(5),
+		ui_value_makepx(5),
+		ui_value_makepx(5));
 	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);
@@ -101,17 +105,17 @@ void DrawGrid(EnvelopeView* self, ui_graphics* g)
 	ui_setcolor(g, 0xFF666666);	
 	for (i = 0; i <= 1.0; i += 0.1 ) {
 		ui_drawline(g,
-			self->spacing.left,
+			self->spacing.left.quantity.integer,
 			pxvalue(self, i),
-			self->spacing.left + self->cx,
+			self->spacing.left.quantity.integer + self->cx,
 			pxvalue(self, i));
 	}	
 	for (i = 0; i <= displaymaxtime(self); i += 0.5) {
 		ui_drawline(g,
 			pxtime(self, i),
-			self->spacing.top,
+			self->spacing.top.quantity.integer,
 			pxtime(self, i),
-			self->spacing.top + self->cy);
+			self->spacing.top.quantity.integer + self->cy);
 	}
 }
 
@@ -163,17 +167,19 @@ void DrawLines(EnvelopeView* self, ui_graphics* g)
 		if (count == self->sustainstage) {
 			ui_drawline(g,
 				pxtime(self, q->time),
-				self->spacing.top,
+				self->spacing.top.quantity.integer,
 				pxtime(self, q->time),
-				self->spacing.top + self->cy);
+				self->spacing.top.quantity.integer + self->cy);
 		}
 	}
 }
 
 void OnSize(EnvelopeView* self, ui_component* sender, ui_size* size)
 {
-	self->cx = size->width - self->spacing.left - self->spacing.right;
-	self->cy = size->height - self->spacing.top - self->spacing.bottom;
+	self->cx = size->width - self->spacing.left.quantity.integer -
+		self->spacing.right.quantity.integer;
+	self->cy = size->height - self->spacing.top.quantity.integer -
+		self->spacing.bottom.quantity.integer;
 }
 
 void OnMouseDown(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
@@ -189,8 +195,11 @@ void OnMouseMove(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 
 		pt = (EnvelopePoint*)self->dragpoint->entry;
 		oldtime = pt->time;
-		pt->value = 1.f - (ev->y - self->spacing.top)/(float)self->cy;
-		pt->time = (ev->x - self->spacing.left) * displaymaxtime(self)/(float)self->cx;				
+		pt->value = 1.f - (ev->y - self->spacing.top.quantity.integer) /
+			(float)self->cy;
+		pt->time = (ev->x - self->spacing.left.quantity.integer) *
+			displaymaxtime(self) /
+			(float)self->cx;
 		CheckAdjustPointRange(self->dragpoint);
 		ShiftSuccessors(self, pt->time - oldtime);
 		adsrpointmapper_updatesettings(&self->pointmapper);
@@ -262,12 +271,14 @@ List* HitTestPoint(EnvelopeView* self, int x, int y)
 
 int pxvalue(EnvelopeView* self, double value)
 {
-	return (int)(self->cy - value*self->cy) + self->spacing.left;
+	return (int)(self->cy - value * self->cy) +
+		self->spacing.left.quantity.integer;
 }
 
 int pxtime(EnvelopeView* self, double t)
 {
-	return (int)(t * self->cx / displaymaxtime(self)) + self->spacing.top;
+	return (int)(t * self->cx / displaymaxtime(self)) +
+		self->spacing.top.quantity.integer;
 }
 
 float displaymaxtime(EnvelopeView* self)

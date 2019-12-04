@@ -19,7 +19,6 @@ typedef struct {
 	List* tabs;
 	ui_component component;
 	int selected;	
-	ui_margin tabmargin;
 	Signal signal_change;
 	ui_font font;
 	int hover;
@@ -28,7 +27,7 @@ typedef struct {
 } TabBar;
 
 void tabbar_init(TabBar*, ui_component* parent);
-void tabbar_append(TabBar*, const char* label);
+Tab* tabbar_append(TabBar*, const char* label);
 void tabbar_select(TabBar*, int tabindex);
 int tabbar_selected(TabBar*);
 void tabbar_settabmargin(TabBar*, int tab, const ui_margin* margin);

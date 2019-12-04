@@ -75,15 +75,23 @@ typedef struct {
 void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	ui_component* parent, struct SequenceView*);
 
+typedef struct {
+	ui_component component;
+	ui_checkbox followsong;
+	ui_checkbox shownames;	
+	ui_checkbox recordtweaks;
+	ui_checkbox multichannelaudition;
+} SequencerOptionsBar;
+
+void sequenceroptionsbar_init(SequencerOptionsBar* self, ui_component* parent);
+
 typedef struct SequenceView {
 	ui_component component;	
 	SequenceListView listview;
 	SequenceButtons buttons;
 	SequenceViewTrackHeader trackheader;
 	SequenceViewDuration duration;
-	ui_checkbox followsong;
-	ui_checkbox shownames;	
-	ui_checkbox recordtweaks;
+	SequencerOptionsBar options;
 	Patterns* patterns;
 	Sequence* sequence;
 	SequenceSelection* selection;

@@ -50,6 +50,7 @@ static void machinewireview_onmouseup(MachineWireView*, ui_component* sender, Mo
 static void machinewireview_onmousemove(MachineWireView*, ui_component* sender, MouseEvent*);
 static void machinewireview_onmousedoubleclick(MachineWireView*, ui_component* sender, MouseEvent*);
 static void machinewireview_onkeydown(MachineWireView*, ui_component* sender, KeyEvent*);
+static void machinewireview_onkeyup(MachineWireView*, ui_component* sender, KeyEvent*);
 static void machinewireview_hittest(MachineWireView*, int x, int y);
 static int machinewireview_hittestpan(MachineWireView*, int x, int y, uintptr_t slot, int* dx);
 static int machinewireview_hittestcoord(MachineWireView*, int x, int y, int mode, uintptr_t slot, SkinCoord*);
@@ -79,6 +80,8 @@ static void machineview_onshow(MachineView*, ui_component* sender);
 static void machineview_onhide(MachineView*, ui_component* sender);
 static void machineview_onmousedoubleclick(MachineView*, ui_component* sender, int x, int y, int button);
 static void machineview_onkeydown(MachineView*, ui_component* sender, KeyEvent*);
+static void machineview_onkeyup(MachineView*, ui_component* sender, KeyEvent*);
+static void machineview_onfocus(MachineView*, ui_component* sender);
 
 void machineui_init(MachineUi* self, int x, int y, Machine* machine,
 	uintptr_t slot, MachineSkin* skin, Workspace* workspace)
@@ -173,7 +176,7 @@ void machineui_editname(MachineUi* self, ui_edit* edit)
 		signal_disconnectall(&edit->component.signal_keydown);
 		signal_disconnectall(&edit->signal_change);
 		signal_connect(&edit->signal_change, self, machineui_oneditchange);
-		signal_connect(&edit->component.signal_keydown, self, machineui_onkeydown);
+		signal_connect(&edit->component.signal_keydown, self, machineui_onkeydown);		
 		signal_connect(&edit->component.signal_focuslost, self, machineui_oneditfocuslost);
 		ui_edit_settext(edit, self->machine->vtable->editname(self->machine));
 		r = machineui_position(self);
@@ -366,7 +369,8 @@ void machinewireview_connectuisignals(MachineWireView* self)
 	signal_connect(&self->component.signal_mouseup, self, machinewireview_onmouseup);
 	signal_connect(&self->component.signal_mousemove, self, machinewireview_onmousemove);
 	signal_connect(&self->component.signal_mousedoubleclick, self, machinewireview_onmousedoubleclick);
-	signal_connect(&self->component.signal_keydown, self, machinewireview_onkeydown);	
+	signal_connect(&self->component.signal_keydown, self, machinewireview_onkeydown);
+	signal_connect(&self->component.signal_keyup, self, machinewireview_onkeyup);
 	signal_connect(&self->component.signal_draw, self, machinewireview_ondraw);
 	signal_connect(&self->component.signal_timer, self, machinewireview_ontimer);
 }
@@ -419,8 +423,8 @@ void machinewireview_initmachinecoords(MachineWireView* self)
 		{ 108, 156, 1, 7, 6, 33, 82, 7, 82 },		// vupeak
 		{ 0, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
 		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
-		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
 		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// bypass
+		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
 		{ 0, 0, 0, 0, 20, 3, 117, 15, 0 },			// name
 	};		
 	MachineCoords effect = {
@@ -746,7 +750,14 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 			}			
 			if (machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_GENERATOR, self->dragslot,
 				&self->skin.generator.solo)) {
-				
+				Machine* machine = machines_at(self->machines, self->dragslot);
+				if (machine) {
+					if (machine->vtable->bypassed(machine)) {
+						machine->vtable->unbypass(machine);
+					} else {
+						machine->vtable->bypass(machine);
+					}
+				}
 			} else
 			if (machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_FX, self->dragslot,
 					&self->skin.effect.bypass)) {
@@ -968,6 +979,11 @@ void machinewireview_onkeydown(MachineWireView* self, ui_component* sender, KeyE
 	} else {
 		ui_component_propagateevent(sender);
 	}
+}
+
+void machinewireview_onkeyup(MachineWireView* self, ui_component* sender, KeyEvent* ev)
+{
+	ui_component_propagateevent(sender);
 }
 
 Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
@@ -1245,6 +1261,29 @@ WireFrame* machinewireview_wireframe(MachineWireView* self, Wire wire)
 	return rv;
 }
 
+void machinewireview_onnewmachineselected(MachineView* self, ui_component* sender,
+	Properties* plugininfo)
+{	
+	Machine* machine;
+	const char* path;
+		
+	path = properties_readstring(plugininfo, "path", "");
+	machine = machinefactory_makemachinefrompath(
+		&self->workspace->machinefactory, 
+		properties_int(plugininfo, "type", NOMACHINE_INDEX), path);
+	if (machine) {		
+		if (self->newmachine.pluginsview.calledby == 10) {
+			machines_insert(self->wireview.machines,
+				machines_slot(self->wireview.machines), machine);
+		} else {
+			machines_changeslot(self->wireview.machines,
+				machines_append(self->wireview.machines, machine));
+		}
+		tabbar_select(&self->tabbar, 0);
+	}	
+}
+
+
 void machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y, MachineSkin* skin)
 {	
 	Machine* machine;
@@ -1303,7 +1342,10 @@ void machineviewbar_init(MachineViewBar* self, ui_component* parent, Workspace* 
 	ui_label_init(&self->label, &self->component);	
 	ui_label_setcharnumber(&self->label, 40);
 	{
-		ui_margin margin = { 2, 10, 2, 0 };
+		ui_margin margin;
+
+		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makepx(0), ui_value_makepx(0));
 
 		list_free(ui_components_setalign(
 			ui_component_children(&self->component, 0),
@@ -1332,11 +1374,13 @@ void machineview_init(MachineView* self, ui_component* parent,
 	ui_component_hide(&self->tabbar.component);
 	tabbar_append(&self->tabbar, "Wires");
 	tabbar_append(&self->tabbar, "New Machine");		
-	ui_notebook_setpage(&self->notebook, 0);
+	ui_notebook_setpageindex(&self->notebook, 0);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	signal_connect(&self->newmachine.pluginsview.signal_selected, self,machinewireview_onnewmachineselected);
 	signal_connect(&self->component.signal_mousedoubleclick, self, machineview_onmousedoubleclick);
 	signal_connect(&self->component.signal_keydown, self, machineview_onkeydown);
+	signal_connect(&self->component.signal_keyup, self, machineview_onkeyup);
+	signal_connect(&self->component.signal_focus, self, machineview_onfocus);
 }
 
 void machineview_onshow(MachineView* self, ui_component* sender)
@@ -1369,29 +1413,17 @@ void machineview_onkeydown(MachineView* self, ui_component* sender, KeyEvent* ke
 	}
 }
 
+void machineview_onkeyup(MachineView* self, ui_component* sender, KeyEvent* ev)
+{
+	ui_component_propagateevent(sender);
+}
+
 void machineview_applyproperties(MachineView* self, Properties* p)
 {
 	machinewireview_applyproperties(&self->wireview, p);
 }
 
-void machinewireview_onnewmachineselected(MachineView* self, ui_component* sender,
-	Properties* plugininfo)
-{	
-	Machine* machine;
-	const char* path;
-		
-	path = properties_readstring(plugininfo, "path", "");
-	machine = machinefactory_makemachinefrompath(
-		&self->workspace->machinefactory, 
-		properties_int(plugininfo, "type", NOMACHINE_INDEX), path);
-	if (machine) {		
-		if (self->newmachine.pluginsview.calledby == 10) {
-			machines_insert(self->wireview.machines,
-				machines_slot(self->wireview.machines), machine);
-		} else {
-			machines_changeslot(self->wireview.machines,
-				machines_append(self->wireview.machines, machine));
-		}
-		tabbar_select(&self->tabbar, 0);
-	}	
+void machineview_onfocus(MachineView* self, ui_component* sender)
+{
+	ui_component_setfocus(&self->wireview.component);
 }
