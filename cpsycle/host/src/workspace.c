@@ -115,6 +115,7 @@ void workspace_init(Workspace* self, void* handle)
 	workspace_makeconfig(self);
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);
+	self->songcbk = self->song;
 	self->properties = workspace_makeproperties(self);
 	sequenceselection_init(&self->sequenceselection, &self->song->sequence);
 	sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
@@ -164,6 +165,7 @@ void workspace_dispose(Workspace* self)
 	player_dispose(&self->player);	
 	song_free(self->song);	
 	self->song = 0;	
+	self->songcbk = 0;
 	properties_free(self->config);
 	self->config = 0;
 	properties_free(self->properties);
@@ -714,12 +716,15 @@ void workspace_loadsong(Workspace* self, const char* path)
 	song = song_allocinit(&self->machinefactory);
 	signal_connect(&song->signal_loadprogress, self, workspace_onloadprogress);
 	songfile.song = song;
-	songfile.file = 0;	
+	songfile.file = 0;
+	lock_enter();
+	self->songcbk = song;
 	songfile_load(&songfile, path);	
 	self->properties = songfile.workspaceproperties;
 	free(self->filename);
 	self->filename = strdup(path);
 	workspace_setsong(self, song, WORKSPACE_LOADSONG);	
+	lock_leave();
 }
 
 void workspace_onloadprogress(Workspace* self, Song* sender, int progress)
@@ -735,7 +740,8 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	oldsong = self->song;
 	player_stop(&self->player);
 	lock_enter();	
-	self->song = song;	
+	self->song = song;
+	self->songcbk = song;
 	player_setsong(&self->player, self->song);
 	applysongproperties(self);
 	sequenceselection_setsequence(&self->sequenceselection
@@ -911,7 +917,7 @@ MachineCallback machinecallback(Workspace* self)
 
 Samples* machinecallback_samples(Workspace* self)
 {
-	return &self->song->samples;
+	return &self->songcbk->samples;
 }
 
 unsigned int machinecallback_samplerate(Workspace* self)
@@ -926,12 +932,12 @@ int machinecallback_bpm(Workspace* self)
 
 Machines* machinecallback_machines(Workspace* self)
 {
-	return self->song ? &self->song->machines : 0;
+	return self->songcbk ? &self->song->machines : 0;
 }
 
 Instruments* machinecallback_instruments(Workspace* self)
 {
-	return self->song ? &self->song->instruments : 0;
+	return self->songcbk ? &self->song->instruments : 0;
 }
 
 EventDriver* workspace_kbddriver(Workspace* self)

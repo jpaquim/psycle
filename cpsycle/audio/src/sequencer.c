@@ -11,13 +11,14 @@ static void clearevents(Sequencer*);
 static void cleardelayed(Sequencer*);
 static void clearinputevents(Sequencer*);
 static void freeentries(List* events);
-static void maketrackiterators(Sequencer*, beat_t offset);
+static void makecurrtracks(Sequencer*, beat_t offset);
 static beat_t skiptrackiterators(Sequencer*, beat_t offset);
-static void cleartrackiterators(Sequencer*);
+static void clearcurrtracks(Sequencer*);
 static void advanceposition(Sequencer* self, beat_t width);
-static void addsequenceevent(Sequencer*, SequenceTrackIterator*, beat_t offset);
+static void addsequenceevent(Sequencer*, SequencerTrack*, beat_t offset);
 static void maketweakslideevents(Sequencer*, PatternEntry*);
-static void makeretriggerevents(Sequencer*, PatternEntry*);
+static void makeretriggerevents(Sequencer*, SequencerTrack*, PatternEntry*);
+static void makeretriggercontinueevents(Sequencer* self, SequencerTrack*, PatternEntry*);
 static int isoffsetinwindow(Sequencer*, beat_t offset);
 static void insertevents(Sequencer*);
 static void insertinputevents(Sequencer*);
@@ -42,10 +43,10 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->events = 0;
 	self->delayedevents = 0;
 	self->inputevents = 0;
-	self->currtrackiterators = 0;
+	self->currtracks = 0;
 	self->mode = SEQUENCERPLAYMODE_PLAYALL;
 	compute_beatsprosample(self);
-	maketrackiterators(self, (beat_t)0.f);
+	makecurrtracks(self, (beat_t)0.f);
 }
 
 void sequencer_dispose(Sequencer* self)
@@ -53,7 +54,7 @@ void sequencer_dispose(Sequencer* self)
 	clearevents(self);
 	cleardelayed(self);
 	clearinputevents(self);
-	cleartrackiterators(self);
+	clearcurrtracks(self);
 	self->sequence = 0;
 	self->machines = 0;
 }
@@ -68,10 +69,10 @@ void sequencer_setposition(Sequencer* self, beat_t offset)
 {
 	clearevents(self);
 	cleardelayed(self);		
-	cleartrackiterators(self);
+	clearcurrtracks(self);
 	self->position = offset;
 	self->window = 0.0f;
-	maketrackiterators(self, offset);
+	makecurrtracks(self, offset);
 }
 
 beat_t sequencer_position(Sequencer* self)
@@ -152,28 +153,38 @@ List* sequencer_machinetickevents(Sequencer* self, size_t slot)
 	return rv;
 }
 
-void cleartrackiterators(Sequencer* self)
+void clearcurrtracks(Sequencer* self)
 {
 	List* p;
 
-	for (p = self->currtrackiterators; p != 0; p = p->next) {
-		free(p->entry);
+	for (p = self->currtracks; p != 0; p = p->next) {
+		SequencerTrack* track;
+
+		track = (SequencerTrack*) p->entry;
+		free(track->iterator);
+		free(track);
 	}
-	list_free(self->currtrackiterators);
-	self->currtrackiterators = 0;
+	list_free(self->currtracks);
+	self->currtracks = 0;
 }
 
-void maketrackiterators(Sequencer* self, beat_t offset)
+void makecurrtracks(Sequencer* self, beat_t offset)
 {
 	SequenceTracks* p;
 
-	for (p = self->sequence->tracks; p != 0; p = p->next) {		
-		SequenceTrackIterator* iterator;
+	for (p = self->sequence->tracks; p != 0; p = p->next) {
+		SequencerTrack* track;		
 
-		iterator =
+		track = malloc(sizeof(SequencerTrack));		
+		track->iterator =
 			(SequenceTrackIterator*)malloc(sizeof(SequenceTrackIterator));
-		*iterator = sequence_begin(self->sequence, p, offset);
-		list_append(&self->currtrackiterators, iterator);		
+		*track->iterator = sequence_begin(self->sequence, p, offset);
+		track->state.jump = 0;
+		track->state.jumpat = 0;
+		track->state.jumpto = 0;
+		track->state.retriggeroffset = 0;
+		track->state.retriggerstep = 0;
+		list_append(&self->currtracks, track);
 	}
 }
 
@@ -183,11 +194,13 @@ beat_t skiptrackiterators(Sequencer* self, beat_t offset)
 		
 	int first = 1;
 	beat_t newplayposition = offset;
-	for (p = self->currtrackiterators; p != 0; p = p->next) {
+	for (p = self->currtracks; p != 0; p = p->next) {
+		SequencerTrack* track;
 		SequenceTrackIterator* it;
 		int skip = 0;
 
-		it = (SequenceTrackIterator*)p->entry;		
+		track = (SequencerTrack*) p->entry;
+		it = track->iterator;
 		while (it->tracknode && !sequencetrackiterator_entry(it)->selplay) {			
 			sequencetrackiterator_incentry(it);			
 			skip = 1;
@@ -316,13 +329,15 @@ void advanceposition(Sequencer* self, beat_t width)
 
 void insertevents(Sequencer* self)
 {
-	List* p;
+	List* p;	
 	int continueplaying = 0;
 
-	for (p = self->currtrackiterators; p != 0; p = p->next) {
+	for (p = self->currtracks; p != 0; p = p->next) {
+		SequencerTrack* track;
 		SequenceTrackIterator* it;
 
-		it = (SequenceTrackIterator*)p->entry;
+		track = (SequencerTrack*) p->entry;
+		it = track->iterator;
 		if (!continueplaying && it->tracknode) {
 			SequenceEntry* entry;
 			Pattern* pattern;
@@ -346,8 +361,26 @@ void insertevents(Sequencer* self)
 				
 				offset = sequencetrackiterator_offset(it);
 				if (isoffsetinwindow(self, offset)) {
-					addsequenceevent(self, it, offset);			
-					sequencetrackiterator_inc(it);
+/*					PatternEntry* patternentry;
+
+					patternentry = 
+						sequencetrackiterator_patternentry(it);					
+					if (patternentry->event.cmd == JUMP_TO_ORDER) {
+						SequencePosition position;
+						SequenceEntry* jumpsequenceentry;
+
+						position = sequence_at(self->sequence,
+							0, patternentry->event.cmd);
+						if (position.trackposition.tracknode) {
+							jumpsequenceentry = (SequenceEntry*)
+								position.trackposition.tracknode->entry;
+							it->state.jump = 1;
+							it->state.jumpat = offset + (1 / (self->lpb * self->lpbspeed));
+							it->state.jumpto = jumpsequenceentry;
+						}
+					}*/
+					addsequenceevent(self, track, offset);
+					sequencetrackiterator_inc(it);					
 				} else {			
 					break;
 				}				
@@ -358,8 +391,8 @@ void insertevents(Sequencer* self)
 		self->position = (beat_t) 0.f;
 		clearevents(self);
 		cleardelayed(self);
-		cleartrackiterators(self);
-		maketrackiterators(self, 0.f);
+		clearcurrtracks(self);
+		makecurrtracks(self, 0.f);
 		self->window = (beat_t) 0.f;
 	} else {
 		self->playing = continueplaying;
@@ -387,12 +420,11 @@ int isoffsetinwindow(Sequencer* self, beat_t offset)
   return offset >= self->position && offset < self->position + self->window;
 }
 
-void addsequenceevent(Sequencer* self, SequenceTrackIterator* trackiterator,
-	beat_t offset)
+void addsequenceevent(Sequencer* self, SequencerTrack* track, beat_t offset)
 {	
-	PatternEntry* patternentry;
+	PatternEntry* patternentry;	
 
-	patternentry = sequencetrackiterator_patternentry(trackiterator);
+	patternentry = sequencetrackiterator_patternentry(track->iterator);
 	if (patternentry->event.cmd == SET_TEMPO) {
 		self->bpm = patternentry->event.parameter;
 		compute_beatsprosample(self);		
@@ -416,10 +448,14 @@ void addsequenceevent(Sequencer* self, SequenceTrackIterator* trackiterator,
 		} else
 		if (entry->event.cmd == RETRIGGER) {
 			entry->delta = offset - self->position;
-			list_append(&self->events, entry);			
-			makeretriggerevents(self, patternentry);
+			list_append(&self->events, entry);
+			makeretriggerevents(self, track, patternentry);
 		} else
-		if (entry->event.cmd == RETR_CONT) {
+		if (entry->event.cmd == RETR_CONT) {			
+			entry->delta = offset + track->state.retriggeroffset -
+				self->position;
+			list_append(&self->delayedevents, entry);
+			makeretriggercontinueevents(self, track, patternentry);
 		} else {
 			entry->delta = offset - self->position;
 			list_append(&self->events, entry);
@@ -488,12 +524,14 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 	}
 }
 
-void makeretriggerevents(Sequencer* self, PatternEntry* entry)
+void makeretriggerevents(Sequencer* self, SequencerTrack* track,
+	PatternEntry* entry)
 {
 	beat_t retriggerstep;
 	beat_t retriggeroffset;		
 
-	retriggerstep = entry->event.parameter / (self->lpb * self->lpbspeed * 256.f);
+	retriggerstep = entry->event.parameter /
+		(self->lpb * self->lpbspeed * 256.f);
 	retriggeroffset = retriggerstep;
 	while (retriggeroffset < 1 / (self->lpb * self->lpbspeed)) {
 		PatternEntry* retriggerentry;
@@ -504,7 +542,37 @@ void makeretriggerevents(Sequencer* self, PatternEntry* entry)
 		retriggerentry->delta = entry->delta + retriggeroffset;
 		list_append(&self->delayedevents, retriggerentry);
 		retriggeroffset += retriggerstep;
-	}	
+	}
+	track->state.retriggeroffset = 		
+		retriggeroffset - (1 / (self->lpb * self->lpbspeed));
+	track->state.retriggerstep = retriggerstep;
+}
+
+void makeretriggercontinueevents(Sequencer* self, SequencerTrack* track,
+	PatternEntry* entry)
+{
+	beat_t retriggerstep;
+	beat_t retriggeroffset;		
+
+	if (entry->event.parameter == 0) {
+		retriggerstep = track->state.retriggerstep;		
+	} else {
+		retriggerstep = track->state.retriggerstep;
+	}
+	retriggeroffset = track->state.retriggeroffset + retriggerstep;
+	while (retriggeroffset < 1 / (self->lpb * self->lpbspeed)) {
+		PatternEntry* retriggerentry;
+
+		retriggerentry = patternentry_clone(entry);
+		retriggerentry->event.cmd = 0;
+		retriggerentry->event.parameter = 0;
+		retriggerentry->delta = entry->delta + retriggeroffset;
+		list_append(&self->delayedevents, retriggerentry);
+		retriggeroffset += retriggerstep;
+	}
+	track->state.retriggeroffset =
+		retriggeroffset - (1 / (self->lpb * self->lpbspeed));
+	track->state.retriggerstep = retriggerstep;
 }
 
 void insertdelayedevents(Sequencer* self)
@@ -602,7 +670,7 @@ List* sequencer_timedevents(Sequencer* self, size_t slot, unsigned int amount)
 }
 
 void sequencer_addinputevent(Sequencer* self, const PatternEvent* event,
-	unsigned int track)
+	uintptr_t track)
 {
 	if (event) {
 		PatternEntry* entry;

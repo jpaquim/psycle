@@ -7,23 +7,13 @@
 #include "uicomponent.h"
 #include "uibitmap.h"
 
-typedef enum {
-	ALIGNMENT_NONE				= 0,	
-	ALIGNMENT_LEFT				= 2,
-	ALIGNMENT_RIGHT				= 4,
-	ALIGNMENT_CENTER_HORIZONTAL	= ALIGNMENT_LEFT | ALIGNMENT_RIGHT,
-	ALIGNMENT_TOP				= 8,
-	ALIGNMENT_BOTTOM			= 16,
-	ALIGNMENT_CENTER_VERTICAL	= ALIGNMENT_TOP | ALIGNMENT_BOTTOM
-} Alignment;
-
 typedef struct {
 	ui_component component;
 	ui_bitmap bitmap;
-	Alignment alignment;	
+	UiAlignment alignment;	
 } ui_image;
 
 void ui_image_init(ui_image*, ui_component* parent);
-void ui_image_setbitmapalignment(ui_image*, Alignment);	
+void ui_image_setbitmapalignment(ui_image*, UiAlignment);	
 
 #endif

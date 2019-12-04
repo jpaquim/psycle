@@ -21,7 +21,7 @@ SequenceEntry* sequenceentry_alloc(void);
 SequenceEntry* sequenceentry_allocinit(uintptr_t pattern, beat_t offset);
 
 typedef struct {
-	List* entries;
+	List* entries;	
 } SequenceTrack;
 
 void sequencetrack_init(SequenceTrack*);
@@ -33,7 +33,7 @@ typedef List SequenceTrackNode;
 typedef struct {
 	Patterns* patterns;	
 	SequenceTrackNode* tracknode;
-	PatternNode* patternnode;		
+	PatternNode* patternnode;	
 } SequenceTrackIterator;
 
 void sequencetrackiterator_inc(SequenceTrackIterator*);

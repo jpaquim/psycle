@@ -28,8 +28,10 @@ void undoredobar_init(UndoRedoBar* self, ui_component* parent, Workspace* worksp
 
 void undoredobar_initalign(UndoRedoBar* self)
 {		
-	ui_margin margin = { 0, 5, 0, 0 };
-	
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makepx(0), ui_value_makepx(0));	
 	list_free(ui_components_setalign(		
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,

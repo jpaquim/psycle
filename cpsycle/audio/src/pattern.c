@@ -7,11 +7,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+int patterneditposition_equal(PatternEditPosition* lhs,
+	PatternEditPosition* rhs)
+{
+	return 
+		rhs->col == lhs->col &&
+		rhs->track == lhs->track &&
+		rhs->offset == lhs->offset &&
+		rhs->pattern == lhs->pattern;
+}
+
 PatternEntry* patternentry_clone(PatternEntry* entry)
 {
 	PatternEntry* rv;
 	if (entry) {			
-		rv = (PatternEntry*)malloc(sizeof(PatternEntry));
+		rv = (PatternEntry*) malloc(sizeof(PatternEntry));
 		*rv = *entry;			
 	} else {
 		rv = 0;
@@ -23,7 +33,7 @@ void pattern_init(Pattern* self)
 {
 	self->events = 0;
 	self->length = 16;
-	self->label = _strdup("Untitled");	
+	self->label = strdup("Untitled");	
 	self->opcount = 0;
 	self->maxsongtracks = 0;
 }
@@ -33,12 +43,40 @@ void pattern_dispose(Pattern* self)
 	PatternNode* p;	
 	
 	for (p = self->events; p != 0; p = p->next) {		
-		free (p->entry);		
+		free(p->entry);		
 	}
 	list_free(self->events);
 	self->events = 0;
 	free(self->label);
 	self->label = 0;
+}
+
+void pattern_copy(Pattern* self, Pattern* src)
+{	
+	PatternNode* p;
+	int opcount;
+
+	opcount = self->opcount;
+	pattern_dispose(self);
+	pattern_init(self);	
+	for (p = src->events; p != 0; p = p->next) {
+		PatternEntry* srcentry;
+		PatternEntry* entry;
+
+		srcentry = (PatternEntry*) p->entry;
+		entry = (PatternEntry*) malloc(sizeof(PatternEntry));
+		memset(entry, 0, sizeof(PatternEntry));
+		if (srcentry) {
+			*entry = *srcentry;
+		} else {
+			memset(entry, 0, sizeof(PatternEntry));
+		}
+		list_append(&self->events, entry);
+	}
+	self->length = src->length;
+	free(self->label);
+	self->label = strdup(src->label);
+	self->opcount = opcount + 1;
 }
 
 Pattern* pattern_alloc(void)
@@ -59,26 +97,12 @@ Pattern* pattern_allocinit(void)
 
 Pattern* pattern_clone(Pattern* self)
 {	
-	Pattern* rv;
-	PatternNode* p;	
+	Pattern* rv;	
 
-	rv = pattern_alloc();
-	rv->events = 0;			
-	for (p = self->events; p != 0; p = p->next) {
-		PatternEntry* entry;
-		PatternEntry* rventry;
-
-		entry = (PatternEntry*)p->entry;
-		rventry = (PatternEntry*)malloc(sizeof(PatternEntry));
-		if (entry) {
-			*rventry = *entry;
-		} else {
-			memset(rventry, 0, sizeof(PatternEntry));
-		}		
-		list_append(&rv->events, rventry);		
+	rv = pattern_allocinit();
+	if (rv) {
+		pattern_copy(rv, self);
 	}
-	rv->length = self->length;
-	rv->label = strdup(self->label);
 	return rv;
 }
 
@@ -197,8 +221,6 @@ PatternNode* pattern_findnode(Pattern* pattern, unsigned int track, float offset
 	return node;
 }
 
-
-
 PatternNode* pattern_last(Pattern* self)
 {	
 	return self->events ? self->events->tail : 0;
@@ -293,6 +315,7 @@ void pattern_blocktranspose(Pattern* self, PatternEditPosition begin,
 		}	
 		p = q;
 	}
+	++self->opcount;
 }
 
 void pattern_changemachine(Pattern* self, PatternEditPosition begin, 
@@ -321,7 +344,7 @@ void pattern_changemachine(Pattern* self, PatternEditPosition begin,
 void pattern_changeinstrument(Pattern* self, PatternEditPosition begin, 
 	PatternEditPosition end, int instrument)
 {
-		PatternNode* p;
+	PatternNode* p;
 	PatternNode* q;
 
 	p = pattern_greaterequal(self, (beat_t) begin.offset);

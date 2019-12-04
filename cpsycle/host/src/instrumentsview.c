@@ -24,7 +24,7 @@ void InitInstrumentsView(InstrumentsView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "Sampulse");
 	tabbar_append(&self->tabbar, "Sampler PS1");		
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	ui_notebook_setpage(&self->notebook, 0);
+	ui_notebook_setpageindex(&self->notebook, 0);
 	signal_connect(&self->component.signal_show, self, OnShow);
 	signal_connect(&self->component.signal_hide, self, OnHide);
 	tabbar_select(&self->tabbar, 0);

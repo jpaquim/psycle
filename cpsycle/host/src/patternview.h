@@ -6,6 +6,7 @@
 #define PATTERNVIEW
 
 #include <uilabel.h>
+#include <uicheckbox.h>
 #include <uinotebook.h>
 #include "patternproperties.h"
 #include "trackerview.h"
@@ -19,11 +20,13 @@ typedef struct {
 	Workspace* workspace;
 } PatternViewStatus;
 
-void InitPatternViewStatus(PatternViewStatus*, ui_component* parent, Workspace*);
+void patternviewstatus_init(PatternViewStatus*, ui_component* parent,
+	Workspace*);
 
 typedef struct {
 	ui_component component;	
-	StepBox step;	
+	StepBox step;
+	ui_checkbox movecursorwhenpaste;
 	PatternViewStatus status;	
 } PatternViewBar;
 

@@ -79,12 +79,15 @@ typedef struct {
 
 static void driver_free(EventDriver*);
 static int driver_init(EventDriver*);
-static void driver_connect(EventDriver*, void* context, EVENTDRIVERWORKFN callback, void* handle);
+static void driver_connect(EventDriver*, void* context,
+	EVENTDRIVERWORKFN callback, void* handle);
 static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
 static void updateconfiguration(EventDriver*);
-static void driver_write(EventDriver* driver, unsigned char* data, int size);
+static void driver_write(EventDriver*, int type, unsigned char* data, int size);
+static void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
+	EventDriverCmd* cmd, int maxsize);
 
 static void init_properties(EventDriver*);
 static void apply_properties(KbdDriver*);
@@ -96,6 +99,7 @@ int onerror(int err, const char* msg)
 {
 #if defined DIVERSALIS__OS__MICROSOFT    
 	MessageBox(0, msg, "Kbd driver", MB_OK | MB_ICONERROR);
+	return 0;
 #else
     fprintf(stderr, "Kbd driver %s", msg);
 	return 0;
@@ -115,6 +119,7 @@ EventDriver* create_kbd_driver(void)
 	kbd->driver.updateconfiguration = updateconfiguration;	
 	kbd->driver.error = onerror;	
 	kbd->driver.write = driver_write;
+	kbd->driver.cmd = driver_cmd;
 	driver_init(&kbd->driver);
 	return &kbd->driver;			
 }
@@ -158,42 +163,101 @@ int driver_close(EventDriver* driver)
 	return 0;
 }
 
-void driver_write(EventDriver* driver, unsigned char* data, int size)
+void driver_write(EventDriver* driver, int type, unsigned char* data, int size)
 {	
 	KbdDriver* self;
 	int cmd;	
 
 	self = (KbdDriver*)(driver);	
-	cmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
-	if (cmd == CMD_NOTE_STOP) {
-		int note;
-		
-		note = NOTECOMMANDS_RELEASE;
-		driver->_pCallback(driver->_callbackContext, 2,
-				(unsigned char*)&note, 4);
-	} else
-	if (cmd == CMD_NOTE_TWEAKM) {
-		int note;
-		
-		note = NOTECOMMANDS_TWEAK;
-		driver->_pCallback(driver->_callbackContext, 2,
-				(unsigned char*)&note, 4);
-	} else
-	if (cmd == CMD_NOTE_TWEAKS) {
-		int note;
-		
-		note = NOTECOMMANDS_TWEAKSLIDE;
-		driver->_pCallback(driver->_callbackContext, 2,
-				(unsigned char*)&note, 4);
-	} else
-	if (cmd != -1) {
-		int base;
-		int note;
+	if (type == EVENTDRIVER_KEYDOWN) {
+		cmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
+	
+		if (cmd == CMD_NOTE_STOP) {
+			int note;
 			
-		base = 48;
-		note = cmd + base;
-		driver->_pCallback(driver->_callbackContext, 2,
+			note = NOTECOMMANDS_RELEASE;
+			driver->_pCallback(driver->_callbackContext, 2,
 				(unsigned char*)&note, 4);
+		} else
+		if (cmd == CMD_NOTE_TWEAKM) {
+			int note;
+			
+			note = NOTECOMMANDS_TWEAK;
+			driver->_pCallback(driver->_callbackContext, 2,
+				(unsigned char*)&note, 4);
+		} else
+		if (cmd == CMD_NOTE_TWEAKS) {
+			int note;
+			
+			note = NOTECOMMANDS_TWEAKSLIDE;
+			driver->_pCallback(driver->_callbackContext, 2,
+				(unsigned char*)&note, 4);
+		} else
+		if (cmd != -1) {
+			int base;
+			int note;
+				
+			base = 48;
+			note = cmd + base;
+			driver->_pCallback(driver->_callbackContext, 2,
+					(unsigned char*)&note, 4);
+		}
+	} else {
+		unsigned char ev[4];
+
+		memset(ev, 0, sizeof(data));
+		ev[0] = NOTECOMMANDS_RELEASE;
+		cmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
+		if (cmd != -1) {
+			int base;
+			int note;
+				
+			base = 48;
+			note = cmd + base;
+			ev[1] = note;
+		}
+		driver->_pCallback(driver->_callbackContext, 2, ev, 4);
+	}
+}
+
+void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
+	EventDriverCmd* cmd, int maxsize)
+{		
+	KbdDriver* self;
+	int kbcmd = 0;
+
+	self = (KbdDriver*)(driver);
+	cmd->type = EVENTDRIVER_CMD_NONE;	
+	cmd->size = 0;	
+	if (type == EVENTDRIVER_KEYDOWN) {
+		kbcmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
+		
+		if (kbcmd == CMD_NOTE_STOP) {
+			cmd->type = EVENTDRIVER_CMD_PATTERN;
+			cmd->data[0] = NOTECOMMANDS_RELEASE;
+			cmd->size = 4;
+		} else
+		if (kbcmd == CMD_NOTE_TWEAKM) {
+			cmd->type = EVENTDRIVER_CMD_PATTERN;
+			cmd->data[0] = NOTECOMMANDS_TWEAK;
+			cmd->size = 4;
+		} else
+		if (kbcmd == CMD_NOTE_TWEAKS) {
+			cmd->type = EVENTDRIVER_CMD_PATTERN;
+			cmd->data[0] = NOTECOMMANDS_TWEAKSLIDE;
+			cmd->size = 4;
+		} else
+		if (kbcmd != -1) {
+			int base = 48;			
+									
+			cmd->type = EVENTDRIVER_CMD_PATTERN;
+			cmd->data[0] = (unsigned char) (cmd + base);
+			cmd->size = 4;
+		}
+	} else {
+		cmd->type = EVENTDRIVER_CMD_PATTERN;
+		cmd->data[0] = NOTECOMMANDS_RELEASE;
+		cmd->size = 4;		
 	}
 }
 

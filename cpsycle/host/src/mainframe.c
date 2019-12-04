@@ -28,6 +28,8 @@ static const char* mainframe_statusbaridletext(MainFrame* self);
 static void mainframe_destroy(MainFrame*, ui_component* component);
 static void mainframe_onkeydown(MainFrame*, ui_component* component,
 	KeyEvent*);
+static void mainframe_onkeyup(MainFrame*, ui_component* component,
+	KeyEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry* entry);
 static void mainframe_onalign(MainFrame*, ui_component* sender);
 static void mainframe_onmousedown(MainFrame*, ui_component* sender,
@@ -74,8 +76,10 @@ enum {
 
 void mainframe_init(MainFrame* self)
 {			
-	ui_margin tabbardividemargin = { 0, 30, 0, 0};
-
+	ui_margin tabbardividemargin;
+	
+	ui_margin_init(&tabbardividemargin, ui_value_makepx(0), ui_value_makeew(4.0),
+		ui_value_makepx(0), ui_value_makepx(0));
 	ui_frame_init(&self->component, 0);				
 	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	ui_component_enablealign(&self->component);
@@ -93,21 +97,23 @@ void mainframe_init(MainFrame* self)
 	signal_connect(&self->component.signal_destroy, self, mainframe_destroy);
 	signal_connect(&self->component.signal_align, self, mainframe_onalign);	
 	signal_connect(&self->component.signal_keydown, self, mainframe_onkeydown);
+	signal_connect(&self->component.signal_keyup, self, mainframe_onkeyup);
 	signal_connect(&self->component.signal_timer, self, mainframe_ontimer);
 	ui_component_init(&self->tabbars, &self->component);
 	ui_component_enablealign(&self->tabbars);
-	navigation_init(&self->navigation, &self->tabbars, &self->workspace);	
+	navigation_init(&self->navigation, &self->tabbars, &self->workspace);
+	self->navigation.component.margin.right = ui_value_makeew(4.0);
 	ui_component_setalign(&self->navigation.component, UI_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->tabbars);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
+	ui_component_setalignexpand(&self->tabbar.component, UI_HORIZONTALEXPAND);	
 	tabbar_append(&self->tabbar, "Machines");
 	tabbar_append(&self->tabbar, "Pattern");	
 	tabbar_append(&self->tabbar, "Samples");
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Properties");
-	tabbar_append(&self->tabbar, "Settings");
-	tabbar_append(&self->tabbar, "Help");	
-	tabbar_settabmargin(&self->tabbar, 4, &tabbardividemargin);	
+	tabbar_append(&self->tabbar, "Settings")->margin.left = ui_value_makeew(4.0);	;
+	tabbar_append(&self->tabbar, "Help")->margin.right = ui_value_makeew(4.0);
 	// splitbar
 	ui_component_init(&self->splitbar, &self->component);	
 	signal_connect(&self->splitbar.signal_mouseenter, self,
@@ -138,7 +144,7 @@ void mainframe_init(MainFrame* self)
 		mainframe_onaboutok);
 	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);
 	renderview_init(&self->renderview, &self->notebook.component,
-		&self->tabbars, &self->workspace);	
+		&self->tabbars, &self->workspace);
 	signal_connect(&self->filebar.renderbutton.signal_clicked, self,
 		mainframe_onrender);
 	signal_connect(&self->workspace.signal_viewselected, self,
@@ -183,16 +189,19 @@ const char* mainframe_statusbaridletext(MainFrame* self)
 
 void mainframe_initstatusbar(MainFrame* self)
 {	
+	ui_margin margin;
+		
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+		ui_value_makepx(0), ui_value_makepx(0));
+
 	ui_component_init(&self->statusbar, &self->component);	
 	ui_component_enablealign(&self->statusbar);
-	{ // statusbar label
-		ui_margin margin = { 2, 0, 2, 0 };
-		ui_label_init(&self->statusbarlabel, &self->statusbar);
-		ui_label_settext(&self->statusbarlabel, "Ready");
-		ui_label_setcharnumber(&self->statusbarlabel, 31);
-		ui_component_setmargin(&self->statusbarlabel.component, &margin);
-		ui_component_setalign(&self->statusbarlabel.component, UI_ALIGN_LEFT);
-	}
+	// statusbar label	
+	ui_label_init(&self->statusbarlabel, &self->statusbar);
+	ui_label_settext(&self->statusbarlabel, "Ready");
+	ui_label_setcharnumber(&self->statusbarlabel, 29);
+	ui_component_setmargin(&self->statusbarlabel.component, &margin);
+	ui_component_setalign(&self->statusbarlabel.component, UI_ALIGN_LEFT);	
 	ui_notebook_init(&self->viewbars, &self->statusbar);
 	ui_component_setalign(&self->viewbars.component, UI_ALIGN_LEFT);
 	ui_component_enablealign(&self->viewbars.component);		
@@ -201,7 +210,7 @@ void mainframe_initstatusbar(MainFrame* self)
 	self->machineview.wireview.statusbar = &self->machineviewbar;
 	patternviewbar_init(&self->patternbar, &self->viewbars.component, &self->workspace);
 	ui_component_setalign(&self->patternbar.component, UI_ALIGN_LEFT);
-	ui_notebook_setpage(&self->viewbars, 0);
+	ui_notebook_setpageindex(&self->viewbars, 0);
 	ui_notebook_connectcontroller(&self->viewbars, &self->tabbar.signal_change);
 	ui_progressbar_init(&self->progressbar, &self->statusbar);
 	ui_component_setalign(&self->progressbar.component, UI_ALIGN_RIGHT);	
@@ -213,21 +222,32 @@ void mainframe_initstatusbar(MainFrame* self)
 
 void mainframe_initbars(MainFrame* self)
 {
+	ui_margin row0margin;
+	ui_margin rowmargin;	
+
+	ui_margin_init(&row0margin, ui_value_makeeh(0.5), ui_value_makepx(0),
+	ui_value_makeeh(0.5), ui_value_makeeh(0.5));
+	ui_margin_init(&rowmargin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makeeh(0.5), ui_value_makeeh(0.5));	
+	
 	ui_component_init(&self->top, &self->component);	
 	ui_component_resize(&self->top, 500, 400);
 	ui_component_enablealign(&self->top);	
 	// row0
 	ui_component_init(&self->toprow0, &self->top);
 	ui_component_enablealign(&self->toprow0);	
-	ui_component_setalign(&self->toprow0, UI_ALIGN_TOP);	
+	ui_component_setalign(&self->toprow0, UI_ALIGN_TOP);
+	ui_component_setmargin(&self->toprow0, &row0margin);
 	// row1
 	ui_component_init(&self->toprow1, &self->top);
 	ui_component_enablealign(&self->toprow1);	
-	ui_component_setalign(&self->toprow1, UI_ALIGN_TOP);	
+	ui_component_setalign(&self->toprow1, UI_ALIGN_TOP);
+	ui_component_setmargin(&self->toprow1, &rowmargin);
 	// row2
 	ui_component_init(&self->toprow2, &self->top);
 	ui_component_enablealign(&self->toprow2);	
-	ui_component_setalign(&self->toprow2, UI_ALIGN_TOP);	
+	ui_component_setalign(&self->toprow2, UI_ALIGN_TOP);
+	ui_component_setmargin(&self->toprow2, &rowmargin);
 	// add bars to rows
 	// row0
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);	
@@ -235,12 +255,15 @@ void mainframe_initbars(MainFrame* self)
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
 	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);
 	{
-		ui_margin margin = { 0, 20, 0, 0 };
+		ui_margin margin;
+		
+		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+			ui_value_makepx(0), ui_value_makepx(0));
 
 		list_free(ui_components_setalign(
 			ui_component_children(&self->toprow0, 0),
 			UI_ALIGN_LEFT, &margin));
-		margin.right = 0;
+		margin.right = ui_value_makepx(0);
 		ui_component_setmargin(&self->playposbar.component, &margin);
 	}
 	// row1
@@ -282,18 +305,23 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 {
 	ui_size size;
 	ui_size statusbarsize;
-	ui_size tabbarsize;
+	ui_size tabbarssize;
 	ui_size sequenceviewsize;
 	ui_size gearsize;
 	ui_size vusize;
 	ui_size topsize;	
 	ui_size limit;
 	int splitbarwidth = 4;
+	ui_textmetric tm;
 	
 	size = ui_component_size(&self->component);
-	statusbarsize = ui_component_preferredsize(&self->statusbar, &size);
-	tabbarsize = ui_component_preferredsize(&self->tabbar.component, &size);
+	tm = ui_component_textmetric(&self->component);
+	statusbarsize = ui_component_preferredsize(&self->statusbar, &size);	
 	sequenceviewsize = ui_component_size(&self->sequenceview.component);
+	limit.width = size.width - sequenceviewsize.width - splitbarwidth;
+	limit.height = size.height;
+	tabbarssize = ui_component_preferredsize(&self->tabbars, &limit);
+	tabbarssize.height += (int)(tm.tmHeight * 0.5);
 	vusize = ui_component_size(&self->vubar.component);	
 	if (self->gear.component.visible) {
 		gearsize = ui_component_size(&self->gear.component);		
@@ -315,7 +343,7 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 		sequenceviewsize.width + splitbarwidth,
 		topsize.height,
 		size.width - sequenceviewsize.width - splitbarwidth,
-		tabbarsize.height);	
+		tabbarssize.height);	
 	ui_component_setposition(&self->splitbar,
 		sequenceviewsize.width,
 		topsize.height, splitbarwidth,
@@ -327,9 +355,10 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 		size.height - statusbarsize.height - topsize.height);	
 	ui_component_setposition(&self->notebook.component,
 		sequenceviewsize.width + splitbarwidth,
-		topsize.height + tabbarsize.height,
+		topsize.height + tabbarssize.height,
 		size.width - sequenceviewsize.width - 3 - gearsize.width,
-		size.height - statusbarsize.height - topsize.height - tabbarsize.height);
+		size.height - statusbarsize.height - topsize.height -
+			tabbarssize.height);
 	ui_component_setposition(&self->statusbar,
 		0,
 		size.height - statusbarsize.height,		
@@ -338,9 +367,10 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	if (ui_component_visible(&self->gear.component)) {
 		ui_component_setposition(&self->gear.component,
 			size.width - gearsize.width,
-			topsize.height + tabbarsize.height,
+			topsize.height + tabbarssize.height,
 			gearsize.width,
-			size.height - statusbarsize.height - topsize.height - tabbarsize.height);
+			size.height - statusbarsize.height - topsize.height -
+				tabbarssize.height);
 	}
 	if (self->firstshow) {
 		machineview_align(&self->machineview);
@@ -352,19 +382,39 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 {	
 	if (keyevent->keycode == VK_F2) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
+	} else 	
+	if (keyevent->keycode == VK_F3) {
+		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);		
+	} else
+	if (keyevent->keycode == VK_F5 && keyevent->shift) {
+		player_setposition(&self->workspace.player, 0);
+		player_start(&self->workspace.player);
 	} else
 	if (keyevent->keycode == VK_F5) {
-		player_start(&self->workspace.player);		
+		SequenceEntry* entry;
+
+		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);		
+		player_setposition(&self->workspace.player, entry ? entry->offset : 0);		
+		player_start(&self->workspace.player);
 	} else
-	if (keyevent->keycode == VK_F3) {
-		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
-		ui_component_setfocus(&self->patternview.trackerview.grid.component);
-	} else	 
-	if (keyevent->keycode == VK_F6) {
-		tabbar_select(&self->tabbar, TABPAGE_SETTINGSVIEW);
+	if (keyevent->keycode == VK_F7) {
+		beat_t playposition = 0;
+		SequenceEntry* entry;
+
+		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+		playposition = (entry ? entry->offset : 0) + 
+			(beat_t) self->workspace.patterneditposition.offset;
+		player_setposition(&self->workspace.player, playposition);
+		player_start(&self->workspace.player);
 	} else
 	if (keyevent->keycode == VK_F8) {
 		player_stop(&self->workspace.player);		
+	} else	
+	if (keyevent->keycode == VK_F10) {
+		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW);
+	} else	 
+	if (keyevent->keycode == VK_F6) {
+		tabbar_select(&self->tabbar, TABPAGE_SETTINGSVIEW);
 	} else	
 	if (keyevent->keycode == VK_F4) {
 		Properties* properties;
@@ -418,23 +468,30 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 		if (keyevent->keycode != VK_CONTROL &&
 			keyevent->keycode != VK_SHIFT) {
 			EventDriver* kbd;
-			int input;
+			int input;			
 			
 			input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
-				GetKeyState(VK_CONTROL) < 0);		
+				GetKeyState(VK_CONTROL) < 0);						
 			kbd = workspace_kbddriver(&self->workspace);
-			kbd->write(kbd, (unsigned char*)&input, 4);
-		}
+			kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);
+		}	
+	}
+}
 
-		/*Machine* machine;
-		int base;
-		base = 48;
-		machine = machines_at(&self->workspace.song->machines,
-			self->workspace.song->machines.slot);
-		if (machine) {				
-			PatternEvent event = { cmd + base, 0, 0, 0, 0 };
-			machine->seqtick(machine, 0, &event);
-		}*/				
+void mainframe_onkeyup(MainFrame* self, ui_component* component, KeyEvent* keyevent)
+{
+	if (keyevent->keycode != VK_CONTROL &&
+			keyevent->keycode != VK_SHIFT) {
+		EventDriver* kbd;
+		int input;			
+		
+		input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
+			GetKeyState(VK_CONTROL) < 0);						
+		kbd = workspace_kbddriver(&self->workspace);
+		kbd->write(kbd,
+			EVENTDRIVER_KEYUP,			
+			(unsigned char*)&input,
+			4);
 	}
 }
 
@@ -598,7 +655,7 @@ int mainframe_showmaximizedatstart(MainFrame* self)
 
 void mainframe_onrender(MainFrame* self, ui_component* sender)
 {
-	ui_notebook_setpage(&self->notebook, TABPAGE_RENDERVIEW);
+	ui_notebook_setpageindex(&self->notebook, TABPAGE_RENDERVIEW);
 }
 
 void mainframe_ontimer(MainFrame* self, ui_component* sender, int timerid)
@@ -613,7 +670,12 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view)
 	}
 }
 
-void mainframe_ontabbarchanged(MainFrame* self, ui_component* sender, uintptr_t tabindex)
+void mainframe_ontabbarchanged(MainFrame* self, ui_component* sender,
+	uintptr_t tabindex)
 {
+	ui_component* component;
 	workspace_onviewchanged(&self->workspace, tabindex);
+	component = ui_notebook_activepage(&self->notebook);
+	ui_component_align(&self->component);
+	ui_component_setfocus(component);
 }

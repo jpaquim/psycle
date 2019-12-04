@@ -79,6 +79,7 @@ typedef struct {
 	Signal signal_preferredsize;
 	Signal signal_command;
 	Signal signal_focuslost;
+	Signal signal_focus;
 	EnumCallback childenum;
 	UiAlignType align;
 	UiJustifyType justify;

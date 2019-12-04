@@ -19,6 +19,10 @@ typedef struct {
 	uintptr_t pattern;
 } PatternEditPosition;
 
+/// compares two pattern edit positions, if they are equal
+int patterneditposition_equal(PatternEditPosition* lhs,
+	PatternEditPosition* rhs);
+
 /// an event with additional position and track information
 typedef struct {
 	PatternEvent event;
@@ -52,6 +56,8 @@ typedef struct {
 void pattern_init(Pattern*);
 /// frees all memory used
 void pattern_dispose(Pattern*);
+/// copies a pattern
+void pattern_copy(Pattern* dst, Pattern* src);
 /// allocates a pattern
 ///\return allocates a pattern
 Pattern* pattern_alloc(void);

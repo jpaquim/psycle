@@ -107,7 +107,7 @@ void InitAbout(About* self, ui_component* parent)
 	ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
 	InitContrib(&self->contrib, &self->notebook.component);
 	InitVersion(&self->version, &self->notebook.component);		
-	ui_notebook_setpage(&self->notebook, 0);
+	ui_notebook_setpageindex(&self->notebook, 0);
 	signal_connect(&self->component.signal_mousedoubleclick, self,
 		OnMouseDoubleClick);
 }
@@ -153,15 +153,15 @@ void OnSize(About* self, ui_component* sender, ui_size* size)
 
 void OnContributors(About* self, ui_component* sender) 
 {	
-	ui_notebook_setpage(&self->notebook, 
-		ui_notebook_page(&self->notebook) != 1 ? 1 : 0);
+	ui_notebook_setpageindex(&self->notebook, 
+		ui_notebook_pageindex(&self->notebook) != 1 ? 1 : 0);
 	ui_component_invalidate(&self->component);
 }
 
 void OnVersion(About* self, ui_component* sender) 
 {	
-	ui_notebook_setpage(&self->notebook, 
-		ui_notebook_page(&self->notebook) != 2 ? 2 : 0);
+	ui_notebook_setpageindex(&self->notebook, 
+		ui_notebook_pageindex(&self->notebook) != 2 ? 2 : 0);
 	ui_component_invalidate(&self->component);
 }
 

@@ -213,6 +213,7 @@ void ui_component_init_signals(ui_component* component)
 	signal_init(&component->signal_destroy);
 	signal_init(&component->signal_show);
 	signal_init(&component->signal_hide);
+	signal_init(&component->signal_focus);
 	signal_init(&component->signal_focuslost);
 	signal_init(&component->signal_align);
 	signal_init(&component->signal_preferredsize);
@@ -268,6 +269,7 @@ void ui_component_dispose(ui_component* component)
 	signal_dispose(&component->signal_destroy);
 	signal_dispose(&component->signal_show);
 	signal_dispose(&component->signal_hide);
+	signal_dispose(&component->signal_focus);
 	signal_dispose(&component->signal_focuslost);
 	signal_dispose(&component->signal_align);
 	signal_dispose(&component->signal_preferredsize);
@@ -475,6 +477,23 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				ui_component_dispose(component);							
 				return 0;
 			break;
+			case WM_SYSKEYDOWN:
+				if (wParam >= VK_F10 && wParam <= VK_F12) {
+					component->propagateevent = component->defaultpropagation;
+					if (component->signal_keydown.slots) {
+						KeyEvent keyevent;
+						
+						keyevent_init(&keyevent, (int)wParam, lParam, 
+							GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+						signal_emit(&component->signal_keydown, component, 1, &keyevent);
+					}
+					if (component->propagateevent) {					
+						SendMessage (GetParent (hwnd), message, wParam, lParam) ;
+					}				
+					component->propagateevent = component->defaultpropagation;
+					return 0;
+				}
+			break;
 			case WM_KEYDOWN:							
 				component->propagateevent = component->defaultpropagation;
 				if (component->signal_keydown.slots) {
@@ -491,13 +510,18 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;				
 			break;
 			case WM_KEYUP:			
+				component->propagateevent = component->defaultpropagation;
 				if (component->signal_keyup.slots) {
 					KeyEvent keyevent;
-
+					
 					keyevent_init(&keyevent, (int)wParam, lParam, 
 						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 					signal_emit(&component->signal_keyup, component, 1, &keyevent);
 				}
+				if (component->propagateevent) {					
+					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
+				}				
+				component->propagateevent = component->defaultpropagation;
 				return 0;
 			break;
 			case WM_LBUTTONUP:			
@@ -1148,6 +1172,7 @@ void ui_component_update(ui_component* self)
 void ui_component_setfocus(ui_component* self)
 {
 	SetFocus((HWND)self->hwnd);
+	signal_emit(&self->signal_focus, self, 0);
 }
 
 int ui_component_hasfocus(ui_component* self)
@@ -1191,9 +1216,11 @@ void ui_component_align(ui_component* self)
 	List* q;
 	List* wrap = 0;
 	ui_size size;
+	ui_textmetric tm;
 	ui_component* client = 0;
 		
 	size = ui_component_size(self);
+	tm = ui_component_textmetric(self);
 	cpx_r = size.width;
 	cpy_b = size.height;
 	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
@@ -1203,56 +1230,69 @@ void ui_component_align(ui_component* self)
 		if (component->visible) {
 			ui_size componentsize;			
 			componentsize = ui_component_preferredsize(component, &size);
+
 			if (component->align == UI_ALIGN_CLIENT) {
 				client = component;
 			} 
 			if (component->align == UI_ALIGN_FILL) {
 				ui_component_setposition(component,
-					component->margin.left,
-					component->margin.top,				
-					size.width - component->margin.left - component->margin.right,
-					size.height - component->margin.top - component->margin.bottom);
+					ui_value_px(&component->margin.left, &tm),
+					ui_value_px(&component->margin.top, &tm),				
+					size.width - ui_value_px(&component->margin.left, &tm) -
+						ui_value_px(&component->margin.right, &tm),
+					size.height -
+						ui_value_px(&component->margin.top, &tm) -
+						ui_value_px(&component->margin.bottom, &tm));
 			} else
 			if (component->align == UI_ALIGN_TOP) {
-				cpy += component->margin.top;
+				cpy += ui_value_px(&component->margin.top, &tm);
 				ui_component_setposition(component, 
-					component->margin.left, 
+					ui_value_px(&component->margin.left, &tm), 
 					cpy,
-					cpx_r - component->margin.left - component->margin.right,
-					componentsize.height);
-				cpy += component->margin.bottom;
+					cpx_r -
+						ui_value_px(&component->margin.left, &tm) - 
+						ui_value_px(&component->margin.right, &tm),
+						componentsize.height);
+				cpy += ui_value_px(&component->margin.bottom, &tm);
 				cpy += componentsize.height;
 			} else
 			if (component->align == UI_ALIGN_BOTTOM) {
-				cpy_b -= component->margin.bottom;
+				cpy_b -= ui_value_px(&component->margin.bottom, &tm);
 				ui_component_setposition(component, 
-					component->margin.left, 
+					ui_value_px(&component->margin.left, &tm), 
 					cpy_b -= componentsize.height,
-					cpx_r - component->margin.left - component->margin.right,
+					cpx_r - ui_value_px(&component->margin.left, &tm) -
+						ui_value_px(&component->margin.right, &tm),
 					componentsize.height);
-				cpy_b -= component->margin.top;
+				cpy_b -= ui_value_px(&component->margin.top, &tm);
 				cpy_b -= componentsize.height;
 
 			} else
 			if (component->align == UI_ALIGN_RIGHT) {
 				int requiredcomponentwidth;
 
-				requiredcomponentwidth = componentsize.width + component->margin.left +
-					component->margin.right;
+				requiredcomponentwidth = componentsize.width +
+						ui_value_px(&component->margin.left, &tm) +
+						ui_value_px(&component->margin.right, &tm);
 				cpx_r -= requiredcomponentwidth;
 				ui_component_setposition(component,
-					cpx_r + component->margin.left,
-					cpy + component->margin.top,
+					cpx_r +
+						ui_value_px(&component->margin.left, &tm),
+					cpy + ui_value_px(&component->margin.top, &tm),
 					componentsize.width,										
-					size.height - component->margin.top - component->margin.bottom);
+					size.height -
+						ui_value_px(&component->margin.top, &tm) -
+						ui_value_px(&component->margin.bottom, &tm));
 			} else
 			if (component->align == UI_ALIGN_LEFT) {
-				if ((self->alignexpandmode & UI_HORIZONTALEXPAND) == UI_HORIZONTALEXPAND) {
+				if ((self->alignexpandmode & UI_HORIZONTALEXPAND)
+						== UI_HORIZONTALEXPAND) {
 				} else {
 					int requiredcomponentwidth;
 
-					requiredcomponentwidth = componentsize.width + component->margin.left +
-						component->margin.right;
+					requiredcomponentwidth = componentsize.width +
+						ui_value_px(&component->margin.left, &tm) +
+						ui_value_px(&component->margin.right, &tm);
 					if (cpx + requiredcomponentwidth > size.width) {
 						List* w;						
 						cpx = 0;
@@ -1260,8 +1300,9 @@ void ui_component_align(ui_component* self)
 							ui_component* c;
 							c = (ui_component*)w->entry;
 							ui_component_resize(c, ui_component_size(c).width,
-								cpymax - cpy - component->margin.top -
-									component->margin.bottom);
+								cpymax - cpy -
+								ui_value_px(&component->margin.top, &tm) -
+								ui_value_px(&component->margin.bottom, &tm));
 						}
 						cpy = cpymax;
 						list_free(wrap);						
@@ -1269,28 +1310,39 @@ void ui_component_align(ui_component* self)
 					}					
 					list_append(&wrap, component);					
 				}
-				cpx += component->margin.left;
+				cpx += ui_value_px(&component->margin.left, &tm);
 				ui_component_setposition(component,
 					cpx,
-					cpy + component->margin.top,
+					cpy + ui_value_px(&component->margin.top, &tm),
 					componentsize.width,
 					component->justify == UI_JUSTIFY_EXPAND 
-					? size.height - cpy - component->margin.top - component->margin.bottom
+					? size.height - cpy -
+						ui_value_px(&component->margin.top, &tm) -
+						ui_value_px(&component->margin.bottom, &tm)
 					: componentsize.height);
-				cpx += component->margin.right;
+				cpx += ui_value_px(&component->margin.right, &tm);
 				cpx += componentsize.width;				
-				if (cpymax < cpy + componentsize.height + component->margin.top + component->margin.bottom) {
-					cpymax = cpy + componentsize.height + component->margin.top + component->margin.bottom;
+				if (cpymax < cpy + 
+						componentsize.height +
+						ui_value_px(&component->margin.top, &tm) + 
+						ui_value_px(&component->margin.bottom, &tm)) {
+					cpymax = cpy + componentsize.height +
+						ui_value_px(&component->margin.top, &tm) +
+						ui_value_px(&component->margin.bottom, &tm);
 				}
 			}				
 		}
 	}
 	if (client) {
 		ui_component_setposition(client,
-					cpx + client->margin.left,
-					cpy + client->margin.top,
-					size.width - cpx - client->margin.left - client->margin.right - (size.width - cpx_r),
-					size.height - cpy - (size.height - cpy_b) - client->margin.top - client->margin.bottom);
+					cpx + client->margin.left.quantity.integer,
+					cpy + client->margin.top.quantity.integer,
+					size.width - cpx - ui_value_px(&client->margin.left, &tm) -
+						ui_value_px(&client->margin.right, &tm) -
+						(size.width - cpx_r),
+					size.height - cpy - (size.height - cpy_b) -
+						ui_value_px(&client->margin.top, &tm) -
+						ui_value_px(&client->margin.bottom, &tm));
 	}
 	list_free(q);
 	list_free(wrap);
@@ -1299,7 +1351,10 @@ void ui_component_align(ui_component* self)
 
 void onpreferredsize(ui_component* self, ui_component* sender,
 	ui_size* limit, ui_size* rv)
-{			
+{		
+	ui_textmetric tm;
+
+	tm = ui_component_textmetric(self);
 	if (rv) {
 		int cpxmax = 0;	
 		int cpymax = 0;		
@@ -1326,46 +1381,59 @@ void onpreferredsize(ui_component* self, ui_component* sender,
 					
 					componentsize = ui_component_preferredsize(component, &size);				
 					if (component->align == UI_ALIGN_TOP) {
-						cpy += component->margin.top;										
+						cpy += ui_value_px(&component->margin.top, &tm);
 						cpy += componentsize.height;
-						cpy += component->margin.bottom;
+						cpy += ui_value_px(&component->margin.bottom, &tm);
 						if (cpymax < cpy) {
 							cpymax = cpy;
 						}
-						if (cpxmax < componentsize.width + component->margin.left + component->margin.right) {
-							cpxmax = componentsize.width + component->margin.left + component->margin.right;
+						if (cpxmax < componentsize.width +
+								ui_value_px(&component->margin.left, &tm) +
+								ui_value_px(&component->margin.right, &tm)) {
+							cpxmax = componentsize.width +
+								ui_value_px(&component->margin.left, &tm) +
+								ui_value_px(&component->margin.right, &tm);
 						}
 					} else
 					if (component->align == UI_ALIGN_BOTTOM) {
-						cpy += component->margin.top;										
+						cpy += ui_value_px(&component->margin.top, &tm);
 						cpy += componentsize.height;
-						cpy += component->margin.bottom;
+						cpy += ui_value_px(&component->margin.bottom, &tm);
 						if (cpymax < cpy) {
 							cpymax = cpy;
 						}
-						if (cpxmax < componentsize.width + component->margin.left + component->margin.right) {
-							cpxmax = componentsize.width + component->margin.left + component->margin.right;
+						if (cpxmax < componentsize.width +
+								ui_value_px(&component->margin.left, &tm) +
+								ui_value_px(&component->margin.right, &tm)) {
+							cpxmax = componentsize.width +
+								ui_value_px(&component->margin.left, &tm) +
+								ui_value_px(&component->margin.right, &tm);
 						}
 					} else
 					if (component->align == UI_ALIGN_LEFT) {					
 						if (size.width != 0) {
 							int requiredcomponentwidth;
 
-							requiredcomponentwidth = componentsize.width + component->margin.left +
-								component->margin.right;				
+							requiredcomponentwidth = componentsize.width +
+								ui_value_px(&component->margin.left, &tm) +
+								ui_value_px(&component->margin.right, &tm);
 							if (cpx + requiredcomponentwidth > size.width) {
 								cpy = cpymax;
 								cpx = 0;							
 							}						
 						}
-						cpx += component->margin.left;				
-						cpx += component->margin.right;
+						cpx += ui_value_px(&component->margin.left, &tm);
+						cpx += ui_value_px(&component->margin.right, &tm);
 						cpx += componentsize.width;
 						if (cpxmax < cpx) {
 							cpxmax = cpx;
 						}
-						if (cpymax < cpy + componentsize.height + component->margin.top + component->margin.bottom) {
-							cpymax = cpy + componentsize.height + component->margin.top + component->margin.bottom;
+						if (cpymax < cpy + componentsize.height +
+								ui_value_px(&component->margin.top, &tm) +
+								ui_value_px(&component->margin.bottom, &tm)) {
+							cpymax = cpy + componentsize.height +
+								ui_value_px(&component->margin.top, &tm) +
+								ui_value_px(&component->margin.bottom, &tm);
 						}
 					}				
 				}
@@ -1589,7 +1657,6 @@ ui_textmetric ui_component_textmetric(ui_component* self)
 	ReleaseDC(NULL, hdc);
 	return tm;
 }
-
 
 void ui_component_seticonressource(ui_component* self, int ressourceid)
 {

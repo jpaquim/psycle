@@ -65,7 +65,26 @@ void library_load(Library* self, const char* path)
 		self->path = _strdup(path);
 		self->module = LoadLibrary(path);			
 		if (self->module == NULL) {
-			self->err = GetLastError();					
+			// LPVOID lpMsgBuf;
+			self->err = GetLastError();
+			
+			/*FormatMessage( 
+				FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+				FORMAT_MESSAGE_FROM_SYSTEM | 
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				GetLastError(),
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+				(LPTSTR) &lpMsgBuf,
+				0,
+				NULL 
+			);
+			// Process any inserts in lpMsgBuf.
+			// ...
+			// Display the string.
+			MessageBox( NULL, (LPCTSTR)lpMsgBuf, path, MB_OK | MB_ICONINFORMATION );
+			// Free the buffer.
+			LocalFree( lpMsgBuf ); */
 		}
 	} __except(FilterException(path, GetExceptionCode(), GetExceptionInformation())) {
 		self->module = 0;

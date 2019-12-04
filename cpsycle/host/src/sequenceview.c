@@ -39,6 +39,7 @@ static void sequenceview_onsingleselection(SequenceView*, ui_button* sender);
 static void sequenceview_onmultiselection(SequenceView*, ui_button* sender);
 static void sequenceview_onfollowsong(SequenceView*, ui_button* sender);
 static void sequenceview_onrecordtweaks(SequenceView*, ui_button* sender);
+static void sequenceview_onmultichannelaudition(SequenceView*, ui_button* sender);
 static void sequenceview_onsize(SequenceView*, ui_component* sender, ui_size*);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*);
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
@@ -53,6 +54,8 @@ static List* rowend(List* p);
 
 static void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader*,
 	ui_component* sender, ui_graphics*);
+
+void sequenceroptionsbar_initalign(SequencerOptionsBar*);
 
 static int listviewmargin = 5;
 
@@ -74,12 +77,8 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	ui_component_resize(&self->buttons.component, 200, 70);
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
 	sequenceduration_init(&self->duration, &self->component, self->sequence);
-	ui_checkbox_init(&self->followsong, &self->component);
-	ui_checkbox_settext(&self->followsong, "Follow Song");
-	ui_checkbox_init(&self->shownames, &self->component);	
-	ui_checkbox_settext(&self->shownames, "Show pattern names");
-	ui_checkbox_init(&self->recordtweaks, &self->component);
-	ui_checkbox_settext(&self->recordtweaks, "Record tweaks");
+	sequenceroptionsbar_init(&self->options, &self->component);
+
 	signal_connect(&self->buttons.newentry.signal_clicked, self,
 		sequenceview_onnewentry);
 	signal_connect(&self->buttons.insertentry.signal_clicked, self,
@@ -108,10 +107,12 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 		sequenceview_onsingleselection);
 	signal_connect(&self->buttons.multisel.signal_clicked, self,
 		sequenceview_onmultiselection);
-	signal_connect(&self->followsong.signal_clicked, self,
+	signal_connect(&self->options.followsong.signal_clicked, self,
 		sequenceview_onfollowsong);
-	signal_connect(&self->recordtweaks.signal_clicked, self,
+	signal_connect(&self->options.recordtweaks.signal_clicked, self,
 		sequenceview_onrecordtweaks);
+	signal_connect(&self->options.multichannelaudition.signal_clicked, self,
+		sequenceview_onmultichannelaudition);
 	signal_connect(&workspace->signal_songchanged, self,
 		sequenceview_onsongchanged);
 	signal_connect(&workspace->signal_sequenceselectionchanged, self,
@@ -406,7 +407,8 @@ void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size
 {		
 	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, size);
 	ui_size trackheader;
-	ui_size durationsize = ui_component_preferredsize(&self->duration.component, size);	
+	ui_size durationsize = ui_component_preferredsize(&self->duration.component, size);
+	ui_size optionssize = ui_component_preferredsize(&self->options.component, size);
 
 	trackheader.height = (int)(self->listview.textheight * 1.5);
 	trackheader.width = size->width;
@@ -418,14 +420,18 @@ void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size
 	ui_component_setposition(&self->listview.component, 
 		0, buttonssize.height + trackheader.height,
 		size->width,
-		size->height - buttonssize.height - durationsize.height - trackheader.height - 60);
+		size->height - buttonssize.height - durationsize.height -
+			trackheader.height - optionssize.height);
 	sequencelistview_adjustscrollbars(&self->listview);
 	ui_component_setposition(&self->duration.component, 
 		0,
-		size->height - durationsize.height - 60,
+		size->height - durationsize.height - optionssize.height,
 		size->width,
 		durationsize.height);
-	ui_component_setposition(&self->followsong.component, 
+	ui_component_setposition(&self->options.component, 0,
+		size->height - optionssize.height, size->width, optionssize.height);
+		
+/*		followsong.component, 
 		0,
 		size->height - 60,
 		size->width,
@@ -439,7 +445,7 @@ void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size
 		0,
 		size->height - 20,
 		size->width,
-		20);
+		20);*/
 }
 
 void sequenceview_onnewentry(SequenceView* self)
@@ -690,6 +696,12 @@ void sequenceview_onrecordtweaks(SequenceView* self, ui_button* sender)
 	}
 }
 
+void sequenceview_onmultichannelaudition(SequenceView* self, ui_button* sender)
+{
+	self->workspace->player.multichannelaudition =
+		!self->workspace->player.multichannelaudition;
+}
+
 void sequencelistview_onmousedown(SequenceListView* self, ui_component* sender,
 	MouseEvent* ev)
 {
@@ -834,4 +846,29 @@ void sequencelistview_ontimer(SequenceListView* self, ui_component* sender, int 
 		ui_component_invalidate(&self->component);
 		self->lastentry = 0;
 	}	
+}
+
+void sequenceroptionsbar_init(SequencerOptionsBar* self, ui_component* parent)
+{
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	ui_checkbox_init(&self->followsong, &self->component);
+	ui_checkbox_settext(&self->followsong, "Follow Song");
+	ui_checkbox_init(&self->shownames, &self->component);	
+	ui_checkbox_settext(&self->shownames, "Show pattern names");
+	ui_checkbox_init(&self->recordtweaks, &self->component);
+	ui_checkbox_settext(&self->recordtweaks, "Record tweaks");
+	ui_checkbox_init(&self->multichannelaudition, &self->component);
+	ui_checkbox_settext(&self->multichannelaudition, "Multichannel Audition");	
+	sequenceroptionsbar_initalign(self);
+}
+
+void sequenceroptionsbar_initalign(SequencerOptionsBar* self)
+{
+	ui_margin margin = {{0, UI_UNIT_PX}, {3, UI_UNIT_PX}, {3, UI_UNIT_PX},
+		{0, UI_UNIT_PX}};				
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_TOP,
+		&margin));		
 }

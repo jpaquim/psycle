@@ -14,8 +14,11 @@ void InitSongBar(SongBar* self, ui_component* parent, Workspace* workspace)
 	InitLinesPerBeatBar(&self->linesperbeatbar, &self->component, &workspace->player);
 	ui_component_resize(&self->linesperbeatbar.component, 130, 0);	
 	InitOctaveBar(&self->octavebar, &self->component, workspace);	
-	{		
-		ui_margin margin = { 0, 10, 0, 0 };
+	{	
+		ui_margin margin;
+
+		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+			ui_value_makepx(0), ui_value_makepx(0));
 		
 		list_free(ui_components_setalign(		
 			ui_component_children(&self->component, 0),

@@ -24,12 +24,15 @@ void InitOctaveBar(OctaveBar* self, ui_component* parent, Workspace* workspace)
 	ui_combobox_init(&self->octavebox, &self->component);
 	ui_combobox_setcharnumber(&self->octavebox, 2);	
 	BuildOctaveBox(self);	
-	signal_connect(&self->octavebox.signal_selchanged, self, OnOctaveBoxSelChange);	
+	signal_connect(&self->octavebox.signal_selchanged, self,
+		OnOctaveBoxSelChange);	
 	signal_connect(&workspace->signal_octavechanged, self, OnOctaveChanged);
 	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	{		
-		ui_margin margin = { 0, 3, 3, 0 };
-				
+		ui_margin margin;
+
+		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+			ui_value_makepx(0), ui_value_makepx(0));				
 		list_free(ui_components_setalign(
 			ui_component_children(&self->component, 0),
 			UI_ALIGN_LEFT,

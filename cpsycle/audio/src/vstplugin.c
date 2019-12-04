@@ -87,7 +87,7 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	
 	custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
-	base->vtable->setcallback(self, callback);
+	base->vtable->setcallback(&self->custommachine.machine, callback);
 	self->custommachine.machine.vtable = &vtable;
 	self->info = 0;
 	self->editorhandle = 0;
@@ -191,15 +191,18 @@ int plugin_vst_test(const char* path, MachineInfo* rv)
 
 void work(VstPlugin* self, BufferContext* bc)
 {
-	unsigned int c;	
-	for (c = 0; c < bc->output->numchannels; ++c) {
-		dsp.mul(bc->output->samples[c], bc->numsamples, 1/32768.f);
-	}
-	processevents(self, bc);
-	self->effect->processReplacing(self->effect, bc->output->samples,
-		bc->output->samples, bc->numsamples);
-	for (c = 0; c < bc->output->numchannels; ++c) {
-		dsp.mul(bc->output->samples[c], bc->numsamples, 32768.f);
+	if (!self->custommachine.machine.vtable->bypassed(
+			&self->custommachine.machine)) {
+		unsigned int c;	
+		for (c = 0; c < bc->output->numchannels; ++c) {
+			dsp.mul(bc->output->samples[c], bc->numsamples, 1/32768.f);
+		}
+		processevents(self, bc);
+		self->effect->processReplacing(self->effect, bc->output->samples,
+			bc->output->samples, bc->numsamples);
+		for (c = 0; c < bc->output->numchannels; ++c) {
+			dsp.mul(bc->output->samples[c], bc->numsamples, 32768.f);
+		}
 	}
 }
 

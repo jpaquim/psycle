@@ -7,7 +7,7 @@
 
 static void ondestroy(ui_image*);
 static void ondraw(ui_image*, ui_component* sender, ui_graphics* g);
-static int checkalignment(ui_image*, Alignment alignment);
+static int checkalignment(ui_image*, UiAlignment alignment);
 
 void ui_image_init(ui_image* self, ui_component* parent)
 {  
@@ -15,7 +15,7 @@ void ui_image_init(ui_image* self, ui_component* parent)
 	ui_bitmap_init(&self->bitmap);
 	signal_connect(&self->component.signal_draw, self, ondraw);
 	signal_connect(&self->component.signal_destroy, self, ondestroy);
-	self->alignment = ALIGNMENT_NONE;	
+	self->alignment = UI_ALIGNMENT_NONE;	
 }
 
 void ondestroy(ui_image* self)
@@ -23,7 +23,7 @@ void ondestroy(ui_image* self)
 	ui_bitmap_dispose(&self->bitmap);
 }
 
-void ui_image_setbitmapalignment(ui_image* self, Alignment alignment)
+void ui_image_setbitmapalignment(ui_image* self, UiAlignment alignment)
 {
 	self->alignment = alignment;
 }
@@ -37,18 +37,18 @@ void ondraw(ui_image* self, ui_component* sender, ui_graphics* g)
 	
 	size = ui_component_size(&self->component);	
 	bmpsize = ui_bitmap_size(&self->bitmap);
-	if (checkalignment(self, ALIGNMENT_CENTER_HORIZONTAL)) {
+	if (checkalignment(self, UI_ALIGNMENT_CENTER_HORIZONTAL)) {
 		x = (size.width - bmpsize.width) / 2;
 	} else 		
-	if (checkalignment(self, ALIGNMENT_RIGHT)) {
+	if (checkalignment(self, UI_ALIGNMENT_RIGHT)) {
 		x = size.width - bmpsize.width;		
 	} else {		
 		x = 0;		
 	}
-	if (checkalignment(self, ALIGNMENT_CENTER_VERTICAL)) {								
+	if (checkalignment(self, UI_ALIGNMENT_CENTER_VERTICAL)) {								
 		y = (size.height - bmpsize.height) / 2;
 	} else 		
-	if (checkalignment(self, ALIGNMENT_BOTTOM)) {
+	if (checkalignment(self, UI_ALIGNMENT_BOTTOM)) {
 		y = size.height - bmpsize.height;
 	} else {		
 		y = 0;		
@@ -57,8 +57,7 @@ void ondraw(ui_image* self, ui_component* sender, ui_graphics* g)
 		x, y, bmpsize.width, bmpsize.height, 0, 0);
 }
 
-int checkalignment(ui_image* self, Alignment alignment)
+int checkalignment(ui_image* self, UiAlignment alignment)
 {
 	return (self->alignment & alignment) == alignment;	
 }
-

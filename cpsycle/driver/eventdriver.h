@@ -24,6 +24,24 @@ typedef struct {
 	char const *ShortName;					// "MME"	
 } EventDriverInfo;
 
+
+typedef enum {
+	EVENTDRIVER_KEYDOWN,
+	EVENTDRIVER_KEYUP
+} EventType;
+
+typedef enum {
+	EVENTDRIVER_CMD_NONE = 0,
+	EVENTDRIVER_CMD_MIDI = 1,
+	EVENTDRIVER_CMD_PATTERN = 2
+} EventDriverCmdType;
+
+typedef struct {
+	EventDriverCmdType type;
+	int size;
+	unsigned char* data;
+} EventDriverCmd;
+
 typedef void (*EVENTDRIVERWORKFN)(void* context, int cmd, unsigned char* data, unsigned int size);
 
 typedef struct EventDriver {
@@ -36,7 +54,9 @@ typedef struct EventDriver {
 	int (*dispose)(struct EventDriver*);
 	int (*close)(struct EventDriver*);
 	void (*connect)(struct EventDriver*, void* context, EVENTDRIVERWORKFN callback, void* handle);	
-	void (*write)(struct EventDriver*, unsigned char* data, int size);
+	void (*write)(struct EventDriver*, int type, unsigned char* data, int size);
+	void (*cmd)(struct EventDriver*, int type, unsigned char* data, int size, EventDriverCmd*,
+		int maxsize);
 	int (*error)(int, const char*);
 } EventDriver;
 

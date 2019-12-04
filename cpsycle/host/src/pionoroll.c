@@ -447,7 +447,7 @@ void pianoheader_drawruler(PianoHeader* self, ui_graphics* g)
 	int c;	
 
 	size = ui_component_size(&self->component);
-	baseline = size.height - margin.bottom;	
+	baseline = size.height - margin.bottom.quantity.integer;	
 	ui_setcolor(g, 0x00CACACA); 
 	ui_drawline(g, 0, baseline, size.width, baseline);	
 	
