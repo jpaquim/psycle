@@ -36,6 +36,7 @@ void properties_init(Properties* self, const char* key, PropertyType typ)
 	self->item.typ = typ;
 	self->item.hint = PROPERTY_HINT_EDIT;
 	self->item.disposechildren = 1;	
+	self->item.id = -1;
 }
 
 void properties_free(Properties* self)
@@ -81,6 +82,49 @@ Properties* properties_createsection(Properties* self, const char* name)
 	properties_init(rv, name, PROPERTY_TYP_SECTION);
 	
 	return append(self, rv);
+}
+
+Properties* properties_clone(Properties* self)
+{
+	Properties* first = 0;
+	Properties* rv = 0;
+	Properties* p = 0;
+	Properties* q = 0;
+	
+	p = self;
+	while (p) {				
+		rv = (Properties*) malloc(sizeof(Properties));
+		if (!first) {
+			first = rv;			
+		} else {
+			q->next = rv;
+		}
+		rv->next = 0;		
+		rv->parent = 0;
+		rv->children = 0;
+		rv->dispose = 0;			
+		rv->item = p->item;
+
+		rv->item.key = p->item.key ? strdup(p->item.key) : 0;
+		rv->item.text = p->item.text ? strdup(p->item.text) : 0;
+		rv->item.min = p->item.min;
+		rv->item.max = p->item.max;
+		rv->item.value = p->item.value;		
+		rv->item.typ = p->item.typ;
+		rv->item.hint = p->item.hint;
+		rv->item.id = p->item.id;
+		rv->item.disposechildren = 1;
+		if (p->children) {
+			Properties* i;
+			rv->children = properties_clone(p->children);
+			for (i = rv->children; i != 0; i = i->next) {
+				i->parent = rv;
+			}
+		}
+		q = rv;
+		p = p->next;
+	}
+	return first;
 }
 
 Property* properties_entry(Properties* self)
@@ -521,6 +565,17 @@ const char* properties_text(Properties* self)
 	return self->item.text ? self->item.text : self->item.key ? self->item.key : "";
 }
 
+Properties* properties_setid(Properties* self, int id)
+{	
+	self->item.id = id;
+	return self;
+}
+
+int properties_id(Properties* self)
+{
+	return self->item.id;
+}
+
 int properties_ischoiceitem(Properties* self)
 {
 	return self->parent && self->parent->item.typ == PROPERTY_TYP_CHOICE;	
@@ -595,10 +650,32 @@ unsigned int properties_size(Properties* self)
 {
 	unsigned int rv = 0;
 	Properties* p;
-	
-	assert(self);
+		
 	if (self) {
 		for (p = self->children; p != 0; p = p->next, ++rv);
+	}
+	return rv;
+}
+
+Properties* properties_read_choice(Properties* self)
+{
+	Properties* rv = 0;	
+		
+	if (self) {		
+		int choice;	
+		Properties* p;
+		int count = 0;		
+		
+		choice = properties_value(self);
+		p = self->children;		
+		while (p) {
+			if (count == choice) {
+				rv = p;
+				break;
+			}
+			p = properties_next(p);
+			++count;
+		}
 	}
 	return rv;
 }

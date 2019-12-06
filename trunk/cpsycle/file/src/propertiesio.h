@@ -7,6 +7,8 @@
 #include "properties.h"
 
 int propertiesio_load(Properties*, const char* path, int allowappend);
+int propertiesio_loadsection(Properties*, const char* path,
+	const char* section, int allowappend);
 void propertiesio_save(Properties*, const char* path);
 
 #endif

@@ -12,11 +12,11 @@ static void OnMouseDown(WaveBox*, ui_component* sender, MouseEvent*);
 
 void InitWaveBox(WaveBox* self, ui_component* parent)
 {			
+	self->sample = 0;
 	ui_component_init(&self->component, parent);	
 	signal_connect(&self->component.signal_draw, self, OnDraw);
 	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	self->sample = 0;
 }
 
 void OnDestroy(WaveBox* self, ui_component* sender)
@@ -29,7 +29,16 @@ void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 	ui_size size = ui_component_size(&self->component);	
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ui_setcolor(g, 0x00B1C8B0);
-	if (self->sample) {
+	if (!self->sample) {
+		ui_textmetric tm;
+		static const char* txt = "No wave loaded";
+
+		tm = ui_component_textmetric(&self->component);
+		ui_setbackgroundmode(g, TRANSPARENT);
+		ui_settextcolor(g, 0x00D1C5B6);
+		ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
+			(size.height - tm.tmHeight) / 2, txt, strlen(txt));
+	} else {
 		int x;
 		int centery = size.height / 2;
 		float offsetstep;

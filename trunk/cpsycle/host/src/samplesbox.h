@@ -15,7 +15,7 @@ typedef struct {
 	Instruments* instruments;
 } SamplesBox;
 
-void InitSamplesBox(SamplesBox*, ui_component* parent, Samples*, Instruments*);
-void SetSamples(SamplesBox*, Samples*, Instruments*);
+void samplesbox_init(SamplesBox*, ui_component* parent, Samples*, Instruments*);
+void samplesbox_setsamples(SamplesBox*, Samples*, Instruments*);
 
 #endif

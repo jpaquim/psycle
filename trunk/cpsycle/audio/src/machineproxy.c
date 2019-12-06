@@ -22,6 +22,8 @@
 static Buffer* machineproxy_mix(MachineProxy*, size_t slot, unsigned int amount, MachineSockets*, Machines*);
 static void machineproxy_work(MachineProxy*, BufferContext*);
 static void machineproxy_generateaudio(MachineProxy*, BufferContext* bc);
+static void machineproxy_seqtick(MachineProxy*, int channel, const PatternEvent* event);
+static void machineproxy_stop(MachineProxy*);
 static void machineproxy_dispose(MachineProxy*);
 static int machineproxy_mode(MachineProxy*);
 static int machineproxy_numinputs(MachineProxy*);
@@ -89,6 +91,8 @@ static void vtable_init(MachineProxy* self)
 		vtable.mix = (fp_machine_mix) machineproxy_mix;
 		vtable.work = (fp_machine_work) machineproxy_work;
 		vtable.generateaudio = (fp_machine_generateaudio) machineproxy_generateaudio;
+		vtable.seqtick = (fp_machine_seqtick) machineproxy_seqtick;
+		vtable.stop = (fp_machine_stop) machineproxy_stop;
 		vtable.dispose = (fp_machine_dispose) machineproxy_dispose;
 		vtable.mode = (fp_machine_mode) machineproxy_mode;
 		vtable.numinputs = (fp_machine_numinputs) machineproxy_numinputs;
@@ -191,6 +195,40 @@ void machineproxy_generateaudio(MachineProxy* self, BufferContext* bc)
 		}
 #endif		
 	}
+}
+
+void machineproxy_seqtick(MachineProxy* self, int channel, const PatternEvent* event)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->seqtick(self->client, channel, event);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except(FilterException(self, "seqtick", GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+
+}
+
+void machineproxy_stop(MachineProxy* self)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->stop(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except(FilterException(self, "stop", GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+
 }
 
 void machineproxy_dispose(MachineProxy* self)

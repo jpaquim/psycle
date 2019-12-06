@@ -46,6 +46,16 @@ void ui_margin_init(ui_margin* self, ui_value top, ui_value right,
    self->left = left;
 }
 
+intptr_t ui_margin_width_px(ui_margin* self, const ui_textmetric* tm)
+{
+	return ui_value_px(&self->left, tm) + ui_value_px(&self->right, tm);
+}
+
+intptr_t ui_margin_height_px(ui_margin* self, const ui_textmetric* tm)
+{
+	return ui_value_px(&self->top, tm) + ui_value_px(&self->bottom, tm);
+}
+
 ui_value ui_value_makepx(intptr_t px)
 {
 	ui_value rv;

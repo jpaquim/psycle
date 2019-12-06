@@ -18,6 +18,7 @@ static Machine* clone(Plugin*);
 static int hostevent(Plugin*, int const eventNr, int const val1, float const val2);
 static void generateaudio(Plugin*, BufferContext*);
 static void seqtick(Plugin*, int channel, const PatternEvent* event);
+static void stop(Plugin*);
 static void sequencerlinetick(Plugin*);
 static MachineInfo* info(Plugin*);
 static int parametertype(Plugin* self, int par);
@@ -48,6 +49,7 @@ static void vtable_init(Plugin* self)
 		vtable.clone = (fp_machine_clone) clone;
 		vtable.hostevent = (fp_machine_hostevent) hostevent;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
+		vtable.stop = (fp_machine_stop) stop;
 		vtable.sequencerlinetick = (fp_machine_sequencerlinetick) sequencerlinetick;
 		vtable.info = (fp_machine_info) info;
 		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;
@@ -168,6 +170,11 @@ void seqtick(Plugin* self, int channel, const PatternEvent* event)
 {
 	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd,
 		event->parameter);
+}
+
+void stop(Plugin* self)
+{
+	mi_stop(self->mi);
 }
 
 void generateaudio(Plugin* self, BufferContext* bc)

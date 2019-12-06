@@ -29,13 +29,47 @@ void inputdefiner_setinput(InputDefiner* self, unsigned int input)
 
 void inputdefiner_text(InputDefiner* self, char* text)
 {
-	char keystr[5];
+	char keystr[10];
 	int keycode;
 	int shift;
 	int ctrl;
 
 	decodeinput(self->input, &keycode, &shift, &ctrl);
-	psy_snprintf(keystr, 5, "%c", keycode);
+	if (keycode == VK_RETURN) {
+		strcpy(keystr, "RETURN");
+	} else
+	if (keycode == VK_LEFT) {
+		strcpy(keystr, "LEFT");
+	} else
+	if (keycode == VK_RIGHT) {
+		strcpy(keystr, "RIGHT");
+	} else
+	if (keycode == VK_UP) {
+		strcpy(keystr, "UP");
+	} else
+	if (keycode == VK_DOWN) {
+		strcpy(keystr, "DOWN");
+	} else
+	if (keycode == VK_TAB) {
+		strcpy(keystr, "TAB");
+	} else
+	if (keycode == VK_BACK) {
+		strcpy(keystr, "BACK");
+	} else
+	if (keycode == VK_DELETE) {
+		strcpy(keystr, "DELETE");
+	} else
+	if (keycode == VK_HOME) {
+		strcpy(keystr, "HOME");
+	} else
+	if (keycode == VK_END) {
+		strcpy(keystr, "END");
+	} else	
+	if (keycode >= VK_F1 && keycode <= VK_F12) {
+		psy_snprintf(keystr, 5, "F%d", keycode - VK_F1 + 1);
+	} else {
+		psy_snprintf(keystr, 5, "%c", keycode);
+	}
 	text[0] = '\0';	
 	if (shift) {
 		strcat(text, "Shift + ");		
@@ -43,9 +77,9 @@ void inputdefiner_text(InputDefiner* self, char* text)
 	if (ctrl) {		
 		strcat(text, "Ctrl + ");
 	}
-	if (keycode >= 0x30) {	
+	// if (keycode >= 0x30) {
 		strcat(text, keystr);	
-	}
+	// }
 }
 
 void ondraw(InputDefiner* self, ui_component* sender, ui_graphics* g)

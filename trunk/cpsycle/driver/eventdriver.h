@@ -16,6 +16,7 @@
 #define EVENTDRIVER_H
 
 #include <properties.h>
+#include <signal.h>
 
 typedef struct {
 	int Version;							// VERSION
@@ -42,22 +43,21 @@ typedef struct {
 	unsigned char* data;
 } EventDriverCmd;
 
-typedef void (*EVENTDRIVERWORKFN)(void* context, int cmd, unsigned char* data, unsigned int size);
 
-typedef struct EventDriver {
-	EVENTDRIVERWORKFN _pCallback;
-	void* _callbackContext;
-	Properties* properties;
+typedef struct EventDriver {	
+	Properties* properties;	
 	int (*open)(struct EventDriver*);
-	void (*free)(struct EventDriver*);	
-	void (*updateconfiguration)(struct EventDriver*);
 	int (*dispose)(struct EventDriver*);
-	int (*close)(struct EventDriver*);
-	void (*connect)(struct EventDriver*, void* context, EVENTDRIVERWORKFN callback, void* handle);	
+	void (*free)(struct EventDriver*);	
+	void (*configure)(struct EventDriver*);	
+	int (*close)(struct EventDriver*);	
 	void (*write)(struct EventDriver*, int type, unsigned char* data, int size);
 	void (*cmd)(struct EventDriver*, int type, unsigned char* data, int size, EventDriverCmd*,
 		int maxsize);
 	int (*error)(int, const char*);
+	int (*getcmd)(struct EventDriver*, Properties* section);
+	void (*setcmddef)(struct EventDriver*, Properties*);
+	Signal signal_input;
 } EventDriver;
 
 

@@ -50,14 +50,13 @@ static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback, v
 static int driver_open(Driver*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
-static void updateconfiguration(Driver*);
+static void driver_configure(Driver*);
 static unsigned int samplerate(Driver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
 static void PollerThread(void *pWaveOut);
 static void DoBlocks(MmeDriver* self);
 static void init_properties(Driver* self);
-static void apply_properties(MmeDriver* self);
 static int on_error(int err, const char* msg);
 static void Quantize(float *pin, int *piout, int c);
 
@@ -105,7 +104,7 @@ EXPORT Driver* __cdecl driver_create(void)
 		mme->driver.open = driver_open;
 		mme->driver.close = driver_close;
 		mme->driver.dispose = driver_dispose;
-		mme->driver.updateconfiguration = updateconfiguration;
+		mme->driver.configure = driver_configure;
 		mme->driver.samplerate = samplerate;
 		mme->hEvent = CreateEvent
 		(NULL, FALSE, FALSE, NULL);
@@ -142,9 +141,7 @@ int driver_init(Driver* driver)
 //	self->_channelmode = 3;
 	self->_bitDepth = 16;
 
-
 	init_properties(&self->driver);
-//	apply_properties(self);
 	return 0;
 }
 
@@ -167,8 +164,8 @@ static void init_properties(Driver* self)
 		
 	properties_append_string(self->properties, "name", "winmme");
 	properties_append_string(self->properties, "version", "1.0");
-	devices = properties_append_choice(self->properties, "device", -1);		 
-	properties_append_int(devices, "WAVE_MAPPER", -1, 0, 0);	
+	devices = properties_append_choice(self->properties, "device", -1);
+	properties_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
 	n = waveOutGetNumDevs();	
 	for (i = 0; i < n; i++)
 	{
@@ -183,10 +180,21 @@ static void init_properties(Driver* self)
 	properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
-static void apply_properties(MmeDriver* self)
+void driver_configure(Driver* driver)
 {
+	MmeDriver* self;
 	Properties* property;
 
+	self = (MmeDriver*) driver;
+	property = properties_read(self->driver.properties, "device");
+	if (property && property->item.typ == PROPERTY_TYP_CHOICE) {
+		Property* device;
+
+		device = properties_read_choice(property);
+		if (device) {
+			self->_deviceId =  properties_value(device);
+		}
+	}
 	property = properties_read(self->driver.properties, "bitdepth");
 	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
 		self->_bitDepth = property->item.value.i;
@@ -207,11 +215,6 @@ static void apply_properties(MmeDriver* self)
 	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
 		self->_blockSizeBytes = property->item.value.i;
 	}
-}
-
-void updateconfiguration(Driver* self)
-{
-	apply_properties((MmeDriver*)self);
 }
 
 unsigned int samplerate(Driver* self)

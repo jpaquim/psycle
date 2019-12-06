@@ -39,14 +39,14 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->looping = 1;
 	self->position = 0;	
 	self->window = 0;
-	self->seqlinetickcount = 1.f / self->lpb;
+	self->seqlinetickcount = (beat_t) (1.f / self->lpb);
 	self->events = 0;
 	self->delayedevents = 0;
 	self->inputevents = 0;
 	self->currtracks = 0;
 	self->mode = SEQUENCERPLAYMODE_PLAYALL;
 	compute_beatsprosample(self);
-	makecurrtracks(self, (beat_t)0.f);
+	makecurrtracks(self, (beat_t) 0.f);
 }
 
 void sequencer_dispose(Sequencer* self)
@@ -378,7 +378,7 @@ void insertevents(Sequencer* self)
 							it->state.jumpat = offset + (1 / (self->lpb * self->lpbspeed));
 							it->state.jumpto = jumpsequenceentry;
 						}
-					}*/
+					}*/					
 					addsequenceevent(self, track, offset);
 					sequencetrackiterator_inc(it);					
 				} else {			
@@ -417,7 +417,7 @@ void sequencer_append(Sequencer* self, List* events)
 
 int isoffsetinwindow(Sequencer* self, beat_t offset)
 {
-  return offset >= self->position && offset < self->position + self->window;
+	return offset >= self->position && offset < self->position + self->window;
 }
 
 void addsequenceevent(Sequencer* self, SequencerTrack* track, beat_t offset)
@@ -425,6 +425,10 @@ void addsequenceevent(Sequencer* self, SequencerTrack* track, beat_t offset)
 	PatternEntry* patternentry;	
 
 	patternentry = sequencetrackiterator_patternentry(track->iterator);
+	if (!patternentry || (patternentry && patterns_istrackmuted(
+			self->sequence->patterns, patternentry->track))) {
+		return;
+	}
 	if (patternentry->event.cmd == SET_TEMPO) {
 		self->bpm = patternentry->event.parameter;
 		compute_beatsprosample(self);		

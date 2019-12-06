@@ -97,7 +97,7 @@ void master_dispose(Master* self)
 void parametertweak(Master* self, int param, int value)
 {
 	if (param == 0) {
-		Machines* machines = self->machine.vtable->machines(self);
+		Machines* machines = self->machine.vtable->machines(&self->machine);
 		if (machines) {			
 			machines_setvolume(machines,
 				floatparamvalue(value) * floatparamvalue(value) * 4.f);
@@ -106,7 +106,7 @@ void parametertweak(Master* self, int param, int value)
 		MachineSockets* sockets;
 		WireSocket* p;
 		int c = 1;
-		Machines* machines = self->machine.vtable->machines(self);
+		Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
@@ -135,7 +135,7 @@ int describevalue(Master* self, char* txt, int param, int value)
 		MachineSockets* sockets;
 		WireSocket* p;
 		int c = 1;
-		Machines* machines = self->machine.vtable->machines(self);
+		Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
@@ -168,7 +168,7 @@ int parametervalue(Master* self, int param)
 		MachineSockets* sockets;
 		WireSocket* input_socket;
 		int c = 1;
-		Machines* machines = self->machine.vtable->machines(self);
+		Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {

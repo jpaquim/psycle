@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "workspace.h"
+#include "cmdproperties.h"
 #include <exclusivelock.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,7 +54,6 @@ static int machinecallback_bpm(Workspace*);
 static Samples* machinecallback_samples(Workspace*);
 static Machines* machinecallback_machines(Workspace*);
 static Instruments* machinecallback_instruments(Workspace*);
-
 
 void history_init(History* self)
 {
@@ -112,7 +112,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->currnavigation = 0;
 	self->currview = 0;
 	history_init(&self->history);
-	workspace_makeconfig(self);
+	workspace_makeconfig(self);	
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);
 	self->songcbk = self->song;
@@ -123,8 +123,8 @@ void workspace_init(Workspace* self, void* handle)
 		workspace_onsequenceeditpositionchanged);
 	undoredo_init(&self->undoredo);	
 	self->navigating = 0;
-	workspace_initsignals(self);
-	workspace_initplayer(self);
+	workspace_initsignals(self);	
+	workspace_initplayer(self);		
 	self->patterneditposition.pattern = 0;
 	self->patterneditposition.col = 
 	self->patterneditposition.line = 0;
@@ -181,6 +181,7 @@ void workspace_dispose(Workspace* self)
 	workspace_disposesignals(self);
 	pattern_dispose(&self->patternpaste);
 	workspace_disposesequencepaste(self);
+	properties_free(self->cmds);
 	lock_dispose();
 }
 
@@ -217,6 +218,8 @@ void workspace_disposesequencepaste(Workspace* self)
 void workspace_initplayer(Workspace* self)
 {
 	player_init(&self->player, self->song, (void*)self->mainhandle->hwnd);
+	self->cmds = cmdproperties_create();
+	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
 	workspace_driverconfig(self);
 	workspace_updatemididriverlist(self);
 	workspace_mididriverconfig(self, 0);
@@ -225,7 +228,7 @@ void workspace_initplayer(Workspace* self)
 void workspace_configaudio(Workspace* self)
 {			
 	player_loaddriver(&self->player, workspace_driverpath(self));
-	workspace_driverconfig(self);	
+	workspace_driverconfig(self);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -248,21 +251,9 @@ const char* workspace_driverpath(Workspace* self)
 	Properties* p;
 	const char* rv = 0;
 
-	p = properties_read(self->inputoutput, "driver");
-	if (p) {
-		int choice;		
-		int count;
-		
-		choice = properties_value(p);
-		p = p->children;
-		count = 0;
-		while (p) {
-			if (count == choice) {
-				rv = properties_valuestring(p);
-				break;
-			}
-			p = properties_next(p);
-			++count;
+	if (p = properties_read(self->inputoutput, "driver")) {	
+		if (p = properties_read_choice(p)) {		
+			rv = properties_valuestring(p);
 		}
 	}
 	return rv;
@@ -296,7 +287,7 @@ const char* workspace_eventdriverpath(Workspace* self)
 void workspace_driverconfig(Workspace* self)
 {		
 	self->driverconfigure->item.disposechildren = 0;
-	self->driverconfigure->children = self->player.driver->properties;	
+	self->driverconfigure->children = self->player.driver->properties->children;	
 }
 
 void workspace_mididriverconfig(Workspace* self, int driverid)
@@ -306,7 +297,8 @@ void workspace_mididriverconfig(Workspace* self, int driverid)
 	eventdriver = player_eventdriver(&self->player, driverid);
 	if (eventdriver) {	
 		self->midiconfigure->item.disposechildren = 0;
-		self->midiconfigure->children = eventdriver->properties;	
+		self->midiconfigure->children = eventdriver->properties ?
+			eventdriver->properties->children : 0;
 	} else {
 		self->midiconfigure->children = 0;	
 	}
@@ -623,6 +615,9 @@ void workspace_configchanged(Workspace* self, Properties* property,
 			}
 		}
 	} else
+	if (properties_insection(property, self->driverconfigure)) {
+		player_restartdriver(&self->player);
+	} else	
 	if (choice && properties_insection(property, self->midi)) {
 		if (strcmp(properties_key(choice), "mididriver") == 0) {
 			workspace_mididriverconfig(self, properties_value(choice));	
@@ -634,6 +629,14 @@ void workspace_configchanged(Workspace* self, Properties* property,
 				player_restarteventdriver(&self->player, properties_value(p));
 			}
 		}
+	} else
+	if (properties_insection(property, self->midi)) {
+		Properties* p;
+
+		p = properties_read(self->midi, "mididriver");
+		if (p) {
+			player_restarteventdriver(&self->player, properties_value(p));
+		}		
 	} else
 	if (choice && (strcmp(properties_key(choice), "driver") == 0)) {
 		player_reloaddriver(&self->player, properties_valuestring(property));		
@@ -793,9 +796,13 @@ Properties* workspace_pluginlist(Workspace* self)
 }
 
 void workspace_load_configuration(Workspace* self)
-{	
+{		
 	propertiesio_load(self->config, "psycle.ini", 0);	
 	workspace_configaudio(self);
+	propertiesio_loadsection(self->config, "psycle.ini",
+		"inputoutput.configure", 0);
+	player_restartdriver(&self->player);
+	eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
@@ -1110,4 +1117,3 @@ void workspace_updatenavigation(Workspace* self)
 	}
 	self->navigating = 0;
 }
-

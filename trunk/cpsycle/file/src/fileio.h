@@ -36,7 +36,21 @@ int psyfile_open(PsyFile*, const char* path);
 int psyfile_create(PsyFile*, const char* path, int overwrite);
 int psyfile_close(PsyFile*);
 int psyfile_read(PsyFile*, void* data, uint32_t numBytes);
+int8_t psyfile_read_int8(PsyFile*);
+uint8_t psyfile_read_uint8(PsyFile*);
+int16_t psyfile_read_int16(PsyFile*);
+uint16_t psyfile_read_uint16(PsyFile*);
+int32_t psyfile_read_int32(PsyFile*);
+uint32_t psyfile_read_uint32(PsyFile*);
+float psyfile_read_float(PsyFile*);
 int psyfile_write(PsyFile*, const void* data, uint32_t numBytes);
+int psyfile_write_int8(PsyFile*, int8_t value);
+int psyfile_write_uint8(PsyFile*, uint8_t value);
+int psyfile_write_int16(PsyFile*, int16_t value);
+int psyfile_write_uint16(PsyFile*, uint16_t value);
+int psyfile_write_int32(PsyFile*, int32_t value);
+int psyfile_write_uint32(PsyFile*, uint32_t value);
+int psyfile_write_float(PsyFile*, float value);
 int psyfile_expect(PsyFile*, void* data, uint32_t numBytes);
 uint32_t psyfile_seek(PsyFile*, uint32_t offset);
 uint32_t psyfile_skip(PsyFile*, uint32_t numBytes);
@@ -52,7 +66,7 @@ uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
 int psyfile_readchunkbegin(PsyFile*);
 void psyfile_seekchunkend(PsyFile*);
 
-static uint32_t FourCC(char *psName);
-	
+static uint32_t FourCC(char *psName);	
+
 
 #endif

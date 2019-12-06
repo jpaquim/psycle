@@ -6,6 +6,7 @@
 #include "fileio.h"
 #include <string.h> 
 #include <stdio.h>
+#include <assert.h>
 
 uint32_t FourCC(char *psName)
 {
@@ -15,9 +16,8 @@ uint32_t FourCC(char *psName)
 	
 	// Remember, this is Intel format!
 	// The first character goes in the LSB
-	for (i=0; i<4 && psName[i]; i++ )
-	{
-		*ps++ = psName[i];
+	for (i = 0; i < 4 && psName[i]; ++i) {
+		ps[i] = psName[i];
 	}
 	return retbuf;
 }
@@ -58,7 +58,7 @@ int psyfile_close(PsyFile* self)
 	}
 	return 1;	
 }
-
+// read
 int psyfile_read(PsyFile* self,
 				   void* pData,
 				   uint32_t numBytes)
@@ -67,6 +67,70 @@ int psyfile_read(PsyFile* self,
 	return (bytesRead == numBytes);	
 }
 
+int8_t psyfile_read_int8(PsyFile* self)
+{
+	int8_t temp;
+	int err;
+
+	err = psyfile_read(self, &temp, sizeof(temp));
+	return temp;
+}
+
+uint8_t psyfile_read_uint8(PsyFile* self)
+{
+	uint8_t temp;
+	int err;
+
+	err = psyfile_read(self, &temp, sizeof(temp));
+	return temp;
+}
+
+int16_t psyfile_read_int16(PsyFile* self)
+{
+	int16_t temp;
+	int err;
+
+	err = psyfile_read(self, &temp, sizeof(temp));
+	return temp;	
+}
+
+uint16_t psyfile_read_uint16(PsyFile* self)
+{
+	uint16_t temp;
+	int err;
+
+	err = psyfile_read(self, &temp, sizeof(temp));
+	return temp;	
+}
+
+int32_t psyfile_read_int32(PsyFile* self)
+{
+	int32_t temp;
+	int err;
+
+	err = psyfile_read(self, &temp, sizeof(temp));
+	return temp;	
+}
+
+uint32_t psyfile_read_uint32(PsyFile* self)
+{
+	uint32_t temp;
+	int err;
+
+	err = psyfile_read(self, &temp, sizeof(temp));
+	return temp;
+}
+
+float psyfile_read_float(PsyFile* self)
+{
+	float temp;
+	int err;
+
+	assert(sizeof(float) != 32);
+	err = psyfile_read(self, &temp, sizeof(temp));
+	return temp;
+}
+// write
 int psyfile_write(PsyFile* self,
 					const void* pData,
 					uint32_t numBytes)
@@ -74,9 +138,42 @@ int psyfile_write(PsyFile* self,
 	uint32_t bytesWritten;
 	fflush(self->_file);
 	bytesWritten = fwrite(pData, sizeof(char), numBytes, self->_file);
-	return (bytesWritten == numBytes);
-	
-	
+	return (bytesWritten == numBytes);	
+}
+
+int psyfile_write_int8(PsyFile* self, int8_t value)
+{
+	return psyfile_write(self, &value, sizeof(int8_t));
+}
+
+int psyfile_write_uint8(PsyFile* self, uint8_t value)
+{
+	return psyfile_write(self, &value, sizeof(uint8_t));
+}
+
+int psyfile_write_int16(PsyFile* self, int16_t value)
+{
+	return psyfile_write(self, &value, sizeof(int16_t));
+}
+
+int psyfile_write_uint16(PsyFile* self, uint16_t value)
+{
+	return psyfile_write(self, &value, sizeof(uint16_t));
+}
+
+int psyfile_write_int32(PsyFile* self, int32_t value)
+{
+	return psyfile_write(self, &value, sizeof(int32_t));
+}
+
+int psyfile_write_uint32(PsyFile* self, uint32_t value)
+{	
+	return psyfile_write(self, &value, sizeof(uint32_t));
+}
+
+int psyfile_write_float(PsyFile* self, float value)
+{	
+	return psyfile_write(self, &value, sizeof(float));
 }
 
 int psyfile_expect(PsyFile* self,

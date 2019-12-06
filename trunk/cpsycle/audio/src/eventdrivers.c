@@ -5,19 +5,22 @@
 
 #include "eventdrivers.h"
 #include "kbddriver.h"
+#include "inputmap.h"
+#include "windows.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-void eventdrivers_init(EventDrivers* self, void* context, EVENTDRIVERWORKFN callback,
-	void* systemhandle)
+static void eventdrivers_ondriverinput(EventDrivers*, EventDriver*);
+
+void eventdrivers_init(EventDrivers* self, void* systemhandle)
 {
 	self->eventdrivers = 0;	
-	self->kbddriver = 0;
-	self->context = context;
-	self->callback = callback;
+	self->kbddriver = 0;	
 	self->systemhandle = systemhandle;
-	eventdrivers_initkbd(self);	
+	self->cmds = 0;
+	signal_init(&self->signal_input);
+	eventdrivers_initkbd(self);
 }
 
 void eventdrivers_initkbd(EventDrivers* self)
@@ -26,13 +29,12 @@ void eventdrivers_initkbd(EventDrivers* self)
 	EventDriverEntry* eventdriverentry;
 
 	eventdriver = create_kbd_driver();	
-	self->kbddriver = eventdriver;
-	eventdriver->connect(eventdriver, self->context, self->callback,
-		self->systemhandle);
+	self->kbddriver = eventdriver;	
 	eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry));
 	eventdriverentry->eventdriver = eventdriver;
 	eventdriverentry->library = 0;
 	list_append(&self->eventdrivers, eventdriverentry);
+	signal_connect(&eventdriver->signal_input, self, eventdrivers_ondriverinput);
 }
 
 void eventdrivers_dispose(EventDrivers* self)
@@ -57,6 +59,8 @@ void eventdrivers_dispose(EventDrivers* self)
 	}
 	list_free(self->eventdrivers);
 	self->eventdrivers = 0;
+	self->cmds = 0;
+	signal_dispose(&self->signal_input);
 }
 
 void eventdrivers_load(EventDrivers* self, const char* path)
@@ -82,14 +86,15 @@ void eventdrivers_load(EventDrivers* self, const char* path)
 				if (fpeventdrivercreate) {
 					EventDriverEntry* eventdriverentry;
 
-					eventdriver = fpeventdrivercreate();					
-					eventdriver->connect(eventdriver, self, self->callback,
-						self->systemhandle);
+					eventdriver = fpeventdrivercreate();
+					eventdriver->setcmddef(eventdriver, self->cmds);					
 					eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry));
 					eventdriverentry->eventdriver = eventdriver;
 					eventdriverentry->library = library;
 					list_append(&self->eventdrivers, eventdriverentry);				
 					eventdriver->open(eventdriver);
+					signal_connect(&eventdriver->signal_input, self,
+						eventdrivers_ondriverinput);
 				}
 			}
 			if (!eventdriver) {
@@ -106,8 +111,26 @@ void eventdrivers_restart(EventDrivers* self, int id)
 	eventdriver = eventdrivers_driver(self, id);
 	if (eventdriver) {
 		eventdriver->close(eventdriver);	
-		eventdriver->updateconfiguration(eventdriver);
+		eventdriver->configure(eventdriver);
 		eventdriver->open(eventdriver);	
+	}
+}
+
+void eventdrivers_restartall(EventDrivers* self)
+{
+	List* p;	
+
+	for (p = self->eventdrivers; p != 0; p = p->next) {
+		EventDriverEntry* eventdriverentry;
+		EventDriver* eventdriver;
+		
+		eventdriverentry = (EventDriverEntry*)p->entry;
+		eventdriver = eventdriverentry->eventdriver;
+		if (eventdriver) {
+			eventdriver->close(eventdriver);	
+			eventdriver->configure(eventdriver);
+			eventdriver->open(eventdriver);	
+		}
 	}
 }
 
@@ -172,4 +195,24 @@ EventDriver* eventdrivers_driver(EventDrivers* self, int id)
 	return p ? ((EventDriverEntry*) (p->entry))->eventdriver : 0;
 }
 
+void eventdrivers_ondriverinput(EventDrivers* self, EventDriver* sender)
+{
+	signal_emit(&self->signal_input, sender, 0);
+}
 
+void eventdrivers_setcmds(EventDrivers* self, Properties* cmds)
+{
+	List* p;
+
+	self->cmds = cmds;
+	for (p = self->eventdrivers; p != 0; p = p->next) {
+		EventDriverEntry* eventdriverentry;
+		EventDriver* eventdriver;
+		
+		eventdriverentry = (EventDriverEntry*)p->entry;
+		eventdriver = eventdriverentry->eventdriver;
+		if (eventdriver) {
+			eventdriver->setcmddef(eventdriver, cmds);
+		}
+	}
+}

@@ -18,9 +18,9 @@
 
 typedef struct {
 	ui_component component;
+	struct SamplesView* view;
 	Sample* sample;
-	Instruments* instruments;
-	ui_listbox* samplelist;
+	Instruments* instruments;	
 	ui_label namelabel;
 	ui_edit nameedit;
 	ui_button prevbutton;
@@ -74,24 +74,52 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
-	ui_notebook notebook;
-	SamplesBox samplesbox;
 	ui_button loadbutton;
+	ui_button importbutton;
 	ui_button savebutton;
 	ui_button duplicatebutton;
-	ui_button deletebutton;	
+	ui_button deletebutton;
+} SamplesViewButtons;
+
+void samplesviewbuttons_init(SamplesViewButtons*, ui_component* parent);
+
+typedef struct {
+	ui_component component;
+	ui_component header;
+	ui_label label;
+	ui_label songname;
+	ui_button browse;
+	SamplesBox samplesbox;
+	ui_component bar;
+	ui_button add;
+	Song* source;
+	struct SamplesView* view;
+	Workspace* workspace;
+} SamplesSongImportView;
+
+typedef struct SamplesView {
+	ui_component component;	
+	ui_notebook clientnotebook;
+	ui_component mainview;
+	ui_component importview;
+	ui_notebook notebook;
+	SamplesBox samplesbox;
+	ui_component left;
+	SamplesViewButtons buttons;	
 	ui_component client;
+	SamplesSongImportView songimport;
 	SamplesHeaderView header;
 	TabBar tabbar;
 	SamplesGeneralView general;
 	SamplesVibratoView vibrato;
+	ui_component loop;
 	SamplesWaveLoopView waveloop;
 	ui_button waveeditorbutton;
 	WaveBox wavebox;
 	Player* player;	
 } SamplesView;
 
-void InitSamplesView(SamplesView*, ui_component* parent,
+void samplesview_init(SamplesView*, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace);
 
 #endif

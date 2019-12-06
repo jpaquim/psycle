@@ -6,6 +6,8 @@
 
 #include "sample.h"
 
+#define WAVE_FORMAT_PCM     1
+
 typedef struct { 
     unsigned short wFormatTag; 
     unsigned short nChannels; 
@@ -16,6 +18,7 @@ typedef struct {
     unsigned short cbSize; 
 } WaveFormatChunk; 
 
-void wave_load(Sample* sample, const char* path);
+void wave_load(Sample*, const char* path);
+void wave_save(Sample*, const char* path);
 
 #endif

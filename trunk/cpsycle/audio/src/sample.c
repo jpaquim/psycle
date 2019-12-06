@@ -7,6 +7,8 @@
 #include "waveio.h"
 #include <string.h>
 #include <stdlib.h>
+#include <operations.h>
+#include <alignedalloc.h>
 
 void double_setvalue(Double* self, double value)
 {
@@ -96,12 +98,56 @@ Sample* sample_allocinit(void)
 	return rv;
 }
 
+Sample* sample_clone(Sample* src)
+{
+	Sample* rv = 0;
+	
+	rv = sample_alloc();
+	if (rv) {
+		uintptr_t c;
+
+		rv->samplerate = src->samplerate;
+		rv->defaultvolume = src->defaultvolume;
+		rv->globalvolume = src->globalvolume;
+		rv->loopstart = src->loopstart;
+		rv->loopend = src->loopend;
+		rv->looptype = src->looptype;
+		rv->sustainloopstart = src->sustainloopstart;
+		rv->sustainloopend = src->sustainloopend;
+		rv->sustainlooptype = src->sustainlooptype;
+		rv->tune = src->tune;
+		rv->finetune = src->finetune;
+		rv->panfactor = src->panfactor;
+		rv->panenabled = src->panenabled;
+		rv->surround = src->surround;
+		rv->name = strdup(src->name);
+		rv->vibrato.attack = src->vibrato.attack;
+		rv->vibrato.depth = src->vibrato.depth;
+		rv->vibrato.speed = src->vibrato.speed;
+		rv->vibrato.type = src->vibrato.type;
+		rv->numframes = src->numframes;
+		buffer_init(&rv->channels, src->channels.numchannels);
+		for (c = 0; c < rv->channels.numchannels; ++c) {
+			rv->channels.samples[c] = dsp.memory_alloc(src->numframes,
+				sizeof(float));
+		}
+		buffer_clearsamples(&rv->channels, src->numframes);
+		buffer_addsamples(&rv->channels, &src->channels, src->numframes, 1.0f);
+	}
+	return rv;
+}
+
 void sample_load(Sample* self, const char* path)
 {
 	char* delim;
 	wave_load(self, path);
 	delim = strrchr(path, '\\');	
 	sample_setname(self, delim ? delim + 1 : path);	
+}
+
+void sample_save(Sample* self, const char* path)
+{
+	wave_save(self, path);
 }
 
 void sample_setname(Sample* self, const char* name)

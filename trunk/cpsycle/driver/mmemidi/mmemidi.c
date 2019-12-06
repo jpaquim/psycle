@@ -17,6 +17,7 @@ typedef struct {
 	HMIDIIN hMidiIn;
 	int deviceid;		
 	int (*error)(int, const char*);
+	int lastinput;	
 	HANDLE hEvent;
 } MmeMidiDriver;
 
@@ -27,9 +28,11 @@ static void driver_connect(EventDriver*, void* context, EVENTDRIVERWORKFN,
 static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
-static void updateconfiguration(EventDriver*);
+static void driver_configure(EventDriver*);
 static void driver_cmd(EventDriver*, int type, unsigned char* data, int size,
 	EventDriverCmd* cmd, int maxsize);
+static int driver_getcmd(EventDriver*, Properties* section);
+static void setcmddef(EventDriver*, Properties*);
 
 static void init_properties(EventDriver* self);
 static void apply_properties(MmeMidiDriver* self);
@@ -64,9 +67,11 @@ EXPORT EventDriver* __cdecl eventdriver_create(void)
 	mme->driver.open = driver_open;
 	mme->driver.close = driver_close;
 	mme->driver.dispose = driver_dispose;
-	mme->driver.updateconfiguration = updateconfiguration;
+	mme->driver.configure = driver_configure;
 	mme->driver.error = onerror;
 	mme->driver.cmd = driver_cmd;
+	mme->driver.getcmd = driver_getcmd;
+	mme->driver.setcmddef = setcmddef;
 	mme->hEvent = CreateEvent
 		(NULL, FALSE, FALSE, NULL);
 	driver_init(&mme->driver);
@@ -82,8 +87,9 @@ int driver_init(EventDriver* driver)
 {
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;
 
-	self->hMidiIn = 0;
+	self->hMidiIn = 0;	
 	init_properties(&self->driver);
+	signal_init(&driver->signal_input);
 	return 0;
 }
 
@@ -93,6 +99,7 @@ int driver_dispose(EventDriver* driver)
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
+	signal_dispose(&driver->signal_input);
 	return 0;
 }
 
@@ -136,15 +143,9 @@ void apply_properties(MmeMidiDriver* self)
 	}
 }
 
-void updateconfiguration(EventDriver* self)
+void driver_configure(EventDriver* self)
 {
 	apply_properties((MmeMidiDriver*)self);
-}
-
-void driver_connect(EventDriver* driver, void* context, EVENTDRIVERWORKFN callback, void* handle)
-{	
-	driver->_callbackContext = context;
-	driver->_pCallback = callback;	
 }
 
 int driver_open(EventDriver* driver)
@@ -152,6 +153,7 @@ int driver_open(EventDriver* driver)
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
 	unsigned int success = 1;
 
+	self->lastinput = -1;
 	if (self->deviceid != 0) {
 		if (midiInOpen (&self->hMidiIn, self->deviceid - 1, (DWORD_PTR)MidiCallback,
 				(DWORD_PTR)driver, CALLBACK_FUNCTION)) {
@@ -185,12 +187,30 @@ int driver_close(EventDriver* driver)
 CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
 {			
 	EventDriver* driver = (EventDriver*)dwInstance;	
-
+	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
 	switch(uMsg) {
 		// normal data message
-		case MIM_DATA: 			
-			driver->_pCallback(driver->_callbackContext, 1,
-				(unsigned char*)&dwParam1, 4);
+		case MIM_DATA:
+		{
+			int cmd;
+			int lsb;
+			int msb;
+			unsigned char* data;
+
+			data = (unsigned char*) &dwParam1;
+			lsb = data[0] & 0x0F;
+			msb = (data[0] & 0xF0) >> 4;
+			switch (msb) {
+				case 0x9:
+					// Note On/Off
+					cmd = data[2] > 0 ? data[1] - 48 : 120;
+					// channel = lsb;
+					self->lastinput = cmd;
+					signal_emit(&self->driver.signal_input, self, 0);
+				default:
+				break;
+			}
+		}
 		break;
 		default:
 		break;
@@ -202,4 +222,34 @@ void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
 {			
 	cmd->type = EVENTDRIVER_CMD_NONE;	
 	cmd->size = 0;	
+}
+
+int driver_getcmd(EventDriver* driver, Properties* section)
+{
+	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
+		
+	return self->lastinput;
+}
+
+/*
+void driver_configure(EventDriver* driver)
+{
+	Properties* notes;
+
+	notes = properties_findsection(driver->properties, "notes");
+	if (notes) {
+		driver_makenoteinputs((KbdDriver*)driver, notes);
+	}
+}
+*/
+
+void setcmddef(EventDriver* driver, Properties* cmddef)
+{
+/*	Properties* notes;
+
+	driver->properties = properties_clone(cmddef);
+	notes = properties_findsection(driver->properties, "notes");
+	if (notes) {
+		driver_makenoteinputs((KbdDriver*)driver, notes);
+	} */
 }

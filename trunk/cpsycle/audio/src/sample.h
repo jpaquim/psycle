@@ -63,7 +63,7 @@ typedef struct Sample {
 	char* name;
 	/// Difference between Glob volume and defVolume is that defVolume 
 	///	determines the volume if no volume is specified in the pattern, while
-	/// globVolume is an attenuator for all notes of this sample.
+	/// globVolume is an attenuator for all notes of this sample.	
 	float defaultvolume;
 	/// range ( 0..4 ) (-inf to +12dB)
 	float globalvolume;
@@ -88,8 +88,10 @@ typedef struct Sample {
 void sample_init(Sample*);
 Sample* sample_alloc(void);
 Sample* sample_allocinit(void);
+Sample* sample_clone(Sample*);
 void sample_dispose(Sample*);
 void sample_load(Sample*, const char* path);
+void sample_save(Sample*, const char* path);
 void sample_setname(Sample*, const char* name);
 SampleIterator sample_begin(Sample*);
 const char* sample_name(Sample*);

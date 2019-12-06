@@ -31,6 +31,7 @@ static void work(Machine*, BufferContext*);
 static void generateaudio(Machine* self, BufferContext* bc) { }
 static int hostevent(Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
 static void seqtick(Machine* self, int channel, const PatternEvent* event) { }
+static void stop(Machine* self) { }
 static void sequencertick(Machine* self) { }
 static List* sequencerinsert(Machine* self, List* events) { return 0; }
 static void sequencerlinetick(Machine* self) { }
@@ -103,6 +104,7 @@ static void vtable_init(void)
 		vtable.mode = mode;
 		vtable.hostevent = hostevent;
 		vtable.seqtick = seqtick;
+		vtable.stop = stop;
 		vtable.sequencertick = sequencertick;
 		vtable.sequencerlinetick = sequencerlinetick;
 		vtable.sequencerinsert = sequencerinsert;

@@ -14,13 +14,14 @@ static void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent,
 void ui_listbox_init(ui_listbox* listbox, ui_component* parent)
 {  
 	ui_listbox_init_style(listbox, parent, 
-		WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY);    
+		(WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY) &~WS_BORDER);	
 }
 
 void ui_listbox_init_multiselect(ui_listbox* listbox, ui_component* parent)
 {  
 	ui_listbox_init_style(listbox, parent, 
-		WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_NOTIFY);    
+		(WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_NOTIFY)
+		&~WS_BORDER);    
 }
 
 void ui_listbox_init_style(ui_listbox* self, ui_component* parent, int style)

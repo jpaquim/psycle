@@ -17,17 +17,19 @@ typedef struct {
 	EventDriver* kbddriver;
 	List* eventdrivers;
 	void* context;
-	void* systemhandle;
-	EVENTDRIVERWORKFN callback;
+	void* systemhandle;	
+	Signal signal_input;	
+	Properties* cmds;
 } EventDrivers;
 
-void eventdrivers_init(EventDrivers*, void* context, EVENTDRIVERWORKFN,
-	void* systemhandle);
+void eventdrivers_init(EventDrivers*, void* systemhandle);
 void eventdrivers_dispose(EventDrivers*);
 void eventdrivers_initkbd(EventDrivers*);
 void eventdrivers_load(EventDrivers*, const char* path);
 void eventdrivers_restart(EventDrivers*, int id);
+void eventdrivers_restartall(EventDrivers*);
 void eventdrivers_remove(EventDrivers*, int id);
+void eventdrivers_setcmds(EventDrivers*, Properties* self);
 unsigned int eventdrivers_size(EventDrivers*);
 EventDriver* eventdrivers_driver(EventDrivers*, int id); 
 EventDriverEntry* eventdrivers_entry(EventDrivers*, int id);

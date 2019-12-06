@@ -68,14 +68,13 @@ static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,vo
 static int driver_open(Driver*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
-static void updateconfiguration(Driver*);
-static unsigned int samplerate(Driver*);
+static void driver_configure(Driver*);
+static unsigned int driver_samplerate(Driver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
 static void PollerThread(void *pWaveOut);
 static void DoBlocks(DXDriver* self);
 static void init_properties(Driver* self);
-static void apply_properties(DXDriver* self);
 static int on_error(int err, const char* msg);
 static void Quantize(float *pin, int *piout, int c);
 
@@ -123,8 +122,8 @@ EXPORT Driver* __cdecl driver_create(void)
 	dx->driver.open = driver_open;
 	dx->driver.close = driver_close;
 	dx->driver.dispose = driver_dispose;
-	dx->driver.updateconfiguration = updateconfiguration;
-	dx->driver.samplerate = samplerate;
+	dx->driver.configure = driver_configure;
+	dx->driver.samplerate = driver_samplerate;
 	driver_init(&dx->driver);
 	return &dx->driver;
 }
@@ -159,7 +158,7 @@ int driver_init(Driver* driver)
 	init_properties(&self->driver);
 	self->hEvent = CreateEvent
 		(NULL, FALSE, FALSE, NULL);
-//	apply_properties(self);
+//	driver_configure(&self->driver);
 	return 0;
 }
 
@@ -187,10 +186,12 @@ static void init_properties(Driver* self)
 	properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
-static void apply_properties(DXDriver* self)
+void driver_configure(Driver* driver)
 {
+	DXDriver* self;
 	Properties* property;
 
+	self = (DXDriver*) driver;
 	property = properties_read(self->driver.properties, "bitdepth");
 	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
 		self->_bitDepth = property->item.value.i;
@@ -209,12 +210,7 @@ static void apply_properties(DXDriver* self)
 	}	
 }
 
-void updateconfiguration(Driver* self)
-{
-	apply_properties((DXDriver*)self);
-}
-
-unsigned int samplerate(Driver* self)
+unsigned int driver_samplerate(Driver* self)
 {
 	return ((DXDriver*)self)->_samplesPerSec;
 }

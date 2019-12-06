@@ -7,18 +7,22 @@
 #include <instruments.h>
 #include <math.h>
 #include <portable.h>
+#include <songio.h>
 
-/// Samples Main View
-static void OnSize(SamplesView*, ui_component* sender, ui_size*);
-static void AlignSamplesView(SamplesView*);
-static void OnSampleListChanged(SamplesView*, ui_component* sender, int slot);
-static void SetSample(SamplesView*, int slot);
-static void OnLoadSample(SamplesView*, ui_component* sender);
-static void OnSongChanged(SamplesView*, Workspace*);
+/// Samples View
+static void samplesview_onsamplelistchanged(SamplesView*, ui_component* sender,
+	int slot);
+static void samplesview_setsample(SamplesView*, int slot);
+static void samplesview_onloadsample(SamplesView*, ui_component* sender);
+static void samplesview_onsongimport(SamplesView*, ui_component* sender);
+static void samplesview_onsavesample(SamplesView*, ui_component* sender);
+static void samplesview_onsongchanged(SamplesView*, Workspace*);
+static void samplesview_oninstrumentslotchanged(SamplesView* self,
+	Instrument* sender, int slot);
 /// Header View
-static void InitSamplesHeaderView(SamplesHeaderView*, ui_component* parent,
-	Instruments*, ui_listbox* samplelist);
-static void SetSampleSamplesHeaderView(SamplesHeaderView*, Sample*);
+static void samplesheaderview_init(SamplesHeaderView*, ui_component* parent,
+	Instruments*, struct SamplesView*);
+static void samplesheaderview_setsample(SamplesHeaderView*, Sample*);
 static void OnInstrumentSlotChanged(SamplesView*, Instrument* sender, int slot);
 static void OnPrevSample(SamplesHeaderView*, ui_component* sender);
 static void OnNextSample(SamplesHeaderView*, ui_component* sender);
@@ -53,114 +57,266 @@ static void OnEditChangeLoopend(SamplesWaveLoopView*, ui_edit* sender);
 static void OnEditChangeSustainstart(SamplesWaveLoopView*, ui_edit* sender);
 static void OnEditChangeSustainend(SamplesWaveLoopView*, ui_edit* sender);
 
-void InitSamplesView(SamplesView* self, ui_component* parent,
-	ui_component* tabbarparent, Workspace* workspace)
+static void samplessongimportview_onloadsong(SamplesSongImportView*,
+	ui_component* sender);
+static void samplessongimportview_oncopy(SamplesSongImportView*,
+	ui_component* sender);
+static void samplessongimportview_ondestroy(SamplesSongImportView*,
+	ui_component* sender);
+
+void samplesviewbuttons_init(SamplesViewButtons* self, ui_component* parent)
 {
-	ui_margin margin = {3, 3, 0, 3};
-	self->player = &workspace->player;	
-	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_size, self, OnSize);
-	InitSamplesBox(&self->samplesbox, &self->component,
-		&workspace->song->samples, &workspace->song->instruments);
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
+		ui_value_makeeh(1.0), ui_value_makepx(0));
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	ui_button_init(&self->loadbutton, &self->component);
 	ui_button_settext(&self->loadbutton, "Load");
-	signal_connect(&self->loadbutton.signal_clicked, self, OnLoadSample);
+	ui_button_init(&self->importbutton, &self->component);
+	ui_button_settext(&self->importbutton, "Import");
 	ui_button_init(&self->savebutton, &self->component);
-	ui_button_settext(&self->savebutton, "Save");
+	ui_button_settext(&self->savebutton, "Save");	
 	ui_button_init(&self->duplicatebutton, &self->component);
 	ui_button_settext(&self->duplicatebutton, "Duplicate");
 	ui_button_init(&self->deletebutton, &self->component);
-	ui_button_settext(&self->deletebutton, "Delete");	
-	ui_component_init(&self->client, &self->component);
+	ui_button_settext(&self->deletebutton, "Delete");
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT, &margin));
+}
+
+void samplessongimportview_init(SamplesSongImportView* self, ui_component* parent,
+	SamplesView* view, Workspace* workspace)
+{	
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
+		ui_value_makeeh(1.0), ui_value_makepx(0));
+	self->view = view;
+	self->source = 0;
+	self->workspace = workspace;
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	ui_component_init(&self->header, &self->component);
+	ui_component_enablealign(&self->header);
+	ui_component_setalign(&self->header, UI_ALIGN_TOP);
+	ui_label_init(&self->label, &self->header);
+	ui_label_settext(&self->label, "Source");	
+	ui_label_init(&self->songname, &self->header);
+	ui_label_settext(&self->songname, "No song loaded");
+	ui_label_setcharnumber(&self->songname, 30);	
+	ui_button_init(&self->browse, &self->header);
+	ui_button_settext(&self->browse, "Select a song");
+	signal_connect(&self->browse.signal_clicked, self,
+		samplessongimportview_onloadsong);	
+	list_free(ui_components_setalign(		
+		ui_component_children(&self->header, 0),
+		UI_ALIGN_LEFT,
+		&margin));
+	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
+	ui_component_setalign(&self->samplesbox.samplelist.component,
+		UI_ALIGN_CLIENT);
+	ui_component_init(&self->bar, &self->component);
+	ui_component_enablealign(&self->bar);
+	ui_component_setalign(&self->bar, UI_ALIGN_LEFT);
+	ui_button_init(&self->add, &self->bar);
+	ui_button_settext(&self->add, "<- Copy");
+	ui_component_setalign(&self->add.component, UI_ALIGN_TOP);
+	signal_connect(&self->add.signal_clicked, self,
+		samplessongimportview_oncopy);
+}
+
+void samplessongimportview_ondestroy(SamplesSongImportView* self,
+	ui_component* sender)
+{
+	if (self->source) {
+		song_dispose(self->source);
+		free(self->source);
+	}
+	self->source = 0;
+}
+
+void samplessongimportview_onloadsong(SamplesSongImportView* self,
+	ui_component* sender)
+{
+	char path[MAX_PATH]	 = "";
+	char title[MAX_PATH]	 = ""; 					
+	static char filter[] = "All Songs (*.psy *.xm *.it *.s3m *.mod)" "\0*.psy;*.xm;*.it;*.s3m;*.mod\0"
+				"Songs (*.psy)"				        "\0*.psy\0"
+				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
+				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
+				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
+				"Original Mod Format Songs (*.mod)" "\0*.mod\0";
+	char  defaultextension[] = "PSY";
+	int showsonginfo = 0;	
+	*path = '\0'; 
+	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {
+		SongFile songfile;
+		if (self->source) {
+			song_dispose(self->source);
+			free(self->source);
+		}	
+		self->source = song_allocinit(&self->workspace->machinefactory);
+		songfile.song = self->source;
+		songfile.file = 0;		
+		songfile_load(&songfile, path);
+		if (!songfile.err) {
+			ui_label_settext(&self->songname,
+				self->source->properties.title);
+			samplesbox_setsamples(&self->samplesbox, &self->source->samples,
+				&self->source->instruments);			
+		} else {
+			ui_label_settext(&self->songname,
+				"No source song loaded");
+		}
+	}		
+}
+
+void samplessongimportview_oncopy(SamplesSongImportView* self,
+	ui_component* sender) {
+	int srcslot;
+	int dstslot;
+	Sample* sample;
+	Sample* samplecopy;
+	Instrument* instrument;
+	
+	srcslot = ui_listbox_cursel(&self->samplesbox.samplelist);
+	dstslot = ui_listbox_cursel(&self->view->samplesbox.samplelist);
+	
+
+	sample = samples_at(&self->source->samples, srcslot);
+	if (sample) {
+		samplecopy = sample_clone(sample);
+		samples_insert(&self->workspace->song->samples, samplecopy, dstslot);
+		instrument = (Instrument*)malloc(sizeof(Instrument));		
+		instrument_init(instrument);
+		instrument_setname(instrument, sample_name(samplecopy));
+		instruments_insert(&self->workspace->song->instruments, instrument,
+			dstslot);
+		samplesview_setsample(self->view, dstslot);
+		/*signal_prevent(&self->workspace->song->instruments.signal_slotchange,
+			self->view, OnInstrumentSlotChanged);
+		instruments_changeslot(&self->workspace->song->instruments, dstslot);
+		signal_enable(&self->workspace->song->instruments.signal_slotchange, self,
+			OnInstrumentSlotChanged);	*/
+		ui_component_invalidate(&self->view->component);	
+	}
+}
+
+void samplesview_init(SamplesView* self, ui_component* parent,
+	ui_component* tabbarparent, Workspace* workspace)
+{
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+		ui_value_makepx(0), ui_value_makepx(0));
+	self->player = &workspace->player;	
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);	
+	samplesheaderview_init(&self->header, &self->component,
+		&workspace->song->instruments, self);
+	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
+	// left
+	ui_component_init(&self->left, &self->component);
+	ui_component_enablealign(&self->left);
+	ui_component_setalign(&self->left, UI_ALIGN_LEFT);
+	ui_component_setmargin(&self->left, &margin);
+	samplesviewbuttons_init(&self->buttons, &self->left);
+	ui_component_setalign(&self->buttons.component, UI_ALIGN_TOP);
+	samplesbox_init(&self->samplesbox, &self->left,
+		&workspace->song->samples, &workspace->song->instruments);	
+	ui_component_setalign(&self->samplesbox.samplelist.component,
+		UI_ALIGN_CLIENT);
+	signal_connect(&self->buttons.loadbutton.signal_clicked, self,
+		samplesview_onloadsample);
+	signal_connect(&self->buttons.importbutton.signal_clicked, self,
+		samplesview_onsongimport);
+	signal_connect(&self->buttons.savebutton.signal_clicked, self,
+		samplesview_onsavesample);
+	// client
+	ui_notebook_init(&self->clientnotebook, &self->component);	
+	ui_component_setalign(&self->clientnotebook.component, UI_ALIGN_CLIENT);
+
+	ui_component_init(&self->client, &self->clientnotebook.component);
 	ui_component_enablealign(&self->client);
-	InitSamplesHeaderView(&self->header, &self->component,
-		&workspace->song->instruments, &self->samplesbox.samplelist);
-	ui_component_resize(&self->header.component, 400, 20);	
-	ui_component_setmargin(&self->header.component, &margin);
-	tabbar_init(&self->tabbar, &self->client);	
+	tabbar_init(&self->tabbar, &self->client);
 	ui_component_resize(&self->tabbar.component, 0, 20);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_TOP);
 	ui_component_setmargin(&self->tabbar.component, &margin);
 	tabbar_append(&self->tabbar, "General");
-	tabbar_append(&self->tabbar, "Vibrato");	
-	ui_notebook_init(&self->notebook, &self->client);	
-	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
-	ui_component_resize(&self->notebook.component, 0, 120);
+	tabbar_append(&self->tabbar, "Vibrato");
+
+	ui_notebook_init(&self->notebook, &self->client);
+	ui_component_enablealign(&self->notebook.component);
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_TOP);	
-	ui_component_setmargin(&self->notebook.component, &margin);
+	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	InitSamplesGeneralView(&self->general, &self->notebook.component);			
-	InitSamplesVibratoView(&self->vibrato, &self->notebook.component, &workspace->player);
+	InitSamplesGeneralView(&self->general, &self->notebook.component);
+	ui_component_setalign(&self->general.component, UI_ALIGN_TOP);
+	InitSamplesVibratoView(&self->vibrato, &self->notebook.component,
+		&workspace->player);
+	ui_component_setalign(&self->vibrato.component, UI_ALIGN_TOP);
 	ui_notebook_setpageindex(&self->notebook, 0);
-	InitWaveBox(&self->wavebox, &self->client);
-	ui_component_resize(&self->wavebox.component, 0, 80);
-	ui_component_setalign(&self->wavebox.component, UI_ALIGN_TOP);	
-	ui_component_setmargin(&self->wavebox.component, &margin);
+
 	ui_button_init(&self->waveeditorbutton, &self->client);
-	ui_button_settext(&self->waveeditorbutton, "Wave Editor");
+	ui_button_settext(&self->waveeditorbutton, "Open Wave Editor");
 	ui_component_resize(&self->waveeditorbutton.component, 0, 20);
-	ui_component_setalign(&self->waveeditorbutton.component, UI_ALIGN_TOP);
+	ui_component_setalign(&self->waveeditorbutton.component, UI_ALIGN_BOTTOM);
 	ui_component_setmargin(&self->waveeditorbutton.component, &margin);
+	InitWaveBox(&self->wavebox, &self->client);	
+	ui_component_setalign(&self->wavebox.component, UI_ALIGN_CLIENT);
+	//ui_component_setmargin(&self->wavebox.component, &margin);
 	InitSamplesWaveLoopView(&self->waveloop, &self->client);
 	ui_component_resize(&self->waveloop.component, 0, 125);	
-	ui_component_setalign(&self->waveloop.component, UI_ALIGN_TOP);
+	ui_component_setalign(&self->waveloop.component, UI_ALIGN_BOTTOM);
 	ui_component_setmargin(&self->waveloop.component, &margin);
-	AlignSamplesView(self);		
-	signal_connect(&self->samplesbox.samplelist.signal_selchanged, self, OnSampleListChanged);	
-	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
-	SetSample(self, 0);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	signal_connect(&self->samplesbox.samplelist.signal_selchanged, self,
+		samplesview_onsamplelistchanged);
+	signal_connect(&workspace->song->instruments.signal_slotchange, self,
+		samplesview_oninstrumentslotchanged);
+	samplesview_setsample(self, 0);	
+	samplessongimportview_init(&self->songimport,
+		&self->clientnotebook.component, self, workspace);
+	ui_notebook_setpageindex(&self->clientnotebook, 0);
+	signal_connect(&workspace->signal_songchanged, self,
+		samplesview_onsongchanged);
 }
 
-void OnSize(SamplesView* self, ui_component* sender, ui_size* size)
-{		
-	AlignSamplesView(self);
-}
-
-void AlignSamplesView(SamplesView* self)
-{
-	ui_size size;
-
-	size = ui_component_size(&self->component);
-
-	ui_component_setposition(&self->header.component, 0, 0, size.width,  25);
-	ui_component_setposition(&self->client, 220, 30, size.width - 220,  size.height - 30);
-	ui_component_setposition(&self->loadbutton.component,         5,  30,  40,  20);
-	ui_component_setposition(&self->savebutton.component,        50,  30,  40,  20);
-	ui_component_setposition(&self->duplicatebutton.component,   95,  30,  65,  20);
-	ui_component_setposition(&self->deletebutton.component,     165,  30,  50,  20);
-	ui_component_setposition(&self->samplesbox.samplelist.component,
-																  5,  50, 210, size.height - 50);
-}
-
-void OnSampleListChanged(SamplesView* self, ui_component* sender, int slot)
+void samplesview_onsamplelistchanged(SamplesView* self, ui_component* sender,
+	int slot)
 {	
-	SetSample(self, slot);	
-	signal_prevent(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+	samplesview_setsample(self, slot);	
+	signal_prevent(&self->player->song->instruments.signal_slotchange, self,
+		samplesview_oninstrumentslotchanged);
 	instruments_changeslot(&self->player->song->instruments, slot);
-	signal_enable(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+	signal_enable(&self->player->song->instruments.signal_slotchange, self,
+		samplesview_oninstrumentslotchanged);
 	ui_component_invalidate(&self->wavebox.component);	
 }
 
-void OnInstrumentSlotChanged(SamplesView* self, Instrument* sender, int slot)
+void samplesview_oninstrumentslotchanged(SamplesView* self, Instrument* sender,
+	int slot)
 {
-	SetSample(self, slot);
+	samplesview_setsample(self, slot);
 }
 
-void SetSample(SamplesView* self, int slot)
+void samplesview_setsample(SamplesView* self, int slot)
 {	
 	Sample* sample;	
 
 	sample = samples_at(&self->player->song->samples, slot);
 	self->wavebox.sample = sample;
-	SetSampleSamplesHeaderView(&self->header, sample);
+	samplesheaderview_setsample(&self->header, sample);
 	SetSampleSamplesGeneralView(&self->general, sample);
 	SetSampleSamplesVibratoView(&self->vibrato, sample);
 	SetSampleSamplesWaveLoopView(&self->waveloop, sample);
 	ui_listbox_setcursel(&self->samplesbox.samplelist, slot);
 }
 
-void OnLoadSample(SamplesView* self, ui_component* sender)
+void samplesview_onloadsample(SamplesView* self, ui_component* sender)
 {	
 	char path[MAX_PATH]	 = "";
 	char title[MAX_PATH]	 = ""; 
@@ -180,29 +336,63 @@ void OnLoadSample(SamplesView* self, ui_component* sender)
 		instrument_init(instrument);
 		instrument_setname(instrument, sample_name(sample));
 		instruments_insert(&self->player->song->instruments, instrument, slot);
-		SetSample(self, slot);
-		signal_prevent(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+		samplesview_setsample(self, slot);
+		signal_prevent(&self->player->song->instruments.signal_slotchange, self,
+			samplesview_oninstrumentslotchanged);
 		instruments_changeslot(&self->player->song->instruments, slot);
-		signal_enable(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
+		signal_enable(&self->player->song->instruments.signal_slotchange, self,
+			samplesview_oninstrumentslotchanged);
 		ui_component_invalidate(&self->component);
 	}	
 }
 
-void OnSongChanged(SamplesView* self, Workspace* workspace)
-{	
-	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);	
-	SetSamples(&self->samplesbox, &workspace->song->samples,
-		&workspace->song->instruments);
-	SetSample(self, 0);
+void samplesview_onsongimport(SamplesView* self, ui_component* sender)
+{
+	if (ui_notebook_pageindex(&self->clientnotebook) == 0) {
+		ui_notebook_setpageindex(&self->clientnotebook, 1);		
+		ui_button_highlight(&self->buttons.importbutton);
+	} else {
+		ui_notebook_setpageindex(&self->clientnotebook, 0);		
+		ui_button_disablehighlight(&self->buttons.importbutton);
+	}
 }
 
-void InitSamplesHeaderView(SamplesHeaderView* self, ui_component* parent, Instruments* instruments, ui_listbox* samplelist)
-{
-	self->instruments = instruments;
-	self->samplelist = samplelist;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);	
+void samplesview_onsavesample(SamplesView* self, ui_component* sender)
+{	
+	char path[MAX_PATH]	 = "";
+	char title[MAX_PATH]	 = ""; 
+	static char filter[]	 = "Wav Files (*.wav)\0*.wav\0" "IFF Samples (*.iff)\0*.iff\0" "All Files (*.*)\0*.*\0";
+	char  defaultextension[] = "WAV";
+	Sample* sample;
 
+	*path = '\0'; 
+	sample = self->wavebox.sample;
+	if (sample && ui_savefile(&self->component, title, filter,
+		defaultextension, path)) {		
+		sample_save(sample, path);		
+	}	
+}
+
+void samplesview_onsongchanged(SamplesView* self, Workspace* workspace)
+{	
+	signal_connect(&workspace->song->instruments.signal_slotchange, self,
+		samplesview_oninstrumentslotchanged);	
+	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
+		&workspace->song->instruments);
+	samplesview_setsample(self, 0);
+}
+
+void samplesheaderview_init(SamplesHeaderView* self, ui_component* parent,
+	Instruments* instruments, struct SamplesView* view)
+{
+	ui_margin margin;
+
+	self->view = view;
+	self->instruments = instruments;
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
+		ui_value_makeeh(0.5), ui_value_makepx(0));
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
 	ui_label_init(&self->namelabel, &self->component);
 	ui_label_settext(&self->namelabel, "Sample Name");
 	ui_edit_init(&self->nameedit, &self->component, 0);		
@@ -227,41 +417,43 @@ void InitSamplesHeaderView(SamplesHeaderView* self, ui_component* parent, Instru
 	ui_label_setcharnumber(&self->numsampleslabel, 10);
 	ui_label_init(&self->channellabel, &self->component);
 	ui_label_settext(&self->channellabel, "");
-	ui_label_setcharnumber(&self->channellabel, 6);
-	{
-		ui_margin margin = { 5, 3, 3, 0 };		
-						
-		list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
-			UI_ALIGN_LEFT,
-			&margin));
-	}
+	ui_label_setcharnumber(&self->channellabel, 6);						
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT,
+			&margin));	
 }
 
-void SetSampleSamplesHeaderView(SamplesHeaderView* self, Sample* sample)
+void samplesheaderview_setsample(SamplesHeaderView* self, Sample* sample)
 {
-	char buffer[20];
+	char text[20];
+
 	self->sample = sample;
 	ui_edit_settext(&self->nameedit, self->sample ? sample->name : "");	
-	psy_snprintf(buffer, 20, "%d", self->sample ? self->sample->samplerate : 0);
-	ui_edit_settext(&self->sredit, buffer);
-	psy_snprintf(buffer, 20, "%d", self->sample ? self->sample->numframes : 0);
-	ui_label_settext(&self->numsampleslabel, buffer);	
+	psy_snprintf(text, 20, "%d", self->sample ? self->sample->samplerate : 0);
+	ui_edit_settext(&self->sredit, text);
+	psy_snprintf(text, 20, "%d", self->sample ? self->sample->numframes : 0);
+	ui_label_settext(&self->numsampleslabel, text);
 	if (self->sample) {
-		if (self->sample->channels.numchannels == 1) {
-			psy_snprintf(buffer, 20, "Mono");
-		} else
-		if (self->sample->channels.numchannels == 2) {
-			psy_snprintf(buffer, 20, "Stereo");
-		} else
-		if (self->sample->channels.numchannels > 3) {
-			psy_snprintf(buffer, 20, "%d Chs", self->sample->channels.numchannels);
+		switch (buffer_numchannels(&self->sample->channels)) {
+			case 0:
+				psy_snprintf(text, 20, "");
+			break;
+			case 1:
+				psy_snprintf(text, 20, "Mono");
+			break;
+			case 2:		
+				psy_snprintf(text, 20, "Stereo");
+			break;
+			default:					
+				psy_snprintf(text, 20, "%d Chs",
+					buffer_numchannels(&self->sample->channels));
+			break;
 		}		
 	} else {
-		psy_snprintf(buffer, 20, "");
+		psy_snprintf(text, 20, "");
 	}
-	ui_label_settext(&self->channellabel, buffer);
-
+	ui_label_settext(&self->channellabel, text);
 	if (self->sample) {
 		ui_component_enableinput(&self->component, 1);
 	} else {
@@ -272,12 +464,14 @@ void SetSampleSamplesHeaderView(SamplesHeaderView* self, Sample* sample)
 void OnEditSampleName(SamplesHeaderView* self, ui_edit* sender)
 {
 	if (self->sample) {
-		char txt[40];		
+		char text[40];
+
 		sample_setname(self->sample, ui_edit_text(sender));
-		psy_snprintf(txt, 20, "%02X:%s", (int)ui_listbox_cursel(self->samplelist),
+		psy_snprintf(text, 20, "%02X:%s", 
+			(int)ui_listbox_cursel(&self->view->samplesbox.samplelist),
 			sample_name(self->sample));
-		ui_listbox_setstring(self->samplelist, txt,
-			ui_listbox_cursel(self->samplelist));
+		ui_listbox_setstring(&self->view->samplesbox.samplelist, text,
+			ui_listbox_cursel(&self->view->samplesbox.samplelist));
 	}
 }
 
@@ -301,22 +495,24 @@ void OnDeleteSample(SamplesHeaderView* self, ui_component* sender)
 }
 
 void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
-{
-	int i;
-	ui_margin margin = { 3, 3, 0, 3 };
+{	
+	ui_margin margin;
 	ui_slider* sliders[] = {
 		&self->defaultvolume,
 		&self->globalvolume,
 		&self->panposition,
 		&self->samplednote,
-		&self->pitchfinetune
+		&self->pitchfinetune,
+		0
 	};	
+	int i;
 		
 	self->sample = 0;
+	ui_margin_init(&margin, ui_value_makeeh(1), ui_value_makepx(0),
+		ui_value_makepx(0), ui_value_makepx(0));			
 	self->notestabmode = NOTESTAB_DEFAULT;
 	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);	
-	
+	ui_component_enablealign(&self->component);
 	ui_slider_init(&self->defaultvolume, &self->component);
 	ui_slider_settext(&self->defaultvolume, "Default Volume");
 	ui_slider_init(&self->globalvolume, &self->component);
@@ -327,10 +523,10 @@ void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
 	ui_slider_settext(&self->samplednote, "Sampled Note"); 
 	ui_slider_init(&self->pitchfinetune, &self->component);
 	ui_slider_settext(&self->pitchfinetune, "Pitch Finetune");	
-	for (i = 0; i < 5; ++i) {		
-		ui_component_resize(&sliders[i]->component, 0, 20);		
-		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);
-		ui_component_setmargin(&sliders[i]->component, &margin);
+	for (i = 0; sliders[i] != 0; ++i) {
+		ui_component_resize(&sliders[i]->component, 0, 20);
+		ui_component_setalign(&sliders[i]->component, UI_ALIGN_TOP);		
+		ui_component_setmargin(&sliders[i]->component, &margin);		
 		ui_slider_connect(sliders[i], self, OnGeneralViewDescribe,
 			OnGeneralViewTweak, OnGeneralViewValue);		
 	}
@@ -350,25 +546,25 @@ int map_1_128(float value) {
 	return (int)(value * 128.f);
 }
 
-void OnGeneralViewTweak(SamplesGeneralView* self, ui_slider* slider, float value)
+void OnGeneralViewTweak(SamplesGeneralView* self, ui_slider* slider,
+	float value)
 {
-	if (!self->sample) {
-		return;
-	}
-	if (slider == &self->defaultvolume) {
-		self->sample->defaultvolume = value;
-	} else
-	if (slider == &self->globalvolume) {		
-		self->sample->globalvolume = (value * value) * 4.f;
-	} else
-	if (slider == &self->panposition) {
-		self->sample->panfactor = value;
-	} else
-	if (slider == &self->samplednote) {
-		self->sample->tune = (int)(value * 119.f) - 60;
-	} else
-	if (slider == &self->pitchfinetune) {
-		self->sample->finetune = (int)(value * 200.f) - 100;
+	if (self->sample) {			
+		if (slider == &self->defaultvolume) {
+			self->sample->defaultvolume = value;
+		} else
+		if (slider == &self->globalvolume) {		
+			self->sample->globalvolume = (value * value) * 4.f;
+		} else
+		if (slider == &self->panposition) {
+			self->sample->panfactor = value;
+		} else
+		if (slider == &self->samplednote) {
+			self->sample->tune = (int)(value * 119.f) - 60;
+		} else
+		if (slider == &self->pitchfinetune) {
+			self->sample->finetune = (int)(value * 200.f) - 100;
+		}
 	}
 }
 
@@ -439,7 +635,7 @@ void GeneralViewFillPanDescription(SamplesGeneralView* self, char* txt) {
 	} else {		
 		int pos = (int)(self->sample->panfactor * 128.f);
 		if (pos == 0) {
-			psy_snprintf(txt, 128,"||%02d  ", pos);
+			psy_snprintf(txt, 128, "||%02d  ", pos);
 		} else
 		if (pos < 32) {
 			psy_snprintf(txt, 128, "<<%02d  ", pos);
@@ -632,9 +828,8 @@ WaveForms ComboBoxToWaveForm(int combobox_index)
 
 void InitSamplesWaveLoopView(SamplesWaveLoopView* self, ui_component* parent)
 {
-	ui_component_init(&self->component, parent);
 	self->sample = 0;
-
+	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->loopheaderlabel, &self->component);
 	ui_label_settext(&self->loopheaderlabel, "Continuous Loop");
 	ui_component_setposition(&self->loopheaderlabel.component, 10, 0, 140, 20);

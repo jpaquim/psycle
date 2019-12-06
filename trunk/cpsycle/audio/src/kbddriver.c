@@ -74,26 +74,24 @@ enum {
 typedef struct {
 	EventDriver driver;
 	Inputs noteinputs;
-	int (*error)(int, const char*);	
+	int (*error)(int, const char*);
+	int lastinput;
+	int lastinputtype;
 } KbdDriver;
 
 static void driver_free(EventDriver*);
 static int driver_init(EventDriver*);
-static void driver_connect(EventDriver*, void* context,
-	EVENTDRIVERWORKFN callback, void* handle);
 static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
-static void updateconfiguration(EventDriver*);
+static void driver_configure(EventDriver*);
 static void driver_write(EventDriver*, int type, unsigned char* data, int size);
 static void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
 	EventDriverCmd* cmd, int maxsize);
+static int driver_getcmd(EventDriver*, Properties* section);
+static void setcmddef(EventDriver*, Properties*);
 
-static void init_properties(EventDriver*);
-static void apply_properties(KbdDriver*);
-static void driver_makenotes(EventDriver*);
-static void driver_makenoteinputs(KbdDriver*, Properties*);
-static int cmdnote(const char* key);
+static void driver_makeinputs(KbdDriver*, Properties*);
 
 int onerror(int err, const char* msg)
 {
@@ -112,14 +110,15 @@ EventDriver* create_kbd_driver(void)
 	memset(kbd, 0, sizeof(KbdDriver));	
 	kbd->driver.open = driver_open;
 	kbd->driver.free = driver_free;	
-	kbd->driver.connect = driver_connect;
 	kbd->driver.open = driver_open;
 	kbd->driver.close = driver_close;
 	kbd->driver.dispose = driver_dispose;
-	kbd->driver.updateconfiguration = updateconfiguration;	
+	kbd->driver.configure = driver_configure;	
 	kbd->driver.error = onerror;	
 	kbd->driver.write = driver_write;
 	kbd->driver.cmd = driver_cmd;
+	kbd->driver.getcmd = driver_getcmd;
+	kbd->driver.setcmddef = setcmddef;
 	driver_init(&kbd->driver);
 	return &kbd->driver;			
 }
@@ -134,7 +133,10 @@ int driver_init(EventDriver* driver)
 	KbdDriver* self = (KbdDriver*) driver;
 	
 	inputs_init(&self->noteinputs);
-	init_properties(driver);
+	self->driver.properties = 0;
+//	init_properties(driver);
+	signal_init(&driver->signal_input);
+	inputs_init(&self->noteinputs);
 	return 0;
 }
 
@@ -144,17 +146,16 @@ int driver_dispose(EventDriver* driver)
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	inputs_dispose(&self->noteinputs);
+	signal_dispose(&driver->signal_input);
 	return 1;
-}
-
-void driver_connect(EventDriver* driver, void* context, EVENTDRIVERWORKFN callback, void* handle)
-{
-	driver->_callbackContext = context;
-	driver->_pCallback = callback;	
 }
 
 int driver_open(EventDriver* driver)
 {
+	KbdDriver* self;
+
+	self = (KbdDriver*)(driver);
+	self->lastinput = 0;	
 	return 0;
 }
 
@@ -165,59 +166,12 @@ int driver_close(EventDriver* driver)
 
 void driver_write(EventDriver* driver, int type, unsigned char* data, int size)
 {	
-	KbdDriver* self;
-	int cmd;	
+	KbdDriver* self;	
 
-	self = (KbdDriver*)(driver);	
-	if (type == EVENTDRIVER_KEYDOWN) {
-		cmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
-	
-		if (cmd == CMD_NOTE_STOP) {
-			int note;
-			
-			note = NOTECOMMANDS_RELEASE;
-			driver->_pCallback(driver->_callbackContext, 2,
-				(unsigned char*)&note, 4);
-		} else
-		if (cmd == CMD_NOTE_TWEAKM) {
-			int note;
-			
-			note = NOTECOMMANDS_TWEAK;
-			driver->_pCallback(driver->_callbackContext, 2,
-				(unsigned char*)&note, 4);
-		} else
-		if (cmd == CMD_NOTE_TWEAKS) {
-			int note;
-			
-			note = NOTECOMMANDS_TWEAKSLIDE;
-			driver->_pCallback(driver->_callbackContext, 2,
-				(unsigned char*)&note, 4);
-		} else
-		if (cmd != -1) {
-			int base;
-			int note;
-				
-			base = 48;
-			note = cmd + base;
-			driver->_pCallback(driver->_callbackContext, 2,
-					(unsigned char*)&note, 4);
-		}
-	} else {
-		unsigned char ev[4];
-
-		memset(ev, 0, sizeof(data));
-		ev[0] = NOTECOMMANDS_RELEASE;
-		cmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
-		if (cmd != -1) {
-			int base;
-			int note;
-				
-			base = 48;
-			note = cmd + base;
-			ev[1] = note;
-		}
-		driver->_pCallback(driver->_callbackContext, 2, ev, 4);
-	}
+	self = (KbdDriver*)(driver);
+	self->lastinput = *((unsigned int*)data);
+	self->lastinputtype = type;
+	signal_emit(&self->driver.signal_input, self, 0);
 }
 
 void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
@@ -261,144 +215,49 @@ void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
 	}
 }
 
-void init_properties(EventDriver* self)
-{		
-	self->properties = properties_create();
-	properties_append_string(self->properties, "name", "Kbd Driver");
-	properties_append_string(self->properties, "version", "1.0");	
-	properties_append_int(self->properties, "bitdepth", 16, 0, 32);
-	properties_append_int(self->properties, "samplerate", 44100, 0, 0);
-	properties_append_int(self->properties, "dither", 0, 0, 1);	
-	properties_append_int(self->properties, "numsamples", 256, 128, 8193);
-	driver_makenotes(self);
-}
-
-void driver_makenotes(EventDriver* self)
+int driver_getcmd(EventDriver* driver, Properties* section)
 {
-	Properties* notes;
-	Properties* p;
-
-	notes = properties_createsection(self->properties, "notes");
-	properties_settext(notes, "Notes");
-	properties_append_int(notes, "cmd_note_c_0", encodeinput('Z', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_cs0", encodeinput('S', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_d_0", encodeinput('X', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_ds0", encodeinput('D', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_e_0", encodeinput('C', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_f_0", encodeinput('V', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_fs0", encodeinput('G', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_g_0", encodeinput('B', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_gs0", encodeinput('H', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_a_0", encodeinput('N', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_as0", encodeinput('J', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_b_0", encodeinput('M', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_c_1", encodeinput('Q', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_cs1", encodeinput('2', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_d_1", encodeinput('W', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_ds1", encodeinput('3', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_e_1", encodeinput('E', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_f_1", encodeinput('R', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_fs1", encodeinput('5', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_g_1", encodeinput('T', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_gs1", encodeinput('6', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_a_1", encodeinput('Y', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_as1", encodeinput('7', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_b_1", encodeinput('U', 0, 0), 0, 0);		
-	properties_append_int(notes, "cmd_note_c_2", encodeinput('I', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_cs2", encodeinput('9', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_d_2", encodeinput('O', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_ds2", encodeinput('0', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_e_2", encodeinput('P', 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_stop", encodeinput('1', 0, 0), 0, 0);
-	// special
-	properties_append_int(notes, "cmd_note_tweakm", encodeinput(192, 0, 0), 0, 0);
-	properties_append_int(notes, "cmd_note_tweaks", encodeinput(192, 0, 1), 0, 0);
-	for (p = notes->children; p != 0; p = properties_next(p)) {
-		properties_sethint(p, PROPERTY_HINT_INPUT);
-	}	
-	driver_makenoteinputs((KbdDriver*)self, notes);
-}
-
-void driver_makenoteinputs(KbdDriver* self, Properties* notes)
-{
-	Properties* p;
-
-	inputs_init(&self->noteinputs);
-	for (p = notes->children; p != 0; p = properties_next(p)) {
-		int cmd;
+	KbdDriver* self;
+	int cmd;
 		
-		cmd = cmdnote(properties_key(p));
-		if (cmd != -1) {
-			inputs_define(&self->noteinputs, properties_value(p), cmd);
+	self = (KbdDriver*)(driver);	
+	if (self->lastinputtype == EVENTDRIVER_KEYDOWN) {
+		cmd = inputs_cmd(&self->noteinputs, self->lastinput);
+	} else {
+		cmd = NOTECOMMANDS_RELEASE;
+	}
+	return cmd;
+}
+
+void driver_makeinputs(KbdDriver* self, Properties* notes)
+{
+	Properties* p;
+	
+	for (p = notes->children; p != 0; p = properties_next(p)) {				
+		if (properties_id(p) != -1) {
+			inputs_define(&self->noteinputs, properties_value(p),
+				properties_id(p));
 		}
 	}
 }
 
-int cmdnote(const char* key)
-{	
-	if (strcmp("cmd_note_c_0", key) == 0) { return CMD_NOTE_C_0; } else
-	if (strcmp("cmd_note_cs0", key) == 0) { return CMD_NOTE_CS0; } else
-	if (strcmp("cmd_note_d_0", key) == 0) { return CMD_NOTE_D_0; } else
-	if (strcmp("cmd_note_ds0", key) == 0) { return CMD_NOTE_DS0; } else
-	if (strcmp("cmd_note_e_0", key) == 0) { return CMD_NOTE_E_0; } else
-	if (strcmp("cmd_note_f_0", key) == 0) { return CMD_NOTE_F_0; } else
-	if (strcmp("cmd_note_fs0", key) == 0) { return CMD_NOTE_FS0; } else
-	if (strcmp("cmd_note_g_0", key) == 0) { return CMD_NOTE_G_0; } else
-	if (strcmp("cmd_note_gs0", key) == 0) { return CMD_NOTE_GS0; } else
-	if (strcmp("cmd_note_a_0", key) == 0) { return CMD_NOTE_A_0; } else
-	if (strcmp("cmd_note_as0", key) == 0) { return CMD_NOTE_AS0; } else
-	if (strcmp("cmd_note_b_0", key) == 0) { return CMD_NOTE_B_0; } else
-	if (strcmp("cmd_note_c_1", key) == 0) { return CMD_NOTE_C_1; } else
-	if (strcmp("cmd_note_cs1", key) == 0) { return CMD_NOTE_CS1; } else
-	if (strcmp("cmd_note_d_1", key) == 0) { return CMD_NOTE_D_1; } else
-	if (strcmp("cmd_note_ds1", key) == 0) { return CMD_NOTE_DS1; } else
-	if (strcmp("cmd_note_e_1", key) == 0) { return CMD_NOTE_E_1; } else
-	if (strcmp("cmd_note_f_1", key) == 0) { return CMD_NOTE_F_1; } else
-	if (strcmp("cmd_note_fs1", key) == 0) { return CMD_NOTE_FS1; } else
-	if (strcmp("cmd_note_g_1", key) == 0) { return CMD_NOTE_G_1; } else
-	if (strcmp("cmd_note_gs1", key) == 0) { return CMD_NOTE_GS1; } else
-	if (strcmp("cmd_note_a_1", key) == 0) { return CMD_NOTE_A_1; } else
-	if (strcmp("cmd_note_as1", key) == 0) { return CMD_NOTE_AS1; } else
-	if (strcmp("cmd_note_b_1", key) == 0) { return CMD_NOTE_B_1; } else
-	if (strcmp("cmd_note_c_2", key) == 0) { return CMD_NOTE_C_2; } else
-	if (strcmp("cmd_note_cs2", key) == 0) { return CMD_NOTE_CS2; } else
-	if (strcmp("cmd_note_d_2", key) == 0) { return CMD_NOTE_D_2; } else
-	if (strcmp("cmd_note_ds2", key) == 0) { return CMD_NOTE_DS2; } else
-	if (strcmp("cmd_note_e_2", key) == 0) { return CMD_NOTE_E_2; } else
-	if (strcmp("cmd_note_f_2", key) == 0) { return CMD_NOTE_F_2; } else
-	if (strcmp("cmd_note_fs2", key) == 0) { return CMD_NOTE_FS2; } else
-	if (strcmp("cmd_note_g_2", key) == 0) { return CMD_NOTE_G_2; } else
-	if (strcmp("cmd_note_gs2", key) == 0) { return CMD_NOTE_GS2; } else
-	if (strcmp("cmd_note_a_2", key) == 0) { return CMD_NOTE_A_2; } else
-	if (strcmp("cmd_note_as2", key) == 0) { return CMD_NOTE_AS2; } else
-	if (strcmp("cmd_note_b_2", key) == 0) { return CMD_NOTE_B_2; } else
-	if (strcmp("cmd_note_c_3", key) == 0) { return CMD_NOTE_C_3; } else
-	if (strcmp("cmd_note_cs3", key) == 0) { return CMD_NOTE_CS3; } else
-	if (strcmp("cmd_note_d_3", key) == 0) { return CMD_NOTE_D_3; } else
-	if (strcmp("cmd_note_ds3", key) == 0) { return CMD_NOTE_DS3; } else
-	if (strcmp("cmd_note_e_3", key) == 0) { return CMD_NOTE_E_3; } else
-	if (strcmp("cmd_note_f_3", key) == 0) { return CMD_NOTE_F_3; } else
-	if (strcmp("cmd_note_fs3", key) == 0) { return CMD_NOTE_FS3; } else
-	if (strcmp("cmd_note_g_3", key) == 0) { return CMD_NOTE_G_3; } else
-	if (strcmp("cmd_note_gs3", key) == 0) { return CMD_NOTE_GS3; } else
-	if (strcmp("cmd_note_a_3", key) == 0) { return CMD_NOTE_A_3; } else
-	if (strcmp("cmd_note_as3", key) == 0) { return CMD_NOTE_AS3; } else
-	if (strcmp("cmd_note_b_3", key) == 0) { return CMD_NOTE_B_3; } else
-	if (strcmp("cmd_note_stop", key) == 0) { return CMD_NOTE_STOP; } else
-	if (strcmp("cmd_note_tweakm", key) == 0) { return  CMD_NOTE_TWEAKM; } else	
-	if (strcmp("cmd_note_midicc", key) == 0) { return CMD_NOTE_MIDICC; } else
-	if (strcmp("cmd_note_tweaks", key) == 0) { return  CMD_NOTE_TWEAKS; }	
-	return -1;
-}
-
-void updateconfiguration(EventDriver* self)
+void driver_configure(EventDriver* driver)
 {
-	apply_properties((KbdDriver*)self);
+	Properties* notes;
+	Properties* general;
+
+	notes = properties_findsection(driver->properties, "notes");
+	if (notes) {
+		driver_makeinputs((KbdDriver*)driver, notes);
+	}
+	general = properties_findsection(driver->properties, "generalcmds");
+	if (general) {
+		driver_makeinputs((KbdDriver*)driver, general);
+	}
 }
 
-void apply_properties(KbdDriver* self)
-{	
-	if (self->driver.properties) {
-	
-	}
+void setcmddef(EventDriver* driver, Properties* cmddef)
+{
+	driver->properties = properties_clone(cmddef);
+	driver_configure(driver);
 }

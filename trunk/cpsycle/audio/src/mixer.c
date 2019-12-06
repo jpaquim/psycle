@@ -146,7 +146,7 @@ static void vtable_init(Mixer* self)
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
 		vtable.dispose = (fp_machine_dispose) mixer_dispose;
 		vtable.seqtick = (fp_machine_seqtick) mixer_seqtick;
-		vtable.mode = mixer_mode;
+		vtable.mode = (fp_machine_mode) mixer_mode;
 		vtable.mix = (fp_machine_mix) mix;
 		vtable.parametertype = (fp_machine_parametertype) parametertype;
 		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
@@ -161,8 +161,8 @@ static void vtable_init(Mixer* self)
 		vtable.paramviewoptions = (fp_machine_paramviewoptions) paramviewoptions;
 		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
 		vtable.savespecific = (fp_machine_savespecific) savespecific;
-		vtable.setslot = setslot;
-		vtable.slot = slot;
+		vtable.setslot = (fp_machine_setslot) setslot;
+		vtable.slot = (fp_machine_slot) slot;
 		vtable_initialized = 1;
 	}
 }
@@ -1122,7 +1122,7 @@ WireSocketEntry* wiresocketentry(Mixer* self, uintptr_t input)
 
 	sockets = connections_at(&machines->connections, self->slot);
 	if (sockets) {
-		int c = 0;
+		uintptr_t c = 0;
 
 		for (p = sockets->inputs; p != 0 && c != input; p = p->next, ++c);
 		if (p) {				
@@ -1248,12 +1248,14 @@ void savespecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
 {
 	float volume_;
 	float drywetmix_;
-	float gain_;
+	float gain_;	
+	uint8_t temp8;
+	uint32_t temp32;
 	int32_t numins;
 	int32_t numrets;
 	uint32_t size;
-	int32_t i;
-	int32_t j;
+	uint32_t i;
+	uint32_t j;
 	
 	size = (sizeof(self->solocolumn) + sizeof(volume_) + sizeof(drywetmix_) + sizeof(gain_) +		
 		2 * sizeof(uint32_t));
@@ -1271,7 +1273,8 @@ void savespecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
 	numrets = self->returns.count;
 	psyfile_write(songfile->file, &numins, sizeof(int32_t));
 	psyfile_write(songfile->file, &numrets, sizeof(int32_t));
-	for (i = 0; i < self->inputs.count; i++)
+	
+	for (i = 0; i < (uint32_t) (self->inputs.count); i++)
 	{
 		MixerChannel* channel;
 
