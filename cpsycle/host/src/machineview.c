@@ -339,7 +339,7 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 	table_init(&self->machineuis);	
 	self->wireframes = 0;
 	machinewireview_initmasterui(self);
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
 	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
 	ui_font_init(&self->skin.font, &fontinfo);
 	ui_component_setfont(&self->component, &self->skin.font);

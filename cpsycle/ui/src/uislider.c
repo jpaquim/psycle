@@ -12,9 +12,9 @@ static void ui_slider_initsignals(ui_slider*);
 static void ui_slider_disposesignals(ui_slider*);
 static void ui_slider_ondraw(ui_slider*, ui_component* sender, ui_graphics*);
 static void ui_slider_drawverticalruler(ui_slider*, ui_graphics* g);
-static void ui_slider_onmousedown(ui_slider*, ui_component* sender, int x, int y, int button);
-static void ui_slider_onmouseup(ui_slider*, ui_component* sender, int x, int y, int button);
-static void ui_slider_onmousemove(ui_slider*, ui_component* sender, int x, int y, int button);
+static void ui_slider_onmousedown(ui_slider*, ui_component* sender, MouseEvent* ev);
+static void ui_slider_onmouseup(ui_slider*, ui_component* sender, MouseEvent* ev);
+static void ui_slider_onmousemove(ui_slider*, ui_component* sender, MouseEvent* ev);
 static void ui_slider_ondestroy(ui_slider*, ui_component* sender);
 static void ui_slider_ontimer(ui_slider*, ui_component* sender, int timerid);
 static void ui_slider_updatevalue(ui_slider*);
@@ -165,23 +165,24 @@ void ui_slider_drawverticalruler(ui_slider* self, ui_graphics* g)
 	}
 }
 
-void ui_slider_onmousedown(ui_slider* self, ui_component* sender, int x, int y,
-	int button)
+void ui_slider_onmousedown(ui_slider* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	ui_size size;
 	size = ui_component_size(&self->component);
 	size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
 	if (self->orientation == UI_HORIZONTAL) {
-		self->tweakbase = (x - self->labelsize - self->margin) - (int)(self->value * (size.width - 6));
+		self->tweakbase = (ev->x - self->labelsize - self->margin) -
+			(int)(self->value * (size.width - 6));
 	} else
 	if (self->orientation == UI_VERTICAL) {
-		self->tweakbase = y - (int)(self->value * (size.height - 6));
+		self->tweakbase = ev->y - (int)(self->value * (size.height - 6));
 	}
 	ui_component_capture(&self->component);
 }
 
-void ui_slider_onmousemove(ui_slider* self, ui_component* sender, int x, int y,
-	int button)
+void ui_slider_onmousemove(ui_slider* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	if (self->tweakbase != -1) {
 		ui_size size;
@@ -190,12 +191,12 @@ void ui_slider_onmousemove(ui_slider* self, ui_component* sender, int x, int y,
 		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
 		if (self->orientation == UI_HORIZONTAL) {
 			self->value = max(0.f,
-				min(1.f, (x - self->tweakbase - self->labelsize - self->margin) 
+				min(1.f, (ev->x - self->tweakbase - self->labelsize - self->margin) 
 					/ (float)(size.width - 6)));
 		}
 		else {
 			self->value = max(0.f,
-				min(1.f, 1 - (y - self->tweakbase) / (float)(size.height - 6)));
+				min(1.f, 1 - (ev->y - self->tweakbase) / (float)(size.height - 6)));
 		}
 		signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
 		signal_emit(&self->signal_changed, self, 0);
@@ -203,8 +204,7 @@ void ui_slider_onmousemove(ui_slider* self, ui_component* sender, int x, int y,
 	}
 }
 
-void ui_slider_onmouseup(ui_slider* self, ui_component* sender, int x, int y,
-	int button)
+void ui_slider_onmouseup(ui_slider* self, ui_component* sender, MouseEvent* ev)
 {
 	self->tweakbase = -1;
 	ui_component_releasecapture(&self->component);

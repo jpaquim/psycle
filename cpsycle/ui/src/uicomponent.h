@@ -59,7 +59,7 @@ typedef struct {
 	Signal signal_draw;
 	Signal signal_timer;
 	Signal signal_keydown;
-	Signal signal_keyup;
+	Signal signal_keyup;	
 	Signal signal_mousedown;
 	Signal signal_mouseup;
 	Signal signal_mousemove;
@@ -104,7 +104,7 @@ typedef struct {
 	int wheelscroll;
 	int handlevscroll;
 	int handlehscroll;
-	int cursor;
+	int cursor;	
 } ui_component;
 
 

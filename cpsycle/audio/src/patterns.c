@@ -11,17 +11,15 @@ static void patterns_disposeslots(Patterns*);
 void patterns_init(Patterns* self)
 {
 	table_init(&self->slots);
-	table_init(&self->mutedtracks);
-	self->songtracks = 16;
-	self->soloactive = 0;	
-	self->soloedtrack = 0;
+	self->songtracks = 16;	
 	self->sharetracknames = 0;
+	patternstrackstate_init(&self->trackstate);
 }
 
 void patterns_dispose(Patterns* self)
 {	
 	patterns_disposeslots(self);
-	table_dispose(&self->mutedtracks);
+	patternstrackstate_dispose(&self->trackstate);
 }
 
 void patterns_disposeslots(Patterns* self)
@@ -89,42 +87,30 @@ uintptr_t patterns_size(Patterns* self)
 
 void patterns_activatesolotrack(Patterns* self, uintptr_t track)
 {
-	self->soloactive = 1;
-	self->soloedtrack = track;
+	patternstrackstate_activatesolotrack(&self->trackstate, track);
 }
 
 void patterns_deactivatesolotrack(Patterns* self)
 {
-	self->soloactive = 0;
-	table_clear(&self->mutedtracks);
+	patternstrackstate_deactivatesolotrack(&self->trackstate);
 }
 
 void patterns_mutetrack(Patterns* self, uintptr_t track)
 {
-	if (!self->soloactive) {
-		table_insert(&self->mutedtracks, track, (void*)(uintptr_t) 1);
-	} else {
-		table_remove(&self->mutedtracks, track);
-	}
+	patternstrackstate_mutetrack(&self->trackstate, track);
 }
 
 void patterns_unmutetrack(Patterns* self, uintptr_t track)
 {
-	if (!self->soloactive) {
-		table_remove(&self->mutedtracks, track);
-	} else {
-		table_insert(&self->mutedtracks, track, (void*)(uintptr_t) 1);
-	}
+	patternstrackstate_unmutetrack(&self->trackstate, track);
 }
 
 int patterns_istrackmuted(Patterns* self, uintptr_t track)
 {
-	return self->soloactive
-		? !table_exists(&self->mutedtracks, track)
-		: table_exists(&self->mutedtracks, track);
+	return patternstrackstate_istrackmuted(&self->trackstate, track);
 }
 
 int patterns_istracksoloed(Patterns* self, uintptr_t track)
 {
-	return self->soloactive && self->soloedtrack == track;		
+	return patternstrackstate_istracksoloed(&self->trackstate, track);
 }

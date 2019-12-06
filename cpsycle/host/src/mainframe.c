@@ -16,6 +16,7 @@
 #include <dir.h>
 #include <portable.h>
 #include "resources/resource.h"
+#include "cmdsgeneral.h"
 
 #define TIMERID_MAINFRAME 20
 
@@ -60,6 +61,7 @@ static void mainframe_onrender(MainFrame*, ui_component* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, ui_component* sender, int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
+static void mainframe_oneventdriverinput(MainFrame*, EventDriver* sender);
 
 HWND hwndmain;
 
@@ -80,7 +82,7 @@ void mainframe_init(MainFrame* self)
 	
 	ui_margin_init(&tabbardividemargin, ui_value_makepx(0), ui_value_makeew(4.0),
 		ui_value_makepx(0), ui_value_makepx(0));
-	ui_frame_init(&self->component, 0);				
+	ui_frame_init(&self->component, 0);
 	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	ui_component_enablealign(&self->component);
 	self->resize = 0;
@@ -128,7 +130,7 @@ void mainframe_init(MainFrame* self)
 		&self->tabbars, &self->workspace);
 	patternview_init(&self->patternview, &self->notebook.component,
 		&self->tabbars, &self->workspace);	
-	InitSamplesView(&self->samplesview, &self->notebook.component,
+	samplesview_init(&self->samplesview, &self->notebook.component,
 		&self->tabbars, &self->workspace);	
 	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
@@ -173,6 +175,8 @@ void mainframe_init(MainFrame* self)
 		mainframe_ontabbarchanged);
 	workspace_addhistory(&self->workspace);
 	ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
+	signal_connect(&self->workspace.player.eventdrivers.signal_input, self,
+		mainframe_oneventdriverinput);
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -378,26 +382,36 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	}	
 }
 
-void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
-{	
-	if (keyevent->keycode == VK_F2) {
+void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
+{
+	int cmd;
+	// 	Properties* section;
+
+	// section = properties_find(sender->properties, "general");
+	cmd = sender->getcmd(sender, 0);
+	if (cmd == CMD_IMM_EDITMACHINE) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
-	} else 	
-	if (keyevent->keycode == VK_F3) {
-		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);		
 	} else
-	if (keyevent->keycode == VK_F5 && keyevent->shift) {
+	if (cmd == CMD_IMM_EDITPATTERN) {
+		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
+	} else
+	if (cmd == CMD_IMM_ADDMACHINE) {
+		self->machineview.newmachine.pluginsview.calledby = self->tabbar.selected;
+		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
+		tabbar_select(&self->machineview.tabbar, 1);
+	} else
+	if (cmd == CMD_IMM_PLAYSONG) {
 		player_setposition(&self->workspace.player, 0);
 		player_start(&self->workspace.player);
 	} else
-	if (keyevent->keycode == VK_F5) {
+	if (cmd == CMD_IMM_PLAYSTART) {
 		SequenceEntry* entry;
 
 		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);		
 		player_setposition(&self->workspace.player, entry ? entry->offset : 0);		
-		player_start(&self->workspace.player);
+		player_start(&self->workspace.player);		
 	} else
-	if (keyevent->keycode == VK_F7) {
+	if (cmd == CMD_IMM_PLAYFROMPOS) {
 		beat_t playposition = 0;
 		SequenceEntry* entry;
 
@@ -407,37 +421,24 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 		player_setposition(&self->workspace.player, playposition);
 		player_start(&self->workspace.player);
 	} else
-	if (keyevent->keycode == VK_F8) {
-		player_stop(&self->workspace.player);		
-	} else	
-	if (keyevent->keycode == VK_F10) {
-		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW);
-	} else	 
-	if (keyevent->keycode == VK_F6) {
-		tabbar_select(&self->tabbar, TABPAGE_SETTINGSVIEW);
-	} else	
-	if (keyevent->keycode == VK_F4) {
-		Properties* properties;
-		
-		properties = properties_create();		
-		skin_load(properties, "old Psycle.psv");
-		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
-		machineview_applyproperties(&self->machineview, properties);
-		properties_free(properties);
-	} else 
-	if (keyevent->keycode == VK_F9) {
-		self->machineview.newmachine.pluginsview.calledby = self->tabbar.selected;
-		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
-		tabbar_select(&self->machineview.tabbar, 1);
+	if (cmd == CMD_IMM_PLAYSTOP) {
+		player_stop(&self->workspace.player);
 	} else
-	if (keyevent->shift && keyevent->keycode == VK_RETURN) {
-		workspace_showparameters(&self->workspace,
-			machines_slot(&self->workspace.song->machines));
+	if (cmd == CMD_IMM_SONGPOSDEC) {
+		if (self->workspace.song) {		
+			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
+					self->workspace.sequenceselection.editposition.trackposition.tracknode->prev) {
+				sequenceselection_seteditposition(
+					&self->workspace.sequenceselection,
+					sequence_makeposition(&self->workspace.song->sequence,
+						self->workspace.sequenceselection.editposition.track,
+						self->workspace.sequenceselection.editposition.trackposition.tracknode->prev));
+				workspace_setsequenceselection(&self->workspace, 
+					self->workspace.sequenceselection);
+			}
+		}
 	} else
-	if (keyevent->ctrl && keyevent->keycode == VK_TAB) {
-		mainframe_maximizeorminimizeview(self);
-	} else
-	if (keyevent->shift && keyevent->keycode == VK_RIGHT) {
+	if (cmd == CMD_IMM_SONGPOSINC) {
 		if (self->workspace.song) {						
 			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
 					self->workspace.sequenceselection.editposition.trackposition.tracknode->next) {
@@ -451,30 +452,38 @@ void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* key
 			}
 		}
 	} else
-	if (keyevent->shift && keyevent->keycode == VK_LEFT) {
-		if (self->workspace.song) {		
-			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
-					self->workspace.sequenceselection.editposition.trackposition.tracknode->prev) {
-				sequenceselection_seteditposition(
-					&self->workspace.sequenceselection,
-					sequence_makeposition(&self->workspace.song->sequence,
-						self->workspace.sequenceselection.editposition.track,
-						self->workspace.sequenceselection.editposition.trackposition.tracknode->prev));
-				workspace_setsequenceselection(&self->workspace, 
-					self->workspace.sequenceselection);
-			}
-		}
-	} else {
-		if (keyevent->keycode != VK_CONTROL &&
-			keyevent->keycode != VK_SHIFT) {
-			EventDriver* kbd;
-			int input;			
+	if (cmd == CMD_IMM_MAXPATTERN) {
+		mainframe_maximizeorminimizeview(self);
+	} else
+	if (cmd == CMD_IMM_INFOMACHINE) {
+		workspace_showparameters(&self->workspace,
+			machines_slot(&self->workspace.song->machines));
+	} else
+	if (cmd == CMD_IMM_EDITINSTR) {
+		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW);
+	}
+}
+
+void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
+{	
+//	if (keyevent->keycode == VK_F4) {
+//		Properties* properties;
+//		
+//		properties = properties_create();		
+//		skin_load(properties, "old Psycle.psv");
+//		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
+//		machineview_applyproperties(&self->machineview, properties);
+//		properties_free(properties);
+//	} else 
+	if (keyevent->keycode != VK_CONTROL &&
+		keyevent->keycode != VK_SHIFT) {
+		EventDriver* kbd;
+		int input;			
 			
-			input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
-				GetKeyState(VK_CONTROL) < 0);						
-			kbd = workspace_kbddriver(&self->workspace);
-			kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);
-		}	
+		input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
+			GetKeyState(VK_CONTROL) < 0);						
+		kbd = workspace_kbddriver(&self->workspace);
+		kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);			
 	}
 }
 
@@ -617,9 +626,11 @@ void mainframe_onmouseleavesplitbar(MainFrame* self, ui_component* sender)
 void mainframe_ongear(MainFrame* self, ui_component* sender)
 {
 	if (ui_component_visible(&self->gear.component)) {
+		ui_button_disablehighlight(&self->machinebar.gear);
 		ui_component_hide(&self->gear.component);
 		ui_component_align(&self->component);
 	} else {						
+		ui_button_highlight(&self->machinebar.gear);
 		ui_component_show(&self->gear.component);
 		ui_component_align(&self->component);		
 	}	

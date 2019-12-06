@@ -17,6 +17,7 @@ static void OnKeyDown(SettingsView*, ui_component* sender, KeyEvent*);
 static void OnMouseDown(SettingsView*, ui_component* sender, MouseEvent*);
 static void OnMouseDoubleClick(SettingsView*, ui_component* sender, MouseEvent*);
 static void OnEditChange(SettingsView*, ui_edit* sender);
+static void OnEditKeyDown(SettingsView*, ui_component* sender, KeyEvent*);
 static void OnInputDefinerChange(SettingsView* self, InputDefiner* sender);
 static void OnDestroy(SettingsView*, ui_component* sender);
 static void OnSize(SettingsView*, ui_component* sender, ui_size*);
@@ -51,6 +52,7 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	signal_connect(&self->client.signal_draw, self, OnDraw);
 	signal_connect(&self->client.signal_scroll, self, OnScroll);
 	signal_connect(&self->client.signal_keydown, self, OnKeyDown);
+	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
 	signal_connect(&self->client.signal_mousedown, self, OnMouseDown);
 	signal_connect(&self->client.signal_mousedoubleclick, self,
 		OnMouseDoubleClick);
@@ -59,7 +61,8 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	self->choiceproperty = 0;
 	self->dy = 0;
 	self->dirbutton = 0;
-	ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);	
+	ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);
+	signal_connect(&self->edit.component.signal_keydown, self, OnEditKeyDown);
 	ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->client);	
 	ui_component_hide(&self->inputdefiner.component);		
@@ -307,6 +310,7 @@ void DrawCheckBox(SettingsView* self, Properties* property, int column)
 
 void OnKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
 {	
+	ui_component_propagateevent(sender);
 }
 
 void OnMouseDown(SettingsView* self, ui_component* sender, MouseEvent* ev)
@@ -501,6 +505,19 @@ void OnEditChange(SettingsView* self, ui_edit* sender)
 			properties_write_int(self->selected->parent, self->selected->item.key, atoi(ui_edit_text(&self->edit)));
 		}
 		signal_emit(&self->signal_changed, self, 1, self->selected);
+	}
+}
+
+void OnEditKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
+{
+	if (keyevent->keycode == VK_RETURN) {
+		ui_component_hide(&self->edit.component);
+		ui_component_setfocus(&self->client);
+		OnEditChange(self, &self->edit);
+	} else
+	if (keyevent->keycode == VK_ESCAPE) {
+		ui_component_hide(&self->edit.component);
+		ui_component_setfocus(&self->client);		
 	}
 }
 

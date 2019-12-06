@@ -34,11 +34,13 @@ static void player_disposerms(Player*);
 static void player_unloaddriver(Player*);
 static void player_unloadeventdrivers(Player*);
 static amp_t* work(Player*, int* numsamples);
+static void player_eventdriverinput(Player*, EventDriver* sender);
 static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(Player*, uintptr_t amount);
 static void player_filldriver(Player*, amp_t* buffer, uintptr_t amount);
 static RMSVol* player_rmsvol(Player*, size_t slot);
 static void player_resetvumeters(Player*);
+static void player_dostop(Player*);
 
 // player init and dispose
 
@@ -52,6 +54,8 @@ void player_init(Player* self, Song* song, void* handle)
 	mainframe = handle;
 	player_initdriver(self);	
 	eventdrivers_init(&self->eventdrivers, self, workeventinput, handle);
+	signal_connect(&self->eventdrivers.signal_input, self,
+		player_eventdriverinput);
 	player_initsignals(self);
 	player_initrms(self);
 	table_init(&self->notestotracks);
@@ -223,9 +227,59 @@ RMSVol* player_rmsvol(Player* self, size_t slot)
 
 // event driver callback
 
+void player_eventdriverinput(Player* self, EventDriver* sender)
+{
+	Properties* notes;
+	int cmd;	
+	
+	notes = properties_find(self->eventdrivers.cmds, "notes");
+	cmd = sender->getcmd(sender, notes);
+	if (cmd != -1 && cmd <  255) {		
+		int base = 48;
+		unsigned char note;
+		uintptr_t track = 0;
+		PatternEvent event;
+
+		if (cmd < NOTECOMMANDS_RELEASE) {
+			note = (unsigned char) cmd + base;
+		} else {
+			note = cmd;
+		}		
+		patternevent_init(&event, note, 255, 0, 0, 0);
+		if (self->multichannelaudition) {
+			if (event.note < NOTECOMMANDS_RELEASE) {
+				if (table_exists(&self->notestotracks, event.note)) {
+					track = (uintptr_t) table_at(&self->notestotracks, event.note);
+				} else {							
+					while (table_exists(&self->trackstonotes, track)) {
+						++track;
+					}
+					table_insert(&self->notestotracks, event.note, (void*)track);
+					table_insert(&self->trackstonotes, track,
+						(void*)(uintptr_t)event.note);
+				}
+			} else
+			if (event.note == NOTECOMMANDS_RELEASE) {				
+				if (table_exists(&self->notestotracks, note)) {
+					track = (uintptr_t) table_at(&self->notestotracks, note);
+					table_remove(&self->notestotracks, note);
+					table_remove(&self->trackstonotes, track);
+				}
+			}
+		}
+		sequencer_addinputevent(&self->sequencer, &event, track);
+		if (self->recordingnotes && sequencer_playing(&self->sequencer)) {
+			sequencer_recordinputevent(&self->sequencer, &event, 0, 
+				player_position(self));			
+		} else {			
+			signal_emit(&self->signal_inputevent, self, 1, &event);
+		}
+	}
+}
+
 void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int size)
 {	
-	int validevent = 0;
+/*	int validevent = 0;
 	uintptr_t note = 0;
 	PatternEvent event;
 	
@@ -293,7 +347,7 @@ void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int siz
 		} else {			
 			signal_emit(&self->signal_inputevent, self, 1, &event);
 		}		
-	}
+	}*/
 }
 
 // general setter and getter
@@ -341,6 +395,23 @@ void player_start(Player* self)
 void player_stop(Player* self)
 {
 	sequencer_stop(&self->sequencer);
+	player_dostop(self);
+}
+
+void player_dostop(Player* self)
+{
+	if (self->song) {
+		TableIterator it;
+		
+		for (it = machines_begin(&self->song->machines);
+				!tableiterator_equal(&it, table_end());
+				tableiterator_inc(&it)) {
+			Machine* machine;
+
+			machine = (Machine*)tableiterator_value(&it);
+			machine->vtable->stop(machine);			
+		}
+	}
 }
 
 int player_playing(Player* self)
@@ -432,7 +503,7 @@ void player_reloaddriver(Player* self, const char* path)
 void player_restartdriver(Player* self)
 {	
 	self->driver->close(self->driver);	
-	self->driver->updateconfiguration(self->driver);
+	self->driver->configure(self->driver);
 	self->driver->open(self->driver);	
 }
 
@@ -484,3 +555,4 @@ unsigned int player_numeventdrivers(Player* self)
 {
 	return eventdrivers_size(&self->eventdrivers);
 }
+

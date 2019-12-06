@@ -34,6 +34,7 @@ typedef	void (*fp_machine_work)(struct Machine*, BufferContext*);
 typedef	void (*fp_machine_generateaudio)(struct Machine*, BufferContext*);
 typedef	int (*fp_machine_hostevent)(struct Machine*, int const eventNr, int const val1, float const val2);
 typedef	void (*fp_machine_seqtick)(struct Machine*, int channel, const PatternEvent*);
+typedef	void (*fp_machine_stop)(struct Machine*);
 typedef	void (*fp_machine_sequencertick)(struct Machine*);
 typedef	void (*fp_machine_sequencerlinetick)(struct Machine*);
 typedef	List* (*fp_machine_sequencerinsert)(struct Machine*, List* events);
@@ -91,6 +92,7 @@ typedef struct MachineVtable {
 	fp_machine_generateaudio generateaudio;
 	fp_machine_hostevent hostevent;
 	fp_machine_seqtick seqtick;
+	fp_machine_stop stop;
 	fp_machine_sequencertick sequencertick;
 	fp_machine_sequencerlinetick sequencerlinetick;
 	// update sequencer events

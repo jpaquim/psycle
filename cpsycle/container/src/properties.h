@@ -39,6 +39,7 @@ typedef struct {
 	int typ;
 	int hint;	
 	int disposechildren;
+	int id;
 } Property;
 
 typedef struct Properties {
@@ -53,6 +54,7 @@ typedef int (*PropertiesCallback)(void* , Properties*, int level);
 
 void properties_init(Properties*, const char* key, PropertyType);
 Properties* properties_create(void);
+Properties* properties_clone(Properties*);
 Properties* properties_createsection(Properties*, const char* name);
 void properties_free(Properties* );
 Properties* properties_create_string(const char* key, const char* value);
@@ -72,6 +74,7 @@ int properties_int(Properties*, const char* key, int defaultvalue);
 int properties_bool(Properties*, const char* key, int defaultvalue);
 void properties_readdouble(Properties*, const char* key, double* value, double defaultvalue);
 const char* properties_readstring(Properties*, const char* key, const char* defaulttext);
+Properties* properties_read_choice(Properties*);
 Properties* properties_write_string(Properties*, const char* key, const char* value);
 Properties* properties_write_int(Properties*, const char* key, int value);
 Properties* properties_write_bool(Properties*, const char* key, int value);
@@ -91,6 +94,8 @@ Property* properties_entry(Properties*);
 const char* properties_valuestring(Properties*);
 Properties* properties_settext(Properties*, const char* text);
 const char* properties_text(Properties* self);
+Properties* properties_setid(Properties*, int id);
+int properties_id(Properties* self);
 Properties* properties_sethint(Properties*, PropertyHint);
 int properties_ischoiceitem(Properties*);
 PropertyHint properties_hint(Properties*);

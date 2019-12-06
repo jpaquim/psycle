@@ -81,10 +81,10 @@ void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit,
 			GetWindowText((HWND)self->component.hwnd, text, 256);
 			size = ui_component_textsize(&self->component, text);	
 			rv->width = size.width + 2;		
-			rv->height = (int)(tm.tmHeight * self->linenumber * 1.5);
+			rv->height = (int)(tm.tmHeight * self->linenumber);
 		} else {				
 			rv->width = tm.tmAveCharWidth * self->charnumber + 2;
-			rv->height = (int)(tm.tmHeight * self->linenumber * 1.5);
+			rv->height = (int)(tm.tmHeight * self->linenumber);
 		}
 	}
 }

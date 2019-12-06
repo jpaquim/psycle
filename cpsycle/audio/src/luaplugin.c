@@ -33,7 +33,7 @@ static void vtable_init(LuaPlugin* self)
 		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;		
 		vtable.describevalue = (fp_machine_describevalue) describevalue;
 		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
-		vtable.dispose = dispose;
+		vtable.dispose =(fp_machine_dispose) dispose;
 		vtable_initialized = 1;
 	}
 }

@@ -190,7 +190,10 @@ void readinfo(SongFile* self)
 {
 	if((self->file->currchunk.version&0xFFFF0000) == VERSION_MAJOR_ZERO)		
 	{
-		char name_[129]; char author_[65]; char comments_[65536];
+		char name_[129];
+		char author_[65];
+		char comments_[65536];
+
 		psyfile_readstring(self->file, name_, sizeof name_);
 		psyfile_readstring(self->file, author_, sizeof author_);
 		psyfile_readstring(self->file, comments_,sizeof comments_);
@@ -313,8 +316,7 @@ void readsngi(SongFile* self)
 }
 
 void readseqd(SongFile* self, unsigned char* playorder, int32_t* playlength)
-{	
-	int32_t temp;
+{		
 	int32_t index;	
 		
 	if((self->file->currchunk.version&0xffff0000) == VERSION_MAJOR_ZERO)
@@ -326,14 +328,12 @@ void readseqd(SongFile* self, unsigned char* playorder, int32_t* playlength)
 			char ptemp[256];
 			int32_t i;
 			// play length for this sequence
-			psyfile_read(self->file, &temp, sizeof temp);
-			*playlength = temp;
+			*playlength = psyfile_read_int32(self->file);			
 			// name, for multipattern, for now unused
 			psyfile_readstring(self->file, ptemp, sizeof ptemp);
 			for (i = 0; i < *playlength; ++i)
 			{
-				psyfile_read(self->file, &temp, sizeof temp);
-				playorder[i] = temp;
+				playorder[i] = (uint8_t) psyfile_read_uint32(self->file);
 			}
 		}
 	}	
@@ -614,7 +614,7 @@ void readsmsb(SongFile* self)
 			wave->globalvolume = ftemp;
 			// default volume
 			psyfile_read(self->file, &temp16, sizeof(temp16));
-			wave->defaultvolume = temp16;
+			wave->defaultvolume = temp16 / (amp_t)0x80;
 			// wave loop start
 			psyfile_read(self->file, &temp, sizeof(temp));
 			wave->loopstart = temp;
@@ -1438,7 +1438,6 @@ void psy3_writeinsd(SongFile* self)
 void psy3_saveinstrumentfilechunk(SongFile* self, Instrument* instrument)
 {	
 	uint32_t temp;
-	uint16_t temp16;
 	uint8_t temp8;
 	char legacyname;
 	
@@ -1541,11 +1540,7 @@ void psy3_writesmsb(SongFile* self)
 }
 
 void psy3_savesample(SongFile* self, Sample* sample)
-{	
-	uint32_t temp;
-	uint16_t temp16;
-	uint8_t temp8;
-	float ftemp;
+{			
 	unsigned char * pData1;
 	unsigned char * pData2;
 	uint32_t size1;
@@ -1567,57 +1562,34 @@ void psy3_savesample(SongFile* self, Sample* sample)
 	{		
 		size2 = (uint32_t)soundsquash(wavedatar, &pData2, sample->numframes);
 	}
-
-	psyfile_writestring(self->file, sample->name);
-	temp = sample->numframes;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	ftemp = sample->globalvolume;
-	psyfile_write(self->file, &ftemp, sizeof(ftemp));
-	temp16 = sample->defaultvolume;
-	psyfile_write(self->file, &temp16, sizeof(temp16));
-	temp = sample->loopstart;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	temp = sample->loopend;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	temp = sample->looptype;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	temp = sample->sustainloopstart;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	temp = sample->sustainloopend;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	temp = sample->sustainlooptype;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	temp = sample->samplerate;
-	psyfile_write(self->file, &temp, sizeof(temp));
-	temp16 = sample->tune;
-	psyfile_write(self->file, &temp16, sizeof(temp16));
-	temp16 = sample->finetune;
-	psyfile_write(self->file, &temp16, sizeof(temp16));
-	temp8 = sample->stereo;
-	psyfile_write(self->file, &temp8, sizeof(temp8));
-	temp8 = sample->panenabled;
-	psyfile_write(self->file, &temp8, sizeof(temp8));
-	ftemp = sample->panfactor;
-	psyfile_write(self->file, &ftemp, sizeof(ftemp));
-	temp8 = sample->surround;
-	psyfile_write(self->file, &temp8, sizeof(temp8));
-	temp8 = sample->vibrato.attack;
-	psyfile_write(self->file, &temp8, sizeof(temp8));
-	temp8 = sample->vibrato.speed;
-	psyfile_write(self->file, &temp8, sizeof(temp8));
-	temp8 = sample->vibrato.depth;
-	psyfile_write(self->file, &temp8, sizeof(temp8));
-	temp8 = sample->vibrato.type;
-	psyfile_write(self->file, &temp8, sizeof(temp8));
-
-	psyfile_write(self->file, &size1, sizeof(size1));
+	psyfile_writestring(self->file, sample->name);	
+	psyfile_write_uint32(self->file, sample->numframes);	
+	psyfile_write_float(self->file, sample->globalvolume);	
+	psyfile_write_uint16(self->file, (uint16_t)(sample->defaultvolume * 0x80));
+	psyfile_write_uint32(self->file, sample->loopstart);	
+	psyfile_write_uint32(self->file, sample->loopend);	
+	psyfile_write_int32(self->file, sample->looptype);	
+	psyfile_write_uint32(self->file, sample->sustainloopstart);	
+	psyfile_write_uint32(self->file, sample->sustainloopend);	
+	psyfile_write_int32(self->file, sample->sustainlooptype);	
+	psyfile_write_uint32(self->file, sample->samplerate);	
+	psyfile_write_int16(self->file, sample->tune);	
+	psyfile_write_int16(self->file, sample->finetune);	
+	psyfile_write_uint8(self->file, sample->stereo);	
+	psyfile_write_uint8(self->file, (uint8_t) sample->panenabled);	
+	psyfile_write_float(self->file, sample->panfactor);	
+	psyfile_write_uint8(self->file, sample->surround);	
+	psyfile_write_uint8(self->file, sample->vibrato.attack);	
+	psyfile_write_uint8(self->file, sample->vibrato.speed);	
+	psyfile_write_uint8(self->file, sample->vibrato.depth);	
+	psyfile_write_uint8(self->file, (uint8_t) sample->vibrato.type);
+	psyfile_write_uint32(self->file, size1);
 	psyfile_write(self->file, (void*)pData1, size1);
 	free(pData1);
-	free(wavedatal);
-	
+	free(wavedatal);	
 	if (sample->stereo)
 	{
-		psyfile_write(self->file, &size2, sizeof(size2));
+		psyfile_write_uint32(self->file, size2);
 		psyfile_write(self->file, (void*)pData2, size2);
 		free(pData2);
 		free(wavedatar);

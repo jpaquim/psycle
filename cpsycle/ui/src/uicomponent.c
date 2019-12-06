@@ -7,7 +7,7 @@
 #include "uimenu.h"
 #include "hashtbl.h"
 #include <memory.h>
-#include <commctrl.h>   // includes the common control header
+#include <commctrl.h>	// includes the common control header
 #include <stdio.h>
 #include <shlobj.h>
 #include <portable.h>
@@ -23,7 +23,7 @@ static ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
 static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
-static int tracking = 0;
+static int mousetracking = 0;
 
 static Table selfmap;
 static Table winidmap;
@@ -40,7 +40,7 @@ static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
 static void enableinput(ui_component* self, int enable, int recursive);
 static void onpreferredsize(ui_component*, ui_component* sender, 
-	ui_size* limit, ui_size* rv);
+	ui_size* limit, ui_size* rv);	
 
 void ui_init(uintptr_t hInstance)
 {
@@ -380,7 +380,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 			break;		
 			case WM_CTLCOLORLISTBOX:
-			case WM_CTLCOLORSTATIC:	
+			case WM_CTLCOLORSTATIC:
+			case WM_CTLCOLOREDIT:
 				component = table_at(&selfmap, (uintptr_t) lParam);
 				if (component) {					
 					SetTextColor((HDC) wParam, component->color);
@@ -629,7 +630,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 			break;
 			case WM_MOUSEMOVE:
-				if (!tracking) {
+				if (!mousetracking) {
 					TRACKMOUSEEVENT tme;
 
 					if (component && component->signal_mouseenter.slots) {	
@@ -640,7 +641,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					tme.dwHoverTime = 200;
 					tme.hwndTrack = hwnd;
 					if (_TrackMouseEvent(&tme)) {
-						tracking = 1;
+						mousetracking = 1;
 					} 
 					return 0;
 				}								
@@ -726,7 +727,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 			break;
 			case WM_MOUSELEAVE:	
-				tracking = 0;			
+				mousetracking = 0;
 				if (component->signal_mouseleave.slots) {				                    
 					signal_emit(&component->signal_mouseleave, component, 0);
 					return 0;
@@ -887,8 +888,6 @@ ui_rectangle ui_component_position(ui_component* self)
 	pt.x = rc.left;
 	pt.y = rc.top;
 	ScreenToClient(GetParent((HWND)self->hwnd), &pt);
-
-	
 	rv.left = pt.x;
 	rv.top = pt.y;
 	rv.right =  pt.x + width;
@@ -1054,17 +1053,17 @@ void ui_component_verticalscrollrange(ui_component* self, int* scrollmin,
 void ui_component_move(ui_component* self, int left, int top)
 {
 	SetWindowPos((HWND)self->hwnd, NULL, 
-	   left,
-	   top,
-	   0, 0, SWP_NOZORDER | SWP_NOSIZE) ;	
+	   left, top,
+	   0, 0,
+	   SWP_NOZORDER | SWP_NOSIZE) ;	
 }
 
 void ui_component_resize(ui_component* self, int width, int height)
 {	
 	SetWindowPos((HWND)self->hwnd, NULL, 
-	   0,
-	   0,
-	   width, height, SWP_NOZORDER | SWP_NOMOVE);	
+	   0, 0,
+	   width, height,
+	   SWP_NOZORDER | SWP_NOMOVE);	
 }
 
 void ui_component_setposition(ui_component* self, int x, int y, int width, int height)
@@ -1207,22 +1206,20 @@ int ui_component_visible(ui_component* self)
 
 void ui_component_align(ui_component* self)
 {	
-	int cpx = 0;
-	int cpx_r;
-	int cpy = 0;
-	int cpy_b = 0;
+	ui_size size;
+	ui_textmetric tm;
+	ui_point cp_topleft = { 0, 0 };
+	ui_point cp_bottomright = { 0, 0 };	
 	int cpymax = 0;
 	List* p;
 	List* q;
-	List* wrap = 0;
-	ui_size size;
-	ui_textmetric tm;
+	List* wrap = 0;	
 	ui_component* client = 0;
 		
 	size = ui_component_size(self);
 	tm = ui_component_textmetric(self);
-	cpx_r = size.width;
-	cpy_b = size.height;
+	cp_bottomright.x = size.width;
+	cp_bottomright.y = size.height;
 	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
 		ui_component* component;
 			
@@ -1241,48 +1238,45 @@ void ui_component_align(ui_component* self)
 					size.width - ui_value_px(&component->margin.left, &tm) -
 						ui_value_px(&component->margin.right, &tm),
 					size.height -
-						ui_value_px(&component->margin.top, &tm) -
-						ui_value_px(&component->margin.bottom, &tm));
+						ui_margin_height_px(&component->margin, &tm));
 			} else
 			if (component->align == UI_ALIGN_TOP) {
-				cpy += ui_value_px(&component->margin.top, &tm);
+				cp_topleft.y += ui_value_px(&component->margin.top, &tm);
 				ui_component_setposition(component, 
 					ui_value_px(&component->margin.left, &tm), 
-					cpy,
-					cpx_r -
-						ui_value_px(&component->margin.left, &tm) - 
-						ui_value_px(&component->margin.right, &tm),
-						componentsize.height);
-				cpy += ui_value_px(&component->margin.bottom, &tm);
-				cpy += componentsize.height;
+					cp_topleft.y,
+					cp_bottomright.x -
+						ui_margin_width_px(&component->margin, &tm),
+					componentsize.height);
+				cp_topleft.y += ui_value_px(&component->margin.bottom, &tm);
+				cp_topleft.y += componentsize.height;
 			} else
 			if (component->align == UI_ALIGN_BOTTOM) {
-				cpy_b -= ui_value_px(&component->margin.bottom, &tm);
+				cp_bottomright.y -=
+					ui_value_px(&component->margin.bottom, &tm);
 				ui_component_setposition(component, 
 					ui_value_px(&component->margin.left, &tm), 
-					cpy_b -= componentsize.height,
-					cpx_r - ui_value_px(&component->margin.left, &tm) -
+					cp_bottomright.y - componentsize.height,
+					cp_bottomright.x -
+						ui_value_px(&component->margin.left, &tm) -
 						ui_value_px(&component->margin.right, &tm),
 					componentsize.height);
-				cpy_b -= ui_value_px(&component->margin.top, &tm);
-				cpy_b -= componentsize.height;
-
+				cp_bottomright.y -= ui_value_px(&component->margin.top, &tm);
+				cp_bottomright.y -= componentsize.height;
 			} else
 			if (component->align == UI_ALIGN_RIGHT) {
 				int requiredcomponentwidth;
 
 				requiredcomponentwidth = componentsize.width +
-						ui_value_px(&component->margin.left, &tm) +
-						ui_value_px(&component->margin.right, &tm);
-				cpx_r -= requiredcomponentwidth;
+					ui_margin_width_px(&component->margin, &tm);
+				cp_bottomright.x -= requiredcomponentwidth;
 				ui_component_setposition(component,
-					cpx_r +
-						ui_value_px(&component->margin.left, &tm),
-					cpy + ui_value_px(&component->margin.top, &tm),
+					cp_bottomright.x + ui_value_px(&component->margin.left, &tm),
+					cp_topleft.y +
+						ui_value_px(&component->margin.top, &tm),
 					componentsize.width,										
 					size.height -
-						ui_value_px(&component->margin.top, &tm) -
-						ui_value_px(&component->margin.bottom, &tm));
+						ui_margin_height_px(&component->margin, &tm));
 			} else
 			if (component->align == UI_ALIGN_LEFT) {
 				if ((self->alignexpandmode & UI_HORIZONTALEXPAND)
@@ -1291,87 +1285,75 @@ void ui_component_align(ui_component* self)
 					int requiredcomponentwidth;
 
 					requiredcomponentwidth = componentsize.width +
-						ui_value_px(&component->margin.left, &tm) +
-						ui_value_px(&component->margin.right, &tm);
-					if (cpx + requiredcomponentwidth > size.width) {
+						ui_margin_width_px(&component->margin, &tm);
+					if (cp_topleft.x + requiredcomponentwidth > size.width) {
 						List* w;						
-						cpx = 0;
+						cp_topleft.x = 0;
 						for (w = wrap; w != 0; w = w->next) {
 							ui_component* c;
 							c = (ui_component*)w->entry;
 							ui_component_resize(c, ui_component_size(c).width,
-								cpymax - cpy -
-								ui_value_px(&component->margin.top, &tm) -
-								ui_value_px(&component->margin.bottom, &tm));
+								cpymax - cp_topleft.y -
+								ui_margin_height_px(&component->margin, &tm));
 						}
-						cpy = cpymax;
+						cp_topleft.y = cpymax;
 						list_free(wrap);						
 						wrap = 0;
 					}					
 					list_append(&wrap, component);					
 				}
-				cpx += ui_value_px(&component->margin.left, &tm);
+				cp_topleft.x += ui_value_px(&component->margin.left, &tm);
 				ui_component_setposition(component,
-					cpx,
-					cpy + ui_value_px(&component->margin.top, &tm),
+					cp_topleft.x,
+					cp_topleft.y + ui_value_px(&component->margin.top, &tm),
 					componentsize.width,
 					component->justify == UI_JUSTIFY_EXPAND 
-					? size.height - cpy -
-						ui_value_px(&component->margin.top, &tm) -
-						ui_value_px(&component->margin.bottom, &tm)
+					? size.height - cp_topleft.y -
+						ui_margin_height_px(&component->margin, &tm)
 					: componentsize.height);
-				cpx += ui_value_px(&component->margin.right, &tm);
-				cpx += componentsize.width;				
-				if (cpymax < cpy + 
-						componentsize.height +
-						ui_value_px(&component->margin.top, &tm) + 
-						ui_value_px(&component->margin.bottom, &tm)) {
-					cpymax = cpy + componentsize.height +
-						ui_value_px(&component->margin.top, &tm) +
-						ui_value_px(&component->margin.bottom, &tm);
+				cp_topleft.x += ui_value_px(&component->margin.right, &tm);
+				cp_topleft.x += componentsize.width;				
+				if (cpymax < cp_topleft.y + componentsize.height +
+						ui_margin_height_px(&component->margin, &tm)) {
+					cpymax = cp_topleft.y + componentsize.height +
+						ui_margin_height_px(&component->margin, &tm);
 				}
 			}				
 		}
 	}
-	if (client) {
+	if (client) {		
 		ui_component_setposition(client,
-					cpx + client->margin.left.quantity.integer,
-					cpy + client->margin.top.quantity.integer,
-					size.width - cpx - ui_value_px(&client->margin.left, &tm) -
-						ui_value_px(&client->margin.right, &tm) -
-						(size.width - cpx_r),
-					size.height - cpy - (size.height - cpy_b) -
-						ui_value_px(&client->margin.top, &tm) -
-						ui_value_px(&client->margin.bottom, &tm));
+			cp_topleft.x + ui_value_px(&client->margin.left, &tm),
+			cp_topleft.y + ui_value_px(&client->margin.top, &tm),
+			cp_bottomright.x - cp_topleft.x -
+				ui_margin_width_px(&client->margin, &tm),
+			cp_bottomright.y - cp_topleft.y -
+				ui_margin_height_px(&client->margin, &tm));
 	}
 	list_free(q);
 	list_free(wrap);
 	signal_emit(&self->signal_align, self, 0);
 }
 
-void onpreferredsize(ui_component* self, ui_component* sender,
-	ui_size* limit, ui_size* rv)
-{		
-	ui_textmetric tm;
-
-	tm = ui_component_textmetric(self);
+void onpreferredsize(ui_component* self, ui_component* sender, ui_size* limit,
+	ui_size* rv)
+{			
 	if (rv) {
-		int cpxmax = 0;	
-		int cpymax = 0;		
-		ui_size size;
+		ui_size size;		
 
-		size = ui_component_size(self);
-		if (self->alignchildren) {
+		size = ui_component_size(self);		
+		if (self->alignchildren) {			
+			ui_textmetric tm;			
 			List* p;
 			List* q;
-			int cpx = 0;
-			int cpy = 0;
+			ui_point cp = { 0, 0 };
+			ui_size maxsize = { 0, 0 };
 
-			if ((self->alignexpandmode & UI_HORIZONTALEXPAND) == UI_HORIZONTALEXPAND) {
-				size.width = 0;		
-			} else {
-				size.width = limit->width;
-			}	
+			tm = ui_component_textmetric(self);			
+			size.width = (self->alignexpandmode & UI_HORIZONTALEXPAND) ==
+				UI_HORIZONTALEXPAND 
+				? 0
+				: limit->width;			
 			for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
 				ui_component* component;
 					
@@ -1379,72 +1361,50 @@ void onpreferredsize(ui_component* self, ui_component* sender,
 				if (component->visible) {
 					ui_size componentsize;			
 					
-					componentsize = ui_component_preferredsize(component, &size);				
-					if (component->align == UI_ALIGN_TOP) {
-						cpy += ui_value_px(&component->margin.top, &tm);
-						cpy += componentsize.height;
-						cpy += ui_value_px(&component->margin.bottom, &tm);
-						if (cpymax < cpy) {
-							cpymax = cpy;
+					componentsize = ui_component_preferredsize(component, &size);
+					if (component->align == UI_ALIGN_TOP ||
+							component->align == UI_ALIGN_BOTTOM) {
+						cp.y += componentsize.height +
+							ui_margin_height_px(&component->margin, &tm);
+						if (maxsize.height < cp.y) {
+							maxsize.height = cp.y;
 						}
-						if (cpxmax < componentsize.width +
-								ui_value_px(&component->margin.left, &tm) +
-								ui_value_px(&component->margin.right, &tm)) {
-							cpxmax = componentsize.width +
-								ui_value_px(&component->margin.left, &tm) +
-								ui_value_px(&component->margin.right, &tm);
+						if (maxsize.width < componentsize.width +
+								ui_margin_width_px(&component->margin, &tm)) {
+							maxsize.width = componentsize.width +
+								ui_margin_width_px(&component->margin, &tm);
 						}
-					} else
-					if (component->align == UI_ALIGN_BOTTOM) {
-						cpy += ui_value_px(&component->margin.top, &tm);
-						cpy += componentsize.height;
-						cpy += ui_value_px(&component->margin.bottom, &tm);
-						if (cpymax < cpy) {
-							cpymax = cpy;
-						}
-						if (cpxmax < componentsize.width +
-								ui_value_px(&component->margin.left, &tm) +
-								ui_value_px(&component->margin.right, &tm)) {
-							cpxmax = componentsize.width +
-								ui_value_px(&component->margin.left, &tm) +
-								ui_value_px(&component->margin.right, &tm);
-						}
-					} else
+					} else					
 					if (component->align == UI_ALIGN_LEFT) {					
 						if (size.width != 0) {
 							int requiredcomponentwidth;
 
 							requiredcomponentwidth = componentsize.width +
-								ui_value_px(&component->margin.left, &tm) +
-								ui_value_px(&component->margin.right, &tm);
-							if (cpx + requiredcomponentwidth > size.width) {
-								cpy = cpymax;
-								cpx = 0;							
+								ui_margin_width_px(&component->margin, &tm);
+							if (cp.x + requiredcomponentwidth > size.width) {
+								cp.y = maxsize.height;
+								cp.x = 0;							
 							}						
 						}
-						cpx += ui_value_px(&component->margin.left, &tm);
-						cpx += ui_value_px(&component->margin.right, &tm);
-						cpx += componentsize.width;
-						if (cpxmax < cpx) {
-							cpxmax = cpx;
+						cp.x += componentsize.width +
+							ui_margin_width_px(&component->margin, &tm);						
+						if (maxsize.width < cp.x) {
+							maxsize.width = cp.x;
 						}
-						if (cpymax < cpy + componentsize.height +
-								ui_value_px(&component->margin.top, &tm) +
-								ui_value_px(&component->margin.bottom, &tm)) {
-							cpymax = cpy + componentsize.height +
-								ui_value_px(&component->margin.top, &tm) +
-								ui_value_px(&component->margin.bottom, &tm);
+						if (maxsize.height < cp.y + componentsize.height +
+								ui_margin_height_px(&component->margin, &tm)) {
+							maxsize.height = cp.y + componentsize.height +
+								ui_margin_height_px(&component->margin, &tm);
 						}
 					}				
 				}
 			}
 			list_free(q);
-			rv->width = cpxmax;
-			rv->height = cpymax;
+			*rv = maxsize;
 		} else {
 			*rv = size;
 		}
-	}
+	}	
 }
 
 void ui_component_setmargin(ui_component* self, const ui_margin* margin)

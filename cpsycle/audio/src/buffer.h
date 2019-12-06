@@ -10,6 +10,7 @@
 typedef struct {
 	uintptr_t numchannels;	
 	amp_t** samples;
+	unsigned int numsamples;
 	uintptr_t offset;
 } Buffer;
 

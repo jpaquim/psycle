@@ -34,9 +34,9 @@ typedef struct Driver {
 	void* _callbackContext;
 	Properties* properties;
 	int (*open)(struct Driver*);
-	void (*free)(struct Driver*);	
-	void (*updateconfiguration)(struct Driver*);
 	int (*dispose)(struct Driver*);
+	void (*free)(struct Driver*);	
+	void (*configure)(struct Driver*);	
 	int (*close)(struct Driver*);
 	void (*connect)(struct Driver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
 	unsigned int (*samplerate)(struct Driver*);

@@ -64,6 +64,8 @@ typedef struct {
 
 void ui_margin_init(ui_margin*, ui_value top, ui_value right, ui_value bottom,
 	ui_value left);
+intptr_t ui_margin_width_px(ui_margin*, const ui_textmetric*);
+intptr_t ui_margin_height_px(ui_margin*, const ui_textmetric*);
 
 
 typedef struct {

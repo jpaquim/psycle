@@ -18,17 +18,17 @@ typedef struct {
 	beat_t retriggerstep;
 	int jump;
 	beat_t jumpat;
-	beat_t jumpto;	
-} SequenceTrackState;
+	beat_t jumpto;
+} SequencerTrackState;
 
 typedef struct {
-	SequenceTrackState state;
+	SequencerTrackState state;
 	SequenceTrackIterator* iterator;
 } SequencerTrack;
 
 typedef struct {
 	Sequence* sequence;
-	Machines* machines;	
+	Machines* machines;
 	beat_t bpm;
 	unsigned int samplerate;
 	beat_t beatsprosample;	
@@ -42,7 +42,7 @@ typedef struct {
 	List* events;
 	List* delayedevents;
 	List* inputevents;
-	SequencerPlayMode mode;
+	SequencerPlayMode mode;	
 	int looping;
 } Sequencer;
 
