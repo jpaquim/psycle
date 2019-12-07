@@ -9,6 +9,7 @@
 static void OnSize(SamplerInstrumentView*, ui_component* sender, ui_size* size);
 static void AlignInstrumentView(SamplerInstrumentView* self);
 static void OnInstrumentInsert(SamplerInstrumentView* self, ui_component* sender, int slot);
+static void OnInstrumentRemoved(SamplerInstrumentView* self, ui_component* sender, int slot);
 static void OnInstrumentSlotChanged(SamplerInstrumentView* self, Instrument* sender, int slot);
 static void OnInstrumentListChanged(SamplerInstrumentView* self, ui_component* sender, int slot);
 static void SetInstrument(SamplerInstrumentView* self, int slot);
@@ -65,6 +66,7 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 
 	AlignInstrumentView(self);
 	signal_connect(&self->player->song->instruments.signal_insert, self, OnInstrumentInsert);
+	signal_connect(&self->player->song->instruments.signal_removed, self, OnInstrumentRemoved);
 	signal_connect(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 	signal_connect(&self->instrumentsbox.instrumentlist.signal_selchanged, self, OnInstrumentListChanged);
 
@@ -89,6 +91,11 @@ void OnSize(SamplerInstrumentView* self, ui_component* sender, ui_size* size)
 }
 
 void OnInstrumentInsert(SamplerInstrumentView* self, ui_component* sender, int slot)
+{
+	SetInstrument(self, slot);
+}
+
+void OnInstrumentRemoved(SamplerInstrumentView* self, ui_component* sender, int slot)
 {
 	SetInstrument(self, slot);
 }
@@ -123,6 +130,8 @@ void OnSongChanged(SamplerInstrumentView* self, Workspace* workspace)
 	self->filter.instruments = &workspace->song->instruments;
 	self->pitch.instruments = &workspace->song->instruments;
 	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+	signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
+	signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
 	SetInstruments(&self->instrumentsbox, &workspace->song->instruments);
 	SetInstrument(self, 0);
 }

@@ -70,6 +70,29 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 	}
 }
 
+struct FileSearch {
+	const char* filepath;
+};
+
+static int onenumfindfile(struct FileSearch* self, const char* path, int flag);
+
+void dir_findfile(const char* searchpath, const char* wildcard,
+	char* filepath)
+{
+	struct FileSearch filesearch;
+
+	filepath[0] = '\0';
+	filesearch.filepath = filepath;
+	dir_enum(&filesearch, searchpath, wildcard, 0, onenumfindfile);
+	SetLastError(0);
+}
+
+int onenumfindfile(struct FileSearch* self, const char* path, int flag)
+{
+	strcpy(self->filepath, path);
+	return 1;
+}
+
 char* workdir(char* buffer)
 {
 	return _getcwd(buffer, _MAX_PATH);

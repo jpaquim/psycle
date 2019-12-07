@@ -34,11 +34,13 @@ static ui_bitmap mixer;
 
 void InitParamView(ParamView* self, ui_component* parent, Machine* machine,
 	Workspace* workspace)
-{		
+{	
 	if (knobs.hBitmap == NULL) {
+		ui_bitmap_init(&knobs);
 		ui_bitmap_loadresource(&knobs, IDB_PARAMKNOB);		
 	}
 	if (mixer.hBitmap == NULL) {
+		ui_bitmap_init(&mixer);
 		ui_bitmap_loadresource(&mixer, IDB_MIXERSKIN);
 	}
 	self->machine = machine;

@@ -68,10 +68,13 @@ void filebar_onloadsong(FileBar* self, ui_component* sender)
 				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
 				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
 				"Original Mod Format Songs (*.mod)" "\0*.mod\0";
-	char  defaultextension[] = "PSY";
+	char  defaultextension[] = "PSY";	
+
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, path)) {		
+	if (ui_openfile(&self->component, title, filter, defaultextension, 
+			workspace_songs_directory(self->workspace),
+			path)) {
 		workspace_loadsong(self->workspace, path);						
 	}
 }
@@ -84,8 +87,9 @@ void filebar_onsavesong(FileBar* self, ui_component* sender)
 	char  defaultextension[] = "PSY";
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_savefile(&self->component, title, filter, defaultextension, path)) {		
-		workspace_savesong(self->workspace, path);						
+	if (ui_savefile(&self->component, title, filter, defaultextension, 
+			workspace_songs_directory(self->workspace), path)) {
+		workspace_savesong(self->workspace, path);
 	}
 }
 

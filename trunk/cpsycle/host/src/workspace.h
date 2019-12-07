@@ -60,6 +60,7 @@ typedef struct {
 	Signal signal_octavechanged;
 	Signal signal_songchanged;	
 	Signal signal_configchanged;
+	Signal signal_skinchanged;
 	Signal signal_patterneditpositionchanged;
 	Signal signal_sequenceselectionchanged;
 	Signal signal_loadprogress;
@@ -67,7 +68,7 @@ typedef struct {
 	Signal signal_beforesavesong;
 	Signal signal_showparameters;
 	Signal signal_viewselected;
-	Signal signal_parametertweak;
+	Signal signal_parametertweak;	
 	ui_component* mainhandle;
 	UndoRedo undoredo;
 	History history;
@@ -93,6 +94,7 @@ void workspace_disposesequencepaste(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_savesong(Workspace*, const char* path);
+void workspace_loadskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 Properties* workspace_pluginlist(Workspace*);
 void workspace_load_configuration(Workspace*);
@@ -136,5 +138,10 @@ void workspace_onviewchanged(Workspace*, int view);
 void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
 void workspace_addhistory(Workspace*);
+const char* workspace_songs_directory(Workspace*);
+const char* workspace_plugins_directory(Workspace*);
+const char* workspace_vsts32_directory(Workspace*);
+const char* workspace_vsts64_directory(Workspace*);
+const char* workspace_skins_directory(Workspace*);
 
 #endif

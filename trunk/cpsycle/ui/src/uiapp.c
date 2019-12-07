@@ -5,16 +5,30 @@
 
 #include "uiapp.h"
 #include <windows.h>
+#include <excpt.h>
+
+static int FilterException(const char* msg, int code, struct _EXCEPTION_POINTERS *ep) 
+{	
+	// char txt[512];	
+			
+	MessageBox(0, msg, "Psycle Ui Exception", MB_OK | MB_ICONERROR);
+	return EXCEPTION_EXECUTE_HANDLER;
+}
 
 int ui_run(void) 
 {
 	MSG msg; 
 
-	while (GetMessage (&msg, NULL, 0, 0))
-    {
-          TranslateMessage (&msg) ;
-          DispatchMessage (&msg) ;
-    }
+	__try
+	{
+		while (GetMessage (&msg, NULL, 0, 0))
+		{
+			  TranslateMessage (&msg) ;
+			  DispatchMessage (&msg) ;
+		}
+	}
+	__except(FilterException("app loop", GetExceptionCode(), GetExceptionInformation())) {			
+	}
     return (int) msg.wParam ;
 }
 

@@ -218,7 +218,7 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 	properties_sethint(properties_settext(
 		properties_append_string(
 			self->directories,
-			"plugin",
+			"plugins",
 			"C:\\Programme\\Psycle\\PsyclePlugins"),
 		"Plug-in directory"),
 		PROPERTY_HINT_EDITDIR);

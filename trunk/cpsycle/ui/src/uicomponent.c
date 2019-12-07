@@ -1461,7 +1461,7 @@ void enableinput(ui_component* self, int enable, int recursive)
 }
 
 int ui_openfile(ui_component* self, char* szTitle, char* szFilter,
-	char* szDefExtension, char* szOpenName)
+	char* szDefExtension, const char* szInitialDir, char* szOpenName)
 {
 	int rv;
 	OPENFILENAME ofn;
@@ -1479,7 +1479,7 @@ int ui_openfile(ui_component* self, char* szTitle, char* szFilter,
 	ofn.lpstrFileTitle= szTitle; 
 	ofn.nMaxFileTitle= MAX_PATH; 
 	ofn.lpstrTitle= (LPSTR)NULL; 
-	ofn.lpstrInitialDir= (LPSTR)NULL; 
+	ofn.lpstrInitialDir= (LPSTR) szInitialDir; 
 	ofn.Flags= OFN_HIDEREADONLY|OFN_FILEMUSTEXIST; 
 	ofn.nFileOffset= 0; 
 	ofn.nFileExtension= 0; 
@@ -1491,7 +1491,7 @@ int ui_openfile(ui_component* self, char* szTitle, char* szFilter,
 }
 
 int ui_savefile(ui_component* self, char* szTitle, char* szFilter,
-	char* szDefExtension, char* szFileName)
+	char* szDefExtension, const char* szInitialDir, char* szFileName)
 {
 	int rv;
 	OPENFILENAME ofn;
@@ -1509,7 +1509,7 @@ int ui_savefile(ui_component* self, char* szTitle, char* szFilter,
 	ofn.lpstrFileTitle= szTitle; 
 	ofn.nMaxFileTitle= _MAX_PATH; 
 	ofn.lpstrTitle= (LPSTR)NULL; 
-	ofn.lpstrInitialDir= (LPSTR)NULL; 
+	ofn.lpstrInitialDir= (LPSTR) szInitialDir;
 	ofn.Flags= OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 	ofn.nFileOffset= 0; 
 	ofn.nFileExtension= 0; 

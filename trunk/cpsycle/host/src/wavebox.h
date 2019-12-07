@@ -12,6 +12,7 @@ typedef struct {
 	Sample* sample;	
 } WaveBox;
 
-void InitWaveBox(WaveBox*, ui_component* parent);
+void wavebox_init(WaveBox*, ui_component* parent);
+void wavebox_setsample(WaveBox*, Sample*);
 
 #endif

@@ -11,6 +11,7 @@ static void BuildInstrumentList(InstrumentsBox* self);
 static void AddString(InstrumentsBox* self, const char* text);
 static void OnInstrumentSlotChanged(InstrumentsBox* self, Instrument* sender, int slot);
 static void OnInstrumentInsert(InstrumentsBox* self, ui_component* sender, int slot);
+static void OnInstrumentRemoved(InstrumentsBox* self, ui_component* sender, int slot);
 static void OnInstrumentListChanged(InstrumentsBox* self, ui_component* sender,
 	int slot);
 
@@ -56,6 +57,12 @@ void OnInstrumentInsert(InstrumentsBox* self, ui_component* sender, int slot)
 	ui_listbox_setcursel(&self->instrumentlist, slot);		
 }
 
+void OnInstrumentRemoved(InstrumentsBox* self, ui_component* sender, int slot)
+{
+	BuildInstrumentList(self);
+	ui_listbox_setcursel(&self->instrumentlist, slot);		
+}
+
 void OnInstrumentSlotChanged(InstrumentsBox* self, Instrument* sender, int slot)
 {
 	ui_listbox_setcursel(&self->instrumentlist, slot);	
@@ -65,6 +72,7 @@ void SetInstruments(InstrumentsBox* self, Instruments* instruments)
 {
 	self->instruments = instruments;	
 	BuildInstrumentList(self);
-	signal_connect(&instruments->signal_insert, self, OnInstrumentInsert);	
+	signal_connect(&instruments->signal_insert, self, OnInstrumentInsert);
+	signal_connect(&instruments->signal_removed, self, OnInstrumentRemoved);
 	signal_connect(&instruments->signal_slotchange, self, OnInstrumentSlotChanged);
 }

@@ -6,11 +6,16 @@
 #include "trackerview.h"
 #include <pattern.h>
 #include "cmdsnotes.h"
+#include "skinio.h"
+#include "skingraphics.h"
+#include "resources/resource.h"
+
 #include <string.h>
 #include <math.h>
-#include "resources/resource.h"
-#include "skingraphics.h"
+
+#include <dir.h>
 #include <portable.h>
+
 
 #define TIMERID_TRACKERVIEW 600
 static const big_beat_t epsilon = 0.0001;
@@ -93,6 +98,7 @@ static void trackerview_showemptydata(TrackerView*, int showstate);
 static int trackerview_numlines(TrackerView*);
 static void trackerview_setclassicheadercoords(TrackerView*);
 static void trackerview_setheadercoords(TrackerView*);
+static void trackerview_setcoords(TrackerView* self, Properties* properties);
 static void trackerview_setheadertextcoords(TrackerView*);
 static void trackerview_onconfigchanged(TrackerView*, Workspace*, Properties*);
 static void trackerview_readconfig(TrackerView*);
@@ -126,6 +132,7 @@ static void trackerview_onpatterneditpositionchanged(TrackerView*,
 	Workspace* sender);
 static void trackerview_onparametertweak(TrackerView*,
 	Workspace* sender, int slot, int tweak, int value);
+static void trackerview_onskinchanged(TrackerView*, Workspace*, Properties*);
 
 static void trackerheader_ondraw(TrackerHeader*, ui_component* sender,
 	ui_graphics* g);
@@ -422,6 +429,8 @@ void trackergrid_numtrackschanged(TrackerGrid* self, Player* player,
 
 void TrackerViewApplyProperties(TrackerView* self, Properties* p)
 {
+	const char* pattern_header_skin_name;
+
 	self->skin.separator = properties_int(p, "pvc_separator", 0x00292929);
 	self->skin.separator2 = properties_int(p, "pvc_separator2", 0x00292929);
 	self->skin.background = properties_int(p, "pvc_background", 0x00292929);
@@ -448,7 +457,109 @@ void TrackerViewApplyProperties(TrackerView* self, Properties* p)
 	self->skin.midline2 = properties_int(p, "pvc_midline2", 0x007D6100);
 	ui_component_setbackgroundcolor(
 		&self->linenumbers.component, self->skin.background);	
+	pattern_header_skin_name = properties_readstring(p, "pattern_header_skin",
+		0);	
+	if (pattern_header_skin_name) {
+		char path[_MAX_PATH];
+		char filename[_MAX_PATH];
+
+		strcpy(filename, pattern_header_skin_name);
+		strcat(filename, ".bmp");
+		dir_findfile(workspace_skins_directory(self->workspace),
+			filename, path);
+		if (path[0] != '\0') {
+			ui_bitmap bmp;
+
+			if (ui_bitmap_load(&bmp, path) == 0) {
+				ui_bitmap_dispose(&self->skin.bitmap);
+				self->skin.bitmap = bmp; 
+			}
+		}
+		strcpy(filename, pattern_header_skin_name);
+		strcat(filename, ".psh");
+		dir_findfile(workspace_skins_directory(self->workspace),
+			filename, path);
+		if (path[0] != '\0') {
+			Properties* coords;
+
+			coords = properties_create();
+			skin_loadpsh(coords, path);
+			trackerview_setcoords(self, coords);
+			properties_free(coords);
+		}
+	}
 	ui_component_invalidate(&self->component);
+}
+
+void trackerview_setcoords(TrackerView* self, Properties* p)
+{
+	const char* s;
+	int vals[4];
+	
+	if (s = properties_readstring(p, "background_source", 0)) {	
+		skin_psh_values(s, 4, vals);
+		self->skin.headercoords.background.srcx = vals[0];
+		self->skin.headercoords.background.srcy = vals[1];
+		self->skin.headercoords.background.destwidth = vals[2];
+		self->skin.headercoords.background.destheight = vals[3];
+	}
+	if (s = properties_readstring(p, "number_0_source", 0)) {	
+		skin_psh_values(s, 4, vals);
+		self->skin.headercoords.digitx0.srcx = vals[0];
+		self->skin.headercoords.digitx0.srcy = vals[1];
+		self->skin.headercoords.digit0x.srcx = vals[0];
+		self->skin.headercoords.digit0x.srcy = vals[1];
+		self->skin.headercoords.digitx0.srcwidth = vals[2];
+		self->skin.headercoords.digitx0.srcheight = vals[3];		
+		self->skin.headercoords.digit0x.srcwidth = vals[2];
+		self->skin.headercoords.digit0x.srcheight = vals[3];		
+	}
+	if (s =properties_readstring(p, "record_on_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		self->skin.headercoords.record.srcx = vals[0];
+		self->skin.headercoords.record.srcy = vals[1];
+		self->skin.headercoords.record.destwidth = vals[2];
+		self->skin.headercoords.record.destheight = vals[3];
+	}
+	if (s = properties_readstring(p, "mute_on_source", 0)) {	
+		skin_psh_values(s, 4, vals);
+		self->skin.headercoords.mute.srcx = vals[0];
+		self->skin.headercoords.mute.srcy = vals[1];
+		self->skin.headercoords.mute.destwidth = vals[2];
+		self->skin.headercoords.mute.destheight = vals[3];
+	}
+	if (s = properties_readstring(p, "solo_on_source", 0)) {	
+		skin_psh_values(s, 4, vals);
+		self->skin.headercoords.solo.srcx = vals[0];
+		self->skin.headercoords.solo.srcy = vals[1];
+		self->skin.headercoords.solo.destwidth = vals[2];
+		self->skin.headercoords.solo.destheight = vals[3];
+	}
+	if (s = properties_readstring(p, "digit_x0_dest", 0)) {	
+		skin_psh_values(s, 2, vals);
+		self->skin.headercoords.digitx0.destx = vals[0];
+		self->skin.headercoords.digitx0.desty = vals[1];
+	}
+	if (s = properties_readstring(p, "digit_0x_dest", 0)) {	
+		skin_psh_values(s, 2, vals);
+		self->skin.headercoords.digit0x.destx = vals[0];
+		self->skin.headercoords.digit0x.desty = vals[1];		
+	}
+	if (s = properties_readstring(p, "record_on_dest", 0)) {	
+		skin_psh_values(s, 2, vals);
+		self->skin.headercoords.record.destx = vals[0];
+		self->skin.headercoords.record.desty = vals[1];
+	}
+	if (s = properties_readstring(p, "mute_on_dest", 0)) {	
+		skin_psh_values(s, 2, vals);
+		self->skin.headercoords.mute.destx = vals[0];
+		self->skin.headercoords.mute.desty = vals[1];
+	}
+	if (s = properties_readstring(p, "solo_on_dest", 0)) {	
+		skin_psh_values(s, 2, vals);
+		self->skin.headercoords.solo.destx = vals[0];
+		self->skin.headercoords.solo.desty = vals[1];
+	}
 }
 
 void trackergrid_ondraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
@@ -830,6 +941,7 @@ void trackergrid_adjustscroll(TrackerGrid* self)
 	int visitracks;
 	int visilines;
 	int vscrollmax;
+	int stepx;
 	size = ui_component_size(&self->component);	
 	visitracks = size.width / self->trackwidth;
 	visilines = size.height / self->lineheight;
@@ -846,6 +958,9 @@ void trackergrid_adjustscroll(TrackerGrid* self)
 		
 		trackerview_centeroncursor(self->view);
 	}
+	stepx = -self->dx / self->trackwidth;	
+	ui_component_sethorizontalscrollposition(&self->component,
+		stepx > 0 ? stepx : 0);
 }
 
 void trackerview_centeroncursor(TrackerView* self)
@@ -1653,12 +1768,15 @@ void trackerview_invalidateline(TrackerView* self, beat_t offset)
 	}
 }
 
-
 void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int stepx,
 	int stepy)
-{				
+{
 	self->dx += (stepx * sender->scrollstepx);
 	self->dy += (stepy * sender->scrollstepy);
+
+	if (self->dx > 0) {
+		self->dx = 0;
+	}	
 
 	if (self->header && stepx != 0) {
 		self->header->dx = self->dx;
@@ -1780,6 +1898,7 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	trackerview_initinputs(self);
 	self->pattern = 0;
+	ui_bitmap_init(&self->skin.bitmap);
 	ui_bitmap_loadresource(&self->skin.bitmap, IDB_HEADERSKIN);
 	trackerview_initdefaultskin(self);	
 	trackerheader_init(&self->header, &self->component, self);
@@ -1853,6 +1972,8 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	signal_connect(&workspace->signal_parametertweak, self,
 		trackerview_onparametertweak);
 	trackerview_readconfig(self);	
+	signal_connect(&self->workspace->signal_skinchanged, self,
+		trackerview_onskinchanged);
 }
 
 void trackerview_ondestroy(TrackerView* self, ui_component* sender)
@@ -2461,14 +2582,10 @@ void trackerview_setpattern(TrackerView* self, Pattern* pattern)
 	self->pattern = pattern;
 	if (pattern) {
 		self->opcount = pattern->opcount;
-	}
-	self->grid.cursor.track = 0;
+	}	
 	self->grid.cursor.offset = 0;
-	self->grid.cursor.subline = 0;
-	self->grid.cursor.col = 0;	
-	self->grid.dx = 0;
-	self->grid.dy = 0;
-	self->header.dx = 0;
+	self->grid.cursor.subline = 0;	
+	self->grid.dy = 0;	
 	self->linenumbers.dy = 0;
 	trackergrid_adjustscroll(&self->grid);
 	ui_component_invalidate(&self->linenumbers.component);
@@ -2788,6 +2905,12 @@ void trackerview_onpatterneditpositionchanged(TrackerView* self, Workspace* send
 			}
 		}
 	}
+}
+
+void trackerview_onskinchanged(TrackerView* self, Workspace* sender,
+	Properties* properties)
+{
+	TrackerViewApplyProperties(self, properties);
 }
 
 void trackerview_onparametertweak(TrackerView* self, Workspace* sender,

@@ -6,8 +6,10 @@
 #include "machineview.h"
 #include "wireview.h"
 #include "skingraphics.h"
+#include "skinio.h"
 #include "resources/resource.h"
 #include <math.h>
+#include <dir.h>
 #include <portable.h>
 
 #define TIMERID_UPDATEVUMETERS 300
@@ -75,6 +77,7 @@ static void machinewireview_readconfig(MachineWireView*);
 static void machinewireview_beforesavesong(MachineWireView*, Workspace*);
 static void machinewireview_showwireview(MachineWireView*, Wire wire);
 static WireFrame* machinewireview_wireframe(MachineWireView* self, Wire wire);
+static void machinewireview_setcoords(MachineWireView*, Properties*);
 
 static void machineview_onshow(MachineView*, ui_component* sender);
 static void machineview_onhide(MachineView*, ui_component* sender);
@@ -82,6 +85,7 @@ static void machineview_onmousedoubleclick(MachineView*, ui_component* sender, i
 static void machineview_onkeydown(MachineView*, ui_component* sender, KeyEvent*);
 static void machineview_onkeyup(MachineView*, ui_component* sender, KeyEvent*);
 static void machineview_onfocus(MachineView*, ui_component* sender);
+static void machineview_onskinchanged(MachineView*, Workspace*, Properties*);
 
 void machineui_init(MachineUi* self, int x, int y, Machine* machine,
 	uintptr_t slot, MachineSkin* skin, Workspace* workspace)
@@ -334,7 +338,8 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 	self->statusbar = 0;
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
-	self->drawvumeters = 1;		
+	self->drawvumeters = 1;	
+	ui_bitmap_init(&self->skin.skinbmp);
 	ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);	
 	table_init(&self->machineuis);	
 	self->wireframes = 0;
@@ -465,6 +470,8 @@ void machinewireview_readconfig(MachineWireView* self)
 
 void machinewireview_applyproperties(MachineWireView* self, Properties* p)
 {
+	const char* machine_skin_name;
+
 	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);
 	self->skin.colour = properties_int(p, "mv_colour", 0x00232323);
 	self->skin.wirecolour = properties_int(p, "mv_wirecolour", 0x005F5F5F);
@@ -491,7 +498,161 @@ void machinewireview_applyproperties(MachineWireView* self, Properties* p)
 		  (((((self->skin.wirecolour&0x00ff))
 			+ ((self->skin.colour&0x00ff)))/2)&0x00ff);
 	ui_component_setbackgroundcolor(&self->component, self->skin.colour);
+	machine_skin_name = properties_readstring(p, "machine_skin",
+		0);	
+	if (machine_skin_name) {
+		char path[_MAX_PATH];
+		char filename[_MAX_PATH];
+
+		strcpy(filename, machine_skin_name);
+		strcat(filename, ".bmp");
+		dir_findfile(workspace_skins_directory(self->workspace),
+			filename, path);
+		if (path[0] != '\0') {
+			ui_bitmap bmp;
+
+			ui_bitmap_init(&bmp);
+			if (ui_bitmap_load(&bmp, path) == 0) {
+				ui_bitmap_dispose(&self->skin.skinbmp);
+				self->skin.skinbmp = bmp; 
+			}
+		}
+		strcpy(filename, machine_skin_name);
+		strcat(filename, ".psm");
+		dir_findfile(workspace_skins_directory(self->workspace),
+			filename, path);
+		if (path[0] != '\0') {
+			Properties* coords;
+
+			coords = properties_create();
+			skin_loadpsh(coords, path);
+			machinewireview_setcoords(self, coords);
+			properties_free(coords);
+		}
+	}
 }
+
+void skincoord_setsource(SkinCoord* coord, int vals[4])
+{
+	coord->srcx = vals[0];
+	coord->srcy = vals[1];
+	coord->srcwidth = vals[2];
+	coord->srcheight = vals[3];
+	coord->destwidth = vals[2];
+	coord->destheight = vals[3];
+}
+
+void skincoord_setdest(SkinCoord* coord, int vals[4])
+{
+	coord->destx = vals[0];
+	coord->desty = vals[1];
+	coord->range = vals[2];
+}
+
+void machinewireview_setcoords(MachineWireView* self, Properties* p)
+{
+	const char* s;
+	int vals[4];	
+	
+	// master
+	if (s = properties_readstring(p, "master_source", 0)) {	
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.master.background, vals);
+	}
+	// generator
+	if (s = properties_readstring(p, "generator_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.generator.background, vals);		
+	}
+	if (s = properties_readstring(p, "generator_vu0_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.generator.vu0, vals);
+	}
+	if (s = properties_readstring(p, "generator_vu_peak_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.generator.vupeak, vals);
+	}
+	if (s = properties_readstring(p, "generator_pan_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.generator.pan, vals);
+	}
+	if (s = properties_readstring(p, "generator_mute_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.generator.mute, vals);		
+	}
+	if (s = properties_readstring(p, "generator_solo_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.generator.solo, vals);
+	}
+	if (s = properties_readstring(p, "generator_vu_dest", 0)) {
+		skin_psh_values(s, 3, vals);
+		skincoord_setdest(&self->skin.generator.vu0, vals);		
+	}
+	if (s = properties_readstring(p, "generator_pan_dest", 0)) {
+		skin_psh_values(s, 3, vals);
+		skincoord_setdest(&self->skin.generator.pan, vals);
+	}
+	if (s = properties_readstring(p, "generator_mute_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		skincoord_setdest(&self->skin.generator.mute, vals);
+	}
+	if (s = properties_readstring(p, "generator_solo_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		skincoord_setdest(&self->skin.generator.solo, vals);
+	}
+	if (s = properties_readstring(p, "generator_name_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		skincoord_setdest(&self->skin.generator.name, vals);
+	}
+	// effect
+	if (s = properties_readstring(p, "effect_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.effect.background, vals);		
+	}
+	if (s = properties_readstring(p, "effect_vu0_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.effect.vu0, vals);
+	}
+	if (s = properties_readstring(p, "effect_vu_peak_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.effect.vupeak, vals);
+	}
+	if (s = properties_readstring(p, "effect_pan_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.effect.pan, vals);
+	}
+	if (s = properties_readstring(p, "effect_mute_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.effect.mute, vals);		
+	}
+	if (s = properties_readstring(p, "effect_bypass_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		skincoord_setsource(&self->skin.effect.bypass, vals);
+	}
+
+	if (s = properties_readstring(p, "effect_vu_dest", 0)) {
+		skin_psh_values(s, 3, vals);
+		skincoord_setdest(&self->skin.effect.vu0, vals);		
+	}
+	if (s = properties_readstring(p, "effect_pan_dest", 0)) {
+		skin_psh_values(s, 3, vals);
+		skincoord_setdest(&self->skin.effect.pan, vals);
+	}
+	if (s = properties_readstring(p, "effect_mute_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		skincoord_setdest(&self->skin.effect.mute, vals);
+	}
+	if (s = properties_readstring(p, "effect_bypass_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		skincoord_setdest(&self->skin.effect.bypass, vals);
+	}
+	if (s = properties_readstring(p, "effect_name_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		skincoord_setdest(&self->skin.effect.name, vals);
+	}
+}
+
+
 
 void machinewireview_ondraw(MachineWireView* self, ui_component* sender, ui_graphics* g)
 {	
@@ -1381,6 +1542,8 @@ void machineview_init(MachineView* self, ui_component* parent,
 	signal_connect(&self->component.signal_keydown, self, machineview_onkeydown);
 	signal_connect(&self->component.signal_keyup, self, machineview_onkeyup);
 	signal_connect(&self->component.signal_focus, self, machineview_onfocus);
+	signal_connect(&self->workspace->signal_skinchanged, self,
+		machineview_onskinchanged);
 }
 
 void machineview_onshow(MachineView* self, ui_component* sender)
@@ -1426,4 +1589,10 @@ void machineview_applyproperties(MachineView* self, Properties* p)
 void machineview_onfocus(MachineView* self, ui_component* sender)
 {
 	ui_component_setfocus(&self->wireview.component);
+}
+
+void machineview_onskinchanged(MachineView* self, Workspace* sender,
+	Properties* properties)
+{	
+	machineview_applyproperties(self, properties);
 }

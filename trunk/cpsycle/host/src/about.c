@@ -9,18 +9,16 @@
 #include <stdio.h>
 #include "resources/resource.h"
 
-static void OnSize(About*, ui_component* sender, ui_size*);
-static void InitButtons(About* self);
-static void OnContributors(About*, ui_component* sender);
-static void OnVersion(About*, ui_component* sender);
-static void OnShowatstartup(About*, ui_component* sender);
-static void Align(About*, ui_component* sender);
-static void OnMouseDoubleClick(About*, ui_component* sender, int x, int y, int button);
+static void about_onsize(About*, ui_component* sender, ui_size*);
+static void about_initbuttons(About* self);
+static void about_oncontributors(About*, ui_component* sender);
+static void about_onversion(About*, ui_component* sender);
+static void about_onshowatstartup(About*, ui_component* sender);
+static void about_align(About*, ui_component* sender);
+static void about_onmousedoubleclick(About*, ui_component* sender, MouseEvent*);
 	
-void InitContrib(Contrib* self, ui_component* parent)
-{
-	ui_margin margin = { 0, 3, 0, 0 };
-
+void contrib_init(Contrib* self, ui_component* parent)
+{	
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
 	ui_edit_init(&self->contrib, &self->component, 
@@ -75,18 +73,18 @@ void InitContrib(Contrib* self, ui_component* parent)
 	ui_component_resize(&self->sourceforge.component, 0, 20);
 	ui_component_resize(&self->steincopyright.component, 0, 20);
 	{
-		List* p;
-		List* q;
-		for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next)
-		{
-			ui_component_setalign((ui_component*)p->entry, UI_ALIGN_TOP);			
-			ui_component_setmargin((ui_component*)p->entry, &margin);
-		}
-		list_free(q);
+		ui_margin margin;
+
+		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makeeh(0.5), ui_value_makepx(0));
+		list_free(ui_components_setalign(
+			ui_component_children(&self->component, 0),
+			UI_ALIGN_TOP,
+			&margin));				
 	}
 }
 
-void InitVersion(Version* self, ui_component* parent)
+void version_init(Version* self, ui_component* parent)
 {
 	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->versioninfo, &self->component);
@@ -96,35 +94,37 @@ void InitVersion(Version* self, ui_component* parent)
 	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
 
-void InitAbout(About* self, ui_component* parent)
+void about_init(About* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_size, self, OnSize);	
-	InitButtons(self);
+	signal_connect(&self->component.signal_size, self, about_onsize);
+	about_initbuttons(self);
 	ui_notebook_init(&self->notebook, &self->component);
 	ui_image_init(&self->image, &self->notebook.component);	
 	self->image.component.preventdefault = 0;
 	ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
-	InitContrib(&self->contrib, &self->notebook.component);
-	InitVersion(&self->version, &self->notebook.component);		
+	contrib_init(&self->contrib, &self->notebook.component);
+	version_init(&self->version, &self->notebook.component);		
 	ui_notebook_setpageindex(&self->notebook, 0);
 	signal_connect(&self->component.signal_mousedoubleclick, self,
-		OnMouseDoubleClick);
+		about_onmousedoubleclick);
 }
 
-void InitButtons(About* self)
+void about_initbuttons(About* self)
 {
 	ui_button_init(&self->contribbutton, &self->component);
 	ui_button_settext(&self->contribbutton, "Contributors / Credits");
-	signal_connect(&self->contribbutton.signal_clicked, self, OnContributors);
+	signal_connect(&self->contribbutton.signal_clicked, self,
+		about_oncontributors);
 	ui_button_init(&self->versionbutton, &self->component);
 	ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
-	signal_connect(&self->versionbutton.signal_clicked, self, OnVersion);
+	signal_connect(&self->versionbutton.signal_clicked, self,
+		about_onversion);
 	ui_button_init(&self->okbutton, &self->component);
 	ui_button_settext(&self->okbutton, "OK");	
 }
 
-void Align(About* self, ui_component* sender)
+void about_align(About* self, ui_component* sender)
 {
 	ui_size size;
 	int centerx;
@@ -133,40 +133,40 @@ void Align(About* self, ui_component* sender)
 	size = ui_component_size(&self->component);
 	centerx = (size.width - 500) / 2;	
 	centery = (size.height - 385) / 2;
-	ui_component_setposition(&self->notebook.component, centerx, centery + 5, 520, 360);	
+	ui_component_setposition(&self->notebook.component,
+		centerx, centery + 5, 520, 360);	
 	if (centery + 365 > size.height - 25) {
 		centery = size.height - 365 - 25;
 	}
-	ui_component_setposition(&self->contribbutton.component, centerx, centery + 365, 120, 20);
-	ui_component_setposition(&self->versionbutton.component, centerx + 145, centery + 365, 300, 20);
+	ui_component_setposition(&self->contribbutton.component,
+		centerx, centery + 365, 120, 20);
+	ui_component_setposition(&self->versionbutton.component,
+		centerx + 145, centery + 365, 300, 20);
 	ui_component_setposition(&self->okbutton.component,
-		centerx + 445,
-		centery + 365,
-		60,
-		20);
+		centerx + 445, centery + 365, 60, 20);
 }
 
-void OnSize(About* self, ui_component* sender, ui_size* size)
+void about_onsize(About* self, ui_component* sender, ui_size* size)
 {	
-	Align(self, &self->component);
+	about_align(self, &self->component);
 }
 
-void OnContributors(About* self, ui_component* sender) 
+void about_oncontributors(About* self, ui_component* sender) 
 {	
 	ui_notebook_setpageindex(&self->notebook, 
 		ui_notebook_pageindex(&self->notebook) != 1 ? 1 : 0);
 	ui_component_invalidate(&self->component);
 }
 
-void OnVersion(About* self, ui_component* sender) 
+void about_onversion(About* self, ui_component* sender) 
 {	
 	ui_notebook_setpageindex(&self->notebook, 
 		ui_notebook_pageindex(&self->notebook) != 2 ? 2 : 0);
 	ui_component_invalidate(&self->component);
 }
 
-void OnMouseDoubleClick(About* self, ui_component* sender, int x, int y, int button)
+void about_onmousedoubleclick(About* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	signal_emit(&self->okbutton.signal_clicked, self, 0);
 }
-

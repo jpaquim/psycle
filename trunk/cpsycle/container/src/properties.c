@@ -596,12 +596,14 @@ Properties* tail(Properties* self)
 
 Properties* append(Properties* self, Properties* p)
 {	
-	if (self->children) {
-		tail(self->children)->next = p;		
-	} else {
-		self->children = p;
+	if (self) {
+		if (self->children) {
+			tail(self->children)->next = p;		
+		} else {
+			self->children = p;
+		}
+		p->parent = self;
 	}
-	p->parent = self;
 	return p;
 }
 

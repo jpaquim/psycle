@@ -15,7 +15,7 @@ void InitHelpView(HelpView* self, ui_component* parent,
 	ui_component_enablealign(&self->component);
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);	
-	InitAbout(&self->about, &self->notebook.component);
+	about_init(&self->about, &self->notebook.component);
 	greet_init(&self->greet, &self->notebook.component);
 	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);

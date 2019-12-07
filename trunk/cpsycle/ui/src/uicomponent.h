@@ -175,13 +175,13 @@ ui_textmetric ui_component_textmetric(ui_component*);
 ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
 void ui_component_seticonressource(ui_component*, int ressourceid);
 
-List* ui_components_setalign(List*, UiAlignType align, const ui_margin* margin);
-List* ui_components_setmargin(List* list, const ui_margin* margin);
+List* ui_components_setalign(List*, UiAlignType, const ui_margin*);
+List* ui_components_setmargin(List*, const ui_margin*);
 
 int ui_openfile(ui_component* self, char* title, char* filter,
-	char* defextension, char* filename);
+	char* defextension, const char* szInitialDir, char* filename);
 int ui_savefile(ui_component* self, char* title, char* filter,
-	char* defextension, char* filename);
+	char* defextension, const char* szInitialDir, char* filename);
 int ui_browsefolder(ui_component* self, const char* title, char* path);
 
 ui_component* ui_maincomponent(void);

@@ -53,7 +53,7 @@ void player_init(Player* self, Song* song, void* handle)
 	sequencer_init(&self->sequencer, &song->sequence, &song->machines);
 	mainframe = handle;
 	player_initdriver(self);	
-	eventdrivers_init(&self->eventdrivers, self, workeventinput, handle);
+	eventdrivers_init(&self->eventdrivers, handle);
 	signal_connect(&self->eventdrivers.signal_input, self,
 		player_eventdriverinput);
 	player_initsignals(self);
@@ -502,9 +502,11 @@ void player_reloaddriver(Player* self, const char* path)
 
 void player_restartdriver(Player* self)
 {	
-	self->driver->close(self->driver);	
-	self->driver->configure(self->driver);
-	self->driver->open(self->driver);	
+	if (self->driver) {
+		self->driver->close(self->driver);	
+		self->driver->configure(self->driver);
+		self->driver->open(self->driver);
+	}
 }
 
 // Event Recording

@@ -357,7 +357,7 @@ SequencePosition sequence_at(Sequence* self, unsigned int trackindex,
 	return rv;
 }
 
-List* sequence_at_offset(Sequence* self, SequenceTracks* tracknode, beat_t offset)
+List* sequenceentry_at_offset(Sequence* self, SequenceTracks* tracknode, beat_t offset)
 {
 	beat_t curroffset = 0.0f;	
 	List* p = 0;
@@ -385,7 +385,21 @@ List* sequence_at_offset(Sequence* self, SequenceTracks* tracknode, beat_t offse
 
 SequenceTrackIterator sequence_begin(Sequence* self, List* track, beat_t pos)
 {		
-	return sequence_makeiterator(self, sequence_at_offset(self, track, pos));	
+	SequenceTrackIterator rv;		
+	SequenceEntry* entry;	
+
+	rv.patterns = self->patterns;
+	rv.tracknode = sequenceentry_at_offset(self, track, pos);
+	if (rv.tracknode) {
+		Pattern* pattern;
+
+		entry = (SequenceEntry*) rv.tracknode->entry;
+		pattern = patterns_at(self->patterns, entry->pattern);
+		rv.patternnode = pattern_greaterequal(pattern, pos - entry->offset);
+	} else {
+		rv.patternnode = 0;
+	}
+	return rv;	
 }
 
 void sequencetrackiterator_inc(SequenceTrackIterator* self)
