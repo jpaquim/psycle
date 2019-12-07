@@ -5,25 +5,31 @@
 
 #include "wavebox.h"
 
-static void OnDraw(WaveBox*, ui_component* sender, ui_graphics*);
-static void OnDestroy(WaveBox*, ui_component* sender);
-static void OnMouseDown(WaveBox*, ui_component* sender, MouseEvent*);
+static void wavebox_ondraw(WaveBox*, ui_component* sender, ui_graphics*);
+static void wavebox_ondestroy(WaveBox*, ui_component* sender);
+static void wavebox_onmousedown(WaveBox*, ui_component* sender, MouseEvent*);
 
-
-void InitWaveBox(WaveBox* self, ui_component* parent)
+void wavebox_init(WaveBox* self, ui_component* parent)
 {			
 	self->sample = 0;
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	signal_connect(&self->component.signal_draw, self, wavebox_ondraw);
+	signal_connect(&self->component.signal_destroy, self, wavebox_ondestroy);
+	signal_connect(&self->component.signal_mousedown, self,
+		wavebox_onmousedown);
 }
 
-void OnDestroy(WaveBox* self, ui_component* sender)
+void wavebox_ondestroy(WaveBox* self, ui_component* sender)
 {		
 }
 
-void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g)
+void wavebox_setsample(WaveBox* self, Sample* sample)
+{
+	self->sample = sample;
+	ui_component_invalidate(&self->component);
+}
+
+void wavebox_ondraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 {	
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);	
@@ -42,17 +48,19 @@ void OnDraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 		int x;
 		int centery = size.height / 2;
 		float offsetstep;
+		amp_t scaley;
 
+		scaley = (size.height / 2) / (amp_t)32768;		
 		offsetstep = (float) self->sample->numframes / size.width;
 		for (x = 0; x < size.width; ++x) {			
 			int frame = (int)(offsetstep * x);
 			float framevalue = self->sample->channels.samples[0][frame];
-			ui_drawline(g, x, centery, x, (int) (centery + framevalue / 1000));
+			ui_drawline(g, x, centery, x, centery + (int)(framevalue * scaley));
 		}
 	}
 }
 
-void OnMouseDown(WaveBox* self, ui_component* sender, MouseEvent* mouseevent)
+void wavebox_onmousedown(WaveBox* self, ui_component* sender, MouseEvent* ev)
 {
 }
 

@@ -5,11 +5,10 @@
 #define ABOUT_H
 
 #include <uibutton.h>
-#include <uilabel.h>
 #include <uiedit.h>
-#include <uinotebook.h>
 #include <uiimage.h>
-
+#include <uilabel.h>
+#include <uinotebook.h>
 
 typedef struct {	
 	ui_component component;		
@@ -21,14 +20,14 @@ typedef struct {
 	ui_edit	contrib;	
 } Contrib;
 
-void InitContrib(Contrib*, ui_component* parent);
+void contrib_init(Contrib*, ui_component* parent);
 
 typedef struct {
 	ui_component component;
 	ui_label versioninfo;
 } Version;
 
-void InitVersion(Version*, ui_component* parent);
+void version_init(Version*, ui_component* parent);
 
 typedef struct {	
 	ui_component component;
@@ -41,6 +40,6 @@ typedef struct {
 	ui_button okbutton;		
 } About;
 
-void InitAbout(About*, ui_component* parent);		
+void about_init(About*, ui_component* parent);
 
 #endif

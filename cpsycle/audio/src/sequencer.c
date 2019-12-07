@@ -178,7 +178,7 @@ void makecurrtracks(Sequencer* self, beat_t offset)
 		track = malloc(sizeof(SequencerTrack));		
 		track->iterator =
 			(SequenceTrackIterator*)malloc(sizeof(SequenceTrackIterator));
-		*track->iterator = sequence_begin(self->sequence, p, offset);
+		*track->iterator = sequence_begin(self->sequence, p, offset);		
 		track->state.jump = 0;
 		track->state.jumpat = 0;
 		track->state.jumpto = 0;

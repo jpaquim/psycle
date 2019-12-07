@@ -15,12 +15,14 @@ typedef struct Instruments {
 	Table container;
 	uintptr_t slot;
 	Signal signal_insert;
+	Signal signal_removed;
 	Signal signal_slotchange;
 } Instruments;
 
 void instruments_init(Instruments*);
 void instruments_dispose(Instruments*);
 void instruments_insert(Instruments*, Instrument*, uintptr_t slot);
+void instruments_remove(Instruments*, uintptr_t slot);
 void instruments_changeslot(Instruments*, uintptr_t slot);
 uintptr_t instruments_slot(Instruments*);
 Instrument* instruments_at(Instruments*, uintptr_t slot);

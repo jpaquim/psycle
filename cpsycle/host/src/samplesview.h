@@ -25,7 +25,6 @@ typedef struct {
 	ui_edit nameedit;
 	ui_button prevbutton;
 	ui_button nextbutton;
-	ui_button deletebutton;
 	ui_label srlabel;
 	ui_edit sredit;
 	ui_label numsamplesheaderlabel;
@@ -115,8 +114,8 @@ typedef struct SamplesView {
 	ui_component loop;
 	SamplesWaveLoopView waveloop;
 	ui_button waveeditorbutton;
-	WaveBox wavebox;
-	Player* player;	
+	WaveBox wavebox;	
+	Workspace* workspace;
 } SamplesView;
 
 void samplesview_init(SamplesView*, ui_component* parent,

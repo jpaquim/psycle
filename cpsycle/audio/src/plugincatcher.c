@@ -133,12 +133,12 @@ void plugincatcher_scan(PluginCatcher* self)
 
 	plugincatcher_clear(self);
 	if (self->dirconfig) {
-		p = properties_findsection(self->dirconfig, "plugin");
+		p = properties_findsection(self->dirconfig, "plugins");
 		if (p) {		
 			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_PLUGIN,
 				onenumdir);
 		}
-		p = properties_findsection(self->dirconfig, "vst");
+		p = properties_findsection(self->dirconfig, "vsts32");
 		if (p) {		
 			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_VST,
 				onenumdir);

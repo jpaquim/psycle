@@ -23,8 +23,6 @@ typedef struct {
 
 static void driver_free(EventDriver*);
 static int driver_init(EventDriver*);
-static void driver_connect(EventDriver*, void* context, EVENTDRIVERWORKFN,
-	void* handle);
 static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
@@ -63,7 +61,6 @@ EXPORT EventDriver* __cdecl eventdriver_create(void)
 	mme->deviceid = DEVICE_NONE;
 	mme->driver.open = driver_open;
 	mme->driver.free = driver_free;
-	mme->driver.connect = driver_connect;
 	mme->driver.open = driver_open;
 	mme->driver.close = driver_close;
 	mme->driver.dispose = driver_dispose;
@@ -72,8 +69,7 @@ EXPORT EventDriver* __cdecl eventdriver_create(void)
 	mme->driver.cmd = driver_cmd;
 	mme->driver.getcmd = driver_getcmd;
 	mme->driver.setcmddef = setcmddef;
-	mme->hEvent = CreateEvent
-		(NULL, FALSE, FALSE, NULL);
+	mme->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	driver_init(&mme->driver);
 	return &mme->driver;
 }

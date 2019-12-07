@@ -566,10 +566,90 @@ void skin_load(Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				properties_append_int(properties, "generator_font_point", _httoi(q+1), 0, 0);	
+				properties_append_int(properties, "generator_font_point", _httoi(q+1), 0, 0);
 				properties_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
 			}
 		}
 	}
 	fclose(hfile);
+}
+
+void skin_loadpsh(Properties* properties, const char* path)
+{
+	char buf[1 << 10];
+	int loaded = 0;
+	FILE* hfile;	
+
+	if ((hfile=fopen(path,"rw")) == NULL )
+	{
+//		MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
+		return;
+	}
+	while(fgets(buf, sizeof buf, hfile))
+	{
+		char* equal;
+
+		if(buf[0] == '#' || (buf[0] == '/' && buf[1] == '/') || buf[0] == '\n')
+		{ 
+			// Skip comments
+			continue;
+		} 
+		equal = strchr(buf,'=');
+		if (equal != NULL)
+		{
+			char key[512];
+			char* value;
+			int length;
+
+			equal[0]='\0';
+			//Skip the double quotes containing strings			
+			if(buf[0] == '"')
+			{
+				char *tmp = equal-1;
+				tmp[0]='\0';
+				tmp = buf+1;
+				strcpy(key, tmp);
+			} else { strcpy(key, buf);	}
+
+			value = &equal[1];
+			length = strlen(value);
+			if(value[0] == '"')
+			{
+				length-=2;
+				value++;
+				value[length-1]='\0';
+			}
+			else {
+				//skip the "dword:"  and "hex:" keywords
+				char* twodots = strchr(value,':');
+				if(twodots != NULL) {
+					value =  &twodots[1];
+				}
+			}			
+			properties_append_string(properties, key, value);			
+			loaded = 1;
+		}
+	}
+	if(!loaded)
+	{
+		MessageBox(0, "No settings found in the specified file",
+			"File Load Error", MB_ICONERROR | MB_OK);		
+	}
+	fclose(hfile);
+}
+
+void skin_psh_values(const char* str, int maxcount, int* values)
+{
+	char s[512];
+	char* token;
+	int c = 0;
+
+	strcpy(s, str);
+	token = strtok(s, ",");	
+	while (token != 0 && (c < maxcount)) {
+		values[c] = atoi(token);
+		token = strtok(NULL, ",");
+		++c;
+	}
+
 }

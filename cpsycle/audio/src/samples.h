@@ -16,6 +16,7 @@ typedef struct Samples {
 void samples_init(Samples*);
 void samples_dispose(Samples*);
 void samples_insert(Samples*, Sample* sample, uintptr_t slot);
+void samples_remove(Samples*, uintptr_t slot);
 Sample* samples_at(Samples*, uintptr_t slot);
 uintptr_t samples_size(Samples*);
 

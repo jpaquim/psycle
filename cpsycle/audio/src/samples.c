@@ -31,6 +31,18 @@ void samples_insert(Samples* self, Sample* sample, uintptr_t slot)
 	table_insert(&self->container, slot, sample);
 }
 
+void samples_remove(Samples* self, uintptr_t slot)
+{
+	Sample* sample;
+	
+	sample = samples_at(self, slot);
+	if (sample) {
+		table_remove(&self->container, slot);
+		sample_dispose(sample);
+		free(sample);
+	}
+}
+
 Sample* samples_at(Samples* self, uintptr_t slot)
 {
 	return table_at(&self->container, slot);

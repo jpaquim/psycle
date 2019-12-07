@@ -4,19 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "mainframe.h"
-#include <uimenu.h>
-#include <uiedit.h>
-#include <uibutton.h>
-#include <uilabel.h>
-#include "settingsview.h"
-#include "cmdsnotes.h"
-#include "skinio.h"
-#include "inputmap.h"
-#include <uiapp.h>
-#include <dir.h>
-#include <portable.h>
-#include "resources/resource.h"
 #include "cmdsgeneral.h"
+#include "settingsview.h"
+#include "resources/resource.h"
+
+#include <portable.h>
+#include <dir.h>
+#include <uiapp.h>
 
 #define TIMERID_MAINFRAME 20
 
@@ -27,10 +21,8 @@ static void mainframe_initvubar(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame* self);
 static void mainframe_destroy(MainFrame*, ui_component* component);
-static void mainframe_onkeydown(MainFrame*, ui_component* component,
-	KeyEvent*);
-static void mainframe_onkeyup(MainFrame*, ui_component* component,
-	KeyEvent*);
+static void mainframe_onkeydown(MainFrame*, ui_component* sender, KeyEvent*);
+static void mainframe_onkeyup(MainFrame*, ui_component* sender, KeyEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry* entry);
 static void mainframe_onalign(MainFrame*, ui_component* sender);
 static void mainframe_onmousedown(MainFrame*, ui_component* sender,
@@ -51,19 +43,17 @@ static void mainframe_onmouseentersplitbar(MainFrame*, ui_component* sender);
 static void mainframe_onmouseleavesplitbar(MainFrame*, ui_component* sender);
 static void mainframe_onsongchanged(MainFrame*, ui_component* sender,
 	int flag);
-static void mainframe_onsongloadprogress(MainFrame*, Workspace*,
-	int progress);
+static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
-static void mainframe_onviewselected(MainFrame*, Workspace*,
-	int view);
+static void mainframe_onviewselected(MainFrame*, Workspace*, int view);
 static void mainframe_onrender(MainFrame*, ui_component* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, ui_component* sender, int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, EventDriver* sender);
 
-HWND hwndmain;
+#define GEARVIEW 10
 
 enum {
 	TABPAGE_MACHINEVIEW		= 0,
@@ -73,7 +63,7 @@ enum {
 	TABPAGE_PROPERTIESVIEW	= 4,
 	TABPAGE_SETTINGSVIEW	= 5,
 	TABPAGE_HELPVIEW		= 6,
-	TABPAGE_RENDERVIEW		= 7,
+	TABPAGE_RENDERVIEW		= 7
 };
 
 void mainframe_init(MainFrame* self)
@@ -464,25 +454,14 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 	}
 }
 
-void mainframe_onkeydown(MainFrame* self, ui_component* component, KeyEvent* keyevent)
+void mainframe_onkeydown(MainFrame* self, ui_component* sender, KeyEvent* ev)
 {	
-//	if (keyevent->keycode == VK_F4) {
-//		Properties* properties;
-//		
-//		properties = properties_create();		
-//		skin_load(properties, "old Psycle.psv");
-//		TrackerViewApplyProperties(&self->patternview.trackerview, properties);
-//		machineview_applyproperties(&self->machineview, properties);
-//		properties_free(properties);
-//	} else 
-	if (keyevent->keycode != VK_CONTROL &&
-		keyevent->keycode != VK_SHIFT) {
+	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
 		EventDriver* kbd;
 		int input;			
 			
-		input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
-			GetKeyState(VK_CONTROL) < 0);						
 		kbd = workspace_kbddriver(&self->workspace);
+		input = encodeinput(ev->keycode, ev->shift, ev->ctrl);
 		kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);			
 	}
 }
@@ -643,7 +622,7 @@ void mainframe_onaboutok(MainFrame* self, ui_component* sender)
 
 void mainframe_ongearcreate(MainFrame* self, ui_component* sender)
 {
-	self->machineview.newmachine.pluginsview.calledby = 10;
+	self->machineview.newmachine.pluginsview.calledby = GEARVIEW;
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	tabbar_select(&self->machineview.tabbar, 1);
 }
@@ -676,7 +655,7 @@ void mainframe_ontimer(MainFrame* self, ui_component* sender, int timerid)
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view)
 {
-	if (view != 10) {
+	if (view != GEARVIEW) {
 		tabbar_select(&self->tabbar, view);
 	}
 }

@@ -5,12 +5,19 @@
 
 #include "workspace.h"
 #include "cmdproperties.h"
+#include "skinio.h"
 #include <exclusivelock.h>
 #include <stdlib.h>
 #include <string.h>
 #include <songio.h>
 #include <portable.h>
 #include <operations.h>
+
+#define PSYCLE_SONGS_DEFAULT_DIR "C:\\Programme\\Psycle\\Songs"
+#define PSYCLE_PLUGINS_DEFAULT_DIR "C:\\Programme\\Psycle\\PsyclePlugins"
+#define PSYCLE_VSTS32_DEFAULT_DIR "C:\\Programme\\Psycle\\VstPlugins"
+#define PSYCLE_VSTS64_DEFAULT_DIR "C:\\Programme\\Psycle\\Vst64Plugins"
+#define PSYCLE_SKINS_DEFAULT_DIR "C:\\Programme\\Psycle\\Skins"
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -150,6 +157,7 @@ void workspace_initsignals(Workspace* self)
 	signal_init(&self->signal_octavechanged);
 	signal_init(&self->signal_songchanged);
 	signal_init(&self->signal_configchanged);
+	signal_init(&self->signal_skinchanged);
 	signal_init(&self->signal_patterneditpositionchanged);
 	signal_init(&self->signal_sequenceselectionchanged);
 	signal_init(&self->signal_loadprogress);
@@ -190,6 +198,7 @@ void workspace_disposesignals(Workspace* self)
 	signal_dispose(&self->signal_octavechanged);
 	signal_dispose(&self->signal_songchanged);
 	signal_dispose(&self->signal_configchanged);
+	signal_dispose(&self->signal_skinchanged);
 	signal_dispose(&self->signal_patterneditpositionchanged);
 	signal_dispose(&self->signal_sequenceselectionchanged);
 	signal_dispose(&self->signal_loadprogress);
@@ -213,7 +222,6 @@ void workspace_disposesequencepaste(Workspace* self)
 	list_free(self->sequencepaste);
 	self->sequencepaste = 0;
 }
-
 
 void workspace_initplayer(Workspace* self)
 {
@@ -348,12 +356,15 @@ void workspace_makegeneral(Workspace* self)
 void workspace_makevisual(Workspace* self)
 {
 	Properties* visual;
-	Properties* p;
-	// Visual
+	
 	visual = properties_createsection(self->config, "visual");	
 	properties_settext(visual, "Visual");
-	p = properties_append_int(visual, "defaultfontsize", 80, 0, 999);
-	properties_settext(p, "Default font size");
+	properties_settext(
+		properties_append_action(visual, "loadskin"),
+		"Load Skin");
+	properties_settext(
+		properties_append_int(visual, "defaultfontsize", 80, 0, 999),
+		"Default font size");	
 	workspace_makepatternview(self, visual);
 	workspace_makemachineview(self, visual);
 }
@@ -432,23 +443,37 @@ void workspace_makedirectories(Workspace* self)
 	properties_sethint(properties_settext(
 		properties_append_string(
 			self->directories,
-			"song",
-			"C:\\Programme\\Psycle\\Songs"),
+			"songs",
+			PSYCLE_SONGS_DEFAULT_DIR),
 		"Song directory"),
 		PROPERTY_HINT_EDITDIR);
 	properties_sethint(properties_settext(
 		properties_append_string(
 			self->directories,
-			"plugin",
-			"C:\\Programme\\Psycle\\PsyclePlugins"),
+			"plugins",
+			PSYCLE_PLUGINS_DEFAULT_DIR),
 		"Plug-in directory"),
 		PROPERTY_HINT_EDITDIR);
 	properties_sethint(properties_settext(
 		properties_append_string(
 			self->directories,
-			"vst",			
-			"C:\\Programme\\Psycle\\VstPlugins"),
+			"vsts32",			
+			PSYCLE_VSTS32_DEFAULT_DIR),
 		"VST directories"),
+		PROPERTY_HINT_EDITDIR);
+	properties_sethint(properties_settext(
+		properties_append_string(
+			self->directories,
+			"vsts64",			
+			PSYCLE_VSTS64_DEFAULT_DIR),
+		"VST directories"),
+		PROPERTY_HINT_EDITDIR);
+	properties_sethint(properties_settext(
+		properties_append_string(
+			self->directories,
+			"skin",			
+			"C:\\Programme\\Psycle\\Skins"),
+		"Skin directory"),
 		PROPERTY_HINT_EDITDIR);
 }
 
@@ -575,6 +600,17 @@ void workspace_configchanged(Workspace* self, Properties* property,
 	Properties* choice)
 {
 	if (properties_type(property) == PROPERTY_TYP_ACTION) {
+		if (strcmp(properties_key(property), "loadskin") == 0) {
+			char path[MAX_PATH]	 = "";
+			char title[MAX_PATH] = ""; 					
+			static char filter[] = "Psycle Display Presets\0*.psv\0";
+			char  defaultextension[] = "PSV";			
+			
+			if (ui_openfile(self->mainhandle, title, filter, defaultextension,
+					workspace_skins_directory(self), path)) {
+				workspace_loadskin(self, path);						
+			}
+		} else
 		if (strcmp(properties_key(property), "addeventdriver") == 0) {
 			Properties* p;
 
@@ -765,6 +801,16 @@ void workspace_savesong(Workspace* self, const char* path)
 	signal_emit(&self->signal_beforesavesong, self, 0);
 	songfile.workspaceproperties = self->properties;
 	songfile_save(&songfile, path);
+}
+
+void workspace_loadskin(Workspace* self, const char* path)
+{
+	Properties* properties;
+		
+	properties = properties_create();		
+	skin_load(properties, path);
+	signal_emit(&self->signal_skinchanged, self, 1, properties);	
+	properties_free(properties);
 }
 
 Properties* workspace_makeproperties(Workspace* self)
@@ -1116,4 +1162,34 @@ void workspace_updatenavigation(Workspace* self)
 		workspace_setsequenceselection(self, self->sequenceselection);
 	}
 	self->navigating = 0;
+}
+
+const char* workspace_songs_directory(Workspace* self)
+{
+	return properties_readstring(self->directories, "songs",
+		PSYCLE_SONGS_DEFAULT_DIR);
+}
+
+const char* workspace_plugins_directory(Workspace* self)
+{
+	return properties_readstring(self->directories, "plugins",
+		PSYCLE_PLUGINS_DEFAULT_DIR);
+}
+
+const char* workspace_vsts32_directory(Workspace* self)
+{
+	return properties_readstring(self->directories, "vsts32",
+		PSYCLE_VSTS32_DEFAULT_DIR);
+}
+
+const char* workspace_vsts64_directory(Workspace* self)
+{
+	return properties_readstring(self->directories, "vsts64",
+		PSYCLE_VSTS64_DEFAULT_DIR);
+}
+
+const char* workspace_skins_directory(Workspace* self)
+{
+	return properties_readstring(self->directories, "skins",
+		PSYCLE_SKINS_DEFAULT_DIR);
 }

@@ -12,6 +12,7 @@ static int driver_init(Driver*);
 static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
 static int driver_open(Driver*);
+static void driver_configure(Driver*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
 static unsigned int samplerate(Driver*);
@@ -39,6 +40,7 @@ int driver_init(Driver* driver)
 	driver->open = driver_open;
 	driver->close = driver_close;
 	driver->dispose = driver_dispose;
+	driver->configure = driver_configure;
 	driver->samplerate = samplerate;
 	init_properties(driver);
 	return 0;
@@ -66,6 +68,11 @@ int driver_open(Driver* driver)
 int driver_close(Driver* driver)
 {
 	return 0;
+}
+
+void driver_configure(Driver* driver)
+{
+
 }
 
 unsigned int samplerate(Driver* self)

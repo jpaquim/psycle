@@ -10,6 +10,7 @@
 static void BuildSampleList(SamplesBox* self);
 static void AddString(SamplesBox* self, const char* text);
 static void OnInstrumentInsert(SamplesBox* self, ui_component* sender, int slot);
+static void OnInstrumentRemoved(SamplesBox* self, ui_component* sender, int slot);
 static void OnSampleListChanged(SamplesBox* self, ui_component* sender,
 	int slot);
 
@@ -57,6 +58,12 @@ void OnInstrumentInsert(SamplesBox* self, ui_component* sender, int slot)
 	ui_listbox_setcursel(&self->samplelist, slot);		
 }
 
+void OnInstrumentRemoved(SamplesBox* self, ui_component* sender, int slot)
+{
+	BuildSampleList(self);
+	ui_listbox_setcursel(&self->samplelist, slot);		
+}
+
 void OnInstrumentsSlotChanged(SamplesBox* self, Instrument* sender, int slot)
 {
 	ui_listbox_setcursel(&self->samplelist, slot);	
@@ -68,7 +75,8 @@ void samplesbox_setsamples(SamplesBox* self, Samples* samples, Instruments* inst
 	self->instruments = instruments;
 	BuildSampleList(self);
 	if (self->instruments) {
-		signal_connect(&instruments->signal_insert, self, OnInstrumentInsert);	
+		signal_connect(&instruments->signal_insert, self, OnInstrumentInsert);
+		signal_connect(&instruments->signal_removed, self, OnInstrumentRemoved);
 		signal_connect(&instruments->signal_slotchange, self, OnInstrumentsSlotChanged);
 	}
 }
