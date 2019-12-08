@@ -10,6 +10,7 @@
 #include <uiedit.h>
 #include <uilabel.h>
 #include "samplesbox.h"
+#include "sampleeditor.h"
 #include <uislider.h>
 #include "wavebox.h"
 #include "tabbar.h"
@@ -74,7 +75,6 @@ typedef struct {
 typedef struct {
 	ui_component component;
 	ui_button loadbutton;
-	ui_button importbutton;
 	ui_button savebutton;
 	ui_button duplicatebutton;
 	ui_button deletebutton;
@@ -98,6 +98,7 @@ typedef struct {
 
 typedef struct SamplesView {
 	ui_component component;	
+	TabBar clienttabbar;
 	ui_notebook clientnotebook;
 	ui_component mainview;
 	ui_component importview;
@@ -107,13 +108,13 @@ typedef struct SamplesView {
 	SamplesViewButtons buttons;	
 	ui_component client;
 	SamplesSongImportView songimport;
+	SampleEditor sampleeditor;
 	SamplesHeaderView header;
 	TabBar tabbar;
 	SamplesGeneralView general;
 	SamplesVibratoView vibrato;
 	ui_component loop;
-	SamplesWaveLoopView waveloop;
-	ui_button waveeditorbutton;
+	SamplesWaveLoopView waveloop;	
 	WaveBox wavebox;	
 	Workspace* workspace;
 } SamplesView;

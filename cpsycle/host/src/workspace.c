@@ -18,6 +18,7 @@
 #define PSYCLE_VSTS32_DEFAULT_DIR "C:\\Programme\\Psycle\\VstPlugins"
 #define PSYCLE_VSTS64_DEFAULT_DIR "C:\\Programme\\Psycle\\Vst64Plugins"
 #define PSYCLE_SKINS_DEFAULT_DIR "C:\\Programme\\Psycle\\Skins"
+#define PSYCLE_DOC_DEFAULT_DIR "C:\\Programme\\Psycle\\Docs"
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -1192,4 +1193,10 @@ const char* workspace_skins_directory(Workspace* self)
 {
 	return properties_readstring(self->directories, "skins",
 		PSYCLE_SKINS_DEFAULT_DIR);
+}
+
+const char* workspace_doc_directory(Workspace* self)
+{
+	return properties_readstring(self->directories, "skins",
+		PSYCLE_DOC_DEFAULT_DIR);
 }

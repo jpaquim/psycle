@@ -136,6 +136,10 @@ SOURCE=.\src\greet.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\help.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\helpview.c
 # End Source File
 # Begin Source File
@@ -225,6 +229,10 @@ SOURCE=.\src\renderview.c
 # Begin Source File
 
 SOURCE=.\src\resources\resource.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sampleeditor.c
 # End Source File
 # Begin Source File
 
@@ -384,6 +392,10 @@ SOURCE=.\src\greet.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\help.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\helpview.h
 # End Source File
 # Begin Source File
@@ -469,6 +481,10 @@ SOURCE=.\src\renderview.h
 # Begin Source File
 
 SOURCE=.\src\resources\resource.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sampleeditor.h
 # End Source File
 # Begin Source File
 

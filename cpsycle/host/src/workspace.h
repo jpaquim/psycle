@@ -143,5 +143,6 @@ const char* workspace_plugins_directory(Workspace*);
 const char* workspace_vsts32_directory(Workspace*);
 const char* workspace_vsts64_directory(Workspace*);
 const char* workspace_skins_directory(Workspace*);
+const char* workspace_doc_directory(Workspace*);
 
 #endif

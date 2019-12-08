@@ -8,39 +8,41 @@
 #include "inputmap.h"
 #include <portable.h>
 
-static void OnDraw(SettingsView*, ui_component* sender, ui_graphics*);
-static int OnPropertiesDrawEnum(SettingsView*, Properties*, int level);
-static int OnPropertiesHitTestEnum(SettingsView*, Properties*, int level);
-static int OnEnumPropertyPosition(SettingsView*, Properties*, int level);
-static void PreparePropertiesEnum(SettingsView* self);
-static void OnKeyDown(SettingsView*, ui_component* sender, KeyEvent*);
-static void OnMouseDown(SettingsView*, ui_component* sender, MouseEvent*);
-static void OnMouseDoubleClick(SettingsView*, ui_component* sender, MouseEvent*);
-static void OnEditChange(SettingsView*, ui_edit* sender);
-static void OnEditKeyDown(SettingsView*, ui_component* sender, KeyEvent*);
-static void OnInputDefinerChange(SettingsView* self, InputDefiner* sender);
-static void OnDestroy(SettingsView*, ui_component* sender);
-static void OnSize(SettingsView*, ui_component* sender, ui_size*);
-static void OnScroll(SettingsView*, ui_component* sender, int stepx, int stepy);
-static void DrawLineBackground(SettingsView*,Properties*);
-static void DrawKey(SettingsView*, Properties*, int column);
-static void DrawValue(SettingsView*, Properties*, int column);
-static void DrawString(SettingsView*, Properties*, int column);
-static void DrawInteger(SettingsView*, Properties*, int column);
-static void DrawButton(SettingsView*, Properties*, int column);
-static void DrawCheckBox(SettingsView*, Properties*, int column);
-static void AdvanceLine(SettingsView*);
-static void AddRemoveIdent(SettingsView*, int level);
-static void AddIdent(SettingsView*);
-static void RemoveIdent(SettingsView*);
-static int IntersectsValue(SettingsView*, Properties* property, int column);
-static void AppendTabbarSections(SettingsView*);
-static void ontabbarchange(SettingsView*, ui_component* sender, int tabindex);
-static void AdjustScrollRange(SettingsView*);
+static void settingsview_ondraw(SettingsView*, ui_component* sender, ui_graphics*);
+static int settingsview_onpropertiesdrawenum(SettingsView*, Properties*, int level);
+static int settingsview_onpropertieshittestenum(SettingsView*, Properties*, int level);
+static int settingsview_onenumpropertyposition(SettingsView*, Properties*, int level);
+static void settingsview_preparepropertiesenum(SettingsView* self);
+static void settingsview_onkeydown(SettingsView*, ui_component* sender, KeyEvent*);
+static void settingsview_onmousedown(SettingsView*, ui_component* sender, MouseEvent*);
+static void settingsview_onmousedoubleclick(SettingsView*, ui_component* sender, MouseEvent*);
+static void settingsview_oneditchange(SettingsView*, ui_edit* sender);
+static void settingsview_oneditkeydown(SettingsView*, ui_component* sender, KeyEvent*);
+static void settingsview_oninputdefinerchange(SettingsView* self, InputDefiner* sender);
+static void settingsview_ondestroy(SettingsView*, ui_component* sender);
+static void settingsview_onsize(SettingsView*, ui_component* sender, ui_size*);
+static void settingsview_onscroll(SettingsView*, ui_component* sender, int stepx, int stepy);
+static void settingsview_drawlinebackground(SettingsView*,Properties*);
+static void settingsview_drawkey(SettingsView*, Properties*, int column);
+static void settingsview_drawvalue(SettingsView*, Properties*, int column);
+static void settingsview_drawstring(SettingsView*, Properties*, int column);
+static void settingsview_drawinteger(SettingsView*, Properties*, int column);
+static void settingsview_drawbutton(SettingsView*, Properties*, int column);
+static void settingsview_drawcheckbox(SettingsView*, Properties*, int column);
+static void settingsview_advanceline(SettingsView*);
+static void settingsview_addremoveident(SettingsView*, int level);
+static void settingsview_addident(SettingsView*);
+static void settingsview_removeident(SettingsView*);
+static int settingsview_intersectsvalue(SettingsView*, Properties* property,
+	int column);
+static void settingsview_appendtabbarsections(SettingsView*);
+static void settingsview_ontabbarchange(SettingsView*, ui_component* sender,
+	int tabindex);
+static void settingsview_adjustscroll(SettingsView*);
 
-void InitSettingsView(SettingsView* self, ui_component* parent,
+void settingsview_init(SettingsView* self, ui_component* parent,
 	ui_component* tabbarparent, Properties* properties)
-{			
+{
 	self->properties = properties;
 	ui_component_init(&self->component, parent);
 	ui_component_init(&self->client, &self->component);
@@ -48,21 +50,24 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	self->client.wheelscroll = 4;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	ui_component_showverticalscrollbar(&self->client);	
-	signal_connect(&self->client.signal_destroy, self, OnDestroy);
-	signal_connect(&self->client.signal_draw, self, OnDraw);
-	signal_connect(&self->client.signal_scroll, self, OnScroll);
-	signal_connect(&self->client.signal_keydown, self, OnKeyDown);
-	signal_connect(&self->component.signal_keydown, self, OnKeyDown);
-	signal_connect(&self->client.signal_mousedown, self, OnMouseDown);
+	signal_connect(&self->client.signal_destroy, self, settingsview_ondestroy);
+	signal_connect(&self->client.signal_draw, self, settingsview_ondraw);
+	signal_connect(&self->client.signal_scroll, self, settingsview_onscroll);
+	signal_connect(&self->client.signal_keydown, self, settingsview_onkeydown);
+	signal_connect(&self->component.signal_keydown, self,
+		settingsview_onkeydown);
+	signal_connect(&self->client.signal_mousedown, self,
+		settingsview_onmousedown);
 	signal_connect(&self->client.signal_mousedoubleclick, self,
-		OnMouseDoubleClick);
-	signal_connect(&self->component.signal_size, self, OnSize);	
+		settingsview_onmousedoubleclick);
+	signal_connect(&self->component.signal_size, self, settingsview_onsize);
 	self->selected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
 	self->dirbutton = 0;
 	ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);
-	signal_connect(&self->edit.component.signal_keydown, self, OnEditKeyDown);
+	signal_connect(&self->edit.component.signal_keydown, self,
+		settingsview_oneditkeydown);
 	ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->client);	
 	ui_component_hide(&self->inputdefiner.component);		
@@ -70,10 +75,10 @@ void InitSettingsView(SettingsView* self, ui_component* parent,
 	tabbar_init(&self->tabbar, &self->component);
 	self->tabbar.tabalignment = UI_ALIGN_RIGHT;	
 	ui_component_resize(&self->tabbar.component, 130, 0);	
-	AppendTabbarSections(self);	
+	settingsview_appendtabbarsections(self);
 }
 
-void AppendTabbarSections(SettingsView* self)
+void settingsview_appendtabbarsections(SettingsView* self)
 {	
 	Properties* p;	
 	
@@ -84,25 +89,27 @@ void AppendTabbarSections(SettingsView* self)
 		}		
 	}
 	tabbar_select(&self->tabbar, 0);			
-	signal_connect(&self->tabbar.signal_change, self, ontabbarchange);
+	signal_connect(&self->tabbar.signal_change, self,
+		settingsview_ontabbarchange);
 }
 
-void OnDestroy(SettingsView* self, ui_component* sender)
+void settingsview_ondestroy(SettingsView* self, ui_component* sender)
 {
 	signal_dispose(&self->signal_changed);	
 }
 
-void OnDraw(SettingsView* self, ui_component* sender, ui_graphics* g)
+void settingsview_ondraw(SettingsView* self, ui_component* sender, ui_graphics* g)
 {	
 	self->g = g;
 	ui_setcolor(g, 0x00EAEAEA);
 	ui_settextcolor(g, 0x00CACACA);
 	ui_setbackgroundmode(g, TRANSPARENT);
-	PreparePropertiesEnum(self);
-	properties_enumerate(self->properties->children, self, OnPropertiesDrawEnum);
+	settingsview_preparepropertiesenum(self);
+	properties_enumerate(self->properties->children, self,
+		settingsview_onpropertiesdrawenum);
 }
 
-void PreparePropertiesEnum(SettingsView* self)
+void settingsview_preparepropertiesenum(SettingsView* self)
 {
 	ui_textmetric tm;
 	
@@ -115,11 +122,12 @@ void PreparePropertiesEnum(SettingsView* self)
 	self->lastlevel = 0;
 }
 
-int OnPropertiesDrawEnum(SettingsView* self, Properties* property, int level)
+int settingsview_onpropertiesdrawenum(SettingsView* self, Properties* property, int level)
 {		
-	AddRemoveIdent(self, level);
-	if (self->cpy != 0 && level == 0 && properties_type(property) ==  PROPERTY_TYP_SECTION) {
-		AdvanceLine(self);
+	settingsview_addremoveident(self, level);
+	if (self->cpy != 0 && level == 0 && properties_type(property) ==
+			PROPERTY_TYP_SECTION) {
+		settingsview_advanceline(self);
 	}
 	if (properties_hint(property) == PROPERTY_HINT_HIDE) {
 		return 1;
@@ -128,39 +136,39 @@ int OnPropertiesDrawEnum(SettingsView* self, Properties* property, int level)
 		self->currchoice = properties_value(property);
 		self->choicecount = 0;					
 	}		
-	DrawLineBackground(self, property);						
-	DrawKey(self, property, 0);	
-	DrawValue(self, property, 1);
+	settingsview_drawlinebackground(self, property);						
+	settingsview_drawkey(self, property, 0);	
+	settingsview_drawvalue(self, property, 1);
 	if (properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
-	AdvanceLine(self);
+	settingsview_advanceline(self);
 	return 1;
 }
 
-void AddRemoveIdent(SettingsView* self, int level)
+void settingsview_addremoveident(SettingsView* self, int level)
 {
 	if (self->lastlevel < level) {
-		AddIdent(self);
+		settingsview_addident(self);
 		self->lastlevel = level;
 	} else
 	while (self->lastlevel > level) {
-		RemoveIdent(self);
+		settingsview_removeident(self);
 		--self->lastlevel;
 	}	
 }
 
-void AddIdent(SettingsView* self)
+void settingsview_addident(SettingsView* self)
 {
 	self->cpx += self->identwidth;
 }
 
-void RemoveIdent(SettingsView* self)
+void settingsview_removeident(SettingsView* self)
 {
 	self->cpx -= self->identwidth;
 }
 
-void DrawLineBackground(SettingsView* self, Properties* property)
+void settingsview_drawlinebackground(SettingsView* self, Properties* property)
 {	
 	if (properties_type(property) != PROPERTY_TYP_SECTION) {
 		ui_size size;
@@ -173,10 +181,10 @@ void DrawLineBackground(SettingsView* self, Properties* property)
 	}
 }
 
-void DrawKey(SettingsView* self, Properties* property, int column)
+void settingsview_drawkey(SettingsView* self, Properties* property, int column)
 {	
 	if (properties_type(property) == PROPERTY_TYP_ACTION) {
-		DrawButton(self, property, column + 1);
+		settingsview_drawbutton(self, property, column + 1);
 	} else {
 		ui_textout(self->g,
 		self->cpx + column * self->columnwidth,
@@ -186,24 +194,26 @@ void DrawKey(SettingsView* self, Properties* property, int column)
 	}
 }
 
-void DrawValue(SettingsView* self, Properties* property, int column)
+void settingsview_drawvalue(SettingsView* self, Properties* property,
+	int column)
 {	
 	if (properties_type(property) == PROPERTY_TYP_BOOL ||
 			properties_ischoiceitem(property)) {
-		DrawCheckBox(self, property, column);			
+		settingsview_drawcheckbox(self, property, column);
 	} else
 	if (properties_type(property) == PROPERTY_TYP_STRING) {
-		DrawString(self, property, column);
+		settingsview_drawstring(self, property, column);
 		if (properties_hint(property) == PROPERTY_HINT_EDITDIR) {
-			DrawButton(self, property, column + 1);
+			settingsview_drawbutton(self, property, column + 1);
 		}
 	} else
 	if (properties_type(property) == PROPERTY_TYP_INTEGER) {
-		DrawInteger(self, property, column);
+		settingsview_drawinteger(self, property, column);
 	}
 }
 
-void DrawString(SettingsView* self, Properties* property, int column)
+void settingsview_drawstring(SettingsView* self, Properties* property,
+	int column)
 {
 	if (self->selected == property) {					
 		ui_setbackgroundmode(self->g, OPAQUE);
@@ -221,7 +231,8 @@ void DrawString(SettingsView* self, Properties* property, int column)
 //	}		
 }
 
-void DrawInteger(SettingsView* self, Properties* property, int column)
+void settingsview_drawinteger(SettingsView* self, Properties* property,
+	int column)
 {	
 	char text[40];
 	
@@ -231,24 +242,26 @@ void DrawInteger(SettingsView* self, Properties* property, int column)
 	} else {
 		psy_snprintf(text, 20, "%d", properties_value(property));
 	}
-	ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy, text, strlen(text));
+	ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy, text,
+		strlen(text));
 }
 
-void AdvanceLine(SettingsView* self)
+void settingsview_advanceline(SettingsView* self)
 {
 	self->cpy += self->lineheight;
 }
 
-void DrawButton(SettingsView* self, Properties* property, int column)
+void settingsview_drawbutton(SettingsView* self, Properties* property,
+	int column)
 {
 	ui_size size;
 	ui_rectangle r;	
 	if (properties_hint(property) == PROPERTY_HINT_EDITDIR) {
-		ui_textout(self->g, self->columnwidth * column + 3, self->cpy + self->dy,
-			"...", 3);
+		ui_textout(self->g, self->columnwidth * column + 3,
+			self->cpy + self->dy, "...", 3);
 	} else {
-		ui_textout(self->g, self->columnwidth * column + 3, self->cpy + self->dy,
-			properties_text(property),
+		ui_textout(self->g, self->columnwidth * column + 3,
+			self->cpy + self->dy, properties_text(property),
 			strlen(properties_text(property)));
 	}
 	ui_setbackgroundcolor(self->g, 0x003E3E3E);
@@ -266,7 +279,8 @@ void DrawButton(SettingsView* self, Properties* property, int column)
 	ui_drawrectangle(self->g, r);
 }
 
-void DrawCheckBox(SettingsView* self, Properties* property, int column)
+void settingsview_drawcheckbox(SettingsView* self, Properties* property,
+	int column)
 {
 	ui_rectangle r;
 	int checked = 0;
@@ -308,20 +322,22 @@ void DrawCheckBox(SettingsView* self, Properties* property, int column)
 	}	
 }
 
-void OnKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
+void settingsview_onkeydown(SettingsView* self, ui_component* sender,
+	KeyEvent* keyevent)
 {	
 	ui_component_propagateevent(sender);
 }
 
-void OnMouseDown(SettingsView* self, ui_component* sender, MouseEvent* ev)
+void settingsview_onmousedown(SettingsView* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	ui_component_setfocus(&self->client);
 	if (ui_component_visible(&self->edit.component)) {
-		OnEditChange(self, &self->edit);
+		settingsview_oneditchange(self, &self->edit);
 		ui_component_hide(&self->edit.component);
 	}	
 	if (ui_component_visible(&self->inputdefiner.component)) {
-		OnInputDefinerChange(self, &self->inputdefiner);
+		settingsview_oninputdefinerchange(self, &self->inputdefiner);
 		ui_component_hide(&self->inputdefiner.component);
 	}	
 	self->selected = 0;
@@ -329,8 +345,9 @@ void OnMouseDown(SettingsView* self, ui_component* sender, MouseEvent* ev)
 	self->my = ev->y;
 	self->choiceproperty = 0;
 	self->dirbutton = 0;
-	PreparePropertiesEnum(self);	
-	properties_enumerate(self->properties->children, self, OnPropertiesHitTestEnum);
+	settingsview_preparepropertiesenum(self);
+	properties_enumerate(self->properties->children, self,
+		settingsview_onpropertieshittestenum);
 	if (self->selected) {
 		if (self->dirbutton) {
 			char path[MAX_PATH]	 = "";
@@ -359,17 +376,19 @@ void OnMouseDown(SettingsView* self, ui_component* sender, MouseEvent* ev)
 	ui_component_invalidate(&self->client);
 }
 
-int Intersects(ui_rectangle* r, int x, int y)
+int settingsview_intersects(ui_rectangle* r, int x, int y)
 {
 	return x >= r->left && x < r->right && y >= r->top && y < r->bottom;
 }
 
-int OnPropertiesHitTestEnum(SettingsView* self, Properties* property, int level)
+int settingsview_onpropertieshittestenum(SettingsView* self,
+	Properties* property, int level)
 {
-	if (self->cpy != 0 && level == 0 && properties_type(property) ==  PROPERTY_TYP_SECTION) {
-		AdvanceLine(self);
+	if (self->cpy != 0 && level == 0 && properties_type(property) == 
+			PROPERTY_TYP_SECTION) {
+		settingsview_advanceline(self);
 	}
-	AddRemoveIdent(self, level);
+	settingsview_addremoveident(self, level);
 	if (properties_hint(property) == PROPERTY_HINT_HIDE) {
 		return 1;
 	}
@@ -377,22 +396,23 @@ int OnPropertiesHitTestEnum(SettingsView* self, Properties* property, int level)
 		self->currchoice = properties_value(property);
 		self->choicecount = 0;					
 	}	
-	if (IntersectsValue(self, property, 1)) {
+	if (settingsview_intersectsvalue(self, property, 1)) {
 		self->selected = property;		
 		return 0;
 	}
 	if (properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
-	AdvanceLine(self);	
+	settingsview_advanceline(self);
 	return 1;	
 }
 
-int OnEnumPropertyPosition(SettingsView* self, Properties* property, int level)
+int settingsview_onenumpropertyposition(SettingsView* self,
+	Properties* property, int level)
 {
-	AddRemoveIdent(self, level);
+	settingsview_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 && properties_type(property) ==  PROPERTY_TYP_SECTION) {
-		AdvanceLine(self);
+		settingsview_advanceline(self);
 	}
 	if (properties_hint(property) == PROPERTY_HINT_HIDE) {
 		return 1;
@@ -407,11 +427,12 @@ int OnEnumPropertyPosition(SettingsView* self, Properties* property, int level)
 	if (properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
-	AdvanceLine(self);	
+	settingsview_advanceline(self);
 	return 1;	
 }
 
-int IntersectsValue(SettingsView* self, Properties* property, int column)
+int settingsview_intersectsvalue(SettingsView* self, Properties* property,
+	int column)
 {
 	int rv = 0;	
 
@@ -429,7 +450,7 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 		r.right = r.left + tm.tmAveCharWidth * 4;;
 		r.bottom = r.top + size.height + 2;
 	
-		rv = Intersects(&r, self->mx, self->my);		
+		rv = settingsview_intersects(&r, self->mx, self->my);
 	} else
 	if (properties_type(property) == PROPERTY_TYP_INTEGER ||
 		properties_type(property) == PROPERTY_TYP_STRING ||
@@ -438,12 +459,12 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 		ui_setrectangle(&r, self->columnwidth * column, 
 			self->cpy + self->dy, self->columnwidth, self->lineheight);
 		self->selrect = r;
-		rv = Intersects(&r, self->mx, self->my);
+		rv = settingsview_intersects(&r, self->mx, self->my);
 		if (!rv && properties_hint(property) == PROPERTY_HINT_EDITDIR) {
 			ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
 				self->cpy + self->dy, self->columnwidth, self->lineheight);
 			self->selrect = r;
-			rv = Intersects(&r, self->mx, self->my);
+			rv = settingsview_intersects(&r, self->mx, self->my);
 			if (rv) {
 				self->dirbutton = 1;
 			}
@@ -452,7 +473,8 @@ int IntersectsValue(SettingsView* self, Properties* property, int column)
 	return rv;
 }
 
-void OnMouseDoubleClick(SettingsView* self, ui_component* sender, MouseEvent* ev)
+void settingsview_onmousedoubleclick(SettingsView* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	if (self->selected) {
 		ui_component* edit = 0;
@@ -485,35 +507,40 @@ void OnMouseDoubleClick(SettingsView* self, ui_component* sender, MouseEvent* ev
 	}
 }
 
-void OnInputDefinerChange(SettingsView* self, InputDefiner* sender)
+void settingsview_oninputdefinerchange(SettingsView* self,
+	InputDefiner* sender)
 {
 	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PROPERTY_TYP_INTEGER) {
-			properties_write_int(self->selected->parent, self->selected->item.key, self->inputdefiner.input);
+			properties_write_int(self->selected->parent,
+				self->selected->item.key, self->inputdefiner.input);
 		}
 		signal_emit(&self->signal_changed, self, 1, self->selected);
 	}
 }
 
-void OnEditChange(SettingsView* self, ui_edit* sender)
+void settingsview_oneditchange(SettingsView* self, ui_edit* sender)
 {
 	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PROPERTY_TYP_STRING) {
-			properties_write_string(self->selected->parent, self->selected->item.key, ui_edit_text(&self->edit));
+			properties_write_string(self->selected->parent,
+				self->selected->item.key, ui_edit_text(&self->edit));
 		} else 
 		if (self->selected->item.typ == PROPERTY_TYP_INTEGER) {
-			properties_write_int(self->selected->parent, self->selected->item.key, atoi(ui_edit_text(&self->edit)));
+			properties_write_int(self->selected->parent,
+				self->selected->item.key, atoi(ui_edit_text(&self->edit)));
 		}
 		signal_emit(&self->signal_changed, self, 1, self->selected);
 	}
 }
 
-void OnEditKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
+void settingsview_oneditkeydown(SettingsView* self, ui_component* sender,
+	KeyEvent* keyevent)
 {
 	if (keyevent->keycode == VK_RETURN) {
 		ui_component_hide(&self->edit.component);
 		ui_component_setfocus(&self->client);
-		OnEditChange(self, &self->edit);
+		settingsview_oneditchange(self, &self->edit);
 	} else
 	if (keyevent->keycode == VK_ESCAPE) {
 		ui_component_hide(&self->edit.component);
@@ -521,12 +548,14 @@ void OnEditKeyDown(SettingsView* self, ui_component* sender, KeyEvent* keyevent)
 	}
 }
 
-void OnScroll(SettingsView* self, ui_component* sender, int stepx, int stepy)
+void settingsview_onscroll(SettingsView* self, ui_component* sender, int stepx,
+	int stepy)
 {
 	self->dy += (stepy * sender->scrollstepy);
 }
 
-void OnSize(SettingsView* self, ui_component* sender, ui_size* size)
+void settingsview_onsize(SettingsView* self, ui_component* sender,
+	ui_size* size)
 {	
 	ui_size tabbarsize;	
 		
@@ -535,10 +564,11 @@ void OnSize(SettingsView* self, ui_component* sender, ui_size* size)
 		size->height);
 	ui_component_setposition(&self->tabbar.component,
 		size->width - tabbarsize.width, 0, tabbarsize.width, size->height);
-	AdjustScrollRange(self);
+	settingsview_adjustscroll(self);
 }
 
-void ontabbarchange(SettingsView* self, ui_component* sender, int tabindex)
+void settingsview_ontabbarchange(SettingsView* self, ui_component* sender,
+	int tabindex)
 {		
 	Properties* p = 0;	
 	Tab* tab;
@@ -563,8 +593,9 @@ void ontabbarchange(SettingsView* self, ui_component* sender, int tabindex)
 			int scrollmin;
 			int scrollmax;
 
-			PreparePropertiesEnum(self);
-			properties_enumerate(self->properties->children, self, OnEnumPropertyPosition);
+			settingsview_preparepropertiesenum(self);
+			properties_enumerate(self->properties->children, self,
+				settingsview_onenumpropertyposition);
 			ui_component_verticalscrollrange(&self->client, &scrollmin, &scrollmax);
 			scrollposition = self->cpy / self->lineheight;
 			if (scrollposition > scrollmax) {
@@ -577,17 +608,21 @@ void ontabbarchange(SettingsView* self, ui_component* sender, int tabindex)
 	}
 }
 
-void AdjustScrollRange(SettingsView* self)
+void settingsview_adjustscroll(SettingsView* self)
 {
 	ui_size size;
 	int scrollmax;
 
 	size = ui_component_size(&self->client);
 	self->search = 0;
-	PreparePropertiesEnum(self);
-	properties_enumerate(self->properties->children, self, OnEnumPropertyPosition);
+	settingsview_preparepropertiesenum(self);
+	properties_enumerate(self->properties->children, self,
+		settingsview_onenumpropertyposition);
 	self->client.scrollstepy = self->lineheight;
 	scrollmax =  (self->cpy - size.height) / self->lineheight + 1;
+	if (scrollmax < 0) {
+		scrollmax = 0;
+	}
 	ui_component_setverticalscrollrange(&self->client, 0, scrollmax);
 	if (-self->dy / self->lineheight > scrollmax - 1) {
 		self->dy = -(scrollmax) * self->lineheight;

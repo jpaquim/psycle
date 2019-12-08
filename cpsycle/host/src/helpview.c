@@ -8,22 +8,24 @@
 static void OnShow(HelpView*, ui_component* sender);
 static void OnHide(HelpView*, ui_component* sender);
 
-void InitHelpView(HelpView* self, ui_component* parent,
+void helpview_init(HelpView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	ui_notebook_init(&self->notebook, &self->component);	
-	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);	
+	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
+	help_init(&self->help, &self->notebook.component, workspace);
 	about_init(&self->about, &self->notebook.component);
-	greet_init(&self->greet, &self->notebook.component);
+	greet_init(&self->greet, &self->notebook.component);	
 	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
-	ui_component_hide(&self->tabbar.component);	
+	ui_component_hide(&self->tabbar.component);
+	tabbar_append(&self->tabbar, "Help");
 	tabbar_append(&self->tabbar, "About");
-	tabbar_append(&self->tabbar, "Greetings");
+	tabbar_append(&self->tabbar, "Greetings");	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	ui_notebook_setpageindex(&self->notebook, 0);
+	tabbar_select(&self->tabbar, 1);
 	signal_connect(&self->component.signal_show, self, OnShow);
 	signal_connect(&self->component.signal_hide, self, OnHide);
 }

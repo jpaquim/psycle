@@ -1,27 +1,25 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(HELPVIEW_H)
-#define HELPVIEW_H
+#if !defined(HELP_H)
+#define HELP_H
 
-#include "about.h"
-#include "greet.h"
-#include "help.h"
 #include "tabbar.h"
 #include "workspace.h"
+#include "greet.h"
+#include "about.h"
 
+#include <uiedit.h>
 #include <uinotebook.h>
 
 typedef struct {
 	ui_component component;
 	ui_notebook notebook;
-	TabBar tabbar;	
-	About about;
-	Greet greet;
-	Help help;
-} HelpView;
+	ui_edit edit;
+	TabBar tabbar;
+	Workspace* workspace;
+} Help;
 
-void helpview_init(HelpView*, ui_component* parent,
-	ui_component* tabbarparent, Workspace*);
+void help_init(Help*, ui_component* parent, Workspace*);
 
 #endif
