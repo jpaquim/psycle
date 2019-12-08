@@ -12,7 +12,13 @@ static void wavebox_onmousedown(WaveBox*, ui_component* sender, MouseEvent*);
 void wavebox_init(WaveBox* self, ui_component* parent)
 {			
 	self->sample = 0;
-	ui_component_init(&self->component, parent);	
+	self->hasselection = 0;
+	self->selectionstart = 0;
+	self->selectionend = 0;
+	self->zoomleft = 0.f;
+	self->zoomright = 1.f;
+	ui_component_init(&self->component, parent);
+	self->component.doublebuffered = 1;
 	signal_connect(&self->component.signal_draw, self, wavebox_ondraw);
 	signal_connect(&self->component.signal_destroy, self, wavebox_ondestroy);
 	signal_connect(&self->component.signal_mousedown, self,
@@ -51,10 +57,35 @@ void wavebox_ondraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 		amp_t scaley;
 
 		scaley = (size.height / 2) / (amp_t)32768;		
-		offsetstep = (float) self->sample->numframes / size.width;
+		offsetstep = (float) self->sample->numframes / size.width *
+			(self->zoomright - self->zoomleft);
+		if (self->hasselection) {
+			ui_rectangle r;
+
+			ui_setrectangle(&r,
+				(int)(1 / offsetstep * self->selectionstart),
+				0,
+				(int)(1 / offsetstep * self->selectionend) -
+				(int)(1 / offsetstep * self->selectionstart),
+				size.height);
+			ui_drawsolidrectangle(g, r, 0x00B1C8B0);
+		} 
 		for (x = 0; x < size.width; ++x) {			
-			int frame = (int)(offsetstep * x);
-			float framevalue = self->sample->channels.samples[0][frame];
+			uintptr_t frame = (int)(offsetstep * x + 
+				(int)(self->sample->numframes * self->zoomleft));
+			float framevalue;
+			
+			if (frame >= self->sample->numframes) {
+				break;
+			}
+			framevalue = self->sample->channels.samples[0][frame];
+			if (self->hasselection &&
+				frame >= self->selectionstart &&
+				frame < self->selectionend) {				
+				ui_setcolor(g, 0x00232323);
+			} else {
+				ui_setcolor(g, 0x00B1C8B0);
+			}
 			ui_drawline(g, x, centery, x, centery + (int)(framevalue * scaley));
 		}
 	}
@@ -64,3 +95,9 @@ void wavebox_onmousedown(WaveBox* self, ui_component* sender, MouseEvent* ev)
 {
 }
 
+void wavebox_setzoom(WaveBox* self, float zoomleft, float zoomright)
+{
+	self->zoomleft = zoomleft;
+	self->zoomright = zoomright;
+	ui_component_invalidate(&self->component);
+}

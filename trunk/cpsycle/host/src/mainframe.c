@@ -126,11 +126,11 @@ void mainframe_init(MainFrame* self)
 		&self->tabbars, &self->workspace);
 	songpropertiesview_init(&self->songpropertiesview,
 		&self->notebook.component, &self->workspace);	
-	InitSettingsView(&self->settingsview, &self->notebook.component,
-		&self->tabbars, self->workspace.config);	
+	settingsview_init(&self->settingsview, &self->notebook.component,
+		&self->tabbars, self->workspace.config);
 	signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
-	InitHelpView(&self->helpview, &self->notebook.component, &self->tabbars,
+	helpview_init(&self->helpview, &self->notebook.component, &self->tabbars,
 		&self->workspace);	
 	signal_connect(&self->helpview.about.okbutton.signal_clicked, self,
 		mainframe_onaboutok);
@@ -379,6 +379,10 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 
 	// section = properties_find(sender->properties, "general");
 	cmd = sender->getcmd(sender, 0);
+	if (cmd == CMD_IMM_HELP) {
+		tabbar_select(&self->helpview.tabbar, 0);
+		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);		
+	} else
 	if (cmd == CMD_IMM_EDITMACHINE) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	} else

@@ -38,7 +38,7 @@ typedef struct {
 	TabBar tabbar;	
 } SettingsView;
 
-void InitSettingsView(SettingsView* Settingsview, ui_component* parent, ui_component* tabbarparent, 
-	Properties* properties);
+void settingsview_init(SettingsView* Settingsview, ui_component* parent,
+	ui_component* tabbarparent, Properties* properties);
 
 #endif

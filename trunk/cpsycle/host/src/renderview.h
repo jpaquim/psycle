@@ -4,6 +4,8 @@
 #if !defined(RENDERVIEW_H)
 #define RENDERVIEW_H
 
+#include "settingsview.h"
+
 #include <uicomponent.h>
 #include <uilabel.h>
 #include <uiedit.h>
@@ -11,9 +13,12 @@
 #include <uicheckbox.h>
 #include "workspace.h"
 
+
 typedef struct {
 	ui_component component;
-	ui_component pathgroup;
+	SettingsView view;
+	Properties* properties;
+	/*ui_component pathgroup;
 	ui_label pathdesc;
 	ui_edit pathedit;
 	ui_button browsebutton;
@@ -21,7 +26,7 @@ typedef struct {
 	ui_checkbox cbx0;
 	ui_checkbox cbx1;
 	ui_checkbox cbx2;
-	ui_button savebutton;	
+	ui_button savebutton;*/
 } RenderView;
 
 void renderview_init(RenderView*, ui_component* parent,

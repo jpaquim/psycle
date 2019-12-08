@@ -12,7 +12,6 @@
 static void pianoheader_ondraw(PianoHeader*, ui_component* sender, ui_graphics*);
 void pianoheader_drawruler(PianoHeader*, ui_graphics*);
 
-
 static void pianoroll_onlpbchanged(Pianoroll*, Player* sender, uintptr_t lpb);
 static void pianoroll_ontimer(Pianoroll*, ui_component* sender, 
 	int timerid);
@@ -421,7 +420,6 @@ void pianoroll_setpattern(Pianoroll* self, Pattern* pattern)
 }
 
 // Header
-
 void pianoheader_init(PianoHeader* self, ui_component* parent, Pianoroll* roll)
 {
 	self->view = roll;	

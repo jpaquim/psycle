@@ -17,7 +17,6 @@ static void samplesview_onsamplelistchanged(SamplesView*, ui_component* sender,
 	int slot);
 static void samplesview_setsample(SamplesView*, int slot);
 static void samplesview_onloadsample(SamplesView*, ui_component* sender);
-static void samplesview_onsongimport(SamplesView*, ui_component* sender);
 static void samplesview_onsavesample(SamplesView*, ui_component* sender);
 static void samplesview_ondeletesample(SamplesView*, ui_component* sender);
 static void samplesview_onduplicatesample(SamplesView*, ui_component* sender);
@@ -26,6 +25,8 @@ static void samplesview_oninstrumentslotchanged(SamplesView* self,
 	Instrument* sender, int slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
+void samplesview_onshow(SamplesView*, ui_component* sender);
+void samplesview_onhide(SamplesView*, ui_component* sender);
 /// Header View
 static void samplesheaderview_init(SamplesHeaderView*, ui_component* parent,
 	Instruments*, struct SamplesView*);
@@ -80,9 +81,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, ui_component* parent)
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	ui_button_init(&self->loadbutton, &self->component);
-	ui_button_settext(&self->loadbutton, "Load");
-	ui_button_init(&self->importbutton, &self->component);
-	ui_button_settext(&self->importbutton, "Import");
+	ui_button_settext(&self->loadbutton, "Load");	
 	ui_button_init(&self->savebutton, &self->component);
 	ui_button_settext(&self->savebutton, "Save");	
 	ui_button_init(&self->duplicatebutton, &self->component);
@@ -234,20 +233,27 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	ui_component_setmargin(&self->left, &margin);
 	samplesviewbuttons_init(&self->buttons, &self->left);
 	ui_component_setalign(&self->buttons.component, UI_ALIGN_TOP);
+	// tabbarparent
+	tabbar_init(&self->clienttabbar, tabbarparent);
+	ui_component_setalign(&self->clienttabbar.component, UI_ALIGN_LEFT);
+	ui_component_hide(&self->clienttabbar.component);
+	tabbar_append(&self->clienttabbar, "Properties");
+	tabbar_append(&self->clienttabbar, "Song Import");
+	tabbar_append(&self->clienttabbar, "Editor");	
 	samplesbox_init(&self->samplesbox, &self->left,
 		&workspace->song->samples, &workspace->song->instruments);	
 	ui_component_setalign(&self->samplesbox.samplelist.component,
 		UI_ALIGN_CLIENT);
 	signal_connect(&self->buttons.loadbutton.signal_clicked, self,
-		samplesview_onloadsample);
-	signal_connect(&self->buttons.importbutton.signal_clicked, self,
-		samplesview_onsongimport);
+		samplesview_onloadsample);	
 	signal_connect(&self->buttons.savebutton.signal_clicked, self,
 		samplesview_onsavesample);
 	signal_connect(&self->buttons.deletebutton.signal_clicked, self,
 		samplesview_ondeletesample);
 	signal_connect(&self->buttons.duplicatebutton.signal_clicked, self,
 		samplesview_onduplicatesample);
+	signal_connect(&self->component.signal_show, self, samplesview_onshow);
+	signal_connect(&self->component.signal_hide, self, samplesview_onhide);	
 	// client
 	ui_notebook_init(&self->clientnotebook, &self->component);	
 	ui_component_setalign(&self->clientnotebook.component, UI_ALIGN_CLIENT);
@@ -271,13 +277,7 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	InitSamplesVibratoView(&self->vibrato, &self->notebook.component,
 		&workspace->player);
 	ui_component_setalign(&self->vibrato.component, UI_ALIGN_TOP);
-	ui_notebook_setpageindex(&self->notebook, 0);
-
-	ui_button_init(&self->waveeditorbutton, &self->client);
-	ui_button_settext(&self->waveeditorbutton, "Open Wave Editor");
-	ui_component_resize(&self->waveeditorbutton.component, 0, 20);
-	ui_component_setalign(&self->waveeditorbutton.component, UI_ALIGN_BOTTOM);
-	ui_component_setmargin(&self->waveeditorbutton.component, &margin);
+	ui_notebook_setpageindex(&self->notebook, 0);	
 	wavebox_init(&self->wavebox, &self->client);	
 	ui_component_setalign(&self->wavebox.component, UI_ALIGN_CLIENT);
 	ui_component_setmargin(&self->wavebox.component, &waveboxmargin);
@@ -291,9 +291,14 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	samplesview_setsample(self, 0);	
 	samplessongimportview_init(&self->songimport,
 		&self->clientnotebook.component, self, workspace);
+	sampleeditor_init(&self->sampleeditor,
+		&self->clientnotebook.component);	
 	ui_notebook_setpageindex(&self->clientnotebook, 0);
 	signal_connect(&workspace->signal_songchanged, self,
 		samplesview_onsongchanged);
+	ui_notebook_setpageindex(&self->clientnotebook, 0);
+	ui_notebook_connectcontroller(&self->clientnotebook,
+		&self->clienttabbar.signal_change);
 }
 
 void samplesview_onsamplelistchanged(SamplesView* self, ui_component* sender,
@@ -324,6 +329,7 @@ void samplesview_setsample(SamplesView* self, int slot)
 		? samples_at(&self->workspace->song->samples, slot)
 		: 0;
 	wavebox_setsample(&self->wavebox, sample);
+	sampleeditor_setsample(&self->sampleeditor, sample);
 	samplesheaderview_setsample(&self->header, sample);
 	SetSampleSamplesGeneralView(&self->general, sample);
 	SetSampleSamplesVibratoView(&self->vibrato, sample);
@@ -364,17 +370,6 @@ void samplesview_onloadsample(SamplesView* self, ui_component* sender)
 				self, samplesview_oninstrumentslotchanged);
 			ui_component_invalidate(&self->component);
 		}
-	}
-}
-
-void samplesview_onsongimport(SamplesView* self, ui_component* sender)
-{
-	if (ui_notebook_pageindex(&self->clientnotebook) == 0) {
-		ui_notebook_setpageindex(&self->clientnotebook, 1);		
-		ui_button_highlight(&self->buttons.importbutton);
-	} else {
-		ui_notebook_setpageindex(&self->clientnotebook, 0);		
-		ui_button_disablehighlight(&self->buttons.importbutton);
 	}
 }
 
@@ -471,6 +466,19 @@ void samplesview_onsongchanged(SamplesView* self, Workspace* workspace)
 		&workspace->song->instruments);
 	samplesview_setsample(self, 0);
 }
+
+void samplesview_onshow(SamplesView* self, ui_component* sender)
+{	
+	self->clienttabbar.component.visible = 1;
+	ui_component_align(ui_component_parent(&self->clienttabbar.component));
+	ui_component_show(&self->clienttabbar.component);
+}
+
+void samplesview_onhide(SamplesView* self, ui_component* sender)
+{
+	ui_component_hide(&self->clienttabbar.component);
+}
+
 
 void samplesheaderview_init(SamplesHeaderView* self, ui_component* parent,
 	Instruments* instruments, struct SamplesView* view)
