@@ -14,6 +14,8 @@
 #include <string.h>
 #include <rms.h>
 #include <multifilter.h>
+#include <windows.h>
+#include <portable.h>
 
 #if !defined(FALSE)
 #define FALSE 0
@@ -34,6 +36,8 @@ static void player_disposerms(Player*);
 static void player_unloaddriver(Player*);
 static void player_unloadeventdrivers(Player*);
 static amp_t* work(Player*, int* numsamples);
+static void player_workamount(Player*, uintptr_t amount,
+	uintptr_t* numsamplex, amp_t** psamples);
 static void player_eventdriverinput(Player*, EventDriver* sender);
 static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(Player*, uintptr_t amount);
@@ -41,6 +45,7 @@ static void player_filldriver(Player*, amp_t* buffer, uintptr_t amount);
 static RMSVol* player_rmsvol(Player*, size_t slot);
 static void player_resetvumeters(Player*);
 static void player_dostop(Player*);
+static void notifylinetick(Player*);
 
 // player init and dispose
 
@@ -113,24 +118,65 @@ void player_disposerms(Player* self)
 // sound driver callback
 
 amp_t* work(Player* self, int* numsamples)
-{		
+{	
+	uintptr_t maxamount;
 	uintptr_t amount;
 	uintptr_t numsamplex;
-	amp_t* psamples;
+	amp_t* psamples;	
 	
 	psamples = bufferdriver;
 	numsamplex = *numsamples;	
-	amount = numsamplex > MAX_STREAM_SIZE ? MAX_STREAM_SIZE : numsamplex;
+	maxamount = numsamplex > MAX_STREAM_SIZE ? MAX_STREAM_SIZE : numsamplex;
 	lock_enter();
-	do {
-		sequencer_frametick(&self->sequencer, amount);
-		player_workpath(self, amount);
-		player_filldriver(self, psamples, amount);
-		numsamplex -= amount;		
-		psamples  += (2*amount);
-	}  while (numsamplex > 0);
+	do {		
+		amount = maxamount;
+		if (amount > numsamplex) {
+			amount = numsamplex;
+		}
+		if (self->sequencer.playing) {
+			self->sequencer.linetickcount -= sequencer_frametooffset(&self->sequencer, amount);
+			if (self->sequencer.linetickcount <= 0) {				
+				amount = sequencer_frames(&self->sequencer, -self->sequencer.linetickcount);
+			}
+		}
+		if (amount > 0) {
+			player_workamount(self, amount, &numsamplex, &psamples);
+		}
+		if (self->sequencer.linetickcount <= 0) {
+			notifylinetick(self);
+			self->sequencer.linetickcount = 
+				1 / (self->sequencer.lpb * self->sequencer.lpbspeed);
+			sequencer_linetick(&self->sequencer);
+		}
+	} while (numsamplex > 0);
 	lock_leave();
 	return bufferdriver;
+}
+
+void notifylinetick(Player* self)
+{
+	if (self->song) {
+		TableIterator it;
+		
+		for (it = machines_begin(&self->song->machines); 
+			!tableiterator_equal(&it, table_end());		
+				tableiterator_inc(&it)) {			
+			Machine* machine;
+
+			machine = (Machine*)tableiterator_value(&it);					
+			machine->vtable->sequencerlinetick(machine);				
+		}
+	}
+}
+
+void player_workamount(Player* self, uintptr_t amount, uintptr_t* numsamplex,
+					   amp_t** psamples)
+{
+	sequencer_frametick(&self->sequencer, amount);
+	player_workpath(self, amount);		
+	player_filldriver(self, *psamples, amount);
+	*numsamplex -= amount;
+	*psamples  += (2*amount);
 }
 
 void player_workpath(Player* self, uintptr_t amount)

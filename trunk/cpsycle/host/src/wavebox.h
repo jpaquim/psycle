@@ -15,6 +15,8 @@ typedef struct {
 	uintptr_t selectionend;
 	float zoomleft;
 	float zoomright;
+	int dragmode;
+	int dragoffset;
 } WaveBox;
 
 void wavebox_init(WaveBox*, ui_component* parent);

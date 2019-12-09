@@ -33,7 +33,7 @@ typedef struct {
 	int recordingnotes;
 	int multichannelaudition;
 	Table notestotracks;
-	Table trackstonotes;
+	Table trackstonotes;	
 } Player;
 
 // init dispose
