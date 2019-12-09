@@ -22,7 +22,6 @@ static void samplezoom_onmousedown(SampleZoom*, ui_component* sender, MouseEvent
 static void samplezoom_onmouseup(SampleZoom*, ui_component* sender, MouseEvent*);
 static void samplezoom_onmousemove(SampleZoom*, ui_component* sender, MouseEvent*);
 
-
 enum {
 	SAMPLEEDITOR_DRAG_NONE,
 	SAMPLEEDITOR_DRAG_LEFT,
@@ -316,6 +315,6 @@ void sampleeditor_computemetrics(SampleEditor* self, SampleEditorMetrics* rv)
 		: 0;	
 	rv->visisteps = 10;	
 	rv->stepwidth = self->sample
-		? rv->samplewidth *  (self->sample->numframes / 10)
+		? rv->samplewidth * (self->sample->numframes / 10)
 		: sampleboxsize.width;	
 }

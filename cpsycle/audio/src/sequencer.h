@@ -15,10 +15,7 @@ typedef enum {
 
 typedef struct {
 	beat_t retriggeroffset;
-	beat_t retriggerstep;
-	int jump;
-	beat_t jumpat;
-	beat_t jumpto;
+	beat_t retriggerstep;	
 } SequencerTrackState;
 
 typedef struct {
@@ -27,23 +24,35 @@ typedef struct {
 } SequencerTrack;
 
 typedef struct {
+	int active;	
+	beat_t offset;
+} SequencerJump;
+
+typedef struct {
+	int active;
+	beat_t rowspeed; // line delay
+} SequenceRowDelay;
+
+typedef struct {
 	Sequence* sequence;
 	Machines* machines;
 	beat_t bpm;
 	unsigned int samplerate;
 	beat_t beatsprosample;	
 	unsigned int lpb; // global
-	beat_t lpbspeed; // pattern
+	beat_t lpbspeed; // pattern	
 	int playing;
-	beat_t position;
-	beat_t seqlinetickcount;
+	beat_t position;	
 	beat_t window;	
 	List* currtracks;	
-	List* events;
+	List* events;	
 	List* delayedevents;
-	List* inputevents;
+	List* inputevents;	
 	SequencerPlayMode mode;	
 	int looping;
+	beat_t linetickcount;
+	SequencerJump jump;
+	SequenceRowDelay rowdelay;
 } Sequencer;
 
 void sequencer_init(Sequencer*, Sequence*, Machines*);
@@ -51,6 +60,7 @@ void sequencer_dispose(Sequencer*);
 void sequencer_reset(Sequencer*, Sequence*, Machines*);
 void sequencer_frametick(Sequencer*, unsigned int numsamples);
 void sequencer_tick(Sequencer*, beat_t offset);
+void sequencer_linetick(Sequencer*);
 void sequencer_setposition(Sequencer*, beat_t position);
 beat_t sequencer_position(Sequencer*);
 void sequencer_start(Sequencer*);
