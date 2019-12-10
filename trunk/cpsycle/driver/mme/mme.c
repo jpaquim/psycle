@@ -50,7 +50,7 @@ static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback, v
 static int driver_open(Driver*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
-static void driver_configure(Driver*);
+static void driver_configure(Driver*, Properties*);
 static unsigned int samplerate(Driver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
@@ -162,8 +162,15 @@ static void init_properties(Driver* self)
 
 	self->properties = properties_create();
 		
-	properties_append_string(self->properties, "name", "winmme");
-	properties_append_string(self->properties, "version", "1.0");
+	properties_sethint(
+		properties_append_string(self->properties, "name", "winmme"),
+		PROPERTY_HINT_READONLY);
+	properties_sethint(
+		properties_append_string(self->properties, "vendor", "Psycedelics"),
+		PROPERTY_HINT_READONLY);
+	properties_sethint(
+		properties_append_string(self->properties, "version", "1.0"),
+		PROPERTY_HINT_READONLY);
 	devices = properties_append_choice(self->properties, "device", -1);
 	properties_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
 	n = waveOutGetNumDevs();	
@@ -180,12 +187,17 @@ static void init_properties(Driver* self)
 	properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
-void driver_configure(Driver* driver)
+void driver_configure(Driver* driver, Properties* config)
 {
 	MmeDriver* self;
 	Properties* property;
 
 	self = (MmeDriver*) driver;
+
+	if (config) {
+		properties_free(self->driver.properties);
+		self->driver.properties = properties_clone(config);
+	} else {
 	property = properties_read(self->driver.properties, "device");
 	if (property && property->item.typ == PROPERTY_TYP_CHOICE) {
 		Property* device;
@@ -214,6 +226,7 @@ void driver_configure(Driver* driver)
 	property = properties_read(self->driver.properties, "numsamples");
 	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
 		self->_blockSizeBytes = property->item.value.i;
+	}
 	}
 }
 

@@ -7,7 +7,7 @@
 #include "custommachine.h"
 
 typedef struct {
-	CustomMachine machine;
+	CustomMachine custommachine;
 	int mode;
 } DummyMachine;
 

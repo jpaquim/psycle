@@ -71,7 +71,7 @@ void player_initdriver(Player* self)
 {	
 	self->driver = 0;	
 	library_init(&self->drivermodule);
-	player_loaddriver(self, 0);		
+	player_loaddriver(self, 0, 0);		
 }
 
 void player_initsignals(Player* self)
@@ -251,7 +251,7 @@ void player_filldriver(Player* self, amp_t* buffer, uintptr_t amount)
 				rmsvol_tick(rms, masteroutput->samples[0], masteroutput->samples[1],
 					amount);		
 			}
-			signal_emit(&master->signal_worked, master, 2, MASTER_INDEX, &bc);			
+			signal_emit(&master->signal_worked, master, 2, MASTER_INDEX, &bc);
 		}	
 		dsp.interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
@@ -498,7 +498,7 @@ uintptr_t player_lpb(Player* self)
 
 // Driver load, unload, restart, ..., methods
 
-void player_loaddriver(Player* self, const char* path)
+void player_loaddriver(Player* self, const char* path, Properties* config)
 {
 	Driver* driver = 0;
 	
@@ -525,6 +525,10 @@ void player_loaddriver(Player* self, const char* path)
 	rmsvol_setsamplerate(driver->samplerate(driver));
 	multifilter_inittables(driver->samplerate(driver));
 	self->driver = driver;
+	if (self->driver && config) {
+		self->driver->configure(self->driver, config);
+		//self->driver->properties = properties_clone(config);
+	}
 	self->driver->open(self->driver);
 }
 
@@ -540,17 +544,17 @@ void player_unloaddriver(Player* self)
 	self->driver = 0;
 }
 
-void player_reloaddriver(Player* self, const char* path)
+void player_reloaddriver(Player* self, const char* path, Properties* config)
 {		
 	player_unloaddriver(self);
-	player_loaddriver(self, path);		
+	player_loaddriver(self, path, config);		
 }
 
-void player_restartdriver(Player* self)
+void player_restartdriver(Player* self, Properties* config)
 {	
 	if (self->driver) {
 		self->driver->close(self->driver);	
-		self->driver->configure(self->driver);
+		self->driver->configure(self->driver, config);
 		self->driver->open(self->driver);
 	}
 }

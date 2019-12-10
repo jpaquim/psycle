@@ -4,8 +4,14 @@
 #include "../../detail/prefix.h"
 
 #include "sampleeditor.h"
+
+#include <operations.h>
+#include <alignedalloc.h>
+#include <exclusivelock.h>
+
 #include <portable.h>
 
+static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditorheader_init(SampleEditorHeader*, ui_component* parent,
 	SampleEditor*);
 static void sampleeditorheader_ondraw(SampleEditorHeader*, ui_component* sender, ui_graphics*);
@@ -13,9 +19,17 @@ static void sampleeditorheader_drawruler(SampleEditorHeader*, ui_graphics*);
 static void samplezoom_ondraw(SampleZoom*, ui_component* sender, ui_graphics*);
 static void samplezoom_drawsamples(SampleZoom*, ui_graphics*);
 
-static void sampleeditor_onsize(SampleEditor* self, ui_component* sender, ui_size*);
+static void sampleeditor_initsampler(SampleEditor*);
+static void sampleeditor_ondestroy(SampleEditor*, ui_component* sender);
+static void sampleeditor_onsize(SampleEditor*, ui_component* sender, ui_size*);
 static void sampleeditor_onzoom(SampleEditor*, ui_component* sender);
 static void sampleeditor_computemetrics(SampleEditor*, SampleEditorMetrics* rv);
+static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace);
+static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
+static void sampleeditor_onplay(SampleEditor*, ui_component* sender);
+static void sampleeditor_onstop(SampleEditor*, ui_component* sender);
+static void sampleeditor_onmasterworked(SampleEditor*, Machine*, unsigned int slot,
+	BufferContext*);
 
 static void samplezoom_ondestroy(SampleZoom*, ui_component* sender);
 static void samplezoom_onmousedown(SampleZoom*, ui_component* sender, MouseEvent*);
@@ -28,6 +42,36 @@ enum {
 	SAMPLEEDITOR_DRAG_RIGHT,
 	SAMPLEEDITOR_DRAG_MOVE
 };
+
+void sampleeditorplaybar_init(SampleEditorPlayBar* self, ui_component* parent,
+	Workspace* workspace)
+{
+	self->workspace = workspace;
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	// ui_button_init(&self->loop, &self->component);
+	// ui_button_settext(&self->loop, "Loop");	
+	// signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
+	ui_button_init(&self->play, &self->component);
+	ui_button_settext(&self->play, workspace_translate(workspace, "play"));	
+	ui_button_init(&self->stop, &self->component);
+	ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
+	//signal_connect(&self->stop.signal_clicked, self, onstopclicked);	
+	sampleeditorplaybar_initalign(self);	
+}
+
+void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
+{
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
+		ui_value_makepx(0), ui_value_makepx(0));
+	ui_component_enablealign(&self->component);
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT, &margin));
+}
 
 void sampleeditorheader_init(SampleEditorHeader* self, ui_component* parent,
 	SampleEditor* view)
@@ -264,25 +308,63 @@ void samplezoom_onmousemove(SampleZoom* self, ui_component* sender, MouseEvent* 
 	}
 }
 
-void samplezoom_onmouseup(SampleZoom* self, ui_component* sender, MouseEvent* ev)
+void samplezoom_onmouseup(SampleZoom* self, ui_component* sender,
+	MouseEvent* ev)
 {
 	self->dragmode = SAMPLEEDITOR_DRAG_NONE;
 	ui_component_releasecapture(&self->component);
 }
 
-void sampleeditor_init(SampleEditor* self, ui_component* parent)
+void sampleeditor_init(SampleEditor* self, ui_component* parent,
+	Workspace* workspace)
 {						
 	self->sample = 0;
+	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
+	signal_connect(&self->component.signal_destroy, self, sampleeditor_ondestroy);
 	ui_component_enablealign(&self->component);	
+	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
+	signal_connect(&self->playbar.play.signal_clicked, self, sampleeditor_onplay);
+	signal_connect(&self->playbar.stop.signal_clicked, self, sampleeditor_onstop);
+	ui_component_setalign(&self->playbar.component, UI_ALIGN_TOP);
 	sampleeditorheader_init(&self->header, &self->component, self);
-	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);	
+	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
 	wavebox_init(&self->samplebox, &self->component);
 	ui_component_setalign(&self->samplebox.component, UI_ALIGN_CLIENT);	
 	samplezoom_init(&self->zoom, &self->component);
 	ui_component_setalign(&self->zoom.component, UI_ALIGN_BOTTOM);
 	sampleeditor_computemetrics(self, &self->metrics);
 	signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
+	signal_connect(&workspace->signal_songchanged, self,
+		sampleeditor_onsongchanged);
+	sampleeditor_initsampler(self);
+	sampleeditor_connectmachinessignals(self, workspace);	
+}
+
+void sampleeditor_initsampler(SampleEditor* self)
+{
+	uintptr_t c;
+
+	sampler_init(&self->sampler,
+		self->workspace->machinefactory.machinecallback);
+	buffer_init(&self->samplerbuffer, 2);
+	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
+		self->samplerbuffer.samples[c] = dsp.memory_alloc(MAX_STREAM_SIZE,
+			sizeof(float));
+	}
+	self->samplerevents = 0;
+}
+
+void sampleeditor_ondestroy(SampleEditor* self, ui_component* sender)
+{
+	uintptr_t c;
+
+	self->sampler.custommachine.machine.vtable->dispose(
+		&self->sampler.custommachine.machine);
+	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
+		dsp.memory_dealloc(self->samplerbuffer.samples[c]);
+	}
+	buffer_dispose(&self->samplerbuffer);
 }
 
 void sampleeditor_setsample(SampleEditor* self, Sample* sample)
@@ -317,4 +399,60 @@ void sampleeditor_computemetrics(SampleEditor* self, SampleEditorMetrics* rv)
 	rv->stepwidth = self->sample
 		? rv->samplewidth * (self->sample->numframes / 10)
 		: sampleboxsize.width;	
+}
+
+void sampleeditor_onsongchanged(SampleEditor* self, Workspace* workspace)
+{
+	sampleeditor_connectmachinessignals(self, workspace);
+}
+
+void sampleeditor_connectmachinessignals(SampleEditor* self,
+	Workspace* workspace)
+{
+	if (workspace && workspace->song &&
+			machines_master(&workspace->song->machines)) {
+		signal_connect(
+			&machines_master(&workspace->song->machines)->signal_worked, self,
+			sampleeditor_onmasterworked);
+	}
+}
+
+void sampleeditor_onplay(SampleEditor* self, ui_component* sender)
+{	
+	if (self->workspace->song && self->sample) {
+		lock_enter();
+		list_free(self->samplerevents);
+		patternevent_init(&self->samplerevent, 
+			(unsigned char) 60,
+			(unsigned char) instruments_slot(&self->workspace->song->instruments),
+			255, 0, 0);	
+		self->samplerevents = list_create(&self->samplerevent);
+		lock_leave();
+	}
+}
+
+void sampleeditor_onstop(SampleEditor* self, ui_component* sender)
+{	
+	lock_enter();
+	list_free(self->samplerevents);
+	patternevent_init(&self->samplerevent, 
+		NOTECOMMANDS_RELEASE, 0, 255, 0, 0);	
+	self->samplerevents = list_create(&self->samplerevent);
+	lock_leave();
+}
+
+void sampleeditor_onmasterworked(SampleEditor* self, Machine* machine,
+	unsigned int slot, BufferContext* bc)
+{
+	BufferContext samplerbc;
+		
+	buffercontext_init(&samplerbc, self->samplerevents, 0,
+		&self->samplerbuffer, bc->numsamples, 16, 0);
+	buffer_clearsamples(&self->samplerbuffer, bc->numsamples);
+	self->sampler.custommachine.machine.vtable->work(
+		&self->sampler.custommachine.machine, &samplerbc);
+	buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 
+		(amp_t)1.f);
+	list_free(self->samplerevents);
+	self->samplerevents = 0;
 }

@@ -87,7 +87,7 @@ int propertiesio_load(Properties* self, const char* path, int allowappend)
 			}
 			if (state == 2) {
 				Properties* p = properties_read(curr, key);
-				if (p) {
+				if (p) {					
 					switch (p->item.typ) {
 						case PROPERTY_TYP_ROOT:
 						break;
@@ -228,7 +228,7 @@ int propertiesio_loadsection(Properties* self, const char* path,
 			if (state == 2) {
 				if (dowrite) {
 					Properties* p = properties_read(curr, key);
-					if (p) {
+					if (p) {						
 						switch (p->item.typ) {
 							case PROPERTY_TYP_ROOT:
 							break;
@@ -301,11 +301,16 @@ int propertiesio_loadsection(Properties* self, const char* path,
 	return fp != 0;	
 }
 
+static skip;
+static skiplevel;
+
 void propertiesio_save(Properties* self, const char* path)
 {
 	FILE* fp;
 	fp = fopen(path, "wb");
 	if (fp) {
+		skip = 0;
+		skiplevel = 0;
 		properties_enumerate(self, fp, (PropertiesCallback)OnSaveIniEnum);
 		fclose(fp);
 	}
@@ -313,6 +318,15 @@ void propertiesio_save(Properties* self, const char* path)
 
 int OnSaveIniEnum(FILE* fp, Properties* property, int level)
 {
+	if (skip && level > skiplevel) {
+		return 1;
+	}
+	skip = skiplevel = 0;	
+	if (!property->item.save) {
+		skip = 1;
+		skiplevel = level;
+		return 1;
+	}
 	if (property->item.key) {
 		char text[40];
 		char sections[MAXSTRINGSIZE];

@@ -37,6 +37,7 @@ void properties_init(Properties* self, const char* key, PropertyType typ)
 	self->item.hint = PROPERTY_HINT_EDIT;
 	self->item.disposechildren = 1;	
 	self->item.id = -1;
+	self->item.save = 1;
 }
 
 void properties_free(Properties* self)
@@ -108,12 +109,19 @@ Properties* properties_clone(Properties* self)
 		rv->item.key = p->item.key ? strdup(p->item.key) : 0;
 		rv->item.text = p->item.text ? strdup(p->item.text) : 0;
 		rv->item.min = p->item.min;
-		rv->item.max = p->item.max;
-		rv->item.value = p->item.value;		
+		rv->item.max = p->item.max;		
+		if (rv->item.typ == PROPERTY_TYP_STRING) {
+			rv->item.value.s = rv->item.value.s 
+				? strdup(rv->item.value.s)
+				: 0;
+		} else {
+			rv->item.value = p->item.value;
+		}
 		rv->item.typ = p->item.typ;
 		rv->item.hint = p->item.hint;
 		rv->item.id = p->item.id;
 		rv->item.disposechildren = 1;
+		rv->item.save = p->item.save;
 		if (p->children) {
 			Properties* i;
 			rv->children = properties_clone(p->children);
@@ -206,7 +214,6 @@ Properties* properties_append_bool(Properties* self, const char* key, int value)
 	p = properties_append_int(self, key, value != 0, 0, 1);
 	p->item.typ = PROPERTY_TYP_BOOL;
 	p->item.hint = PROPERTY_HINT_CHECK;
-
 	return p;
 }
 
@@ -312,7 +319,8 @@ int properties_bool(Properties* properties, const char* key, int defaultvalue)
 	return rv;
 }
 
-void properties_readdouble(Properties* properties, const char* key, double* value, double defaultvalue)
+void properties_readdouble(Properties* properties, const char* key,
+	double* value, double defaultvalue)
 {
 	if (!properties) {
 		*value = defaultvalue;
@@ -326,7 +334,8 @@ void properties_readdouble(Properties* properties, const char* key, double* valu
 	}
 }
 
-const char* properties_readstring(Properties* properties, const char* key, const char* defaulttext)
+const char* properties_readstring(Properties* properties, const char* key,
+	const char* defaulttext)
 {
 	const char* rv = 0;
 	if (!properties) {
@@ -342,7 +351,8 @@ const char* properties_readstring(Properties* properties, const char* key, const
 	return rv;
 }
 
-Properties* properties_write_string(Properties* self, const char* key, const char* value)
+Properties* properties_write_string(Properties* self, const char* key,
+	const char* value)
 {
 	Properties* p = properties_read(self, key);
 	if (p) {
@@ -416,17 +426,20 @@ int properties_enumerate_rec(Properties* self)
 {
 	Properties* p;
 	p = self;
-	while (p != 0) {								
-		if (!callback(target, p, level)) {
+	while (p != 0) {
+		int walkoption = callback(target, p, level);
+		if (walkoption == 0) {
 			return 0;
-		}		
-		if (p->children) {
-			++level;
-			if (!properties_enumerate_rec(p->children)) {
+		} else
+		if (walkoption == 1) {
+			if (p->children) {
+				++level;
+				if (!properties_enumerate_rec(p->children)) {
+					--level;
+					return 0;
+				}			
 				--level;
-				return 0;
 			}
-			--level;
 		}
 		p = p->next;		
 	}	
@@ -499,7 +512,7 @@ Properties* properties_findsectionex(Properties* self, const char* key,
 	strcpy(text, key);
 	token = strtok(text, seps );
 	while(token != 0) {
-		p = properties_find(self, token);	
+		p = properties_find(p, token);	
 		if (!p) {
 			break;
 		}		

@@ -4,9 +4,25 @@
 #if !defined(SAMPLEEDITOR_H)
 #define SAMPLEEDITOR_H
 
-#include "uicomponent.h"
+#include "uibutton.h"
 #include "wavebox.h"
+#include "workspace.h"
+
+#include <sampler.h>
 #include <sample.h>
+
+
+typedef struct {
+	ui_component component;
+	ui_button loop;
+	ui_button play;
+	ui_button stop;
+	ui_button pause;
+	Workspace* workspace;
+} SampleEditorPlayBar;
+
+void sampleeditorplaybar_init(SampleEditorPlayBar*, ui_component* parent,
+	Workspace*);
 
 typedef struct {
 	float samplewidth;	
@@ -35,14 +51,20 @@ typedef struct {
 
 typedef struct SampleEditor {	
 	ui_component component;
+	SampleEditorPlayBar playbar;
 	SampleEditorHeader header;
 	WaveBox samplebox;
 	SampleZoom zoom;
 	SampleEditorMetrics metrics;
-	Sample* sample;	
+	Sample* sample;
+	Sampler sampler;
+	Buffer samplerbuffer;
+	PatternEvent samplerevent;
+	List* samplerevents;
+	Workspace* workspace;
 } SampleEditor;
 
-void sampleeditor_init(SampleEditor*, ui_component* parent);
+void sampleeditor_init(SampleEditor*, ui_component* parent, Workspace*);
 void sampleeditor_setsample(SampleEditor*, Sample*);
 
 #endif

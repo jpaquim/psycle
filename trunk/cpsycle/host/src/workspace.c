@@ -40,11 +40,13 @@ static void workspace_makelangen(Workspace*);
 static void workspace_makelanges(Workspace*);
 static void applysongproperties(Workspace*);
 static Properties* workspace_makeproperties(Workspace*);
-static void workspace_setdriverlist(Workspace*);
+static void workspace_makedriverlist(Workspace*);
+static void workspace_makedriverconfigurations(Workspace*);
 static void workspace_driverconfig(Workspace*);
 static void workspace_mididriverconfig(Workspace*, int deviceid);
 static void workspace_updatemididriverlist(Workspace*);
 static const char* workspace_driverpath(Workspace*);
+static const char* workspace_driverkey(Workspace*);
 static const char* workspace_eventdriverpath(Workspace*);
 static void workspace_configaudio(Workspace*);
 static void workspace_configvisual(Workspace*);
@@ -233,10 +235,17 @@ void workspace_initplayer(Workspace* self)
 	workspace_updatemididriverlist(self);
 	workspace_mididriverconfig(self, 0);
 }
+
+Properties* workspace_driverconfiguration(Workspace* self)
+{		
+	return properties_find(self->driverconfigurations,
+		workspace_driverkey(self));	
+}
 	
 void workspace_configaudio(Workspace* self)
 {			
-	player_loaddriver(&self->player, workspace_driverpath(self));
+	player_loaddriver(&self->player, workspace_driverpath(self),
+		workspace_driverconfiguration(self));	
 	workspace_driverconfig(self);
 }
 
@@ -263,6 +272,19 @@ const char* workspace_driverpath(Workspace* self)
 	if (p = properties_read(self->inputoutput, "driver")) {	
 		if (p = properties_read_choice(p)) {		
 			rv = properties_valuestring(p);
+		}
+	}
+	return rv;
+}
+
+const char* workspace_driverkey(Workspace* self)
+{
+	Properties* p;
+	const char* rv = 0;
+
+	if (p = properties_read(self->inputoutput, "driver")) {	
+		if (p = properties_read_choice(p)) {		
+			rv = properties_key(p);
 		}
 	}
 	return rv;
@@ -481,10 +503,83 @@ void workspace_makedirectories(Workspace* self)
 void workspace_makeinputoutput(Workspace* self)
 {		
 	self->inputoutput = properties_createsection(self->config, "inputoutput");
-	workspace_setdriverlist(self);
+	workspace_makedriverlist(self);
 	self->driverconfigure = properties_settext(
 		properties_createsection(self->inputoutput, "configure"),
-		"Configure");		
+		"Configure");
+	self->driverconfigure->item.save = 0;
+	workspace_makedriverconfigurations(self);
+}
+
+void workspace_makedriverlist(Workspace* self)
+{
+	Properties* drivers;
+
+	properties_settext(self->inputoutput, "Input/Output");
+	// change number to set startup driver, if no psycle.ini found
+	drivers = properties_append_choice(self->inputoutput, "driver", 2); 
+	properties_settext(drivers, "Driver");
+	properties_append_string(drivers, "silent", "silentdriver");
+#if defined(_DEBUG)
+	properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
+	properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
+#else
+	properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
+	properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
+#endif
+}
+
+void workspace_makedriverconfigurations(Workspace* self)
+{
+	Properties* drivers;
+	Properties* p;	
+	
+	self->driverconfigurations = properties_sethint(
+		properties_createsection(self->inputoutput, "configurations"),
+		PROPERTY_HINT_HIDE);
+	
+	drivers = properties_read(self->inputoutput, "driver");
+	if (drivers) {
+		for (p = drivers->children; p != 0; p = properties_next(p)) {			
+			if (properties_type(p) == PROPERTY_TYP_STRING) {
+				const char* path;
+
+				path = properties_valuestring(p);
+				if (path) {
+					Library library;
+
+					library_init(&library);
+					library_load(&library, path);
+					if (library.module) {
+						pfndriver_create fpdrivercreate;
+
+						fpdrivercreate = (pfndriver_create)
+						library_functionpointer(&library, "driver_create");
+						if (fpdrivercreate) {
+							Driver* driver;							
+
+							driver = fpdrivercreate();
+							if (driver && driver->properties) {
+								Properties* driverconfig;
+								Properties* driversection;
+								
+								driverconfig = properties_clone(driver->properties);
+								driversection = properties_createsection(
+									self->driverconfigurations,
+									properties_key(p));	
+								if (driverconfig) {									
+									driversection->children = driverconfig->children;
+									driverconfig->parent = driversection;
+								}
+								driver->dispose(driver);
+							}
+						}
+					}
+					library_dispose(&library);
+				}
+			}
+		}
+	}
 }
 
 void workspace_makemidi(Workspace* self)
@@ -517,24 +612,6 @@ void workspace_makemidi(Workspace* self)
 	self->midiconfigure = properties_settext(
 		properties_createsection(self->midi, "configure"),
 		"Configure");
-}
-
-void workspace_setdriverlist(Workspace* self)
-{
-	Properties* drivers;
-
-	properties_settext(self->inputoutput, "Input/Output");
-	// change number to set startup driver, if no psycle.ini found
-	drivers = properties_append_choice(self->inputoutput, "driver", 2); 
-	properties_settext(drivers, "Driver");
-	properties_append_string(drivers, "silent", "silentdriver");
-#if defined(_DEBUG)
-	properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
-	properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
-#else
-	properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
-	properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
-#endif
 }
 
 void workspace_updatemididriverlist(Workspace* self)
@@ -652,8 +729,28 @@ void workspace_configchanged(Workspace* self, Properties* property,
 			}
 		}
 	} else
-	if (properties_insection(property, self->driverconfigure)) {
-		player_restartdriver(&self->player);
+	if (properties_insection(property, self->driverconfigure)) {		
+		Properties* driversection;
+
+		player_restartdriver(&self->player, 0);		
+		driversection = properties_find(self->driverconfigurations, 
+			workspace_driverkey(self));
+		if (driversection) {
+			if (driversection->children) {
+				Properties* driverconfig;
+				properties_free(driversection->children);
+
+				driverconfig = 
+					properties_clone(self->player.driver->properties);
+				if (driverconfig) {
+					driversection->children = driverconfig->children;					
+					if (driversection->children) {
+						driversection->children->parent =
+							driversection->children;
+					}
+				}
+			}
+		}		
 	} else	
 	if (choice && properties_insection(property, self->midi)) {
 		if (strcmp(properties_key(choice), "mididriver") == 0) {
@@ -676,7 +773,8 @@ void workspace_configchanged(Workspace* self, Properties* property,
 		}		
 	} else
 	if (choice && (strcmp(properties_key(choice), "driver") == 0)) {
-		player_reloaddriver(&self->player, properties_valuestring(property));		
+		player_reloaddriver(&self->player, properties_valuestring(property),
+			workspace_driverconfiguration(self));
 		workspace_driverconfig(self);
 	} else
 	if (strcmp(properties_key(property), "defaultfontsize") == 0) {
@@ -845,10 +943,7 @@ Properties* workspace_pluginlist(Workspace* self)
 void workspace_load_configuration(Workspace* self)
 {		
 	propertiesio_load(self->config, "psycle.ini", 0);	
-	workspace_configaudio(self);
-	propertiesio_loadsection(self->config, "psycle.ini",
-		"inputoutput.configure", 0);
-	player_restartdriver(&self->player);
+	workspace_configaudio(self);	
 	eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
@@ -870,11 +965,6 @@ void workspace_setoctave(Workspace* self, int octave)
 int workspace_octave(Workspace* self)
 {
 	return self->octave;
-}
-
-void workspace_updatedriver(Workspace* self)
-{
-	player_restartdriver(&self->player);
 }
 
 void workspace_undo(Workspace* self)

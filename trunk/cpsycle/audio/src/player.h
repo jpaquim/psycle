@@ -56,9 +56,9 @@ beat_t player_bpm(Player*);
 void player_setlpb(Player*, uintptr_t lpb);
 uintptr_t player_lpb(Player*);
 // audio driver
-void player_loaddriver(Player*, const char* path);
-void player_reloaddriver(Player*, const char* path);
-void player_restartdriver(Player*);
+void player_loaddriver(Player*, const char* path, Properties* config);
+void player_reloaddriver(Player*, const char* path, Properties* config);
+void player_restartdriver(Player*, Properties* config);
 // event recording
 void player_startrecordingnotes(Player*);
 void player_stoprecordingnotes(Player*);

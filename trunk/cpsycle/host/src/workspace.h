@@ -52,6 +52,7 @@ typedef struct {
 	Properties* properties;
 	Properties* lang;	
 	Properties* driverconfigure;
+	Properties* driverconfigurations;
 	Properties* midiconfigure;	
 	Properties* cmds;
 	PluginCatcher plugincatcher;
@@ -100,7 +101,6 @@ Properties* workspace_pluginlist(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_setoctave(Workspace*, int octave);
-void workspace_updatedriver(Workspace*);
 int workspace_octave(Workspace*);
 int workspace_showsonginfoonload(Workspace*);
 int workspace_showaboutatstart(Workspace*);

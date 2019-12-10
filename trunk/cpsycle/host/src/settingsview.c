@@ -123,14 +123,14 @@ void settingsview_preparepropertiesenum(SettingsView* self)
 }
 
 int settingsview_onpropertiesdrawenum(SettingsView* self, Properties* property, int level)
-{		
+{			
 	settingsview_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 && properties_type(property) ==
 			PROPERTY_TYP_SECTION) {
 		settingsview_advanceline(self);
 	}
-	if (properties_hint(property) == PROPERTY_HINT_HIDE) {
-		return 1;
+	if (properties_hint(property) == PROPERTY_HINT_HIDE) {		
+		return 2;
 	}	
 	if (properties_type(property) == PROPERTY_TYP_CHOICE) {
 		self->currchoice = properties_value(property);
@@ -390,7 +390,7 @@ int settingsview_onpropertieshittestenum(SettingsView* self,
 	}
 	settingsview_addremoveident(self, level);
 	if (properties_hint(property) == PROPERTY_HINT_HIDE) {
-		return 1;
+		return 2;
 	}
 	if (properties_type(property) == PROPERTY_TYP_CHOICE) {
 		self->currchoice = properties_value(property);
@@ -415,7 +415,7 @@ int settingsview_onenumpropertyposition(SettingsView* self,
 		settingsview_advanceline(self);
 	}
 	if (properties_hint(property) == PROPERTY_HINT_HIDE) {
-		return 1;
+		return 2;
 	}
 	if (self->search == property) {		
 		return 0;
@@ -501,8 +501,10 @@ void settingsview_onmousedoubleclick(SettingsView* self, ui_component* sender,
 				self->selrect.top,
 				self->selrect.right - self->selrect.left, 
 				self->selrect.bottom - self->selrect.top);
-			ui_component_show(edit);
-			ui_component_setfocus(edit);
+			if (properties_hint(self->selected) != PROPERTY_HINT_READONLY) {				
+				ui_component_show(edit);
+				ui_component_setfocus(edit);
+			}			
 		}
 	}
 }

@@ -181,9 +181,13 @@ void work(Machine* self, BufferContext* bc)
 		numworksamples = (unsigned int)entry->delta - pos;		
 		if (numworksamples > 0) {				
 			int restorenumsamples = bc->numsamples;
-			
-			buffer_setoffset(bc->input, pos);
-			buffer_setoffset(bc->output, pos);			
+		
+			if (bc->input) {
+				buffer_setoffset(bc->input, pos);
+			}
+			if (bc->output) {
+				buffer_setoffset(bc->output, pos);
+			}
 			bc->numsamples = numworksamples;
 			if (!self->vtable->bypassed(self)) {
 				self->vtable->generateaudio(self, bc);
@@ -217,16 +221,24 @@ void work(Machine* self, BufferContext* bc)
 	}
 	if (amount > 0 && self->vtable->generateaudio) {
 		int restorenumsamples = bc->numsamples;
-		buffer_setoffset(bc->input, pos);
-		buffer_setoffset(bc->output, pos);			
+		if (bc->input) {
+			buffer_setoffset(bc->input, pos);
+		}
+		if (bc->output) {
+			buffer_setoffset(bc->output, pos);
+		}
 		bc->numsamples = amount;
 		if (!self->vtable->bypassed(self)) {
 			self->vtable->generateaudio(self, bc);
 		}
 		bc->numsamples = restorenumsamples;
 	}
-	buffer_setoffset(bc->input, 0);
-	buffer_setoffset(bc->output, 0);			
+	if (bc->input) {
+		buffer_setoffset(bc->input, 0);
+	}
+	if (bc->output) {
+		buffer_setoffset(bc->output, 0);
+	}
 }
 
 static int mode(Machine* self)

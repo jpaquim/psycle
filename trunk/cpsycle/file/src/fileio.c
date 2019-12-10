@@ -194,9 +194,7 @@ int psyfile_expect(PsyFile* self,
 		}
 		pData = (char*)pData + 1;
 	}
-	return 1;
-	
-	
+	return 1;	
 }
 
 uint32_t psyfile_seek(PsyFile* self,
