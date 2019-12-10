@@ -483,9 +483,10 @@ void DoBlocks(DXDriver* self)
 			while(blockSize > 0)
 			{
 				int n = blockSize;
+				int hostisplaying;
 				float *pFloatBlock = self->driver._pCallback(
 					self->driver._callbackContext, 
-					&n);
+					&n, &hostisplaying);
 				if (self->_dither)
 				{
 //					QuantizeWithDither(pFloatBlock, pBlock, n);
@@ -503,8 +504,9 @@ void DoBlocks(DXDriver* self)
 			while(blockSize > 0)
 			{
 				int n = blockSize;
+				int hostisplaying;
 				float *pFloatBlock = self->driver._pCallback(
-					self->driver._callbackContext, &n);
+					self->driver._callbackContext, &n, &hostisplaying);
 				if (self->_dither)
 				{
 					//QuantizeWithDither(pFloatBlock, pBlock, n);

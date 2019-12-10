@@ -18,6 +18,7 @@
 #define DRIVER_H
 
 #include <properties.h>
+#include <signal.h>
 #include "../dsp/src/dsptypes.h"
 
 typedef struct {
@@ -27,7 +28,7 @@ typedef struct {
 	char const *ShortName;					// "MME"	
 } AudioDriverInfo;
 
-typedef amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples);
+typedef amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples, int* playing);
 
 typedef struct Driver {
 	AUDIODRIVERWORKFN _pCallback;	
@@ -40,6 +41,7 @@ typedef struct Driver {
 	int (*close)(struct Driver*);
 	void (*connect)(struct Driver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
 	unsigned int (*samplerate)(struct Driver*);
+	Signal signal_stop;
 } Driver;
 
 

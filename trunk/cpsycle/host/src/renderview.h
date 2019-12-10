@@ -13,20 +13,14 @@
 #include <uicheckbox.h>
 #include "workspace.h"
 
-
 typedef struct {
 	ui_component component;
 	SettingsView view;
 	Properties* properties;
-	/*ui_component pathgroup;
-	ui_label pathdesc;
-	ui_edit pathedit;
-	ui_button browsebutton;
-	ui_component optiongroup;
-	ui_checkbox cbx0;
-	ui_checkbox cbx1;
-	ui_checkbox cbx2;
-	ui_button savebutton;*/
+	Workspace* workspace;
+	Driver* fileoutdriver;
+	Driver* curraudiodriver;
+	int restoreloopmode;
 } RenderView;
 
 void renderview_init(RenderView*, ui_component* parent,

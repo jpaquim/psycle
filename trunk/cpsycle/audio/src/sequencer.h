@@ -49,7 +49,7 @@ typedef struct {
 	List* delayedevents;
 	List* inputevents;	
 	SequencerPlayMode mode;	
-	int looping;
+	int looping;	
 	beat_t linetickcount;
 	SequencerJump jump;
 	SequenceRowDelay rowdelay;

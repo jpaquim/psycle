@@ -35,7 +35,7 @@ static void player_initsignals(Player*);
 static void player_disposerms(Player*);
 static void player_unloaddriver(Player*);
 static void player_unloadeventdrivers(Player*);
-static amp_t* work(Player*, int* numsamples);
+static amp_t* work(Player*, int* numsamples, int* stop);
 static void player_workamount(Player*, uintptr_t amount,
 	uintptr_t* numsamplex, amp_t** psamples);
 static void player_eventdriverinput(Player*, EventDriver* sender);
@@ -95,7 +95,7 @@ void player_dispose(Player* self)
 	eventdrivers_dispose(&self->eventdrivers);	
 	signal_dispose(&self->signal_numsongtrackschanged);
 	signal_dispose(&self->signal_lpbchanged);
-	signal_dispose(&self->signal_inputevent);
+	signal_dispose(&self->signal_inputevent);	
 	sequencer_dispose(&self->sequencer);		
 	player_disposerms(self);
 	table_dispose(&self->notestotracks);
@@ -117,7 +117,7 @@ void player_disposerms(Player* self)
 
 // sound driver callback
 
-amp_t* work(Player* self, int* numsamples)
+amp_t* work(Player* self, int* numsamples, int* hostisplaying)
 {	
 	uintptr_t maxamount;
 	uintptr_t amount;
@@ -125,7 +125,7 @@ amp_t* work(Player* self, int* numsamples)
 	amp_t* psamples;	
 	
 	psamples = bufferdriver;
-	numsamplex = *numsamples;	
+	numsamplex = *numsamples;
 	maxamount = numsamplex > MAX_STREAM_SIZE ? MAX_STREAM_SIZE : numsamplex;
 	lock_enter();
 	do {		
@@ -150,6 +150,7 @@ amp_t* work(Player* self, int* numsamples)
 		}
 	} while (numsamplex > 0);
 	lock_leave();
+	*hostisplaying = sequencer_playing(&self->sequencer);	
 	return bufferdriver;
 }
 
@@ -496,7 +497,18 @@ uintptr_t player_lpb(Player* self)
 	return sequencer_lpb(&self->sequencer);
 }
 
-// Driver load, unload, restart, ..., methods
+// Driver set, get, load, unload, restart, ..., methods
+
+void player_setaudiodriver(Player* self, Driver* driver)
+{
+	self->driver = driver;
+	driver->connect(driver, self, work, mainframe);
+}
+
+Driver* player_audiodriver(Player* self)
+{
+	return self->driver;
+}
 
 void player_loaddriver(Player* self, const char* path, Properties* config)
 {

@@ -152,6 +152,10 @@ SOURCE=.\src\exclusivelock.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\fileoutdriver.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\inputmap.c
 # End Source File
 # Begin Source File
@@ -600,6 +604,10 @@ SOURCE=.\src\eventdrivers.h
 # Begin Source File
 
 SOURCE=.\src\exclusivelock.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\fileoutdriver.h
 # End Source File
 # Begin Source File
 

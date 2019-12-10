@@ -5,12 +5,19 @@
 
 #include "renderview.h"
 
+#include <fileoutdriver.h>
+
 static void renderview_ondestroy(RenderView*, ui_component* sender);
 static void renderview_makeproperties(RenderView*);
+static void renderview_onsettingsviewchanged(RenderView*, SettingsView* sender,
+	Properties*);
+static void renderview_render(RenderView*);
+static void renderview_onstoprendering(RenderView*, Driver* sender);
 
 void renderview_init(RenderView* self, ui_component* parent,
 	ui_component* tabbarparent, Workspace* workspace)
 {	
+	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	signal_connect(&self->component.signal_destroy, self,
 		renderview_ondestroy);
@@ -18,12 +25,17 @@ void renderview_init(RenderView* self, ui_component* parent,
 	renderview_makeproperties(self);
 	settingsview_init(&self->view, &self->component, tabbarparent,
 		self->properties);
+	signal_connect(&self->view.signal_changed, self,
+		renderview_onsettingsviewchanged);
 	ui_component_setalign(&self->view.component, UI_ALIGN_CLIENT);
+	self->fileoutdriver = create_fileout_driver();
 }
 
 void renderview_ondestroy(RenderView* self, ui_component* sender)
 {
-	properties_free(self->properties);
+	properties_free(self->properties);	
+	self->fileoutdriver->dispose(self->fileoutdriver);
+	self->fileoutdriver->free(self->fileoutdriver);
 }
 
 void renderview_makeproperties(RenderView* self)
@@ -40,8 +52,10 @@ void renderview_makeproperties(RenderView* self)
 	self->properties = properties_create();
 	actions = properties_settext(
 		properties_createsection(self->properties, "actions"),
-		"Render");	
-	properties_append_action(actions, "Save Wave");	
+		"Render");
+	properties_settext(
+		properties_append_action(actions, "savewave"),
+		"Save wave");
 	filesave = properties_settext(
 		properties_createsection(self->properties, "filesave"),
 		"File");
@@ -116,3 +130,35 @@ void renderview_makeproperties(RenderView* self)
 	);	
 }
 
+void renderview_onsettingsviewchanged(RenderView* self, SettingsView* sender,
+	Properties* property)
+{
+	if (properties_type(property) == PROPERTY_TYP_ACTION) {
+		if (strcmp(properties_key(property), "savewave") == 0) {
+			renderview_render(self);
+		}
+	}
+}
+
+void renderview_render(RenderView* self)
+{	
+	self->curraudiodriver = player_audiodriver(&self->workspace->player);
+	self->curraudiodriver->close(self->curraudiodriver);
+	player_setaudiodriver(&self->workspace->player, self->fileoutdriver);
+	self->restoreloopmode = self->workspace->player.sequencer.looping;
+	self->workspace->player.sequencer.looping = 0;
+	player_setposition(&self->workspace->player, 0);
+	player_start(&self->workspace->player);	
+	signal_connect(&self->fileoutdriver->signal_stop, self,
+		renderview_onstoprendering);
+	self->fileoutdriver->open(self->fileoutdriver);
+}
+
+void renderview_onstoprendering(RenderView* self, Driver* sender)
+{
+	player_stop(&self->workspace->player);
+	player_setaudiodriver(&self->workspace->player, self->curraudiodriver);
+	self->workspace->player.sequencer.looping = self->restoreloopmode;
+	self->curraudiodriver->open(self->curraudiodriver);
+	self->fileoutdriver->close(self->fileoutdriver);
+}
