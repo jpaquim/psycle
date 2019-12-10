@@ -12,7 +12,7 @@ static int driver_init(Driver*);
 static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
 static int driver_open(Driver*);
-static void driver_configure(Driver*);
+static void driver_configure(Driver*, Properties*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
 static unsigned int samplerate(Driver*);
@@ -70,7 +70,7 @@ int driver_close(Driver* driver)
 	return 0;
 }
 
-void driver_configure(Driver* driver)
+void driver_configure(Driver* driver, Properties* config)
 {
 
 }
@@ -83,10 +83,13 @@ unsigned int samplerate(Driver* self)
 void init_properties(Driver* self)
 {		
 	self->properties = properties_create();
-	properties_append_string(self->properties, "name", "Silent Driver");
-	properties_append_string(self->properties, "version", "1.0");	
-	properties_append_int(self->properties, "bitdepth", 16, 0, 32);
-	properties_append_int(self->properties, "samplerate", 44100, 0, 0);
-	properties_append_int(self->properties, "dither", 0, 0, 1);	
-	properties_append_int(self->properties, "numsamples", 256, 128, 8193);	
+	properties_sethint(
+		properties_append_string(self->properties, "name", "Silent Driver"),
+		PROPERTY_HINT_READONLY);
+	properties_sethint(
+		properties_append_string(self->properties, "vendor", "Psycedelics"),
+		PROPERTY_HINT_READONLY);
+	properties_sethint(
+		properties_append_string(self->properties, "version", "1.0"),
+		PROPERTY_HINT_READONLY);
 }

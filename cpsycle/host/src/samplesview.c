@@ -292,7 +292,7 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	samplessongimportview_init(&self->songimport,
 		&self->clientnotebook.component, self, workspace);
 	sampleeditor_init(&self->sampleeditor,
-		&self->clientnotebook.component);	
+		&self->clientnotebook.component, workspace);	
 	ui_notebook_setpageindex(&self->clientnotebook, 0);
 	signal_connect(&workspace->signal_songchanged, self,
 		samplesview_onsongchanged);

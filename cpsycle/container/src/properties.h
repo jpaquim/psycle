@@ -18,6 +18,7 @@ typedef enum {
 
 typedef enum {
 	PROPERTY_HINT_HIDE,
+	PROPERTY_HINT_READONLY,
 	PROPERTY_HINT_EDIT,
 	PROPERTY_HINT_EDITDIR,
 	PROPERTY_HINT_INPUT,
@@ -39,6 +40,7 @@ typedef struct {
 	int typ;
 	int hint;	
 	int disposechildren;
+	int save;
 	int id;
 } Property;
 

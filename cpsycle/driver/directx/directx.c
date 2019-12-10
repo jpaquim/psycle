@@ -68,7 +68,7 @@ static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,vo
 static int driver_open(Driver*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
-static void driver_configure(Driver*);
+static void driver_configure(Driver*, Properties*);
 static unsigned int driver_samplerate(Driver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
@@ -176,8 +176,15 @@ static void init_properties(Driver* self)
 	Properties* property;	
 
 	self->properties = properties_create();
-	properties_append_string(self->properties, "name", "directsound");
-	properties_append_string(self->properties, "version", "1.0");
+	properties_sethint(
+		properties_append_string(self->properties, "name", "directsound"),
+		PROPERTY_HINT_READONLY);
+	properties_sethint(
+		properties_append_string(self->properties, "vendor", "Psycedelics"),
+		PROPERTY_HINT_READONLY);
+	properties_sethint(
+		properties_append_string(self->properties, "version", "1.0"),
+		PROPERTY_HINT_READONLY);
 	property = properties_append_choice(self->properties, "device", -1);	
 	properties_append_int(self->properties, "bitdepth", 16, 0, 32);
 	properties_append_int(self->properties, "samplerate", 44100, 0, 0);
@@ -186,28 +193,33 @@ static void init_properties(Driver* self)
 	properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
-void driver_configure(Driver* driver)
+void driver_configure(Driver* driver, Properties* config)
 {
 	DXDriver* self;
 	Properties* property;
 
 	self = (DXDriver*) driver;
-	property = properties_read(self->driver.properties, "bitdepth");
-	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
-		self->_bitDepth = property->item.value.i;
+	if (config) {
+		properties_free(self->driver.properties);
+		self->driver.properties = properties_clone(config);
+	} else {
+		property = properties_read(self->driver.properties, "bitdepth");
+		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+			self->_bitDepth = property->item.value.i;
+		}
+		property = properties_read(self->driver.properties, "samplerate");
+		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+			self->_samplesPerSec = property->item.value.i;
+		}
+		property = properties_read(self->driver.properties, "numbuf");
+		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+			self->_numBuffers = property->item.value.i;
+		}
+		property = properties_read(self->driver.properties, "numsamples");
+		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+			self->_bufferSize = property->item.value.i;
+		}
 	}
-	property = properties_read(self->driver.properties, "samplerate");
-	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
-		self->_samplesPerSec = property->item.value.i;
-	}
-	property = properties_read(self->driver.properties, "numbuf");
-	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
-		self->_numBuffers = property->item.value.i;
-	}
-	property = properties_read(self->driver.properties, "numsamples");
-	if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
-		self->_bufferSize = property->item.value.i;
-	}	
 }
 
 unsigned int driver_samplerate(Driver* self)

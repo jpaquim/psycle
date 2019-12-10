@@ -34,7 +34,6 @@ static void mainframe_onmouseup(MainFrame*, ui_component* sender,
 static void mainframe_ongear(MainFrame*, ui_component* sender);
 static void mainframe_ongearcreate(MainFrame*, ui_component* sender);
 static void mainframe_onaboutok(MainFrame*, ui_component* sender);
-static void mainframe_onupdatedriver(MainFrame*, ui_component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
 	Properties*);
@@ -635,11 +634,6 @@ void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
 	Properties* property)
 {
 	workspace_configchanged(&self->workspace, property, sender->choiceproperty);	
-}
-
-void mainframe_onupdatedriver(MainFrame* self, ui_component* sender)
-{
-	workspace_updatedriver(&self->workspace);
 }
 
 int mainframe_showmaximizedatstart(MainFrame* self)

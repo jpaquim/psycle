@@ -37,7 +37,7 @@ static int vtable_initialized = 0;
 static void vtable_init(DummyMachine* self)
 {
 	if (!vtable_initialized) {
-		vtable = *self->machine.machine.vtable;
+		vtable = *self->custommachine.machine.vtable;
 		vtable.mode = (fp_machine_mode) mode;
 		vtable.info = (fp_machine_info) info;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
@@ -48,8 +48,8 @@ static void vtable_init(DummyMachine* self)
 
 void dummymachine_init(DummyMachine* self, MachineCallback callback)
 {	
-	Machine* base = (Machine*)self;
-	machine_init(base, callback);
-	vtable_init(self);
 	self->mode = MACHMODE_FX;
+	custommachine_init(&self->custommachine, callback);
+	vtable_init(self);
+	self->custommachine.machine.vtable = &vtable;
 }

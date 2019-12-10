@@ -73,7 +73,7 @@ void vumeter_onsongchanged(Vumeter* self, Workspace* workspace)
 {	
 	self->leftavg = 0;
 	self->rightavg = 0;
-	vumeter_connectmachinessignals(self, workspace);	
+	vumeter_connectmachinessignals(self, workspace);
 }
 
 void vumeter_connectmachinessignals(Vumeter* self, Workspace* workspace)

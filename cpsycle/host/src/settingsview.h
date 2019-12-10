@@ -30,7 +30,7 @@ typedef struct {
 	int choicecount;
 	int lineheight;
 	int columnwidth;
-	int identwidth;
+	int identwidth;	
 	Properties* choiceproperty;
 	ui_edit edit;
 	InputDefiner inputdefiner;

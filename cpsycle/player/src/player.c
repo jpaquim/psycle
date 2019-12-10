@@ -166,7 +166,7 @@ void cmdplayer_init(CmdPlayer* self)
 	cmdplayer_initplugincatcherandmachinefactory(self);
 	self->song = song_allocinit(&self->machinefactory);	
 	player_init(&self->player, self->song, (void*)0);	
-	player_loaddriver(&self->player, cmdplayer_driverpath(self));	
+	player_loaddriver(&self->player, cmdplayer_driverpath(self), 0);	
 	printf("Audio driver %s \n", 
 		properties_readstring(self->player.driver->properties, "name",
 		"no description"));
