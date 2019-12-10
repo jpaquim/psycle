@@ -25,15 +25,16 @@ typedef struct {
 	Signal signal_numsongtrackschanged;
 	Signal signal_lpbchanged;
 	Signal signal_inputevent;
+	Signal signal_stop;
 	Library drivermodule;
 	EventDrivers eventdrivers;
 	Table rms;	
 	VUMeterMode vumode;
 	int resetvumeters;
 	int recordingnotes;
-	int multichannelaudition;
+	int multichannelaudition;	
 	Table notestotracks;
-	Table trackstonotes;	
+	Table trackstonotes;
 } Player;
 
 // init dispose
@@ -56,6 +57,8 @@ beat_t player_bpm(Player*);
 void player_setlpb(Player*, uintptr_t lpb);
 uintptr_t player_lpb(Player*);
 // audio driver
+void player_setaudiodriver(Player*, Driver* driver);
+Driver* player_audiodriver(Player*);
 void player_loaddriver(Player*, const char* path, Properties* config);
 void player_reloaddriver(Player*, const char* path, Properties* config);
 void player_restartdriver(Player*, Properties* config);

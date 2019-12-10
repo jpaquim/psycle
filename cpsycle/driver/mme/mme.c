@@ -354,6 +354,7 @@ void PollerThread(void * self)
 void DoBlocks(MmeDriver* self)
 {
 	CBlock *pb = self->_blocks + self->_currentBlock;
+	int hostisplaying;
 
 	while(pb->pHeader->dwFlags & WHDR_DONE)
 	{
@@ -373,7 +374,7 @@ void DoBlocks(MmeDriver* self)
 		do
 		{
 			int n = bs;
-			float *pBuf = self->driver._pCallback(self->driver._callbackContext, &n);
+			float *pBuf = self->driver._pCallback(self->driver._callbackContext, &n, &hostisplaying);
 			if (self->_stopPolling == TRUE) {
 				break;
 			}

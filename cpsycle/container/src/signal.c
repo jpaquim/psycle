@@ -55,11 +55,13 @@ void signal_connect(Signal* self, void* context, void* fp)
 		p = p->next;
 	}
 	if (!connected) {
-		Slot* node = (Slot*)malloc(sizeof(Slot));
-		node->context = context;
-		node->fp = fp;
-		node->prevented = 0;		
-		list_append(&self->slots, node);		
+		Slot* slot;
+		
+		slot = (Slot*)malloc(sizeof(Slot));
+		slot->context = context;
+		slot->fp = fp;
+		slot->prevented = 0;
+		list_append(&self->slots, slot);
 	}
 }
 
@@ -68,7 +70,7 @@ void signal_disconnect(Signal* self, void* context, void* fp)
 	List* p;	
 
 	p = self->slots;
-	while (p != 0) {
+	while (p != 0) {		
 		Slot* slot = (Slot*) p->entry;
 		if (slot->context == context && slot->fp == fp) {
 			list_remove(&self->slots, p);
@@ -126,7 +128,7 @@ void signal_emit_int(Signal* self, void* context, intptr_t param)
 		List* p = self->slots;
 		for (p = self->slots; p != 0; p = p->next) {
 			Slot* slot = (Slot*) p->entry;
-			if (!slot->prevented) {				
+			if (!slot->prevented) {
 				((signalcallback_int)slot->fp)(slot->context, context, param);
 			}
 		}
@@ -139,7 +141,9 @@ void signal_emit_float(Signal* self, void* context, float param)
 		List* p = self->slots;
 		for (p = self->slots; p != 0; p = p->next) {
 			Slot* slot = (Slot*) p->entry;
-			((signalcallback_float)slot->fp)(slot->context, context, param);			
+			if (!slot->prevented) {
+				((signalcallback_float)slot->fp)(slot->context, context, param);
+			}
 		}
 	}
 }
@@ -171,11 +175,16 @@ void signal_emit(Signal* self, void* context, int num, ...)
 void signal_notify(Signal* self, void* sender)
 {
 	if (self->slots) {
-		List* ptr = self->slots;
-		while (ptr) {				
-			Slot* slot = (Slot*) ptr->entry;
-			((signalcallback0)slot->fp)(slot->context, sender);
-			ptr = ptr->next;
+		List* p;
+		List* q;
+				
+		for (p = self->slots; p != 0; p = q) {			
+			Slot* slot = (Slot*) p->entry;
+
+			q = p->next;
+			if (!slot->prevented) {
+				((signalcallback0)slot->fp)(slot->context, sender);
+			}			
 		}
 	}
 }
@@ -186,7 +195,9 @@ void signal_notify_int(Signal* self, void* sender, intptr_t param)
 		List* ptr = self->slots;
 		while (ptr) {				
 			Slot* slot = (Slot*) ptr->entry;
-			((signalcallback_int)slot->fp)(slot->context, sender, param);
+			if (!slot->prevented) {
+				((signalcallback_int)slot->fp)(slot->context, sender, param);
+			}
 			ptr = ptr->next;
 		}
 	}
@@ -198,7 +209,9 @@ void signal_notify1(Signal* self, void* sender, void* param)
 		List* ptr = self->slots;
 		while (ptr) {
 			Slot* slot = (Slot*)ptr->entry;
-			((signalcallback1)slot->fp)(slot->context, sender, param);
+			if (!slot->prevented) {
+				((signalcallback1)slot->fp)(slot->context, sender, param);
+			}
 			ptr = ptr->next;
 		}
 	}
@@ -210,7 +223,9 @@ void signal_notify2(Signal* self, void* sender, void* param1, void* param2)
 		List* ptr = self->slots;
 		while (ptr) {				
 			Slot* slot = (Slot*) ptr->entry;
-			((signalcallback2)slot->fp)(slot->context, sender, param1, param2);
+			if (!slot->prevented) {
+				((signalcallback2)slot->fp)(slot->context, sender, param1, param2);
+			}
 			ptr = ptr->next;
 		}
 	}
@@ -222,7 +237,9 @@ void signal_notify3(Signal* self, void* sender, void* param1, void* param2, void
 		List* ptr = self->slots;
 		while (ptr) {				
 			Slot* slot = (Slot*) ptr->entry;
-			((signalcallback3)slot->fp)(slot->context, sender, param1, param2, param3);
+			if (!slot->prevented) {
+				((signalcallback3)slot->fp)(slot->context, sender, param1, param2, param3);
+			}
 			ptr = ptr->next;
 		}
 	}

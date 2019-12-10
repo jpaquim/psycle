@@ -10,11 +10,11 @@
 typedef struct {
 	void* fp;
 	void* context;
-	int prevented;
+	int prevented;	
 } Slot;
 
 typedef struct {
-	List* slots;
+	List* slots;	
 } Signal;
 
 void signal_init(Signal*);
