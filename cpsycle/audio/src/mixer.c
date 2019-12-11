@@ -19,6 +19,7 @@ const MachineInfo* mixer_info(void)
 		MI_VERSION,
 		0x0250,
 		GENERATOR | 32 | 64,
+		MACHMODE_GENERATOR,
 		"Mixer"
 			#ifndef NDEBUG
 			" (debug build)"
@@ -179,8 +180,10 @@ void mixer_init(Mixer* self, MachineCallback callback)
 	table_init(&self->sends);
 	table_init(&self->returns);
 	machines = base->vtable->machines(base);
-	signal_connect(&machines->connections.signal_connected, self, onconnected);
-	signal_connect(&machines->connections.signal_disconnected, self, ondisconnected);
+	psy_signal_connect(&machines->connections.signal_connected, self,
+		onconnected);
+	psy_signal_connect(&machines->connections.signal_disconnected, self,
+		ondisconnected);
 	rmsvol_init(&self->masterrmsvol);
 	mixerchannel_init(&self->master, 0);	
 	self->slot = 65535;
@@ -361,7 +364,7 @@ void workreturns(Mixer* self, Machines* machines, unsigned int amount)
 			channel->fx->vtable->work(channel->fx, &bc);
 		//	buffer_pan(fxbuffer, fx->panning(fx), amount);
 		//	buffer_pan(fxbuffer, channel->panning, amount);
-			signal_emit(&channel->fx->signal_worked, channel->fx, 2, 
+			psy_signal_emit(&channel->fx->signal_worked, channel->fx, 2, 
 				channel->fxslot, &bc);
 			if (channel->sendsto.count >=0 ) {
 				for (sendsto_iter = table_begin(&channel->sendsto);
@@ -514,9 +517,9 @@ const MachineInfo* info(Mixer* self)
 	return mixer_info();
 }
 
-static amp_t dB2Amp(amp_t db)
+static psy_dsp_amp_t dB2Amp(psy_dsp_amp_t db)
 {	
-	return (amp_t) pow(10.0f, db / 20.0f);
+	return (psy_dsp_amp_t) pow(10.0f, db / 20.0f);
 }
 
 void patterntweak(Mixer* self, int numparam, int value)
@@ -533,7 +536,7 @@ void patterntweak(Mixer* self, int numparam, int value)
 			if (value == 0) {
 				self->master.volume = 0.0f;
 			} else {
-				amp_t dbs = (value/42.67f)-96.0f;
+				psy_dsp_amp_t dbs = (value/42.67f)-96.0f;
 				self->master.volume = dB2Amp(dbs);
 			}			
 		} else 
@@ -589,7 +592,7 @@ void patterntweak(Mixer* self, int numparam, int value)
 				if (value == 0) {
 					channel->volume = 0.0f;
 				} else {
-					amp_t dbs = (value/42.67f)-96.0f;
+					psy_dsp_amp_t dbs = (value/42.67f)-96.0f;
 					channel->volume = dB2Amp(dbs);
 				}
 			}
@@ -847,7 +850,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 		if (row == self->sends.count + 2) {
 			float db;
 
-			db = (amp_t)(20 * log10(self->master.gain));
+			db = (psy_dsp_amp_t)(20 * log10(self->master.gain));
 			psy_snprintf(txt, 10, "%.2f dB", db);
 			return 1;			
 		} else
@@ -868,7 +871,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 		if (row == self->sends.count + 8) {
 			float db;
 
-			db = (amp_t)(20 * log10(self->master.volume));
+			db = (psy_dsp_amp_t)(20 * log10(self->master.volume));
 			psy_snprintf(txt, 10, "%.2f dB", db);
 			return 1;
 		}
@@ -890,7 +893,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 				return 1;								
 			} else
 			if (row > 0 && row < self->sends.count + 1) {
-				amp_t sendvol;
+				psy_dsp_amp_t sendvol;
 				sendvol = (int) (ptrdiff_t)table_at(&channel->sendvols, row - 1) / 65535.f;
 				if (sendvol == 0.0f) {
 					strcpy(txt,"Off");
@@ -910,7 +913,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 				if (input_entry) {
 					float db;
 
-					db = (amp_t)(20 * log10(input_entry->volume));
+					db = (psy_dsp_amp_t)(20 * log10(input_entry->volume));
 					psy_snprintf(txt, 10, "%.2f dB", db);
 					return 1;
 				}
@@ -932,7 +935,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			if (row == self->sends.count + 8) {
 				float db;
 
-				db = (amp_t)(20 * log10(channel->volume));
+				db = (psy_dsp_amp_t)(20 * log10(channel->volume));
 				psy_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
 			}
@@ -979,7 +982,7 @@ int describevalue(Mixer* self, char* txt, int const param, int const value)
 			if (row == self->sends.count + 8) {
 				float db;
 
-				db = (amp_t)(20 * log10(channel->volume));
+				db = (psy_dsp_amp_t)(20 * log10(channel->volume));
 				psy_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
 			}
@@ -1239,8 +1242,10 @@ void loadspecific(Mixer* self, struct SongFile* songfile, unsigned int slot)
 		}
 	}
 
-	signal_connect(&songfile->song->machines.connections.signal_connected, self, onconnected);
-	signal_connect(&songfile->song->machines.connections.signal_disconnected, self, ondisconnected);
+	psy_signal_connect(&songfile->song->machines.connections.signal_connected,
+		self, onconnected);
+	psy_signal_connect(&songfile->song->machines.connections.signal_disconnected,
+		self, ondisconnected);
 	// return true;
 }
 

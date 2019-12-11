@@ -46,11 +46,11 @@ void InitParamView(ParamView* self, ui_component* parent, Machine* machine,
 	self->machine = machine;
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, OnDraw);	
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
-	signal_connect(&self->component.signal_mousemove,self, OnMouseMove);
-	signal_connect(&self->component.signal_timer,self, OnTimer);	
+	psy_signal_connect(&self->component.signal_draw, self, OnDraw);	
+	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	psy_signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
+	psy_signal_connect(&self->component.signal_mousemove,self, OnMouseMove);
+	psy_signal_connect(&self->component.signal_timer,self, OnTimer);	
 	ui_component_resize(&self->component, 800, 400);
 	if (self->machine) {
 		self->numparams = self->machine->vtable->numparameters(self->machine);

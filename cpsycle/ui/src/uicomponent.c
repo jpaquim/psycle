@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uicomponent.h"
+#include "uiapp.h"
 #include "uimenu.h"
 #include "hashtbl.h"
 #include <memory.h>
@@ -48,7 +49,9 @@ void ui_init(uintptr_t hInstance)
 	INITCOMMONCONTROLSEX icex;
 	ui_fontinfo fontinfo;
 	int succ;
-	
+
+	psy_signal_init(&app.signal_dispose);
+
 	table_init(&selfmap);
 	table_init(&winidmap);
 
@@ -95,10 +98,12 @@ void ui_init(uintptr_t hInstance)
 
 void ui_dispose()
 {
+	psy_signal_emit(&app.signal_dispose, &app, 0);
 	table_dispose(&selfmap);
 	table_dispose(&winidmap);
 	DeleteObject(defaultfont.hfont);
 	DeleteObject(defaultbackgroundbrush);
+	psy_signal_dispose(&app.signal_dispose);
 }
 
 
@@ -195,30 +200,30 @@ void ui_component_init(ui_component* component, ui_component* parent)
 
 void ui_component_init_signals(ui_component* component)
 {
-	signal_init(&component->signal_size);
-	signal_init(&component->signal_draw);
-	signal_init(&component->signal_timer);
-	signal_init(&component->signal_keydown);
-	signal_init(&component->signal_keyup);
-	signal_init(&component->signal_mousedown);
-	signal_init(&component->signal_mouseup);
-	signal_init(&component->signal_mousemove);
-	signal_init(&component->signal_mousewheel);
-	signal_init(&component->signal_mousedoubleclick);
-	signal_init(&component->signal_mouseenter);
-	signal_init(&component->signal_mousehover);
-	signal_init(&component->signal_mouseleave);
-	signal_init(&component->signal_scroll);
-	signal_init(&component->signal_create);
-	signal_init(&component->signal_destroy);
-	signal_init(&component->signal_show);
-	signal_init(&component->signal_hide);
-	signal_init(&component->signal_focus);
-	signal_init(&component->signal_focuslost);
-	signal_init(&component->signal_align);
-	signal_init(&component->signal_preferredsize);
-	signal_init(&component->signal_windowproc);
-	signal_init(&component->signal_command);
+	psy_signal_init(&component->signal_size);
+	psy_signal_init(&component->signal_draw);
+	psy_signal_init(&component->signal_timer);
+	psy_signal_init(&component->signal_keydown);
+	psy_signal_init(&component->signal_keyup);
+	psy_signal_init(&component->signal_mousedown);
+	psy_signal_init(&component->signal_mouseup);
+	psy_signal_init(&component->signal_mousemove);
+	psy_signal_init(&component->signal_mousewheel);
+	psy_signal_init(&component->signal_mousedoubleclick);
+	psy_signal_init(&component->signal_mouseenter);
+	psy_signal_init(&component->signal_mousehover);
+	psy_signal_init(&component->signal_mouseleave);
+	psy_signal_init(&component->signal_scroll);
+	psy_signal_init(&component->signal_create);
+	psy_signal_init(&component->signal_destroy);
+	psy_signal_init(&component->signal_show);
+	psy_signal_init(&component->signal_hide);
+	psy_signal_init(&component->signal_focus);
+	psy_signal_init(&component->signal_focuslost);
+	psy_signal_init(&component->signal_align);
+	psy_signal_init(&component->signal_preferredsize);
+	psy_signal_init(&component->signal_windowproc);
+	psy_signal_init(&component->signal_command);
 }
 
 void ui_component_init_base(ui_component* self) {
@@ -246,35 +251,36 @@ void ui_component_init_base(ui_component* self) {
 	self->cursor = UI_CURSOR_DEFAULT;
 	ui_component_setfont(self, &defaultfont);
 	ui_component_setbackgroundcolor(self, self->backgroundcolor);
-	signal_connect(&self->signal_preferredsize, self, onpreferredsize);
+	psy_signal_connect(&self->signal_preferredsize, self,
+		onpreferredsize);
 }
 
 void ui_component_dispose(ui_component* component)
 {	
-	signal_dispose(&component->signal_size);
-	signal_dispose(&component->signal_draw);
-	signal_dispose(&component->signal_timer);
-	signal_dispose(&component->signal_keydown);
-	signal_dispose(&component->signal_keyup);
-	signal_dispose(&component->signal_mousedown);
-	signal_dispose(&component->signal_mouseup);
-	signal_dispose(&component->signal_mousemove);
-	signal_dispose(&component->signal_mousewheel);
-	signal_dispose(&component->signal_mousedoubleclick);
-	signal_dispose(&component->signal_mouseenter);
-	signal_dispose(&component->signal_mousehover);
-	signal_dispose(&component->signal_mouseleave);
-	signal_dispose(&component->signal_scroll);
-	signal_dispose(&component->signal_create);
-	signal_dispose(&component->signal_destroy);
-	signal_dispose(&component->signal_show);
-	signal_dispose(&component->signal_hide);
-	signal_dispose(&component->signal_focus);
-	signal_dispose(&component->signal_focuslost);
-	signal_dispose(&component->signal_align);
-	signal_dispose(&component->signal_preferredsize);
-	signal_dispose(&component->signal_windowproc);
-	signal_dispose(&component->signal_command);
+	psy_signal_dispose(&component->signal_size);
+	psy_signal_dispose(&component->signal_draw);
+	psy_signal_dispose(&component->signal_timer);
+	psy_signal_dispose(&component->signal_keydown);
+	psy_signal_dispose(&component->signal_keyup);
+	psy_signal_dispose(&component->signal_mousedown);
+	psy_signal_dispose(&component->signal_mouseup);
+	psy_signal_dispose(&component->signal_mousemove);
+	psy_signal_dispose(&component->signal_mousewheel);
+	psy_signal_dispose(&component->signal_mousedoubleclick);
+	psy_signal_dispose(&component->signal_mouseenter);
+	psy_signal_dispose(&component->signal_mousehover);
+	psy_signal_dispose(&component->signal_mouseleave);
+	psy_signal_dispose(&component->signal_scroll);
+	psy_signal_dispose(&component->signal_create);
+	psy_signal_dispose(&component->signal_destroy);
+	psy_signal_dispose(&component->signal_show);
+	psy_signal_dispose(&component->signal_hide);
+	psy_signal_dispose(&component->signal_focus);
+	psy_signal_dispose(&component->signal_focuslost);
+	psy_signal_dispose(&component->signal_align);
+	psy_signal_dispose(&component->signal_preferredsize);
+	psy_signal_dispose(&component->signal_windowproc);
+	psy_signal_dispose(&component->signal_command);
 	if (component->font.hfont && component->font.hfont != defaultfont.hfont) {
 		ui_font_dispose(&component->font);
 	}
@@ -299,13 +305,16 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		{
 			case WM_DESTROY:
 				if (component->signal_destroy.slots) {
-					signal_emit(&component->signal_destroy, component, 0);
+					psy_signal_emit(&component->signal_destroy, component,
+						0);
 				}
 				ui_component_dispose(component);
+				return 0;
 			break;
 			case WM_TIMER:				
 				if (component && component->signal_timer.slots) {
-					signal_emit(&component->signal_timer, component, 1, (int) wParam);					
+					psy_signal_emit(&component->signal_timer, component, 1,
+						(int) wParam);
 				}
 			case WM_KEYDOWN:				
 				if (component->signal_keydown.slots) {
@@ -313,12 +322,12 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					
 					keyevent_init(&keyevent, (int)wParam, lParam, 
 						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-					signal_emit(&component->signal_keydown, component, 1, &keyevent);
+					psy_signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}				
 			break;
 			case WM_KILLFOCUS:
 				if (component->signal_focuslost.slots) {
-					signal_emit(&component->signal_focuslost, component, 0);					
+					psy_signal_emit(&component->signal_focuslost, component, 0);
 				}
 			break;
 		break;		
@@ -342,7 +351,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 	component = table_at(&selfmap, (uintptr_t) hwnd);	
 	if (component && component->signal_windowproc.slots) {				
-		signal_emit(&component->signal_windowproc, component, 3, (LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
+		psy_signal_emit(&component->signal_windowproc, component, 3, 
+			(LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
 		if (component->preventdefault) {					
 			return 0;
 		} else {
@@ -355,9 +365,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		{		
 			case WM_SHOWWINDOW:							
 				if (wParam == TRUE) {
-					signal_emit(&component->signal_show, component, 0);
+					psy_signal_emit(&component->signal_show, component, 0);
 				} else {
-					signal_emit(&component->signal_hide, component, 0);
+					psy_signal_emit(&component->signal_hide, component, 0);
 				}
 				return 0 ;				
 			break;		
@@ -369,13 +379,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 					size.width = LOWORD(lParam);
 					size.height = HIWORD(lParam);
-					signal_emit(&component->signal_size, component, 1, (void*)&size);
+					psy_signal_emit(&component->signal_size, component, 1,
+						(void*)&size);
 					return 0 ;
 				}			
 			break;
 			case WM_TIMER:			
 				if (component->signal_timer.slots) {
-					signal_emit(&component->signal_timer, component, 1, (int) wParam);				
+					psy_signal_emit(&component->signal_timer, component, 1,
+						(int) wParam);				
 					return 0 ;
 				}
 			break;		
@@ -409,14 +421,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			  }
 			  component = table_at(&winidmap, (uintptr_t) LOWORD(wParam));
 			  if (component && component->signal_command.slots) {
-					signal_emit(&component->signal_command, component, 2, wParam, lParam);				
+					psy_signal_emit(&component->signal_command, component, 2, 
+						wParam, lParam);
 					return 0;
 				}
 			  return 0 ;  
 			break;          
 			case WM_CREATE:			
 				if (component->signal_create.slots) {	
-					signal_emit(&component->signal_create, component, 0);
+					psy_signal_emit(&component->signal_create, component, 0);
 				}
 				return 0 ;
 			break;
@@ -454,7 +467,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					if (component->font.hfont) {
 						hPrevFont = SelectObject(g.hdc, component->font.hfont);
 					}
-					signal_emit(&component->signal_draw, component, 1, &g);
+					psy_signal_emit(&component->signal_draw, component, 1, &g);
 					if (hPrevFont) {
 						SelectObject(g.hdc, hPrevFont);
 					}
@@ -473,7 +486,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_DESTROY:												
 				if (component->signal_destroy.slots) {
-					signal_emit(&component->signal_destroy, component, 0);
+					psy_signal_emit(&component->signal_destroy, component, 0);
 				}
 				ui_component_dispose(component);							
 				return 0;
@@ -486,7 +499,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						
 						keyevent_init(&keyevent, (int)wParam, lParam, 
 							GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-						signal_emit(&component->signal_keydown, component, 1, &keyevent);
+						psy_signal_emit(&component->signal_keydown, component, 1, &keyevent);
 					}
 					if (component->propagateevent) {					
 						SendMessage (GetParent (hwnd), message, wParam, lParam) ;
@@ -502,7 +515,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					
 					keyevent_init(&keyevent, (int)wParam, lParam, 
 						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-					signal_emit(&component->signal_keydown, component, 1, &keyevent);
+					psy_signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}
 				if (component->propagateevent) {					
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
@@ -517,7 +530,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					
 					keyevent_init(&keyevent, (int)wParam, lParam, 
 						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-					signal_emit(&component->signal_keyup, component, 1, &keyevent);
+					psy_signal_emit(&component->signal_keyup, component, 1, &keyevent);
 				}
 				if (component->propagateevent) {					
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
@@ -531,7 +544,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
-					signal_emit(&component->signal_mouseup, component, 1,
+					psy_signal_emit(&component->signal_mouseup, component, 1,
 						&mouseevent);
 					return 0 ;
 				}
@@ -542,7 +555,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-					signal_emit(&component->signal_mouseup, component, 1,
+					psy_signal_emit(&component->signal_mouseup, component, 1,
 						&mouseevent);
 					return 0 ;
 				}			
@@ -553,7 +566,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-					signal_emit(&component->signal_mouseup, component, 1,
+					psy_signal_emit(&component->signal_mouseup, component, 1,
 						&mouseevent);
 					return 0 ;
 				}
@@ -564,7 +577,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
-					signal_emit(&component->signal_mousedown, component, 1,
+					psy_signal_emit(&component->signal_mousedown, component, 1,
 						&mouseevent);
 					return 0 ;
 				}			
@@ -575,7 +588,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-					signal_emit(&component->signal_mousedown, component, 1,
+					psy_signal_emit(&component->signal_mousedown, component, 1,
 						&mouseevent);
 					return 0 ;
 				}
@@ -586,7 +599,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-					signal_emit(&component->signal_mousedown, component, 1,
+					psy_signal_emit(&component->signal_mousedown, component, 1,
 						&mouseevent);
 					return 0 ;
 				}
@@ -598,7 +611,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);					
-					signal_emit(&component->signal_mousedoubleclick, component, 1,
+					psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
 						&mouseevent);
 				}
 				if (component->propagateevent) {					
@@ -613,7 +626,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-					signal_emit(&component->signal_mousedoubleclick, component, 1,
+					psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
 						&mouseevent);
 					return 0 ;
 				}
@@ -624,7 +637,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-					signal_emit(&component->signal_mousedoubleclick, component, 1,
+					psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
 						&mouseevent);
 					return 0;
 				}
@@ -634,7 +647,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					TRACKMOUSEEVENT tme;
 
 					if (component && component->signal_mouseenter.slots) {	
-						signal_emit(&component->signal_mouseenter, component, 0);
+						psy_signal_emit(&component->signal_mouseenter, component, 0);
 					}
 					tme.cbSize = sizeof(TRACKMOUSEEVENT);
 					tme.dwFlags = TME_LEAVE | TME_HOVER;
@@ -650,7 +663,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), wParam, 0);
-					signal_emit(&component->signal_mousemove, component, 1,
+					psy_signal_emit(&component->signal_mousemove, component, 1,
 						&mouseevent);
 					return 0 ;
 				}
@@ -676,7 +689,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					mouseevent_init(&mouseevent, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), LOWORD(wParam), HIWORD(wParam));
-					signal_emit(&component->signal_mousewheel, component, 1,
+					psy_signal_emit(&component->signal_mousewheel, component, 1,
 						&mouseevent);
 				} else
 				if (component->wheelscroll > 0) {
@@ -722,14 +735,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_MOUSEHOVER:			
 				if (component->signal_mousehover.slots) {	                    
-					signal_emit(&component->signal_mousehover, component, 0);
+					psy_signal_emit(&component->signal_mousehover, component, 0);
 					return 0;
 				}
 			break;
 			case WM_MOUSELEAVE:	
 				mousetracking = 0;
 				if (component->signal_mouseleave.slots) {				                    
-					signal_emit(&component->signal_mouseleave, component, 0);
+					psy_signal_emit(&component->signal_mouseleave, component, 0);
 					return 0;
 				}			
 			break;
@@ -740,7 +753,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_HSCROLL:
 				component = table_at(&selfmap, (uintptr_t) (int) lParam);
 				if (component && component->signal_windowproc.slots) {				                    
-					signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
+					psy_signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
 					return DefWindowProc (hwnd, message, wParam, lParam);
 				}
 				handle_hscroll(hwnd, wParam, lParam);
@@ -748,7 +761,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_KILLFOCUS:
 				if (component->signal_focuslost.slots) {
-					signal_emit(&component->signal_focuslost, component, 0);
+					psy_signal_emit(&component->signal_focuslost, component, 0);
 					return 0;
 				}
 			break;
@@ -782,7 +795,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	{                    
 		component = table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
-			signal_emit(&component->signal_scroll, component, 2, 
+			psy_signal_emit(&component->signal_scroll, component, 2, 
 				0, (iPos - si.nPos));			
 		}
 		if (component->handlevscroll) {
@@ -825,7 +838,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	{                    
 		component = table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
-			signal_emit(&component->signal_scroll, component, 2, 
+			psy_signal_emit(&component->signal_scroll, component, 2, 
 				(iPos - si.nPos), 0);			
 		}
 		if (component->handlehscroll) {
@@ -1171,7 +1184,7 @@ void ui_component_update(ui_component* self)
 void ui_component_setfocus(ui_component* self)
 {
 	SetFocus((HWND)self->hwnd);
-	signal_emit(&self->signal_focus, self, 0);
+	psy_signal_emit(&self->signal_focus, self, 0);
 }
 
 int ui_component_hasfocus(ui_component* self)
@@ -1332,7 +1345,7 @@ void ui_component_align(ui_component* self)
 	}
 	list_free(q);
 	list_free(wrap);
-	signal_emit(&self->signal_align, self, 0);
+	psy_signal_emit(&self->signal_align, self, 0);
 }
 
 void onpreferredsize(ui_component* self, ui_component* sender, ui_size* limit,
@@ -1594,7 +1607,7 @@ List* ui_components_setmargin(List* list, const ui_margin* margin)
 ui_size ui_component_preferredsize(ui_component* self, ui_size* limit)
 {
 	ui_size rv;	
-	signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
+	psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
 	return rv;	
 }
 

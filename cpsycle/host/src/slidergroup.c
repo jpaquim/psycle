@@ -23,21 +23,21 @@ void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
 	ui_label_init(&self->label, &self->component);		
 	ui_label_settext(&self->desclabel, desc);
 	ui_label_settext(&self->label, "-");	
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_timer, self, OnTimer);
-	signal_connect(&self->component.signal_size, self, OnSize);
-	signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
-	signal_init(&self->signal_value);
-	signal_init(&self->signal_describevalue);
-	signal_init(&self->signal_tweakvalue);	
+	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
+	psy_signal_connect(&self->component.signal_timer, self, OnTimer);
+	psy_signal_connect(&self->component.signal_size, self, OnSize);
+	psy_signal_connect(&self->slider.signal_changed, self, OnSliderChanged);
+	psy_signal_init(&self->signal_value);
+	psy_signal_init(&self->signal_describevalue);
+	psy_signal_init(&self->signal_tweakvalue);	
 	ui_component_starttimer(&self->component, timerid, 50);
 }
 
 void OnDestroy(SliderGroup* self)
 {
-	signal_dispose(&self->signal_value);
-	signal_dispose(&self->signal_describevalue);
-	signal_dispose(&self->signal_tweakvalue);
+	psy_signal_dispose(&self->signal_value);
+	psy_signal_dispose(&self->signal_describevalue);
+	psy_signal_dispose(&self->signal_tweakvalue);
 }
 
 void OnSize(SliderGroup* self, ui_component* sender, ui_size* size)
@@ -67,7 +67,7 @@ void DescribeValue(SliderGroup* self)
 {
 	char buffer[20];
 	buffer[0] = '\0';
-	signal_emit(&self->signal_describevalue, self, 2, buffer);
+	psy_signal_emit(&self->signal_describevalue, self, 2, buffer);
 	if (buffer[0] == '\0') {
 	  _snprintf(buffer, 20, "%f", Value(self));	  
 	}
@@ -80,8 +80,7 @@ void OnTimer(SliderGroup* self, ui_component* sender, int timerid)
 	float* pValue;	
 
 	pValue = &value;
-	signal_emit(&self->signal_value, self, 1, pValue);
-
+	psy_signal_emit(&self->signal_value, self, 1, pValue);
 	if (Value(self) != value) {		
 		ui_slider_setvalue(&self->slider, value);
 		DescribeValue(self);

@@ -9,7 +9,8 @@ static void undoredobar_onundo(UndoRedoBar*, ui_component* sender);
 static void undoredobar_onredo(UndoRedoBar*, ui_component* sender);
 static void undoredobar_initalign(UndoRedoBar* self);
 
-void undoredobar_init(UndoRedoBar* self, ui_component* parent, Workspace* workspace)
+void undoredobar_init(UndoRedoBar* self, ui_component* parent,
+	Workspace* workspace)
 {
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
@@ -18,11 +19,13 @@ void undoredobar_init(UndoRedoBar* self, ui_component* parent, Workspace* worksp
 	ui_button_init(&self->undobutton, &self->component);
 	ui_button_settext(&self->undobutton,
 		workspace_translate(workspace, "undo"));
-	signal_connect(&self->undobutton.signal_clicked, self, undoredobar_onundo);
+	psy_signal_connect(&self->undobutton.signal_clicked, self,
+		undoredobar_onundo);
 	ui_button_init(&self->redobutton, &self->component);
 	ui_button_settext(&self->redobutton,
 		workspace_translate(workspace, "redo"));
-	signal_connect(&self->redobutton.signal_clicked, self, undoredobar_onredo);
+	psy_signal_connect(&self->redobutton.signal_clicked, self,
+		undoredobar_onredo);
 	undoredobar_initalign(self);	
 }
 

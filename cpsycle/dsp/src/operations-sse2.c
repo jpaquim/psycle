@@ -28,7 +28,7 @@ static void dsp_accumulate(big_amp_t* accumleft,
 					const amp_t* __restrict pSamplesL,
 					const amp_t* __restrict pSamplesR, int count);
 
-void dsp_sse2_init(Dsp* self)
+void psy_dsp_sse2_init(psy_dsp_Operations* self)
 {	
 	self->memory_alloc = dsp_memory_alloc;
 	self->memory_dealloc = dsp_memory_dealloc;
@@ -44,12 +44,12 @@ void dsp_sse2_init(Dsp* self)
 
 void* dsp_memory_alloc(size_t count, size_t size)
 {
-	return aligned_memory_alloc(alignment, count, size);
+	return psy_dsp_aligned_memory_alloc(alignment, count, size);
 }
 
 void dsp_memory_dealloc(void* address)
 {
-	aligned_memory_dealloc(address);
+	psy_dsp_aligned_memory_dealloc(address);
 }
 
 void dsp_add(amp_t *src, amp_t *dst, uintptr_t num, amp_t vol)
@@ -265,9 +265,9 @@ void dsp_accumulate(big_amp_t* accumleft,
 
 #include <string.h>
 
-void dsp_sse2_init(Dsp* self)
+void psy_dsp_sse2_init(psy_dsp_Operations* self)
 {
-	memset(self, 0, sizeof(Dsp));	
+	memset(self, 0, sizeof(psy_dsp_Operations));
 }
 
 #endif

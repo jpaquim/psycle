@@ -26,19 +26,19 @@ void timerbar_init(TimeBar* self, ui_component* parent, Player* player)
 	ui_label_setcharnumber(&self->bpmlabel, 8);	
 	ui_button_init(&self->lessless, &self->component);
 	ui_button_seticon(&self->lessless, UI_ICON_LESSLESS);		
-	signal_connect(&self->lessless.signal_clicked, self,
+	psy_signal_connect(&self->lessless.signal_clicked, self,
 		timerbar_onlesslessclicked);	
 	ui_button_init(&self->less, &self->component);
 	ui_button_seticon(&self->less, UI_ICON_LESS);	
-	signal_connect(&self->less.signal_clicked, self,
+	psy_signal_connect(&self->less.signal_clicked, self,
 		timerbar_onlessclicked);		
 	ui_button_init(&self->more, &self->component);
 	ui_button_seticon(&self->more, UI_ICON_MORE);	
-	signal_connect(&self->more.signal_clicked, self,
+	psy_signal_connect(&self->more.signal_clicked, self,
 		timerbar_onmoreclicked);	
 	ui_button_init(&self->moremore, &self->component);
 	ui_button_seticon(&self->moremore, UI_ICON_MOREMORE);	
-	signal_connect(&self->moremore.signal_clicked, self,
+	psy_signal_connect(&self->moremore.signal_clicked, self,
 		timerbar_onmoremoreclicked);
 	{
 		ui_margin margin;
@@ -50,7 +50,8 @@ void timerbar_init(TimeBar* self, ui_component* parent, Player* player)
 			UI_ALIGN_LEFT, &margin));
 	}	
 	ui_component_starttimer(&self->component, TIMERID_TIMERBAR, 50);
-	signal_connect(&self->component.signal_timer, self, timerbar_ontimer);
+	psy_signal_connect(&self->component.signal_timer, self,
+		timerbar_ontimer);
 }
 
 void timerbar_onlesslessclicked(TimeBar* self, ui_component* sender)

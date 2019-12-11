@@ -27,3 +27,13 @@ void patternevent_clear(PatternEvent* self)
 	self->cmd = 0;
 	self->parameter = 0;
 }
+
+int patternevent_empty(PatternEvent* self)
+{
+	return 
+		self->note == 255 &&
+		self->inst == 255 &&
+		self->mach == 255 &&
+		self->cmd == 0 &&
+		self->parameter == 0;
+}

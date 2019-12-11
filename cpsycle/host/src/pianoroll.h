@@ -16,16 +16,16 @@ typedef struct {
 	int keymin;
 	int keymax;
 	int lpb;
-	beat_t visibeats;
+	psy_dsp_beat_t visibeats;
 	int visisteps;	
 	int visiwidth;	
-	beat_t stepwidth;
+	psy_dsp_beat_t stepwidth;
 	int visikeys;
 } PianoMetrics;
 
 typedef struct {
 	ui_component component;           	
-	beat_t bpl;
+	psy_dsp_beat_t bpl;
 	int lpb;
 	struct Pianoroll* view;   
 	int scrollpos;
@@ -47,7 +47,7 @@ void pianokeyboard_init(PianoKeyboard*, ui_component* parent);
 typedef struct {
    ui_component component;   
    int keyheight;   
-   beat_t bpl;
+   psy_dsp_beat_t bpl;
    int lpb;
    struct Pianoroll* view;
    int dy;
@@ -68,8 +68,8 @@ typedef struct Pianoroll {
    Pattern* pattern;
    unsigned int opcount;
    int syncpattern;
-   beat_t sequenceentryoffset;
-   beat_t lastplayposition;
+   psy_dsp_beat_t sequenceentryoffset;
+   psy_dsp_beat_t lastplayposition;
    Workspace* workspace;
 } Pianoroll;
 

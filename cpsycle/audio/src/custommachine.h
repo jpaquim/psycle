@@ -8,7 +8,7 @@
 
 typedef struct {
 	Machine machine;
-	amp_t pan;
+	psy_dsp_amp_t pan;
 	int ismuted;
 	int isbypassed;
 	char* editname;

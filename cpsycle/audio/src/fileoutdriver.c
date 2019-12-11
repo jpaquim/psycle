@@ -71,7 +71,7 @@ int fileoutdriver_init(FileOutDriver* self)
 	self->driver.dispose = driver_dispose;
 	self->driver.configure = driver_configure;
 	self->driver.samplerate = samplerate;
-	signal_init(&self->driver.signal_stop);
+	psy_signal_init(&self->driver.signal_stop);
 	init_properties(&self->driver);
 	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	self->pollsleep = 1;
@@ -87,7 +87,7 @@ int driver_dispose(Driver* driver)
 	self = (FileOutDriver*) driver;
 	properties_free(driver->properties);
 	driver->properties = 0;
-	signal_dispose(&driver->signal_stop);
+	psy_signal_dispose(&driver->signal_stop);
 	free(self->filecontext.path);
 	self->filecontext.path = 0;
 	return 0;
@@ -167,7 +167,7 @@ void PollerThread(void* driver)
 	}
 	fileoutdriver_closefile(self);	
 	SetEvent(self->hEvent);	
-	signal_emit(&self->driver.signal_stop, self, 0);
+	psy_signal_emit(&self->driver.signal_stop, self, 0);
 	_endthread();
 }
 

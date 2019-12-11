@@ -15,6 +15,7 @@
 
 #define PSYCLE_SONGS_DEFAULT_DIR "C:\\Programme\\Psycle\\Songs"
 #define PSYCLE_PLUGINS_DEFAULT_DIR "C:\\Programme\\Psycle\\PsyclePlugins"
+#define PSYCLE_LUASCRIPTS_DEFAULT_DIR "C:\\Programme\\Psycle\\LuaScripts"
 #define PSYCLE_VSTS32_DEFAULT_DIR "C:\\Programme\\Psycle\\VstPlugins"
 #define PSYCLE_VSTS64_DEFAULT_DIR "C:\\Programme\\Psycle\\Vst64Plugins"
 #define PSYCLE_SKINS_DEFAULT_DIR "C:\\Programme\\Psycle\\Skins"
@@ -102,9 +103,9 @@ void workspace_init(Workspace* self, void* handle)
 {	
 	lock_init();
 #ifdef SSE
-	dsp_sse2_init(&dsp);
+	pdy_dsp_sse2_init(&dsp);
 #else
-	dsp_noopt_init(&dsp);
+	psy_dsp_noopt_init(&dsp);
 #endif
 	self->octave = 4;	
 	self->cursorstep = 1;
@@ -129,7 +130,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->properties = workspace_makeproperties(self);
 	sequenceselection_init(&self->sequenceselection, &self->song->sequence);
 	sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
-	signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
+	psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
 		workspace_onsequenceeditpositionchanged);
 	undoredo_init(&self->undoredo);	
 	self->navigating = 0;
@@ -148,7 +149,7 @@ void workspace_init(Workspace* self, void* handle)
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
 {
 	plugincatcher_init(&self->plugincatcher, self->directories);
-	signal_connect(&self->plugincatcher.signal_scanprogress, self,
+	psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 		workspace_onscanprogress);
 	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
 	machinefactory_init(&self->machinefactory, machinecallback(self), 
@@ -157,18 +158,18 @@ void workspace_initplugincatcherandmachinefactory(Workspace* self)
 
 void workspace_initsignals(Workspace* self)
 {
-	signal_init(&self->signal_octavechanged);
-	signal_init(&self->signal_songchanged);
-	signal_init(&self->signal_configchanged);
-	signal_init(&self->signal_skinchanged);
-	signal_init(&self->signal_patterneditpositionchanged);
-	signal_init(&self->signal_sequenceselectionchanged);
-	signal_init(&self->signal_loadprogress);
-	signal_init(&self->signal_scanprogress);
-	signal_init(&self->signal_beforesavesong);
-	signal_init(&self->signal_showparameters);
-	signal_init(&self->signal_viewselected);
-	signal_init(&self->signal_parametertweak);
+	psy_signal_init(&self->signal_octavechanged);
+	psy_signal_init(&self->signal_songchanged);
+	psy_signal_init(&self->signal_configchanged);
+	psy_signal_init(&self->signal_skinchanged);
+	psy_signal_init(&self->signal_patterneditpositionchanged);
+	psy_signal_init(&self->signal_sequenceselectionchanged);
+	psy_signal_init(&self->signal_loadprogress);
+	psy_signal_init(&self->signal_scanprogress);
+	psy_signal_init(&self->signal_beforesavesong);
+	psy_signal_init(&self->signal_showparameters);
+	psy_signal_init(&self->signal_viewselected);
+	psy_signal_init(&self->signal_parametertweak);
 }
 
 void workspace_dispose(Workspace* self)
@@ -198,18 +199,18 @@ void workspace_dispose(Workspace* self)
 
 void workspace_disposesignals(Workspace* self)
 {
-	signal_dispose(&self->signal_octavechanged);
-	signal_dispose(&self->signal_songchanged);
-	signal_dispose(&self->signal_configchanged);
-	signal_dispose(&self->signal_skinchanged);
-	signal_dispose(&self->signal_patterneditpositionchanged);
-	signal_dispose(&self->signal_sequenceselectionchanged);
-	signal_dispose(&self->signal_loadprogress);
-	signal_dispose(&self->signal_scanprogress);
-	signal_dispose(&self->signal_beforesavesong);
-	signal_dispose(&self->signal_showparameters);
-	signal_dispose(&self->signal_viewselected);
-	signal_dispose(&self->signal_parametertweak);
+	psy_signal_dispose(&self->signal_octavechanged);
+	psy_signal_dispose(&self->signal_songchanged);
+	psy_signal_dispose(&self->signal_configchanged);
+	psy_signal_dispose(&self->signal_skinchanged);
+	psy_signal_dispose(&self->signal_patterneditpositionchanged);
+	psy_signal_dispose(&self->signal_sequenceselectionchanged);
+	psy_signal_dispose(&self->signal_loadprogress);
+	psy_signal_dispose(&self->signal_scanprogress);
+	psy_signal_dispose(&self->signal_beforesavesong);
+	psy_signal_dispose(&self->signal_showparameters);
+	psy_signal_dispose(&self->signal_viewselected);
+	psy_signal_dispose(&self->signal_parametertweak);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -343,7 +344,7 @@ void workspace_scanplugins(Workspace* self)
 
 void workspace_onscanprogress(Workspace* self, PluginCatcher* sender, int progress)
 {
-	signal_emit(&self->signal_scanprogress, self, 1, progress);
+	psy_signal_emit(&self->signal_scanprogress, self, 1, progress);
 }
 
 void workspace_makeconfig(Workspace* self)
@@ -476,6 +477,13 @@ void workspace_makedirectories(Workspace* self)
 			"plugins",
 			PSYCLE_PLUGINS_DEFAULT_DIR),
 		"Plug-in directory"),
+		PROPERTY_HINT_EDITDIR);
+	properties_sethint(properties_settext(
+		properties_append_string(
+			self->directories,
+			"luascripts",
+			PSYCLE_LUASCRIPTS_DEFAULT_DIR),
+		"Lua scripts directory"),
 		PROPERTY_HINT_EDITDIR);
 	properties_sethint(properties_settext(
 		properties_append_string(
@@ -790,7 +798,7 @@ void workspace_configchanged(Workspace* self, Properties* property,
 			player_setvumetermode(&self->player, VUMETER_NONE);
 		}
 	}
-	signal_emit(&self->signal_configchanged, self, 1, property);
+	psy_signal_emit(&self->signal_configchanged, self, 1, property);
 }
 
 int workspace_showsonginfoonload(Workspace* self)
@@ -852,7 +860,8 @@ void workspace_loadsong(Workspace* self, const char* path)
 	
 	properties_free(self->properties);
 	song = song_allocinit(&self->machinefactory);
-	signal_connect(&song->signal_loadprogress, self, workspace_onloadprogress);
+	psy_signal_connect(&song->signal_loadprogress, self,
+		workspace_onloadprogress);
 	songfile.song = song;
 	songfile.file = 0;
 	lock_enter();
@@ -867,7 +876,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 
 void workspace_onloadprogress(Workspace* self, Song* sender, int progress)
 {
-	signal_emit(&self->signal_loadprogress, self, 1, progress);
+	psy_signal_emit(&self->signal_loadprogress, self, 1, progress);
 }
 
 void workspace_setsong(Workspace* self, Song* song, int flag)
@@ -885,7 +894,7 @@ void workspace_setsong(Workspace* self, Song* song, int flag)
 	sequenceselection_setsequence(&self->sequenceselection
 		,&self->song->sequence);
 	workspace_addhistory(self);
-	signal_emit(&self->signal_songchanged, self, 1, flag);	
+	psy_signal_emit(&self->signal_songchanged, self, 1, flag);	
 	self->lastentry = 0;
 	workspace_disposesequencepaste(self);
 	lock_leave();
@@ -897,7 +906,7 @@ void workspace_savesong(Workspace* self, const char* path)
 	SongFile songfile;
 	songfile.file = 0;
 	songfile.song = self->song;
-	signal_emit(&self->signal_beforesavesong, self, 0);
+	psy_signal_emit(&self->signal_beforesavesong, self, 0);
 	songfile.workspaceproperties = self->properties;
 	songfile_save(&songfile, path);
 }
@@ -908,7 +917,7 @@ void workspace_loadskin(Workspace* self, const char* path)
 		
 	properties = properties_create();		
 	skin_load(properties, path);
-	signal_emit(&self->signal_skinchanged, self, 1, properties);	
+	psy_signal_emit(&self->signal_skinchanged, self, 1, properties);
 	properties_free(properties);
 }
 
@@ -948,7 +957,7 @@ void workspace_load_configuration(Workspace* self)
 	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
-	signal_emit(&self->signal_configchanged, self, 1,self->config);
+	psy_signal_emit(&self->signal_configchanged, self, 1,self->config);
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -959,7 +968,7 @@ void workspace_save_configuration(Workspace* self)
 void workspace_setoctave(Workspace* self, int octave)
 {
 	self->octave = octave;
-	signal_emit(&self->signal_octavechanged, self, 1, octave);
+	psy_signal_emit(&self->signal_octavechanged, self, 1, octave);
 }
 
 int workspace_octave(Workspace* self)
@@ -993,7 +1002,7 @@ void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editp
 	self->patterneditposition = editposition;
 	self->patterneditposition.line = 
 		(int) (editposition.offset * player_lpb(&self->player));
-	signal_emit(&self->signal_patterneditpositionchanged, self, 0);
+	psy_signal_emit(&self->signal_patterneditpositionchanged, self, 0);
 }
 
 PatternEditPosition workspace_patterneditposition(Workspace* self)
@@ -1006,7 +1015,7 @@ void workspace_setsequenceselection(Workspace* self,
 {	
 	self->sequenceselection = selection;	
 	sequence_setplayselection(&self->song->sequence, &selection);
-	signal_emit(&self->signal_sequenceselectionchanged, self, 0);
+	psy_signal_emit(&self->signal_sequenceselectionchanged, self, 0);
 	workspace_addhistory(self);
 }
 
@@ -1148,7 +1157,7 @@ void workspace_idle(Workspace* self)
 					player_position(&self->player) - self->lastentry->offset;
 				self->patterneditposition.offset = 
 					self->patterneditposition.line / 
-					(beat_t) player_lpb(&self->player);
+					(psy_dsp_beat_t) player_lpb(&self->player);
 				workspace_setpatterneditposition(self, 
 					self->patterneditposition);				
 			}
@@ -1161,7 +1170,7 @@ void workspace_idle(Workspace* self)
 				player_position(&self->player) - self->lastentry->offset;
 			self->patterneditposition.offset = 
 				self->patterneditposition.line / 
-				(beat_t) player_lpb(&self->player);
+				(psy_dsp_beat_t) player_lpb(&self->player);
 			workspace_setpatterneditposition(self, 
 				self->patterneditposition);
 			self->lastentry = 0;
@@ -1171,18 +1180,19 @@ void workspace_idle(Workspace* self)
 
 void workspace_showparameters(Workspace* self, uintptr_t machineslot)
 {
-	signal_emit(&self->signal_showparameters, self, 1, machineslot);
+	psy_signal_emit(&self->signal_showparameters, self, 1, machineslot);
 }
 
 void workspace_selectview(Workspace* self, int view)
 {
 	self->currview = view;
-	signal_emit(&self->signal_viewselected, self, 1, view);
+	psy_signal_emit(&self->signal_viewselected, self, 1, view);
 }
 
 void workspace_parametertweak(Workspace* self, int slot, int tweak, int value)
 {
-	signal_emit(&self->signal_parametertweak, self, 3, slot, tweak, value);
+	psy_signal_emit(&self->signal_parametertweak, self, 3, slot, tweak, 
+		value);
 }
 
 void workspace_recordtweaks(Workspace* self)
@@ -1265,6 +1275,12 @@ const char* workspace_plugins_directory(Workspace* self)
 {
 	return properties_readstring(self->directories, "plugins",
 		PSYCLE_PLUGINS_DEFAULT_DIR);
+}
+
+const char* workspace_lusscripts_directory(Workspace* self)
+{
+	return properties_readstring(self->directories, "luascripts",
+		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
 }
 
 const char* workspace_vsts32_directory(Workspace* self)

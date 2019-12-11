@@ -38,10 +38,10 @@ void ui_button_init(ui_button* self, ui_component* parent)
 	} else {
 		ui_button_create_system(self, parent);
 	}
-	signal_init(&self->signal_clicked);	
-	signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self,
+	psy_signal_init(&self->signal_clicked);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
 		onpreferredsize);
 }
 
@@ -52,17 +52,17 @@ void ui_button_create_system(ui_button* self, ui_component* parent)
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE,
 		1);
-	signal_connect(&self->component.signal_command, self, oncommand);	
+	psy_signal_connect(&self->component.signal_command, self, oncommand);	
 }
 
 void ui_button_create_ownerdrawn(ui_button* self, ui_component* parent)
 {
 	self->text = _strdup("");	
 	ui_component_init(&self->component, parent);
-	signal_connect(&self->component.signal_draw, self, onownerdraw);	
-	signal_connect(&self->component.signal_mousedown, self, onmousedown);
-	signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
+	psy_signal_connect(&self->component.signal_draw, self, onownerdraw);	
+	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
+	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
+	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
 }
 
 void ondestroy(ui_button* self, ui_component* sender)
@@ -70,7 +70,7 @@ void ondestroy(ui_button* self, ui_component* sender)
 	if (self->ownerdrawn == 1) {
 		free(self->text);
 	}
-	signal_dispose(&self->signal_clicked);	
+	psy_signal_dispose(&self->signal_clicked);
 }
 
 void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
@@ -235,7 +235,7 @@ void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit,
 
 void onmousedown(ui_button* self, ui_component* sender)
 {
-	signal_emit(&self->signal_clicked, self, 0);
+	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
 void onmouseenter(ui_button* self, ui_component* sender)
@@ -301,7 +301,7 @@ void oncommand(ui_button* self, ui_component* sender, WPARAM wParam,
         case BN_CLICKED:
         {            
 			if (self->signal_clicked.slots) {
-				signal_emit(&self->signal_clicked, self, 0);
+				psy_signal_emit(&self->signal_clicked, self, 0);
 			}
         }
 		break;

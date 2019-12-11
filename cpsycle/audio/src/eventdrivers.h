@@ -18,7 +18,7 @@ typedef struct {
 	List* eventdrivers;
 	void* context;
 	void* systemhandle;	
-	Signal signal_input;	
+	psy_Signal signal_input;
 	Properties* cmds;
 } EventDrivers;
 

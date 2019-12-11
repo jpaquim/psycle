@@ -14,8 +14,8 @@ void ui_label_init(ui_label* self, ui_component* parent)
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,
 		0);	
-	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
 	self->charnumber = 0;	
 }
 

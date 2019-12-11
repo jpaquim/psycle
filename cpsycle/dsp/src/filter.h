@@ -11,7 +11,7 @@ struct Filter;
 
 typedef void (*fp_filter_init)(struct Filter*);
 typedef void (*fp_filter_dispose)(struct Filter*);
-typedef amp_t (*fp_filter_work)(struct Filter*, amp_t sample);
+typedef psy_dsp_amp_t (*fp_filter_work)(struct Filter*, psy_dsp_amp_t sample);
 typedef void (*fp_filter_setcutoff)(struct Filter*, float cutoff);	
 typedef float (*fp_filter_cutoff)(struct Filter*);
 typedef void (*fp_filter_setressonance)(struct Filter*, float ressonance);
@@ -51,11 +51,15 @@ typedef struct {
 void customfilter_init(CustomFilter*);
 
 typedef struct {
-	amp_t x1, x2, y1, y2;
+	psy_dsp_amp_t x1;
+	psy_dsp_amp_t x2;
+	psy_dsp_amp_t y1;
+	psy_dsp_amp_t y2;
 } FIRWork;
 
 void firwork_init(FIRWork*);
-amp_t firwork_work(FIRWork*, FilterCoeff* coeffs, amp_t sample);
+psy_dsp_amp_t firwork_work(FIRWork*, FilterCoeff* coeffs,
+	psy_dsp_amp_t sample);
 void firwork_reset(FIRWork*);
 
 

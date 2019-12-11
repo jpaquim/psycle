@@ -25,7 +25,7 @@
 #define TRUE 1
 #endif
 
-static amp_t bufferdriver[65535];
+static psy_dsp_amp_t bufferdriver[65535];
 static void* mainframe;
 
 static void player_initdriver(Player*);
@@ -35,13 +35,13 @@ static void player_initsignals(Player*);
 static void player_disposerms(Player*);
 static void player_unloaddriver(Player*);
 static void player_unloadeventdrivers(Player*);
-static amp_t* work(Player*, int* numsamples, int* stop);
+static psy_dsp_amp_t* work(Player*, int* numsamples, int* stop);
 static void player_workamount(Player*, uintptr_t amount,
-	uintptr_t* numsamplex, amp_t** psamples);
+	uintptr_t* numsamplex, psy_dsp_amp_t** psamples);
 static void player_eventdriverinput(Player*, EventDriver* sender);
 static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(Player*, uintptr_t amount);
-static void player_filldriver(Player*, amp_t* buffer, uintptr_t amount);
+static void player_filldriver(Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
 static RMSVol* player_rmsvol(Player*, size_t slot);
 static void player_resetvumeters(Player*);
 static void player_dostop(Player*);
@@ -59,7 +59,7 @@ void player_init(Player* self, Song* song, void* handle)
 	mainframe = handle;
 	player_initdriver(self);	
 	eventdrivers_init(&self->eventdrivers, handle);
-	signal_connect(&self->eventdrivers.signal_input, self,
+	psy_signal_connect(&self->eventdrivers.signal_input, self,
 		player_eventdriverinput);
 	player_initsignals(self);
 	player_initrms(self);
@@ -76,9 +76,9 @@ void player_initdriver(Player* self)
 
 void player_initsignals(Player* self)
 {
-	signal_init(&self->signal_numsongtrackschanged);
-	signal_init(&self->signal_lpbchanged);
-	signal_init(&self->signal_inputevent);
+	psy_signal_init(&self->signal_numsongtrackschanged);
+	psy_signal_init(&self->signal_lpbchanged);
+	psy_signal_init(&self->signal_inputevent);
 }
 
 void player_initrms(Player* self)
@@ -93,9 +93,9 @@ void player_dispose(Player* self)
 	player_unloaddriver(self);
 	library_dispose(&self->drivermodule);
 	eventdrivers_dispose(&self->eventdrivers);	
-	signal_dispose(&self->signal_numsongtrackschanged);
-	signal_dispose(&self->signal_lpbchanged);
-	signal_dispose(&self->signal_inputevent);	
+	psy_signal_dispose(&self->signal_numsongtrackschanged);
+	psy_signal_dispose(&self->signal_lpbchanged);
+	psy_signal_dispose(&self->signal_inputevent);	
 	sequencer_dispose(&self->sequencer);		
 	player_disposerms(self);
 	table_dispose(&self->notestotracks);
@@ -117,12 +117,12 @@ void player_disposerms(Player* self)
 
 // sound driver callback
 
-amp_t* work(Player* self, int* numsamples, int* hostisplaying)
+psy_dsp_amp_t* work(Player* self, int* numsamples, int* hostisplaying)
 {	
 	uintptr_t maxamount;
 	uintptr_t amount;
 	uintptr_t numsamplex;
-	amp_t* psamples;	
+	psy_dsp_amp_t* psamples;
 	
 	psamples = bufferdriver;
 	numsamplex = *numsamples;
@@ -171,7 +171,7 @@ void notifylinetick(Player* self)
 }
 
 void player_workamount(Player* self, uintptr_t amount, uintptr_t* numsamplex,
-					   amp_t** psamples)
+					   psy_dsp_amp_t** psamples)
 {
 	sequencer_frametick(&self->sequencer, amount);
 	player_workpath(self, amount);		
@@ -213,7 +213,8 @@ void player_workpath(Player* self, uintptr_t amount)
 						rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],
 							bc.numsamples);
 					}
-					signal_emit(&machine->signal_worked, machine, 2, slot, &bc);
+					psy_signal_emit(&machine->signal_worked, machine, 2,
+						slot, &bc);
 					list_free(events);										
 				}
 			}			
@@ -231,7 +232,7 @@ void player_resetvumeters(Player* self)
 	self->resetvumeters = 0;	
 }
 
-void player_filldriver(Player* self, amp_t* buffer, uintptr_t amount)
+void player_filldriver(Player* self, psy_dsp_amp_t* buffer, uintptr_t amount)
 {
 	Buffer* masteroutput;	
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
@@ -252,7 +253,8 @@ void player_filldriver(Player* self, amp_t* buffer, uintptr_t amount)
 				rmsvol_tick(rms, masteroutput->samples[0], masteroutput->samples[1],
 					amount);		
 			}
-			signal_emit(&master->signal_worked, master, 2, MASTER_INDEX, &bc);
+			psy_signal_emit(&master->signal_worked, master, 2,
+				MASTER_INDEX, &bc);
 		}	
 		dsp.interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
@@ -319,7 +321,7 @@ void player_eventdriverinput(Player* self, EventDriver* sender)
 			sequencer_recordinputevent(&self->sequencer, &event, 0, 
 				player_position(self));			
 		} else {			
-			signal_emit(&self->signal_inputevent, self, 1, &event);
+			psy_signal_emit(&self->signal_inputevent, self, 1, &event);
 		}
 	}
 }
@@ -411,7 +413,7 @@ void player_setnumsongtracks(Player* self, uintptr_t numsongtracks)
 {
 	if (numsongtracks >= 1 && numsongtracks <= 64) {
 		self->numsongtracks = numsongtracks;	
-		signal_emit(&self->signal_numsongtrackschanged, self, 1,
+		psy_signal_emit(&self->signal_numsongtrackschanged, self, 1,
 			self->numsongtracks);
 	}
 }
@@ -466,22 +468,22 @@ int player_playing(Player* self)
 	return sequencer_playing(&self->sequencer);
 }
 
-void player_setposition(Player* self, beat_t offset)
+void player_setposition(Player* self, psy_dsp_beat_t offset)
 {
 	sequencer_setposition(&self->sequencer, offset);	
 }
 
-beat_t player_position(Player* self)
+psy_dsp_beat_t player_position(Player* self)
 {
 	return sequencer_position(&self->sequencer);
 }
 
-void player_setbpm(Player* self, beat_t bpm)
+void player_setbpm(Player* self, psy_dsp_beat_t bpm)
 {
 	sequencer_setbpm(&self->sequencer, bpm);	
 }
 
-beat_t player_bpm(Player* self)
+psy_dsp_beat_t player_bpm(Player* self)
 {
 	return sequencer_bpm(&self->sequencer);
 }
@@ -489,7 +491,7 @@ beat_t player_bpm(Player* self)
 void player_setlpb(Player* self, uintptr_t lpb)
 {
 	sequencer_setlpb(&self->sequencer, lpb);
-	signal_emit(&self->signal_lpbchanged, self, 1, lpb);
+	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);
 }
 
 uintptr_t player_lpb(Player* self)

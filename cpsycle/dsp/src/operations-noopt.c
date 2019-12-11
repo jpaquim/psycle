@@ -10,21 +10,21 @@
 
 static void* dsp_memory_alloc(size_t count, size_t size);
 static void dsp_memory_dealloc(void* address);
-static void dsp_add(amp_t *src, amp_t *dst, uintptr_t num, amp_t vol);
-static void dsp_mul(amp_t *dst, uintptr_t num, amp_t mul);
-static void dsp_movmul(amp_t *src, amp_t *dst, uintptr_t num, amp_t mul);
-static void dsp_clear(amp_t *dst, uintptr_t num);
-static void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, uintptr_t num);
-static void dsp_erase_all_nans_infinities_and_denormals(amp_t* dst,
+static void dsp_add(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t vol);
+static void dsp_mul(psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul);
+static void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul);
+static void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num);
+static void dsp_interleave(psy_dsp_amp_t* dst, psy_dsp_amp_t* left, psy_dsp_amp_t* right, uintptr_t num);
+static void dsp_erase_all_nans_infinities_and_denormals(psy_dsp_amp_t* dst,
 		uintptr_t num);
-static void erase_all_nans_infinities_and_denormals(amp_t* sample);
+static void erase_all_nans_infinities_and_denormals(psy_dsp_amp_t* sample);
 static float dsp_maxvol(const float* pSamples, uintptr_t numSamples);
-static void dsp_accumulate(big_amp_t* accumleft, 
-					big_amp_t* accumright, 
-					const amp_t* __restrict pSamplesL,
-					const amp_t* __restrict pSamplesR, int count);
+static void dsp_accumulate(psy_dsp_big_amp_t* accumleft, 
+					psy_dsp_big_amp_t* accumright, 
+					const psy_dsp_amp_t* __restrict pSamplesL,
+					const psy_dsp_amp_t* __restrict pSamplesR, int count);
 
-void dsp_noopt_init(Dsp* self)
+void psy_dsp_noopt_init(psy_dsp_Operations* self)
 {	
 	self->memory_alloc = dsp_memory_alloc;
 	self->memory_dealloc = dsp_memory_dealloc;
@@ -48,21 +48,21 @@ void dsp_memory_dealloc(void* address)
 	free(address);
 }
 
-void dsp_add(amp_t *src, amp_t *dst, uintptr_t num, amp_t vol)
+void dsp_add(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t vol)
 {
 	for ( ; num != 0; ++dst, ++src, --num) {
 		*dst += (*src * vol);
 	}	
 }
 
-void dsp_mul(amp_t *dst, uintptr_t num, amp_t mul)
+void dsp_mul(psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul)
 {	
 	for ( ; num != 0; ++dst, --num) {
 		*dst *= mul;		
 	}	
 }
 
-void dsp_movmul(amp_t *src, amp_t *dst, uintptr_t num, amp_t mul)
+void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul)
 {
 	--src;
 	--dst;
@@ -73,12 +73,12 @@ void dsp_movmul(amp_t *src, amp_t *dst, uintptr_t num, amp_t mul)
 	while (--num);
 }
 
-void dsp_clear(amp_t *dst, uintptr_t num)
+void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num)
 {
-	memset(dst, 0, num * sizeof(amp_t));
+	memset(dst, 0, num * sizeof(psy_dsp_amp_t));
 }
 
-void dsp_interleave(amp_t* dst, amp_t* left, amp_t* right, uintptr_t num)
+void dsp_interleave(psy_dsp_amp_t* dst, psy_dsp_amp_t* left, psy_dsp_amp_t* right, uintptr_t num)
 {
 	uintptr_t i;
 	--dst;
@@ -107,7 +107,7 @@ float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 	return vol;
 }
 
-void dsp_erase_all_nans_infinities_and_denormals(amp_t* dst,
+void dsp_erase_all_nans_infinities_and_denormals(psy_dsp_amp_t* dst,
 		uintptr_t num) {
 	uintptr_t i;
 
@@ -143,14 +143,14 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 	#endif
 }
 
-void dsp_accumulate(big_amp_t* accumleft, 
-					big_amp_t* accumright, 
-					const amp_t* __restrict pSamplesL,
-					const amp_t* __restrict pSamplesR,
+void dsp_accumulate(psy_dsp_big_amp_t* accumleft, 
+					psy_dsp_big_amp_t* accumright, 
+					const psy_dsp_amp_t* __restrict pSamplesL,
+					const psy_dsp_amp_t* __restrict pSamplesR,
 					int count)
 {
-	big_amp_t acleft = *accumleft;
-	big_amp_t acright = *accumright;
+	psy_dsp_big_amp_t acleft = *accumleft;
+	psy_dsp_big_amp_t acright = *accumright;
 	--pSamplesL; --pSamplesR;
 	while (count--) {
 		++pSamplesL; acleft  += *pSamplesL * *pSamplesL;

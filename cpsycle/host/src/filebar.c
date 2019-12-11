@@ -22,22 +22,22 @@ void filebar_init(FileBar* self, ui_component* parent, Workspace* workspace)
 	ui_button_init(&self->newbutton, &self->component);
 	ui_button_settext(&self->newbutton,
 		workspace_translate(workspace, "new"));
-	signal_connect(&self->newbutton.signal_clicked, self,
+	psy_signal_connect(&self->newbutton.signal_clicked, self,
 		filebar_onnewsong);
 	ui_button_init(&self->loadbutton, &self->component);
 	ui_button_settext(&self->loadbutton,
 		workspace_translate(workspace, "load"));
-	signal_connect(&self->loadbutton.signal_clicked, self,
+	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 	ui_button_init(&self->savebutton, &self->component);
 	ui_button_settext(&self->savebutton, 
 		workspace_translate(workspace, "save"));
-	signal_connect(&self->savebutton.signal_clicked, self,
+	psy_signal_connect(&self->savebutton.signal_clicked, self,
 		filebar_onsavesong);
 	ui_button_init(&self->renderbutton, &self->component);
 	ui_button_settext(&self->renderbutton, 
 		workspace_translate(workspace, "Render"));
-	signal_connect(&self->renderbutton.signal_clicked, self,
+	psy_signal_connect(&self->renderbutton.signal_clicked, self,
 		filebar_onrendersong);
 	filebar_initalign(self);
 }

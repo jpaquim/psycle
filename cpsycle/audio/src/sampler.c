@@ -53,6 +53,7 @@ static MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	GENERATOR | 32 | 64,
+	MACHMODE_GENERATOR,
 	"Sampler"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -464,7 +465,7 @@ void voice_dispose(Voice* self)
 void voice_seqtick(Voice* self, const PatternEvent* event)
 {
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
-		 self->vol = event->parameter / (amp_t)255;
+		 self->vol = event->parameter / (psy_dsp_amp_t) 255;
 	} else
 	if (event->note == NOTECOMMANDS_RELEASE) {
 		voice_noteoff(self, event);
@@ -483,8 +484,8 @@ void voice_noteon(Voice* self, const PatternEvent* event)
 	double_setvalue(&self->position.speed,
 		pow(2.0f,
 			(event->note + self->sample->tune - baseC + 
-				((amp_t)self->sample->finetune * 0.01f)) / 12.0f) *
-			((beat_t)self->sample->samplerate / 44100));
+				((psy_dsp_amp_t)self->sample->finetune * 0.01f)) / 12.0f) *
+			((psy_dsp_beat_t)self->sample->samplerate / 44100));
 	adsr_start(&self->env);
 	adsr_start(&self->filterenv);
 }
@@ -499,7 +500,7 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 {	
 	if (self->sample && self->env.stage != ENV_OFF) {		
 		int i;
-		amp_t vol;		
+		psy_dsp_amp_t vol;		
 				
 		vol = self->vol * self->sample->globalvolume * self->sample->defaultvolume;
 		if (vol > 0.5) {
@@ -509,9 +510,9 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 			unsigned int c;			
 							
 			for (c = 0; c < buffer_numchannels(&self->sample->channels); ++c) {
-				amp_t* src;
-				amp_t* dst;
-				amp_t val;				
+				psy_dsp_amp_t* src;
+				psy_dsp_amp_t* dst;
+				psy_dsp_amp_t val;				
 				unsigned int frame;
 
 				src = buffer_at(&self->sample->channels, c);

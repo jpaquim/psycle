@@ -14,20 +14,20 @@ static void onpreferredsize(ui_checkbox*, ui_component* sender, ui_size* limit,
 
 void ui_checkbox_init(ui_checkbox* self, ui_component* parent)
 {  	
-	signal_init(&self->signal_clicked);	
+	psy_signal_init(&self->signal_clicked);
 	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
 		1);
-	signal_connect(&self->component.signal_command, self, oncommand);
-	signal_connect(&self->component.signal_destroy, self, ondestroy);
-	signal_connect(&self->component.signal_preferredsize, self,
+	psy_signal_connect(&self->component.signal_command, self, oncommand);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
 		onpreferredsize);
 }
 
 void ondestroy(ui_checkbox* self, ui_component* sender)
 {
-	signal_dispose(&self->signal_clicked);
+	psy_signal_dispose(&self->signal_clicked);
 }
 
 void ui_checkbox_settext(ui_checkbox* self, const char* text)
@@ -61,7 +61,7 @@ void oncommand(ui_checkbox* self, ui_component* sender, WPARAM wParam,
         case BN_CLICKED:
         {            
 			if (self->signal_clicked.slots) {
-				signal_emit(&self->signal_clicked, self, 0);
+				psy_signal_emit(&self->signal_clicked, self, 0);
 			}
         }
 		break;

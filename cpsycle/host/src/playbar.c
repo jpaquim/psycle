@@ -24,20 +24,20 @@ void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
 	ui_component_init(&self->component, parent);	
 	ui_button_init(&self->loop, &self->component);
 	ui_button_settext(&self->loop, "Loop");	
-	signal_connect(&self->loop.signal_clicked, self, onloopclicked);
+	psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);
 	ui_button_init(&self->recordnotes, &self->component);
 	ui_button_settext(&self->recordnotes, "Record Notes");	
-	signal_connect(&self->recordnotes.signal_clicked, self, onrecordnotesclicked);
+	psy_signal_connect(&self->recordnotes.signal_clicked, self, onrecordnotesclicked);
 	ui_button_init(&self->play, &self->component);
 	ui_button_settext(&self->play, workspace_translate(workspace, "play"));
-	signal_connect(&self->play.signal_clicked, self, onplayclicked);
+	psy_signal_connect(&self->play.signal_clicked, self, onplayclicked);
 	ui_button_init(&self->playsel, &self->component);
 	ui_button_settext(&self->playsel, workspace_translate(workspace, "sel"));
-	signal_connect(&self->playsel.signal_clicked, self, onplayselclicked);
+	psy_signal_connect(&self->playsel.signal_clicked, self, onplayselclicked);
 	ui_button_init(&self->stop, &self->component);
 	ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
-	signal_connect(&self->stop.signal_clicked, self, onstopclicked);
-	signal_connect(&self->component.signal_timer, self, ontimer);
+	psy_signal_connect(&self->stop.signal_clicked, self, onstopclicked);
+	psy_signal_connect(&self->component.signal_timer, self, ontimer);
 	playbar_initalign(self);
 	ui_component_starttimer(&self->component, TIMERID_PLAYBAR, 100);
 }

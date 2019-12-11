@@ -11,11 +11,12 @@ const MachineInfo* dummymachine_info(void)
 		MI_VERSION,
 		0x0250,
 		EFFECT | 32 | 64,
+		MACHMODE_FX,
 		"Dummy plug"
 			#ifndef NDEBUG
 			" (debug build)"
 			#endif
-			,
+			,		
 		"Dummy Plug",
 		"Psycledelics",
 		"help",		

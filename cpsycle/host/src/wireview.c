@@ -37,7 +37,7 @@ void wireview_init(WireView* self, ui_component* parent, Wire wire,
 	wireview_initbottomgroup(self);	
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);	
-	signal_connect(&self->component.signal_destroy, self, wireview_ondestroy);
+	psy_signal_connect(&self->component.signal_destroy, self, wireview_ondestroy);
 	wireview_connectmachinessignals(self, workspace);
 	vuscope_init(&self->vuscope, &self->notebook.component, wire, workspace);
 	channelmappingview_init(&self->channelmappingview, &self->notebook.component,
@@ -87,7 +87,7 @@ void wireview_initbottomgroup(WireView* self)
 	ui_button_init(&self->deletewire, &self->bottomgroup);
 	ui_button_settext(&self->deletewire, "Delete Connection");
 	self->deletewire.component.doublebuffered = 1;
-	signal_connect(&self->deletewire.signal_clicked, self,
+	psy_signal_connect(&self->deletewire.signal_clicked, self,
 		wireview_ondeleteconnection);
 	ui_component_setalign(&self->deletewire.component, UI_ALIGN_LEFT);
 }
@@ -95,8 +95,9 @@ void wireview_initbottomgroup(WireView* self)
 void wireview_ondestroy(WireView* self)
 {
 	if (self->workspace && self->workspace->song) {
-		signal_disconnect(&self->workspace->song->machines.connections.signal_disconnected, self,
-			wireview_ondisconnected);		
+		psy_signal_disconnect(
+			&self->workspace->song->machines.connections.signal_disconnected,
+			self, wireview_ondisconnected);		
 	}
 }
 
@@ -129,7 +130,7 @@ void wireview_ontweakvolume(WireView* self, ui_slider* slider, float value)
 	connections = &self->workspace->song->machines.connections;
 	input = connection_input(connections, self->wire.src, self->wire.dst);
 	if (input) {		
-		input->volume = (amp_t)(value * value * 4);			
+		input->volume = (psy_dsp_amp_t)(value * value * 4);			
 	}
 }
 
@@ -170,7 +171,7 @@ int wireview_wireexists(WireView* self)
 void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
 {	
 	if (workspace->song) {
-		signal_connect(
+		psy_signal_connect(
 			&self->workspace->song->machines.connections.signal_disconnected,
 			self, wireview_ondisconnected);
 	}
@@ -183,8 +184,8 @@ void wireframe_init(WireFrame* self, ui_component* parent, WireView* view)
 	ui_component_seticonressource(&self->component, IDI_MACPARAM);
 	ui_component_move(&self->component, 200, 150);
 	ui_component_resize(&self->component, 400, 400);
-	signal_connect(&self->component.signal_destroy, self, wireframe_ondestroy);
-	signal_connect(&self->component.signal_size, self, wireframe_onsize);
+	psy_signal_connect(&self->component.signal_destroy, self, wireframe_ondestroy);
+	psy_signal_connect(&self->component.signal_size, self, wireframe_onsize);
 }
 
 void wireframe_ondestroy(WireFrame* self, ui_component* frame)

@@ -6,7 +6,15 @@
 
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
-#include "hashtbl.h"
+
+#include <hashtbl.h>
+#include <signal.h>
+
+typedef struct {
+	psy_Signal signal_dispose;
+} ui_app;
+
+extern ui_app app;
 
 #if defined (DIVERSALIS__OS__MICROSOFT)
 

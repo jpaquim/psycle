@@ -17,7 +17,52 @@ static const char pathenvvarname[] = {
 	"PATH"
 };
 
-void dir_enum(void* context, const char* root, const char* wildcard, int flag,
+void dir_enumerate(void* context, const char* root, const char* wildcard, int flag,
+	void (*enumproc)(void*, const char* path, int flag))
+{
+	HANDLE hFind;
+	WIN32_FIND_DATA wfd;
+	char path[MAX_PATH];	
+	BOOL cont;
+  
+	// First, enumerate all files using the wildcard in the current directory
+	psy_snprintf(path, MAX_PATH, "%s\\%s", root, wildcard);
+ 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
+		
+	} else {
+		cont = TRUE;
+		do {
+			if ((strncmp(".", wfd.cFileName, 1) != 0) && 
+					(strncmp("..", wfd.cFileName, 2) != 0) ) {
+				if (!(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {						
+					psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
+					enumproc(context, path, flag);				
+				}
+			}		
+		} while (FindNextFile(hFind, &wfd));
+		if (GetLastError() != ERROR_NO_MORE_FILES) {
+			return;
+		}
+		if (FindClose(hFind) == FALSE) {
+			return;
+		}
+	}
+	// Secondly, find and emumerate all subdirectories with their subdirectories
+	psy_snprintf(path, MAX_PATH, "%s\\*", root);
+	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
+		return;
+	}	
+	if (GetLastError() != ERROR_NO_MORE_FILES) {
+		SetLastError(0);
+		return;
+	}
+	if (FindClose(hFind) == FALSE) {
+		return;
+	}
+
+}
+
+void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
 	void (*enumproc)(void*, const char* path, int flag))
 {
 	HANDLE hFind;
@@ -58,11 +103,12 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 				// enumerate subdirectory with its subdirectories
 				psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
-				dir_enum(context, path, wildcard, flag, enumproc);
+				dir_enumerate_recursive(context, path, wildcard, flag, enumproc);
 			}			
 		}		
 	} while (FindNextFile(hFind, &wfd));
 	if (GetLastError() != ERROR_NO_MORE_FILES) {
+		SetLastError(0);
 		return;
 	}
 	if (FindClose(hFind) == FALSE) {
@@ -71,7 +117,7 @@ void dir_enum(void* context, const char* root, const char* wildcard, int flag,
 }
 
 struct FileSearch {
-	const char* filepath;
+	char* filepath;
 };
 
 static int onenumfindfile(struct FileSearch* self, const char* path, int flag);
@@ -83,7 +129,7 @@ void dir_findfile(const char* searchpath, const char* wildcard,
 
 	filepath[0] = '\0';
 	filesearch.filepath = filepath;
-	dir_enum(&filesearch, searchpath, wildcard, 0, onenumfindfile);
+	dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0, onenumfindfile);
 	SetLastError(0);
 }
 
@@ -152,7 +198,7 @@ static const char pathenvvarname[] = {
 	"PATH"
 };
 
-void dir_enum(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
+void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
 {	
 }
 

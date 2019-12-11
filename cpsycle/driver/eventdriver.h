@@ -57,7 +57,7 @@ typedef struct EventDriver {
 	int (*error)(int, const char*);
 	int (*getcmd)(struct EventDriver*, Properties* section);
 	void (*setcmddef)(struct EventDriver*, Properties*);
-	Signal signal_input;
+	psy_Signal signal_input;
 } EventDriver;
 
 

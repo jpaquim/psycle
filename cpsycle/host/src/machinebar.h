@@ -14,6 +14,7 @@ typedef struct {
 	ui_button prevmachinebutton;
 	ui_button nextmachinebutton;
 	ui_button gear;
+	ui_button editor;
 	ui_combobox instparambox;	
 	Player* player;	
 	void (*selchange)(void*, int);

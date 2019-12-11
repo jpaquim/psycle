@@ -17,9 +17,9 @@ void inputdefiner_init(InputDefiner* self, ui_component* parent)
 	self->input = 0;
 	self->regularkey = 0;
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, ondraw);
-	signal_connect(&self->component.signal_keydown, self, onkeydown);
-	signal_connect(&self->component.signal_keyup, self, onkeyup);
+	psy_signal_connect(&self->component.signal_draw, self, ondraw);
+	psy_signal_connect(&self->component.signal_keydown, self, onkeydown);
+	psy_signal_connect(&self->component.signal_keyup, self, onkeyup);
 }
 
 void inputdefiner_setinput(InputDefiner* self, unsigned int input)

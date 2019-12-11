@@ -29,8 +29,8 @@ typedef struct PsyFile {
 	uint32_t fileversion;
 	uint32_t filesize;
 	uint32_t chunkcount;
+	int flip16;
 } PsyFile; 
-
 
 int psyfile_open(PsyFile*, const char* path);
 int psyfile_create(PsyFile*, const char* path, int overwrite);

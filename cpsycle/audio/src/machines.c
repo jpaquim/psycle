@@ -45,9 +45,9 @@ void machines_init(Machines* self)
 
 void machines_initsignals(Machines* self)
 {
-	signal_init(&self->signal_insert);
-	signal_init(&self->signal_removed);
-	signal_init(&self->signal_slotchange);	
+	psy_signal_init(&self->signal_insert);
+	psy_signal_init(&self->signal_removed);
+	psy_signal_init(&self->signal_slotchange);	
 }
 
 void machines_dispose(Machines* self)
@@ -67,9 +67,9 @@ void machines_dispose(Machines* self)
 
 void machines_disposesignals(Machines* self)
 {
-	signal_dispose(&self->signal_insert);
-	signal_dispose(&self->signal_removed);
-	signal_dispose(&self->signal_slotchange);	
+	psy_signal_dispose(&self->signal_insert);
+	psy_signal_dispose(&self->signal_removed);
+	psy_signal_dispose(&self->signal_slotchange);	
 }
 
 void machines_free(Machines* self)
@@ -100,7 +100,7 @@ void machines_insert(Machines* self, uintptr_t slot, Machine* machine)
 			self->master = machine;
 		}
 		machine->vtable->setslot(machine, slot);
-		signal_emit(&self->signal_insert, self, 1, slot);
+		psy_signal_emit(&self->signal_insert, self, 1, slot);
 		if (!self->filemode) {		
 			lock_enter();
 			machines_setpath(self, compute_path(self, MASTER_INDEX));
@@ -126,7 +126,7 @@ void machines_erase(Machines* self, uintptr_t slot)
 	machines_disconnectall(self, slot);	
 	table_remove(&self->slots, slot);
 	machines_setpath(self, compute_path(self, MASTER_INDEX));
-	signal_emit(&self->signal_removed, self, 1, slot);
+	psy_signal_emit(&self->signal_removed, self, 1, slot);
 	lock_leave();	
 }
 
@@ -165,7 +165,7 @@ uintptr_t machines_append(Machines* self, Machine* machine)
 		(machine->vtable->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
 	table_insert(&self->slots, slot, machine);
 	machine->vtable->setslot(machine, slot);
-	signal_emit(&self->signal_insert, self, 1, slot);
+	psy_signal_emit(&self->signal_insert, self, 1, slot);
 	if (!self->filemode) {		
 		lock_enter();
 		machines_setpath(self, compute_path(self, MASTER_INDEX));
@@ -189,10 +189,20 @@ Machine* machines_at(Machines* self, uintptr_t slot)
 
 int machines_connect(Machines* self, uintptr_t outputslot, uintptr_t inputslot)
 {
-	int rv;
+	int rv;	
+
 	if (!self->filemode) {
 		lock_enter();			
 	}
+	/*if (!self->filemode) {
+		Machine* machine;
+
+		machine = machines_at(self, inputslot);
+		if ((machine && machine->vtable->numinputs(machine) == 0)
+			|| !machine) {
+			return 0;
+		}
+	}*/
 	rv = connections_connect(&self->connections, outputslot, inputslot);
 	if (!self->filemode) {
 		machines_setpath(self, compute_path(self, MASTER_INDEX));			
@@ -407,7 +417,7 @@ Buffer* machines_outputs(Machines* self, uintptr_t slot)
 void machines_changeslot(Machines* self, uintptr_t slot)
 {
 	self->slot = slot;	
-	signal_emit(&self->signal_slotchange, self, 1, slot);
+	psy_signal_emit(&self->signal_slotchange, self, 1, slot);
 }
 
 uintptr_t machines_slot(Machines* self)
@@ -438,12 +448,12 @@ uintptr_t machines_size(Machines* self)
 	return table_size(&self->slots);
 }
 
-void machines_setvolume(Machines* self, amp_t volume)
+void machines_setvolume(Machines* self, psy_dsp_amp_t volume)
 {
 	self->volume = volume;
 }
 
-amp_t machines_volume(Machines* self)
+psy_dsp_amp_t machines_volume(Machines* self)
 {
 	return self->volume;
 }

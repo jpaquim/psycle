@@ -26,8 +26,8 @@ void helpview_init(HelpView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "Greetings");	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 1);
-	signal_connect(&self->component.signal_show, self, OnShow);
-	signal_connect(&self->component.signal_hide, self, OnHide);
+	psy_signal_connect(&self->component.signal_show, self, OnShow);
+	psy_signal_connect(&self->component.signal_hide, self, OnHide);
 }
 
 void OnShow(HelpView* self, ui_component* sender)

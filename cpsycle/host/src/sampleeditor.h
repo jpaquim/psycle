@@ -28,12 +28,12 @@ typedef struct {
 	float samplewidth;	
 	int visisteps;	
 	int visiwidth;	
-	beat_t stepwidth;	
+	psy_dsp_beat_t stepwidth;
 } SampleEditorMetrics;
 
 typedef struct {
 	ui_component component;           	
-	beat_t bpl;
+	psy_dsp_beat_t bpl;
 	int lpb;
 	struct SampleEditor* view;   
 	int scrollpos;	
@@ -46,7 +46,7 @@ typedef struct {
 	float zoomright;	
 	int dragmode;
 	int dragoffset;
-	Signal signal_zoom;
+	psy_Signal signal_zoom;
 } SampleZoom;
 
 typedef struct SampleEditor {	

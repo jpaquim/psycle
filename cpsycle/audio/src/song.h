@@ -20,13 +20,18 @@ typedef struct {
 	char* title;
 	char* credits;
 	char* comments;
-	beat_t bpm;
+	psy_dsp_beat_t bpm;
 	uintptr_t lpb;
 	uintptr_t tracks;
 	int octave;
 	int tpb;
 	int extraticksperbeat;
 } SongProperties;
+
+void songproperties_init(SongProperties*, const char* title,
+	const char* credits, const char* comments);
+void songproperties_copy(SongProperties*, const SongProperties* other);
+void songproperties_dispose(SongProperties*);
 
 typedef struct Song {
 	SongProperties properties;
@@ -37,8 +42,8 @@ typedef struct Song {
 	Instruments instruments;
 	XMInstruments xminstruments;
 	MachineFactory* machinefactory;
-	Signal signal_loadprogress;
-	Signal signal_saveprogress;
+	psy_Signal signal_loadprogress;
+	psy_Signal signal_saveprogress;
 } Song;
 
 /// initializes a song with a master and one sequence track/entry/pattern
@@ -55,5 +60,7 @@ Song* song_allocinit(MachineFactory*);
 void song_free(Song*);
 /// Clears the song completly (no master, no pattern, no sequence track/entry)
 void song_clear(Song*);
+/// set song properties
+void song_setproperties(Song*, const SongProperties*);
 
 #endif

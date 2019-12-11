@@ -4,14 +4,14 @@
 #if !defined(DSP_TYPES_H)
 #define DSP_TYPES_H
 
-typedef float amp_t;
-typedef float beat_t;
-typedef float seconds_t;
-typedef float percent_t;
+typedef float psy_dsp_amp_t;
+typedef float psy_dsp_beat_t;
+typedef float psy_dsp_seconds_t;
+typedef float psy_dsp_percent_t;
 
-typedef double big_amp_t;
-typedef double big_beat_t;
-typedef double big_seconds_t;
-typedef double big_percent_t;
+typedef double psy_dsp_big_amp_t;
+typedef double psy_dsp_big_beat_t;
+typedef double psy_dsp_big_seconds_t;
+typedef double psy_dsp_big_percent_t;
 
 #endif

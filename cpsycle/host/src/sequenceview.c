@@ -68,9 +68,10 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	self->selection = &workspace->sequenceselection;	
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
-	signal_connect(&self->component.signal_size, self, sequenceview_onsize);
-	sequencelistview_init(&self->listview, &self->component, self, self->sequence,
-		self->patterns, workspace);
+	psy_signal_connect(&self->component.signal_size, self,
+		sequenceview_onsize);
+	sequencelistview_init(&self->listview, &self->component, self,
+		self->sequence, self->patterns, workspace);
 	self->listview.player = &workspace->player;
 	self->buttons.context = &self->listview;
 	sequencebuttons_init(&self->buttons, &self->component);
@@ -79,43 +80,43 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	sequenceduration_init(&self->duration, &self->component, self->sequence);
 	sequenceroptionsbar_init(&self->options, &self->component);
 
-	signal_connect(&self->buttons.newentry.signal_clicked, self,
+	psy_signal_connect(&self->buttons.newentry.signal_clicked, self,
 		sequenceview_onnewentry);
-	signal_connect(&self->buttons.insertentry.signal_clicked, self,
+	psy_signal_connect(&self->buttons.insertentry.signal_clicked, self,
 		sequenceview_oninsertentry);
-	signal_connect(&self->buttons.cloneentry.signal_clicked, self,
+	psy_signal_connect(&self->buttons.cloneentry.signal_clicked, self,
 		sequenceview_oncloneentry);
-	signal_connect(&self->buttons.delentry.signal_clicked, self,
+	psy_signal_connect(&self->buttons.delentry.signal_clicked, self,
 		sequenceview_ondelentry);
-	signal_connect(&self->buttons.incpattern.signal_clicked, self,
+	psy_signal_connect(&self->buttons.incpattern.signal_clicked, self,
 		sequenceview_onincpattern);
-	signal_connect(&self->buttons.decpattern.signal_clicked, self,
+	psy_signal_connect(&self->buttons.decpattern.signal_clicked, self,
 		sequenceview_ondecpattern);
-	signal_connect(&self->buttons.newtrack.signal_clicked, self,
+	psy_signal_connect(&self->buttons.newtrack.signal_clicked, self,
 		sequenceview_onnewtrack);
-	signal_connect(&self->buttons.deltrack.signal_clicked, self,
+	psy_signal_connect(&self->buttons.deltrack.signal_clicked, self,
 		sequenceview_ondeltrack);
-	signal_connect(&self->buttons.clear.signal_clicked, self,
+	psy_signal_connect(&self->buttons.clear.signal_clicked, self,
 		sequenceview_onclear);
-	signal_connect(&self->buttons.cut.signal_clicked, self,
+	psy_signal_connect(&self->buttons.cut.signal_clicked, self,
 		sequenceview_oncut);
-	signal_connect(&self->buttons.copy.signal_clicked, self,
+	psy_signal_connect(&self->buttons.copy.signal_clicked, self,
 		sequenceview_oncopy);
-	signal_connect(&self->buttons.paste.signal_clicked, self,
+	psy_signal_connect(&self->buttons.paste.signal_clicked, self,
 		sequenceview_onpaste);
-	signal_connect(&self->buttons.singlesel.signal_clicked, self,
+	psy_signal_connect(&self->buttons.singlesel.signal_clicked, self,
 		sequenceview_onsingleselection);
-	signal_connect(&self->buttons.multisel.signal_clicked, self,
+	psy_signal_connect(&self->buttons.multisel.signal_clicked, self,
 		sequenceview_onmultiselection);
-	signal_connect(&self->options.followsong.signal_clicked, self,
+	psy_signal_connect(&self->options.followsong.signal_clicked, self,
 		sequenceview_onfollowsong);
-	signal_connect(&self->options.recordtweaks.signal_clicked, self,
+	psy_signal_connect(&self->options.recordtweaks.signal_clicked, self,
 		sequenceview_onrecordtweaks);
-	signal_connect(&self->options.multichannelaudition.signal_clicked, self,
+	psy_signal_connect(&self->options.multichannelaudition.signal_clicked, self,
 		sequenceview_onmultichannelaudition);
-	signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->signal_songchanged, self,
 		sequenceview_onsongchanged);
-	signal_connect(&workspace->signal_sequenceselectionchanged, self,
+	psy_signal_connect(&workspace->signal_sequenceselectionchanged, self,
 		sequenceview_onsequenceselectionchanged);
 	ui_component_resize(&self->component, 150, 0);	
 }
@@ -154,10 +155,10 @@ void sequencebuttons_init(SequenceButtons* self, ui_component* parent)
 	ui_button_settext(&self->multisel, "MultiSel");	
 	ui_button_highlight(&self->singlesel);
 	ui_button_disablehighlight(&self->multisel);
-	signal_connect(&self->component.signal_align, self,
+	psy_signal_connect(&self->component.signal_align, self,
 		sequencebuttons_onalign);
-	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self,
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
 		sequencebuttons_onpreferredsize);	
 }
 
@@ -245,7 +246,7 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	self->view = view;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
-	signal_connect(&self->component.signal_draw, self,
+	psy_signal_connect(&self->component.signal_draw, self,
 		sequenceviewtrackheader_ondraw); 
 }
 
@@ -285,13 +286,13 @@ void sequencelistview_init(SequenceListView* self, ui_component* parent,
 	self->selection = &workspace->sequenceselection;
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self,
+	psy_signal_connect(&self->component.signal_draw, self,
 		sequencelistview_ondraw);
-	signal_connect(&self->component.signal_mousedown, self, 
+	psy_signal_connect(&self->component.signal_mousedown, self, 
 		sequencelistview_onmousedown);
-	signal_connect(&self->component.signal_scroll, self,
+	psy_signal_connect(&self->component.signal_scroll, self,
 		sequencelistview_onscroll);
-	signal_connect(&self->component.signal_timer, self,
+	psy_signal_connect(&self->component.signal_timer, self,
 		sequencelistview_ontimer);
 	self->selected = 0;
 	self->selectedtrack = 0;	

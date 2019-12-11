@@ -19,12 +19,12 @@ void navigation_init(Navigation* self, ui_component* parent, Workspace* workspac
 	ui_button_settextalignment(&self->prev, UI_ALIGNMENT_CENTER_HORIZONTAL |
 		UI_ALIGNMENT_TOP);
 	ui_button_settext(&self->prev, "<");
-	signal_connect(&self->prev.signal_clicked, self, navigation_onprev);
+	psy_signal_connect(&self->prev.signal_clicked, self, navigation_onprev);
 	ui_button_init(&self->next, &self->component);
 	ui_button_settext(&self->next, ">");
 	ui_button_settextalignment(&self->next, UI_ALIGNMENT_CENTER_HORIZONTAL |
 		UI_ALIGNMENT_TOP);
-	signal_connect(&self->next.signal_clicked, self, navigation_onnext);	
+	psy_signal_connect(&self->next.signal_clicked, self, navigation_onnext);	
 	navigation_initalign(self);	
 }
 

@@ -10,9 +10,9 @@ void instruments_init(Instruments* self)
 {
 	table_init(&self->container);
 	self->slot = 0;		
-	signal_init(&self->signal_insert);
-	signal_init(&self->signal_removed);
-	signal_init(&self->signal_slotchange);
+	psy_signal_init(&self->signal_insert);
+	psy_signal_init(&self->signal_removed);
+	psy_signal_init(&self->signal_slotchange);
 }
 
 void instruments_dispose(Instruments* self)
@@ -28,15 +28,15 @@ void instruments_dispose(Instruments* self)
 		free(instrument);
 	}
 	table_dispose(&self->container);
-	signal_dispose(&self->signal_insert);
-	signal_dispose(&self->signal_removed);
-	signal_dispose(&self->signal_slotchange);
+	psy_signal_dispose(&self->signal_insert);
+	psy_signal_dispose(&self->signal_removed);
+	psy_signal_dispose(&self->signal_slotchange);
 }
 
 void instruments_insert(Instruments* self, Instrument* instrument, uintptr_t slot)
 {
 	table_insert(&self->container, slot, instrument);
-	signal_emit(&self->signal_insert, self, 1, slot);
+	psy_signal_emit(&self->signal_insert, self, 1, slot);
 }
 
 void instruments_remove(Instruments* self, uintptr_t slot)
@@ -48,14 +48,14 @@ void instruments_remove(Instruments* self, uintptr_t slot)
 		table_remove(&self->container, slot);
 		instrument_dispose(instrument);
 		free(instrument);
-		signal_emit(&self->signal_removed, self, 1, slot);
+		psy_signal_emit(&self->signal_removed, self, 1, slot);
 	}
 }
 
 void instruments_changeslot(Instruments* self, uintptr_t slot)
 {
 	self->slot = slot;	
-	signal_emit(&self->signal_slotchange, self, 1, slot);
+	psy_signal_emit(&self->signal_slotchange, self, 1, slot);
 }
 
 uintptr_t instruments_slot(Instruments* self)

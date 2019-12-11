@@ -50,28 +50,28 @@ void settingsview_init(SettingsView* self, ui_component* parent,
 	self->client.wheelscroll = 4;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	ui_component_showverticalscrollbar(&self->client);	
-	signal_connect(&self->client.signal_destroy, self, settingsview_ondestroy);
-	signal_connect(&self->client.signal_draw, self, settingsview_ondraw);
-	signal_connect(&self->client.signal_scroll, self, settingsview_onscroll);
-	signal_connect(&self->client.signal_keydown, self, settingsview_onkeydown);
-	signal_connect(&self->component.signal_keydown, self,
+	psy_signal_connect(&self->client.signal_destroy, self, settingsview_ondestroy);
+	psy_signal_connect(&self->client.signal_draw, self, settingsview_ondraw);
+	psy_signal_connect(&self->client.signal_scroll, self, settingsview_onscroll);
+	psy_signal_connect(&self->client.signal_keydown, self, settingsview_onkeydown);
+	psy_signal_connect(&self->component.signal_keydown, self,
 		settingsview_onkeydown);
-	signal_connect(&self->client.signal_mousedown, self,
+	psy_signal_connect(&self->client.signal_mousedown, self,
 		settingsview_onmousedown);
-	signal_connect(&self->client.signal_mousedoubleclick, self,
+	psy_signal_connect(&self->client.signal_mousedoubleclick, self,
 		settingsview_onmousedoubleclick);
-	signal_connect(&self->component.signal_size, self, settingsview_onsize);
+	psy_signal_connect(&self->component.signal_size, self, settingsview_onsize);
 	self->selected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
 	self->dirbutton = 0;
 	ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);
-	signal_connect(&self->edit.component.signal_keydown, self,
+	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		settingsview_oneditkeydown);
 	ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->client);	
 	ui_component_hide(&self->inputdefiner.component);		
-	signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_changed);
 	tabbar_init(&self->tabbar, &self->component);
 	self->tabbar.tabalignment = UI_ALIGN_RIGHT;	
 	ui_component_resize(&self->tabbar.component, 130, 0);	
@@ -89,13 +89,13 @@ void settingsview_appendtabbarsections(SettingsView* self)
 		}		
 	}
 	tabbar_select(&self->tabbar, 0);			
-	signal_connect(&self->tabbar.signal_change, self,
+	psy_signal_connect(&self->tabbar.signal_change, self,
 		settingsview_ontabbarchange);
 }
 
 void settingsview_ondestroy(SettingsView* self, ui_component* sender)
 {
-	signal_dispose(&self->signal_changed);	
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void settingsview_ondraw(SettingsView* self, ui_component* sender, ui_graphics* g)
@@ -363,14 +363,17 @@ void settingsview_onmousedown(SettingsView* self, ui_component* sender,
 		if (properties_ischoiceitem(self->selected)) {
 			self->choiceproperty = self->selected->parent;
 			self->choiceproperty->item.value.i = self->choicecount;
-			signal_emit(&self->signal_changed, self, 1, self->selected);
+			psy_signal_emit(&self->signal_changed, self, 1,
+				self->selected);
 		} else
 		if (properties_type(self->selected) == PROPERTY_TYP_BOOL) {
 			self->selected->item.value.i = self->selected->item.value.i == 0;
-			signal_emit(&self->signal_changed, self, 1, self->selected);
+			psy_signal_emit(&self->signal_changed, self, 1,
+				self->selected);
 		} else
 		if (properties_type(self->selected) == PROPERTY_TYP_ACTION) {			
-			signal_emit(&self->signal_changed, self, 1, self->selected);
+			psy_signal_emit(&self->signal_changed, self, 1,
+				self->selected);
 		}
 	}
 	ui_component_invalidate(&self->client);
@@ -517,7 +520,7 @@ void settingsview_oninputdefinerchange(SettingsView* self,
 			properties_write_int(self->selected->parent,
 				self->selected->item.key, self->inputdefiner.input);
 		}
-		signal_emit(&self->signal_changed, self, 1, self->selected);
+		psy_signal_emit(&self->signal_changed, self, 1, self->selected);
 	}
 }
 
@@ -532,7 +535,7 @@ void settingsview_oneditchange(SettingsView* self, ui_edit* sender)
 			properties_write_int(self->selected->parent,
 				self->selected->item.key, atoi(ui_edit_text(&self->edit)));
 		}
-		signal_emit(&self->signal_changed, self, 1, self->selected);
+		psy_signal_emit(&self->signal_changed, self, 1, self->selected);
 	}
 }
 

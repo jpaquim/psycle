@@ -39,8 +39,8 @@ typedef struct {
    int avgcharwidth;
    int pluginpos;
    Properties* selectedplugin;
-   Signal signal_selected;
-   Signal signal_changed;
+   psy_Signal signal_selected;
+   psy_Signal signal_changed;
    Workspace* workspace;
    int calledby;
 } PluginsView;

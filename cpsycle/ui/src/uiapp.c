@@ -7,6 +7,8 @@
 #include <windows.h>
 #include <excpt.h>
 
+ui_app app;
+
 static int FilterException(const char* msg, int code, struct _EXCEPTION_POINTERS *ep) 
 {	
 	// char txt[512];	
@@ -19,16 +21,16 @@ int ui_run(void)
 {
 	MSG msg; 
 
-	__try
-	{
+	// __try
+	// {
 		while (GetMessage (&msg, NULL, 0, 0))
 		{
 			  TranslateMessage (&msg) ;
 			  DispatchMessage (&msg) ;
 		}
-	}
-	__except(FilterException("app loop", GetExceptionCode(), GetExceptionInformation())) {			
-	}
+	// }
+	// __except(FilterException("app loop", GetExceptionCode(), GetExceptionInformation())) {			
+	// }
     return (int) msg.wParam ;
 }
 

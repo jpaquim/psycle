@@ -11,7 +11,7 @@
 // edit position in the pattern
 typedef struct {	
 	unsigned int track;
-	big_beat_t offset;
+	psy_dsp_big_beat_t offset;
 	unsigned int line;
 	unsigned int subline;
 	unsigned int totallines;
@@ -27,11 +27,11 @@ int patterneditposition_equal(PatternEditPosition* lhs,
 typedef struct {
 	PatternEvent event;
 	/// position in beat unit
-	beat_t offset;
+	psy_dsp_beat_t offset;
 	/// sound driver callback event position
-	beat_t delta;
+	psy_dsp_beat_t delta;
 	/// current sequencer bpm
-	beat_t bpm;
+	psy_dsp_beat_t bpm;
 	/// the tracker channel
 	unsigned int track; 
 } PatternEntry;
@@ -43,7 +43,7 @@ typedef List PatternNode;
 
 typedef struct {
 	PatternNode* events;	
-	beat_t length;
+	psy_dsp_beat_t length;
 	// used by the paste pattern, player uses songtracks of patterns
 	uintptr_t maxsongtracks;
 	char* label;
@@ -70,23 +70,23 @@ Pattern* pattern_clone(Pattern*);
 /// inserts an event by copy
 ///\return the pattern node containing the inserted event
 PatternNode* pattern_insert(Pattern*, PatternNode* prev, int track,
-	beat_t offset, const PatternEvent*);
+	psy_dsp_beat_t offset, const PatternEvent*);
 /// removes a pattern node
 void pattern_remove(Pattern*, PatternNode*);
 /// finds the pattern node greater or equal than the offset
 ///\return the pattern node greater or equal than the offset
-PatternNode* pattern_greaterequal(Pattern*, beat_t offset);
+PatternNode* pattern_greaterequal(Pattern*, psy_dsp_beat_t offset);
 /// finds a pattern node
 ///\return the pattern node
 PatternNode* pattern_findnode(Pattern* pattern, unsigned int track,
-	float offset, unsigned int subline, beat_t bpl, PatternNode** prev);
+	float offset, unsigned int subline, psy_dsp_beat_t bpl, PatternNode** prev);
 /// finds the last pattern
 ///\return finds the last pattern node
 PatternNode* pattern_last(Pattern*);
 /// sets the pattern description
 void pattern_setlabel(Pattern*, const char*);
 /// sets the pattern length
-void pattern_setlength(Pattern*, beat_t length);	
+void pattern_setlength(Pattern*, psy_dsp_beat_t length);	
 /// tells if the pattern contains events
 ///\return tells if the pattern contains events
 int pattern_empty(Pattern*);

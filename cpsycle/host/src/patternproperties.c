@@ -12,7 +12,7 @@ void InitPatternProperties(PatternProperties* self, ui_component* parent, Patter
 {			
 	self->pattern = pattern;
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_size, self, OnSize);	
+	psy_signal_connect(&self->component.signal_size, self, OnSize);	
 	ui_label_init(&self->namelabel, &self->component);
 	ui_label_settext(&self->namelabel, "Name");
 	ui_label_init(&self->lengthlabel, &self->component);
@@ -22,10 +22,10 @@ void InitPatternProperties(PatternProperties* self, ui_component* parent, Patter
 	ui_edit_init(&self->lengthedit, &self->component, 0);
 	ui_button_init(&self->applybutton, &self->component);
 	ui_button_settext(&self->applybutton, "Apply");	
-	signal_connect(&self->applybutton.signal_clicked, self, OnApplyClicked);	
+	psy_signal_connect(&self->applybutton.signal_clicked, self, OnApplyClicked);	
 	ui_button_init(&self->closebutton, &self->component);
 	ui_button_settext(&self->closebutton, "x");	
-	signal_connect(&self->closebutton.signal_clicked, self, OnCloseClicked);	
+	psy_signal_connect(&self->closebutton.signal_clicked, self, OnCloseClicked);	
 	ui_component_move(&self->namelabel.component, 10, 10);
 	ui_component_resize(&self->namelabel.component, 80, 20);
 	ui_component_move(&self->lengthlabel.component, 10, 35);
@@ -62,7 +62,7 @@ static void OnApplyClicked(PatternProperties* self, ui_component* sender)
 {
 	if (self->pattern) {
 		pattern_setlabel(self->pattern, ui_edit_text(&self->nameedit));
-		pattern_setlength(self->pattern, (beat_t)atof(ui_edit_text(&self->lengthedit)));
+		pattern_setlength(self->pattern, (psy_dsp_beat_t)atof(ui_edit_text(&self->lengthedit)));
 	}
 }
 

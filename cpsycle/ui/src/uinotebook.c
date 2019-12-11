@@ -19,7 +19,7 @@ void ui_notebook_init(ui_notebook* self, ui_component* parent)
     ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	self->component.defaultpropagation = 1;
-	signal_connect(&self->component.signal_size, self, onsize);
+	psy_signal_connect(&self->component.signal_size, self, onsize);
 	self->pageindex = 0;
 	self->split = 0;
 	self->splitx = -1;
@@ -66,9 +66,10 @@ int ui_notebook_pageindex(ui_notebook* self)
 	return self->pageindex;
 }
 
-void ui_notebook_connectcontroller(ui_notebook* self, Signal* controllersignal)
+void ui_notebook_connectcontroller(ui_notebook* self, psy_Signal* 
+	controllersignal)
 {
-	signal_connect(controllersignal, self, ontabbarchange);
+	psy_signal_connect(controllersignal, self, ontabbarchange);
 }
 
 void onsize(ui_notebook* self, ui_component* sender, ui_size* size)
@@ -102,11 +103,16 @@ void ui_notebook_split(ui_notebook* self)
 		self->split = 1;
 		self->splitx = 400;
 		ui_component_init(&self->splitbar, &self->component);
-		signal_connect(&self->splitbar.signal_mouseenter, self, onmouseentersplitbar);
-		signal_connect(&self->splitbar.signal_mouseleave, self, onmouseleavesplitbar);
-		signal_connect(&self->splitbar.signal_mousedown, self, onmousedown);		
-		signal_connect(&self->splitbar.signal_mousemove, self, onmousemove);
-		signal_connect(&self->splitbar.signal_mouseup, self, onmouseup);
+		psy_signal_connect(&self->splitbar.signal_mouseenter, self,
+			onmouseentersplitbar);
+		psy_signal_connect(&self->splitbar.signal_mouseleave, self,
+			onmouseleavesplitbar);
+		psy_signal_connect(&self->splitbar.signal_mousedown, self,
+			onmousedown);
+		psy_signal_connect(&self->splitbar.signal_mousemove, self,
+			onmousemove);
+		psy_signal_connect(&self->splitbar.signal_mouseup, self,
+			onmouseup);
 		ui_notebook_setpageindex(self, 0);
 		align_split(self, self->splitx);
 	}

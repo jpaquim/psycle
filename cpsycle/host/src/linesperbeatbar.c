@@ -25,11 +25,13 @@ void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* pl
 	ui_label_setcharnumber(&self->lpblabel, 3);	
 	ui_button_init(&self->lessbutton, &self->component);
 	ui_button_seticon(&self->lessbutton, UI_ICON_LESS);
-	signal_connect(&self->lessbutton.signal_clicked, self, OnLessClicked);		
+	psy_signal_connect(&self->lessbutton.signal_clicked, self,
+		OnLessClicked);
 	ui_button_init(&self->morebutton, &self->component);
 	ui_button_seticon(&self->morebutton, UI_ICON_MORE);
-	signal_connect(&self->morebutton.signal_clicked, self, OnMoreClicked);
-	signal_connect(&self->component.signal_timer, self, OnTimer);
+	psy_signal_connect(&self->morebutton.signal_clicked, self,
+		OnMoreClicked);
+	psy_signal_connect(&self->component.signal_timer, self, OnTimer);
 	ui_component_starttimer(&self->component, 500, 200);
 	linesperbeatbar_initalign(self);
 }

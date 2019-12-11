@@ -9,8 +9,8 @@
 
 static const char* custommachine_editname(CustomMachine*);
 static void custommachine_seteditname(CustomMachine*, const char* name);
-static void setpanning(CustomMachine*, amp_t);
-static amp_t panning(CustomMachine*);
+static void setpanning(CustomMachine*, psy_dsp_amp_t);
+static psy_dsp_amp_t panning(CustomMachine*);
 static void mute(CustomMachine* self) { self->ismuted = 1;  }
 static void unmute(CustomMachine* self) { self->ismuted = 0;  }
 static int muted(CustomMachine* self) { return self->ismuted; }
@@ -47,15 +47,15 @@ void custommachine_init(CustomMachine* self, MachineCallback callback)
 	self->editname = 0;
 	self->ismuted = 0;
 	self->isbypassed = 0;
-	self->pan = (amp_t) 0.5f;
+	self->pan = (psy_dsp_amp_t) 0.5f;
 }
 
-void setpanning(CustomMachine* self, amp_t val)
+void setpanning(CustomMachine* self, psy_dsp_amp_t val)
 {
 	self->pan = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
 }
 
-amp_t panning(CustomMachine* self)
+psy_dsp_amp_t panning(CustomMachine* self)
 {
 	return self->pan;
 }

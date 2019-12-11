@@ -16,9 +16,9 @@ static void ShiftSuccessors(EnvelopeView* self, double timeshift);
 static void CheckAdjustPointRange(List* p);
 static int pxvalue(EnvelopeView*, double value);
 static int pxtime(EnvelopeView*, double t);
-static seconds_t displaymaxtime(EnvelopeView*);
-EnvelopePoint* allocpoint(seconds_t time, amp_t value, seconds_t mintime,
-	seconds_t maxtime, amp_t minvalue, amp_t maxvalue);
+static psy_dsp_seconds_t displaymaxtime(EnvelopeView*);
+EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime,
+	psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue);
 static void InitPoints(EnvelopeView*);
 
 void adsrpointmapper_init(ADSRPointMapper* self)
@@ -59,12 +59,12 @@ void InitEnvelopeView(EnvelopeView* self, ui_component* parent)
 		ui_value_makepx(5),
 		ui_value_makepx(5));
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_size, self, OnSize);	
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
-	signal_connect(&self->component.signal_mouseup, self, OnMouseUp);	
+	psy_signal_connect(&self->component.signal_draw, self, OnDraw);
+	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
+	psy_signal_connect(&self->component.signal_size, self, OnSize);	
+	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	psy_signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
+	psy_signal_connect(&self->component.signal_mouseup, self, OnMouseUp);	
 	self->cx = 0;
 	self->cy = 0;
 	self->dragpoint = 0;	
@@ -286,7 +286,7 @@ float displaymaxtime(EnvelopeView* self)
 	return 5.f;
 }
 
-EnvelopePoint* allocpoint(seconds_t time, amp_t value, seconds_t mintime, seconds_t maxtime, amp_t minvalue, amp_t maxvalue)
+EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime, psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue)
 {
 	EnvelopePoint* rv;
 

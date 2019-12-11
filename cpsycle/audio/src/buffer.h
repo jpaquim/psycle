@@ -9,7 +9,7 @@
 
 typedef struct {
 	uintptr_t numchannels;	
-	amp_t** samples;
+	psy_dsp_amp_t** samples;
 	unsigned int numsamples;
 	uintptr_t offset;
 } Buffer;
@@ -23,13 +23,13 @@ void buffer_resize(Buffer*, uintptr_t channels);
 void buffer_move(Buffer*, uintptr_t offset);
 void buffer_setoffset(Buffer*, uintptr_t offset);
 uintptr_t buffer_offset(Buffer*);
-amp_t* buffer_at(Buffer*, uintptr_t channel);
+psy_dsp_amp_t* buffer_at(Buffer*, uintptr_t channel);
 void buffer_clearsamples(Buffer*, uintptr_t numsamples);
 void buffer_addsamples(Buffer*, Buffer* source, uintptr_t numsamples,
 	float vol);
-void buffer_mulsamples(Buffer*, uintptr_t numsamples, amp_t mul);
+void buffer_mulsamples(Buffer*, uintptr_t numsamples, psy_dsp_amp_t mul);
 uintptr_t buffer_numchannels(Buffer*);
-void buffer_pan(Buffer* self, amp_t pan, uintptr_t amount);
+void buffer_pan(Buffer* self, psy_dsp_amp_t pan, uintptr_t amount);
 int buffer_mono(Buffer*);
 
 #endif

@@ -19,7 +19,7 @@ void eventdrivers_init(EventDrivers* self, void* systemhandle)
 	self->kbddriver = 0;	
 	self->systemhandle = systemhandle;
 	self->cmds = 0;
-	signal_init(&self->signal_input);
+	psy_signal_init(&self->signal_input);
 	eventdrivers_initkbd(self);
 }
 
@@ -34,7 +34,8 @@ void eventdrivers_initkbd(EventDrivers* self)
 	eventdriverentry->eventdriver = eventdriver;
 	eventdriverentry->library = 0;
 	list_append(&self->eventdrivers, eventdriverentry);
-	signal_connect(&eventdriver->signal_input, self, eventdrivers_ondriverinput);
+	psy_signal_connect(&eventdriver->signal_input, self,
+		eventdrivers_ondriverinput);
 }
 
 void eventdrivers_dispose(EventDrivers* self)
@@ -60,7 +61,7 @@ void eventdrivers_dispose(EventDrivers* self)
 	list_free(self->eventdrivers);
 	self->eventdrivers = 0;
 	self->cmds = 0;
-	signal_dispose(&self->signal_input);
+	psy_signal_dispose(&self->signal_input);
 }
 
 void eventdrivers_load(EventDrivers* self, const char* path)
@@ -93,7 +94,7 @@ void eventdrivers_load(EventDrivers* self, const char* path)
 					eventdriverentry->library = library;
 					list_append(&self->eventdrivers, eventdriverentry);				
 					eventdriver->open(eventdriver);
-					signal_connect(&eventdriver->signal_input, self,
+					psy_signal_connect(&eventdriver->signal_input, self,
 						eventdrivers_ondriverinput);
 				}
 			}
@@ -197,7 +198,7 @@ EventDriver* eventdrivers_driver(EventDrivers* self, int id)
 
 void eventdrivers_ondriverinput(EventDrivers* self, EventDriver* sender)
 {
-	signal_emit(&self->signal_input, sender, 0);
+	psy_signal_emit(&self->signal_input, sender, 0);
 }
 
 void eventdrivers_setcmds(EventDrivers* self, Properties* cmds)

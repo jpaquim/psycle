@@ -52,7 +52,7 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	ui_component_init(&self->component, parent);
 	ui_component_resize(&self->component, 300, 0);	
 	tabbar_init(&self->tabbar, &self->component);	
@@ -64,7 +64,7 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 	tabbar_append(&self->tabbar, "Waves");	
 	tabbar_select(&self->tabbar, 0);		
 	ui_notebook_init(&self->notebook, &self->component);
-	signal_connect(&self->component.signal_size, self, OnSize);	
+	psy_signal_connect(&self->component.signal_size, self, OnSize);	
 	InitMachinesBox(&self->machinesboxgen, &self->notebook.component, 
 		&workspace->song->machines, MACHINEBOX_GENERATOR, self->workspace);
 	InitMachinesBox(&self->machinesboxfx, &self->notebook.component, 
@@ -77,11 +77,14 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);
 	InitGearButtons(&self->buttons, &self->component);
-	signal_connect(&self->buttons.del.signal_clicked, self, OnDelete);
-	signal_connect(&self->buttons.clone.signal_clicked, self, OnClone);
-	signal_connect(&self->buttons.parameters.signal_clicked, self, OnParameters);
-	signal_connect(&self->buttons.showmaster.signal_clicked, self, OnMaster);
-	signal_connect(&self->buttons.exchange.signal_clicked, self, OnExchange);
+	psy_signal_connect(&self->buttons.del.signal_clicked, self, OnDelete);
+	psy_signal_connect(&self->buttons.clone.signal_clicked, self, OnClone);
+	psy_signal_connect(&self->buttons.parameters.signal_clicked, self,
+		OnParameters);
+	psy_signal_connect(&self->buttons.showmaster.signal_clicked, self,
+		OnMaster);
+	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
+		OnExchange);
 	ui_component_resize(&self->buttons.component, 100, 0);
 }
 
@@ -101,8 +104,8 @@ void OnSize(Gear* self, ui_component* sender, ui_size* size)
 
 void ConnectSongSignals(Gear* self)
 {
-	// signal_connect(&self->instruments->signal_insert, self, OnInstrumentInsert);
-	// signal_connect(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);	
+	// psy_signal_connect(&self->instruments->signal_insert, self, OnInstrumentInsert);
+	// psy_signal_connect(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);	
 }
 
 void OnDelete(Gear* self, ui_component* sender)

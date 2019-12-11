@@ -17,7 +17,7 @@ typedef struct {
 	ui_button more;
 	ui_button moremore;
 	Player* player;
-	beat_t bpm;
+	psy_dsp_beat_t bpm;
 } TimeBar;
 
 void timerbar_init(TimeBar*, ui_component* parent, Player*);

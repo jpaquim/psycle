@@ -33,8 +33,8 @@ static void machineproxy_parametertweak(MachineProxy*, int par, int val);
 static void machineproxy_patterntweak(MachineProxy* self, int par, int val);
 static int machineproxy_describevalue(MachineProxy*, char* txt, int const param, int const value);
 static int machineproxy_parametervalue(MachineProxy*, int const param);
-static void machineproxy_setpanning(MachineProxy*, amp_t);
-static amp_t machineproxy_panning(MachineProxy*);
+static void machineproxy_setpanning(MachineProxy*, psy_dsp_amp_t);
+static psy_dsp_amp_t machineproxy_panning(MachineProxy*);
 static void machineproxy_mute(MachineProxy*);
 static void machineproxy_unmute(MachineProxy*);
 static int machineproxy_muted(MachineProxy*);
@@ -43,7 +43,8 @@ static void machineproxy_unbypass(MachineProxy*);
 static int machineproxy_bypassed(MachineProxy*);
 static const MachineInfo* machineproxy_info(MachineProxy*);
 static int machineproxy_parametertype(MachineProxy*, int param);
-static void machineproxy_parameterrange(MachineProxy*, int numparam, int* minval, int* maxval);
+static void machineproxy_parameterrange(MachineProxy*, int numparam,
+	int* minval, int* maxval);
 static unsigned int machineproxy_numparameters(MachineProxy*);
 static unsigned int machineproxy_numparametercols(MachineProxy*);
 static int machineproxy_paramviewoptions(MachineProxy*);
@@ -395,7 +396,7 @@ int machineproxy_parametervalue(MachineProxy* self, int const param)
 	return rv;
 }
 
-void machineproxy_setpanning(MachineProxy* self, amp_t panning)
+void machineproxy_setpanning(MachineProxy* self, psy_dsp_amp_t panning)
 {	
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -411,9 +412,9 @@ void machineproxy_setpanning(MachineProxy* self, amp_t panning)
 	}	
 }
 
-amp_t machineproxy_panning(MachineProxy* self)
+psy_dsp_amp_t machineproxy_panning(MachineProxy* self)
 {
-	amp_t rv = 0;
+	psy_dsp_amp_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

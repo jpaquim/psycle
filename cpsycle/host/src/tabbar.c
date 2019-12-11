@@ -35,15 +35,15 @@ void tabbar_init(TabBar* self, ui_component* parent)
 {
 	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;	
-	signal_init(&self->signal_change);
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_align, self, onalign);
-	signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
-	signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
+	psy_signal_init(&self->signal_change);
+	psy_signal_connect(&self->component.signal_draw, self, OnDraw);
+	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
+	psy_signal_connect(&self->component.signal_align, self, onalign);
+	psy_signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
+	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	psy_signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
+	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
+	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
 	ui_component_resize(&self->component,0, 20);
 	self->tabs = 0;
 	self->selected = 0;
@@ -61,7 +61,7 @@ void OnDestroy(TabBar* self, ui_component* component)
 		free(p->entry);
 	}
 	list_free(self->tabs);
-	signal_dispose(&self->signal_change);	
+	psy_signal_dispose(&self->signal_change);
 }
 
 void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
@@ -149,7 +149,7 @@ void OnMouseDown(TabBar* self, ui_component* sender, MouseEvent* mouseevent)
 	if (tabindex != -1 && tabindex != self->selected)  {
 		self->selected = tabhittest(self, mouseevent->x, mouseevent->y);
 		ui_component_invalidate(&self->component);
-		signal_emit(&self->signal_change, self, 1, self->selected);
+		psy_signal_emit(&self->signal_change, self, 1, self->selected);
 	}		
 }
 
@@ -239,7 +239,7 @@ void tabbar_select(TabBar* self, int tab)
 {
 	self->selected = tab;
 	ui_component_invalidate(&self->component);
-	signal_emit(&self->signal_change, self, 1, self->selected);
+	psy_signal_emit(&self->signal_change, self, 1, self->selected);
 }
 
 int tabbar_selected(TabBar* self)

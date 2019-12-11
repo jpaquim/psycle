@@ -9,11 +9,11 @@
 extern const double TPI;
 
 typedef struct {	
-	big_amp_t coeff[5];
+	psy_dsp_big_amp_t coeff[5];
 } FilterCoeff;
 
 typedef struct {
-	amp_t container[128][128][5];
+	psy_dsp_amp_t container[128][128][5];
 } FilterMap;
 
 

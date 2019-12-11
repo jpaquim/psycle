@@ -48,7 +48,7 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_notebook_init(&self->notebook, &self->component);
 	//ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
-	signal_connect(&self->component.signal_size, self, OnSize);
+	psy_signal_connect(&self->component.signal_size, self, OnSize);
 	InitSamplerInstrumentHeaderView(&self->header, &self->component, &workspace->song->instruments);
 	InitSamplerInstrumentGeneralView(&self->general, &self->notebook.component, &workspace->song->instruments);
 	InitSamplerInstrumentVolumeView(&self->volume, &self->notebook.component, &workspace->song->instruments);
@@ -63,15 +63,17 @@ void InitSamplerInstrumentView(SamplerInstrumentView* self, ui_component* parent
 	tabbar_append(&self->tabbar, "Filter");
 	tabbar_append(&self->tabbar, "Pitch");
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-
 	AlignInstrumentView(self);
-	signal_connect(&self->player->song->instruments.signal_insert, self, OnInstrumentInsert);
-	signal_connect(&self->player->song->instruments.signal_removed, self, OnInstrumentRemoved);
-	signal_connect(&self->player->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
-	signal_connect(&self->instrumentsbox.instrumentlist.signal_selchanged, self, OnInstrumentListChanged);
-
+	psy_signal_connect(&self->player->song->instruments.signal_insert, self,
+		OnInstrumentInsert);
+	psy_signal_connect(&self->player->song->instruments.signal_removed, self,
+		OnInstrumentRemoved);
+	psy_signal_connect(&self->player->song->instruments.signal_slotchange, self,
+		OnInstrumentSlotChanged);
+	psy_signal_connect(&self->instrumentsbox.instrumentlist.signal_selchanged, self,
+		OnInstrumentListChanged);
 	ui_notebook_setpageindex(&self->notebook, 0);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 }
 
 void AlignInstrumentView(SamplerInstrumentView* self)
@@ -129,9 +131,9 @@ void OnSongChanged(SamplerInstrumentView* self, Workspace* workspace)
 	self->pan.instruments = &workspace->song->instruments;
 	self->filter.instruments = &workspace->song->instruments;
 	self->pitch.instruments = &workspace->song->instruments;
-	signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
-	signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
-	signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
+	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+	psy_signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
+	psy_signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
 	SetInstruments(&self->instrumentsbox, &workspace->song->instruments);
 	SetInstrument(self, 0);
 }
@@ -152,17 +154,20 @@ void InitSamplerInstrumentHeaderView(SamplerInstrumentHeaderView* self, ui_compo
 	ui_button_init(&self->previnstrumentbutton, &self->component);
 	ui_button_settext(&self->previnstrumentbutton, "<");
 	ui_component_setposition(&self->previnstrumentbutton.component, 220, 0, 20, 20);
-	signal_connect(&self->previnstrumentbutton.signal_clicked, self, OnPrevInstrument);
+	psy_signal_connect(&self->previnstrumentbutton.signal_clicked, self,
+		OnPrevInstrument);
 
 	ui_button_init(&self->nextinstrumentbutton, &self->component);
 	ui_button_settext(&self->nextinstrumentbutton, ">");
 	ui_component_setposition(&self->nextinstrumentbutton.component, 245, 0, 20, 20);
-	signal_connect(&self->nextinstrumentbutton.signal_clicked, self, OnNextInstrument);
+	psy_signal_connect(&self->nextinstrumentbutton.signal_clicked, self,
+		OnNextInstrument);
 
 	ui_button_init(&self->deleteinstrumentbutton, &self->component);
 	ui_button_settext(&self->deleteinstrumentbutton, "Delete");
 	ui_component_setposition(&self->deleteinstrumentbutton.component, 270, 0, 70, 20);
-	signal_connect(&self->deleteinstrumentbutton.signal_clicked, self, OnDeleteInstrument);	
+	psy_signal_connect(&self->deleteinstrumentbutton.signal_clicked, self,
+		OnDeleteInstrument);	
 }
 
 void SetInstrumentInstrumentHeaderView(SamplerInstrumentHeaderView* self, Instrument* instrument)
@@ -204,17 +209,18 @@ void InitSamplerInstrumentGeneralView(SamplerInstrumentGeneralView* self, ui_com
 	ui_button_init(&self->nnacutbutton, &self->component);
 	ui_button_settext(&self->nnacutbutton, "Note Cut");
 	ui_component_setposition(&self->nnacutbutton.component, 5, 30, 70, 20);
-	signal_connect(&self->nnacutbutton.signal_clicked, self, OnNNACut);
+	psy_signal_connect(&self->nnacutbutton.signal_clicked, self, OnNNACut);
 
 	ui_button_init(&self->nnareleasebutton, &self->component);
 	ui_button_settext(&self->nnareleasebutton, "Note Release");
 	ui_component_setposition(&self->nnareleasebutton.component, 80, 30, 100, 20);
-	signal_connect(&self->nnareleasebutton.signal_clicked, self, OnNNARelease);
+	psy_signal_connect(&self->nnareleasebutton.signal_clicked, self,
+		OnNNARelease);
 
 	ui_button_init(&self->nnanonebutton, &self->component);
 	ui_button_settext(&self->nnanonebutton, "None");
 	ui_component_setposition(&self->nnanonebutton.component, 185, 30, 70, 20);
-	signal_connect(&self->nnanonebutton.signal_clicked, self, OnNNANone);
+	psy_signal_connect(&self->nnanonebutton.signal_clicked, self, OnNNANone);
 
 	SendMessage((HWND)self->nnacutbutton.component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
 

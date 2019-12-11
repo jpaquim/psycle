@@ -19,13 +19,13 @@ void renderview_init(RenderView* self, ui_component* parent,
 {	
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
-	signal_connect(&self->component.signal_destroy, self,
+	psy_signal_connect(&self->component.signal_destroy, self,
 		renderview_ondestroy);
 	ui_component_enablealign(&self->component);
 	renderview_makeproperties(self);
 	settingsview_init(&self->view, &self->component, tabbarparent,
 		self->properties);
-	signal_connect(&self->view.signal_changed, self,
+	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);
 	ui_component_setalign(&self->view.component, UI_ALIGN_CLIENT);
 	self->fileoutdriver = create_fileout_driver();
@@ -149,7 +149,7 @@ void renderview_render(RenderView* self)
 	self->workspace->player.sequencer.looping = 0;
 	player_setposition(&self->workspace->player, 0);
 	player_start(&self->workspace->player);	
-	signal_connect(&self->fileoutdriver->signal_stop, self,
+	psy_signal_connect(&self->fileoutdriver->signal_stop, self,
 		renderview_onstoprendering);
 	self->fileoutdriver->open(self->fileoutdriver);
 }

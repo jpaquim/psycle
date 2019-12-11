@@ -150,7 +150,8 @@ void psy3_load(struct SongFile* self)
 			// shift back 3 bytes and try again
 			psyfile_skip(self->file, -3);
 		}
-		signal_emit(&self->song->signal_loadprogress, self, 1, progress);
+		psy_signal_emit(&self->song->signal_loadprogress, self, 1,
+			progress);
 	}	
 	buildsequence(self, playorder, playlength);	
 	psy3_setinstrumentnames(self);
@@ -189,20 +190,17 @@ void buildsequence(SongFile* self, unsigned char* playorder, int playlength)
 void readinfo(SongFile* self)
 {
 	if((self->file->currchunk.version&0xFFFF0000) == VERSION_MAJOR_ZERO)		
-	{
+	{		
 		char name_[129];
 		char author_[65];
 		char comments_[65536];
+		SongProperties songproperties;
 
 		psyfile_readstring(self->file, name_, sizeof name_);
 		psyfile_readstring(self->file, author_, sizeof author_);
 		psyfile_readstring(self->file, comments_,sizeof comments_);
-		free(self->song->properties.title);
-		self->song->properties.title = strdup(name_);
-		free(self->song->properties.credits);
-		self->song->properties.credits = strdup(author_);
-		free(self->song->properties.comments);
-		self->song->properties.comments = strdup(comments_);
+		songproperties_init(&songproperties, name_, author_, comments_);
+		song_setproperties(self->song, &songproperties);
 		//bugfix. There were songs with incorrect size.
 		if(self->file->currchunk.version == 0) {
 			self->file->currchunk.size = 
@@ -240,7 +238,7 @@ void readsngi(SongFile* self)
 		// # of tracks for whole song
 		psyfile_read(self->file, &temp, sizeof temp);
 		songtracks = temp;
-		self->song->patterns.songtracks = songtracks;
+		patterns_setsongtracks(&self->song->patterns, songtracks);
 		// bpm
 		{///\todo: this was a hack added in 1.9alpha to allow decimal bpm values
 			int32_t bpmcoarse;
@@ -351,7 +349,7 @@ void readpatd(SongFile* self)
 		int32_t index;
 		int32_t temp;
 		int32_t lpb;
-		beat_t bpl;
+		psy_dsp_beat_t bpl;
 		char patternname[MAX_PATTERNS][32];
 		/// number of lines of each pattern
 		int32_t patternlines[MAX_PATTERNS];
@@ -359,7 +357,7 @@ void readpatd(SongFile* self)
 		// index
 
 		lpb = self->song->properties.lpb;
-		bpl = 1 / (beat_t)lpb;
+		bpl = 1 / (psy_dsp_beat_t) lpb;
 		psyfile_read(self->file, &index, sizeof index);
 		if(index < MAX_PATTERNS)
 		{
@@ -384,7 +382,7 @@ void readpatd(SongFile* self)
 			// songtracks = patternlines[index] > 0 ? destsize / ((size_t)patternlines[index] * EVENT_SIZE) : 0;
 			{				
 				Pattern* pattern;				
-				PatternNode* node = 0;				
+				PatternNode* node = 0;
 
 				psource = pdest;
 				pattern = pattern_allocinit();
@@ -394,12 +392,12 @@ void readpatd(SongFile* self)
 				{					
 					unsigned char* ptrack = psource;
 					int32_t track;			
-					beat_t offset;
+					psy_dsp_beat_t offset;
 
 					offset = bpl * y;
 					for (track = 0; track < self->song->patterns.songtracks; ++track) {
 						PatternEvent* event = (PatternEvent*)(ptrack);
-						if (event->note != 255) {
+						if (!patternevent_empty(event)) {
 							node = pattern_insert(pattern, node, track, offset, event);
 						}
 						ptrack += sizeof(PatternEvent);
@@ -614,7 +612,7 @@ void readsmsb(SongFile* self)
 			wave->globalvolume = ftemp;
 			// default volume
 			psyfile_read(self->file, &temp16, sizeof(temp16));
-			wave->defaultvolume = temp16 / (amp_t)0x80;
+			wave->defaultvolume = temp16 / (psy_dsp_amp_t) 0x80;
 			// wave loop start
 			psyfile_read(self->file, &temp, sizeof(temp));
 			wave->loopstart = temp;

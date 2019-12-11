@@ -19,7 +19,7 @@ typedef struct {
 	List* tabs;
 	ui_component component;
 	int selected;	
-	Signal signal_change;
+	psy_Signal signal_change;
 	ui_font font;
 	int hover;
 	int hoverindex;

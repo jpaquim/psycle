@@ -60,7 +60,10 @@ void psy2_load(struct SongFile* songfile)
 	unsigned char playorder[MAX_SONG_POSITIONS];
 	int32_t patternLines[MAX_PATTERNS];
 	char patternName[MAX_PATTERNS][32];
-	char name_[129]; char author_[65]; char comments_[65536];
+	char name_[129];
+	char author_[65];
+	char comments_[65536];
+	SongProperties songproperties;
 		
 //	int32_t temp;
 	int32_t songtracks;
@@ -82,8 +85,7 @@ void psy2_load(struct SongFile* songfile)
 	int32_t playlength;
 
 	int32_t pans[OLD_MAX_INSTRUMENTS];
-	char names[OLD_MAX_INSTRUMENTS][32];
-	
+	char names[OLD_MAX_INSTRUMENTS][32];	
 
 
 	//progress.SetWindowText("Loading old format...");
@@ -92,16 +94,12 @@ void psy2_load(struct SongFile* songfile)
 	psyfile_read(songfile->file, name_, 32);
 	psyfile_read(songfile->file, author_, 32);
 	psyfile_read(songfile->file, comments_,128);
-	free(songfile->song->properties.title);
-	songfile->song->properties.title = strdup(name_);
-	free(songfile->song->properties.credits);
-	songfile->song->properties.credits = strdup(author_);
-	free(songfile->song->properties.comments);
-	songfile->song->properties.comments = strdup(comments_);
+	songproperties_init(&songproperties, name_, author_, comments_);
+	song_setproperties(songfile->song, &songproperties);
 
 	psyfile_read(songfile->file, &m_beatspermin, sizeof m_beatspermin);
 	psyfile_read(songfile->file, &sampR, sizeof sampR);
-	songfile->song->properties.bpm = (beat_t) m_beatspermin;	
+	songfile->song->properties.bpm = (psy_dsp_beat_t) m_beatspermin;
 	if( sampR <= 0)
 	{
 		// Shouldn't happen but has happened.

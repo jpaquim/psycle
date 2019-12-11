@@ -19,7 +19,7 @@ void InitSampulseInstrumentView(SampulseInstrumentView* self,
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	InitNoteMapEdit(&self->notemapedit, &self->component);
-	signal_connect(&self->component.signal_size, self, OnSize);
+	psy_signal_connect(&self->component.signal_size, self, OnSize);
 	ui_listbox_init(&self->instrumentlist, &self->component);
 	AlignInstrumentView(self);
 	BuildInstrumentList(self);

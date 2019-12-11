@@ -25,14 +25,14 @@ uint32_t FourCC(char *psName)
 int psyfile_open(PsyFile* self, const char* psFileName)
 {
 	strcpy(self->szName,psFileName);
-	self->_file = fopen(psFileName, "rb");
+	self->_file = fopen(psFileName, "rb");	
 	return (self->_file != NULL);
 }
 
 int psyfile_create(PsyFile* self, const char* psFileName, int overwrite)
-{
+{	
 	strcpy(self->szName,psFileName);
-	self->_file = fopen(psFileName, "rb");
+	self->_file = fopen(psFileName, "rb");	
 	if (self->_file != NULL)
 	{
 		fclose(self->_file);
@@ -99,7 +99,7 @@ uint16_t psyfile_read_uint16(PsyFile* self)
 	uint16_t temp;
 	int err;
 
-	err = psyfile_read(self, &temp, sizeof(temp));
+	err = psyfile_read(self, &temp, sizeof(temp));				
 	return temp;	
 }
 
@@ -152,7 +152,7 @@ int psyfile_write_uint8(PsyFile* self, uint8_t value)
 }
 
 int psyfile_write_int16(PsyFile* self, int16_t value)
-{
+{	
 	return psyfile_write(self, &value, sizeof(int16_t));
 }
 
@@ -325,5 +325,3 @@ void psyfile_seekchunkend(PsyFile* self)
 {
 	psyfile_seek(self, self->currchunk.begins + self->currchunk.size);	
 }
-
-

@@ -117,7 +117,7 @@ void pattern_remove(Pattern* self, PatternNode* node)
 }
 
 PatternNode* pattern_insert(Pattern* self, PatternNode* prev, int track,
-	beat_t offset, const PatternEvent* event)
+	psy_dsp_beat_t offset, const PatternEvent* event)
 {
 	PatternNode* rv;
 	PatternEntry* entry;
@@ -169,7 +169,7 @@ PatternEvent pattern_event(Pattern* self, PatternNode* node)
 	}	
 }
 
-PatternNode* pattern_greaterequal(Pattern* self, beat_t offset)
+PatternNode* pattern_greaterequal(Pattern* self, psy_dsp_beat_t offset)
 {
 	PatternNode* p;		
 	p = self->events;
@@ -184,7 +184,7 @@ PatternNode* pattern_greaterequal(Pattern* self, beat_t offset)
 }
 
 PatternNode* pattern_findnode(Pattern* pattern, unsigned int track, float offset, 
-	unsigned int subline, beat_t bpl, PatternNode** prev)
+	unsigned int subline, psy_dsp_beat_t bpl, PatternNode** prev)
 {
 	unsigned int currsubline = 0;
 	int first = 1;
@@ -235,7 +235,7 @@ void pattern_setlabel(Pattern* self, const char* text)
 	++self->opcount;
 }
 
-void pattern_setlength(Pattern* self, beat_t length)
+void pattern_setlength(Pattern* self, psy_dsp_beat_t length)
 {
 	self->length = length;
 	++self->opcount;
@@ -268,7 +268,7 @@ void pattern_blockremove(Pattern* self, PatternEditPosition begin,
 	PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (beat_t) begin.offset);	
+	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);	
 	while (p != 0) {			
 		PatternEntry* entry;
 		q = p->next;
@@ -291,7 +291,7 @@ void pattern_blocktranspose(Pattern* self, PatternEditPosition begin,
 	PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (beat_t) begin.offset);
+	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
 	while (p != 0) {			
 		PatternEntry* entry;
 		q = p->next;
@@ -324,7 +324,7 @@ void pattern_changemachine(Pattern* self, PatternEditPosition begin,
 		PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (beat_t) begin.offset);
+	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
 	while (p != 0) {			
 		PatternEntry* entry;
 		q = p->next;
@@ -347,7 +347,7 @@ void pattern_changeinstrument(Pattern* self, PatternEditPosition begin,
 	PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (beat_t) begin.offset);
+	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
 	while (p != 0) {			
 		PatternEntry* entry;
 		q = p->next;

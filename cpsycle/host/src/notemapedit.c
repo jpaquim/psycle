@@ -21,12 +21,12 @@ void InitNoteMapEdit(NoteMapEdit* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, OnDraw);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	signal_connect(&self->component.signal_keydown,self, OnKeyDown);
+	psy_signal_connect(&self->component.signal_draw, self, OnDraw);
+	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
+	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
+	psy_signal_connect(&self->component.signal_keydown,self, OnKeyDown);
 
-	self->notestabmode = NOTESTAB_DEFAULT;
+	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
 	self->cursor.col = 0;
 	self->cursor.note = 0;
 	self->dy = 0;
@@ -71,13 +71,13 @@ void OnDraw(NoteMapEdit* self, ui_component* sender, ui_graphics* g)
 		ui_settextcolor(g, 0x00CACACA);
 		ui_setrectangle(&r, 0, cpy, size.width, size.height);		
 		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r,
-			notetostr(note, self->notestabmode),
-			strlen(notetostr(note, self->notestabmode)));
+			psy_dsp_notetostr(note, self->notestabmode),
+			strlen(psy_dsp_notetostr(note, self->notestabmode)));
 		ui_setrectangle(&r, 40, cpy, size.width, size.height);
 		SetColColor(g, self->cursor.col == 0, cursor);
 		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r,
-			notetostr(note, self->notestabmode),
-			strlen(notetostr(note, self->notestabmode)));		
+			psy_dsp_notetostr(note, self->notestabmode),
+			strlen(psy_dsp_notetostr(note, self->notestabmode)));		
 		SetColColor(g, self->cursor.col == 1, cursor);
 		DrawDigit(self, g, hi, 0, 80, cpy);
 		SetColColor(g, self->cursor.col == 2, cursor);

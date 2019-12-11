@@ -34,7 +34,7 @@ typedef struct {
 	Properties* choiceproperty;
 	ui_edit edit;
 	InputDefiner inputdefiner;
-	Signal signal_changed;
+	psy_Signal signal_changed;
 	TabBar tabbar;	
 } SettingsView;
 

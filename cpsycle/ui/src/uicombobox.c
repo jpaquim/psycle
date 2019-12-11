@@ -21,10 +21,10 @@ static void onmouseleave(ui_combobox*, ui_component* sender);
 void ui_combobox_init(ui_combobox* combobox, ui_component* parent)
 {  
 	combobox->hover = 0;
-	signal_init(&combobox->signal_selchanged);
+	psy_signal_init(&combobox->signal_selchanged);
 	ui_combobox_create_ownerdrawn(combobox, parent);	
-	signal_connect(&combobox->component.signal_destroy, combobox, ondestroy);
-	signal_connect(&combobox->component.signal_preferredsize,
+	psy_signal_connect(&combobox->component.signal_destroy, combobox, ondestroy);
+	psy_signal_connect(&combobox->component.signal_preferredsize,
 		combobox, onpreferredsize);
 	combobox->charnumber = 0;
 }
@@ -36,31 +36,31 @@ void ui_combobox_create_system(ui_combobox* self, ui_component* parent)
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
 		1);
 	ui_component_resize(&self->component, 90, 200);
-	signal_connect(&self->component.signal_command, self, oncommand);	
+	psy_signal_connect(&self->component.signal_command, self, oncommand);	
 	self->currcombo = &self->component;
 }
 
 void ui_combobox_create_ownerdrawn(ui_combobox* self, ui_component* parent)
 {		
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, onownerdraw);	
-	signal_connect(&self->component.signal_mousedown, self, onmousedown);
-	signal_connect(&self->component.signal_mousemove, self, onmousemove);
-	signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	signal_connect(&self->component.signal_mouseleave, self, onmouseleave);		
+	psy_signal_connect(&self->component.signal_draw, self, onownerdraw);	
+	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
+	psy_signal_connect(&self->component.signal_mousemove, self, onmousemove);
+	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
+	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);		
 	ui_win32_component_init(&self->combo, &self->component, TEXT("COMBOBOX"), 
 		0, 0, 100, 200,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
 		1);
 	ui_component_hide(&self->combo);	
-	signal_connect(&self->combo.signal_command, self, oncommand);	
+	psy_signal_connect(&self->combo.signal_command, self, oncommand);	
 	self->ownerdrawn = 1;	
 	self->currcombo = &self->combo;	
 }
 
 void ondestroy(ui_combobox* self, ui_component* sender)
 {
-	signal_dispose(&self->signal_selchanged);
+	psy_signal_dispose(&self->signal_selchanged);
 	ui_component_dispose(&self->combo);
 }
 
@@ -127,7 +127,7 @@ void oncommand(ui_combobox* self, ui_component* sender, WPARAM wParam,
             if (self->signal_selchanged.slots) {
 				intptr_t sel = SendMessage((HWND)self->currcombo->hwnd,
 					CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-				signal_emit(&self->signal_selchanged, self, 1, sel);			
+				psy_signal_emit(&self->signal_selchanged, self, 1, sel);
 			}
 			if (self->ownerdrawn) {
 				ui_component_invalidate(&self->component);
@@ -246,7 +246,7 @@ void onmousedown(ui_combobox* self, ui_component* sender, MouseEvent* ev)
 		intptr_t index = ui_combobox_cursel(self);
 		if (index > 0) {
 			ui_combobox_setcursel(self,  index - 1);
-			signal_emit(&self->signal_selchanged, self, 1, index - 1);
+			psy_signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
 	} else
 	if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
@@ -257,7 +257,7 @@ void onmousedown(ui_combobox* self, ui_component* sender, MouseEvent* ev)
 		index = ui_combobox_cursel(self);
 		if (index < count - 1) {
 			ui_combobox_setcursel(self, index + 1);
-			signal_emit(&self->signal_selchanged, self, 1, index + 1);
+			psy_signal_emit(&self->signal_selchanged, self, 1, index + 1);
 		}
 	} else {
 		SetWindowPos((HWND)self->combo.hwnd, NULL, 

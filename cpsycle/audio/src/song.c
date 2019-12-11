@@ -4,9 +4,6 @@
 #include "../../detail/prefix.h"
 
 #include "song.h"
-#include "psy2.h"
-#include "psy3.h"
-#include <fileio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,10 +14,51 @@ static void song_initsequence(Song*);
 static void song_initsignals(Song*);
 static void song_disposesignals(Song*);
 
+void songproperties_init(SongProperties* self, const char* title,
+	const char* credits, const char* comments)
+{
+	self->title = strdup(title);
+	self->credits = strdup(credits);
+	self->comments = strdup(comments);
+	self->bpm = (psy_dsp_beat_t) 125.0;
+	self->lpb = 4;
+	self->tracks = 16;
+	self->octave = 4;
+	self->tpb = 24;
+	self->extraticksperbeat = 0;
+}
+
+void songproperties_dispose(SongProperties* self)
+{
+	free(self->title);
+	self->title = 0;
+	free(self->credits);
+	self->credits = 0;
+	free(self->comments);
+	self->comments = 0;
+}
+
+void songproperties_copy(SongProperties* self, const SongProperties* other)
+{
+	if (self != other) {
+		songproperties_dispose(self);
+		self->title = strdup(other->title);
+		self->credits = strdup(other->credits);
+		self->comments = strdup(other->comments);
+		self->bpm = other->bpm;
+		self->lpb = other->lpb;
+		self->octave = other->octave;
+		self->tpb = other->tpb;
+		self->extraticksperbeat = other->extraticksperbeat;
+		self->tracks = other->tracks;
+	}
+}
+
 void song_init(Song* self, MachineFactory* machinefactory)
 {		
 	self->machinefactory = machinefactory;	
-	song_initproperties(self);
+	songproperties_init(&self->properties, "Untitled", "Unnamed",
+		"No Comments");	
 	song_initmachines(self);
 	song_initpatterns(self);
 	song_initsequence(self);
@@ -28,19 +66,6 @@ void song_init(Song* self, MachineFactory* machinefactory)
 	instruments_init(&self->instruments);
 	xminstruments_init(&self->xminstruments);
 	song_initsignals(self);
-}
-
-void song_initproperties(Song* self)
-{
-	self->properties.title = strdup("Untitled");
-	self->properties.credits = strdup("Unnamed");
-	self->properties.comments = strdup("No Comments");
-	self->properties.bpm = (beat_t) 125.0;
-	self->properties.lpb = 4;
-	self->properties.tracks = 16;
-	self->properties.octave = 4;
-	self->properties.tpb = 24;
-	self->properties.extraticksperbeat = 0;
 }
 
 void song_initmachines(Song* self)
@@ -69,18 +94,13 @@ void song_initsequence(Song* self)
 
 void song_initsignals(Song* self)
 {
-	signal_init(&self->signal_loadprogress);
-	signal_init(&self->signal_saveprogress);
+	psy_signal_init(&self->signal_loadprogress);
+	psy_signal_init(&self->signal_saveprogress);
 }
 
 void song_dispose(Song* self)
 {
-	free(self->properties.title);
-	self->properties.title = 0;
-	free(self->properties.credits);
-	self->properties.credits = 0;
-	free(self->properties.comments);
-	self->properties.comments = 0;
+	songproperties_dispose(&self->properties);
 	machines_dispose(&self->machines);
 	patterns_dispose(&self->patterns);
 	sequence_dispose(&self->sequence);		
@@ -92,8 +112,8 @@ void song_dispose(Song* self)
 
 void song_disposesignals(Song* self)
 {
-	signal_dispose(&self->signal_loadprogress);
-	signal_dispose(&self->signal_saveprogress);
+	psy_signal_dispose(&self->signal_loadprogress);
+	psy_signal_dispose(&self->signal_saveprogress);
 }
 
 Song* song_alloc(void)
@@ -125,4 +145,9 @@ void song_clear(Song* self)
 	sequence_clear(&self->sequence);
 	patterns_clear(&self->patterns);
 	machines_clear(&self->machines);
+}
+
+void song_setproperties(Song* self, const SongProperties* properties)
+{	
+	songproperties_copy(&self->properties, properties);
 }

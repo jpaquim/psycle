@@ -48,7 +48,7 @@ void newmachinebar_init(NewMachineBar* self, ui_component* parent,
 	ui_component_init(&self->component, parent);	
 	ui_button_init(&self->rescan, &self->component);
 	ui_button_settext(&self->rescan, "Rescan");
-	signal_connect(&self->rescan.signal_clicked, self,
+	psy_signal_connect(&self->rescan.signal_clicked, self,
 		newmachinebar_onrescan);
 	ui_component_setposition(&self->rescan.component, 0, 0, 80, 20);
 }
@@ -83,33 +83,34 @@ void pluginsview_init(PluginsView* self, ui_component* parent,
 	ui_component_init(&self->component, parent);	
 	ui_component_showverticalscrollbar(&self->component);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_destroy, self,
+	psy_signal_connect(&self->component.signal_destroy, self,
 		pluginsview_ondestroy);	
-	signal_connect(&self->component.signal_size, self,
+	psy_signal_connect(&self->component.signal_size, self,
 		pluginsview_onsize);
-	signal_connect(&self->component.signal_scroll, self,
+	psy_signal_connect(&self->component.signal_scroll, self,
 		pluginsview_onscroll);	
-	signal_connect(&self->component.signal_keydown, self,
+	psy_signal_connect(&self->component.signal_keydown, self,
 		pluginsview_onkeydown);
-	signal_connect(&self->component.signal_mousedown, self,
+	psy_signal_connect(&self->component.signal_mousedown, self,
 		pluginsview_onmousedown);
-	signal_connect(&self->component.signal_mousedoubleclick, self,
+	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		pluginsview_onmousedoubleclick);
-	signal_connect(&self->component.signal_draw, self, pluginsview_ondraw);
+	psy_signal_connect(&self->component.signal_draw, self,
+		pluginsview_ondraw);
 	self->selectedplugin = 0;
 	self->workspace = workspace;	
 	self->dy = 0;	
 	self->calledby = 0;
-	signal_init(&self->signal_selected);
-	signal_init(&self->signal_changed);
-	signal_connect(&workspace->plugincatcher.signal_changed, self,
+	psy_signal_init(&self->signal_selected);
+	psy_signal_init(&self->signal_changed);
+	psy_signal_connect(&workspace->plugincatcher.signal_changed, self,
 		pluginsview_onplugincachechanged);
 }
 
 void pluginsview_ondestroy(PluginsView* self, ui_component* component)
 {
-	signal_dispose(&self->signal_selected);
-	signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_selected);
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void pluginsview_ondraw(PluginsView* self, ui_component* sender,
@@ -151,7 +152,7 @@ void pluginsview_drawitem(PluginsView* self, ui_graphics* g,
 	plugintype(property, txt);
 	ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
 		y + self->dy + 2, txt, strlen(txt));	
-	if (pluginmode(property, txt) & 3) {
+	if (pluginmode(property, txt) == MACHMODE_FX) {
 		ui_settextcolor(g, 0x00B1C8B0);
 	} else {		
 		ui_settextcolor(g, 0x00D1C5B6);	
@@ -194,6 +195,9 @@ int plugintype(Properties* property, char* txt)
 		case MACH_PLUGIN:
 			strcpy(txt, "psy");
 		break;
+		case MACH_LUA:
+			strcpy(txt, "lua");
+		break;
 		case MACH_VST:
 			strcpy(txt, "vst");
 		break;
@@ -209,7 +213,7 @@ int pluginmode(Properties* property, char* txt)
 	int rv;
 
 	rv = properties_int(property, "mode", -1);
-	strcpy(txt, rv & 3 ? "gn" : "fx");
+	strcpy(txt, rv == MACHMODE_FX ? "fx" : "gn");
 	return rv;
 }
 
@@ -249,7 +253,8 @@ void pluginsview_onmousedown(PluginsView* self, ui_component* sender,
 {
 	pluginsview_hittest(self, ev->x, ev->y);
 	ui_component_invalidate(&self->component);
-	signal_emit(&self->signal_changed, self, 1, self->selectedplugin);
+	psy_signal_emit(&self->signal_changed, self, 1,
+		self->selectedplugin);
 	ui_component_setfocus(&self->component);
 }
 
@@ -283,7 +288,8 @@ void pluginsview_onmousedoubleclick(PluginsView* self, ui_component* sender,
 	int x, int y, int button)
 {
 	if (self->selectedplugin) {
-		signal_emit(&self->signal_selected, self, 1, self->selectedplugin);
+		psy_signal_emit(&self->signal_selected, self, 1,
+			self->selectedplugin);
 		workspace_selectview(self->workspace, self->calledby);
 	}	
 }
@@ -314,9 +320,9 @@ void newmachine_init(NewMachine* self, ui_component* parent,
 	ui_component_setalign(&self->detail.component, UI_ALIGN_LEFT);	
 	pluginsview_init(&self->pluginsview, &self->component, workspace);
 	ui_component_setalign(&self->pluginsview.component, UI_ALIGN_CLIENT);	
-	signal_connect(&self->pluginsview.signal_changed, self,
+	psy_signal_connect(&self->pluginsview.signal_changed, self,
 		newmachine_onpluginselected);
-	signal_connect(&workspace->plugincatcher.signal_changed, self,
+	psy_signal_connect(&workspace->plugincatcher.signal_changed, self,
 		newmachine_onplugincachechanged);
 }
 

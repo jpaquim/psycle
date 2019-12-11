@@ -19,7 +19,7 @@ void samplesbox_init(SamplesBox* self, ui_component* parent,
 {	
 	ui_listbox_init(&self->samplelist, parent);	
 	samplesbox_setsamples(self, samples, instruments);	
-	signal_connect(&self->samplelist.signal_selchanged, self,
+	psy_signal_connect(&self->samplelist.signal_selchanged, self,
 		OnSampleListChanged);
 }
 
@@ -75,8 +75,11 @@ void samplesbox_setsamples(SamplesBox* self, Samples* samples, Instruments* inst
 	self->instruments = instruments;
 	BuildSampleList(self);
 	if (self->instruments) {
-		signal_connect(&instruments->signal_insert, self, OnInstrumentInsert);
-		signal_connect(&instruments->signal_removed, self, OnInstrumentRemoved);
-		signal_connect(&instruments->signal_slotchange, self, OnInstrumentsSlotChanged);
+		psy_signal_connect(&instruments->signal_insert, self,
+			OnInstrumentInsert);
+		psy_signal_connect(&instruments->signal_removed, self,
+			OnInstrumentRemoved);
+		psy_signal_connect(&instruments->signal_slotchange, self,
+			OnInstrumentsSlotChanged);
 	}
 }

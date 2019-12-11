@@ -16,7 +16,7 @@ typedef enum {
 
 typedef struct {
 	ui_component component;
-	Signal signal_clicked;    
+	psy_Signal signal_clicked;
 	int ownerdrawn;
 	char* text; // ownerdrawn 
 	int hover;

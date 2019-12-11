@@ -37,22 +37,28 @@ void ui_slider_init(ui_slider* self, ui_component* parent)
 	self->rulerstep = 0.1;
 	self->charnumber = 0;
 	ui_slider_initsignals(self);
-	signal_connect(&self->component.signal_draw, self, ui_slider_ondraw);
-	signal_connect(&self->component.signal_destroy, self, ui_slider_ondestroy);
-	signal_connect(&self->component.signal_mousedown, self, ui_slider_onmousedown);
-	signal_connect(&self->component.signal_mousemove, self, ui_slider_onmousemove);
-	signal_connect(&self->component.signal_mouseup, self, ui_slider_onmouseup);
-	signal_connect(&self->component.signal_timer, self, ui_slider_ontimer);
+	psy_signal_connect(&self->component.signal_draw, self, 
+		ui_slider_ondraw);
+	psy_signal_connect(&self->component.signal_destroy, self, 
+		ui_slider_ondestroy);
+	psy_signal_connect(&self->component.signal_mousedown, self,
+		ui_slider_onmousedown);
+	psy_signal_connect(&self->component.signal_mousemove, self,
+		ui_slider_onmousemove);
+	psy_signal_connect(&self->component.signal_mouseup, self,
+		ui_slider_onmouseup);
+	psy_signal_connect(&self->component.signal_timer, self,
+		ui_slider_ontimer);
 	ui_component_starttimer(&self->component, UI_TIMERID_SLIDER, 50);	
 }
 
 void ui_slider_initsignals(ui_slider* self)
 {
-	signal_init(&self->signal_clicked);
-	signal_init(&self->signal_changed);
-	signal_init(&self->signal_describevalue);
-	signal_init(&self->signal_tweakvalue);
-	signal_init(&self->signal_value);	
+	psy_signal_init(&self->signal_clicked);
+	psy_signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_describevalue);
+	psy_signal_init(&self->signal_tweakvalue);
+	psy_signal_init(&self->signal_value);	
 }
 
 void ui_slider_ondestroy(ui_slider* self, ui_component* sender)
@@ -62,11 +68,11 @@ void ui_slider_ondestroy(ui_slider* self, ui_component* sender)
 
 void ui_slider_disposesignals(ui_slider* self)
 {
-	signal_dispose(&self->signal_clicked);
-	signal_dispose(&self->signal_changed);
-	signal_dispose(&self->signal_describevalue);
-	signal_dispose(&self->signal_tweakvalue);
-	signal_dispose(&self->signal_value);
+	psy_signal_dispose(&self->signal_clicked);
+	psy_signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_describevalue);
+	psy_signal_dispose(&self->signal_tweakvalue);
+	psy_signal_dispose(&self->signal_value);
 }
 
 void ui_slider_settext(ui_slider* self, const char* text)
@@ -198,8 +204,8 @@ void ui_slider_onmousemove(ui_slider* self, ui_component* sender,
 			self->value = max(0.f,
 				min(1.f, 1 - (ev->y - self->tweakbase) / (float)(size.height - 6)));
 		}
-		signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
-		signal_emit(&self->signal_changed, self, 0);
+		psy_signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
+		psy_signal_emit(&self->signal_changed, self, 0);
 		ui_component_invalidate(&self->component);
 	}
 }
@@ -237,7 +243,7 @@ void ui_slider_updatevalue(ui_slider* self)
 	float* pvalue;
 
 	pvalue = &value;
-	signal_emit(&self->signal_value, self, 1, pvalue);
+	psy_signal_emit(&self->signal_value, self, 1, pvalue);
 	if (self->value != value) {
 		self->value = value;
 		ui_component_invalidate(&self->component);
@@ -247,7 +253,8 @@ void ui_slider_updatevalue(ui_slider* self)
 void ui_slider_describevalue(ui_slider* self)
 {	
 	self->valuedescription[0] = '\0';
-	signal_emit(&self->signal_describevalue, self, 1, self->valuedescription);
+	psy_signal_emit(&self->signal_describevalue, self, 1,
+		self->valuedescription);
 	if (self->valuedescription[0] == '\0') {
 		psy_snprintf(self->valuedescription, 128, "%f", self->value);
 	}
@@ -257,7 +264,7 @@ void ui_slider_describevalue(ui_slider* self)
 void ui_slider_connect(ui_slider* self, void* context, ui_slider_fpdescribe describe,
 	ui_slider_fptweak tweak, ui_slider_fpvalue value)
 {
-	signal_connect(&self->signal_describevalue, context, describe);
-	signal_connect(&self->signal_tweakvalue, context, tweak);
-	signal_connect(&self->signal_value, context, value);
+	psy_signal_connect(&self->signal_describevalue, context, describe);
+	psy_signal_connect(&self->signal_tweakvalue, context, tweak);
+	psy_signal_connect(&self->signal_value, context, value);
 }

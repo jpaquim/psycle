@@ -6,8 +6,9 @@
 
 #include <stddef.h>
 
-void* aligned_memory_alloc(size_t alignment, size_t count, size_t size);
-void aligned_memory_dealloc(void* address);
+void* psy_dsp_aligned_memory_alloc(size_t alignment, size_t count,
+	size_t size);
+void psy_dsp_aligned_memory_dealloc(void* address);
 
 
 #endif

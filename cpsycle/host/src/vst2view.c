@@ -14,7 +14,7 @@ void InitVst2View(Vst2View* self, ui_component* parent, Machine* plugin)
 	self->plugin = plugin;
 	ui_component_init(&self->component, parent);
 	plugin->vtable->seteditorhandle(plugin, (void*)self->component.hwnd);
-	signal_connect(&self->component.signal_timer, self, ontimer);
+	psy_signal_connect(&self->component.signal_timer, self, ontimer);
 	ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 

@@ -34,13 +34,13 @@ void wavebox_init(WaveBox* self, ui_component* parent)
 	self->zoomright = 1.f;
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, wavebox_ondraw);
-	signal_connect(&self->component.signal_destroy, self, wavebox_ondestroy);
-	signal_connect(&self->component.signal_mousedown, self,
+	psy_signal_connect(&self->component.signal_draw, self, wavebox_ondraw);
+	psy_signal_connect(&self->component.signal_destroy, self, wavebox_ondestroy);
+	psy_signal_connect(&self->component.signal_mousedown, self,
 		wavebox_onmousedown);
-	signal_connect(&self->component.signal_mousemove, self,
+	psy_signal_connect(&self->component.signal_mousemove, self,
 		wavebox_onmousemove);
-	signal_connect(&self->component.signal_mouseup, self,
+	psy_signal_connect(&self->component.signal_mouseup, self,
 		wavebox_onmouseup);
 }
 
@@ -70,12 +70,12 @@ void wavebox_ondraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 		ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
 			(size.height - tm.tmHeight) / 2, txt, strlen(txt));
 	} else {
-		amp_t scaley;
+		psy_dsp_amp_t scaley;
 		float offsetstep;
 		int x;
 		int centery = size.height / 2;
 		
-		scaley = (size.height / 2) / (amp_t)32768;		
+		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;		
 		offsetstep = (float) self->sample->numframes / size.width *
 			(self->zoomright - self->zoomleft);
 		if (self->hasselection) {

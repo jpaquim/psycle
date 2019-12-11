@@ -12,7 +12,7 @@ typedef struct {
 	ui_component component;
 	ui_label header;
 	ui_label position;		
-	beat_t lastposition;
+	psy_dsp_beat_t lastposition;
 	Player* player;
 } PlayPosBar;
 

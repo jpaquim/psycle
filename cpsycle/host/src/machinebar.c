@@ -35,23 +35,28 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	table_init(&self->slotscombobox);
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
+	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	ui_combobox_init(&self->machinebox, &self->component);
 	ui_combobox_setcharnumber(&self->machinebox, 25);
 //	self->machinebox.component.justify = UI_JUSTIFY_NONE;
 	ui_component_resize(&self->machinebox.component, 200, 20);
 	//ui_button_init(&self->prevmachinebutton, &self->component);
 	//ui_button_settext(&self->prevmachinebutton, "<");	
-	//signal_connect(&self->prevmachinebutton.signal_clicked, self, OnPrevMachine);
+	//signal_connect(&self->prevmachinebutton.signal_clicked, self,
+	//	OnPrevMachine);
 	//ui_button_init(&self->nextmachinebutton, &self->component);
 	//ui_button_settext(&self->nextmachinebutton, ">");	
-	//signal_connect(&self->nextmachinebutton.signal_clicked, self, OnNextMachine);
+	//psy_signal_connect(&self->nextmachinebutton.signal_clicked, self,
+	//OnNextMachine);
 	//ui_component_resize(&self->prevmachinebutton.component, 20, 0);	
 	//ui_component_resize(&self->nextmachinebutton.component, 20, 0);
 	ui_button_init(&self->gear, &self->component);
-	ui_button_settext(&self->gear, "Gear Rack");	
+	ui_button_settext(&self->gear, "Gear Rack");
+	ui_button_init(&self->editor, &self->component);
+	ui_button_settext(&self->editor, "Editor");
 	BuildMachineBox(self);
-	signal_connect(&self->machinebox.signal_selchanged, self, OnMachineBoxSelChange);	
+	psy_signal_connect(&self->machinebox.signal_selchanged, self,
+		OnMachineBoxSelChange);	
 	self->prevent_selchange_notify = FALSE;	
 	ui_combobox_init(&self->instparambox, &self->component);
 	ui_combobox_setcharnumber(&self->instparambox, 20);
@@ -59,7 +64,8 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	ui_component_resize(&self->instparambox.component, 200, 20);
 	BuildInstrumentList(self);
 	ui_combobox_setcursel(&self->instparambox, 0);
-	signal_connect(&self->instparambox.signal_selchanged, self, OnInstParamBoxSelChange);
+	psy_signal_connect(&self->instparambox.signal_selchanged, self,
+		OnInstParamBoxSelChange);
 	ConnectSongSignals(self);
 	{		
 		ui_margin margin;
@@ -194,9 +200,11 @@ void AddString(MachineBar* self, const char* text)
 
 void OnInstParamBoxSelChange(MachineBar* self, ui_component* sender, int sel)
 {
-	signal_prevent(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);
+	psy_signal_prevent(&self->instruments->signal_slotchange, self,
+		OnInstrumentSlotChanged);
 	instruments_changeslot(self->instruments, sel);
-	signal_enable(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);
+	psy_signal_enable(&self->instruments->signal_slotchange, self,
+		OnInstrumentSlotChanged);
 }
 
 void OnSongChanged(MachineBar* self, Workspace* workspace)
@@ -212,11 +220,16 @@ void OnSongChanged(MachineBar* self, Workspace* workspace)
 
 void ConnectSongSignals(MachineBar* self)
 {
-	signal_connect(&self->machines->signal_insert, self, OnMachinesInsert);
-	signal_connect(&self->machines->signal_removed, self, OnMachinesRemoved);	
-	signal_connect(&self->machines->signal_slotchange, self, OnMachinesSlotChange);
-	signal_connect(&self->instruments->signal_insert, self, OnInstrumentInsert);
-	signal_connect(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);	
+	psy_signal_connect(&self->machines->signal_insert, self,
+		OnMachinesInsert);
+	psy_signal_connect(&self->machines->signal_removed, self,
+		OnMachinesRemoved);	
+	psy_signal_connect(&self->machines->signal_slotchange, self,
+		OnMachinesSlotChange);
+	psy_signal_connect(&self->instruments->signal_insert, self,
+		OnInstrumentInsert);
+	psy_signal_connect(&self->instruments->signal_slotchange, self,
+		OnInstrumentSlotChanged);
 }
 
 void OnNextMachine(MachineBar* self, ui_component* sender)

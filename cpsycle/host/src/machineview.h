@@ -59,7 +59,7 @@ typedef struct {
 	int x;
 	int y;	
 	int mode;
-	amp_t volumedisplay;	
+	psy_dsp_amp_t volumedisplay;	
 	MachineCoords* coords;
 	MachineSkin* skin;
 	Machine* machine;

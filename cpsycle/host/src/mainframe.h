@@ -17,6 +17,7 @@
 #include "machinebar.h"
 #include "machineview.h"
 #include "gear.h"
+#include "plugineditor.h"
 #include "patternview.h"
 #include "sequenceview.h"
 #include "samplesview.h"
@@ -63,6 +64,7 @@ typedef struct {
 	SettingsView settingsview;
 	HelpView helpview;	
 	Gear gear;
+	PluginEditor plugineditor;
 	VuBar vubar;	
 	ui_component statusbar;
 	ui_notebook viewbars;

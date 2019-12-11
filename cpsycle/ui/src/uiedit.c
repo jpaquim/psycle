@@ -16,18 +16,18 @@ void ui_edit_init(ui_edit* self, ui_component* parent, int styles)
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | ES_LEFT | styles,
 		1);
-	signal_connect(&self->component.signal_command, self, oncommand);
-	signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
-	signal_init(&self->signal_change);
+	psy_signal_connect(&self->component.signal_command, self, oncommand);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
+	psy_signal_init(&self->signal_change);
 	self->charnumber = 0;
 	self->linenumber = 1;
 }
 
 void ondestroy(ui_edit* self, ui_component* sender)
 {
-	signal_dispose(&self->signal_change);
+	psy_signal_dispose(&self->signal_change);
 }
 
 void ui_edit_settext(ui_edit* edit, const char* text)
@@ -59,7 +59,7 @@ void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam,
         case EN_CHANGE:
         {
             if (self->signal_change.slots) {
-				signal_emit(&self->signal_change, self, 0);				
+				psy_signal_emit(&self->signal_change, self, 0);
 			}
         }
 		break;

@@ -23,8 +23,8 @@ typedef struct {
 typedef struct {
 	Table sendsto;
 	unsigned char mastersend;
-	amp_t volume;
-	amp_t panning;
+	psy_dsp_amp_t volume;
+	psy_dsp_amp_t panning;
 	int mute;
 	size_t fxslot;
 	Buffer* buffer;
