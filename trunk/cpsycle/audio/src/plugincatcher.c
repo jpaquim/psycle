@@ -12,6 +12,7 @@
 #include "master.h"
 #include "mixer.h"
 #include "plugin.h"
+#include "luaplugin.h"
 #include "sampler.h"
 #include "vstplugin.h"
 
@@ -61,8 +62,8 @@ void plugincatcher_init(PluginCatcher* self, Properties* dirconfig)
 	strcat(inipath, "\\psycle-plugin-scanner-cache.ini");
 	self->inipath = strdup(inipath);
 	self->dirconfig = dirconfig;
-	signal_init(&self->signal_changed);
-	signal_init(&self->signal_scanprogress);	
+	psy_signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_scanprogress);	
 }
 
 void plugincatcher_dispose(PluginCatcher* self)
@@ -71,8 +72,8 @@ void plugincatcher_dispose(PluginCatcher* self)
 	self->plugins = 0;
 	free(self->inipath);	
 	self->dirconfig = 0;	
-	signal_dispose(&self->signal_changed);
-	signal_dispose(&self->signal_scanprogress);
+	psy_signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_scanprogress);
 }
 
 void plugincatcher_clear(PluginCatcher* self)
@@ -109,7 +110,8 @@ void plugincatcher_makeplugininfo(PluginCatcher* self,
 
 		p = properties_createsection(self->plugins, name);
 		properties_append_int(p, "type", type, 0, 0);
-		properties_append_int(p, "mode", info->Flags, 0, 0);
+		properties_append_int(p, "flags", info->Flags, 0, 0);
+		properties_append_int(p, "mode", info->mode, 0, 0);
 		properties_append_string(p, "name", info->Name);
 		properties_append_string(p, "shortname", info->ShortName);
 		properties_append_string(p, "author", info->Author);
@@ -118,7 +120,7 @@ void plugincatcher_makeplugininfo(PluginCatcher* self,
 		if (type == MACH_PLUGIN) {
 			char text[256];
 			psy_snprintf(text, 256, "Psycle %s by %s ", 
-				(info->Flags & 3) == 3 ? "instrument" : "effect", 
+				info->mode == MACHMODE_FX ? "effect" : "instrument", 
 				info->Author);
 			properties_append_string(p, "desc", text);
 		} else {
@@ -135,17 +137,22 @@ void plugincatcher_scan(PluginCatcher* self)
 	if (self->dirconfig) {
 		p = properties_findsection(self->dirconfig, "plugins");
 		if (p) {		
-			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_PLUGIN,
+			dir_enumerate_recursive(self, properties_valuestring(p), "*"MODULEEXT,
+				MACH_PLUGIN, onenumdir);
+		}
+		p = properties_findsection(self->dirconfig, "luascripts");
+		if (p) {		
+			dir_enumerate(self, properties_valuestring(p), "*.lua", MACH_LUA,
 				onenumdir);
 		}
 		p = properties_findsection(self->dirconfig, "vsts32");
 		if (p) {		
-			dir_enum(self, properties_valuestring(p), "*"MODULEEXT, MACH_VST,
-				onenumdir);
+			dir_enumerate_recursive(self, properties_valuestring(p), "*"MODULEEXT,
+				MACH_VST, onenumdir);
 		}
 	}
-	signal_emit(&self->signal_changed, self, 0);
-	signal_emit(&self->signal_scanprogress, self, 1, 0);
+	psy_signal_emit(&self->signal_changed, self, 0);
+	psy_signal_emit(&self->signal_scanprogress, self, 1, 0);
 }
 
 int isplugin(int type)
@@ -173,13 +180,19 @@ int onenumdir(PluginCatcher* self, const char* path, int type)
 	if (type == MACH_PLUGIN) {		
 		if (plugin_psycle_test(path, &macinfo)) {
 			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
-			signal_emit(&self->signal_scanprogress, self, 1, 1);
+			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}	
+	} else
+	if (type == MACH_LUA) {
+		if (plugin_luascript_test(path, &macinfo)) {
+			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
+		}
 	} else
 	if (type == MACH_VST) {
 		if (plugin_vst_test(path, &macinfo)) {
 			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
-			signal_emit(&self->signal_scanprogress, self, 1, 1);
+			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}
 	}
 	machineinfo_dispose(&macinfo);
@@ -203,7 +216,7 @@ int plugincatcher_load(PluginCatcher* self)
 
 	plugincatcher_clear(self);	
 	rv = propertiesio_load(self->plugins, self->inipath, 1);
-	signal_emit(&self->signal_changed, self, 0);
+	psy_signal_emit(&self->signal_changed, self, 0);
 	return rv;
 }
 
@@ -251,4 +264,14 @@ int onpropertiesenum(PluginCatcher* self, Properties* property, int level)
 int pathhasextension(const char* path)
 {
 	return strrchr(path, '.') != 0;
+}
+
+const char* plugincatcher_searchpath(PluginCatcher* self, const char* name,
+	int machtype)
+{	
+	searchname = name;
+	searchtype = machtype;
+	searchresult = 0;
+	properties_enumerate(self->plugins, self, onpropertiesenum);
+	return properties_readstring(searchresult, "path", 0);
 }

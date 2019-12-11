@@ -25,8 +25,9 @@ static void samplesview_oninstrumentslotchanged(SamplesView* self,
 	Instrument* sender, int slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
-void samplesview_onshow(SamplesView*, ui_component* sender);
-void samplesview_onhide(SamplesView*, ui_component* sender);
+static void samplesview_onshow(SamplesView*, ui_component* sender);
+static void samplesview_onhide(SamplesView*, ui_component* sender);
+static void samplesview_onkeydown(SamplesView*, ui_component* sender, KeyEvent*);
 /// Header View
 static void samplesheaderview_init(SamplesHeaderView*, ui_component* parent,
 	Instruments*, struct SamplesView*);
@@ -115,7 +116,7 @@ void samplessongimportview_init(SamplesSongImportView* self, ui_component* paren
 	ui_label_setcharnumber(&self->songname, 30);	
 	ui_button_init(&self->browse, &self->header);
 	ui_button_settext(&self->browse, "Select a song");
-	signal_connect(&self->browse.signal_clicked, self,
+	psy_signal_connect(&self->browse.signal_clicked, self,
 		samplessongimportview_onloadsong);	
 	list_free(ui_components_setalign(		
 		ui_component_children(&self->header, 0),
@@ -130,7 +131,7 @@ void samplessongimportview_init(SamplesSongImportView* self, ui_component* paren
 	ui_button_init(&self->add, &self->bar);
 	ui_button_settext(&self->add, "<- Copy");
 	ui_component_setalign(&self->add.component, UI_ALIGN_TOP);
-	signal_connect(&self->add.signal_clicked, self,
+	psy_signal_connect(&self->add.signal_clicked, self,
 		samplessongimportview_oncopy);
 }
 
@@ -226,6 +227,8 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	samplesheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self);
 	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
+	psy_signal_connect(&self->component.signal_keydown, self,
+		samplesview_onkeydown);
 	// left
 	ui_component_init(&self->left, &self->component);
 	ui_component_enablealign(&self->left);
@@ -244,16 +247,18 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 		&workspace->song->samples, &workspace->song->instruments);	
 	ui_component_setalign(&self->samplesbox.samplelist.component,
 		UI_ALIGN_CLIENT);
-	signal_connect(&self->buttons.loadbutton.signal_clicked, self,
+	psy_signal_connect(&self->buttons.loadbutton.signal_clicked, self,
 		samplesview_onloadsample);	
-	signal_connect(&self->buttons.savebutton.signal_clicked, self,
+	psy_signal_connect(&self->buttons.savebutton.signal_clicked, self,
 		samplesview_onsavesample);
-	signal_connect(&self->buttons.deletebutton.signal_clicked, self,
+	psy_signal_connect(&self->buttons.deletebutton.signal_clicked, self,
 		samplesview_ondeletesample);
-	signal_connect(&self->buttons.duplicatebutton.signal_clicked, self,
+	psy_signal_connect(&self->buttons.duplicatebutton.signal_clicked, self,
 		samplesview_onduplicatesample);
-	signal_connect(&self->component.signal_show, self, samplesview_onshow);
-	signal_connect(&self->component.signal_hide, self, samplesview_onhide);	
+	psy_signal_connect(&self->component.signal_show, self,
+		samplesview_onshow);
+	psy_signal_connect(&self->component.signal_hide, self,
+		samplesview_onhide);	
 	// client
 	ui_notebook_init(&self->clientnotebook, &self->component);	
 	ui_component_setalign(&self->clientnotebook.component, UI_ALIGN_CLIENT);
@@ -284,9 +289,9 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	InitSamplesWaveLoopView(&self->waveloop, &self->client);	
 	ui_component_setalign(&self->waveloop.component, UI_ALIGN_BOTTOM);
 	ui_component_setmargin(&self->waveloop.component, &margin);
-	signal_connect(&self->samplesbox.samplelist.signal_selchanged, self,
+	psy_signal_connect(&self->samplesbox.samplelist.signal_selchanged, self,
 		samplesview_onsamplelistchanged);
-	signal_connect(&workspace->song->instruments.signal_slotchange, self,
+	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self,
 		samplesview_oninstrumentslotchanged);
 	samplesview_setsample(self, 0);	
 	samplessongimportview_init(&self->songimport,
@@ -294,7 +299,7 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	sampleeditor_init(&self->sampleeditor,
 		&self->clientnotebook.component, workspace);	
 	ui_notebook_setpageindex(&self->clientnotebook, 0);
-	signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->signal_songchanged, self,
 		samplesview_onsongchanged);
 	ui_notebook_setpageindex(&self->clientnotebook, 0);
 	ui_notebook_connectcontroller(&self->clientnotebook,
@@ -306,10 +311,10 @@ void samplesview_onsamplelistchanged(SamplesView* self, ui_component* sender,
 {	
 	samplesview_setsample(self, slot);
 	if (self->workspace->song) {
-		signal_prevent(&self->workspace->song->instruments.signal_slotchange,
+		psy_signal_prevent(&self->workspace->song->instruments.signal_slotchange,
 			self, samplesview_oninstrumentslotchanged);
 		instruments_changeslot(&self->workspace->song->instruments, slot);
-		signal_enable(&self->workspace->song->instruments.signal_slotchange,
+		psy_signal_enable(&self->workspace->song->instruments.signal_slotchange,
 			self, samplesview_oninstrumentslotchanged);		
 	}
 	ui_component_invalidate(&self->wavebox.component);
@@ -361,11 +366,11 @@ void samplesview_onloadsample(SamplesView* self, ui_component* sender)
 			instruments_insert(&self->workspace->song->instruments, instrument,
 				slot);
 			samplesview_setsample(self, slot);
-			signal_prevent(
+			psy_signal_prevent(
 				&self->workspace->song->instruments.signal_slotchange,
 				self, samplesview_oninstrumentslotchanged);
 			instruments_changeslot(&self->workspace->song->instruments, slot);
-			signal_enable(
+			psy_signal_enable(
 				&self->workspace->song->instruments.signal_slotchange,
 				self, samplesview_oninstrumentslotchanged);
 			ui_component_invalidate(&self->component);
@@ -460,7 +465,7 @@ uintptr_t samplesview_freesampleslot(SamplesView* self, uintptr_t startslot,
 
 void samplesview_onsongchanged(SamplesView* self, Workspace* workspace)
 {	
-	signal_connect(&workspace->song->instruments.signal_slotchange, self,
+	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self,
 		samplesview_oninstrumentslotchanged);	
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
@@ -479,6 +484,11 @@ void samplesview_onhide(SamplesView* self, ui_component* sender)
 	ui_component_hide(&self->clienttabbar.component);
 }
 
+void samplesview_onkeydown(SamplesView* self, ui_component* sender, KeyEvent* ev)
+{
+	ui_component_propagateevent(&self->component);
+}
+
 
 void samplesheaderview_init(SamplesHeaderView* self, ui_component* parent,
 	Instruments* instruments, struct SamplesView* view)
@@ -495,13 +505,16 @@ void samplesheaderview_init(SamplesHeaderView* self, ui_component* parent,
 	ui_label_settext(&self->namelabel, "Sample Name");
 	ui_edit_init(&self->nameedit, &self->component, 0);		
 	ui_edit_setcharnumber(&self->nameedit, 20);	
-	signal_connect(&self->nameedit.signal_change, self, OnEditSampleName);
+	psy_signal_connect(&self->nameedit.signal_change, self,
+		OnEditSampleName);
 	ui_button_init(&self->prevbutton, &self->component);
 	ui_button_seticon(&self->prevbutton, UI_ICON_LESS);	
-	signal_connect(&self->prevbutton.signal_clicked, self, OnPrevSample);
+	psy_signal_connect(&self->prevbutton.signal_clicked, self,
+		OnPrevSample);
 	ui_button_init(&self->nextbutton, &self->component);
 	ui_button_seticon(&self->nextbutton, UI_ICON_MORE);	
-	signal_connect(&self->nextbutton.signal_clicked, self, OnNextSample);
+	psy_signal_connect(&self->nextbutton.signal_clicked, self,
+		OnNextSample);
 	ui_label_init(&self->srlabel, &self->component);
 	ui_label_settext(&self->srlabel, "Sample Rate");	
 	ui_edit_init(&self->sredit, &self->component, 0);	
@@ -600,7 +613,7 @@ void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
 	self->sample = 0;
 	ui_margin_init(&margin, ui_value_makeeh(1), ui_value_makepx(0),
 		ui_value_makepx(0), ui_value_makepx(0));			
-	self->notestabmode = NOTESTAB_DEFAULT;
+	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	ui_slider_init(&self->defaultvolume, &self->component);
@@ -705,8 +718,8 @@ void OnGeneralViewDescribe(SamplesGeneralView* self, ui_slider* slider, char* tx
 	} else
 	if (slider == &self->samplednote) {		
 		psy_snprintf(txt, 10, "%s", self->sample
-			? notetostr((note_t)(self->sample->tune + 60), self->notestabmode)
-			: notetostr(60, self->notestabmode));		
+			? psy_dsp_notetostr((note_t)(self->sample->tune + 60), self->notestabmode)
+			: psy_dsp_notetostr(60, self->notestabmode));		
 	} else
 	if (slider == &self->pitchfinetune) {
 		psy_snprintf(txt, 10, "%d ct.", self->sample
@@ -774,7 +787,8 @@ void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, Play
 	ui_combobox_addstring(&self->waveformbox, "Random");	
 	ui_component_setposition(&self->waveformbox.component, 110, 5, 100, 20);
 	ui_combobox_setcursel(&self->waveformbox, 0);
-	signal_connect(&self->waveformbox.signal_selchanged, self, OnWaveFormChange);
+	psy_signal_connect(&self->waveformbox.signal_selchanged, self,
+		OnWaveFormChange);
 
 	ui_slider_init(&self->attack, &self->component);
 	ui_slider_settext(&self->attack, "Attack");	
@@ -970,12 +984,18 @@ void InitSamplesWaveLoopView(SamplesWaveLoopView* self, ui_component* parent)
 	ui_edit_init(&self->sustainloopendedit, &self->component, 0);	
 	ui_component_setposition(&self->sustainloopendedit.component, 265, 75, 100, 20);
 
-	signal_connect(&self->loopdir.signal_selchanged, self, OnLoopTypeChange);
-	signal_connect(&self->sustainloopdir.signal_selchanged, self, OnSustainLoopTypeChange);
-	signal_connect(&self->loopstartedit.signal_change, self, OnEditChangeLoopstart);
-	signal_connect(&self->loopendedit.signal_change, self, OnEditChangeLoopend);
-	signal_connect(&self->sustainloopstartedit.signal_change, self, OnEditChangeSustainstart);
-	signal_connect(&self->sustainloopendedit.signal_change, self, OnEditChangeSustainend);
+	psy_signal_connect(&self->loopdir.signal_selchanged, self,
+		OnLoopTypeChange);
+	psy_signal_connect(&self->sustainloopdir.signal_selchanged, self,
+		OnSustainLoopTypeChange);
+	psy_signal_connect(&self->loopstartedit.signal_change, self,
+		OnEditChangeLoopstart);
+	psy_signal_connect(&self->loopendedit.signal_change, self,
+		OnEditChangeLoopend);
+	psy_signal_connect(&self->sustainloopstartedit.signal_change, self,
+		OnEditChangeSustainstart);
+	psy_signal_connect(&self->sustainloopendedit.signal_change, self,
+		OnEditChangeSustainend);
 }
 
 void SetSampleSamplesWaveLoopView(SamplesWaveLoopView* self, Sample* sample)

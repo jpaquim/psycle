@@ -20,7 +20,7 @@ void playposbar_init(PlayPosBar* self, ui_component* parent, Player* player)
 	ui_label_init(&self->position, &self->component);
 	ui_label_setcharnumber(&self->position, 10);
 	self->lastposition = -1.0f;
-	signal_connect(&self->component.signal_timer, self, ontimer);
+	psy_signal_connect(&self->component.signal_timer, self, ontimer);
 	ui_component_starttimer(&self->component, 500, 50);
 	{		
 		ui_margin margin;

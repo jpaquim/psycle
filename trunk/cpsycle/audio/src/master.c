@@ -34,6 +34,7 @@ static MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
+	MACHMODE_FX,
 	"Master"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -128,7 +129,8 @@ int describevalue(Master* self, char* txt, int param, int value)
 		Machines* machines = self->machine.callback.machines(
 			self->machine.callback.context);
 
-		amp_t db = (amp_t)(20 * log10(machines_volume(machines)));
+		psy_dsp_amp_t db = (psy_dsp_amp_t)(20 * 
+			log10(machines_volume(machines)));
 		psy_snprintf(txt, 10, "%.2f dB", db);
 		return 1;
 	} else {
@@ -142,10 +144,10 @@ int describevalue(Master* self, char* txt, int param, int value)
 			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
 			if (p) {				
 				WireSocketEntry* input_entry;
-				amp_t db;
+				psy_dsp_amp_t db;
 
 				input_entry = (WireSocketEntry*) p->entry;
-				db = (amp_t)(20 * log10(input_entry->volume));
+				db = (psy_dsp_amp_t)(20 * log10(input_entry->volume));
 				psy_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
 			}			
@@ -254,7 +256,7 @@ void master_loadspecific(Master* self, struct SongFile* songfile, unsigned int s
 	psyfile_read(songfile->file, &outdry, sizeof outdry);
 	psyfile_read(songfile->file, &decreaseOnClip, sizeof decreaseOnClip);
 
-	machines_setvolume(&songfile->song->machines, outdry / (amp_t)256);
+	machines_setvolume(&songfile->song->machines, outdry / (psy_dsp_amp_t) 256);
 }
 
 void master_savespecific(Master* self, struct SongFile* songfile, unsigned int slot)

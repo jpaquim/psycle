@@ -34,6 +34,7 @@ static MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	GENERATOR | 32 | 64,
+	MACHMODE_GENERATOR,
 	"Note Duplicator"
 		#ifndef NDEBUG
 		" (debug build)"

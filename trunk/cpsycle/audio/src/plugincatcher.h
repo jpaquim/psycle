@@ -15,8 +15,8 @@ typedef struct {
 	Properties* plugins;
 	char* inipath;
 	Properties* dirconfig;
-	Signal signal_changed;
-	Signal signal_scanprogress;	
+	psy_Signal signal_changed;
+	psy_Signal signal_scanprogress;
 } PluginCatcher;
 
 void plugincatcher_init(PluginCatcher*, Properties* dirconfig);
@@ -30,5 +30,7 @@ void plugincatcher_save(PluginCatcher*);
 char* plugincatcher_modulepath(PluginCatcher*, MachineType, const char* path,
 	char* fullpath);
 void plugincatcher_catchername(PluginCatcher*, const char* path, char* name);
+const char* plugincatcher_searchpath(PluginCatcher*, const char* name,
+	int type);
 
 #endif

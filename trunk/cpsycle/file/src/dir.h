@@ -4,7 +4,8 @@
 #if !defined(DIR_H)
 #define DIR_H
 
-void dir_enum(void* self, const char* path, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag));
+void dir_enumerate(void* self, const char* path, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag));
+void dir_enumerate_recursive(void* self, const char* path, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag));
 void dir_findfile(const char* searchpath, const char* wildcard, char* filepath);
 char* workdir(char* buffer);
 const char* pathenv(void);
@@ -13,3 +14,4 @@ void insertpathenv(const char* path);
 void extract_path(const char* path, char* prefix, char* name, char* ext);
 
 #endif
+

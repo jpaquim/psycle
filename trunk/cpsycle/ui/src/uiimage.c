@@ -13,8 +13,8 @@ void ui_image_init(ui_image* self, ui_component* parent)
 {  
     ui_component_init(&self->component, parent);
 	ui_bitmap_init(&self->bitmap);
-	signal_connect(&self->component.signal_draw, self, ondraw);
-	signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_signal_connect(&self->component.signal_draw, self, ondraw);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	self->alignment = UI_ALIGNMENT_NONE;	
 }
 

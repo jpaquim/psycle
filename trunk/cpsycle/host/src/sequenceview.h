@@ -47,7 +47,7 @@ typedef struct {
 	int avgcharwidth;
 	int dx;
 	int dy;	
-	beat_t lastplayposition;
+	psy_dsp_beat_t lastplayposition;
 	Player* player;
 	SequenceEntry* lastentry;	
 	Workspace* workspace;

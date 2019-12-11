@@ -30,14 +30,14 @@ void ui_listbox_init_style(ui_listbox* self, ui_component* parent, int style)
 		0, 0, 100, 200,
 		style,
 		1);	
-	signal_connect(&self->component.signal_command, self, oncommand);
-	signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	signal_init(&self->signal_selchanged);	
+	psy_signal_connect(&self->component.signal_command, self, oncommand);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	psy_signal_init(&self->signal_selchanged);	
 }
 
 void ondestroy(ui_listbox* self, ui_component* sender)
 {
-	signal_dispose(&self->signal_selchanged);
+	psy_signal_dispose(&self->signal_selchanged);
 }
 
 intptr_t ui_listbox_addstring(ui_listbox* listbox, const char* text)
@@ -91,7 +91,7 @@ void oncommand(ui_listbox* self, ui_component* sender, WPARAM wParam,
             if (self->signal_selchanged.slots) {
 				intptr_t sel = SendMessage((HWND)self->component.hwnd, LB_GETCURSEL,
 					(WPARAM)0, (LPARAM)0);
-				signal_emit(&self->signal_selchanged, self, 1, sel);
+				psy_signal_emit(&self->signal_selchanged, self, 1, sel);
 			}
         }
 		break;

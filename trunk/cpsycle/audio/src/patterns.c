@@ -114,3 +114,13 @@ int patterns_istracksoloed(Patterns* self, uintptr_t track)
 {
 	return patternstrackstate_istracksoloed(&self->trackstate, track);
 }
+
+void patterns_setsongtracks(Patterns* self, uintptr_t trackcount)
+{
+	self->songtracks = trackcount;
+}
+
+uintptr_t patterns_songtracks(Patterns* self, uintptr_t trackcount)
+{
+	return self->songtracks;
+}

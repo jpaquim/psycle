@@ -3,6 +3,7 @@
 
 #include "../../detail/prefix.h"
 
+#include "machinedefs.h"
 #include "machineinfo.h"
 #include <string.h>
 #include <stdlib.h> 
@@ -12,6 +13,7 @@ void machineinfo_init(MachineInfo* self)
 	self->Author = strdup("");
 	self->Command = strdup("");
 	self->Flags = 0;
+	self->mode = MACHMODE_FX;
 	self->Name = strdup("");	
 	self->ShortName = strdup("");
 	self->APIVersion = 0;
@@ -25,6 +27,7 @@ void machineinfo_set(MachineInfo* self,
 		const char* author,
 		const char* command,
 		int flags,
+		int mode,
 		const char* name,
 		const char* shortname,
 		short apiversion,
@@ -36,13 +39,14 @@ void machineinfo_set(MachineInfo* self,
 	self->Author = strdup(author);
 	self->Command = strdup(command);
 	self->Flags = flags;
+	self->mode = mode;
 	self->Name = strdup(name);	
 	self->ShortName = strdup(shortname);
 	self->APIVersion = apiversion;
 	self->PlugVersion = plugversion;
 	self->type = type;	
 	self->modulepath = strdup(modulepath);
-	self->shellidx = shellidx;
+	self->shellidx = shellidx;	
 }
 
 void machineinfo_setnativeinfo(MachineInfo* self,
@@ -55,6 +59,7 @@ void machineinfo_setnativeinfo(MachineInfo* self,
 	self->Author = strdup(info->Author);
 	self->Command = strdup(info->Command);
 	self->Flags = info->Flags;
+	self->mode = (info->Flags & 3 == 3) ? MACHMODE_GENERATOR : MACHMODE_FX;
 	self->Name = strdup(info->Name);		
 	self->ShortName = strdup(info->ShortName);
 	self->APIVersion = info->APIVersion;

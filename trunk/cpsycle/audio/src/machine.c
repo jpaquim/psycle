@@ -14,6 +14,7 @@ static MachineInfo const macinfo = {
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
+	MACHMODE_FX,
 	"Machine"
 		#ifndef NDEBUG
 		" (debug build)"
@@ -51,8 +52,8 @@ static int parameterlabel(Machine* self, char* txt, int param) { txt[0] = '\0'; 
 static int parametername(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
 static int describevalue(Machine* self, char* txt, int param, int value) { return 0; }
 static int parametervalue(Machine* self, int const param) { return 0; }
-static void setpanning(Machine* self, amp_t panning) { }
-static amp_t panning(Machine* self) { return (amp_t) 0.5f; }
+static void setpanning(Machine* self, psy_dsp_amp_t panning) { }
+static psy_dsp_amp_t panning(Machine* self) { return (psy_dsp_amp_t) 0.5f; }
 static void mute(Machine* self) { }
 static void unmute(Machine* self) { }
 static int muted(Machine* self) { return 0; }
@@ -67,7 +68,8 @@ static void setcallback(Machine* self, MachineCallback callback) { self->callbac
 static void updatesamplerate(Machine* self, unsigned int samplerate) { }
 static void loadspecific(Machine*, struct SongFile*, unsigned int slot);
 static void savespecific(Machine*, struct SongFile*, unsigned int slot);
-static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, amp_t vol);
+static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples,
+	psy_dsp_amp_t vol);
 static unsigned int numparameters(Machine* self) { return 0; }
 static unsigned int numparametercols(Machine* self) { return 0; }
 static int paramviewoptions(Machine* self) { return 0; }
@@ -160,12 +162,12 @@ void machine_init(Machine* self, MachineCallback callback)
 	vtable_init();
 	self->vtable = &vtable;
 	self->callback = callback;
-	signal_init(&self->signal_worked);
+	psy_signal_init(&self->signal_worked);
 }
 
 void machine_dispose(Machine* self)
 {
-	signal_dispose(&self->signal_worked);
+	psy_signal_dispose(&self->signal_worked);
 }
 
 void work(Machine* self, BufferContext* bc)
@@ -246,9 +248,7 @@ static int mode(Machine* self)
 	const MachineInfo* info;
 
 	info = self->vtable->info(self);
-	return (!info) ? MACHMODE_GENERATOR : (info->Flags & 3) == 3
-			? MACHMODE_GENERATOR 
-		    : MACHMODE_FX;
+	return (!info) ? MACHMODE_FX : info->mode;
 }
 
 int machine_supports(Machine* self, int option)
@@ -279,7 +279,8 @@ Buffer* mix(Machine* self, size_t slot, unsigned int amount, MachineSockets* con
 	return output;
 }
 
-void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples, amp_t vol)
+void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples,
+	psy_dsp_amp_t vol)
 {
 	unsigned int channel;
 

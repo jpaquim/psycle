@@ -8,7 +8,7 @@
 
 typedef struct {
    ui_component component;
-   Signal signal_selchanged;
+   psy_Signal signal_selchanged;
 } ui_listbox;
 
 void ui_listbox_init(ui_listbox*, ui_component* parent);

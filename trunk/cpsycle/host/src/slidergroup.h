@@ -12,9 +12,9 @@ typedef struct {
 	ui_label desclabel;
 	ui_slider slider;
 	ui_label label;	
-	Signal signal_describevalue;
-	Signal signal_tweakvalue;
-	Signal signal_value;
+	psy_Signal signal_describevalue;
+	psy_Signal signal_tweakvalue;
+	psy_Signal signal_value;
 } SliderGroup;
 
 typedef void (*SliderGroupDescribe)(void* context, SliderGroup*, char* txt);

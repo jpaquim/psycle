@@ -18,7 +18,7 @@
 
 
 #define TIMERID_TRACKERVIEW 600
-static const big_beat_t epsilon = 0.0001;
+static const psy_dsp_big_beat_t epsilon = 0.0001;
 
 static void trackergrid_ondraw(TrackerGrid*, ui_component* sender, ui_graphics*);
 static void trackergrid_drawbackground(TrackerGrid*, ui_graphics*, TrackerGridBlock* clip);
@@ -45,10 +45,10 @@ static void trackergrid_onsize(TrackerGrid*, ui_component* sender, ui_size* size
 static void trackergrid_onscroll(TrackerGrid*, ui_component* sender,
 	int stepx, int stepy);
 static int trackergrid_testcursor(TrackerGrid*, unsigned int track,
-	big_beat_t offset, unsigned int subline);
+	psy_dsp_big_beat_t offset, unsigned int subline);
 int trackergrid_testselection(TrackerGrid*, unsigned int track, double offset,
 	unsigned int subline);
-static int trackergrid_testplaybar(TrackerGrid* self, big_beat_t offset);
+static int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset);
 static void trackergrid_clipblock(TrackerGrid*, const ui_rectangle*,
 	TrackerGridBlock*);
 static void trackergrid_drawdigit(TrackerGrid*, ui_graphics*, int digit,
@@ -105,9 +105,9 @@ static void trackerview_readconfig(TrackerView*);
 static void trackerview_oninput(TrackerView*, Player*, PatternEvent*);
 static void trackerview_initinputs(TrackerView*);
 static void trackerview_invalidatecursor(TrackerView*, const TrackerCursor*);
-static void trackerview_invalidateline(TrackerView*, beat_t offset);
+static void trackerview_invalidateline(TrackerView*, psy_dsp_beat_t offset);
 static void trackerview_initdefaultskin(TrackerView*);
-static int trackerview_offsettoscreenline(TrackerView*, big_beat_t);
+static int trackerview_offsettoscreenline(TrackerView*, psy_dsp_big_beat_t);
 static void trackerview_onchangegenerator(TrackerView* self);
 static void trackerview_onchangeinstrument(TrackerView* self);
 static void trackerview_blockstart(TrackerView*);
@@ -149,9 +149,9 @@ static void trackerlinenumbers_ondraw(TrackerLineNumbers*,
 static void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const TrackerCursor*);
 static void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
-	beat_t offset);
-static int testrange(big_beat_t position, big_beat_t offset, big_beat_t width);
-static int testrange_e(big_beat_t position, big_beat_t offset, big_beat_t width);
+	psy_dsp_beat_t offset);
+static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t width);
+static int testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t width);
 static int colgroupstart(int col);
 
 enum {
@@ -246,9 +246,9 @@ void InsertCommandExecute(InsertCommand* self)
 
 	node = pattern_findnode(self->pattern,
 		self->cursor.track,
-		(beat_t)self->cursor.offset,
+		(psy_dsp_beat_t)self->cursor.offset,
 		self->cursor.subline,
-		(beat_t)self->bpl, &prev);	
+		(psy_dsp_beat_t)self->bpl, &prev);	
 	if (node) {
 		self->oldevent = pattern_event(self->pattern, node);
 		pattern_setevent(self->pattern, node, &self->event);
@@ -257,7 +257,7 @@ void InsertCommandExecute(InsertCommand* self)
 		node = pattern_insert(self->pattern,
 			prev,
 			self->cursor.track, 
-			(beat_t)self->cursor.offset,
+			(psy_dsp_beat_t)self->cursor.offset,
 			&self->event);
 		self->insert = 1;
 	}
@@ -272,9 +272,9 @@ void InsertCommandRevert(InsertCommand* self)
 
 		node = pattern_findnode(self->pattern,
 			self->cursor.track,
-			(beat_t)self->cursor.offset,
+			(psy_dsp_beat_t)self->cursor.offset,
 			self->cursor.subline,
-			(beat_t)self->bpl, &prev);
+			(psy_dsp_beat_t)self->bpl, &prev);
 		if (node) {
 			pattern_remove(self->pattern, node);
 		}
@@ -284,9 +284,9 @@ void InsertCommandRevert(InsertCommand* self)
 
 		node = pattern_findnode(self->pattern,
 			self->cursor.track,
-			(beat_t)self->cursor.offset,
+			(psy_dsp_beat_t)self->cursor.offset,
 			self->cursor.subline,
-			(beat_t)self->bpl, &prev);
+			(psy_dsp_beat_t)self->bpl, &prev);
 		if (node) {
 			pattern_setevent(self->pattern, node, &self->oldevent);
 		}
@@ -358,32 +358,32 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent,
 	self->header = 0;	
 	self->hasselection = 0;
 	self->midline = 1;	
-	signal_connect(&player->signal_numsongtrackschanged, self,
+	psy_signal_connect(&player->signal_numsongtrackschanged, self,
 		trackergrid_numtrackschanged);
 	self->view->font = ui_createfont("Tahoma", 12);	
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_size, self, trackergrid_onsize);
-	signal_connect(&self->component.signal_keydown,self, 
+	psy_signal_connect(&self->component.signal_size, self, trackergrid_onsize);
+	psy_signal_connect(&self->component.signal_keydown,self, 
 		trackergrid_onkeydown);
-	signal_connect(&self->component.signal_keyup, self, 
+	psy_signal_connect(&self->component.signal_keyup, self, 
 		trackergrid_onkeyup);
-	signal_connect(&self->component.signal_mousedown, self,
+	psy_signal_connect(&self->component.signal_mousedown, self,
 		trackergrid_onmousedown);
-	signal_connect(&self->component.signal_mousemove, self,
+	psy_signal_connect(&self->component.signal_mousemove, self,
 		trackergrid_onmousemove);
-	signal_connect(&self->component.signal_mouseup, self,
+	psy_signal_connect(&self->component.signal_mouseup, self,
 		trackergrid_onmouseup);
-	signal_connect(&self->component.signal_mousedoubleclick, self,
+	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		trackergrid_onmousedoubleclick);
-	signal_connect(&self->component.signal_draw, self,
+	psy_signal_connect(&self->component.signal_draw, self,
 		trackergrid_ondraw);
-	signal_connect(&self->component.signal_scroll, self,
+	psy_signal_connect(&self->component.signal_scroll, self,
 		trackergrid_onscroll);	
 	self->player = player;	
 	self->numtracks = player_numsongtracks(player);
 	self->lpb = player_lpb(self->player);
-	self->bpl = 1 / (big_beat_t) player_lpb(self->player);
-	self->notestabmode = NOTESTAB_DEFAULT;	
+	self->bpl = 1 / (psy_dsp_big_beat_t) player_lpb(self->player);
+	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;	
 	self->cursor.track = 0;
 	self->cursor.offset = 0;
 	self->cursor.subline = 0;
@@ -575,7 +575,7 @@ void trackergrid_ondraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-big_beat_t trackergrid_offset(TrackerGrid* self, int y, unsigned int* lines,
+psy_dsp_big_beat_t trackergrid_offset(TrackerGrid* self, int y, unsigned int* lines,
 	unsigned int* sublines, unsigned int* subline)
 {
 	double offset = 0;	
@@ -693,7 +693,7 @@ int trackergrid_testcursor(TrackerGrid* self, unsigned int track, double offset,
 		self->cursor.subline == subline;
 }
 
-int trackergrid_testplaybar(TrackerGrid* self, big_beat_t offset)
+int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset)
 {
 	return player_playing(self->player) && 
 		testrange(self->view->lastplayposition -
@@ -718,7 +718,7 @@ void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock*
 	halfy = (size.height / self->lineheight / 2) * self->lineheight;
 	cpy = (clip->topleft.totallines - clip->topleft.subline) * self->lineheight + self->dy;
 	offset = clip->topleft.offset;	
-	node = pattern_greaterequal(self->view->pattern, (beat_t)offset);
+	node = pattern_greaterequal(self->view->pattern, (psy_dsp_beat_t)offset);
 	subline = 0;	
 	while (offset <= clip->bottomright.offset && offset < self->view->pattern->length) {	
 		int beat;
@@ -788,12 +788,12 @@ void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock*
 	}
 }
 
-int testrange(big_beat_t position, big_beat_t offset, big_beat_t width)
+int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t width)
 {
 	return position >= offset && position < offset + width; 
 }
 
-int testrange_e(big_beat_t position, big_beat_t offset, big_beat_t width)
+int testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t width)
 {
 	return position + 2*epsilon >= offset &&
 		position < offset + width - epsilon;
@@ -847,7 +847,7 @@ void trackergrid_drawevent(TrackerGrid* self, ui_graphics* g, PatternEvent* even
 	{	// draw note		
 		ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->textheight);
 		notestr = (event->note != 255 || !self->view->showemptydata) 
-			  ? notetostr(event->note, self->notestabmode)
+			  ? psy_dsp_notetostr(event->note, self->notestabmode)
 			  : emptynotestr;		
 		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE | ETO_CLIPPED, r, notestr,
 		 strlen(notestr));	
@@ -981,7 +981,7 @@ void trackerview_centeroncursor(TrackerView* self)
 
 unsigned int NumSublines(Pattern* pattern, double offset, double bpl)
 {
-	PatternNode* node = pattern_greaterequal(pattern, (beat_t)offset);	
+	PatternNode* node = pattern_greaterequal(pattern, (psy_dsp_beat_t)offset);	
 	unsigned int currsubline = 0;
 	int first = 1;
 
@@ -1240,8 +1240,8 @@ int trackerview_scrollup(TrackerView* self)
 	}
 	if (-self->grid.dy + topline * self->grid.lineheight > r.top) {
 		int dlines = (-self->grid.dy + topline * self->grid.lineheight - r.top) / (self->grid.lineheight);
-		signal_emit(&self->grid.component.signal_scroll, &self->grid.component,
-			2, 0, dlines);
+		psy_signal_emit(&self->grid.component.signal_scroll,
+			&self->grid.component, 2, 0, dlines);
 		ui_component_scrollstep(&self->grid.component, 0, dlines);
 		ui_component_setverticalscrollposition(
 		&self->grid.component, 
@@ -1269,8 +1269,8 @@ int trackerview_scrolldown(TrackerView* self)
 		int dlines;
 
 		dlines = line + self->grid.dy / self->grid.lineheight - visilines;
-		signal_emit(&self->grid.component.signal_scroll, &self->grid.component,
-			2, 0, -dlines);
+		psy_signal_emit(&self->grid.component.signal_scroll,
+			&self->grid.component, 2, 0, -dlines);
 		ui_component_scrollstep(&self->grid.component, 0, -dlines);
 		ui_component_setverticalscrollposition(
 			&self->grid.component, 
@@ -1452,7 +1452,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 
 			trackerview_prevline(self);		
 			node = pattern_findnode(self->pattern, self->grid.cursor.track,
-				(beat_t)self->grid.cursor.offset, self->grid.cursor.subline, (beat_t)self->grid.bpl, &prev);		
+				(psy_dsp_beat_t)self->grid.cursor.offset, self->grid.cursor.subline, (psy_dsp_beat_t)self->grid.bpl, &prev);		
 			if (node) {			
 				pattern_remove(self->pattern, node);
 				ui_component_invalidate(&self->linenumbers.component);
@@ -1469,7 +1469,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 				entry = (PatternEntry*) p->entry;								
 				if (entry->track == self->grid.cursor.track) {
 					PatternEvent event;
-					beat_t offset;
+					psy_dsp_beat_t offset;
 					uintptr_t track;
 					PatternNode* node;
 					PatternNode* prev;
@@ -1478,11 +1478,11 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 					offset = entry->offset;
 					track = entry->track;
 					pattern_remove(self->pattern, p);
-					offset -= (beat_t) self->grid.bpl;
+					offset -= (psy_dsp_beat_t) self->grid.bpl;
 					node = pattern_findnode(self->pattern, track,
 						offset, 
 						self->grid.cursor.subline,
-						(beat_t)self->grid.bpl,
+						(psy_dsp_beat_t)self->grid.bpl,
 						&prev);
 					if (node) {
 						PatternEntry* entry;
@@ -1491,7 +1491,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 						entry->event = event;
 					} else {
 						pattern_insert(self->pattern, prev, track, 
-							(beat_t)offset, &event);
+							(psy_dsp_beat_t)offset, &event);
 					}					
 				}
 			}
@@ -1501,7 +1501,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 	if (cmd == CMD_ROWCLEAR) {
 		PatternNode* prev;
 		PatternNode* node = pattern_findnode(self->pattern, self->grid.cursor.track,
-			(beat_t)self->grid.cursor.offset, self->grid.cursor.subline, (beat_t)self->grid.bpl, &prev);
+			(psy_dsp_beat_t)self->grid.cursor.offset, self->grid.cursor.subline, (psy_dsp_beat_t)self->grid.bpl, &prev);
 		if (node) {
 			pattern_remove(self->pattern, node);
 			ui_component_invalidate(&self->linenumbers.component);
@@ -1529,13 +1529,13 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 	if (keyevent->keycode == VK_RETURN) {
 		PatternNode* prev;
 		PatternNode* node = pattern_findnode(self->pattern, 0,
-			(beat_t)self->grid.cursor.offset, self->grid.cursor.subline + 1, (beat_t)self->grid.bpl, &prev);		
+			(psy_dsp_beat_t)self->grid.cursor.offset, self->grid.cursor.subline + 1, (psy_dsp_beat_t)self->grid.bpl, &prev);		
 		if (prev && ((PatternEntry*)prev->entry)->offset >= self->grid.cursor.offset) {
 			PatternEvent ev = { 255, 255, 255, 0, 0 };
 			double offset;
 			++self->grid.cursor.subline;
 			offset = self->grid.cursor.offset + self->grid.cursor.subline*self->grid.bpl/4;
-			pattern_insert(self->pattern, prev, 0, (beat_t)offset, &ev);			
+			pattern_insert(self->pattern, prev, 0, (psy_dsp_beat_t)offset, &ev);			
 			trackergrid_adjustscroll(&self->grid);
 			workspace_setpatterneditposition(self->workspace, self->grid.cursor);
 			ui_component_invalidate(&self->linenumbers.component);
@@ -1628,9 +1628,9 @@ void trackerview_inputdigit(TrackerView* self, int value)
 		
 		node = pattern_findnode(self->pattern,
 					self->grid.cursor.track,
-					(beat_t)self->grid.cursor.offset,
+					(psy_dsp_beat_t)self->grid.cursor.offset,
 					self->grid.cursor.subline,
-					(beat_t)self->grid.bpl,
+					(psy_dsp_beat_t)self->grid.bpl,
 					&prev);						
 		event = pattern_event(self->pattern, node);
 		enterdigitcolumn(&event, self->grid.cursor.col, value);
@@ -1750,7 +1750,7 @@ void trackerview_invalidatecursor(TrackerView* self, const TrackerCursor* cursor
 	trackerlinenumbers_invalidatecursor(&self->linenumbers, cursor);
 }
 
-void trackerview_invalidateline(TrackerView* self, beat_t offset)
+void trackerview_invalidateline(TrackerView* self, psy_dsp_beat_t offset)
 {
 	int line;	
 	ui_rectangle r;	
@@ -1916,36 +1916,36 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	self->showlinenumbercursor = 1;
 	self->showlinenumbersinhex = 1;
 	self->showemptydata = 0;
-	signal_connect(&self->component.signal_destroy, self, trackerview_ondestroy);
-	signal_connect(&self->component.signal_align, self, trackerview_onalign);
-	// signal_connect(&self->component.signal_size, self, trackerview_onsize);
-	signal_connect(&self->component.signal_timer, self, trackerview_ontimer);
-	signal_connect(&self->component.signal_keydown, self,
+	psy_signal_connect(&self->component.signal_destroy, self, trackerview_ondestroy);
+	psy_signal_connect(&self->component.signal_align, self, trackerview_onalign);
+	// psy_signal_connect(&self->component.signal_size, self, trackerview_onsize);
+	psy_signal_connect(&self->component.signal_timer, self, trackerview_ontimer);
+	psy_signal_connect(&self->component.signal_keydown, self,
 		trackerview_onkeydown);
-	signal_connect(&self->component.signal_keyup, self,
+	psy_signal_connect(&self->component.signal_keyup, self,
 		trackerview_onkeyup);
 	patternblockmenu_init(&self->blockmenu, &self->component);
-	signal_connect(&self->blockmenu.changegenerator.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.changegenerator.signal_clicked, self,
 		trackerview_onchangegenerator);
-	signal_connect(&self->blockmenu.changeinstrument.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.changeinstrument.signal_clicked, self,
 		trackerview_onchangeinstrument);
-	signal_connect(&self->blockmenu.cut.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.cut.signal_clicked, self,
 		trackerview_onblockcut);
-	signal_connect(&self->blockmenu.copy.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.copy.signal_clicked, self,
 		trackerview_onblockcopy);
-	signal_connect(&self->blockmenu.paste.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.paste.signal_clicked, self,
 		trackerview_onblockpaste);
-	signal_connect(&self->blockmenu.mixpaste.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.mixpaste.signal_clicked, self,
 		trackerview_onblockmixpaste);
-	signal_connect(&self->blockmenu.del.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.del.signal_clicked, self,
 		trackerview_onblockdelete);
-	signal_connect(&self->blockmenu.blocktransposeup.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.blocktransposeup.signal_clicked, self,
 		trackerview_onblocktransposeup);
-	signal_connect(&self->blockmenu.blocktransposedown.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.blocktransposedown.signal_clicked, self,
 		trackerview_onblocktransposedown);
-	signal_connect(&self->blockmenu.blocktransposeup12.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.blocktransposeup12.signal_clicked, self,
 		trackerview_onblocktransposeup12);
-	signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked, self,
+	psy_signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked, self,
 		trackerview_onblocktransposedown12);	
 	ui_component_hide(&self->blockmenu.component);
 	TrackerViewApplyProperties(self, 0);
@@ -1961,18 +1961,18 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	}
 	self->grid.component.scrollstepx = self->grid.trackwidth;
 	ui_component_starttimer(&self->component, TIMERID_TRACKERVIEW, 50);
-	signal_connect(&workspace->player.signal_lpbchanged, self,
+	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		trackerview_onlpbchanged);
-	signal_connect(&workspace->signal_configchanged, self,
+	psy_signal_connect(&workspace->signal_configchanged, self,
 		trackerview_onconfigchanged);
-	signal_connect(&workspace->player.signal_inputevent, self,
+	psy_signal_connect(&workspace->player.signal_inputevent, self,
 		trackerview_oninput);
-	signal_connect(&workspace->signal_patterneditpositionchanged, self,
+	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
 		trackerview_onpatterneditpositionchanged);	
-	signal_connect(&workspace->signal_parametertweak, self,
+	psy_signal_connect(&workspace->signal_parametertweak, self,
 		trackerview_onparametertweak);
 	trackerview_readconfig(self);	
-	signal_connect(&self->workspace->signal_skinchanged, self,
+	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		trackerview_onskinchanged);
 }
 
@@ -2078,8 +2078,9 @@ void trackerheader_init(TrackerHeader* self, ui_component* parent,
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
-	signal_connect(&self->component.signal_draw, self, trackerheader_ondraw);
-	signal_connect(&self->component.signal_mousedown, self,
+	psy_signal_connect(&self->component.signal_draw, self,
+		trackerheader_ondraw);
+	psy_signal_connect(&self->component.signal_mousedown, self,
 		trackerheader_onmousedown);
 	self->dx = 0;
 	self->numtracks = 16;
@@ -2177,7 +2178,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, ui_component* parent,
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
 	ui_component_setbackgroundcolor(&self->component, 
 		self->view->skin.background);
-	signal_connect(&self->component.signal_draw, self,
+	psy_signal_connect(&self->component.signal_draw, self,
 		trackerlinenumbers_ondraw);	
 	self->dy = 0;
 	self->textheight = 12;
@@ -2271,7 +2272,7 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 	ui_component_invalidaterect(&self->component, &r);	
 }
 
-void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, beat_t offset)
+void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_beat_t offset)
 {
 	int line;	
 	ui_rectangle r;	
@@ -2289,15 +2290,19 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, beat_t offset)
 	}
 }
 
-void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self, ui_component* parent, TrackerView* view)
+void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self,
+	ui_component* parent, TrackerView* view)
 {		
 	self->view = view;
 	ui_component_init(&self->component, parent);
-	signal_connect(&self->component.signal_draw, self, OnLineNumbersLabelDraw);
-	signal_connect(&self->component.signal_mousedown, self, OnLineNumbersLabelMouseDown);
+	psy_signal_connect(&self->component.signal_draw, self,
+		OnLineNumbersLabelDraw);
+	psy_signal_connect(&self->component.signal_mousedown, self,
+		OnLineNumbersLabelMouseDown);
 }
 
-void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel* self, ui_component* sender)
+void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel* self,
+	ui_component* sender)
 {
 	self->view->header.classic = !self->view->header.classic;
 	if (self->view->header.classic) {
@@ -2394,7 +2399,7 @@ int trackerview_numlines(TrackerView* self)
 	return lines + sublines + remaininglines;
 }
 
-int trackerview_offsettoscreenline(TrackerView* self, big_beat_t offs)
+int trackerview_offsettoscreenline(TrackerView* self, psy_dsp_big_beat_t offs)
 {
 	int lines = 0;
 	int sublines = 0;	
@@ -2447,7 +2452,7 @@ int trackerview_offsettoscreenline(TrackerView* self, big_beat_t offs)
 
 void trackerview_onlpbchanged(TrackerView* self, Player* sender, uintptr_t lpb)
 {
-	self->grid.bpl = 1 / (big_beat_t) lpb;
+	self->grid.bpl = 1 / (psy_dsp_big_beat_t) lpb;
 }
 
 void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
@@ -2630,12 +2635,12 @@ void trackerview_onblockcopy(TrackerView* self)
 		PatternNode* p;
 		PatternNode* q;
 		PatternNode* prev = 0;
-		beat_t offset;
+		psy_dsp_beat_t offset;
 		int trackoffset;
 
 		begin = pattern_greaterequal(self->pattern, 
-			(beat_t) self->grid.selection.topleft.offset);
-		offset = (beat_t) self->grid.selection.topleft.offset;
+			(psy_dsp_beat_t) self->grid.selection.topleft.offset);
+		offset = (psy_dsp_beat_t) self->grid.selection.topleft.offset;
 		trackoffset = self->grid.selection.topleft.track;
 		pattern_dispose(&self->workspace->patternpaste);
 		pattern_init(&self->workspace->patternpaste);
@@ -2661,7 +2666,7 @@ void trackerview_onblockcopy(TrackerView* self)
 			self->grid.selection.bottomright.track -
 			self->grid.selection.topleft.track);
 		pattern_setlength(&self->workspace->patternpaste,
-			(beat_t)(self->grid.selection.bottomright.offset -
+			(psy_dsp_beat_t)(self->grid.selection.bottomright.offset -
 			self->grid.selection.topleft.offset));
 
 	}
@@ -2672,12 +2677,12 @@ void trackerview_onblockpaste(TrackerView* self)
 {
 	PatternNode* p;
 	PatternNode* prev = 0;
-	beat_t offset;
+	psy_dsp_beat_t offset;
 	int trackoffset;
 	PatternEditPosition begin;
 	PatternEditPosition end;
 
-	offset = (beat_t) self->grid.cursor.offset;
+	offset = (psy_dsp_beat_t) self->grid.cursor.offset;
 	trackoffset = self->grid.cursor.track;
 	p = self->workspace->patternpaste.events;	
 
@@ -2694,7 +2699,7 @@ void trackerview_onblockpaste(TrackerView* self)
 			pasteentry->track + trackoffset,
 			pasteentry->offset + offset,
 			0,
-			(beat_t) self->grid.bpl,
+			(psy_dsp_beat_t) self->grid.bpl,
 			&prev);
 		if (node) {
 			PatternEntry* entry;
@@ -2717,10 +2722,10 @@ void trackerview_onblockmixpaste(TrackerView* self)
 {
 	PatternNode* p;
 	PatternNode* prev = 0;
-	beat_t offset;
+	psy_dsp_beat_t offset;
 	int trackoffset;
 
-	offset = (beat_t) self->grid.cursor.offset;
+	offset = (psy_dsp_beat_t) self->grid.cursor.offset;
 	trackoffset = self->grid.cursor.track;
 	p = self->workspace->patternpaste.events;
 	while (p != 0) {			
@@ -2728,7 +2733,7 @@ void trackerview_onblockmixpaste(TrackerView* self)
 
 		pasteentry = (PatternEntry*) p->entry;
 		if (!pattern_findnode(self->pattern, pasteentry->track + trackoffset,
-				pasteentry->offset + offset, 0, (beat_t) self->grid.bpl,
+				pasteentry->offset + offset, 0, (psy_dsp_beat_t) self->grid.bpl,
 				&prev)) {
 			pattern_insert(self->pattern,
 					prev, 

@@ -220,6 +220,10 @@ SOURCE=.\src\playposbar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\plugineditor.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\psycle.c
 # End Source File
 # Begin Source File
@@ -473,6 +477,10 @@ SOURCE=.\src\playbar.h
 # Begin Source File
 
 SOURCE=.\src\playposbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\plugineditor.h
 # End Source File
 # Begin Source File
 

@@ -23,9 +23,12 @@ void InitSongTrackBar(SongTrackBar* self, ui_component* parent, Workspace* works
 	ui_combobox_init(&self->trackbox, &self->component);	
 	ui_combobox_setcharnumber(&self->trackbox, 3);
 	Buildtrackbox(self);	
-	signal_connect(&self->trackbox.signal_selchanged, self, OnTrackBoxSelChange);	
-	signal_connect(&workspace->player.signal_numsongtrackschanged, self, OnSongTracksNumChanged);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	psy_signal_connect(&self->trackbox.signal_selchanged, self,
+		OnTrackBoxSelChange);	
+	psy_signal_connect(&workspace->player.signal_numsongtrackschanged, self,
+		OnSongTracksNumChanged);
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		OnSongChanged);
 	{		
 		ui_margin margin;
 

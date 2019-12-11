@@ -31,7 +31,7 @@ static void vuscope_onsrcmachineworked(VuScope*, Machine*, unsigned int slot, Bu
 static void vuscope_onsongchanged(VuScope*, Workspace*);
 static void vuscope_connectmachinessignals(VuScope*, Workspace*);
 static void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace);
-static amp_t dB(amp_t amplitude);
+static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 
 void vuscope_init(VuScope* self, ui_component* parent, Wire wire,
 	Workspace* workspace)
@@ -44,7 +44,7 @@ void vuscope_init(VuScope* self, ui_component* parent, Wire wire,
 	self->mult = 1.0f;
 	self->scope_peak_rate = 20;
 	self->hold = 0;
-	self->peakL = self->peakR = (amp_t) 128.0f;
+	self->peakL = self->peakR = (psy_dsp_amp_t) 128.0f;
 	self->peakLifeL = self->peakLifeR = 0;
 	self->workspace = workspace;
 	self->component.doublebuffered = 1;
@@ -52,10 +52,10 @@ void vuscope_init(VuScope* self, ui_component* parent, Wire wire,
 	self->pSamplesR = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
 	dsp.clear(self->pSamplesL, SCOPE_BUF_SIZE);
 	dsp.clear(self->pSamplesR, SCOPE_BUF_SIZE);
-	signal_connect(&self->component.signal_destroy, self, vuscope_ondestroy);
-	signal_connect(&self->component.signal_draw, self, vuscope_ondraw);	
-	signal_connect(&self->component.signal_timer, self, vuscope_ontimer);	
-	signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&self->component.signal_destroy, self, vuscope_ondestroy);
+	psy_signal_connect(&self->component.signal_draw, self, vuscope_ondraw);	
+	psy_signal_connect(&self->component.signal_timer, self, vuscope_ontimer);	
+	psy_signal_connect(&workspace->signal_songchanged, self,
 		vuscope_onsongchanged);
 	vuscope_connectmachinessignals(self, workspace);
 	ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
@@ -194,10 +194,10 @@ void vuscope_drawbars(VuScope* self, ui_graphics* g)
 		}
 
 	// }
-	maxL = ((amp_t)(2*step) - dB(maxL * multleft + 0.0000001f) * (amp_t)step / 6.f);
-	maxR = ((amp_t)(2*step) - dB(maxR * multright + 0.0000001f) * (amp_t)step/ 6.f);
-	rmsL = (int)((amp_t)(2*step) - dB(self->leftavg * multleft + 0.0000001f) * (amp_t)step / 6.f);
-	rmsR = (int)((amp_t)(2*step) - dB(self->rightavg * multright + 0.0000001f) * (amp_t)step / 6.f);
+	maxL = ((psy_dsp_amp_t)(2*step) - dB(maxL * multleft + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
+	maxR = ((psy_dsp_amp_t)(2*step) - dB(maxR * multright + 0.0000001f) * (psy_dsp_amp_t)step/ 6.f);
+	rmsL = (int)((psy_dsp_amp_t)(2*step) - dB(self->leftavg * multleft + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
+	rmsR = (int)((psy_dsp_amp_t)(2*step) - dB(self->rightavg * multright + 0.0000001f) * (psy_dsp_amp_t)step / 6.f);
 
 	if (maxL < self->peakL) //  it is a cardinal value, so smaller means higher peak.
 	{
@@ -282,8 +282,8 @@ void vuscope_drawbars(VuScope* self, ui_graphics* g)
 		{
 			self->peakLifeL--;
 			self->peakLifeR--;
-			if (self->peakLifeL <= 0) { self->peakL = (amp_t) centerx; }
-			if (self->peakLifeR <= 0) { self->peakR = (amp_t) centerx; }
+			if (self->peakLifeL <= 0) { self->peakL = (psy_dsp_amp_t) centerx; }
+			if (self->peakLifeR <= 0) { self->peakR = (psy_dsp_amp_t) centerx; }
 		}
 	}	
 	psy_snprintf(buf, 64, "Refresh %.2fhz", 1000.0f / self->scope_peak_rate);
@@ -332,7 +332,7 @@ void vuscope_connectmachinessignals(VuScope* self, Workspace* workspace)
 
 		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
-			signal_connect(&srcmachine->signal_worked, self,
+			psy_signal_connect(&srcmachine->signal_worked, self,
 				vuscope_onsrcmachineworked);
 		}
 	}
@@ -345,7 +345,7 @@ void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace)
 
 		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
-			signal_disconnect(&srcmachine->signal_worked, self,
+			psy_signal_disconnect(&srcmachine->signal_worked, self,
 				vuscope_onsrcmachineworked);
 		}
 	}
@@ -359,7 +359,7 @@ void vuscope_stop(VuScope* self)
 			self->wire.src);
 		if (srcmachine) {
 			lock_enter();
-			signal_disconnect(&srcmachine->signal_worked, self,
+			psy_signal_disconnect(&srcmachine->signal_worked, self,
 				vuscope_onsrcmachineworked);
 			lock_leave();			
 		}
@@ -368,8 +368,8 @@ void vuscope_stop(VuScope* self)
 
 /// linear -> deciBell
 /// amplitude normalized to 1.0f.
-amp_t dB(amp_t amplitude)
+psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
 {
 	///\todo merge with psycle::helpers::math::linear_to_deci_bell
-	return (amp_t) (20.0 * log10(amplitude));
+	return (psy_dsp_amp_t) (20.0 * log10(amplitude));
 }

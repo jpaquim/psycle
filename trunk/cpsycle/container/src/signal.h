@@ -11,21 +11,21 @@ typedef struct {
 	void* fp;
 	void* context;
 	int prevented;	
-} Slot;
+} psy_Slot;
 
 typedef struct {
 	List* slots;	
-} Signal;
+} psy_Signal;
 
-void signal_init(Signal*);
-void signal_connect(Signal*, void* context, void* fp);
-void signal_disconnect(Signal*, void* context, void* fp);
-void signal_disconnectall(Signal*);
-void signal_prevent(Signal*, void* context, void* fp);
-void signal_enable(Signal*, void* context, void* fp);
-void signal_emit(Signal*, void* context, int num, ...);
-void signal_emit_int(Signal*, void* context, intptr_t param);
-void signal_emit_float(Signal*, void* context, float param);
-void signal_dispose(Signal*);
+void psy_signal_init(psy_Signal*);
+void psy_signal_connect(psy_Signal*, void* context, void* fp);
+void psy_signal_disconnect(psy_Signal*, void* context, void* fp);
+void psy_signal_disconnectall(psy_Signal*);
+void psy_signal_prevent(psy_Signal*, void* context, void* fp);
+void psy_signal_enable(psy_Signal*, void* context, void* fp);
+void psy_signal_emit(psy_Signal*, void* context, int num, ...);
+void psy_signal_emit_int(psy_Signal*, void* context, intptr_t param);
+void psy_signal_emit_float(psy_Signal*, void* context, float param);
+void psy_signal_dispose(psy_Signal*);
 
 #endif

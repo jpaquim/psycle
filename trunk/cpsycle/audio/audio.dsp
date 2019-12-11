@@ -533,6 +533,10 @@ SOURCE=.\src\waveio.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\xm.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\xminstrument.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -768,6 +772,14 @@ SOURCE=.\src\vstplugin.h
 # Begin Source File
 
 SOURCE=.\src\waveio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\xm.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\xmdefs.h
 # End Source File
 # Begin Source File
 

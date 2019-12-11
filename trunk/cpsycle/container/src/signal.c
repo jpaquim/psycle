@@ -7,12 +7,12 @@
 #include <stdlib.h>
 #include <stdarg.h>          
 
-static void signal_notify(Signal* self, void* sender);
-static void signal_notify1(Signal* self, void* sender, void* param1);
-static void signal_notify2(Signal* self, void* sender, void* param1, void* param2);
-static void signal_notify3(Signal* self, void* sender, void* param1, void* param2, void* param3);
-static void signal_notify_int(Signal* self, void* sender, intptr_t param);
-static Slot* signal_findslot(Signal* self, void* context, void* fp);
+static void psy_signal_notify(psy_Signal*, void* sender);
+static void psy_signal_notify1(psy_Signal*, void* sender, void* param1);
+static void psy_signal_notify2(psy_Signal*, void* sender, void* param1, void* param2);
+static void psy_signal_notify3(psy_Signal*, void* sender, void* param1, void* param2, void* param3);
+static void psy_signal_notify_int(psy_Signal*, void* sender, intptr_t param);
+static psy_Slot* psy_signal_findslot(psy_Signal*, void* context, void* fp);
 
 typedef void (*signalcallback0)(void*, void*);
 typedef void (*signalcallback_int)(void*, void*, intptr_t);
@@ -21,33 +21,33 @@ typedef void (*signalcallback1)(void*, void*, void*);
 typedef void (*signalcallback2)(void*, void*, void*, void*);
 typedef void (*signalcallback3)(void*, void*, void*, void*, void*);
 
-void signal_init(Signal* self)
+void psy_signal_init(psy_Signal* self)
 {
 	self->slots = 0;
 }
 
-void signal_dispose(Signal* self)
+void psy_signal_dispose(psy_Signal* self)
 {
 	if (self->slots) {
-		List* ptr = self->slots;
-		while (ptr) {				
-			Slot* slot = (Slot*) ptr->entry;
-			free(slot);
-			ptr = ptr->next;
+		List* p;
+
+		for (p = self->slots; p != 0; p = p->next) {
+			psy_Slot* slot = (psy_Slot*) p->entry;
+			free(slot);			
 		}
 		list_free(self->slots);
 	}
 	self->slots = 0;	
 }
 
-void signal_connect(Signal* self, void* context, void* fp)
+void psy_signal_connect(psy_Signal* self, void* context, void* fp)
 {
 	List* p;
 	int connected = 0;
 
 	p = self->slots;
 	while (p != 0) {
-		Slot* slot = (Slot*) p->entry;
+		psy_Slot* slot = (psy_Slot*) p->entry;
 		if (slot->context == context && slot->fp == fp) {
 			connected = 1;
 			break;
@@ -55,9 +55,9 @@ void signal_connect(Signal* self, void* context, void* fp)
 		p = p->next;
 	}
 	if (!connected) {
-		Slot* slot;
+		psy_Slot* slot;
 		
-		slot = (Slot*)malloc(sizeof(Slot));
+		slot = (psy_Slot*) malloc(sizeof(psy_Slot));
 		slot->context = context;
 		slot->fp = fp;
 		slot->prevented = 0;
@@ -65,13 +65,13 @@ void signal_connect(Signal* self, void* context, void* fp)
 	}
 }
 
-void signal_disconnect(Signal* self, void* context, void* fp)
+void psy_signal_disconnect(psy_Signal* self, void* context, void* fp)
 {
 	List* p;	
 
 	p = self->slots;
 	while (p != 0) {		
-		Slot* slot = (Slot*) p->entry;
+		psy_Slot* slot = (psy_Slot*) p->entry;
 		if (slot->context == context && slot->fp == fp) {
 			list_remove(&self->slots, p);
 			break;
@@ -80,39 +80,43 @@ void signal_disconnect(Signal* self, void* context, void* fp)
 	}
 }
 
-void signal_disconnectall(Signal* self)
+void psy_signal_disconnectall(psy_Signal* self)
 {
-	signal_dispose(self);
+	psy_signal_dispose(self);
 }
 
-void signal_prevent(Signal* self, void* context, void* fp)
+void psy_signal_prevent(psy_Signal* self, void* context, void* fp)
 {
-	Slot* slot;
+	psy_Slot* slot;
 	
-	slot = signal_findslot(self, context, fp);
+	slot = psy_signal_findslot(self, context, fp);
 	if (slot) {
 		slot->prevented = 1;
 	}
 }
 
-void signal_enable(Signal* self, void* context, void* fp)
+void psy_signal_enable(psy_Signal* self, void* context, void* fp)
 {
-	Slot* slot;
+	psy_Slot* slot;
 	
-	slot = signal_findslot(self, context, fp);
+	slot = psy_signal_findslot(self, context, fp);
 	if (slot) {
 		slot->prevented = 0;
 	}
 }
 
-Slot* signal_findslot(Signal* self, void* context, void* fp)
+psy_Slot* psy_signal_findslot(psy_Signal* self, void* context,
+	void* fp)
 {
-	Slot* rv = 0;
+	psy_Slot* rv = 0;
 
 	if (self->slots) {
-		List* p = self->slots;
+		List* p;
+
 		for (p = self->slots; p != 0; p = p->next) {
-			Slot* slot = (Slot*) p->entry;
+			psy_Slot* slot;
+			
+			slot = (psy_Slot*) p->entry;
 			if (slot->context == context && slot->fp == fp) {
 				rv = slot;
 				break;
@@ -122,12 +126,16 @@ Slot* signal_findslot(Signal* self, void* context, void* fp)
 	return rv;
 }
 
-void signal_emit_int(Signal* self, void* context, intptr_t param)
+void psy_signal_emit_int(psy_Signal* self, void* context,
+	intptr_t param)
 {
 	if (self->slots) {
-		List* p = self->slots;
+		List* p;
+
 		for (p = self->slots; p != 0; p = p->next) {
-			Slot* slot = (Slot*) p->entry;
+			psy_Slot* slot;
+			
+			slot = (psy_Slot*) p->entry;
 			if (!slot->prevented) {
 				((signalcallback_int)slot->fp)(slot->context, context, param);
 			}
@@ -135,12 +143,14 @@ void signal_emit_int(Signal* self, void* context, intptr_t param)
 	}
 }
 
-void signal_emit_float(Signal* self, void* context, float param)
+void psy_signal_emit_float(psy_Signal* self, void* context, float param)
 {
 	if (self->slots) {
 		List* p = self->slots;
 		for (p = self->slots; p != 0; p = p->next) {
-			Slot* slot = (Slot*) p->entry;
+			psy_Slot* slot;
+			
+			slot = (psy_Slot*) p->entry;
 			if (!slot->prevented) {
 				((signalcallback_float)slot->fp)(slot->context, context, param);
 			}
@@ -148,39 +158,40 @@ void signal_emit_float(Signal* self, void* context, float param)
 	}
 }
 
-void signal_emit(Signal* self, void* context, int num, ...)
+void psy_signal_emit(psy_Signal* self, void* context, int num, ...)
 {
 	va_list ap;
 	va_start(ap, num);	
 	if (num == 0) {
-		signal_notify(self, context);
+		psy_signal_notify(self, context);
 	} else 
 	if (num == 1) {
-		signal_notify1(self, context, va_arg(ap, void*));
+		psy_signal_notify1(self, context, va_arg(ap, void*));
 	} else 
 	if (num == 2) {
 		void* arg1 = va_arg(ap, void*);
 		void* arg2 = va_arg(ap, void*);
-		signal_notify2(self, context, arg1, arg2);
+		psy_signal_notify2(self, context, arg1, arg2);
 	} else
 	if (num == 3) {
 		void* arg1 = va_arg(ap, void*);
 		void* arg2 = va_arg(ap, void*);
 		void* arg3 = va_arg(ap, void*);
-		signal_notify3(self, context, arg1, arg2, arg3);
+		psy_signal_notify3(self, context, arg1, arg2, arg3);
 	}
 	va_end(ap);
 }
 
-void signal_notify(Signal* self, void* sender)
+void psy_signal_notify(psy_Signal* self, void* sender)
 {
 	if (self->slots) {
 		List* p;
 		List* q;
 				
 		for (p = self->slots; p != 0; p = q) {			
-			Slot* slot = (Slot*) p->entry;
-
+			psy_Slot* slot;
+			
+			slot = (psy_Slot*) p->entry;
 			q = p->next;
 			if (!slot->prevented) {
 				((signalcallback0)slot->fp)(slot->context, sender);
@@ -189,12 +200,13 @@ void signal_notify(Signal* self, void* sender)
 	}
 }
 
-void signal_notify_int(Signal* self, void* sender, intptr_t param)
+void psy_signal_notify_int(psy_Signal* self, void* sender,
+	intptr_t param)
 {
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->entry;
+			psy_Slot* slot = (psy_Slot*) ptr->entry;
 			if (!slot->prevented) {
 				((signalcallback_int)slot->fp)(slot->context, sender, param);
 			}
@@ -203,12 +215,12 @@ void signal_notify_int(Signal* self, void* sender, intptr_t param)
 	}
 }
 
-void signal_notify1(Signal* self, void* sender, void* param)
+void psy_signal_notify1(psy_Signal* self, void* sender, void* param)
 {
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {
-			Slot* slot = (Slot*)ptr->entry;
+			psy_Slot* slot = (psy_Slot*) ptr->entry;
 			if (!slot->prevented) {
 				((signalcallback1)slot->fp)(slot->context, sender, param);
 			}
@@ -217,12 +229,13 @@ void signal_notify1(Signal* self, void* sender, void* param)
 	}
 }
 
-void signal_notify2(Signal* self, void* sender, void* param1, void* param2)
+void psy_signal_notify2(psy_Signal* self, void* sender, void* param1,
+	void* param2)
 {
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->entry;
+			psy_Slot* slot = (psy_Slot*) ptr->entry;
 			if (!slot->prevented) {
 				((signalcallback2)slot->fp)(slot->context, sender, param1, param2);
 			}
@@ -231,12 +244,13 @@ void signal_notify2(Signal* self, void* sender, void* param1, void* param2)
 	}
 }
 
-void signal_notify3(Signal* self, void* sender, void* param1, void* param2, void* param3)
+void psy_signal_notify3(psy_Signal* self, void* sender, void* param1,
+	void* param2, void* param3)
 {
 	if (self->slots) {
 		List* ptr = self->slots;
 		while (ptr) {				
-			Slot* slot = (Slot*) ptr->entry;
+			psy_Slot* slot = (psy_Slot*) ptr->entry;
 			if (!slot->prevented) {
 				((signalcallback3)slot->fp)(slot->context, sender, param1, param2, param3);
 			}

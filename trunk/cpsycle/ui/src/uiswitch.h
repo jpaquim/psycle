@@ -8,7 +8,7 @@
 
 typedef struct {
 	ui_component component;
-	Signal signal_clicked;    
+	psy_Signal signal_clicked;
 } ui_switch;
 
 void ui_switch_init(ui_switch*, ui_component* parent);

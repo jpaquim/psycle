@@ -125,9 +125,9 @@ typedef struct {
    int lpb;
    double bpl;
    double cbpl;   
-   NotesTabMode notestabmode;
+   psy_dsp_NotesTabMode notestabmode;
    TrackerCursor cursor;
-   beat_t cursorstep;   
+   psy_dsp_beat_t cursorstep;   
    Player* player;
    int textheight;
    int textwidth;
@@ -172,8 +172,8 @@ typedef struct TrackerView {
 	TrackerInputs inputs;
 	unsigned int cursorstep;
 	int syncpattern;
-	beat_t lastplayposition;
-	beat_t sequenceentryoffset;
+	psy_dsp_beat_t lastplayposition;
+	psy_dsp_beat_t sequenceentryoffset;
 	List* sublines;
 	Table screenlines;	
 } TrackerView;

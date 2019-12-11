@@ -11,8 +11,10 @@ typedef struct {
 	short APIVersion;
 	/// plug version. Your machine version. Shown in Hexadecimal.
 	short PlugVersion;
-	/// Machine flags. Defines the type of machine
-	int Flags;	
+	/// Machine flags
+	int Flags;
+	/// Defines the type of machine
+	int mode;
 	char  * Name;
 	/// "Name of the machine in machine Display"
 	char  * ShortName;
@@ -25,7 +27,7 @@ typedef struct {
 	/// module path
 	char* modulepath;
 	/// shellidx
-	int shellidx;
+	int shellidx;	
 } MachineInfo;
 
 void machineinfo_init(MachineInfo*);
@@ -38,6 +40,7 @@ void machineinfo_set(MachineInfo*,
 		const char* author,
 		const char* command,
 		int flags,
+		int mode,
 		const char* name,
 		const char* shortname,
 		short apiversion,

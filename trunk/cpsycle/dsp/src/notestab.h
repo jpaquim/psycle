@@ -7,13 +7,13 @@
 typedef unsigned char note_t;
 
 typedef enum {
-	NOTESTAB_A440,
-	NOTESTAB_A220	
-} NotesTabMode;
+	psy_dsp_NOTESTAB_A440,
+	psy_dsp_NOTESTAB_A220	
+} psy_dsp_NotesTabMode;
 
-#define NOTESTAB_DEFAULT NOTESTAB_A220
+#define psy_dsp_NOTESTAB_DEFAULT psy_dsp_NOTESTAB_A220
 
-const char* notetostr(note_t note, NotesTabMode mode);
-const char* const * notetab(NotesTabMode mode);
+const char* psy_dsp_notetostr(note_t note, psy_dsp_NotesTabMode mode);
+const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode);
 
 #endif

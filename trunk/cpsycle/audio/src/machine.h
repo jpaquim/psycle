@@ -38,8 +38,8 @@ typedef	void (*fp_machine_stop)(struct Machine*);
 typedef	void (*fp_machine_sequencertick)(struct Machine*);
 typedef	void (*fp_machine_sequencerlinetick)(struct Machine*);
 typedef	List* (*fp_machine_sequencerinsert)(struct Machine*, List* events);
-typedef	void (*fp_machine_setpanning)(struct Machine*, amp_t);
-typedef	amp_t (*fp_machine_panning)(struct Machine*);
+typedef	void (*fp_machine_setpanning)(struct Machine*, psy_dsp_amp_t);
+typedef	psy_dsp_amp_t (*fp_machine_panning)(struct Machine*);
 typedef	void (*fp_machine_mute)(struct Machine*);	
 typedef	void (*fp_machine_unmute)(struct Machine*);
 typedef	int (*fp_machine_muted)(struct Machine*);
@@ -147,7 +147,7 @@ typedef struct MachineVtable {
 typedef struct Machine {
 	MachineVtable* vtable;
 	MachineCallback callback;	
-	Signal signal_worked;	
+	psy_Signal signal_worked;
 } Machine;
 
 void machine_init(Machine*, MachineCallback);

@@ -97,7 +97,7 @@ void version_init(Version* self, ui_component* parent)
 void about_init(About* self, ui_component* parent)
 {			
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_size, self, about_onsize);
+	psy_signal_connect(&self->component.signal_size, self, about_onsize);
 	about_initbuttons(self);
 	ui_notebook_init(&self->notebook, &self->component);
 	ui_image_init(&self->image, &self->notebook.component);	
@@ -106,7 +106,7 @@ void about_init(About* self, ui_component* parent)
 	contrib_init(&self->contrib, &self->notebook.component);
 	version_init(&self->version, &self->notebook.component);		
 	ui_notebook_setpageindex(&self->notebook, 0);
-	signal_connect(&self->component.signal_mousedoubleclick, self,
+	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		about_onmousedoubleclick);
 }
 
@@ -114,11 +114,11 @@ void about_initbuttons(About* self)
 {
 	ui_button_init(&self->contribbutton, &self->component);
 	ui_button_settext(&self->contribbutton, "Contributors / Credits");
-	signal_connect(&self->contribbutton.signal_clicked, self,
+	psy_signal_connect(&self->contribbutton.signal_clicked, self,
 		about_oncontributors);
 	ui_button_init(&self->versionbutton, &self->component);
 	ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
-	signal_connect(&self->versionbutton.signal_clicked, self,
+	psy_signal_connect(&self->versionbutton.signal_clicked, self,
 		about_onversion);
 	ui_button_init(&self->okbutton, &self->component);
 	ui_button_settext(&self->okbutton, "OK");	
@@ -168,5 +168,5 @@ void about_onversion(About* self, ui_component* sender)
 void about_onmousedoubleclick(About* self, ui_component* sender,
 	MouseEvent* ev)
 {
-	signal_emit(&self->okbutton.signal_clicked, self, 0);
+	psy_signal_emit(&self->okbutton.signal_clicked, self, 0);
 }

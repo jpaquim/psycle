@@ -200,7 +200,7 @@ void driver_configure(Driver* driver, Properties* config)
 	} else {
 	property = properties_read(self->driver.properties, "device");
 	if (property && property->item.typ == PROPERTY_TYP_CHOICE) {
-		Property* device;
+		Properties* device;
 
 		device = properties_read_choice(property);
 		if (device) {

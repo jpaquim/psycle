@@ -34,14 +34,14 @@ void patternviewstatus_init(PatternViewStatus* self, ui_component* parent, Works
 	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;	
 	ui_component_resize(&self->component, 300, 20);
-	signal_connect(&self->component.signal_draw, self,
+	psy_signal_connect(&self->component.signal_draw, self,
 		patternviewstatus_ondraw);
-	signal_connect(&workspace->signal_patterneditpositionchanged, self,
+	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
 		patternviewstatus_onpatterneditpositionchanged);
-	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self,
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
 		patternviewstatus_onpreferredsize);	
-	signal_connect(&workspace->signal_sequenceselectionchanged,
+	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
 		self, patternviewstatus_onsequenceselectionchanged);
 }
 
@@ -131,23 +131,23 @@ void patternview_init(PatternView* self,
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
-	signal_connect(&self->component.signal_keydown, self,
+	psy_signal_connect(&self->component.signal_keydown, self,
 		patternview_onkeydown);
-	signal_connect(&self->component.signal_keyup, self,
+	psy_signal_connect(&self->component.signal_keyup, self,
 		patternview_onkeyup);
-	signal_connect(&self->component.signal_focus, self, patternview_onfocus);
+	psy_signal_connect(&self->component.signal_focus, self, patternview_onfocus);
 	ui_notebook_init(&self->notebook, &self->component);
 	ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_NONE);
 	ui_notebook_init(&self->editnotebook, &self->notebook.component);
 	ui_component_setbackgroundmode(&self->editnotebook.component, BACKGROUND_NONE);
 	ui_notebook_setpageindex(&self->editnotebook, 0);
 	trackerview_init(&self->trackerview, &self->editnotebook.component, workspace);
-	signal_connect(&self->component.signal_size, self, patternview_onsize);	
+	psy_signal_connect(&self->component.signal_size, self, patternview_onsize);	
 	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);
 	InitPatternProperties(&self->properties, &self->notebook.component, 0);
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));		
-	signal_connect(&self->properties.closebutton.signal_clicked, self, patternview_onpropertiesclose);
-	signal_connect(&self->properties.applybutton.signal_clicked, self, patternview_onpropertiesapply);	
+	psy_signal_connect(&self->properties.closebutton.signal_clicked, self, patternview_onpropertiesclose);
+	psy_signal_connect(&self->properties.applybutton.signal_clicked, self, patternview_onpropertiesapply);	
 	// Tabbar
 	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);	
@@ -156,19 +156,19 @@ void patternview_init(PatternView* self,
 	tabbar_append(&self->tabbar, "Pianoroll");	
 	tabbar_append(&self->tabbar, "Split");
 	tabbar_append(&self->tabbar, "Properties");	
-	signal_connect(&self->tabbar.signal_change, self,
+	psy_signal_connect(&self->tabbar.signal_change, self,
 		patternview_ontabbarchange);
 	// ui_notebook_connectcontroller(&self->editnotebook, &self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);	
-	signal_connect(&self->component.signal_show, self, patternview_onshow);
-	signal_connect(&self->component.signal_hide, self, patternview_onhide);
-	signal_connect(&workspace->player.signal_lpbchanged, self,
+	psy_signal_connect(&self->component.signal_show, self, patternview_onshow);
+	psy_signal_connect(&self->component.signal_hide, self, patternview_onhide);
+	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		patternview_onlpbchanged);
-	signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternview_onsongchanged);
 	//signal_connect(&workspace->signal_editpositionchanged,
 	//	self, OnEditPositionChanged);
-	signal_connect(&workspace->signal_sequenceselectionchanged,
+	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
 		self, patternview_onsequenceselectionchanged);
 	self->lpb = player_lpb(&workspace->player);
 }

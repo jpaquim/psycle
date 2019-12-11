@@ -55,11 +55,12 @@ void machineframe_init(MachineFrame* self, ui_component* parent)
 	ui_component_seticonressource(&self->component, IDI_MACPARAM);
 	ui_component_move(&self->component, 200, 150);
 	ui_component_resize(&self->component, 400, 400);	
-	signal_connect(&self->component.signal_destroy, self,
+	psy_signal_connect(&self->component.signal_destroy, self,
 		machineframe_ondestroy);
-	signal_connect(&self->component.signal_align, self, machineframe_onalign);
-	signal_connect(&self->parameterbar.presetsbox.signal_selchanged, self,
-		machineframe_onpresetchange);
+	psy_signal_connect(&self->component.signal_align, self,
+		machineframe_onalign);
+	psy_signal_connect(&self->parameterbar.presetsbox.signal_selchanged,
+		self, machineframe_onpresetchange);
 }
 
 void machineframe_setview(MachineFrame* self, ui_component* view,

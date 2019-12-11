@@ -22,9 +22,9 @@ void vumeter_init(Vumeter* self, ui_component* parent, Workspace* workspace)
 	self->leftavg = 0;
 	self->rightavg = 0;
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, vumeter_ondraw);	
-	signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
-	signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&self->component.signal_draw, self, vumeter_ondraw);	
+	psy_signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
+	psy_signal_connect(&workspace->signal_songchanged, self,
 		vumeter_onsongchanged);
 	vumeter_connectmachinessignals(self, workspace);
 	ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
@@ -80,7 +80,7 @@ void vumeter_connectmachinessignals(Vumeter* self, Workspace* workspace)
 {
 	if (workspace && workspace->song &&
 			machines_master(&workspace->song->machines)) {
-		signal_connect(
+		psy_signal_connect(
 			&machines_master(&workspace->song->machines)->signal_worked, self,
 			vumeter_onmasterworked);
 	}

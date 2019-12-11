@@ -10,8 +10,8 @@
 typedef struct {	
 	ui_component component;
 	Wire wire;
-	amp_t leftavg;
-	amp_t rightavg;
+	psy_dsp_amp_t leftavg;
+	psy_dsp_amp_t rightavg;
 	float invol;
 	float mult;
 	float* pSamplesL;
@@ -19,7 +19,7 @@ typedef struct {
 	int scope_peak_rate;
 	int hold;	
 	// memories for vu-meter
-	amp_t peakL, peakR;
+	psy_dsp_amp_t peakL, peakR;
 	int peakLifeL, peakLifeR;
 	Workspace* workspace;	
 } VuScope;

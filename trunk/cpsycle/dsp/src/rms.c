@@ -21,10 +21,13 @@ void rmsdata_init(RMSData* self)
 	self->previousRight = 0;
 }
 
-void rmsdata_accumulate(RMSData* self, const amp_t* __restrict pSamplesL,
-	const amp_t* __restrict pSamplesR, int count)
+void rmsdata_accumulate(RMSData* self,
+	const psy_dsp_amp_t* __restrict pSamplesL,
+	const psy_dsp_amp_t* __restrict pSamplesR,
+	int count)
 {	
-	dsp.accumulate(&self->AccumLeft, &self->AccumRight, pSamplesL, pSamplesR, count);
+	dsp.accumulate(&self->AccumLeft, &self->AccumRight, pSamplesL, pSamplesR,
+		count);
 }
 
 // RMSVol
@@ -52,8 +55,8 @@ RMSVol* rmsvol_allocinit(void)
 }
 
 /// Note: Values are accumulated since the standard calculation requires 50ms of data.
-void rmsvol_tick(RMSVol* self, const amp_t * __restrict pSamplesL,
-	const amp_t * __restrict pSamplesR, int numSamples)
+void rmsvol_tick(RMSVol* self, const psy_dsp_amp_t * __restrict pSamplesL,
+	const psy_dsp_amp_t * __restrict pSamplesR, int numSamples)
 {
 	const float * pL = pSamplesL;
 	const float * pR = pSamplesR;
@@ -85,7 +88,7 @@ void rmsvol_tick(RMSVol* self, const amp_t * __restrict pSamplesL,
 			: self->data.previousRight;
 }
 
-amp_t rmsvol_value(RMSVol* self)
+psy_dsp_amp_t rmsvol_value(RMSVol* self)
 {
 	return self->volume;
 }

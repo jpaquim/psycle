@@ -10,7 +10,7 @@ typedef struct {
    ui_component component;
    ui_component combo;
    ui_component* currcombo;
-   Signal signal_selchanged;
+   psy_Signal signal_selchanged;
    int ownerdrawn;   
    int hover;
    int charnumber;

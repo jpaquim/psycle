@@ -19,10 +19,10 @@ void clipbox_init(ClipBox* self, ui_component* parent, Workspace* workspace)
 {
 	self->clip = 0;	
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, clipbox_ondraw);
-	signal_connect(&self->component.signal_mousedown, self, clipbox_onmousedown);
-	signal_connect(&self->component.signal_timer, self, clipbox_ontimer);
-	signal_connect(&workspace->signal_songchanged, self, clipbox_onsongchanged);	
+	psy_signal_connect(&self->component.signal_draw, self, clipbox_ondraw);
+	psy_signal_connect(&self->component.signal_mousedown, self, clipbox_onmousedown);
+	psy_signal_connect(&self->component.signal_timer, self, clipbox_ontimer);
+	psy_signal_connect(&workspace->signal_songchanged, self, clipbox_onsongchanged);	
 	clipbox_connectmachinessignals(self, workspace);
 	// ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 200);
 }
@@ -66,7 +66,7 @@ void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
 {
 	if (workspace && workspace->song &&
 			machines_master(&workspace->song->machines)) {
-		signal_connect(&machines_master(
+		psy_signal_connect(&machines_master(
 			&workspace->song->machines)->signal_worked, self,
 			clipbox_onmasterworked);
 	}

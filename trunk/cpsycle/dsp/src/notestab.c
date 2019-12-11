@@ -49,15 +49,15 @@ static char* notes_tab_a220[256] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 };
 
-const char* notetostr(note_t note, NotesTabMode mode)
+const char* psy_dsp_notetostr(note_t note, psy_dsp_NotesTabMode mode)
 {
 	const char* rv;
 
 	switch (mode) {
-		case NOTESTAB_A440:
+		case psy_dsp_NOTESTAB_A440:
 			rv = notes_tab_a440[note];
 		break;
-		case NOTESTAB_A220:
+		case psy_dsp_NOTESTAB_A220:
 			rv = notes_tab_a220[note];
 		break;
 		default:
@@ -67,15 +67,15 @@ const char* notetostr(note_t note, NotesTabMode mode)
 	return rv;
 }
 
-const char* const * notetab(NotesTabMode mode)
+const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode)
 {
 	const char* const * rv;
 
 	switch (mode) {
-		case NOTESTAB_A440:
+		case psy_dsp_NOTESTAB_A440:
 			rv = notes_tab_a440;
 		break;
-		case NOTESTAB_A220:
+		case psy_dsp_NOTESTAB_A220:
 			rv = notes_tab_a220;
 		break;
 		default:

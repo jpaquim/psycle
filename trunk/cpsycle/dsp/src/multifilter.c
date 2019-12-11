@@ -108,7 +108,7 @@ void reset(MultiFilter* self)
 	}
 }
 
-amp_t work(MultiFilter* self, amp_t sample)
+psy_dsp_amp_t work(MultiFilter* self, psy_dsp_amp_t sample)
 {
 	return self->selectedfilter 
 		? self->selectedfilter->vtable->work(self->selectedfilter, sample)

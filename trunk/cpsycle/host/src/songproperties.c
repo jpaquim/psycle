@@ -22,24 +22,24 @@ void songpropertiesview_init(SongPropertiesView* self, ui_component* parent,
 	ui_label_init(&self->label_title, &self->component);
 	ui_label_settext(&self->label_title, "Song Title");
 	ui_edit_init(&self->edit_title, &self->component, 0);
-	signal_connect(&self->edit_title.signal_change, self,
+	psy_signal_connect(&self->edit_title.signal_change, self,
 		songpropertiesview_ontitlechanged);
 	ui_label_init(&self->label_credits, &self->component);
 	ui_label_settext(&self->label_credits, "Credits");	
 	ui_edit_init(&self->edit_credits, &self->component, 0);
-	signal_connect(&self->edit_credits.signal_change, self,
+	psy_signal_connect(&self->edit_credits.signal_change, self,
 		songpropertiesview_oncreditschanged);
 	ui_label_init(&self->label_comments, &self->component);
 	ui_label_settext(&self->label_comments, "Comments");	
 	ui_edit_init(&self->edit_comments, &self->component,
 		WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL);
 	ui_component_resize(&self->edit_comments.component, 0, 200);
-	signal_connect(&self->edit_comments.signal_change, self,
+	psy_signal_connect(&self->edit_comments.signal_change, self,
 		songpropertiesview_oncommentschanged);
 	songpropertiesview_read(self);	
-	signal_connect(&workspace->signal_songchanged, self,
+	psy_signal_connect(&workspace->signal_songchanged, self,
 		songpropertiesview_onsongchanged);
-	signal_connect(&self->component.signal_hide, self,
+	psy_signal_connect(&self->component.signal_hide, self,
 		songpropertiesview_onhide);	
 	songpropertiesview_initalign(self);
 }

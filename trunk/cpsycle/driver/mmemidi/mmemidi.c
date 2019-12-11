@@ -85,7 +85,7 @@ int driver_init(EventDriver* driver)
 
 	self->hMidiIn = 0;	
 	init_properties(&self->driver);
-	signal_init(&driver->signal_input);
+	psy_signal_init(&driver->signal_input);
 	return 0;
 }
 
@@ -95,7 +95,7 @@ int driver_dispose(EventDriver* driver)
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
-	signal_dispose(&driver->signal_input);
+	psy_signal_dispose(&driver->signal_input);
 	return 0;
 }
 
@@ -202,7 +202,7 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 					cmd = data[2] > 0 ? data[1] - 48 : 120;
 					// channel = lsb;
 					self->lastinput = cmd;
-					signal_emit(&self->driver.signal_input, self, 0);
+					psy_signal_emit(&self->driver.signal_input, self, 0);
 				default:
 				break;
 			}

@@ -61,8 +61,8 @@ void buffer_resize(Buffer* self, uintptr_t channels)
 	free(self->samples);
 	self->samples = 0;	
 	if (channels > 0) {
-		self->samples = (amp_t**) malloc(sizeof(amp_t*)*channels);		
-		memset(self->samples, 0, sizeof(amp_t*)*channels);
+		self->samples = (psy_dsp_amp_t**) malloc(sizeof(psy_dsp_amp_t*)*channels);		
+		memset(self->samples, 0, sizeof(psy_dsp_amp_t*)*channels);
 	}
 	self->numchannels = channels;
 }
@@ -77,7 +77,7 @@ uintptr_t buffer_offset(Buffer* self)
 	return self->offset;
 }
 
-amp_t* buffer_at(Buffer* self, uintptr_t channel)
+psy_dsp_amp_t* buffer_at(Buffer* self, uintptr_t channel)
 {
 	return self->samples[channel] + self->offset;
 }
@@ -92,7 +92,7 @@ void buffer_clearsamples(Buffer* self, uintptr_t numsamples)
 }
 
 void buffer_addsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
-	amp_t vol)
+	psy_dsp_amp_t vol)
 {
 	uintptr_t channel;
 
@@ -108,7 +108,7 @@ void buffer_addsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
 	}
 }
 
-void buffer_mulsamples(Buffer* self, uintptr_t numsamples, amp_t mul)
+void buffer_mulsamples(Buffer* self, uintptr_t numsamples, psy_dsp_amp_t mul)
 {
 	uintptr_t channel;
 	
@@ -117,10 +117,10 @@ void buffer_mulsamples(Buffer* self, uintptr_t numsamples, amp_t mul)
 	}	
 }
 
-void buffer_pan(Buffer* self, amp_t pan, uintptr_t amount)
+void buffer_pan(Buffer* self, psy_dsp_amp_t pan, uintptr_t amount)
 {
 	uintptr_t channel;
-	amp_t vol[2];
+	psy_dsp_amp_t vol[2];
 
 	vol[1] = pan * 2.f;
 	vol[0] = 2.0f - vol[1];

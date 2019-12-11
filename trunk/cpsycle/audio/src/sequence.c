@@ -25,7 +25,7 @@ void sequenceselection_init(SequenceSelection* self, Sequence* sequence)
 			? ((SequenceTrack*) self->sequence->tracks->entry)->entries
 			: 0);
 	sequenceselection_addeditposition(self);
-	signal_init(&self->signal_editpositionchanged);
+	psy_signal_init(&self->signal_editpositionchanged);
 }
 
 void sequenceselection_addeditposition(SequenceSelection* self)
@@ -40,7 +40,7 @@ void sequenceselection_addeditposition(SequenceSelection* self)
 
 void sequenceselection_dispose(SequenceSelection* self)
 {
-	signal_dispose(&self->signal_editpositionchanged);
+	psy_signal_dispose(&self->signal_editpositionchanged);
 }
 
 void sequenceselection_seteditposition(SequenceSelection* self,
@@ -119,7 +119,7 @@ SequenceTrack* sequencetrack_allocinit(void)
 	return rv;
 }
 
-void sequenceentry_init(SequenceEntry* self, uintptr_t pattern, beat_t offset)
+void sequenceentry_init(SequenceEntry* self, uintptr_t pattern, psy_dsp_beat_t offset)
 {
 	self->pattern = pattern;
 	self->offset = offset;
@@ -132,7 +132,7 @@ SequenceEntry* sequenceentry_alloc(void)
 	return (SequenceEntry*) malloc(sizeof(SequenceEntry));
 }
 
-SequenceEntry* sequenceentry_allocinit(uintptr_t pattern, beat_t offset)
+SequenceEntry* sequenceentry_allocinit(uintptr_t pattern, psy_dsp_beat_t offset)
 {
 	SequenceEntry* rv;
 
@@ -202,21 +202,23 @@ SequenceTrackNode* sequence_insert(Sequence* self, SequencePosition position,
 	int pattern)
 {		
 	List* rv = 0;
-	SequenceEntry* entry;
-	SequenceTrack* track;
+	if (position.track) {
+		SequenceEntry* entry;
+		SequenceTrack* track;
 
-	entry = sequenceentry_allocinit(pattern, (beat_t) 0.f);	
-	track = (SequenceTrack*) position.track->entry;
-	if (track->entries) {		
-		if (position.trackposition.tracknode) {			
-			rv = list_insert(&track->entries, position.trackposition.tracknode,
-				entry);			
-			sequence_reposition(self, track);						
-		} 
-	} else {		
-		rv = track->entries = list_create(entry);		
-	}	
-	entry->node = rv;
+		entry = sequenceentry_allocinit(pattern, (psy_dsp_beat_t) 0.f);	
+		track = (SequenceTrack*) position.track->entry;						
+		if (track->entries) {		
+			if (position.trackposition.tracknode) {			
+				rv = list_insert(&track->entries, position.trackposition.tracknode,
+					entry);			
+				sequence_reposition(self, track);						
+			} 
+		} else {		
+			rv = track->entries = list_create(entry);		
+		}	
+		entry->node = rv;
+	}
 	return rv;
 }
 
@@ -285,7 +287,7 @@ SequenceTrackIterator sequence_last(Sequence* self, List* tracknode)
 
 void sequence_reposition(Sequence* self, SequenceTrack* track)
 {
-	beat_t curroffset = 0.0f;	
+	psy_dsp_beat_t curroffset = 0.0f;	
 	List* p;	
 			
 	for (p = track->entries; p != 0; p = p->next) {
@@ -357,9 +359,9 @@ SequencePosition sequence_at(Sequence* self, unsigned int trackindex,
 	return rv;
 }
 
-List* sequenceentry_at_offset(Sequence* self, SequenceTracks* tracknode, beat_t offset)
+List* sequenceentry_at_offset(Sequence* self, SequenceTracks* tracknode, psy_dsp_beat_t offset)
 {
-	beat_t curroffset = 0.0f;	
+	psy_dsp_beat_t curroffset = 0.0f;	
 	List* p = 0;
 
 	if (tracknode) {		
@@ -383,7 +385,7 @@ List* sequenceentry_at_offset(Sequence* self, SequenceTracks* tracknode, beat_t 
 	return p;
 }
 
-SequenceTrackIterator sequence_begin(Sequence* self, List* track, beat_t pos)
+SequenceTrackIterator sequence_begin(Sequence* self, List* track, psy_dsp_beat_t pos)
 {		
 	SequenceTrackIterator rv;		
 	SequenceEntry* entry;	
@@ -528,7 +530,7 @@ PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator* self)
 	return self->patternnode ? (PatternEntry*)(self->patternnode)->entry : 0;
 }
 
-beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
+psy_dsp_beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
 {	
 	return sequencetrackiterator_patternentry(self)
 		? sequencetrackiterator_entry(self)->offset +
@@ -600,10 +602,10 @@ void sequence_setpatternslot(Sequence* self, SequencePosition position,
 	}
 }
 
-beat_t sequence_duration(Sequence* self)
+psy_dsp_beat_t sequence_duration(Sequence* self)
 {	
 	SequenceTracks* t;
-	beat_t duration = 0.f;
+	psy_dsp_beat_t duration = 0.f;
 
 	t = self->tracks;
 	while (t) {

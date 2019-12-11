@@ -135,7 +135,7 @@ int driver_init(EventDriver* driver)
 	inputs_init(&self->noteinputs);
 	self->driver.properties = 0;
 //	init_properties(driver);
-	signal_init(&driver->signal_input);
+	psy_signal_init(&driver->signal_input);
 	inputs_init(&self->noteinputs);
 	return 0;
 }
@@ -146,7 +146,7 @@ int driver_dispose(EventDriver* driver)
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	inputs_dispose(&self->noteinputs);
-	signal_dispose(&driver->signal_input);
+	psy_signal_dispose(&driver->signal_input);
 	return 1;
 }
 
@@ -171,7 +171,7 @@ void driver_write(EventDriver* driver, int type, unsigned char* data, int size)
 	self = (KbdDriver*)(driver);
 	self->lastinput = *((unsigned int*)data);
 	self->lastinputtype = type;
-	signal_emit(&self->driver.signal_input, self, 0);
+	psy_signal_emit(&self->driver.signal_input, self, 0);
 }
 
 void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,

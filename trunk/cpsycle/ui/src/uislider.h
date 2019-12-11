@@ -7,9 +7,7 @@
 #include "uicomponent.h"
 
 typedef struct {
-	ui_component component;
-	Signal signal_clicked;
-	Signal signal_changed;
+	ui_component component;	
 	double value;
 	double rulerstep;
 	int tweakbase;
@@ -18,11 +16,13 @@ typedef struct {
 	int labelsize;
 	int valuelabelsize;
 	int margin;	
-	UiOrientation orientation;
-	Signal signal_describevalue;
-	Signal signal_tweakvalue;
-	Signal signal_value;
 	int charnumber;
+	UiOrientation orientation;
+	psy_Signal signal_clicked;
+	psy_Signal signal_changed;
+	psy_Signal signal_describevalue;
+	psy_Signal signal_tweakvalue;
+	psy_Signal signal_value;	
 } ui_slider;
 
 typedef void (*ui_slider_fpdescribe)(void*, ui_slider*, char* txt);

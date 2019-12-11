@@ -30,9 +30,10 @@ void InitMachinesBox(MachinesBox* self, ui_component* parent,
 	table_init(&self->slotslistbox);
 	ui_listbox_init_multiselect(&self->machinelist, parent);	
 	SetMachines(self, machines);	
-	signal_connect(&self->machinelist.signal_selchanged, self,
+	psy_signal_connect(&self->machinelist.signal_selchanged, self,
 		OnMachinesListChanged);
-	signal_connect(&self->machinelist.component.signal_destroy, self, OnDestroy);
+	psy_signal_connect(&self->machinelist.component.signal_destroy, self,
+		OnDestroy);
 }
 
 void OnDestroy(MachinesBox* self, ui_component* component)
@@ -300,7 +301,10 @@ void SetMachines(MachinesBox* self, Machines* machines)
 {
 	self->machines = machines;
 	BuildMachinesList(self);
-	signal_connect(&self->machines->signal_insert, self, OnMachinesInsert);
-	signal_connect(&self->machines->signal_removed, self, OnMachinesRemoved);	
-	signal_connect(&self->machines->signal_slotchange, self, OnMachineSlotChanged);
+	psy_signal_connect(&self->machines->signal_insert, self,
+		OnMachinesInsert);
+	psy_signal_connect(&self->machines->signal_removed, self,
+		OnMachinesRemoved);	
+	psy_signal_connect(&self->machines->signal_slotchange, self,
+		OnMachineSlotChanged);
 }

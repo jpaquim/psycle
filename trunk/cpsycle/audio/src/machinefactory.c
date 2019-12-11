@@ -12,6 +12,7 @@
 #include "master.h"
 #include "mixer.h"
 #include "plugin.h"
+#include "luaplugin.h"
 #include "sampler.h"
 #include "vstplugin.h"
 #include "machineproxy.h"
@@ -159,6 +160,24 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 			plugin = (Machine*)malloc(sizeof(Plugin));
 			if (plugin) {
 				plugin_init((Plugin*)plugin, self->machinecallback, path);
+				if (plugin->vtable->info(plugin)) {
+					rv = plugin;
+				} else {
+					plugin->vtable->dispose(plugin);
+					free(plugin);
+				}
+			} else {
+				rv = 0;
+			}
+		}
+		break;
+		case MACH_LUA:
+		{
+			Machine* plugin;			
+									
+			plugin = (Machine*)malloc(sizeof(LuaPlugin));
+			if (plugin) {
+				luaplugin_init((LuaPlugin*)plugin, self->machinecallback, path);
 				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {

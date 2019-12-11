@@ -5,4 +5,4 @@
 
 #include "operations.h"
 
-Dsp dsp;
+psy_dsp_Operations dsp;

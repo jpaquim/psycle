@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
 	uintptr_t slot;	
-	amp_t volume;
+	psy_dsp_amp_t volume;
 	List* mapping;
 } WireSocketEntry;
 
@@ -43,8 +43,8 @@ typedef struct {
 typedef struct {
 	Table container;
 	Table sends;
-	Signal signal_connected;
-	Signal signal_disconnected;
+	psy_Signal signal_connected;
+	psy_Signal signal_disconnected;
 	int filemode;
 } Connections;
 
@@ -57,9 +57,11 @@ void connections_disconnect(Connections*, uintptr_t outputslot, uintptr_t inputs
 int connections_connected(Connections*, uintptr_t outputslot, uintptr_t inputslot);
 void connections_disconnectall(Connections*, uintptr_t slot);
 void connections_setwirevolume(Connections*, uintptr_t outputslot, uintptr_t inputslot,
-	amp_t factor);
-amp_t connections_wirevolume(Connections*, uintptr_t outputslot, uintptr_t inputslot);
-WireSocketEntry* connection_input(Connections* self, uintptr_t outputslot, uintptr_t inputslot);
+	psy_dsp_amp_t factor);
+psy_dsp_amp_t connections_wirevolume(Connections*, uintptr_t outputslot, 
+	uintptr_t inputslot);
+WireSocketEntry* connection_input(Connections* self, uintptr_t outputslot,
+	uintptr_t inputslot);
 
 
 #endif

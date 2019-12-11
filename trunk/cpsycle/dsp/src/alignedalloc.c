@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-void* aligned_memory_alloc(size_t alignment, size_t count, size_t size) {
+void* psy_dsp_aligned_memory_alloc(size_t alignment, size_t count, size_t size) {
 #if POSIX
 	void* address;
 	int err;
@@ -25,7 +25,7 @@ void* aligned_memory_alloc(size_t alignment, size_t count, size_t size) {
 #endif	
 }
 
-void aligned_memory_dealloc(void* address) {
+void psy_dsp_aligned_memory_dealloc(void* address) {
 #if defined _WIN32 && defined SSE	
 	_aligned_free(address);	
 #else

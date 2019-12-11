@@ -66,5 +66,6 @@ void patternevent_init(PatternEvent*,
 	unsigned char cmd,
 	unsigned char parameter);
 void patternevent_clear(PatternEvent*);
+int patternevent_empty(PatternEvent*);
 
 #endif

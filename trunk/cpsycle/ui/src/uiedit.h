@@ -10,7 +10,7 @@ typedef struct {
 	ui_component component;
 	int charnumber;
 	int linenumber;
-	Signal signal_change;      
+	psy_Signal signal_change;
 } ui_edit;
 
 void ui_edit_init(ui_edit*, ui_component* parent, int styles);

@@ -9,7 +9,8 @@
 
 static void init(Filter* self) { }
 static void dispose(Filter* self) { }
-static amp_t work(Filter* self, amp_t sample) { return sample; }
+static psy_dsp_amp_t work(Filter* self, psy_dsp_amp_t sample) { 
+	return sample; }
 static void setcutoff(Filter* self, float cutoff) { }
 static float cutoff(Filter* self) { return 0.f; }
 static void setressonance(Filter* self, float ressonance) { }
@@ -83,7 +84,7 @@ void customfilter_init(CustomFilter* self)
 	customfilter_vtable_init(&self->filter);
 	self->filter.vtable = &customfilter_vtable;
 	
-	self->samplerate = (beat_t) 44100.f;
+	self->samplerate = (psy_dsp_beat_t) 44100.f;
 	self->cutoff = 1.0f;
 	self->q = 0.f;
 }
@@ -91,7 +92,7 @@ void customfilter_init(CustomFilter* self)
 void customfilter_setsamplerate(CustomFilter* self, float samplerate)
 {
 	self->samplerate = samplerate;
-	self->filter.vtable->update(self, 1);
+	self->filter.vtable->update(&self->filter, 1);
 }
 
 float customfilter_samplerate(CustomFilter* self)
@@ -103,7 +104,7 @@ void customfilter_setcutoff(CustomFilter* self, float cutoff)
 {
 	if (self->cutoff != cutoff) {
 		self->cutoff = cutoff;
-		self->filter.vtable->update(self, 0);
+		self->filter.vtable->update(&self->filter, 0);
 	}
 }
 
@@ -116,7 +117,7 @@ void customfilter_setressonance(CustomFilter* self, float q)
 {
 	if (self->q != q) {
 		self->q = q;
-		self->filter.vtable->update(self, 0);
+		self->filter.vtable->update(&self->filter, 0);
 	}
 }
 
@@ -138,11 +139,12 @@ void firwork_reset(FIRWork* self)
 	firwork_init(self);
 }
 
-amp_t firwork_work(FIRWork* self, FilterCoeff* coeffs, amp_t sample)
+psy_dsp_amp_t firwork_work(FIRWork* self, FilterCoeff* coeffs,
+	psy_dsp_amp_t sample)
 {
-	amp_t y;
+	psy_dsp_amp_t y;
 
-	y = (amp_t) 
+	y = (psy_dsp_amp_t) 
 		 (sample * coeffs->coeff[0] +  
 		self->x1 * coeffs->coeff[1] + 
 		self->x2 * coeffs->coeff[2] + 

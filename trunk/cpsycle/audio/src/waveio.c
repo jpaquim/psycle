@@ -50,7 +50,8 @@ void wave_load(Sample* sample, const char* path)
 					format.nChannels / (format.wBitsPerSample / 8);	
 
 				for (channel = 0; channel < format.nChannels; ++channel) {
-					sample->channels.samples[channel] = malloc(numsamples*sizeof(amp_t));
+					sample->channels.samples[channel] = malloc(numsamples * 
+						sizeof(psy_dsp_amp_t));
 				}
 				for (frame = 0; frame < sample->numframes; ++frame) {
 					for (channel = 0; channel < format.nChannels; ++channel) {

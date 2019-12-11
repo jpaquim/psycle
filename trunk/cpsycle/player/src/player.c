@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 		cmdplayer_loadsong(&cmdplayer, argv[1]);		
 		printf("psycle: player: press q to stop.\n");
 		sequencer_stoploop(&cmdplayer.player.sequencer);
-		player_setposition(&cmdplayer.player, (beat_t) 0.f);
+		player_setposition(&cmdplayer.player, (psy_dsp_beat_t) 0.f);
 		player_start(&cmdplayer.player);		
 #if !defined _WIN32
 		set_conio_terminal_mode();
@@ -158,7 +158,7 @@ void cmdplayer_init(CmdPlayer* self)
 {
 	cmdplayer_initenv(self);
 	lock_init();
-	dsp_noopt_init(&dsp);
+	psy_dsp_noopt_init(&dsp);
 	self->config = properties_create();
 	cmdplayer_makedirectories(self);
 	cmdplayer_makeinputoutput(self);
@@ -187,7 +187,7 @@ void cmdplayer_initenv(CmdPlayer* self)
 void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 {
 	plugincatcher_init(&self->plugincatcher, self->directories);
-	// signal_connect(&self->plugincatcher.signal_scanprogress, self,
+	// psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 	//	workspace_onscanprogress);
 	if (!plugincatcher_load(&self->plugincatcher)) {
 		printf("no plugin cache found, start scanning\n");

@@ -20,6 +20,7 @@ int ui_notebook_pageindex(ui_notebook*);
 ui_component* ui_notebook_activepage(ui_notebook*);
 void ui_notebook_split(ui_notebook*);
 void ui_notebook_full(ui_notebook*);
-void ui_notebook_connectcontroller(ui_notebook*, Signal* controllersignal);
+void ui_notebook_connectcontroller(ui_notebook*, 
+	psy_Signal* controllersignal);
 
 #endif

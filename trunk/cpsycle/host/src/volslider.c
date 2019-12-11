@@ -24,12 +24,18 @@ void volslider_init(VolSlider* self, ui_component* parent, Workspace* workspace)
 	self->dragx = -1;
 	self->machines = &workspace->song->machines;	
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_draw, self, volslider_ondraw);
-	signal_connect(&self->component.signal_mousedown, self, volslider_onmousedown);
-	signal_connect(&self->component.signal_mousemove, self, volslider_onmousemove);
-	signal_connect(&self->component.signal_mouseup, self, volslider_onmouseup);
-	signal_connect(&self->component.signal_timer, self, volslider_ontimer);	
-	signal_connect(&workspace->signal_songchanged, self, volslider_onsongchanged);
+	psy_signal_connect(&self->component.signal_draw, self,
+		volslider_ondraw);
+	psy_signal_connect(&self->component.signal_mousedown, self,
+		volslider_onmousedown);
+	psy_signal_connect(&self->component.signal_mousemove, self,
+		volslider_onmousemove);
+	psy_signal_connect(&self->component.signal_mouseup, self,
+		volslider_onmouseup);
+	psy_signal_connect(&self->component.signal_timer, self,
+		volslider_ontimer);	
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		volslider_onsongchanged);
 	ui_component_starttimer(&self->component, TIMERID_VOLSLIDER, 50);
 }
 
@@ -94,10 +100,10 @@ void volslider_onsongchanged(VolSlider* self, Workspace* workspace)
 void volslider_ontimer(VolSlider* self, ui_component* sender, int timerid)
 {		
 	if (self->machines) {
-		amp_t oldvalue;
+		psy_dsp_amp_t oldvalue;
 
 		oldvalue = self->value;
-		self->value = (amp_t)(sqrt(machines_volume(self->machines)) * 0.5f);
+		self->value = (psy_dsp_amp_t)(sqrt(machines_volume(self->machines)) * 0.5f);
 		if (oldvalue != self->value) {
 			ui_component_invalidate(&self->component);
 		}

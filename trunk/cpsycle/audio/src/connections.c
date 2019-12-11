@@ -8,7 +8,8 @@
 #include "connections.h"
 #include <assert.h>
 
-static WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot, amp_t volume);
+static WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
+	psy_dsp_amp_t volume);
 static void wiresocketentry_dispose(WireSocketEntry*);
 
 void machinesockets_init(MachineSockets* self)
@@ -52,7 +53,8 @@ MachineSockets* machinesockets_allocinit(void)
 	return rv;
 }
 
-WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot, amp_t volume)
+WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
+	psy_dsp_amp_t volume)
 {
 	WireSocketEntry* rv;
 		
@@ -122,8 +124,8 @@ void connections_init(Connections* self)
 {
 	table_init(&self->container);
 	table_init(&self->sends);
-	signal_init(&self->signal_connected);
-	signal_init(&self->signal_disconnected);
+	psy_signal_init(&self->signal_connected);
+	psy_signal_init(&self->signal_disconnected);
 	self->filemode = 0;
 }
 
@@ -141,8 +143,8 @@ void connections_dispose(Connections* self)
 	}
 	table_dispose(&self->container);
 	table_dispose(&self->sends);
-	signal_dispose(&self->signal_connected);
-	signal_dispose(&self->signal_disconnected);
+	psy_signal_dispose(&self->signal_connected);
+	psy_signal_dispose(&self->signal_disconnected);
 }
 
 MachineSockets* connections_at(Connections* self, uintptr_t slot)
@@ -182,7 +184,8 @@ int connections_connect(Connections* self, uintptr_t outputslot, uintptr_t input
 				wiresocketentry_allocinit(outputslot, 1.f));
 		}
 		if (!self->filemode) {
-			signal_emit(&self->signal_connected, self, 2, outputslot, inputslot);
+			psy_signal_emit(&self->signal_connected, self, 2, outputslot,
+				inputslot);
 		}
 		return 1;
 	}
@@ -209,7 +212,8 @@ void connections_disconnect(Connections* self, uintptr_t outputslot, uintptr_t i
 			list_remove(&connections->inputs, p);			
 		}
 		if (!self->filemode) {
-			signal_emit(&self->signal_disconnected, self, 2, outputslot, inputslot);
+			psy_signal_emit(&self->signal_disconnected, self, 2,
+				outputslot, inputslot);
 		}
 	}	
 }
@@ -235,7 +239,8 @@ void connections_disconnectall(Connections* self, uintptr_t slot)
 			list_remove(&dst->inputs, dstinput);
 			out = out->next;
 			if (!self->filemode) {
-				signal_emit(&self->signal_disconnected, self, 2, slot, dstslot);
+				psy_signal_emit(&self->signal_disconnected, self, 2, slot,
+					dstslot);
 			}
 		}
 		list_free(connections->outputs);
@@ -255,7 +260,8 @@ void connections_disconnectall(Connections* self, uintptr_t slot)
 			list_remove(&src->outputs, srcoutput);
 			in = in->next;
 			if (!self->filemode) {
-				signal_emit(&self->signal_disconnected, self, 2, srcslot, slot);
+				psy_signal_emit(&self->signal_disconnected, self, 2, srcslot,
+					slot);
 			}
 		}
 		list_free(connections->inputs);
@@ -284,7 +290,7 @@ int connections_connected(Connections* self, uintptr_t outputslot, uintptr_t inp
 }
 
 void connections_setwirevolume(Connections* self, uintptr_t outputslot,
-	uintptr_t inputslot, amp_t factor)
+	uintptr_t inputslot, psy_dsp_amp_t factor)
 {	
 	WireSocketEntry* input_entry;
 
@@ -294,7 +300,8 @@ void connections_setwirevolume(Connections* self, uintptr_t outputslot,
 	}
 }
 
-amp_t connections_wirevolume(Connections* self, uintptr_t outputslot, uintptr_t inputslot)
+psy_dsp_amp_t connections_wirevolume(Connections* self, uintptr_t outputslot,
+	uintptr_t inputslot)
 {	
 	WireSocketEntry* input_entry;
 

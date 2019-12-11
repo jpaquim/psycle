@@ -58,7 +58,7 @@ static int machinewireview_hittestpan(MachineWireView*, int x, int y, uintptr_t 
 static int machinewireview_hittestcoord(MachineWireView*, int x, int y, int mode, uintptr_t slot, SkinCoord*);
 static Wire machinewireview_hittestwire(MachineWireView*, int x, int y);
 static int machinewireview_hittesteditname(MachineWireView*, int x, int y, uintptr_t slot);
-static amp_t machinewireview_panvalue(MachineWireView*, int x, int y, uintptr_t slot);
+static psy_dsp_amp_t machinewireview_panvalue(MachineWireView*, int x, int y, uintptr_t slot);
 static void machinewireview_onnewmachineselected(MachineView*, ui_component* sender, Properties*);
 static void machinewireview_initmachinecoords(MachineWireView*);
 static void machinewireview_onmachineschangeslot(MachineWireView*, Machines*, uintptr_t slot);
@@ -95,12 +95,7 @@ void machineui_init(MachineUi* self, int x, int y, Machine* machine,
 	self->x = x;
 	self->y = y;
 	self->skin = skin;	
-	self->mode = machine->vtable->mode(machine);
-	if (self->mode == MACHMODE_MASTER) {
-		self->mode = MACHMODE_MASTER;		
-	} else {
-		self->mode = (self->mode & 3) ? MACHMODE_GENERATOR : MACHMODE_FX;
-	}	
+	self->mode = machine->vtable->mode(machine);	
 	machineui_updatecoords(self);	
 	self->volumedisplay = 0.f;	
 	self->machine = machine;
@@ -176,12 +171,14 @@ void machineui_editname(MachineUi* self, ui_edit* edit)
 		self->restorename = 
 			self->machine->vtable->editname(self->machine) 
 				? strdup(self->machine->vtable->editname(self->machine)) : 0;
-		signal_disconnectall(&edit->component.signal_focuslost);
-		signal_disconnectall(&edit->component.signal_keydown);
-		signal_disconnectall(&edit->signal_change);
-		signal_connect(&edit->signal_change, self, machineui_oneditchange);
-		signal_connect(&edit->component.signal_keydown, self, machineui_onkeydown);		
-		signal_connect(&edit->component.signal_focuslost, self, machineui_oneditfocuslost);
+		psy_signal_disconnectall(&edit->component.signal_focuslost);
+		psy_signal_disconnectall(&edit->component.signal_keydown);
+		psy_signal_disconnectall(&edit->signal_change);
+		psy_signal_connect(&edit->signal_change, self, machineui_oneditchange);
+		psy_signal_connect(&edit->component.signal_keydown, self,
+			machineui_onkeydown);		
+		psy_signal_connect(&edit->component.signal_focuslost, self,
+			machineui_oneditfocuslost);
 		ui_edit_settext(edit, self->machine->vtable->editname(self->machine));
 		r = machineui_position(self);
 		r.left += self->coords->name.destx;
@@ -357,11 +354,15 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 	self->selectedwire.dst = NOMACHINE_INDEX;
 	self->component.doublebuffered = TRUE;
 	machinewireview_initmachinecoords(self);
-	signal_connect(&workspace->signal_songchanged, self, machinewireview_onsongchanged);	
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		machinewireview_onsongchanged);	
 	machinewireview_connectmachinessignals(self);
-	signal_connect(&workspace->signal_configchanged, self, machinewireview_onconfigchanged);
-	signal_connect(&workspace->signal_beforesavesong, self, machinewireview_beforesavesong);
-	signal_connect(&workspace->signal_showparameters, self,machinewireview_onshowparameters);
+	psy_signal_connect(&workspace->signal_configchanged, self,
+		machinewireview_onconfigchanged);
+	psy_signal_connect(&workspace->signal_beforesavesong, self,
+		machinewireview_beforesavesong);
+	psy_signal_connect(&workspace->signal_showparameters, self,
+		machinewireview_onshowparameters);
 	ui_edit_init(&self->editname, &self->component, 0);
 	ui_component_hide(&self->editname.component);
 	ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
@@ -369,15 +370,24 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 
 void machinewireview_connectuisignals(MachineWireView* self)
 {
-	signal_connect(&self->component.signal_destroy, self, machinewireview_ondestroy);
-	signal_connect(&self->component.signal_mousedown, self, machinewireview_onmousedown);
-	signal_connect(&self->component.signal_mouseup, self, machinewireview_onmouseup);
-	signal_connect(&self->component.signal_mousemove, self, machinewireview_onmousemove);
-	signal_connect(&self->component.signal_mousedoubleclick, self, machinewireview_onmousedoubleclick);
-	signal_connect(&self->component.signal_keydown, self, machinewireview_onkeydown);
-	signal_connect(&self->component.signal_keyup, self, machinewireview_onkeyup);
-	signal_connect(&self->component.signal_draw, self, machinewireview_ondraw);
-	signal_connect(&self->component.signal_timer, self, machinewireview_ontimer);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		machinewireview_ondestroy);
+	psy_signal_connect(&self->component.signal_mousedown, self,
+		machinewireview_onmousedown);
+	psy_signal_connect(&self->component.signal_mouseup, self,
+		machinewireview_onmouseup);
+	psy_signal_connect(&self->component.signal_mousemove, self,
+		machinewireview_onmousemove);
+	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
+		machinewireview_onmousedoubleclick);
+	psy_signal_connect(&self->component.signal_keydown, self,
+		machinewireview_onkeydown);
+	psy_signal_connect(&self->component.signal_keyup, self,
+		machinewireview_onkeyup);
+	psy_signal_connect(&self->component.signal_draw, self,
+		machinewireview_ondraw);
+	psy_signal_connect(&self->component.signal_timer, self,
+		machinewireview_ontimer);
 }
 
 void machinewireview_initmasterui(MachineWireView* self)
@@ -386,10 +396,13 @@ void machinewireview_initmasterui(MachineWireView* self)
 }
 
 void machinewireview_connectmachinessignals(MachineWireView* self)
-{
-	signal_connect(&self->machines->signal_slotchange, self,machinewireview_onmachineschangeslot);
-	signal_connect(&self->machines->signal_insert, self,machinewireview_onmachinesinsert);
-	signal_connect(&self->machines->signal_removed, self,machinewireview_onmachinesremoved);	
+{	
+	psy_signal_connect(&self->machines->signal_slotchange, self,
+		machinewireview_onmachineschangeslot);
+	psy_signal_connect(&self->machines->signal_insert, self,
+		machinewireview_onmachinesinsert);
+	psy_signal_connect(&self->machines->signal_removed, self,
+		machinewireview_onmachinesremoved);	
 }
 
 void machinewireview_ondestroy(MachineWireView* self, ui_component* component)
@@ -1038,9 +1051,9 @@ int machinewireview_hittestcoord(MachineWireView* self, int x, int y, int mode, 
 	return 0;
 }
 
-amp_t machinewireview_panvalue(MachineWireView* self, int x, int y, uintptr_t slot)
+psy_dsp_amp_t machinewireview_panvalue(MachineWireView* self, int x, int y, uintptr_t slot)
 {
-	amp_t rv = 0.f;	
+	psy_dsp_amp_t rv = 0.f;	
 	MachineUi* machineui;
 
 	machineui = machineuis_at(self, slot);
@@ -1234,7 +1247,7 @@ void machinewireview_onmachinesinsert(MachineWireView* self, Machines* machines,
 	machine = machines_at(self->machines, slot);
 	if (machine) {
 		machineuis_insert(self, slot, 0, 0, &self->skin);
-		signal_connect(&machine->signal_worked, self, 
+		psy_signal_connect(&machine->signal_worked, self, 
 			machinewireview_onmachineworked);
 		ui_component_invalidate(&self->component);
 	}
@@ -1292,7 +1305,7 @@ void machinewireview_updatemachineuis(MachineWireView* self, Properties* machine
 				if (machine) {					
 					machineuis_insert(self, index, x, y, &self->skin);
 					if (index != MASTER_INDEX) {					
-						signal_connect(&machine->signal_worked, self,
+						psy_signal_connect(&machine->signal_worked, self,
 							machinewireview_onmachineworked);
 					}
 				}
@@ -1524,8 +1537,8 @@ void machineview_init(MachineView* self, ui_component* parent,
 	ui_component_enablealign(&self->component);
 	ui_notebook_init(&self->notebook, &self->component);	
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
-	signal_connect(&self->component.signal_show, self, machineview_onshow);
-	signal_connect(&self->component.signal_hide, self, machineview_onhide);
+	psy_signal_connect(&self->component.signal_show, self, machineview_onshow);
+	psy_signal_connect(&self->component.signal_hide, self, machineview_onhide);
 	machinewireview_init(&self->wireview, &self->notebook.component, tabbarparent,
 		workspace);
 	newmachine_init(&self->newmachine, &self->notebook.component,
@@ -1537,12 +1550,12 @@ void machineview_init(MachineView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "New Machine");		
 	ui_notebook_setpageindex(&self->notebook, 0);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	signal_connect(&self->newmachine.pluginsview.signal_selected, self,machinewireview_onnewmachineselected);
-	signal_connect(&self->component.signal_mousedoubleclick, self, machineview_onmousedoubleclick);
-	signal_connect(&self->component.signal_keydown, self, machineview_onkeydown);
-	signal_connect(&self->component.signal_keyup, self, machineview_onkeyup);
-	signal_connect(&self->component.signal_focus, self, machineview_onfocus);
-	signal_connect(&self->workspace->signal_skinchanged, self,
+	psy_signal_connect(&self->newmachine.pluginsview.signal_selected, self,machinewireview_onnewmachineselected);
+	psy_signal_connect(&self->component.signal_mousedoubleclick, self, machineview_onmousedoubleclick);
+	psy_signal_connect(&self->component.signal_keydown, self, machineview_onkeydown);
+	psy_signal_connect(&self->component.signal_keyup, self, machineview_onkeyup);
+	psy_signal_connect(&self->component.signal_focus, self, machineview_onfocus);
+	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		machineview_onskinchanged);
 }
 

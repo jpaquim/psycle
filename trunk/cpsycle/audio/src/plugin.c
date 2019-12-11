@@ -216,7 +216,7 @@ int parametervalue(Plugin* self, int param)
 unsigned int numinputs(Plugin* self)
 {
 	if (info(self)) {
-		return ((info(self)->Flags & 3) == 3) ? 0 : 2;
+		return self->plugininfo->mode == MACHMODE_FX ? 2 : 0;
 	} else {
 		return 0;
 	}

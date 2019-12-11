@@ -14,9 +14,9 @@
 typedef struct Instruments {
 	Table container;
 	uintptr_t slot;
-	Signal signal_insert;
-	Signal signal_removed;
-	Signal signal_slotchange;
+	psy_Signal signal_insert;
+	psy_Signal signal_removed;
+	psy_Signal signal_slotchange;
 } Instruments;
 
 void instruments_init(Instruments*);

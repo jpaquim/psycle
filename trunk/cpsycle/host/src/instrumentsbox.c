@@ -20,7 +20,7 @@ void InitInstrumentsBox(InstrumentsBox* self, ui_component* parent,
 {	
 	ui_listbox_init(&self->instrumentlist, parent);	
 	SetInstruments(self, instruments);	
-	signal_connect(&self->instrumentlist.signal_selchanged, self,
+	psy_signal_connect(&self->instrumentlist.signal_selchanged, self,
 		OnInstrumentListChanged);
 }
 
@@ -72,7 +72,10 @@ void SetInstruments(InstrumentsBox* self, Instruments* instruments)
 {
 	self->instruments = instruments;	
 	BuildInstrumentList(self);
-	signal_connect(&instruments->signal_insert, self, OnInstrumentInsert);
-	signal_connect(&instruments->signal_removed, self, OnInstrumentRemoved);
-	signal_connect(&instruments->signal_slotchange, self, OnInstrumentSlotChanged);
+	psy_signal_connect(&instruments->signal_insert, self,
+		OnInstrumentInsert);
+	psy_signal_connect(&instruments->signal_removed, self,
+		OnInstrumentRemoved);
+	psy_signal_connect(&instruments->signal_slotchange, self,
+		OnInstrumentSlotChanged);
 }

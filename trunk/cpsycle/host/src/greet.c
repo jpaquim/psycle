@@ -14,7 +14,7 @@ static void OnOriginal(Greet*, ui_component* sender);
 void greet_init(Greet* self, ui_component* parent)
 {	
 	ui_component_init(&self->component, parent);	
-	signal_connect(&self->component.signal_size, self, OnSize);
+	psy_signal_connect(&self->component.signal_size, self, OnSize);
 	self->current = 1;
 	ui_component_settitle(&self->component, "Greetings and info");	
 	ui_label_init(&self->header, &self->component);
@@ -25,7 +25,7 @@ void greet_init(Greet* self, ui_component* parent)
 	ui_groupbox_settext(&self->groupbox, "Thanks!");
 	ui_button_init(&self->original, &self->component);
 	ui_button_settext(&self->original, "Show Original Arguru's Greetings");
-	signal_connect(&self->original.signal_clicked, self, OnOriginal);	
+	psy_signal_connect(&self->original.signal_clicked, self, OnOriginal);	
 /*
 	//Original Arguru's Greetings.
 	m_greetz.AddString("Hamarr Heylen 'Hymax' [Logo design]");

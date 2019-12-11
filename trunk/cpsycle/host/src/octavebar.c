@@ -18,16 +18,16 @@ void InitOctaveBar(OctaveBar* self, ui_component* parent, Workspace* workspace)
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	signal_connect(&self->component.signal_destroy, self, OnDestroy);	
+	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	ui_label_init(&self->headerlabel, &self->component);	
 	ui_label_settext(&self->headerlabel, "Octave");		
 	ui_combobox_init(&self->octavebox, &self->component);
 	ui_combobox_setcharnumber(&self->octavebox, 2);	
 	BuildOctaveBox(self);	
-	signal_connect(&self->octavebox.signal_selchanged, self,
+	psy_signal_connect(&self->octavebox.signal_selchanged, self,
 		OnOctaveBoxSelChange);	
-	signal_connect(&workspace->signal_octavechanged, self, OnOctaveChanged);
-	signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	psy_signal_connect(&workspace->signal_octavechanged, self, OnOctaveChanged);
+	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	{		
 		ui_margin margin;
 

@@ -19,7 +19,7 @@ void pinedit_init(PinEdit* self, ui_component* parent, Wire wire,
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, pinedit_ondraw);	
+	psy_signal_connect(&self->component.signal_draw, self, pinedit_ondraw);	
 }
 
 void pinedit_ondraw(PinEdit* self, ui_component* sender, ui_graphics* g)

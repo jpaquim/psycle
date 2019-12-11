@@ -8,7 +8,7 @@
 
 typedef struct {
    ui_component component;
-   Signal signal_clicked;   
+   psy_Signal signal_clicked;   
 } ui_checkbox;
 
 void ui_checkbox_init(ui_checkbox*, ui_component* parent);

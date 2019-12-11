@@ -7,39 +7,43 @@
 #include "dsptypes.h"
 
 typedef struct {
-	amp_t value;
-	beat_t time;
-	amp_t minvalue;
-	amp_t maxvalue;
-	beat_t mintime;
-	beat_t maxtime;	
+	psy_dsp_amp_t value;
+	psy_dsp_beat_t time;
+	psy_dsp_amp_t minvalue;
+	psy_dsp_amp_t maxvalue;
+	psy_dsp_beat_t mintime;
+	psy_dsp_beat_t maxtime;	
 } EnvelopePoint;
 
 void envelopepoint_init(EnvelopePoint*, 
-		seconds_t time, amp_t value,
-		seconds_t mintime, seconds_t maxtime,
-		amp_t minvalue, amp_t maxvalue);
+		psy_dsp_seconds_t time,
+		psy_dsp_amp_t value,
+		psy_dsp_seconds_t mintime,
+		psy_dsp_seconds_t maxtime,
+		psy_dsp_amp_t minvalue,
+		psy_dsp_amp_t maxvalue);
 
 typedef struct {	
-	seconds_t attack;
-	seconds_t decay;
-	percent_t sustain;
-	seconds_t release;
-	seconds_t fastrelease;
+	psy_dsp_seconds_t attack;
+	psy_dsp_seconds_t decay;
+	psy_dsp_percent_t sustain;
+	psy_dsp_seconds_t release;
+	psy_dsp_seconds_t fastrelease;
 } ADSRSettings;
 
-void adsr_settings_init(ADSRSettings*, seconds_t, seconds_t, seconds_t, seconds_t);
+void adsr_settings_init(ADSRSettings*, psy_dsp_seconds_t, psy_dsp_seconds_t,
+	psy_dsp_seconds_t, psy_dsp_seconds_t);
 void adsr_settings_initdefault(ADSRSettings*);
 float adsr_settings_attack(ADSRSettings*);
-void adsr_settings_setattack(ADSRSettings*, seconds_t);
+void adsr_settings_setattack(ADSRSettings*, psy_dsp_seconds_t);
 float adsr_settings_decay(ADSRSettings*);
-void adsr_settings_setdecay(ADSRSettings*, seconds_t);
+void adsr_settings_setdecay(ADSRSettings*, psy_dsp_seconds_t);
 float adsr_settings_sustain(ADSRSettings*);
-void adsr_settings_setsustain(ADSRSettings*, percent_t);
+void adsr_settings_setsustain(ADSRSettings*, psy_dsp_percent_t);
 float adsr_settings_release(ADSRSettings*);
-void adsr_settings_setrelease(ADSRSettings*, seconds_t);
+void adsr_settings_setrelease(ADSRSettings*, psy_dsp_seconds_t);
 float adsr_settings_fastrelease(ADSRSettings*);
-void adsr_settings_setfastrelease(ADSRSettings*, seconds_t);
+void adsr_settings_setfastrelease(ADSRSettings*, psy_dsp_seconds_t);
 
 typedef enum
 {
@@ -52,8 +56,8 @@ typedef enum
 } EnvelopeStage;
 
 typedef struct {
-	amp_t value;
-	amp_t step;	
+	psy_dsp_amp_t value;
+	psy_dsp_amp_t step;	
 	unsigned int samplerate;
 	ADSRSettings settings;
 	EnvelopeStage stage;

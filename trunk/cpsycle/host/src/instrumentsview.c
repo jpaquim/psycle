@@ -15,9 +15,11 @@ void InitInstrumentsView(InstrumentsView* self, ui_component* parent,
 	ui_component_init(&self->component, parent);		
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	ui_notebook_init(&self->notebook, &self->component);	
-	signal_connect(&self->component.signal_size, self, OnSize);
-	InitSampulseInstrumentView(&self->sampulseview, &self->notebook.component, workspace);
-	InitSamplerInstrumentView(&self->samplerview, &self->notebook.component, workspace);	
+	psy_signal_connect(&self->component.signal_size, self, OnSize);
+	InitSampulseInstrumentView(&self->sampulseview, &self->notebook.component,
+		workspace);
+	InitSamplerInstrumentView(&self->samplerview, &self->notebook.component,
+		workspace);
 	tabbar_init(&self->tabbar, tabbarparent);
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);	
 	ui_component_hide(&self->tabbar.component);
@@ -25,8 +27,8 @@ void InitInstrumentsView(InstrumentsView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "Sampler PS1");		
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	ui_notebook_setpageindex(&self->notebook, 0);
-	signal_connect(&self->component.signal_show, self, OnShow);
-	signal_connect(&self->component.signal_hide, self, OnHide);
+	psy_signal_connect(&self->component.signal_show, self, OnShow);
+	psy_signal_connect(&self->component.signal_hide, self, OnHide);
 	tabbar_select(&self->tabbar, 0);
 }
 

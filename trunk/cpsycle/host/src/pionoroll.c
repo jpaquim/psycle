@@ -27,9 +27,9 @@ static void pianogrid_onmousedown(Pianogrid*, ui_component* sender, MouseEvent*)
 
 static void pianoroll_updatemetrics(Pianoroll*);
 static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
-static int pianorolld_testplaybar(Pianoroll*, big_beat_t offset);
-static int testrange(big_beat_t position, big_beat_t offset, big_beat_t width);
-static void pianoroll_invalidateline(Pianoroll*, beat_t offset);
+static int pianorolld_testplaybar(Pianoroll*, psy_dsp_big_beat_t offset);
+static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t width);
+static void pianoroll_invalidateline(Pianoroll*, psy_dsp_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, ui_component* component);
 static void pianoroll_onsize(Pianoroll*, ui_component* sender, ui_size*);
 static void pianoroll_onmousedown(Pianoroll*, ui_component* sender, MouseEvent*);
@@ -49,22 +49,22 @@ void pianoroll_init(Pianoroll* self, ui_component* parent, Workspace* workspace)
 	self->sequenceentryoffset = 0.f;
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
-	signal_connect(&self->component.signal_destroy, self, pianoroll_ondestroy);
-	signal_connect(&self->component.signal_size, self, pianoroll_onsize);
-	signal_connect(&self->component.signal_mousedown, self,
+	psy_signal_connect(&self->component.signal_destroy, self, pianoroll_ondestroy);
+	psy_signal_connect(&self->component.signal_size, self, pianoroll_onsize);
+	psy_signal_connect(&self->component.signal_mousedown, self,
 		pianoroll_onmousedown);
-	signal_connect(&self->component.signal_mouseup, self, pianoroll_onmouseup);
-	signal_connect(&self->component.signal_mousemove, self,
+	psy_signal_connect(&self->component.signal_mouseup, self, pianoroll_onmouseup);
+	psy_signal_connect(&self->component.signal_mousemove, self,
 		pianoroll_onmousemove);
-	signal_connect(&self->component.signal_mousedoubleclick, self,
+	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		pianoroll_onmousedoubleclick);
-	signal_connect(&self->component.signal_keydown, self, pianoroll_onkeydown);
-	signal_connect(&self->component.signal_timer, self, pianoroll_ontimer);
+	psy_signal_connect(&self->component.signal_keydown, self, pianoroll_onkeydown);
+	psy_signal_connect(&self->component.signal_timer, self, pianoroll_ontimer);
 	pianoheader_init(&self->header, &self->component, self);
 	ui_component_init(&self->keyboardheader, &self->component);
 	pianokeyboard_init(&self->keyboard, &self->component);
 	pianogrid_init(&self->grid, &self->component, self);		
-	signal_connect(&workspace->player.signal_lpbchanged, self,
+	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		pianoroll_onlpbchanged);
 	pianoroll_updatemetrics(self);
 	ui_component_starttimer(&self->component, TIMERID_PIANOROLL, 100);
@@ -95,20 +95,20 @@ void pianoroll_ontimer(Pianoroll* self, ui_component* sender, int timerid)
 	}
 }
 
-int pianoroll_testplaybar(Pianoroll* self, big_beat_t offset)
+int pianoroll_testplaybar(Pianoroll* self, psy_dsp_big_beat_t offset)
 {
 	return player_playing(&self->workspace->player) &&
 		testrange(self->lastplayposition -
 			self->sequenceentryoffset,
-			offset, 1 / (big_beat_t)self->grid.metrics.lpb);
+			offset, 1 / (psy_dsp_big_beat_t)self->grid.metrics.lpb);
 }
 
-int testrange(big_beat_t position, big_beat_t offset, big_beat_t width)
+int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t width)
 {
 	return position >= offset && position < offset + width;
 }
 
-void pianoroll_invalidateline(Pianoroll* self, beat_t offset)
+void pianoroll_invalidateline(Pianoroll* self, psy_dsp_beat_t offset)
 {
 	int line;
 	ui_rectangle r;
@@ -169,11 +169,11 @@ void pianogrid_init(Pianogrid* self, ui_component* parent, Pianoroll* roll)
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
 	self->component.wheelscroll = 4;
-	signal_connect(&self->component.signal_draw, self, pianogrid_ondraw);
-	signal_connect(&self->component.signal_size, self, pianogrid_onsize);
-	signal_connect(&self->component.signal_scroll, self, pianogrid_onscroll);
-	signal_connect(&self->component.signal_keydown, self, pianogrid_onkeydown);
-	signal_connect(&self->component.signal_mousedown, self,
+	psy_signal_connect(&self->component.signal_draw, self, pianogrid_ondraw);
+	psy_signal_connect(&self->component.signal_size, self, pianogrid_onsize);
+	psy_signal_connect(&self->component.signal_scroll, self, pianogrid_onscroll);
+	psy_signal_connect(&self->component.signal_keydown, self, pianogrid_onkeydown);
+	psy_signal_connect(&self->component.signal_mousedown, self,
 		pianogrid_onmousedown);
 	ui_component_showhorizontalscrollbar(&self->component);
 	ui_component_showverticalscrollbar(&self->component);	
@@ -211,7 +211,7 @@ void pianogrid_drawgrid(Pianogrid* self, ui_graphics* g)
 
 		{												
 			int c;
-			beat_t cpx;
+			psy_dsp_beat_t cpx;
 			int cpy;
 			
 			cpy = self->metrics.visikeys * self->metrics.keyheight;				
@@ -223,7 +223,7 @@ void pianogrid_drawgrid(Pianogrid* self, ui_graphics* g)
 	}
 
 	if (player_playing(&self->view->workspace->player)) {
-		big_beat_t offset;
+		psy_dsp_big_beat_t offset;
 		
 		offset = self->view->lastplayposition;
 		if (offset >= self->view->sequenceentryoffset &&
@@ -324,7 +324,8 @@ void pianokeyboard_init(PianoKeyboard* self, ui_component* parent)
 	self->textheight = 12;	
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, pianokeyboard_ondraw);
+	psy_signal_connect(&self->component.signal_draw, self,
+		pianokeyboard_ondraw);
 }
 
 int isblack(int key)
@@ -377,11 +378,11 @@ void pianokeyboard_ondraw(PianoKeyboard* self, ui_component* sender, ui_graphics
 
 void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, MouseEvent* ev)
 {	
-	beat_t offset;	
+	psy_dsp_beat_t offset;	
 
 	ui_component_setfocus(&self->component);
-	offset = (ev->x  / (beat_t) self->metrics.beatwidth) + self->beatscrollpos;
-	offset = (int)(offset * (beat_t)self->metrics.lpb) / (beat_t)self->metrics.lpb;
+	offset = (ev->x  / (psy_dsp_beat_t) self->metrics.beatwidth) + self->beatscrollpos;
+	offset = (int)(offset * (psy_dsp_beat_t)self->metrics.lpb) / (psy_dsp_beat_t)self->metrics.lpb;
 	if (ev->button == 1) {
 		PatternEvent event;
 		PatternNode* node = 0;
@@ -391,7 +392,7 @@ void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, MouseEvent* ev
 		event.note = self->metrics.keymax - 1 - (ev->y - self->dy) /
 			self->metrics.keyheight;
 		node = pattern_findnode(self->view->pattern, 0, offset, 0,
-			1 / (beat_t) self->metrics.lpb, &prev);
+			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 		if (node) {				
 			pattern_setevent(self->view->pattern, node, &event);		
 		} else {
@@ -401,7 +402,7 @@ void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, MouseEvent* ev
 	if (ev->button == 2) {
 		PatternNode* prev;
 		PatternNode* node = pattern_findnode(self->view->pattern, 0,
-			offset, 0, 1 / (beat_t) self->metrics.lpb, &prev);
+			offset, 0, 1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 		if (node) {
 			pattern_remove(self->view->pattern, node);			
 		}
@@ -426,7 +427,7 @@ void pianoheader_init(PianoHeader* self, ui_component* parent, Pianoroll* roll)
 	self->scrollpos = 0;
 	ui_component_init(&self->component, parent);
 	self->component.doublebuffered = 1;
-	signal_connect(&self->component.signal_draw, self, pianoheader_ondraw);		
+	psy_signal_connect(&self->component.signal_draw, self, pianoheader_ondraw);		
 }
 
 void pianoheader_ondraw(PianoHeader* self, ui_component* sender, ui_graphics* g)
@@ -441,7 +442,7 @@ void pianoheader_drawruler(PianoHeader* self, ui_graphics* g)
 	ui_size size;
 	ui_margin margin = { 0, 0, 5, 0 };
 	int baseline;		
-	beat_t cpx;	
+	psy_dsp_beat_t cpx;	
 	int c;	
 
 	size = ui_component_size(&self->component);
@@ -486,11 +487,11 @@ void pianoroll_computemetrics(Pianoroll* self, PianoMetrics* rv)
 	rv->keymax = 88;	
 	rv->visibeats = self->pattern
 		? min(max(0, self->pattern->length + self->grid.beatscrollpos),
-			  gridsize.width / (beat_t) rv->beatwidth)
+			  gridsize.width / (psy_dsp_beat_t) rv->beatwidth)
 		: 0;
 	rv->visisteps = (int)(rv->visibeats * rv->lpb + 0.5);
 	rv->visiwidth = (int)(rv->visibeats * rv->beatwidth + 0.5);
-	rv->stepwidth = rv->beatwidth / (beat_t) rv->lpb;
+	rv->stepwidth = rv->beatwidth / (psy_dsp_beat_t) rv->lpb;
 	rv->visikeys = (int)(gridsize.height / (float)rv->keyheight + 0.5);
 }
 

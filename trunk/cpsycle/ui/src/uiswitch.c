@@ -17,20 +17,20 @@ static void onpreferredsize(ui_switch*, ui_component* sender, ui_size* limit,
 void ui_switch_init(ui_switch* self, ui_component* parent)
 {		
 	ui_component_init(&self->component, parent);
-	signal_connect(&self->component.signal_draw, self, ondraw);
-	signal_connect(&self->component.signal_mousedown, self, onmousedown);
-	signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
-	signal_init(&self->signal_clicked);	
-	signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	signal_disconnectall(&self->component.signal_preferredsize);
-	signal_connect(&self->component.signal_preferredsize, self,
+	psy_signal_connect(&self->component.signal_draw, self, ondraw);
+	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
+	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
+	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
+	psy_signal_init(&self->signal_clicked);	
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
 		onpreferredsize);
 }
 
 void ondestroy(ui_switch* self, ui_component* sender)
 {	
-	signal_dispose(&self->signal_clicked);	
+	psy_signal_dispose(&self->signal_clicked);	
 }
 
 void ondraw(ui_switch* self, ui_component* sender, ui_graphics* g)
@@ -88,7 +88,7 @@ void onpreferredsize(ui_switch* self, ui_component* sender, ui_size* limit,
 
 void onmousedown(ui_switch* self, ui_component* sender)
 {
-	signal_emit(&self->signal_clicked, self, 0);
+	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
 void onmouseenter(ui_switch* self, ui_component* sender)

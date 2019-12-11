@@ -33,12 +33,13 @@ static int transpose(int note, int offset);
 static MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
-	GENERATOR | 32 | 64,	
+	GENERATOR | 32 | 64,
+	MACHMODE_GENERATOR,
 	"Note Duplicator 2"
 		#ifndef NDEBUG
 		" (debug build)"
 		#endif
-		,
+		,	
 	"Note Duplicator 2",
 	"Psycledelics",
 	"help",	

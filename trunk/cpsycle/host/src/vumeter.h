@@ -9,8 +9,8 @@
 
 typedef struct {	
 	ui_component component;
-	amp_t leftavg;
-	amp_t rightavg;
+	psy_dsp_amp_t leftavg;
+	psy_dsp_amp_t rightavg;
 } Vumeter;
 
 void vumeter_init(Vumeter*, ui_component* parent, Workspace*);

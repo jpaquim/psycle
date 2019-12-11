@@ -19,7 +19,7 @@ typedef struct {
 	NoteMapEditCursor cursor;
 	PatternEvent map[120];
 	Inputs* noteinputs;
-	NotesTabMode notestabmode;
+	psy_dsp_NotesTabMode notestabmode;
 	int dy;	
 } NoteMapEdit;
 

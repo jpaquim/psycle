@@ -8,17 +8,17 @@
 
 typedef struct {
 	int count;
-	big_amp_t AccumLeft, AccumRight;
-	amp_t previousLeft, previousRight;
+	psy_dsp_big_amp_t AccumLeft, AccumRight;
+	psy_dsp_amp_t previousLeft, previousRight;
 } RMSData;
 
 void rmsdata_init(RMSData*);
-void rmsdata_accumulate(RMSData*, const amp_t* __restrict pSamplesL,
-	const amp_t* __restrict pSamplesR, int count);
+void rmsdata_accumulate(RMSData*, const psy_dsp_amp_t* __restrict pSamplesL,
+	const psy_dsp_amp_t* __restrict pSamplesR, int count);
 
 typedef struct RMSVol {
 	RMSData data;
-	amp_t volume;
+	psy_dsp_amp_t volume;
 } RMSVol;
 
 void rmsvol_init(RMSVol*);
@@ -26,9 +26,9 @@ RMSVol* rmsvol_alloc(void);
 RMSVol* rmsvol_allocinit(void);
 /// Note: Values are accumulated since the standard calculation requires 50ms
 /// of data.
-void rmsvol_tick(RMSVol*, const amp_t* __restrict pSamplesL,
-	const amp_t* __restrict pSamplesR, int numSamples);
-amp_t rmsvol_value(RMSVol*);
+void rmsvol_tick(RMSVol*, const psy_dsp_amp_t* __restrict pSamplesL,
+	const psy_dsp_amp_t* __restrict pSamplesR, int numSamples);
+psy_dsp_amp_t rmsvol_value(RMSVol*);
 void rmsvol_setsamplerate(unsigned int samplerate);
 
 #endif

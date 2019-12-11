@@ -7,6 +7,8 @@
 
 #include "psy2.h"
 #include "psy3.h"
+#include "xm.h"
+#include "xmdefs.h"
 
 #include <string.h>
 
@@ -19,7 +21,7 @@ void songfile_load(SongFile* self, const char* path)
 	self->err = 0;
 	self->file = &file;
 	if (psyfile_open(self->file, path)) {
-		char header[9];
+		char header[20];
 //		SequencePosition position;
 		
 		self->workspaceproperties = properties_create();
@@ -27,14 +29,20 @@ void songfile_load(SongFile* self, const char* path)
 		machines_startfilemode(&self->song->machines);
 		psyfile_read(self->file, header, 8);
 		header[8] = '\0';
-		signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
-		if (strcmp(header,"PSY3SONG") == 0) {						
+		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
+		if (strcmp(header,"PSY3SONG") == 0) {
 			psy3_load(self);
 		} else
 		if (strcmp(header,"PSY2SONG") == 0) {
 			psy2_load(self);
 		} else {
-			self->err = 2;
+			psyfile_read(self->file, header + 8, strlen(XM_HEADER) - 8);
+			header[strlen(XM_HEADER)] = '\0';
+			if (strcmp(header, XM_HEADER) == 0) {
+				xm_load(self);
+			} else {
+				self->err = 2;
+			}
 		}
 		if (!machines_at(&self->song->machines, MASTER_INDEX)) {
 			songfile_createmaster(self);
@@ -44,7 +52,7 @@ void songfile_load(SongFile* self, const char* path)
 	} else {
 		self->err = 1;
 	}
-	signal_emit(&self->song->signal_loadprogress, self->song, 1, 0);
+	psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 0);
 }
 
 void songfile_save(SongFile* self, const char* path)

@@ -92,7 +92,7 @@ void vstplugin_init(VstPlugin* self, MachineCallback callback, const char* path)
 	self->info = 0;
 	self->editorhandle = 0;
 	self->events = 0;
-	self->plugininfo = 0;	
+	self->plugininfo = 0;
 	library_init(&self->library);
 	library_load(&self->library, path);		
 	mainproc = getmainentry(&self->library);
@@ -295,6 +295,7 @@ int machineinfo(AEffect* effect, MachineInfo* info, const char* path,
 			vendorString,
 			"",
 			(effect->flags & effFlagsIsSynth) == effFlagsIsSynth,
+			effFlagsIsSynth ? MACHMODE_FX : MACHMODE_GENERATOR,
 			effectName,
 			effectName,
 			0,

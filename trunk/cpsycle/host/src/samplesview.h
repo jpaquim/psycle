@@ -36,7 +36,7 @@ typedef struct {
 typedef struct {
 	ui_component component;
 	Sample* sample;
-	NotesTabMode notestabmode;
+	psy_dsp_NotesTabMode notestabmode;
 	ui_slider defaultvolume;
 	ui_slider globalvolume;
 	ui_slider panposition;

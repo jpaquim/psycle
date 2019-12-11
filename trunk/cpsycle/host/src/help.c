@@ -29,7 +29,7 @@ void help_init(Help* self, ui_component* parent, Workspace* workspace)
 	ui_edit_init(&self->edit, &self->component, 
 		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY);
 	ui_component_setalign(&self->edit.component, UI_ALIGN_CLIENT);	
-	signal_connect(&self->tabbar.signal_change, self,
+	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
 	ui_notebook_setpageindex(&self->notebook, 0);
 	help_loadpage(self, 0);
