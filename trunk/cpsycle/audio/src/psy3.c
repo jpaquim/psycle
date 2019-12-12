@@ -386,10 +386,8 @@ void readpatd(SongFile* self)
 
 				psource = pdest;
 				pattern = pattern_allocinit();
-				patterns_insert(&self->song->patterns, index, pattern);
-				//unsigned char* pdata = CreateNewPattern() + (y * MULTIPLY);
-				for(y = 0 ; y < patternlines[index] ; ++y)
-				{					
+				patterns_insert(&self->song->patterns, index, pattern);				
+				for(y = 0 ; y < patternlines[index]; ++y) {					
 					unsigned char* ptrack = psource;
 					int32_t track;			
 					psy_dsp_beat_t offset;
@@ -603,7 +601,7 @@ void readsmsb(SongFile* self)
 
 			wave = sample_allocinit();
 			psyfile_readstring(self->file, wavename, sizeof(wavename));
-			sample_setname(wave, wavename);			
+			sample_setname(wave, wavename);
 			// wavelength
 			psyfile_read(self->file, &temp, sizeof(temp));
 			wave->numframes = temp;

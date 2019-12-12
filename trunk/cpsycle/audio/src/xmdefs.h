@@ -165,7 +165,7 @@ struct XMSAMPLEHEADER
 	uint16_t reserved[11];
 };
 
-struct XMSAMPLESTRUCT
+typedef struct XMSAMPLESTRUCT
 {
 	uint32_t samplen;
 	uint32_t loopstart;
@@ -177,6 +177,6 @@ struct XMSAMPLESTRUCT
 	int8_t relnote;
 	uint8_t res;
 	char name[22];
-};
+} XMSAMPLESTRUCT;
 
 #endif

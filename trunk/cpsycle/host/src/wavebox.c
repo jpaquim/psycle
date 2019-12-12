@@ -11,9 +11,11 @@ static void wavebox_onmousedown(WaveBox*, ui_component* sender, MouseEvent*);
 static void wavebox_onmousemove(WaveBox*, ui_component* sender, MouseEvent*);
 static void wavebox_onmouseup(WaveBox*, ui_component* sender, MouseEvent*);
 static int wavebox_hittest(WaveBox*, uintptr_t frame, int x, int epsilon);
+ui_rectangle wavebox_framerangetoscreen(WaveBox*, uintptr_t framebegin,
+	uintptr_t frameend);
 int wavebox_hittest_range(WaveBox*, uintptr_t framemin, uintptr_t framemax, 
 	int x);
-uintptr_t wavebox_screentoframe(WaveBox* self, int x);
+uintptr_t wavebox_screentoframe(WaveBox*, int x);
 int wavebox_frametoscreen(WaveBox*, uintptr_t frame);
 static void wavebox_swapselection(WaveBox*);
 
@@ -74,26 +76,29 @@ void wavebox_ondraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 		float offsetstep;
 		int x;
 		int centery = size.height / 2;
-		
+		ui_rectangle cont_loop_rc;
+		ui_rectangle sustain_loop_rc;
+
+		if (self->sample->looptype != LOOP_DO_NOT) {
+			cont_loop_rc = wavebox_framerangetoscreen(self,
+				self->sample->loopstart, self->sample->loopend);
+		}
+		if (self->sample->sustainlooptype != LOOP_DO_NOT) {
+			sustain_loop_rc = wavebox_framerangetoscreen(self,
+				self->sample->sustainloopstart,
+				self->sample->sustainloopend);
+		}
 		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;		
 		offsetstep = (float) self->sample->numframes / size.width *
 			(self->zoomright - self->zoomleft);
-		if (self->hasselection) {
-			ui_rectangle r;
-			int startx;
-			int endx;
 
-			startx = wavebox_frametoscreen(self, self->selectionstart);
-			if (startx < 0) {
-				startx = 0;
-			}
-			endx = wavebox_frametoscreen(self, self->selectionend);			
-			if (endx < 0) {
-				endx = 0;
-			}
-			ui_setrectangle(&r, startx, 0, endx - startx, size.height);
-			ui_drawsolidrectangle(g, r, 0x00B1C8B0);
-		} 
+		if (self->sample && self->sample->looptype != LOOP_DO_NOT) {			
+			ui_drawsolidrectangle(g, cont_loop_rc, 0x00292929);
+		}		
+		if (self->hasselection) {			
+			ui_drawsolidrectangle(g, wavebox_framerangetoscreen(self,
+				self->selectionend, self->selectionend), 0x00B1C8B0);			
+		}		
 		for (x = 0; x < size.width; ++x) {			
 			uintptr_t frame = (int)(offsetstep * x + 
 				(int)(self->sample->numframes * self->zoomleft));
@@ -112,7 +117,42 @@ void wavebox_ondraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 			}
 			ui_drawline(g, x, centery, x, centery + (int)(framevalue * scaley));
 		}
+		if (self->sample && self->sample->looptype != LOOP_DO_NOT) {
+			ui_setcolor(g, 0x00D1C5B6);			
+			ui_drawline(g, cont_loop_rc.left, 0, cont_loop_rc.left + 1,
+				size.height);
+			ui_drawline(g, cont_loop_rc.right, 0, cont_loop_rc.right + 1,
+				size.height);
+		}
+		if (self->sample && self->sample->sustainlooptype != LOOP_DO_NOT) {
+			ui_setcolor(g, 0x00B6C5D1);
+			ui_drawline(g, sustain_loop_rc.left, 0, sustain_loop_rc.left + 1,
+				size.height);
+			ui_drawline(g, sustain_loop_rc.right, 0, sustain_loop_rc.right + 1,
+				size.height);
+		}
 	}
+}
+
+ui_rectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebegin,
+	uintptr_t frameend)
+{
+	ui_rectangle rv;
+	int startx;
+	int endx;
+	ui_size size;
+	
+	size = ui_component_size(&self->component);
+	startx = wavebox_frametoscreen(self, framebegin);
+	if (startx < 0) {
+		startx = 0;
+	}
+	endx = wavebox_frametoscreen(self, frameend);
+	if (endx < 0) {
+		endx = 0;
+	}
+	ui_setrectangle(&rv, startx, 0, endx - startx, size.height);
+	return rv;
 }
 
 void wavebox_onmousedown(WaveBox* self, ui_component* sender, MouseEvent* ev)

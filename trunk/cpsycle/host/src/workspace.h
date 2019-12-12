@@ -53,7 +53,8 @@ typedef struct {
 	Properties* lang;	
 	Properties* driverconfigure;
 	Properties* driverconfigurations;
-	Properties* midiconfigure;	
+	Properties* midiconfigure;
+	Properties* theme;
 	Properties* cmds;
 	PluginCatcher plugincatcher;
 	MachineFactory machinefactory;

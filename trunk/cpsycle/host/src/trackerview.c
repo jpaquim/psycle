@@ -20,6 +20,8 @@
 #define TIMERID_TRACKERVIEW 600
 static const psy_dsp_big_beat_t epsilon = 0.0001;
 
+static void trackergrid_computecolumns(TrackerGrid*, int textwidth);
+static int trackergrid_preferredtrackwidth(TrackerGrid*);
 static void trackergrid_ondraw(TrackerGrid*, ui_component* sender, ui_graphics*);
 static void trackergrid_drawbackground(TrackerGrid*, ui_graphics*, TrackerGridBlock* clip);
 static void trackergrid_drawtrackbackground(TrackerGrid*, ui_graphics*, int track);
@@ -46,7 +48,7 @@ static void trackergrid_onscroll(TrackerGrid*, ui_component* sender,
 	int stepx, int stepy);
 static int trackergrid_testcursor(TrackerGrid*, unsigned int track,
 	psy_dsp_big_beat_t offset, unsigned int subline);
-int trackergrid_testselection(TrackerGrid*, unsigned int track, double offset,
+static int trackergrid_testselection(TrackerGrid*, unsigned int track, double offset,
 	unsigned int subline);
 static int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset);
 static void trackergrid_clipblock(TrackerGrid*, const ui_rectangle*,
@@ -58,7 +60,10 @@ static double trackergrid_offset(TrackerGrid*, int y, unsigned int* lines,
 	unsigned int* sublines, unsigned int* subline);
 static void trackergrid_numtrackschanged(TrackerGrid*, Player*,
 	unsigned int numtracks);
-// static void trackerview_onsize(TrackerView*, ui_component* sender, ui_size*);
+
+static void trackerview_setfont(TrackerView*, ui_font*);
+static void trackerview_initmetrics(TrackerView*);
+static void trackerview_computemetrics(TrackerView*);
 static void trackerview_ondestroy(TrackerView*, ui_component* sender);
 static void trackerview_onkeydown(TrackerView*, ui_component* sender,
 	KeyEvent*);
@@ -71,7 +76,7 @@ static void trackerview_inputnote(TrackerView*, note_t);
 static void trackerview_inputdigit(TrackerView*, int value);
 static void enterdigitcolumn(PatternEvent*, int column, int value);
 static void enterdigit(int digit, int newval, unsigned char* val);
-static int chartoint(char c);
+static int keycodetoint(unsigned int keycode);
 static void trackerview_setcentermode(TrackerView*, int mode);
 static void trackerview_prevcol(TrackerView*);
 static void trackerview_nextcol(TrackerView*);
@@ -134,6 +139,7 @@ static void trackerview_onparametertweak(TrackerView*,
 	Workspace* sender, int slot, int tweak, int value);
 static void trackerview_onskinchanged(TrackerView*, Workspace*, Properties*);
 
+static int trackerheader_preferredtrackwidth(TrackerHeader*);
 static void trackerheader_ondraw(TrackerHeader*, ui_component* sender,
 	ui_graphics* g);
 static void trackerheader_onmousedown(TrackerHeader*, ui_component* sender,
@@ -357,11 +363,10 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent,
 	self->view = view;
 	self->header = 0;	
 	self->hasselection = 0;
-	self->midline = 1;	
+	self->midline = 1;				
+	ui_component_init(&self->component, parent);	
 	psy_signal_connect(&player->signal_numsongtrackschanged, self,
 		trackergrid_numtrackschanged);
-	self->view->font = ui_createfont("Tahoma", 12);	
-	ui_component_init(&self->component, parent);	
 	psy_signal_connect(&self->component.signal_size, self, trackergrid_onsize);
 	psy_signal_connect(&self->component.signal_keydown,self, 
 		trackergrid_onkeydown);
@@ -391,31 +396,24 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent,
 	workspace_setpatterneditposition(self->view->workspace, self->cursor);
 	self->cursorstep = 0.25;
 	self->dx = 0;
-	self->dy = 0;
-
-	self->textheight = 12;
-	self->textwidth = 9;
-	self->textleftedge = 2;
-	self->colx[0] = 0;
-	self->colx[1] = (self->textwidth*3)+2;
-	self->colx[2] = self->colx[1]+self->textwidth;
-	self->colx[3] = self->colx[2]+self->textwidth + 1;
-	self->colx[4] = self->colx[3]+self->textwidth;
-	self->colx[5] = self->colx[4]+self->textwidth + 1;
-	self->colx[6] = self->colx[5]+self->textwidth;
-	self->colx[7] = self->colx[6]+self->textwidth;
-	self->colx[8] = self->colx[7]+self->textwidth;
-	self->colx[9] = self->colx[8]+self->textwidth + 1;
-	self->trackwidth = self->colx[9];		
-	
-	self->lineheight = self->textheight + 1;
-	self->component.scrollstepx = self->trackwidth;
-	self->component.scrollstepy = self->lineheight;
-	ui_component_showhorizontalscrollbar(&self->component);
-	ui_component_showverticalscrollbar(&self->component);
-	trackergrid_adjustscroll(self);
+	self->dy = 0;	
+	trackergrid_computecolumns(self, 9);	
 	self->component.doublebuffered = 1;
 	self->component.wheelscroll = 4;
+}
+
+void trackergrid_computecolumns(TrackerGrid* self, int textwidth)
+{
+	self->colx[0] = 0;
+	self->colx[1] = (textwidth * 3) + 1;
+	self->colx[2] = self->colx[1] + textwidth;
+	self->colx[3] = self->colx[2] + textwidth + 1;
+	self->colx[4] = self->colx[3] + textwidth;
+	self->colx[5] = self->colx[4] + textwidth + 1;
+	self->colx[6] = self->colx[5] + textwidth;
+	self->colx[7] = self->colx[6] + textwidth;
+	self->colx[8] = self->colx[7] + textwidth;
+	self->colx[9] = self->colx[8] + textwidth + 1;	
 }
 
 void trackergrid_numtrackschanged(TrackerGrid* self, Player* player,
@@ -487,7 +485,7 @@ void TrackerViewApplyProperties(TrackerView* self, Properties* p)
 			trackerview_setcoords(self, coords);
 			properties_free(coords);
 		}
-	}
+	}	
 	ui_component_invalidate(&self->component);
 }
 
@@ -565,8 +563,7 @@ void trackerview_setcoords(TrackerView* self, Properties* p)
 void trackergrid_ondraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
 {	 
   	TrackerGridBlock clip;
-	if (self->view->pattern) {
-		ui_setfont(g, &self->view->font);
+	if (self->view->pattern) {		
 		trackergrid_clipblock(self, &g->clip, &clip);
 		trackergrid_drawbackground(self, g, &clip);
 		trackergrid_drawevents(self, g, &clip);
@@ -584,7 +581,7 @@ psy_dsp_big_beat_t trackergrid_offset(TrackerGrid* self, int y, unsigned int* li
 	unsigned int count;
 	unsigned int remaininglines = 0;
 	
-	count = (y >= 0) ? y / self->lineheight : 0;
+	count = (y >= 0) ? y / self->view->metrics.lineheight : 0;
 	if (self->view->pattern) {
 		PatternNode* curr = self->view->pattern->events;
 		*lines = 0;
@@ -633,14 +630,16 @@ void trackergrid_clipblock(TrackerGrid* self, const ui_rectangle* clip,
 	int lines;
 	int sublines;
 	int subline;
-	block->topleft.track = (clip->left - self->dx) / self->trackwidth;
+	block->topleft.track = (clip->left - self->dx) / self->view->metrics.trackwidth;
 	block->topleft.col = 0;
 	block->topleft.offset =  trackergrid_offset(self, clip->top - self->dy,
 		&lines, &sublines, &subline);
 	block->topleft.line = lines;
 	block->topleft.subline = subline;
 	block->topleft.totallines = lines + sublines;
-	block->bottomright.track = (clip->right - self->dx + self->trackwidth) / self->trackwidth;
+	block->bottomright.track = (clip->right - self->dx +
+			self->view->metrics.trackwidth) /
+		self->view->metrics.trackwidth;
 	if (block->bottomright.track > self->numtracks) {
 		block->bottomright.track = self->numtracks;
 	}
@@ -661,8 +660,11 @@ void trackergrid_drawbackground(TrackerGrid* self, ui_graphics* g, TrackerGridBl
 			++track) {
 		trackergrid_drawtrackbackground(self, g, track);
 	}
-	ui_setrectangle(&r, self->numtracks * self->trackwidth + self->dx, 0, 
-		self->cx - (self->numtracks * self->trackwidth + self->dx), self->cy);
+	ui_setrectangle(&r,
+		self->numtracks * self->view->metrics.trackwidth +
+		self->dx, 0, 
+		self->cx - (self->numtracks * self->view->metrics.trackwidth +
+			self->dx), self->cy);
 	ui_drawsolidrectangle(g, r, self->view->skin.background);
 }
 
@@ -670,8 +672,9 @@ void trackergrid_drawtrackbackground(TrackerGrid* self, ui_graphics* g, int trac
 {
 	ui_rectangle r;
 	
-	ui_setrectangle(&r, track * self->trackwidth + self->dx, 0,
-		self->trackwidth, self->cy);
+	ui_setrectangle(&r, track * self->view->metrics.trackwidth +
+			self->dx, 0,
+		self->view->metrics.trackwidth, self->cy);
 	ui_drawsolidrectangle(g, r, self->view->skin.background);	
 }
 
@@ -712,11 +715,11 @@ void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock*
 	int mid = 0;
 	PatternNode* node;
 	ui_size size;
-	int halfy;
+	int halfy;	
 	
 	size = ui_component_size(&self->component);
-	halfy = (size.height / self->lineheight / 2) * self->lineheight;
-	cpy = (clip->topleft.totallines - clip->topleft.subline) * self->lineheight + self->dy;
+	halfy = (self->view->metrics.visilines / 2) * self->view->metrics.lineheight;	
+	cpy = (clip->topleft.totallines - clip->topleft.subline) * self->view->metrics.lineheight + self->dy;
 	offset = clip->topleft.offset;	
 	node = pattern_greaterequal(self->view->pattern, (psy_dsp_beat_t)offset);
 	subline = 0;	
@@ -727,10 +730,11 @@ void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock*
 		
 		beat = fabs(fmod(offset, 1.0f)) < 0.01f ;
 		beat4 = fabs(fmod(offset, 4.0f)) < 0.01f;
-		mid = self->midline && cpy >= halfy && cpy < halfy + self->lineheight;
+		mid = self->midline && cpy >= halfy && cpy < halfy + self->view->metrics.lineheight;
 		do {
 			fill = 0;
-			cpx = clip->topleft.track * self->trackwidth + self->dx;						
+			cpx = clip->topleft.track * self->view->metrics.trackwidth +
+				self->dx;
 			for (track =  clip->topleft.track; track < clip->bottomright.track;
 					++track) {
 				int hasevent = 0;
@@ -752,7 +756,9 @@ void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock*
 					entry = (PatternEntry*)(node->entry);					
 					if (entry->track == track) {
 						trackergrid_drawevent(self, g, &entry->event, 
-							cpx, cpy, playbar, cursor, selection, beat, beat4, mid);
+							cpx + self->view->metrics.patterntrackident,
+							cpy, playbar, cursor, 
+							selection, beat, beat4, mid);
 						node = node->next;
 						hasevent = 1;
 						break;
@@ -764,13 +770,14 @@ void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock*
 					memset(&event, 0xFF, sizeof(PatternEvent));
 					event.cmd = 0;
 					event.parameter = 0;
-					trackergrid_drawevent(self, g, &event, cpx, cpy, playbar,
-						cursor, selection, beat, beat4, mid);
+					trackergrid_drawevent(self, g, &event,
+						cpx + self->view->metrics.patterntrackident,
+						cpy, playbar, cursor, selection, beat, beat4, mid);
 				} else
 				if (node && ((PatternEntry*)(node->entry))->track <= track) {
 					fill = 1;
 				}
-				cpx += self->trackwidth;			
+				cpx += self->view->metrics.trackwidth;
 			}
 			// skip remaining tracks
 			while (node && ((PatternEntry*)(node->entry))->track > 0 &&
@@ -778,7 +785,7 @@ void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock*
 						offset, self->bpl)) {
 				node = node->next;
 			}
-			cpy += self->lineheight;
+			cpy += self->view->metrics.lineheight;
 			++line;
 			++subline;
 		} while (node &&
@@ -845,7 +852,8 @@ void trackergrid_drawevent(TrackerGrid* self, ui_graphics* g, PatternEvent* even
 	SetColColor(&self->view->skin, g, 0, playbar, cursor && self->cursor.col == 0, 
 		selection, beat, beat4, mid);
 	{	// draw note		
-		ui_setrectangle(&r, x + self->colx[0], y, self->textwidth*3, self->textheight);
+		ui_setrectangle(&r, x + self->colx[0], y, 
+			self->view->metrics.textwidth*3, self->view->metrics.tm.tmHeight);
 		notestr = (event->note != 255 || !self->view->showemptydata) 
 			  ? psy_dsp_notetostr(event->note, self->notestabmode)
 			  : emptynotestr;		
@@ -910,11 +918,13 @@ void trackergrid_drawevent(TrackerGrid* self, ui_graphics* g, PatternEvent* even
 	}			
 }
 
-void trackergrid_drawdigit(TrackerGrid* self, ui_graphics* g, int digit, int col, int x, int y)
+void trackergrid_drawdigit(TrackerGrid* self, ui_graphics* g, int digit,
+						   int col, int x, int y)
 {
 	char buffer[20];	
 	ui_rectangle r;
-	ui_setrectangle(&r, x + self->colx[col], y, self->textwidth, self->textheight);
+	ui_setrectangle(&r, x + self->colx[col], y, self->view->metrics.textwidth,
+		self->view->metrics.tm.tmHeight);
 	if (digit != -1) {
 		psy_snprintf(buffer, 2, "%X", digit);	
 	} else {
@@ -924,56 +934,45 @@ void trackergrid_drawdigit(TrackerGrid* self, ui_graphics* g, int digit, int col
 			psy_snprintf(buffer, 2, "%s", "");	
 		}
 	}
-	ui_textoutrectangle(g, r.left + self->textleftedge, r.top,
+	ui_textoutrectangle(g, r.left + self->view->metrics.textleftedge, r.top,
 		ETO_OPAQUE | ETO_CLIPPED, r, buffer, strlen(buffer));	
 }
 
 void trackergrid_onsize(TrackerGrid* self, ui_component* sender, ui_size* size)
-{
+{	
 	self->cx = size->width;
-	self->cy = size->height;
-	trackergrid_adjustscroll(self);
+	self->cy = size->height;	
 }
 
 void trackergrid_adjustscroll(TrackerGrid* self)
 {
-	ui_size size;
-	int visitracks;
-	int visilines;
+	ui_size size;	
 	int vscrollmax;
 	int stepx;
-	size = ui_component_size(&self->component);	
-	visitracks = size.width / self->trackwidth;
-	visilines = size.height / self->lineheight;
+	size = ui_component_size(&self->component);		
 	ui_component_sethorizontalscrollrange(&self->component, 0,
-		self->numtracks - visitracks);
+		self->numtracks - self->view->metrics.visitracks);
 	vscrollmax = trackerview_numlines(self->view);
 	if (!self->midline) {
-		vscrollmax -= visilines;
+		vscrollmax -= self->view->metrics.visilines;
 	} else {
 		vscrollmax -= 1;
 	}
 	ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
-	if (self->midline) {
-		
+	if (self->midline) {		
 		trackerview_centeroncursor(self->view);
 	}
-	stepx = -self->dx / self->trackwidth;	
+	stepx = -self->dx / self->view->metrics.trackwidth;
 	ui_component_sethorizontalscrollposition(&self->component,
 		stepx > 0 ? stepx : 0);
 }
 
 void trackerview_centeroncursor(TrackerView* self)
 {
-	int line;
-	int visilines;
-	ui_size size;
-
-	size = ui_component_size(&self->grid.component);
-	visilines = size.height / self->grid.lineheight;
+	int line;		
 	line = trackerview_offsettoscreenline(self, 
 		self->grid.cursor.offset) + self->grid.cursor.subline;
-	self->grid.dy = (visilines / 2 - line) * self->grid.lineheight;
+	self->grid.dy = (self->metrics.visilines / 2 - line) * self->metrics.lineheight;
 	self->linenumbers.dy = self->grid.dy;
 	ui_component_setverticalscrollposition(&self->grid.component,
 		line);
@@ -1228,18 +1227,19 @@ int trackerview_scrollup(TrackerView* self)
 	line = trackerview_offsettoscreenline(self, self->grid.cursor.offset)
 		+ self->grid.cursor.subline;
 	ui_setrectangle(&r,
-		self->grid.cursor.track * self->grid.trackwidth,
-		self->grid.lineheight * line,		
-		self->grid.trackwidth,
-		self->grid.lineheight);
+		self->grid.cursor.track * self->metrics.trackwidth,
+		self->metrics.lineheight * line,		
+		self->metrics.trackwidth,
+		self->metrics.lineheight);
 	if (self->grid.midline) {
 		topline = ui_component_size(&self->grid.component).height  
-			/ self->grid.lineheight / 2;		
+			/ self->metrics.lineheight / 2;		
 	} else {
 		topline = 0;
 	}
-	if (-self->grid.dy + topline * self->grid.lineheight > r.top) {
-		int dlines = (-self->grid.dy + topline * self->grid.lineheight - r.top) / (self->grid.lineheight);
+	if (-self->grid.dy + topline * self->metrics.lineheight > r.top) {
+		int dlines = (-self->grid.dy + topline * self->metrics.lineheight - r.top) /
+			(self->metrics.lineheight);
 		psy_signal_emit(&self->grid.component.signal_scroll,
 			&self->grid.component, 2, 0, dlines);
 		ui_component_scrollstep(&self->grid.component, 0, dlines);
@@ -1257,7 +1257,7 @@ int trackerview_scrolldown(TrackerView* self)
 	int visilines;
 	int rv = 1;	
 	
-	visilines = ui_component_size(&self->grid.component).height  / self->grid.lineheight;
+	visilines = self->metrics.visilines;
 	if (self->grid.midline) {
 		visilines /= 2;
 	} else {
@@ -1265,10 +1265,10 @@ int trackerview_scrolldown(TrackerView* self)
 	}
 	line = trackerview_offsettoscreenline(self, self->grid.cursor.offset)
 		+ self->grid.cursor.subline;	
-	if (visilines < line + self->grid.dy / self->grid.lineheight) {
+	if (visilines < line + self->grid.dy / self->metrics.lineheight) {
 		int dlines;
 
-		dlines = line + self->grid.dy / self->grid.lineheight - visilines;
+		dlines = line + self->grid.dy / self->metrics.lineheight - visilines;
 		psy_signal_emit(&self->grid.component.signal_scroll,
 			&self->grid.component, 2, 0, -dlines);
 		ui_component_scrollstep(&self->grid.component, 0, -dlines);
@@ -1332,8 +1332,8 @@ int trackerview_scrollleft(TrackerView* self)
 	int invalidate = 1;
 	
 	tracks = self->grid.cursor.track;
-	if (-self->grid.dx / self->grid.trackwidth > tracks) {
-		self->grid.dx = -tracks * self->grid.trackwidth;
+	if (-self->grid.dx / self->metrics.trackwidth > tracks) {
+		self->grid.dx = -tracks * self->metrics.trackwidth;
 		self->header.dx = self->grid.dx;
 		ui_component_invalidate(&self->grid.component);
 		ui_component_update(&self->grid.component);
@@ -1352,10 +1352,10 @@ int trackerview_scrollright(TrackerView* self)
 	int tracks;
 		
 	visitracks = ui_component_size(&self->component).width /
-		self->grid.trackwidth;
+		self->metrics.trackwidth;
 	tracks = self->grid.cursor.track + 2;
-	if (visitracks - self->grid.dx / self->grid.trackwidth < tracks) {
-		self->grid.dx = -(tracks - visitracks) * self->grid.trackwidth;
+	if (visitracks - self->grid.dx / self->metrics.trackwidth < tracks) {
+		self->grid.dx = -(tracks - visitracks) * self->metrics.trackwidth;
 		self->header.dx = self->grid.dx;
 		ui_component_invalidate(&self->header.component);		
 		ui_component_update(&self->header.component);
@@ -1541,9 +1541,12 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 			ui_component_invalidate(&self->linenumbers.component);
 		}	
 	} else {
-		if (self->grid.cursor.col != TRACKER_COLUMN_NOTE) {
-			trackerview_inputdigit(self, chartoint((char)keyevent->keycode));
-			return;
+		if (self->grid.cursor.col != TRACKER_COLUMN_NOTE) {			
+			int digit = keycodetoint(keyevent->keycode);
+			if (digit != -1) {
+				trackerview_inputdigit(self, digit);
+				return;
+			}			
 		}
 		{	
 			EventDriver* kbd;
@@ -1665,17 +1668,14 @@ int colgroupstart(int col)
 	}
 }
 
-int chartoint(char c) {
+int keycodetoint(unsigned int keycode) {
 	int rv = -1;
 
-	if (c >= '0' && c <='9') {
-		rv = c - '0';
+	if (keycode >= '0' && keycode <='9') {
+		rv = keycode - '0';
 	} else
-	if (c >= 'A' && c <='Z') {
-		rv = c - 'A' + 10;
-	} else
-	if (c >= 'a' && c <='z') {
-		rv = c - 'a' + 10;
+	if (keycode >= 'A' && keycode <='Z') {
+		rv = keycode - 'A' + 10;
 	}
 	return rv;
 }
@@ -1742,10 +1742,10 @@ void trackerview_invalidatecursor(TrackerView* self, const TrackerCursor* cursor
 	line = trackerview_offsettoscreenline(self, cursor->offset)
 		+ cursor->subline;	
 	ui_setrectangle(&r,
-		cursor->track * self->grid.trackwidth + self->grid.dx,
-		self->grid.lineheight * line + self->grid.dy,		
-		self->grid.trackwidth,
-		self->grid.lineheight);
+		cursor->track * self->metrics.trackwidth + self->grid.dx,
+		self->metrics.lineheight * line + self->grid.dy,		
+		self->metrics.trackwidth,
+		self->metrics.lineheight);
 	ui_component_invalidaterect(&self->grid.component, &r);
 	trackerlinenumbers_invalidatecursor(&self->linenumbers, cursor);
 }
@@ -1761,9 +1761,9 @@ void trackerview_invalidateline(TrackerView* self, psy_dsp_beat_t offset)
 			/ self->grid.bpl);
 		ui_setrectangle(&r,
 			self->grid.dx,
-			self->grid.lineheight * line + self->grid.dy,
+			self->metrics.lineheight * line + self->grid.dy,
 			ui_component_size(&self->component).width - self->grid.dx,
-			self->grid.lineheight);
+			self->metrics.lineheight);
 		ui_component_invalidaterect(&self->grid.component, &r);
 	}
 }
@@ -1794,9 +1794,9 @@ void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int stepx,
 		ui_rectangle r;		
 			
 		size = ui_component_size(&self->component);		
-		halfvisilines = size.height / self->lineheight / 2;
-		ui_setrectangle(&r, 0, halfvisilines * self->lineheight, size.width,
-			2 * self->lineheight);
+		halfvisilines = self->view->metrics.visilines / 2;
+		ui_setrectangle(&r, 0, halfvisilines * self->view->metrics.lineheight, size.width,
+			2 * self->view->metrics.lineheight);
 		restoremidline = self->midline;
 		self->midline = 0;
 		ui_component_invalidaterect(&self->component, &r);
@@ -1858,30 +1858,25 @@ TrackerCursor trackergrid_makecursor(TrackerGrid* self, int x, int y)
 	int lines;
 	int sublines;
 	int subline;		
-	int coloffset;
+	int coloffset;	
 	
-
 	rv.offset = trackergrid_offset(self, y - self->dy, &lines, &sublines, &subline);
 	rv.totallines = lines + sublines;
 	rv.subline = subline;
-	rv.track = (x - self->dx) / self->trackwidth;
-	coloffset = (x - self->dx) - rv.track * self->trackwidth;
-	if (coloffset < 3*self->textwidth) {
-		rv.col = 0;
-	} else {
-		rv.col = coloffset / self->textwidth - 2;
-	}
+	rv.track = (x - self->dx) / self->view->metrics.trackwidth;
+	coloffset = (x - self->dx - self->view->metrics.patterntrackident) -
+		rv.track * self->view->metrics.trackwidth;
+	rv.col = 0;
+	while (rv.col < TRACKER_COLUMN_END && self->colx[rv.col + 1] < coloffset) {
+		++rv.col;
+	}	
 	self->cursor.pattern = 
 		workspace_patterneditposition(self->view->workspace).pattern;
 	return rv;
 }
 	
 void trackergrid_onmouseup(TrackerGrid* self, ui_component* sender, MouseEvent* ev)
-{
-	if (self->hasselection) {
-		// ui_component_show(&self->view->blockmenu.component);
-		// ui_component_align(&self->view->component);		
-	}
+{	
 }
 
 void trackerview_init(TrackerView* self, ui_component* parent, Workspace* workspace)
@@ -1893,33 +1888,44 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	self->lastplayposition = -1.f;
 	self->sequenceentryoffset = 0.f;
 	self->wraparound = 1;
+	trackerview_initmetrics(self);
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
-	trackerview_initinputs(self);
+	trackerview_initinputs(self);	
 	self->pattern = 0;
 	ui_bitmap_init(&self->skin.bitmap);
 	ui_bitmap_loadresource(&self->skin.bitmap, IDB_HEADERSKIN);
 	trackerview_initdefaultskin(self);	
 	trackerheader_init(&self->header, &self->component, self);
-	self->header.numtracks = player_numsongtracks(&workspace->player);
-	self->header.trackwidth = self->skin.headercoords.background.destwidth;
+	self->header.numtracks = player_numsongtracks(&workspace->player);	
 	self->linenumbers.skin = &self->skin;
 	trackergrid_init(&self->grid, &self->component, self, &workspace->player);
+	trackerview_computemetrics(self);
 	InitTrackerLineNumbersLabel(&self->linenumberslabel, &self->component, self);	
-	trackerlinenumbers_init(&self->linenumbers, &self->component, self);	
+	trackerlinenumbers_init(&self->linenumbers, &self->component, self);
+	{
+		ui_fontinfo fontinfo;
+		ui_font font;
+
+		ui_fontinfo_init(&fontinfo, "Tahoma", 80);
+		ui_font_init(&font, &fontinfo);		
+		trackerview_setfont(self, &font);
+		ui_font_dispose(&font);
+	}
 	self->grid.header = &self->header;
 	self->grid.linenumbers = &self->linenumbers;	
-	self->header.skin = &self->skin;
-	self->linenumbers.lineheight = 13;
+	self->header.skin = &self->skin;	
 	self->showlinenumbers = 1;
 	self->showlinenumbercursor = 1;
 	self->showlinenumbersinhex = 1;
 	self->showemptydata = 0;
-	psy_signal_connect(&self->component.signal_destroy, self, trackerview_ondestroy);
-	psy_signal_connect(&self->component.signal_align, self, trackerview_onalign);
-	// psy_signal_connect(&self->component.signal_size, self, trackerview_onsize);
-	psy_signal_connect(&self->component.signal_timer, self, trackerview_ontimer);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		trackerview_ondestroy);
+	psy_signal_connect(&self->component.signal_align, self,
+		trackerview_onalign);
+	psy_signal_connect(&self->component.signal_timer, self,
+		trackerview_ontimer);
 	psy_signal_connect(&self->component.signal_keydown, self,
 		trackerview_onkeydown);
 	psy_signal_connect(&self->component.signal_keyup, self,
@@ -1941,25 +1947,15 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 		trackerview_onblockdelete);
 	psy_signal_connect(&self->blockmenu.blocktransposeup.signal_clicked, self,
 		trackerview_onblocktransposeup);
-	psy_signal_connect(&self->blockmenu.blocktransposedown.signal_clicked, self,
-		trackerview_onblocktransposedown);
-	psy_signal_connect(&self->blockmenu.blocktransposeup12.signal_clicked, self,
-		trackerview_onblocktransposeup12);
-	psy_signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked, self,
-		trackerview_onblocktransposedown12);	
+	psy_signal_connect(&self->blockmenu.blocktransposedown.signal_clicked,
+		self, trackerview_onblocktransposedown);
+	psy_signal_connect(&self->blockmenu.blocktransposeup12.signal_clicked,
+		self, trackerview_onblocktransposeup12);
+	psy_signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked,
+		self, trackerview_onblocktransposedown12);
 	ui_component_hide(&self->blockmenu.component);
-	TrackerViewApplyProperties(self, 0);
-	if (self->grid.trackwidth < self->header.trackwidth) {
-		int i;
-		int temp = (self->header.trackwidth - self->grid.trackwidth)/2;
-		self->grid.trackwidth = self->header.trackwidth;
-		for (i = 0; i < 10; ++i) {
-			self->grid.colx[i] += temp;
-		}				
-	} else {
-		self->header.trackwidth = self->grid.trackwidth;
-	}
-	self->grid.component.scrollstepx = self->grid.trackwidth;
+	TrackerViewApplyProperties(self, 0);		
+	trackergrid_adjustscroll(&self->grid);
 	ui_component_starttimer(&self->component, TIMERID_TRACKERVIEW, 50);
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		trackerview_onlpbchanged);
@@ -1968,7 +1964,7 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 	psy_signal_connect(&workspace->player.signal_inputevent, self,
 		trackerview_oninput);
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
-		trackerview_onpatterneditpositionchanged);	
+		trackerview_onpatterneditpositionchanged);
 	psy_signal_connect(&workspace->signal_parametertweak, self,
 		trackerview_onparametertweak);
 	trackerview_readconfig(self);	
@@ -2037,17 +2033,13 @@ void trackerview_setheadertextcoords(TrackerView* self)
 	self->skin.headercoords.digitx0 = digitx0;	
 }
 
-// void trackerview_onsize(TrackerView* self, ui_component* sender, ui_size* size)
-// {
-//	trackerview_align(self, sender);
-// }
-
 void trackerview_onalign(TrackerView* self, ui_component* sender)
 {
 	ui_size size;
 	ui_size menusize;	
-	int headerheight = 30;
-	int linenumberwidth = self->showlinenumbers ? 45 :0;
+	int headerheight = 30;	
+	int linenumberwidth = self->showlinenumbers ? 
+		self->metrics.textwidth * 7 :0;
 	size = ui_component_size(&self->component);
 	menusize.width = self->blockmenu.component.visible
 		? ui_component_preferredsize(&self->blockmenu.component, &size).width
@@ -2068,7 +2060,9 @@ void trackerview_onalign(TrackerView* self, ui_component* sender)
 	ui_component_setposition(&self->linenumbers.component,
 		0, headerheight, linenumberwidth, size.height - headerheight);
 	ui_component_resize(&self->linenumberslabel.component,
-		linenumberwidth, headerheight);	
+		linenumberwidth, headerheight);
+	trackerview_computemetrics(self);
+	trackergrid_adjustscroll(&self->grid);
 }
 
 void trackerheader_init(TrackerHeader* self, ui_component* parent,
@@ -2083,8 +2077,7 @@ void trackerheader_init(TrackerHeader* self, ui_component* parent,
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		trackerheader_onmousedown);
 	self->dx = 0;
-	self->numtracks = 16;
-	self->trackwidth = 102;
+	self->numtracks = 16;	
 	self->classic = 1;
 }
 
@@ -2122,7 +2115,7 @@ void trackerheader_ondraw(TrackerHeader* self, ui_component* sender, ui_graphics
 					&self->skin->headercoords.solo);
 			}
 		}
-		cpx += self->trackwidth;
+		cpx += self->view->metrics.trackwidth;
 	}		
 }
 
@@ -2133,9 +2126,10 @@ void trackerheader_onmousedown(TrackerHeader* self, ui_component* sender,
 		ui_rectangle r;
 		uintptr_t track;
 
-		track = (ev->x - self->dx) / self->trackwidth;
+		track = (ev->x - self->dx) / self->view->metrics.trackwidth;
 		ui_setrectangle(&r,
-			self->skin->headercoords.mute.destx + track * self->trackwidth,
+			self->skin->headercoords.mute.destx + track *
+				self->view->metrics.trackwidth,
 			self->skin->headercoords.mute.desty,
 			self->skin->headercoords.mute.destwidth,
 			self->skin->headercoords.mute.destheight);
@@ -2151,7 +2145,8 @@ void trackerheader_onmousedown(TrackerHeader* self, ui_component* sender,
 			ui_component_invalidate(&self->component);
 		}
 		ui_setrectangle(&r,
-			self->skin->headercoords.solo.destx + track * self->trackwidth,
+			self->skin->headercoords.solo.destx + track *
+				self->view->metrics.trackwidth,
 			self->skin->headercoords.solo.desty,
 			self->skin->headercoords.solo.destwidth,
 			self->skin->headercoords.solo.destheight);
@@ -2174,16 +2169,13 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, ui_component* parent,
 	TrackerView* view)
 {		
 	self->view = view;
-	ui_component_init(&self->component, parent);	
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);
+	self->dy = 0;
+	ui_component_init(&self->component, parent);
+	self->component.doublebuffered = 1;
 	ui_component_setbackgroundcolor(&self->component, 
-		self->view->skin.background);
+		self->view->skin.background);	
 	psy_signal_connect(&self->component.signal_draw, self,
 		trackerlinenumbers_ondraw);	
-	self->dy = 0;
-	self->textheight = 12;
-	self->lineheight = self->textheight + 1;
-	self->component.doublebuffered = 1;
 }
 
 void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
@@ -2198,12 +2190,13 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
 		TrackerGridBlock clip;
 
 		size = ui_component_size(&self->component);
-		trackergrid_clipblock(&self->view->grid, &g->clip, &clip);
-		ui_setfont(g, &self->view->font);
-		cpy = (clip.topleft.totallines - clip.topleft.subline) * self->lineheight + self->dy;
+		trackergrid_clipblock(&self->view->grid, &g->clip, &clip);		
+		cpy = (clip.topleft.totallines - clip.topleft.subline) *
+			self->view->metrics.lineheight + self->dy;
 		offset = clip.topleft.offset;				
 		line = clip.topleft.line;
-		while (offset <= clip.bottomright.offset && offset < self->view->pattern->length) {
+		while (offset <= clip.bottomright.offset &&
+			   offset < self->view->pattern->length) {
 			ui_rectangle r;			
 			int beat;
 			int beat4;
@@ -2225,10 +2218,11 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
 			} else {
 				psy_snprintf(buffer, 10, "%.2d %.3f", line, offset);
 			}
-			ui_setrectangle(&r, 0, cpy, size.width - 2, self->textheight);			
+			ui_setrectangle(&r, 0, cpy, size.width - 2,
+				self->view->metrics.tm.tmHeight);
 			ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 				strlen(buffer));		
-			cpy += self->lineheight;
+			cpy += self->view->metrics.lineheight;
 			ystart = cpy;
 			numsublines = NumSublines(self->view->pattern, offset, self->view->grid.bpl);
 			for (subline = 0; subline < numsublines; ++subline) {
@@ -2241,14 +2235,17 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
 					self->view->grid.cursor.track, offset, subline);
 				SetColColor(self->skin, g, 0, playbar, cursor,
 					0, beat, beat4, 0);
-				ui_setrectangle(&r, 0, cpy, size.width - 2, self->textheight);
+				ui_setrectangle(&r, 0, cpy, size.width - 2,
+					self->view->metrics.tm.tmHeight);
 				ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE, r, buffer,
 					strlen(buffer));		
-				cpy += self->lineheight;
+				cpy += self->view->metrics.lineheight;
 			}
 			if (ystart != cpy) {
-				ui_drawline(g, 1, ystart, 1, cpy - self->lineheight / 2);
-				ui_drawline(g, 1, cpy - self->lineheight / 2, 4, cpy - self->lineheight / 2);
+				ui_drawline(g, 1, ystart, 1,
+					cpy - self->view->metrics.lineheight / 2);
+				ui_drawline(g, 1, cpy - self->view->metrics.lineheight / 2, 4,
+					cpy - self->view->metrics.lineheight / 2);
 			}
 			offset += self->view->grid.bpl;
 			++line;
@@ -2266,9 +2263,9 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 		+ cursor->subline;	
 	ui_setrectangle(&r,
 		0,
-		self->view->grid.lineheight * line + self->view->grid.dy,
+		self->view->metrics.lineheight * line + self->view->grid.dy,
 		ui_component_size(&self->component).width,
-		self->view->grid.lineheight);
+		self->view->metrics.lineheight);
 	ui_component_invalidaterect(&self->component, &r);	
 }
 
@@ -2283,9 +2280,9 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_beat_t 
 			/ self->view->grid.bpl);	
 		ui_setrectangle(&r,
 			self->view->grid.dx,
-			self->view->grid.lineheight * line + self->view->grid.dy,
+			self->view->metrics.lineheight * line + self->view->grid.dy,
 			ui_component_size(&self->component).width - self->view->grid.dx,
-			self->view->grid.lineheight);
+			self->view->metrics.lineheight);
 		ui_component_invalidaterect(&self->component, &r);
 	}
 }
@@ -2479,6 +2476,15 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	} else
 	if (strcmp(properties_key(property), "centercursoronscreen") == 0) {
 		trackerview_setcentermode(self, properties_value(property));
+	} else
+	if (strcmp(properties_key(property), "fontsize") == 0) {
+		ui_fontinfo fontinfo;
+		ui_font font;
+
+		ui_fontinfo_init(&fontinfo, "Tahoma", properties_value(property));
+		ui_font_init(&font, &fontinfo);		
+		trackerview_setfont(self, &font);
+		ui_font_dispose(&font);
 	}
 }
 
@@ -2494,6 +2500,16 @@ void trackerview_readconfig(TrackerView* self)
 		self->wraparound = properties_bool(pv, "wraparound", 1);
 		trackerview_showemptydata(self, properties_bool(pv, "drawemptydata", 1));
 		trackerview_setcentermode(self, properties_bool(pv, "centercursoronscreen", 1));
+		{
+			ui_fontinfo fontinfo;
+			ui_font font;
+
+			ui_fontinfo_init(&fontinfo, "Tahoma", 
+				properties_int(pv, "fontsize", 80));
+			ui_font_init(&font, &fontinfo);		
+			trackerview_setfont(self, &font);
+			ui_font_dispose(&font);
+		}
 	}
 }
 
@@ -2947,4 +2963,72 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 		}
 		trackerview_enablesync(self);
 	}
+}
+
+int trackergrid_preferredtrackwidth(TrackerGrid* self)
+{
+	return self->colx[9];
+}
+
+int trackerheader_preferredtrackwidth(TrackerHeader* self)
+{
+	return self->view->skin.headercoords.background.destwidth;
+}
+
+void trackerview_initmetrics(TrackerView* self)
+{
+	self->metrics.textwidth = 9;
+	self->metrics.textleftedge = 2;
+	self->metrics.tm.tmHeight = 12;
+	self->metrics.lineheight = 12 + 1;
+	self->metrics.trackwidth = 120;
+	self->metrics.patterntrackident = 0;
+	self->metrics.headertrackident = 0;
+	self->metrics.visitracks = 4;
+	self->metrics.visilines = 25;
+}
+
+void trackerview_computemetrics(TrackerView* self)
+{
+	ui_size gridsize;		
+
+	gridsize = ui_component_size(&self->grid.component);
+	self->metrics.tm = ui_component_textmetric(&self->component);	
+	self->metrics.textwidth = (int)(self->metrics.tm.tmAveCharWidth * 1.5) + 2;
+	self->metrics.textleftedge = 2;
+	trackergrid_computecolumns(&self->grid, self->metrics.textwidth);	
+	self->metrics.lineheight = self->metrics.tm.tmHeight + 1;
+	self->metrics.trackwidth = max(
+		trackergrid_preferredtrackwidth(&self->grid),
+		trackerheader_preferredtrackwidth(&self->header));	
+	self->metrics.patterntrackident = 
+		(self->metrics.trackwidth -
+			trackergrid_preferredtrackwidth(&self->grid)) / 2;
+	if (self->metrics.patterntrackident < 0) {
+		self->metrics.patterntrackident = 0;
+	}
+	self->metrics.trackwidth += 1;
+	self->metrics.headertrackident = 0;
+	self->metrics.visitracks = gridsize.width / self->metrics.trackwidth;
+	self->metrics.visilines = gridsize.height / self->metrics.lineheight;
+	/*if (self->grid.trackwidth < self->header.trackwidth) {
+		int i;
+		int temp = (self->header.trackwidth - self->grid.trackwidth) / 2;
+		self->grid.trackwidth = self->header.trackwidth;
+		for (i = 0; i < 10; ++i) {
+			self->grid.colx[i] += temp;
+		}				
+	} else {
+		self->header.trackwidth = self->grid.trackwidth;
+	}*/
+}
+
+void trackerview_setfont(TrackerView* self, ui_font* font)
+{	
+	ui_component_setfont(&self->component, font);
+	ui_component_setfont(&self->grid.component, font);
+	ui_component_setfont(&self->linenumbers.component, font);
+	trackerview_computemetrics(self);	
+		self->grid.component.scrollstepx = self->metrics.trackwidth;
+	self->grid.component.scrollstepy = self->metrics.lineheight;	
 }

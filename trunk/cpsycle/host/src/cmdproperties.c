@@ -138,6 +138,8 @@ void cmdproperties_makegeneral(Properties* self)
 		encodeinput(VK_F10, 0, 1), 0, 0), CMD_IMM_EDITWAVE);
 	properties_setid(properties_append_int(general, "cmd_editinstr",
 		encodeinput(VK_F1, 0, 0), 0, 0), CMD_IMM_HELP);
+	properties_setid(properties_append_int(general, "cmd_editinstr",
+		encodeinput(VK_F12, 0, 0), 0, 0), CMD_IMM_TERMINAL);	
 	for (p = general->children; p != 0; p = properties_next(p)) {
 		properties_sethint(p, PROPERTY_HINT_INPUT);
 	}	

@@ -100,6 +100,7 @@ int ui_rectangle_intersect_rectangle(const ui_rectangle*, const ui_rectangle* ot
 void ui_error(const char* err, const char* shorterr);
 
 void ui_font_init(ui_font*, const ui_fontinfo* info);
+void ui_font_copy(ui_font*, const ui_font* other);
 void ui_font_dispose(ui_font*);
 
 #endif

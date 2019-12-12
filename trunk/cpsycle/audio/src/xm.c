@@ -11,7 +11,8 @@
 #include <string.h>
 
 static void xm_readheader(SongFile*, struct XMFILEHEADER*);
-static void xm_readpatterns(SongFile*, struct XMFILEHEADER*);
+static uint32_t xm_readpatterns(SongFile*, struct XMFILEHEADER*);
+static void xm_readinstruments(SongFile*, struct XMFILEHEADER*, uint32_t start);
 static void xm_makesequence(SongFile*, struct XMFILEHEADER*);
 
 static uint16_t flip16(uint16_t value) 
@@ -24,6 +25,7 @@ static uint16_t flip16(uint16_t value)
 
 void xm_load(SongFile* self)
 {	
+	uint32_t nextstart;
 	SongProperties songproperties;
 	char name[20];
 	char comments[4096];
@@ -31,6 +33,7 @@ void xm_load(SongFile* self)
 	uint8_t trackername_follows;
 	uint16_t xmversion;
 	uint32_t beginheader;
+	uint32_t beginpatterns;
 	struct XMFILEHEADER xmheader;		
 	
 	psyfile_read(self->file, &name, sizeof(name));
@@ -48,8 +51,11 @@ void xm_load(SongFile* self)
 	xmversion = flip16(psyfile_read_uint16(self->file));
 	beginheader = psyfile_getpos(self->file);
 	xm_readheader(self, &xmheader);
-	psyfile_seek(self->file, beginheader + xmheader.size);
-	xm_readpatterns(self, &xmheader);
+	beginpatterns = beginheader + xmheader.size;
+	psyfile_seek(self->file, beginpatterns);	
+	nextstart = xm_readpatterns(self, &xmheader);
+	psyfile_seek(self->file, nextstart);
+	xm_readinstruments(self, &xmheader, nextstart);
 	xm_makesequence(self, &xmheader);
 }
 
@@ -73,18 +79,22 @@ void xm_readheader(SongFile* self, struct XMFILEHEADER *xmheader)
 	self->song->properties.bpm = (psy_dsp_beat_t) xmheader->speed;
 }
 
-void xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
+uint32_t xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 {	
 	uintptr_t slot;	
+	uint32_t nextstart;
 
+	nextstart = psyfile_getpos(self->file);
 	for (slot = 0; slot < xmheader->patterns; ++slot) {
 		struct XMPATTERNHEADER patternheader;
 		Pattern* pattern;
 
+		psyfile_seek(self->file, nextstart);
 		patternheader.size = psyfile_read_uint32(self->file);
 		patternheader.packingtype = psyfile_read_uint8(self->file);
 		patternheader.rows = psyfile_read_uint16(self->file);
 		patternheader.packedsize = psyfile_read_uint16(self->file);
+		nextstart += patternheader.size;
 
 		pattern = pattern_allocinit();
 		pattern_setlength(pattern, patternheader.rows * (psy_dsp_beat_t) 0.25);
@@ -100,6 +110,7 @@ void xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 			PatternEvent ev;
 			PatternNode* node = 0;
 
+			nextstart += patternheader.packedsize;
 			patternevent_clear(&ev);
 			packeddata = malloc(patternheader.packedsize);
 			psyfile_read(self->file, packeddata, patternheader.packedsize);
@@ -164,6 +175,124 @@ void xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 				}
 			}
 			free(packeddata);
+		}
+	}
+
+	return nextstart;
+}
+
+void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t start)
+{
+	uintptr_t slot;	
+	uintptr_t insertslot = 0;
+
+	for (slot = 0; slot < xmheader->instruments; ++slot) {
+		struct XMINSTRUMENTHEADER instrumentheader;		
+
+		start = psyfile_getpos(self->file);
+		instrumentheader.size = psyfile_read_uint32(self->file);
+		psyfile_read(self->file, &instrumentheader.name,
+			sizeof(instrumentheader.name));
+		instrumentheader.name[sizeof(instrumentheader.name) - 1] = '\0';
+		instrumentheader.type = psyfile_read_uint8(self->file);
+		instrumentheader.samples = psyfile_read_uint16(self->file);
+
+		start += instrumentheader.size;
+		if (instrumentheader.samples >  0) {
+			struct XMSAMPLEHEADER sampleheader;
+			XMSAMPLESTRUCT* xmsamples = 0;
+			int s;		
+			
+			// Sample header size
+			psyfile_read(self->file, &sampleheader.shsize, 4);
+			// Sample number for all notes
+			psyfile_read(self->file, &sampleheader.snum, 96);
+			// Points for volume envelope
+			psyfile_read(self->file, &sampleheader.venv, 48);
+			// Points for panning envelope
+			psyfile_read(self->file, &sampleheader.penv, 48);
+			// Number of volume points
+			psyfile_read(self->file, &sampleheader.vnum, 1);
+			// Number of panning points
+			psyfile_read(self->file, &sampleheader.pnum, 1);
+			// Volume sustain point
+			psyfile_read(self->file, &sampleheader.psustain, 1);
+			// Volume loop start point
+			psyfile_read(self->file, &sampleheader.vloops, 1);
+			// Volume loop end point
+			psyfile_read(self->file, &sampleheader.vloope, 1);
+			// Panning sustain point
+			psyfile_read(self->file, &sampleheader.psustain, 1);
+			// Panning loop start point
+			psyfile_read(self->file, &sampleheader.ploops, 1);
+			// Panning loop end point
+			psyfile_read(self->file, &sampleheader.ploope, 1);
+			// Volume type: bit 0: On; 1: Sustain; 2: Loop
+			psyfile_read(self->file, &sampleheader.vtype, 1);
+			// Panning type: bit 0: On; 1: Sustain; 2: Loop
+			psyfile_read(self->file, &sampleheader.ptype, 1);			
+			psyfile_read(self->file, &sampleheader.vibtype, 1);			
+			psyfile_read(self->file, &sampleheader.vibsweep, 1);			
+			psyfile_read(self->file, &sampleheader.vibdepth, 1);			
+			psyfile_read(self->file, &sampleheader.vibrate, 1);			
+			psyfile_read(self->file, &sampleheader.volfade, 2);			
+			psyfile_read(self->file, &sampleheader.reserved, 2);
+			xmsamples = (XMSAMPLESTRUCT*) malloc(sizeof(
+				XMSAMPLESTRUCT) * (int)instrumentheader.samples);
+			psyfile_seek(self->file, start);
+			for (s = 0; s < instrumentheader.samples; ++s) {				
+				psyfile_read(self->file, &xmsamples[s].samplen, 4);				
+				psyfile_read(self->file, &xmsamples[s].loopstart, 4);			
+				psyfile_read(self->file, &xmsamples[s].looplen, 4);			
+				psyfile_read(self->file, &xmsamples[s].vol, 1);
+				// Finetune (signed byte -16..+15)
+				psyfile_read(self->file, &xmsamples[s].finetune, 1);
+				// Type: Bit 0-1: 0 = No loop, 1 = Forward loop,
+				//		 2 = Ping-pong loop;
+				//		 4: 16-bit sampledata
+				psyfile_read(self->file, &xmsamples[s].type, 1);
+				// Panning (0-255)
+				psyfile_read(self->file, &xmsamples[s].pan, 1);
+				// Relative note number (signed byte)
+				psyfile_read(self->file, &xmsamples[s].relnote, 1);				
+				psyfile_read(self->file, &xmsamples[s].res, 1);				
+				psyfile_read(self->file, &xmsamples[s].name, 22);
+				xmsamples[s].name[21] = '\0';			
+			}
+			for (s = 0; s < instrumentheader.samples; ++s) {
+				Sample* sample;
+				Instrument* instrument;
+
+				sample = sample_allocinit();
+				sample_setname(sample, xmsamples[s].name);
+				sample->numframes = xmsamples[s].samplen;
+				buffer_resize(&sample->channels, 1);				
+				if (xmsamples[s].samplen) {
+					unsigned char* pData;
+					int16_t oldvalue;
+					uintptr_t i;
+
+					sample->channels.samples[0] = malloc(sizeof(float)
+						* sample->numframes);
+					pData = malloc(xmsamples[s].samplen);
+					psyfile_read(self->file, pData, xmsamples[s].samplen);
+					oldvalue = 0;
+					for (i = 0; i < sample->numframes; ++i) {
+						int8_t value;
+						
+						value = pData[i] + oldvalue;
+						sample->channels.samples[0][i] = (float) value * 256;
+							;
+					}
+					free(pData);
+				}
+				samples_insert(&self->song->samples, sample, insertslot);
+				instrument = instrument_allocinit();
+				instruments_insert(&self->song->instruments, instrument,
+					insertslot);
+				++insertslot;
+			}
+			free(xmsamples);
 		}
 	}
 }

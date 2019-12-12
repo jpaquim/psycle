@@ -171,6 +171,10 @@ SOURCE=.\src\uistatusbar.c
 
 SOURCE=.\src\uiswitch.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\uiterminal.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -262,6 +266,10 @@ SOURCE=.\src\uistatusbar.h
 # Begin Source File
 
 SOURCE=.\src\uiswitch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiterminal.h
 # End Source File
 # End Group
 # End Target
