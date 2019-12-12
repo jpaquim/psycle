@@ -49,7 +49,8 @@ static void SetSampleSamplesVibratoView(SamplesVibratoView*, Sample* sample);
 static void OnVibratoViewDescribe(SamplesVibratoView*, ui_slider*, char* txt);
 static void OnVibratoViewTweak(SamplesVibratoView*, ui_slider*, float value);
 static void OnVibratoViewValue(SamplesVibratoView*, ui_slider*, float* value);
-static void InitSamplesWaveLoopView(SamplesWaveLoopView*, ui_component* parent);
+static void InitSamplesWaveLoopView(SamplesWaveLoopView*, ui_component* parent,
+	SamplesView*);
 static void OnWaveFormChange(SamplesVibratoView*, ui_combobox* sender, int sel);
 static WaveForms ComboBoxToWaveForm(int combobox_index);
 static int WaveFormToComboBox(WaveForms waveform);
@@ -286,7 +287,7 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	wavebox_init(&self->wavebox, &self->client);	
 	ui_component_setalign(&self->wavebox.component, UI_ALIGN_CLIENT);
 	ui_component_setmargin(&self->wavebox.component, &waveboxmargin);
-	InitSamplesWaveLoopView(&self->waveloop, &self->client);	
+	InitSamplesWaveLoopView(&self->waveloop, &self->component, self);	
 	ui_component_setalign(&self->waveloop.component, UI_ALIGN_BOTTOM);
 	ui_component_setmargin(&self->waveloop.component, &margin);
 	psy_signal_connect(&self->samplesbox.samplelist.signal_selchanged, self,
@@ -360,8 +361,7 @@ void samplesview_onloadsample(SamplesView* self, ui_component* sender)
 			sample_load(sample, path);
 			slot = ui_listbox_cursel(&self->samplesbox.samplelist);
 			samples_insert(&self->workspace->song->samples, sample, slot);
-			instrument = (Instrument*)malloc(sizeof(Instrument));		
-			instrument_init(instrument);
+			instrument = instrument_allocinit();
 			instrument_setname(instrument, sample_name(sample));
 			instruments_insert(&self->workspace->song->instruments, instrument,
 				slot);
@@ -427,8 +427,7 @@ void samplesview_onduplicatesample(SamplesView* self, ui_component* sender)
 				copy = sample_clone(source);
 				samples_insert(&self->workspace->song->samples, copy,
 					dstslot);
-				instrument = (Instrument*)malloc(sizeof(Instrument));
-				instrument_init(instrument);
+				instrument = instrument_allocinit();
 				instrument_setname(instrument, sample_name(copy));
 				instruments_insert(&self->workspace->song->instruments,
 					instrument, dstslot);
@@ -930,60 +929,71 @@ WaveForms ComboBoxToWaveForm(int combobox_index)
 	return rv;
 }
 
-void InitSamplesWaveLoopView(SamplesWaveLoopView* self, ui_component* parent)
+void InitSamplesWaveLoopView(SamplesWaveLoopView* self, ui_component* parent,
+	SamplesView* view)
 {
+	ui_margin margin;
+	ui_margin rowmargin;
+	
+	self->view = view;
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2),
+		ui_value_makepx(0), ui_value_makepx(0));
+	ui_margin_init(&rowmargin, ui_value_makeew(1.5), ui_value_makepx(0),
+		ui_value_makeew(1.5), ui_value_makepx(0));
 	self->sample = 0;
-	ui_component_init(&self->component, parent);	
-	ui_label_init(&self->loopheaderlabel, &self->component);
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	ui_component_init(&self->cont, &self->component);
+	ui_component_enablealign(&self->cont);
+	ui_component_setmargin(&self->cont, &rowmargin);
+	ui_label_init(&self->loopheaderlabel, &self->cont);	
 	ui_label_settext(&self->loopheaderlabel, "Continuous Loop");
-	ui_component_setposition(&self->loopheaderlabel.component, 10, 0, 140, 20);
-
-	ui_combobox_init(&self->loopdir, &self->component);	
+	ui_label_setcharnumber(&self->loopheaderlabel, 18);	
+	ui_combobox_init(&self->loopdir, &self->cont);
 	ui_combobox_addstring(&self->loopdir, "Disabled");
 	ui_combobox_addstring(&self->loopdir, "Forward");
 	ui_combobox_addstring(&self->loopdir, "Bidirection");	
-	ui_component_setposition(&self->loopdir.component, 155, 0, 100, 20);
 	ui_combobox_setcursel(&self->loopdir, 0);
-
-	ui_label_init(&self->loopstartlabel, &self->component);
-	ui_label_settext(&self->loopstartlabel, "Start ");
-	ui_component_setposition(&self->loopstartlabel.component, 10, 25, 70, 20);
-
-	ui_edit_init(&self->loopstartedit, &self->component, 0);	
-	ui_component_setposition(&self->loopstartedit.component, 85, 25, 100, 20);
-
-	ui_label_init(&self->loopendlabel, &self->component);
-	ui_label_settext(&self->loopendlabel, "End ");
-	ui_component_setposition(&self->loopendlabel.component, 190, 25, 70, 20);
-
-	ui_edit_init(&self->loopendedit, &self->component, 0);	
-	ui_component_setposition(&self->loopendedit.component, 265, 25, 100, 20);
-
-	ui_label_init(&self->sustainloopheaderlabel, &self->component);
+	ui_combobox_setcharnumber(&self->loopdir, 10);
+	ui_label_init(&self->loopstartlabel, &self->cont);
+	ui_label_settext(&self->loopstartlabel, "Start ");	
+	ui_edit_init(&self->loopstartedit, &self->cont, 0);
+	ui_edit_setcharnumber(&self->loopstartedit, 10);
+	ui_label_init(&self->loopendlabel, &self->cont);
+	ui_label_settext(&self->loopendlabel, "End ");	
+	ui_edit_init(&self->loopendedit, &self->cont, 0);
+	ui_edit_setcharnumber(&self->loopendedit, 10);
+	list_free(ui_components_setalign(
+		ui_component_children(&self->cont, 0),
+		UI_ALIGN_LEFT,
+		&margin));
+	ui_component_init(&self->sustain, &self->component);	
+	ui_component_enablealign(&self->sustain);
+	ui_label_init(&self->sustainloopheaderlabel, &self->sustain);
 	ui_label_settext(&self->sustainloopheaderlabel, "Sustain Loop");
-	ui_component_setposition(&self->sustainloopheaderlabel.component, 10, 50, 140, 20);
-
-	ui_combobox_init(&self->sustainloopdir, &self->component);	
+	ui_label_setcharnumber(&self->sustainloopheaderlabel, 18);
+	ui_combobox_init(&self->sustainloopdir, &self->sustain);
 	ui_combobox_addstring(&self->sustainloopdir, "Disabled");
 	ui_combobox_addstring(&self->sustainloopdir, "Forward");
-	ui_combobox_addstring(&self->sustainloopdir, "Bidirection");	
-	ui_component_setposition(&self->sustainloopdir.component, 155, 50, 100, 20);
+	ui_combobox_addstring(&self->sustainloopdir, "Bidirection");		
 	ui_combobox_setcursel(&self->sustainloopdir, 0);
-
-	ui_label_init(&self->sustainloopstartlabel, &self->component);
-	ui_label_settext(&self->sustainloopstartlabel, "Start ");
-	ui_component_setposition(&self->sustainloopstartlabel.component, 10, 75, 70, 20);
-
-	ui_edit_init(&self->sustainloopstartedit, &self->component, 0);	
-	ui_component_setposition(&self->sustainloopstartedit.component, 85, 75, 100, 20);
-
-	ui_label_init(&self->sustainloopendlabel, &self->component);
-	ui_label_settext(&self->sustainloopendlabel, "End ");
-	ui_component_setposition(&self->sustainloopendlabel.component, 190, 75, 70, 20);
-
-	ui_edit_init(&self->sustainloopendedit, &self->component, 0);	
-	ui_component_setposition(&self->sustainloopendedit.component, 265, 75, 100, 20);
-
+	ui_combobox_setcharnumber(&self->sustainloopdir, 10);
+	ui_label_init(&self->sustainloopstartlabel, &self->sustain);
+	ui_label_settext(&self->sustainloopstartlabel, "Start ");	
+	ui_edit_init(&self->sustainloopstartedit, &self->sustain, 0);		
+	ui_edit_setcharnumber(&self->sustainloopstartedit, 10);
+	ui_label_init(&self->sustainloopendlabel, &self->sustain);	
+	ui_label_settext(&self->sustainloopendlabel, "End ");	
+	ui_edit_init(&self->sustainloopendedit, &self->sustain, 0);
+	ui_edit_setcharnumber(&self->sustainloopendedit, 10);
+	list_free(ui_components_setalign(
+		ui_component_children(&self->sustain, 0),
+		UI_ALIGN_LEFT,
+		&margin));
+	list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_TOP,
+		0));
 	psy_signal_connect(&self->loopdir.signal_selchanged, self,
 		OnLoopTypeChange);
 	psy_signal_connect(&self->sustainloopdir.signal_selchanged, self,
@@ -1013,8 +1023,10 @@ void SetSampleSamplesWaveLoopView(SamplesWaveLoopView* self, Sample* sample)
 		ui_edit_settext(&self->sustainloopstartedit, tmp);
 		sprintf(tmp, "%d", sample->sustainloopend);
 		ui_edit_settext(&self->sustainloopendedit, tmp);
-		ui_combobox_setcursel(&self->loopdir, LoopTypeToComboBox(self->sample->looptype));
-		ui_combobox_setcursel(&self->sustainloopdir, LoopTypeToComboBox(self->sample->sustainlooptype));
+		ui_combobox_setcursel(&self->loopdir,
+			LoopTypeToComboBox(self->sample->looptype));
+		ui_combobox_setcursel(&self->sustainloopdir,
+			LoopTypeToComboBox(self->sample->sustainlooptype));
 	} else {
 		ui_component_preventinput(&self->component, 1);
 		sprintf(tmp, "%d", 0);
@@ -1022,8 +1034,10 @@ void SetSampleSamplesWaveLoopView(SamplesWaveLoopView* self, Sample* sample)
 		ui_edit_settext(&self->loopendedit, tmp);		
 		ui_edit_settext(&self->sustainloopstartedit, tmp);		
 		ui_edit_settext(&self->sustainloopendedit, tmp);
-		ui_combobox_setcursel(&self->loopdir, LoopTypeToComboBox(LOOP_DO_NOT));
-		ui_combobox_setcursel(&self->sustainloopdir, LoopTypeToComboBox(LOOP_DO_NOT));		
+		ui_combobox_setcursel(&self->loopdir,
+			LoopTypeToComboBox(LOOP_DO_NOT));
+		ui_combobox_setcursel(&self->sustainloopdir,
+			LoopTypeToComboBox(LOOP_DO_NOT));		
 	}
 	LoopTypeEnablePreventInput(self);
 }
@@ -1046,7 +1060,8 @@ void OnLoopTypeChange(SamplesWaveLoopView* self, ui_combobox* sender, int sel)
 {
 	if (self->sample) {
 		self->sample->looptype = ComboBoxToLoopType(sel);
-		LoopTypeEnablePreventInput(self);
+		ui_component_invalidate(&self->view->wavebox.component);
+		LoopTypeEnablePreventInput(self);		
 	}
 }
 
@@ -1054,6 +1069,7 @@ void OnSustainLoopTypeChange(SamplesWaveLoopView* self, ui_combobox* sender, int
 {
 	if (self->sample) {
 		self->sample->sustainlooptype = ComboBoxToLoopType(sel);
+		ui_component_invalidate(&self->view->wavebox.component);
 		LoopTypeEnablePreventInput(self);
 	}
 }

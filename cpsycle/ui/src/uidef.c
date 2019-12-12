@@ -12,6 +12,8 @@
 #define EZ_ATTR_UNDERLINE     4
 #define EZ_ATTR_STRIKEOUT     8
 
+extern ui_font defaultfont;
+
 static LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
 	int iDeciPtWidth, int iAttributes, BOOL fLogRes);
 
@@ -173,17 +175,38 @@ LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
 
 
 void ui_font_init(ui_font* self, const ui_fontinfo* fontinfo)
-{	
-    HDC hdc = GetDC (NULL) ;
-    SaveDC (hdc) ;          
-	self->hfont = CreateFontIndirect (&fontinfo->lf) ;         
-	RestoreDC (hdc, -1);
-	ReleaseDC(NULL, hdc);     
+{		
+	if (fontinfo) {
+		HDC hdc = GetDC (NULL) ;
+		SaveDC (hdc) ;          
+		self->hfont = CreateFontIndirect (&fontinfo->lf) ;         
+		RestoreDC (hdc, -1);
+		ReleaseDC(NULL, hdc);
+	} else {
+		self->hfont = 0;
+		self->stock = 0;
+	}
+}
+
+void ui_font_copy(ui_font* self, const ui_font* other)
+{
+	if (self->hfont) {
+		ui_font_dispose(self);		
+	}
+	if (other->hfont && other->hfont != defaultfont.hfont) {
+		LOGFONT lf;
+		GetObject(other->hfont, sizeof(LOGFONT), &lf);
+		self->hfont = CreateFontIndirect(&lf);
+	}
+	if (other->hfont == defaultfont.hfont) {
+		self->hfont = defaultfont.hfont;
+	}
 }
 
 void ui_font_dispose(ui_font* self)
 {
-	if (!self->stock && self->hfont) {		
+	if (!self->stock && self->hfont && self->hfont !=
+			defaultfont.hfont) {
 		DeleteObject(self->hfont);
 	}
 	self->hfont = 0;

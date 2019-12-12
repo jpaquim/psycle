@@ -57,13 +57,16 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
+	struct SamplesView* view;
 	Sample* sample;	
+	ui_component cont;
 	ui_label loopheaderlabel;
 	ui_combobox loopdir;
 	ui_label loopstartlabel;
 	ui_edit loopstartedit;
 	ui_label loopendlabel;
 	ui_edit loopendedit;
+	ui_component sustain;
 	ui_label sustainloopheaderlabel;
 	ui_combobox sustainloopdir;
 	ui_label sustainloopstartlabel;

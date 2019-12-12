@@ -8,6 +8,7 @@
 #include <uilabel.h>
 #include <uibutton.h>
 #include <uiframe.h>
+#include <uiterminal.h>
 #include <uinotebook.h>
 #include <uiprogressbar.h>
 #include "uistatusbar.h"
@@ -41,9 +42,10 @@ typedef struct {
 	ui_component toprow1;
 	ui_component toprow2;
 	ui_component tabbars;
-	ui_component client;	
+	ui_component client;
+	ui_terminal terminal;
 	// ui_button updatedriver;
-	ui_component splitbar;
+	ui_component splitbar;	
 	ui_progressbar progressbar;
 	Navigation navigation;
 	TabBar tabbar;	
@@ -75,7 +77,7 @@ typedef struct {
 	int resize;
 	ui_label statusbarlabel;
 	PatternViewBar patternbar;
-	MachineViewBar machineviewbar;
+	MachineViewBar machineviewbar;	
 } MainFrame;
 
 void mainframe_init(MainFrame*);

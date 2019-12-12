@@ -63,9 +63,20 @@ typedef struct {
 typedef TrackerGridBlock PatternSelection;
 
 typedef struct {
-	ui_component component;
-	int dx;
+	ui_textmetric tm;
+	int textwidth;
+	int textleftedge;
+	int lineheight;
 	int trackwidth;
+	int patterntrackident;
+	int headertrackident;
+	int visilines;
+	int visitracks;
+} TrackerMetrics;
+
+typedef struct {
+	ui_component component;
+	int dx;	
 	unsigned int numtracks;
 	int classic;
 	TrackerSkin* skin;
@@ -86,8 +97,6 @@ typedef struct {
 	ui_component component;
 	TrackerSkin* skin;
 	int dy;
-	int textheight;
-	int lineheight;
 	struct TrackerView* view;
 } TrackerLineNumbers;
 
@@ -118,9 +127,7 @@ typedef struct {
    int cx;
    int cy;
    int dx;
-   int dy;
-   int trackwidth;
-   int lineheight;
+   int dy;      
    unsigned int numtracks;   
    int lpb;
    double bpl;
@@ -128,10 +135,7 @@ typedef struct {
    psy_dsp_NotesTabMode notestabmode;
    TrackerCursor cursor;
    psy_dsp_beat_t cursorstep;   
-   Player* player;
-   int textheight;
-   int textwidth;
-   int textleftedge;
+   Player* player;   
    int colx[TRACKERGRID_numparametercols];
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
@@ -160,8 +164,7 @@ typedef struct TrackerView {
 	TrackerGrid grid;
 	PatternBlockMenu blockmenu;
 	Pattern* pattern;
-	TrackerSkin skin;
-	ui_font font;
+	TrackerSkin skin;	
 	int showlinenumbers;
 	int showlinenumbercursor;
 	int showlinenumbersinhex;
@@ -175,7 +178,8 @@ typedef struct TrackerView {
 	psy_dsp_beat_t lastplayposition;
 	psy_dsp_beat_t sequenceentryoffset;
 	List* sublines;
-	Table screenlines;	
+	Table screenlines;
+	TrackerMetrics metrics;
 } TrackerView;
 
 void trackerview_init(TrackerView*, ui_component* parent, Workspace*);

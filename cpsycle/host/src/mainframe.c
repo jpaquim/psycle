@@ -84,8 +84,11 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
 		mainframe_onsongchanged);
 	mainframe_updatetitle(self);
-	self->firstshow = 1;	
+	self->firstshow = 1;			
 	mainframe_initbars(self);
+	ui_terminal_init(&self->terminal, &self->component);
+	ui_component_hide(&self->terminal.component);
+	ui_component_resize(&self->terminal.component, 0, 100);
 	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);
 	psy_signal_connect(&self->component.signal_align, self, mainframe_onalign);	
 	psy_signal_connect(&self->component.signal_keydown, self, mainframe_onkeydown);
@@ -307,6 +310,7 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	ui_size sequenceviewsize;
 	ui_size gearsize;
 	ui_size plugineditorsize;
+	ui_size terminalsize;
 	ui_size vusize;
 	ui_size topsize;	
 	ui_size limit;
@@ -316,7 +320,7 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	size = ui_component_size(&self->component);
 	tm = ui_component_textmetric(&self->component);
 	statusbarsize = ui_component_preferredsize(&self->statusbar, &size);	
-	sequenceviewsize = ui_component_size(&self->sequenceview.component);
+	sequenceviewsize = ui_component_size(&self->sequenceview.component);	
 	limit.width = size.width - sequenceviewsize.width - splitbarwidth;
 	limit.height = size.height;
 	tabbarssize = ui_component_preferredsize(&self->tabbars, &limit);
@@ -331,6 +335,12 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 		plugineditorsize = ui_component_size(&self->plugineditor.component);
 	} else {
 		plugineditorsize.width = 0;
+	}
+	if (self->terminal.component.visible) {
+		terminalsize.height = 
+			ui_component_size(&self->terminal.component).height;
+	} else {
+		terminalsize.height = 0;
 	}
 	limit.width = size.width - vusize.width;
 	limit.height = size.height;
@@ -351,19 +361,21 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	ui_component_setposition(&self->splitbar,
 		sequenceviewsize.width,
 		topsize.height, splitbarwidth,
-		size.height - statusbarsize.height - topsize.height);
+		size.height - statusbarsize.height - topsize.height -
+			terminalsize.height);
 	ui_component_setposition(&self->sequenceview.component,
 		0,
 		topsize.height,
 		sequenceviewsize.width,
-		size.height - statusbarsize.height - topsize.height);	
+		size.height - statusbarsize.height - topsize.height
+			- terminalsize.height);	
 	ui_component_setposition(&self->notebook.component,
 		sequenceviewsize.width + splitbarwidth + plugineditorsize.width,
 		topsize.height + tabbarssize.height,
 		size.width - sequenceviewsize.width - 3 - gearsize.width
 			- plugineditorsize.width,
 		size.height - statusbarsize.height - topsize.height -
-			tabbarssize.height);
+			tabbarssize.height - terminalsize.height);
 	ui_component_setposition(&self->statusbar,
 		0,
 		size.height - statusbarsize.height,		
@@ -375,7 +387,7 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 			topsize.height + tabbarssize.height,
 			plugineditorsize.width,
 			size.height - statusbarsize.height - topsize.height -
-				tabbarssize.height);
+				tabbarssize.height - terminalsize.height);
 	}
 	if (ui_component_visible(&self->gear.component)) {
 		ui_component_setposition(&self->gear.component,
@@ -383,7 +395,14 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 			topsize.height + tabbarssize.height,
 			gearsize.width,
 			size.height - statusbarsize.height - topsize.height -
-				tabbarssize.height);
+				tabbarssize.height - terminalsize.height);
+	}
+	if (ui_component_visible(&self->terminal.component)) {
+		ui_component_setposition(&self->terminal.component,
+			0,
+			size.height - terminalsize.height - statusbarsize.height,
+			size.width,
+			terminalsize.height);
 	}
 	if (self->firstshow) {
 		machineview_align(&self->machineview);
@@ -482,8 +501,19 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 	if (cmd == CMD_IMM_EDITWAVE) {
 		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW);
 		tabbar_select(&self->samplesview.clienttabbar, 2);
+	} else
+	if (cmd == CMD_IMM_TERMINAL) {
+		if (ui_component_visible(&self->terminal.component)) {		
+		ui_component_hide(&self->terminal.component);
+		ui_component_align(&self->component);
+	} else {								
+		ui_component_show(&self->terminal.component);
+		ui_component_align(&self->component);		
+	}
 	}
 }
+
+
 
 void mainframe_onkeydown(MainFrame* self, ui_component* sender, KeyEvent* ev)
 {	

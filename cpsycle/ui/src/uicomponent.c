@@ -20,7 +20,7 @@ int iDeltaPerLine = 120;
 TCHAR szAppClass[] = TEXT("PsycleApp");
 static TCHAR szComponentClass[] = TEXT("PsycleComponent");
 static uintptr_t winid = 20000;
-static ui_font defaultfont;
+ui_font defaultfont;
 static int defaultbackgroundcolor = 0x00232323;
 static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
@@ -105,7 +105,6 @@ void ui_dispose()
 	DeleteObject(defaultbackgroundbrush);
 	psy_signal_dispose(&app.signal_dispose);
 }
-
 
 void ui_replacedefaultfont(ui_component* main, ui_font* font)
 {		
@@ -1192,13 +1191,24 @@ int ui_component_hasfocus(ui_component* self)
 	return (HWND) self->hwnd == GetFocus();
 }
 
-void ui_component_setfont(ui_component* self, ui_font* font)
+void ui_component_setfont(ui_component* self, ui_font* source)
 {
-	if (font && font->hfont) {
-		SendMessage((HWND)self->hwnd, WM_SETFONT, (WPARAM) font->hfont, 0);
-	}
-	if (font) {
-		self->font = *font;
+	ui_font font;
+
+	font.hfont = 0;
+	font.stock = 0;
+	if (source && source->hfont && source->hfont != defaultfont.hfont) {
+		ui_font_init(&font, 0);
+		ui_font_copy(&font, source);
+	} else {
+		font.hfont = defaultfont.hfont;
+	}	
+	SendMessage((HWND)self->hwnd, WM_SETFONT, (WPARAM) font.hfont, 0);	
+	if (self->font.hfont) {
+		if (self->font.hfont != defaultfont.hfont) {
+			ui_font_dispose(&self->font);		
+		}
+		self->font = font;
 	}
 }
 
@@ -1256,9 +1266,9 @@ void ui_component_align(ui_component* self)
 			if (component->align == UI_ALIGN_TOP) {
 				cp_topleft.y += ui_value_px(&component->margin.top, &tm);
 				ui_component_setposition(component, 
-					ui_value_px(&component->margin.left, &tm), 
+					cp_topleft.x + ui_value_px(&component->margin.left, &tm), 
 					cp_topleft.y,
-					cp_bottomright.x -
+					cp_bottomright.x - cp_topleft.x -
 						ui_margin_width_px(&component->margin, &tm),
 					componentsize.height);
 				cp_topleft.y += ui_value_px(&component->margin.bottom, &tm);
@@ -1268,11 +1278,10 @@ void ui_component_align(ui_component* self)
 				cp_bottomright.y -=
 					ui_value_px(&component->margin.bottom, &tm);
 				ui_component_setposition(component, 
-					ui_value_px(&component->margin.left, &tm), 
+					cp_topleft.x + ui_value_px(&component->margin.left, &tm), 
 					cp_bottomright.y - componentsize.height,
-					cp_bottomright.x -
-						ui_value_px(&component->margin.left, &tm) -
-						ui_value_px(&component->margin.right, &tm),
+					cp_bottomright.x - cp_topleft.x -
+						ui_margin_width_px(&component->margin, &tm),						
 					componentsize.height);
 				cp_bottomright.y -= ui_value_px(&component->margin.top, &tm);
 				cp_bottomright.y -= componentsize.height;
