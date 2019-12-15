@@ -36,6 +36,7 @@ void renderview_ondestroy(RenderView* self, ui_component* sender)
 	properties_free(self->properties);	
 	self->fileoutdriver->dispose(self->fileoutdriver);
 	self->fileoutdriver->free(self->fileoutdriver);
+//	free(self->fileoutdriver);
 }
 
 void renderview_makeproperties(RenderView* self)

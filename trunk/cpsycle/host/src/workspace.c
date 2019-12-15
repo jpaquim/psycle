@@ -103,7 +103,7 @@ void workspace_init(Workspace* self, void* handle)
 {	
 	lock_init();
 #ifdef SSE
-	pdy_dsp_sse2_init(&dsp);
+	psy_dsp_sse2_init(&dsp);
 #else
 	psy_dsp_noopt_init(&dsp);
 #endif

@@ -33,6 +33,6 @@ UIMAIN
 	if (env) {
 		setpathenv(env);
 	}	
-	// _CrtDumpMemoryLeaks();
+//	_CrtDumpMemoryLeaks();
 	return err;
 }

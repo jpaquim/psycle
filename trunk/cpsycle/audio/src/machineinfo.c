@@ -59,7 +59,7 @@ void machineinfo_setnativeinfo(MachineInfo* self,
 	self->Author = strdup(info->Author);
 	self->Command = strdup(info->Command);
 	self->Flags = info->Flags;
-	self->mode = (info->Flags & 3 == 3) ? MACHMODE_GENERATOR : MACHMODE_FX;
+	self->mode = (info->Flags & 3) == 3 ? MACHMODE_GENERATOR : MACHMODE_FX;
 	self->Name = strdup(info->Name);		
 	self->ShortName = strdup(info->ShortName);
 	self->APIVersion = info->APIVersion;
