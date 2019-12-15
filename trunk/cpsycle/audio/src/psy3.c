@@ -167,7 +167,8 @@ void psy3_setinstrumentnames(SongFile* self)
 		Sample* sample;
 
 		instrument = tableiterator_value(&it);
-		sample = samples_at(&self->song->samples, tableiterator_key(&it));
+		sample = samples_at(&self->song->samples,
+			sampleindex_make(tableiterator_key(&it), 0));
 		instrument_setname(instrument, sample_name(sample));		
 	}
 }
@@ -719,7 +720,8 @@ void readsmsb(SongFile* self)
 					pData = 0;
 					wave->channels.numchannels = 2;
 				}
-				samples_insert(&self->song->samples, wave, sampleidx);
+				samples_insert(&self->song->samples, wave,
+					sampleindex_make(sampleidx, 0));
 			}
 		}
 	}
@@ -823,7 +825,8 @@ void loadwavesubchunk(SongFile* self, int32_t instrIdx, int32_t pan, char * inst
 				wave->channels.samples[1] = 0;
 			}
 		}
-		samples_insert(&self->song->samples, wave, instrIdx);
+		samples_insert(&self->song->samples, wave,
+			sampleindex_make(instrIdx, 0));
 	}
 	else
 	{
@@ -991,7 +994,7 @@ uint32_t psy3_chunkcount(Song* song)
 	// INSD
 	rv += (uint32_t)instruments_size(&song->instruments);
 	// SMSB
-	rv += (uint32_t)samples_size(&song->samples);
+	rv += (uint32_t)samples_groupsize(&song->samples);
 	return rv;
 }
 
@@ -1521,11 +1524,12 @@ void psy3_writesmsb(SongFile* self)
 	uint32_t sizepos;
 	int32_t index;
 
-	for (it = table_begin(&self->song->samples.container);
-			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+	for (it = samples_begin(&self->song->samples);
+			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {		
 		Sample* sample;
-		
-		sample = (Sample*)tableiterator_value(&it);					
+				
+		sample = samples_at(&self->song->samples,
+			sampleindex_make(tableiterator_key(&it), 0));
 		sizepos = psyfile_writeheader(self->file, "SMSB",
 			CURRENT_FILE_VERSION_SMSB, 0);
 		index = (int32_t) tableiterator_key(&it);

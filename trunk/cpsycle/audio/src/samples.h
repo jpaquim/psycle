@@ -9,15 +9,30 @@
 
 #define NOSAMPLES_INDEX UINTPTR_MAX
 
-typedef struct Samples {
+typedef struct {
+	uintptr_t slot;
+	uintptr_t subslot;
+} SampleIndex;
+
+SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot);
+
+typedef struct {
+	char* name;
 	Table container;
+} SamplesGroup;
+
+typedef struct Samples {
+	Table groups;
 } Samples;
 
 void samples_init(Samples*);
 void samples_dispose(Samples*);
-void samples_insert(Samples*, Sample* sample, uintptr_t slot);
-void samples_remove(Samples*, uintptr_t slot);
-Sample* samples_at(Samples*, uintptr_t slot);
-uintptr_t samples_size(Samples*);
+void samples_insert(Samples*, Sample* sample, SampleIndex);
+void samples_remove(Samples*, SampleIndex);
+Sample* samples_at(Samples*, SampleIndex);
+uintptr_t samples_groupsize(Samples*);
+
+TableIterator samples_begin(Samples*);
+TableIterator samples_groupbegin(Samples*, uintptr_t slot);
 
 #endif

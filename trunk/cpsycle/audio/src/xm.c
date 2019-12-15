@@ -184,11 +184,13 @@ uint32_t xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t start)
 {
 	uintptr_t slot;	
-	uintptr_t insertslot = 0;
 
 	for (slot = 0; slot < xmheader->instruments; ++slot) {
 		struct XMINSTRUMENTHEADER instrumentheader;		
+		Instrument* instrument;
 
+		instrument = instrument_allocinit();
+			instruments_insert(&self->song->instruments, instrument, slot);
 		start = psyfile_getpos(self->file);
 		instrumentheader.size = psyfile_read_uint32(self->file);
 		psyfile_read(self->file, &instrumentheader.name,
@@ -258,10 +260,9 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 				psyfile_read(self->file, &xmsamples[s].res, 1);				
 				psyfile_read(self->file, &xmsamples[s].name, 22);
 				xmsamples[s].name[21] = '\0';			
-			}
+			}		
 			for (s = 0; s < instrumentheader.samples; ++s) {
-				Sample* sample;
-				Instrument* instrument;
+				Sample* sample;				
 
 				sample = sample_allocinit();
 				sample_setname(sample, xmsamples[s].name);
@@ -286,13 +287,10 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 					}
 					free(pData);
 				}
-				samples_insert(&self->song->samples, sample, insertslot);
-				instrument = instrument_allocinit();
-				instruments_insert(&self->song->instruments, instrument,
-					insertslot);
-				++insertslot;
+				samples_insert(&self->song->samples, sample,
+					sampleindex_make(slot, s));
 			}
-			free(xmsamples);
+			free(xmsamples);			
 		}
 	}
 }

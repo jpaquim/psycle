@@ -73,14 +73,14 @@ typedef struct {
 	ui_edit sustainloopstartedit;
 	ui_label sustainloopendlabel;
 	ui_edit sustainloopendedit;		
-} SamplesWaveLoopView;
+} SamplesLoopView;
 
 typedef struct {
 	ui_component component;
-	ui_button loadbutton;
-	ui_button savebutton;
-	ui_button duplicatebutton;
-	ui_button deletebutton;
+	ui_button load;
+	ui_button save;
+	ui_button duplicate;
+	ui_button del;
 } SamplesViewButtons;
 
 void samplesviewbuttons_init(SamplesViewButtons*, ui_component* parent);
@@ -117,7 +117,7 @@ typedef struct SamplesView {
 	SamplesGeneralView general;
 	SamplesVibratoView vibrato;
 	ui_component loop;
-	SamplesWaveLoopView waveloop;	
+	SamplesLoopView waveloop;	
 	WaveBox wavebox;	
 	Workspace* workspace;
 } SamplesView;

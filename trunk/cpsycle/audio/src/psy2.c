@@ -409,7 +409,8 @@ void psy2_load(struct SongFile* songfile)
 							pData = 0;
 							wave->channels.numchannels = 2;
 						}			
-						samples_insert(&songfile->song->samples, wave, i);
+						samples_insert(&songfile->song->samples, wave,
+							sampleindex_make(i, 0));
 						{
 							Instrument* instrument;
 

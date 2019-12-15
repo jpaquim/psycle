@@ -5,6 +5,20 @@
 
 #include "patternevent.h"
 
+void parameterrange_init(ParameterRange* self, 
+	uintptr_t low, uintptr_t high, uintptr_t min, uintptr_t max)
+{
+	self->low = low;
+	self->high = high;
+	self->min = min;
+	self->max = high;
+}
+
+int parameterrange_intersect(ParameterRange* self, uintptr_t value)
+{
+	return value >= self->low && value <= self->high;
+}
+
 void patternevent_init(PatternEvent* self,
 	unsigned char note,
 	unsigned char inst,

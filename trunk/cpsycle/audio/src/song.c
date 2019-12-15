@@ -64,7 +64,6 @@ void song_init(Song* self, MachineFactory* machinefactory)
 	song_initsequence(self);
 	samples_init(&self->samples);
 	instruments_init(&self->instruments);
-	xminstruments_init(&self->xminstruments);
 	song_initsignals(self);
 }
 
@@ -105,8 +104,7 @@ void song_dispose(Song* self)
 	patterns_dispose(&self->patterns);
 	sequence_dispose(&self->sequence);		
 	samples_dispose(&self->samples);
-	instruments_dispose(&self->instruments);
-	xminstruments_dispose(&self->xminstruments);	
+	instruments_dispose(&self->instruments);	
 	song_disposesignals(self);
 }
 

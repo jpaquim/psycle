@@ -190,7 +190,7 @@ void ui_font_init(ui_font* self, const ui_fontinfo* fontinfo)
 
 void ui_font_copy(ui_font* self, const ui_font* other)
 {
-	if (self->hfont) {
+	if (self->hfont && self->hfont != defaultfont.hfont) {
 		ui_font_dispose(self);		
 	}
 	if (other->hfont && other->hfont != defaultfont.hfont) {
@@ -205,8 +205,7 @@ void ui_font_copy(ui_font* self, const ui_font* other)
 
 void ui_font_dispose(ui_font* self)
 {
-	if (!self->stock && self->hfont && self->hfont !=
-			defaultfont.hfont) {
+	if (self->hfont && self->hfont != defaultfont.hfont) {
 		DeleteObject(self->hfont);
 	}
 	self->hfont = 0;

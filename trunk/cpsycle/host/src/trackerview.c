@@ -2990,9 +2990,9 @@ void trackerview_initmetrics(TrackerView* self)
 
 void trackerview_computemetrics(TrackerView* self)
 {
-	ui_size gridsize;		
+	ui_size gridsize;	
 
-	gridsize = ui_component_size(&self->grid.component);
+	gridsize = ui_component_size(&self->grid.component);	
 	self->metrics.tm = ui_component_textmetric(&self->component);	
 	self->metrics.textwidth = (int)(self->metrics.tm.tmAveCharWidth * 1.5) + 2;
 	self->metrics.textleftedge = 2;

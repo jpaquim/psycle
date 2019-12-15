@@ -6,16 +6,23 @@
 #define SAMPLESBOX_H
 
 #include <uilistbox.h>
+#include <uilabel.h>
 #include "samples.h"
 #include "instruments.h"
 
 typedef struct {
-	ui_listbox samplelist;	
+	ui_component component;
+	ui_listbox samplelist;
+	ui_label header;
+	ui_label group;
+	ui_listbox subsamplelist;	
 	Samples* samples;
 	Instruments* instruments;
+	psy_Signal signal_changed;
 } SamplesBox;
 
 void samplesbox_init(SamplesBox*, ui_component* parent, Samples*, Instruments*);
 void samplesbox_setsamples(SamplesBox*, Samples*, Instruments*);
+SampleIndex samplesbox_selected(SamplesBox*);
 
 #endif

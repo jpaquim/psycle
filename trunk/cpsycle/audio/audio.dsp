@@ -535,32 +535,6 @@ SOURCE=.\src\waveio.c
 
 SOURCE=.\src\xm.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\src\xminstrument.c
-
-!IF  "$(CFG)" == "audio - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
-
-# ADD CPP /GR
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\xminstruments.c
-
-!IF  "$(CFG)" == "audio - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "audio - Win32 Debug"
-
-# ADD CPP /GR
-
-!ENDIF 
-
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -780,14 +754,6 @@ SOURCE=.\src\xm.h
 # Begin Source File
 
 SOURCE=.\src\xmdefs.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\xminstrument.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\xminstruments.h
 # End Source File
 # End Group
 # End Target

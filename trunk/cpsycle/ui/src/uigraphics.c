@@ -5,19 +5,22 @@
 
 #include "uigraphics.h"
 
+extern ui_font defaultfont;
+
 void ui_graphics_init(ui_graphics* g, HDC hdc)
 {
-	g->hdc = hdc;	
-	g->hFontPrev = 0;	
+	g->hdc = hdc;		
 	g->pen = CreatePen(PS_SOLID, 1, 0x00666666);	
 	g->brush = 0;
 	g->hBrushPrev = 0;
 	g->penprev = SelectObject(g->hdc, g->pen);
+	g->hFontPrev = SelectObject(g->hdc, defaultfont.hfont);
 }	
 
 void ui_graphics_dispose(ui_graphics* g)
 {
 	SelectObject(g->hdc, g->penprev);
+	SelectObject(g->hdc, g->hFontPrev);
 	if (g->pen) {		
 		DeleteObject(g->pen);
 	}	
@@ -120,7 +123,7 @@ void ui_drawsolidpolygon(ui_graphics* g, ui_point* pts, unsigned int numpoints,
     hBrush = CreateSolidBrush(inner);
 	hBrushPrev = SelectObject(g->hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, outter);
-	hPenPrev = SelectObject(g->hdc, hPen);
+	hPenPrev = SelectObject(g->hdc, hPen);	
 	Polygon(g->hdc, wpts, numpoints);
 	SelectObject(g->hdc, hBrushPrev);
 	SelectObject(g->hdc, hPenPrev);
@@ -180,7 +183,7 @@ void ui_settextcolor(ui_graphics* g, unsigned int color)
 
 void ui_setfont(ui_graphics* g, ui_font* font)
 {	
-	if (font && font->hfont) {
+	if (font && font->hfont) {		
 		SelectObject(g->hdc, font->hfont);
 	}
 }
@@ -192,11 +195,6 @@ ui_font ui_createfont(const char* name, int size)
 		1, 0, 0, 0, VARIABLE_PITCH | FF_DONTCARE, name);          
 	font.stock = 0;
 	return font;
-}
-
-void ui_deletefont(HFONT hfont)
-{	
-	DeleteObject(hfont);
 }
 
 void ui_drawline(ui_graphics* g, int x1, int y1, int x2, int y2)

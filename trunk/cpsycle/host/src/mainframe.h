@@ -22,7 +22,7 @@
 #include "patternview.h"
 #include "sequenceview.h"
 #include "samplesview.h"
-#include "instrumentsview.h"
+#include "instrumentview.h"
 #include "settingsview.h"
 #include "songproperties.h"
 #include "renderview.h"
@@ -60,7 +60,7 @@ typedef struct {
 	MachineView machineview;
 	PatternView patternview;		
 	SamplesView samplesview;
-	InstrumentsView instrumentsview;
+	InstrumentView instrumentsview;
 	SongPropertiesView songpropertiesview;
 	RenderView renderview;
 	SettingsView settingsview;
