@@ -9,7 +9,6 @@
 #include "sequence.h"
 #include "samples.h"
 #include "instruments.h"
-#include "xminstruments.h"
 #include "machinefactory.h"
 
 /// Song hold everything comprising a "tracker module",
@@ -40,7 +39,6 @@ typedef struct Song {
 	Sequence sequence;
 	Samples samples;
 	Instruments instruments;
-	XMInstruments xminstruments;
 	MachineFactory* machinefactory;
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_saveprogress;
