@@ -36,6 +36,7 @@ void instruments_dispose(Instruments* self)
 void instruments_insert(Instruments* self, Instrument* instrument, uintptr_t slot)
 {
 	table_insert(&self->container, slot, instrument);
+	instrument_setindex(instrument, slot);
 	psy_signal_emit(&self->signal_insert, self, 1, slot);
 }
 

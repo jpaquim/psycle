@@ -112,13 +112,18 @@ void wavebox_ondraw(WaveBox* self, ui_component* sender, ui_graphics* g)
 				frame >= self->selectionstart &&
 				frame < self->selectionend) {				
 				ui_setcolor(g, 0x00232323);
-			} else {
+			} else
+			if (self->sample->looptype != LOOP_DO_NOT &&
+					ui_rectangle_intersect(&cont_loop_rc, x, 0)) {
+				ui_setcolor(g, 0x00D1C5B6);
+			} else			
+			{
 				ui_setcolor(g, 0x00B1C8B0);
 			}
 			ui_drawline(g, x, centery, x, centery + (int)(framevalue * scaley));
 		}
 		if (self->sample && self->sample->looptype != LOOP_DO_NOT) {
-			ui_setcolor(g, 0x00D1C5B6);			
+			ui_setcolor(g, 0x00D1C5B6);
 			ui_drawline(g, cont_loop_rc.left, 0, cont_loop_rc.left + 1,
 				size.height);
 			ui_drawline(g, cont_loop_rc.right, 0, cont_loop_rc.right + 1,

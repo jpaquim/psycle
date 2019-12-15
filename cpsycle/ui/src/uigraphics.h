@@ -44,6 +44,5 @@ void ui_settextcolor(ui_graphics* g, unsigned int color);
 void ui_setcolor(ui_graphics* g, unsigned int color);
 void ui_setfont(ui_graphics* g, ui_font* font);
 ui_font ui_createfont(const char* name, int size);
-void ui_deletefont(HFONT hfont);
 
 #endif

@@ -4,7 +4,21 @@
 #if !defined(PATTERNEVENT_H)
 #define PATTERNEVENT_H
 
+#include "../../detail/stdint.h"
+
 #include <dsptypes.h>
+
+
+typedef struct {
+	uintptr_t low;
+	uintptr_t high; // including
+	uintptr_t min;
+	uintptr_t max;
+} ParameterRange;
+
+void parameterrange_init(ParameterRange*, 
+	uintptr_t low, uintptr_t high, uintptr_t min, uintptr_t max);
+int parameterrange_intersect(ParameterRange*, uintptr_t value);
 
 typedef	enum {
 	EXTENDED	=		0xFE, // (see below)

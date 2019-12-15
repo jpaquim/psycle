@@ -4,8 +4,12 @@
 #if !defined(INSTRUMENT_H)
 #define INSTRUMENT_H
 
+#include "patternevent.h"
+#include "samples.h"
+
 #include <adsr.h>
 #include <multifilter.h>
+#include <list.h>
 
 typedef enum {
 	NNA_STOP = 0x0,		///  [Note Cut]	(This one actually does a very fast fadeout)
@@ -13,6 +17,16 @@ typedef enum {
 	NNA_NOTEOFF = 0x2,	///  [Note off]
 	NNA_FADEOUT = 0x3	///  [Note fade]
 } NewNoteAction;
+
+typedef struct {
+	SampleIndex sampleindex;
+	ParameterRange keyrange;
+	ParameterRange velocityrange;
+} InstrumentEntry;
+
+void InstrumentEntry_init(void);
+InstrumentEntry* instrumententry_alloc(void);
+InstrumentEntry* instrumententry_allocinit(void);
 
 typedef struct {	
 	char* name;
@@ -27,6 +41,8 @@ typedef struct {
 	unsigned char _RPAN;
 	unsigned char _RCUT;
 	unsigned char _RRES;
+	List* entries;
+	uintptr_t index;
 } Instrument;
 
 void instrument_init(Instrument*);
@@ -35,8 +51,12 @@ Instrument* instrument_alloc(void);
 Instrument* instrument_allocinit(void);
 void instrument_load(Instrument*, const char* path);
 void instrument_setname(Instrument*, const char* name);
+void instrument_setindex(Instrument*, uintptr_t index);
+uintptr_t instrument_index(Instrument*);
 const char* instrument_name(Instrument*);
 void instrument_setnna(Instrument*, NewNoteAction nna);
 NewNoteAction instrument_nna(Instrument*);
+SampleIndex instrument_sample(Instrument*, uintptr_t key, uintptr_t velocity);
+void instrument_addentry(Instrument*, const InstrumentEntry* entry);
 
 #endif

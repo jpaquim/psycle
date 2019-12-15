@@ -32,19 +32,19 @@ void ui_editor_init(ui_editor* self, ui_component* parent)
 			"LoadLibrary SciLexer.dll failure\n"
 			"Check if 'SciLexer.dll' is in the psycle bin directory or\n"
 			"if you have the right version for your system.");
-		ui_error("LoadLibrary SciLexer.dll failure ...",
-			"Error - Psycle Ui - Editor");		
+//		ui_error("LoadLibrary SciLexer.dll failure ...",
+//			"Error - Psycle Ui - Editor");		
 	}
 }
 
 int loadscilexer(void)
 {
-	if (scimodule == 0) {
+/*	if (scimodule == 0) {
 		scimodule = LoadLibrary ("SciLexer.dll");
 		if (scimodule != NULL) {		
 			psy_signal_connect(&app.signal_dispose, 0, onappdestroy);
 		}		
-	}
+	}*/
 	return scimodule == NULL;
 }
 

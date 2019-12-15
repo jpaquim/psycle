@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
+TableIterator tableend;
+
 static uintptr_t h(uintptr_t k, uintptr_t size) {  return k % size; }
-static TableIterator tableend;
 
 void table_init(Table* self)
 {

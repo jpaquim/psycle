@@ -37,7 +37,8 @@ static void savespecific(Sampler*, struct SongFile*, unsigned int slot);
 
 static int currslot(Sampler*, unsigned int channel, const PatternEvent*);
 
-static void voice_init(Voice*, Instrument*, Sample*, int channel, unsigned int samplerate);
+static void voice_init(Voice*, Instrument*, int channel, unsigned int samplerate,
+	Samples* samples);
 static void voice_dispose(Voice*);
 static void voice_seqtick(Voice*, const PatternEvent*);
 static void voice_noteon(Voice*, const PatternEvent*);
@@ -110,7 +111,9 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->custommachine.machine.vtable = &vtable;
 	self->numvoices = SAMPLER_MAX_POLYPHONY;	
 	for (voice = 0; voice < self->numvoices; ++voice) {
-		voice_init(&self->voices[voice], 0, 0, 0, 44100);
+		voice_init(&self->voices[voice], 0, 0, 44100,
+			self->custommachine.machine.vtable->samples(
+				&self->custommachine.machine));
 	}
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;	
@@ -142,30 +145,26 @@ void generateaudio(Sampler* self, BufferContext* bc)
 void seqtick(Sampler* self, int channel, const PatternEvent* event)
 {	
 	Machine* base = (Machine*)self;
-	Sample* sample;
+	Instrument* instrument;
 	int slot;
 		
 	slot = currslot(self, channel, event);
 	if (slot == NOTECOMMANDS_EMPTY) {
 		return;
 	}	
-	sample = samples_at(base->vtable->samples(
-		&self->custommachine.machine), slot);	
-	if (sample) {
-		Instrument* instrument;
+	instrument = instruments_at(base->vtable->instruments(
+		&self->custommachine.machine), slot);
+	if (instrument) {
+		int voice;
 
 		release_voices(self, channel);
-		instrument = instruments_at(base->vtable->instruments(
-			&self->custommachine.machine), slot);		
-		if (instrument) {
-			int voice;
-			
-			voice = unused_voice(self);
-			if (voice != -1) {
-				voice_init(&self->voices[voice], instrument, sample, channel,
-					base->vtable->samplerate(base));
-				voice_seqtick(&self->voices[voice], event);			
-			}
+		voice = unused_voice(self);
+		if (voice != -1) {
+			voice_init(&self->voices[voice], instrument, channel,
+				base->vtable->samplerate(base),
+				self->custommachine.machine.vtable->samples(
+				&self->custommachine.machine));
+			voice_seqtick(&self->voices[voice], event);		
 		}
 	}
 }
@@ -348,39 +347,6 @@ unsigned int numoutputs(Sampler* self)
 	return 2;
 }
 
-void voice_init(Voice* self, Instrument* instrument, Sample* sample,
-	int channel, unsigned int samplerate) 
-{
-	self->instrument = instrument;
-	self->sample = sample;
-	self->channel = channel;
-	self->vol = 1.f;
-	if (sample) {
-		self->position = sample_begin(self->sample);
-	}	
-	if (instrument) {
-		adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
-		adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
-	} else {
-		adsr_initdefault(&self->env, samplerate);
-		adsr_initdefault(&self->filterenv, samplerate);
-	}	
-	multifilter_init(&self->filter_l);
-	multifilter_init(&self->filter_r);
-	if (instrument) {
-		((Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l.filter, 
-			self->instrument->filtercutoff);
-		((Filter*)&self->filter_r)->vtable->setcutoff(&self->filter_r.filter,
-			self->instrument->filtercutoff);	
-		((Filter*)&self->filter_l)->vtable->setressonance(&self->filter_l.filter, 
-			self->instrument->filterres);
-		((Filter*)&self->filter_r)->vtable->setressonance(&self->filter_r.filter,
-			self->instrument->filterres);
-		multifilter_settype(&self->filter_l, instrument->filtertype);
-		multifilter_settype(&self->filter_r, instrument->filtertype);
-	}
-}
-
 static void loadspecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
 {
 	//Old version had default C4 as false
@@ -450,8 +416,40 @@ void savespecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
 }
 
+void voice_init(Voice* self, Instrument* instrument, int channel,
+	unsigned int samplerate, Samples* samples) 
+{	
+	self->samples = samples;
+	self->instrument = instrument;
+	self->channel = channel;
+	self->currsample = 0;
+	self->vol = 1.f;	
+	self->position = sample_begin(0);
+	if (instrument) {
+		adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
+		adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
+	} else {
+		adsr_initdefault(&self->env, samplerate);
+		adsr_initdefault(&self->filterenv, samplerate);
+	}	
+	multifilter_init(&self->filter_l);
+	multifilter_init(&self->filter_r);
+	if (instrument) {
+		((Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l.filter, 
+			self->instrument->filtercutoff);
+		((Filter*)&self->filter_r)->vtable->setcutoff(&self->filter_r.filter,
+			self->instrument->filtercutoff);	
+		((Filter*)&self->filter_l)->vtable->setressonance(&self->filter_l.filter, 
+			self->instrument->filterres);
+		((Filter*)&self->filter_r)->vtable->setressonance(&self->filter_r.filter,
+			self->instrument->filterres);
+		multifilter_settype(&self->filter_l, instrument->filtertype);
+		multifilter_settype(&self->filter_r, instrument->filtertype);
+	}
+}
+
 void voice_reset(Voice* self)
-{				
+{
 	adsr_reset(&self->env);
 	adsr_reset(&self->filterenv);
 	((Filter*)(&self->filter_r))->vtable->reset(&self->filter_l.filter);
@@ -476,16 +474,22 @@ void voice_seqtick(Voice* self, const PatternEvent* event)
 }
 
 void voice_noteon(Voice* self, const PatternEvent* event)
-{
-	int baseC;	
+{	
+	SampleIndex index;
+	Sample* sample;		
+	int baseC = 60;
 	
-	baseC = 60;
-	self->position = sample_begin(self->sample);
+	index = instrument_sample(self->instrument, event->note, 127);
+	sample = samples_at(self->samples, index);
+	if (sample != self->currsample) {
+		self->currsample = sample;
+		self->position = sample_begin(sample);
+	}	
 	double_setvalue(&self->position.speed,
 		pow(2.0f,
-			(event->note + self->sample->tune - baseC + 
-				((psy_dsp_amp_t)self->sample->finetune * 0.01f)) / 12.0f) *
-			((psy_dsp_beat_t)self->sample->samplerate / 44100));
+			(event->note + self->currsample->tune - baseC + 
+				((psy_dsp_amp_t)self->currsample->finetune * 0.01f)) / 12.0f) *
+			((psy_dsp_beat_t)self->currsample->samplerate / 44100));
 	adsr_start(&self->env);
 	adsr_start(&self->filterenv);
 }
@@ -498,24 +502,26 @@ void voice_noteoff(Voice* self, const PatternEvent* event)
 
 void voice_work(Voice* self, Buffer* output, int numsamples)
 {	
-	if (self->sample && self->env.stage != ENV_OFF) {		
+	if (self->currsample && self->env.stage != ENV_OFF) {		
 		int i;
 		psy_dsp_amp_t vol;		
 				
-		vol = self->vol * self->sample->globalvolume * self->sample->defaultvolume;
+		vol = self->vol * self->currsample->globalvolume *
+			self->currsample->defaultvolume;
 		if (vol > 0.5) {
 			vol = 0.5;
 		}
 		for (i = 0; i < numsamples; ++i) {
 			unsigned int c;			
 							
-			for (c = 0; c < buffer_numchannels(&self->sample->channels); ++c) {
+			for (c = 0; c < buffer_numchannels(&self->currsample->channels);
+					++c) {
 				psy_dsp_amp_t* src;
 				psy_dsp_amp_t* dst;
 				psy_dsp_amp_t val;				
 				unsigned int frame;
 
-				src = buffer_at(&self->sample->channels, c);
+				src = buffer_at(&self->currsample->channels, c);
 				if (c >= buffer_numchannels(output)) {
 					break;
 				}
@@ -524,17 +530,21 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 				val = src[frame];
 				if (c == 0) {
 					if (multifilter_type(&self->filter_l) != F_NONE) {
-						((Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l.filter,
+						((Filter*)&self->filter_l)->vtable->setcutoff(
+							&self->filter_l.filter,
 							self->filterenv.value);
-						val = ((Filter*)&self->filter_l)->vtable->work(&self->filter_l.filter,
+						val = ((Filter*)&self->filter_l)->vtable->work(
+							&self->filter_l.filter,
 							val);
 					}
 				} else
 				if (c == 1) {
 					if (multifilter_type(&self->filter_r) != F_NONE) {
-						((Filter*)&self->filter_r)->vtable->setcutoff(&self->filter_r.filter,
+						((Filter*)&self->filter_r)->vtable->setcutoff(
+							&self->filter_r.filter,
 							self->filterenv.value);
-						val = ((Filter*)&self->filter_r)->vtable->work(&self->filter_r.filter,
+						val = ((Filter*)&self->filter_r)->vtable->work(
+							&self->filter_r.filter,
 							val);
 					}
 				}								
@@ -549,7 +559,7 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 				break;				
 			}
 		}
-		if (buffer_mono(&self->sample->channels) &&
+		if (buffer_mono(&self->currsample->channels) &&
 			buffer_numchannels(output) > 1) {
 			dsp.add(
 				buffer_at(output, 0),

@@ -125,8 +125,8 @@ void mainframe_init(MainFrame* self)
 		&self->tabbars, &self->workspace);	
 	samplesview_init(&self->samplesview, &self->notebook.component,
 		&self->tabbars, &self->workspace);	
-	InitInstrumentsView(&self->instrumentsview, &self->notebook.component,
-		&self->tabbars, &self->workspace);
+	instrumentview_init(&self->instrumentsview, &self->notebook.component,
+		&self->workspace);
 	songpropertiesview_init(&self->songpropertiesview,
 		&self->notebook.component, &self->workspace);	
 	settingsview_init(&self->settingsview, &self->notebook.component,

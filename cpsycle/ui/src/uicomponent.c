@@ -20,7 +20,7 @@ int iDeltaPerLine = 120;
 TCHAR szAppClass[] = TEXT("PsycleApp");
 static TCHAR szComponentClass[] = TEXT("PsycleComponent");
 static uintptr_t winid = 20000;
-ui_font defaultfont;
+ui_font defaultfont = { 0, 0 };
 static int defaultbackgroundcolor = 0x00232323;
 static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
@@ -91,7 +91,7 @@ void ui_init(uintptr_t hInstance)
 
 	appInstance = (HINSTANCE) hInstance;
 	
-	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
+	ui_fontinfo_init(&fontinfo, "Tahoma", 80);	
 	ui_font_init(&defaultfont, &fontinfo);	
 	defaultbackgroundbrush = CreateSolidBrush(0x00232323);
 }
@@ -113,14 +113,17 @@ void ui_replacedefaultfont(ui_component* main, ui_font* font)
 		List* q;
 
 		if (main->font.hfont == defaultfont.hfont) {
-			ui_component_setfont(main, font);
+			main->font.hfont = font->hfont;
+			SendMessage((HWND)main->hwnd, WM_SETFONT, (WPARAM) font->hfont, 0);
 		}
 		for (p = q = ui_component_children(main, 1); p != 0; p = p->next) {
 			ui_component* child;
 
 			child = (ui_component*)p->entry;
 			if (child->font.hfont == defaultfont.hfont) {
-				ui_component_setfont(child, font);
+				child->font.hfont = font->hfont;		
+				SendMessage((HWND)child->hwnd, WM_SETFONT,
+					(WPARAM) font->hfont, 0);
 				ui_component_align(child);
 			}		
 		}		
@@ -248,6 +251,7 @@ void ui_component_init_base(ui_component* self) {
 	self->background = 0;
 	self->color = defaultcolor;
 	self->cursor = UI_CURSOR_DEFAULT;
+	ui_font_init(&self->font, 0);
 	ui_component_setfont(self, &defaultfont);
 	ui_component_setbackgroundcolor(self, self->backgroundcolor);
 	psy_signal_connect(&self->signal_preferredsize, self,
@@ -465,6 +469,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 					if (component->font.hfont) {
 						hPrevFont = SelectObject(g.hdc, component->font.hfont);
+					} else {
+						hPrevFont = SelectObject(g.hdc, defaultfont.hfont);
 					}
 					psy_signal_emit(&component->signal_draw, component, 1, &g);
 					if (hPrevFont) {
@@ -1204,12 +1210,10 @@ void ui_component_setfont(ui_component* self, ui_font* source)
 		font.hfont = defaultfont.hfont;
 	}	
 	SendMessage((HWND)self->hwnd, WM_SETFONT, (WPARAM) font.hfont, 0);	
-	if (self->font.hfont) {
-		if (self->font.hfont != defaultfont.hfont) {
-			ui_font_dispose(&self->font);		
-		}
-		self->font = font;
+	if (self->font.hfont && self->font.hfont != defaultfont.hfont) {
+		ui_font_dispose(&self->font);		
 	}
+	self->font = font;
 }
 
 void ui_component_propagateevent(ui_component* self)
@@ -1330,7 +1334,7 @@ void ui_component_align(ui_component* self)
 					cp_topleft.y + ui_value_px(&component->margin.top, &tm),
 					componentsize.width,
 					component->justify == UI_JUSTIFY_EXPAND 
-					? size.height - cp_topleft.y -
+					? cp_bottomright.y - cp_topleft.y - 
 						ui_margin_height_px(&component->margin, &tm)
 					: componentsize.height);
 				cp_topleft.x += ui_value_px(&component->margin.right, &tm);
@@ -1580,7 +1584,7 @@ ui_size ui_component_textsize(ui_component* self, const char* text)
 	}
 	ui_graphics_dispose(&g);
 	RestoreDC (hdc, -1);	
-	ReleaseDC(NULL, hdc);
+	ReleaseDC((HWND)self->hwnd, hdc);
 	return rv;
 }
 
@@ -1636,7 +1640,7 @@ ui_textmetric ui_component_textmetric(ui_component* self)
 		SelectObject(hdc, hPrevFont);
 	}	
 	RestoreDC(hdc, -1);	
-	ReleaseDC(NULL, hdc);
+	ReleaseDC((HWND)self->hwnd, hdc);
 	return tm;
 }
 

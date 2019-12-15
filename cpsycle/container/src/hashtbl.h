@@ -27,6 +27,8 @@ typedef struct {
 	Table* table;
 } TableIterator;
 
+extern TableIterator tableend;
+
 void tableiterator_init(TableIterator*, Table*);
 void tableiterator_inc(TableIterator*);
 uintptr_t tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs);

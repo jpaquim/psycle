@@ -38,7 +38,8 @@ InterpolationType;
 
 typedef struct {
 	Instrument* instrument;
-	Sample* sample;
+	Sample* currsample;
+	Samples* samples;
 	ADSR env;
 	ADSR filterenv;
 	MultiFilter filter_l;

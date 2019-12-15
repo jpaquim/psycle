@@ -152,7 +152,7 @@ SOURCE=.\src\instrumentsbox.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\instrumentsview.c
+SOURCE=.\src\instrumentview.c
 # End Source File
 # Begin Source File
 
@@ -185,10 +185,6 @@ SOURCE=.\src\navigation.c
 # Begin Source File
 
 SOURCE=.\src\newmachine.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\notemapedit.c
 # End Source File
 # Begin Source File
 
@@ -240,19 +236,11 @@ SOURCE=.\src\sampleeditor.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\samplerinstrumentview.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\samplesbox.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\samplesview.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\sampulseinstrumentsview.c
 # End Source File
 # Begin Source File
 
@@ -412,7 +400,7 @@ SOURCE=.\src\instrumentsbox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\instrumentsview.h
+SOURCE=.\src\instrumentview.h
 # End Source File
 # Begin Source File
 
@@ -445,10 +433,6 @@ SOURCE=.\src\navigation.h
 # Begin Source File
 
 SOURCE=.\src\newmachine.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\notemapedit.h
 # End Source File
 # Begin Source File
 
@@ -500,19 +484,11 @@ SOURCE=..\audio\src\sampler.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\samplerinstrumentview.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\samplesbox.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\samplesview.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\sampulseinstrumentview.h
 # End Source File
 # Begin Source File
 

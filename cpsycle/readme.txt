@@ -1,22 +1,27 @@
-These files are a setup for a test version to help replacing MFC from 
-Psycle and adding a sequencer to the player. This version is neither a
-replacement or has any aims to be a full psycle version. To reduce
-complexity and incompatibilities between c++ compilers, its written in C.
-For now, it uses win32 behind an abstraction layer. 
+This is a test version and has no intent to be a full psycle replacement, but
+hopefully helps some new programmers to continue psycle. 
+It should help replacing MFC from Psycle, making the host more responsive to
+different screen resolutions, adding a sequencer, unifying sampulse and
+sampler ps1 and their instruments, and avoiding ui dependencies in the audio
+core. A command line player makes use of this separation. This player will
+serve as first step to make a posix version available. The ui is reduced from
+mfc to win32 and wrapped behind an own layer. In a next step this layer will
+be used to add xt motif. The version is written in c with c++ parts, in which
+some plugin and driver apis are written in. 
 
-The basic setup and goals consist of:
-- audio basic structures like machine, pattern, sequence
-        develop a sequencer orientated player
-- dsp   basic dsp block operations
-- host  basic setup for pattern/machine and settingview
-        avoiding audio core dependencies on the host
-- file  developing a common property system for drivers, audio modules,
-        host views and plugin scanning
-- lua 
-- drivers (directx, mme)
-          module based approach
-- ui   wrapped win32 calls
-       Abstraction layer for other toolkits
+Structure of the host:
+
+audio:      machines, patterns, instruments, sequence, player,
+            song import/export, ...			
+container   list, hashtable, properties, signals
+dsp			mostly buffer operations, adsr, notetab defines
+detail		global header defines
+driver		mme, mmemidi, directx	
+file		file/dir routines
+host		graphical psycle front end
+lua			script engine used since psycle 1.10
+ui			wrapped win32 calls
+
 
 Compiling
 
@@ -28,9 +33,5 @@ For the 64Bit Configuration adjust the Output File Target in Project
 Linker settings for the host project. Set the Output File Target to the 
 project standard. Install also mfc and atl support (resource includes 
 need it).
-
-
-
-
 
 
