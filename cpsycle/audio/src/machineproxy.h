@@ -11,6 +11,7 @@ typedef struct {
 	Machine* client;
 	/// Tells wether the machine client has crashed.
 	int crashed;
+	fp_machine_dispose machinedispose;
 } MachineProxy;
 
 void machineproxy_init(MachineProxy* self, Machine* client);

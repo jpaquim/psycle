@@ -104,10 +104,10 @@ List* list_remove(List** self, List* ptr)
 	return rv;
 }
 
-unsigned int list_size(List* self)
+uintptr_t list_size(const List* self)
 {	
-	unsigned int rv = 0;
-	List* p;
+	uintptr_t rv = 0;
+	const List* p;
 
 	for (p = self; p != 0; p = p->next, ++rv);
 	return rv;
@@ -143,4 +143,20 @@ List* list_findentry(List* self, void* entry)
 	}
 	return p;
 }
+
+List* list_at(List* self, uintptr_t numentry)
+{
+	List* p = self;
+	uintptr_t c = 0;
+			
+	while (p != 0) {
+		if (c == numentry) {
+			break;
+		}
+		p = p->next;
+		++c;
+	}
+	return p;
+}
+
 

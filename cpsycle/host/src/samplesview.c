@@ -13,7 +13,7 @@
 #include <math.h>
 
 /// Samples View
-static void samplesview_onsampleboxchanged(SamplesView*, ui_component* sender);
+static void samplesview_onsamplesboxchanged(SamplesView*, ui_component* sender);
 static void samplesview_setsample(SamplesView*, SampleIndex slot);
 static void samplesview_onloadsample(SamplesView*, ui_component* sender);
 static void samplesview_onsavesample(SamplesView*, ui_component* sender);
@@ -65,12 +65,14 @@ static void samplesloopview_oneditchangedloopstart(SamplesLoopView*, ui_edit* se
 static void samplesloopview_oneditchangedloopend(SamplesLoopView*, ui_edit* sender);
 static void samplesloopview_oneditchangedsustainstart(SamplesLoopView*, ui_edit* sender);
 static void samplesloopview_oneditchangedsustainend(SamplesLoopView*, ui_edit* sender);
-
+// Songimport
+static void samplessongimportview_ondestroy(SamplesSongImportView*,
+	ui_component* sender);
 static void samplessongimportview_onloadsong(SamplesSongImportView*,
 	ui_component* sender);
 static void samplessongimportview_oncopy(SamplesSongImportView*,
 	ui_component* sender);
-static void samplessongimportview_ondestroy(SamplesSongImportView*,
+static void samplessongimportview_onsamplesboxchanged(SamplesSongImportView*,
 	ui_component* sender);
 
 void samplesviewbuttons_init(SamplesViewButtons* self, ui_component* parent)
@@ -123,9 +125,7 @@ void samplessongimportview_init(SamplesSongImportView* self, ui_component* paren
 		ui_component_children(&self->header, 0),
 		UI_ALIGN_LEFT,
 		&margin));
-	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
-	ui_component_setalign(&self->samplesbox.component,
-		UI_ALIGN_CLIENT);
+	// bar
 	ui_component_init(&self->bar, &self->component);
 	ui_component_enablealign(&self->bar);
 	ui_component_setalign(&self->bar, UI_ALIGN_LEFT);
@@ -134,6 +134,17 @@ void samplessongimportview_init(SamplesSongImportView* self, ui_component* paren
 	ui_component_setalign(&self->add.component, UI_ALIGN_TOP);
 	psy_signal_connect(&self->add.signal_clicked, self,
 		samplessongimportview_oncopy);
+	// samplesbox
+	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
+	ui_component_setalign(&self->samplesbox.component,
+		UI_ALIGN_CLIENT);
+	psy_signal_connect(&self->samplesbox.signal_changed, self,
+		samplessongimportview_onsamplesboxchanged);
+	// samplebox
+	wavebox_init(&self->samplebox, &self->component);
+	ui_component_setalign(&self->samplebox.component,
+		UI_ALIGN_BOTTOM);
+	ui_component_resize(&self->samplebox.component, 0, 150);
 }
 
 void samplessongimportview_ondestroy(SamplesSongImportView* self,
@@ -210,6 +221,19 @@ void samplessongimportview_oncopy(SamplesSongImportView* self,
 			OnInstrumentSlotChanged);	*/
 		ui_component_invalidate(&self->view->component);	
 	}
+}
+
+void samplessongimportview_onsamplesboxchanged(SamplesSongImportView* self,
+	ui_component* sender)
+{
+	SampleIndex index;
+	Sample* sample;
+	
+	index = samplesbox_selected(&self->samplesbox);
+	sample = self->source
+		? samples_at(&self->source->samples, index)
+		: 0;
+	wavebox_setsample(&self->samplebox, sample);
 }
 
 void samplesview_init(SamplesView* self, ui_component* parent,
@@ -291,7 +315,7 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 	ui_component_setalign(&self->waveloop.component, UI_ALIGN_BOTTOM);
 	ui_component_setmargin(&self->waveloop.component, &margin);
 	psy_signal_connect(&self->samplesbox.signal_changed, self,
-		samplesview_onsampleboxchanged);
+		samplesview_onsamplesboxchanged);
 	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self,
 		samplesview_oninstrumentslotchanged);
 	samplesview_setsample(self, sampleindex_make(0, 0));	
@@ -307,7 +331,7 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 		&self->clienttabbar.signal_change);
 }
 
-void samplesview_onsampleboxchanged(SamplesView* self, ui_component* sender)
+void samplesview_onsamplesboxchanged(SamplesView* self, ui_component* sender)
 {		
 	SampleIndex index;
 	

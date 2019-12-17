@@ -127,28 +127,22 @@ NewNoteAction instrument_nna(Instrument* self)
 	return self->nna;
 }
 
-SampleIndex instrument_sample(Instrument* self, uintptr_t key,
+List* instrument_entriesintersect(Instrument* self, uintptr_t key,
 	uintptr_t velocity)
 {
-	SampleIndex rv;
+	List* rv = 0;
 
 	if (self->entries) {
 		List* p;
-
-		p = self->entries;
-		while (p != 0) {
+		
+		for (p = self->entries; p != 0; p = p->next) {
 			InstrumentEntry* entry;
 
 			entry = (InstrumentEntry*) p->entry;
 			if (instrumententry_intersect(entry, key, velocity)) {
-				rv = entry->sampleindex;
-				break;
-			}
-			p = p->next;
-		}
-		if (p == 0) {
-			rv = sampleindex_make(self->index, 0);
-		}
+				list_append(&rv, entry);
+			}			
+		}		
 	}
 	return rv;
 }
@@ -162,5 +156,38 @@ void instrument_addentry(Instrument* self, const InstrumentEntry* entry)
 		*newentry = *entry;
 		list_append(&self->entries, newentry);
 	}
+}
+
+void instrument_removeentry(Instrument* self, uintptr_t numentry)
+{
+	List* node;
+
+	node = list_at(self->entries, numentry);
+	if (node) {
+		free(node->entry);
+		list_remove(&self->entries, node);
+	}
+}
+
+void instrument_clearentries(Instrument* self)
+{	
+	instrument_disposeentries(self);	
+}
+
+InstrumentEntry* instrument_entryat(Instrument* self, uintptr_t numentry)
+{	
+	InstrumentEntry* rv = 0;
+	List* node;
+
+	node = list_at(self->entries, numentry);
+	if (node) {
+		rv = (InstrumentEntry*) node->entry;
+	}	
+	return rv;
+}
+
+const List* instrument_entries(Instrument* self)
+{
+	return self->entries;
 }
 

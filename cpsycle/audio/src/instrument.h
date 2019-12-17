@@ -24,7 +24,7 @@ typedef struct {
 	ParameterRange velocityrange;
 } InstrumentEntry;
 
-void InstrumentEntry_init(void);
+void instrumententry_init(InstrumentEntry*);
 InstrumentEntry* instrumententry_alloc(void);
 InstrumentEntry* instrumententry_allocinit(void);
 
@@ -56,7 +56,11 @@ uintptr_t instrument_index(Instrument*);
 const char* instrument_name(Instrument*);
 void instrument_setnna(Instrument*, NewNoteAction nna);
 NewNoteAction instrument_nna(Instrument*);
-SampleIndex instrument_sample(Instrument*, uintptr_t key, uintptr_t velocity);
+List* instrument_entriesintersect(Instrument*, uintptr_t key, uintptr_t velocity);
+void instrument_clearentries(Instrument*);
 void instrument_addentry(Instrument*, const InstrumentEntry* entry);
+void instrument_removeentry(Instrument*, uintptr_t numentry);
+InstrumentEntry* instrument_entryat(Instrument*, uintptr_t numentry);
+const List* instrument_entries(Instrument*);
 
 #endif

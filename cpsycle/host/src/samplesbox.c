@@ -12,6 +12,8 @@ static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot);
 static void samplesbox_oninstrumentinsert(SamplesBox*, ui_component* sender, int slot);
 static void samplesbox_oninstrumentremoved(SamplesBox*, ui_component* sender, int slot);
+static void samplesbox_onsampleinsert(SamplesBox*, ui_component* sender, SampleIndex* index);
+static void samplesbox_onsampleremoved(SamplesBox*, ui_component* sender, SampleIndex* index);
 static void samplesbox_onsamplelistchanged(SamplesBox*, ui_component* sender,
 	int slot);
 static void samplesbox_onsubsamplelistchanged(SamplesBox*, ui_component* sender,
@@ -120,7 +122,27 @@ void samplesbox_oninstrumentinsert(SamplesBox* self, ui_component* sender,
 {
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, slot);
-	ui_listbox_setcursel(&self->samplelist, slot);		
+	ui_listbox_setcursel(&self->samplelist, slot);
+}
+
+void samplesbox_onsampleinsert(SamplesBox* self, ui_component* sender,
+	SampleIndex* index)
+{
+	if (self->component.debugflag == 200) {
+		self->component.debugflag = self->component.debugflag;
+	}
+	samplesbox_buildsamplelist(self);
+	samplesbox_buildsubsamplelist(self, index->subslot);
+}
+
+void samplesbox_onsampleremoved(SamplesBox* self, ui_component* sender,
+	SampleIndex* index)
+{
+	if (self->component.debugflag == 200) {
+		self->component.debugflag = self->component.debugflag;
+	}
+	samplesbox_buildsamplelist(self);
+	samplesbox_buildsubsamplelist(self, index->subslot);
 }
 
 void samplesbox_oninstrumentremoved(SamplesBox* self, ui_component* sender,
@@ -154,6 +176,12 @@ void samplesbox_setsamples(SamplesBox* self, Samples* samples,
 			samplesbox_oninstrumentremoved);
 		psy_signal_connect(&instruments->signal_slotchange, self,
 			samplesbox_oninstrumentsslotchanged);
+	}
+	if (self->samples) {
+		psy_signal_connect(&samples->signal_insert, self,
+			samplesbox_onsampleinsert);	
+		psy_signal_connect(&samples->signal_removed, self,
+			samplesbox_onsampleremoved);	
 	}
 }
 

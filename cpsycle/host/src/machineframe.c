@@ -35,13 +35,15 @@ void parameterbar_setpresetlist(ParameterBar* self, Presets* presets)
 	self->presets = presets;
 	
 	ui_combobox_clear(&self->presetsbox);
-	for (p = presets->container; p != 0; p = p->next) {
-		Preset* preset;
+	if (self->presets) {
+		for (p = presets->container; p != 0; p = p->next) {
+			Preset* preset;
 
-		preset = (Preset*) p->entry;
-		ui_combobox_addstring(&self->presetsbox, preset_name(preset));
+			preset = (Preset*) p->entry;
+			ui_combobox_addstring(&self->presetsbox, preset_name(preset));
+		}
+		ui_combobox_setcursel(&self->presetsbox, 0);
 	}
-	ui_combobox_setcursel(&self->presetsbox, 0);
 }
 
 void machineframe_init(MachineFrame* self, ui_component* parent)
@@ -75,13 +77,15 @@ void machineframe_setview(MachineFrame* self, ui_component* view,
 	self->view = (ui_component*) view;
 	self->machine = machine;
 	info = machine->vtable->info(machine);
-	extract_path(info->modulepath, prefix, name, ext);
-	psy_snprintf(prspath, 4096, "%s\\%s%s", prefix, name, ".prs");
-	if (self->presets) {
-		presets_dispose(self->presets);
+	if (info && info->modulepath) {
+		extract_path(info->modulepath, prefix, name, ext);
+		psy_snprintf(prspath, 4096, "%s\\%s%s", prefix, name, ".prs");
+		if (self->presets) {
+			presets_dispose(self->presets);
+		}
+		self->presets = presets_allocinit();
+		presetsio_load(prspath, self->presets);		
 	}
-	self->presets = presets_allocinit();
-	presetsio_load(prspath, self->presets);
 	parameterbar_setpresetlist(&self->parameterbar, self->presets);
 }
 

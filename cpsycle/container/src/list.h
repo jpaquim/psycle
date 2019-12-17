@@ -4,6 +4,8 @@
 #if !defined(LIST_H)
 #define LIST_H
 
+#include "../../detail/stdint.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,11 +38,13 @@ List* list_remove(List**, List* node);
 /// returns the tail node or null
 List* list_last(List*);
 /// counts the nodes of the list
-unsigned int list_size(List*);
+uintptr_t list_size(const List*);
 /// checks if the list has the node
-int list_check(List* self, List* node);
+int list_check(List*, List* node);
 /// returns the node for the entry
-List* list_findentry(List* self, void* entry);
+List* list_findentry(List*, void* entry);
+/// returns the node at numentry position
+List* list_at(List*, uintptr_t numentry);
 
 #ifdef __cplusplus
 }

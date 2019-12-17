@@ -155,6 +155,8 @@ uint32_t xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 					param = packeddata[i++] & 0x7F;				
 				}
 
+				// xm note = 1..96, 1 = c-0, 97 = key off 
+				// psycle note = 0..119, 0 = c-0, 120 = key off
 				note = (note & 0x7F);
 				if (note >= 97) {
 					note = NOTECOMMANDS_RELEASE;
@@ -185,17 +187,19 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 {
 	uintptr_t slot;	
 
+	start = psyfile_getpos(self->file);
 	for (slot = 0; slot < xmheader->instruments; ++slot) {
 		struct XMINSTRUMENTHEADER instrumentheader;		
 		Instrument* instrument;
 
+		start = psyfile_seek(self->file, start);
 		instrument = instrument_allocinit();
-			instruments_insert(&self->song->instruments, instrument, slot);
-		start = psyfile_getpos(self->file);
+			instruments_insert(&self->song->instruments, instrument, slot + 1);
 		instrumentheader.size = psyfile_read_uint32(self->file);
 		psyfile_read(self->file, &instrumentheader.name,
 			sizeof(instrumentheader.name));
 		instrumentheader.name[sizeof(instrumentheader.name) - 1] = '\0';
+		instrument_setname(instrument, instrumentheader.name);
 		instrumentheader.type = psyfile_read_uint8(self->file);
 		instrumentheader.samples = psyfile_read_uint16(self->file);
 
@@ -203,7 +207,9 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 		if (instrumentheader.samples >  0) {
 			struct XMSAMPLEHEADER sampleheader;
 			XMSAMPLESTRUCT* xmsamples = 0;
-			int s;		
+			int s;
+			int note;
+			InstrumentEntry instentry;
 			
 			// Sample header size
 			psyfile_read(self->file, &sampleheader.shsize, 4);
@@ -241,8 +247,24 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 			psyfile_read(self->file, &sampleheader.reserved, 2);
 			xmsamples = (XMSAMPLESTRUCT*) malloc(sizeof(
 				XMSAMPLESTRUCT) * (int)instrumentheader.samples);
+			// create instrument entries
+			instrument_clearentries(instrument);
+			instrumententry_init(&instentry);
+			instentry.sampleindex =
+				sampleindex_make(slot + 1, sampleheader.snum[0]);
+			for (note = 1; note < 96; ++note) {
+				if (sampleheader.snum[note] != instentry.sampleindex.subslot) {
+					instentry.keyrange.high = note - 1;
+					instrument_addentry(instrument, &instentry);
+					instentry.keyrange.low = note;
+					instentry.sampleindex.subslot = sampleheader.snum[note];
+				}
+			}
+			instentry.keyrange.high = 119;
+			instrument_addentry(instrument, &instentry);
 			psyfile_seek(self->file, start);
-			for (s = 0; s < instrumentheader.samples; ++s) {				
+			for (s = 0; s < instrumentheader.samples; ++s) {
+				psyfile_seek(self->file, start);
 				psyfile_read(self->file, &xmsamples[s].samplen, 4);				
 				psyfile_read(self->file, &xmsamples[s].loopstart, 4);			
 				psyfile_read(self->file, &xmsamples[s].looplen, 4);			
@@ -251,7 +273,7 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 				psyfile_read(self->file, &xmsamples[s].finetune, 1);
 				// Type: Bit 0-1: 0 = No loop, 1 = Forward loop,
 				//		 2 = Ping-pong loop;
-				//		 4: 16-bit sampledata
+				//		 4: 16-bit sampledata				
 				psyfile_read(self->file, &xmsamples[s].type, 1);
 				// Panning (0-255)
 				psyfile_read(self->file, &xmsamples[s].pan, 1);
@@ -259,36 +281,77 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 				psyfile_read(self->file, &xmsamples[s].relnote, 1);				
 				psyfile_read(self->file, &xmsamples[s].res, 1);				
 				psyfile_read(self->file, &xmsamples[s].name, 22);
-				xmsamples[s].name[21] = '\0';			
-			}		
+				xmsamples[s].name[21] = '\0';	
+				start += 40;
+			}
 			for (s = 0; s < instrumentheader.samples; ++s) {
-				Sample* sample;				
-
+				Sample* sample;
+				int is16bit;
+				
 				sample = sample_allocinit();
 				sample_setname(sample, xmsamples[s].name);
-				sample->numframes = xmsamples[s].samplen;
-				buffer_resize(&sample->channels, 1);				
-				if (xmsamples[s].samplen) {
-					unsigned char* pData;
+				buffer_resize(&sample->channels, 1);
+				
+				is16bit = (xmsamples[s].type & 0x10) == 0x10;
+				sample->panfactor =  xmsamples[s].pan / (psy_dsp_amp_t) 255.f;
+				// Type: Bit 0-1: 0 = No loop, 1 = Forward loop,
+				//		 2 = Ping-pong loop;
+				//		 4: 16-bit sampledata
+				if (xmsamples[s].looplen > 0) {
+					if (xmsamples[s].type & 0x01) {
+						sample->looptype = LOOP_NORMAL;
+					} else
+					if (xmsamples[s].type & 0x02) {
+						sample->looptype = LOOP_BIDI;
+					} else {
+						sample->looptype = LOOP_DO_NOT;
+					}
+				} else {
+					sample->looptype = LOOP_DO_NOT;
+				}				
+				if (sample->looptype != LOOP_DO_NOT) {
+					sample->loopstart = xmsamples[s].loopstart / (is16bit ? 2 : 1);
+					sample->loopend = (xmsamples[s].loopstart + xmsamples[s].looplen) /
+						(is16bit ? 2 : 1);
+				}
+				sample->numframes = xmsamples[s].samplen / (is16bit ? 2 : 1);
+				sample->samplerate = 8363;
+				sample->globalvolume = xmsamples[s].vol / (psy_dsp_amp_t) 128.f;
+				sample->tune = xmsamples[s].relnote;
+				// WaveFineTune has +-100 range in Psycle.
+				sample->finetune = (int16_t) (xmsamples[s].finetune / 1.28f);
+				// Sounds Stupid, but it isn't. Some modules save sample
+				// header when there is no sample.
+				if (xmsamples[s].samplen > 0) {
+					unsigned char* smpbuf;
 					int16_t oldvalue;
 					uintptr_t i;
-
+					uintptr_t j;
+					
+					smpbuf = malloc(xmsamples[s].samplen);
+					psyfile_read(self->file, smpbuf, xmsamples[s].samplen);
 					sample->channels.samples[0] = malloc(sizeof(float)
 						* sample->numframes);
-					pData = malloc(xmsamples[s].samplen);
-					psyfile_read(self->file, pData, xmsamples[s].samplen);
 					oldvalue = 0;
-					for (i = 0; i < sample->numframes; ++i) {
-						int8_t value;
+					for (i = 0, j = 0; i < sample->numframes; ++i) {
+						int16_t value;
 						
-						value = pData[i] + oldvalue;
-						sample->channels.samples[0][i] = (float) value * 256;
-							;
+						if (is16bit) {
+							value = (smpbuf[j]&0xFF) | (smpbuf[j+1]<<8);
+							j += 2;
+						} else {								
+							value = (int16_t)(smpbuf[j] << 8);
+							++j;
+						}
+						value += oldvalue;
+						sample->channels.samples[0][i] = (psy_dsp_amp_t) value;							
+						oldvalue = value;
 					}
-					free(pData);
+					free(smpbuf);
 				}
 				samples_insert(&self->song->samples, sample,
-					sampleindex_make(slot, s));
+					sampleindex_make(slot + 1, s));
+				start += xmsamples[s].samplen;
 			}
 			free(xmsamples);			
 		}
