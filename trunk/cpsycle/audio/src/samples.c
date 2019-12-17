@@ -26,7 +26,7 @@ SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot)
 // SamplesGroup
 void samplesgroup_init(SamplesGroup* self)
 {
-	table_init(&self->container);
+	table_init(&self->container);	
 }
 
 void samplesgroup_dispose(SamplesGroup* self)
@@ -41,7 +41,7 @@ void samplesgroup_dispose(SamplesGroup* self)
 		sample_dispose(sample);
 		free(sample);
 	}
-	table_dispose(&self->container);	
+	table_dispose(&self->container);
 }
 
 SamplesGroup* samplesgroup_alloc(void)
@@ -93,6 +93,8 @@ uintptr_t samplesgroup_size(SamplesGroup* self)
 void samples_init(Samples* self)
 {
 	table_init(&self->groups);
+	psy_signal_init(&self->signal_insert);
+	psy_signal_init(&self->signal_removed);
 }
 
 void samples_dispose(Samples* self)
@@ -108,6 +110,8 @@ void samples_dispose(Samples* self)
 		free(group);
 	}	
 	table_dispose(&self->groups);
+	psy_signal_dispose(&self->signal_insert);
+	psy_signal_dispose(&self->signal_removed);
 }
 
 void samples_insert(Samples* self, Sample* sample, SampleIndex index)
@@ -122,7 +126,8 @@ void samples_insert(Samples* self, Sample* sample, SampleIndex index)
 		}
 	}
 	if (group) {
-		samplesgroup_insert(group, sample, index.subslot);
+		samplesgroup_insert(group, sample, index.subslot);		
+		psy_signal_emit(&self->signal_insert, self, 1, &index);
 	}
 }
 
@@ -137,6 +142,7 @@ void samples_remove(Samples* self, SampleIndex index)
 			table_remove(&self->groups, index.slot);
 			samplesgroup_dispose(group);
 			free(group);
+			psy_signal_emit(&self->signal_removed, self, 1, &index);
 		}
 	}	
 }

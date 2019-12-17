@@ -6,6 +6,7 @@
 
 #include "sample.h"
 #include <hashtbl.h>
+#include <signal.h>
 
 #define NOSAMPLES_INDEX UINTPTR_MAX
 
@@ -23,6 +24,8 @@ typedef struct {
 
 typedef struct Samples {
 	Table groups;
+	psy_Signal signal_insert;
+	psy_Signal signal_removed;
 } Samples;
 
 void samples_init(Samples*);

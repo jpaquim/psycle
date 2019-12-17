@@ -49,7 +49,8 @@ void vibrato_init(Vibrato*);
 typedef struct {
 	struct Sample* sample;
 	Double pos;
-	Double speed;	
+	Double speed;
+	int forward;
 } SampleIterator;
 
 void sampleiterator_init(SampleIterator*, struct Sample*);
@@ -64,14 +65,14 @@ typedef struct Sample {
 	/// Difference between Glob volume and defVolume is that defVolume 
 	///	determines the volume if no volume is specified in the pattern, while
 	/// globVolume is an attenuator for all notes of this sample.	
-	float defaultvolume;
+	psy_dsp_amp_t defaultvolume;
 	/// range ( 0..4 ) (-inf to +12dB)
-	float globalvolume;
-	unsigned int loopstart;
-	unsigned int loopend;
+	psy_dsp_amp_t globalvolume;
+	uintptr_t loopstart;
+	uintptr_t loopend;
 	LoopType looptype;
-	unsigned int sustainloopstart;
-	unsigned int sustainloopend;
+	uintptr_t sustainloopstart;
+	uintptr_t sustainloopend;
 	LoopType sustainlooptype;
 	/// Tuning for the center note (value that is added to the note received).
 	/// values from -60 to 59.

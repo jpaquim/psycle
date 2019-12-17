@@ -18,20 +18,55 @@ void double_setvalue(Double* self, double value)
 void sampleiterator_init(SampleIterator* self, Sample* sample)
 {
 	self->sample = sample;
+	self->forward = 1;
 	double_setvalue(&self->pos, 0.0);
 	double_setvalue(&self->speed, 1.0);
 }
 
 int sampleiterator_inc(SampleIterator* self)
-{	
-	self->pos.QuadPart += self->speed.QuadPart;
-	if (self->pos.HighPart >= self->sample->numframes) {				
-		self->pos.LowPart = 0;
-		self->pos.HighPart = 0;
-		if (self->sample->looptype == LOOP_DO_NOT) {
-			return 0;
+{			
+	if (self->sample->looptype == LOOP_DO_NOT) {
+		self->pos.QuadPart += self->speed.QuadPart;
+		if (self->pos.HighPart >= self->sample->numframes) {
+			self->pos.LowPart = 0;
+			self->pos.HighPart = 0;			
+			return 0;			
 		}
-	}
+	} else
+	if (self->sample->looptype == LOOP_NORMAL) {
+		self->pos.QuadPart += self->speed.QuadPart;
+		if (self->pos.HighPart >= self->sample->loopend) {
+			self->pos.HighPart = self->sample->loopstart +
+				self->sample->loopend - self->pos.HighPart;
+		}
+	} else
+	if (self->sample->looptype == LOOP_BIDI) {
+		if (self->forward) {
+			self->pos.QuadPart += self->speed.QuadPart;
+			if (self->pos.HighPart >= self->sample->loopend) {
+				Double loopend;
+				Double delta;
+				
+				loopend.LowPart = 0;
+				loopend.HighPart = self->sample->loopend;
+				delta.QuadPart = self->pos.QuadPart - loopend.QuadPart;
+				self->pos.QuadPart = loopend.QuadPart - delta.QuadPart;
+				self->forward = 0;
+			}
+		} else {
+			self->pos.QuadPart -= self->speed.QuadPart;
+			if (self->pos.HighPart <= self->sample->loopstart) {
+				Double loopstart;
+				Double delta;
+				
+				loopstart.LowPart = 0;
+				loopstart.HighPart = self->sample->loopstart;
+				delta.QuadPart = loopstart.QuadPart - self->pos.QuadPart;
+				self->pos.QuadPart = loopstart.QuadPart + delta.QuadPart;
+				self->forward = 1;
+			}
+		}
+	}	
 	return 1;
 }
 

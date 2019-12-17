@@ -94,6 +94,7 @@ typedef struct {
 	SamplesBox samplesbox;
 	ui_component bar;
 	ui_button add;
+	WaveBox samplebox;
 	Song* source;
 	struct SamplesView* view;
 	Workspace* workspace;

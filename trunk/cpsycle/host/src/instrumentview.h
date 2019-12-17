@@ -7,6 +7,7 @@
 #include "envelopeview.h"
 #include "tabbar.h"
 #include "instrumentsbox.h"
+#include "instnotemapview.h"
 #include "samplesbox.h"
 #include "workspace.h"
 
@@ -28,23 +29,6 @@ typedef struct {
 } InstrumentHeaderView;
 
 typedef struct {
-	ui_component component;	
-	int dy;
-} InstrumentKeyboardView;
-
-void instrumentkeyboardview_init(InstrumentKeyboardView*,
-	ui_component* parent);
-
-typedef struct {
-	ui_component component;	
-	int dy;
-	Instrument* instrument;
-} InstrumentEntryView;
-
-void instrumententryview_init(InstrumentEntryView*,
-	ui_component* parent);
-
-typedef struct {
 	ui_component component;
 	ui_button load;
 	ui_button save;
@@ -59,9 +43,9 @@ typedef struct {
 	ui_button nnacutbutton;
 	ui_button nnareleasebutton;
 	ui_button nnanonebutton;
+	ui_component left;
 	SamplesBox samplesbox;
-	InstrumentKeyboardView keyboard;
-	InstrumentEntryView entryview;
+	InstrumentNoteMapView notemapview;
 	Instrument* instrument;
 	Instruments* instruments;
 } InstrumentGeneralView;

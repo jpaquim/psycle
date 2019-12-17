@@ -741,92 +741,90 @@ void loadwavesubchunk(SongFile* self, int32_t instrIdx, int32_t pan, char * inst
 	//fileformat supports several waves, but sampler only supports one.
 	if (strcmp(Header,"WAVE")==0 && version <= CURRENT_FILE_VERSION_WAVE || loadIdx == 0)
 	{
-		Sample* wave;
+		Sample* sample;
 		//This index represented the index position of this wave for the instrument. 0 to 15.
 		uint32_t legacyindex;
-		unsigned short volume = 0;
-		int32_t tmp = 0;
-		unsigned char doloop = 0;
+		uint16_t volume = 0;		
+		int32_t tmp = 0;		
+		uint8_t doloop = 0;
+		uint8_t stereo = 0;
 		char dummy[32];
 		uint32_t packedsize;
 		byte* pData;
-		short* pDest;
+		int16_t* pDest;
 		
-		wave = sample_allocinit();
-		wave->panfactor = (float) pan / 256.f ; //(value_mapper::map_256_1(pan));
-		wave->samplerate = 44100;				
-		psyfile_read(self->file, &legacyindex,sizeof(legacyindex));
-		psyfile_read(self->file, &wave->numframes, sizeof(wave->numframes));
-		psyfile_read(self->file, &volume, sizeof volume);
-		wave->globalvolume = volume*0.01f;
-		psyfile_read(self->file, &wave->loopstart, sizeof wave->loopstart);
-		psyfile_read(self->file, &wave->loopend, sizeof wave->loopend);
-				
-		psyfile_read(self->file, &tmp, sizeof(tmp));
-		wave->tune = tmp;
-		psyfile_read(self->file, &tmp, sizeof(tmp));
-		//Current sampler uses 100 cents. Older used +-256
-		tmp = (int32_t)((float)tmp/2.56f);
-		wave->finetune = tmp;		
-		psyfile_read(self->file, &doloop, sizeof(doloop));
-		wave->looptype = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
-		psyfile_read(self->file, &wave->stereo, sizeof(&wave->stereo));
-		//Old sample name, never used.
+		sample = sample_allocinit();
+		sample->panfactor = (float) pan / 256.f ; //(value_mapper::map_256_1(pan));
+		sample->samplerate = 44100;				
+		legacyindex = psyfile_read_uint32(self->file);
+		sample->numframes = psyfile_read_uint32(self->file);
+		volume = psyfile_read_uint16(self->file);
+		sample->globalvolume = volume * 0.01f;
+		sample->loopstart = psyfile_read_uint32(self->file);
+		sample->loopend = psyfile_read_uint32(self->file);		
+		sample->tune = psyfile_read_uint32(self->file);		
+		tmp = psyfile_read_int32(self->file, &tmp, sizeof(tmp));
+		//Current sampler uses 100 cents. Older used +-256		
+		sample->finetune = (int16_t)(tmp / 2.56f);		
+		doloop = psyfile_read_uint8(self->file);
+		sample->looptype = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
+		stereo = psyfile_read_uint8(self->file);
+		sample->stereo = stereo != 0;
+		// Old sample name, never used.
 		psyfile_readstring(self->file, dummy,sizeof(dummy));
-		sample_setname(wave, instrum_name);
-		psyfile_read(self->file, &packedsize,sizeof(packedsize));
-
-		
-		if ( fullopen )
-		{
+		sample_setname(sample, instrum_name);
+		psyfile_read(self->file, &packedsize,sizeof(packedsize));		
+		if (fullopen) {
 			uint32_t i;
 			pData = malloc(packedsize+4);// +4 to avoid any attempt at buffer overflow by the code
 			psyfile_read(self->file, pData, packedsize);
 			sounddesquash(pData, &pDest);		
 			free(pData);
-			wave->channels.samples[0] = malloc(sizeof(float)*wave->numframes);
-			for (i = 0; i < wave->numframes; i++) {
+			sample->channels.samples[0] = malloc(sizeof(float) *
+				sample->numframes);
+			for (i = 0; i < sample->numframes; i++) {
 				short val = (short) pDest[i];
-				wave->channels.samples[0][i] = (float) val;				
+				sample->channels.samples[0][i] = (float) val;				
 			 }
 			free(pDest);
 			pData = 0;
-			wave->channels.numchannels = 1;
+			sample->channels.numchannels = 1;
 		}
 		else
 		{
 			psyfile_skip(self->file, packedsize);
-
-			wave->channels.samples[0] = 0;
+			sample->channels.samples[0] = 0;
 		}
-
-		if (wave->stereo)
+		if (sample->stereo)
 		{
 			psyfile_read(self->file, &packedsize,sizeof(packedsize));
 			if ( fullopen )
 			{
 				uint32_t i;
-				pData = malloc(packedsize+4); // +4 to avoid any attempt at buffer overflow by the code
+
+				// +4 to avoid any attempt at buffer overflow by the code
+				pData = malloc(packedsize+4); 
 				psyfile_read(self->file, pData,packedsize);
 				sounddesquash(pData, &pDest);
 				free(pData);
-				wave->channels.samples[1] = malloc(sizeof(float)*wave->numframes);
-				for (i = 0; i < wave->numframes; i++) {
+				sample->channels.samples[1] = malloc(sizeof(float) *
+					sample->numframes);
+				for (i = 0; i < sample->numframes; i++) {
 					short val = (short) pDest[i];
-					wave->channels.samples[1][i] = (float) val;					
+					sample->channels.samples[1][i] = (float) val;					
 				}
 				free(pDest);
 				pData = 0;
-				wave->channels.numchannels = 2;
+				sample->channels.numchannels = 2;
 			}
 			else
 			{
 				psyfile_skip(self->file, packedsize);
-				wave->channels.samples[1] = 0;
+				sample->channels.samples[1] = 0;
 			}
 		}
-		samples_insert(&self->song->samples, wave,
-			sampleindex_make(instrIdx, 0));
+		samples_insert(&self->song->samples, sample, sampleindex_make(instrIdx,
+			0));
 	}
 	else
 	{
@@ -1566,11 +1564,11 @@ void psy3_savesample(SongFile* self, Sample* sample)
 	psyfile_write_uint32(self->file, sample->numframes);	
 	psyfile_write_float(self->file, sample->globalvolume);	
 	psyfile_write_uint16(self->file, (uint16_t)(sample->defaultvolume * 0x80));
-	psyfile_write_uint32(self->file, sample->loopstart);	
-	psyfile_write_uint32(self->file, sample->loopend);	
+	psyfile_write_uint32(self->file, (uint32_t) sample->loopstart);	
+	psyfile_write_uint32(self->file, (uint32_t) sample->loopend);	
 	psyfile_write_int32(self->file, sample->looptype);	
-	psyfile_write_uint32(self->file, sample->sustainloopstart);	
-	psyfile_write_uint32(self->file, sample->sustainloopend);	
+	psyfile_write_uint32(self->file, (uint32_t) sample->sustainloopstart);	
+	psyfile_write_uint32(self->file, (uint32_t) sample->sustainloopend);	
 	psyfile_write_int32(self->file, sample->sustainlooptype);	
 	psyfile_write_uint32(self->file, sample->samplerate);	
 	psyfile_write_int16(self->file, sample->tune);	

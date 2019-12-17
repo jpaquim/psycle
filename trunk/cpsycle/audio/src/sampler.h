@@ -11,9 +11,6 @@
 #include <multifilter.h>
 #include <hashtbl.h>
 
-#define MAX_TRACKS 64
-
-#define SAMPLER_MAX_POLYPHONY		16
 #define SAMPLER_DEFAULT_POLYPHONY	8
 
 #define SAMPLER_CMD_NONE			0x00
@@ -38,21 +35,20 @@ InterpolationType;
 
 typedef struct {
 	Instrument* instrument;
-	Sample* currsample;
 	Samples* samples;
 	ADSR env;
 	ADSR filterenv;
 	MultiFilter filter_l;
 	MultiFilter filter_r;
-	SampleIterator position;
-	int channel;
-	float vol;
+	List* positions;	
+	uintptr_t channel;
+	psy_dsp_amp_t vol;	
 } Voice;
 
 typedef struct {
 	CustomMachine custommachine;		
-	Voice voices[SAMPLER_MAX_POLYPHONY];
-	int numvoices;
+	List* voices;
+	uintptr_t numvoices;
 	int resamplingmethod;
 	int defaultspeed;	
 	Table lastinst;	

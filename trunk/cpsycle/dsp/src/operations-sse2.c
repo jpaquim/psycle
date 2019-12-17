@@ -11,6 +11,7 @@
 #include <xmmintrin.h>
 
 static size_t alignment = 16;
+static psy_dsp_Operations noopt;
 
 static void* dsp_memory_alloc(size_t alignment, size_t count, size_t size);
 static void dsp_memory_dealloc(void* address);
@@ -30,6 +31,7 @@ static void dsp_accumulate(psy_dsp_big_amp_t* accumleft,
 
 void psy_dsp_sse2_init(psy_dsp_Operations* self)
 {	
+	psy_dsp_noopt_init(&noopt);
 	self->memory_alloc = dsp_memory_alloc;
 	self->memory_dealloc = dsp_memory_dealloc;
 	self->add = dsp_add;
@@ -79,12 +81,16 @@ void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_a
 	
 void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num)
 {
-	const __m128 zeroval = _mm_set_ps1(0.0f);
-	while (num > 0)
-	{
-		_mm_store_ps(dst, zeroval);
-		dst += 4;
-		num -= 4;
+	if ((num & 0x3) == 0) {
+		const __m128 zeroval = _mm_set_ps1(0.0f);
+		while (num > 0)
+		{
+			_mm_store_ps(dst, zeroval);
+			dst += 4;
+			num -= 4;
+		}
+	} else {
+		noopt.clear(dst, num);		
 	}
 }
 
@@ -145,6 +151,9 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 //same method, for a single buffer (allowing to calculate max for each buffer). samples need to be aligned by 16 in optimized paths.
 float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 {
+	if ((numSamples & 0x3) != 0) {
+		return noopt.maxvol(pSamples, numSamples);
+	}
 #if defined SSE
 	__m128 minVol = _mm_set_ps1(0.0f);
 	__m128 maxVol = _mm_set_ps1(0.0f);

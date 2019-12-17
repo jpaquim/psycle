@@ -6,59 +6,67 @@
 #include "instrumentview.h"
 #include <portable.h>
 
-static void OnInstrumentInsert(InstrumentView* self, ui_component* sender, int slot);
-static void OnInstrumentRemoved(InstrumentView* self, ui_component* sender, int slot);
-static void OnInstrumentSlotChanged(InstrumentView* self, Instrument* sender, int slot);
-static void OnInstrumentListChanged(InstrumentView* self, ui_component* sender, int slot);
-static void SetInstrument(InstrumentView* self, int slot);
-static void OnSongChanged(InstrumentView* self, Workspace* workspace);
-static void InitInstrumentHeaderView(InstrumentHeaderView*, ui_component* parent, Instruments*);
-static void SetInstrumentInstrumentHeaderView(InstrumentHeaderView*, Instrument*);
+static void instrumentview_onaddentry(InstrumentView*, ui_component* sender);
+static void instrumentview_onremoveentry(InstrumentView*, ui_component* sender);
+static void OnInstrumentInsert(InstrumentView*, ui_component* sender, int slot);
+static void OnInstrumentRemoved(InstrumentView*, ui_component* sender, int slot);
+static void OnInstrumentSlotChanged(InstrumentView*, Instrument* sender, int slot);
+static void OnInstrumentListChanged(InstrumentView*, ui_component* sender, int slot);
+static void instrumentview_setinstrument(InstrumentView*, int slot);
+static void OnSongChanged(InstrumentView*, Workspace* workspace);
+// InstrumentHeaderView
+static void instrumentheaderview_init(InstrumentHeaderView*, ui_component* parent, Instruments*);
+static void instrumentheaderview_setinstrument(InstrumentHeaderView*, Instrument*);
 static void OnPrevInstrument(InstrumentHeaderView*, ui_component* sender);
 static void OnNextInstrument(InstrumentHeaderView*, ui_component* sender);
 static void OnDeleteInstrument(InstrumentHeaderView*, ui_component* sender);
-static void InitInstrumentGeneralView(InstrumentGeneralView*, ui_component* parent, Instruments*);
-static void SetInstrumentInstrumentGeneralView(InstrumentGeneralView* self, Instrument* instrument);
-static void OnNNACut(InstrumentGeneralView* self);
-static void OnNNARelease(InstrumentGeneralView* self);
-static void OnNNANone(InstrumentGeneralView* self);
-static void InitInstrumentVolumeView(InstrumentVolumeView*, ui_component* parent, Instruments*);
+// InstrumentGeneralView
+static void instrumentgeneralview_init(InstrumentGeneralView*, ui_component* parent, Instruments*);
+static void instrumentgeneralview_setinstrument(InstrumentGeneralView* self, Instrument* instrument);
+static void OnNNACut(InstrumentGeneralView*);
+static void OnNNARelease(InstrumentGeneralView*);
+static void OnNNANone(InstrumentGeneralView*);
+// InstrumentVolumeView
+static void instrumentvolumeview_init(InstrumentVolumeView*, ui_component* parent, Instruments*);
 static void OnVolumeViewDescribe(InstrumentVolumeView*, ui_slider*, char* txt);
 static void OnVolumeViewTweak(InstrumentVolumeView*, ui_slider*, float value);
 static void OnVolumeViewValue(InstrumentVolumeView*, ui_slider*, float* value);
-static void SetInstrumentInstrumentVolumeView(InstrumentVolumeView* self, Instrument* instrument);
-static void InitInstrumentPanView(InstrumentPanView*, ui_component* parent, Instruments*);
-static void SetInstrumentInstrumentPanView(InstrumentPanView* self, Instrument* instrument);
-static void InitInstrumentFilterView(InstrumentFilterView*, ui_component* parent, Instruments*);
-static void SetInstrumentInstrumentFilterView(InstrumentFilterView* self, Instrument* instrument);
+static void instrumentvolumeview_setinstrument(InstrumentVolumeView* self, Instrument* instrument);
+// InstrumentPanView
+static void instrumentpanview_init(InstrumentPanView*, ui_component* parent, Instruments*);
+static void instrumentpanview_setinstrument(InstrumentPanView* self, Instrument* instrument);
+// InstrumentFilterView
+static void instrumentfilterview_init(InstrumentFilterView*, ui_component* parent, Instruments*);
+static void instrumentfilterview_setinstrument(InstrumentFilterView* self, Instrument* instrument);
 static void OnFilterViewDescribe(InstrumentFilterView*, ui_slider*, char* txt);
 static void OnFilterViewTweak(InstrumentFilterView*, ui_slider*, float value);
 static void OnFilterViewValue(InstrumentFilterView*, ui_slider*, float* value);
-static void InitInstrumentPitchView(InstrumentPitchView*, ui_component* parent, Instruments*);
-static void SetInstrumentInstrumentPitchView(InstrumentPitchView*, Instrument*);
-static void instrumentkeyboardview_ondraw(InstrumentKeyboardView*, ui_component* sender, ui_graphics* g);
-static void instrumententryview_init(InstrumentEntryView*, ui_component* parent);
-static void instrumententryview_ondraw(InstrumentEntryView*, ui_component* sender,
-	ui_graphics* g);
-static void instrumententryview_setinstrument(InstrumentEntryView*, Instrument*);
+// InstrumentPitchView
+static void instrumentpitchview_init(InstrumentPitchView*, ui_component* parent, Instruments*);
+static void instrumentpitchview_setinstrument(InstrumentPitchView*, Instrument*);
 static void instrumentviewbuttons_init(InstrumentViewButtons*,
 	ui_component* parent);
-static int isblack(int key);
 
+// InstrumentView
 void instrumentview_init(InstrumentView* self, ui_component* parent,
 							   Workspace* workspace)
 {
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(1),
+		ui_value_makepx(0), ui_value_makepx(0));
 	self->player = &workspace->player;
 	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);	
+	ui_component_enablealign(&self->component);
 	// header
-	InitInstrumentHeaderView(&self->header, &self->component,
+	instrumentheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments);
 	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
 	// left
 	ui_component_init(&self->left, &self->component);
 	ui_component_enablealign(&self->left);	
 	ui_component_setalign(&self->left, UI_ALIGN_LEFT);
+	ui_component_setmargin(&self->left, &margin);
 	// ui_label_init(&self->label, &self->left);
 	// ui_label_settext(&self->label, "Instruments");
 	// ui_label_setcharnumber(&self->label, 25);
@@ -91,11 +99,11 @@ void instrumentview_init(InstrumentView* self, ui_component* parent,
 	ui_notebook_init(&self->notebook, &self->client);
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
 	//ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
-	InitInstrumentGeneralView(&self->general, &self->notebook.component, &workspace->song->instruments);
-	InitInstrumentVolumeView(&self->volume, &self->notebook.component, &workspace->song->instruments);
-	InitInstrumentPanView(&self->pan, &self->notebook.component, &workspace->song->instruments);
-	InitInstrumentFilterView(&self->filter, &self->notebook.component, &workspace->song->instruments);
-	InitInstrumentPitchView(&self->pitch, &self->notebook.component, &workspace->song->instruments);	
+	instrumentgeneralview_init(&self->general, &self->notebook.component, &workspace->song->instruments);
+	instrumentvolumeview_init(&self->volume, &self->notebook.component, &workspace->song->instruments);
+	instrumentpanview_init(&self->pan, &self->notebook.component, &workspace->song->instruments);
+	instrumentfilterview_init(&self->filter, &self->notebook.component, &workspace->song->instruments);
+	instrumentpitchview_init(&self->pitch, &self->notebook.component, &workspace->song->instruments);	
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);	
 	psy_signal_connect(&self->player->song->instruments.signal_insert, self,
 		OnInstrumentInsert);
@@ -107,21 +115,27 @@ void instrumentview_init(InstrumentView* self, ui_component* parent,
 		OnInstrumentListChanged);
 	ui_notebook_setpageindex(&self->notebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
+		&workspace->song->instruments);
+	psy_signal_connect(&self->general.notemapview.buttons.add.signal_clicked, self,
+		instrumentview_onaddentry);
+	psy_signal_connect(&self->general.notemapview.buttons.remove.signal_clicked, self,
+		instrumentview_onremoveentry);
 }
 
 void OnInstrumentInsert(InstrumentView* self, ui_component* sender, int slot)
 {
-	SetInstrument(self, slot);
+	instrumentview_setinstrument(self, slot);
 }
 
 void OnInstrumentRemoved(InstrumentView* self, ui_component* sender, int slot)
 {
-	SetInstrument(self, slot);
+	instrumentview_setinstrument(self, slot);
 }
 
 void OnInstrumentSlotChanged(InstrumentView* self, Instrument* sender, int slot)
 {	
-	SetInstrument(self, slot);
+	instrumentview_setinstrument(self, slot);
 }
 
 void OnInstrumentListChanged(InstrumentView* self, ui_component* sender, int slot)
@@ -129,16 +143,17 @@ void OnInstrumentListChanged(InstrumentView* self, ui_component* sender, int slo
 	instruments_changeslot(&self->player->song->instruments, slot);
 }
 
-void SetInstrument(InstrumentView* self, int slot)
+void instrumentview_setinstrument(InstrumentView* self, int slot)
 {
-	Instrument* instrument = instruments_at(&self->player->song->instruments, slot);	
-	SetInstrumentInstrumentHeaderView(&self->header, instrument);
-	SetInstrumentInstrumentGeneralView(&self->general, instrument);
-	SetInstrumentInstrumentVolumeView(&self->volume, instrument);
-	SetInstrumentInstrumentPanView(&self->pan, instrument);
-	SetInstrumentInstrumentFilterView(&self->filter, instrument);
-	SetInstrumentInstrumentPitchView(&self->pitch, instrument);
+	Instrument* instrument;
 	
+	instrument = instruments_at(&self->player->song->instruments, slot);
+	instrumentheaderview_setinstrument(&self->header, instrument);
+	instrumentgeneralview_setinstrument(&self->general, instrument);
+	instrumentvolumeview_setinstrument(&self->volume, instrument);
+	instrumentpanview_setinstrument(&self->pan, instrument);
+	instrumentfilterview_setinstrument(&self->filter, instrument);
+	instrumentpitchview_setinstrument(&self->pitch, instrument);	
 }
 
 void OnSongChanged(InstrumentView* self, Workspace* workspace)
@@ -153,12 +168,13 @@ void OnSongChanged(InstrumentView* self, Workspace* workspace)
 	psy_signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
 	psy_signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
 	SetInstruments(&self->instrumentsbox, &workspace->song->instruments);
+	self->general.notemapview.entryview.instrument = 0;
+	instrumentnotemapview_setinstrument(&self->general.notemapview, 0);	
 	samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
-	SetInstrument(self, 0);
 }
 
-void InitInstrumentHeaderView(InstrumentHeaderView* self, ui_component* parent, Instruments* instruments)
+void instrumentheaderview_init(InstrumentHeaderView* self, ui_component* parent, Instruments* instruments)
 {	
 	ui_margin margin;
 
@@ -188,9 +204,8 @@ void InitInstrumentHeaderView(InstrumentHeaderView* self, ui_component* parent, 
 			&margin));
 }
 
-void SetInstrumentInstrumentHeaderView(InstrumentHeaderView* self, Instrument* instrument)
+void instrumentheaderview_setinstrument(InstrumentHeaderView* self, Instrument* instrument)
 {
-//	char buffer[20];
 	self->instrument = instrument;
 	ui_edit_settext(&self->nameedit, instrument ? instrument->name : "");
 }
@@ -210,8 +225,7 @@ void OnNextInstrument(InstrumentHeaderView* self, ui_component* sender)
 }
 
 void OnDeleteInstrument(InstrumentHeaderView* self, ui_component* sender)
-{
-	
+{	
 }
 
 void instrumentviewbuttons_init(InstrumentViewButtons* self,
@@ -238,21 +252,30 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 }
 
 // GeneralView
-void InitInstrumentGeneralView(InstrumentGeneralView* self, ui_component* parent, Instruments* instruments)
+void instrumentgeneralview_init(InstrumentGeneralView* self, ui_component* parent, Instruments* instruments)
 {
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2),
+		ui_value_makeeh(1.5), ui_value_makepx(0));
 	self->instruments = instruments;
 	self->instrument = 0;
 	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);	
+	ui_component_enablealign(&self->component);
+	// left
+	// ui_component_init(&self->left, &self->component);
+	// ui_component_enablealign(&self->left);	
+	// ui_component_setalign(&self->left, UI_ALIGN_LEFT);
 	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
-	ui_component_resize(&self->samplesbox.component, 200, 0);
-	ui_component_setalign(&self->samplesbox.component, UI_ALIGN_LEFT);	
+	ui_component_setalign(&self->samplesbox.component, UI_ALIGN_LEFT);
+	ui_component_setmargin(&self->samplesbox.component, &margin);
+	ui_component_resize(&self->samplesbox.component, 150, 0);
 	// nna
 	ui_component_init(&self->nna, &self->component);
 	ui_component_enablealign(&self->nna);
 	ui_component_setalign(&self->nna, UI_ALIGN_TOP);
 	ui_label_init(&self->nnaheaderlabel, &self->nna);
-	ui_label_settext(&self->nnaheaderlabel, "New Note Action");	
+	ui_label_settext(&self->nnaheaderlabel, "New Note Action ");
 	ui_button_init(&self->nnacutbutton, &self->nna);
 	ui_button_settext(&self->nnacutbutton, "Note Cut");
 	ui_component_setposition(&self->nnacutbutton.component, 5, 30, 70, 20);
@@ -266,21 +289,15 @@ void InitInstrumentGeneralView(InstrumentGeneralView* self, ui_component* parent
 		OnNNARelease);
 	list_free(ui_components_setalign(		
 		ui_component_children(&self->nna, 0),
-		UI_ALIGN_LEFT, 0));			
-
-	instrumentkeyboardview_init(&self->keyboard, &self->component);
-	ui_component_setalign(&self->keyboard.component, UI_ALIGN_BOTTOM);
-	instrumententryview_init(&self->entryview, &self->component);
-	ui_component_setalign(&self->entryview.component, UI_ALIGN_BOTTOM);
-	
-	SendMessage((HWND)self->nnacutbutton.component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+		UI_ALIGN_LEFT, &margin));			
+	instrumentnotemapview_init(&self->notemapview, &self->component);
+	ui_component_setalign(&self->notemapview.component, UI_ALIGN_CLIENT);
 }
 
-void SetInstrumentInstrumentGeneralView(InstrumentGeneralView* self, Instrument* instrument)
-{
-	// char buffer[20];
-	self->instrument = instrument;	
-	instrumententryview_setinstrument(&self->entryview, instrument);
+void instrumentgeneralview_setinstrument(InstrumentGeneralView* self, Instrument* instrument)
+{	
+	self->instrument = instrument;		
+	instrumentnotemapview_setinstrument(&self->notemapview, instrument);	
 	ui_button_disablehighlight(&self->nnacutbutton);
 	ui_button_disablehighlight(&self->nnareleasebutton);
 	ui_button_disablehighlight(&self->nnanonebutton);
@@ -331,7 +348,8 @@ void OnNNANone(InstrumentGeneralView* self)
 	}
 }
 
-void InitInstrumentVolumeView(InstrumentVolumeView* self, ui_component* parent, Instruments* instruments)
+// InistrumentVolumeView
+void instrumentvolumeview_init(InstrumentVolumeView* self, ui_component* parent, Instruments* instruments)
 {
 	ui_margin margin;
 	int i;
@@ -383,7 +401,7 @@ void InitInstrumentVolumeView(InstrumentVolumeView* self, ui_component* parent, 
 	}	
 }
 
-void SetInstrumentInstrumentVolumeView(InstrumentVolumeView* self, Instrument* instrument)
+void instrumentvolumeview_setinstrument(InstrumentVolumeView* self, Instrument* instrument)
 {	
 	self->instrument = instrument;
 	EnvelopeViewSetAdsrEnvelope(&self->envelopeview, instrument ? &instrument->volumeenvelope : 0);
@@ -473,19 +491,20 @@ void OnVolumeViewValue(InstrumentVolumeView* self, ui_slider* slidergroup, float
 	}
 }
 
-void InitInstrumentPanView(InstrumentPanView* self, ui_component* parent, Instruments* instruments)
+// InstrumentPanView
+void instrumentpanview_init(InstrumentPanView* self, ui_component* parent, Instruments* instruments)
 {
 	self->instruments = instruments;	
 	ui_component_init(&self->component, parent);	
 }
 
-void SetInstrumentInstrumentPanView(InstrumentPanView* self, Instrument* instrument)
+void instrumentpanview_setinstrument(InstrumentPanView* self, Instrument* instrument)
 {
-	// char buffer[20];
 	self->instrument = instrument;	
 }
 
-void InitInstrumentFilterView(InstrumentFilterView* self, ui_component* parent, Instruments* instruments)
+// InstrumentFilterView
+void instrumentfilterview_init(InstrumentFilterView* self, ui_component* parent, Instruments* instruments)
 {
 	ui_margin margin;
 	int i;
@@ -546,7 +565,7 @@ void InitInstrumentFilterView(InstrumentFilterView* self, ui_component* parent, 
 	}	
 }
 
-void SetInstrumentInstrumentFilterView(InstrumentFilterView* self, Instrument* instrument)
+void instrumentfilterview_setinstrument(InstrumentFilterView* self, Instrument* instrument)
 {	
 	self->instrument = instrument;
 	EnvelopeViewSetAdsrEnvelope(&self->envelopeview,
@@ -687,145 +706,39 @@ void OnFilterViewValue(InstrumentFilterView* self, ui_slider* slidergroup, float
 	}
 }
 
-void InitInstrumentPitchView(InstrumentPitchView* self,
+// InstrumentPitchView
+void instrumentpitchview_init(InstrumentPitchView* self,
 	ui_component* parent, Instruments* instruments)
 {
 	self->instruments = instruments;	
 	ui_component_init(&self->component, parent);	
 }
 
-void SetInstrumentInstrumentPitchView(InstrumentPitchView* self,
+void instrumentpitchview_setinstrument(InstrumentPitchView* self,
 	Instrument* instrument)
 {
-	// char buffer[20];
 	self->instrument = instrument;	
 }
 
-void instrumentkeyboardview_init(InstrumentKeyboardView* self,
-	ui_component* parent)
+void instrumentview_onaddentry(InstrumentView* self, ui_component* sender)
 {
-	self->dy = 0;
-	ui_component_init(&self->component, parent);
-	ui_component_resize(&self->component, 0, 40);
-	psy_signal_connect(&self->component.signal_draw, self,
-		instrumentkeyboardview_ondraw);
-}
-
-int isblack(int key)
-{
-	int offset = key % 12;
-
-	return (offset == 1 || offset == 3 || offset == 6 || offset == 8 
-		|| offset == 10);
-	// 0 1 2 3 4 5 6 7 8 9 10 11
-	// c   d   e f   g   a    h 
-}
-
-void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, ui_component* sender, ui_graphics* g)
-{		
-	int keymin = 0;
-	int keymax = NOTECOMMANDS_RELEASE;
-	int key;	
-	int keyboardsize;
-	int keysize = 8;
-	int cp = 0;
-	float top = 0.50;
-	float bottom = 1 - top;
-	ui_textmetric tm;
-	ui_size size;
-
-	tm = ui_component_textmetric(&self->component);
-	keyboardsize = (keymax - keymin) * keysize;
-	size = ui_component_size(&self->component);
-	ui_setcolor(g, 0x00333333);
-
-	ui_setbackgroundmode(g, TRANSPARENT);
-	ui_settextcolor(g, 0x00333333);
-	for (key = keymin; key < keymax; ++key) {					
-		ui_drawline(g, cp, 0, cp, size.height);
-		if (!isblack(key)) {
-			ui_rectangle r;
-			ui_setrectangle(&r, cp, 0, keysize, size.height);
-			ui_drawsolidrectangle(g, r, 0x00CACACA);
-			ui_drawline(g, cp, 0, cp, size.height);			
-			cp += keysize;			
-			ui_drawline(g, cp, 0, cp, size.height);			
-		}
-	}
-	ui_settextcolor(g, 0x00CACACA);
-	for (cp = 0, key = keymin; key < keymax; ++key) {							
-		if (!isblack(key)) {			
-			cp += keysize;			
-		} else {
-			ui_rectangle r;
-			int x;
-			int width;
-
-			x = cp - (int)(keysize * 0.8 / 2);
-			width = (int)(keysize * 0.8);
-			ui_setrectangle(&r, x, 0, width, (int)(size.height * top));
-			ui_drawsolidrectangle(g, r, 0x00444444);			
-		}
+	if (self->general.instrument) {
+		InstrumentEntry entry;
+		
+		instrumententry_init(&entry);
+		entry.sampleindex = samplesbox_selected(&self->general.samplesbox);
+		instrument_addentry(self->general.instrument, &entry);
+		ui_component_invalidate(&self->general.notemapview.component);
 	}
 }
 
-// entry view
-void instrumententryview_init(InstrumentEntryView* self,
-	ui_component* parent)
+void instrumentview_onremoveentry(InstrumentView* self, ui_component* sender)
 {
-	self->instrument = 0;
-	self->dy = 0;
-	ui_component_init(&self->component, parent);	
-	ui_component_resize(&self->component, 0, 40);
-	psy_signal_connect(&self->component.signal_draw, self,
-		instrumententryview_ondraw);
-}
-
-void instrumententryview_setinstrument(InstrumentEntryView* self, Instrument* instrument)
-{
-	self->instrument = instrument;
-	ui_component_invalidate(&self->component);
-}
-
-int numwhitekey(int key)
-{
-	int octave = key / 12;
-	int offset = key % 12;
-	int c = 0;
-	int i;
-
-	for (i = 0; i < offset; ++i) {
-		if (!isblack(i)) ++c;
-	}
-	return octave * 7 + c;
-}
-
-void instrumententryview_ondraw(InstrumentEntryView* self, ui_component* sender, ui_graphics* g)
-{	
-	if (self->instrument) {
-		int cpy = 0;
-		List* p;
-		ui_size size;
-		int keysize = 8;
-		int width = keysize * numwhitekey(NOTECOMMANDS_RELEASE); 
-
-		size = ui_component_size(&self->component);
-		ui_setcolor(g, 0x00CACACA);
-		for (p = self->instrument->entries; p != 0; p = p->next) {
-			InstrumentEntry* entry;
-			int startx;
-			int endx;
-
-			entry = (InstrumentEntry*) p->entry;
-			startx = (int)(
-				(float) numwhitekey(entry->keyrange.low) / 
-					numwhitekey(NOTECOMMANDS_RELEASE) * width);
-			endx = (int)(
-				(float)numwhitekey(entry->keyrange.high) / 
-					numwhitekey(NOTECOMMANDS_RELEASE) * width);			
-			ui_drawline(g, startx, cpy + 5, endx, cpy + 5);
-			ui_drawline(g, startx, cpy, startx, cpy + 10);
-			ui_drawline(g, endx, cpy, endx, cpy + 10);
-		}
+	if (self->general.instrument) {
+		instrument_removeentry(
+			self->general.instrument,
+				self->general.notemapview.entryview.selected);
+		self->general.notemapview.entryview.selected = NOINSTRUMENT_INDEX;		
+		ui_component_invalidate(&self->general.notemapview.component);
 	}
 }

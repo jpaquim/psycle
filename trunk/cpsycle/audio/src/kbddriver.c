@@ -205,7 +205,7 @@ void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
 			int base = 48;			
 									
 			cmd->type = EVENTDRIVER_CMD_PATTERN;
-			cmd->data[0] = (unsigned char) (cmd + base);
+			cmd->data[0] = (unsigned char) (kbcmd + base);
 			cmd->size = 4;
 		}
 	} else {
