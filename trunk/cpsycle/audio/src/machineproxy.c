@@ -69,8 +69,12 @@ static int machineproxy_haseditor(MachineProxy*);
 static void machineproxy_seteditorhandle(MachineProxy*, void* handle);
 static void machineproxy_editorsize(MachineProxy*, int* width, int* height);
 static void machineproxy_editoridle(MachineProxy*);
-static const char* machineproxy_editname(MachineProxy* self);
-static void machineproxy_seteditname(MachineProxy* self, const char* name);
+static const char* machineproxy_editname(MachineProxy*);
+static void machineproxy_seteditname(MachineProxy*, const char* name);
+static Buffer* machineproxy_buffermemory(MachineProxy*);
+static uintptr_t machineproxy_buffermemorysize(MachineProxy*);
+static void machineproxy_setbuffermemorysize(MachineProxy*, uintptr_t);
+
 
 #if defined DIVERSALIS__OS__MICROSOFT
 static int FilterException(MachineProxy* proxy, const char* msg, int code,
@@ -164,6 +168,11 @@ static void vtable_init(MachineProxy* self)
 		vtable.editoridle = (fp_machine_editoridle) machineproxy_editoridle;
 		vtable.seteditname = (fp_machine_seteditname) machineproxy_seteditname;
 		vtable.editname = (fp_machine_editname) machineproxy_editname;
+		vtable.buffermemory = (fp_machine_buffermemory) machineproxy_buffermemory;
+		vtable.buffermemorysize = (fp_machine_buffermemorysize)
+			machineproxy_buffermemorysize;
+		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
+			machineproxy_buffermemory;
 		vtable_initialized = 1;
 	}
 }
@@ -1048,6 +1057,64 @@ void machineproxy_seteditname(MachineProxy* self, const char* name)
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "seteditname", GetExceptionCode(),
 			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+Buffer* machineproxy_buffermemory(MachineProxy* self)
+{
+	Buffer* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->buffermemory(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "buffermemory", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+uintptr_t machineproxy_buffermemorysize(MachineProxy* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->buffermemorysize(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "buffermemorysize", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+
+}
+
+void machineproxy_setbuffermemorysize(MachineProxy* self, uintptr_t size)
+{
+if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->setbuffermemorysize(self->client, size);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "setbuffermemorysize",
+			GetExceptionCode(), GetExceptionInformation())) {
 		}
 #endif		
 	}

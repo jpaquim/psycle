@@ -53,6 +53,7 @@ typedef struct {
 	psy_dsp_beat_t linetickcount;
 	SequencerJump jump;
 	SequenceRowDelay rowdelay;
+	Table lastmachine;
 } Sequencer;
 
 void sequencer_init(Sequencer*, Sequence*, Machines*);

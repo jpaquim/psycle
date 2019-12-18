@@ -144,3 +144,27 @@ int buffer_mono(Buffer* self)
 {
 	return self->numchannels == 1;
 }
+
+void buffer_insertsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
+	uintptr_t numsourcesamples)
+{	
+	if (numsourcesamples < numsamples) {		
+		uintptr_t diff;		
+		uintptr_t c;
+
+		diff = numsamples - numsourcesamples;		
+		for (c = 0; c < self->numchannels; ++c) {
+			dsp.clear(self->samples[c] + numsourcesamples, diff);			
+			dsp.add(self->samples[c], self->samples[c] + numsourcesamples, diff, 1.f);
+			dsp.clear(self->samples[c], numsourcesamples);
+			dsp.add(source->samples[c], self->samples[c], numsourcesamples, 1.f);
+		}
+	} else {
+		uintptr_t c;
+
+		for (c = 0; c < self->numchannels; ++c) {
+			dsp.clear(self->samples[c], numsamples);			
+			dsp.add(source->samples[c], self->samples[c], numsamples, 1.f);	
+		}
+	}
+}

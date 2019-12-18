@@ -85,6 +85,9 @@ static void editorsize(Machine* self, int* width, int* height)
 static void editoridle(Machine* self) { }
 static const char* editname(Machine* self) { return ""; }
 static void seteditname(Machine* self, const char* name) { }
+static Buffer* buffermemory(Machine* self) { return 0; }
+static uintptr_t buffermemorysize(Machine* self) { return 0; }
+static void setbuffermemorysize(Machine* self, uintptr_t size) { }
 
 /// machinecallback
 static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
@@ -152,6 +155,9 @@ static void vtable_init(void)
 		vtable.editoridle = editoridle;
 		vtable.editname = editname;
 		vtable.seteditname = seteditname;
+		vtable.buffermemory = buffermemory;
+		vtable.buffermemorysize = buffermemorysize;
+		vtable.setbuffermemorysize = setbuffermemorysize;
 		vtable_initialized = 1;
 	}
 }
@@ -239,7 +245,15 @@ void work(Machine* self, BufferContext* bc)
 		buffer_setoffset(bc->input, 0);
 	}
 	if (bc->output) {
-		buffer_setoffset(bc->output, 0);
+		Buffer* memory;
+
+		buffer_setoffset(bc->output, 0);		
+		memory = self->vtable->buffermemory(self);
+		if (memory) {			
+			buffer_insertsamples(memory, bc->output, 
+				self->vtable->buffermemorysize(self),
+				bc->numsamples);
+		}
 	}
 }
 

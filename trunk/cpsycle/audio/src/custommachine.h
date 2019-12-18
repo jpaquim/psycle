@@ -12,6 +12,8 @@ typedef struct {
 	int ismuted;
 	int isbypassed;
 	char* editname;
+	Buffer memorybuffer;
+	uintptr_t memorybuffersize;
 } CustomMachine;
 
 void custommachine_init(CustomMachine*, MachineCallback);

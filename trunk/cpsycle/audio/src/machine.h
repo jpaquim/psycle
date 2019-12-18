@@ -77,6 +77,9 @@ typedef	void (*fp_machine_editorsize)(struct Machine*, int* width, int* height);
 typedef	void (*fp_machine_editoridle)(struct Machine*);
 typedef	const char* (*fp_machine_editname)(struct Machine*);
 typedef	void (*fp_machine_seteditname)(struct Machine*, const char* name);
+typedef	struct Buffer* (*fp_machine_buffermemory)(struct Machine*);
+typedef	uintptr_t (*fp_machine_buffermemorysize)(struct Machine*);
+typedef	void (*fp_machine_setbuffermemorysize)(struct Machine*, uintptr_t);
 // machine callbacks
 typedef	unsigned int (*fp_machine_samplerate)(struct Machine*);
 typedef unsigned int (*fp_machine_bpm)(struct Machine*);	
@@ -136,6 +139,9 @@ typedef struct MachineVtable {
 	fp_machine_editoridle editoridle;
 	fp_machine_editname editname;
 	fp_machine_seteditname seteditname;
+	fp_machine_buffermemory buffermemory;
+	fp_machine_buffermemorysize buffermemorysize;
+	fp_machine_setbuffermemorysize setbuffermemorysize;
 	// machine callbacks
 	fp_machine_samplerate samplerate;
 	fp_machine_bpm bpm;

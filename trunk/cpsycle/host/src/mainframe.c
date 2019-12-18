@@ -249,6 +249,14 @@ void mainframe_initbars(MainFrame* self)
 	ui_component_enablealign(&self->toprow2);	
 	ui_component_setalign(&self->toprow2, UI_ALIGN_TOP);
 	ui_component_setmargin(&self->toprow2, &rowmargin);
+	// scopebar
+	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);
+	ui_component_setalign(&self->trackscopeview.component, UI_ALIGN_TOP);
+	ui_component_setmargin(&self->trackscopeview.component, &rowmargin);
+	if (!workspace_showtrackscopes(&self->workspace)) {
+		ui_component_hide(&self->trackscopeview.component);
+		trackscopeview_stop(&self->trackscopeview);
+	}
 	// add bars to rows
 	// row0
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);	
@@ -703,8 +711,20 @@ void mainframe_ongearcreate(MainFrame* self, ui_component* sender)
 
 void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
 	Properties* property)
-{
-	workspace_configchanged(&self->workspace, property, sender->choiceproperty);	
+{	
+	if (strcmp(properties_key(property), "trackscopes") == 0) {
+		if (workspace_showtrackscopes(&self->workspace)) {
+			ui_component_show(&self->trackscopeview.component);
+			ui_component_align(&self->component);
+			trackscopeview_start(&self->trackscopeview);
+		} else {
+			ui_component_hide(&self->trackscopeview.component);
+			ui_component_align(&self->component);
+			trackscopeview_stop(&self->trackscopeview);
+		}
+	} else {
+		workspace_configchanged(&self->workspace, property, sender->choiceproperty);
+	}
 }
 
 int mainframe_showmaximizedatstart(MainFrame* self)

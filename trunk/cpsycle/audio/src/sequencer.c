@@ -5,6 +5,7 @@
 
 #include "sequencer.h"
 #include "pattern.h"
+#include "instruments.h"
 #include <stdlib.h> 
 
 static void clearevents(Sequencer*);
@@ -52,6 +53,7 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->linetickcount = (psy_dsp_beat_t) 0.f;
 	compute_beatsprosample(self);
 	makecurrtracks(self, (psy_dsp_beat_t) 0.f);
+	table_init(&self->lastmachine);
 }
 
 void sequencer_dispose(Sequencer* self)
@@ -62,6 +64,7 @@ void sequencer_dispose(Sequencer* self)
 	clearcurrtracks(self);
 	self->sequence = 0;
 	self->machines = 0;
+	table_dispose(&self->lastmachine);
 }
 
 void sequencer_reset(Sequencer* self, Sequence* sequence, Machines* machines)
@@ -189,7 +192,7 @@ void makecurrtracks(Sequencer* self, psy_dsp_beat_t offset)
 			(SequenceTrackIterator*)malloc(sizeof(SequenceTrackIterator));
 		*track->iterator = sequence_begin(self->sequence, p, offset);		
 		track->state.retriggeroffset = 0;
-		track->state.retriggerstep = 0;
+		track->state.retriggerstep = 0;		
 		list_append(&self->currtracks, track);
 	}
 }
@@ -297,7 +300,7 @@ void sequencer_linetick(Sequencer* self)
 {
 	if (self->jump.active) {
 		self->jump.active = 0;
-		sequencer_setposition(self, self->jump.offset);		
+		sequencer_setposition(self, self->jump.offset);
 	}
 	if (self->rowdelay.active) {
 		self->rowdelay.active = 0;
@@ -512,6 +515,10 @@ void addsequenceevent(Sequencer* self, SequencerTrack* track, psy_dsp_beat_t off
 			makeretriggercontinueevents(self, track, patternentry);
 		} else {
 			entry->delta = offset - self->position;
+			if (entry->event.note < NOTECOMMANDS_RELEASE) {
+				table_insert(&self->lastmachine, entry->track,
+					(void*)(uintptr_t)entry->event.mach);				
+			}
 			list_append(&self->events, entry);
 		}
 	}	
