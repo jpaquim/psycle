@@ -415,6 +415,9 @@ void workspace_makepatternview(Workspace* self, Properties* visual)
 		properties_append_bool(pvc, "linenumbersinhex", 1),
 		"Line numbers in HEX");
 	properties_settext(
+		properties_append_bool(pvc, "trackscopes", 1),
+		"Pattern track scopes");
+	properties_settext(
 		properties_append_bool(pvc, "wraparound", 1),
 		"Wrap Around");
 	properties_settext(
@@ -829,6 +832,11 @@ int workspace_showlinenumbercursor(Workspace* self)
 int workspace_showlinenumbersinhex(Workspace* self)
 {
 	return properties_bool(self->config, "visual.patternview.linenumbersinhex", 1);
+}
+
+int workspace_showtrackscopes(Workspace* self)
+{
+	return properties_bool(self->config, "visual.patternview.trackscopes", 1);
 }
 
 int workspace_wraparound(Workspace* self)

@@ -57,6 +57,9 @@ void Buildtrackbox(SongTrackBar* self)
 void OnTrackBoxSelChange(SongTrackBar* self, ui_component* sender, int sel)
 {		
 	player_setnumsongtracks(&self->workspace->player, sel);
+	if (self->workspace->song) {
+		patterns_setsongtracks(&self->workspace->song->patterns, sel);
+	}
 }
 
 void OnSongTracksNumChanged(SongTrackBar* self, Workspace* workspace,

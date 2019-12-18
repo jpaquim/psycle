@@ -7,7 +7,7 @@
 #include <dsptypes.h>
 #include "../../detail/stdint.h"
 
-typedef struct {
+typedef struct Buffer {
 	uintptr_t numchannels;	
 	psy_dsp_amp_t** samples;
 	unsigned int numsamples;
@@ -31,5 +31,7 @@ void buffer_mulsamples(Buffer*, uintptr_t numsamples, psy_dsp_amp_t mul);
 uintptr_t buffer_numchannels(Buffer*);
 void buffer_pan(Buffer* self, psy_dsp_amp_t pan, uintptr_t amount);
 int buffer_mono(Buffer*);
+void buffer_insertsamples(Buffer*, Buffer* source, uintptr_t numsamples,
+	uintptr_t numsourcesamples);
 
 #endif

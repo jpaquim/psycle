@@ -109,6 +109,7 @@ int workspace_showmaximizedatstart(Workspace*);
 int workspace_showlinenumbers(Workspace*);
 int workspace_showlinenumbercursor(Workspace*);
 int workspace_showlinenumbersinhex(Workspace*);
+int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
 void workspace_configchanged(Workspace*, Properties* property,
 	Properties* choice);

@@ -292,6 +292,10 @@ SOURCE=.\src\trackerview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\trackscopeview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\undoredo.c
 # End Source File
 # Begin Source File
@@ -545,6 +549,10 @@ SOURCE=.\src\timebar.h
 # Begin Source File
 
 SOURCE=.\src\trackerview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\trackscopeview.h
 # End Source File
 # Begin Source File
 

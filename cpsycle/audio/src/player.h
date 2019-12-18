@@ -25,7 +25,7 @@ typedef struct {
 	psy_Signal signal_numsongtrackschanged;
 	psy_Signal signal_lpbchanged;
 	psy_Signal signal_inputevent;
-	psy_Signal signal_stop;
+	psy_Signal signal_stop;	
 	Library drivermodule;
 	EventDrivers eventdrivers;
 	Table rms;	
@@ -34,7 +34,7 @@ typedef struct {
 	int recordingnotes;
 	int multichannelaudition;	
 	Table notestotracks;
-	Table trackstonotes;
+	Table trackstonotes;	
 } Player;
 
 // init dispose

@@ -10,7 +10,7 @@ typedef struct {
 	Table mute;	
 	Table record;
 	int soloactive;
-	uintptr_t soloedtrack;
+	uintptr_t soloedtrack;	
 } PatternsTrackState;
 
 void patternstrackstate_init(PatternsTrackState*);

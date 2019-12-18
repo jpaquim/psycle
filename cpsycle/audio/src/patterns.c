@@ -120,7 +120,7 @@ void patterns_setsongtracks(Patterns* self, uintptr_t trackcount)
 	self->songtracks = trackcount;
 }
 
-uintptr_t patterns_songtracks(Patterns* self, uintptr_t trackcount)
+uintptr_t patterns_songtracks(Patterns* self)
 {
 	return self->songtracks;
 }

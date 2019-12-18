@@ -32,7 +32,7 @@ void patterns_unmutetrack(Patterns* self, uintptr_t track);
 int patterns_istrackmuted(Patterns*, uintptr_t track);
 int patterns_istracksoloed(Patterns*, uintptr_t track);
 void patterns_setsongtracks(Patterns*, uintptr_t trackcount);
-uintptr_t patterns_songtracks(Patterns*, uintptr_t trackcount);
+uintptr_t patterns_songtracks(Patterns*);
 
 
 #endif

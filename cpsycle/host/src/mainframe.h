@@ -5,6 +5,7 @@
 #define MAINFRAME_H
 
 #include "workspace.h"
+#include "trackscopeview.h"
 #include <uilabel.h>
 #include <uibutton.h>
 #include <uiframe.h>
@@ -56,6 +57,7 @@ typedef struct {
 	SongBar songbar;
 	PlayBar playbar;
 	PlayPosBar playposbar;
+	TrackScopeView trackscopeview;
 	SequenceView sequenceview;
 	MachineView machineview;
 	PatternView patternview;		
