@@ -38,7 +38,7 @@ static void savespecific(Sampler*, struct SongFile*, unsigned int slot);
 
 static int currslot(Sampler*, unsigned int channel, const PatternEvent*);
 
-static void voice_init(Voice*, Instrument*, uintptr_t channel,
+static void voice_init(Voice*, Sampler*, Instrument*, uintptr_t channel,
 	unsigned int samplerate, Samples* samples);
 static void voice_dispose(Voice*);
 static void voice_seqtick(Voice*, const PatternEvent*);
@@ -114,6 +114,7 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->voices = 0;
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;	
+	self->maxvolume = 0xFF;
 	base->vtable->seteditname(base, "Sampler");
 	table_init(&self->lastinst);
 }
@@ -166,7 +167,7 @@ void seqtick(Sampler* self, int channel, const PatternEvent* event)
 			Voice* voice;
 
 			voice = malloc(sizeof(Voice));
-			voice_init(voice, instrument, channel,
+			voice_init(voice, self, instrument, channel,
 				base->vtable->samplerate(base),
 				self->custommachine.machine.vtable->samples(
 				&self->custommachine.machine));
@@ -235,6 +236,7 @@ void parametertweak(Sampler* self, int param, int value)
 		case 0: self->numvoices = value; break;
 		case 1: self->resamplingmethod = value; break;
 		case 2: self->defaultspeed = value; break;
+		case 3: self->maxvolume = value; break;
 		default:
 		break;
 	}
@@ -257,6 +259,10 @@ int describevalue(Sampler* self, char* txt, int param, int value)
 			case 0:sprintf(txt,"played by C3");return 1;break;
 			case 1:sprintf(txt,"played by C4");return 1;break;		
 		}
+	} else
+	if (param == 3) {
+		sprintf(txt,"%0X", value);
+		return 1;
 	}
 	return 0;
 }
@@ -267,6 +273,7 @@ int parametervalue(Sampler* self, int param)
 		case 0: return self->numvoices; break;
 		case 1: return self->resamplingmethod; break;
 		case 2: return self->defaultspeed; break;
+		case 3: return self->maxvolume; break;
 		default:
 		break;
 	}
@@ -275,12 +282,12 @@ int parametervalue(Sampler* self, int param)
 
 unsigned int numparameters(Sampler* self)
 {
-	return 3;
+	return 4;
 }
 
 unsigned int numparametercols(Sampler* self)
 {
-	return 3;
+	return 4;
 }
 
 int parametertype(Sampler* self, int par)
@@ -303,6 +310,10 @@ void parameterrange(Sampler* self, int param, int* minval, int* maxval)
 		*minval = 0;
 		*maxval = 1;
 		break;
+	case 3:
+		*minval = 0;
+		*maxval = 255;
+		break;
 	default:
 		*minval = 0;
 		*maxval = 0;
@@ -322,6 +333,9 @@ int parameterlabel(Sampler* self, char* txt, int param)
 		break;
 	case 2:
 		psy_snprintf(txt, 128, "%s", "Default speed");
+		break;
+	case 3:
+		psy_snprintf(txt, 128, "%s", "Max volume");
 		break;
 	default:
 		txt[0] = '\0';
@@ -343,6 +357,9 @@ int parametername(Sampler* self, char* txt, int param)
 		break;
 	case 2:
 		psy_snprintf(txt, 128, "%s", "Default speed");
+		break;
+	case 3:
+		psy_snprintf(txt, 128, "%s", "Max volume");
 		break;
 	default:
 		txt[0] = '\0';
@@ -431,13 +448,16 @@ void savespecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
 }
 
-void voice_init(Voice* self, Instrument* instrument, uintptr_t channel,
-	unsigned int samplerate, Samples* samples) 
+void voice_init(Voice* self, Sampler* sampler, Instrument* instrument,
+	uintptr_t channel, unsigned int samplerate, Samples* samples) 
 {	
+	self->sampler = sampler;
 	self->samples = samples;
 	self->instrument = instrument;
 	self->channel = channel;
-	self->vol = 1.f;	
+	self->usedefaultvolume = 1;
+	self->vol = 1.f;
+	self->pan = 0.5f;
 	self->positions = 0;
 	if (instrument) {
 		adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
@@ -477,10 +497,15 @@ void voice_dispose(Voice* self)
 }
 
 void voice_seqtick(Voice* self, const PatternEvent* event)
-{
+{	
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
-		 self->vol = event->parameter / (psy_dsp_amp_t) 255;
+		 self->usedefaultvolume = 0;
+		 self->vol = event->parameter / 
+			 (psy_dsp_amp_t) self->sampler->maxvolume;
 	} else
+	if (event->cmd == SAMPLER_CMD_PANNING) {
+		self->pan = event->parameter / (psy_dsp_amp_t) 255;
+	}
 	if (event->note == NOTECOMMANDS_RELEASE) {
 		voice_noteoff(self, event);
 	} else
@@ -492,7 +517,7 @@ void voice_seqtick(Voice* self, const PatternEvent* event)
 void voice_noteon(Voice* self, const PatternEvent* event)
 {	
 	Sample* sample;		
-	int baseC = 60;
+	int baseC = 48;
 	List* entries;
 	List* p;
 						
@@ -557,15 +582,23 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 		}
 		for (p = self->positions; p != 0; p = p->next) {
 			SampleIterator* position;
-			int i;
-			psy_dsp_amp_t vol;					
+			int i;			
+			psy_dsp_amp_t svol;
+			psy_dsp_amp_t rvol;
+			psy_dsp_amp_t lvol;
 
 			position = (SampleIterator*) p->entry;
-			vol = self->vol * position->sample->globalvolume *
-				position->sample->defaultvolume;
-			if (vol > 0.5) {
-				vol = 0.5;
-			}
+			svol = position->sample->globalvolume *
+						(self->usedefaultvolume
+							? position->sample->defaultvolume
+							: self->vol);			
+			rvol = position->sample->panfactor * svol;
+			lvol = (1.f - position->sample->panfactor) * svol;
+			svol *= 0.5f;
+			//FT2 Style (Two slides) mode, but with max amp = 0.5.
+			if (rvol > 0.5f) { rvol = 0.5f; }
+			if (lvol > 0.5f) { lvol = 0.5f; }			
+			if (svol > 0.5f) { svol = 0.5f; }
 			
 			for (i = 0; i < numsamples; ++i) {
 				unsigned int c;			
@@ -604,7 +637,7 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 								val);
 						}
 					}								
-					dst[i] += val * vol * env[i];
+					dst[i] += val * env[i];					
 				}				
 				if (multifilter_type(&self->filter_l) != F_NONE) {
 					adsr_tick(&self->filterenv);
@@ -621,7 +654,11 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 					buffer_at(output, 1),
 					numsamples,
 					1.f);
-			}			
+			}
+			if (buffer_numchannels(output) > 1) {
+				dsp.mul(buffer_at(output, 0), numsamples, lvol);
+				dsp.mul(buffer_at(output, 1), numsamples, rvol);
+			}
 		}
 		free(env);
 	}

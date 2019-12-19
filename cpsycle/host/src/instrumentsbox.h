@@ -13,7 +13,8 @@ typedef struct {
 	Instruments* instruments;
 } InstrumentsBox;
 
-void InitInstrumentsBox(InstrumentsBox*, ui_component* parent, Instruments*);
-void SetInstruments(InstrumentsBox*, Instruments* instruments);
+void instrumentsbox_init(InstrumentsBox*, ui_component* parent, Instruments*);
+void instrumentsbox_setinstruments(InstrumentsBox*, Instruments* instruments);
+int instrumentsbox_selected(InstrumentsBox*);
 
 #endif

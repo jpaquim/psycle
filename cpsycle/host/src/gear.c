@@ -48,7 +48,7 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 	}
 }
 
-void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
+void gear_init(Gear* self, ui_component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
@@ -69,7 +69,7 @@ void InitGear(Gear* self, ui_component* parent, Workspace* workspace)
 		&workspace->song->machines, MACHINEBOX_GENERATOR, self->workspace);
 	InitMachinesBox(&self->machinesboxfx, &self->notebook.component, 
 		&workspace->song->machines, MACHINEBOX_FX, self->workspace);
-	InitInstrumentsBox(&self->instrumentsbox, &self->notebook.component, 
+	instrumentsbox_init(&self->instrumentsbox, &self->notebook.component, 
 		&workspace->song->instruments);
 	samplesbox_init(&self->samplesbox, &self->notebook.component, 
 		&workspace->song->samples, &workspace->song->instruments);
@@ -127,7 +127,7 @@ void OnSongChanged(Gear* self, Workspace* workspace)
 	self->machines = &workspace->song->machines;		
 	SetMachines(&self->machinesboxgen, &workspace->song->machines);
 	SetMachines(&self->machinesboxfx, &workspace->song->machines);
-	SetInstruments(&self->instrumentsbox, &workspace->song->instruments);
+	instrumentsbox_setinstruments(&self->instrumentsbox, &workspace->song->instruments);
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
 	ConnectSongSignals(self);

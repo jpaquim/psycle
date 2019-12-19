@@ -6,9 +6,12 @@
 
 #include <patterns.h>
 #include <sequence.h>
+
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uicheckbox.h>
+
+#include "playlisteditor.h"
 #include "workspace.h"
 
 typedef struct {
@@ -78,7 +81,8 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 typedef struct {
 	ui_component component;
 	ui_checkbox followsong;
-	ui_checkbox shownames;	
+	ui_checkbox shownames;
+	ui_checkbox showplaylist;
 	ui_checkbox recordtweaks;
 	ui_checkbox multichannelaudition;
 } SequencerOptionsBar;
@@ -91,6 +95,7 @@ typedef struct SequenceView {
 	SequenceButtons buttons;
 	SequenceViewTrackHeader trackheader;
 	SequenceViewDuration duration;
+	PlayListEditor playlisteditor;
 	SequencerOptionsBar options;
 	Patterns* patterns;
 	Sequence* sequence;

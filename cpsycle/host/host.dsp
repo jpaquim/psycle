@@ -216,6 +216,10 @@ SOURCE=.\src\playbar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\playlisteditor.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\playposbar.c
 # End Source File
 # Begin Source File
@@ -469,6 +473,10 @@ SOURCE=.\src\pianoroll.h
 # Begin Source File
 
 SOURCE=.\src\playbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\playlisteditor.h
 # End Source File
 # Begin Source File
 

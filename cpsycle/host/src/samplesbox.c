@@ -25,7 +25,8 @@ void samplesbox_init(SamplesBox* self, ui_component* parent,
 	ui_margin margin;
 
 	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makeeh(1), ui_value_makepx(0));	
+		ui_value_makeeh(1), ui_value_makepx(0));
+	self->changeinstrumentslot = 1;
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
 	psy_signal_init(&self->signal_changed);
@@ -105,7 +106,7 @@ void samplesbox_onsamplelistchanged(SamplesBox* self, ui_component* sender,
 {
 	samplesbox_buildsubsamplelist(self, slot);
 	ui_listbox_setcursel(&self->subsamplelist, 0);
-	if (self->instruments) {
+	if (self->instruments && self->changeinstrumentslot) {
 		instruments_changeslot(self->instruments, slot);
 	}	
 	psy_signal_emit(&self->signal_changed, self, 0);

@@ -43,6 +43,8 @@ typedef struct {
 	unsigned char _RRES;
 	List* entries;
 	uintptr_t index;
+	psy_Signal signal_addentry;
+	psy_Signal signal_removeentry;
 } Instrument;
 
 void instrument_init(Instrument*);

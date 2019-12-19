@@ -6,6 +6,7 @@
 #include "instrumentview.h"
 #include <portable.h>
 
+static void instrumentview_oncreateinstrument(InstrumentView*, ui_component* sender);
 static void instrumentview_onaddentry(InstrumentView*, ui_component* sender);
 static void instrumentview_onremoveentry(InstrumentView*, ui_component* sender);
 static void OnInstrumentInsert(InstrumentView*, ui_component* sender, int slot);
@@ -56,6 +57,7 @@ void instrumentview_init(InstrumentView* self, ui_component* parent,
 	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(1),
 		ui_value_makepx(0), ui_value_makepx(0));
 	self->player = &workspace->player;
+	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	// header
@@ -73,15 +75,15 @@ void instrumentview_init(InstrumentView* self, ui_component* parent,
 	// ui_component_setalign(&self->label.component, UI_ALIGN_TOP);
 	instrumentviewbuttons_init(&self->buttons, &self->left);
 	ui_component_setalign(&self->buttons.component, UI_ALIGN_TOP);	
-	InitInstrumentsBox(&self->instrumentsbox, &self->left,
+	instrumentsbox_init(&self->instrumentsbox, &self->left,
 		&workspace->song->instruments);
 	ui_component_setalign(&self->instrumentsbox.instrumentlist.component,
 		UI_ALIGN_CLIENT);
 	{
 		ui_margin margin;
 
-		ui_margin_init(&margin, ui_value_makeeh(1.5), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));
+		ui_margin_init(&margin, ui_value_makeeh(0.5), ui_value_makepx(0),
+			ui_value_makepx(0), ui_value_makepx(0));
 		ui_component_setmargin(&self->instrumentsbox.instrumentlist.component,
 			&margin);
 	}
@@ -117,6 +119,8 @@ void instrumentview_init(InstrumentView* self, ui_component* parent,
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
+	psy_signal_connect(&self->buttons.create.signal_clicked, self,
+		instrumentview_oncreateinstrument);
 	psy_signal_connect(&self->general.notemapview.buttons.add.signal_clicked, self,
 		instrumentview_onaddentry);
 	psy_signal_connect(&self->general.notemapview.buttons.remove.signal_clicked, self,
@@ -167,7 +171,8 @@ void OnSongChanged(InstrumentView* self, Workspace* workspace)
 	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 	psy_signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
 	psy_signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
-	SetInstruments(&self->instrumentsbox, &workspace->song->instruments);
+	instrumentsbox_setinstruments(&self->instrumentsbox,
+		&workspace->song->instruments);
 	self->general.notemapview.entryview.instrument = 0;
 	instrumentnotemapview_setinstrument(&self->general.notemapview, 0);	
 	samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
@@ -234,20 +239,32 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	ui_margin margin;
 
 	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
-		ui_value_makeeh(1.0), ui_value_makepx(0));
+		ui_value_makeeh(0.5), ui_value_makepx(0));
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	ui_button_init(&self->load, &self->component);
-	ui_button_settext(&self->load, "Load");	
-	ui_button_init(&self->save, &self->component);
-	ui_button_settext(&self->save, "Save");	
-	ui_button_init(&self->duplicate, &self->component);
-	ui_button_settext(&self->duplicate, "Duplicate");
-	ui_button_init(&self->del, &self->component);
+	ui_component_init(&self->row1, &self->component);
+	ui_component_enablealign(&self->row1);
+	ui_component_setalign(&self->row1, UI_ALIGN_TOP);
+	ui_component_setalignexpand(&self->row1, UI_HORIZONTALEXPAND);
+	ui_button_init(&self->create, &self->row1);
+	ui_button_settext(&self->create, "New");
+	ui_button_init(&self->load, &self->row1);
+	ui_button_settext(&self->load, "Load");
+	ui_button_init(&self->save, &self->row1);
+	ui_button_settext(&self->save, "Save");
+	ui_button_init(&self->duplicate, &self->row1);
+	ui_button_settext(&self->duplicate, "Duplicate");	
+	list_free(ui_components_setalign(
+		ui_component_children(&self->row1, 0),
+		UI_ALIGN_LEFT, &margin));
+	ui_component_init(&self->row2, &self->component);
+	ui_component_enablealign(&self->row2);
+	ui_component_setalign(&self->row2, UI_ALIGN_TOP);
+	ui_component_setalignexpand(&self->row2, UI_HORIZONTALEXPAND);
+	ui_button_init(&self->del, &self->row2);
 	ui_button_settext(&self->del, "Delete");
 	list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+		ui_component_children(&self->row2, 0),
 		UI_ALIGN_LEFT, &margin));
 }
 
@@ -267,6 +284,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, ui_component* paren
 	// ui_component_enablealign(&self->left);	
 	// ui_component_setalign(&self->left, UI_ALIGN_LEFT);
 	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
+	self->samplesbox.changeinstrumentslot = 0;
 	ui_component_setalign(&self->samplesbox.component, UI_ALIGN_LEFT);
 	ui_component_setmargin(&self->samplesbox.component, &margin);
 	ui_component_resize(&self->samplesbox.component, 150, 0);
@@ -720,6 +738,23 @@ void instrumentpitchview_setinstrument(InstrumentPitchView* self,
 	self->instrument = instrument;	
 }
 
+void instrumentview_oncreateinstrument(InstrumentView* self, ui_component* sender)
+{
+	if (self->workspace->song) {
+		Instrument* instrument;
+		int selected;
+		
+		selected = instrumentsbox_selected(&self->instrumentsbox);
+		if (instruments_at(&self->workspace->song->instruments, selected)) {						
+			instruments_remove(&self->workspace->song->instruments, selected);
+		}
+		instrument = instrument_allocinit();
+		instrument_setname(instrument, "Untitled");
+		instruments_insert(&self->workspace->song->instruments, instrument,
+			selected);
+	}
+}
+
 void instrumentview_onaddentry(InstrumentView* self, ui_component* sender)
 {
 	if (self->general.instrument) {
@@ -728,7 +763,7 @@ void instrumentview_onaddentry(InstrumentView* self, ui_component* sender)
 		instrumententry_init(&entry);
 		entry.sampleindex = samplesbox_selected(&self->general.samplesbox);
 		instrument_addentry(self->general.instrument, &entry);
-		ui_component_invalidate(&self->general.notemapview.component);
+		instrumentnotemapview_update(&self->general.notemapview);
 	}
 }
 
@@ -738,7 +773,7 @@ void instrumentview_onremoveentry(InstrumentView* self, ui_component* sender)
 		instrument_removeentry(
 			self->general.instrument,
 				self->general.notemapview.entryview.selected);
-		self->general.notemapview.entryview.selected = NOINSTRUMENT_INDEX;		
-		ui_component_invalidate(&self->general.notemapview.component);
+		self->general.notemapview.entryview.selected = NOINSTRUMENT_INDEX;
+		instrumentnotemapview_update(&self->general.notemapview);
 	}
 }

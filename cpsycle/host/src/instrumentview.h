@@ -30,8 +30,11 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
+	ui_component row1;
+	ui_button create;
 	ui_button load;
 	ui_button save;
+	ui_component row2;
 	ui_button duplicate;
 	ui_button del;
 } InstrumentViewButtons;
@@ -107,6 +110,7 @@ typedef struct {
 	InstrumentFilterView filter;
 	InstrumentPitchView pitch;	
 	Player* player;
+	Workspace* workspace;
 } InstrumentView;
 
 void instrumentview_init(InstrumentView*, ui_component* parent, Workspace*);

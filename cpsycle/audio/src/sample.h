@@ -50,7 +50,7 @@ typedef struct {
 	struct Sample* sample;
 	Double pos;
 	Double speed;
-	int forward;
+	int forward;	
 } SampleIterator;
 
 void sampleiterator_init(SampleIterator*, struct Sample*);

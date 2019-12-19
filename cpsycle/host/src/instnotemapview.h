@@ -37,7 +37,6 @@ typedef struct {
 	ui_button remove;
 } InstrumentNoteMapButtons;
 
-
 enum {
 	INSTVIEW_DRAG_NONE,
 	INSTVIEW_DRAG_LEFT,
@@ -76,5 +75,6 @@ typedef struct {
 void instrumentnotemapview_init(InstrumentNoteMapView*,
 	ui_component* parent);
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, Instrument*);
+void instrumentnotemapview_update(InstrumentNoteMapView*);
 
 #endif
