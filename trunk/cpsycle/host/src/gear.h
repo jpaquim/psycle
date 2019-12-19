@@ -39,6 +39,6 @@ typedef struct {
 	Workspace* workspace;
 } Gear;
 
-void InitGear(Gear*, ui_component* parent, Workspace*);
+void gear_init(Gear*, ui_component* parent, Workspace*);
 
 #endif

@@ -37,6 +37,7 @@ static void sequenceview_oncopy(SequenceView*);
 static void sequenceview_onpaste(SequenceView*);
 static void sequenceview_onsingleselection(SequenceView*, ui_button* sender);
 static void sequenceview_onmultiselection(SequenceView*, ui_button* sender);
+static void sequenceview_onshowplaylist(SequenceView*, ui_button* sender);
 static void sequenceview_onfollowsong(SequenceView*, ui_button* sender);
 static void sequenceview_onrecordtweaks(SequenceView*, ui_button* sender);
 static void sequenceview_onmultichannelaudition(SequenceView*, ui_button* sender);
@@ -78,6 +79,9 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	ui_component_resize(&self->buttons.component, 200, 70);
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
 	sequenceduration_init(&self->duration, &self->component, self->sequence);
+	playlisteditor_init(&self->playlisteditor, &self->component,
+		workspace);
+	ui_component_hide(&self->playlisteditor.component);
 	sequenceroptionsbar_init(&self->options, &self->component);
 
 	psy_signal_connect(&self->buttons.newentry.signal_clicked, self,
@@ -108,6 +112,8 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 		sequenceview_onsingleselection);
 	psy_signal_connect(&self->buttons.multisel.signal_clicked, self,
 		sequenceview_onmultiselection);
+	psy_signal_connect(&self->options.showplaylist.signal_clicked, self,
+		sequenceview_onshowplaylist);
 	psy_signal_connect(&self->options.followsong.signal_clicked, self,
 		sequenceview_onfollowsong);
 	psy_signal_connect(&self->options.recordtweaks.signal_clicked, self,
@@ -409,8 +415,14 @@ void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size
 	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, size);
 	ui_size trackheader;
 	ui_size durationsize = ui_component_preferredsize(&self->duration.component, size);
+	ui_size playlistsize;
 	ui_size optionssize = ui_component_preferredsize(&self->options.component, size);
 
+	if (self->playlisteditor.component.visible) {
+		playlistsize = ui_component_size(&self->playlisteditor.component);
+	} else {
+		playlistsize.height = 0;
+	}
 	trackheader.height = (int)(self->listview.textheight * 1.5);
 	trackheader.width = size->width;
 		
@@ -422,31 +434,22 @@ void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size
 		0, buttonssize.height + trackheader.height,
 		size->width,
 		size->height - buttonssize.height - durationsize.height -
-			trackheader.height - optionssize.height);
+			trackheader.height - optionssize.height - playlistsize.height);	
 	sequencelistview_adjustscrollbars(&self->listview);
 	ui_component_setposition(&self->duration.component, 
 		0,
-		size->height - durationsize.height - optionssize.height,
+		size->height - durationsize.height - optionssize.height - playlistsize.height,
 		size->width,
 		durationsize.height);
+	if (self->playlisteditor.component.visible) {
+		ui_component_setposition(&self->playlisteditor.component, 
+			0,
+			size->height - optionssize.height - playlistsize.height,
+			size->width,
+			playlistsize.height);
+	}
 	ui_component_setposition(&self->options.component, 0,
-		size->height - optionssize.height, size->width, optionssize.height);
-		
-/*		followsong.component, 
-		0,
-		size->height - 60,
-		size->width,
-		20);
-	ui_component_setposition(&self->shownames.component, 
-		0,
-		size->height - 40,
-		size->width,
-		20);
-	ui_component_setposition(&self->recordtweaks.component, 
-		0,
-		size->height - 20,
-		size->width,
-		20);*/
+		size->height - optionssize.height, size->width, optionssize.height);		
 }
 
 void sequenceview_onnewentry(SequenceView* self)
@@ -688,6 +691,20 @@ void sequenceview_onfollowsong(SequenceView* self, ui_button* sender)
 	}
 }
 
+void sequenceview_onshowplaylist(SequenceView* self, ui_button* sender)
+{
+	ui_size size;
+
+	size = ui_component_size(&self->component);
+	if (ui_component_visible(&self->playlisteditor.component)) {
+		ui_component_hide(&self->playlisteditor.component);
+	} else {
+		self->playlisteditor.component.visible = 1;
+		ui_component_show(&self->playlisteditor.component);
+	}
+	sequenceview_onsize(self, &self->component, &size);
+}
+
 void sequenceview_onrecordtweaks(SequenceView* self, ui_button* sender)
 {
 	if (workspace_recordingtweaks(self->workspace)) {
@@ -855,8 +872,10 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, ui_component* parent)
 	ui_component_enablealign(&self->component);
 	ui_checkbox_init(&self->followsong, &self->component);
 	ui_checkbox_settext(&self->followsong, "Follow Song");
-	ui_checkbox_init(&self->shownames, &self->component);	
+	ui_checkbox_init(&self->shownames, &self->component);
 	ui_checkbox_settext(&self->shownames, "Show pattern names");
+	ui_checkbox_init(&self->showplaylist, &self->component);	
+	ui_checkbox_settext(&self->showplaylist, "Show playlist");
 	ui_checkbox_init(&self->recordtweaks, &self->component);
 	ui_checkbox_settext(&self->recordtweaks, "Record tweaks");
 	ui_checkbox_init(&self->multichannelaudition, &self->component);

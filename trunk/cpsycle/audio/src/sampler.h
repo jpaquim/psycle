@@ -34,6 +34,7 @@ typedef enum
 InterpolationType;
 
 typedef struct {
+	struct Sampler* sampler;
 	Instrument* instrument;
 	Samples* samples;
 	ADSR env;
@@ -42,16 +43,19 @@ typedef struct {
 	MultiFilter filter_r;
 	List* positions;	
 	uintptr_t channel;
-	psy_dsp_amp_t vol;	
+	psy_dsp_amp_t vol;
+	psy_dsp_amp_t pan;
+	int usedefaultvolume;
 } Voice;
 
-typedef struct {
+typedef struct Sampler {
 	CustomMachine custommachine;		
 	List* voices;
 	uintptr_t numvoices;
 	int resamplingmethod;
 	int defaultspeed;	
-	Table lastinst;	
+	Table lastinst;
+	int maxvolume; // psycle 0CFF, xm 0C80
 } Sampler;
 
 void sampler_init(Sampler*, MachineCallback);

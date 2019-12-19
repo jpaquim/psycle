@@ -144,7 +144,7 @@ void mainframe_init(MainFrame* self)
 		mainframe_onrender);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
 		mainframe_onviewselected);
-	InitGear(&self->gear, &self->component, &self->workspace);
+	gear_init(&self->gear, &self->component, &self->workspace);
 	ui_component_hide(&self->gear.component);
 	psy_signal_connect(&self->machinebar.gear.signal_clicked, self,
 		mainframe_ongear);
@@ -319,7 +319,7 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 	ui_size gearsize;
 	ui_size plugineditorsize;
 	ui_size terminalsize;
-	ui_size vusize;
+	ui_size vusize;	
 	ui_size topsize;	
 	ui_size limit;
 	int splitbarwidth = 4;
@@ -404,7 +404,7 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 			gearsize.width,
 			size.height - statusbarsize.height - topsize.height -
 				tabbarssize.height - terminalsize.height);
-	}
+	}	
 	if (ui_component_visible(&self->terminal.component)) {
 		ui_component_setposition(&self->terminal.component,
 			0,

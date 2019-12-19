@@ -15,11 +15,11 @@ static void OnInstrumentRemoved(InstrumentsBox* self, ui_component* sender, int 
 static void OnInstrumentListChanged(InstrumentsBox* self, ui_component* sender,
 	int slot);
 
-void InitInstrumentsBox(InstrumentsBox* self, ui_component* parent,
+void instrumentsbox_init(InstrumentsBox* self, ui_component* parent,
 	Instruments* instruments)
 {	
 	ui_listbox_init(&self->instrumentlist, parent);	
-	SetInstruments(self, instruments);	
+	instrumentsbox_setinstruments(self, instruments);	
 	psy_signal_connect(&self->instrumentlist.signal_selchanged, self,
 		OnInstrumentListChanged);
 }
@@ -68,7 +68,7 @@ void OnInstrumentSlotChanged(InstrumentsBox* self, Instrument* sender, int slot)
 	ui_listbox_setcursel(&self->instrumentlist, slot);	
 }
 
-void SetInstruments(InstrumentsBox* self, Instruments* instruments)
+void instrumentsbox_setinstruments(InstrumentsBox* self, Instruments* instruments)
 {
 	self->instruments = instruments;	
 	BuildInstrumentList(self);
@@ -78,4 +78,9 @@ void SetInstruments(InstrumentsBox* self, Instruments* instruments)
 		OnInstrumentRemoved);
 	psy_signal_connect(&instruments->signal_slotchange, self,
 		OnInstrumentSlotChanged);
+}
+
+int instrumentsbox_selected(InstrumentsBox* self)
+{
+	return ui_listbox_cursel(&self->instrumentlist);	
 }

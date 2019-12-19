@@ -69,7 +69,7 @@ typedef struct {
 	HelpView helpview;	
 	Gear gear;
 	PluginEditor plugineditor;
-	VuBar vubar;	
+	VuBar vubar;
 	ui_component statusbar;
 	ui_notebook viewbars;
 	ui_component* activeview;	

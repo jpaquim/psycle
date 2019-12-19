@@ -14,7 +14,11 @@ static void instrumentnotemapview_setmetrics(InstrumentNoteMapView*,
 static void instrumentparameterview_setinstrument(InstrumentParameterView*,
 	Instrument*);
 static void instrumententryview_ondraw(InstrumentEntryView*, ui_component* sender,
-	ui_graphics* g);
+	ui_graphics*);
+static void instrumententryview_onsize(InstrumentEntryView*, ui_component* sender, ui_size* size);
+static void instrumententryview_onscroll(InstrumentEntryView*, ui_component* sender,
+	int stepx, int stepy);
+static void instrumententryview_adjustscroll(InstrumentEntryView*);
 static void instrumententryview_onmousedown(InstrumentEntryView*,
 	ui_component* sender, MouseEvent*);
 static void instrumententryview_onmousemove(InstrumentEntryView*,
@@ -44,7 +48,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	ui_value_makeeh(1.5), ui_value_makepx(0));
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	self->metrics.keysize = 6;
+	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	ui_label_init(&self->label, &self->component);
 	ui_label_settext(&self->label, "Notemap");
@@ -57,7 +61,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	ui_component_setalign(&self->parameterview.component, UI_ALIGN_LEFT);	
 	instrumententryview_init(&self->entryview,
 		&self->component, &self->parameterview);	
-	ui_component_setalign(&self->entryview.component, UI_ALIGN_TOP);
+	ui_component_setalign(&self->entryview.component, UI_ALIGN_CLIENT);
 	instrumentkeyboardview_init(&self->keyboard, &self->component);
 	ui_component_setalign(&self->keyboard.component, UI_ALIGN_BOTTOM);
 	instrumentnotemapview_setmetrics(self, self->metrics);
@@ -66,6 +70,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView* self,
 	Instrument* instrument)
 {
+	self->instrument = instrument;
 	instrumententryview_setinstrument(&self->entryview, instrument);
 	instrumentparameterview_setinstrument(&self->parameterview, instrument);
 }
@@ -77,6 +82,12 @@ void instrumentnotemapview_setmetrics(InstrumentNoteMapView* self,
 	self->entryview.metrics = metrics;
 	self->parameterview.metrics = metrics;
 	self->keyboard.metrics = metrics;
+}
+
+void instrumentnotemapview_update(InstrumentNoteMapView* self)
+{
+	instrumententryview_adjustscroll(&self->entryview);
+	ui_component_invalidate(&self->component);
 }
 
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
@@ -94,11 +105,10 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 int isblack(int key)
 {
 	int offset = key % 12;
-
-	return (offset == 1 || offset == 3 || offset == 6 || offset == 8 
-		|| offset == 10);
 	// 0 1 2 3 4 5 6 7 8 9 10 11
 	// c   d   e f   g   a    h 
+	return (offset == 1 || offset == 3 || offset == 6 || offset == 8 
+		|| offset == 10);	
 }
 
 void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, ui_component* sender, ui_graphics* g)
@@ -160,10 +170,15 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;
 	self->selected = NOINSTRUMENT_INDEX;
-	ui_component_init(&self->component, parent);	
-	ui_component_resize(&self->component, 0, 40);
+	ui_component_init(&self->component, parent);
+	self->component.doublebuffered = 1;
+	self->component.scrollstepy = 45;	
 	psy_signal_connect(&self->component.signal_draw, self,
 		instrumententryview_ondraw);
+	psy_signal_connect(&self->component.signal_size, self,
+		instrumententryview_onsize);
+	psy_signal_connect(&self->component.signal_scroll, self,
+		instrumententryview_onscroll);
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		instrumententryview_onmousedown);
 	psy_signal_connect(&self->component.signal_mousemove, self,
@@ -186,7 +201,7 @@ int numwhitekey(int key)
 	int c = 0;
 	int i;
 
-	for (i = 0; i < offset; ++i) {
+	for (i = 1; i <= offset; ++i) {
 		if (!isblack(i)) ++c;
 	}
 	return octave * 7 + c;
@@ -216,26 +231,60 @@ void instrumententryview_ondraw(InstrumentEntryView* self, ui_component* sender,
 		for (p = self->instrument->entries; p != 0; p = p->next, ++c) {
 			InstrumentEntry* entry;
 			int startx;
-			int endx;
+			int endx;			
 
-			entry = (InstrumentEntry*) p->entry;
+			entry = (InstrumentEntry*) p->entry;			
 			startx = (int)(
 				(float) numwhitekey(entry->keyrange.low) / 
-					numwhitekey(NOTECOMMANDS_RELEASE) * width);
+					numwhitekey(NOTECOMMANDS_RELEASE) * width) +
+					(int) (isblack(entry->keyrange.low)
+							 ? self->metrics.keysize / 2 : 0);
 			endx = (int)(
-				(float)numwhitekey(entry->keyrange.high) / 
-					numwhitekey(NOTECOMMANDS_RELEASE) * width);
+				(float)numwhitekey(entry->keyrange.high + 1) / 
+					numwhitekey(NOTECOMMANDS_RELEASE) * width) +
+					(int) (isblack(entry->keyrange.high + 1)
+							 ? self->metrics.keysize / 2 : 0);
 			if (c == self->selected) {
 				ui_setcolor(g, 0x00EAEAEA);
 			} else {
 				ui_setcolor(g, 0x00CACACA);
 			}
-			ui_drawline(g, startx, cpy + 5, endx, cpy + 5);
-			ui_drawline(g, startx, cpy, startx, cpy + 10);
-			ui_drawline(g, endx, cpy, endx, cpy + 10);
+			ui_drawline(g, startx, cpy + 5 + self->dy, endx, cpy + 5 + self->dy);
+			ui_drawline(g, startx, cpy + self->dy, startx, cpy + self->dy + 10);
+			ui_drawline(g, endx, cpy + self->dy, endx, cpy + self->dy + 10);
 			cpy += self->metrics.lineheight * 3;
 		}
 	}
+}
+
+void instrumententryview_onsize(InstrumentEntryView* self,
+	ui_component* sender, ui_size* size)
+{
+	instrumententryview_adjustscroll(self);
+}
+
+void instrumententryview_onscroll(InstrumentEntryView* self, ui_component* sender,
+	int stepx, int stepy)
+{
+	self->dy += (stepy * self->metrics.lineheight * 3);
+	self->parameterview->dy = self->dy;
+	ui_component_invalidate(&self->parameterview->component);
+}
+
+void instrumententryview_adjustscroll(InstrumentEntryView* self)
+{
+	ui_size size;
+	int vscrollmax;
+	int numentries;
+	int visientries;
+
+	size = ui_component_size(&self->component);
+	numentries = self->instrument
+		? list_size(instrument_entries(self->instrument))
+		: 0;	
+	visientries = size.height / (self->metrics.lineheight * 3);
+	vscrollmax = numentries < visientries ? 0 : numentries - visientries;
+	ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
 }
 
 void instrumententryview_onmousedown(InstrumentEntryView* self,
@@ -245,7 +294,7 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 	if (self->instrument) {
 		uintptr_t numentry;	
 
-		numentry = ev->y / (self->metrics.lineheight * 3);
+		numentry = (ev->y - self->dy) / (self->metrics.lineheight * 3);
 		if (numentry < list_size(instrument_entries(self->instrument))) {
 			self->selected = numentry;
 		} else {
@@ -282,9 +331,15 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 			if (self->dragmode == INSTVIEW_DRAG_LEFT) {
 				entry->keyrange.low = screentokey(ev->x,
 					self->metrics.keysize);
+				if (entry->keyrange.low > entry->keyrange.high) {
+					entry->keyrange.low = entry->keyrange.high;
+				}
 			} else {
 				entry->keyrange.high = screentokey(ev->x,
 					self->metrics.keysize);
+				if (entry->keyrange.high < entry->keyrange.low) {
+					entry->keyrange.high = entry->keyrange.low;
+				}
 			}
 			ui_component_invalidate(&self->component);
 			ui_component_invalidate(&self->parameterview->component);
@@ -300,16 +355,33 @@ void instrumententryview_onmouseup(InstrumentEntryView* self,
 }
 
 int screentokey(int x, int keysize)
-{		
-	return whitekeytokey(x / keysize);
+{
+	int rv;	
+	int numwhitekey;
+
+	numwhitekey = x / keysize;
+	rv = whitekeytokey(numwhitekey);	
+	// 0 1 2 3 4 5 6 7 8 9 10 11
+	// c   d   e f   g   a    h 
+	if ((rv % 12) != 4 && (rv % 12) != 11) {		
+		int delta;
+
+		delta = x - numwhitekey * keysize;
+		if (delta > 0.5 * keysize) {
+			++rv;
+		}
+	}
+	return rv;
 }
+
 
 void instrumentparameterview_init(InstrumentParameterView* self,
 	ui_component* parent)
 {
 	self->instrument = 0;
 	self->dy = 0;
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	self->component.doublebuffered = 1;
 	ui_component_resize(&self->component, 0, 40);
 	psy_signal_connect(&self->component.signal_draw, self,
 		instrumentparameterview_ondraw);
@@ -344,15 +416,15 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 			entry = (InstrumentEntry*) p->entry;
 			psy_snprintf(text, 40, "Sample %0X:%0X", entry->sampleindex.slot,
 				entry->sampleindex.subslot);
-			ui_textout(g, 0, cpy, text, strlen(text));
+			ui_textout(g, 0, cpy + self->dy, text, strlen(text));
 			psy_snprintf(text, 40, "Notes %.3d - %.3d", entry->keyrange.low,
 				entry->keyrange.high);
-			ui_textout(g, 0, cpy + self->metrics.lineheight, text,
+			ui_textout(g, 0, cpy + self->dy + self->metrics.lineheight, text,
 				strlen(text));
 			psy_snprintf(text, 40, "Volume %.2X - %.2X", entry->velocityrange.low,
 				entry->velocityrange.high);
-			ui_textout(g, 0, cpy + self->metrics.lineheight * 2, text,
-				strlen(text));
+			ui_textout(g, 0, cpy + self->dy + self->metrics.lineheight * 2,
+				text, strlen(text));
 			cpy += (self->metrics.lineheight * 3);
 		}
 	}

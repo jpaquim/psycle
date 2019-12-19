@@ -33,7 +33,6 @@ void plugineditor_init(PluginEditor* self, ui_component* parent,
 
 void plugineditor_ondestroy(PluginEditor* self, ui_component* sender)
 {
-
 }
 
 void plugineditor_onmachineschangeslot(PluginEditor* self, Machines* machines,

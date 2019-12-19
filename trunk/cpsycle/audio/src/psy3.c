@@ -611,7 +611,7 @@ void readsmsb(SongFile* self)
 			wave->globalvolume = ftemp;
 			// default volume
 			psyfile_read(self->file, &temp16, sizeof(temp16));
-			wave->defaultvolume = temp16 / (psy_dsp_amp_t) 0x80;
+			wave->defaultvolume = temp16 / (psy_dsp_amp_t) 255;
 			// wave loop start
 			psyfile_read(self->file, &temp, sizeof(temp));
 			wave->loopstart = temp;

@@ -19,6 +19,7 @@ typedef struct {
 	Samples* samples;
 	Instruments* instruments;
 	psy_Signal signal_changed;
+	int changeinstrumentslot;
 } SamplesBox;
 
 void samplesbox_init(SamplesBox*, ui_component* parent, Samples*, Instruments*);
