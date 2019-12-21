@@ -15,13 +15,19 @@ typedef enum {
 
 typedef struct {
 	psy_dsp_beat_t retriggeroffset;
-	psy_dsp_beat_t retriggerstep;	
+	psy_dsp_beat_t retriggerstep;
 } SequencerTrackState;
 
 typedef struct {
 	SequencerTrackState state;
 	SequenceTrackIterator* iterator;
 } SequencerTrack;
+
+typedef struct {
+	int active;
+	int count;
+	psy_dsp_beat_t offset;	
+} SequencerLoop;
 
 typedef struct {
 	int active;	
@@ -53,6 +59,7 @@ typedef struct {
 	psy_dsp_beat_t linetickcount;
 	SequencerJump jump;
 	SequenceRowDelay rowdelay;
+	SequencerLoop loop;
 	Table lastmachine;
 } Sequencer;
 

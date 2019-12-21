@@ -69,8 +69,10 @@ void rmsvol_tick(RMSVol* self, const psy_dsp_amp_t * __restrict pSamplesL,
 			rmsdata_accumulate(&self->data, pSamplesL, pSamplesR, count);				
 #if defined SSE
 			//small workaround for 16byte boundary (it makes it slightly incorrect, but hopefully just a bit).
-			ns -= count&0x3;
-			count = count&~0x3;
+			if ((count & 0x3) == 0) {
+				ns -= count & 0x3;
+				count = count & ~0x3;
+			}
 #endif
 			ns -= count;
 			pL+=count; pR+=count;

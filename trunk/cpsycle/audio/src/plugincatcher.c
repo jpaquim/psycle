@@ -238,7 +238,15 @@ char* plugincatcher_modulepath(PluginCatcher* self, MachineType machtype,
 		searchtype = machtype;
 		searchresult = 0;
 		properties_enumerate(self->plugins, self, onpropertiesenum);
-		if (searchresult) {						
+		if (!searchresult) {
+			if (strstr(path, "blitz")) {
+				searchname = "blitzn";
+				searchtype = machtype;
+				searchresult = 0;
+				properties_enumerate(self->plugins, self, onpropertiesenum);
+			}
+		}
+		if (searchresult) {
 			strcpy(fullpath, properties_readstring(searchresult, "path", ""));
 		} else {
 			strcpy(fullpath, path);

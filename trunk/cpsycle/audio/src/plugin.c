@@ -68,7 +68,7 @@ static void vtable_init(Plugin* self)
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
 		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) savespecific;	
+		vtable.savespecific = (fp_machine_savespecific) savespecific;
 		vtable.setcallback = (fp_machine_setcallback) setcallback;	
 		vtable_initialized = 1;
 	}

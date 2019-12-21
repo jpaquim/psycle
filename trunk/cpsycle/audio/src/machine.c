@@ -146,9 +146,7 @@ static void vtable_init(void)
 		vtable.samples = samples;
 		vtable.machines = machines;		
 		vtable.slot = slot;
-		vtable.setslot = setslot;
-		vtable.bypass = 0;
-		vtable.mute = 0;	
+		vtable.setslot = setslot;		
 		vtable.haseditor = haseditor;
 		vtable.seteditorhandle = seteditorhandle;
 		vtable.editorsize = editorsize;
