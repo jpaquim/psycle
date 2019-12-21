@@ -50,6 +50,9 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->jump.offset = (psy_dsp_beat_t) 0.f;
 	self->rowdelay.active = 0;
 	self->rowdelay.rowspeed = (psy_dsp_beat_t) 1.f;
+	self->loop.active = 0;
+	self->loop.count = 0;
+	self->loop.offset = (psy_dsp_beat_t) 0.f;
 	self->linetickcount = (psy_dsp_beat_t) 0.f;
 	compute_beatsprosample(self);
 	makecurrtracks(self, (psy_dsp_beat_t) 0.f);
@@ -95,6 +98,9 @@ void sequencer_start(Sequencer* self)
 	self->jump.offset = (psy_dsp_beat_t) 0.f;
 	self->rowdelay.active = 0;
 	self->rowdelay.rowspeed = (psy_dsp_beat_t) 1.f;
+	self->loop.active = 0;
+	self->loop.count = 0;
+	self->loop.offset = (psy_dsp_beat_t) 0.f;
 	self->lpbspeed = (psy_dsp_beat_t) 1.f;
 	compute_beatsprosample(self);
 	self->playing = 1;
@@ -402,6 +408,36 @@ void insertevents(Sequencer* self)
 							self->rowdelay.rowspeed = 
 								(psy_dsp_beat_t)0.5 / 15 * (psy_dsp_beat_t)(30 - ticks);
 							compute_beatsprosample(self);													
+						} else
+						if ((patternentry->event.parameter & 0xB0) ==
+								PATTERN_LOOP) {
+							if (!self->loop.active) {
+								self->loop.count =
+									patternentry->event.parameter & 0x0F;
+								if (self->loop.count > 0) {
+									self->loop.active = 1;									
+									self->jump.active = 1;
+									self->jump.offset = self->loop.offset;
+								} else {
+									self->loop.offset = offset;
+								}
+							} else
+							if (self->loop.count > 0 && 
+									offset != self->loop.offset) {
+								--self->loop.count;
+								if (self->loop.count > 0) {
+									self->jump.active = 1;
+									self->jump.offset = self->loop.offset;
+								} else {
+									self->loop.active = 0;
+									self->loop.offset = offset +
+										(psy_dsp_beat_t) 1.f / self->lpb;
+								}
+							} else 
+							if (self->loop.count == 0) {
+								self->loop.active = 0;
+								self->loop.offset = offset;
+							}
 						}
 					} else
 					if (patternentry->event.cmd == JUMP_TO_ORDER) {

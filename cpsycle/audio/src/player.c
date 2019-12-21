@@ -294,7 +294,12 @@ void player_eventdriverinput(Player* self, EventDriver* sender)
 		} else {
 			note = cmd;
 		}		
-		patternevent_init(&event, note, 255, 0, 0, 0);
+		patternevent_init(&event, note, 255, 
+			(unsigned char) (
+			self->song
+				? machines_slot(&self->song->machines)
+				: 0),
+			0, 0);
 		if (self->multichannelaudition) {
 			if (event.note < NOTECOMMANDS_RELEASE) {
 				if (table_exists(&self->notestotracks, event.note)) {

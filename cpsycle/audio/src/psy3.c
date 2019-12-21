@@ -863,7 +863,7 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, Properties* propert
 	int32_t type;
 	char modulename[256];
 	char plugincatchername[256];
-	char editname[32];
+	char editname[32];	
 	int32_t i;
 	
 	psyfile_read(self->file, &type,sizeof(type));
@@ -889,7 +889,7 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, Properties* propert
 		psyfile_read(self->file, &panning, sizeof(panning));
 		psyfile_read(self->file, &x, sizeof(x));
 		psyfile_read(self->file, &y, sizeof(y));
-		psyfile_skip(self->file, 2*sizeof(int32_t));	// numInputs, numOutputs				
+		psyfile_skip(self->file, 2*sizeof(int32_t));	// numInputs, numOutputs
 		properties_append_int(properties, "x", x, 0, 0);
 		properties_append_int(properties, "y", y, 0, 0);
 		if (bypass) {
@@ -926,19 +926,23 @@ Machine* machineloadfilechunk(SongFile* self, int32_t index, Properties* propert
 			machines_connect(&self->song->machines, index, output);
 		}
 		if (incon && input != -1) {
-			machines_connect(&self->song->machines, input, index);
+			machines_connect(&self->song->machines, input, index);			
 			connections_setwirevolume(&self->song->machines.connections,
-				input, index, inconvol);
+				input, index, inconvol * wiremultiplier);
 		}
 	}
 
 	psyfile_readstring(self->file, editname, 32);
 	if (type == MACH_DUMMY) {
-		char txt[40];
-		strcpy(txt, "X!");
-		strcat(txt, editname);		
+		char text[256];
+
+		strcpy(text, "X!");
+		strcat(text, editname);
+		machine->vtable->seteditname(machine, text);
+	} else {
+		machine->vtable->seteditname(machine, editname);
 	}
-	machine->vtable->seteditname(machine, editname);
+	
 	machine->vtable->loadspecific(machine, self, index);
 	return machine;	
 }
@@ -959,9 +963,6 @@ void makeplugincatchername(const char* modulename, char* catchername)
 	extract_path(modulename, prefix, catchername, ext);
 	_strlwr(catchername);
 	replace_char(catchername, ' ', '-');
-	if (strstr(catchername, "blitz")) {
-		// strcpy(catchername, "blitzn");
-	}
 }
 
 void psy3_save(struct SongFile* self)

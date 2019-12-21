@@ -324,7 +324,8 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					KeyEvent keyevent;
 					
 					keyevent_init(&keyevent, (int)wParam, lParam, 
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+						(lParam & 0x40000000) == 0x40000000);
 					psy_signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}				
 			break;
@@ -503,7 +504,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						KeyEvent keyevent;
 						
 						keyevent_init(&keyevent, (int)wParam, lParam, 
-							GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+							GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+							(lParam & 0x40000000) == 0x40000000);
 						psy_signal_emit(&component->signal_keydown, component, 1, &keyevent);
 					}
 					if (component->propagateevent) {					
@@ -519,7 +521,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					KeyEvent keyevent;
 					
 					keyevent_init(&keyevent, (int)wParam, lParam, 
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+						(lParam & 0x40000000) == 0x40000000);
 					psy_signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}
 				if (component->propagateevent) {					
@@ -534,7 +537,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					KeyEvent keyevent;
 					
 					keyevent_init(&keyevent, (int)wParam, lParam, 
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+						(lParam & 0x40000000) == 0x40000000);
 					psy_signal_emit(&component->signal_keyup, component, 1, &keyevent);
 				}
 				if (component->propagateevent) {					

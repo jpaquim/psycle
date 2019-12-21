@@ -235,7 +235,8 @@ void pluginsview_adjustscroll(PluginsView* self)
 		pluginsview_computetextsizes(self);
 		size = ui_component_size(&self->component);		
 		visilines = size.height / self->lineheight;
-		currlines = properties_size(p) / self->numparametercols;
+		currlines = (int) (properties_size(p) / (float) self->numparametercols
+			+ 0.5f);
 		self->component.scrollstepy = self->lineheight;
 		ui_component_setverticalscrollrange(&self->component,
 			0, currlines - visilines);

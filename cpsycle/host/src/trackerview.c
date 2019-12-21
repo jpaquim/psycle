@@ -383,7 +383,7 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent,
 	psy_signal_connect(&self->component.signal_draw, self,
 		trackergrid_ondraw);
 	psy_signal_connect(&self->component.signal_scroll, self,
-		trackergrid_onscroll);	
+		trackergrid_onscroll);
 	self->player = player;	
 	self->numtracks = player_numsongtracks(player);
 	self->lpb = player_lpb(self->player);

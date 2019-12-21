@@ -531,7 +531,7 @@ void mainframe_onkeydown(MainFrame* self, ui_component* sender, KeyEvent* ev)
 			
 		kbd = workspace_kbddriver(&self->workspace);
 		input = encodeinput(ev->keycode, ev->shift, ev->ctrl);
-		kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);			
+		kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);
 	}
 }
 

@@ -46,6 +46,9 @@ void psy_dsp_sse2_init(psy_dsp_Operations* self)
 
 void* dsp_memory_alloc(size_t count, size_t size)
 {
+	if ((count & 3) != 0) {
+		count += (4 - (count % 4));
+	}
 	return psy_dsp_aligned_memory_alloc(alignment, count, size);
 }
 
@@ -151,86 +154,87 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 //same method, for a single buffer (allowing to calculate max for each buffer). samples need to be aligned by 16 in optimized paths.
 float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 {
-	if ((numSamples & 0x3) != 0) {
+	if ((numSamples & 0x3) != 0) {		
 		return noopt.maxvol(pSamples, numSamples);
-	}
+	} else {
 #if defined SSE
-	__m128 minVol = _mm_set_ps1(0.0f);
-	__m128 maxVol = _mm_set_ps1(0.0f);
-	const __m128* psrc = (const __m128*)pSamples;
-	while (numSamples > 0) {
-		maxVol = _mm_max_ps(maxVol, *psrc);
-		minVol = _mm_min_ps(minVol, *psrc);
-		psrc++;
-		numSamples -= 4;
-	}
-	__m128 highTmp = _mm_movehl_ps(maxVol, maxVol);
-	maxVol = _mm_max_ps(maxVol, highTmp);
-	highTmp = _mm_move_ss(highTmp, maxVol);
-	maxVol = _mm_shuffle_ps(maxVol, highTmp, 0x11);
-	maxVol = _mm_max_ps(maxVol, highTmp);
+		__m128 minVol = _mm_set_ps1(0.0f);
+		__m128 maxVol = _mm_set_ps1(0.0f);
+		const __m128* psrc = (const __m128*)pSamples;
+		while (numSamples > 0) {
+			maxVol = _mm_max_ps(maxVol, *psrc);
+			minVol = _mm_min_ps(minVol, *psrc);
+			psrc++;
+			numSamples -= 4;
+		}
+		__m128 highTmp = _mm_movehl_ps(maxVol, maxVol);
+		maxVol = _mm_max_ps(maxVol, highTmp);
+		highTmp = _mm_move_ss(highTmp, maxVol);
+		maxVol = _mm_shuffle_ps(maxVol, highTmp, 0x11);
+		maxVol = _mm_max_ps(maxVol, highTmp);
 
-	__m128 lowTmp = _mm_movehl_ps(minVol, minVol);
-	minVol = _mm_max_ps(minVol, lowTmp);
-	lowTmp = _mm_move_ss(lowTmp, minVol);
-	minVol = _mm_shuffle_ps(minVol, lowTmp, 0x11);
-	minVol = _mm_max_ps(minVol, lowTmp);
+		__m128 lowTmp = _mm_movehl_ps(minVol, minVol);
+		minVol = _mm_max_ps(minVol, lowTmp);
+		lowTmp = _mm_move_ss(lowTmp, minVol);
+		minVol = _mm_shuffle_ps(minVol, lowTmp, 0x11);
+		minVol = _mm_max_ps(minVol, lowTmp);
 
-	__m128 minus1 = _mm_set_ps1(-1.0f);
-	minVol = _mm_mul_ss(minVol, minus1);
-	//beware: -0.0f and 0.0f are supposed to be the same number, -0.0f > 0.0f returns false, just because 0.0f == 0.0f returns true
-	maxVol = _mm_max_ps(minVol, maxVol);
-	float result;
-	_mm_store_ss(&result, maxVol);
-	return result;
+		__m128 minus1 = _mm_set_ps1(-1.0f);
+		minVol = _mm_mul_ss(minVol, minus1);
+		//beware: -0.0f and 0.0f are supposed to be the same number, -0.0f > 0.0f returns false, just because 0.0f == 0.0f returns true
+		maxVol = _mm_max_ps(minVol, maxVol);
+		float result;
+		_mm_store_ss(&result, maxVol);
+		return result;
 #elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
-	// If anyone knows better assembler than me improve this variable utilization:
-	float volmax = 0.0f, volmin = 0.0f;
-	float* volmaxb = &volmax, * volminb = &volmin;
-	__asm
-	{
-		// we store the max in xmm0 and the min in xmm1
-		xorps xmm0, xmm0
-		xorps xmm1, xmm1
-		mov esi, [pSamples]
-		mov eax, [numSamples]
-		// Loop does: get the 4 max values and 4 min values in xmm0 and xmm1 respct.
-		LOOPSTART:
-		cmp eax, 0
-			jle END
-			maxps xmm0, [esi]
-			minps xmm1, [esi]
-			add esi, 10H
-			sub eax, 4
-			jmp LOOPSTART
-			END :
-		// to finish, get the max and of each of the four values.
-		// put 02 and 03 to 20 and 21
-		movhlps xmm2, xmm0
-			// find max of 00 and 20 (02) and of 01 and 21 (03)
-			maxps xmm0, xmm2
-			// put 00 (result of max(00,02)) to 20
-			movss xmm2, xmm0
-			// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
-			shufps xmm0, xmm2, 11H
-			// and find max of 00 (01) and 20 (00)
-			maxps xmm0, xmm2
+		// If anyone knows better assembler than me improve this variable utilization:
+		float volmax = 0.0f, volmin = 0.0f;
+		float* volmaxb = &volmax, * volminb = &volmin;
+		__asm
+		{
+			// we store the max in xmm0 and the min in xmm1
+			xorps xmm0, xmm0
+			xorps xmm1, xmm1
+			mov esi, [pSamples]
+			mov eax, [numSamples]
+			// Loop does: get the 4 max values and 4 min values in xmm0 and xmm1 respct.
+			LOOPSTART:
+			cmp eax, 0
+				jle END
+				maxps xmm0, [esi]
+				minps xmm1, [esi]
+				add esi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+				END :
+			// to finish, get the max and of each of the four values.
+			// put 02 and 03 to 20 and 21
+			movhlps xmm2, xmm0
+				// find max of 00 and 20 (02) and of 01 and 21 (03)
+				maxps xmm0, xmm2
+				// put 00 (result of max(00,02)) to 20
+				movss xmm2, xmm0
+				// put 01 (result of max(01,03)) into 00 (that's the only one we care about)
+				shufps xmm0, xmm2, 11H
+				// and find max of 00 (01) and 20 (00)
+				maxps xmm0, xmm2
 
-			movhlps xmm2, xmm1
-			minps xmm1, xmm2
-			movss xmm2, xmm1
-			shufps xmm1, xmm2, 11H
-			minps xmm1, xmm2
+				movhlps xmm2, xmm1
+				minps xmm1, xmm2
+				movss xmm2, xmm1
+				shufps xmm1, xmm2, 11H
+				minps xmm1, xmm2
 
-			mov edi, volmaxb
-			movss[edi], xmm0
-			mov edi, volminb
-			movss[edi], xmm1
-	}
-	volmin *= -1.0f;
-	//beware: -0.0f and 0.0f are supposed to be the same number, -0.0f > 0.0f returns false, just because 0.0f == 0.0f returns true
-	return (volmin > volmax) ? volmin : volmax;
+				mov edi, volmaxb
+				movss[edi], xmm0
+				mov edi, volminb
+				movss[edi], xmm1
+		}
+		volmin *= -1.0f;
+		//beware: -0.0f and 0.0f are supposed to be the same number, -0.0f > 0.0f returns false, just because 0.0f == 0.0f returns true
+		return (volmin > volmax) ? volmin : volmax;
 #endif	
+	}
 }
 
 void dsp_accumulate(psy_dsp_amp_t* accumleft,
@@ -238,36 +242,40 @@ void dsp_accumulate(psy_dsp_amp_t* accumleft,
 					psy_dsp_amp_t* __restrict pSamplesL,
 					psy_dsp_amp_t* __restrict pSamplesR,
 					int count)
-{
-	float result; // does this work with double?
+{		
+	if ((count & 0x3) != 0) {
+		noopt.accumulate(accumleft, accumright, pSamplesL, pSamplesR, count);
+	} else {
+		float result;
 
-	__m128 acleftvec = _mm_set_ps1(0.0f);
-	__m128 acrightvec = _mm_set_ps1(0.0f);
-	const __m128 *psrcl = (const __m128*)pSamplesL;
-	const __m128 *psrcr = (const __m128*)pSamplesR;
-	while (count > 3){
-		acleftvec = _mm_add_ps(acleftvec,_mm_mul_ps(*psrcl,*psrcl));
-		acrightvec = _mm_add_ps(acrightvec,_mm_mul_ps(*psrcr,*psrcr));
-		psrcl++;
-		psrcr++;
-		count-=4;
-	}	
-	acleftvec = _mm_add_ps(acleftvec,_mm_movehl_ps(acleftvec, acleftvec)); // add (0= 0+2 and 1=1+3 thanks to the move)
-	acleftvec = _mm_add_ss(acleftvec,_mm_shuffle_ps(acleftvec,acleftvec,0x11)); // add (0 = 0+1 thanks to the shuffle)
-	_mm_store_ss(&result, acleftvec); //get the position 0
-	*accumleft += result;
-	acrightvec = _mm_add_ps(acrightvec,_mm_movehl_ps(acrightvec, acrightvec)); // add (0= 0+2 and 1=1+3 thanks to the move)
-	acrightvec = _mm_add_ss(acrightvec,_mm_shuffle_ps(acrightvec,acrightvec,0x11)); // add (0 = 0+1 thanks to the shuffle)
-	_mm_store_ss(&result, acrightvec); //get the position 0
-	*accumright += result;
-	if (count > 0 ) {
-		const float* pL = (const float*)psrcl;
-		const float* pR= (const float*)psrcr;
-		while (count--) {
-			*accumleft += (*pL * *pL); pL++;
-			*accumright += (*pR * *pR); pR++;
+		__m128 acleftvec = _mm_set_ps1(0.0f);
+		__m128 acrightvec = _mm_set_ps1(0.0f);
+		const __m128* psrcl = (const __m128*)pSamplesL;
+		const __m128* psrcr = (const __m128*)pSamplesR;
+		while (count > 3) {
+			acleftvec = _mm_add_ps(acleftvec, _mm_mul_ps(*psrcl, *psrcl));
+			acrightvec = _mm_add_ps(acrightvec, _mm_mul_ps(*psrcr, *psrcr));
+			psrcl++;
+			psrcr++;
+			count -= 4;
 		}
-	}	
+		acleftvec = _mm_add_ps(acleftvec, _mm_movehl_ps(acleftvec, acleftvec)); // add (0= 0+2 and 1=1+3 thanks to the move)
+		acleftvec = _mm_add_ss(acleftvec, _mm_shuffle_ps(acleftvec, acleftvec, 0x11)); // add (0 = 0+1 thanks to the shuffle)
+		_mm_store_ss(&result, acleftvec); //get the position 0
+		*accumleft += result;
+		acrightvec = _mm_add_ps(acrightvec, _mm_movehl_ps(acrightvec, acrightvec)); // add (0= 0+2 and 1=1+3 thanks to the move)
+		acrightvec = _mm_add_ss(acrightvec, _mm_shuffle_ps(acrightvec, acrightvec, 0x11)); // add (0 = 0+1 thanks to the shuffle)
+		_mm_store_ss(&result, acrightvec); //get the position 0
+		*accumright += result;
+		if (count > 0) {
+			const float* pL = (const float*)psrcl;
+			const float* pR = (const float*)psrcr;
+			while (count--) {
+				*accumleft += (*pL * *pL); pL++;
+				*accumright += (*pR * *pR); pR++;
+			}
+		}
+	}
 }
 
 #else

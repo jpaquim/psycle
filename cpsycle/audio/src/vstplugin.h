@@ -8,6 +8,11 @@
 #include "library.h"
 
 typedef struct {
+	unsigned char key;
+	unsigned char midichan;
+} VstNote;
+
+typedef struct {
 	CustomMachine custommachine;		
 	Library library;
 	struct AEffect* effect;
@@ -17,6 +22,7 @@ typedef struct {
 	int eventcap;
 	Table noteons;
 	MachineInfo* plugininfo;
+	VstNote tracknote[64];
 } VstPlugin;
 
 void vstplugin_init(VstPlugin*, MachineCallback, const char* path);

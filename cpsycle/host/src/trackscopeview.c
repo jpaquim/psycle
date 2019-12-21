@@ -5,6 +5,7 @@
 
 #include "trackscopeview.h"
 #include <portable.h>
+#include <math.h>
 
 #define TIMERID_TRACKSCOPEVIEW 6000
 
@@ -17,7 +18,8 @@ static void trackscopeview_onpreferredsize(TrackScopeView*,
 	ui_component* sender, ui_size* limit, ui_size* rv);
 
 
-void trackscopeview_init(TrackScopeView* self, ui_component* parent, Workspace* workspace)
+void trackscopeview_init(TrackScopeView* self, ui_component* parent,
+	Workspace* workspace)
 {		
 	self->workspace = workspace;
 	self->trackheight = 30;
@@ -49,7 +51,6 @@ void trackscopeview_ondraw(TrackScopeView* self, ui_component* sender,
 
 		columns = numtracks < maxcolumns ? numtracks : maxcolumns;
 		size = ui_component_size(&self->component);
-
 		width = size.width / columns;		
 		ui_setbackgroundmode(g, TRANSPARENT);
 		ui_settextcolor(g, 0x00444444);
@@ -72,21 +73,15 @@ void trackscopeview_ondraw(TrackScopeView* self, ui_component* sender,
 void trackscopeview_drawtrack(TrackScopeView* self, ui_graphics* g, int x, int y,
 	int width, int height, int track)
 {
-//	ui_rectangle r;
-//	ui_setrectangle(&r, x, y, width, height);
-//	ui_setcolor(g, 0x00CACACA);
-//	ui_drawrectangle(g, r);
 	uintptr_t lastmachine;
 	char text[40];
 
 	if (table_exists(&self->workspace->player.sequencer.lastmachine, track)) {
 		lastmachine = (uintptr_t)
-			table_at(&self->workspace->player.sequencer.lastmachine, track);
-	
+			table_at(&self->workspace->player.sequencer.lastmachine, track);	
 	} else {
 		lastmachine = NOMACHINE_INDEX;
 	}
-
 	psy_snprintf(text, 40, "%X", track);
 	ui_textout(g, x + 3, y, text, strlen(text));
 	if (lastmachine != NOMACHINE_INDEX) {		
@@ -110,24 +105,39 @@ void trackscopeview_drawtrack(TrackScopeView* self, ui_graphics* g, int x, int y
 				float px;
 				float py;
 				float cpx = 0;
-				int x1, y1, x2, y2;					
+				int x1, y1, x2, y2;
+				static float epsilon = 0.1f;
 
-				numsamples = machine->vtable->buffermemorysize(machine);
+				numsamples = machine->vtable->buffermemorysize(machine);				
+				
+
 				if (numsamples > 0) {
-					px = width / (float) numsamples;
-					py = height / 32768.f;						
-					x1 = 0;
-					y1 = (int) (memory->samples[0][0] * py);
-					x2 = 0;
-					y2 = y1;						
-					for (frame = 0; frame < numsamples; ++frame, cpx += px) {
-						x1 = x2;
-						x2 = (int) (frame * px);
-						if (frame == 0 || x1 != x2) {
-							y1 = y2;							
-							y2 = (int) (memory->samples[0][frame] * py);
-							ui_drawline(g, x + x1, centery + y1, x + x2, centery + y2);
+					int zero = 1;
+
+					for (frame = 0; frame < numsamples; ++frame) {
+						if (fabs(memory->samples[0][frame]) > epsilon) {
+							zero = 0;
+							break;
 						}
+					}
+					if (!zero) {
+						px = width / (float) numsamples;
+						py = height / 32768.f;						
+						x1 = 0;
+						y1 = (int) (memory->samples[0][0] * py);
+						x2 = 0;
+						y2 = y1;						
+						for (frame = 0; frame < numsamples; ++frame, cpx += px) {
+							x1 = x2;
+							x2 = (int) (frame * px);
+							if (frame == 0 || x1 != x2) {
+								y1 = y2;							
+								y2 = (int) (memory->samples[0][frame] * py);
+								ui_drawline(g, x + x1, centery + y1, x + x2, centery + y2);
+							}
+						}
+					} else {
+						ui_drawline(g, x, centery, x + width, centery);
 					}
 				}
 			} else {

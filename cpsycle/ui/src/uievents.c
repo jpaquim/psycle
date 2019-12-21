@@ -6,12 +6,13 @@
 #include "uievents.h"
 
 void keyevent_init(KeyEvent* self, int keycode, int keydata, int shift,
-	int ctrl)
+	int ctrl, int repeat)
 {
 	self->keycode = keycode;
 	self->keydata = keydata;
 	self->shift = shift;
 	self->ctrl = ctrl;
+	self->repeat = repeat;
 }
 
 void mouseevent_init(MouseEvent* self, int x, int y, int button, int delta)

@@ -83,6 +83,8 @@ typedef struct {
 	Machines* machines;
 	Table machineuis;
 	List* wireframes;
+	int dx;
+	int dy;
 	int mx;
 	int my;
 	uintptr_t dragslot;
@@ -104,7 +106,7 @@ void machinewireview_align(MachineWireView*);
 
 typedef struct MachineViewBar {
 	ui_component component;
-	ui_label label;
+	ui_label label;	
 } MachineViewBar;
 
 void machineviewbar_init(MachineViewBar*, ui_component* parent, Workspace*);

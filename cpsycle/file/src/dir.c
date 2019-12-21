@@ -2,13 +2,115 @@
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
+#include "../../detail/compiler.h"
 
 #include "dir.h"
 #include <stdio.h>
 #include <string.h>
 #include <portable.h>
 
-#if defined(_WIN32)
+#if defined DIVERSALIS__COMPILER__GNU || DIVERSALIS__OS__POSIX
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+static int wildcardmatch(const char *str, const char *match);
+
+char* workdir(char* buffer)
+{
+    return getcwd(buffer, 4096);
+}
+
+const char* pathenv(void)
+{		
+	return 0;
+}
+
+void insertpathenv(const char* path)
+{
+ 	 // todo		
+}
+
+void setpathenv(const char* path)
+{
+ 	 // todo
+}
+
+void dir_enumerate(void* context, const char* root, const char* wildcard,
+	 int flag, void (*enumproc)(void*, const char* path, int flag))
+{
+ 	DIR *dir;
+	struct dirent *dir_ptr;
+	char path[4096];	
+	
+	if ((dir=opendir(root)) == NULL) {
+	   return;
+    }
+	while((dir_ptr = readdir(dir)) != NULL) {
+	   if (wildcardmatch((*dir_ptr).d_name, wildcard)) {
+		  if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
+ 		  	 (strncmp("..", (*dir_ptr).d_name, 2) != 0)) {
+					psy_snprintf(path, MAX_PATH, "%s\\%s", root,
+		                (*dir_ptr).d_name);
+					enumproc(context, path, flag);										   
+          }				   
+       }
+    }
+    if(closedir(dir) == -1) {
+      return;
+    }
+	return;	
+}
+
+void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
+	void (*enumproc)(void*, const char* path, int flag))
+{
+ 	// todo
+}
+
+// modified version from Dezhi Zao, codeproject
+// a simple wildcard matching function
+// modification: replaced TCHAR with char
+int wildcardmatch(const char *pszString, const char *pszMatch)
+{
+	const char *mp;
+	const char *cp = NULL;
+ 
+	while (*pszString) 
+	{
+		if (*pszMatch == '*') 
+		{
+			if (!*++pszMatch) 
+				return 1;
+			mp = pszMatch;
+			cp = pszString + 1;
+		} 
+		else if (*pszMatch == '?' || toupper(*pszMatch) == toupper(*pszString)) 
+		{
+			pszMatch++;
+			pszString++;
+		}
+		else if (!cp)
+			return 0;
+		else 
+		{
+			pszMatch = mp;
+			pszString = cp++;
+		}
+	}
+
+	while (*pszMatch == '*')
+		pszMatch++;
+
+	return !*pszMatch;
+}
+
+#elif defined(DIVERSALIS__OS__MICROSOFT)
 
 #include <direct.h>
 #include <windows.h>
@@ -41,15 +143,18 @@ void dir_enumerate(void* context, const char* root, const char* wildcard, int fl
 			}		
 		} while (FindNextFile(hFind, &wfd));
 		if (GetLastError() != ERROR_NO_MORE_FILES) {
+			SetLastError(0);		   				   
 			return;
 		}
 		if (FindClose(hFind) == FALSE) {
+			SetLastError(0);		   					 
 			return;
 		}
 	}
 	// Secondly, find and emumerate all subdirectories with their subdirectories
 	psy_snprintf(path, MAX_PATH, "%s\\*", root);
 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
+		SetLastError(0);	   		   
 		return;
 	}	
 	if (GetLastError() != ERROR_NO_MORE_FILES) {
@@ -57,9 +162,9 @@ void dir_enumerate(void* context, const char* root, const char* wildcard, int fl
 		return;
 	}
 	if (FindClose(hFind) == FALSE) {
+		SetLastError(0);	   					 
 		return;
 	}
-
 }
 
 void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
@@ -86,15 +191,18 @@ void dir_enumerate_recursive(void* context, const char* root, const char* wildca
 			}		
 		} while (FindNextFile(hFind, &wfd));
 		if (GetLastError() != ERROR_NO_MORE_FILES) {
+			SetLastError(0);		   				   
 			return;
 		}
 		if (FindClose(hFind) == FALSE) {
+			SetLastError(0);		   					 
 			return;
 		}
 	}
 	// Secondly, find and emumerate all subdirectories with their subdirectories
 	psy_snprintf(path, MAX_PATH, "%s\\*", root);
 	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {		
+		SetLastError(0);	   		   
 		return;
 	}	
 	do {
@@ -112,31 +220,10 @@ void dir_enumerate_recursive(void* context, const char* root, const char* wildca
 		return;
 	}
 	if (FindClose(hFind) == FALSE) {
+	 	SetLastError(0);
 		return;
 	}
-}
-
-struct FileSearch {
-	char* filepath;
-};
-
-static int onenumfindfile(struct FileSearch* self, const char* path, int flag);
-
-void dir_findfile(const char* searchpath, const char* wildcard,
-	char* filepath)
-{
-	struct FileSearch filesearch;
-
-	filepath[0] = '\0';
-	filesearch.filepath = filepath;
-	dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0, onenumfindfile);
 	SetLastError(0);
-}
-
-int onenumfindfile(struct FileSearch* self, const char* path, int flag)
-{
-	strcpy(self->filepath, path);
-	return 1;
 }
 
 char* workdir(char* buffer)
@@ -198,6 +285,11 @@ static const char pathenvvarname[] = {
 	"PATH"
 };
 
+void dir_enumerate(void* context, const char* root, const char* wildcard, int flag,
+	void (*enumproc)(void*, const char* path, int flag))
+{
+}
+
 void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
 {	
 }
@@ -219,8 +311,29 @@ void insertpathenv(const char* path)
 void setpathenv(const char* path)
 {
 }
-
 #endif
+
+struct FileSearch {
+	char* filepath;
+};
+
+static int onenumfindfile(struct FileSearch* self, const char* path, int flag);
+
+void dir_findfile(const char* searchpath, const char* wildcard,
+	char* filepath)
+{
+	struct FileSearch filesearch;
+
+	filepath[0] = '\0';
+	filesearch.filepath = filepath;
+	dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0, onenumfindfile);
+}
+
+int onenumfindfile(struct FileSearch* self, const char* path, int flag)
+{
+	strcpy(self->filepath, path);
+	return 1;
+}
 
 void extract_path(const char* path, char* prefix, char* name, char* ext)
 {
