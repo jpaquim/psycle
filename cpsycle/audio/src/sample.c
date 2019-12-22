@@ -15,7 +15,7 @@ void double_setvalue(Double* self, double value)
 	self->QuadPart = (uint64_t)(value * 4294967296.0f);
 }
 
-void sampleiterator_init(SampleIterator* self, Sample* sample)
+void sampleiterator_init(SampleIterator* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	self->forward = 1;
@@ -83,7 +83,7 @@ void vibrato_init(Vibrato* self)
 	self->type = WAVEFORMS_SINUS;
 }
 
-void sample_init(Sample* self)
+void sample_init(psy_audio_Sample* self)
 {
 	buffer_init(&self->channels, 2);
 	self->numframes = 0;
@@ -105,7 +105,7 @@ void sample_init(Sample* self)
 	vibrato_init(&self->vibrato);
 }
 
-void sample_dispose(Sample* self)
+void sample_dispose(psy_audio_Sample* self)
 {
 	unsigned int channel;
 	for (channel = 0; channel < self->channels.numchannels; ++channel) {
@@ -117,14 +117,14 @@ void sample_dispose(Sample* self)
 	free(self->name);
 }
 
-Sample* sample_alloc(void)
+psy_audio_Sample* sample_alloc(void)
 {
-	return (Sample*) malloc(sizeof(Sample));
+	return (psy_audio_Sample*) malloc(sizeof(psy_audio_Sample));
 }
 
-Sample* sample_allocinit(void)
+psy_audio_Sample* sample_allocinit(void)
 {
-	Sample* rv;
+	psy_audio_Sample* rv;
 
 	rv = sample_alloc();
 	if (rv) {
@@ -133,9 +133,9 @@ Sample* sample_allocinit(void)
 	return rv;
 }
 
-Sample* sample_clone(Sample* src)
+psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 {
-	Sample* rv = 0;
+	psy_audio_Sample* rv = 0;
 	
 	rv = sample_alloc();
 	if (rv) {
@@ -172,7 +172,7 @@ Sample* sample_clone(Sample* src)
 	return rv;
 }
 
-void sample_load(Sample* self, const char* path)
+void sample_load(psy_audio_Sample* self, const char* path)
 {
 	char* delim;
 	wave_load(self, path);
@@ -180,23 +180,23 @@ void sample_load(Sample* self, const char* path)
 	sample_setname(self, delim ? delim + 1 : path);	
 }
 
-void sample_save(Sample* self, const char* path)
+void sample_save(psy_audio_Sample* self, const char* path)
 {
 	wave_save(self, path);
 }
 
-void sample_setname(Sample* self, const char* name)
+void sample_setname(psy_audio_Sample* self, const char* name)
 {
 	free(self->name);
 	self->name = _strdup(name);
 }
 
-const char* sample_name(Sample* self)
+const char* sample_name(psy_audio_Sample* self)
 {
 	return self->name;
 }
 
-SampleIterator sample_begin(Sample* self)
+SampleIterator sample_begin(psy_audio_Sample* self)
 {
 	SampleIterator rv;
 

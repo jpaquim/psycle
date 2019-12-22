@@ -46,14 +46,14 @@ enum {
 typedef struct {
 	ui_component component;	
 	int dy;
-	Instrument* instrument;
+	psy_audio_Instrument* instrument;
 	InstrumentNoteMapMetrics metrics;
 } InstrumentParameterView;
 
 typedef struct {
 	ui_component component;	
 	int dy;
-	Instrument* instrument;
+	psy_audio_Instrument* instrument;
 	uintptr_t selected;
 	int dragmode;
 	InstrumentParameterView* parameterview;
@@ -67,14 +67,14 @@ typedef struct {
 	InstrumentKeyboardView keyboard;
 	InstrumentEntryView entryview;
 	InstrumentParameterView parameterview;
-	Instrument* instrument;
-	Instruments* instruments;
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 	InstrumentNoteMapMetrics metrics;
 } InstrumentNoteMapView;
 
 void instrumentnotemapview_init(InstrumentNoteMapView*,
 	ui_component* parent);
-void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, Instrument*);
+void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, psy_audio_Instrument*);
 void instrumentnotemapview_update(InstrumentNoteMapView*);
 
 #endif

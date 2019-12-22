@@ -6,70 +6,70 @@
 #include "instruments.h"
 #include <stdlib.h>
 
-void instruments_init(Instruments* self)
+void instruments_init(psy_audio_Instruments* self)
 {
-	table_init(&self->container);
+	psy_table_init(&self->container);
 	self->slot = 0;		
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
 	psy_signal_init(&self->signal_slotchange);
 }
 
-void instruments_dispose(Instruments* self)
+void instruments_dispose(psy_audio_Instruments* self)
 {	
-	TableIterator it;
+	psy_TableIterator it;
 
-	for (it = table_begin(&self->container);
-			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
-		Instrument* instrument;
+	for (it = psy_table_begin(&self->container);
+			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
+		psy_audio_Instrument* instrument;
 		
-		instrument = (Instrument*)tableiterator_value(&it);
+		instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it);
 		instrument_dispose(instrument);
 		free(instrument);
 	}
-	table_dispose(&self->container);
+	psy_table_dispose(&self->container);
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);
 	psy_signal_dispose(&self->signal_slotchange);
 }
 
-void instruments_insert(Instruments* self, Instrument* instrument, uintptr_t slot)
+void instruments_insert(psy_audio_Instruments* self, psy_audio_Instrument* instrument, uintptr_t slot)
 {
-	table_insert(&self->container, slot, instrument);
+	psy_table_insert(&self->container, slot, instrument);
 	instrument_setindex(instrument, slot);
 	psy_signal_emit(&self->signal_insert, self, 1, slot);
 }
 
-void instruments_remove(Instruments* self, uintptr_t slot)
+void instruments_remove(psy_audio_Instruments* self, uintptr_t slot)
 {
-	Instrument* instrument;
+	psy_audio_Instrument* instrument;
 	
 	instrument = instruments_at(self, slot);
 	if (instrument) {
-		table_remove(&self->container, slot);
+		psy_table_remove(&self->container, slot);
 		instrument_dispose(instrument);
 		free(instrument);
 		psy_signal_emit(&self->signal_removed, self, 1, slot);
 	}
 }
 
-void instruments_changeslot(Instruments* self, uintptr_t slot)
+void instruments_changeslot(psy_audio_Instruments* self, uintptr_t slot)
 {
 	self->slot = slot;	
 	psy_signal_emit(&self->signal_slotchange, self, 1, slot);
 }
 
-uintptr_t instruments_slot(Instruments* self)
+uintptr_t instruments_slot(psy_audio_Instruments* self)
 {
 	return self->slot;
 }
 
-Instrument* instruments_at(Instruments* self, uintptr_t slot)
+psy_audio_Instrument* instruments_at(psy_audio_Instruments* self, uintptr_t slot)
 {
-	return table_at(&self->container, slot);
+	return psy_table_at(&self->container, slot);
 }
 
-size_t instruments_size(Instruments* self)
+size_t instruments_size(psy_audio_Instruments* self)
 {
-	return table_size(&self->container);
+	return psy_table_size(&self->container);
 }

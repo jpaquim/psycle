@@ -154,7 +154,7 @@ struct VstTimeInfo
 {
 //-------------------------------------------------------------------------------------------------------
 	double samplePos;				///< current Position in audio samples (always valid)
-	double sampleRate;				///< current Sample Rate in Herz (always valid)
+	double sampleRate;				///< current psy_audio_Sample Rate in Herz (always valid)
 	double nanoSeconds;				///< System Time in nanoseconds (10^-9 second)
 	double ppqPos;					///< Musical Position, in Quarter Note (1.0 equals 1 Quarter Note)
 	double tempo;					///< current Tempo in BPM (Beats Per Minute)
@@ -417,7 +417,7 @@ enum VstProcessPrecision
 };
 
 //-------------------------------------------------------------------------------------------------------
-/** Parameter Properties used in #effGetParameterProperties. */
+/** Parameter psy_Properties used in #effGetParameterProperties. */
 //-------------------------------------------------------------------------------------------------------
 struct VstParameterProperties
 {
@@ -473,7 +473,7 @@ enum VstParameterFlags
 };
 
 //-------------------------------------------------------------------------------------------------------
-/** Pin Properties used in #effGetInputProperties and #effGetOutputProperties. */
+/** Pin psy_Properties used in #effGetInputProperties and #effGetOutputProperties. */
 //-------------------------------------------------------------------------------------------------------
 struct VstPinProperties
 {
@@ -507,7 +507,7 @@ enum VstPlugCategory
 //-------------------------------------------------------------------------------------------------------
     kPlugCategUnknown = 0,		///< Unknown, category not implemented
     kPlugCategEffect,			///< Simple Effect
-    kPlugCategSynth,			///< VST Instrument (Synths, samplers,...)
+    kPlugCategSynth,			///< VST psy_audio_Instrument (Synths, samplers,...)
     kPlugCategAnalysis,			///< Scope, Tuner, ...
     kPlugCategMastering,		///< Dynamics, ...
 	kPlugCategSpacializer,		///< Panners, ...
@@ -583,7 +583,7 @@ struct MidiKeyName
 // Surround Setup
 //-------------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-/** Speaker Properties.
+/** Speaker psy_Properties.
 	The origin for azimuth is right (as by math conventions dealing with radians).
 	The elevation origin is also right, visualizing a rotation of a circle across the
 	-pi/pi axis of the horizontal circle. Thus, an elevation of -pi/2 corresponds

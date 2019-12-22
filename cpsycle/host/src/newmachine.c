@@ -8,14 +8,14 @@
 #include <portable.h>
 
 static void newmachine_onpluginselected(NewMachine*, ui_component* parent,
-	Properties*);
-static void newmachine_onplugincachechanged(NewMachine*, PluginCatcher*);
+	psy_Properties*);
+static void newmachine_onplugincachechanged(NewMachine*, psy_audio_PluginCatcher*);
 static void newmachine_onkeydown(NewMachine*, ui_component* sender, KeyEvent*);
 
 static void pluginsview_ondestroy(PluginsView*, ui_component* component);
 static void pluginsview_ondraw(PluginsView*, ui_component* sender,
 	ui_graphics*);
-static void pluginsview_drawitem(PluginsView*, ui_graphics* g, Properties*,
+static void pluginsview_drawitem(PluginsView*, ui_graphics* g, psy_Properties*,
 	int x, int y);
 static void pluginsview_onsize(PluginsView*, ui_component* sender,
 	ui_size* size);
@@ -30,12 +30,12 @@ static void pluginsview_onmousedoubleclick(PluginsView*, ui_component* sender,
 static void pluginsview_onkeydown(PluginsView*, ui_component* sender,
 	KeyEvent*);
 static void pluginsview_onplugincachechanged(PluginsView*,
-	PluginCatcher* sender);
+	psy_audio_PluginCatcher* sender);
 static void pluginsview_adjustscroll(PluginsView*);
 
-static void pluginname(Properties*, char* txt);
-static int plugintype(Properties*, char* txt);
-static int pluginmode(Properties*, char* txt);
+static void pluginname(psy_Properties*, char* txt);
+static int plugintype(psy_Properties*, char* txt);
+static int pluginmode(psy_Properties*, char* txt);
 
 static void newmachinebar_onrescan(NewMachineBar*, ui_component* sender);
 
@@ -116,7 +116,7 @@ void pluginsview_ondestroy(PluginsView* self, ui_component* component)
 void pluginsview_ondraw(PluginsView* self, ui_component* sender,
 	ui_graphics* g)
 {	
-	Properties* p;
+	psy_Properties* p;
 	int cpx = 0;
 	int cpy = 0;
 	
@@ -136,7 +136,7 @@ void pluginsview_ondraw(PluginsView* self, ui_component* sender,
 }
 
 void pluginsview_drawitem(PluginsView* self, ui_graphics* g,
-	Properties* property, int x, int y)
+	psy_Properties* property, int x, int y)
 {
 	char txt[128];
 
@@ -175,22 +175,22 @@ void pluginsview_computetextsizes(PluginsView* self)
 	self->numparametercols = max(1, size.width / self->columnwidth);
 }
 
-void pluginname(Properties* property, char* txt)
+void pluginname(psy_Properties* property, char* txt)
 {
-	Properties* p;
+	psy_Properties* p;
 	
-	p = properties_read(property, "name");	
+	p = psy_properties_read(property, "name");	
 	psy_snprintf(txt, 128, "%s", 
-		p && properties_valuestring(p) != '\0'
-		? properties_valuestring(p)
-		: properties_key(property));	
+		p && strlen(psy_properties_valuestring(p)) != 0
+		? psy_properties_valuestring(p)
+		: psy_properties_key(property));	
 }
 
-int plugintype(Properties* property, char* txt)
+int plugintype(psy_Properties* property, char* txt)
 {	
 	int rv;
 	
-	rv = properties_int(property, "type", -1);
+	rv = psy_properties_int(property, "type", -1);
 	switch (rv) {
 		case MACH_PLUGIN:
 			strcpy(txt, "psy");
@@ -208,11 +208,11 @@ int plugintype(Properties* property, char* txt)
 	return rv;
 }
 
-int pluginmode(Properties* property, char* txt)
+int pluginmode(psy_Properties* property, char* txt)
 {			
 	int rv;
 
-	rv = properties_int(property, "mode", -1);
+	rv = psy_properties_int(property, "mode", -1);
 	strcpy(txt, rv == MACHMODE_FX ? "fx" : "gn");
 	return rv;
 }
@@ -224,7 +224,7 @@ void pluginsview_onsize(PluginsView* self, ui_component* sender, ui_size* size)
 
 void pluginsview_adjustscroll(PluginsView* self)
 {
-	Properties* p;
+	psy_Properties* p;
 
 	p = workspace_pluginlist(self->workspace);
 	if (p) {
@@ -235,7 +235,7 @@ void pluginsview_adjustscroll(PluginsView* self)
 		pluginsview_computetextsizes(self);
 		size = ui_component_size(&self->component);		
 		visilines = size.height / self->lineheight;
-		currlines = (int) (properties_size(p) / (float) self->numparametercols
+		currlines = (int) (psy_properties_size(p) / (float) self->numparametercols
 			+ 0.5f);
 		self->component.scrollstepy = self->lineheight;
 		ui_component_setverticalscrollrange(&self->component,
@@ -261,7 +261,7 @@ void pluginsview_onmousedown(PluginsView* self, ui_component* sender,
 
 void pluginsview_hittest(PluginsView* self, int x, int y)
 {	
-	Properties* p;
+	psy_Properties* p;
 	int cpx = 0;
 	int cpy = 0;
 	
@@ -303,7 +303,7 @@ void pluginsview_onkeydown(PluginsView* self, ui_component* sender,
 	}
 }
 
-void pluginsview_onplugincachechanged(PluginsView* self, PluginCatcher* sender)
+void pluginsview_onplugincachechanged(PluginsView* self, psy_audio_PluginCatcher* sender)
 {
 	self->dy = 0;
 	self->selectedplugin = 0;
@@ -328,20 +328,20 @@ void newmachine_init(NewMachine* self, ui_component* parent,
 }
 
 void newmachine_onpluginselected(NewMachine* self, ui_component* parent,
-	Properties* selected)
+	psy_Properties* selected)
 {
 	const char* text;
 	char detail[1024];
 
-	text = properties_readstring(selected, "name", "");
+	text = psy_properties_readstring(selected, "name", "");
 	strcpy(detail, text);
-	text = properties_readstring(selected, "desc", "");
+	text = psy_properties_readstring(selected, "desc", "");
 	strcat(detail, "  ");
 	strcat(detail, text);
 	ui_label_settext(&self->detail.desclabel, detail);
 }
 
-void newmachine_onplugincachechanged(NewMachine* self, PluginCatcher* sender)
+void newmachine_onplugincachechanged(NewMachine* self, psy_audio_PluginCatcher* sender)
 {
 	newmachinedetail_reset(&self->detail);
 }

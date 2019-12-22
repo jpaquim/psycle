@@ -26,9 +26,9 @@ static int defaultcolor = 0x00D1C5B6;
 static HBRUSH defaultbackgroundbrush;
 static int mousetracking = 0;
 
-static Table selfmap;
-static Table winidmap;
-extern Table menumap;
+static psy_Table selfmap;
+static psy_Table winidmap;
+extern psy_Table menumap;
 
 static LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
@@ -52,8 +52,8 @@ void ui_init(uintptr_t hInstance)
 
 	psy_signal_init(&app.signal_dispose);
 
-	table_init(&selfmap);
-	table_init(&winidmap);
+	psy_table_init(&selfmap);
+	psy_table_init(&winidmap);
 
 	wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
     wndclass.lpfnWndProc   = ui_winproc ;
@@ -99,8 +99,8 @@ void ui_init(uintptr_t hInstance)
 void ui_dispose()
 {
 	psy_signal_emit(&app.signal_dispose, &app, 0);
-	table_dispose(&selfmap);
-	table_dispose(&winidmap);
+	psy_table_dispose(&selfmap);
+	psy_table_dispose(&winidmap);
 	DeleteObject(defaultfont.hfont);
 	DeleteObject(defaultbackgroundbrush);
 	psy_signal_dispose(&app.signal_dispose);
@@ -109,8 +109,8 @@ void ui_dispose()
 void ui_replacedefaultfont(ui_component* main, ui_font* font)
 {		
 	if (font && main) {
-		List* p;
-		List* q;
+		psy_List* p;
+		psy_List* q;
 
 		if (main->font.hfont == defaultfont.hfont) {
 			main->font.hfont = font->hfont;
@@ -127,7 +127,7 @@ void ui_replacedefaultfont(ui_component* main, ui_font* font)
 				ui_component_align(child);
 			}		
 		}		
-		list_free(q);
+		psy_list_free(q);
 		ui_font_dispose(&defaultfont);
 		defaultfont = *font;
 		ui_component_align(main);
@@ -169,10 +169,10 @@ int ui_win32_component_init(ui_component* self, ui_component* parent,
 			MB_OK | MB_ICONERROR);
 		err = 1;
 	} else {
-		table_insert(&selfmap, (uintptr_t) self->hwnd, self);
+		psy_table_insert(&selfmap, (uintptr_t) self->hwnd, self);
 	}
 	if (err == 0 && usecommand) {
-		table_insert(&winidmap, winid, self);
+		psy_table_insert(&winidmap, winid, self);
 		winid++;		
 	}
 	ui_component_init_base(self);		
@@ -302,7 +302,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 {
 	ui_component*   component;	
 
-	component = table_at(&selfmap, (uintptr_t) hwnd);
+	component = psy_table_at(&selfmap, (uintptr_t) hwnd);
 	if (component) {		
 		switch (message)
 		{
@@ -353,7 +353,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	ui_menu*	 menu;
 	int			 menu_id;		
 
-	component = table_at(&selfmap, (uintptr_t) hwnd);	
+	component = psy_table_at(&selfmap, (uintptr_t) hwnd);	
 	if (component && component->signal_windowproc.slots) {				
 		psy_signal_emit(&component->signal_windowproc, component, 3, 
 			(LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
@@ -398,7 +398,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLORSTATIC:
 			case WM_CTLCOLOREDIT:
-				component = table_at(&selfmap, (uintptr_t) lParam);
+				component = psy_table_at(&selfmap, (uintptr_t) lParam);
 				if (component) {					
 					SetTextColor((HDC) wParam, component->color);
 					SetBkColor((HDC) wParam, component->backgroundcolor);
@@ -419,11 +419,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_COMMAND:
 			  hMenu = GetMenu (hwnd) ;
 			  menu_id = LOWORD (wParam);
-			  menu = table_at(&menumap, (uintptr_t) menu_id);
+			  menu = psy_table_at(&menumap, (uintptr_t) menu_id);
 			  if (menu && menu->execute) {	
 				menu->execute(menu);
 			  }
-			  component = table_at(&winidmap, (uintptr_t) LOWORD(wParam));
+			  component = psy_table_at(&winidmap, (uintptr_t) LOWORD(wParam));
 			  if (component && component->signal_command.slots) {
 					psy_signal_emit(&component->signal_command, component, 2, 
 						wParam, lParam);
@@ -760,7 +760,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 			break;
 			case WM_HSCROLL:
-				component = table_at(&selfmap, (uintptr_t) (int) lParam);
+				component = psy_table_at(&selfmap, (uintptr_t) (int) lParam);
 				if (component && component->signal_windowproc.slots) {				                    
 					psy_signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
 					return DefWindowProc (hwnd, message, wParam, lParam);
@@ -802,7 +802,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	// If the position has changed, scroll the window and update it
 	if (si.nPos != iPos)
 	{                    
-		component = table_at(&selfmap, (uintptr_t) hwnd);
+		component = psy_table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
 			psy_signal_emit(&component->signal_scroll, component, 2, 
 				0, (iPos - si.nPos));			
@@ -845,7 +845,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	if (si.nPos != iPos)
 	{                    
-		component = table_at(&selfmap, (uintptr_t) hwnd);
+		component = psy_table_at(&selfmap, (uintptr_t) hwnd);
 		if (component && component->signal_scroll.slots) {
 			psy_signal_emit(&component->signal_scroll, component, 2, 
 				(iPos - si.nPos), 0);			
@@ -1116,32 +1116,32 @@ void ui_component_enumerate_children(ui_component* self, void* context,
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam)
 {
 	EnumCallback* callback = (EnumCallback*) lParam;
-	ui_component* child = table_at(&selfmap, (uintptr_t) hwnd);
+	ui_component* child = psy_table_at(&selfmap, (uintptr_t) hwnd);
 	if (child &&  callback->childenum) {
 		return callback->childenum(callback->context, child);		  
 	}     
     return FALSE ;
 }
 
-List* ui_component_children(ui_component* self, int recursive)
+psy_List* ui_component_children(ui_component* self, int recursive)
 {	
-	List* children = 0;	
+	psy_List* children = 0;	
 	if (recursive == 1) {
 		EnumChildWindows ((HWND)self->hwnd, AllChildEnumProc, (LPARAM) &children);
 	} else {
 		uintptr_t hwnd = (uintptr_t)GetWindow((HWND)self->hwnd, GW_CHILD);
 		if (hwnd) {
-			ui_component* child = table_at(&selfmap, hwnd);
+			ui_component* child = psy_table_at(&selfmap, hwnd);
 			if (child) {				
-				children = list_create(child);				
+				children = psy_list_create(child);				
 			}
 		}
 		while (hwnd) {
 			hwnd = (uintptr_t) GetNextWindow((HWND)hwnd, GW_HWNDNEXT);
 			if (hwnd) {
-				ui_component* child = table_at(&selfmap, hwnd);
+				ui_component* child = psy_table_at(&selfmap, hwnd);
 				if (child) {					
-					list_append(&children, child);							
+					psy_list_append(&children, child);							
 				}
 			}
 		}
@@ -1151,10 +1151,10 @@ List* ui_component_children(ui_component* self, int recursive)
 
 BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam)
 {
-	List** pChildren = (List**) lParam;
-	ui_component* child = table_at(&selfmap, (uintptr_t) hwnd);
+	psy_List** pChildren = (psy_List**) lParam;
+	ui_component* child = psy_table_at(&selfmap, (uintptr_t) hwnd);
 	if (child) {		
-		list_append(pChildren, child);				
+		psy_list_append(pChildren, child);				
 	}     
     return TRUE;
 }
@@ -1242,9 +1242,9 @@ void ui_component_align(ui_component* self)
 	ui_point cp_topleft = { 0, 0 };
 	ui_point cp_bottomright = { 0, 0 };	
 	int cpymax = 0;
-	List* p;
-	List* q;
-	List* wrap = 0;	
+	psy_List* p;
+	psy_List* q;
+	psy_List* wrap = 0;	
 	ui_component* client = 0;
 		
 	size = ui_component_size(self);
@@ -1317,7 +1317,7 @@ void ui_component_align(ui_component* self)
 					requiredcomponentwidth = componentsize.width +
 						ui_margin_width_px(&component->margin, &tm);
 					if (cp_topleft.x + requiredcomponentwidth > size.width) {
-						List* w;						
+						psy_List* w;						
 						cp_topleft.x = 0;
 						for (w = wrap; w != 0; w = w->next) {
 							ui_component* c;
@@ -1327,10 +1327,10 @@ void ui_component_align(ui_component* self)
 								ui_margin_height_px(&component->margin, &tm));
 						}
 						cp_topleft.y = cpymax;
-						list_free(wrap);						
+						psy_list_free(wrap);						
 						wrap = 0;
 					}					
-					list_append(&wrap, component);					
+					psy_list_append(&wrap, component);					
 				}
 				cp_topleft.x += ui_value_px(&component->margin.left, &tm);
 				ui_component_setposition(component,
@@ -1360,8 +1360,8 @@ void ui_component_align(ui_component* self)
 			cp_bottomright.y - cp_topleft.y -
 				ui_margin_height_px(&client->margin, &tm));
 	}
-	list_free(q);
-	list_free(wrap);
+	psy_list_free(q);
+	psy_list_free(wrap);
 	psy_signal_emit(&self->signal_align, self, 0);
 }
 
@@ -1374,8 +1374,8 @@ void onpreferredsize(ui_component* self, ui_component* sender, ui_size* limit,
 		size = ui_component_size(self);		
 		if (self->alignchildren) {			
 			ui_textmetric tm;			
-			List* p;
-			List* q;
+			psy_List* p;
+			psy_List* q;
 			ui_point cp = { 0, 0 };
 			ui_size maxsize = { 0, 0 };
 
@@ -1429,7 +1429,7 @@ void onpreferredsize(ui_component* self, ui_component* sender, ui_size* limit,
 					}				
 				}
 			}
-			list_free(q);
+			psy_list_free(q);
 			*rv = maxsize;
 		} else {
 			*rv = size;
@@ -1480,13 +1480,13 @@ void enableinput(ui_component* self, int enable, int recursive)
 {	
 	EnableWindow((HWND) self->hwnd, enable);
 	if (recursive) {
-		List* p;
-		List* q;
+		psy_List* p;
+		psy_List* q;
 		
 		for (p = q = ui_component_children(self, recursive); p != 0; p = p->next) {
 			EnableWindow((HWND)((ui_component*)(p->entry))->hwnd, enable);
 		}
-		list_free(q);
+		psy_list_free(q);
 	}
 }
 
@@ -1594,13 +1594,13 @@ ui_size ui_component_textsize(ui_component* self, const char* text)
 
 ui_component* ui_component_parent(ui_component* self)
 {			
-	return (ui_component*) table_at(&selfmap, 
+	return (ui_component*) psy_table_at(&selfmap, 
 		(uintptr_t) GetParent((HWND)self->hwnd));
 }
 
-List* ui_components_setalign(List* list, UiAlignType align, const ui_margin* margin)
+psy_List* ui_components_setalign(psy_List* list, UiAlignType align, const ui_margin* margin)
 {
-	List* p;
+	psy_List* p;
 
 	for (p = list; p != 0; p = p->next) {
 		ui_component_setalign((ui_component*)p->entry, align);
@@ -1611,9 +1611,9 @@ List* ui_components_setalign(List* list, UiAlignType align, const ui_margin* mar
 	return list;
 }
 
-List* ui_components_setmargin(List* list, const ui_margin* margin)
+psy_List* ui_components_setmargin(psy_List* list, const ui_margin* margin)
 {
-	List* p;
+	psy_List* p;
 
 	for (p = list; p != 0; p = p->next) {
 		ui_component_setmargin((ui_component*)p->entry, margin);		
@@ -1661,7 +1661,7 @@ void ui_component_seticonressource(ui_component* self, int ressourceid)
 
 ui_component* ui_maincomponent(void)
 {
-	return table_at(&selfmap, (uintptr_t) appMainComponentHandle);
+	return psy_table_at(&selfmap, (uintptr_t) appMainComponentHandle);
 }
 
 void ui_component_starttimer(ui_component* self, unsigned int id,

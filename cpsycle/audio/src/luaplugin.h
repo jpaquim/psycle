@@ -8,13 +8,13 @@
 #include "psyclescript.h"
 
 typedef struct {
-	CustomMachine custommachine;			
-	PsycleScript script;
-	Machine* client;
-	MachineInfo* plugininfo;
-} LuaPlugin;
+	psy_audio_CustomMachine custommachine;			
+	psy_audio_PsycleScript script;
+	psy_audio_Machine* client;
+	psy_audio_MachineInfo* plugininfo;
+} psy_audio_LuaPlugin;
 
-void luaplugin_init(LuaPlugin*, MachineCallback, const char* path);
-int plugin_luascript_test(const char* path, MachineInfo*);
+void luaplugin_init(psy_audio_LuaPlugin*, MachineCallback, const char* path);
+int plugin_luascript_test(const char* path, psy_audio_MachineInfo*);
 
 #endif

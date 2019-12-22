@@ -8,14 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-void buffer_init(Buffer* self, uintptr_t channels)
+void buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 {
 	self->samples = 0;	
 	self->offset = 0;
 	buffer_resize(self, channels);
 }
 
-void buffer_init_shared(Buffer* self, Buffer* src, uintptr_t offset)
+void buffer_init_shared(psy_audio_Buffer* self, psy_audio_Buffer* src, uintptr_t offset)
 {
 	uintptr_t channel;
 
@@ -25,7 +25,7 @@ void buffer_init_shared(Buffer* self, Buffer* src, uintptr_t offset)
 	}
 }
 
-void buffer_move(Buffer* self, uintptr_t offset)
+void buffer_move(psy_audio_Buffer* self, uintptr_t offset)
 {	
 	uintptr_t channel;
 
@@ -34,19 +34,19 @@ void buffer_move(Buffer* self, uintptr_t offset)
 	}
 }
 
-void buffer_dispose(Buffer* self)
+void buffer_dispose(psy_audio_Buffer* self)
 {
 	free(self->samples);
 }
 
-Buffer* buffer_alloc(void)
+psy_audio_Buffer* buffer_alloc(void)
 {
-	return (Buffer*) malloc(sizeof(Buffer));
+	return (psy_audio_Buffer*) malloc(sizeof(psy_audio_Buffer));
 }
 
-Buffer* buffer_allocinit(uintptr_t channels)
+psy_audio_Buffer* buffer_allocinit(uintptr_t channels)
 {
-	Buffer* rv;
+	psy_audio_Buffer* rv;
 
 	rv = buffer_alloc();
 	if (rv) {
@@ -56,7 +56,7 @@ Buffer* buffer_allocinit(uintptr_t channels)
 }
 
 
-void buffer_resize(Buffer* self, uintptr_t channels)
+void buffer_resize(psy_audio_Buffer* self, uintptr_t channels)
 {
 	free(self->samples);
 	self->samples = 0;	
@@ -67,22 +67,22 @@ void buffer_resize(Buffer* self, uintptr_t channels)
 	self->numchannels = channels;
 }
 
-void buffer_setoffset(Buffer* self, uintptr_t offset)
+void buffer_setoffset(psy_audio_Buffer* self, uintptr_t offset)
 {
 	self->offset = offset;
 }
 
-uintptr_t buffer_offset(Buffer* self)
+uintptr_t buffer_offset(psy_audio_Buffer* self)
 {
 	return self->offset;
 }
 
-psy_dsp_amp_t* buffer_at(Buffer* self, uintptr_t channel)
+psy_dsp_amp_t* buffer_at(psy_audio_Buffer* self, uintptr_t channel)
 {
 	return self->samples[channel] + self->offset;
 }
 
-void buffer_clearsamples(Buffer* self, uintptr_t numsamples)
+void buffer_clearsamples(psy_audio_Buffer* self, uintptr_t numsamples)
 {
 	uintptr_t channel;
 
@@ -91,7 +91,7 @@ void buffer_clearsamples(Buffer* self, uintptr_t numsamples)
 	}
 }
 
-void buffer_addsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
+void buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* source, uintptr_t numsamples,
 	psy_dsp_amp_t vol)
 {
 	uintptr_t channel;
@@ -108,7 +108,7 @@ void buffer_addsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
 	}
 }
 
-void buffer_mulsamples(Buffer* self, uintptr_t numsamples, psy_dsp_amp_t mul)
+void buffer_mulsamples(psy_audio_Buffer* self, uintptr_t numsamples, psy_dsp_amp_t mul)
 {
 	uintptr_t channel;
 	
@@ -117,7 +117,7 @@ void buffer_mulsamples(Buffer* self, uintptr_t numsamples, psy_dsp_amp_t mul)
 	}	
 }
 
-void buffer_pan(Buffer* self, psy_dsp_amp_t pan, uintptr_t amount)
+void buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t amount)
 {
 	uintptr_t channel;
 	psy_dsp_amp_t vol[2];
@@ -135,17 +135,17 @@ void buffer_pan(Buffer* self, psy_dsp_amp_t pan, uintptr_t amount)
 	}
 }
 
-uintptr_t buffer_numchannels(Buffer* self)
+uintptr_t buffer_numchannels(psy_audio_Buffer* self)
 {
 	return self->numchannels;
 }
 
-int buffer_mono(Buffer* self)
+int buffer_mono(psy_audio_Buffer* self)
 {
 	return self->numchannels == 1;
 }
 
-void buffer_insertsamples(Buffer* self, Buffer* source, uintptr_t numsamples,
+void buffer_insertsamples(psy_audio_Buffer* self, psy_audio_Buffer* source, uintptr_t numsamples,
 	uintptr_t numsourcesamples)
 {	
 	if (numsourcesamples < numsamples) {		

@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {	
 	ui_component component;	
-	Sample* sample;
+	psy_audio_Sample* sample;
 	float zoomleft;
 	float zoomright;	
 	int dragmode;
@@ -56,15 +56,15 @@ typedef struct SampleEditor {
 	WaveBox samplebox;
 	SampleZoom zoom;
 	SampleEditorMetrics metrics;
-	Sample* sample;
-	Sampler sampler;
-	Buffer samplerbuffer;
-	PatternEvent samplerevent;
-	List* samplerevents;
+	psy_audio_Sample* sample;
+	psy_audio_Sampler sampler;
+	psy_audio_Buffer samplerbuffer;
+	psy_audio_PatternEvent samplerevent;
+	psy_List* samplerevents;
 	Workspace* workspace;
 } SampleEditor;
 
 void sampleeditor_init(SampleEditor*, ui_component* parent, Workspace*);
-void sampleeditor_setsample(SampleEditor*, Sample*);
+void sampleeditor_setsample(SampleEditor*, psy_audio_Sample*);
 
 #endif

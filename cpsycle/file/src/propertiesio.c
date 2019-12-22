@@ -15,12 +15,12 @@
 #define MAXSTRINGSIZE 4096
 
 static int reallocstr(char** str, size_t size, size_t* cap);
-static int OnSaveIniEnum(FILE* file, Properties*, int level);
+static int OnSaveIniEnum(FILE* file, psy_Properties*, int level);
 
-int propertiesio_load(Properties* self, const char* path, int allowappend)
+int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 {
 	FILE* fp;
-	Properties* curr;
+	psy_Properties* curr;
 
 	curr = self;			
 	fp = fopen(path, "rb");
@@ -86,22 +86,22 @@ int propertiesio_load(Properties* self, const char* path, int allowappend)
 				++i;
 			}
 			if (state == 2) {
-				Properties* p = properties_read(curr, key);
+				psy_Properties* p = psy_properties_read(curr, key);
 				if (p) {					
 					switch (p->item.typ) {
-						case PROPERTY_TYP_ROOT:
+						case PSY_PROPERTY_TYP_ROOT:
 						break;
-						case PROPERTY_TYP_INTEGER:
-							properties_write_int(curr, key, atoi(value));
+						case PSY_PROPERTY_TYP_INTEGER:
+							psy_properties_write_int(curr, key, atoi(value));
 						break;
-						case PROPERTY_TYP_BOOL:
-							properties_write_bool(curr, key, atoi(value));
+						case PSY_PROPERTY_TYP_BOOL:
+							psy_properties_write_bool(curr, key, atoi(value));
 						break;
-						case PROPERTY_TYP_CHOICE:
-							properties_write_choice(curr, key, atoi(value));
+						case PSY_PROPERTY_TYP_CHOICE:
+							psy_properties_write_choice(curr, key, atoi(value));
 						break;
-						case PROPERTY_TYP_STRING:
-							properties_write_string(curr, key, value);
+						case PSY_PROPERTY_TYP_STRING:
+							psy_properties_write_string(curr, key, value);
 						break;
 						default:
 						break;
@@ -113,23 +113,23 @@ int propertiesio_load(Properties* self, const char* path, int allowappend)
 
 					intval = strtol(value, &stopstring, 10);
 					if (errno == ERANGE || strcmp(stopstring, "") != 0) {
-						properties_append_string(curr, key, value);	
+						psy_properties_append_string(curr, key, value);	
 					} else {
-						properties_append_int(curr, key, intval, 0, 0);											
+						psy_properties_append_int(curr, key, intval, 0, 0);											
 					}
 				}
 				i = 0;
 				state = 0;
 			} else
 			if (state == 4) {
-				Properties* p;				
-				Properties* prev = 0;
-				p = properties_findsectionex(self, key, &prev);
+				psy_Properties* p;				
+				psy_Properties* prev = 0;
+				p = psy_properties_findsectionex(self, key, &prev);
 				if (p && p->children) {
 					curr = p;
 				} else
 				if (allowappend) {										
-					curr = properties_createsection(prev, key);
+					curr = psy_properties_create_section(prev, key);
 				} else {
 					curr = self;
 				}
@@ -144,8 +144,8 @@ int propertiesio_load(Properties* self, const char* path, int allowappend)
 			} else {
 				value[MAXSTRINGSIZE-1] = '\0';
 			}
-			if (properties_read(curr, key)) {
-				properties_write_string(curr, key, value);
+			if (psy_properties_read(curr, key)) {
+				psy_properties_write_string(curr, key, value);
 			}			
 		}
 		free(key);
@@ -154,11 +154,11 @@ int propertiesio_load(Properties* self, const char* path, int allowappend)
 	return fp != 0;
 }
 
-int propertiesio_loadsection(Properties* self, const char* path,
+int propertiesio_loadsection(psy_Properties* self, const char* path,
 	const char* section, int allowappend)
 {
 	FILE* fp;
-	Properties* curr;
+	psy_Properties* curr;
 	int dowrite;
 
 	dowrite = 0;
@@ -227,22 +227,22 @@ int propertiesio_loadsection(Properties* self, const char* path,
 			}
 			if (state == 2) {
 				if (dowrite) {
-					Properties* p = properties_read(curr, key);
+					psy_Properties* p = psy_properties_read(curr, key);
 					if (p) {						
 						switch (p->item.typ) {
-							case PROPERTY_TYP_ROOT:
+							case PSY_PROPERTY_TYP_ROOT:
 							break;
-							case PROPERTY_TYP_INTEGER:
-								properties_write_int(curr, key, atoi(value));
+							case PSY_PROPERTY_TYP_INTEGER:
+								psy_properties_write_int(curr, key, atoi(value));
 							break;
-							case PROPERTY_TYP_BOOL:
-								properties_write_bool(curr, key, atoi(value));
+							case PSY_PROPERTY_TYP_BOOL:
+								psy_properties_write_bool(curr, key, atoi(value));
 							break;
-							case PROPERTY_TYP_CHOICE:
-								properties_write_choice(curr, key, atoi(value));
+							case PSY_PROPERTY_TYP_CHOICE:
+								psy_properties_write_choice(curr, key, atoi(value));
 							break;
-							case PROPERTY_TYP_STRING:
-								properties_write_string(curr, key, value);
+							case PSY_PROPERTY_TYP_STRING:
+								psy_properties_write_string(curr, key, value);
 							break;
 							default:
 							break;
@@ -254,9 +254,9 @@ int propertiesio_loadsection(Properties* self, const char* path,
 
 						intval = strtol(value, &stopstring, 10);
 						if (errno == ERANGE || strcmp(stopstring, "") != 0) {
-							properties_append_string(curr, key, value);	
+							psy_properties_append_string(curr, key, value);	
 						} else {
-							properties_append_int(curr, key, intval, 0, 0);											
+							psy_properties_append_int(curr, key, intval, 0, 0);											
 						}
 					}
 				}
@@ -264,16 +264,16 @@ int propertiesio_loadsection(Properties* self, const char* path,
 				state = 0;
 			} else
 			if (state == 4) {
-				Properties* p;				
-				Properties* prev = 0;				
+				psy_Properties* p;				
+				psy_Properties* prev = 0;				
 				dowrite = strncmp(key, section, strlen(section)) == 0;					
 				if (dowrite) {
-					p = properties_findsectionex(self, key, &prev);
+					p = psy_properties_findsectionex(self, key, &prev);
 					if (p && p->children) {
 						curr = p;
 					} else
 					if (allowappend) {										
-						curr = properties_createsection(prev, key);
+						curr = psy_properties_create_section(prev, key);
 					} else {
 						curr = self;
 					}
@@ -290,8 +290,8 @@ int propertiesio_loadsection(Properties* self, const char* path,
 				value[MAXSTRINGSIZE-1] = '\0';
 			}
 			if (dowrite) {
-				if (properties_read(curr, key)) {
-					properties_write_string(curr, key, value);
+				if (psy_properties_read(curr, key)) {
+					psy_properties_write_string(curr, key, value);
 				}
 			}
 		}
@@ -304,19 +304,19 @@ int propertiesio_loadsection(Properties* self, const char* path,
 static skip;
 static skiplevel;
 
-void propertiesio_save(Properties* self, const char* path)
+void propertiesio_save(psy_Properties* self, const char* path)
 {
 	FILE* fp;
 	fp = fopen(path, "wb");
 	if (fp) {
 		skip = 0;
 		skiplevel = 0;
-		properties_enumerate(self, fp, (PropertiesCallback)OnSaveIniEnum);
+		psy_properties_enumerate(self, fp, (psy_PropertiesCallback)OnSaveIniEnum);
 		fclose(fp);
 	}
 }
 
-int OnSaveIniEnum(FILE* fp, Properties* property, int level)
+int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 {
 	if (skip && level > skiplevel) {
 		return 1;
@@ -331,40 +331,40 @@ int OnSaveIniEnum(FILE* fp, Properties* property, int level)
 		char text[40];
 		char sections[MAXSTRINGSIZE];
 		
-		if (property->item.typ == PROPERTY_TYP_ROOT) {
+		if (property->item.typ == PSY_PROPERTY_TYP_ROOT) {
 			fwrite("[root]", sizeof(char), 6, fp);			
 		} else
-		if (property->item.typ == PROPERTY_TYP_SECTION) {
-			properties_sections(property, sections);
+		if (property->item.typ == PSY_PROPERTY_TYP_SECTION) {
+			psy_properties_sections(property, sections);
 			fwrite("[", sizeof(char), 1, fp);
 			if (sections[0] != '\0') {
 				fwrite(sections, sizeof(char), strlen(sections), fp);
 			}			
 			fwrite("]", sizeof(char), 1, fp);
 		} else 
-		if (property->item.typ != PROPERTY_TYP_ACTION) {
-			fwrite(properties_key(property), sizeof(char),
-				strlen(properties_key(property)), fp);
+		if (property->item.typ != PSY_PROPERTY_TYP_ACTION) {
+			fwrite(psy_properties_key(property), sizeof(char),
+				strlen(psy_properties_key(property)), fp);
 			fwrite("=", sizeof(char), 1, fp);
 			switch (property->item.typ) {				
-				case PROPERTY_TYP_INTEGER:
-					psy_snprintf(text, 40, "%d", properties_value(property));
+				case PSY_PROPERTY_TYP_INTEGER:
+					psy_snprintf(text, 40, "%d", psy_properties_value(property));
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);					
 				break;
-				case PROPERTY_TYP_BOOL:
+				case PSY_PROPERTY_TYP_BOOL:
 					psy_snprintf(text, 40, "%d", property->item.value.i);
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;
-				case PROPERTY_TYP_CHOICE:
+				case PSY_PROPERTY_TYP_CHOICE:
 					psy_snprintf(text, 40, "%d", property->item.value.i);
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;
-				case PROPERTY_TYP_STRING:
-					fwrite(properties_valuestring(property), sizeof(char),
-						strlen(properties_valuestring(property)), fp);					
+				case PSY_PROPERTY_TYP_STRING:
+					fwrite(psy_properties_valuestring(property), sizeof(char),
+						strlen(psy_properties_valuestring(property)), fp);					
 				break;						
 				default:
 				break;

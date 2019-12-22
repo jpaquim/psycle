@@ -34,11 +34,11 @@ typedef psy_dsp_amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples,
 typedef struct Driver {
 	AUDIODRIVERWORKFN _pCallback;	
 	void* _callbackContext;
-	Properties* properties;
+	psy_Properties* properties;
 	int (*open)(struct Driver*);
 	int (*dispose)(struct Driver*);
 	void (*free)(struct Driver*);	
-	void (*configure)(struct Driver*, Properties*);	
+	void (*configure)(struct Driver*, psy_Properties*);	
 	int (*close)(struct Driver*);
 	void (*connect)(struct Driver*, void* context, AUDIODRIVERWORKFN callback,
 		void* handle);

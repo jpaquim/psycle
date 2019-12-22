@@ -46,7 +46,7 @@ void filebar_initalign(FileBar* self)
 {	
 	ui_margin margin = { 0, 5, 0, 0 };
 
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
 		&margin));

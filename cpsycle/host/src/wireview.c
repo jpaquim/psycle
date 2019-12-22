@@ -19,12 +19,12 @@ static void wireview_ondescribevolume(WireView*, ui_slider*, char* txt);
 static void wireview_ontweakvolume(WireView*, ui_slider*, float value);
 static void wireview_onvaluevolume(WireView*, ui_slider*, float* value);
 static void wireview_ondeleteconnection(WireView*, ui_component* sender);
-static void wireview_ondisconnected(WireView*, Connections*, uintptr_t outputslot, uintptr_t inputslot);
+static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 
 static void wireframe_ondestroy(WireFrame*, ui_component* frame);
 static void wireframe_onsize(WireFrame*, ui_component* sender, ui_size* size);
 
-void wireview_init(WireView* self, ui_component* parent, Wire wire,
+void wireview_init(WireView* self, ui_component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	self->wire = wire;	
@@ -108,8 +108,8 @@ void wireview_onsongchanged(WireView* self, Workspace* workspace)
 
 void wireview_ondescribevolume(WireView* self, ui_slider* slider, char* txt)
 {
-	Connections* connections;
-	WireSocketEntry* input;	
+	psy_audio_Connections* connections;
+	psy_audio_WireSocketEntry* input;	
 
 	connections = &self->workspace->song->machines.connections;
 	input = connection_input(connections, self->wire.src, self->wire.dst);
@@ -124,8 +124,8 @@ void wireview_ondescribevolume(WireView* self, ui_slider* slider, char* txt)
 
 void wireview_ontweakvolume(WireView* self, ui_slider* slider, float value)
 {
-	Connections* connections;
-	WireSocketEntry* input;	
+	psy_audio_Connections* connections;
+	psy_audio_WireSocketEntry* input;	
 
 	connections = &self->workspace->song->machines.connections;
 	input = connection_input(connections, self->wire.src, self->wire.dst);
@@ -136,8 +136,8 @@ void wireview_ontweakvolume(WireView* self, ui_slider* slider, float value)
 
 void wireview_onvaluevolume(WireView* self, ui_slider* slider, float* value)
 {
-	Connections* connections;
-	WireSocketEntry* input;	
+	psy_audio_Connections* connections;
+	psy_audio_WireSocketEntry* input;	
 
 	connections = &self->workspace->song->machines.connections;
 	input = connection_input(connections, self->wire.src, self->wire.dst);
@@ -154,7 +154,7 @@ void wireview_ondeleteconnection(WireView* self, ui_component* sender)
 	}
 }
 
-void wireview_ondisconnected(WireView* self, Connections* connections,
+void wireview_ondisconnected(WireView* self, psy_audio_Connections* connections,
 		uintptr_t outputslot, uintptr_t inputslot)
 {
 	vuscope_stop(&self->vuscope);

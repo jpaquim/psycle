@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h> 
 
-void wave_load(Sample* sample, const char* path)
+void wave_load(psy_audio_Sample* sample, const char* path)
 {
 	char header[9];
 	PsyFile file;
@@ -26,7 +26,7 @@ void wave_load(Sample* sample, const char* path)
 		psyfile_read(&file, header, 8);
 		header[8] = 0;
 		if (strcmp(&header[0], "WAVEfmt ") == 0) {
-			WaveFormatChunk format;
+			psy_audio_WaveFormatChunk format;
 			psyfile_read(&file, &pcmsize, sizeof(pcmsize));
 			psyfile_read(&file, &format.wFormatTag, 2);
 			psyfile_read(&file, &format.nChannels, 2);
@@ -75,10 +75,10 @@ void wave_load(Sample* sample, const char* path)
 	psyfile_close(&file);
 }
 
-void wave_save(Sample* sample, const char* path)
+void wave_save(psy_audio_Sample* sample, const char* path)
 {
 	PsyFile file;
-	WaveFormatChunk format;
+	psy_audio_WaveFormatChunk format;
 	int bitspersample = 16;
 	uint8_t temp8 = 0;
 	uint16_t temp16 = 0;

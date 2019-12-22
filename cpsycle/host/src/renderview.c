@@ -10,7 +10,7 @@
 static void renderview_ondestroy(RenderView*, ui_component* sender);
 static void renderview_makeproperties(RenderView*);
 static void renderview_onsettingsviewchanged(RenderView*, SettingsView* sender,
-	Properties*);
+	psy_Properties*);
 static void renderview_render(RenderView*);
 static void renderview_onstoprendering(RenderView*, Driver* sender);
 
@@ -41,101 +41,101 @@ void renderview_ondestroy(RenderView* self, ui_component* sender)
 
 void renderview_makeproperties(RenderView* self)
 {
-	Properties* filesave;
-	Properties* savechoice;	
-	Properties* record;
-	Properties* recordchoice;
-	Properties* recordpatnum;
-	Properties* recordseqpos;
-	Properties* quality;
-	Properties* actions;
+	psy_Properties* filesave;
+	psy_Properties* savechoice;	
+	psy_Properties* record;
+	psy_Properties* recordchoice;
+	psy_Properties* recordpatnum;
+	psy_Properties* recordseqpos;
+	psy_Properties* quality;
+	psy_Properties* actions;
 
-	self->properties = properties_create();
-	actions = properties_settext(
-		properties_createsection(self->properties, "actions"),
+	self->properties = psy_properties_create();
+	actions = psy_properties_settext(
+		psy_properties_create_section(self->properties, "actions"),
 		"Render");
-	properties_settext(
-		properties_append_action(actions, "savewave"),
+	psy_properties_settext(
+		psy_properties_append_action(actions, "savewave"),
 		"Save wave");
-	filesave = properties_settext(
-		properties_createsection(self->properties, "filesave"),
+	filesave = psy_properties_settext(
+		psy_properties_create_section(self->properties, "filesave"),
 		"File");
-	properties_settext(
-		properties_append_string(filesave, "filesave-outputpath", "Untitled.wav"),
+	psy_properties_settext(
+		psy_properties_append_string(filesave, "filesave-outputpath", "Untitled.wav"),
 		"Output Path");
-	savechoice = properties_settext(
-		properties_append_choice(filesave, "filesave-choice", 0),
+	savechoice = psy_properties_settext(
+		psy_properties_append_choice(filesave, "filesave-choice", 0),
 		"Save each unmuted");
-	properties_settext(
-		properties_append_string(savechoice, "filesave-channel", ""),
+	psy_properties_settext(
+		psy_properties_append_string(savechoice, "filesave-channel", ""),
 		"input to master as a separated wav (wire number"
 		" will be appended to filename)"
 	);
-	properties_settext(
-		properties_append_string(savechoice, "filesave-track", ""),
+	psy_properties_settext(
+		psy_properties_append_string(savechoice, "filesave-track", ""),
 		"track as a separated"
 		"wav (track number will be appended to filename) ** may suffer from"
 		"'delay bleed' - insert silence at the end of your file if this is a "
 		"problem."
 	);
-	properties_settext(
-		properties_append_string(savechoice, "filesave-generator", ""),
+	psy_properties_settext(
+		psy_properties_append_string(savechoice, "filesave-generator", ""),
 		"generator as a separated wav (generator number will"
 		"be appended to filename) ** may suffer from 'delay bleed' - insert"
 		" silence at the end of your file if this is a problem."
 	);
-	record = properties_settext(
-		properties_createsection(self->properties, "record"),
+	record = psy_properties_settext(
+		psy_properties_create_section(self->properties, "record"),
 		"Selection");	
-	recordchoice = properties_settext(
-		properties_append_choice(record, "record", 0),
+	recordchoice = psy_properties_settext(
+		psy_properties_append_choice(record, "record", 0),
 		"Record");
-	properties_settext(
-		properties_append_string(recordchoice, "record-entiresong", ""),
+	psy_properties_settext(
+		psy_properties_append_string(recordchoice, "record-entiresong", ""),
 		"the entire song"
 	);
-	recordpatnum = properties_settext(
-		properties_append_string(recordchoice, "record-pattern", ""),
+	recordpatnum = psy_properties_settext(
+		psy_properties_append_string(recordchoice, "record-pattern", ""),
 		"pattern"
 	);
-	properties_settext(
-		properties_append_int(recordpatnum, "record-pattern-number", 0, 0, 256),
+	psy_properties_settext(
+		psy_properties_append_int(recordpatnum, "record-pattern-number", 0, 0, 256),
 		"number"
 	);
-	recordseqpos = properties_settext(
-		properties_append_string(recordchoice, "record-seqpos", ""),
+	recordseqpos = psy_properties_settext(
+		psy_properties_append_string(recordchoice, "record-seqpos", ""),
 		"sequence positions"
 	);
-	properties_settext(
-		properties_append_int(recordseqpos, "record-seqpos-from", 0, 0, 256),
+	psy_properties_settext(
+		psy_properties_append_int(recordseqpos, "record-seqpos-from", 0, 0, 256),
 		"from"
 	);
-	properties_settext(
-		properties_append_int(recordseqpos, "record-seqpos-to", 0, 0, 256),
+	psy_properties_settext(
+		psy_properties_append_int(recordseqpos, "record-seqpos-to", 0, 0, 256),
 		"to"
 	);
-	quality = properties_settext(
-		properties_createsection(self->properties, "quality"),
+	quality = psy_properties_settext(
+		psy_properties_create_section(self->properties, "quality"),
 		"Quality");	
-	properties_settext(
-		properties_append_int(quality, "quality-samplerate", 44100, 0, 96000),
-		"Sample Rate"
+	psy_properties_settext(
+		psy_properties_append_int(quality, "quality-samplerate", 44100, 0, 96000),
+		"psy_audio_Sample Rate"
 	);
-	properties_settext(
-		properties_append_int(quality, "quality-bitdepth", 8, 8, 16),
+	psy_properties_settext(
+		psy_properties_append_int(quality, "quality-bitdepth", 8, 8, 16),
 		"Bit Depth"
 	);
-	properties_settext(
-		properties_append_int(quality, "quality-channels", 2, 0, 2),
+	psy_properties_settext(
+		psy_properties_append_int(quality, "quality-channels", 2, 0, 2),
 		"Channels"
 	);	
 }
 
 void renderview_onsettingsviewchanged(RenderView* self, SettingsView* sender,
-	Properties* property)
+	psy_Properties* property)
 {
-	if (properties_type(property) == PROPERTY_TYP_ACTION) {
-		if (strcmp(properties_key(property), "savewave") == 0) {
+	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
+		if (strcmp(psy_properties_key(property), "savewave") == 0) {
 			renderview_render(self);
 		}
 	}

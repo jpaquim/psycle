@@ -7,27 +7,27 @@
 #include <string.h>
 #include <stdlib.h>
 
-void preset_init(Preset* self)
+void preset_init(psy_audio_Preset* self)
 {
 	self->name = strdup("");
-	table_init(&self->parameters);
+	psy_table_init(&self->parameters);
 }
 
-void preset_dispose(Preset* self)
+void preset_dispose(psy_audio_Preset* self)
 {
 	free(self->name);
 	self->name = 0;
-	table_dispose(&self->parameters);
+	psy_table_dispose(&self->parameters);
 }
 
-Preset* preset_alloc(void)
+psy_audio_Preset* preset_alloc(void)
 {
-	return malloc(sizeof(Preset));
+	return malloc(sizeof(psy_audio_Preset));
 }
 
-Preset* preset_allocinit(void)
+psy_audio_Preset* preset_allocinit(void)
 {
-	Preset* rv;
+	psy_audio_Preset* rv;
 
 	rv = preset_alloc();
 	if (rv) {
@@ -36,26 +36,26 @@ Preset* preset_allocinit(void)
 	return rv;
 }
 
-void preset_setname(Preset* self, const char* name)
+void preset_setname(psy_audio_Preset* self, const char* name)
 {
 	free(self->name);
 	self->name = strdup(name);
 }
 
-const char* preset_name(Preset* self)
+const char* preset_name(psy_audio_Preset* self)
 {
 	return self->name;
 }
 
-void preset_setvalue(Preset* self, int numparam, int value)
+void preset_setvalue(psy_audio_Preset* self, int numparam, int value)
 {
-	table_insert(&self->parameters, numparam, (void*)(uintptr_t)value);
+	psy_table_insert(&self->parameters, numparam, (void*)(uintptr_t)value);
 }
 
-int preset_value(Preset* self, int numparam)
+int preset_value(psy_audio_Preset* self, int numparam)
 {
-	if (table_exists(&self->parameters, numparam)) {
-		return (int)(uintptr_t) table_at(&self->parameters, numparam);
+	if (psy_table_exists(&self->parameters, numparam)) {
+		return (int)(uintptr_t) psy_table_at(&self->parameters, numparam);
 	} else {
 		return 0;
 	}

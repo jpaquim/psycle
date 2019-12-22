@@ -11,15 +11,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void work(LuaPlugin*, BufferContext*);
-static void seqtick(LuaPlugin*, int channel, const PatternEvent*);
-static void sequencerlinetick(LuaPlugin*);
-static MachineInfo* info(LuaPlugin*);
-static void parametertweak(LuaPlugin*, int par, int val);
-static int describevalue(LuaPlugin*, char* txt, int param, int value);
-static int parametervalue(LuaPlugin*, int param);
-static void dispose(LuaPlugin*);
-static int mode(LuaPlugin*);
+static void work(psy_audio_LuaPlugin*, psy_audio_BufferContext*);
+static void seqtick(psy_audio_LuaPlugin*, int channel, const psy_audio_PatternEvent*);
+static void sequencerlinetick(psy_audio_LuaPlugin*);
+static psy_audio_MachineInfo* info(psy_audio_LuaPlugin*);
+static void parametertweak(psy_audio_LuaPlugin*, int par, int val);
+static int describevalue(psy_audio_LuaPlugin*, char* txt, int param, int value);
+static int parametervalue(psy_audio_LuaPlugin*, int param);
+static void dispose(psy_audio_LuaPlugin*);
+static int mode(psy_audio_LuaPlugin*);
 
 int luascript_setmachine(lua_State* L);
 
@@ -37,7 +37,7 @@ static const luaL_Reg psycle_methods[] = {
 	{NULL, NULL}
 };
 
-static void vtable_init(LuaPlugin* self)
+static void vtable_init(psy_audio_LuaPlugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;		
@@ -53,7 +53,7 @@ static void vtable_init(LuaPlugin* self)
 	}
 }
 		
-void luaplugin_init(LuaPlugin* self, MachineCallback callback,
+void luaplugin_init(psy_audio_LuaPlugin* self, MachineCallback callback,
 	const char* path)
 {
 	int err = 0;	
@@ -83,7 +83,7 @@ void luaplugin_init(LuaPlugin* self, MachineCallback callback,
 		&self->custommachine.machine, self->plugininfo->ShortName);
 }
 
-void dispose(LuaPlugin* self)
+void dispose(psy_audio_LuaPlugin* self)
 {	
 	if (self->plugininfo) {
 		machineinfo_dispose(self->plugininfo);
@@ -94,9 +94,9 @@ void dispose(LuaPlugin* self)
 	custommachine_dispose(&self->custommachine);
 }
 
-int plugin_luascript_test(const char* path, MachineInfo* machineinfo)
+int plugin_luascript_test(const char* path, psy_audio_MachineInfo* machineinfo)
 {		
-	PsycleScript script;
+	psy_audio_PsycleScript script;
 	int err = 0;	
 	
 	psyclescript_init(&script);
@@ -121,41 +121,41 @@ int plugin_luascript_test(const char* path, MachineInfo* machineinfo)
 	return 1;
 }
 
-void work(LuaPlugin* self, BufferContext* bc)
+void work(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 {
 	
 }
 
-void seqtick(LuaPlugin* self, int channel, const PatternEvent* event)
+void seqtick(psy_audio_LuaPlugin* self, int channel, const psy_audio_PatternEvent* event)
 {
 	
 }
 
-void sequencerlinetick(LuaPlugin* self)
+void sequencerlinetick(psy_audio_LuaPlugin* self)
 {
 }
 
-MachineInfo* info(LuaPlugin* self)
+psy_audio_MachineInfo* info(psy_audio_LuaPlugin* self)
 {
 	return self->plugininfo;
 }
 
-void parametertweak(LuaPlugin* self, int par, int val)
+void parametertweak(psy_audio_LuaPlugin* self, int par, int val)
 {
 
 }
 
-int describevalue(LuaPlugin* self, char* txt, int param, int value)
+int describevalue(psy_audio_LuaPlugin* self, char* txt, int param, int value)
 { 
 	return 0;
 }
 
-int parametervalue(LuaPlugin* self, int param)
+int parametervalue(psy_audio_LuaPlugin* self, int param)
 {
 	return 0;
 }
 
-int mode(LuaPlugin* self)
+int mode(psy_audio_LuaPlugin* self)
 {
 	return MACHMODE_FX;		
 }
@@ -176,7 +176,7 @@ int luamachine_create(lua_State* L)
 {	
 	int n;
 	int self = 1;
-	Machine** ud;	
+	psy_audio_Machine** ud;	
 	MachineCallback callback;
 
 	memset(&callback, 0, sizeof(MachineCallback));
@@ -188,9 +188,9 @@ int luamachine_create(lua_State* L)
 	lua_setmetatable(L, -2);
 	lua_pushvalue(L, self);
 	lua_setfield(L, self, "__index");		
-	ud = (void*)lua_newuserdata(L, sizeof(Machine*));	
-	*ud = malloc(sizeof(DummyMachine));	
-	dummymachine_init((DummyMachine*)*ud, callback); 
+	ud = (void*)lua_newuserdata(L, sizeof(psy_audio_Machine*));	
+	*ud = malloc(sizeof(psy_audio_DummyMachine));	
+	dummymachine_init((psy_audio_DummyMachine*)*ud, callback); 
 	luaL_getmetatable(L, luamachine_meta);
 	lua_setmetatable(L, -2);
 	lua_setfield(L, -2, "__self");
@@ -201,7 +201,7 @@ int luamachine_create(lua_State* L)
 
 int luamachine_gc(lua_State* L)
 {
-	Machine** ud = (Machine**) luaL_checkudata(L, 1, luamachine_meta);	
+	psy_audio_Machine** ud = (psy_audio_Machine**) luaL_checkudata(L, 1, luamachine_meta);	
 	machine_dispose(*ud);
 	free(*ud);
 	return 0;
@@ -214,15 +214,15 @@ int luamachine_work(lua_State* L)
 
 int luascript_setmachine(lua_State* L)
 {
-	LuaPlugin* proxy;
-	Machine** ud;
+	psy_audio_LuaPlugin* proxy;
+	psy_audio_Machine** ud;
 
 	lua_getglobal(L, "psycle");
 	lua_getfield(L, -1, "__self");
-	proxy = *(LuaPlugin**)luaL_checkudata(L, -1, "psyhostmeta");
+	proxy = *(psy_audio_LuaPlugin**)luaL_checkudata(L, -1, "psyhostmeta");
 	luaL_checktype(L, 1, LUA_TTABLE);
 	lua_getfield(L, 1, "__self");
-	ud = (Machine**) luaL_checkudata(L, -1, "psypluginmeta");	
+	ud = (psy_audio_Machine**) luaL_checkudata(L, -1, "psypluginmeta");	
 	if (*ud) {
 		proxy->client = *ud;
 	}

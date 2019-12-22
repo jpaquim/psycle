@@ -12,7 +12,7 @@
 static void machineframe_ondestroy(MachineFrame* self, ui_component* frame);
 static void machineframe_onalign(MachineFrame*, ui_component* sender);
 static void machineframe_onpresetchange(MachineFrame*, ui_component* sender, int index);
-static void parameterbar_setpresetlist(ParameterBar*, Presets*);
+static void parameterbar_setpresetlist(ParameterBar*, psy_audio_Presets*);
 
 void parameterbar_init(ParameterBar* self, ui_component* parent)
 {				
@@ -23,23 +23,23 @@ void parameterbar_init(ParameterBar* self, ui_component* parent)
 	ui_button_settext(&self->mute, "Mute");
 	ui_combobox_init(&self->presetsbox, &self->component);
 	ui_combobox_setcharnumber(&self->presetsbox, 30);	
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
 		0));	
 }
 
-void parameterbar_setpresetlist(ParameterBar* self, Presets* presets)
+void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
 {
-	List* p;
+	psy_List* p;
 	self->presets = presets;
 	
 	ui_combobox_clear(&self->presetsbox);
 	if (self->presets) {
 		for (p = presets->container; p != 0; p = p->next) {
-			Preset* preset;
+			psy_audio_Preset* preset;
 
-			preset = (Preset*) p->entry;
+			preset = (psy_audio_Preset*) p->entry;
 			ui_combobox_addstring(&self->presetsbox, preset_name(preset));
 		}
 		ui_combobox_setcursel(&self->presetsbox, 0);
@@ -66,9 +66,9 @@ void machineframe_init(MachineFrame* self, ui_component* parent)
 }
 
 void machineframe_setview(MachineFrame* self, ui_component* view,
-	Machine* machine)
+	psy_audio_Machine* machine)
 {
-	const MachineInfo* info;
+	const psy_audio_MachineInfo* info;
 	char name[4096];
 	char prefix[4096];
 	char ext[4096];
@@ -78,7 +78,7 @@ void machineframe_setview(MachineFrame* self, ui_component* view,
 	self->machine = machine;
 	info = machine->vtable->info(machine);
 	if (info && info->modulepath) {
-		extract_path(info->modulepath, prefix, name, ext);
+		psy_dir_extract_path(info->modulepath, prefix, name, ext);
 		psy_snprintf(prspath, 4096, "%s\\%s%s", prefix, name, ".prs");
 		if (self->presets) {
 			presets_dispose(self->presets);
@@ -112,22 +112,22 @@ void machineframe_onalign(MachineFrame* self, ui_component* sender)
 void machineframe_onpresetchange(MachineFrame* self, ui_component* sender, int index)
 {
 	if (self->presets && self->machine) {
-		List* p;
+		psy_List* p;
 		int c = 0;
 
 		p = self->presets->container;
 		while (p != 0) {
 			if (c == index) {
-				Preset* preset;
-				TableIterator it;
+				psy_audio_Preset* preset;
+				psy_TableIterator it;
 
-				preset = (Preset*) p->entry;
-				for (it = table_begin(&preset->parameters); 
-						!tableiterator_equal(&it, table_end());
-						tableiterator_inc(&it)) {
+				preset = (psy_audio_Preset*) p->entry;
+				for (it = psy_table_begin(&preset->parameters); 
+						!psy_tableiterator_equal(&it, psy_table_end());
+						psy_tableiterator_inc(&it)) {
 					self->machine->vtable->parametertweak(self->machine,
-						tableiterator_key(&it),
-						(uintptr_t)tableiterator_value(&it));
+						psy_tableiterator_key(&it),
+						(uintptr_t)psy_tableiterator_value(&it));
 				}		
 				break;
 			}

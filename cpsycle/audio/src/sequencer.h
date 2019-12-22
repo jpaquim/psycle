@@ -40,8 +40,8 @@ typedef struct {
 } SequenceRowDelay;
 
 typedef struct {
-	Sequence* sequence;
-	Machines* machines;
+	psy_audio_Sequence* sequence;
+	psy_audio_Machines* machines;
 	psy_dsp_beat_t bpm;
 	unsigned int samplerate;
 	psy_dsp_beat_t beatsprosample;	
@@ -50,49 +50,49 @@ typedef struct {
 	int playing;
 	psy_dsp_beat_t position;	
 	psy_dsp_beat_t window;	
-	List* currtracks;	
-	List* events;	
-	List* delayedevents;
-	List* inputevents;	
+	psy_List* currtracks;	
+	psy_List* events;	
+	psy_List* delayedevents;
+	psy_List* inputevents;	
 	SequencerPlayMode mode;	
 	int looping;	
 	psy_dsp_beat_t linetickcount;
 	SequencerJump jump;
 	SequenceRowDelay rowdelay;
 	SequencerLoop loop;
-	Table lastmachine;
-} Sequencer;
+	psy_Table lastmachine;
+} psy_audio_Sequencer;
 
-void sequencer_init(Sequencer*, Sequence*, Machines*);
-void sequencer_dispose(Sequencer*);
-void sequencer_reset(Sequencer*, Sequence*, Machines*);
-void sequencer_frametick(Sequencer*, unsigned int numsamples);
-void sequencer_tick(Sequencer*, psy_dsp_beat_t offset);
-void sequencer_linetick(Sequencer*);
-void sequencer_setposition(Sequencer*, psy_dsp_beat_t position);
-psy_dsp_beat_t sequencer_position(Sequencer*);
-void sequencer_start(Sequencer*);
-void sequencer_stop(Sequencer*);
-List* sequencer_tickevents(Sequencer*);
-List* sequencer_machinetickevents(Sequencer*, size_t slot);
-List* sequencer_timedevents(Sequencer*, size_t slot, unsigned int amount);
-void sequencer_append(Sequencer*, List* events);
-void sequencer_setsamplerate(Sequencer*, unsigned int samplerate);
-unsigned int sequencer_samplerate(Sequencer*);
-void sequencer_setbpm(Sequencer*, psy_dsp_beat_t bpm);
-psy_dsp_beat_t sequencer_bpm(Sequencer*);
-void sequencer_setlpb(Sequencer*, uintptr_t lpb);
-uintptr_t sequencer_lpb(Sequencer*);
-unsigned int sequencer_frames(Sequencer*, psy_dsp_beat_t offset);
-psy_dsp_beat_t sequencer_frametooffset(Sequencer*, int numsamples);
-int sequencer_playing(Sequencer*);
-void sequencer_addinputevent(Sequencer*, const PatternEvent*, uintptr_t track);
-void sequencer_recordinputevent(Sequencer*, const PatternEvent*,
+void sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*, psy_audio_Machines*);
+void sequencer_dispose(psy_audio_Sequencer*);
+void sequencer_reset(psy_audio_Sequencer*, psy_audio_Sequence*, psy_audio_Machines*);
+void sequencer_frametick(psy_audio_Sequencer*, unsigned int numsamples);
+void sequencer_tick(psy_audio_Sequencer*, psy_dsp_beat_t offset);
+void sequencer_linetick(psy_audio_Sequencer*);
+void sequencer_setposition(psy_audio_Sequencer*, psy_dsp_beat_t position);
+psy_dsp_beat_t sequencer_position(psy_audio_Sequencer*);
+void sequencer_start(psy_audio_Sequencer*);
+void sequencer_stop(psy_audio_Sequencer*);
+psy_List* sequencer_tickevents(psy_audio_Sequencer*);
+psy_List* sequencer_machinetickevents(psy_audio_Sequencer*, size_t slot);
+psy_List* sequencer_timedevents(psy_audio_Sequencer*, size_t slot, unsigned int amount);
+void sequencer_append(psy_audio_Sequencer*, psy_List* events);
+void sequencer_setsamplerate(psy_audio_Sequencer*, unsigned int samplerate);
+unsigned int sequencer_samplerate(psy_audio_Sequencer*);
+void sequencer_setbpm(psy_audio_Sequencer*, psy_dsp_beat_t bpm);
+psy_dsp_beat_t sequencer_bpm(psy_audio_Sequencer*);
+void sequencer_setlpb(psy_audio_Sequencer*, uintptr_t lpb);
+uintptr_t sequencer_lpb(psy_audio_Sequencer*);
+unsigned int sequencer_frames(psy_audio_Sequencer*, psy_dsp_beat_t offset);
+psy_dsp_beat_t sequencer_frametooffset(psy_audio_Sequencer*, int numsamples);
+int sequencer_playing(psy_audio_Sequencer*);
+void sequencer_addinputevent(psy_audio_Sequencer*, const psy_audio_PatternEvent*, uintptr_t track);
+void sequencer_recordinputevent(psy_audio_Sequencer*, const psy_audio_PatternEvent*,
 	unsigned int track, psy_dsp_beat_t playposition);
-void sequencer_setplaymode(Sequencer*, SequencerPlayMode);
-void sequencer_loop(Sequencer*);
-void sequencer_stoploop(Sequencer*);
-int sequencer_looping(Sequencer*);
-SequencerPlayMode sequencer_playmode(Sequencer*);
+void sequencer_setplaymode(psy_audio_Sequencer*, SequencerPlayMode);
+void sequencer_loop(psy_audio_Sequencer*);
+void sequencer_stoploop(psy_audio_Sequencer*);
+int sequencer_looping(psy_audio_Sequencer*);
+SequencerPlayMode sequencer_playmode(psy_audio_Sequencer*);
 
 #endif

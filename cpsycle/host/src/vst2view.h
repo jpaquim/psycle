@@ -11,9 +11,9 @@
 
 typedef struct {
    ui_component component;   
-   Machine* plugin;      
+   psy_audio_Machine* plugin;      
 } Vst2View;
 
-void InitVst2View(Vst2View*, ui_component* parent, Machine*);
+void InitVst2View(Vst2View*, ui_component* parent, psy_audio_Machine*);
 
 #endif

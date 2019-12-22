@@ -54,19 +54,19 @@ void tabbar_init(TabBar* self, ui_component* parent)
 
 void OnDestroy(TabBar* self, ui_component* component)
 {	
-	List* p;	
+	psy_List* p;	
 
 	for (p = self->tabs; p != 0; p = p->next) {	
 		DisposeTab((Tab*)(p->entry));
 		free(p->entry);
 	}
-	list_free(self->tabs);
+	psy_list_free(self->tabs);
 	psy_signal_dispose(&self->signal_change);
 }
 
 void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 {	
-	List* tabs;
+	psy_List* tabs;
 	int c = 0;
 	int cpx = 0;
 	int cpy = 0;
@@ -155,7 +155,7 @@ void OnMouseDown(TabBar* self, ui_component* sender, MouseEvent* mouseevent)
 
 int tabhittest(TabBar* self, int x, int y) 
 {
-	List* tabs;	
+	psy_List* tabs;	
 	int rv = -1;
 	int c = 0;
 	int cpx = 0;
@@ -256,7 +256,7 @@ Tab* tabbar_append(TabBar* self, const char* label)
 	if (self->tabs != 0) {
 		tab->margin.left = ui_value_makeew(1.5);
 	} 
-	list_append(&self->tabs, tab);	
+	psy_list_append(&self->tabs, tab);	
 	tab->size = ui_component_textsize(&self->component, tab->text);
 	tab->size.height = 20;
 
@@ -265,7 +265,7 @@ Tab* tabbar_append(TabBar* self, const char* label)
 
 void tabbar_settabmargin(TabBar* self, int tabindex, const ui_margin* margin)
 {
-	List* tabs;
+	psy_List* tabs;
 	int c = 0;
 	
 	if (!margin) {
@@ -288,7 +288,7 @@ void tabbar_settabmargin(TabBar* self, int tabindex, const ui_margin* margin)
 
 void onalign(TabBar* self, ui_component* sender)
 {
-	List* p;
+	psy_List* p;
 	
 	for (p = self->tabs; p != 0; p = p->next) {
 		Tab* tab;
@@ -303,7 +303,7 @@ void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, ui_size
 	if (rv) {
 		ui_size size;
 		ui_textmetric tm;
-		List* tabs;	
+		psy_List* tabs;	
 		int cpx = 0;
 		int cpy = 0;
 		int cpxmax = 0;
@@ -373,7 +373,7 @@ void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, ui_size
 Tab* tabbar_tab(TabBar* self, int tabindex)
 {
 	Tab* rv = 0;
-	List* p;
+	psy_List* p;
 	int c = 0;
 	
 	for (p = self->tabs; p != 0 && c < tabindex; p = p->next, ++c);

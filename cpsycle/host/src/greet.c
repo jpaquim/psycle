@@ -69,7 +69,7 @@ void Build(Greet* self)
 	AddString(self, "dj_d [Beta testing]");
 	AddString(self, "DJMirage");
 //	AddString(self, "Drax_D [for asking to be here ;D]");
-	AddString(self, "Druttis [Machines]");
+	AddString(self, "Druttis [psy_audio_Machines]");
 	AddString(self, "Erodix");
 //	AddString(self, "Felix Kaplan / Spirit Of India");
 //	AddString(self, "Felix Petrescu 'WakaX'");
@@ -84,7 +84,7 @@ void Build(Greet* self)
 	AddString(self, "LegoStar [asio]");
 //	AddString(self, "Loby [for being away]");
 	AddString(self, "Pikari");
-	AddString(self, "pooplog [Machines + Coding]");
+	AddString(self, "pooplog [psy_audio_Machines + Coding]");
 	AddString(self, "sampler");
 	AddString(self, "[SAS] SOLARiS");
 	AddString(self, "hugo Vinagre [Extreme testing]");

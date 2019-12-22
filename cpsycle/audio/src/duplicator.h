@@ -10,14 +10,14 @@
 #define NUMMACHINES 8
 
 typedef struct {
-	CustomMachine custommachine;
+	psy_audio_CustomMachine custommachine;
 	short macoutput[NUMMACHINES];
 	short noteoffset[NUMMACHINES];
 	int isticking;
-	DuplicatorMap map;	
-} Duplicator;
+	psy_audio_DuplicatorMap map;	
+} psy_audio_Duplicator;
 
-void duplicator_init(Duplicator*, MachineCallback);
-const MachineInfo* duplicator_info(void);
+void duplicator_init(psy_audio_Duplicator*, MachineCallback);
+const psy_audio_MachineInfo* duplicator_info(void);
 
 #endif

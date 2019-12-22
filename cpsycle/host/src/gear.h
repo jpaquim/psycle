@@ -35,7 +35,7 @@ typedef struct {
 	InstrumentsBox instrumentsbox;
 	SamplesBox samplesbox;	
 	GearButtons buttons;	
-	Machines* machines;
+	psy_audio_Machines* machines;
 	Workspace* workspace;
 } Gear;
 

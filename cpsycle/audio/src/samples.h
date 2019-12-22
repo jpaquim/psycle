@@ -19,23 +19,23 @@ SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot);
 
 typedef struct {
 	char* name;
-	Table container;
+	psy_Table container;
 } SamplesGroup;
 
-typedef struct Samples {
-	Table groups;
+typedef struct psy_audio_Samples {
+	psy_Table groups;
 	psy_Signal signal_insert;
 	psy_Signal signal_removed;
-} Samples;
+} psy_audio_Samples;
 
-void samples_init(Samples*);
-void samples_dispose(Samples*);
-void samples_insert(Samples*, Sample* sample, SampleIndex);
-void samples_remove(Samples*, SampleIndex);
-Sample* samples_at(Samples*, SampleIndex);
-uintptr_t samples_groupsize(Samples*);
+void samples_init(psy_audio_Samples*);
+void samples_dispose(psy_audio_Samples*);
+void samples_insert(psy_audio_Samples*, psy_audio_Sample* sample, SampleIndex);
+void samples_remove(psy_audio_Samples*, SampleIndex);
+psy_audio_Sample* samples_at(psy_audio_Samples*, SampleIndex);
+uintptr_t samples_groupsize(psy_audio_Samples*);
 
-TableIterator samples_begin(Samples*);
-TableIterator samples_groupbegin(Samples*, uintptr_t slot);
+psy_TableIterator samples_begin(psy_audio_Samples*);
+psy_TableIterator samples_groupbegin(psy_audio_Samples*, uintptr_t slot);
 
 #endif

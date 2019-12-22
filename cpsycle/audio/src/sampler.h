@@ -34,32 +34,32 @@ typedef enum
 InterpolationType;
 
 typedef struct {
-	struct Sampler* sampler;
-	Instrument* instrument;
-	Samples* samples;
-	ADSR env;
-	ADSR filterenv;
-	MultiFilter filter_l;
-	MultiFilter filter_r;
-	List* positions;	
+	struct psy_audio_Sampler* sampler;
+	psy_audio_Instrument* instrument;
+	psy_audio_Samples* samples;
+	psy_dsp_ADSR env;
+	psy_dsp_ADSR filterenv;
+	psy_dsp_MultiFilter filter_l;
+	psy_dsp_MultiFilter filter_r;
+	psy_List* positions;	
 	uintptr_t channel;
 	psy_dsp_amp_t vol;
 	psy_dsp_amp_t pan;
 	int usedefaultvolume;
 } Voice;
 
-typedef struct Sampler {
-	CustomMachine custommachine;		
-	List* voices;
+typedef struct psy_audio_Sampler {
+	psy_audio_CustomMachine custommachine;		
+	psy_List* voices;
 	uintptr_t numvoices;
 	int resamplingmethod;
 	int defaultspeed;	
-	Table lastinst;
+	psy_Table lastinst;
 	int maxvolume; // psycle 0CFF, xm 0C80
-} Sampler;
+} psy_audio_Sampler;
 
-void sampler_init(Sampler*, MachineCallback);
+void sampler_init(psy_audio_Sampler*, MachineCallback);
 
-const MachineInfo* sampler_info(void);
+const psy_audio_MachineInfo* sampler_info(void);
 
 #endif

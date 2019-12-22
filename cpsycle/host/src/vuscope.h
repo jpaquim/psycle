@@ -9,7 +9,7 @@
 
 typedef struct {	
 	ui_component component;
-	Wire wire;
+	psy_audio_Wire wire;
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
 	float invol;
@@ -24,7 +24,7 @@ typedef struct {
 	Workspace* workspace;	
 } VuScope;
 
-void vuscope_init(VuScope*, ui_component* parent, Wire wire, Workspace*);
+void vuscope_init(VuScope*, ui_component* parent, psy_audio_Wire wire, Workspace*);
 void vuscope_stop(VuScope*);
 
 #endif

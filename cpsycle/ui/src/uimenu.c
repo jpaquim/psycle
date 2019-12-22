@@ -6,12 +6,12 @@
 #include "uimenu.h"
 #include "hashtbl.h"
 
-Table menumap;
+psy_Table menumap;
 static int id = 40000;
 
 void ui_menu_setup(void)
 {
-	table_init(&menumap);
+	psy_table_init(&menumap);
 }
 
 void ui_menu_init(ui_menu* menu, char* label, void (*execute)(ui_menu*))
@@ -29,7 +29,7 @@ void ui_menu_append(ui_menu* self, ui_menu* child, int popup)
 		AppendMenu(self->hmenu, MF_POPUP, (UINT_PTR)child->hmenu, child->label);		
 	} else {
 		AppendMenu(self->hmenu, MF_STRING, id, child->label);
-		table_insert(&menumap, id, child);
+		psy_table_insert(&menumap, id, child);
 		++id;
 	}
 }

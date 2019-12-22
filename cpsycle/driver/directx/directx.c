@@ -68,7 +68,7 @@ static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,vo
 static int driver_open(Driver*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
-static void driver_configure(Driver*, Properties*);
+static void driver_configure(Driver*, psy_Properties*);
 static unsigned int driver_samplerate(Driver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
@@ -173,50 +173,50 @@ int driver_dispose(Driver* driver)
 
 static void init_properties(Driver* self)
 {	
-	Properties* property;	
+	psy_Properties* property;	
 
-	self->properties = properties_create();
-	properties_sethint(
-		properties_append_string(self->properties, "name", "directsound"),
-		PROPERTY_HINT_READONLY);
-	properties_sethint(
-		properties_append_string(self->properties, "vendor", "Psycedelics"),
-		PROPERTY_HINT_READONLY);
-	properties_sethint(
-		properties_append_string(self->properties, "version", "1.0"),
-		PROPERTY_HINT_READONLY);
-	property = properties_append_choice(self->properties, "device", -1);	
-	properties_append_int(self->properties, "bitdepth", 16, 0, 32);
-	properties_append_int(self->properties, "samplerate", 44100, 0, 0);
-	properties_append_int(self->properties, "dither", 0, 0, 1);
-	properties_append_int(self->properties, "numbuf", 8, 6, 8);
-	properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
+	self->properties = psy_properties_create();
+	psy_properties_sethint(
+		psy_properties_append_string(self->properties, "name", "directsound"),
+		PSY_PROPERTY_HINT_READONLY);
+	psy_properties_sethint(
+		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
+		PSY_PROPERTY_HINT_READONLY);
+	psy_properties_sethint(
+		psy_properties_append_string(self->properties, "version", "1.0"),
+		PSY_PROPERTY_HINT_READONLY);
+	property = psy_properties_append_choice(self->properties, "device", -1);	
+	psy_properties_append_int(self->properties, "bitdepth", 16, 0, 32);
+	psy_properties_append_int(self->properties, "samplerate", 44100, 0, 0);
+	psy_properties_append_int(self->properties, "dither", 0, 0, 1);
+	psy_properties_append_int(self->properties, "numbuf", 8, 6, 8);
+	psy_properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
-void driver_configure(Driver* driver, Properties* config)
+void driver_configure(Driver* driver, psy_Properties* config)
 {
 	DXDriver* self;
-	Properties* property;
+	psy_Properties* property;
 
 	self = (DXDriver*) driver;
 	if (config) {
 		properties_free(self->driver.properties);
-		self->driver.properties = properties_clone(config);
+		self->driver.properties = psy_properties_clone(config);
 	} else {
-		property = properties_read(self->driver.properties, "bitdepth");
-		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+		property = psy_properties_read(self->driver.properties, "bitdepth");
+		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			self->_bitDepth = property->item.value.i;
 		}
-		property = properties_read(self->driver.properties, "samplerate");
-		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+		property = psy_properties_read(self->driver.properties, "samplerate");
+		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			self->_samplesPerSec = property->item.value.i;
 		}
-		property = properties_read(self->driver.properties, "numbuf");
-		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+		property = psy_properties_read(self->driver.properties, "numbuf");
+		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			self->_numBuffers = property->item.value.i;
 		}
-		property = properties_read(self->driver.properties, "numsamples");
-		if (property && property->item.typ == PROPERTY_TYP_INTEGER) {
+		property = psy_properties_read(self->driver.properties, "numsamples");
+		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			self->_bufferSize = property->item.value.i;
 		}
 	}
@@ -300,7 +300,7 @@ int driver_open(Driver* driver)
 	
 	if (FAILED(IDirectSound_CreateSoundBuffer(self->_pDs, &desc, &self->_pBuffer, NULL)))
 	{
-		self->error(1, "Failed to create DirectSound Buffer(s)");
+		self->error(1, "Failed to create DirectSound psy_audio_Buffer(s)");
 		IDirectSound_Release(self->_pDs);
 		self->_pDs = NULL;
 		return FALSE;
@@ -311,7 +311,7 @@ int driver_open(Driver* driver)
 		IDirectSoundBuffer_Stop(self->_pBuffer);
 		if (FAILED(IDirectSoundBuffer_SetFormat(self->_pBuffer, &format)))
 		{
-			self->error(1, "Failed to set DirectSound Buffer format");
+			self->error(1, "Failed to set DirectSound psy_audio_Buffer format");
 			IDirectSoundBuffer_Release(self->_pBuffer);
 			self->_pBuffer = NULL;
 			IDirectSound_Release(self->_pDs);
@@ -321,7 +321,7 @@ int driver_open(Driver* driver)
 		caps.dwSize = sizeof(caps);
 		if (FAILED(IDirectSoundBuffer_GetCaps(self->_pBuffer, &caps)))
 		{
-			self->error(1, "Failed to get DirectSound Buffer capabilities");
+			self->error(1, "Failed to get DirectSound psy_audio_Buffer capabilities");
 			IDirectSoundBuffer_Release(self->_pBuffer);
 			self->_pBuffer = NULL;
 			IDirectSound_Release(self->_pDs);
@@ -365,7 +365,7 @@ void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits,
 	} else {
 /*		wf->wFormatTag = WAVE_FORMAT_EXTENSIBLE;
 		wf.Format.cbSize = 0x16;
-				wf.Samples.wValidBitsPerSample  = validBits;
+				wf.psy_audio_Samples.wValidBitsPerSample  = validBits;
 				if(channels == 2) {
 					wf.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
 				}

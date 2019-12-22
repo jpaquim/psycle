@@ -10,9 +10,9 @@ static void samplesgroup_init(SamplesGroup*);
 static void samplesgroup_dispose(SamplesGroup*);
 static SamplesGroup* samplesgroup_alloc(void);
 static SamplesGroup* samplesgroup_allocinit(void);
-static void samplesgroup_insert(SamplesGroup*, Sample* sample, uintptr_t slot);
+static void samplesgroup_insert(SamplesGroup*, psy_audio_Sample* sample, uintptr_t slot);
 static void samplesgroup_remove(SamplesGroup*, uintptr_t slot);
-static Sample* samplesgroup_at(SamplesGroup*, uintptr_t slot);
+static psy_audio_Sample* samplesgroup_at(SamplesGroup*, uintptr_t slot);
 
 SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot)
 {
@@ -26,22 +26,22 @@ SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot)
 // SamplesGroup
 void samplesgroup_init(SamplesGroup* self)
 {
-	table_init(&self->container);	
+	psy_table_init(&self->container);	
 }
 
 void samplesgroup_dispose(SamplesGroup* self)
 {
-	TableIterator it;
+	psy_TableIterator it;
 
-	for (it = table_begin(&self->container);
-			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
-		Sample* sample;
+	for (it = psy_table_begin(&self->container);
+			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
+		psy_audio_Sample* sample;
 		
-		sample = (Sample*)tableiterator_value(&it);
+		sample = (psy_audio_Sample*)psy_tableiterator_value(&it);
 		sample_dispose(sample);
 		free(sample);
 	}
-	table_dispose(&self->container);
+	psy_table_dispose(&self->container);
 }
 
 SamplesGroup* samplesgroup_alloc(void)
@@ -60,69 +60,69 @@ SamplesGroup* samplesgroup_allocinit(void)
 	return rv;
 }
 
-void samplesgroup_insert(SamplesGroup* self, Sample* sample, uintptr_t slot)
+void samplesgroup_insert(SamplesGroup* self, psy_audio_Sample* sample, uintptr_t slot)
 {
 	if (sample) {		
-		table_insert(&self->container, slot, sample);
+		psy_table_insert(&self->container, slot, sample);
 	}
 }
 
 void samplesgroup_remove(SamplesGroup* self, uintptr_t slot)
 {
-	Sample* sample;
+	psy_audio_Sample* sample;
 	
-	sample = table_at(&self->container, slot);
+	sample = psy_table_at(&self->container, slot);
 	if (sample) {
-		table_remove(&self->container, slot);
+		psy_table_remove(&self->container, slot);
 		sample_dispose(sample);
 		free(sample);
 	}
 }
 
-Sample* samplesgroup_at(SamplesGroup* self, uintptr_t slot)
+psy_audio_Sample* samplesgroup_at(SamplesGroup* self, uintptr_t slot)
 {
-	return table_at(&self->container, slot);
+	return psy_table_at(&self->container, slot);
 }
 
 uintptr_t samplesgroup_size(SamplesGroup* self)
 {
-	return table_size(&self->container);
+	return psy_table_size(&self->container);
 }
 
-// Samples
-void samples_init(Samples* self)
+// psy_audio_Samples
+void samples_init(psy_audio_Samples* self)
 {
-	table_init(&self->groups);
+	psy_table_init(&self->groups);
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
 }
 
-void samples_dispose(Samples* self)
+void samples_dispose(psy_audio_Samples* self)
 {	
-	TableIterator it;
+	psy_TableIterator it;
 
-	for (it = table_begin(&self->groups);
-			!tableiterator_equal(&it, table_end()); tableiterator_inc(&it)) {
+	for (it = psy_table_begin(&self->groups);
+			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
 		SamplesGroup* group;
 		
-		group = (SamplesGroup*) tableiterator_value(&it);
+		group = (SamplesGroup*) psy_tableiterator_value(&it);
 		samplesgroup_dispose(group);
 		free(group);
 	}	
-	table_dispose(&self->groups);
+	psy_table_dispose(&self->groups);
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);
 }
 
-void samples_insert(Samples* self, Sample* sample, SampleIndex index)
+void samples_insert(psy_audio_Samples* self, psy_audio_Sample* sample, SampleIndex index)
 {
 	SamplesGroup* group;
 
-	group = table_at(&self->groups, index.slot);
+	group = psy_table_at(&self->groups, index.slot);
 	if (!group) {
 		group = samplesgroup_allocinit();
 		if (group) {
-			table_insert(&self->groups, index.slot, group);
+			psy_table_insert(&self->groups, index.slot, group);
 		}
 	}
 	if (group) {
@@ -131,15 +131,15 @@ void samples_insert(Samples* self, Sample* sample, SampleIndex index)
 	}
 }
 
-void samples_remove(Samples* self, SampleIndex index)
+void samples_remove(psy_audio_Samples* self, SampleIndex index)
 {
 	SamplesGroup* group;
 
-	group = table_at(&self->groups, index.slot);
+	group = psy_table_at(&self->groups, index.slot);
 	if (group) {
 		samplesgroup_remove(group, index.subslot);
 		if (samplesgroup_size(group) == 0) {
-			table_remove(&self->groups, index.slot);
+			psy_table_remove(&self->groups, index.slot);
 			samplesgroup_dispose(group);
 			free(group);
 			psy_signal_emit(&self->signal_removed, self, 1, &index);
@@ -147,34 +147,34 @@ void samples_remove(Samples* self, SampleIndex index)
 	}	
 }
 
-Sample* samples_at(Samples* self, SampleIndex index)
+psy_audio_Sample* samples_at(psy_audio_Samples* self, SampleIndex index)
 {
 	SamplesGroup* group;
 
-	group = table_at(&self->groups, index.slot);
+	group = psy_table_at(&self->groups, index.slot);
 	if (group) {
 		return samplesgroup_at(group, index.subslot);	
 	}
 	return 0;
 }
 
-uintptr_t samples_groupsize(Samples* self)
+uintptr_t samples_groupsize(psy_audio_Samples* self)
 {		
-	return table_size(&self->groups);
+	return psy_table_size(&self->groups);
 }
 
-TableIterator samples_begin(Samples* self)
+psy_TableIterator samples_begin(psy_audio_Samples* self)
 {
-	return table_begin(&self->groups);
+	return psy_table_begin(&self->groups);
 }
 
-TableIterator samples_groupbegin(Samples* self, uintptr_t slot)
+psy_TableIterator samples_groupbegin(psy_audio_Samples* self, uintptr_t slot)
 {
 	SamplesGroup* group;
 
-	group = table_at(&self->groups, slot);
+	group = psy_table_at(&self->groups, slot);
 	if (group) {
-		return table_begin(&group->container);
+		return psy_table_begin(&group->container);
 	}
 	return tableend;
 }

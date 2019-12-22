@@ -7,7 +7,7 @@
 #include <hashtbl.h>
 
 typedef struct {
-	Table map;	
+	psy_Table map;	
 } Inputs;
 
 void inputs_init(Inputs*);

@@ -14,7 +14,7 @@ typedef struct {
 } psy_Slot;
 
 typedef struct {
-	List* slots;	
+	psy_List* slots;	
 } psy_Signal;
 
 void psy_signal_init(psy_Signal*);

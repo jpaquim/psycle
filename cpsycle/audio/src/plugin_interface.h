@@ -44,7 +44,7 @@ typedef struct CMachineInfo {
 	short APIVersion;
 	/// plug version. Your machine version. Shown in Hexadecimal.
 	short PlugVersion;
-	/// Machine flags. Defines the type of machine
+	/// psy_audio_Machine flags. Defines the type of machine
 	int Flags;
 	/// number of parameters.
 	int numParameters;

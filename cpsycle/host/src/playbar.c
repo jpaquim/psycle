@@ -8,7 +8,7 @@
 
 #define TIMERID_PLAYBAR 400
 
-void playbar_initalign(PlayBar*);
+static void playbar_initalign(PlayBar*);
 static void onloopclicked(PlayBar*, ui_component* sender);
 static void onrecordnotesclicked(PlayBar*, ui_component* sender);
 static void onplayclicked(PlayBar*, ui_component* sender);
@@ -50,7 +50,7 @@ void playbar_initalign(PlayBar* self)
 		ui_value_makepx(0), ui_value_makepx(0));
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT, &margin));
 }
@@ -76,7 +76,7 @@ void onplayselclicked(PlayBar* self, ui_component* sender)
 
 void startplay(PlayBar* self)
 {
-	Sequence* sequence;
+	psy_audio_Sequence* sequence;
 	SequencePosition editposition;
 	SequenceEntry* entry;
 	

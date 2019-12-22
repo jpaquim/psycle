@@ -15,36 +15,36 @@
 #include <stdlib.h>
 #include <portable.h>
 
-static void generateaudio(Sampler*, BufferContext*);
-static void seqtick(Sampler*, int channel, const PatternEvent*);
-static const MachineInfo* info(Sampler*);
-static unsigned int numparametercols(Sampler*);
-static unsigned int numparameters(Sampler*);
-static int parametertype(Sampler* self, int par);
-static void parameterrange(Sampler*, int numparam, int* minval, int* maxval);
-static int parameterlabel(Sampler*, char* txt, int param);
-static int parametername(Sampler*, char* txt, int param);
-static void parametertweak(Sampler*, int par, int val);
-static int describevalue(Sampler*, char* txt, int param, int value);
-static int parametervalue(Sampler*, int param);
-static void dispose(Sampler*);
-static int alloc_voice(Sampler*);
-static void releasevoices(Sampler*, uintptr_t channel);
-static void removeunusedvoices(Sampler* self);
-static unsigned int numinputs(Sampler*);
-static unsigned int numoutputs(Sampler*);
-static void loadspecific(Sampler*, struct SongFile*, unsigned int slot);
-static void savespecific(Sampler*, struct SongFile*, unsigned int slot);
+static void generateaudio(psy_audio_Sampler*, psy_audio_BufferContext*);
+static void seqtick(psy_audio_Sampler*, int channel, const psy_audio_PatternEvent*);
+static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
+static unsigned int numparametercols(psy_audio_Sampler*);
+static unsigned int numparameters(psy_audio_Sampler*);
+static int parametertype(psy_audio_Sampler* self, int par);
+static void parameterrange(psy_audio_Sampler*, int numparam, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Sampler*, char* txt, int param);
+static int parametername(psy_audio_Sampler*, char* txt, int param);
+static void parametertweak(psy_audio_Sampler*, int par, int val);
+static int describevalue(psy_audio_Sampler*, char* txt, int param, int value);
+static int parametervalue(psy_audio_Sampler*, int param);
+static void dispose(psy_audio_Sampler*);
+static int alloc_voice(psy_audio_Sampler*);
+static void releasevoices(psy_audio_Sampler*, uintptr_t channel);
+static void removeunusedvoices(psy_audio_Sampler* self);
+static unsigned int numinputs(psy_audio_Sampler*);
+static unsigned int numoutputs(psy_audio_Sampler*);
+static void loadspecific(psy_audio_Sampler*, struct psy_audio_SongFile*, unsigned int slot);
+static void savespecific(psy_audio_Sampler*, struct psy_audio_SongFile*, unsigned int slot);
 
-static int currslot(Sampler*, unsigned int channel, const PatternEvent*);
+static int currslot(psy_audio_Sampler*, unsigned int channel, const psy_audio_PatternEvent*);
 
-static void voice_init(Voice*, Sampler*, Instrument*, uintptr_t channel,
-	unsigned int samplerate, Samples* samples);
+static void voice_init(Voice*, psy_audio_Sampler*, psy_audio_Instrument*, uintptr_t channel,
+	unsigned int samplerate, psy_audio_Samples* samples);
 static void voice_dispose(Voice*);
-static void voice_seqtick(Voice*, const PatternEvent*);
-static void voice_noteon(Voice*, const PatternEvent*);
-static void voice_noteoff(Voice*, const PatternEvent*);
-static void voice_work(Voice*, Buffer*, int numsamples);
+static void voice_seqtick(Voice*, const psy_audio_PatternEvent*);
+static void voice_noteon(Voice*, const psy_audio_PatternEvent*);
+static void voice_noteoff(Voice*, const psy_audio_PatternEvent*);
+static void voice_work(Voice*, psy_audio_Buffer*, int numsamples);
 static void voice_release(Voice*);
 static void voice_fastrelease(Voice*);
 static void voice_clearpositions(Voice*);
@@ -52,7 +52,7 @@ static void voice_clearpositions(Voice*);
 static int songtracks = 16;
 static const uint32_t SAMPLERVERSION = 0x00000002;
 
-static MachineInfo const MacInfo = {
+static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	GENERATOR | 32 | 64,
@@ -70,7 +70,7 @@ static MachineInfo const MacInfo = {
 	0
 };
 
-const MachineInfo* sampler_info(void)
+const psy_audio_MachineInfo* sampler_info(void)
 {
 	return &MacInfo;
 }
@@ -78,7 +78,7 @@ const MachineInfo* sampler_info(void)
 static MachineVtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(Sampler* self)
+static void vtable_init(psy_audio_Sampler* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;		
@@ -103,9 +103,9 @@ static void vtable_init(Sampler* self)
 	}
 }
 
-void sampler_init(Sampler* self, MachineCallback callback)
+void sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 {
-	Machine* base = &self->custommachine.machine;
+	psy_audio_Machine* base = &self->custommachine.machine;
 	
 	custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
@@ -115,13 +115,13 @@ void sampler_init(Sampler* self, MachineCallback callback)
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;	
 	self->maxvolume = 0xFF;
-	base->vtable->seteditname(base, "Sampler");
-	table_init(&self->lastinst);
+	base->vtable->seteditname(base, "psy_audio_Sampler");
+	psy_table_init(&self->lastinst);
 }
 
-void dispose(Sampler* self)
+void dispose(psy_audio_Sampler* self)
 {
-	List* p;
+	psy_List* p;
 	
 	for (p = self->voices; p != 0; p = p->next) {
 		Voice* voice;
@@ -130,14 +130,14 @@ void dispose(Sampler* self)
 		voice_dispose(voice);		
 		free(voice);
 	}
-	list_free(self->voices);
+	psy_list_free(self->voices);
 	self->voices = 0;
 	custommachine_dispose(&self->custommachine);
 }
 
-void generateaudio(Sampler* self, BufferContext* bc)
+void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 {	
-	List* p;
+	psy_List* p;
 	uintptr_t c = 0;
 
 	removeunusedvoices(self);
@@ -149,10 +149,10 @@ void generateaudio(Sampler* self, BufferContext* bc)
 	}
 }
 
-void seqtick(Sampler* self, int channel, const PatternEvent* event)
+void seqtick(psy_audio_Sampler* self, int channel, const psy_audio_PatternEvent* event)
 {	
-	Machine* base = (Machine*)self;
-	Instrument* instrument;
+	psy_audio_Machine* base = (psy_audio_Machine*)self;
+	psy_audio_Instrument* instrument;
 	int slot;
 		
 	slot = currslot(self, channel, event);
@@ -171,31 +171,31 @@ void seqtick(Sampler* self, int channel, const PatternEvent* event)
 				base->vtable->samplerate(base),
 				self->custommachine.machine.vtable->samples(
 				&self->custommachine.machine));
-			list_append(&self->voices, voice);
+			psy_list_append(&self->voices, voice);
 			voice_seqtick(voice, event);		
 		}
 	}
 }
 
-int currslot(Sampler* self, unsigned int channel, const PatternEvent* event)
+int currslot(psy_audio_Sampler* self, unsigned int channel, const psy_audio_PatternEvent* event)
 {
 	int rv;
 
 	if (event->inst != NOTECOMMANDS_EMPTY) {
-		table_insert(&self->lastinst, channel, (void*)event->inst);
+		psy_table_insert(&self->lastinst, channel, (void*)event->inst);
 		rv = event->inst;
 	} else
-	if (table_exists(&self->lastinst, channel)) {
-		rv = (int)(uintptr_t) table_at(&self->lastinst, channel);
+	if (psy_table_exists(&self->lastinst, channel)) {
+		rv = (int)(uintptr_t) psy_table_at(&self->lastinst, channel);
 	} else { 
 		rv = NOTECOMMANDS_EMPTY;
 	}
 	return rv;
 }
 
-void releasevoices(Sampler* self, uintptr_t channel)
+void releasevoices(psy_audio_Sampler* self, uintptr_t channel)
 {
-	List* p;
+	psy_List* p;
 	
 	for (p = self->voices; p != 0; p = p->next) {
 		Voice* voice;
@@ -207,10 +207,10 @@ void releasevoices(Sampler* self, uintptr_t channel)
 	}
 }
 
-void removeunusedvoices(Sampler* self)
+void removeunusedvoices(psy_audio_Sampler* self)
 {
-	List* p;
-	List* q;
+	psy_List* p;
+	psy_List* q;
 		
 	for (p = self->voices; p != 0; p = q) {
 		Voice* voice;
@@ -220,17 +220,17 @@ void removeunusedvoices(Sampler* self)
 		if (voice->env.stage == ENV_OFF) {
 			voice_dispose(voice);
 			free(voice);
-			list_remove(&self->voices, p);
+			psy_list_remove(&self->voices, p);
 		}			
 	}
 }
 
-const MachineInfo* info(Sampler* self)
+const psy_audio_MachineInfo* info(psy_audio_Sampler* self)
 {	
 	return &MacInfo;
 }
 
-void parametertweak(Sampler* self, int param, int value)
+void parametertweak(psy_audio_Sampler* self, int param, int value)
 {	
 	switch (param) {
 		case 0: self->numvoices = value; break;
@@ -242,7 +242,7 @@ void parametertweak(Sampler* self, int param, int value)
 	}
 }
 
-int describevalue(Sampler* self, char* txt, int param, int value)
+int describevalue(psy_audio_Sampler* self, char* txt, int param, int value)
 { 
 	if (param == 1) {
 		switch(value)
@@ -267,7 +267,7 @@ int describevalue(Sampler* self, char* txt, int param, int value)
 	return 0;
 }
 
-int parametervalue(Sampler* self, int param)
+int parametervalue(psy_audio_Sampler* self, int param)
 {	
 	switch (param) {
 		case 0: return self->numvoices; break;
@@ -280,22 +280,22 @@ int parametervalue(Sampler* self, int param)
 	return 0;
 }
 
-unsigned int numparameters(Sampler* self)
+unsigned int numparameters(psy_audio_Sampler* self)
 {
 	return 4;
 }
 
-unsigned int numparametercols(Sampler* self)
+unsigned int numparametercols(psy_audio_Sampler* self)
 {
 	return 4;
 }
 
-int parametertype(Sampler* self, int par)
+int parametertype(psy_audio_Sampler* self, int par)
 {
 	return MPF_STATE;
 }
 
-void parameterrange(Sampler* self, int param, int* minval, int* maxval)
+void parameterrange(psy_audio_Sampler* self, int param, int* minval, int* maxval)
 {
 	switch (param) {
 	case 0:
@@ -321,7 +321,7 @@ void parameterrange(Sampler* self, int param, int* minval, int* maxval)
 	}
 }
 
-int parameterlabel(Sampler* self, char* txt, int param)
+int parameterlabel(psy_audio_Sampler* self, char* txt, int param)
 {
 	int rv = 1;
 	switch (param) {
@@ -345,7 +345,7 @@ int parameterlabel(Sampler* self, char* txt, int param)
 	return rv;
 }
 
-int parametername(Sampler* self, char* txt, int param)
+int parametername(psy_audio_Sampler* self, char* txt, int param)
 {
 	int rv = 1;
 	switch (param) {
@@ -369,17 +369,17 @@ int parametername(Sampler* self, char* txt, int param)
 	return rv;
 }
 
-unsigned int numinputs(Sampler* self)
+unsigned int numinputs(psy_audio_Sampler* self)
 {
 	return 0;
 }
 
-unsigned int numoutputs(Sampler* self)
+unsigned int numoutputs(psy_audio_Sampler* self)
 {
 	return 2;
 }
 
-static void loadspecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
+static void loadspecific(psy_audio_Sampler* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {
 	//Old version had default C4 as false
 	// DefaultC4(false);
@@ -420,7 +420,7 @@ static void loadspecific(Sampler* self, struct SongFile* songfile, unsigned int 
 	}	
 }
 
-void savespecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
+void savespecific(psy_audio_Sampler* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {
 	uint32_t temp;
 	uint32_t size = 3 * sizeof(temp) + 2 * sizeof(unsigned char);
@@ -448,8 +448,8 @@ void savespecific(Sampler* self, struct SongFile* songfile, unsigned int slot)
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
 }
 
-void voice_init(Voice* self, Sampler* sampler, Instrument* instrument,
-	uintptr_t channel, unsigned int samplerate, Samples* samples) 
+void voice_init(Voice* self, psy_audio_Sampler* sampler, psy_audio_Instrument* instrument,
+	uintptr_t channel, unsigned int samplerate, psy_audio_Samples* samples) 
 {	
 	self->sampler = sampler;
 	self->samples = samples;
@@ -460,34 +460,34 @@ void voice_init(Voice* self, Sampler* sampler, Instrument* instrument,
 	self->pan = 0.5f;
 	self->positions = 0;
 	if (instrument) {
-		adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
-		adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
+		psy_dsp_adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
+		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
 	} else {
-		adsr_initdefault(&self->env, samplerate);
-		adsr_initdefault(&self->filterenv, samplerate);
+		psy_dsp_adsr_initdefault(&self->env, samplerate);
+		psy_dsp_adsr_initdefault(&self->filterenv, samplerate);
 	}	
-	multifilter_init(&self->filter_l);
-	multifilter_init(&self->filter_r);
+	psy_dsp_multifilter_init(&self->filter_l);
+	psy_dsp_multifilter_init(&self->filter_r);
 	if (instrument) {
-		((Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l.filter, 
+		((psy_dsp_Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l.filter, 
 			self->instrument->filtercutoff);
-		((Filter*)&self->filter_r)->vtable->setcutoff(&self->filter_r.filter,
+		((psy_dsp_Filter*)&self->filter_r)->vtable->setcutoff(&self->filter_r.filter,
 			self->instrument->filtercutoff);	
-		((Filter*)&self->filter_l)->vtable->setressonance(&self->filter_l.filter, 
+		((psy_dsp_Filter*)&self->filter_l)->vtable->setressonance(&self->filter_l.filter, 
 			self->instrument->filterres);
-		((Filter*)&self->filter_r)->vtable->setressonance(&self->filter_r.filter,
+		((psy_dsp_Filter*)&self->filter_r)->vtable->setressonance(&self->filter_r.filter,
 			self->instrument->filterres);
-		multifilter_settype(&self->filter_l, instrument->filtertype);
-		multifilter_settype(&self->filter_r, instrument->filtertype);
+		psy_dsp_multifilter_settype(&self->filter_l, instrument->filtertype);
+		psy_dsp_multifilter_settype(&self->filter_r, instrument->filtertype);
 	}
 }
 
 void voice_reset(Voice* self)
 {
-	adsr_reset(&self->env);
-	adsr_reset(&self->filterenv);
-	((Filter*)(&self->filter_r))->vtable->reset(&self->filter_l.filter);
-	((Filter*)(&self->filter_r))->vtable->reset(&self->filter_r.filter);	
+	psy_dsp_adsr_reset(&self->env);
+	psy_dsp_adsr_reset(&self->filterenv);
+	((psy_dsp_Filter*)(&self->filter_r))->vtable->reset(&self->filter_l.filter);
+	((psy_dsp_Filter*)(&self->filter_r))->vtable->reset(&self->filter_r.filter);	
 }
 
 void voice_dispose(Voice* self)
@@ -496,7 +496,7 @@ void voice_dispose(Voice* self)
 	self->positions = 0;	
 }
 
-void voice_seqtick(Voice* self, const PatternEvent* event)
+void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 {	
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
 		 self->usedefaultvolume = 0;
@@ -514,27 +514,27 @@ void voice_seqtick(Voice* self, const PatternEvent* event)
 	}
 }
 
-void voice_noteon(Voice* self, const PatternEvent* event)
+void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
 {	
-	Sample* sample;		
+	psy_audio_Sample* sample;		
 	int baseC = 48;
-	List* entries;
-	List* p;
+	psy_List* entries;
+	psy_List* p;
 						
 	voice_clearpositions(self);
 	entries = instrument_entriesintersect(self->instrument,
 		event->note, 127);
 	for (p = entries; p != 0; p = p->next) {
-		InstrumentEntry* entry;
+		psy_audio_InstrumentEntry* entry;
 		
-		entry = (InstrumentEntry*) p->entry;
+		entry = (psy_audio_InstrumentEntry*) p->entry;
 		sample = samples_at(self->samples, entry->sampleindex);
 		if (sample) {
 			SampleIterator* iterator;
 
 			iterator = malloc(sizeof(SampleIterator));
 			*iterator = sample_begin(sample);
-			list_append(&self->positions, iterator);
+			psy_list_append(&self->positions, iterator);
 
 			double_setvalue(&iterator->speed,
 				pow(2.0f,
@@ -543,41 +543,41 @@ void voice_noteon(Voice* self, const PatternEvent* event)
 					((psy_dsp_beat_t)sample->samplerate / 44100));
 		}
 	}		
-	list_free(entries);	
+	psy_list_free(entries);	
 	if (self->positions) {
-		adsr_start(&self->env);
-		adsr_start(&self->filterenv);
+		psy_dsp_adsr_start(&self->env);
+		psy_dsp_adsr_start(&self->filterenv);
 	}
 }
 
 void voice_clearpositions(Voice* self)
 {
-	List* p;
+	psy_List* p;
 
 	for (p = self->positions; p != 0; p = p->next) {
 		free(p->entry);
 	}
-	list_free(self->positions);
+	psy_list_free(self->positions);
 	self->positions = 0;
 }
 
 
-void voice_noteoff(Voice* self, const PatternEvent* event)
+void voice_noteoff(Voice* self, const psy_audio_PatternEvent* event)
 {
-	adsr_release(&self->env);
-	adsr_release(&self->filterenv);
+	psy_dsp_adsr_release(&self->env);
+	psy_dsp_adsr_release(&self->filterenv);
 }
 
-void voice_work(Voice* self, Buffer* output, int numsamples)
+void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 {		
 	if (self->positions && self->env.stage != ENV_OFF) {
-		List* p;
+		psy_List* p;
 		psy_dsp_amp_t* env;
 		int i;
 
 		env = malloc(numsamples * sizeof(psy_dsp_amp_t));
 		for (i = 0; i < numsamples; ++i) {
-			adsr_tick(&self->env);
+			psy_dsp_adsr_tick(&self->env);
 			env[i] = self->env.value;
 		}
 		for (p = self->positions; p != 0; p = p->next) {
@@ -618,29 +618,29 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 					frame = sampleiterator_frameposition(position);
 					val = src[frame];
 					if (c == 0) {
-						if (multifilter_type(&self->filter_l) != F_NONE) {
-							((Filter*)&self->filter_l)->vtable->setcutoff(
+						if (psy_dsp_multifilter_type(&self->filter_l) != F_NONE) {
+							((psy_dsp_Filter*)&self->filter_l)->vtable->setcutoff(
 								&self->filter_l.filter,
 								self->filterenv.value);
-							val = ((Filter*)&self->filter_l)->vtable->work(
+							val = ((psy_dsp_Filter*)&self->filter_l)->vtable->work(
 								&self->filter_l.filter,
 								val);
 						}
 					} else
 					if (c == 1) {
-						if (multifilter_type(&self->filter_r) != F_NONE) {
-							((Filter*)&self->filter_r)->vtable->setcutoff(
+						if (psy_dsp_multifilter_type(&self->filter_r) != F_NONE) {
+							((psy_dsp_Filter*)&self->filter_r)->vtable->setcutoff(
 								&self->filter_r.filter,
 								self->filterenv.value);
-							val = ((Filter*)&self->filter_r)->vtable->work(
+							val = ((psy_dsp_Filter*)&self->filter_r)->vtable->work(
 								&self->filter_r.filter,
 								val);
 						}
 					}								
 					dst[i] += val * env[i];					
 				}				
-				if (multifilter_type(&self->filter_l) != F_NONE) {
-					adsr_tick(&self->filterenv);
+				if (psy_dsp_multifilter_type(&self->filter_l) != F_NONE) {
+					psy_dsp_adsr_tick(&self->filterenv);
 				}			
 				if (!sampleiterator_inc(position)) {			
 					voice_reset(self);					
@@ -666,12 +666,12 @@ void voice_work(Voice* self, Buffer* output, int numsamples)
 
 void voice_release(Voice* self)
 {
-	adsr_release(&self->env);	
-	adsr_release(&self->filterenv);
+	psy_dsp_adsr_release(&self->env);	
+	psy_dsp_adsr_release(&self->filterenv);
 }
 
 void voice_fastrelease(Voice* self)
 {
-	adsr_release(&self->env);	
-	adsr_release(&self->filterenv);
+	psy_dsp_adsr_release(&self->env);	
+	psy_dsp_adsr_release(&self->filterenv);
 }

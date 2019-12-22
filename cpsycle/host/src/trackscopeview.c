@@ -76,9 +76,9 @@ void trackscopeview_drawtrack(TrackScopeView* self, ui_graphics* g, int x, int y
 	uintptr_t lastmachine;
 	char text[40];
 
-	if (table_exists(&self->workspace->player.sequencer.lastmachine, track)) {
+	if (psy_table_exists(&self->workspace->player.sequencer.lastmachine, track)) {
 		lastmachine = (uintptr_t)
-			table_at(&self->workspace->player.sequencer.lastmachine, track);	
+			psy_table_at(&self->workspace->player.sequencer.lastmachine, track);	
 	} else {
 		lastmachine = NOMACHINE_INDEX;
 	}
@@ -90,13 +90,13 @@ void trackscopeview_drawtrack(TrackScopeView* self, ui_graphics* g, int x, int y
 	}
 	ui_setcolor(g, 0x00888888);
 	if (self->workspace->song) {
-		Machine* machine;
+		psy_audio_Machine* machine;
 		int centery;
 
 		centery = height / 2 + y;
 		machine = machines_at(&self->workspace->song->machines, lastmachine);
 		if (machine) {
-			Buffer* memory;
+			psy_audio_Buffer* memory;
 			
 			memory = machine->vtable->buffermemory(machine);
 			if (memory) {

@@ -7,11 +7,11 @@
 #include "custommachine.h"
 
 typedef struct {
-	CustomMachine custommachine;
+	psy_audio_CustomMachine custommachine;
 	int mode;
-} DummyMachine;
+} psy_audio_DummyMachine;
 
-void dummymachine_init(DummyMachine* self, MachineCallback);
-const MachineInfo* dummymachine_info(void);
+void dummymachine_init(psy_audio_DummyMachine* self, MachineCallback);
+const psy_audio_MachineInfo* dummymachine_info(void);
 
 #endif

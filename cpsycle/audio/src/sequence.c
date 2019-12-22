@@ -11,10 +11,10 @@ static sequenceentryid = 1;
 static void sequenceselection_addeditposition(SequenceSelection*);
 static PatternNode* SequenceTrackIterator_next(SequenceTrackIterator*);
 static void SequenceTrackIterator_unget(SequenceTrackIterator*);
-static void sequence_reposition(Sequence* self, SequenceTrack*);
-static SequenceTrackIterator sequence_makeiterator(Sequence*, List* entries);
+static void sequence_reposition(psy_audio_Sequence* self, SequenceTrack*);
+static SequenceTrackIterator sequence_makeiterator(psy_audio_Sequence*, psy_List* entries);
 
-void sequenceselection_init(SequenceSelection* self, Sequence* sequence)
+void sequenceselection_init(SequenceSelection* self, psy_audio_Sequence* sequence)
 {
 	self->sequence = sequence;
 	self->entries = 0;
@@ -31,7 +31,7 @@ void sequenceselection_init(SequenceSelection* self, Sequence* sequence)
 void sequenceselection_addeditposition(SequenceSelection* self)
 {						
 	if (self->editposition.trackposition.tracknode) {				
-		list_append(&self->entries, 
+		psy_list_append(&self->entries, 
 			self->editposition.trackposition.tracknode->entry);	
 	}
 	sequence_setplayselection(self->sequence, self);
@@ -46,31 +46,31 @@ void sequenceselection_dispose(SequenceSelection* self)
 void sequenceselection_seteditposition(SequenceSelection* self,
 	SequencePosition position)
 {
-	List* p;
+	psy_List* p;
 	int append = 1;
 
 	if (self->selectionmode == SELECTIONMODE_SINGLE) {
-		list_free(self->entries);
+		psy_list_free(self->entries);
 		self->entries = 0;
 	} else
-	if ((p = list_findentry(self->entries, 
+	if ((p = psy_list_findentry(self->entries, 
 			position.trackposition.tracknode->entry)) != 0) {
-		list_remove(&self->entries, p);
+		psy_list_remove(&self->entries, p);
 		append = 0;
 	}
 	self->editposition = position;
 	if (append) {
 		if (self->editposition.trackposition.tracknode) {
-			list_append(&self->entries,
+			psy_list_append(&self->entries,
 			self->editposition.trackposition.tracknode->entry);
 		}
 	} else {		
 		SequenceTrack* track;
-		List* p = list_last(self->entries);
+		psy_List* p = list_last(self->entries);
 			
 		if (p) {
 			track = (SequenceTrack*)position.track->entry;
-			p = list_findentry(track->entries, p->entry);			
+			p = psy_list_findentry(track->entries, p->entry);			
 			self->editposition = sequence_makeposition(self->sequence,
 				position.track,
 				p);
@@ -85,7 +85,7 @@ SequencePosition sequenceselection_editposition(SequenceSelection* self)
 }
 
 void sequenceselection_setsequence(SequenceSelection* self,
-	Sequence* sequence)
+	psy_audio_Sequence* sequence)
 {
 	self->sequence = sequence;
 	self->editposition = sequence_makeposition(self->sequence,
@@ -163,8 +163,8 @@ SequenceEntry* sequenceposition_entry(SequencePosition* position)
 
 void sequencetrack_dispose(SequenceTrack* self)
 {
-	List* p;
-	List* next;
+	psy_List* p;
+	psy_List* next;
 
 	p = self->entries;
 	while (p) {
@@ -172,20 +172,20 @@ void sequencetrack_dispose(SequenceTrack* self)
 		free(p->entry);
 		p = next;
 	}
-	list_free(self->entries);
+	psy_list_free(self->entries);
 	self->entries = 0;
 }
 
-void sequence_init(Sequence* self, Patterns* patterns)
+void sequence_init(psy_audio_Sequence* self, psy_audio_Patterns* patterns)
 {
 	self->tracks = 0;
 	self->patterns = patterns;	
 }
 
-void sequence_dispose(Sequence* self)
+void sequence_dispose(psy_audio_Sequence* self)
 {
 	SequenceTracks* p;
-	List* next;
+	psy_List* next;
 
 	p = self->tracks;
 	while (p) {
@@ -194,14 +194,14 @@ void sequence_dispose(Sequence* self)
 		free(p->entry);
 		p = next;
 	}
-	list_free(self->tracks);	
+	psy_list_free(self->tracks);	
 }
 
 
-SequenceTrackNode* sequence_insert(Sequence* self, SequencePosition position,
+SequenceTrackNode* sequence_insert(psy_audio_Sequence* self, SequencePosition position,
 	int pattern)
 {		
-	List* rv = 0;
+	psy_List* rv = 0;
 	if (position.track) {
 		SequenceEntry* entry;
 		SequenceTrack* track;
@@ -210,19 +210,19 @@ SequenceTrackNode* sequence_insert(Sequence* self, SequencePosition position,
 		track = (SequenceTrack*) position.track->entry;						
 		if (track->entries) {		
 			if (position.trackposition.tracknode) {			
-				rv = list_insert(&track->entries, position.trackposition.tracknode,
+				rv = psy_list_insert(&track->entries, position.trackposition.tracknode,
 					entry);			
 				sequence_reposition(self, track);						
 			} 
 		} else {		
-			rv = track->entries = list_create(entry);		
+			rv = track->entries = psy_list_create(entry);		
 		}	
 		entry->node = rv;
 	}
 	return rv;
 }
 
-SequenceTrackNode* sequence_remove(Sequence* self, SequencePosition position)
+SequenceTrackNode* sequence_remove(psy_audio_Sequence* self, SequencePosition position)
 {					
 	SequenceTrackNode* rv = 0;
 	if (position.track) {
@@ -232,7 +232,7 @@ SequenceTrackNode* sequence_remove(Sequence* self, SequencePosition position)
 		track = (SequenceTrack*)position.track->entry;		
 		if (position.trackposition.tracknode) {
 			entry = (SequenceEntry*)position.trackposition.tracknode->entry;
-			rv = list_remove(&track->entries, 
+			rv = psy_list_remove(&track->entries, 
 				position.trackposition.tracknode);
 			if (track->entries != 0) {
 				SequencePosition newposition;
@@ -245,7 +245,7 @@ SequenceTrackNode* sequence_remove(Sequence* self, SequencePosition position)
 	return rv;
 }
 
-void sequence_clear(Sequence* self)
+void sequence_clear(psy_audio_Sequence* self)
 {
 	SequenceTracks* p;	
 	
@@ -253,11 +253,11 @@ void sequence_clear(Sequence* self)
 		sequencetrack_dispose((SequenceTrack*)p->entry);
 		free(p->entry);
 	}
-	list_free(self->tracks);
+	psy_list_free(self->tracks);
 	self->tracks = 0;	
 }
 
-SequenceTrackIterator sequence_last(Sequence* self, List* tracknode)
+SequenceTrackIterator sequence_last(psy_audio_Sequence* self, psy_List* tracknode)
 {
 	SequenceTrackIterator p;
 	SequenceTrack* track;
@@ -273,7 +273,7 @@ SequenceTrackIterator sequence_last(Sequence* self, List* tracknode)
 	p.patternnode = 0;		
 	p.tracknode = track->entries->tail;
 	if (p.tracknode) {
-		Pattern* pattern;
+		psy_audio_Pattern* pattern;
 		SequenceEntry* entry = (SequenceEntry*) track->entries->tail->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
 		if (pattern) {
@@ -285,13 +285,13 @@ SequenceTrackIterator sequence_last(Sequence* self, List* tracknode)
 	return p;
 }
 
-void sequence_reposition(Sequence* self, SequenceTrack* track)
+void sequence_reposition(psy_audio_Sequence* self, SequenceTrack* track)
 {
 	psy_dsp_beat_t curroffset = 0.0f;	
-	List* p;	
+	psy_List* p;	
 			
 	for (p = track->entries; p != 0; p = p->next) {
-		Pattern* pattern;
+		psy_audio_Pattern* pattern;
 		SequenceEntry* entry = (SequenceEntry*) p->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
 		if (pattern) {
@@ -303,13 +303,13 @@ void sequence_reposition(Sequence* self, SequenceTrack* track)
 	}
 }
 
-unsigned int sequence_size(Sequence* self, List* tracknode)
+unsigned int sequence_size(psy_audio_Sequence* self, psy_List* tracknode)
 {	
 	unsigned int rv = 0;
 
 	if (tracknode) {
 		SequenceTrack* track;
-		List* p;
+		psy_List* p;
 
 		track = (SequenceTrack*)(tracknode->entry);
 		for (p = track->entries; p != 0; p = p->next, ++rv);
@@ -317,11 +317,11 @@ unsigned int sequence_size(Sequence* self, List* tracknode)
 	return rv;
 }
 
-SequencePosition sequence_at(Sequence* self, unsigned int trackindex,
+SequencePosition sequence_at(psy_audio_Sequence* self, unsigned int trackindex,
 	unsigned int position)
 {
 	SequencePosition rv;	
-	List* ptr;	
+	psy_List* ptr;	
 	unsigned int c = 0;	
 	SequenceTracks* ptracks;
 	SequenceTrack* track;
@@ -359,10 +359,10 @@ SequencePosition sequence_at(Sequence* self, unsigned int trackindex,
 	return rv;
 }
 
-List* sequenceentry_at_offset(Sequence* self, SequenceTracks* tracknode, psy_dsp_beat_t offset)
+psy_List* sequenceentry_at_offset(psy_audio_Sequence* self, SequenceTracks* tracknode, psy_dsp_beat_t offset)
 {
 	psy_dsp_beat_t curroffset = 0.0f;	
-	List* p = 0;
+	psy_List* p = 0;
 
 	if (tracknode) {		
 		SequenceTrack* track;
@@ -370,7 +370,7 @@ List* sequenceentry_at_offset(Sequence* self, SequenceTracks* tracknode, psy_dsp
 		track = (SequenceTrack*)tracknode->entry;
 		p = track->entries;	
 		while (p) {
-			Pattern* pattern;
+			psy_audio_Pattern* pattern;
 			SequenceEntry* entry = (SequenceEntry*) p->entry;
 			pattern = patterns_at(self->patterns, entry->pattern);
 			if (pattern) {
@@ -385,7 +385,7 @@ List* sequenceentry_at_offset(Sequence* self, SequenceTracks* tracknode, psy_dsp
 	return p;
 }
 
-SequenceTrackIterator sequence_begin(Sequence* self, List* track, psy_dsp_beat_t pos)
+SequenceTrackIterator sequence_begin(psy_audio_Sequence* self, psy_List* track, psy_dsp_beat_t pos)
 {		
 	SequenceTrackIterator rv;		
 	SequenceEntry* entry;	
@@ -393,7 +393,7 @@ SequenceTrackIterator sequence_begin(Sequence* self, List* track, psy_dsp_beat_t
 	rv.patterns = self->patterns;
 	rv.tracknode = sequenceentry_at_offset(self, track, pos);
 	if (rv.tracknode) {
-		Pattern* pattern;
+		psy_audio_Pattern* pattern;
 
 		entry = (SequenceEntry*) rv.tracknode->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
@@ -411,7 +411,7 @@ void sequencetrackiterator_inc(SequenceTrackIterator* self)
 		if (self->patternnode == NULL) {
 			if (self->tracknode->next) {
 				SequenceEntry* entry;
-				Pattern* pattern;
+				psy_audio_Pattern* pattern;
 				self->tracknode = self->tracknode->next;			
 				entry = (SequenceEntry*) self->tracknode->entry;
 				pattern = patterns_at(self->patterns, entry->pattern);
@@ -427,7 +427,7 @@ void sequencetrackiterator_incentry(SequenceTrackIterator* self)
 		self->tracknode = self->tracknode->next;
 		if (self->tracknode) {
 			SequenceEntry* entry;
-			Pattern* pattern;
+			psy_audio_Pattern* pattern;
 
 			entry = (SequenceEntry*) self->tracknode->entry;
 			pattern = patterns_at(self->patterns, entry->pattern);
@@ -444,7 +444,7 @@ void sequencetrackiterator_decentry(SequenceTrackIterator* self)
 		self->tracknode = self->tracknode->prev;
 		if (self->tracknode) {
 			SequenceEntry* entry;
-			Pattern* pattern;
+			psy_audio_Pattern* pattern;
 
 			entry = (SequenceEntry*) self->tracknode->entry;
 			pattern = patterns_at(self->patterns, entry->pattern);
@@ -455,10 +455,10 @@ void sequencetrackiterator_decentry(SequenceTrackIterator* self)
 	}
 }
 
-SequenceTrackIterator sequence_makeiterator(Sequence* self, List* entries)
+SequenceTrackIterator sequence_makeiterator(psy_audio_Sequence* self, psy_List* entries)
 {
 	SequenceTrackIterator rv;
-	Pattern* pPattern  = 0;	
+	psy_audio_Pattern* pPattern  = 0;	
 	
 	rv.patterns = self->patterns;
 	rv.tracknode = entries;
@@ -474,7 +474,7 @@ SequenceTrackIterator sequence_makeiterator(Sequence* self, List* entries)
 	return rv;
 }
 
-SequencePosition sequence_makeposition(Sequence* self, SequenceTracks* track, List* entries)
+SequencePosition sequence_makeposition(psy_audio_Sequence* self, SequenceTracks* track, psy_List* entries)
 {
 	SequencePosition rv;
 
@@ -483,7 +483,7 @@ SequencePosition sequence_makeposition(Sequence* self, SequenceTracks* track, Li
 	return rv;
 }
 
-SequencePosition sequence_positionfromid(Sequence* self, int id)
+SequencePosition sequence_positionfromid(psy_audio_Sequence* self, int id)
 {
 	SequencePosition rv;	
 	SequenceTracks* t;	
@@ -495,7 +495,7 @@ SequencePosition sequence_positionfromid(Sequence* self, int id)
 	t = self->tracks;
 	while (t) {
 		SequenceTrack* track;
-		List* p;
+		psy_List* p;
 
 		track = (SequenceTrack*)t->entry;
 		p = track->entries;
@@ -525,9 +525,9 @@ SequenceEntry* sequencetrackiterator_entry(SequenceTrackIterator* self)
 	return self->tracknode ? (SequenceEntry*) self->tracknode->entry : 0;
 }
 
-PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator* self)
+psy_audio_PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator* self)
 {
-	return self->patternnode ? (PatternEntry*)(self->patternnode)->entry : 0;
+	return self->patternnode ? (psy_audio_PatternEntry*)(self->patternnode)->entry : 0;
 }
 
 psy_dsp_beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
@@ -538,17 +538,17 @@ psy_dsp_beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
 		: 0.f;	
 }
 
-List* sequence_appendtrack(Sequence* self, SequenceTrack* track)
+psy_List* sequence_appendtrack(psy_audio_Sequence* self, SequenceTrack* track)
 {	
-	return list_append(&self->tracks, track);	
+	return psy_list_append(&self->tracks, track);	
 }
 
-List* sequence_removetrack(Sequence* self, SequenceTracks* tracknode)
+psy_List* sequence_removetrack(psy_audio_Sequence* self, SequenceTracks* tracknode)
 {		
-	return list_remove(&self->tracks, tracknode);
+	return psy_list_remove(&self->tracks, tracknode);
 }
 
-unsigned int sequence_sizetracks(Sequence* self)
+unsigned int sequence_sizetracks(psy_audio_Sequence* self)
 {
 	unsigned int c = 0;	
 	SequenceTracks* p;
@@ -557,7 +557,7 @@ unsigned int sequence_sizetracks(Sequence* self)
 	return c;
 }
 
-int sequence_patternused(Sequence* self, unsigned int patternslot)
+int sequence_patternused(psy_audio_Sequence* self, unsigned int patternslot)
 {
 	int rv = 0;
 	SequenceTracks* t;	
@@ -565,7 +565,7 @@ int sequence_patternused(Sequence* self, unsigned int patternslot)
 	t = self->tracks;
 	while (t) {
 		SequenceTrack* track;
-		List* p;
+		psy_List* p;
 
 		track = (SequenceTrack*)t->entry;
 		p = track->entries;
@@ -584,14 +584,14 @@ int sequence_patternused(Sequence* self, unsigned int patternslot)
 	return rv;
 }
 
-void sequence_setpatternslot(Sequence* self, SequencePosition position,
+void sequence_setpatternslot(psy_audio_Sequence* self, SequencePosition position,
 	unsigned int slot)
 {
 	SequenceEntry* entry;
 
 	entry = sequenceposition_entry(&position);
 	if (entry) {
-		Pattern* pattern;		
+		psy_audio_Pattern* pattern;		
 		
 		pattern = patterns_at(self->patterns, slot);
 		if (pattern == 0) {			
@@ -602,7 +602,7 @@ void sequence_setpatternslot(Sequence* self, SequencePosition position,
 	}
 }
 
-psy_dsp_beat_t sequence_duration(Sequence* self)
+psy_dsp_beat_t sequence_duration(psy_audio_Sequence* self)
 {	
 	SequenceTracks* t;
 	psy_dsp_beat_t duration = 0.f;
@@ -610,12 +610,12 @@ psy_dsp_beat_t sequence_duration(Sequence* self)
 	t = self->tracks;
 	while (t) {
 		SequenceTrack* track;
-		List* p;
+		psy_List* p;
 
 		track = (SequenceTrack*)t->entry;
 		p = track->entries;
 		if (p) {			
-			Pattern* pattern;
+			psy_audio_Pattern* pattern;
 			SequenceEntry* entry;
 
 			p = p->tail;
@@ -632,7 +632,7 @@ psy_dsp_beat_t sequence_duration(Sequence* self)
 	return duration;
 }
 
-unsigned int sequence_maxtracksize(Sequence* self)
+unsigned int sequence_maxtracksize(psy_audio_Sequence* self)
 {
 	unsigned int rv = 0;	
 	SequenceTracks* t;
@@ -648,9 +648,9 @@ unsigned int sequence_maxtracksize(Sequence* self)
 	return rv;
 }
 
-void sequence_setplayselection(Sequence* self, SequenceSelection* selection)
+void sequence_setplayselection(psy_audio_Sequence* self, SequenceSelection* selection)
 {
-	List* p;
+	psy_List* p;
 
 	sequence_clearplayselection(self);
 	for (p = selection->entries; p != 0; p = p->next) {
@@ -661,13 +661,13 @@ void sequence_setplayselection(Sequence* self, SequenceSelection* selection)
 	}
 }
 
-void sequence_clearplayselection(Sequence* self)
+void sequence_clearplayselection(psy_audio_Sequence* self)
 {
 	SequenceTracks* t;
 	
 	for (t = self->tracks; t != 0; t = t->next) {
 		SequenceTrack* track;
-		List* p;
+		psy_List* p;
 
 		track = t->entry;
 		for (p = track->entries; p != 0; p = p->next) {

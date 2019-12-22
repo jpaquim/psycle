@@ -14,7 +14,7 @@ typedef struct {
    ui_component component;   
    int cx;
    int cy;
-   Machine* machine;   
+   psy_audio_Machine* machine;   
    int numparams;
    int numparametercols;   
    int numrows;
@@ -25,7 +25,7 @@ typedef struct {
    Workspace* workspace;
 } ParamView;
 
-void InitParamView(ParamView*, ui_component* parent, Machine* machine,
+void InitParamView(ParamView*, ui_component* parent, psy_audio_Machine* machine,
 	Workspace*);
 void ParamViewSize(ParamView*, int* width, int* height);
 

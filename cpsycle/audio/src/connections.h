@@ -15,53 +15,52 @@
 typedef struct {
 	uintptr_t src;
 	uintptr_t dst;
-} PinConnection;
+} psy_audio_PinConnection;
 
 typedef struct {
 	uintptr_t slot;	
 	psy_dsp_amp_t volume;
-	List* mapping;
-} WireSocketEntry;
+	psy_List* mapping;
+} psy_audio_WireSocketEntry;
 
-typedef List WireSocket;
+typedef psy_List WireSocket;
 
 typedef struct {	
 	WireSocket* inputs;
 	WireSocket* outputs;
-} MachineSockets;
+} psy_audio_MachineSockets;
 
-void machinesockets_init(MachineSockets*);
-void machinesockets_dispose(MachineSockets*);
+void machinesockets_init(psy_audio_MachineSockets*);
+void machinesockets_dispose(psy_audio_MachineSockets*);
 
 WireSocket* connection_at(WireSocket*, uintptr_t slot);
 
 typedef struct {
 	uintptr_t src;
 	uintptr_t dst;
-} Wire;
+} psy_audio_Wire;
 
 typedef struct {
-	Table container;
-	Table sends;
+	psy_Table container;
+	psy_Table sends;
 	psy_Signal signal_connected;
 	psy_Signal signal_disconnected;
 	int filemode;
-} Connections;
+} psy_audio_Connections;
 
-void connections_init(Connections*);
-void connections_dispose(Connections*);
-MachineSockets* connections_initslot(Connections*, uintptr_t slot);
-MachineSockets* connections_at(Connections*, uintptr_t slot);
-int connections_connect(Connections*, uintptr_t outputslot, uintptr_t inputslot);
-void connections_disconnect(Connections*, uintptr_t outputslot, uintptr_t inputslot);
-int connections_connected(Connections*, uintptr_t outputslot, uintptr_t inputslot);
-void connections_disconnectall(Connections*, uintptr_t slot);
-void connections_setwirevolume(Connections*, uintptr_t outputslot, uintptr_t inputslot,
+void connections_init(psy_audio_Connections*);
+void connections_dispose(psy_audio_Connections*);
+psy_audio_MachineSockets* connections_initslot(psy_audio_Connections*, uintptr_t slot);
+psy_audio_MachineSockets* connections_at(psy_audio_Connections*, uintptr_t slot);
+int connections_connect(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+void connections_disconnect(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+int connections_connected(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+void connections_disconnectall(psy_audio_Connections*, uintptr_t slot);
+void connections_setwirevolume(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot,
 	psy_dsp_amp_t factor);
-psy_dsp_amp_t connections_wirevolume(Connections*, uintptr_t outputslot, 
+psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*, uintptr_t outputslot, 
 	uintptr_t inputslot);
-WireSocketEntry* connection_input(Connections* self, uintptr_t outputslot,
+psy_audio_WireSocketEntry* connection_input(psy_audio_Connections* self, uintptr_t outputslot,
 	uintptr_t inputslot);
-
 
 #endif

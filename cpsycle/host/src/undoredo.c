@@ -8,8 +8,8 @@
 
 static void clear_redo(UndoRedo*);
 static void clear_undo(UndoRedo*);
-static void clear_list(List* list);
-static Command* swap(List** first, List** second);
+static void clear_list(psy_List* list);
+static Command* swap(psy_List** first, psy_List** second);
 
 void undoredo_init(UndoRedo* self)
 {
@@ -43,14 +43,14 @@ void undoredo_redo(UndoRedo* self)
 	}	
 }
 
-Command* swap(List** first, List** second)
+Command* swap(psy_List** first, psy_List** second)
 {
 	Command* rv;
 
 	if (*first) {		
 		rv = (Command*)list_last(*first)->entry;
-		list_append(second, rv);
-		list_remove(first, list_last(*first));		
+		psy_list_append(second, rv);
+		psy_list_remove(first, list_last(*first));		
 	} else {
 		rv = 0;
 	}
@@ -59,7 +59,7 @@ Command* swap(List** first, List** second)
 
 void undoredo_execute(UndoRedo* self, Command* command)
 {	
-	list_append(&self->undo, command);	
+	psy_list_append(&self->undo, command);	
 	command->execute(command);
 	clear_redo(self);
 }
@@ -76,9 +76,9 @@ void clear_redo(UndoRedo* self)
 	self->redo = 0;
 }
 
-void clear_list(List* list)
+void clear_list(psy_List* list)
 {
-	List* p;
+	psy_List* p;
 
 	for (p = list; p != 0; p = p->next) {
 		Command* command;
@@ -87,5 +87,5 @@ void clear_list(List* list)
 		command->dispose(command);		
 		free(command);
 	}
-	list_free(list);	
+	psy_list_free(list);	
 }

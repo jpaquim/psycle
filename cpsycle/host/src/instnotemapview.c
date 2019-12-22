@@ -8,11 +8,11 @@
 
 static void instrumententryview_init(InstrumentEntryView*, ui_component* parent,
 	InstrumentParameterView*);
-static void instrumententryview_setinstrument(InstrumentEntryView*, Instrument*);
+static void instrumententryview_setinstrument(InstrumentEntryView*, psy_audio_Instrument*);
 static void instrumentnotemapview_setmetrics(InstrumentNoteMapView*,
 	InstrumentNoteMapMetrics);
 static void instrumentparameterview_setinstrument(InstrumentParameterView*,
-	Instrument*);
+	psy_audio_Instrument*);
 static void instrumententryview_ondraw(InstrumentEntryView*, ui_component* sender,
 	ui_graphics*);
 static void instrumententryview_onsize(InstrumentEntryView*, ui_component* sender, ui_size* size);
@@ -68,7 +68,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 }
 
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView* self,
-	Instrument* instrument)
+	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
 	instrumententryview_setinstrument(&self->entryview, instrument);
@@ -188,7 +188,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	ui_component_resize(&self->component, 100, 200);
 }
 
-void instrumententryview_setinstrument(InstrumentEntryView* self, Instrument* instrument)
+void instrumententryview_setinstrument(InstrumentEntryView* self, psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
 	ui_component_invalidate(&self->component);
@@ -221,7 +221,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, ui_component* sender,
 {	
 	if (self->instrument) {
 		int cpy = 0;
-		List* p;
+		psy_List* p;
 		ui_size size;
 		int keysize = self->metrics.keysize;
 		uintptr_t c = 0;
@@ -229,11 +229,11 @@ void instrumententryview_ondraw(InstrumentEntryView* self, ui_component* sender,
 
 		size = ui_component_size(&self->component);		
 		for (p = self->instrument->entries; p != 0; p = p->next, ++c) {
-			InstrumentEntry* entry;
+			psy_audio_InstrumentEntry* entry;
 			int startx;
 			int endx;			
 
-			entry = (InstrumentEntry*) p->entry;			
+			entry = (psy_audio_InstrumentEntry*) p->entry;			
 			startx = (int)(
 				(float) numwhitekey(entry->keyrange.low) / 
 					numwhitekey(NOTECOMMANDS_RELEASE) * width) +
@@ -280,7 +280,7 @@ void instrumententryview_adjustscroll(InstrumentEntryView* self)
 
 	size = ui_component_size(&self->component);
 	numentries = self->instrument
-		? list_size(instrument_entries(self->instrument))
+		? psy_list_size(instrument_entries(self->instrument))
 		: 0;	
 	visientries = size.height / (self->metrics.lineheight * 3);
 	vscrollmax = numentries < visientries ? 0 : numentries - visientries;
@@ -290,12 +290,12 @@ void instrumententryview_adjustscroll(InstrumentEntryView* self)
 void instrumententryview_onmousedown(InstrumentEntryView* self,
 	ui_component* sender, MouseEvent* ev)
 {
-	InstrumentEntry* entry;
+	psy_audio_InstrumentEntry* entry;
 	if (self->instrument) {
 		uintptr_t numentry;	
 
 		numentry = (ev->y - self->dy) / (self->metrics.lineheight * 3);
-		if (numentry < list_size(instrument_entries(self->instrument))) {
+		if (numentry < psy_list_size(instrument_entries(self->instrument))) {
 			self->selected = numentry;
 		} else {
 			self->selected = NOINSTRUMENT_INDEX;
@@ -324,7 +324,7 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 	ui_component* sender, MouseEvent* ev)
 {
 	if (self->dragmode != INSTVIEW_DRAG_NONE && self->instrument) {
-		InstrumentEntry* entry;
+		psy_audio_InstrumentEntry* entry;
 		
 		entry = instrument_entryat(self->instrument, self->selected);
 		if (entry) {
@@ -389,7 +389,7 @@ void instrumentparameterview_init(InstrumentParameterView* self,
 }
 
 void instrumentparameterview_setinstrument(InstrumentParameterView* self,
-		Instrument* instrument)
+		psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
 	ui_component_invalidate(&self->component);
@@ -400,7 +400,7 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 {	
 	if (self->instrument) {
 		int cpy = 0;
-		List* p;
+		psy_List* p;
 		ui_size size;
 		int keysize = self->metrics.keysize;
 		int width = keysize * numwhitekey(NOTECOMMANDS_RELEASE);		
@@ -410,11 +410,11 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 		ui_setbackgroundmode(g, TRANSPARENT);
 		ui_settextcolor(g, 0x00CACACA);
 		for (p = self->instrument->entries; p != 0; p = p->next) {
-			InstrumentEntry* entry;
+			psy_audio_InstrumentEntry* entry;
 			char text[40];
 
-			entry = (InstrumentEntry*) p->entry;
-			psy_snprintf(text, 40, "Sample %0X:%0X", entry->sampleindex.slot,
+			entry = (psy_audio_InstrumentEntry*) p->entry;
+			psy_snprintf(text, 40, "psy_audio_Sample %0X:%0X", entry->sampleindex.slot,
 				entry->sampleindex.subslot);
 			ui_textout(g, 0, cpy + self->dy, text, strlen(text));
 			psy_snprintf(text, 40, "Notes %.3d - %.3d", entry->keyrange.low,
@@ -443,7 +443,7 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	ui_button_settext(&self->add, "Add");
 	ui_button_init(&self->remove, &self->component);
 	ui_button_settext(&self->remove, "Remove");
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
 			&margin));

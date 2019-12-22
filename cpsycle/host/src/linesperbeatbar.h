@@ -15,11 +15,11 @@ typedef struct {
 	ui_label lpblabel;	
 	ui_button lessbutton;
 	ui_button morebutton;
-	Player* player;
+	psy_audio_Player* player;
 	unsigned int lpb;
 } LinesPerBeatBar;
 
 
-void InitLinesPerBeatBar(LinesPerBeatBar*, ui_component* parent,Player* player);
+void InitLinesPerBeatBar(LinesPerBeatBar*, ui_component* parent,psy_audio_Player* player);
 
 #endif

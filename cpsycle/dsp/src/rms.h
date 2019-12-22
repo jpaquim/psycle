@@ -10,25 +10,25 @@ typedef struct {
 	int count;
 	psy_dsp_big_amp_t AccumLeft, AccumRight;
 	psy_dsp_amp_t previousLeft, previousRight;
-} RMSData;
+} psy_dsp_RMSData;
 
-void rmsdata_init(RMSData*);
-void rmsdata_accumulate(RMSData*, const psy_dsp_amp_t* __restrict pSamplesL,
+void rmsdata_init(psy_dsp_RMSData*);
+void rmsdata_accumulate(psy_dsp_RMSData*, const psy_dsp_amp_t* __restrict pSamplesL,
 	const psy_dsp_amp_t* __restrict pSamplesR, int count);
 
-typedef struct RMSVol {
-	RMSData data;
+typedef struct psy_dsp_RMSVol {
+	psy_dsp_RMSData data;
 	psy_dsp_amp_t volume;
-} RMSVol;
+} psy_dsp_RMSVol;
 
-void rmsvol_init(RMSVol*);
-RMSVol* rmsvol_alloc(void);
-RMSVol* rmsvol_allocinit(void);
+void psy_dsp_rmsvol_init(psy_dsp_RMSVol*);
+psy_dsp_RMSVol* psy_dsp_rmsvol_alloc(void);
+psy_dsp_RMSVol* psy_dsp_rmsvol_allocinit(void);
 /// Note: Values are accumulated since the standard calculation requires 50ms
 /// of data.
-void rmsvol_tick(RMSVol*, const psy_dsp_amp_t* __restrict pSamplesL,
+void psy_dsp_rmsvol_tick(psy_dsp_RMSVol*, const psy_dsp_amp_t* __restrict pSamplesL,
 	const psy_dsp_amp_t* __restrict pSamplesR, int numSamples);
-psy_dsp_amp_t rmsvol_value(RMSVol*);
-void rmsvol_setsamplerate(unsigned int samplerate);
+psy_dsp_amp_t psy_dsp_rmsvol_value(psy_dsp_RMSVol*);
+void psy_dsp_rmsvol_setsamplerate(unsigned int samplerate);
 
 #endif

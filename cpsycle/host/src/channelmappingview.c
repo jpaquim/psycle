@@ -11,7 +11,7 @@ static void pinedit_ondraw(PinEdit*, ui_component* sender, ui_graphics*);
 static void pinedit_drawpinsockets(PinEdit*, ui_graphics*);
 static void pinedit_drawpinconnections(PinEdit*, ui_graphics*);
 
-void pinedit_init(PinEdit* self, ui_component* parent, Wire wire,
+void pinedit_init(PinEdit* self, ui_component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	self->wire = wire;
@@ -30,7 +30,7 @@ void pinedit_ondraw(PinEdit* self, ui_component* sender, ui_graphics* g)
 
 void pinedit_drawpinsockets(PinEdit* self, ui_graphics* g)
 {
-	Machine* machine;
+	psy_audio_Machine* machine;
 	uintptr_t numsrcpins;
 	uintptr_t numdstpins;
 	
@@ -70,9 +70,9 @@ void pinedit_drawpinsockets(PinEdit* self, ui_graphics* g)
 
 void pinedit_drawpinconnections(PinEdit* self, ui_graphics* g)
 {
-	Connections* connections;
-	WireSocketEntry* input;
-	List* pinpair;
+	psy_audio_Connections* connections;
+	psy_audio_WireSocketEntry* input;
+	psy_List* pinpair;
 	ui_size pin = { 8, 8 };
 	ui_size size;
 	int centerx;
@@ -82,9 +82,9 @@ void pinedit_drawpinconnections(PinEdit* self, ui_graphics* g)
 	connections = &self->workspace->song->machines.connections;
 	input = connection_input(connections, self->wire.src, self->wire.dst);
 	for (pinpair = input->mapping; pinpair != 0; pinpair = pinpair->next) {
-		PinConnection* pinconnection;		
+		psy_audio_PinConnection* pinconnection;		
 
-		pinconnection = (PinConnection*)pinpair->entry;
+		pinconnection = (psy_audio_PinConnection*)pinpair->entry;
 		ui_setcolor(g, 0x00CACACA);		
 		ui_drawline(g, centerx + 20 + pin.width / 2, (int)(pinconnection->src * self->lineheight + self->lineheight / 2),
 			centerx + 100 + pin.width / 2, (int)(pinconnection->dst * self->lineheight + self->lineheight / 2));
@@ -92,7 +92,7 @@ void pinedit_drawpinconnections(PinEdit* self, ui_graphics* g)
 }
 
 void channelmappingview_init(ChannelMappingView* self, ui_component* parent,
-	Wire wire, Workspace* workspace)
+	psy_audio_Wire wire, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	

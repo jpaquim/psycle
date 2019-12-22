@@ -10,7 +10,7 @@ static void patternview_ontabbarchange(PatternView*, ui_component* sender, int t
 static void patternview_onsize(PatternView*, ui_component* sender, ui_size*);
 static void patternview_onshow(PatternView*, ui_component* sender);
 static void patternview_onhide(PatternView*, ui_component* sender);
-static void patternview_onlpbchanged(PatternView*, Player* sender, uintptr_t lpb);
+static void patternview_onlpbchanged(PatternView*, psy_audio_Player* sender, uintptr_t lpb);
 static void patternview_onsongchanged(PatternView*, Workspace* sender);
 static void patternview_oneditpositionchanged(PatternView*, Workspace* sender);
 static void patternview_onsequenceselectionchanged(PatternView*, Workspace* sender);
@@ -118,7 +118,7 @@ void patternviewbar_initalign(PatternViewBar* self)
 
 	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
 		ui_value_makepx(0), ui_value_makepx(0));			
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
 		&margin));		
@@ -193,7 +193,7 @@ void patternview_ontabbarchange(PatternView* self, ui_component* sender,
 	}
 }
 
-void patternview_setpattern(PatternView* self, Pattern* pattern)
+void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 {	
 	trackerview_setpattern(&self->trackerview, pattern);
 	pianoroll_setpattern(&self->pianoroll, pattern);
@@ -217,12 +217,12 @@ void patternview_onhide(PatternView* self, ui_component* sender)
 	ui_component_hide(&self->tabbar.component);				
 }
 
-void patternview_onlpbchanged(PatternView* self, Player* sender, uintptr_t lpb)
+void patternview_onlpbchanged(PatternView* self, psy_audio_Player* sender, uintptr_t lpb)
 {
-	// Sequence* sequence;	
+	// psy_audio_Sequence* sequence;	
 	// SequenceTrackIterator iterator;
 	// SequenceEntry* seqentry; 
-	// Pattern* pattern;
+	// psy_audio_Pattern* pattern;
 	//    		
 	// sequence = &self->workspace->song->sequence;	
 	// iterator = sequence_begin(sequence, sequence->tracks, 0.0f);
@@ -257,7 +257,7 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace)
 
 void patternview_oneditpositionchanged(PatternView* self, Workspace* sender)
 {	
-	/*Pattern* pattern;
+	/*psy_audio_Pattern* pattern;
 
 	if (sender->song) {
 		pattern = patterns_at(&sender->song->patterns, 
@@ -282,7 +282,7 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 	selection = workspace_sequenceselection(workspace);
 	entry = sequenceposition_entry(&selection.editposition);
 	if (entry) {
-		Pattern* pattern;
+		psy_audio_Pattern* pattern;
 
 		pattern = patterns_at(&workspace->song->patterns, 
 			entry->pattern);

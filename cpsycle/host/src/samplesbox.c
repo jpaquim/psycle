@@ -20,7 +20,7 @@ static void samplesbox_onsubsamplelistchanged(SamplesBox*, ui_component* sender,
 	int slot);
 
 void samplesbox_init(SamplesBox* self, ui_component* parent,
-	Samples* samples, Instruments* instruments)
+	psy_audio_Samples* samples, psy_audio_Instruments* instruments)
 {	
 	ui_margin margin;
 
@@ -65,7 +65,7 @@ void samplesbox_buildsamplelist(SamplesBox* self)
 	
 	ui_listbox_clear(&self->samplelist);	
 	for ( ; slot < 256; ++slot) {
-		Sample* sample;
+		psy_audio_Sample* sample;
 
 		sample = self->samples ? samples_at(self->samples,
 			sampleindex_make(slot, 0)) : 0;
@@ -86,7 +86,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot)
 	
 	ui_listbox_clear(&self->subsamplelist);
 	for ( ; subslot < 256; ++subslot) {
-		Sample* sample;		
+		psy_audio_Sample* sample;		
 
 		sample = self->samples
 			?  samples_at(self->samples, sampleindex_make(slot, subslot))
@@ -154,7 +154,7 @@ void samplesbox_oninstrumentremoved(SamplesBox* self, ui_component* sender,
 	ui_listbox_setcursel(&self->samplelist, slot);
 }
 
-void samplesbox_oninstrumentsslotchanged(SamplesBox* self, Instrument* sender,
+void samplesbox_oninstrumentsslotchanged(SamplesBox* self, psy_audio_Instrument* sender,
 	int slot)
 {
 	ui_listbox_setcursel(&self->samplelist, slot);
@@ -163,8 +163,8 @@ void samplesbox_oninstrumentsslotchanged(SamplesBox* self, Instrument* sender,
 	}		
 }
 
-void samplesbox_setsamples(SamplesBox* self, Samples* samples,
-	Instruments* instruments)
+void samplesbox_setsamples(SamplesBox* self, psy_audio_Samples* samples,
+	psy_audio_Instruments* instruments)
 {
 	self->samples = samples;
 	self->instruments = instruments;

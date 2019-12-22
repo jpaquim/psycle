@@ -88,10 +88,10 @@ static void driver_configure(EventDriver*);
 static void driver_write(EventDriver*, int type, unsigned char* data, int size);
 static void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
 	EventDriverCmd* cmd, int maxsize);
-static int driver_getcmd(EventDriver*, Properties* section);
-static void setcmddef(EventDriver*, Properties*);
+static int driver_getcmd(EventDriver*, psy_Properties* section);
+static void setcmddef(EventDriver*, psy_Properties*);
 
-static void driver_makeinputs(KbdDriver*, Properties*);
+static void driver_makeinputs(KbdDriver*, psy_Properties*);
 
 int onerror(int err, const char* msg)
 {
@@ -215,7 +215,7 @@ void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
 	}
 }
 
-int driver_getcmd(EventDriver* driver, Properties* section)
+int driver_getcmd(EventDriver* driver, psy_Properties* section)
 {
 	KbdDriver* self;
 	int cmd;
@@ -229,35 +229,35 @@ int driver_getcmd(EventDriver* driver, Properties* section)
 	return cmd;
 }
 
-void driver_makeinputs(KbdDriver* self, Properties* notes)
+void driver_makeinputs(KbdDriver* self, psy_Properties* notes)
 {
-	Properties* p;
+	psy_Properties* p;
 	
-	for (p = notes->children; p != 0; p = properties_next(p)) {				
-		if (properties_id(p) != -1) {
-			inputs_define(&self->noteinputs, properties_value(p),
-				properties_id(p));
+	for (p = notes->children; p != 0; p = psy_properties_next(p)) {				
+		if (psy_properties_id(p) != -1) {
+			inputs_define(&self->noteinputs, psy_properties_value(p),
+				psy_properties_id(p));
 		}
 	}
 }
 
 void driver_configure(EventDriver* driver)
 {
-	Properties* notes;
-	Properties* general;
+	psy_Properties* notes;
+	psy_Properties* general;
 
-	notes = properties_findsection(driver->properties, "notes");
+	notes = psy_properties_findsection(driver->properties, "notes");
 	if (notes) {
 		driver_makeinputs((KbdDriver*)driver, notes);
 	}
-	general = properties_findsection(driver->properties, "generalcmds");
+	general = psy_properties_findsection(driver->properties, "generalcmds");
 	if (general) {
 		driver_makeinputs((KbdDriver*)driver, general);
 	}
 }
 
-void setcmddef(EventDriver* driver, Properties* cmddef)
+void setcmddef(EventDriver* driver, psy_Properties* cmddef)
 {
-	driver->properties = properties_clone(cmddef);
+	driver->properties = psy_properties_clone(cmddef);
 	driver_configure(driver);
 }

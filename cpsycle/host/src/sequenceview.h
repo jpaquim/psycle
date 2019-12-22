@@ -37,9 +37,9 @@ void sequencebuttons_init(SequenceButtons*, ui_component* parent);
 
 typedef struct {
 	ui_component component;
-	Sequence* sequence;
+	psy_audio_Sequence* sequence;
 	SequenceSelection* selection;	
-	Patterns* patterns;	
+	psy_audio_Patterns* patterns;	
 	int selected;
 	int selectedtrack;
 	int foundselected;
@@ -51,24 +51,24 @@ typedef struct {
 	int dx;
 	int dy;	
 	psy_dsp_beat_t lastplayposition;
-	Player* player;
+	psy_audio_Player* player;
 	SequenceEntry* lastentry;	
 	Workspace* workspace;
 	struct SequenceView* view;
 } SequenceListView;
 
 void sequencelistview_init(SequenceListView*, ui_component* parent,
-	struct SequenceView*, Sequence*, Patterns*, Workspace*);
+	struct SequenceView*, psy_audio_Sequence*, psy_audio_Patterns*, Workspace*);
 
 typedef struct {
 	ui_component component;
 	ui_label desc;
 	ui_label duration;	
-	Sequence* sequence;
+	psy_audio_Sequence* sequence;
 } SequenceViewDuration;
 
 void sequenceduration_init(SequenceViewDuration*, ui_component* parent,
-	Sequence*);
+	psy_audio_Sequence*);
 
 typedef struct {
 	ui_component component;	
@@ -97,8 +97,8 @@ typedef struct SequenceView {
 	SequenceViewDuration duration;
 	PlayListEditor playlisteditor;
 	SequencerOptionsBar options;
-	Patterns* patterns;
-	Sequence* sequence;
+	psy_audio_Patterns* patterns;
+	psy_audio_Sequence* sequence;
 	SequenceSelection* selection;
 	Workspace* workspace;	
 } SequenceView;

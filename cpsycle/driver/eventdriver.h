@@ -45,7 +45,7 @@ typedef struct {
 
 
 typedef struct EventDriver {	
-	Properties* properties;	
+	psy_Properties* properties;	
 	int (*open)(struct EventDriver*);
 	int (*dispose)(struct EventDriver*);
 	void (*free)(struct EventDriver*);	
@@ -55,8 +55,8 @@ typedef struct EventDriver {
 	void (*cmd)(struct EventDriver*, int type, unsigned char* data, int size, EventDriverCmd*,
 		int maxsize);
 	int (*error)(int, const char*);
-	int (*getcmd)(struct EventDriver*, Properties* section);
-	void (*setcmddef)(struct EventDriver*, Properties*);
+	int (*getcmd)(struct EventDriver*, psy_Properties* section);
+	void (*setcmddef)(struct EventDriver*, psy_Properties*);
 	psy_Signal signal_input;
 } EventDriver;
 

@@ -38,7 +38,7 @@ typedef struct {
    int numparametercols;
    int avgcharwidth;
    int pluginpos;
-   Properties* selectedplugin;
+   psy_Properties* selectedplugin;
    psy_Signal signal_selected;
    psy_Signal signal_changed;
    Workspace* workspace;

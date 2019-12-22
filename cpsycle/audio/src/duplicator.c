@@ -10,43 +10,43 @@
 #include "songio.h"
 #include <portable.h>
 
-static void work(Duplicator* self, BufferContext* bc) { }
-static void sequencertick(Duplicator*);
-static List* sequencerinsert(Duplicator*, List* events);
-static const MachineInfo* info(Duplicator*);
-static void parametertweak(Duplicator*, int par, int val);
-static int describevalue(Duplicator*, char* txt, int param, int value);
-static int parametervalue(Duplicator*, int param);
-static void parameterrange(Duplicator*, int param, int* minval, int* maxval);
-static int parameterlabel(Duplicator*, char* txt, int param);
-static int parametername(Duplicator*, char* txt, int param);
-static unsigned int numparameters(Duplicator*);
-static unsigned int numparametercols(Duplicator*);
-static void dispose(Duplicator*);
-static unsigned int numinputs(Duplicator* self) { return 0; }
-static unsigned int numoutputs(Duplicator* self) { return 0; }
-static void loadspecific(Duplicator*, struct SongFile*, unsigned int slot);
-static void savespecific(Duplicator*, struct SongFile*, unsigned int slot);
+static void work(psy_audio_Duplicator* self, psy_audio_BufferContext* bc) { }
+static void sequencertick(psy_audio_Duplicator*);
+static psy_List* sequencerinsert(psy_audio_Duplicator*, psy_List* events);
+static const psy_audio_MachineInfo* info(psy_audio_Duplicator*);
+static void parametertweak(psy_audio_Duplicator*, int par, int val);
+static int describevalue(psy_audio_Duplicator*, char* txt, int param, int value);
+static int parametervalue(psy_audio_Duplicator*, int param);
+static void parameterrange(psy_audio_Duplicator*, int param, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Duplicator*, char* txt, int param);
+static int parametername(psy_audio_Duplicator*, char* txt, int param);
+static unsigned int numparameters(psy_audio_Duplicator*);
+static unsigned int numparametercols(psy_audio_Duplicator*);
+static void dispose(psy_audio_Duplicator*);
+static unsigned int numinputs(psy_audio_Duplicator* self) { return 0; }
+static unsigned int numoutputs(psy_audio_Duplicator* self) { return 0; }
+static void loadspecific(psy_audio_Duplicator*, struct psy_audio_SongFile*, unsigned int slot);
+static void savespecific(psy_audio_Duplicator*, struct psy_audio_SongFile*, unsigned int slot);
 
 static int transpose(int note, int offset);
 
-static MachineInfo const MacInfo = {
+static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	GENERATOR | 32 | 64,
 	MACHMODE_GENERATOR,
-	"Note Duplicator"
+	"Duplicator"
 		#ifndef NDEBUG
 		" (debug build)"
 		#endif
 		,
-	"Note Duplicator",
+	"Duplicator",
 	"Psycledelics",
 	"help",	
 	MACH_DUPLICATOR
 };
 
-const MachineInfo* duplicator_info(void)
+const psy_audio_MachineInfo* duplicator_info(void)
 {
 	return &MacInfo;
 }
@@ -54,7 +54,7 @@ const MachineInfo* duplicator_info(void)
 static MachineVtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(Duplicator* self)
+static void vtable_init(psy_audio_Duplicator* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
@@ -80,9 +80,9 @@ static void vtable_init(Duplicator* self)
 	}
 }
 
-void duplicator_init(Duplicator* self, MachineCallback callback)
+void duplicator_init(psy_audio_Duplicator* self, MachineCallback callback)
 {	
-	Machine* base = &self->custommachine.machine;
+	psy_audio_Machine* base = &self->custommachine.machine;
 	int i;
 
 	custommachine_init(&self->custommachine, callback);
@@ -93,25 +93,25 @@ void duplicator_init(Duplicator* self, MachineCallback callback)
 		self->noteoffset[i] = 0;
 	}
 	self->isticking = 0;
-	base->vtable->seteditname(base, "Note Duplicator");
+	base->vtable->seteditname(base, "Note psy_audio_Duplicator");
 	duplicatormap_init(&self->map);
 }
 
-void dispose(Duplicator* self)
+void dispose(psy_audio_Duplicator* self)
 {		
 	duplicatormap_dispose(&self->map);
 	custommachine_dispose(&self->custommachine);
 }
 
-void sequencertick(Duplicator* self)
+void sequencertick(psy_audio_Duplicator* self)
 {
 	self->isticking = 0; // Prevent possible loops of Duplicators
 }
 
-List* sequencerinsert(Duplicator* self, List* events)
+psy_List* sequencerinsert(psy_audio_Duplicator* self, psy_List* events)
 {			
-	List* p;	
-	List* insert = 0;
+	psy_List* p;	
+	psy_List* insert = 0;
 
 	if (!self->isticking) {
 		self->isticking = 1; // Prevent possible loops of Duplicators
@@ -121,10 +121,10 @@ List* sequencerinsert(Duplicator* self, List* events)
 			for (i = 0; i < NUMMACHINES; i++) {						
 				if (self->macoutput[i] != -1) {
 					int note;
-					PatternEntry* duplicatorentry;
-					PatternEntry* entry;
+					psy_audio_PatternEntry* duplicatorentry;
+					psy_audio_PatternEntry* entry;
 
-					duplicatorentry = (PatternEntry*)p->entry;
+					duplicatorentry = (psy_audio_PatternEntry*)p->entry;
 					duplicatormap_allocate(&self->map, duplicatorentry->track, i,
 						self->macoutput[i]);
 					note = duplicatorentry->event.note;
@@ -137,7 +137,7 @@ List* sequencerinsert(Duplicator* self, List* events)
 						entry->event.note = note;						
 						entry->track = duplicatormap_at(&self->map,
 							duplicatorentry->track, i);						 						
-						list_append(&insert, entry);						
+						psy_list_append(&insert, entry);						
 					}
 					if (entry->event.note >= NOTECOMMANDS_RELEASE) {
 						duplicatormap_remove(&self->map, duplicatorentry->track, i,
@@ -163,12 +163,12 @@ int transpose(int note, int offset)
 	return rv;
 }
 
-const MachineInfo* info(Duplicator* self)
+const psy_audio_MachineInfo* info(psy_audio_Duplicator* self)
 {	
 	return &MacInfo;
 }
 
-void parametertweak(Duplicator* self, int param, int value)
+void parametertweak(psy_audio_Duplicator* self, int param, int value)
 {
 	if (param >= 0 && param < NUMMACHINES) {
 		self->macoutput[param] = value;
@@ -179,12 +179,12 @@ void parametertweak(Duplicator* self, int param, int value)
 
 }
 
-int describevalue(Duplicator* self, char* txt, int param, int value)
+int describevalue(psy_audio_Duplicator* self, char* txt, int param, int value)
 { 
 	return 0;
 }
 
-int parametervalue(Duplicator* self, int param)
+int parametervalue(psy_audio_Duplicator* self, int param)
 {	
 	if (param >= 0 && param < NUMMACHINES) {
 		return self->macoutput[param];
@@ -195,7 +195,7 @@ int parametervalue(Duplicator* self, int param)
 	return 0;
 }
 
-void parameterrange(Duplicator* self, int param, int* minval, int* maxval)
+void parameterrange(psy_audio_Duplicator* self, int param, int* minval, int* maxval)
 {
 	if (param < 8) {
 		*minval = -1;
@@ -206,33 +206,33 @@ void parameterrange(Duplicator* self, int param, int* minval, int* maxval)
 	}
 }
 
-int parameterlabel(Duplicator* self, char* txt, int param)
+int parameterlabel(psy_audio_Duplicator* self, char* txt, int param)
 {
 	return parametername(self, txt, param);
 }
 
-int parametername(Duplicator* self, char* txt, int param)
+int parametername(psy_audio_Duplicator* self, char* txt, int param)
 {
 	txt[0] = '\0';
 	if (param < 8) {
-		psy_snprintf(txt, 128, "%s %d", "Output Machine ", param);
+		psy_snprintf(txt, 128, "%s %d", "Output psy_audio_Machine ", param);
 	} else {
 		psy_snprintf(txt, 128, "%s %d", "Note Offset ", param);
 	}
 	return 1;
 }
 
-unsigned int numparameters(Duplicator* self)
+unsigned int numparameters(psy_audio_Duplicator* self)
 {
 	return 16;
 }
 
-unsigned int numparametercols(Duplicator* self)
+unsigned int numparametercols(psy_audio_Duplicator* self)
 {
 	return 2;	
 }
 
-void loadspecific(Duplicator* self, struct SongFile* songfile, unsigned int slot)
+void loadspecific(psy_audio_Duplicator* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {
 	uint32_t size;
 	psyfile_read(songfile->file, &size, sizeof size); // size of this part params to load
@@ -241,7 +241,7 @@ void loadspecific(Duplicator* self, struct SongFile* songfile, unsigned int slot
 	psyfile_read(songfile->file, &self->noteoffset[0], NUMMACHINES * sizeof(short));	
 }
 
-void savespecific(Duplicator* self, struct SongFile* songfile, unsigned int slot)
+void savespecific(psy_audio_Duplicator* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {
 	uint32_t size;
 	

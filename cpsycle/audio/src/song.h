@@ -11,7 +11,7 @@
 #include "instruments.h"
 #include "machinefactory.h"
 
-/// Song hold everything comprising a "tracker module",
+/// psy_audio_Song hold everything comprising a "tracker module",
 /// this include patterns, pattern sequence, machines and their initial 
 /// parameters and coordinates, wavetables, ...
 
@@ -32,33 +32,33 @@ void songproperties_init(SongProperties*, const char* title,
 void songproperties_copy(SongProperties*, const SongProperties* other);
 void songproperties_dispose(SongProperties*);
 
-typedef struct Song {
+typedef struct psy_audio_Song {
 	SongProperties properties;
-	Machines machines;
-	Patterns patterns;
-	Sequence sequence;
-	Samples samples;
-	Instruments instruments;
+	psy_audio_Machines machines;
+	psy_audio_Patterns patterns;
+	psy_audio_Sequence sequence;
+	psy_audio_Samples samples;
+	psy_audio_Instruments instruments;
 	MachineFactory* machinefactory;
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_saveprogress;
-} Song;
+} psy_audio_Song;
 
 /// initializes a song with a master and one sequence track/entry/pattern
-void song_init(Song*, MachineFactory*);
+void song_init(psy_audio_Song*, MachineFactory*);
 /// frees all internal memory used by the songstruct
-void song_dispose(Song*);
+void song_dispose(psy_audio_Song*);
 /// allocates a song
 ///\return allocates a song
-Song* song_alloc(void);
+psy_audio_Song* song_alloc(void);
 /// allocates and initializes a song
 ///\return allocates and initializes a song
-Song* song_allocinit(MachineFactory*);
+psy_audio_Song* song_allocinit(MachineFactory*);
 /// disposes and deallocates the song
-void song_free(Song*);
+void song_free(psy_audio_Song*);
 /// Clears the song completly (no master, no pattern, no sequence track/entry)
-void song_clear(Song*);
+void song_clear(psy_audio_Song*);
 /// set song properties
-void song_setproperties(Song*, const SongProperties*);
+void song_setproperties(psy_audio_Song*, const SongProperties*);
 
 #endif

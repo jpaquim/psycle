@@ -10,60 +10,60 @@ static const char* names[] = {
 	0
 };
 
-static void init(MultiFilter* self) { }
-static void dispose(MultiFilter* self) { }
-static void reset(MultiFilter*);
-static float work(MultiFilter*, float sample);
-static void setcutoff(MultiFilter*, float cutoff);
-static float cutoff(MultiFilter*);
-static void setressonance(MultiFilter*, float ressonance);
-static float ressonance(MultiFilter*);
-static void setsamplerate(MultiFilter*, float samplerate);
-static float samplerate(MultiFilter*);
-static void update(MultiFilter*, int full);
+static void init(psy_dsp_MultiFilter* self) { }
+static void dispose(psy_dsp_MultiFilter* self) { }
+static void reset(psy_dsp_MultiFilter*);
+static float work(psy_dsp_MultiFilter*, float sample);
+static void setcutoff(psy_dsp_MultiFilter*, float cutoff);
+static float cutoff(psy_dsp_MultiFilter*);
+static void setressonance(psy_dsp_MultiFilter*, float ressonance);
+static float ressonance(psy_dsp_MultiFilter*);
+static void setsamplerate(psy_dsp_MultiFilter*, float samplerate);
+static float samplerate(psy_dsp_MultiFilter*);
+static void update(psy_dsp_MultiFilter*, int full);
 
 static filter_vtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(Filter* filter)
+static void vtable_init(psy_dsp_Filter* filter)
 {
 	if (!vtable_initialized) {
 		vtable = *filter->vtable;
-		vtable.reset = (fp_filter_reset) reset;
-		vtable.work = (fp_filter_work) work;
-		vtable.update = (fp_filter_update) update;
-		vtable.setcutoff = (fp_filter_setcutoff) setcutoff;
-		vtable.cutoff = (fp_filter_cutoff) cutoff;
-		vtable.setressonance = (fp_filter_setressonance) setressonance;
-		vtable.ressonance = (fp_filter_ressonance) ressonance;
-		vtable.setsamplerate = (fp_filter_setsamplerate) setsamplerate;
-		vtable.samplerate = (fp_filter_samplerate) samplerate;
-		vtable.work = (fp_filter_work) work;
+		vtable.reset = (psy_dsp_fp_filter_reset) reset;
+		vtable.work = (psy_dsp_fp_filter_work) work;
+		vtable.update = (psy_dsp_fp_filter_update) update;
+		vtable.setcutoff = (psy_dsp_fp_filter_setcutoff) setcutoff;
+		vtable.cutoff = (psy_dsp_fp_filter_cutoff) cutoff;
+		vtable.setressonance = (psy_dsp_fp_filter_setressonance) setressonance;
+		vtable.ressonance = (psy_dsp_fp_filter_ressonance) ressonance;
+		vtable.setsamplerate = (psy_dsp_fp_filter_setsamplerate) setsamplerate;
+		vtable.samplerate = (psy_dsp_fp_filter_samplerate) samplerate;
+		vtable.work = (psy_dsp_fp_filter_work) work;
 		vtable_initialized = 1;
 	}	
 }
 
-void multifilter_init(MultiFilter* self)
+void psy_dsp_multifilter_init(psy_dsp_MultiFilter* self)
 {
-	filter_init(&self->filter);
+	psy_dsp_filter_init(&self->filter);
 	vtable_init(&self->filter);
 	self->filter.vtable = &vtable;
 	self->samplerate = 44100.f;
 	self->cutoff = 1.f;
 	self->q = 0.f;	
-	lowpass12e_init(&self->lowpass12E);
+	psy_dsp_lowpass12e_init(&self->lowpass12E);
 	self->selected = F_NONE;
-	multifilter_settype(self, self->selected);
+	psy_dsp_multifilter_settype(self, self->selected);
 }
 
-void multifilter_settype(MultiFilter* self, FilterType type)
+void psy_dsp_multifilter_settype(psy_dsp_MultiFilter* self, FilterType type)
 {
-	Filter* filter;
+	psy_dsp_Filter* filter;
 
 	self->selected = type;	
 	switch (self->selected) {
 		case F_LOWPASS12E:
-			filter = (Filter*)(&self->lowpass12E);
+			filter = (psy_dsp_Filter*)(&self->lowpass12E);
 			filter->vtable->setcutoff(filter, self->cutoff);
 			filter->vtable->setressonance(filter, self->q);
 		break;
@@ -74,48 +74,45 @@ void multifilter_settype(MultiFilter* self, FilterType type)
 	self->selectedfilter = filter;
 }
 
-FilterType multifilter_type(MultiFilter* self)
+FilterType psy_dsp_multifilter_type(psy_dsp_MultiFilter* self)
 {
 	return self->selected;
 }
 
-const char* multifilter_name(MultiFilter* self, FilterType type)
+const char* psy_dsp_multifilter_name(psy_dsp_MultiFilter* self, FilterType type)
 {
 	return names[(int)type];
 }
 
-unsigned int numfilters(MultiFilter* self)
+unsigned int psy_dsp_multifilter_numfilters(psy_dsp_MultiFilter* self)
 {
 	return F_NUMFILTERS;
 }
 
-void multifilter_inittables(unsigned int samplerate)
+void psy_dsp_multifilter_inittables(unsigned int samplerate)
 {
-	{
-		LowPass12E lp12e;
+	psy_dsp_LowPass12E lp12e;
 	
-		lowpass12e_init(&lp12e); // forces static stable to initialize
-		lp12e.customfilter.filter.vtable->setsamplerate(
-			&lp12e.customfilter.filter, (float)samplerate);
-	}
-	
+	psy_dsp_lowpass12e_init(&lp12e); // forces static stable to initialize
+	lp12e.customfilter.filter.vtable->setsamplerate(
+		&lp12e.customfilter.filter, (float)samplerate);
 }
 
-void reset(MultiFilter* self)
+void reset(psy_dsp_MultiFilter* self)
 { 
 	if (self->selectedfilter) {
 		self->selectedfilter->vtable->reset(self->selectedfilter);
 	}
 }
 
-psy_dsp_amp_t work(MultiFilter* self, psy_dsp_amp_t sample)
+psy_dsp_amp_t work(psy_dsp_MultiFilter* self, psy_dsp_amp_t sample)
 {
 	return self->selectedfilter 
 		? self->selectedfilter->vtable->work(self->selectedfilter, sample)
 		: sample;
 }
 
-static void setcutoff(MultiFilter* self, float cutoff)
+static void setcutoff(psy_dsp_MultiFilter* self, float cutoff)
 { 
 	if (self->selectedfilter) {
 		self->selectedfilter->vtable->setcutoff(self->selectedfilter, cutoff);
@@ -123,14 +120,14 @@ static void setcutoff(MultiFilter* self, float cutoff)
 	self->cutoff = cutoff;
 }
 
-static float cutoff(MultiFilter* self)
+static float cutoff(psy_dsp_MultiFilter* self)
 {
 	return self->selectedfilter 
 		? self->selectedfilter->vtable->cutoff(self->selectedfilter)
 		: self->cutoff;
 }
 
-void setressonance(MultiFilter* self, float ressonance)
+void setressonance(psy_dsp_MultiFilter* self, float ressonance)
 { 
 	if (self->selectedfilter) {
 		self->selectedfilter->vtable->setressonance(self->selectedfilter,
@@ -139,14 +136,14 @@ void setressonance(MultiFilter* self, float ressonance)
 	self->q = ressonance;
 }
 
-float ressonance(MultiFilter* self)
+float ressonance(psy_dsp_MultiFilter* self)
 {
 	return self->selectedfilter 
 		? self->selectedfilter->vtable->ressonance(self->selectedfilter)
 		: self->q;
 }
 
-void setsamplerate(MultiFilter* self, float samplerate)
+void setsamplerate(psy_dsp_MultiFilter* self, float samplerate)
 { 
 	if (self->selectedfilter) {
 		self->selectedfilter->vtable->setsamplerate(self->selectedfilter,
@@ -155,14 +152,14 @@ void setsamplerate(MultiFilter* self, float samplerate)
 	self->samplerate = samplerate;
 }
 
-float samplerate(MultiFilter* self)
+float samplerate(psy_dsp_MultiFilter* self)
 {
 	return self->selectedfilter 
 		? self->selectedfilter->vtable->samplerate(self->selectedfilter)
 		: self->samplerate;
 }
 
-void update(MultiFilter* self, int full)
+void update(psy_dsp_MultiFilter* self, int full)
 { 
 	if (self->selectedfilter) {
 		self->selectedfilter->vtable->update(self->selectedfilter, full);

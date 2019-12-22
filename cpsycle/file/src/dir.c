@@ -41,7 +41,7 @@ void setpathenv(const char* path)
  	 // todo
 }
 
-void dir_enumerate(void* context, const char* root, const char* wildcard,
+void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
 	 int flag, void (*enumproc)(void*, const char* path, int flag))
 {
  	DIR *dir;
@@ -67,7 +67,7 @@ void dir_enumerate(void* context, const char* root, const char* wildcard,
 	return;	
 }
 
-void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
+void psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
 	void (*enumproc)(void*, const char* path, int flag))
 {
  	// todo
@@ -119,7 +119,7 @@ static const char pathenvvarname[] = {
 	"PATH"
 };
 
-void dir_enumerate(void* context, const char* root, const char* wildcard, int flag,
+void psy_dir_enumerate(void* context, const char* root, const char* wildcard, int flag,
 	void (*enumproc)(void*, const char* path, int flag))
 {
 	HANDLE hFind;
@@ -167,7 +167,7 @@ void dir_enumerate(void* context, const char* root, const char* wildcard, int fl
 	}
 }
 
-void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
+void psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
 	void (*enumproc)(void*, const char* path, int flag))
 {
 	HANDLE hFind;
@@ -211,7 +211,7 @@ void dir_enumerate_recursive(void* context, const char* root, const char* wildca
 			if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 				// enumerate subdirectory with its subdirectories
 				psy_snprintf(path, MAX_PATH, "%s\\%s", root, wfd.cFileName);				
-				dir_enumerate_recursive(context, path, wildcard, flag, enumproc);
+				psy_dir_enumerate_recursive(context, path, wildcard, flag, enumproc);
 			}			
 		}		
 	} while (FindNextFile(hFind, &wfd));
@@ -285,12 +285,12 @@ static const char pathenvvarname[] = {
 	"PATH"
 };
 
-void dir_enumerate(void* context, const char* root, const char* wildcard, int flag,
+void psy_dir_enumerate(void* context, const char* root, const char* wildcard, int flag,
 	void (*enumproc)(void*, const char* path, int flag))
 {
 }
 
-void dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
+void psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag))
 {	
 }
 
@@ -319,14 +319,14 @@ struct FileSearch {
 
 static int onenumfindfile(struct FileSearch* self, const char* path, int flag);
 
-void dir_findfile(const char* searchpath, const char* wildcard,
+void psy_dir_findfile(const char* searchpath, const char* wildcard,
 	char* filepath)
 {
 	struct FileSearch filesearch;
 
 	filepath[0] = '\0';
 	filesearch.filepath = filepath;
-	dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0, onenumfindfile);
+	psy_dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0, onenumfindfile);
 }
 
 int onenumfindfile(struct FileSearch* self, const char* path, int flag)
@@ -335,7 +335,7 @@ int onenumfindfile(struct FileSearch* self, const char* path, int flag)
 	return 1;
 }
 
-void extract_path(const char* path, char* prefix, char* name, char* ext)
+void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext)
 {
 	char* p;
 

@@ -8,7 +8,7 @@ typedef enum {
 	MACHMODE_GENERATOR = 0,
 	MACHMODE_FX = 1,
 	MACHMODE_MASTER = 2,
-} MachineMode;
+} psy_audio_MachineMode;
 
 typedef enum  {
 	MACH_UNDEFINED = -1,

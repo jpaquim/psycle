@@ -28,28 +28,28 @@
 static psy_dsp_amp_t bufferdriver[65535];
 static void* mainframe;
 
-static void player_initdriver(Player*);
-static void player_initkbddriver(Player*);
-static void player_initrms(Player*);
-static void player_initsignals(Player*);
-static void player_disposerms(Player*);
-static void player_unloaddriver(Player*);
-static void player_unloadeventdrivers(Player*);
-static psy_dsp_amp_t* work(Player*, int* numsamples, int* stop);
-static void player_workamount(Player*, uintptr_t amount,
+static void player_initdriver(psy_audio_Player*);
+static void player_initkbddriver(psy_audio_Player*);
+static void player_initrms(psy_audio_Player*);
+static void player_initsignals(psy_audio_Player*);
+static void player_disposerms(psy_audio_Player*);
+static void player_unloaddriver(psy_audio_Player*);
+static void player_unloadeventdrivers(psy_audio_Player*);
+static psy_dsp_amp_t* work(psy_audio_Player*, int* numsamples, int* stop);
+static void player_workamount(psy_audio_Player*, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples);
-static void player_eventdriverinput(Player*, EventDriver* sender);
-static void workeventinput(Player*, int cmd, unsigned char* data, unsigned int size);
-static void player_workpath(Player*, uintptr_t amount);
-static void player_filldriver(Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
-static RMSVol* player_rmsvol(Player*, size_t slot);
-static void player_resetvumeters(Player*);
-static void player_dostop(Player*);
-static void notifylinetick(Player*);
+static void player_eventdriverinput(psy_audio_Player*, EventDriver* sender);
+static void workeventinput(psy_audio_Player*, int cmd, unsigned char* data, unsigned int size);
+static void player_workpath(psy_audio_Player*, uintptr_t amount);
+static void player_filldriver(psy_audio_Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
+static psy_dsp_RMSVol* player_rmsvol(psy_audio_Player*, size_t slot);
+static void player_resetvumeters(psy_audio_Player*);
+static void player_dostop(psy_audio_Player*);
+static void notifylinetick(psy_audio_Player*);
 
 // player init and dispose
 
-void player_init(Player* self, Song* song, void* handle)
+void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 {			
 	self->song = song;	
 	self->numsongtracks = 16;
@@ -63,32 +63,32 @@ void player_init(Player* self, Song* song, void* handle)
 		player_eventdriverinput);
 	player_initsignals(self);
 	player_initrms(self);
-	table_init(&self->notestotracks);
-	table_init(&self->trackstonotes);
+	psy_table_init(&self->notestotracks);
+	psy_table_init(&self->trackstonotes);
 }
 
-void player_initdriver(Player* self)
+void player_initdriver(psy_audio_Player* self)
 {	
 	self->driver = 0;	
 	library_init(&self->drivermodule);
 	player_loaddriver(self, 0, 0);		
 }
 
-void player_initsignals(Player* self)
+void player_initsignals(psy_audio_Player* self)
 {
 	psy_signal_init(&self->signal_numsongtrackschanged);
 	psy_signal_init(&self->signal_lpbchanged);
 	psy_signal_init(&self->signal_inputevent);
 }
 
-void player_initrms(Player* self)
+void player_initrms(psy_audio_Player* self)
 {
 	self->vumode = VUMETER_RMS;
 	self->resetvumeters = 0;
-	table_init(&self->rms);
+	psy_table_init(&self->rms);
 }
 
-void player_dispose(Player* self)
+void player_dispose(psy_audio_Player* self)
 {			
 	player_unloaddriver(self);
 	library_dispose(&self->drivermodule);
@@ -98,26 +98,26 @@ void player_dispose(Player* self)
 	psy_signal_dispose(&self->signal_inputevent);	
 	sequencer_dispose(&self->sequencer);		
 	player_disposerms(self);
-	table_dispose(&self->notestotracks);
-	table_dispose(&self->trackstonotes);
+	psy_table_dispose(&self->notestotracks);
+	psy_table_dispose(&self->trackstonotes);
 }
 
-void player_disposerms(Player* self)
+void player_disposerms(psy_audio_Player* self)
 {
-	TableIterator it;
+	psy_TableIterator it;
 
-	for (it = table_begin(&self->rms); !tableiterator_equal(&it, table_end());
-			tableiterator_inc(&it)) {
-		free(tableiterator_value(&it));
+	for (it = psy_table_begin(&self->rms); !psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		free(psy_tableiterator_value(&it));
 	}
-	table_dispose(&self->rms);
+	psy_table_dispose(&self->rms);
 }
 
 // driver callbacks
 
 // sound driver callback
 
-psy_dsp_amp_t* work(Player* self, int* numsamples, int* hostisplaying)
+psy_dsp_amp_t* work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
 {	
 	uintptr_t maxamount;
 	uintptr_t amount;
@@ -154,23 +154,23 @@ psy_dsp_amp_t* work(Player* self, int* numsamples, int* hostisplaying)
 	return bufferdriver;
 }
 
-void notifylinetick(Player* self)
+void notifylinetick(psy_audio_Player* self)
 {
 	if (self->song) {
-		TableIterator it;
+		psy_TableIterator it;
 		
 		for (it = machines_begin(&self->song->machines); 
-			!tableiterator_equal(&it, table_end());		
-				tableiterator_inc(&it)) {			
-			Machine* machine;
+			!psy_tableiterator_equal(&it, psy_table_end());		
+				psy_tableiterator_inc(&it)) {			
+			psy_audio_Machine* machine;
 
-			machine = (Machine*)tableiterator_value(&it);					
+			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);					
 			machine->vtable->sequencerlinetick(machine);				
 		}
 	}
 }
 
-void player_workamount(Player* self, uintptr_t amount, uintptr_t* numsamplex,
+void player_workamount(psy_audio_Player* self, uintptr_t amount, uintptr_t* numsamplex,
 					   psy_dsp_amp_t** psamples)
 {
 	sequencer_frametick(&self->sequencer, amount);
@@ -180,27 +180,27 @@ void player_workamount(Player* self, uintptr_t amount, uintptr_t* numsamplex,
 	*psamples  += (2*amount);
 }
 
-void player_workpath(Player* self, uintptr_t amount)
+void player_workpath(psy_audio_Player* self, uintptr_t amount)
 {
 	MachinePath* path;
 	path = machines_path(&self->song->machines);
 	if (path) {
 		for ( ; path != 0; path = path->next) {
 			size_t slot;									
-			Machine* machine;
+			psy_audio_Machine* machine;
 
 			slot = (size_t)path->entry;
 			machine = machines_at(&self->song->machines, slot);
-			if (machine && !table_exists(&self->song->machines.connections.sends, slot)) {
-				Buffer* output;
+			if (machine && !psy_table_exists(&self->song->machines.connections.sends, slot)) {
+				psy_audio_Buffer* output;
 
 				output = machine->vtable->mix(machine, slot, amount,
 					connections_at(&self->song->machines.connections, slot),
 					&self->song->machines);
 				if (output && slot != MASTER_INDEX) {				
-					BufferContext bc;										
-					List* events;
-					RMSVol* rms;
+					psy_audio_BufferContext bc;										
+					psy_List* events;
+					psy_dsp_RMSVol* rms;
 
 					events = sequencer_timedevents(&self->sequencer, slot, amount);
 					rms = player_rmsvol(self, slot);					
@@ -210,12 +210,12 @@ void player_workpath(Player* self, uintptr_t amount)
 					buffer_pan(output, machine->vtable->panning(machine), amount);
 					if (self->vumode == VUMETER_RMS && buffer_numchannels(
 							bc.output) >= 2) {
-						rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],
+						psy_dsp_rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],
 							bc.numsamples);
 					}
 					psy_signal_emit(&machine->signal_worked, machine, 2,
 						slot, &bc);
-					list_free(events);										
+					psy_list_free(events);										
 				}
 			}			
 		}							
@@ -225,24 +225,24 @@ void player_workpath(Player* self, uintptr_t amount)
 	}
 }
 
-void player_resetvumeters(Player* self)
+void player_resetvumeters(psy_audio_Player* self)
 {	
-	table_dispose(&self->rms);
-	table_init(&self->rms);
+	psy_table_dispose(&self->rms);
+	psy_table_init(&self->rms);
 	self->resetvumeters = 0;	
 }
 
-void player_filldriver(Player* self, psy_dsp_amp_t* buffer, uintptr_t amount)
+void player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t amount)
 {
-	Buffer* masteroutput;	
+	psy_audio_Buffer* masteroutput;	
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
 	if (masteroutput) {		
-		Machine* master;
+		psy_audio_Machine* master;
 
 		master = machines_master(&self->song->machines);
 		if (master) {
-			BufferContext bc;
-			RMSVol* rms;
+			psy_audio_BufferContext bc;
+			psy_dsp_RMSVol* rms;
 
 			rms = player_rmsvol(self, MASTER_INDEX);
 			buffercontext_init(&bc, 0, masteroutput, masteroutput, amount,
@@ -250,7 +250,7 @@ void player_filldriver(Player* self, psy_dsp_amp_t* buffer, uintptr_t amount)
 			buffer_mulsamples(masteroutput, amount,
 				machines_volume(&self->song->machines));			
 			if (self->vumode == VUMETER_RMS) {
-				rmsvol_tick(rms, masteroutput->samples[0], masteroutput->samples[1],
+				psy_dsp_rmsvol_tick(rms, masteroutput->samples[0], masteroutput->samples[1],
 					amount);		
 			}
 			psy_signal_emit(&master->signal_worked, master, 2,
@@ -261,33 +261,33 @@ void player_filldriver(Player* self, psy_dsp_amp_t* buffer, uintptr_t amount)
 	}
 }
 
-RMSVol* player_rmsvol(Player* self, size_t slot)
+psy_dsp_RMSVol* player_rmsvol(psy_audio_Player* self, size_t slot)
 {
-	RMSVol* rv;
+	psy_dsp_RMSVol* rv;
 
-	if (!table_exists(&self->rms, slot)) {
-		rv = rmsvol_allocinit();		
-		table_insert(&self->rms, slot, rv);
+	if (!psy_table_exists(&self->rms, slot)) {
+		rv = psy_dsp_rmsvol_allocinit();		
+		psy_table_insert(&self->rms, slot, rv);
 	} else {
-		rv = (RMSVol*) table_at(&self->rms, slot);
+		rv = (psy_dsp_RMSVol*) psy_table_at(&self->rms, slot);
 	}
 	return rv;
 }
 
 // event driver callback
 
-void player_eventdriverinput(Player* self, EventDriver* sender)
+void player_eventdriverinput(psy_audio_Player* self, EventDriver* sender)
 {
-	Properties* notes;
+	psy_Properties* notes;
 	int cmd;	
 	
-	notes = properties_find(self->eventdrivers.cmds, "notes");
+	notes = psy_properties_find(self->eventdrivers.cmds, "notes");
 	cmd = sender->getcmd(sender, notes);
 	if (cmd != -1 && cmd <  255) {		
 		int base = 48;
 		unsigned char note;
 		uintptr_t track = 0;
-		PatternEvent event;
+		psy_audio_PatternEvent event;
 
 		if (cmd < NOTECOMMANDS_RELEASE) {
 			note = (unsigned char) cmd + base;
@@ -302,22 +302,22 @@ void player_eventdriverinput(Player* self, EventDriver* sender)
 			0, 0);
 		if (self->multichannelaudition) {
 			if (event.note < NOTECOMMANDS_RELEASE) {
-				if (table_exists(&self->notestotracks, event.note)) {
-					track = (uintptr_t) table_at(&self->notestotracks, event.note);
+				if (psy_table_exists(&self->notestotracks, event.note)) {
+					track = (uintptr_t) psy_table_at(&self->notestotracks, event.note);
 				} else {							
-					while (table_exists(&self->trackstonotes, track)) {
+					while (psy_table_exists(&self->trackstonotes, track)) {
 						++track;
 					}
-					table_insert(&self->notestotracks, event.note, (void*)track);
-					table_insert(&self->trackstonotes, track,
+					psy_table_insert(&self->notestotracks, event.note, (void*)track);
+					psy_table_insert(&self->trackstonotes, track,
 						(void*)(uintptr_t)event.note);
 				}
 			} else
 			if (event.note == NOTECOMMANDS_RELEASE) {				
-				if (table_exists(&self->notestotracks, note)) {
-					track = (uintptr_t) table_at(&self->notestotracks, note);
-					table_remove(&self->notestotracks, note);
-					table_remove(&self->trackstonotes, track);
+				if (psy_table_exists(&self->notestotracks, note)) {
+					track = (uintptr_t) psy_table_at(&self->notestotracks, note);
+					psy_table_remove(&self->notestotracks, note);
+					psy_table_remove(&self->trackstonotes, track);
 				}
 			}
 		}
@@ -331,11 +331,11 @@ void player_eventdriverinput(Player* self, EventDriver* sender)
 	}
 }
 
-void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int size)
+void workeventinput(psy_audio_Player* self, int cmd, unsigned char* data, unsigned int size)
 {	
 /*	int validevent = 0;
 	uintptr_t note = 0;
-	PatternEvent event;
+	psy_audio_PatternEvent event;
 	
 	switch (cmd) {
 		// MIDI DATA
@@ -361,7 +361,7 @@ void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int siz
 			}
 		}
 		break;
-		// Pattern Data
+		// psy_audio_Pattern Data
 		case 2:
 			patternevent_init(&event, data[0], 255, 0, 0, 0);
 			note = data[1];
@@ -375,22 +375,22 @@ void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int siz
 
 		if (self->multichannelaudition) {
 			if (event.note < NOTECOMMANDS_RELEASE) {
-				if (table_exists(&self->notestotracks, event.note)) {
-					track = (uintptr_t) table_at(&self->notestotracks, event.note);
+				if (psy_table_exists(&self->notestotracks, event.note)) {
+					track = (uintptr_t) psy_table_at(&self->notestotracks, event.note);
 				} else {							
-					while (table_exists(&self->trackstonotes, track)) {
+					while (psy_table_exists(&self->trackstonotes, track)) {
 						++track;
 					}
-					table_insert(&self->notestotracks, event.note, (void*)track);
-					table_insert(&self->trackstonotes, track,
+					psy_table_insert(&self->notestotracks, event.note, (void*)track);
+					psy_table_insert(&self->trackstonotes, track,
 						(void*)(uintptr_t)event.note);
 				}
 			} else
 			if (event.note == NOTECOMMANDS_RELEASE) {				
-				if (table_exists(&self->notestotracks, note)) {
-					track = (uintptr_t) table_at(&self->notestotracks, note);
-					table_remove(&self->notestotracks, note);
-					table_remove(&self->trackstonotes, track);
+				if (psy_table_exists(&self->notestotracks, note)) {
+					track = (uintptr_t) psy_table_at(&self->notestotracks, note);
+					psy_table_remove(&self->notestotracks, note);
+					psy_table_remove(&self->trackstonotes, track);
 				}
 			}
 		}
@@ -406,15 +406,18 @@ void workeventinput(Player* self, int cmd, unsigned char* data, unsigned int siz
 
 // general setter and getter
 
-void player_setsong(Player* self, Song* song)
+void player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 {
 	self->song = song;
-	sequencer_reset(&self->sequencer, &song->sequence, &song->machines);
-	sequencer_setsamplerate(&self->sequencer,
-		self->driver->samplerate(self->driver));	
+	if (self->song) {
+		sequencer_reset(&self->sequencer, &song->sequence, &song->machines);
+		sequencer_setsamplerate(&self->sequencer,
+			self->driver->samplerate(self->driver));
+		player_setnumsongtracks(self, patterns_songtracks(&song->patterns));
+	}
 }
 
-void player_setnumsongtracks(Player* self, uintptr_t numsongtracks)
+void player_setnumsongtracks(psy_audio_Player* self, uintptr_t numsongtracks)
 {
 	if (numsongtracks >= 1 && numsongtracks <= 64) {
 		self->numsongtracks = numsongtracks;	
@@ -423,101 +426,101 @@ void player_setnumsongtracks(Player* self, uintptr_t numsongtracks)
 	}
 }
 
-uintptr_t player_numsongtracks(Player* self)
+uintptr_t player_numsongtracks(psy_audio_Player* self)
 {
 	return self->numsongtracks;
 }
 
-void player_setvumetermode(Player* self, VUMeterMode mode)
+void player_setvumetermode(psy_audio_Player* self, VUMeterMode mode)
 {
 	self->vumode = mode;
 	self->resetvumeters = 1;
 }
 
-VUMeterMode player_vumetermode(Player* self)
+VUMeterMode player_vumetermode(psy_audio_Player* self)
 {
 	return self->vumode;
 }
 
 // sequencer setter and getter
 
-void player_start(Player* self)
+void player_start(psy_audio_Player* self)
 {		
 	sequencer_start(&self->sequencer);	
 }
 
-void player_stop(Player* self)
+void player_stop(psy_audio_Player* self)
 {
 	sequencer_stop(&self->sequencer);
 	player_dostop(self);
 }
 
-void player_dostop(Player* self)
+void player_dostop(psy_audio_Player* self)
 {
 	if (self->song) {
-		TableIterator it;
+		psy_TableIterator it;
 		
 		for (it = machines_begin(&self->song->machines);
-				!tableiterator_equal(&it, table_end());
-				tableiterator_inc(&it)) {
-			Machine* machine;
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_audio_Machine* machine;
 
-			machine = (Machine*)tableiterator_value(&it);
+			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
 			machine->vtable->stop(machine);			
 		}
 	}
 }
 
-int player_playing(Player* self)
+int player_playing(psy_audio_Player* self)
 {
 	return sequencer_playing(&self->sequencer);
 }
 
-void player_setposition(Player* self, psy_dsp_beat_t offset)
+void player_setposition(psy_audio_Player* self, psy_dsp_beat_t offset)
 {
 	sequencer_setposition(&self->sequencer, offset);	
 }
 
-psy_dsp_beat_t player_position(Player* self)
+psy_dsp_beat_t player_position(psy_audio_Player* self)
 {
 	return sequencer_position(&self->sequencer);
 }
 
-void player_setbpm(Player* self, psy_dsp_beat_t bpm)
+void player_setbpm(psy_audio_Player* self, psy_dsp_beat_t bpm)
 {
 	sequencer_setbpm(&self->sequencer, bpm);	
 }
 
-psy_dsp_beat_t player_bpm(Player* self)
+psy_dsp_beat_t player_bpm(psy_audio_Player* self)
 {
 	return sequencer_bpm(&self->sequencer);
 }
 
-void player_setlpb(Player* self, uintptr_t lpb)
+void player_setlpb(psy_audio_Player* self, uintptr_t lpb)
 {
 	sequencer_setlpb(&self->sequencer, lpb);
 	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);
 }
 
-uintptr_t player_lpb(Player* self)
+uintptr_t player_lpb(psy_audio_Player* self)
 {
 	return sequencer_lpb(&self->sequencer);
 }
 
 // Driver set, get, load, unload, restart, ..., methods
 
-void player_setaudiodriver(Player* self, Driver* driver)
+void player_setaudiodriver(psy_audio_Player* self, Driver* driver)
 {
 	self->driver = driver;
 	driver->connect(driver, self, work, mainframe);
 }
 
-Driver* player_audiodriver(Player* self)
+Driver* player_audiodriver(psy_audio_Player* self)
 {
 	return self->driver;
 }
 
-void player_loaddriver(Player* self, const char* path, Properties* config)
+void player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties* config)
 {
 	Driver* driver = 0;
 	
@@ -541,17 +544,17 @@ void player_loaddriver(Player* self, const char* path, Properties* config)
 		lock_disable();
 	}	
 	sequencer_setsamplerate(&self->sequencer, driver->samplerate(driver));
-	rmsvol_setsamplerate(driver->samplerate(driver));
-	multifilter_inittables(driver->samplerate(driver));
+	psy_dsp_rmsvol_setsamplerate(driver->samplerate(driver));
+	psy_dsp_multifilter_inittables(driver->samplerate(driver));
 	self->driver = driver;
 	if (self->driver && config) {
 		self->driver->configure(self->driver, config);
-		//self->driver->properties = properties_clone(config);
+		//self->driver->properties = psy_properties_clone(config);
 	}
 	self->driver->open(self->driver);
 }
 
-void player_unloaddriver(Player* self)
+void player_unloaddriver(psy_audio_Player* self)
 {
 	if (self->driver) {
 		self->driver->close(self->driver);		
@@ -563,13 +566,13 @@ void player_unloaddriver(Player* self)
 	self->driver = 0;
 }
 
-void player_reloaddriver(Player* self, const char* path, Properties* config)
+void player_reloaddriver(psy_audio_Player* self, const char* path, psy_Properties* config)
 {		
 	player_unloaddriver(self);
 	player_loaddriver(self, path, config);		
 }
 
-void player_restartdriver(Player* self, Properties* config)
+void player_restartdriver(psy_audio_Player* self, psy_Properties* config)
 {	
 	if (self->driver) {
 		self->driver->close(self->driver);	
@@ -580,49 +583,49 @@ void player_restartdriver(Player* self, Properties* config)
 
 // Event Recording
 
-void player_startrecordingnotes(Player* self)
+void player_startrecordingnotes(psy_audio_Player* self)
 {
 	self->recordingnotes = 1;
 }
 
-void player_stoprecordingnotes(Player* self)
+void player_stoprecordingnotes(psy_audio_Player* self)
 {
 	self->recordingnotes = 0;
 }
 
-int player_recordingnotes(Player* self)
+int player_recordingnotes(psy_audio_Player* self)
 {
 	return self->recordingnotes;
 }
 
 // EventDriver load, unload, restart, ..., methods
 
-void player_loadeventdriver(Player* self, const char* path)
+void player_loadeventdriver(psy_audio_Player* self, const char* path)
 {
 	eventdrivers_load(&self->eventdrivers, path);
 }
 
-void player_restarteventdriver(Player* self, int id)
+void player_restarteventdriver(psy_audio_Player* self, int id)
 {
 	eventdrivers_restart(&self->eventdrivers, id);
 }
 
-void player_removeeventdriver(Player * self, int id)
+void player_removeeventdriver(psy_audio_Player * self, int id)
 {
 	eventdrivers_remove(&self->eventdrivers, id);
 }
 
-EventDriver* player_kbddriver(Player* self)
+EventDriver* player_kbddriver(psy_audio_Player* self)
 {
 	return self->eventdrivers.kbddriver;
 }
 
-EventDriver* player_eventdriver(Player* self, int id) 
+EventDriver* player_eventdriver(psy_audio_Player* self, int id) 
 {
 	return eventdrivers_driver(&self->eventdrivers, id);
 }
 
-unsigned int player_numeventdrivers(Player* self)
+unsigned int player_numeventdrivers(psy_audio_Player* self)
 {
 	return eventdrivers_size(&self->eventdrivers);
 }

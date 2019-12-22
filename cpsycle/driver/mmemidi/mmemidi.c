@@ -29,8 +29,8 @@ static int driver_dispose(EventDriver*);
 static void driver_configure(EventDriver*);
 static void driver_cmd(EventDriver*, int type, unsigned char* data, int size,
 	EventDriverCmd* cmd, int maxsize);
-static int driver_getcmd(EventDriver*, Properties* section);
-static void setcmddef(EventDriver*, Properties*);
+static int driver_getcmd(EventDriver*, psy_Properties* section);
+static void setcmddef(EventDriver*, psy_Properties*);
 
 static void init_properties(EventDriver* self);
 static void apply_properties(MmeMidiDriver* self);
@@ -101,16 +101,16 @@ int driver_dispose(EventDriver* driver)
 
 void init_properties(EventDriver* self)
 {		
-	Properties* devices;
+	psy_Properties* devices;
 	int i;
 	int n;	
 
-	self->properties = properties_create();
+	self->properties = psy_properties_create();
 		
-	properties_append_string(self->properties, "name", "winmme midi");
-	properties_append_string(self->properties, "version", "1.0");
-	devices = properties_append_choice(self->properties, "device", 0);		 
-	properties_append_int(devices, "0:None", 0, 0, 0);
+	psy_properties_append_string(self->properties, "name", "winmme midi");
+	psy_properties_append_string(self->properties, "version", "1.0");
+	devices = psy_properties_append_choice(self->properties, "device", 0);		 
+	psy_properties_append_int(devices, "0:None", 0, 0, 0);
 	n = midiInGetNumDevs();	
 	for (i = 0; i < n; i++)
 	{
@@ -123,18 +123,18 @@ void init_properties(EventDriver* self)
 #else
 		_snprintf(text, 256, "%d:%s", i, caps.szPname);
 #endif
-		properties_append_int(devices, text, i, 0, 0);
+		psy_properties_append_int(devices, text, i, 0, 0);
 	}
 }
 
 void apply_properties(MmeMidiDriver* self)
 {	
 	if (self->driver.properties) {
-		Properties* p;
+		psy_Properties* p;
 
-		p = properties_read(self->driver.properties, "device");
+		p = psy_properties_read(self->driver.properties, "device");
 		if (p) {
-			self->deviceid = properties_value(p);
+			self->deviceid = psy_properties_value(p);
 		}
 	}
 }
@@ -220,7 +220,7 @@ void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
 	cmd->size = 0;	
 }
 
-int driver_getcmd(EventDriver* driver, Properties* section)
+int driver_getcmd(EventDriver* driver, psy_Properties* section)
 {
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
 		
@@ -230,21 +230,21 @@ int driver_getcmd(EventDriver* driver, Properties* section)
 /*
 void driver_configure(EventDriver* driver)
 {
-	Properties* notes;
+	psy_Properties* notes;
 
-	notes = properties_findsection(driver->properties, "notes");
+	notes = psy_properties_findsection(driver->properties, "notes");
 	if (notes) {
 		driver_makenoteinputs((KbdDriver*)driver, notes);
 	}
 }
 */
 
-void setcmddef(EventDriver* driver, Properties* cmddef)
+void setcmddef(EventDriver* driver, psy_Properties* cmddef)
 {
-/*	Properties* notes;
+/*	psy_Properties* notes;
 
-	driver->properties = properties_clone(cmddef);
-	notes = properties_findsection(driver->properties, "notes");
+	driver->properties = psy_properties_clone(cmddef);
+	notes = psy_properties_findsection(driver->properties, "notes");
 	if (notes) {
 		driver_makenoteinputs((KbdDriver*)driver, notes);
 	} */

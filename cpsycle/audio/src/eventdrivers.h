@@ -15,11 +15,11 @@ typedef struct {
 
 typedef struct {
 	EventDriver* kbddriver;
-	List* eventdrivers;
+	psy_List* eventdrivers;
 	void* context;
 	void* systemhandle;	
 	psy_Signal signal_input;
-	Properties* cmds;
+	psy_Properties* cmds;
 } EventDrivers;
 
 void eventdrivers_init(EventDrivers*, void* systemhandle);
@@ -29,7 +29,7 @@ void eventdrivers_load(EventDrivers*, const char* path);
 void eventdrivers_restart(EventDrivers*, int id);
 void eventdrivers_restartall(EventDrivers*);
 void eventdrivers_remove(EventDrivers*, int id);
-void eventdrivers_setcmds(EventDrivers*, Properties* self);
+void eventdrivers_setcmds(EventDrivers*, psy_Properties* self);
 unsigned int eventdrivers_size(EventDrivers*);
 EventDriver* eventdrivers_driver(EventDrivers*, int id); 
 EventDriverEntry* eventdrivers_entry(EventDrivers*, int id);

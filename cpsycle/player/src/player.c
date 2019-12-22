@@ -17,14 +17,14 @@
 #include <dir.h>
 
 typedef struct {
-	Player player;
-	Song* song;	
-	PluginCatcher plugincatcher;
+	psy_audio_Player player;
+	psy_audio_Song* song;	
+	psy_audio_PluginCatcher plugincatcher;
 	MachineFactory machinefactory;
-	Properties* config;
-	Properties* directories;
-	Properties* inputoutput;
-	Properties* driverconfigure;
+	psy_Properties* config;
+	psy_Properties* directories;
+	psy_Properties* inputoutput;
+	psy_Properties* driverconfigure;
 	int hasplugincache;
 } CmdPlayer;
 
@@ -45,9 +45,9 @@ static void cmdplayer_idle(void);
 static MachineCallback machinecallback(CmdPlayer*);
 static unsigned int machinecallback_samplerate(CmdPlayer*);
 static int machinecallback_bpm(CmdPlayer*);
-static Samples* machinecallback_samples(CmdPlayer*);
-static Machines* machinecallback_machines(CmdPlayer*);
-static Instruments* machinecallback_instruments(CmdPlayer*);
+static psy_audio_Samples* machinecallback_samples(CmdPlayer*);
+static psy_audio_Machines* machinecallback_machines(CmdPlayer*);
+static psy_audio_Instruments* machinecallback_instruments(CmdPlayer*);
 
 static void usage(void) {
 	printf(
@@ -159,7 +159,7 @@ void cmdplayer_init(CmdPlayer* self)
 	cmdplayer_initenv(self);
 	lock_init();
 	psy_dsp_noopt_init(&dsp);
-	self->config = properties_create();
+	self->config = psy_properties_create();
 	cmdplayer_makedirectories(self);
 	cmdplayer_makeinputoutput(self);
 	cmdplayer_setdriverlist(self);
@@ -168,7 +168,7 @@ void cmdplayer_init(CmdPlayer* self)
 	player_init(&self->player, self->song, (void*)0);	
 	player_loaddriver(&self->player, cmdplayer_driverpath(self), 0);	
 	printf("Audio driver %s \n", 
-		properties_readstring(self->player.driver->properties, "name",
+		psy_properties_readstring(self->player.driver->properties, "name",
 		"no description"));
 }
 
@@ -205,56 +205,56 @@ void cmdplayer_scanplugins(CmdPlayer* self)
 
 void cmdplayer_makedirectories(CmdPlayer* self)
 {	
-	self->directories = properties_settext(
-		properties_createsection(self->config, "directories"),
+	self->directories = psy_properties_settext(
+		psy_properties_create_section(self->config, "directories"),
 		"Directories");
-	properties_sethint(properties_settext(
-		properties_append_string(
+	psy_properties_sethint(psy_properties_settext(
+		psy_properties_append_string(
 			self->directories,
 			"song",
 			"C:\\Programme\\Psycle\\Songs"),
-		"Song directory"),
-		PROPERTY_HINT_EDITDIR);
-	properties_sethint(properties_settext(
-		properties_append_string(
+		"psy_audio_Song directory"),
+		PSY_PROPERTY_HINT_EDITDIR);
+	psy_properties_sethint(psy_properties_settext(
+		psy_properties_append_string(
 			self->directories,
 			"plugins",
 			"C:\\Programme\\Psycle\\PsyclePlugins"),
 		"Plug-in directory"),
-		PROPERTY_HINT_EDITDIR);
-	properties_sethint(properties_settext(
-		properties_append_string(
+		PSY_PROPERTY_HINT_EDITDIR);
+	psy_properties_sethint(psy_properties_settext(
+		psy_properties_append_string(
 			self->directories,
 			"vst",			
 			"C:\\Programme\\Psycle\\VstPlugins"),
 		"VST directories"),
-		PROPERTY_HINT_EDITDIR);
+		PSY_PROPERTY_HINT_EDITDIR);
 }
 
 void cmdplayer_makeinputoutput(CmdPlayer* self)
 {		
-	self->inputoutput = properties_createsection(self->config, "inputoutput");
+	self->inputoutput = psy_properties_create_section(self->config, "inputoutput");
 		cmdplayer_setdriverlist(self);
-	self->driverconfigure = properties_settext(
-		properties_createsection(self->inputoutput, "configure"),
+	self->driverconfigure = psy_properties_settext(
+		psy_properties_create_section(self->inputoutput, "configure"),
 		"Configure");		
 }
 
 void cmdplayer_setdriverlist(CmdPlayer* self)
 {
-	Properties* drivers;
+	psy_Properties* drivers;
 
-	properties_settext(self->inputoutput, "Input/Output");
+	psy_properties_settext(self->inputoutput, "Input/Output");
 	// change number to set startup driver, if no psycle.ini found
-	drivers = properties_append_choice(self->inputoutput, "driver", 1); 
-	properties_settext(drivers, "Driver");
-	properties_append_string(drivers, "silent", "silentdriver");
+	drivers = psy_properties_append_choice(self->inputoutput, "driver", 1); 
+	psy_properties_settext(drivers, "Driver");
+	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(_DEBUG)
-	properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
-	properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
+	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
+	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
 #else
-	properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
-	properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
+	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
+	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
 #endif
 }
 
@@ -272,23 +272,23 @@ void cmdplayer_dispose(CmdPlayer* self)
 
 const char* cmdplayer_driverpath(CmdPlayer* self)
 {
-	Properties* p;
+	psy_Properties* p;
 	const char* rv = 0;
 
-	p = properties_read(self->inputoutput, "driver");
+	p = psy_properties_read(self->inputoutput, "driver");
 	if (p) {
 		int choice;		
 		int count;
 		
-		choice = properties_value(p);
+		choice = psy_properties_value(p);
 		p = p->children;
 		count = 0;
 		while (p) {
 			if (count == choice) {
-				rv = properties_valuestring(p);
+				rv = psy_properties_valuestring(p);
 				break;
 			}
-			p = properties_next(p);
+			p = psy_properties_next(p);
 			++count;
 		}
 	}
@@ -297,8 +297,8 @@ const char* cmdplayer_driverpath(CmdPlayer* self)
 
 void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 {		
-	Song* oldsong;
-	SongFile songfile;
+	psy_audio_Song* oldsong;
+	psy_audio_SongFile songfile;
 
 	player_stop(&self->player);
 	oldsong = self->song;
@@ -336,7 +336,7 @@ MachineCallback machinecallback(CmdPlayer* self)
 	return rv;
 }
 
-Samples* machinecallback_samples(CmdPlayer* self)
+psy_audio_Samples* machinecallback_samples(CmdPlayer* self)
 {
 	return &self->song->samples;
 }
@@ -351,12 +351,12 @@ int machinecallback_bpm(CmdPlayer* self)
 	return (int) player_bpm(&self->player);
 }
 
-Machines* machinecallback_machines(CmdPlayer* self)
+psy_audio_Machines* machinecallback_machines(CmdPlayer* self)
 {
 	return self->song ? &self->song->machines : 0;
 }
 
-Instruments* machinecallback_instruments(CmdPlayer* self)
+psy_audio_Instruments* machinecallback_instruments(CmdPlayer* self)
 {
 	return self->song ? &self->song->instruments : 0;
 }

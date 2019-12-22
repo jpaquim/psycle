@@ -10,7 +10,7 @@
 
 typedef struct {	
 	ui_component component;
-	Machines* machines;
+	psy_audio_Machines* machines;
 	float value;
 	int dragx;
 } VolSlider;

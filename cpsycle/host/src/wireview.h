@@ -23,11 +23,11 @@ typedef struct {
 	ChannelMappingView channelmappingview;
 	ui_component bottomgroup;
 	ui_button deletewire;
-	Wire wire;
+	psy_audio_Wire wire;
 	Workspace* workspace;
 } WireView;
 
-void wireview_init(WireView*, ui_component* parent, Wire, Workspace*);
+void wireview_init(WireView*, ui_component* parent, psy_audio_Wire, Workspace*);
 int wireview_wireexists(WireView*);
 
 typedef struct {

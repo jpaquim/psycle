@@ -17,20 +17,20 @@ typedef enum {
 
 typedef struct {
 	ui_listbox machinelist;	
-	Machines* machines;
-	Table listboxslots;
-	Table slotslistbox;
+	psy_audio_Machines* machines;
+	psy_Table listboxslots;
+	psy_Table slotslistbox;
 	MachineBoxMode mode;
 	int showslots;
 	Workspace* workspace;
 } MachinesBox;
 
-void InitMachinesBox(MachinesBox*, ui_component* parent, Machines*, MachineBoxMode,
+void InitMachinesBox(MachinesBox*, ui_component* parent, psy_audio_Machines*, MachineBoxMode,
 	Workspace*);
 void MachinesBoxClone(MachinesBox*);
 void MachinesBoxRemove(MachinesBox*);
 void MachinesBoxExchange(MachinesBox*);
 void MachinesBoxShowParameters(MachinesBox*);
-void SetMachines(MachinesBox*, Machines*);
+void SetMachines(MachinesBox*, psy_audio_Machines*);
 
 #endif

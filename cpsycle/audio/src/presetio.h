@@ -6,7 +6,7 @@
 
 #include "presets.h"
 
-void presetsio_load(const char* path, Presets*);
-void presetsio_save(const char* path, Presets*);
+void presetsio_load(const char* path, psy_audio_Presets*);
+void presetsio_save(const char* path, psy_audio_Presets*);
 
 #endif

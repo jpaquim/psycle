@@ -7,11 +7,11 @@
 #include "filter.h"
 
 typedef struct {
-	CustomFilter customfilter;	
-	FilterCoeff coeff;
-	FIRWork firwork;
-} LowPass12E;
+	psy_dsp_CustomFilter customfilter;	
+	psy_dsp_FilterCoeff coeff;
+	psy_dsp_FIRWork firwork;
+} psy_dsp_LowPass12E;
 
-void lowpass12e_init(LowPass12E*);
+void psy_dsp_lowpass12e_init(psy_dsp_LowPass12E*);
 
 #endif

@@ -14,12 +14,12 @@ typedef struct {
 	int allocatedchans[MAX_TRACKS][MAX_VIRTUALINSTS]; //Not Using MAX_MACHINES because now there are the Virtual instruments
 	// indicates if the channel of the specified machine is in use or not
 	int availablechans[MAX_VIRTUALINSTS][MAX_TRACKS];//Not Using MAX_MACHINES because now there are the Virtual instruments	
-} DuplicatorMap;
+} psy_audio_DuplicatorMap;
 
-void duplicatormap_init(DuplicatorMap*);
-void duplicatormap_dispose(DuplicatorMap*);
-int duplicatormap_at(DuplicatorMap*, int channel, int machine);
-void duplicatormap_allocate(DuplicatorMap*, int channel, int machine, int outputmachine);
-void duplicatormap_remove(DuplicatorMap*, int channel, int machine, int outputmachine);
+void duplicatormap_init(psy_audio_DuplicatorMap*);
+void duplicatormap_dispose(psy_audio_DuplicatorMap*);
+int duplicatormap_at(psy_audio_DuplicatorMap*, int channel, int machine);
+void duplicatormap_allocate(psy_audio_DuplicatorMap*, int channel, int machine, int outputmachine);
+void duplicatormap_remove(psy_audio_DuplicatorMap*, int channel, int machine, int outputmachine);
 
 #endif

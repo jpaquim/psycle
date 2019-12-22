@@ -65,7 +65,7 @@ typedef struct Pianoroll {
    Pianogrid grid;
    int cx;
    int cy;
-   Pattern* pattern;
+   psy_audio_Pattern* pattern;
    unsigned int opcount;
    int syncpattern;
    psy_dsp_beat_t sequenceentryoffset;
@@ -74,6 +74,6 @@ typedef struct Pianoroll {
 } Pianoroll;
 
 void pianoroll_init(Pianoroll*, ui_component* parent, Workspace* workspace);
-void pianoroll_setpattern(Pianoroll*, Pattern*);
+void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
 
 #endif

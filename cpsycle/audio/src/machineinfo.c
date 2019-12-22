@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h> 
 
-void machineinfo_init(MachineInfo* self)
+void machineinfo_init(psy_audio_MachineInfo* self)
 {
 	self->Author = strdup("");
 	self->Command = strdup("");
@@ -23,7 +23,7 @@ void machineinfo_init(MachineInfo* self)
 	self->shellidx = 0;
 }
 
-void machineinfo_set(MachineInfo* self,
+void machineinfo_set(psy_audio_MachineInfo* self,
 		const char* author,
 		const char* command,
 		int flags,
@@ -49,7 +49,7 @@ void machineinfo_set(MachineInfo* self,
 	self->shellidx = shellidx;	
 }
 
-void machineinfo_setnativeinfo(MachineInfo* self,
+void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 		CMachineInfo* info,
 		int type,		
 		const char* modulepath,
@@ -69,7 +69,7 @@ void machineinfo_setnativeinfo(MachineInfo* self,
 	self->shellidx = shellidx;
 }
 
-void machineinfo_dispose(MachineInfo* self)
+void machineinfo_dispose(psy_audio_MachineInfo* self)
 {
 	free(self->Author);
 	self->Author = 0;
@@ -81,14 +81,14 @@ void machineinfo_dispose(MachineInfo* self)
 	self->modulepath = 0;
 }
 
-MachineInfo* machineinfo_alloc(void)
+psy_audio_MachineInfo* machineinfo_alloc(void)
 {
-	return (MachineInfo*) malloc(sizeof(MachineInfo));
+	return (psy_audio_MachineInfo*) malloc(sizeof(psy_audio_MachineInfo));
 }
 
-MachineInfo* machineinfo_allocinit(void)
+psy_audio_MachineInfo* machineinfo_allocinit(void)
 {
-	MachineInfo* rv;
+	psy_audio_MachineInfo* rv;
 
 	rv = machineinfo_alloc();
 	if (rv) {
@@ -97,11 +97,11 @@ MachineInfo* machineinfo_allocinit(void)
 	return rv;
 }
 
-MachineInfo* machineinfo_clone(const MachineInfo* self)
+psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 {
-	MachineInfo* rv;
+	psy_audio_MachineInfo* rv;
 
-	rv = (MachineInfo*) malloc(sizeof(MachineInfo));
+	rv = (psy_audio_MachineInfo*) malloc(sizeof(psy_audio_MachineInfo));
 	if (rv) {
 		rv->Author = strdup(self->Author ? self->Author : "");
 		rv->Command = strdup(self->Command ? self->Command : "");

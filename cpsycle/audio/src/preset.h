@@ -8,17 +8,17 @@
 
 typedef struct {
   char* name;
-  Table parameters;
-} Preset;
+  psy_Table parameters;
+} psy_audio_Preset;
 
-void preset_init(Preset*);
-void preset_dispose(Preset*);
-Preset* preset_alloc(void);
-Preset* preset_allocinit(void);
+void preset_init(psy_audio_Preset*);
+void preset_dispose(psy_audio_Preset*);
+psy_audio_Preset* preset_alloc(void);
+psy_audio_Preset* preset_allocinit(void);
 
-void preset_setname(Preset*, const char* name);
-const char* preset_name(Preset*);
-void preset_setvalue(Preset*, int numparam, int value);
-int preset_value(Preset*, int numparam);
+void preset_setname(psy_audio_Preset*, const char* name);
+const char* preset_name(psy_audio_Preset*);
+void preset_setvalue(psy_audio_Preset*, int numparam, int value);
+int preset_value(psy_audio_Preset*, int numparam);
 
 #endif

@@ -49,7 +49,7 @@ static char* notes_tab_a220[256] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 };
 
-const char* psy_dsp_notetostr(note_t note, psy_dsp_NotesTabMode mode)
+const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode)
 {
 	const char* rv;
 

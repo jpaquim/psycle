@@ -12,8 +12,8 @@ extern "C" {
 #include "command.h"
 
 typedef struct {
-	List* undo;
-	List* redo;
+	psy_List* undo;
+	psy_List* redo;
 } UndoRedo;
 
 void undoredo_init(UndoRedo*);

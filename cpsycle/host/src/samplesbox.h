@@ -16,14 +16,14 @@ typedef struct {
 	ui_label header;
 	ui_label group;
 	ui_listbox subsamplelist;	
-	Samples* samples;
-	Instruments* instruments;
+	psy_audio_Samples* samples;
+	psy_audio_Instruments* instruments;
 	psy_Signal signal_changed;
 	int changeinstrumentslot;
 } SamplesBox;
 
-void samplesbox_init(SamplesBox*, ui_component* parent, Samples*, Instruments*);
-void samplesbox_setsamples(SamplesBox*, Samples*, Instruments*);
+void samplesbox_init(SamplesBox*, ui_component* parent, psy_audio_Samples*, psy_audio_Instruments*);
+void samplesbox_setsamples(SamplesBox*, psy_audio_Samples*, psy_audio_Instruments*);
 SampleIndex samplesbox_selected(SamplesBox*);
 
 #endif

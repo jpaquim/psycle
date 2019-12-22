@@ -14,11 +14,11 @@
 typedef struct {
 	ui_component component;
 	ui_component client;
-	Properties* properties;
+	psy_Properties* properties;
 	ui_graphics* g;
 	int lastlevel;
-	Properties* selected;
-	Properties* search;
+	psy_Properties* selected;
+	psy_Properties* search;
 	ui_rectangle selrect;
 	int dirbutton;
 	int dy;
@@ -31,7 +31,7 @@ typedef struct {
 	int lineheight;
 	int columnwidth;
 	int identwidth;	
-	Properties* choiceproperty;
+	psy_Properties* choiceproperty;
 	ui_edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
@@ -39,6 +39,6 @@ typedef struct {
 } SettingsView;
 
 void settingsview_init(SettingsView* Settingsview, ui_component* parent,
-	ui_component* tabbarparent, Properties* properties);
+	ui_component* tabbarparent, psy_Properties* properties);
 
 #endif

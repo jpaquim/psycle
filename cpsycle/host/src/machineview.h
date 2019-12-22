@@ -62,7 +62,7 @@ typedef struct {
 	psy_dsp_amp_t volumedisplay;	
 	MachineCoords* coords;
 	MachineSkin* skin;
-	Machine* machine;
+	psy_audio_Machine* machine;
 	uintptr_t slot;
 	MachineFrame* frame;
 	ParamView* paramview;
@@ -80,9 +80,9 @@ enum {
 
 typedef struct {
 	ui_component component;	
-	Machines* machines;
-	Table machineuis;
-	List* wireframes;
+	psy_audio_Machines* machines;
+	psy_Table machineuis;
+	psy_List* wireframes;
 	int dx;
 	int dy;
 	int mx;
@@ -90,10 +90,10 @@ typedef struct {
 	uintptr_t dragslot;
 	int dragmode;
 	uintptr_t selectedslot;	
-	Wire dragwire;	
-	Wire selectedwire;
+	psy_audio_Wire dragwire;	
+	psy_audio_Wire selectedwire;
 	int drawvumeters;	
-	PluginCatcher plugincatcher;
+	psy_audio_PluginCatcher plugincatcher;
 	MachineSkin skin;	   
 	Workspace* workspace;	
 	struct MachineViewBar* statusbar;
@@ -122,7 +122,7 @@ typedef struct {
 
 void machineview_init(MachineView*, ui_component* parent,
 	ui_component* tabbarparent, Workspace*);
-void machineview_applyproperties(MachineView*, Properties*);
+void machineview_applyproperties(MachineView*, psy_Properties*);
 void machineview_align(MachineView*);
 
 #endif

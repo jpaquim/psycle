@@ -5,9 +5,9 @@
 
 #include "dummy.h"
 
-const MachineInfo* dummymachine_info(void)
+const psy_audio_MachineInfo* dummymachine_info(void)
 {
-	static MachineInfo const macinfo = {
+	static psy_audio_MachineInfo const macinfo = {
 		MI_VERSION,
 		0x0250,
 		EFFECT | 32 | 64,
@@ -25,17 +25,17 @@ const MachineInfo* dummymachine_info(void)
 	return &macinfo;
 }
 
-static const MachineInfo* info(DummyMachine* self) {
+static const psy_audio_MachineInfo* info(psy_audio_DummyMachine* self) {
 	return dummymachine_info();
 }
-static int mode(DummyMachine* self) { return self->mode; }
-static unsigned int numinputs(DummyMachine* self) { return 2; }
-static unsigned int numoutputs(DummyMachine* self) { return 2; }
+static int mode(psy_audio_DummyMachine* self) { return self->mode; }
+static unsigned int numinputs(psy_audio_DummyMachine* self) { return 2; }
+static unsigned int numoutputs(psy_audio_DummyMachine* self) { return 2; }
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(DummyMachine* self)
+static void vtable_init(psy_audio_DummyMachine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
@@ -47,7 +47,7 @@ static void vtable_init(DummyMachine* self)
 	}
 }
 
-void dummymachine_init(DummyMachine* self, MachineCallback callback)
+void dummymachine_init(psy_audio_DummyMachine* self, MachineCallback callback)
 {	
 	self->mode = MACHMODE_FX;
 	custommachine_init(&self->custommachine, callback);

@@ -27,13 +27,13 @@ static void vuscope_ondraw(VuScope*, ui_component* sender, ui_graphics*);
 static void vuscope_drawscale(VuScope*, ui_graphics*);
 static void vuscope_drawbars(VuScope*, ui_graphics*);
 static void vuscope_ontimer(VuScope*, ui_component* sender, int timerid);
-static void vuscope_onsrcmachineworked(VuScope*, Machine*, unsigned int slot, BufferContext*);
+static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
 static void vuscope_onsongchanged(VuScope*, Workspace*);
 static void vuscope_connectmachinessignals(VuScope*, Workspace*);
 static void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 
-void vuscope_init(VuScope* self, ui_component* parent, Wire wire,
+void vuscope_init(VuScope* self, ui_component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	ui_component_init(&self->component, parent);
@@ -301,12 +301,12 @@ void vuscope_ontimer(VuScope* self, ui_component* sender, int timerid)
 	}
 }
 
-void vuscope_onsrcmachineworked(VuScope* self, Machine* master, unsigned int slot,
-	BufferContext* bc)
+void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsigned int slot,
+	psy_audio_BufferContext* bc)
 {	
 	if (bc->rmsvol) {	
-		Connections* connections;
-		WireSocketEntry* input;	
+		psy_audio_Connections* connections;
+		psy_audio_WireSocketEntry* input;	
 
 		connections = &self->workspace->song->machines.connections;
 		input = connection_input(connections, self->wire.src, self->wire.dst);
@@ -328,7 +328,7 @@ void vuscope_onsongchanged(VuScope* self, Workspace* workspace)
 void vuscope_connectmachinessignals(VuScope* self, Workspace* workspace)
 {
 	if (workspace->song) {
-		Machine* srcmachine;
+		psy_audio_Machine* srcmachine;
 
 		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
@@ -341,7 +341,7 @@ void vuscope_connectmachinessignals(VuScope* self, Workspace* workspace)
 void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace)
 {
 	if (workspace->song) {
-		Machine* srcmachine;
+		psy_audio_Machine* srcmachine;
 
 		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
@@ -354,7 +354,7 @@ void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace)
 void vuscope_stop(VuScope* self)
 {
 	if (self->workspace && self->workspace->song) {
-		Machine* srcmachine;		
+		psy_audio_Machine* srcmachine;		
 		srcmachine = machines_at(&self->workspace->song->machines,
 			self->wire.src);
 		if (srcmachine) {

@@ -65,10 +65,10 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	ui_component_enablealign(&self->row1);
 	ui_component_setalign(&self->row1, UI_ALIGN_TOP);
 	ui_button_init(&self->addsong, &self->row1);
-	ui_button_settext(&self->addsong, "+ Song");
+	ui_button_settext(&self->addsong, "+ psy_audio_Song");
 	ui_button_init(&self->removesong, &self->row1);
-	ui_button_settext(&self->removesong, "- Song");
-	list_free(ui_components_setalign(
+	ui_button_settext(&self->removesong, "- psy_audio_Song");
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->row1, 0),
 		UI_ALIGN_LEFT,
 			&margin));	
@@ -83,7 +83,7 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	ui_button_settext(&self->stop, "Stop");
 	ui_button_init(&self->next, &self->row2);
 	ui_button_settext(&self->next, "Next");
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->row2, 0),
 		UI_ALIGN_LEFT,
 			&margin));	
@@ -146,12 +146,12 @@ void playlisteditor_onaddsong(PlayListEditor* self, ui_component* sender)
 		int currsel;
 
 		currsel = ui_listbox_cursel(&self->listbox);
-		extract_path(path, prefix, name, ext);
+		psy_dir_extract_path(path, prefix, name, ext);
 		entry = playlistentry_allocinit(name, path);
 		if (entry) {
-			List* p;
+			psy_List* p;
 
-			p = list_append(&self->entries, entry);
+			p = psy_list_append(&self->entries, entry);
 			playlisteditor_buildplaylist(self);
 			if (!self->currentry) {				
 				ui_listbox_setcursel(&self->listbox, 0);
@@ -171,7 +171,7 @@ void playlisteditor_onremovesong(PlayListEditor* self, ui_component* sender)
 
 void playlisteditor_buildplaylist(PlayListEditor* self)
 {
-	List* p;
+	psy_List* p;
 	
 	ui_listbox_clear(&self->listbox);
 	for (p = self->entries; p != 0; p = p->next) {
@@ -220,7 +220,7 @@ void playlisteditor_ontimer(PlayListEditor* self, ui_component* sender, int time
 	if (!player_playing(&self->workspace->player)) {
 		if (self->nextentry) {
 			PlayListEntry* entry;
-			List* p;
+			psy_List* p;
 			int c;
 			
 			self->currentry = self->nextentry;
@@ -251,9 +251,9 @@ void playlisteditor_ontimer(PlayListEditor* self, ui_component* sender, int time
 void playlisteditor_onlistchanged(PlayListEditor* self, ui_component* sender,
 	int slot)
 {
-	List* p;
+	psy_List* p;
 	
-	p = list_at(self->entries, slot);
+	p = psy_list_at(self->entries, slot);
 	player_stop(&self->workspace->player);
 	self->currentry = p;
 	self->nextentry = p;

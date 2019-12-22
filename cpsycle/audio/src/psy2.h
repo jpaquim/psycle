@@ -6,6 +6,6 @@
 
 #include "songio.h"
 
-void psy2_load(struct SongFile*);
+void psy2_load(struct psy_audio_SongFile*);
 
 #endif

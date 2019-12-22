@@ -28,8 +28,8 @@ void ui_notebook_init(ui_notebook* self, ui_component* parent)
 
 void ui_notebook_setpageindex(ui_notebook* self, int pageindex)
 {	
-	List* p;
-	List* q;
+	psy_List* p;
+	psy_List* q;
 	int c = 0;	
 	ui_size size;
 	
@@ -55,7 +55,7 @@ void ui_notebook_setpageindex(ui_notebook* self, int pageindex)
 			}
 		}
 	}
-	list_free(q);		
+	psy_list_free(q);		
 	if (self->component.align == UI_ALIGN_LEFT) {
 		ui_component_align(ui_component_parent(&self->component));
 	}
@@ -74,8 +74,8 @@ void ui_notebook_connectcontroller(ui_notebook* self, psy_Signal*
 
 void onsize(ui_notebook* self, ui_component* sender, ui_size* size)
 {
-	List* p;
-	List* q;
+	psy_List* p;
+	psy_List* q;
 
 	if (self->split) {
 		align_split(self, self->splitx);
@@ -88,7 +88,7 @@ void onsize(ui_notebook* self, ui_component* sender, ui_size* size)
 				ui_component_setposition(component,
 					0, 0, size->width, size->height);		
 		}	
-		list_free(q);
+		psy_list_free(q);
 	}
 }
 
@@ -180,8 +180,8 @@ void onmouseleavesplitbar(ui_notebook* self, ui_component* sender)
 }
 
 void align_split(ui_notebook* self, int x) {
-	List* p;
-	List* q;
+	psy_List* p;
+	psy_List* q;
 	int c = 0;
 	ui_size size;
 
@@ -204,14 +204,14 @@ void align_split(ui_notebook* self, int x) {
 			}			
 		}		
 	}	
-	list_free(q);
+	psy_list_free(q);
 }
 
 ui_component* ui_notebook_activepage(ui_notebook* self)
 {
 	ui_component* rv = 0;
-	List* p;
-	List* q;
+	psy_List* p;
+	psy_List* q;
 
 	for (p = q = ui_component_children(&self->component, 0);
 			p != 0; p = p->next) {		
@@ -223,6 +223,6 @@ ui_component* ui_notebook_activepage(ui_notebook* self)
 			break;
 		}
 	}
-	list_free(q);
+	psy_list_free(q);
 	return rv;			
 }
