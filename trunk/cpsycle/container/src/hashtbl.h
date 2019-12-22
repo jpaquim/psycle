@@ -6,46 +6,46 @@
 
 #include "../../detail/stdint.h"
 
-#define TABLEKEYS 256
+#define psy_TABLEKEYS 256
 
-typedef struct HashEntry {
+typedef struct psy_TableHashEntry {
 	uintptr_t key;
 	void* value;
-	struct HashEntry* next;
-} HashEntry;
+	struct psy_TableHashEntry* next;
+} psy_TableHashEntry;
 
 typedef struct {
-	HashEntry* keys[TABLEKEYS];
+	psy_TableHashEntry* keys[psy_TABLEKEYS];
 	uintptr_t arraysize;
 	uintptr_t count;
-} Table;
+} psy_Table;
 
 typedef struct {
 	uintptr_t pos;
 	uintptr_t count;
-	HashEntry* curr;
-	Table* table;
-} TableIterator;
+	psy_TableHashEntry* curr;
+	psy_Table* table;
+} psy_TableIterator;
 
-extern TableIterator tableend;
+extern psy_TableIterator tableend;
 
-void tableiterator_init(TableIterator*, Table*);
-void tableiterator_inc(TableIterator*);
-uintptr_t tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs);
-uintptr_t tableiterator_key(TableIterator*);
-void* tableiterator_value(TableIterator*);
+void psy_tableiterator_init(psy_TableIterator*, psy_Table*);
+void psy_tableiterator_inc(psy_TableIterator*);
+uintptr_t psy_tableiterator_equal(const psy_TableIterator* lhs, const psy_TableIterator* rhs);
+uintptr_t psy_tableiterator_key(psy_TableIterator*);
+void* psy_tableiterator_value(psy_TableIterator*);
 
-void table_init(Table*);
-void table_dispose(Table*);
-void table_insert(Table*, uintptr_t k, void* value);
-void table_remove(Table*, uintptr_t k);
-void* table_at(Table*, uintptr_t k);
-uintptr_t table_size(Table*);
-int table_exists(Table*, uintptr_t k);
-void table_clear(Table*);
-TableIterator table_begin(Table*);
-const TableIterator* table_end(void);
+void psy_table_init(psy_Table*);
+void psy_table_dispose(psy_Table*);
+void psy_table_insert(psy_Table*, uintptr_t k, void* value);
+void psy_table_remove(psy_Table*, uintptr_t k);
+void* psy_table_at(psy_Table*, uintptr_t k);
+uintptr_t psy_table_size(psy_Table*);
+int psy_table_exists(psy_Table*, uintptr_t k);
+void psy_table_clear(psy_Table*);
+psy_TableIterator psy_table_begin(psy_Table*);
+const psy_TableIterator* psy_table_end(void);
 
-uintptr_t freetableentry(void*, void*, HashEntry*);
+uintptr_t psy_table_freetableentry(void*, void*, psy_TableHashEntry*);
 
 #endif

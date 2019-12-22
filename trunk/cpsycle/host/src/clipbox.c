@@ -9,7 +9,7 @@
 static void clipbox_ondraw(ClipBox*, ui_component* sender, ui_graphics*);
 static void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid);
 static void clipbox_onmousedown(ClipBox* self, ui_component* sender, MouseEvent*);
-static void clipbox_onmasterworked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc);
+static void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned int slot, psy_audio_BufferContext* bc);
 static void clipbox_onsongchanged(ClipBox* self, Workspace* workspace);
 static void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace);
 
@@ -36,7 +36,7 @@ void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid)
 	}
 }
 
-void clipbox_onmasterworked(ClipBox* self, Machine* master, unsigned int slot, BufferContext* bc)
+void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned int slot, psy_audio_BufferContext* bc)
 {	
 	if (bc->rmsvol) {		
 		if (bc->rmsvol->data.previousLeft >= 32767.f ||

@@ -6,61 +6,60 @@
 
 #include "filtercoeff.h"
 
-struct Filter;
+struct psy_dsp_Filter;
 
 
-typedef void (*fp_filter_init)(struct Filter*);
-typedef void (*fp_filter_dispose)(struct Filter*);
-typedef psy_dsp_amp_t (*fp_filter_work)(struct Filter*, psy_dsp_amp_t sample);
-typedef void (*fp_filter_setcutoff)(struct Filter*, float cutoff);	
-typedef float (*fp_filter_cutoff)(struct Filter*);
-typedef void (*fp_filter_setressonance)(struct Filter*, float ressonance);
-typedef float (*fp_filter_ressonance)(struct Filter*);
-typedef void (*fp_filter_setsamplerate)(struct Filter*, float samplerate);
-typedef float (*fp_filter_samplerate)(struct Filter*);
-typedef void (*fp_filter_update)(struct Filter*, int full);
-typedef void (*fp_filter_reset)(struct Filter*);
+typedef void (*psy_dsp_fp_filter_init)(struct psy_dsp_Filter*);
+typedef void (*psy_dsp_fp_filter_dispose)(struct psy_dsp_Filter*);
+typedef psy_dsp_amp_t (*psy_dsp_fp_filter_work)(struct psy_dsp_Filter*, psy_dsp_amp_t sample);
+typedef void (*psy_dsp_fp_filter_setcutoff)(struct psy_dsp_Filter*, float cutoff);	
+typedef float (*psy_dsp_fp_filter_cutoff)(struct psy_dsp_Filter*);
+typedef void (*psy_dsp_fp_filter_setressonance)(struct psy_dsp_Filter*, float ressonance);
+typedef float (*psy_dsp_fp_filter_ressonance)(struct psy_dsp_Filter*);
+typedef void (*psy_dsp_fp_filter_setsamplerate)(struct psy_dsp_Filter*, float samplerate);
+typedef float (*psy_dsp_fp_filter_samplerate)(struct psy_dsp_Filter*);
+typedef void (*psy_dsp_fp_filter_update)(struct psy_dsp_Filter*, int full);
+typedef void (*psy_dsp_fp_filter_reset)(struct psy_dsp_Filter*);
 
 typedef struct filter_vtable {
-	fp_filter_init init;
-	fp_filter_dispose dispose;
-	fp_filter_work work;
-	fp_filter_setcutoff setcutoff;
-	fp_filter_cutoff cutoff;
-	fp_filter_setressonance setressonance;
-	fp_filter_ressonance ressonance;
-	fp_filter_setsamplerate setsamplerate;
-	fp_filter_samplerate samplerate;
-	fp_filter_update update;
-	fp_filter_reset reset;
+	psy_dsp_fp_filter_init init;
+	psy_dsp_fp_filter_dispose dispose;
+	psy_dsp_fp_filter_work work;
+	psy_dsp_fp_filter_setcutoff setcutoff;
+	psy_dsp_fp_filter_cutoff cutoff;
+	psy_dsp_fp_filter_setressonance setressonance;
+	psy_dsp_fp_filter_ressonance ressonance;
+	psy_dsp_fp_filter_setsamplerate setsamplerate;
+	psy_dsp_fp_filter_samplerate samplerate;
+	psy_dsp_fp_filter_update update;
+	psy_dsp_fp_filter_reset reset;
 } filter_vtable;
 
-typedef struct Filter {
+typedef struct psy_dsp_Filter {
 	struct filter_vtable* vtable;
-} Filter;
+} psy_dsp_Filter;
 
-void filter_init(Filter*);
+void psy_dsp_filter_init(psy_dsp_Filter*);
 
 typedef struct {
-	Filter filter;	
+	psy_dsp_Filter filter;	
 	float samplerate;
 	float cutoff;
 	float q;
-} CustomFilter;
+} psy_dsp_CustomFilter;
 
-void customfilter_init(CustomFilter*);
+void psy_dsp_customfilter_init(psy_dsp_CustomFilter*);
 
 typedef struct {
 	psy_dsp_amp_t x1;
 	psy_dsp_amp_t x2;
 	psy_dsp_amp_t y1;
 	psy_dsp_amp_t y2;
-} FIRWork;
+} psy_dsp_FIRWork;
 
-void firwork_init(FIRWork*);
-psy_dsp_amp_t firwork_work(FIRWork*, FilterCoeff* coeffs,
+void psy_dsp_firwork_init(psy_dsp_FIRWork*);
+psy_dsp_amp_t psy_dsp_firwork_work(psy_dsp_FIRWork*, psy_dsp_FilterCoeff* coeffs,
 	psy_dsp_amp_t sample);
-void firwork_reset(FIRWork*);
-
+void psy_dsp_firwork_reset(psy_dsp_FIRWork*);
 
 #endif

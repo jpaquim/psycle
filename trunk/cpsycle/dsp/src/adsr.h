@@ -13,9 +13,9 @@ typedef struct {
 	psy_dsp_amp_t maxvalue;
 	psy_dsp_beat_t mintime;
 	psy_dsp_beat_t maxtime;	
-} EnvelopePoint;
+} psy_dsp_EnvelopePoint;
 
-void envelopepoint_init(EnvelopePoint*, 
+void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint*, 
 		psy_dsp_seconds_t time,
 		psy_dsp_amp_t value,
 		psy_dsp_seconds_t mintime,
@@ -29,21 +29,21 @@ typedef struct {
 	psy_dsp_percent_t sustain;
 	psy_dsp_seconds_t release;
 	psy_dsp_seconds_t fastrelease;
-} ADSRSettings;
+} psy_dsp_ADSRSettings;
 
-void adsr_settings_init(ADSRSettings*, psy_dsp_seconds_t, psy_dsp_seconds_t,
+void adsr_settings_init(psy_dsp_ADSRSettings*, psy_dsp_seconds_t, psy_dsp_seconds_t,
 	psy_dsp_seconds_t, psy_dsp_seconds_t);
-void adsr_settings_initdefault(ADSRSettings*);
-float adsr_settings_attack(ADSRSettings*);
-void adsr_settings_setattack(ADSRSettings*, psy_dsp_seconds_t);
-float adsr_settings_decay(ADSRSettings*);
-void adsr_settings_setdecay(ADSRSettings*, psy_dsp_seconds_t);
-float adsr_settings_sustain(ADSRSettings*);
-void adsr_settings_setsustain(ADSRSettings*, psy_dsp_percent_t);
-float adsr_settings_release(ADSRSettings*);
-void adsr_settings_setrelease(ADSRSettings*, psy_dsp_seconds_t);
-float adsr_settings_fastrelease(ADSRSettings*);
-void adsr_settings_setfastrelease(ADSRSettings*, psy_dsp_seconds_t);
+void adsr_settings_initdefault(psy_dsp_ADSRSettings*);
+float adsr_settings_attack(psy_dsp_ADSRSettings*);
+void adsr_settings_setattack(psy_dsp_ADSRSettings*, psy_dsp_seconds_t);
+float adsr_settings_decay(psy_dsp_ADSRSettings*);
+void adsr_settings_setdecay(psy_dsp_ADSRSettings*, psy_dsp_seconds_t);
+float adsr_settings_sustain(psy_dsp_ADSRSettings*);
+void adsr_settings_setsustain(psy_dsp_ADSRSettings*, psy_dsp_percent_t);
+float adsr_settings_release(psy_dsp_ADSRSettings*);
+void adsr_settings_setrelease(psy_dsp_ADSRSettings*, psy_dsp_seconds_t);
+float adsr_settings_fastrelease(psy_dsp_ADSRSettings*);
+void adsr_settings_setfastrelease(psy_dsp_ADSRSettings*, psy_dsp_seconds_t);
 
 typedef enum
 {
@@ -53,22 +53,22 @@ typedef enum
 	ENV_SUSTAIN = 3,
 	ENV_RELEASE = 4,
 	ENV_FASTRELEASE = 5
-} EnvelopeStage;
+} psy_dsp_EnvelopeStage;
 
 typedef struct {
 	psy_dsp_amp_t value;
 	psy_dsp_amp_t step;	
 	unsigned int samplerate;
-	ADSRSettings settings;
-	EnvelopeStage stage;
-} ADSR;
+	psy_dsp_ADSRSettings settings;
+	psy_dsp_EnvelopeStage stage;
+} psy_dsp_ADSR;
 
-void adsr_initdefault(ADSR*, unsigned int samplerate);
-void adsr_init(ADSR*, const ADSRSettings*, unsigned int samplerate);
-void adsr_reset(ADSR*);
-void adsr_setsamplerate(ADSR*, unsigned int samplerate);
-void adsr_tick(ADSR*);
-void adsr_start(ADSR*);
-void adsr_release(ADSR*);
+void psy_dsp_adsr_initdefault(psy_dsp_ADSR*, unsigned int samplerate);
+void psy_dsp_adsr_init(psy_dsp_ADSR*, const psy_dsp_ADSRSettings*, unsigned int samplerate);
+void psy_dsp_adsr_reset(psy_dsp_ADSR*);
+void psy_dsp_adsr_setsamplerate(psy_dsp_ADSR*, unsigned int samplerate);
+void psy_dsp_adsr_tick(psy_dsp_ADSR*);
+void psy_dsp_adsr_start(psy_dsp_ADSR*);
+void psy_dsp_adsr_release(psy_dsp_ADSR*);
 
 #endif

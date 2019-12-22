@@ -7,31 +7,31 @@
 #include <dsptypes.h>
 #include "../../detail/stdint.h"
 
-typedef struct Buffer {
+typedef struct psy_audio_Buffer {
 	uintptr_t numchannels;	
 	psy_dsp_amp_t** samples;
 	unsigned int numsamples;
 	uintptr_t offset;
-} Buffer;
+} psy_audio_Buffer;
 
-void buffer_init(Buffer*, uintptr_t channels);
-void buffer_init_shared(Buffer*, Buffer* src, uintptr_t offset);
-void buffer_dispose(Buffer*);
-Buffer* buffer_alloc(void);
-Buffer* buffer_allocinit(uintptr_t channels);
-void buffer_resize(Buffer*, uintptr_t channels);
-void buffer_move(Buffer*, uintptr_t offset);
-void buffer_setoffset(Buffer*, uintptr_t offset);
-uintptr_t buffer_offset(Buffer*);
-psy_dsp_amp_t* buffer_at(Buffer*, uintptr_t channel);
-void buffer_clearsamples(Buffer*, uintptr_t numsamples);
-void buffer_addsamples(Buffer*, Buffer* source, uintptr_t numsamples,
+void buffer_init(psy_audio_Buffer*, uintptr_t channels);
+void buffer_init_shared(psy_audio_Buffer*, psy_audio_Buffer* src, uintptr_t offset);
+void buffer_dispose(psy_audio_Buffer*);
+psy_audio_Buffer* buffer_alloc(void);
+psy_audio_Buffer* buffer_allocinit(uintptr_t channels);
+void buffer_resize(psy_audio_Buffer*, uintptr_t channels);
+void buffer_move(psy_audio_Buffer*, uintptr_t offset);
+void buffer_setoffset(psy_audio_Buffer*, uintptr_t offset);
+uintptr_t buffer_offset(psy_audio_Buffer*);
+psy_dsp_amp_t* buffer_at(psy_audio_Buffer*, uintptr_t channel);
+void buffer_clearsamples(psy_audio_Buffer*, uintptr_t numsamples);
+void buffer_addsamples(psy_audio_Buffer*, psy_audio_Buffer* source, uintptr_t numsamples,
 	float vol);
-void buffer_mulsamples(Buffer*, uintptr_t numsamples, psy_dsp_amp_t mul);
-uintptr_t buffer_numchannels(Buffer*);
-void buffer_pan(Buffer* self, psy_dsp_amp_t pan, uintptr_t amount);
-int buffer_mono(Buffer*);
-void buffer_insertsamples(Buffer*, Buffer* source, uintptr_t numsamples,
+void buffer_mulsamples(psy_audio_Buffer*, uintptr_t numsamples, psy_dsp_amp_t mul);
+uintptr_t buffer_numchannels(psy_audio_Buffer*);
+void buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t amount);
+int buffer_mono(psy_audio_Buffer*);
+void buffer_insertsamples(psy_audio_Buffer*, psy_audio_Buffer* source, uintptr_t numsamples,
 	uintptr_t numsourcesamples);
 
 #endif

@@ -5,7 +5,7 @@
 
 #include "patternevent.h"
 
-void parameterrange_init(ParameterRange* self, 
+void parameterrange_init(psy_audio_ParameterRange* self, 
 	uintptr_t low, uintptr_t high, uintptr_t min, uintptr_t max)
 {
 	self->low = low;
@@ -14,12 +14,12 @@ void parameterrange_init(ParameterRange* self,
 	self->max = high;
 }
 
-int parameterrange_intersect(ParameterRange* self, uintptr_t value)
+int parameterrange_intersect(psy_audio_ParameterRange* self, uintptr_t value)
 {
 	return value >= self->low && value <= self->high;
 }
 
-void patternevent_init(PatternEvent* self,
+void patternevent_init(psy_audio_PatternEvent* self,
 	unsigned char note,
 	unsigned char inst,
 	unsigned char mach,
@@ -33,7 +33,7 @@ void patternevent_init(PatternEvent* self,
 	self->parameter = parameter;
 }
 
-void patternevent_clear(PatternEvent* self)
+void patternevent_clear(psy_audio_PatternEvent* self)
 {
 	self->note = 255;
 	self->inst = 255;
@@ -42,7 +42,7 @@ void patternevent_clear(PatternEvent* self)
 	self->parameter = 0;
 }
 
-int patternevent_empty(PatternEvent* self)
+int patternevent_empty(psy_audio_PatternEvent* self)
 {
 	return 
 		self->note == 255 &&

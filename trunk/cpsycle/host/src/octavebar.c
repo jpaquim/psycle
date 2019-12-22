@@ -33,7 +33,7 @@ void InitOctaveBar(OctaveBar* self, ui_component* parent, Workspace* workspace)
 
 		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
 			ui_value_makepx(0), ui_value_makepx(0));				
-		list_free(ui_components_setalign(
+		psy_list_free(ui_components_setalign(
 			ui_component_children(&self->component, 0),
 			UI_ALIGN_LEFT,
 			&margin));		

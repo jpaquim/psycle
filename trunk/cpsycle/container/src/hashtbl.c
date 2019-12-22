@@ -7,26 +7,26 @@
 #include <stdlib.h>
 #include <assert.h>
 
-TableIterator tableend;
+psy_TableIterator tableend;
 
 static uintptr_t h(uintptr_t k, uintptr_t size) {  return k % size; }
 
-void table_init(Table* self)
+void psy_table_init(psy_Table* self)
 {
   uintptr_t i;
 
-  self->arraysize = TABLEKEYS;
+  self->arraysize = psy_TABLEKEYS;
   for (i = 0; i < self->arraysize; ++i) {
     self->keys[i] = 0;
   }
   self->count = 0; 
 }
 
-void table_dispose(Table* self)
+void psy_table_dispose(psy_Table* self)
 {
   uintptr_t i;
-  HashEntry* p;
-  HashEntry* q;
+  psy_TableHashEntry* p;
+  psy_TableHashEntry* q;
 
   for (i = 0; i < self->arraysize; ++i) {
     for (p = self->keys[i]; p != 0; p = q) {      
@@ -38,17 +38,17 @@ void table_dispose(Table* self)
   self->count = 0;
 }
 
-void table_clear(Table* self)
+void psy_table_clear(psy_Table* self)
 {
-	table_dispose(self);
-	table_init(self);
+	psy_table_dispose(self);
+	psy_table_init(self);
 }
 
-void table_insert(Table* self, uintptr_t k, void* value)
+void psy_table_insert(psy_Table* self, uintptr_t k, void* value)
 {
 	uintptr_t hn;
-	HashEntry* p;
-	HashEntry* newentry;
+	psy_TableHashEntry* p;
+	psy_TableHashEntry* newentry;
 
 	hn = h(k, self->arraysize);
 	p = 0;
@@ -63,7 +63,7 @@ void table_insert(Table* self, uintptr_t k, void* value)
 		}
 	}
 	if (!p) {
-		newentry = malloc(sizeof(HashEntry));
+		newentry = malloc(sizeof(psy_TableHashEntry));
 		newentry->key = k;
 		newentry->value = value;
 		newentry->next = 0;
@@ -80,11 +80,11 @@ void table_insert(Table* self, uintptr_t k, void* value)
 	}
 }
 
-void table_remove(Table* self, uintptr_t k)
+void psy_table_remove(psy_Table* self, uintptr_t k)
 {
 	uintptr_t hn;
-	HashEntry* p;
-	HashEntry* q;
+	psy_TableHashEntry* p;
+	psy_TableHashEntry* q;
 
 	hn = h(k, self->arraysize);
 	if (self->keys[hn] != 0) {	
@@ -107,7 +107,7 @@ void table_remove(Table* self, uintptr_t k)
 	}
 }
 
-void* table_at(Table* self, uintptr_t k)
+void* psy_table_at(psy_Table* self, uintptr_t k)
 {
 	void* rv = 0;
 	  	
@@ -116,7 +116,7 @@ void* table_at(Table* self, uintptr_t k)
 
 		hn = h(k, self->arraysize);
 		if (self->keys[hn] != 0) {		
-			HashEntry* p;
+			psy_TableHashEntry* p;
 
 			p = self->keys[hn];
 			while (p != 0) {
@@ -131,7 +131,7 @@ void* table_at(Table* self, uintptr_t k)
 	return rv;
 }
 
-int table_exists(Table* self, uintptr_t k)
+int psy_table_exists(psy_Table* self, uintptr_t k)
 {	
 	int rv = 0;
 	  	
@@ -140,7 +140,7 @@ int table_exists(Table* self, uintptr_t k)
 
 		hn = h(k, self->arraysize);
 		if (self->keys[hn] != 0) {		
-			HashEntry* p;
+			psy_TableHashEntry* p;
 
 			p = self->keys[hn];
 			while (p != 0) {
@@ -155,31 +155,31 @@ int table_exists(Table* self, uintptr_t k)
 	return rv;
 }
 
-uintptr_t table_size(Table* self)
+uintptr_t psy_table_size(psy_Table* self)
 {
 	return self->count;
 }
 
-uintptr_t freetableentry(void* context, void* param, HashEntry* entry)
+uintptr_t psy_table_freetableentry(void* context, void* param, psy_TableHashEntry* entry)
 {
 	free(entry->value);
 	return 1;
 }
 
-TableIterator table_begin(Table* self)
+psy_TableIterator psy_table_begin(psy_Table* self)
 {
-	TableIterator rv;
+	psy_TableIterator rv;
 
-	tableiterator_init(&rv, self);
+	psy_tableiterator_init(&rv, self);
 	return rv;
 }
 
-const TableIterator* table_end(void)
+const psy_TableIterator* psy_table_end(void)
 {
 	return &tableend;
 }
 
-void tableiterator_init(TableIterator* self, Table* table)
+void psy_tableiterator_init(psy_TableIterator* self, psy_Table* table)
 {
 	assert(table);
 	self->table = table;
@@ -189,18 +189,18 @@ void tableiterator_init(TableIterator* self, Table* table)
 	}
 	self->pos = 0;
 	self->count = 0;	
-	while (!table->keys[self->pos] && self->pos < TABLEKEYS) {		
+	while (!table->keys[self->pos] && self->pos < psy_TABLEKEYS) {		
 		++self->pos;		
 	}	
-	self->curr = self->pos < TABLEKEYS ? table->keys[self->pos] : 0;
+	self->curr = self->pos < psy_TABLEKEYS ? table->keys[self->pos] : 0;
 }
 
-uintptr_t tableiterator_equal(const TableIterator* lhs, const TableIterator* rhs)
+uintptr_t psy_tableiterator_equal(const psy_TableIterator* lhs, const psy_TableIterator* rhs)
 {
 	return lhs->curr == rhs->curr;
 }
 
-void tableiterator_inc(TableIterator* self)
+void psy_tableiterator_inc(psy_TableIterator* self)
 {
 	if (self->count == self->table->count) {
 		self->curr = 0;
@@ -209,20 +209,20 @@ void tableiterator_inc(TableIterator* self)
 	if (self->curr) {
 		self->curr = self->curr->next;		
 	}	
-	while (!self->curr && self->pos + 1 < TABLEKEYS) {
+	while (!self->curr && self->pos + 1 < psy_TABLEKEYS) {
 		++self->pos;
 		self->curr = self->table->keys[self->pos];		
 	}
 	++self->count;
 }
 
-uintptr_t tableiterator_key(TableIterator* self)
+uintptr_t psy_tableiterator_key(psy_TableIterator* self)
 {
 	assert(self->curr);
 	return self->curr->key;
 }
 
-void* tableiterator_value(TableIterator* self)
+void* psy_tableiterator_value(psy_TableIterator* self)
 {
 	assert(self->curr);
 	return self->curr->value;

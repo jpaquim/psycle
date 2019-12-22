@@ -13,17 +13,17 @@
 #include <windows.h>
 #endif
 
-static int psyclescript_parse_machineinfo(PsycleScript*, MachineInfo*);
-static void psyclescript_setsearchpath(PsycleScript*, const char* modulepath);
+static int psyclescript_parse_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
+static void psyclescript_setsearchpath(psy_audio_PsycleScript*, const char* modulepath);
 
-int psyclescript_init(PsycleScript* self)
+int psyclescript_init(psy_audio_PsycleScript* self)
 {
 	self->L = luaL_newstate();
 	luaL_openlibs(self->L);
 	return 0;
 }
 
-int psyclescript_dispose(PsycleScript* self)
+int psyclescript_dispose(psy_audio_PsycleScript* self)
 {
   int err = 0;
 
@@ -34,7 +34,7 @@ int psyclescript_dispose(PsycleScript* self)
   return err;
 }
 
-int psyclescript_load(PsycleScript* self, const char* path)
+int psyclescript_load(psy_audio_PsycleScript* self, const char* path)
 {
   int status;  
 // set search path for require  
@@ -51,14 +51,14 @@ int psyclescript_load(PsycleScript* self, const char* path)
   return status;
 }
 
-int psyclescript_preparestate(PsycleScript* self, const luaL_Reg methods[],
+int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg methods[],
 	void* host)
 {
-  PsycleScript** ud;
+  psy_audio_PsycleScript** ud;
 
   lua_newtable(self->L);
   luaL_setfuncs(self->L, methods, 0);
-  ud = (PsycleScript **)lua_newuserdata(self->L, sizeof(PsycleScript *));
+  ud = (psy_audio_PsycleScript **)lua_newuserdata(self->L, sizeof(psy_audio_PsycleScript *));
   luaL_newmetatable(self->L, "psyhostmeta");
   lua_setmetatable(self->L, -2);
   *ud = host;
@@ -77,7 +77,7 @@ int psyclescript_preparestate(PsycleScript* self, const luaL_Reg methods[],
   return 0;
 }
 
-int psyclescript_run(PsycleScript* self)
+int psyclescript_run(psy_audio_PsycleScript* self)
 { 
   int status;
 
@@ -88,7 +88,7 @@ int psyclescript_run(PsycleScript* self)
   return status;
 }
 
-int psyclescript_start(PsycleScript* self)
+int psyclescript_start(psy_audio_PsycleScript* self)
 {
   lua_getglobal(self->L, "psycle");
   if (lua_isnil(self->L, -1)) {
@@ -106,7 +106,7 @@ int psyclescript_start(PsycleScript* self)
   return 0;
 }
 
-int psyclescript_machineinfo(PsycleScript* self, MachineInfo* rv)
+int psyclescript_machineinfo(psy_audio_PsycleScript* self, psy_audio_MachineInfo* rv)
 {
 	int err = 0;
 	lua_getglobal(self->L, "psycle");
@@ -131,7 +131,7 @@ int psyclescript_machineinfo(PsycleScript* self, MachineInfo* rv)
 	return err;
 }
 
-int psyclescript_parse_machineinfo(PsycleScript* self, MachineInfo* rv)
+int psyclescript_parse_machineinfo(psy_audio_PsycleScript* self, psy_audio_MachineInfo* rv)
 {  
 	char* name = 0;
 	char* vendor = 0;	
@@ -228,14 +228,14 @@ int psyclescript_open(lua_State* L,
     return 1;
 }
 
-void psyclescript_require(PsycleScript* self, const char* name,
+void psyclescript_require(psy_audio_PsycleScript* self, const char* name,
 	lua_CFunction openf)
 {
 	luaL_requiref(self->L, name, openf, 1);
     lua_pop(self->L, 1);
 }
 
-void psyclescript_setsearchpath(PsycleScript* self, const char* modulepath)
+void psyclescript_setsearchpath(psy_audio_PsycleScript* self, const char* modulepath)
 {	
   const char* path =
 	  "c:/programme/psycle/luascripts/?.lua;"

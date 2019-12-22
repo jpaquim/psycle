@@ -36,7 +36,7 @@ static int fileoutdriver_init(FileOutDriver*);
 static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
 static int driver_open(Driver*);
-static void driver_configure(Driver*, Properties*);
+static void driver_configure(Driver*, psy_Properties*);
 static int driver_close(Driver*);
 static int driver_dispose(Driver*);
 static unsigned int samplerate(Driver*);
@@ -120,7 +120,7 @@ int driver_close(Driver* driver)
 	return 0;
 }
 
-void driver_configure(Driver* driver, Properties* config)
+void driver_configure(Driver* driver, psy_Properties* config)
 {
 }
 
@@ -131,17 +131,17 @@ unsigned int samplerate(Driver* self)
 
 void init_properties(Driver* self)
 {		
-	self->properties = properties_create();
-	properties_sethint(
-		properties_append_string(self->properties, "name", "File Driver"),
-		PROPERTY_HINT_READONLY);
-	properties_sethint(
-		properties_append_string(self->properties, "vendor", "Psycedelics"),
-		PROPERTY_HINT_READONLY);
-	properties_sethint(
-		properties_append_string(self->properties, "version", "1.0"),
-		PROPERTY_HINT_READONLY);	
-	properties_append_string(self->properties, "outputpath", "Untitled.wav");
+	self->properties = psy_properties_create();
+	psy_properties_sethint(
+		psy_properties_append_string(self->properties, "name", "File Driver"),
+		PSY_PROPERTY_HINT_READONLY);
+	psy_properties_sethint(
+		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
+		PSY_PROPERTY_HINT_READONLY);
+	psy_properties_sethint(
+		psy_properties_append_string(self->properties, "version", "1.0"),
+		PSY_PROPERTY_HINT_READONLY);	
+	psy_properties_append_string(self->properties, "outputpath", "Untitled.wav");
 }
 
 void PollerThread(void* driver)
@@ -173,7 +173,7 @@ void PollerThread(void* driver)
 
 void fileoutdriver_createfile(FileOutDriver* self)
 {	
-	WaveFormatChunk format;
+	psy_audio_WaveFormatChunk format;
 	int bitspersample = 16;
 	uint8_t temp8 = 0;
 	uint16_t temp16 = 0;

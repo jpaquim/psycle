@@ -135,7 +135,7 @@ typedef struct {
    psy_dsp_NotesTabMode notestabmode;
    TrackerCursor cursor;
    psy_dsp_beat_t cursorstep;   
-   Player* player;   
+   psy_audio_Player* player;   
    int colx[TRACKERGRID_numparametercols];
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
@@ -146,7 +146,7 @@ typedef struct {
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, ui_component* parent, struct TrackerView*,
-	Player*);
+	psy_audio_Player*);
 
 typedef Inputs TrackerInputs;
 
@@ -163,7 +163,7 @@ typedef struct TrackerView {
 	TrackerLineNumbers linenumbers;
 	TrackerGrid grid;
 	PatternBlockMenu blockmenu;
-	Pattern* pattern;
+	psy_audio_Pattern* pattern;
 	TrackerSkin skin;	
 	int showlinenumbers;
 	int showlinenumbercursor;
@@ -177,14 +177,14 @@ typedef struct TrackerView {
 	int syncpattern;
 	psy_dsp_beat_t lastplayposition;
 	psy_dsp_beat_t sequenceentryoffset;
-	List* sublines;
-	Table screenlines;
+	psy_List* sublines;
+	psy_Table screenlines;
 	TrackerMetrics metrics;
 } TrackerView;
 
 void trackerview_init(TrackerView*, ui_component* parent, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
-void trackerview_setpattern(TrackerView*, Pattern*);
-void TrackerViewApplyProperties(TrackerView*, Properties*);
+void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
+void TrackerViewApplyProperties(TrackerView*, psy_Properties*);
 
 #endif

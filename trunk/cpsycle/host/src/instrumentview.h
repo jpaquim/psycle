@@ -24,8 +24,8 @@ typedef struct {
 	ui_edit nameedit;	
 	ui_button prevbutton;
 	ui_button nextbutton;	
-	Instrument* instrument;
-	Instruments* instruments;
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 } InstrumentHeaderView;
 
 typedef struct {
@@ -49,8 +49,8 @@ typedef struct {
 	ui_component left;
 	SamplesBox samplesbox;
 	InstrumentNoteMapView notemapview;
-	Instrument* instrument;
-	Instruments* instruments;
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 } InstrumentGeneralView;
 
 typedef struct {
@@ -61,15 +61,15 @@ typedef struct {
 	ui_slider decay;
 	ui_slider sustain;
 	ui_slider release;
-	Player* player;
-	Instrument* instrument;
-	Instruments* instruments;
+	psy_audio_Player* player;
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 } InstrumentVolumeView;
 
 typedef struct {
 	ui_component component;		
-	Instrument* instrument;
-	Instruments* instruments;
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 } InstrumentPanView;
 
 typedef struct {
@@ -83,15 +83,15 @@ typedef struct {
 	ui_slider cutoff;
 	ui_slider res;
 	ui_slider modamount;
-	Player* player;
-	Instrument* instrument;
-	Instruments* instruments;
+	psy_audio_Player* player;
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 } InstrumentFilterView;
 
 typedef struct {
 	ui_component component;		
-	Instrument* instrument;
-	Instruments* instruments;
+	psy_audio_Instrument* instrument;
+	psy_audio_Instruments* instruments;
 } InstrumentPitchView;
 
 typedef struct {
@@ -109,7 +109,7 @@ typedef struct {
 	InstrumentPanView pan;
 	InstrumentFilterView filter;
 	InstrumentPitchView pitch;	
-	Player* player;
+	psy_audio_Player* player;
 	Workspace* workspace;
 } InstrumentView;
 

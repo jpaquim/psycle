@@ -27,7 +27,7 @@
 
 
 void machinefactory_init(MachineFactory* self, MachineCallback callback,
-	PluginCatcher* catcher)
+	psy_audio_PluginCatcher* catcher)
 {
 	self->machinecallback = callback;	
 	self->catcher = catcher;
@@ -49,7 +49,7 @@ MachineFactoryOptions machinefactory_options(MachineFactory* self)
 	return self->options;
 }
 
-Machine* machinefactory_makemachine(MachineFactory* self, MachineType type,
+psy_audio_Machine* machinefactory_makemachine(MachineFactory* self, MachineType type,
 	const char* plugincatchername)
 {
 	char fullpath[_MAX_PATH];
@@ -62,19 +62,19 @@ Machine* machinefactory_makemachine(MachineFactory* self, MachineType type,
 		plugincatchername, fullpath));	
 }
 
-Machine* machinefactory_makemachinefrompath(MachineFactory* self,
+psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 	MachineType type, const char* path)
 {
-	Machine* rv = 0;
-	MachineProxy* proxy = 0;
+	psy_audio_Machine* rv = 0;
+	psy_audio_MachineProxy* proxy = 0;
 
 	switch (type) {
 		case MACH_MASTER:
 		{
-			Master* master = (Master*)malloc(sizeof(Master));
+			psy_audio_Master* master = (psy_audio_Master*)malloc(sizeof(psy_audio_Master));
 			if (master) {
 				master_init(master, self->machinecallback);
-				rv = (Machine*) master;
+				rv = (psy_audio_Machine*) master;
 			} else {
 				rv = 0;
 			}
@@ -82,10 +82,10 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;
 		case MACH_DUMMY:
 		{
-			DummyMachine* dummy = (DummyMachine*)malloc(sizeof(DummyMachine));
+			psy_audio_DummyMachine* dummy = (psy_audio_DummyMachine*)malloc(sizeof(psy_audio_DummyMachine));
 			if (dummy) {
 				dummymachine_init(dummy, self->machinecallback);
-				rv = (Machine*) dummy;
+				rv = (psy_audio_Machine*) dummy;
 			} else {
 				rv = 0;
 			}
@@ -93,10 +93,10 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;
 		case MACH_DUPLICATOR:
 		{
-			Duplicator* duplicator = (Duplicator*)malloc(sizeof(Duplicator));
+			psy_audio_Duplicator* duplicator = (psy_audio_Duplicator*)malloc(sizeof(psy_audio_Duplicator));
 			if (duplicator) {
 				duplicator_init(duplicator, self->machinecallback);
-				rv = (Machine*) duplicator;
+				rv = (psy_audio_Machine*) duplicator;
 			} else {
 				rv = 0;
 			}
@@ -104,10 +104,10 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;
 		case MACH_DUPLICATOR2:
 		{
-			Duplicator2* duplicator2 = (Duplicator2*)malloc(sizeof(Duplicator2));
+			psy_audio_Duplicator2* duplicator2 = (psy_audio_Duplicator2*)malloc(sizeof(psy_audio_Duplicator2));
 			if (duplicator2) {
 				duplicator2_init(duplicator2, self->machinecallback);
-				rv = (Machine*) duplicator2;
+				rv = (psy_audio_Machine*) duplicator2;
 			} else {
 				rv = 0;
 			}
@@ -115,10 +115,10 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;
 		case MACH_MIXER:
 		{
-			Mixer* mixer = (Mixer*)malloc(sizeof(Mixer));
+			psy_audio_Mixer* mixer = (psy_audio_Mixer*)malloc(sizeof(psy_audio_Mixer));
 			if (mixer) {
 				mixer_init(mixer, self->machinecallback);
-				rv = (Machine*) mixer;
+				rv = (psy_audio_Machine*) mixer;
 			} else {
 				rv = 0;
 			}
@@ -126,10 +126,10 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;
 		case MACH_SAMPLER:
 		{
-			Sampler* sampler = (Sampler*)malloc(sizeof(Sampler));
+			psy_audio_Sampler* sampler = (psy_audio_Sampler*)malloc(sizeof(psy_audio_Sampler));
 			if (sampler) {
 				sampler_init(sampler, self->machinecallback);
-				rv = (Machine*) sampler;
+				rv = (psy_audio_Machine*) sampler;
 			} else {
 				rv = 0;
 			}
@@ -137,11 +137,11 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;
 		case MACH_VST:
 		{
-			Machine* plugin;			
+			psy_audio_Machine* plugin;			
 
-			plugin = (Machine*)malloc(sizeof(VstPlugin));
+			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_VstPlugin));
 			if (plugin) {
-				vstplugin_init((VstPlugin*)plugin, self->machinecallback, path);
+				vstplugin_init((psy_audio_VstPlugin*)plugin, self->machinecallback, path);
 				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {
@@ -155,11 +155,11 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;		
 		case MACH_PLUGIN:
 		{
-			Machine* plugin;			
+			psy_audio_Machine* plugin;			
 									
-			plugin = (Machine*)malloc(sizeof(Plugin));
+			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_Plugin));
 			if (plugin) {
-				plugin_init((Plugin*)plugin, self->machinecallback, path);
+				plugin_init((psy_audio_Plugin*)plugin, self->machinecallback, path);
 				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {
@@ -173,11 +173,11 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		break;
 		case MACH_LUA:
 		{
-			Machine* plugin;			
+			psy_audio_Machine* plugin;			
 									
-			plugin = (Machine*)malloc(sizeof(LuaPlugin));
+			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_LuaPlugin));
 			if (plugin) {
-				luaplugin_init((LuaPlugin*)plugin, self->machinecallback, path);
+				luaplugin_init((psy_audio_LuaPlugin*)plugin, self->machinecallback, path);
 				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {
@@ -195,7 +195,7 @@ Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 	}
 	if ((rv && ((self->options & MACHINEFACTORY_CREATEASPROXY)
 			== MACHINEFACTORY_CREATEASPROXY))) {
-		proxy = malloc(sizeof(MachineProxy));
+		proxy = malloc(sizeof(psy_audio_MachineProxy));
 		if (proxy) {
 			machineproxy_init(proxy, rv);
 			rv = &proxy->machine;

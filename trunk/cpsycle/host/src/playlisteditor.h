@@ -37,10 +37,10 @@ typedef struct PlayListEditor {
 	ui_component component;
 	ui_listbox listbox;
 	PlayListEditorButtons buttons;
-	List* entries;
+	psy_List* entries;
 	Workspace* workspace;
-	List* currentry;
-	List* nextentry;
+	psy_List* currentry;
+	psy_List* nextentry;
 } PlayListEditor;
 
 void playlisteditor_init(PlayListEditor*, ui_component* parent, Workspace*);

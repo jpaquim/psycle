@@ -11,21 +11,21 @@
 
 #define NOINSTRUMENT_INDEX UINTPTR_MAX
 
-typedef struct Instruments {
-	Table container;
+typedef struct psy_audio_Instruments {
+	psy_Table container;
 	uintptr_t slot;
 	psy_Signal signal_insert;
 	psy_Signal signal_removed;
 	psy_Signal signal_slotchange;
-} Instruments;
+} psy_audio_Instruments;
 
-void instruments_init(Instruments*);
-void instruments_dispose(Instruments*);
-void instruments_insert(Instruments*, Instrument*, uintptr_t slot);
-void instruments_remove(Instruments*, uintptr_t slot);
-void instruments_changeslot(Instruments*, uintptr_t slot);
-uintptr_t instruments_slot(Instruments*);
-Instrument* instruments_at(Instruments*, uintptr_t slot);
-uintptr_t instruments_size(Instruments*);
+void instruments_init(psy_audio_Instruments*);
+void instruments_dispose(psy_audio_Instruments*);
+void instruments_insert(psy_audio_Instruments*, psy_audio_Instrument*, uintptr_t slot);
+void instruments_remove(psy_audio_Instruments*, uintptr_t slot);
+void instruments_changeslot(psy_audio_Instruments*, uintptr_t slot);
+uintptr_t instruments_slot(psy_audio_Instruments*);
+psy_audio_Instrument* instruments_at(psy_audio_Instruments*, uintptr_t slot);
+uintptr_t instruments_size(psy_audio_Instruments*);
 
 #endif

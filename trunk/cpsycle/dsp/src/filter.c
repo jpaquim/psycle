@@ -5,20 +5,20 @@
 
 #include "filter.h"
 
-// Filter Interface
+// psy_dsp_Filter Interface
 
-static void init(Filter* self) { }
-static void dispose(Filter* self) { }
-static psy_dsp_amp_t work(Filter* self, psy_dsp_amp_t sample) { 
+static void init(psy_dsp_Filter* self) { }
+static void dispose(psy_dsp_Filter* self) { }
+static psy_dsp_amp_t work(psy_dsp_Filter* self, psy_dsp_amp_t sample) { 
 	return sample; }
-static void setcutoff(Filter* self, float cutoff) { }
-static float cutoff(Filter* self) { return 0.f; }
-static void setressonance(Filter* self, float ressonance) { }
-static float ressonance(Filter* self) { return 0.f; }
-static void setsamplerate(Filter* self, float samplerate) { }
-static float samplerate(Filter* self) { return 44100.f; }
-static void update(Filter* self, int full) { }
-static void reset(Filter* self) { }
+static void setcutoff(psy_dsp_Filter* self, float cutoff) { }
+static float cutoff(psy_dsp_Filter* self) { return 0.f; }
+static void setressonance(psy_dsp_Filter* self, float ressonance) { }
+static float ressonance(psy_dsp_Filter* self) { return 0.f; }
+static void setsamplerate(psy_dsp_Filter* self, float samplerate) { }
+static float samplerate(psy_dsp_Filter* self) { return 44100.f; }
+static void update(psy_dsp_Filter* self, int full) { }
+static void reset(psy_dsp_Filter* self) { }
 
 static filter_vtable vtable;
 static int vtable_initialized = 0;
@@ -40,47 +40,47 @@ static void vtable_init(void)
 	}	
 }
 
-void filter_init(Filter* self)		
+void psy_dsp_filter_init(psy_dsp_Filter* self)		
 {
 	vtable_init();
 	self->vtable = &vtable;
 }
 
-// CustomFilter
+// psy_dsp_CustomFilter
 
-static void customfilter_setcutoff(CustomFilter*, float cutoff);
-static float customfilter_cutoff(CustomFilter*);
-static void customfilter_setressonance(CustomFilter*, float ressonance);
-static float customfilter_ressonance(CustomFilter*);
-static void customfilter_setsamplerate(CustomFilter*, float samplerate);
-static float customfilter_samplerate(CustomFilter*);
+static void customfilter_setcutoff(psy_dsp_CustomFilter*, float cutoff);
+static float customfilter_cutoff(psy_dsp_CustomFilter*);
+static void customfilter_setressonance(psy_dsp_CustomFilter*, float ressonance);
+static float customfilter_ressonance(psy_dsp_CustomFilter*);
+static void customfilter_setsamplerate(psy_dsp_CustomFilter*, float samplerate);
+static float customfilter_samplerate(psy_dsp_CustomFilter*);
 
 static filter_vtable customfilter_vtable;
 static int customfilter_vtable_initialized = 0;
 
-void customfilter_vtable_init(Filter* filter)
+void customfilter_vtable_init(psy_dsp_Filter* filter)
 {
 	if (!customfilter_vtable_initialized) {
 		customfilter_vtable = *filter->vtable;
-		customfilter_vtable.setsamplerate = (fp_filter_setsamplerate) 
+		customfilter_vtable.setsamplerate = (psy_dsp_fp_filter_setsamplerate) 
 			customfilter_setsamplerate;
-		customfilter_vtable.samplerate = (fp_filter_samplerate) 
+		customfilter_vtable.samplerate = (psy_dsp_fp_filter_samplerate) 
 			customfilter_samplerate;
-		customfilter_vtable.setcutoff = (fp_filter_setcutoff)
+		customfilter_vtable.setcutoff = (psy_dsp_fp_filter_setcutoff)
 			customfilter_setcutoff;
-		customfilter_vtable.cutoff = (fp_filter_cutoff)
+		customfilter_vtable.cutoff = (psy_dsp_fp_filter_cutoff)
 			customfilter_cutoff;
-		customfilter_vtable.setressonance = (fp_filter_setressonance)
+		customfilter_vtable.setressonance = (psy_dsp_fp_filter_setressonance)
 			customfilter_setressonance;
-		customfilter_vtable.ressonance = (fp_filter_ressonance)
+		customfilter_vtable.ressonance = (psy_dsp_fp_filter_ressonance)
 			customfilter_ressonance;
 		customfilter_vtable_initialized = 1;
 	}
 }
 
-void customfilter_init(CustomFilter* self)
+void psy_dsp_customfilter_init(psy_dsp_CustomFilter* self)
 {
-	filter_init(&self->filter);
+	psy_dsp_filter_init(&self->filter);
 	customfilter_vtable_init(&self->filter);
 	self->filter.vtable = &customfilter_vtable;
 	
@@ -89,18 +89,18 @@ void customfilter_init(CustomFilter* self)
 	self->q = 0.f;
 }
 
-void customfilter_setsamplerate(CustomFilter* self, float samplerate)
+void customfilter_setsamplerate(psy_dsp_CustomFilter* self, float samplerate)
 {
 	self->samplerate = samplerate;
 	self->filter.vtable->update(&self->filter, 1);
 }
 
-float customfilter_samplerate(CustomFilter* self)
+float customfilter_samplerate(psy_dsp_CustomFilter* self)
 {
 	return self->samplerate;
 }
 
-void customfilter_setcutoff(CustomFilter* self, float cutoff)
+void customfilter_setcutoff(psy_dsp_CustomFilter* self, float cutoff)
 {
 	if (self->cutoff != cutoff) {
 		self->cutoff = cutoff;
@@ -108,12 +108,12 @@ void customfilter_setcutoff(CustomFilter* self, float cutoff)
 	}
 }
 
-float customfilter_cutoff(CustomFilter* self)
+float customfilter_cutoff(psy_dsp_CustomFilter* self)
 {
 	return self->cutoff;
 }
 
-void customfilter_setressonance(CustomFilter* self, float q)
+void customfilter_setressonance(psy_dsp_CustomFilter* self, float q)
 {
 	if (self->q != q) {
 		self->q = q;
@@ -121,12 +121,12 @@ void customfilter_setressonance(CustomFilter* self, float q)
 	}
 }
 
-float customfilter_ressonance(CustomFilter* self)
+float customfilter_ressonance(psy_dsp_CustomFilter* self)
 {
 	return self->q;
 }
 
-void firwork_init(FIRWork* self)
+void psy_dsp_firwork_init(psy_dsp_FIRWork* self)
 {
 	self->x1 = 0;
 	self->x2 = 0;
@@ -134,12 +134,12 @@ void firwork_init(FIRWork* self)
 	self->y2 = 0;	
 }
 
-void firwork_reset(FIRWork* self)
+void psy_dsp_firwork_reset(psy_dsp_FIRWork* self)
 {
-	firwork_init(self);
+	psy_dsp_firwork_init(self);
 }
 
-psy_dsp_amp_t firwork_work(FIRWork* self, FilterCoeff* coeffs,
+psy_dsp_amp_t psy_dsp_firwork_work(psy_dsp_FIRWork* self, psy_dsp_FilterCoeff* coeffs,
 	psy_dsp_amp_t sample)
 {
 	psy_dsp_amp_t y;

@@ -37,7 +37,7 @@ static void mainframe_ongearcreate(MainFrame*, ui_component* sender);
 static void mainframe_onaboutok(MainFrame*, ui_component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
-	Properties*);
+	psy_Properties*);
 static void mainframe_ontabbarchanged(MainFrame*, ui_component* sender, uintptr_t tabindex);
 static void mainframe_onmouseentersplitbar(MainFrame*, ui_component* sender);
 static void mainframe_onmouseleavesplitbar(MainFrame*, ui_component* sender);
@@ -103,7 +103,7 @@ void mainframe_init(MainFrame* self)
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
 	ui_component_setalignexpand(&self->tabbar.component, UI_HORIZONTALEXPAND);	
 	tabbar_append(&self->tabbar, "Machines");
-	tabbar_append(&self->tabbar, "Pattern");	
+	tabbar_append(&self->tabbar, "Patterns");	
 	tabbar_append(&self->tabbar, "Samples");
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Properties");
@@ -269,7 +269,7 @@ void mainframe_initbars(MainFrame* self)
 		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
 			ui_value_makepx(0), ui_value_makepx(0));
 
-		list_free(ui_components_setalign(
+		psy_list_free(ui_components_setalign(
 			ui_component_children(&self->toprow0, 0),
 			UI_ALIGN_LEFT, &margin));
 		margin.right = ui_value_makepx(0);
@@ -421,9 +421,9 @@ void mainframe_onalign(MainFrame* self, ui_component* sender)
 void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 {
 	int cmd;
-	// 	Properties* section;
+	// 	psy_Properties* section;
 
-	// section = properties_find(sender->properties, "general");
+	// section = psy_properties_find(sender->properties, "general");
 	cmd = sender->getcmd(sender, 0);
 	if (cmd == CMD_IMM_HELP) {
 		tabbar_select(&self->helpview.tabbar, 0);
@@ -617,7 +617,7 @@ void mainframe_updatetitle(MainFrame* self)
 	char name[4096];
 	char ext[4096];
 
-	extract_path(self->workspace.filename, prefix, name, ext);
+	psy_dir_extract_path(self->workspace.filename, prefix, name, ext);
 	psy_snprintf(txt, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
 		name, ext);			
 	ui_component_settitle(&self->component, txt);
@@ -710,9 +710,9 @@ void mainframe_ongearcreate(MainFrame* self, ui_component* sender)
 }
 
 void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
-	Properties* property)
+	psy_Properties* property)
 {	
-	if (strcmp(properties_key(property), "trackscopes") == 0) {
+	if (strcmp(psy_properties_key(property), "trackscopes") == 0) {
 		if (workspace_showtrackscopes(&self->workspace)) {
 			ui_component_show(&self->trackscopeview.component);
 			ui_component_align(&self->component);

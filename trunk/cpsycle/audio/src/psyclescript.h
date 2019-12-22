@@ -12,20 +12,20 @@
 typedef struct {
 	int id;
 	lua_State* L;
-} PsycleScript;
+} psy_audio_PsycleScript;
 
-int psyclescript_init(PsycleScript*);
-int psyclescript_load(PsycleScript*, const char* path);
-int psyclescript_preparestate(PsycleScript* self, const luaL_Reg methods[],
+int psyclescript_init(psy_audio_PsycleScript*);
+int psyclescript_load(psy_audio_PsycleScript*, const char* path);
+int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg methods[],
 	void* host);
-int psyclescript_run(PsycleScript*);
-int psyclescript_start(PsycleScript*);
-int psyclescript_dispose(PsycleScript*);
+int psyclescript_run(psy_audio_PsycleScript*);
+int psyclescript_start(psy_audio_PsycleScript*);
+int psyclescript_dispose(psy_audio_PsycleScript*);
 
-int psyclescript_machineinfo(PsycleScript*, MachineInfo*);
+int psyclescript_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
 int psyclescript_open(lua_State*, const char* meta, const luaL_Reg methods[],
 	lua_CFunction gc, lua_CFunction tostring);
-void psyclescript_require(PsycleScript*, const char* name, lua_CFunction openf);
+void psyclescript_require(psy_audio_PsycleScript*, const char* name, lua_CFunction openf);
 void psyclescript_register_weakuserdata(lua_State*, void* ud);
 
 #endif

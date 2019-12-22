@@ -12,12 +12,14 @@
 #include "connections.h"
 #include <dsptypes.h>
 
+#define NOMACHINE_INDEX UINTPTR_MAX
+
 typedef struct MachineCallback {	
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);
-	struct Samples* (*samples)(void*);
-	struct Machines* (*machines)(void*);
-	struct Instruments* (*instruments)(void*);	
+	struct psy_audio_Samples* (*samples)(void*);
+	struct psy_audio_Machines* (*machines)(void*);
+	struct psy_audio_Instruments* (*instruments)(void*);	
 	void* context;
 } MachineCallback;
 
@@ -25,67 +27,67 @@ typedef enum {
 	MACHINE_PARAMVIEW_COMPACT = 1
 } MachineViewOptions;
 
-struct Machine;
+struct psy_audio_Machine;
 
-typedef	void (*fp_machine_init)(struct Machine*);
-typedef	struct Machine* (*fp_machine_clone)(struct Machine*);
-typedef	Buffer* (*fp_machine_mix)(struct Machine*, size_t slot, unsigned int amount, MachineSockets*, struct Machines*);
-typedef	void (*fp_machine_work)(struct Machine*, BufferContext*);
-typedef	void (*fp_machine_generateaudio)(struct Machine*, BufferContext*);
-typedef	int (*fp_machine_hostevent)(struct Machine*, int const eventNr, int const val1, float const val2);
-typedef	void (*fp_machine_seqtick)(struct Machine*, int channel, const PatternEvent*);
-typedef	void (*fp_machine_stop)(struct Machine*);
-typedef	void (*fp_machine_sequencertick)(struct Machine*);
-typedef	void (*fp_machine_sequencerlinetick)(struct Machine*);
-typedef	List* (*fp_machine_sequencerinsert)(struct Machine*, List* events);
-typedef	void (*fp_machine_setpanning)(struct Machine*, psy_dsp_amp_t);
-typedef	psy_dsp_amp_t (*fp_machine_panning)(struct Machine*);
-typedef	void (*fp_machine_mute)(struct Machine*);	
-typedef	void (*fp_machine_unmute)(struct Machine*);
-typedef	int (*fp_machine_muted)(struct Machine*);
-typedef	void (*fp_machine_bypass)(struct Machine*);
-typedef	void (*fp_machine_unbypass)(struct Machine*);
-typedef	int (*fp_machine_bypassed)(struct Machine*);
-typedef	void (*fp_machine_setvalue)(struct Machine*, int param, int value);	
-typedef	const MachineInfo* (*fp_machine_info)(struct Machine*);
-typedef	void (*fp_machine_dispose)(struct Machine*);
-typedef	int (*fp_machine_mode)(struct Machine*);	
-typedef	void (*fp_machine_updatesamplerate)(struct Machine*, unsigned int samplerate);
-typedef	unsigned int (*fp_machine_numinputs)(struct Machine*);
-typedef	unsigned int (*fp_machine_numoutputs)(struct Machine*);
-typedef	uintptr_t (*fp_machine_slot)(struct Machine*);
-typedef	void (*fp_machine_setslot)(struct Machine*, uintptr_t);
+typedef	void (*fp_machine_init)(struct psy_audio_Machine*);
+typedef	struct psy_audio_Machine* (*fp_machine_clone)(struct psy_audio_Machine*);
+typedef	psy_audio_Buffer* (*fp_machine_mix)(struct psy_audio_Machine*, size_t slot, unsigned int amount, psy_audio_MachineSockets*, struct psy_audio_Machines*);
+typedef	void (*fp_machine_work)(struct psy_audio_Machine*, psy_audio_BufferContext*);
+typedef	void (*fp_machine_generateaudio)(struct psy_audio_Machine*, psy_audio_BufferContext*);
+typedef	int (*fp_machine_hostevent)(struct psy_audio_Machine*, int const eventNr, int const val1, float const val2);
+typedef	void (*fp_machine_seqtick)(struct psy_audio_Machine*, int channel, const psy_audio_PatternEvent*);
+typedef	void (*fp_machine_stop)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_sequencertick)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_sequencerlinetick)(struct psy_audio_Machine*);
+typedef	psy_List* (*fp_machine_sequencerinsert)(struct psy_audio_Machine*, psy_List* events);
+typedef	void (*fp_machine_setpanning)(struct psy_audio_Machine*, psy_dsp_amp_t);
+typedef	psy_dsp_amp_t (*fp_machine_panning)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_mute)(struct psy_audio_Machine*);	
+typedef	void (*fp_machine_unmute)(struct psy_audio_Machine*);
+typedef	int (*fp_machine_muted)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_bypass)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_unbypass)(struct psy_audio_Machine*);
+typedef	int (*fp_machine_bypassed)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_setvalue)(struct psy_audio_Machine*, int param, int value);	
+typedef	const psy_audio_MachineInfo* (*fp_machine_info)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_dispose)(struct psy_audio_Machine*);
+typedef	int (*fp_machine_mode)(struct psy_audio_Machine*);	
+typedef	void (*fp_machine_updatesamplerate)(struct psy_audio_Machine*, unsigned int samplerate);
+typedef	unsigned int (*fp_machine_numinputs)(struct psy_audio_Machine*);
+typedef	unsigned int (*fp_machine_numoutputs)(struct psy_audio_Machine*);
+typedef	uintptr_t (*fp_machine_slot)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_setslot)(struct psy_audio_Machine*, uintptr_t);
 	// Parameters	
-typedef	int (*fp_machine_parametertype)(struct Machine*, int param);
-typedef	unsigned int (*fp_machine_numparameters)(struct Machine*);
-typedef	unsigned int (*fp_machine_numparametercols)(struct Machine*);
-typedef	void (*fp_machine_parameterrange)(struct Machine*, int numparam, int* minval, int* maxval);
-typedef	void (*fp_machine_parametertweak)(struct Machine*, int par, int val);	
-typedef	void (*fp_machine_patterntweak)(struct Machine*, int par, int val);
-typedef	int (*fp_machine_parameterlabel)(struct Machine*, char* txt, int param);
-typedef	int (*fp_machine_parametername)(struct Machine*, char* txt, int param);
-typedef	int (*fp_machine_describevalue)(struct Machine*, char* txt, int param, int value);
-typedef	int (*fp_machine_parametervalue)(struct Machine*, int param);	
-typedef	int (*fp_machine_paramviewoptions)(struct Machine*);
+typedef	int (*fp_machine_parametertype)(struct psy_audio_Machine*, int param);
+typedef	unsigned int (*fp_machine_numparameters)(struct psy_audio_Machine*);
+typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_parameterrange)(struct psy_audio_Machine*, int numparam, int* minval, int* maxval);
+typedef	void (*fp_machine_parametertweak)(struct psy_audio_Machine*, int par, int val);	
+typedef	void (*fp_machine_patterntweak)(struct psy_audio_Machine*, int par, int val);
+typedef	int (*fp_machine_parameterlabel)(struct psy_audio_Machine*, char* txt, int param);
+typedef	int (*fp_machine_parametername)(struct psy_audio_Machine*, char* txt, int param);
+typedef	int (*fp_machine_describevalue)(struct psy_audio_Machine*, char* txt, int param, int value);
+typedef	int (*fp_machine_parametervalue)(struct psy_audio_Machine*, int param);	
+typedef	int (*fp_machine_paramviewoptions)(struct psy_audio_Machine*);
 
-typedef	void (*fp_machine_setcallback)(struct Machine*, MachineCallback);
-typedef	void (*fp_machine_loadspecific)(struct Machine*, struct SongFile*, unsigned int slot);
-typedef	void (*fp_machine_savespecific)(struct Machine*, struct SongFile*, unsigned int slot);
-typedef	int (*fp_machine_haseditor)(struct Machine*);
-typedef	void (*fp_machine_seteditorhandle)(struct Machine*, void* handle);
-typedef	void (*fp_machine_editorsize)(struct Machine*, int* width, int* height);
-typedef	void (*fp_machine_editoridle)(struct Machine*);
-typedef	const char* (*fp_machine_editname)(struct Machine*);
-typedef	void (*fp_machine_seteditname)(struct Machine*, const char* name);
-typedef	struct Buffer* (*fp_machine_buffermemory)(struct Machine*);
-typedef	uintptr_t (*fp_machine_buffermemorysize)(struct Machine*);
-typedef	void (*fp_machine_setbuffermemorysize)(struct Machine*, uintptr_t);
+typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*, MachineCallback);
+typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*, struct psy_audio_SongFile*, unsigned int slot);
+typedef	void (*fp_machine_savespecific)(struct psy_audio_Machine*, struct psy_audio_SongFile*, unsigned int slot);
+typedef	int (*fp_machine_haseditor)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_seteditorhandle)(struct psy_audio_Machine*, void* handle);
+typedef	void (*fp_machine_editorsize)(struct psy_audio_Machine*, int* width, int* height);
+typedef	void (*fp_machine_editoridle)(struct psy_audio_Machine*);
+typedef	const char* (*fp_machine_editname)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_seteditname)(struct psy_audio_Machine*, const char* name);
+typedef	struct psy_audio_Buffer* (*fp_machine_buffermemory)(struct psy_audio_Machine*);
+typedef	uintptr_t (*fp_machine_buffermemorysize)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_setbuffermemorysize)(struct psy_audio_Machine*, uintptr_t);
 // machine callbacks
-typedef	unsigned int (*fp_machine_samplerate)(struct Machine*);
-typedef unsigned int (*fp_machine_bpm)(struct Machine*);	
-typedef	struct Samples* (*fp_machine_samples)(struct Machine*);
-typedef	struct Machines* (*fp_machine_machines)(struct Machine*);
-typedef	struct Instruments* (*fp_machine_instruments)(struct Machine*);
+typedef	unsigned int (*fp_machine_samplerate)(struct psy_audio_Machine*);
+typedef unsigned int (*fp_machine_bpm)(struct psy_audio_Machine*);	
+typedef	struct psy_audio_Samples* (*fp_machine_samples)(struct psy_audio_Machine*);
+typedef	struct psy_audio_Machines* (*fp_machine_machines)(struct psy_audio_Machine*);
+typedef	struct psy_audio_Instruments* (*fp_machine_instruments)(struct psy_audio_Machine*);
 
 typedef struct MachineVtable {
 	fp_machine_init init;
@@ -150,14 +152,14 @@ typedef struct MachineVtable {
 	fp_machine_instruments instruments;
 } MachineVtable;
 
-typedef struct Machine {
+typedef struct psy_audio_Machine {
 	MachineVtable* vtable;
 	MachineCallback callback;	
 	psy_Signal signal_worked;
-} Machine;
+} psy_audio_Machine;
 
-void machine_init(Machine*, MachineCallback);
-void machine_dispose(Machine*);
-int machine_supports(Machine*, int option);
+void machine_init(psy_audio_Machine*, MachineCallback);
+void machine_dispose(psy_audio_Machine*);
+int machine_supports(psy_audio_Machine*, int option);
 
 #endif

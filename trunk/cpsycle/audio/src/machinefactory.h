@@ -14,15 +14,15 @@ typedef enum {
 
 typedef struct {
 	MachineCallback machinecallback;	
-	PluginCatcher* catcher;
+	psy_audio_PluginCatcher* catcher;
 	MachineFactoryOptions options;	
 } MachineFactory;
 
-void machinefactory_init(MachineFactory*, MachineCallback, PluginCatcher*);
+void machinefactory_init(MachineFactory*, MachineCallback, psy_audio_PluginCatcher*);
 void machinefactory_dispose(MachineFactory*);
-Machine* machinefactory_makemachine(MachineFactory*, MachineType,
+psy_audio_Machine* machinefactory_makemachine(MachineFactory*, MachineType,
 	const char* plugincatchername);
-Machine* machinefactory_makemachinefrompath(MachineFactory*, MachineType,
+psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory*, MachineType,
 	const char* path);
 void machinefactory_setoptions(MachineFactory*, MachineFactoryOptions options);
 MachineFactoryOptions machinefactory_options(MachineFactory*);

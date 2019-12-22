@@ -7,24 +7,24 @@
 
 void inputs_init(Inputs* self)
 {
-	table_init(&self->map);
+	psy_table_init(&self->map);
 }
 
 void inputs_dispose(Inputs* self)
 {
-	table_dispose(&self->map);
+	psy_table_dispose(&self->map);
 }
 
 int inputs_cmd(Inputs* self, int input)
 {
-	return table_exists(&self->map, input) 
-		? (int)(uintptr_t) table_at(&self->map, input)
+	return psy_table_exists(&self->map, input) 
+		? (int)(uintptr_t) psy_table_at(&self->map, input)
 		: -1;	
 }
 
 void inputs_define(Inputs* self, int input, int cmd)
 {
-	table_insert(&self->map, input, (void*)(uintptr_t)cmd);
+	psy_table_insert(&self->map, input, (void*)(uintptr_t)cmd);
 }
 
 unsigned int encodeinput(unsigned int keycode, int shift, int ctrl)

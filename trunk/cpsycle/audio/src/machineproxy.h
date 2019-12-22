@@ -7,13 +7,13 @@
 #include "machine.h"
 
 typedef struct {
-	Machine machine;
-	Machine* client;
+	psy_audio_Machine machine;
+	psy_audio_Machine* client;
 	/// Tells wether the machine client has crashed.
 	int crashed;
 	fp_machine_dispose machinedispose;
-} MachineProxy;
+} psy_audio_MachineProxy;
 
-void machineproxy_init(MachineProxy* self, Machine* client);
+void machineproxy_init(psy_audio_MachineProxy* self, psy_audio_Machine* client);
 
 #endif

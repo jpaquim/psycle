@@ -14,7 +14,7 @@ typedef struct {
 	ui_button play;
 	ui_button playsel;
 	ui_button stop;	
-	Player* player;
+	psy_audio_Player* player;
 	Workspace* workspace;
 } PlayBar;
 

@@ -7,16 +7,17 @@
 #include "machine.h"
 
 typedef struct {
-	Machine machine;
+	psy_audio_Machine machine;
 	psy_dsp_amp_t pan;
 	int ismuted;
 	int isbypassed;
 	char* editname;
-	Buffer memorybuffer;
+	psy_audio_Buffer memorybuffer;
 	uintptr_t memorybuffersize;
-} CustomMachine;
+	uintptr_t slot;
+} psy_audio_CustomMachine;
 
-void custommachine_init(CustomMachine*, MachineCallback);
-void custommachine_dispose(CustomMachine*);
+void custommachine_init(psy_audio_CustomMachine*, MachineCallback);
+void custommachine_dispose(psy_audio_CustomMachine*);
 
 #endif

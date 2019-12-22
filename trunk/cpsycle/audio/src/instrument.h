@@ -16,24 +16,24 @@ typedef enum {
 	NNA_CONTINUE = 0x1,	///  [Ignore]
 	NNA_NOTEOFF = 0x2,	///  [Note off]
 	NNA_FADEOUT = 0x3	///  [Note fade]
-} NewNoteAction;
+} psy_audio_NewNoteAction;
 
 typedef struct {
 	SampleIndex sampleindex;
-	ParameterRange keyrange;
-	ParameterRange velocityrange;
-} InstrumentEntry;
+	psy_audio_ParameterRange keyrange;
+	psy_audio_ParameterRange velocityrange;
+} psy_audio_InstrumentEntry;
 
-void instrumententry_init(InstrumentEntry*);
-InstrumentEntry* instrumententry_alloc(void);
-InstrumentEntry* instrumententry_allocinit(void);
+void instrumententry_init(psy_audio_InstrumentEntry*);
+psy_audio_InstrumentEntry* instrumententry_alloc(void);
+psy_audio_InstrumentEntry* instrumententry_allocinit(void);
 
 typedef struct {	
 	char* name;
 	/// Action to take on the playing voice when any new note comes in the same channel.
-	NewNoteAction nna;
-	ADSRSettings volumeenvelope;
-	ADSRSettings filterenvelope;	
+	psy_audio_NewNoteAction nna;
+	psy_dsp_ADSRSettings volumeenvelope;
+	psy_dsp_ADSRSettings filterenvelope;	
 	float filtercutoff;	
 	float filterres;		
 	float filtermodamount;	
@@ -41,28 +41,28 @@ typedef struct {
 	unsigned char _RPAN;
 	unsigned char _RCUT;
 	unsigned char _RRES;
-	List* entries;
+	psy_List* entries;
 	uintptr_t index;
 	psy_Signal signal_addentry;
 	psy_Signal signal_removeentry;
-} Instrument;
+} psy_audio_Instrument;
 
-void instrument_init(Instrument*);
-void instrument_dispose(Instrument*);
-Instrument* instrument_alloc(void);
-Instrument* instrument_allocinit(void);
-void instrument_load(Instrument*, const char* path);
-void instrument_setname(Instrument*, const char* name);
-void instrument_setindex(Instrument*, uintptr_t index);
-uintptr_t instrument_index(Instrument*);
-const char* instrument_name(Instrument*);
-void instrument_setnna(Instrument*, NewNoteAction nna);
-NewNoteAction instrument_nna(Instrument*);
-List* instrument_entriesintersect(Instrument*, uintptr_t key, uintptr_t velocity);
-void instrument_clearentries(Instrument*);
-void instrument_addentry(Instrument*, const InstrumentEntry* entry);
-void instrument_removeentry(Instrument*, uintptr_t numentry);
-InstrumentEntry* instrument_entryat(Instrument*, uintptr_t numentry);
-const List* instrument_entries(Instrument*);
+void instrument_init(psy_audio_Instrument*);
+void instrument_dispose(psy_audio_Instrument*);
+psy_audio_Instrument* instrument_alloc(void);
+psy_audio_Instrument* instrument_allocinit(void);
+void instrument_load(psy_audio_Instrument*, const char* path);
+void instrument_setname(psy_audio_Instrument*, const char* name);
+void instrument_setindex(psy_audio_Instrument*, uintptr_t index);
+uintptr_t instrument_index(psy_audio_Instrument*);
+const char* instrument_name(psy_audio_Instrument*);
+void instrument_setnna(psy_audio_Instrument*, psy_audio_NewNoteAction nna);
+psy_audio_NewNoteAction instrument_nna(psy_audio_Instrument*);
+psy_List* instrument_entriesintersect(psy_audio_Instrument*, uintptr_t key, uintptr_t velocity);
+void instrument_clearentries(psy_audio_Instrument*);
+void instrument_addentry(psy_audio_Instrument*, const psy_audio_InstrumentEntry* entry);
+void instrument_removeentry(psy_audio_Instrument*, uintptr_t numentry);
+psy_audio_InstrumentEntry* instrument_entryat(psy_audio_Instrument*, uintptr_t numentry);
+const psy_List* instrument_entries(psy_audio_Instrument*);
 
 #endif

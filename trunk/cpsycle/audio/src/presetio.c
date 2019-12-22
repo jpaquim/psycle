@@ -8,10 +8,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static void presetio_loadversion0(FILE*, int numpresets, int numparameters, Presets*);
-static void presetio_loadversion1(FILE*, int numParameters, Presets*);
+static void presetio_loadversion0(FILE*, int numpresets, int numparameters, psy_audio_Presets*);
+static void presetio_loadversion1(FILE*, int numParameters, psy_audio_Presets*);
 
-void presetsio_load(const char* path, Presets* presets)
+void presetsio_load(const char* path, psy_audio_Presets* presets)
 {
 	FILE* fp;	
 	
@@ -20,12 +20,12 @@ void presetsio_load(const char* path, Presets* presets)
 		int filenumpars;
 		if (fread(&numpresets,sizeof(int), 1, fp) != 1 ||
 			fread(&filenumpars,sizeof(int), 1, fp) != 1 ) {
-			// ::MessageBox(0,"Couldn't read from file. Operation aborted","Preset File Error",MB_OK);
+			// ::MessageBox(0,"Couldn't read from file. Operation aborted","psy_audio_Preset File Error",MB_OK);
 		} else if (numpresets >= 0) {
 			// ok so we still support old file format by checking for a positive numpresets
 //			if (filenumpars != numparameters) //  || (dataSizeStruct))
 //			{
-//				// ::MessageBox(0,"The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
+//				// ::MessageBox(0,"The current preset File is not up-to-date with the plugin.","psy_audio_Preset File Error",MB_OK);
 //			} else {
 				// presets.clear();
 			presetio_loadversion0(fp, numpresets, filenumpars, presets);
@@ -39,21 +39,21 @@ void presetsio_load(const char* path, Presets* presets)
 				presetio_loadversion1(fp, numpresets, presets);
 				// presets.sort();
 			} else {
-				// ::MessageBox(0,"The current preset file is from a newer version of psycle than you are currently running.","Preset File Error",MB_OK);
+				// ::MessageBox(0,"The current preset file is from a newer version of psycle than you are currently running.","psy_audio_Preset File Error",MB_OK);
 			}
 		}
 		fclose(fp);
 	} else {
-		//::MessageBox(0,"Couldn't open file. Operation aborted","Preset File Error",MB_OK);
+		//::MessageBox(0,"Couldn't open file. Operation aborted","psy_audio_Preset File Error",MB_OK);
 	}	
 }
 
-void presetsio_save(const char* path, Presets* presets)
+void presetsio_save(const char* path, psy_audio_Presets* presets)
 {
 
 }
 
-void presetio_loadversion0(FILE* fp, int numpresets, int numparameters, Presets* presets)
+void presetio_loadversion0(FILE* fp, int numpresets, int numparameters, psy_audio_Presets* presets)
 {	
 	char name[32];
 	int* ibuf;
@@ -61,7 +61,7 @@ void presetio_loadversion0(FILE* fp, int numpresets, int numparameters, Presets*
 	
 	ibuf = malloc(sizeof(int) * numparameters);
 	for (i = 0; i< numpresets && !feof(fp) && !ferror(fp); ++i) {		
-		Preset* preset;
+		psy_audio_Preset* preset;
 		int j;
 
 		preset = preset_allocinit();
@@ -76,7 +76,7 @@ void presetio_loadversion0(FILE* fp, int numpresets, int numparameters, Presets*
 	free(ibuf);
 }
 
-void presetio_loadversion1(FILE* fp, int numParameters, Presets* presets)
+void presetio_loadversion1(FILE* fp, int numParameters, psy_audio_Presets* presets)
 {
 	int numpresets;
 	int filenumpars;
@@ -93,7 +93,7 @@ void presetio_loadversion1(FILE* fp, int numParameters, Presets* presets)
 	// now it is time to check our file for compatability
 	if (filenumpars != numParameters) // || (filepresetsize != dataSizeStruct))
 	{
-		//::MessageBox(0,"The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
+		//::MessageBox(0,"The current preset File is not up-to-date with the plugin.","psy_audio_Preset File Error",MB_OK);
 		return;
 	}
 	// ok that works, so we should now load the names of all of the presets
@@ -104,7 +104,7 @@ void presetio_loadversion1(FILE* fp, int numParameters, Presets* presets)
 
 	for (i=0; i< numpresets && !feof(fp) && !ferror(fp); i++)
 	{
-		Preset* preset;
+		psy_audio_Preset* preset;
 		int j;
 
 		preset = preset_allocinit();

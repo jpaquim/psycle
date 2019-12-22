@@ -5,60 +5,60 @@
 
 #include "patternstrackstate.h"
 
-void patternstrackstate_init(PatternsTrackState* self)
+void patternstrackstate_init(psy_audio_PatternsTrackState* self)
 {	
-	table_init(&self->mute);
-	table_init(&self->record);
+	psy_table_init(&self->mute);
+	psy_table_init(&self->record);
 	self->soloactive = 0;	
 	self->soloedtrack = 0;
 }
 
-void patternstrackstate_dispose(PatternsTrackState* self)
+void patternstrackstate_dispose(psy_audio_PatternsTrackState* self)
 {
-	table_dispose(&self->mute);
-	table_dispose(&self->record);
+	psy_table_dispose(&self->mute);
+	psy_table_dispose(&self->record);
 	self->soloactive = 0;	
 	self->soloedtrack = 0;
 }
 
-void patternstrackstate_activatesolotrack(PatternsTrackState* self, uintptr_t track)
+void patternstrackstate_activatesolotrack(psy_audio_PatternsTrackState* self, uintptr_t track)
 {
 	self->soloactive = 1;
 	self->soloedtrack = track;
 }
 
-void patternstrackstate_deactivatesolotrack(PatternsTrackState* self)
+void patternstrackstate_deactivatesolotrack(psy_audio_PatternsTrackState* self)
 {
 	self->soloactive = 0;
-	table_clear(&self->mute);
+	psy_table_clear(&self->mute);
 }
 
-void patternstrackstate_mutetrack(PatternsTrackState* self, uintptr_t track)
+void patternstrackstate_mutetrack(psy_audio_PatternsTrackState* self, uintptr_t track)
 {
 	if (!self->soloactive) {
-		table_insert(&self->mute, track, (void*)(uintptr_t) 1);
+		psy_table_insert(&self->mute, track, (void*)(uintptr_t) 1);
 	} else {
-		table_remove(&self->mute, track);
+		psy_table_remove(&self->mute, track);
 	}
 }
 
-void patternstrackstate_unmutetrack(PatternsTrackState* self, uintptr_t track)
+void patternstrackstate_unmutetrack(psy_audio_PatternsTrackState* self, uintptr_t track)
 {
 	if (!self->soloactive) {
-		table_remove(&self->mute, track);
+		psy_table_remove(&self->mute, track);
 	} else {
-		table_insert(&self->mute, track, (void*)(uintptr_t) 1);
+		psy_table_insert(&self->mute, track, (void*)(uintptr_t) 1);
 	}
 }
 
-int patternstrackstate_istrackmuted(PatternsTrackState* self, uintptr_t track)
+int patternstrackstate_istrackmuted(psy_audio_PatternsTrackState* self, uintptr_t track)
 {
 	return self->soloactive
-		? !table_exists(&self->mute, track)
-		: table_exists(&self->mute, track);
+		? !psy_table_exists(&self->mute, track)
+		: psy_table_exists(&self->mute, track);
 }
 
-int patternstrackstate_istracksoloed(PatternsTrackState* self, uintptr_t track)
+int patternstrackstate_istracksoloed(psy_audio_PatternsTrackState* self, uintptr_t track)
 {
 	return self->soloactive && self->soloedtrack == track;		
 }

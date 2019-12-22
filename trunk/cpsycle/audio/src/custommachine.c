@@ -8,24 +8,26 @@
 #include <string.h>
 #include <operations.h>
 
-static const char* custommachine_editname(CustomMachine*);
-static void custommachine_seteditname(CustomMachine*, const char* name);
-static void setpanning(CustomMachine*, psy_dsp_amp_t);
-static psy_dsp_amp_t panning(CustomMachine*);
-static void mute(CustomMachine* self) { self->ismuted = 1;  }
-static void unmute(CustomMachine* self) { self->ismuted = 0;  }
-static int muted(CustomMachine* self) { return self->ismuted; }
-static void bypass(CustomMachine* self) { self->isbypassed = 1; }
-static void unbypass(CustomMachine* self) { self->isbypassed = 0; }
-static int bypassed(CustomMachine* self) { return self->isbypassed; }
-static Buffer* custommachine_buffermemory(CustomMachine*);
-static uintptr_t custommachine_buffermemorysize(CustomMachine*);
-static void custommachine_setbuffermemorysize(CustomMachine*, uintptr_t size);
+static const char* custommachine_editname(psy_audio_CustomMachine*);
+static void custommachine_seteditname(psy_audio_CustomMachine*, const char* name);
+static void setpanning(psy_audio_CustomMachine*, psy_dsp_amp_t);
+static psy_dsp_amp_t panning(psy_audio_CustomMachine*);
+static void mute(psy_audio_CustomMachine* self) { self->ismuted = 1;  }
+static void unmute(psy_audio_CustomMachine* self) { self->ismuted = 0;  }
+static int muted(psy_audio_CustomMachine* self) { return self->ismuted; }
+static void bypass(psy_audio_CustomMachine* self) { self->isbypassed = 1; }
+static void unbypass(psy_audio_CustomMachine* self) { self->isbypassed = 0; }
+static int bypassed(psy_audio_CustomMachine* self) { return self->isbypassed; }
+static psy_audio_Buffer* custommachine_buffermemory(psy_audio_CustomMachine*);
+static uintptr_t custommachine_buffermemorysize(psy_audio_CustomMachine*);
+static void custommachine_setbuffermemorysize(psy_audio_CustomMachine*, uintptr_t size);
+static uintptr_t custommachine_slot(psy_audio_CustomMachine*);
+static void custommachine_setslot(psy_audio_CustomMachine*, uintptr_t slot);
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(CustomMachine* self)
+static void vtable_init(psy_audio_CustomMachine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;
@@ -46,11 +48,13 @@ static void vtable_init(CustomMachine* self)
 			custommachine_buffermemorysize;
 		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
 			custommachine_setbuffermemorysize;
+		vtable.setslot = (fp_machine_setslot) custommachine_setslot;
+		vtable.slot = (fp_machine_slot) custommachine_slot;
 		vtable_initialized = 1;
 	}
 }
 
-void custommachine_init(CustomMachine* self, MachineCallback callback)
+void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
 {
 	uintptr_t c;
 
@@ -61,6 +65,7 @@ void custommachine_init(CustomMachine* self, MachineCallback callback)
 	self->ismuted = 0;
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
+	self->slot = NOMACHINE_INDEX;
 	buffer_init(&self->memorybuffer, 2);
 	self->memorybuffersize = 256;
 	for (c = 0; c < self->memorybuffer.numchannels; ++c) {
@@ -69,7 +74,7 @@ void custommachine_init(CustomMachine* self, MachineCallback callback)
 	}
 }
 
-void custommachine_dispose(CustomMachine* self)
+void custommachine_dispose(psy_audio_CustomMachine* self)
 {
 	uintptr_t c;
 
@@ -82,38 +87,48 @@ void custommachine_dispose(CustomMachine* self)
 	machine_dispose(&self->machine);
 }
 
-void setpanning(CustomMachine* self, psy_dsp_amp_t val)
+void setpanning(psy_audio_CustomMachine* self, psy_dsp_amp_t val)
 {
 	self->pan = val < 0.f ? 0.f : val > 1.f ? 1.f : val;
 }
 
-psy_dsp_amp_t panning(CustomMachine* self)
+psy_dsp_amp_t panning(psy_audio_CustomMachine* self)
 {
 	return self->pan;
 }
 
-const char* custommachine_editname(CustomMachine* self)
+const char* custommachine_editname(psy_audio_CustomMachine* self)
 {
 	return self->editname;
 }
 
-void custommachine_seteditname(CustomMachine* self, const char* name)
+void custommachine_seteditname(psy_audio_CustomMachine* self, const char* name)
 {
 	free(self->editname);
 	self->editname = strdup(name);
 }
 
-Buffer* custommachine_buffermemory(CustomMachine* self)
+psy_audio_Buffer* custommachine_buffermemory(psy_audio_CustomMachine* self)
 {
 	return &self->memorybuffer;	
 }
 
-uintptr_t custommachine_buffermemorysize(CustomMachine* self)
+uintptr_t custommachine_buffermemorysize(psy_audio_CustomMachine* self)
 {
 	return self->memorybuffersize;	
 }
 
-void custommachine_setbuffermemorysize(CustomMachine* self, uintptr_t size)
+void custommachine_setbuffermemorysize(psy_audio_CustomMachine* self, uintptr_t size)
 {
 	// self->memorybuffersize = size;
+}
+
+uintptr_t custommachine_slot(psy_audio_CustomMachine* self)
+{
+	return self->slot;
+}
+
+void custommachine_setslot(psy_audio_CustomMachine* self, uintptr_t slot)
+{
+	self->slot = slot;
 }

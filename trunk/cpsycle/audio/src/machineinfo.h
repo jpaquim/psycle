@@ -11,7 +11,7 @@ typedef struct {
 	short APIVersion;
 	/// plug version. Your machine version. Shown in Hexadecimal.
 	short PlugVersion;
-	/// Machine flags
+	/// psy_audio_Machine flags
 	int Flags;
 	/// Defines the type of machine
 	int mode;
@@ -28,15 +28,15 @@ typedef struct {
 	char* modulepath;
 	/// shellidx
 	int shellidx;	
-} MachineInfo;
+} psy_audio_MachineInfo;
 
-void machineinfo_init(MachineInfo*);
-void machineinfo_dispose(MachineInfo*);
-MachineInfo* machineinfo_alloc(void);
-MachineInfo* machineinfo_allocinit(void);
-MachineInfo* machineinfo_clone(const MachineInfo*);
+void machineinfo_init(psy_audio_MachineInfo*);
+void machineinfo_dispose(psy_audio_MachineInfo*);
+psy_audio_MachineInfo* machineinfo_alloc(void);
+psy_audio_MachineInfo* machineinfo_allocinit(void);
+psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo*);
 
-void machineinfo_set(MachineInfo*,
+void machineinfo_set(psy_audio_MachineInfo*,
 		const char* author,
 		const char* command,
 		int flags,
@@ -48,7 +48,7 @@ void machineinfo_set(MachineInfo*,
 		int type,		
 		const char* modulepath,
 		int shellidx);
-void machineinfo_setnativeinfo(MachineInfo*,
+void machineinfo_setnativeinfo(psy_audio_MachineInfo*,
 		CMachineInfo*,
 		int type,		
 		const char* modulepath,

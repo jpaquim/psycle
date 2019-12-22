@@ -140,7 +140,7 @@ void ui_component_setmenu(ui_component*, ui_menu* menu);
 void ui_component_settitle(ui_component*, const char* title);
 ui_component* ui_component_parent(ui_component* component);
 void ui_component_enumerate_children(ui_component*, void* context, int (*childenum)(void*, void*));
-List* ui_component_children(ui_component*, int recursive);
+psy_List* ui_component_children(ui_component*, int recursive);
 void ui_component_capture(ui_component*);
 void ui_component_releasecapture();
 ui_size ui_component_size(ui_component*);
@@ -175,8 +175,8 @@ ui_textmetric ui_component_textmetric(ui_component*);
 ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
 void ui_component_seticonressource(ui_component*, int ressourceid);
 
-List* ui_components_setalign(List*, UiAlignType, const ui_margin*);
-List* ui_components_setmargin(List*, const ui_margin*);
+psy_List* ui_components_setalign(psy_List*, UiAlignType, const ui_margin*);
+psy_List* ui_components_setmargin(psy_List*, const ui_margin*);
 
 int ui_openfile(ui_component* self, char* title, char* filter,
 	char* defextension, const char* szInitialDir, char* filename);

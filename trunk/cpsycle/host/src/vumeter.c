@@ -12,7 +12,7 @@
 
 static void vumeter_ondraw(Vumeter*, ui_component* sender, ui_graphics*);
 static void vumeter_ontimer(Vumeter*, ui_component* sender, int timerid);
-static void vumeter_onmasterworked(Vumeter*, Machine*, unsigned int slot, BufferContext*);
+static void vumeter_onmasterworked(Vumeter*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
 static void vumeter_onsongchanged(Vumeter*, Workspace*);
 static void vumeter_connectmachinessignals(Vumeter*, Workspace*);
 
@@ -60,8 +60,8 @@ void vumeter_ontimer(Vumeter* self, ui_component* sender, int timerid)
 	}
 }
 
-void vumeter_onmasterworked(Vumeter* self, Machine* master, unsigned int slot,
-	BufferContext* bc)
+void vumeter_onmasterworked(Vumeter* self, psy_audio_Machine* master, unsigned int slot,
+	psy_audio_BufferContext* bc)
 {	
 	if (bc->rmsvol) {
 		self->leftavg = bc->rmsvol->data.previousLeft / 32768;

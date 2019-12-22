@@ -6,11 +6,11 @@
 #include "list.h"
 #include <stdlib.h>
 
-List* list_create(void* entry)
+psy_List* psy_list_create(void* entry)
 {
-	List* list;
+	psy_List* list;
 
-	list = (List*) malloc(sizeof(List));
+	list = (psy_List*) malloc(sizeof(psy_List));
 	list->prev = 0;
 	list->next = 0;
 	list->tail = list;
@@ -18,11 +18,11 @@ List* list_create(void* entry)
 	return list;
 }
 
-void list_free(List* list)
+void psy_list_free(psy_List* list)
 {
 	if (list) {
-		List* ptr;
-		List* next;
+		psy_List* ptr;
+		psy_List* next;
 
 		ptr = list;
 		while (ptr != NULL) {
@@ -33,19 +33,19 @@ void list_free(List* list)
 	}
 }
 
-List* list_append(List** self, void* entry)
+psy_List* psy_list_append(psy_List** self, void* entry)
 {		
 	if (*self == 0) {
-		*self = list_create(entry);
+		*self = psy_list_create(entry);
 	} else {
-		(*self)->tail->next = list_create(entry);
+		(*self)->tail->next = psy_list_create(entry);
 		(*self)->tail->next->prev = (*self)->tail;
 		(*self)->tail = (*self)->tail->next;	
 	}
 	return (*self)->tail;
 }
 
-List* list_cat(List** self, List* list)
+psy_List* psy_list_cat(psy_List** self, psy_List* list)
 {
 	if (!*self) {
 		*self = list;
@@ -57,11 +57,11 @@ List* list_cat(List** self, List* list)
 	return *self ? (*self)->tail : 0;
 }
 
-List* list_insert(List** self, List* ptr, void* entry)
+psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
 {
-	List* next;
+	psy_List* next;
 	if (ptr == NULL) {
-		ptr = list_create(entry);
+		ptr = psy_list_create(entry);
 		(*self)->prev = ptr;
 		ptr->next = *self;
 		ptr->tail = (*self)->tail;
@@ -71,18 +71,18 @@ List* list_insert(List** self, List* ptr, void* entry)
 	}	
 	next = ptr->next;	
 	if (next == NULL) {
-		return list_append(self, entry);
+		return psy_list_append(self, entry);
 	}
-	ptr->next = list_create(entry);	
+	ptr->next = psy_list_create(entry);	
 	ptr->next->prev = ptr;	
 	next->prev = ptr->next;
 	ptr->next->next = next;
 	return ptr->next;
 }
 
-List* list_remove(List** self, List* ptr)
+psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 {	
-	List* rv;
+	psy_List* rv;
 	if (ptr->prev == NULL && ptr->next == NULL) {
 		*self = NULL;
 		free(ptr);
@@ -104,23 +104,23 @@ List* list_remove(List** self, List* ptr)
 	return rv;
 }
 
-uintptr_t list_size(const List* self)
+uintptr_t psy_list_size(const psy_List* self)
 {	
 	uintptr_t rv = 0;
-	const List* p;
+	const psy_List* p;
 
 	for (p = self; p != 0; p = p->next, ++rv);
 	return rv;
 }
 
-List* list_last(List* self)
+psy_List* list_last(psy_List* self)
 {
 	return self ? self->tail : 0;
 }
 
-int list_check(List* self, List* node)
+int psy_list_check(psy_List* self, psy_List* node)
 {
-	List* p = self;
+	psy_List* p = self;
 			
 	while (p != 0) {
 		if (p == node) {
@@ -131,9 +131,9 @@ int list_check(List* self, List* node)
 	return p != 0;
 }
 
-List* list_findentry(List* self, void* entry)
+psy_List* psy_list_findentry(psy_List* self, void* entry)
 {
-	List* p = self;
+	psy_List* p = self;
 			
 	while (p != 0) {
 		if (p->entry == entry) {
@@ -144,9 +144,9 @@ List* list_findentry(List* self, void* entry)
 	return p;
 }
 
-List* list_at(List* self, uintptr_t numentry)
+psy_List* psy_list_at(psy_List* self, uintptr_t numentry)
 {
-	List* p = self;
+	psy_List* p = self;
 	uintptr_t c = 0;
 			
 	while (p != 0) {

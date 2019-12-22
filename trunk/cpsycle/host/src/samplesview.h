@@ -20,8 +20,8 @@
 typedef struct {
 	ui_component component;
 	struct SamplesView* view;
-	Sample* sample;
-	Instruments* instruments;	
+	psy_audio_Sample* sample;
+	psy_audio_Instruments* instruments;	
 	ui_label namelabel;
 	ui_edit nameedit;
 	ui_button prevbutton;
@@ -35,7 +35,7 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
-	Sample* sample;
+	psy_audio_Sample* sample;
 	psy_dsp_NotesTabMode notestabmode;
 	ui_slider defaultvolume;
 	ui_slider globalvolume;
@@ -46,19 +46,19 @@ typedef struct {
 
 typedef struct {
 	ui_component component;
-	Sample* sample;	
+	psy_audio_Sample* sample;	
 	ui_label waveformheaderlabel;
 	ui_combobox waveformbox;
 	ui_slider attack;
 	ui_slider speed;
 	ui_slider depth;
-	Player* player;
+	psy_audio_Player* player;
 } SamplesVibratoView;
 
 typedef struct {
 	ui_component component;
 	struct SamplesView* view;
-	Sample* sample;	
+	psy_audio_Sample* sample;	
 	ui_component cont;
 	ui_label loopheaderlabel;
 	ui_combobox loopdir;
@@ -95,7 +95,7 @@ typedef struct {
 	ui_component bar;
 	ui_button add;
 	WaveBox samplebox;
-	Song* source;
+	psy_audio_Song* source;
 	struct SamplesView* view;
 	Workspace* workspace;
 } SamplesSongImportView;

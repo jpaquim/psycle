@@ -24,7 +24,7 @@
 
 /*
 ** {==================================================================
-** List of valid conversion specifiers for the 'strftime' function;
+** psy_List of valid conversion specifiers for the 'strftime' function;
 ** options are grouped by length; group of length 2 start with '||'.
 ** ===================================================================
 */

@@ -19,8 +19,8 @@ typedef enum {
 
 typedef struct {	
 	Driver* driver;		
-	Song* song;
-	Sequencer sequencer;	
+	psy_audio_Song* song;
+	psy_audio_Sequencer sequencer;	
 	uintptr_t numsongtracks;
 	psy_Signal signal_numsongtrackschanged;
 	psy_Signal signal_lpbchanged;
@@ -28,51 +28,51 @@ typedef struct {
 	psy_Signal signal_stop;	
 	Library drivermodule;
 	EventDrivers eventdrivers;
-	Table rms;	
+	psy_Table rms;	
 	VUMeterMode vumode;
 	int resetvumeters;
 	int recordingnotes;
 	int multichannelaudition;	
-	Table notestotracks;
-	Table trackstonotes;	
-} Player;
+	psy_Table notestotracks;
+	psy_Table trackstonotes;	
+} psy_audio_Player;
 
 // init dispose
-void player_init(Player*, Song*, void* systemhandle);
-void player_dispose(Player*);
+void player_init(psy_audio_Player*, psy_audio_Song*, void* systemhandle);
+void player_dispose(psy_audio_Player*);
 // general
-void player_setsong(Player*, Song*);
-void player_setnumsongtracks(Player*, uintptr_t numsongtracks);
-uintptr_t player_numsongtracks(Player*);
-void player_setvumetermode(Player*, VUMeterMode);
-VUMeterMode player_vumetermode(Player*);
+void player_setsong(psy_audio_Player*, psy_audio_Song*);
+void player_setnumsongtracks(psy_audio_Player*, uintptr_t numsongtracks);
+uintptr_t player_numsongtracks(psy_audio_Player*);
+void player_setvumetermode(psy_audio_Player*, VUMeterMode);
+VUMeterMode player_vumetermode(psy_audio_Player*);
 // sequencer
-void player_start(Player*);
-void player_stop(Player*);
-int player_playing(Player*);
-void player_setposition(Player*, psy_dsp_beat_t offset);
-psy_dsp_beat_t player_position(Player*);
-void player_setbpm(Player*, psy_dsp_beat_t bpm);
-psy_dsp_beat_t player_bpm(Player*);
-void player_setlpb(Player*, uintptr_t lpb);
-uintptr_t player_lpb(Player*);
+void player_start(psy_audio_Player*);
+void player_stop(psy_audio_Player*);
+int player_playing(psy_audio_Player*);
+void player_setposition(psy_audio_Player*, psy_dsp_beat_t offset);
+psy_dsp_beat_t player_position(psy_audio_Player*);
+void player_setbpm(psy_audio_Player*, psy_dsp_beat_t bpm);
+psy_dsp_beat_t player_bpm(psy_audio_Player*);
+void player_setlpb(psy_audio_Player*, uintptr_t lpb);
+uintptr_t player_lpb(psy_audio_Player*);
 // audio driver
-void player_setaudiodriver(Player*, Driver* driver);
-Driver* player_audiodriver(Player*);
-void player_loaddriver(Player*, const char* path, Properties* config);
-void player_reloaddriver(Player*, const char* path, Properties* config);
-void player_restartdriver(Player*, Properties* config);
+void player_setaudiodriver(psy_audio_Player*, Driver* driver);
+Driver* player_audiodriver(psy_audio_Player*);
+void player_loaddriver(psy_audio_Player*, const char* path, psy_Properties* config);
+void player_reloaddriver(psy_audio_Player*, const char* path, psy_Properties* config);
+void player_restartdriver(psy_audio_Player*, psy_Properties* config);
 // event recording
-void player_startrecordingnotes(Player*);
-void player_stoprecordingnotes(Player*);
-int player_recordingnotes(Player*);
+void player_startrecordingnotes(psy_audio_Player*);
+void player_stoprecordingnotes(psy_audio_Player*);
+int player_recordingnotes(psy_audio_Player*);
 // event driver
-void player_loadeventdriver(Player*, const char * path);
-void player_addeventdriver(Player*, int id);
-void player_removeeventdriver(Player*, int id);
-void player_restarteventdriver(Player*, int id);
-EventDriver* player_kbddriver(Player*);
-EventDriver* player_eventdriver(Player*, int id);
-unsigned int player_numeventdrivers(Player*);
+void player_loadeventdriver(psy_audio_Player*, const char * path);
+void player_addeventdriver(psy_audio_Player*, int id);
+void player_removeeventdriver(psy_audio_Player*, int id);
+void player_restarteventdriver(psy_audio_Player*, int id);
+EventDriver* player_kbddriver(psy_audio_Player*);
+EventDriver* player_eventdriver(psy_audio_Player*, int id);
+unsigned int player_numeventdrivers(psy_audio_Player*);
 
 #endif

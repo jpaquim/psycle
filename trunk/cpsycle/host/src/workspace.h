@@ -25,7 +25,7 @@ typedef struct {
 } HistoryEntry;
 
 typedef struct {
-	List* container;
+	psy_List* container;
 	int prevented;
 } History;
 
@@ -41,22 +41,22 @@ typedef struct {
 } MaximizedView;
 
 typedef struct {	
-	Song* song;
-	Song* songcbk;
-	Player player;	
-	Properties* config;
-	Properties* inputoutput;
-	Properties* midi;
-	Properties* keyboard;
-	Properties* directories;
-	Properties* properties;
-	Properties* lang;	
-	Properties* driverconfigure;
-	Properties* driverconfigurations;
-	Properties* midiconfigure;
-	Properties* theme;
-	Properties* cmds;
-	PluginCatcher plugincatcher;
+	psy_audio_Song* song;
+	psy_audio_Song* songcbk;
+	psy_audio_Player player;	
+	psy_Properties* config;
+	psy_Properties* inputoutput;
+	psy_Properties* midi;
+	psy_Properties* keyboard;
+	psy_Properties* directories;
+	psy_Properties* properties;
+	psy_Properties* lang;	
+	psy_Properties* driverconfigure;
+	psy_Properties* driverconfigurations;
+	psy_Properties* midiconfigure;
+	psy_Properties* theme;
+	psy_Properties* cmds;
+	psy_audio_PluginCatcher plugincatcher;
 	MachineFactory machinefactory;
 	int octave;
 	psy_Signal signal_octavechanged;
@@ -82,11 +82,11 @@ typedef struct {
 	int followsong;
 	int recordtweaks;
 	SequenceEntry* lastentry;
-	Pattern patternpaste;
-	List* sequencepaste;
+	psy_audio_Pattern patternpaste;
+	psy_List* sequencepaste;
 	MaximizedView maximizeview;
 	int currview;
-	List* currnavigation;
+	psy_List* currnavigation;
 	int navigating;
 } Workspace;
 
@@ -98,7 +98,7 @@ void workspace_loadsong(Workspace*, const char* path);
 void workspace_savesong(Workspace*, const char* path);
 void workspace_loadskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
-Properties* workspace_pluginlist(Workspace*);
+psy_Properties* workspace_pluginlist(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_setoctave(Workspace*, int octave);
@@ -111,8 +111,8 @@ int workspace_showlinenumbercursor(Workspace*);
 int workspace_showlinenumbersinhex(Workspace*);
 int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
-void workspace_configchanged(Workspace*, Properties* property,
-	Properties* choice);
+void workspace_configchanged(Workspace*, psy_Properties* property,
+	psy_Properties* choice);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_setpatterneditposition(Workspace*, PatternEditPosition);

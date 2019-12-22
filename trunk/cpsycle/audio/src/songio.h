@@ -9,17 +9,17 @@
 #include <fileio.h>
 
 /// song load and save
-typedef struct SongFile {
-	struct Song* song;
+typedef struct psy_audio_SongFile {
+	struct psy_audio_Song* song;
 	struct PsyFile* file;
-	Properties* workspaceproperties;
+	psy_Properties* workspaceproperties;
 	int err;
-} SongFile;
+} psy_audio_SongFile;
 
 /// loads a song
 ///\return ui properties (coordinates, ...)
-void songfile_load(struct SongFile*, const char* path);
+void songfile_load(struct psy_audio_SongFile*, const char* path);
 /// saves a song
-void songfile_save(struct SongFile*, const char* path);
+void songfile_save(struct psy_audio_SongFile*, const char* path);
 
 #endif

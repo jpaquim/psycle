@@ -50,7 +50,7 @@ void wavebox_ondestroy(WaveBox* self, ui_component* sender)
 {		
 }
 
-void wavebox_setsample(WaveBox* self, Sample* sample)
+void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	ui_component_invalidate(&self->component);

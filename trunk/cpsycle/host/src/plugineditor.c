@@ -7,12 +7,10 @@
 
 #include <portable.h>
 
-static void plugineditor_onmachineschangeslot(PluginEditor*, Machines*,
-	uintptr_t slot);
+static void plugineditor_onmachineschangeslot(PluginEditor*,
+	psy_audio_Machines*, uintptr_t slot);
 static void plugineditor_onsongchanged(PluginEditor*, Workspace*);
-static void plugineditor_connectmachinesignals(PluginEditor* self,
-	Workspace* workspace);
-
+static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
 static void plugineditor_ondestroy(PluginEditor*, ui_component* sender);
 
 void plugineditor_init(PluginEditor* self, ui_component* parent,
@@ -35,10 +33,10 @@ void plugineditor_ondestroy(PluginEditor* self, ui_component* sender)
 {
 }
 
-void plugineditor_onmachineschangeslot(PluginEditor* self, Machines* machines,
-	uintptr_t slot)
+void plugineditor_onmachineschangeslot(PluginEditor* self,
+	psy_audio_Machines* machines, uintptr_t slot)
 {
-	Machine* machine;
+	psy_audio_Machine* machine;
 
 	machine = machines_at(machines, slot);
 	if (machine && machine->vtable->info(machine)->type == MACH_LUA) {
@@ -59,7 +57,8 @@ void plugineditor_onsongchanged(PluginEditor* self, Workspace* workspace)
 	plugineditor_connectmachinesignals(self, workspace);
 }
 
-void plugineditor_connectmachinesignals(PluginEditor* self, Workspace* workspace)
+void plugineditor_connectmachinesignals(PluginEditor* self,
+	Workspace* workspace)
 {
 	if (workspace->song) {
 		psy_signal_connect(&workspace->song->machines.signal_slotchange, self,

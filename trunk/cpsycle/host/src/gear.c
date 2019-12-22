@@ -34,8 +34,8 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 	ui_button_settext(&self->showmaster, "Show master");
 	{
 		ui_margin margin = { 0, 3, 3, 0 };
-		List* p;
-		List* q;
+		psy_List* p;
+		psy_List* q;
 		for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next) {
 			ui_component* component;
 			
@@ -44,7 +44,7 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 			ui_component_setmargin(component, &margin);
 			ui_component_resize(component, 0, 20);
 		}
-		list_free(q);
+		psy_list_free(q);
 	}
 }
 

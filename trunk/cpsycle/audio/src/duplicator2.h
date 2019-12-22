@@ -8,16 +8,16 @@
 #include "duplicatormap.h"
 
 typedef struct {
-	CustomMachine custommachine;
+	psy_audio_CustomMachine custommachine;
 	short macoutput[16];
 	short noteoffset[16];	
 	short lowkey[16];
 	short highkey[16];
-	DuplicatorMap map;	
+	psy_audio_DuplicatorMap map;	
 	int isticking;
-} Duplicator2;
+} psy_audio_Duplicator2;
 
-void duplicator2_init(Duplicator2*, MachineCallback);
-const MachineInfo* duplicator2_info(void);
+void duplicator2_init(psy_audio_Duplicator2*, MachineCallback);
+const psy_audio_MachineInfo* duplicator2_info(void);
 
 #endif

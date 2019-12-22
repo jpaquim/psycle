@@ -10,91 +10,91 @@
 #include <string.h>
 #include <operations.h>
 
-static MachineInfo const macinfo = {	
+static psy_audio_MachineInfo const macinfo = {	
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
 	MACHMODE_FX,
-	"Machine"
+	"psy_audio_Machine"
 		#ifndef NDEBUG
 		" (debug build)"
 		#endif
 		,
-	"Machine",
+	"psy_audio_Machine",
 	"Psycledelics",
 	"help",
 	MACH_UNDEFINED
 };
 
-static Machine* clone(Machine* self) { return 0; }
-static Buffer* mix(Machine*, size_t slot, unsigned int amount, MachineSockets*, Machines*);
-static void work(Machine*, BufferContext*);
-static void generateaudio(Machine* self, BufferContext* bc) { }
-static int hostevent(Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
-static void seqtick(Machine* self, int channel, const PatternEvent* event) { }
-static void stop(Machine* self) { }
-static void sequencertick(Machine* self) { }
-static List* sequencerinsert(Machine* self, List* events) { return 0; }
-static void sequencerlinetick(Machine* self) { }
-static const MachineInfo* info(Machine* self) { return &macinfo; }
-static int parametertype(Machine* self, int param) { return MPF_STATE; }
-static void parameterrange(Machine* self, int numparam, int* minval, int* maxval)
+static psy_audio_Machine* clone(psy_audio_Machine* self) { return 0; }
+static psy_audio_Buffer* mix(psy_audio_Machine*, size_t slot, unsigned int amount, psy_audio_MachineSockets*, psy_audio_Machines*);
+static void work(psy_audio_Machine*, psy_audio_BufferContext*);
+static void generateaudio(psy_audio_Machine* self, psy_audio_BufferContext* bc) { }
+static int hostevent(psy_audio_Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
+static void seqtick(psy_audio_Machine* self, int channel, const psy_audio_PatternEvent* event) { }
+static void stop(psy_audio_Machine* self) { }
+static void sequencertick(psy_audio_Machine* self) { }
+static psy_List* sequencerinsert(psy_audio_Machine* self, psy_List* events) { return 0; }
+static void sequencerlinetick(psy_audio_Machine* self) { }
+static const psy_audio_MachineInfo* info(psy_audio_Machine* self) { return &macinfo; }
+static int parametertype(psy_audio_Machine* self, int param) { return MPF_STATE; }
+static void parameterrange(psy_audio_Machine* self, int numparam, int* minval, int* maxval)
 {
 	*minval = 0;
 	*maxval = 0;
 }
-static void parametertweak(Machine* self, int par, int val) { }
-static void patterntweak(Machine* self, int par, int val)
+static void parametertweak(psy_audio_Machine* self, int par, int val) { }
+static void patterntweak(psy_audio_Machine* self, int par, int val)
 {
 	self->vtable->parametertweak(self, par, val);
 }
-static int parameterlabel(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
-static int parametername(Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
-static int describevalue(Machine* self, char* txt, int param, int value) { return 0; }
-static int parametervalue(Machine* self, int const param) { return 0; }
-static void setpanning(Machine* self, psy_dsp_amp_t panning) { }
-static psy_dsp_amp_t panning(Machine* self) { return (psy_dsp_amp_t) 0.5f; }
-static void mute(Machine* self) { }
-static void unmute(Machine* self) { }
-static int muted(Machine* self) { return 0; }
-static void bypass(Machine* self) { }
-static void unbypass(Machine* self) { }
-static int bypassed(Machine* self) { return 0; }
-static void dispose(Machine*);
-static int mode(Machine*);
-static unsigned int numinputs(Machine* self) { return 0; }
-static unsigned int numoutputs(Machine* self) { return 0; }	
-static void setcallback(Machine* self, MachineCallback callback) { self->callback = callback; }
-static void updatesamplerate(Machine* self, unsigned int samplerate) { }
-static void loadspecific(Machine*, struct SongFile*, unsigned int slot);
-static void savespecific(Machine*, struct SongFile*, unsigned int slot);
-static void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples,
+static int parameterlabel(psy_audio_Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
+static int parametername(psy_audio_Machine* self, char* txt, int param) { txt[0] = '\0'; return 0; }
+static int describevalue(psy_audio_Machine* self, char* txt, int param, int value) { return 0; }
+static int parametervalue(psy_audio_Machine* self, int const param) { return 0; }
+static void setpanning(psy_audio_Machine* self, psy_dsp_amp_t panning) { }
+static psy_dsp_amp_t panning(psy_audio_Machine* self) { return (psy_dsp_amp_t) 0.5f; }
+static void mute(psy_audio_Machine* self) { }
+static void unmute(psy_audio_Machine* self) { }
+static int muted(psy_audio_Machine* self) { return 0; }
+static void bypass(psy_audio_Machine* self) { }
+static void unbypass(psy_audio_Machine* self) { }
+static int bypassed(psy_audio_Machine* self) { return 0; }
+static void dispose(psy_audio_Machine*);
+static int mode(psy_audio_Machine*);
+static unsigned int numinputs(psy_audio_Machine* self) { return 0; }
+static unsigned int numoutputs(psy_audio_Machine* self) { return 0; }	
+static void setcallback(psy_audio_Machine* self, MachineCallback callback) { self->callback = callback; }
+static void updatesamplerate(psy_audio_Machine* self, unsigned int samplerate) { }
+static void loadspecific(psy_audio_Machine*, struct psy_audio_SongFile*, unsigned int slot);
+static void savespecific(psy_audio_Machine*, struct psy_audio_SongFile*, unsigned int slot);
+static void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, unsigned int numsamples,
 	psy_dsp_amp_t vol);
-static unsigned int numparameters(Machine* self) { return 0; }
-static unsigned int numparametercols(Machine* self) { return 0; }
-static int paramviewoptions(Machine* self) { return 0; }
-static uintptr_t slot(Machine* self) { return NOMACHINE_INDEX; }
-static void setslot(Machine* self, uintptr_t slot) { }
-static int haseditor(Machine* self) { return 0; }
-static void seteditorhandle(Machine* self, void* handle) { }
-static void editorsize(Machine* self, int* width, int* height)
+static unsigned int numparameters(psy_audio_Machine* self) { return 0; }
+static unsigned int numparametercols(psy_audio_Machine* self) { return 0; }
+static int paramviewoptions(psy_audio_Machine* self) { return 0; }
+static uintptr_t slot(psy_audio_Machine* self) { return NOMACHINE_INDEX; }
+static void setslot(psy_audio_Machine* self, uintptr_t slot) { }
+static int haseditor(psy_audio_Machine* self) { return 0; }
+static void seteditorhandle(psy_audio_Machine* self, void* handle) { }
+static void editorsize(psy_audio_Machine* self, int* width, int* height)
 { 
 	*width = 0;
 	*height = 0;
 }
-static void editoridle(Machine* self) { }
-static const char* editname(Machine* self) { return ""; }
-static void seteditname(Machine* self, const char* name) { }
-static Buffer* buffermemory(Machine* self) { return 0; }
-static uintptr_t buffermemorysize(Machine* self) { return 0; }
-static void setbuffermemorysize(Machine* self, uintptr_t size) { }
+static void editoridle(psy_audio_Machine* self) { }
+static const char* editname(psy_audio_Machine* self) { return ""; }
+static void seteditname(psy_audio_Machine* self, const char* name) { }
+static psy_audio_Buffer* buffermemory(psy_audio_Machine* self) { return 0; }
+static uintptr_t buffermemorysize(psy_audio_Machine* self) { return 0; }
+static void setbuffermemorysize(psy_audio_Machine* self, uintptr_t size) { }
 
 /// machinecallback
-static unsigned int samplerate(Machine* self) { return self->callback.samplerate(self->callback.context); }
-static unsigned int bpm(Machine* self) { return self->callback.bpm(self->callback.context); }
-static struct Samples* samples(Machine* self) { return self->callback.samples(self->callback.context); }
-static struct Machines* machines(Machine* self) { return self->callback.machines(self->callback.context); }
-static struct Instruments* instruments(Machine* self) { return self->callback.instruments(self->callback.context); }
+static unsigned int samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
+static unsigned int bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
+static struct psy_audio_Samples* samples(psy_audio_Machine* self) { return self->callback.samples(self->callback.context); }
+static struct psy_audio_Machines* machines(psy_audio_Machine* self) { return self->callback.machines(self->callback.context); }
+static struct psy_audio_Instruments* instruments(psy_audio_Machine* self) { return self->callback.instruments(self->callback.context); }
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -160,30 +160,30 @@ static void vtable_init(void)
 	}
 }
 
-void machine_init(Machine* self, MachineCallback callback)
+void machine_init(psy_audio_Machine* self, MachineCallback callback)
 {		
-	memset(self, 0, sizeof(Machine));
+	memset(self, 0, sizeof(psy_audio_Machine));
 	vtable_init();
 	self->vtable = &vtable;
 	self->callback = callback;
 	psy_signal_init(&self->signal_worked);
 }
 
-void machine_dispose(Machine* self)
+void machine_dispose(psy_audio_Machine* self)
 {
 	psy_signal_dispose(&self->signal_worked);
 }
 
-void work(Machine* self, BufferContext* bc)
+void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 {			
-	List* p;
+	psy_List* p;
 	unsigned int amount = bc->numsamples;
 	unsigned int pos = 0;
 
 	for (p = bc->events; p != 0; p = p->next) {					
 		int numworksamples;
 
-		PatternEntry* entry = (PatternEntry*)p->entry;		
+		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;		
 		numworksamples = (unsigned int)entry->delta - pos;		
 		if (numworksamples > 0) {				
 			int restorenumsamples = bc->numsamples;
@@ -206,7 +206,7 @@ void work(Machine* self, BufferContext* bc)
 				entry->event.parameter / 255.f);
 		} else
 		if (entry->event.note == NOTECOMMANDS_MIDICC) {
-			Machine* dst;
+			psy_audio_Machine* dst;
 			int value;
 
 			dst = machines_at(self->vtable->machines(self), entry->event.mach);
@@ -243,7 +243,7 @@ void work(Machine* self, BufferContext* bc)
 		buffer_setoffset(bc->input, 0);
 	}
 	if (bc->output) {
-		Buffer* memory;
+		psy_audio_Buffer* memory;
 
 		buffer_setoffset(bc->output, 0);		
 		memory = self->vtable->buffermemory(self);
@@ -255,15 +255,15 @@ void work(Machine* self, BufferContext* bc)
 	}
 }
 
-static int mode(Machine* self)
+static int mode(psy_audio_Machine* self)
 { 
-	const MachineInfo* info;
+	const psy_audio_MachineInfo* info;
 
 	info = self->vtable->info(self);
 	return (!info) ? MACHMODE_FX : info->mode;
 }
 
-int machine_supports(Machine* self, int option)
+int machine_supports(psy_audio_Machine* self, int option)
 {
 	if (self->vtable->info(self)) {
 		return (self->vtable->info(self)->Flags & option) == option;
@@ -271,9 +271,9 @@ int machine_supports(Machine* self, int option)
 	return 0;
 }
 
-Buffer* mix(Machine* self, size_t slot, unsigned int amount, MachineSockets* connected_machine_sockets, Machines* machines)
+psy_audio_Buffer* mix(psy_audio_Machine* self, size_t slot, unsigned int amount, psy_audio_MachineSockets* connected_machine_sockets, psy_audio_Machines* machines)
 {			
-	Buffer* output;
+	psy_audio_Buffer* output;
 
 	output = machines_outputs(machines, slot);
 	if (output) {
@@ -282,7 +282,7 @@ Buffer* mix(Machine* self, size_t slot, unsigned int amount, MachineSockets* con
 			WireSocket* input_socket;
 			
 			for (input_socket = connected_machine_sockets->inputs; input_socket != 0; input_socket = input_socket->next) {
-				WireSocketEntry* source = (WireSocketEntry*) input_socket->entry;
+				psy_audio_WireSocketEntry* source = (psy_audio_WireSocketEntry*) input_socket->entry;
 				addsamples(output, machines_outputs(machines, source->slot), amount,
 					source->volume);				
 			}							
@@ -291,7 +291,7 @@ Buffer* mix(Machine* self, size_t slot, unsigned int amount, MachineSockets* con
 	return output;
 }
 
-void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples,
+void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, unsigned int numsamples,
 	psy_dsp_amp_t vol)
 {
 	unsigned int channel;
@@ -310,7 +310,7 @@ void addsamples(Buffer* dst, Buffer* source, unsigned int numsamples,
 	}
 }
 
-void loadspecific(Machine* self, struct SongFile* songfile, unsigned int slot)
+void loadspecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {
 	unsigned int size;
 	unsigned int count;
@@ -326,7 +326,7 @@ void loadspecific(Machine* self, struct SongFile* songfile, unsigned int slot)
 	psyfile_skip(songfile->file, size - sizeof(count) - (count * sizeof(int)));
 }
 
-void savespecific(Machine* self, struct SongFile* songfile, unsigned int slot)
+void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {
 	unsigned int i;
 	unsigned count = self->vtable->numparameters(self);

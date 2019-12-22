@@ -12,9 +12,9 @@
 
 #include <string.h>
 
-static void songfile_createmaster(SongFile*);
+static void songfile_createmaster(psy_audio_SongFile*);
 
-void songfile_load(SongFile* self, const char* path)
+void songfile_load(psy_audio_SongFile* self, const char* path)
 {		
 	PsyFile file;
 
@@ -24,7 +24,7 @@ void songfile_load(SongFile* self, const char* path)
 		char header[20];
 //		SequencePosition position;
 		
-		self->workspaceproperties = properties_create();
+		self->workspaceproperties = psy_properties_create();
 		song_clear(self->song);		
 		machines_startfilemode(&self->song->machines);
 		psyfile_read(self->file, header, 8);
@@ -55,7 +55,7 @@ void songfile_load(SongFile* self, const char* path)
 	psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 0);
 }
 
-void songfile_save(SongFile* self, const char* path)
+void songfile_save(psy_audio_SongFile* self, const char* path)
 {	
 	PsyFile file;
 
@@ -66,22 +66,22 @@ void songfile_save(SongFile* self, const char* path)
 	}
 }
 
-void songfile_createmaster(SongFile* self)
+void songfile_createmaster(psy_audio_SongFile* self)
 {
-	Properties* machines;	
-	Properties* machine;
+	psy_Properties* machines;	
+	psy_Properties* machine;
 
 	machines_insertmaster(&self->song->machines,
 			machinefactory_makemachine(self->song->machinefactory,
 			MACH_MASTER, 0));
-	machines = properties_findsection(self->workspaceproperties,
+	machines = psy_properties_findsection(self->workspaceproperties,
 		"machines");
 	if (!machines) {
-		machines = properties_createsection(
+		machines = psy_properties_create_section(
 			self->workspaceproperties, "machines");
 	}
-	machine = properties_createsection(machines, "machine");
-	properties_append_int(machine, "index", MASTER_INDEX, 0, 0);		
-	properties_append_int(machine, "x", 320, 0, 0);
-	properties_append_int(machine, "y", 200, 0, 0);
+	machine = psy_properties_create_section(machines, "machine");
+	psy_properties_append_int(machine, "index", MASTER_INDEX, 0, 0);		
+	psy_properties_append_int(machine, "x", 320, 0, 0);
+	psy_properties_append_int(machine, "y", 200, 0, 0);
 }

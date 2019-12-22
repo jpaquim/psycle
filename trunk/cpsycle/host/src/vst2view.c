@@ -9,7 +9,7 @@
 
 static void ontimer(Vst2View*, ui_component* sender, int id);
 
-void InitVst2View(Vst2View* self, ui_component* parent, Machine* plugin)
+void InitVst2View(Vst2View* self, ui_component* parent, psy_audio_Machine* plugin)
 {		
 	self->plugin = plugin;
 	ui_component_init(&self->component, parent);

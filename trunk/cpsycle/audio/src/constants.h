@@ -17,7 +17,7 @@
 //		#define MASTER_INDEX			128
 	/// Max number of instruments.
 	#define MAX_INSTRUMENTS			256
-	/// Instrument index of the wave preview.
+	/// psy_audio_Instrument index of the wave preview.
 	#define PREV_WAV_INS			255
 	/// Number of tracks of the sequence (psycle just support one sequence now). Modify this, CURRENT_FILE_VERSION_SEQD and add the appropiated load and save code.
 	#define MAX_SEQUENCES			1
@@ -44,15 +44,15 @@
 	#define MULTIPLY2				MULTIPLY * MAX_LINES		
 	#define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	
 
-	/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
+	/// Temporary buffer to get all the audio from psy_audio_Master (which work in small chunks), and send it to the soundcard after converting it to float.
 	#define MAX_SAMPLES_WORKFN		65536
-	/// Sampler
+	/// psy_audio_Sampler
 	#define OVERLAPTIME				128
 	/// Maximum size of the audio block to be passed to the Work() function.
 	// int const STREAM_SIZE = 256; // plugin_interface::MAX_BUFFER_LENGTH;
 	#define STREAM_SIZE				256
 
-	/// Current version of the Song file chunks. 0xAAAABBBB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, the loader skips the extra info.
+	/// Current version of the psy_audio_Song file chunks. 0xAAAABBBB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, the loader skips the extra info.
 	//Version for the metadata information (author, comments..)
 	#define CURRENT_FILE_VERSION_INFO	0x00000000
 	//Version for the song data information (BPM, number of tracks..)

@@ -12,13 +12,13 @@
 static void pianoheader_ondraw(PianoHeader*, ui_component* sender, ui_graphics*);
 void pianoheader_drawruler(PianoHeader*, ui_graphics*);
 
-static void pianoroll_onlpbchanged(Pianoroll*, Player* sender, uintptr_t lpb);
+static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player* sender, uintptr_t lpb);
 static void pianoroll_ontimer(Pianoroll*, ui_component* sender, 
 	int timerid);
 static void pianogrid_ondraw(Pianogrid*, ui_component* sender, ui_graphics*);
 static void pianogrid_drawgrid(Pianogrid*, ui_graphics*);
 static void pianogrid_drawevents(Pianogrid*, ui_graphics*);
-static void pianogrid_drawevent(Pianogrid*, ui_graphics*, PatternEvent*, int track, float offset, float length);
+static void pianogrid_drawevent(Pianogrid*, ui_graphics*, psy_audio_PatternEvent*, int track, float offset, float length);
 static void pianogrid_onsize(Pianogrid*, ui_component* sender, ui_size*);
 static void pianogrid_adjustscroll(Pianogrid*);
 static void pianogrid_onscroll(Pianogrid*, ui_component* sender, int stepx, int stepy);
@@ -246,7 +246,7 @@ void pianogrid_drawgrid(Pianogrid* self, ui_graphics* g)
 
 void pianogrid_drawevents(Pianogrid* self, ui_graphics* g)
 {
-	PatternEntry channel[64];
+	psy_audio_PatternEntry channel[64];
 	int track;	
 
 	for (track = 0; track < 64; ++track) {
@@ -256,7 +256,7 @@ void pianogrid_drawevents(Pianogrid* self, ui_graphics* g)
 		PatternNode* curr;
 		curr = self->view->pattern->events;
 		while (curr) {			
-			PatternEntry* entry = (PatternEntry*)(curr->entry);			
+			psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(curr->entry);			
 			if (channel[entry->track].offset != -1.0f) {
 				pianogrid_drawevent(self, g, &channel[entry->track].event, entry->track,
 					channel[entry->track].offset,
@@ -281,7 +281,7 @@ void pianogrid_drawevents(Pianogrid* self, ui_graphics* g)
 	}
 }
 
-void pianogrid_drawevent(Pianogrid* self, ui_graphics* g, PatternEvent* event, int track, float offset, float length)
+void pianogrid_drawevent(Pianogrid* self, ui_graphics* g, psy_audio_PatternEvent* event, int track, float offset, float length)
 {
 	ui_rectangle r;	
 	int left = (int)((offset + self->beatscrollpos) * self->metrics.beatwidth);
@@ -384,7 +384,7 @@ void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, MouseEvent* ev
 	offset = (ev->x  / (psy_dsp_beat_t) self->metrics.beatwidth) + self->beatscrollpos;
 	offset = (int)(offset * (psy_dsp_beat_t)self->metrics.lpb) / (psy_dsp_beat_t)self->metrics.lpb;
 	if (ev->button == 1) {
-		PatternEvent event;
+		psy_audio_PatternEvent event;
 		PatternNode* node = 0;
 		PatternNode* prev = 0;
 
@@ -409,7 +409,7 @@ void pianogrid_onmousedown(Pianogrid* self, ui_component* sender, MouseEvent* ev
 	}
 }
 
-void pianoroll_setpattern(Pianoroll* self, Pattern* pattern)
+void pianoroll_setpattern(Pianoroll* self, psy_audio_Pattern* pattern)
 {	
 	self->pattern = pattern;
 	self->grid.dy = 0;
@@ -509,7 +509,7 @@ void pianogrid_adjustscroll(Pianogrid* self)
 		metrics.keymax - metrics.keymin - metrics.visikeys);
 }
 
-void pianoroll_onlpbchanged(Pianoroll* self, Player* sender, uintptr_t lpb)
+void pianoroll_onlpbchanged(Pianoroll* self, psy_audio_Player* sender, uintptr_t lpb)
 {
 	pianoroll_updatemetrics(self);
 	pianogrid_adjustscroll(&self->grid);

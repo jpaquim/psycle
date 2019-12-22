@@ -8,7 +8,7 @@ static void OnSize(PatternProperties* self, ui_component* sender, ui_size*);
 static void OnApplyClicked(PatternProperties* self, ui_component* sender);
 static void OnCloseClicked(PatternProperties* self, ui_component* sender);
 
-void InitPatternProperties(PatternProperties* self, ui_component* parent, Pattern* pattern)
+void InitPatternProperties(PatternProperties* self, ui_component* parent, psy_audio_Pattern* pattern)
 {			
 	self->pattern = pattern;
 	ui_component_init(&self->component, parent);	
@@ -18,7 +18,7 @@ void InitPatternProperties(PatternProperties* self, ui_component* parent, Patter
 	ui_label_init(&self->lengthlabel, &self->component);
 	ui_label_settext(&self->lengthlabel, "Length");
 	ui_edit_init(&self->nameedit, &self->component, 0);
-	ui_edit_settext(&self->nameedit, "No Pattern");
+	ui_edit_settext(&self->nameedit, "No psy_audio_Pattern");
 	ui_edit_init(&self->lengthedit, &self->component, 0);
 	ui_button_init(&self->applybutton, &self->component);
 	ui_button_settext(&self->applybutton, "Apply");	
@@ -38,7 +38,7 @@ void InitPatternProperties(PatternProperties* self, ui_component* parent, Patter
 	ui_component_resize(&self->applybutton.component, 100, 20);	
 }
 
-void PatternPropertiesSetPattern(PatternProperties* self, Pattern* pattern)
+void PatternPropertiesSetPattern(PatternProperties* self, psy_audio_Pattern* pattern)
 {
 	char buffer[20];
 	self->pattern = pattern;

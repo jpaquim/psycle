@@ -16,9 +16,9 @@ typedef struct {
     unsigned short nBlockAlign; 
     unsigned short wBitsPerSample; 
     unsigned short cbSize; 
-} WaveFormatChunk; 
+} psy_audio_WaveFormatChunk; 
 
-void wave_load(Sample*, const char* path);
-void wave_save(Sample*, const char* path);
+void wave_load(psy_audio_Sample*, const char* path);
+void wave_save(psy_audio_Sample*, const char* path);
 
 #endif

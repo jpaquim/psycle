@@ -46,6 +46,6 @@ typedef struct PatternView {
 
 void patternview_init(PatternView*, ui_component* parent,
 		ui_component* tabbarparent,	Workspace*);
-void patternview_setpattern(PatternView*, Pattern*);
+void patternview_setpattern(PatternView*, psy_audio_Pattern*);
 
 #endif

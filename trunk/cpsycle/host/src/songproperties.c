@@ -20,7 +20,7 @@ void songpropertiesview_init(SongPropertiesView* self, ui_component* parent,
 	self->song = workspace->song;	
 	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->label_title, &self->component);
-	ui_label_settext(&self->label_title, "Song Title");
+	ui_label_settext(&self->label_title, "psy_audio_Song Title");
 	ui_edit_init(&self->edit_title, &self->component, 0);
 	psy_signal_connect(&self->edit_title.signal_change, self,
 		songpropertiesview_ontitlechanged);
@@ -52,7 +52,7 @@ void songpropertiesview_initalign(SongPropertiesView* self)
 		ui_value_makepx(0), ui_value_makepx(0));
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_TOP, &margin));
 	ui_component_setalign(&self->edit_comments.component, UI_ALIGN_CLIENT);

@@ -10,9 +10,9 @@
 
 static int numRMSSamples = 1;
 
-// RMSData
+// psy_dsp_RMSData
 
-void rmsdata_init(RMSData* self)
+void rmsdata_init(psy_dsp_RMSData* self)
 {
 	self->AccumLeft = 0;
 	self->AccumRight = 0;
@@ -21,7 +21,7 @@ void rmsdata_init(RMSData* self)
 	self->previousRight = 0;
 }
 
-void rmsdata_accumulate(RMSData* self,
+void rmsdata_accumulate(psy_dsp_RMSData* self,
 	const psy_dsp_amp_t* __restrict pSamplesL,
 	const psy_dsp_amp_t* __restrict pSamplesR,
 	int count)
@@ -30,32 +30,32 @@ void rmsdata_accumulate(RMSData* self,
 		count);
 }
 
-// RMSVol
+// psy_dsp_RMSVol
 
-void rmsvol_init(RMSVol* self)
+void psy_dsp_rmsvol_init(psy_dsp_RMSVol* self)
 {
 	rmsdata_init(&self->data);
 	self->volume = 0.f;
 }
 
-RMSVol* rmsvol_alloc(void)
+psy_dsp_RMSVol* psy_dsp_rmsvol_alloc(void)
 {
-	return (RMSVol*) malloc(sizeof(RMSVol));
+	return (psy_dsp_RMSVol*) malloc(sizeof(psy_dsp_RMSVol));
 }
 
-RMSVol* rmsvol_allocinit(void)
+psy_dsp_RMSVol* psy_dsp_rmsvol_allocinit(void)
 {
-	RMSVol* rv;
+	psy_dsp_RMSVol* rv;
 
-	rv = rmsvol_alloc();
+	rv = psy_dsp_rmsvol_alloc();
 	if (rv) {
-		rmsvol_init(rv);
+		psy_dsp_rmsvol_init(rv);
 	}
 	return rv;
 }
 
 /// Note: Values are accumulated since the standard calculation requires 50ms of data.
-void rmsvol_tick(RMSVol* self, const psy_dsp_amp_t * __restrict pSamplesL,
+void psy_dsp_rmsvol_tick(psy_dsp_RMSVol* self, const psy_dsp_amp_t * __restrict pSamplesL,
 	const psy_dsp_amp_t * __restrict pSamplesR, int numSamples)
 {
 	const float * pL = pSamplesL;
@@ -90,12 +90,12 @@ void rmsvol_tick(RMSVol* self, const psy_dsp_amp_t * __restrict pSamplesL,
 			: self->data.previousRight;
 }
 
-psy_dsp_amp_t rmsvol_value(RMSVol* self)
+psy_dsp_amp_t psy_dsp_rmsvol_value(psy_dsp_RMSVol* self)
 {
 	return self->volume;
 }
 
-void rmsvol_setsamplerate(unsigned int samplerate)
+void psy_dsp_rmsvol_setsamplerate(unsigned int samplerate)
 {
 	/// standard calculation requires 50ms of data.
 	numRMSSamples = (int) (samplerate * 0.05f);

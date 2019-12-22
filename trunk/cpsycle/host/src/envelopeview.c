@@ -11,22 +11,22 @@ static void OnDestroy(EnvelopeView*, ui_component* component);
 static void OnMouseDown(EnvelopeView*, ui_component* sender, MouseEvent*);
 static void OnMouseMove(EnvelopeView*, ui_component* sender, MouseEvent*);
 static void OnMouseUp(EnvelopeView*, ui_component* sender, MouseEvent*);
-static List* HitTestPoint(EnvelopeView* self, int x, int y);
+static psy_List* HitTestPoint(EnvelopeView* self, int x, int y);
 static void ShiftSuccessors(EnvelopeView* self, double timeshift);
-static void CheckAdjustPointRange(List* p);
+static void CheckAdjustPointRange(psy_List* p);
 static int pxvalue(EnvelopeView*, double value);
 static int pxtime(EnvelopeView*, double t);
 static psy_dsp_seconds_t displaymaxtime(EnvelopeView*);
-EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime,
+psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime,
 	psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue);
 static void InitPoints(EnvelopeView*);
 
 void adsrpointmapper_init(ADSRPointMapper* self)
 {
-	envelopepoint_init(&self->start, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
-	envelopepoint_init(&self->attack, 0.2f, 1.f, 0.f, 5.f, 1.f, 1.f);
-	envelopepoint_init(&self->decay, 0.4f, 0.5f, 0.f, 5.f, 0.f, 1.f);
-	envelopepoint_init(&self->release, 0.6f, 0.f, 0.f, 5.f, 0.f, 0.f);
+	psy_dsp_envelopepoint_init(&self->start, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+	psy_dsp_envelopepoint_init(&self->attack, 0.2f, 1.f, 0.f, 5.f, 1.f, 1.f);
+	psy_dsp_envelopepoint_init(&self->decay, 0.4f, 0.5f, 0.f, 5.f, 0.f, 1.f);
+	psy_dsp_envelopepoint_init(&self->release, 0.6f, 0.f, 0.f, 5.f, 0.f, 0.f);
 	self->settings = 0;
 }
 
@@ -71,15 +71,15 @@ void InitEnvelopeView(EnvelopeView* self, ui_component* parent)
 	self->points = 0;
 	adsr_settings_init(&self->dummysettings, 0.2f, 0.4f, 0.8f, 0.3f);
 	adsrpointmapper_init(&self->pointmapper);
-	self->points = list_create(&self->pointmapper.start);
-	list_append(&self->points, &self->pointmapper.attack);
-	list_append(&self->points, &self->pointmapper.decay);
-	list_append(&self->points, &self->pointmapper.release);
+	self->points = psy_list_create(&self->pointmapper.start);
+	psy_list_append(&self->points, &self->pointmapper.attack);
+	psy_list_append(&self->points, &self->pointmapper.decay);
+	psy_list_append(&self->points, &self->pointmapper.release);
 	self->sustainstage = 2;
 	self->dragrelative = 1;
 }
 
-void EnvelopeViewSetAdsrEnvelope(EnvelopeView* self, ADSRSettings* adsr_settings)
+void EnvelopeViewSetAdsrEnvelope(EnvelopeView* self, psy_dsp_ADSRSettings* adsr_settings)
 {		
 	self->pointmapper.settings = adsr_settings;
 	adsrpointmapper_updatepoints(&self->pointmapper);
@@ -87,7 +87,7 @@ void EnvelopeViewSetAdsrEnvelope(EnvelopeView* self, ADSRSettings* adsr_settings
 
 void OnDestroy(EnvelopeView* self, ui_component* component)
 {	
-	list_free(self->points);
+	psy_list_free(self->points);
 	self->points = 0;
 }
 
@@ -121,10 +121,10 @@ void DrawGrid(EnvelopeView* self, ui_graphics* g)
 
 void DrawPoints(EnvelopeView* self, ui_graphics* g)
 {
-	List* p;
+	psy_List* p;
 	ui_size ptsize;
 	ui_size ptsize2;
-	EnvelopePoint* q = 0;
+	psy_dsp_EnvelopePoint* q = 0;
 
 	ptsize.width = 5;
 	ptsize.height = 5;
@@ -132,9 +132,9 @@ void DrawPoints(EnvelopeView* self, ui_graphics* g)
 	ptsize2.height = ptsize.height / 2;	
 	for (p = self->points; p !=0; p = p->next) {
 		ui_rectangle r;
-		EnvelopePoint* pt;
+		psy_dsp_EnvelopePoint* pt;
 
-		pt = (EnvelopePoint*)p->entry;
+		pt = (psy_dsp_EnvelopePoint*)p->entry;
 		ui_setrectangle(&r, 
 			pxtime(self, pt->time) - ptsize2.width,
 			pxvalue(self, pt->value) - ptsize2.height,
@@ -147,15 +147,15 @@ void DrawPoints(EnvelopeView* self, ui_graphics* g)
 
 void DrawLines(EnvelopeView* self, ui_graphics* g)
 {
-	List* p;
-	EnvelopePoint* q = 0;
+	psy_List* p;
+	psy_dsp_EnvelopePoint* q = 0;
 	int count = 0;
 
 	ui_setcolor(g, 0x00B1C8B0);	
 	for (p = self->points; p !=0; p = p->next, ++count) {		
-		EnvelopePoint* pt;
+		psy_dsp_EnvelopePoint* pt;
 
-		pt = (EnvelopePoint*)p->entry;			
+		pt = (psy_dsp_EnvelopePoint*)p->entry;			
 		if (q) {
 			ui_drawline(g,
 				pxtime(self, q->time),
@@ -190,10 +190,10 @@ void OnMouseDown(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 void OnMouseMove(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 {		
 	if (self->dragpoint) {		
-		EnvelopePoint* pt;
+		psy_dsp_EnvelopePoint* pt;
 		double oldtime;
 
-		pt = (EnvelopePoint*)self->dragpoint->entry;
+		pt = (psy_dsp_EnvelopePoint*)self->dragpoint->entry;
 		oldtime = pt->time;
 		pt->value = 1.f - (ev->y - self->spacing.top.quantity.integer) /
 			(float)self->cy;
@@ -210,26 +210,26 @@ void OnMouseMove(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 void ShiftSuccessors(EnvelopeView* self, double timeshift)
 {	
 	if (self->dragrelative) {
-		List* p;
+		psy_List* p;
 		for (p = self->dragpoint->next; p != 0; p = p->next) {		
-			EnvelopePoint* pt;		
+			psy_dsp_EnvelopePoint* pt;		
 
-			pt = (EnvelopePoint*)p->entry;
+			pt = (psy_dsp_EnvelopePoint*)p->entry;
 			pt->time += (float)timeshift;
 			CheckAdjustPointRange(p);
 		}
 	}
 }
 
-void CheckAdjustPointRange(List* p)
+void CheckAdjustPointRange(psy_List* p)
 {
-	EnvelopePoint* pt;	
+	psy_dsp_EnvelopePoint* pt;	
 
-	pt = (EnvelopePoint*) p->entry;	
+	pt = (psy_dsp_EnvelopePoint*) p->entry;	
 	if (p->prev) {
-		EnvelopePoint* ptprev;
+		psy_dsp_EnvelopePoint* ptprev;
 
-		ptprev = (EnvelopePoint*) p->prev->entry;
+		ptprev = (psy_dsp_EnvelopePoint*) p->prev->entry;
 		if (pt->time < ptprev->time) {
 			pt->time = ptprev->time;
 		}
@@ -253,14 +253,14 @@ void OnMouseUp(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
 	self->dragpoint = 0;
 }
 
-List* HitTestPoint(EnvelopeView* self, int x, int y)
+psy_List* HitTestPoint(EnvelopeView* self, int x, int y)
 {
-	List* p = 0;	
+	psy_List* p = 0;	
 	
 	for (p = self->points; p != 0; p = p->next) {		
-		EnvelopePoint* pt;		
+		psy_dsp_EnvelopePoint* pt;		
 
-		pt = (EnvelopePoint*)p->entry;			
+		pt = (psy_dsp_EnvelopePoint*)p->entry;			
 		if (abs(pxtime(self, pt->time) - x) < 5 &&
 				abs(pxvalue(self, pt->value) - y) < 5) {			
 			break;
@@ -286,11 +286,11 @@ float displaymaxtime(EnvelopeView* self)
 	return 5.f;
 }
 
-EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime, psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue)
+psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime, psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue)
 {
-	EnvelopePoint* rv;
+	psy_dsp_EnvelopePoint* rv;
 
-	rv = (EnvelopePoint*) malloc(sizeof(EnvelopePoint));
+	rv = (psy_dsp_EnvelopePoint*) malloc(sizeof(psy_dsp_EnvelopePoint));
 	rv->time = time;
 	rv->value = value;
 	rv->mintime = mintime;

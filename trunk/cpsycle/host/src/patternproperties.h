@@ -18,11 +18,11 @@ typedef struct {
 	ui_edit lengthedit;
 	ui_button applybutton;
 	ui_button closebutton;
-	Pattern* pattern;
+	psy_audio_Pattern* pattern;
 } PatternProperties;
 
 
-void InitPatternProperties(PatternProperties*, ui_component* parent, Pattern*);
-void PatternPropertiesSetPattern(PatternProperties*, Pattern*);
+void InitPatternProperties(PatternProperties*, ui_component* parent, psy_audio_Pattern*);
+void PatternPropertiesSetPattern(PatternProperties*, psy_audio_Pattern*);
 
 #endif

@@ -14,11 +14,11 @@ typedef struct {
 	uintptr_t high; // including
 	uintptr_t min;
 	uintptr_t max;
-} ParameterRange;
+} psy_audio_ParameterRange;
 
-void parameterrange_init(ParameterRange*, 
+void parameterrange_init(psy_audio_ParameterRange*, 
 	uintptr_t low, uintptr_t high, uintptr_t min, uintptr_t max);
-int parameterrange_intersect(ParameterRange*, uintptr_t value);
+int parameterrange_intersect(psy_audio_ParameterRange*, uintptr_t value);
 
 typedef	enum {
 	EXTENDED	=		0xFE, // (see below)
@@ -70,16 +70,16 @@ typedef struct {
 	unsigned char mach;
 	unsigned char cmd;
 	unsigned char parameter;
-} PatternEvent;
+} psy_audio_PatternEvent;
 
 
-void patternevent_init(PatternEvent*,
+void patternevent_init(psy_audio_PatternEvent*,
 	unsigned char note,
 	unsigned char inst,
 	unsigned char mach,
 	unsigned char cmd,
 	unsigned char parameter);
-void patternevent_clear(PatternEvent*);
-int patternevent_empty(PatternEvent*);
+void patternevent_clear(psy_audio_PatternEvent*);
+int patternevent_empty(psy_audio_PatternEvent*);
 
 #endif

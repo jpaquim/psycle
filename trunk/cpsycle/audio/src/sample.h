@@ -16,7 +16,7 @@ typedef union _Double {
 
 void double_setvalue(Double*, double value);
 
-/// Sample Loop Types
+/// psy_audio_Sample Loop Types
 typedef enum {
 	LOOP_DO_NOT	= 0x0,	/// < Do Nothing
 	LOOP_NORMAL	= 0x1,	/// < normal Start --> End ,Start --> End ...
@@ -47,18 +47,18 @@ typedef struct {
 void vibrato_init(Vibrato*);
 
 typedef struct {
-	struct Sample* sample;
+	struct psy_audio_Sample* sample;
 	Double pos;
 	Double speed;
 	int forward;	
 } SampleIterator;
 
-void sampleiterator_init(SampleIterator*, struct Sample*);
+void sampleiterator_init(SampleIterator*, struct psy_audio_Sample*);
 int sampleiterator_inc(SampleIterator*);
 unsigned int sampleiterator_frameposition(SampleIterator*);
 
-typedef struct Sample {
-	Buffer channels;
+typedef struct psy_audio_Sample {
+	psy_audio_Buffer channels;
 	unsigned int numframes;
 	unsigned int samplerate;
 	char* name;
@@ -84,17 +84,17 @@ typedef struct Sample {
 	unsigned char surround;
 	unsigned char stereo;
 	Vibrato vibrato;
-} Sample;
+} psy_audio_Sample;
 
-void sample_init(Sample*);
-Sample* sample_alloc(void);
-Sample* sample_allocinit(void);
-Sample* sample_clone(Sample*);
-void sample_dispose(Sample*);
-void sample_load(Sample*, const char* path);
-void sample_save(Sample*, const char* path);
-void sample_setname(Sample*, const char* name);
-SampleIterator sample_begin(Sample*);
-const char* sample_name(Sample*);
+void sample_init(psy_audio_Sample*);
+psy_audio_Sample* sample_alloc(void);
+psy_audio_Sample* sample_allocinit(void);
+psy_audio_Sample* sample_clone(psy_audio_Sample*);
+void sample_dispose(psy_audio_Sample*);
+void sample_load(psy_audio_Sample*, const char* path);
+void sample_save(psy_audio_Sample*, const char* path);
+void sample_setname(psy_audio_Sample*, const char* name);
+SampleIterator sample_begin(psy_audio_Sample*);
+const char* sample_name(psy_audio_Sample*);
 
 #endif

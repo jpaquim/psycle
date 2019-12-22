@@ -10,10 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void xm_readheader(SongFile*, struct XMFILEHEADER*);
-static uint32_t xm_readpatterns(SongFile*, struct XMFILEHEADER*);
-static void xm_readinstruments(SongFile*, struct XMFILEHEADER*, uint32_t start);
-static void xm_makesequence(SongFile*, struct XMFILEHEADER*);
+static void xm_readheader(psy_audio_SongFile*, struct XMFILEHEADER*);
+static uint32_t xm_readpatterns(psy_audio_SongFile*, struct XMFILEHEADER*);
+static void xm_readinstruments(psy_audio_SongFile*, struct XMFILEHEADER*, uint32_t start);
+static void xm_makesequence(psy_audio_SongFile*, struct XMFILEHEADER*);
 
 static uint16_t flip16(uint16_t value) 
 {
@@ -23,7 +23,7 @@ static uint16_t flip16(uint16_t value)
 	return rv;
 }
 
-void xm_load(SongFile* self)
+void xm_load(psy_audio_SongFile* self)
 {	
 	uint32_t nextstart;
 	SongProperties songproperties;
@@ -59,7 +59,7 @@ void xm_load(SongFile* self)
 	xm_makesequence(self, &xmheader);
 }
 
-void xm_readheader(SongFile* self, struct XMFILEHEADER *xmheader)
+void xm_readheader(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader)
 {	
 	xmheader->size = psyfile_read_uint32(self->file);
 	xmheader->norder = psyfile_read_uint16(self->file);
@@ -79,7 +79,7 @@ void xm_readheader(SongFile* self, struct XMFILEHEADER *xmheader)
 	self->song->properties.bpm = (psy_dsp_beat_t) xmheader->speed;
 }
 
-uint32_t xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
+uint32_t xm_readpatterns(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader)
 {	
 	uintptr_t slot;	
 	uint32_t nextstart;
@@ -87,7 +87,7 @@ uint32_t xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 	nextstart = psyfile_getpos(self->file);
 	for (slot = 0; slot < xmheader->patterns; ++slot) {
 		struct XMPATTERNHEADER patternheader;
-		Pattern* pattern;
+		psy_audio_Pattern* pattern;
 
 		psyfile_seek(self->file, nextstart);
 		patternheader.size = psyfile_read_uint32(self->file);
@@ -107,7 +107,7 @@ uint32_t xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 			int line = 0;
 			int insert = 0;
 			psy_dsp_beat_t bpl = 0.25;
-			PatternEvent ev;
+			psy_audio_PatternEvent ev;
 			PatternNode* node = 0;
 
 			nextstart += patternheader.packedsize;
@@ -183,14 +183,14 @@ uint32_t xm_readpatterns(SongFile* self, struct XMFILEHEADER *xmheader)
 	return nextstart;
 }
 
-void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t start)
+void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader, uint32_t start)
 {
 	uintptr_t slot;	
 
 	start = psyfile_getpos(self->file);
 	for (slot = 0; slot < xmheader->instruments; ++slot) {
 		struct XMINSTRUMENTHEADER instrumentheader;		
-		Instrument* instrument;
+		psy_audio_Instrument* instrument;
 
 		start = psyfile_seek(self->file, start);
 		instrument = instrument_allocinit();
@@ -209,11 +209,11 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 			XMSAMPLESTRUCT* xmsamples = 0;
 			int s;
 			int note;
-			InstrumentEntry instentry;
+			psy_audio_InstrumentEntry instentry;
 			
-			// Sample header size
+			// psy_audio_Sample header size
 			psyfile_read(self->file, &sampleheader.shsize, 4);
-			// Sample number for all notes
+			// psy_audio_Sample number for all notes
 			psyfile_read(self->file, &sampleheader.snum, 96);
 			// Points for volume envelope
 			psyfile_read(self->file, &sampleheader.venv, 48);
@@ -285,7 +285,7 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 				start += 40;
 			}
 			for (s = 0; s < instrumentheader.samples; ++s) {
-				Sample* sample;
+				psy_audio_Sample* sample;
 				int is16bit;
 				
 				sample = sample_allocinit();
@@ -358,7 +358,7 @@ void xm_readinstruments(SongFile* self, struct XMFILEHEADER *xmheader, uint32_t 
 	}
 }
 
-void xm_makesequence(SongFile* self, struct XMFILEHEADER *xmheader)
+void xm_makesequence(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader)
 {
 	uintptr_t i;
 	SequencePosition sequenceposition;

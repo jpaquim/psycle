@@ -10,7 +10,7 @@
 
 typedef struct {
 	ui_component component;
-	Song* song;
+	psy_audio_Song* song;
 	ui_label label_title;
 	ui_label label_credits;
 	ui_label label_comments;

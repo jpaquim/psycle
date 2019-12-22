@@ -6,6 +6,6 @@
 
 #include "songio.h"
 
-void xm_load(struct SongFile*);
+void xm_load(struct psy_audio_SongFile*);
 
 #endif

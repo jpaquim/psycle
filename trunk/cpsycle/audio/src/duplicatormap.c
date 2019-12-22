@@ -8,7 +8,7 @@
 
 #define NUMMACHINES 8
 
-void duplicatormap_init(DuplicatorMap* self)
+void duplicatormap_init(psy_audio_DuplicatorMap* self)
 {
 	int i;
 	int j;
@@ -29,11 +29,11 @@ void duplicatormap_init(DuplicatorMap* self)
 	}
 }
 
-void duplicatormap_dispose(DuplicatorMap* self)
+void duplicatormap_dispose(psy_audio_DuplicatorMap* self)
 {
 }
 
-void duplicatormap_allocate(DuplicatorMap* self, int channel, int machine, int outputmachine)
+void duplicatormap_allocate(psy_audio_DuplicatorMap* self, int channel, int machine, int outputmachine)
 {
 	int j=channel;
 	// If this channel already has allocated channels, use them.
@@ -54,12 +54,12 @@ void duplicatormap_allocate(DuplicatorMap* self, int channel, int machine, int o
 	self->availablechans[outputmachine][j]=0;
 }
 
-int duplicatormap_at(DuplicatorMap* self, int channel, int machine)
+int duplicatormap_at(psy_audio_DuplicatorMap* self, int channel, int machine)
 {
 	return self->allocatedchans[channel][machine];
 }
 
-void duplicatormap_remove(DuplicatorMap* self, int channel, int machine, int outputmachine)
+void duplicatormap_remove(psy_audio_DuplicatorMap* self, int channel, int machine, int outputmachine)
 {
 	if (self->allocatedchans[channel][machine] == -1 )
 			return;

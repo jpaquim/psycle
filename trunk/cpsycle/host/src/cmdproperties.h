@@ -6,6 +6,6 @@
 
 #include <properties.h>
 
-Properties* cmdproperties_create(void);
+psy_Properties* cmdproperties_create(void);
 
 #endif

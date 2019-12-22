@@ -7,10 +7,10 @@
 #include "machine.h"
 
 typedef struct {
-	Machine machine;	
-} Master;
+	psy_audio_Machine machine;	
+} psy_audio_Master;
 
-void master_init(Master* self, MachineCallback);
-const MachineInfo* master_info(void);
+void master_init(psy_audio_Master* self, MachineCallback);
+const psy_audio_MachineInfo* master_info(void);
 
 #endif

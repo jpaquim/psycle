@@ -8,21 +8,21 @@
 #include <list.h>
 
 typedef struct {
-	Buffer* input;
-	Buffer* output;
-	List* events;
+	psy_audio_Buffer* input;
+	psy_audio_Buffer* output;
+	psy_List* events;
 	unsigned int numsamples;
 	unsigned int numtracks;
-	struct RMSVol* rmsvol;
-} BufferContext;
+	struct psy_dsp_RMSVol* rmsvol;
+} psy_audio_BufferContext;
 
-void buffercontext_init(BufferContext*, List* events, Buffer* input,
-	Buffer* output, unsigned int numsamples, unsigned int numtracks,
-	struct RMSVol* rmsvol);
-void buffercontext_dispose(BufferContext*);
-unsigned int buffercontext_numsamples(BufferContext*);
-unsigned int buffercontext_numtracks(BufferContext*);
-float buffercontext_rmsvolume(BufferContext*);
+void buffercontext_init(psy_audio_BufferContext*, psy_List* events, psy_audio_Buffer* input,
+	psy_audio_Buffer* output, unsigned int numsamples, unsigned int numtracks,
+	struct psy_dsp_RMSVol* rmsvol);
+void buffercontext_dispose(psy_audio_BufferContext*);
+unsigned int buffercontext_numsamples(psy_audio_BufferContext*);
+unsigned int buffercontext_numtracks(psy_audio_BufferContext*);
+float buffercontext_rmsvolume(psy_audio_BufferContext*);
 
 
 #endif

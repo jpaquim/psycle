@@ -9,29 +9,29 @@
 #include <adsr.h>
 
 typedef struct {	
-	EnvelopePoint start;
-	EnvelopePoint attack;
-	EnvelopePoint decay;
-	EnvelopePoint release;
-	ADSRSettings* settings;
+	psy_dsp_EnvelopePoint start;
+	psy_dsp_EnvelopePoint attack;
+	psy_dsp_EnvelopePoint decay;
+	psy_dsp_EnvelopePoint release;
+	psy_dsp_ADSRSettings* settings;
 } ADSRPointMapper;
 
 typedef struct {	
 	ui_component component;
 	int cx;
 	int cy;
-	List* points;
-	List* dragpoint;
+	psy_List* points;
+	psy_List* dragpoint;
 	int sustainstage;
 	int dragrelative;
 	ui_margin spacing;	
-	ADSRSettings dummysettings;
-	ADSRSettings* adsr;
+	psy_dsp_ADSRSettings dummysettings;
+	psy_dsp_ADSRSettings* adsr;
 	ADSRPointMapper pointmapper;
 } EnvelopeView;
 
 void InitEnvelopeView(EnvelopeView*, ui_component* parent);
-void EnvelopeViewSetAdsrEnvelope(EnvelopeView*, ADSRSettings*);
+void EnvelopeViewSetAdsrEnvelope(EnvelopeView*, psy_dsp_ADSRSettings*);
 void EnvelopeViewUpdate(EnvelopeView*);
 
 #endif

@@ -16,7 +16,7 @@
 typedef struct {
 	ui_component component;
 	SettingsView view;
-	Properties* properties;
+	psy_Properties* properties;
 	Workspace* workspace;
 	Driver* fileoutdriver;
 	Driver* curraudiodriver;

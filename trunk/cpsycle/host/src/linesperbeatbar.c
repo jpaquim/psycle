@@ -12,7 +12,7 @@ static void OnMoreClicked(LinesPerBeatBar*, ui_component* sender);
 static void OnTimer(LinesPerBeatBar*, ui_component* sender, int timerid);
 void linesperbeatbar_initalign(LinesPerBeatBar*);
 
-void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, Player* player)
+void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, psy_audio_Player* player)
 {	
 	self->lpb = 0;			
 	ui_component_init(&self->component, parent);	
@@ -42,7 +42,7 @@ void linesperbeatbar_initalign(LinesPerBeatBar* self)
 
 	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
 		ui_value_makepx(0), ui_value_makepx(0));				
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
 		&margin));		

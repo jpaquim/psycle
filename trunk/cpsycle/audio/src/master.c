@@ -10,27 +10,27 @@
 #include "songio.h"
 #include <portable.h>
 
-static int master_mode(Master* self) { return MACHMODE_MASTER; }
-static void master_dispose(Master*);
+static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
+static void master_dispose(psy_audio_Master*);
 
-static int parametertype(Master*, int param);
-static unsigned int numparameters(Master*);
-static unsigned int numparametercols(Master*);
-static void parametertweak(Master*, int par, int val);	
-static void parameterrange(Master*, int numparam, int* minval, int* maxval);
-static int parameterlabel(Master*, char* txt, int param);
-static int parametername(Master*, char* txt, int param);
-static int describevalue(Master*, char* txt, int param, int value);
-static int parametervalue(Master*, int param);
-static const MachineInfo* info(Master*);
-static unsigned int numinputs(Master*);
-static unsigned int numoutputs(Master*);
+static int parametertype(psy_audio_Master*, int param);
+static unsigned int numparameters(psy_audio_Master*);
+static unsigned int numparametercols(psy_audio_Master*);
+static void parametertweak(psy_audio_Master*, int par, int val);	
+static void parameterrange(psy_audio_Master*, int numparam, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Master*, char* txt, int param);
+static int parametername(psy_audio_Master*, char* txt, int param);
+static int describevalue(psy_audio_Master*, char* txt, int param, int value);
+static int parametervalue(psy_audio_Master*, int param);
+static const psy_audio_MachineInfo* info(psy_audio_Master*);
+static unsigned int numinputs(psy_audio_Master*);
+static unsigned int numoutputs(psy_audio_Master*);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
-static void master_loadspecific(Master*, struct SongFile*, unsigned int slot);
-static void master_savespecific(Master*, struct SongFile*, unsigned int slot);
+static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*, unsigned int slot);
+static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*, unsigned int slot);
 
-static MachineInfo const MacInfo = {
+static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
 	EFFECT | 32 | 64,
@@ -48,12 +48,12 @@ static MachineInfo const MacInfo = {
 	0
 };
 
-const MachineInfo* master_info(void) { return &MacInfo; }
+const psy_audio_MachineInfo* master_info(void) { return &MacInfo; }
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(Master* self)
+static void vtable_init(psy_audio_Master* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;
@@ -82,40 +82,40 @@ static void vtable_init(Master* self)
 	}
 }
 
-void master_init(Master* self, MachineCallback callback)
+void master_init(psy_audio_Master* self, MachineCallback callback)
 {
-	memset(self, 0, sizeof(Master));
+	memset(self, 0, sizeof(psy_audio_Master));
 	machine_init(&self->machine, callback);	
 	vtable_init(self);
 	self->machine.vtable = &vtable;
 }
 
-void master_dispose(Master* self)
+void master_dispose(psy_audio_Master* self)
 {		
 	machine_dispose(&self->machine);
 }
 
-void parametertweak(Master* self, int param, int value)
+void parametertweak(psy_audio_Master* self, int param, int value)
 {
 	if (param == 0) {
-		Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
 		if (machines) {			
 			machines_setvolume(machines,
 				floatparamvalue(value) * floatparamvalue(value) * 4.f);
 		}
 	} else {
-		MachineSockets* sockets;
+		psy_audio_MachineSockets* sockets;
 		WireSocket* p;
 		int c = 1;
-		Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
 			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
 			if (p) {
-				WireSocketEntry* input_entry;
+				psy_audio_WireSocketEntry* input_entry;
 
-				input_entry = (WireSocketEntry*) p->entry;
+				input_entry = (psy_audio_WireSocketEntry*) p->entry;
 				input_entry->volume =
 					floatparamvalue(value) * floatparamvalue(value) * 4.f;					
 			}
@@ -123,10 +123,10 @@ void parametertweak(Master* self, int param, int value)
 	}
 }
 
-int describevalue(Master* self, char* txt, int param, int value)
+int describevalue(psy_audio_Master* self, char* txt, int param, int value)
 { 	
 	if (param == 0) {
-		Machines* machines = self->machine.callback.machines(
+		psy_audio_Machines* machines = self->machine.callback.machines(
 			self->machine.callback.context);
 
 		psy_dsp_amp_t db = (psy_dsp_amp_t)(20 * 
@@ -134,19 +134,19 @@ int describevalue(Master* self, char* txt, int param, int value)
 		psy_snprintf(txt, 10, "%.2f dB", db);
 		return 1;
 	} else {
-		MachineSockets* sockets;
+		psy_audio_MachineSockets* sockets;
 		WireSocket* p;
 		int c = 1;
-		Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
 			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
 			if (p) {				
-				WireSocketEntry* input_entry;
+				psy_audio_WireSocketEntry* input_entry;
 				psy_dsp_amp_t db;
 
-				input_entry = (WireSocketEntry*) p->entry;
+				input_entry = (psy_audio_WireSocketEntry*) p->entry;
 				db = (psy_dsp_amp_t)(20 * log10(input_entry->volume));
 				psy_snprintf(txt, 10, "%.2f dB", db);
 				return 1;
@@ -156,10 +156,10 @@ int describevalue(Master* self, char* txt, int param, int value)
 	return 0;
 }
 
-int parametervalue(Master* self, int param)
+int parametervalue(psy_audio_Master* self, int param)
 {	
 	if (param == 0) {
-		Machines* machines = self->machine.callback.machines(
+		psy_audio_Machines* machines = self->machine.callback.machines(
 			self->machine.callback.context);
 
 		if (machines) {
@@ -167,19 +167,19 @@ int parametervalue(Master* self, int param)
 				(float)sqrt(machines_volume(machines)) * 0.5f);
 		}
 	} else {
-		MachineSockets* sockets;
+		psy_audio_MachineSockets* sockets;
 		WireSocket* input_socket;
 		int c = 1;
-		Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
 			for (input_socket = sockets->inputs; input_socket != 0 && c != param;
 					input_socket = input_socket->next, ++c);
 			if (input_socket) {
-				WireSocketEntry* input_entry;
+				psy_audio_WireSocketEntry* input_entry;
 
-				input_entry = (WireSocketEntry*) input_socket->entry;
+				input_entry = (psy_audio_WireSocketEntry*) input_socket->entry;
 				return intparamvalue(
 					(float)sqrt(input_entry->volume) * 0.5f);
 			}
@@ -198,55 +198,55 @@ float floatparamvalue(int value)
 	return value / 65535.f;	
 }
 
-const MachineInfo* info(Master* self)
+const psy_audio_MachineInfo* info(psy_audio_Master* self)
 {	
 	return &MacInfo;
 }
 
-unsigned int numinputs(Master* self)
+unsigned int numinputs(psy_audio_Master* self)
 {
 	return 2;
 }
 
-unsigned int numoutputs(Master* self)
+unsigned int numoutputs(psy_audio_Master* self)
 {
 	return 2;
 }
 
-int parametertype(Master* self, int par)
+int parametertype(psy_audio_Master* self, int par)
 {
 	return MPF_STATE;
 }
 
-void parameterrange(Master* self, int numparam, int* minval, int* maxval)
+void parameterrange(psy_audio_Master* self, int numparam, int* minval, int* maxval)
 {
 	*minval = 0;
 	*maxval = 65535;
 }
 
-unsigned int numparameters(Master* self)
+unsigned int numparameters(psy_audio_Master* self)
 {
 	return 13;
 }
 
-unsigned int numparametercols(Master* self)
+unsigned int numparametercols(psy_audio_Master* self)
 {
 	return 4;
 }
 
-int parameterlabel(Master* self, char* txt, int param)
+int parameterlabel(psy_audio_Master* self, char* txt, int param)
 {
 	psy_snprintf(txt, 128, "%s", "Vol");
 	return 1;
 }
 
-int parametername(Master* self, char* txt, int param)
+int parametername(psy_audio_Master* self, char* txt, int param)
 {
 	psy_snprintf(txt, 128, "%s", "Vol");
 	return 1;
 }
 
-void master_loadspecific(Master* self, struct SongFile* songfile, unsigned int slot)
+void master_loadspecific(psy_audio_Master* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {	
 	unsigned int size;
 	int outdry = 256;
@@ -259,7 +259,7 @@ void master_loadspecific(Master* self, struct SongFile* songfile, unsigned int s
 	machines_setvolume(&songfile->song->machines, outdry / (psy_dsp_amp_t) 256);
 }
 
-void master_savespecific(Master* self, struct SongFile* songfile, unsigned int slot)
+void master_savespecific(psy_audio_Master* self, struct psy_audio_SongFile* songfile, unsigned int slot)
 {
 	unsigned int size;
 	int outdry = 256;

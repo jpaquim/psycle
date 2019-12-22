@@ -7,19 +7,19 @@
 #include <hashtbl.h>
 
 typedef struct {
-	Table mute;	
-	Table record;
+	psy_Table mute;	
+	psy_Table record;
 	int soloactive;
 	uintptr_t soloedtrack;	
-} PatternsTrackState;
+} psy_audio_PatternsTrackState;
 
-void patternstrackstate_init(PatternsTrackState*);
-void patternstrackstate_dispose(PatternsTrackState*);
-void patternstrackstate_activatesolotrack(PatternsTrackState*, uintptr_t track);
-void patternstrackstate_deactivatesolotrack(PatternsTrackState*);
-void patternstrackstate_mutetrack(PatternsTrackState*, uintptr_t track);
-void patternstrackstate_unmutetrack(PatternsTrackState*, uintptr_t track);
-int patternstrackstate_istrackmuted(PatternsTrackState*, uintptr_t track);
-int patternstrackstate_istracksoloed(PatternsTrackState*, uintptr_t track);
+void patternstrackstate_init(psy_audio_PatternsTrackState*);
+void patternstrackstate_dispose(psy_audio_PatternsTrackState*);
+void patternstrackstate_activatesolotrack(psy_audio_PatternsTrackState*, uintptr_t track);
+void patternstrackstate_deactivatesolotrack(psy_audio_PatternsTrackState*);
+void patternstrackstate_mutetrack(psy_audio_PatternsTrackState*, uintptr_t track);
+void patternstrackstate_unmutetrack(psy_audio_PatternsTrackState*, uintptr_t track);
+int patternstrackstate_istrackmuted(psy_audio_PatternsTrackState*, uintptr_t track);
+int patternstrackstate_istracksoloed(psy_audio_PatternsTrackState*, uintptr_t track);
 
 #endif

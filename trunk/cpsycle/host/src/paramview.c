@@ -32,7 +32,7 @@ static float floatparamvalue(int value);
 static ui_bitmap knobs;
 static ui_bitmap mixer;
 
-void InitParamView(ParamView* self, ui_component* parent, Machine* machine,
+void InitParamView(ParamView* self, ui_component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
 {	
 	if (knobs.hBitmap == NULL) {

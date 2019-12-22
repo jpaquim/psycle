@@ -13,19 +13,18 @@ typedef struct {
 } VstNote;
 
 typedef struct {
-	CustomMachine custommachine;		
+	psy_audio_CustomMachine custommachine;		
 	Library library;
 	struct AEffect* effect;
-	MachineInfo* info;
+	psy_audio_MachineInfo* info;
 	void* editorhandle;
 	struct VstEvents* events;
-	int eventcap;
-	Table noteons;
-	MachineInfo* plugininfo;
-	VstNote tracknote[64];
-} VstPlugin;
+	int eventcap;	
+	psy_audio_MachineInfo* plugininfo;
+	psy_Table tracknote;
+} psy_audio_VstPlugin;
 
-void vstplugin_init(VstPlugin*, MachineCallback, const char* path);
-int plugin_vst_test(const char* path, MachineInfo* rv);
+void vstplugin_init(psy_audio_VstPlugin*, MachineCallback, const char* path);
+int plugin_vst_test(const char* path, psy_audio_MachineInfo* rv);
 
 #endif

@@ -77,7 +77,7 @@ void contrib_init(Contrib* self, ui_component* parent)
 
 		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
 		ui_value_makeeh(0.5), ui_value_makepx(0));
-		list_free(ui_components_setalign(
+		psy_list_free(ui_components_setalign(
 			ui_component_children(&self->component, 0),
 			UI_ALIGN_TOP,
 			&margin));				

@@ -28,8 +28,8 @@ static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, ui_component* sender);
 static void sampleeditor_onstop(SampleEditor*, ui_component* sender);
-static void sampleeditor_onmasterworked(SampleEditor*, Machine*, unsigned int slot,
-	BufferContext*);
+static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*, unsigned int slot,
+	psy_audio_BufferContext*);
 
 static void samplezoom_ondestroy(SampleZoom*, ui_component* sender);
 static void samplezoom_onmousedown(SampleZoom*, ui_component* sender, MouseEvent*);
@@ -68,7 +68,7 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 		ui_value_makepx(0), ui_value_makepx(0));
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	list_free(ui_components_setalign(
+	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT, &margin));
 }
@@ -374,7 +374,7 @@ void sampleeditor_ondestroy(SampleEditor* self, ui_component* sender)
 	buffer_dispose(&self->samplerbuffer);
 }
 
-void sampleeditor_setsample(SampleEditor* self, Sample* sample)
+void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	wavebox_setsample(&self->samplebox, sample);
@@ -428,12 +428,12 @@ void sampleeditor_onplay(SampleEditor* self, ui_component* sender)
 {	
 	if (self->workspace->song && self->sample) {
 		lock_enter();
-		list_free(self->samplerevents);
+		psy_list_free(self->samplerevents);
 		patternevent_init(&self->samplerevent, 
 			(unsigned char) 60,
 			(unsigned char) instruments_slot(&self->workspace->song->instruments),
 			255, 0, 0);	
-		self->samplerevents = list_create(&self->samplerevent);
+		self->samplerevents = psy_list_create(&self->samplerevent);
 		lock_leave();
 	}
 }
@@ -441,17 +441,17 @@ void sampleeditor_onplay(SampleEditor* self, ui_component* sender)
 void sampleeditor_onstop(SampleEditor* self, ui_component* sender)
 {	
 	lock_enter();
-	list_free(self->samplerevents);
+	psy_list_free(self->samplerevents);
 	patternevent_init(&self->samplerevent, 
 		NOTECOMMANDS_RELEASE, 0, 255, 0, 0);	
-	self->samplerevents = list_create(&self->samplerevent);
+	self->samplerevents = psy_list_create(&self->samplerevent);
 	lock_leave();
 }
 
-void sampleeditor_onmasterworked(SampleEditor* self, Machine* machine,
-	unsigned int slot, BufferContext* bc)
+void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
+	unsigned int slot, psy_audio_BufferContext* bc)
 {
-	BufferContext samplerbc;
+	psy_audio_BufferContext samplerbc;
 		
 	buffercontext_init(&samplerbc, self->samplerevents, 0,
 		&self->samplerbuffer, bc->numsamples, 16, 0);
@@ -460,6 +460,6 @@ void sampleeditor_onmasterworked(SampleEditor* self, Machine* machine,
 		&self->sampler.custommachine.machine, &samplerbc);
 	buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 
 		(psy_dsp_amp_t)1.f);
-	list_free(self->samplerevents);
+	psy_list_free(self->samplerevents);
 	self->samplerevents = 0;
 }

@@ -8,13 +8,13 @@
 #include <list.h>
 
 typedef struct {
-  List* container;
-} Presets;
+	psy_List* container;
+} psy_audio_Presets;
 
-void presets_init(Presets*);
-void presets_dispose(Presets*);
-Presets* presets_alloc(void);
-Presets* presets_allocinit(void);
-void presets_append(Presets*, Preset*);
+void presets_init(psy_audio_Presets*);
+void presets_dispose(psy_audio_Presets*);
+psy_audio_Presets* presets_alloc(void);
+psy_audio_Presets* presets_allocinit(void);
+void presets_append(psy_audio_Presets*, psy_audio_Preset*);
 
 #endif

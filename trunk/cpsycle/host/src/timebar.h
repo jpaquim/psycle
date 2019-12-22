@@ -16,10 +16,10 @@ typedef struct {
 	ui_button less;
 	ui_button more;
 	ui_button moremore;
-	Player* player;
+	psy_audio_Player* player;
 	psy_dsp_beat_t bpm;
 } TimeBar;
 
-void timerbar_init(TimeBar*, ui_component* parent, Player*);
+void timerbar_init(TimeBar*, ui_component* parent, psy_audio_Player*);
 
 #endif

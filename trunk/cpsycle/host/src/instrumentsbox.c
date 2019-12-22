@@ -9,14 +9,14 @@
 
 static void BuildInstrumentList(InstrumentsBox* self);
 static void AddString(InstrumentsBox* self, const char* text);
-static void OnInstrumentSlotChanged(InstrumentsBox* self, Instrument* sender, int slot);
+static void OnInstrumentSlotChanged(InstrumentsBox* self, psy_audio_Instrument* sender, int slot);
 static void OnInstrumentInsert(InstrumentsBox* self, ui_component* sender, int slot);
 static void OnInstrumentRemoved(InstrumentsBox* self, ui_component* sender, int slot);
 static void OnInstrumentListChanged(InstrumentsBox* self, ui_component* sender,
 	int slot);
 
 void instrumentsbox_init(InstrumentsBox* self, ui_component* parent,
-	Instruments* instruments)
+	psy_audio_Instruments* instruments)
 {	
 	ui_listbox_init(&self->instrumentlist, parent);	
 	instrumentsbox_setinstruments(self, instruments);	
@@ -26,7 +26,7 @@ void instrumentsbox_init(InstrumentsBox* self, ui_component* parent,
 
 void BuildInstrumentList(InstrumentsBox* self)
 {
-	Instrument* instrument;
+	psy_audio_Instrument* instrument;
 	int slot = 0;
 	char buffer[20];
 
@@ -63,12 +63,12 @@ void OnInstrumentRemoved(InstrumentsBox* self, ui_component* sender, int slot)
 	ui_listbox_setcursel(&self->instrumentlist, slot);		
 }
 
-void OnInstrumentSlotChanged(InstrumentsBox* self, Instrument* sender, int slot)
+void OnInstrumentSlotChanged(InstrumentsBox* self, psy_audio_Instrument* sender, int slot)
 {
 	ui_listbox_setcursel(&self->instrumentlist, slot);	
 }
 
-void instrumentsbox_setinstruments(InstrumentsBox* self, Instruments* instruments)
+void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments* instruments)
 {
 	self->instruments = instruments;	
 	BuildInstrumentList(self);

@@ -15,20 +15,20 @@ typedef enum FilterType {
 } FilterType;
 
 typedef struct {	
-	Filter filter;	
-	LowPass12E lowpass12E;
+	psy_dsp_Filter filter;	
+	psy_dsp_LowPass12E lowpass12E;
 	FilterType selected;
-	Filter* selectedfilter;
+	psy_dsp_Filter* selectedfilter;
 	float samplerate;
 	float cutoff;
 	float q;
-} MultiFilter;
+} psy_dsp_MultiFilter;
 
-void multifilter_init(MultiFilter*);
-void multifilter_settype(MultiFilter*, FilterType type);
-FilterType multifilter_type(MultiFilter*);
-const char* multifilter_name(MultiFilter*, FilterType);
-unsigned int numfilters(MultiFilter*);
-void multifilter_inittables(unsigned int samplerate);
+void psy_dsp_multifilter_init(psy_dsp_MultiFilter*);
+void psy_dsp_multifilter_settype(psy_dsp_MultiFilter*, FilterType type);
+FilterType psy_dsp_multifilter_type(psy_dsp_MultiFilter*);
+const char* psy_dsp_multifilter_name(psy_dsp_MultiFilter*, FilterType);
+unsigned int psy_dsp_multifilter_numfilters(psy_dsp_MultiFilter*);
+void psy_dsp_multifilter_inittables(unsigned int samplerate);
 
 #endif

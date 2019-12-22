@@ -16,14 +16,14 @@ typedef struct {
 	ui_button gear;
 	ui_button editor;
 	ui_combobox instparambox;	
-	Player* player;	
+	psy_audio_Player* player;	
 	void (*selchange)(void*, int);
 	void* eventcontext;
-	Machines* machines;
-	Instruments* instruments;
+	psy_audio_Machines* machines;
+	psy_audio_Instruments* instruments;
 	int prevent_selchange_notify;
-	Table comboboxslots;
-	Table slotscombobox;
+	psy_Table comboboxslots;
+	psy_Table slotscombobox;
 } MachineBar;
 
 void InitMachineBar(MachineBar*, ui_component* parent, Workspace* );

@@ -10,21 +10,21 @@ extern const double TPI;
 
 typedef struct {	
 	psy_dsp_big_amp_t coeff[5];
-} FilterCoeff;
+} psy_dsp_FilterCoeff;
 
 typedef struct {
 	psy_dsp_amp_t container[128][128][5];
-} FilterMap;
+} psy_dsp_FilterMap;
 
 
-void filtercoeff_update(FilterCoeff*, FilterMap* map, int cutoff, int q);
-void filtercoeff_setparameter(FilterCoeff*, float a0, float a1, float a2,
+void psy_dsp_filtercoeff_update(psy_dsp_FilterCoeff*, psy_dsp_FilterMap* map, int cutoff, int q);
+void psy_dsp_filtercoeff_setparameter(psy_dsp_FilterCoeff*, float a0, float a1, float a2,
 	float b0, float b1, float b2);
 
-typedef void (*FilterMapCallback)(void*, int freq, int r, FilterCoeff* coeff);
-void filtermap_compute(FilterMap*, void* context, FilterMapCallback);
+typedef void (*psy_dsp_FilterMapCallback)(void*, int freq, int r, psy_dsp_FilterCoeff* coeff);
+void psy_dsp_filtermap_compute(psy_dsp_FilterMap*, void* context, psy_dsp_FilterMapCallback);
 
-float cutoffinternalext(int v);
-float resonanceinternal(float v);
+float psy_dsp_cutoffinternalext(int v);
+float psy_dsp_resonanceinternal(float v);
 
 #endif

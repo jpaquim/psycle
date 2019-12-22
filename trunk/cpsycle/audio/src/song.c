@@ -7,12 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void song_initproperties(Song*);
-static void song_initmachines(Song*);
-static void song_initpatterns(Song*);
-static void song_initsequence(Song*);
-static void song_initsignals(Song*);
-static void song_disposesignals(Song*);
+static void song_initproperties(psy_audio_Song*);
+static void song_initmachines(psy_audio_Song*);
+static void song_initpatterns(psy_audio_Song*);
+static void song_initsequence(psy_audio_Song*);
+static void song_initsignals(psy_audio_Song*);
+static void song_disposesignals(psy_audio_Song*);
 
 void songproperties_init(SongProperties* self, const char* title,
 	const char* credits, const char* comments)
@@ -54,7 +54,7 @@ void songproperties_copy(SongProperties* self, const SongProperties* other)
 	}
 }
 
-void song_init(Song* self, MachineFactory* machinefactory)
+void song_init(psy_audio_Song* self, MachineFactory* machinefactory)
 {		
 	self->machinefactory = machinefactory;	
 	songproperties_init(&self->properties, "Untitled", "Unnamed",
@@ -67,20 +67,20 @@ void song_init(Song* self, MachineFactory* machinefactory)
 	song_initsignals(self);
 }
 
-void song_initmachines(Song* self)
+void song_initmachines(psy_audio_Song* self)
 {
 	machines_init(&self->machines);
 	machines_insertmaster(&self->machines,
 		machinefactory_makemachine(self->machinefactory, MACH_MASTER, 0));
 }
 
-void song_initpatterns(Song* self)
+void song_initpatterns(psy_audio_Song* self)
 {
 	patterns_init(&self->patterns);
 	patterns_insert(&self->patterns, 0, pattern_allocinit());
 }
 
-void song_initsequence(Song* self)
+void song_initsequence(psy_audio_Song* self)
 {
 	SequencePosition sequenceposition;
 	sequence_init(&self->sequence, &self->patterns);	
@@ -91,13 +91,13 @@ void song_initsequence(Song* self)
 	sequence_insert(&self->sequence, sequenceposition, 0);
 }
 
-void song_initsignals(Song* self)
+void song_initsignals(psy_audio_Song* self)
 {
 	psy_signal_init(&self->signal_loadprogress);
 	psy_signal_init(&self->signal_saveprogress);
 }
 
-void song_dispose(Song* self)
+void song_dispose(psy_audio_Song* self)
 {
 	songproperties_dispose(&self->properties);
 	machines_dispose(&self->machines);
@@ -108,20 +108,20 @@ void song_dispose(Song* self)
 	song_disposesignals(self);
 }
 
-void song_disposesignals(Song* self)
+void song_disposesignals(psy_audio_Song* self)
 {
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_saveprogress);
 }
 
-Song* song_alloc(void)
+psy_audio_Song* song_alloc(void)
 {
-	return (Song*) malloc(sizeof(Song));
+	return (psy_audio_Song*) malloc(sizeof(psy_audio_Song));
 }
 
-Song* song_allocinit(MachineFactory* machinefactory)
+psy_audio_Song* song_allocinit(MachineFactory* machinefactory)
 {
-	Song* rv;
+	psy_audio_Song* rv;
 
 	rv = song_alloc();
 	if (rv) {
@@ -130,7 +130,7 @@ Song* song_allocinit(MachineFactory* machinefactory)
 	return rv;
 }
 
-void song_free(Song* self)
+void song_free(psy_audio_Song* self)
 {
 	if (self) {
 		song_dispose(self);
@@ -138,14 +138,14 @@ void song_free(Song* self)
 	}
 }
 
-void song_clear(Song* self)
+void song_clear(psy_audio_Song* self)
 {
 	sequence_clear(&self->sequence);
 	patterns_clear(&self->patterns);
 	machines_clear(&self->machines);
 }
 
-void song_setproperties(Song* self, const SongProperties* properties)
+void song_setproperties(psy_audio_Song* self, const SongProperties* properties)
 {	
 	songproperties_copy(&self->properties, properties);
 }

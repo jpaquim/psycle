@@ -12,7 +12,7 @@ static void timerbar_onmoreclicked(TimeBar* self, ui_component* sender);
 static void timerbar_onmoremoreclicked(TimeBar* self, ui_component* sender);
 static void timerbar_ontimer(TimeBar* self, ui_component* sender, int timerid);
 
-void timerbar_init(TimeBar* self, ui_component* parent, Player* player)
+void timerbar_init(TimeBar* self, ui_component* parent, psy_audio_Player* player)
 {				
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
@@ -45,7 +45,7 @@ void timerbar_init(TimeBar* self, ui_component* parent, Player* player)
 
 		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
 		ui_value_makepx(0), ui_value_makepx(0));
-		list_free(ui_components_setalign(
+		psy_list_free(ui_components_setalign(
 			ui_component_children(&self->component, 0),
 			UI_ALIGN_LEFT, &margin));
 	}	

@@ -13,9 +13,9 @@ typedef struct {
 	ui_label header;
 	ui_label position;		
 	psy_dsp_beat_t lastposition;
-	Player* player;
+	psy_audio_Player* player;
 } PlayPosBar;
 
-void playposbar_init(PlayPosBar*, ui_component* parent,Player* player);
+void playposbar_init(PlayPosBar*, ui_component* parent,psy_audio_Player* player);
 
 #endif

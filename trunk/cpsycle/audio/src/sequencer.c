@@ -8,28 +8,28 @@
 #include "instruments.h"
 #include <stdlib.h> 
 
-static void clearevents(Sequencer*);
-static void cleardelayed(Sequencer*);
-static void clearinputevents(Sequencer*);
-static void freeentries(List* events);
-static void makecurrtracks(Sequencer*, psy_dsp_beat_t offset);
-static psy_dsp_beat_t skiptrackiterators(Sequencer*, psy_dsp_beat_t offset);
-static void clearcurrtracks(Sequencer*);
-static void advanceposition(Sequencer* self, psy_dsp_beat_t width);
-static void addsequenceevent(Sequencer*, SequencerTrack*, psy_dsp_beat_t offset);
-static void maketweakslideevents(Sequencer*, PatternEntry*);
-static void makeretriggerevents(Sequencer*, SequencerTrack*, PatternEntry*);
-static void makeretriggercontinueevents(Sequencer* self, SequencerTrack*, PatternEntry*);
-static int isoffsetinwindow(Sequencer*, psy_dsp_beat_t offset);
-static void insertevents(Sequencer*);
-static void insertinputevents(Sequencer*);
-static void insertdelayedevents(Sequencer*);
-static void sequencerinsert(Sequencer*);
-static void compute_beatsprosample(Sequencer*);
-static void notifysequencertick(Sequencer*, psy_dsp_beat_t width);
-static psy_dsp_beat_t sequencer_speed(Sequencer*);
+static void clearevents(psy_audio_Sequencer*);
+static void cleardelayed(psy_audio_Sequencer*);
+static void clearinputevents(psy_audio_Sequencer*);
+static void freeentries(psy_List* events);
+static void makecurrtracks(psy_audio_Sequencer*, psy_dsp_beat_t offset);
+static psy_dsp_beat_t skiptrackiterators(psy_audio_Sequencer*, psy_dsp_beat_t offset);
+static void clearcurrtracks(psy_audio_Sequencer*);
+static void advanceposition(psy_audio_Sequencer* self, psy_dsp_beat_t width);
+static void addsequenceevent(psy_audio_Sequencer*, SequencerTrack*, psy_dsp_beat_t offset);
+static void maketweakslideevents(psy_audio_Sequencer*, psy_audio_PatternEntry*);
+static void makeretriggerevents(psy_audio_Sequencer*, SequencerTrack*, psy_audio_PatternEntry*);
+static void makeretriggercontinueevents(psy_audio_Sequencer* self, SequencerTrack*, psy_audio_PatternEntry*);
+static int isoffsetinwindow(psy_audio_Sequencer*, psy_dsp_beat_t offset);
+static void insertevents(psy_audio_Sequencer*);
+static void insertinputevents(psy_audio_Sequencer*);
+static void insertdelayedevents(psy_audio_Sequencer*);
+static void sequencerinsert(psy_audio_Sequencer*);
+static void compute_beatsprosample(psy_audio_Sequencer*);
+static void notifysequencertick(psy_audio_Sequencer*, psy_dsp_beat_t width);
+static psy_dsp_beat_t sequencer_speed(psy_audio_Sequencer*);
 
-void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
+void sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence* sequence, psy_audio_Machines* machines)
 {
 	self->sequence = sequence;
 	self->machines = machines;
@@ -56,10 +56,10 @@ void sequencer_init(Sequencer* self, Sequence* sequence, Machines* machines)
 	self->linetickcount = (psy_dsp_beat_t) 0.f;
 	compute_beatsprosample(self);
 	makecurrtracks(self, (psy_dsp_beat_t) 0.f);
-	table_init(&self->lastmachine);
+	psy_table_init(&self->lastmachine);
 }
 
-void sequencer_dispose(Sequencer* self)
+void sequencer_dispose(psy_audio_Sequencer* self)
 {
 	clearevents(self);
 	cleardelayed(self);
@@ -67,16 +67,16 @@ void sequencer_dispose(Sequencer* self)
 	clearcurrtracks(self);
 	self->sequence = 0;
 	self->machines = 0;
-	table_dispose(&self->lastmachine);
+	psy_table_dispose(&self->lastmachine);
 }
 
-void sequencer_reset(Sequencer* self, Sequence* sequence, Machines* machines)
+void sequencer_reset(psy_audio_Sequencer* self, psy_audio_Sequence* sequence, psy_audio_Machines* machines)
 {	
 	sequencer_dispose(self);
 	sequencer_init(self, sequence, machines);
 }
 
-void sequencer_setposition(Sequencer* self, psy_dsp_beat_t offset)
+void sequencer_setposition(psy_audio_Sequencer* self, psy_dsp_beat_t offset)
 {
 	clearevents(self);
 	cleardelayed(self);		
@@ -86,12 +86,12 @@ void sequencer_setposition(Sequencer* self, psy_dsp_beat_t offset)
 	makecurrtracks(self, offset);
 }
 
-psy_dsp_beat_t sequencer_position(Sequencer* self)
+psy_dsp_beat_t sequencer_position(psy_audio_Sequencer* self)
 {	
 	return self->position;
 }
 
-void sequencer_start(Sequencer* self)
+void sequencer_start(psy_audio_Sequencer* self)
 {	
 	self->linetickcount = 0;
 	self->jump.active = 0;
@@ -106,23 +106,23 @@ void sequencer_start(Sequencer* self)
 	self->playing = 1;
 }
 
-void sequencer_stop(Sequencer* self)
+void sequencer_stop(psy_audio_Sequencer* self)
 {
 	self->playing = 0;
 }
 
-void sequencer_setsamplerate(Sequencer* self, unsigned int samplerate)
+void sequencer_setsamplerate(psy_audio_Sequencer* self, unsigned int samplerate)
 {
 	self->samplerate = samplerate;
 	compute_beatsprosample(self);
 }
 
-unsigned int sequencer_samplerate(Sequencer* self)
+unsigned int sequencer_samplerate(psy_audio_Sequencer* self)
 {
 	return self->samplerate;
 }
 
-void sequencer_setbpm(Sequencer* self, psy_dsp_beat_t bpm)
+void sequencer_setbpm(psy_audio_Sequencer* self, psy_dsp_beat_t bpm)
 {	
 	if (bpm < 32) {
 		self->bpm = 32;
@@ -135,45 +135,45 @@ void sequencer_setbpm(Sequencer* self, psy_dsp_beat_t bpm)
 	compute_beatsprosample(self);
 }
 
-psy_dsp_beat_t sequencer_bpm(Sequencer* self)
+psy_dsp_beat_t sequencer_bpm(psy_audio_Sequencer* self)
 {
 	return self->bpm;
 }
 
-void sequencer_setlpb(Sequencer* self, uintptr_t lpb)
+void sequencer_setlpb(psy_audio_Sequencer* self, uintptr_t lpb)
 {	
 	self->lpb = lpb;
 	self->lpbspeed = (psy_dsp_beat_t) 1.f;
 	compute_beatsprosample(self);
 }
 
-uintptr_t sequencer_lpb(Sequencer* self)
+uintptr_t sequencer_lpb(psy_audio_Sequencer* self)
 {
 	return self->lpb;
 }
 
-List* sequencer_tickevents(Sequencer* self)
+psy_List* sequencer_tickevents(psy_audio_Sequencer* self)
 {
 	return self->events;
 }
 
-List* sequencer_machinetickevents(Sequencer* self, size_t slot)
+psy_List* sequencer_machinetickevents(psy_audio_Sequencer* self, size_t slot)
 {
-	List* rv = 0;
-	List* p;
+	psy_List* rv = 0;
+	psy_List* p;
 		
 	for (p = self->events; p != 0; p = p->next) {
-		PatternEntry* entry = (PatternEntry*) p->entry;		
+		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*) p->entry;		
 		if (entry->event.mach == slot) {			
-			list_append(&rv, entry);						
+			psy_list_append(&rv, entry);						
 		}		
 	}
 	return rv;
 }
 
-void clearcurrtracks(Sequencer* self)
+void clearcurrtracks(psy_audio_Sequencer* self)
 {
-	List* p;
+	psy_List* p;
 
 	for (p = self->currtracks; p != 0; p = p->next) {
 		SequencerTrack* track;
@@ -182,11 +182,11 @@ void clearcurrtracks(Sequencer* self)
 		free(track->iterator);
 		free(track);
 	}
-	list_free(self->currtracks);
+	psy_list_free(self->currtracks);
 	self->currtracks = 0;
 }
 
-void makecurrtracks(Sequencer* self, psy_dsp_beat_t offset)
+void makecurrtracks(psy_audio_Sequencer* self, psy_dsp_beat_t offset)
 {
 	SequenceTracks* p;
 
@@ -199,13 +199,13 @@ void makecurrtracks(Sequencer* self, psy_dsp_beat_t offset)
 		*track->iterator = sequence_begin(self->sequence, p, offset);		
 		track->state.retriggeroffset = 0;
 		track->state.retriggerstep = 0;		
-		list_append(&self->currtracks, track);
+		psy_list_append(&self->currtracks, track);
 	}
 }
 
-psy_dsp_beat_t skiptrackiterators(Sequencer* self, psy_dsp_beat_t offset)
+psy_dsp_beat_t skiptrackiterators(psy_audio_Sequencer* self, psy_dsp_beat_t offset)
 {
-	List* p;		
+	psy_List* p;		
 		
 	int first = 1;
 	psy_dsp_beat_t newplayposition = offset;
@@ -227,42 +227,42 @@ psy_dsp_beat_t skiptrackiterators(Sequencer* self, psy_dsp_beat_t offset)
 	return newplayposition;
 }
 
-void clearevents(Sequencer* self)
+void clearevents(psy_audio_Sequencer* self)
 {
 	freeentries(self->events);
-	list_free(self->events);
+	psy_list_free(self->events);
 	self->events = 0;	
 }
 
-void cleardelayed(Sequencer* self)
+void cleardelayed(psy_audio_Sequencer* self)
 {	
 	freeentries(self->delayedevents);
-	list_free(self->delayedevents);
+	psy_list_free(self->delayedevents);
 	self->delayedevents = 0;	
 }
 
-void clearinputevents(Sequencer* self)
+void clearinputevents(psy_audio_Sequencer* self)
 {
 	freeentries(self->inputevents);
-	list_free(self->inputevents);
+	psy_list_free(self->inputevents);
 	self->inputevents = 0;	
 }
 
-void freeentries(List* events)
+void freeentries(psy_List* events)
 {
-	List* p;
+	psy_List* p;
 	
 	for (p = events; p != 0; p = p->next) {
 		free(p->entry);
 	}
 }
 
-void sequencer_frametick(Sequencer* self, unsigned int numframes)
+void sequencer_frametick(psy_audio_Sequencer* self, unsigned int numframes)
 {	
 	sequencer_tick(self, sequencer_frametooffset(self, numframes));
 }
 
-void sequencer_tick(Sequencer* self, psy_dsp_beat_t width)
+void sequencer_tick(psy_audio_Sequencer* self, psy_dsp_beat_t width)
 {
 	if (self->playing) {
 		advanceposition(self, width);		
@@ -283,26 +283,26 @@ void sequencer_tick(Sequencer* self, psy_dsp_beat_t width)
 	}	
 }
 
-void advanceposition(Sequencer* self, psy_dsp_beat_t width)
+void advanceposition(psy_audio_Sequencer* self, psy_dsp_beat_t width)
 {	
 	self->position += self->window;
 	self->window = width;	
 }
 
-void notifysequencertick(Sequencer* self, psy_dsp_beat_t width)
+void notifysequencertick(psy_audio_Sequencer* self, psy_dsp_beat_t width)
 {
-	TableIterator it;	
+	psy_TableIterator it;	
 	
-	for (it = machines_begin(self->machines); !tableiterator_equal(&it, table_end());		
-			tableiterator_inc(&it)) {			
-		Machine* machine;
+	for (it = machines_begin(self->machines); !psy_tableiterator_equal(&it, psy_table_end());		
+			psy_tableiterator_inc(&it)) {			
+		psy_audio_Machine* machine;
 
-		machine = (Machine*)tableiterator_value(&it);
+		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
 		machine->vtable->sequencertick(machine);
 	}
 }
 
-void sequencer_linetick(Sequencer* self)
+void sequencer_linetick(psy_audio_Sequencer* self)
 {
 	if (self->jump.active) {
 		self->jump.active = 0;
@@ -314,39 +314,39 @@ void sequencer_linetick(Sequencer* self)
 	}
 }
 
-void sequencerinsert(Sequencer* self) {
-	List* p;
+void sequencerinsert(psy_audio_Sequencer* self) {
+	psy_List* p;
 
 	for (p = sequencer_tickevents(self); p != 0; p = p->next) {			
-		PatternEntry* entry;			
+		psy_audio_PatternEntry* entry;			
 		
-		entry = (PatternEntry*) p->entry;
+		entry = (psy_audio_PatternEntry*) p->entry;
 		if (entry->event.mach != NOTECOMMANDS_EMPTY) {
-			Machine* machine;				
+			psy_audio_Machine* machine;				
 				
 			machine = machines_at(self->machines, entry->event.mach);
 			if (machine) {
-				List* events;
+				psy_List* events;
 
 				events = sequencer_machinetickevents(self, entry->event.mach);
 				if (events) {					
-					List* insert;
+					psy_List* insert;
 					
 					insert = machine->vtable->sequencerinsert(machine, events);
 					if (insert) {
 						sequencer_append(self, insert);					
-						list_free(insert);
+						psy_list_free(insert);
 					}
-					list_free(events);
+					psy_list_free(events);
 				}					
 			}									
 		}
 	}
 }
 
-void insertevents(Sequencer* self)
+void insertevents(psy_audio_Sequencer* self)
 {
-	List* p;	
+	psy_List* p;	
 	int continueplaying = 0;
 
 	for (p = self->currtracks; p != 0; p = p->next) {
@@ -357,7 +357,7 @@ void insertevents(Sequencer* self)
 		it = track->iterator;
 		if (!continueplaying && it->tracknode) {
 			SequenceEntry* entry;
-			Pattern* pattern;
+			psy_audio_Pattern* pattern;
 
 			entry = sequencetrackiterator_entry(it);
 			pattern = patterns_at(it->patterns, entry->pattern);
@@ -378,7 +378,7 @@ void insertevents(Sequencer* self)
 				
 				offset = sequencetrackiterator_offset(it);
 				if (isoffsetinwindow(self, offset)) {
-					PatternEntry* patternentry;
+					psy_audio_PatternEntry* patternentry;
 
 					patternentry = 
 						sequencetrackiterator_patternentry(it);					
@@ -488,41 +488,45 @@ void insertevents(Sequencer* self)
 	}
 }
 
-void sequencer_append(Sequencer* self, List* events)
+void sequencer_append(psy_audio_Sequencer* self, psy_List* events)
 {
-	List* p;
+	psy_List* p;
 
 	for (p = events; p != 0; p = p->next) {
-		PatternEntry* entry;
+		psy_audio_PatternEntry* entry;
 
-		entry = (PatternEntry*) p->entry;
+		entry = (psy_audio_PatternEntry*) p->entry;
 		if (entry->event.cmd == NOTE_DELAY) {
-			list_append(&self->delayedevents, entry);
+			psy_list_append(&self->delayedevents, entry);
 		} else {
-			list_append(&self->events, entry);
+			psy_list_append(&self->events, entry);
 		}
 	}
 }
 
-int isoffsetinwindow(Sequencer* self, psy_dsp_beat_t offset)
+int isoffsetinwindow(psy_audio_Sequencer* self, psy_dsp_beat_t offset)
 {
 	return offset >= self->position && offset < self->position + self->window;
 }
 
-void addsequenceevent(Sequencer* self, SequencerTrack* track, psy_dsp_beat_t offset)
+void addsequenceevent(psy_audio_Sequencer* self, SequencerTrack* track, psy_dsp_beat_t offset)
 {	
-	PatternEntry* patternentry;	
+	psy_audio_PatternEntry* patternentry;	
 
 	patternentry = sequencetrackiterator_patternentry(track->iterator);
 	if (!patternentry || (patternentry && patterns_istrackmuted(
 			self->sequence->patterns, patternentry->track))) {
 		return;
 	}
-	if (patternentry->event.cmd == SET_TEMPO) {
+	if (patternentry->event.cmd == SET_TEMPO
+		&& !(patternentry->event.note >= NOTECOMMANDS_RELEASE &&
+			 patternentry->event.note <= NOTECOMMANDS_INVALID)) {
 		self->bpm = patternentry->event.parameter;
 		compute_beatsprosample(self);		
 	} else 
-	if (patternentry->event.cmd == EXTENDED) {
+	if (patternentry->event.cmd == EXTENDED 
+		&& !(patternentry->event.note >= NOTECOMMANDS_RELEASE &&
+			 patternentry->event.note <= NOTECOMMANDS_INVALID)) {
 		if (patternentry->event.parameter < SET_LINESPERBEAT1) {
 			self->lpbspeed = patternentry->event.parameter / (psy_dsp_beat_t)self->lpb;
 			compute_beatsprosample(self);
@@ -531,38 +535,38 @@ void addsequenceevent(Sequencer* self, SequencerTrack* track, psy_dsp_beat_t off
 	if (patternentry->event.note == NOTECOMMANDS_TWEAKSLIDE) {
 		maketweakslideevents(self, patternentry);
 	} else {
-		PatternEntry* entry;
+		psy_audio_PatternEntry* entry;
 		entry =	patternentry_clone(patternentry);
 		entry->bpm = self->bpm;
 		if (entry->event.cmd == NOTE_DELAY) {
 			entry->delta = offset + entry->event.parameter / 
 				(self->lpb * sequencer_speed(self) * 256.f);
-			list_append(&self->delayedevents, entry);
+			psy_list_append(&self->delayedevents, entry);
 		} else
 		if (entry->event.cmd == RETRIGGER) {
 			entry->delta = offset - self->position;
-			list_append(&self->events, entry);
+			psy_list_append(&self->events, entry);
 			makeretriggerevents(self, track, patternentry);
 		} else
 		if (entry->event.cmd == RETR_CONT) {			
 			entry->delta = offset + track->state.retriggeroffset -
 				self->position;
-			list_append(&self->delayedevents, entry);
+			psy_list_append(&self->delayedevents, entry);
 			makeretriggercontinueevents(self, track, patternentry);
 		} else {
 			entry->delta = offset - self->position;
 			if (entry->event.note < NOTECOMMANDS_RELEASE) {
-				table_insert(&self->lastmachine, entry->track,
+				psy_table_insert(&self->lastmachine, entry->track,
 					(void*)(uintptr_t)entry->event.mach);				
 			}
-			list_append(&self->events, entry);
+			psy_list_append(&self->events, entry);
 		}
 	}	
 }
 
-void maketweakslideevents(Sequencer* self, PatternEntry* entry)
+void maketweakslideevents(psy_audio_Sequencer* self, psy_audio_PatternEntry* entry)
 {
-	Machine* machine;		
+	psy_audio_Machine* machine;		
 		
 	machine = machines_at(self->machines, entry->event.mach);
 	if (machine &&
@@ -587,16 +591,16 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 			dest = maxval;
 		}
 		if (dest == start) {
-			PatternEntry* slideentry;
+			psy_audio_PatternEntry* slideentry;
 			slideentry = patternentry_clone(entry);
 			slideentry->event.note = NOTECOMMANDS_TWEAK;
 			slideentry->bpm = self->bpm;
-			list_append(&self->events, slideentry);
+			psy_list_append(&self->events, slideentry);
 		} else {
 			delta = (dest - start) / (float)slides;			
 			curr = (float)start + minval;
 			for (slide = 0; slide < slides; ++slide) {
-				PatternEntry* slideentry;
+				psy_audio_PatternEntry* slideentry;
 				int cmd;
 				int parameter;				
 				int nv;
@@ -615,14 +619,14 @@ void maketweakslideevents(Sequencer* self, PatternEntry* entry)
 				slideentry->event.cmd = cmd;
 				slideentry->event.parameter = parameter;				
 				slideentry->delta += slide * 64 * self->beatsprosample;				
-				list_append(&self->delayedevents, slideentry);
+				psy_list_append(&self->delayedevents, slideentry);
 			}
 		}
 	}
 }
 
-void makeretriggerevents(Sequencer* self, SequencerTrack* track,
-	PatternEntry* entry)
+void makeretriggerevents(psy_audio_Sequencer* self, SequencerTrack* track,
+	psy_audio_PatternEntry* entry)
 {
 	psy_dsp_beat_t retriggerstep;
 	psy_dsp_beat_t retriggeroffset;		
@@ -631,13 +635,13 @@ void makeretriggerevents(Sequencer* self, SequencerTrack* track,
 		(self->lpb * sequencer_speed(self) * 256.f);
 	retriggeroffset = retriggerstep;
 	while (retriggeroffset < 1 / (self->lpb * sequencer_speed(self))) {
-		PatternEntry* retriggerentry;
+		psy_audio_PatternEntry* retriggerentry;
 
 		retriggerentry = patternentry_clone(entry);
 		retriggerentry->event.cmd = 0;
 		retriggerentry->event.parameter = 0;
 		retriggerentry->delta = entry->delta + retriggeroffset;
-		list_append(&self->delayedevents, retriggerentry);
+		psy_list_append(&self->delayedevents, retriggerentry);
 		retriggeroffset += retriggerstep;
 	}
 	track->state.retriggeroffset = 		
@@ -645,8 +649,8 @@ void makeretriggerevents(Sequencer* self, SequencerTrack* track,
 	track->state.retriggerstep = retriggerstep;
 }
 
-void makeretriggercontinueevents(Sequencer* self, SequencerTrack* track,
-	PatternEntry* entry)
+void makeretriggercontinueevents(psy_audio_Sequencer* self, SequencerTrack* track,
+	psy_audio_PatternEntry* entry)
 {
 	psy_dsp_beat_t retriggerstep;
 	psy_dsp_beat_t retriggeroffset;		
@@ -658,13 +662,13 @@ void makeretriggercontinueevents(Sequencer* self, SequencerTrack* track,
 	}
 	retriggeroffset = track->state.retriggeroffset + retriggerstep;
 	while (retriggeroffset < 1 / (self->lpb * sequencer_speed(self))) {
-		PatternEntry* retriggerentry;
+		psy_audio_PatternEntry* retriggerentry;
 
 		retriggerentry = patternentry_clone(entry);
 		retriggerentry->event.cmd = 0;
 		retriggerentry->event.parameter = 0;
 		retriggerentry->delta = entry->delta + retriggeroffset;
-		list_append(&self->delayedevents, retriggerentry);
+		psy_list_append(&self->delayedevents, retriggerentry);
 		retriggeroffset += retriggerstep;
 	}
 	track->state.retriggeroffset =
@@ -672,30 +676,30 @@ void makeretriggercontinueevents(Sequencer* self, SequencerTrack* track,
 	track->state.retriggerstep = retriggerstep;
 }
 
-void insertdelayedevents(Sequencer* self)
+void insertdelayedevents(psy_audio_Sequencer* self)
 {
-	List* p;
+	psy_List* p;
 	
 	for (p = self->delayedevents; p != 0; p = p->next) {
-		PatternEntry* delayed = (PatternEntry*)p->entry;
+		psy_audio_PatternEntry* delayed = (psy_audio_PatternEntry*)p->entry;
 
 		if (isoffsetinwindow(self, delayed->offset + delayed->delta)) {						
-			List* q;
+			psy_List* q;
 			int inserted = 0;
 			q = self->events;
 			while (q) {
-				PatternEntry* entry = (PatternEntry*)q->entry;
+				psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)q->entry;
 				if (delayed->offset >= entry->offset) {					
 					break;
 				}
 				q = q->next;
 			}			
-			p = list_remove(&self->delayedevents, p);
+			p = psy_list_remove(&self->delayedevents, p);
 			delayed->delta = delayed->offset + delayed->delta - self->position;	
 			if (q) {
-				q = list_insert(&self->events, q, delayed);								
+				q = psy_list_insert(&self->events, q, delayed);								
 			} else {				
-				list_append(&self->events, delayed);								
+				psy_list_append(&self->events, delayed);								
 			}			
 			if (!p) {
 				break;
@@ -704,17 +708,17 @@ void insertdelayedevents(Sequencer* self)
 	}
 }
 
-void insertinputevents(Sequencer* self)
+void insertinputevents(psy_audio_Sequencer* self)
 {
-	List* p;
-	List* q;
+	psy_List* p;
+	psy_List* q;
 	
 	for (p = self->inputevents; p != 0; p = q) {
-		PatternEntry* entry = (PatternEntry*)p->entry;
+		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
 		
 		q = p->next;
 		entry->delta = 0;
-		list_append(&self->events, entry);
+		psy_list_append(&self->events, entry);
 		if (q) {
 			q->tail = self->inputevents->tail;
 			q->prev = 0;
@@ -724,38 +728,38 @@ void insertinputevents(Sequencer* self)
 	}
 }
 
-void compute_beatsprosample(Sequencer* self)
+void compute_beatsprosample(psy_audio_Sequencer* self)
 {
 	self->beatsprosample = (self->bpm * sequencer_speed(self)) / (self->samplerate * 60.0f);
 }
 
-psy_dsp_beat_t sequencer_frametooffset(Sequencer* self, int numsamples)
+psy_dsp_beat_t sequencer_frametooffset(psy_audio_Sequencer* self, int numsamples)
 {
 	return numsamples * self->beatsprosample;
 }
 
-unsigned int sequencer_frames(Sequencer* self, psy_dsp_beat_t offset)
+unsigned int sequencer_frames(psy_audio_Sequencer* self, psy_dsp_beat_t offset)
 {
 	return (unsigned int)(offset / self->beatsprosample);
 }
 
-int sequencer_playing(Sequencer* self)
+int sequencer_playing(psy_audio_Sequencer* self)
 {
 	return self->playing;
 }
 
-List* sequencer_timedevents(Sequencer* self, size_t slot, unsigned int amount)
+psy_List* sequencer_timedevents(psy_audio_Sequencer* self, size_t slot, unsigned int amount)
 {
-	List* rv = 0;
-	List* p;
+	psy_List* rv = 0;
+	psy_List* p;
 
 	rv = sequencer_machinetickevents(self, slot);
 	for (p = rv ; p != 0; p = p->next) {		
-		PatternEntry* entry;
+		psy_audio_PatternEntry* entry;
 		psy_dsp_beat_t beatsprosample;
 		unsigned int deltaframes;			
 
-		entry = (PatternEntry*) p->entry;
+		entry = (psy_audio_PatternEntry*) p->entry;
 		beatsprosample = (entry->bpm * sequencer_speed(self)) / (self->samplerate * 60.0f);			
 		deltaframes = (unsigned int) (entry->delta / self->beatsprosample);
 		if (deltaframes >= amount) {
@@ -766,23 +770,23 @@ List* sequencer_timedevents(Sequencer* self, size_t slot, unsigned int amount)
 	return rv;
 }
 
-void sequencer_addinputevent(Sequencer* self, const PatternEvent* event,
+void sequencer_addinputevent(psy_audio_Sequencer* self, const psy_audio_PatternEvent* event,
 	uintptr_t track)
 {
 	if (event) {
-		PatternEntry* entry;
+		psy_audio_PatternEntry* entry;
 	
-		entry = (PatternEntry*) malloc(sizeof(PatternEntry));
+		entry = (psy_audio_PatternEntry*) malloc(sizeof(psy_audio_PatternEntry));
 			entry->event = *event;
 			entry->track = track;
 			entry->bpm = self->bpm;
 			entry->delta = 0;
 			entry->offset = 0;
-		list_append(&self->inputevents, entry);
+		psy_list_append(&self->inputevents, entry);
 	}
 }
 
-void sequencer_recordinputevent(Sequencer* self, const PatternEvent* event,
+void sequencer_recordinputevent(psy_audio_Sequencer* self, const psy_audio_PatternEvent* event,
 	unsigned int track, psy_dsp_beat_t playposition)
 {
 	SequenceTrackIterator it;
@@ -790,7 +794,7 @@ void sequencer_recordinputevent(Sequencer* self, const PatternEvent* event,
 	it = sequence_begin(self->sequence, self->sequence->tracks, playposition);
 	if (it.tracknode) {
 		SequenceEntry* entry;
-		Pattern* pattern;		
+		psy_audio_Pattern* pattern;		
 		
 		entry = (SequenceEntry*) it.tracknode->entry;
 		pattern = patterns_at(self->sequence->patterns, entry->pattern);
@@ -813,32 +817,32 @@ void sequencer_recordinputevent(Sequencer* self, const PatternEvent* event,
 	}
 }
 
-void sequencer_setplaymode(Sequencer* self, SequencerPlayMode mode)
+void sequencer_setplaymode(psy_audio_Sequencer* self, SequencerPlayMode mode)
 {
 	self->mode = mode;
 }
 
-SequencerPlayMode sequencer_playmode(Sequencer* self)
+SequencerPlayMode sequencer_playmode(psy_audio_Sequencer* self)
 {
 	return self->mode;
 }
 
-void sequencer_loop(Sequencer* self)
+void sequencer_loop(psy_audio_Sequencer* self)
 {
 	self->looping = 1;
 }
 
-void sequencer_stoploop(Sequencer* self)
+void sequencer_stoploop(psy_audio_Sequencer* self)
 {
 	self->looping = 0;
 }
 
-int sequencer_looping(Sequencer* self)
+int sequencer_looping(psy_audio_Sequencer* self)
 {
 	return self->looping;
 }
 
-psy_dsp_beat_t sequencer_speed(Sequencer* self)
+psy_dsp_beat_t sequencer_speed(psy_audio_Sequencer* self)
 {
 	psy_dsp_beat_t rv;
 
