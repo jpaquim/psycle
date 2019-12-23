@@ -10,6 +10,8 @@
 // © 2006, Steinberg Media Technologies, All Rights Reserved
 //-------------------------------------------------------------------------------------------------------
 
+// modified by psycedelics for c usage
+
 #ifndef __aeffectx__
 #define __aeffectx__
 
@@ -1005,6 +1007,7 @@ enum VstModifierKey
 //-------------------------------------------------------------------------------------------------------
 /** File filter used in #VstFileSelect. */
 //-------------------------------------------------------------------------------------------------------
+// modified by psycedelics for c usage
 #ifdef _cplusplus
 struct VstFileType
 {
@@ -1028,12 +1031,37 @@ struct VstFileType
 	}
 //-------------------------------------------------------------------------------------------------------
 };
+#else
+typedef struct VstFileType
+{
+//-------------------------------------------------------------------------------------------------------
+	char name[128];				///< display name
+	char macType[8];			///< MacOS type
+	char dosType[8];			///< Windows file extension
+	char unixType[8];			///< Unix file extension
+	char mimeType1[128];		///< MIME type
+	char mimeType2[128];		///< additional MIME type
+} VstFileType;
+
+
+InitVstFileType (struct VstFileType* self,
+	const char* _name, const char* _macType, const char* _dosType,
+	const char* _unixType, const char* _mimeType1, const char* _mimeType2)
+{
+	vst_strncpy (self->name, _name ? _name : "", 127);
+	vst_strncpy (self->macType, _macType ? _macType : "", 7);
+	vst_strncpy (self->dosType, _dosType ? _dosType : "", 7);
+	vst_strncpy (self->unixType, _unixType ? _unixType : "", 7);
+	vst_strncpy (self->mimeType1, _mimeType1 ? _mimeType1 : "", 127);
+	vst_strncpy (self->mimeType2, _mimeType2 ? _mimeType2 : "", 127);
+}
 #endif
+//-------------------------------------------------------------------------------------------------------
+
 
 //-------------------------------------------------------------------------------------------------------
 /** File Selector Description used in #audioMasterOpenFileSelector. */
 //-------------------------------------------------------------------------------------------------------
-#ifdef _cplusplus
 struct VstFileSelect
 {
 //-------------------------------------------------------------------------------------------------------
@@ -1053,7 +1081,6 @@ struct VstFileSelect
 	char future[116];			///< reserved for future use
 //-------------------------------------------------------------------------------------------------------
 };
-#endif
 
 //-------------------------------------------------------------------------------------------------------
 /** Command constants used in #VstFileSelect structure. */

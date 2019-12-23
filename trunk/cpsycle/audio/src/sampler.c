@@ -16,7 +16,8 @@
 #include <portable.h>
 
 static void generateaudio(psy_audio_Sampler*, psy_audio_BufferContext*);
-static void seqtick(psy_audio_Sampler*, int channel, const psy_audio_PatternEvent*);
+static void seqtick(psy_audio_Sampler*, uintptr_t channel,
+	const psy_audio_PatternEvent*);
 static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
 static unsigned int numparametercols(psy_audio_Sampler*);
 static unsigned int numparameters(psy_audio_Sampler*);
@@ -31,8 +32,8 @@ static void dispose(psy_audio_Sampler*);
 static int alloc_voice(psy_audio_Sampler*);
 static void releasevoices(psy_audio_Sampler*, uintptr_t channel);
 static void removeunusedvoices(psy_audio_Sampler* self);
-static unsigned int numinputs(psy_audio_Sampler*);
-static unsigned int numoutputs(psy_audio_Sampler*);
+static uintptr_t numinputs(psy_audio_Sampler*);
+static uintptr_t numoutputs(psy_audio_Sampler*);
 static void loadspecific(psy_audio_Sampler*, struct psy_audio_SongFile*, unsigned int slot);
 static void savespecific(psy_audio_Sampler*, struct psy_audio_SongFile*, unsigned int slot);
 
@@ -115,7 +116,7 @@ void sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;	
 	self->maxvolume = 0xFF;
-	base->vtable->seteditname(base, "psy_audio_Sampler");
+	base->vtable->seteditname(base, "Sampler");
 	psy_table_init(&self->lastinst);
 }
 
@@ -149,7 +150,8 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 	}
 }
 
-void seqtick(psy_audio_Sampler* self, int channel, const psy_audio_PatternEvent* event)
+void seqtick(psy_audio_Sampler* self, uintptr_t channel,
+	const psy_audio_PatternEvent* event)
 {	
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	psy_audio_Instrument* instrument;
@@ -369,12 +371,12 @@ int parametername(psy_audio_Sampler* self, char* txt, int param)
 	return rv;
 }
 
-unsigned int numinputs(psy_audio_Sampler* self)
+uintptr_t numinputs(psy_audio_Sampler* self)
 {
 	return 0;
 }
 
-unsigned int numoutputs(psy_audio_Sampler* self)
+uintptr_t numoutputs(psy_audio_Sampler* self)
 {
 	return 2;
 }

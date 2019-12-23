@@ -7,8 +7,9 @@
 
 #include "psyclescript.h"
 #include "machinedefs.h"
-#include "lauxlib.h"
-#include "lualib.h"
+
+#include <lauxlib.h>
+#include <lualib.h>
 #if defined DIVERSALIS__OS__MICROSOFT    
 #include <windows.h>
 #endif
@@ -253,4 +254,17 @@ void psyclescript_register_weakuserdata(lua_State* L, void* ud)
 	lua_pushvalue(L, -4);
 	lua_settable(L, -3);
 	lua_pop(L, 2);
+}
+
+void* psyclescript_checkself(lua_State* L, int index, const char* meta)
+{
+	void** ud;
+
+	luaL_checktype(L, index, LUA_TTABLE);
+	lua_getfield(L, index, "__self");      
+	ud = luaL_checkudata(L, -1, meta);
+	luaL_argcheck(L, (ud) != 0, 1, meta);
+	lua_pop(L, 1);
+	// luaL_argcheck(L, (*SPTR) != 0, 1, (meta+" expected").c_str());     
+	return *ud;
 }

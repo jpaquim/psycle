@@ -15,12 +15,12 @@ static psy_audio_MachineInfo const macinfo = {
 	0x0250,
 	EFFECT | 32 | 64,
 	MACHMODE_FX,
-	"psy_audio_Machine"
+	"Machine"
 		#ifndef NDEBUG
 		" (debug build)"
 		#endif
 		,
-	"psy_audio_Machine",
+	"Machine",
 	"Psycledelics",
 	"help",
 	MACH_UNDEFINED
@@ -31,7 +31,8 @@ static psy_audio_Buffer* mix(psy_audio_Machine*, size_t slot, unsigned int amoun
 static void work(psy_audio_Machine*, psy_audio_BufferContext*);
 static void generateaudio(psy_audio_Machine* self, psy_audio_BufferContext* bc) { }
 static int hostevent(psy_audio_Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
-static void seqtick(psy_audio_Machine* self, int channel, const psy_audio_PatternEvent* event) { }
+static void seqtick(psy_audio_Machine* self, uintptr_t channel,
+	const psy_audio_PatternEvent* event) { }
 static void stop(psy_audio_Machine* self) { }
 static void sequencertick(psy_audio_Machine* self) { }
 static psy_List* sequencerinsert(psy_audio_Machine* self, psy_List* events) { return 0; }
@@ -62,8 +63,8 @@ static void unbypass(psy_audio_Machine* self) { }
 static int bypassed(psy_audio_Machine* self) { return 0; }
 static void dispose(psy_audio_Machine*);
 static int mode(psy_audio_Machine*);
-static unsigned int numinputs(psy_audio_Machine* self) { return 0; }
-static unsigned int numoutputs(psy_audio_Machine* self) { return 0; }	
+static uintptr_t numinputs(psy_audio_Machine* self) { return 0; }
+static uintptr_t numoutputs(psy_audio_Machine* self) { return 0; }	
 static void setcallback(psy_audio_Machine* self, MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(psy_audio_Machine* self, unsigned int samplerate) { }
 static void loadspecific(psy_audio_Machine*, struct psy_audio_SongFile*, unsigned int slot);

@@ -165,6 +165,10 @@ SOURCE=.\src\uislider.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uisplitbar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uistatusbar.c
 # End Source File
 # Begin Source File
@@ -258,6 +262,10 @@ SOURCE=.\src\uiprogressbar.h
 # Begin Source File
 
 SOURCE=.\src\uislider.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uisplitbar.h
 # End Source File
 # Begin Source File
 

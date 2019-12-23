@@ -8,7 +8,7 @@
 
 static void ondestroy(ui_switch*, ui_component* sender);
 static void ondraw(ui_switch*, ui_component* sender, ui_graphics*);
-static void onmousedown(ui_switch*, ui_component* sender);
+static void onmousedown(ui_switch*, ui_component* sender, MouseEvent*);
 static void onmouseenter(ui_switch*, ui_component* sender);
 static void onmouseleave(ui_switch*, ui_component* sender);
 static void onpreferredsize(ui_switch*, ui_component* sender, ui_size* limit,
@@ -86,7 +86,7 @@ void onpreferredsize(ui_switch* self, ui_component* sender, ui_size* limit,
 	}
 }
 
-void onmousedown(ui_switch* self, ui_component* sender)
+void onmousedown(ui_switch* self, ui_component* sender, MouseEvent* ev)
 {
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }

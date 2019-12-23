@@ -213,7 +213,7 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 			self->directories,
 			"song",
 			"C:\\Programme\\Psycle\\Songs"),
-		"psy_audio_Song directory"),
+		"Song directory"),
 		PSY_PROPERTY_HINT_EDITDIR);
 	psy_properties_sethint(psy_properties_settext(
 		psy_properties_append_string(

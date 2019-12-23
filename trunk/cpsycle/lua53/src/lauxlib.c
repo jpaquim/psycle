@@ -447,7 +447,7 @@ LUALIB_API lua_Integer luaL_optinteger (lua_State *L, int arg,
 
 /*
 ** {======================================================
-** Generic psy_audio_Buffer manipulation
+** Generic Buffer manipulation
 ** =======================================================
 */
 

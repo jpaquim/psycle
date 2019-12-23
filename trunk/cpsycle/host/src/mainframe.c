@@ -19,18 +19,11 @@ static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initbars(MainFrame*);
 static void mainframe_initvubar(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
-static const char* mainframe_statusbaridletext(MainFrame* self);
+static const char* mainframe_statusbaridletext(MainFrame*);
 static void mainframe_destroy(MainFrame*, ui_component* component);
 static void mainframe_onkeydown(MainFrame*, ui_component* sender, KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, ui_component* sender, KeyEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry* entry);
-static void mainframe_onalign(MainFrame*, ui_component* sender);
-static void mainframe_onmousedown(MainFrame*, ui_component* sender,
-	MouseEvent*);
-static void mainframe_onmousemove(MainFrame*, ui_component* sender,
-	MouseEvent*);
-static void mainframe_onmouseup(MainFrame*, ui_component* sender,
-	MouseEvent*);
 static void mainframe_ongear(MainFrame*, ui_component* sender);
 static void mainframe_onplugineditor(MainFrame*, ui_component* sender);
 static void mainframe_ongearcreate(MainFrame*, ui_component* sender);
@@ -39,8 +32,6 @@ static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
 	psy_Properties*);
 static void mainframe_ontabbarchanged(MainFrame*, ui_component* sender, uintptr_t tabindex);
-static void mainframe_onmouseentersplitbar(MainFrame*, ui_component* sender);
-static void mainframe_onmouseleavesplitbar(MainFrame*, ui_component* sender);
 static void mainframe_onsongchanged(MainFrame*, ui_component* sender,
 	int flag);
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
@@ -75,7 +66,7 @@ void mainframe_init(MainFrame* self)
 	ui_frame_init(&self->component, 0);
 	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	ui_component_enablealign(&self->component);
-	self->resize = 0;
+	
 	workspace_init(&self->workspace, &self->component);	
 	workspace_load_configuration(&self->workspace);
 	if (!workspace_hasplugincache(&self->workspace)) {
@@ -84,17 +75,35 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
 		mainframe_onsongchanged);
 	mainframe_updatetitle(self);
-	self->firstshow = 1;			
-	mainframe_initbars(self);
+	// create empty status bar
+	ui_component_init(&self->statusbar, &self->component);	
+	ui_component_setalign(&self->statusbar, UI_ALIGN_BOTTOM);
+	ui_component_enablealign(&self->statusbar);
 	ui_terminal_init(&self->terminal, &self->component);
+	ui_component_setalign(&self->terminal.component, UI_ALIGN_BOTTOM);
 	ui_component_hide(&self->terminal.component);
 	ui_component_resize(&self->terminal.component, 0, 100);
-	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);
-	psy_signal_connect(&self->component.signal_align, self, mainframe_onalign);	
+	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);	
 	psy_signal_connect(&self->component.signal_keydown, self, mainframe_onkeydown);
 	psy_signal_connect(&self->component.signal_keyup, self, mainframe_onkeyup);
 	psy_signal_connect(&self->component.signal_timer, self, mainframe_ontimer);
-	ui_component_init(&self->tabbars, &self->component);
+	ui_component_init(&self->top, &self->component);
+	ui_component_setalign(&self->top, UI_ALIGN_TOP);
+	ui_component_enablealign(&self->top);
+	// sequenceview
+	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);	
+	ui_component_setalign(&self->sequenceview.component, UI_ALIGN_LEFT);
+	// client
+	ui_component_init(&self->client, &self->component);
+	ui_component_setbackgroundmode(&self->client, BACKGROUND_NONE);
+	ui_component_enablealign(&self->client);
+	ui_component_setalign(&self->client, UI_ALIGN_CLIENT);
+	// tabbars			
+	ui_component_init(&self->tabbars, &self->client);
+	mainframe_initbars(self);	
+	ui_component_resize(&self->top, 500, 400);	
+	// tabbars
+	ui_component_setalign(&self->tabbars, UI_ALIGN_TOP);
 	ui_component_enablealign(&self->tabbars);
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);
 	self->navigation.component.margin.right = ui_value_makeew(4.0);
@@ -110,13 +119,10 @@ void mainframe_init(MainFrame* self)
 	tabbar_append(&self->tabbar, "Settings")->margin.left = ui_value_makeew(4.0);	;
 	tabbar_append(&self->tabbar, "Help")->margin.right = ui_value_makeew(4.0);
 	// splitbar
-	ui_component_init(&self->splitbar, &self->component);	
-	psy_signal_connect(&self->splitbar.signal_mouseenter, self,
-		mainframe_onmouseentersplitbar);
-	psy_signal_connect(&self->splitbar.signal_mouseleave, self,
-		mainframe_onmouseleavesplitbar);
+	ui_splitbar_init(&self->splitbar, &self->component);	
 	/// init notebook views
-	ui_notebook_init(&self->notebook, &self->component);	
+	ui_notebook_init(&self->notebook, &self->client);
+	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
 	ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);	
 	machineview_init(&self->machineview, &self->notebook.component, 
@@ -136,8 +142,7 @@ void mainframe_init(MainFrame* self)
 	helpview_init(&self->helpview, &self->notebook.component, &self->tabbars,
 		&self->workspace);	
 	psy_signal_connect(&self->helpview.about.okbutton.signal_clicked, self,
-		mainframe_onaboutok);
-	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);
+		mainframe_onaboutok);	
 	renderview_init(&self->renderview, &self->notebook.component,
 		&self->tabbars, &self->workspace);
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
@@ -145,22 +150,19 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
 		mainframe_onviewselected);
 	gear_init(&self->gear, &self->component, &self->workspace);
+	ui_component_setalign(&self->gear.component, UI_ALIGN_RIGHT);
 	ui_component_hide(&self->gear.component);
 	psy_signal_connect(&self->machinebar.gear.signal_clicked, self,
 		mainframe_ongear);
 	plugineditor_init(&self->plugineditor, &self->component, &self->workspace);
+	ui_component_setalign(&self->plugineditor.component, UI_ALIGN_LEFT);
+	ui_component_resize(&self->plugineditor.component, 400, 0);
 	ui_component_hide(&self->plugineditor.component);
 	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
 		mainframe_onplugineditor);
 	psy_signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
-		mainframe_ongearcreate);
-	mainframe_initstatusbar(self);
-	psy_signal_connect(&self->splitbar.signal_mousedown, self,
-		mainframe_onmousedown);
-	psy_signal_connect(&self->splitbar.signal_mousemove, self,
-		mainframe_onmousemove);
-	psy_signal_connect(&self->splitbar.signal_mouseup, self,
-		mainframe_onmouseup);
+		mainframe_ongearcreate);	
+
 	mainframe_setstartpage(self);
 	if (self->workspace.song) {
 		mainframe_setstatusbartext(self,
@@ -170,10 +172,12 @@ void mainframe_init(MainFrame* self)
 		&self->workspace, 1, self->workspace.config);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		mainframe_ontabbarchanged);
-	workspace_addhistory(&self->workspace);
-	ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
+	workspace_addhistory(&self->workspace);	
 	psy_signal_connect(&self->workspace.player.eventdrivers.signal_input, self,
 		mainframe_oneventdriverinput);
+	// create statusbar components
+	mainframe_initstatusbar(self);
+	ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -192,11 +196,8 @@ void mainframe_initstatusbar(MainFrame* self)
 {	
 	ui_margin margin;
 		
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
-		ui_value_makepx(0), ui_value_makepx(0));
-
-	ui_component_init(&self->statusbar, &self->component);	
-	ui_component_enablealign(&self->statusbar);
+	ui_margin_init(&margin, ui_value_makeeh(0.5), ui_value_makeew(2.0),
+		ui_value_makeeh(0.5), ui_value_makepx(0));	
 	// statusbar label	
 	ui_label_init(&self->statusbarlabel, &self->statusbar);
 	ui_label_settext(&self->statusbarlabel, "Ready");
@@ -218,22 +219,24 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_loadprogress, self, 
 		mainframe_onsongloadprogress);
 	psy_signal_connect(&self->workspace.signal_scanprogress, self, 
-		mainframe_onpluginscanprogress);
+		mainframe_onpluginscanprogress);	
 }
 
 void mainframe_initbars(MainFrame* self)
 {
+	ui_margin margin;
 	ui_margin row0margin;
 	ui_margin rowmargin;	
 
 	ui_margin_init(&row0margin, ui_value_makeeh(0.5), ui_value_makepx(0),
 	ui_value_makeeh(0.5), ui_value_makeeh(0.5));
 	ui_margin_init(&rowmargin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makeeh(0.5), ui_value_makeeh(0.5));	
+		ui_value_makeeh(0.5), ui_value_makeeh(0.5));
 	
-	ui_component_init(&self->top, &self->component);	
-	ui_component_resize(&self->top, 500, 400);
-	ui_component_enablealign(&self->top);	
+	// Vugroup
+	vubar_init(&self->vubar, &self->top, &self->workspace);
+	ui_component_resize(&self->vubar.component, 200, 50);
+	ui_component_setalign(&self->vubar.component, UI_ALIGN_RIGHT);
 	// row0
 	ui_component_init(&self->toprow0, &self->top);
 	ui_component_enablealign(&self->toprow0);	
@@ -262,19 +265,14 @@ void mainframe_initbars(MainFrame* self)
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);	
 	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);	
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
-	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);
-	{
-		ui_margin margin;
-		
-		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
-			ui_value_makepx(0), ui_value_makepx(0));
-
-		psy_list_free(ui_components_setalign(
-			ui_component_children(&self->toprow0, 0),
-			UI_ALIGN_LEFT, &margin));
-		margin.right = ui_value_makepx(0);
-		ui_component_setmargin(&self->playposbar.component, &margin);
-	}
+	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);	
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+		ui_value_makepx(0), ui_value_makepx(0));
+	psy_list_free(ui_components_setalign(
+		ui_component_children(&self->toprow0, 0),
+		UI_ALIGN_LEFT, &margin));
+	margin.right = ui_value_makepx(0);
+	ui_component_setmargin(&self->playposbar.component, &margin);	
 	// row1
 	// Songbar	
 	InitSongBar(&self->songbar, &self->toprow1, &self->workspace);
@@ -282,10 +280,7 @@ void mainframe_initbars(MainFrame* self)
 	// row2
 	// Machinebar
 	InitMachineBar(&self->machinebar, &self->toprow2, &self->workspace);	
-	ui_component_setalign(&self->machinebar.component, UI_ALIGN_LEFT);		
-	// Vugroup
-	vubar_init(&self->vubar, &self->component, &self->workspace);
-	ui_component_resize(&self->vubar.component, 200, 50);	
+	ui_component_setalign(&self->machinebar.component, UI_ALIGN_LEFT);	
 }
 
 void mainframe_setstartpage(MainFrame* self)
@@ -308,114 +303,6 @@ void mainframe_destroy(MainFrame* self, ui_component* component)
 	workspace_save_configuration(&self->workspace);
 	workspace_dispose(&self->workspace);
 	ui_quit();
-}
-
-void mainframe_onalign(MainFrame* self, ui_component* sender)
-{
-	ui_size size;
-	ui_size statusbarsize;
-	ui_size tabbarssize;
-	ui_size sequenceviewsize;
-	ui_size gearsize;
-	ui_size plugineditorsize;
-	ui_size terminalsize;
-	ui_size vusize;	
-	ui_size topsize;	
-	ui_size limit;
-	int splitbarwidth = 4;
-	ui_textmetric tm;
-	
-	size = ui_component_size(&self->component);
-	tm = ui_component_textmetric(&self->component);
-	statusbarsize = ui_component_preferredsize(&self->statusbar, &size);	
-	sequenceviewsize = ui_component_size(&self->sequenceview.component);	
-	limit.width = size.width - sequenceviewsize.width - splitbarwidth;
-	limit.height = size.height;
-	tabbarssize = ui_component_preferredsize(&self->tabbars, &limit);
-	tabbarssize.height += (int)(tm.tmHeight * 0.5);
-	vusize = ui_component_size(&self->vubar.component);	
-	if (self->gear.component.visible) {
-		gearsize = ui_component_size(&self->gear.component);		
-	} else {
-		gearsize.width = 0;
-	}
-	if (self->plugineditor.component.visible) {
-		plugineditorsize = ui_component_size(&self->plugineditor.component);
-	} else {
-		plugineditorsize.width = 0;
-	}
-	if (self->terminal.component.visible) {
-		terminalsize.height = 
-			ui_component_size(&self->terminal.component).height;
-	} else {
-		terminalsize.height = 0;
-	}
-	limit.width = size.width - vusize.width;
-	limit.height = size.height;
-	topsize = ui_component_preferredsize(&self->top, &limit);
-	topsize.height += ui_component_textmetric(&self->component).tmHeight;
-	ui_component_setposition(&self->top, 0, 0, size.width - vusize.width,
-		topsize.height);
-	ui_component_setposition(&self->vubar.component, 
-		size.width - vusize.width,
-		0,
-		vusize.width,
-		topsize.height);
-	ui_component_setposition(&self->tabbars,
-		sequenceviewsize.width + splitbarwidth,
-		topsize.height,
-		size.width - sequenceviewsize.width - splitbarwidth,
-		tabbarssize.height);	
-	ui_component_setposition(&self->splitbar,
-		sequenceviewsize.width,
-		topsize.height, splitbarwidth,
-		size.height - statusbarsize.height - topsize.height -
-			terminalsize.height);
-	ui_component_setposition(&self->sequenceview.component,
-		0,
-		topsize.height,
-		sequenceviewsize.width,
-		size.height - statusbarsize.height - topsize.height
-			- terminalsize.height);	
-	ui_component_setposition(&self->notebook.component,
-		sequenceviewsize.width + splitbarwidth + plugineditorsize.width,
-		topsize.height + tabbarssize.height,
-		size.width - sequenceviewsize.width - 3 - gearsize.width
-			- plugineditorsize.width,
-		size.height - statusbarsize.height - topsize.height -
-			tabbarssize.height - terminalsize.height);
-	ui_component_setposition(&self->statusbar,
-		0,
-		size.height - statusbarsize.height,		
-		size.width,
-		statusbarsize.height);
-	if (ui_component_visible(&self->plugineditor.component)) {
-		ui_component_setposition(&self->plugineditor.component,
-			sequenceviewsize.width + splitbarwidth,
-			topsize.height + tabbarssize.height,
-			plugineditorsize.width,
-			size.height - statusbarsize.height - topsize.height -
-				tabbarssize.height - terminalsize.height);
-	}
-	if (ui_component_visible(&self->gear.component)) {
-		ui_component_setposition(&self->gear.component,
-			size.width - gearsize.width,
-			topsize.height + tabbarssize.height,
-			gearsize.width,
-			size.height - statusbarsize.height - topsize.height -
-				tabbarssize.height - terminalsize.height);
-	}	
-	if (ui_component_visible(&self->terminal.component)) {
-		ui_component_setposition(&self->terminal.component,
-			0,
-			size.height - terminalsize.height - statusbarsize.height,
-			size.width,
-			terminalsize.height);
-	}
-	if (self->firstshow) {
-		machineview_align(&self->machineview);
-		self->firstshow = 0;
-	}	
 }
 
 void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
@@ -623,53 +510,6 @@ void mainframe_updatetitle(MainFrame* self)
 	ui_component_settitle(&self->component, txt);
 }
 
-void mainframe_onmousedown(MainFrame* self, ui_component* sender, MouseEvent* ev)
-{	
-	ui_component_capture(sender);
-	self->resize = 1;
-	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-}
-
-void mainframe_onmousemove(MainFrame* self, ui_component* sender, MouseEvent* ev)
-{
-	if (self->resize == 1) {		
-		ui_size toolbarsize;
-		ui_rectangle position;
-	
-		toolbarsize = ui_component_size(&self->top);
-		position = ui_component_position(sender);
-		ui_component_move(sender, position.left + ev->x, toolbarsize.height);
-		ui_component_invalidate(sender);
-		ui_component_update(sender);		
-	}
-	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-}
-
-void mainframe_onmouseup(MainFrame* self, ui_component* sender, MouseEvent* ev)
-{			
-	ui_rectangle position;
-	
-	ui_component_releasecapture();
-	self->resize = 0;
-	position = ui_component_position(sender);
-	ui_component_resize(&self->sequenceview.component,
-		position.left, ui_component_size(&self->sequenceview.component).height);	
-	ui_component_align(&self->component);
-	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-}
-
-void mainframe_onmouseentersplitbar(MainFrame* self, ui_component* sender)
-{	
-	ui_component_setbackgroundcolor(sender, 0x00666666);
-	ui_component_invalidate(sender);
-	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-}
-
-void mainframe_onmouseleavesplitbar(MainFrame* self, ui_component* sender)
-{			
-	ui_component_setbackgroundcolor(sender, 0x00232323);
-	ui_component_invalidate(sender);
-}
 
 void mainframe_ongear(MainFrame* self, ui_component* sender)
 {

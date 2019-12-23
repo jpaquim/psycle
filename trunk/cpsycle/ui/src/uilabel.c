@@ -40,11 +40,13 @@ void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, ui_si
 			ui_size size;
 			GetWindowText((HWND)self->component.hwnd, text, 256);
 			size = ui_component_textsize(&self->component, text);
-			rv->width = size.width + 2;
+			rv->width = size.width + 2 +
+				ui_margin_width_px(&self->component.spacing, &tm);
 		} else {		
 			rv->width = tm.tmAveCharWidth * self->charnumber;
 		}
-		rv->height = tm.tmHeight;
+		rv->height = tm.tmHeight +
+			ui_margin_height_px(&self->component.spacing, &tm);
 	}
 }
 

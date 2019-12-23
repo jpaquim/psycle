@@ -12,6 +12,7 @@ void buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 {
 	self->samples = 0;	
 	self->offset = 0;
+	self->numsamples = 0;
 	buffer_resize(self, channels);
 }
 

@@ -45,6 +45,7 @@ typedef struct {
 	uintptr_t index;
 	psy_Signal signal_addentry;
 	psy_Signal signal_removeentry;
+	psy_Signal signal_namechanged;
 } psy_audio_Instrument;
 
 void instrument_init(psy_audio_Instrument*);

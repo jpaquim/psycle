@@ -20,7 +20,10 @@ typedef struct MachineCallback {
 	struct psy_audio_Samples* (*samples)(void*);
 	struct psy_audio_Machines* (*machines)(void*);
 	struct psy_audio_Instruments* (*instruments)(void*);	
-	void* context;
+	void (*fileselect_load)(void*);
+	void (*fileselect_save)(void*);
+	void (*fileselect_directory)(void*);
+	void* context;	
 } MachineCallback;
 
 typedef enum {
@@ -35,7 +38,8 @@ typedef	psy_audio_Buffer* (*fp_machine_mix)(struct psy_audio_Machine*, size_t sl
 typedef	void (*fp_machine_work)(struct psy_audio_Machine*, psy_audio_BufferContext*);
 typedef	void (*fp_machine_generateaudio)(struct psy_audio_Machine*, psy_audio_BufferContext*);
 typedef	int (*fp_machine_hostevent)(struct psy_audio_Machine*, int const eventNr, int const val1, float const val2);
-typedef	void (*fp_machine_seqtick)(struct psy_audio_Machine*, int channel, const psy_audio_PatternEvent*);
+typedef	void (*fp_machine_seqtick)(struct psy_audio_Machine*,
+	uintptr_t channel, const psy_audio_PatternEvent*);
 typedef	void (*fp_machine_stop)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_sequencertick)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_sequencerlinetick)(struct psy_audio_Machine*);
@@ -48,13 +52,12 @@ typedef	int (*fp_machine_muted)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_bypass)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_unbypass)(struct psy_audio_Machine*);
 typedef	int (*fp_machine_bypassed)(struct psy_audio_Machine*);
-typedef	void (*fp_machine_setvalue)(struct psy_audio_Machine*, int param, int value);	
 typedef	const psy_audio_MachineInfo* (*fp_machine_info)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_dispose)(struct psy_audio_Machine*);
 typedef	int (*fp_machine_mode)(struct psy_audio_Machine*);	
 typedef	void (*fp_machine_updatesamplerate)(struct psy_audio_Machine*, unsigned int samplerate);
-typedef	unsigned int (*fp_machine_numinputs)(struct psy_audio_Machine*);
-typedef	unsigned int (*fp_machine_numoutputs)(struct psy_audio_Machine*);
+typedef	uintptr_t (*fp_machine_numinputs)(struct psy_audio_Machine*);
+typedef	uintptr_t (*fp_machine_numoutputs)(struct psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_slot)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setslot)(struct psy_audio_Machine*, uintptr_t);
 	// Parameters	
@@ -110,7 +113,6 @@ typedef struct MachineVtable {
 	fp_machine_bypass bypass;
 	fp_machine_unbypass unbypass;
 	fp_machine_bypassed bypassed;
-	fp_machine_setvalue setvalue;
 	fp_machine_info info;
 	fp_machine_dispose dispose;
 	fp_machine_mode mode;	
@@ -155,7 +157,7 @@ typedef struct MachineVtable {
 typedef struct psy_audio_Machine {
 	MachineVtable* vtable;
 	MachineCallback callback;	
-	psy_Signal signal_worked;
+	psy_Signal signal_worked;	
 } psy_audio_Machine;
 
 void machine_init(psy_audio_Machine*, MachineCallback);

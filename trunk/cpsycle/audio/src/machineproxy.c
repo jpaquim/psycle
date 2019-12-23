@@ -23,14 +23,14 @@ static psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy*, size_t slot,
 	unsigned int amount, psy_audio_MachineSockets*, psy_audio_Machines*);
 static void machineproxy_work(psy_audio_MachineProxy*, psy_audio_BufferContext*);
 static void machineproxy_generateaudio(psy_audio_MachineProxy*, psy_audio_BufferContext*);
-static void machineproxy_seqtick(psy_audio_MachineProxy*, int channel,
+static void machineproxy_seqtick(psy_audio_MachineProxy*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void machineproxy_sequencerlinetick(psy_audio_MachineProxy*);
 static void machineproxy_stop(psy_audio_MachineProxy*);
 static void machineproxy_dispose(psy_audio_MachineProxy*);
 static int machineproxy_mode(psy_audio_MachineProxy*);
-static int machineproxy_numinputs(psy_audio_MachineProxy*);
-static unsigned int machineproxy_numoutputs(psy_audio_MachineProxy*);
+static uintptr_t machineproxy_numinputs(psy_audio_MachineProxy*);
+static uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy*);
 static void machineproxy_parametertweak(psy_audio_MachineProxy*, int par, int val);
 static void machineproxy_patterntweak(psy_audio_MachineProxy* self, int par, int val);
 static int machineproxy_describevalue(psy_audio_MachineProxy*, char* txt, int param,
@@ -88,7 +88,7 @@ static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int c
 			(unsigned int)proxy->client->vtable->slot(proxy->client),
 			proxy->client->vtable->info(proxy->client)->ShortName, msg);
 	} else {
-		psy_snprintf(txt, 512, "psy_audio_Machine crashed");
+		psy_snprintf(txt, 512, "Machine crashed");
 	}
 	MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
 	return EXCEPTION_EXECUTE_HANDLER;
@@ -244,7 +244,8 @@ void machineproxy_generateaudio(psy_audio_MachineProxy* self, psy_audio_BufferCo
 	}
 }
 
-void machineproxy_seqtick(psy_audio_MachineProxy* self, int channel, const psy_audio_PatternEvent* event)
+void machineproxy_seqtick(psy_audio_MachineProxy* self, uintptr_t channel,
+	const psy_audio_PatternEvent* event)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -338,9 +339,9 @@ int machineproxy_mode(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-int machineproxy_numinputs(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_numinputs(psy_audio_MachineProxy* self)
 {
-	int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -358,9 +359,9 @@ int machineproxy_numinputs(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-unsigned int machineproxy_numoutputs(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy* self)
 { 
-	unsigned int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

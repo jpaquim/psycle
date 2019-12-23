@@ -23,8 +23,7 @@ static const VstInt32 kNumProcessCycles = 5;
 // vtable prototypes
 static int mode(psy_audio_VstPlugin*);
 static void work(psy_audio_VstPlugin* self, psy_audio_BufferContext*);
-static int hostevent(psy_audio_VstPlugin* self, int const eventNr, int const val1, float const val2);
-static const psy_audio_MachineInfo* info(psy_audio_VstPlugin* self);
+static const psy_audio_MachineInfo* info(psy_audio_VstPlugin*);
 static void parametertweak(psy_audio_VstPlugin* self, int par, int val);
 static int parameterlabel(psy_audio_VstPlugin*, char* txt, int param);
 static int parametername(psy_audio_VstPlugin*, char* txt, int param);
@@ -35,8 +34,8 @@ static void parameterrange(psy_audio_VstPlugin*, int param, int* minval, int* ma
 static unsigned int numparameters(psy_audio_VstPlugin*);
 static unsigned int numparametercols(psy_audio_VstPlugin*);
 static void dispose(psy_audio_VstPlugin* self);
-static unsigned int numinputs(psy_audio_VstPlugin*);
-static unsigned int numoutputs(psy_audio_VstPlugin*);
+static uintptr_t numinputs(psy_audio_VstPlugin*);
+static uintptr_t numoutputs(psy_audio_VstPlugin*);
 static void loadspecific(psy_audio_VstPlugin*, struct psy_audio_SongFile*, unsigned int slot);
 static void savespecific(psy_audio_VstPlugin*, struct psy_audio_SongFile*, unsigned int slot);
 static int haseditor(psy_audio_VstPlugin*);
@@ -53,8 +52,9 @@ static PluginEntryProc getmainentry(Library* library);
 static void processevents(psy_audio_VstPlugin*, psy_audio_BufferContext*);
 struct VstMidiEvent* allocinitmidievent(psy_audio_VstPlugin*, const psy_audio_PatternEntry*);
 
-struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self, const psy_audio_PatternEntry* entry);
-struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin* self, int note, int channel);
+struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin*, const psy_audio_PatternEntry*);
+struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin*, int note, int channel);
+static void vstplugin_onfileselect(psy_audio_VstPlugin*, struct VstFileSelect*);
 
 // init vstplugin class vtable
 static MachineVtable vtable;
@@ -66,7 +66,6 @@ static void vtable_init(psy_audio_VstPlugin* self)
 		vtable = *self->custommachine.machine.vtable;
 		vtable.mode = (fp_machine_mode) mode;
 		vtable.work = (fp_machine_work) work;
-		vtable.hostevent = (fp_machine_hostevent) hostevent;	
 		vtable.info = (fp_machine_info) info;
 		vtable.parametertype = (fp_machine_parametertype) parametertype;
 		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
@@ -135,7 +134,7 @@ void vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callback, const c
 		}
 	}
 	if (!base->vtable->editname(base)) {
-		base->vtable->seteditname(base, "psy_audio_VstPlugin");
+		base->vtable->seteditname(base, "VstPlugin");
 	}
 } 
 
@@ -333,11 +332,6 @@ struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin* self, int note, int chann
 	return rv;
 }
 
-int hostevent(psy_audio_VstPlugin* self, int const eventNr, int const val1, float const val2)
-{
-	return 0;
-}
-
 #if defined DIVERSALIS__OS__MICROSOFT
 static int FilterException(int code, struct _EXCEPTION_POINTERS *ep) 
 {
@@ -418,51 +412,14 @@ int parametervalue(psy_audio_VstPlugin* self, int param)
 	return (int)(self->effect->getParameter(self->effect, param) * 65535.f);
 }
 
-void setvalue(psy_audio_VstPlugin* self, int param, int value)
+uintptr_t numinputs(psy_audio_VstPlugin* self)
 {
-
+	return (uintptr_t) self->effect->numInputs;
 }
 
-VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
+uintptr_t numoutputs(psy_audio_VstPlugin* self)
 {
-	VstIntPtr result = 0;
-	psy_audio_VstPlugin* self;
-	psy_audio_Machine* base;
-	
-	if (effect) {
-		self = (psy_audio_VstPlugin*) effect->user;
-	} else
-	if (opcode == audioMasterVersion) {
-		return kVstVersion;
-	} else {
-		return 0;
-	}
-	base = &self->custommachine.machine;
-	
-	switch(opcode)
-	{
-		case audioMasterVersion :
-			result = kVstVersion;
-		break;		
-		case audioMasterIdle:            
-        break;
-		case audioMasterGetSampleRate:
-			result = base->vtable->samplerate(base);
-		default:
-		break;
-	}
-
-	return result;
-}
-
-unsigned int numinputs(psy_audio_VstPlugin* self)
-{
-	return self->effect->numInputs;
-}
-
-unsigned int numoutputs(psy_audio_VstPlugin* self)
-{
-	return self->effect->numOutputs;
+	return (uintptr_t) self->effect->numOutputs;
 }
 
 unsigned int numparameters(psy_audio_VstPlugin* self)
@@ -618,3 +575,61 @@ int mode(psy_audio_VstPlugin* self)
 		? MACHMODE_GENERATOR
 		: MACHMODE_FX;
 }
+
+VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
+{
+	VstIntPtr result = 0;
+	psy_audio_VstPlugin* self;
+	psy_audio_Machine* base;
+	
+	if (effect) {
+		self = (psy_audio_VstPlugin*) effect->user;
+	} else
+	if (opcode == audioMasterVersion) {
+		return kVstVersion;
+	} else {
+		return 0;
+	}
+	base = &self->custommachine.machine;
+	
+	switch(opcode)
+	{
+		case audioMasterVersion :
+			result = kVstVersion;
+		break;		
+		case audioMasterIdle:            
+        break;
+		case audioMasterGetSampleRate:
+			result = base->vtable->samplerate(base);
+		break;
+		case audioMasterOpenFileSelector :
+			vstplugin_onfileselect(self, (struct VstFileSelect*) ptr);
+		break;		
+		default:
+		break;
+	}
+
+	return result;
+}
+
+void vstplugin_onfileselect(psy_audio_VstPlugin* self,
+	struct VstFileSelect* select)
+{
+	switch (select->command) {
+		case kVstFileLoad:
+			self->custommachine.machine.callback.fileselect_load(
+				self->custommachine.machine.callback.context);
+		break;
+		case kVstFileSave:
+			self->custommachine.machine.callback.fileselect_save(
+				self->custommachine.machine.callback.context);
+		break;
+		case kVstDirectorySelect:
+			self->custommachine.machine.callback.fileselect_directory(
+				self->custommachine.machine.callback.context);
+		break;
+		default:
+		break;
+	}
+}
+

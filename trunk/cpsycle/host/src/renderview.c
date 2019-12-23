@@ -119,7 +119,7 @@ void renderview_makeproperties(RenderView* self)
 		"Quality");	
 	psy_properties_settext(
 		psy_properties_append_int(quality, "quality-samplerate", 44100, 0, 96000),
-		"psy_audio_Sample Rate"
+		"Sample Rate"
 	);
 	psy_properties_settext(
 		psy_properties_append_int(quality, "quality-bitdepth", 8, 8, 16),

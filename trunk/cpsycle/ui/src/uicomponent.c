@@ -238,6 +238,7 @@ void ui_component_init_base(ui_component* self) {
 	self->alignchildren = 0;
 	self->alignexpandmode = UI_NOEXPAND;
 	memset(&self->margin, 0, sizeof(ui_margin));
+	memset(&self->spacing, 0, sizeof(ui_margin));
 	self->debugflag = 0;
 	self->defaultpropagation = 0;	
 	self->visible = 1;
@@ -1443,6 +1444,15 @@ void ui_component_setmargin(ui_component* self, const ui_margin* margin)
 		self->margin = *margin;		
 	} else {
 		memset(&self->margin, 0, sizeof(ui_margin));
+	}
+}
+
+void ui_component_setspacing(ui_component* self, const ui_margin* spacing)
+{	
+	if (spacing) {
+		self->spacing = *spacing;
+	} else {
+		memset(&self->spacing, 0, sizeof(ui_margin));
 	}
 }
 

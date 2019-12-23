@@ -23,8 +23,8 @@ static int parametername(psy_audio_Master*, char* txt, int param);
 static int describevalue(psy_audio_Master*, char* txt, int param, int value);
 static int parametervalue(psy_audio_Master*, int param);
 static const psy_audio_MachineInfo* info(psy_audio_Master*);
-static unsigned int numinputs(psy_audio_Master*);
-static unsigned int numoutputs(psy_audio_Master*);
+static uintptr_t numinputs(psy_audio_Master*);
+static uintptr_t numoutputs(psy_audio_Master*);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
 static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*, unsigned int slot);
@@ -203,12 +203,12 @@ const psy_audio_MachineInfo* info(psy_audio_Master* self)
 	return &MacInfo;
 }
 
-unsigned int numinputs(psy_audio_Master* self)
+uintptr_t numinputs(psy_audio_Master* self)
 {
 	return 2;
 }
 
-unsigned int numoutputs(psy_audio_Master* self)
+uintptr_t numoutputs(psy_audio_Master* self)
 {
 	return 2;
 }

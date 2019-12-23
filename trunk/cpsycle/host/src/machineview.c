@@ -1590,7 +1590,7 @@ void machineview_init(MachineView* self, ui_component* parent,
 	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
 	ui_component_hide(&self->tabbar.component);
 	tabbar_append(&self->tabbar, "Wires");
-	tabbar_append(&self->tabbar, "New psy_audio_Machine");		
+	tabbar_append(&self->tabbar, "New Machine");		
 	ui_notebook_setpageindex(&self->notebook, 0);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
 	psy_signal_connect(&self->newmachine.pluginsview.signal_selected, self,machinewireview_onnewmachineselected);

@@ -52,11 +52,13 @@ void instrument_init(psy_audio_Instrument* self)
 	adsr_settings_initdefault(&self->volumeenvelope);
 	adsr_settings_init(&self->filterenvelope, 0.005f, 0.370f, 0.5f, 0.370f);
 	self->filtermodamount = 1.0f;
+	psy_signal_init(&self->signal_namechanged);
 }
 
 void instrument_dispose(psy_audio_Instrument* self)
-{
+{	
 	instrument_disposeentries(self);
+	psy_signal_dispose(&self->signal_namechanged);
 	free(self->name);
 }
 
@@ -95,6 +97,7 @@ void instrument_setname(psy_audio_Instrument* self, const char* name)
 {
 	free(self->name);
 	self->name = _strdup(name);
+	psy_signal_emit(&self->signal_namechanged, self, 0);
 }
 
 void instrument_setindex(psy_audio_Instrument* self, uintptr_t index)

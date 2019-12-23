@@ -141,7 +141,7 @@ LUALIB_API void (luaL_requiref) (lua_State *L, const char *modname,
 
 /*
 ** {======================================================
-** Generic psy_audio_Buffer manipulation
+** Generic Buffer manipulation
 ** =======================================================
 */
 

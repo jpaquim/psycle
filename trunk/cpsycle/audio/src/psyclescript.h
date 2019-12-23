@@ -28,4 +28,6 @@ int psyclescript_open(lua_State*, const char* meta, const luaL_Reg methods[],
 void psyclescript_require(psy_audio_PsycleScript*, const char* name, lua_CFunction openf);
 void psyclescript_register_weakuserdata(lua_State*, void* ud);
 
+void* psyclescript_checkself(lua_State* L, int index, const char* meta);
+
 #endif
