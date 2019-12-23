@@ -12,7 +12,7 @@ void instruments_init(psy_audio_Instruments* self)
 	self->slot = 0;		
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
-	psy_signal_init(&self->signal_slotchange);
+	psy_signal_init(&self->signal_slotchange);	
 }
 
 void instruments_dispose(psy_audio_Instruments* self)

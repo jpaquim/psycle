@@ -65,6 +65,9 @@ static int machinecallback_bpm(Workspace*);
 static psy_audio_Samples* machinecallback_samples(Workspace*);
 static psy_audio_Machines* machinecallback_machines(Workspace*);
 static psy_audio_Instruments* machinecallback_instruments(Workspace*);
+static void machinecallback_fileselect_load(Workspace*);
+static void machinecallback_fileselect_save(Workspace*);
+static void machinecallback_fileselect_directory(Workspace*);
 
 void history_init(History* self)
 {
@@ -1063,44 +1066,6 @@ int workspace_hasplugincache(Workspace* self)
 	return self->hasplugincache;
 }
 
-MachineCallback machinecallback(Workspace* self)
-{
-	MachineCallback rv;
-
-	rv.context = self;
-	rv.samples = machinecallback_samples;
-	rv.samplerate = machinecallback_samplerate;
-	rv.bpm = machinecallback_bpm;	
-	rv.machines = machinecallback_machines;
-	rv.instruments = machinecallback_instruments;
-	return rv;
-}
-
-psy_audio_Samples* machinecallback_samples(Workspace* self)
-{
-	return &self->songcbk->samples;
-}
-
-unsigned int machinecallback_samplerate(Workspace* self)
-{
-	return self->player.driver->samplerate(self->player.driver);
-}
-
-int machinecallback_bpm(Workspace* self)
-{
-	return (int) player_bpm(&self->player);
-}
-
-psy_audio_Machines* machinecallback_machines(Workspace* self)
-{
-	return self->songcbk ? &self->song->machines : 0;
-}
-
-psy_audio_Instruments* machinecallback_instruments(Workspace* self)
-{
-	return self->songcbk ? &self->song->instruments : 0;
-}
-
 EventDriver* workspace_kbddriver(Workspace* self)
 {
 	return player_kbddriver(&self->player);
@@ -1313,4 +1278,74 @@ const char* workspace_doc_directory(Workspace* self)
 {
 	return psy_properties_readstring(self->directories, "skins",
 		PSYCLE_DOC_DEFAULT_DIR);
+}
+
+MachineCallback machinecallback(Workspace* self)
+{
+	MachineCallback rv;	
+
+	rv.context = self;
+	rv.samples = machinecallback_samples;
+	rv.samplerate = machinecallback_samplerate;
+	rv.bpm = machinecallback_bpm;	
+	rv.machines = machinecallback_machines;
+	rv.instruments = machinecallback_instruments;
+	rv.fileselect_load = machinecallback_fileselect_load;
+	rv.fileselect_save = machinecallback_fileselect_save;
+	rv.fileselect_directory = machinecallback_fileselect_directory;
+	return rv;
+}
+
+void machinecallback_fileselect_load(Workspace* self)
+{
+	char path[MAX_PATH]	 = "";
+	char title[MAX_PATH] = ""; 					
+	static char filter[] = "Psycle Display psy_audio_Presets\0*.psv\0";
+	char  defaultextension[] = "PSV";			
+			
+	if (ui_openfile(self->mainhandle, title, filter, defaultextension,
+			workspace_skins_directory(self), path)) {		
+	}	
+}
+
+void machinecallback_fileselect_save(Workspace* self)
+{
+	char path[MAX_PATH]	 = "";
+	char title[MAX_PATH] = ""; 					
+	static char filter[] = "Psycle Display psy_audio_Presets\0*.psv\0";
+	char  defaultextension[] = "PSV";			
+			
+	if (ui_savefile(self->mainhandle, title, filter, defaultextension,
+			workspace_skins_directory(self), path)) {		
+	}	
+}
+
+void machinecallback_fileselect_directory(Workspace* self)
+{
+
+}
+
+psy_audio_Samples* machinecallback_samples(Workspace* self)
+{
+	return &self->songcbk->samples;
+}
+
+unsigned int machinecallback_samplerate(Workspace* self)
+{
+	return self->player.driver->samplerate(self->player.driver);
+}
+
+int machinecallback_bpm(Workspace* self)
+{
+	return (int) player_bpm(&self->player);
+}
+
+psy_audio_Machines* machinecallback_machines(Workspace* self)
+{
+	return self->songcbk ? &self->song->machines : 0;
+}
+
+psy_audio_Instruments* machinecallback_instruments(Workspace* self)
+{
+	return self->songcbk ? &self->song->instruments : 0;
 }

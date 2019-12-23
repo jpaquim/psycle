@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\file\src" /I "..\container\src" /I "..\dsp\src" /I "..\lua53\src" /I "..\vst-2.4\vst2.x" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\file\src" /I "..\container\src" /I "..\dsp\src" /I "..\lua53\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -83,6 +83,10 @@ LIB32=link.exe -lib
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Source File
+
+SOURCE=.\src\array.c
+# End Source File
 # Begin Source File
 
 SOURCE=.\src\buffer.c
@@ -200,6 +204,14 @@ SOURCE=.\src\library.c
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\luaarray.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\luaimport.c
 # End Source File
 # Begin Source File
 
@@ -541,6 +553,10 @@ SOURCE=.\src\xm.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\src\array.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\buffer.h
 # End Source File
 # Begin Source File
@@ -606,6 +622,14 @@ SOURCE=.\src\kbddriver.h
 # Begin Source File
 
 SOURCE=.\src\library.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\luaarray.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\luaimport.h
 # End Source File
 # Begin Source File
 

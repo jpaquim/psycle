@@ -23,8 +23,8 @@ static int parametername(psy_audio_Duplicator*, char* txt, int param);
 static unsigned int numparameters(psy_audio_Duplicator*);
 static unsigned int numparametercols(psy_audio_Duplicator*);
 static void dispose(psy_audio_Duplicator*);
-static unsigned int numinputs(psy_audio_Duplicator* self) { return 0; }
-static unsigned int numoutputs(psy_audio_Duplicator* self) { return 0; }
+static uintptr_t numinputs(psy_audio_Duplicator* self) { return 0; }
+static uintptr_t numoutputs(psy_audio_Duplicator* self) { return 0; }
 static void loadspecific(psy_audio_Duplicator*, struct psy_audio_SongFile*, unsigned int slot);
 static void savespecific(psy_audio_Duplicator*, struct psy_audio_SongFile*, unsigned int slot);
 

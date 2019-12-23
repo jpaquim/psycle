@@ -34,10 +34,12 @@ static int parametername(psy_audio_Plugin*, char* txt, int param);
 static int describevalue(psy_audio_Plugin*, char* txt, int param, int value);
 static int parametervalue(psy_audio_Plugin*, int param);
 static void dispose(psy_audio_Plugin*);
-static unsigned int numinputs(psy_audio_Plugin*);
-static unsigned int numoutputs(psy_audio_Plugin*);
-static void loadspecific(psy_audio_Plugin*, struct psy_audio_SongFile*, unsigned int slot);
-static void savespecific(psy_audio_Plugin*, struct psy_audio_SongFile*, unsigned int slot);
+static uintptr_t numinputs(psy_audio_Plugin*);
+static uintptr_t numoutputs(psy_audio_Plugin*);
+static void loadspecific(psy_audio_Plugin*, psy_audio_SongFile*,
+	unsigned int slot);
+static void savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
+	unsigned int slot);
 static void setcallback(psy_audio_Plugin*, MachineCallback);
 
 static MachineVtable vtable;
@@ -117,7 +119,7 @@ void plugin_init(psy_audio_Plugin* self, MachineCallback callback, const char* p
 		}
 	}
 	if (!base->vtable->editname(base)) {
-		base->vtable->seteditname(base, "psy_audio_Plugin");
+		base->vtable->seteditname(base, "Plugin");
 	}
 }
 
@@ -171,7 +173,8 @@ int plugin_psycle_test(const char* path, psy_audio_MachineInfo* info)
 	return rv;	
 }
 
-void seqtick(psy_audio_Plugin* self, int channel, const psy_audio_PatternEvent* event)
+void seqtick(psy_audio_Plugin* self, uintptr_t channel,
+	const psy_audio_PatternEvent* event)
 {
 	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd,
 		event->parameter);
@@ -221,7 +224,7 @@ int parametervalue(psy_audio_Plugin* self, int param)
 	return mi_val(self->mi, param);
 }
 
-unsigned int numinputs(psy_audio_Plugin* self)
+uintptr_t numinputs(psy_audio_Plugin* self)
 {
 	if (info(self)) {
 		return self->plugininfo->mode == MACHMODE_FX ? 2 : 0;
@@ -349,12 +352,13 @@ int parameterlabel(psy_audio_Plugin* self, char* txt, int param)
 	int rv = 0;
 	GETINFO GetInfo;
 
-	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	GetInfo =(GETINFO) library_functionpointer(&self->library, "GetInfo");
 	if (GetInfo != NULL) {	
-		CMachineInfo* pInfo = GetInfo();
-		if (pInfo) {	
-			if (param < pInfo->numParameters) {
-				psy_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Description);
+		CMachineInfo* info = GetInfo();
+		if (info) {	
+			if (param < info->numParameters) {
+				psy_snprintf(txt, 128, "%s",
+					info->Parameters[param]->Description);
 				rv = 1;
 			}
 		}
@@ -364,15 +368,15 @@ int parameterlabel(psy_audio_Plugin* self, char* txt, int param)
 
 int parametername(psy_audio_Plugin* self, char* txt, int param)
 {
-	int rv = 0;
+	int rv = 0;	
 	GETINFO GetInfo;
 
-	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
+	GetInfo =(GETINFO) library_functionpointer(&self->library, "GetInfo");
 	if (GetInfo != NULL) {	
-		CMachineInfo* pInfo = GetInfo();
-		if (pInfo) {	
-			if (param < pInfo->numParameters) {
-				psy_snprintf(txt, 128, "%s", pInfo->Parameters[param]->Name);
+		CMachineInfo* info = GetInfo();
+		if (info) {	
+			if (param < info->numParameters) {
+				psy_snprintf(txt, 128, "%s", info->Parameters[param]->Name);
 				rv = 1;
 			}
 		}
@@ -387,9 +391,9 @@ unsigned int numparametercols(psy_audio_Plugin* self)
 
 	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
 	if (GetInfo != NULL) {	
-		CMachineInfo* pInfo = GetInfo();
-		if (pInfo) {	
-			rv = pInfo->numparametercols;				
+		CMachineInfo* info = GetInfo();
+		if (info) {	
+			rv = info->numparametercols;				
 		}
 	}
 	return rv;
@@ -401,10 +405,10 @@ unsigned int numparameters(psy_audio_Plugin* self)
 	GETINFO GetInfo;
 
 	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
-	if (GetInfo != NULL) {	
-		CMachineInfo* pInfo = GetInfo();
-		if (pInfo) {	
-			rv = pInfo->numParameters;
+	if (info != NULL) {	
+		CMachineInfo* info = GetInfo();
+		if (info) {	
+			rv = info->numParameters;
 		}
 	}
 	return rv;

@@ -10,7 +10,7 @@
 typedef struct psy_audio_Buffer {
 	uintptr_t numchannels;	
 	psy_dsp_amp_t** samples;
-	unsigned int numsamples;
+	uintptr_t numsamples;
 	uintptr_t offset;
 } psy_audio_Buffer;
 

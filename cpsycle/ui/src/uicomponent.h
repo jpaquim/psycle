@@ -86,6 +86,7 @@ typedef struct {
 	int alignexpandmode;
 	int alignchildren;
 	ui_margin margin;
+	ui_margin spacing;
 	int doublebuffered;
 	int defaultpropagation;
 	int propagateevent;
@@ -106,7 +107,6 @@ typedef struct {
 	int handlehscroll;
 	int cursor;	
 } ui_component;
-
 
 void ui_replacedefaultfont(ui_component* main, ui_font* font);
 
@@ -159,6 +159,7 @@ void ui_component_init_signals(ui_component*);
 int ui_component_visible(ui_component*);
 void ui_component_align(ui_component*);
 void ui_component_setmargin(ui_component*, const ui_margin*);
+void ui_component_setspacing(ui_component*, const ui_margin*);
 void ui_component_setalign(ui_component*, UiAlignType align);
 void ui_component_enablealign(ui_component*);
 void ui_component_setalignexpand(ui_component*, UiExpandMode);

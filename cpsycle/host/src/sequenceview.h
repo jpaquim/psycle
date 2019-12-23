@@ -10,6 +10,7 @@
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uicheckbox.h>
+#include <uisplitbar.h>
 
 #include "playlisteditor.h"
 #include "workspace.h"
@@ -96,6 +97,7 @@ typedef struct SequenceView {
 	SequenceViewTrackHeader trackheader;
 	SequenceViewDuration duration;
 	PlayListEditor playlisteditor;
+	ui_splitbar splitbar;
 	SequencerOptionsBar options;
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;

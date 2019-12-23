@@ -7,26 +7,32 @@
 #include <portable.h>
 
 static void OnDestroy(MachineBar*, ui_component* component);
-static void BuildMachineBox(MachineBar* self);
+static void BuildMachineBox(MachineBar*);
 static void OnMachinesInsert(MachineBar*, psy_audio_Machines* machines, int slot);
 static int insertmachine(MachineBar*, size_t slot, psy_audio_Machine*);
 static void OnMachinesRemoved(MachineBar*, psy_audio_Machines* machines, int slot);
 static void OnMachinesSlotChange(MachineBar*, psy_audio_Machines* machines, int slot);
 static void OnMachineBoxSelChange(MachineBar*, ui_component* sender, int sel);
 static void OnInstParamBoxSelChange(MachineBar*, ui_component* sender, int sel);
-static void BuildInstrumentList(MachineBar* self);
-static void AddString(MachineBar* self, const char* text);
-static void OnInstrumentInsert(MachineBar* self, ui_component* sender, int slot);
+static void BuildInstrumentList(MachineBar*);
+static void AddString(MachineBar*, const char* text);
+static void OnInstrumentNameChanged(MachineBar*, ui_component* sender);
+static void OnInstrumentInsert(MachineBar*, psy_audio_Instruments* sender, int slot);
 static void OnInstrumentSlotChanged(MachineBar* self, psy_audio_Instrument* sender, int slot);
 static void OnInstrumentListChanged(MachineBar* self, ui_component* sender, int slot);
 static void OnSongChanged(MachineBar*, Workspace*);
-static void ConnectSongSignals(MachineBar* self);
+static void ConnectSongSignals(MachineBar*);
+static void ConnectInstrumentSignals(MachineBar*);
 static void ClearMachineBox(MachineBar* self);
 static void OnPrevMachine(MachineBar*, ui_component* sender);
 static void OnNextMachine(MachineBar*, ui_component* sender);
 
 void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace)
-{				
+{		
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
+		ui_value_makepx(0), ui_value_makepx(0));				
 	self->selchange = 0;	
 	self->player = &workspace->player;
 	self->machines = &workspace->song->machines;	
@@ -66,17 +72,11 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 	ui_combobox_setcursel(&self->instparambox, 0);
 	psy_signal_connect(&self->instparambox.signal_selchanged, self,
 		OnInstParamBoxSelChange);
-	ConnectSongSignals(self);
-	{		
-		ui_margin margin;
-
-		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
-			ui_value_makepx(0), ui_value_makepx(0));				
-		psy_list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
-			UI_ALIGN_LEFT,
-			&margin));		
-	}
+	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	ConnectSongSignals(self);					
+	psy_list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT, &margin));
 }
 
 void OnDestroy(MachineBar* self, ui_component* component)
@@ -99,10 +99,18 @@ void SelectMachineBarSlot(MachineBar* self, int slot)
 	ui_combobox_setcursel(&self->machinebox, slot);
 }
 
-void OnInstrumentInsert(MachineBar* self, ui_component* sender, int slot)
+void OnInstrumentInsert(MachineBar* self, psy_audio_Instruments* sender,
+	int slot)
 {
+	psy_audio_Instrument* instrument;
+
 	BuildInstrumentList(self);
-	ui_combobox_setcursel(&self->instparambox, slot);	
+	ui_combobox_setcursel(&self->instparambox, slot);
+	instrument = instruments_at(sender, slot);
+	if (instrument) {
+		psy_signal_connect(&instrument->signal_namechanged, self,
+			OnInstrumentNameChanged);
+	}
 }
 
 void OnInstrumentSlotChanged(MachineBar* self, psy_audio_Instrument* sender, int slot)
@@ -126,7 +134,7 @@ void BuildMachineBox(MachineBar* self)
 {
 	ClearMachineBox(self);	
 	if (machines_size(self->machines) == 1) {
-		ui_combobox_addstring(&self->machinebox, "No psy_audio_Machines Loaded");
+		ui_combobox_addstring(&self->machinebox, "No Machines Loaded");
 		ui_combobox_setcursel(&self->machinebox, 0);
 	} else {
 		psy_TableIterator it;
@@ -230,6 +238,22 @@ void ConnectSongSignals(MachineBar* self)
 		OnInstrumentInsert);
 	psy_signal_connect(&self->instruments->signal_slotchange, self,
 		OnInstrumentSlotChanged);
+	ConnectInstrumentSignals(self);
+}
+
+void ConnectInstrumentSignals(MachineBar* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->instruments->container);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_Instrument* instrument;
+		
+		instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it);
+		psy_signal_connect(&instrument->signal_namechanged, self,
+			OnInstrumentNameChanged);
+	}
 }
 
 void OnNextMachine(MachineBar* self, ui_component* sender)
@@ -243,5 +267,13 @@ void OnPrevMachine(MachineBar* self, ui_component* sender)
 {
 	if (self->machines) {
 		machines_changeslot(self->machines, machines_slot(self->machines) + 1);
+	}
+}
+
+void OnInstrumentNameChanged(MachineBar* self, ui_component* sender)
+{
+	if (self->instruments) {
+		BuildInstrumentList(self);
+		ui_combobox_setcursel(&self->instparambox, self->instruments->slot);
 	}
 }

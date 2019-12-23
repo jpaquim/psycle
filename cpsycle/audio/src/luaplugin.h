@@ -8,9 +8,14 @@
 #include "psyclescript.h"
 
 typedef struct {
-	psy_audio_CustomMachine custommachine;			
+	psy_audio_Machine* machine;
+	psy_audio_BufferContext* bc;
+} psy_audio_LuaMachine;
+
+typedef struct {
+	psy_audio_CustomMachine custommachine;
 	psy_audio_PsycleScript script;
-	psy_audio_Machine* client;
+	psy_audio_LuaMachine* client;
 	psy_audio_MachineInfo* plugininfo;
 } psy_audio_LuaPlugin;
 

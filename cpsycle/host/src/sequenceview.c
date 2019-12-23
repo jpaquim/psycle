@@ -41,9 +41,10 @@ static void sequenceview_onshowplaylist(SequenceView*, ui_button* sender);
 static void sequenceview_onfollowsong(SequenceView*, ui_button* sender);
 static void sequenceview_onrecordtweaks(SequenceView*, ui_button* sender);
 static void sequenceview_onmultichannelaudition(SequenceView*, ui_button* sender);
-static void sequenceview_onsize(SequenceView*, ui_component* sender, ui_size*);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*);
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
+static void sequenceview_onpreferredsize(SequenceView*,
+	ui_component* sender, ui_size* limit, ui_size* rv);
 
 static void sequenceduration_update(SequenceViewDuration*);
 
@@ -53,10 +54,9 @@ static void sequencebuttons_onpreferredsize(SequenceButtons*,
 	ui_component* sender, ui_size* limit, ui_size* rv);
 static psy_List* rowend(psy_List* p);
 
+
 static void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader*,
 	ui_component* sender, ui_graphics*);
-
-void sequenceroptionsbar_initalign(SequencerOptionsBar*);
 
 static int listviewmargin = 5;
 
@@ -67,22 +67,28 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;
 	self->selection = &workspace->sequenceselection;	
-	ui_component_init(&self->component, parent);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
-	psy_signal_connect(&self->component.signal_size, self,
-		sequenceview_onsize);
-	sequencelistview_init(&self->listview, &self->component, self,
-		self->sequence, self->patterns, workspace);
-	self->listview.player = &workspace->player;
-	self->buttons.context = &self->listview;
-	sequencebuttons_init(&self->buttons, &self->component);
-	ui_component_resize(&self->buttons.component, 200, 70);
-	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
-	sequenceduration_init(&self->duration, &self->component, self->sequence);
+	ui_component_init(&self->component, parent);	
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	ui_component_enablealign(&self->component);
 	playlisteditor_init(&self->playlisteditor, &self->component,
 		workspace);
+	ui_component_setalign(&self->playlisteditor.component, UI_ALIGN_TOP);
 	ui_component_hide(&self->playlisteditor.component);
+	ui_splitbar_init(&self->splitbar, &self->component);
+	ui_component_setalign(&self->splitbar.component, UI_ALIGN_TOP);	
+	sequencelistview_init(&self->listview, &self->component, self,
+		self->sequence, self->patterns, workspace);
+	ui_component_setalign(&self->listview.component, UI_ALIGN_CLIENT);
+	self->listview.player = &workspace->player;
+	self->buttons.context = &self->listview;
+	sequencebuttons_init(&self->buttons, &self->component);	
+	ui_component_setalign(&self->buttons.component, UI_ALIGN_TOP);
+	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
+	ui_component_setalign(&self->trackheader.component, UI_ALIGN_TOP);	
 	sequenceroptionsbar_init(&self->options, &self->component);
+	ui_component_setalign(&self->options.component, UI_ALIGN_BOTTOM);
+	sequenceduration_init(&self->duration, &self->component, self->sequence);
+	ui_component_setalign(&self->duration.component, UI_ALIGN_BOTTOM);
 
 	psy_signal_connect(&self->buttons.newentry.signal_clicked, self,
 		sequenceview_onnewentry);
@@ -124,6 +130,9 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 		sequenceview_onsongchanged);
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged, self,
 		sequenceview_onsequenceselectionchanged);
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
+		sequenceview_onpreferredsize);
 	ui_component_resize(&self->component, 200, 0);	
 }
 
@@ -165,7 +174,7 @@ void sequencebuttons_init(SequenceButtons* self, ui_component* parent)
 		sequencebuttons_onalign);
 	psy_signal_disconnectall(&self->component.signal_preferredsize);
 	psy_signal_connect(&self->component.signal_preferredsize, self,
-		sequencebuttons_onpreferredsize);	
+		sequencebuttons_onpreferredsize);
 }
 
 void sequencebuttons_onalign(SequenceButtons* self, ui_component* sender)
@@ -253,7 +262,8 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	ui_component_init(&self->component, parent);
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
 	psy_signal_connect(&self->component.signal_draw, self,
-		sequenceviewtrackheader_ondraw); 
+		sequenceviewtrackheader_ondraw);
+	ui_component_resize(&self->component, 0, 10);
 }
 
 void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
@@ -408,48 +418,6 @@ void sequencelistview_drawtrack(SequenceListView* self, ui_graphics* g, Sequence
 		}
 		ui_textout(g, x + 5, cpy + self->dy + listviewmargin, buffer, strlen(buffer));
 	}	
-}
-
-void sequenceview_onsize(SequenceView* self, ui_component* sender, ui_size* size)
-{		
-	ui_size buttonssize = ui_component_preferredsize(&self->buttons.component, size);
-	ui_size trackheader;
-	ui_size durationsize = ui_component_preferredsize(&self->duration.component, size);
-	ui_size playlistsize;
-	ui_size optionssize = ui_component_preferredsize(&self->options.component, size);
-
-	if (self->playlisteditor.component.visible) {
-		playlistsize = ui_component_size(&self->playlisteditor.component);
-	} else {
-		playlistsize.height = 0;
-	}
-	trackheader.height = (int)(self->listview.textheight * 1.5);
-	trackheader.width = size->width;
-		
-	ui_component_setposition(&self->buttons.component,
-		0, 0, size->width, buttonssize.height);
-	ui_component_setposition(&self->trackheader.component,
-		0, buttonssize.height, size->width, trackheader.height);
-	ui_component_setposition(&self->listview.component, 
-		0, buttonssize.height + trackheader.height,
-		size->width,
-		size->height - buttonssize.height - durationsize.height -
-			trackheader.height - optionssize.height - playlistsize.height);	
-	sequencelistview_adjustscrollbars(&self->listview);
-	ui_component_setposition(&self->duration.component, 
-		0,
-		size->height - durationsize.height - optionssize.height - playlistsize.height,
-		size->width,
-		durationsize.height);
-	if (self->playlisteditor.component.visible) {
-		ui_component_setposition(&self->playlisteditor.component, 
-			0,
-			size->height - optionssize.height - playlistsize.height,
-			size->width,
-			playlistsize.height);
-	}
-	ui_component_setposition(&self->options.component, 0,
-		size->height - optionssize.height, size->width, optionssize.height);		
 }
 
 void sequenceview_onnewentry(SequenceView* self)
@@ -702,7 +670,7 @@ void sequenceview_onshowplaylist(SequenceView* self, ui_button* sender)
 		self->playlisteditor.component.visible = 1;
 		ui_component_show(&self->playlisteditor.component);
 	}
-	sequenceview_onsize(self, &self->component, &size);
+	ui_component_align(&self->component);
 }
 
 void sequenceview_onrecordtweaks(SequenceView* self, ui_button* sender)
@@ -822,21 +790,38 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	ui_component_invalidate(&self->trackheader.component);
 }
 
+void sequenceview_onpreferredsize(SequenceView* self, ui_component* sender,
+	ui_size* limit, ui_size* rv)
+{	
+	if (rv) {		
+		*rv = ui_component_size(&self->component);		
+	}
+}
+
 void sequenceduration_init(SequenceViewDuration* self, ui_component* parent,
 	psy_audio_Sequence* sequence)
 {
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makeeh(0.5), ui_value_makepx(0),
+		ui_value_makeeh(0.5), ui_value_makeew(1.0));
 	self->sequence = sequence;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
 	ui_label_init(&self->desc, &self->component);	
 	ui_label_settext(&self->desc, "Duration");
 	ui_label_setcharnumber(&self->desc, 10);
+	ui_label_setstyle(&self->desc, 
+		WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE);
 	ui_component_setalign(&self->desc.component, UI_ALIGN_LEFT);
 	ui_label_init(&self->duration, &self->component);
 	ui_label_setstyle(&self->duration, 
 		WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE);
 	ui_component_setalign(&self->duration.component, UI_ALIGN_CLIENT);
-	ui_label_setcharnumber(&self->duration, 10);
+	ui_label_setcharnumber(&self->duration, 10);	
+	psy_list_free(ui_components_setmargin(
+			ui_component_children(&self->component, 0),
+			&margin));
 	sequenceduration_update(self);
 }
 
@@ -868,10 +853,12 @@ void sequencelistview_ontimer(SequenceListView* self, ui_component* sender, int 
 
 void sequenceroptionsbar_init(SequencerOptionsBar* self, ui_component* parent)
 {
+	ui_margin margin;
+
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	ui_checkbox_init(&self->followsong, &self->component);
-	ui_checkbox_settext(&self->followsong, "Follow psy_audio_Song");
+	ui_checkbox_settext(&self->followsong, "Follow Song");
 	ui_checkbox_init(&self->shownames, &self->component);
 	ui_checkbox_settext(&self->shownames, "Show pattern names");
 	ui_checkbox_init(&self->showplaylist, &self->component);	
@@ -879,16 +866,11 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, ui_component* parent)
 	ui_checkbox_init(&self->recordtweaks, &self->component);
 	ui_checkbox_settext(&self->recordtweaks, "Record tweaks");
 	ui_checkbox_init(&self->multichannelaudition, &self->component);
-	ui_checkbox_settext(&self->multichannelaudition, "Multichannel Audition");	
-	sequenceroptionsbar_initalign(self);
-}
-
-void sequenceroptionsbar_initalign(SequencerOptionsBar* self)
-{
-	ui_margin margin = {{0, UI_UNIT_PX}, {3, UI_UNIT_PX}, {3, UI_UNIT_PX},
-		{0, UI_UNIT_PX}};				
+	ui_checkbox_settext(&self->multichannelaudition, "Multichannel Audition");
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makeeh(0.2), ui_value_makeew(1.0));
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_TOP,
-		&margin));		
+		&margin));	
 }

@@ -18,7 +18,7 @@
 #include <uislider.h>
 #include <uigroupbox.h>
 
-typedef struct {
+typedef struct {	
 	ui_component component;	
 	ui_label namelabel;
 	ui_edit nameedit;	
@@ -26,6 +26,7 @@ typedef struct {
 	ui_button nextbutton;	
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
+	struct InstrumentView* view;
 } InstrumentHeaderView;
 
 typedef struct {
@@ -94,7 +95,7 @@ typedef struct {
 	psy_audio_Instruments* instruments;
 } InstrumentPitchView;
 
-typedef struct {
+typedef struct InstrumentView {
 	ui_component component;
 	ui_notebook notebook;
 	TabBar tabbar;

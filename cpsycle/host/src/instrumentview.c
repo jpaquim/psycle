@@ -6,51 +6,70 @@
 #include "instrumentview.h"
 #include <portable.h>
 
-static void instrumentview_oncreateinstrument(InstrumentView*, ui_component* sender);
+static void instrumentview_oncreateinstrument(InstrumentView*,
+	ui_component* sender);
 static void instrumentview_onaddentry(InstrumentView*, ui_component* sender);
-static void instrumentview_onremoveentry(InstrumentView*, ui_component* sender);
-static void OnInstrumentInsert(InstrumentView*, ui_component* sender, int slot);
-static void OnInstrumentRemoved(InstrumentView*, ui_component* sender, int slot);
-static void OnInstrumentSlotChanged(InstrumentView*, psy_audio_Instrument* sender, int slot);
-static void OnInstrumentListChanged(InstrumentView*, ui_component* sender, int slot);
+static void instrumentview_onremoveentry(InstrumentView*,
+	ui_component* sender);
+static void OnInstrumentInsert(InstrumentView*, ui_component* sender,
+	int slot);
+static void OnInstrumentRemoved(InstrumentView*, ui_component* sender,
+	int slot);
+static void OnInstrumentSlotChanged(InstrumentView*,
+	psy_audio_Instrument* sender, int slot);
+static void OnInstrumentListChanged(InstrumentView*, ui_component* sender,
+	int slot);
 static void instrumentview_setinstrument(InstrumentView*, int slot);
 static void OnSongChanged(InstrumentView*, Workspace* workspace);
 // InstrumentHeaderView
-static void instrumentheaderview_init(InstrumentHeaderView*, ui_component* parent, psy_audio_Instruments*);
-static void instrumentheaderview_setinstrument(InstrumentHeaderView*, psy_audio_Instrument*);
+static void instrumentheaderview_init(InstrumentHeaderView*,
+	ui_component* parent, psy_audio_Instruments*, InstrumentView*);
+static void instrumentheaderview_setinstrument(InstrumentHeaderView*,
+	psy_audio_Instrument*);
 static void OnPrevInstrument(InstrumentHeaderView*, ui_component* sender);
 static void OnNextInstrument(InstrumentHeaderView*, ui_component* sender);
 static void OnDeleteInstrument(InstrumentHeaderView*, ui_component* sender);
+static void OnEditInstrumentName(InstrumentHeaderView*, ui_edit* sender);
 // InstrumentGeneralView
-static void instrumentgeneralview_init(InstrumentGeneralView*, ui_component* parent, psy_audio_Instruments*);
-static void instrumentgeneralview_setinstrument(InstrumentGeneralView* self, psy_audio_Instrument* instrument);
+static void instrumentgeneralview_init(InstrumentGeneralView*,
+	ui_component* parent, psy_audio_Instruments*);
+static void instrumentgeneralview_setinstrument(InstrumentGeneralView*,
+	psy_audio_Instrument* instrument);
 static void OnNNACut(InstrumentGeneralView*);
 static void OnNNARelease(InstrumentGeneralView*);
 static void OnNNANone(InstrumentGeneralView*);
 // InstrumentVolumeView
-static void instrumentvolumeview_init(InstrumentVolumeView*, ui_component* parent, psy_audio_Instruments*);
+static void instrumentvolumeview_init(InstrumentVolumeView*,
+	ui_component* parent, psy_audio_Instruments*);
 static void OnVolumeViewDescribe(InstrumentVolumeView*, ui_slider*, char* txt);
 static void OnVolumeViewTweak(InstrumentVolumeView*, ui_slider*, float value);
 static void OnVolumeViewValue(InstrumentVolumeView*, ui_slider*, float* value);
-static void instrumentvolumeview_setinstrument(InstrumentVolumeView* self, psy_audio_Instrument* instrument);
+static void instrumentvolumeview_setinstrument(InstrumentVolumeView* self,
+	psy_audio_Instrument* instrument);
 // InstrumentPanView
-static void instrumentpanview_init(InstrumentPanView*, ui_component* parent, psy_audio_Instruments*);
-static void instrumentpanview_setinstrument(InstrumentPanView* self, psy_audio_Instrument* instrument);
+static void instrumentpanview_init(InstrumentPanView*, ui_component* parent,
+	psy_audio_Instruments*);
+static void instrumentpanview_setinstrument(InstrumentPanView* self,
+	psy_audio_Instrument* instrument);
 // InstrumentFilterView
-static void instrumentfilterview_init(InstrumentFilterView*, ui_component* parent, psy_audio_Instruments*);
-static void instrumentfilterview_setinstrument(InstrumentFilterView* self, psy_audio_Instrument* instrument);
+static void instrumentfilterview_init(InstrumentFilterView*,
+	ui_component* parent, psy_audio_Instruments*);
+static void instrumentfilterview_setinstrument(InstrumentFilterView*,
+	psy_audio_Instrument*);
 static void OnFilterViewDescribe(InstrumentFilterView*, ui_slider*, char* txt);
 static void OnFilterViewTweak(InstrumentFilterView*, ui_slider*, float value);
 static void OnFilterViewValue(InstrumentFilterView*, ui_slider*, float* value);
 // InstrumentPitchView
-static void instrumentpitchview_init(InstrumentPitchView*, ui_component* parent, psy_audio_Instruments*);
-static void instrumentpitchview_setinstrument(InstrumentPitchView*, psy_audio_Instrument*);
+static void instrumentpitchview_init(InstrumentPitchView*,
+	ui_component* parent, psy_audio_Instruments*);
+static void instrumentpitchview_setinstrument(InstrumentPitchView*,
+	psy_audio_Instrument*);
 static void instrumentviewbuttons_init(InstrumentViewButtons*,
 	ui_component* parent);
 
 // InstrumentView
 void instrumentview_init(InstrumentView* self, ui_component* parent,
-							   Workspace* workspace)
+	Workspace* workspace)
 {
 	ui_margin margin;
 
@@ -62,7 +81,7 @@ void instrumentview_init(InstrumentView* self, ui_component* parent,
 	ui_component_enablealign(&self->component);
 	// header
 	instrumentheaderview_init(&self->header, &self->component,
-		&workspace->song->instruments);
+		&workspace->song->instruments, self);
 	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
 	// left
 	ui_component_init(&self->left, &self->component);
@@ -96,7 +115,7 @@ void instrumentview_init(InstrumentView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "General");
 	tabbar_append(&self->tabbar, "Volume");
 	tabbar_append(&self->tabbar, "Pan");
-	tabbar_append(&self->tabbar, "psy_dsp_Filter");
+	tabbar_append(&self->tabbar, "Filter");
 	tabbar_append(&self->tabbar, "Pitch");	
 	ui_notebook_init(&self->notebook, &self->client);
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
@@ -179,22 +198,24 @@ void OnSongChanged(InstrumentView* self, Workspace* workspace)
 		&workspace->song->instruments);
 }
 
-void instrumentheaderview_init(InstrumentHeaderView* self, ui_component* parent, psy_audio_Instruments* instruments)
+void instrumentheaderview_init(InstrumentHeaderView* self, ui_component* parent,
+	psy_audio_Instruments* instruments, InstrumentView* view)
 {	
 	ui_margin margin;
 
 	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
 		ui_value_makeeh(0.5), ui_value_makepx(0));
+	self->view = view;
 	self->instrument = 0;
 	self->instruments = instruments;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	ui_label_init(&self->namelabel, &self->component);
-	ui_label_settext(&self->namelabel, "psy_audio_Instrument Name");
+	ui_label_settext(&self->namelabel, "Instrument Name");
 	ui_edit_init(&self->nameedit, &self->component, 0);		
 	ui_edit_setcharnumber(&self->nameedit, 20);	
-//	psy_signal_connect(&self->nameedit.signal_change, self,
-//		OnEditInstrumentName);
+	psy_signal_connect(&self->nameedit.signal_change, self,
+		OnEditInstrumentName);
 	ui_button_init(&self->prevbutton, &self->component);
 	ui_button_seticon(&self->prevbutton, UI_ICON_LESS);	
 	psy_signal_connect(&self->prevbutton.signal_clicked, self,
@@ -213,6 +234,21 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self, psy_audio_In
 {
 	self->instrument = instrument;
 	ui_edit_settext(&self->nameedit, instrument ? instrument->name : "");
+}
+
+void OnEditInstrumentName(InstrumentHeaderView* self, ui_edit* sender)
+{
+	if (self->instrument) {
+		char text[40];
+		int index;
+		
+		index = instrumentsbox_selected(&self->view->instrumentsbox);
+		instrument_setname(self->instrument, ui_edit_text(sender));
+		psy_snprintf(text, 20, "%02X:%s", 
+			(int) index, instrument_name(self->instrument));
+		ui_listbox_setstring(&self->view->instrumentsbox.instrumentlist, text,
+			index);		
+	}
 }
 
 void OnPrevInstrument(InstrumentHeaderView* self, ui_component* sender)

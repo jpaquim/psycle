@@ -18,7 +18,7 @@ void InitPatternProperties(PatternProperties* self, ui_component* parent, psy_au
 	ui_label_init(&self->lengthlabel, &self->component);
 	ui_label_settext(&self->lengthlabel, "Length");
 	ui_edit_init(&self->nameedit, &self->component, 0);
-	ui_edit_settext(&self->nameedit, "No psy_audio_Pattern");
+	ui_edit_settext(&self->nameedit, "No Pattern");
 	ui_edit_init(&self->lengthedit, &self->component, 0);
 	ui_button_init(&self->applybutton, &self->component);
 	ui_button_settext(&self->applybutton, "Apply");	

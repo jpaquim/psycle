@@ -36,9 +36,10 @@ const psy_audio_MachineInfo* mixer_info(void)
 static const psy_audio_MachineInfo* info(psy_audio_Mixer*);
 static void mixer_dispose(psy_audio_Mixer*);
 static int mixer_mode(psy_audio_Mixer* self) { return MACHMODE_FX; }
-static void mixer_seqtick(psy_audio_Mixer*, int channel, const psy_audio_PatternEvent*);
-static unsigned int numinputs(psy_audio_Mixer*);
-static unsigned int numoutputs(psy_audio_Mixer*);
+static void mixer_seqtick(psy_audio_Mixer*, uintptr_t channel,
+	const psy_audio_PatternEvent*);
+static uintptr_t numinputs(psy_audio_Mixer*);
+static uintptr_t numoutputs(psy_audio_Mixer*);
 static psy_audio_Buffer* mix(psy_audio_Mixer*, uintptr_t slot, unsigned int amount, psy_audio_MachineSockets*, psy_audio_Machines*);
 static void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, unsigned int numsamples, float vol);
 static void loadspecific(psy_audio_Mixer*, struct psy_audio_SongFile*, unsigned int slot);
@@ -187,7 +188,7 @@ void mixer_init(psy_audio_Mixer* self, MachineCallback callback)
 	psy_dsp_rmsvol_init(&self->masterrmsvol);
 	mixerchannel_init(&self->master, 0);	
 	self->slot = 65535;
-	base->vtable->seteditname(base, "psy_audio_Mixer");
+	base->vtable->seteditname(base, "Mixer");
 }
 
 void mixer_dispose(psy_audio_Mixer* self)
@@ -222,7 +223,8 @@ void mixer_dispose(psy_audio_Mixer* self)
 	custommachine_dispose(&self->custommachine);	
 }
 
-void mixer_seqtick(psy_audio_Mixer* self, int channel, const psy_audio_PatternEvent* event)
+void mixer_seqtick(psy_audio_Mixer* self, uintptr_t channel,
+	const psy_audio_PatternEvent* event)
 {	
 	if(event->note == NOTECOMMANDS_TWEAK)
 	{
@@ -246,12 +248,12 @@ void mixer_seqtick(psy_audio_Mixer* self, int channel, const psy_audio_PatternEv
 	}
 }
 
-unsigned int numinputs(psy_audio_Mixer* self)
+uintptr_t numinputs(psy_audio_Mixer* self)
 {
 	return 2;
 }
 
-unsigned int numoutputs(psy_audio_Mixer* self)
+uintptr_t numoutputs(psy_audio_Mixer* self)
 {
 	return 2;
 }

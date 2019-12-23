@@ -414,7 +414,7 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 			char text[40];
 
 			entry = (psy_audio_InstrumentEntry*) p->entry;
-			psy_snprintf(text, 40, "psy_audio_Sample %0X:%0X", entry->sampleindex.slot,
+			psy_snprintf(text, 40, "Sample %0X:%0X", entry->sampleindex.slot,
 				entry->sampleindex.subslot);
 			ui_textout(g, 0, cpy + self->dy, text, strlen(text));
 			psy_snprintf(text, 40, "Notes %.3d - %.3d", entry->keyrange.low,

@@ -20,12 +20,12 @@ void presetsio_load(const char* path, psy_audio_Presets* presets)
 		int filenumpars;
 		if (fread(&numpresets,sizeof(int), 1, fp) != 1 ||
 			fread(&filenumpars,sizeof(int), 1, fp) != 1 ) {
-			// ::MessageBox(0,"Couldn't read from file. Operation aborted","psy_audio_Preset File Error",MB_OK);
+			// ::MessageBox(0,"Couldn't read from file. Operation aborted","Preset File Error",MB_OK);
 		} else if (numpresets >= 0) {
 			// ok so we still support old file format by checking for a positive numpresets
 //			if (filenumpars != numparameters) //  || (dataSizeStruct))
 //			{
-//				// ::MessageBox(0,"The current preset File is not up-to-date with the plugin.","psy_audio_Preset File Error",MB_OK);
+//				// ::MessageBox(0,"The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
 //			} else {
 				// presets.clear();
 			presetio_loadversion0(fp, numpresets, filenumpars, presets);
@@ -39,12 +39,12 @@ void presetsio_load(const char* path, psy_audio_Presets* presets)
 				presetio_loadversion1(fp, numpresets, presets);
 				// presets.sort();
 			} else {
-				// ::MessageBox(0,"The current preset file is from a newer version of psycle than you are currently running.","psy_audio_Preset File Error",MB_OK);
+				// ::MessageBox(0,"The current preset file is from a newer version of psycle than you are currently running.","Preset File Error",MB_OK);
 			}
 		}
 		fclose(fp);
 	} else {
-		//::MessageBox(0,"Couldn't open file. Operation aborted","psy_audio_Preset File Error",MB_OK);
+		//::MessageBox(0,"Couldn't open file. Operation aborted","Preset File Error",MB_OK);
 	}	
 }
 
@@ -93,7 +93,7 @@ void presetio_loadversion1(FILE* fp, int numParameters, psy_audio_Presets* prese
 	// now it is time to check our file for compatability
 	if (filenumpars != numParameters) // || (filepresetsize != dataSizeStruct))
 	{
-		//::MessageBox(0,"The current preset File is not up-to-date with the plugin.","psy_audio_Preset File Error",MB_OK);
+		//::MessageBox(0,"The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
 		return;
 	}
 	// ok that works, so we should now load the names of all of the presets

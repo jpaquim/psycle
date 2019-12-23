@@ -29,8 +29,8 @@ static const psy_audio_MachineInfo* info(psy_audio_DummyMachine* self) {
 	return dummymachine_info();
 }
 static int mode(psy_audio_DummyMachine* self) { return self->mode; }
-static unsigned int numinputs(psy_audio_DummyMachine* self) { return 2; }
-static unsigned int numoutputs(psy_audio_DummyMachine* self) { return 2; }
+static uintptr_t numinputs(psy_audio_DummyMachine* self) { return 2; }
+static uintptr_t numoutputs(psy_audio_DummyMachine* self) { return 2; }
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;

@@ -30,7 +30,7 @@ typedef struct {
 	ui_edit sredit;
 	ui_label numsamplesheaderlabel;
 	ui_label numsampleslabel;
-	ui_label channellabel;	
+	ui_label channellabel;
 } SamplesHeaderView;
 
 typedef struct {
