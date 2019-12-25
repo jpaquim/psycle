@@ -8,12 +8,18 @@
 #include <uicomponent.h>
 #include <machine.h>
 
+#include "workspace.h"
+
 
 typedef struct {
    ui_component component;   
-   psy_audio_Machine* plugin;      
+   psy_audio_Machine* machine;      
 } Vst2View;
 
-void InitVst2View(Vst2View*, ui_component* parent, psy_audio_Machine*);
+void vst2view_init(Vst2View*, ui_component* parent, psy_audio_Machine*,
+	Workspace* workspace);
+Vst2View* vst2view_alloc(void);
+Vst2View* vst2view_allocinit(ui_component* parent, psy_audio_Machine*,
+	Workspace*);
 
 #endif

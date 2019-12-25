@@ -62,9 +62,10 @@ typedef	uintptr_t (*fp_machine_slot)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setslot)(struct psy_audio_Machine*, uintptr_t);
 	// Parameters	
 typedef	int (*fp_machine_parametertype)(struct psy_audio_Machine*, int param);
-typedef	unsigned int (*fp_machine_numparameters)(struct psy_audio_Machine*);
+typedef	uintptr_t (*fp_machine_numparameters)(struct psy_audio_Machine*);
 typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
-typedef	void (*fp_machine_parameterrange)(struct psy_audio_Machine*, int numparam, int* minval, int* maxval);
+typedef	void (*fp_machine_parameterrange)(struct psy_audio_Machine*,
+	int numparam, int* minval, int* maxval);
 typedef	void (*fp_machine_parametertweak)(struct psy_audio_Machine*, int par, int val);	
 typedef	void (*fp_machine_patterntweak)(struct psy_audio_Machine*, int par, int val);
 typedef	int (*fp_machine_parameterlabel)(struct psy_audio_Machine*, char* txt, int param);
@@ -72,10 +73,11 @@ typedef	int (*fp_machine_parametername)(struct psy_audio_Machine*, char* txt, in
 typedef	int (*fp_machine_describevalue)(struct psy_audio_Machine*, char* txt, int param, int value);
 typedef	int (*fp_machine_parametervalue)(struct psy_audio_Machine*, int param);	
 typedef	int (*fp_machine_paramviewoptions)(struct psy_audio_Machine*);
-
 typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*, MachineCallback);
-typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*, struct psy_audio_SongFile*, unsigned int slot);
-typedef	void (*fp_machine_savespecific)(struct psy_audio_Machine*, struct psy_audio_SongFile*, unsigned int slot);
+typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*,
+	struct psy_audio_SongFile*, uintptr_t slot);
+typedef	void (*fp_machine_savespecific)(struct psy_audio_Machine*,
+	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	int (*fp_machine_haseditor)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_seteditorhandle)(struct psy_audio_Machine*, void* handle);
 typedef	void (*fp_machine_editorsize)(struct psy_audio_Machine*, int* width, int* height);
@@ -133,7 +135,6 @@ typedef struct MachineVtable {
 	fp_machine_describevalue describevalue;
 	fp_machine_parametervalue parametervalue;
 	fp_machine_paramviewoptions paramviewoptions;
-
 	fp_machine_setcallback setcallback;
 	fp_machine_loadspecific loadspecific;
 	fp_machine_savespecific savespecific;
@@ -164,4 +165,34 @@ void machine_init(psy_audio_Machine*, MachineCallback);
 void machine_dispose(psy_audio_Machine*);
 int machine_supports(psy_audio_Machine*, int option);
 
+// virtual calls
+int machine_describevalue(psy_audio_Machine*, char* txt, int param, int value);
+void machine_parametertweak(psy_audio_Machine*, int par, int val);
+void machine_patterntweak(psy_audio_Machine*, int par, int val);
+int machine_parametervalue(psy_audio_Machine*, int param);
+void machine_parameterrange(struct psy_audio_Machine*,
+	int numparam, int* minval, int* maxval);
+uintptr_t machine_numparameters(psy_audio_Machine*);
+int machine_parameterlabel(psy_audio_Machine*, char* txt, int param);
+int machine_parametername(psy_audio_Machine*, char* txt, int param);
+void machine_setcallback(psy_audio_Machine*, MachineCallback);
+void machine_setpanning(psy_audio_Machine*, psy_dsp_amp_t);
+
+void machine_mute(psy_audio_Machine*);	
+void machine_unmute(psy_audio_Machine*);
+int machine_muted(psy_audio_Machine*);
+void machine_bypass(psy_audio_Machine*);
+void machine_unbypass(psy_audio_Machine*);
+int machine_bypassed(psy_audio_Machine*);
+int machine_haseditor(psy_audio_Machine*);
+void machine_seteditorhandle(psy_audio_Machine*, void* handle);
+void machine_editorsize(psy_audio_Machine*, int* width, int* height);
+void machine_editoridle(psy_audio_Machine*);
+void machine_seteditname(psy_audio_Machine*, const char* name);
+const char* machine_editname(psy_audio_Machine*);
+unsigned int machine_samplerate(psy_audio_Machine*);
+struct psy_audio_Samples* machine_samples(psy_audio_Machine*);
+struct psy_audio_Instruments* machine_instruments(psy_audio_Machine*);
+psy_audio_Buffer* machine_buffermemory(psy_audio_Machine*);
+uintptr_t machine_buffermemorysize(psy_audio_Machine*);
 #endif

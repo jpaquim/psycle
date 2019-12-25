@@ -13,4 +13,13 @@ typedef struct {
 void ui_editor_init(ui_editor*, ui_component* parent);
 void ui_editor_load(ui_editor*, const char* path);
 
+void ui_editor_settext(ui_editor*, const char* text);
+void ui_editor_addtext(ui_editor*, const char* text);
+void ui_editor_clear(ui_editor*);
+void ui_editor_setcolor(ui_editor*, uint32_t color);
+void ui_editor_setbackgroundcolor(ui_editor*, uint32_t color);
+
+void ui_editor_enableedit(ui_editor*);
+void ui_editor_preventedit(ui_editor*);
+
 #endif

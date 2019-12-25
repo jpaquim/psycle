@@ -191,6 +191,7 @@ void ui_setfont(ui_graphics* g, ui_font* font)
 ui_font ui_createfont(const char* name, int size)
 {
 	ui_font font;
+
 	font.hfont = CreateFont(size, 0, 0, 0, 0, 0, 0, 0, 
 		1, 0, 0, 0, VARIABLE_PITCH | FF_DONTCARE, name);          
 	font.stock = 0;

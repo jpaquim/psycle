@@ -21,6 +21,7 @@ void ui_checkbox_init(ui_checkbox* self, ui_component* parent)
 		1);
 	psy_signal_connect(&self->component.signal_command, self, oncommand);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_signal_disconnectall(&self->component.signal_preferredsize);	
 	psy_signal_connect(&self->component.signal_preferredsize, self,
 		onpreferredsize);
 }

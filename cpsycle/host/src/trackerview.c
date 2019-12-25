@@ -16,7 +16,6 @@
 #include <dir.h>
 #include <portable.h>
 
-
 #define TIMERID_TRACKERVIEW 600
 static const psy_dsp_big_beat_t epsilon = 0.0001;
 
@@ -363,7 +362,9 @@ void trackergrid_init(TrackerGrid* self, ui_component* parent,
 	self->view = view;
 	self->header = 0;	
 	self->hasselection = 0;
-	self->midline = 1;				
+	self->midline = 1;
+	self->view->workspace->chordmode = 0;
+	self->chordbegin = 0;
 	ui_component_init(&self->component, parent);	
 	psy_signal_connect(&player->signal_numsongtrackschanged, self,
 		trackergrid_numtrackschanged);
@@ -1005,7 +1006,7 @@ unsigned int NumSublines(psy_audio_Pattern* pattern, double offset, double bpl)
 void trackergrid_onkeydown(TrackerGrid* self, ui_component* sender,
 	KeyEvent* keyevent)
 {
-	sender->propagateevent = 1;	
+	sender->propagateevent = 1;
 }
 
 void trackergrid_onkeyup(TrackerGrid* self, ui_component* sender,
@@ -1561,13 +1562,24 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 			cmd.type = -1;
 			cmd.data = data;
 			kbd = workspace_kbddriver(self->workspace);
-			input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
+			if (keyevent->keycode != VK_SHIFT) {
+				self = self;
+			}
+			input = encodeinput(keyevent->keycode, 0, /* GetKeyState(VK_SHIFT) < 0 */
 				GetKeyState(VK_CONTROL) < 0);				
-			kbd->cmd(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4, &cmd, 32);
+			kbd->cmd(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4, &cmd,
+				32);
 			if (cmd.type == EVENTDRIVER_CMD_PATTERN &&
 					cmd.data[0] == NOTECOMMANDS_RELEASE) {
 				trackerview_inputnote(self, NOTECOMMANDS_RELEASE);
 				return;
+			}
+			if (cmd.type == EVENTDRIVER_CMD_PATTERN &&
+					cmd.data[0] <= NOTECOMMANDS_RELEASE &&
+					keyevent->shift &&
+					!self->workspace->chordmode) {
+				self->workspace->chordmode = 1;
+				self->grid.chordbegin = self->grid.cursor.track;				
 			}
 		}
 	}		
@@ -1577,7 +1589,14 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 void trackerview_onkeyup(TrackerView* self, ui_component* sender,
 	KeyEvent* keyevent)
 {
-	ui_component_propagateevent(sender);
+	if (self->workspace->chordmode && !keyevent->shift) {
+		self->grid.cursor.track = self->grid.chordbegin;
+		trackerview_scrollleft(self);
+		trackerview_advanceline(self);
+		self->workspace->chordmode = 0;
+	} else {
+		ui_component_propagateevent(sender);
+	}
 }
 
 void trackerview_oninput(TrackerView* self, psy_audio_Player* sender, psy_audio_PatternEvent* event)
@@ -1622,7 +1641,11 @@ void trackerview_inputnote(TrackerView* self, psy_dsp_note_t note)
 	undoredo_execute(&self->workspace->undoredo,
 		&InsertCommandAlloc(self->pattern, self->grid.bpl,
 			self->grid.cursor, event, self->workspace)->command);
-	trackerview_advanceline(self);
+	if (self->workspace->chordmode) {
+		trackerview_nexttrack(self);
+	} else {
+		trackerview_advanceline(self);
+	}
 	trackerview_enablesync(self);
 }
 
@@ -1829,6 +1852,7 @@ void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, MouseEvent
 			trackerview_invalidatecursor(self->view, &oldcursor);
 			trackerview_invalidatecursor(self->view, &self->cursor);			
 			ui_component_setfocus(&self->component);
+			ui_component_capture(&self->component);
 		}		
 	}
 }
@@ -1845,6 +1869,7 @@ void trackergrid_onmousemove(TrackerGrid* self, ui_component* sender, MouseEvent
 			self->selection.bottomright = cursor;
 			self->selection.bottomright.offset += self->bpl;
 			self->selection.bottomright.track += 1;
+
 			ui_component_invalidate(&self->component);		
 		}
 	}
@@ -1881,6 +1906,7 @@ TrackerCursor trackergrid_makecursor(TrackerGrid* self, int x, int y)
 	
 void trackergrid_onmouseup(TrackerGrid* self, ui_component* sender, MouseEvent* ev)
 {	
+	ui_component_releasecapture(&self->component);
 }
 
 void trackerview_init(TrackerView* self, ui_component* parent, Workspace* workspace)

@@ -20,7 +20,7 @@ static void seqtick(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
 static unsigned int numparametercols(psy_audio_Sampler*);
-static unsigned int numparameters(psy_audio_Sampler*);
+static uintptr_t numparameters(psy_audio_Sampler*);
 static int parametertype(psy_audio_Sampler* self, int par);
 static void parameterrange(psy_audio_Sampler*, int numparam, int* minval, int* maxval);
 static int parameterlabel(psy_audio_Sampler*, char* txt, int param);
@@ -34,14 +34,19 @@ static void releasevoices(psy_audio_Sampler*, uintptr_t channel);
 static void removeunusedvoices(psy_audio_Sampler* self);
 static uintptr_t numinputs(psy_audio_Sampler*);
 static uintptr_t numoutputs(psy_audio_Sampler*);
-static void loadspecific(psy_audio_Sampler*, struct psy_audio_SongFile*, unsigned int slot);
-static void savespecific(psy_audio_Sampler*, struct psy_audio_SongFile*, unsigned int slot);
+static void loadspecific(psy_audio_Sampler*, psy_audio_SongFile*,
+	uintptr_t slot);
+static void savespecific(psy_audio_Sampler*, psy_audio_SongFile*,
+	uintptr_t slot);
+static int currslot(psy_audio_Sampler*, uintptr_t channel,
+	const psy_audio_PatternEvent*);
 
-static int currslot(psy_audio_Sampler*, unsigned int channel, const psy_audio_PatternEvent*);
-
-static void voice_init(Voice*, psy_audio_Sampler*, psy_audio_Instrument*, uintptr_t channel,
-	unsigned int samplerate, psy_audio_Samples* samples);
+static void voice_init(Voice*, psy_audio_Sampler*, psy_audio_Instrument*,
+	uintptr_t channel, unsigned int samplerate);
 static void voice_dispose(Voice*);
+Voice* voice_alloc(void);
+Voice* voice_allocinit(psy_audio_Sampler*, psy_audio_Instrument*,
+	uintptr_t channel, unsigned int samplerate);
 static void voice_seqtick(Voice*, const psy_audio_PatternEvent*);
 static void voice_noteon(Voice*, const psy_audio_PatternEvent*);
 static void voice_noteoff(Voice*, const psy_audio_PatternEvent*);
@@ -50,7 +55,6 @@ static void voice_release(Voice*);
 static void voice_fastrelease(Voice*);
 static void voice_clearpositions(Voice*);
 
-static int songtracks = 16;
 static const uint32_t SAMPLERVERSION = 0x00000002;
 
 static psy_audio_MachineInfo const MacInfo = {
@@ -82,7 +86,7 @@ static int vtable_initialized = 0;
 static void vtable_init(psy_audio_Sampler* self)
 {
 	if (!vtable_initialized) {
-		vtable = *self->custommachine.machine.vtable;		
+		vtable = *(sampler_base(self)->vtable);
 		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
 		vtable.info = (fp_machine_info) info;
@@ -105,18 +109,16 @@ static void vtable_init(psy_audio_Sampler* self)
 }
 
 void sampler_init(psy_audio_Sampler* self, MachineCallback callback)
-{
-	psy_audio_Machine* base = &self->custommachine.machine;
-	
+{	
 	custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
-	self->custommachine.machine.vtable = &vtable;
-	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;
-	self->voices = 0;
+	sampler_base(self)->vtable = &vtable;
+	machine_seteditname(sampler_base(self), "Sampler");
+	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;	
+	self->voices = 0;	
 	self->resamplingmethod = 2;
 	self->defaultspeed = 1;	
 	self->maxvolume = 0xFF;
-	base->vtable->seteditname(base, "Sampler");
 	psy_table_init(&self->lastinst);
 }
 
@@ -136,6 +138,11 @@ void dispose(psy_audio_Sampler* self)
 	custommachine_dispose(&self->custommachine);
 }
 
+psy_audio_Machine* sampler_base(psy_audio_Sampler* self)
+{
+	return &(self->custommachine.machine);
+}
+
 void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 {	
 	psy_List* p;
@@ -152,8 +159,7 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 
 void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
-{	
-	psy_audio_Machine* base = (psy_audio_Machine*)self;
+{		
 	psy_audio_Instrument* instrument;
 	int slot;
 		
@@ -161,25 +167,19 @@ void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	if (slot == NOTECOMMANDS_EMPTY) {
 		return;
 	}	
-	instrument = instruments_at(base->vtable->instruments(
-		&self->custommachine.machine), slot);
+	instrument = instruments_at(machine_instruments(sampler_base(self)), slot);
 	if (instrument) {
-		releasevoices(self, channel);
-		{
-			Voice* voice;
-
-			voice = malloc(sizeof(Voice));
-			voice_init(voice, self, instrument, channel,
-				base->vtable->samplerate(base),
-				self->custommachine.machine.vtable->samples(
-				&self->custommachine.machine));
-			psy_list_append(&self->voices, voice);
-			voice_seqtick(voice, event);		
-		}
+		Voice* voice;
+		releasevoices(self, channel);		
+		voice = voice_allocinit(self, instrument, channel,
+			machine_samplerate(sampler_base(self)));
+		psy_list_append(&self->voices, voice);
+		voice_seqtick(voice, event);		
 	}
 }
 
-int currslot(psy_audio_Sampler* self, unsigned int channel, const psy_audio_PatternEvent* event)
+int currslot(psy_audio_Sampler* self, uintptr_t channel,
+	const psy_audio_PatternEvent* event)
 {
 	int rv;
 
@@ -282,7 +282,7 @@ int parametervalue(psy_audio_Sampler* self, int param)
 	return 0;
 }
 
-unsigned int numparameters(psy_audio_Sampler* self)
+uintptr_t numparameters(psy_audio_Sampler* self)
 {
 	return 4;
 }
@@ -381,17 +381,19 @@ uintptr_t numoutputs(psy_audio_Sampler* self)
 	return 2;
 }
 
-static void loadspecific(psy_audio_Sampler* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {
-	//Old version had default C4 as false
+	// Old version had default C4 as false
 	// DefaultC4(false);
 	// LinearSlide(false);
-	unsigned int size = 0;
+	uint32_t size = 0;
+
 	psyfile_read(songfile->file, &size, sizeof(size));
 	if (size)
 	{
 		/// Version 0
-		int temp;
+		int32_t temp;
 		psyfile_read(songfile->file, &temp, sizeof(temp)); // numSubtracks
 		self->numvoices = temp;
 		psyfile_read(songfile->file, &temp, sizeof(temp)); // quality		
@@ -422,7 +424,8 @@ static void loadspecific(psy_audio_Sampler* self, struct psy_audio_SongFile* son
 	}	
 }
 
-void savespecific(psy_audio_Sampler* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {
 	uint32_t temp;
 	uint32_t size = 3 * sizeof(temp) + 2 * sizeof(unsigned char);
@@ -450,11 +453,12 @@ void savespecific(psy_audio_Sampler* self, struct psy_audio_SongFile* songfile, 
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
 }
 
-void voice_init(Voice* self, psy_audio_Sampler* sampler, psy_audio_Instrument* instrument,
-	uintptr_t channel, unsigned int samplerate, psy_audio_Samples* samples) 
+void voice_init(Voice* self, psy_audio_Sampler* sampler,
+	psy_audio_Instrument* instrument, uintptr_t channel,
+	unsigned int samplerate) 
 {	
 	self->sampler = sampler;
-	self->samples = samples;
+	self->samples = machine_samples(sampler_base(sampler));
 	self->instrument = instrument;
 	self->channel = channel;
 	self->usedefaultvolume = 1;
@@ -498,6 +502,24 @@ void voice_dispose(Voice* self)
 	self->positions = 0;	
 }
 
+Voice* voice_alloc(void)
+{
+	return (Voice*) malloc(sizeof(Voice));
+}
+
+Voice* voice_allocinit(psy_audio_Sampler* sampler,
+	psy_audio_Instrument* instrument, uintptr_t channel,
+	unsigned int samplerate)
+{
+	Voice* rv;
+
+	rv = voice_alloc();
+	if (rv) {
+		voice_init(rv, sampler, instrument, channel, samplerate);
+	}
+	return rv;
+}
+
 void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 {	
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
@@ -534,7 +556,7 @@ void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
 		if (sample) {
 			SampleIterator* iterator;
 
-			iterator = malloc(sizeof(SampleIterator));
+			iterator = sampleiterator_alloc();
 			*iterator = sample_begin(sample);
 			psy_list_append(&self->positions, iterator);
 

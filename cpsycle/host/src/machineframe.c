@@ -10,7 +10,6 @@
 #include <presetio.h>
 
 static void machineframe_ondestroy(MachineFrame* self, ui_component* frame);
-static void machineframe_onalign(MachineFrame*, ui_component* sender);
 static void machineframe_onpresetchange(MachineFrame*, ui_component* sender, int index);
 static void parameterbar_setpresetlist(ParameterBar*, psy_audio_Presets*);
 
@@ -52,15 +51,17 @@ void machineframe_init(MachineFrame* self, ui_component* parent)
 	self->presets = 0;
 	self->machine = 0;
 	ui_frame_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
-	parameterbar_init(&self->parameterbar, &self->component);
 	ui_component_seticonressource(&self->component, IDI_MACPARAM);
 	ui_component_move(&self->component, 200, 150);
-	ui_component_resize(&self->component, 400, 400);	
+	ui_component_resize(&self->component, 800, 800);	
+
+	ui_component_enablealign(&self->component);
+	parameterbar_init(&self->parameterbar, &self->component);
+	ui_component_setalign(&self->parameterbar.component, UI_ALIGN_TOP);	
+	parameterlistbox_init(&self->parameterbox, &self->component, 0);
+	ui_component_setalign(&self->parameterbox.component, UI_ALIGN_RIGHT);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		machineframe_ondestroy);
-	psy_signal_connect(&self->component.signal_align, self,
-		machineframe_onalign);
+		machineframe_ondestroy);	
 	psy_signal_connect(&self->parameterbar.presetsbox.signal_selchanged,
 		self, machineframe_onpresetchange);
 }
@@ -73,9 +74,13 @@ void machineframe_setview(MachineFrame* self, ui_component* view,
 	char prefix[4096];
 	char ext[4096];
 	char prspath[4096];
+	ui_size viewsize;
+	char text[128];
 
 	self->view = (ui_component*) view;
+	ui_component_setalign(self->view, UI_ALIGN_CLIENT);
 	self->machine = machine;
+	parameterlistbox_setmachine(&self->parameterbox, machine);
 	info = machine->vtable->info(machine);
 	if (info && info->modulepath) {
 		psy_dir_extract_path(info->modulepath, prefix, name, ext);
@@ -86,7 +91,21 @@ void machineframe_setview(MachineFrame* self, ui_component* view,
 		self->presets = presets_allocinit();
 		presetsio_load(prspath, self->presets);		
 	}
-	parameterbar_setpresetlist(&self->parameterbar, self->presets);
+	parameterbar_setpresetlist(&self->parameterbar, self->presets);	
+	viewsize = ui_component_preferredsize(view, 0);
+	ui_component_resize(&self->component, viewsize.width + 150,
+		viewsize.height + 28);
+	if (self->machine && self->machine->vtable->info(self->machine)) {
+		psy_snprintf(text, 128, "%.2X : %s",
+			self->machine->vtable->slot(self->machine),
+		self->machine->vtable->info(self->machine)->ShortName);
+	} else {
+		ui_component_settitle(&self->component, text);
+			psy_snprintf(text, 128, "%.2X :",
+				self->machine->vtable->slot(self->machine));
+	}
+	ui_component_settitle(&self->component, text);
+	ui_component_align(&self->component);
 }
 
 void machineframe_ondestroy(MachineFrame* self, ui_component* frame)
@@ -95,17 +114,6 @@ void machineframe_ondestroy(MachineFrame* self, ui_component* frame)
 	if (self->presets) {
 		presets_dispose(self->presets);
 		self->presets = 0;
-	}
-}
-
-void machineframe_onalign(MachineFrame* self, ui_component* sender)
-{
-	ui_size size;
-
-	size = ui_component_size(&self->component);
-	ui_component_setposition(&self->parameterbar.component, 0, 0, size.width, 20);
-	if (self->view) {		
-		ui_component_setposition(self->view, 0, 20, size.width, size.height - 20);
 	}
 }
 
@@ -136,3 +144,20 @@ void machineframe_onpresetchange(MachineFrame* self, ui_component* sender, int i
 		}
 	}
 }
+
+MachineFrame* machineframe_alloc(void)
+{
+	return (MachineFrame*) malloc(sizeof(MachineFrame));
+}
+
+MachineFrame* machineframe_allocinit(ui_component* parent)
+{
+	MachineFrame* rv;
+
+	rv = machineframe_alloc();
+	if (rv) {
+		machineframe_init(rv, parent);
+	}
+	return rv;	
+}
+

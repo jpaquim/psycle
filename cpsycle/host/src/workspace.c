@@ -68,6 +68,13 @@ static psy_audio_Instruments* machinecallback_instruments(Workspace*);
 static void machinecallback_fileselect_load(Workspace*);
 static void machinecallback_fileselect_save(Workspace*);
 static void machinecallback_fileselect_directory(Workspace*);
+/// terminal
+static void workspace_onterminalwarning(Workspace*,
+	psy_audio_SongFile* sender, const char* text);
+static void workspace_onterminaloutput(Workspace*,
+	psy_audio_SongFile* sender, const char* text);
+static void workspace_onterminalerror(Workspace*,
+	psy_audio_SongFile* sender, const char* text);
 
 void history_init(History* self)
 {
@@ -173,6 +180,9 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_showparameters);
 	psy_signal_init(&self->signal_viewselected);
 	psy_signal_init(&self->signal_parametertweak);
+	psy_signal_init(&self->signal_terminal_error);
+	psy_signal_init(&self->signal_terminal_out);
+	psy_signal_init(&self->signal_terminal_warning);
 }
 
 void workspace_dispose(Workspace* self)
@@ -214,6 +224,9 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_showparameters);
 	psy_signal_dispose(&self->signal_viewselected);
 	psy_signal_dispose(&self->signal_parametertweak);
+	psy_signal_dispose(&self->signal_terminal_error);
+	psy_signal_dispose(&self->signal_terminal_out);
+	psy_signal_dispose(&self->signal_terminal_warning);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -362,22 +375,23 @@ void workspace_makeconfig(Workspace* self)
 }
 
 void workspace_makegeneral(Workspace* self)
-{
-	psy_Properties* general;
+{	
 	psy_Properties* p;
 
 	self->config = psy_properties_create();	
-	general = psy_properties_create_section(self->config, "general");
-	psy_properties_settext(general, "General");
-	p = psy_properties_append_string(general, "version", "alpha");	
+	self->general = psy_properties_create_section(self->config, "general");
+	psy_properties_settext(self->general, "General");
+	p = psy_properties_append_string(self->general, "version", "alpha");	
 	psy_properties_settext(p, "Version");	
 	p->item.hint = PSY_PROPERTY_HINT_HIDE;
-	p = psy_properties_append_bool(general, "showaboutatstart", 1);
+	p = psy_properties_append_bool(self->general, "showaboutatstart", 1);
 	psy_properties_settext(p, "Show About at Startup");
-	p = psy_properties_append_bool(general, "showsonginfoonload", 1);
+	p = psy_properties_append_bool(self->general, "showsonginfoonload", 1);
 	psy_properties_settext(p, "Show song info on Load");
-	p = psy_properties_append_bool(general, "showmaximizedatstart", 1);
+	p = psy_properties_append_bool(self->general, "showmaximizedatstart", 1);
 	psy_properties_settext(p, "Show Maximized at Startup");
+	p = psy_properties_append_bool(self->general, "showplaylisteditor", 0);
+	psy_properties_settext(p, "Show Playlist Editor");
 }
 
 void workspace_makevisual(Workspace* self)
@@ -822,6 +836,11 @@ int workspace_showmaximizedatstart(Workspace* self)
 	return psy_properties_bool(self->config, "general.showmaximizedatstart", 1);	
 }
 
+int workspace_showplaylisteditor(Workspace* self)
+{	
+	return psy_properties_bool(self->config, "general.showplaylisteditor", 0);
+}
+
 int workspace_showlinenumbers(Workspace* self)
 {	
 	return psy_properties_bool(self->config, "visual.patternview.linenumbers", 1);	
@@ -872,16 +891,25 @@ void workspace_loadsong(Workspace* self, const char* path)
 	properties_free(self->properties);
 	song = song_allocinit(&self->machinefactory);
 	psy_signal_connect(&song->signal_loadprogress, self,
-		workspace_onloadprogress);
+		workspace_onloadprogress);	
+	psy_signal_emit(&song->signal_loadprogress, self, 1, -1);
+	psy_audio_songfile_init(&songfile);
+	psy_signal_connect(&songfile.signal_warning, self,
+		workspace_onterminalwarning);
+	psy_signal_connect(&songfile.signal_error, self,
+		workspace_onterminalerror);
+	psy_signal_connect(&songfile.signal_output, self,
+		workspace_onterminaloutput);
 	songfile.song = song;
 	songfile.file = 0;
 	lock_enter();
 	self->songcbk = song;
-	songfile_load(&songfile, path);	
+	psy_audio_songfile_load(&songfile, path);	
 	self->properties = songfile.workspaceproperties;
+	psy_audio_songfile_dispose(&songfile);
 	free(self->filename);
 	self->filename = strdup(path);
-	workspace_setsong(self, song, WORKSPACE_LOADSONG);	
+	workspace_setsong(self, song, WORKSPACE_LOADSONG);
 	lock_leave();
 }
 
@@ -915,11 +943,13 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 void workspace_savesong(Workspace* self, const char* path)
 {
 	psy_audio_SongFile songfile;
+	psy_audio_songfile_init(&songfile);
 	songfile.file = 0;
 	songfile.song = self->song;
 	psy_signal_emit(&self->signal_beforesavesong, self, 0);
 	songfile.workspaceproperties = self->properties;
-	songfile_save(&songfile, path);
+	psy_audio_songfile_save(&songfile, path);
+	psy_audio_songfile_dispose(&songfile);
 }
 
 void workspace_loadskin(Workspace* self, const char* path)
@@ -1348,4 +1378,22 @@ psy_audio_Machines* machinecallback_machines(Workspace* self)
 psy_audio_Instruments* machinecallback_instruments(Workspace* self)
 {
 	return self->songcbk ? &self->song->instruments : 0;
+}
+
+void workspace_onterminalwarning(Workspace* self, psy_audio_SongFile* sender,
+	const char* text)	
+{
+	psy_signal_emit(&self->signal_terminal_warning, self, 1, text);
+}
+
+void workspace_onterminalerror(Workspace* self, psy_audio_SongFile* sender,
+	const char* text)	
+{
+	psy_signal_emit(&self->signal_terminal_error, self, 1, text);
+}
+
+void workspace_onterminaloutput(Workspace* self, psy_audio_SongFile* sender,
+	const char* text)	
+{
+	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
 }

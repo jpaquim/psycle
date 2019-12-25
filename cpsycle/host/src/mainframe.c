@@ -44,6 +44,14 @@ static void mainframe_ontimer(MainFrame*, ui_component* sender, int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, EventDriver* sender);
 
+static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
+	const char* text);
+static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
+	const char* text);
+static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
+	const char* text);
+
+
 #define GEARVIEW 10
 
 enum {
@@ -80,6 +88,12 @@ void mainframe_init(MainFrame* self)
 	ui_component_setalign(&self->statusbar, UI_ALIGN_BOTTOM);
 	ui_component_enablealign(&self->statusbar);
 	ui_terminal_init(&self->terminal, &self->component);
+	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
+		mainframe_onterminalwarning);
+	psy_signal_connect(&self->workspace.signal_terminal_out, self,
+		mainframe_onterminaloutput);
+	psy_signal_connect(&self->workspace.signal_terminal_error, self,
+		mainframe_onterminalerror);
 	ui_component_setalign(&self->terminal.component, UI_ALIGN_BOTTOM);
 	ui_component_hide(&self->terminal.component);
 	ui_component_resize(&self->terminal.component, 0, 100);
@@ -95,6 +109,7 @@ void mainframe_init(MainFrame* self)
 	ui_component_setalign(&self->sequenceview.component, UI_ALIGN_LEFT);
 	// client
 	ui_component_init(&self->client, &self->component);
+	self->client.defaultpropagation = 1;
 	ui_component_setbackgroundmode(&self->client, BACKGROUND_NONE);
 	ui_component_enablealign(&self->client);
 	ui_component_setalign(&self->client, UI_ALIGN_CLIENT);
@@ -399,12 +414,12 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 	} else
 	if (cmd == CMD_IMM_TERMINAL) {
 		if (ui_component_visible(&self->terminal.component)) {		
-		ui_component_hide(&self->terminal.component);
-		ui_component_align(&self->component);
-	} else {								
-		ui_component_show(&self->terminal.component);
-		ui_component_align(&self->component);		
-	}
+			ui_component_hide(&self->terminal.component);
+			ui_component_align(&self->component);
+		} else {								
+			ui_component_show(&self->terminal.component);
+			ui_component_align(&self->component);		
+		}
 	}
 }
 
@@ -415,9 +430,13 @@ void mainframe_onkeydown(MainFrame* self, ui_component* sender, KeyEvent* ev)
 	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
 		EventDriver* kbd;
 		int input;			
-			
+					
 		kbd = workspace_kbddriver(&self->workspace);
-		input = encodeinput(ev->keycode, ev->shift, ev->ctrl);
+		if (self->workspace.chordmode) {
+			input = encodeinput(ev->keycode, 0, ev->ctrl);
+		} else {
+			input = encodeinput(ev->keycode, ev->shift, ev->ctrl);
+		}
 		kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);
 	}
 }
@@ -469,7 +488,10 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 }
 
 void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
-{
+{	
+	if (progress == -1) {
+		ui_terminal_clear(&self->terminal);		
+	}
 	ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
 }
 
@@ -598,3 +620,30 @@ void mainframe_ontabbarchanged(MainFrame* self, ui_component* sender,
 	ui_component_align(&self->component);
 	ui_component_setfocus(component);
 }
+
+void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
+	const char* text)
+{
+	ui_terminal_output(&self->terminal, text);
+}
+
+void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
+	const char* text)
+{
+	if (!ui_component_visible(&self->terminal.component)) {		
+		ui_component_show(&self->terminal.component);
+		ui_component_align(&self->component);		
+	}	
+	ui_terminal_output(&self->terminal, text);
+}
+
+void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
+	const char* text)
+{
+	if (!ui_component_visible(&self->terminal.component)) {		
+		ui_component_show(&self->terminal.component);
+		ui_component_align(&self->component);		
+	}	
+	ui_terminal_output(&self->terminal, text);
+}
+

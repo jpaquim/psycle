@@ -59,6 +59,7 @@ typedef struct psy_audio_Sampler {
 } psy_audio_Sampler;
 
 void sampler_init(psy_audio_Sampler*, MachineCallback);
+psy_audio_Machine* sampler_base(psy_audio_Sampler*);
 
 const psy_audio_MachineInfo* sampler_info(void);
 

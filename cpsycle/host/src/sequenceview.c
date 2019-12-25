@@ -73,7 +73,9 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	playlisteditor_init(&self->playlisteditor, &self->component,
 		workspace);
 	ui_component_setalign(&self->playlisteditor.component, UI_ALIGN_TOP);
-	ui_component_hide(&self->playlisteditor.component);
+	if (!workspace_showplaylisteditor(workspace)) {
+		ui_component_hide(&self->playlisteditor.component);
+	}
 	ui_splitbar_init(&self->splitbar, &self->component);
 	ui_component_setalign(&self->splitbar.component, UI_ALIGN_TOP);	
 	sequencelistview_init(&self->listview, &self->component, self,
@@ -86,6 +88,9 @@ void sequenceview_init(SequenceView* self, ui_component* parent,
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
 	ui_component_setalign(&self->trackheader.component, UI_ALIGN_TOP);	
 	sequenceroptionsbar_init(&self->options, &self->component);
+	if (workspace_showplaylisteditor(workspace)) {
+		ui_checkbox_check(&self->options.showplaylist);
+	}
 	ui_component_setalign(&self->options.component, UI_ALIGN_BOTTOM);
 	sequenceduration_init(&self->duration, &self->component, self->sequence);
 	ui_component_setalign(&self->duration.component, UI_ALIGN_BOTTOM);
@@ -666,9 +671,13 @@ void sequenceview_onshowplaylist(SequenceView* self, ui_button* sender)
 	size = ui_component_size(&self->component);
 	if (ui_component_visible(&self->playlisteditor.component)) {
 		ui_component_hide(&self->playlisteditor.component);
-	} else {
+		psy_properties_write_bool(self->workspace->general,
+			"showplaylisteditor", 0);
+	} else {		
 		self->playlisteditor.component.visible = 1;
-		ui_component_show(&self->playlisteditor.component);
+		ui_component_show(&self->playlisteditor.component);		
+		psy_properties_write_bool(self->workspace->general,
+			"showplaylisteditor", 1);
 	}
 	ui_component_align(&self->component);
 }

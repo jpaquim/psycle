@@ -54,6 +54,8 @@ typedef struct {
 } SampleIterator;
 
 void sampleiterator_init(SampleIterator*, struct psy_audio_Sample*);
+SampleIterator* sampleiterator_alloc(void);
+SampleIterator* sampleiterator_allocinit(struct psy_audio_Sample*);
 int sampleiterator_inc(SampleIterator*);
 unsigned int sampleiterator_frameposition(SampleIterator*);
 

@@ -122,7 +122,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, ui_graphics* g, int x, int y
 					}
 					if (!zero) {
 						px = width / (float) numsamples;
-						py = height / 32768.f;						
+						py = height / 32768.f / 2;
 						x1 = 0;
 						y1 = (int) (memory->samples[0][0] * py);
 						x2 = 0;

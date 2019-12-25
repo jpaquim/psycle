@@ -136,6 +136,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		}
 		break;
 		case MACH_VST:
+		case MACH_VSTFX:
 		{
 			psy_audio_Machine* plugin;			
 

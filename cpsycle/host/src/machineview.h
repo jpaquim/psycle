@@ -97,7 +97,8 @@ typedef struct {
 	MachineSkin skin;	   
 	Workspace* workspace;	
 	struct MachineViewBar* statusbar;
-	ui_edit editname;	
+	ui_edit editname;
+	int firstsize;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, ui_component* parent,

@@ -14,7 +14,6 @@
 #include <portable.h>
 
 HINSTANCE appInstance = 0;
-HWND appMainComponentHandle = 0;
 int iDeltaPerLine = 120;
 
 TCHAR szAppClass[] = TEXT("PsycleApp");
@@ -50,7 +49,7 @@ void ui_init(uintptr_t hInstance)
 	ui_fontinfo fontinfo;
 	int succ;
 
-	psy_signal_init(&app.signal_dispose);
+	ui_app_init(&app);
 
 	psy_table_init(&selfmap);
 	psy_table_init(&winidmap);
@@ -103,7 +102,7 @@ void ui_dispose()
 	psy_table_dispose(&winidmap);
 	DeleteObject(defaultfont.hfont);
 	DeleteObject(defaultbackgroundbrush);
-	psy_signal_dispose(&app.signal_dispose);
+	ui_app_dispose(&app);
 }
 
 void ui_replacedefaultfont(ui_component* main, ui_font* font)
@@ -121,14 +120,14 @@ void ui_replacedefaultfont(ui_component* main, ui_font* font)
 
 			child = (ui_component*)p->entry;
 			if (child->font.hfont == defaultfont.hfont) {
-				child->font.hfont = font->hfont;		
+				child->font.hfont = font->hfont;	
 				SendMessage((HWND)child->hwnd, WM_SETFONT,
 					(WPARAM) font->hfont, 0);
 				ui_component_align(child);
 			}		
 		}		
 		psy_list_free(q);
-		ui_font_dispose(&defaultfont);
+		DeleteObject(defaultfont.hfont);
 		defaultfont = *font;
 		ui_component_align(main);
 	}
@@ -165,7 +164,12 @@ int ui_win32_component_init(ui_component* self, ui_component* parent,
 		hInstance,
 		NULL);	
 	if ((HWND) self->hwnd == NULL) {
-        MessageBox(NULL, "Failed To Create Component", "Error",
+		char text[256];
+		unsigned long err;
+
+		err = GetLastError();
+		psy_snprintf(text, 256, "Failed To Create Component (Error %u)", err);
+        MessageBox(NULL, text, "Error",
 			MB_OK | MB_ICONERROR);
 		err = 1;
 	} else {
@@ -189,7 +193,7 @@ int ui_win32_component_init(ui_component* self, ui_component* parent,
 #endif
 	}
 	if (!parent) {
-		appMainComponentHandle = (HWND) self->hwnd;
+		app.main = self;
 	}
 	return err;
 }
@@ -379,7 +383,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_SIZE:			
 				{
 					ui_size size;
-					if (component->alignchildren == 1) {
+					if (component->alignchildren) {
 						ui_component_align(component);
 					}
 					size.width = LOWORD(lParam);
@@ -526,7 +530,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						(lParam & 0x40000000) == 0x40000000);
 					psy_signal_emit(&component->signal_keydown, component, 1, &keyevent);
 				}
-				if (component->propagateevent) {					
+				if (component->propagateevent) {
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
 				}				
 				component->propagateevent = component->defaultpropagation;
@@ -1525,8 +1529,10 @@ int ui_openfile(ui_component* self, char* szTitle, char* szFilter,
 	ofn.nFileExtension= 0; 
 	ofn.lpstrDefExt= szDefExtension;
 	rv = GetOpenFileName(&ofn);
-	InvalidateRect(appMainComponentHandle, 0, FALSE);
-	UpdateWindow(appMainComponentHandle);
+	if (app.main) {
+		InvalidateRect((HWND) app.main->hwnd, 0, FALSE);
+		UpdateWindow((HWND) app.main->hwnd);
+	}
 	return rv;
 }
 
@@ -1554,8 +1560,10 @@ int ui_savefile(ui_component* self, char* szTitle, char* szFilter,
 	ofn.nFileOffset= 0; 
 	ofn.nFileExtension= 0; 
 	ofn.lpstrDefExt= szDefExtension;
-	InvalidateRect(appMainComponentHandle, 0, FALSE);
-	UpdateWindow(appMainComponentHandle);
+	if (app.main) {
+		InvalidateRect((HWND) app.main->hwnd, 0, FALSE);
+		UpdateWindow((HWND) app.main->hwnd);
+	}
 	rv = GetSaveFileName(&ofn);
 	return rv;
 }
@@ -1669,11 +1677,6 @@ void ui_component_seticonressource(ui_component* self, int ressourceid)
 #endif
 }
 
-ui_component* ui_maincomponent(void)
-{
-	return psy_table_at(&selfmap, (uintptr_t) appMainComponentHandle);
-}
-
 void ui_component_starttimer(ui_component* self, unsigned int id,
 	unsigned int interval)
 {
@@ -1735,4 +1738,14 @@ int ui_browsefolder(ui_component* self, const char* title, char* path)
 		pMalloc->lpVtbl->Release(pMalloc);
 	}
 	return val;
+}
+
+uint32_t ui_defaultcolor(void)
+{
+	return defaultcolor;
+}
+
+uint32_t ui_defaultbackgroundcolor(void)
+{
+	return defaultbackgroundcolor;
 }

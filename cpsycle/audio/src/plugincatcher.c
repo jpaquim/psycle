@@ -46,6 +46,8 @@ static int onenumdir(psy_audio_PluginCatcher*, const char* path, int flag);
 static int onpropertiesenum(psy_audio_PluginCatcher*, psy_Properties*, int level);
 static int pathhasextension(const char* path);
 static char* replace_char(char* str, char c, char r);
+static void plugincatcher_scan_multipath(psy_audio_PluginCatcher*,
+	const char* multipath, const char* wildcard, int option);
 
 static const char* searchname;
 static int searchtype;
@@ -103,8 +105,8 @@ void plugincatcher_makeplugininfo(psy_audio_PluginCatcher* self,
 		const char* name,
 		const char* path,
 		unsigned int type,
-		const psy_audio_MachineInfo* info) {
-
+		const psy_audio_MachineInfo* info)
+{
 	if (info) {
 		psy_Properties* p;
 
@@ -129,6 +131,21 @@ void plugincatcher_makeplugininfo(psy_audio_PluginCatcher* self,
 	}
 }
 
+void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
+	const char* multipath, const char* wildcard, int option)
+{
+	char text[4096];
+	char seps[] = ";,";
+	char *token;
+		
+	strcpy(text, multipath);
+	token = strtok(text, seps);
+	while(token != 0) {
+		psy_dir_enumerate_recursive(self, token, wildcard, option, onenumdir);
+		token = strtok(0, seps );
+	}
+}
+
 void plugincatcher_scan(psy_audio_PluginCatcher* self)
 {	
 	psy_Properties* p;
@@ -147,8 +164,8 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 		}
 		p = psy_properties_findsection(self->dirconfig, "vsts32");
 		if (p) {		
-			psy_dir_enumerate_recursive(self, psy_properties_valuestring(p), "*"MODULEEXT,
-				MACH_VST, onenumdir);
+			plugincatcher_scan_multipath(self, psy_properties_valuestring(p),
+				"*"MODULEEXT, MACH_VST);
 		}
 	}
 	psy_signal_emit(&self->signal_changed, self, 0);
@@ -179,19 +196,22 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 	plugincatcher_catchername(self, path, name);
 	if (type == MACH_PLUGIN) {		
 		if (plugin_psycle_test(path, &macinfo)) {
-			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}	
 	} else
 	if (type == MACH_LUA) {
 		if (plugin_luascript_test(path, &macinfo)) {
-			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}
 	} else
 	if (type == MACH_VST) {
-		if (plugin_vst_test(path, &macinfo)) {
-			plugincatcher_makeplugininfo(self, name, path, type, &macinfo);
+		if (plugin_vst_test(path, &macinfo)) {			
+			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}
 	}

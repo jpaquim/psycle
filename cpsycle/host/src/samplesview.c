@@ -179,9 +179,10 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 			free(self->source);
 		}	
 		self->source = song_allocinit(&self->workspace->machinefactory);
+		psy_audio_songfile_init(&songfile);
 		songfile.song = self->source;
 		songfile.file = 0;		
-		songfile_load(&songfile, path);
+		psy_audio_songfile_load(&songfile, path);
 		if (!songfile.err) {
 			ui_label_settext(&self->songname,
 				self->source->properties.title);
@@ -191,6 +192,7 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 			ui_label_settext(&self->songname,
 				"No source song loaded");
 		}
+		psy_audio_songfile_dispose(&songfile);
 	}		
 }
 

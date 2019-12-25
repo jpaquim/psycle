@@ -305,8 +305,9 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	lock_enter();	
 	self->song = song_allocinit(&self->machinefactory);	
 	songfile.song = self->song;
-	songfile.file = 0;	
-	songfile_load(&songfile, path);	
+	songfile.file = 0;
+	psy_audio_songfile_init(&songfile);
+	psy_audio_songfile_load(&songfile, path);	
 	if (songfile.err) {
 		fprintf(stderr, "Couldn't load song\n");
 	}	
@@ -314,6 +315,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	cmdplayer_applysongproperties(self);
 	lock_leave();
 	song_free(oldsong);
+	psy_audio_songfile_dispose(&songfile);
 }
 
 void cmdplayer_applysongproperties(CmdPlayer* self)

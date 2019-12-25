@@ -11,6 +11,8 @@
 
 #define TIMERID_PARAMVIEW 410
 
+static void onpreferredsize(ParamView* self, ui_component* sender,
+	ui_size* limit, ui_size* rv);
 static void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g);
 static void DrawBackground(ParamView* self, ui_graphics* g);
 static void DrawParam(ParamView* self, ui_graphics* g, int param, int row, int col);
@@ -29,10 +31,11 @@ static void OnTimer(ParamView*, ui_component* sender, int timerid);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
 
+
 static ui_bitmap knobs;
 static ui_bitmap mixer;
 
-void InitParamView(ParamView* self, ui_component* parent, psy_audio_Machine* machine,
+void paramview_init(ParamView* self, ui_component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
 {	
 	if (knobs.hBitmap == NULL) {
@@ -50,7 +53,10 @@ void InitParamView(ParamView* self, ui_component* parent, psy_audio_Machine* mac
 	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	psy_signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
 	psy_signal_connect(&self->component.signal_mousemove,self, OnMouseMove);
-	psy_signal_connect(&self->component.signal_timer,self, OnTimer);	
+	psy_signal_connect(&self->component.signal_timer,self, OnTimer);
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
+		onpreferredsize);
 	ui_component_resize(&self->component, 800, 400);
 	if (self->machine) {
 		self->numparams = self->machine->vtable->numparameters(self->machine);
@@ -71,12 +77,29 @@ void InitParamView(ParamView* self, ui_component* parent, psy_audio_Machine* mac
 	ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
 }
 
+ParamView* paramview_alloc(void)
+{
+	return (ParamView*) malloc(sizeof(ParamView));
+}
+
+ParamView* paramview_allocinit(ui_component* parent, psy_audio_Machine* machine,
+	Workspace* workspace)
+{
+	ParamView* rv;
+
+	rv = paramview_alloc();
+	if (rv) {
+		paramview_init(rv, parent, machine, workspace);
+	}
+	return rv;
+}
+
 void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
 {			
 	if (self->machine) {								
-		int row = 0;
-		int col = 0;
-		int param;		
+		uintptr_t row = 0;
+		uintptr_t col = 0;
+		uintptr_t param;		
 
 		self->numparams = self->machine->vtable->numparameters(self->machine);
 		self->numparametercols = self->machine->vtable->numparametercols(self->machine);
@@ -318,25 +341,6 @@ void cellposition(ParamView* self, int row, int col, int* x, int* y)
 	*y = row * height;	
 }
 
-void ParamViewSize(ParamView* self, int* width, int* height)
-{
-	int cellwidth;
-	int cellheight;
-
-	if (self->machine) {
-		self->numparams = self->machine->vtable->numparameters(self->machine);
-		self->numparametercols = self->machine->vtable->numparametercols(self->machine);
-		if (self->numparametercols > 0) {
-			self->numrows = self->numparams / self->numparametercols;
-		} else {
-			self->numrows = self->numparams;
-		}
-	}
-	cellsize(self, &cellwidth, &cellheight);
-	*width = self->numparametercols * cellwidth;
-	*height = self->numrows * cellheight;
-}
-
 void OnMouseDown(ParamView* self, ui_component* sender, MouseEvent* ev)
 {
 	self->tweak = HitTest(self, ev->x, ev->y);
@@ -352,15 +356,15 @@ int HitTest(ParamView* self, int x, int y)
 {
 	int width;
 	int height;
-	int row;
-	int col;
-	int rv;
+	uintptr_t row;
+	uintptr_t col;	
+	uintptr_t param;
 	
 	cellsize(self, &width, &height);
 	row = y / height;
 	col = x / width;
-	rv = (row % self->numrows) + col*self->numrows;
-	return (rv >= 0 && rv < self->numparams) ? rv : -1;
+	param = (row % self->numrows) + col*self->numrows;
+	return (param >= 0 && param < self->numparams) ? (int) param : -1;
 }
 
 void OnMouseUp(ParamView* self, ui_component* sender, MouseEvent* ev)
@@ -411,4 +415,28 @@ int intparamvalue(float value)
 float floatparamvalue(int value)
 {
 	return value / 65535.f;	
+}
+
+void onpreferredsize(ParamView* self, ui_component* sender, ui_size* limit,
+	ui_size* rv)
+{
+	if (rv) {
+		int cellwidth;
+		int cellheight;
+
+		if (self->machine) {
+			self->numparams = self->machine->vtable->numparameters(self->machine);
+			self->numparametercols = self->machine->vtable->numparametercols(self->machine);
+			if (self->numparametercols > 0) {
+				self->numrows = self->numparams / self->numparametercols;
+			} else {
+				self->numrows = self->numparams;
+			}
+		}
+		cellsize(self, &cellwidth, &cellheight);
+		rv->width = self->numparametercols * cellwidth;
+		rv->height = self->numrows * cellheight;
+	} else {
+		*rv = ui_component_size(&self->component);
+	}
 }
