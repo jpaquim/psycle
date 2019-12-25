@@ -17,6 +17,23 @@ static int FilterException(const char* msg, int code, struct _EXCEPTION_POINTERS
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
+void ui_app_init(ui_app* self)
+{
+	psy_signal_init(&self->signal_dispose);
+	self->main = 0;
+}
+
+void ui_app_dispose(ui_app* self)
+{
+	psy_signal_dispose(&self->signal_dispose);
+}
+
+struct ui_component* ui_app_main(ui_app* self)
+{
+	return self->main;	
+}
+
+
 int ui_run(void) 
 {
 	MSG msg; 

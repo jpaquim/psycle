@@ -12,7 +12,12 @@
 
 typedef struct {
 	psy_Signal signal_dispose;
+	struct ui_component* main;
 } ui_app;
+
+void ui_app_init(ui_app*);
+void ui_app_dispose(ui_app*);
+struct ui_component* ui_app_main(ui_app*);
 
 extern ui_app app;
 

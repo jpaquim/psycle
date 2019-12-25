@@ -52,7 +52,7 @@ typedef struct {
 typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
 	LPARAM lParam);
 
-typedef struct {
+typedef struct ui_component {
 	uintptr_t hwnd;
 	uintptr_t winid;	
 	psy_Signal signal_size;
@@ -167,8 +167,8 @@ void ui_component_preventalign(ui_component*);
 void ui_component_enableinput(ui_component*, int recursive);
 void ui_component_preventinput(ui_component*, int recursive);
 void ui_component_setbackgroundmode(ui_component*, BackgroundMode);
-void ui_component_setbackgroundcolor(ui_component*, unsigned int color);
-void ui_component_setcolor(ui_component*, unsigned int color);
+void ui_component_setbackgroundcolor(ui_component*, uint32_t color);
+void ui_component_setcolor(ui_component*, uint32_t color);
 void ui_component_starttimer(ui_component*, unsigned int id, unsigned int interval);
 void ui_component_stoptimer(ui_component*, unsigned int id);
 ui_size ui_component_textsize(ui_component*, const char*);
@@ -185,6 +185,7 @@ int ui_savefile(ui_component* self, char* title, char* filter,
 	char* defextension, const char* szInitialDir, char* filename);
 int ui_browsefolder(ui_component* self, const char* title, char* path);
 
-ui_component* ui_maincomponent(void);
+uint32_t ui_defaultcolor(void);
+uint32_t ui_defaultbackgroundcolor(void);
 
 #endif

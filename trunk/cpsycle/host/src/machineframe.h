@@ -5,6 +5,7 @@
 #define MACHINEFRAME_H
 
 #include "paramview.h"
+#include "paramlistbox.h"
 
 #include <presets.h>
 #include <uibutton.h>
@@ -22,6 +23,7 @@ typedef struct {
 typedef struct {
 	ui_component component;
 	ParameterBar parameterbar;
+	ParameterListBox parameterbox;
 	ui_component* view;
 	psy_audio_Presets* presets;
 	psy_audio_Machine* machine;
@@ -30,6 +32,9 @@ typedef struct {
 void parameterbar_init(ParameterBar*, ui_component* parent);
 
 void machineframe_init(MachineFrame*, ui_component* parent);
+MachineFrame* machineframe_alloc(void);
+MachineFrame* machineframe_allocinit(ui_component* parent);
+
 void machineframe_setview(MachineFrame* self, ui_component* view, psy_audio_Machine*);
 
 #endif

@@ -15,9 +15,9 @@ typedef struct {
    int cx;
    int cy;
    psy_audio_Machine* machine;   
-   int numparams;
-   int numparametercols;   
-   int numrows;
+   uintptr_t numparams;
+   uintptr_t numparametercols;   
+   uintptr_t numrows;
    int tweak;
    int tweakbase;
    int tweakval;
@@ -25,9 +25,11 @@ typedef struct {
    Workspace* workspace;
 } ParamView;
 
-void InitParamView(ParamView*, ui_component* parent, psy_audio_Machine* machine,
+void paramview_init(ParamView*, ui_component* parent, psy_audio_Machine*,
 	Workspace*);
-void ParamViewSize(ParamView*, int* width, int* height);
+ParamView* paramview_alloc(void);
+ParamView* paramview_allocinit(ui_component* parent, psy_audio_Machine*,
+	Workspace*);
 
 
 #endif

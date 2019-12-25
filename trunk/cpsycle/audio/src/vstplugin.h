@@ -25,6 +25,7 @@ typedef struct {
 } psy_audio_VstPlugin;
 
 void vstplugin_init(psy_audio_VstPlugin*, MachineCallback, const char* path);
+psy_audio_Machine* vstplugin_base(psy_audio_VstPlugin*);
 int plugin_vst_test(const char* path, psy_audio_MachineInfo* rv);
 
 #endif

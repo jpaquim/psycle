@@ -81,6 +81,7 @@ static void machinewireview_beforesavesong(MachineWireView*, Workspace*);
 static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire wire);
 static WireFrame* machinewireview_wireframe(MachineWireView* self, psy_audio_Wire wire);
 static void machinewireview_setcoords(MachineWireView*, psy_Properties*);
+static void machinewireview_onsize(MachineWireView*, ui_component* sender, ui_size* size);
 
 static void machineview_onshow(MachineView*, ui_component* sender);
 static void machineview_onhide(MachineView*, ui_component* sender);
@@ -290,48 +291,37 @@ void machineui_drawvu(MachineUi* self, MachineWireView* wireview, ui_graphics* g
 
 void machineui_showparameters(MachineUi* self, ui_component* parent)
 {
-	if (self->machine) {
+	if (self->machine) {		
 		if (self->frame == 0) {			
-			self->frame = (MachineFrame*) malloc(sizeof(MachineFrame));
+			self->frame = machineframe_alloc();
 			self->frame->component.hwnd = 0;
 		}
-		if (self->machine->vtable->haseditor(self->machine)) {
-			int width;
-			int height;
-
-			machineframe_init(self->frame, parent);
-			self->vst2view = (Vst2View*) malloc(sizeof(Vst2View));
-			InitVst2View(self->vst2view, &self->frame->component, self->machine);
-			machineframe_setview(self->frame, &self->vst2view->component,
-				self->machine);
-			self->machine->vtable->editorsize(self->machine, &width, &height);
-			ui_component_resize(&self->frame->component, width, height + 28);			
-		} else
 		if (self->frame->component.hwnd == 0) {
-			int width;
-			int height;
-			char txt[128];
-
+			ui_component* view = 0;
+			
 			machineframe_init(self->frame, parent);
+			if (machine_haseditor(self->machine)) {
+				Vst2View* vst2view;
 
-			if (self->machine && self->machine->vtable->info(self->machine)) {
-				psy_snprintf(txt, 128, "%.2X : %s", self->slot,
-					self->machine->vtable->info(self->machine)->ShortName);
+				vst2view = vst2view_allocinit(&self->frame->component,
+					self->machine, self->workspace);
+				if (vst2view) {
+					view = &vst2view->component;
+				}
 			} else {
-				ui_component_settitle(&self->frame->component, txt);
-				psy_snprintf(txt, 128, "%.2X :", self->slot);
+				ParamView* paramview;
+
+				paramview = paramview_allocinit(&self->frame->component,
+					self->machine, self->workspace);
+				if (paramview) {
+					view = &paramview->component;
+				}
 			}
-			ui_component_settitle(&self->frame->component, txt);
-			self->paramview = (ParamView*) malloc(sizeof(ParamView));
-			InitParamView(self->paramview, &self->frame->component, self->machine,
-				self->workspace);
-			machineframe_setview(self->frame, &self->paramview->component,
-				self->machine);		
-			ParamViewSize(self->paramview, &width, &height);
-			ui_component_resize(&self->frame->component, width, height + 28);
-		}
-		ui_component_show(&self->frame->component);
-		//ui_component_setfocus(&self->paramview->component);
+			if (view) {				
+				machineframe_setview(self->frame, view, self->machine);
+			}
+		}		
+		ui_component_show(&self->frame->component);				
 	}
 }
 
@@ -340,6 +330,7 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 {	
 	ui_fontinfo fontinfo;
 
+	self->firstsize = 0;
 	self->dx = 0;
 	self->dy = 0;
 	self->statusbar = 0;
@@ -355,8 +346,7 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
 	ui_font_init(&self->skin.font, &fontinfo);
 	ui_component_setfont(&self->component, &self->skin.font);
-	machinewireview_connectuisignals(self);
-	ui_component_move(&self->component, 0, 0);	
+	machinewireview_connectuisignals(self);	
 	self->dragslot = NOMACHINE_INDEX;
 	self->dragmode = MACHINEWIREVIEW_DRAG_MACHINE;
 	self->selectedslot = MASTER_INDEX;
@@ -375,10 +365,13 @@ void machinewireview_init(MachineWireView* self, ui_component* parent,
 		machinewireview_onshowparameters);
 	psy_signal_connect(&self->component.signal_scroll, self,
 		machinewireview_onscroll);
+		psy_signal_connect(&self->component.signal_size, self,
+		machinewireview_onsize);
 	machinewireview_adjustscroll(self);
 	ui_edit_init(&self->editname, &self->component, 0);
 	ui_component_hide(&self->editname.component);
 	ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
+	self->firstsize = 1;
 }
 
 void machinewireview_adjustscroll(MachineWireView* self)
@@ -449,6 +442,7 @@ void machinewireview_ondestroy(MachineWireView* self, ui_component* component)
 		free(frame);
 	}
 	psy_list_free(self->wireframes);
+	ui_font_dispose(&self->skin.font);
 }
 
 void machinewireview_initmachinecoords(MachineWireView* self)
@@ -889,6 +883,14 @@ void drawmachineline(ui_graphics* g, int xdir, int ydir, int x, int y)
 	int hlength = 9; // the length of the selected machine highlight	
 
 	ui_drawline(g, x, y, x + xdir * hlength, y + ydir * hlength);
+}
+
+void machinewireview_onsize(MachineWireView* self, ui_component* sender, ui_size* size)
+{
+	if (self->firstsize) {
+		self->firstsize = 0;
+		machinewireview_align(self);
+	}
 }
 
 void machineview_align(MachineView* self)

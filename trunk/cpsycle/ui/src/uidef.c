@@ -12,6 +12,7 @@
 #define EZ_ATTR_UNDERLINE     4
 #define EZ_ATTR_STRIKEOUT     8
 
+
 extern ui_font defaultfont;
 
 static LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
@@ -179,7 +180,7 @@ void ui_font_init(ui_font* self, const ui_fontinfo* fontinfo)
 	if (fontinfo) {
 		HDC hdc = GetDC (NULL) ;
 		SaveDC (hdc) ;          
-		self->hfont = CreateFontIndirect (&fontinfo->lf) ;         
+		self->hfont = CreateFontIndirect (&fontinfo->lf) ;
 		RestoreDC (hdc, -1);
 		ReleaseDC(NULL, hdc);
 	} else {

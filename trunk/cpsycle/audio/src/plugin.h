@@ -15,7 +15,8 @@ typedef struct {
 	unsigned int preventsequencerlinetick;
 } psy_audio_Plugin;
 
-void plugin_init(psy_audio_Plugin* self, MachineCallback, const char* path);
+void plugin_init(psy_audio_Plugin*, MachineCallback, const char* path);
+psy_audio_Machine* plugin_base(psy_audio_Plugin*);
 int plugin_psycle_test(const char* path, psy_audio_MachineInfo*);
 
 #endif

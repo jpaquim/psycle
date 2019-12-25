@@ -196,6 +196,10 @@ SOURCE=.\src\octavebar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\paramlistbox.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\paramview.c
 # End Source File
 # Begin Source File
@@ -453,6 +457,10 @@ SOURCE=.\src\newmachine.h
 # Begin Source File
 
 SOURCE=.\src\octavebar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\paramlistbox.h
 # End Source File
 # Begin Source File
 

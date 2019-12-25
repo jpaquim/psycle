@@ -5,12 +5,15 @@
 #define UITERMINAL_H
 
 #include "uicomponent.h"
+#include "uieditor.h"
 
 typedef struct {
-   ui_component component;      
+   ui_component component;
+   ui_editor output;
 } ui_terminal;
 
 void ui_terminal_init(ui_terminal*, ui_component* parent);
-void ui_terminal_output(ui_terminal*, char* text);
+void ui_terminal_output(ui_terminal*, const char* text);
+void ui_terminal_clear(ui_terminal*);
 
 #endif

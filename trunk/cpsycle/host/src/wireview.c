@@ -70,7 +70,7 @@ void wireview_initvolumeslider(WireView* self)
 	ui_button_setcharnumber(&self->dbvol, 10);
 	self->dbvol.component.doublebuffered = 1;
 	ui_component_setalign(&self->dbvol.component, UI_ALIGN_BOTTOM);
-	ui_slider_init(&self->volslider, &self->slidergroup);	
+	ui_slider_init(&self->volslider, &self->slidergroup);
 	ui_slider_setcharnumber(&self->volslider, 4);
 	ui_slider_showvertical(&self->volslider);
 	ui_component_resize(&self->volslider.component, 20, 0);

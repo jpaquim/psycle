@@ -201,6 +201,9 @@ int plugintype(psy_Properties* property, char* txt)
 		case MACH_VST:
 			strcpy(txt, "vst");
 		break;
+		case MACH_VSTFX:
+			strcpy(txt, "vst");
+		break;
 		default:
 			strcpy(txt, "int");
 		break;

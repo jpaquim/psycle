@@ -9,13 +9,13 @@
 #include "greet.h"
 #include "about.h"
 
-#include <uiedit.h>
+#include <uieditor.h>
 #include <uinotebook.h>
 
 typedef struct {
 	ui_component component;
 	ui_notebook notebook;
-	ui_edit edit;
+	ui_editor editor;
 	TabBar tabbar;
 	Workspace* workspace;
 } Help;

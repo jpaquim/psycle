@@ -45,6 +45,7 @@ typedef struct {
 	psy_audio_Song* songcbk;
 	psy_audio_Player player;	
 	psy_Properties* config;
+	psy_Properties* general;
 	psy_Properties* inputoutput;
 	psy_Properties* midi;
 	psy_Properties* keyboard;
@@ -71,6 +72,9 @@ typedef struct {
 	psy_Signal signal_showparameters;
 	psy_Signal signal_viewselected;
 	psy_Signal signal_parametertweak;
+	psy_Signal signal_terminal_error;
+	psy_Signal signal_terminal_out;
+	psy_Signal signal_terminal_warning;
 	ui_component* mainhandle;
 	UndoRedo undoredo;
 	History history;
@@ -88,6 +92,7 @@ typedef struct {
 	int currview;
 	psy_List* currnavigation;
 	int navigating;
+	int chordmode;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -106,6 +111,7 @@ int workspace_octave(Workspace*);
 int workspace_showsonginfoonload(Workspace*);
 int workspace_showaboutatstart(Workspace*);
 int workspace_showmaximizedatstart(Workspace*);
+int workspace_showplaylisteditor(Workspace*);
 int workspace_showlinenumbers(Workspace*);
 int workspace_showlinenumbercursor(Workspace*);
 int workspace_showlinenumbersinhex(Workspace*);

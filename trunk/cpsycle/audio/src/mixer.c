@@ -42,8 +42,10 @@ static uintptr_t numinputs(psy_audio_Mixer*);
 static uintptr_t numoutputs(psy_audio_Mixer*);
 static psy_audio_Buffer* mix(psy_audio_Mixer*, uintptr_t slot, unsigned int amount, psy_audio_MachineSockets*, psy_audio_Machines*);
 static void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, unsigned int numsamples, float vol);
-static void loadspecific(psy_audio_Mixer*, struct psy_audio_SongFile*, unsigned int slot);
-static void savespecific(psy_audio_Mixer*, struct psy_audio_SongFile*, unsigned int slot);
+static void loadspecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
+	uintptr_t slot);
+static void savespecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
+	uintptr_t slot);
 static void onconnected(psy_audio_Mixer*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void ondisconnected(psy_audio_Mixer*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static int parametertype(psy_audio_Mixer*, int par);
@@ -54,7 +56,7 @@ static void parametertweak(psy_audio_Mixer*, int param, int value);
 static void patterntweak(psy_audio_Mixer* self, int par, int val);
 static int parametervalue(psy_audio_Mixer*, int const param);
 static int describevalue(psy_audio_Mixer*, char* txt, int const param, int const value);
-static unsigned int numparameters(psy_audio_Mixer*);
+static uintptr_t numparameters(psy_audio_Mixer*);
 static unsigned int numparametercols(psy_audio_Mixer*);
 
 static int intparamvalue(float value);
@@ -993,7 +995,7 @@ int describevalue(psy_audio_Mixer* self, char* txt, int const param, int const v
 	return 0;
 }
 
-unsigned int numparameters(psy_audio_Mixer* self)
+uintptr_t numparameters(psy_audio_Mixer* self)
 {	
 	return (unsigned int)( numparametercols(self) * (10  + psy_table_size(&self->sends) + 
 		psy_table_size(&self->sends)));
@@ -1137,12 +1139,13 @@ psy_audio_WireSocketEntry* wiresocketentry(psy_audio_Mixer* self, uintptr_t inpu
 	return rv;
 }
 
-void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {
-	unsigned int filesize;
-	int numins = 0;
-	unsigned int numrets = 0;
-	unsigned int i;
+	uint32_t filesize;
+	int32_t numins = 0;
+	uint32_t numrets = 0;
+	uint32_t i;
 	
 	psyfile_read(songfile->file, &filesize, sizeof(filesize));
 	psyfile_read(songfile->file, &self->solocolumn, sizeof(self->solocolumn));
@@ -1251,7 +1254,8 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile, un
 	// return true;
 }
 
-void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {
 	float volume_;
 	float drywetmix_;

@@ -5,8 +5,6 @@
 
 #include "psy3.h"
 #include "songio.h"
-// #include "machines.h"
-// #include "pattern.h"
 #include "constants.h"
 #include <datacompression.h>
 #include <dir.h>
@@ -60,8 +58,8 @@ static short* psy3_floatbuffertoshort(float* buffer, uintptr_t numframes);
 void psy3_load(struct psy_audio_SongFile* self)
 {
 	char header[9];	
+	uint32_t temp32;
 	uint32_t index = 0;
-//	int32_t temp;
 	int32_t solo = 0;
 	int32_t playlength;
 	int32_t chunkcount = 0;		
@@ -72,11 +70,14 @@ void psy3_load(struct psy_audio_SongFile* self)
 	
 	machinesproperties = psy_properties_create_section(
 		self->workspaceproperties, "machines");	
-	psyfile_read(self->file, &self->file->fileversion, sizeof(uint32_t));
-	psyfile_read(self->file, &self->file->filesize, sizeof(uint32_t));	
-	if(self->file->fileversion > CURRENT_FILE_VERSION)
-	{
-		//MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
+	psyfile_read(self->file, &temp32, sizeof(temp32));
+	self->file->fileversion = temp32;
+	psyfile_read(self->file, &temp32, sizeof(temp32));	
+	self->file->filesize = temp32;
+	if(self->file->fileversion > CURRENT_FILE_VERSION) {
+		psy_audio_songfile_warn(self, 
+			"This file is from a newer version of Psycle! "
+			"This process will try to load it anyway.\n");
 	}	
 	psyfile_read(self->file, &self->file->chunkcount, sizeof(uint32_t));
 	if (self->file->fileversion >= 8) {
@@ -763,7 +764,7 @@ void loadwavesubchunk(psy_audio_SongFile* self, int32_t instrIdx, int32_t pan, c
 		sample->loopstart = psyfile_read_uint32(self->file);
 		sample->loopend = psyfile_read_uint32(self->file);		
 		sample->tune = psyfile_read_uint32(self->file);		
-		tmp = psyfile_read_int32(self->file, &tmp, sizeof(tmp));
+		psyfile_read(self->file, &tmp, sizeof(tmp));
 		//Current sampler uses 100 cents. Older used +-256		
 		sample->finetune = (int16_t)(tmp / 2.56f);		
 		doloop = psyfile_read_uint8(self->file);
@@ -874,7 +875,7 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 	if (!machine) {
 		machine = machinefactory_makemachine(self->song->machinefactory, MACH_DUMMY, 
 			plugincatchername);
-		type = MACH_DUMMY;
+		type = MACH_DUMMY;		
 	}
 	
 	{
@@ -893,12 +894,12 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 		psy_properties_append_int(properties, "x", x, 0, 0);
 		psy_properties_append_int(properties, "y", y, 0, 0);
 		if (bypass) {
-			machine->vtable->bypass(machine);
+			machine_bypass(machine);
 		}
 		if (mute) {
-			machine->vtable->mute(machine);
+			machine_mute(machine);
 		}
-		machine->vtable->setpanning(machine, panning / 128.f);
+		machine_setpanning(machine, panning / 128.f);
 	}	
 	
 	for(i = 0; i < MAX_CONNECTIONS; i++)
@@ -939,6 +940,12 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 		strcpy(text, "X!");
 		strcat(text, editname);
 		machine->vtable->seteditname(machine, text);
+		psy_audio_songfile_warn(self, "replaced missing module ");
+		psy_audio_songfile_warn(self, modulename);
+		psy_audio_songfile_warn(self, " aka ");
+		psy_audio_songfile_warn(self, editname);
+		psy_audio_songfile_warn(self, " with dummy-plug\n");
+
 	} else {
 		machine->vtable->seteditname(machine, editname);
 	}
@@ -1448,29 +1455,34 @@ void psy3_saveinstrumentfilechunk(psy_audio_SongFile* self, psy_audio_Instrument
 	temp8 = instrument->nna;
 	psyfile_write(self->file, &temp8, sizeof(temp8));
 	// ENV_AT
-	temp = adsr_settings_attack(&instrument->volumeenvelope);
+	temp = (int) (adsr_settings_attack(&instrument->volumeenvelope) * 
+		44100);	
 	psyfile_write(self->file, &temp, sizeof(temp));
 	// ENV_DT
-	temp = adsr_settings_decay(&instrument->volumeenvelope);
+	temp = (int) (adsr_settings_decay(&instrument->volumeenvelope) *
+		44100);
 	psyfile_write(self->file, &temp, sizeof(temp));
 	// ENV_SL
-	temp = adsr_settings_sustain(&instrument->volumeenvelope);
+	temp = (int)(adsr_settings_sustain(&instrument->volumeenvelope) * 100);
 	psyfile_write(self->file, &temp, sizeof(temp));
 	// ENV_RT
-	temp = adsr_settings_release(&instrument->volumeenvelope);
+	temp = (int)(adsr_settings_release(&instrument->volumeenvelope)
+		* 44100);
 	psyfile_write(self->file, &temp, sizeof(temp));
-
 	// ENV_F_AT
-	temp = adsr_settings_attack(&instrument->filterenvelope);
+	temp = (int)(adsr_settings_attack(&instrument->filterenvelope)
+		* 44100);
 	psyfile_write(self->file, &temp, sizeof(temp));
 	// ENV_F_DT
-	temp = adsr_settings_decay(&instrument->filterenvelope);
+	temp = (int)(adsr_settings_decay(&instrument->filterenvelope)
+		* 44100);
 	psyfile_write(self->file, &temp, sizeof(temp));
 	// ENV_F_SL
-	temp = adsr_settings_sustain(&instrument->filterenvelope);
+	temp = (int)(adsr_settings_sustain(&instrument->filterenvelope) * 128);
 	psyfile_write(self->file, &temp, sizeof(temp));
 	// ENV_F_RT
-	temp = adsr_settings_release(&instrument->filterenvelope);
+	temp = (int)(adsr_settings_release(&instrument->filterenvelope)
+		* 44100);
 	psyfile_write(self->file, &temp, sizeof(temp));
 	// ENV_F_CO
 	temp = instrument->filtercutoff;
@@ -1564,7 +1576,7 @@ void psy3_savesample(psy_audio_SongFile* self, psy_audio_Sample* sample)
 	psyfile_writestring(self->file, sample->name);	
 	psyfile_write_uint32(self->file, sample->numframes);	
 	psyfile_write_float(self->file, sample->globalvolume);	
-	psyfile_write_uint16(self->file, (uint16_t)(sample->defaultvolume * 0x80));
+	psyfile_write_uint16(self->file, (uint16_t)(sample->defaultvolume * 255));
 	psyfile_write_uint32(self->file, (uint32_t) sample->loopstart);	
 	psyfile_write_uint32(self->file, (uint32_t) sample->loopend);	
 	psyfile_write_int32(self->file, sample->looptype);	
@@ -1594,7 +1606,6 @@ void psy3_savesample(psy_audio_SongFile* self, psy_audio_Sample* sample)
 		free(wavedatar);
 	}
 }
-
 
 short* psy3_floatbuffertoshort(float* buffer, uintptr_t numframes)
 {	

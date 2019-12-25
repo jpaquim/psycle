@@ -94,6 +94,8 @@ void cmdproperties_makenotes(psy_Properties* self)
 	// special
 	psy_properties_setid(psy_properties_append_int(notes, "cmd_note_tweakm",
 		encodeinput(192, 0, 0), 0, 0), CMD_NOTE_TWEAKM);
+	psy_properties_setid(psy_properties_append_int(notes, "cmd_note_tweakm",
+		encodeinput(192, 1, 0), 0, 0), CMD_NOTE_MIDICC);	
 	psy_properties_setid(psy_properties_append_int(notes, "cmd_note_tweaks",
 		encodeinput(192, 0, 1), 0, 0), CMD_NOTE_TWEAKS);		
 	for (p = notes->children; p != 0; p = psy_properties_next(p)) {

@@ -5,7 +5,7 @@
 
 #include "help.h"
 
-#define MAXTEXTLENGTH 65535
+#define MAXREADBUFFER 4096
 
 static void help_ontabbarchanged(Help*, ui_component* sender,
 	uintptr_t tabindex);
@@ -26,9 +26,9 @@ void help_init(Help* self, ui_component* parent, Workspace* workspace)
 	tabbar_append(&self->tabbar, "./docs/keys.txt");
 	tabbar_append(&self->tabbar, "./docs/tweaking.txt");
 	tabbar_append(&self->tabbar, "./docs/whatsnew.txt");	
-	ui_edit_init(&self->edit, &self->component, 
-		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY);
-	ui_component_setalign(&self->edit.component, UI_ALIGN_CLIENT);	
+	ui_editor_init(&self->editor, &self->component);
+	ui_editor_preventedit(&self->editor);
+	ui_component_setalign(&self->editor.component, UI_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
 	ui_notebook_setpageindex(&self->notebook, 0);
@@ -74,17 +74,27 @@ void help_load(Help* self, const char* path)
 	FILE* fp;
 
 	fp = fopen(path, "rb");
-	if (fp) {
+	if (fp) {		
 		char c;
-		int pos = 0;
-		char text[MAXTEXTLENGTH];
+		int pos = 0;		
+		char text[MAXREADBUFFER];
 
-		memset(text, 0, MAXTEXTLENGTH);
-		while ((c = fgetc(fp)) != EOF && pos < MAXTEXTLENGTH) {
-			text[pos] = c;
-			++pos;
+		ui_editor_clear(&self->editor);
+		ui_editor_enableedit(&self->editor);
+		memset(text, 0, MAXREADBUFFER);
+		while ((c = fgetc(fp)) != EOF) {
+			if (pos < MAXREADBUFFER) {
+				text[pos] = c;
+				++pos;
+			} else {
+				ui_editor_addtext(&self->editor, text);
+				pos = 0;
+			}
 		}		
 		fclose(fp);
-		ui_edit_settext(&self->edit, text);		
+		if (pos > 0) {
+			ui_editor_addtext(&self->editor, text);
+		}
+		ui_editor_preventedit(&self->editor);
 	}
 }

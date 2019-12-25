@@ -48,13 +48,13 @@ static const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy*);
 static int machineproxy_parametertype(psy_audio_MachineProxy*, int param);
 static void machineproxy_parameterrange(psy_audio_MachineProxy*, int numparam,
 	int* minval, int* maxval);
-static unsigned int machineproxy_numparameters(psy_audio_MachineProxy*);
+static uintptr_t machineproxy_numparameters(psy_audio_MachineProxy*);
 static unsigned int machineproxy_numparametercols(psy_audio_MachineProxy*);
 static int machineproxy_paramviewoptions(psy_audio_MachineProxy*);
 static void machineproxy_loadspecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
-	unsigned int slot);
+	uintptr_t slot);
 static void machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
-	unsigned int slot);
+	uintptr_t slot);
 static unsigned int machineproxy_samplerate(psy_audio_MachineProxy*);
 static unsigned int machineproxy_bpm(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_slot(psy_audio_MachineProxy*);
@@ -620,9 +620,9 @@ const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-unsigned int machineproxy_numparameters(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_numparameters(psy_audio_MachineProxy* self)
 {
-	unsigned int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -681,7 +681,8 @@ int machineproxy_paramviewoptions(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_loadspecific(psy_audio_MachineProxy* self, psy_audio_SongFile* songfile, unsigned int slot)
+void machineproxy_loadspecific(psy_audio_MachineProxy* self,
+	psy_audio_SongFile* songfile, uintptr_t slot)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -698,8 +699,8 @@ void machineproxy_loadspecific(psy_audio_MachineProxy* self, psy_audio_SongFile*
 	}
 }
 
-void machineproxy_savespecific(psy_audio_MachineProxy* self, psy_audio_SongFile* songfile,
-	unsigned int slot)
+void machineproxy_savespecific(psy_audio_MachineProxy* self,
+	psy_audio_SongFile* songfile, uintptr_t slot)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

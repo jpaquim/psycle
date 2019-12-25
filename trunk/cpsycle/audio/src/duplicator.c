@@ -20,13 +20,15 @@ static int parametervalue(psy_audio_Duplicator*, int param);
 static void parameterrange(psy_audio_Duplicator*, int param, int* minval, int* maxval);
 static int parameterlabel(psy_audio_Duplicator*, char* txt, int param);
 static int parametername(psy_audio_Duplicator*, char* txt, int param);
-static unsigned int numparameters(psy_audio_Duplicator*);
+static uintptr_t numparameters(psy_audio_Duplicator*);
 static unsigned int numparametercols(psy_audio_Duplicator*);
 static void dispose(psy_audio_Duplicator*);
 static uintptr_t numinputs(psy_audio_Duplicator* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Duplicator* self) { return 0; }
-static void loadspecific(psy_audio_Duplicator*, struct psy_audio_SongFile*, unsigned int slot);
-static void savespecific(psy_audio_Duplicator*, struct psy_audio_SongFile*, unsigned int slot);
+static void loadspecific(psy_audio_Duplicator*, struct psy_audio_SongFile*,
+	uintptr_t slot);
+static void savespecific(psy_audio_Duplicator*, struct psy_audio_SongFile*,
+	uintptr_t slot);
 
 static int transpose(int note, int offset);
 
@@ -222,7 +224,7 @@ int parametername(psy_audio_Duplicator* self, char* txt, int param)
 	return 1;
 }
 
-unsigned int numparameters(psy_audio_Duplicator* self)
+uintptr_t numparameters(psy_audio_Duplicator* self)
 {
 	return 16;
 }
@@ -232,7 +234,8 @@ unsigned int numparametercols(psy_audio_Duplicator* self)
 	return 2;	
 }
 
-void loadspecific(psy_audio_Duplicator* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void loadspecific(psy_audio_Duplicator* self, struct psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {
 	uint32_t size;
 	psyfile_read(songfile->file, &size, sizeof size); // size of this part params to load
@@ -241,7 +244,8 @@ void loadspecific(psy_audio_Duplicator* self, struct psy_audio_SongFile* songfil
 	psyfile_read(songfile->file, &self->noteoffset[0], NUMMACHINES * sizeof(short));	
 }
 
-void savespecific(psy_audio_Duplicator* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void savespecific(psy_audio_Duplicator* self, struct psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {
 	uint32_t size;
 	

@@ -23,6 +23,22 @@ void sampleiterator_init(SampleIterator* self, psy_audio_Sample* sample)
 	double_setvalue(&self->speed, 1.0);
 }
 
+SampleIterator* sampleiterator_alloc(void)
+{
+	return malloc(sizeof(SampleIterator));
+}
+
+SampleIterator* sampleiterator_allocinit(psy_audio_Sample* sample)
+{
+	SampleIterator* rv;
+
+	rv = sampleiterator_alloc();
+	if (rv) {		
+		sampleiterator_init(rv, sample);
+	}
+	return rv;
+}
+
 int sampleiterator_inc(SampleIterator* self)
 {			
 	if (self->sample->looptype == LOOP_DO_NOT) {

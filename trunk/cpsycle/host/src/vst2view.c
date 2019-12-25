@@ -7,18 +7,51 @@
 
 #define TIMERID_VST2VIEW 420
 
+static void onpreferredsize(Vst2View* self, ui_component* sender,
+	ui_size* limit, ui_size* rv);
 static void ontimer(Vst2View*, ui_component* sender, int id);
 
-void InitVst2View(Vst2View* self, ui_component* parent, psy_audio_Machine* plugin)
+void vst2view_init(Vst2View* self, ui_component* parent, psy_audio_Machine* machine,
+	Workspace* workspace)
 {		
-	self->plugin = plugin;
+	self->machine = machine;
 	ui_component_init(&self->component, parent);
-	plugin->vtable->seteditorhandle(plugin, (void*)self->component.hwnd);
+	machine->vtable->seteditorhandle(machine, (void*)self->component.hwnd);
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);
+		psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
+		onpreferredsize);
 	ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 
-void ontimer(Vst2View* self, ui_component* sender, int id)
+Vst2View* vst2view_alloc(void)
+{
+	return (Vst2View*) malloc(sizeof(Vst2View));
+}
+
+Vst2View* vst2view_allocinit(ui_component* parent, psy_audio_Machine* machine,
+	Workspace* workspace)
+{
+	Vst2View* rv;
+
+	rv = vst2view_alloc();
+	if (rv) {
+		vst2view_init(rv, parent, machine, workspace);
+	}
+	return rv;	
+}
+
+void ontimer(Vst2View* self, ui_component* sender, int timerid)
 {	
-	self->plugin->vtable->editoridle(self->plugin);
+	machine_editoridle(self->machine);
+}
+
+void onpreferredsize(Vst2View* self, ui_component* sender, ui_size* limit,
+	ui_size* rv)
+{
+	if (rv) {		
+		machine_editorsize(self->machine, &rv->width, &rv->height);		
+	} else {
+		*rv = ui_component_size(&self->component);
+	}
 }

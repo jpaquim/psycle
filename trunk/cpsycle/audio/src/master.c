@@ -14,7 +14,7 @@ static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(psy_audio_Master*);
 
 static int parametertype(psy_audio_Master*, int param);
-static unsigned int numparameters(psy_audio_Master*);
+static uintptr_t numparameters(psy_audio_Master*);
 static unsigned int numparametercols(psy_audio_Master*);
 static void parametertweak(psy_audio_Master*, int par, int val);	
 static void parameterrange(psy_audio_Master*, int numparam, int* minval, int* maxval);
@@ -27,8 +27,10 @@ static uintptr_t numinputs(psy_audio_Master*);
 static uintptr_t numoutputs(psy_audio_Master*);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
-static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*, unsigned int slot);
-static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*, unsigned int slot);
+static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
+	uintptr_t slot);
+static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
+	uintptr_t slot);
 
 static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
@@ -224,7 +226,7 @@ void parameterrange(psy_audio_Master* self, int numparam, int* minval, int* maxv
 	*maxval = 65535;
 }
 
-unsigned int numparameters(psy_audio_Master* self)
+uintptr_t numparameters(psy_audio_Master* self)
 {
 	return 13;
 }
@@ -246,10 +248,11 @@ int parametername(psy_audio_Master* self, char* txt, int param)
 	return 1;
 }
 
-void master_loadspecific(psy_audio_Master* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void master_loadspecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {	
-	unsigned int size;
-	int outdry = 256;
+	uint32_t size;
+	int32_t outdry = 256;
 	unsigned char decreaseOnClip = 0;
 
 	psyfile_read(songfile->file, &size, sizeof size ); // size of this part params to load
@@ -259,10 +262,11 @@ void master_loadspecific(psy_audio_Master* self, struct psy_audio_SongFile* song
 	machines_setvolume(&songfile->song->machines, outdry / (psy_dsp_amp_t) 256);
 }
 
-void master_savespecific(psy_audio_Master* self, struct psy_audio_SongFile* songfile, unsigned int slot)
+void master_savespecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
+	uintptr_t slot)
 {
-	unsigned int size;
-	int outdry = 256;
+	uint32_t size;
+	int32_t outdry = 256;
 	unsigned char decreaseOnClip = 0;
 				
 	size = sizeof outdry + sizeof decreaseOnClip;

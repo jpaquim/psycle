@@ -44,7 +44,7 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 	self->ShortName = strdup(shortname);
 	self->APIVersion = apiversion;
 	self->PlugVersion = plugversion;
-	self->type = type;	
+	self->type = type;
 	self->modulepath = strdup(modulepath);
 	self->shellidx = shellidx;	
 }
