@@ -13,13 +13,13 @@
 #include <uinotebook.h>
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ui_notebook notebook;
-	ui_editor editor;
+	psy_ui_Editor editor;
 	TabBar tabbar;
 	Workspace* workspace;
 } Help;
 
-void help_init(Help*, ui_component* parent, Workspace*);
+void help_init(Help*, psy_ui_Component* parent, Workspace*);
 
 #endif

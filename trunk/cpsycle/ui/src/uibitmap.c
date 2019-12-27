@@ -4,15 +4,17 @@
 #include "../../detail/prefix.h"
 
 #include "uibitmap.h"
+#include "uiapp.h"
+#include "uiwinapp.h"
 
-extern HINSTANCE appInstance;
+extern psy_ui_App app;
 
-void ui_bitmap_init(ui_bitmap* self)
+void ui_bitmap_init(psy_ui_Bitmap* self)
 {
 	self->hBitmap = 0;
 }
 
-void ui_bitmap_dispose(ui_bitmap* self)
+void ui_bitmap_dispose(psy_ui_Bitmap* self)
 {
 	if (self->hBitmap) {
 		DeleteObject(self->hBitmap);
@@ -20,7 +22,7 @@ void ui_bitmap_dispose(ui_bitmap* self)
 	}
 }
 
-int ui_bitmap_load(ui_bitmap* self, const char* path)
+int ui_bitmap_load(psy_ui_Bitmap* self, const char* path)
 {	
 	HBITMAP bmp;
 	
@@ -36,7 +38,7 @@ int ui_bitmap_load(ui_bitmap* self, const char* path)
 	return bmp == 0;
 }
 
-ui_size ui_bitmap_size(ui_bitmap* self)
+ui_size ui_bitmap_size(psy_ui_Bitmap* self)
 {
 	ui_size size;
 	BITMAP bitmap ;
@@ -52,11 +54,13 @@ ui_size ui_bitmap_size(ui_bitmap* self)
 	return size;
 }
 
-int ui_bitmap_loadresource(ui_bitmap* self, int resourceid)
+int ui_bitmap_loadresource(psy_ui_Bitmap* self, int resourceid)
 {
 	HBITMAP bmp;	
+	psy_ui_WinApp* winapp;
 	
-	bmp = LoadBitmap (appInstance, MAKEINTRESOURCE(resourceid));	
+	winapp = (psy_ui_WinApp*) app.platform;
+	bmp = LoadBitmap (winapp->instance, MAKEINTRESOURCE(resourceid));	
 	if (bmp != 0) {
 		ui_bitmap_dispose(self);
 		self->hBitmap = bmp;

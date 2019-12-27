@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <portable.h>
 
-static void OnDestroy(MachinesBox*, ui_component*);
+static void OnDestroy(MachinesBox*, psy_ui_Component*);
 static void ClearMachineBox(MachinesBox*);
 static void BuildMachinesList(MachinesBox*);
 static void InsertSlot(MachinesBox* self, int slot, psy_audio_Machine* machine);
@@ -17,10 +17,10 @@ static void AddString(MachinesBox*, const char* text);
 static void OnMachineSlotChanged(MachinesBox*, psy_audio_Machines* sender, int slot);
 static void OnMachinesInsert(MachinesBox*, psy_audio_Machines* sender, int slot);
 static void OnMachinesRemoved(MachinesBox*, psy_audio_Machines* machines, int slot);
-static void OnMachinesListChanged(MachinesBox*, ui_component* sender,
+static void OnMachinesListChanged(MachinesBox*, psy_ui_Component* sender,
 	int slot);
 
-void InitMachinesBox(MachinesBox* self, ui_component* parent,
+void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
 	self->workspace = workspace;
@@ -36,7 +36,7 @@ void InitMachinesBox(MachinesBox* self, ui_component* parent,
 		OnDestroy);
 }
 
-void OnDestroy(MachinesBox* self, ui_component* component)
+void OnDestroy(MachinesBox* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->listboxslots);
 	psy_table_dispose(&self->slotslistbox);
@@ -127,7 +127,7 @@ void AddString(MachinesBox* self, const char* text)
 	ui_listbox_addstring(&self->machinelist, text);
 }
 
-void OnMachinesListChanged(MachinesBox* self, ui_component* sender, int sel)
+void OnMachinesListChanged(MachinesBox* self, psy_ui_Component* sender, int sel)
 {
 	int slot;
 

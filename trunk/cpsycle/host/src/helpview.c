@@ -5,11 +5,11 @@
 
 #include "helpview.h"
 
-static void OnShow(HelpView*, ui_component* sender);
-static void OnHide(HelpView*, ui_component* sender);
+static void OnShow(HelpView*, psy_ui_Component* sender);
+static void OnHide(HelpView*, psy_ui_Component* sender);
 
-void helpview_init(HelpView* self, ui_component* parent,
-	ui_component* tabbarparent, Workspace* workspace)
+void helpview_init(HelpView* self, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
@@ -30,14 +30,14 @@ void helpview_init(HelpView* self, ui_component* parent,
 	psy_signal_connect(&self->component.signal_hide, self, OnHide);
 }
 
-void OnShow(HelpView* self, ui_component* sender)
+void OnShow(HelpView* self, psy_ui_Component* sender)
 {	
 	self->tabbar.component.visible = 1;
 	ui_component_align(ui_component_parent(&self->tabbar.component));
 	ui_component_show(&self->tabbar.component);
 }
 
-void OnHide(HelpView* self, ui_component* sender)
+void OnHide(HelpView* self, psy_ui_Component* sender)
 {
 	ui_component_hide(&self->tabbar.component);
 }

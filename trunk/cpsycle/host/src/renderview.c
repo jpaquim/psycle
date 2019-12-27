@@ -7,15 +7,15 @@
 
 #include <fileoutdriver.h>
 
-static void renderview_ondestroy(RenderView*, ui_component* sender);
+static void renderview_ondestroy(RenderView*, psy_ui_Component* sender);
 static void renderview_makeproperties(RenderView*);
 static void renderview_onsettingsviewchanged(RenderView*, SettingsView* sender,
 	psy_Properties*);
 static void renderview_render(RenderView*);
 static void renderview_onstoprendering(RenderView*, Driver* sender);
 
-void renderview_init(RenderView* self, ui_component* parent,
-	ui_component* tabbarparent, Workspace* workspace)
+void renderview_init(RenderView* self, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
@@ -31,7 +31,7 @@ void renderview_init(RenderView* self, ui_component* parent,
 	self->fileoutdriver = create_fileout_driver();
 }
 
-void renderview_ondestroy(RenderView* self, ui_component* sender)
+void renderview_ondestroy(RenderView* self, psy_ui_Component* sender)
 {
 	properties_free(self->properties);	
 	self->fileoutdriver->dispose(self->fileoutdriver);

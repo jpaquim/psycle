@@ -6,12 +6,12 @@
 #include "uiprogressbar.h"
 #include <string.h>
 
-static void ondestroy(ui_progressbar*, ui_component* sender);
-static void ondraw(ui_progressbar*, ui_component* sender, ui_graphics*);
-static void onpreferredsize(ui_progressbar*, ui_component* sender, ui_size* limit,
+static void ondestroy(ui_progressbar*, psy_ui_Component* sender);
+static void ondraw(ui_progressbar*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void onpreferredsize(ui_progressbar*, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv);
 
-void ui_progressbar_init(ui_progressbar* self, ui_component* parent)
+void ui_progressbar_init(ui_progressbar* self, psy_ui_Component* parent)
 {	
 	self->text = _strdup("");
 	self->progress = 0.f;
@@ -22,12 +22,12 @@ void ui_progressbar_init(ui_progressbar* self, ui_component* parent)
 		onpreferredsize);
 }
 
-void ondestroy(ui_progressbar* self, ui_component* sender)
+void ondestroy(ui_progressbar* self, psy_ui_Component* sender)
 {	
 	free(self->text);	
 }
 
-void ondraw(ui_progressbar* self, ui_component* sender, ui_graphics* g)
+void ondraw(ui_progressbar* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	ui_size size;
 	ui_rectangle r;
@@ -42,7 +42,7 @@ void ondraw(ui_progressbar* self, ui_component* sender, ui_graphics* g)
 	ui_drawsolidrectangle(g, r, 0x00D1C5B6);
 }
 
-void onpreferredsize(ui_progressbar* self, ui_component* sender, ui_size* limit,
+void onpreferredsize(ui_progressbar* self, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv)
 {		
 	if (rv) {

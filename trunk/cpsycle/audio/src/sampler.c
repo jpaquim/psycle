@@ -18,6 +18,8 @@
 static void generateaudio(psy_audio_Sampler*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
+static void sequencerlinetick(psy_audio_Sampler*);
+static void stop(psy_audio_Sampler*);
 static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
 static unsigned int numparametercols(psy_audio_Sampler*);
 static uintptr_t numparameters(psy_audio_Sampler*);
@@ -30,6 +32,8 @@ static int describevalue(psy_audio_Sampler*, char* txt, int param, int value);
 static int parametervalue(psy_audio_Sampler*, int param);
 static void dispose(psy_audio_Sampler*);
 static int alloc_voice(psy_audio_Sampler*);
+static void releaseallvoices(psy_audio_Sampler*);
+static Voice* activevoice(psy_audio_Sampler*, uintptr_t channel);
 static void releasevoices(psy_audio_Sampler*, uintptr_t channel);
 static void removeunusedvoices(psy_audio_Sampler* self);
 static uintptr_t numinputs(psy_audio_Sampler*);
@@ -89,6 +93,8 @@ static void vtable_init(psy_audio_Sampler* self)
 		vtable = *(sampler_base(self)->vtable);
 		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
+		vtable.sequencerlinetick = (fp_machine_sequencerlinetick) sequencerlinetick;
+		vtable.stop = (fp_machine_stop) stop;
 		vtable.info = (fp_machine_info) info;
 		vtable.dispose = (fp_machine_dispose) dispose;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
@@ -169,13 +175,37 @@ void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	}	
 	instrument = instruments_at(machine_instruments(sampler_base(self)), slot);
 	if (instrument) {
-		Voice* voice;
-		releasevoices(self, channel);		
-		voice = voice_allocinit(self, instrument, channel,
-			machine_samplerate(sampler_base(self)));
-		psy_list_append(&self->voices, voice);
+		Voice* voice = 0;		
+
+		if (event->note <= NOTECOMMANDS_EMPTY) {
+			releasevoices(self, channel);
+		} else {
+			voice = activevoice(self, channel);
+		}
+		if (!voice) {
+			voice = voice_allocinit(self, instrument, channel,
+				machine_samplerate(sampler_base(self)));
+			psy_list_append(&self->voices, voice);
+		}		
 		voice_seqtick(voice, event);		
 	}
+}
+
+void sequencerlinetick(psy_audio_Sampler* self)
+{
+	psy_List* p;
+	
+	for (p = self->voices; p != 0; p = p->next) {
+		Voice* voice;
+
+		voice = (Voice*) p->entry;		
+		// voice->portaspeed = 1.0;
+	}
+}
+
+void stop(psy_audio_Sampler* self)
+{
+	releaseallvoices(self);
 }
 
 int currslot(psy_audio_Sampler* self, uintptr_t channel,
@@ -195,6 +225,18 @@ int currslot(psy_audio_Sampler* self, uintptr_t channel,
 	return rv;
 }
 
+void releaseallvoices(psy_audio_Sampler* self)
+{
+	psy_List* p;
+	
+	for (p = self->voices; p != 0; p = p->next) {
+		Voice* voice;
+
+		voice = (Voice*) p->entry;		
+		voice_release(voice);		
+	}
+}
+
 void releasevoices(psy_audio_Sampler* self, uintptr_t channel)
 {
 	psy_List* p;
@@ -207,6 +249,24 @@ void releasevoices(psy_audio_Sampler* self, uintptr_t channel)
 			voice_release(voice);
 		}
 	}
+}
+
+Voice* activevoice(psy_audio_Sampler* self, uintptr_t channel)
+{
+	Voice* rv = 0;	
+	psy_List* p = 0;
+	
+	for (p = self->voices; p != 0; p = p->next) {
+		Voice* voice;
+
+		voice = (Voice*) p->entry;
+		if (voice->channel == channel && voice->env.stage != ENV_RELEASE
+				&& voice->env.stage != ENV_OFF) {
+			rv = voice;
+			break;
+		}
+	}
+	return rv;
 }
 
 void removeunusedvoices(psy_audio_Sampler* self)
@@ -453,6 +513,8 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
 }
 
+// Voice
+
 void voice_init(Voice* self, psy_audio_Sampler* sampler,
 	psy_audio_Instrument* instrument, uintptr_t channel,
 	unsigned int samplerate) 
@@ -465,6 +527,9 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 	self->vol = 1.f;
 	self->pan = 0.5f;
 	self->positions = 0;
+	self->portaspeed = 1.0;	
+	self->effcmd = SAMPLER_CMD_NONE;
+	self->effval = 0;
 	if (instrument) {
 		psy_dsp_adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
 		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
@@ -490,6 +555,8 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 
 void voice_reset(Voice* self)
 {
+	self->effcmd = SAMPLER_CMD_NONE;
+	self->portaspeed = 1.0;
 	psy_dsp_adsr_reset(&self->env);
 	psy_dsp_adsr_reset(&self->filterenv);
 	((psy_dsp_Filter*)(&self->filter_r))->vtable->reset(&self->filter_l.filter);
@@ -536,6 +603,28 @@ void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 	if (event->note < NOTECOMMANDS_RELEASE) {
 		voice_noteon(self, event);
 	}
+	if (event->cmd == SAMPLER_CMD_PORTAUP) {
+		double samplesprobeat;
+
+		self->effval = event->parameter;
+		self->effcmd = event->cmd;				
+		samplesprobeat = 1 / machine_beatspersample(
+			sampler_base(self->sampler));
+		self->portanumframes = (uintptr_t) samplesprobeat;
+		self->portacurrframe = 0;
+		self->portaspeed = pow(2.0f, event->parameter / 12.0 * 1.0 / samplesprobeat);
+	} else
+	if (event->cmd == SAMPLER_CMD_PORTADOWN) {
+		double samplesprobeat;
+
+		self->effval = event->parameter;
+		self->effcmd = event->cmd;				
+		samplesprobeat = 1 / machine_beatspersample(
+			sampler_base(self->sampler));
+		self->portanumframes = (uintptr_t) samplesprobeat;
+		self->portacurrframe = 0;
+		self->portaspeed = pow(2.0f, -event->parameter / 12.0 * 1.0 / samplesprobeat);
+	}
 }
 
 void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
@@ -559,8 +648,7 @@ void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
 			iterator = sampleiterator_alloc();
 			*iterator = sample_begin(sample);
 			psy_list_append(&self->positions, iterator);
-
-			double_setvalue(&iterator->speed,
+			iterator->speed = (int64_t)(4294967296.0f *
 				pow(2.0f,
 					(event->note + sample->tune - baseC + 
 						((psy_dsp_amp_t)sample->finetune * 0.01f)) / 12.0f) *
@@ -598,19 +686,23 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 		psy_List* p;
 		psy_dsp_amp_t* env;
 		int i;
+		uintptr_t portaframe = self->portacurrframe;
+		double portaspeed = 1.0;
+		int portadone = 0;
 
 		env = malloc(numsamples * sizeof(psy_dsp_amp_t));
 		for (i = 0; i < numsamples; ++i) {
 			psy_dsp_adsr_tick(&self->env);
 			env[i] = self->env.value;
 		}
+		
 		for (p = self->positions; p != 0; p = p->next) {
 			SampleIterator* position;
-			int i;			
+			int i;	
 			psy_dsp_amp_t svol;
 			psy_dsp_amp_t rvol;
 			psy_dsp_amp_t lvol;
-
+		
 			position = (SampleIterator*) p->entry;
 			svol = position->sample->globalvolume *
 						(self->usedefaultvolume
@@ -623,7 +715,12 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 			if (rvol > 0.5f) { rvol = 0.5f; }
 			if (lvol > 0.5f) { lvol = 0.5f; }			
 			if (svol > 0.5f) { svol = 0.5f; }
-			
+
+			if (self->effcmd == SAMPLER_CMD_PORTAUP ||
+				self->effcmd == SAMPLER_CMD_PORTADOWN) {
+				portaframe = self->portacurrframe;
+				portaspeed = self->portaspeed;
+			}			
 			for (i = 0; i < numsamples; ++i) {
 				unsigned int c;			
 								
@@ -665,12 +762,22 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 				}				
 				if (psy_dsp_multifilter_type(&self->filter_l) != F_NONE) {
 					psy_dsp_adsr_tick(&self->filterenv);
-				}			
+				}
+				if (self->effcmd == SAMPLER_CMD_PORTAUP ||
+						self->effcmd == SAMPLER_CMD_PORTADOWN) {
+					++portaframe;
+					if (portaframe >= self->portanumframes) {
+						portaspeed = 1.0;
+						portadone = 1;
+					} else {
+						position->speed *= portaspeed;
+					}
+				}
 				if (!sampleiterator_inc(position)) {			
 					voice_reset(self);					
 					break;				
-				}
-			}
+				}								
+			}			
 			if (buffer_mono(&position->sample->channels) &&
 				buffer_numchannels(output) > 1) {
 				dsp.add(
@@ -682,6 +789,15 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 			if (buffer_numchannels(output) > 1) {
 				dsp.mul(buffer_at(output, 0), numsamples, lvol);
 				dsp.mul(buffer_at(output, 1), numsamples, rvol);
+			}			
+		}
+		if (self->effcmd == SAMPLER_CMD_PORTAUP ||
+				self->effcmd == SAMPLER_CMD_PORTADOWN) {
+			self->portacurrframe += numsamples;
+			if (portadone) {
+				self->effcmd = SAMPLER_CMD_NONE;
+				self->portaspeed = 1.0;
+				self->portacurrframe = 0;
 			}
 		}
 		free(env);
@@ -690,12 +806,16 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 
 void voice_release(Voice* self)
 {
+	self->portaspeed = 1.0;
+	self->effcmd = SAMPLER_CMD_NONE;
 	psy_dsp_adsr_release(&self->env);	
 	psy_dsp_adsr_release(&self->filterenv);
 }
 
 void voice_fastrelease(Voice* self)
 {
+	self->portaspeed = 1.0;
+	self->effcmd = SAMPLER_CMD_NONE;
 	psy_dsp_adsr_release(&self->env);	
 	psy_dsp_adsr_release(&self->filterenv);
 }

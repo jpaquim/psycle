@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uidef.h"
+#include "uiapp.h"
 #include <windows.h>
 #include <math.h>
 
@@ -12,11 +13,19 @@
 #define EZ_ATTR_UNDERLINE     4
 #define EZ_ATTR_STRIKEOUT     8
 
-
-extern ui_font defaultfont;
+extern psy_ui_App app;
 
 static LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
 	int iDeciPtWidth, int iAttributes, BOOL fLogRes);
+
+ui_point ui_point_make(int x, int y)
+{
+	ui_point rv;
+
+	rv.x = x;
+	rv.y = y;
+	return rv;
+}
 
 void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int height)
 {
@@ -180,7 +189,7 @@ void ui_font_init(ui_font* self, const ui_fontinfo* fontinfo)
 	if (fontinfo) {
 		HDC hdc = GetDC (NULL) ;
 		SaveDC (hdc) ;          
-		self->hfont = CreateFontIndirect (&fontinfo->lf) ;
+		self->hfont = CreateFontIndirect(&fontinfo->lf);
 		RestoreDC (hdc, -1);
 		ReleaseDC(NULL, hdc);
 	} else {
@@ -191,22 +200,22 @@ void ui_font_init(ui_font* self, const ui_fontinfo* fontinfo)
 
 void ui_font_copy(ui_font* self, const ui_font* other)
 {
-	if (self->hfont && self->hfont != defaultfont.hfont) {
+	if (self->hfont && self->hfont != app.defaults.defaultfont.hfont) {
 		ui_font_dispose(self);		
 	}
-	if (other->hfont && other->hfont != defaultfont.hfont) {
+	if (other->hfont && other->hfont != app.defaults.defaultfont.hfont) {
 		LOGFONT lf;
 		GetObject(other->hfont, sizeof(LOGFONT), &lf);
 		self->hfont = CreateFontIndirect(&lf);
 	}
-	if (other->hfont == defaultfont.hfont) {
-		self->hfont = defaultfont.hfont;
+	if (other->hfont == app.defaults.defaultfont.hfont) {
+		self->hfont = app.defaults.defaultfont.hfont;
 	}
 }
 
 void ui_font_dispose(ui_font* self)
 {
-	if (self->hfont && self->hfont != defaultfont.hfont) {
+	if (self->hfont && self->hfont != app.defaults.defaultfont.hfont) {
 		DeleteObject(self->hfont);
 	}
 	self->hfont = 0;

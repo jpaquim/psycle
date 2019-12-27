@@ -9,12 +9,12 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
-	ui_label headerlabel;
+	psy_ui_Component component;
+	psy_ui_Label headerlabel;
 	ui_combobox trackbox;	
 	Workspace* workspace;
 } SongTrackBar;
 
-void InitSongTrackBar(SongTrackBar*, ui_component* parent, Workspace*);
+void songtrackbar_init(SongTrackBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

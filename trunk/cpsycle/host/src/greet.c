@@ -5,13 +5,13 @@
 
 #include "greet.h"
 
-static void OnSize(Greet*, ui_component* sender, ui_size*);
+static void OnSize(Greet*, psy_ui_Component* sender, ui_size*);
 static void AddString(Greet*, const char* text);
 static void Build(Greet* self);
 static void BuildOriginal(Greet* self);
-static void OnOriginal(Greet*, ui_component* sender);
+static void OnOriginal(Greet*, psy_ui_Component* sender);
 
-void greet_init(Greet* self, ui_component* parent)
+void greet_init(Greet* self, psy_ui_Component* parent)
 {	
 	ui_component_init(&self->component, parent);	
 	psy_signal_connect(&self->component.signal_size, self, OnSize);
@@ -126,7 +126,7 @@ void AddString(Greet* self, const char* text)
 	ui_listbox_addstring(&self->greetz, text);
 }
 
-void OnOriginal(Greet* self, ui_component* sender)
+void OnOriginal(Greet* self, psy_ui_Component* sender)
 {
 	ui_listbox_clear(&self->greetz);
 	self->current = self->current == 0;
@@ -139,7 +139,7 @@ void OnOriginal(Greet* self, ui_component* sender)
 	}	
 }
 
-void OnSize(Greet* self, ui_component* sender, ui_size* size)
+void OnSize(Greet* self, psy_ui_Component* sender, ui_size* size)
 {
 	ui_component_setposition(&self->header.component, 0, 10, size->width, 40);
 	ui_component_setposition(&self->groupbox.component, 0, 45, size->width - 10, size->height - 75);

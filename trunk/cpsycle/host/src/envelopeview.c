@@ -2,15 +2,15 @@
 
 #include "envelopeview.h"
 
-static void OnDraw(EnvelopeView*, ui_component* sender, ui_graphics* g);
-static void DrawGrid(EnvelopeView*, ui_graphics* g);
-static void DrawPoints(EnvelopeView*, ui_graphics* g);
-static void DrawLines(EnvelopeView*, ui_graphics* g);
-static void OnSize(EnvelopeView*, ui_component* sender, ui_size* size);
-static void OnDestroy(EnvelopeView*, ui_component* component);
-static void OnMouseDown(EnvelopeView*, ui_component* sender, MouseEvent*);
-static void OnMouseMove(EnvelopeView*, ui_component* sender, MouseEvent*);
-static void OnMouseUp(EnvelopeView*, ui_component* sender, MouseEvent*);
+static void OnDraw(EnvelopeView*, psy_ui_Component* sender, psy_ui_Graphics* g);
+static void DrawGrid(EnvelopeView*, psy_ui_Graphics* g);
+static void DrawPoints(EnvelopeView*, psy_ui_Graphics* g);
+static void DrawLines(EnvelopeView*, psy_ui_Graphics* g);
+static void OnSize(EnvelopeView*, psy_ui_Component* sender, ui_size* size);
+static void OnDestroy(EnvelopeView*, psy_ui_Component* component);
+static void OnMouseDown(EnvelopeView*, psy_ui_Component* sender, MouseEvent*);
+static void OnMouseMove(EnvelopeView*, psy_ui_Component* sender, MouseEvent*);
+static void OnMouseUp(EnvelopeView*, psy_ui_Component* sender, MouseEvent*);
 static psy_List* HitTestPoint(EnvelopeView* self, int x, int y);
 static void ShiftSuccessors(EnvelopeView* self, double timeshift);
 static void CheckAdjustPointRange(psy_List* p);
@@ -50,7 +50,7 @@ void adsrpointmapper_updatesettings(ADSRPointMapper* self)
 	}
 }
 
-void InitEnvelopeView(EnvelopeView* self, ui_component* parent)
+void InitEnvelopeView(EnvelopeView* self, psy_ui_Component* parent)
 {				
 	ui_component_init(&self->component, parent);	
 	ui_margin_init(&self->spacing, 
@@ -85,20 +85,20 @@ void EnvelopeViewSetAdsrEnvelope(EnvelopeView* self, psy_dsp_ADSRSettings* adsr_
 	adsrpointmapper_updatepoints(&self->pointmapper);
 }
 
-void OnDestroy(EnvelopeView* self, ui_component* component)
+void OnDestroy(EnvelopeView* self, psy_ui_Component* component)
 {	
 	psy_list_free(self->points);
 	self->points = 0;
 }
 
-void OnDraw(EnvelopeView* self, ui_component* sender, ui_graphics* g)
+void OnDraw(EnvelopeView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {		
 	DrawGrid(self, g);
 	DrawLines(self, g);
 	DrawPoints(self, g);
 }
 
-void DrawGrid(EnvelopeView* self, ui_graphics* g)
+void DrawGrid(EnvelopeView* self, psy_ui_Graphics* g)
 {
 	double i;		
 
@@ -119,7 +119,7 @@ void DrawGrid(EnvelopeView* self, ui_graphics* g)
 	}
 }
 
-void DrawPoints(EnvelopeView* self, ui_graphics* g)
+void DrawPoints(EnvelopeView* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
 	ui_size ptsize;
@@ -145,7 +145,7 @@ void DrawPoints(EnvelopeView* self, ui_graphics* g)
 	}
 }
 
-void DrawLines(EnvelopeView* self, ui_graphics* g)
+void DrawLines(EnvelopeView* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
 	psy_dsp_EnvelopePoint* q = 0;
@@ -174,7 +174,7 @@ void DrawLines(EnvelopeView* self, ui_graphics* g)
 	}
 }
 
-void OnSize(EnvelopeView* self, ui_component* sender, ui_size* size)
+void OnSize(EnvelopeView* self, psy_ui_Component* sender, ui_size* size)
 {
 	self->cx = size->width - self->spacing.left.quantity.integer -
 		self->spacing.right.quantity.integer;
@@ -182,12 +182,12 @@ void OnSize(EnvelopeView* self, ui_component* sender, ui_size* size)
 		self->spacing.bottom.quantity.integer;
 }
 
-void OnMouseDown(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
+void OnMouseDown(EnvelopeView* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	self->dragpoint = HitTestPoint(self, ev->x, ev->y);
 }
 
-void OnMouseMove(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
+void OnMouseMove(EnvelopeView* self, psy_ui_Component* sender, MouseEvent* ev)
 {		
 	if (self->dragpoint) {		
 		psy_dsp_EnvelopePoint* pt;
@@ -248,7 +248,7 @@ void CheckAdjustPointRange(psy_List* p)
 	}	
 }
 
-void OnMouseUp(EnvelopeView* self, ui_component* sender, MouseEvent* ev)
+void OnMouseUp(EnvelopeView* self, psy_ui_Component* sender, MouseEvent* ev)
 {	
 	self->dragpoint = 0;
 }

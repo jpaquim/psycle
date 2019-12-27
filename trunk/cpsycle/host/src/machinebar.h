@@ -9,12 +9,12 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ui_combobox machinebox;
-	ui_button prevmachinebutton;
-	ui_button nextmachinebutton;
-	ui_button gear;
-	ui_button editor;
+	psy_ui_Button prevmachinebutton;
+	psy_ui_Button nextmachinebutton;
+	psy_ui_Button gear;
+	psy_ui_Button editor;
 	ui_combobox instparambox;	
 	psy_audio_Player* player;	
 	void (*selchange)(void*, int);
@@ -26,7 +26,6 @@ typedef struct {
 	psy_Table slotscombobox;
 } MachineBar;
 
-void InitMachineBar(MachineBar*, ui_component* parent, Workspace* );
-void SelectMachineBarSlot(MachineBar*, int slot);
+void machinebar_init(MachineBar*, psy_ui_Component* parent, Workspace* );
 
 #endif

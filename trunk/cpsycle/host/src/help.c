@@ -7,12 +7,12 @@
 
 #define MAXREADBUFFER 4096
 
-static void help_ontabbarchanged(Help*, ui_component* sender,
+static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void help_loadpage(Help*, uintptr_t index);
 static void help_load(Help*, const char* path);
 
-void help_init(Help* self, ui_component* parent, Workspace* workspace)
+void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
@@ -35,7 +35,7 @@ void help_init(Help* self, ui_component* parent, Workspace* workspace)
 	help_loadpage(self, 0);
 }
 
-void help_ontabbarchanged(Help* self, ui_component* sender,
+void help_ontabbarchanged(Help* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
 	help_loadpage(self, tabindex);

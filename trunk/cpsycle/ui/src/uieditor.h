@@ -7,19 +7,19 @@
 #include "uicomponent.h"
 
 typedef struct {
-	ui_component component;	
-} ui_editor;
+	psy_ui_Component component;	
+} psy_ui_Editor;
 
-void ui_editor_init(ui_editor*, ui_component* parent);
-void ui_editor_load(ui_editor*, const char* path);
+void ui_editor_init(psy_ui_Editor*, psy_ui_Component* parent);
+void ui_editor_load(psy_ui_Editor*, const char* path);
 
-void ui_editor_settext(ui_editor*, const char* text);
-void ui_editor_addtext(ui_editor*, const char* text);
-void ui_editor_clear(ui_editor*);
-void ui_editor_setcolor(ui_editor*, uint32_t color);
-void ui_editor_setbackgroundcolor(ui_editor*, uint32_t color);
+void ui_editor_settext(psy_ui_Editor*, const char* text);
+void ui_editor_addtext(psy_ui_Editor*, const char* text);
+void ui_editor_clear(psy_ui_Editor*);
+void ui_editor_setcolor(psy_ui_Editor*, uint32_t color);
+void ui_editor_setbackgroundcolor(psy_ui_Editor*, uint32_t color);
 
-void ui_editor_enableedit(ui_editor*);
-void ui_editor_preventedit(ui_editor*);
+void ui_editor_enableedit(psy_ui_Editor*);
+void ui_editor_preventedit(psy_ui_Editor*);
 
 #endif

@@ -7,11 +7,11 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;
+   psy_ui_Component component;
    psy_Signal signal_clicked;   
 } ui_checkbox;
 
-void ui_checkbox_init(ui_checkbox*, ui_component* parent);
+void ui_checkbox_init(ui_checkbox*, psy_ui_Component* parent);
 void ui_checkbox_settext(ui_checkbox*, const char* text);
 void ui_checkbox_check(ui_checkbox*);
 void ui_checkbox_disablecheck(ui_checkbox*);

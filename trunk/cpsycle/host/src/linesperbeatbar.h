@@ -10,16 +10,16 @@
 #include "player.h"
 
 typedef struct {
-	ui_component component;
-	ui_label lpbdesclabel;
-	ui_label lpblabel;	
-	ui_button lessbutton;
-	ui_button morebutton;
+	psy_ui_Component component;
+	psy_ui_Label lpbdesclabel;
+	psy_ui_Label lpblabel;	
+	psy_ui_Button lessbutton;
+	psy_ui_Button morebutton;
 	psy_audio_Player* player;
 	unsigned int lpb;
 } LinesPerBeatBar;
 
 
-void InitLinesPerBeatBar(LinesPerBeatBar*, ui_component* parent,psy_audio_Player* player);
+void linesperbeatbar_init(LinesPerBeatBar*, psy_ui_Component* parent,psy_audio_Player* player);
 
 #endif

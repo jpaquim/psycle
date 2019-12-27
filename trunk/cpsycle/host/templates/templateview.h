@@ -5,9 +5,9 @@
 #include <uicomponent.h>
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
 } nameView;
 
-void InitnameView(nameView* nameview, ui_component* parent);
+void InitnameView(nameView* nameview, psy_ui_Component* parent);
 
 #endif

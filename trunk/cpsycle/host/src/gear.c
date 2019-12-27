@@ -5,17 +5,18 @@
 
 #include "gear.h"
 
-static void OnSize(Gear*, ui_component* sender, ui_size*);
-static void ConnectSongSignals(Gear*);
-static void OnDelete(Gear*, ui_component* sender);
-static void OnSongChanged(Gear*, Workspace*);
-static void OnClone(Gear*, ui_component* sender);
-static void OnExchange(Gear* self, ui_component* sender);
-static void OnParameters(Gear*, ui_component* sender);
-static void OnMaster(Gear*, ui_component* sender);
+static void gear_connectsongsignals(Gear*);
+static void gear_ondelete(Gear*, psy_ui_Component* sender);
+static void gear_onsongchanged(Gear*, Workspace*);
+static void gear_onclone(Gear*, psy_ui_Component* sender);
+static void gear_onexchange(Gear* self, psy_ui_Component* sender);
+static void gear_onparameters(Gear*, psy_ui_Component* sender);
+static void gear_onmaster(Gear*, psy_ui_Component* sender);
 
-void InitGearButtons(GearButtons* self, ui_component* parent)
+void gearbuttons_init(GearButtons* self, psy_ui_Component* parent)
 {
+	ui_margin margin;	
+
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);	
 	ui_button_init(&self->createreplace, &self->component);
@@ -31,84 +32,64 @@ void InitGearButtons(GearButtons* self, ui_component* parent)
 	ui_button_init(&self->clone, &self->component);
 	ui_button_settext(&self->clone, "Clone");
 	ui_button_init(&self->showmaster, &self->component);
-	ui_button_settext(&self->showmaster, "Show master");
-	{
-		ui_margin margin = { 0, 3, 3, 0 };
-		psy_List* p;
-		psy_List* q;
-		for (p = q = ui_component_children(&self->component, 0); p != 0; p = p->next) {
-			ui_component* component;
-			
-			component = (ui_component*)p->entry;
-			ui_component_setalign(component, UI_ALIGN_TOP);
-			ui_component_setmargin(component, &margin);
-			ui_component_resize(component, 0, 20);
-		}
-		psy_list_free(q);
-	}
+	ui_button_settext(&self->showmaster, "Show master");			
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
+		ui_value_makeeh(0.5), ui_value_makepx(0));				
+	psy_list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_TOP,
+		&margin));
 }
 
-void gear_init(Gear* self, ui_component* parent, Workspace* workspace)
+void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
-	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		gear_onsongchanged);
 	ui_component_init(&self->component, parent);
-	ui_component_resize(&self->component, 300, 0);	
+	ui_component_enablealign(&self->component);
 	tabbar_init(&self->tabbar, &self->component);	
-	ui_component_move(&self->tabbar.component, 0, 0);
-	ui_component_resize(&self->tabbar.component, 0, 20);
 	tabbar_append(&self->tabbar, "Generators");
 	tabbar_append(&self->tabbar, "Effects");	
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Waves");	
-	tabbar_select(&self->tabbar, 0);		
+	tabbar_select(&self->tabbar, 0);
+	ui_component_setalign(&self->tabbar.component, UI_ALIGN_BOTTOM);
 	ui_notebook_init(&self->notebook, &self->component);
-	psy_signal_connect(&self->component.signal_size, self, OnSize);	
-	InitMachinesBox(&self->machinesboxgen, &self->notebook.component, 
+	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);	
+	machinesbox_init(&self->machinesboxgen, &self->notebook.component, 
 		&workspace->song->machines, MACHINEBOX_GENERATOR, self->workspace);
-	InitMachinesBox(&self->machinesboxfx, &self->notebook.component, 
+	machinesbox_init(&self->machinesboxfx, &self->notebook.component, 
 		&workspace->song->machines, MACHINEBOX_FX, self->workspace);
 	instrumentsbox_init(&self->instrumentsbox, &self->notebook.component, 
 		&workspace->song->instruments);
 	samplesbox_init(&self->samplesbox, &self->notebook.component, 
 		&workspace->song->samples, &workspace->song->instruments);
-	ConnectSongSignals(self);
-	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
+	gear_connectsongsignals(self);
+	ui_notebook_connectcontroller(&self->notebook,
+		&self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);
-	InitGearButtons(&self->buttons, &self->component);
-	psy_signal_connect(&self->buttons.del.signal_clicked, self, OnDelete);
-	psy_signal_connect(&self->buttons.clone.signal_clicked, self, OnClone);
+	gearbuttons_init(&self->buttons, &self->component);
+	ui_component_setalign(&self->buttons.component, UI_ALIGN_RIGHT);
+	psy_signal_connect(&self->buttons.del.signal_clicked, self, gear_ondelete);
+	psy_signal_connect(&self->buttons.clone.signal_clicked, self,
+		gear_onclone);
 	psy_signal_connect(&self->buttons.parameters.signal_clicked, self,
-		OnParameters);
+		gear_onparameters);
 	psy_signal_connect(&self->buttons.showmaster.signal_clicked, self,
-		OnMaster);
+		gear_onmaster);
 	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
-		OnExchange);
-	ui_component_resize(&self->buttons.component, 100, 0);
+		gear_onexchange);	
 }
 
-void OnSize(Gear* self, ui_component* sender, ui_size* size)
-{
-	ui_size buttonssize;
-
-	buttonssize = ui_component_size(&self->buttons.component);
-	ui_component_move(&self->tabbar.component, 0, size->height - 20);
-	ui_component_resize(&self->tabbar.component, size->width, 20);
-	ui_component_setposition(&self->notebook.component, 0, 0,
-		size->width - buttonssize.width, size->height - 20);
-	ui_component_setposition(&self->buttons.component,
-		size->width - buttonssize.width , 0,
-		buttonssize.width, size->height - 20);
-}
-
-void ConnectSongSignals(Gear* self)
+void gear_connectsongsignals(Gear* self)
 {
 	// psy_signal_connect(&self->instruments->signal_insert, self, OnInstrumentInsert);
 	// psy_signal_connect(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);	
 }
 
-void OnDelete(Gear* self, ui_component* sender)
+void gear_ondelete(Gear* self, psy_ui_Component* sender)
 {
 	switch (self->tabbar.selected) {
 		case 0:
@@ -122,19 +103,20 @@ void OnDelete(Gear* self, ui_component* sender)
 	}
 }
 
-void OnSongChanged(Gear* self, Workspace* workspace)
+void gear_onsongchanged(Gear* self, Workspace* workspace)
 {	
 	self->machines = &workspace->song->machines;		
 	SetMachines(&self->machinesboxgen, &workspace->song->machines);
 	SetMachines(&self->machinesboxfx, &workspace->song->machines);
-	instrumentsbox_setinstruments(&self->instrumentsbox, &workspace->song->instruments);
+	instrumentsbox_setinstruments(&self->instrumentsbox,
+		&workspace->song->instruments);
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
-	ConnectSongSignals(self);
+	gear_connectsongsignals(self);
 	ui_component_invalidate(&self->component);
 }
 
-void OnClone(Gear* self, ui_component* sender)
+void gear_onclone(Gear* self, psy_ui_Component* sender)
 {
 	switch (self->tabbar.selected) {
 		case 0:
@@ -148,7 +130,7 @@ void OnClone(Gear* self, ui_component* sender)
 	}
 }
 
-void OnExchange(Gear* self, ui_component* sender)
+void gear_onexchange(Gear* self, psy_ui_Component* sender)
 {
 	switch (self->tabbar.selected) {
 		case 0:
@@ -162,8 +144,7 @@ void OnExchange(Gear* self, ui_component* sender)
 	}
 }
 
-
-void OnParameters(Gear* self, ui_component* sender)
+void gear_onparameters(Gear* self, psy_ui_Component* sender)
 {
 	switch (self->tabbar.selected) {
 		case 0:
@@ -177,7 +158,7 @@ void OnParameters(Gear* self, ui_component* sender)
 	}
 }
 
-void OnMaster(Gear* self, ui_component* sender)
+void gear_onmaster(Gear* self, psy_ui_Component* sender)
 {
 	workspace_showparameters(self->workspace, MASTER_INDEX);
 }

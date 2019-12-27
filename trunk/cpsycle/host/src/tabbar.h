@@ -13,11 +13,11 @@ typedef struct {
 	ui_margin margin;
 } Tab;
 
-void InitTab(Tab*, const char* text, ui_size* size);
+void tab_init(Tab*, const char* text, ui_size* size);
 
 typedef struct {
 	psy_List* tabs;
-	ui_component component;
+	psy_ui_Component component;
 	int selected;	
 	psy_Signal signal_change;
 	ui_font font;
@@ -26,7 +26,7 @@ typedef struct {
 	int tabalignment;
 } TabBar;
 
-void tabbar_init(TabBar*, ui_component* parent);
+void tabbar_init(TabBar*, psy_ui_Component* parent);
 Tab* tabbar_append(TabBar*, const char* label);
 void tabbar_select(TabBar*, int tabindex);
 int tabbar_selected(TabBar*);

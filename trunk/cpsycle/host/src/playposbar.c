@@ -9,9 +9,10 @@
 
 #define TIMERID_PLAYPOSBAR 500
 
-static void ontimer(PlayPosBar*, ui_component* sender, int timerid);
+static void playposbar_ontimer(PlayPosBar*, psy_ui_Component* sender, int timerid);
 
-void playposbar_init(PlayPosBar* self, ui_component* parent, psy_audio_Player* player)
+void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
+	psy_audio_Player* player)
 {		
 	ui_margin margin;
 
@@ -26,7 +27,8 @@ void playposbar_init(PlayPosBar* self, ui_component* parent, psy_audio_Player* p
 	ui_label_init(&self->position, &self->component);
 	ui_label_setcharnumber(&self->position, 10);
 	self->lastposition = -1.0f;
-	psy_signal_connect(&self->component.signal_timer, self, ontimer);	
+	psy_signal_connect(&self->component.signal_timer, self,
+		playposbar_ontimer);
 	psy_list_free(ui_components_setalign(		
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
@@ -34,7 +36,7 @@ void playposbar_init(PlayPosBar* self, ui_component* parent, psy_audio_Player* p
 	ui_component_starttimer(&self->component, TIMERID_PLAYPOSBAR, 50);
 }
 
-void ontimer(PlayPosBar* self, ui_component* sender, int timerid)
+void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender, int timerid)
 {		
 	if (self->lastposition != player_position(self->player)) {
 		char text[20];

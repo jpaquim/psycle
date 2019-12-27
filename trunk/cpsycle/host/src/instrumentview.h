@@ -19,35 +19,35 @@
 #include <uigroupbox.h>
 
 typedef struct {	
-	ui_component component;	
-	ui_label namelabel;
-	ui_edit nameedit;	
-	ui_button prevbutton;
-	ui_button nextbutton;	
+	psy_ui_Component component;	
+	psy_ui_Label namelabel;
+	psy_ui_Edit nameedit;	
+	psy_ui_Button prevbutton;
+	psy_ui_Button nextbutton;	
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 	struct InstrumentView* view;
 } InstrumentHeaderView;
 
 typedef struct {
-	ui_component component;
-	ui_component row1;
-	ui_button create;
-	ui_button load;
-	ui_button save;
-	ui_component row2;
-	ui_button duplicate;
-	ui_button del;
+	psy_ui_Component component;
+	psy_ui_Component row1;
+	psy_ui_Button create;
+	psy_ui_Button load;
+	psy_ui_Button save;
+	psy_ui_Component row2;
+	psy_ui_Button duplicate;
+	psy_ui_Button del;
 } InstrumentViewButtons;
 
 typedef struct {
-	ui_component component;
-	ui_component nna;
-	ui_label nnaheaderlabel;
-	ui_button nnacutbutton;
-	ui_button nnareleasebutton;
-	ui_button nnanonebutton;
-	ui_component left;
+	psy_ui_Component component;
+	psy_ui_Component nna;
+	psy_ui_Label nnaheaderlabel;
+	psy_ui_Button nnacutbutton;
+	psy_ui_Button nnareleasebutton;
+	psy_ui_Button nnanonebutton;
+	psy_ui_Component left;
 	SamplesBox samplesbox;
 	InstrumentNoteMapView notemapview;
 	psy_audio_Instrument* instrument;
@@ -55,8 +55,8 @@ typedef struct {
 } InstrumentGeneralView;
 
 typedef struct {
-	ui_component component;	
-	ui_groupbox groupbox;
+	psy_ui_Component component;	
+	psy_ui_Groupbox groupbox;
 	EnvelopeView envelopeview;
 	ui_slider attack;
 	ui_slider decay;
@@ -68,14 +68,14 @@ typedef struct {
 } InstrumentVolumeView;
 
 typedef struct {
-	ui_component component;		
+	psy_ui_Component component;		
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 } InstrumentPanView;
 
 typedef struct {
-	ui_component component;	
-	ui_groupbox groupbox;
+	psy_ui_Component component;	
+	psy_ui_Groupbox groupbox;
 	EnvelopeView envelopeview;
 	ui_slider attack;
 	ui_slider decay;
@@ -90,20 +90,20 @@ typedef struct {
 } InstrumentFilterView;
 
 typedef struct {
-	ui_component component;		
+	psy_ui_Component component;		
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 } InstrumentPitchView;
 
 typedef struct InstrumentView {
-	ui_component component;
+	psy_ui_Component component;
 	ui_notebook notebook;
 	TabBar tabbar;
-	ui_component left;
-	ui_label label;
+	psy_ui_Component left;
+	psy_ui_Label label;
 	InstrumentViewButtons buttons;
 	InstrumentsBox instrumentsbox;
-	ui_component client;
+	psy_ui_Component client;
 	InstrumentHeaderView header;
 	InstrumentGeneralView general;
 	InstrumentVolumeView volume;
@@ -114,6 +114,6 @@ typedef struct InstrumentView {
 	Workspace* workspace;
 } InstrumentView;
 
-void instrumentview_init(InstrumentView*, ui_component* parent, Workspace*);
+void instrumentview_init(InstrumentView*, psy_ui_Component* parent, Workspace*);
 
 #endif

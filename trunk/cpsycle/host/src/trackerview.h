@@ -50,7 +50,7 @@ typedef struct {
 	unsigned int midline;
 	unsigned int midline2;
 	TrackerHeaderCoords headercoords;
-	ui_bitmap bitmap;
+	psy_ui_Bitmap bitmap;
 } TrackerSkin;
 
 typedef PatternEditPosition TrackerCursor;
@@ -75,7 +75,7 @@ typedef struct {
 } TrackerMetrics;
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	int dx;	
 	unsigned int numtracks;
 	int classic;
@@ -83,47 +83,47 @@ typedef struct {
 	struct TrackerView* view;
 } TrackerHeader;
 
-void trackerheader_init(TrackerHeader*, ui_component* parent,
+void trackerheader_init(TrackerHeader*, psy_ui_Component* parent,
 	struct TrackerView* view);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	struct TrackerView* view;
 } TrackerLineNumbersLabel;
 
-void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, ui_component* parent, struct TrackerView*);
+void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, psy_ui_Component* parent, struct TrackerView*);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	TrackerSkin* skin;
 	int dy;
 	struct TrackerView* view;
 } TrackerLineNumbers;
 
-void trackerlinenumbers_init(TrackerLineNumbers*, ui_component* parent,
+void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
 	struct TrackerView*);
 
 #define TRACKERGRID_numparametercols 10
 
 typedef struct {
-	ui_component component;
-	ui_button cut;
-	ui_button copy;
-	ui_button paste;
-	ui_button mixpaste;
-	ui_button del;
-	ui_button changegenerator;
-	ui_button changeinstrument;
-	ui_button blocktransposeup;
-	ui_button blocktransposedown;
-	ui_button blocktransposeup12;	
-	ui_button blocktransposedown12;
+	psy_ui_Component component;
+	psy_ui_Button cut;
+	psy_ui_Button copy;
+	psy_ui_Button paste;
+	psy_ui_Button mixpaste;
+	psy_ui_Button del;
+	psy_ui_Button changegenerator;
+	psy_ui_Button changeinstrument;
+	psy_ui_Button blocktransposeup;
+	psy_ui_Button blocktransposedown;
+	psy_ui_Button blocktransposeup12;	
+	psy_ui_Button blocktransposedown12;
 } PatternBlockMenu;
 
-void patternblockmenu_init(PatternBlockMenu*, ui_component*);
+void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*);
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    int cx;
    int cy;
    int dx;
@@ -146,7 +146,7 @@ typedef struct {
    int chordbegin;
 } TrackerGrid;
 
-void trackergrid_init(TrackerGrid*, ui_component* parent, struct TrackerView*,
+void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, struct TrackerView*,
 	psy_audio_Player*);
 
 typedef Inputs TrackerInputs;
@@ -158,7 +158,7 @@ typedef struct {
 } SublineCache;
 
 typedef struct TrackerView {
-	ui_component component;
+	psy_ui_Component component;
 	TrackerHeader header;
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
@@ -183,7 +183,7 @@ typedef struct TrackerView {
 	TrackerMetrics metrics;
 } TrackerView;
 
-void trackerview_init(TrackerView*, ui_component* parent, Workspace*);
+void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
 void TrackerViewApplyProperties(TrackerView*, psy_Properties*);

@@ -8,10 +8,10 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	int clip;
 } ClipBox;
 
-void clipbox_init(ClipBox*, ui_component* parent, Workspace* workspace);
+void clipbox_init(ClipBox*, psy_ui_Component* parent, Workspace* workspace);
 
 #endif

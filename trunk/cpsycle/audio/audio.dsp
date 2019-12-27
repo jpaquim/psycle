@@ -545,6 +545,10 @@ SOURCE=.\src\waveio.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\wavsongio.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\xm.c
 # End Source File
 # End Group
@@ -770,6 +774,10 @@ SOURCE=.\src\vstplugin.h
 # Begin Source File
 
 SOURCE=.\src\waveio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\wavsongio.h
 # End Source File
 # Begin Source File
 

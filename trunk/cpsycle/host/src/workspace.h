@@ -75,7 +75,7 @@ typedef struct {
 	psy_Signal signal_terminal_error;
 	psy_Signal signal_terminal_out;
 	psy_Signal signal_terminal_warning;
-	ui_component* mainhandle;
+	psy_ui_Component* mainhandle;
 	UndoRedo undoredo;
 	History history;
 	PatternEditPosition patterneditposition;

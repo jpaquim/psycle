@@ -8,12 +8,12 @@
 #include "uibitmap.h"
 
 typedef struct {
-	ui_component component;
-	ui_bitmap bitmap;
+	psy_ui_Component component;
+	psy_ui_Bitmap bitmap;
 	UiAlignment alignment;	
-} ui_image;
+} psy_ui_Image;
 
-void ui_image_init(ui_image*, ui_component* parent);
-void ui_image_setbitmapalignment(ui_image*, UiAlignment);	
+void ui_image_init(psy_ui_Image*, psy_ui_Component* parent);
+void ui_image_setbitmapalignment(psy_ui_Image*, UiAlignment);	
 
 #endif

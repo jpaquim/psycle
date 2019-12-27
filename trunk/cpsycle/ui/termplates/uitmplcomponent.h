@@ -4,10 +4,9 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;
+   psy_ui_Component component;
 } ui_name;
 
-
-void ui_name_init(void* self, ui_name* name, ui_component* parent);
+void ui_name_init(void* self, ui_name* name, psy_ui_Component* parent);
 
 #endif

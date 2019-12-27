@@ -52,7 +52,7 @@ typedef struct {
 typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
 	LPARAM lParam);
 
-typedef struct ui_component {
+typedef struct psy_ui_Component {
 	uintptr_t hwnd;
 	uintptr_t winid;	
 	psy_Signal signal_size;
@@ -106,86 +106,83 @@ typedef struct ui_component {
 	int handlevscroll;
 	int handlehscroll;
 	int cursor;	
-} ui_component;
+} psy_ui_Component;
 
-void ui_replacedefaultfont(ui_component* main, ui_font* font);
+void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font);
 
-void ui_component_init(ui_component*, ui_component* parent);
-void ui_component_dispose(ui_component*);
-void ui_component_destroy(ui_component*);
-void ui_frame_init(ui_component*, ui_component* parent);
-int ui_win32_component_init(ui_component*, ui_component* parent,
+void ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
+void ui_component_dispose(psy_ui_Component*);
+void ui_component_destroy(psy_ui_Component*);
+void ui_frame_init(psy_ui_Component*, psy_ui_Component* parent);
+int ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
 	LPCTSTR classname, int x, int y, int width, int height,
 	DWORD dwStyle, int usecommand);
-void ui_component_show(ui_component*);
-void ui_component_hide(ui_component*);
-void ui_component_show_state(ui_component*, int cmd);
-void ui_component_showhorizontalscrollbar(ui_component*);
-void ui_component_hidehorizontalscrollbar(ui_component*);
-void ui_component_sethorizontalscrollrange(ui_component*, int min, int max);
-void ui_component_showverticalscrollbar(ui_component*);
-void ui_component_hideverticalscrollbar(ui_component*);
-void ui_component_setverticalscrollrange(ui_component*, int min, int max);
-void ui_component_verticalscrollrange(ui_component* self, int* scrollmin,
+void ui_component_show(psy_ui_Component*);
+void ui_component_hide(psy_ui_Component*);
+void ui_component_show_state(psy_ui_Component*, int cmd);
+void ui_component_showhorizontalscrollbar(psy_ui_Component*);
+void ui_component_hidehorizontalscrollbar(psy_ui_Component*);
+void ui_component_sethorizontalscrollrange(psy_ui_Component*, int min, int max);
+void ui_component_showverticalscrollbar(psy_ui_Component*);
+void ui_component_hideverticalscrollbar(psy_ui_Component*);
+void ui_component_setverticalscrollrange(psy_ui_Component*, int min, int max);
+void ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
 	int* scrollmax);
-int ui_component_verticalscrollposition(ui_component* self);
-void ui_component_setverticalscrollposition(ui_component*, int position);
-void ui_component_sethorizontalscrollposition(ui_component*, int position);
-int ui_component_horizontalscrollposition(ui_component*);
-void ui_component_scrollstep(ui_component*, intptr_t stepx, intptr_t stepy);
-void ui_component_move(ui_component*, int left, int top);
-void ui_component_resize(ui_component*, int width, int height);
-void ui_component_setposition(ui_component*, int x, int y, int width, int height);
-void ui_component_setmenu(ui_component*, ui_menu* menu);
-void ui_component_settitle(ui_component*, const char* title);
-ui_component* ui_component_parent(ui_component* component);
-void ui_component_enumerate_children(ui_component*, void* context, int (*childenum)(void*, void*));
-psy_List* ui_component_children(ui_component*, int recursive);
-void ui_component_capture(ui_component*);
+int ui_component_verticalscrollposition(psy_ui_Component* self);
+void ui_component_setverticalscrollposition(psy_ui_Component*, int position);
+void ui_component_sethorizontalscrollposition(psy_ui_Component*, int position);
+int ui_component_horizontalscrollposition(psy_ui_Component*);
+void ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
+void ui_component_move(psy_ui_Component*, int left, int top);
+void ui_component_resize(psy_ui_Component*, int width, int height);
+void ui_component_setposition(psy_ui_Component*, int x, int y, int width, int height);
+void ui_component_setmenu(psy_ui_Component*, ui_menu* menu);
+void ui_component_settitle(psy_ui_Component*, const char* title);
+psy_ui_Component* ui_component_parent(psy_ui_Component* component);
+void ui_component_enumerate_children(psy_ui_Component*, void* context, int (*childenum)(void*, void*));
+psy_List* ui_component_children(psy_ui_Component*, int recursive);
+void ui_component_capture(psy_ui_Component*);
 void ui_component_releasecapture();
-ui_size ui_component_size(ui_component*);
-ui_rectangle ui_component_position(ui_component*);
-ui_size ui_component_frame_size(ui_component*);
-void ui_component_invalidate(ui_component*);
-void ui_component_invalidaterect(ui_component*, const ui_rectangle* rect);
-void ui_component_update(ui_component*);
-void ui_component_setfocus(ui_component*);
-int ui_component_hasfocus(ui_component*);
-void ui_component_setfont(ui_component*, ui_font* font);
-void ui_component_propagateevent(ui_component*);
-void ui_component_preventdefault(ui_component*);
-void ui_component_init_base(ui_component*);
-void ui_component_init_signals(ui_component*);
-int ui_component_visible(ui_component*);
-void ui_component_align(ui_component*);
-void ui_component_setmargin(ui_component*, const ui_margin*);
-void ui_component_setspacing(ui_component*, const ui_margin*);
-void ui_component_setalign(ui_component*, UiAlignType align);
-void ui_component_enablealign(ui_component*);
-void ui_component_setalignexpand(ui_component*, UiExpandMode);
-void ui_component_preventalign(ui_component*);
-void ui_component_enableinput(ui_component*, int recursive);
-void ui_component_preventinput(ui_component*, int recursive);
-void ui_component_setbackgroundmode(ui_component*, BackgroundMode);
-void ui_component_setbackgroundcolor(ui_component*, uint32_t color);
-void ui_component_setcolor(ui_component*, uint32_t color);
-void ui_component_starttimer(ui_component*, unsigned int id, unsigned int interval);
-void ui_component_stoptimer(ui_component*, unsigned int id);
-ui_size ui_component_textsize(ui_component*, const char*);
-ui_textmetric ui_component_textmetric(ui_component*);
-ui_size ui_component_preferredsize(ui_component*, ui_size* limit);
-void ui_component_seticonressource(ui_component*, int ressourceid);
+ui_size ui_component_size(psy_ui_Component*);
+ui_rectangle ui_component_position(psy_ui_Component*);
+ui_size ui_component_frame_size(psy_ui_Component*);
+void ui_component_invalidate(psy_ui_Component*);
+void ui_component_invalidaterect(psy_ui_Component*, const ui_rectangle* rect);
+void ui_component_update(psy_ui_Component*);
+void ui_component_setfocus(psy_ui_Component*);
+int ui_component_hasfocus(psy_ui_Component*);
+void ui_component_setfont(psy_ui_Component*, ui_font* font);
+void ui_component_propagateevent(psy_ui_Component*);
+void ui_component_preventdefault(psy_ui_Component*);
+void ui_component_init_base(psy_ui_Component*);
+void ui_component_init_signals(psy_ui_Component*);
+int ui_component_visible(psy_ui_Component*);
+void ui_component_align(psy_ui_Component*);
+void ui_component_setmargin(psy_ui_Component*, const ui_margin*);
+void ui_component_setspacing(psy_ui_Component*, const ui_margin*);
+void ui_component_setalign(psy_ui_Component*, UiAlignType align);
+void ui_component_enablealign(psy_ui_Component*);
+void ui_component_setalignexpand(psy_ui_Component*, UiExpandMode);
+void ui_component_preventalign(psy_ui_Component*);
+void ui_component_enableinput(psy_ui_Component*, int recursive);
+void ui_component_preventinput(psy_ui_Component*, int recursive);
+void ui_component_setbackgroundmode(psy_ui_Component*, BackgroundMode);
+void ui_component_setbackgroundcolor(psy_ui_Component*, uint32_t color);
+void ui_component_setcolor(psy_ui_Component*, uint32_t color);
+void ui_component_starttimer(psy_ui_Component*, unsigned int id, unsigned int interval);
+void ui_component_stoptimer(psy_ui_Component*, unsigned int id);
+ui_size ui_component_textsize(psy_ui_Component*, const char*);
+ui_textmetric ui_component_textmetric(psy_ui_Component*);
+ui_size ui_component_preferredsize(psy_ui_Component*, ui_size* limit);
+void ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 
 psy_List* ui_components_setalign(psy_List*, UiAlignType, const ui_margin*);
 psy_List* ui_components_setmargin(psy_List*, const ui_margin*);
 
-int ui_openfile(ui_component* self, char* title, char* filter,
+int ui_openfile(psy_ui_Component* self, char* title, char* filter,
 	char* defextension, const char* szInitialDir, char* filename);
-int ui_savefile(ui_component* self, char* title, char* filter,
+int ui_savefile(psy_ui_Component* self, char* title, char* filter,
 	char* defextension, const char* szInitialDir, char* filename);
-int ui_browsefolder(ui_component* self, const char* title, char* path);
-
-uint32_t ui_defaultcolor(void);
-uint32_t ui_defaultbackgroundcolor(void);
+int ui_browsefolder(psy_ui_Component* self, const char* title, char* path);
 
 #endif

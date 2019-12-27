@@ -50,7 +50,7 @@ typedef struct {
 	int effect_font_point;
 	unsigned int effect_font_flags;	
 	unsigned int effect_fontcolour;
-	ui_bitmap skinbmp;	
+	psy_ui_Bitmap skinbmp;	
 	ui_font font;
 	int drawmachineindexes;
 } MachineSkin;
@@ -79,7 +79,7 @@ enum {
 };
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	psy_audio_Machines* machines;
 	psy_Table machineuis;
 	psy_List* wireframes;
@@ -97,23 +97,23 @@ typedef struct {
 	MachineSkin skin;	   
 	Workspace* workspace;	
 	struct MachineViewBar* statusbar;
-	ui_edit editname;
+	psy_ui_Edit editname;
 	int firstsize;
 } MachineWireView;
 
-void machinewireview_init(MachineWireView*, ui_component* parent,
-	ui_component* tabbarparent, Workspace*);
+void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace*);
 void machinewireview_align(MachineWireView*);
 
 typedef struct MachineViewBar {
-	ui_component component;
-	ui_label label;	
+	psy_ui_Component component;
+	psy_ui_Label label;	
 } MachineViewBar;
 
-void machineviewbar_init(MachineViewBar*, ui_component* parent, Workspace*);
+void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	TabBar tabbar;
 	ui_notebook notebook;	
 	MachineWireView wireview;
@@ -121,8 +121,8 @@ typedef struct {
 	Workspace* workspace;
 } MachineView;
 
-void machineview_init(MachineView*, ui_component* parent,
-	ui_component* tabbarparent, Workspace*);
+void machineview_init(MachineView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace*);
 void machineview_applyproperties(MachineView*, psy_Properties*);
 void machineview_align(MachineView*);
 

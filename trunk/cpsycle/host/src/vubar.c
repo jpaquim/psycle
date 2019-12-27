@@ -5,7 +5,7 @@
 
 #include "vubar.h"
 
-void vubar_init(VuBar* self, ui_component* parent, Workspace* workspace)
+void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
 	vumeter_init(&self->vumeter, &self->component, workspace);

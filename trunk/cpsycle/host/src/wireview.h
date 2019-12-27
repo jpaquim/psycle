@@ -12,29 +12,29 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	TabBar tabbar;
 	ui_notebook notebook;
-	ui_component slidergroup;
+	psy_ui_Component slidergroup;
 	ui_slider volslider;
-	ui_button dbvol;
-	ui_button percvol;
+	psy_ui_Button dbvol;
+	psy_ui_Button percvol;
 	VuScope vuscope;
 	ChannelMappingView channelmappingview;
-	ui_component bottomgroup;
-	ui_button deletewire;
+	psy_ui_Component bottomgroup;
+	psy_ui_Button deletewire;
 	psy_audio_Wire wire;
 	Workspace* workspace;
 } WireView;
 
-void wireview_init(WireView*, ui_component* parent, psy_audio_Wire, Workspace*);
+void wireview_init(WireView*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
 int wireview_wireexists(WireView*);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	WireView* wireview;
 } WireFrame;
 
-void wireframe_init(WireFrame*, ui_component* parent, WireView* view);
+void wireframe_init(WireFrame*, psy_ui_Component* parent, WireView* view);
 
 #endif

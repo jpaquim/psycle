@@ -5,11 +5,11 @@
 
 #include "undoredobar.h"
 
-static void undoredobar_onundo(UndoRedoBar*, ui_component* sender);
-static void undoredobar_onredo(UndoRedoBar*, ui_component* sender);
+static void undoredobar_onundo(UndoRedoBar*, psy_ui_Component* sender);
+static void undoredobar_onredo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_initalign(UndoRedoBar* self);
 
-void undoredobar_init(UndoRedoBar* self, ui_component* parent,
+void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	self->workspace = workspace;
@@ -41,12 +41,12 @@ void undoredobar_initalign(UndoRedoBar* self)
 		&margin));
 }
 
-void undoredobar_onundo(UndoRedoBar* self, ui_component* sender)
+void undoredobar_onundo(UndoRedoBar* self, psy_ui_Component* sender)
 {
 	workspace_undo(self->workspace);
 }
 
-void undoredobar_onredo(UndoRedoBar* self, ui_component* sender)
+void undoredobar_onredo(UndoRedoBar* self, psy_ui_Component* sender)
 {
 	workspace_redo(self->workspace);
 }

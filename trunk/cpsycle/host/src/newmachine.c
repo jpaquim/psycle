@@ -7,27 +7,27 @@
 #include <plugin_interface.h>
 #include <portable.h>
 
-static void newmachine_onpluginselected(NewMachine*, ui_component* parent,
+static void newmachine_onpluginselected(NewMachine*, psy_ui_Component* parent,
 	psy_Properties*);
 static void newmachine_onplugincachechanged(NewMachine*, psy_audio_PluginCatcher*);
-static void newmachine_onkeydown(NewMachine*, ui_component* sender, KeyEvent*);
+static void newmachine_onkeydown(NewMachine*, psy_ui_Component* sender, KeyEvent*);
 
-static void pluginsview_ondestroy(PluginsView*, ui_component* component);
-static void pluginsview_ondraw(PluginsView*, ui_component* sender,
-	ui_graphics*);
-static void pluginsview_drawitem(PluginsView*, ui_graphics* g, psy_Properties*,
+static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
+static void pluginsview_ondraw(PluginsView*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
+static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics* g, psy_Properties*,
 	int x, int y);
-static void pluginsview_onsize(PluginsView*, ui_component* sender,
+static void pluginsview_onsize(PluginsView*, psy_ui_Component* sender,
 	ui_size* size);
-static void pluginsview_onmousedown(PluginsView*, ui_component* sender,
+static void pluginsview_onmousedown(PluginsView*, psy_ui_Component* sender,
 	MouseEvent*);
 static void pluginsview_hittest(PluginsView*, int x, int y);
 static void pluginsview_computetextsizes(PluginsView* self);
-static void pluginsview_onscroll(PluginsView*, ui_component* sender,
+static void pluginsview_onscroll(PluginsView*, psy_ui_Component* sender,
 	int stepx, int stepy);
-static void pluginsview_onmousedoubleclick(PluginsView*, ui_component* sender,
+static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_Component* sender,
 	int x, int y, int button);
-static void pluginsview_onkeydown(PluginsView*, ui_component* sender,
+static void pluginsview_onkeydown(PluginsView*, psy_ui_Component* sender,
 	KeyEvent*);
 static void pluginsview_onplugincachechanged(PluginsView*,
 	psy_audio_PluginCatcher* sender);
@@ -37,11 +37,11 @@ static void pluginname(psy_Properties*, char* txt);
 static int plugintype(psy_Properties*, char* txt);
 static int pluginmode(psy_Properties*, char* txt);
 
-static void newmachinebar_onrescan(NewMachineBar*, ui_component* sender);
+static void newmachinebar_onrescan(NewMachineBar*, psy_ui_Component* sender);
 
 static void newmachinedetail_reset(NewMachineDetail*);
 
-void newmachinebar_init(NewMachineBar* self, ui_component* parent,
+void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	self->workspace = workspace;	
@@ -53,12 +53,12 @@ void newmachinebar_init(NewMachineBar* self, ui_component* parent,
 	ui_component_setposition(&self->rescan.component, 0, 0, 80, 20);
 }
 
-void newmachinebar_onrescan(NewMachineBar* self, ui_component* sender)
+void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
 {
 	workspace_scanplugins(self->workspace);
 }
 
-void newmachinedetail_init(NewMachineDetail* self, ui_component* parent,
+void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);	
@@ -77,7 +77,7 @@ void newmachinedetail_reset(NewMachineDetail* self)
 		"Select a plugin to view its description.");	
 }
 
-void pluginsview_init(PluginsView* self, ui_component* parent,
+void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	ui_component_init(&self->component, parent);	
@@ -107,14 +107,14 @@ void pluginsview_init(PluginsView* self, ui_component* parent,
 		pluginsview_onplugincachechanged);
 }
 
-void pluginsview_ondestroy(PluginsView* self, ui_component* component)
+void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
 {
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void pluginsview_ondraw(PluginsView* self, ui_component* sender,
-	ui_graphics* g)
+void pluginsview_ondraw(PluginsView* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
 {	
 	psy_Properties* p;
 	int cpx = 0;
@@ -135,7 +135,7 @@ void pluginsview_ondraw(PluginsView* self, ui_component* sender,
 	}	
 }
 
-void pluginsview_drawitem(PluginsView* self, ui_graphics* g,
+void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	psy_Properties* property, int x, int y)
 {
 	char txt[128];
@@ -220,7 +220,7 @@ int pluginmode(psy_Properties* property, char* txt)
 	return rv;
 }
 
-void pluginsview_onsize(PluginsView* self, ui_component* sender, ui_size* size)
+void pluginsview_onsize(PluginsView* self, psy_ui_Component* sender, ui_size* size)
 {
 	pluginsview_adjustscroll(self);
 }
@@ -246,13 +246,13 @@ void pluginsview_adjustscroll(PluginsView* self)
 	}
 }
 
-void pluginsview_onscroll(PluginsView* self, ui_component* sender, 
+void pluginsview_onscroll(PluginsView* self, psy_ui_Component* sender, 
 	int stepx, int stepy)
 {
 	self->dy += sender->scrollstepy * stepy;
 }
 
-void pluginsview_onmousedown(PluginsView* self, ui_component* sender,
+void pluginsview_onmousedown(PluginsView* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	pluginsview_hittest(self, ev->x, ev->y);
@@ -288,7 +288,7 @@ void pluginsview_hittest(PluginsView* self, int x, int y)
 	}
 }
 
-void pluginsview_onmousedoubleclick(PluginsView* self, ui_component* sender,
+void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_Component* sender,
 	int x, int y, int button)
 {
 	if (self->selectedplugin) {
@@ -298,7 +298,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, ui_component* sender,
 	}	
 }
 
-void pluginsview_onkeydown(PluginsView* self, ui_component* sender,
+void pluginsview_onkeydown(PluginsView* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	if (keyevent->keycode == VK_ESCAPE) {	
@@ -314,7 +314,7 @@ void pluginsview_onplugincachechanged(PluginsView* self, psy_audio_PluginCatcher
 	ui_component_invalidate(&self->component);
 }
 
-void newmachine_init(NewMachine* self, ui_component* parent,
+void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
@@ -330,7 +330,7 @@ void newmachine_init(NewMachine* self, ui_component* parent,
 		newmachine_onplugincachechanged);
 }
 
-void newmachine_onpluginselected(NewMachine* self, ui_component* parent,
+void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	psy_Properties* selected)
 {
 	const char* text;
@@ -349,7 +349,7 @@ void newmachine_onplugincachechanged(NewMachine* self, psy_audio_PluginCatcher* 
 	newmachinedetail_reset(&self->detail);
 }
 
-void newmachine_onkeydown(NewMachine* self, ui_component* sender,
+void newmachine_onkeydown(NewMachine* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	if (keyevent->keycode == VK_ESCAPE) {	

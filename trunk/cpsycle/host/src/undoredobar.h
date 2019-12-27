@@ -8,12 +8,12 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
-	ui_button undobutton;
-	ui_button redobutton;
+	psy_ui_Component component;
+	psy_ui_Button undobutton;
+	psy_ui_Button redobutton;
 	Workspace* workspace;
 } UndoRedoBar;
 
-void undoredobar_init(UndoRedoBar*, ui_component* parent, Workspace*);
+void undoredobar_init(UndoRedoBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

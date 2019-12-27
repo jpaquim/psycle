@@ -9,12 +9,12 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
-	ui_label headerlabel;
+	psy_ui_Component component;
+	psy_ui_Label headerlabel;
 	ui_combobox octavebox;	
 	Workspace* workspace;
 } OctaveBar;
 
-void InitOctaveBar(OctaveBar*, ui_component* parent, Workspace*);
+void octavebar_init(OctaveBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

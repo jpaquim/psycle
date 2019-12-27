@@ -16,28 +16,28 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;	
-	ui_button incpattern;
-	ui_button decpattern;	
-	ui_button newentry;
-	ui_button insertentry;
-	ui_button delentry;
-	ui_button cloneentry;
-	ui_button newtrack;
-	ui_button deltrack;
-	ui_button clear;
-	ui_button cut;
-	ui_button copy;
-	ui_button paste;
-	ui_button singlesel;
-	ui_button multisel;	
+	psy_ui_Component component;	
+	psy_ui_Button incpattern;
+	psy_ui_Button decpattern;	
+	psy_ui_Button newentry;
+	psy_ui_Button insertentry;
+	psy_ui_Button delentry;
+	psy_ui_Button cloneentry;
+	psy_ui_Button newtrack;
+	psy_ui_Button deltrack;
+	psy_ui_Button clear;
+	psy_ui_Button cut;
+	psy_ui_Button copy;
+	psy_ui_Button paste;
+	psy_ui_Button singlesel;
+	psy_ui_Button multisel;	
 	void* context;	
 } SequenceButtons;
 
-void sequencebuttons_init(SequenceButtons*, ui_component* parent);
+void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	psy_audio_Sequence* sequence;
 	SequenceSelection* selection;	
 	psy_audio_Patterns* patterns;	
@@ -58,29 +58,29 @@ typedef struct {
 	struct SequenceView* view;
 } SequenceListView;
 
-void sequencelistview_init(SequenceListView*, ui_component* parent,
+void sequencelistview_init(SequenceListView*, psy_ui_Component* parent,
 	struct SequenceView*, psy_audio_Sequence*, psy_audio_Patterns*, Workspace*);
 
 typedef struct {
-	ui_component component;
-	ui_label desc;
-	ui_label duration;	
+	psy_ui_Component component;
+	psy_ui_Label desc;
+	psy_ui_Label duration;	
 	psy_audio_Sequence* sequence;
 } SequenceViewDuration;
 
-void sequenceduration_init(SequenceViewDuration*, ui_component* parent,
+void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
 	psy_audio_Sequence*);
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	struct SequenceView* view;
 } SequenceViewTrackHeader;
 
 void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
-	ui_component* parent, struct SequenceView*);
+	psy_ui_Component* parent, struct SequenceView*);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ui_checkbox followsong;
 	ui_checkbox shownames;
 	ui_checkbox showplaylist;
@@ -88,10 +88,10 @@ typedef struct {
 	ui_checkbox multichannelaudition;
 } SequencerOptionsBar;
 
-void sequenceroptionsbar_init(SequencerOptionsBar* self, ui_component* parent);
+void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* parent);
 
 typedef struct SequenceView {
-	ui_component component;	
+	psy_ui_Component component;	
 	SequenceListView listview;
 	SequenceButtons buttons;
 	SequenceViewTrackHeader trackheader;
@@ -105,7 +105,7 @@ typedef struct SequenceView {
 	Workspace* workspace;	
 } SequenceView;
 
-void sequenceview_init(SequenceView*, ui_component* parent, Workspace*);
+void sequenceview_init(SequenceView*, psy_ui_Component* parent, Workspace*);
 
 
 #endif

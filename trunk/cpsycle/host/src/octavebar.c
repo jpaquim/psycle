@@ -6,13 +6,13 @@
 #include "octavebar.h"
 #include <portable.h>
 
-static void OnDestroy(OctaveBar*, ui_component* component);
+static void OnDestroy(OctaveBar*, psy_ui_Component* component);
 static void BuildOctaveBox(OctaveBar* self);
-static void OnOctaveBoxSelChange(OctaveBar*, ui_component* sender, int sel);
+static void OnOctaveBoxSelChange(OctaveBar*, psy_ui_Component* sender, int sel);
 static void OnOctaveChanged(OctaveBar*, Workspace*, int octave);
 static void OnSongChanged(OctaveBar*, Workspace*);
 
-void InitOctaveBar(OctaveBar* self, ui_component* parent, Workspace* workspace)
+void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
@@ -40,7 +40,7 @@ void InitOctaveBar(OctaveBar* self, ui_component* parent, Workspace* workspace)
 	}
 }
 
-void OnDestroy(OctaveBar* self, ui_component* component)
+void OnDestroy(OctaveBar* self, psy_ui_Component* component)
 {
 }
 
@@ -56,7 +56,7 @@ void BuildOctaveBox(OctaveBar* self)
 	ui_combobox_setcursel(&self->octavebox, self->workspace->octave);
 }
 
-void OnOctaveBoxSelChange(OctaveBar* self, ui_component* sender, int sel)
+void OnOctaveBoxSelChange(OctaveBar* self, psy_ui_Component* sender, int sel)
 {	
 	workspace_setoctave(self->workspace, sel);
 }

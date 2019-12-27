@@ -13,15 +13,15 @@
 
 
 typedef struct {
-	ui_component component;
-	ui_button loop;
-	ui_button play;
-	ui_button stop;
-	ui_button pause;
+	psy_ui_Component component;
+	psy_ui_Button loop;
+	psy_ui_Button play;
+	psy_ui_Button stop;
+	psy_ui_Button pause;
 	Workspace* workspace;
 } SampleEditorPlayBar;
 
-void sampleeditorplaybar_init(SampleEditorPlayBar*, ui_component* parent,
+void sampleeditorplaybar_init(SampleEditorPlayBar*, psy_ui_Component* parent,
 	Workspace*);
 
 typedef struct {
@@ -32,7 +32,7 @@ typedef struct {
 } SampleEditorMetrics;
 
 typedef struct {
-	ui_component component;           	
+	psy_ui_Component component;           	
 	psy_dsp_beat_t bpl;
 	int lpb;
 	struct SampleEditor* view;   
@@ -40,7 +40,7 @@ typedef struct {
 } SampleEditorHeader;
 
 typedef struct {	
-	ui_component component;	
+	psy_ui_Component component;	
 	psy_audio_Sample* sample;
 	float zoomleft;
 	float zoomright;	
@@ -50,7 +50,7 @@ typedef struct {
 } SampleZoom;
 
 typedef struct SampleEditor {	
-	ui_component component;
+	psy_ui_Component component;
 	SampleEditorPlayBar playbar;
 	SampleEditorHeader header;
 	WaveBox samplebox;
@@ -64,7 +64,7 @@ typedef struct SampleEditor {
 	Workspace* workspace;
 } SampleEditor;
 
-void sampleeditor_init(SampleEditor*, ui_component* parent, Workspace*);
+void sampleeditor_init(SampleEditor*, psy_ui_Component* parent, Workspace*);
 void sampleeditor_setsample(SampleEditor*, psy_audio_Sample*);
 
 #endif

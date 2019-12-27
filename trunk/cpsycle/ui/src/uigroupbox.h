@@ -7,11 +7,11 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;
-} ui_groupbox;
+   psy_ui_Component component;
+} psy_ui_Groupbox;
 
 
-void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent);
-void ui_groupbox_settext(ui_groupbox* groupbox, const char* text);
+void ui_groupbox_init(psy_ui_Groupbox* groupbox, psy_ui_Component* parent);
+void ui_groupbox_settext(psy_ui_Groupbox* groupbox, const char* text);
 
 #endif

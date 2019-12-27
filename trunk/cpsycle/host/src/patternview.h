@@ -15,25 +15,25 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	struct PatternView* view;
 	Workspace* workspace;
 } PatternViewStatus;
 
-void patternviewstatus_init(PatternViewStatus*, ui_component* parent,
+void patternviewstatus_init(PatternViewStatus*, psy_ui_Component* parent,
 	Workspace*);
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	StepBox step;
 	ui_checkbox movecursorwhenpaste;
 	PatternViewStatus status;	
 } PatternViewBar;
 
-void patternviewbar_init(PatternViewBar*, ui_component* parent, Workspace*);
+void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent, Workspace*);
 
 typedef struct PatternView {
-	ui_component component;
+	psy_ui_Component component;
 	ui_notebook notebook;
 	ui_notebook editnotebook;
 	TrackerView trackerview;
@@ -44,8 +44,8 @@ typedef struct PatternView {
 	unsigned int lpb;	
 } PatternView;
 
-void patternview_init(PatternView*, ui_component* parent,
-		ui_component* tabbarparent,	Workspace*);
+void patternview_init(PatternView*, psy_ui_Component* parent,
+		psy_ui_Component* tabbarparent,	Workspace*);
 void patternview_setpattern(PatternView*, psy_audio_Pattern*);
 
 #endif

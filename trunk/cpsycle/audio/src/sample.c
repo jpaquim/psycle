@@ -20,7 +20,7 @@ void sampleiterator_init(SampleIterator* self, psy_audio_Sample* sample)
 	self->sample = sample;
 	self->forward = 1;
 	double_setvalue(&self->pos, 0.0);
-	double_setvalue(&self->speed, 1.0);
+	self->speed = (int64_t) 4294967296.0f;	
 }
 
 SampleIterator* sampleiterator_alloc(void)
@@ -42,7 +42,7 @@ SampleIterator* sampleiterator_allocinit(psy_audio_Sample* sample)
 int sampleiterator_inc(SampleIterator* self)
 {			
 	if (self->sample->looptype == LOOP_DO_NOT) {
-		self->pos.QuadPart += self->speed.QuadPart;
+		self->pos.QuadPart += self->speed;
 		if (self->pos.HighPart >= self->sample->numframes) {
 			self->pos.LowPart = 0;
 			self->pos.HighPart = 0;			
@@ -50,7 +50,7 @@ int sampleiterator_inc(SampleIterator* self)
 		}
 	} else
 	if (self->sample->looptype == LOOP_NORMAL) {
-		self->pos.QuadPart += self->speed.QuadPart;
+		self->pos.QuadPart += self->speed;
 		if (self->pos.HighPart >= self->sample->loopend) {
 			self->pos.HighPart = self->sample->loopstart +
 				self->sample->loopend - self->pos.HighPart;
@@ -58,7 +58,7 @@ int sampleiterator_inc(SampleIterator* self)
 	} else
 	if (self->sample->looptype == LOOP_BIDI) {
 		if (self->forward) {
-			self->pos.QuadPart += self->speed.QuadPart;
+			self->pos.QuadPart += self->speed;
 			if (self->pos.HighPart >= self->sample->loopend) {
 				Double loopend;
 				Double delta;
@@ -70,7 +70,8 @@ int sampleiterator_inc(SampleIterator* self)
 				self->forward = 0;
 			}
 		} else {
-			self->pos.QuadPart -= self->speed.QuadPart;
+			// todo check negative values first
+			self->pos.QuadPart -= self->speed;
 			if (self->pos.HighPart <= self->sample->loopstart) {
 				Double loopstart;
 				Double delta;

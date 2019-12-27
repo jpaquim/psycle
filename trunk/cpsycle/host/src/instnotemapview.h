@@ -23,18 +23,18 @@ typedef struct {
 } InstrumentNoteMapMetrics;
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	int dy;
 	InstrumentNoteMapMetrics metrics;
 } InstrumentKeyboardView;
 
 void instrumentkeyboardview_init(InstrumentKeyboardView*,
-	ui_component* parent);
+	psy_ui_Component* parent);
 
 typedef struct {
-	ui_component component;
-	ui_button add;
-	ui_button remove;
+	psy_ui_Component component;
+	psy_ui_Button add;
+	psy_ui_Button remove;
 } InstrumentNoteMapButtons;
 
 enum {
@@ -44,14 +44,14 @@ enum {
 };
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	int dy;
 	psy_audio_Instrument* instrument;
 	InstrumentNoteMapMetrics metrics;
 } InstrumentParameterView;
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	int dy;
 	psy_audio_Instrument* instrument;
 	uintptr_t selected;
@@ -61,8 +61,8 @@ typedef struct {
 } InstrumentEntryView;
 
 typedef struct {	
-	ui_component component;
-	ui_label label;
+	psy_ui_Component component;
+	psy_ui_Label label;
 	InstrumentNoteMapButtons buttons;
 	InstrumentKeyboardView keyboard;
 	InstrumentEntryView entryview;
@@ -73,7 +73,7 @@ typedef struct {
 } InstrumentNoteMapView;
 
 void instrumentnotemapview_init(InstrumentNoteMapView*,
-	ui_component* parent);
+	psy_ui_Component* parent);
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, psy_audio_Instrument*);
 void instrumentnotemapview_update(InstrumentNoteMapView*);
 

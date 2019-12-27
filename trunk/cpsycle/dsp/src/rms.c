@@ -10,6 +10,11 @@
 
 static int numRMSSamples = 1;
 
+#if defined SSE
+#define is_aligned(POINTER, BYTE_COUNT) \
+	(((uintptr_t)(const void*)(POINTER)) % (BYTE_COUNT) == 0)
+#endif
+
 // psy_dsp_RMSData
 
 void rmsdata_init(psy_dsp_RMSData* self)
@@ -69,7 +74,7 @@ void psy_dsp_rmsvol_tick(psy_dsp_RMSVol* self, const psy_dsp_amp_t * __restrict 
 			rmsdata_accumulate(&self->data, pSamplesL, pSamplesR, count);				
 #if defined SSE
 			//small workaround for 16byte boundary (it makes it slightly incorrect, but hopefully just a bit).
-			if ((count & 0x3) == 0) {
+			if (!is_aligned(pSamplesL, 16)) {
 				ns -= count & 0x3;
 				count = count & ~0x3;
 			}

@@ -14,82 +14,115 @@
 
 #define TIMERID_UPDATEVUMETERS 300
 
-static void machineuis_insert(MachineWireView*, uintptr_t slot, int x, int y, MachineSkin*);
+static void machineuis_insert(MachineWireView*, uintptr_t slot, int x, int y,
+	MachineSkin*);
 static MachineUi* machineuis_at(MachineWireView*, uintptr_t slot);
 static void machineuis_remove(MachineWireView*, uintptr_t slot);
 static void machineuis_removeall(MachineWireView*);
 
-static void machineui_init(MachineUi*, int x, int y, psy_audio_Machine* machine, uintptr_t slot, MachineSkin*, Workspace*);
+static void machineui_init(MachineUi*, int x, int y,
+	psy_audio_Machine* machine, uintptr_t slot, MachineSkin*, Workspace*);
 static void machineui_updatecoords(MachineUi*);
 static void machineui_dispose(MachineUi*);
 static ui_size machineui_size(MachineUi*);
 static ui_rectangle machineui_position(MachineUi*);
-static void machineui_draw(MachineUi*, MachineWireView*, ui_graphics*, uintptr_t slot);
-static void machineui_drawvu(MachineUi*, MachineWireView*, ui_graphics*);
-static void machineui_drawhighlight(MachineUi*, MachineWireView*, ui_graphics*);
-static void machineui_showparameters(MachineUi*, ui_component* parent);
-static void machineui_editname(MachineUi*, ui_edit* edit);
-static void machineui_onkeydown(MachineUi*, ui_component* sender, KeyEvent*);
-static void machineui_oneditchange(MachineUi*, ui_edit* sender);
-static void machineui_oneditfocuslost(MachineUi*, ui_component* sender);
+static void machineui_draw(MachineUi*, MachineWireView*, psy_ui_Graphics*,
+	uintptr_t slot);
+static void machineui_drawvu(MachineUi*, MachineWireView*, psy_ui_Graphics*);
+static void machineui_drawhighlight(MachineUi*, MachineWireView*,
+	psy_ui_Graphics*);
+static void machineui_showparameters(MachineUi*, psy_ui_Component* parent);
+static void machineui_editname(MachineUi*, psy_ui_Edit* edit);
+static void machineui_onkeydown(MachineUi*, psy_ui_Component* sender, KeyEvent*);
+static void machineui_oneditchange(MachineUi*, psy_ui_Edit* sender);
+static void machineui_oneditfocuslost(MachineUi*, psy_ui_Component* sender);
 static int slidercoord(SkinCoord*, float value);
 
 static void machinewireview_adjustscroll(MachineWireView*);
-static void machinewireview_onscroll(MachineWireView*, ui_component* sender,
+static void machinewireview_onscroll(MachineWireView*, psy_ui_Component* sender,
 	int stepx,	int stepy);
 static void machinewireview_initmasterui(MachineWireView*);
 static void machinewireview_connectuisignals(MachineWireView*);
 static void machinewireview_connectmachinessignals(MachineWireView*);
-static void machinewireview_ondraw(MachineWireView*, ui_component* sender, ui_graphics*);
-static void machinewireview_drawmachines(MachineWireView*, ui_graphics*);
-static void drawmachineline(ui_graphics* g, int xdir, int ydir, int x, int y);
-static void machinewireview_drawdragwire(MachineWireView*, ui_graphics*);
-static void machinewireview_drawwires(MachineWireView*, ui_graphics*);
-static void machinewireview_drawwire(MachineWireView*, ui_graphics*, uintptr_t slot, MachineUi*);
-static void machinewireview_drawwirearrow(MachineWireView*, ui_graphics*, MachineUi* out, MachineUi* in);
+static void machinewireview_ondraw(MachineWireView*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
+static void machinewireview_drawmachines(MachineWireView*, psy_ui_Graphics*);
+static void drawmachineline(psy_ui_Graphics* g, int xdir, int ydir, int x, int y);
+static void machinewireview_drawdragwire(MachineWireView*, psy_ui_Graphics*);
+static void machinewireview_drawwires(MachineWireView*, psy_ui_Graphics*);
+static void machinewireview_drawwire(MachineWireView*, psy_ui_Graphics*,
+	uintptr_t slot, MachineUi*);
+static void machinewireview_drawwirearrow(MachineWireView*, psy_ui_Graphics*,
+	MachineUi* out, MachineUi* in);
 static ui_point rotate_point(ui_point, double phi);
 static ui_point move_point(ui_point pt, ui_point d);
-static void machinewireview_ondestroy(MachineWireView*, ui_component* component);
-static void machinewireview_onmousedown(MachineWireView*, ui_component* sender, MouseEvent*);
-static void machinewireview_onmouseup(MachineWireView*, ui_component* sender, MouseEvent*);
-static void machinewireview_onmousemove(MachineWireView*, ui_component* sender, MouseEvent*);
-static void machinewireview_onmousedoubleclick(MachineWireView*, ui_component* sender, MouseEvent*);
-static void machinewireview_onkeydown(MachineWireView*, ui_component* sender, KeyEvent*);
-static void machinewireview_onkeyup(MachineWireView*, ui_component* sender, KeyEvent*);
+static void machinewireview_ondestroy(MachineWireView*,
+	psy_ui_Component* component);
+static void machinewireview_onmousedown(MachineWireView*,
+	psy_ui_Component* sender, MouseEvent*);
+static void machinewireview_onmouseup(MachineWireView*, psy_ui_Component* sender,
+	MouseEvent*);
+static void machinewireview_onmousemove(MachineWireView*, psy_ui_Component* sender,
+	MouseEvent*);
+static void machinewireview_onmousedoubleclick(MachineWireView*,
+	psy_ui_Component* sender, MouseEvent*);
+static void machinewireview_onkeydown(MachineWireView*, psy_ui_Component* sender,
+	KeyEvent*);
+static void machinewireview_onkeyup(MachineWireView*, psy_ui_Component* sender,
+	KeyEvent*);
 static void machinewireview_hittest(MachineWireView*, int x, int y);
-static int machinewireview_hittestpan(MachineWireView*, int x, int y, uintptr_t slot, int* dx);
-static int machinewireview_hittestcoord(MachineWireView*, int x, int y, int mode, uintptr_t slot, SkinCoord*);
-static psy_audio_Wire machinewireview_hittestwire(MachineWireView*, int x, int y);
-static int machinewireview_hittesteditname(MachineWireView*, int x, int y, uintptr_t slot);
-static psy_dsp_amp_t machinewireview_panvalue(MachineWireView*, int x, int y, uintptr_t slot);
-static void machinewireview_onnewmachineselected(MachineView*, ui_component* sender, psy_Properties*);
+static int machinewireview_hittestpan(MachineWireView*, int x, int y,
+	uintptr_t slot, int* dx);
+static int machinewireview_hittestcoord(MachineWireView*, int x, int y,
+	int mode, uintptr_t slot, SkinCoord*);
+static psy_audio_Wire machinewireview_hittestwire(MachineWireView*, int x,
+	int y);
+static int machinewireview_hittesteditname(MachineWireView*, int x, int y,
+	uintptr_t slot);
+static psy_dsp_amp_t machinewireview_panvalue(MachineWireView*, int x, int y,
+	uintptr_t slot);
+static void machinewireview_onnewmachineselected(MachineView*,
+	psy_ui_Component* sender, psy_Properties*);
 static void machinewireview_initmachinecoords(MachineWireView*);
-static void machinewireview_onmachineschangeslot(MachineWireView*, psy_audio_Machines*, uintptr_t slot);
-static void machinewireview_onmachinesinsert(MachineWireView*, psy_audio_Machines*, uintptr_t slot);
-static void machinewireview_onmachinesremoved(MachineWireView*, psy_audio_Machines*, uintptr_t slot);
+static void machinewireview_onmachineschangeslot(MachineWireView*,
+	psy_audio_Machines*, uintptr_t slot);
+static void machinewireview_onmachinesinsert(MachineWireView*,
+	psy_audio_Machines*, uintptr_t slot);
+static void machinewireview_onmachinesremoved(MachineWireView*,
+	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onsongchanged(MachineWireView*, Workspace*);
-static void machinewireview_updatemachineuis(MachineWireView*, psy_Properties* );
+static void machinewireview_updatemachineuis(MachineWireView*,
+	psy_Properties*);
 static void machinewireview_applyproperties(MachineWireView*, psy_Properties*);
-static void machinewireview_onshowparameters(MachineWireView*, Workspace*, uintptr_t slot);
-static void machinewireview_onmachineworked(MachineWireView*, psy_audio_Machine*, uintptr_t slot,
-	psy_audio_BufferContext*);
-static void machinewireview_ontimer(MachineWireView*, ui_component* sender, int timerid);
+static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
+	uintptr_t slot);
+static void machinewireview_onmachineworked(MachineWireView*,
+	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
+static void machinewireview_ontimer(MachineWireView*, psy_ui_Component* sender,
+	int timerid);
 static void machinewireview_preparedrawallmacvus(MachineWireView*);
-static void machinewireview_onconfigchanged(MachineWireView*, Workspace*, psy_Properties*);
+static void machinewireview_onconfigchanged(MachineWireView*, Workspace*,
+	psy_Properties*);
 static void machinewireview_readconfig(MachineWireView*);
 static void machinewireview_beforesavesong(MachineWireView*, Workspace*);
-static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire wire);
-static WireFrame* machinewireview_wireframe(MachineWireView* self, psy_audio_Wire wire);
+static void machinewireview_showwireview(MachineWireView*,
+	psy_audio_Wire wire);
+static WireFrame* machinewireview_wireframe(MachineWireView* self,
+	psy_audio_Wire wire);
 static void machinewireview_setcoords(MachineWireView*, psy_Properties*);
-static void machinewireview_onsize(MachineWireView*, ui_component* sender, ui_size* size);
+static void machinewireview_onsize(MachineWireView*, psy_ui_Component* sender,
+	ui_size* size);
 
-static void machineview_onshow(MachineView*, ui_component* sender);
-static void machineview_onhide(MachineView*, ui_component* sender);
-static void machineview_onmousedoubleclick(MachineView*, ui_component* sender, int x, int y, int button);
-static void machineview_onkeydown(MachineView*, ui_component* sender, KeyEvent*);
-static void machineview_onkeyup(MachineView*, ui_component* sender, KeyEvent*);
-static void machineview_onfocus(MachineView*, ui_component* sender);
-static void machineview_onskinchanged(MachineView*, Workspace*, psy_Properties*);
+static void machineview_onshow(MachineView*, psy_ui_Component* sender);
+static void machineview_onhide(MachineView*, psy_ui_Component* sender);
+static void machineview_onmousedoubleclick(MachineView*, psy_ui_Component* sender,
+	int x, int y, int button);
+static void machineview_onkeydown(MachineView*, psy_ui_Component* sender,
+	KeyEvent*);
+static void machineview_onkeyup(MachineView*, psy_ui_Component* sender, KeyEvent*);
+static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
+static void machineview_onskinchanged(MachineView*, Workspace*,
+	psy_Properties*);
 
 void machineui_init(MachineUi* self, int x, int y, psy_audio_Machine* machine,
 	uintptr_t slot, MachineSkin* skin, Workspace* workspace)
@@ -99,7 +132,7 @@ void machineui_init(MachineUi* self, int x, int y, psy_audio_Machine* machine,
 	self->x = x;
 	self->y = y;
 	self->skin = skin;	
-	self->mode = machine->vtable->mode(machine);	
+	self->mode = machine_mode(machine);	
 	machineui_updatecoords(self);	
 	self->volumedisplay = 0.f;	
 	self->machine = machine;
@@ -166,15 +199,15 @@ ui_rectangle machineui_position(MachineUi* self)
 	return rv;	
 }
 
-void machineui_editname(MachineUi* self, ui_edit* edit)
+void machineui_editname(MachineUi* self, psy_ui_Edit* edit)
 {
 	if (self->machine) {
 		ui_rectangle r;
 		
 		free(self->restorename);
 		self->restorename = 
-			self->machine->vtable->editname(self->machine) 
-				? strdup(self->machine->vtable->editname(self->machine)) : 0;
+			machine_editname(self->machine)
+				? strdup(machine_editname(self->machine)) : 0;
 		psy_signal_disconnectall(&edit->component.signal_focuslost);
 		psy_signal_disconnectall(&edit->component.signal_keydown);
 		psy_signal_disconnectall(&edit->signal_change);
@@ -183,7 +216,7 @@ void machineui_editname(MachineUi* self, ui_edit* edit)
 			machineui_onkeydown);		
 		psy_signal_connect(&edit->component.signal_focuslost, self,
 			machineui_oneditfocuslost);
-		ui_edit_settext(edit, self->machine->vtable->editname(self->machine));
+		ui_edit_settext(edit, machine_editname(self->machine));
 		r = machineui_position(self);
 		r.left += self->coords->name.destx;
 		r.top += self->coords->name.desty;
@@ -195,15 +228,14 @@ void machineui_editname(MachineUi* self, ui_edit* edit)
 	}
 }
 
-void machineui_onkeydown(MachineUi* self, ui_component* sender, KeyEvent* keyevent)
+void machineui_onkeydown(MachineUi* self, psy_ui_Component* sender, KeyEvent* ev)
 {	
-	if (keyevent->keycode == VK_RETURN) {		
+	if (ev->keycode == VK_RETURN) {		
 		ui_component_hide(sender);
 	} else
-	if (keyevent->keycode == VK_ESCAPE) {
+	if (ev->keycode == VK_ESCAPE) {
 		if (self->machine) {
-			self->machine->vtable->seteditname(self->machine,
-				self->restorename);
+			machine_seteditname(self->machine, self->restorename);
 			free(self->restorename);
 			self->restorename = 0;
 		}
@@ -211,20 +243,20 @@ void machineui_onkeydown(MachineUi* self, ui_component* sender, KeyEvent* keyeve
 	}
 }
 
-void machineui_oneditchange(MachineUi* self, ui_edit* sender)
+void machineui_oneditchange(MachineUi* self, psy_ui_Edit* sender)
 {
 	if (self->machine) {
-		self->machine->vtable->seteditname(self->machine, ui_edit_text(sender));
+		machine_seteditname(self->machine, ui_edit_text(sender));
 	}
 }
 
-void machineui_oneditfocuslost(MachineUi* self, ui_component* sender)
+void machineui_oneditfocuslost(MachineUi* self, psy_ui_Component* sender)
 {
 	ui_component_hide(sender);
 }
 
-void machineui_draw(MachineUi* self, MachineWireView* wireview, ui_graphics* g, 
-	uintptr_t slot)
+void machineui_draw(MachineUi* self, MachineWireView* wireview,
+	psy_ui_Graphics* g, uintptr_t slot)
 {	
 	ui_rectangle r;
 
@@ -239,33 +271,38 @@ void machineui_draw(MachineUi* self, MachineWireView* wireview, ui_graphics* g,
 
 		editname[0] = '\0';
 		coords = self->coords;		
-		if (self->machine->vtable->editname(self->machine)) {
+		if (machine_editname(self->machine)) {
 			if (self->skin->drawmachineindexes) {
 				psy_snprintf(editname, 130, "%02d:%s", slot, 
-					self->machine->vtable->editname(self->machine));
+					machine_editname(self->machine));
 			} else {
 				psy_snprintf(editname, 130, "%s", 
-					self->machine->vtable->editname(self->machine));
+					machine_editname(self->machine));
 			}
 		}
 		ui_setbackgroundmode(g, TRANSPARENT);		
-		skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top, &self->coords->background);
+		skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
+			&self->coords->background);
 		if (self->mode == MACHMODE_FX) {			
 			ui_settextcolor(g, wireview->skin.effect_fontcolour);
 		} else {		
 			ui_settextcolor(g, wireview->skin.generator_fontcolour);;
 		}
 		if (self->mode != MACHMODE_MASTER) {			
-			ui_textout(g, r.left + coords->name.destx + 2, r.top + coords->name.desty + 2,
+			ui_textout(g, r.left + coords->name.destx + 2,
+				r.top + coords->name.desty + 2,
 				editname, strlen(editname));
-			skin_blitpart(g, &wireview->skin.skinbmp, r.left + slidercoord(&coords->pan, 
-				self->machine->vtable->panning(self->machine)), r.top,
+			skin_blitpart(g, &wireview->skin.skinbmp,
+				r.left + slidercoord(&coords->pan, 
+				machine_panning(self->machine)), r.top,
 					&coords->pan);
-			if (self->machine->vtable->muted(self->machine)) {
-				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top, &coords->mute);
+			if (machine_muted(self->machine)) {
+				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
+					&coords->mute);
 			}
-			if (self->machine->vtable->bypassed(self->machine)) {
-				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top, &coords->bypass);
+			if (machine_bypassed(self->machine)) {
+				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
+					&coords->bypass);
 			}
 		}		
 		if (wireview->drawvumeters) {
@@ -274,7 +311,8 @@ void machineui_draw(MachineUi* self, MachineWireView* wireview, ui_graphics* g,
 	}
 }
 
-void machineui_drawvu(MachineUi* self, MachineWireView* wireview, ui_graphics* g)
+void machineui_drawvu(MachineUi* self, MachineWireView* wireview,
+	psy_ui_Graphics* g)
 {				
 	if (self->coords && self->mode != MACHMODE_MASTER) {	
 		SkinCoord* vu;		
@@ -289,7 +327,7 @@ void machineui_drawvu(MachineUi* self, MachineWireView* wireview, ui_graphics* g
 	}
 }
 
-void machineui_showparameters(MachineUi* self, ui_component* parent)
+void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 {
 	if (self->machine) {		
 		if (self->frame == 0) {			
@@ -297,7 +335,7 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 			self->frame->component.hwnd = 0;
 		}
 		if (self->frame->component.hwnd == 0) {
-			ui_component* view = 0;
+			psy_ui_Component* view = 0;
 			
 			machineframe_init(self->frame, parent);
 			if (machine_haseditor(self->machine)) {
@@ -325,8 +363,8 @@ void machineui_showparameters(MachineUi* self, ui_component* parent)
 	}
 }
 
-void machinewireview_init(MachineWireView* self, ui_component* parent,
-	ui_component* tabbarparent, Workspace* workspace)
+void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
 	ui_fontinfo fontinfo;
 
@@ -382,7 +420,7 @@ void machinewireview_adjustscroll(MachineWireView* self)
 	ui_component_setverticalscrollrange(&self->component, 0, 200);
 }
 
-void machinewireview_onscroll(MachineWireView* self, ui_component* sender,
+void machinewireview_onscroll(MachineWireView* self, psy_ui_Component* sender,
 	int stepx,	int stepy)
 {
 	self->dx += self->component.scrollstepx * stepx;
@@ -426,12 +464,13 @@ void machinewireview_connectmachinessignals(MachineWireView* self)
 		machinewireview_onmachinesremoved);	
 }
 
-void machinewireview_ondestroy(MachineWireView* self, ui_component* component)
+void machinewireview_ondestroy(MachineWireView* self, psy_ui_Component* component)
 {
 	psy_List* wireframenode;
 	machineuis_removeall(self);
 	psy_table_dispose(&self->machineuis);
-	for (wireframenode = self->wireframes; wireframenode != 0;  wireframenode = wireframenode->next) {
+	for (wireframenode = self->wireframes; wireframenode != 0;
+			wireframenode = wireframenode->next) {
 		WireFrame* frame;
 		frame = (WireFrame*) wireframenode->entry;
 		if (frame->wireview) {
@@ -483,7 +522,8 @@ void machinewireview_initmachinecoords(MachineWireView* self)
 	machinewireview_applyproperties(self, 0);
 }
 
-void machinewireview_onconfigchanged(MachineWireView* self, Workspace* workspace, psy_Properties* property)
+void machinewireview_onconfigchanged(MachineWireView* self,
+	Workspace* workspace, psy_Properties* property)
 {	
 	machinewireview_readconfig(self);
 }
@@ -492,14 +532,17 @@ void machinewireview_readconfig(MachineWireView* self)
 {
 	psy_Properties* mv;
 	
-	mv = psy_properties_findsection(self->workspace->config, "visual.machineview");
+	mv = psy_properties_findsection(self->workspace->config,
+		"visual.machineview");
 	if (mv) {		
 		self->drawvumeters = psy_properties_bool(mv, "drawvumeters", 1);
 		ui_component_stoptimer(&self->component, TIMERID_UPDATEVUMETERS);
 		if (self->drawvumeters) {
-			ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
+			ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS,
+				50);
 		}
-		self->skin.drawmachineindexes = psy_properties_bool(mv, "drawmachineindexes", 1);
+		self->skin.drawmachineindexes = psy_properties_bool(mv,
+			"drawmachineindexes", 1);
 	}
 }
 
@@ -544,7 +587,7 @@ void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
 		psy_dir_findfile(workspace_skins_directory(self->workspace),
 			filename, path);
 		if (path[0] != '\0') {
-			ui_bitmap bmp;
+			psy_ui_Bitmap bmp;
 
 			ui_bitmap_init(&bmp);
 			if (ui_bitmap_load(&bmp, path) == 0) {
@@ -687,16 +730,15 @@ void machinewireview_setcoords(MachineWireView* self, psy_Properties* p)
 	}
 }
 
-
-
-void machinewireview_ondraw(MachineWireView* self, ui_component* sender, ui_graphics* g)
-{	
+void machinewireview_ondraw(MachineWireView* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
+{		
 	machinewireview_drawwires(self, g);
 	machinewireview_drawmachines(self, g);
 	machinewireview_drawdragwire(self, g);
 }
 
-void machinewireview_drawwires(MachineWireView* self, ui_graphics* g)
+void machinewireview_drawwires(MachineWireView* self, psy_ui_Graphics* g)
 {
 	psy_TableIterator it;
 	
@@ -708,8 +750,8 @@ void machinewireview_drawwires(MachineWireView* self, ui_graphics* g)
 	}	
 }
 
-void machinewireview_drawwire(MachineWireView* self, ui_graphics* g, uintptr_t slot,
-	MachineUi* outmachineui)
+void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
+	uintptr_t slot, MachineUi* outmachineui)
 {		
 	psy_audio_MachineSockets* sockets;
 	WireSocket* p;
@@ -717,7 +759,8 @@ void machinewireview_drawwire(MachineWireView* self, ui_graphics* g, uintptr_t s
 	sockets	= connections_at(&self->machines->connections, slot);
 	if (sockets) {
 		for (p = sockets->outputs; p != NULL; p = p->next) {
-			psy_audio_WireSocketEntry* entry = (psy_audio_WireSocketEntry*)p->entry;
+			psy_audio_WireSocketEntry* entry =
+				(psy_audio_WireSocketEntry*)p->entry;
 			if (entry->slot != NOMACHINE_INDEX) {
 				MachineUi* inmachineui;				
 
@@ -739,14 +782,15 @@ void machinewireview_drawwire(MachineWireView* self, ui_graphics* g, uintptr_t s
 						self->dy + out.top + (out.bottom - out.top) / 2,
 						self->dx + in.left + (in.right - in.left) / 2,
 						self->dy + in.top + (in.bottom - in.top) / 2);
-					machinewireview_drawwirearrow(self, g, outmachineui, inmachineui);
+					machinewireview_drawwirearrow(self, g, outmachineui,
+						inmachineui);
 				}
 			}		
 		}
 	}
 }
 
-void machinewireview_drawwirearrow(MachineWireView* self, ui_graphics* g,
+void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	MachineUi* outmachineui, MachineUi* inmachineui)
 {
 	ui_size out;
@@ -810,7 +854,7 @@ ui_point move_point(ui_point pt, ui_point d)
 	return rv;
 }
 
-void machinewireview_drawdragwire(MachineWireView* self, ui_graphics* g)
+void machinewireview_drawdragwire(MachineWireView* self, psy_ui_Graphics* g)
 {
 	if (self->dragslot != NOMACHINE_INDEX &&
 			self->dragmode == MACHINEWIREVIEW_DRAG_NEWCONNECTION) {
@@ -831,7 +875,7 @@ void machinewireview_drawdragwire(MachineWireView* self, ui_graphics* g)
 	}
 }
 
-void machinewireview_drawmachines(MachineWireView* self, ui_graphics* g)
+void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
 {
 	psy_TableIterator it;
 	
@@ -845,7 +889,8 @@ void machinewireview_drawmachines(MachineWireView* self, ui_graphics* g)
 
 			machineui = (MachineUi*)psy_tableiterator_value(&it);
 			machineui_draw(machineui, self, g, psy_tableiterator_key(&it));
-			if (self->selectedwire.src == NOMACHINE_INDEX && self->selectedslot == psy_tableiterator_key(&it)) {
+			if (self->selectedwire.src == NOMACHINE_INDEX &&
+					self->selectedslot == psy_tableiterator_key(&it)) {
 				machineui_drawhighlight(machineui, self, g);	
 			}
 		}
@@ -857,7 +902,8 @@ int slidercoord(SkinCoord* coord, float value)
 	return (int)(value * coord->range);
 }
 
-void machineui_drawhighlight(MachineUi* self, MachineWireView* wireview, ui_graphics* g)
+void machineui_drawhighlight(MachineUi* self,
+	MachineWireView* wireview, psy_ui_Graphics* g)
 {	
 	ui_rectangle r;
 	static int d = 5; // the distance of the highlight from the machine
@@ -878,14 +924,15 @@ void machineui_drawhighlight(MachineUi* self, MachineWireView* wireview, ui_grap
 	drawmachineline(g, 0, -1, r.left - d, r.bottom + d);	
 }
 
-void drawmachineline(ui_graphics* g, int xdir, int ydir, int x, int y)
+void drawmachineline(psy_ui_Graphics* g, int xdir, int ydir, int x, int y)
 {
 	int hlength = 9; // the length of the selected machine highlight	
 
 	ui_drawline(g, x, y, x + xdir * hlength, y + ydir * hlength);
 }
 
-void machinewireview_onsize(MachineWireView* self, ui_component* sender, ui_size* size)
+void machinewireview_onsize(MachineWireView* self, psy_ui_Component* sender,
+	ui_size* size)
 {
 	if (self->firstsize) {
 		self->firstsize = 0;
@@ -912,7 +959,8 @@ void machinewireview_align(MachineWireView* self)
 	}
 }
 
-void machinewireview_onmousedoubleclick(MachineWireView* self, ui_component* sender, MouseEvent* ev)
+void machinewireview_onmousedoubleclick(MachineWireView* self,
+	psy_ui_Component* sender, MouseEvent* ev)
 {
 	self->mx = ev->x - self->dx;
 	self->my = ev->y - self->dy;
@@ -930,7 +978,8 @@ void machinewireview_onmousedoubleclick(MachineWireView* self, ui_component* sen
 	if (machinewireview_hittesteditname(self, ev->x - self->dx,
 			ev->y - self->dy, self->dragslot)) {
 		if (machineuis_at(self, self->dragslot)) {
-			machineui_editname(machineuis_at(self, self->dragslot), &self->editname);
+			machineui_editname(machineuis_at(self, self->dragslot),
+				&self->editname);
 		}
 	} else {
 		workspace_showparameters(self->workspace, self->dragslot);
@@ -938,7 +987,8 @@ void machinewireview_onmousedoubleclick(MachineWireView* self, ui_component* sen
 	self->dragslot = NOMACHINE_INDEX;
 }
 
-void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, MouseEvent* ev)
+void machinewireview_onmousedown(MachineWireView* self, psy_ui_Component* sender,
+	MouseEvent* ev)
 {
 	ui_component_hide(&self->editname.component);
 	ui_component_setfocus(&self->component);
@@ -962,24 +1012,26 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 			if (machinewireview_hittestcoord(self, ev->x - self->dx,
 					ev->y - self->dy, MACHMODE_GENERATOR, self->dragslot,
 				&self->skin.generator.solo)) {
-				psy_audio_Machine* machine = machines_at(self->machines, self->dragslot);
+				psy_audio_Machine* machine = machines_at(self->machines,
+					self->dragslot);
 				if (machine) {
-					if (machine->vtable->bypassed(machine)) {
-						machine->vtable->unbypass(machine);
+					if (machine_bypassed(machine)) {
+						machine_unbypass(machine);
 					} else {
-						machine->vtable->bypass(machine);
+						machine_bypass(machine);
 					}
 				}
 			} else
 			if (machinewireview_hittestcoord(self, ev->x - self->dx,
 					ev->y - self->dy, MACHMODE_FX, self->dragslot,
 					&self->skin.effect.bypass)) {
-				psy_audio_Machine* machine = machines_at(self->machines, self->dragslot);
+				psy_audio_Machine* machine = machines_at(self->machines,
+					self->dragslot);
 				if (machine) {
-					if (machine->vtable->bypassed(machine)) {
-						machine->vtable->unbypass(machine);
+					if (machine_bypassed(machine)) {
+						machine_unbypass(machine);
 					} else {
-						machine->vtable->bypass(machine);
+						machine_bypass(machine);
 					}
 				}
 			} else
@@ -989,12 +1041,13 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 				machinewireview_hittestcoord(self, ev->x - self->dx,
 					ev->y - self->dy, MACHMODE_FX, self->dragslot,
 					&self->skin.effect.mute)) {
-				psy_audio_Machine* machine = machines_at(self->machines, self->dragslot);
+				psy_audio_Machine* machine = machines_at(self->machines,
+					self->dragslot);
 				if (machine) {
-					if (machine->vtable->muted(machine)) {
-						machine->vtable->unmute(machine);
+					if (machine_muted(machine)) {
+						machine_unmute(machine);
 					} else {
-						machine->vtable->mute(machine);
+						machine_mute(machine);
 					}
 				}
 			} else
@@ -1017,7 +1070,7 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 			psy_audio_Machine* machine;
 
 			machine = machines_at(self->machines, self->dragslot);
-			if (machine && machine->vtable->numoutputs(machine) > 0) {
+			if (machine && machine_numoutputs(machine) > 0) {
 				self->dragmode = MACHINEWIREVIEW_DRAG_NEWCONNECTION;				
 			} else {
 				self->dragslot = NOMACHINE_INDEX;
@@ -1026,7 +1079,8 @@ void machinewireview_onmousedown(MachineWireView* self, ui_component* sender, Mo
 	}
 }
 
-int machinewireview_hittestpan(MachineWireView* self, int x, int y, uintptr_t slot, int* dx)
+int machinewireview_hittestpan(MachineWireView* self, int x, int y,
+	uintptr_t slot, int* dx)
 {
 	int rv = 0;
 	psy_audio_Machine* machine;
@@ -1042,7 +1096,7 @@ int machinewireview_hittestpan(MachineWireView* self, int x, int y, uintptr_t sl
 		machine = machines_at(self->machines, slot);
 		coords = machineui->coords;
 		if (coords) {
-			offset = (int) (machine->vtable->panning(machine) *
+			offset = (int) (machine_panning(machine) *
 				coords->pan.range);
 			ui_setrectangle(&r, coords->pan.destx + offset, coords->pan.desty,
 					coords->pan.destwidth, coords->pan.destheight);
@@ -1053,7 +1107,8 @@ int machinewireview_hittestpan(MachineWireView* self, int x, int y, uintptr_t sl
 	return rv;
 }
 
-int machinewireview_hittesteditname(MachineWireView* self, int x, int y, uintptr_t slot)
+int machinewireview_hittesteditname(MachineWireView* self, int x, int y,
+	uintptr_t slot)
 {
 	int rv = 0;
 	psy_audio_Machine* machine;
@@ -1076,7 +1131,8 @@ int machinewireview_hittesteditname(MachineWireView* self, int x, int y, uintptr
 	return rv;
 }
 
-int machinewireview_hittestcoord(MachineWireView* self, int x, int y, int mode, uintptr_t slot, SkinCoord* coord)
+int machinewireview_hittestcoord(MachineWireView* self, int x, int y, int mode,
+	uintptr_t slot, SkinCoord* coord)
 {
 	MachineUi* machineui;
 
@@ -1093,7 +1149,8 @@ int machinewireview_hittestcoord(MachineWireView* self, int x, int y, int mode, 
 	return 0;
 }
 
-psy_dsp_amp_t machinewireview_panvalue(MachineWireView* self, int x, int y, uintptr_t slot)
+psy_dsp_amp_t machinewireview_panvalue(MachineWireView* self, int x, int y,
+	uintptr_t slot)
 {
 	psy_dsp_amp_t rv = 0.f;	
 	MachineUi* machineui;
@@ -1119,7 +1176,8 @@ void machinewireview_hittest(MachineWireView* self, int x, int y)
 			psy_tableiterator_inc(&it)) {
 		ui_rectangle position;	
 
-		position = machineui_position((MachineUi*)psy_tableiterator_value(&it));
+		position = machineui_position((MachineUi*)
+			psy_tableiterator_value(&it));
 		if (ui_rectangle_intersect(&position, self->mx, self->my)) {
 			self->dragslot = it.curr->key;
 			break;	
@@ -1127,7 +1185,8 @@ void machinewireview_hittest(MachineWireView* self, int x, int y)
 	}	
 }
 
-void machinewireview_onmousemove(MachineWireView* self, ui_component* sender, MouseEvent* ev)
+void machinewireview_onmousemove(MachineWireView* self, psy_ui_Component* sender,
+	MouseEvent* ev)
 {
 	if (self->dragslot != NOMACHINE_INDEX) {
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_PAN) {
@@ -1135,7 +1194,7 @@ void machinewireview_onmousemove(MachineWireView* self, ui_component* sender, Mo
 
 			machine = machines_at(self->machines, self->dragslot);
 			if (machine) {
-				machine->vtable->setpanning(machine,machinewireview_panvalue(
+				machine_setpanning(machine,machinewireview_panvalue(
 					self, ev->x - self->dx, ev->y - self->dy, self->dragslot));
 			}
 		} else
@@ -1149,13 +1208,13 @@ void machinewireview_onmousemove(MachineWireView* self, ui_component* sender, Mo
 				machineui->x = ev->x - self->mx - self->dx;
 				machineui->y = ev->y - self->my - self->dy;									
 				psy_snprintf(txt, 128, "%s (%d, %d)",
-					machineui->machine->vtable->editname(machineui->machine)
-					? machineui->machine->vtable->editname(machineui->machine)
+					machine_editname(machineui->machine)
+					? machine_editname(machineui->machine)
 					: "",
 					ev->x - self->mx - self->dx,
 					ev->y - self->my - self->dy);
 				ui_label_settext(&self->statusbar->label, txt);
-				ui_component_invalidate(&self->statusbar->label.component);				
+				ui_component_invalidate(&self->statusbar->label.component);			
 			}
 		} else
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_NEWCONNECTION) {
@@ -1166,7 +1225,8 @@ void machinewireview_onmousemove(MachineWireView* self, ui_component* sender, Mo
 	}
 }
 
-void machinewireview_onmouseup(MachineWireView* self, ui_component* sender, MouseEvent* ev)
+void machinewireview_onmouseup(MachineWireView* self, psy_ui_Component* sender,
+	MouseEvent* ev)
 {	
 	if (self->dragslot != NOMACHINE_INDEX) {
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_NEWCONNECTION) {
@@ -1175,7 +1235,7 @@ void machinewireview_onmouseup(MachineWireView* self, ui_component* sender, Mous
 			machinewireview_hittest(self, ev->x - self->dx,
 				ev->y - self->dy);
 			if (self->dragslot != NOMACHINE_INDEX) {
-				machines_connect(self->machines, outputslot, self->dragslot);				
+				machines_connect(self->machines, outputslot, self->dragslot);
 			}
 		}
 	}
@@ -1183,24 +1243,27 @@ void machinewireview_onmouseup(MachineWireView* self, ui_component* sender, Mous
 	ui_component_invalidate(&self->component);
 }
 
-void machinewireview_onkeydown(MachineWireView* self, ui_component* sender, KeyEvent* keyevent)
+void machinewireview_onkeydown(MachineWireView* self, psy_ui_Component* sender,
+	KeyEvent* ev)
 {		
-	if (keyevent->keycode == VK_DELETE && self->selectedwire.src != NOMACHINE_INDEX) {
+	if (ev->keycode == VK_DELETE &&
+			self->selectedwire.src != NOMACHINE_INDEX) {
 		machines_disconnect(self->machines, self->selectedwire.src, 
 			self->selectedwire.dst);
 		ui_component_invalidate(&self->component);
 	} else 
-	if (keyevent->keycode == VK_DELETE && self->selectedslot != - 1 && 
+	if (ev->keycode == VK_DELETE && self->selectedslot != - 1 &&
 			self->selectedslot != MASTER_INDEX) {		
 		machines_remove(self->machines, self->selectedslot);
 		self->selectedslot = NOMACHINE_INDEX;
 	} else 
-	if (!keyevent->repeat) {
+	if (!ev->repeat) {
 		ui_component_propagateevent(sender);
 	}
 }
 
-void machinewireview_onkeyup(MachineWireView* self, ui_component* sender, KeyEvent* ev)
+void machinewireview_onkeyup(MachineWireView* self, psy_ui_Component* sender,
+	KeyEvent* ev)
 {
 	ui_component_propagateevent(sender);
 }
@@ -1223,7 +1286,8 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 		if (sockets) {
 			p = sockets->outputs;	
 			while (p != NULL) {
-				psy_audio_WireSocketEntry* entry = (psy_audio_WireSocketEntry*)p->entry;
+				psy_audio_WireSocketEntry* entry =
+					(psy_audio_WireSocketEntry*) p->entry;
 				if (entry->slot != NOMACHINE_INDEX) {
 					ui_size out;
 					ui_size in;								
@@ -1275,8 +1339,8 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 	return rv;
 }
 
-void machinewireview_onmachineschangeslot(MachineWireView* self, psy_audio_Machines* machines,
-	uintptr_t slot)
+void machinewireview_onmachineschangeslot(MachineWireView* self,
+	psy_audio_Machines* machines, uintptr_t slot)
 {
 	self->selectedslot = slot;
 	self->selectedwire.src = NOMACHINE_INDEX;
@@ -1285,7 +1349,8 @@ void machinewireview_onmachineschangeslot(MachineWireView* self, psy_audio_Machi
 	ui_component_setfocus(&self->component);
 }
 
-void machinewireview_onmachinesinsert(MachineWireView* self, psy_audio_Machines* machines, uintptr_t slot)
+void machinewireview_onmachinesinsert(MachineWireView* self,
+	psy_audio_Machines* machines, uintptr_t slot)
 {
 	psy_audio_Machine* machine;
 
@@ -1298,13 +1363,15 @@ void machinewireview_onmachinesinsert(MachineWireView* self, psy_audio_Machines*
 	}
 }
 
-void machinewireview_onmachinesremoved(MachineWireView* self, psy_audio_Machines* machines, uintptr_t slot)
+void machinewireview_onmachinesremoved(MachineWireView* self,
+	psy_audio_Machines* machines, uintptr_t slot)
 {
 	machineuis_remove(self, slot);
 	ui_component_invalidate(&self->component);
 }
 
-void machinewireview_beforesavesong(MachineWireView* self, Workspace* workspace)
+void machinewireview_beforesavesong(MachineWireView* self,
+	Workspace* workspace)
 {
 	if (workspace->properties) {		
 		psy_Properties* p;
@@ -1329,7 +1396,8 @@ void machinewireview_beforesavesong(MachineWireView* self, Workspace* workspace)
 	}	
 }
 
-void machinewireview_updatemachineuis(MachineWireView* self, psy_Properties* machines)
+void machinewireview_updatemachineuis(MachineWireView* self,
+	psy_Properties* machines)
 {
 	if (machines) {
 		psy_audio_Machine* machine;
@@ -1363,8 +1431,8 @@ void machinewireview_updatemachineuis(MachineWireView* self, psy_Properties* mac
 void machinewireview_onsongchanged(MachineWireView* self, Workspace* workspace)
 {		
 	self->machines = &workspace->song->machines;	
-	machinewireview_updatemachineuis(self, psy_properties_find(workspace->properties,
-		"machines"));	
+	machinewireview_updatemachineuis(self, psy_properties_find(
+		workspace->properties, "machines"));	
 	machinewireview_connectmachinessignals(self);
 	ui_component_invalidate(&self->component);	
 }
@@ -1377,8 +1445,8 @@ void machinewireview_onshowparameters(MachineWireView* self, Workspace* sender,
 	}
 }
 
-void machinewireview_onmachineworked(MachineWireView* self, psy_audio_Machine* machine,
-	uintptr_t slot, psy_audio_BufferContext* bc)
+void machinewireview_onmachineworked(MachineWireView* self,
+	psy_audio_Machine* machine, uintptr_t slot, psy_audio_BufferContext* bc)
 {
 	MachineUi* machineui;
 
@@ -1391,7 +1459,8 @@ void machinewireview_onmachineworked(MachineWireView* self, psy_audio_Machine* m
 	}
 }
 
-void machinewireview_ontimer(MachineWireView* self, ui_component* sender, int timerid)
+void machinewireview_ontimer(MachineWireView* self, psy_ui_Component* sender,
+	int timerid)
 {	
 	psy_List* p;
 	psy_List* q;
@@ -1463,7 +1532,8 @@ void machinewireview_showwireview(MachineWireView* self, psy_audio_Wire wire)
 	}
 }
 
-WireFrame* machinewireview_wireframe(MachineWireView* self, psy_audio_Wire wire)
+WireFrame* machinewireview_wireframe(MachineWireView* self,
+	psy_audio_Wire wire)
 {
 	WireFrame* rv = 0;
 	psy_List* framenode;
@@ -1483,8 +1553,8 @@ WireFrame* machinewireview_wireframe(MachineWireView* self, psy_audio_Wire wire)
 	return rv;
 }
 
-void machinewireview_onnewmachineselected(MachineView* self, ui_component* sender,
-	psy_Properties* plugininfo)
+void machinewireview_onnewmachineselected(MachineView* self,
+	psy_ui_Component* sender, psy_Properties* plugininfo)
 {	
 	psy_audio_Machine* machine;
 	const char* path;
@@ -1505,8 +1575,8 @@ void machinewireview_onnewmachineselected(MachineView* self, ui_component* sende
 	}	
 }
 
-
-void machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y, MachineSkin* skin)
+void machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y,
+	MachineSkin* skin)
 {	
 	psy_audio_Machine* machine;
 
@@ -1518,7 +1588,8 @@ void machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y, Mach
 			machineuis_remove(self, slot);
 		}	
 		machineui = (MachineUi*) malloc(sizeof(MachineUi));
-		machineui_init(machineui, x, y, machine, slot, &self->skin, self->workspace);
+		machineui_init(machineui, x, y, machine, slot, &self->skin,
+			self->workspace);
 		psy_table_insert(&self->machineuis, slot, machineui);
 	}
 }
@@ -1557,7 +1628,8 @@ void machineuis_removeall(MachineWireView* self)
 	psy_table_init(&self->machineuis);
 }
 
-void machineviewbar_init(MachineViewBar* self, ui_component* parent, Workspace* workspace)
+void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {
 	ui_margin margin;
 
@@ -1573,8 +1645,8 @@ void machineviewbar_init(MachineViewBar* self, ui_component* parent, Workspace* 
 		&margin));	
 }
 
-void machineview_init(MachineView* self, ui_component* parent,
-	ui_component* tabbarparent, Workspace* workspace)
+void machineview_init(MachineView* self, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
@@ -1584,8 +1656,8 @@ void machineview_init(MachineView* self, ui_component* parent,
 	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_show, self, machineview_onshow);
 	psy_signal_connect(&self->component.signal_hide, self, machineview_onhide);
-	machinewireview_init(&self->wireview, &self->notebook.component, tabbarparent,
-		workspace);
+	machinewireview_init(&self->wireview, &self->notebook.component,
+		tabbarparent, workspace);
 	newmachine_init(&self->newmachine, &self->notebook.component,
 		self->workspace);	
 	tabbar_init(&self->tabbar, tabbarparent);
@@ -1595,37 +1667,43 @@ void machineview_init(MachineView* self, ui_component* parent,
 	tabbar_append(&self->tabbar, "New Machine");		
 	ui_notebook_setpageindex(&self->notebook, 0);
 	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
-	psy_signal_connect(&self->newmachine.pluginsview.signal_selected, self,machinewireview_onnewmachineselected);
-	psy_signal_connect(&self->component.signal_mousedoubleclick, self, machineview_onmousedoubleclick);
-	psy_signal_connect(&self->component.signal_keydown, self, machineview_onkeydown);
-	psy_signal_connect(&self->component.signal_keyup, self, machineview_onkeyup);
-	psy_signal_connect(&self->component.signal_focus, self, machineview_onfocus);
+	psy_signal_connect(&self->newmachine.pluginsview.signal_selected, self,
+		machinewireview_onnewmachineselected);
+	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
+		machineview_onmousedoubleclick);
+	psy_signal_connect(&self->component.signal_keydown, self,
+		machineview_onkeydown);
+	psy_signal_connect(&self->component.signal_keyup, self,
+		machineview_onkeyup);
+	psy_signal_connect(&self->component.signal_focus, self,
+		machineview_onfocus);
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		machineview_onskinchanged);
 }
 
-void machineview_onshow(MachineView* self, ui_component* sender)
+void machineview_onshow(MachineView* self, psy_ui_Component* sender)
 {	
 	self->tabbar.component.visible = 1;
 	ui_component_align(ui_component_parent(&self->tabbar.component));
 	ui_component_show(&self->tabbar.component);
 }
 
-void machineview_onhide(MachineView* self, ui_component* sender)
+void machineview_onhide(MachineView* self, psy_ui_Component* sender)
 {
 	ui_component_hide(&self->tabbar.component);
 }
 
-void machineview_onmousedoubleclick(MachineView* self, ui_component* sender,
+void machineview_onmousedoubleclick(MachineView* self, psy_ui_Component* sender,
 	int x, int y, int button)
 {	
 	self->newmachine.pluginsview.calledby = 0;
 	tabbar_select(&self->tabbar, 1);
 }
 
-void machineview_onkeydown(MachineView* self, ui_component* sender, KeyEvent* keyevent)
+void machineview_onkeydown(MachineView* self, psy_ui_Component* sender,
+	KeyEvent* ev)
 {
-	if (keyevent->keycode == VK_ESCAPE) {
+	if (ev->keycode == VK_ESCAPE) {
 		if (tabbar_selected(&self->tabbar) == 1) {
 			tabbar_select(&self->tabbar, 0);			
 		}
@@ -1634,7 +1712,7 @@ void machineview_onkeydown(MachineView* self, ui_component* sender, KeyEvent* ke
 	}
 }
 
-void machineview_onkeyup(MachineView* self, ui_component* sender, KeyEvent* ev)
+void machineview_onkeyup(MachineView* self, psy_ui_Component* sender, KeyEvent* ev)
 {
 	ui_component_propagateevent(sender);
 }
@@ -1644,7 +1722,7 @@ void machineview_applyproperties(MachineView* self, psy_Properties* p)
 	machinewireview_applyproperties(&self->wireview, p);
 }
 
-void machineview_onfocus(MachineView* self, ui_component* sender)
+void machineview_onfocus(MachineView* self, psy_ui_Component* sender)
 {
 	ui_component_setfocus(&self->wireview.component);
 }

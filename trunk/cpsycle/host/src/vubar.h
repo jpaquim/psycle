@@ -11,12 +11,12 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	Vumeter vumeter;
 	VolSlider volslider;
 	ClipBox clipbox;	
 } VuBar;
 
-void vubar_init(VuBar*, ui_component* parent, Workspace*);
+void vubar_init(VuBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

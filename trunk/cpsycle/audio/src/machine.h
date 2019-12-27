@@ -17,6 +17,7 @@
 typedef struct MachineCallback {	
 	unsigned int (*samplerate)(void*);
 	unsigned int (*bpm)(void*);
+	psy_dsp_beat_t (*beatspersample)(void*);
 	struct psy_audio_Samples* (*samples)(void*);
 	struct psy_audio_Machines* (*machines)(void*);
 	struct psy_audio_Instruments* (*instruments)(void*);	
@@ -54,7 +55,7 @@ typedef	void (*fp_machine_unbypass)(struct psy_audio_Machine*);
 typedef	int (*fp_machine_bypassed)(struct psy_audio_Machine*);
 typedef	const psy_audio_MachineInfo* (*fp_machine_info)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_dispose)(struct psy_audio_Machine*);
-typedef	int (*fp_machine_mode)(struct psy_audio_Machine*);	
+typedef	int (*fp_machine_mode)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_updatesamplerate)(struct psy_audio_Machine*, unsigned int samplerate);
 typedef	uintptr_t (*fp_machine_numinputs)(struct psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_numoutputs)(struct psy_audio_Machine*);
@@ -89,7 +90,8 @@ typedef	uintptr_t (*fp_machine_buffermemorysize)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setbuffermemorysize)(struct psy_audio_Machine*, uintptr_t);
 // machine callbacks
 typedef	unsigned int (*fp_machine_samplerate)(struct psy_audio_Machine*);
-typedef unsigned int (*fp_machine_bpm)(struct psy_audio_Machine*);	
+typedef unsigned int (*fp_machine_bpm)(struct psy_audio_Machine*);
+typedef psy_dsp_beat_t (*fp_machine_beatspersample)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Samples* (*fp_machine_samples)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Machines* (*fp_machine_machines)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Instruments* (*fp_machine_instruments)(struct psy_audio_Machine*);
@@ -150,6 +152,7 @@ typedef struct MachineVtable {
 	// machine callbacks
 	fp_machine_samplerate samplerate;
 	fp_machine_bpm bpm;
+	fp_machine_beatspersample beatspersample;
 	fp_machine_samples samples;
 	fp_machine_machines machines;
 	fp_machine_instruments instruments;
@@ -177,7 +180,11 @@ int machine_parameterlabel(psy_audio_Machine*, char* txt, int param);
 int machine_parametername(psy_audio_Machine*, char* txt, int param);
 void machine_setcallback(psy_audio_Machine*, MachineCallback);
 void machine_setpanning(psy_audio_Machine*, psy_dsp_amp_t);
+psy_dsp_amp_t machine_panning(struct psy_audio_Machine*);
+uintptr_t machine_numinputs(psy_audio_Machine*);
+uintptr_t machine_numoutputs(psy_audio_Machine*);
 
+int machine_mode(psy_audio_Machine*);
 void machine_mute(psy_audio_Machine*);	
 void machine_unmute(psy_audio_Machine*);
 int machine_muted(psy_audio_Machine*);
@@ -190,8 +197,12 @@ void machine_editorsize(psy_audio_Machine*, int* width, int* height);
 void machine_editoridle(psy_audio_Machine*);
 void machine_seteditname(psy_audio_Machine*, const char* name);
 const char* machine_editname(psy_audio_Machine*);
+
+unsigned int machine_bpm(struct psy_audio_Machine*);
+psy_dsp_beat_t machine_beatspersample(struct psy_audio_Machine*);
 unsigned int machine_samplerate(psy_audio_Machine*);
 struct psy_audio_Samples* machine_samples(psy_audio_Machine*);
+struct psy_audio_Machines* machine_machines(struct psy_audio_Machine*);
 struct psy_audio_Instruments* machine_instruments(psy_audio_Machine*);
 psy_audio_Buffer* machine_buffermemory(psy_audio_Machine*);
 uintptr_t machine_buffermemorysize(psy_audio_Machine*);

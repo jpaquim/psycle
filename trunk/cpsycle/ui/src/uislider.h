@@ -7,7 +7,7 @@
 #include "uicomponent.h"
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	double value;
 	double rulerstep;
 	int tweakbase;
@@ -29,7 +29,7 @@ typedef void (*ui_slider_fpdescribe)(void*, ui_slider*, char* txt);
 typedef void (*ui_slider_fptweak)(void*, ui_slider*, float value);
 typedef void (*ui_slider_fpvalue)(void*, ui_slider*, float* value);
 
-void ui_slider_init(ui_slider*, ui_component* parent);
+void ui_slider_init(ui_slider*, psy_ui_Component* parent);
 void ui_slider_settext(ui_slider*, const char* text);
 void ui_slider_setcharnumber(ui_slider*, int number);
 void ui_slider_setvalue(ui_slider*, double value);

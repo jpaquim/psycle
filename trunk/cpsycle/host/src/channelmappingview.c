@@ -7,11 +7,11 @@
 #include <stdio.h>
 #include <portable.h>
 
-static void pinedit_ondraw(PinEdit*, ui_component* sender, ui_graphics*);
-static void pinedit_drawpinsockets(PinEdit*, ui_graphics*);
-static void pinedit_drawpinconnections(PinEdit*, ui_graphics*);
+static void pinedit_ondraw(PinEdit*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void pinedit_drawpinsockets(PinEdit*, psy_ui_Graphics*);
+static void pinedit_drawpinconnections(PinEdit*, psy_ui_Graphics*);
 
-void pinedit_init(PinEdit* self, ui_component* parent, psy_audio_Wire wire,
+void pinedit_init(PinEdit* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	self->wire = wire;
@@ -22,13 +22,13 @@ void pinedit_init(PinEdit* self, ui_component* parent, psy_audio_Wire wire,
 	psy_signal_connect(&self->component.signal_draw, self, pinedit_ondraw);	
 }
 
-void pinedit_ondraw(PinEdit* self, ui_component* sender, ui_graphics* g)
+void pinedit_ondraw(PinEdit* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {		
 	pinedit_drawpinsockets(self, g);
 	pinedit_drawpinconnections(self, g);	
 }
 
-void pinedit_drawpinsockets(PinEdit* self, ui_graphics* g)
+void pinedit_drawpinsockets(PinEdit* self, psy_ui_Graphics* g)
 {
 	psy_audio_Machine* machine;
 	uintptr_t numsrcpins;
@@ -68,7 +68,7 @@ void pinedit_drawpinsockets(PinEdit* self, ui_graphics* g)
 	}	
 }
 
-void pinedit_drawpinconnections(PinEdit* self, ui_graphics* g)
+void pinedit_drawpinconnections(PinEdit* self, psy_ui_Graphics* g)
 {
 	psy_audio_Connections* connections;
 	psy_audio_WireSocketEntry* input;
@@ -91,7 +91,7 @@ void pinedit_drawpinconnections(PinEdit* self, ui_graphics* g)
 	}
 }
 
-void channelmappingview_init(ChannelMappingView* self, ui_component* parent,
+void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);

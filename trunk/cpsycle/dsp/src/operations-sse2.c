@@ -10,10 +10,13 @@
 #include "alignedalloc.h"
 #include <xmmintrin.h>
 
+#define is_aligned(POINTER, BYTE_COUNT) \
+	(((uintptr_t)(const void*)(POINTER)) % (16) == 0)
+
 static size_t alignment = 16;
 static psy_dsp_Operations noopt;
 
-static void* dsp_memory_alloc(size_t alignment, size_t count, size_t size);
+static void* dsp_memory_alloc(size_t count, size_t size);
 static void dsp_memory_dealloc(void* address);
 static void dsp_add(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t vol);
 static void dsp_mul(psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul);
@@ -24,10 +27,10 @@ static void dsp_erase_all_nans_infinities_and_denormals(psy_dsp_amp_t* dst,
 		uintptr_t num);
 static void erase_all_nans_infinities_and_denormals(psy_dsp_amp_t* sample);
 static float dsp_maxvol(const float* pSamples, uintptr_t numSamples);
-static void dsp_accumulate(psy_dsp_big_amp_t* accumleft, 
-					psy_dsp_big_amp_t* accumright,
-					const psy_dsp_amp_t* __restrict pSamplesL,
-					const psy_dsp_amp_t* __restrict pSamplesR, int count);
+static void dsp_accumulate(psy_dsp_big_amp_t* accumleft,
+	psy_dsp_big_amp_t* accumright,
+	const psy_dsp_amp_t* __restrict pSamplesL,
+	const psy_dsp_amp_t* __restrict pSamplesR, int count);
 
 void psy_dsp_sse2_init(psy_dsp_Operations* self)
 {	
@@ -84,7 +87,7 @@ void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_a
 	
 void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num)
 {
-	if ((num & 0x3) == 0) {
+	if (is_aligned(dst, 16)) {
 		const __m128 zeroval = _mm_set_ps1(0.0f);
 		while (num > 0)
 		{
@@ -154,7 +157,7 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 //same method, for a single buffer (allowing to calculate max for each buffer). samples need to be aligned by 16 in optimized paths.
 float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 {
-	if ((numSamples & 0x3) != 0) {		
+	if (is_aligned(pSamples, 16)) {
 		return noopt.maxvol(pSamples, numSamples);
 	} else {
 #if defined SSE
@@ -237,13 +240,17 @@ float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 	}
 }
 
-void dsp_accumulate(psy_dsp_amp_t* accumleft,
-					psy_dsp_amp_t* accumright,
-					psy_dsp_amp_t* __restrict pSamplesL,
-					psy_dsp_amp_t* __restrict pSamplesR,
-					int count)
+void dsp_accumulate(psy_dsp_big_amp_t* accumleft,
+	psy_dsp_big_amp_t* accumright,
+	const psy_dsp_amp_t* __restrict pSamplesL,
+	const psy_dsp_amp_t* __restrict pSamplesR,
+	int count)
 {		
-	if ((count & 0x3) != 0) {
+	if (count == 0)
+	{
+		return;
+	}
+	if (!is_aligned(pSamplesL, count) || is_aligned(pSamplesR, count)) {
 		noopt.accumulate(accumleft, accumright, pSamplesL, pSamplesR, count);
 	} else {
 		float result;

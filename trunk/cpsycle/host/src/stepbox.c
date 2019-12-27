@@ -6,11 +6,14 @@
 #include "stepbox.h"
 #include <portable.h>
 
-static void build(StepBox*);
-static void onselectionchanged(StepBox*, ui_component* sender, int index);
+static void stepbox_build(StepBox*);
+static void stepbox_onselectionchanged(StepBox*, psy_ui_Component* sender,
+	int index);
 
-void stepbox_init(StepBox* self, ui_component* parent, Workspace* workspace)
+void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 {		
+	ui_margin margin;
+
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
@@ -19,23 +22,19 @@ void stepbox_init(StepBox* self, ui_component* parent, Workspace* workspace)
 	ui_label_settext(&self->header, "Step");
 	ui_combobox_init(&self->combobox, &self->component);
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
-		onselectionchanged);
+		stepbox_onselectionchanged);
 	ui_combobox_setcharnumber(&self->combobox, 3);
-	build(self);
-	ui_combobox_setcursel(&self->combobox, workspace_cursorstep(workspace) - 1);	
-	{
-		ui_margin margin;
-
-		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-			ui_value_makepx(0), ui_value_makepx(0));
-		psy_list_free(ui_components_setalign(		
-			ui_component_children(&self->component, 0),
-			UI_ALIGN_LEFT,
-			&margin));
-	}
+	stepbox_build(self);
+	ui_combobox_setcursel(&self->combobox,
+		workspace_cursorstep(workspace) - 1);	
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makepx(0), ui_value_makepx(0));
+	psy_list_free(ui_components_setalign(		
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT, &margin));	
 }
 
-void build(StepBox* self)
+void stepbox_build(StepBox* self)
 {
 	int step;
 
@@ -46,10 +45,9 @@ void build(StepBox* self)
 	}	
 }
 
-void onselectionchanged(StepBox* self, ui_component* sender, int index)
+void stepbox_onselectionchanged(StepBox* self, psy_ui_Component* sender, int index)
 {		
 	if (index >= 0) {
 		workspace_setcursorstep(self->workspace, index + 1);
 	}
 }
-

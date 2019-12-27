@@ -6,29 +6,29 @@
 #include "patternview.h"
 #include <portable.h>
 
-static void patternview_ontabbarchange(PatternView*, ui_component* sender, int tabindex);
-static void patternview_onsize(PatternView*, ui_component* sender, ui_size*);
-static void patternview_onshow(PatternView*, ui_component* sender);
-static void patternview_onhide(PatternView*, ui_component* sender);
+static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender, int tabindex);
+static void patternview_onsize(PatternView*, psy_ui_Component* sender, ui_size*);
+static void patternview_onshow(PatternView*, psy_ui_Component* sender);
+static void patternview_onhide(PatternView*, psy_ui_Component* sender);
 static void patternview_onlpbchanged(PatternView*, psy_audio_Player* sender, uintptr_t lpb);
 static void patternview_onsongchanged(PatternView*, Workspace* sender);
 static void patternview_oneditpositionchanged(PatternView*, Workspace* sender);
 static void patternview_onsequenceselectionchanged(PatternView*, Workspace* sender);
-static void patternview_onpropertiesclose(PatternView*, ui_component* sender);
-static void patternview_onpropertiesapply(PatternView*, ui_component* sender);
-static void patternview_onkeydown(PatternView*, ui_component* sender, KeyEvent*);
-static void patternview_onkeyup(PatternView*, ui_component* sender, KeyEvent*);
-static void patternview_onfocus(PatternView*, ui_component* sender);
-static void patternviewstatus_ondraw(PatternViewStatus*, ui_component* sender, ui_graphics* g);
+static void patternview_onpropertiesclose(PatternView*, psy_ui_Component* sender);
+static void patternview_onpropertiesapply(PatternView*, psy_ui_Component* sender);
+static void patternview_onkeydown(PatternView*, psy_ui_Component* sender, KeyEvent*);
+static void patternview_onkeyup(PatternView*, psy_ui_Component* sender, KeyEvent*);
+static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
+static void patternviewstatus_ondraw(PatternViewStatus*, psy_ui_Component* sender, psy_ui_Graphics* g);
 static void patternviewstatus_onpreferredsize(PatternViewStatus* self,
-	ui_component* sender, ui_size* limit, ui_size* rv);
+	psy_ui_Component* sender, ui_size* limit, ui_size* rv);
 static void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus*,
 	Workspace* sender);
 static void patternviewstatus_onsequenceselectionchanged(PatternViewStatus*,
 	Workspace* sender);
 void patternviewbar_initalign(PatternViewBar*);
 
-void patternviewstatus_init(PatternViewStatus* self, ui_component* parent, Workspace* workspace)
+void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
@@ -57,8 +57,8 @@ void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus* self,
 	ui_component_invalidate(&self->component);
 }
 
-void patternviewstatus_ondraw(PatternViewStatus* self, ui_component* sender,
-	ui_graphics* g)
+void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
 {
 	char text[256];
 	PatternEditPosition editposition;
@@ -89,7 +89,7 @@ void patternviewstatus_ondraw(PatternViewStatus* self, ui_component* sender,
 }
 
 void patternviewstatus_onpreferredsize(PatternViewStatus* self,
-	ui_component* sender, ui_size* limit, ui_size* rv)
+	psy_ui_Component* sender, ui_size* limit, ui_size* rv)
 {				
 	if (rv) {
 		ui_textmetric tm;
@@ -100,7 +100,7 @@ void patternviewstatus_onpreferredsize(PatternViewStatus* self,
 	}
 }
 
-void patternviewbar_init(PatternViewBar* self, ui_component* parent,
+void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
 	ui_component_init(&self->component, parent);	
@@ -124,8 +124,8 @@ void patternviewbar_initalign(PatternViewBar* self)
 		&margin));		
 }
 void patternview_init(PatternView* self, 
-		ui_component* parent,
-		ui_component* tabbarparent,		
+		psy_ui_Component* parent,
+		psy_ui_Component* tabbarparent,		
 		Workspace* workspace)
 {
 	self->workspace = workspace;
@@ -173,7 +173,7 @@ void patternview_init(PatternView* self,
 	self->lpb = player_lpb(&workspace->player);
 }
 
-void patternview_ontabbarchange(PatternView* self, ui_component* sender,
+void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 	int tabindex)
 {
 	if (tabindex < 2) {
@@ -200,19 +200,19 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 	PatternPropertiesSetPattern(&self->properties, pattern);
 }
 
-void patternview_onsize(PatternView* self, ui_component* sender, ui_size* size)
+void patternview_onsize(PatternView* self, psy_ui_Component* sender, ui_size* size)
 {					
 	ui_component_resize(&self->notebook.component, size->width, size->height);
 }
 
-void patternview_onshow(PatternView* self, ui_component* sender)
+void patternview_onshow(PatternView* self, psy_ui_Component* sender)
 {			
 	self->tabbar.component.visible = 1;	
 	ui_component_align(ui_component_parent(&self->tabbar.component));
 	ui_component_show(&self->tabbar.component);	
 }
 
-void patternview_onhide(PatternView* self, ui_component* sender)
+void patternview_onhide(PatternView* self, psy_ui_Component* sender)
 {	
 	ui_component_hide(&self->tabbar.component);				
 }
@@ -297,28 +297,28 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 	ui_component_invalidate(&self->component);		
 }
 
-void patternview_onpropertiesclose(PatternView* self, ui_component* sender)
+void patternview_onpropertiesclose(PatternView* self, psy_ui_Component* sender)
 {	
 }
 
-void patternview_onpropertiesapply(PatternView* self, ui_component* sender)
+void patternview_onpropertiesapply(PatternView* self, psy_ui_Component* sender)
 {
 	patternview_setpattern(self, self->properties.pattern);
 }
 
-void patternview_onkeydown(PatternView* self, ui_component* sender,
+void patternview_onkeydown(PatternView* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	ui_component_propagateevent(sender);
 }
 
-void patternview_onkeyup(PatternView* self, ui_component* sender,
+void patternview_onkeyup(PatternView* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	ui_component_propagateevent(sender);
 }
 
-void patternview_onfocus(PatternView* self, ui_component* sender)
+void patternview_onfocus(PatternView* self, psy_ui_Component* sender)
 {
 	ui_component_setfocus(&self->trackerview.grid.component);
 }

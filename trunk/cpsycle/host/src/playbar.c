@@ -9,15 +9,15 @@
 #define TIMERID_PLAYBAR 400
 
 static void playbar_initalign(PlayBar*);
-static void onloopclicked(PlayBar*, ui_component* sender);
-static void onrecordnotesclicked(PlayBar*, ui_component* sender);
-static void onplayclicked(PlayBar*, ui_component* sender);
-static void onplayselclicked(PlayBar*, ui_component* sender);
+static void onloopclicked(PlayBar*, psy_ui_Component* sender);
+static void onrecordnotesclicked(PlayBar*, psy_ui_Component* sender);
+static void onplayclicked(PlayBar*, psy_ui_Component* sender);
+static void onplayselclicked(PlayBar*, psy_ui_Component* sender);
 static void startplay(PlayBar*);
-static void onstopclicked(PlayBar*, ui_component* sender);
-static void ontimer(PlayBar*, ui_component* sender, int timerid);
+static void onstopclicked(PlayBar*, psy_ui_Component* sender);
+static void ontimer(PlayBar*, psy_ui_Component* sender, int timerid);
 
-void playbar_init(PlayBar* self, ui_component* parent, Workspace* workspace)
+void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 {			
 	self->workspace = workspace;
 	self->player = &workspace->player;
@@ -55,12 +55,12 @@ void playbar_initalign(PlayBar* self)
 		UI_ALIGN_LEFT, &margin));
 }
 
-void onplayclicked(PlayBar* self, ui_component* sender)
+void onplayclicked(PlayBar* self, psy_ui_Component* sender)
 {	
 	startplay(self);
 }
 
-void onplayselclicked(PlayBar* self, ui_component* sender)
+void onplayselclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	if (sequencer_playmode(&self->player->sequencer) == SEQUENCERPLAYMODE_PLAYALL) {
 		sequencer_setplaymode(&self->player->sequencer, SEQUENCERPLAYMODE_PLAYSEL);
@@ -93,14 +93,14 @@ void startplay(PlayBar* self)
 	}
 }
 
-void onstopclicked(PlayBar* self, ui_component* sender)
+void onstopclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	ui_button_disablehighlight(&self->play);
 	ui_button_disablehighlight(&self->playsel);
 	player_stop(self->player);	
 }
 
-void onloopclicked(PlayBar* self, ui_component* sender)
+void onloopclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	if (sequencer_looping(&self->player->sequencer)) {
 		sequencer_stoploop(&self->player->sequencer);
@@ -111,7 +111,7 @@ void onloopclicked(PlayBar* self, ui_component* sender)
 	}
 }
 
-void onrecordnotesclicked(PlayBar* self, ui_component* sender)
+void onrecordnotesclicked(PlayBar* self, psy_ui_Component* sender)
 {	
 	if (player_recordingnotes(self->player)) {
 		player_stoprecordingnotes(self->player);
@@ -122,7 +122,7 @@ void onrecordnotesclicked(PlayBar* self, ui_component* sender)
 	}
 }
 
-void ontimer(PlayBar* self, ui_component* sender, int timerid)
+void ontimer(PlayBar* self, psy_ui_Component* sender, int timerid)
 {
 	if (player_playing(self->player)) {
 		ui_button_highlight(&self->play);

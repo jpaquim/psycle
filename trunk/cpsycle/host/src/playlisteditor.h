@@ -20,21 +20,21 @@ PlayListEntry* playlistentry_alloc(void);
 PlayListEntry* playlistentry_allocinit(const char* title, const char* path);
 
 typedef struct {
-	ui_component component;
-	ui_component row1;
-	ui_button addsong;
-	ui_button removesong;
-	ui_component row2;
-	ui_button prev;
-	ui_button play;
-	ui_button stop;
-	ui_button next;	
+	psy_ui_Component component;
+	psy_ui_Component row1;
+	psy_ui_Button addsong;
+	psy_ui_Button removesong;
+	psy_ui_Component row2;
+	psy_ui_Button prev;
+	psy_ui_Button play;
+	psy_ui_Button stop;
+	psy_ui_Button next;	
 } PlayListEditorButtons;
 
-void playlisteditorbuttons_init(PlayListEditorButtons*, ui_component* parent);
+void playlisteditorbuttons_init(PlayListEditorButtons*, psy_ui_Component* parent);
 
 typedef struct PlayListEditor {
-	ui_component component;
+	psy_ui_Component component;
 	ui_listbox listbox;
 	PlayListEditorButtons buttons;
 	psy_List* entries;
@@ -43,6 +43,6 @@ typedef struct PlayListEditor {
 	psy_List* nextentry;
 } PlayListEditor;
 
-void playlisteditor_init(PlayListEditor*, ui_component* parent, Workspace*);
+void playlisteditor_init(PlayListEditor*, psy_ui_Component* parent, Workspace*);
 
 #endif

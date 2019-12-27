@@ -7,16 +7,16 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;
-   ui_component combo;
-   ui_component* currcombo;
+   psy_ui_Component component;
+   psy_ui_Component combo;
+   psy_ui_Component* currcombo;
    psy_Signal signal_selchanged;
    int ownerdrawn;   
    int hover;
    int charnumber;
 } ui_combobox;
 
-void ui_combobox_init(ui_combobox*, ui_component* parent);
+void ui_combobox_init(ui_combobox*, psy_ui_Component* parent);
 int ui_combobox_addstring(ui_combobox*, const char* text);
 void ui_combobox_clear(ui_combobox*);
 void ui_combobox_setcursel(ui_combobox*, intptr_t index);

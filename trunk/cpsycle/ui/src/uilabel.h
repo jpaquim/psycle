@@ -7,13 +7,13 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;
+   psy_ui_Component component;
    int charnumber;
-} ui_label;
+} psy_ui_Label;
 
-void ui_label_init(ui_label*, ui_component* parent);
-void ui_label_settext(ui_label*, const char* text);
-void ui_label_setcharnumber(ui_label*, int number);
-void ui_label_setstyle(ui_label*, int style);
+void ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
+void ui_label_settext(psy_ui_Label*, const char* text);
+void ui_label_setcharnumber(psy_ui_Label*, int number);
+void ui_label_setstyle(psy_ui_Label*, int style);
 
 #endif

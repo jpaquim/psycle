@@ -8,7 +8,7 @@
 #include <sample.h>
 
 typedef struct {	
-	ui_component component;
+	psy_ui_Component component;
 	psy_audio_Sample* sample;
 	int hasselection;
 	uintptr_t selectionstart;
@@ -19,7 +19,7 @@ typedef struct {
 	int dragoffset;
 } WaveBox;
 
-void wavebox_init(WaveBox*, ui_component* parent);
+void wavebox_init(WaveBox*, psy_ui_Component* parent);
 void wavebox_setsample(WaveBox*, psy_audio_Sample*);
 void wavebox_setzoom(WaveBox*, float left, float right);
 

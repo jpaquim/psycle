@@ -11,31 +11,31 @@
 
 #define TIMERID_PARAMVIEW 410
 
-static void onpreferredsize(ParamView* self, ui_component* sender,
+static void onpreferredsize(ParamView* self, psy_ui_Component* sender,
 	ui_size* limit, ui_size* rv);
-static void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g);
-static void DrawBackground(ParamView* self, ui_graphics* g);
-static void DrawParam(ParamView* self, ui_graphics* g, int param, int row, int col);
-static void DrawSlider(ParamView* self, ui_graphics* g, int param, int row, int col);
-static void DrawLevel(ParamView* self, ui_graphics* g, int param, int row, int col);
-static void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col);
-static void DrawInfoLabel(ParamView*, ui_graphics* g, int param, int row, int col);
-static void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col);
+static void OnDraw(ParamView* self, psy_ui_Component* sender, psy_ui_Graphics* g);
+static void DrawBackground(ParamView* self, psy_ui_Graphics* g);
+static void DrawParam(ParamView* self, psy_ui_Graphics* g, int param, int row, int col);
+static void DrawSlider(ParamView* self, psy_ui_Graphics* g, int param, int row, int col);
+static void DrawLevel(ParamView* self, psy_ui_Graphics* g, int param, int row, int col);
+static void DrawHeader(ParamView* self, psy_ui_Graphics* g, int param, int row, int col);
+static void DrawInfoLabel(ParamView*, psy_ui_Graphics* g, int param, int row, int col);
+static void DrawKnob(ParamView* self, psy_ui_Graphics* g, int param, int row, int col);
 static void cellsize(ParamView* self, int* width, int* height);
 static void cellposition(ParamView* self, int row, int col, int* x, int* y);
-static void OnMouseDown(ParamView* self, ui_component* sender, MouseEvent*);
-static void OnMouseUp(ParamView* self, ui_component* sender, MouseEvent*);
-static void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent*);
+static void OnMouseDown(ParamView* self, psy_ui_Component* sender, MouseEvent*);
+static void OnMouseUp(ParamView* self, psy_ui_Component* sender, MouseEvent*);
+static void OnMouseMove(ParamView* self, psy_ui_Component* sender, MouseEvent*);
 static int HitTest(ParamView* self, int x, int y);
-static void OnTimer(ParamView*, ui_component* sender, int timerid);
+static void OnTimer(ParamView*, psy_ui_Component* sender, int timerid);
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
 
 
-static ui_bitmap knobs;
-static ui_bitmap mixer;
+static psy_ui_Bitmap knobs;
+static psy_ui_Bitmap mixer;
 
-void paramview_init(ParamView* self, ui_component* parent, psy_audio_Machine* machine,
+void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
 {	
 	if (knobs.hBitmap == NULL) {
@@ -82,7 +82,7 @@ ParamView* paramview_alloc(void)
 	return (ParamView*) malloc(sizeof(ParamView));
 }
 
-ParamView* paramview_allocinit(ui_component* parent, psy_audio_Machine* machine,
+ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
 {
 	ParamView* rv;
@@ -94,7 +94,7 @@ ParamView* paramview_allocinit(ui_component* parent, psy_audio_Machine* machine,
 	return rv;
 }
 
-void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
+void OnDraw(ParamView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {			
 	if (self->machine) {								
 		uintptr_t row = 0;
@@ -118,12 +118,12 @@ void OnDraw(ParamView* self, ui_component* sender, ui_graphics* g)
 	}			
 }
 
-void DrawBackground(ParamView* self, ui_graphics* g)
+void DrawBackground(ParamView* self, psy_ui_Graphics* g)
 {
 
 }
 
-void DrawParam(ParamView* self, ui_graphics* g, int par, int row, int col)
+void DrawParam(ParamView* self, psy_ui_Graphics* g, int par, int row, int col)
 {	
 	switch (self->machine->vtable->parametertype(self->machine, par)) {
 		case 1:
@@ -146,7 +146,7 @@ void DrawParam(ParamView* self, ui_graphics* g, int par, int row, int col)
 	}
 }
 
-void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
+void DrawKnob(ParamView* self, psy_ui_Graphics* g, int param, int row, int col)
 {	
 	char label[128];
 	char str[128];
@@ -195,7 +195,7 @@ void DrawKnob(ParamView* self, ui_graphics* g, int param, int row, int col)
 	ui_drawbitmap(g, &knobs, r.left, r.top, knob_cx, knob_cy, knob_frame*knob_cx, 0);	
 }
 
-void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
+void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, int param, int row, int col)
 {
 	int top;
 	int left;
@@ -232,7 +232,7 @@ void DrawInfoLabel(ParamView* self, ui_graphics* g, int param, int row, int col)
 		r, str, strlen(str));	
 }
 
-void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
+void DrawHeader(ParamView* self, psy_ui_Graphics* g, int param, int row, int col)
 {
 	int top;
 	int left;
@@ -274,7 +274,7 @@ void DrawHeader(ParamView* self, ui_graphics* g, int param, int row, int col)
 		r, str, strlen(str));	
 }
 
-void DrawSlider(ParamView* self, ui_graphics* g, int param, int row, int col)
+void DrawSlider(ParamView* self, psy_ui_Graphics* g, int param, int row, int col)
 {
 	int top;
 	int left;
@@ -297,7 +297,7 @@ void DrawSlider(ParamView* self, ui_graphics* g, int param, int row, int col)
 	skin_blitpart(g, &mixer, left + xoffset, top + yoffset, &knob);	
 }
 
-void DrawLevel(ParamView* self, ui_graphics* g, int param, int row, int col)
+void DrawLevel(ParamView* self, psy_ui_Graphics* g, int param, int row, int col)
 {
 	int top;
 	int left;
@@ -341,7 +341,7 @@ void cellposition(ParamView* self, int row, int col, int* x, int* y)
 	*y = row * height;	
 }
 
-void OnMouseDown(ParamView* self, ui_component* sender, MouseEvent* ev)
+void OnMouseDown(ParamView* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	self->tweak = HitTest(self, ev->x, ev->y);
 	if (self->tweak != -1) {
@@ -367,7 +367,7 @@ int HitTest(ParamView* self, int x, int y)
 	return (param >= 0 && param < self->numparams) ? (int) param : -1;
 }
 
-void OnMouseUp(ParamView* self, ui_component* sender, MouseEvent* ev)
+void OnMouseUp(ParamView* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	if (self->tweak != -1) {
 		ui_component_releasecapture();
@@ -375,7 +375,7 @@ void OnMouseUp(ParamView* self, ui_component* sender, MouseEvent* ev)
 	self->tweak = -1;
 }
 
-void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent* ev)
+void OnMouseMove(ParamView* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	if (self->tweak != -1) {		
 		int dy;
@@ -402,7 +402,7 @@ void OnMouseMove(ParamView* self, ui_component* sender, MouseEvent* ev)
 	}
 }
 
-void OnTimer(ParamView* self, ui_component* sender, int timerid)
+void OnTimer(ParamView* self, psy_ui_Component* sender, int timerid)
 {
 	ui_component_invalidate(&self->component);
 }
@@ -417,7 +417,7 @@ float floatparamvalue(int value)
 	return value / 65535.f;	
 }
 
-void onpreferredsize(ParamView* self, ui_component* sender, ui_size* limit,
+void onpreferredsize(ParamView* self, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv)
 {
 	if (rv) {

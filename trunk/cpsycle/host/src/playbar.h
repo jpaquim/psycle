@@ -8,16 +8,16 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
-	ui_button loop;
-	ui_button recordnotes;
-	ui_button play;
-	ui_button playsel;
-	ui_button stop;	
+	psy_ui_Component component;
+	psy_ui_Button loop;
+	psy_ui_Button recordnotes;
+	psy_ui_Button play;
+	psy_ui_Button playsel;
+	psy_ui_Button stop;	
 	psy_audio_Player* player;
 	Workspace* workspace;
 } PlayBar;
 
-void playbar_init(PlayBar*, ui_component* parent, Workspace*);
+void playbar_init(PlayBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

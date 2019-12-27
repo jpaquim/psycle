@@ -7,12 +7,12 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    char* text;   
    float progress;
 } ui_progressbar;
 
-void ui_progressbar_init(ui_progressbar*, ui_component* parent);
+void ui_progressbar_init(ui_progressbar*, psy_ui_Component* parent);
 void ui_progressbar_settext(ui_progressbar*, const char* text);
 void ui_progressbar_setprogress(ui_progressbar*, float progress);
 void ui_progressbar_tick(ui_progressbar*);

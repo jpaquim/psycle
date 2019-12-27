@@ -5,12 +5,12 @@
 
 #include "uiedit.h"
 
-static void oncommand(ui_edit*, ui_component* sender, WPARAM wParam, LPARAM lParam);
-static void ondestroy(ui_edit*, ui_component* sender);
-static void onpreferredsize(ui_edit*, ui_component* sender, ui_size* limit,
+static void oncommand(psy_ui_Edit*, psy_ui_Component* sender, WPARAM wParam, LPARAM lParam);
+static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
+static void onpreferredsize(psy_ui_Edit*, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv);
 
-void ui_edit_init(ui_edit* self, ui_component* parent, int styles)
+void ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent, int styles)
 {  		
 	ui_win32_component_init(&self->component, parent, TEXT("EDIT"), 
 		0, 0, 100, 20,
@@ -25,34 +25,34 @@ void ui_edit_init(ui_edit* self, ui_component* parent, int styles)
 	self->linenumber = 1;
 }
 
-void ondestroy(ui_edit* self, ui_component* sender)
+void ondestroy(psy_ui_Edit* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_change);
 }
 
-void ui_edit_settext(ui_edit* edit, const char* text)
+void ui_edit_settext(psy_ui_Edit* edit, const char* text)
 {
 	SetWindowText((HWND)edit->component.hwnd, text);
 }
 
-void ui_edit_setcharnumber(ui_edit* self, int number)
+void ui_edit_setcharnumber(psy_ui_Edit* self, int number)
 {
 	self->charnumber = number;
 }
 
-void ui_edit_setlinenumber(ui_edit* self, int number)
+void ui_edit_setlinenumber(psy_ui_Edit* self, int number)
 {
 	self->linenumber = number;
 }
 
-const char* ui_edit_text(ui_edit* edit)
+const char* ui_edit_text(psy_ui_Edit* edit)
 {
 	static char buf[256];
 	GetWindowText((HWND)edit->component.hwnd, buf, 255);
 	return buf;
 }
 
-void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam,
+void oncommand(psy_ui_Edit* self, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam) {
 	switch(HIWORD(wParam))
     {
@@ -68,7 +68,7 @@ void oncommand(ui_edit* self, ui_component* sender, WPARAM wParam,
     }
 }
 
-void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit,
+void onpreferredsize(psy_ui_Edit* self, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv)
 {			
 	if (rv) {
@@ -89,12 +89,14 @@ void onpreferredsize(ui_edit* self, ui_component* sender, ui_size* limit,
 	}
 }
 
-void ui_edit_enableedit(ui_edit* self)
+void ui_edit_enableedit(psy_ui_Edit* self)
 {
-	SendMessage((HWND)self->component.hwnd, EM_SETREADONLY, (WPARAM)0, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, EM_SETREADONLY, (WPARAM) 0,
+		(LPARAM) 0);
 }
 
-void ui_edit_preventedit(ui_edit* self)
+void ui_edit_preventedit(psy_ui_Edit* self)
 {
-	SendMessage((HWND)self->component.hwnd, EM_SETREADONLY, (WPARAM)1, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, EM_SETREADONLY, (WPARAM) 1,
+		(LPARAM) 0);
 }

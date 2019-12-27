@@ -7,12 +7,12 @@
 #include <portable.h>
 
 static void Buildtrackbox(SongTrackBar* self);
-static void OnTrackBoxSelChange(SongTrackBar*, ui_component* sender, int sel);
+static void OnTrackBoxSelChange(SongTrackBar*, psy_ui_Component* sender, int sel);
 static void OnSongTracksNumChanged(SongTrackBar*, Workspace*,
 	unsigned int numsongtracks);
 static void OnSongChanged(SongTrackBar*, Workspace*);
 
-void InitSongTrackBar(SongTrackBar* self, ui_component* parent, Workspace* workspace)
+void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
@@ -54,7 +54,7 @@ void Buildtrackbox(SongTrackBar* self)
 		player_numsongtracks(&self->workspace->player));
 }
 
-void OnTrackBoxSelChange(SongTrackBar* self, ui_component* sender, int sel)
+void OnTrackBoxSelChange(SongTrackBar* self, psy_ui_Component* sender, int sel)
 {		
 	player_setnumsongtracks(&self->workspace->player, sel);
 	if (self->workspace->song) {

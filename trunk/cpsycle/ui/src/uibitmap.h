@@ -8,12 +8,12 @@
 
 typedef struct {
    HBITMAP hBitmap;
-} ui_bitmap;
+} psy_ui_Bitmap;
 
-void ui_bitmap_init(ui_bitmap*);
-int ui_bitmap_load(ui_bitmap*, const char* path);
-void ui_bitmap_dispose(ui_bitmap*);
-ui_size ui_bitmap_size(ui_bitmap*);
-int ui_bitmap_loadresource(ui_bitmap*, int resourceid);
+void ui_bitmap_init(psy_ui_Bitmap*);
+int ui_bitmap_load(psy_ui_Bitmap*, const char* path);
+void ui_bitmap_dispose(psy_ui_Bitmap*);
+ui_size ui_bitmap_size(psy_ui_Bitmap*);
+int ui_bitmap_loadresource(psy_ui_Bitmap*, int resourceid);
 
 #endif

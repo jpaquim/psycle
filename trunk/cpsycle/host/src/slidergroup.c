@@ -7,15 +7,15 @@
 #include <stdio.h>
 
 static void OnDestroy(SliderGroup*);
-static void OnSize(SliderGroup*, ui_component* sender, ui_size*);
-static void OnSliderChanged(SliderGroup*, ui_component* sender);
+static void OnSize(SliderGroup*, psy_ui_Component* sender, ui_size*);
+static void OnSliderChanged(SliderGroup*, psy_ui_Component* sender);
 static void DescribeValue(SliderGroup*);
 static float Value(SliderGroup*);
-static void OnTimer(SliderGroup*, ui_component* sender, int timerid);
+static void OnTimer(SliderGroup*, psy_ui_Component* sender, int timerid);
 
 static int timerid = 600;
 
-void InitSliderGroup(SliderGroup* self, ui_component* parent, const char* desc)
+void InitSliderGroup(SliderGroup* self, psy_ui_Component* parent, const char* desc)
 {
 	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->desclabel, &self->component);
@@ -40,7 +40,7 @@ void OnDestroy(SliderGroup* self)
 	psy_signal_dispose(&self->signal_tweakvalue);
 }
 
-void OnSize(SliderGroup* self, ui_component* sender, ui_size* size)
+void OnSize(SliderGroup* self, psy_ui_Component* sender, ui_size* size)
 {	
 	int descwidth = 100;
 	int lblwidth = 70;
@@ -52,7 +52,7 @@ void OnSize(SliderGroup* self, ui_component* sender, ui_size* size)
 	ui_component_move(&self->label.component, size->width - lblwidth - 5, 0);
 }
 
-void OnSliderChanged(SliderGroup* self, ui_component* sender)
+void OnSliderChanged(SliderGroup* self, psy_ui_Component* sender)
 {	
 	signal_emit_float(&self->signal_tweakvalue, self, Value(self));
 	DescribeValue(self);
@@ -74,7 +74,7 @@ void DescribeValue(SliderGroup* self)
 	ui_label_settext(&self->label, buffer);
 }
 
-void OnTimer(SliderGroup* self, ui_component* sender, int timerid)
+void OnTimer(SliderGroup* self, psy_ui_Component* sender, int timerid)
 {
 	float value = 0;
 	float* pValue;	

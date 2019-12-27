@@ -10,11 +10,11 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
-	ui_editor editor;
+	psy_ui_Component component;
+	psy_ui_Editor editor;
 	Workspace* workspace;
 } PluginEditor;
 
-void plugineditor_init(PluginEditor*, ui_component* parent, Workspace*);
+void plugineditor_init(PluginEditor*, psy_ui_Component* parent, Workspace*);
 
 #endif

@@ -5,15 +5,15 @@
 
 #include "uigroupbox.h"
 
-void ui_groupbox_init(ui_groupbox* groupbox, ui_component* parent)
+void ui_groupbox_init(psy_ui_Groupbox* self, psy_ui_Component* parent)
 {
-	ui_win32_component_init(&groupbox->component, parent, TEXT("BUTTON"),
+	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"),
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
 		0);
 }
 
-void ui_groupbox_settext(ui_groupbox* groupbox, const char* text)
+void ui_groupbox_settext(psy_ui_Groupbox* self, const char* text)
 {
-	SetWindowText((HWND)groupbox->component.hwnd, text);
+	SetWindowText((HWND)self->component.hwnd, text);
 }

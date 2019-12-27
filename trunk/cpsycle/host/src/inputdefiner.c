@@ -8,11 +8,11 @@
 #include <stdio.h>
 #include <portable.h>
 
-static void ondraw(InputDefiner*, ui_component* sender, ui_graphics*);
-static void onkeydown(InputDefiner*, ui_component* sender, KeyEvent*);
-static void onkeyup(InputDefiner*, ui_component* sender, KeyEvent*);
+static void ondraw(InputDefiner*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void onkeydown(InputDefiner*, psy_ui_Component* sender, KeyEvent*);
+static void onkeyup(InputDefiner*, psy_ui_Component* sender, KeyEvent*);
 
-void inputdefiner_init(InputDefiner* self, ui_component* parent)
+void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
 	self->input = 0;
 	self->regularkey = 0;
@@ -82,7 +82,7 @@ void inputdefiner_text(InputDefiner* self, char* text)
 	// }
 }
 
-void ondraw(InputDefiner* self, ui_component* sender, ui_graphics* g)
+void ondraw(InputDefiner* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	char text[40];	
 	
@@ -92,7 +92,7 @@ void ondraw(InputDefiner* self, ui_component* sender, ui_graphics* g)
 	ui_textout(g, 0, 0, text, strlen(text));
 }
 
-void onkeydown(InputDefiner* self, ui_component* sender, KeyEvent* keyevent)
+void onkeydown(InputDefiner* self, psy_ui_Component* sender, KeyEvent* keyevent)
 {
 	int shift;
 	int ctrl;	
@@ -114,7 +114,7 @@ void onkeydown(InputDefiner* self, ui_component* sender, KeyEvent* keyevent)
 	ui_component_invalidate(&self->component);
 }
 
-void onkeyup(InputDefiner* self, ui_component* sender, KeyEvent* keyevent)
+void onkeyup(InputDefiner* self, psy_ui_Component* sender, KeyEvent* keyevent)
 {
 	int shift;
 	int ctrl;

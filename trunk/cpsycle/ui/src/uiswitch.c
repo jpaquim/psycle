@@ -6,15 +6,15 @@
 #include "uiswitch.h"
 #include <string.h>
 
-static void ondestroy(ui_switch*, ui_component* sender);
-static void ondraw(ui_switch*, ui_component* sender, ui_graphics*);
-static void onmousedown(ui_switch*, ui_component* sender, MouseEvent*);
-static void onmouseenter(ui_switch*, ui_component* sender);
-static void onmouseleave(ui_switch*, ui_component* sender);
-static void onpreferredsize(ui_switch*, ui_component* sender, ui_size* limit,
+static void ondestroy(psy_ui_Switch*, psy_ui_Component* sender);
+static void ondraw(psy_ui_Switch*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void onmousedown(psy_ui_Switch*, psy_ui_Component* sender, MouseEvent*);
+static void onmouseenter(psy_ui_Switch*, psy_ui_Component* sender);
+static void onmouseleave(psy_ui_Switch*, psy_ui_Component* sender);
+static void onpreferredsize(psy_ui_Switch*, psy_ui_Component* sender, ui_size* limit,
 	ui_size* size);
 
-void ui_switch_init(ui_switch* self, ui_component* parent)
+void ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 {		
 	ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);
@@ -28,12 +28,12 @@ void ui_switch_init(ui_switch* self, ui_component* parent)
 		onpreferredsize);
 }
 
-void ondestroy(ui_switch* self, ui_component* sender)
+void ondestroy(psy_ui_Switch* self, psy_ui_Component* sender)
 {	
 	psy_signal_dispose(&self->signal_clicked);	
 }
 
-void ondraw(ui_switch* self, ui_component* sender, ui_graphics* g)
+void ondraw(psy_ui_Switch* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	ui_rectangle r;
 	int checked = 0;
@@ -72,7 +72,7 @@ void ondraw(ui_switch* self, ui_component* sender, ui_graphics* g)
 	}	
 }
 
-void onpreferredsize(ui_switch* self, ui_component* sender, ui_size* limit,
+void onpreferredsize(psy_ui_Switch* self, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv)
 {		
 	if (rv) {		
@@ -86,18 +86,18 @@ void onpreferredsize(ui_switch* self, ui_component* sender, ui_size* limit,
 	}
 }
 
-void onmousedown(ui_switch* self, ui_component* sender, MouseEvent* ev)
+void onmousedown(psy_ui_Switch* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
-void onmouseenter(ui_switch* self, ui_component* sender)
+void onmouseenter(psy_ui_Switch* self, psy_ui_Component* sender)
 {
 //	self->hover = 1;
 	ui_component_invalidate(&self->component);
 }
 
-void onmouseleave(ui_switch* self, ui_component* sender)
+void onmouseleave(psy_ui_Switch* self, psy_ui_Component* sender)
 {		
 //	self->hover = 0;
 	ui_component_invalidate(&self->component);

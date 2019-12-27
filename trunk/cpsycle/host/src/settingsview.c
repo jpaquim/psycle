@@ -8,40 +8,54 @@
 #include "inputmap.h"
 #include <portable.h>
 
-static void settingsview_ondraw(SettingsView*, ui_component* sender, ui_graphics*);
-static int settingsview_onpropertiesdrawenum(SettingsView*, psy_Properties*, int level);
-static int settingsview_onpropertieshittestenum(SettingsView*, psy_Properties*, int level);
-static int settingsview_onenumpropertyposition(SettingsView*, psy_Properties*, int level);
+static void settingsview_ondraw(SettingsView*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
+static int settingsview_onpropertiesdrawenum(SettingsView*, psy_Properties*,
+	int level);
+static int settingsview_onpropertieshittestenum(SettingsView*, psy_Properties*,
+	int level);
+static int settingsview_onenumpropertyposition(SettingsView*, psy_Properties*,
+	int level);
 static void settingsview_preparepropertiesenum(SettingsView* self);
-static void settingsview_onkeydown(SettingsView*, ui_component* sender, KeyEvent*);
-static void settingsview_onmousedown(SettingsView*, ui_component* sender, MouseEvent*);
-static void settingsview_onmousedoubleclick(SettingsView*, ui_component* sender, MouseEvent*);
-static void settingsview_oneditchange(SettingsView*, ui_edit* sender);
-static void settingsview_oneditkeydown(SettingsView*, ui_component* sender, KeyEvent*);
-static void settingsview_oninputdefinerchange(SettingsView* self, InputDefiner* sender);
-static void settingsview_ondestroy(SettingsView*, ui_component* sender);
-static void settingsview_onsize(SettingsView*, ui_component* sender, ui_size*);
-static void settingsview_onscroll(SettingsView*, ui_component* sender, int stepx, int stepy);
+static void settingsview_onkeydown(SettingsView*, psy_ui_Component* sender,
+	KeyEvent*);
+static void settingsview_onmousedown(SettingsView*, psy_ui_Component* sender,
+	MouseEvent*);
+static void settingsview_onmousedoubleclick(SettingsView*, psy_ui_Component* sender,
+	MouseEvent*);
+static void settingsview_oneditchange(SettingsView*, psy_ui_Edit* sender);
+static void settingsview_oneditkeydown(SettingsView*, psy_ui_Component* sender,
+	KeyEvent*);
+static void settingsview_oninputdefinerchange(SettingsView* self,
+	InputDefiner* sender);
+static void settingsview_ondestroy(SettingsView*, psy_ui_Component* sender);
+static void settingsview_onsize(SettingsView*, psy_ui_Component* sender, ui_size*);
+static void settingsview_onscroll(SettingsView*, psy_ui_Component* sender,
+	int stepx, int stepy);
 static void settingsview_drawlinebackground(SettingsView*,psy_Properties*);
 static void settingsview_drawkey(SettingsView*, psy_Properties*, int column);
 static void settingsview_drawvalue(SettingsView*, psy_Properties*, int column);
-static void settingsview_drawstring(SettingsView*, psy_Properties*, int column);
-static void settingsview_drawinteger(SettingsView*, psy_Properties*, int column);
-static void settingsview_drawbutton(SettingsView*, psy_Properties*, int column);
-static void settingsview_drawcheckbox(SettingsView*, psy_Properties*, int column);
+static void settingsview_drawstring(SettingsView*, psy_Properties*,
+	int column);
+static void settingsview_drawinteger(SettingsView*, psy_Properties*,
+	int column);
+static void settingsview_drawbutton(SettingsView*, psy_Properties*,
+	int column);
+static void settingsview_drawcheckbox(SettingsView*, psy_Properties*,
+	int column);
 static void settingsview_advanceline(SettingsView*);
 static void settingsview_addremoveident(SettingsView*, int level);
 static void settingsview_addident(SettingsView*);
 static void settingsview_removeident(SettingsView*);
-static int settingsview_intersectsvalue(SettingsView*, psy_Properties* property,
+static int settingsview_intersectsvalue(SettingsView*, psy_Properties*,
 	int column);
 static void settingsview_appendtabbarsections(SettingsView*);
-static void settingsview_ontabbarchange(SettingsView*, ui_component* sender,
+static void settingsview_ontabbarchange(SettingsView*, psy_ui_Component* sender,
 	int tabindex);
 static void settingsview_adjustscroll(SettingsView*);
 
-void settingsview_init(SettingsView* self, ui_component* parent,
-	ui_component* tabbarparent, psy_Properties* properties)
+void settingsview_init(SettingsView* self, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, psy_Properties* properties)
 {
 	self->properties = properties;
 	ui_component_init(&self->component, parent);
@@ -50,17 +64,21 @@ void settingsview_init(SettingsView* self, ui_component* parent,
 	self->client.wheelscroll = 4;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	ui_component_showverticalscrollbar(&self->client);	
-	psy_signal_connect(&self->client.signal_destroy, self, settingsview_ondestroy);
+	psy_signal_connect(&self->client.signal_destroy, self,
+		settingsview_ondestroy);
 	psy_signal_connect(&self->client.signal_draw, self, settingsview_ondraw);
-	psy_signal_connect(&self->client.signal_scroll, self, settingsview_onscroll);
-	psy_signal_connect(&self->client.signal_keydown, self, settingsview_onkeydown);
+	psy_signal_connect(&self->client.signal_scroll, self,
+		settingsview_onscroll);
+	psy_signal_connect(&self->client.signal_keydown, self,
+		settingsview_onkeydown);
 	psy_signal_connect(&self->component.signal_keydown, self,
 		settingsview_onkeydown);
 	psy_signal_connect(&self->client.signal_mousedown, self,
 		settingsview_onmousedown);
 	psy_signal_connect(&self->client.signal_mousedoubleclick, self,
 		settingsview_onmousedoubleclick);
-	psy_signal_connect(&self->component.signal_size, self, settingsview_onsize);
+	psy_signal_connect(&self->component.signal_size, self,
+		settingsview_onsize);
 	self->selected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
@@ -93,12 +111,13 @@ void settingsview_appendtabbarsections(SettingsView* self)
 		settingsview_ontabbarchange);
 }
 
-void settingsview_ondestroy(SettingsView* self, ui_component* sender)
+void settingsview_ondestroy(SettingsView* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void settingsview_ondraw(SettingsView* self, ui_component* sender, ui_graphics* g)
+void settingsview_ondraw(SettingsView* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
 {	
 	self->g = g;
 	ui_setcolor(g, 0x00EAEAEA);
@@ -122,7 +141,8 @@ void settingsview_preparepropertiesenum(SettingsView* self)
 	self->lastlevel = 0;
 }
 
-int settingsview_onpropertiesdrawenum(SettingsView* self, psy_Properties* property, int level)
+int settingsview_onpropertiesdrawenum(SettingsView* self,
+	psy_Properties* property, int level)
 {			
 	settingsview_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 && psy_properties_type(property) ==
@@ -168,7 +188,8 @@ void settingsview_removeident(SettingsView* self)
 	self->cpx -= self->identwidth;
 }
 
-void settingsview_drawlinebackground(SettingsView* self, psy_Properties* property)
+void settingsview_drawlinebackground(SettingsView* self,
+	psy_Properties* property)
 {	
 	if (psy_properties_type(property) != PSY_PROPERTY_TYP_SECTION) {
 		ui_size size;
@@ -181,7 +202,8 @@ void settingsview_drawlinebackground(SettingsView* self, psy_Properties* propert
 	}
 }
 
-void settingsview_drawkey(SettingsView* self, psy_Properties* property, int column)
+void settingsview_drawkey(SettingsView* self, psy_Properties* property,
+	int column)
 {	
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
 		settingsview_drawbutton(self, property, column + 1);
@@ -270,7 +292,8 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
 		size = ui_component_textsize(&self->client, "...");
 	} else {
-		size = ui_component_textsize(&self->client, psy_properties_text(property));
+		size = ui_component_textsize(&self->client,
+			psy_properties_text(property));
 	}
 	r.left = self->columnwidth * column ;
 	r.top = self->cpy + self->dy ;
@@ -322,13 +345,13 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 	}	
 }
 
-void settingsview_onkeydown(SettingsView* self, ui_component* sender,
+void settingsview_onkeydown(SettingsView* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {	
 	ui_component_propagateevent(sender);
 }
 
-void settingsview_onmousedown(SettingsView* self, ui_component* sender,
+void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	ui_component_setfocus(&self->client);
@@ -353,7 +376,8 @@ void settingsview_onmousedown(SettingsView* self, ui_component* sender,
 			char path[MAX_PATH]	 = "";
 			char title[MAX_PATH];
 			
-			psy_snprintf(title, MAX_PATH, "%s", psy_properties_text(self->selected));
+			psy_snprintf(title, MAX_PATH, "%s",
+				psy_properties_text(self->selected));
 			title[MAX_PATH - 1] = '\0';
 			if (ui_browsefolder(&self->component, title, path)) {
 				psy_properties_write_string(self->selected->parent,
@@ -414,7 +438,8 @@ int settingsview_onenumpropertyposition(SettingsView* self,
 	psy_Properties* property, int level)
 {
 	settingsview_addremoveident(self, level);
-	if (self->cpy != 0 && level == 0 && psy_properties_type(property) ==  PSY_PROPERTY_TYP_SECTION) {
+	if (self->cpy != 0 && level == 0 &&
+			psy_properties_type(property) ==  PSY_PROPERTY_TYP_SECTION) {
 		settingsview_advanceline(self);
 	}
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_HIDE) {
@@ -463,7 +488,8 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 			self->cpy + self->dy, self->columnwidth, self->lineheight);
 		self->selrect = r;
 		rv = settingsview_intersects(&r, self->mx, self->my);
-		if (!rv && psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
+		if (!rv &&
+				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
 			ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
 				self->cpy + self->dy, self->columnwidth, self->lineheight);
 			self->selrect = r;
@@ -476,20 +502,22 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 	return rv;
 }
 
-void settingsview_onmousedoubleclick(SettingsView* self, ui_component* sender,
+void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	if (self->selected) {
-		ui_component* edit = 0;
+		psy_ui_Component* edit = 0;
 
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			if (psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_INPUT) {
+			if (psy_properties_hint(self->selected) ==
+					PSY_PROPERTY_HINT_INPUT) {
 				inputdefiner_setinput(&self->inputdefiner,
 					psy_properties_value(self->selected));
 				edit = &self->inputdefiner.component;				
 			} else {
 				char text[40];
-				psy_snprintf(text, 40, "%d", psy_properties_value(self->selected));
+				psy_snprintf(text, 40, "%d",
+					psy_properties_value(self->selected));
 				ui_edit_settext(&self->edit, text);
 				edit = &self->edit.component;				
 			}
@@ -504,7 +532,8 @@ void settingsview_onmousedoubleclick(SettingsView* self, ui_component* sender,
 				self->selrect.top,
 				self->selrect.right - self->selrect.left, 
 				self->selrect.bottom - self->selrect.top);
-			if (psy_properties_hint(self->selected) != PSY_PROPERTY_HINT_READONLY) {				
+			if (psy_properties_hint(self->selected) !=
+					PSY_PROPERTY_HINT_READONLY) {				
 				ui_component_show(edit);
 				ui_component_setfocus(edit);
 			}			
@@ -524,7 +553,7 @@ void settingsview_oninputdefinerchange(SettingsView* self,
 	}
 }
 
-void settingsview_oneditchange(SettingsView* self, ui_edit* sender)
+void settingsview_oneditchange(SettingsView* self, psy_ui_Edit* sender)
 {
 	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_STRING) {
@@ -539,7 +568,7 @@ void settingsview_oneditchange(SettingsView* self, ui_edit* sender)
 	}
 }
 
-void settingsview_oneditkeydown(SettingsView* self, ui_component* sender,
+void settingsview_oneditkeydown(SettingsView* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	if (keyevent->keycode == VK_RETURN) {
@@ -553,13 +582,13 @@ void settingsview_oneditkeydown(SettingsView* self, ui_component* sender,
 	}
 }
 
-void settingsview_onscroll(SettingsView* self, ui_component* sender, int stepx,
+void settingsview_onscroll(SettingsView* self, psy_ui_Component* sender, int stepx,
 	int stepy)
 {
 	self->dy += (stepy * sender->scrollstepy);
 }
 
-void settingsview_onsize(SettingsView* self, ui_component* sender,
+void settingsview_onsize(SettingsView* self, psy_ui_Component* sender,
 	ui_size* size)
 {	
 	ui_size tabbarsize;	
@@ -572,7 +601,7 @@ void settingsview_onsize(SettingsView* self, ui_component* sender,
 	settingsview_adjustscroll(self);
 }
 
-void settingsview_ontabbarchange(SettingsView* self, ui_component* sender,
+void settingsview_ontabbarchange(SettingsView* self, psy_ui_Component* sender,
 	int tabindex)
 {		
 	psy_Properties* p = 0;	
@@ -601,7 +630,8 @@ void settingsview_ontabbarchange(SettingsView* self, ui_component* sender,
 			settingsview_preparepropertiesenum(self);
 			psy_properties_enumerate(self->properties->children, self,
 				settingsview_onenumpropertyposition);
-			ui_component_verticalscrollrange(&self->client, &scrollmin, &scrollmax);
+			ui_component_verticalscrollrange(&self->client, &scrollmin,
+				&scrollmax);
 			scrollposition = self->cpy / self->lineheight;
 			if (scrollposition > scrollmax) {
 				scrollposition = scrollmax;

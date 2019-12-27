@@ -15,7 +15,7 @@ typedef enum {
 } ButtonIcon;
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	psy_Signal signal_clicked;
 	int ownerdrawn;
 	char* text; // ownerdrawn 
@@ -24,14 +24,14 @@ typedef struct {
 	ButtonIcon icon;
 	int charnumber;
 	UiAlignment textalignment;
-} ui_button;
+} psy_ui_Button;
 
-void ui_button_init(ui_button*, ui_component* parent);
-void ui_button_settext(ui_button*, const char* text);
-void ui_button_seticon(ui_button*, ButtonIcon);
-void ui_button_highlight(ui_button*);
-void ui_button_disablehighlight(ui_button*);
-void ui_button_setcharnumber(ui_button*, int number);
-void ui_button_settextalignment(ui_button*, UiAlignment);
+void ui_button_init(psy_ui_Button*, psy_ui_Component* parent);
+void ui_button_settext(psy_ui_Button*, const char* text);
+void ui_button_seticon(psy_ui_Button*, ButtonIcon);
+void ui_button_highlight(psy_ui_Button*);
+void ui_button_disablehighlight(psy_ui_Button*);
+void ui_button_setcharnumber(psy_ui_Button*, int number);
+void ui_button_settextalignment(psy_ui_Button*, UiAlignment);
 
 #endif

@@ -5,7 +5,7 @@
 
 #include "skingraphics.h"
 
-void skin_blitpart(ui_graphics* g, ui_bitmap* bitmap, int x, int y,
+void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y,
 	SkinCoord* coord)
 {
 	ui_drawbitmap(g, bitmap, x + coord->destx, y + coord->desty,

@@ -10,15 +10,15 @@
 #include <uilabel.h>
 
 typedef struct {
-	ui_component component;
-	ui_label header;
-	ui_button newbutton;
-	ui_button loadbutton;
-	ui_button savebutton;
-	ui_button renderbutton;
+	psy_ui_Component component;
+	psy_ui_Label header;
+	psy_ui_Button newbutton;
+	psy_ui_Button loadbutton;
+	psy_ui_Button savebutton;
+	psy_ui_Button renderbutton;
 	Workspace* workspace;	
 } FileBar;
 
-void filebar_init(FileBar*, ui_component* parent, Workspace*);
+void filebar_init(FileBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

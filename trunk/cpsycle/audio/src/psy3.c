@@ -388,7 +388,7 @@ void readpatd(psy_audio_SongFile* self)
 
 				psource = pdest;
 				pattern = pattern_allocinit();
-				patterns_insert(&self->song->patterns, index, pattern);				
+				patterns_insert(&self->song->patterns, index, pattern);
 				for(y = 0 ; y < patternlines[index]; ++y) {					
 					unsigned char* ptrack = psource;
 					int32_t track;			
@@ -939,7 +939,7 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 
 		strcpy(text, "X!");
 		strcat(text, editname);
-		machine->vtable->seteditname(machine, text);
+		machine_seteditname(machine, text);
 		psy_audio_songfile_warn(self, "replaced missing module ");
 		psy_audio_songfile_warn(self, modulename);
 		psy_audio_songfile_warn(self, " aka ");
@@ -947,7 +947,7 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 		psy_audio_songfile_warn(self, " with dummy-plug\n");
 
 	} else {
-		machine->vtable->seteditname(machine, editname);
+		machine_seteditname(machine, editname);
 	}
 	
 	machine->vtable->loadspecific(machine, self, index);

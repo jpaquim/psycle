@@ -14,7 +14,7 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	SettingsView view;
 	psy_Properties* properties;
 	Workspace* workspace;
@@ -23,7 +23,7 @@ typedef struct {
 	int restoreloopmode;
 } RenderView;
 
-void renderview_init(RenderView*, ui_component* parent,
-	ui_component* tabbarparent, Workspace*);
+void renderview_init(RenderView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace*);
 
 #endif

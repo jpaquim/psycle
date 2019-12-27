@@ -9,12 +9,12 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
-	ui_label header;
+	psy_ui_Component component;
+	psy_ui_Label header;
 	ui_combobox combobox;	
 	Workspace* workspace;
 } StepBox;
 
-void stepbox_init(StepBox*, ui_component* parent, Workspace*);
+void stepbox_init(StepBox*, psy_ui_Component* parent, Workspace*);
 
 #endif

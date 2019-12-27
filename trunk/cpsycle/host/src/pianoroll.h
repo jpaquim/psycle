@@ -24,7 +24,7 @@ typedef struct {
 } PianoMetrics;
 
 typedef struct {
-	ui_component component;           	
+	psy_ui_Component component;           	
 	psy_dsp_beat_t bpl;
 	int lpb;
 	struct Pianoroll* view;   
@@ -32,20 +32,20 @@ typedef struct {
 	PianoMetrics metrics;
 } PianoHeader;
 
-void pianoheader_init(PianoHeader*, ui_component* parent, struct Pianoroll*);
+void pianoheader_init(PianoHeader*, psy_ui_Component* parent, struct Pianoroll*);
 
 typedef struct {
-	ui_component component;	
+	psy_ui_Component component;	
 	int dy;
 	int textheight;		
 	struct TrackerView* view;
 	PianoMetrics metrics;
 } PianoKeyboard;
 
-void pianokeyboard_init(PianoKeyboard*, ui_component* parent);
+void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent);
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    int keyheight;   
    psy_dsp_beat_t bpl;
    int lpb;
@@ -55,12 +55,12 @@ typedef struct {
    PianoMetrics metrics;
 } Pianogrid;
 
-void pianogrid_init(Pianogrid*, ui_component* parent, struct Pianoroll*);
+void pianogrid_init(Pianogrid*, psy_ui_Component* parent, struct Pianoroll*);
 
 typedef struct Pianoroll {
-   ui_component component;
+   psy_ui_Component component;
    PianoHeader header;
-   ui_component keyboardheader;
+   psy_ui_Component keyboardheader;
    PianoKeyboard keyboard;
    Pianogrid grid;
    int cx;
@@ -73,7 +73,7 @@ typedef struct Pianoroll {
    Workspace* workspace;
 } Pianoroll;
 
-void pianoroll_init(Pianoroll*, ui_component* parent, Workspace* workspace);
+void pianoroll_init(Pianoroll*, psy_ui_Component* parent, Workspace* workspace);
 void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
 
 #endif

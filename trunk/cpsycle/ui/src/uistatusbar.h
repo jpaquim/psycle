@@ -7,11 +7,11 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;
-} ui_statusbar;
+   psy_ui_Component component;
+} psy_ui_Statusbar;
 
-void ui_statusbar_init(ui_statusbar*, ui_component* parent);
-void ui_statusbar_setfields(ui_statusbar*, int parts, int iStatusWidths[]);
-void ui_statusbar_settext(ui_statusbar*, int field, const char* text);
+void ui_statusbar_init(psy_ui_Statusbar*, psy_ui_Component* parent);
+void ui_statusbar_setfields(psy_ui_Statusbar*, int parts, int iStatusWidths[]);
+void ui_statusbar_settext(psy_ui_Statusbar*, int field, const char* text);
 
 #endif

@@ -6,28 +6,28 @@
 #include "machinebar.h"
 #include <portable.h>
 
-static void OnDestroy(MachineBar*, ui_component* component);
+static void OnDestroy(MachineBar*, psy_ui_Component* component);
 static void BuildMachineBox(MachineBar*);
 static void OnMachinesInsert(MachineBar*, psy_audio_Machines* machines, int slot);
 static int insertmachine(MachineBar*, size_t slot, psy_audio_Machine*);
 static void OnMachinesRemoved(MachineBar*, psy_audio_Machines* machines, int slot);
 static void OnMachinesSlotChange(MachineBar*, psy_audio_Machines* machines, int slot);
-static void OnMachineBoxSelChange(MachineBar*, ui_component* sender, int sel);
-static void OnInstParamBoxSelChange(MachineBar*, ui_component* sender, int sel);
+static void OnMachineBoxSelChange(MachineBar*, psy_ui_Component* sender, int sel);
+static void OnInstParamBoxSelChange(MachineBar*, psy_ui_Component* sender, int sel);
 static void BuildInstrumentList(MachineBar*);
 static void AddString(MachineBar*, const char* text);
-static void OnInstrumentNameChanged(MachineBar*, ui_component* sender);
+static void OnInstrumentNameChanged(MachineBar*, psy_ui_Component* sender);
 static void OnInstrumentInsert(MachineBar*, psy_audio_Instruments* sender, int slot);
 static void OnInstrumentSlotChanged(MachineBar* self, psy_audio_Instrument* sender, int slot);
-static void OnInstrumentListChanged(MachineBar* self, ui_component* sender, int slot);
+static void OnInstrumentListChanged(MachineBar* self, psy_ui_Component* sender, int slot);
 static void OnSongChanged(MachineBar*, Workspace*);
 static void ConnectSongSignals(MachineBar*);
 static void ConnectInstrumentSignals(MachineBar*);
 static void ClearMachineBox(MachineBar* self);
-static void OnPrevMachine(MachineBar*, ui_component* sender);
-static void OnNextMachine(MachineBar*, ui_component* sender);
+static void OnPrevMachine(MachineBar*, psy_ui_Component* sender);
+static void OnNextMachine(MachineBar*, psy_ui_Component* sender);
 
-void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace)
+void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	ui_margin margin;
 
@@ -79,7 +79,7 @@ void InitMachineBar(MachineBar* self, ui_component* parent, Workspace* workspace
 		UI_ALIGN_LEFT, &margin));
 }
 
-void OnDestroy(MachineBar* self, ui_component* component)
+void OnDestroy(MachineBar* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);
@@ -92,11 +92,6 @@ void ClearMachineBox(MachineBar* self)
 	psy_table_init(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);
 	psy_table_init(&self->slotscombobox);
-}
-
-void SelectMachineBarSlot(MachineBar* self, int slot)
-{
-	ui_combobox_setcursel(&self->machinebox, slot);
 }
 
 void OnInstrumentInsert(MachineBar* self, psy_audio_Instruments* sender,
@@ -165,7 +160,7 @@ int insertmachine(MachineBar* self, size_t slot, psy_audio_Machine* machine)
 	return 1;
 }
 
-void OnMachineBoxSelChange(MachineBar* self, ui_component* sender, int sel)
+void OnMachineBoxSelChange(MachineBar* self, psy_ui_Component* sender, int sel)
 {	
 	size_t slot;
 	
@@ -206,7 +201,7 @@ void AddString(MachineBar* self, const char* text)
 	ui_combobox_addstring(&self->instparambox, text);
 }
 
-void OnInstParamBoxSelChange(MachineBar* self, ui_component* sender, int sel)
+void OnInstParamBoxSelChange(MachineBar* self, psy_ui_Component* sender, int sel)
 {
 	psy_signal_prevent(&self->instruments->signal_slotchange, self,
 		OnInstrumentSlotChanged);
@@ -256,21 +251,21 @@ void ConnectInstrumentSignals(MachineBar* self)
 	}
 }
 
-void OnNextMachine(MachineBar* self, ui_component* sender)
+void OnNextMachine(MachineBar* self, psy_ui_Component* sender)
 {
 	if (self->machines && machines_slot(self->machines) > 0) {
 		machines_changeslot(self->machines, machines_slot(self->machines) - 1);
 	}
 }
 
-void OnPrevMachine(MachineBar* self, ui_component* sender)
+void OnPrevMachine(MachineBar* self, psy_ui_Component* sender)
 {
 	if (self->machines) {
 		machines_changeslot(self->machines, machines_slot(self->machines) + 1);
 	}
 }
 
-void OnInstrumentNameChanged(MachineBar* self, ui_component* sender)
+void OnInstrumentNameChanged(MachineBar* self, psy_ui_Component* sender)
 {
 	if (self->instruments) {
 		BuildInstrumentList(self);

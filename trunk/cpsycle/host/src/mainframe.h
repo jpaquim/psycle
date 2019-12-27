@@ -38,14 +38,14 @@
 #include "stepbox.h"
 
 typedef struct {
-	ui_component component;
-	ui_component top;	
-	ui_component toprow0;
-	ui_component toprow1;
-	ui_component toprow2;
-	ui_component tabbars;
-	ui_component client;
-	ui_terminal terminal;
+	psy_ui_Component component;
+	psy_ui_Component top;	
+	psy_ui_Component toprow0;
+	psy_ui_Component toprow1;
+	psy_ui_Component toprow2;
+	psy_ui_Component tabbars;
+	psy_ui_Component client;
+	psy_ui_Terminal terminal;
 	ui_splitbar splitbar;	
 	ui_progressbar progressbar;
 	Navigation navigation;
@@ -70,12 +70,12 @@ typedef struct {
 	Gear gear;
 	PluginEditor plugineditor;
 	VuBar vubar;
-	ui_component statusbar;
+	psy_ui_Component statusbar;
 	ui_notebook viewbars;
-	ui_component* activeview;	
+	psy_ui_Component* activeview;	
 	Workspace workspace;
-	ui_label label;	
-	ui_label statusbarlabel;
+	psy_ui_Label label;	
+	psy_ui_Label statusbarlabel;
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 } MainFrame;

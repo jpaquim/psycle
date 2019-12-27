@@ -6,34 +6,24 @@
 
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
+#include "uidefaults.h"
 
 #include <hashtbl.h>
 #include <signal.h>
 
 typedef struct {
 	psy_Signal signal_dispose;
-	struct ui_component* main;
-} ui_app;
+	struct psy_ui_Component* main;
+	void* platform;
+	psy_ui_Defaults defaults;
+} psy_ui_App;
 
-void ui_app_init(ui_app*);
-void ui_app_dispose(ui_app*);
-struct ui_component* ui_app_main(ui_app*);
+extern psy_ui_App app;
 
-extern ui_app app;
-
-#if defined (DIVERSALIS__OS__MICROSOFT)
-
-#define WIN32_LEAN_AND_MEAN
-#define UIMAIN int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
-#define UIINIT ui_init((uintptr_t) hInstance)
-void ui_init(uintptr_t hInstance);
-#else
-#define UIMAIN int main(int argc, char **argv)
-#define UIINIT ui_init()
-void ui_init(void);
-#endif
-void ui_dispose();
-int ui_run(void);
-void ui_quit(void);
+void psy_ui_app_init(psy_ui_App*, uintptr_t instance);
+void psy_ui_app_dispose(psy_ui_App*);
+struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);
+int psy_ui_app_run(psy_ui_App*);
+void psy_ui_app_stop(psy_ui_App*);
 
 #endif

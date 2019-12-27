@@ -23,17 +23,17 @@ const COLORREF CLRIGHT = 0x60C060;
 const COLORREF CLBOTH = 0xC0C060;
 
 static void vuscope_ondestroy(VuScope*);
-static void vuscope_ondraw(VuScope*, ui_component* sender, ui_graphics*);
-static void vuscope_drawscale(VuScope*, ui_graphics*);
-static void vuscope_drawbars(VuScope*, ui_graphics*);
-static void vuscope_ontimer(VuScope*, ui_component* sender, int timerid);
+static void vuscope_ondraw(VuScope*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void vuscope_drawscale(VuScope*, psy_ui_Graphics*);
+static void vuscope_drawbars(VuScope*, psy_ui_Graphics*);
+static void vuscope_ontimer(VuScope*, psy_ui_Component* sender, int timerid);
 static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
 static void vuscope_onsongchanged(VuScope*, Workspace*);
 static void vuscope_connectmachinessignals(VuScope*, Workspace*);
 static void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 
-void vuscope_init(VuScope* self, ui_component* parent, psy_audio_Wire wire,
+void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	ui_component_init(&self->component, parent);
@@ -70,13 +70,13 @@ void vuscope_ondestroy(VuScope* self)
 	self->pSamplesR = 0;
 }
 
-void vuscope_ondraw(VuScope* self, ui_component* sender, ui_graphics* g)
+void vuscope_ondraw(VuScope* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {		
 	vuscope_drawscale(self, g);	
 	vuscope_drawbars(self, g);
 }
 
-void vuscope_drawscale(VuScope* self, ui_graphics* g)
+void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 {	
 	char buf[128];	
 	int centerx;
@@ -141,7 +141,7 @@ void vuscope_drawscale(VuScope* self, ui_graphics* g)
 	ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
 }
 
-void vuscope_drawbars(VuScope* self, ui_graphics* g)
+void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 {
 	float maxL, maxR;
 	int rmsL, rmsR;
@@ -294,7 +294,7 @@ void vuscope_drawbars(VuScope* self, ui_graphics* g)
 	// bufDC.SelectObject(oldFont);
 }
 
-void vuscope_ontimer(VuScope* self, ui_component* sender, int timerid)
+void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, int timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		ui_component_invalidate(&self->component);

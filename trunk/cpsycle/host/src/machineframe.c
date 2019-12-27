@@ -9,11 +9,11 @@
 #include <portable.h>
 #include <presetio.h>
 
-static void machineframe_ondestroy(MachineFrame* self, ui_component* frame);
-static void machineframe_onpresetchange(MachineFrame*, ui_component* sender, int index);
+static void machineframe_ondestroy(MachineFrame* self, psy_ui_Component* frame);
+static void machineframe_onpresetchange(MachineFrame*, psy_ui_Component* sender, int index);
 static void parameterbar_setpresetlist(ParameterBar*, psy_audio_Presets*);
 
-void parameterbar_init(ParameterBar* self, ui_component* parent)
+void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 {				
 	self->presets = 0;
 	ui_component_init(&self->component, parent);
@@ -45,7 +45,7 @@ void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
 	}
 }
 
-void machineframe_init(MachineFrame* self, ui_component* parent)
+void machineframe_init(MachineFrame* self, psy_ui_Component* parent)
 {		
 	self->view = 0;
 	self->presets = 0;
@@ -66,7 +66,7 @@ void machineframe_init(MachineFrame* self, ui_component* parent)
 		self, machineframe_onpresetchange);
 }
 
-void machineframe_setview(MachineFrame* self, ui_component* view,
+void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	psy_audio_Machine* machine)
 {
 	const psy_audio_MachineInfo* info;
@@ -77,7 +77,7 @@ void machineframe_setview(MachineFrame* self, ui_component* view,
 	ui_size viewsize;
 	char text[128];
 
-	self->view = (ui_component*) view;
+	self->view = (psy_ui_Component*) view;
 	ui_component_setalign(self->view, UI_ALIGN_CLIENT);
 	self->machine = machine;
 	parameterlistbox_setmachine(&self->parameterbox, machine);
@@ -108,7 +108,7 @@ void machineframe_setview(MachineFrame* self, ui_component* view,
 	ui_component_align(&self->component);
 }
 
-void machineframe_ondestroy(MachineFrame* self, ui_component* frame)
+void machineframe_ondestroy(MachineFrame* self, psy_ui_Component* frame)
 {
 	self->component.hwnd = 0;
 	if (self->presets) {
@@ -117,7 +117,7 @@ void machineframe_ondestroy(MachineFrame* self, ui_component* frame)
 	}
 }
 
-void machineframe_onpresetchange(MachineFrame* self, ui_component* sender, int index)
+void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, int index)
 {
 	if (self->presets && self->machine) {
 		psy_List* p;
@@ -150,7 +150,7 @@ MachineFrame* machineframe_alloc(void)
 	return (MachineFrame*) malloc(sizeof(MachineFrame));
 }
 
-MachineFrame* machineframe_allocinit(ui_component* parent)
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent)
 {
 	MachineFrame* rv;
 

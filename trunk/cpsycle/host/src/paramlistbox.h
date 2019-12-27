@@ -9,13 +9,13 @@
 #include <machine.h>
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ui_listbox listbox;
 	ui_slider slider;
 	psy_audio_Machine* machine;
 } ParameterListBox;
 
-void parameterlistbox_init(ParameterListBox*, ui_component* parent, psy_audio_Machine*);
+void parameterlistbox_init(ParameterListBox*, psy_ui_Component* parent, psy_audio_Machine*);
 void parameterlistbox_setmachine(ParameterListBox*, psy_audio_Machine*);
 int parameterlistbox_selected(ParameterListBox*);
 

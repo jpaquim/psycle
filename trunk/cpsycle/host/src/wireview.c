@@ -12,19 +12,19 @@ static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);
 static void wireview_inittabbar(WireView* self);
 static void wireview_initbottomgroup(WireView*);
-static void wireview_ondraw(WireView*, ui_component* sender, ui_graphics*);
+static void wireview_ondraw(WireView*, psy_ui_Component* sender, psy_ui_Graphics*);
 static void wireview_onsongchanged(WireView*, Workspace*);
 static void wireview_connectmachinessignals(WireView*, Workspace*);
 static void wireview_ondescribevolume(WireView*, ui_slider*, char* txt);
 static void wireview_ontweakvolume(WireView*, ui_slider*, float value);
 static void wireview_onvaluevolume(WireView*, ui_slider*, float* value);
-static void wireview_ondeleteconnection(WireView*, ui_component* sender);
+static void wireview_ondeleteconnection(WireView*, psy_ui_Component* sender);
 static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 
-static void wireframe_ondestroy(WireFrame*, ui_component* frame);
-static void wireframe_onsize(WireFrame*, ui_component* sender, ui_size* size);
+static void wireframe_ondestroy(WireFrame*, psy_ui_Component* frame);
+static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, ui_size* size);
 
-void wireview_init(WireView* self, ui_component* parent, psy_audio_Wire wire,
+void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	self->wire = wire;	
@@ -146,7 +146,7 @@ void wireview_onvaluevolume(WireView* self, ui_slider* slider, float* value)
 	}
 }
 
-void wireview_ondeleteconnection(WireView* self, ui_component* sender)
+void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 {
 	if (self->workspace && self->workspace->song) {		
 		machines_disconnect(&self->workspace->song->machines, self->wire.src,
@@ -177,7 +177,7 @@ void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
 	}
 }
 
-void wireframe_init(WireFrame* self, ui_component* parent, WireView* view)
+void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
 {
 	self->wireview = view;
 	ui_frame_init(&self->component, parent);
@@ -188,12 +188,12 @@ void wireframe_init(WireFrame* self, ui_component* parent, WireView* view)
 	psy_signal_connect(&self->component.signal_size, self, wireframe_onsize);
 }
 
-void wireframe_ondestroy(WireFrame* self, ui_component* frame)
+void wireframe_ondestroy(WireFrame* self, psy_ui_Component* frame)
 {	
 	self->component.hwnd = 0;
 }
 
-void wireframe_onsize(WireFrame* self, ui_component* sender, ui_size* size)
+void wireframe_onsize(WireFrame* self, psy_ui_Component* sender, ui_size* size)
 {
 	if (self->wireview) {
 		ui_component_resize(&self->wireview->component, size->width, size->height);
