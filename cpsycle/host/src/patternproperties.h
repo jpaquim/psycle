@@ -11,18 +11,18 @@
 #include "pattern.h"
 
 typedef struct {
-	ui_component component;
-	ui_label namelabel;
-	ui_label lengthlabel;
-	ui_edit nameedit;
-	ui_edit lengthedit;
-	ui_button applybutton;
-	ui_button closebutton;
+	psy_ui_Component component;
+	psy_ui_Label namelabel;
+	psy_ui_Label lengthlabel;
+	psy_ui_Edit nameedit;
+	psy_ui_Edit lengthedit;
+	psy_ui_Button applybutton;
+	psy_ui_Button closebutton;
 	psy_audio_Pattern* pattern;
 } PatternProperties;
 
 
-void InitPatternProperties(PatternProperties*, ui_component* parent, psy_audio_Pattern*);
+void InitPatternProperties(PatternProperties*, psy_ui_Component* parent, psy_audio_Pattern*);
 void PatternPropertiesSetPattern(PatternProperties*, psy_audio_Pattern*);
 
 #endif

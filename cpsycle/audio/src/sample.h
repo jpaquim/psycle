@@ -49,7 +49,7 @@ void vibrato_init(Vibrato*);
 typedef struct {
 	struct psy_audio_Sample* sample;
 	Double pos;
-	Double speed;
+	int64_t speed;	
 	int forward;	
 } SampleIterator;
 

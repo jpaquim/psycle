@@ -14,27 +14,27 @@
 #include <machine.h>
 
 typedef struct {
-	ui_component component;
-	ui_button mute;
+	psy_ui_Component component;
+	psy_ui_Button mute;
 	ui_combobox presetsbox;
 	psy_audio_Presets* presets;
 } ParameterBar;
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ParameterBar parameterbar;
 	ParameterListBox parameterbox;
-	ui_component* view;
+	psy_ui_Component* view;
 	psy_audio_Presets* presets;
 	psy_audio_Machine* machine;
 } MachineFrame;
 
-void parameterbar_init(ParameterBar*, ui_component* parent);
+void parameterbar_init(ParameterBar*, psy_ui_Component* parent);
 
-void machineframe_init(MachineFrame*, ui_component* parent);
+void machineframe_init(MachineFrame*, psy_ui_Component* parent);
 MachineFrame* machineframe_alloc(void);
-MachineFrame* machineframe_allocinit(ui_component* parent);
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent);
 
-void machineframe_setview(MachineFrame* self, ui_component* view, psy_audio_Machine*);
+void machineframe_setview(MachineFrame* self, psy_ui_Component* view, psy_audio_Machine*);
 
 #endif

@@ -6,13 +6,13 @@
 
 #define TIMERID_TIMERBAR 500
 
-static void timerbar_onlesslessclicked(TimeBar* self, ui_component* sender);
-static void timerbar_onlessclicked(TimeBar* self, ui_component* sender);
-static void timerbar_onmoreclicked(TimeBar* self, ui_component* sender);
-static void timerbar_onmoremoreclicked(TimeBar* self, ui_component* sender);
-static void timerbar_ontimer(TimeBar* self, ui_component* sender, int timerid);
+static void timerbar_onlesslessclicked(TimeBar* self, psy_ui_Component* sender);
+static void timerbar_onlessclicked(TimeBar* self, psy_ui_Component* sender);
+static void timerbar_onmoreclicked(TimeBar* self, psy_ui_Component* sender);
+static void timerbar_onmoremoreclicked(TimeBar* self, psy_ui_Component* sender);
+static void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timerid);
 
-void timerbar_init(TimeBar* self, ui_component* parent, psy_audio_Player* player)
+void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* player)
 {				
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
@@ -54,27 +54,27 @@ void timerbar_init(TimeBar* self, ui_component* parent, psy_audio_Player* player
 		timerbar_ontimer);
 }
 
-void timerbar_onlesslessclicked(TimeBar* self, ui_component* sender)
+void timerbar_onlesslessclicked(TimeBar* self, psy_ui_Component* sender)
 {		
 	player_setbpm(self->player, player_bpm(self->player) - 10);
 }
 
-void timerbar_onlessclicked(TimeBar* self, ui_component* sender)
+void timerbar_onlessclicked(TimeBar* self, psy_ui_Component* sender)
 {		
 	player_setbpm(self->player, player_bpm(self->player) - 1);
 }
 
-void timerbar_onmoreclicked(TimeBar* self, ui_component* sender)
+void timerbar_onmoreclicked(TimeBar* self, psy_ui_Component* sender)
 {		
 	player_setbpm(self->player, player_bpm(self->player) + 1);
 }
 
-void timerbar_onmoremoreclicked(TimeBar* self, ui_component* sender)
+void timerbar_onmoremoreclicked(TimeBar* self, psy_ui_Component* sender)
 {	
 	player_setbpm(self->player, player_bpm(self->player) + 10);
 }
 
-void timerbar_ontimer(TimeBar* self, ui_component* sender, int timerid)
+void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timerid)
 {		
 	if (self->bpm != player_bpm(self->player)) {
 		char txt[20];

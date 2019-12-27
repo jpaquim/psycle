@@ -8,13 +8,13 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
-	ui_button prev;
-	ui_button next;
+	psy_ui_Component component;
+	psy_ui_Button prev;
+	psy_ui_Button next;
 	Workspace* workspace;
 } Navigation;
 
-void navigation_init(Navigation*, ui_component* parent, Workspace*);
+void navigation_init(Navigation*, psy_ui_Component* parent, Workspace*);
 
 
 #endif

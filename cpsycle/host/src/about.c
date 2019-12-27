@@ -9,15 +9,15 @@
 #include <stdio.h>
 #include "resources/resource.h"
 
-static void about_onsize(About*, ui_component* sender, ui_size*);
+static void about_onsize(About*, psy_ui_Component* sender, ui_size*);
 static void about_initbuttons(About* self);
-static void about_oncontributors(About*, ui_component* sender);
-static void about_onversion(About*, ui_component* sender);
-static void about_onshowatstartup(About*, ui_component* sender);
-static void about_align(About*, ui_component* sender);
-static void about_onmousedoubleclick(About*, ui_component* sender, MouseEvent*);
+static void about_oncontributors(About*, psy_ui_Component* sender);
+static void about_onversion(About*, psy_ui_Component* sender);
+static void about_onshowatstartup(About*, psy_ui_Component* sender);
+static void about_align(About*, psy_ui_Component* sender);
+static void about_onmousedoubleclick(About*, psy_ui_Component* sender, MouseEvent*);
 	
-void contrib_init(Contrib* self, ui_component* parent)
+void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
@@ -84,7 +84,7 @@ void contrib_init(Contrib* self, ui_component* parent)
 	}
 }
 
-void version_init(Version* self, ui_component* parent)
+void version_init(Version* self, psy_ui_Component* parent)
 {
 	ui_component_init(&self->component, parent);	
 	ui_label_init(&self->versioninfo, &self->component);
@@ -94,7 +94,7 @@ void version_init(Version* self, ui_component* parent)
 	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
 
-void about_init(About* self, ui_component* parent)
+void about_init(About* self, psy_ui_Component* parent)
 {			
 	ui_component_init(&self->component, parent);	
 	psy_signal_connect(&self->component.signal_size, self, about_onsize);
@@ -124,7 +124,7 @@ void about_initbuttons(About* self)
 	ui_button_settext(&self->okbutton, "OK");	
 }
 
-void about_align(About* self, ui_component* sender)
+void about_align(About* self, psy_ui_Component* sender)
 {
 	ui_size size;
 	int centerx;
@@ -146,26 +146,26 @@ void about_align(About* self, ui_component* sender)
 		centerx + 445, centery + 365, 60, 20);
 }
 
-void about_onsize(About* self, ui_component* sender, ui_size* size)
+void about_onsize(About* self, psy_ui_Component* sender, ui_size* size)
 {	
 	about_align(self, &self->component);
 }
 
-void about_oncontributors(About* self, ui_component* sender) 
+void about_oncontributors(About* self, psy_ui_Component* sender) 
 {	
 	ui_notebook_setpageindex(&self->notebook, 
 		ui_notebook_pageindex(&self->notebook) != 1 ? 1 : 0);
 	ui_component_invalidate(&self->component);
 }
 
-void about_onversion(About* self, ui_component* sender) 
+void about_onversion(About* self, psy_ui_Component* sender) 
 {	
 	ui_notebook_setpageindex(&self->notebook, 
 		ui_notebook_pageindex(&self->notebook) != 2 ? 2 : 0);
 	ui_component_invalidate(&self->component);
 }
 
-void about_onmousedoubleclick(About* self, ui_component* sender,
+void about_onmousedoubleclick(About* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	psy_signal_emit(&self->okbutton.signal_clicked, self, 0);

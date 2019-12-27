@@ -7,10 +7,10 @@
 #include "uicomponent.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	psy_Signal signal_clicked;
-} ui_switch;
+} psy_ui_Switch;
 
-void ui_switch_init(ui_switch*, ui_component* parent);
+void ui_switch_init(psy_ui_Switch*, psy_ui_Component* parent);
 
 #endif

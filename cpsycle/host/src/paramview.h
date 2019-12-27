@@ -11,7 +11,7 @@
 #include <plugin_interface.h>
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    int cx;
    int cy;
    psy_audio_Machine* machine;   
@@ -25,10 +25,10 @@ typedef struct {
    Workspace* workspace;
 } ParamView;
 
-void paramview_init(ParamView*, ui_component* parent, psy_audio_Machine*,
+void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,
 	Workspace*);
 ParamView* paramview_alloc(void);
-ParamView* paramview_allocinit(ui_component* parent, psy_audio_Machine*,
+ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
 	Workspace*);
 
 

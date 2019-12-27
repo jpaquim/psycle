@@ -7,10 +7,10 @@
 #include "uicomponent.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	int resize;
 } ui_splitbar;
 
-void ui_splitbar_init(ui_splitbar*, ui_component* parent);
+void ui_splitbar_init(ui_splitbar*, psy_ui_Component* parent);
 
 #endif

@@ -6,13 +6,13 @@
 #include "uicheckbox.h"
 #include <string.h>
 
-static void oncommand(ui_checkbox*, ui_component*, WPARAM wParam,
+static void oncommand(ui_checkbox*, psy_ui_Component*, WPARAM wParam,
 	LPARAM lParam);
-static void ondestroy(ui_checkbox*, ui_component*);
-static void onpreferredsize(ui_checkbox*, ui_component* sender, ui_size* limit,
+static void ondestroy(ui_checkbox*, psy_ui_Component*);
+static void onpreferredsize(ui_checkbox*, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv);
 
-void ui_checkbox_init(ui_checkbox* self, ui_component* parent)
+void ui_checkbox_init(ui_checkbox* self, psy_ui_Component* parent)
 {  	
 	psy_signal_init(&self->signal_clicked);
 	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
@@ -26,7 +26,7 @@ void ui_checkbox_init(ui_checkbox* self, ui_component* parent)
 		onpreferredsize);
 }
 
-void ondestroy(ui_checkbox* self, ui_component* sender)
+void ondestroy(ui_checkbox* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_clicked);
 }
@@ -54,7 +54,7 @@ void ui_checkbox_disablecheck(ui_checkbox* self)
 	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
 }
 
-void oncommand(ui_checkbox* self, ui_component* sender, WPARAM wParam,
+void oncommand(ui_checkbox* self, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam)
 {
 	switch(HIWORD(wParam))
@@ -71,7 +71,7 @@ void oncommand(ui_checkbox* self, ui_component* sender, WPARAM wParam,
     }
 }
 
-void onpreferredsize(ui_checkbox* self, ui_component* sender, ui_size* limit,
+void onpreferredsize(ui_checkbox* self, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv)
 {	
 	if (rv) {

@@ -43,6 +43,8 @@ typedef struct {
 	int y;
 } ui_point;
 
+ui_point ui_point_make(int x, int y);
+
 typedef struct {
 	int left;
 	int top;

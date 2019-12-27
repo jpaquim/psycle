@@ -10,16 +10,16 @@
 static void samplesbox_ondestroy(SamplesBox*);
 static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot);
-static void samplesbox_oninstrumentinsert(SamplesBox*, ui_component* sender, int slot);
-static void samplesbox_oninstrumentremoved(SamplesBox*, ui_component* sender, int slot);
-static void samplesbox_onsampleinsert(SamplesBox*, ui_component* sender, SampleIndex* index);
-static void samplesbox_onsampleremoved(SamplesBox*, ui_component* sender, SampleIndex* index);
-static void samplesbox_onsamplelistchanged(SamplesBox*, ui_component* sender,
+static void samplesbox_oninstrumentinsert(SamplesBox*, psy_ui_Component* sender, int slot);
+static void samplesbox_oninstrumentremoved(SamplesBox*, psy_ui_Component* sender, int slot);
+static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender, SampleIndex* index);
+static void samplesbox_onsampleremoved(SamplesBox*, psy_ui_Component* sender, SampleIndex* index);
+static void samplesbox_onsamplelistchanged(SamplesBox*, psy_ui_Component* sender,
 	int slot);
-static void samplesbox_onsubsamplelistchanged(SamplesBox*, ui_component* sender,
+static void samplesbox_onsubsamplelistchanged(SamplesBox*, psy_ui_Component* sender,
 	int slot);
 
-void samplesbox_init(SamplesBox* self, ui_component* parent,
+void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_audio_Samples* samples, psy_audio_Instruments* instruments)
 {	
 	ui_margin margin;
@@ -101,7 +101,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot)
 	}	
 }
 
-void samplesbox_onsamplelistchanged(SamplesBox* self, ui_component* sender,
+void samplesbox_onsamplelistchanged(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
 	samplesbox_buildsubsamplelist(self, slot);
@@ -112,13 +112,13 @@ void samplesbox_onsamplelistchanged(SamplesBox* self, ui_component* sender,
 	psy_signal_emit(&self->signal_changed, self, 0);
 }
 
-void samplesbox_onsubsamplelistchanged(SamplesBox* self, ui_component* sender,
+void samplesbox_onsubsamplelistchanged(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {	
 	psy_signal_emit(&self->signal_changed, self, 0);	
 }
 
-void samplesbox_oninstrumentinsert(SamplesBox* self, ui_component* sender,
+void samplesbox_oninstrumentinsert(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
 	samplesbox_buildsamplelist(self);
@@ -126,7 +126,7 @@ void samplesbox_oninstrumentinsert(SamplesBox* self, ui_component* sender,
 	ui_listbox_setcursel(&self->samplelist, slot);
 }
 
-void samplesbox_onsampleinsert(SamplesBox* self, ui_component* sender,
+void samplesbox_onsampleinsert(SamplesBox* self, psy_ui_Component* sender,
 	SampleIndex* index)
 {
 	if (self->component.debugflag == 200) {
@@ -136,7 +136,7 @@ void samplesbox_onsampleinsert(SamplesBox* self, ui_component* sender,
 	samplesbox_buildsubsamplelist(self, index->subslot);
 }
 
-void samplesbox_onsampleremoved(SamplesBox* self, ui_component* sender,
+void samplesbox_onsampleremoved(SamplesBox* self, psy_ui_Component* sender,
 	SampleIndex* index)
 {
 	if (self->component.debugflag == 200) {
@@ -146,7 +146,7 @@ void samplesbox_onsampleremoved(SamplesBox* self, ui_component* sender,
 	samplesbox_buildsubsamplelist(self, index->subslot);
 }
 
-void samplesbox_oninstrumentremoved(SamplesBox* self, ui_component* sender,
+void samplesbox_oninstrumentremoved(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
 	samplesbox_buildsamplelist(self);

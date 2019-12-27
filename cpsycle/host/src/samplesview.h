@@ -18,23 +18,23 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	struct SamplesView* view;
 	psy_audio_Sample* sample;
 	psy_audio_Instruments* instruments;	
-	ui_label namelabel;
-	ui_edit nameedit;
-	ui_button prevbutton;
-	ui_button nextbutton;
-	ui_label srlabel;
-	ui_edit sredit;
-	ui_label numsamplesheaderlabel;
-	ui_label numsampleslabel;
-	ui_label channellabel;
+	psy_ui_Label namelabel;
+	psy_ui_Edit nameedit;
+	psy_ui_Button prevbutton;
+	psy_ui_Button nextbutton;
+	psy_ui_Label srlabel;
+	psy_ui_Edit sredit;
+	psy_ui_Label numsamplesheaderlabel;
+	psy_ui_Label numsampleslabel;
+	psy_ui_Label channellabel;
 } SamplesHeaderView;
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	psy_audio_Sample* sample;
 	psy_dsp_NotesTabMode notestabmode;
 	ui_slider defaultvolume;
@@ -45,9 +45,9 @@ typedef struct {
 } SamplesGeneralView;
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	psy_audio_Sample* sample;	
-	ui_label waveformheaderlabel;
+	psy_ui_Label waveformheaderlabel;
 	ui_combobox waveformbox;
 	ui_slider attack;
 	ui_slider speed;
@@ -56,44 +56,44 @@ typedef struct {
 } SamplesVibratoView;
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	struct SamplesView* view;
 	psy_audio_Sample* sample;	
-	ui_component cont;
-	ui_label loopheaderlabel;
+	psy_ui_Component cont;
+	psy_ui_Label loopheaderlabel;
 	ui_combobox loopdir;
-	ui_label loopstartlabel;
-	ui_edit loopstartedit;
-	ui_label loopendlabel;
-	ui_edit loopendedit;
-	ui_component sustain;
-	ui_label sustainloopheaderlabel;
+	psy_ui_Label loopstartlabel;
+	psy_ui_Edit loopstartedit;
+	psy_ui_Label loopendlabel;
+	psy_ui_Edit loopendedit;
+	psy_ui_Component sustain;
+	psy_ui_Label sustainloopheaderlabel;
 	ui_combobox sustainloopdir;
-	ui_label sustainloopstartlabel;
-	ui_edit sustainloopstartedit;
-	ui_label sustainloopendlabel;
-	ui_edit sustainloopendedit;		
+	psy_ui_Label sustainloopstartlabel;
+	psy_ui_Edit sustainloopstartedit;
+	psy_ui_Label sustainloopendlabel;
+	psy_ui_Edit sustainloopendedit;		
 } SamplesLoopView;
 
 typedef struct {
-	ui_component component;
-	ui_button load;
-	ui_button save;
-	ui_button duplicate;
-	ui_button del;
+	psy_ui_Component component;
+	psy_ui_Button load;
+	psy_ui_Button save;
+	psy_ui_Button duplicate;
+	psy_ui_Button del;
 } SamplesViewButtons;
 
-void samplesviewbuttons_init(SamplesViewButtons*, ui_component* parent);
+void samplesviewbuttons_init(SamplesViewButtons*, psy_ui_Component* parent);
 
 typedef struct {
-	ui_component component;
-	ui_component header;
-	ui_label label;
-	ui_label songname;
-	ui_button browse;
+	psy_ui_Component component;
+	psy_ui_Component header;
+	psy_ui_Label label;
+	psy_ui_Label songname;
+	psy_ui_Button browse;
 	SamplesBox samplesbox;
-	ui_component bar;
-	ui_button add;
+	psy_ui_Component bar;
+	psy_ui_Button add;
 	WaveBox samplebox;
 	psy_audio_Song* source;
 	struct SamplesView* view;
@@ -101,29 +101,29 @@ typedef struct {
 } SamplesSongImportView;
 
 typedef struct SamplesView {
-	ui_component component;	
+	psy_ui_Component component;	
 	TabBar clienttabbar;
 	ui_notebook clientnotebook;
-	ui_component mainview;
-	ui_component importview;
+	psy_ui_Component mainview;
+	psy_ui_Component importview;
 	ui_notebook notebook;
 	SamplesBox samplesbox;
-	ui_component left;
+	psy_ui_Component left;
 	SamplesViewButtons buttons;	
-	ui_component client;
+	psy_ui_Component client;
 	SamplesSongImportView songimport;
 	SampleEditor sampleeditor;
 	SamplesHeaderView header;
 	TabBar tabbar;
 	SamplesGeneralView general;
 	SamplesVibratoView vibrato;
-	ui_component loop;
+	psy_ui_Component loop;
 	SamplesLoopView waveloop;	
 	WaveBox wavebox;	
 	Workspace* workspace;
 } SamplesView;
 
-void samplesview_init(SamplesView*, ui_component* parent,
-	ui_component* tabbarparent, Workspace* workspace);
+void samplesview_init(SamplesView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace* workspace);
 
 #endif

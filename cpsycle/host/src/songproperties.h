@@ -9,17 +9,17 @@
 #include "workspace.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	psy_audio_Song* song;
-	ui_label label_title;
-	ui_label label_credits;
-	ui_label label_comments;
-	ui_edit edit_title;
-	ui_edit edit_credits;
-	ui_edit edit_comments;	
+	psy_ui_Label label_title;
+	psy_ui_Label label_credits;
+	psy_ui_Label label_comments;
+	psy_ui_Edit edit_title;
+	psy_ui_Edit edit_credits;
+	psy_ui_Edit edit_comments;	
 } SongPropertiesView;
 
-void songpropertiesview_init(SongPropertiesView*, ui_component* parent, Workspace*);
+void songpropertiesview_init(SongPropertiesView*, psy_ui_Component* parent, Workspace*);
 void songpropertiesview_enableedit(SongPropertiesView*);
 void songpropertiesview_disableedit(SongPropertiesView*);
 

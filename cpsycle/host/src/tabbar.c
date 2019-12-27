@@ -1,19 +1,23 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+
 #include "../../detail/prefix.h"
 
 #include "tabbar.h"
 #include <string.h>
 
-static void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g);
-static void OnDestroy(TabBar* self, ui_component* component);
-static void OnMouseDown(TabBar* self, ui_component* sender, MouseEvent*);
-static void OnMouseMove(TabBar* self, ui_component* sender, MouseEvent*);
-static void onmouseenter(TabBar*, ui_component* sender);
-static void onmouseleave(TabBar*, ui_component* sender);
-static int tabhittest(TabBar* self, int x, int y);
-static void onalign(TabBar*, ui_component* sender);
-static void onpreferredsize(TabBar*, ui_component* sender, ui_size* limit, ui_size* rv);
+static void tabbar_ondraw(TabBar*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void tabbar_ondestroy(TabBar*, psy_ui_Component* component);
+static void tabbar_onmousedown(TabBar*, psy_ui_Component* sender, MouseEvent*);
+static void tabbar_onmousemove(TabBar*, psy_ui_Component* sender, MouseEvent*);
+static void tabbar_onmouseenter(TabBar*, psy_ui_Component* sender);
+static void tabbar_onmouseleave(TabBar*, psy_ui_Component* sender);
+static int tabbar_tabhittest(TabBar* self, int x, int y);
+static void tabbar_onalign(TabBar*, psy_ui_Component* sender);
+static void tabbar_onpreferredsize(TabBar*, psy_ui_Component* sender,
+	ui_size* limit, ui_size* rv);
 
-void InitTab(Tab* self, const char* text, ui_size* size)
+void tab_init(Tab* self, const char* text, ui_size* size)
 {
 	self->text = _strdup(text);
 	if (size) {
@@ -26,25 +30,31 @@ void InitTab(Tab* self, const char* text, ui_size* size)
 		ui_value_makepx(0));
 }
 
-void DisposeTab(Tab* self)
+void tab_dispose(Tab* self)
 {
 	free(self->text);
 }
 
-void tabbar_init(TabBar* self, ui_component* parent)
+void tabbar_init(TabBar* self, psy_ui_Component* parent)
 {
 	ui_component_init(&self->component, parent);	
 	self->component.doublebuffered = 1;	
 	psy_signal_init(&self->signal_change);
-	psy_signal_connect(&self->component.signal_draw, self, OnDraw);
-	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
-	psy_signal_connect(&self->component.signal_align, self, onalign);
-	psy_signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
-	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
-	psy_signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
-	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
-	ui_component_resize(&self->component,0, 20);
+	psy_signal_connect(&self->component.signal_draw, self, tabbar_ondraw);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		tabbar_ondestroy);
+	psy_signal_connect(&self->component.signal_align, self, tabbar_onalign);
+	psy_signal_disconnectall(&self->component.signal_preferredsize);
+	psy_signal_connect(&self->component.signal_preferredsize, self,
+		tabbar_onpreferredsize);
+	psy_signal_connect(&self->component.signal_mousedown, self,
+		tabbar_onmousedown);
+	psy_signal_connect(&self->component.signal_mousemove, self,
+		tabbar_onmousemove);
+	psy_signal_connect(&self->component.signal_mouseenter, self,
+		tabbar_onmouseenter);
+	psy_signal_connect(&self->component.signal_mouseleave, self,
+		tabbar_onmouseleave);	
 	self->tabs = 0;
 	self->selected = 0;
 	self->hover = 0;
@@ -52,19 +62,19 @@ void tabbar_init(TabBar* self, ui_component* parent)
 	self->tabalignment = UI_ALIGN_TOP;
 }
 
-void OnDestroy(TabBar* self, ui_component* component)
+void tabbar_ondestroy(TabBar* self, psy_ui_Component* component)
 {	
 	psy_List* p;	
 
 	for (p = self->tabs; p != 0; p = p->next) {	
-		DisposeTab((Tab*)(p->entry));
+		tab_dispose((Tab*)(p->entry));
 		free(p->entry);
 	}
 	psy_list_free(self->tabs);
 	psy_signal_dispose(&self->signal_change);
 }
 
-void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
+void tabbar_ondraw(TabBar* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	psy_List* tabs;
 	int c = 0;
@@ -141,19 +151,19 @@ void OnDraw(TabBar* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-void OnMouseDown(TabBar* self, ui_component* sender, MouseEvent* mouseevent)
+void tabbar_onmousedown(TabBar* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	int tabindex;
 	
-	tabindex = tabhittest(self, mouseevent->x, mouseevent->y);
+	tabindex = tabbar_tabhittest(self, ev->x, ev->y);
 	if (tabindex != -1 && tabindex != self->selected)  {
-		self->selected = tabhittest(self, mouseevent->x, mouseevent->y);
+		self->selected = tabbar_tabhittest(self, ev->x, ev->y);
 		ui_component_invalidate(&self->component);
 		psy_signal_emit(&self->signal_change, self, 1, self->selected);
 	}		
 }
 
-int tabhittest(TabBar* self, int x, int y) 
+int tabbar_tabhittest(TabBar* self, int x, int y) 
 {
 	psy_List* tabs;	
 	int rv = -1;
@@ -211,11 +221,11 @@ int tabhittest(TabBar* self, int x, int y)
 	return rv;
 }
 
-void OnMouseMove(TabBar* self, ui_component* sender, MouseEvent* ev)
+void tabbar_onmousemove(TabBar* self, psy_ui_Component* sender, MouseEvent* ev)
 {	
 	int tabindex;
 
-	tabindex = tabhittest(self, ev->x, ev->y);	
+	tabindex = tabbar_tabhittest(self, ev->x, ev->y);	
 	if (tabindex != self->hoverindex) {
 		self->hoverindex = tabindex;
 		ui_component_invalidate(&self->component);
@@ -223,13 +233,13 @@ void OnMouseMove(TabBar* self, ui_component* sender, MouseEvent* ev)
 	
 }
 
-void onmouseenter(TabBar* self, ui_component* sender)
+void tabbar_onmouseenter(TabBar* self, psy_ui_Component* sender)
 {
 	self->hover = 1;
 	ui_component_invalidate(&self->component);
 }
 
-void onmouseleave(TabBar* self, ui_component* sender)
+void tabbar_onmouseleave(TabBar* self, psy_ui_Component* sender)
 {		
 	self->hover = 0;
 	ui_component_invalidate(&self->component);
@@ -252,7 +262,7 @@ Tab* tabbar_append(TabBar* self, const char* label)
 	Tab* tab;
 
 	tab = (Tab*)malloc(sizeof(Tab));
-	InitTab(tab, label, 0);
+	tab_init(tab, label, 0);
 	if (self->tabs != 0) {
 		tab->margin.left = ui_value_makeew(1.5);
 	} 
@@ -286,7 +296,7 @@ void tabbar_settabmargin(TabBar* self, int tabindex, const ui_margin* margin)
 	}		
 }
 
-void onalign(TabBar* self, ui_component* sender)
+void tabbar_onalign(TabBar* self, psy_ui_Component* sender)
 {
 	psy_List* p;
 	
@@ -298,7 +308,8 @@ void onalign(TabBar* self, ui_component* sender)
 	}		
 }
 
-void onpreferredsize(TabBar* self, ui_component* sender, ui_size* limit, ui_size* rv)
+void tabbar_onpreferredsize(TabBar* self, psy_ui_Component* sender, ui_size* limit,
+	ui_size* rv)
 {
 	if (rv) {
 		ui_size size;

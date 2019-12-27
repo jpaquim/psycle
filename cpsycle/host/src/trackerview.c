@@ -21,29 +21,29 @@ static const psy_dsp_big_beat_t epsilon = 0.0001;
 
 static void trackergrid_computecolumns(TrackerGrid*, int textwidth);
 static int trackergrid_preferredtrackwidth(TrackerGrid*);
-static void trackergrid_ondraw(TrackerGrid*, ui_component* sender, ui_graphics*);
-static void trackergrid_drawbackground(TrackerGrid*, ui_graphics*, TrackerGridBlock* clip);
-static void trackergrid_drawtrackbackground(TrackerGrid*, ui_graphics*, int track);
-static void trackergrid_drawevents(TrackerGrid*, ui_graphics*,
+static void trackergrid_ondraw(TrackerGrid*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void trackergrid_drawbackground(TrackerGrid*, psy_ui_Graphics*, TrackerGridBlock* clip);
+static void trackergrid_drawtrackbackground(TrackerGrid*, psy_ui_Graphics*, int track);
+static void trackergrid_drawevents(TrackerGrid*, psy_ui_Graphics*,
 	TrackerGridBlock* clip);
-static void trackergrid_drawevent(TrackerGrid*, ui_graphics* g, psy_audio_PatternEvent*,
+static void trackergrid_drawevent(TrackerGrid*, psy_ui_Graphics* g, psy_audio_PatternEvent*,
 	int x, int y, int playbar, int cursor, int selection, int beat, int beat4,
 	int mid);
-static void trackergrid_onkeydown(TrackerGrid*, ui_component* sender,
+static void trackergrid_onkeydown(TrackerGrid*, psy_ui_Component* sender,
 	KeyEvent*);
-static void trackergrid_onkeyup(TrackerGrid*, ui_component* sender,
+static void trackergrid_onkeyup(TrackerGrid*, psy_ui_Component* sender,
 	KeyEvent*);
-static void trackergrid_onmousedown(TrackerGrid*, ui_component* sender,
+static void trackergrid_onmousedown(TrackerGrid*, psy_ui_Component* sender,
 	MouseEvent*);
-static void trackergrid_onmousemove(TrackerGrid*, ui_component* sender,
+static void trackergrid_onmousemove(TrackerGrid*, psy_ui_Component* sender,
 	MouseEvent*);
-static void trackergrid_onmouseup(TrackerGrid*, ui_component* sender,
+static void trackergrid_onmouseup(TrackerGrid*, psy_ui_Component* sender,
 	MouseEvent*);
-static void trackergrid_onmousedoubleclick(TrackerGrid*, ui_component* sender,
+static void trackergrid_onmousedoubleclick(TrackerGrid*, psy_ui_Component* sender,
 	MouseEvent*);
 static TrackerCursor trackergrid_makecursor(TrackerGrid* self, int x, int y);
-static void trackergrid_onsize(TrackerGrid*, ui_component* sender, ui_size* size);
-static void trackergrid_onscroll(TrackerGrid*, ui_component* sender,
+static void trackergrid_onsize(TrackerGrid*, psy_ui_Component* sender, ui_size* size);
+static void trackergrid_onscroll(TrackerGrid*, psy_ui_Component* sender,
 	int stepx, int stepy);
 static int trackergrid_testcursor(TrackerGrid*, unsigned int track,
 	psy_dsp_big_beat_t offset, unsigned int subline);
@@ -52,7 +52,7 @@ static int trackergrid_testselection(TrackerGrid*, unsigned int track, double of
 static int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset);
 static void trackergrid_clipblock(TrackerGrid*, const ui_rectangle*,
 	TrackerGridBlock*);
-static void trackergrid_drawdigit(TrackerGrid*, ui_graphics*, int digit,
+static void trackergrid_drawdigit(TrackerGrid*, psy_ui_Graphics*, int digit,
 	int col, int x, int y);
 static void trackergrid_adjustscroll(TrackerGrid*);
 static double trackergrid_offset(TrackerGrid*, int y, unsigned int* lines,
@@ -63,14 +63,14 @@ static void trackergrid_numtrackschanged(TrackerGrid*, psy_audio_Player*,
 static void trackerview_setfont(TrackerView*, ui_font*);
 static void trackerview_initmetrics(TrackerView*);
 static void trackerview_computemetrics(TrackerView*);
-static void trackerview_ondestroy(TrackerView*, ui_component* sender);
-static void trackerview_onkeydown(TrackerView*, ui_component* sender,
+static void trackerview_ondestroy(TrackerView*, psy_ui_Component* sender);
+static void trackerview_onkeydown(TrackerView*, psy_ui_Component* sender,
 	KeyEvent*);
-static void trackerview_onkeyup(TrackerView*, ui_component* sender,
+static void trackerview_onkeyup(TrackerView*, psy_ui_Component* sender,
 	KeyEvent*);
-static void trackerview_ontimer(TrackerView*, ui_component* sender, 
+static void trackerview_ontimer(TrackerView*, psy_ui_Component* sender, 
 	int timerid);
-static void trackerview_onalign(TrackerView*, ui_component* sender);
+static void trackerview_onalign(TrackerView*, psy_ui_Component* sender);
 static void trackerview_inputnote(TrackerView*, psy_dsp_note_t);
 static void trackerview_inputdigit(TrackerView*, int value);
 static void enterdigitcolumn(psy_audio_PatternEvent*, int column, int value);
@@ -139,18 +139,18 @@ static void trackerview_onparametertweak(TrackerView*,
 static void trackerview_onskinchanged(TrackerView*, Workspace*, psy_Properties*);
 
 static int trackerheader_preferredtrackwidth(TrackerHeader*);
-static void trackerheader_ondraw(TrackerHeader*, ui_component* sender,
-	ui_graphics* g);
-static void trackerheader_onmousedown(TrackerHeader*, ui_component* sender,
+static void trackerheader_ondraw(TrackerHeader*, psy_ui_Component* sender,
+	psy_ui_Graphics* g);
+static void trackerheader_onmousedown(TrackerHeader*, psy_ui_Component* sender,
 	MouseEvent*);
 
 static void OnLineNumbersLabelDraw(TrackerLineNumbersLabel*,
-	ui_component* sender, ui_graphics*);
+	psy_ui_Component* sender, psy_ui_Graphics*);
 static void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel*,
-	ui_component* sender);
+	psy_ui_Component* sender);
 
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*,
-	ui_component* sender, ui_graphics*);
+	psy_ui_Component* sender, psy_ui_Graphics*);
 static void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const TrackerCursor*);
 static void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
@@ -356,7 +356,7 @@ void BlockTransposeCommandRevert(BlockTransposeCommand* self)
 }
 
 /// TrackerGrid
-void trackergrid_init(TrackerGrid* self, ui_component* parent,
+void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	TrackerView* view, psy_audio_Player* player)
 {		
 	self->view = view;
@@ -467,7 +467,7 @@ void TrackerViewApplyProperties(TrackerView* self, psy_Properties* p)
 		psy_dir_findfile(workspace_skins_directory(self->workspace),
 			filename, path);
 		if (path[0] != '\0') {
-			ui_bitmap bmp;
+			psy_ui_Bitmap bmp;
 
 			if (ui_bitmap_load(&bmp, path) == 0) {
 				ui_bitmap_dispose(&self->skin.bitmap);
@@ -561,7 +561,7 @@ void trackerview_setcoords(TrackerView* self, psy_Properties* p)
 	}
 }
 
-void trackergrid_ondraw(TrackerGrid* self, ui_component* sender, ui_graphics* g)
+void trackergrid_ondraw(TrackerGrid* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	 
   	TrackerGridBlock clip;
 	if (self->view->pattern) {		
@@ -652,7 +652,7 @@ void trackergrid_clipblock(TrackerGrid* self, const ui_rectangle* clip,
 	block->bottomright.subline = subline;
 }
 
-void trackergrid_drawbackground(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
+void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g, TrackerGridBlock* clip)
 {
 	ui_rectangle r;
 	unsigned int track;
@@ -669,7 +669,7 @@ void trackergrid_drawbackground(TrackerGrid* self, ui_graphics* g, TrackerGridBl
 	ui_drawsolidrectangle(g, r, self->view->skin.background);
 }
 
-void trackergrid_drawtrackbackground(TrackerGrid* self, ui_graphics* g, int track)
+void trackergrid_drawtrackbackground(TrackerGrid* self, psy_ui_Graphics* g, int track)
 {
 	ui_rectangle r;
 	
@@ -705,7 +705,7 @@ int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset)
 				  offset, self->bpl); 	
 }
 
-void trackergrid_drawevents(TrackerGrid* self, ui_graphics* g, TrackerGridBlock* clip)
+void trackergrid_drawevents(TrackerGrid* self, psy_ui_Graphics* g, TrackerGridBlock* clip)
 {	
 	unsigned int track;
 	int cpx = 0;	
@@ -807,7 +807,7 @@ int testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset, psy_dsp_
 		position < offset + width - epsilon;
 }
 
-void SetColColor(TrackerSkin* skin, ui_graphics* g, int col, int playbar, int cursor, int selection, int beat, int beat4, int mid)
+void SetColColor(TrackerSkin* skin, psy_ui_Graphics* g, int col, int playbar, int cursor, int selection, int beat, int beat4, int mid)
 {	
 	if (cursor != 0) {
 		ui_setbackgroundcolor(g, skin->cursor);
@@ -843,7 +843,7 @@ void SetColColor(TrackerSkin* skin, ui_graphics* g, int col, int playbar, int cu
 	}	
 }
 
-void trackergrid_drawevent(TrackerGrid* self, ui_graphics* g, psy_audio_PatternEvent* event,
+void trackergrid_drawevent(TrackerGrid* self, psy_ui_Graphics* g, psy_audio_PatternEvent* event,
 	int x, int y, int playbar, int cursor, int selection, int beat, int beat4, int mid)
 {					
 	ui_rectangle r;
@@ -923,7 +923,7 @@ void trackergrid_drawevent(TrackerGrid* self, ui_graphics* g, psy_audio_PatternE
 	}			
 }
 
-void trackergrid_drawdigit(TrackerGrid* self, ui_graphics* g, int digit,
+void trackergrid_drawdigit(TrackerGrid* self, psy_ui_Graphics* g, int digit,
 						   int col, int x, int y)
 {
 	char buffer[20];	
@@ -943,7 +943,7 @@ void trackergrid_drawdigit(TrackerGrid* self, ui_graphics* g, int digit,
 		ETO_OPAQUE | ETO_CLIPPED, r, buffer, strlen(buffer));	
 }
 
-void trackergrid_onsize(TrackerGrid* self, ui_component* sender, ui_size* size)
+void trackergrid_onsize(TrackerGrid* self, psy_ui_Component* sender, ui_size* size)
 {	
 	self->cx = size->width;
 	self->cy = size->height;	
@@ -1003,13 +1003,13 @@ unsigned int NumSublines(psy_audio_Pattern* pattern, double offset, double bpl)
 	return currsubline;
 }
 
-void trackergrid_onkeydown(TrackerGrid* self, ui_component* sender,
+void trackergrid_onkeydown(TrackerGrid* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	sender->propagateevent = 1;
 }
 
-void trackergrid_onkeyup(TrackerGrid* self, ui_component* sender,
+void trackergrid_onkeyup(TrackerGrid* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	sender->propagateevent = 1;	
@@ -1373,7 +1373,7 @@ int trackerview_scrollright(TrackerView* self)
 	return invalidate;
 }
 
-void trackerview_onkeydown(TrackerView* self, ui_component* sender,
+void trackerview_onkeydown(TrackerView* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {		
 	int cmd;
@@ -1586,7 +1586,7 @@ void trackerview_onkeydown(TrackerView* self, ui_component* sender,
 	ui_component_propagateevent(sender);
 }
 
-void trackerview_onkeyup(TrackerView* self, ui_component* sender,
+void trackerview_onkeyup(TrackerView* self, psy_ui_Component* sender,
 	KeyEvent* keyevent)
 {
 	if (self->workspace->chordmode && !keyevent->shift) {
@@ -1795,7 +1795,7 @@ void trackerview_invalidateline(TrackerView* self, psy_dsp_beat_t offset)
 	}
 }
 
-void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int stepx,
+void trackergrid_onscroll(TrackerGrid* self, psy_ui_Component* sender, int stepx,
 	int stepy)
 {
 	self->dx += (stepx * sender->scrollstepx);
@@ -1831,7 +1831,7 @@ void trackergrid_onscroll(TrackerGrid* self, ui_component* sender, int stepx,
 	}
 }
 
-void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, MouseEvent* ev)
+void trackergrid_onmousedown(TrackerGrid* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	if (ev->button == 2) {
 		trackerview_toggleblockmenu(self->view);
@@ -1857,7 +1857,7 @@ void trackergrid_onmousedown(TrackerGrid* self, ui_component* sender, MouseEvent
 	}
 }
 
-void trackergrid_onmousemove(TrackerGrid* self, ui_component* sender, MouseEvent* ev)
+void trackergrid_onmousemove(TrackerGrid* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	TrackerCursor cursor;
 
@@ -1875,7 +1875,7 @@ void trackergrid_onmousemove(TrackerGrid* self, ui_component* sender, MouseEvent
 	}
 }
 
-void trackergrid_onmousedoubleclick(TrackerGrid* self, ui_component* sender,
+void trackergrid_onmousedoubleclick(TrackerGrid* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	trackerview_selectcol(self->view);
@@ -1904,12 +1904,12 @@ TrackerCursor trackergrid_makecursor(TrackerGrid* self, int x, int y)
 	return rv;
 }
 	
-void trackergrid_onmouseup(TrackerGrid* self, ui_component* sender, MouseEvent* ev)
+void trackergrid_onmouseup(TrackerGrid* self, psy_ui_Component* sender, MouseEvent* ev)
 {	
 	ui_component_releasecapture(&self->component);
 }
 
-void trackerview_init(TrackerView* self, ui_component* parent, Workspace* workspace)
+void trackerview_init(TrackerView* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	self->workspace = workspace;
 	self->opcount = 0;
@@ -2002,7 +2002,7 @@ void trackerview_init(TrackerView* self, ui_component* parent, Workspace* worksp
 		trackerview_onskinchanged);
 }
 
-void trackerview_ondestroy(TrackerView* self, ui_component* sender)
+void trackerview_ondestroy(TrackerView* self, psy_ui_Component* sender)
 {
 	inputs_dispose(&self->inputs);
 }
@@ -2063,7 +2063,7 @@ void trackerview_setheadertextcoords(TrackerView* self)
 	self->skin.headercoords.digitx0 = digitx0;	
 }
 
-void trackerview_onalign(TrackerView* self, ui_component* sender)
+void trackerview_onalign(TrackerView* self, psy_ui_Component* sender)
 {
 	ui_size size;
 	ui_size menusize;	
@@ -2095,7 +2095,7 @@ void trackerview_onalign(TrackerView* self, ui_component* sender)
 	trackergrid_adjustscroll(&self->grid);
 }
 
-void trackerheader_init(TrackerHeader* self, ui_component* parent,
+void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	TrackerView* view)
 {		
 	self->view = view;
@@ -2111,7 +2111,7 @@ void trackerheader_init(TrackerHeader* self, ui_component* parent,
 	self->classic = 1;
 }
 
-void trackerheader_ondraw(TrackerHeader* self, ui_component* sender, ui_graphics* g)
+void trackerheader_ondraw(TrackerHeader* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	ui_size size;
 	ui_rectangle r;
@@ -2149,7 +2149,7 @@ void trackerheader_ondraw(TrackerHeader* self, ui_component* sender, ui_graphics
 	}		
 }
 
-void trackerheader_onmousedown(TrackerHeader* self, ui_component* sender,
+void trackerheader_onmousedown(TrackerHeader* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	if (self->view->workspace->song) {
@@ -2195,7 +2195,7 @@ void trackerheader_onmousedown(TrackerHeader* self, ui_component* sender,
 	}
 }
 
-void trackerlinenumbers_init(TrackerLineNumbers* self, ui_component* parent,
+void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
 	TrackerView* view)
 {		
 	self->view = view;
@@ -2208,8 +2208,8 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, ui_component* parent,
 		trackerlinenumbers_ondraw);	
 }
 
-void trackerlinenumbers_ondraw(TrackerLineNumbers* self, ui_component* sender,
-	ui_graphics* g)
+void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
 {	
 	if (self->view->pattern) {
 		ui_size size;
@@ -2318,7 +2318,7 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_beat_t 
 }
 
 void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self,
-	ui_component* parent, TrackerView* view)
+	psy_ui_Component* parent, TrackerView* view)
 {		
 	self->view = view;
 	ui_component_init(&self->component, parent);
@@ -2329,7 +2329,7 @@ void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel* self,
 }
 
 void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel* self,
-	ui_component* sender)
+	psy_ui_Component* sender)
 {
 	self->view->header.classic = !self->view->header.classic;
 	if (self->view->header.classic) {
@@ -2340,7 +2340,7 @@ void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel* self,
 	ui_component_invalidate(&self->view->header.component);
 }
 
-void OnLineNumbersLabelDraw(TrackerLineNumbersLabel* self, ui_component* sender, ui_graphics* g)
+void OnLineNumbersLabelDraw(TrackerLineNumbersLabel* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	ui_size size;
 	ui_rectangle r;
@@ -2352,7 +2352,7 @@ void OnLineNumbersLabelDraw(TrackerLineNumbersLabel* self, ui_component* sender,
 	ui_textoutrectangle(g, r.left, r.top, 0, r, "Line", strlen("Line"));
 }
 
-void trackerview_ontimer(TrackerView* self, ui_component* sender, int timerid)
+void trackerview_ontimer(TrackerView* self, psy_ui_Component* sender, int timerid)
 {
 	if (timerid == TIMERID_TRACKERVIEW && self->pattern) {		
 		if (player_playing(self->grid.player)) {
@@ -2889,7 +2889,7 @@ void trackerview_toggleblockmenu(TrackerView* self)
 	}
 }
 
-void patternblockmenu_init(PatternBlockMenu* self, ui_component* parent)
+void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent)
 {
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);

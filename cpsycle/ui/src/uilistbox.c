@@ -5,26 +5,26 @@
 
 #include "uilistbox.h"
 
-static void oncommand(ui_listbox*, ui_component* sender, WPARAM wParam,
+static void oncommand(ui_listbox*, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam);
-static void ondestroy(ui_listbox*, ui_component* sender);
-static void ui_listbox_init_style(ui_listbox* listbox, ui_component* parent,
+static void ondestroy(ui_listbox*, psy_ui_Component* sender);
+static void ui_listbox_init_style(ui_listbox* listbox, psy_ui_Component* parent,
 	int style);
 
-void ui_listbox_init(ui_listbox* listbox, ui_component* parent)
+void ui_listbox_init(ui_listbox* listbox, psy_ui_Component* parent)
 {  
 	ui_listbox_init_style(listbox, parent, 
 		(WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY) &~WS_BORDER);	
 }
 
-void ui_listbox_init_multiselect(ui_listbox* listbox, ui_component* parent)
+void ui_listbox_init_multiselect(ui_listbox* listbox, psy_ui_Component* parent)
 {  
 	ui_listbox_init_style(listbox, parent, 
 		(WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_NOTIFY)
 		&~WS_BORDER);    
 }
 
-void ui_listbox_init_style(ui_listbox* self, ui_component* parent, int style)
+void ui_listbox_init_style(ui_listbox* self, psy_ui_Component* parent, int style)
 {  		
 	ui_win32_component_init(&self->component, parent, TEXT("LISTBOX"), 
 		0, 0, 100, 200,
@@ -35,7 +35,7 @@ void ui_listbox_init_style(ui_listbox* self, ui_component* parent, int style)
 	psy_signal_init(&self->signal_selchanged);	
 }
 
-void ondestroy(ui_listbox* self, ui_component* sender)
+void ondestroy(ui_listbox* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_selchanged);
 }
@@ -82,7 +82,7 @@ intptr_t ui_listbox_selcount(ui_listbox* listbox)
 		(WPARAM)0, (LPARAM)0); 
 }
 
-void oncommand(ui_listbox* self, ui_component* sender, WPARAM wParam,
+void oncommand(ui_listbox* self, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam) {
 	switch(HIWORD(wParam))
     {

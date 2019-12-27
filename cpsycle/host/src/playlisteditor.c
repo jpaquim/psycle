@@ -10,19 +10,19 @@
 
 #define TIMERID_PLAYLIST 4000
 
-static void playlisteditor_ontimer(PlayListEditor*, ui_component* sender, int timerid);
+static void playlisteditor_ontimer(PlayListEditor*, psy_ui_Component* sender, int timerid);
 
-static void playlisteditor_onaddsong(PlayListEditor*, ui_component* sender);
-static void playlisteditor_onremovesong(PlayListEditor*, ui_component* sender);
-static void playlisteditor_onplay(PlayListEditor*, ui_component* sender);
-static void playlisteditor_onstop(PlayListEditor*, ui_component* sender);
-static void playlisteditor_onprev(PlayListEditor*, ui_component* sender);
-static void playlisteditor_onnext(PlayListEditor*, ui_component* sender);
-static void playlisteditor_onlistchanged(PlayListEditor*, ui_component* sender,
+static void playlisteditor_onaddsong(PlayListEditor*, psy_ui_Component* sender);
+static void playlisteditor_onremovesong(PlayListEditor*, psy_ui_Component* sender);
+static void playlisteditor_onplay(PlayListEditor*, psy_ui_Component* sender);
+static void playlisteditor_onstop(PlayListEditor*, psy_ui_Component* sender);
+static void playlisteditor_onprev(PlayListEditor*, psy_ui_Component* sender);
+static void playlisteditor_onnext(PlayListEditor*, psy_ui_Component* sender);
+static void playlisteditor_onlistchanged(PlayListEditor*, psy_ui_Component* sender,
 	int slot);
 static void playlisteditor_buildplaylist(PlayListEditor*);
 static void playlisteditor_onpreferredsize(PlayListEditor*,
-	ui_component* sender, ui_size* limit, ui_size* rv);
+	psy_ui_Component* sender, ui_size* limit, ui_size* rv);
 
 void playlistentry_init(PlayListEntry* self, const char* title, const char* path)
 {
@@ -55,7 +55,7 @@ PlayListEntry* playlistentry_allocinit(const char* title, const char* path)
 
 
 void playlisteditorbuttons_init(PlayListEditorButtons* self,
-	ui_component* parent)
+	psy_ui_Component* parent)
 {
 	ui_margin margin;
 
@@ -91,7 +91,7 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 			&margin));	
 }
 
-void playlisteditor_init(PlayListEditor* self, ui_component* parent,
+void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	self->workspace = workspace;
@@ -127,7 +127,7 @@ void playlisteditor_init(PlayListEditor* self, ui_component* parent,
 			playlisteditor_onpreferredsize);
 }
 
-void playlisteditor_onaddsong(PlayListEditor* self, ui_component* sender)
+void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 {
 	char path[MAX_PATH]	 = "";
 	char title[MAX_PATH]	 = ""; 					
@@ -169,7 +169,7 @@ void playlisteditor_onaddsong(PlayListEditor* self, ui_component* sender)
 	}
 }
 
-void playlisteditor_onremovesong(PlayListEditor* self, ui_component* sender)
+void playlisteditor_onremovesong(PlayListEditor* self, psy_ui_Component* sender)
 {
 	
 }
@@ -187,20 +187,20 @@ void playlisteditor_buildplaylist(PlayListEditor* self)
 	}	
 }
 
-void playlisteditor_onplay(PlayListEditor* self, ui_component* sender)
+void playlisteditor_onplay(PlayListEditor* self, psy_ui_Component* sender)
 {		
 	player_stop(&self->workspace->player);
 	self->nextentry = self->currentry;
 	ui_component_starttimer(&self->component, TIMERID_PLAYLIST, 50);
 }
 
-void playlisteditor_onstop(PlayListEditor* self, ui_component* sender)
+void playlisteditor_onstop(PlayListEditor* self, psy_ui_Component* sender)
 {	
 	ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
 	player_stop(&self->workspace->player);
 }
 
-void playlisteditor_onprev(PlayListEditor* self, ui_component* sender)
+void playlisteditor_onprev(PlayListEditor* self, psy_ui_Component* sender)
 {
 	if (self->currentry->prev) {
 		self->nextentry = self->currentry->prev;
@@ -210,7 +210,7 @@ void playlisteditor_onprev(PlayListEditor* self, ui_component* sender)
 	}
 }
 
-void playlisteditor_onnext(PlayListEditor* self, ui_component* sender)
+void playlisteditor_onnext(PlayListEditor* self, psy_ui_Component* sender)
 {
 	if (self->currentry->next) {
 		self->nextentry = self->currentry->next;
@@ -220,7 +220,7 @@ void playlisteditor_onnext(PlayListEditor* self, ui_component* sender)
 	}
 }
 
-void playlisteditor_ontimer(PlayListEditor* self, ui_component* sender, int timerid)
+void playlisteditor_ontimer(PlayListEditor* self, psy_ui_Component* sender, int timerid)
 {		
 	if (!player_playing(&self->workspace->player)) {
 		if (self->nextentry) {
@@ -253,7 +253,7 @@ void playlisteditor_ontimer(PlayListEditor* self, ui_component* sender, int time
 	}
 }
 
-void playlisteditor_onlistchanged(PlayListEditor* self, ui_component* sender,
+void playlisteditor_onlistchanged(PlayListEditor* self, psy_ui_Component* sender,
 	int slot)
 {
 	psy_List* p;
@@ -264,7 +264,7 @@ void playlisteditor_onlistchanged(PlayListEditor* self, ui_component* sender,
 	self->nextentry = p;
 }
 
-void playlisteditor_onpreferredsize(PlayListEditor* self, ui_component* sender,
+void playlisteditor_onpreferredsize(PlayListEditor* self, psy_ui_Component* sender,
 	ui_size* limit, ui_size* rv)
 {	
 	if (rv) {

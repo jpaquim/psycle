@@ -12,29 +12,29 @@
 #include <portable.h>
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
-static void sampleeditorheader_init(SampleEditorHeader*, ui_component* parent,
+static void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent,
 	SampleEditor*);
-static void sampleeditorheader_ondraw(SampleEditorHeader*, ui_component* sender, ui_graphics*);
-static void sampleeditorheader_drawruler(SampleEditorHeader*, ui_graphics*);
-static void samplezoom_ondraw(SampleZoom*, ui_component* sender, ui_graphics*);
-static void samplezoom_drawsamples(SampleZoom*, ui_graphics*);
+static void sampleeditorheader_ondraw(SampleEditorHeader*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void sampleeditorheader_drawruler(SampleEditorHeader*, psy_ui_Graphics*);
+static void samplezoom_ondraw(SampleZoom*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void samplezoom_drawsamples(SampleZoom*, psy_ui_Graphics*);
 
 static void sampleeditor_initsampler(SampleEditor*);
-static void sampleeditor_ondestroy(SampleEditor*, ui_component* sender);
-static void sampleeditor_onsize(SampleEditor*, ui_component* sender, ui_size*);
-static void sampleeditor_onzoom(SampleEditor*, ui_component* sender);
+static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
+static void sampleeditor_onsize(SampleEditor*, psy_ui_Component* sender, ui_size*);
+static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_computemetrics(SampleEditor*, SampleEditorMetrics* rv);
 static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
-static void sampleeditor_onplay(SampleEditor*, ui_component* sender);
-static void sampleeditor_onstop(SampleEditor*, ui_component* sender);
+static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
+static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*, unsigned int slot,
 	psy_audio_BufferContext*);
 
-static void samplezoom_ondestroy(SampleZoom*, ui_component* sender);
-static void samplezoom_onmousedown(SampleZoom*, ui_component* sender, MouseEvent*);
-static void samplezoom_onmouseup(SampleZoom*, ui_component* sender, MouseEvent*);
-static void samplezoom_onmousemove(SampleZoom*, ui_component* sender, MouseEvent*);
+static void samplezoom_ondestroy(SampleZoom*, psy_ui_Component* sender);
+static void samplezoom_onmousedown(SampleZoom*, psy_ui_Component* sender, MouseEvent*);
+static void samplezoom_onmouseup(SampleZoom*, psy_ui_Component* sender, MouseEvent*);
+static void samplezoom_onmousemove(SampleZoom*, psy_ui_Component* sender, MouseEvent*);
 
 enum {
 	SAMPLEEDITOR_DRAG_NONE,
@@ -43,7 +43,7 @@ enum {
 	SAMPLEEDITOR_DRAG_MOVE
 };
 
-void sampleeditorplaybar_init(SampleEditorPlayBar* self, ui_component* parent,
+void sampleeditorplaybar_init(SampleEditorPlayBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	self->workspace = workspace;
@@ -73,7 +73,7 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 		UI_ALIGN_LEFT, &margin));
 }
 
-void sampleeditorheader_init(SampleEditorHeader* self, ui_component* parent,
+void sampleeditorheader_init(SampleEditorHeader* self, psy_ui_Component* parent,
 	SampleEditor* view)
 {
 	self->view = view;
@@ -85,13 +85,13 @@ void sampleeditorheader_init(SampleEditorHeader* self, ui_component* parent,
 		sampleeditorheader_ondraw);
 }
 
-void sampleeditorheader_ondraw(SampleEditorHeader* self, ui_component* sender,
-	ui_graphics* g)
+void sampleeditorheader_ondraw(SampleEditorHeader* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
 {	
 	sampleeditorheader_drawruler(self, g);	
 }
 
-void sampleeditorheader_drawruler(SampleEditorHeader* self, ui_graphics* g)
+void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 {
 	ui_size size;	
 	int baseline;		
@@ -119,7 +119,7 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, ui_graphics* g)
 	}
 }
 
-void samplezoom_init(SampleZoom* self, ui_component* parent)
+void samplezoom_init(SampleZoom* self, psy_ui_Component* parent)
 {
 	self->sample = 0;
 	self->zoomleft = 0.f;
@@ -142,12 +142,12 @@ void samplezoom_init(SampleZoom* self, ui_component* parent)
 	ui_component_resize(&self->component, 100, 50);
 }
 
-void samplezoom_ondestroy(SampleZoom* self, ui_component* sender)
+void samplezoom_ondestroy(SampleZoom* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_zoom);
 }
 
-void samplezoom_ondraw(SampleZoom* self, ui_component* sender, ui_graphics* g)
+void samplezoom_ondraw(SampleZoom* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	ui_rectangle r;
 	ui_size size;
@@ -168,7 +168,7 @@ void samplezoom_ondraw(SampleZoom* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-void samplezoom_drawsamples(SampleZoom* self, ui_graphics* g)
+void samplezoom_drawsamples(SampleZoom* self, psy_ui_Graphics* g)
 {
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);	
@@ -205,7 +205,7 @@ void samplezoom_drawsamples(SampleZoom* self, ui_graphics* g)
 	}
 }
 
-void samplezoom_onmousedown(SampleZoom* self, ui_component* sender, MouseEvent* ev)
+void samplezoom_onmousedown(SampleZoom* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	ui_size size;
 	int zoomleftx;
@@ -232,7 +232,7 @@ void samplezoom_onmousedown(SampleZoom* self, ui_component* sender, MouseEvent* 
 	ui_component_capture(&self->component);
 }
 
-void samplezoom_onmousemove(SampleZoom* self, ui_component* sender, MouseEvent* ev)
+void samplezoom_onmousemove(SampleZoom* self, psy_ui_Component* sender, MouseEvent* ev)
 {	
 	ui_size size;	
 
@@ -315,14 +315,14 @@ void samplezoom_onmousemove(SampleZoom* self, ui_component* sender, MouseEvent* 
 	}
 }
 
-void samplezoom_onmouseup(SampleZoom* self, ui_component* sender,
+void samplezoom_onmouseup(SampleZoom* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	self->dragmode = SAMPLEEDITOR_DRAG_NONE;
 	ui_component_releasecapture(&self->component);
 }
 
-void sampleeditor_init(SampleEditor* self, ui_component* parent,
+void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {						
 	self->sample = 0;
@@ -362,7 +362,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 	self->samplerevents = 0;
 }
 
-void sampleeditor_ondestroy(SampleEditor* self, ui_component* sender)
+void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 {
 	uintptr_t c;
 
@@ -383,12 +383,12 @@ void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
 	ui_component_invalidate(&self->component);
 }
 
-void sampleeditor_onsize(SampleEditor* self, ui_component* sender, ui_size* size)
+void sampleeditor_onsize(SampleEditor* self, psy_ui_Component* sender, ui_size* size)
 {
 	sampleeditor_computemetrics(self, &self->metrics);
 }
 
-void sampleeditor_onzoom(SampleEditor* self, ui_component* sender)
+void sampleeditor_onzoom(SampleEditor* self, psy_ui_Component* sender)
 {
 	wavebox_setzoom(&self->samplebox, self->zoom.zoomleft,
 		self->zoom.zoomright);
@@ -424,7 +424,7 @@ void sampleeditor_connectmachinessignals(SampleEditor* self,
 	}
 }
 
-void sampleeditor_onplay(SampleEditor* self, ui_component* sender)
+void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song && self->sample) {
 		lock_enter();
@@ -438,7 +438,7 @@ void sampleeditor_onplay(SampleEditor* self, ui_component* sender)
 	}
 }
 
-void sampleeditor_onstop(SampleEditor* self, ui_component* sender)
+void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 {	
 	lock_enter();
 	psy_list_free(self->samplerevents);

@@ -12,13 +12,13 @@
 #include "songtrackbar.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	SongTrackBar songtrackbar;
 	TimeBar timebar;
 	LinesPerBeatBar linesperbeatbar;
 	OctaveBar octavebar;
 } SongBar;
 
-void InitSongBar(SongBar*, ui_component* parent, Workspace*);
+void songbar_init(SongBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

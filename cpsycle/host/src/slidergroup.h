@@ -8,7 +8,7 @@
 #include <uislider.h>
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ui_label desclabel;
 	ui_slider slider;
 	ui_label label;	
@@ -21,7 +21,7 @@ typedef void (*SliderGroupDescribe)(void* context, SliderGroup*, char* txt);
 typedef void (*SliderGroupTweak)(void* context, SliderGroup*, float value);
 typedef void (*SliderGroupValue)(void* context, SliderGroup*, float* value);
 
-void InitSliderGroup(SliderGroup*, ui_component* parent, const char* desc);
+void InitSliderGroup(SliderGroup*, psy_ui_Component* parent, const char* desc);
 void SliderGroupConnect(SliderGroup*, void* context, SliderGroupDescribe,
 	SliderGroupTweak, SliderGroupValue);
 

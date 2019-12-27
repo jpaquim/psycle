@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include <portable.h>
 
-static void OnLessClicked(LinesPerBeatBar*, ui_component* sender);
-static void OnMoreClicked(LinesPerBeatBar*, ui_component* sender);
-static void OnTimer(LinesPerBeatBar*, ui_component* sender, int timerid);
+static void OnLessClicked(LinesPerBeatBar*, psy_ui_Component* sender);
+static void OnMoreClicked(LinesPerBeatBar*, psy_ui_Component* sender);
+static void OnTimer(LinesPerBeatBar*, psy_ui_Component* sender, int timerid);
 void linesperbeatbar_initalign(LinesPerBeatBar*);
 
-void InitLinesPerBeatBar(LinesPerBeatBar* self, ui_component* parent, psy_audio_Player* player)
+void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent, psy_audio_Player* player)
 {	
 	self->lpb = 0;			
 	ui_component_init(&self->component, parent);	
@@ -45,20 +45,20 @@ void linesperbeatbar_initalign(LinesPerBeatBar* self)
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
-		&margin));		
+		&margin));
 }
 
-void OnLessClicked(LinesPerBeatBar* self, ui_component* sender)
+void OnLessClicked(LinesPerBeatBar* self, psy_ui_Component* sender)
 {		
 	player_setlpb(self->player, player_lpb(self->player) - 1);
 }
 
-void OnMoreClicked(LinesPerBeatBar* self, ui_component* sender)
+void OnMoreClicked(LinesPerBeatBar* self, psy_ui_Component* sender)
 {		
 	player_setlpb(self->player, player_lpb(self->player) + 1);
 }
 
-void OnTimer(LinesPerBeatBar* self, ui_component* sender, int timerid)
+void OnTimer(LinesPerBeatBar* self, psy_ui_Component* sender, int timerid)
 {		
 	if (self->lpb != player_lpb(self->player)) {
 		char text[20];

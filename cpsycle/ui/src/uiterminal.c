@@ -6,12 +6,11 @@
 #include "uiterminal.h"
 #include <string.h>
 
-static void ondestroy(ui_terminal*, ui_component* sender);
-static void ondraw(ui_terminal*, ui_component* sender, ui_graphics*);
-static void onpreferredsize(ui_terminal*, ui_component* sender, ui_size* limit,
-	ui_size* rv);
+static void ondestroy(psy_ui_Terminal*, psy_ui_Component* sender);
+static void onpreferredsize(psy_ui_Terminal*, psy_ui_Component* sender,
+	ui_size* limit, ui_size* rv);
 
-void ui_terminal_init(ui_terminal* self, ui_component* parent)
+void ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 {			
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
@@ -23,16 +22,12 @@ void ui_terminal_init(ui_terminal* self, ui_component* parent)
 		onpreferredsize);
 }
 
-void ondestroy(ui_terminal* self, ui_component* sender)
+void ondestroy(psy_ui_Terminal* self, psy_ui_Component* sender)
 {	
 }
 
-void ondraw(ui_terminal* self, ui_component* sender, ui_graphics* g)
-{	
-}
-
-void onpreferredsize(ui_terminal* self, ui_component* sender, ui_size* limit,
-	ui_size* rv)
+void onpreferredsize(psy_ui_Terminal* self, psy_ui_Component* sender,
+	ui_size* limit, ui_size* rv)
 {		
 	if (rv) {
 		ui_size size;
@@ -42,12 +37,12 @@ void onpreferredsize(ui_terminal* self, ui_component* sender, ui_size* limit,
 	}
 }
 
-void ui_terminal_output(ui_terminal* self, const char* text)
+void ui_terminal_output(psy_ui_Terminal* self, const char* text)
 {
 	ui_editor_addtext(&self->output, text);
 }
 
-void ui_terminal_clear(ui_terminal* self)
+void ui_terminal_clear(psy_ui_Terminal* self)
 {
 	ui_editor_clear(&self->output);
 }

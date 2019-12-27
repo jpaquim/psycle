@@ -17,32 +17,35 @@ typedef struct {
   HPEN penprev;
   HBRUSH brush;
   HBRUSH hBrushPrev;
-} ui_graphics;
+} psy_ui_Graphics;
 
-void ui_graphics_init(ui_graphics* g, HDC hdc);
-void ui_graphics_dispose(ui_graphics* g);
-void ui_textout(ui_graphics*, int x, int y,  const char*, size_t len);
-void ui_textoutrectangle(ui_graphics* g, int x, int y, unsigned int options,
+void ui_graphics_init(psy_ui_Graphics*, HDC);
+void ui_graphics_dispose(psy_ui_Graphics*);
+void ui_textout(psy_ui_Graphics*, int x, int y,  const char*, size_t len);
+void ui_textoutrectangle(psy_ui_Graphics*, int x, int y, unsigned int options,
 	ui_rectangle r, const char* text, size_t len);
-void ui_drawrectangle(ui_graphics*, const ui_rectangle);
-void ui_drawroundrectangle(ui_graphics*, const ui_rectangle,
+void ui_drawrectangle(psy_ui_Graphics*, const ui_rectangle);
+void ui_drawroundrectangle(psy_ui_Graphics*, const ui_rectangle,
 	ui_size cornersize);
-ui_size ui_textsize(ui_graphics*, const char*);
-void ui_drawsolidrectangle(ui_graphics* g, const ui_rectangle r,
+ui_size ui_textsize(psy_ui_Graphics*, const char*);
+void ui_drawsolidrectangle(psy_ui_Graphics*, const ui_rectangle r,
 	unsigned int color);
-void ui_drawsolidroundrectangle(ui_graphics* self, const ui_rectangle r,
+void ui_drawsolidroundrectangle(psy_ui_Graphics*, const ui_rectangle r,
 	ui_size cornersize, unsigned int color);
-void ui_drawsolidpolygon(ui_graphics* g, ui_point* , unsigned int numpoints, 
+void ui_drawsolidpolygon(psy_ui_Graphics*, ui_point*, unsigned int numpoints, 
 	unsigned int inner, unsigned int outter);
-void ui_drawline(ui_graphics* g, int x1, int y1, int x2, int y2);			
-void ui_drawfullbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y);
-void ui_drawbitmap(ui_graphics* g, ui_bitmap* bitmap, int x, int y, int width,
+void ui_drawline(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
+void ui_drawarc(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
+void ui_drawfullbitmap(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y);
+void ui_drawbitmap(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
-void ui_setbackgroundcolor(ui_graphics* g, unsigned int color);
-void ui_setbackgroundmode(ui_graphics* g, unsigned int mode);
-void ui_settextcolor(ui_graphics* g, unsigned int color);
-void ui_setcolor(ui_graphics* g, unsigned int color);
-void ui_setfont(ui_graphics* g, ui_font* font);
-ui_font ui_createfont(const char* name, int size);
+void ui_setbackgroundcolor(psy_ui_Graphics*, unsigned int color);
+void ui_setbackgroundmode(psy_ui_Graphics*, unsigned int mode);
+void ui_settextcolor(psy_ui_Graphics*, unsigned int color);
+void ui_setcolor(psy_ui_Graphics*, unsigned int color);
+void ui_setfont(psy_ui_Graphics*, ui_font* font);
+void ui_moveto(psy_ui_Graphics*, ui_point pt);
+void ui_devcurveto(psy_ui_Graphics*, ui_point control_p1, ui_point control_p2,
+	ui_point p);
 
 #endif

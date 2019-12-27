@@ -25,7 +25,7 @@ typedef struct {
 	Workspace* workspace;
 } MachinesBox;
 
-void InitMachinesBox(MachinesBox*, ui_component* parent, psy_audio_Machines*, MachineBoxMode,
+void machinesbox_init(MachinesBox*, psy_ui_Component* parent, psy_audio_Machines*, MachineBoxMode,
 	Workspace*);
 void MachinesBoxClone(MachinesBox*);
 void MachinesBoxRemove(MachinesBox*);

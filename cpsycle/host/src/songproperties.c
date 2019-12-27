@@ -9,12 +9,12 @@ static void songpropertiesview_initalign(SongPropertiesView*);
 static void songpropertiesview_read(SongPropertiesView*);
 static void songpropertiesview_write(SongPropertiesView*);
 static void songpropertiesview_onsongchanged(SongPropertiesView*, Workspace*, int flag);
-static void songpropertiesview_onhide(SongPropertiesView*, ui_component* sender);
-static void songpropertiesview_ontitlechanged(SongPropertiesView*, ui_component* sender);
-static void songpropertiesview_oncreditschanged(SongPropertiesView*, ui_component* sender);
-static void songpropertiesview_oncommentschanged(SongPropertiesView*, ui_component* sender);
+static void songpropertiesview_onhide(SongPropertiesView*, psy_ui_Component* sender);
+static void songpropertiesview_ontitlechanged(SongPropertiesView*, psy_ui_Component* sender);
+static void songpropertiesview_oncreditschanged(SongPropertiesView*, psy_ui_Component* sender);
+static void songpropertiesview_oncommentschanged(SongPropertiesView*, psy_ui_Component* sender);
 
-void songpropertiesview_init(SongPropertiesView* self, ui_component* parent,
+void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
 	self->song = workspace->song;	
@@ -107,26 +107,26 @@ void songpropertiesview_disableedit(SongPropertiesView* self)
 	ui_edit_preventedit(&self->edit_comments);	
 }
 
-void songpropertiesview_onhide(SongPropertiesView* self, ui_component* sender)
+void songpropertiesview_onhide(SongPropertiesView* self, psy_ui_Component* sender)
 {
 	songpropertiesview_enableedit(self);
 }
 
-void songpropertiesview_ontitlechanged(SongPropertiesView* self, ui_component* sender)
+void songpropertiesview_ontitlechanged(SongPropertiesView* self, psy_ui_Component* sender)
 {
 	free(self->song->properties.title);
 	self->song->properties.title = strdup(ui_edit_text(&self->edit_title));
 }
 
 void songpropertiesview_oncreditschanged(SongPropertiesView* self,
-	ui_component* sender)
+	psy_ui_Component* sender)
 {
 	free(self->song->properties.credits);
 	self->song->properties.credits = strdup(ui_edit_text(&self->edit_credits));
 }
 
 void songpropertiesview_oncommentschanged(SongPropertiesView* self,
-	ui_component* sender)
+	psy_ui_Component* sender)
 {
 	free(self->song->properties.comments);
 	self->song->properties.comments = strdup(

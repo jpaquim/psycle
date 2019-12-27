@@ -9,7 +9,7 @@
 
 static void parameterlistbox_build(ParameterListBox*);
 static void parameterlistbox_onpreferredsize(ParameterListBox*,
-	ui_component* sender, ui_size* limit, ui_size* rv);
+	psy_ui_Component* sender, ui_size* limit, ui_size* rv);
 static void parameterlistbox_ondescribe(ParameterListBox*, ui_slider*,
 	char* txt);
 static void parameterlistbox_ontweak(ParameterListBox*, ui_slider*,
@@ -17,7 +17,7 @@ static void parameterlistbox_ontweak(ParameterListBox*, ui_slider*,
 static void parameterlistbox_onvalue(ParameterListBox*, ui_slider*,
 	float* value);
 
-void parameterlistbox_init(ParameterListBox* self, ui_component* parent,
+void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine)
 {	
 	ui_component_init(&self->component, parent);	
@@ -62,7 +62,7 @@ void parameterlistbox_build(ParameterListBox* self)
 	}
 }
 
-// void OnParameterListChanged(ParametersBox* self, ui_component* sender, int slot)
+// void OnParameterListChanged(ParametersBox* self, psy_ui_Component* sender, int slot)
 // {
 //	Parameters_changeslot(self->Parameters, slot);
 // }
@@ -80,7 +80,7 @@ int parameterlistbox_selected(ParameterListBox* self)
 }
 
 void parameterlistbox_onpreferredsize(ParameterListBox* self,
-	ui_component* sender, ui_size* limit, ui_size* rv)
+	psy_ui_Component* sender, ui_size* limit, ui_size* rv)
 {
 	if (rv) {
 		*rv = ui_component_size(&self->component);

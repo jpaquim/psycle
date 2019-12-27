@@ -57,6 +57,7 @@ static void machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFil
 	uintptr_t slot);
 static unsigned int machineproxy_samplerate(psy_audio_MachineProxy*);
 static unsigned int machineproxy_bpm(psy_audio_MachineProxy*);
+static psy_dsp_beat_t machineproxy_beatspersample(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_slot(psy_audio_MachineProxy*);
 static void machineproxy_setslot(psy_audio_MachineProxy*, uintptr_t slot);
 static struct psy_audio_Samples* machineproxy_samples(psy_audio_MachineProxy*);
@@ -152,6 +153,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.samplerate = (fp_machine_samplerate)
 			machineproxy_samplerate;
 		vtable.bpm = (fp_machine_bpm) machineproxy_bpm;
+		vtable.beatspersample= (fp_machine_beatspersample) machineproxy_beatspersample;
 		vtable.machines = (fp_machine_machines)
 			machineproxy_machines;
 		vtable.instruments = (fp_machine_instruments)
@@ -750,6 +752,26 @@ unsigned int machineproxy_bpm(psy_audio_MachineProxy* self)
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "bpm", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+psy_dsp_beat_t machineproxy_beatspersample(psy_audio_MachineProxy* self)
+{
+	psy_dsp_beat_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->beatspersample(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except(FilterException(self, "beatspersample", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

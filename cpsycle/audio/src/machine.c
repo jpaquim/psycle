@@ -95,6 +95,7 @@ static void setbuffermemorysize(psy_audio_Machine* self, uintptr_t size) { }
 /// machinecallback
 static unsigned int samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
+static psy_dsp_beat_t beatspersample(psy_audio_Machine* self) { return self->callback.beatspersample(self->callback.context); }
 static struct psy_audio_Samples* samples(psy_audio_Machine* self) { return self->callback.samples(self->callback.context); }
 static struct psy_audio_Machines* machines(psy_audio_Machine* self) { return self->callback.machines(self->callback.context); }
 static struct psy_audio_Instruments* instruments(psy_audio_Machine* self) { return self->callback.instruments(self->callback.context); }
@@ -144,6 +145,7 @@ static void vtable_init(void)
 		vtable.loadspecific = loadspecific;
 		vtable.savespecific = savespecific;
 		vtable.bpm = bpm;
+		vtable.beatspersample = beatspersample;
 		vtable.samplerate = samplerate;
 		vtable.instruments = instruments;	
 		vtable.samples = samples;
@@ -349,6 +351,11 @@ void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 }
 
 // virtual calls
+int machine_mode(psy_audio_Machine* self)
+{
+	return self->vtable->mode(self);
+}
+
 int machine_describevalue(psy_audio_Machine* self, char* txt, int param,
 	int value)
 {
@@ -391,6 +398,16 @@ int machine_parametername(psy_audio_Machine* self, char* txt, int param)
 	return self->vtable->parametername(self, txt, param);
 }
 
+uintptr_t machine_numinputs(psy_audio_Machine* self)
+{
+	return self->vtable->numinputs(self);
+}
+
+uintptr_t machine_numoutputs(psy_audio_Machine* self)
+{
+	return self->vtable->numoutputs(self);
+}
+
 void machine_setcallback(psy_audio_Machine* self, MachineCallback callback)
 {
 	self->vtable->setcallback(self, callback);
@@ -399,6 +416,11 @@ void machine_setcallback(psy_audio_Machine* self, MachineCallback callback)
 void machine_setpanning(psy_audio_Machine* self, psy_dsp_amp_t pan)
 {
 	self->vtable->setpanning(self, pan);
+}
+
+psy_dsp_amp_t machine_panning(psy_audio_Machine* self)
+{
+	return self->vtable->panning(self);
 }
 
 void machine_mute(psy_audio_Machine* self)
@@ -461,6 +483,16 @@ const char* machine_editname(psy_audio_Machine* self)
 	return self->vtable->editname(self);
 }
 
+unsigned int machine_bpm(psy_audio_Machine* self)
+{
+	return self->vtable->bpm(self);
+}
+
+psy_dsp_beat_t machine_beatspersample(psy_audio_Machine* self)
+{
+	return self->vtable->beatspersample(self);
+}
+
 unsigned int machine_samplerate(psy_audio_Machine* self)
 {
 	return self->vtable->samplerate(self);
@@ -469,6 +501,11 @@ unsigned int machine_samplerate(psy_audio_Machine* self)
 psy_audio_Samples* machine_samples(psy_audio_Machine* self)
 {
 	return self->vtable->samples(self);
+}
+
+psy_audio_Machines* machine_machines(psy_audio_Machine* self)
+{
+	return self->vtable->machines(self);
 }
 
 psy_audio_Instruments* machine_instruments(psy_audio_Machine* self)

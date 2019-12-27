@@ -9,17 +9,17 @@
 #include <player.h>
 
 typedef struct {
-	ui_component component;
-	ui_label bpmdesc;
-	ui_label bpmlabel;
-	ui_button lessless;
-	ui_button less;
-	ui_button more;
-	ui_button moremore;
+	psy_ui_Component component;
+	psy_ui_Label bpmdesc;
+	psy_ui_Label bpmlabel;
+	psy_ui_Button lessless;
+	psy_ui_Button less;
+	psy_ui_Button more;
+	psy_ui_Button moremore;
 	psy_audio_Player* player;
 	psy_dsp_beat_t bpm;
 } TimeBar;
 
-void timerbar_init(TimeBar*, ui_component* parent, psy_audio_Player*);
+void timerbar_init(TimeBar*, psy_ui_Component* parent, psy_audio_Player*);
 
 #endif

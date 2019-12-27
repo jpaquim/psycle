@@ -25,7 +25,7 @@ static void insertevents(psy_audio_Sequencer*);
 static void insertinputevents(psy_audio_Sequencer*);
 static void insertdelayedevents(psy_audio_Sequencer*);
 static void sequencerinsert(psy_audio_Sequencer*);
-static void compute_beatsprosample(psy_audio_Sequencer*);
+static void compute_beatspersample(psy_audio_Sequencer*);
 static void notifysequencertick(psy_audio_Sequencer*, psy_dsp_beat_t width);
 static psy_dsp_beat_t sequencer_speed(psy_audio_Sequencer*);
 
@@ -54,7 +54,7 @@ void sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence* sequence, psy
 	self->loop.count = 0;
 	self->loop.offset = (psy_dsp_beat_t) 0.f;
 	self->linetickcount = (psy_dsp_beat_t) 0.f;
-	compute_beatsprosample(self);
+	compute_beatspersample(self);
 	makecurrtracks(self, (psy_dsp_beat_t) 0.f);
 	psy_table_init(&self->lastmachine);
 }
@@ -102,7 +102,7 @@ void sequencer_start(psy_audio_Sequencer* self)
 	self->loop.count = 0;
 	self->loop.offset = (psy_dsp_beat_t) 0.f;
 	self->lpbspeed = (psy_dsp_beat_t) 1.f;
-	compute_beatsprosample(self);
+	compute_beatspersample(self);
 	self->playing = 1;
 }
 
@@ -114,7 +114,7 @@ void sequencer_stop(psy_audio_Sequencer* self)
 void sequencer_setsamplerate(psy_audio_Sequencer* self, unsigned int samplerate)
 {
 	self->samplerate = samplerate;
-	compute_beatsprosample(self);
+	compute_beatspersample(self);
 }
 
 unsigned int sequencer_samplerate(psy_audio_Sequencer* self)
@@ -132,7 +132,7 @@ void sequencer_setbpm(psy_audio_Sequencer* self, psy_dsp_beat_t bpm)
 	} else {
 		self->bpm = bpm;
 	}
-	compute_beatsprosample(self);
+	compute_beatspersample(self);
 }
 
 psy_dsp_beat_t sequencer_bpm(psy_audio_Sequencer* self)
@@ -144,7 +144,7 @@ void sequencer_setlpb(psy_audio_Sequencer* self, uintptr_t lpb)
 {	
 	self->lpb = lpb;
 	self->lpbspeed = (psy_dsp_beat_t) 1.f;
-	compute_beatsprosample(self);
+	compute_beatspersample(self);
 }
 
 uintptr_t sequencer_lpb(psy_audio_Sequencer* self)
@@ -310,7 +310,7 @@ void sequencer_linetick(psy_audio_Sequencer* self)
 	}
 	if (self->rowdelay.active) {
 		self->rowdelay.active = 0;
-		compute_beatsprosample(self);
+		compute_beatspersample(self);
 	}
 }
 
@@ -377,11 +377,11 @@ void insertevents(psy_audio_Sequencer* self)
 				psy_dsp_beat_t offset;
 				
 				offset = sequencetrackiterator_offset(it);
-				if (isoffsetinwindow(self, offset)) {
+				if (isoffsetinwindow(self, offset)) {					
 					psy_audio_PatternEntry* patternentry;
 
 					patternentry = 
-						sequencetrackiterator_patternentry(it);					
+						sequencetrackiterator_patternentry(it);
 					if (patternentry->event.cmd == EXTENDED) {
 						if ((patternentry->event.parameter & 0xF0) ==
 								PATTERN_DELAY) {
@@ -396,7 +396,7 @@ void insertevents(psy_audio_Sequencer* self)
 								self->rowdelay.rowspeed = (psy_dsp_beat_t) 1.f;
 								self->rowdelay.active = 0;
 							}
-							compute_beatsprosample(self);
+							compute_beatspersample(self);
 						} else
 						if ((patternentry->event.parameter & 0xF0) ==
 							FINE_PATTERN_DELAY) {
@@ -407,7 +407,7 @@ void insertevents(psy_audio_Sequencer* self)
 							self->rowdelay.active = 1;
 							self->rowdelay.rowspeed = 
 								(psy_dsp_beat_t)0.5 / 15 * (psy_dsp_beat_t)(30 - ticks);
-							compute_beatsprosample(self);													
+							compute_beatspersample(self);													
 						} else
 						if ((patternentry->event.parameter & 0xB0) ==
 								PATTERN_LOOP) {
@@ -522,14 +522,14 @@ void addsequenceevent(psy_audio_Sequencer* self, SequencerTrack* track, psy_dsp_
 		&& !(patternentry->event.note >= NOTECOMMANDS_RELEASE &&
 			 patternentry->event.note <= NOTECOMMANDS_INVALID)) {
 		self->bpm = patternentry->event.parameter;
-		compute_beatsprosample(self);		
+		compute_beatspersample(self);		
 	} else 
 	if (patternentry->event.cmd == EXTENDED 
 		&& !(patternentry->event.note >= NOTECOMMANDS_RELEASE &&
 			 patternentry->event.note <= NOTECOMMANDS_INVALID)) {
 		if (patternentry->event.parameter < SET_LINESPERBEAT1) {
 			self->lpbspeed = patternentry->event.parameter / (psy_dsp_beat_t)self->lpb;
-			compute_beatsprosample(self);
+			compute_beatspersample(self);
 		}
 	}
 	if (patternentry->event.note == NOTECOMMANDS_TWEAKSLIDE) {
@@ -618,7 +618,7 @@ void maketweakslideevents(psy_audio_Sequencer* self, psy_audio_PatternEntry* ent
 				slideentry->event.note = NOTECOMMANDS_TWEAK;
 				slideentry->event.cmd = cmd;
 				slideentry->event.parameter = parameter;				
-				slideentry->delta += slide * 64 * self->beatsprosample;				
+				slideentry->delta += slide * 64 * self->beatspersample;				
 				psy_list_append(&self->delayedevents, slideentry);
 			}
 		}
@@ -728,19 +728,24 @@ void insertinputevents(psy_audio_Sequencer* self)
 	}
 }
 
-void compute_beatsprosample(psy_audio_Sequencer* self)
+void compute_beatspersample(psy_audio_Sequencer* self)
 {
-	self->beatsprosample = (self->bpm * sequencer_speed(self)) / (self->samplerate * 60.0f);
+	self->beatspersample = (self->bpm * sequencer_speed(self)) / (self->samplerate * 60.0f);
+}
+
+psy_dsp_beat_t sequencer_beatspersample(psy_audio_Sequencer* self)
+{
+	return self->beatspersample;
 }
 
 psy_dsp_beat_t sequencer_frametooffset(psy_audio_Sequencer* self, int numsamples)
 {
-	return numsamples * self->beatsprosample;
+	return numsamples * self->beatspersample;
 }
 
 unsigned int sequencer_frames(psy_audio_Sequencer* self, psy_dsp_beat_t offset)
 {
-	return (unsigned int)(offset / self->beatsprosample);
+	return (unsigned int)(offset / self->beatspersample);
 }
 
 int sequencer_playing(psy_audio_Sequencer* self)
@@ -756,12 +761,12 @@ psy_List* sequencer_timedevents(psy_audio_Sequencer* self, size_t slot, unsigned
 	rv = sequencer_machinetickevents(self, slot);
 	for (p = rv ; p != 0; p = p->next) {		
 		psy_audio_PatternEntry* entry;
-		psy_dsp_beat_t beatsprosample;
+		psy_dsp_beat_t beatspersample;
 		unsigned int deltaframes;			
 
 		entry = (psy_audio_PatternEntry*) p->entry;
-		beatsprosample = (entry->bpm * sequencer_speed(self)) / (self->samplerate * 60.0f);			
-		deltaframes = (unsigned int) (entry->delta / self->beatsprosample);
+		beatspersample = (entry->bpm * sequencer_speed(self)) / (self->samplerate * 60.0f);			
+		deltaframes = (unsigned int) (entry->delta / self->beatspersample);
 		if (deltaframes >= amount) {
 			deltaframes = amount - 1;
 		}

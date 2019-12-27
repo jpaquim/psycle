@@ -9,13 +9,13 @@
 #include "player.h"
 
 typedef struct {
-	ui_component component;
-	ui_label header;
-	ui_label position;		
+	psy_ui_Component component;
+	psy_ui_Label header;
+	psy_ui_Label position;		
 	psy_dsp_beat_t lastposition;
 	psy_audio_Player* player;
 } PlayPosBar;
 
-void playposbar_init(PlayPosBar*, ui_component* parent,psy_audio_Player* player);
+void playposbar_init(PlayPosBar*, psy_ui_Component* parent,psy_audio_Player* player);
 
 #endif

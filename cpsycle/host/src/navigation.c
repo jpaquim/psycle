@@ -6,10 +6,10 @@
 #include "navigation.h"
 
 static void navigation_initalign(Navigation*);
-static void navigation_onprev(Navigation*, ui_component* sender);
-static void navigation_onnext(Navigation*, ui_component* sender);
+static void navigation_onprev(Navigation*, psy_ui_Component* sender);
+static void navigation_onnext(Navigation*, psy_ui_Component* sender);
 
-void navigation_init(Navigation* self, ui_component* parent, Workspace* workspace)
+void navigation_init(Navigation* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
@@ -38,12 +38,12 @@ void navigation_initalign(Navigation* self)
 		&margin));
 }
 
-void navigation_onprev(Navigation* self, ui_component* sender)
+void navigation_onprev(Navigation* self, psy_ui_Component* sender)
 {
 	workspace_back(self->workspace);
 }
 
-void navigation_onnext(Navigation* self, ui_component* sender)
+void navigation_onnext(Navigation* self, psy_ui_Component* sender)
 {
 	workspace_forward(self->workspace);
 }

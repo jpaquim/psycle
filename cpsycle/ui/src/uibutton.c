@@ -9,22 +9,22 @@
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
-static void ui_button_create_system(ui_button*, ui_component* parent);
-static void ui_button_create_ownerdrawn(ui_button*, ui_component* parent);
-static void ondestroy(ui_button*, ui_component* sender);
-static void onownerdraw(ui_button*, ui_component* sender, ui_graphics*);
-static void drawicon(ui_button*, ui_graphics*);
-static void drawarrow(ui_button*, ui_point* arrow, ui_graphics*);
+static void ui_button_create_system(psy_ui_Button*, psy_ui_Component* parent);
+static void ui_button_create_ownerdrawn(psy_ui_Button*, psy_ui_Component* parent);
+static void ondestroy(psy_ui_Button*, psy_ui_Component* sender);
+static void onownerdraw(psy_ui_Button*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
+static void drawarrow(psy_ui_Button*, ui_point* arrow, psy_ui_Graphics*);
 static void makearrow(ui_point*, ButtonIcon icon, int x, int y);
-static void onmousedown(ui_button*, ui_component* sender);
-static void onmouseenter(ui_button*, ui_component* sender);
-static void onmouseleave(ui_button*, ui_component* sender);
-static void oncommand(ui_button*, ui_component* sender, WPARAM wParam,
+static void onmousedown(psy_ui_Button*, psy_ui_Component* sender);
+static void onmouseenter(psy_ui_Button*, psy_ui_Component* sender);
+static void onmouseleave(psy_ui_Button*, psy_ui_Component* sender);
+static void oncommand(psy_ui_Button*, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam);
-static void onpreferredsize(ui_button*, ui_component* sender, ui_size* limit,
+static void onpreferredsize(psy_ui_Button*, psy_ui_Component* sender, ui_size* limit,
 	ui_size* size);
 
-void ui_button_init(ui_button* self, ui_component* parent)
+void ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {	
 	self->ownerdrawn = 1;
 	self->hover = 0;
@@ -45,7 +45,7 @@ void ui_button_init(ui_button* self, ui_component* parent)
 		onpreferredsize);
 }
 
-void ui_button_create_system(ui_button* self, ui_component* parent)
+void ui_button_create_system(psy_ui_Button* self, psy_ui_Component* parent)
 {    	
 	self->text = 0;
 	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
@@ -55,7 +55,7 @@ void ui_button_create_system(ui_button* self, ui_component* parent)
 	psy_signal_connect(&self->component.signal_command, self, oncommand);	
 }
 
-void ui_button_create_ownerdrawn(ui_button* self, ui_component* parent)
+void ui_button_create_ownerdrawn(psy_ui_Button* self, psy_ui_Component* parent)
 {
 	self->text = _strdup("");	
 	ui_component_init(&self->component, parent);
@@ -65,7 +65,7 @@ void ui_button_create_ownerdrawn(ui_button* self, ui_component* parent)
 	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
 }
 
-void ondestroy(ui_button* self, ui_component* sender)
+void ondestroy(psy_ui_Button* self, psy_ui_Component* sender)
 {
 	if (self->ownerdrawn == 1) {
 		free(self->text);
@@ -73,7 +73,7 @@ void ondestroy(ui_button* self, ui_component* sender)
 	psy_signal_dispose(&self->signal_clicked);
 }
 
-void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
+void onownerdraw(psy_ui_Button* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	ui_size size;
 	ui_size textsize;
@@ -114,7 +114,7 @@ void onownerdraw(ui_button* self, ui_component* sender, ui_graphics* g)
 	}
 }
 
-void drawicon(ui_button* self, ui_graphics* g)
+void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	ui_size size;
 	ui_point arrow[4];
@@ -162,7 +162,7 @@ void drawicon(ui_button* self, ui_graphics* g)
 	}
 }
 
-void drawarrow(ui_button* self, ui_point* arrow, ui_graphics* g)
+void drawarrow(psy_ui_Button* self, ui_point* arrow, psy_ui_Graphics* g)
 {
 	if (self->hover == 1) {
 		ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor,
@@ -198,12 +198,12 @@ void makearrow(ui_point* arrow, ButtonIcon icon, int x, int y)
 	}
 }
 
-void ui_button_setcharnumber(ui_button* self, int number)
+void ui_button_setcharnumber(psy_ui_Button* self, int number)
 {
 	self->charnumber = number;
 }
 
-void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit,
+void onpreferredsize(psy_ui_Button* self, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv)
 {		
 	if (rv) {
@@ -233,24 +233,24 @@ void onpreferredsize(ui_button* self, ui_component* sender, ui_size* limit,
 	}
 }
 
-void onmousedown(ui_button* self, ui_component* sender)
+void onmousedown(psy_ui_Button* self, psy_ui_Component* sender)
 {
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
-void onmouseenter(ui_button* self, ui_component* sender)
+void onmouseenter(psy_ui_Button* self, psy_ui_Component* sender)
 {
 	self->hover = 1;
 	ui_component_invalidate(&self->component);
 }
 
-void onmouseleave(ui_button* self, ui_component* sender)
+void onmouseleave(psy_ui_Button* self, psy_ui_Component* sender)
 {		
 	self->hover = 0;
 	ui_component_invalidate(&self->component);
 }
 
-void ui_button_settext(ui_button* self, const char* text)
+void ui_button_settext(psy_ui_Button* self, const char* text)
 {
 	if (self->ownerdrawn) {
 		free(self->text);
@@ -261,12 +261,12 @@ void ui_button_settext(ui_button* self, const char* text)
 	}
 }
 
-void ui_button_seticon(ui_button* self, ButtonIcon icon)
+void ui_button_seticon(psy_ui_Button* self, ButtonIcon icon)
 {
 	self->icon = icon;
 }
 
-void ui_button_highlight(ui_button* self)
+void ui_button_highlight(psy_ui_Button* self)
 {
 	if (!self->highlight) {
 		self->highlight = 1;
@@ -277,7 +277,7 @@ void ui_button_highlight(ui_button* self)
 	}
 }
 
-void ui_button_disablehighlight(ui_button* self)
+void ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (self->highlight) {
 		self->highlight = 0;
@@ -288,12 +288,12 @@ void ui_button_disablehighlight(ui_button* self)
 	}
 }
 
-void ui_button_settextalignment(ui_button* self, UiAlignment alignment)
+void ui_button_settextalignment(psy_ui_Button* self, UiAlignment alignment)
 {
 	self->textalignment = alignment;
 }
 
-void oncommand(ui_button* self, ui_component* sender, WPARAM wParam,
+void oncommand(psy_ui_Button* self, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam)
 {
 	switch(HIWORD(wParam))

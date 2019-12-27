@@ -45,7 +45,12 @@ typedef struct {
 	uintptr_t channel;
 	psy_dsp_amp_t vol;
 	psy_dsp_amp_t pan;
-	int usedefaultvolume;
+	int usedefaultvolume;	
+	double portaspeed;
+	uintptr_t portanumframes;
+	uintptr_t portacurrframe;
+	int effcmd;
+	int effval;
 } Voice;
 
 typedef struct psy_audio_Sampler {

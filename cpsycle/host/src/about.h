@@ -11,35 +11,35 @@
 #include <uinotebook.h>
 
 typedef struct {	
-	ui_component component;		
-	ui_label asio;
-	ui_edit	sourceforge;
-	ui_edit	psycledelics;
-	ui_label steincopyright;		
-	ui_label headercontrib;
-	ui_edit	contrib;	
+	psy_ui_Component component;		
+	psy_ui_Label asio;
+	psy_ui_Edit	sourceforge;
+	psy_ui_Edit	psycledelics;
+	psy_ui_Label steincopyright;		
+	psy_ui_Label headercontrib;
+	psy_ui_Edit	contrib;	
 } Contrib;
 
-void contrib_init(Contrib*, ui_component* parent);
+void contrib_init(Contrib*, psy_ui_Component* parent);
 
 typedef struct {
-	ui_component component;
-	ui_label versioninfo;
+	psy_ui_Component component;
+	psy_ui_Label versioninfo;
 } Version;
 
-void version_init(Version*, ui_component* parent);
+void version_init(Version*, psy_ui_Component* parent);
 
 typedef struct {	
-	ui_component component;
+	psy_ui_Component component;
 	ui_notebook notebook;
-	ui_image image;
+	psy_ui_Image image;
 	Contrib contrib;
 	Version version;
-	ui_button contribbutton;
-	ui_button versionbutton;
-	ui_button okbutton;		
+	psy_ui_Button contribbutton;
+	psy_ui_Button versionbutton;
+	psy_ui_Button okbutton;		
 } About;
 
-void about_init(About*, ui_component* parent);
+void about_init(About*, psy_ui_Component* parent);
 
 #endif

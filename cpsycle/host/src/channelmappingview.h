@@ -8,23 +8,23 @@
 #include "workspace.h"
 
 typedef struct {	
-	ui_component component;	
+	psy_ui_Component component;	
 	Workspace* workspace;
 	psy_audio_Wire wire;
 	int lineheight;
 } PinEdit;
 
-void pinedit_init(PinEdit*, ui_component* parent, psy_audio_Wire, Workspace*);
+void pinedit_init(PinEdit*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	PinEdit pinedit;
-	ui_component buttongroup;
-	ui_button autowire;
-	ui_button unselectall;
+	psy_ui_Component buttongroup;
+	psy_ui_Button autowire;
+	psy_ui_Button unselectall;
 } ChannelMappingView;
 
 
-void channelmappingview_init(ChannelMappingView*, ui_component* parent, psy_audio_Wire, Workspace*);
+void channelmappingview_init(ChannelMappingView*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
 
 #endif

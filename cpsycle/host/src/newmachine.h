@@ -12,24 +12,24 @@
 
 
 typedef struct {
-	ui_component component;	
-	ui_button rescan;
+	psy_ui_Component component;	
+	psy_ui_Button rescan;
 	Workspace* workspace;
 } NewMachineBar;
 
-void newmachinebar_init(NewMachineBar*, ui_component* parent, Workspace*);
+void newmachinebar_init(NewMachineBar*, psy_ui_Component* parent, Workspace*);
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	NewMachineBar bar;
-	ui_label desclabel;
+	psy_ui_Label desclabel;
 } NewMachineDetail;
 
-void newmachinedetail_init(NewMachineDetail*, ui_component* parent,
+void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
 	Workspace*);
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    int dy;
    int count;
    int lineheight;
@@ -45,14 +45,14 @@ typedef struct {
    int calledby;
 } PluginsView;
 
-void pluginsview_init(PluginsView*, ui_component* parent, Workspace*);
+void pluginsview_init(PluginsView*, psy_ui_Component* parent, Workspace*);
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    PluginsView pluginsview;
    NewMachineDetail detail;   
 } NewMachine;
 
-void newmachine_init(NewMachine*, ui_component* parent, Workspace*);
+void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
 
 #endif

@@ -13,7 +13,7 @@
 #include <uinotebook.h>
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ui_notebook notebook;
 	TabBar tabbar;	
 	About about;
@@ -21,7 +21,7 @@ typedef struct {
 	Help help;
 } HelpView;
 
-void helpview_init(HelpView*, ui_component* parent,
-	ui_component* tabbarparent, Workspace*);
+void helpview_init(HelpView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace*);
 
 #endif

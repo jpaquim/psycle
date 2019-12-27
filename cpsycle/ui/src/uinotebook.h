@@ -7,17 +7,17 @@
 #include "uicomponent.h"
 
 typedef struct {
-   ui_component component;
-   ui_component splitbar;
+   psy_ui_Component component;
+   psy_ui_Component splitbar;
    int pageindex;
    int split;
    int splitx;
 } ui_notebook;
 
-void ui_notebook_init(ui_notebook*, ui_component* parent);
+void ui_notebook_init(ui_notebook*, psy_ui_Component* parent);
 void ui_notebook_setpageindex(ui_notebook*, int page);
 int ui_notebook_pageindex(ui_notebook*);
-ui_component* ui_notebook_activepage(ui_notebook*);
+psy_ui_Component* ui_notebook_activepage(ui_notebook*);
 void ui_notebook_split(ui_notebook*);
 void ui_notebook_full(ui_notebook*);
 void ui_notebook_connectcontroller(ui_notebook*, 

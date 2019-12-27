@@ -11,9 +11,9 @@ static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
 static void plugineditor_onsongchanged(PluginEditor*, Workspace*);
 static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
-static void plugineditor_ondestroy(PluginEditor*, ui_component* sender);
+static void plugineditor_ondestroy(PluginEditor*, psy_ui_Component* sender);
 
-void plugineditor_init(PluginEditor* self, ui_component* parent,
+void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {							
 	self->workspace = workspace;
@@ -29,7 +29,7 @@ void plugineditor_init(PluginEditor* self, ui_component* parent,
 	plugineditor_connectmachinesignals(self, workspace);
 }
 
-void plugineditor_ondestroy(PluginEditor* self, ui_component* sender)
+void plugineditor_ondestroy(PluginEditor* self, psy_ui_Component* sender)
 {
 }
 

@@ -12,14 +12,14 @@
 
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    psy_audio_Machine* machine;      
 } Vst2View;
 
-void vst2view_init(Vst2View*, ui_component* parent, psy_audio_Machine*,
+void vst2view_init(Vst2View*, psy_ui_Component* parent, psy_audio_Machine*,
 	Workspace* workspace);
 Vst2View* vst2view_alloc(void);
-Vst2View* vst2view_allocinit(ui_component* parent, psy_audio_Machine*,
+Vst2View* vst2view_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
 	Workspace*);
 
 #endif

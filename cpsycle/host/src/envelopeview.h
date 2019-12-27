@@ -17,7 +17,7 @@ typedef struct {
 } ADSRPointMapper;
 
 typedef struct {	
-	ui_component component;
+	psy_ui_Component component;
 	int cx;
 	int cy;
 	psy_List* points;
@@ -30,7 +30,7 @@ typedef struct {
 	ADSRPointMapper pointmapper;
 } EnvelopeView;
 
-void InitEnvelopeView(EnvelopeView*, ui_component* parent);
+void InitEnvelopeView(EnvelopeView*, psy_ui_Component* parent);
 void EnvelopeViewSetAdsrEnvelope(EnvelopeView*, psy_dsp_ADSRSettings*);
 void EnvelopeViewUpdate(EnvelopeView*);
 

@@ -10,13 +10,13 @@
 
 #define TIMERID_MASTERVU 400
 
-static void vumeter_ondraw(Vumeter*, ui_component* sender, ui_graphics*);
-static void vumeter_ontimer(Vumeter*, ui_component* sender, int timerid);
+static void vumeter_ondraw(Vumeter*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void vumeter_ontimer(Vumeter*, psy_ui_Component* sender, int timerid);
 static void vumeter_onmasterworked(Vumeter*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
 static void vumeter_onsongchanged(Vumeter*, Workspace*);
 static void vumeter_connectmachinessignals(Vumeter*, Workspace*);
 
-void vumeter_init(Vumeter* self, ui_component* parent, Workspace* workspace)
+void vumeter_init(Vumeter* self, psy_ui_Component* parent, Workspace* workspace)
 {					
 	ui_component_init(&self->component, parent);
 	self->leftavg = 0;
@@ -30,7 +30,7 @@ void vumeter_init(Vumeter* self, ui_component* parent, Workspace* workspace)
 	ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
 }
 
-void vumeter_ondraw(Vumeter* self, ui_component* sender, ui_graphics* g)
+void vumeter_ondraw(Vumeter* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	ui_rectangle left;
 	ui_rectangle right;
@@ -53,7 +53,7 @@ void vumeter_ondraw(Vumeter* self, ui_component* sender, ui_graphics* g)
 	ui_drawsolidrectangle(g, right, 0x003E3E3E);
 }
 
-void vumeter_ontimer(Vumeter* self, ui_component* sender, int timerid)
+void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, int timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		ui_component_invalidate(&self->component);

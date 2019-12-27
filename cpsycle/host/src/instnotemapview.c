@@ -6,41 +6,41 @@
 #include "instnotemapview.h"
 #include <portable.h>
 
-static void instrumententryview_init(InstrumentEntryView*, ui_component* parent,
+static void instrumententryview_init(InstrumentEntryView*, psy_ui_Component* parent,
 	InstrumentParameterView*);
 static void instrumententryview_setinstrument(InstrumentEntryView*, psy_audio_Instrument*);
 static void instrumentnotemapview_setmetrics(InstrumentNoteMapView*,
 	InstrumentNoteMapMetrics);
 static void instrumentparameterview_setinstrument(InstrumentParameterView*,
 	psy_audio_Instrument*);
-static void instrumententryview_ondraw(InstrumentEntryView*, ui_component* sender,
-	ui_graphics*);
-static void instrumententryview_onsize(InstrumentEntryView*, ui_component* sender, ui_size* size);
-static void instrumententryview_onscroll(InstrumentEntryView*, ui_component* sender,
+static void instrumententryview_ondraw(InstrumentEntryView*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
+static void instrumententryview_onsize(InstrumentEntryView*, psy_ui_Component* sender, ui_size* size);
+static void instrumententryview_onscroll(InstrumentEntryView*, psy_ui_Component* sender,
 	int stepx, int stepy);
 static void instrumententryview_adjustscroll(InstrumentEntryView*);
 static void instrumententryview_onmousedown(InstrumentEntryView*,
-	ui_component* sender, MouseEvent*);
+	psy_ui_Component* sender, MouseEvent*);
 static void instrumententryview_onmousemove(InstrumentEntryView*,
-	ui_component* sender, MouseEvent*);
+	psy_ui_Component* sender, MouseEvent*);
 static void instrumententryview_onmouseup(InstrumentEntryView*,
-	ui_component* sender, MouseEvent*);
+	psy_ui_Component* sender, MouseEvent*);
 static int isblack(int key);
 static int whitekeytokey(int whitekey);
 static int screentokey(int x, int keysize);
 // instrument parameter view
 static void instrumentparameterview_init(InstrumentParameterView*,
-	ui_component* parent);
+	psy_ui_Component* parent);
 static void instrumentparameterview_ondraw(InstrumentParameterView*,
-	ui_component* sender, ui_graphics*);
+	psy_ui_Component* sender, psy_ui_Graphics*);
 static void instrumentnotemapbuttons_init(InstrumentNoteMapButtons*,
-	ui_component* parent);
+	psy_ui_Component* parent);
 // keyboardview
 static void instrumentkeyboardview_ondraw(InstrumentKeyboardView*,
-	ui_component* sender, ui_graphics*);
+	psy_ui_Component* sender, psy_ui_Graphics*);
 
 void instrumentnotemapview_init(InstrumentNoteMapView* self,
-	ui_component* parent)
+	psy_ui_Component* parent)
 {
 	ui_margin margin;
 
@@ -91,7 +91,7 @@ void instrumentnotemapview_update(InstrumentNoteMapView* self)
 }
 
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
-	ui_component* parent)
+	psy_ui_Component* parent)
 {
 	self->dy = 0;
 	self->metrics.keysize = 6;
@@ -111,7 +111,7 @@ int isblack(int key)
 		|| offset == 10);	
 }
 
-void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, ui_component* sender, ui_graphics* g)
+void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {		
 	int keymin = 0;
 	int keymax = NOTECOMMANDS_RELEASE;
@@ -161,7 +161,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, ui_component* s
 
 // entry view
 void instrumententryview_init(InstrumentEntryView* self,
-	ui_component* parent, InstrumentParameterView* parameterview)
+	psy_ui_Component* parent, InstrumentParameterView* parameterview)
 {
 	self->parameterview = parameterview;
 	self->instrument = 0;
@@ -217,7 +217,7 @@ int whitekeytokey(int whitekey)
 	return octave * 12 + numkey[offset];	
 }
 
-void instrumententryview_ondraw(InstrumentEntryView* self, ui_component* sender, ui_graphics* g)
+void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	if (self->instrument) {
 		int cpy = 0;
@@ -258,12 +258,12 @@ void instrumententryview_ondraw(InstrumentEntryView* self, ui_component* sender,
 }
 
 void instrumententryview_onsize(InstrumentEntryView* self,
-	ui_component* sender, ui_size* size)
+	psy_ui_Component* sender, ui_size* size)
 {
 	instrumententryview_adjustscroll(self);
 }
 
-void instrumententryview_onscroll(InstrumentEntryView* self, ui_component* sender,
+void instrumententryview_onscroll(InstrumentEntryView* self, psy_ui_Component* sender,
 	int stepx, int stepy)
 {
 	self->dy += (stepy * self->metrics.lineheight * 3);
@@ -288,7 +288,7 @@ void instrumententryview_adjustscroll(InstrumentEntryView* self)
 }
 
 void instrumententryview_onmousedown(InstrumentEntryView* self,
-	ui_component* sender, MouseEvent* ev)
+	psy_ui_Component* sender, MouseEvent* ev)
 {
 	psy_audio_InstrumentEntry* entry;
 	if (self->instrument) {
@@ -321,7 +321,7 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 }
 
 void instrumententryview_onmousemove(InstrumentEntryView* self,
-	ui_component* sender, MouseEvent* ev)
+	psy_ui_Component* sender, MouseEvent* ev)
 {
 	if (self->dragmode != INSTVIEW_DRAG_NONE && self->instrument) {
 		psy_audio_InstrumentEntry* entry;
@@ -348,7 +348,7 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 }
 
 void instrumententryview_onmouseup(InstrumentEntryView* self,
-	ui_component* sender, MouseEvent* ev)
+	psy_ui_Component* sender, MouseEvent* ev)
 {
 	self->dragmode = 0;
 	ui_component_releasecapture(&self->component);
@@ -376,7 +376,7 @@ int screentokey(int x, int keysize)
 
 
 void instrumentparameterview_init(InstrumentParameterView* self,
-	ui_component* parent)
+	psy_ui_Component* parent)
 {
 	self->instrument = 0;
 	self->dy = 0;
@@ -396,7 +396,7 @@ void instrumentparameterview_setinstrument(InstrumentParameterView* self,
 }
 
 void instrumentparameterview_ondraw(InstrumentParameterView* self,
-	ui_component* sender, ui_graphics* g)
+	psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	if (self->instrument) {
 		int cpy = 0;
@@ -431,7 +431,7 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 }
 
 void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
-	ui_component* parent)
+	psy_ui_Component* parent)
 {
 	ui_margin margin;
 

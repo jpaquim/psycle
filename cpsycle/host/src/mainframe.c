@@ -14,33 +14,32 @@
 
 #define TIMERID_MAINFRAME 20
 
-static void mainframe_initmenu(MainFrame*);
 static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initbars(MainFrame*);
 static void mainframe_initvubar(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame*);
-static void mainframe_destroy(MainFrame*, ui_component* component);
-static void mainframe_onkeydown(MainFrame*, ui_component* sender, KeyEvent*);
-static void mainframe_onkeyup(MainFrame*, ui_component* sender, KeyEvent*);
+static void mainframe_destroy(MainFrame*, psy_ui_Component* component);
+static void mainframe_onkeydown(MainFrame*, psy_ui_Component* sender, KeyEvent*);
+static void mainframe_onkeyup(MainFrame*, psy_ui_Component* sender, KeyEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry* entry);
-static void mainframe_ongear(MainFrame*, ui_component* sender);
-static void mainframe_onplugineditor(MainFrame*, ui_component* sender);
-static void mainframe_ongearcreate(MainFrame*, ui_component* sender);
-static void mainframe_onaboutok(MainFrame*, ui_component* sender);
+static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
+static void mainframe_ongearcreate(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
 	psy_Properties*);
-static void mainframe_ontabbarchanged(MainFrame*, ui_component* sender, uintptr_t tabindex);
-static void mainframe_onsongchanged(MainFrame*, ui_component* sender,
+static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender, uintptr_t tabindex);
+static void mainframe_onsongchanged(MainFrame*, psy_ui_Component* sender,
 	int flag);
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
 static void mainframe_onviewselected(MainFrame*, Workspace*, int view);
-static void mainframe_onrender(MainFrame*, ui_component* sender);
+static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatetitle(MainFrame*);
-static void mainframe_ontimer(MainFrame*, ui_component* sender, int timerid);
+static void mainframe_ontimer(MainFrame*, psy_ui_Component* sender, int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, EventDriver* sender);
 
@@ -290,11 +289,11 @@ void mainframe_initbars(MainFrame* self)
 	ui_component_setmargin(&self->playposbar.component, &margin);	
 	// row1
 	// Songbar	
-	InitSongBar(&self->songbar, &self->toprow1, &self->workspace);
+	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
 	ui_component_setalign(&self->songbar.component, UI_ALIGN_LEFT);	
 	// row2
 	// Machinebar
-	InitMachineBar(&self->machinebar, &self->toprow2, &self->workspace);	
+	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);	
 	ui_component_setalign(&self->machinebar.component, UI_ALIGN_LEFT);	
 }
 
@@ -309,15 +308,13 @@ void mainframe_setstartpage(MainFrame* self)
 	}
 }
 
-void mainframe_initmenu(MainFrame* self)
+void mainframe_destroy(MainFrame* self, psy_ui_Component* component)
 {
-}
+	extern psy_ui_App app;
 
-void mainframe_destroy(MainFrame* self, ui_component* component)
-{
 	workspace_save_configuration(&self->workspace);
 	workspace_dispose(&self->workspace);
-	ui_quit();
+	psy_ui_app_stop(&app);
 }
 
 void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
@@ -425,7 +422,7 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 
 
 
-void mainframe_onkeydown(MainFrame* self, ui_component* sender, KeyEvent* ev)
+void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender, KeyEvent* ev)
 {	
 	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
 		EventDriver* kbd;
@@ -441,7 +438,7 @@ void mainframe_onkeydown(MainFrame* self, ui_component* sender, KeyEvent* ev)
 	}
 }
 
-void mainframe_onkeyup(MainFrame* self, ui_component* component, KeyEvent* keyevent)
+void mainframe_onkeyup(MainFrame* self, psy_ui_Component* component, KeyEvent* keyevent)
 {
 	if (keyevent->keycode != VK_CONTROL &&
 			keyevent->keycode != VK_SHIFT) {
@@ -504,7 +501,7 @@ void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace, int p
 	}
 }
 
-void mainframe_onsongchanged(MainFrame* self, ui_component* sender, int flag)
+void mainframe_onsongchanged(MainFrame* self, psy_ui_Component* sender, int flag)
 {		
 	if (flag == WORKSPACE_LOADSONG) {
 		if (workspace_showsonginfoonload(&self->workspace)) {
@@ -533,7 +530,7 @@ void mainframe_updatetitle(MainFrame* self)
 }
 
 
-void mainframe_ongear(MainFrame* self, ui_component* sender)
+void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 {
 	if (ui_component_visible(&self->gear.component)) {
 		ui_button_disablehighlight(&self->machinebar.gear);
@@ -546,7 +543,7 @@ void mainframe_ongear(MainFrame* self, ui_component* sender)
 	}	
 }
 
-void mainframe_onplugineditor(MainFrame* self, ui_component* sender)
+void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 {
 	if (ui_component_visible(&self->plugineditor.component)) {
 		ui_button_disablehighlight(&self->machinebar.editor);
@@ -559,12 +556,12 @@ void mainframe_onplugineditor(MainFrame* self, ui_component* sender)
 	}	
 }
 
-void mainframe_onaboutok(MainFrame* self, ui_component* sender)
+void mainframe_onaboutok(MainFrame* self, psy_ui_Component* sender)
 {
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 }
 
-void mainframe_ongearcreate(MainFrame* self, ui_component* sender)
+void mainframe_ongearcreate(MainFrame* self, psy_ui_Component* sender)
 {
 	self->machineview.newmachine.pluginsview.calledby = GEARVIEW;
 	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
@@ -594,12 +591,12 @@ int mainframe_showmaximizedatstart(MainFrame* self)
 	return workspace_showmaximizedatstart(&self->workspace);
 }
 
-void mainframe_onrender(MainFrame* self, ui_component* sender)
+void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 {
 	ui_notebook_setpageindex(&self->notebook, TABPAGE_RENDERVIEW);
 }
 
-void mainframe_ontimer(MainFrame* self, ui_component* sender, int timerid)
+void mainframe_ontimer(MainFrame* self, psy_ui_Component* sender, int timerid)
 {
 	workspace_idle(&self->workspace);
 }
@@ -611,10 +608,10 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view)
 	}
 }
 
-void mainframe_ontabbarchanged(MainFrame* self, ui_component* sender,
+void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
-	ui_component* component;
+	psy_ui_Component* component;
 	workspace_onviewchanged(&self->workspace, tabindex);
 	component = ui_notebook_activepage(&self->notebook);
 	ui_component_align(&self->component);

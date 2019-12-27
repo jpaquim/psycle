@@ -8,6 +8,7 @@
 #include "psy2.h"
 #include "psy3.h"
 #include "xm.h"
+#include "wavsongio.h"
 #include "xmdefs.h"
 
 #include <string.h>
@@ -34,13 +35,15 @@ void psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 
 	self->err = 0;
 	self->warnings = 0;
-	self->file = &file;	
+	self->file = &file;
+	self->path = path;
 	
 	psy_audio_songfile_message(self, "searching for ");
 	psy_audio_songfile_message(self, path);
 	psy_audio_songfile_message(self, "\n");
 	if (psyfile_open(self->file, path)) {
 		char header[20];
+		char riff[5];
 //		SequencePosition position;
 		
 		psy_audio_songfile_message(self, "loading ");
@@ -51,12 +54,24 @@ void psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		machines_startfilemode(&self->song->machines);
 		psyfile_read(self->file, header, 8);
 		header[8] = '\0';
+		strncpy(riff, header, 4);
+		riff[4] = '\0';
 		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
 		if (strcmp(header,"PSY3SONG") == 0) {
 			psy3_load(self);
+			psyfile_close(self->file);
 		} else
 		if (strcmp(header,"PSY2SONG") == 0) {
 			psy2_load(self);
+			psyfile_close(self->file);
+		} else 
+		if (strcmp(riff, "RIFF") == 0) {			
+			psyfile_read(&file, header, 8);
+			header[8] = 0;
+			if (strcmp(&header[0], "WAVEfmt ") == 0) {
+				psyfile_close(self->file);		
+				wav_songio_load(self);
+			}
 		} else {
 			psyfile_read(self->file, header + 8, strlen(XM_HEADER) - 8);
 			header[strlen(XM_HEADER)] = '\0';
@@ -65,12 +80,12 @@ void psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			} else {
 				self->err = 2;
 			}
+			psyfile_close(self->file);
 		}
 		if (!machines_at(&self->song->machines, MASTER_INDEX)) {
 			songfile_createmaster(self);
 		}		
-		machines_endfilemode(&self->song->machines);
-		psyfile_close(self->file);
+		machines_endfilemode(&self->song->machines);		
 		psy_audio_songfile_message(self, "ready\n");
 	} else {
 		psy_audio_songfile_error(self, "file not open error\n");		
@@ -84,6 +99,9 @@ void psy_audio_songfile_save(psy_audio_SongFile* self, const char* path)
 	PsyFile file;
 
 	self->file = &file;
+	self->err = 0;
+	self->warnings = 0;
+	self->path = path;
 	if (psyfile_create(self->file, path, 1)) {		
 		psy3_save(self);
 		psyfile_close(self->file);

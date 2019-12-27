@@ -5,11 +5,11 @@
 
 #include "wavebox.h"
 
-static void wavebox_ondraw(WaveBox*, ui_component* sender, ui_graphics*);
-static void wavebox_ondestroy(WaveBox*, ui_component* sender);
-static void wavebox_onmousedown(WaveBox*, ui_component* sender, MouseEvent*);
-static void wavebox_onmousemove(WaveBox*, ui_component* sender, MouseEvent*);
-static void wavebox_onmouseup(WaveBox*, ui_component* sender, MouseEvent*);
+static void wavebox_ondraw(WaveBox*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void wavebox_ondestroy(WaveBox*, psy_ui_Component* sender);
+static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender, MouseEvent*);
+static void wavebox_onmousemove(WaveBox*, psy_ui_Component* sender, MouseEvent*);
+static void wavebox_onmouseup(WaveBox*, psy_ui_Component* sender, MouseEvent*);
 static int wavebox_hittest(WaveBox*, uintptr_t frame, int x, int epsilon);
 ui_rectangle wavebox_framerangetoscreen(WaveBox*, uintptr_t framebegin,
 	uintptr_t frameend);
@@ -26,7 +26,7 @@ enum {
 	SAMPLEBOX_DRAG_MOVE
 };
 
-void wavebox_init(WaveBox* self, ui_component* parent)
+void wavebox_init(WaveBox* self, psy_ui_Component* parent)
 {			
 	self->sample = 0;
 	self->hasselection = 0;
@@ -46,7 +46,7 @@ void wavebox_init(WaveBox* self, ui_component* parent)
 		wavebox_onmouseup);
 }
 
-void wavebox_ondestroy(WaveBox* self, ui_component* sender)
+void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
 {		
 }
 
@@ -56,7 +56,7 @@ void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample)
 	ui_component_invalidate(&self->component);
 }
 
-void wavebox_ondraw(WaveBox* self, ui_component* sender, ui_graphics* g)
+void wavebox_ondraw(WaveBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	ui_rectangle r;
 	ui_size size = ui_component_size(&self->component);	
@@ -160,7 +160,7 @@ ui_rectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebegin,
 	return rv;
 }
 
-void wavebox_onmousedown(WaveBox* self, ui_component* sender, MouseEvent* ev)
+void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender, MouseEvent* ev)
 {	
 	if (self->sample && self->sample->numframes > 0) {
 		if (self->hasselection) {
@@ -192,7 +192,7 @@ void wavebox_onmousedown(WaveBox* self, ui_component* sender, MouseEvent* ev)
 	}
 }
 
-void wavebox_onmousemove(WaveBox* self, ui_component* sender, MouseEvent* ev)
+void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender, MouseEvent* ev)
 {	
 	if (self->sample && self->sample->numframes > 0) {
 		if (self->dragmode == SAMPLEBOX_DRAG_LEFT) {		
@@ -303,7 +303,7 @@ int wavebox_frametoscreen(WaveBox* self, uintptr_t frame)
 	return rv;
 }
 
-void wavebox_onmouseup(WaveBox* self, ui_component* sender, MouseEvent* ev)
+void wavebox_onmouseup(WaveBox* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	if (self->sample && self->sample->numframes > 0) {
 		ui_component_releasecapture(&self->component);

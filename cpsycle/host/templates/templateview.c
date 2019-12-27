@@ -2,7 +2,7 @@
 
 static void Draw(nameView* self, ui_graphics* g);
 
-void InitnameView(nameView* patternview, ui_component* parent)
+void InitnameView(nameView* patternview, psy_ui_Component* parent)
 {			
 	ui_component_init(&nameview->component, parent);
 	nameview->component.events.draw = Draw;

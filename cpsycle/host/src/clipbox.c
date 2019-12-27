@@ -6,16 +6,16 @@
 #include "clipbox.h"
 #include <rms.h>
 
-static void clipbox_ondraw(ClipBox*, ui_component* sender, ui_graphics*);
-static void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid);
-static void clipbox_onmousedown(ClipBox* self, ui_component* sender, MouseEvent*);
+static void clipbox_ondraw(ClipBox*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void clipbox_ontimer(ClipBox* self, psy_ui_Component* sender, int timerid);
+static void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender, MouseEvent*);
 static void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned int slot, psy_audio_BufferContext* bc);
 static void clipbox_onsongchanged(ClipBox* self, Workspace* workspace);
 static void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace);
 
 #define TIMER_ID_CLIPBOX 700
 
-void clipbox_init(ClipBox* self, ui_component* parent, Workspace* workspace)
+void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->clip = 0;	
 	ui_component_init(&self->component, parent);	
@@ -27,7 +27,7 @@ void clipbox_init(ClipBox* self, ui_component* parent, Workspace* workspace)
 	// ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 200);
 }
 
-void clipbox_ontimer(ClipBox* self, ui_component* sender, int timerid)
+void clipbox_ontimer(ClipBox* self, psy_ui_Component* sender, int timerid)
 {	
 	if (self->clip) {
 		ui_component_setbackgroundcolor(&self->component, 0x00FF0000);
@@ -50,7 +50,7 @@ void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned i
 	}
 }
 
-void clipbox_onmousedown(ClipBox* self, ui_component* sender, MouseEvent* ev)
+void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	self->clip = 0;
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);
@@ -72,7 +72,7 @@ void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
 	}
 }
 
-void clipbox_ondraw(ClipBox* self, ui_component* sender, ui_graphics* g)
+void clipbox_ondraw(ClipBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	ui_rectangle r;
 	ui_size size;

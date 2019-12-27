@@ -44,7 +44,7 @@ typedef struct {
 	psy_audio_Machines* machines;
 	psy_dsp_beat_t bpm;
 	unsigned int samplerate;
-	psy_dsp_beat_t beatsprosample;	
+	psy_dsp_beat_t beatspersample;	
 	unsigned int lpb; // global
 	psy_dsp_beat_t lpbspeed; // pattern	
 	int playing;
@@ -94,5 +94,6 @@ void sequencer_loop(psy_audio_Sequencer*);
 void sequencer_stoploop(psy_audio_Sequencer*);
 int sequencer_looping(psy_audio_Sequencer*);
 SequencerPlayMode sequencer_playmode(psy_audio_Sequencer*);
+psy_dsp_beat_t sequencer_beatspersample(psy_audio_Sequencer*);
 
 #endif

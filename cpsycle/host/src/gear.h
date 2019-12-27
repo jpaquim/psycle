@@ -15,18 +15,18 @@
 
 
 typedef struct {
-	ui_component component;
-	ui_button createreplace;
-	ui_button del;
-	ui_button parameters;
-	ui_button properties;
-	ui_button exchange;
-	ui_button clone;
-	ui_button showmaster;
+	psy_ui_Component component;
+	psy_ui_Button createreplace;
+	psy_ui_Button del;
+	psy_ui_Button parameters;
+	psy_ui_Button properties;
+	psy_ui_Button exchange;
+	psy_ui_Button clone;
+	psy_ui_Button showmaster;
 } GearButtons;
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	TabBar tabbar;
 	ui_notebook notebook;
 	ui_listbox listbox;	
@@ -39,6 +39,6 @@ typedef struct {
 	Workspace* workspace;
 } Gear;
 
-void gear_init(Gear*, ui_component* parent, Workspace*);
+void gear_init(Gear*, psy_ui_Component* parent, Workspace*);
 
 #endif

@@ -11,10 +11,10 @@
 #include "instruments.h"
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	ui_listbox samplelist;
-	ui_label header;
-	ui_label group;
+	psy_ui_Label header;
+	psy_ui_Label group;
 	ui_listbox subsamplelist;	
 	psy_audio_Samples* samples;
 	psy_audio_Instruments* instruments;
@@ -22,7 +22,7 @@ typedef struct {
 	int changeinstrumentslot;
 } SamplesBox;
 
-void samplesbox_init(SamplesBox*, ui_component* parent, psy_audio_Samples*, psy_audio_Instruments*);
+void samplesbox_init(SamplesBox*, psy_ui_Component* parent, psy_audio_Samples*, psy_audio_Instruments*);
 void samplesbox_setsamples(SamplesBox*, psy_audio_Samples*, psy_audio_Instruments*);
 SampleIndex samplesbox_selected(SamplesBox*);
 

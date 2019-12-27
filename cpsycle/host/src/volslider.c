@@ -4,21 +4,22 @@
 #include "../../detail/prefix.h"
 
 #include "volslider.h"
+#include <uiapp.h>
 #include <stdio.h>
 #include <math.h>
 #include <portable.h>
 
 static int TIMERID_VOLSLIDER = 700;
 
-static void volslider_ondraw(VolSlider*, ui_component* sender, ui_graphics*);
-static void volslider_onmousedown(VolSlider*, ui_component* sender, MouseEvent*);
-static void volslider_onmouseup(VolSlider*, ui_component* sender, MouseEvent*);
-static void volslider_onmousemove(VolSlider*, ui_component* sender, MouseEvent*);
-static void volslider_ontimer(VolSlider*, ui_component* sender, int timerid);
-static void volslider_onsliderchanged(VolSlider*, ui_component* sender);
+static void volslider_ondraw(VolSlider*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void volslider_onmousedown(VolSlider*, psy_ui_Component* sender, MouseEvent*);
+static void volslider_onmouseup(VolSlider*, psy_ui_Component* sender, MouseEvent*);
+static void volslider_onmousemove(VolSlider*, psy_ui_Component* sender, MouseEvent*);
+static void volslider_ontimer(VolSlider*, psy_ui_Component* sender, int timerid);
+static void volslider_onsliderchanged(VolSlider*, psy_ui_Component* sender);
 static void volslider_onsongchanged(VolSlider*, Workspace*);
 
-void volslider_init(VolSlider* self, ui_component* parent, Workspace* workspace)
+void volslider_init(VolSlider* self, psy_ui_Component* parent, Workspace* workspace)
 {		
 	self->value = 0.f;
 	self->dragx = -1;
@@ -39,24 +40,25 @@ void volslider_init(VolSlider* self, ui_component* parent, Workspace* workspace)
 	ui_component_starttimer(&self->component, TIMERID_VOLSLIDER, 50);
 }
 
-void volslider_ondraw(VolSlider* self, ui_component* sender, ui_graphics* g)
+void volslider_ondraw(VolSlider* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	ui_rectangle r;
 	ui_size size;
-	int sliderwidth;	
+	int sliderwidth;
+	extern psy_ui_App app;
 
 	size = ui_component_size(&self->component);
 	ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_setcolor(g, 0x00333333);
+	ui_setcolor(g, ui_defaults_bordercolor(&app.defaults));
 	ui_drawrectangle(g, r);
 	sliderwidth = 6;	
 	ui_setrectangle(&r, (int)((size.width - sliderwidth) * self->value), 
 		2, sliderwidth, size.height - 4);
-	ui_drawsolidrectangle(g, r, 0x00CACACA);
+	ui_drawsolidrectangle(g, r, ui_defaults_color(&app.defaults));
 	
 }
 
-void volslider_onmousedown(VolSlider* self, ui_component* sender,
+void volslider_onmousedown(VolSlider* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	ui_size size;
@@ -65,7 +67,7 @@ void volslider_onmousedown(VolSlider* self, ui_component* sender,
 	ui_component_capture(&self->component);
 }
 
-void volslider_onmousemove(VolSlider* self, ui_component* sender,
+void volslider_onmousemove(VolSlider* self, psy_ui_Component* sender,
 	MouseEvent* ev)
 {
 	if (self->dragx != -1) {
@@ -79,13 +81,13 @@ void volslider_onmousemove(VolSlider* self, ui_component* sender,
 	}
 }
 
-void volslider_onmouseup(VolSlider* self, ui_component* sender, MouseEvent* ev)
+void volslider_onmouseup(VolSlider* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	self->dragx = -1;
 	ui_component_releasecapture(&self->component);
 }
 
-void volslider_onsliderchanged(VolSlider* self, ui_component* sender)
+void volslider_onsliderchanged(VolSlider* self, psy_ui_Component* sender)
 {	
 	if (self->machines) {
 		machines_setvolume(self->machines, self->value * self->value * 4.f);
@@ -97,7 +99,7 @@ void volslider_onsongchanged(VolSlider* self, Workspace* workspace)
 	self->machines = &workspace->song->machines;
 }
 
-void volslider_ontimer(VolSlider* self, ui_component* sender, int timerid)
+void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, int timerid)
 {		
 	if (self->machines) {
 		psy_dsp_amp_t oldvalue;

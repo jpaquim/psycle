@@ -113,6 +113,10 @@ SOURCE=.\src\uidef.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uidefaults.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiedit.c
 # End Source File
 # Begin Source File
@@ -179,6 +183,10 @@ SOURCE=.\src\uiswitch.c
 
 SOURCE=.\src\uiterminal.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinapp.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -210,6 +218,10 @@ SOURCE=.\src\uicomponent.h
 # Begin Source File
 
 SOURCE=.\src\uidef.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uidefaults.h
 # End Source File
 # Begin Source File
 
@@ -278,6 +290,10 @@ SOURCE=.\src\uiswitch.h
 # Begin Source File
 
 SOURCE=.\src\uiterminal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinapp.h
 # End Source File
 # End Group
 # End Target

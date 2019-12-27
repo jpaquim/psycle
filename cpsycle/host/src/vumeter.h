@@ -8,11 +8,11 @@
 #include "workspace.h"
 
 typedef struct {	
-	ui_component component;
+	psy_ui_Component component;
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
 } Vumeter;
 
-void vumeter_init(Vumeter*, ui_component* parent, Workspace*);
+void vumeter_init(Vumeter*, psy_ui_Component* parent, Workspace*);
 
 #endif

@@ -5,10 +5,10 @@
 
 #include "uilabel.h"
 
-static void onpreferredsize(ui_label*, ui_component* sender, ui_size* limit, ui_size* rv);
-static ui_textmetric textmetric(ui_component*);
+static void onpreferredsize(psy_ui_Label*, psy_ui_Component* sender, ui_size* limit, ui_size* rv);
+static ui_textmetric textmetric(psy_ui_Component*);
 
-void ui_label_init(ui_label* self, ui_component* parent)
+void ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {  		
 	ui_win32_component_init(&self->component, parent, TEXT("STATIC"), 
 		0, 0, 100, 20,
@@ -19,17 +19,17 @@ void ui_label_init(ui_label* self, ui_component* parent)
 	self->charnumber = 0;	
 }
 
-void ui_label_settext(ui_label* label, const char* text)
+void ui_label_settext(psy_ui_Label* label, const char* text)
 {
 	SetWindowText((HWND)label->component.hwnd, text);	
 }
 
-void ui_label_setcharnumber(ui_label* self, int number)
+void ui_label_setcharnumber(psy_ui_Label* self, int number)
 {
 	self->charnumber = number;
 }
 
-void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, ui_size* rv)
+void onpreferredsize(psy_ui_Label* self, psy_ui_Component* sender, ui_size* limit, ui_size* rv)
 {	
 	if (rv) {
 		ui_textmetric tm;	
@@ -50,7 +50,7 @@ void onpreferredsize(ui_label* self, ui_component* sender, ui_size* limit, ui_si
 	}
 }
 
-void ui_label_setstyle(ui_label* self, int style)
+void ui_label_setstyle(psy_ui_Label* self, int style)
 {
 	#if defined(_WIN64)
 	SetWindowLongPtr((HWND)self->component.hwnd, GWL_STYLE, style);		

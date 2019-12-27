@@ -5,17 +5,17 @@
 
 #include "uisplitbar.h"
 
-static void splitbar_onmousedown(ui_splitbar*, ui_component* sender, MouseEvent*);
-static void splitbar_onmousemove(ui_splitbar*, ui_component* sender, MouseEvent*);
-static void splitbar_onmouseup(ui_splitbar*, ui_component* sender, MouseEvent*);
-static void splitbar_onmouseenter(ui_splitbar*, ui_component* sender);
-static void splitbar_onmouseleave(ui_splitbar*, ui_component* sender);
-static void splitbar_onpreferredsize(ui_splitbar*, ui_component* sender,
+static void splitbar_onmousedown(ui_splitbar*, psy_ui_Component* sender, MouseEvent*);
+static void splitbar_onmousemove(ui_splitbar*, psy_ui_Component* sender, MouseEvent*);
+static void splitbar_onmouseup(ui_splitbar*, psy_ui_Component* sender, MouseEvent*);
+static void splitbar_onmouseenter(ui_splitbar*, psy_ui_Component* sender);
+static void splitbar_onmouseleave(ui_splitbar*, psy_ui_Component* sender);
+static void splitbar_onpreferredsize(ui_splitbar*, psy_ui_Component* sender,
 	ui_size* limit, ui_size* size);
-static ui_component* splitbar_prevcomponent(ui_splitbar*);
+static psy_ui_Component* splitbar_prevcomponent(ui_splitbar*);
 static void splitbar_setcursor(ui_splitbar*);
 
-void ui_splitbar_init(ui_splitbar* self, ui_component* parent)
+void ui_splitbar_init(ui_splitbar* self, psy_ui_Component* parent)
 {		
 	self->resize = 0;
 	ui_component_init(&self->component, parent);
@@ -31,7 +31,7 @@ void ui_splitbar_init(ui_splitbar* self, ui_component* parent)
 		splitbar_onpreferredsize);
 }
 
-void splitbar_onpreferredsize(ui_splitbar* self, ui_component* sender,
+void splitbar_onpreferredsize(ui_splitbar* self, psy_ui_Component* sender,
 	ui_size* limit, ui_size* rv)
 {		
 	if (rv) {		
@@ -46,14 +46,14 @@ void splitbar_onpreferredsize(ui_splitbar* self, ui_component* sender,
 	}
 }
 
-void splitbar_onmousedown(ui_splitbar* self, ui_component* sender, MouseEvent* ev)
+void splitbar_onmousedown(ui_splitbar* self, psy_ui_Component* sender, MouseEvent* ev)
 {	
 	ui_component_capture(sender);
 	self->resize = 1;
 	splitbar_setcursor(self);
 }
 
-void splitbar_onmousemove(ui_splitbar* self, ui_component* sender, MouseEvent* ev)
+void splitbar_onmousemove(ui_splitbar* self, psy_ui_Component* sender, MouseEvent* ev)
 {
 	if (self->resize == 1) {		
 		ui_rectangle position;
@@ -72,10 +72,10 @@ void splitbar_onmousemove(ui_splitbar* self, ui_component* sender, MouseEvent* e
 	splitbar_setcursor(self);
 }
 
-void splitbar_onmouseup(ui_splitbar* self, ui_component* sender, MouseEvent* ev)
+void splitbar_onmouseup(ui_splitbar* self, psy_ui_Component* sender, MouseEvent* ev)
 {			
 	ui_rectangle position;
-	ui_component* prev;
+	psy_ui_Component* prev;
 
 	ui_component_releasecapture();
 	self->resize = 0;
@@ -95,29 +95,29 @@ void splitbar_onmouseup(ui_splitbar* self, ui_component* sender, MouseEvent* ev)
 	splitbar_setcursor(self);
 }
 
-void splitbar_onmouseenter(ui_splitbar* self, ui_component* sender)
+void splitbar_onmouseenter(ui_splitbar* self, psy_ui_Component* sender)
 {	
 	ui_component_setbackgroundcolor(sender, 0x00666666);
 	ui_component_invalidate(sender);	
 	splitbar_setcursor(self);
 }
 
-void splitbar_onmouseleave(ui_splitbar* self, ui_component* sender)
+void splitbar_onmouseleave(ui_splitbar* self, psy_ui_Component* sender)
 {			
 	ui_component_setbackgroundcolor(sender, 0x00232323);
 	ui_component_invalidate(sender);
 }
 
-ui_component* splitbar_prevcomponent(ui_splitbar* self)
+psy_ui_Component* splitbar_prevcomponent(ui_splitbar* self)
 {
-	ui_component* rv = 0;
+	psy_ui_Component* rv = 0;
 	psy_List* c;
 
 	c = ui_component_children(ui_component_parent(&self->component), 0);	
 	while (c) {
 		if (c->entry == &self->component) {
 			c = c->prev;
-			while (c && ((ui_component*)c->entry)->align != 
+			while (c && ((psy_ui_Component*)c->entry)->align != 
 					self->component.align) {
 				c = c->prev;
 			}
@@ -126,7 +126,7 @@ ui_component* splitbar_prevcomponent(ui_splitbar* self)
 		c = c->next;
 	}	
 	if (c) {		
-		rv = (ui_component*) c->entry;
+		rv = (psy_ui_Component*) c->entry;
 	}
 	psy_list_free(c);
 	return rv;

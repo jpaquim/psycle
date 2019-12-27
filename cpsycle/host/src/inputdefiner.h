@@ -7,12 +7,12 @@
 #include <uicomponent.h>
 
 typedef struct {
-   ui_component component;   
+   psy_ui_Component component;   
    unsigned int input;
    int regularkey;
 } InputDefiner;
 
-void inputdefiner_init(InputDefiner*, ui_component* parent);
+void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
 void inputdefiner_setinput(InputDefiner*, unsigned int input);
 void inputdefiner_text(InputDefiner*, char* text);
 

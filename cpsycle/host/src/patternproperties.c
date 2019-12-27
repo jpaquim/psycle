@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <portable.h>
 
-static void OnSize(PatternProperties* self, ui_component* sender, ui_size*);
-static void OnApplyClicked(PatternProperties* self, ui_component* sender);
-static void OnCloseClicked(PatternProperties* self, ui_component* sender);
+static void OnSize(PatternProperties* self, psy_ui_Component* sender, ui_size*);
+static void OnApplyClicked(PatternProperties* self, psy_ui_Component* sender);
+static void OnCloseClicked(PatternProperties* self, psy_ui_Component* sender);
 
-void InitPatternProperties(PatternProperties* self, ui_component* parent, psy_audio_Pattern* pattern)
+void InitPatternProperties(PatternProperties* self, psy_ui_Component* parent, psy_audio_Pattern* pattern)
 {			
 	self->pattern = pattern;
 	ui_component_init(&self->component, parent);	
@@ -52,13 +52,13 @@ void PatternPropertiesSetPattern(PatternProperties* self, psy_audio_Pattern* pat
 	ui_edit_settext(&self->lengthedit, buffer);
 }
 
-void OnSize(PatternProperties* self, ui_component* sender, ui_size* size)
+void OnSize(PatternProperties* self, psy_ui_Component* sender, ui_size* size)
 {
 	ui_component_move(&self->closebutton.component, size->width - 25, 5);
 	ui_component_resize(&self->closebutton.component, 20, 20);
 }
 
-static void OnApplyClicked(PatternProperties* self, ui_component* sender)
+static void OnApplyClicked(PatternProperties* self, psy_ui_Component* sender)
 {
 	if (self->pattern) {
 		pattern_setlabel(self->pattern, ui_edit_text(&self->nameedit));
@@ -66,7 +66,7 @@ static void OnApplyClicked(PatternProperties* self, ui_component* sender)
 	}
 }
 
-static void OnCloseClicked(PatternProperties* self, ui_component* sender)
+static void OnCloseClicked(PatternProperties* self, psy_ui_Component* sender)
 {
 	PatternPropertiesSetPattern(self, self->pattern);
 	ui_component_hide(&self->component);	

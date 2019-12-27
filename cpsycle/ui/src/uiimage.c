@@ -5,11 +5,11 @@
 
 #include "uiimage.h"
 
-static void ondestroy(ui_image*);
-static void ondraw(ui_image*, ui_component* sender, ui_graphics* g);
-static int checkalignment(ui_image*, UiAlignment alignment);
+static void ondestroy(psy_ui_Image*);
+static void ondraw(psy_ui_Image*, psy_ui_Component* sender, psy_ui_Graphics* g);
+static int checkalignment(psy_ui_Image*, UiAlignment alignment);
 
-void ui_image_init(ui_image* self, ui_component* parent)
+void ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 {  
     ui_component_init(&self->component, parent);
 	ui_bitmap_init(&self->bitmap);
@@ -18,17 +18,17 @@ void ui_image_init(ui_image* self, ui_component* parent)
 	self->alignment = UI_ALIGNMENT_NONE;	
 }
 
-void ondestroy(ui_image* self)
+void ondestroy(psy_ui_Image* self)
 {
 	ui_bitmap_dispose(&self->bitmap);
 }
 
-void ui_image_setbitmapalignment(ui_image* self, UiAlignment alignment)
+void ui_image_setbitmapalignment(psy_ui_Image* self, UiAlignment alignment)
 {
 	self->alignment = alignment;
 }
 
-void ondraw(ui_image* self, ui_component* sender, ui_graphics* g)
+void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	ui_size size;
 	ui_size bmpsize;
@@ -57,7 +57,7 @@ void ondraw(ui_image* self, ui_component* sender, ui_graphics* g)
 		x, y, bmpsize.width, bmpsize.height, 0, 0);
 }
 
-int checkalignment(ui_image* self, UiAlignment alignment)
+int checkalignment(psy_ui_Image* self, UiAlignment alignment)
 {
 	return (self->alignment & alignment) == alignment;	
 }

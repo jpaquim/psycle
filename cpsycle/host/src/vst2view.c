@@ -7,11 +7,11 @@
 
 #define TIMERID_VST2VIEW 420
 
-static void onpreferredsize(Vst2View* self, ui_component* sender,
+static void onpreferredsize(Vst2View* self, psy_ui_Component* sender,
 	ui_size* limit, ui_size* rv);
-static void ontimer(Vst2View*, ui_component* sender, int id);
+static void ontimer(Vst2View*, psy_ui_Component* sender, int id);
 
-void vst2view_init(Vst2View* self, ui_component* parent, psy_audio_Machine* machine,
+void vst2view_init(Vst2View* self, psy_ui_Component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
 {		
 	self->machine = machine;
@@ -29,7 +29,7 @@ Vst2View* vst2view_alloc(void)
 	return (Vst2View*) malloc(sizeof(Vst2View));
 }
 
-Vst2View* vst2view_allocinit(ui_component* parent, psy_audio_Machine* machine,
+Vst2View* vst2view_allocinit(psy_ui_Component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
 {
 	Vst2View* rv;
@@ -41,12 +41,12 @@ Vst2View* vst2view_allocinit(ui_component* parent, psy_audio_Machine* machine,
 	return rv;	
 }
 
-void ontimer(Vst2View* self, ui_component* sender, int timerid)
+void ontimer(Vst2View* self, psy_ui_Component* sender, int timerid)
 {	
 	machine_editoridle(self->machine);
 }
 
-void onpreferredsize(Vst2View* self, ui_component* sender, ui_size* limit,
+void onpreferredsize(Vst2View* self, psy_ui_Component* sender, ui_size* limit,
 	ui_size* rv)
 {
 	if (rv) {		

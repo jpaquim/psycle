@@ -8,12 +8,12 @@
 #include <uicomponent.h>
 
 typedef struct {
-	ui_component component;
+	psy_ui_Component component;
 	Workspace* workspace;
 	int trackheight;
 } TrackScopeView;
 
-void trackscopeview_init(TrackScopeView*, ui_component* parent, Workspace*);
+void trackscopeview_init(TrackScopeView*, psy_ui_Component* parent, Workspace*);
 void trackscopeview_start(TrackScopeView*);
 void trackscopeview_stop(TrackScopeView*);
 

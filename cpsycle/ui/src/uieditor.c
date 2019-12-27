@@ -16,11 +16,11 @@ static HMODULE scimodule = 0;
 #define MAXTEXTLENGTH 65535
 
 static int loadscilexer(void);
-static void onappdestroy(void*, ui_app* sender);
-static void ui_editor_styleclearall(ui_editor*);
-static void ui_editor_setcaretcolor(ui_editor*, uint32_t color);
+static void onappdestroy(void*, psy_ui_App* sender);
+static void ui_editor_styleclearall(psy_ui_Editor*);
+static void ui_editor_setcaretcolor(psy_ui_Editor*, uint32_t color);
 
-void ui_editor_init(ui_editor* self, ui_component* parent)
+void ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {  		
 #ifdef SCINTILLA_ENABLED
 	int err;
@@ -29,9 +29,12 @@ void ui_editor_init(ui_editor* self, ui_component* parent)
 		ui_win32_component_init(&self->component, parent, TEXT("Scintilla"), 
 			0, 0, 100, 20, WS_CHILD | WS_VISIBLE, 0);
 		if (self->component.hwnd) {
-			ui_editor_setcolor(self, ui_defaultcolor());
-			ui_editor_setcaretcolor(self, ui_defaultcolor());
-			ui_editor_setbackgroundcolor(self, ui_defaultbackgroundcolor());
+			extern psy_ui_App app;
+
+			ui_editor_setcolor(self, ui_defaults_color(&app.defaults));
+			ui_editor_setcaretcolor(self, ui_defaults_color(&app.defaults));
+			ui_editor_setbackgroundcolor(self, 
+				ui_defaults_backgroundcolor(&app.defaults));
 			ui_editor_styleclearall(self);
 		}
 	} else
@@ -68,7 +71,7 @@ int loadscilexer(void)
 #endif
 }
 
-void onappdestroy(void* context, ui_app* sender)
+void onappdestroy(void* context, psy_ui_App* sender)
 {	
 	if (scimodule != NULL) {
 		FreeLibrary(scimodule);
@@ -76,7 +79,7 @@ void onappdestroy(void* context, ui_app* sender)
 	}
 }
 
-void ui_editor_load(ui_editor* self, const char* path)
+void ui_editor_load(psy_ui_Editor* self, const char* path)
 {	
 	FILE* fp;
 
@@ -99,7 +102,7 @@ void ui_editor_load(ui_editor* self, const char* path)
 	}
 }
 
-void ui_editor_settext(ui_editor* self, const char* text)
+void ui_editor_settext(psy_ui_Editor* self, const char* text)
 {
 	SendMessage((HWND) self->component.hwnd,
 		SCI_SETTEXT,
@@ -107,7 +110,7 @@ void ui_editor_settext(ui_editor* self, const char* text)
 		(LPARAM)(intptr_t) text);		
 }
 
-void ui_editor_addtext(ui_editor* self, const char* text)
+void ui_editor_addtext(psy_ui_Editor* self, const char* text)
 {
 	SendMessage((HWND) self->component.hwnd,
 		SCI_ADDTEXT,
@@ -115,39 +118,39 @@ void ui_editor_addtext(ui_editor* self, const char* text)
 		(LPARAM)(intptr_t) text);		
 }
 
-void ui_editor_clear(ui_editor* self)
+void ui_editor_clear(psy_ui_Editor* self)
 {
 	SendMessage((HWND) self->component.hwnd, SCI_CLEARALL, 0, 0);
 }
 
-void ui_editor_setcolor(ui_editor* self, uint32_t color)
+void ui_editor_setcolor(psy_ui_Editor* self, uint32_t color)
 {
 	SendMessage((HWND) self->component.hwnd, 
 		SCI_STYLESETFORE, STYLE_DEFAULT, color);  
 }
 
-void ui_editor_setbackgroundcolor(ui_editor* self, uint32_t color)
+void ui_editor_setbackgroundcolor(psy_ui_Editor* self, uint32_t color)
 {
 	SendMessage((HWND) self->component.hwnd, 
 		SCI_STYLESETBACK, STYLE_DEFAULT, color);  
 }
 
-void ui_editor_styleclearall(ui_editor* self)
+void ui_editor_styleclearall(psy_ui_Editor* self)
 {
 	SendMessage((HWND) self->component.hwnd, SCI_STYLECLEARALL, 0, 0);
 }
 
-void ui_editor_setcaretcolor(ui_editor* self, uint32_t color)
+void ui_editor_setcaretcolor(psy_ui_Editor* self, uint32_t color)
 {
 	SendMessage((HWND) self->component.hwnd, SCI_SETCARETFORE, color, 0);
 }
 
-void ui_editor_preventedit(ui_editor* self)
+void ui_editor_preventedit(psy_ui_Editor* self)
 {
 	SendMessage((HWND) self->component.hwnd, SCI_SETREADONLY, 1, 0);
 }
 
-void ui_editor_enableedit(ui_editor* self)
+void ui_editor_enableedit(psy_ui_Editor* self)
 {
 	SendMessage((HWND) self->component.hwnd, SCI_SETREADONLY, 0, 0);
 }

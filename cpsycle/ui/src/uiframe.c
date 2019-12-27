@@ -5,12 +5,17 @@
 
 #include "uiframe.h"
 #include "hashtbl.h"
+#include "uiapp.h"
+#include "uiwinapp.h"
 
-extern TCHAR szAppClass[];
+extern psy_ui_App app;
 
-void ui_frame_init(ui_frame* self, ui_component* parent)
+void ui_frame_init(ui_frame* self, psy_ui_Component* parent)
 {			
-	ui_win32_component_init(self, parent, szAppClass, 
+	psy_ui_WinApp* winapp;
+
+	winapp = (psy_ui_WinApp*) app.platform;
+	ui_win32_component_init(self, parent, winapp->appclass, 
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		WS_OVERLAPPEDWINDOW,

@@ -12,10 +12,10 @@
 #include "tabbar.h"
 
 typedef struct {
-	ui_component component;
-	ui_component client;
+	psy_ui_Component component;
+	psy_ui_Component client;
 	psy_Properties* properties;
-	ui_graphics* g;
+	psy_ui_Graphics* g;
 	int lastlevel;
 	psy_Properties* selected;
 	psy_Properties* search;
@@ -32,13 +32,13 @@ typedef struct {
 	int columnwidth;
 	int identwidth;	
 	psy_Properties* choiceproperty;
-	ui_edit edit;
+	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
 	TabBar tabbar;	
 } SettingsView;
 
-void settingsview_init(SettingsView* Settingsview, ui_component* parent,
-	ui_component* tabbarparent, psy_Properties* properties);
+void settingsview_init(SettingsView* Settingsview, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, psy_Properties* properties);
 
 #endif

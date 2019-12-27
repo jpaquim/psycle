@@ -18,6 +18,7 @@ typedef struct psy_audio_SongFile {
 	psy_Signal signal_output;
 	psy_Signal signal_warning;
 	psy_Signal signal_error;
+	const char* path;
 } psy_audio_SongFile;
 
 void psy_audio_songfile_init(psy_audio_SongFile*);

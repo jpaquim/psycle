@@ -13,36 +13,36 @@
 #include <math.h>
 
 /// psy_audio_Samples View
-static void samplesview_onsamplesboxchanged(SamplesView*, ui_component* sender);
+static void samplesview_onsamplesboxchanged(SamplesView*, psy_ui_Component* sender);
 static void samplesview_setsample(SamplesView*, SampleIndex slot);
-static void samplesview_onloadsample(SamplesView*, ui_component* sender);
-static void samplesview_onsavesample(SamplesView*, ui_component* sender);
-static void samplesview_ondeletesample(SamplesView*, ui_component* sender);
-static void samplesview_onduplicatesample(SamplesView*, ui_component* sender);
+static void samplesview_onloadsample(SamplesView*, psy_ui_Component* sender);
+static void samplesview_onsavesample(SamplesView*, psy_ui_Component* sender);
+static void samplesview_ondeletesample(SamplesView*, psy_ui_Component* sender);
+static void samplesview_onduplicatesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onsongchanged(SamplesView*, Workspace*);
 static void samplesview_oninstrumentslotchanged(SamplesView* self,
 	psy_audio_Instrument* sender, int slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
-static void samplesview_onshow(SamplesView*, ui_component* sender);
-static void samplesview_onhide(SamplesView*, ui_component* sender);
-static void samplesview_onkeydown(SamplesView*, ui_component* sender, KeyEvent*);
+static void samplesview_onshow(SamplesView*, psy_ui_Component* sender);
+static void samplesview_onhide(SamplesView*, psy_ui_Component* sender);
+static void samplesview_onkeydown(SamplesView*, psy_ui_Component* sender, KeyEvent*);
 /// Header View
-static void samplesheaderview_init(SamplesHeaderView*, ui_component* parent,
+static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
 	psy_audio_Instruments*, struct SamplesView*);
 static void samplesheaderview_setsample(SamplesHeaderView*, psy_audio_Sample*);
 static void OnInstrumentSlotChanged(SamplesView*, psy_audio_Instrument* sender, int slot);
-static void OnPrevSample(SamplesHeaderView*, ui_component* sender);
-static void OnNextSample(SamplesHeaderView*, ui_component* sender);
-static void OnEditSampleName(SamplesHeaderView*, ui_edit* sender);
+static void OnPrevSample(SamplesHeaderView*, psy_ui_Component* sender);
+static void OnNextSample(SamplesHeaderView*, psy_ui_Component* sender);
+static void OnEditSampleName(SamplesHeaderView*, psy_ui_Edit* sender);
 /// General Settings View
-static void InitSamplesGeneralView(SamplesGeneralView*, ui_component* parent);
+static void InitSamplesGeneralView(SamplesGeneralView*, psy_ui_Component* parent);
 static void SetSampleSamplesGeneralView(SamplesGeneralView*, psy_audio_Sample* sample);
 static void OnGeneralViewDescribe(SamplesGeneralView*, ui_slider*, char* txt);
 static void GeneralViewFillPanDescription(SamplesGeneralView*, char* txt);
 static void OnGeneralViewTweak(SamplesGeneralView*, ui_slider*, float value);
 static void OnGeneralViewValue(SamplesGeneralView*, ui_slider*, float* value);
-static void InitSamplesVibratoView(SamplesVibratoView*, ui_component* parent, psy_audio_Player* player);
+static void InitSamplesVibratoView(SamplesVibratoView*, psy_ui_Component* parent, psy_audio_Player* player);
 static void SetSampleSamplesVibratoView(SamplesVibratoView*, psy_audio_Sample* sample);
 /// Vibrato Settings View
 static void OnVibratoViewDescribe(SamplesVibratoView*, ui_slider*, char* txt);
@@ -52,30 +52,35 @@ static void OnWaveFormChange(SamplesVibratoView*, ui_combobox* sender, int sel);
 static WaveForms ComboBoxToWaveForm(int combobox_index);
 static int WaveFormToComboBox(WaveForms waveform);
 /// Waveloop Setting View
-static void samplesloopview_init(SamplesLoopView*, ui_component* parent,
+static void samplesloopview_init(SamplesLoopView*, psy_ui_Component* parent,
 	SamplesView*);
-static void samplesloopview_setsample(SamplesLoopView*, psy_audio_Sample* sample);
+static void samplesloopview_setsample(SamplesLoopView*, psy_audio_Sample*);
 static int LoopTypeToComboBox(LoopType looptype);
 static LoopType ComboBoxToLoopType(int combobox_index);
-static void samplesloopview_onlooptypechange(SamplesLoopView*, ui_combobox* sender, int sel);
+static void samplesloopview_onlooptypechange(SamplesLoopView*,
+	ui_combobox* sender, int sel);
 static void samplesloopview_onsustainlooptypechange(SamplesLoopView*,
 	ui_combobox* sender, int selectedindex);
 static void samplesloopview_looptypeenablepreventinput(SamplesLoopView*);
-static void samplesloopview_oneditchangedloopstart(SamplesLoopView*, ui_edit* sender);
-static void samplesloopview_oneditchangedloopend(SamplesLoopView*, ui_edit* sender);
-static void samplesloopview_oneditchangedsustainstart(SamplesLoopView*, ui_edit* sender);
-static void samplesloopview_oneditchangedsustainend(SamplesLoopView*, ui_edit* sender);
+static void samplesloopview_oneditchangedloopstart(SamplesLoopView*,
+	psy_ui_Edit* sender);
+static void samplesloopview_oneditchangedloopend(SamplesLoopView*,
+	psy_ui_Edit* sender);
+static void samplesloopview_oneditchangedsustainstart(SamplesLoopView*,
+	psy_ui_Edit* sender);
+static void samplesloopview_oneditchangedsustainend(SamplesLoopView*,
+	psy_ui_Edit* sender);
 // Songimport
 static void samplessongimportview_ondestroy(SamplesSongImportView*,
-	ui_component* sender);
+	psy_ui_Component* sender);
 static void samplessongimportview_onloadsong(SamplesSongImportView*,
-	ui_component* sender);
+	psy_ui_Component* sender);
 static void samplessongimportview_oncopy(SamplesSongImportView*,
-	ui_component* sender);
+	psy_ui_Component* sender);
 static void samplessongimportview_onsamplesboxchanged(SamplesSongImportView*,
-	ui_component* sender);
+	psy_ui_Component* sender);
 
-void samplesviewbuttons_init(SamplesViewButtons* self, ui_component* parent)
+void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent)
 {
 	ui_margin margin;
 
@@ -97,7 +102,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, ui_component* parent)
 		UI_ALIGN_LEFT, &margin));
 }
 
-void samplessongimportview_init(SamplesSongImportView* self, ui_component* parent,
+void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* parent,
 	SamplesView* view, Workspace* workspace)
 {	
 	ui_margin margin;
@@ -148,7 +153,7 @@ void samplessongimportview_init(SamplesSongImportView* self, ui_component* paren
 }
 
 void samplessongimportview_ondestroy(SamplesSongImportView* self,
-	ui_component* sender)
+	psy_ui_Component* sender)
 {
 	if (self->source) {
 		song_dispose(self->source);
@@ -158,7 +163,7 @@ void samplessongimportview_ondestroy(SamplesSongImportView* self,
 }
 
 void samplessongimportview_onloadsong(SamplesSongImportView* self,
-	ui_component* sender)
+	psy_ui_Component* sender)
 {
 	char path[MAX_PATH]	 = "";
 	char title[MAX_PATH]	 = ""; 					
@@ -197,7 +202,7 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 }
 
 void samplessongimportview_oncopy(SamplesSongImportView* self,
-	ui_component* sender) {
+	psy_ui_Component* sender) {
 	SampleIndex src;
 	SampleIndex dst;
 	psy_audio_Sample* sample;
@@ -226,7 +231,7 @@ void samplessongimportview_oncopy(SamplesSongImportView* self,
 }
 
 void samplessongimportview_onsamplesboxchanged(SamplesSongImportView* self,
-	ui_component* sender)
+	psy_ui_Component* sender)
 {
 	SampleIndex index;
 	psy_audio_Sample* sample;
@@ -238,8 +243,8 @@ void samplessongimportview_onsamplesboxchanged(SamplesSongImportView* self,
 	wavebox_setsample(&self->samplebox, sample);
 }
 
-void samplesview_init(SamplesView* self, ui_component* parent,
-	ui_component* tabbarparent, Workspace* workspace)
+void samplesview_init(SamplesView* self, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
 	ui_margin margin;
 	ui_margin waveboxmargin;
@@ -333,7 +338,7 @@ void samplesview_init(SamplesView* self, ui_component* parent,
 		&self->clienttabbar.signal_change);
 }
 
-void samplesview_onsamplesboxchanged(SamplesView* self, ui_component* sender)
+void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender)
 {		
 	SampleIndex index;
 	
@@ -381,7 +386,7 @@ void samplesview_setsample(SamplesView* self, SampleIndex index)
 	ui_listbox_setcursel(&self->samplesbox.subsamplelist, index.subslot);
 }
 
-void samplesview_onloadsample(SamplesView* self, ui_component* sender)
+void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song) {
 		char path[MAX_PATH]	 = "";
@@ -417,7 +422,7 @@ void samplesview_onloadsample(SamplesView* self, ui_component* sender)
 	}
 }
 
-void samplesview_onsavesample(SamplesView* self, ui_component* sender)
+void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 {	
 	char path[MAX_PATH]	 = "";
 	char title[MAX_PATH]	 = ""; 
@@ -433,7 +438,7 @@ void samplesview_onsavesample(SamplesView* self, ui_component* sender)
 	}	
 }
 
-void samplesview_ondeletesample(SamplesView* self, ui_component* sender)
+void samplesview_ondeletesample(SamplesView* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song) {
 		SampleIndex index;
@@ -448,7 +453,7 @@ void samplesview_ondeletesample(SamplesView* self, ui_component* sender)
 	}
 }
 
-void samplesview_onduplicatesample(SamplesView* self, ui_component* sender)
+void samplesview_onduplicatesample(SamplesView* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song) {
 		SampleIndex src;
@@ -512,25 +517,25 @@ void samplesview_onsongchanged(SamplesView* self, Workspace* workspace)
 	samplesview_setsample(self, sampleindex_make(0, 0));
 }
 
-void samplesview_onshow(SamplesView* self, ui_component* sender)
+void samplesview_onshow(SamplesView* self, psy_ui_Component* sender)
 {	
 	self->clienttabbar.component.visible = 1;
 	ui_component_align(ui_component_parent(&self->clienttabbar.component));
 	ui_component_show(&self->clienttabbar.component);
 }
 
-void samplesview_onhide(SamplesView* self, ui_component* sender)
+void samplesview_onhide(SamplesView* self, psy_ui_Component* sender)
 {
 	ui_component_hide(&self->clienttabbar.component);
 }
 
-void samplesview_onkeydown(SamplesView* self, ui_component* sender, KeyEvent* ev)
+void samplesview_onkeydown(SamplesView* self, psy_ui_Component* sender, KeyEvent* ev)
 {
 	ui_component_propagateevent(&self->component);
 }
 
 
-void samplesheaderview_init(SamplesHeaderView* self, ui_component* parent,
+void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, struct SamplesView* view)
 {
 	ui_margin margin;
@@ -609,7 +614,7 @@ void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* samp
 	}
 }
 
-void OnEditSampleName(SamplesHeaderView* self, ui_edit* sender)
+void OnEditSampleName(SamplesHeaderView* self, psy_ui_Edit* sender)
 {
 	if (self->sample) {
 		char text[40];
@@ -630,21 +635,21 @@ void OnEditSampleName(SamplesHeaderView* self, ui_edit* sender)
 	}
 }
 
-void OnPrevSample(SamplesHeaderView* self, ui_component* sender)
+void OnPrevSample(SamplesHeaderView* self, psy_ui_Component* sender)
 {
 	instruments_changeslot(self->instruments,
 		instruments_slot(self->instruments) > 0 ?
 		instruments_slot(self->instruments) - 1 : 0);
 }
 
-void OnNextSample(SamplesHeaderView* self, ui_component* sender)
+void OnNextSample(SamplesHeaderView* self, psy_ui_Component* sender)
 {
 	instruments_changeslot(self->instruments,
 		instruments_slot(self->instruments) < 255 ?
 		instruments_slot(self->instruments) + 1 : 255);
 }
 
-void InitSamplesGeneralView(SamplesGeneralView* self, ui_component* parent)
+void InitSamplesGeneralView(SamplesGeneralView* self, psy_ui_Component* parent)
 {	
 	ui_margin margin;
 	ui_slider* sliders[] = {
@@ -807,7 +812,7 @@ void GeneralViewFillPanDescription(SamplesGeneralView* self, char* txt) {
 	}	
 }
 
-void InitSamplesVibratoView(SamplesVibratoView* self, ui_component* parent, psy_audio_Player* player)
+void InitSamplesVibratoView(SamplesVibratoView* self, psy_ui_Component* parent, psy_audio_Player* player)
 {
 	ui_margin margin;
 	int i;
@@ -977,7 +982,7 @@ WaveForms ComboBoxToWaveForm(int combobox_index)
 	return rv;
 }
 
-void samplesloopview_init(SamplesLoopView* self, ui_component* parent,
+void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	SamplesView* view)
 {
 	ui_margin margin;
@@ -1161,7 +1166,8 @@ LoopType ComboBoxToLoopType(int combobox_index)
 	return rv;
 }
 
-void samplesloopview_oneditchangedloopstart(SamplesLoopView* self, ui_edit* sender)
+void samplesloopview_oneditchangedloopstart(SamplesLoopView* self,
+	psy_ui_Edit* sender)
 {
 	if (self->sample) {
 		self->sample->loopstart = atoi(ui_edit_text(sender));
@@ -1169,7 +1175,8 @@ void samplesloopview_oneditchangedloopstart(SamplesLoopView* self, ui_edit* send
 	}
 }
 
-void samplesloopview_oneditchangedloopend(SamplesLoopView* self, ui_edit* sender)
+void samplesloopview_oneditchangedloopend(SamplesLoopView* self,
+	psy_ui_Edit* sender)
 {				
 	if (self->sample) {
 		self->sample->loopend = atoi(ui_edit_text(sender));
@@ -1177,7 +1184,8 @@ void samplesloopview_oneditchangedloopend(SamplesLoopView* self, ui_edit* sender
 	}
 }
 
-void samplesloopview_oneditchangedsustainstart(SamplesLoopView* self, ui_edit* sender)
+void samplesloopview_oneditchangedsustainstart(SamplesLoopView* self,
+	psy_ui_Edit* sender)
 {
 	if (self->sample) {
 		self->sample->sustainloopstart = atoi(ui_edit_text(sender));
@@ -1185,7 +1193,8 @@ void samplesloopview_oneditchangedsustainstart(SamplesLoopView* self, ui_edit* s
 	}
 }
 
-void samplesloopview_oneditchangedsustainend(SamplesLoopView* self, ui_edit* sender)
+void samplesloopview_oneditchangedsustainend(SamplesLoopView* self,
+	psy_ui_Edit* sender)
 {
 	if (self->sample) {
 		self->sample->sustainloopend = atoi(ui_edit_text(sender));		

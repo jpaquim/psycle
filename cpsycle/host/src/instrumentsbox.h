@@ -13,7 +13,7 @@ typedef struct {
 	psy_audio_Instruments* instruments;
 } InstrumentsBox;
 
-void instrumentsbox_init(InstrumentsBox*, ui_component* parent, psy_audio_Instruments*);
+void instrumentsbox_init(InstrumentsBox*, psy_ui_Component* parent, psy_audio_Instruments*);
 void instrumentsbox_setinstruments(InstrumentsBox*, psy_audio_Instruments* instruments);
 int instrumentsbox_selected(InstrumentsBox*);
 
