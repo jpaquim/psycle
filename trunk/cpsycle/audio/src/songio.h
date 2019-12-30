@@ -14,22 +14,18 @@ typedef struct psy_audio_SongFile {
 	struct PsyFile* file;
 	psy_Properties* workspaceproperties;
 	int err;
+	const char *serr;
 	int warnings;
 	psy_Signal signal_output;
-	psy_Signal signal_warning;
-	psy_Signal signal_error;
+	psy_Signal signal_warning;	
 	const char* path;
 } psy_audio_SongFile;
 
 void psy_audio_songfile_init(psy_audio_SongFile*);
 void psy_audio_songfile_dispose(psy_audio_SongFile*);
-/// loads a song
-///\return ui properties (coordinates, ...)
-void psy_audio_songfile_load(psy_audio_SongFile*, const char* path);
-/// saves a song
-void psy_audio_songfile_save(psy_audio_SongFile*, const char* path);
+int psy_audio_songfile_load(psy_audio_SongFile*, const char* path);
+int psy_audio_songfile_save(psy_audio_SongFile*, const char* path);
 void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
-void psy_audio_songfile_error(psy_audio_SongFile*, const char* text);
 void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
 
 #endif

@@ -42,7 +42,7 @@ int psyclescript_load(psy_audio_PsycleScript* self, const char* path)
 //  lua_pushstring(L, "?.lua");
 //  lua_setfield(L, -2, "path");
   psyclescript_setsearchpath(self, path);
-  status = luaL_loadfile(self->L, path);
+  status = luaL_loadfile(self->L, "nonsense");
   if (status) {
     const char* msg =lua_tostring(self->L, -1);
 #if defined DIVERSALIS__OS__MICROSOFT    

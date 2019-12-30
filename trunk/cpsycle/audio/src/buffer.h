@@ -12,6 +12,7 @@ typedef struct psy_audio_Buffer {
 	psy_dsp_amp_t** samples;
 	uintptr_t numsamples;
 	uintptr_t offset;
+	psy_dsp_amp_range_t range;
 } psy_audio_Buffer;
 
 void buffer_init(psy_audio_Buffer*, uintptr_t channels);
@@ -33,5 +34,6 @@ void buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t amount);
 int buffer_mono(psy_audio_Buffer*);
 void buffer_insertsamples(psy_audio_Buffer*, psy_audio_Buffer* source, uintptr_t numsamples,
 	uintptr_t numsourcesamples);
+void buffer_scale(psy_audio_Buffer*, psy_dsp_amp_range_t, uintptr_t numsamples);
 
 #endif

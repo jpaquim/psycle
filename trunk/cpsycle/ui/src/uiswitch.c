@@ -8,24 +8,34 @@
 
 static void ondestroy(psy_ui_Switch*, psy_ui_Component* sender);
 static void ondraw(psy_ui_Switch*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void onmousedown(psy_ui_Switch*, psy_ui_Component* sender, MouseEvent*);
+static void onmousedown(psy_ui_Switch*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Switch*, psy_ui_Component* sender);
 static void onmouseleave(psy_ui_Switch*, psy_ui_Component* sender);
-static void onpreferredsize(psy_ui_Switch*, psy_ui_Component* sender, ui_size* limit,
-	ui_size* size);
+static void preferredsize(psy_ui_Switch*, ui_size* limit, ui_size* size);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(psy_ui_Switch* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+	}
+}
 
 void ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 {		
 	ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);
 	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
 	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
 	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self,
-		onpreferredsize);
 }
 
 void ondestroy(psy_ui_Switch* self, psy_ui_Component* sender)
@@ -72,8 +82,7 @@ void ondraw(psy_ui_Switch* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	}	
 }
 
-void onpreferredsize(psy_ui_Switch* self, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv)
+void preferredsize(psy_ui_Switch* self, ui_size* limit, ui_size* rv)
 {		
 	if (rv) {		
 		ui_textmetric tm;		
@@ -86,7 +95,8 @@ void onpreferredsize(psy_ui_Switch* self, psy_ui_Component* sender, ui_size* lim
 	}
 }
 
-void onmousedown(psy_ui_Switch* self, psy_ui_Component* sender, MouseEvent* ev)
+void onmousedown(psy_ui_Switch* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }

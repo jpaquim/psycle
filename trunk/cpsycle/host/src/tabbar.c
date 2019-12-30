@@ -8,14 +8,27 @@
 
 static void tabbar_ondraw(TabBar*, psy_ui_Component* sender, psy_ui_Graphics*);
 static void tabbar_ondestroy(TabBar*, psy_ui_Component* component);
-static void tabbar_onmousedown(TabBar*, psy_ui_Component* sender, MouseEvent*);
-static void tabbar_onmousemove(TabBar*, psy_ui_Component* sender, MouseEvent*);
+static void tabbar_onmousedown(TabBar*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void tabbar_onmousemove(TabBar*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static void tabbar_onmouseenter(TabBar*, psy_ui_Component* sender);
 static void tabbar_onmouseleave(TabBar*, psy_ui_Component* sender);
 static int tabbar_tabhittest(TabBar* self, int x, int y);
 static void tabbar_onalign(TabBar*, psy_ui_Component* sender);
-static void tabbar_onpreferredsize(TabBar*, psy_ui_Component* sender,
-	ui_size* limit, ui_size* rv);
+static void tabbar_preferredsize(TabBar*, ui_size* limit, ui_size* rv);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(TabBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize)
+			tabbar_preferredsize;
+	}
+}
 
 void tab_init(Tab* self, const char* text, ui_size* size)
 {
@@ -37,16 +50,18 @@ void tab_dispose(Tab* self)
 
 void tabbar_init(TabBar* self, psy_ui_Component* parent)
 {
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	self->tabs = 0;
+	self->selected = 0;
+	self->hover = 0;
+	self->hoverindex = -1;
+	self->tabalignment = UI_ALIGN_TOP;
 	self->component.doublebuffered = 1;	
 	psy_signal_init(&self->signal_change);
 	psy_signal_connect(&self->component.signal_draw, self, tabbar_ondraw);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		tabbar_ondestroy);
-	psy_signal_connect(&self->component.signal_align, self, tabbar_onalign);
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self,
-		tabbar_onpreferredsize);
+	psy_signal_connect(&self->component.signal_align, self, tabbar_onalign);	
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		tabbar_onmousedown);
 	psy_signal_connect(&self->component.signal_mousemove, self,
@@ -54,12 +69,10 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->component.signal_mouseenter, self,
 		tabbar_onmouseenter);
 	psy_signal_connect(&self->component.signal_mouseleave, self,
-		tabbar_onmouseleave);	
-	self->tabs = 0;
-	self->selected = 0;
-	self->hover = 0;
-	self->hoverindex = -1;
-	self->tabalignment = UI_ALIGN_TOP;
+		tabbar_onmouseleave);
+	vtable_init(self);
+	self->component.vtable = &vtable;
+
 }
 
 void tabbar_ondestroy(TabBar* self, psy_ui_Component* component)
@@ -151,7 +164,8 @@ void tabbar_ondraw(TabBar* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	}
 }
 
-void tabbar_onmousedown(TabBar* self, psy_ui_Component* sender, MouseEvent* ev)
+void tabbar_onmousedown(TabBar* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	int tabindex;
 	
@@ -221,7 +235,8 @@ int tabbar_tabhittest(TabBar* self, int x, int y)
 	return rv;
 }
 
-void tabbar_onmousemove(TabBar* self, psy_ui_Component* sender, MouseEvent* ev)
+void tabbar_onmousemove(TabBar* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {	
 	int tabindex;
 
@@ -308,8 +323,7 @@ void tabbar_onalign(TabBar* self, psy_ui_Component* sender)
 	}		
 }
 
-void tabbar_onpreferredsize(TabBar* self, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv)
+void tabbar_preferredsize(TabBar* self, ui_size* limit, ui_size* rv)
 {
 	if (rv) {
 		ui_size size;
@@ -336,7 +350,7 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Component* sender, ui_size* lim
 			Tab* tab;
 			ui_size tabsize;
 
-			tab = (Tab*)tabs->entry;
+			tab = (Tab*) tabs->entry;
 			tabsize = ui_component_textsize(&self->component, tab->text);
 			tabsize.height = (int) (tabsize.height * 1.5);
 			tabsize.width = (int) tabsize.width;

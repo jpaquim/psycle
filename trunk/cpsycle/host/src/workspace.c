@@ -147,11 +147,11 @@ void workspace_init(Workspace* self, void* handle)
 	self->navigating = 0;
 	workspace_initsignals(self);	
 	workspace_initplayer(self);		
-	self->patterneditposition.pattern = 0;
-	self->patterneditposition.col = 
+	self->patterneditposition.pattern = 0;	
+	self->patterneditposition.column = 0;
+	self->patterneditposition.digit = 0;
 	self->patterneditposition.line = 0;
-	self->patterneditposition.offset = 0;
-	self->patterneditposition.totallines = 0;
+	self->patterneditposition.offset = 0;	
 	self->patterneditposition.track = 0;
 	pattern_init(&self->patternpaste);
 	self->sequencepaste = 0;	
@@ -426,6 +426,9 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "linenumbers", 1),
 		"Line numbers");
+	psy_properties_settext(
+		psy_properties_append_bool(pvc, "beatoffset", 1),
+		"Beat offset");
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "linenumberscursor", 1),
 		"Line numbers cursor");
@@ -847,6 +850,11 @@ int workspace_showlinenumbers(Workspace* self)
 	return psy_properties_bool(self->config, "visual.patternview.linenumbers", 1);	
 }
 
+int workspace_showbeatoffset(Workspace* self)
+{	
+	return psy_properties_bool(self->config, "visual.patternview.beatoffset", 1);	
+}
+
 int workspace_showlinenumbercursor(Workspace* self)
 {	
 	return psy_properties_bool(self->config, "visual.patternview.linenumberscursor", 1);
@@ -888,30 +896,41 @@ void workspace_loadsong(Workspace* self, const char* path)
 {	
 	psy_audio_Song* song;
 	psy_audio_SongFile songfile;
-	
-	properties_free(self->properties);
+		
 	song = song_allocinit(&self->machinefactory);
-	psy_signal_connect(&song->signal_loadprogress, self,
-		workspace_onloadprogress);	
-	psy_signal_emit(&song->signal_loadprogress, self, 1, -1);
-	psy_audio_songfile_init(&songfile);
-	psy_signal_connect(&songfile.signal_warning, self,
-		workspace_onterminalwarning);
-	psy_signal_connect(&songfile.signal_error, self,
-		workspace_onterminalerror);
-	psy_signal_connect(&songfile.signal_output, self,
-		workspace_onterminaloutput);
-	songfile.song = song;
-	songfile.file = 0;
-	lock_enter();
-	self->songcbk = song;
-	psy_audio_songfile_load(&songfile, path);	
-	self->properties = songfile.workspaceproperties;
-	psy_audio_songfile_dispose(&songfile);
-	free(self->filename);
-	self->filename = strdup(path);
-	workspace_setsong(self, song, WORKSPACE_LOADSONG);
-	lock_leave();
+	if (song) {		
+		psy_signal_connect(&song->signal_loadprogress, self,
+			workspace_onloadprogress);	
+		psy_signal_emit(&song->signal_loadprogress, self, 1, -1);
+		psy_audio_songfile_init(&songfile);
+		psy_signal_connect(&songfile.signal_warning, self,
+			workspace_onterminalwarning);		
+		psy_signal_connect(&songfile.signal_output, self,
+			workspace_onterminaloutput);
+		songfile.song = song;
+		songfile.file = 0;		
+		lock_enter();
+		self->songcbk = song;
+		if (psy_audio_songfile_load(&songfile, path) != PSY_OK) {
+			self->songcbk = self->song;
+			lock_leave();			
+			song_free(song);
+			psy_signal_emit(&self->signal_terminal_error, self, 1,
+				songfile.serr);
+			psy_audio_songfile_dispose(&songfile);
+		} else {
+			properties_free(self->properties);
+			self->properties = songfile.workspaceproperties;
+			psy_audio_songfile_dispose(&songfile);
+			free(self->filename);
+			self->filename = strdup(path);
+			workspace_setsong(self, song, WORKSPACE_LOADSONG);
+			psy_audio_songfile_dispose(&songfile);
+			lock_leave();	
+		}
+		psy_signal_emit(&self->signal_terminal_out, self, 1,
+			"ready\n");
+	}
 }
 
 void workspace_onloadprogress(Workspace* self, psy_audio_Song* sender, int progress)
@@ -934,7 +953,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 	sequenceselection_setsequence(&self->sequenceselection
 		,&self->song->sequence);
 	workspace_addhistory(self);
-	psy_signal_emit(&self->signal_songchanged, self, 1, flag);	
+	psy_signal_emit(&self->signal_songchanged, self, 1, flag);
 	self->lastentry = 0;
 	workspace_disposesequencepaste(self);
 	lock_leave();
@@ -949,8 +968,13 @@ void workspace_savesong(Workspace* self, const char* path)
 	songfile.song = self->song;
 	psy_signal_emit(&self->signal_beforesavesong, self, 0);
 	songfile.workspaceproperties = self->properties;
-	psy_audio_songfile_save(&songfile, path);
+	if (psy_audio_songfile_save(&songfile, path)) {
+		psy_signal_emit(&self->signal_terminal_error, self, 1,
+			songfile.serr);
+	}
 	psy_audio_songfile_dispose(&songfile);
+	psy_signal_emit(&self->signal_terminal_out, self, 1,
+				"ready\n");
 }
 
 void workspace_loadskin(Workspace* self, const char* path)
@@ -1126,10 +1150,10 @@ void workspace_onsequenceeditpositionchanged(Workspace* self,
 	if (selection->editposition.trackposition.tracknode) {
 		entry = (SequenceEntry*) selection->editposition.trackposition.tracknode->entry;
 		position.pattern = entry->pattern;
-		position.col = 
+		position.column = 0;
+		position.digit = 0;
 		position.line = 0;
-		position.offset = 0;
-		position.totallines = 0;
+		position.offset = 0;		
 		position.track = 0;
 		workspace_setpatterneditposition(self, position);		
 	}

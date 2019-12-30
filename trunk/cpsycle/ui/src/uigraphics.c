@@ -6,6 +6,8 @@
 #include "uigraphics.h"
 #include "uiapp.h"
 
+#include <assert.h>
+
 extern psy_ui_App app;
 
 void ui_graphics_init(psy_ui_Graphics* g, HDC hdc)
@@ -44,11 +46,17 @@ void ui_textoutrectangle(psy_ui_Graphics* g, int x, int y, unsigned int options,
 ui_size ui_textsize(psy_ui_Graphics* g, const char* text)
 {
 	ui_size	rv;
-	SIZE size;
-	
-	GetTextExtentPoint(g->hdc, text, (int)strlen(text), &size) ;	
-	rv.width = size.cx; 
-	rv.height = size.cy;
+
+	if (text) {
+		SIZE size;
+				
+		GetTextExtentPoint(g->hdc, text, (int)strlen(text), &size) ;	
+		rv.width = size.cx; 
+		rv.height = size.cy;
+	} else {
+		rv.width = 0; 
+		rv.height = 0;
+	}
 	return rv;
 }
 
@@ -140,7 +148,7 @@ void ui_drawfullbitmap(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y)
 
 	hdcMem = CreateCompatibleDC (g->hdc) ;
 	SelectObject (hdcMem, bitmap->hBitmap) ;
-	size = ui_bitmap_size(bitmap);
+	size = psy_ui_bitmap_size(bitmap);
 	BitBlt(g->hdc, x, y, size.width, size.height, hdcMem, 0, 0, SRCCOPY);
 	DeleteDC (hdcMem);  
 }

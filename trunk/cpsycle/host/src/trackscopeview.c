@@ -10,19 +10,32 @@
 
 #define TIMERID_TRACKSCOPEVIEW 6000
 
-static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
+static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Graphics*);
 static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_Component* sender,
-	MouseEvent*);
-static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*, int x, int y,
-	int width, int height, int track);
-void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*, int x, int y,
-	int width, int height, int track);
+	psy_ui_MouseEvent*);
+static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*,
+	int x, int y, int width, int height, int track);
+void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*,
+	int x, int y, int width, int height, int track);
 void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, int x,
 	int y, int width, int height, int track);
-static void trackscopeview_ontimer(TrackScopeView*, psy_ui_Component* sender, int timerid);
-static void trackscopeview_onpreferredsize(TrackScopeView*,
-	psy_ui_Component* sender, ui_size* limit, ui_size* rv);
+static void trackscopeview_ontimer(TrackScopeView*, psy_ui_Component* sender,
+	int timerid);
+static void trackscopeview_preferredsize(TrackScopeView*, ui_size* limit,
+	ui_size* rv);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(TrackScopeView* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize)
+			trackscopeview_preferredsize;
+		vtable.draw = (psy_ui_fp_draw) trackscopeview_ondraw;
+	}
+}
 
 void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -30,19 +43,17 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->trackheight = 30;
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
-	psy_signal_connect(&self->component.signal_draw, self, trackscopeview_ondraw); 
+	vtable_init(self);
+	self->component.vtable = &vtable;
+	self->component.doublebuffered = 1;	
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		trackscopeview_onmousedown); 
-	psy_signal_connect(&self->component.signal_timer, self, trackscopeview_ontimer);
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self,
-		trackscopeview_onpreferredsize);	
+	psy_signal_connect(&self->component.signal_timer, self,
+		trackscopeview_ontimer);
 	ui_component_starttimer(&self->component, TIMERID_TRACKSCOPEVIEW, 50);
 }
 
-void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
+void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 {
 	if (self->workspace->song) {
 		ui_size size;
@@ -200,8 +211,8 @@ void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, int 
 	ui_component_invalidate(&self->component);	
 }
 
-void trackscopeview_onpreferredsize(TrackScopeView* self,
-	psy_ui_Component* sender, ui_size* limit, ui_size* rv)
+void trackscopeview_preferredsize(TrackScopeView* self, ui_size* limit,
+	ui_size* rv)
 {
 	int maxcolumns = 16;
 	int columns = maxcolumns;
@@ -213,27 +224,42 @@ void trackscopeview_onpreferredsize(TrackScopeView* self,
 }
 
 void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
-	int columns;
-	ui_size size;
-	int track;
-	int trackwidth;
-	int maxcolumns = 16;
-	int numtracks = player_numsongtracks(&self->workspace->player);
+	if (self->workspace->song) {
+		int columns;
+		ui_size size;
+		int track;
+		int trackwidth;
+		int maxcolumns = 16;
+		int numtracks = player_numsongtracks(&self->workspace->player);
 
-	columns = numtracks < maxcolumns ? numtracks : maxcolumns;
-	size = ui_component_size(&self->component);
-	trackwidth = size.width / columns;
-	
-	track = (ev->x / trackwidth) + (ev->y / self->trackheight) * columns;
-	if (!patternstrackstate_istrackmuted(
-			&self->workspace->song->patterns.trackstate, track)) {
-		patternstrackstate_mutetrack(
-			&self->workspace->song->patterns.trackstate, track);
-	} else {
-		patternstrackstate_unmutetrack(
-			&self->workspace->song->patterns.trackstate, track);
+		columns = numtracks < maxcolumns ? numtracks : maxcolumns;
+		size = ui_component_size(&self->component);
+		trackwidth = size.width / columns;
+		
+		track = (ev->x / trackwidth) + (ev->y / self->trackheight) * columns;
+		if (ev->button == 1) {
+			if (!patternstrackstate_istrackmuted(
+					&self->workspace->song->patterns.trackstate, track)) {
+				patternstrackstate_mutetrack(
+					&self->workspace->song->patterns.trackstate, track);
+			} else {
+				patternstrackstate_unmutetrack(
+					&self->workspace->song->patterns.trackstate, track);
+			}
+		} else
+		if (ev->button == 2) {				
+			if (patterns_istracksoloed(&self->workspace->song->patterns,
+						track)) {
+				patterns_deactivatesolotrack(
+					&self->workspace->song->patterns);
+			} else {
+				patterns_activatesolotrack(
+					&self->workspace->song->patterns, track);
+			}
+			ui_component_invalidate(&self->component);
+		}
 	}
 }
 

@@ -49,6 +49,14 @@ int ui_rectangle_intersect(ui_rectangle* self, int x, int y)
 			y >= self->top && y < self->bottom);
 }
 
+void ui_rectangle_union(ui_rectangle* self, const ui_rectangle* other)
+{
+	self->left = self->left < other->left ? self->left : other->left;
+	self->right = self->right > other->right ? self->right : other->right;
+	self->top = self->top < other->top ? self->top : other->top;
+	self->bottom = self->bottom > other->bottom ? self->bottom : other->bottom;
+}
+
 void ui_margin_init(ui_margin* self, ui_value top, ui_value right,
 	ui_value bottom, ui_value left)
 {   

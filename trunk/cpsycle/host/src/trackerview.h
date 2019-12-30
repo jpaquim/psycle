@@ -53,8 +53,6 @@ typedef struct {
 	psy_ui_Bitmap bitmap;
 } TrackerSkin;
 
-typedef PatternEditPosition TrackerCursor;
-
 typedef struct {
 	PatternEditPosition topleft;
 	PatternEditPosition bottomright;
@@ -123,9 +121,13 @@ typedef struct {
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*);
 
 typedef struct {
+	unsigned int width;
+	unsigned int digits;
+	unsigned int ident;
+} TrackerColumn;
+
+typedef struct {
    psy_ui_Component component;   
-   int cx;
-   int cy;
    int dx;
    int dy;      
    unsigned int numtracks;   
@@ -133,10 +135,10 @@ typedef struct {
    double bpl;
    double cbpl;   
    psy_dsp_NotesTabMode notestabmode;
-   TrackerCursor cursor;
+   PatternEditPosition cursor;
    psy_dsp_beat_t cursorstep;   
    psy_audio_Player* player;   
-   int colx[TRACKERGRID_numparametercols];
+   TrackerColumn cols[5];
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
    struct TrackerView* view;

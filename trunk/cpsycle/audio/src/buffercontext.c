@@ -6,8 +6,12 @@
 #include "buffercontext.h"
 #include <rms.h>
 
-void buffercontext_init(psy_audio_BufferContext* self, psy_List* events, psy_audio_Buffer* input, 
-	psy_audio_Buffer* output, unsigned int numsamples, unsigned int numtracks,
+void buffercontext_init(psy_audio_BufferContext* self,
+	psy_List* events,
+	psy_audio_Buffer* input,
+	psy_audio_Buffer* output,
+	uintptr_t numsamples,
+	uintptr_t numtracks,
 	psy_dsp_RMSVol* rmsvol)
 {	
 	self->events = events;
@@ -22,12 +26,12 @@ void buffercontext_dispose(psy_audio_BufferContext* self)
 {	
 }
 
-unsigned int buffercontext_numsamples(psy_audio_BufferContext* self)
+uintptr_t buffercontext_numsamples(psy_audio_BufferContext* self)
 {
 	return self->numsamples;
 }
 
-unsigned int buffercontext_numtracks(psy_audio_BufferContext* self)
+uintptr_t buffercontext_numtracks(psy_audio_BufferContext* self)
 {
 	return self->numtracks;
 }

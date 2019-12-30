@@ -130,15 +130,16 @@ float psyfile_read_float(PsyFile* self)
 	err = psyfile_read(self, &temp, sizeof(temp));
 	return temp;
 }
-// write
-int psyfile_write(PsyFile* self,
-					const void* pData,
-					uint32_t numBytes)
-{
-	uint32_t bytesWritten;
+
+int psyfile_write(PsyFile* self, const void* data, uint32_t numbytes)
+{		
+	uint32_t byteswritten;
+	int status;
+
 	fflush(self->_file);
-	bytesWritten = fwrite(pData, sizeof(char), numBytes, self->_file);
-	return (bytesWritten == numBytes);	
+	byteswritten = fwrite(data, sizeof(char), numbytes, self->_file);
+	status = (byteswritten == numbytes) ? PSY_OK : PSY_ERRFILE;
+	return status;
 }
 
 int psyfile_write_int8(PsyFile* self, int8_t value)
@@ -279,24 +280,27 @@ FILE* psyfile_getfile(PsyFile* self)
 	return self->_file;
 }
 
-uint32_t psyfile_writeheader(PsyFile* file, char* pData, uint32_t version,
-	uint32_t size/*=0*/)
-{
-	uint32_t pos;
+int psyfile_writeheader(PsyFile* file, char* data, uint32_t version,
+	uint32_t size, uint32_t* pos)
+{	
+	int status;
 
-	psyfile_write(file, pData, 4);
-	psyfile_write(file, &version, sizeof(version));
-	pos = psyfile_getpos(file);
-	psyfile_write(file, &size, sizeof(size));
-	return pos;
+	if (status = psyfile_write(file, data, 4)) {
+		return status;
+	}
+	if (status = psyfile_write_uint32(file, version)) {
+		return status;
+	}
+	*pos = psyfile_getpos(file);
+	if (status = psyfile_write_uint32(file, size)) {
+		return status;
+	}
+	return status;
 }
 
 int psyfile_writestring(PsyFile* file, const char* str)
 {
-	int rv = 0;
-
-	rv = psyfile_write(file, str, (uint32_t)strlen(str) + 1);
-	return rv;
+	return psyfile_write(file, str, (uint32_t)strlen(str) + 1);	
 }
 
 uint32_t psyfile_updatesize(PsyFile* file, uint32_t startpos)

@@ -7,8 +7,18 @@
 
 static void oncommand(psy_ui_Edit*, psy_ui_Component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
-static void onpreferredsize(psy_ui_Edit*, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv);
+static void preferredsize(psy_ui_Edit*, ui_size* limit, ui_size* rv);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(psy_ui_Edit* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+	}
+}
 
 void ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent, int styles)
 {  		
@@ -16,10 +26,10 @@ void ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent, int styles)
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | ES_LEFT | styles,
 		1);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	psy_signal_connect(&self->component.signal_command, self, oncommand);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
 	psy_signal_init(&self->signal_change);
 	self->charnumber = 0;
 	self->linenumber = 1;
@@ -68,8 +78,7 @@ void oncommand(psy_ui_Edit* self, psy_ui_Component* sender, WPARAM wParam,
     }
 }
 
-void onpreferredsize(psy_ui_Edit* self, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv)
+void preferredsize(psy_ui_Edit* self, ui_size* limit, ui_size* rv)
 {			
 	if (rv) {
 		char text[256];

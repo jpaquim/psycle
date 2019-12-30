@@ -43,19 +43,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	ui_combobox_init(&self->machinebox, &self->component);
-	ui_combobox_setcharnumber(&self->machinebox, 25);
-//	self->machinebox.component.justify = UI_JUSTIFY_NONE;
-	ui_component_resize(&self->machinebox.component, 200, 20);
-	//ui_button_init(&self->prevmachinebutton, &self->component);
-	//ui_button_settext(&self->prevmachinebutton, "<");	
-	//signal_connect(&self->prevmachinebutton.signal_clicked, self,
-	//	OnPrevMachine);
-	//ui_button_init(&self->nextmachinebutton, &self->component);
-	//ui_button_settext(&self->nextmachinebutton, ">");	
-	//psy_signal_connect(&self->nextmachinebutton.signal_clicked, self,
-	//OnNextMachine);
-	//ui_component_resize(&self->prevmachinebutton.component, 20, 0);	
-	//ui_component_resize(&self->nextmachinebutton.component, 20, 0);
+	ui_combobox_setcharnumber(&self->machinebox, 30);	
 	ui_button_init(&self->gear, &self->component);
 	ui_button_settext(&self->gear, "Gear Rack");
 	ui_button_init(&self->editor, &self->component);
@@ -65,9 +53,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 		OnMachineBoxSelChange);	
 	self->prevent_selchange_notify = FALSE;	
 	ui_combobox_init(&self->instparambox, &self->component);
-	ui_combobox_setcharnumber(&self->instparambox, 20);
-	//self->instparambox.component.justify = UI_JUSTIFY_NONE;
-	ui_component_resize(&self->instparambox.component, 200, 20);
+	ui_combobox_setcharnumber(&self->instparambox, 30);	
 	BuildInstrumentList(self);
 	ui_combobox_setcursel(&self->instparambox, 0);
 	psy_signal_connect(&self->instparambox.signal_selchanged, self,

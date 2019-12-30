@@ -5,11 +5,15 @@
 
 #include "wavebox.h"
 
-static void wavebox_ondraw(WaveBox*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void wavebox_ondraw(WaveBox*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
 static void wavebox_ondestroy(WaveBox*, psy_ui_Component* sender);
-static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender, MouseEvent*);
-static void wavebox_onmousemove(WaveBox*, psy_ui_Component* sender, MouseEvent*);
-static void wavebox_onmouseup(WaveBox*, psy_ui_Component* sender, MouseEvent*);
+static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void wavebox_onmousemove(WaveBox*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void wavebox_onmouseup(WaveBox*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static int wavebox_hittest(WaveBox*, uintptr_t frame, int x, int epsilon);
 ui_rectangle wavebox_framerangetoscreen(WaveBox*, uintptr_t framebegin,
 	uintptr_t frameend);
@@ -160,7 +164,8 @@ ui_rectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebegin,
 	return rv;
 }
 
-void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender, MouseEvent* ev)
+void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {	
 	if (self->sample && self->sample->numframes > 0) {
 		if (self->hasselection) {
@@ -192,7 +197,8 @@ void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender, MouseEvent* ev
 	}
 }
 
-void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender, MouseEvent* ev)
+void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {	
 	if (self->sample && self->sample->numframes > 0) {
 		if (self->dragmode == SAMPLEBOX_DRAG_LEFT) {		
@@ -303,7 +309,8 @@ int wavebox_frametoscreen(WaveBox* self, uintptr_t frame)
 	return rv;
 }
 
-void wavebox_onmouseup(WaveBox* self, psy_ui_Component* sender, MouseEvent* ev)
+void wavebox_onmouseup(WaveBox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	if (self->sample && self->sample->numframes > 0) {
 		ui_component_releasecapture(&self->component);

@@ -23,17 +23,17 @@ static void seqtick(psy_audio_Plugin*, uintptr_t channel,
 static void stop(psy_audio_Plugin*);
 static void sequencerlinetick(psy_audio_Plugin*);
 static psy_audio_MachineInfo* info(psy_audio_Plugin*);
-static int parametertype(psy_audio_Plugin* self, int par);
+static int parametertype(psy_audio_Plugin* self, uintptr_t par);
 static unsigned int numparametercols(psy_audio_Plugin*);
 static uintptr_t numparameters(psy_audio_Plugin*);
-static void parameterrange(psy_audio_Plugin*, int numparam, int* minval, int* maxval);
-static int parameterlabel(psy_audio_Plugin*, char* txt, int param);
-static int parametername(psy_audio_Plugin*, char* txt, int param);
-static void parametertweak(psy_audio_Plugin*, int par, int val);
-static int parameterlabel(psy_audio_Plugin*, char* txt, int param);
-static int parametername(psy_audio_Plugin*, char* txt, int param);
-static int describevalue(psy_audio_Plugin*, char* txt, int param, int value);
-static int parametervalue(psy_audio_Plugin*, int param);
+static void parameterrange(psy_audio_Plugin*, uintptr_t param, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Plugin*, char* txt, uintptr_t param);
+static int parametername(psy_audio_Plugin*, char* txt, uintptr_t param);
+static void parametertweak(psy_audio_Plugin*, uintptr_t param, int val);
+static int parameterlabel(psy_audio_Plugin*, char* txt, uintptr_t param);
+static int parametername(psy_audio_Plugin*, char* txt, uintptr_t param);
+static int describevalue(psy_audio_Plugin*, char* txt, uintptr_t param, int value);
+static int parametervalue(psy_audio_Plugin*, uintptr_t param);
 static void dispose(psy_audio_Plugin*);
 static uintptr_t numinputs(psy_audio_Plugin*);
 static uintptr_t numoutputs(psy_audio_Plugin*);
@@ -193,7 +193,7 @@ void stop(psy_audio_Plugin* self)
 }
 
 void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
-{
+{	
 	mi_work(self->mi, buffer_at(bc->output, 0), buffer_at(bc->output, 1),
 		bc->numsamples, bc->numtracks);
 }
@@ -216,19 +216,19 @@ psy_audio_MachineInfo* info(psy_audio_Plugin* self)
 	return self->plugininfo;
 }
 
-void parametertweak(psy_audio_Plugin* self, int par, int val)
+void parametertweak(psy_audio_Plugin* self, uintptr_t param, int val)
 {	
-	mi_parametertweak(self->mi, par, val);
+	mi_parametertweak(self->mi, (int) param, val);
 }
 
-int describevalue(psy_audio_Plugin* self, char* txt, int param, int value)
+int describevalue(psy_audio_Plugin* self, char* txt, uintptr_t param, int value)
 { 
-	return mi_describevalue(self->mi, txt, param, value);
+	return mi_describevalue(self->mi, txt, (int) param, value);
 }
 
-int parametervalue(psy_audio_Plugin* self, int param)
+int parametervalue(psy_audio_Plugin* self, uintptr_t param)
 {
-	return mi_val(self->mi, param);
+	return mi_val(self->mi, (int) param);
 }
 
 uintptr_t numinputs(psy_audio_Plugin* self)
@@ -236,7 +236,7 @@ uintptr_t numinputs(psy_audio_Plugin* self)
 	return info(self) ? (self->plugininfo->mode == MACHMODE_FX ? 2 : 0) : 0;
 }
 
-unsigned int numoutputs(psy_audio_Plugin* self)
+uintptr_t numoutputs(psy_audio_Plugin* self)
 {
 	return info(self) ? 2 : 0;
 }
@@ -312,7 +312,7 @@ void savespecific(psy_audio_Plugin* self, struct psy_audio_SongFile* songfile,
 	}
 }
 
-int parametertype(psy_audio_Plugin* self, int param)
+int parametertype(psy_audio_Plugin* self, uintptr_t param)
 {
 	int rv = MPF_STATE;
 	GETINFO GetInfo;
@@ -329,7 +329,7 @@ int parametertype(psy_audio_Plugin* self, int param)
 	return rv;
 }
 
-void parameterrange(psy_audio_Plugin* self, int param, int* minval, int* maxval)
+void parameterrange(psy_audio_Plugin* self, uintptr_t param, int* minval, int* maxval)
 {	
 	GETINFO GetInfo;
 
@@ -347,7 +347,7 @@ void parameterrange(psy_audio_Plugin* self, int param, int* minval, int* maxval)
 	}	
 }
 
-int parameterlabel(psy_audio_Plugin* self, char* txt, int param)
+int parameterlabel(psy_audio_Plugin* self, char* txt, uintptr_t param)
 {
 	int rv = 0;
 	GETINFO GetInfo;
@@ -366,7 +366,7 @@ int parameterlabel(psy_audio_Plugin* self, char* txt, int param)
 	return rv;
 }
 
-int parametername(psy_audio_Plugin* self, char* txt, int param)
+int parametername(psy_audio_Plugin* self, char* txt, uintptr_t param)
 {
 	int rv = 0;	
 	GETINFO GetInfo;

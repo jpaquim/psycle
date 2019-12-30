@@ -1,17 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_DSP_LOWPASS12E_H)
-#define PSY_DSP_LOWPASS12E_H
+#if !defined(PSY2CONVERTER_H)
+#define PSY2CONVERTER_H
 
-#include "filter.h"
 
-typedef struct {
-	psy_dsp_CustomFilter customfilter;	
-	psy_dsp_FilterCoeff coeff;
-	psy_dsp_FIRWork firwork;
-} psy_dsp_LowPass12E;
-
-void psy_dsp_lowpass12e_init(psy_dsp_LowPass12E*);
+struct psy_audio_Machine* psy2converter_load(struct psy_audio_SongFile*,
+	int index, int* newindex, int* x, int* y);
 
 #endif

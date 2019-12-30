@@ -31,18 +31,17 @@ typedef enum {
 	EVENTDRIVER_KEYUP
 } EventType;
 
-typedef enum {
-	EVENTDRIVER_CMD_NONE = 0,
-	EVENTDRIVER_CMD_MIDI = 1,
-	EVENTDRIVER_CMD_PATTERN = 2
-} EventDriverCmdType;
+typedef struct 
+{	
+	intptr_t message;
+	intptr_t param1;
+	intptr_t param2;
+} EventDriverData;
 
 typedef struct {
-	EventDriverCmdType type;
-	int size;
-	unsigned char* data;
+	int id;
+	EventDriverData data;
 } EventDriverCmd;
-
 
 typedef struct EventDriver {	
 	psy_Properties* properties;	
@@ -51,11 +50,10 @@ typedef struct EventDriver {
 	void (*free)(struct EventDriver*);	
 	void (*configure)(struct EventDriver*);	
 	int (*close)(struct EventDriver*);	
-	void (*write)(struct EventDriver*, int type, unsigned char* data, int size);
-	void (*cmd)(struct EventDriver*, int type, unsigned char* data, int size, EventDriverCmd*,
-		int maxsize);
+	void (*write)(struct EventDriver*, EventDriverData);
+	void (*cmd)(struct EventDriver*, EventDriverData, EventDriverCmd*);
 	int (*error)(int, const char*);
-	int (*getcmd)(struct EventDriver*, psy_Properties* section);
+	EventDriverCmd (*getcmd)(struct EventDriver*, psy_Properties* section);
 	void (*setcmddef)(struct EventDriver*, psy_Properties*);
 	psy_Signal signal_input;
 } EventDriver;

@@ -46,7 +46,7 @@ typedef struct {
 	psy_ui_Component tabbars;
 	psy_ui_Component client;
 	psy_ui_Terminal terminal;
-	ui_splitbar splitbar;	
+	psy_ui_SplitBar splitbar;	
 	ui_progressbar progressbar;
 	Navigation navigation;
 	TabBar tabbar;	

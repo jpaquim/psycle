@@ -5,8 +5,19 @@
 
 #include "uilabel.h"
 
-static void onpreferredsize(psy_ui_Label*, psy_ui_Component* sender, ui_size* limit, ui_size* rv);
+static void preferredsize(psy_ui_Label*, ui_size* limit, ui_size* rv);
 static ui_textmetric textmetric(psy_ui_Component*);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(psy_ui_Label* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+	}
+}
 
 void ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {  		
@@ -14,8 +25,8 @@ void ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,
 		0);	
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self, onpreferredsize);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	self->charnumber = 0;	
 }
 
@@ -29,7 +40,7 @@ void ui_label_setcharnumber(psy_ui_Label* self, int number)
 	self->charnumber = number;
 }
 
-void onpreferredsize(psy_ui_Label* self, psy_ui_Component* sender, ui_size* limit, ui_size* rv)
+void preferredsize(psy_ui_Label* self, ui_size* limit, ui_size* rv)
 {	
 	if (rv) {
 		ui_textmetric tm;	

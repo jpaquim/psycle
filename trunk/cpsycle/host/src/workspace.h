@@ -113,6 +113,7 @@ int workspace_showaboutatstart(Workspace*);
 int workspace_showmaximizedatstart(Workspace*);
 int workspace_showplaylisteditor(Workspace*);
 int workspace_showlinenumbers(Workspace*);
+int workspace_showbeatoffset(Workspace*);
 int workspace_showlinenumbercursor(Workspace*);
 int workspace_showlinenumbersinhex(Workspace*);
 int workspace_showtrackscopes(Workspace*);

@@ -9,8 +9,18 @@
 static void oncommand(ui_checkbox*, psy_ui_Component*, WPARAM wParam,
 	LPARAM lParam);
 static void ondestroy(ui_checkbox*, psy_ui_Component*);
-static void onpreferredsize(ui_checkbox*, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv);
+static void preferredsize(ui_checkbox*, ui_size* limit, ui_size* rv);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(ui_checkbox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+	}
+}
 
 void ui_checkbox_init(ui_checkbox* self, psy_ui_Component* parent)
 {  	
@@ -21,9 +31,8 @@ void ui_checkbox_init(ui_checkbox* self, psy_ui_Component* parent)
 		1);
 	psy_signal_connect(&self->component.signal_command, self, oncommand);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
-	psy_signal_disconnectall(&self->component.signal_preferredsize);	
-	psy_signal_connect(&self->component.signal_preferredsize, self,
-		onpreferredsize);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 }
 
 void ondestroy(ui_checkbox* self, psy_ui_Component* sender)
@@ -71,8 +80,7 @@ void oncommand(ui_checkbox* self, psy_ui_Component* sender, WPARAM wParam,
     }
 }
 
-void onpreferredsize(ui_checkbox* self, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv)
+void preferredsize(ui_checkbox* self, ui_size* limit, ui_size* rv)
 {	
 	if (rv) {
 		ui_size size;	

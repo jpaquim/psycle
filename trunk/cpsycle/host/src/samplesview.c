@@ -26,7 +26,8 @@ static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
 static void samplesview_onshow(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onhide(SamplesView*, psy_ui_Component* sender);
-static void samplesview_onkeydown(SamplesView*, psy_ui_Component* sender, KeyEvent*);
+static void samplesview_onkeydown(SamplesView*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
 /// Header View
 static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
 	psy_audio_Instruments*, struct SamplesView*);
@@ -529,7 +530,8 @@ void samplesview_onhide(SamplesView* self, psy_ui_Component* sender)
 	ui_component_hide(&self->clienttabbar.component);
 }
 
-void samplesview_onkeydown(SamplesView* self, psy_ui_Component* sender, KeyEvent* ev)
+void samplesview_onkeydown(SamplesView* self, psy_ui_Component* sender,
+	psy_ui_KeyEvent* ev)
 {
 	ui_component_propagateevent(&self->component);
 }

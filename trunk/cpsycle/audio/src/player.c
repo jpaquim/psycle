@@ -194,7 +194,7 @@ void player_workpath(psy_audio_Player* self, uintptr_t amount)
 			if (machine && !psy_table_exists(&self->song->machines.connections.sends, slot)) {
 				psy_audio_Buffer* output;
 
-				output = machine->vtable->mix(machine, slot, amount,
+				output = machine_mix(machine, slot, amount,
 					connections_at(&self->song->machines.connections, slot),
 					&self->song->machines);
 				if (output && slot != MASTER_INDEX) {				
@@ -206,11 +206,13 @@ void player_workpath(psy_audio_Player* self, uintptr_t amount)
 					rms = player_rmsvol(self, slot);					
 					buffercontext_init(&bc, events, output, output, amount,
 						self->numsongtracks, rms);
+					buffer_scale(output, machine_amprange(machine), amount);
 					machine->vtable->work(machine, &bc);
 					buffer_pan(output, machine->vtable->panning(machine), amount);
 					if (self->vumode == VUMETER_RMS && buffer_numchannels(
 							bc.output) >= 2) {
-						psy_dsp_rmsvol_tick(rms, bc.output->samples[0], bc.output->samples[1],
+						psy_dsp_rmsvol_tick(rms, bc.output->samples[0],
+							bc.output->samples[1],
 							bc.numsamples);
 					}
 					psy_signal_emit(&machine->signal_worked, machine, 2,
@@ -255,7 +257,8 @@ void player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t 
 			}
 			psy_signal_emit(&master->signal_worked, master, 2,
 				MASTER_INDEX, &bc);
-		}	
+		}
+		buffer_scale(masteroutput, PSY_DSP_AMP_RANGE_NATIVE, amount);
 		dsp.interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
 	}
@@ -279,20 +282,20 @@ psy_dsp_RMSVol* player_rmsvol(psy_audio_Player* self, size_t slot)
 void player_eventdriverinput(psy_audio_Player* self, EventDriver* sender)
 {
 	psy_Properties* notes;
-	int cmd;	
+	EventDriverCmd cmd;	
 	
 	notes = psy_properties_find(self->eventdrivers.cmds, "notes");
 	cmd = sender->getcmd(sender, notes);
-	if (cmd != -1 && cmd <  255) {		
-		int base = 48;
+	if (cmd.id != -1 && cmd.data.param1 < 255) {		
 		unsigned char note;
+
 		uintptr_t track = 0;
 		psy_audio_PatternEvent event;
 
-		if (cmd < NOTECOMMANDS_RELEASE) {
-			note = (unsigned char) cmd + base;
+		if (cmd.id < NOTECOMMANDS_RELEASE) {
+			note = (unsigned char) cmd.data.param1;
 		} else {
-			note = cmd;
+			note = cmd.data.param1;
 		}		
 		patternevent_init(&event, note, 255, 
 			(unsigned char) (

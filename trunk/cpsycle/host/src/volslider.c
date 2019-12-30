@@ -11,15 +11,21 @@
 
 static int TIMERID_VOLSLIDER = 700;
 
-static void volslider_ondraw(VolSlider*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void volslider_onmousedown(VolSlider*, psy_ui_Component* sender, MouseEvent*);
-static void volslider_onmouseup(VolSlider*, psy_ui_Component* sender, MouseEvent*);
-static void volslider_onmousemove(VolSlider*, psy_ui_Component* sender, MouseEvent*);
-static void volslider_ontimer(VolSlider*, psy_ui_Component* sender, int timerid);
+static void volslider_ondraw(VolSlider*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
+static void volslider_onmousedown(VolSlider*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void volslider_onmouseup(VolSlider*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void volslider_onmousemove(VolSlider*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void volslider_ontimer(VolSlider*, psy_ui_Component* sender,
+	int timerid);
 static void volslider_onsliderchanged(VolSlider*, psy_ui_Component* sender);
 static void volslider_onsongchanged(VolSlider*, Workspace*);
 
-void volslider_init(VolSlider* self, psy_ui_Component* parent, Workspace* workspace)
+void volslider_init(VolSlider* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {		
 	self->value = 0.f;
 	self->dragx = -1;
@@ -59,7 +65,7 @@ void volslider_ondraw(VolSlider* self, psy_ui_Component* sender, psy_ui_Graphics
 }
 
 void volslider_onmousedown(VolSlider* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	ui_size size;
 	size = ui_component_size(&self->component);
@@ -68,7 +74,7 @@ void volslider_onmousedown(VolSlider* self, psy_ui_Component* sender,
 }
 
 void volslider_onmousemove(VolSlider* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	if (self->dragx != -1) {
 		ui_size size;
@@ -81,7 +87,8 @@ void volslider_onmousemove(VolSlider* self, psy_ui_Component* sender,
 	}
 }
 
-void volslider_onmouseup(VolSlider* self, psy_ui_Component* sender, MouseEvent* ev)
+void volslider_onmouseup(VolSlider* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	self->dragx = -1;
 	ui_component_releasecapture(&self->component);

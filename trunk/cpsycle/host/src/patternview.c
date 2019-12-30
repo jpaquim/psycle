@@ -6,41 +6,62 @@
 #include "patternview.h"
 #include <portable.h>
 
-static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender, int tabindex);
-static void patternview_onsize(PatternView*, psy_ui_Component* sender, ui_size*);
+static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
+	int tabindex);
+static void patternview_onsize(PatternView*, psy_ui_Component* sender,
+	ui_size*);
 static void patternview_onshow(PatternView*, psy_ui_Component* sender);
 static void patternview_onhide(PatternView*, psy_ui_Component* sender);
-static void patternview_onlpbchanged(PatternView*, psy_audio_Player* sender, uintptr_t lpb);
+static void patternview_onlpbchanged(PatternView*, psy_audio_Player* sender,
+	uintptr_t lpb);
 static void patternview_onsongchanged(PatternView*, Workspace* sender);
 static void patternview_oneditpositionchanged(PatternView*, Workspace* sender);
-static void patternview_onsequenceselectionchanged(PatternView*, Workspace* sender);
-static void patternview_onpropertiesclose(PatternView*, psy_ui_Component* sender);
-static void patternview_onpropertiesapply(PatternView*, psy_ui_Component* sender);
-static void patternview_onkeydown(PatternView*, psy_ui_Component* sender, KeyEvent*);
-static void patternview_onkeyup(PatternView*, psy_ui_Component* sender, KeyEvent*);
+static void patternview_onsequenceselectionchanged(PatternView*,
+	Workspace* sender);
+static void patternview_onpropertiesclose(PatternView*,
+	psy_ui_Component* sender);
+static void patternview_onpropertiesapply(PatternView*,
+	psy_ui_Component* sender);
+static void patternview_onkeydown(PatternView*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
+static void patternview_onkeyup(PatternView*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
 static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
-static void patternviewstatus_ondraw(PatternViewStatus*, psy_ui_Component* sender, psy_ui_Graphics* g);
-static void patternviewstatus_onpreferredsize(PatternViewStatus* self,
-	psy_ui_Component* sender, ui_size* limit, ui_size* rv);
+static void patternviewstatus_ondraw(PatternViewStatus*,
+	psy_ui_Component* sender, psy_ui_Graphics* g);
+static void patternviewstatus_preferredsize(PatternViewStatus* self,
+	ui_size* limit, ui_size* rv);
 static void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus*,
 	Workspace* sender);
 static void patternviewstatus_onsequenceselectionchanged(PatternViewStatus*,
 	Workspace* sender);
 void patternviewbar_initalign(PatternViewBar*);
 
-void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent, Workspace* workspace)
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(PatternViewStatus* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize)
+			patternviewstatus_preferredsize;
+	}
+}
+
+void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {		
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	self->component.doublebuffered = 1;	
 	ui_component_resize(&self->component, 300, 20);
 	psy_signal_connect(&self->component.signal_draw, self,
 		patternviewstatus_ondraw);
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
-		patternviewstatus_onpatterneditpositionchanged);
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self,
-		patternviewstatus_onpreferredsize);	
+		patternviewstatus_onpatterneditpositionchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
 		self, patternviewstatus_onsequenceselectionchanged);
 }
@@ -80,16 +101,17 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Component* sender,
 	}	
 	ui_settextcolor(g, 0x00D1C5B6);
 	ui_setbackgroundmode(g, TRANSPARENT);
-	psy_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d         Edit ON",
+	psy_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d, %d      Edit ON",
 		pattern,
 		editposition.line,
 		editposition.track,
-		editposition.col);
+		editposition.column,
+		editposition.digit);
 	ui_textout(g, 0, (size.height - tm.tmHeight) / 2, text, strlen(text));
 }
 
-void patternviewstatus_onpreferredsize(PatternViewStatus* self,
-	psy_ui_Component* sender, ui_size* limit, ui_size* rv)
+void patternviewstatus_preferredsize(PatternViewStatus* self, ui_size* limit,
+	ui_size* rv)
 {				
 	if (rv) {
 		ui_textmetric tm;
@@ -185,7 +207,7 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 	} else 
 	if (tabindex == 2) {
 		ui_notebook_setpageindex(&self->notebook, 0);
-		if (self->editnotebook.splitbar.hwnd == 0) {		 
+		if (self->editnotebook.splitbar.hwnd == 0) {
 			ui_notebook_split(&self->editnotebook);			
 		}
 	} else {
@@ -307,13 +329,13 @@ void patternview_onpropertiesapply(PatternView* self, psy_ui_Component* sender)
 }
 
 void patternview_onkeydown(PatternView* self, psy_ui_Component* sender,
-	KeyEvent* keyevent)
+	psy_ui_KeyEvent* keyevent)
 {
 	ui_component_propagateevent(sender);
 }
 
 void patternview_onkeyup(PatternView* self, psy_ui_Component* sender,
-	KeyEvent* keyevent)
+	psy_ui_KeyEvent* keyevent)
 {
 	ui_component_propagateevent(sender);
 }

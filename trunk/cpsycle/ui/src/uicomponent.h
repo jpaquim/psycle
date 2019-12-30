@@ -49,10 +49,22 @@ typedef struct {
    void* context;
 } EnumCallback;
 
+
 typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
 	LPARAM lParam);
 
+// vtable function pointers
+typedef void (*psy_ui_fp_preferredsize)(struct psy_ui_Component*,
+	ui_size* limit, ui_size* rv);
+typedef void (*psy_ui_fp_draw)(struct psy_ui_Component*, psy_ui_Graphics*);
+
+typedef struct psy_ui_ComponentVTable {
+	psy_ui_fp_draw draw;
+	psy_ui_fp_preferredsize preferredsize;
+} psy_ui_ComponentVtable;
+
 typedef struct psy_ui_Component {
+	psy_ui_ComponentVtable* vtable;
 	uintptr_t hwnd;
 	uintptr_t winid;	
 	psy_Signal signal_size;
@@ -76,7 +88,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_hide;
 	psy_Signal signal_windowproc;
 	psy_Signal signal_align;
-	psy_Signal signal_preferredsize;
+	//psy_Signal signal_preferredsize;
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;
 	psy_Signal signal_focus;
@@ -184,5 +196,6 @@ int ui_openfile(psy_ui_Component* self, char* title, char* filter,
 int ui_savefile(psy_ui_Component* self, char* title, char* filter,
 	char* defextension, const char* szInitialDir, char* filename);
 int ui_browsefolder(psy_ui_Component* self, const char* title, char* path);
+
 
 #endif

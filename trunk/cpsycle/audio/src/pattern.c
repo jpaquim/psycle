@@ -11,7 +11,8 @@ int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs)
 {
 	return 
-		rhs->col == lhs->col &&
+		rhs->column == lhs->column &&
+		rhs->digit == lhs->digit &&
 		rhs->track == lhs->track &&
 		rhs->offset == lhs->offset &&
 		rhs->pattern == lhs->pattern;
@@ -184,9 +185,10 @@ PatternNode* pattern_greaterequal(psy_audio_Pattern* self, psy_dsp_beat_t offset
 }
 
 PatternNode* pattern_findnode(psy_audio_Pattern* pattern, unsigned int track, float offset, 
-	unsigned int subline, psy_dsp_beat_t bpl, PatternNode** prev)
-{
+	psy_dsp_beat_t bpl, PatternNode** prev)
+{		
 	unsigned int currsubline = 0;
+	unsigned int subline = 0;
 	int first = 1;
 	PatternNode* node = pattern_greaterequal(pattern, offset);	
 	if (node) {
@@ -196,22 +198,11 @@ PatternNode* pattern_findnode(psy_audio_Pattern* pattern, unsigned int track, fl
 	}	
 	while (node) {
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(node->entry);
-		if (entry->offset >= offset + bpl) {			
-			node = 0;
-			break;
-		}
-		if (entry->track == 0 && !first) {
-			++currsubline;				
-		}
-		if (subline < currsubline) {			
-			node = 0;
-			break;
-		}
-		if (entry->track > track && subline == currsubline) {			
+		if (entry->offset >= offset + bpl || entry->track > track) {
 			node = 0;
 			break;
 		}		
-		if (entry->track == track && subline == currsubline) {
+		if (entry->track == track) {
 			break;
 		}				
 		*prev = node;		
@@ -239,6 +230,11 @@ void pattern_setlength(psy_audio_Pattern* self, psy_dsp_beat_t length)
 {
 	self->length = length;
 	++self->opcount;
+}
+
+psy_dsp_beat_t pattern_length(psy_audio_Pattern* self)
+{
+	return self->length;
 }
 
 int pattern_empty(psy_audio_Pattern* self)

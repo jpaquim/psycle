@@ -25,12 +25,12 @@ static int mode(psy_audio_VstPlugin*);
 static void work(psy_audio_VstPlugin* self, psy_audio_BufferContext*);
 static const psy_audio_MachineInfo* info(psy_audio_VstPlugin*);
 static void parametertweak(psy_audio_VstPlugin* self, int par, int val);
-static int parameterlabel(psy_audio_VstPlugin*, char* txt, int param);
-static int parametername(psy_audio_VstPlugin*, char* txt, int param);
-static int describevalue(psy_audio_VstPlugin*, char* txt, int param, int value);
-static int parametervalue(psy_audio_VstPlugin*, int param);
-static int parametertype(psy_audio_VstPlugin*, int param);
-static void parameterrange(psy_audio_VstPlugin*, int param, int* minval, int* maxval);
+static int parameterlabel(psy_audio_VstPlugin*, char* txt, uintptr_t param);
+static int parametername(psy_audio_VstPlugin*, char* txt, uintptr_t param);
+static int describevalue(psy_audio_VstPlugin*, char* txt, uintptr_t param, int value);
+static int parametervalue(psy_audio_VstPlugin*, uintptr_t param);
+static int parametertype(psy_audio_VstPlugin*, uintptr_t param);
+static void parameterrange(psy_audio_VstPlugin*, uintptr_t param, int* minval, int* maxval);
 static uintptr_t numparameters(psy_audio_VstPlugin*);
 static unsigned int numparametercols(psy_audio_VstPlugin*);
 static void dispose(psy_audio_VstPlugin* self);
@@ -61,6 +61,10 @@ struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin*, const psy_audio_PatternEn
 struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin*, int note, int channel);
 struct VstMidiEvent* allocmidientry(psy_audio_VstPlugin* self,
 	const psy_audio_PatternEntry*);
+static psy_dsp_amp_range_t amprange(psy_audio_VstPlugin* self)
+{
+	return PSY_DSP_AMP_RANGE_VST;
+}
 
 static void vstplugin_onfileselect(psy_audio_VstPlugin*, struct VstFileSelect*);
 
@@ -93,6 +97,7 @@ static void vtable_init(psy_audio_VstPlugin* self)
 		vtable.seteditorhandle = (fp_machine_seteditorhandle) seteditorhandle;
 		vtable.editorsize = (fp_machine_editorsize) editorsize;
 		vtable.editoridle = (fp_machine_editoridle) editoridle;
+		vtable.amprange = (fp_machine_amprange) amprange;
 		vtable_initialized = 1;
 	}
 }
@@ -213,32 +218,18 @@ int plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 }
 
 void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
-{
-	// scale from -32768..32767 to 0..1
-	if (!machine_bypassed(vstplugin_base(self))) {
-		uintptr_t c;
-
-		for (c = 0; c < buffer_numchannels(bc->output); ++c) {
-			dsp.mul(bc->output->samples[c], bc->numsamples, 1/32768.f);
-		}
-	}	
-	processevents(self, bc);
-	// scale from 0..1 to -32768..32767
-	if (!machine_bypassed(vstplugin_base(self))) {
-		uintptr_t c;
-
-		for (c = 0; c < buffer_numchannels(bc->output); ++c) {
-				dsp.mul(bc->output->samples[c], bc->numsamples, 32768.f);
-		}
-	}
-	// add to buffer memory
-	if (bc->output) {		
-		if (machine_buffermemory(vstplugin_base(self))) {
-			buffer_insertsamples(
-				machine_buffermemory(vstplugin_base(self)),
-				bc->output,
-				machine_buffermemorysize(vstplugin_base(self)),
-				bc->numsamples);
+{	
+	if (!machine_bypassed(vstplugin_base(self))) {		
+		processevents(self, bc);					
+		// add to buffer memory
+		if (bc->output) {		
+			if (machine_buffermemory(vstplugin_base(self))) {
+				buffer_insertsamples(
+					machine_buffermemory(vstplugin_base(self)),
+					bc->output,
+					machine_buffermemorysize(vstplugin_base(self)),
+					bc->numsamples);
+			}
 		}
 	}
 }
@@ -531,28 +522,28 @@ void parametertweak(psy_audio_VstPlugin* self, int par, int val)
 	self->effect->setParameter(self->effect, par, val / 65535.f);
 }
 
-int parameterlabel(psy_audio_VstPlugin* self, char* txt, int param)
+int parameterlabel(psy_audio_VstPlugin* self, char* txt, uintptr_t param)
 {
 	txt[0] = '\0';
 	self->effect->dispatcher(self->effect, effGetParamLabel, param, 0, txt, 0);
 	return *txt != '\0';
 }
 
-int parametername(psy_audio_VstPlugin* self, char* txt, int param)
+int parametername(psy_audio_VstPlugin* self, char* txt, uintptr_t param)
 {
 	txt[0] = '\0';
 	self->effect->dispatcher(self->effect, effGetParamName, param, 0, txt, 0);
 	return *txt != '\0';
 }
 
-int describevalue(psy_audio_VstPlugin* self, char* txt, int param, int value)
+int describevalue(psy_audio_VstPlugin* self, char* txt, uintptr_t param, int value)
 { 		
 	txt[0] = '\0';
 	self->effect->dispatcher(self->effect, effGetParamDisplay, param, 0, txt, 0);
 	return *txt != '\0';
 }
 
-int parametervalue(psy_audio_VstPlugin* self, int param)
+int parametervalue(psy_audio_VstPlugin* self, uintptr_t param)
 {
 	return (int)(self->effect->getParameter(self->effect, param) * 65535.f);
 }
@@ -577,12 +568,12 @@ unsigned int numparametercols(psy_audio_VstPlugin* self)
 	return 6;
 }
 
-int parametertype(psy_audio_VstPlugin* self, int param)
+int parametertype(psy_audio_VstPlugin* self, uintptr_t param)
 {
 	return MPF_STATE;
 }
 
-void parameterrange(psy_audio_VstPlugin* self, int param, int* minval, int* maxval)
+void parameterrange(psy_audio_VstPlugin* self, uintptr_t param, int* minval, int* maxval)
 {
 	*minval = 0;
 	*maxval = 65535;

@@ -8,8 +8,8 @@
 #include <portable.h>
 
 static void parameterlistbox_build(ParameterListBox*);
-static void parameterlistbox_onpreferredsize(ParameterListBox*,
-	psy_ui_Component* sender, ui_size* limit, ui_size* rv);
+static void parameterlistbox_preferredsize(ParameterListBox*, ui_size* limit,
+	ui_size* rv);
 static void parameterlistbox_ondescribe(ParameterListBox*, ui_slider*,
 	char* txt);
 static void parameterlistbox_ontweak(ParameterListBox*, ui_slider*,
@@ -17,10 +17,24 @@ static void parameterlistbox_ontweak(ParameterListBox*, ui_slider*,
 static void parameterlistbox_onvalue(ParameterListBox*, ui_slider*,
 	float* value);
 
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(ParameterListBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize)
+			parameterlistbox_preferredsize;
+	}
+}
+
 void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine)
 {	
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	ui_component_enablealign(&self->component);
 	ui_listbox_init(&self->listbox, &self->component);
 	ui_component_setalign(&self->listbox.component, UI_ALIGN_CLIENT);
@@ -30,10 +44,7 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	ui_component_resize(&self->slider.component, 20, 0);
 	ui_component_setalign(&self->slider.component, UI_ALIGN_RIGHT);
 	ui_component_resize(&self->component, 150, 200);
-	parameterlistbox_setmachine(self, machine);
-		psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self,
-		parameterlistbox_onpreferredsize);	
+	parameterlistbox_setmachine(self, machine);	
 	ui_slider_connect(&self->slider, self, parameterlistbox_ondescribe,
 		parameterlistbox_ontweak, parameterlistbox_onvalue);
 	// psy_signal_connect(&self->parameterlist.signal_selchanged, self,
@@ -79,8 +90,8 @@ int parameterlistbox_selected(ParameterListBox* self)
 	return ui_listbox_cursel(&self->listbox);
 }
 
-void parameterlistbox_onpreferredsize(ParameterListBox* self,
-	psy_ui_Component* sender, ui_size* limit, ui_size* rv)
+void parameterlistbox_preferredsize(ParameterListBox* self, ui_size* limit,
+	ui_size* rv)
 {
 	if (rv) {
 		*rv = ui_component_size(&self->component);

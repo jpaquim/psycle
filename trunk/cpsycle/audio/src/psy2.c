@@ -5,6 +5,7 @@
 #include "../../detail/os.h"
 
 #include "psy2.h"
+#include "psy2converter.h"
 #include "songio.h"
 #include "pattern.h"
 #include "constants.h"
@@ -14,47 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-#if !defined DIVERSALIS__OS__MICROSOFT
-#define _MAX_PATH 4096
-#endif
-
-typedef struct {
-	int32_t x;
-	int32_t y;
-} POINT;
-
-static void makeplugincatchername(const char* psy3dllname,
-	char* catchername);
-static void psy2machineload(psy_audio_SongFile*, int32_t slot);
-static void psy2pluginload(psy_audio_SongFile*, int32_t slot);
-static void psy2samplerload(psy_audio_SongFile*, int32_t slot);
-static void psy2readmachineconnections(psy_audio_SongFile*, int32_t slot);
-static char* replace_char(char* str, char c, char r)
-{
-	char* p;
-	
-	for (p = strchr(str, c); p != 0; p = strchr(p + 1, c)) *p = r;
-	return p;
-}
-void makeplugincatchername(const char* modulename, char* catchername)
-{
-	char prefix[_MAX_PATH];
-	char ext[_MAX_PATH];
-
-	psy_dir_extract_path(modulename, prefix, catchername, ext);
-	_strlwr(catchername);
-	replace_char(catchername, ' ', '-');
-	if (strstr(catchername, "blitz")) {
-		strcpy(catchername, "blitzn");
-	}
-}
-
 void psy2_load(struct psy_audio_SongFile* songfile)
 {	
 	int32_t i;	
-	int32_t num,sampR;
-	unsigned char _machineActive[128];
+	int32_t num,sampR;	
 //	unsigned char busEffect[64];
 	unsigned char busMachine[64];
 	unsigned char playorder[MAX_SONG_POSITIONS];
@@ -465,87 +429,32 @@ void psy2_load(struct psy_audio_SongFile* songfile)
 
 //	progress.m_Progress.SetPos(8192);
 //	::Sleep(1);
-	{  
-		psy_audio_Machine* pMac[128];
+
+	{  	// psy_audio_Machines			
+		unsigned char active[128];
 		psy_Properties* machinesproperties;	
 		int32_t i;
-		// psy_audio_Machines
-		//
-		psyfile_read(songfile->file, &_machineActive[0], sizeof(_machineActive));		
-		memset(pMac,0,sizeof(pMac));		
+		psyfile_read(songfile->file, &active[0], sizeof(active));		
 		machinesproperties = psy_properties_create_section(
-			songfile->workspaceproperties, "machines");
-	//	convert_internal_machines::Converter converter;								
-		for (i=0; i<128; i++)
-		{
-			int32_t x,y,type;
-			char sDllName[256];
-			char plugincatchername[256];
-
-			plugincatchername[0] = '\0';
-
-			if (_machineActive[i])
-			{
+			songfile->workspaceproperties, "machines");	
+		for (i=0; i<128; ++i) {
+			if (active[i]) {
 				psy_audio_Machine* machine;
-				int32_t slot;
-				psy_Properties* machineproperties;
-				char plugincatchername[256];
-
-				if (i == 0) {
-					slot = MASTER_INDEX;
-				} else
-				if (i == MASTER_INDEX) {
-					slot = 0;
-				} else {
-					slot = i;
-				}
-				// progress.m_Progress.SetPos(8192+i*(4096/128));
-				// ::Sleep(1);
-				machineproperties = psy_properties_create_section(machinesproperties, "machine");
-				psy_properties_append_int(machineproperties, "index", slot, 0, MAX_MACHINES);
+				int32_t index;
+				int32_t x;
+				int32_t y;				
+				machine = psy2converter_load(songfile, i, &index, &x, &y);
+				if (machine) {				
+					psy_Properties* machineproperties;				
 				
-				psyfile_read(songfile->file, &x, sizeof(x));
-				psyfile_read(songfile->file, &y, sizeof(y));
-
-				psy_properties_append_int(machineproperties, "x", x, 0, 0);
-				psy_properties_append_int(machineproperties, "y", y, 0, 0);
-
-
-				psyfile_read(songfile->file, &type, sizeof(type));
-
-				if (type == MACH_PLUGIN) {					
-					psyfile_read(songfile->file, sDllName, sizeof(sDllName)); // psy_audio_Plugin dll name
-					makeplugincatchername(sDllName, plugincatchername);
-				}				
-				machine = machinefactory_makemachine(
-					songfile->song->machinefactory,
-					type,
-					plugincatchername);
-				if (!machine) {
-					machine = machinefactory_makemachine(
-						songfile->song->machinefactory, 
-						MACH_DUMMY,
-						plugincatchername);
-					type = MACH_DUMMY;
-				}				
-				if (type == MACH_DUMMY) {
-					char txt[40];
-					strcpy(txt, "X!");
-					//strcat(txt, sDllName);
-					psy_properties_append_string(machineproperties, "editname", "dummy");
-				} else {
-					psy_properties_append_string(machineproperties, "editname", sDllName);
+					machineproperties = psy_properties_create_section(
+						machinesproperties, "machine");
+					psy_properties_append_int(machineproperties, "index",
+						index, 0, MAX_MACHINES);				
+					psy_properties_append_int(machineproperties, "x", x, 0, 0);
+					psy_properties_append_int(machineproperties, "y", y, 0, 0);								
+					machines_insert(&songfile->song->machines, index, machine);
 				}
-				
-				if (type == MACH_SAMPLER) {
-					psy2samplerload(songfile, slot);
-				} else
-				if (type == MACH_PLUGIN) {
-					psy2pluginload(songfile, slot);
-				} else {
-					psy2machineload(songfile, slot);
-				}
-				machines_insert(&songfile->song->machines, slot, machine);
 			}
 		}
 	}
@@ -821,217 +730,3 @@ void psy2_load(struct psy_audio_SongFile* songfile)
 //	return true;	
 }
 
-void psy2machineload(psy_audio_SongFile* songfile, int32_t slot)
-{
-	char junk[256];
-
-	char _editName[16];
-	int32_t _panning;
-	int32_t _outDry;
-	int32_t _outWet;
-
-	memset(&junk, 0, sizeof(junk));
-
-	psyfile_read(songfile->file, &_editName, sizeof(_editName));
-	psy2readmachineconnections(songfile, slot);
-	psyfile_read(songfile->file, &_panning, sizeof(_panning));
-	// psy_audio_Machine::SetPan(_panning);
-	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // numSubtracks
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // interpol
-
-	psyfile_read(songfile->file, &_outDry, sizeof(_outDry));
-	psyfile_read(songfile->file, &_outWet, sizeof(_outWet));
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosClamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegClamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinespeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sineglide
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinevolume
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfoamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeR
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackR
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterCutoff
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterResonance
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfoamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfophase
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode	
-}
-
-void psy2pluginload(psy_audio_SongFile* songfile, int32_t slot)
-{
-	char junk[256];
-	char _editName[16];
-	int32_t _panning;
-	int32_t _outDry;
-	int32_t _outWet;
-	int32_t i;
-	int32_t numParameters;
-
-	psyfile_read(songfile->file, &_editName, sizeof(_editName));
-	psyfile_read(songfile->file, &numParameters, sizeof(numParameters));
-	for (i=0; i<numParameters; i++)
-	{
-		psyfile_read(songfile->file, &junk[0], sizeof(int32_t));			
-	}
-	psy2readmachineconnections(songfile, slot);
-	psyfile_read(songfile->file, &_panning, sizeof(_panning));
-//	psy_audio_Machine::SetPan(_panning);
-	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // numSubtracks
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // interpol
-
-	psyfile_read(songfile->file, &_outDry, sizeof(_outDry));
-	psyfile_read(songfile->file, &_outWet, sizeof(_outWet));
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosClamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegClamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinespeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sineglide
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinevolume
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfoamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeR
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackR
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterCutoff
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterResonance
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfoamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfophase
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode
-}
-
-void psy2samplerload(psy_audio_SongFile* songfile, int32_t slot)
-{	
-	char junk[256];	
-	char _editName[16];
-	int32_t _panning;
-	int32_t _outDry;
-	int32_t _outWet;
-	int32_t i;
-//	int32_t numParameters;
-	int32_t _numVoices;
-
-
-	memset(&junk, 0, sizeof(junk));
-
-	psyfile_read(songfile->file, &_editName, sizeof(_editName));
-	psy2readmachineconnections(songfile, slot);
-	psyfile_read(songfile->file, &_panning, sizeof(_panning));
-// 	psy_audio_Machine::SetPan(_panning);
-	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
-	psyfile_read(songfile->file, &_numVoices, sizeof(_numVoices)); // numSubtracks
-
-/*	if (_numVoices < 4)  // No more need for this code.
-	{
-		// Most likely an old polyphony
-		_numVoices = 8;
-	}
-*/
-	psyfile_read(songfile->file, &i, sizeof(int32_t)); // interpol
-/*	switch (i)
-	{
-	case 2:
-		_resampler.SetQuality(RESAMPLE_SPLINE);
-		break;
-	case 0:
-		_resampler.SetQuality(RESAMPLE_NONE);
-		break;
-	default:
-	case 1:
-		_resampler.SetQuality(RESAMPLE_LINEAR);
-		break;
-	}*/
-
-	psyfile_read(songfile->file, &_outDry, sizeof(_outDry));
-	psyfile_read(songfile->file, &_outWet, sizeof(_outWet));
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosClamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegClamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinespeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sineglide
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinevolume
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfoamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeR
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackR
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterCutoff
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterResonance
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfoamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfophase
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode	
-}
-
-void psy2readmachineconnections(psy_audio_SongFile* songfile, int32_t slot)
-{	
-	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections psy_audio_Machine number
-	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections psy_audio_Machine number
-	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections psy_audio_Machine vol
-//	float _wireMultiplier[MAX_CONNECTIONS];	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-	unsigned char _connection[MAX_CONNECTIONS];      // Outgoing connections activated
-	unsigned char _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
-	int32_t _numInputs;							// number of Incoming connections
-	int32_t _numOutputs;						// number of Outgoing connections
-	POINT _connectionPoint[MAX_CONNECTIONS];			
-
-	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
-	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));
-	psyfile_read(songfile->file, &_inputConVol[0], sizeof(_inputConVol));
-	psyfile_read(songfile->file, &_connection[0], sizeof(_connection));
-	psyfile_read(songfile->file, &_inputCon[0], sizeof(_inputCon));
-	psyfile_read(songfile->file, &_connectionPoint[0], sizeof(_connectionPoint));
-	psyfile_read(songfile->file, &_numInputs, sizeof(_numInputs));
-	psyfile_read(songfile->file, &_numOutputs, sizeof(_numOutputs));
-
-
-	/*for (c = 0; c < MAX_CONNECTIONS; ++c) { // all for each of its input connections.		
-		if (_connection[c]) {
-			int32_t invertslot;
-
-			if (_inputMachines[c] == 0) {
-				invertslot = MASTER_INDEX;
-			} else
-			if (_inputMachines[c] == MASTER_INDEX) {
-				invertslot = 0;
-			} else {
-				invertslot = _inputMachines[c];
-			}
-			connections_connect(&songfile->song->machines.connections,
-				invertslot, slot);
-			if (_outputMachines[c] == 0) {
-				invertslot = MASTER_INDEX;
-			} else
-			if (_outputMachines[c] == MASTER_INDEX) {
-				invertslot = 0;
-			} else {
-				invertslot = _outputMachines[c];
-			}
-			connections_connect(&songfile->song->machines.connections,
-				slot, invertslot);
-		}		
-	}*/
-}

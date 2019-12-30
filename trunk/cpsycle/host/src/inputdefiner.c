@@ -9,8 +9,9 @@
 #include <portable.h>
 
 static void ondraw(InputDefiner*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void onkeydown(InputDefiner*, psy_ui_Component* sender, KeyEvent*);
-static void onkeyup(InputDefiner*, psy_ui_Component* sender, KeyEvent*);
+static void onkeydown(InputDefiner*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
+static void onkeyup(InputDefiner*, psy_ui_Component* sender, psy_ui_KeyEvent*);
 
 void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
@@ -92,7 +93,8 @@ void ondraw(InputDefiner* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	ui_textout(g, 0, 0, text, strlen(text));
 }
 
-void onkeydown(InputDefiner* self, psy_ui_Component* sender, KeyEvent* keyevent)
+void onkeydown(InputDefiner* self, psy_ui_Component* sender,
+	psy_ui_KeyEvent* ev)
 {
 	int shift;
 	int ctrl;	
@@ -100,21 +102,22 @@ void onkeydown(InputDefiner* self, psy_ui_Component* sender, KeyEvent* keyevent)
 	shift = GetKeyState (VK_SHIFT) < 0;
 	ctrl = GetKeyState (VK_CONTROL) < 0;	
 
-	if ((keyevent->keycode == VK_SHIFT || keyevent->keycode == VK_CONTROL)) {
+	if ((ev->keycode == VK_SHIFT || ev->keycode == VK_CONTROL)) {
 		if (self->regularkey == 0) {
 			self->input = encodeinput(0, shift, ctrl);
 		} else {
 			self->input = encodeinput(self->regularkey, shift, ctrl);
 		}
 	}
-	if (keyevent->keycode >= 0x30) {
-		self->regularkey = keyevent->keycode;	
+	if (ev->keycode >= 0x30) {
+		self->regularkey = ev->keycode;
 		self->input = encodeinput(self->regularkey, shift, ctrl);
 	}
 	ui_component_invalidate(&self->component);
 }
 
-void onkeyup(InputDefiner* self, psy_ui_Component* sender, KeyEvent* keyevent)
+void onkeyup(InputDefiner* self, psy_ui_Component* sender,
+	psy_ui_KeyEvent* ev)
 {
 	int shift;
 	int ctrl;
@@ -128,7 +131,7 @@ void onkeyup(InputDefiner* self, psy_ui_Component* sender, KeyEvent* keyevent)
 	if (self->regularkey) {		
 		self->input = encodeinput(inputkeycode, shift, ctrl);
 	}
-	if (keyevent->keycode >= 0x30) {
+	if (ev->keycode >= 0x30) {
 		self->regularkey = 0;
 	}
 	if (inputkeycode <= 0x30) {

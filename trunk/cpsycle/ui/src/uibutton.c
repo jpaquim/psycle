@@ -12,7 +12,7 @@ static unsigned int arrowhighlightcolor = 0x00FFFFFF;
 static void ui_button_create_system(psy_ui_Button*, psy_ui_Component* parent);
 static void ui_button_create_ownerdrawn(psy_ui_Button*, psy_ui_Component* parent);
 static void ondestroy(psy_ui_Button*, psy_ui_Component* sender);
-static void onownerdraw(psy_ui_Button*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void draw(psy_ui_Button*, psy_ui_Graphics*);
 static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
 static void drawarrow(psy_ui_Button*, ui_point* arrow, psy_ui_Graphics*);
 static void makearrow(ui_point*, ButtonIcon icon, int x, int y);
@@ -21,8 +21,19 @@ static void onmouseenter(psy_ui_Button*, psy_ui_Component* sender);
 static void onmouseleave(psy_ui_Button*, psy_ui_Component* sender);
 static void oncommand(psy_ui_Button*, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam);
-static void onpreferredsize(psy_ui_Button*, psy_ui_Component* sender, ui_size* limit,
-	ui_size* size);
+static void preferredsize(psy_ui_Button*, ui_size* limit, ui_size* size);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(psy_ui_Button* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.draw = (psy_ui_fp_draw) draw;
+		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;		
+	}
+}
 
 void ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {	
@@ -38,12 +49,11 @@ void ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	} else {
 		ui_button_create_system(self, parent);
 	}
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	psy_signal_init(&self->signal_clicked);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-	psy_signal_connect(&self->component.signal_preferredsize, self,
-		onpreferredsize);
-}
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+}	
 
 void ui_button_create_system(psy_ui_Button* self, psy_ui_Component* parent)
 {    	
@@ -59,7 +69,6 @@ void ui_button_create_ownerdrawn(psy_ui_Button* self, psy_ui_Component* parent)
 {
 	self->text = _strdup("");	
 	ui_component_init(&self->component, parent);
-	psy_signal_connect(&self->component.signal_draw, self, onownerdraw);	
 	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
 	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
 	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
@@ -73,7 +82,7 @@ void ondestroy(psy_ui_Button* self, psy_ui_Component* sender)
 	psy_signal_dispose(&self->signal_clicked);
 }
 
-void onownerdraw(psy_ui_Button* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void draw(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	ui_size size;
 	ui_size textsize;
@@ -203,8 +212,7 @@ void ui_button_setcharnumber(psy_ui_Button* self, int number)
 	self->charnumber = number;
 }
 
-void onpreferredsize(psy_ui_Button* self, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv)
+void preferredsize(psy_ui_Button* self, ui_size* limit, ui_size* rv)
 {		
 	if (rv) {
 		if (self->ownerdrawn) {

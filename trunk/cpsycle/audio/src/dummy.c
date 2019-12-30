@@ -31,6 +31,10 @@ static const psy_audio_MachineInfo* info(psy_audio_DummyMachine* self) {
 static int mode(psy_audio_DummyMachine* self) { return self->mode; }
 static uintptr_t numinputs(psy_audio_DummyMachine* self) { return 2; }
 static uintptr_t numoutputs(psy_audio_DummyMachine* self) { return 2; }
+static psy_dsp_amp_range_t amprange(psy_audio_DummyMachine* self)
+{
+	return PSY_DSP_AMP_RANGE_IGNORE;
+}
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -43,6 +47,7 @@ static void vtable_init(psy_audio_DummyMachine* self)
 		vtable.info = (fp_machine_info) info;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable.amprange = (fp_machine_amprange) amprange;
 		vtable_initialized = 1;
 	}
 }

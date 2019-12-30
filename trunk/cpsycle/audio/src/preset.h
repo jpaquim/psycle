@@ -18,7 +18,7 @@ psy_audio_Preset* preset_allocinit(void);
 
 void preset_setname(psy_audio_Preset*, const char* name);
 const char* preset_name(psy_audio_Preset*);
-void preset_setvalue(psy_audio_Preset*, int numparam, int value);
-int preset_value(psy_audio_Preset*, int numparam);
+void preset_setvalue(psy_audio_Preset*, uintptr_t param, int value);
+int preset_value(psy_audio_Preset*, uintptr_t param);
 
 #endif
