@@ -16,8 +16,8 @@ typedef struct {
 void tab_init(Tab*, const char* text, ui_size* size);
 
 typedef struct {
-	psy_List* tabs;
 	psy_ui_Component component;
+	psy_List* tabs;	
 	int selected;	
 	psy_Signal signal_change;
 	ui_font font;

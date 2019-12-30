@@ -40,24 +40,30 @@ static void mixer_seqtick(psy_audio_Mixer*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static uintptr_t numinputs(psy_audio_Mixer*);
 static uintptr_t numoutputs(psy_audio_Mixer*);
-static psy_audio_Buffer* mix(psy_audio_Mixer*, uintptr_t slot, unsigned int amount, psy_audio_MachineSockets*, psy_audio_Machines*);
-static void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, unsigned int numsamples, float vol);
+static psy_audio_Buffer* mix(psy_audio_Mixer*, uintptr_t slot, uintptr_t amount,
+	psy_audio_MachineSockets*, psy_audio_Machines*);
+static void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source,
+	uintptr_t numsamples, float vol);
 static void loadspecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void savespecific(psy_audio_Mixer*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void onconnected(psy_audio_Mixer*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void ondisconnected(psy_audio_Mixer*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
-static int parametertype(psy_audio_Mixer*, int par);
-static void parameterrange(psy_audio_Mixer*, int param, int* minval, int* maxval);
-static int parameterlabel(psy_audio_Mixer*, char* txt, int param);
-static int parametername(psy_audio_Mixer*, char* txt, int param);
-static void parametertweak(psy_audio_Mixer*, int param, int value);
-static void patterntweak(psy_audio_Mixer* self, int par, int val);
-static int parametervalue(psy_audio_Mixer*, int const param);
-static int describevalue(psy_audio_Mixer*, char* txt, int const param, int const value);
+static int parametertype(psy_audio_Mixer*, uintptr_t param);
+static void parameterrange(psy_audio_Mixer*, uintptr_t param, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Mixer*, char* txt, uintptr_t param);
+static int parametername(psy_audio_Mixer*, char* txt, uintptr_t param);
+static void parametertweak(psy_audio_Mixer*, uintptr_t param, int value);
+static void patterntweak(psy_audio_Mixer* self, uintptr_t param, int val);
+static int parametervalue(psy_audio_Mixer*, uintptr_t param);
+static int describevalue(psy_audio_Mixer*, char* txt, uintptr_t param, int value);
 static uintptr_t numparameters(psy_audio_Mixer*);
-static unsigned int numparametercols(psy_audio_Mixer*);
+static uintptr_t numparametercols(psy_audio_Mixer*);
+static psy_dsp_amp_range_t amprange(psy_audio_Mixer* self)
+{
+	return PSY_DSP_AMP_RANGE_IGNORE;
+}
 
 static int intparamvalue(float value);
 static float floatparamvalue(int value);
@@ -69,12 +75,12 @@ static void setslot(psy_audio_Mixer* self, uintptr_t slot) { self->slot = slot; 
 static uintptr_t mastercolumn(psy_audio_Mixer*);
 static uintptr_t inputcolumn(psy_audio_Mixer*);
 static uintptr_t returncolumn(psy_audio_Mixer*);
-static void preparemix(psy_audio_Mixer*, psy_audio_Machines*, unsigned int amount);
-static void mixinputs(psy_audio_Mixer*, psy_audio_Machines*, unsigned int amount);
-static void workreturns(psy_audio_Mixer*, psy_audio_Machines*, unsigned int amount);
-static void mixreturns(psy_audio_Mixer*, psy_audio_Machines*, unsigned int amount);
-static void tickrms(psy_audio_Mixer*, unsigned int amount);
-static void levelmaster(psy_audio_Mixer*, unsigned int amount);
+static void preparemix(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount);
+static void mixinputs(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount);
+static void workreturns(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount);
+static void mixreturns(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount);
+static void tickrms(psy_audio_Mixer*, uintptr_t amount);
+static void levelmaster(psy_audio_Mixer*, uintptr_t amount);
 
 static psy_audio_MixerChannel* mixerchannel_allocinit(uintptr_t inputslot);
 static void mixerchannel_dispose(psy_audio_MixerChannel*);
@@ -82,6 +88,7 @@ static void mixerchannel_dispose(psy_audio_MixerChannel*);
 static void returnchannel_init(psy_audio_ReturnChannel*, uintptr_t fxslot);
 static psy_audio_ReturnChannel* returnchannel_allocinit(uintptr_t fxslot);
 static void returnchannel_dispose(psy_audio_ReturnChannel*);
+
 
 void mixerchannel_init(psy_audio_MixerChannel* self, uintptr_t inputslot)
 {		
@@ -167,6 +174,7 @@ static void vtable_init(psy_audio_Mixer* self)
 		vtable.savespecific = (fp_machine_savespecific) savespecific;
 		vtable.setslot = (fp_machine_setslot) setslot;
 		vtable.slot = (fp_machine_slot) slot;
+		vtable.amprange = (fp_machine_amprange) amprange;
 		vtable_initialized = 1;
 	}
 }
@@ -231,7 +239,7 @@ void mixer_seqtick(psy_audio_Mixer* self, uintptr_t channel,
 	if(event->note == NOTECOMMANDS_TWEAK)
 	{
 		int nv = (event->cmd<<8)+event->parameter;
-		int param =  event->inst; // translate_param(event->inst);
+		uintptr_t param =  event->inst; // translate_param(event->inst);
 
 		// if(param < GetNumParams()) {
 		//	SetParameter(param,nv);
@@ -242,7 +250,7 @@ void mixer_seqtick(psy_audio_Mixer* self, uintptr_t channel,
 		//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 		// doing simply "tweak" for now..
 		int nv = (event->cmd<<8)+event->parameter;
-		int param = event->inst; // translate_param(event->inst);
+		uintptr_t param = event->inst; // translate_param(event->inst);
 
 		//if(param < GetNumParams()) {
 		//	SetParameter(param,nv);
@@ -260,7 +268,9 @@ uintptr_t numoutputs(psy_audio_Mixer* self)
 	return 2;
 }
 
-psy_audio_Buffer* mix(psy_audio_Mixer* self, uintptr_t slot, unsigned int amount, psy_audio_MachineSockets* connected_machine_sockets, psy_audio_Machines* machines)
+psy_audio_Buffer* mix(psy_audio_Mixer* self, uintptr_t slot, uintptr_t amount,
+	psy_audio_MachineSockets* connected_machine_sockets,
+	psy_audio_Machines* machines)
 {							
 	preparemix(self, machines, amount);
 	mixinputs(self, machines, amount);
@@ -271,7 +281,8 @@ psy_audio_Buffer* mix(psy_audio_Mixer* self, uintptr_t slot, unsigned int amount
 	return self->master.buffer;
 }
 
-void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned int amount)
+void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines,
+	uintptr_t amount)
 {			
 	psy_TableIterator iter;
 
@@ -291,7 +302,8 @@ void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned in
 	}
 }
 
-void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned int amount)
+void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines,
+	uintptr_t amount)
 {		
 	psy_TableIterator iter;	
 	
@@ -331,7 +343,8 @@ void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned int
 	}
 }
 
-void mixreturns(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned int amount)
+void mixreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
+	uintptr_t amount)
 {		
 	psy_TableIterator iter;
 	
@@ -348,7 +361,8 @@ void mixreturns(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned in
 	}
 }
 
-void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned int amount)
+void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
+	uintptr_t amount)
 {	
 	psy_TableIterator iter;
 	
@@ -387,9 +401,10 @@ void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines, unsigned i
 	}
 }
 
-void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, unsigned int numsamples, float vol)
+void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source,
+	uintptr_t numsamples, float vol)
 {
-	unsigned int channel;
+	uintptr_t channel;
 
 	if (source) {
 		for (channel = 0; channel < source->numchannels && 
@@ -405,7 +420,7 @@ void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, unsigned int nu
 	}
 }
 
-void tickrms(psy_audio_Mixer* self, unsigned int amount)
+void tickrms(psy_audio_Mixer* self, uintptr_t amount)
 {
 	psy_dsp_rmsvol_tick(&self->masterrmsvol, 
 		self->master.buffer->samples[0],
@@ -413,13 +428,14 @@ void tickrms(psy_audio_Mixer* self, unsigned int amount)
 		amount);
 }
 
-void levelmaster(psy_audio_Mixer* self, unsigned int amount)
+void levelmaster(psy_audio_Mixer* self, uintptr_t amount)
 {
 	dsp.mul(self->master.buffer->samples[0], amount, self->master.volume);
 	dsp.mul(self->master.buffer->samples[1], amount, self->master.volume);
 }
 
-void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections, uintptr_t outputslot, uintptr_t inputslot)
+void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
+	uintptr_t outputslot, uintptr_t inputslot)
 {				
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	if (inputslot == (int)self->slot) {		
@@ -526,7 +542,7 @@ static psy_dsp_amp_t dB2Amp(psy_dsp_amp_t db)
 	return (psy_dsp_amp_t) pow(10.0f, db / 20.0f);
 }
 
-void patterntweak(psy_audio_Mixer* self, int numparam, int value)
+void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, int value)
 {
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	uintptr_t channelindex = numparam / 16;
@@ -605,7 +621,7 @@ void patterntweak(psy_audio_Mixer* self, int numparam, int value)
 }
 
 
-void parametertweak(psy_audio_Mixer* self, int param, int value)
+void parametertweak(psy_audio_Mixer* self, uintptr_t param, int value)
 {	
 	uintptr_t col;
 	uintptr_t row;
@@ -712,7 +728,7 @@ void parametertweak(psy_audio_Mixer* self, int param, int value)
 	}
 }
 
-int parametervalue(psy_audio_Mixer* self, int const param)
+int parametervalue(psy_audio_Mixer* self, uintptr_t param)
 {	
 	uintptr_t col;
 	uintptr_t row;
@@ -815,7 +831,7 @@ int parametervalue(psy_audio_Mixer* self, int const param)
 	return 0;
 }
 
-int describevalue(psy_audio_Mixer* self, char* txt, int const param, int const value)
+int describevalue(psy_audio_Mixer* self, char* txt, uintptr_t param, int value)
 { 	
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	uintptr_t col;
@@ -997,16 +1013,16 @@ int describevalue(psy_audio_Mixer* self, char* txt, int const param, int const v
 
 uintptr_t numparameters(psy_audio_Mixer* self)
 {	
-	return (unsigned int)( numparametercols(self) * (10  + psy_table_size(&self->sends) + 
+	return (uintptr_t)( numparametercols(self) * (10  + psy_table_size(&self->sends) + 
 		psy_table_size(&self->sends)));
 }
 
-unsigned int numparametercols(psy_audio_Mixer* self)
+uintptr_t numparametercols(psy_audio_Mixer* self)
 {
-	return (unsigned int) (returncolumn(self) + self->returns.count + 1);
+	return returncolumn(self) + self->returns.count + 1;
 }
 
-int parametername(psy_audio_Mixer* self, char* txt, int param)
+int parametername(psy_audio_Mixer* self, char* txt, uintptr_t param)
 {		
 	uintptr_t col;
 	uintptr_t row;
@@ -1051,7 +1067,7 @@ int parametername(psy_audio_Mixer* self, char* txt, int param)
 	return *txt != '\0';
 }
 
-int parametertype(psy_audio_Mixer* self, int param)
+int parametertype(psy_audio_Mixer* self, uintptr_t param)
 {
 	uintptr_t col;
 	uintptr_t row;
@@ -1098,13 +1114,13 @@ int parametertype(psy_audio_Mixer* self, int param)
 	return MPF_STATE;
 }
 
-void parameterrange(psy_audio_Mixer* self, int param, int* minval, int* maxval)
+void parameterrange(psy_audio_Mixer* self, uintptr_t param, int* minval, int* maxval)
 {
 	*minval = 0;
 	*maxval = 65535;
 }
 
-int parameterlabel(psy_audio_Mixer* self, char* txt, int param)
+int parameterlabel(psy_audio_Mixer* self, char* txt, uintptr_t param)
 {
 	return parametername(self, txt, param);	
 }

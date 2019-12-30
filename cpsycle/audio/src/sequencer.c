@@ -466,7 +466,7 @@ void insertevents(psy_audio_Sequencer* self)
 								patternentry->event.parameter *
 								((psy_dsp_beat_t)1.f / self->lpb);
 						}
-					} else {
+					} else {						
 						addsequenceevent(self, track, offset);
 					}
 					sequencetrackiterator_inc(it);
@@ -571,7 +571,7 @@ void maketweakslideevents(psy_audio_Sequencer* self, psy_audio_PatternEntry* ent
 	machine = machines_at(self->machines, entry->event.mach);
 	if (machine &&
 			entry->event.inst < machine->vtable->numparameters(machine) > 0) {
-		int param = entry->event.inst;
+		uintptr_t param = entry->event.inst;
 		int minval;
 		int maxval;		
 		int slides = sequencer_frames(self, 1.f/(self->lpb * sequencer_speed(self))) / 64;		
@@ -602,7 +602,7 @@ void maketweakslideevents(psy_audio_Sequencer* self, psy_audio_PatternEntry* ent
 			for (slide = 0; slide < slides; ++slide) {
 				psy_audio_PatternEntry* slideentry;
 				int cmd;
-				int parameter;				
+				uintptr_t parameter;				
 				int nv;
 
 				if (slide == slides -1) {
@@ -810,7 +810,7 @@ void sequencer_recordinputevent(psy_audio_Sequencer* self, const psy_audio_Patte
 
 			quantizedpatternoffset = ((int)((playposition - entry->offset) *
 				self->lpb)) / (psy_dsp_beat_t)self->lpb;			
-			node = pattern_findnode(pattern, 0, quantizedpatternoffset, 0, 
+			node = pattern_findnode(pattern, 0, quantizedpatternoffset, 
 				1.f / self->lpb, &prev);
 			if (node) {					
 				pattern_setevent(pattern, node, event);

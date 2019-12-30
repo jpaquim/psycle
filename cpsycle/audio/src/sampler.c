@@ -23,13 +23,13 @@ static void stop(psy_audio_Sampler*);
 static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
 static unsigned int numparametercols(psy_audio_Sampler*);
 static uintptr_t numparameters(psy_audio_Sampler*);
-static int parametertype(psy_audio_Sampler* self, int par);
-static void parameterrange(psy_audio_Sampler*, int numparam, int* minval, int* maxval);
-static int parameterlabel(psy_audio_Sampler*, char* txt, int param);
-static int parametername(psy_audio_Sampler*, char* txt, int param);
-static void parametertweak(psy_audio_Sampler*, int par, int val);
-static int describevalue(psy_audio_Sampler*, char* txt, int param, int value);
-static int parametervalue(psy_audio_Sampler*, int param);
+static int parametertype(psy_audio_Sampler* self, uintptr_t param);
+static void parameterrange(psy_audio_Sampler*, uintptr_t param, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Sampler*, char* txt, uintptr_t param);
+static int parametername(psy_audio_Sampler*, char* txt, uintptr_t param);
+static void parametertweak(psy_audio_Sampler*, uintptr_t par, int val);
+static int describevalue(psy_audio_Sampler*, char* txt, uintptr_t param, int value);
+static int parametervalue(psy_audio_Sampler*, uintptr_t param);
 static void dispose(psy_audio_Sampler*);
 static int alloc_voice(psy_audio_Sampler*);
 static void releaseallvoices(psy_audio_Sampler*);
@@ -153,7 +153,7 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 {	
 	psy_List* p;
 	uintptr_t c = 0;
-
+	
 	removeunusedvoices(self);
 	for (p = self->voices; p != 0 && c < self->numvoices; p = p->next, ++c) {
 		Voice* voice;
@@ -166,28 +166,26 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {		
-	psy_audio_Instrument* instrument;
-	int slot;
+	Voice* voice = 0;	
 		
-	slot = currslot(self, channel, event);
-	if (slot == NOTECOMMANDS_EMPTY) {
-		return;
-	}	
-	instrument = instruments_at(machine_instruments(sampler_base(self)), slot);
-	if (instrument) {
-		Voice* voice = 0;		
-
-		if (event->note <= NOTECOMMANDS_EMPTY) {
-			releasevoices(self, channel);
-		} else {
-			voice = activevoice(self, channel);
-		}
-		if (!voice) {
+	if (event->note <= NOTECOMMANDS_RELEASE) {
+		releasevoices(self, channel);
+	} else {
+		voice = activevoice(self, channel);		
+	}
+	if (!voice) {		
+		psy_audio_Instrument* instrument;
+		
+		instrument = instruments_at(machine_instruments(sampler_base(self)),
+			currslot(self, channel, event));
+		if (instrument) {
 			voice = voice_allocinit(self, instrument, channel,
 				machine_samplerate(sampler_base(self)));
 			psy_list_append(&self->voices, voice);
-		}		
-		voice_seqtick(voice, event);		
+		}
+	}
+	if (voice) {
+		voice_seqtick(voice, event);
 	}
 }
 
@@ -292,7 +290,7 @@ const psy_audio_MachineInfo* info(psy_audio_Sampler* self)
 	return &MacInfo;
 }
 
-void parametertweak(psy_audio_Sampler* self, int param, int value)
+void parametertweak(psy_audio_Sampler* self, uintptr_t param, int value)
 {	
 	switch (param) {
 		case 0: self->numvoices = value; break;
@@ -304,7 +302,7 @@ void parametertweak(psy_audio_Sampler* self, int param, int value)
 	}
 }
 
-int describevalue(psy_audio_Sampler* self, char* txt, int param, int value)
+int describevalue(psy_audio_Sampler* self, char* txt, uintptr_t param, int value)
 { 
 	if (param == 1) {
 		switch(value)
@@ -329,7 +327,7 @@ int describevalue(psy_audio_Sampler* self, char* txt, int param, int value)
 	return 0;
 }
 
-int parametervalue(psy_audio_Sampler* self, int param)
+int parametervalue(psy_audio_Sampler* self, uintptr_t param)
 {	
 	switch (param) {
 		case 0: return self->numvoices; break;
@@ -352,12 +350,12 @@ unsigned int numparametercols(psy_audio_Sampler* self)
 	return 4;
 }
 
-int parametertype(psy_audio_Sampler* self, int par)
+int parametertype(psy_audio_Sampler* self, uintptr_t param)
 {
 	return MPF_STATE;
 }
 
-void parameterrange(psy_audio_Sampler* self, int param, int* minval, int* maxval)
+void parameterrange(psy_audio_Sampler* self, uintptr_t param, int* minval, int* maxval)
 {
 	switch (param) {
 	case 0:
@@ -383,7 +381,7 @@ void parameterrange(psy_audio_Sampler* self, int param, int* minval, int* maxval
 	}
 }
 
-int parameterlabel(psy_audio_Sampler* self, char* txt, int param)
+int parameterlabel(psy_audio_Sampler* self, char* txt, uintptr_t param)
 {
 	int rv = 1;
 	switch (param) {
@@ -407,7 +405,7 @@ int parameterlabel(psy_audio_Sampler* self, char* txt, int param)
 	return rv;
 }
 
-int parametername(psy_audio_Sampler* self, char* txt, int param)
+int parametername(psy_audio_Sampler* self, char* txt, uintptr_t param)
 {
 	int rv = 1;
 	switch (param) {
@@ -589,6 +587,12 @@ Voice* voice_allocinit(psy_audio_Sampler* sampler,
 
 void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 {	
+	if (event->note == NOTECOMMANDS_RELEASE) {
+		voice_noteoff(self, event);
+	} else
+	if (event->note < NOTECOMMANDS_RELEASE) {
+		voice_noteon(self, event);
+	}
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
 		 self->usedefaultvolume = 0;
 		 self->vol = event->parameter / 
@@ -596,13 +600,10 @@ void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 	} else
 	if (event->cmd == SAMPLER_CMD_PANNING) {
 		self->pan = event->parameter / (psy_dsp_amp_t) 255;
-	}
-	if (event->note == NOTECOMMANDS_RELEASE) {
-		voice_noteoff(self, event);
 	} else
-	if (event->note < NOTECOMMANDS_RELEASE) {
-		voice_noteon(self, event);
-	}
+	if (event->cmd == SAMPLER_CMD_OFFSET) {
+		
+	} else
 	if (event->cmd == SAMPLER_CMD_PORTAUP) {
 		double samplesprobeat;
 
@@ -770,7 +771,8 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 						portaspeed = 1.0;
 						portadone = 1;
 					} else {
-						position->speed *= portaspeed;
+						position->speed = 
+							(int64_t) (position->speed * portaspeed);
 					}
 				}
 				if (!sampleiterator_inc(position)) {			

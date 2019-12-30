@@ -59,8 +59,8 @@ uint32_t psyfile_filesize(PsyFile*);
 int psyfile_readstring(PsyFile*, char* pData, uint32_t maxBytes);
 uint32_t psyfile_getpos(PsyFile*);
 FILE* psyfile_getfile(PsyFile*);
-uint32_t psyfile_writeheader(PsyFile*, char* pData, uint32_t version,
-	uint32_t size);
+int psyfile_writeheader(PsyFile*, char* pData, uint32_t version,
+	uint32_t size, uint32_t* pos);
 int psyfile_writestring(PsyFile*, const char* str);
 uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
 int psyfile_readchunkbegin(PsyFile*);

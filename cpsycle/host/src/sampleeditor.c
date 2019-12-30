@@ -28,13 +28,16 @@ static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
-static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*, unsigned int slot,
-	psy_audio_BufferContext*);
+static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*,
+	unsigned int slot, psy_audio_BufferContext*);
 
 static void samplezoom_ondestroy(SampleZoom*, psy_ui_Component* sender);
-static void samplezoom_onmousedown(SampleZoom*, psy_ui_Component* sender, MouseEvent*);
-static void samplezoom_onmouseup(SampleZoom*, psy_ui_Component* sender, MouseEvent*);
-static void samplezoom_onmousemove(SampleZoom*, psy_ui_Component* sender, MouseEvent*);
+static void samplezoom_onmousedown(SampleZoom*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void samplezoom_onmouseup(SampleZoom*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void samplezoom_onmousemove(SampleZoom*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 
 enum {
 	SAMPLEEDITOR_DRAG_NONE,
@@ -205,7 +208,8 @@ void samplezoom_drawsamples(SampleZoom* self, psy_ui_Graphics* g)
 	}
 }
 
-void samplezoom_onmousedown(SampleZoom* self, psy_ui_Component* sender, MouseEvent* ev)
+void samplezoom_onmousedown(SampleZoom* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	ui_size size;
 	int zoomleftx;
@@ -232,7 +236,8 @@ void samplezoom_onmousedown(SampleZoom* self, psy_ui_Component* sender, MouseEve
 	ui_component_capture(&self->component);
 }
 
-void samplezoom_onmousemove(SampleZoom* self, psy_ui_Component* sender, MouseEvent* ev)
+void samplezoom_onmousemove(SampleZoom* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {	
 	ui_size size;	
 
@@ -316,7 +321,7 @@ void samplezoom_onmousemove(SampleZoom* self, psy_ui_Component* sender, MouseEve
 }
 
 void samplezoom_onmouseup(SampleZoom* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	self->dragmode = SAMPLEEDITOR_DRAG_NONE;
 	ui_component_releasecapture(&self->component);

@@ -33,7 +33,7 @@ void machines_init(psy_audio_Machines* self)
 	self->path = 0;
 	self->numsamplebuffers = 100;
 	self->samplebuffers = dsp.memory_alloc(MAX_STREAM_SIZE *
-		self->numsamplebuffers, sizeof(float));
+		self->numsamplebuffers, sizeof(float));	
 	self->currsamplebuffer = 0;
 	self->slot = 0;	
 	self->buffers = 0;
@@ -376,8 +376,10 @@ psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines* self, unsigned int cha
 	rv = buffer_allocinit(channels);
 	for (channel = 0; channel < channels; ++channel) {
 		float* samples;
-		
-		samples = self->samplebuffers + (self->currsamplebuffer * MAX_STREAM_SIZE);		
+				
+		samples = self->samplebuffers
+			? self->samplebuffers + (self->currsamplebuffer * MAX_STREAM_SIZE)
+			: 0;
 		++self->currsamplebuffer;
 		if (self->currsamplebuffer >= self->numsamplebuffers) {
 			self->currsamplebuffer = 0;

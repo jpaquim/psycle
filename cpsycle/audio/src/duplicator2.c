@@ -14,14 +14,14 @@ static void work(psy_audio_Duplicator2* self, psy_audio_BufferContext* bc) { }
 static void sequencertick(psy_audio_Duplicator2*);
 static psy_List* sequencerinsert(psy_audio_Duplicator2*, psy_List* events);
 static const psy_audio_MachineInfo* info(psy_audio_Duplicator2*);
-static void parametertweak(psy_audio_Duplicator2*, int par, int val);
-static int describevalue(psy_audio_Duplicator2*, char* txt, int param, int value);
-static int parametervalue(psy_audio_Duplicator2*, int param);
-static void parameterrange(psy_audio_Duplicator2*, int param, int* minval, int* maxval);
-static int parameterlabel(psy_audio_Duplicator2*, char* txt, int param);
-static int parametername(psy_audio_Duplicator2*, char* txt, int param);
+static void parametertweak(psy_audio_Duplicator2*, uintptr_t param, int val);
+static int describevalue(psy_audio_Duplicator2*, char* txt, uintptr_t param, int value);
+static int parametervalue(psy_audio_Duplicator2*, uintptr_t param);
+static void parameterrange(psy_audio_Duplicator2*, uintptr_t param, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Duplicator2*, char* txt, uintptr_t param);
+static int parametername(psy_audio_Duplicator2*, char* txt, uintptr_t param);
 static uintptr_t numparameters(psy_audio_Duplicator2*);
-static unsigned int numparametercols(psy_audio_Duplicator2*);
+static uintptr_t numparametercols(psy_audio_Duplicator2*);
 static void dispose(psy_audio_Duplicator2*);
 static uintptr_t numinputs(psy_audio_Duplicator2* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Duplicator2* self) { return 0; }
@@ -174,7 +174,7 @@ const psy_audio_MachineInfo* info(psy_audio_Duplicator2* self)
 	return &MacInfo;
 }
 
-void parametertweak(psy_audio_Duplicator2* self, int param, int value)
+void parametertweak(psy_audio_Duplicator2* self, uintptr_t param, int value)
 {
 	if (param >= 0 && param < 16) {
 		self->macoutput[param] = value;
@@ -187,12 +187,12 @@ void parametertweak(psy_audio_Duplicator2* self, int param, int value)
 	}			
 }
 
-int describevalue(psy_audio_Duplicator2* self, char* txt, int param, int value)
+int describevalue(psy_audio_Duplicator2* self, char* txt, uintptr_t param, int value)
 { 
 	return 0;
 }
 
-int parametervalue(psy_audio_Duplicator2* self, int param)
+int parametervalue(psy_audio_Duplicator2* self, uintptr_t param)
 {	
 	if (param >= 0 && param < 16) {
 		return self->macoutput[param];
@@ -206,7 +206,7 @@ int parametervalue(psy_audio_Duplicator2* self, int param)
 	return 0;
 }
 
-void parameterrange(psy_audio_Duplicator2* self, int param, int* minval, int* maxval)
+void parameterrange(psy_audio_Duplicator2* self, uintptr_t param, int* minval, int* maxval)
 {
 	if (param < 16) {
 		*minval = -1;
@@ -222,12 +222,12 @@ void parameterrange(psy_audio_Duplicator2* self, int param, int* minval, int* ma
 	}
 }
 
-int parameterlabel(psy_audio_Duplicator2* self, char* txt, int param)
+int parameterlabel(psy_audio_Duplicator2* self, char* txt, uintptr_t param)
 {
 	return parametername(self, txt, param);
 }
 
-int parametername(psy_audio_Duplicator2* self, char* txt, int param)
+int parametername(psy_audio_Duplicator2* self, char* txt, uintptr_t param)
 {
 	txt[0] = '\0';
 	if (param < 16) {
@@ -251,7 +251,7 @@ uintptr_t numparameters(psy_audio_Duplicator2* self)
 	return 16 * 4;
 }
 
-unsigned int numparametercols(psy_audio_Duplicator2* self)
+uintptr_t numparametercols(psy_audio_Duplicator2* self)
 {
 	return 4;	
 }

@@ -97,7 +97,7 @@ typedef struct SequenceView {
 	SequenceViewTrackHeader trackheader;
 	SequenceViewDuration duration;
 	PlayListEditor playlisteditor;
-	ui_splitbar splitbar;
+	psy_ui_SplitBar splitbar;
 	SequencerOptionsBar options;
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;

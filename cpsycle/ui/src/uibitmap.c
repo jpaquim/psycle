@@ -9,12 +9,12 @@
 
 extern psy_ui_App app;
 
-void ui_bitmap_init(psy_ui_Bitmap* self)
+void psy_ui_bitmap_init(psy_ui_Bitmap* self)
 {
 	self->hBitmap = 0;
 }
 
-void ui_bitmap_dispose(psy_ui_Bitmap* self)
+void psy_ui_bitmap_dispose(psy_ui_Bitmap* self)
 {
 	if (self->hBitmap) {
 		DeleteObject(self->hBitmap);
@@ -22,7 +22,7 @@ void ui_bitmap_dispose(psy_ui_Bitmap* self)
 	}
 }
 
-int ui_bitmap_load(psy_ui_Bitmap* self, const char* path)
+int psy_ui_bitmap_load(psy_ui_Bitmap* self, const char* path)
 {	
 	HBITMAP bmp;
 	
@@ -32,13 +32,13 @@ int ui_bitmap_load(psy_ui_Bitmap* self, const char* path)
 		0, 0,
 		LR_DEFAULTSIZE | LR_LOADFROMFILE);	
 	if (bmp != 0) {
-		ui_bitmap_dispose(self);
+		psy_ui_bitmap_dispose(self);
 		self->hBitmap = bmp;
 	}
 	return bmp == 0;
 }
 
-ui_size ui_bitmap_size(psy_ui_Bitmap* self)
+ui_size psy_ui_bitmap_size(psy_ui_Bitmap* self)
 {
 	ui_size size;
 	BITMAP bitmap ;
@@ -54,7 +54,7 @@ ui_size ui_bitmap_size(psy_ui_Bitmap* self)
 	return size;
 }
 
-int ui_bitmap_loadresource(psy_ui_Bitmap* self, int resourceid)
+int psy_ui_bitmap_loadresource(psy_ui_Bitmap* self, int resourceid)
 {
 	HBITMAP bmp;	
 	psy_ui_WinApp* winapp;
@@ -62,7 +62,7 @@ int ui_bitmap_loadresource(psy_ui_Bitmap* self, int resourceid)
 	winapp = (psy_ui_WinApp*) app.platform;
 	bmp = LoadBitmap (winapp->instance, MAKEINTRESOURCE(resourceid));	
 	if (bmp != 0) {
-		ui_bitmap_dispose(self);
+		psy_ui_bitmap_dispose(self);
 		self->hBitmap = bmp;
 	}	
 	return bmp == 0;

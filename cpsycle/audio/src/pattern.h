@@ -13,9 +13,8 @@ typedef struct {
 	unsigned int track;
 	psy_dsp_big_beat_t offset;
 	unsigned int line;
-	unsigned int subline;
-	unsigned int totallines;
-	unsigned int col;
+	unsigned int column;
+	unsigned int digit;
 	uintptr_t pattern;
 } PatternEditPosition;
 
@@ -79,14 +78,16 @@ PatternNode* pattern_greaterequal(psy_audio_Pattern*, psy_dsp_beat_t offset);
 /// finds a pattern node
 ///\return the pattern node
 PatternNode* pattern_findnode(psy_audio_Pattern* pattern, unsigned int track,
-	float offset, unsigned int subline, psy_dsp_beat_t bpl, PatternNode** prev);
+	float offset, psy_dsp_beat_t bpl, PatternNode** prev);
 /// finds the last pattern
 ///\return finds the last pattern node
 PatternNode* pattern_last(psy_audio_Pattern*);
 /// sets the pattern description
 void pattern_setlabel(psy_audio_Pattern*, const char*);
 /// sets the pattern length
-void pattern_setlength(psy_audio_Pattern*, psy_dsp_beat_t length);	
+void pattern_setlength(psy_audio_Pattern*, psy_dsp_beat_t length);
+/// return length of the pattern
+psy_dsp_beat_t pattern_length(psy_audio_Pattern*);
 /// tells if the pattern contains events
 ///\return tells if the pattern contains events
 int pattern_empty(psy_audio_Pattern*);

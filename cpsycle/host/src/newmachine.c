@@ -10,8 +10,8 @@
 static void newmachine_onpluginselected(NewMachine*, psy_ui_Component* parent,
 	psy_Properties*);
 static void newmachine_onplugincachechanged(NewMachine*, psy_audio_PluginCatcher*);
-static void newmachine_onkeydown(NewMachine*, psy_ui_Component* sender, KeyEvent*);
-
+static void newmachine_onkeydown(NewMachine*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
 static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
@@ -20,15 +20,15 @@ static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics* g, psy_Propertie
 static void pluginsview_onsize(PluginsView*, psy_ui_Component* sender,
 	ui_size* size);
 static void pluginsview_onmousedown(PluginsView*, psy_ui_Component* sender,
-	MouseEvent*);
+	psy_ui_MouseEvent*);
 static void pluginsview_hittest(PluginsView*, int x, int y);
 static void pluginsview_computetextsizes(PluginsView* self);
 static void pluginsview_onscroll(PluginsView*, psy_ui_Component* sender,
 	int stepx, int stepy);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_Component* sender,
-	int x, int y, int button);
+	psy_ui_MouseEvent*);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_Component* sender,
-	KeyEvent*);
+	psy_ui_KeyEvent*);
 static void pluginsview_onplugincachechanged(PluginsView*,
 	psy_audio_PluginCatcher* sender);
 static void pluginsview_adjustscroll(PluginsView*);
@@ -253,7 +253,7 @@ void pluginsview_onscroll(PluginsView* self, psy_ui_Component* sender,
 }
 
 void pluginsview_onmousedown(PluginsView* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	pluginsview_hittest(self, ev->x, ev->y);
 	ui_component_invalidate(&self->component);
@@ -288,8 +288,8 @@ void pluginsview_hittest(PluginsView* self, int x, int y)
 	}
 }
 
-void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_Component* sender,
-	int x, int y, int button)
+void pluginsview_onmousedoubleclick(PluginsView* self,
+	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
 	if (self->selectedplugin) {
 		psy_signal_emit(&self->signal_selected, self, 1,
@@ -299,18 +299,19 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_Component* sender,
 }
 
 void pluginsview_onkeydown(PluginsView* self, psy_ui_Component* sender,
-	KeyEvent* keyevent)
+	psy_ui_KeyEvent* ev)
 {
-	if (keyevent->keycode == VK_ESCAPE) {	
+	if (ev->keycode == VK_ESCAPE) {	
 		self->component.propagateevent = 1;
 	}
 }
 
-void pluginsview_onplugincachechanged(PluginsView* self, psy_audio_PluginCatcher* sender)
+void pluginsview_onplugincachechanged(PluginsView* self,
+	psy_audio_PluginCatcher* sender)
 {
 	self->dy = 0;
 	self->selectedplugin = 0;
-	pluginsview_adjustscroll(self);	
+	pluginsview_adjustscroll(self);
 	ui_component_invalidate(&self->component);
 }
 
@@ -350,9 +351,9 @@ void newmachine_onplugincachechanged(NewMachine* self, psy_audio_PluginCatcher* 
 }
 
 void newmachine_onkeydown(NewMachine* self, psy_ui_Component* sender,
-	KeyEvent* keyevent)
+	psy_ui_KeyEvent* ev)
 {
-	if (keyevent->keycode == VK_ESCAPE) {	
+	if (ev->keycode == VK_ESCAPE) {	
 		self->component.propagateevent = 1;
 	}
 }

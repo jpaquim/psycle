@@ -47,15 +47,15 @@ const char* preset_name(psy_audio_Preset* self)
 	return self->name;
 }
 
-void preset_setvalue(psy_audio_Preset* self, int numparam, int value)
+void preset_setvalue(psy_audio_Preset* self, uintptr_t param, int value)
 {
-	psy_table_insert(&self->parameters, numparam, (void*)(uintptr_t)value);
+	psy_table_insert(&self->parameters, param, (void*)(uintptr_t)value);
 }
 
-int preset_value(psy_audio_Preset* self, int numparam)
+int preset_value(psy_audio_Preset* self, uintptr_t param)
 {
-	if (psy_table_exists(&self->parameters, numparam)) {
-		return (int)(uintptr_t) psy_table_at(&self->parameters, numparam);
+	if (psy_table_exists(&self->parameters, param)) {
+		return (int)(uintptr_t) psy_table_at(&self->parameters, param);
 	} else {
 		return 0;
 	}

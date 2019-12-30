@@ -18,9 +18,9 @@
 BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam);
 BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam);
 
-static void enableinput(psy_ui_Component* self, int enable, int recursive);
-static void onpreferredsize(psy_ui_Component*, psy_ui_Component* sender, 
-	ui_size* limit, ui_size* rv);	
+static void enableinput(psy_ui_Component*, int enable, int recursive);
+// vtable defaults
+static void preferredsize(psy_ui_Component*, ui_size* limit, ui_size* rv);
 
 void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font)
 {		
@@ -50,6 +50,17 @@ void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font)
 	}
 }
 
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.draw = 0;
+		vtable.preferredsize = preferredsize;
+	}
+}
+
 int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 		LPCTSTR classname, 
 		int x, int y, int width, int height,
@@ -60,7 +71,7 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 	HINSTANCE hInstance;
 	psy_ui_WinApp* winapp;
 
-	winapp = (psy_ui_WinApp*) app.platform;
+	winapp = (psy_ui_WinApp*) app.platform;	
 	ui_component_init_signals(self);
 	if (parent) {
 #if defined(_WIN64)		
@@ -149,7 +160,7 @@ void ui_component_init_signals(psy_ui_Component* component)
 	psy_signal_init(&component->signal_focus);
 	psy_signal_init(&component->signal_focuslost);
 	psy_signal_init(&component->signal_align);
-	psy_signal_init(&component->signal_preferredsize);
+//	psy_signal_init(&component->signal_preferredsize);
 	psy_signal_init(&component->signal_windowproc);
 	psy_signal_init(&component->signal_command);
 }
@@ -162,9 +173,11 @@ void ui_component_init_base(psy_ui_Component* self) {
 	self->align = UI_ALIGN_NONE;
 	self->justify = UI_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
-	self->alignexpandmode = UI_NOEXPAND;
-	memset(&self->margin, 0, sizeof(ui_margin));
-	memset(&self->spacing, 0, sizeof(ui_margin));
+	self->alignexpandmode = UI_NOEXPAND;	
+	ui_margin_init(&self->margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makepx(0), ui_value_makepx(0));
+	ui_margin_init(&self->spacing, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makepx(0), ui_value_makepx(0));
 	self->debugflag = 0;
 	self->defaultpropagation = 0;	
 	self->visible = 1;
@@ -181,8 +194,8 @@ void ui_component_init_base(psy_ui_Component* self) {
 	ui_font_init(&self->font, 0);
 	ui_component_setfont(self, &app.defaults.defaultfont);
 	ui_component_setbackgroundcolor(self, self->backgroundcolor);
-	psy_signal_connect(&self->signal_preferredsize, self,
-		onpreferredsize);
+	vtable_init();
+	self->vtable = &vtable;	
 }
 
 void ui_component_dispose(psy_ui_Component* component)
@@ -208,7 +221,7 @@ void ui_component_dispose(psy_ui_Component* component)
 	psy_signal_dispose(&component->signal_focus);
 	psy_signal_dispose(&component->signal_focuslost);
 	psy_signal_dispose(&component->signal_align);
-	psy_signal_dispose(&component->signal_preferredsize);
+	// psy_signal_dispose(&component->signal_preferredsize);
 	psy_signal_dispose(&component->signal_windowproc);
 	psy_signal_dispose(&component->signal_command);
 	if (component->font.hfont && component->font.hfont !=
@@ -733,21 +746,21 @@ void ui_component_align(psy_ui_Component* self)
 	psy_signal_emit(&self->signal_align, self, 0);
 }
 
-void onpreferredsize(psy_ui_Component* self, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv)
+void preferredsize(psy_ui_Component* self, ui_size* limit, ui_size* rv)
 {			
 	if (rv) {
-		ui_size size;		
+		ui_size size;
+		ui_textmetric tm;
 
-		size = ui_component_size(self);		
+		size = ui_component_size(self);
+		tm = ui_component_textmetric(self);
 		if (self->alignchildren) {			
-			ui_textmetric tm;			
 			psy_List* p;
 			psy_List* q;
 			ui_point cp = { 0, 0 };
 			ui_size maxsize = { 0, 0 };
 
-			tm = ui_component_textmetric(self);			
+			
 			size.width = (self->alignexpandmode & UI_HORIZONTALEXPAND) ==
 				UI_HORIZONTALEXPAND 
 				? 0
@@ -799,8 +812,12 @@ void onpreferredsize(psy_ui_Component* self, psy_ui_Component* sender, ui_size* 
 			}
 			psy_list_free(q);
 			*rv = maxsize;
+			rv->width += ui_margin_width_px(&self->spacing, &tm);
+			rv->height += ui_margin_height_px(&self->spacing, &tm);
 		} else {
 			*rv = size;
+			rv->width += ui_margin_width_px(&self->spacing, &tm);
+			rv->height += ui_margin_height_px(&self->spacing, &tm);
 		}
 	}	
 }
@@ -1008,7 +1025,8 @@ psy_List* ui_components_setmargin(psy_List* list, const ui_margin* margin)
 ui_size ui_component_preferredsize(psy_ui_Component* self, ui_size* limit)
 {
 	ui_size rv;	
-	psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
+	self->vtable->preferredsize(self, limit, &rv);
+	// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
 	return rv;	
 }
 

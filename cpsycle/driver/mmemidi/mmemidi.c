@@ -17,7 +17,7 @@ typedef struct {
 	HMIDIIN hMidiIn;
 	int deviceid;		
 	int (*error)(int, const char*);
-	int lastinput;	
+	EventDriverData lastinput;	
 	HANDLE hEvent;
 } MmeMidiDriver;
 
@@ -27,9 +27,8 @@ static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
 static void driver_configure(EventDriver*);
-static void driver_cmd(EventDriver*, int type, unsigned char* data, int size,
-	EventDriverCmd* cmd, int maxsize);
-static int driver_getcmd(EventDriver*, psy_Properties* section);
+static void driver_cmd(EventDriver*, EventDriverData input, EventDriverCmd*);
+static EventDriverCmd driver_getcmd(EventDriver*, psy_Properties* section);
 static void setcmddef(EventDriver*, psy_Properties*);
 
 static void init_properties(EventDriver* self);
@@ -112,8 +111,7 @@ void init_properties(EventDriver* self)
 	devices = psy_properties_append_choice(self->properties, "device", 0);		 
 	psy_properties_append_int(devices, "0:None", 0, 0, 0);
 	n = midiInGetNumDevs();	
-	for (i = 0; i < n; i++)
-	{
+	for (i = 0; i < n; ++i) {
 		char text[256];
 		
 		MIDIINCAPS caps;
@@ -149,7 +147,7 @@ int driver_open(EventDriver* driver)
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
 	unsigned int success = 1;
 
-	self->lastinput = -1;
+	self->lastinput.message = -1;
 	if (self->deviceid != 0) {
 		if (midiInOpen (&self->hMidiIn, self->deviceid - 1, (DWORD_PTR)MidiCallback,
 				(DWORD_PTR)driver, CALLBACK_FUNCTION)) {
@@ -201,7 +199,8 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 					// Note On/Off
 					cmd = data[2] > 0 ? data[1] - 48 : 120;
 					// channel = lsb;
-					self->lastinput = cmd;
+					self->lastinput.param1 = cmd;
+					self->lastinput.param2 = 48;
 					psy_signal_emit(&self->driver.signal_input, self, 0);
 				default:
 				break;
@@ -213,18 +212,19 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 	}
 }
 
-void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
-	EventDriverCmd* cmd, int maxsize)
-{			
-	cmd->type = EVENTDRIVER_CMD_NONE;	
-	cmd->size = 0;	
+void driver_cmd(EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
+{		
+	cmd->id = input.param1;
+	cmd->data.param1 = input.param1;
 }
 
-int driver_getcmd(EventDriver* driver, psy_Properties* section)
+EventDriverCmd driver_getcmd(EventDriver* driver, psy_Properties* section)
 {
+	EventDriverCmd cmd;
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
-		
-	return self->lastinput;
+			
+	driver_cmd(driver, self->lastinput, &cmd);	
+	return cmd;
 }
 
 /*

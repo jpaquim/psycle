@@ -6,7 +6,7 @@
 #include "uistatusbar.h"
 #include <commctrl.h>
 
-void ui_statusbar_init(psy_ui_Statusbar* self, psy_ui_Component* parent)
+void psy_ui_statusbar_init(psy_ui_StatusBar* self, psy_ui_Component* parent)
 {	
    	ui_win32_component_init(&self->component, parent, STATUSCLASSNAME, 
 		0, 0, 100, 20,
@@ -14,14 +14,15 @@ void ui_statusbar_init(psy_ui_Statusbar* self, psy_ui_Component* parent)
 		0);
 }
 
-void ui_statusbar_setfields(psy_ui_Statusbar* self, int parts, int iStatusWidths[])
+void psy_ui_statusbar_setfields(psy_ui_StatusBar* self, int parts,
+	int iStatusWidths[])
 {	
 	SendMessage((HWND)self->component.hwnd, SB_SETPARTS, parts, 
 		(LPARAM)iStatusWidths);           
 }
 
-void ui_statusbar_settext(psy_ui_Statusbar* self, int field, const char* text)
+void psy_ui_statusbar_settext(psy_ui_StatusBar* self, int field,
+	const char* text)
 {
 	SendMessage((HWND)self->component.hwnd, SB_SETTEXT, field,(LPARAM)text);
 }
-

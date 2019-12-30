@@ -8,9 +8,12 @@
 static void onsize(ui_notebook*, psy_ui_Component* sender, ui_size* size);
 static void align_split(ui_notebook* self, int x);
 static void ontabbarchange(ui_notebook*, psy_ui_Component* sender, int tabindex);
-static void onmousedown(ui_notebook*, psy_ui_Component* sender, MouseEvent* ev);
-static void onmousemove(ui_notebook*, psy_ui_Component* sender, MouseEvent* ev);
-static void onmouseup(ui_notebook*, psy_ui_Component* sender, MouseEvent* ev);
+static void onmousedown(ui_notebook*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void onmousemove(ui_notebook*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void onmouseup(ui_notebook*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static void onmouseentersplitbar(ui_notebook*, psy_ui_Component* sender);
 static void onmouseleavesplitbar(ui_notebook*, psy_ui_Component* sender);
 
@@ -23,7 +26,7 @@ void ui_notebook_init(ui_notebook* self, psy_ui_Component* parent)
 	self->pageindex = 0;
 	self->split = 0;
 	self->splitx = -1;
-	self->splitbar.hwnd = 0;	
+	self->splitbar.hwnd = 0;
 }
 
 void ui_notebook_setpageindex(ui_notebook* self, int pageindex)
@@ -129,7 +132,8 @@ void ui_notebook_full(ui_notebook* self)
 }
 
 
-void onmousedown(ui_notebook* self, psy_ui_Component* sender, MouseEvent* ev)
+void onmousedown(ui_notebook* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {	
 	if (self->split) {
 		ui_component_capture(sender);
@@ -137,7 +141,8 @@ void onmousedown(ui_notebook* self, psy_ui_Component* sender, MouseEvent* ev)
 	}
 }
 
-void onmousemove(ui_notebook* self, psy_ui_Component* sender, MouseEvent* ev)
+void onmousemove(ui_notebook* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	if (self->split && self->splitx == -1) {				
 		ui_size size;
@@ -152,7 +157,8 @@ void onmousemove(ui_notebook* self, psy_ui_Component* sender, MouseEvent* ev)
 	}
 }
 
-void onmouseup(ui_notebook* self, psy_ui_Component* sender, MouseEvent* ev)
+void onmouseup(ui_notebook* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {	
 	if (self->split) {
 		ui_size size;

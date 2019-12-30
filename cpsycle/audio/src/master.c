@@ -13,15 +13,15 @@
 static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(psy_audio_Master*);
 
-static int parametertype(psy_audio_Master*, int param);
+static int parametertype(psy_audio_Master*, uintptr_t param);
 static uintptr_t numparameters(psy_audio_Master*);
 static unsigned int numparametercols(psy_audio_Master*);
-static void parametertweak(psy_audio_Master*, int par, int val);	
-static void parameterrange(psy_audio_Master*, int numparam, int* minval, int* maxval);
-static int parameterlabel(psy_audio_Master*, char* txt, int param);
-static int parametername(psy_audio_Master*, char* txt, int param);
-static int describevalue(psy_audio_Master*, char* txt, int param, int value);
-static int parametervalue(psy_audio_Master*, int param);
+static void parametertweak(psy_audio_Master*, uintptr_t param, int val);	
+static void parameterrange(psy_audio_Master*, uintptr_t param, int* minval, int* maxval);
+static int parameterlabel(psy_audio_Master*, char* txt, uintptr_t param);
+static int parametername(psy_audio_Master*, char* txt, uintptr_t param);
+static int describevalue(psy_audio_Master*, char* txt, uintptr_t param, int value);
+static int parametervalue(psy_audio_Master*, uintptr_t param);
 static const psy_audio_MachineInfo* info(psy_audio_Master*);
 static uintptr_t numinputs(psy_audio_Master*);
 static uintptr_t numoutputs(psy_audio_Master*);
@@ -31,6 +31,10 @@ static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
 	uintptr_t slot);
+static psy_dsp_amp_range_t amprange(psy_audio_Master* self)
+{
+	return PSY_DSP_AMP_RANGE_IGNORE;
+}
 
 static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
@@ -80,6 +84,7 @@ static void vtable_init(psy_audio_Master* self)
 		vtable.parametername = (fp_machine_parametername) parametername;
 		vtable.describevalue = (fp_machine_describevalue) describevalue;
 		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
+		vtable.amprange = (fp_machine_amprange) amprange;
 		vtable_initialized = 1;
 	}
 }
@@ -97,7 +102,7 @@ void master_dispose(psy_audio_Master* self)
 	machine_dispose(&self->machine);
 }
 
-void parametertweak(psy_audio_Master* self, int param, int value)
+void parametertweak(psy_audio_Master* self, uintptr_t param, int value)
 {
 	if (param == 0) {
 		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
@@ -125,7 +130,7 @@ void parametertweak(psy_audio_Master* self, int param, int value)
 	}
 }
 
-int describevalue(psy_audio_Master* self, char* txt, int param, int value)
+int describevalue(psy_audio_Master* self, char* txt, uintptr_t param, int value)
 { 	
 	if (param == 0) {
 		psy_audio_Machines* machines = self->machine.callback.machines(
@@ -158,7 +163,7 @@ int describevalue(psy_audio_Master* self, char* txt, int param, int value)
 	return 0;
 }
 
-int parametervalue(psy_audio_Master* self, int param)
+int parametervalue(psy_audio_Master* self, uintptr_t param)
 {	
 	if (param == 0) {
 		psy_audio_Machines* machines = self->machine.callback.machines(
@@ -215,12 +220,12 @@ uintptr_t numoutputs(psy_audio_Master* self)
 	return 2;
 }
 
-int parametertype(psy_audio_Master* self, int par)
+int parametertype(psy_audio_Master* self, uintptr_t param)
 {
 	return MPF_STATE;
 }
 
-void parameterrange(psy_audio_Master* self, int numparam, int* minval, int* maxval)
+void parameterrange(psy_audio_Master* self, uintptr_t param, int* minval, int* maxval)
 {
 	*minval = 0;
 	*maxval = 65535;
@@ -236,13 +241,13 @@ unsigned int numparametercols(psy_audio_Master* self)
 	return 4;
 }
 
-int parameterlabel(psy_audio_Master* self, char* txt, int param)
+int parameterlabel(psy_audio_Master* self, char* txt, uintptr_t param)
 {
 	psy_snprintf(txt, 128, "%s", "Vol");
 	return 1;
 }
 
-int parametername(psy_audio_Master* self, char* txt, int param)
+int parametername(psy_audio_Master* self, char* txt, uintptr_t param)
 {
 	psy_snprintf(txt, 128, "%s", "Vol");
 	return 1;

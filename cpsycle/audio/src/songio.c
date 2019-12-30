@@ -13,38 +13,38 @@
 
 #include <string.h>
 
-static void songfile_createmaster(psy_audio_SongFile*);
+static void psy_audio_songfile_createmaster(psy_audio_SongFile*);
+static int psy_audio_songfile_errfile(psy_audio_SongFile* self);
 
 void psy_audio_songfile_init(psy_audio_SongFile* self)
 {
 	psy_signal_init(&self->signal_output);
 	psy_signal_init(&self->signal_warning);	
-	psy_signal_init(&self->signal_error);
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
 {
 	psy_signal_dispose(&self->signal_output);
-	psy_signal_dispose(&self->signal_warning);
-	psy_signal_dispose(&self->signal_error);
+	psy_signal_dispose(&self->signal_warning);	
 }
 
-void psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
+int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 {		
 	PsyFile file;
+	int status;
 
+	status = PSY_OK;
+	self->serr = 0;
 	self->err = 0;
 	self->warnings = 0;
 	self->file = &file;
-	self->path = path;
-	
+	self->path = path;	
 	psy_audio_songfile_message(self, "searching for ");
 	psy_audio_songfile_message(self, path);
 	psy_audio_songfile_message(self, "\n");
 	if (psyfile_open(self->file, path)) {
 		char header[20];
 		char riff[5];
-//		SequencePosition position;
 		
 		psy_audio_songfile_message(self, "loading ");
 		psy_audio_songfile_message(self, path);
@@ -58,7 +58,9 @@ void psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		riff[4] = '\0';
 		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
 		if (strcmp(header,"PSY3SONG") == 0) {
-			psy3_load(self);
+			if (status = psy3_load(self)) {
+				psy_audio_songfile_errfile(self);
+			}
 			psyfile_close(self->file);
 		} else
 		if (strcmp(header,"PSY2SONG") == 0) {
@@ -83,29 +85,35 @@ void psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			psyfile_close(self->file);
 		}
 		if (!machines_at(&self->song->machines, MASTER_INDEX)) {
-			songfile_createmaster(self);
+			psy_audio_songfile_createmaster(self);
 		}		
 		machines_endfilemode(&self->song->machines);		
-		psy_audio_songfile_message(self, "ready\n");
 	} else {
-		psy_audio_songfile_error(self, "file not open error\n");		
-		self->err = 1;
+		status = psy_audio_songfile_errfile(self);
 	}
 	psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 0);
+	return status;
 }
 
-void psy_audio_songfile_save(psy_audio_SongFile* self, const char* path)
-{	
+int psy_audio_songfile_save(psy_audio_SongFile* self, const char* path)
+{		
+	int status;
 	PsyFile file;
 
+	status = PSY_OK;
 	self->file = &file;
 	self->err = 0;
 	self->warnings = 0;
 	self->path = path;
-	if (psyfile_create(self->file, path, 1)) {		
-		psy3_save(self);
+	if (psyfile_create(self->file, path, 1)) {				
+		if (status = psy3_save(self)) {
+			psy_audio_songfile_errfile(self);
+		}
 		psyfile_close(self->file);
+	} else {
+		return psy_audio_songfile_errfile(self);
 	}
+	return status;
 }
 
 void psy_audio_songfile_message(psy_audio_SongFile* self, const char* text)
@@ -118,19 +126,14 @@ void psy_audio_songfile_warn(psy_audio_SongFile* self, const char* text)
 	psy_signal_emit(&self->signal_warning, self, 1, text);
 }
 
-void psy_audio_songfile_error(psy_audio_SongFile* self, const char* text)
-{
-	psy_signal_emit(&self->signal_error, self, 1, text);
-}
-
-void songfile_createmaster(psy_audio_SongFile* self)
+void psy_audio_songfile_createmaster(psy_audio_SongFile* self)
 {
 	psy_Properties* machines;	
 	psy_Properties* machine;
 
 	machines_insertmaster(&self->song->machines,
-			machinefactory_makemachine(self->song->machinefactory,
-			MACH_MASTER, 0));
+		machinefactory_makemachine(self->song->machinefactory,
+		MACH_MASTER, 0));
 	machines = psy_properties_findsection(self->workspaceproperties,
 		"machines");
 	if (!machines) {
@@ -143,3 +146,9 @@ void songfile_createmaster(psy_audio_SongFile* self)
 	psy_properties_append_int(machine, "y", 200, 0, 0);
 }
 
+int psy_audio_songfile_errfile(psy_audio_SongFile* self)
+{
+	self->err = errno;
+	self->serr = strerror(self->err);
+	return PSY_ERRFILE;
+}

@@ -21,8 +21,20 @@ static void playlisteditor_onnext(PlayListEditor*, psy_ui_Component* sender);
 static void playlisteditor_onlistchanged(PlayListEditor*, psy_ui_Component* sender,
 	int slot);
 static void playlisteditor_buildplaylist(PlayListEditor*);
-static void playlisteditor_onpreferredsize(PlayListEditor*,
-	psy_ui_Component* sender, ui_size* limit, ui_size* rv);
+static void playlisteditor_preferredsize(PlayListEditor*, ui_size* limit,
+	ui_size* rv);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(PlayListEditor* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize)
+			playlisteditor_preferredsize;
+	}
+}
 
 void playlistentry_init(PlayListEntry* self, const char* title, const char* path)
 {
@@ -98,7 +110,9 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	self->entries = 0;
 	self->currentry = 0;
 	self->nextentry = 0;
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	ui_component_enablealign(&self->component);
 	ui_listbox_init(&self->listbox, &self->component);	
 	ui_component_setalign(&self->listbox.component, UI_ALIGN_CLIENT);
@@ -122,9 +136,6 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		playlisteditor_onlistchanged);
 	ui_component_resize(&self->component, 200, 120);
-	psy_signal_disconnectall(&self->component.signal_preferredsize);
-		psy_signal_connect(&self->component.signal_preferredsize, self,
-			playlisteditor_onpreferredsize);
 }
 
 void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
@@ -264,8 +275,8 @@ void playlisteditor_onlistchanged(PlayListEditor* self, psy_ui_Component* sender
 	self->nextentry = p;
 }
 
-void playlisteditor_onpreferredsize(PlayListEditor* self, psy_ui_Component* sender,
-	ui_size* limit, ui_size* rv)
+void playlisteditor_preferredsize(PlayListEditor* self, ui_size* limit,
+	ui_size* rv)
 {	
 	if (rv) {
 		*rv = ui_component_size(&self->component);

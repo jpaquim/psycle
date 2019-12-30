@@ -27,9 +27,10 @@ static void pianogrid_onsize(Pianogrid*, psy_ui_Component* sender, ui_size*);
 static void pianogrid_adjustscroll(Pianogrid*);
 static void pianogrid_onscroll(Pianogrid*, psy_ui_Component* sender, int stepx,
 	int stepy);
-static void pianogrid_onkeydown(Pianogrid*, psy_ui_Component* sender, KeyEvent*);
+static void pianogrid_onkeydown(Pianogrid*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
 static void pianogrid_onmousedown(Pianogrid*, psy_ui_Component* sender,
-	MouseEvent*);
+	psy_ui_MouseEvent*);
 
 static void pianoroll_updatemetrics(Pianoroll*);
 static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
@@ -39,12 +40,16 @@ static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 static void pianoroll_invalidateline(Pianoroll*, psy_dsp_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, psy_ui_Component* component);
 static void pianoroll_onsize(Pianoroll*, psy_ui_Component* sender, ui_size*);
-static void pianoroll_onmousedown(Pianoroll*, psy_ui_Component* sender, MouseEvent*);
-static void pianoroll_onmouseup(Pianoroll*, psy_ui_Component* sender, MouseEvent*);
-static void pianoroll_onmousemove(Pianoroll*, psy_ui_Component* sender, MouseEvent*);
+static void pianoroll_onmousedown(Pianoroll*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void pianoroll_onmouseup(Pianoroll*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void pianoroll_onmousemove(Pianoroll*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static void pianoroll_onmousedoubleclick(Pianoroll*, psy_ui_Component* sender,
-	MouseEvent*);
-static void pianoroll_onkeydown(Pianoroll*, psy_ui_Component* sender, KeyEvent*);
+	psy_ui_MouseEvent*);
+static void pianoroll_onkeydown(Pianoroll*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
 
 static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
@@ -161,28 +166,28 @@ void pianoroll_onsize(Pianoroll* self, psy_ui_Component* sender, ui_size* size)
 }
 
 void pianoroll_onmousedown(Pianoroll* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	ui_component_setfocus(&self->grid.component);	
 }
 
 void pianoroll_onmouseup(Pianoroll* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {		
 }
 
 void pianoroll_onmousemove(Pianoroll* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {	
 }
 
 void pianoroll_onmousedoubleclick(Pianoroll* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {	
 }
 
 void pianoroll_onkeydown(Pianoroll* self, psy_ui_Component* sender,
-	KeyEvent* keyevent)
+	psy_ui_KeyEvent* keyevent)
 {	
 	ui_component_propagateevent(sender);
 }
@@ -327,7 +332,8 @@ void pianogrid_drawevent(Pianogrid* self, psy_ui_Graphics* g,
 	ui_drawsolidrectangle(g, r, 0x00B1C8B0);	
 }
 
-void pianogrid_onkeydown(Pianogrid* self, psy_ui_Component* sender, KeyEvent* ev)
+void pianogrid_onkeydown(Pianogrid* self, psy_ui_Component* sender,
+	psy_ui_KeyEvent* ev)
 {	
 	ui_component_propagateevent(sender);
 }
@@ -415,7 +421,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Component* sender,
 }
 
 void pianogrid_onmousedown(Pianogrid* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {	
 	psy_dsp_beat_t offset;	
 
@@ -432,7 +438,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_Component* sender,
 		patternevent_clear(&event);
 		event.note = self->metrics.keymax - 1 - (ev->y - self->dy) /
 			self->metrics.keyheight;
-		node = pattern_findnode(self->view->pattern, 0, offset, 0,
+		node = pattern_findnode(self->view->pattern, 0, offset,
 			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 		if (node) {				
 			pattern_setevent(self->view->pattern, node, &event);		
@@ -443,7 +449,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_Component* sender,
 	if (ev->button == 2) {
 		PatternNode* prev;
 		PatternNode* node = pattern_findnode(self->view->pattern, 0,
-			offset, 0, 1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
+			offset, 1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 		if (node) {
 			pattern_remove(self->view->pattern, node);			
 		}

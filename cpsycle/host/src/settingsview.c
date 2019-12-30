@@ -18,14 +18,14 @@ static int settingsview_onenumpropertyposition(SettingsView*, psy_Properties*,
 	int level);
 static void settingsview_preparepropertiesenum(SettingsView* self);
 static void settingsview_onkeydown(SettingsView*, psy_ui_Component* sender,
-	KeyEvent*);
+	psy_ui_KeyEvent*);
 static void settingsview_onmousedown(SettingsView*, psy_ui_Component* sender,
-	MouseEvent*);
+	psy_ui_MouseEvent*);
 static void settingsview_onmousedoubleclick(SettingsView*, psy_ui_Component* sender,
-	MouseEvent*);
+	psy_ui_MouseEvent*);
 static void settingsview_oneditchange(SettingsView*, psy_ui_Edit* sender);
 static void settingsview_oneditkeydown(SettingsView*, psy_ui_Component* sender,
-	KeyEvent*);
+	psy_ui_KeyEvent*);
 static void settingsview_oninputdefinerchange(SettingsView* self,
 	InputDefiner* sender);
 static void settingsview_ondestroy(SettingsView*, psy_ui_Component* sender);
@@ -346,13 +346,13 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 }
 
 void settingsview_onkeydown(SettingsView* self, psy_ui_Component* sender,
-	KeyEvent* keyevent)
+	psy_ui_KeyEvent* keyevent)
 {	
 	ui_component_propagateevent(sender);
 }
 
 void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	ui_component_setfocus(&self->client);
 	if (ui_component_visible(&self->edit.component)) {
@@ -503,7 +503,7 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 }
 
 void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	if (self->selected) {
 		psy_ui_Component* edit = 0;
@@ -569,21 +569,21 @@ void settingsview_oneditchange(SettingsView* self, psy_ui_Edit* sender)
 }
 
 void settingsview_oneditkeydown(SettingsView* self, psy_ui_Component* sender,
-	KeyEvent* keyevent)
+	psy_ui_KeyEvent* ev)
 {
-	if (keyevent->keycode == VK_RETURN) {
+	if (ev->keycode == VK_RETURN) {
 		ui_component_hide(&self->edit.component);
 		ui_component_setfocus(&self->client);
 		settingsview_oneditchange(self, &self->edit);
 	} else
-	if (keyevent->keycode == VK_ESCAPE) {
+	if (ev->keycode == VK_ESCAPE) {
 		ui_component_hide(&self->edit.component);
 		ui_component_setfocus(&self->client);		
 	}
 }
 
-void settingsview_onscroll(SettingsView* self, psy_ui_Component* sender, int stepx,
-	int stepy)
+void settingsview_onscroll(SettingsView* self, psy_ui_Component* sender,
+	int stepx, int stepy)
 {
 	self->dy += (stepy * sender->scrollstepy);
 }

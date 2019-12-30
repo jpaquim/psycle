@@ -8,16 +8,20 @@ static void DrawPoints(EnvelopeView*, psy_ui_Graphics* g);
 static void DrawLines(EnvelopeView*, psy_ui_Graphics* g);
 static void OnSize(EnvelopeView*, psy_ui_Component* sender, ui_size* size);
 static void OnDestroy(EnvelopeView*, psy_ui_Component* component);
-static void OnMouseDown(EnvelopeView*, psy_ui_Component* sender, MouseEvent*);
-static void OnMouseMove(EnvelopeView*, psy_ui_Component* sender, MouseEvent*);
-static void OnMouseUp(EnvelopeView*, psy_ui_Component* sender, MouseEvent*);
+static void OnMouseDown(EnvelopeView*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void OnMouseMove(EnvelopeView*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+static void OnMouseUp(EnvelopeView*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static psy_List* HitTestPoint(EnvelopeView* self, int x, int y);
 static void ShiftSuccessors(EnvelopeView* self, double timeshift);
 static void CheckAdjustPointRange(psy_List* p);
 static int pxvalue(EnvelopeView*, double value);
 static int pxtime(EnvelopeView*, double t);
 static psy_dsp_seconds_t displaymaxtime(EnvelopeView*);
-psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime,
+psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value,
+	psy_dsp_seconds_t mintime,
 	psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue);
 static void InitPoints(EnvelopeView*);
 
@@ -79,7 +83,8 @@ void InitEnvelopeView(EnvelopeView* self, psy_ui_Component* parent)
 	self->dragrelative = 1;
 }
 
-void EnvelopeViewSetAdsrEnvelope(EnvelopeView* self, psy_dsp_ADSRSettings* adsr_settings)
+void EnvelopeViewSetAdsrEnvelope(EnvelopeView* self,
+	psy_dsp_ADSRSettings* adsr_settings)
 {		
 	self->pointmapper.settings = adsr_settings;
 	adsrpointmapper_updatepoints(&self->pointmapper);
@@ -182,12 +187,14 @@ void OnSize(EnvelopeView* self, psy_ui_Component* sender, ui_size* size)
 		self->spacing.bottom.quantity.integer;
 }
 
-void OnMouseDown(EnvelopeView* self, psy_ui_Component* sender, MouseEvent* ev)
+void OnMouseDown(EnvelopeView* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	self->dragpoint = HitTestPoint(self, ev->x, ev->y);
 }
 
-void OnMouseMove(EnvelopeView* self, psy_ui_Component* sender, MouseEvent* ev)
+void OnMouseMove(EnvelopeView* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {		
 	if (self->dragpoint) {		
 		psy_dsp_EnvelopePoint* pt;
@@ -248,7 +255,8 @@ void CheckAdjustPointRange(psy_List* p)
 	}	
 }
 
-void OnMouseUp(EnvelopeView* self, psy_ui_Component* sender, MouseEvent* ev)
+void OnMouseUp(EnvelopeView* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {	
 	self->dragpoint = 0;
 }
@@ -286,7 +294,9 @@ float displaymaxtime(EnvelopeView* self)
 	return 5.f;
 }
 
-psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value, psy_dsp_seconds_t mintime, psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue)
+psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value,
+	psy_dsp_seconds_t mintime, psy_dsp_seconds_t maxtime,
+	psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue)
 {
 	psy_dsp_EnvelopePoint* rv;
 

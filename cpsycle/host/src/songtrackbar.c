@@ -6,14 +6,18 @@
 #include "songtrackbar.h"
 #include <portable.h>
 
-static void Buildtrackbox(SongTrackBar* self);
-static void OnTrackBoxSelChange(SongTrackBar*, psy_ui_Component* sender, int sel);
-static void OnSongTracksNumChanged(SongTrackBar*, Workspace*,
+static void songtrackbar_build(SongTrackBar*);
+static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
+	int index);
+static void songtrackbar_onsongtracknumchanged(SongTrackBar*, Workspace*,
 	unsigned int numsongtracks);
-static void OnSongChanged(SongTrackBar*, Workspace*);
+static void songtrackbar_onsongchanged(SongTrackBar*, Workspace*);
 
-void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace* workspace)
+void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
+	workspace)
 {	
+	ui_margin margin;
+
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
@@ -21,27 +25,23 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace* 
 	ui_label_init(&self->headerlabel, &self->component);	
 	ui_label_settext(&self->headerlabel, "Tracks");		
 	ui_combobox_init(&self->trackbox, &self->component);	
-	ui_combobox_setcharnumber(&self->trackbox, 3);
-	Buildtrackbox(self);	
+	ui_combobox_setcharnumber(&self->trackbox, 4);
+	songtrackbar_build(self);	
 	psy_signal_connect(&self->trackbox.signal_selchanged, self,
-		OnTrackBoxSelChange);	
+		songtrackbar_onselchange);	
 	psy_signal_connect(&workspace->player.signal_numsongtrackschanged, self,
-		OnSongTracksNumChanged);
+		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		OnSongChanged);
-	{		
-		ui_margin margin;
-
-		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-			ui_value_makepx(0), ui_value_makepx(0));		
-		psy_list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
-			UI_ALIGN_LEFT,
-			&margin));
-	}
+		songtrackbar_onsongchanged);
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(1),
+		ui_value_makepx(0), ui_value_makepx(0));		
+	psy_list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT,
+		&margin));	
 }
 
-void Buildtrackbox(SongTrackBar* self)
+void songtrackbar_build(SongTrackBar* self)
 {
 	int track;
 	char text[20];
@@ -54,21 +54,22 @@ void Buildtrackbox(SongTrackBar* self)
 		player_numsongtracks(&self->workspace->player));
 }
 
-void OnTrackBoxSelChange(SongTrackBar* self, psy_ui_Component* sender, int sel)
+void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
+	int index)
 {		
-	player_setnumsongtracks(&self->workspace->player, sel);
+	player_setnumsongtracks(&self->workspace->player, index);
 	if (self->workspace->song) {
-		patterns_setsongtracks(&self->workspace->song->patterns, sel);
+		patterns_setsongtracks(&self->workspace->song->patterns, index);
 	}
 }
 
-void OnSongTracksNumChanged(SongTrackBar* self, Workspace* workspace,
-	unsigned int numsongtracks)
+void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
+	Workspace* workspace, unsigned int numsongtracks)
 {
 	ui_combobox_setcursel(&self->trackbox, numsongtracks);
 }
 
-void OnSongChanged(SongTrackBar* self, Workspace* workspace)
+void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* workspace)
 {	
 	ui_combobox_setcursel(&self->trackbox,
 		player_numsongtracks(&workspace->player));

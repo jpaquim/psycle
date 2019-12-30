@@ -20,11 +20,11 @@ static void instrumententryview_onscroll(InstrumentEntryView*, psy_ui_Component*
 	int stepx, int stepy);
 static void instrumententryview_adjustscroll(InstrumentEntryView*);
 static void instrumententryview_onmousedown(InstrumentEntryView*,
-	psy_ui_Component* sender, MouseEvent*);
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static void instrumententryview_onmousemove(InstrumentEntryView*,
-	psy_ui_Component* sender, MouseEvent*);
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static void instrumententryview_onmouseup(InstrumentEntryView*,
-	psy_ui_Component* sender, MouseEvent*);
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static int isblack(int key);
 static int whitekeytokey(int whitekey);
 static int screentokey(int x, int keysize);
@@ -288,7 +288,7 @@ void instrumententryview_adjustscroll(InstrumentEntryView* self)
 }
 
 void instrumententryview_onmousedown(InstrumentEntryView* self,
-	psy_ui_Component* sender, MouseEvent* ev)
+	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
 	psy_audio_InstrumentEntry* entry;
 	if (self->instrument) {
@@ -321,7 +321,7 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 }
 
 void instrumententryview_onmousemove(InstrumentEntryView* self,
-	psy_ui_Component* sender, MouseEvent* ev)
+	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
 	if (self->dragmode != INSTVIEW_DRAG_NONE && self->instrument) {
 		psy_audio_InstrumentEntry* entry;
@@ -348,7 +348,7 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 }
 
 void instrumententryview_onmouseup(InstrumentEntryView* self,
-	psy_ui_Component* sender, MouseEvent* ev)
+	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
 	self->dragmode = 0;
 	ui_component_releasecapture(&self->component);

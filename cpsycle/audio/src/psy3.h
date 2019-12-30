@@ -6,7 +6,7 @@
 
 #include "songio.h"
 
-void psy3_load(struct psy_audio_SongFile*);
-void psy3_save(struct psy_audio_SongFile*);
+int psy3_load(struct psy_audio_SongFile*);
+int psy3_save(struct psy_audio_SongFile*);
 
 #endif

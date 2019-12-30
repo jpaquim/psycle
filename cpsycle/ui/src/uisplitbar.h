@@ -9,8 +9,9 @@
 typedef struct {
 	psy_ui_Component component;
 	int resize;
-} ui_splitbar;
+	int hover;
+} psy_ui_SplitBar;
 
-void ui_splitbar_init(ui_splitbar*, psy_ui_Component* parent);
+void ui_splitbar_init(psy_ui_SplitBar*, psy_ui_Component* parent);
 
 #endif

@@ -228,6 +228,7 @@ void plugincatcher_catchername(psy_audio_PluginCatcher* self, const char* path, 
 	strlwr(name);
 	strlwr(ext);
 	replace_char(name, ' ', '-');
+	replace_char(name, '_', '-');
 }
 
 int plugincatcher_load(psy_audio_PluginCatcher* self)

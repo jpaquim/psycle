@@ -15,7 +15,8 @@ static void about_oncontributors(About*, psy_ui_Component* sender);
 static void about_onversion(About*, psy_ui_Component* sender);
 static void about_onshowatstartup(About*, psy_ui_Component* sender);
 static void about_align(About*, psy_ui_Component* sender);
-static void about_onmousedoubleclick(About*, psy_ui_Component* sender, MouseEvent*);
+static void about_onmousedoubleclick(About*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 	
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
@@ -102,7 +103,7 @@ void about_init(About* self, psy_ui_Component* parent)
 	ui_notebook_init(&self->notebook, &self->component);
 	ui_image_init(&self->image, &self->notebook.component);	
 	self->image.component.preventdefault = 0;
-	ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
+	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
 	contrib_init(&self->contrib, &self->notebook.component);
 	version_init(&self->version, &self->notebook.component);		
 	ui_notebook_setpageindex(&self->notebook, 0);
@@ -166,7 +167,7 @@ void about_onversion(About* self, psy_ui_Component* sender)
 }
 
 void about_onmousedoubleclick(About* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	psy_signal_emit(&self->okbutton.signal_clicked, self, 0);
 }

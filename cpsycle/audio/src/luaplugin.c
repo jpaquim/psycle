@@ -22,8 +22,8 @@ static void seqtick(psy_audio_LuaPlugin*, uintptr_t channel,
 static void sequencerlinetick(psy_audio_LuaPlugin*);
 static psy_audio_MachineInfo* info(psy_audio_LuaPlugin*);
 static void parametertweak(psy_audio_LuaPlugin*, int par, int val);
-static int describevalue(psy_audio_LuaPlugin*, char* txt, int param, int value);
-static int parametervalue(psy_audio_LuaPlugin*, int param);
+static int describevalue(psy_audio_LuaPlugin*, char* txt, uintptr_t param, int value);
+static int parametervalue(psy_audio_LuaPlugin*, uintptr_t param);
 static void dispose(psy_audio_LuaPlugin*);
 static int mode(psy_audio_LuaPlugin*);
 static uintptr_t numinputs(psy_audio_LuaPlugin*);
@@ -176,12 +176,12 @@ void parametertweak(psy_audio_LuaPlugin* self, int par, int val)
 
 }
 
-int describevalue(psy_audio_LuaPlugin* self, char* txt, int param, int value)
+int describevalue(psy_audio_LuaPlugin* self, char* txt, uintptr_t param, int value)
 { 
 	return 0;
 }
 
-int parametervalue(psy_audio_LuaPlugin* self, int param)
+int parametervalue(psy_audio_LuaPlugin* self, uintptr_t param)
 {
 	return 0;
 }

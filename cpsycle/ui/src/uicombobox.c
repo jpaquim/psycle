@@ -5,28 +5,42 @@
 
 #include "uicombobox.h"
 
-static void onpreferredsize(ui_combobox*, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv);
+static void preferredsize(ui_combobox*, ui_size* limit, ui_size* rv);
 static void oncommand(ui_combobox*, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam);
 static void ondestroy(ui_combobox*, psy_ui_Component* sender);
 static void ui_combobox_create_system(ui_combobox*, psy_ui_Component* parent);
 static void ui_combobox_create_ownerdrawn(ui_combobox*, psy_ui_Component* parent);
 static void onownerdraw(ui_combobox*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void onmousedown(ui_combobox*, psy_ui_Component* sender, MouseEvent* ev);
-static void onmousemove(ui_combobox*, psy_ui_Component* sender, MouseEvent* ev);
+static void onmousedown(ui_combobox*, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev);
+static void onmousemove(ui_combobox*, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev);
 static void onmouseenter(ui_combobox*, psy_ui_Component* sender);
 static void onmouseleave(ui_combobox*, psy_ui_Component* sender);
 
-void ui_combobox_init(ui_combobox* combobox, psy_ui_Component* parent)
-{  
-	combobox->hover = 0;
-	psy_signal_init(&combobox->signal_selchanged);
-	ui_combobox_create_ownerdrawn(combobox, parent);	
-	psy_signal_connect(&combobox->component.signal_destroy, combobox, ondestroy);
-	psy_signal_connect(&combobox->component.signal_preferredsize,
-		combobox, onpreferredsize);
-	combobox->charnumber = 0;
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(ui_combobox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+	}
+}
+
+void ui_combobox_init(ui_combobox* self, psy_ui_Component* parent)
+{  			
+	ui_combobox_create_ownerdrawn(self, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
+	self->charnumber = 0;
+	self->hover = 0;
+	psy_signal_init(&self->signal_selchanged);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	
+	
 }
 
 void ui_combobox_create_system(ui_combobox* self, psy_ui_Component* parent)
@@ -102,8 +116,7 @@ void ui_combobox_setcharnumber(ui_combobox* self, int number)
 	self->charnumber = number;
 }
 
-void onpreferredsize(ui_combobox* self, psy_ui_Component* sender, ui_size* limit,
-	ui_size* rv)
+void preferredsize(ui_combobox* self, ui_size* limit, ui_size* rv)
 {
 	if (rv) {
 		ui_textmetric tm;
@@ -238,7 +251,8 @@ void onownerdraw(ui_combobox* self, psy_ui_Component* sender, psy_ui_Graphics* g
 	}
 }
 
-void onmousedown(ui_combobox* self, psy_ui_Component* sender, MouseEvent* ev)
+void onmousedown(ui_combobox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	ui_size size = ui_component_size(sender);	
 
@@ -275,7 +289,8 @@ void onmouseenter(ui_combobox* self, psy_ui_Component* sender)
 	ui_component_invalidate(&self->component);
 }
 
-void onmousemove(ui_combobox* self, psy_ui_Component* sender, MouseEvent* ev)
+void onmousemove(ui_combobox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	if (self->hover) {
 		int hover = self->hover;

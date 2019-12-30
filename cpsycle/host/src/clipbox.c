@@ -8,7 +8,8 @@
 
 static void clipbox_ondraw(ClipBox*, psy_ui_Component* sender, psy_ui_Graphics*);
 static void clipbox_ontimer(ClipBox* self, psy_ui_Component* sender, int timerid);
-static void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender, MouseEvent*);
+static void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned int slot, psy_audio_BufferContext* bc);
 static void clipbox_onsongchanged(ClipBox* self, Workspace* workspace);
 static void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace);
@@ -50,7 +51,8 @@ void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned i
 	}
 }
 
-void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender, MouseEvent* ev)
+void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	self->clip = 0;
 	ui_component_setbackgroundcolor(&self->component, 0x00000000);

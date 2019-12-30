@@ -25,6 +25,8 @@ void patternstrackstate_activatesolotrack(psy_audio_PatternsTrackState* self, ui
 {
 	self->soloactive = 1;
 	self->soloedtrack = track;
+	psy_table_clear(&self->mute);
+	psy_table_insert(&self->mute, track, (void*)(uintptr_t) 1);
 }
 
 void patternstrackstate_deactivatesolotrack(psy_audio_PatternsTrackState* self)

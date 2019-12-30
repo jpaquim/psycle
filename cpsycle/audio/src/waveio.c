@@ -41,7 +41,7 @@ void wave_load(psy_audio_Sample* sample, const char* path)
 			header[4] = 0;			
 			if (strcmp(&header[0], "data") == 0) {
 				int numsamples;
-				int frame;
+				unsigned int frame;
 				int channel;
 				char frame8;
 				short frame16;

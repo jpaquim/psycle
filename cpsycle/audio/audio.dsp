@@ -416,6 +416,10 @@ SOURCE=.\src\psy2.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\psy2converter.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\psy3.c
 # End Source File
 # Begin Source File
@@ -722,6 +726,10 @@ SOURCE=.\src\detail\project.h
 # Begin Source File
 
 SOURCE=.\src\psy2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\psy2converter.h
 # End Source File
 # Begin Source File
 

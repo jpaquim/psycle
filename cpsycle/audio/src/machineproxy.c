@@ -19,8 +19,9 @@
 
 // proxy
 
-static psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy*, size_t slot,
-	unsigned int amount, psy_audio_MachineSockets*, psy_audio_Machines*);
+static psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy*,
+	uintptr_t slot, uintptr_t amount, psy_audio_MachineSockets*,
+	psy_audio_Machines*);
 static void machineproxy_work(psy_audio_MachineProxy*, psy_audio_BufferContext*);
 static void machineproxy_generateaudio(psy_audio_MachineProxy*, psy_audio_BufferContext*);
 static void machineproxy_seqtick(psy_audio_MachineProxy*, uintptr_t channel,
@@ -31,11 +32,11 @@ static void machineproxy_dispose(psy_audio_MachineProxy*);
 static int machineproxy_mode(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numinputs(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy*);
-static void machineproxy_parametertweak(psy_audio_MachineProxy*, int par, int val);
-static void machineproxy_patterntweak(psy_audio_MachineProxy* self, int par, int val);
-static int machineproxy_describevalue(psy_audio_MachineProxy*, char* txt, int param,
+static void machineproxy_parametertweak(psy_audio_MachineProxy*, uintptr_t par, int val);
+static void machineproxy_patterntweak(psy_audio_MachineProxy* self, uintptr_t par, int val);
+static int machineproxy_describevalue(psy_audio_MachineProxy*, char* txt, uintptr_t param,
 	int value);
-static int machineproxy_parametervalue(psy_audio_MachineProxy*, int param);
+static int machineproxy_parametervalue(psy_audio_MachineProxy*, uintptr_t param);
 static void machineproxy_setpanning(psy_audio_MachineProxy*, psy_dsp_amp_t);
 static psy_dsp_amp_t machineproxy_panning(psy_audio_MachineProxy*);
 static void machineproxy_mute(psy_audio_MachineProxy*);
@@ -45,11 +46,11 @@ static void machineproxy_bypass(psy_audio_MachineProxy*);
 static void machineproxy_unbypass(psy_audio_MachineProxy*);
 static int machineproxy_bypassed(psy_audio_MachineProxy*);
 static const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy*);
-static int machineproxy_parametertype(psy_audio_MachineProxy*, int param);
-static void machineproxy_parameterrange(psy_audio_MachineProxy*, int numparam,
+static int machineproxy_parametertype(psy_audio_MachineProxy*, uintptr_t param);
+static void machineproxy_parameterrange(psy_audio_MachineProxy*, uintptr_t numparam,
 	int* minval, int* maxval);
 static uintptr_t machineproxy_numparameters(psy_audio_MachineProxy*);
-static unsigned int machineproxy_numparametercols(psy_audio_MachineProxy*);
+static uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy*);
 static int machineproxy_paramviewoptions(psy_audio_MachineProxy*);
 static void machineproxy_loadspecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
@@ -64,8 +65,8 @@ static struct psy_audio_Samples* machineproxy_samples(psy_audio_MachineProxy*);
 static struct psy_audio_Machines* machineproxy_machines(psy_audio_MachineProxy*);
 static struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineProxy*);
 static void machineproxy_setcallback(psy_audio_MachineProxy*, MachineCallback);
-static int machineproxy_parameterlabel(psy_audio_MachineProxy*, char* txt, int param);
-static int machineproxy_parametername(psy_audio_MachineProxy*, char* txt, int param);
+static int machineproxy_parameterlabel(psy_audio_MachineProxy*, char* txt, uintptr_t param);
+static int machineproxy_parametername(psy_audio_MachineProxy*, char* txt, uintptr_t param);
 static int machineproxy_haseditor(psy_audio_MachineProxy*);
 static void machineproxy_seteditorhandle(psy_audio_MachineProxy*, void* handle);
 static void machineproxy_editorsize(psy_audio_MachineProxy*, int* width, int* height);
@@ -75,6 +76,7 @@ static void machineproxy_seteditname(psy_audio_MachineProxy*, const char* name);
 static psy_audio_Buffer* machineproxy_buffermemory(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_buffermemorysize(psy_audio_MachineProxy*);
 static void machineproxy_setbuffermemorysize(psy_audio_MachineProxy*, uintptr_t);
+static psy_dsp_amp_range_t machineproxy_amprange(psy_audio_MachineProxy*);
 
 
 #if defined DIVERSALIS__OS__MICROSOFT
@@ -176,6 +178,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_buffermemorysize;
 		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
 			machineproxy_buffermemory;
+		vtable.amprange = (fp_machine_amprange) machineproxy_amprange;
 		vtable_initialized = 1;
 	}
 }
@@ -190,8 +193,9 @@ void machineproxy_init(psy_audio_MachineProxy* self, psy_audio_Machine* client)
 	self->client = client;	
 }
 
-psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy* self, size_t slot, unsigned int amount,
-	psy_audio_MachineSockets* sockets, psy_audio_Machines* machines)
+psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy* self, uintptr_t slot,
+	uintptr_t amount, psy_audio_MachineSockets* sockets,
+	psy_audio_Machines* machines)
 {
 	psy_audio_Buffer* rv = 0;
 
@@ -381,14 +385,15 @@ uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy* self)
 	return rv;
 }	
 
-void machineproxy_parametertweak(psy_audio_MachineProxy* self, int par, int val)
+void machineproxy_parametertweak(psy_audio_MachineProxy* self, uintptr_t param,
+	int val)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			self->client->vtable->parametertweak(self->client, par, val);
+			self->client->vtable->parametertweak(self->client, param, val);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parametertweak", GetExceptionCode(),
@@ -398,14 +403,15 @@ void machineproxy_parametertweak(psy_audio_MachineProxy* self, int par, int val)
 	}
 }
 
-void machineproxy_patterntweak(psy_audio_MachineProxy* self, int par, int val)
+void machineproxy_patterntweak(psy_audio_MachineProxy* self, uintptr_t param,
+	int val)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			self->client->vtable->patterntweak(self->client, par, val);
+			self->client->vtable->patterntweak(self->client, param, val);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parametertweak", GetExceptionCode(),
@@ -415,7 +421,7 @@ void machineproxy_patterntweak(psy_audio_MachineProxy* self, int par, int val)
 	}
 }
 
-int machineproxy_describevalue(psy_audio_MachineProxy* self, char* txt, int param,
+int machineproxy_describevalue(psy_audio_MachineProxy* self, char* txt, uintptr_t param,
 	int value)
 {
 	int rv = 0;
@@ -437,7 +443,7 @@ int machineproxy_describevalue(psy_audio_MachineProxy* self, char* txt, int para
 	return rv;
 }
 
-int machineproxy_parametervalue(psy_audio_MachineProxy* self, int param)
+int machineproxy_parametervalue(psy_audio_MachineProxy* self, uintptr_t param)
 {
 	int rv = 0;
 
@@ -642,9 +648,9 @@ uintptr_t machineproxy_numparameters(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-unsigned int machineproxy_numparametercols(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy* self)
 { 
-	unsigned int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -894,7 +900,7 @@ void machineproxy_setslot(psy_audio_MachineProxy* self, uintptr_t slot)
 	}
 }
 
-int machineproxy_parametertype(psy_audio_MachineProxy* self, int param)
+int machineproxy_parametertype(psy_audio_MachineProxy* self, uintptr_t param)
 {
 	int rv = MPF_STATE;
 	
@@ -914,7 +920,7 @@ int machineproxy_parametertype(psy_audio_MachineProxy* self, int param)
 	return rv;
 }
 
-void machineproxy_parameterrange(psy_audio_MachineProxy* self, int numparam, int* minval,
+void machineproxy_parameterrange(psy_audio_MachineProxy* self, uintptr_t param, int* minval,
 	int* maxval)
 {
 	if (self->crashed == 0) {
@@ -922,8 +928,8 @@ void machineproxy_parameterrange(psy_audio_MachineProxy* self, int numparam, int
 		__try
 #endif		
 		{ 
-			self->client->vtable->parameterrange(self->client, numparam,
-				minval, maxval);
+			self->client->vtable->parameterrange(self->client, param, minval,
+				maxval);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parameterrange", GetExceptionCode(),
@@ -933,7 +939,7 @@ void machineproxy_parameterrange(psy_audio_MachineProxy* self, int numparam, int
 	}
 }
 
-int machineproxy_parameterlabel(psy_audio_MachineProxy* self, char* txt, int param)
+int machineproxy_parameterlabel(psy_audio_MachineProxy* self, char* txt, uintptr_t param)
 {
 	int rv = 0;
 
@@ -955,7 +961,7 @@ int machineproxy_parameterlabel(psy_audio_MachineProxy* self, char* txt, int par
 	return rv;
 }
 
-int machineproxy_parametername(psy_audio_MachineProxy* self, char* txt, int param)
+int machineproxy_parametername(psy_audio_MachineProxy* self, char* txt, uintptr_t param)
 {
 	int rv = 0;
 
@@ -1125,7 +1131,6 @@ uintptr_t machineproxy_buffermemorysize(psy_audio_MachineProxy* self)
 #endif		
 	}
 	return rv;
-
 }
 
 void machineproxy_setbuffermemorysize(psy_audio_MachineProxy* self, uintptr_t size)
@@ -1143,4 +1148,24 @@ if (self->crashed == 0) {
 		}
 #endif		
 	}
+}
+
+psy_dsp_amp_range_t machineproxy_amprange(psy_audio_MachineProxy* self)
+{
+	psy_dsp_amp_range_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->amprange(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "amprange", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
 }

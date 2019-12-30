@@ -4,6 +4,11 @@
 #if !defined(PREFIX_H)
 #define PREFIX_H
 
+// psycle status
+
+#define PSY_OK 0
+#define PSY_ERRFILE 1
+
 #if defined _M_X64
 #define SSE
 #else

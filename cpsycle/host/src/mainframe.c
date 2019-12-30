@@ -20,8 +20,10 @@ static void mainframe_initvubar(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame*);
 static void mainframe_destroy(MainFrame*, psy_ui_Component* component);
-static void mainframe_onkeydown(MainFrame*, psy_ui_Component* sender, KeyEvent*);
-static void mainframe_onkeyup(MainFrame*, psy_ui_Component* sender, KeyEvent*);
+static void mainframe_onkeydown(MainFrame*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
+static void mainframe_onkeyup(MainFrame*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry* entry);
 static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
@@ -113,9 +115,15 @@ void mainframe_init(MainFrame* self)
 	ui_component_enablealign(&self->client);
 	ui_component_setalign(&self->client, UI_ALIGN_CLIENT);
 	// tabbars			
-	ui_component_init(&self->tabbars, &self->client);
-	mainframe_initbars(self);	
-	ui_component_resize(&self->top, 500, 400);	
+	{
+		ui_margin spacing;
+
+		ui_margin_init(&spacing, ui_value_makepx(0),
+			ui_value_makepx(0), ui_value_makeeh(0.5), ui_value_makepx(0));
+		ui_component_init(&self->tabbars, &self->client);
+		ui_component_setspacing(&self->tabbars, &spacing);
+		mainframe_initbars(self);
+	}
 	// tabbars
 	ui_component_setalign(&self->tabbars, UI_ALIGN_TOP);
 	ui_component_enablealign(&self->tabbars);
@@ -319,38 +327,38 @@ void mainframe_destroy(MainFrame* self, psy_ui_Component* component)
 
 void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 {
-	int cmd;
+	EventDriverCmd cmd;
 	// 	psy_Properties* section;
 
 	// section = psy_properties_find(sender->properties, "general");
 	cmd = sender->getcmd(sender, 0);
-	if (cmd == CMD_IMM_HELP) {
+	if (cmd.id == CMD_IMM_HELP) {
 		tabbar_select(&self->helpview.tabbar, 0);
 		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);		
 	} else
-	if (cmd == CMD_IMM_EDITMACHINE) {
+	if (cmd.id == CMD_IMM_EDITMACHINE) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 	} else
-	if (cmd == CMD_IMM_EDITPATTERN) {
+	if (cmd.id == CMD_IMM_EDITPATTERN) {
 		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
 	} else
-	if (cmd == CMD_IMM_ADDMACHINE) {
+	if (cmd.id == CMD_IMM_ADDMACHINE) {
 		self->machineview.newmachine.pluginsview.calledby = self->tabbar.selected;
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 		tabbar_select(&self->machineview.tabbar, 1);
 	} else
-	if (cmd == CMD_IMM_PLAYSONG) {
+	if (cmd.id == CMD_IMM_PLAYSONG) {
 		player_setposition(&self->workspace.player, 0);
 		player_start(&self->workspace.player);
 	} else
-	if (cmd == CMD_IMM_PLAYSTART) {
+	if (cmd.id == CMD_IMM_PLAYSTART) {
 		SequenceEntry* entry;
 
 		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);		
 		player_setposition(&self->workspace.player, entry ? entry->offset : 0);		
 		player_start(&self->workspace.player);		
 	} else
-	if (cmd == CMD_IMM_PLAYFROMPOS) {
+	if (cmd.id == CMD_IMM_PLAYFROMPOS) {
 		psy_dsp_beat_t playposition = 0;
 		SequenceEntry* entry;
 
@@ -360,10 +368,10 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 		player_setposition(&self->workspace.player, playposition);
 		player_start(&self->workspace.player);
 	} else
-	if (cmd == CMD_IMM_PLAYSTOP) {
+	if (cmd.id == CMD_IMM_PLAYSTOP) {
 		player_stop(&self->workspace.player);
 	} else
-	if (cmd == CMD_IMM_SONGPOSDEC) {
+	if (cmd.id == CMD_IMM_SONGPOSDEC) {
 		if (self->workspace.song) {		
 			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
 					self->workspace.sequenceselection.editposition.trackposition.tracknode->prev) {
@@ -377,7 +385,7 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 			}
 		}
 	} else
-	if (cmd == CMD_IMM_SONGPOSINC) {
+	if (cmd.id == CMD_IMM_SONGPOSINC) {
 		if (self->workspace.song) {						
 			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
 					self->workspace.sequenceselection.editposition.trackposition.tracknode->next) {
@@ -391,25 +399,25 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 			}
 		}
 	} else
-	if (cmd == CMD_IMM_MAXPATTERN) {
+	if (cmd.id == CMD_IMM_MAXPATTERN) {
 		mainframe_maximizeorminimizeview(self);
 	} else
-	if (cmd == CMD_IMM_INFOMACHINE) {
+	if (cmd.id == CMD_IMM_INFOMACHINE) {
 		workspace_showparameters(&self->workspace,
 			machines_slot(&self->workspace.song->machines));
 	} else
-	if (cmd == CMD_IMM_EDITINSTR) {
+	if (cmd.id == CMD_IMM_EDITINSTR) {
 		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW);
 	} else
-	if (cmd == CMD_IMM_EDITSAMPLE) {
+	if (cmd.id == CMD_IMM_EDITSAMPLE) {
 		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW);
 		tabbar_select(&self->samplesview.clienttabbar, 0);
 	} else
-	if (cmd == CMD_IMM_EDITWAVE) {
+	if (cmd.id == CMD_IMM_EDITWAVE) {
 		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW);
 		tabbar_select(&self->samplesview.clienttabbar, 2);
 	} else
-	if (cmd == CMD_IMM_TERMINAL) {
+	if (cmd.id == CMD_IMM_TERMINAL) {
 		if (ui_component_visible(&self->terminal.component)) {		
 			ui_component_hide(&self->terminal.component);
 			ui_component_align(&self->component);
@@ -420,38 +428,35 @@ void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
 	}
 }
 
-
-
-void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender, KeyEvent* ev)
+void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender,
+	psy_ui_KeyEvent* ev)
 {	
 	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
 		EventDriver* kbd;
-		int input;			
-					
-		kbd = workspace_kbddriver(&self->workspace);
-		if (self->workspace.chordmode) {
-			input = encodeinput(ev->keycode, 0, ev->ctrl);
-		} else {
-			input = encodeinput(ev->keycode, ev->shift, ev->ctrl);
-		}
-		kbd->write(kbd, EVENTDRIVER_KEYDOWN, (unsigned char*)&input, 4);
+		EventDriverData input;			
+		
+		input.message = EVENTDRIVER_KEYDOWN;
+		kbd = workspace_kbddriver(&self->workspace);		
+		input.param1 = encodeinput(ev->keycode, 
+			self->workspace.chordmode ? 0 : ev->shift, ev->ctrl);		
+		input.param2 = workspace_octave(&self->workspace) * 12;
+		kbd->write(kbd, input);
 	}
 }
 
-void mainframe_onkeyup(MainFrame* self, psy_ui_Component* component, KeyEvent* keyevent)
+void mainframe_onkeyup(MainFrame* self, psy_ui_Component* component,
+	psy_ui_KeyEvent* ev)
 {
-	if (keyevent->keycode != VK_CONTROL &&
-			keyevent->keycode != VK_SHIFT) {
+	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
 		EventDriver* kbd;
-		int input;			
+		EventDriverData input;			
 		
-		input = encodeinput(keyevent->keycode, GetKeyState(VK_SHIFT) < 0,
-			GetKeyState(VK_CONTROL) < 0);						
+		input.message = EVENTDRIVER_KEYUP;
+		input.param1 = encodeinput(ev->keycode, GetKeyState(VK_SHIFT) < 0,
+			GetKeyState(VK_CONTROL) < 0);
+		input.param2 = 48;
 		kbd = workspace_kbddriver(&self->workspace);
-		kbd->write(kbd,
-			EVENTDRIVER_KEYUP,			
-			(unsigned char*)&input,
-			4);
+		kbd->write(kbd, input);
 	}
 }
 

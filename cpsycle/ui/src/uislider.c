@@ -11,13 +11,18 @@
 
 static void ui_slider_initsignals(ui_slider*);
 static void ui_slider_disposesignals(ui_slider*);
-static void ui_slider_ondraw(ui_slider*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void ui_slider_drawverticalruler(ui_slider*, psy_ui_Graphics* g);
-static void ui_slider_onmousedown(ui_slider*, psy_ui_Component* sender, MouseEvent* ev);
-static void ui_slider_onmouseup(ui_slider*, psy_ui_Component* sender, MouseEvent* ev);
-static void ui_slider_onmousemove(ui_slider*, psy_ui_Component* sender, MouseEvent* ev);
+static void ui_slider_ondraw(ui_slider*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
+static void ui_slider_drawverticalruler(ui_slider*, psy_ui_Graphics*);
+static void ui_slider_onmousedown(ui_slider*, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev);
+static void ui_slider_onmouseup(ui_slider*, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev);
+static void ui_slider_onmousemove(ui_slider*, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev);
 static void ui_slider_ondestroy(ui_slider*, psy_ui_Component* sender);
-static void ui_slider_ontimer(ui_slider*, psy_ui_Component* sender, int timerid);
+static void ui_slider_ontimer(ui_slider*, psy_ui_Component* sender,
+	int timerid);
 static void ui_slider_updatevalue(ui_slider*);
 static void ui_slider_describevalue(self);
 
@@ -174,7 +179,7 @@ void ui_slider_drawverticalruler(ui_slider* self, psy_ui_Graphics* g)
 }
 
 void ui_slider_onmousedown(ui_slider* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	ui_size size;
 	size = ui_component_size(&self->component);
@@ -190,7 +195,7 @@ void ui_slider_onmousedown(ui_slider* self, psy_ui_Component* sender,
 }
 
 void ui_slider_onmousemove(ui_slider* self, psy_ui_Component* sender,
-	MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	if (self->tweakbase != -1) {
 		ui_size size;
@@ -212,7 +217,8 @@ void ui_slider_onmousemove(ui_slider* self, psy_ui_Component* sender,
 	}
 }
 
-void ui_slider_onmouseup(ui_slider* self, psy_ui_Component* sender, MouseEvent* ev)
+void ui_slider_onmouseup(ui_slider* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	self->tweakbase = -1;
 	ui_component_releasecapture(&self->component);

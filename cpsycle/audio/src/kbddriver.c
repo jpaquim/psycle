@@ -75,8 +75,7 @@ typedef struct {
 	EventDriver driver;
 	Inputs noteinputs;
 	int (*error)(int, const char*);
-	int lastinput;
-	int lastinputtype;
+	EventDriverData lastinput;	
 } KbdDriver;
 
 static void driver_free(EventDriver*);
@@ -85,10 +84,10 @@ static int driver_open(EventDriver*);
 static int driver_close(EventDriver*);
 static int driver_dispose(EventDriver*);
 static void driver_configure(EventDriver*);
-static void driver_write(EventDriver*, int type, unsigned char* data, int size);
-static void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
-	EventDriverCmd* cmd, int maxsize);
-static int driver_getcmd(EventDriver*, psy_Properties* section);
+static void driver_write(EventDriver*, EventDriverData input);
+static void driver_cmd(EventDriver* driver, EventDriverData,
+	EventDriverCmd* cmd);
+static EventDriverCmd driver_getcmd(EventDriver*, psy_Properties* section);
 static void setcmddef(EventDriver*, psy_Properties*);
 
 static void driver_makeinputs(KbdDriver*, psy_Properties*);
@@ -155,7 +154,7 @@ int driver_open(EventDriver* driver)
 	KbdDriver* self;
 
 	self = (KbdDriver*)(driver);
-	self->lastinput = 0;	
+	self->lastinput.message = 0;
 	return 0;
 }
 
@@ -164,68 +163,53 @@ int driver_close(EventDriver* driver)
 	return 0;
 }
 
-void driver_write(EventDriver* driver, int type, unsigned char* data, int size)
+void driver_write(EventDriver* driver, EventDriverData input)
 {	
 	KbdDriver* self;	
 
 	self = (KbdDriver*)(driver);
-	self->lastinput = *((unsigned int*)data);
-	self->lastinputtype = type;
+	self->lastinput = input;	
 	psy_signal_emit(&self->driver.signal_input, self, 0);
 }
 
-void driver_cmd(EventDriver* driver, int type, unsigned char* data, int size,
-	EventDriverCmd* cmd, int maxsize)
+void driver_cmd(EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
 {		
 	KbdDriver* self;
-	int kbcmd = 0;
+	EventDriverCmd kbcmd;
 
 	self = (KbdDriver*)(driver);
-	cmd->type = EVENTDRIVER_CMD_NONE;	
-	cmd->size = 0;	
-	if (type == EVENTDRIVER_KEYDOWN) {
-		kbcmd = inputs_cmd(&self->noteinputs, *((unsigned int*)data));
-		
-		if (kbcmd == CMD_NOTE_STOP) {
-			cmd->type = EVENTDRIVER_CMD_PATTERN;
-			cmd->data[0] = NOTECOMMANDS_RELEASE;
-			cmd->size = 4;
+	cmd->id = -1;	
+	if (input.message == EVENTDRIVER_KEYDOWN) {
+		kbcmd.id = inputs_cmd(&self->noteinputs, input.param1);		
+		if (kbcmd.id == CMD_NOTE_STOP) {
+			cmd->id = kbcmd.id;
+			cmd->data.param1 = NOTECOMMANDS_RELEASE;			
 		} else
-		if (kbcmd == CMD_NOTE_TWEAKM) {
-			cmd->type = EVENTDRIVER_CMD_PATTERN;
-			cmd->data[0] = NOTECOMMANDS_TWEAK;
-			cmd->size = 4;
+		if (kbcmd.id == CMD_NOTE_TWEAKM) {
+			cmd->id = kbcmd.id;
+			cmd->data.param1 = NOTECOMMANDS_TWEAK;			
 		} else
-		if (kbcmd == CMD_NOTE_TWEAKS) {
-			cmd->type = EVENTDRIVER_CMD_PATTERN;
-			cmd->data[0] = NOTECOMMANDS_TWEAKSLIDE;
-			cmd->size = 4;
+		if (kbcmd.id == CMD_NOTE_TWEAKS) {
+			cmd->id = kbcmd.id;
+			cmd->data.param1 = NOTECOMMANDS_TWEAKSLIDE;			
 		} else
-		if (kbcmd != -1) {
-			int base = 48;			
-									
-			cmd->type = EVENTDRIVER_CMD_PATTERN;
-			cmd->data[0] = (unsigned char) (kbcmd + base);
-			cmd->size = 4;
+		if (kbcmd.id != -1) {
+			cmd->id = kbcmd.id;
+			cmd->data.param1 = kbcmd.id + input.param2;
 		}
 	} else {
-		cmd->type = EVENTDRIVER_CMD_PATTERN;
-		cmd->data[0] = NOTECOMMANDS_RELEASE;
-		cmd->size = 4;		
+		cmd->id = NOTECOMMANDS_RELEASE;
+		cmd->data.param1 = NOTECOMMANDS_RELEASE;
 	}
 }
 
-int driver_getcmd(EventDriver* driver, psy_Properties* section)
-{
+EventDriverCmd driver_getcmd(EventDriver* driver, psy_Properties* section)
+{	
 	KbdDriver* self;
-	int cmd;
+	EventDriverCmd cmd;	
 		
-	self = (KbdDriver*)(driver);	
-	if (self->lastinputtype == EVENTDRIVER_KEYDOWN) {
-		cmd = inputs_cmd(&self->noteinputs, self->lastinput);
-	} else {
-		cmd = NOTECOMMANDS_RELEASE;
-	}
+	self = (KbdDriver*)(driver);
+	driver_cmd(driver, self->lastinput, &cmd);	
 	return cmd;
 }
 
