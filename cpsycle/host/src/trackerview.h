@@ -89,7 +89,8 @@ typedef struct {
 	struct TrackerView* view;
 } TrackerLineNumbersLabel;
 
-void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*, psy_ui_Component* parent, struct TrackerView*);
+void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*,
+	psy_ui_Component* parent, struct TrackerView*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -121,10 +122,16 @@ typedef struct {
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*);
 
 typedef struct {
-	unsigned int width;
-	unsigned int digits;
-	unsigned int ident;
-} TrackerColumn;
+	uintptr_t numdigits;
+	uintptr_t numchars;	
+	uintptr_t marginright;
+	int wrapeditcolumn;
+	int wrapclearcolumn;
+	uintptr_t emptyvalue;
+} TrackerColumnDef;
+
+void trackercolumndef_init(TrackerColumnDef*, int numdigits, int numchars,
+	int marginright, int wrapeditcol, int wrapclearcol, int emptyvalue);
 
 typedef struct {
    psy_ui_Component component;   
@@ -138,7 +145,7 @@ typedef struct {
    PatternEditPosition cursor;
    psy_dsp_beat_t cursorstep;   
    psy_audio_Player* player;   
-   TrackerColumn cols[5];
+   TrackerColumnDef coldefs[5];
    TrackerHeader* header;
    TrackerLineNumbers* linenumbers;
    struct TrackerView* view;
@@ -148,16 +155,10 @@ typedef struct {
    int chordbegin;
 } TrackerGrid;
 
-void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, struct TrackerView*,
-	psy_audio_Player*);
+void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
+	struct TrackerView*, psy_audio_Player*);
 
 typedef Inputs TrackerInputs;
-
-typedef struct {
-	int line;
-	int sublines;
-	int accsublines;
-} SublineCache;
 
 typedef struct TrackerView {
 	psy_ui_Component component;

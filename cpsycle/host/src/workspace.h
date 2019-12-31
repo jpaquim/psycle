@@ -116,6 +116,7 @@ int workspace_showlinenumbers(Workspace*);
 int workspace_showbeatoffset(Workspace*);
 int workspace_showlinenumbercursor(Workspace*);
 int workspace_showlinenumbersinhex(Workspace*);
+int workspace_showwideinstcolumn(Workspace*);
 int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
 void workspace_configchanged(Workspace*, psy_Properties* property,

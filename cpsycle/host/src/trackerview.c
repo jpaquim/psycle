@@ -19,6 +19,7 @@
 #define TIMERID_TRACKERVIEW 600
 static const psy_dsp_big_beat_t epsilon = 0.0001;
 
+static void trackergrid_initcolumns(TrackerGrid*);
 static void trackergrid_computecolumns(TrackerGrid*, int textwidth);
 static int trackergrid_preferredtrackwidth(TrackerGrid*);
 static void trackergrid_ondraw(TrackerGrid*, psy_ui_Graphics*);
@@ -28,7 +29,7 @@ static void trackergrid_drawtrackbackground(TrackerGrid*, psy_ui_Graphics*,
 	int track);
 static void trackergrid_drawevents(TrackerGrid*, psy_ui_Graphics*,
 	TrackerGridBlock* clip);
-static void trackergrid_drawevent(TrackerGrid*, psy_ui_Graphics* g,
+static void trackergrid_drawevent(TrackerGrid*, psy_ui_Graphics*,
 	psy_audio_PatternEvent*, int x, int y, int playbar, int cursor,
 	int selection, int beat, int beat4, int mid);
 static void trackergrid_onkeydown(TrackerGrid*, psy_ui_Component* sender,
@@ -53,7 +54,7 @@ static int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset)
 static void trackergrid_clipblock(TrackerGrid*, const ui_rectangle*,
 	TrackerGridBlock*);
 static void trackergrid_drawdigit(TrackerGrid*, psy_ui_Graphics*, int digit,
-	int col, int numdigit, int x, int y);
+	int col, int numdigit, int x, int y, int empty);
 static void trackergrid_adjustscroll(TrackerGrid*);
 static double trackergrid_offset(TrackerGrid*, int y, unsigned int* lines);
 static void trackergrid_numtrackschanged(TrackerGrid*, psy_audio_Player*,
@@ -72,8 +73,12 @@ static void trackerview_ontimer(TrackerView*, psy_ui_Component* sender,
 static void trackerview_onalign(TrackerView*, psy_ui_Component* sender);
 static void trackerview_inputnote(TrackerView*, psy_dsp_note_t);
 static void trackerview_inputvalue(TrackerView*, int value, int digit);
-static void enterdigitcolumn(psy_audio_PatternEvent*, int column, int digit, int value);
+static void enterdigitcolumn(psy_audio_PatternEvent*, int column, int digit, int value,
+	int numdigits, int emptyvalue);
 static void enterdigit(int digit, int newval, unsigned char* val);
+static void digitlohi(int value, int digit, uintptr_t size, uint8_t* lo, uint8_t* hi);
+static void lohi(uint8_t* value, int digit, uint8_t* lo, uint8_t* hi);
+
 static void entervaluecolumn(psy_audio_PatternEvent*, int column, int value);
 static int keycodetoint(unsigned int keycode);
 static void trackerview_setcentermode(TrackerView*, int mode);
@@ -162,7 +167,6 @@ static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t width);
 static int testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t width);
-static int colgroupstart(int col);
 
 static psy_ui_ComponentVtable trackergrid_vtable;
 static int trackergrid_vtable_initialized = 0;
@@ -218,6 +222,7 @@ enum {
 };
 
 enum {
+	TRACKER_COLUMN_NONE  = -1,
 	TRACKER_COLUMN_NOTE	 = 0,
 	TRACKER_COLUMN_INST	 = 1,
 	TRACKER_COLUMN_MACH	 = 2,
@@ -226,7 +231,19 @@ enum {
 	TRACKER_COLUMN_END	 = 5
 };
 
-/// Commands
+// TrackerColumn
+void trackercolumndef_init(TrackerColumnDef* self, int numdigits, int numchars,
+	int marginright, int wrapeditcolumn, int wrapclearcolumn, int emptyvalue)
+{
+	self->numdigits = numdigits;
+	self->numchars = numchars;	
+	self->marginright = marginright;
+	self->wrapeditcolumn = wrapeditcolumn;
+	self->wrapclearcolumn = wrapclearcolumn;
+	self->emptyvalue = emptyvalue;
+}
+
+// Commands
 typedef struct {
 	Command command;
 	PatternEditPosition cursor;
@@ -406,22 +423,28 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	trackergrid_computecolumns(self, 9);	
 	self->component.doublebuffered = 1;
 	self->component.wheelscroll = 4;
+	trackergrid_initcolumns(self);
+}
 
-	self->cols[0].digits = 1;
-	self->cols[0].width = 3;
-	self->cols[0].ident = 1;
-	self->cols[1].digits = 2;
-	self->cols[1].width = 2;
-	self->cols[1].ident = 1;
-	self->cols[2].digits = 2;
-	self->cols[2].width = 2;
-	self->cols[2].ident = 1;
-	self->cols[3].digits = 2;
-	self->cols[3].width = 2;
-	self->cols[3].ident = 0;
-	self->cols[4].digits = 2;
-	self->cols[4].width = 2;
-	self->cols[4].ident = 1;
+void trackergrid_initcolumns(TrackerGrid* self)
+{
+	// numdigits, numchars, right-margin-px, wrapeditcolumn, wrapclearcolumn,
+	// emptyvalue
+	trackercolumndef_init(&self->coldefs[TRACKER_COLUMN_NOTE],  1, 3, 1,
+		TRACKER_COLUMN_NOTE, TRACKER_COLUMN_NOTE, 0xFF);
+	if (workspace_showwideinstcolumn(self->view->workspace)) {
+		trackercolumndef_init(&self->coldefs[TRACKER_COLUMN_INST],  4, 4, 1,
+			TRACKER_COLUMN_INST, TRACKER_COLUMN_INST, NOTECOMMANDS_INST_EMPTY);
+	} else {
+		trackercolumndef_init(&self->coldefs[TRACKER_COLUMN_INST],  2, 2, 1,
+			TRACKER_COLUMN_INST, TRACKER_COLUMN_INST, NOTECOMMANDS_INST_EMPTY);
+	}
+	trackercolumndef_init(&self->coldefs[TRACKER_COLUMN_MACH],  2, 2, 1,
+		TRACKER_COLUMN_MACH, TRACKER_COLUMN_MACH, NOTECOMMANDS_MACH_EMPTY);
+	trackercolumndef_init(&self->coldefs[TRACKER_COLUMN_CMD],   2, 2, 0,
+		TRACKER_COLUMN_NONE, TRACKER_COLUMN_CMD, 0x00);
+	trackercolumndef_init(&self->coldefs[TRACKER_COLUMN_PARAM], 2, 2, 1,
+		TRACKER_COLUMN_CMD, TRACKER_COLUMN_PARAM, 0x00);
 }
 
 void trackergrid_computecolumns(TrackerGrid* self, int textwidth)
@@ -768,9 +791,8 @@ void trackergrid_drawevents(TrackerGrid* self, psy_ui_Graphics* g, TrackerGridBl
 			}
 			if (!hasevent) {
 				psy_audio_PatternEvent event;
-				memset(&event, 0xFF, sizeof(psy_audio_PatternEvent));
-				event.cmd = 0;
-				event.parameter = 0;
+
+				patternevent_clear(&event);				
 				trackergrid_drawevent(self, g, &event,
 					cpx + self->view->metrics.patterntrackident,
 					cpy, playbar, cursor, selection, beat, beat4, mid);
@@ -847,6 +869,7 @@ void trackergrid_drawevent(TrackerGrid* self, psy_ui_Graphics* g,
 	ui_rectangle r;
 	static const char* emptynotestr = "- - -";
 	const char* notestr;
+	unsigned int column;
 
 	if (event->note == 121) {
 		event->note = event->note;
@@ -858,88 +881,67 @@ void trackergrid_drawevent(TrackerGrid* self, psy_ui_Graphics* g,
 	{	// draw note		
 		ui_setrectangle(&r, x + trackergrid_column_x(self, 0, 0)
 			, y, 
-			self->view->metrics.textwidth*3, self->view->metrics.tm.tmHeight);
+			self->view->metrics.textwidth * 3, self->view->metrics.tm.tmHeight);
 		notestr = (event->note != 255 || !self->view->showemptydata) 
 			  ? psy_dsp_notetostr(event->note, self->notestabmode)
 			  : emptynotestr;		
 		ui_textoutrectangle(g, r.left, r.top, ETO_OPAQUE | ETO_CLIPPED, r, notestr,
 			strlen(notestr));	
 	}
-	{	// draw inst
-		int hi = (event->inst & 0xF0) >> 4;
-		int lo = event->inst & 0x0F;
-		if (event->inst == 0xFF) {
-			hi = -1;
-			lo = -1;
-		}
-		SetColColor(&self->view->skin, g, playbar, cursor && 
-			(cursor && self->cursor.column == TRACKER_COLUMN_INST && self->cursor.digit == 0), 
-			selection, beat, beat4,mid);
-		trackergrid_drawdigit(self, g, hi, 1, 0, x, y);
-		SetColColor(&self->view->skin, g, playbar,
-			(cursor && self->cursor.column == TRACKER_COLUMN_INST && self->cursor.digit == 1),
-			selection, beat, beat4, mid);
-		trackergrid_drawdigit(self, g, lo, 1, 1, x, y);
-	}
-	{	// draw mach
-		int hi = (event->mach & 0xF0) >> 4;
-		int lo = event->mach & 0x0F;
-		if (event->mach == 0xFF) {
-			hi = -1;
-			lo = -1;
-		}
-		SetColColor(&self->view->skin, g, playbar,
-			(cursor && self->cursor.column == TRACKER_COLUMN_MACH && self->cursor.digit == 0),
-			selection, beat, beat4, mid);
-		trackergrid_drawdigit(self, g, hi, 2, 0, x, y);
-		SetColColor(&self->view->skin, g, playbar,
-			(cursor && self->cursor.column == TRACKER_COLUMN_MACH && self->cursor.digit == 1),
-			selection, beat, beat4,mid);
-		trackergrid_drawdigit(self, g, lo, 2, 1, x, y);
-	}
-	{	// draw cmd
-		int hi = (event->cmd & 0xF0) >> 4;
-		int lo = event->cmd & 0x0F;				
-		if (event->cmd == 0x00 && event->parameter == 0x00) {
-			hi = -1;
-			lo = -1;
-		}
-		SetColColor(&self->view->skin, g, playbar,
-			(cursor && self->cursor.column == TRACKER_COLUMN_CMD && self->cursor.digit == 0),
-			selection, beat, beat4, mid);
-		trackergrid_drawdigit(self, g, hi, 3, 0, x, y);
-		SetColColor(&self->view->skin, g, playbar,
-			(cursor && self->cursor.column == TRACKER_COLUMN_CMD && self->cursor.digit == 1),
-			selection, beat, beat4, mid);
-		trackergrid_drawdigit(self, g, lo, 3, 1, x, y);
-	}
-	{	// draw parameter
-		int hi = (event->parameter & 0xF0) >> 4;
-		int lo = event->parameter & 0x0F;		
-		if (event->cmd == 0x00 && event->parameter == 0x00) {
-			hi = -1;
-			lo = -1;
-		}
-		SetColColor(&self->view->skin, g, playbar,
-			(cursor && self->cursor.column == TRACKER_COLUMN_PARAM && self->cursor.digit == 0),
-			selection, beat, beat4,mid);
-		trackergrid_drawdigit(self, g, hi, 4, 0, x, y);
-		SetColColor(&self->view->skin, g, playbar,
-			(cursor && self->cursor.column == TRACKER_COLUMN_PARAM && self->cursor.digit == 1),
-			selection, beat, beat4, mid);
-		trackergrid_drawdigit(self, g, lo, 4, 1, x, y);
-	}			
+	for (column = 1; column < TRACKER_COLUMN_END; ++column) {
+		int empty;
+		unsigned int c;
+		uint8_t hi;
+		uint8_t lo;
+		unsigned int value;
+
+		switch (column) {
+			case TRACKER_COLUMN_NOTE:
+				value = event->note;
+			break;
+			case TRACKER_COLUMN_INST:
+				value = event->inst;
+			break;
+			case TRACKER_COLUMN_MACH:
+				value = event->mach;
+			break;
+			case TRACKER_COLUMN_CMD:
+				value = event->cmd;
+			break;
+			case TRACKER_COLUMN_PARAM:
+				value = event->parameter;
+			break;
+			default:
+				value = 0;
+			break;
+		}		
+		empty = (value == self->coldefs[column].emptyvalue);
+		for (c = 0; c < self->coldefs[column].numdigits / 2; ++c) {
+			digitlohi(value, c * 2, self->coldefs[column].numdigits / 2,
+				&lo, &hi);
+			SetColColor(&self->view->skin, g, playbar, cursor && 
+				(cursor && self->cursor.column == column &&
+				self->cursor.digit == c * 2),
+				selection, beat, beat4,mid);			
+			trackergrid_drawdigit(self, g, hi, column, c * 2, x, y, empty);
+			SetColColor(&self->view->skin, g, playbar,
+				(cursor && self->cursor.column == column &&
+				self->cursor.digit == c * 2 + 1),
+				selection, beat, beat4, mid);
+			trackergrid_drawdigit(self, g, lo, column, c * 2 + 1, x, y, empty);
+		}		
+	}	
 }
 
 void trackergrid_drawdigit(TrackerGrid* self, psy_ui_Graphics* g, int digit,
-						   int col, int numdigit, int x, int y)
+						   int col, int numdigit, int x, int y, int empty)
 {
 	char buffer[20];	
 	ui_rectangle r;
 	ui_setrectangle(&r, x + trackergrid_column_x(self, col, numdigit),
 		y, self->view->metrics.textwidth,
 			self->view->metrics.tm.tmHeight);
-	if (digit != -1) {
+	if (!empty) {
 		psy_snprintf(buffer, 2, "%X", digit);	
 	} else {
 		if (self->view->showemptydata) {
@@ -1028,8 +1030,8 @@ void trackerview_prevcol(TrackerView* self)
 	if (self->grid.cursor.column == 0 && self->grid.cursor.digit == 0) {
 		if (self->wraparound) {
 			self->grid.cursor.column = TRACKER_COLUMN_END - 1;
-			self->grid.cursor.digit = self->grid.cols[
-				self->grid.cursor.column].digits - 1;
+			self->grid.cursor.digit = self->grid.coldefs[
+				self->grid.cursor.column].numdigits - 1;
 		}
 		if (self->grid.cursor.track > 0) {
 			--self->grid.cursor.track;
@@ -1045,8 +1047,8 @@ void trackerview_prevcol(TrackerView* self)
 			--self->grid.cursor.digit;
 		} else {
 			--self->grid.cursor.column;
-			self->grid.cursor.digit = self->grid.cols[
-				self->grid.cursor.column].digits - 1;
+			self->grid.cursor.digit = self->grid.coldefs[
+				self->grid.cursor.column].numdigits - 1;
 		}
 	}
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);	
@@ -1064,7 +1066,7 @@ void trackerview_nextcol(TrackerView* self)
 
 	if (self->grid.cursor.column == TRACKER_COLUMN_END - 1 &&
 			self->grid.cursor.digit ==
-			self->grid.cols[self->grid.cursor.column].digits - 1) {		
+			self->grid.coldefs[self->grid.cursor.column].numdigits - 1) {		
 		if (self->grid.cursor.track < player_numsongtracks(
 			&self->workspace->player) - 1) {
 			self->grid.cursor.column = 0;
@@ -1080,8 +1082,8 @@ void trackerview_nextcol(TrackerView* self)
 		}
 	} else {
 		++self->grid.cursor.digit;
-		if (self->grid.cursor.digit >= self->grid.cols[
-			self->grid.cursor.column].digits) {
+		if (self->grid.cursor.digit >= self->grid.coldefs[
+			self->grid.cursor.column].numdigits) {
 			++self->grid.cursor.column;
 			self->grid.cursor.digit = 0;
 		}		
@@ -1507,7 +1509,9 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_Component* sender,
 	if (cmd == CMD_ROWCLEAR) {
 		if (self->grid.cursor.column == TRACKER_COLUMN_NOTE) {
 			PatternNode* prev;
-			PatternNode* node = pattern_findnode(self->pattern, self->grid.cursor.track,
+			PatternNode* node;
+			
+			node = pattern_findnode(self->pattern, self->grid.cursor.track,
 				(psy_dsp_beat_t)self->grid.cursor.offset,
 				(psy_dsp_beat_t)self->grid.bpl, &prev);
 			if (node) {
@@ -1516,11 +1520,8 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_Component* sender,
 			}
 			trackerview_advanceline(self);	
 		} else {
-			if (self->grid.cursor.column < 4) {
-				trackerview_inputvalue(self, 255, 0);
-			} else {
-				trackerview_inputvalue(self, 0, 0);
-			}
+			trackerview_inputvalue(self, 
+				self->grid.coldefs[self->grid.cursor.column].emptyvalue, 0);
 			return;
 		}
 	} else
@@ -1591,13 +1592,13 @@ void trackerview_onkeyup(TrackerView* self, psy_ui_Component* sender,
 	}
 }
 
-void trackerview_oninput(TrackerView* self, psy_audio_Player* sender, psy_audio_PatternEvent* event)
+void trackerview_oninput(TrackerView* self, psy_audio_Player* sender,
+	psy_audio_PatternEvent* event)
 {
 	if (ui_component_hasfocus(&self->grid.component) &&
-			self->grid.cursor.column == TRACKER_COLUMN_NOTE) {
-		if (event->note != NOTECOMMANDS_RELEASE) {
-			trackerview_inputnote(self, event->note);
-		}		
+			self->grid.cursor.column == TRACKER_COLUMN_NOTE &&
+			event->note != NOTECOMMANDS_RELEASE) {
+		trackerview_inputnote(self, event->note);				
 	}
 }
 
@@ -1655,50 +1656,47 @@ void trackerview_inputvalue(TrackerView* self, int value, int digit)
 					&prev);						
 		event = pattern_event(self->pattern, node);
 		if (digit) {
-			enterdigitcolumn(&event, self->grid.cursor.column,
-				self->grid.cursor.digit, value);
+			enterdigitcolumn(&event,
+				self->grid.cursor.column,
+				self->grid.cursor.digit,
+				value,
+				self->grid.coldefs[self->grid.cursor.column].numdigits,
+				self->grid.coldefs[self->grid.cursor.column].emptyvalue);
 		} else {
-			entervaluecolumn(&event, self->grid.cursor.column, value);
+			entervaluecolumn(&event, self->grid.cursor.column,
+				value);
 		}
 		trackerview_preventsync(self);
 		undoredo_execute(&self->workspace->undoredo,
 				&InsertCommandAlloc(self->pattern, self->grid.bpl,
 					self->grid.cursor, event, self->workspace)->command);
-		if (!digit) {
-			/*if (self->grid.cursor.column == 3) {
-				self->grid.cursor.col = TRACKER_COLUMN_PARAM;
-				self->grid.cursor.column = 3;
-				self->grid.cursor.digit = 0;
+		if (!digit) {			
+			if (self->grid.coldefs[self->grid.cursor.column].wrapclearcolumn
+					== TRACKER_COLUMN_NONE) {
+				trackerview_nextcol(self);
 			} else {
-				self->grid.cursor.col = colgroupstart(self->grid.cursor.col);
 				self->grid.cursor.digit = 0;
-			}*/
-			trackerview_advanceline(self);
+				self->grid.cursor.column = self->grid.coldefs[
+					self->grid.cursor.column].wrapclearcolumn;				
+				trackerview_advanceline(self);
+			}
 		} else
-		if (self->grid.cursor.digit >= self->grid.cols[
-				self->grid.cursor.column].digits) {
-			self->grid.cursor.digit = 0;			
-			trackerview_advanceline(self);			
+		if (self->grid.cursor.digit + 1 >= self->grid.coldefs[
+				self->grid.cursor.column].numdigits) {			
+			if (self->grid.coldefs[self->grid.cursor.column].wrapeditcolumn
+					== TRACKER_COLUMN_NONE) {
+				trackerview_nextcol(self);	
+			} else {
+				self->grid.cursor.digit = 0;
+				self->grid.cursor.column = self->grid.coldefs[
+					self->grid.cursor.column].wrapeditcolumn;
+				trackerview_advanceline(self);
+			}
 		} else {
 			trackerview_nextcol(self);
 		}
 		trackerview_invalidatecursor(self, &self->grid.cursor);
 		trackerview_enablesync(self);
-	}
-}
-
-int colgroupstart(int col)
-{
-	if (col >= TRACKER_COLUMN_INST && col < TRACKER_COLUMN_MACH) {
-		return TRACKER_COLUMN_INST;
-	} else
-	if (col >= TRACKER_COLUMN_MACH && col < TRACKER_COLUMN_CMD) {
-		return TRACKER_COLUMN_MACH;
-	} else
-	if (col >= TRACKER_COLUMN_CMD && col < TRACKER_COLUMN_END) {
-		return TRACKER_COLUMN_CMD;
-	} else {
-		return TRACKER_COLUMN_NOTE;
 	}
 }
 	
@@ -1715,26 +1713,30 @@ int keycodetoint(unsigned int keycode) {
 }
 
 void enterdigitcolumn(psy_audio_PatternEvent* event, int column, int digit,
-	int value)
-{
+	int value, int numdigits, int emptyvalue)
+{			
+	ptrdiff_t pos;
+		
+	pos = (numdigits / 2 - 1) - digit / 2;
 	switch (column) {
-		case TRACKER_COLUMN_INST: 			
-			if ((event->inst == 0xFF) && (value != 0x0F)) {
+		case TRACKER_COLUMN_INST:
+			if (event->inst == emptyvalue) {
 				event->inst = 0;
 			}
-			enterdigit(digit, value, &event->inst);
+			enterdigit(digit % 2, value,
+				(uint8_t*) &event->inst + pos);
 		break;		
 		case TRACKER_COLUMN_MACH:
-			if ((event->mach == 0xFF) && (value != 0x0F)) {
+			if (event->mach == emptyvalue) {
 				event->mach = 0;
-			}
-			enterdigit(digit, value, &event->mach);
+			}			
+			enterdigit(digit % 2, value, &event->mach + pos);
 		break;		
-		case TRACKER_COLUMN_CMD:							
-			enterdigit(digit, value, &event->cmd);
+		case TRACKER_COLUMN_CMD:			
+			enterdigit(digit % 2, value, &event->cmd + pos);
 		break;		
-		case TRACKER_COLUMN_PARAM:
-			enterdigit(digit, value, &event->parameter);
+		case TRACKER_COLUMN_PARAM:			
+			enterdigit(digit % 2, value, &event->parameter + pos);
 		break;		
 		default:
 		break;
@@ -1742,7 +1744,7 @@ void enterdigitcolumn(psy_audio_PatternEvent* event, int column, int digit,
 }
 
 void enterdigit(int digit, int newval, unsigned char* val)
-{	
+{		
 	if (digit == 0) {
 		*val = (*val & 0x0F) | ((newval & 0x0F) << 4);
 	} else
@@ -1751,23 +1753,33 @@ void enterdigit(int digit, int newval, unsigned char* val)
 	}
 }
 
+void digitlohi(int value, int digit, uintptr_t size, uint8_t* lo, uint8_t* hi)
+{
+	uintptr_t pos;
+
+	pos = (size - 1) - digit / 2;
+	lohi((uint8_t*) &value + pos, digit, lo, hi);
+}
+
+void lohi(uint8_t* value, int digit, uint8_t* lo, uint8_t* hi)
+{	
+	*lo = *value & 0x0F;
+	*hi = (*value & 0xF0) >> 4;	
+}
+
 void entervaluecolumn(psy_audio_PatternEvent* event, int column, int value)
 {	
 	switch (column) {
-		case 1:
-		case 2:
+		case TRACKER_COLUMN_INST:
 			event->inst = value;			
 		break;		
-		case 3:
-		case 4:
+		case TRACKER_COLUMN_MACH:
 			event->mach = value;						
 		break;		
-		case 5:
-		case 6:
+		case TRACKER_COLUMN_CMD:
 			event->cmd = value;
-		break;		
-		case 7:
-		case 8:
+		break;
+		case TRACKER_COLUMN_PARAM:
 			event->parameter = value;
 		break;		
 		default:
@@ -2421,6 +2433,10 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	if (strcmp(psy_properties_key(property), "linenumbersinhex") == 0) {
 		trackerview_showlinenumbersinhex(self, psy_properties_value(property));
 	} else
+	if (strcmp(psy_properties_key(property), "wideinstcolumn") == 0) {
+		trackergrid_initcolumns(&self->grid);
+		trackerview_computemetrics(self);
+	} else
 	if (strcmp(psy_properties_key(property), "drawemptydata") == 0) {
 		trackerview_showemptydata(self, psy_properties_value(property));
 	} else
@@ -2460,6 +2476,7 @@ void trackerview_readconfig(TrackerView* self)
 			trackerview_setfont(self, &font);
 			ui_font_dispose(&font);
 		}
+		trackergrid_initcolumns(&self->grid);
 	}
 }
 
@@ -2916,8 +2933,9 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 int trackergrid_preferredtrackwidth(TrackerGrid* self)
 {
 	return trackergrid_column_x(self, 4, 0) + 
-		self->cols[4].width * self->view->metrics.textwidth +
-		self->cols[4].ident;
+		self->coldefs[TRACKER_COLUMN_END - 1].numchars *
+			self->view->metrics.textwidth +
+			self->coldefs[TRACKER_COLUMN_END - 1].marginright;
 }
 
 int trackerheader_preferredtrackwidth(TrackerHeader* self)
@@ -2979,8 +2997,8 @@ int trackergrid_column_x(TrackerGrid* self, int column, int digit)
 	int i;
 
 	for (i = 0; i < column; ++i) {
-		rv += self->cols[i].width * self->view->metrics.textwidth
-			+ self->cols[i].ident;
+		rv += self->coldefs[i].numchars * self->view->metrics.textwidth
+			+ self->coldefs[i].marginright;
 	}
 	rv += digit * self->view->metrics.textwidth;
 	return rv;

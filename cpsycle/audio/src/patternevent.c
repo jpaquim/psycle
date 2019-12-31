@@ -35,9 +35,9 @@ void patternevent_init(psy_audio_PatternEvent* self,
 
 void patternevent_clear(psy_audio_PatternEvent* self)
 {
-	self->note = 255;
-	self->inst = 255;
-	self->mach = 255;
+	self->note = NOTECOMMANDS_EMPTY;
+	self->inst = NOTECOMMANDS_INST_EMPTY;
+	self->mach = NOTECOMMANDS_MACH_EMPTY;
 	self->cmd = 0;
 	self->parameter = 0;
 }
@@ -45,9 +45,9 @@ void patternevent_clear(psy_audio_PatternEvent* self)
 int patternevent_empty(psy_audio_PatternEvent* self)
 {
 	return 
-		self->note == 255 &&
-		self->inst == 255 &&
-		self->mach == 255 &&
+		self->note == NOTECOMMANDS_EMPTY &&
+		self->inst == NOTECOMMANDS_INST_EMPTY &&
+		self->mach == NOTECOMMANDS_MACH_EMPTY &&
 		self->cmd == 0 &&
 		self->parameter == 0;
 }

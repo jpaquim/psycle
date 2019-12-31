@@ -319,10 +319,10 @@ int parametertype(psy_audio_Plugin* self, uintptr_t param)
 
 	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
 	if (GetInfo != NULL) {	
-		CMachineInfo* pInfo = GetInfo();
-		if (pInfo) {	
-			if (param < pInfo->numParameters) {
-				rv = pInfo->Parameters[param]->Flags;
+		CMachineInfo* cinfo = GetInfo();
+		if (cinfo) {	
+			if (param < (uintptr_t) cinfo->numParameters) {
+				rv = cinfo->Parameters[param]->Flags;
 			}
 		}
 	}
@@ -337,11 +337,11 @@ void parameterrange(psy_audio_Plugin* self, uintptr_t param, int* minval, int* m
 	*maxval = 0;
 	GetInfo =(GETINFO)library_functionpointer(&self->library, "GetInfo");
 	if (GetInfo != NULL) {	
-		CMachineInfo* pInfo = GetInfo();
-		if (pInfo) {	
-			if (param < pInfo->numParameters) {
-				*minval = pInfo->Parameters[param]->MinValue;
-				*maxval = pInfo->Parameters[param]->MaxValue;				
+		CMachineInfo* cinfo = GetInfo();
+		if (cinfo) {	
+			if (param < (uintptr_t) cinfo->numParameters) {
+				*minval = cinfo->Parameters[param]->MinValue;
+				*maxval = cinfo->Parameters[param]->MaxValue;				
 			}
 		}
 	}	
@@ -354,11 +354,11 @@ int parameterlabel(psy_audio_Plugin* self, char* txt, uintptr_t param)
 
 	GetInfo =(GETINFO) library_functionpointer(&self->library, "GetInfo");
 	if (GetInfo != NULL) {	
-		CMachineInfo* info = GetInfo();
-		if (info) {	
-			if (param < info->numParameters) {
+		CMachineInfo* cinfo = GetInfo();
+		if (cinfo) {	
+			if (param < (uintptr_t) cinfo->numParameters) {
 				psy_snprintf(txt, 128, "%s",
-					info->Parameters[param]->Description);
+					cinfo->Parameters[param]->Description);
 				rv = 1;
 			}
 		}
@@ -375,7 +375,7 @@ int parametername(psy_audio_Plugin* self, char* txt, uintptr_t param)
 	if (GetInfo != NULL) {	
 		CMachineInfo* info = GetInfo();
 		if (info) {	
-			if (param < info->numParameters) {
+			if (param < (uintptr_t) info->numParameters) {
 				psy_snprintf(txt, 128, "%s", info->Parameters[param]->Name);
 				rv = 1;
 			}

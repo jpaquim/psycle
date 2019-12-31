@@ -415,8 +415,12 @@ void readpatd(psy_audio_SongFile* self)
 						// uint8_t parameter;	4												
 						patternevent_clear(&event);
 						event.note = ptrack[0];
-						event.inst = ptrack[1];
-						event.mach = ptrack[2];
+						event.inst = (ptrack[1] == 0xFF)
+							? event.inst = NOTECOMMANDS_INST_EMPTY
+							: ptrack[1];
+						event.mach = (ptrack[2] == 0xFF)
+							? event.mach = NOTECOMMANDS_MACH_EMPTY
+							: ptrack[2];
 						event.cmd = ptrack[3];
 						event.parameter = ptrack[4];						
 						if (!patternevent_empty(&event)) {
@@ -1257,23 +1261,34 @@ int psy3_write_patd(psy_audio_SongFile* self)
 			lpb = self->song->properties.lpb;
 			patternLines = (int32_t) (pattern->length * lpb + 0.5);
 			patsize = self->song->patterns.songtracks *
-				patternLines * EVENT_SIZE;
-			source = malloc(patsize);			
-			copy = source;			
+				patternLines * EVENT_SIZE;			
 
+			// clear source
+			source = malloc(patsize);			
+			copy = source;
 			for (y = 0; y < patternLines; ++y) {
 				for (t = 0; t < self->song->patterns.songtracks; ++t) {
-					unsigned char* data;
-					psy_audio_PatternEvent* event;					
+					unsigned char* data;					
 
 					data = copy + y * self->song->patterns.songtracks * EVENT_SIZE +
 						t * EVENT_SIZE;
-					event = (psy_audio_PatternEvent*) data;
-					patternevent_clear(event);
+					// Psy3 PatternEntry format
+					// type				offset
+					// uint8_t note;		0
+					// uint8_t inst;		1
+					// uint8_t mach;		2
+					// uint8_t cmd;			3
+					// uint8_t parameter;	4
+
+					// empty entry					
+					data[0] = 255;
+					data[1] = 255;
+					data[2] = 255;
+					data[3] = 0;
+					data[4] = 0;
 				}
 			}
 			
-
 			for (node = pattern->events; node != 0; node = node->next) {				
 				unsigned char* data;
 				psy_audio_PatternEntry* entry;
@@ -1293,7 +1308,7 @@ int psy3_write_patd(psy_audio_SongFile* self)
 				// uint8_t cmd;			3
 				// uint8_t parameter;	4
 				data[0] = entry->event.note;
-				data[1] = entry->event.inst;
+				data[1] = (uint8_t)(entry->event.inst & 0xFF);
 				data[2] = entry->event.mach;
 				data[3] = entry->event.cmd;
 				data[4] = entry->event.parameter;				
