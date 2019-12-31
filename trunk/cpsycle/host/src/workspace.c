@@ -436,6 +436,9 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 		psy_properties_append_bool(pvc, "linenumbersinhex", 1),
 		"Line numbers in HEX");
 	psy_properties_settext(
+		psy_properties_append_bool(pvc, "wideinstcolumn", 0),
+		"Wide instrument column");
+	psy_properties_settext(
 		psy_properties_append_bool(pvc, "trackscopes", 1),
 		"Pattern track scopes");
 	psy_properties_settext(
@@ -863,6 +866,11 @@ int workspace_showlinenumbercursor(Workspace* self)
 int workspace_showlinenumbersinhex(Workspace* self)
 {
 	return psy_properties_bool(self->config, "visual.patternview.linenumbersinhex", 1);
+}
+
+int workspace_showwideinstcolumn(Workspace* self)
+{	
+	return psy_properties_bool(self->config, "visual.patternview.wideinstcolumn", 1);
 }
 
 int workspace_showtrackscopes(Workspace* self)

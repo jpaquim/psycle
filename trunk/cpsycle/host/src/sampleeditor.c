@@ -448,7 +448,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 	lock_enter();
 	psy_list_free(self->samplerevents);
 	patternevent_init(&self->samplerevent, 
-		NOTECOMMANDS_RELEASE, 0, 255, 0, 0);	
+		NOTECOMMANDS_RELEASE, 0, NOTECOMMANDS_MACH_EMPTY, 0, 0);	
 	self->samplerevents = psy_list_create(&self->samplerevent);
 	lock_leave();
 }

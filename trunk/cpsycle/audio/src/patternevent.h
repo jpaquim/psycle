@@ -61,15 +61,17 @@ typedef	enum {
 	//Place whatever that can be written in the pattern above invalid, and anything else below it
 	NOTECOMMANDS_INVALID,
 	NOTECOMMANDS_MIDI_SYNC = 254,
-	NOTECOMMANDS_EMPTY = 255
+	NOTECOMMANDS_EMPTY = 255,
+	NOTECOMMANDS_INST_EMPTY = 0xFFFF,
+	NOTECOMMANDS_MACH_EMPTY = 0xFF
 } NoteCommands;
 
 typedef struct {
-	unsigned char note;
-	unsigned char inst;
-	unsigned char mach;
-	unsigned char cmd;
-	unsigned char parameter;
+	uint8_t note;	
+	uint16_t inst;	
+	uint8_t mach;
+	uint8_t cmd;
+	uint8_t parameter;
 } psy_audio_PatternEvent;
 
 
