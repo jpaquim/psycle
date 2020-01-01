@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
@@ -239,38 +239,39 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	psy_List* p = 0;
 	int count = 0;
 	int i;
-	unsigned int amount = bc->numsamples;
-	unsigned int pos = 0;
+	uintptr_t amount = bc->numsamples;
+	uintptr_t pos = 0;
 		
-
-	for (p = bc->events; p != 0 && count < self->eventcap;
-			p = p->next) {
+	for (p = bc->events; p != 0 && count < self->eventcap; p = p->next) {
 		int numworksamples;
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
 
 		numworksamples = (unsigned int)entry->delta - pos;
-		if (entry->event.cmd == SET_PANNING) {
+		if (patternentry_front(entry)->cmd == SET_PANNING) {
 			// todo split work
-			machine_setpanning(vstplugin_base(self), entry->event.parameter /
-				255.f);
+			machine_setpanning(vstplugin_base(self),
+				patternentry_front(entry)->parameter / 255.f);
 		} else
-		if (entry->event.note == NOTECOMMANDS_MIDICC) {
-			if (entry->event.inst >= 0x80 && entry->event.inst < 0xFF) {
+		if (patternentry_front(entry)->note == NOTECOMMANDS_MIDICC) {
+			if (patternentry_front(entry)->inst >= 0x80 &&
+				patternentry_front(entry)->inst < 0xFF) {
 					self->events->events[count] = (VstEvent*)
 					allocmidientry(self, entry);
 				++count;
-			} else {								
-				if (entry->event.cmd == 0xC2) { // Panning
+			} else {						
+				// Panning
+				if (patternentry_front(entry)->cmd == 0xC2) {
 					unsigned char midichannel = 0;
 
 					self->events->events[count] = (VstEvent*) allocmidi(self,
 						(unsigned char)(0xB0 | midichannel), 0x0A,
-						(unsigned char)(entry->event.parameter >> 1));
+						(unsigned char)(
+							patternentry_front(entry)->parameter >> 1));
 					++count;	
 				}
 			}
 		} else
-		if (entry->event.note == NOTECOMMANDS_TWEAK) {			
+		if (patternentry_front(entry)->note == NOTECOMMANDS_TWEAK) {			
 			int value;
 			
 			if (numworksamples > 0) {				
@@ -289,15 +290,17 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				amount -= numworksamples;
 				bc->numsamples = restorenumsamples;
 			}
-			value = (entry->event.cmd << 8) + entry->event.parameter;
-			machine_patterntweak(vstplugin_base(self), entry->event.inst, value);
+			value = (patternentry_front(entry)->cmd << 8) +
+				patternentry_front(entry)->parameter;
+			machine_patterntweak(vstplugin_base(self),
+				patternentry_front(entry)->inst, value);
 			for (i = 0; i < count; ++i) {		
 				free(self->events->events[i]);
 			}
 			self->events->numEvents = 0;
 			count = 0;
 		} else 
-		if (entry->event.note < NOTECOMMANDS_RELEASE) {
+		if (patternentry_front(entry)->note < NOTECOMMANDS_RELEASE) {
 			VstNote* note = 0;
 
 			if (psy_table_exists(&self->tracknote, entry->track)) {
@@ -306,12 +309,12 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					allocnoteoff(self, note->key, entry->track);
 				++count;
 			}
-			if (entry->event.cmd == 0xC2) { // Panning
+			if (patternentry_front(entry)->cmd == 0xC2) { // Panning
 				unsigned char midichannel = 0;
 
 				self->events->events[count] = (VstEvent*) allocmidi(self,
 					(unsigned char)(0xB0 | midichannel), 0x0A,
-					(unsigned char)(entry->event.parameter >> 1));
+					(unsigned char)(patternentry_front(entry)->parameter >> 1));
 				++count;	
 			}
 			self->events->events[count] = (VstEvent*)
@@ -320,11 +323,11 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				note = malloc(sizeof(VstNote));			
 				psy_table_insert(&self->tracknote, entry->track, (void*) note);
 			}
-			note->key = entry->event.note;
+			note->key = patternentry_front(entry)->note;
 			note->midichan = 0;
 			++count;			
 		} else
-		if (entry->event.note == NOTECOMMANDS_RELEASE) {
+		if (patternentry_front(entry)->note == NOTECOMMANDS_RELEASE) {
 			if (psy_table_exists(&self->tracknote, entry->track)) {
 				VstNote* note;
 				
@@ -396,7 +399,7 @@ struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self, const psy_audio_Patt
 		char note;
 
 		memset(rv, 0, sizeof(struct VstMidiEvent));
-		note = (char) entry->event.note;
+		note = (char) patternentry_front_const(entry)->note;
 		rv->type = kVstMidiType;
 		rv->byteSize = sizeof(struct VstMidiEvent);
 		rv->flags = kVstMidiEventIsRealtime;
@@ -434,13 +437,13 @@ struct VstMidiEvent* allocmidientry(psy_audio_VstPlugin* self,
 		char note;
 
 		memset(rv, 0, sizeof(struct VstMidiEvent));
-		note = (char) entry->event.note;
+		note = (char) patternentry_front_const(entry)->note;
 		rv->type = kVstMidiType;
 		rv->byteSize = sizeof(struct VstMidiEvent);
 		rv->flags = kVstMidiEventIsRealtime;
-		rv->midiData[0] = (char)entry->event.inst;
-		rv->midiData[1] = (char)entry->event.cmd;
-		rv->midiData[2] = (char)entry->event.parameter;
+		rv->midiData[0] = (char) patternentry_front_const(entry)->inst;
+		rv->midiData[1] = (char) patternentry_front_const(entry)->cmd;
+		rv->midiData[2] = (char) patternentry_front_const(entry)->parameter;
 	}
 	return rv;
 }

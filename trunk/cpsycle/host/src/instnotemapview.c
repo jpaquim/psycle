@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -290,39 +290,41 @@ void instrumententryview_adjustscroll(InstrumentEntryView* self)
 void instrumententryview_onmousedown(InstrumentEntryView* self,
 	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
-	psy_audio_InstrumentEntry* entry;
 	if (self->instrument) {
-		uintptr_t numentry;	
+		psy_audio_InstrumentEntry* entry;
+		if (self->instrument) {
+			uintptr_t numentry;	
 
-		numentry = (ev->y - self->dy) / (self->metrics.lineheight * 3);
-		if (numentry < psy_list_size(instrument_entries(self->instrument))) {
-			self->selected = numentry;
+			numentry = (ev->y - self->dy) / (self->metrics.lineheight * 3);
+			if (numentry < psy_list_size(instrument_entries(self->instrument))) {
+				self->selected = numentry;
+			} else {
+				self->selected = NOINSTRUMENT_INDEX;
+			}
 		} else {
 			self->selected = NOINSTRUMENT_INDEX;
 		}
-	} else {
-		self->selected = NOINSTRUMENT_INDEX;
-	}
-	self->dragmode = 1;
-		
-	entry = instrument_entryat(self->instrument, self->selected);
-	if (entry) {
-		if (abs(entry->keyrange.low  - screentokey(ev->x,
-				self->metrics.keysize)) < 
-			abs(entry->keyrange.high  - screentokey(ev->x,
-				self->metrics.keysize))) {
-			self->dragmode = INSTVIEW_DRAG_LEFT;
-		} else {
-			self->dragmode = INSTVIEW_DRAG_RIGHT;
+		self->dragmode = 1;
+			
+		entry = instrument_entryat(self->instrument, self->selected);
+		if (entry) {
+			if (abs(entry->keyrange.low  - screentokey(ev->x,
+					self->metrics.keysize)) < 
+				abs(entry->keyrange.high  - screentokey(ev->x,
+					self->metrics.keysize))) {
+				self->dragmode = INSTVIEW_DRAG_LEFT;
+			} else {
+				self->dragmode = INSTVIEW_DRAG_RIGHT;
+			}
+			ui_component_capture(&self->component);
 		}
-		ui_component_capture(&self->component);
+		ui_component_invalidate(&self->component);
 	}
-	ui_component_invalidate(&self->component);
 }
 
 void instrumententryview_onmousemove(InstrumentEntryView* self,
 	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
-{
+{	
 	if (self->dragmode != INSTVIEW_DRAG_NONE && self->instrument) {
 		psy_audio_InstrumentEntry* entry;
 		
@@ -350,8 +352,10 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 void instrumententryview_onmouseup(InstrumentEntryView* self,
 	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
-	self->dragmode = 0;
-	ui_component_releasecapture(&self->component);
+	if (self->instrument) {
+		self->dragmode = 0;
+		ui_component_releasecapture(&self->component);
+	}
 }
 
 int screentokey(int x, int keysize)

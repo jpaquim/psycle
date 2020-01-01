@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -212,27 +212,31 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 			amount -= numworksamples;
 			bc->numsamples = restorenumsamples;
 		}
-		if (entry->event.cmd == SET_PANNING) {
-			machine_setpanning(self, entry->event.parameter / 255.f);
+		if (patternentry_front(entry)->cmd == SET_PANNING) {
+			machine_setpanning(self, patternentry_front(entry)->parameter / 255.f);
 		} else
-		if (entry->event.note == NOTECOMMANDS_MIDICC) {
+		if (patternentry_front(entry)->note == NOTECOMMANDS_MIDICC) {
 			// only native plugins, vst handle it in vstplugin_work
 			psy_audio_Machine* dst;
 			int value;
 
-			dst = machines_at(machine_machines(self), entry->event.mach);
+			dst = machines_at(machine_machines(self),
+				patternentry_front(entry)->mach);
 			if (dst) {
-				value = (entry->event.cmd << 8) + entry->event.parameter;
-				machine_patterntweak(dst, entry->event.inst, value);
+				value = (patternentry_front(entry)->cmd << 8) +
+					patternentry_front(entry)->parameter;
+				machine_patterntweak(dst, patternentry_front(entry)->inst,
+					value);
 			}
 		} else
-		if (entry->event.note == NOTECOMMANDS_TWEAK) {
+		if (patternentry_front(entry)->note == NOTECOMMANDS_TWEAK) {
 			int value;
 			
-			value = (entry->event.cmd << 8) + entry->event.parameter;
-			machine_patterntweak(self, entry->event.inst, value);
+			value = (patternentry_front(entry)->cmd << 8) +
+				patternentry_front(entry)->parameter;
+			machine_patterntweak(self, patternentry_front(entry)->inst, value);
 		} else {			
-			machine_seqtick(self, entry->track, &entry->event);
+			machine_seqtick(self, entry->track, patternentry_front(entry));
 		}
 		pos = (uintptr_t) entry->delta;	
 	}
@@ -372,6 +376,11 @@ psy_audio_Buffer* machine_mix(psy_audio_Machine* self, uintptr_t slot,
 	struct psy_audio_Machines* machines)
 {
 	return self->vtable->mix(self, slot, amount, sockets, machines);
+}
+
+void machine_work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
+{
+	self->vtable->work(self, bc);
 }
 
 void machine_generateaudio(psy_audio_Machine* self,

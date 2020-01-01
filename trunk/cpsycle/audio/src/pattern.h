@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(PATTERN_H)
 #define PATTERN_H
@@ -24,7 +24,7 @@ int patterneditposition_equal(PatternEditPosition* lhs,
 
 /// an event with additional position and track information
 typedef struct {
-	psy_audio_PatternEvent event;
+	psy_List* events;
 	/// position in beat unit
 	psy_dsp_beat_t offset;
 	/// sound driver callback event position
@@ -32,10 +32,23 @@ typedef struct {
 	/// current sequencer bpm
 	psy_dsp_beat_t bpm;
 	/// the tracker channel
-	unsigned int track; 
+	uintptr_t track; 
 } psy_audio_PatternEntry;
 
+void patternentry_init(psy_audio_PatternEntry*);
+void patternentry_init_all(psy_audio_PatternEntry*,
+	const psy_audio_PatternEvent* event,
+	psy_dsp_beat_t offset,
+	psy_dsp_beat_t delta,
+	psy_dsp_beat_t bpm,
+	uintptr_t track);
+void patternentry_dispose(psy_audio_PatternEntry*);
+
+psy_audio_PatternEntry* patternentry_alloc(void);
+psy_audio_PatternEntry* patternentry_allocinit(void);
 psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry*);
+psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry*);
+const psy_audio_PatternEvent* patternentry_front_const(const psy_audio_PatternEntry*);
 
 /// a list of event entries ordered by position in beat unit
 typedef psy_List PatternNode;

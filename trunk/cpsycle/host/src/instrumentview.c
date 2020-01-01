@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -11,15 +11,19 @@ static void instrumentview_oncreateinstrument(InstrumentView*,
 static void instrumentview_onaddentry(InstrumentView*, psy_ui_Component* sender);
 static void instrumentview_onremoveentry(InstrumentView*,
 	psy_ui_Component* sender);
-static void OnInstrumentInsert(InstrumentView*, psy_ui_Component* sender,
+static void OnInstrumentInsert(InstrumentView*, psy_audio_Instruments* sender,
 	int slot);
-static void OnInstrumentRemoved(InstrumentView*, psy_ui_Component* sender,
+static void OnInstrumentRemoved(InstrumentView*, psy_audio_Instruments* sender,
 	int slot);
 static void OnInstrumentSlotChanged(InstrumentView*,
 	psy_audio_Instrument* sender, int slot);
 static void OnInstrumentListChanged(InstrumentView*, psy_ui_Component* sender,
 	int slot);
 static void instrumentview_setinstrument(InstrumentView*, int slot);
+static void OnMachinesInsert(InstrumentView* self, psy_audio_Machines* sender,
+	int slot);
+static void OnMachinesRemoved(InstrumentView* self, psy_audio_Machines* sender,
+	int slot);
 static void OnSongChanged(InstrumentView*, Workspace* workspace);
 // InstrumentHeaderView
 static void instrumentheaderview_init(InstrumentHeaderView*,
@@ -51,6 +55,8 @@ static void instrumentpanview_init(InstrumentPanView*, psy_ui_Component* parent,
 	psy_audio_Instruments*);
 static void instrumentpanview_setinstrument(InstrumentPanView* self,
 	psy_audio_Instrument* instrument);
+static void instrumentview_onrandompanning(InstrumentPanView* self,
+	psy_ui_CheckBox* sender);
 // InstrumentFilterView
 static void instrumentfilterview_init(InstrumentFilterView*,
 	psy_ui_Component* parent, psy_audio_Instruments*);
@@ -129,11 +135,15 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->player->song->instruments.signal_insert, self,
 		OnInstrumentInsert);
 	psy_signal_connect(&self->player->song->instruments.signal_removed, self,
-		OnInstrumentRemoved);
+		OnInstrumentRemoved);	
 	psy_signal_connect(&self->player->song->instruments.signal_slotchange, self,
 		OnInstrumentSlotChanged);
 	psy_signal_connect(&self->instrumentsbox.instrumentlist.signal_selchanged, self,
 		OnInstrumentListChanged);
+	psy_signal_connect(&self->player->song->machines.signal_insert, self,
+		OnMachinesInsert);
+	psy_signal_connect(&self->player->song->machines.signal_removed, self,
+		OnMachinesRemoved);
 	ui_notebook_setpageindex(&self->notebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
@@ -146,12 +156,14 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		instrumentview_onremoveentry);
 }
 
-void OnInstrumentInsert(InstrumentView* self, psy_ui_Component* sender, int slot)
+void OnInstrumentInsert(InstrumentView* self, psy_audio_Instruments* sender,
+	int slot)
 {
 	instrumentview_setinstrument(self, slot);
 }
 
-void OnInstrumentRemoved(InstrumentView* self, psy_ui_Component* sender, int slot)
+void OnInstrumentRemoved(InstrumentView* self, psy_audio_Instruments* sender,
+	int slot)
 {
 	instrumentview_setinstrument(self, slot);
 }
@@ -164,6 +176,16 @@ void OnInstrumentSlotChanged(InstrumentView* self, psy_audio_Instrument* sender,
 void OnInstrumentListChanged(InstrumentView* self, psy_ui_Component* sender, int slot)
 {
 	instruments_changeslot(&self->player->song->instruments, slot);
+}
+
+void OnMachinesInsert(InstrumentView* self, psy_audio_Machines* sender,
+	int slot)
+{
+}
+
+void OnMachinesRemoved(InstrumentView* self, psy_audio_Machines* sender,
+	int slot)
+{
 }
 
 void instrumentview_setinstrument(InstrumentView* self, int slot)
@@ -181,23 +203,33 @@ void instrumentview_setinstrument(InstrumentView* self, int slot)
 
 void OnSongChanged(InstrumentView* self, Workspace* workspace)
 {	
-	self->header.instruments = &workspace->song->instruments;
-	self->general.instruments = &workspace->song->instruments;
-	self->volume.instruments = &workspace->song->instruments;
-	self->pan.instruments = &workspace->song->instruments;
-	self->filter.instruments = &workspace->song->instruments;
-	self->pitch.instruments = &workspace->song->instruments;
-	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
-	psy_signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
-	psy_signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
-	instrumentsbox_setinstruments(&self->instrumentsbox,
-		&workspace->song->instruments);
-	self->general.notemapview.entryview.instrument = 0;
-	instrumentnotemapview_setinstrument(&self->general.notemapview, 0);	
-	samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
-		&workspace->song->instruments);
+	if (workspace->song) {
+		self->header.instruments = &workspace->song->instruments;
+		self->general.instruments = &workspace->song->instruments;
+		self->volume.instruments = &workspace->song->instruments;
+		self->pan.instruments = &workspace->song->instruments;
+		self->filter.instruments = &workspace->song->instruments;
+		self->pitch.instruments = &workspace->song->instruments;
+		psy_signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
+		psy_signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
+		psy_signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
+		psy_signal_connect(&self->player->song->machines.signal_insert, self,
+			OnMachinesInsert);
+		psy_signal_connect(&self->player->song->machines.signal_removed, self,
+			OnMachinesRemoved);
+		instrumentsbox_setinstruments(&self->instrumentsbox,
+			&workspace->song->instruments);	
+		samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
+			&workspace->song->instruments);
+	} else {
+		instrumentsbox_setinstruments(&self->instrumentsbox, 0);	
+		samplesbox_setsamples(&self->general.samplesbox,
+			&workspace->song->samples, 0);
+	}
+	instrumentview_setinstrument(self, 0);
 }
 
+// instrument header
 void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, InstrumentView* view)
 {	
@@ -223,7 +255,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	ui_button_init(&self->nextbutton, &self->component);
 	ui_button_seticon(&self->nextbutton, UI_ICON_MORE);	
 	psy_signal_connect(&self->nextbutton.signal_clicked, self,
-		OnNextInstrument);	
+		OnNextInstrument);
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
 		UI_ALIGN_LEFT,
@@ -270,6 +302,7 @@ void OnDeleteInstrument(InstrumentHeaderView* self, psy_ui_Component* sender)
 {	
 }
 
+// instrumentviewbuttons
 void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_Component* parent)
 {
@@ -549,13 +582,40 @@ void OnVolumeViewValue(InstrumentVolumeView* self, ui_slider* slidergroup, float
 // InstrumentPanView
 void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent, psy_audio_Instruments* instruments)
 {
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makeeh(1.5), ui_value_makepx(0));
+	self->instrument = 0;
 	self->instruments = instruments;	
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	psy_ui_checkbox_init(&self->randompanning, &self->component);
+	psy_ui_checkbox_settext(&self->randompanning, "Random panning");
+	psy_signal_connect(&self->randompanning.signal_clicked, self,
+		instrumentview_onrandompanning);
+	psy_list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_TOP,
+			&margin));
 }
 
-void instrumentpanview_setinstrument(InstrumentPanView* self, psy_audio_Instrument* instrument)
+void instrumentpanview_setinstrument(InstrumentPanView* self,
+	psy_audio_Instrument* instrument)
+{	
+	self->instrument = instrument;
+	if (self->instrument && self->instrument->randompan) {
+		psy_ui_checkbox_check(&self->randompanning);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->randompanning);	
+	}
+}
+
+void instrumentview_onrandompanning(InstrumentPanView* self, psy_ui_CheckBox* sender)
 {
-	self->instrument = instrument;	
+	if (self->instrument) {
+		self->instrument->randompan = psy_ui_checkbox_checked(sender);
+	}
 }
 
 // InstrumentFilterView

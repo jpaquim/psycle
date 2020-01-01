@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(PATTERNEVENT_H)
 #define PATTERNEVENT_H
@@ -63,24 +63,27 @@ typedef	enum {
 	NOTECOMMANDS_MIDI_SYNC = 254,
 	NOTECOMMANDS_EMPTY = 255,
 	NOTECOMMANDS_INST_EMPTY = 0xFFFF,
-	NOTECOMMANDS_MACH_EMPTY = 0xFF
+	NOTECOMMANDS_MACH_EMPTY = 0xFF,
+	NOTECOMMANDS_VOL_EMPTY = 0xFF
 } NoteCommands;
 
 typedef struct {
 	uint8_t note;	
 	uint16_t inst;	
 	uint8_t mach;
+	uint8_t vol;
 	uint8_t cmd;
-	uint8_t parameter;
+	uint8_t parameter;	
 } psy_audio_PatternEvent;
 
 
 void patternevent_init(psy_audio_PatternEvent*,
-	unsigned char note,
-	unsigned char inst,
-	unsigned char mach,
-	unsigned char cmd,
-	unsigned char parameter);
+	uint8_t note,
+	uint16_t inst,
+	uint8_t mach,
+	uint8_t vol,
+	uint8_t cmd,
+	uint8_t parameter);
 void patternevent_clear(psy_audio_PatternEvent*);
 int patternevent_empty(psy_audio_PatternEvent*);
 

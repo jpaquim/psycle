@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -116,7 +116,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	ui_component_setalign(&self->trackheader.component, UI_ALIGN_TOP);	
 	sequenceroptionsbar_init(&self->options, &self->component);
 	if (workspace_showplaylisteditor(workspace)) {
-		ui_checkbox_check(&self->options.showplaylist);
+		psy_ui_checkbox_check(&self->options.showplaylist);
 	}
 	ui_component_setalign(&self->options.component, UI_ALIGN_BOTTOM);
 	sequenceduration_init(&self->duration, &self->component, self->sequence);
@@ -891,16 +891,16 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_checkbox_init(&self->followsong, &self->component);
-	ui_checkbox_settext(&self->followsong, "Follow Song");
-	ui_checkbox_init(&self->shownames, &self->component);
-	ui_checkbox_settext(&self->shownames, "Show pattern names");
-	ui_checkbox_init(&self->showplaylist, &self->component);	
-	ui_checkbox_settext(&self->showplaylist, "Show playlist");
-	ui_checkbox_init(&self->recordtweaks, &self->component);
-	ui_checkbox_settext(&self->recordtweaks, "Record tweaks");
-	ui_checkbox_init(&self->multichannelaudition, &self->component);
-	ui_checkbox_settext(&self->multichannelaudition, "Multichannel Audition");
+	psy_ui_checkbox_init(&self->followsong, &self->component);
+	psy_ui_checkbox_settext(&self->followsong, "Follow Song");
+	psy_ui_checkbox_init(&self->shownames, &self->component);
+	psy_ui_checkbox_settext(&self->shownames, "Show pattern names");
+	psy_ui_checkbox_init(&self->showplaylist, &self->component);	
+	psy_ui_checkbox_settext(&self->showplaylist, "Show playlist");
+	psy_ui_checkbox_init(&self->recordtweaks, &self->component);
+	psy_ui_checkbox_settext(&self->recordtweaks, "Record tweaks");
+	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);
+	psy_ui_checkbox_settext(&self->multichannelaudition, "Multichannel Audition");
 	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
 		ui_value_makeeh(0.2), ui_value_makeew(1.0));
 	psy_list_free(ui_components_setalign(

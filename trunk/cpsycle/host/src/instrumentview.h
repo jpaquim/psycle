@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(INSTRUMENTVIEW_H)
 #define INSTRUMENTVIEW_H
@@ -11,12 +11,14 @@
 #include "samplesbox.h"
 #include "workspace.h"
 
-#include <uinotebook.h>
-#include <uilabel.h>
-#include <uiedit.h>
 #include <uibutton.h>
-#include <uislider.h>
+#include <uicheckbox.h>
+#include <uicombobox.h>
+#include <uiedit.h>
 #include <uigroupbox.h>
+#include <uilabel.h>
+#include <uinotebook.h>
+#include <uislider.h>
 
 typedef struct {	
 	psy_ui_Component component;	
@@ -71,6 +73,7 @@ typedef struct {
 	psy_ui_Component component;		
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
+	psy_ui_CheckBox randompanning;
 } InstrumentPanView;
 
 typedef struct {

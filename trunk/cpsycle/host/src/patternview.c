@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -101,7 +101,7 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Component* sender,
 	}	
 	ui_settextcolor(g, 0x00D1C5B6);
 	ui_setbackgroundmode(g, TRANSPARENT);
-	psy_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d, %d      Edit ON",
+	psy_snprintf(text, 256, "          Pat  %2d   Ln   %d   Track   %d   Col  %d Digit %d    Edit ON",
 		pattern,
 		editposition.line,
 		editposition.track,
@@ -128,8 +128,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);	
 	stepbox_init(&self->step, &self->component, workspace);
-	ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
-	ui_checkbox_settext(&self->movecursorwhenpaste, "Move Cursor When Paste");
+	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
+	psy_ui_checkbox_settext(&self->movecursorwhenpaste, "Move Cursor When Paste");
 	patternviewstatus_init(&self->status, &self->component, workspace);
 	patternviewbar_initalign(self);
 }

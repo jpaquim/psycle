@@ -1,11 +1,17 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
 #include "pattern.h"
+
+#include <list.h>
+
 #include <stdlib.h>
 #include <string.h>
+
+static void patternentry_addevent(psy_audio_PatternEntry*,
+	const psy_audio_PatternEvent*);
 
 int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs)
@@ -18,17 +24,103 @@ int patterneditposition_equal(PatternEditPosition* lhs,
 		rhs->pattern == lhs->pattern;
 }
 
+void patternentry_init(psy_audio_PatternEntry* self)
+{
+	psy_audio_PatternEvent first;
+
+	memset(self, 0, sizeof(psy_audio_PatternEntry));
+	patternevent_clear(&first);
+	patternentry_addevent(self,	&first);
+}
+
+void patternentry_init_all(psy_audio_PatternEntry* self,
+	const psy_audio_PatternEvent* event,
+	psy_dsp_beat_t offset,
+	psy_dsp_beat_t delta,
+	psy_dsp_beat_t bpm,
+	uintptr_t track)	
+{
+	self->events = 0;
+	patternentry_addevent(self,	event);	
+	self->offset = offset;
+	self->delta = delta;
+	self->bpm = bpm;
+	self->track = track;
+}
+
+void patternentry_dispose(psy_audio_PatternEntry* self)
+{
+	psy_List* p;
+
+	for (p = self->events; p != 0; p = p->next) {
+		free(p->entry);
+	}
+	psy_list_free(self->events);
+	self->events = 0;
+}
+
+psy_audio_PatternEntry* patternentry_alloc(void)
+{
+	return (psy_audio_PatternEntry*) malloc(sizeof(psy_audio_PatternEntry));
+}
+
+psy_audio_PatternEntry* patternentry_allocinit(void)
+{
+	psy_audio_PatternEntry* rv;
+	
+	rv = patternentry_alloc();
+	if (rv) {
+		patternentry_init(rv);
+	}
+	return rv;
+}
+
 psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
 {
 	psy_audio_PatternEntry* rv;
-	if (entry) {			
-		rv = (psy_audio_PatternEntry*) malloc(sizeof(psy_audio_PatternEntry));
-		*rv = *entry;			
+	if (entry) {
+		psy_List* p;
+		rv = patternentry_alloc();
+		rv->bpm = entry->bpm;
+		rv->delta = entry->delta;
+		rv->offset = entry->offset;
+		rv->track = entry->track;
+		rv->events = 0;
+		for (p = entry->events; p != 0; p = p->next) {
+			psy_audio_PatternEvent* copy;
+
+			copy = (psy_audio_PatternEvent*)
+				malloc(sizeof(psy_audio_PatternEvent));
+			*copy = *((psy_audio_PatternEvent*)p->entry);
+			psy_list_append(&rv->events, copy);
+		}		
 	} else {
 		rv = 0;
 	}
 	return rv;
 }
+
+psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry* self)
+{	
+	return (psy_audio_PatternEvent*)(self->events->entry);
+}
+
+const psy_audio_PatternEvent* patternentry_front_const(
+	const psy_audio_PatternEntry* self)
+{
+	return (const psy_audio_PatternEvent*)(self->events->entry);
+}
+
+void patternentry_addevent(psy_audio_PatternEntry* self,
+	const psy_audio_PatternEvent* event)
+{
+	psy_audio_PatternEvent* copy;
+
+	copy = (psy_audio_PatternEvent*)malloc(sizeof(psy_audio_PatternEvent));
+	*copy = *event;
+	psy_list_append(&self->events, copy);
+}
+
 
 void pattern_init(psy_audio_Pattern* self)
 {
@@ -43,7 +135,8 @@ void pattern_dispose(psy_audio_Pattern* self)
 {
 	PatternNode* p;	
 	
-	for (p = self->events; p != 0; p = p->next) {		
+	for (p = self->events; p != 0; p = p->next) {
+		patternentry_dispose((psy_audio_PatternEntry*) p->entry);
 		free(p->entry);		
 	}
 	psy_list_free(self->events);
@@ -64,14 +157,8 @@ void pattern_copy(psy_audio_Pattern* self, psy_audio_Pattern* src)
 		psy_audio_PatternEntry* srcentry;
 		psy_audio_PatternEntry* entry;
 
-		srcentry = (psy_audio_PatternEntry*) p->entry;
-		entry = (psy_audio_PatternEntry*) malloc(sizeof(psy_audio_PatternEntry));
-		memset(entry, 0, sizeof(psy_audio_PatternEntry));
-		if (srcentry) {
-			*entry = *srcentry;
-		} else {
-			memset(entry, 0, sizeof(psy_audio_PatternEntry));
-		}
+		srcentry = (psy_audio_PatternEntry*) p->entry;		
+		entry = patternentry_clone(srcentry);		
 		psy_list_append(&self->events, entry);
 	}
 	self->length = src->length;
@@ -112,24 +199,21 @@ void pattern_remove(psy_audio_Pattern* self, PatternNode* node)
 	if (node) {
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(node->entry);
 		psy_list_remove(&self->events, node);
-		free(entry);		
+		patternentry_dispose(entry);
+		free(entry);
 		++self->opcount;
 	}
 }
 
-PatternNode* pattern_insert(psy_audio_Pattern* self, PatternNode* prev, int track,
-	psy_dsp_beat_t offset, const psy_audio_PatternEvent* event)
+PatternNode* pattern_insert(psy_audio_Pattern* self, PatternNode* prev,
+	int track, psy_dsp_beat_t offset, const psy_audio_PatternEvent* event)
 {
 	PatternNode* rv;
 	psy_audio_PatternEntry* entry;
 
 	if (event) {
-		entry = (psy_audio_PatternEntry*)malloc(sizeof(psy_audio_PatternEntry));
-		entry->event = *event;
-		entry->offset = offset;
-		entry->delta = 0.f;
-		entry->bpm = 0.f;
-		entry->track = track;
+		entry = patternentry_alloc();
+		patternentry_init_all(entry, event, offset, 0.f, 0.f, track);
 		if (!self->events) {
 			rv = self->events = psy_list_create(entry);
 		} else {	
@@ -140,19 +224,20 @@ PatternNode* pattern_insert(psy_audio_Pattern* self, PatternNode* prev, int trac
 	return rv;
 }
 
-void pattern_setevent(psy_audio_Pattern* self, PatternNode* node, const psy_audio_PatternEvent* event)
+void pattern_setevent(psy_audio_Pattern* self, PatternNode* node,
+	const psy_audio_PatternEvent* event)
 {
 	if (node) {
 		psy_audio_PatternEntry* entry;
 			
 		entry = (psy_audio_PatternEntry*) node->entry;
 		if (event) {			
-			entry->event = *event;
+			*patternentry_front(entry) = *event;
 		} else {
 			psy_audio_PatternEvent empty;
 
 			patternevent_clear(&empty);
-			entry->event = empty;
+			*patternentry_front(entry) = empty;
 		}
 		++self->opcount;
 	}
@@ -161,7 +246,7 @@ void pattern_setevent(psy_audio_Pattern* self, PatternNode* node, const psy_audi
 psy_audio_PatternEvent pattern_event(psy_audio_Pattern* self, PatternNode* node)
 {
 	if (node) {
-		return ((psy_audio_PatternEntry*)node->entry)->event;
+		return *patternentry_front(((psy_audio_PatternEntry*)node->entry));
 	} else {
 		psy_audio_PatternEvent empty;
 
@@ -295,14 +380,14 @@ void pattern_blocktranspose(psy_audio_Pattern* self, PatternEditPosition begin,
 		entry = (psy_audio_PatternEntry*) p->entry;
 		if (entry->offset < end.offset) {
 			if (entry->track >= begin.track && entry->track < end.track) {
-				if (entry->event.note < NOTECOMMANDS_RELEASE) {
-					if (entry->event.note + offset < 0) {
-						entry->event.note = 0;
+				if (patternentry_front(entry)->note < NOTECOMMANDS_RELEASE) {
+					if (patternentry_front(entry)->note + offset < 0) {
+						patternentry_front(entry)->note = 0;
 					} else {
-						entry->event.note += offset;
+						patternentry_front(entry)->note += offset;
 					}					
-					if (entry->event.note >= NOTECOMMANDS_RELEASE) {
-						entry->event.note = NOTECOMMANDS_RELEASE - 1;
+					if (patternentry_front(entry)->note >= NOTECOMMANDS_RELEASE) {
+						patternentry_front(entry)->note = NOTECOMMANDS_RELEASE - 1;
 					}
 				}
 			}
@@ -328,7 +413,7 @@ void pattern_changemachine(psy_audio_Pattern* self, PatternEditPosition begin,
 		entry = (psy_audio_PatternEntry*) p->entry;
 		if (entry->offset < end.offset) {
 			if (entry->track >= begin.track && entry->track < end.track) {
-				entry->event.mach = machine;
+				patternentry_front(entry)->mach = machine;
 			}
 		} else {
 			break;
@@ -351,7 +436,7 @@ void pattern_changeinstrument(psy_audio_Pattern* self, PatternEditPosition begin
 		entry = (psy_audio_PatternEntry*) p->entry;
 		if (entry->offset < end.offset) {
 			if (entry->track >= begin.track && entry->track < end.track) {
-				entry->event.inst = instrument;
+				patternentry_front(entry)->inst = instrument;
 			}
 		} else {
 			break;

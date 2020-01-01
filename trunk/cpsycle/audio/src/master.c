@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -113,7 +113,7 @@ void parametertweak(psy_audio_Master* self, uintptr_t param, int value)
 	} else {
 		psy_audio_MachineSockets* sockets;
 		WireSocket* p;
-		int c = 1;
+		uintptr_t c = 1;
 		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
@@ -143,7 +143,7 @@ int describevalue(psy_audio_Master* self, char* txt, uintptr_t param, int value)
 	} else {
 		psy_audio_MachineSockets* sockets;
 		WireSocket* p;
-		int c = 1;
+		uintptr_t c = 1;
 		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
@@ -176,7 +176,7 @@ int parametervalue(psy_audio_Master* self, uintptr_t param)
 	} else {
 		psy_audio_MachineSockets* sockets;
 		WireSocket* input_socket;
-		int c = 1;
+		uintptr_t c = 1;
 		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
 		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);

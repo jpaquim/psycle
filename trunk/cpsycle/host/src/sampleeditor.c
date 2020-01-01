@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -437,7 +437,9 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 		patternevent_init(&self->samplerevent, 
 			(unsigned char) 60,
 			(unsigned char) instruments_slot(&self->workspace->song->instruments),
-			255, 0, 0);	
+			NOTECOMMANDS_MACH_EMPTY,
+			NOTECOMMANDS_VOL_EMPTY,
+			0, 0);	
 		self->samplerevents = psy_list_create(&self->samplerevent);
 		lock_leave();
 	}
@@ -448,7 +450,11 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 	lock_enter();
 	psy_list_free(self->samplerevents);
 	patternevent_init(&self->samplerevent, 
-		NOTECOMMANDS_RELEASE, 0, NOTECOMMANDS_MACH_EMPTY, 0, 0);	
+		NOTECOMMANDS_RELEASE,
+		0,		
+		NOTECOMMANDS_MACH_EMPTY,
+		NOTECOMMANDS_VOL_EMPTY,
+		0, 0);	
 	self->samplerevents = psy_list_create(&self->samplerevent);
 	lock_leave();
 }
